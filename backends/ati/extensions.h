@@ -25,6 +25,9 @@ extern "C" {
 extern PFNGLALLOCMEM3DATIPROC           glAllocMem3DATI;
 extern PFNGLALLOCMEM2DATIPROC           glAllocMem2DATI;
 extern PFNGLALLOCMEM1DATIPROC           glAllocMem1DATI;
+extern PFNGLBINDFRAMEBUFFERATIPROC      glBindFramebufferATI;
+extern PFNGLCREATEFRAMEBUFFERATIPROC    glCreateFramebufferATI;
+extern PFNGLDELETEFRAMEBUFFERATIPROC    glDeleteFramebufferATI;
 extern PFNGLDELETEMEMATIPROC            glDeleteMemATI;
 extern PFNGLGETMEMPROPERTYATIPROC       glGetMemPropertyATI;
 extern PFNGLGETMEMATIPROC               glGetMemATI;

@@ -3170,8 +3170,40 @@ typedef GLvoid (APIENTRY * PFNGLDRAWBUFFERS) (GLsizei n, const GLenum *bufs);
 #define GL_STENCIL_COMPONENT_ATI            0x001d0000  // TEMPORARY VALUE
 #define GL_STENCIL_COMPONENT8_ATI           0x001e0000  // TEMPORARY VALUE
 
+#define GL_PROXY_ATI                        0x001f0000  // TEMPORARY VALUE
+#define GL_CUBE_MAP_ATI                     0x00200000  // TEMPORARY VALUE
+#define GL_3D_DEPTH_SLICE_ATI               0x00210000  // TEMPORARY VALUE
+#define GL_MATCH_COMPONENT_TYPE_ATI         0x00220000  // TEMPORARY VALUE
+#define GL_IS_BASE_MEM_ATI                  0x00230000  // TEMPORARY VALUE
+#define GL_IMAGES_ATI                       0x00240000  // TEMPORARY VALUE
+#define GL_DRAW_FRAMEBUFFER_ATI             0x00250000  // TEMPORARY VALUE
+#define GL_READ_FRAMEBUFFER_ATI             0x00260000  // TEMPORARY VALUE
+#define GL_SWAP_SRC_FRAMEBUFFER_ATI         0x00270000  // TEMPORARY VALUE
+#define GL_SWAP_DST_FRAMEBUFFER_ATI         0x00280000  // TEMPORARY VALUE
+#define GL_SWAP_PRESERVE_ATI                0x00290000  // TEMPORARY VALUE
+#define GL_SWAP_SYNC_ATI                    0x002a0000  // TEMPORARY VALUE
+#define GL_SWAP_INTERVAL_ATI                0x002b0000  // TEMPORARY VALUE
+#define GL_VIDEO_ATI                        0x002c0000  // TEMPORARY VALUE
+
+#define GL_BASE_ATI                         0x00000001
+#define GL_LEAVES_ATI                       0x00000002
+#define GL_MIPMAP_FALSE_ATI                 0x00000004
+#define GL_MIPMAP_TRUE_ATI                  0x00000008
+#define GL_MIPMAP_EITHER_ATI                0x0000000c
+#define GL_CUBE_MAP_FALSE_ATI               0x00000010
+#define GL_CUBE_MAP_TRUE_ATI                0x00000020
+#define GL_CUBE_MAP_EITHER_ATI              0x00000030
+#define GL_3D_DEPTH_SLICE_FALSE_ATI         0x00000040
+#define GL_3D_DEPTH_SLICE_TRUE_ATI          0x00000080
+#define GL_3D_DEPTH_SLICE_EITHER_ATI        0x000000c0
+
+#define GL_MAX_SWAP_INTERVAL_ATI            16
+
+#ifndef GL_CHAR_ARB_DEFINED
+typedef char   GLcharARB;
+#define GL_CHAR_ARB_DEFINED
+#endif
 typedef GLuint GLmem;
-typedef char GLcharARB;
 
 typedef GLmem             (APIENTRY *PFNGLALLOCMEM3DATIPROC)(GLenum format,
                                                              GLsizei width, GLsizei height, GLsizei depth,
@@ -3182,10 +3214,12 @@ typedef GLmem             (APIENTRY *PFNGLALLOCMEM2DATIPROC)(GLenum format,
 typedef GLmem             (APIENTRY *PFNGLALLOCMEM1DATIPROC)(GLenum format,
                                                              GLsizei width,
                                                              GLsizei np, const GLint *properties);
-typedef const GLcharARB * (APIENTRY *PFNGLGETMEMINFOLOGATIPROC)(GLmem mem);
+typedef GLvoid            (APIENTRY *PFNGLGETMEMINFOLOGATIPROC)(GLmem mem,
+                                                                GLsizei maxLength,
+                                                                GLsizei* length,
+                                                                GLcharARB* infoLog);
 typedef GLmem             (APIENTRY *PFNGLCLONEMEMATIPROC)(GLmem mem);
 typedef GLvoid            (APIENTRY *PFNGLDELETEMEMATIPROC)(GLmem mem);
-typedef GLboolean         (APIENTRY *PFNGLISMEMMARKEDFORDELETIONATIPROC)(GLmem mem);
 typedef GLint             (APIENTRY *PFNGLGETMEMPROPERTYATIPROC)(GLmem mem, GLenum property);
 typedef GLmem             (APIENTRY *PFNGLGETSUBMEMATIPROC)(GLmem mem, GLenum type, GLuint child);
 typedef GLmem             (APIENTRY *PFNGLGETBASEMEMATIPROC)(GLmem mem);
@@ -3243,14 +3277,23 @@ typedef GLvoid            (APIENTRY *PFNGLGETMEMSUBIMAGE1DATIPROC)(GLmem mem,
                                                                    GLenum format, GLenum type,
                                                                    GLvoid *data);
 typedef GLvoid            (APIENTRY *PFNGLINVALIDATEMEMATIPROC)(GLmem mem);
-typedef GLvoid            (APIENTRY *PFNGLATTACHMEMATIPROC)(GLenum target, GLmem mem);
+typedef GLvoid            (APIENTRY *PFNGLATTACHMEMATIPROC)(GLenum target,
+							    GLenum attachment,
+							    GLmem mem);
 typedef GLboolean         (APIENTRY *PFNGLDETACHMEMATIPROC)(GLmem mem);
-typedef GLuint            (APIENTRY *PFNGLNEWFRAMEBUFFERATIPROC)(GLvoid);
+
+typedef GLuint            (APIENTRY *PFNGLCREATEFRAMEBUFFERATIPROC)(GLvoid);
 typedef GLvoid            (APIENTRY *PFNGLDELETEFRAMEBUFFERATIPROC)(GLuint framebuffer);
 typedef GLvoid            (APIENTRY *PFNGLBINDFRAMEBUFFERATIPROC)(GLenum target, GLuint framebuffer);
 typedef GLuint            (APIENTRY *PFNGLGETFRAMEBUFFERATIPROC)(GLenum target);
 typedef GLboolean         (APIENTRY *PFNGLISFRAMEBUFFERATIPROC)(GLuint framebuffer);
-typedef GLboolean         (APIENTRY *PFNGLSWAPBUFFERSATIPROC)(GLenum preserve);
+typedef GLvoid            (APIENTRY *PFNGLFRAMEBUFFERPARAMETERFATIPROC)(GLenum target, GLenum pname, GLfloat param);
+typedef GLvoid            (APIENTRY *PFNGLFRAMEBUFFERPARAMETERFVATIPROC)(GLenum target, GLenum pname, const GLfloat *params);
+typedef GLvoid            (APIENTRY *PFNGLFRAMEBUFFERPARAMETERIATIPROC)(GLenum target, GLenum pname, GLint param);
+typedef GLvoid            (APIENTRY *PFNGLFRAMEBUFFERPARAMETERIVATIPROC)(GLenum target, GLenum pname, const GLint *params);
+typedef GLvoid            (APIENTRY *PFNGLGETFRAMEBUFFERPARAMETERFVATIPROC)(GLenum target, GLenum pname, GLfloat *params);
+typedef GLvoid            (APIENTRY *PFNGLGETFRAMEBUFFERPARAMETERIVATIPROC)(GLenum target, GLenum pname, GLint *params);
+typedef GLvoid            (APIENTRY *PFNGLSWAPBUFFERSATIPROC)(GLvoid);
 typedef GLvoid            (APIENTRY *PFNGLVERTEXARRAYMEMATIPROC)(GLenum array, GLint size, GLmem mem, GLuint offset);
 typedef GLvoid            (APIENTRY *PFNGLVERTEXATTRIBMEMATIPROC)(GLuint index, GLint size, GLboolean normalized,
                                                                   GLmem mem, GLuint offset);
@@ -3259,7 +3302,6 @@ typedef GLvoid            (APIENTRY *PFNGLMULTIDRAWMEMELEMENTSATIPROC)(GLenum mo
                                                                        GLuint *offsets, GLsizei primcount);
 
 #endif /* GL_ATI_uber_buffers */
-
 
 #ifdef FGL_DRM
 

@@ -206,8 +206,9 @@ public:
 
   // copies data from one ubuf to another
   // Should use glCloneMem later, but for now does something unforgivably stupid.
-  virtual void copyUberbufferData(SH::ShUberbufferPtr dest, const SH::ShUberbuffer *src );
+  virtual void copyUberbufferData(SH::ShUberbufferPtr dest, SH::ShUberbufferPtr src );
 
+  virtual void deleteFramebuffer(const SH::ShFramebuffer *fb);
   virtual void deleteUberbuffer(const SH::ShUberbuffer *ub);
 
   /// Allocate uber buffers (called by allocRegs)
@@ -235,6 +236,9 @@ private:
   int m_texs[2]; ///< Maximum number of TEX instructions for each shader kind
 
   int m_framebufBinding; ///< Uberbuffer that GL_AUX0 is bound to (TODO accomodate other aux buffres later)
+
+  /// hack for now - glDeleteFramebuffer or glCreateFramebuffer 
+  unsigned int tempfb; 
 
 };
 

@@ -15,10 +15,12 @@
 //
 // ATI_uber_buffer
 //
-PFNGLALLOCMEM3DATIPROC           ____glAllocMem3DATI;
-PFNGLALLOCMEM3DATIPROC           glAllocMem3DATI = NULL;
+PFNGLALLOCMEM3DATIPROC           glAllocMem3DATI;
 PFNGLALLOCMEM2DATIPROC           glAllocMem2DATI;
 PFNGLALLOCMEM1DATIPROC           glAllocMem1DATI;
+PFNGLBINDFRAMEBUFFERATIPROC      glBindFramebufferATI;
+PFNGLCREATEFRAMEBUFFERATIPROC    glCreateFramebufferATI;
+PFNGLDELETEFRAMEBUFFERATIPROC    glDeleteFramebufferATI;
 PFNGLDELETEMEMATIPROC            glDeleteMemATI;
 PFNGLGETMEMPROPERTYATIPROC       glGetMemPropertyATI;
 PFNGLGETMEMATIPROC               glGetMemATI;
@@ -181,9 +183,9 @@ IsExtSupported(const char *ext)
 }
 
 #ifdef EXIT_ON_MISSING_EXTENSION
-#define GET_PROC(x)                                 \
+#define GET_PROC(x, T)                                 \
 {                                                   \
-    x = (void*) glXGetProcAddressARB(#x);              \
+    x = (T) glXGetProcAddressARB(#x);              \
     if (x == NULL)                                  \
     {                                               \
         printf("Extension %s not found.\n", #x);    \
@@ -191,9 +193,9 @@ IsExtSupported(const char *ext)
     }                                               \
 }
 #else
-#define GET_PROC(x)                                 \
+#define GET_PROC(x, T)                                 \
 {                                                   \
-    x = (void*) glXGetProcAddressARB(#x);              \
+    x = (T) glXGetProcAddressARB(#x);              \
 }
 #endif
 
@@ -211,74 +213,76 @@ InitExtensions(void)
     }
 */
 
-    ____glAllocMem3DATI = (PFNGLALLOCMEM3DATIPROC)glXGetProcAddressARB("glAllocMem3DATI");
-    glAllocMem3DATI = (PFNGLALLOCMEM3DATIPROC)glXGetProcAddressARB("glAllocMem3DATI");
-    glAllocMem2DATI = (PFNGLALLOCMEM2DATIPROC)glXGetProcAddressARB("glAllocMem2DATI");
-    glAllocMem1DATI = (PFNGLALLOCMEM1DATIPROC)glXGetProcAddressARB("glAllocMem1DATI");
-    glDeleteMemATI  = (PFNGLDELETEMEMATIPROC)glXGetProcAddressARB("glDeleteMemATI");
-    glGetMemPropertyATI = (PFNGLGETMEMPROPERTYATIPROC)glXGetProcAddressARB("glGetMemPropertyATI");
-    glGetMemATI = (PFNGLGETMEMATIPROC)glXGetProcAddressARB("glGetMemATI");
-    glCopyMemImage2DATI = (PFNGLCOPYMEMIMAGE2DATIPROC)glXGetProcAddressARB("glCopyMemImage2DATI");
-    glCopyMemImage1DATI = (PFNGLCOPYMEMIMAGE1DATIPROC)glXGetProcAddressARB("glCopyMemImage1DATI");
-    glMemSubImage3DATI = (PFNGLMEMSUBIMAGE3DATIPROC)glXGetProcAddressARB("glMemSubImage3DATI");
-    glMemSubImage2DATI = (PFNGLMEMSUBIMAGE2DATIPROC)glXGetProcAddressARB("glMemSubImage2DATI");
-    glMemSubImage1DATI = (PFNGLMEMSUBIMAGE1DATIPROC)glXGetProcAddressARB("glMemSubImage1DATI");
-    glCopyMemSubImage2DATI = (PFNGLCOPYMEMSUBIMAGE2DATIPROC)glXGetProcAddressARB("glCopyMemSubImage2DATI");
-    glCopyMemSubImage1DATI = (PFNGLCOPYMEMSUBIMAGE1DATIPROC)glXGetProcAddressARB("glCopyMemSubImage1DATI");
-    glMemCopy3DATI = (PFNGLMEMCOPY3DATIPROC)glXGetProcAddressARB("glMemCopy3DATI");
-    glMemCopy2DATI = (PFNGLMEMCOPY2DATIPROC)glXGetProcAddressARB("glMemCopy2DATI");
-    glMemCopy1DATI = (PFNGLMEMCOPY1DATIPROC)glXGetProcAddressARB("glMemCopy1DATI");
-    glAttachMemATI = (PFNGLATTACHMEMATIPROC)glXGetProcAddressARB("glAttachMemATI");
-    glVertexArrayMemATI = (PFNGLVERTEXARRAYMEMATIPROC) glXGetProcAddressARB("glVertexArrayMemATI");
-	glDrawElementArrayATI = (PFNGLDRAWELEMENTARRAYATIPROC) glXGetProcAddressARB("glDrawElementArrayATI");
-    glGetMemInfoLogATI = (PFNGLGETMEMINFOLOGATIPROC)glXGetProcAddressARB("glGetMemInfoLogATI");
+    GET_PROC(glAllocMem3DATI, PFNGLALLOCMEM3DATIPROC);
+    GET_PROC(glAllocMem2DATI, PFNGLALLOCMEM2DATIPROC);
+    GET_PROC(glAllocMem1DATI, PFNGLALLOCMEM1DATIPROC);
+    GET_PROC(glCreateFramebufferATI, PFNGLCREATEFRAMEBUFFERATIPROC);
+    GET_PROC(glDeleteFramebufferATI, PFNGLDELETEFRAMEBUFFERATIPROC);
+    GET_PROC(glBindFramebufferATI, PFNGLBINDFRAMEBUFFERATIPROC);
+    GET_PROC(glDeleteMemATI, PFNGLDELETEMEMATIPROC);
+    GET_PROC(glGetMemPropertyATI, PFNGLGETMEMPROPERTYATIPROC);
+    GET_PROC(glGetMemATI, PFNGLGETMEMATIPROC);
+    GET_PROC(glCopyMemImage2DATI, PFNGLCOPYMEMIMAGE2DATIPROC);
+    GET_PROC(glCopyMemImage1DATI, PFNGLCOPYMEMIMAGE1DATIPROC);
+    GET_PROC(glMemSubImage3DATI, PFNGLMEMSUBIMAGE3DATIPROC);
+    GET_PROC(glMemSubImage2DATI, PFNGLMEMSUBIMAGE2DATIPROC);
+    GET_PROC(glMemSubImage1DATI, PFNGLMEMSUBIMAGE1DATIPROC);
+    GET_PROC(glCopyMemSubImage2DATI, PFNGLCOPYMEMSUBIMAGE2DATIPROC);
+    GET_PROC(glCopyMemSubImage1DATI, PFNGLCOPYMEMSUBIMAGE1DATIPROC);
+    GET_PROC(glMemCopy3DATI, PFNGLMEMCOPY3DATIPROC);
+    GET_PROC(glMemCopy2DATI, PFNGLMEMCOPY2DATIPROC);
+    GET_PROC(glMemCopy1DATI, PFNGLMEMCOPY1DATIPROC);
+    GET_PROC(glAttachMemATI, PFNGLATTACHMEMATIPROC);
+    GET_PROC(glVertexArrayMemATI, PFNGLVERTEXARRAYMEMATIPROC);
+    GET_PROC(glDrawElementArrayATI, PFNGLDRAWELEMENTARRAYATIPROC);
+    GET_PROC(glGetMemInfoLogATI, PFNGLGETMEMINFOLOGATIPROC);
 
-    GET_PROC(glProgramStringARB);
-    GET_PROC(glBindProgramARB);
-    GET_PROC(glDeleteProgramsARB);
-    GET_PROC(glGenProgramsARB);
-    GET_PROC(glProgramEnvParameter4fARB);
-    GET_PROC(glProgramEnvParameter4dARB);
-    GET_PROC(glProgramEnvParameter4fvARB);
-    GET_PROC(glProgramEnvParameter4dvARB);
-    GET_PROC(glProgramLocalParameter4fARB);
-    GET_PROC(glProgramLocalParameter4dARB);
-    GET_PROC(glProgramLocalParameter4fvARB);
-    GET_PROC(glProgramLocalParameter4dvARB);
-    GET_PROC(glGetProgramEnvParameterfvARB);
-    GET_PROC(glGetProgramEnvParameterdvARB);
-    GET_PROC(glGetProgramLocalParameterfvARB);
-    GET_PROC(glGetProgramLocalParameterdvARB);
-    GET_PROC(glGetProgramivARB);
-    GET_PROC(glGetProgramStringARB);
-    GET_PROC(glIsProgramARB);
-	GET_PROC(glDrawBuffersATI);
+    GET_PROC(glProgramStringARB, PFNGLPROGRAMSTRINGARBPROC);
+    GET_PROC(glBindProgramARB, PFNGLBINDPROGRAMARBPROC);
+    GET_PROC(glDeleteProgramsARB, PFNGLDELETEPROGRAMSARBPROC);
+    GET_PROC(glGenProgramsARB, PFNGLGENPROGRAMSARBPROC);
+    GET_PROC(glProgramEnvParameter4fARB, PFNGLPROGRAMENVPARAMETER4FARBPROC);
+    GET_PROC(glProgramEnvParameter4dARB, PFNGLPROGRAMENVPARAMETER4DARBPROC);
+    GET_PROC(glProgramEnvParameter4fvARB, PFNGLPROGRAMENVPARAMETER4FVARBPROC);
+    GET_PROC(glProgramEnvParameter4dvARB, PFNGLPROGRAMENVPARAMETER4DVARBPROC);
+    GET_PROC(glProgramLocalParameter4fARB, PFNGLPROGRAMLOCALPARAMETER4FARBPROC);
+    GET_PROC(glProgramLocalParameter4dARB, PFNGLPROGRAMLOCALPARAMETER4DARBPROC);
+    GET_PROC(glProgramLocalParameter4fvARB, PFNGLPROGRAMLOCALPARAMETER4FVARBPROC);
+    GET_PROC(glProgramLocalParameter4dvARB, PFNGLPROGRAMLOCALPARAMETER4DVARBPROC);
+    GET_PROC(glGetProgramEnvParameterfvARB, PFNGLGETPROGRAMENVPARAMETERFVARBPROC);
+    GET_PROC(glGetProgramEnvParameterdvARB, PFNGLGETPROGRAMENVPARAMETERDVARBPROC);
+    GET_PROC(glGetProgramLocalParameterfvARB, PFNGLGETPROGRAMLOCALPARAMETERFVARBPROC);
+    GET_PROC(glGetProgramLocalParameterdvARB, PFNGLGETPROGRAMLOCALPARAMETERDVARBPROC);
+    GET_PROC(glGetProgramivARB, PFNGLGETPROGRAMIVARBPROC);
+    GET_PROC(glGetProgramStringARB, PFNGLGETPROGRAMSTRINGARBPROC);
+    GET_PROC(glIsProgramARB, PFNGLISPROGRAMARBPROC);
+	GET_PROC(glDrawBuffersATI, PFNGLDRAWBUFFERSATIPROC);
 
-    GET_PROC(glNewObjectBufferATI);
-    GET_PROC(glIsObjectBufferATI);
-    GET_PROC(glUpdateObjectBufferATI);
-    GET_PROC(glGetObjectBufferfvATI);
-    GET_PROC(glGetObjectBufferivATI);
-    GET_PROC(glDeleteObjectBufferATI);
-    GET_PROC(glArrayObjectATI);
-    GET_PROC(glGetArrayObjectfvATI);
-    GET_PROC(glGetArrayObjectivATI);
-    GET_PROC(glVariantArrayObjectATI);
-    GET_PROC(glGetVariantArrayObjectfvATI);
-    GET_PROC(glGetVariantArrayObjectivATI);
+    GET_PROC(glNewObjectBufferATI, PFNGLNEWOBJECTBUFFERATIPROC);
+    GET_PROC(glIsObjectBufferATI, PFNGLISOBJECTBUFFERATIPROC);
+    GET_PROC(glUpdateObjectBufferATI, PFNGLUPDATEOBJECTBUFFERATIPROC);
+    GET_PROC(glGetObjectBufferfvATI, PFNGLGETOBJECTBUFFERFVATIPROC);
+    GET_PROC(glGetObjectBufferivATI, PFNGLGETOBJECTBUFFERIVATIPROC);
+    GET_PROC(glDeleteObjectBufferATI, PFNGLFREEOBJECTBUFFERATIPROC);
+    GET_PROC(glArrayObjectATI, PFNGLARRAYOBJECTATIPROC);
+    GET_PROC(glGetArrayObjectfvATI, PFNGLGETARRAYOBJECTFVATIPROC);
+    GET_PROC(glGetArrayObjectivATI, PFNGLGETARRAYOBJECTIVATIPROC);
+    GET_PROC(glVariantArrayObjectATI, PFNGLVARIANTARRAYOBJECTATIPROC);
+    GET_PROC(glGetVariantArrayObjectfvATI, PFNGLGETVARIANTARRAYOBJECTFVATIPROC);
+    GET_PROC(glGetVariantArrayObjectivATI, PFNGLGETVARIANTARRAYOBJECTIVATIPROC);
 
-    GET_PROC(glBindBufferARB);
-    GET_PROC(glDeleteBuffersARB);
-    GET_PROC(glGenBuffersARB);
-    GET_PROC(glIsBufferARB);
-    GET_PROC(glBufferDataARB);
-    GET_PROC(glBuffersSubDataARB);
-    GET_PROC(glGetBuffersSubDataARB);
-    GET_PROC(glMapBufferARB);
-    GET_PROC(glUnMapBufferARB);
-    GET_PROC(glGetBufferParameterivARB);
-    GET_PROC(glGetBufferParameterivARB);
-    GET_PROC(glGetBufferPointervARB);
+    GET_PROC(glBindBufferARB, PFNGLBINDBUFFERARBPROC);
+    GET_PROC(glDeleteBuffersARB, PFNGLDELETEBUFFERSARBPROC);
+    GET_PROC(glGenBuffersARB, PFNGLGENBUFFERSARBPROC);
+    GET_PROC(glIsBufferARB, PFNGLISBUFFERARBPROC);
+    GET_PROC(glBufferDataARB, PFNGLBUFFERDATAARBPROC);
+    GET_PROC(glBuffersSubDataARB, PFNGLBUFFERSUBDATAARBPROC);
+    GET_PROC(glGetBuffersSubDataARB, PFNGLGETBUFFERSUBDATAARBPROC);
+    GET_PROC(glMapBufferARB, PFNGLMAPBUFFERARBPROC);
+    GET_PROC(glUnMapBufferARB, PFNGLUNMAPBUFFERARBPROC);
+    GET_PROC(glGetBufferParameterivARB, PFNGLGETBUFFERPARAMETERIVARBPROC);
+    GET_PROC(glGetBufferParameterivARB, PFNGLGETBUFFERPARAMETERIVARBPROC);
+    GET_PROC(glGetBufferPointervARB, PFNGLGETBUFFERPOINTERVARBPROC);
 
 
 #if 0
