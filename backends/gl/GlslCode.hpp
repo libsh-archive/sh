@@ -99,9 +99,13 @@ private:
   void gen_node(SH::ShCtrlGraphNodePtr node);
   
   /// Generate code for a single Sh statement.
-  void emit(const SH::ShStatement &stmt);
-  void emit_lit(const SH::ShStatement &stmt);
-  void emit_texture(const SH::ShStatement &stmt);
+  void emit(const SH::ShStatement& stmt);
+  void emit_exp(const SH::ShStatement& stmt, double power);
+  void emit_lit(const SH::ShStatement& stmt);
+  void emit_log(const SH::ShStatement& stmt, double base);
+  void emit_prod(const SH::ShStatement& stmt);
+  void emit_sum(const SH::ShStatement& stmt);
+  void emit_texture(const SH::ShStatement& stmt);
   
   std::string resolve(const SH::ShVariable& v, int index = -1) const;
 

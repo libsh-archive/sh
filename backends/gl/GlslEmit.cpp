@@ -26,6 +26,7 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "GlslCode.hpp"
 #include <iostream>
+#include <cmath>
 
 namespace shgl {
 
@@ -39,16 +40,23 @@ struct GlslMapping {
 
 static GlslMapping opCodeTable[] = {
   {SH_OP_ABS,   "abs($0)"},
-  {SH_OP_ASN,   "$0"},
+  {SH_OP_ACOS,  "acos($0)"},
   {SH_OP_ADD,   "$0 + $1"},
+  {SH_OP_ASIN,  "asin($0)"},
+  {SH_OP_ASN,   "$0"},
+  {SH_OP_ATAN,  "atan($0)"},
   {SH_OP_CBRT,  "pow($0, 1.0f/3.0f)"},
   {SH_OP_CEIL,  "ceil($0)"},
   {SH_OP_COND,  "$0 ? $1 : $2"},
   {SH_OP_COS,   "cos($0)"},
   {SH_OP_DOT,   "dot($0, $1)"},
   {SH_OP_DIV,   "$0 / $1"},
+  {SH_OP_EXP2,  "exp2($0)"},
   {SH_OP_FLR,   "floor($0)"},
   {SH_OP_FRAC,  "fract($0)"},
+  {SH_OP_LOG2,  "log2($0)"},
+  {SH_OP_LRP,   "mix($2, $1, $0)"},
+  {SH_OP_MAD,   "$0 * $1 + $2"},
   {SH_OP_MAX,   "max($0, $1)"},
   {SH_OP_MIN,   "min($0, $1)"},
   {SH_OP_MOD,   "mod($0, $1)"},
@@ -56,7 +64,9 @@ static GlslMapping opCodeTable[] = {
   {SH_OP_NEG,   "-($0)"},
   {SH_OP_NORM,  "normalize($0)"},
   {SH_OP_POW,   "pow($0, $1)"},
+  {SH_OP_RCP,   "1.0f / $0"},
   {SH_OP_RND,   "floor($0 + 0.5)"},
+  {SH_OP_RSQ,   "inversesqrt($0)"},
   {SH_OP_SEQ,   "equal($0, $1)"},
   {SH_OP_SGE,   "greaterThanEqual($0, $1)"},
   {SH_OP_SGN,   "sign($0)"},
@@ -66,6 +76,8 @@ static GlslMapping opCodeTable[] = {
   {SH_OP_SLT,   "lessThan($0, $1)"},
   {SH_OP_SNE,   "not(equal($0, $1))"}, // notEqual() doesn't work on NVIDIA
   {SH_OP_SQRT,  "sqrt($0)"},
+  {SH_OP_TAN,   "tan($0)"},
+
 
   {SH_OPERATION_END,  0} 
 };
@@ -139,8 +151,26 @@ void GlslCode::emit(const ShStatement &stmt)
   else {
     // Handle the rest of the operations
     switch(stmt.op) {
+    case SH_OP_CMUL:
+      emit_prod(stmt);
+      break;
+    case SH_OP_CSUM:
+      emit_sum(stmt);
+      break;
+    case SH_OP_EXP:
+      emit_exp(stmt, M_E);
+      break;
+    case SH_OP_EXP10:
+      emit_exp(stmt, 10);
+      break;
     case SH_OP_LIT:
       emit_lit(stmt);
+      break;
+    case SH_OP_LOG:
+      emit_log(stmt, M_E);
+      break;
+    case SH_OP_LOG10:
+      emit_log(stmt, 10);
       break;
     case SH_OP_TEX:
     case SH_OP_TEXI:
@@ -153,7 +183,15 @@ void GlslCode::emit(const ShStatement &stmt)
   }
 }
 
-void GlslCode::emit_lit(const ShStatement &stmt)
+void GlslCode::emit_exp(const ShStatement& stmt, double power)
+{
+  stringstream s;
+  s << power;
+  m_lines.push_back(resolve(stmt.dest) + " = " + s.str());
+  m_lines.push_back(resolve(stmt.dest) + " = pow(" + resolve(stmt.dest) + ", " + resolve(stmt.src[0]) + ")");
+}
+
+void GlslCode::emit_lit(const ShStatement& stmt)
 {
   // Result according to OpenGL spec
   m_lines.push_back(resolve(stmt.dest, 0) + " = 1.0f");
@@ -168,7 +206,35 @@ void GlslCode::emit_lit(const ShStatement &stmt)
   m_lines.push_back(resolve(stmt.dest, 3) + " = 1.0f");
 }
 
-void GlslCode::emit_texture(const ShStatement &stmt)
+void GlslCode::emit_log(const ShStatement& stmt, double base)
+{
+  stringstream s;
+  s << base;
+  m_lines.push_back(resolve(stmt.dest) + " = " + s.str());
+  m_lines.push_back(resolve(stmt.dest) + " = log2(" + resolve(stmt.src[0]) + ") / log2(" + resolve(stmt.dest) + ")");
+}
+
+void GlslCode::emit_prod(const ShStatement& stmt)
+{
+  m_lines.push_back(resolve(stmt.dest) + " = 1");
+
+  int size = stmt.src[0].size();
+  for (int i=0; i < size; i++) {
+    m_lines.push_back(resolve(stmt.dest) + " *= " + resolve(stmt.src[0], i));
+  }
+}
+
+void GlslCode::emit_sum(const ShStatement& stmt)
+{
+  m_lines.push_back(resolve(stmt.dest) + " = 0");
+
+  int size = stmt.src[0].size();
+  for (int i=0; i < size; i++) {
+    m_lines.push_back(resolve(stmt.dest) + " += " + resolve(stmt.src[0], i));
+  }
+}
+
+void GlslCode::emit_texture(const ShStatement& stmt)
 {
   SH_DEBUG_ASSERT((SH_OP_TEX == stmt.op) || (SH_OP_TEXI == stmt.op));
 
