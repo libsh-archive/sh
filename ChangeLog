@@ -1,3 +1,9 @@
+2005-03-01  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* util/ShObjMesh.cpp (ShTriple::ShTriple): Be a little less
+	aggressive about unexpected characters, and in particular restore
+	skipws.
+
 2005-02-25  Francois Marier  <francois@serioushack.com>
 
 	* sh/trunk/backends/cc/Cc.cpp, Cc.hpp, 

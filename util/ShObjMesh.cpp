@@ -44,6 +44,8 @@ struct Triple {
       idx[0] = idx[1] = idx[2] = 0;
       while(in.peek() != '\n' && isspace(in.peek())) in.ignore();
 
+      if (in.peek() == '\n') return;
+      
       // each vertex spec must not have spaces (just copying what the old ShObjFile did...)
       in >> std::noskipws;  
       for(int i = 0; i < 3;) {
@@ -52,9 +54,12 @@ struct Triple {
           in.clear();
           if(in.peek() == '/') {
             ++i;
-            in.ignore(); 
-          }else {
-            return;
+            in.ignore();
+          } else if (isspace(in.peek())) {
+            break;
+          } else {
+            // ?
+            break;
           }
         } 
       }
@@ -96,7 +101,9 @@ std::istream& ShObjMesh::readObj(std::istream &in) {
   // read in verts,tangents,normals, etc. first 
   while (in) {
     in >> std::ws >> ch;
-    if (!in) break; // TODO: Check for error conditions.
+    if (!in) {
+      break; // TODO: Check for error conditions.
+    }
     switch (ch) {
       case 'v': {
         ch = in.get();
