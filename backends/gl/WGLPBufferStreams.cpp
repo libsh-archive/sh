@@ -97,8 +97,35 @@ namespace shgl {
 
     m_info.shcontext = shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->newContext();
   
+    // Grab the current DC and context, this will need to be
+    // restored after the pbuffer work has been completed. If
+    // there is no DC then we need to create one, the subsequent
+    // WGL calls need a suitable DC to bootstrap the pbuffer
+    // creation. 
+    // TODO: cleanup this hackery. I assume the a that "DISPLAY"
+    // DC is suitable enough for the subsequent WGL stuffs, but
+    // the Win32 documentation doesn't say one way or another if
+    // this is the "right" thing. Should the HWND/HDC/HGLRC that
+    // is being used in GlBackend::GlBackend be kept around so
+    // this code doesn't need any special cases (see comments
+    // in GlBackend.cpp)?
+    bool delete_dc = false;
     m_orig_hdc = wglGetCurrentDC();
-    m_orig_hglrc = wglGetCurrentContext();
+    if (m_orig_hdc == NULL)
+      {
+      delete_dc = true;
+      m_orig_hdc = CreateDC("DISPLAY", NULL, NULL, NULL);
+      if (m_orig_hdc == NULL)
+        {
+        std::stringstream msg;
+        msg << "CreateDC failed (" << GetLastError() << ")";
+        shError(WGLPBufferStreamException(msg.str()));
+        }
+      }
+    else
+      {
+      m_orig_hglrc = wglGetCurrentContext();
+      }
 
     int nfattribs = 0;
     int niattribs = 0;
@@ -232,17 +259,11 @@ namespace shgl {
       shError(WGLPBufferStreamException(msg.str()));
       }
 
-    // Determine the actual width and height we were able to create.
-    int actual_width;
-    int actual_height;
-    wglQueryPbufferARB(m_info.pbuffer, WGL_PBUFFER_WIDTH_ARB, &actual_width);
-    wglQueryPbufferARB(m_info.pbuffer, WGL_PBUFFER_HEIGHT_ARB, &actual_height);
-
-    if (m_info.width != actual_width || m_info.height != actual_height)
+    // If we had to create the DC (see above) then delete it.
+    // TODO: cleanup this hackery (see above)
+    if (delete_dc)
       {
-      SH_DEBUG_WARN("PBuffer size mismatch, desired (" <<
-                    m_info.width << ", " << m_info.height << "), actual (" <<
-                    actual_width << ", " << actual_height << ")");
+      DeleteDC(m_orig_hdc);
       }
 
     return m_info.extension;
@@ -250,11 +271,14 @@ namespace shgl {
 
   void WGLPBufferStreams::restoreContext(void)
     {
-    if (!wglMakeCurrent(m_orig_hdc, m_orig_hglrc))
+    if (m_orig_hdc != NULL && m_orig_hglrc != NULL)
       {
-      std::stringstream msg;
-      msg << "wglMakeCurrent failed (" << GetLastError() << ")";
-      shError(WGLPBufferStreamException(msg.str()));
+      if (!wglMakeCurrent(m_orig_hdc, m_orig_hglrc))
+        {
+        std::stringstream msg;
+        msg << "wglMakeCurrent failed (" << GetLastError() << ")";
+        shError(WGLPBufferStreamException(msg.str()));
+        }
       }
     }
 

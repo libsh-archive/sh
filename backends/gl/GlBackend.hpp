@@ -73,7 +73,6 @@ extern PFNWGLQUERYPBUFFERARBPROC wglQueryPbufferARB;
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include <GL/glx.h>
-//#include <GL/glut.h>
 #endif /* __APPLE */
 
 #endif /* WIN32 */

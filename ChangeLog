@@ -1,3 +1,9 @@
+2004-10-27  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* backends/gl/GlBackend.*, backends/gl/WGLPBuffersStreams.cpp:
+	Create an OpenGL context if there already isn't one already
+	to bootstrap the calls to wglGetProcAddress and for pbuffer creation.
+
 2004-10-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShConstProp.cpp (ConstPropInfo): Respect "opt:lifting"
