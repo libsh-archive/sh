@@ -38,7 +38,7 @@ std::string printVar(const ShVariable& var)
   if (var.swizzle().size()) {  
     out += "[\"";
     for (int i = 0; i < std::min(var.swizzle().size(), 4); i++) {
-      out += swizChars[i];
+      out += swizChars[var.swizzle()[i]];
     }
     out += "\"]";
   }
@@ -74,6 +74,9 @@ void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
       // TODO: Check number and dimensions or args! 
     case SH_OP_ASN:
       m_instructions.push_back(SmInstruction(OP_MOV, stmt.dest, stmt.src1));
+      break;
+    case SH_OP_ADD:
+      m_instructions.push_back(SmInstruction(OP_ADD, stmt.dest, stmt.src1, stmt.src2));
       break;
     case SH_OP_MUL:
       m_instructions.push_back(SmInstruction(OP_MUL, stmt.dest, stmt.src1, stmt.src2));
