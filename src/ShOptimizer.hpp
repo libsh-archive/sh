@@ -73,20 +73,14 @@ private:
   void moveElimination(bool& changed);
   //@}
   
-  /**@name Output to temp convertor
+  /**@name Input and Output variable to temp convertor
    * In most GPU shading languages/assembly, outputs cannot be used as src
-   * variable in computation.  This converts outputs used in computation 
-   * into a temporary.
+   * variable in computation and inputs cannot be used as a dest.  
+   * This converts outputs and inputs used in computation 
+   * into a temporaries.
    */
-  friend struct OutputConvertor;
-  void outputConversion(bool& changed);
-
-  /**@name Input to temp convertor
-   * In many SLs, inputs cannot be used as src variable in computation.  
-   * This converts inputs used in computation into a temporary.
-   */
-  friend struct InputConvertor;
-  void inputConversion(bool& changed);
+  friend struct InputOutputConvertor;
+  void inputOutputConversion(bool& changed);
 
   /**@name Basic block straightening
    * Combines basic blocks which can be connected with another.
