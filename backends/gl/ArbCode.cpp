@@ -389,7 +389,21 @@ bool ArbCode::printSamplingInstruction(std::ostream& out, const ArbInst& instr) 
 
   ShTextureNodePtr texture = shref_dynamic_cast<ShTextureNode>(instr.src[1].node());
   RegMap::const_iterator texRegIt = m_registers.find(instr.src[1].node());
-  SH_DEBUG_ASSERT(texRegIt != m_registers.end());
+  if (texRegIt == m_registers.end()) {
+    SH_DEBUG_PRINT("Unallocated texture found.");
+    SH_DEBUG_PRINT("Operation = " << arbOpInfo[instr.op].name);
+    SH_DEBUG_PRINT("Destination* = " << instr.dest.node().object());
+    if (instr.dest.node()) {
+      SH_DEBUG_PRINT("Destination = " << instr.dest.name());
+    }
+    SH_DEBUG_PRINT("Texture pointer = " << texture.object());
+    if (texture) {
+      SH_DEBUG_PRINT("Texture = " << texture->name());
+    }
+    out << "  INVALID TEX INSTRUCTION;";
+    return true;
+  }
+  //SH_DEBUG_ASSERT(texRegIt != m_registers.end());
 
   const ArbReg& texReg = *texRegIt->second;
   
@@ -480,7 +494,10 @@ std::ostream& ArbCode::print(std::ostream& out)
       out << "  BRA label" << I->label;
       if (I->src[0].node()) {
         out << "  (GT)";
-        // TODO: swizzle
+        out << ".";
+        for (int i = 0; i < I->src[0].swizzle().size(); i++) {
+          out << swizChars[I->src[0].swizzle()[i]];
+        }
       }
       out << ";";
     } else if (I->op == SH_ARB_REP) {
@@ -523,20 +540,44 @@ std::ostream& ArbCode::print(std::ostream& out)
       out << "  IF ";
       if (I->src[0].node()) {
         out << "GT";
-        // TODO: swizzle
+        out << ".";
+        for (int i = 0; i < I->src[0].swizzle().size(); i++) {
+          out << swizChars[I->src[0].swizzle()[i]];
+        }
       } else {
         out << "TR";
       }
       out << ";";
     } else if (!printSamplingInstruction(out, *I)) {
       out << "  ";
-      out << arbOpInfo[I->op].name << " ";
+      out << arbOpInfo[I->op].name;
+      if (I->update_cc) out << "C";
+      out << " ";
       printVar(out, true, I->dest, arbOpInfo[I->op].collectingOp);
+      if (I->ccode != ArbInst::NOCC) {
+        out << " (";
+        out << arbCCnames[I->ccode];
+        out << ".";
+        for (int i = 0; i < 4; i++) {
+          out << swizChars[(i < I->ccswiz.size() ? I->ccswiz[i]
+                            : (I->ccswiz.size() == 1 ? I->ccswiz[0] : i))];
+        }
+        out << ") ";
+      }
       for (int i = 0; i < arbOpInfo[I->op].arity; i++) {
         out << ", ";
         printVar(out, false, I->src[i], arbOpInfo[I->op].collectingOp, I->dest.swizzle());
       }
       out << ';';
+    }
+    out << " # ";
+    if (I->dest.node() && I->dest.has_name()) {
+      out << "d=" << I->dest.name() << " ";
+    }
+    for (int i = 0; i < 3; i++) {
+      if (I->src[i].node()  && I->src[i].has_name()) {
+        out << "s[" << i << "]=" << I->src[i].name() << " ";
+      }
     }
     out << endl;
   }
@@ -842,6 +883,14 @@ bool mark(ShLinearAllocator& allocator, ShVariableNodePtr node, int i)
   return true;
 }
 
+bool markable(ShVariableNodePtr node)
+{
+  if (!node) return false;
+  if (node->kind() != SH_TEMP) return false;
+  if (node->hasValues()) return false;
+  return true;
+}
+
 struct ArbScope {
   ArbScope(int start)
     : start(start)
@@ -855,15 +904,116 @@ struct ArbScope {
   MarkList need_mark; // Need to mark at end of loop
   int start; // location where loop started
   UsageMap usage_map;
+  UsageMap write_map; // locations last written to
 };
 
 void ArbCode::allocTemps(const ArbLimits& limits)
 {
+
   typedef std::list<ArbScope> ScopeStack;
   ScopeStack scopestack;
   
   ShLinearAllocator allocator(this);
 
+//   {
+//     ScopeStack scopestack;
+//     // First do a backwards traversal to find loop nodes that need to be
+//     // marked due to later uses of assignments
+//     std::map<ShVariableNode*, int> last_use;
+    
+//     for (int i = (int)m_instructions.size() - 1; i >= 0; --i) {
+//       ArbInst instr = m_instructions[i];
+//       if (instr.op == SH_ARB_ENDREP) {
+//         scopestack.push_back((int)i);
+//       }
+//       if (instr.op == SH_ARB_REP) {
+//         const ArbScope& scope = scopestack.back();
+//         for (ArbScope::MarkList::const_iterator I = scope.need_mark.begin();
+//              I != scope.need_mark.end(); ++I) {
+//           mark(allocator, *I, (int)i);
+//         }
+//         scopestack.pop_back();
+//       }
+
+//       if (markable(instr.dest.node())) {
+//         if (last_use.find(instr.dest.node().object()) == last_use.end()) continue;
+//         for (ScopeStack::iterator S = scopestack.begin(); S != scopestack.end(); ++S) {
+//           ArbScope& scope = *S;
+//           // Note scope.start == location of ENDREP
+//           // TODO: Consider sub-components in last_use update and here.
+//           if (last_use[instr.dest.node().object()] > scope.start) {
+//             mark(allocator, instr.dest.node().object(), scope.start);
+//             scope.need_mark.insert(instr.dest.node().object());
+//           }
+//         }
+//       }
+      
+//       for (int j = 0; j < 3; j++) {
+//         if (!markable(instr.src[j].node())) continue;
+        
+//         if (last_use.find(instr.src[j].node().object()) == last_use.end()) {
+//           last_use[instr.src[j].node().object()] = i;
+//         }
+//       }
+//     }
+//   }
+
+  {
+    ScopeStack scopestack;
+    // First do a backwards traversal to find loop nodes that need to be
+    // marked due to later uses of assignments
+
+    // push root stack
+
+    scopestack.push_back(m_instructions.size() - 1);
+    
+    for (int i = (int)m_instructions.size() - 1; i >= 0; --i) {
+      ArbInst instr = m_instructions[i];
+      if (instr.op == SH_ARB_ENDREP) {
+        scopestack.push_back((int)i);
+      }
+      if (instr.op == SH_ARB_REP) {
+        const ArbScope& scope = scopestack.back();
+        for (ArbScope::MarkList::const_iterator I = scope.need_mark.begin();
+             I != scope.need_mark.end(); ++I) {
+          mark(allocator, *I, (int)i);
+        }
+        scopestack.pop_back();
+      }
+
+      if (markable(instr.dest.node())) {
+        std::bitset<4> writemask;
+        for (int k = 0; k < instr.dest.size(); k++) {
+          writemask[instr.dest.swizzle()[k]] = true;
+        }
+        std::bitset<4> used;
+        for (ScopeStack::iterator S = scopestack.begin(); S != scopestack.end(); ++S) {
+          ArbScope& scope = *S;
+
+          if ((used & writemask).any()) {
+            mark(allocator, instr.dest.node().object(), scope.start);
+            scope.need_mark.insert(instr.dest.node().object());
+          }
+          
+          used |= scope.usage_map[instr.dest.node().object()];
+        }
+
+        ArbScope& scope = scopestack.back();
+        scope.usage_map[instr.dest.node().object()] &= ~writemask;
+      }
+      
+      for (int j = 0; j < 3; j++) {
+        if (!markable(instr.src[j].node())) continue;
+        std::bitset<4> usemask;
+        for (int k = 0; k < instr.src[j].size(); k++) {
+          usemask[instr.src[j].swizzle()[k]] = true;
+        }
+        ArbScope& scope = scopestack.back();
+        scope.usage_map[instr.src[j].node().object()] |= usemask;
+      }
+    }
+  }
+  
   for (std::size_t i = 0; i < m_instructions.size(); i++) {
     ArbInst instr = m_instructions[i];
     if (instr.op == SH_ARB_REP) {
@@ -882,15 +1032,15 @@ void ArbCode::allocTemps(const ArbLimits& limits)
       for (ScopeStack::iterator S = scopestack.begin(); S != scopestack.end(); ++S) {
         ArbScope& scope = *S;
         std::bitset<4> writemask;
-        for (int i = 0; i < instr.dest.size(); i++) {
-          writemask[instr.dest.swizzle()[i]] = true;
+        for (int k = 0; k < instr.dest.size(); k++) {
+          writemask[instr.dest.swizzle()[k]] = true;
         }
-        writemask &= scope.usage_map[instr.dest.node().object()];
-        
-        if (writemask.any()) {
-          mark(allocator, instr.dest.node(), scope.start);
-          scope.need_mark.insert(instr.dest.node().object());
-        }
+        // TODO: Only change the writemask for scopes that see this
+        // write unconditionally
+        // I.e. don't change it if the scope is outside an if
+        // statement, or a post-BRK REP scope.
+        scope.write_map[instr.dest.node().object()] |= writemask;
+
       }        
     }
     
@@ -898,9 +1048,14 @@ void ArbCode::allocTemps(const ArbLimits& limits)
       if (mark(allocator, instr.src[j].node(), (int)i)) {
         for (ScopeStack::iterator S = scopestack.begin(); S != scopestack.end(); ++S) {
           ArbScope& scope = *S;
-          // Mark uses
-          for (int i = 0; i < instr.src[j].size(); i++) {
-            scope.usage_map[instr.src[j].node().object()][instr.src[j].swizzle()[i]] = true;
+          // Mark uses that weren't recently written to.
+          std::bitset<4> usemask;
+          for (int k = 0; k < instr.src[j].size(); k++) {
+            usemask[instr.src[j].swizzle()[k]] = true;
+          }
+          if ((usemask & ~scope.write_map[instr.src[j].node().object()]).any()) {
+            mark(allocator, instr.src[j].node(), scope.start);
+            scope.need_mark.insert(instr.src[j].node().object());
           }
         }
       }

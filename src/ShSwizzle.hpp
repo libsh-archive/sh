@@ -54,6 +54,8 @@ namespace SH {
  */
 class ShSwizzle {
 public:
+  // Null swizzle
+  ShSwizzle();
   /// Identity swizzle: does nothing at all.
   ShSwizzle(int srcSize);
   /// Use one element from the original tuple.

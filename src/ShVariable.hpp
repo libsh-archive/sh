@@ -103,6 +103,7 @@ public:
   ShVariable operator-() const;
 
   bool operator==(const ShVariable& other) const;
+  bool operator!=(const ShVariable& other) const { return !((*this) == other); }
 
 protected:
   

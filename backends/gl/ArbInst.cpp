@@ -95,4 +95,16 @@ ArbOpInfo arbOpInfo[] = {
   {"<fun>", 0, false}
 };
 
+char* arbCCnames[] = {
+  "",
+  "EQ",
+  "GE",
+  "GT",
+  "LE",
+  "LT",
+  "NE",
+  "TR",
+  "FL"
+};
+
 }

@@ -31,6 +31,11 @@
 
 namespace SH {
 
+ShSwizzle::ShSwizzle()
+  : m_srcSize(0)
+{
+}
+
 ShSwizzle::ShSwizzle(int srcSize)
   : m_srcSize(srcSize)
 {

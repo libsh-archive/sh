@@ -5,7 +5,7 @@
 #include <set>
 #include "ShDebug.hpp"
 
-#define SH_STRUCTURAL_DEBUG
+// #define SH_STRUCTURAL_DEBUG
 
 #ifdef SH_STRUCTURAL_DEBUG
 #  define SH_STR_DEBUG_PRINT(x) SH_DEBUG_PRINT(x)
@@ -244,7 +244,7 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
         if (s && n != node) nodeset.push_front(n);
 
         if (nodeset.size() >= 2) {
-          SH_STR_DEBUG_PRINT("Found block of size " << nodeset.size());
+          SH_STR_DEBUG_PRINT("FOUND BLOCK of size " << nodeset.size());
           for (NodeSet::iterator I = nodeset.begin(); I != nodeset.end(); ++I) {
             SH_STR_DEBUG_PRINT("  node " << I->object());
           }
@@ -271,7 +271,7 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
         ShStructuralNodePtr m = S->second;
         ShStructuralNodePtr n = (++S)->second;
         if (m->succs == n->succs && m->succs.size() == 1) {
-          SH_STR_DEBUG_PRINT("Found an if-else");
+          SH_STR_DEBUG_PRINT("FOUND IF-ELSE");
           nodeset.push_back(node);
           nodeset.push_back(m);
           nodeset.push_back(n);
@@ -281,6 +281,7 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
 
       // Find cyclic regions
       if (!newnode) {
+        /*
         typedef std::list<ShStructuralNode*> ReachUnder;
         //        typedef NodeSet ReachUnder;
         ReachUnder ru;
@@ -291,19 +292,39 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
         }
 
         if (ru.size() == 1) {
-          SH_STR_DEBUG_PRINT("Found a self-loop");
+          SH_STR_DEBUG_PRINT("FOUND SELFLOOP");
           SH_DEBUG_ASSERT(ru.front() == node);
           newnode = new ShStructuralNode(ShStructuralNode::SELFLOOP);
-        }
+        } else
         if (ru.size() == 2 && ru.back()->succs.size() == 1) {
-          SH_STR_DEBUG_PRINT("Found a while-loop");
+          SH_STR_DEBUG_PRINT("FOUND WHILELOOP");
           SH_DEBUG_ASSERT(ru.front() == node);
           SH_DEBUG_ASSERT(ru.back() != node);
           newnode = new ShStructuralNode(ShStructuralNode::WHILELOOP);
-        }
+        } 
         if (newnode) {
           for (ReachUnder::iterator I = ru.begin(); I != ru.end(); ++I) {
             nodeset.push_back(*I);
+          }
+        }
+        */
+
+        for (ShStructuralNode::SuccessorList::iterator S = node->succs.begin();
+             S != node->succs.end(); ++S) {
+          if (S->second->preds.size() == 1
+              && S->second->succs.size() == 1
+              && S->second->succs.begin()->second == node) {
+            // found while loop
+            nodeset.push_back(node);
+            nodeset.push_back(S->second);
+            newnode = new ShStructuralNode(ShStructuralNode::WHILELOOP);
+            break;
+          }
+          // self loop?
+          if (S->second == node) {
+            nodeset.push_back(node);
+            newnode = new ShStructuralNode(ShStructuralNode::SELFLOOP);
+            break;
           }
         }
       }
@@ -321,18 +342,35 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
         
         newnode->parent = nodeset.front()->parent;
 
+        
         for (NodeSet::iterator N = nodeset.begin(); N != nodeset.end(); ++N) {
           ShStructuralNodePtr n = *N;
+          
           for (ShStructuralNode::PredecessorList::iterator P = n->preds.begin();
                P != n->preds.end(); ++P) {
-            if (contains(nodeset, P->second)) continue;
+            if (N == nodeset.begin() && newnode->type == ShStructuralNode::BLOCK
+                && P->second == nodeset.back().object()) {
+              ShStructuralNode::PredecessorEdge e = *P;
+              e.second = newnode.object();
+              newnode->preds.push_back(e);
+              continue;
+            }
             if (contains(newnode->preds, *P)) continue;
+            if (contains(nodeset, P->second)) continue;
+
             newnode->preds.push_back(*P);
           }
           for (ShStructuralNode::SuccessorList::iterator S = n->succs.begin();
                S != n->succs.end(); ++S) {
-            if (contains(nodeset, S->second)) continue;
             if (contains(newnode->succs, *S)) continue;
+            if (n == nodeset.back() && newnode->type == ShStructuralNode::BLOCK
+                && S->second == nodeset.front()) {
+              ShStructuralNode::SuccessorEdge e = *S;
+              e.second = newnode;
+              newnode->succs.push_back(e);
+              continue;
+            }
+            if (contains(nodeset, S->second)) continue;
             newnode->succs.push_back(*S);
           }
           for (ShStructuralNode::ChildList::iterator C = n->children.begin();
@@ -368,9 +406,16 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
                J != s->preds.end(); ++J) {
             if (contains(nodeset, J->second)) J->second = newnode.object();
           }
-          // TODO: unique is not really enough here, it compares
-          // adjacent elements only...
-          s->preds.unique();
+          // Make preds unique.
+          for (ShStructuralNode::PredecessorList::iterator J = s->preds.begin();
+               J != s->preds.end(); ++J) {
+            ShStructuralNode::PredecessorList::iterator K = J;
+            ++K;
+            if (std::find(K, s->preds.end(), *J) != s->preds.end()) {
+              J = s->preds.erase(J);
+              J--;
+            }
+          }
         }
 
         SH_STR_DEBUG_PRINT("Replace succs of preds");
@@ -382,7 +427,16 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
              J != p->succs.end(); ++J) {
             if (contains(nodeset, J->second)) J->second = newnode;
           }
-          p->succs.unique();
+          // Make succs unique.
+          for (ShStructuralNode::SuccessorList::iterator J = p->succs.begin();
+               J != p->succs.end(); ++J) {
+            ShStructuralNode::SuccessorList::iterator K = J;
+            ++K;
+            if (std::find(K, p->succs.end(), *J) != p->succs.end()) {
+              J = p->succs.erase(J);
+              J--;
+            }
+          }
         }
         
         SH_STR_DEBUG_PRINT("Add to postorder");

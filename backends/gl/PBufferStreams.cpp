@@ -29,7 +29,12 @@
 /// Turn this on if you want timings on std::cerr
 //#define DO_PBUFFER_TIMING
 
+// Turn this on to debug the fragment programs.
+#define SH_DEBUG_PBS_PRINTFP
+
 #include <map>
+#include <fstream>
+#include <cstdlib>
 
 // Extensions for ATI and Nvidia
 
@@ -138,20 +143,24 @@ public:
       ShStatement& stmt = *I;
       if (stmt.op != SH_OP_FETCH) continue;
       
+      if (!stmt.src[0].node()) {
+        SH_DEBUG_WARN("FETCH from null stream");
+        continue;
+      }
       if (stmt.src[0].node()->kind() != SH_STREAM) {
-        // TODO: complain
+        SH_DEBUG_WARN("FETCH from non-stream");
         continue;
       }
       
       ShChannelNodePtr stream_node = shref_dynamic_cast<ShChannelNode>(stmt.src[0].node());
       StreamInputMap::const_iterator I = input_map.find(stream_node);
       if (I == input_map.end()) {
-        // TODO: complain
+        SH_DEBUG_WARN("Stream node not found in input map");
         continue;
       }
 
       if (!I->second) {
-        // TODO: complain
+        SH_DEBUG_WARN("No texture allocated for stream node");
         continue;
       }
 
@@ -471,7 +480,8 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
 
   DECLARE_TIMER(fpsetup);
   // Add in the texcoord variable
-  ShProgram fp = ShProgram(shref_const_cast<ShProgramNode>(program)) & lose<ShTexCoord2f>();
+  ShProgram fp = ShProgram(shref_const_cast<ShProgramNode>(program))
+    & lose<ShTexCoord2f>("streamcoord");
 
   // Make it a fragment program
   fp.node()->target() = "gpu:fragment";
@@ -505,9 +515,23 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
     //XFree(fb_config);
     return;
   }
+#ifdef SH_DEBUG_PBS_PRINTFP
+  {
+  std::ofstream fpgv("pb.dot");
+  fp.node()->ctrlGraph->graphvizDump(fpgv);
+  }
+  system("dot -Tps -o pb.ps pb.dot");
+#endif
 
   // generate code
   shCompile(fp);
+
+#ifdef SH_DEBUG_PBS_PRINTFP
+ {
+  std::ofstream fpdbg("pbufferstream.fp");
+  fp.code()->print(fpdbg);
+ }
+#endif
 
   TIMING_RESULT(fpsetup);
 
@@ -533,7 +557,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   TIMING_RESULT(binding);
 
   DECLARE_TIMER(clear);
-  //glClear(GL_COLOR_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT);
   TIMING_RESULT(clear);
 
   DECLARE_TIMER(rendersetup);

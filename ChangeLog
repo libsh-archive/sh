@@ -1,3 +1,32 @@
+2004-07-17  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShVariable.hpp (ShVariable): Add operator!=.
+
+	* src/ShSwizzle.cpp (ShSwizzle): Implement default constructor.
+
+	* src/ShSwizzle.hpp (ShSwizzle): Add default constructor.
+
+	* src/ShStructural.cpp (ShStructural): Rewrote cycle discovery code.
+	(ShStructural): Fix duplicate removal code.
+
+	* backends/gl/GlTextures.cpp (shGlInternalFormat): Use
+	GL_FLOAT_RGBA_NV for 2-component floating-point textures with
+	NV_float_buffer so that the appropriate components are extracted.
+
+	* backends/gl/PBufferStreams.cpp (execute): Added fragment program
+	dumping code.
+
+	* backends/gl/ArbCode.cpp (print): Handle condition codes.
+	(allocTemps): Allocate temporaries (mostly) correctly in the
+	presence of REPs.
+
+	* backends/gl/ArbInst.hpp (ArbInst): Add condition code data.
+
+	* backends/gl/ArbEmit.cpp: Use emit_div even on NV40, because we
+	found a bug with DIV in the drivers.
+	(emit_nvcond): Use condition-codes for COND instructions on NV backends.
+	(emit_tex): Fixed texture lookups, in particular for 2-tuple textures.
+
 2004-07-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/ArbInst.hpp: Add an "invert" field for BRKs.

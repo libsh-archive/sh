@@ -40,7 +40,8 @@ public:
   typedef std::pair<ShVariable, ShPointer<ShStructuralNode> > SuccessorEdge;
   typedef std::list<SuccessorEdge> SuccessorList;
   SuccessorList succs;
-  typedef std::list< std::pair<ShVariable, ShStructuralNode*> > PredecessorList;
+  typedef std::pair<ShVariable, ShStructuralNode*> PredecessorEdge;
+  typedef std::list<PredecessorEdge> PredecessorList;
   PredecessorList preds;
 
   // Spanning tree

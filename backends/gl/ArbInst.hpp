@@ -116,37 +116,43 @@ extern ArbOpInfo arbOpInfo[];
  */
 struct ArbInst {
   ArbInst(ArbOp op, int label)
-    : op(op), label(label), invert(false)
+    : op(op), label(label), invert(false),
+      update_cc(false), ccode(NOCC)
   {
   }
 
   ArbInst(ArbOp op, int label, const SH::ShVariable& condition)
-    : op(op), label(label), invert(false)
+    : op(op), label(label), invert(false),
+      update_cc(false), ccode(NOCC)
   {
     src[0] = condition;
   }
   
   ArbInst(ArbOp op, const SH::ShVariable& dest)
-    : op(op), dest(dest), invert(false)
+    : op(op), dest(dest), invert(false),
+      update_cc(false), ccode(NOCC)
   {
   }
 
   ArbInst(ArbOp op, const SH::ShVariable& dest, const SH::ShVariable& src0)
-    : op(op), dest(dest), invert(false)
+    : op(op), dest(dest), invert(false),
+      update_cc(false), ccode(NOCC)
   {
     src[0] = src0;
   }
 
   ArbInst(ArbOp op, const SH::ShVariable& dest, const SH::ShVariable& src0,
           const SH::ShVariable& src1)
-    : op(op), dest(dest), invert(false)
+    : op(op), dest(dest), invert(false),
+      update_cc(false), ccode(NOCC)
   {
     src[0] = src0;
     src[1] = src1;
   }
   ArbInst(ArbOp op, const SH::ShVariable& dest, const SH::ShVariable& src0,
           const SH::ShVariable& src1, const SH::ShVariable& src2)
-    : op(op), dest(dest), invert(false)
+    : op(op), dest(dest), invert(false),
+      update_cc(false), ccode(NOCC)
   {
     src[0] = src0;
     src[1] = src1;
@@ -159,7 +165,27 @@ struct ArbInst {
 
   int label; // For branching instructions and labels
   bool invert; // Invert the sense of a break condition.
+
+  // NV specific stuff for condition codes
+  bool update_cc; ///< Prepend "C" to update the condition code
+  
+  enum CCode {
+    NOCC,
+    EQ,
+    GE,
+    GT,
+    LE,
+    LT,
+    NE,
+    TR,
+    FL
+  } ccode; ///< Do a conditional instruction
+
+  SH::ShSwizzle ccswiz;
+  
 };
+
+extern char* arbCCnames[];
 
 }
 

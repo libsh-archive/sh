@@ -35,7 +35,10 @@ ArbMapping ArbCode::table[] = {
   {SH_OP_ADD,  SH_ARB_ANY,   0,            SH_ARB_ADD, 0},
   {SH_OP_NEG,  SH_ARB_ANY,   negate_first, SH_ARB_MOV, 0},
   {SH_OP_MUL,  SH_ARB_ANY,   0,            SH_ARB_MUL, 0},
-  {SH_OP_DIV,  SH_ARB_NVFP2, scalarize,    SH_ARB_DIV, 0},
+
+  // Removed this temporarily because of a bug in the NV drivers
+  //{SH_OP_DIV,  SH_ARB_NVFP2, scalarize,    SH_ARB_DIV, 0},
+  
   {SH_OP_DIV,  SH_ARB_ANY,   scalarize,    SH_ARB_FUN, &ArbCode::emit_div},
   {SH_OP_POW,  SH_ARB_ANY,   scalarize,    SH_ARB_POW, 0},
   {SH_OP_RCP,  SH_ARB_ANY,   scalarize,    SH_ARB_RCP, 0},
@@ -115,12 +118,14 @@ ArbMapping ArbCode::table[] = {
   {SH_OP_XPD,  SH_ARB_ANY | SH_ARB_VEC3,   0, SH_ARB_XPD, 0},
 
   // Texture
-  {SH_OP_TEX,  SH_ARB_NVVP2, swap_sources | delay_mask, SH_ARB_TEX, 0},
-  {SH_OP_TEX,  SH_ARB_FP,    swap_sources | delay_mask, SH_ARB_TEX, 0},
-  {SH_OP_TEXI, SH_ARB_NVVP2, swap_sources | delay_mask, SH_ARB_TEX, 0},
-  {SH_OP_TEXI, SH_ARB_FP,    swap_sources | delay_mask, SH_ARB_TEX, 0},
+  {SH_OP_TEX,  SH_ARB_NVVP2, 0, SH_ARB_FUN, &ArbCode::emit_tex},
+  {SH_OP_TEX,  SH_ARB_FP,    0, SH_ARB_FUN, &ArbCode::emit_tex},
+  {SH_OP_TEXI, SH_ARB_NVVP2, 0, SH_ARB_FUN, &ArbCode::emit_tex},
+  {SH_OP_TEXI, SH_ARB_FP,    0, SH_ARB_FUN, &ArbCode::emit_tex},
 
   // Misc.
+  {SH_OP_COND, SH_ARB_NVFP, 0, SH_ARB_FUN, &ArbCode::emit_nvcond},
+  {SH_OP_COND, SH_ARB_NVVP2, 0, SH_ARB_FUN, &ArbCode::emit_nvcond},
   {SH_OP_COND, SH_ARB_ANY, negate_first, SH_ARB_CMP, 0},
   {SH_OP_KIL,  SH_ARB_FP,  negate_first, SH_ARB_KIL, 0},
 
@@ -198,20 +203,22 @@ void ArbCode::emit(const ShStatement& stmt)
     if (mapping->arb_op == SH_ARB_FUN) {
       (this->*(mapping->function))(*I);
     } else {
+      // HACK for delay_mask to work.
+      ArbOp op = (I->op == SH_OP_ASN) ? SH_ARB_MOV : mapping->arb_op;
       switch (opInfo[I->op].arity) {
       case 0:
-        m_instructions.push_back(ArbInst(mapping->arb_op, I->dest));
+        m_instructions.push_back(ArbInst(op, I->dest));
         break;
       case 1:
-        m_instructions.push_back(ArbInst(mapping->arb_op, I->dest,
+        m_instructions.push_back(ArbInst(op, I->dest,
                                          I->src[0]));
         break;
       case 2:
-        m_instructions.push_back(ArbInst(mapping->arb_op, I->dest,
+        m_instructions.push_back(ArbInst(op, I->dest,
                                          I->src[0], I->src[1]));
         break;
       case 3:
-        m_instructions.push_back(ArbInst(mapping->arb_op, I->dest,
+        m_instructions.push_back(ArbInst(op, I->dest,
                                          I->src[0], I->src[1], I->src[2]));
         break;
       }
@@ -457,6 +464,69 @@ void ArbCode::emit_sgn(const ShStatement& stmt)
   ShVariable tmp(new ShVariableNode(SH_TEMP, stmt.src[0].size()));
   m_instructions.push_back(ArbInst(SH_ARB_ABS, tmp, stmt.src[0]));
   emit(ShStatement(stmt.dest, stmt.src[0], SH_OP_DIV, tmp));
+}
+
+void ArbCode::emit_tex(const ShStatement& stmt)
+{
+  bool delay = false;
+  ShVariable tmpdest;
+  ShVariable tmpsrc;
+  
+  if (!stmt.dest.swizzle().identity()) {
+    tmpdest = ShVariable(new ShVariableNode(SH_TEMP, 4));
+    tmpsrc = tmpdest;
+    delay = true;
+  }
+
+  ShTextureNodePtr tnode = shref_dynamic_cast<ShTextureNode>(stmt.src[0].node());
+
+  SH_DEBUG_ASSERT(tnode);
+
+  if (tnode->size() == 2) {
+    // Special case for LUMINANCE_ALPHA
+    if (!delay) {
+      tmpdest = ShVariable(new ShVariableNode(SH_TEMP, 4));
+      tmpsrc = tmpdest;
+    }
+    tmpsrc = tmpsrc(0,3);
+    delay = true;
+  }
+
+  m_instructions.push_back(ArbInst(SH_ARB_TEX,
+                                   (delay ? tmpdest : stmt.dest), stmt.src[1], stmt.src[0]));
+  if (delay) emit(ShStatement(stmt.dest, SH_OP_ASN, tmpsrc));
+}
+
+void ArbCode::emit_nvcond(const ShStatement& stmt)
+{
+
+  ShVariable dummy(new ShVariableNode(SH_TEMP, stmt.src[0].size()));
+  ArbInst updatecc(SH_ARB_MOV, dummy, stmt.src[0]);
+  updatecc.update_cc = true;
+  m_instructions.push_back(updatecc);
+
+  /*
+  ShSwizzle ccswiz = stmt.src[0].swizzle();
+  if (ccswiz.size() == 1) {
+    int indices[4];
+    for (int i = 0; i < stmt.dest.size(); i++) {
+      indices[i] = 0;
+    }
+    ccswiz *= ShSwizzle(1, stmt.dest.size(), indices);
+  }
+  */  
+  if (stmt.dest != stmt.src[1]) {
+    ArbInst movt(SH_ARB_MOV, stmt.dest, stmt.src[1]);
+    movt.ccode = ArbInst::GT;
+    movt.ccswiz = stmt.src[0].swizzle();
+    m_instructions.push_back(movt);
+  }
+  if (stmt.dest != stmt.src[2]) {
+    ArbInst movf(SH_ARB_MOV, stmt.dest, stmt.src[2]);
+    movf.ccode = ArbInst::LE;
+    movf.ccswiz = stmt.src[0].swizzle();
+    m_instructions.push_back(movf);
+  }
 }
 
 }
