@@ -89,6 +89,14 @@ void shBindShader(const std::string& target, ShProgram& shader)
   shader->code(target, ShEnvironment::backend)->bind();
 }
 
+bool shSetBackend(const std::string& name)
+{
+  ShBackendPtr backend = SH::ShBackend::lookup(name);
+  if (!backend) return false;
+  SH::ShEnvironment::backend = backend;
+  return true;
+}
+
 void shIf(bool)
 {
   ShRefCount<ShToken> token = new ShToken(SH_TOKEN_IF);

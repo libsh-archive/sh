@@ -70,6 +70,21 @@ void ShVariable::name(const std::string& name)
   m_node->name(name);
 }
 
+void ShVariable::range(ShVariableNode::ValueType low, ShVariableNode::ValueType high)
+{
+  m_node->range(low, high);
+}
+
+ShVariableNode::ValueType ShVariable::lowBound()
+{
+  return m_node->lowBound();
+}
+
+ShVariableNode::ValueType ShVariable::highBound()
+{
+  return m_node->highBound();
+}
+
 const ShSwizzle& ShVariable::swizzle() const
 {
   return m_swizzle;

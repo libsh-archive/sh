@@ -306,10 +306,11 @@ void ArbCode::freeRegister(const ShVariableNodePtr& var)
 
 void ArbCode::upload()
 {
-  if (!m_programId)
-    shGlGenProgramsARB(1, &m_programId);
+  if (!m_programId) {
+    SH_GL_CHECK_ERROR(shGlGenProgramsARB(1, &m_programId));
+  }
 
-  shGlBindProgramARB(shArbTarget(m_target), m_programId);
+  SH_GL_CHECK_ERROR(shGlBindProgramARB(shArbTarget(m_target), m_programId));
   
   std::ostringstream out;
   print(out);
@@ -319,11 +320,16 @@ void ArbCode::upload()
   int error = glGetError();
   if (error == GL_INVALID_OPERATION) {
     int pos = -1;
-    glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &pos);
-    const unsigned char* message = glGetString(GL_PROGRAM_ERROR_STRING_ARB);
-    SH_DEBUG_WARN("Error at character " << pos);
-    SH_DEBUG_WARN("Message: " << message);
-    SH_DEBUG_WARN("Code (30 chars): " << text.substr(pos, 30));
+    SH_GL_CHECK_ERROR(glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &pos));
+    if (pos >= 0){
+      const unsigned char* message = glGetString(GL_PROGRAM_ERROR_STRING_ARB);
+      SH_DEBUG_WARN("Error at character " << pos);
+      SH_DEBUG_WARN("Message: " << message);
+      int i = pos;
+      while (pos >= 0 && text[pos] != '\n') pos--;
+      if (pos > 0) pos++;
+      SH_DEBUG_WARN("Code: " << text.substr(pos, text.find('\n', pos)));
+    }
   }
   if (error != GL_NO_ERROR) {
     SH_DEBUG_ERROR("Error uploading ARB program (" << m_target << "): " << error);
@@ -339,7 +345,7 @@ void ArbCode::bind()
     upload();
   }
   
-  shGlBindProgramARB(shArbTarget(m_target), m_programId);
+  SH_GL_CHECK_ERROR(shGlBindProgramARB(shArbTarget(m_target), m_programId));
   
   SH::ShEnvironment::boundShaders()[m_target] = m_originalShader; 
 
@@ -396,10 +402,10 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
   if (reg.type != SH_ARB_REG_PARAM) return;
   switch(reg.binding) {
   case SH_ARB_REG_PARAMLOC:
-    shGlProgramLocalParameter4fvARB(shArbTarget(m_target), reg.bindingIndex, values);
+    SH_GL_CHECK_ERROR(shGlProgramLocalParameter4fvARB(shArbTarget(m_target), reg.bindingIndex, values));
     break;
   case SH_ARB_REG_PARAMENV:
-    shGlProgramEnvParameter4fvARB(shArbTarget(m_target), reg.bindingIndex, values);
+    SH_GL_CHECK_ERROR(shGlProgramEnvParameter4fvARB(shArbTarget(m_target), reg.bindingIndex, values));
     break;
   default:
     return;
@@ -1209,7 +1215,7 @@ ArbBackend::ArbBackend()
     std::string sh_target = (i == 0 ? "gpu:vertex" : "gpu:fragment");
     unsigned int arb_target = shArbTarget(sh_target);
     m_instrs[sh_target] = (!i ? 128 : 48);
-    shGlGetProgramivARB(arb_target, GL_MAX_PROGRAM_INSTRUCTIONS_ARB, &m_instrs[sh_target]);
+    SH_GL_CHECK_ERROR(shGlGetProgramivARB(arb_target, GL_MAX_PROGRAM_INSTRUCTIONS_ARB, &m_instrs[sh_target]));
     SH_DEBUG_PRINT("instrs[" << sh_target << "] = " << m_instrs[sh_target]);
 
     /** TODO big ugly hack follows:
@@ -1218,16 +1224,16 @@ ArbBackend::ArbBackend()
      * ATI will still have the right number because its drivers should set m_temps properly.
      */
     m_temps[sh_target] = (!i ? 12 : 32);
-    shGlGetProgramivARB(arb_target, GL_MAX_PROGRAM_TEMPORARIES_ARB, &m_temps[sh_target]);
+    SH_GL_CHECK_ERROR(shGlGetProgramivARB(arb_target, GL_MAX_PROGRAM_TEMPORARIES_ARB, &m_temps[sh_target]));
     SH_DEBUG_PRINT("temps[" << sh_target << "] = " << m_temps[sh_target]);
     m_attribs[sh_target] = (!i ? 16 : 10);
-    shGlGetProgramivARB(arb_target, GL_MAX_PROGRAM_ATTRIBS_ARB, &m_attribs[sh_target]);
+    SH_GL_CHECK_ERROR(shGlGetProgramivARB(arb_target, GL_MAX_PROGRAM_ATTRIBS_ARB, &m_attribs[sh_target]));
     SH_DEBUG_PRINT("attribs[" << sh_target << "] = " << m_attribs[sh_target]);
     m_params[sh_target] = (!i ? 96 : 24);
-    shGlGetProgramivARB(arb_target, GL_MAX_PROGRAM_LOCAL_PARAMETERS_ARB, &m_params[sh_target]);
+    SH_GL_CHECK_ERROR(shGlGetProgramivARB(arb_target, GL_MAX_PROGRAM_LOCAL_PARAMETERS_ARB, &m_params[sh_target]));
     SH_DEBUG_PRINT("params[" << sh_target << "] = " << m_params[sh_target]);
     m_texs[sh_target] = (!i ? 0 : 24);
-    if (i) shGlGetProgramivARB(arb_target, GL_MAX_PROGRAM_TEX_INSTRUCTIONS_ARB, &m_texs[sh_target]);
+    if (i) SH_GL_CHECK_ERROR(shGlGetProgramivARB(arb_target, GL_MAX_PROGRAM_TEX_INSTRUCTIONS_ARB, &m_texs[sh_target]));
     SH_DEBUG_PRINT("texs[" << sh_target << "] = " << m_texs[sh_target]);
   }
 }

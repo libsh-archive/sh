@@ -73,14 +73,19 @@ public:
   /// to the type and id of the variable.
   void name(const std::string& name);
 
+  typedef float ValueType; ///< This is not necessarily correct. Oh well.
+
+  // Metadata
+  void range(ShVariableNode::ValueType low, ShVariableNode::ValueType high);
+  ShVariableNode::ValueType lowBound();
+  ShVariableNode::ValueType highBound();
+
   ShVariableKind kind() const;
   ShVariableSpecialType specialType() const;
   void specialType(ShVariableSpecialType);
 
   std::string nameOfType() const; ///< Get a string of this var's specialType, kind, & size
 
-  typedef float ValueType; ///< This is not necessarily correct. Oh well.
-  
   /// For variables with values only. Sets the value of the i'th entry.
   /// If i is outside [0, size - 1] this is a no-op.
   ///
@@ -101,6 +106,7 @@ protected:
   std::string m_name;
 
   ValueType* m_values;
+  ValueType m_lowBound, m_highBound;
   
   static int m_maxID;
 };

@@ -77,6 +77,25 @@ ShVariableNode::ShVariableNode(ShVariableKind kind, int size, ShVariableSpecialT
     // Do nothing
     break;
   }
+
+  switch (type) {
+  case SH_ATTRIB:
+    range(0, 1.0);
+    break;
+  case SH_POINT:
+  case SH_VECTOR:
+  case SH_NORMAL:
+  case SH_POSITION:
+    range(-1.0, 1.0);
+    break;
+  case SH_TEXCOORD:
+  case SH_COLOR:
+    range(0, 1.0);
+    break;
+  default:
+    range(0, 1.0);
+    break;
+  }
 }
 
 ShVariableNode::~ShVariableNode()
@@ -152,6 +171,22 @@ void ShVariableNode::name(const std::string& name)
   m_name = name;
 }
 
+void ShVariableNode::range(ShVariableNode::ValueType low, ShVariableNode::ValueType high)
+{
+  m_lowBound = low;
+  m_highBound = high;
+}
+
+ShVariableNode::ValueType ShVariableNode::lowBound()
+{
+  return m_lowBound;
+}
+
+ShVariableNode::ValueType ShVariableNode::highBound()
+{
+  return m_highBound;
+}
+
 ShVariableKind ShVariableNode::kind() const
 {
   return m_kind;
@@ -182,10 +217,12 @@ void ShVariableNode::setValue(int i, ValueType value)
   if (i < 0 || i >= m_size) return;
   m_values[i] = value;
 
-  for (ShEnvironment::BoundShaderMap::iterator I = ShEnvironment::boundShaders().begin();
-       I != ShEnvironment::boundShaders().end(); ++I) {
-    // TODO: Why not tell code() directly?
-    if (I->second) I->second->updateUniform(this);
+  if (m_uniform) {
+    for (ShEnvironment::BoundShaderMap::iterator I = ShEnvironment::boundShaders().begin();
+         I != ShEnvironment::boundShaders().end(); ++I) {
+      // TODO: Why not tell code() directly?
+      if (I->second) I->second->updateUniform(this);
+    }
   }
 }
 

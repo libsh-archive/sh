@@ -61,6 +61,11 @@ public:
   /// to the type and id of the variable.
   void name(const std::string& name);
 
+  // Metadata
+  void range(ShVariableNode::ValueType low, ShVariableNode::ValueType high);
+  ShVariableNode::ValueType lowBound();
+  ShVariableNode::ValueType highBound();
+  
   /// Obtain the swizzling (if any) applied to this variable.
   const ShSwizzle& swizzle() const;
 

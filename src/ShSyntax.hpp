@@ -194,6 +194,9 @@ void shBindShader(ShProgram& shader);
 /// Bind a shader with the given target.
 void shBindShader(const std::string& target, ShProgram& shader);
 
+/// Switch to a particular backend
+bool shSetBackend(const std::string& name);
+
 void shIf(bool);
 void shElse();
 void shEndIf();

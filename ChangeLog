@@ -1,3 +1,11 @@
+2004-02-17  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShVariable.hpp: Added range metadata wrappers to ShVariable.
+
+	* src/ShVariableNode.cpp (setValue): Only notify bound shaders if
+	this is actually a uniform (and not, e.g. a constant).
+	(range): Added range metadata to ShVariableNodes.
+
 2004 02-17  Bryan Chan <b8chan@uwaterloo.ca>
 	* src/ShTransformer.cpp (InputOutputConvertor):
 	I am not fit to program. period.
