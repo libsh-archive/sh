@@ -1,5 +1,7 @@
 INCLUDES = -I../src $(LTDLINCL) 
 
+EXTRA_DIST = Makefile.win32
+
 lib_LTLIBRARIES = libshutil.la
 
 libshutil_la_LIBADD = $(LIBLTDL)

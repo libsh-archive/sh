@@ -1,5 +1,7 @@
 INCLUDES = -I$(top_srcdir)/src
 
+EXTRA_DIST = Makefile.win32
+
 shbackenddir = $(prefix)/lib/sh
 
 if ENABLE_ARB_BACKEND
