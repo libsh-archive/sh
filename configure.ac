@@ -3,12 +3,23 @@ AC_INIT(Sh, 0.7.6, libsh-devel@lists.sourceforge.net, libsh)
 AC_CONFIG_SRCDIR([src/ShVariable.hpp])
 AM_INIT_AUTOMAKE
 
+AC_CANONICAL_HOST
+
 AM_CONFIG_HEADER(config.h)
 
 # Checks for programs.
 if test "x$CXXFLAGS" = x ; then
     CXXFLAGS="-Wall -g -O2"
 fi
+
+# Additional libraries if in OSX
+case ${host_os}
+     in darwin*)
+	 if [[ -f /sw/include/png.h ]]; then
+	    CXXFLAGS="-I/sw/include $CXXFLAGS"
+	    LDFLAGS="-L/sw/lib $LDFLAGS"
+	 fi
+esac
 
 AC_PROG_CXX
 AC_LIBLTDL_CONVENIENCE
