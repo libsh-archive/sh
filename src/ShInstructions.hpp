@@ -34,7 +34,7 @@ void shCEIL(ShVariable& dest, const ShVariable& a);
 void shCOS(ShVariable& dest, const ShVariable& a);
 void shDOT(ShVariable& dest, const ShVariable& a, const ShVariable& b);
 void shFLR(ShVariable& dest, const ShVariable& a);
-void shFMOD(ShVariable& dest, const ShVariable& a);
+void shFMOD(ShVariable& dest, const ShVariable& a, const ShVariable& b);
 void shFRAC(ShVariable& dest, const ShVariable& a);
 void shLRP(ShVariable& dest, const ShVariable& alpha,
            const ShVariable& a, const ShVariable& b);

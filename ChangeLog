@@ -1,5 +1,7 @@
 2004-04-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShInstructions.hpp: shFMOD() should take two parameters.
+
 	* backends/gl/GlTextures.cpp (shGlInternalFormat): With new ATI
 	drivers, floating-point textures now work on ATI. Hurrah!
 
