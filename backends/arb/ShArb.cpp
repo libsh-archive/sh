@@ -894,7 +894,6 @@ std::ostream& ArbCode::print(std::ostream& out)
   return out;
 }
 
-
 void ArbCode::genNode(ShCtrlGraphNodePtr node)
 {
   if (!node || node->marked()) return;
@@ -914,24 +913,7 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       m_instructions.push_back(ArbInst(SH_ARB_ADD, stmt.dest, stmt.src[0], stmt.src[1]));
       break;
     case SH_OP_MUL:
-      if (stmt.src[0].size() != 1 || stmt.src[1].size() != 1) {
-        if (stmt.src[0].size() == 1) {
-          int* swizzle = new int[stmt.src[1].size()];
-          for (int i = 0; i < stmt.src[1].size(); i++) swizzle[i] = 0; 
-          m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, 
-                stmt.src[0](stmt.src[1].size(), swizzle), stmt.src[1]));
-          delete [] swizzle;
-          break;
-        } else if (stmt.src[1].size() == 1) {
-          int* swizzle = new int[stmt.src[0].size()];
-          for (int i = 0; i < stmt.src[0].size(); i++) swizzle[i] = 0;
-          m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0],
-                                                 stmt.src[1](stmt.src[0].size(), swizzle)));
-          delete [] swizzle;
-          break;
-        }
-      } 
-      m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0], stmt.src[1])); 
+      genScalarVectorInst(stmt.dest, stmt.src[0], stmt.src[1], SH_ARB_MUL);
       break;
     case SH_OP_DIV:
       genDiv(stmt.dest, stmt.src[0], stmt.src[1]);
@@ -1091,22 +1073,22 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       {
         ShVariable seq(new ShVariableNode(SH_VAR_TEMP, stmt.src[0].size()));
         ShVariable seq2(new ShVariableNode(SH_VAR_TEMP, stmt.src[0].size()));
-        m_instructions.push_back(ArbInst(SH_ARB_SGE, seq, stmt.src[0], stmt.src[1]));
-        m_instructions.push_back(ArbInst(SH_ARB_SGE, seq2, stmt.src[1], stmt.src[0]));
+        genScalarVectorInst(seq, stmt.src[0], stmt.src[1], SH_ARB_SGE);
+        genScalarVectorInst(seq2, stmt.src[1], stmt.src[0], SH_ARB_SGE);
         m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, seq, seq2 ));
       }
       break;
     case SH_OP_SLT:
-      m_instructions.push_back(ArbInst(SH_ARB_SLT, stmt.dest, stmt.src[0], stmt.src[1]));
+      genScalarVectorInst(stmt.dest, stmt.src[0], stmt.src[1], SH_ARB_SLT);
       break;
     case SH_OP_SGT:
-      m_instructions.push_back(ArbInst(SH_ARB_SLT, stmt.dest, stmt.src[1], stmt.src[0]));
+      genScalarVectorInst(stmt.dest, stmt.src[1], stmt.src[0], SH_ARB_SLT);
       break;
     case SH_OP_SLE:
-      m_instructions.push_back(ArbInst(SH_ARB_SGE, stmt.dest, stmt.src[1], stmt.src[0]));
+      genScalarVectorInst(stmt.dest, stmt.src[1], stmt.src[0], SH_ARB_SGE);
       break;
     case SH_OP_SGE:
-      m_instructions.push_back(ArbInst(SH_ARB_SGE, stmt.dest, stmt.src[0], stmt.src[1]));
+      genScalarVectorInst(stmt.dest, stmt.src[0], stmt.src[1], SH_ARB_SGE);
       break;
     case SH_OP_SQRT:
       {
@@ -1167,6 +1149,29 @@ void ArbCode::genDiv(ShVariable dest, ShVariable op1, ShVariable op2) {
     }
   }
 }
+
+void ArbCode::genScalarVectorInst( SH::ShVariable dest, SH::ShVariable op1, 
+    SH::ShVariable op2, int opcode ) {
+  if (op1.size() != 1 || op2.size() != 1) {
+    if (op1.size() == 1) {
+      int* swizzle = new int[op2.size()];
+      for (int i = 0; i < op2.size(); i++) swizzle[i] = 0; 
+      m_instructions.push_back(ArbInst((ArbOp)opcode, dest, 
+            op1(op2.size(), swizzle), op2));
+      delete [] swizzle;
+      return;
+    } else if (op2.size() == 1) {
+      int* swizzle = new int[op1.size()];
+      for (int i = 0; i < op1.size(); i++) swizzle[i] = 0;
+      m_instructions.push_back(ArbInst((ArbOp)opcode, dest, op1,
+                                             op2(op1.size(), swizzle)));
+      delete [] swizzle;
+      return;
+    }
+  } 
+  m_instructions.push_back(ArbInst((ArbOp)opcode, dest, op1, op2)); 
+}
+
 
 void ArbCode::allocRegs()
 {

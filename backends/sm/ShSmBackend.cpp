@@ -332,6 +332,28 @@ std::ostream& BackendCode::print(std::ostream& out)
   return out;
 }
 
+void BackendCode::genScalarVectorInst( SH::ShVariable dest, SH::ShVariable op1, 
+    SH::ShVariable op2, Operation opcode ) {
+  if (op1.size() != 1 || op2.size() != 1) {
+    if (op1.size() == 1) {
+      int* swizzle = new int[op2.size()];
+      for (int i = 0; i < op2.size(); i++) swizzle[i] = 0; 
+      m_instructions.push_back(SmInstruction((Operation)opcode, dest, 
+            op1(op2.size(), swizzle), op2));
+      delete [] swizzle;
+      return;
+    } else if (op2.size() == 1) {
+      int* swizzle = new int[op1.size()];
+      for (int i = 0; i < op1.size(); i++) swizzle[i] = 0;
+      m_instructions.push_back(SmInstruction((Operation)opcode, dest, op1,
+                                             op2(op1.size(), swizzle)));
+      delete [] swizzle;
+      return;
+    }
+  } 
+  m_instructions.push_back(SmInstruction((Operation)opcode, dest, op1, op2)); 
+}
+
 void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
 {
   for (ShBasicBlock::ShStmtList::const_iterator I = block->begin();
@@ -346,28 +368,7 @@ void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
       m_instructions.push_back(SmInstruction(OP_ADD, stmt.dest, stmt.src[0], stmt.src[1]));
       break;
     case SH_OP_MUL:
-      {
-        if (stmt.src[0].size() != 1 || stmt.src[1].size() != 1) {
-          if (stmt.src[0].size() == 1) {
-            int* swizzle = new int[stmt.src[1].size()];
-            for (int i = 0; i < stmt.src[1].size(); i++) swizzle[i] = 0;
-            m_instructions.push_back(SmInstruction(OP_MUL, stmt.dest,
-                                                   stmt.src[0](stmt.src[1].size(), swizzle), stmt.src[1]));
-            delete [] swizzle;
-            break;
-          } else if (stmt.src[1].size() == 1) {
-            int* swizzle = new int[stmt.src[0].size()];
-            for (int i = 0; i < stmt.src[0].size(); i++) swizzle[i] = 0;
-            m_instructions.push_back(SmInstruction(OP_MUL, stmt.dest, stmt.src[0],
-                                                   stmt.src[1](stmt.src[0].size(), swizzle)));
-            delete [] swizzle;
-            break;
-          }
-        }
-        
-        m_instructions.push_back(SmInstruction(OP_MUL, stmt.dest, stmt.src[0], stmt.src[1]));
-        break;
-      }
+      genScalarVectorInst(stmt.dest, stmt.src[0], stmt.src[1], OP_MUL);
     case SH_OP_DIV:
       {
         ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, stmt.src[1].size()));
@@ -385,22 +386,22 @@ void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
         break;
       }
     case SH_OP_SLT:
-      m_instructions.push_back(SmInstruction(OP_SLT, stmt.dest, stmt.src[0], stmt.src[1]));
+      genScalarVectorInst(stmt.dest, stmt.src[0], stmt.src[1], OP_SLT);
       break;
     case SH_OP_SLE:
-      m_instructions.push_back(SmInstruction(OP_SLE, stmt.dest, stmt.src[0], stmt.src[1]));
+      genScalarVectorInst(stmt.dest, stmt.src[0], stmt.src[1], OP_SLE);
       break;
     case SH_OP_SGT:
-      m_instructions.push_back(SmInstruction(OP_SGT, stmt.dest, stmt.src[0], stmt.src[1]));
+      genScalarVectorInst(stmt.dest, stmt.src[0], stmt.src[1], OP_SGT);
       break;
     case SH_OP_SGE:
-      m_instructions.push_back(SmInstruction(OP_SGE, stmt.dest, stmt.src[0], stmt.src[1]));
+      genScalarVectorInst(stmt.dest, stmt.src[0], stmt.src[1], OP_SGE);
       break;
     case SH_OP_SEQ:
-      m_instructions.push_back(SmInstruction(OP_SEQ, stmt.dest, stmt.src[0], stmt.src[1]));
+      genScalarVectorInst(stmt.dest, stmt.src[0], stmt.src[1], OP_SEQ);
       break;
     case SH_OP_SNE:
-      m_instructions.push_back(SmInstruction(OP_SNE, stmt.dest, stmt.src[0], stmt.src[1]));
+      genScalarVectorInst(stmt.dest, stmt.src[0], stmt.src[1], OP_SNE);
       break;
     case SH_OP_ABS:
       m_instructions.push_back(SmInstruction(OP_ABS, stmt.dest, stmt.src[0]));

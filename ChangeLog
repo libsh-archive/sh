@@ -1,7 +1,15 @@
+2004-01-18  Bryan Chan  <b8chan@cgl.uwaterloo.ca>
+	* backends/ati/ShArb.?pp, backends/sm/ShSmBackend.?pp:
+	Changed boolean <,<=,>,>=,==,!= operators to accept vec/vec
+	and scalar/vec arguments in addition to original vec/scalar.
+
+	* src/ShFixedManipulator.??: Rewrote these from scratch.
+	  Added shDup.
+	
 2004-01-17  Bryan Chan  <b8chan@cgl.uwaterloo.ca>
 	* src/ShFixedManipulator.??: Added shKeep, shLose
 	manipulators that support combine with ShProgram and 
-	other ShFixedManipulators. (shDup and some cleanup coming soon)
+	other ShFixedManipulators.
 
 	* src/ShManipulator.?pp, src/ShManipulatorImpl.hpp:
 	Reworked all manipulators to take string parameters as well.           

@@ -114,6 +114,12 @@ private:
   typedef std::vector<SmInstruction> SmInstList;
   SmInstList m_instructions; ///< The actual code.
 
+  /// Generates an instruction for a scalar/vector binary op
+  // where the scalar must be promoted to a vector by duplicating 
+  // components.
+  void genScalarVectorInst( SH::ShVariable dest, SH::ShVariable op1, 
+    SH::ShVariable op2, Operation opcode ); 
+
   /// Returns true if a register has been allocated to var.
   bool haveReg(const SH::ShVariableNodePtr& var);
 

@@ -82,6 +82,10 @@ private:
   /// Generate code for DIV (either op2 is scalar or op1.size() == op2.size())
   void genDiv( SH::ShVariable dest, SH::ShVariable op1, SH::ShVariable op2 );
 
+  /// Generate code for a scalar/vector binary op where the scalar
+  // should be promoted to a vector by duplicating components
+  void genScalarVectorInst( SH::ShVariable dest, SH::ShVariable op1, SH::ShVariable op2, int opcode );
+
   /// Allocate registers, after the code has been generated
   void allocRegs();
 

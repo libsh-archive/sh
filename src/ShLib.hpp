@@ -249,144 +249,59 @@ SH_SHLIB_CONST_SCALAR_OP(operator^);
 SH_SHLIB_CONST_N_OP_RIGHT(operator^);
 
 // "Boolean" operators
+#define SH_SHLIB_BOOLEAN_OP(opfunc, op, shop) \
+template<int N, int M, typename T>\
+ShVariableN<N, T> opfunc(const ShVariableN<N, T>& left, const ShVariableN<M, T>& right)\
+{\
+  ShCheckDims<N, true, M, true>();\
+  if (!ShEnvironment::insideShader) {\
+    assert(left.hasValues());\
+    assert(right.hasValues());\
+    T lvals[N];\
+    left.getValues(lvals);\
+    T rvals[M];\
+    right.getValues(rvals);\
+    T result[N];\
+    for (int i = 0; i < N; i++) result[i] = (lvals[i] op rvals[(M == 1) ? 0 : i] ? 1.0 : 0.0);\
+    return ShConstant<N, T>(result);\
+  } else {\
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;\
+    ShStatement stmt(t, left, shop, right);\
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);\
+    return t;\
+  }\
+}\
+\
+template<int M, typename T>\
+ShVariableN<M, T> opfunc(const ShVariableN<1, T>& left, const ShVariableN<M, T>& right)\
+{\
+  if (!ShEnvironment::insideShader) {\
+    assert(left.hasValues());\
+    assert(right.hasValues());\
+    T lvals[1];\
+    left.getValues(lvals);\
+    T rvals[M];\
+    right.getValues(rvals);\
+    T result[M];\
+    for (int i = 0; i < M; i++) result[i] = (lvals[0] op rvals[i] ? 1.0 : 0.0);\
+    return ShConstant<M, T>(result);\
+  } else {\
+    ShAttrib<M, SH_VAR_TEMP, T, false> t;\
+    ShStatement stmt(t, left, shop, right);\
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);\
+    return t;\
+  }\
+}\
+SH_SHLIB_CONST_SCALAR_OP(opfunc);\
+SH_SHLIB_CONST_N_OP_BOTH(opfunc);
 
-template<int N, typename T>
-ShVariableN<N, T> operator<(const ShVariableN<N, T>& left, const ShVariableN<1, T>& right)
-{
-  if (!ShEnvironment::insideShader) {
-    assert(left.hasValues());
-    assert(right.hasValues());
-    T lvals[N];
-    left.getValues(lvals);
-    T rvals[1];
-    right.getValues(rvals);
-    T result[N];
-    for (int i = 0; i < N; i++) result[i] = (lvals[i] < rvals[0] ? 1.0 : 0.0);
-    return ShConstant<N, T>(result);
-  } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
-    ShStatement stmt(t, left, SH_OP_SLT, right);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  }
-}
+SH_SHLIB_BOOLEAN_OP(operator<, <, SH_OP_SLT); 
+SH_SHLIB_BOOLEAN_OP(operator<=, <=, SH_OP_SLE); 
+SH_SHLIB_BOOLEAN_OP(operator>, >, SH_OP_SGT); 
+SH_SHLIB_BOOLEAN_OP(operator>=, >=, SH_OP_SGE); 
+SH_SHLIB_BOOLEAN_OP(operator==, ==, SH_OP_SEQ); 
+SH_SHLIB_BOOLEAN_OP(operator!=, !=, SH_OP_SNE); 
 
-SH_SHLIB_CONST_SCALAR_OP(operator<);
-
-template<int N, typename T>
-ShVariableN<N, T> operator<=(const ShVariableN<N, T>& left, const ShVariableN<1, T>& right)
-{
-  if (!ShEnvironment::insideShader) {
-    assert(left.hasValues());
-    assert(right.hasValues());
-    T lvals[N];
-    left.getValues(lvals);
-    T rvals[1];
-    right.getValues(rvals);
-    T result[N];
-    for (int i = 0; i < N; i++) result[i] = (lvals[i] <= rvals[0] ? 1.0 : 0.0);
-    return ShConstant<N, T>(result);
-  } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
-    ShStatement stmt(t, left, SH_OP_SLE, right);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  }
-}
-
-SH_SHLIB_CONST_SCALAR_OP(operator<=);
-
-template<int N, typename T>
-ShVariableN<N, T> operator>(const ShVariableN<N, T>& left, const ShVariableN<1, T>& right)
-{
-  if (!ShEnvironment::insideShader) {
-    assert(left.hasValues());
-    assert(right.hasValues());
-    T lvals[N];
-    left.getValues(lvals);
-    T rvals[1];
-    right.getValues(rvals);
-    T result[N];
-    for (int i = 0; i < N; i++) result[i] = (lvals[i] > rvals[0] ? 1.0 : 0.0);
-    return ShConstant<N, T>(result);
-  } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
-    ShStatement stmt(t, left, SH_OP_SGT, right);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  }
-}
-
-SH_SHLIB_CONST_SCALAR_OP(operator>);
-
-template<int N, typename T>
-ShVariableN<N, T> operator>=(const ShVariableN<N, T>& left, const ShVariableN<1, T>& right)
-{
-  if (!ShEnvironment::insideShader) {
-    assert(left.hasValues());
-    assert(right.hasValues());
-    T lvals[N];
-    left.getValues(lvals);
-    T rvals[1];
-    right.getValues(rvals);
-    T result[N];
-    for (int i = 0; i < N; i++) result[i] = (lvals[i] >= rvals[0] ? 1.0 : 0.0);
-    return ShConstant<N, T>(result);
-  } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
-    ShStatement stmt(t, left, SH_OP_SGE, right);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  }
-}
-
-SH_SHLIB_CONST_SCALAR_OP(operator>=);
-
-template<int N, typename T>
-ShVariableN<N, T> operator==(const ShVariableN<N, T>& left, const ShVariableN<1, T>& right)
-{
-  if (!ShEnvironment::insideShader) {
-    assert(left.hasValues());
-    assert(right.hasValues());
-    T lvals[N];
-    left.getValues(lvals);
-    T rvals[1];
-    right.getValues(rvals);
-    T result[N];
-    for (int i = 0; i < N; i++) result[i] = (lvals[i] == rvals[0] ? 1.0 : 0.0);
-    return ShConstant<N, T>(result);
-  } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
-    ShStatement stmt(t, left, SH_OP_SEQ, right);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  }
-}
-
-SH_SHLIB_CONST_SCALAR_OP(operator==);
-
-template<int N, typename T>
-ShVariableN<N, T> operator!=(const ShVariableN<N, T>& left, const ShVariableN<1, T>& right)
-{
-  if (!ShEnvironment::insideShader) {
-    assert(left.hasValues());
-    assert(right.hasValues());
-    T lvals[N];
-    left.getValues(lvals);
-    T rvals[1];
-    right.getValues(rvals);
-    T result[N];
-    for (int i = 0; i < N; i++) result[i] = (lvals[i] != rvals[0] ? 1.0 : 0.0);
-    return ShConstant<N, T>(result);
-  } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
-    ShStatement stmt(t, left, SH_OP_SNE, right);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  }
-}
-
-SH_SHLIB_CONST_SCALAR_OP(operator!=);
 
 /** Conditional assignment (COND/CMP)
  *  dest[i] = (src[0][i] > 0.0 ? src[1][i] : src[2][i])
