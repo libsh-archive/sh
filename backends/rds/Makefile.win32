@@ -1,0 +1,9 @@
+# -*- makefile -*-
+include ../../win32.mk
+
+INCLUDES += -I../../src
+CPPFLAGS += -DSH_DLLEXPORT="__declspec(dllimport)"
+
+all: $(ALL_TARGETS)
+
+libshrds_la_SOURCES = PDomTree.cpp Partition.cpp RDS.cpp
