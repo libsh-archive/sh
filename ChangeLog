@@ -1,5 +1,7 @@
 2004-10-06  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShVariable.cpp (operator<<): Simplify this a little.
+
 	* src/ShInstructions.cpp: Implement shCBRT and shRND.
 
 	* src/ShProgram.cpp: Add operator() on streams here.

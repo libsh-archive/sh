@@ -193,7 +193,7 @@ std::ostream& operator<<(std::ostream& out, const ShVariable& v)
 
   for (int k = 0; k < v.size(); k++) {
     if (k) out << ", ";
-    out << ((v.neg() ? -1.0 : 1.0) * v.m_node->getValue(v.swizzle()[k]));
+    out << v.getValue(k);
   }
 
   out << ']';
