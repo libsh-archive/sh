@@ -39,6 +39,11 @@ std::size_t wordsize(std::size_t size)
   return size / WORD_SIZE + (size % WORD_SIZE ? 1 : 0);
 }
 
+std::size_t fullwordsize(std::size_t size)
+{
+  return size / WORD_SIZE;
+}
+
 }
 
 namespace SH {
@@ -62,14 +67,23 @@ ShBitRef::ShBitRef(unsigned int* byte, unsigned int mask)
 {
 }
 
+ShBitSet::ShBitSet()
+  : m_size(0), m_data(0)
+{
+}
+
 ShBitSet::ShBitSet(std::size_t size)
   : m_size(size), m_data(new unsigned int[wordsize(m_size)])
 {
+  for (std::size_t i = 0; i < wordsize(m_size); i++) {
+    m_data[i] = 0;
+  }
 }
 
 ShBitSet::ShBitSet(const ShBitSet& other)
   : m_size(other.m_size), m_data(new unsigned int[wordsize(m_size)])
 {
+  memcpy(m_data, other.m_data, wordsize(m_size) * WORD_SIZE);
 }
 
 ShBitSet::~ShBitSet()
@@ -136,6 +150,24 @@ ShBitSet ShBitSet::operator~() const
   for (std::size_t i = 0; i < wordsize(m_size); i++)
     ret.m_data[i] = ~m_data[i];
   return ret;
+}
+
+bool ShBitSet::operator==(const ShBitSet& other) const
+{
+  if (m_size != other.m_size) return false;
+  for (int i = 0; i < fullwordsize(m_size); i++) {
+    if (m_data[i] != other.m_data[i]) return false;
+  }
+  if (m_size % WORD_SIZE) {
+    unsigned int mask = (1 << ((m_size % WORD_SIZE) + 1)) - 1;
+    return ((m_data[m_size / WORD_SIZE] & mask) == (other.m_data[m_size / WORD_SIZE] & mask));
+  }
+  return true;
+}
+
+bool ShBitSet::operator!=(const ShBitSet& other) const
+{
+  return !(*this == other);
 }
 
 std::size_t ShBitSet::size() const

@@ -28,6 +28,7 @@
 #define SHSTATEMENT_HPP
 
 #include <iosfwd>
+#include <set>
 #include "ShVariable.hpp"
 
 namespace SH {
@@ -42,9 +43,11 @@ enum ShOperation {
   
   SH_OP_NEG, ///< Unary negation
   SH_OP_ADD, ///< Binary addition
-  SH_OP_MUL, ///< Binary multiplication
-  SH_OP_DIV, ///< Binary division
+  SH_OP_MUL, ///< Binary multiplication. Can be scalar on left or
+             ///  right side.
+  SH_OP_DIV, ///< Binary division. Can be scalar on right side.
 
+  // All of the following set dst to either 1 or 0.
   SH_OP_SLT, ///< Set less than
   SH_OP_SLE, ///< Set less than or equal
   SH_OP_SGT, ///< Set greater than
@@ -56,8 +59,8 @@ enum ShOperation {
   SH_OP_ACOS, ///< Unary arccosine (result between -pi/2 and pi/2)
   SH_OP_ASIN, ///< Unary arcsine (result between 0 and pi)
   SH_OP_ATAN, ///< Unary arctan (result between -pi/2 and pi/2)
-  SH_OP_ATAN2, ///< Binary arctan of src2/src1 (result between -pi and pi)
-  SH_OP_CEIL, ///< Unary smallest integer not less than src1
+  SH_OP_ATAN2, ///< Binary arctan of src[1]/src[0] (result between -pi and pi)
+  SH_OP_CEIL, ///< Unary smallest integer not less than src[0]
   SH_OP_COS, ///< Unary cosine function
   SH_OP_DOT, ///< Binary dot product
   SH_OP_FRAC, ///< Unary fractional part
@@ -72,9 +75,13 @@ enum ShOperation {
 
   SH_OP_TEX, ///< Texture lookup
 
-  SH_OP_COND, ///< Conditional assignment: dst[i] = (src1[i] > 0.0 ? src2[i] : src3[i])
+  SH_OP_COND, ///< Conditional assignment: dst[i] = (src[0][i] > 0.0 ? src[1][i] : src[2][i])
 
   SH_OP_KIL, ///< Conditionally kill fragment (if for any i, dst[i] > 0)
+
+  SH_OP_OPTBRA, ///< Used in the optimizer to indicate a conditional
+                ///  branch dependency. This should never show up in
+                ///  code passed to the backend.
   // TODO: finish these
 };
 
@@ -88,25 +95,30 @@ extern const ShOperationInfo opInfo[];
 
 /** A single statement.
  * Represent a statement of the form 
- * <pre>dest := src1 op src2</pre>
+ * <pre>dest := src[0] op src[1]</pre>
  * or, for unary operators: 
- * <pre>dest := op src1</pre>
+ * <pre>dest := op src[0]</pre>
  * or, for op == SH_OP_ASN:
- * <pre>dest := src1</pre>
+ * <pre>dest := src[0]</pre>
  */
 class ShStatement {
 public:
   ShStatement(ShVariable dest, ShOperation op);
   ShStatement(ShVariable dest, ShOperation op, ShVariable src);
-  ShStatement(ShVariable dest, ShVariable src1, ShOperation op, ShVariable src2);
-  ShStatement(ShVariable dest, ShOperation op, ShVariable src1, ShVariable src2, ShVariable src3);
+  ShStatement(ShVariable dest, ShVariable src0, ShOperation op, ShVariable src1);
+  ShStatement(ShVariable dest, ShOperation op, ShVariable src0, ShVariable src1, ShVariable src2);
   
   ShVariable dest;
-  ShVariable src1;
-  ShVariable src2;
-  ShVariable src3;
+  ShVariable src[3];
   
   ShOperation op;
+
+  // The following are used for the optimizer.
+  
+  std::set<ShStatement*> ud[3];
+  std::set<ShStatement*> du;
+
+  bool marked;
 };
 
 std::ostream& operator<<(std::ostream& out, const SH::ShStatement& stmt);

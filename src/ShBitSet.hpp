@@ -61,6 +61,7 @@ public:
    * By default all bits are set to 0.
    * @arg size number of bits in the bitset.
    */
+  ShBitSet();
   explicit ShBitSet(std::size_t size);
   ShBitSet(const ShBitSet& other);
   
@@ -77,6 +78,9 @@ public:
   
   ShBitSet operator~() const;
 
+  bool operator==(const ShBitSet& other) const;
+  bool operator!=(const ShBitSet& other) const;
+  
   std::size_t size() const;
 
   bool operator[](std::size_t i) const;

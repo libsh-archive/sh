@@ -869,131 +869,131 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
     const ShStatement& stmt = *I;
     switch (stmt.op) {
     case SH_OP_ASN:
-      m_instructions.push_back(ArbInst(SH_ARB_MOV, stmt.dest, stmt.src1));
+      m_instructions.push_back(ArbInst(SH_ARB_MOV, stmt.dest, stmt.src[0]));
       break;
     case SH_OP_NEG:
-      m_instructions.push_back(ArbInst(SH_ARB_MOV, stmt.dest, -stmt.src1));
+      m_instructions.push_back(ArbInst(SH_ARB_MOV, stmt.dest, -stmt.src[0]));
       break;
     case SH_OP_ADD:
-      m_instructions.push_back(ArbInst(SH_ARB_ADD, stmt.dest, stmt.src1, stmt.src2));
+      m_instructions.push_back(ArbInst(SH_ARB_ADD, stmt.dest, stmt.src[0], stmt.src[1]));
       break;
     case SH_OP_MUL:
       {
-      if (stmt.src1.size() != 1 || stmt.src2.size() != 1) {
-        if (stmt.src1.size() == 1) {
-          int* swizzle = new int[stmt.src2.size()];
-          for (int i = 0; i < stmt.src2.size(); i++) swizzle[i] = 0;
+      if (stmt.src[0].size() != 1 || stmt.src[1].size() != 1) {
+        if (stmt.src[0].size() == 1) {
+          int* swizzle = new int[stmt.src[1].size()];
+          for (int i = 0; i < stmt.src[1].size(); i++) swizzle[i] = 0;
           m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest,
-                                                 stmt.src1(stmt.src2.size(), swizzle), stmt.src2));
+                                                 stmt.src[0](stmt.src[1].size(), swizzle), stmt.src[1]));
           delete [] swizzle;
           break;
-        } else if (stmt.src2.size() == 1) {
-          int* swizzle = new int[stmt.src1.size()];
-          for (int i = 0; i < stmt.src1.size(); i++) swizzle[i] = 0;
-          m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src1,
-                                                 stmt.src2(stmt.src1.size(), swizzle)));
+        } else if (stmt.src[1].size() == 1) {
+          int* swizzle = new int[stmt.src[0].size()];
+          for (int i = 0; i < stmt.src[0].size(); i++) swizzle[i] = 0;
+          m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0],
+                                                 stmt.src[1](stmt.src[0].size(), swizzle)));
           delete [] swizzle;
           break;
         }
       }
 
-      m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src1, stmt.src2));
+      m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0], stmt.src[1]));
       break;
       }
     case SH_OP_DIV:
       {
-        ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, stmt.src2.size()));
-        m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp, stmt.src2));
+        ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, stmt.src[1].size()));
+        m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp, stmt.src[1]));
 
-        if (rcp.size() == 1 && stmt.src1.size() != 1) {
-          int* swizzle = new int[stmt.src1.size()];
-          for (int i = 0; i < stmt.src1.size(); i++) swizzle[i] = 0;
-          m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src1,
-                                                 rcp(stmt.src1.size(), swizzle)));
+        if (rcp.size() == 1 && stmt.src[0].size() != 1) {
+          int* swizzle = new int[stmt.src[0].size()];
+          for (int i = 0; i < stmt.src[0].size(); i++) swizzle[i] = 0;
+          m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0],
+                                                 rcp(stmt.src[0].size(), swizzle)));
           delete [] swizzle;
         } else {
-          m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src1, rcp));
+          m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0], rcp));
         }
         break;
       }
       /*
       {
-      ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, stmt.src2.size()));
-      m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp, stmt.src2));
-      m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src1, rcp));
+      ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, stmt.src[1].size()));
+      m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp, stmt.src[1]));
+      m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0], rcp));
       }
       */
       break;
     case SH_OP_DOT:
       {
-        if (stmt.src1.size() == 3) {
-          m_instructions.push_back(ArbInst(SH_ARB_DP3, stmt.dest, stmt.src1, stmt.src2));
-        } else if (stmt.src1.size() == 4) {
-          m_instructions.push_back(ArbInst(SH_ARB_DP4, stmt.dest, stmt.src1, stmt.src2));
-        } else if (stmt.src1.size() == 1) {
-          m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src1, stmt.src2));
+        if (stmt.src[0].size() == 3) {
+          m_instructions.push_back(ArbInst(SH_ARB_DP3, stmt.dest, stmt.src[0], stmt.src[1]));
+        } else if (stmt.src[0].size() == 4) {
+          m_instructions.push_back(ArbInst(SH_ARB_DP4, stmt.dest, stmt.src[0], stmt.src[1]));
+        } else if (stmt.src[0].size() == 1) {
+          m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0], stmt.src[1]));
         } else {
-          ShVariable mul(new ShVariableNode(SH_VAR_TEMP, stmt.src1.size()));
-          m_instructions.push_back(ArbInst(SH_ARB_MUL, mul, stmt.src1, stmt.src2));
+          ShVariable mul(new ShVariableNode(SH_VAR_TEMP, stmt.src[0].size()));
+          m_instructions.push_back(ArbInst(SH_ARB_MUL, mul, stmt.src[0], stmt.src[1]));
           m_instructions.push_back(ArbInst(SH_ARB_ADD, stmt.dest, mul(0), mul(1)));
-          for (int i = 2; i < stmt.src1.size(); i++) {
+          for (int i = 2; i < stmt.src[0].size(); i++) {
             m_instructions.push_back(ArbInst(SH_ARB_ADD, stmt.dest, stmt.dest, mul(i)));
           }
         }
       }
       break;
     case SH_OP_COS:
-      m_instructions.push_back(ArbInst(SH_ARB_COS, stmt.dest, stmt.src1));
+      m_instructions.push_back(ArbInst(SH_ARB_COS, stmt.dest, stmt.src[0]));
       break;
     case SH_OP_FRAC:
-      m_instructions.push_back(ArbInst(SH_ARB_FRC, stmt.dest, stmt.src1, stmt.src2));
+      m_instructions.push_back(ArbInst(SH_ARB_FRC, stmt.dest, stmt.src[0], stmt.src[1]));
       break;
     case SH_OP_MAX:
-      m_instructions.push_back(ArbInst(SH_ARB_MAX, stmt.dest, stmt.src1, stmt.src2));
+      m_instructions.push_back(ArbInst(SH_ARB_MAX, stmt.dest, stmt.src[0], stmt.src[1]));
       break;
     case SH_OP_MIN:
-      m_instructions.push_back(ArbInst(SH_ARB_MIN, stmt.dest, stmt.src1, stmt.src2));
+      m_instructions.push_back(ArbInst(SH_ARB_MIN, stmt.dest, stmt.src[0], stmt.src[1]));
       break;
     case SH_OP_NORM:
       { // TODO: other than 3 components
         ShVariable mul(new ShVariableNode(SH_VAR_TEMP, 1));
-        m_instructions.push_back(ArbInst(SH_ARB_DP3, mul, stmt.src1, stmt.src1));
+        m_instructions.push_back(ArbInst(SH_ARB_DP3, mul, stmt.src[0], stmt.src[0]));
         m_instructions.push_back(ArbInst(SH_ARB_RSQ, mul, mul));
-        m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, mul, stmt.src1));
+        m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, mul, stmt.src[0]));
       }
       break;
     case SH_OP_SIN:
-      m_instructions.push_back(ArbInst(SH_ARB_SIN, stmt.dest, stmt.src1));
+      m_instructions.push_back(ArbInst(SH_ARB_SIN, stmt.dest, stmt.src[0]));
       break;
     case SH_OP_SLT:
-      m_instructions.push_back(ArbInst(SH_ARB_SLT, stmt.dest, stmt.src1, stmt.src2));
+      m_instructions.push_back(ArbInst(SH_ARB_SLT, stmt.dest, stmt.src[0], stmt.src[1]));
       break;
     case SH_OP_SGT:
-      m_instructions.push_back(ArbInst(SH_ARB_SGE, stmt.dest, stmt.src1, stmt.src2));
+      m_instructions.push_back(ArbInst(SH_ARB_SGE, stmt.dest, stmt.src[0], stmt.src[1]));
       break;
     case SH_OP_SQRT:
       {
-        ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, stmt.src1.size()));
-        m_instructions.push_back(ArbInst(SH_ARB_RSQ, rcp, stmt.src1));
+        ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, stmt.src[0].size()));
+        m_instructions.push_back(ArbInst(SH_ARB_RSQ, rcp, stmt.src[0]));
         m_instructions.push_back(ArbInst(SH_ARB_RCP, stmt.dest, rcp));
       break;
       }
     case SH_OP_POW:
       // TODO: scalarize?
-      m_instructions.push_back(ArbInst(SH_ARB_POW, stmt.dest, stmt.src1, stmt.src2));
+      m_instructions.push_back(ArbInst(SH_ARB_POW, stmt.dest, stmt.src[0], stmt.src[1]));
       break;
     case SH_OP_TEX:
-      m_instructions.push_back(ArbInst(SH_ARB_TEX, stmt.dest, stmt.src2, stmt.src1));
+      m_instructions.push_back(ArbInst(SH_ARB_TEX, stmt.dest, stmt.src[1], stmt.src[0]));
       break;
     case SH_OP_COND:
-      if (stmt.src1.size() == 1 && stmt.src2.size() != 1) {
-        int* swizzle = new int[stmt.src2.size()];
-        for (int i = 0; i < stmt.src2.size(); i++) swizzle[i] = 0;
-        m_instructions.push_back(ArbInst(SH_ARB_CMP, stmt.dest, -stmt.src1(stmt.src2.size(), swizzle),
-                                         stmt.src2, stmt.src3));
+      if (stmt.src[0].size() == 1 && stmt.src[1].size() != 1) {
+        int* swizzle = new int[stmt.src[1].size()];
+        for (int i = 0; i < stmt.src[1].size(); i++) swizzle[i] = 0;
+        m_instructions.push_back(ArbInst(SH_ARB_CMP, stmt.dest, -stmt.src[0](stmt.src[1].size(), swizzle),
+                                         stmt.src[1], stmt.src[2]));
         delete [] swizzle;
       } else {
-        m_instructions.push_back(ArbInst(SH_ARB_CMP, stmt.dest, -stmt.src1, stmt.src2, stmt.src3));
+        m_instructions.push_back(ArbInst(SH_ARB_CMP, stmt.dest, -stmt.src[0], stmt.src[1], stmt.src[2]));
       }
       break;
     case SH_OP_KIL:

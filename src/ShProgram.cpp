@@ -90,9 +90,9 @@ void ShProgramNode::collectNodeVars(const ShCtrlGraphNodePtr& node)
          I != node->block->end(); ++I) {
       
       collectVar(I->dest.node());
-      collectVar(I->src1.node());
-      collectVar(I->src2.node());
-      collectVar(I->src3.node());
+      collectVar(I->src[0].node());
+      collectVar(I->src[1].node());
+      collectVar(I->src[2].node());
     }
   }
 

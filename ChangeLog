@@ -1,3 +1,19 @@
+2003-08-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShBitSet.hpp, src/ShBitSet.cpp: Added operator== and operator!=.
+
+	* src/ShLib.hpp (kill): Pass in the extra argument to SH_OP_KIL.
+
+	* src/ShStatement.cpp: Make KIL take one (ignored) argument. This
+	is useful for the optimzer. Added OPTBRA instruction info.
+
+	* src/ShStatement.hpp: Data structures for ud/du chains, added
+	OPTBRA instruction for the optimizer. Use src[3] instead of src1,
+	src2, src3 in ShStatement.
+
+	* src/ShOptimizer.cpp, src/ShOptimizer.hpp: Added du/ud-chain
+	construction and dead code elimination. Lots and lots of code.
+
 2003-08-25  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/Makefile.am (CXXFLAGS): Enable optimizations.

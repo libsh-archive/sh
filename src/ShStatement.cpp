@@ -69,36 +69,44 @@ const ShOperationInfo opInfo[] = {
 
   {"COND", 3},
 
-  {"KIL", 0},
+  {"KIL", 1},
+
+  {"OPTBRA", 1},
   
   {0, 0}
 };
 
 ShStatement::ShStatement(ShVariable dest, ShOperation op)
-  : dest(dest), src1(0), src2(0), src3(0), op(op)
+  : dest(dest), op(op)
 {
 }
 
-ShStatement::ShStatement(ShVariable dest, ShOperation op, ShVariable src)
-  : dest(dest), src1(src), src2(0), src3(0), op(op)
+ShStatement::ShStatement(ShVariable dest, ShOperation op, ShVariable src1)
+  : dest(dest), op(op)
 {
+  src[0] = src1;
 }
 
-ShStatement::ShStatement(ShVariable dest, ShVariable src1, ShOperation op, ShVariable src2)
-  : dest(dest), src1(src1), src2(src2), src3(0), op(op)
+ShStatement::ShStatement(ShVariable dest, ShVariable src0, ShOperation op, ShVariable src1)
+  : dest(dest), op(op)
 {
+  src[0] = src0;
+  src[1] = src1;
 }
 
-ShStatement::ShStatement(ShVariable dest, ShOperation op, ShVariable src1, ShVariable src2, ShVariable src3)
-  : dest(dest), src1(src1), src2(src2), src3(src3), op(op)
+ShStatement::ShStatement(ShVariable dest, ShOperation op, ShVariable src0, ShVariable src1, ShVariable src2)
+  : dest(dest), op(op)
 {
+  src[0] = src0;
+  src[1] = src1;
+  src[2] = src2;
 }
 
 std::ostream& operator<<(std::ostream& out, const ShStatement& stmt)
 {
   if (stmt.op == SH::SH_OP_ASN) {
     // Special case for assignment
-    out << (stmt.dest.neg() ? "-" : "") << stmt.dest.name() << stmt.dest.swizzle() << " := " << stmt.src1.name() << stmt.src1.swizzle();
+    out << (stmt.dest.neg() ? "-" : "") << stmt.dest.name() << stmt.dest.swizzle() << " := " << stmt.src[0].name() << stmt.src[0].swizzle();
     return out;
   }
   
@@ -108,17 +116,17 @@ std::ostream& operator<<(std::ostream& out, const ShStatement& stmt)
     break;
   case 1:
     out << (stmt.dest.neg() ? "-" : "") << stmt.dest.name() << stmt.dest.swizzle() << " := " << SH::opInfo[stmt.op].name
-        << " " << (stmt.src1.neg() ? "-" : "") << stmt.src1.name() << stmt.src1.swizzle();
+        << " " << (stmt.src[0].neg() ? "-" : "") << stmt.src[0].name() << stmt.src[0].swizzle();
     break;
   case 2:
-    out << (stmt.dest.neg() ? "-" : "") << stmt.dest.name() << stmt.dest.swizzle() << " := " << (stmt.src1.neg() ? "-" : "") << stmt.src1.name() << stmt.src1.swizzle()
-        << " " << SH::opInfo[stmt.op].name << " " <<(stmt.src2.neg() ? "-" : "") <<  stmt.src2.name() << stmt.src2.swizzle();
+    out << (stmt.dest.neg() ? "-" : "") << stmt.dest.name() << stmt.dest.swizzle() << " := " << (stmt.src[0].neg() ? "-" : "") << stmt.src[0].name() << stmt.src[0].swizzle()
+        << " " << SH::opInfo[stmt.op].name << " " <<(stmt.src[1].neg() ? "-" : "") <<  stmt.src[1].name() << stmt.src[1].swizzle();
     break;
   case 3:
     out << (stmt.dest.neg() ? "-" : "") << stmt.dest.name() << stmt.dest.swizzle() << " := " << SH::opInfo[stmt.op].name << " "
-        << (stmt.src1.neg() ? "-" : "") << stmt.src1.name() << stmt.src1.swizzle() << ", " 
-        << (stmt.src2.neg() ? "-" : "") << stmt.src2.name() << stmt.src2.swizzle() << ", "
-        << (stmt.src3.neg() ? "-" : "") << stmt.src3.name() << stmt.src3.swizzle();
+        << (stmt.src[0].neg() ? "-" : "") << stmt.src[0].name() << stmt.src[0].swizzle() << ", " 
+        << (stmt.src[1].neg() ? "-" : "") << stmt.src[1].name() << stmt.src[1].swizzle() << ", "
+        << (stmt.src[2].neg() ? "-" : "") << stmt.src[2].name() << stmt.src[2].swizzle();
     break;
   default:
     out << "<<<Unknown arity>>>";

@@ -30,8 +30,11 @@
 #include <list>
 #include <utility>
 #include <set>
+#include <map>
+#include <vector>
 #include "ShCtrlGraph.hpp"
 #include "ShBasicBlock.hpp"
+#include "ShBitSet.hpp"
 
 namespace SH {
 
@@ -61,11 +64,29 @@ private:
   void eliminateMove(ShStatement& stmt);
   void removeAME(ShVariableNodePtr node);
 
-  friend class TempFinder;
-  friend class TempRemover;
-  typedef std::set<ShVariableNodePtr> TempUsageMap;
-  TempUsageMap m_tum;
-  void unusedTempsRemoval();
+  friend class DefFinder;
+  friend class InitRch;
+  friend class IterateRch;
+  friend class DumpRch;
+  typedef std::vector<ShStatement*> DefList;
+  DefList m_defs; ///< All definition statements
+  typedef std::vector<ShCtrlGraphNodePtr> DefNodeList;
+  DefNodeList m_defNodes; ///< Corresponding nodes to m_defs
+  typedef std::map<ShCtrlGraphNodePtr, ShBitSet> ReachingMap;
+  ReachingMap m_reachIn;
+  void solveReachDefs();
+
+  friend class UdDuBuilder;
+  void buildUdDuChains();
+
+  friend class InitLiveCode;
+  friend class DeadCodeRemover;
+  void removeDeadCode();
+
+  friend class BraInstInserter;
+  friend class BraInstRemover;
+  void insertBraInsts();
+  void removeBraInsts();
   
   /// NOT IMPLEMENTED
   ShOptimizer(const ShOptimizer& other);

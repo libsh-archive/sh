@@ -28,6 +28,7 @@
 #define SHCTRLGRAPH_HPP
 
 #include <vector>
+#include <list>
 #include <iosfwd>
 #include "ShRefCount.hpp"
 #include "ShBasicBlock.hpp"
@@ -64,6 +65,9 @@ public:
   std::vector<ShCtrlGraphBranch> successors; ///< Conditional successors
   ShRefCount<ShCtrlGraphNode> follower; ///< Unconditional successor
 
+  typedef std::list<ShCtrlGraphNode*> ShPredList;
+  ShPredList predecessors;
+
   /// Output a graph node _and its successors_ at the given
   /// indentation level.
   std::ostream& print(std::ostream& out, int indent) const;
@@ -89,7 +93,7 @@ public:
   void mark() const; ///< Set the marked flag
   void clearMarked() const; ///< Clears the marked flag of this and
                             ///  all successors'/followers flags
-
+  
   template<typename F>
   void dfs(F& functor);
 
@@ -116,6 +120,9 @@ public:
   template<typename F>
   void dfs(F& functor);
   
+  /// Determine the predecessors in this graph
+  void computePredecessors();
+  
 private:
   ShCtrlGraphNodePtr m_entry;
   ShCtrlGraphNodePtr m_exit;
@@ -135,7 +142,7 @@ void ShCtrlGraphNode::dfs(F& functor)
   for (std::vector<ShCtrlGraphBranch>::iterator I = successors.begin(); I != successors.end(); ++I) {
     I->node->dfs(functor);
   }
-  follower->dfs(functor);
+  if (follower) follower->dfs(functor);
 }
 
 template<typename F>

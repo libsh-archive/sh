@@ -182,5 +182,35 @@ std::ostream& ShCtrlGraph::graphvizDump(std::ostream& out) const
   return out;
 }
 
+struct ClearPreds {
+  void operator()(ShCtrlGraphNodePtr node) {
+    if (!node) return;
+    node->predecessors.clear();
+  }
+};
+
+struct ComputePreds {
+  void operator()(ShCtrlGraphNode* node) {
+    if (!node) return;
+    
+    for (std::vector<ShCtrlGraphBranch>::iterator I = node->successors.begin();
+         I != node->successors.end(); ++I) {
+      if (I->node) I->node->predecessors.push_back(node);
+    }
+    if (node->follower) node->follower->predecessors.push_back(node);
+  }
+};
+
+
+void ShCtrlGraph::computePredecessors()
+{
+  ClearPreds clear;
+  dfs(clear);
+
+  ComputePreds comp;
+  dfs(comp);
+}
+
+
 }
 

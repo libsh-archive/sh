@@ -381,9 +381,9 @@ ShVariableN<N, T> operator!=(const ShVariableN<N, T>& left, const ShVariableN<1,
 SH_SHLIB_CONST_SCALAR_OP(operator!=);
 
 /** Conditional assignment (COND/CMP)
- *  dest[i] = (src1[i] > 0.0 ? src2[i] : src3[i])
+ *  dest[i] = (src[0][i] > 0.0 ? src[1][i] : src[2][i])
  *  Note: CMP in the ARB_{vertex,fragment}_program spec has
- *  src1[i] < 0.0, not greater than.
+ *  src[0][i] < 0.0, not greater than.
  */
 template<int M, int N, typename T>
 ShVariableN<N, T> cond(const ShVariableN<M, T>& condition, const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
@@ -415,7 +415,7 @@ template<int N, typename T>
 void kill(const ShVariableN<N, T>& c)
 {
   assert(ShEnvironment::insideShader);
-  ShStatement stmt(c, SH_OP_KIL);
+  ShStatement stmt(c, SH_OP_KIL, c);
   ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
 }
 
