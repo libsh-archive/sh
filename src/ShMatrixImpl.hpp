@@ -367,11 +367,11 @@ namespace SH {
     ShSwizzle swizzle(Cols, Cols - 1, indices);
     
     for(int i=0;i<rowToRemove;i++){
-      myMatrix.setRow(ShAttrib<Cols - 1, SH_VAR_TEMP, T, false>(m_data[i].node(), swizzle, m_data[i].neg()),i); 
+      myMatrix[i]=(ShAttrib<Cols - 1, SH_VAR_TEMP, T, false>(m_data[i].node(), swizzle, m_data[i].neg())); 
     }
     
     for(int i=rowToRemove+1;i<Rows;i++){
-      myMatrix.setRow(ShAttrib<Cols - 1, SH_VAR_TEMP, T, false>(m_data[i].node(), swizzle, m_data[i].neg()),i-1);
+      myMatrix[i-1]=(ShAttrib<Cols - 1, SH_VAR_TEMP, T, false>(m_data[i].node(), swizzle, m_data[i].neg()));
     }
     
     delete [] indices;
@@ -401,8 +401,23 @@ namespace SH {
     m_data[2][2]=scaleZ;
     
   }
+  */
+
+   template<int Rows,int Cols,int Kind, typename T>
+  void ShMatrix<Rows, Cols, Kind, T>::setTranslation(const ShVariableN<Rows-1, T>& trans){
+							
+   for(int i=0;i<(Rows-1);i++)
+     m_data[i][(Rows-1)]=trans[i];
+   }
   
   
+  template<int Rows,int Cols,int Kind, typename T>
+  void ShMatrix<Rows, Cols, Kind, T>::setScaling(const ShVariableN<Rows-1, T>& scale){
+    for(int i=0;i<(Rows-1);i++)
+      m_data[i][i]=scale[i];
+  }
+
+  /*
   template<int Kind, typename T>
   void
   ShMatrix<4, 4, Kind, T>::setRotationX(const ShVariableN<1, T>& angle){

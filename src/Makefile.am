@@ -22,6 +22,8 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
                    ShSwizzle.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp \
                    ShUtility.hpp ShVariable.hpp ShVariableNode.hpp sh.hpp \
                    ShMatrix.hpp ShMatrixImpl.hpp \
+                   ShUberbuffer.hpp ShUberbuffer.cpp \
+                   ShFramebuffer.hpp ShFramebuffer.cpp \
                    ShMemoryObject.hpp ShMemoryObject.cpp \
                    ShTexture.hpp ShTextureImpl.hpp \
                    ShTextureNode.hpp ShImage.hpp ShLinearAllocator.hpp \
@@ -36,6 +38,7 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
 		   ShAlgebra.hpp ShAlgebra.cpp \
 		   ShInit.cpp
 
+
 incincdir = $(includedir)/sh
 
 incinc_HEADERS = ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp \
@@ -46,6 +49,8 @@ incinc_HEADERS = ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp \
                    ShSwizzle.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp \
                    ShUtility.hpp ShVariable.hpp ShVariableNode.hpp sh.hpp \
                    ShMatrix.hpp ShMatrixImpl.hpp ShTexture.hpp ShTextureImpl.hpp \
+                   ShUberbuffer.hpp \
+                   ShFramebuffer.hpp \
                    ShMemoryObject.hpp \
                    ShTextureNode.hpp ShImage.hpp ShLinearAllocator.hpp \
                    ShLibAttrib.hpp ShSpecialType.hpp \
@@ -56,3 +61,5 @@ incinc_HEADERS = ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp \
                    ShNormal.hpp ShLibNormal.hpp \
                    ShTexCoord.hpp ShLibTexCoord.hpp \
                    ShDomTree.hpp ShOptimizer.hpp ShAlgebra.hpp
+
+

@@ -91,12 +91,5 @@ float* ShDataMemoryObject::data() const {
   return result; 
 }
 
-ShExternalMemoryObject::ShExternalMemoryObject(int width, int height, int depth,
-    int elements)
-  : ShMemoryObject(width, height, depth, elements) {
-}
-
-ShExternalMemoryObject::~ShExternalMemoryObject() {
-}
 
 };

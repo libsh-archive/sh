@@ -28,6 +28,7 @@
 #define SHSYNTAX_HPP
 
 #include "ShProgram.hpp"
+#include "ShFramebuffer.hpp"
 
 /** \file ShSyntax.hpp
  * Sh syntactical definitions.
@@ -170,6 +171,9 @@ void shCompileShader(int target, ShProgram& shader);
 void shBindShader(ShProgram& shader);
 /// Bind a shader with the given target.
 void shBindShader(int target, ShProgram& shader);
+
+/// Change the render target
+void shDrawBuffer(ShFramebufferPtr fb);
 
 void shIf(bool);
 void shElse();

@@ -76,7 +76,11 @@ ShRefCount<ShBackend> ShBackend::lookup(const std::string& name)
   init();
   
   for (ShBackendList::iterator I = begin(); I != end(); ++I) {
-    if ((*I)->name() == name) return *I;
+    if ((*I)->name() == name)
+        {
+            (*I)->init2();
+            return *I;
+        }
   }
 #ifndef WIN32
   std::string libname(SH_INSTALL_PREFIX);
@@ -90,7 +94,11 @@ ShRefCount<ShBackend> ShBackend::lookup(const std::string& name)
   }
 
   for (ShBackendList::iterator I = begin(); I != end(); ++I) {
-    if ((*I)->name() == name) return *I;
+    if ((*I)->name() == name)
+        {
+            (*I)->init2();
+            return *I;
+        }
   }
 
   SH_DEBUG_ERROR("Could not find " << name << "backend");
@@ -99,6 +107,11 @@ ShRefCount<ShBackend> ShBackend::lookup(const std::string& name)
 #else
   return 0;
 #endif
+}
+
+void ShBackend::init2(void)
+{
+  printf("no init for this backend...\n");
 }
 
 void ShBackend::init()

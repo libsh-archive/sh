@@ -41,6 +41,8 @@
 #include "ShLib.hpp"
 #include "ShTexture.hpp"
 #include "ShMemoryObject.hpp"
+#include "ShFramebuffer.hpp"
+#include "ShUberbuffer.hpp"
 #include "ShBackend.hpp"
 #include "ShImage.hpp"
 #include "ShAlgebra.hpp"

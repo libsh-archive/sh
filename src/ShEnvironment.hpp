@@ -30,6 +30,7 @@
 #include <map>
 #include "ShProgram.hpp"
 #include "ShBackend.hpp"
+#include "ShFramebuffer.hpp"
 
 namespace SH {
 
@@ -51,6 +52,9 @@ struct ShEnvironment
 
   /// The currently active backend
   static ShBackendPtr backend;
+
+  /// The currently active framebuffer
+  static ShFramebufferPtr framebuffer;
 
   /// 0 means no optimizations. The default level is 1.
   static int optimizationLevel;

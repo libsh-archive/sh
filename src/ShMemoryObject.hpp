@@ -138,35 +138,6 @@ class ShDataMemoryObject: public ShMemoryObject {
 
 typedef ShRefCount<ShDataMemoryObject> ShDataMemoryObjectPtr;
 
-/** A custom memory object 
- * 
- * This is a temporary hack.  When the super buffer specs stabilize, 
- * each backend should present an interface for manipulating buffers.
- * 
- * But for now, the ARB backend only needs to call attach 
- * after binding a texture if that texture is bound to this memory object.
- * 
- * And the rest is implemented externally as a light wrapper around the 
- * über buffer methods.  
- */
-class ShExternalMemoryObject: public ShMemoryObject {
-  public:
-    ShExternalMemoryObject(int width, int height, int depth, int elements);
-    virtual ~ShExternalMemoryObject();
-
-    /** Attaches memory object to "currently active texture"
-     *
-     * This a temporary hack for über buffer support
-     * If this memory object is attached to a texture, the backend
-     * must call attach() while that texture is "active". 
-     *
-     * Then this memory object (über buffer) will be attached to the 
-     * active texture.
-     */
-    virtual void attach() = 0; 
-};
-
-typedef ShRefCount<ShExternalMemoryObject> ShExternalMemoryObjectPtr;
 
 }
 

@@ -87,6 +87,12 @@ void shBindShader(int kind, ShProgram& shader)
   shader->code(kind, ShEnvironment::backend)->bind();
 }
 
+void shDrawBuffer(ShFramebufferPtr fb ) {
+  if (!ShEnvironment::backend) return;
+  ShEnvironment::framebuffer = fb;
+  ShEnvironment::backend->bindFramebuffer();
+}
+
 void shIf(bool)
 {
   ShRefCount<ShToken> token = new ShToken(SH_TOKEN_IF);

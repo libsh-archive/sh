@@ -220,6 +220,14 @@ namespace SH {
      */
     ShMatrix<Rows - 1, Cols -1, SH_VAR_TEMP, T> subMatrix(int,int) const;
 
+
+
+   
+    void setTranslation(const ShVariableN<Rows-1, T>& trans);
+  
+    void setScaling(const ShVariableN<Rows-1, T>& scale);
+
+
     /** \brief Definition of the scalar multiplication operation
      *
      * Returns the address of a matrix where the result is the current matrix * (for each element) with the scalar in the parameters

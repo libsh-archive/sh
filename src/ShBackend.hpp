@@ -72,6 +72,9 @@ public:
   /// ShEnvironment::shader is the same as shader before calling this,
   /// since extra variables may be declared inside this function!
   virtual ShBackendCodePtr generateCode(int kind, const ShProgram& shader) = 0;
+  virtual void bindFramebuffer() = 0;
+
+  virtual void init2(void);
 
   typedef std::vector< ShRefCount<ShBackend> > ShBackendList;
 

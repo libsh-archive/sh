@@ -32,6 +32,7 @@
 #include "../backends/arb/ShArb.hpp"
 #endif /* WIN32 */
 
+
 namespace SH {
 
 void ShInit(void)
