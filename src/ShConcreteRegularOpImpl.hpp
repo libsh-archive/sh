@@ -7,6 +7,7 @@
 #include "ShError.hpp"
 #include "ShTypeInfo.hpp"
 #include "ShVariant.hpp"
+#include "ShInterval.hpp"
 
 namespace SH {
 
@@ -156,17 +157,17 @@ struct ShConcreteRegularOp<SH_OP_LIT, T>
 
   static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
   {
-    typename Variant::DataType::DataType x, y, w;
-    x = (*a)[0].lo();
-    if (x < 0) x = 0;
-    y = (*a)[1].lo();
-    if (y < 0) y = 0;
-    w = (*a)[2].lo();
-    if (w < -128) w = -128;
-    if (w > 128) w = 128;
+    typename Variant::DataType x, y, w;
+    x = (*a)[0];
+    if (x.lo() < 0.0) x = 0;
+    y = (*a)[1];
+    if (y.lo() < 0.0) y = 0;
+    w = (*a)[2];
+    if (w.lo() < -128.0) w = -128;
+    if (w.lo() > 128.0) w = 128;
     (*dest)[0] = 1;
     (*dest)[1] = x;
-    (*dest)[2] = (x > 0) ? std::pow(y,w) : 0;
+    (*dest)[2] = (x.lo() > 0.0) ? pow(y, w) : 0.0;
     (*dest)[3] = 1;
   }
 };
