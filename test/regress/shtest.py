@@ -313,7 +313,7 @@ class ImmediateTest(Test):
     def __init__(self, name, arity):
         Test.__init__(self, name, arity)
 
-    def output(self, out):
+    def output(self, out, immediate=False):
         self.output_header(out)
         test_nb = 0
         for test, testcalls in self.tests:
@@ -322,10 +322,10 @@ class ImmediateTest(Test):
             for i, call in enumerate(testcalls):
                 testname = make_testname(src_arg_types, types, call.key())
                 out.write('  { // ' + testname + '\n')
-                out.write(init_inputs('    ', src_arg_types, True))
-                out.write(init_expected('    ', test[0], types[0], True))
+                out.write(init_inputs('    ', src_arg_types, immediate))
+                out.write(init_expected('    ', test[0], types[0], immediate))
                 out.write('\n')
-                out.write('    ' + make_variable(test[0], 'SH_TEMP', types[0], True) +  ' out;\n')
+                out.write('    ' + make_variable(test[0], 'SH_TEMP', types[0], immediate) +  ' out;\n')
                 out.write('    ' + str(call) + ';\n')
                 out.write('\n')
                 out.write('    if (test.check("' + testname + '", out, exp' + ') != 0) errors++;\n')

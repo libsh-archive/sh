@@ -6,7 +6,7 @@ TESTS = add add_im cbrt cmul cos csum div mul rnd sin tex lt le gt ge eq ne \
 	mod floor ceil abs pow dot frac sign max max1 min min1 pos sat clamp \
 	sqrt exp sub madd msub mmul mdiv mmod matrix_mul lit lit_im mad lerp \
 	rsqrt rcp tan acos asin atan length exp2 exp10 log log2 log10 atan2 \
-	cross sort cond
+	cross sort cond matrix_add
 check_PROGRAMS = $(TESTS)
 BACKENDS = arb cc host glsl
 EXTRA_DIST = shtest.py common.py
@@ -38,6 +38,8 @@ mod.cpp: mod_test.py
 mmod.cpp: mod_test.py
 lit.cpp: lit_test.py
 lit_im.cpp: lit_test.py
+matrix_mul.cpp: matrix_mul_test.py
+matrix_add.cpp: matrix_add_test.py
 
 common = test.cpp test.hpp
 
@@ -121,8 +123,10 @@ mdiv_SOURCES = mdiv.cpp div_test.py $(common)
 EXTRA_DIST += mdiv.cpp.py div_test.py
 mmod_SOURCES = mmod.cpp mod_test.py $(common)
 EXTRA_DIST += mmod.cpp.py mod_test.py
-matrix_mul_SOURCES = matrix_mul.cpp $(common)
+matrix_mul_SOURCES = matrix_mul.cpp matrix_mul_test.py $(common)
 EXTRA_DIST += matrix_mul.cpp.py
+matrix_add_SOURCES = matrix_add.cpp matrix_add_test.py $(common)
+EXTRA_DIST += matrix_add.cpp.py
 lit_SOURCES = lit.cpp lit_test.py $(common)
 EXTRA_DIST += lit.cpp.py
 lit_im_SOURCES = lit_im.cpp lit_test.py $(common)
