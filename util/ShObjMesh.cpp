@@ -294,8 +294,18 @@ int ShObjMesh::generateTangents(bool force) {
 }
 
 int ShObjMesh::generateSphericalTexCoords(bool force) {
-  ShPoint3f center;
+  if( !force ) {
+    // If some vertex has texcoords, don't mess with them
+    for(EdgeSet::iterator I = edges.begin(); I != edges.end(); ++I) {
+      if( sqrt(dot((*I)->texcoord, (*I)->texcoord).getValue(0)) > EPS ) {
+        return 0;
+      }
+    }
+  }
+
+  // Find center and generate texture coordinates 
   int changed = 0;
+  ShPoint3f center;
   for(VertexSet::iterator I = verts.begin(); I != verts.end(); ++I) {
     center += (*I)->pos;
   }

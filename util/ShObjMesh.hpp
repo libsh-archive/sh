@@ -97,8 +97,8 @@ class ShObjMesh: public ShMesh<ShObjMeshType> {
     int generateTangents(bool force = false);
 
     /** \brief Generates texcoords in a "spherical" shrink map centered at
-     * the average of all vertex positions for vertices that have 0 texcoords
-     * (or all vertices if force = true)
+     * the average of all vertex positions only when all vertex texcoords are 0. 
+     * (or if force = true)
      *
      * returns the number of texture coordinates generated */ 
     int generateSphericalTexCoords(bool force = false);
