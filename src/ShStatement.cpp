@@ -97,27 +97,27 @@ std::ostream& operator<<(std::ostream& out, const ShStatement& stmt)
 {
   if (stmt.op == SH::SH_OP_ASN) {
     // Special case for assignment
-    out << stmt.dest.name() << stmt.dest.swizzle() << " := " << stmt.src1.name() << stmt.src1.swizzle();
+    out << (stmt.dest.neg() ? "-" : "") << stmt.dest.name() << stmt.dest.swizzle() << " := " << stmt.src1.name() << stmt.src1.swizzle();
     return out;
   }
   
   switch (SH::opInfo[stmt.op].arity) {
   case 0:
-    out << SH::opInfo[stmt.op].name << " " << stmt.dest.name() << stmt.dest.swizzle();
+    out << SH::opInfo[stmt.op].name << " " << (stmt.dest.neg() ? "-" : "") << stmt.dest.name() << stmt.dest.swizzle();
     break;
   case 1:
-    out << stmt.dest.name() << stmt.dest.swizzle() << " := " << SH::opInfo[stmt.op].name
-        << " " << stmt.src1.name() << stmt.src1.swizzle();
+    out << (stmt.dest.neg() ? "-" : "") << stmt.dest.name() << stmt.dest.swizzle() << " := " << SH::opInfo[stmt.op].name
+        << " " << (stmt.src1.neg() ? "-" : "") << stmt.src1.name() << stmt.src1.swizzle();
     break;
   case 2:
-    out << stmt.dest.name() << stmt.dest.swizzle() << " := " << stmt.src1.name() << stmt.src1.swizzle()
-        << " " << SH::opInfo[stmt.op].name << " " << stmt.src2.name() << stmt.src2.swizzle();
+    out << (stmt.dest.neg() ? "-" : "") << stmt.dest.name() << stmt.dest.swizzle() << " := " << (stmt.src1.neg() ? "-" : "") << stmt.src1.name() << stmt.src1.swizzle()
+        << " " << SH::opInfo[stmt.op].name << " " <<(stmt.src2.neg() ? "-" : "") <<  stmt.src2.name() << stmt.src2.swizzle();
     break;
   case 3:
-    out << stmt.dest.name() << stmt.dest.swizzle() << " := " << SH::opInfo[stmt.op].name << " "
-        << stmt.src1.name() << stmt.src1.swizzle() << ", " 
-        << stmt.src2.name() << stmt.src2.swizzle() << ", "
-        << stmt.src3.name() << stmt.src3.swizzle();
+    out << (stmt.dest.neg() ? "-" : "") << stmt.dest.name() << stmt.dest.swizzle() << " := " << SH::opInfo[stmt.op].name << " "
+        << (stmt.src1.neg() ? "-" : "") << stmt.src1.name() << stmt.src1.swizzle() << ", " 
+        << (stmt.src2.neg() ? "-" : "") << stmt.src2.name() << stmt.src2.swizzle() << ", "
+        << (stmt.src3.neg() ? "-" : "") << stmt.src3.name() << stmt.src3.swizzle();
     break;
   default:
     out << "<<<Unknown arity>>>";

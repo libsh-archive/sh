@@ -51,8 +51,8 @@ public:
   ShStmtList::iterator begin();
   ShStmtList::iterator end();
 
-  void erase(ShStmtList::iterator I) {
-    m_statements.erase(I);
+  ShStmtList::iterator erase(ShStmtList::iterator I) {
+    return m_statements.erase(I);
   }
   
 private:

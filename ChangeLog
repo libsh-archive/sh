@@ -1,3 +1,13 @@
+2003-08-20  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShStatement.cpp (operator<<): Print negations.
+
+	* src/ShBasicBlock.hpp (ShBasicBlock::erase): Return the result of
+	the erase operation (i.e. the iterator one past the erased element).
+
+	* src/ShOptimizer.cpp: Improved the iterate-erase loops used in
+	the optimizations.
+
 2003-08-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShOptimizer.cpp (struct TempFinder): Mark temporaries used

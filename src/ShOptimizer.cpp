@@ -62,7 +62,6 @@ struct CopyPropagator {
 
 void ShOptimizer::copyPropagation()
 {
-  SH_DEBUG_PRINT("Doing Copy Propagation...");
   CopyPropagator c(*this);
   m_graph->dfs(c);
 }
@@ -70,9 +69,7 @@ void ShOptimizer::copyPropagation()
 void ShOptimizer::localCopyProp(ShBasicBlockPtr block)
 {
   if (!block) return;
-  SH_DEBUG_PRINT("Doing local copy propagation");
   for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-    SH_DEBUG_PRINT("Looking at a statement");
     if (opInfo[I->op].arity >= 1) {
       copyValue(I->src1);
     }
@@ -89,7 +86,6 @@ void ShOptimizer::localCopyProp(ShBasicBlockPtr block)
         && I->dest.node()->kind() == SH_VAR_TEMP
         && I->dest.swizzle().identity()
         && I->src1.swizzle().identity()) {
-      SH_DEBUG_PRINT("Adding something to the ACP");
       m_acp.push_back(std::make_pair(I->dest.node(), I->src1.node()));
     }
   }
@@ -100,7 +96,6 @@ void ShOptimizer::copyValue(ShVariable& var)
 {
   for (ACP::const_iterator I = m_acp.begin(); I != m_acp.end(); ++I) {
     if (I->first == var.node()) {
-      SH_DEBUG_PRINT("Replacing something");
       var.node() = I->second;
     }
   }
@@ -108,14 +103,12 @@ void ShOptimizer::copyValue(ShVariable& var)
 
 void ShOptimizer::removeACP(const ShVariable& var)
 {
-  for (ACP::iterator I = m_acp.begin(); I != m_acp.end(); ++I) {
+  for (ACP::iterator I = m_acp.begin(); I != m_acp.end();) {
     if (I->first == var.node() || I->second == var.node()) {
-      SH_DEBUG_PRINT("Removing something");
-      ACP::iterator J = I;
-      J++;
-      m_acp.erase(I);
-      I = J;
+      I = m_acp.erase(I);
+      continue;
     }
+    ++I;
   }
 }
 
@@ -149,7 +142,6 @@ struct MoveEliminator {
 
 void ShOptimizer::moveElimination()
 {
-  SH_DEBUG_PRINT("Doing Move Elimination...");
   MoveEliminator m(*this);
   m_graph->dfs(m);
 }
@@ -158,7 +150,6 @@ void ShOptimizer::localMoveElim(ShBasicBlockPtr block)
 {
   if (!block) return;
   for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-    SH_DEBUG_PRINT("Looking at a statement");
     eliminateMove(*I);
 
     removeAME(I->dest.node());
@@ -166,7 +157,6 @@ void ShOptimizer::localMoveElim(ShBasicBlockPtr block)
     if (!inRHS(I->dest.node(), *I)
         && I->dest.node()->kind() == SH_VAR_TEMP
         && I->dest.swizzle().identity()) {
-      SH_DEBUG_PRINT("Adding something to the AME");
       m_ame.push_back(*I);
     }
   }
@@ -181,7 +171,6 @@ void ShOptimizer::eliminateMove(ShStatement& stmt)
 
   for (AME::const_iterator I = m_ame.begin(); I != m_ame.end(); ++I) {
     if (I->dest.node() == stmt.src1.node()) {
-      SH_DEBUG_PRINT("Replacing something");
       ShVariable v = stmt.dest;
       stmt = *I;
       stmt.dest = v;
@@ -192,14 +181,12 @@ void ShOptimizer::eliminateMove(ShStatement& stmt)
 
 void ShOptimizer::removeAME(ShVariableNodePtr node)
 {
-  for (AME::iterator I = m_ame.begin(); I != m_ame.end(); ++I) {
+  for (AME::iterator I = m_ame.begin(); I != m_ame.end();) {
     if (I->dest.node() == node || inRHS(node, *I)) {
-      SH_DEBUG_PRINT("Removing something");
-      AME::iterator J = I;
-      J++;
-      m_ame.erase(I);
-      I = J;
+      I = m_ame.erase(I);
+      continue;
     }
+    ++I;
   }
 }
 
@@ -245,16 +232,13 @@ struct TempRemover {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
     if (!block) return;
-  redo:
-    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-      if (!I->dest.node()) continue;
-      if (I->dest.node()->kind() != SH_VAR_TEMP) continue;
-      if (optimizer.m_tum.find(I->dest.node()) == optimizer.m_tum.end()) {
-        //        ShBasicBlock::ShStmtList::iterator J = I;
-        //        J++;
-        block->erase(I);
-        goto redo; // yikes, this is sure inefficient
+    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end();) {
+      if (I->dest.node() && I->dest.node()->kind() == SH_VAR_TEMP
+          && optimizer.m_tum.find(I->dest.node()) == optimizer.m_tum.end()) {
+        I = block->erase(I);
+        continue;
       }
+      ++I;
     }
   }
   
