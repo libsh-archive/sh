@@ -69,7 +69,7 @@ void ShNoise<M, T, P>::init() {
   for(k = 0; k < P; ++k) {
    for(i = 0; i < P; ++i) for(j = 0; j < P; ++j) for(l = 0; l < M; ++l) {
 #ifdef WIN32
-     noiseImage(i, j, k, l) = rand();
+     noiseImage(i, j, k, l) = ((float)rand())/(RAND_MAX+1.0);
 #else
      noiseImage(i, j, k, l) = drand48();
 #endif

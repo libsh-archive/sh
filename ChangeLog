@@ -1,3 +1,7 @@
+2004-08-04  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* util/ShNoiseImpl.hpp: fixed random number generation under Win32.
+
 2004-07-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/ArbCode.cpp (allocateRegister): Instead of
