@@ -7,7 +7,7 @@ namespace SH {
 
 struct ShArrayTraits : public ShTextureTraits {
   ShArrayTraits()
-    : ShTextureTraits(0, SH_FILTER_NONE, SH_WRAP_CLAMP, SH_CLAMPED)
+    : ShTextureTraits(0, SH_FILTER_NONE, SH_WRAP_CLAMP_TO_EDGE, SH_CLAMPED)
   {
   }
 };

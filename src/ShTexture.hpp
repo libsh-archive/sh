@@ -7,7 +7,7 @@ namespace SH {
 
 struct ShFilteredTextureTraits : public ShTextureTraits {
   ShFilteredTextureTraits()
-    : ShTextureTraits(1, SH_FILTER_MIPMAP, SH_WRAP_CLAMP, SH_CLAMPED)
+    : ShTextureTraits(1, SH_FILTER_MIPMAP, SH_WRAP_CLAMP_TO_EDGE, SH_CLAMPED)
   {
   }
 };
