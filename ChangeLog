@@ -3,6 +3,7 @@
 	* src/ShConstProp.cpp (struct FinishConstProp): Ignore nodes whose
 	RHS is all (uniform OR constant), unless they're writing to output
 	(or inout) nodes.
+	(struct FinishConstProp): Fix boolean expressions.
 
 	* src/Makefile.am (libsh_la_SOURCES): Split some of
 	ShOptimizations.cpp into ShConstProp.cpp and ShValueTracking.cpp

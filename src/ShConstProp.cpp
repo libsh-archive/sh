@@ -543,7 +543,7 @@ struct FinishConstProp
           for (int s = 0; s < opInfo[I->op].arity; s++) {
             for (int i = 0; i < I->src[s].size(); i++) {
               if (cp->src[s][i].state != ConstProp::Cell::UNIFORM
-                  || cp->src[s][i].state != ConstProp::Cell::CONSTANT) {
+                  && cp->src[s][i].state != ConstProp::Cell::CONSTANT) {
                 alluniform = false;
                 break;
               }
