@@ -18,6 +18,7 @@ struct CtrlGraphCopier {
   }
   
   void operator()(ShCtrlGraphNodePtr node) {
+    if (!node) return;
     ShCtrlGraphNodePtr newNode = new ShCtrlGraphNode(*node);
     copyMap[node] = newNode;
   }
@@ -169,6 +170,16 @@ ShProgram combine(const ShProgram& a, const ShProgram& b)
   program->collectVariables();
   
   return program;
+}
+
+ShProgram operator<<(const ShProgram& a, const ShProgram& b)
+{
+  return connect(a, b);
+}
+
+ShProgram operator+(const ShProgram& a, const ShProgram& b)
+{
+  return combine(a, b);
 }
 
 }

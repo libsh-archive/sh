@@ -213,7 +213,7 @@ ShVariableN<N, T> operator/(const ShVariableN<N, T>& left, const ShVariableN<M, 
 }
 
 SH_SHLIB_CONST_SCALAR_OP(operator/);
-SH_SHLIB_CONST_N_OP_RIGHT(operator/);
+SH_SHLIB_CONST_N_OP_LEFT(operator/);
 
 /// Conventional power operation.
 template<int N, typename T>

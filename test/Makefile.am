@@ -1,9 +1,10 @@
-check_PROGRAMS = bitset combine connect constants copy do if for julia matrix ops point rch simple texture uniforms shvector while
+check_PROGRAMS = algebra bitset combine connect constants copy do if for julia matrix ops point rch simple texture uniforms shvector while
 
 INCLUDES = -I../src
 
 LDADD = ../src/libsh.la
 
+algebra_SOURCES = algebra.cpp
 bitset_SOURCES = bitset.cpp
 combine_SOURCES = combine.cpp
 connect_SOURCES = connect.cpp

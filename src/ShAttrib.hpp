@@ -86,6 +86,10 @@ public:
 
   /// Negate this attribute.
   ShAttrib<N, Kind, T, Swizzled> operator-() const;
+
+  static const int typesize = N;
+  static const int typekind = Kind;
+  typedef T ValueType;
 };
 
 typedef ShAttrib<1, SH_VAR_INPUT, double> ShInputAttrib1f;

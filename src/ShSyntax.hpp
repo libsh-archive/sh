@@ -59,6 +59,9 @@
 #define SH_BEGIN_VERTEX_SHADER ::SH::shBeginShader(0);
 #define SH_BEGIN_FRAGMENT_SHADER ::SH::shBeginShader(1);
 
+#define SH_VERTEX_SHADER 0
+#define SH_FRAGMENT_SHADER 1
+
 ///@name If statements
 //@{
 /** \def SH_IF(cond)

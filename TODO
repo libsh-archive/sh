@@ -19,6 +19,7 @@ OPTIMIZER/SHADER ALGEBRA:
  / control flow graph optimizations
  X Run the optimizations more than once as necessary.
  X Don't run the optimizer twice in connect(), once the previous item is done.
+ - fix combine() to operate correctly on empty graphs.
 
 MATRICES:
  X operator()() extracts submatrix

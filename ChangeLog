@@ -1,5 +1,9 @@
 2003-08-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShAlgebra.hpp: Added operator<<, operator+, lose and keep.
+
+	* src/ShAlgebra.cpp: Added operator<< and operator+ for programs.
+
 	* src/ShOptimizer.hpp, src/ShOptimizer.cpp: Added straightening.
 	Loop over optimizations until a fixed point is reached.
 
