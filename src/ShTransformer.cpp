@@ -75,8 +75,8 @@ struct VariableSplitter {
   
   void splitVars(ShStatement& stmt) {
     stmt.marked = false;
-    if(stmt.dest.node()) stmt.marked = stmt.marked || split(stmt.dest.node());
-    for(int i = 0; i < 3; ++i) if(stmt.src[i].node()) stmt.marked = stmt.marked || split(stmt.src[i].node()); 
+    if(stmt.dest.node()) stmt.marked = split(stmt.dest.node()) || stmt.marked;
+    for(int i = 0; i < 3; ++i) if(stmt.src[i].node()) stmt.marked = split(stmt.src[i].node()) || stmt.marked; 
   }
 
   // returns true if variable split
@@ -85,6 +85,11 @@ struct VariableSplitter {
     int n = node->size();
     if(n <= maxTuple ) return false;
     else if(splits.count(node) > 0) return true;
+    SH_DEBUG_PRINT( "Splitting node " << node->name());
+    if( node->kind() != SH_VAR_TEMP ) {
+      ShError( ShTransformerException("Long tuple support is only implemented for temporaries."));
+            
+    }
     VarNodeVec &nodeVarNodeVec = splits[node];
     for(; n > 0; n -= maxTuple) {
       nodeVarNodeVec.push_back(new ShVariableNode(node->kind(), 
