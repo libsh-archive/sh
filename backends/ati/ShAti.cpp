@@ -70,6 +70,26 @@ PFNGLGETPROGRAMIVARBPROC glGetProgramivARB = NULL;
 #include "ShTextureNode.hpp"
 #include "ShSyntax.hpp"
 
+// TODO replace with proper error handling
+#define CHECK_GL_ERROR() { if( int error = glGetError() ) { SH_DEBUG_WARN( "Unexpected GL error: " << error ); } }
+#define PRINT_GL_ERROR( message ) { \
+  int error = glGetError();\
+  if (error != GL_NO_ERROR) {\
+    SH_DEBUG_ERROR("Error description: " << message << " error: " << error << " " );\
+    switch(error) {\
+    case GL_INVALID_ENUM:\
+      SH_DEBUG_ERROR("INVALID_ENUM");\
+      break;\
+    case GL_INVALID_VALUE:\
+      SH_DEBUG_ERROR("INVALID_VALUE");\
+      break;\
+    case GL_INVALID_OPERATION:\
+      SH_DEBUG_ERROR("INVALID_OPERATION");\
+      break;\
+    }\
+  } \
+}
+
 
 namespace ShAti {
 
@@ -1451,6 +1471,8 @@ void AtiBackend::allocFramebuffer(ShFramebufferPtr fb)
 void AtiBackend::allocUberbuffer( ShUberbufferPtr ub) {
   if( !ub ) return;
 
+  CHECK_GL_ERROR();
+
   GLmem mem = ub->mem();
   if( mem ) return;
 
@@ -1498,7 +1520,7 @@ void AtiBackend::allocUberbuffer( ShUberbufferPtr ub) {
 
   delete[] propsArray;
 
-  printUbErrors();
+  PRINT_GL_ERROR( "Allocating ubuf" );
 }
 
 void AtiBackend::printUbErrors() {
@@ -1511,23 +1533,35 @@ void AtiBackend::bindFramebuffer() {
   ShFramebufferPtr fb = ShEnvironment::framebuffer;
   allocFramebuffer( fb );
 
+  CHECK_GL_ERROR();
+
   if( fb ) {
     ShUberbufferPtr ub = fb->getUberbuffer();
     if( ub ) {
       allocUberbuffer( ub );
       //TODO may not be necessary
-      glAttachMemATI( GL_AUX0, 0 );
       glAttachMemATI( GL_AUX0, ub->mem() );
+
+      SH_DEBUG_PRINT( "Attach GL_AUX0 to " << ub->mem() );
+
       //TODO other buffers 
       glDrawBuffer( GL_AUX0 ); 
     } else {
       glAttachMemATI( GL_AUX0, 0 );
+
+      SH_DEBUG_PRINT( "Detach GL_AUX0" ); 
+
       glDrawBuffer( GL_BACK );
     }
   } else {
       glAttachMemATI( GL_AUX0, 0 );
+
+      SH_DEBUG_PRINT( "Detach GL_AUX0" ); 
+
       glDrawBuffer( GL_BACK );
   }
+
+  PRINT_GL_ERROR( "Binding Framebuffer" );
 }
 
 void AtiBackend::setUberbufferData(ShUberbufferPtr ub, const float *data) {
@@ -1535,6 +1569,9 @@ void AtiBackend::setUberbufferData(ShUberbufferPtr ub, const float *data) {
   unsigned int mem = ub->mem();
   if( !mem ) return; 
   //TODO replace all this junk with a glMemImage(...) call when it's implemented
+
+
+  CHECK_GL_ERROR();
 
   //bind the texture 
   GLuint texBinding;
@@ -1565,6 +1602,8 @@ void AtiBackend::setUberbufferData(ShUberbufferPtr ub, const float *data) {
 
   //delete texture
   glDeleteTextures(1, (GLuint*)&texBinding);
+
+  PRINT_GL_ERROR( "Setting data for ubuf " << mem  );
 }
 
 //TODO use glGetImage on the super buffer when it's implemented
@@ -1576,24 +1615,23 @@ float* AtiBackend::getUberbufferData(const ShUberbuffer *ub) {
     return 0; 
   }
   SH_DEBUG_WARN( "Getting ubuf data (Warning - experimental - bindShader again before accessing textures)" ); 
+
+  CHECK_GL_ERROR();
+
   GLint oldReadBuf;
   glGetIntegerv( GL_READ_BUFFER, &oldReadBuf );
 
   float* data = new float[ ub->width() * ub->height() * ub->elements() ];
 
-  //bind the texture 
-  GLuint texBinding;
-  glGenTextures(1, &texBinding);
-  shGlActiveTextureARB(GL_TEXTURE0);
 
-  //TODO handle other dimensions
-  glBindTexture(GL_TEXTURE_2D, texBinding); 
-  
-  //attach the uber buffer
-  glAttachMemATI( GL_TEXTURE_2D, mem ); 
+  glAttachMemATI( GL_AUX0, 0 );
+  SH_DEBUG_PRINT( "Detach GL_AUX0" );
 
-  //use glTexImage to upload data
-  // TODO support other dimensions
+  glAttachMemATI( GL_AUX0, mem );
+  SH_DEBUG_PRINT( "Attach GL_AUX0 to " << mem );
+
+  glReadBuffer( GL_AUX0 );
+
   GLenum format;
   switch (ub->elements()) {
     case 1: format = GL_LUMINANCE; break;
@@ -1602,13 +1640,29 @@ float* AtiBackend::getUberbufferData(const ShUberbuffer *ub) {
     case 4: format = GL_RGBA; break;
     default: format = 0; break;
   }
-  glGetTexImage(GL_TEXTURE_2D, 0, format, GL_FLOAT, data );
+  glReadPixels( 0, 0, ub->width(), ub->height(), format, GL_FLOAT, data ); 
 
-  //detach uber buffer
-  glAttachMemATI( GL_TEXTURE_2D, 0 );
+  /*
+  for( int i = 0; i < ub->height(); ++i ) {
+    std::cout << "Row " << i << ": ";
+    for( int j = 0; j < ub->width(); ++j ) {
+      std::cout << "( ";
+      for( int k = 0; k < ub->elements(); ++k ) {
+        std::cout << data[ ub->elements() * ( ub->width() * i + j ) + k ] << " ";
+      }
+      std::cout << " )";
+    }
+    std::cout << std::endl;
+  }
+  */
 
-  //delete texture
-  glDeleteTextures(1, (GLuint*)&texBinding);
+
+  glAttachMemATI( GL_AUX0, 0 );
+  SH_DEBUG_PRINT( "Detach GL_AUX0" ); 
+
+  glReadBuffer( oldReadBuf );
+
+  PRINT_GL_ERROR( "Getting data from ubuf " << mem );
 
   return data;
 }
@@ -1659,8 +1713,12 @@ void AtiBackend::render_planar(SH::ShVertexArray& data){
 
 
 void AtiBackend::deleteUberbuffer(const ShUberbuffer* ub) {
+  CHECK_GL_ERROR();
+
   if( !ub->mem() ) return; 
   glDeleteMemATI(ub->mem());
+
+  PRINT_GL_ERROR( "Deleting Ubuf " << ub->mem() );
 }
 
 }
