@@ -13,9 +13,15 @@ public:
                 int width, int height, int pitch);
 
   // TODO
-  void bindAsTexture(GLenum target);
-  void bindAsAux(int n);
-  
+  void bindAsTexture(unsigned int target);
+  void bindAsAux(unsigned int n);
+  void unbind();
+  static void unbindall();
+
+  bool isBoundAsTexture(unsigned int target);
+  bool isBoundAsAux(unsigned int target);
+  bool isBound();
+
   int width() const { return m_width; }
   int height() const { return m_height; }
   int pitch() const { return m_pitch; }
@@ -25,7 +31,10 @@ public:
  
   // we need a dummy framebuffer object
   static int temp_fb[4];
+  static int allocfb(int, bool bForce = false);
  
+  void clearBuffer(float* col);
+
 private:
   
   /// manipulate memory objects
@@ -36,6 +45,10 @@ private:
           
   // the uber buffer
   unsigned int m_mem;
+
+  // binding information
+  unsigned int m_bound; // 0 - unbound, 1 - texture of some sort, 2 - rendering target
+  unsigned int m_boundto; // 0-3 -> for the aux buffers, GL_TEXTURE2D, etc. for the texture boundings
 
   friend class HostUberTransfer;
   friend class UberUberTransfer;

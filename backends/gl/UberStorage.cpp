@@ -18,12 +18,17 @@ UberUberTransfer* UberUberTransfer::instance = new UberUberTransfer();
 UberHostTransfer* UberHostTransfer::instance = new UberHostTransfer();
 HostUberTransfer* HostUberTransfer::instance = new HostUberTransfer();
 
+
+// this should be rep[lace by a correct onbe
+#define CHECK_GL_ERROR()  
+
 int UberStorage::temp_fb[4] = {-1, -1, -1, -1};
 
 UberStorage::UberStorage(SH::ShMemory* memory, 
 			     int width, int height, int pitch)
   : SH::ShStorage(memory),
-    m_width(width), m_height(height), m_pitch(pitch), m_mem(0)
+    m_width(width), m_height(height), m_pitch(pitch), 
+    m_mem(0), m_bound(0), m_boundto(0) 
 {
   static int bFirstTime = 1;
 
@@ -45,22 +50,80 @@ GLenum getFormat(int pitch)
   return format;
 }
 
+
+
+void UberStorage::bindAsTexture(unsigned int target){
+  unsigned int mem = alloc();// it use m_mem if already allocated
+  SH_GL_CHECK_ERROR(glAttachMemATI(GL_TEXTURE_2D, GL_IMAGES_ATI, mem)); 
+}
+
+void UberStorage::bindAsAux(unsigned int n){
+  unsigned int mem = alloc();// it uses m_mem if already allocated
+  SH_GL_CHECK_ERROR(glBindFramebufferATI(GL_DRAW_FRAMEBUFFER_ATI, allocfb(0)));
+  SH_GL_CHECK_ERROR(glAttachMemATI( GL_DRAW_FRAMEBUFFER_ATI, n + GL_AUX0, mem));
+}
+
+void UberStorage::unbind(){
+
+  switch(m_bound){
+  case 0:
+    // not bound
+    break;
+  case 1:
+    SH_GL_CHECK_ERROR(glAttachMemATI(GL_DRAW_FRAMEBUFFER_ATI,m_boundto, 0));
+    break;
+  case 2:
+    SH_GL_CHECK_ERROR(glBindFramebufferATI(GL_DRAW_FRAMEBUFFER_ATI, temp_fb[0]));
+    SH_GL_CHECK_ERROR(glAttachMemATI(GL_DRAW_FRAMEBUFFER_ATI,m_boundto+GL_AUX0, 0));
+    break;
+  default:
+    // invalid bound parameter
+    SH_DEBUG_WARN("Invalid  bind parameter!");
+  }
+}
+
+//TO DO:
+void UberStorage::unbindall(){
+
+}
+
+bool UberStorage::isBoundAsTexture(unsigned int target){
+  if(m_bound!=1)
+    return false;
+  if(m_boundto!= target)
+    return false;
+  return true;
+}
+
+bool UberStorage::isBoundAsAux(unsigned int n){
+  if(m_bound!=2)
+    return false;
+  if(m_boundto!=n)
+    return false;
+  return true;
+}
+
+bool UberStorage::isBound(){
+  return m_bound==0;
+}
+
+int UberStorage::allocfb(int n, bool bForce){
+  // create the temporary frame buffer
+  if (temp_fb[n]<0 || bForce) {
+    temp_fb[n] = SH_GL_CHECK_ERROR(glCreateFramebufferATI());
+  }
+
+  return temp_fb[n];
+}
+
 unsigned int UberStorage::alloc(int bForce)
 {
   if (m_mem && !bForce) {
     return m_mem;
   }
-  
-  GLenum format = getFormat(m_pitch);
- 
-  
   /// property array is constant for the time being
   GLint propsArray[4] = {GL_TEXTURE_2D, GL_TRUE, GL_COLOR_BUFFER_ATI, GL_TRUE};
-  // create the temporary frame buffer
-  if (temp_fb[0]<0) {
-    temp_fb[0] = SH_GL_CHECK_ERROR(glCreateFramebufferATI());
-  }
-
+  GLenum format = getFormat(m_pitch);
   m_mem = SH_GL_CHECK_ERROR(glAllocMem2DATI(format, m_width, m_height, 2, propsArray));
 
   return m_mem;
@@ -75,6 +138,75 @@ unsigned int UberStorage::remove()
   return 0;
 }
 
+
+void UberStorage::clearBuffer(float* col){
+  
+  if(m_mem<=0) return;
+  CHECK_GL_ERROR();
+  SH_GL_CHECK_ERROR(glBindFramebufferATI(GL_DRAW_FRAMEBUFFER_ATI, allocfb(3)));
+
+  // whi aux2? don't know
+  glAttachMemATI(GL_DRAW_FRAMEBUFFER_ATI, GL_AUX2, m_mem);
+   	 
+  glDrawBuffer(GL_AUX2); 
+  
+  float local[4];
+   if(!col){
+     col = local;
+     glGetFloatv(GL_COLOR_CLEAR_VALUE, col);
+   }
+
+   /// draw a quad...
+   //glClearColor(col[0], col[1], col[2], col[3]);
+   //glClear(GL_COLOR_BUFFER_BIT);
+   glClear(GL_DEPTH_BUFFER_BIT);
+
+   // setup matrices 
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+  gluOrtho2D(0.0, width(), 0.0, height());
+ 
+  CHECK_GL_ERROR();
+
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glLoadIdentity();
+  CHECK_GL_ERROR();
+
+  // save the state 
+  SH_GL_CHECK_ERROR(glPushAttrib(GL_COLOR_BUFFER_BIT | /* GL_DRAW_BUFFER */
+				 GL_PIXEL_MODE_BIT | /* GL_READ_BUFER */
+				 GL_POLYGON_BIT | /* GL_FRONT_FACE */
+				 GL_ENABLE_BIT /* Hopefully, all enables: */
+				 /* programs + lighting */));
+    
+  glDisable(GL_VERTEX_PROGRAM_ARB);
+  glDisable(GL_FRAGMENT_PROGRAM_ARB);
+  glDisable(GL_LIGHTING);
+  glDisable(GL_TEXTURE_2D);
+  glDisable(GL_DEPTH_TEST);
+
+  glBegin(GL_QUADS);  
+  glColor4f(col[0], col[1], col[2], col[3]);
+  glVertex3f(0.0, 0.0, 0.0);
+  glVertex3f(width(), 0.0 , 0.0);
+  glVertex3f(width(), height(), 0.0);
+  glVertex3f(0.0, height(), 0.0);
+  glEnd(); 
+  CHECK_GL_ERROR();
+
+  SH_GL_CHECK_ERROR(glPopAttrib());
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
+
+  glDrawBuffer(GL_BACK); 
+  glBindFramebufferATI(GL_DRAW_FRAMEBUFFER_ATI, 0);
+  glDrawBuffer(GL_BACK); 
+
+}
 
 bool UberUberTransfer::transfer(const SH::ShStorage* from, SH::ShStorage* to)
 {
@@ -127,10 +259,7 @@ bool UberUberTransfer::transfer(const SH::ShStorage* from, SH::ShStorage* to)
   glBindFramebufferATI(GL_DRAW_FRAMEBUFFER_ATI, 0);
   // use this dummy memory object to force GL_AUXn to be
   // a float framebuffer, so ReadPixels can return unclamped values with full precision
-  if (UberStorage::temp_fb[2] < 0) {
-    UberStorage::temp_fb[2] = SH_GL_CHECK_ERROR(glCreateFramebufferATI());
-    SH_DEBUG_PRINT("Create temporary framebuffer fb " << UberStorage::temp_fb[2]);
-  }
+  UberStorage::allocfb(2);
 
   SH_GL_CHECK_ERROR(glAttachMemATI(GL_TEXTURE_2D, GL_IMAGES_ATI, srcmem));
 
@@ -242,10 +371,8 @@ bool UberHostTransfer::transfer(const SH::ShStorage* from, SH::ShStorage* to)
   // a float framebuffer, so ReadPixels can return unclamped values with full precision
   GLint propsArray[] = {GL_TEXTURE_2D, GL_TRUE, GL_COLOR_BUFFER_ATI, GL_TRUE};
   GLmem dummyMem = glAllocMem2DATI(format, width, height, 2, propsArray);
-  if (ustorage->temp_fb[1] < 0) {
-    ustorage->temp_fb[1] = SH_GL_CHECK_ERROR(glCreateFramebufferATI());
-    SH_DEBUG_PRINT("Create temporary framebuffer fb " << ustorage->temp_fb[1]);
-  }
+  
+  UberStorage::allocfb(1);
 
   SH_GL_CHECK_ERROR(glAttachMemATI(GL_TEXTURE_2D, GL_IMAGES_ATI, mem));
   SH_DEBUG_PRINT("Attach GL_TEXTURE_2D temporarily to mem " << mem);
