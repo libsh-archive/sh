@@ -59,8 +59,14 @@ public:
                                                ///particular component
                                                ///from the image.
 
+
   void loadPng(const std::string& filename); ///< Load a PNG file into
                                              ///this image.
+
+  void savePng(const std::string& filename, int inverse_alpha=0);///< Save a PNG image into
+                                             ///this file
+  
+  
 
   const float* data() const;
   float* data();
