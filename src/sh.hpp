@@ -7,6 +7,8 @@
 #include "ShAttrib.hpp"
 #include "ShMatrix.hpp"
 #include "ShVector.hpp"
+#include "ShPoint.hpp"
+#include "ShColor.hpp"
 #include "ShLib.hpp"
 #include "ShTexture.hpp"
 #include "ShBackend.hpp"

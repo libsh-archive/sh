@@ -11,4 +11,7 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
                    ShUtility.hpp ShVariable.hpp ShVariableNode.hpp sh.hpp \
                    ShMatrix.hpp ShMatrixImpl.hpp ShTexture.hpp ShTextureImpl.hpp \
                    ShTextureNode.hpp ShTextureNode.cpp ShImage.hpp ShImage.cpp \
-                   ShVector.hpp ShVectorImpl.hpp ShLibVector.hpp ShLibAttrib.hpp
+                   ShLibAttrib.hpp ShSpecialType.hpp \
+                   ShVector.hpp ShLibVector.hpp \
+                   ShPoint.hpp ShLibPoint.hpp \
+                   ShColor.hpp ShLibColor.hpp

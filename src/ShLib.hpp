@@ -541,15 +541,18 @@ libop(const libtype<N, K1, T, S1>& var) \
   return libtype<libretsize, SH_VAR_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
 }
 
-#define SH_SHLIB_BINARY_OPERATION(libtype, libop, libretsize) \
+#define SH_SHLIB_BINARY_RETTYPE_OPERATION(libtype, libop, librettype, libretsize) \
 template<int N, int K1, int K2, typename T, bool S1, bool S2> \
-libtype<libretsize, SH_VAR_TEMP, T, false> \
+librettype<libretsize, SH_VAR_TEMP, T, false> \
 libop(const libtype<N, K1, T, S1>& left, const libtype<N, K2, T, S2>& right) \
 { \
   ShVariableN<libretsize, T> t = libop(static_cast< ShVariableN<N, T> >(left), \
                                        static_cast< ShVariableN<N, T> >(right)); \
-  return libtype<libretsize, SH_VAR_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
+  return librettype<libretsize, SH_VAR_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
 }
+
+#define SH_SHLIB_BINARY_OPERATION(libtype, libop, libretsize) \
+  SH_SHLIB_BINARY_RETTYPE_OPERATION(libtype, libop, libtype, libretsize)
 
 #define SH_SHLIB_UNEQ_BINARY_OPERATION(libtype, libop, libretsize) \
 template<int N, int M, int K1, int K2, typename T, bool S1, bool S2> \
@@ -583,5 +586,7 @@ libtype<libretsize, SH_VAR_TEMP, T, false> libop(const ShMatrix<M, N, K1, T>& a,
 
 #include "ShLibAttrib.hpp"
 #include "ShLibVector.hpp"
+#include "ShLibPoint.hpp"
+#include "ShLibColor.hpp"
 
 #endif
