@@ -8,7 +8,7 @@ TESTS = add add_im cbrt cmul cos csum div mul rnd sin tex lt le gt ge eq ne \
 	rsqrt rcp tan acos asin atan length exp2 exp10 log log2 log10 atan2 \
 	cross
 check_PROGRAMS = $(TESTS)
-BACKENDS = arb cc host
+BACKENDS = arb cc host glsl
 EXTRA_DIST = shtest.py common.py
 
 checkall:
