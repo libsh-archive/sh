@@ -63,6 +63,9 @@ class ShObjMesh: public ShMesh<ShPoint3f, ShObjMeshEdgeData, ShNormal3f> {
     /** \brief Deletes current mesh and reads in a new mesh from an OBJ file */
     std::istream& readObj(std::istream &in);
 
+    /** \brief Generates face normals by cross product  */
+    void generateFaceNormals();
+
     /** \brief Generates normals by averaging adjacent face normals
      * for vertices that have zero normals (or all vertices if force = true) 
      *

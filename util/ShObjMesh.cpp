@@ -188,9 +188,7 @@ std::istream& ShObjMesh::readObj(std::istream &in) {
       int tci = (*I)[1] - 1;
       int ni = (*I)[2] - 1; 
 
-      if( tci == -1 ) {
-        // TODO make a texture coordinate
-      } else {
+      if( tci != -1 ) {
         if( tci >= tcVec.size() ) {
           std::ostringstream os;
           os << "Invalid texcoord index " << tci << " in OBJ file.";
@@ -199,9 +197,7 @@ std::istream& ShObjMesh::readObj(std::istream &in) {
         edge->data.tc = tcVec[tci]; 
       }
 
-      if( ni == -1 ) {
-        // TODO make a normal  
-      } else {
+      if( ni != -1 ) {
         if( ni >= normVec.size() ) {
           std::ostringstream os;
           os << "Invalid normal index " << ni << " in OBJ file.";
@@ -216,20 +212,29 @@ std::istream& ShObjMesh::readObj(std::istream &in) {
         }
       }
     }
-    ShVector3f v01 = face->edge->end->data - face->edge->start->data;
-    ShVector3f v02 = face->edge->next->end->data - face->edge->start->data; 
-    face->data = cross(v01, v02);  
   }
+
+  if(earTriangulate()) SH_DEBUG_PRINT("Warning: Encountered non-triangular faces in OBJ file.");
 
   mergeVertices<ObjVertLess>();
   mergeEdges<std::less<VertexType*> >();
+
+  generateFaceNormals();
   if(generateVertexNormals()) SH_DEBUG_PRINT("Warning: Some vertex normals were missing in OBJ file.");
   if(generateSphericalTexCoords()) SH_DEBUG_PRINT("Warning: Some texcoords were missing in OBJ file.");
   normalizeNormals();
   // TODO flip faces that have vert normals not matching the face normal
-  // TODO triangulate
 
   return in;
+}
+
+void ShObjMesh::generateFaceNormals() {
+  for(FaceSet::iterator I = faces.begin(); I != faces.end(); ++I) {
+    FaceType &face = **I;
+    ShVector3f v01 = face.edge->end->data - face.edge->start->data;
+    ShVector3f v02 = face.edge->next->end->data - face.edge->start->data; 
+    face.data = cross(v01, v02);  
+  }
 }
 
 bool ShObjMesh::generateVertexNormals(bool force) {

@@ -231,6 +231,7 @@ ShProgram namedConnect(const ShProgram &a, const ShProgram &b, bool keepExtra) {
       if((*I)->size() != (*J)->size()) {
         SH_DEBUG_WARN("Named connect matched channel name " << (*I)->name() 
             << " but output size " << (*I)->size() << " != " << " input size " << (*J)->size() );
+        continue;
       }
       mcm[i] = j;
       aMatch[i] = true;

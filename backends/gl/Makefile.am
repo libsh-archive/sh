@@ -2,16 +2,16 @@ INCLUDES = -I$(top_srcdir)/src
 
 shbackenddir = $(prefix)/lib/sh
 
-noinst_LIBRARIES = libgl.a libgltex.a
+noinst_LTLIBRARIES = libgl.la libgltex.la
 shbackend_LTLIBRARIES = libsharb.la # libshati.la
 
-libgl_a_SOURCES = GlBackend.cpp GlBackend.hpp \
+libgl_la_SOURCES = GlBackend.cpp GlBackend.hpp \
 		  GlTextureName.hpp GlTextureName.cpp
-libgltex_a_SOURCES = GlTextureStorage.hpp GlTextureStorage.cpp \
+libgltex_la_SOURCES = GlTextureStorage.hpp GlTextureStorage.cpp \
 		     GlTextures.hpp GlTextures.cpp 
 
 libsharb_la_LDFLAGS = -L$(prefix)/lib -module
-libsharb_la_LIBADD = libgl.a libgltex.a $(top_srcdir)/src/libsh.la -lGL
+libsharb_la_LIBADD = libgl.la libgltex.la $(top_srcdir)/src/libsh.la -lGL
 libsharb_la_SOURCES = Arb.cpp ArbCode.cpp ArbInst.cpp ArbLimits.cpp \
 		      ArbReg.cpp \
 		      Arb.hpp ArbCode.hpp ArbInst.hpp ArbLimits.hpp \

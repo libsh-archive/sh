@@ -1,3 +1,10 @@
+2004-02-27  Bryan Chan <b8chan@uwaterloo.ca>
+	* backends/gl/Makefile.am:
+	Stefanus' fix for linking problems.
+
+	* util/*Mesh*:
+	Added triangulation.
+	
 2004-02-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/*: Started GL backend abstraction, for future

@@ -36,29 +36,42 @@ namespace ShUtil {
 
 /** \file ShMesh.hpp
  * A mesh structure based on half-edge data structure
- * for storing manifold meshes.
+ * for storing meshes.
  *
  * This class is a clean implementation of the
- * basic interface from the 488 course notes. Additional
+ * basic interface from the CS488 course notes. Additional
  * features should be added by making a subclass of
  * the mesh.
  *
- * All the pointers in a face are setup when faces are added
- * using addFace.  The edge syms are only set up after
- * calling merge. (And typically calling 
- *
+ * The majority of the links are kept in the edges,
+ * and each vertex points to an edge which starts on that vertex,
+ * and each face points to an edge in the face.
  */
 
 /** The following invariants must be maintained at all times:
- * In a ShMesh object x, x.verts, x.edges, and x.faces
- * must hold exactly the vertices, edges, and faces 
- * currently involved in the mesh.
- * (e.g. an edge can't point to a start/end vertex that is not in
- * x.verts) 
  *
- * But it is okay to have disconnected elements (i.e.
- * verts not in any edges, edges without faces, etc.)
- * depending on the nature of your particular mesh type.
+ * I) In a ShMesh object x, x.verts, x.edges and x.faces sets hold
+ * the vertices, edges, and faces of the mesh.
+ * If p is in one of these sets and has a pointer to vert/edge/face q,
+ * then q is also in the appropriate set.
+ *
+ * II) If an edge e = f.edge for any face f, then
+ * following e->next pointers must form a cycle that returns to e.
+ * There must be at least two edges in each face.
+ *
+ * III) Some edge pointer invariants:
+ *   a) if e->next, then e->next->prev = e
+ *   b) if e->next, e->next->start == e->end
+ *   c) if e->prev, then e->prev->next = e
+ *   d) if e->prev, e->prev->end == e->start
+ *   e) if e->sym != 0, then e->sym->sym = e
+ *
+ * Otherwise anything goes.  It is okay to have disconnected
+ * vertices, edges that don't cycle (as long as they are not 
+ * in faces), duplicate edges, etc. 
+ *
+ * All the functions defined directly in ShMesh should maintain
+ * these invariants.
  */
 
 template<typename VT, typename ET, typename FT>
@@ -102,20 +115,42 @@ struct ShMeshEdge {
    */
   ShMeshEdge();
 
-  /** \brief Constructs a edge with the given start/end vertices */
+  /** \brief Constructs a edge with the given pointers vertices */
   ShMeshEdge(ShMeshVertex<VT, ET, FT> *start, ShMeshVertex<VT, ET, FT> *end,
-      ShMeshEdge<VT, ET, FT> *prev, ShMeshFace<VT, ET, FT> *face);
+      ShMeshFace<VT, ET, FT> *face,
+      ShMeshEdge<VT, ET, FT> *next, ShMeshEdge<VT, ET, FT> *prev,
+      ShMeshEdge<VT, ET, FT> *sym);
+
+  /** \brief Constructs a edge with the given pointers vertices & data */
+  ShMeshEdge(ShMeshVertex<VT, ET, FT> *start, ShMeshVertex<VT, ET, FT> *end,
+      ShMeshFace<VT, ET, FT> *face,
+      ShMeshEdge<VT, ET, FT> *next, ShMeshEdge<VT, ET, FT> *prev,
+      ShMeshEdge<VT, ET, FT> *sym, 
+      const ET &data);
 
   /** \brief Copy constructor
    * This makes this->data a copy of other->data, but does not init any ptrs. 
    */
   ShMeshEdge(const ShMeshEdge<VT, ET, FT> &other);
 
-  /** \brief Sets previous edge (and sets prev->next to this)
+  /** \brief ShMeshEdge destructor.
+   * If next, prev or sym are set, then next->prev, prev->next, sym->sym 
+   * are all updated to reflect the demise of this edge.
+   */
+  ~ShMeshEdge();
+
+  /** \brief Sets next edge 
+   * Sets p->prev to this and clear any old next->prev to 0. 
+   */
+  void setNext(ShMeshEdge<VT, ET, FT> *n);
+
+  /** \brief Sets previous edge 
+   * Sets p->next to this and clear any old prev->next to 0. 
    */
   void setPrev(ShMeshEdge<VT, ET, FT> *p);
 
-  /** \brief Sets sym edge and sets sym->sym to this
+  /** \brief Sets sym edge and sets s->sym to this
+   * while clearing any old sym->sym to 0.
    */
   void setSym(ShMeshEdge<VT, ET, FT> *s);
 
@@ -173,6 +208,11 @@ class ShMesh {
      */
     FaceType* addFace(const VertexList &vl);
 
+    /** \brief Removes a face from the mesh.
+     * Deletes any edges from this face, but does not delete any vertices.
+     */
+    void removeFace(FaceType *f);
+
     /** \brief Vertex merging function.
      * Merges any vertices that are "equal" according to the 
      * STL Strict Weak Ordering functor VertLess
@@ -184,11 +224,20 @@ class ShMesh {
      * Pairs up half-edges that match each other (i.e. e1.start = e2.end, e1.end = e2.start) 
      * using the given STL Strict Weak Ordering functor VertLess 
      *
-     * By default, this uses the pointer comparison
+     * This is best used after mergeVertices, then VertLess can be the default std::less
+     * and it will obey the ordering established by mergeVertices.
+     *
+     * Note that if there are multiple edges between start->end 
+     * that match up with an edge, e, from end->start, one of them will be  
+     * set to e->sym.  Which one gets matched is undefined.
      */
     template<typename VertLess> 
     void mergeEdges();
 
+    /** \brief Triangulates by ear. 
+     * Removes any two-sided faces from the mesh
+     * returnst true if any triangles removed */
+    bool earTriangulate();
 
     VertexSet verts;
     EdgeSet edges;
