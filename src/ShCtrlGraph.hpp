@@ -27,6 +27,7 @@
 #ifndef SHCTRLGRAPH_HPP
 #define SHCTRLGRAPH_HPP
 
+#include <set>
 #include <vector>
 #include <list>
 #include <iosfwd>
@@ -60,7 +61,7 @@ SH_DLLEXPORT ShCtrlGraphBranch {
  * successor of 0.
  */
 class
-SH_DLLEXPORT ShCtrlGraphNode : public ShRefCountable {
+SH_DLLEXPORT ShCtrlGraphNode : public ShRefCountable, public ShInfoHolder {
 public:
   ShCtrlGraphNode();
   ~ShCtrlGraphNode();
@@ -88,13 +89,14 @@ public:
   void append(const ShPointer<ShCtrlGraphNode>& node,
               ShVariable cond);
 
+
   /** Splits this control graph node into two nodes A, B, at the given statement.
    * A is this, and keeps all predecessor information, 
    * B is a new node that takes over all successor/follower
    * B is NOT appended by default as a child of A 
    *
-   * A contains a block with all the statements before the given iterator.
-   * B contains a block with all statements after and including the given iterator.
+   * A contains a block with all the statements up to and including the given iterator.
+   * B contains a block with all statements after the given iterator.
    *
    * This is useful for splicing in a control graph between A and B to replace 
    * some statement (or TODO a sequence of statements)
@@ -103,6 +105,23 @@ public:
    */
   ShPointer<ShCtrlGraphNode> 
   split(ShBasicBlock::ShStmtList::iterator stmt);
+
+  typedef std::set<ShVariableNodePtr> DeclSet;
+  typedef DeclSet::const_iterator DeclIt;
+
+  /** Adds a temporary declaration to this cfg node */
+  void addDecl(ShVariableNodePtr node);
+
+  /** Returns whether this node contains a declaration for the given node */
+  bool hasDecl(ShVariableNodePtr node) const;
+
+  /** Inserts the given declarations into this */ 
+  void insert_decls(DeclIt f, DeclIt l);
+
+  /** Iterators into the decl set */ 
+  DeclIt decl_begin() const;
+  DeclIt decl_end() const;
+
 
   /// Whether this node has been "marked". Useful for mark and sweep
   /// type algorithms.
@@ -129,6 +148,8 @@ private:
   void real_dfs(F& functor) const;
 
   mutable bool m_marked;
+
+  DeclSet m_decls; ///< temporary declarations in this node
 };
 
 typedef ShPointer<ShCtrlGraphNode> ShCtrlGraphNodePtr;
@@ -157,6 +178,13 @@ public:
 
   /// Adds an empty node after exit, gives old exit a block and returns it. 
   ShCtrlGraphNodePtr appendExit();
+
+  /// prepends another ctrl graph to this' entry (updating entry) 
+  void prepend(ShPointer<ShCtrlGraph> cfg); 
+
+  /// appends another ctrl graph to this' exit (updating exit)
+  void append(ShPointer<ShCtrlGraph> cfg); 
+
 
   template<typename F>
   void dfs(F& functor);

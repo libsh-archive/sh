@@ -26,6 +26,7 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "ShTypeInfo.hpp"
 #include "ShContext.hpp"
+#include "ShAffine.hpp"
 #include "ShInterval.hpp"
 #include "ShEval.hpp"
 #include "ShCastManager.hpp"
@@ -50,8 +51,12 @@ ShTypeInfo::TypeInfoMap ShTypeInfo::m_valueTypes;
 
 void ShTypeInfo::init()
 {
+  setTypeInfo<ShAffine<double> >(m_valueTypes);
+  setTypeInfo<ShAffine<float> >(m_valueTypes);
+
   setTypeInfo<ShInterval<double> >(m_valueTypes);
   setTypeInfo<ShInterval<float> >(m_valueTypes);
+
 
   setTypeInfo<double>(m_valueTypes);
   setTypeInfo<float>(m_valueTypes);

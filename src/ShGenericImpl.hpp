@@ -54,6 +54,18 @@ ShGeneric<N, T>::ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, boo
   SH_DEBUG_ASSERT(node); // DEBUG
 }
 
+// @todo range - should throw something if prg doesn't have an output 
+/*
+template<int N, typename T>
+inline
+ShGeneric<N, T>::ShGeneric(const ShProgram &prg)
+  : ShVariable(prg.node()->outputs.front()->clone(SH_TEMP, 0, SH_VALUETYPE_END, 
+        SH_SEMANTICTYPE_END, true, false))
+{
+  *this = prg;
+}
+*/
+
 template<int N, typename T>
 inline
 ShGeneric<N, T>::~ShGeneric()
@@ -200,7 +212,7 @@ template<int N, typename T>
 inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator+=(host_type right)
 {
-  *this = *this + right;
+  *this = *this + ShAttrib<1, SH_CONST, T>(right);
   return *this;
 }
 
@@ -208,7 +220,7 @@ template<int N, typename T>
 inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator-=(host_type right)
 {
-  *this = *this - right;
+  *this = *this - ShAttrib<1, SH_CONST, T>(right);
   return *this;
 }
 
@@ -216,7 +228,7 @@ template<int N, typename T>
 inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator*=(host_type right)
 {
-  *this = *this * right;
+  *this = *this * ShAttrib<1, SH_CONST, T>(right);
   return *this;
 }
 
@@ -224,7 +236,7 @@ template<int N, typename T>
 inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator/=(host_type right)
 {
-  *this = *this / right;
+  *this = *this / ShAttrib<1, SH_CONST, T>(right);
   return *this;
 }
 
@@ -232,7 +244,7 @@ template<int N, typename T>
 inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator%=(host_type right)
 {
-  *this = *this % right;
+  *this = *this % ShAttrib<1, SH_CONST, T>(right);
   return *this;
 }
 
@@ -353,7 +365,8 @@ template<int N, typename T>
 void ShGeneric<N, T>::setValues(const host_type variantValues[]) 
 {
   if(m_swizzle.identity() && !m_neg) {
-    memcpy(m_node->getVariant()->array(), variantValues, N * sizeof(host_type));
+    VariantTypePtr variantPtr(variant_cast<T, SH_HOST>(m_node->getVariant()));
+    std::copy(variantValues, variantValues + N, variantPtr->begin()); 
   } else {
     VariantTypePtr variantPtr(new VariantType(N, variantValues, false));
     setVariant(variantPtr);
@@ -490,7 +503,7 @@ template<typename T>
 inline
 ShGeneric<1, T>& ShGeneric<1, T>::operator*=(host_type right)
 {
-  *this = *this * right;
+  *this = *this * ShAttrib<1, SH_CONST, T>(right);
   return *this;
 }
 
@@ -498,7 +511,7 @@ template<typename T>
 inline
 ShGeneric<1, T>& ShGeneric<1, T>::operator/=(host_type right)
 {
-  *this = *this / right;
+  *this = *this / ShAttrib<1, SH_CONST, T>(right);
   return *this;
 }
 
@@ -506,7 +519,7 @@ template<typename T>
 inline
 ShGeneric<1, T>& ShGeneric<1, T>::operator%=(host_type right)
 {
-  *this = *this % right;
+  *this = *this % ShAttrib<1, SH_CONST, T>(right);
   return *this;
 }
 
@@ -514,7 +527,7 @@ template<typename T>
 inline
 ShGeneric<1, T>& ShGeneric<1, T>::operator+=(host_type right)
 {
-  *this = *this + right;
+  *this = *this + ShAttrib<1, SH_CONST, T>(right);
   return *this;
 }
 
@@ -522,7 +535,7 @@ template<typename T>
 inline
 ShGeneric<1, T>& ShGeneric<1, T>::operator-=(host_type right)
 {
-  *this = *this - right;
+  *this = *this - ShAttrib<1, SH_CONST, T>(right);
   return *this;
 }
 

@@ -24,61 +24,51 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHVARIABLETYPE_HPP
-#define SHVARIABLETYPE_HPP
+#ifndef SHINFOIMPL_HPP
+#define SHINFOIMPL_HPP
 
-#include "ShDllExport.hpp"
-
-/** @file ShVariableType.hpp
- * 
- * Lists the binding, semantic, and Value types available in Sh
- * and their associated C++ data types for host computation and 
- * holding in memory.  Each enum is zero-indexed. 
- * 
- * For some Value types, the host data type and memory data types are
- * different since the first must be efficient in host computation and the
- * second needs to satisfy space constraints and special data formats used in some
- * backends. 
- * 
- * For more information on operations dealing with the data types such as
- * allocation of arrays, automatic promotions, and casting.
- * @see ShTypeInfo.hpp
- */
+#include "ShInfo.hpp"
 
 namespace SH {
 
-/** The various ways variables can be bound.
- */
-enum ShBindingType {
-  SH_INPUT, 
-  SH_OUTPUT, 
-  SH_INOUT,
-  SH_TEMP,
-  SH_CONST, 
-  SH_TEXTURE, 
-  SH_STREAM, 
-  SH_PALETTE, 
-
-  SH_BINDINGTYPE_END
-};
-
-SH_DLLEXPORT extern const char* bindingTypeName[];
-
-/** The various ways semantic types for variables.
- */
-enum ShSemanticType {
-  SH_ATTRIB,
-  SH_POINT,
-  SH_VECTOR,
-  SH_NORMAL,
-  SH_COLOR,
-  SH_TEXCOORD,
-  SH_POSITION,
-  
-  SH_SEMANTICTYPE_END
-};
-
-SH_DLLEXPORT extern const char* semanticTypeName[];
-
+template<typename T>
+T* ShInfoHolder::get_info()
+{
+  for (InfoList::iterator I = info.begin(); I != info.end(); ++I) {
+    T* item = dynamic_cast<T*>(*I);
+    if (item) {
+      return item;
+    }
+  }
+  return 0;
 }
+
+template<typename T>
+const T* ShInfoHolder::get_info() const
+{
+  for (InfoList::const_iterator I = info.begin(); I != info.end(); ++I) {
+    const T* item = dynamic_cast<const T*>(*I);
+    if (item) {
+      return item;
+    }
+  }
+  return 0;
+}
+
+template<typename T>
+void ShInfoHolder::destroy_info()
+{
+  for (InfoList::iterator I = info.begin(); I != info.end();) {
+    T* item = dynamic_cast<T*>(*I);
+    if (item) {
+      I = info.erase(I);
+      delete item;
+    } else {
+      ++I;
+    }
+  }
+}
+
+} // namespace SH
+
 #endif

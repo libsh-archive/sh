@@ -37,18 +37,28 @@ namespace SH {
 
 void ShTypeInfo::addOps()
 {
-  /// not all TxTx... -> ops are implemented.  The way things work is similar to
-  /// C++ in spirit (except for the way the i x ui case is handled.  C++
-  /// has a special case there which uses ui, which to me sounds like a serious
-  /// loss of information. I think prefering loss of precision by going to float 
-  /// over losing sign information sounds better) 
-  ///
-  /// 1) if either operand is i_d or operands are d x i_f, use i_d
-  /// 2) else if one operand is i_f, use i_f
-  /// 3) else if either operand is d, use d 
-  /// 4) else if either operand is f or we have i x ui, use f 
-  /// 5) else if operands are integers/unsigned integers use i
-  /// 6) else use float (this includes all fractionals)
+  /* not all TxTx... -> ops are implemented.  The way things work is similar to
+   * C++ in spirit 
+   * 
+   * @see ShStorageTypeImpl.hpp ShTypeInfoCasts.cpp
+   *
+   * Rules (checked in order until one matches)
+   * 1) If either is affine, and either has base type double, use affine double
+   * 2) If either is affine, use affine float
+   * 3) If either is interval, and either has base type double, use interval
+   * double
+   * 4) If either is interval, use interval float
+   * 5) If either is double, use double
+   * 6) If either is float or fractional, use float
+   * 7) If both are half, use half
+   * 8) Use int 
+   */
+  _shInitFloatOps<ShAffine<double> >();
+  _shInitAffineOps<double, ShAffine<double> >();
+
+  _shInitFloatOps<ShAffine<float> >();
+  _shInitAffineOps<float, ShAffine<float> >();
+
   _shInitFloatOps<ShInterval<double> >();
   _shInitIntervalOps<double, ShInterval<double> >();
 
@@ -57,8 +67,17 @@ void ShTypeInfo::addOps()
 
   _shInitFloatOps<double>();
   _shInitFloatOps<float>();
+  // @todo range - this should be okay for now
+  // Because of ShCommonType, library functions will still use half temporaries when recorded in shaders,
+  // but in immediate mode halfs will be converted to float for computation.
+  //_shInitFloatOps<ShHalf>();
 
   _shInitIntOps<int>();
+
+#if 0
+  std::cout << "Available Ops: " << std::endl;
+  std::cout << ShEval::instance()->availableOps();
+#endif
 }
 
 }

@@ -11,6 +11,14 @@
 #include <sstream>
 #include <fstream>
 
+// Uncomment to enable use-def chain debugging 
+// #define SH_DEBUG_VALUETRACK
+
+#ifdef SH_DEBUG_OPTIMIZER
+#ifndef SH_DEBUG_VALUETRACK
+#define SH_DEBUG_VALUETRACK
+#endif
+#endif
 namespace {
 using namespace SH;
 
@@ -73,7 +81,7 @@ struct DefFinder {
     while (1) {
       if (I == block->begin()) break;
       --I;
-      if (I->op != SH_OP_KIL && I->op != SH_OP_OPTBRA && I->dest.node()->kind() == SH_TEMP) {
+      if (I->op != SH_OP_KIL && I->op != SH_OP_OPTBRA /*&& I->dest.node()->kind() == SH_TEMP*/) {
         // Construct a disable map if this node has not yet been
         // assigned to in a later statement in this block.
         if (disable_map.find(I->dest.node()) == disable_map.end()) {
@@ -137,7 +145,7 @@ struct InitRch {
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
       if (I->op == SH_OP_KIL
           || I->op == SH_OP_OPTBRA
-          || I->dest.node()->kind() != SH_TEMP) continue;
+          /*|| I->dest.node()->kind() != SH_TEMP*/) continue;
       for (unsigned int i = 0; i < r.defs.size(); i++) {
         if (r.defs[i].stmt->dest.node() != I->dest.node()) continue;
 
@@ -239,7 +247,7 @@ struct UdDuBuilder {
       // Compute the ud chains for the statement's source variables,
       // and contribute to the du chains of the source variables' definitions.
       for (int j = 0; j < opInfo[I->op].arity; j++) {
-        if (I->src[j].node()->kind() == SH_TEMP) {
+        //if (I->src[j].node()->kind() == SH_TEMP) {
           ValueTracking* vt = I->get_info<ValueTracking>();
           if (!vt) {
             vt = new ValueTracking(&(*I));
@@ -258,7 +266,7 @@ struct UdDuBuilder {
               ut->uses[J->index].insert(ValueTracking::Use(&(*I), j, i));
             }
           }
-        } 
+        //} 
       }
 
       // Now update the defs structure.
@@ -326,6 +334,9 @@ namespace SH {
 ValueTracking::ValueTracking(ShStatement* stmt)
   : uses(stmt->dest.node() ? stmt->dest.size() : 0)
 {
+#ifdef SH_DEBUG_VALUETRACK
+  SH_DEBUG_PRINT("Adding value tracking to " << *stmt);
+#endif
   for (int i = 0; i < opInfo[stmt->op].arity; i++) {
     for (int j = 0; j < (stmt->src[i].node() ? stmt->src[i].size() : 0); j++) {
       defs[i].push_back(std::set<Def>());
@@ -333,7 +344,7 @@ ValueTracking::ValueTracking(ShStatement* stmt)
   }
 }
 
-ShStatementInfo* ValueTracking::clone() const
+ShInfo* ValueTracking::clone() const
 {
   return new ValueTracking(*this);
 }
@@ -357,7 +368,7 @@ void add_value_tracking(ShProgram& p)
     graph->dfs(iter);
   } while (changed);
 
-#ifdef SH_DEBUG_OPTIMIZER
+#ifdef SH_DEBUG_VALUETRACK
   SH_DEBUG_PRINT("Dumping Reaching Defs");
   SH_DEBUG_PRINT("defsize = " << r.defsize);
   SH_DEBUG_PRINT("defs.size() = " << r.defs.size());
@@ -383,7 +394,8 @@ void add_value_tracking(ShProgram& p)
   UdDuBuilder builder(r);
   graph->dfs(builder);
 
-#ifdef SH_DEBUG_OPTIMIZER
+#ifdef SH_DEBUG_VALUETRACK
+  SH_DEBUG_PRINT("Uddu Dump");
   UdDuDumper dumper;
   graph->dfs(dumper);
 #endif

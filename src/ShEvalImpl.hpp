@@ -30,7 +30,7 @@ void ShRegularOp<OP, T>::operator()(
 }
 
 template<ShOperation OP, typename T1, typename T2>
-void ShIntervalOp<OP, T1, T2>::operator()( 
+void ShRangeOp<OP, T1, T2>::operator()( 
     ShVariant* dest, const ShVariant* a, const ShVariant* b, const ShVariant* c) const
 {
 
@@ -39,8 +39,9 @@ void ShIntervalOp<OP, T1, T2>::operator()(
   ShDataVariant<T1, SH_HOST>* destVec = variant_cast<T1, SH_HOST>(dest);
 
   const ShDataVariant<T2, SH_HOST>* aVec = variant_cast<T2, SH_HOST>(a);
+  const ShDataVariant<T2, SH_HOST>* bVec = b ? variant_cast<T2, SH_HOST>(b) : 0;
 
-  ShConcreteIntervalOp<OP, T1, T2>::doop(*destVec, *aVec);
+  ShConcreteRangeOp<OP, T1, T2>::doop(destVec, aVec, bVec);
 }
 
 template<typename T>
@@ -141,21 +142,49 @@ void _shInitIntOps() {
   // results)
 }
 
+/** Helper function to initialize operations common to all range types */
+template<typename T, typename RangeT>
+void __shInitRangeOps() {
+  ShEval* eval = ShEval::instance();
+  const ShValueType V = ShStorageTypeInfo<T>::value_type;
+  const ShValueType RangeV = ShStorageTypeInfo<RangeT>::value_type; 
+
+  eval->addOp(SH_OP_LO, new ShRangeOp<SH_OP_LO, T, RangeT>(), 
+      V, RangeV);
+  eval->addOp(SH_OP_HI, new ShRangeOp<SH_OP_HI, T, RangeT>(), 
+      V, RangeV);
+
+  eval->addOp(SH_OP_WIDTH, new ShRangeOp<SH_OP_WIDTH, T, RangeT>(), 
+      V, RangeV);
+  eval->addOp(SH_OP_CENTER, new ShRangeOp<SH_OP_CENTER, T, RangeT>(), 
+      V, RangeV);
+
+
+  eval->addOp(SH_OP_UNION, new ShRangeOp<SH_OP_UNION, RangeT, RangeT>(), 
+      RangeV, RangeV, RangeV);
+
+  eval->addOp(SH_OP_ISCT, new ShRangeOp<SH_OP_ISCT, RangeT, RangeT>(), 
+      RangeV, RangeV, RangeV);
+
+  eval->addOp(SH_OP_CONTAINS, new ShRangeOp<SH_OP_CONTAINS, RangeT, RangeT>(), 
+      RangeV, RangeV, RangeV);
+}
+
 template<typename T, typename IntervalT>
 void _shInitIntervalOps() {
+  __shInitRangeOps<T, IntervalT>();
+
   ShEval* eval = ShEval::instance();
   const ShValueType V = ShStorageTypeInfo<T>::value_type;
   const ShValueType IntervalV = ShStorageTypeInfo<IntervalT>::value_type; 
 
-  eval->addOp(SH_OP_LO, new ShIntervalOp<SH_OP_LO, T, IntervalT>(), 
-      V, IntervalV);
-  eval->addOp(SH_OP_HI, new ShIntervalOp<SH_OP_HI, T, IntervalT>(), 
-      V, IntervalV);
+  eval->addOp(SH_OP_IVAL, new ShRangeOp<SH_OP_IVAL, IntervalT, T>(), 
+      IntervalV, V, V);
+}
 
-  eval->addOp(SH_OP_SETLO, new ShIntervalOp<SH_OP_SETLO, IntervalT, T>(), 
-      IntervalV, V);
-  eval->addOp(SH_OP_SETHI, new ShIntervalOp<SH_OP_SETHI, IntervalT, T>(), 
-      IntervalV, V);
+template<typename T, typename AffineT>
+void _shInitAffineOps() {
+  __shInitRangeOps<T, AffineT>();
 }
 
 }

@@ -136,6 +136,7 @@ inline ShSwizzle::ShSwizzle(const ShSwizzle& other)
   copy(other, !alloc());
 }
 
+
 inline ShSwizzle::~ShSwizzle()
 {
   dealloc();

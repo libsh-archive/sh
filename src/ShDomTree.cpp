@@ -30,6 +30,47 @@
 #include "ShDebug.hpp"
 #include "ShUtility.hpp"
 
+namespace {
+using namespace SH;
+
+/** Functor to compute dominance frontier */ 
+struct DfComputer 
+{
+  DfComputer(const ShDomTree &domTree, ShDomTree::CfgNodeSetMap &df) 
+    : domTree(domTree), df(df) {}
+
+  void operator()(const ShCtrlGraphNodePtr &node, int level)
+  {
+    ShDomTree::CfgNodeSet &dfnode = df[node];
+    dfnode.clear();
+
+    ShDomTree::CfgNodeSet::const_iterator I;
+    const ShDomTree::CfgNodeSet& succ = domTree.succ(node);
+
+    // compute local component
+    for(I = succ.begin(); I != succ.end(); ++I) {
+      if(domTree.idom(*I) != node) {
+        dfnode.insert(*I);
+      }
+    }
+
+    // add on up component
+    const ShDomTree::CfgNodeSet& idom_by = domTree.idom_by(node);
+    for(I = idom_by.begin(); I != idom_by.end(); ++I) {
+      ShDomTree::CfgNodeSet &dfI = df[*I]; 
+      ShDomTree::CfgNodeSet::const_iterator J = dfI.begin(); 
+      for(; J != dfI.end(); ++J) {
+        if(domTree.idom(*J) != node) {
+          dfnode.insert(*J);
+        }
+      }
+    }
+  }
+
+  const ShDomTree &domTree;
+  ShDomTree::CfgNodeSetMap &df;
+};
+}
 
 namespace SH {
 
@@ -113,6 +154,7 @@ namespace SH {
 	dfs(w);
       }
       m_pred[w].insert(v);
+      m_succ[v].insert(w);
     }
     ShCtrlGraphNodePtr w = v->follower;
     if (w) {
@@ -121,6 +163,7 @@ namespace SH {
 	dfs(w);
       }
       m_pred[w].insert(v);
+      m_succ[v].insert(w);
     }
   }
 
@@ -152,4 +195,63 @@ namespace SH {
     m_children[v].insert(w);
   }
 
+  const ShDomTree::CfgNodeSet& ShDomTree::succ(ShCtrlGraphNodePtr node) const
+  {
+    return m_succ(node); 
+  }
+
+  const ShDomTree::CfgNodeSet& ShDomTree::pred(ShCtrlGraphNodePtr node) const
+  {
+    return m_pred(node); 
+  }
+
+  ShCtrlGraphNodePtr ShDomTree::idom(ShCtrlGraphNodePtr node) const
+  {
+    return m_dom(node); 
+  }
+
+  const ShDomTree::CfgNodeSet& ShDomTree::idom_by(ShCtrlGraphNodePtr node) const
+  {
+    if(m_dom_by.empty()) {
+      for(CfgNodeVec::const_iterator I = m_vertex.begin(); I != m_vertex.end(); ++I) {
+        m_dom_by[m_dom[*I]].insert(*I);
+      }
+    }
+    return m_dom_by[node];
+  }
+
+  const ShDomTree::CfgNodeSet& ShDomTree::df(ShCtrlGraphNodePtr node) const
+  {
+    if(m_df.empty()) {
+      DfComputer dfcomp(*this, m_df);
+      postorder(dfcomp);
+    }
+    return m_df[node];
+  }
+
+  ShDomTree::CfgNodeSet ShDomTree::df(const CfgNodeSet &nodes) const
+  {
+    CfgNodeSet::const_iterator N = nodes.begin();
+    CfgNodeSet result;
+    for(; N != nodes.end(); ++N) {
+      const CfgNodeSet& dfN = df(*N);
+      result.insert(dfN.begin(), dfN.end());
+    }
+    return result;
+  }
+
+  // @todo range runtime is not optimal 
+  ShDomTree::CfgNodeSet ShDomTree::df_plus(const CfgNodeSet &nodes) const
+  {
+    CfgNodeSet::const_iterator N = nodes.begin();
+    CfgNodeSet result = df(nodes);
+    int size = result.size();
+    for(;;) {
+      result = df(result);
+      int newsize = result.size();
+      if(size == newsize) break; 
+      size = newsize;
+    } 
+    return result;
+  }
 }

@@ -66,13 +66,13 @@ struct ShInterval {
 
   /** Useful helpers **/ 
   /** Returns m_hi - m_lo **/
-  const T& width() const;
+  const T width() const;
 
   /** Returns (m_hi + m_lo) / 2 **/
-  const T& centre() const;
+  const T center() const;
 
   /** Returns width() / 2 **/
-  const T& radius() const;
+  const T radius() const;
 
   /** Arithmetic operators **/
   ShInterval& operator=(const T &value);
@@ -106,146 +106,155 @@ struct ShInterval {
   template<typename TT>
   friend std::istream& operator>>(std::istream& out, ShInterval<TT> &value);
 
+  /** Arithmetic operators **/
+  // TODO fill in the remaining interval with scalar ops
+  template<typename TT>
+  friend ShInterval<TT> operator+(const ShInterval<TT> &a, const ShInterval<TT> &b);
+
+  template<typename TT>
+  friend ShInterval<TT> operator-(const ShInterval<TT> &a, const ShInterval<TT> &b);
+
+  template<typename TT>
+  friend ShInterval<TT> operator*(const ShInterval<TT> &a, const ShInterval<TT> &b);
+
+  template<typename TT>
+  friend ShInterval<TT> operator/(const ShInterval<TT> &a, const ShInterval<TT> &b);
+
+  template<typename TT>
+  friend ShInterval<TT> operator%(const ShInterval<TT> &a, const ShInterval<TT> &b);
+
+  template<typename TT>
+  friend ShInterval<TT> cbrt(const ShInterval<TT> &a);
+
+  template<typename TT>
+  friend ShInterval<TT> exp(const ShInterval<TT> &a);
+
+  template<typename TT>
+  friend ShInterval<TT> exp2(const ShInterval<TT> &a);
+
+  template<typename TT>
+  friend ShInterval<TT> exp10(const ShInterval<TT> &a);
+
+  template<typename TT>
+  friend ShInterval<TT> log(const ShInterval<TT> &a);
+
+  template<typename TT>
+  friend ShInterval<TT> log2(const ShInterval<TT> &a);
+
+  template<typename TT>
+  friend ShInterval<TT> log10(const ShInterval<TT> &a);
+
+  template<typename TT>
+  friend ShInterval<TT> frac(const ShInterval<TT> &a);
+
+  template<typename TT>
+  friend ShInterval<TT> fmod(const ShInterval<TT> &a, const ShInterval<TT> &b);
+
+  template<typename TT>
+  friend ShInterval<TT> pow(const ShInterval<TT> &a, const ShInterval<TT> &b);
+
+  template<typename TT>
+  friend ShInterval<TT> rcp(const ShInterval<TT> &a);
+
+  template<typename TT>
+  friend ShInterval<TT> rsq(const ShInterval<TT> &a);
+
+  template<typename TT>
+  friend ShInterval<TT> sgn(const ShInterval<TT> &a);
+
+  template<typename TT>
+  friend ShInterval<TT> sqrt(const ShInterval<TT> &a);
+
+  /** Trig Operators */
+  template<typename TT>
+  friend ShInterval<TT> acos(const ShInterval<TT> &a);
+
+  template<typename TT>
+  friend ShInterval<TT> asin(const ShInterval<TT> &a);
+
+  template<typename TT>
+  friend ShInterval<TT> atan(const ShInterval<TT> &a);
+
+  template<typename TT>
+  friend ShInterval<TT> atan2(const ShInterval<TT> &a, const ShInterval<TT> &b);
+
+  template<typename TT>
+  friend ShInterval<TT> cos(const ShInterval<TT> &a); 
+  template<typename TT>
+  friend ShInterval<TT> sin(const ShInterval<TT> &a);
+
+  template<typename TT>
+  friend ShInterval<TT> tan(const ShInterval<TT> &a);
+
+  /** Comparison Operators **/
+  // @todo should think about how to represent tri-state logic values.
+  // For now output is interval (follows the t x t -> t convention of
+  // types for the standard operators)
+  template<typename TT>
+  friend ShInterval<TT> operator<(const ShInterval<TT> &a, const ShInterval<TT> &b);
+
+  template<typename TT>
+  friend ShInterval<TT> operator<=(const ShInterval<TT> &a, const ShInterval<TT> &b);
+
+  template<typename TT>
+  friend ShInterval<TT> operator>(const ShInterval<TT> &a, const ShInterval<TT> &b);
+
+  template<typename TT>
+  friend ShInterval<TT> operator>(const ShInterval<TT> &a, const TT& b); 
+
+  template<typename TT>
+  friend ShInterval<TT> operator>=(const ShInterval<TT> &a, const ShInterval<TT> &b);
+
+  template<typename TT>
+  friend ShInterval<TT> operator==(const ShInterval<TT> &a, const ShInterval<TT> &b);
+
+  template<typename TT>
+  friend ShInterval<TT> operator!=(const ShInterval<TT> &a, const ShInterval<TT> &b);
+
+  /// Returns true iff lo = a.lo and hi = a.hi 
+  template<typename TT>
+  bool boundsEqual(const ShInterval<TT> &a);
+
+
+  /** Clamping operators **/
+  template<typename TT>
+  friend ShInterval<TT> min(const ShInterval<TT> &a, const ShInterval<TT> &b);
+
+  template<typename TT>
+  friend ShInterval<TT> max(const ShInterval<TT> &a, const ShInterval<TT> &b);
+
+  template<typename TT>
+  friend ShInterval<TT> floor(const ShInterval<TT> &a);
+
+  template<typename TT>
+  friend ShInterval<TT> ceil(const ShInterval<TT> &a);
+
+  template<typename TT>
+  friend ShInterval<TT> rnd(const ShInterval<TT> &a);
+
+  template<typename TT>
+  friend ShInterval<TT> abs(const ShInterval<TT> &a);
+
+  /** Misc Operators **/
+  template<typename TT>
+  friend ShInterval<TT> cond(const ShInterval<TT> &a, const ShInterval<TT> &b, const ShInterval<TT> &c);
+
+  template<typename TT>
+  friend ShInterval<TT> lerp(const ShInterval<TT> &a, const ShInterval<TT> &b, const ShInterval<TT> &c);
+
+  /** Special Interval Ops **/
+  template<typename TT>
+  friend ShInterval<TT> range_union(const ShInterval<TT> &a, const ShInterval<TT> &b);
+
+  template<typename TT>
+  friend ShInterval<TT> range_isct(const ShInterval<TT> &a, const ShInterval<TT> &b);
+
+  template<typename TT>
+  friend ShInterval<TT> range_contains(const ShInterval<TT> &a, const ShInterval<TT> &b);
+
 };
 
-/** Arithmetic operators **/
-// TODO fill in the remaining interval with scalar ops
-template<typename T>
-ShInterval<T> operator+(const ShInterval<T> &a, const ShInterval<T> &b);
 
-template<typename T>
-ShInterval<T> operator-(const ShInterval<T> &a, const ShInterval<T> &b);
-
-template<typename T>
-ShInterval<T> operator-(const T &a, const ShInterval<T> &b);
-
-template<typename T>
-ShInterval<T> operator*(const ShInterval<T> &a, const ShInterval<T> &b);
-
-template<typename T>
-ShInterval<T> operator/(const ShInterval<T> &a, const ShInterval<T> &b);
-
-template<typename T>
-ShInterval<T> operator%(const ShInterval<T> &a, const ShInterval<T> &b);
-
-template<typename T>
-ShInterval<T> cbrt(const ShInterval<T> &a);
-
-template<typename T>
-ShInterval<T> exp(const ShInterval<T> &a);
-
-template<typename T>
-ShInterval<T> exp2(const ShInterval<T> &a);
-
-template<typename T>
-ShInterval<T> exp10(const ShInterval<T> &a);
-
-template<typename T>
-ShInterval<T> log(const ShInterval<T> &a);
-
-template<typename T>
-ShInterval<T> log2(const ShInterval<T> &a);
-
-template<typename T>
-ShInterval<T> log10(const ShInterval<T> &a);
-
-template<typename T>
-ShInterval<T> frac(const ShInterval<T> &a);
-
-template<typename T>
-ShInterval<T> fmod(const ShInterval<T> &a, const ShInterval<T> &b);
-
-template<typename T>
-ShInterval<T> pow(const ShInterval<T> &a, const ShInterval<T> &b);
-
-template<typename T>
-ShInterval<T> rcp(const ShInterval<T> &a);
-
-template<typename T>
-ShInterval<T> rsq(const ShInterval<T> &a);
-
-template<typename T>
-ShInterval<T> sgn(const ShInterval<T> &a);
-
-template<typename T>
-ShInterval<T> sqrt(const ShInterval<T> &a);
-
-/** Trig Operators */
-template<typename T>
-ShInterval<T> acos(const ShInterval<T> &a);
-
-template<typename T>
-ShInterval<T> asin(const ShInterval<T> &a);
-
-template<typename T>
-ShInterval<T> atan(const ShInterval<T> &a);
-
-template<typename T>
-ShInterval<T> atan2(const ShInterval<T> &a, const ShInterval<T> &b);
-
-template<typename T>
-ShInterval<T> cos(const ShInterval<T> &a); 
-template<typename T>
-ShInterval<T> sin(const ShInterval<T> &a);
-
-template<typename T>
-ShInterval<T> tan(const ShInterval<T> &a);
-
-/** Comparison Operators **/
-// @todo should think about how to represent tri-state logic values.
-// For now output is interval (follows the t x t -> t convention of
-// types for the standard operators)
-template<typename T>
-ShInterval<T> operator<(const ShInterval<T> &a, const ShInterval<T> &b);
-
-template<typename T>
-ShInterval<T> operator<=(const ShInterval<T> &a, const ShInterval<T> &b);
-
-template<typename T>
-ShInterval<T> operator>(const ShInterval<T> &a, const ShInterval<T> &b);
-
-template<typename T>
-ShInterval<T> operator>(const ShInterval<T> &a, const T& b); 
-
-template<typename T>
-ShInterval<T> operator>=(const ShInterval<T> &a, const ShInterval<T> &b);
-
-template<typename T>
-ShInterval<T> operator==(const ShInterval<T> &a, const ShInterval<T> &b);
-
-template<typename T>
-ShInterval<T> operator!=(const ShInterval<T> &a, const ShInterval<T> &b);
-
-/// Returns true iff lo = a.lo and hi = a.hi 
-template<typename T>
-bool boundsEqual(const ShInterval<T> &a);
-
-
-/** Clamping operators **/
-template<typename T>
-ShInterval<T> min(const ShInterval<T> &a, const ShInterval<T> &b);
-
-template<typename T>
-ShInterval<T> max(const ShInterval<T> &a, const ShInterval<T> &b);
-
-template<typename T>
-ShInterval<T> floor(const ShInterval<T> &a);
-
-template<typename T>
-ShInterval<T> ceil(const ShInterval<T> &a);
-
-template<typename T>
-ShInterval<T> rnd(const ShInterval<T> &a);
-
-template<typename T>
-ShInterval<T> abs(const ShInterval<T> &a);
-
-/** Misc Operators **/
-template<typename T>
-ShInterval<T> cond(const ShInterval<T> &a, const ShInterval<T> &b, const ShInterval<T> &c);
-
-template<typename T>
-ShInterval<T> lerp(const ShInterval<T> &a, const ShInterval<T> &b, const ShInterval<T> &c);
 }
 
 #include "ShIntervalImpl.hpp"

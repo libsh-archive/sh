@@ -31,6 +31,8 @@
 #include "ShVariantCast.hpp"
 #include "ShCastManager.hpp"
 
+//#define SH_DEBUG_CASTMGR
+
 namespace {
 struct ShCastMgrEdgeWeigher
 {
@@ -154,6 +156,10 @@ void ShCastManager::init()
 void ShCastManager::doCast(ShVariant* dest, const ShVariant* src)
 {
   SH_DEBUG_ASSERT(dest != src);
+#ifdef SH_DEBUG_CASTMGR
+  SH_DEBUG_PRINT("Casting to " << shValueTypeName(dest->valueType()) << "," << dataTypeName[dest->dataType()] <<  
+      " from " << shValueTypeName(src->valueType()) << "," << dataTypeName[src->dataType()]);
+#endif
 
   // should be the same size
   int size = dest->size();
@@ -164,14 +170,14 @@ void ShCastManager::doCast(ShVariant* dest, const ShVariant* src)
   ShValueType srcVt = src->valueType();
   ShDataType srcDt = src->dataType();
 
-  if((srcVt == destVt) && (srcDt == destDt)) {
-    memcpy(dest->array(), src->array(), dest->datasize() * dest->size());
-    return;
-  }
+  SH_DEBUG_ASSERT(!(destVt == srcVt && srcDt == destDt));
 
   for(bool first = true;;first = false) {
     const ShVariantCast* caster = m_castStep(destVt, destDt, srcVt, srcDt);
-    //SH_DEBUG_ASSERT(caster);
+    if(!caster) {
+      SH_DEBUG_ERROR("Unable to cast to " << shValueTypeName(destVt) << " from " << shValueTypeName(srcVt));
+    }
+    SH_DEBUG_ASSERT(caster);
 
     caster->getDestTypes(srcVt, srcDt); // get results of next step in cast
     if((srcVt == destVt) && (srcDt == destDt)) {

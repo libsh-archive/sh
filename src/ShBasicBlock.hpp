@@ -47,7 +47,7 @@ public:
 
   void print(std::ostream& out, int indent) const;
   void graphvizDump(std::ostream& out) const;
-  
+
   /**@name Add statement at start.
    * Adds the given statement after the statements in this block */
   void addStatement(const ShStatement& stmt);
@@ -76,7 +76,7 @@ public:
   // Places all the elements starting from lI in l before the iterator I and
   // removes them from l
   void splice(ShStmtList::iterator I, ShStmtList &l, ShStmtList::iterator lI) {
-    m_statements.splice(I, l, lI);
+    m_statements.splice(I, l, lI, l.end());
   }
   
   ShStmtList m_statements;

@@ -25,6 +25,7 @@
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
 #include <algorithm>
+#include <sstream>
 #include <map>
 #include <list>
 #include "ShContext.hpp"
@@ -33,7 +34,11 @@
 #include "ShVariant.hpp"
 #include "ShVariableNode.hpp"
 #include "ShInternals.hpp"
+#include "ShAaSymPlacer.hpp"
+#include "ShAaOpHandler.hpp"
 #include "ShTransformer.hpp"
+
+#define SH_DBG_TRANSFORMER
 
 namespace SH {
 
@@ -112,6 +117,9 @@ struct VariableSplitter {
       int newSize = n < maxTuple ? n : maxTuple;
       newNode = node->clone(SH_BINDINGTYPE_END, newSize, 
           SH_VALUETYPE_END, SH_SEMANTICTYPE_END, false); 
+      std::ostringstream sout;
+      sout << node->name() << "_" << offset;
+      newNode->name(sout.str());
 
       // @todo type should not be necessary any more
       // if(node->uniform()) ShContext::current()->enter(0);
@@ -174,6 +182,9 @@ struct StatementSplitter {
       // TODO check that typing works correctly - temporary should
       // have same type as the statement's operation type
       ShVariable tempVar(resizeCloneNode(v.node(), tsize));
+      std::ostringstream sout;
+      sout << v.name() << "_" << i << "_temp";
+      tempVar.name(sout.str());
       vv.push_back(tempVar);
 
       int* tempSwiz = new int[tsize];
@@ -332,6 +343,9 @@ struct StatementSplitter {
 
 void ShTransformer::splitTuples(int maxTuple, ShTransformer::VarSplitMap &splits) {
   SH_DEBUG_ASSERT(maxTuple > 0); 
+#ifdef SH_DBG_TRANSFORMER
+  m_program->dump("splittupl_start");
+#endif
 
   VariableSplitter vs(maxTuple, splits, m_changed);
   vs.splitVarList(m_program->inputs);
@@ -341,6 +355,10 @@ void ShTransformer::splitTuples(int maxTuple, ShTransformer::VarSplitMap &splits
 
   StatementSplitter ss(maxTuple, splits, m_changed);
   m_program->ctrlGraph->dfs(ss);
+
+#ifdef SH_DBG_TRANSFORMER
+  m_program->dump("splittupl_done");
+#endif
 }
 
 static int id = 0;
@@ -363,15 +381,17 @@ struct InputOutputConvertor {
 
   // Turn node into a temporary, but do not update var list and do not keep
   // uniform
-  ShVariableNodePtr cloneNode(ShVariableNodePtr node, ShBindingType binding_type=SH_TEMP) {
-    return node->clone(binding_type, 0, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, false, false);
+  ShVariableNodePtr cloneNode(ShVariableNodePtr node, const char* suffix, ShBindingType binding_type=SH_TEMP) {
+    ShVariableNodePtr result = node->clone(binding_type, 0, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, false, false);
+    result->name(node->name() + suffix); 
+    return result;
   }
 
   /* Convert all INOUT nodes that appear in a VarList (use std::for_each with this object)
    * (currently InOuts are always converted) */ 
   void operator()(ShVariableNodePtr node) {
     if (node->kind() != SH_INOUT || m_varMap.count(node) > 0) return;
-    m_varMap[node] = cloneNode(node);
+    m_varMap[node] = cloneNode(node, "_ioc-iot");
   }
 
   // Convert inputs, outputs only when they appear in incompatible locations
@@ -382,7 +402,7 @@ struct InputOutputConvertor {
       const ShVariableNodePtr &oldNode = stmt.dest.node();
       if(oldNode->kind() == SH_INPUT) { 
         if(m_varMap.count(oldNode) == 0) {
-          m_varMap[oldNode] = cloneNode(oldNode);
+          m_varMap[oldNode] = cloneNode(oldNode, "_ioc-it");
         }
       }
     }
@@ -391,7 +411,7 @@ struct InputOutputConvertor {
         const ShVariableNodePtr &oldNode = stmt.src[i].node();
         if(oldNode->kind() == SH_OUTPUT) { 
           if(m_varMap.count(oldNode) == 0) {
-            m_varMap[oldNode] = cloneNode(oldNode);
+            m_varMap[oldNode] = cloneNode(oldNode, "_ioc-ot");
           }
         }
       }
@@ -417,8 +437,8 @@ struct InputOutputConvertor {
               ShVariable(it->second), SH_OP_ASN, ShVariable(oldNode)));
       } else if(oldNode->kind() == SH_INOUT) {
         // replace INOUT nodes in input/output lists with INPUT and OUTPUT nodes
-        ShVariableNodePtr newInNode(cloneNode(oldNode, SH_INPUT));
-        ShVariableNodePtr newOutNode(cloneNode(oldNode, SH_OUTPUT));
+        ShVariableNodePtr newInNode(cloneNode(oldNode, "_ioc-i", SH_INPUT));
+        ShVariableNodePtr newOutNode(cloneNode(oldNode, "_ioc-o", SH_OUTPUT));
 
         std::replace(m_program->inputs.begin(), m_program->inputs.end(),
             oldNode, newInNode);
@@ -443,6 +463,9 @@ struct InputOutputConvertor {
 
 void ShTransformer::convertInputOutput()
 {
+#ifdef SH_DBG_TRANSFORMER
+  m_program->dump("ioconvert_start");
+#endif
   ShVarMap varMap; // maps from outputs used as srcs in computation to their temporary variables
 
   InputOutputConvertor ioc(m_program, varMap, m_changed);
@@ -454,6 +477,10 @@ void ShTransformer::convertInputOutput()
   m_program->ctrlGraph->dfs(vr);
 
   ioc.updateGraph(); 
+
+#ifdef SH_DBG_TRANSFORMER
+  m_program->dump("ioconvert_done");
+#endif
 }
 
 struct TextureLookupConverter {
@@ -511,11 +538,25 @@ struct TextureLookupConverter {
 
 void ShTransformer::convertTextureLookups()
 {
+#ifdef SH_DBG_TRANSFORMER
+  m_program->dump("texlkup_start");
+#endif
+
   TextureLookupConverter conv;
   m_program->ctrlGraph->dfs(conv);
   if (conv.changed) m_changed = true;
+
+#ifdef SH_DBG_TRANSFORMER
+  m_program->dump("texlkup_done");
+#endif
 }
 
+void ShTransformer::convertAffineTypes()
+{
+  ShAaVarSymsMap empty;
+  placeAaSyms(m_program, empty);
+  m_changed |= handleAaOps(m_program);
+}
 
 }
 

@@ -29,6 +29,7 @@
 
 #include "ShUtility.hpp"
 #include "ShVariableType.hpp"
+#include "ShAffine.hpp"
 #include "ShInterval.hpp"
 #include "ShHalf.hpp"
 #include "ShFraction.hpp"
@@ -118,6 +119,7 @@ bool shIsSigned(ShValueType value_type);
 
 bool shIsRegularValueType(ShValueType value_type);
 bool shIsInterval(ShValueType value_type);
+bool shIsAffine(ShValueType value_type);
 
 bool shIsInvalidValueType(ShValueType value_type);
 // @}
@@ -149,9 +151,13 @@ SH_VALUE_STORAGE_TYPE_MAPPING(SH_FUBYTE,  ShFracUByte);
 SH_VALUE_STORAGE_TYPE_MAPPING(SH_FUSHORT, ShFracUShort); 
 SH_VALUE_STORAGE_TYPE_MAPPING(SH_FUINT,   ShFracUInt); 
 
-SH_VALUE_STORAGE_TYPE_MAPPING(SH_I_HALF,  ShInterval<ShHalf>); 
+//SH_VALUE_STORAGE_TYPE_MAPPING(SH_I_HALF,  ShInterval<ShHalf>); 
 SH_VALUE_STORAGE_TYPE_MAPPING(SH_I_FLOAT, ShInterval<float>); 
 SH_VALUE_STORAGE_TYPE_MAPPING(SH_I_DOUBLE,ShInterval<double>); 
+
+//SH_VALUE_STORAGE_TYPE_MAPPING(SH_A_HALF,  ShAffine<ShHalf>); 
+SH_VALUE_STORAGE_TYPE_MAPPING(SH_A_FLOAT, ShAffine<float>); 
+SH_VALUE_STORAGE_TYPE_MAPPING(SH_A_DOUBLE,ShAffine<double>); 
 
 // @}
 
@@ -181,9 +187,13 @@ SH_STORAGETYPE_NAME_SPEC(ShFracUByte);
 SH_STORAGETYPE_NAME_SPEC(ShFracUShort);
 SH_STORAGETYPE_NAME_SPEC(ShFracUInt);
 
-SH_STORAGETYPE_NAME_SPEC(ShInterval<ShHalf>);
+//SH_STORAGETYPE_NAME_SPEC(ShInterval<ShHalf>);
 SH_STORAGETYPE_NAME_SPEC(ShInterval<float>);
 SH_STORAGETYPE_NAME_SPEC(ShInterval<double>);
+
+//SH_STORAGETYPE_NAME_SPEC(ShAffine<ShHalf>);
+SH_STORAGETYPE_NAME_SPEC(ShAffine<float>);
+SH_STORAGETYPE_NAME_SPEC(ShAffine<double>);
 
 #undef SH_STORAGETYPE_NAME_SPEC
 //@}
@@ -196,31 +206,28 @@ template<typename T>
 struct ShIsInterval: public MatchTemplateType<T, ShInterval> {};
 //@}
 
+/** Returns whether a type is an affine type
+ * @{ */
+template<typename T>
+struct ShIsAffine: public MatchTemplateType<T, ShAffine> {};
+//@}
+
+/** Returns whether a type is a range arithmetic type (interval or affine at
+ * this point) 
+ * @{ */
+template<typename T>
+struct ShIsRange 
+{
+  static const bool matches = ShIsAffine<T>::matches || ShIsInterval<T>::matches;
+};
+//@}
+
 /** Returns whether a type is an interval type
  * @{ */
 template<typename T>
 struct ShIsFraction: public MatchTemplateType<T, ShFraction> {};
 //@}
-
-/** Returns an interval value type corresponding to a type,
- * or SH_VALUETYPE_NONE if no such type is defined; 
- * @{ */
-
-template<typename T>
-struct __ShIntervalStorageType
-{
-  static const bool invalid = MatchType<T, ShInvalidStorageType>::matches;
-  static const bool is_interval = ShIsInterval<T>::matches;
-  // @todo range - this doesn't quite work once we have other special types,
-  // perhaps...
-  typedef typename SelectType<invalid, ShInvalidStorageType, 
-           typename SelectType<is_interval, T, ShInterval<T> >::type>::type type; 
-};
-
-inline 
-ShValueType shIntervalValueType(ShValueType value_type); 
-// @}
-
+//
 /** Returns the regular value type corresponding to a special templated value type
  * (interval or affine) so far 
  * @{ */
@@ -241,6 +248,35 @@ struct __ShRegularStorageType
 inline 
 ShValueType shRegularValueType(ShValueType value_type); 
 // @}
+
+/** Returns an interval value type corresponding to a type,
+ * or SH_VALUETYPE_NONE if no such type is defined; 
+ * @{ */
+
+template<typename T>
+struct __ShIntervalStorageType
+{
+  typedef ShInterval<typename __ShRegularStorageType<T>::type> type;
+};
+
+inline 
+ShValueType shIntervalValueType(ShValueType value_type); 
+// @}
+
+/** Returns an affine value type corresponding to a type,
+ * or SH_VALUETYPE_NONE if no such type is defined; 
+ * @{ */
+
+template<typename T>
+struct __ShAffineStorageType
+{
+  typedef ShAffine<typename __ShRegularStorageType<T>::type> type;
+};
+
+inline 
+ShValueType shAffineValueType(ShValueType value_type); 
+// @}
+
 
 /** Provides a least common ancestor in the automatic promotion tree
  * for use in immediate mode
@@ -280,6 +316,11 @@ struct ShStorageTypeInfo {
    * bounds).  May be ShInvalidStorageType if no proper interval type exists */ 
   typedef typename __ShIntervalStorageType<T>::type IntervalType; 
   static const ShValueType IntervalValueType = __ShStorageToValueType<IntervalType>::type;
+
+  /** Affine storage type corresponding to T (either T itself or uses T as its
+   * bounds).  May be ShInvalidStorageType if no proper interval type exists */ 
+  typedef typename __ShAffineStorageType<T>::type AffineType; 
+  static const ShValueType AffineValueType = __ShStorageToValueType<AffineType>::type;
 
   static const char* name; 
 

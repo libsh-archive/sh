@@ -425,7 +425,7 @@ inline
 ShGeneric<N, CT1T2> lerp(double f, const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b)
 {
   ShAttrib<N, SH_TEMP, CT1T2> t;
-  shLRP(t, f, a, b);
+  shLRP(t, ShAttrib<N, SH_TEMP, CT1T2>(f), a, b);
   return t;
 }
 

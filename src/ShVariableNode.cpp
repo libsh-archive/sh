@@ -72,6 +72,7 @@ ShVariableNode::ShVariableNode(ShBindingType kind, int size, ShValueType valueTy
 {
   if (m_uniform || m_kind == SH_CONST) addVariant();
   programVarListInit();
+  programDeclInit();
 }
 
 ShVariableNode::ShVariableNode(const ShVariableNode& old, ShBindingType newKind,
@@ -89,6 +90,7 @@ ShVariableNode::ShVariableNode(const ShVariableNode& old, ShBindingType newKind,
 
   if(m_uniform || m_kind == SH_CONST) addVariant(); 
   if(updateVarList) programVarListInit();
+  programDeclInit();
 }
 
 ShVariableNode::~ShVariableNode()
@@ -169,7 +171,7 @@ std::string ShVariableNode::name() const
   
   // Special case for constants
   if (m_kind == SH_CONST) {
-    return m_variant->encode();
+    return m_variant->encodeArray();
   }
 
   switch (m_kind) {
@@ -183,7 +185,8 @@ std::string ShVariableNode::name() const
     stream << "io";
     break;
   case SH_TEMP:
-    stream << "t";
+    if(uniform()) stream << "ut";
+    else stream << "t";
     break;
   case SH_CONST:
     stream << "c";
@@ -371,19 +374,22 @@ void ShVariableNode::update_all()
 
 void ShVariableNode::programVarListInit() 
 {
+  ShProgramNodePtr prog = ShContext::current()->parsing();
   switch (m_kind) {
   case SH_INPUT:
-    assert(ShContext::current()->parsing());
-    ShContext::current()->parsing()->inputs.push_back(this);
+    assert(prog);
+    prog->inputs.push_back(this);
     break;
   case SH_OUTPUT:
-    assert(ShContext::current()->parsing());
-    ShContext::current()->parsing()->outputs.push_back(this);
+    assert(prog);
+    prog->outputs.push_back(this);
     break;
   case SH_INOUT:
-    assert(ShContext::current()->parsing());
-    ShContext::current()->parsing()->outputs.push_back(this);
-    ShContext::current()->parsing()->inputs.push_back(this);
+    assert(prog);
+    prog->outputs.push_back(this);
+    prog->inputs.push_back(this);
+    break;
+  case SH_TEMP:
     break;
   default:
     // Do nothing
@@ -391,9 +397,29 @@ void ShVariableNode::programVarListInit()
   }
 }
 
+void ShVariableNode::programDeclInit() 
+{
+  if(m_kind != SH_TEMP || m_uniform) return;
+  ShProgramNodePtr prog = ShContext::current()->parsing();
+  if(prog) {
+    if(prog->ctrlGraph) { // already has ctrlGraph, add decl to entry
+// @todo range - remove debug statements
+//      SH_DEBUG_PRINT("Adding decl for " << name() << " to program"); 
+      prog->addDecl(this);
+    } else {
+//      SH_DEBUG_PRINT("Adding decl for " << name() << " to parsing blocklist"); 
+      prog->tokenizer.blockList()->addStatement(
+          ShStatement(ShVariable(this), SH_OP_DECL, ShVariable(this)));
+    }
+  } else {
+//    SH_DEBUG_PRINT("Not adding decl for " << name() << ".  No current program");
+  }
+}
+
 void ShVariableNode::addVariant()
 {
   if (m_variant) return;
+  SH_DEBUG_ASSERT(m_valueType != SH_VALUETYPE_END);
   m_variant = shVariantFactory(m_valueType)->generate(m_size);
 }
 

@@ -31,8 +31,18 @@
 
 namespace SH {
 
+inline ShMeta::ShMeta(const ShMeta &other)
+  : m_meta(0)
+{
+  if(other.m_meta) {
+    m_meta = new MetaMap();
+    *m_meta = *other.m_meta;
+  }
+}
+
 inline ShMeta::~ShMeta()
 {
+  if(m_meta) delete m_meta;
 }
 
 inline std::string ShMeta::name() const

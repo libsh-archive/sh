@@ -70,6 +70,12 @@ inline bool shIsInterval(ShValueType value_type)
     (value_type & SH_VALUETYPE_SPECIAL_MASK) == SH_VALUETYPE_SPECIAL_I; 
 }
 
+inline bool shIsAffine(ShValueType value_type)
+{
+  return !shIsInvalidValueType(value_type) && 
+    (value_type & SH_VALUETYPE_SPECIAL_MASK) == SH_VALUETYPE_SPECIAL_A; 
+}
+
 inline bool shIsInvalidValueType(ShValueType value_type)
 {
   return value_type == SH_VALUETYPE_END; 
@@ -78,9 +84,13 @@ inline bool shIsInvalidValueType(ShValueType value_type)
 inline 
 ShValueType shIntervalValueType(ShValueType value_type)
 {
-  return shIsInterval(value_type) ? value_type :
-         shIsFloat(value_type) ? (value_type | SH_VALUETYPE_SPECIAL_I) :
-         SH_VALUETYPE_END;
+  return shRegularValueType(value_type) | SH_VALUETYPE_SPECIAL_I;
+}
+
+inline 
+ShValueType shAffineValueType(ShValueType value_type)
+{
+  return shRegularValueType(value_type) | SH_VALUETYPE_SPECIAL_A;
 }
 
 inline 
@@ -90,27 +100,54 @@ ShValueType shRegularValueType(ShValueType value_type)
          (value_type & ~SH_VALUETYPE_SPECIAL_MASK); 
 }
 
-// implementation of the automatic promotion tree lookup
-// (may need to break this out for non-compliant compilers)
-#define SH_MATCH(V) ((V == V1) || (V == V2))
+/*** Implementation of the automatic promotion tree lookup
+ * This decides the argument conversions used in operators
+ * and the result type given by operators (and library funcs).
+ * (The tree is built explicitly in ShTypeInfoCasts.cpp as well,
+ * and this should match those tree edges)
+ *
+ * @see ShTypeInfoCasts.cpp
+ *
+ * Rules (checked in order until one matches)
+ * 1) If either is affine, and either has base type double, use affine double
+ * 2) If either is affine, use affine float
+ * 3) If either is interval, and either has base type double, use interval
+ * double
+ * 4) If either is interval, use interval float
+ * 5) If either is double, use double
+ * 6) If either is float or fractional, use float
+ * 7) If both are half, use half
+ * 8) Use int 
+ */
 template<typename T1, typename T2>
 struct ShCommonType {
   static const ShValueType V1 = ShStorageTypeInfo<T1>::value_type;
   static const ShValueType V2 = ShStorageTypeInfo<T2>::value_type;
-  static const bool isFraction1 = ShIsFraction<T1>::matches;
-  static const bool isFraction2 = ShIsFraction<T2>::matches;
+
+  static const bool eitherAffine = ShIsAffine<T1>::matches || ShIsAffine<T2>::matches;
+  static const bool eitherInterval = ShIsInterval<T1>::matches || ShIsInterval<T2>::matches;
+  static const bool eitherDouble = V1 == SH_DOUBLE || V2 == SH_DOUBLE; 
+  static const bool eitherFloat = V1 == SH_FLOAT || V2 == SH_FLOAT; 
+  static const bool eitherFraction = ShIsFraction<T1>::matches || ShIsFraction<T2>::matches;
+  static const bool bothHalf = V1 == SH_HALF && V2 == SH_HALF;  
+
   static const ShValueType value_type = 
-          ((SH_MATCH(SH_I_DOUBLE) || (SH_MATCH(SH_I_FLOAT) && SH_MATCH(SH_DOUBLE))) ? 
+          (eitherAffine ?
+            (eitherDouble ? 
+              SH_A_DOUBLE :
+            SH_A_FLOAT) :
+          (eitherInterval ?
+            (eitherDouble ?
               SH_I_DOUBLE :
-          (SH_MATCH(SH_I_FLOAT) ? 
-              SH_I_FLOAT :
-          (SH_MATCH(SH_DOUBLE) ? 
-              SH_DOUBLE :
-          (SH_MATCH(SH_FLOAT) || isFraction1 || isFraction2) ?
-              SH_FLOAT :
-          ((V1 == SH_HALF && V2 == SH_HALF) ?
-              SH_HALF :
-              SH_INT))));
+            SH_I_FLOAT) :
+          (eitherDouble ?
+            SH_DOUBLE :
+          ((eitherFloat || eitherFraction) ?
+            SH_FLOAT :
+          (bothHalf ?
+            SH_HALF :
+            SH_INT)))));
+
   typedef typename ShValueTypeInfo<value_type>::storage_type type;
 };
 #undef SH_MATCH

@@ -31,8 +31,10 @@
 #include "ShException.hpp"
 #include "ShContext.hpp"
 #include "ShProgram.hpp"
+#include "ShOptimizations.hpp"
 #include "ShSyntax.hpp"
 #include "ShInterval.hpp"
+#include "ShAffine.hpp"
 #include "ShHalf.hpp"
 #include "ShFraction.hpp"
 #include "ShAttrib.hpp"
@@ -68,11 +70,13 @@
 #include "ShChannelNode.hpp"
 #include "ShChannel.hpp"
 #include "ShStream.hpp"
+#include "ShRecord.hpp"
 #include "ShQuaternion.hpp"
 #include "ShVariant.hpp"
 #include "ShTypeInfo.hpp"
 #include "ShMemoryDep.hpp"
 #include "ShPalette.hpp"
+#include "ShInclusion.hpp"
 
 /** \namespace SH
  * \brief The main Sh namespace.

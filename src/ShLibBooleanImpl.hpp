@@ -243,6 +243,7 @@ ShGeneric<1, CT1T2T3> cond(const ShGeneric<1, T1>& condition, const ShGeneric<1,
   shCOND(t, condition, left, right);
   return t;
 }
+SH_SHLIB_CONST_TRINARY_OP_011(cond); 
 
 // TODO
 

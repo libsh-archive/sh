@@ -60,7 +60,7 @@ ShGeneric<M, T> fillcast(const ShGeneric<N, T>& a);
 template<int M> 
 ShGeneric<M, double> fillcast(double a); // @todo type do a cpp type -> value type map
 
-/** Join two tuples 
+/** Concatenate two tuples 
  * Creates an M+N tuple with components of a first then b.
  */
 template<int M, int N, typename T1, typename T2> 

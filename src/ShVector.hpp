@@ -673,6 +673,50 @@ typedef ShVector<4, SH_TEMP, float> ShVector4f;
 typedef ShVector<4, SH_CONST, float> ShConstVector4f;
 
 
+typedef ShVector<1, SH_INPUT, ShAffine<double> > ShInputVector1a_d;
+typedef ShVector<1, SH_OUTPUT, ShAffine<double> > ShOutputVector1a_d;
+typedef ShVector<1, SH_INOUT, ShAffine<double> > ShInOutVector1a_d;
+typedef ShVector<1, SH_TEMP, ShAffine<double> > ShVector1a_d;
+typedef ShVector<1, SH_CONST, ShAffine<double> > ShConstVector1a_d;
+typedef ShVector<2, SH_INPUT, ShAffine<double> > ShInputVector2a_d;
+typedef ShVector<2, SH_OUTPUT, ShAffine<double> > ShOutputVector2a_d;
+typedef ShVector<2, SH_INOUT, ShAffine<double> > ShInOutVector2a_d;
+typedef ShVector<2, SH_TEMP, ShAffine<double> > ShVector2a_d;
+typedef ShVector<2, SH_CONST, ShAffine<double> > ShConstVector2a_d;
+typedef ShVector<3, SH_INPUT, ShAffine<double> > ShInputVector3a_d;
+typedef ShVector<3, SH_OUTPUT, ShAffine<double> > ShOutputVector3a_d;
+typedef ShVector<3, SH_INOUT, ShAffine<double> > ShInOutVector3a_d;
+typedef ShVector<3, SH_TEMP, ShAffine<double> > ShVector3a_d;
+typedef ShVector<3, SH_CONST, ShAffine<double> > ShConstVector3a_d;
+typedef ShVector<4, SH_INPUT, ShAffine<double> > ShInputVector4a_d;
+typedef ShVector<4, SH_OUTPUT, ShAffine<double> > ShOutputVector4a_d;
+typedef ShVector<4, SH_INOUT, ShAffine<double> > ShInOutVector4a_d;
+typedef ShVector<4, SH_TEMP, ShAffine<double> > ShVector4a_d;
+typedef ShVector<4, SH_CONST, ShAffine<double> > ShConstVector4a_d;
+
+
+typedef ShVector<1, SH_INPUT, ShAffine<float> > ShInputVector1a_f;
+typedef ShVector<1, SH_OUTPUT, ShAffine<float> > ShOutputVector1a_f;
+typedef ShVector<1, SH_INOUT, ShAffine<float> > ShInOutVector1a_f;
+typedef ShVector<1, SH_TEMP, ShAffine<float> > ShVector1a_f;
+typedef ShVector<1, SH_CONST, ShAffine<float> > ShConstVector1a_f;
+typedef ShVector<2, SH_INPUT, ShAffine<float> > ShInputVector2a_f;
+typedef ShVector<2, SH_OUTPUT, ShAffine<float> > ShOutputVector2a_f;
+typedef ShVector<2, SH_INOUT, ShAffine<float> > ShInOutVector2a_f;
+typedef ShVector<2, SH_TEMP, ShAffine<float> > ShVector2a_f;
+typedef ShVector<2, SH_CONST, ShAffine<float> > ShConstVector2a_f;
+typedef ShVector<3, SH_INPUT, ShAffine<float> > ShInputVector3a_f;
+typedef ShVector<3, SH_OUTPUT, ShAffine<float> > ShOutputVector3a_f;
+typedef ShVector<3, SH_INOUT, ShAffine<float> > ShInOutVector3a_f;
+typedef ShVector<3, SH_TEMP, ShAffine<float> > ShVector3a_f;
+typedef ShVector<3, SH_CONST, ShAffine<float> > ShConstVector3a_f;
+typedef ShVector<4, SH_INPUT, ShAffine<float> > ShInputVector4a_f;
+typedef ShVector<4, SH_OUTPUT, ShAffine<float> > ShOutputVector4a_f;
+typedef ShVector<4, SH_INOUT, ShAffine<float> > ShInOutVector4a_f;
+typedef ShVector<4, SH_TEMP, ShAffine<float> > ShVector4a_f;
+typedef ShVector<4, SH_CONST, ShAffine<float> > ShConstVector4a_f;
+
+
 typedef ShVector<1, SH_INPUT, char> ShInputVector1b;
 typedef ShVector<1, SH_OUTPUT, char> ShOutputVector1b;
 typedef ShVector<1, SH_INOUT, char> ShInOutVector1b;

@@ -85,19 +85,19 @@ const T& ShInterval<T>::hi() const
 
 /** Useful helpers **/
 template<typename T>
-const T& ShInterval<T>::width() const
+const T ShInterval<T>::width() const
 {
   return m_hi - m_lo;
 }
 
 template<typename T>
-const T& ShInterval<T>::centre() const
+const T ShInterval<T>::center() const
 {
   return (m_hi + m_lo) / 2; 
 }
 
 template<typename T>
-const T& ShInterval<T>::radius() const
+const T ShInterval<T>::radius() const
 {
   return width() / 2;
 }
@@ -227,130 +227,123 @@ std::istream& operator>>(std::istream &in, ShInterval<TT> &value)
 }
 
 /** Arithmetic operators **/
-template<typename T>
-ShInterval<T> operator+(const ShInterval<T> &a, const ShInterval<T> &b) 
+template<typename TT>
+ShInterval<TT> operator+(const ShInterval<TT> &a, const ShInterval<TT> &b) 
 {
-  return ShInterval<T>(a.m_lo + b.m_lo, a.m_hi + b.m_hi);
+  return ShInterval<TT>(a.m_lo + b.m_lo, a.m_hi + b.m_hi);
 }
 
 
-template<typename T>
-ShInterval<T> operator-(const ShInterval<T> &a, const ShInterval<T> &b) 
+template<typename TT>
+ShInterval<TT> operator-(const ShInterval<TT> &a, const ShInterval<TT> &b) 
 {
-  return ShInterval<T>(a.m_lo - b.m_hi, a.m_hi - b.m_lo);
+  return ShInterval<TT>(a.m_lo - b.m_hi, a.m_hi - b.m_lo);
 }
 
-template<typename T>
-ShInterval<T> operator-(const T &a, const ShInterval<T> &b) 
+template<typename TT>
+ShInterval<TT> operator*(const ShInterval<TT> &a, const ShInterval<TT> &b) 
 {
-  return ShInterval<T>(a - b.m_hi, a - b.m_lo);
-}
-
-
-template<typename T>
-ShInterval<T> operator*(const ShInterval<T> &a, const ShInterval<T> &b) 
-{
-  T ll, lh, hl, hh;
+  TT ll, lh, hl, hh;
   ll = a.m_lo * b.m_lo;
   lh = a.m_lo * b.m_hi;
   hl = a.m_hi * b.m_lo;
   hh = a.m_hi * b.m_hi;
 
-  return ShInterval<T>(std::min(std::min(ll, lh), std::min(hl, hh)),
+  return ShInterval<TT>(std::min(std::min(ll, lh), std::min(hl, hh)),
       std::max(std::max(ll, lh), std::max(hl, hh)));
 }
 
 
-template<typename T>
-ShInterval<T> operator/(const ShInterval<T> &a, const ShInterval<T> &b) 
+template<typename TT>
+ShInterval<TT> operator/(const ShInterval<TT> &a, const ShInterval<TT> &b) 
 {
   return a * rcp(b);
 }
 
 
-template<typename T>
-ShInterval<T> operator%(const ShInterval<T> &a, const ShInterval<T> &b) 
+template<typename TT>
+ShInterval<TT> operator%(const ShInterval<TT> &a, const ShInterval<TT> &b) 
 {
-  T large = std::max(std::fabs(b.m_lo), std::fabs(b.m_hi));
-  return ShInterval<T>(-large, large); 
+  TT large = std::max(std::fabs(b.m_lo), std::fabs(b.m_hi));
+  return ShInterval<TT>(-large, large); 
 }
 
-template<typename T>
-ShInterval<T> cbrt(const ShInterval<T> &a) 
+template<typename TT>
+ShInterval<TT> cbrt(const ShInterval<TT> &a) 
 {
   // monotonic
   // @todo type check this one 
-  return pow(a, ShInterval<T>(1.0f / 3.0f)); 
+  return pow(a, ShInterval<TT>(1.0f / 3.0f)); 
 }
 
 
-template<typename T>
-ShInterval<T> exp(const ShInterval<T> &a) 
+template<typename TT>
+ShInterval<TT> exp(const ShInterval<TT> &a) 
 {
   // monotonic function
-  return ShInterval<T>(std::exp(a.m_lo), std::exp(a.m_hi));
+  return ShInterval<TT>(std::exp(a.m_lo), std::exp(a.m_hi));
 }
 
 
-template<typename T>
-ShInterval<T> exp2(const ShInterval<T> &a) 
+template<typename TT>
+ShInterval<TT> exp2(const ShInterval<TT> &a) 
 {
   // monotonic function
-  return ShInterval<T>(exp2f(a.m_lo), exp2f(a.m_hi));
+  return ShInterval<TT>(exp2f(a.m_lo), exp2f(a.m_hi));
 }
 
 
-template<typename T>
-ShInterval<T> exp10(const ShInterval<T> &a) 
+template<typename TT>
+ShInterval<TT> exp10(const ShInterval<TT> &a) 
 {
   // monotonic function
-return ShInterval<T>(exp10f(a.m_lo), exp10f(a.m_hi)); 
+return ShInterval<TT>(exp10f(a.m_lo), exp10f(a.m_hi)); 
 }
 
 
-template<typename T>
-ShInterval<T> log(const ShInterval<T> &a) 
+template<typename TT>
+ShInterval<TT> log(const ShInterval<TT> &a) 
 {
   // monotonic, except <= 0 gives NaN 
   // @todo handle <= 0 with exception?
-  return ShInterval<T>(std::log(a.m_lo), std::log(a.m_hi));
+  return ShInterval<TT>(std::log(a.m_lo), std::log(a.m_hi));
 }
 
 
-template<typename T>
-ShInterval<T> log2(const ShInterval<T> &a) 
+template<typename TT>
+ShInterval<TT> log2(const ShInterval<TT> &a) 
 {
   // monotonic, except <= 0 gives NaN 
   // @todo handle <= 0 with exception or clamp?
-  return ShInterval<T>(log2f(a.m_lo), log2f(a.m_hi));
+  return ShInterval<TT>(log2f(a.m_lo), log2f(a.m_hi));
 }
 
 
-template<typename T>
-ShInterval<T> log10(const ShInterval<T> &a) 
+template<typename TT>
+ShInterval<TT> log10(const ShInterval<TT> &a) 
 {
   // monotonic, except <= 0 gives NaN 
   // @todo handle <= 0 with exception or clamp?
-  return ShInterval<T>(log10f(a.m_lo), log10f(a.m_hi));
+  return ShInterval<TT>(log10f(a.m_lo), log10f(a.m_hi));
 }
 
-template<typename T>
-ShInterval<T> frac(const ShInterval<T> &a)
+template<typename TT>
+ShInterval<TT> frac(const ShInterval<TT> &a)
 {
   // @todo - if width > 1, then return below,
   // otherwise do some more figuring
-  return ShInterval<T>(0, 1);
+  return ShInterval<TT>(0, 1);
 }
 
-template<typename T>
-ShInterval<T> fmod(const ShInterval<T> &a, const ShInterval<T> &b) 
+template<typename TT>
+ShInterval<TT> fmod(const ShInterval<TT> &a, const ShInterval<TT> &b) 
 {
   return a % b;
 }
 
 
-template<typename T>
-ShInterval<T> pow(const ShInterval<T> &a, const ShInterval<T> &b) 
+template<typename TT>
+ShInterval<TT> pow(const ShInterval<TT> &a, const ShInterval<TT> &b) 
 {
   // @todo check if this is optimal
   // @todo do integer special cases? - see NuS.cc
@@ -358,159 +351,159 @@ ShInterval<T> pow(const ShInterval<T> &a, const ShInterval<T> &b)
 }
 
 
-template<typename T>
-ShInterval<T> rcp(const ShInterval<T> &a) 
+template<typename TT>
+ShInterval<TT> rcp(const ShInterval<TT> &a) 
 {
   if(a.m_lo <= 0 && a.m_hi >= 0) {
     // @todo handle infinities
     // This results in a -inf, inf interval
   }
-  return ShInterval<T>(1.0 / a.m_hi, 1.0 / a.m_lo);
+  return ShInterval<TT>(1.0 / a.m_hi, 1.0 / a.m_lo);
 }
 
-template<typename T>
-ShInterval<T> rsq(const ShInterval<T> &a) 
+template<typename TT>
+ShInterval<TT> rsq(const ShInterval<TT> &a) 
 {
   // @todo something better?
   return rcp(sqrt(a)); 
 }
 
-template<typename T>
-ShInterval<T> sgn(const ShInterval<T> &a) 
+template<typename TT>
+ShInterval<TT> sgn(const ShInterval<TT> &a) 
 {
   // @todo have constants for positve, negative, zero values
 
   // the usual sgn function is monotonic:
-  return ShInterval<T>(a.m_lo < 0 ? -1 : a.m_lo > 0 ? 1 : 0,
+  return ShInterval<TT>(a.m_lo < 0 ? -1 : a.m_lo > 0 ? 1 : 0,
                        a.m_hi < 0 ? -1 : a.m_hi > 0 ? 1 : 0);
 }
 
-template<typename T>
-ShInterval<T> sqrt(const ShInterval<T> &a) 
+template<typename TT>
+ShInterval<TT> sqrt(const ShInterval<TT> &a) 
 {
   // monotonic, except <= 0 gives NaN
   // @todo handle <= 0 with exception or clamp
-  return ShInterval<T>(std::sqrt(a.m_lo), std::sqrt(a.m_hi));
+  return ShInterval<TT>(std::sqrt(a.m_lo), std::sqrt(a.m_hi));
 }
 
 
 /** Trig Operators */
-template<typename T>
-ShInterval<T> acos(const ShInterval<T> &a) 
+template<typename TT>
+ShInterval<TT> acos(const ShInterval<TT> &a) 
 {
   // @todo
-  return ShInterval<T>(0, M_PI);
+  return ShInterval<TT>(0, M_PI);
 }
 
 
-template<typename T>
-ShInterval<T> asin(const ShInterval<T> &a) 
+template<typename TT>
+ShInterval<TT> asin(const ShInterval<TT> &a) 
 {
   // @todo
-  return ShInterval<T>(-M_PI/2, M_PI/2);
+  return ShInterval<TT>(-M_PI/2, M_PI/2);
 }
 
 
-template<typename T>
-ShInterval<T> atan(const ShInterval<T> &a) 
+template<typename TT>
+ShInterval<TT> atan(const ShInterval<TT> &a) 
 {
   // @todo
-  return ShInterval<T>(-M_PI/2, M_PI/2);
+  return ShInterval<TT>(-M_PI/2, M_PI/2);
 }
 
 
-template<typename T>
-ShInterval<T> atan2(const ShInterval<T> &a, const ShInterval<T> &b) 
+template<typename TT>
+ShInterval<TT> atan2(const ShInterval<TT> &a, const ShInterval<TT> &b) 
 {
   // @todo
-  return ShInterval<T>(-M_PI, M_PI);
+  return ShInterval<TT>(-M_PI, M_PI);
 }
 
 
-template<typename T>
-ShInterval<T> cos(const ShInterval<T> &a) 
+template<typename TT>
+ShInterval<TT> cos(const ShInterval<TT> &a) 
 {
   //@todo
-  return ShInterval<T>(-1, 1);
+  return ShInterval<TT>(-1, 1);
 }
 
-template<typename T>
-ShInterval<T> sin(const ShInterval<T> &a) 
+template<typename TT>
+ShInterval<TT> sin(const ShInterval<TT> &a) 
 {
   // @todo
-  return ShInterval<T>(-1, 1);
+  return ShInterval<TT>(-1, 1);
 }
 
 
-template<typename T>
-ShInterval<T> tan(const ShInterval<T> &a) 
+template<typename TT>
+ShInterval<TT> tan(const ShInterval<TT> &a) 
 {
   // @todo
-  return ShInterval<T>(-1, 1); // @todo this is totally wrong...
+  return ShInterval<TT>(-1, 1); // @todo this is totally wrong...
 }
 
 
 /** Comparison Operators **/
-template<typename T>
-ShInterval<T> __boolean_op(bool trueCond, bool falseCond) {
+template<typename TT>
+ShInterval<TT> __boolean_op(bool trueCond, bool falseCond) {
   // @todo fix this assumption that false < true
   // @todo special value for maybe? 
-  // @todo make this return something special (other than Interval<T>)?
+  // @todo make this return something special (other than Interval<TT>)?
   
-  if(trueCond) return ShInterval<T>(1);
-  if(falseCond) return ShInterval<T>(0);
-  return ShInterval<T>(0, 1);
+  if(trueCond) return ShInterval<TT>(1);
+  if(falseCond) return ShInterval<TT>(0);
+  return ShInterval<TT>(0, 1);
 }
 
-template<typename T>
-ShInterval<T> operator<(const ShInterval<T> &a, const ShInterval<T> &b) 
+template<typename TT>
+ShInterval<TT> operator<(const ShInterval<TT> &a, const ShInterval<TT> &b) 
 {
-  return __boolean_op<T>(a.m_hi < b.m_lo, a.m_lo > b.m_hi);
+  return __boolean_op<TT>(a.m_hi < b.m_lo, a.m_lo > b.m_hi);
 }
 
-template<typename T>
-ShInterval<T> operator<=(const ShInterval<T> &a, const ShInterval<T> &b) 
+template<typename TT>
+ShInterval<TT> operator<=(const ShInterval<TT> &a, const ShInterval<TT> &b) 
 {
-  return __boolean_op<T>(a.m_hi <= b.m_lo, a.m_lo > b.m_hi);
+  return __boolean_op<TT>(a.m_hi <= b.m_lo, a.m_lo > b.m_hi);
 }
 
-template<typename T>
-ShInterval<T> operator>(const ShInterval<T> &a, const ShInterval<T> &b) 
+template<typename TT>
+ShInterval<TT> operator>(const ShInterval<TT> &a, const ShInterval<TT> &b) 
 {
-  return __boolean_op<T>(a.m_hi > b.m_lo, a.m_lo < b.m_hi);
+  return __boolean_op<TT>(a.m_hi > b.m_lo, a.m_lo < b.m_hi);
 }
 
-template<typename T>
-ShInterval<T> operator>(const ShInterval<T> &a, const T &b) 
+template<typename TT>
+ShInterval<TT> operator>(const ShInterval<TT> &a, const TT &b) 
 {
-  return __boolean_op<T>(a.m_hi > b, a.m_lo < b);
+  return __boolean_op<TT>(a.m_hi > b, a.m_lo < b);
 }
 
-template<typename T>
-ShInterval<T> operator>=(const ShInterval<T> &a, const ShInterval<T> &b) 
+template<typename TT>
+ShInterval<TT> operator>=(const ShInterval<TT> &a, const ShInterval<TT> &b) 
 {
-  return __boolean_op<T>(a.m_hi > b.m_lo, a.m_lo < b.m_hi);
+  return __boolean_op<TT>(a.m_hi >= b.m_lo, a.m_lo < b.m_hi);
 }
 
-template<typename T>
-ShInterval<T> operator==(const ShInterval<T> &a, const ShInterval<T> &b) 
+template<typename TT>
+ShInterval<TT> operator==(const ShInterval<TT> &a, const ShInterval<TT> &b) 
 {
-  return __boolean_op<T>(
+  return __boolean_op<TT>(
       a.m_hi == b.m_hi && a.m_lo == b.m_lo && a.m_lo == a.m_hi,
       a.m_hi < b.m_lo || a.m_lo > b.m_hi);
 }
 
-template<typename T>
-ShInterval<T> operator!=(const ShInterval<T> &a, const ShInterval<T> &b) 
+template<typename TT>
+ShInterval<TT> operator!=(const ShInterval<TT> &a, const ShInterval<TT> &b) 
 {
   // @todo should use not(a==b) once we have not
-  return __boolean_op<T>(
+  return __boolean_op<TT>(
       a.m_hi < b.m_lo || a.m_lo > b.m_hi,
       a.m_hi == b.m_hi && a.m_lo == b.m_lo && a.m_lo == a.m_hi);
 }
 
-template<typename T>
-bool boundsEqual(const ShInterval<T> &a, const ShInterval<T> &b) 
+template<typename TT>
+bool boundsEqual(const ShInterval<TT> &a, const ShInterval<TT> &b) 
 {
   return (a.lo() == b.lo()) && (a.hi() == b.hi());
 }
@@ -518,63 +511,86 @@ bool boundsEqual(const ShInterval<T> &a, const ShInterval<T> &b)
 
 
 /** Clamping operators **/
-template<typename T>
-ShInterval<T> min(const ShInterval<T> &a, const ShInterval<T> &b) 
+template<typename TT>
+ShInterval<TT> min(const ShInterval<TT> &a, const ShInterval<TT> &b) 
 {
-  return ShInterval<T>(std::min(a.m_lo, b.m_lo), std::min(a.m_hi, b.m_hi));
+  return ShInterval<TT>(std::min(a.m_lo, b.m_lo), std::min(a.m_hi, b.m_hi));
 }
 
-template<typename T>
-ShInterval<T> max(const ShInterval<T> &a, const ShInterval<T> &b) 
+template<typename TT>
+ShInterval<TT> max(const ShInterval<TT> &a, const ShInterval<TT> &b) 
 {
-  return ShInterval<T>(std::max(a.m_lo, b.m_lo), std::max(a.m_hi, b.m_hi));
+  return ShInterval<TT>(std::max(a.m_lo, b.m_lo), std::max(a.m_hi, b.m_hi));
 }
 
-template<typename T>
-ShInterval<T> floor(const ShInterval<T> &a) 
-{
-  // monotonic
-  return ShInterval<T>(std::floor(a.m_lo), std::floor(a.m_hi));
-}
-
-template<typename T>
-ShInterval<T> ceil(const ShInterval<T> &a) 
+template<typename TT>
+ShInterval<TT> floor(const ShInterval<TT> &a) 
 {
   // monotonic
-  return ShInterval<T>(std::ceil(a.m_lo), std::ceil(a.m_hi));
+  return ShInterval<TT>(std::floor(a.m_lo), std::floor(a.m_hi));
 }
 
-template<typename T>
-ShInterval<T> rnd(const ShInterval<T> &a) 
+template<typename TT>
+ShInterval<TT> ceil(const ShInterval<TT> &a) 
+{
+  // monotonic
+  return ShInterval<TT>(std::ceil(a.m_lo), std::ceil(a.m_hi));
+}
+
+template<typename TT>
+ShInterval<TT> rnd(const ShInterval<TT> &a) 
 {
   // monotonic
   // @todo type handle this in general
-  return ShInterval<T>(std::floor(a.m_lo + 0.5f), std::floor(a.m_hi + 0.5f));
+  return ShInterval<TT>(std::floor(a.m_lo + 0.5f), std::floor(a.m_hi + 0.5f));
 }
 
-template<typename T>
-ShInterval<T> abs(const ShInterval<T> &a) 
+template<typename TT>
+ShInterval<TT> abs(const ShInterval<TT> &a) 
 {
-  T lo, hi;
+  TT lo, hi;
 
   hi = std::max(std::fabs(a.m_lo), std::fabs(a.m_hi));
   lo = std::min(std::fabs(a.m_lo), std::fabs(a.m_hi));
   if(a.m_lo <= 0 && a.m_hi >= 0) lo = 0;
-  return ShInterval<T>(lo, hi);
+  return ShInterval<TT>(lo, hi);
 }
 
 /** Misc operators **/
-template<typename T>
-ShInterval<T> cond(const ShInterval<T> &a, const ShInterval<T> &b, 
-    const ShInterval<T> &c)
+template<typename TT>
+ShInterval<TT> cond(const ShInterval<TT> &a, const ShInterval<TT> &b, 
+    const ShInterval<TT> &c)
 {
-  return lerp(a > (T)(0), b, c);
+  return lerp(a > (TT)(0.0), b, c);
 }
 
-template<typename T>
-ShInterval<T> lerp(const ShInterval<T> &a, const ShInterval<T> &b, const ShInterval<T> &c) 
+template<typename TT>
+ShInterval<TT> lerp(const ShInterval<TT> &a, const ShInterval<TT> &b, const ShInterval<TT> &c) 
 {
-  return a * b + ((T)(1) - a) * c;
+  // @todo range - check that this is as stable as possible for intervals
+  return a * (b - c) + c; 
+}
+
+template<typename TT>
+ShInterval<TT> range_union(const ShInterval<TT> &a, const ShInterval<TT> &b)
+{
+  return ShInterval<TT>(std::min(a.m_lo, b.m_lo),
+                       std::max(a.m_hi, b.m_hi));
+}
+
+template<typename TT>
+ShInterval<TT> range_isct(const ShInterval<TT> &a, const ShInterval<TT> &b)
+{
+  return ShInterval<TT>(std::max(a.m_lo, b.m_lo),
+                       std::min(a.m_hi, b.m_hi));
+}
+
+// @todo range fix this to have the proper return type
+template<typename TT>
+ShInterval<TT> range_contains(const ShInterval<TT> &a, const ShInterval<TT> &b)
+{
+  TT result = a.m_lo <= b.m_lo && b.m_hi <= a.m_hi ? 1 : 0; 
+  return ShInterval<TT>(result);
 }
 
 }

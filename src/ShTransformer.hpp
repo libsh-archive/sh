@@ -99,13 +99,22 @@ public:
    * Converts computations on N-tuple intervals of type T into
    * computation on regular N-tuples of type T. 
    *
-   * (Implemented in ShIntervalConverter.?pp)
-   *
    * splits contains a split into exactly 2 new variables for each interval
    * variable encountered
+   *
+   * @see ShIntervalConverter.cpp
    */
-  void convertIntervalTypes(VarSplitMap &splits);
+  void convertIntervalTypes();
 
+  /**@name Removes affine arithmetic computation
+   * Converts computations on N-tuple affine tuples of type T into
+   * computation on k N-tuples of type T, where k is the number of error symbols
+   * needed for a certain variable.
+   *
+   * @see ShAaSymPlacer.hpp
+   * @see ShAaOpHandler.hpp
+   */
+  void convertAffineTypes();
 
   typedef std::map<ShValueType, ShValueType> ValueTypeMap;  
   /**@name Arithmetic type conversions
@@ -122,6 +131,40 @@ public:
 
   //@todo  use dependent uniforms in conversion and spliting functions
   //instead of separate VarSplitMaps and ShVarMaps
+
+#if 0
+  /** Turns automatic promotions into ASN statements.
+   *
+   * Given a functor that indicates automatic promotions not handled by a platform, 
+   * this turns the promotion into an ASN statement so other transformers can
+   * just deal with ASNs, instead of having to deal with unhandled promotions in
+   * all ops.
+   *
+   * @param CanCast A functor with two static functions
+   *  bool checkSrc()(ShOperation op, ShValueType from, ShValueType to)
+   *  bool checkDest()(ShOperation op, ShValueType from, ShValueType to)
+   * that says whether the platform can support automatically casting type from
+   * to type to when a value is used as a src or dest. 
+   *
+   * @todo range (may want to add an operator param to the functor for certain platforms)
+   */
+  template<class CanCast>
+  void extractCasts();
+
+  /** Vectorizes scalar sources when they are in a vector operation 
+   * This is once again for convenience, but may interfere with optimizations
+   * later on so be careful when using it.  After asking the functor for 
+   * permission, this vectorizes sources on ops with at least 2 arguments, 
+   * that are of type either LINEAR or ALL.
+   *
+   * @param DoVec A functor with one static function
+   *  bool check()(ShOperation op)
+   * that returns whether an scalar argument to that operation should be
+   * vectorized to match the maximum size of all sources. 
+   */
+  template<class DoVec>
+  void vectorizeScalars();
+#endif
   
 private:
   /// NOT IMPLEMENTED
@@ -133,6 +176,70 @@ private:
   bool m_changed;
 };
 
+/* A default transformer.
+ * T can overload any of the methods in ShTransformerParent 
+ *
+ * - void start(ShProgramNodePtr)
+ *   Does whatever initialization may be necessary.  Initializes changed() to
+ *   false.
+ *
+ * - void handleVarList(ShProgramNode::VarList &varlist, ShBindingType type); 
+ *   This is called first and fixes anything that needs to be fixed in the
+ *   variable lists. 
+ * - handleTexList, handleChannelList, handlePaletteList are similar
+ *
+ * - bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node);
+ *   This performs some kind of per-statement transformation during a dfs
+ *   through the cfg.  Returns true iff the transformation has already
+ *   incremented I (or deleted I and moved I to the next element). 
+ *
+ * - void finish();
+ *   Does any cleanup necessary afterwards, any other transformations to wrap
+ *   things up. 
+ *
+ *   Note - this allows you to split a set of multipass transformations into 
+ *   smaller chunks by chaining transformers together.  Have one transformer's
+ *   finish call the next transformer's transform()...
+ *
+ * It must also implement this method:
+ * - bool changed()
+ *   Returns whether this transformer changed anything
+ *
+ * @todo range - this sequence of transformations (varlist, statements, finish),
+ * might not be the right abstraction...it's just matches most of what we have
+ * used so far - first pass identifies something about the variables,
+ * second actually fixes the cfg, and final pass does any general stuff
+ * that doesn't fit in.
+ */ 
+template<typename T>
+struct ShDefaultTransformer: public T {
+  // Applies transformation to the given ctrl graph node. 
+  void operator()(ShCtrlGraphNodePtr node); 
+
+  // Applies transformation to the given ShProgram 
+  bool transform(ShProgramNodePtr p); 
+};
+
+struct ShTransformerParent {
+ ShTransformerParent() : m_changed(false) {}
+ void start(ShProgramNodePtr program) { m_program = program; }
+ void handleVarList(ShProgramNode::VarList &varlist, ShBindingType type) {}
+ void handleTexList(ShProgramNode::TexList &texlist) {}
+ void handleChannelList(ShProgramNode::ChannelList &chanlist) {}
+ void handlePaletteList(ShProgramNode::PaletteList &palettelist) {}
+
+ bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node) { return false; }
+ void finish() {}
+ bool changed() 
+ { return m_changed; }
+
+ protected:
+   ShProgramNodePtr m_program;
+   bool m_changed;
+};
+
 }
+
+#include "ShTransformerImpl.hpp"
 
 #endif

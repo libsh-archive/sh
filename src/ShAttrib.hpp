@@ -686,6 +686,50 @@ typedef ShAttrib<4, SH_TEMP, float> ShAttrib4f;
 typedef ShAttrib<4, SH_CONST, float> ShConstAttrib4f;
 
 
+typedef ShAttrib<1, SH_INPUT, ShAffine<double> > ShInputAttrib1a_d;
+typedef ShAttrib<1, SH_OUTPUT, ShAffine<double> > ShOutputAttrib1a_d;
+typedef ShAttrib<1, SH_INOUT, ShAffine<double> > ShInOutAttrib1a_d;
+typedef ShAttrib<1, SH_TEMP, ShAffine<double> > ShAttrib1a_d;
+typedef ShAttrib<1, SH_CONST, ShAffine<double> > ShConstAttrib1a_d;
+typedef ShAttrib<2, SH_INPUT, ShAffine<double> > ShInputAttrib2a_d;
+typedef ShAttrib<2, SH_OUTPUT, ShAffine<double> > ShOutputAttrib2a_d;
+typedef ShAttrib<2, SH_INOUT, ShAffine<double> > ShInOutAttrib2a_d;
+typedef ShAttrib<2, SH_TEMP, ShAffine<double> > ShAttrib2a_d;
+typedef ShAttrib<2, SH_CONST, ShAffine<double> > ShConstAttrib2a_d;
+typedef ShAttrib<3, SH_INPUT, ShAffine<double> > ShInputAttrib3a_d;
+typedef ShAttrib<3, SH_OUTPUT, ShAffine<double> > ShOutputAttrib3a_d;
+typedef ShAttrib<3, SH_INOUT, ShAffine<double> > ShInOutAttrib3a_d;
+typedef ShAttrib<3, SH_TEMP, ShAffine<double> > ShAttrib3a_d;
+typedef ShAttrib<3, SH_CONST, ShAffine<double> > ShConstAttrib3a_d;
+typedef ShAttrib<4, SH_INPUT, ShAffine<double> > ShInputAttrib4a_d;
+typedef ShAttrib<4, SH_OUTPUT, ShAffine<double> > ShOutputAttrib4a_d;
+typedef ShAttrib<4, SH_INOUT, ShAffine<double> > ShInOutAttrib4a_d;
+typedef ShAttrib<4, SH_TEMP, ShAffine<double> > ShAttrib4a_d;
+typedef ShAttrib<4, SH_CONST, ShAffine<double> > ShConstAttrib4a_d;
+
+
+typedef ShAttrib<1, SH_INPUT, ShAffine<float> > ShInputAttrib1a_f;
+typedef ShAttrib<1, SH_OUTPUT, ShAffine<float> > ShOutputAttrib1a_f;
+typedef ShAttrib<1, SH_INOUT, ShAffine<float> > ShInOutAttrib1a_f;
+typedef ShAttrib<1, SH_TEMP, ShAffine<float> > ShAttrib1a_f;
+typedef ShAttrib<1, SH_CONST, ShAffine<float> > ShConstAttrib1a_f;
+typedef ShAttrib<2, SH_INPUT, ShAffine<float> > ShInputAttrib2a_f;
+typedef ShAttrib<2, SH_OUTPUT, ShAffine<float> > ShOutputAttrib2a_f;
+typedef ShAttrib<2, SH_INOUT, ShAffine<float> > ShInOutAttrib2a_f;
+typedef ShAttrib<2, SH_TEMP, ShAffine<float> > ShAttrib2a_f;
+typedef ShAttrib<2, SH_CONST, ShAffine<float> > ShConstAttrib2a_f;
+typedef ShAttrib<3, SH_INPUT, ShAffine<float> > ShInputAttrib3a_f;
+typedef ShAttrib<3, SH_OUTPUT, ShAffine<float> > ShOutputAttrib3a_f;
+typedef ShAttrib<3, SH_INOUT, ShAffine<float> > ShInOutAttrib3a_f;
+typedef ShAttrib<3, SH_TEMP, ShAffine<float> > ShAttrib3a_f;
+typedef ShAttrib<3, SH_CONST, ShAffine<float> > ShConstAttrib3a_f;
+typedef ShAttrib<4, SH_INPUT, ShAffine<float> > ShInputAttrib4a_f;
+typedef ShAttrib<4, SH_OUTPUT, ShAffine<float> > ShOutputAttrib4a_f;
+typedef ShAttrib<4, SH_INOUT, ShAffine<float> > ShInOutAttrib4a_f;
+typedef ShAttrib<4, SH_TEMP, ShAffine<float> > ShAttrib4a_f;
+typedef ShAttrib<4, SH_CONST, ShAffine<float> > ShConstAttrib4a_f;
+
+
 typedef ShAttrib<1, SH_INPUT, char> ShInputAttrib1b;
 typedef ShAttrib<1, SH_OUTPUT, char> ShOutputAttrib1b;
 typedef ShAttrib<1, SH_INOUT, char> ShInOutAttrib1b;

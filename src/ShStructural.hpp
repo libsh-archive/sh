@@ -62,15 +62,50 @@ public:
   ShStructuralNode* container;
   typedef std::list< ShPointer< ShStructuralNode> > StructNodeList;
   StructNodeList structnodes; ///< Nodes in this region
+  bool contains(ShCtrlGraphNodePtr node) const; ///< Contains the cfg_node in this region
   
   // Graph structure
   ShCtrlGraphNodePtr cfg_node;
   typedef std::pair<ShVariable, ShPointer<ShStructuralNode> > SuccessorEdge;
   typedef std::list<SuccessorEdge> SuccessorList;
   SuccessorList succs;
+
+
   typedef std::pair<ShVariable, ShStructuralNode*> PredecessorEdge;
   typedef std::list<PredecessorEdge> PredecessorList;
   PredecessorList preds;
+
+  // Functions to access underlying CFG structure
+ 
+  /** Describes a cfg edge.
+   * Used in searching for cfg edges that match criteria in the structural
+   * graph.
+   */
+  struct CfgMatch {
+    ShCtrlGraphNodePtr from, to;
+    ShCtrlGraphNode::SuccessorList::iterator S; //< set to succ.end() if edge is from->follower 
+
+    CfgMatch();
+    CfgMatch(ShCtrlGraphNodePtr from); //< for a follower
+    CfgMatch(ShCtrlGraphNodePtr from, 
+        ShCtrlGraphNode::SuccessorList::iterator S); //< for a successor 
+        
+    bool isFollower(); 
+  };
+  typedef std::list<CfgMatch> CfgMatchList; 
+
+  // Retrieves successors from CFG that match the given SuccessorEdge
+  void getSuccs(CfgMatchList &result, const SuccessorEdge &edge);
+  void getPreds(CfgMatchList &result, const PredecessorEdge &edge);
+  
+  // Retrieves all successors from CFG in this node that leave the given node 
+  // node = 0 indicates the typical case of node = this;
+  void getExits(CfgMatchList &result, ShPointer<ShStructuralNode> node = 0);
+
+  // Retrieves all successor edges from CFG in this node that enter the given node 
+  // node = 0 indicates the typical case of node = this
+  void getEntries(CfgMatchList &result, ShPointer<ShStructuralNode> node = 0);
+
 
   // Spanning tree
   ShStructuralNode* parent;

@@ -24,8 +24,9 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#include "ShBasicBlock.hpp"
 #include <iostream>
+#include "ShBasicBlock.hpp"
+#include "ShInfo.hpp"
 #include "ShUtility.hpp"
 
 namespace SH {
@@ -53,6 +54,10 @@ void ShBasicBlock::graphvizDump(std::ostream& out) const
 {
   for (ShStmtList::const_iterator I = m_statements.begin();
        I != m_statements.end(); ++I) {
+    const ShInfoComment* comment = I->get_info<ShInfoComment>();    
+    if(comment) {
+      out << "// " << comment->comment << "\\n";
+    }
     out << *I << "\\n";
   }
 }

@@ -670,6 +670,50 @@ typedef ShNormal<4, SH_TEMP, float> ShNormal4f;
 typedef ShNormal<4, SH_CONST, float> ShConstNormal4f;
 
 
+typedef ShNormal<1, SH_INPUT, ShAffine<double> > ShInputNormal1a_d;
+typedef ShNormal<1, SH_OUTPUT, ShAffine<double> > ShOutputNormal1a_d;
+typedef ShNormal<1, SH_INOUT, ShAffine<double> > ShInOutNormal1a_d;
+typedef ShNormal<1, SH_TEMP, ShAffine<double> > ShNormal1a_d;
+typedef ShNormal<1, SH_CONST, ShAffine<double> > ShConstNormal1a_d;
+typedef ShNormal<2, SH_INPUT, ShAffine<double> > ShInputNormal2a_d;
+typedef ShNormal<2, SH_OUTPUT, ShAffine<double> > ShOutputNormal2a_d;
+typedef ShNormal<2, SH_INOUT, ShAffine<double> > ShInOutNormal2a_d;
+typedef ShNormal<2, SH_TEMP, ShAffine<double> > ShNormal2a_d;
+typedef ShNormal<2, SH_CONST, ShAffine<double> > ShConstNormal2a_d;
+typedef ShNormal<3, SH_INPUT, ShAffine<double> > ShInputNormal3a_d;
+typedef ShNormal<3, SH_OUTPUT, ShAffine<double> > ShOutputNormal3a_d;
+typedef ShNormal<3, SH_INOUT, ShAffine<double> > ShInOutNormal3a_d;
+typedef ShNormal<3, SH_TEMP, ShAffine<double> > ShNormal3a_d;
+typedef ShNormal<3, SH_CONST, ShAffine<double> > ShConstNormal3a_d;
+typedef ShNormal<4, SH_INPUT, ShAffine<double> > ShInputNormal4a_d;
+typedef ShNormal<4, SH_OUTPUT, ShAffine<double> > ShOutputNormal4a_d;
+typedef ShNormal<4, SH_INOUT, ShAffine<double> > ShInOutNormal4a_d;
+typedef ShNormal<4, SH_TEMP, ShAffine<double> > ShNormal4a_d;
+typedef ShNormal<4, SH_CONST, ShAffine<double> > ShConstNormal4a_d;
+
+
+typedef ShNormal<1, SH_INPUT, ShAffine<float> > ShInputNormal1a_f;
+typedef ShNormal<1, SH_OUTPUT, ShAffine<float> > ShOutputNormal1a_f;
+typedef ShNormal<1, SH_INOUT, ShAffine<float> > ShInOutNormal1a_f;
+typedef ShNormal<1, SH_TEMP, ShAffine<float> > ShNormal1a_f;
+typedef ShNormal<1, SH_CONST, ShAffine<float> > ShConstNormal1a_f;
+typedef ShNormal<2, SH_INPUT, ShAffine<float> > ShInputNormal2a_f;
+typedef ShNormal<2, SH_OUTPUT, ShAffine<float> > ShOutputNormal2a_f;
+typedef ShNormal<2, SH_INOUT, ShAffine<float> > ShInOutNormal2a_f;
+typedef ShNormal<2, SH_TEMP, ShAffine<float> > ShNormal2a_f;
+typedef ShNormal<2, SH_CONST, ShAffine<float> > ShConstNormal2a_f;
+typedef ShNormal<3, SH_INPUT, ShAffine<float> > ShInputNormal3a_f;
+typedef ShNormal<3, SH_OUTPUT, ShAffine<float> > ShOutputNormal3a_f;
+typedef ShNormal<3, SH_INOUT, ShAffine<float> > ShInOutNormal3a_f;
+typedef ShNormal<3, SH_TEMP, ShAffine<float> > ShNormal3a_f;
+typedef ShNormal<3, SH_CONST, ShAffine<float> > ShConstNormal3a_f;
+typedef ShNormal<4, SH_INPUT, ShAffine<float> > ShInputNormal4a_f;
+typedef ShNormal<4, SH_OUTPUT, ShAffine<float> > ShOutputNormal4a_f;
+typedef ShNormal<4, SH_INOUT, ShAffine<float> > ShInOutNormal4a_f;
+typedef ShNormal<4, SH_TEMP, ShAffine<float> > ShNormal4a_f;
+typedef ShNormal<4, SH_CONST, ShAffine<float> > ShConstNormal4a_f;
+
+
 typedef ShNormal<1, SH_INPUT, char> ShInputNormal1b;
 typedef ShNormal<1, SH_OUTPUT, char> ShOutputNormal1b;
 typedef ShNormal<1, SH_INOUT, char> ShInOutNormal1b;

@@ -40,6 +40,9 @@ public:
     : m_meta(0) 
   {
   }
+
+  ShMeta(const ShMeta &other);
+
   virtual ~ShMeta();
   
   virtual std::string name() const;

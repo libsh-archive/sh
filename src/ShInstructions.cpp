@@ -44,7 +44,10 @@ inline bool immediate()
 
 inline void sizes_match(const ShVariable& a, const ShVariable& b)
 {
-  SH_DEBUG_ASSERT(a.size() == b.size());
+  if(a.size() != b.size()) {
+    SH_DEBUG_ERROR("Variable size mismatch.  size of " << a.name() << "=" << a.size() << ", " << b.name() << "=" << b.size());
+    abort();
+  }
 }
 
 inline void sizes_match(const ShVariable& a, const ShVariable& b,
@@ -110,7 +113,7 @@ namespace SH {
   }
 
 #define SHINST_UNARY_OP(op)\
-void sh ## op(ShVariable& dest, const ShVariable& src)\
+void sh ## op(const ShVariable& dest, const ShVariable& src)\
 {\
   sizes_match(dest, src);\
   SHINST_UNARY_OP_CORE(op);\
@@ -139,7 +142,7 @@ void sh ## op(ShVariable& dest, const ShVariable& src)\
   }\
 
 #define SHINST_BINARY_OP(op, scalar_a, scalar_b)\
-void sh ## op(ShVariable& dest, const ShVariable& a, const ShVariable &b)\
+void sh ## op(const ShVariable& dest, const ShVariable& a, const ShVariable &b)\
 {\
   sizes_match(dest, a, b, scalar_a, scalar_b);\
   SHINST_BINARY_OP_CORE(op);\
@@ -147,7 +150,7 @@ void sh ## op(ShVariable& dest, const ShVariable& a, const ShVariable &b)\
 
 
 #define SHINST_TERNARY_OP(op, condition)\
-void sh ## op(ShVariable& dest, const ShVariable& a, const ShVariable &b, const ShVariable &c)\
+void sh ## op(const ShVariable& dest, const ShVariable& a, const ShVariable &b, const ShVariable &c)\
 {\
   SH_DEBUG_ASSERT(condition);\
   if(immediate()) {\
@@ -200,26 +203,26 @@ SHINST_UNARY_OP(CBRT);
 SHINST_UNARY_OP(CEIL);
 SHINST_UNARY_OP(COS);
 
-void shCMUL(ShVariable& dest, const ShVariable& src)
+void shCMUL(const ShVariable& dest, const ShVariable& src)
 {
   SH_DEBUG_ASSERT(dest.size() == 1);
   SHINST_UNARY_OP_CORE(CMUL);
 }
 
-void shCSUM(ShVariable& dest, const ShVariable& src)
+void shCSUM(const ShVariable& dest, const ShVariable& src)
 {
   SH_DEBUG_ASSERT(dest.size() == 1);
   SHINST_UNARY_OP_CORE(CSUM);
 }
 
-void shDOT(ShVariable& dest, const ShVariable& a, const ShVariable& b)
+void shDOT(const ShVariable& dest, const ShVariable& a, const ShVariable& b)
 {
   SH_DEBUG_ASSERT(dest.size() == 1);
   sizes_match(a, b);
   SHINST_BINARY_OP_CORE(DOT);
 }
 
-void shDX(ShVariable &dest, const ShVariable& a)
+void shDX(const ShVariable& dest, const ShVariable& a)
 {
   if(immediate()) {
       shError(ShScopeException("Cannot take derivatives in immediate mode"));
@@ -228,7 +231,7 @@ void shDX(ShVariable &dest, const ShVariable& a)
   addStatement(stmt);
 }
 
-void shDY(ShVariable &dest, const ShVariable& a)
+void shDY(const ShVariable& dest, const ShVariable& a)
 {
   if(immediate()) {
       shError(ShScopeException("Cannot take derivatives in immediate mode"));
@@ -271,7 +274,7 @@ SHINST_UNARY_OP(TAN);
 SHINST_UNARY_OP(NORM);
 
 
-void shXPD(ShVariable& dest, const ShVariable& a, const ShVariable& b)
+void shXPD(const ShVariable& dest, const ShVariable& a, const ShVariable& b)
 {
   SH_DEBUG_ASSERT(dest.size() == 3 && a.size() == 3 && b.size() == 3);
   SHINST_BINARY_OP_CORE(XPD);
@@ -282,29 +285,15 @@ SHINST_TERNARY_OP(COND,
     dest.size() == c.size() &&
     (dest.size() == a.size() || a.size() == 1)));
 
-void shLO(ShVariable& dest, const ShVariable& src)
-{
-  sizes_match(dest, src); // TODO check types are okay
-  SHINST_UNARY_OP_CORE(LO);
-}
+SHINST_UNARY_OP(LO);
+SHINST_UNARY_OP(HI);
+SHINST_UNARY_OP(WIDTH);
+SHINST_UNARY_OP(CENTER);
 
-void shHI(ShVariable& dest, const ShVariable& src)
-{
-  sizes_match(dest, src); // TODO check types are okay
-  SHINST_UNARY_OP_CORE(HI);
-}
-
-void shSETLO(ShVariable& dest, const ShVariable& src)
-{
-  sizes_match(dest, src); // TODO check types are okay
-  SHINST_UNARY_OP_CORE(SETLO);
-}
-
-void shSETHI(ShVariable& dest, const ShVariable& src)
-{
-  sizes_match(dest, src); // TODO check types are okay
-  SHINST_UNARY_OP_CORE(SETHI);
-}
+SHINST_BINARY_OP(IVAL, true, true);
+SHINST_BINARY_OP(UNION, true, true);
+SHINST_BINARY_OP(ISCT, true, true);
+SHINST_BINARY_OP(CONTAINS, true, true);
 
 void shKIL(const ShVariable& a)
 {

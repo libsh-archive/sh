@@ -38,12 +38,18 @@ void addCast(bool automatic)
   ShCastManager::instance()->addCast(ShDataVariantCast<Dest, DestDT, Src, SrcDT>::instance(), automatic);
 }
 // adds automatic promotion from src to dest
-// and a type conversion edge in the opposite direction 
+// and a type conversion edge in the opposite direction of reverse = true 
 template<typename Dest, typename Src>
 void addPromotion()
 {
   addCast<Dest, SH_HOST, Src, SH_HOST>(true);
   addCast<Src, SH_HOST, Dest, SH_HOST>(false);
+}
+
+template<typename Dest, typename Src>
+void addPromotionOnly()
+{
+  addCast<Dest, SH_HOST, Src, SH_HOST>(true);
 }
 
 // adds automatic promotion from src to dest
@@ -77,11 +83,18 @@ void ShTypeInfo::addCasts()
   //
   // We can add in a few more automatic conversions to turn this down to 2
   // (by making f the direct "supertype" of everything fractional or int)
+  addPromotion<ShAffine<double>, ShAffine<float> >();
+
+  // @todo range do we really want to allow conversions from affine -> interval?
+  addPromotion<ShAffine<double>, ShInterval<double> >(); 
+
+  addPromotion<ShAffine<float>, ShInterval<float> >();
+
   
   addPromotion<ShInterval<double>, ShInterval<float> >();
-  addCast<ShInterval<double>, SH_HOST, double, SH_HOST>(true);
+  addPromotionOnly<ShInterval<double>, double>();
 
-  addCast<ShInterval<float>, SH_HOST, float, SH_HOST>(true);
+  addPromotionOnly<ShInterval<float>, float>();
 
   addPromotion<double, float>();
 
@@ -107,6 +120,9 @@ void ShTypeInfo::addCasts()
   addCast<float, SH_HOST, unsigned char, SH_HOST>(false);
 
   // these are the memory->SH_HOST, SH_HOST->memory casts
+  addMemoryCast<ShAffine<double> >();
+  addMemoryCast<ShAffine<float> >();
+
   addMemoryCast<ShInterval<double> >();
   addMemoryCast<ShInterval<float> >();
 

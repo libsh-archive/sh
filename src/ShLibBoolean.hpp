@@ -157,6 +157,7 @@ template<int N, typename T1, typename T2, typename T3>
 ShGeneric<N, CT1T2T3> 
 cond(const ShGeneric<1, T1>& condition, const ShGeneric<1, T2>& left,
                      const ShGeneric<1, T3>& right);
+SH_SHLIB_CONST_TRINARY_OP_011_DECL(cond);
 
 /// Boolean negation
 template<int N, typename T>

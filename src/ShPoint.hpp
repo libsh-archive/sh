@@ -670,6 +670,50 @@ typedef ShPoint<4, SH_TEMP, float> ShPoint4f;
 typedef ShPoint<4, SH_CONST, float> ShConstPoint4f;
 
 
+typedef ShPoint<1, SH_INPUT, ShAffine<double> > ShInputPoint1a_d;
+typedef ShPoint<1, SH_OUTPUT, ShAffine<double> > ShOutputPoint1a_d;
+typedef ShPoint<1, SH_INOUT, ShAffine<double> > ShInOutPoint1a_d;
+typedef ShPoint<1, SH_TEMP, ShAffine<double> > ShPoint1a_d;
+typedef ShPoint<1, SH_CONST, ShAffine<double> > ShConstPoint1a_d;
+typedef ShPoint<2, SH_INPUT, ShAffine<double> > ShInputPoint2a_d;
+typedef ShPoint<2, SH_OUTPUT, ShAffine<double> > ShOutputPoint2a_d;
+typedef ShPoint<2, SH_INOUT, ShAffine<double> > ShInOutPoint2a_d;
+typedef ShPoint<2, SH_TEMP, ShAffine<double> > ShPoint2a_d;
+typedef ShPoint<2, SH_CONST, ShAffine<double> > ShConstPoint2a_d;
+typedef ShPoint<3, SH_INPUT, ShAffine<double> > ShInputPoint3a_d;
+typedef ShPoint<3, SH_OUTPUT, ShAffine<double> > ShOutputPoint3a_d;
+typedef ShPoint<3, SH_INOUT, ShAffine<double> > ShInOutPoint3a_d;
+typedef ShPoint<3, SH_TEMP, ShAffine<double> > ShPoint3a_d;
+typedef ShPoint<3, SH_CONST, ShAffine<double> > ShConstPoint3a_d;
+typedef ShPoint<4, SH_INPUT, ShAffine<double> > ShInputPoint4a_d;
+typedef ShPoint<4, SH_OUTPUT, ShAffine<double> > ShOutputPoint4a_d;
+typedef ShPoint<4, SH_INOUT, ShAffine<double> > ShInOutPoint4a_d;
+typedef ShPoint<4, SH_TEMP, ShAffine<double> > ShPoint4a_d;
+typedef ShPoint<4, SH_CONST, ShAffine<double> > ShConstPoint4a_d;
+
+
+typedef ShPoint<1, SH_INPUT, ShAffine<float> > ShInputPoint1a_f;
+typedef ShPoint<1, SH_OUTPUT, ShAffine<float> > ShOutputPoint1a_f;
+typedef ShPoint<1, SH_INOUT, ShAffine<float> > ShInOutPoint1a_f;
+typedef ShPoint<1, SH_TEMP, ShAffine<float> > ShPoint1a_f;
+typedef ShPoint<1, SH_CONST, ShAffine<float> > ShConstPoint1a_f;
+typedef ShPoint<2, SH_INPUT, ShAffine<float> > ShInputPoint2a_f;
+typedef ShPoint<2, SH_OUTPUT, ShAffine<float> > ShOutputPoint2a_f;
+typedef ShPoint<2, SH_INOUT, ShAffine<float> > ShInOutPoint2a_f;
+typedef ShPoint<2, SH_TEMP, ShAffine<float> > ShPoint2a_f;
+typedef ShPoint<2, SH_CONST, ShAffine<float> > ShConstPoint2a_f;
+typedef ShPoint<3, SH_INPUT, ShAffine<float> > ShInputPoint3a_f;
+typedef ShPoint<3, SH_OUTPUT, ShAffine<float> > ShOutputPoint3a_f;
+typedef ShPoint<3, SH_INOUT, ShAffine<float> > ShInOutPoint3a_f;
+typedef ShPoint<3, SH_TEMP, ShAffine<float> > ShPoint3a_f;
+typedef ShPoint<3, SH_CONST, ShAffine<float> > ShConstPoint3a_f;
+typedef ShPoint<4, SH_INPUT, ShAffine<float> > ShInputPoint4a_f;
+typedef ShPoint<4, SH_OUTPUT, ShAffine<float> > ShOutputPoint4a_f;
+typedef ShPoint<4, SH_INOUT, ShAffine<float> > ShInOutPoint4a_f;
+typedef ShPoint<4, SH_TEMP, ShAffine<float> > ShPoint4a_f;
+typedef ShPoint<4, SH_CONST, ShAffine<float> > ShConstPoint4a_f;
+
+
 typedef ShPoint<1, SH_INPUT, char> ShInputPoint1b;
 typedef ShPoint<1, SH_OUTPUT, char> ShOutputPoint1b;
 typedef ShPoint<1, SH_INOUT, char> ShInOutPoint1b;

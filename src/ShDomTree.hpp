@@ -40,9 +40,12 @@ namespace SH {
 
   /** A dominator tree in a flowgraph.
    */
-  class
-  SH_DLLEXPORT ShDomTree {
+class
+SH_DLLEXPORT ShDomTree {
   public:
+    typedef std::set<ShCtrlGraphNodePtr> CfgNodeSet;
+    typedef std::map<ShCtrlGraphNodePtr, CfgNodeSet> CfgNodeSetMap;
+
     ShDomTree(ShCtrlGraphPtr ctrlGraph);
 
     /// Postorder (bottom-up) traversal.
@@ -50,6 +53,30 @@ namespace SH {
 
     /// Preorder traversal.
     template<typename T> void preorder(T& f);
+
+    /// Returns the successors of a node in the cfg 
+    const CfgNodeSet& succ(ShCtrlGraphNodePtr node) const;
+
+    /// Returns the predecessors of a node in the cfg 
+    const CfgNodeSet& pred(ShCtrlGraphNodePtr node) const;
+
+    /// Returns the immediate dominator of a given cfg node
+    /// or 0 if passed the root. 
+    ShCtrlGraphNodePtr idom(ShCtrlGraphNodePtr node) const; 
+
+    /// Returns the set of nodes that a given cfg node immediately dominates
+    const CfgNodeSet& idom_by(ShCtrlGraphNodePtr node) const;
+
+    /// Returns the dominance frontier of node   
+    const CfgNodeSet& df(ShCtrlGraphNodePtr node) const;
+
+    /// Returns the dominance frontier of a set of nodes  
+    /// Takes time proportional to total sum of |df(x)| for x in nodes  
+    CfgNodeSet df(const CfgNodeSet &nodes) const;
+
+    /// Returns the iterated dominance frontier 
+    CfgNodeSet df_plus(const CfgNodeSet &nodes) const;
+
   
     void debugDump();
 
@@ -65,68 +92,88 @@ namespace SH {
   
     ShCtrlGraphPtr m_graph;
 
-    // See [TODO Ref Langauer & Tarjan pg 127] for more information on these
+    // See Langauer & Tarjan, 1979 in TOPLAS for more info on this algorithm 
+    typedef std::map<ShCtrlGraphNodePtr, ShCtrlGraphNodePtr> CfgNodeNodeMap;
 
-    typedef std::map<ShCtrlGraphNodePtr, ShCtrlGraphNodePtr> ParentMap;
-    ParentMap m_parent;
-    typedef std::set<ShCtrlGraphNodePtr> PredSet;
-    typedef std::map<ShCtrlGraphNodePtr, PredSet> PredMap;
-    PredMap m_pred;
+
+    // m_parent(w) = parent of w in the dfs tree  
+    CfgNodeNodeMap m_parent;
+
+    // m_succ(v) = nodes w st (v,w) is an edge in the cfg 
+    CfgNodeSetMap m_succ;
+
+    // m_pred(w) = nodes v st (v,w) is an edge in the cfg 
+    CfgNodeSetMap m_pred;
+
+    // m_semi(w) = index of sdom(w)  
     typedef std::map<ShCtrlGraphNodePtr, int> SemiMap;
     SemiMap m_semi;
-    std::vector<ShCtrlGraphNodePtr> m_vertex;
-    typedef std::set<ShCtrlGraphNodePtr> BucketSet;
-    typedef std::map<ShCtrlGraphNodePtr, BucketSet> BucketMap;
-    BucketMap m_bucket;
-    typedef std::map<ShCtrlGraphNodePtr, ShCtrlGraphNodePtr> DomMap;
-    DomMap m_dom;
 
-    typedef std::map<ShCtrlGraphNodePtr, ShCtrlGraphNodePtr> AncestorMap;
-    AncestorMap m_ancestor;
-    typedef std::map<ShCtrlGraphNodePtr, ShCtrlGraphNodePtr> LabelMap;
-    LabelMap m_label;
+    // m_vertex(i) = cfg node with numbering i
+    typedef std::vector<ShCtrlGraphNodePtr> CfgNodeVec;
+    CfgNodeVec m_vertex;
 
-    typedef std::set<ShCtrlGraphNodePtr> ChildrenSet;
-    typedef std::map<ShCtrlGraphNodePtr, ChildrenSet> ChildrenMap;
-    ChildrenMap m_children;
+    // m_bucket(w) = nodes v st semi(v) = w 
+    CfgNodeSetMap m_bucket;
+
+    // m_dom(w) = immediate dominator of w
+    CfgNodeNodeMap m_dom;
+
+    // @todo range - move all these derivative computations out of this class... 
+    // They don't really belong in domtree
+
+    // m_dom_by(w) = { v | m_dom(v) = w } 
+    // This gets built on the first call to idom_by()
+    mutable CfgNodeNodeMap m_dom_by;
+
+    // m_df(w) = nodes v in the dominance frontier of w
+    // This gets built on the first call to df()
+    mutable CfgNodeSetMap m_df;
+
+    CfgNodeNodeMap m_ancestor;
+
+    CfgNodeNodeMap m_label;
+
+    // m_children(w) = children of w in the dfs tree
+    CfgNodeSetMap m_children;
   
     int m_n;
 
     template<typename T> void postorderNode(T& f, ShCtrlGraphNodePtr root, int level = 0);
     template<typename T> void preorderNode(T& f, ShCtrlGraphNodePtr root, int level = 0);
-  };
+};
 
-  template<typename T>
-  void ShDomTree::postorder(T& f)
-  {
-    postorderNode(f, m_graph->entry());
-  }
+template<typename T>
+void ShDomTree::postorder(T& f)
+{
+  postorderNode(f, m_graph->entry());
+}
 
-  template<typename T>
-  void ShDomTree::postorderNode(T& f, ShCtrlGraphNodePtr root, int level)
-  {
-    ChildrenSet& children = m_children[root];
-    for (ChildrenSet::iterator I = children.begin(); I != children.end(); ++I) {
-      postorderNode(f, *I, level + 1);
-    }
-    f(root, level);
+template<typename T>
+void ShDomTree::postorderNode(T& f, ShCtrlGraphNodePtr root, int level)
+{
+  ChildrenSet& children = m_children[root];
+  for (ChildrenSet::iterator I = children.begin(); I != children.end(); ++I) {
+    postorderNode(f, *I, level + 1);
   }
+  f(root, level);
+}
 
-  template<typename T>
-  void ShDomTree::preorder(T& f)
-  {
-    preorderNode(f, m_graph->entry());
-  }
+template<typename T>
+void ShDomTree::preorder(T& f)
+{
+  preorderNode(f, m_graph->entry());
+}
 
-  template<typename T>
-  void ShDomTree::preorderNode(T& f, ShCtrlGraphNodePtr root, int level)
-  {
-    f(root, level);
-    ChildrenSet& children = m_children[root];
-    for (ChildrenSet::iterator I = children.begin(); I != children.end(); ++I) {
-      preorderNode(f, *I, level + 1);
-    }
+template<typename T>
+void ShDomTree::preorderNode(T& f, ShCtrlGraphNodePtr root, int level)
+{
+  f(root, level);
+  ChildrenSet& children = m_children[root];
+  for (ChildrenSet::iterator I = children.begin(); I != children.end(); ++I) {
+    preorderNode(f, *I, level + 1);
   }
+}
 
 }
 

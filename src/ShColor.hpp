@@ -670,6 +670,50 @@ typedef ShColor<4, SH_TEMP, float> ShColor4f;
 typedef ShColor<4, SH_CONST, float> ShConstColor4f;
 
 
+typedef ShColor<1, SH_INPUT, ShAffine<double> > ShInputColor1a_d;
+typedef ShColor<1, SH_OUTPUT, ShAffine<double> > ShOutputColor1a_d;
+typedef ShColor<1, SH_INOUT, ShAffine<double> > ShInOutColor1a_d;
+typedef ShColor<1, SH_TEMP, ShAffine<double> > ShColor1a_d;
+typedef ShColor<1, SH_CONST, ShAffine<double> > ShConstColor1a_d;
+typedef ShColor<2, SH_INPUT, ShAffine<double> > ShInputColor2a_d;
+typedef ShColor<2, SH_OUTPUT, ShAffine<double> > ShOutputColor2a_d;
+typedef ShColor<2, SH_INOUT, ShAffine<double> > ShInOutColor2a_d;
+typedef ShColor<2, SH_TEMP, ShAffine<double> > ShColor2a_d;
+typedef ShColor<2, SH_CONST, ShAffine<double> > ShConstColor2a_d;
+typedef ShColor<3, SH_INPUT, ShAffine<double> > ShInputColor3a_d;
+typedef ShColor<3, SH_OUTPUT, ShAffine<double> > ShOutputColor3a_d;
+typedef ShColor<3, SH_INOUT, ShAffine<double> > ShInOutColor3a_d;
+typedef ShColor<3, SH_TEMP, ShAffine<double> > ShColor3a_d;
+typedef ShColor<3, SH_CONST, ShAffine<double> > ShConstColor3a_d;
+typedef ShColor<4, SH_INPUT, ShAffine<double> > ShInputColor4a_d;
+typedef ShColor<4, SH_OUTPUT, ShAffine<double> > ShOutputColor4a_d;
+typedef ShColor<4, SH_INOUT, ShAffine<double> > ShInOutColor4a_d;
+typedef ShColor<4, SH_TEMP, ShAffine<double> > ShColor4a_d;
+typedef ShColor<4, SH_CONST, ShAffine<double> > ShConstColor4a_d;
+
+
+typedef ShColor<1, SH_INPUT, ShAffine<float> > ShInputColor1a_f;
+typedef ShColor<1, SH_OUTPUT, ShAffine<float> > ShOutputColor1a_f;
+typedef ShColor<1, SH_INOUT, ShAffine<float> > ShInOutColor1a_f;
+typedef ShColor<1, SH_TEMP, ShAffine<float> > ShColor1a_f;
+typedef ShColor<1, SH_CONST, ShAffine<float> > ShConstColor1a_f;
+typedef ShColor<2, SH_INPUT, ShAffine<float> > ShInputColor2a_f;
+typedef ShColor<2, SH_OUTPUT, ShAffine<float> > ShOutputColor2a_f;
+typedef ShColor<2, SH_INOUT, ShAffine<float> > ShInOutColor2a_f;
+typedef ShColor<2, SH_TEMP, ShAffine<float> > ShColor2a_f;
+typedef ShColor<2, SH_CONST, ShAffine<float> > ShConstColor2a_f;
+typedef ShColor<3, SH_INPUT, ShAffine<float> > ShInputColor3a_f;
+typedef ShColor<3, SH_OUTPUT, ShAffine<float> > ShOutputColor3a_f;
+typedef ShColor<3, SH_INOUT, ShAffine<float> > ShInOutColor3a_f;
+typedef ShColor<3, SH_TEMP, ShAffine<float> > ShColor3a_f;
+typedef ShColor<3, SH_CONST, ShAffine<float> > ShConstColor3a_f;
+typedef ShColor<4, SH_INPUT, ShAffine<float> > ShInputColor4a_f;
+typedef ShColor<4, SH_OUTPUT, ShAffine<float> > ShOutputColor4a_f;
+typedef ShColor<4, SH_INOUT, ShAffine<float> > ShInOutColor4a_f;
+typedef ShColor<4, SH_TEMP, ShAffine<float> > ShColor4a_f;
+typedef ShColor<4, SH_CONST, ShAffine<float> > ShConstColor4a_f;
+
+
 typedef ShColor<1, SH_INPUT, char> ShInputColor1b;
 typedef ShColor<1, SH_OUTPUT, char> ShOutputColor1b;
 typedef ShColor<1, SH_INOUT, char> ShInOutColor1b;

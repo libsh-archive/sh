@@ -674,6 +674,50 @@ typedef ShPosition<4, SH_TEMP, float> ShPosition4f;
 typedef ShPosition<4, SH_CONST, float> ShConstPosition4f;
 
 
+typedef ShPosition<1, SH_INPUT, ShAffine<double> > ShInputPosition1a_d;
+typedef ShPosition<1, SH_OUTPUT, ShAffine<double> > ShOutputPosition1a_d;
+typedef ShPosition<1, SH_INOUT, ShAffine<double> > ShInOutPosition1a_d;
+typedef ShPosition<1, SH_TEMP, ShAffine<double> > ShPosition1a_d;
+typedef ShPosition<1, SH_CONST, ShAffine<double> > ShConstPosition1a_d;
+typedef ShPosition<2, SH_INPUT, ShAffine<double> > ShInputPosition2a_d;
+typedef ShPosition<2, SH_OUTPUT, ShAffine<double> > ShOutputPosition2a_d;
+typedef ShPosition<2, SH_INOUT, ShAffine<double> > ShInOutPosition2a_d;
+typedef ShPosition<2, SH_TEMP, ShAffine<double> > ShPosition2a_d;
+typedef ShPosition<2, SH_CONST, ShAffine<double> > ShConstPosition2a_d;
+typedef ShPosition<3, SH_INPUT, ShAffine<double> > ShInputPosition3a_d;
+typedef ShPosition<3, SH_OUTPUT, ShAffine<double> > ShOutputPosition3a_d;
+typedef ShPosition<3, SH_INOUT, ShAffine<double> > ShInOutPosition3a_d;
+typedef ShPosition<3, SH_TEMP, ShAffine<double> > ShPosition3a_d;
+typedef ShPosition<3, SH_CONST, ShAffine<double> > ShConstPosition3a_d;
+typedef ShPosition<4, SH_INPUT, ShAffine<double> > ShInputPosition4a_d;
+typedef ShPosition<4, SH_OUTPUT, ShAffine<double> > ShOutputPosition4a_d;
+typedef ShPosition<4, SH_INOUT, ShAffine<double> > ShInOutPosition4a_d;
+typedef ShPosition<4, SH_TEMP, ShAffine<double> > ShPosition4a_d;
+typedef ShPosition<4, SH_CONST, ShAffine<double> > ShConstPosition4a_d;
+
+
+typedef ShPosition<1, SH_INPUT, ShAffine<float> > ShInputPosition1a_f;
+typedef ShPosition<1, SH_OUTPUT, ShAffine<float> > ShOutputPosition1a_f;
+typedef ShPosition<1, SH_INOUT, ShAffine<float> > ShInOutPosition1a_f;
+typedef ShPosition<1, SH_TEMP, ShAffine<float> > ShPosition1a_f;
+typedef ShPosition<1, SH_CONST, ShAffine<float> > ShConstPosition1a_f;
+typedef ShPosition<2, SH_INPUT, ShAffine<float> > ShInputPosition2a_f;
+typedef ShPosition<2, SH_OUTPUT, ShAffine<float> > ShOutputPosition2a_f;
+typedef ShPosition<2, SH_INOUT, ShAffine<float> > ShInOutPosition2a_f;
+typedef ShPosition<2, SH_TEMP, ShAffine<float> > ShPosition2a_f;
+typedef ShPosition<2, SH_CONST, ShAffine<float> > ShConstPosition2a_f;
+typedef ShPosition<3, SH_INPUT, ShAffine<float> > ShInputPosition3a_f;
+typedef ShPosition<3, SH_OUTPUT, ShAffine<float> > ShOutputPosition3a_f;
+typedef ShPosition<3, SH_INOUT, ShAffine<float> > ShInOutPosition3a_f;
+typedef ShPosition<3, SH_TEMP, ShAffine<float> > ShPosition3a_f;
+typedef ShPosition<3, SH_CONST, ShAffine<float> > ShConstPosition3a_f;
+typedef ShPosition<4, SH_INPUT, ShAffine<float> > ShInputPosition4a_f;
+typedef ShPosition<4, SH_OUTPUT, ShAffine<float> > ShOutputPosition4a_f;
+typedef ShPosition<4, SH_INOUT, ShAffine<float> > ShInOutPosition4a_f;
+typedef ShPosition<4, SH_TEMP, ShAffine<float> > ShPosition4a_f;
+typedef ShPosition<4, SH_CONST, ShAffine<float> > ShConstPosition4a_f;
+
+
 typedef ShPosition<1, SH_INPUT, char> ShInputPosition1b;
 typedef ShPosition<1, SH_OUTPUT, char> ShOutputPosition1b;
 typedef ShPosition<1, SH_INOUT, char> ShInOutPosition1b;

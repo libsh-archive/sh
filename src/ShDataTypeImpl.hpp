@@ -56,6 +56,20 @@ bool shDataTypeEqual(const T &a,
 
 template<typename T>
 inline
+bool shDataTypeEqual(const ShAffine<T> &a, const ShAffine<T> &b)
+{
+  if(&a == &b) return true;
+
+  if(a.center() != b.center() || a.size() != b.size()) return false;
+  typename ShAffine<T>::const_iterator A, B;
+  for(A = a.begin(), B = b.begin(); A != a.end(); ++A, ++B) {
+    if(*A != *B) return false;
+  }
+  return true; 
+}
+
+template<typename T>
+inline
 bool shDataTypeEqual(const ShInterval<T> &a, const ShInterval<T> &b)
 {
   return (a.lo() == b.lo()) && (a.hi() == b.hi()); 
@@ -70,6 +84,13 @@ inline
 bool shDataTypeIsPositive(const T &a)
 {
   return a > 0; 
+}
+
+template<typename T>
+inline
+bool shDataTypeIsPositive(const ShAffine<T> &a)
+{
+  return (a.lo() > 0); 
 }
 
 template<typename T>
@@ -90,7 +111,7 @@ void shDataTypeCast(typename ShDataTypeCppType<T1, DT1>::type &dest,
                     const typename ShDataTypeCppType<T2, DT2>::type &src)
 {
   typedef typename ShDataTypeCppType<T1, DT1>::type desttype; 
-  dest = (desttype)(src);
+  dest = static_cast<desttype>(src);
 }
 
 

@@ -670,6 +670,50 @@ typedef ShTexCoord<4, SH_TEMP, float> ShTexCoord4f;
 typedef ShTexCoord<4, SH_CONST, float> ShConstTexCoord4f;
 
 
+typedef ShTexCoord<1, SH_INPUT, ShAffine<double> > ShInputTexCoord1a_d;
+typedef ShTexCoord<1, SH_OUTPUT, ShAffine<double> > ShOutputTexCoord1a_d;
+typedef ShTexCoord<1, SH_INOUT, ShAffine<double> > ShInOutTexCoord1a_d;
+typedef ShTexCoord<1, SH_TEMP, ShAffine<double> > ShTexCoord1a_d;
+typedef ShTexCoord<1, SH_CONST, ShAffine<double> > ShConstTexCoord1a_d;
+typedef ShTexCoord<2, SH_INPUT, ShAffine<double> > ShInputTexCoord2a_d;
+typedef ShTexCoord<2, SH_OUTPUT, ShAffine<double> > ShOutputTexCoord2a_d;
+typedef ShTexCoord<2, SH_INOUT, ShAffine<double> > ShInOutTexCoord2a_d;
+typedef ShTexCoord<2, SH_TEMP, ShAffine<double> > ShTexCoord2a_d;
+typedef ShTexCoord<2, SH_CONST, ShAffine<double> > ShConstTexCoord2a_d;
+typedef ShTexCoord<3, SH_INPUT, ShAffine<double> > ShInputTexCoord3a_d;
+typedef ShTexCoord<3, SH_OUTPUT, ShAffine<double> > ShOutputTexCoord3a_d;
+typedef ShTexCoord<3, SH_INOUT, ShAffine<double> > ShInOutTexCoord3a_d;
+typedef ShTexCoord<3, SH_TEMP, ShAffine<double> > ShTexCoord3a_d;
+typedef ShTexCoord<3, SH_CONST, ShAffine<double> > ShConstTexCoord3a_d;
+typedef ShTexCoord<4, SH_INPUT, ShAffine<double> > ShInputTexCoord4a_d;
+typedef ShTexCoord<4, SH_OUTPUT, ShAffine<double> > ShOutputTexCoord4a_d;
+typedef ShTexCoord<4, SH_INOUT, ShAffine<double> > ShInOutTexCoord4a_d;
+typedef ShTexCoord<4, SH_TEMP, ShAffine<double> > ShTexCoord4a_d;
+typedef ShTexCoord<4, SH_CONST, ShAffine<double> > ShConstTexCoord4a_d;
+
+
+typedef ShTexCoord<1, SH_INPUT, ShAffine<float> > ShInputTexCoord1a_f;
+typedef ShTexCoord<1, SH_OUTPUT, ShAffine<float> > ShOutputTexCoord1a_f;
+typedef ShTexCoord<1, SH_INOUT, ShAffine<float> > ShInOutTexCoord1a_f;
+typedef ShTexCoord<1, SH_TEMP, ShAffine<float> > ShTexCoord1a_f;
+typedef ShTexCoord<1, SH_CONST, ShAffine<float> > ShConstTexCoord1a_f;
+typedef ShTexCoord<2, SH_INPUT, ShAffine<float> > ShInputTexCoord2a_f;
+typedef ShTexCoord<2, SH_OUTPUT, ShAffine<float> > ShOutputTexCoord2a_f;
+typedef ShTexCoord<2, SH_INOUT, ShAffine<float> > ShInOutTexCoord2a_f;
+typedef ShTexCoord<2, SH_TEMP, ShAffine<float> > ShTexCoord2a_f;
+typedef ShTexCoord<2, SH_CONST, ShAffine<float> > ShConstTexCoord2a_f;
+typedef ShTexCoord<3, SH_INPUT, ShAffine<float> > ShInputTexCoord3a_f;
+typedef ShTexCoord<3, SH_OUTPUT, ShAffine<float> > ShOutputTexCoord3a_f;
+typedef ShTexCoord<3, SH_INOUT, ShAffine<float> > ShInOutTexCoord3a_f;
+typedef ShTexCoord<3, SH_TEMP, ShAffine<float> > ShTexCoord3a_f;
+typedef ShTexCoord<3, SH_CONST, ShAffine<float> > ShConstTexCoord3a_f;
+typedef ShTexCoord<4, SH_INPUT, ShAffine<float> > ShInputTexCoord4a_f;
+typedef ShTexCoord<4, SH_OUTPUT, ShAffine<float> > ShOutputTexCoord4a_f;
+typedef ShTexCoord<4, SH_INOUT, ShAffine<float> > ShInOutTexCoord4a_f;
+typedef ShTexCoord<4, SH_TEMP, ShAffine<float> > ShTexCoord4a_f;
+typedef ShTexCoord<4, SH_CONST, ShAffine<float> > ShConstTexCoord4a_f;
+
+
 typedef ShTexCoord<1, SH_INPUT, char> ShInputTexCoord1b;
 typedef ShTexCoord<1, SH_OUTPUT, char> ShOutputTexCoord1b;
 typedef ShTexCoord<1, SH_INOUT, char> ShInOutTexCoord1b;

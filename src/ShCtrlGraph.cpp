@@ -28,11 +28,13 @@
 #include <iostream>
 #include <cassert>
 #include <vector>
+#include <string>
 #include "ShBasicBlock.hpp"
 #include "ShToken.hpp"
 #include "ShTokenizer.hpp"
 #include "ShUtility.hpp"
 #include "ShParser.hpp"
+#include "ShVariable.hpp"
 #include "ShDebug.hpp"
 
 namespace SH {
@@ -73,12 +75,22 @@ std::ostream& ShCtrlGraphNode::graphvizDump(std::ostream& out) const
   if (marked()) return out;
   mark();
   out << "\"" << this << "\" ";
+  out << " [label=\"";
+
+  if(!m_decls.empty()) {
+    out << "DECLS:\\n";
+    for(DeclIt I = decl_begin(); I != decl_end(); ++I) {
+      out << (*I)->nameOfType() << " " << (*I)->name() << "\\n";
+    }
+    out << "\\n";
+  }
+
   if (block) {
-    out << " [label=\"";
+    out << "CODE:\\n";
     block->graphvizDump(out);
     out << "\", shape=box]";
   } else {
-    out << " [label=\"\", shape=circle, height=0.25]";
+    out << " \", shape=circle]";
   }
   out << ";" << std::endl;
 
@@ -147,17 +159,41 @@ ShCtrlGraphNodePtr ShCtrlGraphNode::split(ShBasicBlock::ShStmtList::iterator stm
   after->successors = successors;
   after->follower = follower;
   successors.clear();
-  follower = 0;
 
   // link up the two nodes
+  follower = after;
   after->predecessors.push_back(this);
-  this->follower = after;
 
   // make a block for after and split up the statements
   after->block = new ShBasicBlock();
+  ++stmt;
   after->block->splice(after->block->begin(), block->m_statements, stmt);
 
   return after;
+}
+
+void ShCtrlGraphNode::addDecl(ShVariableNodePtr node)
+{
+  m_decls.insert(node);
+}
+
+bool ShCtrlGraphNode::hasDecl(ShVariableNodePtr node) const
+{
+  return m_decls.find(node) != m_decls.end();
+}
+
+void ShCtrlGraphNode::insert_decls(DeclIt f, DeclIt l)
+{
+  m_decls.insert(f, l);
+}
+ShCtrlGraphNode::DeclIt ShCtrlGraphNode::decl_begin() const
+{
+  return m_decls.begin();
+}
+
+ShCtrlGraphNode::DeclIt ShCtrlGraphNode::decl_end() const
+{
+  return m_decls.end();
 }
 
 ShCtrlGraphBranch::ShCtrlGraphBranch(const ShPointer<ShCtrlGraphNode>& node,
@@ -230,6 +266,18 @@ ShCtrlGraphNodePtr ShCtrlGraph::appendExit() {
   }
   m_exit = newExit;
   return oldExit;
+}
+
+void ShCtrlGraph::prepend(ShPointer<ShCtrlGraph> cfg)
+{
+  cfg->exit()->append(m_entry);
+  m_entry = cfg->entry();
+}
+
+void ShCtrlGraph::append(ShPointer<ShCtrlGraph> cfg)
+{
+  m_exit->append(cfg->entry());
+  m_exit = cfg->exit();
 }
 
 std::ostream& ShCtrlGraph::print(std::ostream& out, int indent) const
