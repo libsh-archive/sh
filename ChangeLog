@@ -1,3 +1,11 @@
+2005-02-10  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/scripts/ShAttribImpl.hpp.py (Impl.scalarcons): Only do
+	constant-assignment when the types being passed are host_type.
+
+	* src/ShBaseTexture.hpp: Made width(), height() and depth()
+	constant for all the ShBaseTexture classes.
+
 2005-02-09  Francois Marier  <francois@serioushack.com>
 
 	* src/scripts/ShAttribImpl.hpp.py (Impl.scalarcons):
