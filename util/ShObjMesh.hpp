@@ -36,23 +36,40 @@ namespace ShUtil {
 
 using namespace SH;
 
-/** \file ShObjMesh.hpp
- * A OBJ file reading  
- */
-struct ShObjMeshEdgeData {
-  // data for the start vertex in an edge 
-  ShNormal3f n;  // normal
-  ShTexCoord2f tc;  // texture coordinate
-  ShVector3f tgt; // tangent
+struct ShObjVertex; 
+struct ShObjFace;
+struct ShObjEdge;
+
+typedef ShMeshType<ShObjVertex, ShObjFace, ShObjEdge> ShObjMeshType;
+
+struct ShObjVertex: public ShMeshVertex<ShObjMeshType> {
+  ShPoint3f pos; // vertex position
+
+  /** \brief Constructs a vertex with the given position */
+  ShObjVertex(const ShPoint3f &p);
+};
+
+struct ShObjFace: public ShMeshFace<ShObjMeshType> {
+  ShNormal3f normal; // face normal
+};
+
+struct ShObjEdge: public ShMeshEdge<ShObjMeshType> {
+  // properties for start vertex in this edge's face
+  ShNormal3f normal;  
+  ShVector3f tangent;
+  ShTexCoord2f texcoord;
 };
 
 /* OBJ file mesh where each vertex stores its position,
  * Each edge stores the normal/tc/tangent for its start vertex,
  * and each face stores its face normal
+ *
+ * Each face in the object mesh is a triangle. (Triangulation
+ * happens on loading from the OBJ file)
  */
-class ShObjMesh: public ShMesh<ShPoint3f, ShObjMeshEdgeData, ShNormal3f> {
+class ShObjMesh: public ShMesh<ShObjMeshType> {
   public:
-    typedef ShMesh<ShPoint3f, ShObjMeshEdgeData, ShNormal3f> ParentType;
+    typedef ShMesh<ShObjMeshType> ParentType;
 
     /** \brief Constructs an empty mesh */
     ShObjMesh();
@@ -69,22 +86,28 @@ class ShObjMesh: public ShMesh<ShPoint3f, ShObjMeshEdgeData, ShNormal3f> {
     /** \brief Generates normals by averaging adjacent face normals
      * for vertices that have zero normals (or all vertices if force = true) 
      *
-     * returns true iff some vertex had a zero normal that needed fixing */
-    bool generateVertexNormals(bool force = false);
+     * returns the number of fixed vertex normals */ 
+    int generateVertexNormals(bool force = false);
+
+    /** \brief Generates tangents by cross product with (0,1,0)
+     * for vertices that have zero tangents (or all vertices if force = true)
+     *
+     * returns the number of tangents generated
+     */
+    int generateTangents(bool force = false);
 
     /** \brief Generates texcoords in a "spherical" shrink map centered at
      * the average of all vertex positions for vertices that have 0 texcoords
      * (or all vertices if force = true)
      *
-     * returns true iff some vertex had a zero texcoord that needed fixing */
-    bool generateSphericalTexCoords(bool force = false);
+     * returns the number of texture coordinates generated */ 
+    int generateSphericalTexCoords(bool force = false);
 
     /** \brief Normalizes all the normals held in this mesh */
     void normalizeNormals();
 
     /** \brief Sets mesh data to data from an OBJ file */
     friend std::istream& operator>>(std::istream &in, ShObjMesh &mesh);
-
 };
 
 }

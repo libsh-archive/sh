@@ -32,109 +32,95 @@
 #include <map>
 #include "ShError.hpp"
 #include "ShException.hpp"
+#include "ShDebug.hpp"
 #include "ShMesh.hpp"
 
 namespace ShUtil {
 
-template<typename VT, typename ET, typename FT>
-ShMeshVertex<VT, ET, FT>::ShMeshVertex()
+/** ShMeshVertex method definitions */
+template<typename M>
+ShMeshVertex<M>::ShMeshVertex()
   : edge(0) {}
 
-template<typename VT, typename ET, typename FT>
-ShMeshVertex<VT, ET, FT>::ShMeshVertex(const VT &data)
-  : edge(0), data(data) {}
+template<typename M>
+ShMeshVertex<M>::ShMeshVertex(const ShMeshVertex<M> &other)
+  : edge(0) {}
 
-template<typename VT, typename ET, typename FT>
-ShMeshVertex<VT, ET, FT>::ShMeshVertex(const ShMeshVertex<VT, ET, FT> &other)
-  : edge(0), data(other.data) {}
+template<typename M>
+ShMeshFace<M>::ShMeshFace()
+  : edge(0) {}
 
-template<typename VT, typename ET, typename FT>
-ShMeshEdge<VT, ET, FT>::ShMeshEdge()
+template<typename M>
+ShMeshFace<M>::ShMeshFace(const ShMeshFace<M> &other)
+  : edge(0) {}
+
+/** ShMeshEdge method definitions */
+template<typename M>
+ShMeshEdge<M>::ShMeshEdge()
   : start(0), end(0), face(0), next(0), prev(0), sym(0) {}
 
-template<typename VT, typename ET, typename FT>
-ShMeshEdge<VT, ET, FT>::ShMeshEdge(ShMeshVertex<VT, ET, FT> *start,
-    ShMeshVertex<VT, ET, FT> *end, ShMeshFace<VT, ET, FT> *face,
-    ShMeshEdge<VT, ET, FT> *next, ShMeshEdge<VT, ET, FT> *prev,
-    ShMeshEdge<VT, ET, FT> *sym) 
-  : start(start), end(end), face(face), next(0), prev(0), sym(0) { 
-  setNext(next);
-  setPrev(prev);
-  setSym(sym);
-} 
+template<typename M>
+ShMeshEdge<M>::ShMeshEdge(const ShMeshEdge<M> &other)
+  : start(0), end(0), face(0), next(0), prev(0), sym(0) {} 
 
-template<typename VT, typename ET, typename FT>
-ShMeshEdge<VT, ET, FT>::ShMeshEdge(ShMeshVertex<VT, ET, FT> *start,
-    ShMeshVertex<VT, ET, FT> *end, ShMeshFace<VT, ET, FT> *face,
-    ShMeshEdge<VT, ET, FT> *next, ShMeshEdge<VT, ET, FT> *prev,
-    ShMeshEdge<VT, ET, FT> *sym, const ET &data)
-  : start(start), end(end), face(face), next(0), prev(0), sym(0), data(data) { 
-  setNext(next);
-  setPrev(prev);
-  setSym(sym);
-} 
-
-template<typename VT, typename ET, typename FT>
-ShMeshEdge<VT, ET, FT>::ShMeshEdge(const ShMeshEdge<VT, ET, FT> &other)
-  : start(0), end(0), face(0), next(0), prev(0), sym(0), data(other.data) {}
-
-template<typename VT, typename ET, typename FT>
-ShMeshEdge<VT, ET, FT>::~ShMeshEdge() {
-  setNext(0);
-  setPrev(0);
-  setSym(0);
-  if( start->edge == this ) {
-    // TODO figure out what to do
+template<typename M>
+void ShMeshEdge<M>::setLinks(Vertex *s, Vertex *e, Face *f,
+    Edge *next, Edge *prev, Edge *sym) {
+  // TODO Figure out what to do here instead of shellacking
+  // the user with a dumb error message.
+  if(start || end) {
+    SH_DEBUG_WARN("Changing start/end vertex of an edge.  "
+      << "This is probably not a good idea.");
   }
-}
 
-template<typename VT, typename ET, typename FT>
-void ShMeshEdge<VT, ET, FT>::setNext(ShMeshEdge<VT, ET, FT> *n) {
+  start = s;
+  end = e;
+  face = f;
+  setNext(next);
+  setPrev(prev);
+  setSym(sym);
+} 
+
+template<typename M>
+void ShMeshEdge<M>::setNext(Edge *n) {
   if( next ) next->prev = 0;
   next = n;
-  if( next ) next->prev = this;
+  if( next ) next->prev = reinterpret_cast<Edge*>(this);
 }
 
-template<typename VT, typename ET, typename FT>
-void ShMeshEdge<VT, ET, FT>::setPrev(ShMeshEdge<VT, ET, FT> *p) {
+template<typename M>
+void ShMeshEdge<M>::setPrev(Edge *p) {
   if( prev ) prev->next = 0;
   prev = p;
-  if( prev ) prev->next = this;
+  if( prev ) prev->next = reinterpret_cast<Edge*>(this);
 }
 
-template<typename VT, typename ET, typename FT>
-void ShMeshEdge<VT, ET, FT>::setSym(ShMeshEdge<VT, ET, FT> *e) {
+template<typename M>
+void ShMeshEdge<M>::setSym(Edge *e) {
   if( sym ) sym->sym = 0;
   sym = e;
-  if( sym ) sym->sym = this;
+  if( sym ) sym->sym = reinterpret_cast<Edge*>(this);
 }
 
-template<typename VT, typename ET, typename FT>
-ShMeshFace<VT, ET, FT>::ShMeshFace()
-  : edge(0) {}
+/* ShMesh method definitions */
+template<typename M>
+ShMesh<M>::ShMesh() {}
 
-template<typename VT, typename ET, typename FT>
-ShMeshFace<VT, ET, FT>::ShMeshFace(const ShMeshFace<VT, ET, FT> &other)
-  : edge(0), data(other.data) {}
-
-template<typename VT, typename ET, typename FT>
-ShMesh<VT, ET, FT>::ShMesh() {}
-
-template<typename VT, typename ET, typename FT>
-ShMesh<VT, ET, FT>::ShMesh(const ShMesh<VT, ET, FT> &other) {
+template<typename M>
+ShMesh<M>::ShMesh(const ShMesh<M> &other) {
   *this = other;
 }
 
-template<typename VT, typename ET, typename FT>
-ShMesh<VT, ET, FT>::~ShMesh() {
+template<typename M>
+ShMesh<M>::~ShMesh() {
   clear();
 }
 
-template<typename VT, typename ET, typename FT>
-ShMesh<VT, ET, FT>& ShMesh<VT, ET, FT>::operator=(const ShMesh<VT, ET, FT> &other) {
+template<typename M>
+ShMesh<M>& ShMesh<M>::operator=(const ShMesh<M> &other) {
   // TODO switch to hash_maps for O(V + E + F) runtime instead of
   // O(VlogV + ElogE + FlogF) run-time.
-  VertMap vmap;
+  VertexMap vmap;
   EdgeMap emap;
   FaceMap fmap;
 
@@ -148,104 +134,118 @@ ShMesh<VT, ET, FT>& ShMesh<VT, ET, FT>::operator=(const ShMesh<VT, ET, FT> &othe
 
   // make copies
   for(typename EdgeSet::iterator J = other.edges.begin(); J != other.edges.end(); ++J) {
-    EdgeType* newedge = new EdgeType(**J); 
+    Edge* newedge = new Edge(**J); 
     edges.insert(newedge);
     emap[*J] = newedge; 
   }
 
   for(typename VertexSet::iterator I = other.verts.begin(); I != other.verts.end(); ++I) {
-    VertexType* newvert = new VertexType(**I); 
+    Vertex* newvert = new Vertex(**I); 
     verts.insert(newvert);
     vmap[*I] = newvert;
     newvert->edge = emap[(*I)->edge];
   }
 
   for(typename FaceSet::iterator K = other.faces.begin(); K != other.faces.end(); ++K) {
-    FaceType* newface = new FaceType(**K); 
+    Face* newface = new Face(**K); 
     faces.insert(newface);
     fmap[*K] = newface; 
     newface->edge = emap[(*K)->edge]; 
   }
 
   for(typename EdgeSet::iterator J = other.edges.begin(); J != other.edges.end(); ++J) {
-    emap[*J]->start = vmap[(*J)->start]; 
-    emap[*J]->end = vmap[(*J)->end]; 
-    emap[*J]->face = fmap[(*J)->face]; 
-    emap[*J]->sym = emap[(*J)->sym]; 
-    emap[*J]->prev = emap[(*J)->prev]; 
-    emap[*J]->next  = emap[(*J)->next]; 
+    Edge *e = emap[*J];
+    e->start = vmap[(*J)->start]; 
+    e->end = vmap[(*J)->end]; 
+    e->face = fmap[(*J)->face]; 
+    e->sym = emap[(*J)->sym]; 
+    e->prev = emap[(*J)->prev]; 
+    e->next  = emap[(*J)->next]; 
+    m_incidences.insert(Incidence(e->start, e));
   }
 
   return *this;
 }
 
-template<typename VT, typename ET, typename FT>
-void ShMesh<VT, ET, FT>::clear() {
+template<typename M>
+void ShMesh<M>::clear() {
   for(typename VertexSet::iterator I = verts.begin(); I != verts.end(); ++I) {
     delete (*I);
   }
   verts.clear();
+
+  for(typename FaceSet::iterator K = faces.begin(); K != faces.end(); ++K) {
+    delete (*K);
+  }
+  faces.clear();
 
   for(typename EdgeSet::iterator J = edges.begin(); J != edges.end(); ++J) {
     delete (*J);
   }
   edges.clear();
 
-  for(typename FaceSet::iterator K = faces.begin(); K != faces.end(); ++K) {
-    delete (*K);
-  }
-  faces.clear();
+  m_incidences.clear();
 }
 
-template<typename VT, typename ET, typename FT>
-typename ShMesh<VT, ET, FT>::FaceType* 
-ShMesh<VT, ET, FT>::addFace(const ShMesh<VT, ET, FT>::VertexList &vl) {
+template<typename M>
+typename ShMesh<M>::Face* 
+ShMesh<M>::addFace(const ShMesh<M>::VertexList &vl) {
   verts.insert(vl.begin(), vl.end());  
 
-  if( vl.size() < 2 ) {
-    SH::ShError(SH::ShException("ShMesh::addFace can only handle faces with >= 2 vertices")); 
+  if( vl.size() < 1 ) {
+    SH::ShError(SH::ShException("ShMesh::addFace can only handle faces with >= 1 vertices")); 
   }
-  FaceType *newf = new FaceType();
+  Face *newf = new Face();
   faces.insert(newf);
 
-  EdgeType *newe = 0;
+  Edge *newe, *olde;
+  Vertex *first = vl.front();
+  olde = 0;
   for(typename VertexList::const_iterator I = vl.begin(); I != vl.end();) {
-    VertexType *start = *(I++);
-    VertexType *end = (I == vl.end() ? newf->edge->start : *I); 
+    Vertex *start = *(I++);
+    Vertex *end = (I == vl.end() ? first : *I); 
 
-    newe = new EdgeType(start, end, newf, 0, newe, 0);
+    SH_DEBUG_ASSERT(start);
+
+    newe = new Edge();
+    newe->setLinks(start, end, newf, 0, olde, 0);
+    olde = newe;
+
     if( !newf->edge ) newf->edge = newe; // assign first edge to newf->edge
-    edges.insert(newe);
+    insertHalfEdge(newe);
   }
   newf->edge->setPrev(newe); // close the loop
   return newf;
 }
 
-template<typename VT, typename ET, typename FT>
-void ShMesh<VT, ET, FT>::removeFace(FaceType *f) {
-  EdgeType *olde;
-  EdgeType *e = f->edge;
+
+template<typename M>
+void ShMesh<M>::removeFace(Face *f) {
+  Edge *olde, *e;
+  e = f->edge;
+  //TODO this may fail if != is redefined to 
+  //access pointer contents 
+  //In that case, might need to store a list of edges to be deleted
+  //instead of deleting as we traverse the next pointers...
   do {
-    edges.erase(e);
     olde = e;
     e = e->next;
-    delete olde;
+    removeHalfEdge(e);
   } while( e != f->edge );
   faces.erase(f);
   delete f;
 }
 
-template<typename VT, typename ET, typename FT>
+template<typename M>
 template<typename VertLess>
-void ShMesh<VT, ET, FT>::mergeVertices() {
-  typedef std::map<VertexType*, VertexType*, VertLess> MergedVertMap;
+void ShMesh<M>::mergeVertices() {
+  typedef std::map<Vertex*, Vertex*, VertLess> MergedVertMap;
   MergedVertMap mvmap;
 
   // keep only the first occurrence of a similar vertex
   for(typename VertexSet::iterator I = verts.begin(); I != verts.end(); ++I) {
     if( mvmap.count(*I) == 0 ) mvmap[*I] = *I;
   }
-  SH_DEBUG_PRINT("uh-huh");
 
   for(typename EdgeSet::iterator J = edges.begin(); J != edges.end(); ++J) {
     (*J)->start = mvmap[(*J)->start];
@@ -260,28 +260,35 @@ void ShMesh<VT, ET, FT>::mergeVertices() {
     if( mvmap[*I] != *I ) {
       typename VertexSet::iterator deadI = I; 
       ++I;
-      VertexType *deadVert = *deadI;
+      Vertex *deadVert = *deadI;
       verts.erase(deadI);
+
+      // fix incidence map
+      IncidenceRange ir = m_incidences.equal_range(deadVert);
+      for(IncidenceIterator K = ir.first; K != ir.second; ++K) {
+        m_incidences.insert(Incidence(mvmap[K->first], K->second));
+      }
+      m_incidences.erase(ir.first, ir.second);
+
       delete deadVert;
     } else {
       ++I;;
     }
   }
-  SH_DEBUG_PRINT("duh duh duh");
 }
 
-template<typename VT, typename ET, typename FT>
+template<typename M>
 template<typename VertLess> 
-void ShMesh<VT, ET, FT>::mergeEdges() {
-  typedef std::map<VertexType*, std::map<VertexType*, EdgeType*, VertLess>, VertLess> EdgeMatchMap;
+void ShMesh<M>::mergeEdges() {
+  typedef std::map<Vertex*, std::map<Vertex*, Edge*, VertLess>, VertLess> EdgeMatchMap;
 
   EdgeMatchMap edgeMatch;
 
   for(typename EdgeSet::iterator J = edges.begin(); J != edges.end(); ++J) {
-    EdgeType *e = (*J);
-    EdgeType *match = edgeMatch[e->end][e->start]; 
+    Edge *e = (*J);
+    Edge *match = edgeMatch[e->end][e->start]; 
 
-    if( match != 0 ) match->setSym(e);
+    if(match) match->setSym(e);
 
     if( edgeMatch[e->start][e->end] != 0 ) {
       SH_DEBUG_WARN("Duplicate edge found in mesh");
@@ -290,37 +297,39 @@ void ShMesh<VT, ET, FT>::mergeEdges() {
   }
 }
 
-template<typename VT, typename ET, typename FT>
-bool ShMesh<VT, ET, FT>::earTriangulate() {
+template<typename M>
+bool ShMesh<M>::earTriangulate() {
   bool changed = false;
   for(typename FaceSet::iterator I = faces.begin(); I != faces.end(); ++I) {
-    EdgeType *e = (*I)->edge;
+    Edge *e = (*I)->edge;
 
     if( e->next->next->next == e ) continue;  // ignore 3-sided faces
 
     changed = true;
-    if( e->next->next == e ) { // remove 2-sided faces
+    if( e->next == e || e->next->next == e ) { // remove 1-sided and 2-sided faces
       removeFace(*(I++));
       continue;
     }
 
     // triangulate face
-    FaceType *lastface = *I;
-    EdgeType *e0 = e; // first edge in face
-    EdgeType *en = e0->prev; // last edge in face 
+    Face *lastface = *I;
+    Edge *e0 = e; // first edge in face
+    Edge *en = e0->prev; // last edge in face 
     for(e = e->next->next; e != en; e = e->next) {
-      FaceType *newf = new FaceType();
+      Face *newf = new Face();
       newf->edge = e;
 
       // make edges from e-> start to e0 and e0-> start to e->start
-      EdgeType *ee0 = new EdgeType(e->start, e0->start, lastface, 
-          e->prev->prev, e->prev, 0, e->data);
-      EdgeType *e0e = new EdgeType(e0->start, e->start, newf,
-          e, en, 0, e0->data);
+      Edge *ee0 = new Edge(*e);
+      ee0->setLinks(e->start, e0->start, lastface, e->prev->prev, e->prev, 0); 
+
+      Edge *e0e = new Edge(*e0);
+      e0e->setLinks(e0->start, e->start, newf, e, en, 0); 
+
       ee0->setSym(e0e);
 
-      edges.insert(ee0);
-      edges.insert(e0e);
+      insertHalfEdge(ee0);
+      insertHalfEdge(e0e);
       faces.insert(newf);
 
       lastface = newf;
@@ -328,6 +337,38 @@ bool ShMesh<VT, ET, FT>::earTriangulate() {
     e->face = lastface;
   }
   return changed;
+}
+
+template<typename M>
+void ShMesh<M>::removeHalfEdge(Edge *e) {
+  edges.erase(e);
+  e->setNext(0);
+  e->setPrev(0);
+  e->setSym(0);
+
+  // Update incidence map and e->start
+  IncidenceRange ir = m_incidences.equal_range(e->start);
+  for(IncidenceIterator I = ir.first; I != ir.second; ++I) {
+    if(I->second == e) {
+      m_incidences.erase(I);
+      break;
+    }
+  }
+  if(e->start->edge == e)  {
+    if(m_incidences.count(e->start) > 0) {
+      e->start->edge = m_incidences.find(e->start)->second;
+    } else {
+      e->start->edge = 0; 
+    }
+  }
+  delete e;
+}
+
+template<typename M>
+void ShMesh<M>::insertHalfEdge(Edge *e) {
+  edges.insert(e);
+  SH_DEBUG_ASSERT(e->start);
+  m_incidences.insert(Incidence(e->start, e));
 }
 
 }

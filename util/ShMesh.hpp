@@ -35,197 +35,154 @@
 namespace ShUtil {
 
 /** \file ShMesh.hpp
- * A mesh structure based on half-edge data structure
- * for storing meshes.
+ * A basic mesh structure based on half-edges.
  *
- * This class is a clean implementation of the
- * basic interface from the CS488 course notes. Additional
- * features should be added by making a subclass of
- * the mesh.
+ * To use this class, define CopyConstructible 
+ * vertex, face, and edge classes to hold your vertex/face/edge specific data
+ * that are subclasses of ShMeshVertex, ShMeshFace, and ShMeshEdge
+ * respectively.
  *
- * The majority of the links are kept in the edges,
- * and each vertex points to an edge which starts on that vertex,
- * and each face points to an edge in the face.
+ * The half-edge ShMesh class always keeps the following invariants: 
+ * * Edge pointers: 
+ *   For any edge e,
+ *   a) if e.next, then e.next->prev = e
+ *   b) if e.next, then e.next->start == e->end
+ *   c) if e.prev, then e.prev->next = e
+ *   d) if e.prev, then e.prev->end == e->start
+ *   e) if e.sym != 0, then e.sym->sym = e
+ *
+ * * Vertex edge:
+ *   For any vertex v, v.edge.start = v 
+ *
+ * * Face edge:
+ *   For any face f, f.edge.face = f, and
+ *   f.edge->next->next...  = f.edge after following enough next pointers.
+ *
+ * All the public ShMesh class functions maintain these invariants.
+ *
+ * Null Pointers:
+ * For any edge e, e.start and e.end are always != 0.
+ * For any face f, f.edge is always != 0.
+ * All other pointers can be 0. 
  */
 
-/** The following invariants must be maintained at all times:
- *
- * I) In a ShMesh object x, x.verts, x.edges and x.faces sets hold
- * the vertices, edges, and faces of the mesh.
- * If p is in one of these sets and has a pointer to vert/edge/face q,
- * then q is also in the appropriate set.
- *
- * II) If an edge e = f.edge for any face f, then
- * following e->next pointers must form a cycle that returns to e.
- * There must be at least two edges in each face.
- *
- * III) Some edge pointer invariants:
- *   a) if e->next, then e->next->prev = e
- *   b) if e->next, e->next->start == e->end
- *   c) if e->prev, then e->prev->next = e
- *   d) if e->prev, e->prev->end == e->start
- *   e) if e->sym != 0, then e->sym->sym = e
- *
- * Otherwise anything goes.  It is okay to have disconnected
- * vertices, edges that don't cycle (as long as they are not 
- * in faces), duplicate edges, etc. 
- *
- * All the functions defined directly in ShMesh should maintain
- * these invariants.
- */
+template<typename VertexType, typename FaceType, typename EdgeType>
+struct ShMeshType {
+  typedef VertexType Vertex;
+  typedef FaceType Face;
+  typedef EdgeType Edge;
+};
 
-template<typename VT, typename ET, typename FT>
-struct ShMeshEdge;
-
-template<typename VT, typename ET, typename FT>
-struct ShMeshFace;
-
-template<typename VT, typename ET, typename FT>
+template<typename M>
 struct ShMeshVertex {
-  ShMeshEdge<VT, ET, FT> *edge;
-  VT data;
+  typedef typename M::Edge Edge;
+  Edge *edge; //< Edge that starts at this vertex 
 
-  /** \brief Constructor fo ShMeshVertex
-   * Constructs a vertex with edge = 0, default data
-   */
+  /** \brief Constructor that sets edge to 0 */ 
   ShMeshVertex();
 
-  /** \brief Constructor fo ShMeshVertex
-   * Constructs a vertex with given data 
-   */
-  ShMeshVertex(const VT &data);
-
-  /** \brief Copy constructor
-   * This makes this->data a copy of other->data, but does not init the edge.
-   */
-  ShMeshVertex(const ShMeshVertex<VT, ET, FT> &other);
+  /** \brief Constructor that sets edge to 0 */ 
+  ShMeshVertex(const ShMeshVertex<M> &other);
 };
 
-
-// A half-edge going from start to end that is part of face.
-template<typename VT, typename ET, typename FT>
-struct ShMeshEdge {
-  ShMeshVertex<VT, ET, FT> *start, *end;
-  ShMeshFace<VT, ET, FT> *face;
-  ShMeshEdge<VT, ET, FT> *sym, *next, *prev;
-  ET data;
-
-  /** \brief Constructor for ShMeshEdge 
-   * Constructs a edge with all pointers = 0, default data
-   */
-  ShMeshEdge();
-
-  /** \brief Constructs a edge with the given pointers vertices */
-  ShMeshEdge(ShMeshVertex<VT, ET, FT> *start, ShMeshVertex<VT, ET, FT> *end,
-      ShMeshFace<VT, ET, FT> *face,
-      ShMeshEdge<VT, ET, FT> *next, ShMeshEdge<VT, ET, FT> *prev,
-      ShMeshEdge<VT, ET, FT> *sym);
-
-  /** \brief Constructs a edge with the given pointers vertices & data */
-  ShMeshEdge(ShMeshVertex<VT, ET, FT> *start, ShMeshVertex<VT, ET, FT> *end,
-      ShMeshFace<VT, ET, FT> *face,
-      ShMeshEdge<VT, ET, FT> *next, ShMeshEdge<VT, ET, FT> *prev,
-      ShMeshEdge<VT, ET, FT> *sym, 
-      const ET &data);
-
-  /** \brief Copy constructor
-   * This makes this->data a copy of other->data, but does not init any ptrs. 
-   */
-  ShMeshEdge(const ShMeshEdge<VT, ET, FT> &other);
-
-  /** \brief ShMeshEdge destructor.
-   * If next, prev or sym are set, then next->prev, prev->next, sym->sym 
-   * are all updated to reflect the demise of this edge.
-   */
-  ~ShMeshEdge();
-
-  /** \brief Sets next edge 
-   * Sets p->prev to this and clear any old next->prev to 0. 
-   */
-  void setNext(ShMeshEdge<VT, ET, FT> *n);
-
-  /** \brief Sets previous edge 
-   * Sets p->next to this and clear any old prev->next to 0. 
-   */
-  void setPrev(ShMeshEdge<VT, ET, FT> *p);
-
-  /** \brief Sets sym edge and sets s->sym to this
-   * while clearing any old sym->sym to 0.
-   */
-  void setSym(ShMeshEdge<VT, ET, FT> *s);
-
-};
-
-
-template<typename VT, typename ET, typename FT> 
+template<typename M>
 struct ShMeshFace {
-  ShMeshEdge<VT, ET, FT> *edge;
-  FT data;
+  typedef typename M::Edge Edge;
+  Edge *edge; //< Edge in this face 
 
-  /** \brief Constructor for ShMeshFace 
-   * Constructs a face with all pointers = 0, default data
-   */
+  /** \brief Constructor that sets edge to 0 */ 
   ShMeshFace();
 
-  /** \brief Copy constructor
-   * This makes this->data a copy of other->data, but does not init any ptrs. 
-   */
-  ShMeshFace(const ShMeshFace<VT, ET, FT> &other);
+  /** \brief Constructor that sets edge to 0 */ 
+  ShMeshFace(const ShMeshFace<M> &other);
 };
 
-template<typename VT, typename ET, typename FT>
+// A half-edge going from start to end that is part of face.
+template<typename M>
+struct ShMeshEdge {
+  typedef typename M::Vertex Vertex;
+  typedef typename M::Face Face;
+  typedef typename M::Edge Edge;
+  Vertex *start; //< Start vertex 
+  Vertex *end;  //< End vertex
+  Face *face; //< Face  
+  Edge *sym; //< Edge paired with this edge.
+  Edge *next; //< Next edge in the face 
+  Edge *prev; //< Previous edge in the face
+
+  /** \brief Constructs a edge with all pointers = 0 */ 
+  ShMeshEdge();
+
+  /** \brief Constructor that sets all pointers = 0 */ 
+  ShMeshEdge(const ShMeshEdge<M> &other);
+
+  /** \brief Constructs a edge with pointers to the given objects 
+   * (any may be 0 except start and end) */
+  void setLinks(Vertex *s, Vertex *e, Face *f, 
+      Edge *next, Edge *prev, Edge *sym);
+
+  /** \brief Sets next, updating next->prev if next is non-null. */ 
+  void setNext(Edge *n);
+
+  /** \brief Sets prev, updating prev->next if prev is non-null */ 
+  void setPrev(Edge *p);
+
+  /** \brief Sets sym, updating sym->sym if sym is non-null */ 
+  void setSym(Edge *s);
+};
+
+/** ShMesh class stores a mesh using a half-edge data structure */
+template<typename M>
 class ShMesh {
   public:
-    typedef ShMeshVertex<VT, ET, FT> VertexType;
-    typedef ShMeshEdge<VT, ET, FT> EdgeType;
-    typedef ShMeshFace<VT, ET, FT> FaceType;
+    typedef M MeshType; 
+    typedef typename M::Vertex Vertex; 
+    typedef typename M::Edge Edge; 
+    typedef typename M::Face Face; 
 
-    typedef std::set<VertexType*> VertexSet;
-    typedef std::set<EdgeType*> EdgeSet;
-    typedef std::set<FaceType*> FaceSet;
-    typedef std::list<VertexType*> VertexList;
+    typedef std::set<Vertex*> VertexSet;
+    typedef std::set<Edge*> EdgeSet;
+    typedef std::set<Face*> FaceSet;
+    typedef std::list<Vertex*> VertexList;
 
     /** \brief Empty mesh constructor */
     ShMesh();
 
-    /** \brief Copies other mesh to this mesh */
-    ShMesh(const ShMesh<VT, ET, FT>& other);
+    /** \brief Copy constructor 
+     * Makes copies of vertices, edges, and faces and builds a mesh isomorphic other */
+    ShMesh(const ShMesh<M>& other);
 
-    /** \brief ShMesh Destructor */
+    /** \brief ShMesh destructor */
     ~ShMesh();
 
-    /** \brief Assignment Operator */
-    ShMesh<VT, ET, FT>& operator=(const ShMesh<VT, ET, FT>& other); 
+    /** \brief Assignment Operator  */
+    ShMesh<M>& operator=(const ShMesh<M>& other); 
 
     /** \brief removes all verts, edges, and faces in this mesh & deletes them*/
     void clear();
 
     /** \brief Adds a face to the mesh.
-     * Adds required edges and faces with uninitialized data.
+     * The face contains the given vertices in order (do not repeat first vertex).
+     * Adds required edges and faces. 
      * The edge corresponding to vl(0) -> vl(1) is set to result->edge
-     * Any edges that make a pair with an existing edge will have edge->sym 
-     * set correctly.
      */
-    FaceType* addFace(const VertexList &vl);
+    Face* addFace(const VertexList &vl);
 
     /** \brief Removes a face from the mesh.
-     * Deletes any edges from this face, but does not delete any vertices.
+     * Deletes edges involed in the face, but not the vertices. 
      */
-    void removeFace(FaceType *f);
+    void removeFace(Face *f);
 
     /** \brief Vertex merging function.
      * Merges any vertices that are "equal" according to the 
-     * STL Strict Weak Ordering functor VertLess
+     * StrictWeakOrdering functor VertLess
      */
     template<typename VertLess>
     void mergeVertices();
 
     /** \brief Edge merging function.
      * Pairs up half-edges that match each other (i.e. e1.start = e2.end, e1.end = e2.start) 
-     * using the given STL Strict Weak Ordering functor VertLess 
-     *
-     * This is best used after mergeVertices, then VertLess can be the default std::less
-     * and it will obey the ordering established by mergeVertices.
+     * using the given StrictWeakOrdering functor VertLess 
      *
      * Note that if there are multiple edges between start->end 
      * that match up with an edge, e, from end->start, one of them will be  
@@ -235,7 +192,6 @@ class ShMesh {
     void mergeEdges();
 
     /** \brief Triangulates by ear. 
-     * Removes any two-sided faces from the mesh
      * returnst true if any triangles removed */
     bool earTriangulate();
 
@@ -244,9 +200,36 @@ class ShMesh {
     FaceSet faces;
 
   protected:
-    typedef std::map<VertexType*, VertexType*> VertMap;
-    typedef std::map<EdgeType*, EdgeType*> EdgeMap;
-    typedef std::map<FaceType*, FaceType*> FaceMap;
+    typedef std::map<Vertex*, Vertex*> VertexMap;
+    typedef std::map<Edge*, Edge*> EdgeMap;
+    typedef std::map<Face*, Face*> FaceMap;
+
+    // TODO this is a real hack...figure out how to do removeHalfEdge(e) in log or 
+    // constant time without the incidence map for weird meshes 
+    // (e.g. with articulation points).
+    
+    // On certain meshes, all edges incident to a vertex v can be found
+    // by traversing v.edge->sym pointers, but this is not always
+    // the case.
+    typedef std::multimap<Vertex*, Edge*> IncidenceMap;
+    typedef typename IncidenceMap::value_type Incidence;
+    typedef typename IncidenceMap::iterator IncidenceIterator;
+    typedef std::pair<typename IncidenceMap::iterator, 
+              typename IncidenceMap::iterator> IncidenceRange;
+
+    IncidenceMap m_incidences; // m_incidences[v] holds all edges e with e.start = v
+
+    /** \brief Removes a half-edge from the mesh.
+     * If e->start->edge == this, then e->start->edge is set
+     * to a different element in the m_startMap;
+     *
+     * This is a private utility function that does not update 
+     * e->face if e->face->edge == e. 
+     */
+    void removeHalfEdge(Edge *e);
+
+    /** \brief Adds e to the edges set and m_incidenceEdges incidence map */
+    void insertHalfEdge(Edge *e);
 };
 
 
