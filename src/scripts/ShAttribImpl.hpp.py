@@ -4,7 +4,8 @@ common.header()
 
 common.guard("SHATTRIBIMPL_HPP")
 common.inprint('#include "ShAttrib.hpp"')
-common.inprint('#include "ShLib.hpp"')
+common.inprint('#include "ShStatement.hpp"')
+common.inprint('#include "ShEnvironment.hpp"')
 common.inprint('#include "ShDebug.hpp"')
 common.inprint('')
 common.namespace()
@@ -29,8 +30,8 @@ class Impl(semantic.Impl):
         common.indent()
         common.inprint("if (Binding == SH_CONST || uniform()) {")
         common.indent()
-        common.inprint("assert(!ShEnvironment::insideShader);")
-        common.inprint("assert(" + other + ".hasValues());")
+        common.inprint("SH_DEBUG_ASSERT(!ShEnvironment::insideShader);")
+        common.inprint("SH_DEBUG_ASSERT(" + other + ".hasValues());")
         common.inprint("T data[" + self.sizevar(size) + "];")
         common.inprint(other + ".getValues(data);")
         common.inprint("setValues(data);")
@@ -125,36 +126,36 @@ class Impl(semantic.Impl):
         if size > 1:
             self.scalarcons(size, "const ShGeneric<1, T>&")
 
-    def assign(self, fun, args, size):
-        common.inprint(self.tpl(size) + "\n" +
-                       self.tplcls(size) + "&\n" +
-                       self.tplcls(size) + "::" + fun +
-                       "(" + ', '.join([' '.join(x) for x in args]) + ")")
-        common.inprint("{")
-        common.indent()
-        other = args[0][1]
-        if fun[-1] == "=" and fun[-2] in ["+", "-", "/", "*"]:
-            common.inprint("*this = *this " + fun[-2] + " " + other + ";")
-        else:
-            common.inprint("if (Binding == SH_CONST || uniform()) {")
-            common.indent()
-            common.inprint("assert(!ShEnvironment::insideShader);")
-            common.inprint("assert(" + other + ".hasValues());")
-            common.inprint("T data[" + self.sizevar(size) + "];")
-            common.inprint(other + ".getValues(data);")
-            common.inprint("setValues(data);")
-            common.deindent()
-            common.inprint("} else {")
-            common.indent()
-            common.inprint("ShStatement asn(*this, SH_OP_ASN, " + other + ");")
-            common.inprint("ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);")
-            common.deindent()
-            common.inprint("}")
+#     def assign(self, fun, args, size):
+#         common.inprint(self.tpl(size) + "\n" +
+#                        self.tplcls(size) + "&\n" +
+#                        self.tplcls(size) + "::" + fun +
+#                        "(" + ', '.join([' '.join(x) for x in args]) + ")")
+#         common.inprint("{")
+#         common.indent()
+#         other = args[0][1]
+#         if fun[-1] == "=" and fun[-2] in ["+", "-", "/", "*"]:
+#             common.inprint("*this = *this " + fun[-2] + " " + other + ";")
+#         else:
+#             common.inprint("if (Binding == SH_CONST || uniform()) {")
+#             common.indent()
+#             common.inprint("SH_DEBUG_ASSERT(!ShEnvironment::insideShader);")
+#             common.inprint("SH_DEBUG_ASSERT(" + other + ".hasValues());")
+#             common.inprint("T data[" + self.sizevar(size) + "];")
+#             common.inprint(other + ".getValues(data);")
+#             common.inprint("setValues(data);")
+#             common.deindent()
+#             common.inprint("} else {")
+#             common.indent()
+#             common.inprint("ShStatement asn(*this, SH_OP_ASN, " + other + ");")
+#             common.inprint("ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);")
+#             common.deindent()
+#             common.inprint("}")
 
-        common.inprint("return *this;")
-        common.deindent()
-        common.inprint("}")
-        common.inprint("")
+#         common.inprint("return *this;")
+#         common.deindent()
+#         common.inprint("}")
+#         common.inprint("")
         
 
 impl = Impl()

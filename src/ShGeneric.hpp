@@ -68,6 +68,8 @@ public:
   ShGeneric& operator-=(const ShGeneric& right);
   ShGeneric& operator*=(const ShGeneric& right);
   ShGeneric& operator/=(const ShGeneric& right);
+  ShGeneric& operator*=(const ShGeneric<1, T>& right);
+  ShGeneric& operator/=(const ShGeneric<1, T>& right);
   ShGeneric& operator*=(T);
   ShGeneric& operator/=(T);
 
@@ -86,6 +88,44 @@ public:
 
   typedef T ValueType;
   static const int typesize = N;
+
+protected:
+  ShGeneric(const ShVariableNodePtr& node);
+};
+
+template<typename T>
+class ShGeneric<1, T> : public ShVariable 
+{
+public:
+  ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, bool neg);
+  ~ShGeneric();
+
+  ShGeneric& operator=(const ShGeneric& other);
+  
+  ShGeneric& operator+=(const ShGeneric& right);
+  ShGeneric& operator-=(const ShGeneric& right);
+  ShGeneric& operator*=(const ShGeneric& right);
+  ShGeneric& operator/=(const ShGeneric& right);
+  ShGeneric& operator+=(T);
+  ShGeneric& operator-=(T);
+  ShGeneric& operator*=(T);
+  ShGeneric& operator/=(T);
+
+  ShGeneric operator-() const;
+
+  ShGeneric operator()() const; ///< Identity swizzle
+  ShGeneric<1, T> operator()(int) const;
+  ShGeneric<1, T> operator[](int) const;
+  ShGeneric<2, T> operator()(int, int) const;
+  ShGeneric<3, T> operator()(int, int, int) const;
+  ShGeneric<4, T> operator()(int, int, int, int) const;
+  
+  // Arbitrary Swizzle
+  template<int N2>
+  ShGeneric<N2, T> swiz(int indices[]) const;
+
+  typedef T ValueType;
+  static const int typesize = 1;
 
 protected:
   ShGeneric(const ShVariableNodePtr& node);

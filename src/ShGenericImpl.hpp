@@ -96,6 +96,20 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator/=(const ShGeneric<N, T>& right)
 }
 
 template<int N, typename T>
+ShGeneric<N, T>& ShGeneric<N, T>::operator*=(const ShGeneric<1, T>& right)
+{
+  *this = *this * right;
+  return *this;
+}
+
+template<int N, typename T>
+ShGeneric<N, T>& ShGeneric<N, T>::operator/=(const ShGeneric<1, T>& right)
+{
+  *this = *this / right;
+  return *this;
+}
+
+template<int N, typename T>
 ShGeneric<N, T>& ShGeneric<N, T>::operator*=(T right)
 {
   *this = *this * right;
@@ -157,6 +171,147 @@ template<int N2>
 ShGeneric<N2, T> ShGeneric<N, T>::swiz(int indices[]) const
 {
   return ShGeneric<N2, T>(m_node, m_swizzle * ShSwizzle(N, N2, indices), m_neg);
+}
+
+template<typename T>
+ShGeneric<1, T>::ShGeneric(const ShVariableNodePtr& node)
+  : ShVariable(node)
+{
+}
+
+template<typename T>
+ShGeneric<1, T>::ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, bool neg)
+  : ShVariable(node)
+{
+  m_swizzle = swizzle;
+  m_neg = neg;
+}
+
+template<typename T>
+ShGeneric<1, T>::~ShGeneric()
+{
+}
+
+template<typename T>
+ShGeneric<1, T>& ShGeneric<1, T>::operator=(const ShGeneric<1, T>& other)
+{
+  if (m_node->kind() == SH_CONST || uniform()) {
+    assert(!ShEnvironment::insideShader);
+    assert(other.hasValues());
+    T data[1];
+    other.getValues(data);
+    setValues(data);
+  } else {
+    ShStatement asn(*this, SH_OP_ASN, other);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
+  }
+  return *this;
+}
+
+template<typename T>
+ShGeneric<1, T>& ShGeneric<1, T>::operator+=(const ShGeneric<1, T>& right)
+{
+  *this = *this + right;
+  return *this;
+}
+
+template<typename T>
+ShGeneric<1, T>& ShGeneric<1, T>::operator-=(const ShGeneric<1, T>& right)
+{
+  *this = *this - right;
+  return *this;
+}
+
+template<typename T>
+ShGeneric<1, T>& ShGeneric<1, T>::operator*=(const ShGeneric<1, T>& right)
+{
+  *this = *this * right;
+  return *this;
+}
+
+template<typename T>
+ShGeneric<1, T>& ShGeneric<1, T>::operator/=(const ShGeneric<1, T>& right)
+{
+  *this = *this / right;
+  return *this;
+}
+
+template<typename T>
+ShGeneric<1, T>& ShGeneric<1, T>::operator*=(T right)
+{
+  *this = *this * right;
+  return *this;
+}
+
+template<typename T>
+ShGeneric<1, T>& ShGeneric<1, T>::operator/=(T right)
+{
+  *this = *this / right;
+  return *this;
+}
+
+template<typename T>
+ShGeneric<1, T>& ShGeneric<1, T>::operator+=(T right)
+{
+  *this = *this + right;
+  return *this;
+}
+
+template<typename T>
+ShGeneric<1, T>& ShGeneric<1, T>::operator-=(T right)
+{
+  *this = *this - right;
+  return *this;
+}
+
+template<typename T>
+ShGeneric<1, T> ShGeneric<1, T>::operator-() const
+{
+  return ShGeneric<1, T>(m_node, m_swizzle, !m_neg);
+}
+
+
+template<typename T>
+ShGeneric<1, T> ShGeneric<1, T>::operator()() const
+{
+  return ShGeneric<1, T>(m_node, m_swizzle, m_neg);
+}
+
+template<typename T>
+ShGeneric<1, T> ShGeneric<1, T>::operator()(int i1) const
+{
+  return ShGeneric<1, T>(m_node, m_swizzle * ShSwizzle(size(), i1), m_neg);
+}
+
+template<typename T>
+ShGeneric<1, T> ShGeneric<1, T>::operator[](int i1) const
+{
+  return ShGeneric<1, T>(m_node, m_swizzle * ShSwizzle(size(), i1), m_neg);
+}
+
+template<typename T>
+ShGeneric<2, T> ShGeneric<1, T>::operator()(int i1, int i2) const
+{
+  return ShGeneric<2, T>(m_node, m_swizzle * ShSwizzle(size(), i1, i2), m_neg);
+}
+
+template<typename T>
+ShGeneric<3, T> ShGeneric<1, T>::operator()(int i1, int i2, int i3) const
+{
+  return ShGeneric<3, T>(m_node, m_swizzle * ShSwizzle(size(), i1, i2, i3), m_neg);
+}
+
+template<typename T>
+ShGeneric<4, T> ShGeneric<1, T>::operator()(int i1, int i2, int i3, int i4) const
+{
+  return ShGeneric<4, T>(m_node, m_swizzle * ShSwizzle(size(), i1, i2, i3, i4), m_neg);
+}
+  
+template<typename T> 
+template<int N2>
+ShGeneric<N2, T> ShGeneric<1, T>::swiz(int indices[]) const
+{
+  return ShGeneric<N2, T>(m_node, m_swizzle * ShSwizzle(1, N2, indices), m_neg);
 }
 
 }

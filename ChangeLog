@@ -1,8 +1,19 @@
+2004-04-12  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/scripts/ShAttribImpl.hpp.py (Impl.assign): Use ShGeneric's
+	implementations of these functions instead of providing our own.
+	No longer include ShLib.hpp.
+
+	* src/ShGeneric.hpp (class ShGeneric): Specialize for N = 1.
+	(class ShGeneric): Add scalar op*= and op/=.
+
+	* src/scripts/ShAttribImpl.hpp.py (Impl.copycons): Use
+	SH_DEBUG_ASSERT() instead of assert().
+
 2004-04-12  Jack Wang  <jmwang@uwaterloo.ca>
 
 	* src/ShImage.?pp: Added getNormalMap() to generate a normal map by 
 	treating the image as a height field.
-
 
 2004-04-08  Jack Wang  <jmwang@uwaterloo.ca>
 

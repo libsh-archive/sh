@@ -35,7 +35,8 @@
 #define SH_SHATTRIBIMPL_HPP
 
 #include "ShAttrib.hpp"
-#include "ShLib.hpp"
+#include "ShStatement.hpp"
+#include "ShEnvironment.hpp"
 #include "ShDebug.hpp"
 
 namespace SH {
@@ -51,8 +52,8 @@ ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShGeneric<N, T>& other)
   : ShGeneric<N, T>(new ShVariableNode(Binding, N))
 {
   if (Binding == SH_CONST || uniform()) {
-    assert(!ShEnvironment::insideShader);
-    assert(other.hasValues());
+    SH_DEBUG_ASSERT(!ShEnvironment::insideShader);
+    SH_DEBUG_ASSERT(other.hasValues());
     T data[N];
     other.getValues(data);
     setValues(data);
@@ -67,8 +68,8 @@ ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShAttrib<N, Binding, T, Swizzl
   : ShGeneric<N, T>(new ShVariableNode(Binding, N))
 {
   if (Binding == SH_CONST || uniform()) {
-    assert(!ShEnvironment::insideShader);
-    assert(other.hasValues());
+    SH_DEBUG_ASSERT(!ShEnvironment::insideShader);
+    SH_DEBUG_ASSERT(other.hasValues());
     T data[N];
     other.getValues(data);
     setValues(data);
@@ -107,16 +108,7 @@ template<int N, ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator=(const ShGeneric<N, T>& other)
 {
-  if (Binding == SH_CONST || uniform()) {
-    assert(!ShEnvironment::insideShader);
-    assert(other.hasValues());
-    T data[N];
-    other.getValues(data);
-    setValues(data);
-  } else {
-    ShStatement asn(*this, SH_OP_ASN, other);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
-  }
+  ParentType::operator=(other);
   return *this;
 }
 
@@ -124,16 +116,7 @@ template<int N, ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator=(const ShAttrib<N, Binding, T, Swizzled>& other)
 {
-  if (Binding == SH_CONST || uniform()) {
-    assert(!ShEnvironment::insideShader);
-    assert(other.hasValues());
-    T data[N];
-    other.getValues(data);
-    setValues(data);
-  } else {
-    ShStatement asn(*this, SH_OP_ASN, other);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
-  }
+  ParentType::operator=(other);
   return *this;
 }
 
@@ -141,7 +124,7 @@ template<int N, ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator+=(const ShGeneric<N, T>& right)
 {
-  *this = *this + right;
+  ParentType::operator+=(right);
   return *this;
 }
 
@@ -149,7 +132,7 @@ template<int N, ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator-=(const ShGeneric<N, T>& right)
 {
-  *this = *this - right;
+  ParentType::operator-=(right);
   return *this;
 }
 
@@ -157,7 +140,7 @@ template<int N, ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator*=(const ShGeneric<N, T>& right)
 {
-  *this = *this * right;
+  ParentType::operator*=(right);
   return *this;
 }
 
@@ -165,7 +148,7 @@ template<int N, ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator/=(const ShGeneric<N, T>& right)
 {
-  *this = *this / right;
+  ParentType::operator/=(right);
   return *this;
 }
 
@@ -173,7 +156,7 @@ template<int N, ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator*=(T right)
 {
-  *this = *this * right;
+  ParentType::operator*=(right);
   return *this;
 }
 
@@ -181,7 +164,7 @@ template<int N, ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator/=(T right)
 {
-  *this = *this / right;
+  ParentType::operator/=(right);
   return *this;
 }
 
@@ -189,7 +172,7 @@ template<int N, ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T>& right)
 {
-  *this = *this * right;
+  ParentType::operator*=(right);
   return *this;
 }
 
@@ -197,7 +180,7 @@ template<int N, ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T>& right)
 {
-  *this = *this / right;
+  ParentType::operator/=(right);
   return *this;
 }
 
@@ -262,8 +245,8 @@ ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T>& other)
   : ShGeneric<1, T>(new ShVariableNode(Binding, 1))
 {
   if (Binding == SH_CONST || uniform()) {
-    assert(!ShEnvironment::insideShader);
-    assert(other.hasValues());
+    SH_DEBUG_ASSERT(!ShEnvironment::insideShader);
+    SH_DEBUG_ASSERT(other.hasValues());
     T data[1];
     other.getValues(data);
     setValues(data);
@@ -278,8 +261,8 @@ ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShAttrib<1, Binding, T, Swizzl
   : ShGeneric<1, T>(new ShVariableNode(Binding, 1))
 {
   if (Binding == SH_CONST || uniform()) {
-    assert(!ShEnvironment::insideShader);
-    assert(other.hasValues());
+    SH_DEBUG_ASSERT(!ShEnvironment::insideShader);
+    SH_DEBUG_ASSERT(other.hasValues());
     T data[1];
     other.getValues(data);
     setValues(data);
@@ -329,16 +312,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<1, Binding, T, Swizzled>&
 ShAttrib<1, Binding, T, Swizzled>::operator=(const ShGeneric<1, T>& other)
 {
-  if (Binding == SH_CONST || uniform()) {
-    assert(!ShEnvironment::insideShader);
-    assert(other.hasValues());
-    T data[1];
-    other.getValues(data);
-    setValues(data);
-  } else {
-    ShStatement asn(*this, SH_OP_ASN, other);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
-  }
+  ParentType::operator=(other);
   return *this;
 }
 
@@ -346,16 +320,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<1, Binding, T, Swizzled>&
 ShAttrib<1, Binding, T, Swizzled>::operator=(const ShAttrib<1, Binding, T, Swizzled>& other)
 {
-  if (Binding == SH_CONST || uniform()) {
-    assert(!ShEnvironment::insideShader);
-    assert(other.hasValues());
-    T data[1];
-    other.getValues(data);
-    setValues(data);
-  } else {
-    ShStatement asn(*this, SH_OP_ASN, other);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
-  }
+  ParentType::operator=(other);
   return *this;
 }
 
@@ -363,7 +328,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<1, Binding, T, Swizzled>&
 ShAttrib<1, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T>& right)
 {
-  *this = *this + right;
+  ParentType::operator+=(right);
   return *this;
 }
 
@@ -371,7 +336,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<1, Binding, T, Swizzled>&
 ShAttrib<1, Binding, T, Swizzled>::operator-=(const ShGeneric<1, T>& right)
 {
-  *this = *this - right;
+  ParentType::operator-=(right);
   return *this;
 }
 
@@ -379,7 +344,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<1, Binding, T, Swizzled>&
 ShAttrib<1, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T>& right)
 {
-  *this = *this * right;
+  ParentType::operator*=(right);
   return *this;
 }
 
@@ -387,7 +352,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<1, Binding, T, Swizzled>&
 ShAttrib<1, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T>& right)
 {
-  *this = *this / right;
+  ParentType::operator/=(right);
   return *this;
 }
 
@@ -395,7 +360,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<1, Binding, T, Swizzled>&
 ShAttrib<1, Binding, T, Swizzled>::operator*=(T right)
 {
-  *this = *this * right;
+  ParentType::operator*=(right);
   return *this;
 }
 
@@ -403,7 +368,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<1, Binding, T, Swizzled>&
 ShAttrib<1, Binding, T, Swizzled>::operator/=(T right)
 {
-  *this = *this / right;
+  ParentType::operator/=(right);
   return *this;
 }
 
@@ -411,7 +376,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<1, Binding, T, Swizzled>&
 ShAttrib<1, Binding, T, Swizzled>::operator+=(T right)
 {
-  *this = *this + right;
+  ParentType::operator+=(right);
   return *this;
 }
 
@@ -419,7 +384,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<1, Binding, T, Swizzled>&
 ShAttrib<1, Binding, T, Swizzled>::operator-=(T right)
 {
-  *this = *this - right;
+  ParentType::operator-=(right);
   return *this;
 }
 
@@ -484,8 +449,8 @@ ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShGeneric<2, T>& other)
   : ShGeneric<2, T>(new ShVariableNode(Binding, 2))
 {
   if (Binding == SH_CONST || uniform()) {
-    assert(!ShEnvironment::insideShader);
-    assert(other.hasValues());
+    SH_DEBUG_ASSERT(!ShEnvironment::insideShader);
+    SH_DEBUG_ASSERT(other.hasValues());
     T data[2];
     other.getValues(data);
     setValues(data);
@@ -500,8 +465,8 @@ ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShAttrib<2, Binding, T, Swizzl
   : ShGeneric<2, T>(new ShVariableNode(Binding, 2))
 {
   if (Binding == SH_CONST || uniform()) {
-    assert(!ShEnvironment::insideShader);
-    assert(other.hasValues());
+    SH_DEBUG_ASSERT(!ShEnvironment::insideShader);
+    SH_DEBUG_ASSERT(other.hasValues());
     T data[2];
     other.getValues(data);
     setValues(data);
@@ -568,16 +533,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator=(const ShGeneric<2, T>& other)
 {
-  if (Binding == SH_CONST || uniform()) {
-    assert(!ShEnvironment::insideShader);
-    assert(other.hasValues());
-    T data[2];
-    other.getValues(data);
-    setValues(data);
-  } else {
-    ShStatement asn(*this, SH_OP_ASN, other);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
-  }
+  ParentType::operator=(other);
   return *this;
 }
 
@@ -585,16 +541,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator=(const ShAttrib<2, Binding, T, Swizzled>& other)
 {
-  if (Binding == SH_CONST || uniform()) {
-    assert(!ShEnvironment::insideShader);
-    assert(other.hasValues());
-    T data[2];
-    other.getValues(data);
-    setValues(data);
-  } else {
-    ShStatement asn(*this, SH_OP_ASN, other);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
-  }
+  ParentType::operator=(other);
   return *this;
 }
 
@@ -602,7 +549,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator+=(const ShGeneric<2, T>& right)
 {
-  *this = *this + right;
+  ParentType::operator+=(right);
   return *this;
 }
 
@@ -610,7 +557,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator-=(const ShGeneric<2, T>& right)
 {
-  *this = *this - right;
+  ParentType::operator-=(right);
   return *this;
 }
 
@@ -618,7 +565,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator*=(const ShGeneric<2, T>& right)
 {
-  *this = *this * right;
+  ParentType::operator*=(right);
   return *this;
 }
 
@@ -626,7 +573,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator/=(const ShGeneric<2, T>& right)
 {
-  *this = *this / right;
+  ParentType::operator/=(right);
   return *this;
 }
 
@@ -634,7 +581,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator*=(T right)
 {
-  *this = *this * right;
+  ParentType::operator*=(right);
   return *this;
 }
 
@@ -642,7 +589,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator/=(T right)
 {
-  *this = *this / right;
+  ParentType::operator/=(right);
   return *this;
 }
 
@@ -650,7 +597,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T>& right)
 {
-  *this = *this * right;
+  ParentType::operator*=(right);
   return *this;
 }
 
@@ -658,7 +605,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T>& right)
 {
-  *this = *this / right;
+  ParentType::operator/=(right);
   return *this;
 }
 
@@ -723,8 +670,8 @@ ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShGeneric<3, T>& other)
   : ShGeneric<3, T>(new ShVariableNode(Binding, 3))
 {
   if (Binding == SH_CONST || uniform()) {
-    assert(!ShEnvironment::insideShader);
-    assert(other.hasValues());
+    SH_DEBUG_ASSERT(!ShEnvironment::insideShader);
+    SH_DEBUG_ASSERT(other.hasValues());
     T data[3];
     other.getValues(data);
     setValues(data);
@@ -739,8 +686,8 @@ ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShAttrib<3, Binding, T, Swizzl
   : ShGeneric<3, T>(new ShVariableNode(Binding, 3))
 {
   if (Binding == SH_CONST || uniform()) {
-    assert(!ShEnvironment::insideShader);
-    assert(other.hasValues());
+    SH_DEBUG_ASSERT(!ShEnvironment::insideShader);
+    SH_DEBUG_ASSERT(other.hasValues());
     T data[3];
     other.getValues(data);
     setValues(data);
@@ -812,16 +759,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator=(const ShGeneric<3, T>& other)
 {
-  if (Binding == SH_CONST || uniform()) {
-    assert(!ShEnvironment::insideShader);
-    assert(other.hasValues());
-    T data[3];
-    other.getValues(data);
-    setValues(data);
-  } else {
-    ShStatement asn(*this, SH_OP_ASN, other);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
-  }
+  ParentType::operator=(other);
   return *this;
 }
 
@@ -829,16 +767,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator=(const ShAttrib<3, Binding, T, Swizzled>& other)
 {
-  if (Binding == SH_CONST || uniform()) {
-    assert(!ShEnvironment::insideShader);
-    assert(other.hasValues());
-    T data[3];
-    other.getValues(data);
-    setValues(data);
-  } else {
-    ShStatement asn(*this, SH_OP_ASN, other);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
-  }
+  ParentType::operator=(other);
   return *this;
 }
 
@@ -846,7 +775,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator+=(const ShGeneric<3, T>& right)
 {
-  *this = *this + right;
+  ParentType::operator+=(right);
   return *this;
 }
 
@@ -854,7 +783,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator-=(const ShGeneric<3, T>& right)
 {
-  *this = *this - right;
+  ParentType::operator-=(right);
   return *this;
 }
 
@@ -862,7 +791,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator*=(const ShGeneric<3, T>& right)
 {
-  *this = *this * right;
+  ParentType::operator*=(right);
   return *this;
 }
 
@@ -870,7 +799,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator/=(const ShGeneric<3, T>& right)
 {
-  *this = *this / right;
+  ParentType::operator/=(right);
   return *this;
 }
 
@@ -878,7 +807,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator*=(T right)
 {
-  *this = *this * right;
+  ParentType::operator*=(right);
   return *this;
 }
 
@@ -886,7 +815,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator/=(T right)
 {
-  *this = *this / right;
+  ParentType::operator/=(right);
   return *this;
 }
 
@@ -894,7 +823,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T>& right)
 {
-  *this = *this * right;
+  ParentType::operator*=(right);
   return *this;
 }
 
@@ -902,7 +831,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T>& right)
 {
-  *this = *this / right;
+  ParentType::operator/=(right);
   return *this;
 }
 
@@ -967,8 +896,8 @@ ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShGeneric<4, T>& other)
   : ShGeneric<4, T>(new ShVariableNode(Binding, 4))
 {
   if (Binding == SH_CONST || uniform()) {
-    assert(!ShEnvironment::insideShader);
-    assert(other.hasValues());
+    SH_DEBUG_ASSERT(!ShEnvironment::insideShader);
+    SH_DEBUG_ASSERT(other.hasValues());
     T data[4];
     other.getValues(data);
     setValues(data);
@@ -983,8 +912,8 @@ ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShAttrib<4, Binding, T, Swizzl
   : ShGeneric<4, T>(new ShVariableNode(Binding, 4))
 {
   if (Binding == SH_CONST || uniform()) {
-    assert(!ShEnvironment::insideShader);
-    assert(other.hasValues());
+    SH_DEBUG_ASSERT(!ShEnvironment::insideShader);
+    SH_DEBUG_ASSERT(other.hasValues());
     T data[4];
     other.getValues(data);
     setValues(data);
@@ -1061,16 +990,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator=(const ShGeneric<4, T>& other)
 {
-  if (Binding == SH_CONST || uniform()) {
-    assert(!ShEnvironment::insideShader);
-    assert(other.hasValues());
-    T data[4];
-    other.getValues(data);
-    setValues(data);
-  } else {
-    ShStatement asn(*this, SH_OP_ASN, other);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
-  }
+  ParentType::operator=(other);
   return *this;
 }
 
@@ -1078,16 +998,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator=(const ShAttrib<4, Binding, T, Swizzled>& other)
 {
-  if (Binding == SH_CONST || uniform()) {
-    assert(!ShEnvironment::insideShader);
-    assert(other.hasValues());
-    T data[4];
-    other.getValues(data);
-    setValues(data);
-  } else {
-    ShStatement asn(*this, SH_OP_ASN, other);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
-  }
+  ParentType::operator=(other);
   return *this;
 }
 
@@ -1095,7 +1006,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator+=(const ShGeneric<4, T>& right)
 {
-  *this = *this + right;
+  ParentType::operator+=(right);
   return *this;
 }
 
@@ -1103,7 +1014,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator-=(const ShGeneric<4, T>& right)
 {
-  *this = *this - right;
+  ParentType::operator-=(right);
   return *this;
 }
 
@@ -1111,7 +1022,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator*=(const ShGeneric<4, T>& right)
 {
-  *this = *this * right;
+  ParentType::operator*=(right);
   return *this;
 }
 
@@ -1119,7 +1030,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator/=(const ShGeneric<4, T>& right)
 {
-  *this = *this / right;
+  ParentType::operator/=(right);
   return *this;
 }
 
@@ -1127,7 +1038,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator*=(T right)
 {
-  *this = *this * right;
+  ParentType::operator*=(right);
   return *this;
 }
 
@@ -1135,7 +1046,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator/=(T right)
 {
-  *this = *this / right;
+  ParentType::operator/=(right);
   return *this;
 }
 
@@ -1143,7 +1054,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T>& right)
 {
-  *this = *this * right;
+  ParentType::operator*=(right);
   return *this;
 }
 
@@ -1151,7 +1062,7 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T>& right)
 {
-  *this = *this / right;
+  ParentType::operator/=(right);
   return *this;
 }
 
