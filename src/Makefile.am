@@ -9,4 +9,6 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
                    ShParser.hpp ShRefCount.hpp ShShader.hpp ShStatement.hpp \
                    ShSwizzle.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp \
                    ShUtility.hpp ShVariable.hpp ShVariableNode.hpp sh.hpp \
-                   ShMatrix.hpp ShMatrixImpl.hpp
+                   ShMatrix.hpp ShMatrixImpl.hpp ShTexture.hpp ShTextureImpl.hpp \
+                   ShTextureNode.hpp ShTextureNode.cpp ShImage.hpp ShImage.cpp \
+                   ShVector.hpp ShVectorImpl.hpp ShLibVector.hpp ShLibAttrib.hpp

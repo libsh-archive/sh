@@ -7,6 +7,12 @@
 #include "ShAttrib.hpp"
 #include "ShMatrix.hpp"
 
+/** \file ShLib.hpp
+ * \brief The Sh library functions.
+ * If you add or remove functions in this file be sure to modify the
+ * other ShLib*.hpp (e.g. ShLibVector.hpp) files appropriately.
+ */
+
 namespace SH {
 
 /** Utility template to check whether dimensions are equal or scalar.
@@ -144,17 +150,17 @@ ShVariableN<N, T> operator/(const ShVariableN<N, T>& left, const ShVariableN<M, 
 
 /// Conventional power operation.
 template<int N, typename T>
-ShVariableN<N, T> operator^(const ShVariableN<N, T>& left, const ShVariableN<1, T>& right)
+ShVariableN<N, T> operator^(const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
 {
   if (!ShEnvironment::insideShader) {
     assert(left.hasValues());
     assert(right.hasValues());
     T lvals[N];
     left.getValues(lvals);
-    T rvals[1];
+    T rvals[N];
     right.getValues(rvals);
     T result[N];
-    for (int i = 0; i < N; i++) result[i] = std::pow(lvals[i], rvals[0]);
+    for (int i = 0; i < N; i++) result[i] = std::pow(lvals[i], rvals[i]);
     return ShConstant<N, T>(result);
   } else {
     ShAttrib<N, SH_VAR_TEMP, T, false> t;
@@ -525,5 +531,57 @@ ShVariableN<M, T> operator|(const ShMatrix<M, N, Kind, T>& a, const ShVariableN<
 }
 
 }
+
+#define SH_SHLIB_UNARY_OPERATION(libtype, libop, libretsize) \
+template<int N, int K1, typename T, bool S1> \
+libtype<libretsize, SH_VAR_TEMP, T, false> \
+libop(const libtype<N, K1, T, S1>& var) \
+{ \
+  ShVariableN<libretsize, T> t = libop(static_cast< ShVariableN<N, T> >(var)); \
+  return libtype<libretsize, SH_VAR_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
+}
+
+#define SH_SHLIB_BINARY_OPERATION(libtype, libop, libretsize) \
+template<int N, int K1, int K2, typename T, bool S1, bool S2> \
+libtype<libretsize, SH_VAR_TEMP, T, false> \
+libop(const libtype<N, K1, T, S1>& left, const libtype<N, K2, T, S2>& right) \
+{ \
+  ShVariableN<libretsize, T> t = libop(static_cast< ShVariableN<N, T> >(left), \
+                                       static_cast< ShVariableN<N, T> >(right)); \
+  return libtype<libretsize, SH_VAR_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
+}
+
+#define SH_SHLIB_UNEQ_BINARY_OPERATION(libtype, libop, libretsize) \
+template<int N, int M, int K1, int K2, typename T, bool S1, bool S2> \
+libtype<libretsize, SH_VAR_TEMP, T, false> \
+libop(const libtype<N, K1, T, S1>& left, const libtype<M, K2, T, S2>& right) \
+{ \
+  ShVariableN<libretsize, T> t = libop(static_cast< ShVariableN<N, T> >(left), \
+                                       static_cast< ShVariableN<M, T> >(right)); \
+  return libtype<libretsize, SH_VAR_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
+}
+
+#define SH_SHLIB_LEFT_SCALAR_OPERATION(libtype, libop) \
+template<int M, int K1, int K2, typename T, bool S1, bool S2> \
+libtype<M, SH_VAR_TEMP, T, false> \
+libop(const libtype<1, K2, T, S2>& left, const libtype<M, K1, T, S1>& right) \
+{ \
+  ShVariableN<M, T> t = libop(static_cast< ShVariableN<1, T> >(left), \
+                              static_cast< ShVariableN<M, T> >(right)); \
+  return libtype<M, SH_VAR_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
+}
+
+#define SH_SHLIB_LEFT_MATRIX_OPERATION(libtype, libop, libretsize) \
+template<int M, int N, int K1, int K2, typename T, bool S1> \
+libtype<libretsize, SH_VAR_TEMP, T, false> libop(const ShMatrix<M, N, K1, T>& a, \
+                                                 const libtype<N, K2, T, S1>& b) \
+{ \
+  ShVariableN<libretsize, T> t = libop(a, \
+                                       static_cast< ShVariableN<N, T> >(b)); \
+  return libtype<libretsize, K1, T, S1>(t.node(), t.swizzle(), t.neg()); \
+}
+
+#include "ShLibAttrib.hpp"
+#include "ShLibVector.hpp"
 
 #endif

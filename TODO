@@ -2,9 +2,25 @@ MATRICES:
  X operator()() extracts submatrix
  X operator[] extracts single row
  X operator{+,-,*,/}=
- X add linear algebra
+ X add matrix mults
+ - adjunct
+ - determinant
+ - inverse
+ - name()
+
+TEXTURES:
+ X bind texture units in shader
+ - RESOLVE THIS: allocating texture units... how not to conflict between two shaders? Need to talk to Kevin
+ X scale lookups in SM backend
+ X load data into textures
+ - turn 3-textures into 4-textures automatically... in sm backend!
+ - update notification
+ - mip mapping
+ - other lookup mechanisms (bilinear etc.)
+ - generic traits mechanism
 
 SMALL TASKS:
+ - check for libpng in configure
  X have updating semantics for uniforms
  - have functions to switch the current backend, clearing bound shaders etc. appropriately.
  X need a map of shader kind -> currently bound shader
@@ -29,7 +45,7 @@ SMALL TASKS:
  X store ShBackendCode objects in ShShader
  - replace assert() with exceptions/error function
  - add operator*(T) and similar for division to Sh{Lib,Attrib,Matrix}.hpp
- - add operator[] to ShAttrib also to do one-element swizzle.
+ X add operator[] to ShAttrib also to do one-element swizzle.
  - use a ShVariableKind instead of an int template parameter in ShAttrib and ShMatrix
 
 MEDIUM TASKS:
@@ -37,14 +53,14 @@ MEDIUM TASKS:
  X code generator
  - add smarter configuration mechanism
  - add "context" concept
- - vectors
+ X vectors
  - points
  - colours
 
 LARGE TASKS:
  X finish the parser
  - begin the optimizer
- X matrices
+ / matrices
  - textures
  - more backends
 
@@ -58,14 +74,23 @@ OPERATIONS:
 |-+-+-+
 |X|X|X| mul
 |X|X|X| div
+|X|X|X| add
+|X|X|X| sub
 |X|X|X| sqrt
 |X|X|X| dot
 |X|X|X| pow
 |X|X|X| frac
 |X|X|X| sin
 |X|X|X| cos
+| | | | tan
 |X|X|X| <, <=, >, >=, ==, !=
 | |X| | ceil
+|X|X| | acos
+|X|X| | asin
+| | | | atan
+| | | | cross
+| | | | min
+| | | | max
 | | | | exp
 | | | | log
 | | | | fmod

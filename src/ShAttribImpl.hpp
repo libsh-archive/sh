@@ -48,6 +48,16 @@ ShAttrib<N, Kind, T, Swizzled>::ShAttrib(const ShAttrib<N, Kind, T, Swizzled>& o
 }
 
 template<int N, int Kind, typename T, bool Swizzled>
+ShAttrib<N, Kind, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
+                                         const ShSwizzle& swizzle,
+                                         bool neg)
+  : ShVariableN<N, T>(node)
+{
+  m_swizzle = swizzle;
+  m_neg = neg;
+}
+
+template<int N, int Kind, typename T, bool Swizzled>
 ShAttrib<N, Kind, T, Swizzled>::ShAttrib(T v1)
   : ShVariableN<N, T>(new ShVariableNode(static_cast<ShVariableKind>(Kind), N))
 {
@@ -230,15 +240,6 @@ ShAttrib<N, Kind, T, Swizzled>
 ShAttrib<N, Kind, T, Swizzled>::operator-() const
 {
   return ShAttrib<N, Kind, T, Swizzled>(m_node, m_swizzle, !m_neg);
-}
-
-template<int N, int Kind, typename T, bool Swizzled>
-ShAttrib<N, Kind, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node, const ShSwizzle& swizzle,
-                                         bool neg)
-  : ShVariableN<N, T>(node)
-{
-  m_swizzle = swizzle;
-  m_neg = neg;
 }
 
 }

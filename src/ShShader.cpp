@@ -3,6 +3,7 @@
 #include <algorithm>
 #include "ShBackend.hpp"
 #include "ShEnvironment.hpp"
+#include "ShDebug.hpp"
 
 namespace SH {
 
@@ -73,18 +74,22 @@ void ShShaderNode::collectNodeVars(const ShCtrlGraphNodePtr& node)
 
 void ShShaderNode::collectVar(const ShVariableNodePtr& var) {
   if (!var) return;
-  if (var->uniform()) {
-    if (std::find(uniforms.begin(), uniforms.end(), var) != uniforms.end()) uniforms.push_back(var);
+  if (var->uniform() && var->kind() != SH_VAR_TEXTURE) {
+    if (std::find(uniforms.begin(), uniforms.end(), var) == uniforms.end()) uniforms.push_back(var);
   } else switch (var->kind()) {
   case SH_VAR_INPUT:
   case SH_VAR_OUTPUT:
     // Taken care of by ShVariableNode constructor
     break;
   case SH_VAR_TEMP:
-    if (std::find(temps.begin(), temps.end(), var) != temps.end()) temps.push_back(var);
+    if (std::find(temps.begin(), temps.end(), var) == temps.end()) temps.push_back(var);
     break;
   case SH_VAR_CONST:
-    if (std::find(constants.begin(), constants.end(), var) != constants.end()) constants.push_back(var);
+    if (std::find(constants.begin(), constants.end(), var) == constants.end()) constants.push_back(var);
+    break;
+  case SH_VAR_TEXTURE:
+    SH_DEBUG_PRINT("Found a texture");
+    if (std::find(textures.begin(), textures.end(), var) == textures.end()) textures.push_back(var);
     break;
   }
 }

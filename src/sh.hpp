@@ -6,8 +6,11 @@
 #include "ShSyntax.hpp"
 #include "ShAttrib.hpp"
 #include "ShMatrix.hpp"
+#include "ShVector.hpp"
 #include "ShLib.hpp"
+#include "ShTexture.hpp"
 #include "ShBackend.hpp"
+#include "ShImage.hpp"
 
 /** \namespace SH
  * \brief The main Sh namespace.

@@ -27,6 +27,13 @@ public:
   ShParseException(const std::string& message);
 };
 
+/** An exception relating to an ShImage operation.
+ */
+class ShImageException : public ShException {
+public:
+  ShImageException(const std::string& message);
+};
+
 }
 
 #endif

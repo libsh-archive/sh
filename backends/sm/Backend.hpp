@@ -10,6 +10,7 @@
 #include "ShBasicBlock.hpp"
 #include "sm.hpp"
 #include "ShRefCount.hpp"
+#include "ShTextureNode.hpp"
 
 namespace ShSm {
 
@@ -38,6 +39,7 @@ enum SmRegType {
   SHSM_REG_OUTPUT = 1,
   SHSM_REG_TEMP = 2,
   SHSM_REG_CONST = 3,
+  SHSM_REG_TEXTURE = 4,
 };
 
 struct SmRegister {
@@ -91,6 +93,8 @@ private:
   int m_maxTR;
   int m_maxIR;
   int m_maxOR;
+  int m_maxTex;
+  
   typedef std::map<SH::ShVariableNodePtr, SmRegister> RegMap;
   RegMap m_registers; ///< Really Simple(TM) register allocation
 
@@ -98,6 +102,10 @@ private:
   SMreg* m_tR;
   SMreg* m_iR;
   SMreg* m_oR;
+
+  typedef std::map<SH::ShTextureNodePtr, SMtexture> TextureNodeMap;
+
+  TextureNodeMap m_textureMap;
 
   std::string printVar(const SH::ShVariable& var);
 };

@@ -1,0 +1,154 @@
+#include "ShImage.hpp"
+#include <string>
+#include <cstring>
+#include <cstdio>
+#include <png.h>
+#include "ShException.hpp"
+
+namespace SH {
+
+ShImage::ShImage()
+  : m_width(0), m_height(0), m_depth(0), m_data(0)
+{
+}
+
+ShImage::ShImage(int width, int height, int depth)
+  : m_width(width), m_height(height), m_depth(depth),
+    m_data(new float[m_width * m_height * m_depth])
+{
+}
+
+ShImage::ShImage(const ShImage& other)
+  : m_width(other.m_width), m_height(other.m_height), m_depth(other.m_depth),
+    m_data(new float[m_width * m_height * m_depth])
+{
+  std::memcpy(m_data, other.m_data, m_width * m_height * m_depth * sizeof(float));
+}
+
+ShImage::~ShImage()
+{
+  delete [] m_data;
+}
+
+ShImage& ShImage::operator=(const ShImage& other)
+{
+  delete [] m_data;
+  m_width = other.m_width;
+  m_height = other.m_height;
+  m_depth = other.m_depth;
+  m_data = new float[m_width * m_height * m_depth];
+  std::memcpy(m_data, other.m_data, m_width * m_height * m_depth * sizeof(float));
+  return *this;
+}
+
+int ShImage::width() const
+{
+  return m_width;
+}
+
+int ShImage::height() const
+{
+  return m_height;
+}
+
+int ShImage::depth() const
+{
+  return m_depth;
+}
+
+float ShImage::operator()(int x, int y, int i) const
+{
+  return m_data[m_depth * (m_width * y + x) + i];
+}
+
+float& ShImage::operator()(int x, int y, int i)
+{
+  return m_data[m_depth * (m_width * y + x) + i];
+}
+
+void ShImage::loadPng(const std::string& filename)
+{
+  // check that the file is a png file
+  png_byte buf[8];
+
+  FILE* in = std::fopen(filename.c_str(), "r");
+
+  if (!in) throw ShImageException("Unable to open " + filename);
+  
+  for (int i = 0; i < 8; i++) {
+    if (!(buf[i] = fgetc(in))) throw ShImageException("Not a PNG file");
+  }
+  if (png_sig_cmp(buf, 0, 8)) throw ShImageException("Not a PNG file");
+
+  png_structp png_ptr =
+    png_create_read_struct(PNG_LIBPNG_VER_STRING,
+			   0, 0, 0); // FIXME: use error handlers
+  if (!png_ptr) throw ShImageException("Error initialising libpng (png_ptr)");
+
+  png_infop info_ptr = png_create_info_struct(png_ptr);
+  if (!info_ptr) {
+    png_destroy_read_struct(&png_ptr, 0, 0);
+    throw ShImageException("Error initialising libpng (info_ptr)");
+  }
+
+  if (setjmp(png_jmpbuf(png_ptr))) {
+    png_destroy_read_struct(&png_ptr, 0, 0);
+    throw ShImageException("Error initialising libpng (setjmp/lngjmp)");    
+  }
+  
+  //  png_set_read_fn(png_ptr, reinterpret_cast<void*>(&in), my_istream_read_data);
+  png_init_io(png_ptr, in);
+  
+  png_set_sig_bytes(png_ptr, 8);
+
+  png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, 0);
+
+  int bit_depth = png_get_bit_depth(png_ptr, info_ptr);
+  if (bit_depth != 8) {
+    png_destroy_read_struct(&png_ptr, 0, 0);
+    throw ShImageException("Invalid bit depth");
+  }
+
+  int colour_type = png_get_color_type(png_ptr, info_ptr);
+
+  if (colour_type == PNG_COLOR_TYPE_PALETTE) {
+    png_set_palette_to_rgb(png_ptr);
+    colour_type = PNG_COLOR_TYPE_RGB;
+  }
+
+  if (colour_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8) {
+    png_set_gray_1_2_4_to_8(png_ptr);
+  }
+
+  if (colour_type != PNG_COLOR_TYPE_RGB
+      && colour_type != PNG_COLOR_TYPE_GRAY) {
+    png_destroy_read_struct(&png_ptr, 0, 0);
+    throw ShImageException("Invalid colour type");
+  }
+
+  delete [] m_data;
+
+  m_width = png_get_image_width(png_ptr, info_ptr);
+  m_height = png_get_image_height(png_ptr, info_ptr);
+  m_depth = (colour_type == PNG_COLOR_TYPE_RGB ? 3 : 1);
+  png_bytep* row_pointers = png_get_rows(png_ptr, info_ptr);
+
+  m_data = new float[m_width * m_height * m_depth];
+
+  for (int y = 0; y < m_height; y++) {
+    for (int x = 0; x < m_width; x++) {
+      for (int i = 0; i < m_depth; i++) {
+        m_data[m_depth * (y * m_width + x) + i] = row_pointers[y][x * m_depth + i]/255.0;
+      }
+    }
+  }
+
+  png_destroy_read_struct(&png_ptr, &info_ptr, 0);
+}
+
+const float* ShImage::data() const
+{
+  return m_data;
+}
+
+}

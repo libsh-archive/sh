@@ -11,3 +11,5 @@ ops
 simple
 uniforms
 matrix
+shvector
+texture

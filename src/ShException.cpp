@@ -17,5 +17,10 @@ ShParseException::ShParseException(const std::string& message)
 {
 }
 
+ShImageException::ShImageException(const std::string& message)
+  : ShException("Image Error: " + message)
+{
+}
+
 
 }

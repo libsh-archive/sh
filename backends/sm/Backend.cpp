@@ -30,6 +30,9 @@ std::string SmRegister::print() const
   case SHSM_REG_CONST:
     stream << "cR";
     break;
+  case SHSM_REG_TEXTURE:
+    stream << index << std::ends;
+    return stream.str();
   }
   stream << "[" << index << "]" << std::ends;
   
@@ -38,7 +41,7 @@ std::string SmRegister::print() const
 
 BackendCode::BackendCode(ShRefCount<Backend> backend, const ShShader& shader)
   : m_backend(backend), m_shader(shader),
-    m_maxCR(0), m_maxTR(0), m_maxIR(0), m_maxOR(0),
+    m_maxCR(0), m_maxTR(0), m_maxIR(0), m_maxOR(0), m_maxTex(0),
     m_cR(0), m_tR(0), m_iR(0), m_oR(0)
 {
 }
@@ -49,6 +52,10 @@ BackendCode::~BackendCode()
   delete [] m_tR;
   delete [] m_iR;
   delete [] m_oR;
+
+  for (TextureNodeMap::iterator I = m_textureMap.begin(); I != m_textureMap.end(); ++I) {
+    smDeleteTexture(I->second);
+  }
 }
 
 void BackendCode::upload()
@@ -65,7 +72,9 @@ void BackendCode::upload()
 
   for (SmInstList::const_iterator I = m_instructions.begin(); I != m_instructions.end();
        ++I) {
-    if (I->src1.null()) {
+    if (I->op == OP_TEX) {
+      smTEX(getSmReg(I->dest), getSmReg(I->src1), getReg(I->src2.node()).index);
+    } else if (I->src1.null()) {
       smInstr(I->op, getSmReg(I->dest));
     } else if (I->src2.null()) {
       smInstr(I->op, getSmReg(I->dest), getSmReg(I->src1));
@@ -90,7 +99,7 @@ void BackendCode::bind()
   for (RegMap::const_iterator I = m_registers.begin(); I != m_registers.end(); ++I) {
     ShVariableNodePtr node = I->first;
     SmRegister reg = I->second;
-    if (node->hasValues()) {
+    if (node->hasValues() && reg.type == SHSM_REG_CONST) {
       float values[4];
       int i;
       for (i = 0; i < node->size(); i++) {
@@ -103,6 +112,31 @@ void BackendCode::bind()
     }
   }
 
+  SH_DEBUG_PRINT("Uploading textures...");
+  for (ShShaderNode::VarList::const_iterator I = m_shader->textures.begin(); I != m_shader->textures.end();
+       ++I) {
+    ShTextureNodePtr texture = *I;
+    if (!texture) {
+      SH_DEBUG_WARN((*I)->name() << " is not a valid texture!");
+      continue;
+    }
+    if (m_textureMap.find(texture) == m_textureMap.end()) {
+      // TODO: Other types of textures.
+      
+      m_textureMap[texture] = smNewTexture2DRect(texture->width(), texture->height(),
+                                                 texture->elements(), SM_FLOAT);
+      SMtexture smTex = m_textureMap[texture];
+      smTexImage2D(smTex, 0, const_cast<float*>(texture->data()));
+
+      // TODO: Capabilities
+      smTexWrapS(smTex, SM_REPEAT);
+      smTexWrapT(smTex, SM_REPEAT);
+    } else {
+      SH_DEBUG_PRINT("Texture already allocated");
+    }
+    SH_DEBUG_PRINT("Binding texture " << m_textureMap[texture] << " to texture unit " << getReg(texture).index);
+    smBindTexture(getReg(texture).index, m_textureMap[texture]);
+  }
 }
 
 std::string BackendCode::printVar(const ShVariable& var)
@@ -114,6 +148,9 @@ std::string BackendCode::printVar(const ShVariable& var)
   if (var.neg()) out += "-";
   
   out += getReg(var.node()).print();
+
+  if (var.node()->kind() == SH_VAR_TEXTURE) return out;
+  
   if (var.swizzle().size()) {  
     out += "[\"";
     for (int i = 0; i < std::min(var.swizzle().size(), 4); i++) {
@@ -194,7 +231,7 @@ std::ostream& BackendCode::print(std::ostream& out)
   for (RegMap::const_iterator I = m_registers.begin(); I != m_registers.end(); ++I) {
     ShVariableNodePtr node = I->first;
     SmRegister reg = I->second;
-    if (node->hasValues()) {
+    if (node->hasValues() && reg.type == SHSM_REG_CONST) {
       out << "smModLocalConstant(" << m_shader->kind() << ", " << reg.index << ", smTuple(";
       for (int i = 0; i < node->size(); i++) {
         if (i) out << ", ";
@@ -304,7 +341,9 @@ void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
       m_instructions.push_back(SmInstruction(OP_FRC, stmt.dest, stmt.src1));
       break;
     case SH_OP_POW:
-      m_instructions.push_back(SmInstruction(OP_POW, stmt.dest, stmt.src1, stmt.src2));
+      for (int i = 0; i < stmt.src1.size(); i++) {
+        m_instructions.push_back(SmInstruction(OP_POW, stmt.dest(i), stmt.src1(i), stmt.src2(i)));
+      }
       break;
     case SH_OP_SIN:
       m_instructions.push_back(SmInstruction(OP_SIN, stmt.dest, stmt.src1));
@@ -320,6 +359,25 @@ void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
     case SH_OP_NORM:
       m_instructions.push_back(SmInstruction(OP_NORM, stmt.dest, stmt.src1));
       break;
+    case SH_OP_TEX:
+      {
+        ShTextureNodePtr texture = stmt.src1.node();
+        if (!texture) break;
+        // TODO: Check texture for not mipmapped
+
+        /*
+        // Scale the lookup as necessary
+        ShVariableNodePtr scale = new ShVariableNode(SH_VAR_CONST, stmt.src2.size());
+        
+        scale->setValue(0, texture->width());
+        if (stmt.src2.size() >= 2) scale->setValue(1, texture->height());
+
+        ShVariable scaled(new ShVariableNode(SH_VAR_TEMP, stmt.src2.size()));
+        m_instructions.push_back(SmInstruction(OP_MUL, scaled, stmt.src2, ShVariable(scale)));
+        */
+        m_instructions.push_back(SmInstruction(OP_TEX, stmt.dest, stmt.src2, stmt.src1));
+        break;
+      }
     default:
       // TODO: other ops
       SH_DEBUG_WARN(opInfo[stmt.op].name << " not implement in SM backend");
@@ -362,7 +420,7 @@ SmRegister BackendCode::getReg(const SH::ShVariableNodePtr& var)
   RegMap::const_iterator I = m_registers.find(var);
   if (I != m_registers.end()) return I->second;
   
-  if (var->uniform()) {
+  if (var->uniform() && var->kind() != SH_VAR_TEXTURE) {
     m_registers[var] = SmRegister(SHSM_REG_CONST, m_maxCR++);
     return m_registers[var];
   }
@@ -379,6 +437,10 @@ SmRegister BackendCode::getReg(const SH::ShVariableNodePtr& var)
     break;
   case SH_VAR_CONST:
     m_registers[var] = SmRegister(SHSM_REG_CONST, m_maxCR++);
+    break;
+  case SH_VAR_TEXTURE:
+    SH_DEBUG_PRINT("Allocating texture unit " << m_maxTex);
+    m_registers[var] = SmRegister(SHSM_REG_TEXTURE, m_maxTex++);
     break;
   }
   return m_registers[var];
@@ -406,6 +468,9 @@ SMreg BackendCode::getSmReg(const SH::ShVariable& var)
     break;
   case SHSM_REG_CONST:
     smReg = m_cR[reg.index];
+    break;
+  case SHSM_REG_TEXTURE:
+    return SMreg();
     break;
   default:
     SH_DEBUG_WARN("Unknown register type " << (int)reg.type);

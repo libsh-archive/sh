@@ -21,7 +21,7 @@ int main()
       out(0) = in1(0) * in2(1);
       out = in1 / in2;
       out = in1 / in2(3);
-      out = in1 ^ in2(0);
+      out = in1 ^ in2;
       out = abs(in1);
       out = acos(in1);
       out = asin(in1);

@@ -6,10 +6,10 @@
 namespace SH {
 
 ShVariableNode::ShVariableNode(ShVariableKind kind, int size)
-  : m_uniform(!ShEnvironment::insideShader), m_kind(kind), m_size(size),
+  : m_uniform(!ShEnvironment::insideShader && kind != SH_VAR_TEXTURE), m_kind(kind), m_size(size),
     m_id(m_maxID++), m_values(0)
 {
-  if (m_uniform || m_kind == SH_VAR_CONST) {
+  if (m_kind != SH_VAR_TEXTURE && (m_uniform || m_kind == SH_VAR_CONST)) {
     m_values = new ValueType[size];
   }
   switch (m_kind) {
@@ -82,6 +82,9 @@ std::string ShVariableNode::name() const
     break;
   case SH_VAR_CONST:
     stream << "c";
+    break;
+  case SH_VAR_TEXTURE:
+    stream << "tex";
     break;
   }
 

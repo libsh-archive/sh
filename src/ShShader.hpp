@@ -51,6 +51,7 @@ public:
   VarList temps; ///< Temporary variables used in this shader
   VarList constants; ///< Constants used in this shader
   VarList uniforms; ///< Uniform variables used in this shader
+  VarList textures; ///< Textures used in this shader
 
   int kind() const { return m_kind; }
   
