@@ -150,7 +150,8 @@ void ShImage::loadPng(const std::string& filename)
   }
 
   if (colour_type != PNG_COLOR_TYPE_RGB
-      && colour_type != PNG_COLOR_TYPE_GRAY) {
+      && colour_type != PNG_COLOR_TYPE_GRAY
+      && colour_type != PNG_COLOR_TYPE_RGBA) {
     png_destroy_read_struct(&png_ptr, 0, 0);
     throw ShImageException("Invalid colour type");
   }
@@ -159,7 +160,18 @@ void ShImage::loadPng(const std::string& filename)
 
   m_width = png_get_image_width(png_ptr, info_ptr);
   m_height = png_get_image_height(png_ptr, info_ptr);
-  m_depth = (colour_type == PNG_COLOR_TYPE_RGB ? 3 : 1);
+  switch (colour_type) {
+  case PNG_COLOR_TYPE_RGB:
+    m_depth = 3;
+    break;
+  case PNG_COLOR_TYPE_RGBA:
+    m_depth = 4;
+    break;
+  default:
+    m_depth = 1;
+    break;
+  }
+  
   png_bytep* row_pointers = png_get_rows(png_ptr, info_ptr);
 
   m_data = new float[m_width * m_height * m_depth];

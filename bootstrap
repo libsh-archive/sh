@@ -1,6 +1,6 @@
 #!/bin/sh
 
-rm -r libltdl
+rm -rf libltdl
 
 if test "x${LIBTOOLIZE}" = "x" ; then
   LIBTOOLIZE="libtoolize --ltdl"
@@ -8,5 +8,7 @@ else
   LIBTOOLIZE="$LIBTOOLIZE --ltdl"
 fi
 export LIBTOOLIZE
+
+cat config/*.m4 > acinclude.m4
 
 autoreconf -s -i $*

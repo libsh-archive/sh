@@ -1,0 +1,9 @@
+2003-08-07  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* configure.ac, bootstrap, config/*.m4: Split off some useful
+	utility functions into their own M4 files, making the configure.ac
+	slightly less verbose.
+
+	* doc/Makefile.am: Added proper rules to build the documentation
+	and install/upload it as well.
+
