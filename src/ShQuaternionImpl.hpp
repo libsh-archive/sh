@@ -211,22 +211,22 @@ operator*(const ShAttrib<1, K2, T>& c, const ShQuaternion<K, T>& q)
   return (r *= c);
 }
 
-/*
 template<int K1, int K2, typename T>
 extern ShQuaternion<SH_TEMP, T>
 slerp(const ShQuaternion<K1, T>& q1, const ShQuaternion<K2, T>& q2, 
 		const ShAttrib1f& t)
 {
-  ShAttrib<1, SH_TEMP, T> cosTheta = q1.normalize().dot(q2.normalize());
+  //TODO::q1 and q2 must be unit quaternions, we cannot call normalize here
+  //since it's not a const function.
+  //TODO: when cosTheta is 1 or -1, we need to fallback to linear interpolation
+  //not sure how to implement this efficiently yet
+  ShAttrib<1, SH_TEMP, T> cosTheta = q1.dot(q2);
   ShAttrib<1, SH_TEMP, T> sinTheta = sqrt(1.0 - cosTheta*cosTheta);
   
-  ShQuaternion<K2, T> q2prime = (cosTheta >= 0.0)*q2 - (costTheta < 0.0)*q2;
-  
+  ShQuaternion<K2, T> q2prime = (cosTheta >= 0.0)*q2 - (cosTheta < 0.0)*q2;
+  ShAttrib<1, SH_TEMP, T> theta = asin(sinTheta);
 
-  
-  
-}*/
-
-
+  return (sin((1.0 - t)*theta)/sinTheta)*q1 + (sin(t*theta)/sinTheta)*q2prime;
+}
 
 }

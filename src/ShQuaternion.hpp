@@ -79,10 +79,10 @@ template<int K, typename T, int K2>
 extern ShQuaternion<SH_TEMP, T> 
 operator*(const ShAttrib<1, K2, T>& c, const ShQuaternion<K, T>& q); 
 
-//template<int K1, int K2, typename T>
-//extern ShQuaternion<SH_TEMP, T>
-//slerp(const ShQuaternion<K1, T>& q1, const ShQuaternion<K2, T>& q2, 
-//		const ShAttrib1f& t);
+template<int K1, int K2, typename T>
+extern ShQuaternion<SH_TEMP, T>
+slerp(const ShQuaternion<K1, T>& q1, const ShQuaternion<K2, T>& q2, 
+    const ShAttrib1f& t);
 
 typedef ShQuaternion<SH_INPUT, float> ShInputQuaternionf;
 typedef ShQuaternion<SH_OUTPUT, float> ShOutputQuaternionf;
