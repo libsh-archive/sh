@@ -1,3 +1,8 @@
+2004-02-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShVariable.cpp (setValues): Set m_neg to false, since we're
+	setting signed values.
+
 2004-02-26  Bryan Chan <b8chan@uwaterloo.ca>
 	* util/ShMesh*, util/ShObjMesh*:
 	Added half-edge mesh structure and cleaned up OBJ file reader a bit

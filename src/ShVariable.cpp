@@ -140,6 +140,7 @@ void ShVariable::setValues(ShVariableNode::ValueType values[])
   for (int i = 0; i < size(); i++) {
     m_node->setValue(m_swizzle[i], values[i]); 
   }
+  m_neg = false;
 }
 
 ShVariable ShVariable::operator()() const
