@@ -34,24 +34,6 @@
 
 namespace ShUtil {
 
-static const float EPS = 1e-6;
-
-struct ObjVertLess {
- bool operator()( const ShObjVertex *a, const ShObjVertex *b ) const {
-   float aval[3], bval[3];
-   a->pos.getValues(aval); b->pos.getValues(bval);
-
-   if( aval[0] < bval[0] - EPS ) return true;
-   else if( aval[0] < bval[0] + EPS ) {
-     if( aval[1] < bval[1] - EPS ) return true;
-     else if( aval[1] < bval[1] + EPS ) {
-       if( aval[2] < bval[2] - EPS ) return true;
-     }
-   }
-   return false;
- }
-};
-
 struct Triple {
     int idx[3];
 
@@ -198,7 +180,7 @@ std::istream& ShObjMesh::readObj(std::istream &in) {
           ShError( ShException(os.str()));
         }
         edge->texcoord = tcVec[tci]; 
-      }
+      } else edge->texcoord *= 0.0f;
 
       if( ni != -1 ) {
         if( ni >= (int)normVec.size() ) {
@@ -209,7 +191,7 @@ std::istream& ShObjMesh::readObj(std::istream &in) {
         edge->normal = normVec[ni];
 
         if( ni >= (int)tangentVec.size() ) {
-          // TODO make a tangent
+          edge->tangent *= 0.0f;
         } else {
           edge->tangent = tangentVec[ni];
         }
@@ -218,10 +200,6 @@ std::istream& ShObjMesh::readObj(std::istream &in) {
   }
 
   earTriangulate();
-
-  mergeVertices<ObjVertLess>();
-  mergeEdges<std::less<Vertex*> >();
-
   generateFaceNormals();
 
   int badNorms = generateVertexNormals();
@@ -233,9 +211,7 @@ std::istream& ShObjMesh::readObj(std::istream &in) {
   int badTexCoords = generateSphericalTexCoords();
   if(badTexCoords > 0) SH_DEBUG_WARN("OBJ file has " << badTexCoords << " vertices without texture coordinates.");
 
-  normalizeNormals();
   // TODO flip faces that have vert normals not matching the face normal
-
   return in;
 }
 
@@ -257,7 +233,7 @@ int ShObjMesh::generateVertexNormals(bool force) {
   NormalSumCount nscount;
   for(EdgeSet::iterator I = edges.begin(); I != edges.end(); ++I) {
     Edge &e = **I;
-    if( force || sqrt(dot(e.normal, e.normal).getValue(0)) < EPS ) {
+    if( force || dot(e.normal, e.normal).getValue(0) == 0 ) { 
       nsm[e.start] = ShConstant3f(0.0f, 0.0f, 0.0f);
       nscount[e.start] = 0;
     }
@@ -285,7 +261,7 @@ int ShObjMesh::generateTangents(bool force) {
   int changed = 0;
   for(EdgeSet::iterator I = edges.begin(); I != edges.end(); ++I) {
     Edge &e = **I;
-    if( force || sqrt(dot(e.tangent, e.tangent).getValue(0)) < EPS ) {
+    if( force || dot(e.tangent, e.tangent).getValue(0)  == 0) {
       e.tangent = cross(e.normal, ShVector3f(0.0f, 1.0f, 0.0f));
       changed++;
     }
@@ -297,7 +273,7 @@ int ShObjMesh::generateSphericalTexCoords(bool force) {
   if( !force ) {
     // If some vertex has texcoords, don't mess with them
     for(EdgeSet::iterator I = edges.begin(); I != edges.end(); ++I) {
-      if( sqrt(dot((*I)->texcoord, (*I)->texcoord).getValue(0)) > EPS ) {
+      if( dot((*I)->texcoord, (*I)->texcoord).getValue(0) != 0) {
         return 0;
       }
     }
@@ -313,7 +289,7 @@ int ShObjMesh::generateSphericalTexCoords(bool force) {
 
   for(EdgeSet::iterator I = edges.begin(); I != edges.end(); ++I) {
     Edge &e = **I;
-    if( force || sqrt(dot(e.texcoord, e.texcoord).getValue(0)) < EPS ) {
+    if( force || dot(e.texcoord, e.texcoord).getValue(0) == 0) {
       ShVector3f cv = normalize(e.start->pos - center);
       e.texcoord(0) = atan2(cv.getValue(2), cv.getValue(0));
       e.texcoord(1) = acos(cv.getValue(1));
@@ -331,6 +307,24 @@ void ShObjMesh::normalizeNormals() {
   for(FaceSet::iterator J = faces.begin(); J != faces.end(); ++J) {
     (*J)->normal = normalize((*J)->normal);
   }
+}
+
+struct ObjVertLess {
+ static const float EPS = 1e-5;
+ inline bool operator()( const ShObjVertex *a, const ShObjVertex *b ) const {
+   float aval[3], bval[3];
+   a->pos.getValues(aval); b->pos.getValues(bval);
+
+   return (aval[0] < bval[0] - EPS) || ( 
+          (aval[0] < bval[0] + EPS) && ( 
+          (aval[1] < bval[1] - EPS) || ( 
+          (aval[1] < bval[1] + EPS) && 
+          (aval[2] < bval[2] - EPS))));
+ }
+};
+
+void ShObjMesh::consolidateVertices() {
+  mergeVertices<ObjVertLess>();
 }
 
 

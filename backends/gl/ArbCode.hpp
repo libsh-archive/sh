@@ -47,6 +47,8 @@ private:
   void genDiv( const SH::ShVariable &dest, const SH::ShVariable &op1, 
       const SH::ShVariable &op2 );
 
+  /// Generate code for a Dot Product 
+
   /// Generate code for a scalar/vector binary op where the scalar
   /// should be promoted to a vector by duplicating components
   void genScalarVectorInst( const SH::ShVariable &dest, const SH::ShVariable &op1, 
@@ -55,6 +57,9 @@ private:
   /// Generate code for polynomial approximations of trig functions.
   void genTrigInst( const SH::ShVariable &dest, const SH::ShVariable& src,
       int opcode );
+
+  void genDot( const SH::ShVariable &dest, const SH::ShVariable& src0,
+      const SH::ShVariable& src1);
 
   /// Allocate registers, after the code has been generated
   void allocRegs();

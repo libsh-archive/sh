@@ -28,8 +28,9 @@
 #define SHUTIL_SHMESH_HPP
 
 #include <list>
-#include <set>
 #include <map>
+#include <set>
+
 #include "sh.hpp"
 
 namespace ShUtil {
@@ -131,6 +132,7 @@ struct ShMeshEdge {
   void setSym(Edge *s);
 };
 
+
 /** ShMesh class stores a mesh using a half-edge data structure */
 template<typename M>
 class ShMesh {
@@ -182,13 +184,11 @@ class ShMesh {
 
     /** \brief Edge merging function.
      * Pairs up half-edges that match each other (i.e. e1.start = e2.end, e1.end = e2.start) 
-     * using the given StrictWeakOrdering functor VertLess 
      *
      * Note that if there are multiple edges between start->end 
      * that match up with an edge, e, from end->start, one of them will be  
      * set to e->sym.  Which one gets matched is undefined.
      */
-    template<typename VertLess> 
     void mergeEdges();
 
     /** \brief Triangulates by ear. 

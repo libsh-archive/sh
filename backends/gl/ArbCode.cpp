@@ -512,39 +512,8 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
         }
       }
       break;
-    case SH_OP_DOT:
-      {
-        ShVariable left = stmt.src[0];
-        ShVariable right = stmt.src[1];
-
-        // expand left/right if they are scalar
-        if( left.size() < right.size() ) {
-          int *swizzle = new int[ right.size() ];
-          for( int i = 0; i < right.size(); ++i ) swizzle[i] = 0; 
-          left = left( right.size(), swizzle ); 
-          delete swizzle;
-        } else if( right.size() < left.size() ) {
-          int *swizzle = new int[ left.size() ];
-          for( int i = 0; i < left.size(); ++i ) swizzle[i] = 0; 
-          right = right( left.size(), swizzle ); 
-          delete swizzle;
-        }
-
-        if (left.size() == 3) {
-          m_instructions.push_back(ArbInst(SH_ARB_DP3, stmt.dest, left, right));
-        } else if (left.size() == 4) {
-          m_instructions.push_back(ArbInst(SH_ARB_DP4, stmt.dest, left, right));
-        } else if (left.size() == 1) {
-          m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, left, right));
-        } else {
-          ShVariable mul(new ShVariableNode(SH_TEMP, left.size()));
-          m_instructions.push_back(ArbInst(SH_ARB_MUL, mul, left, right));
-          m_instructions.push_back(ArbInst(SH_ARB_ADD, stmt.dest, mul(0), mul(1)));
-          for (int i = 2; i < left.size(); i++) {
-            m_instructions.push_back(ArbInst(SH_ARB_ADD, stmt.dest, stmt.dest, mul(i)));
-          }
-        }
-      }
+    case SH_OP_DOT: 
+      genDot(stmt.dest, stmt.src[0], stmt.src[1]);
       break;
     case SH_OP_FLR:
       m_instructions.push_back(ArbInst(SH_ARB_FLR, stmt.dest, stmt.src[0]));
@@ -629,9 +598,9 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       m_instructions.push_back(ArbInst(SH_ARB_MIN, stmt.dest, stmt.src[0], stmt.src[1]));
       break;
     case SH_OP_NORM:
-      { // TODO: other than 3 components
+      { 
         ShVariable mul(new ShVariableNode(SH_TEMP, 1));
-        m_instructions.push_back(ArbInst(SH_ARB_DP3, mul, stmt.src[0], stmt.src[0]));
+        genDot(mul, stmt.src[0], stmt.src[0]);
         m_instructions.push_back(ArbInst(SH_ARB_RSQ, mul, mul));
         m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, mul, stmt.src[0]));
       }
@@ -890,6 +859,40 @@ void ArbCode::genTrigInst( const SH::ShVariable& dest,
       m_instructions.push_back(
           ArbInst(SH_ARB_DP3, r0(0), r1(0,1,2), -r2(0,1,2)));
       m_instructions.push_back(ArbInst(SH_ARB_MOV, dest(i), r0(0)));
+    }
+  }
+}
+
+void ArbCode::genDot( const ShVariable& dest, 
+    const ShVariable& src0, const ShVariable &src1) { 
+  ShVariable left = src0;
+  ShVariable right = src1;
+
+  // expand src0/src1 if they are scalar
+  if( src0.size() < src1.size() ) {
+    int *swizzle = new int[ src1.size() ];
+    for( int i = 0; i < src1.size(); ++i ) swizzle[i] = 0; 
+    left = src0( src1.size(), swizzle ); 
+    delete swizzle;
+  } else if( src1.size() < src0.size() ) {
+    int *swizzle = new int[ src0.size() ];
+    for( int i = 0; i < src0.size(); ++i ) swizzle[i] = 0; 
+    right = src1( src0.size(), swizzle ); 
+    delete swizzle;
+  }
+
+  if (left.size() == 3) {
+    m_instructions.push_back(ArbInst(SH_ARB_DP3, dest, left, right));
+  } else if (left.size() == 4) {
+    m_instructions.push_back(ArbInst(SH_ARB_DP4, dest, left, right));
+  } else if (left.size() == 1) {
+    m_instructions.push_back(ArbInst(SH_ARB_MUL, dest, left, right));
+  } else {
+    ShVariable mul(new ShVariableNode(SH_TEMP, left.size()));
+    m_instructions.push_back(ArbInst(SH_ARB_MUL, mul, left, right));
+    m_instructions.push_back(ArbInst(SH_ARB_ADD, dest, mul(0), mul(1)));
+    for (int i = 2; i < left.size(); i++) {
+      m_instructions.push_back(ArbInst(SH_ARB_ADD, dest, dest, mul(i)));
     }
   }
 }

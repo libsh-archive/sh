@@ -106,6 +106,11 @@ class ShObjMesh: public ShMesh<ShObjMeshType> {
     /** \brief Normalizes all the normals held in this mesh */
     void normalizeNormals();
 
+    /** \brief Consolidates vertices whose coordinates are within 1e-5 of each 
+     * other componentwise
+     */
+    void consolidateVertices();
+
     /** \brief Sets mesh data to data from an OBJ file */
     friend std::istream& operator>>(std::istream &in, ShObjMesh &mesh);
 };

@@ -277,9 +277,8 @@ void ShMesh<M>::mergeVertices() {
 }
 
 template<typename M>
-template<typename VertLess> 
 void ShMesh<M>::mergeEdges() {
-  typedef std::map<Vertex*, std::map<Vertex*, Edge*, VertLess>, VertLess> EdgeMatchMap;
+  typedef std::map<Vertex*, std::map<Vertex*, Edge*> > EdgeMatchMap;
 
   EdgeMatchMap edgeMatch;
 

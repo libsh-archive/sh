@@ -1,6 +1,15 @@
 2004-03-17  Bryan Chan <b8chan@uwaterloo.ca>
 	* src/ShWrap.hpp, src/ShTextureNode.hpp, backends/gl/GlTextureName.cpp:
 	  Added GL_CLAMP_TO_EDGE wrap mode for textures.
+
+	* backends/gl/ArbCode.cpp (genDiv, genNode):
+	  Added codegen for normalize n-tuples for n != 3.
+
+	* util/ShObjMesh*:
+	  Removed some of the mesh processing at load time
+	  (vertex consolidation, edge matching, 
+	   normalization of normals) since they're not
+	  needed in most cases.
 	
 2004-03-16  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
