@@ -1,5 +1,8 @@
 2004-07-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* Added copyright statements to the heads of all the files that
+	were missing.
+
 	* src/ShLibMatrix.hpp: Added operator* for existing matrix
 	multiplication functions. Resolves issue92.
 	Added row vector / matrix multiplication. Resolves issue93.
