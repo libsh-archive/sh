@@ -1,0 +1,106 @@
+# -*- makefile -*-
+
+# build options
+GEN_DEPENDENCIES=1
+BUILD_RELEASE=1
+BUILD_DEBUG=1
+
+# Sh
+SH_DIR = \dev\install
+INCLUDES += -I$(SH_DIR)\include
+SH_RELEASE_LDADD = $(SH_DIR)\lib\libsh.lib
+SH_DEBUG_LDADD = $(SH_DIR)\lib\libshd.lib
+
+# GLUT
+GLUT_DIR = \dev\glut
+INCLUDES += -I$(GLUT_DIR)\include
+GLUT_LDADD = $(GLUT_DIR)\lib\glut32.lib
+
+# OpenGL
+OPENGL_DIR = \dev\opengl
+INCLUDES += -I$(OPENGL_DIR)\include
+OPENGL_LDADD = opengl32.lib
+
+CXX = cl /nologo
+AR = link /lib /nologo
+LD = link /nologo
+
+CPPFLAGS = -DWIN32 -DNOMINMAX -D_USE_MATH_DEFINES $(INCLUDES)
+CXXFLAGS = /GR /EHsc /wd4003
+
+RELEASE_CPPFLAGS = $(CPPFLAGS)
+RELEASE_CXXFLAGS = $(CXXFLAGS) $(RELEASE_CPPFLAGS) /MD /O2
+
+DEBUG_CPPFLAGS = $(CPPFLAGS) -D_DEBUG
+DEBUG_CXXFLAGS = $(CXXFLAGS) $(DEBUG_CPPFLAGS) /MDd /Zi /Od
+
+LDFLAGS = 
+RELEASE_LDFLAGS = $(LDFLAGS)
+DEBUG_LDFLAGS = $(LDFLAGS) /DEBUG
+
+shglutex_SOURCES = Camera.hpp Camera.cpp
+shglutex_SOURCES += ShTrackball.hpp ShTrackball.cpp
+shglutex_SOURCES += main.cpp
+
+shglutex_CXXFILES = $(filter %.cpp,$(dispmap_SOURCES))
+shglutex_RELEASE_OBJECTS = $(dispmap_CXXFILES:.cpp=.r.obj)
+shglutex_DEBUG_OBJECTS = $(dispmap_CXXFILES:.cpp=.d.obj)
+
+shglutex_RELEASE_LDADD = $(SH_RELEASE_LDADD)
+shglutex_RELEASE_LDADD += $(GLUT_LDADD) $(OPENGL_LDADD)
+shglutex_RELEASE_LDADD += kernel32.lib user32.lib gdi32.lib
+shglutex_RELEASE_LDADD += shell32.lib ole32.lib comctl32.lib
+shglutex_RELEASE_LDADD += comdlg32.lib rpcrt4.lib advapi32.lib
+
+shglutex_DEBUG_LDADD = $(SH_DEBUG_LDADD)
+shglutex_DEBUG_LDADD += $(GLUT_LDADD) $(OPENGL_LDADD)
+shglutex_DEBUG_LDADD += kernel32.lib user32.lib gdi32.lib
+shglutex_DEBUG_LDADD += shell32.lib ole32.lib comctl32.lib
+shglutex_DEBUG_LDADD += comdlg32.lib rpcrt4.lib advapi32.lib
+
+ALL_TARGETS =
+RELEASE_TARGETS = shglutex.exe
+DEBUG_TARGETS = shglutexd.exe
+
+ifeq ($(BUILD_RELEASE), 1)
+	ALL_TARGETS += all-release
+endif
+
+ifeq ($(BUILD_DEBUG), 1)
+	ALL_TARGETS += all-debug
+endif
+
+all: $(ALL_TARGETS)
+all-release: $(RELEASE_TARGETS)
+all-debug: $(DEBUG_TARGETS)
+
+shglutex.exe: $(dispmap_RELEASE_OBJECTS)
+	$(LD) /out:$@ $^ $(RELEASE_LDFLAGS) $(shglutex_RELEASE_LDADD)
+
+shglutexd.exe: $(dispmap_DEBUG_OBJECTS)
+	$(LD) /out:$@ $^ $(DEBUG_LDFLAGS) $(shglutex_DEBUG_LDADD)
+
+clean:
+	-del $(RELEASE_TARGETS) $(DEBUG_TARGETS)
+	-del *.obj *.d
+	-del *.pdb *.ilk
+
+shglutex_DEPENDS = $(dispmap_CXXFILES:.cpp=.r.d) $(dispmap_CXXFILES:.cpp=.d.d)
+
+ifeq ($(GEN_DEPENDENCIES), 1)
+-include $(shglutex_DEPENDS)
+endif
+
+%.r.obj: %.cpp
+	$(CXX) /Fo$@ /c $< $(RELEASE_CXXFLAGS)
+
+%.d.obj: %.cpp
+	$(CXX) /Fo$@ /c $< $(DEBUG_CXXFLAGS)
+
+%.r.d: %.cpp
+	@makedepend -f- -o.r.obj $< -- $(RELEASE_CPPFLAGS) > $@ 2>devnull
+	-@del devnull
+
+%.d.d: %.cpp
+	@makedepend -f- -o.d.obj $< -- $(DEBUG_CPPFLAGS) > $@ 2>devnull
+	-@del devnull
