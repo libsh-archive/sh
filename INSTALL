@@ -1,6 +1,6 @@
 REQUIREMENTS
 
- - g++ > 3.0.0, 3.2 is recommended.
+ - g++ > 3.0.0, >= 3.2 is recommended.
  - libpng
  - for the ARB backend, a recent glext.h as well as GL drivers and headers
    You can obtain the latest glext.h from the SGI OpenGL Registry at
@@ -35,8 +35,8 @@ $ ./bootstrap
 (also run this if you change any Makefile.am or the configure.ac)
 You will need recent versions of autoconf, automake, libtool and
 libltdl.
-Ignore the mesage about needing to run aclocal.
+Ignore the message about needing to run aclocal.
 
 MORE HELP
 
-See the homepage at http://libsh.sf.net/ for mailing list info, etc.
+See the homepage at http://libsh.org/ for mailing list info, etc.
