@@ -175,6 +175,53 @@ void keyboard(unsigned char k, int x, int y)
   glutPostRedisplay();
 }
 
+int gprintf(int x, int y, char* fmt, ...)
+{
+  char temp[1024];
+  va_list va;
+  va_start(va, fmt);
+  vsprintf(temp, fmt, va);
+  va_end(va);
+  
+  // setup the matrices for a direct
+  // screen coordinate transform when
+  // using glRasterPos
+  int vp[4];
+  glGetIntegerv(GL_VIEWPORT, vp);
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+  glOrtho(0, vp[2], 0, vp[3], -1, 1);
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glLoadIdentity();
+
+  // just in case, turn lighting and
+  // texturing off and disable depth testing
+  glPushAttrib(GL_ENABLE_BIT);
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_VERTEX_PROGRAM_ARB);
+  glDisable(GL_FRAGMENT_PROGRAM_ARB);
+
+  // render the character through glut
+  char* p = temp;
+  glRasterPos2f(x, y);
+  while(*p) {
+    glutBitmapCharacter(GLUT_BITMAP_8_BY_13, (*p));
+    p++;
+  }
+  
+  // reset OpenGL to what is was
+  // before we started
+  glPopAttrib();
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
+  
+  return p-temp;
+}
+
 int main(int argc, char** argv)
 {
   glutInit(&argc, argv);
@@ -226,51 +273,4 @@ int main(int argc, char** argv)
 #endif
   
   glutMainLoop();
-}
-
-int gprintf(int x, int y, char* fmt, ...)
-{
-  char temp[1024];
-  va_list va;
-  va_start(va, fmt);
-  vsprintf(temp, fmt, va);
-  va_end(va);
-  
-  // setup the matrices for a direct
-  // screen coordinate transform when
-  // using glRasterPos
-  int vp[4];
-  glGetIntegerv(GL_VIEWPORT, vp);
-  glMatrixMode(GL_PROJECTION);
-  glPushMatrix();
-  glLoadIdentity();
-  glOrtho(0, vp[2], 0, vp[3], -1, 1);
-  glMatrixMode(GL_MODELVIEW);
-  glPushMatrix();
-  glLoadIdentity();
-
-  // just in case, turn lighting and
-  // texturing off and disable depth testing
-  glPushAttrib(GL_ENABLE_BIT);
-  glDisable(GL_DEPTH_TEST);
-  glDisable(GL_VERTEX_PROGRAM_ARB);
-  glDisable(GL_FRAGMENT_PROGRAM_ARB);
-
-  // render the character through glut
-  char* p = temp;
-  glRasterPos2f(x, y);
-  while(*p) {
-    glutBitmapCharacter(GLUT_BITMAP_8_BY_13, (*p));
-    p++;
-  }
-  
-  // reset OpenGL to what is was
-  // before we started
-  glPopAttrib();
-  glMatrixMode(GL_PROJECTION);
-  glPopMatrix();
-  glMatrixMode(GL_MODELVIEW);
-  glPopMatrix();
-  
-  return p-temp;
 }
