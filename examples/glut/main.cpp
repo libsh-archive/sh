@@ -21,6 +21,7 @@ int cur_x, cur_y;
 int gprintf(int x, int y, char* fmt, ...);
 
 bool show_help = false;
+bool shaders_initialized = false;
 
 void initShaders()
 {
@@ -52,23 +53,29 @@ void initShaders()
 
 void display()
 {
+  if (shaders_initialized) {
+    cerr << "Binding both programs." << endl;
+    shBind(vsh);
+    shBind(fsh);
+  }
+
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glFrontFace(GL_CW);
   glutSolidTeapot(2.5);
   glFrontFace(GL_CCW);
 
-  // Help information
-  if (show_help) {
-    gprintf(30, 100, "Sh Glut Example Help");
-    gprintf(30, 80,  "  '1' - Colour 1");
-    gprintf(30, 65,  "  '2' - Colour 2");
-    gprintf(30, 50,  "  '3' - Light angle 1");
-    gprintf(30, 45,  "  '4' - Light angle 2");
-    gprintf(30, 30,  "  'Q' - Quit");
-  } else {
-    gprintf(10, 10, "'H' for help...");
-  }
+   // Help information
+   if (show_help) {
+     gprintf(30, 120, "Sh Glut Example Help");
+     gprintf(30, 100, "  '1' - Colour 1");
+     gprintf(30, 80,  "  '2' - Colour 2");
+     gprintf(30, 65,  "  '3' - Light angle 1");
+     gprintf(30, 50,  "  '4' - Light angle 2");
+     gprintf(30, 30,  "  'Q' - Quit");
+   } else {
+     gprintf(10, 10, "'H' for help...");
+   }
   
   glutSwapBuffers();
 }
@@ -173,8 +180,8 @@ int gprintf(int x, int y, char* fmt, ...)
   // texturing off and disable depth testing
   glPushAttrib(GL_ENABLE_BIT);
   glDisable(GL_DEPTH_TEST);
-  glDisable(GL_VERTEX_PROGRAM_ARB);
-  glDisable(GL_FRAGMENT_PROGRAM_ARB);
+  shUnbind(vsh);
+  shUnbind(fsh);
 
   // render the character through glut
   char* p = temp;
@@ -206,11 +213,9 @@ int main(int argc, char** argv)
   glutMouseFunc(mouse);
   glutMotionFunc(motion);
   glutKeyboardFunc(keyboard);
-  
+
   shSetBackend("glsl");
 
-  initShaders();
-  
   glEnable(GL_DEPTH_TEST);
   glClearColor(0.0, 0.0, 0.0, 1.0);
   setupView();
@@ -219,12 +224,10 @@ int main(int argc, char** argv)
   camera.move(0.0, 0.0, -15.0);
   lightPos = ShPoint3f(5.0, 5.0, 5.0);
   diffusecolor = ShColor3f(0.5, 0.1, 0.2);
-  
+
   initShaders();
 
-  shBind(vsh);
-  shBind(fsh);
-
+  shaders_initialized = true;
 #if 0
   cout << "Vertex Unit:" << endl;
   vsh.node()->code()->print(cout);

@@ -105,6 +105,11 @@ void ShContext::set_binding(const std::string& unit, const ShProgram program)
   }
 }
 
+void ShContext::unset_binding(const std::string& unit)
+{
+  m_bound.erase(unit);
+}
+
 ShProgramNodePtr ShContext::parsing()
 {
   if (m_parsing.empty()) return 0;

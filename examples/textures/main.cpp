@@ -80,7 +80,8 @@ void initShaders()
 
 void display()
 {
-  shUpdate();
+  shBind(vsh);
+  shBind(fsh);
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -234,7 +235,7 @@ int main(int argc, char** argv)
   glutMotionFunc(motion);
   glutKeyboardFunc(keyboard);
     
-  shSetBackend("glsl");
+  shSetBackend("arb");
 
   initShaders();
 
@@ -244,8 +245,6 @@ int main(int argc, char** argv)
   ks_images[1].loadPng("ks.png");
   
   glEnable(GL_DEPTH_TEST);
-  glEnable(GL_VERTEX_PROGRAM_ARB);
-  glEnable(GL_FRAGMENT_PROGRAM_ARB);
   glClearColor(0.0, 0.0, 0.0, 1.0);
   setupView();
 
@@ -259,10 +258,7 @@ int main(int argc, char** argv)
 
   // Set the initial texture
   xTexture();
-
-  shBind(vsh);
-  shBind(fsh);
-
+  
 #if 0
   cout << "Vertex Unit:" << endl;
   vsh.node()->code()->print(cout);

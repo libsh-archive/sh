@@ -352,6 +352,8 @@ void ArbCode::bind()
 
 void ArbCode::unbind()
 {
+  ShContext::current()->unset_binding(std::string("arb:") + m_unit);
+
   if (m_unit == "vertex") {
     SH_GL_CHECK_ERROR(glDisable(GL_VERTEX_PROGRAM_ARB));
   } else if (m_unit == "fragment") {
