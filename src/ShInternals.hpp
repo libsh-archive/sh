@@ -27,13 +27,15 @@
 #ifndef SHINTERNALS_HPP 
 #define SHINTERNALS_HPP
 
+#include <map>
+#include "ShDllExport.hpp"
 #include "ShVariableNode.hpp"
 #include "ShCtrlGraph.hpp"
-#include <map>
 
 namespace SH { 
 
-struct ShVariableReplacer {
+struct
+SH_DLLEXPORT ShVariableReplacer {
   typedef std::map<ShVariableNodePtr, ShVariableNodePtr> VarMap;
 
   ShVariableReplacer(VarMap& v);

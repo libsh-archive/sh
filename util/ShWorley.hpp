@@ -189,9 +189,12 @@ public PropertyFactory<N, D, T> {
     const P2* m_propFactory2;
 };
 
+#ifndef WIN32
+// MSVC++ .NET does not recognize this as being the same as its implementation.
 template<typename P1, typename P2>
 PropertyFactory<P1::NUM_PROPS + P2::NUM_PROPS, P1::DIM, typename P1::PropType>*
 combine(const P1 *propFactory1, const P2 *propFactory2);
+#endif
 
 // standard distance based property factories 
 // Re-write later to take function pointer (or ShProgram object)
@@ -238,7 +241,11 @@ struct CellnoisePropFactory: public PropertyFactory<N, D, T> {
 template<typename TexType, typename T>
 struct Tex2DPropFactory: public PropertyFactory<TexType::typesize, 2, T> {
   Tex2DPropFactory(const ShBaseTexture2D<TexType> &tex, const ShGeneric<1, T> &scale);
-  ShGeneric<TexType::typesize, T> operator()(const ShGeneric<2, T> &p, const Generator<2, T> &g) const; 
+  ShGeneric<TexType::typesize, T> operator()(const ShGeneric<2, T> &p, const Generator<2, T> &g) const
+  {
+    // Moved here from WorleyImpl.hpp because MSVC gets confused otherwise
+    return m_tex(frac(g.cell * invScale * m_scale)) * ShConstAttrib1f(1.0f);
+  }
 
   private:
     const ShBaseTexture2D<TexType> &m_tex;
@@ -260,10 +267,10 @@ ShGeneric<K, T> worley(const ShGeneric<D, T> &p, bool useTexture = true);
 /** \brief Worley texture generator.
  * This uses a GeneratorFactory and PropertyFactory of your choice.
  */
-template<int K, int N, int P, int D, typename T>
-void worley(ShGeneric<K, T> result[N], const ShGeneric<D, T> &p, 
+template<int K, int L, int P, int D, typename T>
+void worley(ShGeneric<K, T> result[], const ShGeneric<D, T> &p, 
     const GeneratorFactory<P, D, T> *genFactory,
-    const PropertyFactory<N, D, T> *propFactory);
+    const PropertyFactory<L, D, T> *propFactory);
 
 /** Makes a shader that takes 
  *  IN(1) ShTexCoord<D,T> texcoord; // texture lookup coordinates

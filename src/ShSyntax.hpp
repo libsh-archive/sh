@@ -27,6 +27,7 @@
 #ifndef SHSYNTAX_HPP
 #define SHSYNTAX_HPP
 
+#include "ShDllExport.hpp"
 #include "ShProgram.hpp"
 #include "ShUtility.hpp"
 
@@ -191,31 +192,42 @@
 namespace SH {
 
 /// \internal
+SH_DLLEXPORT
 ShProgram shBeginShader(const std::string& kind = "");
 /// \internal
+SH_DLLEXPORT
 void shEndShader();
 
 /// Force (re)compilation of a program under its default target.
+SH_DLLEXPORT
 void shCompile(ShProgram& prg);
 /// Force (re)compilation of a program for a given target.
+SH_DLLEXPORT
 void shCompile(ShProgram& prg, const std::string& target);
 
 /// \deprecated Use shCompile() instead
+SH_DLLEXPORT
 void shCompileShader(ShProgram& prg);
 /// \deprecated Use shCompile() instead
+SH_DLLEXPORT
 void shCompileShader(ShProgram& prg, const std::string& target);
 
 /// Bind a program using the program's default target
+SH_DLLEXPORT
 void shBind(ShProgram& prg);
 /// Bind a program with the given target.
+SH_DLLEXPORT
 void shBind(const std::string& target, ShProgram& shader);
 
 /// \deprecated Use shBind() instead.
+SH_DLLEXPORT
 void shBindShader(ShProgram& shader);
 /// \deprecated Use shBind() instead.
+SH_DLLEXPORT
 void shBindShader(const std::string& target, ShProgram& shader);
 
 /// Switch to a particular backend
+SH_DLLEXPORT
 bool shSetBackend(const std::string& name);
 
 
@@ -224,33 +236,45 @@ bool shSetBackend(const std::string& name);
  * The function needs to be called prior to the use of any other SH functions. Additionally,
  * in Windows, this function needs to be called after a OpenGL context/window has been created.
  */
+SH_DLLEXPORT
 void shInit();
 
 /// \internal
+SH_DLLEXPORT
 void shIf(bool);
 /// \internal
+SH_DLLEXPORT
 void shElse();
 /// \internal
+SH_DLLEXPORT
 void shEndIf();
 
 /// \internal
+SH_DLLEXPORT
 void shWhile(bool);
 /// \internal
+SH_DLLEXPORT
 void shEndWhile();
 
 /// \internal
+SH_DLLEXPORT
 void shDo();
 /// \internal
+SH_DLLEXPORT
 void shUntil(bool);
 
 /// \internal
+SH_DLLEXPORT
 void shFor(bool);
 /// \internal
+SH_DLLEXPORT
 void shEndFor();
 
 /// \internal
+SH_DLLEXPORT
 void shBreak();
 /// \internal
+SH_DLLEXPORT
 void shContinue();
 
 }

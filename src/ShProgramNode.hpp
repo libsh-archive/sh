@@ -31,6 +31,7 @@
 #include <map>
 #include <utility>
 #include <string>
+#include "ShDllExport.hpp"
 #include "ShRefCount.hpp"
 #include "ShTokenizer.hpp"
 #include "ShVariableNode.hpp"
@@ -46,7 +47,8 @@ class ShBackend;
 
 /** A particular Sh program.
  */
-class ShProgramNode : public virtual ShRefCountable, public virtual ShMeta {
+class
+SH_DLLEXPORT ShProgramNode : public virtual ShRefCountable, public virtual ShMeta {
 public:
   ShProgramNode(const std::string& target);
 

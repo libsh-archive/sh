@@ -29,6 +29,7 @@
 
 #include <iosfwd>
 #include <set>
+#include "ShDllExport.hpp"
 #include "ShVariable.hpp"
 
 namespace SH {
@@ -104,11 +105,13 @@ enum ShOperation {
 };
 
 /** Information related to a specific operation */
-struct ShOperationInfo {
+struct
+SH_DLLEXPORT ShOperationInfo {
   const char* name; ///< The operation's name, e.g. "ASN"
   int arity; ///< The arity of the operation. 1, 2 or 3.
 };
 
+SH_DLLEXPORT
 extern const ShOperationInfo opInfo[];
 
 /** A single statement.
@@ -119,7 +122,8 @@ extern const ShOperationInfo opInfo[];
  * or, for op == SH_OP_ASN:
  * <pre>dest := src[0]</pre>
  */
-class ShStatement {
+class
+SH_DLLEXPORT ShStatement {
 public:
   ShStatement(ShVariable dest, ShOperation op);
   ShStatement(ShVariable dest, ShOperation op, ShVariable src);

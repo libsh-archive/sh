@@ -29,13 +29,15 @@
 
 #include <cstddef>
 #include <iosfwd>
+#include "ShDllExport.hpp"
 
 namespace SH {
 
 /* A reference to a single bit in a set.
  * @see ShBitSet
  */
-class ShBitRef {
+class
+SH_DLLEXPORT ShBitRef {
 public:
   operator bool() const;
   ShBitRef& operator=(bool b);
@@ -57,7 +59,8 @@ private:
  * std::bitset. Run-time sized bitset with all the bit operations one
  * may need.
  */
-class ShBitSet {
+class
+SH_DLLEXPORT ShBitSet {
 public:
   /** Construct a bitset with size bits.
    * By default all bits are set to 0.
@@ -93,6 +96,7 @@ private:
   unsigned int* m_data;
 };
 
+SH_DLLEXPORT
 std::ostream& operator<<(std::ostream& out, const ShBitSet& bitset);
 
 }

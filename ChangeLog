@@ -1,3 +1,40 @@
+2004-07-19    <sdt@HUEY>
+
+	* src/ShLibClamp.hpp: Undef max and min if they are defined.
+
+	* backends/gl/GlBackend.cpp (setContext): Fix assertion.
+
+	* backends/gl/ArbEmit.cpp: Add some stuff missing on win32.
+
+	* backends/gl/ArbBackend.cpp: Add a DllMain for win32.
+
+	* backends/gl/Arb.cpp: Include windows.h on win32.
+
+	* backends/gl/Makefile.win32: Added Makefile for win32.
+
+2004-07-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShTransformer.cpp: Get rid of some more stack-based variable
+	array initializers.
+
+	* src/ShSyntax.cpp (shInit): Empty for now.
+
+	* src/ShOptimizer.cpp: Only output node block in DumpRch if
+	SH_DEBUG is enabled.
+
+	* src/ShInstructions.cpp: Use new instead of stack-based
+	variable-sized arrays.
+
+	* src/ShImage.cpp: Include <cmath> for sqrt.
+
+	* util/Makefile.win32: Added Win32 Makefile.
+
+	* src/Makefile.win32: Added Win32 Makefile.
+
+	* win32.mk: Added global win32 make settings.
+
+	* test/sandbox/Makefile.win32: Added Win32 makefile.
+
 2004-07-17  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShVariable.hpp (ShVariable): Add operator!=.

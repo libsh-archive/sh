@@ -1,0 +1,37 @@
+RELEASE_TARGETS = libshutil.lib
+DEBUG_TARGETS = libshutild.lib
+
+all: all-release all-debug
+
+all-release: $(RELEASE_TARGETS)
+all-debug: $(DEBUG_TARGETS)
+
+libshutil_lib_SOURCES = ShKernelLib.cpp ShKernelSurfMap.cpp \
+		        ShObjMesh.cpp 
+
+libshutil_lib_CXXFILES = $(filter %.cpp,$(libshutil_lib_SOURCES))
+libshutil_lib_RELEASE_OBJECTS = $(libshutil_lib_CXXFILES:.cpp=.r.obj)
+libshutil_lib_DEBUG_OBJECTS = $(libshutil_lib_CXXFILES:.cpp=.d.obj)
+
+libshutil.lib: $(libshutil_lib_RELEASE_OBJECTS)
+	link /LIB /OUT:$@ $^
+libshutild.lib: $(libshutil_lib_DEBUG_OBJECTS)
+	link /LIB /OUT:$@ $^
+
+# TODO Move this to win32.mk or something
+INSTALLDIR = \Dev\install-sh
+
+install: $(RELEASE_TARGETS) $(DEBUG_TARGETS) $(wildcard *.hpp)
+	-mkdir $(INSTALLDIR)\include
+	-mkdir $(INSTALLDIR)\include\sh
+	-mkdir $(INSTALLDIR)\lib
+	copy libshutil.lib $(INSTALLDIR)\lib
+	copy libshutild.lib $(INSTALLDIR)\lib
+	copy *.hpp $(INSTALLDIR)\include\sh
+
+libshutil_lib_DEPENDS = $(libshutil_lib_CXXFILES:.cpp=.r.d) $(libshutil_lib_CXXFILES:.cpp=.d.d)
+
+include ../win32.mk
+INCLUDES += -I../src
+CPPFLAGS += -DSH_DLLEXPORT=__declspec(dllimport)
+include $(libshutil_lib_DEPENDS)

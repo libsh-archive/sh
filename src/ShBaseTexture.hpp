@@ -2,6 +2,7 @@
 #define SHBASETEXTURE_HPP
 
 #include <string>
+#include "ShDllExport.hpp"
 #include "ShTextureNode.hpp"
 #include "ShMemory.hpp"
 #include "ShVariable.hpp"
@@ -10,7 +11,8 @@
 
 namespace SH {
 
-class ShBaseTexture : public ShMetaForwarder {
+class
+SH_DLLEXPORT ShBaseTexture : public ShMetaForwarder {
 public:
   ShBaseTexture(const ShTextureNodePtr& node);
 

@@ -13,7 +13,7 @@ ShGeneric<M, T> cast(const ShGeneric<N, T>& a)
   int copySize = std::min(M, N);
   ShAttrib<M, SH_TEMP, T> result;
 
-  int indices[copySize];
+  int* indices = new int[copySize];
   for(int i = 0; i < copySize; ++i) indices[i] = i;
   if(M < N) {
     result = a.template swiz<M>(indices);
@@ -22,6 +22,7 @@ ShGeneric<M, T> cast(const ShGeneric<N, T>& a)
   } else { // M == N
     shASN(result, a);
   }
+  delete [] indices;
   return result;
 }
 

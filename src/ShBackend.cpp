@@ -30,6 +30,8 @@
 
 #ifndef WIN32
 #include <ltdl.h>
+#else
+#include <windows.h>
 #endif
 
 #include <algorithm>
@@ -94,13 +96,44 @@ ShPointer<ShBackend> ShBackend::lookup(const std::string& name)
   }
 
   for (ShBackendList::iterator I = begin(); I != end(); ++I) {
-    if ((*I)->name() == name) return *I;
+    if ((*I)->name() == name) {
+      return *I;
+    }
   }
 
   SH_DEBUG_ERROR("Could not find " << name << "backend");
 
   return 0;
 #else
+  
+  SH_DEBUG_PRINT("Looking up " << name);
+
+  HMODULE mod = NULL;
+#define SH_WIN32_BACKENDS_DIR "\\DEV\\SH\\BACKENDS\\GL"
+
+  std::string libname(SH_WIN32_BACKENDS_DIR);
+  libname += "\\LIBSH";
+  libname += name;
+#ifdef SH_DEBUG
+  libname += "D";
+#endif
+  libname += ".DLL";
+  mod = LoadLibrary(libname.c_str());
+
+  if (!mod) {
+    SH_DEBUG_ERROR("Could not open " << libname);
+    return 0;
+  }
+
+  for (ShBackendList::iterator I = begin(); I != end(); ++I) {
+    if ((*I)->name() == name) {
+      SH_DEBUG_PRINT("Found " << name << " at " << I->object());
+      return *I;
+    }
+  }
+  
+  SH_DEBUG_ERROR("Could not find " << name << "backend");
+  
   return 0;
 #endif
 }

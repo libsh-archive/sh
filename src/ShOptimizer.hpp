@@ -32,6 +32,7 @@
 #include <set>
 #include <map>
 #include <vector>
+#include "ShDllExport.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShBasicBlock.hpp"
 #include "ShBitSet.hpp"
@@ -42,7 +43,8 @@ namespace SH {
  * Used internally after programs are created to (hopefully) make them
  * more efficient.
  */
-class ShOptimizer {
+class
+SH_DLLEXPORT ShOptimizer {
 public:
   ShOptimizer(ShCtrlGraphPtr graph);
 

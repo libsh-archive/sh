@@ -28,6 +28,7 @@
 #define SHVARIABLENODE_HPP
 
 #include <string>
+#include "ShDllExport.hpp"
 #include "ShRefCount.hpp"
 #include "ShMeta.hpp"
 
@@ -58,12 +59,13 @@ enum ShSemanticType {
 };
 
 // ensure these match the BindingType and SemanticType enums
-extern const char* ShBindingTypeName[];
-extern const char* ShSemanticTypeName[];
+SH_DLLEXPORT extern const char* ShBindingTypeName[];
+SH_DLLEXPORT extern const char* ShSemanticTypeName[];
 
 /** A generic n-tuple variable.
  */
-class ShVariableNode : public virtual ShRefCountable,
+class 
+SH_DLLEXPORT ShVariableNode : public virtual ShRefCountable,
                        public virtual ShMeta {
 public:
   ShVariableNode(ShBindingType kind, int size, ShSemanticType type = SH_ATTRIB);

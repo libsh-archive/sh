@@ -27,6 +27,7 @@
 #ifndef SHUTIL_FUNCIMPL_HPP 
 #define SHUTIL_FUNCIMPL_HPP 
 
+#define _USE_MATH_DEFINES
 #include <cmath>
 #include <numeric>
 #include "ShAttrib.hpp"

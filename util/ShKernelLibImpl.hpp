@@ -72,7 +72,7 @@ ShProgram ShKernelLib::shVsh(const ShMatrix<N, N, Binding, T> &mv,
         tgt2 = cross(nm, tgt);
       }
     }
-    ShInputPoint3f lpv[numLights];                 
+    ShInputPoint3f* lpv = new ShInputPoint3f[numLights];                 
     for(i = 0; i < numLights; ++i) lpv[i].name(makeName("lightPos", i));
     ShInputPosition4f SH_NAMEDECL(pm, "posm");     
 
@@ -86,20 +86,20 @@ ShProgram ShKernelLib::shVsh(const ShMatrix<N, N, Binding, T> &mv,
     ShOutputVector3f SH_NAMEDECL(tv, "tangent");
     ShOutputVector3f SH_NAMEDECL(tv2, "tangent2");
     ShOutputVector3f SH_NAMEDECL(vv, "viewVec");     
-    ShOutputVector3f hv[numLights];    
+    ShOutputVector3f* hv = new ShOutputVector3f[numLights];    
     for(i = 0; i < numLights; ++i) hv[i].name(makeName("halfVec", i).c_str());
-    ShOutputVector3f lv[numLights];    
+    ShOutputVector3f* lv = new ShOutputVector3f[numLights];    
     for(i = 0; i < numLights; ++i) lv[i].name(makeName("lightVec", i).c_str()); 
 
-    ShOutputPoint3f lpo[numLights];    
+    ShOutputPoint3f* lpo = new ShOutputPoint3f[numLights];    
     for(i = 0; i < numLights; ++i) lpo[i].name(makeName("lightPos", i).c_str()); 
 
     // TCS outputs
     ShOutputNormal3f SH_NAMEDECL(nvt, "normalt");      
     ShOutputVector3f SH_NAMEDECL(vvt, "viewVect");     
-    ShOutputVector3f hvt[numLights];    
+    ShOutputVector3f* hvt = new ShOutputVector3f[numLights];    
     for(i = 0; i < numLights; ++i) hvt[i].name(makeName("halfVect", i).c_str());
-    ShOutputVector3f lvt[numLights];    
+    ShOutputVector3f* lvt = new ShOutputVector3f[numLights];    
     for(i = 0; i < numLights; ++i) lvt[i].name(makeName("lightVect", i).c_str()); 
 
     ShOutputPosition4f SH_NAMEDECL(pd, "posh");      
@@ -127,8 +127,14 @@ ShProgram ShKernelLib::shVsh(const ShMatrix<N, N, Binding, T> &mv,
       lvt[i] = normalize(changeBasis(nv, tv, tv2, lv[i])); 
     }
 
-
     pd = mvp | pm;
+
+    delete [] lvt;
+    delete [] hvt;
+    delete [] lpo;
+    delete [] lv;
+    delete [] hv;
+    delete [] lpv;
   } SH_END;
   return generalVsh;
 }

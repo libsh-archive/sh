@@ -208,7 +208,7 @@ template<ShBindingType Binding, typename T>
 ShAttrib1f
 det(const ShMatrix<1, 1, Binding, T>& matrix)
 {
-  return matrix.m_data[0][0];
+  return matrix[0][0];
 }
 
   
@@ -216,7 +216,7 @@ template<ShBindingType Binding, typename T>
 ShAttrib1f
 det(const ShMatrix<2, 2, Binding, T>& matrix)
 {
-  return (matrix.m_data[0][0]*matrix.m_data[1][1] - matrix.m_data[0][1] * matrix.m_data[1][0]);
+  return (matrix[0][0]*matrix[1][1] - matrix[0][1] * matrix[1][0]);
 }
  
 template<int RowsCols, ShBindingType Binding, typename T>
@@ -227,7 +227,7 @@ det(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix)
   ShAttrib1f dir = RowsCols % 2 ? 1.0 : -1.0;
 
   for (int i = 0; i < RowsCols; i++) {
-    ret += dir * matrix.m_data[RowsCols - 1][i] * det(matrix.subMatrix(RowsCols - 1, i));
+    ret += dir * matrix[RowsCols - 1][i] * det(matrix.subMatrix(RowsCols - 1, i));
     dir *= -1.0;
   }
   return ret;
@@ -245,11 +245,10 @@ ShMatrix<2,2,Binding,T>
 cofactors(const ShMatrix<2, 2, Binding, T>& matrix)
 {
   ShMatrix<2,2,Binding,T> matrixToReturn;
-  ShAttrib1f minusOne = -1.0;
-  matrixToReturn.m_data[0][0]=         matrix[1][1];
-  matrixToReturn.m_data[1][0]=minusOne*matrix[0][1];
-  matrixToReturn.m_data[0][1]=minusOne*matrix[1][0];
-  matrixToReturn.m_data[1][1]=         matrix[0][0];
+  matrixToReturn.m_data[0][0]= matrix[1][1];
+  matrixToReturn.m_data[1][0]=-matrix[0][1];
+  matrixToReturn.m_data[0][1]=-matrix[1][0];
+  matrixToReturn.m_data[1][1]= matrix[0][0];
     
   return matrixToReturn;
   //return matrix;
@@ -265,9 +264,9 @@ cofactors(const ShMatrix<RowsCols,RowsCols, Binding, T>& matrix)
   for (int i = 0; i < RowsCols; i++) {
     for (int j = 0; j < RowsCols; j++) {
       if( (i+j)%2 ==0)	  
-        matrixToReturn.m_data[i][j]=         det(matrix.subMatrix(i,j));
+        matrixToReturn[i][j]=         det(matrix.subMatrix(i,j));
       else
-        matrixToReturn.m_data[i][j]=minusOne*det(matrix.subMatrix(i,j));
+        matrixToReturn[i][j]=minusOne*det(matrix.subMatrix(i,j));
     }
   }
   return matrixToReturn;
@@ -282,7 +281,7 @@ trans(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix){
     
   for (int i = 0; i < RowsCols; i++) {
     for (int j = 0; j < RowsCols; j++) {	  
-      matrixToReturn.m_data[i][j]= matrix[j][i];	
+      matrixToReturn[i][j]= matrix[j][i];	
     }
   }
     

@@ -29,11 +29,13 @@
 
 #include <string>
 #include <map>
+#include "ShDllExport.hpp"
 #include "ShProgram.hpp"
 
 namespace SH {
 
-class ShContext {
+class
+SH_DLLEXPORT ShContext {
 public:
   static ShContext* current();
 
@@ -82,9 +84,11 @@ private:
 typedef ShContext::BoundProgramMap::iterator ShBoundIterator;
 
 /// Get beginning of bound program map for current context
+SH_DLLEXPORT
 ShBoundIterator shBeginBound();
 
 /// Get end of bound program map for current context
+SH_DLLEXPORT
 ShBoundIterator shEndBound();
 
 

@@ -57,14 +57,22 @@ void ShNoise<M, T, P>::init() {
 
   int i, j, k, l;
 
-  // generate pseudorandom noise noiseImage[x + y * P][z] holds the four
+  // generate pseudorand noise noiseImage[x + y * P][z] holds the four
   // 1D gradient components for lattice points (x, y, z), (x, y, z + 1), (x, y + 1, z),
   // and (x, y + 1, z + 1)
+#ifdef WIN32
+  srand(13);
+#else
   srand48(13);
+#endif
   ShImage3D noiseImage(P, P, P, M);
   for(k = 0; k < P; ++k) {
    for(i = 0; i < P; ++i) for(j = 0; j < P; ++j) for(l = 0; l < M; ++l) {
-      noiseImage(i, j, k, l) = drand48();
+#ifdef WIN32
+     noiseImage(i, j, k, l) = rand();
+#else
+     noiseImage(i, j, k, l) = drand48();
+#endif
     }
   }
   noiseTex.memory(noiseImage.memory());

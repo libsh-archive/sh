@@ -28,6 +28,7 @@
 #define SHTOKEN_HPP
 
 #include <vector>
+#include "ShDllExport.hpp"
 #include "ShRefCount.hpp"
 #include "ShBlock.hpp"
 
@@ -58,7 +59,8 @@ enum ShTokenType {
  * have some arguments, see ShTokenArgument. Later these tokens
  * will be parsed into real control structures by the parser.
  */
-class ShToken : public ShBlock {
+class 
+SH_DLLEXPORT ShToken : public ShBlock {
 public:
   ShToken(ShTokenType type);
   ~ShToken();

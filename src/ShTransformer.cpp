@@ -158,8 +158,8 @@ struct StatementSplitter {
       ShVariable tempVar(new ShVariableNode(SH_TEMP, tsize, SH_ATTRIB));
       vv.push_back(tempVar);
 
-      int tempSwiz[tsize];
-      int srcSwiz[tsize];
+      int* tempSwiz = new int[tsize];
+      int* srcSwiz = new int[tsize];
       int tempSize;
       for(j = 0; j < srcVec.size(); ++j) {
         tempSize = 0;
@@ -175,6 +175,8 @@ struct StatementSplitter {
           stmts.push_back(ShStatement(tempVar(tempSize, tempSwiz), SH_OP_ASN, srcVar(tempSize, srcSwiz)));
         }
       }
+      delete [] tempSwiz;
+      delete [] srcSwiz;
     }
   }
 
@@ -184,8 +186,8 @@ struct StatementSplitter {
     std::size_t j;
     int k;
     int offset = 0;
-    int swizd[maxTuple];
-    int swizr[maxTuple];
+    int* swizd = new int[maxTuple];
+    int* swizr = new int[maxTuple];
     int size;
     for(VarVec::const_iterator I = resultVec.begin(); I != resultVec.end(); 
         offset += I->size(), ++I) {
@@ -204,6 +206,8 @@ struct StatementSplitter {
         }
       }
     }
+    delete [] swizd;
+    delete [] swizr;
   }
 
   // works on two assumptions
@@ -337,7 +341,10 @@ struct InputOutputConvertor {
   ShVariableNodePtr dupNode(ShVariableNodePtr node, ShBindingType newBinding = SH_TEMP) {
     ShVariableNodePtr result( new ShVariableNode(newBinding,
           node->size(), node->specialType()));
-    result->name(node->name());
+    if (node->has_name()) {
+      // TODO: should really copy all meta information here.
+      result->name(node->name());
+    }
     return result;
   }
   

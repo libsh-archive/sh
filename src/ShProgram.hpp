@@ -27,6 +27,7 @@
 #ifndef SHPROGRAM_HPP
 #define SHPROGRAM_HPP
 
+#include "ShDllExport.hpp"
 #include "ShProgramNode.hpp"
 #include "ShBackend.hpp"
 
@@ -34,7 +35,8 @@ namespace SH {
 
 /** Thin wrapper around ShProgramNode.
  */
-class ShProgram : public ShMetaForwarder {
+class
+SH_DLLEXPORT ShProgram : public ShMetaForwarder {
 public:
   ShProgram();
   ShProgram(const ShProgram& other);

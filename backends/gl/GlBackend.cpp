@@ -53,11 +53,34 @@ void shGlCheckError(const char* desc, const char* file, int line)
   SH_DEBUG_PRINT("GL ERROR call: " << desc);
 }
 
+#ifdef WIN32
+#define GET_WGL_PROCEDURE(x, T) do { x = reinterpret_cast<PFN ## T ## PROC>(wglGetProcAddress(#x)); } while(0)
+#else
+#define GET_WGL_PROCEDURE(x, T) do { } while (0)
+#endif
+
 GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* textures,
                      StreamStrategy* streams)
   : m_curContext(0)
 {
   m_contexts.push_back(Context(code, textures, streams));
+
+  GET_WGL_PROCEDURE(glProgramStringARB,
+		    GLPROGRAMSTRINGARB);
+  GET_WGL_PROCEDURE(glBindProgramARB,
+		    GLBINDPROGRAMARB);
+  GET_WGL_PROCEDURE(glGenProgramsARB,
+		    GLGENPROGRAMSARB);
+  GET_WGL_PROCEDURE(glActiveTextureARB,
+		    GLACTIVETEXTUREARB);
+  GET_WGL_PROCEDURE(glTexImage3D,
+		    GLTEXIMAGE3D);
+  GET_WGL_PROCEDURE(glProgramEnvParameter4fvARB,
+		    GLPROGRAMENVPARAMETER4FVARB);
+  GET_WGL_PROCEDURE(glProgramLocalParameter4fvARB,
+		    GLPROGRAMLOCALPARAMETER4FVARB);
+  GET_WGL_PROCEDURE(glGetProgramivARB,
+		    GLGETPROGRAMIVARB);
 }
 
 SH::ShBackendCodePtr
@@ -97,7 +120,7 @@ int GlBackend::context() const
 
 void GlBackend::setContext(int context)
 {
-  SH_DEBUG_ASSERT(0 <= context < m_contexts.size());
+  SH_DEBUG_ASSERT(0 <= context && context < m_contexts.size());
   m_curContext = context;
 }
 

@@ -68,6 +68,13 @@ ShGeneric<N, T> frac(const ShGeneric<N, T>& var);
 template<int N, typename T>
 ShGeneric<N,  T> pos(const ShGeneric<N, T>& x);
 
+#ifdef max
+#undef max
+#endif
+#ifdef min
+#undef min
+#endif
+
 /** Maximum.
  * Creates a tuple of componentwise maximums of a pair of input tuples.
  */

@@ -27,6 +27,7 @@
 #ifndef SH_HPP
 #define SH_HPP
 
+#include "ShDllExport.hpp"
 #include "ShException.hpp"
 #include "ShContext.hpp"
 #include "ShProgram.hpp"

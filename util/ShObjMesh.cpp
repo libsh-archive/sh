@@ -310,7 +310,8 @@ void ShObjMesh::normalizeNormals() {
 }
 
 struct ObjVertLess {
- static const float EPS = 1e-5;
+ static const float EPS;
+
  inline bool operator()( const ShObjVertex *a, const ShObjVertex *b ) const {
    float aval[3], bval[3];
    a->pos.getValues(aval); b->pos.getValues(bval);
@@ -322,6 +323,8 @@ struct ObjVertLess {
           (aval[2] < bval[2] - EPS))));
  }
 };
+
+const float ObjVertLess::EPS = 1e-5;
 
 void ShObjMesh::consolidateVertices() {
   mergeVertices<ObjVertLess>();

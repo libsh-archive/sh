@@ -28,6 +28,8 @@
 #include <string>
 #include <cstring>
 #include <cstdio>
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include <png.h>
 #include <sstream>
 #include "ShException.hpp"

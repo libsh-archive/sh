@@ -29,6 +29,7 @@
 
 #include <iosfwd>
 #include <vector>
+#include "ShDllExport.hpp"
 #include "ShException.hpp"
 
 namespace SH {
@@ -52,7 +53,8 @@ namespace SH {
  * sanity, since currently swizzles don't know anything about (in
  * particular the size of) the tuple which they are swizzling.
  */
-class ShSwizzle {
+class
+SH_DLLEXPORT ShSwizzle {
 public:
   // Null swizzle
   ShSwizzle();
@@ -96,12 +98,13 @@ private:
   std::size_t m_srcSize;
   std::vector<int> m_indices;
 
-  friend std::ostream& operator<<(std::ostream& out, const ShSwizzle& swizzle);
+  friend SH_DLLEXPORT std::ostream& operator<<(std::ostream& out, const ShSwizzle& swizzle);
 };
 
 /// Thrown when an invalid swizzle is specified (e.g. an index in the
 /// swizzle is out of range).
-class ShSwizzleException : public ShException 
+class
+SH_DLLEXPORT ShSwizzleException : public ShException 
 {
 public:
   ShSwizzleException(const ShSwizzle& s, int idx, int size);

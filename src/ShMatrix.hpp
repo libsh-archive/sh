@@ -138,57 +138,6 @@ public:
    */
   template<ShBindingType Binding2>
   ShMatrix& operator/=(const ShMatrix<Rows, Cols, Binding2, T>& other);    
-    
-  /** \brief Returns the determinant for the matrix in parameter
-   *
-   * Returns a ShAttrib1f containing the value of the determinant of the matrix. NOTE: This method uses an naive recursive algorithm in O(n!) which could take a long time with large matrices
-   * \param other The matrix from which we want the determinant (need to be a square matrix to compile)
-   */
-  template<ShBindingType Binding2, typename T2>
-  friend ShAttrib1f det(const ShMatrix<1, 1, Binding2, T2>& matrix);
-
-  template<ShBindingType Binding2, typename T2>
-  friend ShAttrib1f det(const ShMatrix<2, 2, Binding2, T2>& matrix);
-    
-  template <int RowsCols, ShBindingType Binding2, typename T2>
-  friend ShAttrib1f det(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
-    
-    
-  /** \brief Returns the matrix of cofactors for the matrix in parameter
-   *
-   * Returns a ShMatrix containing the same amount of Rows/Colsvalue as the matrix in parameter 
-   * \param other The matrix from which we want the matrix of cofactors (need to be a square matrix to compile)
-   */
-  template <int RowsCols, ShBindingType Binding2, typename T2>
-  friend
-  ShMatrix<RowsCols, RowsCols, Binding2, T2> cofactors(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
-    
-  /** \brief Returns the transposed matrix for the matrix in parameter
-   *
-   * Returns a ShMatrix that is the transposed of the one in parameters
-   * \param other The matrix from which we want the matrix of cofactors (need to be a square matrix to compile, we might want to change that...)
-   */
-  template <int RowsCols, ShBindingType Binding2, typename T2>
-  friend
-  ShMatrix<RowsCols, RowsCols, Binding2, T2> trans(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
-  
-  /** \brief Returns the adjacent matrix for the matrix in parameter
-   *
-   * Returns a ShMatrix that is the adjacent of the one in parameters
-   * \param other The matrix from which we want the adjacent matrix (need to be a square matrix to compile)
-   */
-  template <int RowsCols, ShBindingType Binding2, typename T2>
-  friend
-  ShMatrix<RowsCols, RowsCols, Binding2, T2> adj(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
-
-  /** \brief Returns the inverse matrix for the matrix in parameter
-   *
-   * Returns a ShMatrix that is the inverse of the one in parameters (NOTE: There is no error handling if the determinant is 0, NOTE #2: We might want to rewrite this method if we have the * operator with a ShVariableN)
-   * \param other The matrix from which we want the inverse matrix (need to be a square matrix to compile)
-   */
-  template <int RowsCols, ShBindingType Binding2, typename T2>
-  friend
-  ShMatrix<RowsCols,RowsCols, Binding2, T2> inv(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
    
   /** \brief Operator << (used for iostream)
    *
@@ -310,6 +259,55 @@ public:
 private:
   ShAttrib<Cols, SH_TEMP, T> m_data[Rows];
 };
+
+    
+  /** \brief Returns the determinant for the matrix in parameter
+   *
+   * Returns a ShAttrib1f containing the value of the determinant of the matrix. NOTE: This method uses an naive recursive algorithm in O(n!) which could take a long time with large matrices
+   * \param other The matrix from which we want the determinant (need to be a square matrix to compile)
+   */
+  template<ShBindingType Binding2, typename T2>
+   ShAttrib1f det(const ShMatrix<1, 1, Binding2, T2>& matrix);
+
+  template<ShBindingType Binding2, typename T2>
+   ShAttrib1f det(const ShMatrix<2, 2, Binding2, T2>& matrix);
+    
+  template <int RowsCols, ShBindingType Binding2, typename T2>
+   ShAttrib1f det(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
+    
+    
+  /** \brief Returns the matrix of cofactors for the matrix in parameter
+   *
+   * Returns a ShMatrix containing the same amount of Rows/Colsvalue as the matrix in parameter 
+   * \param other The matrix from which we want the matrix of cofactors (need to be a square matrix to compile)
+   */
+  template <int RowsCols, ShBindingType Binding2, typename T2>
+  ShMatrix<RowsCols, RowsCols, Binding2, T2> cofactors(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
+    
+  /** \brief Returns the transposed matrix for the matrix in parameter
+   *
+   * Returns a ShMatrix that is the transposed of the one in parameters
+   * \param other The matrix from which we want the matrix of cofactors (need to be a square matrix to compile, we might want to change that...)
+   */
+  template <int RowsCols, ShBindingType Binding2, typename T2>
+  ShMatrix<RowsCols, RowsCols, Binding2, T2> trans(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
+  
+  /** \brief Returns the adjacent matrix for the matrix in parameter
+   *
+   * Returns a ShMatrix that is the adjacent of the one in parameters
+   * \param other The matrix from which we want the adjacent matrix (need to be a square matrix to compile)
+   */
+  template <int RowsCols, ShBindingType Binding2, typename T2>
+  ShMatrix<RowsCols, RowsCols, Binding2, T2> adj(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
+
+  /** \brief Returns the inverse matrix for the matrix in parameter
+   *
+   * Returns a ShMatrix that is the inverse of the one in parameters (NOTE: There is no error handling if the determinant is 0, NOTE #2: We might want to rewrite this method if we have the * operator with a ShVariableN)
+   * \param other The matrix from which we want the inverse matrix (need to be a square matrix to compile)
+   */
+  template <int RowsCols, ShBindingType Binding2, typename T2>
+  ShMatrix<RowsCols,RowsCols, Binding2, T2> inv(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
+
 
 typedef ShMatrix<1, 1, SH_INPUT, float> ShInputMatrix1x1f;
 typedef ShMatrix<1, 1, SH_OUTPUT, float> ShOutputMatrix1x1f;

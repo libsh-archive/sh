@@ -2,12 +2,14 @@
 #define SHMETAFORWARDER_HPP
 
 #include <string>
+#include "ShDllExport.hpp"
 
 namespace SH {
 
 class ShMeta;
 
-class ShMetaForwarder {
+class
+SH_DLLEXPORT ShMetaForwarder {
 public:
   ShMetaForwarder(ShMeta* meta);
   

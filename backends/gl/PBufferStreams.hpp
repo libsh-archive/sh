@@ -32,13 +32,13 @@
 
 namespace shgl {
 
-#ifndef WIN32
 enum FloatExtension {
   SH_ARB_NV_FLOAT_BUFFER,
   SH_ARB_ATI_PIXEL_FORMAT_FLOAT,
   SH_ARB_NO_FLOAT_EXT
 };
 
+#ifndef WIN32
 struct ShGLXPBufferInfo {
   ShGLXPBufferInfo()
     : extension(SH_ARB_NO_FLOAT_EXT),

@@ -28,6 +28,7 @@
 #define SHREFCOUNT_HPP
 
 #include <utility>
+#include "ShDllExport.hpp"
 
 // #define SH_REFCOUNT_DEBUGGING
 
@@ -49,7 +50,9 @@ namespace SH {
  * These are classes you can wrap in an ShRefCount. Inherit from this
  * if you want to reference-count your class.
  */
-class ShRefCountable 
+class 
+SH_DLLEXPORT
+ShRefCountable 
 {
 public:
   ShRefCountable()
@@ -147,6 +150,8 @@ public:
 
   /// Obtain a pointer to the object we reference count
   T* object() const;
+
+  void swap(ShPointer& other);
 
 private:
   void releaseRef();

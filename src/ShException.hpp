@@ -28,13 +28,15 @@
 #define SHEXCEPTION_HPP
 
 #include <string>
+#include "ShDllExport.hpp"
 
 namespace SH {
 
 /** A generic exception.
  * You should derive from this class to make more specific exceptions.
  */
-class ShException {
+class
+SH_DLLEXPORT ShException {
 public:
   /// Construct a general exception with the given message.
   ShException(const std::string& message);
@@ -48,49 +50,56 @@ protected:
 
 /** An exception representing a parse error.
  */
-class ShParseException : public ShException {
+class
+SH_DLLEXPORT ShParseException : public ShException {
 public:
   ShParseException(const std::string& message);
 };
 
 /** An exception representing a scoping violation
  */
-class ShScopeException : public ShException {
+class
+SH_DLLEXPORT ShScopeException : public ShException {
 public:
   ShScopeException(const std::string& message);
 };
 
 /** An exception relating to an ShImage operation.
  */
-class ShImageException : public ShException {
+class
+SH_DLLEXPORT ShImageException : public ShException {
 public:
   ShImageException(const std::string& message);
 };
 
 /** An exception relating to an ShAlgebra operation.
  */
-class ShAlgebraException : public ShException {
+class
+SH_DLLEXPORT ShAlgebraException : public ShException {
 public:
   ShAlgebraException(const std::string& message);
 };
 
 /** An exception relating to an ShOptimizer operation.
  */
-class ShOptimizerException : public ShException {
+class
+SH_DLLEXPORT ShOptimizerException : public ShException {
 public:
   ShOptimizerException(const std::string& message);
 };
 
 /** An exception relating to an ShTransformer operation.
  */
-class ShTransformerException : public ShException {
+class
+SH_DLLEXPORT ShTransformerException : public ShException {
 public:
   ShTransformerException(const std::string& message);
 };
 
 /** An exception relating to an ShBackend operation.
  */
-class ShBackendException : public ShException {
+class
+SH_DLLEXPORT ShBackendException : public ShException {
 public:
   ShBackendException(const std::string& message);
 };

@@ -27,6 +27,7 @@
 #include "ArbCode.hpp"
 #include <iostream>
 #include <sstream>
+#define _USE_MATH_DEFINES
 #include <cmath>
 #include <bitset>
 
@@ -493,11 +494,12 @@ std::ostream& ArbCode::print(std::ostream& out)
       }
       out << "  BRA label" << I->label;
       if (I->src[0].node()) {
-        out << "  (GT)";
+        out << "  (GT";
         out << ".";
         for (int i = 0; i < I->src[0].swizzle().size(); i++) {
           out << swizChars[I->src[0].swizzle()[i]];
         }
+        out << ")";
       }
       out << ";";
     } else if (I->op == SH_ARB_REP) {
