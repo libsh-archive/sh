@@ -27,7 +27,6 @@
 #ifndef SHLIB_HPP
 #define SHLIB_HPP
 
-#define _USE_MATH_DEFINES
 #include <cmath>
 #include <cassert>
 #include "ShVariable.hpp"
@@ -282,8 +281,9 @@ SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, operator*, rettype, 1);  \
 SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_BOTH(type, operator*, rettype, N);  \
                                                         \
 SH_SHLIB_UNEQ_BINARY_RETTYPE_OPERATION(type, operator/, rettype, N); \
+SH_SHLIB_LEFT_SCALAR_RETTYPE_OPERATION(type, operator/, rettype);    \
 SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, operator/, rettype, 1);  \
-SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_LEFT(type, operator/, rettype, N);  \
+SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_BOTH(type, operator/, rettype, N);  \
                                                         \
 SH_SHLIB_BINARY_RETTYPE_OPERATION(type, pow, rettype, N);            \
 SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, pow, rettype, 1);        \

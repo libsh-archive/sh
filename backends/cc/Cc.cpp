@@ -24,11 +24,16 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
+#ifdef WIN32
+#include <windows.h>
+#include <math.h>
+#else
 #include <dlfcn.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#endif /* WIN32 */
 
-#include "Gcc.hpp" 
+#include "Cc.hpp" 
 #include "ShDebug.hpp" 
 #include "ShStream.hpp" 
 
@@ -36,24 +41,24 @@
 #include "config.h"
 #endif
 
-#ifdef SH_GCC_DEBUG
-#  define SH_GCC_DEBUG_PRINT(x) SH_DEBUG_PRINT(x)
+#ifdef SH_CC_DEBUG
+#  define SH_CC_DEBUG_PRINT(x) SH_DEBUG_PRINT(x)
 #else
-#  define SH_GCC_DEBUG_PRINT(x) do { } while(0)
+#  define SH_CC_DEBUG_PRINT(x) do { } while(0)
 #endif
 
-void sh_gcc_backend_lookup1D(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_cc_backend_lookup1D(SH::ShTextureNode* tex, float* src, float* dst)
   {
   if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
     {
-    SH_GCC_DEBUG_PRINT("1D/SH_FILTER_MIPMAP textures unsupported...");
+    SH_CC_DEBUG_PRINT("1D/SH_FILTER_MIPMAP textures unsupported...");
     return;
     }
 
   SH::ShHostStoragePtr storage = SH::shref_dynamic_cast<SH::ShHostStorage>(tex->memory()->findStorage("host"));
   if (!storage)
     {
-    SH_GCC_DEBUG_PRINT("failed to find host storage...");
+    SH_CC_DEBUG_PRINT("failed to find host storage...");
     }
   float* data = (float*)storage->data();
   
@@ -96,23 +101,23 @@ void sh_gcc_backend_lookup1D(SH::ShTextureNode* tex, float* src, float* dst)
       }
     case 1:
       // linear interpolation
-      SH_GCC_DEBUG_PRINT("1D/LINEAR textures unsupported...");
+      SH_CC_DEBUG_PRINT("1D/LINEAR textures unsupported...");
       break;
     }
   }
 
-void sh_gcc_backend_lookup2D(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_cc_backend_lookup2D(SH::ShTextureNode* tex, float* src, float* dst)
   {
   if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
     {
-    SH_GCC_DEBUG_PRINT("2D/SH_FILTER_MIPMAP textures unsupported...");
+    SH_CC_DEBUG_PRINT("2D/SH_FILTER_MIPMAP textures unsupported...");
     return;
     }
 
   SH::ShHostStoragePtr storage = SH::shref_dynamic_cast<SH::ShHostStorage>(tex->memory()->findStorage("host"));
   if (!storage)
     {
-    SH_GCC_DEBUG_PRINT("failed to find host storage...");
+    SH_CC_DEBUG_PRINT("failed to find host storage...");
     }
   float* data = (float*)storage->data();
   
@@ -172,23 +177,23 @@ void sh_gcc_backend_lookup2D(SH::ShTextureNode* tex, float* src, float* dst)
       }
     case 1:
       // linear interpolation
-      SH_GCC_DEBUG_PRINT("2D/LINEAR textures unsupported...");
+      SH_CC_DEBUG_PRINT("2D/LINEAR textures unsupported...");
       break;
     }
   }
 
-void sh_gcc_backend_lookupRECT(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_cc_backend_lookupRECT(SH::ShTextureNode* tex, float* src, float* dst)
   {
   if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
     {
-    SH_GCC_DEBUG_PRINT("RECT/SH_FILTER_MIPMAP textures unsupported...");
+    SH_CC_DEBUG_PRINT("RECT/SH_FILTER_MIPMAP textures unsupported...");
     return;
     }
 
   SH::ShHostStoragePtr storage = SH::shref_dynamic_cast<SH::ShHostStorage>(tex->memory()->findStorage("host"));
   if (!storage)
     {
-    SH_GCC_DEBUG_PRINT("failed to find host storage...");
+    SH_CC_DEBUG_PRINT("failed to find host storage...");
     }
   float* data = (float*)storage->data();
   
@@ -248,22 +253,22 @@ void sh_gcc_backend_lookupRECT(SH::ShTextureNode* tex, float* src, float* dst)
       }
     case 1:
       // linear interpolation
-      SH_GCC_DEBUG_PRINT("RECT/LINEAR textures unsupported...");
+      SH_CC_DEBUG_PRINT("RECT/LINEAR textures unsupported...");
       break;
     }
   }
 
-void sh_gcc_backend_lookup3D(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_cc_backend_lookup3D(SH::ShTextureNode* tex, float* src, float* dst)
   {
-  SH_GCC_DEBUG_PRINT("3D textures unsupported...");
+  SH_CC_DEBUG_PRINT("3D textures unsupported...");
   }
 
-void sh_gcc_backend_lookupCUBE(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_cc_backend_lookupCUBE(SH::ShTextureNode* tex, float* src, float* dst)
   {
-  SH_GCC_DEBUG_PRINT("CUBE textures unsupported...");
+  SH_CC_DEBUG_PRINT("CUBE textures unsupported...");
   }
 
-extern "C" void sh_gcc_backend_lookup(void *t, float* src, float* dst)
+extern "C" void sh_cc_backend_lookup(void *t, float* src, float* dst)
   {
   // [0, 1) float based texture lookup
   SH::ShTextureNode* tex = (SH::ShTextureNode*)t;
@@ -271,38 +276,38 @@ extern "C" void sh_gcc_backend_lookup(void *t, float* src, float* dst)
   switch(tex->dims())
     {
     case SH::SH_TEXTURE_1D:
-      sh_gcc_backend_lookup1D(tex, src, dst);
+      sh_cc_backend_lookup1D(tex, src, dst);
       break;
     case SH::SH_TEXTURE_2D:
-      sh_gcc_backend_lookup2D(tex, src, dst);
+      sh_cc_backend_lookup2D(tex, src, dst);
       break;
     case SH::SH_TEXTURE_RECT:
-      sh_gcc_backend_lookupRECT(tex, src, dst);
+      sh_cc_backend_lookupRECT(tex, src, dst);
       break;
     case SH::SH_TEXTURE_3D:
-      sh_gcc_backend_lookup3D(tex, src, dst);
+      sh_cc_backend_lookup3D(tex, src, dst);
       break;
     case SH::SH_TEXTURE_CUBE:
-      sh_gcc_backend_lookupCUBE(tex, src, dst);
+      sh_cc_backend_lookupCUBE(tex, src, dst);
       break;
     default:
-      SH_GCC_DEBUG_PRINT("unknown texture dimension (" << tex->dims() << ")");
+      SH_CC_DEBUG_PRINT("unknown texture dimension (" << tex->dims() << ")");
       break;
     }
   }
 
-void sh_gcc_backend_lookupi1D(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_cc_backend_lookupi1D(SH::ShTextureNode* tex, float* src, float* dst)
   {
   if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
     {
-    SH_GCC_DEBUG_PRINT("1D/SH_FILTER_MIPMAP textures unsupported...");
+    SH_CC_DEBUG_PRINT("1D/SH_FILTER_MIPMAP textures unsupported...");
     return;
     }
 
   SH::ShHostStoragePtr storage = SH::shref_dynamic_cast<SH::ShHostStorage>(tex->memory()->findStorage("host"));
   if (!storage)
     {
-    SH_GCC_DEBUG_PRINT("failed to find host storage...");
+    SH_CC_DEBUG_PRINT("failed to find host storage...");
     }
   float* data = (float*)storage->data();
   
@@ -345,23 +350,23 @@ void sh_gcc_backend_lookupi1D(SH::ShTextureNode* tex, float* src, float* dst)
       }
     case 1:
       // linear interpolation
-      SH_GCC_DEBUG_PRINT("1D/LINEAR textures unsupported...");
+      SH_CC_DEBUG_PRINT("1D/LINEAR textures unsupported...");
       break;
     }
   }
 
-void sh_gcc_backend_lookupi2D(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_cc_backend_lookupi2D(SH::ShTextureNode* tex, float* src, float* dst)
   {
   if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
     {
-    SH_GCC_DEBUG_PRINT("2D/SH_FILTER_MIPMAP textures unsupported...");
+    SH_CC_DEBUG_PRINT("2D/SH_FILTER_MIPMAP textures unsupported...");
     return;
     }
 
   SH::ShHostStoragePtr storage = SH::shref_dynamic_cast<SH::ShHostStorage>(tex->memory()->findStorage("host"));
   if (!storage)
     {
-    SH_GCC_DEBUG_PRINT("failed to find host storage...");
+    SH_CC_DEBUG_PRINT("failed to find host storage...");
     }
   float* data = (float*)storage->data();
   
@@ -421,23 +426,23 @@ void sh_gcc_backend_lookupi2D(SH::ShTextureNode* tex, float* src, float* dst)
       }
     case 1:
       // linear interpolation
-      SH_GCC_DEBUG_PRINT("2D/LINEAR textures unsupported...");
+      SH_CC_DEBUG_PRINT("2D/LINEAR textures unsupported...");
       break;
     }
   }
 
-void sh_gcc_backend_lookupiRECT(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_cc_backend_lookupiRECT(SH::ShTextureNode* tex, float* src, float* dst)
   {
   if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
     {
-    SH_GCC_DEBUG_PRINT("RECT/SH_FILTER_MIPMAP textures unsupported...");
+    SH_CC_DEBUG_PRINT("RECT/SH_FILTER_MIPMAP textures unsupported...");
     return;
     }
 
   SH::ShHostStoragePtr storage = SH::shref_dynamic_cast<SH::ShHostStorage>(tex->memory()->findStorage("host"));
   if (!storage)
     {
-    SH_GCC_DEBUG_PRINT("failed to find host storage...");
+    SH_CC_DEBUG_PRINT("failed to find host storage...");
     }
   float* data = (float*)storage->data();
   
@@ -497,22 +502,22 @@ void sh_gcc_backend_lookupiRECT(SH::ShTextureNode* tex, float* src, float* dst)
       }
     case 1:
       // linear interpolation
-      SH_GCC_DEBUG_PRINT("RECT/LINEAR textures unsupported...");
+      SH_CC_DEBUG_PRINT("RECT/LINEAR textures unsupported...");
       break;
     }
   }
 
-void sh_gcc_backend_lookupi3D(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_cc_backend_lookupi3D(SH::ShTextureNode* tex, float* src, float* dst)
   {
-  SH_GCC_DEBUG_PRINT("3D textures unsupported...");
+  SH_CC_DEBUG_PRINT("3D textures unsupported...");
   }
 
-void sh_gcc_backend_lookupiCUBE(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_cc_backend_lookupiCUBE(SH::ShTextureNode* tex, float* src, float* dst)
   {
-  SH_GCC_DEBUG_PRINT("CUBE textures unsupported...");
+  SH_CC_DEBUG_PRINT("CUBE textures unsupported...");
   }
 
-extern "C" void sh_gcc_backend_lookupi(void* t, float* src, float* dst)
+extern "C" void sh_cc_backend_lookupi(void* t, float* src, float* dst)
   {
   // [0, size] integer based texture lookup
   SH::ShTextureNode* tex = (SH::ShTextureNode*)t;
@@ -520,22 +525,22 @@ extern "C" void sh_gcc_backend_lookupi(void* t, float* src, float* dst)
   switch(tex->dims())
     {
     case SH::SH_TEXTURE_1D:
-      sh_gcc_backend_lookupi1D(tex, src, dst);
+      sh_cc_backend_lookupi1D(tex, src, dst);
       break;
     case SH::SH_TEXTURE_2D:
-      sh_gcc_backend_lookupi2D(tex, src, dst);
+      sh_cc_backend_lookupi2D(tex, src, dst);
       break;
     case SH::SH_TEXTURE_RECT:
-      sh_gcc_backend_lookupiRECT(tex, src, dst);
+      sh_cc_backend_lookupiRECT(tex, src, dst);
       break;
     case SH::SH_TEXTURE_3D:
-      sh_gcc_backend_lookupi3D(tex, src, dst);
+      sh_cc_backend_lookupi3D(tex, src, dst);
       break;
     case SH::SH_TEXTURE_CUBE:
-      sh_gcc_backend_lookupiCUBE(tex, src, dst);
+      sh_cc_backend_lookupiCUBE(tex, src, dst);
       break;
     default:
-      SH_GCC_DEBUG_PRINT("unknown texture dimension (" << tex->dims() << ")");
+      SH_CC_DEBUG_PRINT("unknown texture dimension (" << tex->dims() << ")");
       break;
     }
   }
@@ -549,103 +554,108 @@ std::string encode(const SH::ShVariable& v)
   return ret.str();
   }
 
-namespace ShGcc {
+namespace ShCc {
 
-  GccVariable::GccVariable(void) :
+  CcVariable::CcVariable(void) :
     m_num(-1),
     m_size(-1)
     {
     }
   
-  GccVariable::GccVariable(int num, const std::string& name) :
+  CcVariable::CcVariable(int num, const std::string& name) :
     m_num(num),
     m_name(name),
     m_size(-1)
     {
     }
 
-  GccVariable::GccVariable(int num, const std::string& name, int size) :
+  CcVariable::CcVariable(int num, const std::string& name, int size) :
     m_num(num),
     m_name(name),
     m_size(size)
     {
     }
 
-  GccBackendCode::LabelFunctor::LabelFunctor(std::map<SH::ShCtrlGraphNodePtr, int>& label_map) :
+  CcBackendCode::LabelFunctor::LabelFunctor(std::map<SH::ShCtrlGraphNodePtr, int>& label_map) :
     m_cur_label(0),
     m_label_map(label_map)
     {
     }
 
-  void GccBackendCode::LabelFunctor::operator()(SH::ShCtrlGraphNode* node)
+  void CcBackendCode::LabelFunctor::operator()(SH::ShCtrlGraphNode* node)
     {
     m_label_map[node] = m_cur_label++;
     }
   
-  GccBackendCode::EmitFunctor::EmitFunctor(GccBackendCode* bec) :
+  CcBackendCode::EmitFunctor::EmitFunctor(CcBackendCode* bec) :
     m_bec(bec)
     {
     }
   
-  void GccBackendCode::EmitFunctor::operator()(SH::ShCtrlGraphNode* node)
+  void CcBackendCode::EmitFunctor::operator()(SH::ShCtrlGraphNode* node)
     {
     m_bec->emit(node);
     }
   
-  GccBackendCode::GccBackendCode(const SH::ShProgramNodeCPtr& program) :
+  CcBackendCode::CcBackendCode(const SH::ShProgramNodeCPtr& program) :
     m_program(program),
+#ifdef WIN32
+    m_hmodule(NULL),
+#else
     m_handle(NULL),
-    m_func(NULL),
+#endif
+    m_init_func(NULL),
+    m_shader_func(NULL),
     m_cur_temp(0),
     m_params(NULL)
     {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
     }
 
-  GccBackendCode::~GccBackendCode(void)
+  CcBackendCode::~CcBackendCode(void)
     {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
     }
 
-  bool GccBackendCode::allocateRegister(const SH::ShVariableNodePtr& var)
+  bool CcBackendCode::allocateRegister(const SH::ShVariableNodePtr& var)
     {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
     return false;
     }
 
-  void GccBackendCode::freeRegister(const SH::ShVariableNodePtr& var)
+  void CcBackendCode::freeRegister(const SH::ShVariableNodePtr& var)
     {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
     }
 
-  void GccBackendCode::upload(void)
+  void CcBackendCode::upload(void)
     {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
     }
 
-  void GccBackendCode::bind(void)
+  void CcBackendCode::bind(void)
     {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
     }
 
-  void GccBackendCode::updateUniform(const SH::ShVariableNodePtr& uniform)
+  void CcBackendCode::updateUniform(const SH::ShVariableNodePtr& uniform)
     {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
     }
 
-  std::ostream& GccBackendCode::print(std::ostream& out)
+  std::ostream& CcBackendCode::print(std::ostream& out)
     {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
     return out;
     }
 
-  std::ostream& GccBackendCode::printInputOutputFormat(std::ostream& out)
+  std::ostream& CcBackendCode::printInputOutputFormat(std::ostream& out)
     {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
     return out;
     }
   
-  void GccBackendCode::allocate_consts(void)
+  void CcBackendCode::allocate_consts(void)
     {
     int cur_const = 0;
     for (SH::ShProgramNode::VarList::const_iterator itr = m_program->constants.begin();
@@ -657,7 +667,7 @@ namespace ShGcc {
       // allocate internal variable as constant
       char name[128];
       sprintf(name, "var_c_%d", cur_const);
-      m_varmap[node] = GccVariable(cur_const++, name);
+      m_varmap[node] = CcVariable(cur_const++, name);
 
       // output constant definition
       m_code << "float " << name << "[" << node->size() << "] = {";
@@ -671,10 +681,10 @@ namespace ShGcc {
       m_code << "};" << std::endl;
       }
 
-    SH_GCC_DEBUG_PRINT("Found " << cur_const << " consts...");
+    SH_CC_DEBUG_PRINT("Found " << cur_const << " consts...");
     }
 
-  void GccBackendCode::allocate_inputs(void)
+  void CcBackendCode::allocate_inputs(void)
     {
     int cur_input = 0;
     for (SH::ShProgramNode::VarList::const_iterator itr = m_program->inputs.begin();
@@ -686,13 +696,13 @@ namespace ShGcc {
       // allocate internal variable as attribute
       char name[128];
       sprintf(name, "inputs[%d]", cur_input);
-      m_varmap[node] = GccVariable(cur_input++, name);
+      m_varmap[node] = CcVariable(cur_input++, name);
       }
 
-    SH_GCC_DEBUG_PRINT("Found " << cur_input << " inputs...");
+    SH_CC_DEBUG_PRINT("Found " << cur_input << " inputs...");
     }
 
-  void GccBackendCode::allocate_outputs(void)
+  void CcBackendCode::allocate_outputs(void)
     {
     int cur_output = 0;
     for (SH::ShProgramNode::VarList::const_iterator itr = m_program->outputs.begin();
@@ -704,13 +714,13 @@ namespace ShGcc {
       // allocate internal variable as attribute
       char name[128];
       sprintf(name, "outputs[%d]", cur_output);
-      m_varmap[node] = GccVariable(cur_output++, name);
+      m_varmap[node] = CcVariable(cur_output++, name);
       }
 
-    SH_GCC_DEBUG_PRINT("Found " << cur_output << " outputs...");
+    SH_CC_DEBUG_PRINT("Found " << cur_output << " outputs...");
     }
 
-  void GccBackendCode::allocate_streams(void)
+  void CcBackendCode::allocate_streams(void)
     {
     int cur_stream = 0;
     for (SH::ShProgramNode::ChannelList::const_iterator itr = m_program->channels.begin();
@@ -722,14 +732,14 @@ namespace ShGcc {
       // allocate internal variable as stream
       char name[128];
       sprintf(name, "streams[%d]", cur_stream);
-      m_varmap[node] = GccVariable(cur_stream++, name);
+      m_varmap[node] = CcVariable(cur_stream++, name);
       m_streams.push_back(node);
       }
 
-    SH_GCC_DEBUG_PRINT("Found " << cur_stream << " streams...");
+    SH_CC_DEBUG_PRINT("Found " << cur_stream << " streams...");
     }
 
-  void GccBackendCode::allocate_textures(void)
+  void CcBackendCode::allocate_textures(void)
     {
     int cur_texture = 0;
     for (SH::ShProgramNode::TexList::const_iterator itr = m_program->textures.begin();
@@ -741,14 +751,14 @@ namespace ShGcc {
       // allocate internal variable as texture
       char name[128];
       sprintf(name, "textures[%d]", cur_texture);
-      m_varmap[node] = GccVariable(cur_texture++, name);
+      m_varmap[node] = CcVariable(cur_texture++, name);
       m_textures.push_back(node);
       }
 
-    SH_GCC_DEBUG_PRINT("Found " << cur_texture << " textures...");
+    SH_CC_DEBUG_PRINT("Found " << cur_texture << " textures...");
     }
 
-  void GccBackendCode::allocate_uniforms(void)
+  void CcBackendCode::allocate_uniforms(void)
     {
     int cur_uniform = 0;
     std::vector<SH::ShVariableNodePtr> uniforms;
@@ -762,7 +772,7 @@ namespace ShGcc {
       // allocate internal variable as parameter
       char name[128];
       sprintf(name, "params[%d]", cur_uniform);
-      m_varmap[node] = GccVariable(cur_uniform++, name);
+      m_varmap[node] = CcVariable(cur_uniform++, name);
       uniforms.push_back(node);
       }
 
@@ -788,13 +798,13 @@ namespace ShGcc {
 	}
       }
 
-    SH_GCC_DEBUG_PRINT("Found " << cur_uniform << " uniforms...");
+    SH_CC_DEBUG_PRINT("Found " << cur_uniform << " uniforms...");
     }
 
-  std::string GccBackendCode::resolve(const SH::ShVariable& v)
+  std::string CcBackendCode::resolve(const SH::ShVariable& v)
     {
-    GccVariable v2;
-    std::map<SH::ShVariableNodePtr, GccVariable>::iterator itr = m_varmap.find(v.node());
+    CcVariable v2;
+    std::map<SH::ShVariableNodePtr, CcVariable>::iterator itr = m_varmap.find(v.node());
     
     if (itr == m_varmap.end())
       {
@@ -804,7 +814,7 @@ namespace ShGcc {
       // allocate internal variable as temp
       char name[128];
       sprintf(name, "var_t_%d", m_cur_temp);
-      v2 = GccVariable(m_cur_temp++, name, v.node()->size());
+      v2 = CcVariable(m_cur_temp++, name, v.node()->size());
       m_varmap[v.node()] = v2;
       m_temps.push_back(v2);
       }
@@ -819,10 +829,10 @@ namespace ShGcc {
     return buf.str();
     }
 
-  std::string GccBackendCode::resolve(const SH::ShVariable& v, int idx)
+  std::string CcBackendCode::resolve(const SH::ShVariable& v, int idx)
     {
-    GccVariable v2;
-    std::map<SH::ShVariableNodePtr, GccVariable>::iterator itr = m_varmap.find(v.node());
+    CcVariable v2;
+    std::map<SH::ShVariableNodePtr, CcVariable>::iterator itr = m_varmap.find(v.node());
     
     if (itr == m_varmap.end())
       {
@@ -832,7 +842,7 @@ namespace ShGcc {
       // allocate internal variable as temp
       char name[128];
       sprintf(name, "var_t_%d", m_cur_temp);
-      v2 = GccVariable(m_cur_temp++, name, v.node()->size());
+      v2 = CcVariable(m_cur_temp++, name, v.node()->size());
       m_varmap[v.node()] = v2;
       m_temps.push_back(v2);
       }
@@ -848,7 +858,7 @@ namespace ShGcc {
     return buf.str();
     }
 
-  void GccBackendCode::emit(const SH::ShStatement& stmt)
+  void CcBackendCode::emit(const SH::ShStatement& stmt)
     {
     // output SH intermediate m_code for reference
     switch(SH::opInfo[stmt.op].arity)
@@ -1607,7 +1617,7 @@ namespace ShGcc {
 	  {
 	  if (stmt.src[1].swizzle().identity())
 	    {
-	    m_code << "  sh_gcc_backend_lookup("
+	    m_code << "  sh_cc_backend_lookup("
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << resolve(stmt.src[1])
@@ -1628,7 +1638,7 @@ namespace ShGcc {
 		     << resolve(stmt.src[1], i)
 		     << ";" << std::endl;
 	      }
-	    m_code << "    sh_gcc_backend_lookup("
+	    m_code << "    sh_cc_backend_lookup("
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << "input"
@@ -1644,7 +1654,7 @@ namespace ShGcc {
 	    {
 	    m_code << "    {" << std::endl;
 	    m_code << "    float result[" << stmt.dest.size() << "];" << std::endl;
-	    m_code << "    sh_gcc_backend_lookup("
+	    m_code << "    sh_cc_backend_lookup("
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << resolve(stmt.src[1])
@@ -1675,7 +1685,7 @@ namespace ShGcc {
 		     << resolve(stmt.src[1], i)
 		     << ";" << std::endl;
 	      }
-	    m_code << "    sh_gcc_backend_lookup("
+	    m_code << "    sh_cc_backend_lookup("
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << "input"
@@ -1702,7 +1712,7 @@ namespace ShGcc {
 	  {
 	  if (stmt.src[1].swizzle().identity())
 	    {
-	    m_code << "  sh_gcc_backend_lookupi("
+	    m_code << "  sh_cc_backend_lookupi("
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << resolve(stmt.src[1])
@@ -1723,7 +1733,7 @@ namespace ShGcc {
 		     << resolve(stmt.src[1], i)
 		     << ";" << std::endl;
 	      }
-	    m_code << "    sh_gcc_backend_lookupi("
+	    m_code << "    sh_cc_backend_lookupi("
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << "input"
@@ -1739,7 +1749,7 @@ namespace ShGcc {
 	    {
 	    m_code << "    {" << std::endl;
 	    m_code << "    float result[" << stmt.dest.size() << "];" << std::endl;
-	    m_code << "    sh_gcc_backend_lookupi("
+	    m_code << "    sh_cc_backend_lookupi("
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << resolve(stmt.src[1])
@@ -1770,7 +1780,7 @@ namespace ShGcc {
 		     << resolve(stmt.src[1], i)
 		     << ";" << std::endl;
 	      }
-	    m_code << "    sh_gcc_backend_lookupi("
+	    m_code << "    sh_cc_backend_lookupi("
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << "input"
@@ -1867,7 +1877,7 @@ namespace ShGcc {
       }
     }
 
-  void GccBackendCode::emit(SH::ShBasicBlockPtr block)
+  void CcBackendCode::emit(SH::ShBasicBlockPtr block)
     {
     if (!block)
       {
@@ -1886,7 +1896,7 @@ namespace ShGcc {
       }
     }
 
-  void GccBackendCode::emit(SH::ShCtrlGraphNodePtr node)
+  void CcBackendCode::emit(SH::ShCtrlGraphNodePtr node)
     {
     m_code << "label_" << m_label_map[node] << ":" << std::endl
 	   << "  ;" << std::endl;
@@ -1904,7 +1914,9 @@ namespace ShGcc {
       for(int i = 0; i < (*itr).cond.size(); i++)
 	{
 	if (i != 0) 
+	  {
 	  m_code << " || ";
+	  }
 
 	m_code << "(";
 	m_code << resolve((*itr).cond, i) << " > 0.0f";
@@ -1929,9 +1941,9 @@ namespace ShGcc {
       }
     }
 
-  bool GccBackendCode::generate(void)
+  bool CcBackendCode::generate(void)
     {
-    SH_GCC_DEBUG_PRINT("Creating label map...");
+    SH_CC_DEBUG_PRINT("Creating label map...");
     LabelFunctor fl(m_label_map);
     m_program->ctrlGraph->dfs(fl);
 
@@ -1943,7 +1955,7 @@ namespace ShGcc {
     allocate_uniforms();
 
     // emit code
-    SH_GCC_DEBUG_PRINT("Emitting code...");
+    SH_CC_DEBUG_PRINT("Emitting code...");
     EmitFunctor fe(this);
     m_program->ctrlGraph->dfs(fe);
 
@@ -1951,27 +1963,44 @@ namespace ShGcc {
     std::stringstream prologue;
     prologue << "#include <math.h>" << std::endl;
     prologue << std::endl;
-    prologue << "extern \"C\" void sh_gcc_backend_lookup(void*, float*, float*);" << std::endl;
-    prologue << "extern \"C\" void sh_gcc_backend_lookupi(void*, float*, float*);" << std::endl;
+    prologue << "extern \"C\" typedef void (*CcLookupFunc)(void* t, float* src, float* dst);" << std::endl;
+    prologue << std::endl;
+    prologue << "static CcLookupFunc sh_cc_backend_lookup;" << std::endl;
+    prologue << "static CcLookupFunc sh_cc_backend_lookupi;" << std::endl;
+    prologue << std::endl;
+    prologue << "extern \"C\"";
+#ifdef WIN32
+    prologue << "void __declspec(dllexport) cc_init(CcLookupFunc lookup, CcLookupFunc lookupi)" << std::endl;
+#else
+    prologue << "void cc_init(CcLookupFunc lookup, CcLookupFunc lookupi)" << std::endl;
+#endif /* WIN32 */
+    prologue << "  {" << std::endl;
+    prologue << "  sh_cc_backend_lookup = lookup;" << std::endl;
+    prologue << "  sh_cc_backend_lookupi = lookupi;" << std::endl;
+    prologue << "  }" << std::endl;
     prologue << std::endl;
     prologue << "extern \"C\" "
-	   << " void func("
-	   << "float** inputs, "
-	   << "float** params, "
-	   << "float** streams, "
-	   << "void** textures, "
-	   << "float** outputs)" << std::endl;
+#ifdef WIN32
+	     << " void __declspec(dllexport) cc_shader("
+#else
+	     << " void cc_shader("
+#endif /* WIN32 */
+	     << "float** inputs, "
+	     << "float** params, "
+	     << "float** streams, "
+	     << "void** textures, "
+	     << "float** outputs)" << std::endl;
     prologue << "  {" << std::endl;
 
     // output temp declarations
-    for(std::vector<GccVariable>::iterator itr = m_temps.begin();
+    for(std::vector<CcVariable>::iterator itr = m_temps.begin();
 	itr != m_temps.end();
 	itr++)
       {
       // output temp declaration
       prologue << "  float "
-	     << (*itr).m_name << "[" << (*itr).m_size << "]"
-	     << ";" << std::endl;
+	       << (*itr).m_name << "[" << (*itr).m_size << "]"
+	       << ";" << std::endl;
       }
 
     // epilogue
@@ -1979,10 +2008,84 @@ namespace ShGcc {
     epilogue << "  }" << std::endl;
 
     // output code for debugging...
-    SH_GCC_DEBUG_PRINT(prologue.str());
-    SH_GCC_DEBUG_PRINT(m_code.str());
-    SH_GCC_DEBUG_PRINT(epilogue.str());
+    SH_CC_DEBUG_PRINT(prologue.str());
+    SH_CC_DEBUG_PRINT(m_code.str());
+    SH_CC_DEBUG_PRINT(epilogue.str());
 
+#ifdef WIN32
+    // generate temporary names for the
+    // code and the dll
+    char path[1024];
+    GetTempPath(1024, path);
+
+    char prefix[1024];
+    GetTempFileName(path, "shcc", 0, prefix);
+
+    char cppfile[1024];
+    char dllfile[1024];
+    sprintf(cppfile, "%s.cpp", prefix);
+    sprintf(dllfile, "%s.dll", prefix);
+
+    // write the code out to cppfile
+    FILE* f = fopen(cppfile, "w");
+    fprintf(f, "%s", prologue.str().c_str());
+    fprintf(f, "%s", m_code.str().c_str());
+    fprintf(f, "%s", epilogue.str().c_str());
+    fflush(f);
+    fclose(f);
+
+    // run cl on cppfile and generate dllfile
+    char cmdline[1024];
+    sprintf(cmdline, "cl /LD /Fe\"%s\" \"%s\"", dllfile, cppfile);
+
+    SH_CC_DEBUG_PRINT("cmdline: \"" << cmdline << "\"");
+
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+    ZeroMemory(&si, sizeof(STARTUPINFO));   
+    ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));   
+    si.cb = sizeof(STARTUPINFO);
+
+    if (!CreateProcess(NULL, cmdline, NULL, NULL,
+                      TRUE, 0, NULL, NULL, &si, &pi))
+      {
+      SH_CC_DEBUG_PRINT("CreateProcess failed!" << GetLastError());
+      return false;
+      }
+
+    // TODO: do not use INFINITE
+    WaitForSingleObject(pi.hProcess, INFINITE);
+
+    // Attempt to load the dll and fetch our function
+    m_hmodule = LoadLibrary(dllfile);
+    if (m_hmodule == NULL)
+      {
+      SH_CC_DEBUG_PRINT("LoadLibrary failed: " << GetLastError());
+      return false;
+      }
+    else
+      {
+      m_init_func = (CcInitFunc)GetProcAddress(m_hmodule, "cc_init");
+
+      if (m_init_func == NULL)
+        {
+        SH_CC_DEBUG_PRINT("GetProcAddress failed: " << GetLastError());
+        return false;
+        }
+
+      m_shader_func = (CcShaderFunc)GetProcAddress(m_hmodule, "cc_shader");
+
+      if (m_shader_func == NULL)
+        {
+        SH_CC_DEBUG_PRINT("GetProcAddress failed: " << GetLastError());
+        return false;
+        }
+
+      m_init_func(sh_cc_backend_lookup, sh_cc_backend_lookupi);
+      }
+
+    return true;
+#else
     char name[32];
     tmpnam(name);
     char ccfile[32];
@@ -1994,14 +2097,14 @@ namespace ShGcc {
     fprintf(f, "%s", m_code.str().c_str());
     fprintf(f, "%s", epilogue.str().c_str());
     fflush(f);
+    fclose(f);
 
     pid_t pid = fork();
     if (pid == 0)
       {
       // child
-      execlp("gcc", "gcc", "-O2", "-shared", "-o", sofile, ccfile,
-             "-L", SH_INSTALL_PREFIX "/lib/sh", "-lshgcc", NULL);
-      SH_GCC_DEBUG_PRINT("exec failed (" << errno << ")");
+      execlp("cc", "cc", "-O2", "-shared", "-o", sofile, ccfile, NULL);
+      SH_CC_DEBUG_PRINT("exec failed (" << errno << ")");
       exit(-1);
       }
     else if (pid > 0)
@@ -2010,29 +2113,39 @@ namespace ShGcc {
       pid_t ret = waitpid(pid, &status, 0);
       if (ret == -1)
 	{
-	SH_GCC_DEBUG_PRINT("wait failed...");
+	SH_CC_DEBUG_PRINT("wait failed...");
 	return false;
 	}
       else
 	{
-	SH_GCC_DEBUG_PRINT("status = " << status);
+	SH_CC_DEBUG_PRINT("status = " << status);
 	}
 
       m_handle = dlopen(sofile, RTLD_NOW);
       if (m_handle == NULL)
 	{
-          SH_GCC_DEBUG_PRINT("dlopen failed: " << dlerror());
+	SH_CC_DEBUG_PRINT("dlopen failed: " << dlerror());
 	return false;
 	}
       else
 	{
-	m_func = (GccFunc)dlsym(m_handle, "func");
+	m_init_func = (CcInitFunc)dlsym(m_handle, "cc_init");
 
-	if (m_func == NULL)
+	if (m_init_func == NULL)
 	  {
-            SH_GCC_DEBUG_PRINT("dlsym failed: " << dlerror());
+	  SH_CC_DEBUG_PRINT("dlsym failed: " << dlerror());
 	  return false;
 	  }
+
+	m_shader_func = (CcShaderFunc)dlsym(m_handle, "cc_shader");
+
+	if (m_shader_func == NULL)
+	  {
+	  SH_CC_DEBUG_PRINT("dlsym failed: " << dlerror());
+	  return false;
+	  }
+
+	m_init_func(sh_cc_backend_lookup, sh_cc_backend_lookupi);
 	}
 
       return true;
@@ -2040,18 +2153,19 @@ namespace ShGcc {
     else 
       {
       // fork failed
-      SH_GCC_DEBUG_PRINT("fork failed...");
+      SH_CC_DEBUG_PRINT("fork failed...");
       return false;
       }
+#endif /* WIN32 */
     }
 
-  bool GccBackendCode::execute(SH::ShStream& dest)
+  bool CcBackendCode::execute(SH::ShStream& dest)
     {
-    if (!m_func)
+    if (!m_shader_func)
       {
       if (!generate())
 	{
-	SH_GCC_DEBUG_PRINT("failed to generate program..."); 
+	SH_CC_DEBUG_PRINT("failed to generate program..."); 
 	return false;
 	}
       }
@@ -2114,7 +2228,7 @@ namespace ShGcc {
 	{
 	if (count != channel->count())
 	  {
-	  SH_GCC_DEBUG_PRINT("channel count discrepancy...");
+	  SH_CC_DEBUG_PRINT("channel count discrepancy...");
 	  return false;
 	  }
 	}
@@ -2123,23 +2237,23 @@ namespace ShGcc {
       
     for(int i = 0; i < count; i++)
       {
-      SH_GCC_DEBUG_PRINT("execution " << i << " of " << count);
-      m_func(inputs, params, streams, textures, outputs);
+      SH_CC_DEBUG_PRINT("execution " << i << " of " << count);
+      m_shader_func(inputs, params, streams, textures, outputs);
 
       for(int j = 0; j < num_streams; j++)
 	{
-	SH_GCC_DEBUG_PRINT("advancing input stream "
-		       << j
-		       << " by "
-		       << stream_sizes[j]);
+	SH_CC_DEBUG_PRINT("advancing input stream "
+			  << j
+			  << " by "
+			  << stream_sizes[j]);
 	streams[j] += stream_sizes[j];
 	}
       for(int j = 0; j < num_outputs; j++)
 	{
-	SH_GCC_DEBUG_PRINT("advancing output stream "
-		       << j
-		       << " by "
-		       << output_sizes[j]);
+	SH_CC_DEBUG_PRINT("advancing output stream "
+			  << j
+			  << " by "
+			  << output_sizes[j]);
 	outputs[j] += output_sizes[j];
 	}
       }
@@ -2148,40 +2262,40 @@ namespace ShGcc {
     }
 
 
-  GccBackend::GccBackend(void)
+  CcBackend::CcBackend(void)
     {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
     }
 
-  GccBackend::~GccBackend(void)
+  CcBackend::~CcBackend(void)
     {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
     }
 
-  std::string GccBackend::name(void) const
+  std::string CcBackend::name(void) const
     {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
-    return "gcc";
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
+    return "cc";
     }
 
-  SH::ShBackendCodePtr GccBackend::generateCode(const std::string& target,
-						const SH::ShProgramNodeCPtr& program)
+  SH::ShBackendCodePtr CcBackend::generateCode(const std::string& target,
+					       const SH::ShProgramNodeCPtr& program)
     {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
-    GccBackendCodePtr backendcode = new GccBackendCode(program);
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
+    CcBackendCodePtr backendcode = new CcBackendCode(program);
     backendcode->generate();
     return backendcode;
     }
 
-  void GccBackend::execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest)
+  void CcBackend::execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest)
     {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
 
-    GccBackendCodePtr backendcode = new GccBackendCode(program);
+    CcBackendCodePtr backendcode = new CcBackendCode(program);
     backendcode->execute(dest);
     }
 
-  static GccBackend* backend = new GccBackend();
+  static CcBackend* backend = new CcBackend();
 
 }
 

@@ -24,16 +24,21 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
+#ifdef WIN32
+#include <windows.h>
+#endif /* WIN32 */
+
 #include <iostream>
+
 #include "Arb.hpp"
 #include "GlTextures.hpp"
 #include "GlBackend.hpp"
-#ifndef WIN32
-#include "PBufferStreams.hpp"
-#endif
+
 #ifdef WIN32
-#include <windows.h>
-#endif
+#include "WGLPBufferStreams.hpp"
+#else
+#include "GLXPBufferStreams.hpp"
+#endif /* WIN32 */
 
 namespace shgl {
 
@@ -42,10 +47,10 @@ struct ArbBackend : public GlBackend {
     : GlBackend(new ArbCodeStrategy(),
                 new GlTextures(),
 #ifdef WIN32
-		0)
+                new WGLPBufferStreams())
 #else
-                new PBufferStreams())
-#endif
+                new GLXPBufferStreams())
+#endif /* WIN32 */
   {
   }
 
@@ -63,7 +68,7 @@ BOOL APIENTRY DllMain(HANDLE hModule,
   std::cerr << "Arb Backend DllMain called!" << std::endl;
   std::cerr << "Have backend: " << backend << std::endl;
   std::cerr << "lpReserved = " << lpReserved << std::endl;
-  std::cerr << "hModule = " << lpReserved << std::endl;
+  std::cerr << "hModule = " << hModule << std::endl;
   switch (ul_reason_for_call) {
   case DLL_PROCESS_ATTACH:
     std::cerr << "Process attach!" << std::endl;
@@ -87,5 +92,5 @@ BOOL APIENTRY DllMain(HANDLE hModule,
 
 #else
 static ArbBackend* backend = new ArbBackend();
-#endif
+#endif /* WIN32 */
 }

@@ -32,6 +32,8 @@ libsh_la_SOURCES += ShMetaForwarder.hpp ShMetaForwarder.cpp
 libsh_la_SOURCES += ShContext.hpp ShContext.cpp
 libsh_la_SOURCES += ShDllExport.hpp
 incinc_HEADERS   += ShDllExport.hpp
+libsh_la_SOURCES += ShPool.hpp ShPool.cpp
+incinc_HEADERS   += ShPool.hpp
 
 # Backend
 libsh_la_SOURCES += ShBackend.cpp ShBackend.hpp 
@@ -65,7 +67,7 @@ libsh_la_SOURCES += ShBaseTexture.hpp ShBaseTextureImpl.hpp ShBaseTexture.cpp
 libsh_la_SOURCES += ShArray.hpp ShTable.hpp ShTexture.hpp
 libsh_la_SOURCES += ShWrap.hpp ShClamping.hpp ShInterp.hpp
 libsh_la_SOURCES += ShTextureNode.hpp ShImage.hpp ShImage3D.hpp
-libsh_la_SOURCES += ShMemory.hpp ShMemory.cpp
+libsh_la_SOURCES += ShMemory.hpp ShMemory.cpp ShMemoryDep.hpp
 libsh_la_SOURCES += ShTextureNode.cpp ShImage.cpp ShImage3D.cpp
 
 # Types
@@ -92,7 +94,12 @@ libsh_la_SOURCES += ShChannelNode.hpp ShChannelNode.cpp
 libsh_la_SOURCES += ShChannel.hpp ShChannelImpl.hpp
 libsh_la_SOURCES += ShStream.hpp ShStreamImpl.hpp ShStream.cpp
 
+# Palettes
+libsh_la_SOURCES += ShPalette.hpp ShPaletteImpl.hpp
+libsh_la_SOURCES += ShPaletteNode.hpp ShPaletteNode.cpp
+incinc_HEADERS   += ShPalette.hpp ShPaletteImpl.hpp ShPaletteNode.hpp
 
+# These should really be moved up top
 incinc_HEADERS += ShBlock.hpp ShCtrlGraph.hpp
 incinc_HEADERS += ShDebug.hpp ShEnvironment.hpp ShError.hpp
 incinc_HEADERS += ShException.hpp ShLib.hpp
@@ -131,7 +138,7 @@ incinc_HEADERS += ShNibbles.hpp ShNibblesImpl.hpp
 incinc_HEADERS += ShChannelNode.hpp ShChannel.hpp ShChannelImpl.hpp
 incinc_HEADERS += ShStream.hpp ShStreamImpl.hpp
 incinc_HEADERS += ShQuaternion.hpp ShQuaternionImpl.hpp
-incinc_HEADERS += ShMemory.hpp ShClamping.hpp ShInterp.hpp
+incinc_HEADERS += ShMemory.hpp ShClamping.hpp ShInterp.hpp ShMemoryDep.hpp
 incinc_HEADERS += ShInstructions.hpp
 incinc_HEADERS += ShMeta.hpp ShMetaForwarder.hpp
 incinc_HEADERS += ShContext.hpp

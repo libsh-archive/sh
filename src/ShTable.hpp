@@ -46,7 +46,7 @@ class ShTable1D
   : public ShBaseTexture1D<T> {
 public:
   ShTable1D()
-    : ShBaseTexture1D<T>(ShTableTextureTraits())
+    : ShBaseTexture1D<T>(ShTableTraits())
   {}
   ShTable1D(int width)
     : ShBaseTexture1D<T>(width, ShTableTraits())
@@ -61,7 +61,7 @@ class ShTable2D
   : public ShBaseTexture2D<T> {
 public:
   ShTable2D()
-    : ShBaseTexture2D<T>(ShTableTextureTraits())
+    : ShBaseTexture2D<T>(ShTableTraits())
   {}
   ShTable2D(int width, int height)
     : ShBaseTexture2D<T>(width, height, ShTableTraits())
@@ -76,7 +76,7 @@ class ShTableRect
   : public ShBaseTextureRect<T> {
 public:
   ShTableRect()
-    : ShBaseTextureRect<T>(ShTableTextureTraits())
+    : ShBaseTextureRect<T>(ShTableTraits())
   {}
   ShTableRect(int width, int height)
     : ShBaseTextureRect<T>(width, height, ShTableTraits())
@@ -91,7 +91,7 @@ class ShTable3D
   : public ShBaseTexture3D<T> {
 public:
   ShTable3D()
-    : ShBaseTexture3D<T>(ShTableTextureTraits())
+    : ShBaseTexture3D<T>(ShTableTraits())
   {}
   ShTable3D(int width, int height, int depth)
     : ShBaseTexture3D<T>(width, height, depth, ShTableTraits())
@@ -106,7 +106,7 @@ class ShTableCube
   : public ShBaseTextureCube<T> {
 public:
   ShTableCube()
-    : ShBaseTextureCube<T>(ShTableTextureTraits())
+    : ShBaseTextureCube<T>(ShTableTraits())
   {}
   ShTableCube(int width, int height)
     : ShBaseTextureCube<T>(width, height, ShTableTraits())

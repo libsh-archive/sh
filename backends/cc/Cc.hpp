@@ -24,8 +24,8 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHGCC_HPP
-#define SHGCC_HPP
+#ifndef SHCC_HPP
+#define SHCC_HPP
 
 #include <map>
 #include <string>
@@ -33,20 +33,27 @@
 
 #include "ShBackend.hpp"
 
-typedef void (*GccFunc)(float** inputs,
-			float** params,
-			float** streams,
-			void** textures,
-			float** outputs);
+extern "C" typedef void (*CcLookupFunc)(void* t,
+                                        float* src,
+                                        float* dst);
 
-namespace ShGcc {
+extern "C" typedef void (*CcInitFunc)(CcLookupFunc,
+                                      CcLookupFunc);
+
+extern "C" typedef void (*CcShaderFunc)(float** inputs,
+                                        float** params,
+                                        float** streams,
+                                        void** textures,
+                                        float** outputs);
+
+namespace ShCc {
   
-  class GccVariable
+  class CcVariable
     {
     public:
-      GccVariable(void);
-      GccVariable(int num, const std::string& name);
-      GccVariable(int num, const std::string& name, int size);
+      CcVariable(void);
+      CcVariable(int num, const std::string& name);
+      CcVariable(int num, const std::string& name, int size);
 
     public:
       int m_num;
@@ -54,11 +61,11 @@ namespace ShGcc {
       int m_size;
     };
 
-  class GccBackendCode: public SH::ShBackendCode
+  class CcBackendCode: public SH::ShBackendCode
     {
     public:
-      GccBackendCode(const SH::ShProgramNodeCPtr& program);
-      ~GccBackendCode(void);
+      CcBackendCode(const SH::ShProgramNodeCPtr& program);
+      ~CcBackendCode(void);
 
       bool allocateRegister(const SH::ShVariableNodePtr& var);
       void freeRegister(const SH::ShVariableNodePtr& var);
@@ -73,7 +80,7 @@ namespace ShGcc {
       std::ostream& printInputOutputFormat(std::ostream& out);
 
     protected:
-      friend class GccBackend;
+      friend class CcBackend;
       bool generate(void);
       bool execute(SH::ShStream& dest);
 
@@ -89,27 +96,27 @@ namespace ShGcc {
       std::string resolve(const SH::ShVariable& v, int idx);
 
       class LabelFunctor
-	{
-	public:
-	  LabelFunctor(std::map<SH::ShCtrlGraphNodePtr, int>& label_map);
-	  
-	  void operator()(SH::ShCtrlGraphNode* node);
-	  
-	public:
-	  int m_cur_label;
-	  std::map<SH::ShCtrlGraphNodePtr, int>& m_label_map;
-	};
+  {
+  public:
+    LabelFunctor(std::map<SH::ShCtrlGraphNodePtr, int>& label_map);
+    
+    void operator()(SH::ShCtrlGraphNode* node);
+    
+  public:
+    int m_cur_label;
+    std::map<SH::ShCtrlGraphNodePtr, int>& m_label_map;
+  };
       
       class EmitFunctor
-	{
-	public:
-	  EmitFunctor(GccBackendCode* bec);
+  {
+  public:
+    EmitFunctor(CcBackendCode* bec);
 
-	  void operator()(SH::ShCtrlGraphNode* node);
-	  
-	public:
-	  GccBackendCode* m_bec;
-	};
+    void operator()(SH::ShCtrlGraphNode* node);
+    
+  public:
+    CcBackendCode* m_bec;
+  };
       
       void emit(const SH::ShStatement& stmt);
       void emit(SH::ShBasicBlockPtr block);
@@ -119,38 +126,44 @@ namespace ShGcc {
       const SH::ShProgramNodeCPtr& m_program;
 
       std::map<SH::ShCtrlGraphNodePtr, int> m_label_map;
-      std::map<SH::ShVariableNodePtr, GccVariable> m_varmap;
+      std::map<SH::ShVariableNodePtr, CcVariable> m_varmap;
 
       std::stringstream m_code;
 
+#ifdef WIN32
+      HMODULE m_hmodule;
+#else
       void* m_handle;
-      GccFunc m_func;
+#endif /* WIN32 */
+
+      CcInitFunc m_init_func;
+      CcShaderFunc m_shader_func;
 
       int m_cur_temp;
 
       float** m_params;
       std::vector<SH::ShChannelNodePtr> m_streams;
-      std::vector<GccVariable> m_temps;
+      std::vector<CcVariable> m_temps;
       std::vector<SH::ShTextureNodePtr> m_textures;
     };
   
-  class GccBackend: public SH::ShBackend
+  class CcBackend: public SH::ShBackend
     {
     public:
-      GccBackend(void);
-      ~GccBackend(void);
+      CcBackend(void);
+      ~CcBackend(void);
 
       std::string name(void) const;
 
       SH::ShBackendCodePtr generateCode(const std::string& target,
-					const SH::ShProgramNodeCPtr& program);
+                                        const SH::ShProgramNodeCPtr& program);
       
       void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
     };
 
 
-  typedef SH::ShPointer<GccBackendCode> GccBackendCodePtr;
-  typedef SH::ShPointer<GccBackend> GccBackendPtr;
+  typedef SH::ShPointer<CcBackendCode> CcBackendCodePtr;
+  typedef SH::ShPointer<CcBackend> CcBackendPtr;
 }
 
 #endif

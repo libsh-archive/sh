@@ -24,7 +24,6 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#define _USE_MATH_DEFINES
 #include <cmath>
 #include "ShInstructions.hpp"
 #include "ShStatement.hpp"
@@ -32,46 +31,53 @@
 #include "ShDebug.hpp"
 #include "ShError.hpp"
 
+#ifdef WIN32
+// TODO: quick fix, maybe this should be handled elsewhere or
+// implemented better?
+inline float roundf(float f) { return floorf(f + 0.5); }
+inline float cbrtf(float f) { return pow(f, 1.0f/3.0f); }
+#endif /* WIN32 */
+
 namespace {
 
 using namespace SH;
 
-bool immediate()
+inline bool immediate()
 {
   return !ShContext::current()->parsing();
 }
 
-void sizes_match(const ShVariable& a, const ShVariable& b)
+inline void sizes_match(const ShVariable& a, const ShVariable& b)
 {
   SH_DEBUG_ASSERT(a.size() == b.size());
 }
 
-void sizes_match(const ShVariable& a, const ShVariable& b,
+inline void sizes_match(const ShVariable& a, const ShVariable& b,
                  const ShVariable& c, bool scalar_b = false, bool scalar_c = false)
 {
   SH_DEBUG_ASSERT(((scalar_b && b.size() == 1) || a.size() == b.size()) && 
                   ((scalar_c && c.size() == 1) || a.size() == c.size()));
 }
 
-void has_values(const ShVariable& a)
+inline void has_values(const ShVariable& a)
 {
   SH_DEBUG_ASSERT(a.hasValues());
 }
 
-void has_values(const ShVariable& a, const ShVariable& b)
+inline void has_values(const ShVariable& a, const ShVariable& b)
 {
   SH_DEBUG_ASSERT(a.hasValues());
   SH_DEBUG_ASSERT(b.hasValues());
 }
 
-void has_values(const ShVariable& a, const ShVariable& b, const ShVariable& c)
+inline void has_values(const ShVariable& a, const ShVariable& b, const ShVariable& c)
 {
   SH_DEBUG_ASSERT(a.hasValues());
   SH_DEBUG_ASSERT(b.hasValues());
   SH_DEBUG_ASSERT(c.hasValues());
 }
 
-void has_values(const ShVariable& a, const ShVariable& b,
+inline void has_values(const ShVariable& a, const ShVariable& b,
                 const ShVariable& c, const ShVariable& d)
 {
   SH_DEBUG_ASSERT(a.hasValues());
@@ -80,35 +86,35 @@ void has_values(const ShVariable& a, const ShVariable& b,
   SH_DEBUG_ASSERT(d.hasValues());
 }
 
-void addStatement(const ShStatement& stmt)
+inline void addStatement(const ShStatement& stmt)
 {
   ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
 }
 
 typedef float T;
 
-T slt(T a, T b) { return a < b ? 1.0f : 0.0f; }
-T sle(T a, T b) { return a <= b ? 1.0f : 0.0f; }
-T sgt(T a, T b) { return a > b ? 1.0f : 0.0f; }
-T sge(T a, T b) { return a >= b ? 1.0f : 0.0f; }
-T seq(T a, T b) { return a == b ? 1.0f : 0.0f; }
-T sne(T a, T b) { return a != b ? 1.0f : 0.0f; }
-T max(T a, T b) { return a > b ? a : b; }
-T min(T a, T b) { return a < b ? a : b; }
-T lrp(T alpha, T a, T b) { return alpha*a + (1.0f-alpha)*b; }
-T cond(T alpha, T a, T b) { return alpha > 0.0f ? a : b; }
-T mad(T a, T b, T c) { return a * b + c; }
-T frac(T a) { return fmodf(a, 1.0f); }
-T sgn(T a) { return (a < 0.0f ? -1.0f : (a == 0.0f ? 0.0f : 1.0f)); }
+inline T slt(T a, T b) { return a < b ? 1.0f : 0.0f; }
+inline T sle(T a, T b) { return a <= b ? 1.0f : 0.0f; }
+inline T sgt(T a, T b) { return a > b ? 1.0f : 0.0f; }
+inline T sge(T a, T b) { return a >= b ? 1.0f : 0.0f; }
+inline T seq(T a, T b) { return a == b ? 1.0f : 0.0f; }
+inline T sne(T a, T b) { return a != b ? 1.0f : 0.0f; }
+inline T max(T a, T b) { return a > b ? a : b; }
+inline T min(T a, T b) { return a < b ? a : b; }
+inline T lrp(T alpha, T a, T b) { return alpha*a + (1.0f-alpha)*b; }
+inline T cond(T alpha, T a, T b) { return alpha > 0.0f ? a : b; }
+inline T mad(T a, T b, T c) { return a * b + c; }
+inline T frac(T a) { return fmodf(a, 1.0f); }
+inline T sgn(T a) { return (a < 0.0f ? -1.0f : (a == 0.0f ? 0.0f : 1.0f)); }
 
 // TODO: Replace ifdef with an autoconf check
 #ifdef WIN32
-T exp2f(T a) { return powf(2.0, a); }
-T exp10f(T a) { return powf(10.0, a); }
-T log2f(T a) { return logf(a)/logf(2.0); }
+inline T exp2f(T a) { return powf(2.0, a); }
+inline T exp10f(T a) { return powf(10.0, a); }
+inline T log2f(T a) { return logf(a)/logf(2.0); }
 #endif
 #ifdef __APPLE__
-T exp10f(T a) { return powf(10.0, a); }
+inline T exp10f(T a) { return powf(10.0, a); }
 #endif
 }
 
@@ -348,6 +354,16 @@ void shATAN2(ShVariable& dest, const ShVariable& a, const ShVariable& b)
   }
 }
 
+void shCBRT(ShVariable& dest, const ShVariable& a)
+{
+  sizes_match(dest, a);
+  if (immediate()) {
+    CWISE_UNARY_OP(dest, a, cbrtf);
+  } else {
+    ShStatement stmt(dest, SH_OP_CBRT, a);
+    addStatement(stmt);
+  }
+}
 void shCEIL(ShVariable& dest, const ShVariable& a)
 {
   sizes_match(dest, a);
@@ -611,6 +627,17 @@ void shRCP(ShVariable& dest, const ShVariable& a)
     CWISE_UNARY_OP(dest, a, 1.0f / );
   } else {
     ShStatement stmt(dest, SH_OP_RCP, a);
+    addStatement(stmt);
+  }
+}
+
+void shRND(ShVariable& dest, const ShVariable& a)
+{
+  sizes_match(dest, a);
+  if (immediate()) {
+    CWISE_UNARY_OP(dest, a, roundf);
+  } else {
+    ShStatement stmt(dest, SH_OP_RND, a);
     addStatement(stmt);
   }
 }

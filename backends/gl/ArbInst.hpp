@@ -77,6 +77,10 @@ enum ArbOp {
   SH_ARB_EXP,
   SH_ARB_LOG,
   
+  // Weird,
+  SH_ARB_ARL,
+  SH_ARB_ARRAYMOV, // Kind of hacky but works.
+  
   // FRAGMENT ONLY
   // Scalar
   SH_ARB_COS,
@@ -107,6 +111,7 @@ enum ArbOp {
   SH_ARB_DDX,
   SH_ARB_DDY,
   SH_ARB_RFL,
+  SH_ARB_TXD,
 
   // NV_vertex_program2
   SH_ARB_SSG,
@@ -141,6 +146,8 @@ extern ArbOpInfo arbOpInfo[];
 /** An ARB instruction.
  */
 struct ArbInst {
+  static const int max_num_sources = 4;
+  
   ArbInst(ArbOp op, int label)
     : op(op), label(label), invert(false),
       update_cc(false), ccode(NOCC)
@@ -184,10 +191,22 @@ struct ArbInst {
     src[1] = src1;
     src[2] = src2;
   }
+  ArbInst(ArbOp op, const SH::ShVariable& dest, const SH::ShVariable& src0,
+          const SH::ShVariable& src1, const SH::ShVariable& src2,
+          const SH::ShVariable& src3)
+    : op(op), dest(dest), invert(false),
+      update_cc(false), ccode(NOCC)
+  {
+    src[0] = src0;
+    src[1] = src1;
+    src[2] = src2;
+    src[3] = src3;
+  }
   
   ArbOp op;
   SH::ShVariable dest;
-  SH::ShVariable src[3];
+
+  SH::ShVariable src[max_num_sources];
 
   int label; // For branching instructions and labels
   bool invert; // Invert the sense of a break condition.

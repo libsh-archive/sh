@@ -1,3 +1,382 @@
+2004-10-28  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* backends/gl/WGLPBufferStreams.*: Changed pbuffer management
+	code, removed context tracking and replaced with list of
+	cached pbuffer/contexts. 
+
+2004-10-28  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* backends/gl/ArbCode.*: The ArbCode was holding a reference
+	to its associated program causing a cyclic dependency. The smart
+	pointer was changed to a raw pointer, alleviating most of the memory
+	leaks.
+
+	* backends/gl/WGLPBufferStreams.*: Changed pbuffer management
+	code, removed context tracking and replaced with list of
+	cached pbuffer/contexts. 
+
+	* backends/gl/GLXPBufferStreams.*: Changed pbuffer management
+	code, removed context tracking and replaced with list of
+	cached pbuffer/contexts. 
+
+	* backends/gl/GlTextures.*, backends/gl/GlTextureStorage.*,
+	backends/gl/Arb.*, backends/gl/GlBackend.*,
+	backends/gl/PBufferStreams.*: Removed all the context bookkeeping
+	code. We now assume that contexts share the same texture/program/
+	display list space.
+
+2004-10-28  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* backends/cc/Cc.cpp: Generated code changed to use
+	static variable, some linux ld versions caused symbol
+	collisions leading to segfaults
+
+2004-10-27  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* backends/gl/GlBackend.*, backends/gl/WGLPBuffersStreams.cpp:
+	Create an OpenGL context if there already isn't one already
+	to bootstrap the calls to wglGetProcAddress and for pbuffer creation.
+
+2004-10-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShConstProp.cpp (ConstPropInfo): Respect "opt:lifting"
+	metadata. This should be particularily useful for bypassing Sh's
+	uniform updating facilities (to trade convenience for speed).
+
+	* backends/gl/ArbCode.cpp (generate): Remove debugging output.
+	(allocateRegister): Throw exception from here to be caught further up.
+	(allocRegs): Catch exception from allocateRegister and provide
+	more useful error message.
+
+	* src/ShLinearAllocator.hpp: Remove spurious semicolon
+
+	* src/ShStatement.cpp: Set arity of PAL to 2 instead of 1.
+	This took a while to track down!
+
+2004-10-25  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* examples/particle/main.cpp: Use nicer colours.
+
+2004-10-24  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* win32/*: Added Visual Studio .NET solution/project files.
+
+	* examples/particle/*: Added a stream example, loosely based
+	on the particle code from the book.
+
+	* backends/gl/Makefile.win32: Added WGL pbuffer source files.
+
+	* backends/gl/ArbBackend.cpp: Changes to instantiate GLX streams
+	on linux and WGL streams on windows.
+
+	* backends/gl/GlBackend.hpp, backends/gl/GlBackend.cpp: Added WGL
+	stuffs to load WGL_ARB_pbuffer and WGL_ARB_pixel_format extensions.
+
+	* backends/gl/PBufferStream.cpp, backends/gl/PBufferStreams.hpp:
+	Factored out the GLX specifics, leaving only the code common to both
+	WGL and GLX. Added a few pure virtual functions that are implemented
+	by the platform dependent classes.
+
+	* backends/gl/WGLPBufferStreams.cpp, backends/gl/WGLPBufferStreams.hpp:
+	Added WGL specific pbuffer code.
+
+	* backends/gl/GLXPBufferStreams.cpp, backends/gl/GLXPBufferStreams.hpp:
+	Added GLX specific pbuffer code (transplanted from old PBufferStreams.cpp).
+
+2004-10-22  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShTransformer.cpp: Instead of popping the current program,
+	push 0, when constructing uniforms.
+
+	* src/ShProgramNode.cpp (compile): More exception safety fixes.
+
+	* backends/gl/ArbCode.cpp (upload): Call shError() when the driver
+	doesn't allow code to be uploaded (e.g. due to failing instruction
+	limits).
+	(generate): Exception safety fix (leave context and rethrow
+	exception if we get one).
+
+	* src/ShException.cpp (ShBackendException): Implement
+	ShBackendException constructor.
+
+2004-10-22  Sylvain Vasseur  <sfvsasse@cgl.uwaterloo.ca>
+
+	* src/Makefile.win32: Add ShMemoryDep file.
+
+2004-10-21  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* backends/cc/Cc.cpp, backends/cc/Cc.hpp: Completed Win32 support
+	for cc backend. Added 'init' function to generated code to bootstrap
+	texture lookup functions
+
+	* src/ShImage.cpp: savePng on Win32 generates bad images, fopen
+	need a "wb" instead of "w".
+
+	* src/ShPaletteNode.hpp: Added SH_DLLEXPORT
+
+2004-10-20  Sylvain Vasseur  <sfvsasse@cgl.uwaterloo.ca>
+
+	* src/ShMemoryDep.hpp: Implement dependencies with a memory object
+  
+	* src/ShMemory.hpp (ShMemory::add_dep): Add function to link with
+  dependencies.
+	(ShMemory::flush): Add function to use the dependencies.
+	(ShStorage::dirtyall): Add function to mark dirty without
+  a sync before.
+  
+	* src/sh.hpp: Include ShMemoryDep.hpp.
+  
+	* src/Makefile.am: Add ShMemoryDep files.
+
+2004-10-20  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbCode.cpp (print): Handle ARRAYMOV instructions.
+	(allocRegs): Add palette allocation code.
+	(allocPalette): Implement.
+	(printVar): Only print swizzle if do_swiz is set.
+	(allocRegs): Allocate address register if necessary.
+	(allocParam): Use m_numParamBindings.
+	(ArbCode): Initialize m_address_register.
+
+	* backends/gl/ArbEmit.cpp (emit_pal): Implement this.
+	(table): Handle SH_OP_PAL.
+
+	* backends/gl/ArbCode.hpp: Keep track of parameters and parameter
+	bindings separately. Add m_address_register member. Add do_swiz
+	parameter to printVar. Add emit_pal function. Add allocPalette function.
+
+	* backends/gl/ArbInst.cpp (arbOpInfo): Add information for ARL and ARRAYMOV.
+
+	* backends/gl/ArbReg.cpp (printDecl): Make use of bindingCount.
+
+	* backends/gl/ArbInst.hpp: Add SH_ARB_ARL and SH_ARB_ARRAYMOV instructions.
+
+	* backends/gl/ArbReg.hpp (ArbReg): Add bindingCount member for
+	parameter arrays.
+
+2004-10-20  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* backends/cc/Cc.cpp, backends/cc/Cc.hpp: Win32 port of compiler
+	backend.
+
+2004-10-19  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* configure.ac, backends/Makefile.am, backends/cc/Makefile.am,
+	backends/cc/Cc.cpp, backends/cc/Cc.hpp, test/regress/test.cpp:
+	Renamed Gcc to Cc, Windows port of compiler backend to follow...
+
+2004-10-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShConstProp.cpp (ConstProp::ConstProp): Handle palette nodes.
+
+	* src/ShVariableNode.cpp (name): Handle palette nodes.
+
+	* src/Makefile.win32: Add palette source files.
+
+	* src/Makefile.am: Add palette source files.
+
+	* src/sh.hpp: Include ShPalette.hpp.
+
+	* src/ShStatement.cpp (opInfo): Add info for SH_OP_PAL.
+
+	* src/ShStatement.hpp (ShOperation): Add SH_OP_PAL.
+
+	* src/ShVariableNode.hpp (ShBindingType): Add new SH_PALETTE
+	binding type.
+
+	* src/ShProgram.hpp (ShProgram): Add palette accessor function
+	wrappers.
+
+	* src/ShProgramNode.cpp (collectVar): Look for palettes.
+
+	* src/ShProgramNode.hpp (ShProgramNode): Add palette accesor functions.
+
+	* src/ShPaletteNode.cpp: Implement ShPaletteNode.
+
+	* src/ShPaletteNode.hpp: Add ShPaletteNode class for internal
+	palette representation.
+
+	* src/ShPaletteImpl.hpp: Add implementation for ShPalette.
+
+	* src/ShPalette.hpp: Add initial palette support.
+
+2004-10-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShGenericImpl.hpp (operator%=): Actually do a modulo, not a
+	divide. Woops.
+
+2004-10-13  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShConstProp.cpp (updateDest): Temporarily fixed issue with
+	detecting whether all srcs are uniform.
+
+	* configure.ac: Changed AC_CONFIG_SRCDIR to ShVariable.hpp, since
+	ShAttrib.hpp is now generated automatically.
+
+2004-10-12  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbCode.cpp (printSamplingInstruction): Output
+	SH_ARB_TXD instructions properly.
+
+	* backends/gl/ArbEmit.cpp (emit_tex): Handle SH_OP_TEXD (only 2D
+	for now).
+
+	* backends/gl/ArbInst.hpp (struct ArbInst): Add max_num_sources,
+	set to four, add constructor for four sources.
+
+	* backends/gl/ArbInst.cpp (arbOpInfo): Add operation info for SH_ARB_TXD.
+
+	* backends/gl/ArbInst.hpp (enum ArbOp): Add SH_ARB_TXD.
+
+	* src/ShBaseTextureImpl.hpp (ShBaseTexture2D::operator()):
+	Implemented lookup-with-derivatives operator.
+
+	* src/ShBaseTexture.hpp (ShBaseTexture2D): Added
+	lookup-with-derivatives operator, only for 2D for now.
+
+	* src/ShStatement.cpp (opInfo): Added opInfo for SH_OP_TEXD.
+
+	* src/ShStatement.hpp: Added SH_OP_TEXD.
+
+	* backends/gl/ArbEmit.cpp: Only emit texture lookups on NVVP3 (was NVVP2).
+
+	* src/ShConstProp.cpp (struct FinishConstProp): Skip the statement
+	for uniform lifting if we've replaced it with a constant.
+
+2004-10-08  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShInstructions.cpp: Inline helper functions.
+
+	* src/ShRefCountImpl.hpp: More inlining.
+
+	* src/ShVariableNode.cpp (ShVariableNode): Only construct m_eval
+	if we have to (i.e. in functions that use it).
+
+	* src/ShSwizzle.hpp: Use a simple array instead of std::vector.
+
+	* src/ShGenericImpl.hpp: Inline lots of stuff.
+
+	* src/ShMeta.hpp: Inline default constructor.
+
+	* src/scripts/ShAttribImpl.hpp.py: More inlining.
+
+	* src/scripts/semantic.py: Inline those member functions.
+
+	* src/ShLib.hpp (SH_SHLIB_USUAL_NON_UNIT_OPS_RETTYPE): Add all
+	versions of operator/.
+
+	* test/regress/regress.py: Remove this file.
+
+	* test/regress/add.cpp.py, test/regress/mul.cpp.py,
+	test/regress/div.cpp.py, test/regress/cos.cpp.py,
+	test/regress/sin.cpp.py: Added the first of the new regression
+	tests.
+
+	* test/regress/common.py: Add file containing some useful
+	functions for regression testing (well, just one right now).
+
+	* test/regress/streamtest.py: Add beginnings of new regression test engine.
+
+	* test/regress/Makefile.am: Remove old regression testing cruft.
+
+2004-10-08  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* Makefile.win32, backends/Makefile.win32, backends/gl/Makefile.win32,
+	src/Makefile.win32, util/Makefile.win32, win32.mk: Updated makefiles
+	to support release/debug only builds, turning off dependency
+	generetion and explicit targets for release and debug builds.
+
+2004-10-07  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* win32.mk, src/Makefile.win32: makedepend doesn't recognize
+	/I and /D, changed all references to -I and -D.
+
+	* src/ShMatrix.hpp: Previous SH_DLLEXPORT though to be
+	misplaced was actually unnecessary.
+	
+2004-10-07  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* src/ShInstructions.cpp: No roundf or cbrtf on Win32, created
+	inline replacements using floor and pow.
+
+	* src/ShLibMiscImpl.hpp: VC++ complained about unknown type ShProgram,
+	added appropriate include.
+
+	* src/ShMatrix.hpp: Fixed misplaced SH_DLLEXPORT.
+	
+2004-10-06  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShVariableNode.cpp: Added optional memory pool
+	support implementation. Disabled right now.
+
+	* src/ShVariableNode.hpp: Added optional memory pool
+	support. Disabled right now.
+
+	* src/ShPool.cpp: Added memory pool implementation.
+
+	* src/ShPool.hpp: Added optional memory pool interface. Disabled
+	for now.
+
+	* src/ShVariableNode.cpp (~ShVariableNode): Fix memory leak by
+	deleting m_eval. doh.
+
+	* src/ShLibMatrixImpl.hpp (rotate): Added 2D version of rotation.
+
+	* src/ShVariable.cpp (operator<<): Simplify this a little.
+
+	* src/ShInstructions.cpp: Implement shCBRT and shRND.
+
+	* src/ShProgram.cpp: Add operator() on streams here.
+
+	* src/ShChannelImpl.hpp (operator()): Add operators for programs
+	to channels.
+
+	* src/ShLibClamp.hpp (round): Add this function.
+
+	* src/ShLibArith.hpp (cbrt): Add this function.
+
+	* src/ShStatement.cpp: Add opInfo for CBRT and RND.
+
+	* src/ShStatement.hpp: Add CBRT and RND.
+
+	* src/ShLibMisc.hpp (freeze): Add this function to turn uniforms
+	into constants.
+
+	* src/ShLibMatrixImpl.hpp: Added colmat, rotate, translate, scale
+	(although 2D rotate is still missing).
+
+	* src/ShMatrix.hpp: Many much needed comment fixes. Also, moved
+	operator<< out of ShMatrix.
+
+	* src/ShVariable.hpp (ShVariable): Add clone member function.
+
+2004-10-05  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShGenericImpl.hpp (operator=(T)): Make the temporary
+	constant attribute an SH_CONST instead of an SH_TEMP.
+
+2004-10-05  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* win32.mk: Updated for building with Visual C++ 2005
+	Express Beta 1
+	
+2004-10-04  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* backends/gl/ArbCode.cpp, backends/gl/ArbEmit.cpp,
+	src/ShImage.cpp, src/ShInstructions.cpp, src/ShLib.hpp,
+	src/ShLibClamp.hpp, util/ShFuncImpl.hpp: Removed use of
+	_USE_MATH_DEFINES and undefines of min and max, now
+	controlled via win32.mk.
+
+	* backends/gl/Makefile.win32, src/Makefile.win32,
+	util/Makefile.win32, win32.mk: General WIN32 makefile
+	cleanup/overhaul.
+
+2004-09-24  Sylvain Vasseur  <sfvvasse@cgl.uwaterloo.ca>
+
+	* src/ShLibClampImpl.hpp (max): Specialize unary max for N==1.
+	(min): Specialize unary min for N==1.
+
 2004-09-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/ArbEmit.cpp: Implement emit_kil and use it to emit

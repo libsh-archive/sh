@@ -38,6 +38,7 @@
 
 #include <GL/gl.h>
 #include <GL/glext.h>
+#include <GL/wglext.h>
 
 extern PFNGLPROGRAMSTRINGARBPROC glProgramStringARB;
 extern PFNGLBINDPROGRAMARBPROC glBindProgramARB;
@@ -47,6 +48,18 @@ extern PFNGLPROGRAMLOCALPARAMETER4FVARBPROC glProgramLocalParameter4fvARB;
 extern PFNGLGETPROGRAMIVARBPROC glGetProgramivARB;
 extern PFNGLTEXIMAGE3DPROC glTexImage3D;
 extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
+
+// WGL_ARB_pixel_format
+extern PFNWGLGETPIXELFORMATATTRIBIVARBPROC wglGetPixelFormatAttribivARB;
+extern PFNWGLGETPIXELFORMATATTRIBFVARBPROC wglGetPixelFormatAttribfvARB;
+extern PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB;
+
+// WGL_ARB_pbuffer
+extern PFNWGLCREATEPBUFFERARBPROC wglCreatePbufferARB;
+extern PFNWGLGETPBUFFERDCARBPROC wglGetPbufferDCARB;
+extern PFNWGLRELEASEPBUFFERDCARBPROC wglReleasePbufferDCARB;
+extern PFNWGLDESTROYPBUFFERARBPROC wglDestroyPbufferARB;
+extern PFNWGLQUERYPBUFFERARBPROC wglQueryPbufferARB;
 
 #else
 
@@ -61,7 +74,6 @@ extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include <GL/glx.h>
-//#include <GL/glut.h>
 #endif /* __APPLE */
 
 #endif /* WIN32 */
@@ -69,22 +81,22 @@ extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
 namespace shgl {
 
 struct TextureStrategy {
-  virtual TextureStrategy* create(int context) = 0;
+  virtual TextureStrategy* create(void) = 0;
   
   virtual void bindTexture(const SH::ShTextureNodePtr& texture,
                            GLenum target) = 0;
 };
 
 struct StreamStrategy {
-  virtual StreamStrategy* create(int context) = 0;
+  virtual StreamStrategy* create(void) = 0;
   virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest) = 0;
 };
 
 struct CodeStrategy {
-  virtual CodeStrategy* create(int context) = 0;
+  virtual CodeStrategy* create(void) = 0;
   virtual SH::ShBackendCodePtr generate(const std::string& target,
                                         const SH::ShProgramNodeCPtr& shader,
-                                        TextureStrategy* textures) = 0;
+                                        TextureStrategy* texture) = 0;
 };
 
 class GlBackend : public SH::ShBackend {
@@ -96,32 +108,13 @@ public:
   virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
   // TODO: Add execute for a schedule
 
-  virtual int newContext();
-  virtual int context() const;
-  virtual void setContext(int context);
-  virtual void destroyContext();
-  
 protected:
-  GlBackend(CodeStrategy* code, TextureStrategy* texture,
-            StreamStrategy* stream);
+  GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrategy* stream);
   
 private:
-  int m_curContext;
-
-  struct Context {
-    Context(CodeStrategy* code,
-            TextureStrategy* textures,
-            StreamStrategy* streams)
-      : code(code), textures(textures), streams(streams)
-    {
-    }
-    
-    CodeStrategy* code;
-    TextureStrategy* textures;
-    StreamStrategy* streams;
-  };
-  
-  std::vector<Context> m_contexts;
+  CodeStrategy* m_code;
+  TextureStrategy* m_texture;
+  StreamStrategy* m_stream;
 
   // NOT IMPLEMENTED
   GlBackend(const GlBackend& other);

@@ -26,17 +26,9 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "ArbCode.hpp"
 #include <algorithm>
-#define _USE_MATH_DEFINES
 #include <cmath>
 #include "ShDebug.hpp"
 #include "ShError.hpp"
-
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
 
 #ifdef WIN32
 namespace {
@@ -161,16 +153,20 @@ ArbMapping ArbCode::table[] = {
   {SH_OP_XPD,  SH_ARB_ANY | SH_ARB_VEC3,   0, SH_ARB_XPD, 0},
 
   // Texture
-  {SH_OP_TEX,  SH_ARB_NVVP2, 0, SH_ARB_FUN, &ArbCode::emit_tex},
+  {SH_OP_TEX,  SH_ARB_NVVP3, 0, SH_ARB_FUN, &ArbCode::emit_tex},
   {SH_OP_TEX,  SH_ARB_FP,    0, SH_ARB_FUN, &ArbCode::emit_tex},
-  {SH_OP_TEXI, SH_ARB_NVVP2, 0, SH_ARB_FUN, &ArbCode::emit_tex},
+  {SH_OP_TEXI, SH_ARB_NVVP3, 0, SH_ARB_FUN, &ArbCode::emit_tex},
   {SH_OP_TEXI, SH_ARB_FP,    0, SH_ARB_FUN, &ArbCode::emit_tex},
 
+  {SH_OP_TEXD,  SH_ARB_NVFP,  0, SH_ARB_FUN, &ArbCode::emit_tex},
+  
   // Misc.
   {SH_OP_COND, SH_ARB_NVFP, 0, SH_ARB_FUN, &ArbCode::emit_nvcond},
   {SH_OP_COND, SH_ARB_NVVP2, 0, SH_ARB_FUN, &ArbCode::emit_nvcond},
   {SH_OP_COND, SH_ARB_ANY, negate_first, SH_ARB_CMP, 0},
   {SH_OP_KIL,  SH_ARB_FP,  0, SH_ARB_FUN, &ArbCode::emit_kil},
+
+  {SH_OP_PAL,  SH_ARB_VP, 0, SH_ARB_FUN, &ArbCode::emit_pal},
 
   {SH_OP_ASN, SH_ARB_END, 0, SH_ARB_FUN, 0}
 };
@@ -535,8 +531,15 @@ void ArbCode::emit_tex(const ShStatement& stmt)
     delay = true;
   }
 
-  m_instructions.push_back(ArbInst(SH_ARB_TEX,
-                                   (delay ? tmpdest : stmt.dest), stmt.src[1], stmt.src[0]));
+  if (stmt.op == SH_OP_TEXD) {
+    SH_DEBUG_ASSERT(tnode->dims() == SH_TEXTURE_2D);
+    m_instructions.push_back(ArbInst(SH_ARB_TXD,
+                                     (delay ? tmpdest : stmt.dest), stmt.src[1], stmt.src[0],
+                                     stmt.src[2](0,1), stmt.src[2](2,3)));
+  } else {
+    m_instructions.push_back(ArbInst(SH_ARB_TEX,
+                                     (delay ? tmpdest : stmt.dest), stmt.src[1], stmt.src[0]));
+  }
   if (delay) emit(ShStatement(stmt.dest, SH_OP_ASN, tmpsrc));
 }
 
@@ -599,6 +602,12 @@ void ArbCode::emit_cmul(const ShStatement& stmt)
 void ArbCode::emit_kil(const ShStatement& stmt)
 {
   m_instructions.push_back(ArbInst(SH_ARB_KIL, -stmt.src[0]));
+}
+
+void ArbCode::emit_pal(const ShStatement& stmt)
+{
+  m_instructions.push_back(ArbInst(SH_ARB_ARL, m_address_register, stmt.src[1]));
+  m_instructions.push_back(ArbInst(SH_ARB_ARRAYMOV, stmt.dest, stmt.src[0], m_address_register));
 }
 
 }

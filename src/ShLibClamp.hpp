@@ -62,6 +62,13 @@ ShGeneric<N, T> ceil(const ShGeneric<N, T>& var);
 template<int N, typename T>
 ShGeneric<N, T> floor(const ShGeneric<N, T>& var);
 
+/** Round.
+ * Returns the nearest integer to the argument.
+ * Operates componentwise on tuples.
+ */
+template<int N, typename T>
+ShGeneric<N, T> round(const ShGeneric<N, T>& var);
+
 /** Float modulus. 
  * The result is always positive.
  */
@@ -80,6 +87,8 @@ ShGeneric<1, T> operator%(const ShGeneric<1, T>& left, const ShGeneric<1, T>& ri
 
 SH_SHLIB_CONST_SCALAR_OP(mod);
 SH_SHLIB_CONST_N_OP_LEFT(mod);
+SH_SHLIB_CONST_SCALAR_OP(operator%);
+SH_SHLIB_CONST_N_OP_LEFT(operator%);
 
 /** Fractional part.
  * Discards the integer part of each componenent in var.
@@ -93,13 +102,6 @@ ShGeneric<N, T> frac(const ShGeneric<N, T>& var);
  */
 template<int N, typename T>
 ShGeneric<N,  T> pos(const ShGeneric<N, T>& x);
-
-#ifdef max
-#undef max
-#endif
-#ifdef min
-#undef min
-#endif
 
 /** Maximum.
  * Creates a tuple of componentwise maximums of a pair of input tuples.

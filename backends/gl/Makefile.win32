@@ -1,50 +1,81 @@
-# -*- Makefile -*-
+# -*- makefile -*-
+include ../../win32.mk
+
+INCLUDES += -I../../src
+CPPFLAGS += -DSH_DLLEXPORT="__declspec(dllimport)"
+
+ALL_TARGETS =
+INSTALL_TARGETS =
 RELEASE_TARGETS = libsharb.dll
 DEBUG_TARGETS = libsharbd.dll
 
-all: all-release all-debug
+ifeq ($(BUILD_RELEASE), 1)
+	ALL_TARGETS += all-release
+	INSTALL_TARGETS += install-release
+endif
 
+ifeq ($(BUILD_DEBUG), 1)
+	ALL_TARGETS += all-debug
+	INSTALL_TARGETS += install-debug
+endif
+
+all: $(ALL_TARGETS)
+install: $(INSTALL_TARGETS)
 all-release: $(RELEASE_TARGETS)
 all-debug: $(DEBUG_TARGETS)
 
-CLEANFILES = $(RELEASE_TARGETS) $(DEBUG_TARGETS)
+libsharb_dll_SOURCES = Arb.hpp Arb.cpp
+libsharb_dll_SOURCES += ArbBackend.cpp
+libsharb_dll_SOURCES += ArbCode.hpp ArbCode.cpp
+libsharb_dll_SOURCES += ArbEmit.cpp
+libsharb_dll_SOURCES += ArbInst.hpp ArbInst.cpp
+libsharb_dll_SOURCES += ArbLimits.hpp ArbLimits.cpp
+libsharb_dll_SOURCES += ArbReg.hpp ArbReg.cpp
 
-install:
+# OpenGL backend
+libsharb_dll_SOURCES += GlBackend.hpp GlBackend.cpp
+libsharb_dll_SOURCES += GlTextureName.hpp GlTextureName.cpp
 
-GLBACKEND_SOURCES = GlBackend.cpp GlBackend.hpp \
-		  GlTextureName.hpp GlTextureName.cpp
-GLTEXTURE_SOURCES = GlTextureStorage.hpp GlTextureStorage.cpp \
-		     GlTextures.hpp GlTextures.cpp 
-# PBUFFERSTREAM_SOURCES = PBufferStreams.hpp PBufferStreams.cpp
+# OpenGL textures
+libsharb_dll_SOURCES += GlTextures.hpp GlTextures.cpp
+libsharb_dll_SOURCES += GlTextureStorage.hpp GlTextureStorage.cpp
 
-# For now..
-PBUFFERSTREAM_SOURCES = 
-
-# libsharb_dll_LDFLAGS = -L$(prefix)/lib -module
-libsharb_dll_SOURCES =  Arb.cpp ArbCode.cpp ArbEmit.cpp ArbInst.cpp
-libsharb_dll_SOURCES += ArbLimits.cpp ArbReg.cpp
-libsharb_dll_SOURCES += Arb.hpp ArbCode.hpp ArbInst.hpp ArbLimits.hpp
-libsharb_dll_SOURCES += ArbReg.hpp ArbBackend.cpp
-libsharb_dll_SOURCES += $(GLBACKEND_SOURCES) $(GLTEXTURE_SOURCES) $(PBUFFERSTREAM_SOURCES)
+# Stream support
+libsharb_dll_SOURCES += PBufferStreams.hpp PBufferStreams.cpp
+libsharb_dll_SOURCES += WGLPBufferStreams.hpp WGLPBufferStreams.cpp
 
 libsharb_dll_CXXFILES = $(filter %.cpp,$(libsharb_dll_SOURCES))
 libsharb_dll_RELEASE_OBJECTS = $(libsharb_dll_CXXFILES:.cpp=.r.obj)
 libsharb_dll_DEBUG_OBJECTS = $(libsharb_dll_CXXFILES:.cpp=.d.obj)
 
-libsharb_dll_DEBUG_LDADD = ../../src/libshd.lib 
-libsharb_dll_DEBUG_LDADD += $(OPENGL_DIR)\lib\OPENGL32.LIB
 libsharb_dll_RELEASE_LDADD = ../../src/libsh.lib 
-libsharb_dll_RELEASE_LDADD += $(OPENGL_DIR)\lib\OPENGL32.LIB
+libsharb_dll_RELEASE_LDADD += GDI32.LIB USER32.LIB OPENGL32.LIB
+libsharb_dll_DEBUG_LDADD = ../../src/libshd.lib 
+libsharb_dll_DEBUG_LDADD += GDI32.LIB USER32.LIB OPENGL32.LIB
 
 libsharb.dll: $(libsharb_dll_RELEASE_OBJECTS)
-	$(CXX) /Felibsharb /LD $^ $(libsharb_dll_RELEASE_LDADD) $(RELEASE_LDFLAGS)
+	$(LD) /DLL /OUT:$@ $^ $(RELEASE_LDFLAGS) $(libsharb_dll_RELEASE_LDADD)
 
 libsharbd.dll: $(libsharb_dll_DEBUG_OBJECTS)
-	$(CXX) /Felibsharbd /LD $^ $(libsharb_dll_DEBUG_LDADD) $(DEBUG_LDFLAGS)
+	$(LD) /DLL /OUT:$@ $^ $(DEBUG_LDFLAGS) $(libsharb_dll_DEBUG_LDADD)
+
+install-common:
+	-mkdir $(SH_INSTALLDIR)
+
+install-release: $(RELEASE_TARGETS) install-common
+	copy libsharb.dll $(SH_INSTALLDIR)
+
+install-debug: $(DEBUG_TARGETS) install-common
+	copy libsharbd.dll $(SH_INSTALLDIR)
+	copy libsharbd.pdb $(SH_INSTALLDIR)
+
+clean:
+	-del $(RELEASE_TARGETS) $(DEBUG_TARGETS)
+	-del *.obj *.d
+	-del *.exp *.pdb *.idb *.ilk
 
 libsharb_dll_DEPENDS = $(libsharb_dll_CXXFILES:.cpp=.r.d) $(libsharb_dll_CXXFILES:.cpp=.d.d)
 
-include ../../win32.mk
-INCLUDES += -I../../src
-CPPFLAGS += -DSH_DLLEXPORT="__declspec(dllimport)"
-include $(libsharb_dll_DEPENDS)
+ifeq ($(GEN_DEPENDENCIES), 1)
+-include $(libsharb_dll_DEPENDS)
+endif

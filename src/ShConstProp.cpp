@@ -40,11 +40,18 @@ struct ConstProp : public ShStatementInfo {
         case SH_INOUT:
         case SH_TEXTURE:
         case SH_STREAM:
+        case SH_PALETTE:
           src[i].push_back(Cell(Cell::BOTTOM));
           break;
         case SH_TEMP:
           if (stmt->src[i].uniform()) {
-            src[i].push_back(Cell(Cell::UNIFORM, stmt->src[i], j));
+            // Don't lift computations dependent on uniforms which
+            // have been marked with "opt:lifting" == "never"
+            if (stmt->src[i].meta("opt:lifting") != "never") {
+              src[i].push_back(Cell(Cell::UNIFORM, stmt->src[i], j));
+            } else {
+              src[i].push_back(Cell(Cell::BOTTOM));
+            }
           } else {
             src[i].push_back(Cell(Cell::TOP));
           }
@@ -90,6 +97,7 @@ struct ConstProp : public ShStatementInfo {
       // Consider each tuple element in turn.
       // Dest and sources are guaranteed to be of the same length.
       // Except that sources might be scalar.
+      bool all_fields_uniform = true;
       for (int i = 0; i < stmt->dest.size(); i++) {
         bool alluniform = true;
         bool allconst = true;
@@ -101,6 +109,7 @@ struct ConstProp : public ShStatementInfo {
             }
           }
         }
+	if (!alluniform) all_fields_uniform = false;
         if (allconst) {
           ShVariable tmpdest(new ShVariableNode(SH_CONST, 1));
           ShStatement eval(*stmt);
@@ -113,13 +122,22 @@ struct ConstProp : public ShStatementInfo {
           evaluate(eval);
           dest.push_back(Cell(Cell::CONSTANT, tmpdest.getValue(0)));
           worklist.push(ValueTracking::Def(stmt, i));
-        } else if (alluniform) {
-          dest.push_back(Cell(Cell::UNIFORM, this, i));
-          worklist.push(ValueTracking::Def(stmt, i));
         } else {
           dest.push_back(Cell(Cell::BOTTOM));
         }
-      }      
+      } 
+
+      // Because making a uniform cell based on a ConstProp requires
+      // generating a value for the entire statement (not just one
+      // field of the destination), we only push said cells if ALL of
+      // the indices are uniform for ALL of their corresponding sources.
+      if (all_fields_uniform) {
+	dest.clear();
+	for (int i = 0; i < stmt->dest.size(); i++) {
+	  dest.push_back(Cell(Cell::UNIFORM, this, i));
+	  worklist.push(ValueTracking::Def(stmt, i));
+	}
+      }
     } else if (opInfo[stmt->op].result_source == ShOperationInfo::ALL) {
       // build statement ONLY if ALL elements of ALL sources are constant
       bool allconst = true;
@@ -563,7 +581,7 @@ struct FinishConstProp
             }
           }
 
-          if (!lift_uniforms) {
+          if (!lift_uniforms || allconst) {
             //SH_DEBUG_PRINT("Skipping uniform lifting");
             continue;
           }
@@ -656,7 +674,10 @@ struct FinishConstProp
           }
         }
       }
+    }
 
+    // Clean up
+    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
       // Remove constant propagation information.
       I->template destroy_info<ConstProp>();
     }

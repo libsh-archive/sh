@@ -52,6 +52,7 @@ const ShOperationInfo opInfo[] = {
   {"ASIN", 1, ShOperationInfo::LINEAR, false},
   {"ATAN", 1, ShOperationInfo::LINEAR, false},
   {"ATAN2", 2, ShOperationInfo::LINEAR, false},
+  {"CBRT", 1, ShOperationInfo::LINEAR, false},
   {"CEIL", 1, ShOperationInfo::LINEAR, false},
   {"COS", 1, ShOperationInfo::LINEAR, false},
   {"CMUL", 1, ShOperationInfo::ALL, false},
@@ -73,6 +74,7 @@ const ShOperationInfo opInfo[] = {
   {"LOG2", 1, ShOperationInfo::LINEAR, false},
   {"LOG10", 1, ShOperationInfo::LINEAR, false},
   {"POW", 2, ShOperationInfo::LINEAR, false},
+  {"RND", 1, ShOperationInfo::LINEAR, false},
   {"RCP", 1, ShOperationInfo::LINEAR, false},
   {"RSQ", 1, ShOperationInfo::LINEAR, false},
   {"SIN", 1, ShOperationInfo::LINEAR, false},
@@ -85,6 +87,7 @@ const ShOperationInfo opInfo[] = {
 
   {"TEX", 2, ShOperationInfo::EXTERNAL, false},
   {"TEXI", 2, ShOperationInfo::EXTERNAL, false},
+  {"TEXD", 3, ShOperationInfo::EXTERNAL, false},
 
   {"COND", 3, ShOperationInfo::LINEAR, false},
 
@@ -93,6 +96,8 @@ const ShOperationInfo opInfo[] = {
   {"OPTBRA", 1, ShOperationInfo::IGNORE, false},
 
   {"FETCH", 1, ShOperationInfo::EXTERNAL, false},
+
+  {"PAL", 2, ShOperationInfo::EXTERNAL, false},
   
   {0, 0, ShOperationInfo::IGNORE, false}
 };

@@ -292,6 +292,65 @@ rowmat(const ShGeneric<N, T>& s0,
   return r;
 }
 
+
+template<int N, typename T>
+ShMatrix<N, 1, SH_TEMP, T>
+colmat(const ShGeneric<N, T>& s0)
+{
+  ShMatrix<N, 1, SH_TEMP, T> r;
+  for (int i = 0; i < N; ++i) {
+    r[i][0] = s0[i];
+  }
+  return r;
+}
+
+template<int N, typename T>
+ShMatrix<N, 2, SH_TEMP, T>
+colmat(const ShGeneric<N, T>& s0,
+       const ShGeneric<N, T>& s1)
+{
+  ShMatrix<N, 2, SH_TEMP, T> r;
+  for (int i = 0; i < N; ++i) {
+    r[i][0] = s0[i];
+    r[i][1] = s1[i];
+  }
+  return r;
+}
+
+template<int N, typename T>
+ShMatrix<N, 3, SH_TEMP, T>
+colmat(const ShGeneric<N, T>& s0,
+       const ShGeneric<N, T>& s1,
+       const ShGeneric<N, T>& s2)
+{
+  ShMatrix<N, 3, SH_TEMP, T> r;
+  for (int i = 0; i < N; ++i) {
+    r[i][0] = s0[i];
+    r[i][1] = s1[i];
+    r[i][2] = s2[i];
+  }
+  return r;
+}
+
+
+template<int N, typename T>
+ShMatrix<N, 4, SH_TEMP, T>
+colmat(const ShGeneric<N, T>& s0,
+       const ShGeneric<N, T>& s1,
+       const ShGeneric<N, T>& s2,
+       const ShGeneric<N, T>& s3)
+{
+  ShMatrix<N, 4, SH_TEMP, T> r;
+  for (int i = 0; i < N; ++i) {
+    r[i][0] = s0[i];
+    r[i][1] = s1[i];
+    r[i][2] = s2[i];
+    r[i][3] = s3[i];
+  }
+  return r;
+}
+
+
 template<int N, typename T>
 ShMatrix<N, N, SH_TEMP, T>
 diag(const ShGeneric<N, T>& a)
@@ -301,6 +360,103 @@ diag(const ShGeneric<N, T>& a)
   for (int i = 0; i < N; ++i) r[i][i] = a[i];
   return r;
 }
+
+template<typename T>
+ShMatrix<4, 4, SH_TEMP, T>
+rotate(const ShGeneric<3, T>& axis,
+       const ShGeneric<1, T>& angle)
+{
+  ShGeneric<1, T> c = cos(angle);
+  ShGeneric<1, T> s = sin(angle);
+  ShGeneric<3, T> xyz = normalize(axis);
+
+  ShMatrix<4, 4, SH_TEMP, T> result;
+
+  result[0](0,1,2) = fillcast<3>((1.0 - c) * xyz(0));
+  result[1](0,1,2) = fillcast<3>((1.0 - c) * xyz(1));
+  result[2](0,1,2) = fillcast<3>((1.0 - c) * xyz(2));
+
+  result[0](1,2) *= xyz(1,2);
+  result[0][1] -= xyz(2) * s;
+  result[0][2] += xyz(1) * s;
+
+  result[1](0,2) *= xyz(0,2);
+  result[1][0] += xyz(2) * s;
+  result[1][2] -= xyz(0) * s;
+
+  result[2](0,1) *= xyz(0,1);
+  result[2][0] -= xyz(1) * s;
+  result[2][1] += xyz(0) * s;
+  
+  result[0][0] *= 2.0; result[0][0] += c;
+  result[1][1] *= 2.0; result[1][1] += c;
+  result[2][2] *= 2.0; result[2][2] += c;
+
+  return result;
+}
+
+template<typename T>
+ShMatrix<3, 3, SH_TEMP, T>
+rotate(const ShGeneric<1, T>& angle)
+{
+  ShMatrix<3, 3, SH_TEMP, T> result;
+  
+  ShGeneric<1, T> c = cos(angle);
+  ShGeneric<1, T> s = sin(angle);
+  result[0] = ShAttrib<3, SH_TEMP, T>(c, -s, 0.0f);
+  result[1] = ShAttrib<3, SH_TEMP, T>(c, s, 0.0f);
+  result[2] = ShAttrib<3, SH_TEMP, T>(0.0f, 0.0f, 1.0f);
+
+  return result;
+}
+
+template<typename T>
+ShMatrix<4, 4, SH_TEMP, T>
+translate(const ShGeneric<3, T>& a)
+{
+  ShMatrix<4, 4, SH_TEMP, T> result;
+
+  for (int i = 0; i < 3; i++) {
+    result[i][3] = a[i];
+  }
+  
+  return result;
+}
+
+template<typename T>
+ShMatrix<3, 3, SH_TEMP, T>
+translate(const ShGeneric<2, T>& a)
+{
+  ShMatrix<3, 3, SH_TEMP, T> result;
+
+  result[0][2] = a[0];
+  result[1][2] = a[1];
+  
+  return result;
+}
+
+
+template<typename T>
+ShMatrix<4, 4, SH_TEMP, T>
+scale(const ShGeneric<3, T>& a)
+{
+  return diag(join(a, ShConstAttrib1f(1.0)));
+}
+
+template<typename T>
+ShMatrix<3, 3, SH_TEMP, T>
+scale(const ShGeneric<2, T>& a)
+{
+  return diag(join(a, ShConstAttrib1f(1.0)));
+}
+
+template<int N, typename T>
+ShMatrix<N, N, SH_TEMP, T>
+scale(const ShGeneric<1, T>& a)
+{
+  return diag(join(fillcast<N - 1>(a), ShConstAttrib1f(1.0)));
+}
+
 
 }
 

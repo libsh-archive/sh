@@ -38,6 +38,7 @@
 #include "ShCtrlGraph.hpp"
 #include "ShTextureNode.hpp"
 #include "ShChannelNode.hpp"
+#include "ShPaletteNode.hpp"
 #include "ShMeta.hpp"
 
 namespace SH {
@@ -100,6 +101,7 @@ public:
   typedef std::list<ShVariableNodePtr> VarList;
   typedef std::list<ShTextureNodePtr> TexList;
   typedef std::list<ShChannelNodePtr> ChannelList;
+  typedef std::list<ShPaletteNodePtr> PaletteList;
 
   VarList::const_iterator inputs_begin() const;
   VarList::const_iterator inputs_end() const;
@@ -117,6 +119,9 @@ public:
 
   ChannelList::const_iterator channels_begin() const;
   ChannelList::const_iterator channels_end() const;
+
+  PaletteList::const_iterator palettes_begin() const;
+  PaletteList::const_iterator palettes_end() const;
   
   
   VarList inputs; ///< Input variables used in this program
@@ -126,6 +131,7 @@ public:
   VarList uniforms; ///< Uniform variables used in this program
   TexList textures; ///< Textures used in this program
   ChannelList channels; ///< Channels used in FETCH instructions in this program
+  PaletteList palettes; ///< Palettes used in PAL instructions in this program
 
   /// Can be empty, if there is no target associated with this program.
   std::string target() const { return m_target; }

@@ -77,7 +77,11 @@ public:
 
   T operator()(const ShGeneric<2, float>& coords) const;
   T operator[](const ShGeneric<2, float>& coords) const;
-
+  /// Texture lookup with derivatives
+  T operator()(const ShGeneric<2, float>& coords,
+               const ShGeneric<2, float>& dx,
+               const ShGeneric<2, float>& dy) const;
+  
   ShMemoryPtr memory();
   void memory(ShMemoryPtr memory);
   void size(int width, int height);

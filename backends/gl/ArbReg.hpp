@@ -98,6 +98,7 @@ struct ArbReg : public SH::ShRefCountable {
     struct {
       ArbRegBinding binding;
       int bindingIndex;
+      int bindingCount;
     };
     float values[4];
   };

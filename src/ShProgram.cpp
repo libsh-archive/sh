@@ -26,6 +26,7 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "ShProgram.hpp"
 #include "ShBackend.hpp"
+#include "ShStream.hpp"
 
 namespace SH {
 
@@ -59,6 +60,43 @@ ShProgram& ShProgram::operator=(const ShProgram& other)
   m_node = other.m_node;
   real_meta(m_node.object());
   return *this;
+}
+
+// Call operators for channels and streams.
+// Equivalent to operator<< invocations.
+ShProgram ShProgram::operator()(const ShStream& s0) const
+{
+  return (*this) << s0;
+}
+
+ShProgram ShProgram::operator()(const ShStream& s0,
+                                 const ShStream& s1) const
+{
+  return (*this) << s0 << s1;
+}
+
+ShProgram ShProgram::operator()(const ShStream& s0,
+                                 const ShStream& s1,
+                                 const ShStream& s2) const
+{
+  return (*this) << s0 << s1 << s2;
+}
+
+ShProgram ShProgram::operator()(const ShStream& s0,
+                                 const ShStream& s1,
+                                 const ShStream& s2,
+                                 const ShStream& s3) const
+{
+  return (*this) << s0 << s1 << s2 << s3;
+}
+
+ShProgram ShProgram::operator()(const ShStream& s0,
+                                 const ShStream& s1,
+                                 const ShStream& s2,
+                                 const ShStream& s3,
+                                 const ShStream& s4) const
+{
+  return (*this) << s0 << s1 << s2 << s3 << s4;
 }
 
 }

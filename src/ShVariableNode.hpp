@@ -32,6 +32,7 @@
 #include "ShDllExport.hpp"
 #include "ShRefCount.hpp"
 #include "ShMeta.hpp"
+#include "ShPool.hpp"
 
 namespace SH {
 
@@ -44,7 +45,8 @@ enum ShBindingType {
   SH_TEMP = 3,
   SH_CONST = 4,
   SH_TEXTURE = 5,
-  SH_STREAM = 6
+  SH_STREAM = 6,
+  SH_PALETTE = 7
 };
 
 /** The various ways semantic types for variables.
@@ -137,6 +139,12 @@ public:
   const ShPointer<ShProgramNode>& evaluator() const;
   
   /** @} */
+
+#ifdef SH_USE_MEMORY_POOL
+  // Memory pool stuff.
+  void* operator new(std::size_t size);
+  void operator delete(void* d);
+#endif
   
 protected:
 
@@ -160,10 +168,14 @@ protected:
   ValueType m_lowBound, m_highBound;
 
   // Dependent uniform evaluation
-  ShVariableNodeEval* m_eval;
+  mutable ShVariableNodeEval* m_eval;
   std::list<ShVariableNode*> m_dependents;
   
   static int m_maxID;
+
+#ifdef SH_USE_MEMORY_POOL
+  static ShPool* m_pool;
+#endif
 };
 
 typedef ShPointer<ShVariableNode> ShVariableNodePtr;

@@ -99,11 +99,10 @@ struct VariableSplitter {
     ShTransformer::VarNodeVec &nodeVarNodeVec = splits[node];
     ShVariableNodePtr newNode;
     for(offset = 0; n > 0; offset += maxTuple, n -= maxTuple) {
-      ShProgramNodePtr prev = ShContext::current()->parsing();
-      if(node->uniform()) ShContext::current()->exit();
+      if (node->uniform()) ShContext::current()->enter(0);
       newNode = new ShVariableNode(node->kind(), n < maxTuple ? n : maxTuple, node->specialType());
       newNode->name(node->name());
-      if(node->uniform()) ShContext::current()->enter(prev);
+      if (node->uniform()) ShContext::current()->exit();
 
       if( node->hasValues() ) { 
         for(i = 0; i < newNode->size(); ++i){

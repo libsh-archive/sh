@@ -347,6 +347,15 @@ ShGeneric<N, T> rsqrt(const ShGeneric<N, T>& var)
 }
 
 template<int N, typename T>
+inline
+ShGeneric<N, T> cbrt(const ShGeneric<N, T>& var)
+{
+  ShAttrib<N, SH_TEMP, T> t;
+  shCBRT(t, var);
+  return t;
+}
+
+template<int N, typename T>
 ShGeneric<N, T> lerp(const ShGeneric<N, T>& f, const ShGeneric<N, T>& a, 
                      const ShGeneric<N, T>& b)
 {

@@ -33,6 +33,7 @@
 #include <string>
 #include "ShDllExport.hpp"
 #include "ShRefCount.hpp"
+#include "ShMemoryDep.hpp"
 
 namespace SH {
 
@@ -69,6 +70,12 @@ public:
   /// Discard this storage from this memory
   void removeStorage(const ShPointer<ShStorage>& storage);
 
+  /// link the memory to a specific dependency
+  void add_dep(ShMemoryDep* dep);
+
+  /// modify the memory data by using the links to the dependencies
+  void flush();
+
 protected:
   ShMemory();
   
@@ -80,6 +87,9 @@ private:
   typedef std::list< ShPointer<ShStorage> > StorageList;
   StorageList m_storages;
   int m_timestamp;
+
+  /// the list of all dependencies, for update calls
+  std::list<ShMemoryDep*> dependencies;
 
   friend class ShStorage;
 
@@ -157,6 +167,10 @@ public:
   /// Mark an upcoming write to this storage.
   /// This will sync, if necessary.
   void dirty();
+  
+  // Mark an upcoming write to this storage.
+  /// Don't call sync, all storages are replaced.
+  void dirtyall();
   
   /// Return an id uniquely identifying the _type_ of this storage
   /// This is used for looking up transfer functions.
