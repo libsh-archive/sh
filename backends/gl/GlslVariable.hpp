@@ -24,37 +24,43 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef GLSL_HPP
-#define GLSL_HPP
+#ifndef GLSLVARIABLE_HPP
+#define GLSLVARIABLE_HPP
 
+#include "ShVariableType.hpp"
+#include "ShVariableNode.hpp"
 #include <string>
-#include "GlBackend.hpp"
-#include "ShBackend.hpp"
-#include "ShProgram.hpp"
-#include "ShException.hpp"
 
 namespace shgl {
 
-class GlslCodeStrategy : public CodeStrategy {
+class GlslVariable {
 public:
-  GlslCodeStrategy(void);
+  GlslVariable(const SH::ShVariableNodePtr& v); /// Usual constructor
+  GlslVariable(); /// Default constructor (for STL container initialization)
+  GlslVariable(const GlslVariable& v); /// Copy constructor
   
-  SH::ShBackendCodePtr generate(const std::string& target,
-                                const SH::ShProgramNodeCPtr& shader,
-                                TextureStrategy* textures);
+  std::string declaration() const;
 
-  GlslCodeStrategy* create(void);
+  bool varying() const { return (m_kind == SH::SH_INPUT) || (m_kind == SH::SH_OUTPUT) || (m_kind == SH::SH_INOUT); }
+  
+  const std::string& name() const { return m_name; }
+  const SH::ShSemanticType& semantic_type() const { return m_semantic_type; }
+
+  void name(int i); /// for regular variables
+  void name(const std::string& name); /// for built-in variables
+  
+private:
+  bool m_builtin; /// if true, it won't be declared or initialized
+  std::string m_name;
+  int m_size;
+  SH::ShBindingType m_kind;
+  SH::ShValueType m_type;
+  SH::ShSemanticType m_semantic_type;
+  std::string m_values;
+  
+  std::string type_string() const;
 };
-
-unsigned int glslTarget(const std::string& unit);
-
-class GlslException : public SH::ShBackendException {
-public:
-  GlslException(const std::string& message);
-};
-
-enum GlslProgramType { SH_GLSL_FP, SH_GLSL_VP }; 
 
 }
 
-#endif
+#endif /* GLSLVARIABLE_HPP */

@@ -27,26 +27,14 @@
 #ifndef GLSLCODE_HPP
 #define GLSLCODE_HPP
 
+#include "Glsl.hpp"
 #include "GlBackend.hpp"
 #include "ShVariableNode.hpp"
 #include "ShProgram.hpp"
 #include "ShCtrlGraph.hpp"
+#include "GlslVariableMap.hpp"
 
 namespace shgl {
-
-enum GlslProgramType { SH_GLSL_FP, SH_GLSL_VP }; 
-
-struct GlslVariable {
-  bool builtin; // if true, then it won't be declared or initialized
-  std::string name;
-  int size;
-  SH::ShBindingType kind;
-  SH::ShValueType type;
-  SH::ShSemanticType semantic_type;
-  std::string values;
-
-  bool varying() const { return (kind == SH::SH_INPUT) || (kind == SH::SH_OUTPUT) || (kind == SH::SH_INOUT); }
-};
 
 class GlslCode : public SH::ShBackendCode {
 public:
@@ -82,12 +70,7 @@ private:
   GLhandleARB m_arb_shader; /// shader program uploaded to the GPU
 
   std::vector<std::string> m_lines; /// raw lines of code (unindented)
-  unsigned m_nb_variables;
-  unsigned m_nb_varying;
-  std::map<SH::ShVariableNodePtr, GlslVariable> m_varmap; /// maps a variable node to a variable
-  bool m_gl_Normal_allocated;
-  bool m_gl_Position_allocated;
-  bool m_gl_FragColor_allocated;
+  GlslVariableMap* m_varmap;
 
   bool m_uploaded; /// true if the program has already been uploaded to the GPU
 
@@ -99,17 +82,12 @@ private:
   /// Generate code for a single Sh statement.
   void emit(const SH::ShStatement &stmt);
   
-  std::string declare_var(const GlslVariable& v);
-  std::string type_string(const GlslVariable& v); /// returns corresponding OpenGL SL type
-
-  std::string var_name(const SH::ShVariable& v); /// generates an identifier for the given variable
-  void allocate_var(const SH::ShVariable& v);
   std::string resolve(const SH::ShVariable& v);
   std::string resolve(const SH::ShVariable& v, int idx);
   std::string swizzle(const SH::ShVariable& v); /// returns the proper swizzle to add to the varname
 
-  void print_infolog(GLhandleARB obj);
-  void print_shader_source();
+  void print_infolog(GLhandleARB obj); /// Debug: print the OpenGL SL compiler log
+  void print_shader_source(); /// Debug: retrieve and print shader source code from GPU
 };
 
 typedef SH::ShPointer<GlslCode> GlslCodePtr;

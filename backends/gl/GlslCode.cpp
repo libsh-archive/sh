@@ -41,9 +41,7 @@ using namespace std;
 GlslCode::GlslCode(const ShProgramNodeCPtr& shader, const std::string& unit,
 		   TextureStrategy* texture) 
   : m_texture(texture), m_target("glsl:" + unit), m_arb_shader(0),
-    m_nb_variables(0), m_nb_varying(0), m_gl_Normal_allocated(false),
-    m_gl_Position_allocated(false), m_gl_FragColor_allocated(false),
-    m_uploaded(false)
+    m_varmap(NULL), m_uploaded(false)
 {
   m_originalShader = const_cast<ShProgramNode*>(shader.object());
   
@@ -67,6 +65,8 @@ GlslCode::~GlslCode()
   if (m_arb_shader != 0) {
     glDetachObjectARB(m_arb_program, m_arb_shader);
   }
+
+  delete m_varmap;
 }
 
 void GlslCode::generate()
@@ -79,11 +79,11 @@ void GlslCode::generate()
   ShContext::current()->enter(m_shader);
   
   ShTransformer transform(m_shader);
-  //transform.convertInputOutput(); 
-  //transform.convertTextureLookups();
+  transform.convertInputOutput(); 
+  transform.convertTextureLookups();
   //transform.convertToFloat(m_convertMap);
   //transform.splitTuples(4, m_splits);
-  //transform.stripDummyOps();
+  transform.stripDummyOps();
 
   if (transform.changed()) {
     optimize(m_shader);
@@ -93,7 +93,12 @@ void GlslCode::generate()
     ShContext::current()->exit();
     ShContext::current()->enter(m_shader);
   }
+
+  // Initialize the variable map
+  delete m_varmap;
+  m_varmap = new GlslVariableMap(m_shader, m_unit);
   
+  // Code generation
   try {
     m_shader->ctrlGraph->entry()->clearMarked();
     gen_node(m_shader->ctrlGraph->entry());
@@ -148,7 +153,7 @@ void GlslCode::upload()
 {
   stringstream code;
   print(code);
-  string s = code.str(); // w/o this extra copy, the shader code gets corrupted
+  string s = code.str(); // w/o this extra copy, the last bytes of the shader code become garbage
 
   const char* code_string = s.c_str();
   GLint code_len = strlen(code_string);
@@ -169,7 +174,7 @@ void GlslCode::upload()
   }
 
   glAttachObjectARB(m_arb_program, m_arb_shader);
-  //glDeleteObjectARB(m_arb_shader); // Mark for deletion on detachment
+  glDeleteObjectARB(m_arb_shader); // mark for deletion on detachment
 
 #ifdef SH_DEBUG_GLSL_BACKEND
   int nb_objects;
@@ -226,62 +231,17 @@ void GlslCode::updateUniform(const ShVariableNodePtr& uniform)
   // After updating the uniform variables, we must relink the shaders (hence, call bind())
 }
 
-string GlslCode::type_string(const GlslVariable &v)
-{
-  stringstream s;
-  if (shIsInteger(v.type)) {
-    if (v.size > 1) {
-      s << "ivec";
-    } else {
-      return "int";
-    }
-  } else {
-    if (v.size > 1) {
-      s << "vec";
-    } else {
-      return "float";
-    }
-  }
-
-  s << v.size;
-  return s.str();
-}
-
-string GlslCode::declare_var(const GlslVariable& v)
-{
-  if (v.builtin) return "";
-
-  string ret;
-  string type = type_string(v);
-
-  if (v.kind == SH_CONST) {
-    ret += "const ";
-  }
-  ret += type + " " + v.name;
-  if (!v.values.empty()) {
-    ret += " = " + type + "(" + v.values + ")";
-  }
-
-  return ret;
-}
-
 ostream& GlslCode::print(ostream& out)
 {
+  SH_DEBUG_ASSERT(m_varmap);
+
   out << "// OpenGL SL " << ((m_unit == SH_GLSL_VP) ? "Vertex" : "Fragment") << " Program" << endl;
   out << endl;
 
-  vector<string> vars; // holds variables to be declared in main
-  for (map<ShVariableNodePtr, GlslVariable>::const_iterator i = m_varmap.begin(); 
-       i != m_varmap.end(); i++) {
-    string var = declare_var((*i).second);
-
-    if (var.empty()) continue; // builtin variables are implicitly declared
-
-    if ((*i).second.varying()) {
-      out << "varying " << var << ";" << endl;
-    } else {
-      vars.push_back(var);
-    }
+  // Varying variables
+  for (GlslVariableMap::DeclarationList::const_iterator i = m_varmap->varying_begin(); 
+       i != m_varmap->varying_end(); i++) {
+    out  << "varying " << *i << ";" << endl;
   }
   out << endl;
 
@@ -290,7 +250,8 @@ ostream& GlslCode::print(ostream& out)
   string indent = "  ";
 
   // Temporaries and constants
-  for (vector<string>::const_iterator i = vars.begin(); i != vars.end(); i++) {
+  for (GlslVariableMap::DeclarationList::const_iterator i = m_varmap->regular_begin(); 
+       i != m_varmap->regular_end(); i++) {
     out << indent << *i << ";" << endl;
   }
   out << endl;
@@ -367,93 +328,10 @@ void GlslCode::emit(const ShStatement &stmt)
   }
 }
 
-string GlslCode::var_name(const ShVariable& v)
-{
-  stringstream varname;
-  switch (v.node()->kind()) {
-  case SH_INPUT:
-    varname << "var_i_";
-    break;
-  case SH_OUTPUT:
-    varname << "var_o_";
-    break;
-  case SH_INOUT:
-    varname << "var_io_";
-    break;
-  case SH_TEMP:
-    varname << "var_t_";
-    break;
-  case SH_CONST:
-    varname << "var_c_";
-    break;
-  case SH_TEXTURE:
-    varname << "var_tex_";
-    break;
-  case SH_STREAM:
-    varname << "var_s_";
-    break;
-  case SH_PALETTE:
-    varname << "var_p_";
-    break;
-  default:
-    varname << "var_";
-  }
-  varname << m_nb_variables++;
-  return varname.str();
-}
-
-void GlslCode::allocate_var(const ShVariable& v)
-{
-  GlslVariable var;
-  var.builtin = false;
-  var.size = v.node()->size();
-  var.kind = v.node()->kind();
-  var.type = v.valueType();
-  var.semantic_type = v.node()->specialType();
-  if (v.hasValues()) {
-    var.values = v.getVariant()->encodeArray();
-  }
-  
-  // Special cases
-  if (!m_gl_Position_allocated && (var.semantic_type == SH_POSITION) &&
-      ((var.kind == SH_INPUT) || (var.kind == SH_INOUT) || (var.kind == SH_OUTPUT)) ) {
-    var.name = "gl_Position";
-    var.builtin = true;
-    m_gl_Position_allocated = true;
-  }
-  else if (!m_gl_FragColor_allocated && (var.semantic_type == SH_COLOR) &&
-	   ((var.kind == SH_OUTPUT) || (var.kind == SH_INOUT))) {
-    var.name = "gl_FragColor";
-    var.builtin = true;
-    m_gl_FragColor_allocated = true;
-  }
-  else if (!m_gl_Normal_allocated && (m_unit == SH_GLSL_VP) && (var.semantic_type == SH_NORMAL) &&
-	   ((var.kind == SH_INPUT) || (var.kind == SH_INOUT) || (var.kind == SH_OUTPUT)) ) {
-    stringstream ss;
-    ss << "varying" << m_nb_varying++;
-    var.name = ss.str();
-
-    var.values = "gl_Normal";
-    m_gl_Normal_allocated = true;
-  }
-  else if (var.varying()) {
-    stringstream ss;
-    ss << "varying" << m_nb_varying++;
-    var.name = ss.str();
-  }
-  else {
-    var.name = var_name(v);  
-  }
-
-  m_varmap[v.node()] = var;
-}
-
 string GlslCode::resolve(const ShVariable& v)
 {
-  if (m_varmap.find(v.node()) == m_varmap.end()) {
-    allocate_var(v);
-  }
-  return m_varmap[v.node()].name + swizzle(v);
+  SH_DEBUG_ASSERT(m_varmap);
+  return m_varmap->resolve(v.node()).name() + swizzle(v);
 }
 
 string GlslCode::resolve(const ShVariable& v, int idx)
