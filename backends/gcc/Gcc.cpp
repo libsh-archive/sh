@@ -1954,6 +1954,17 @@ namespace ShGcc {
     prologue << "extern \"C\" void sh_gcc_backend_lookup(void*, float*, float*);" << std::endl;
     prologue << "extern \"C\" void sh_gcc_backend_lookupi(void*, float*, float*);" << std::endl;
     prologue << std::endl;
+
+#if defined(__APPLE__)
+    prologue << "#if defined(__APPLE__)" << std::endl;
+    /// some math funcs aren't defined for darwin
+    prologue << "float exp10f(double a) { return powf(10.0f, a); }" << std::endl;
+    prologue << "double exp10(double a) { return pow(10.0, a); }" << std::endl;
+    /// g++ complains about _main being unresolved
+    prologue << "int main( int argc, const char* argv[] ) {}" << std::endl;
+    prologue << "#endif" << std::endl;
+#endif
+
     prologue << "extern \"C\" "
 	   << " void func("
 	   << "float** inputs, "
@@ -1999,8 +2010,14 @@ namespace ShGcc {
     if (pid == 0)
       {
       // child
-      execlp("gcc", "gcc", "-O2", "-shared", "-o", sofile, ccfile,
-             "-L", SH_INSTALL_PREFIX "/lib/sh", "-lshgcc", NULL);
+      execlp("g++", "g++", "-O2",
+#if defined( __APPLE__ )
+	     "-bundle", 
+#else
+	     "-shared",
+#endif
+	     "-o", sofile, ccfile,
+             "-L" SH_INSTALL_PREFIX "/lib/sh", "-lshgcc", "-lmx", NULL);
       SH_GCC_DEBUG_PRINT("exec failed (" << errno << ")");
       exit(-1);
       }
