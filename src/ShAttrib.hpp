@@ -126,3 +126,15 @@ ShAttrib<1, Kind, T, Swizzled>& operator-=(ShAttrib<1, Kind, T, Swizzled>& a, T 
 #include "ShAttribImpl.hpp"
 
 #endif
+
+
+
+
+
+
+
+
+
+
+
+

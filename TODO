@@ -26,12 +26,13 @@ MATRICES:
  X operator[] extracts single row
  X operator{+,-,*,/}=
  X add matrix mults
- - adjunct
- - determinant
- - inverse
+ X adjunct
+ X determinant
+ X inverse
  - name()
  - add some matrix expand() call to expand to an ident matrix with top-left submatrix replaced with M
  - identity fetcher
+
 
 TEXTURES:
  X bind texture units in shader
