@@ -186,16 +186,6 @@ void init_sh()
     oclr = pos(inrm|ilightv)*diffuse + ambient;
   } SH_END;
 
-
-#if 1
-  cout << "Vertex Unit:" << endl;
-  vsh.node()->code()->print(cout);
-  cout << "--" << endl;
-  cout << "Fragment Unit:" << endl;
-  fsh.node()->code()->print(cout);
-  cout << "--" << endl;
-#endif
-
   }
 
 int main(int argc, char** argv)
@@ -244,8 +234,6 @@ int gprintf(int x, int y, char* fmt, ...)
   // texturing off and disable depth testing
   glPushAttrib(GL_ENABLE_BIT);
   glDisable(GL_DEPTH_TEST);
-  glDisable(GL_VERTEX_PROGRAM_ARB);
-  glDisable(GL_FRAGMENT_PROGRAM_ARB);
 
   // render the character through glut
   char* p = temp;
