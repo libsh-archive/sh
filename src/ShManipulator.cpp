@@ -31,7 +31,9 @@ ShProgram operator<<(const ShProgram &p, const ShManipulator &m) {
   int i;
 
   ShProgram permuter = SH_BEGIN_PROGRAM() {
-    /* Make shader outputs from p's inputs */
+    /* Make shader outputs from p's inputs 
+     * default output value is zero, so for those that have
+     * no matching inputs, they become zero outputs */
     std::vector<ShVariable> outputs;
     for(ShProgramNode::VarList::const_iterator inIt = p->inputs.begin();
         inIt != p->inputs.end(); ++inIt) {
@@ -68,16 +70,6 @@ ShProgram operator<<(const ShProgram &p, const ShManipulator &m) {
         }
         used[i] = true;
 
-        ShVariable input(new ShVariableNode(SH_VAR_INPUT, 
-              outputs[i].node()->size(), outputs[i].node()->specialType()));
-
-        ShStatement stmt(outputs[i], SH_OP_ASN, input);
-        ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
-      }
-    }
-
-    for(i = 0; i < size; ++i) {
-      if(!used[i]) {
         ShVariable input(new ShVariableNode(SH_VAR_INPUT, 
               outputs[i].node()->size(), outputs[i].node()->specialType()));
 

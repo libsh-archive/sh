@@ -30,6 +30,7 @@
 #include "ShUtilLib.hpp"
 #include "ShWorley.hpp"
 #include "ShPerlin.hpp"
+#include "ShKernelLib.hpp"
 
 /** \namespace ShUtil
  * \brief The main ShUtil namespace.

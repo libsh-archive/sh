@@ -1,7 +1,14 @@
-2004-01-15  Bryan Chan  <b8chan@enora.cgl.uwaterloo.ca>
+2004-01-15.5  Bryan Chan  <b8chan@enora.cgl.uwaterloo.ca>
 	* src/Makefile.am: Added missing headers
 
 	* src/ShManipulator.?pp: Added input manipulation
+	  (unsed input channels are given default value of 0)
+
+	* util/ShKernelLib.hpp, util/ShKernelLibImpl.hpp,
+	  util/ShKernelLib.cpp: Added a few useful kernels and nibbles
+
+	* src/ShAlgebra.cpp: Changed connect/combine(p,q) to use
+	  p's target (instead of "") if p.target == q.target
 	
 2004-01-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 

@@ -40,7 +40,7 @@ class ShManipulator {
  * since inputs cannot be repeated, and should not be discarded.
  *
  * This means that ranges in the manipulator must not overlap, and any inputs not 
- * in a range are appended at the end in order.
+ * in a range are given a default value of 0. 
  */
 ShProgram operator<<(const ShProgram &p, const ShManipulator &m); 
 ShProgram operator>>(const ShManipulator &m, const ShProgram &p); /// Equiv. to p << m 

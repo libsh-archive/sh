@@ -120,7 +120,7 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   if (a->target().empty()) {
     rtarget = b->target(); // A doesn't have a target. Use b's.
   } else {
-    if (b->target().empty()) {
+    if (b->target().empty() || a->target() == b->target()) {
       rtarget = a->target(); // A has a target, b doesn't
     } else {
       rtarget = ""; // Connecting different targets.
@@ -197,9 +197,9 @@ ShProgram combine(const ShProgram& a, const ShProgram& b)
   if (a->target().empty()) {
     rtarget = b->target(); // A doesn't have a target. Use b's.
   } else {
-    if (b->target().empty()) {
+    if (b->target().empty() || a->target() == b->target() ) {
       rtarget = a->target(); // A has a target, b doesn't
-    } else {
+    } else { 
       rtarget = ""; // Connecting different targets.
     }
   }
