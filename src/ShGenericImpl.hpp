@@ -36,17 +36,17 @@
 
 namespace SH {
 
-template<int N, ShValueType V>
+template<int N, typename T>
 inline
-ShGeneric<N, V>::ShGeneric(const ShVariableNodePtr& node)
+ShGeneric<N, T>::ShGeneric(const ShVariableNodePtr& node)
   : ShVariable(node)
 {
   SH_DEBUG_ASSERT(node); // DEBUG
 }
 
-template<int N, ShValueType V>
+template<int N, typename T>
 inline
-ShGeneric<N, V>::ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, bool neg)
+ShGeneric<N, T>::ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, bool neg)
   : ShVariable(node)
 {
   m_swizzle = swizzle;
@@ -54,15 +54,15 @@ ShGeneric<N, V>::ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, boo
   SH_DEBUG_ASSERT(node); // DEBUG
 }
 
-template<int N, ShValueType V>
+template<int N, typename T>
 inline
-ShGeneric<N, V>::~ShGeneric()
+ShGeneric<N, T>::~ShGeneric()
 {
 }
 
-//template<int N, ShValueType V>
-//ShGeneric<N, V>::ShGeneric(const ShGeneric<N, V>& other)
-//  : ShVariable(new ShVariableNode(SH_TEMP, N, V, 
+//template<int N, typename T>
+//ShGeneric<N, T>::ShGeneric(const ShGeneric<N, T>& other)
+//  : ShVariable(new ShVariableNode(SH_TEMP, N, T, 
 //        other.node()->specialType()))
 //{
 //  SH_DEBUG_ASSERT(other.node());
@@ -70,11 +70,11 @@ ShGeneric<N, V>::~ShGeneric()
 //  shASN(*this, other);
 //}
 
-template<int N, ShValueType V>
-template<ShValueType V2>
+template<int N, typename T>
+template<typename T2>
 inline
-ShGeneric<N, V>::ShGeneric(const ShGeneric<N, V2>& other)
-  : ShVariable(new ShVariableNode(SH_TEMP, N, V, 
+ShGeneric<N, T>::ShGeneric(const ShGeneric<N, T2>& other)
+  : ShVariable(new ShVariableNode(SH_TEMP, N, value_type, 
         other.node()->specialType()))
 {
   SH_DEBUG_ASSERT(other.node());
@@ -82,266 +82,266 @@ ShGeneric<N, V>::ShGeneric(const ShGeneric<N, V2>& other)
   shASN(*this, other);
 }
 
-template<int N, ShValueType V>
+template<int N, typename T>
 inline
-ShGeneric<N, V>& ShGeneric<N, V>::operator=(const ShProgram& prg)
+ShGeneric<N, T>& ShGeneric<N, T>::operator=(const ShProgram& prg)
 {
   this->ShVariable::operator=(prg);
   return *this;
 }
 
-template<int N, ShValueType V>
+template<int N, typename T>
 inline
-ShGeneric<N, V>& ShGeneric<N, V>::operator=(const ShGeneric<N, V>& other)
+ShGeneric<N, T>& ShGeneric<N, T>::operator=(const ShGeneric<N, T>& other)
 {
   shASN(*this, other);
   return *this;
 }
 
-template<int N, ShValueType V>
-template<ShValueType V2>
-ShGeneric<N, V>& ShGeneric<N, V>::operator=(const ShGeneric<N, V2>& other)
+template<int N, typename T>
+template<typename T2>
+ShGeneric<N, T>& ShGeneric<N, T>::operator=(const ShGeneric<N, T2>& other)
 {
   shASN(*this, other);
   return *this;
 }
 
-template<int N, ShValueType V>
-template<ShValueType V2>
+template<int N, typename T>
+template<typename T2>
 inline
-ShGeneric<N, V>& ShGeneric<N, V>::operator+=(const ShGeneric<N, V2>& right)
+ShGeneric<N, T>& ShGeneric<N, T>::operator+=(const ShGeneric<N, T2>& right)
 {
   *this = *this + right;
   return *this;
 }
 
-template<int N, ShValueType V>
-template<ShValueType V2>
+template<int N, typename T>
+template<typename T2>
 inline
-ShGeneric<N, V>& ShGeneric<N, V>::operator-=(const ShGeneric<N, V2>& right)
+ShGeneric<N, T>& ShGeneric<N, T>::operator-=(const ShGeneric<N, T2>& right)
 {
   *this = *this - right;
   return *this;
 }
 
-template<int N, ShValueType V>
-template<ShValueType V2>
+template<int N, typename T>
+template<typename T2>
 inline
-ShGeneric<N, V>& ShGeneric<N, V>::operator*=(const ShGeneric<N, V2>& right)
+ShGeneric<N, T>& ShGeneric<N, T>::operator*=(const ShGeneric<N, T2>& right)
 {
   *this = *this * right;
   return *this;
 }
 
-template<int N, ShValueType V>
-template<ShValueType V2>
+template<int N, typename T>
+template<typename T2>
 inline
-ShGeneric<N, V>& ShGeneric<N, V>::operator/=(const ShGeneric<N, V2>& right)
+ShGeneric<N, T>& ShGeneric<N, T>::operator/=(const ShGeneric<N, T2>& right)
 {
   *this = *this / right;
   return *this;
 }
 
-template<int N, ShValueType V>
-template<ShValueType V2>
+template<int N, typename T>
+template<typename T2>
 inline
-ShGeneric<N, V>& ShGeneric<N, V>::operator%=(const ShGeneric<N, V2>& right)
+ShGeneric<N, T>& ShGeneric<N, T>::operator%=(const ShGeneric<N, T2>& right)
 {
   *this = *this % right;
   return *this;
 }
 
-template<int N, ShValueType V>
-template<ShValueType V2>
+template<int N, typename T>
+template<typename T2>
 inline
-ShGeneric<N, V>& ShGeneric<N, V>::operator+=(const ShGeneric<1, V2>& right)
+ShGeneric<N, T>& ShGeneric<N, T>::operator+=(const ShGeneric<1, T2>& right)
 {
   *this = *this + right;
   return *this;
 }
 
-template<int N, ShValueType V>
-template<ShValueType V2>
+template<int N, typename T>
+template<typename T2>
 inline
-ShGeneric<N, V>& ShGeneric<N, V>::operator-=(const ShGeneric<1, V2>& right)
+ShGeneric<N, T>& ShGeneric<N, T>::operator-=(const ShGeneric<1, T2>& right)
 {
   *this = *this - right;
   return *this;
 }
 
-template<int N, ShValueType V>
-template<ShValueType V2>
+template<int N, typename T>
+template<typename T2>
 inline
-ShGeneric<N, V>& ShGeneric<N, V>::operator*=(const ShGeneric<1, V2>& right)
+ShGeneric<N, T>& ShGeneric<N, T>::operator*=(const ShGeneric<1, T2>& right)
 {
   *this = *this * right;
   return *this;
 }
 
-template<int N, ShValueType V>
-template<ShValueType V2>
+template<int N, typename T>
+template<typename T2>
 inline
-ShGeneric<N, V>& ShGeneric<N, V>::operator/=(const ShGeneric<1, V2>& right)
+ShGeneric<N, T>& ShGeneric<N, T>::operator/=(const ShGeneric<1, T2>& right)
 {
   *this = *this / right;
   return *this;
 }
 
-template<int N, ShValueType V>
-template<ShValueType V2>
+template<int N, typename T>
+template<typename T2>
 inline
-ShGeneric<N, V>& ShGeneric<N, V>::operator%=(const ShGeneric<1, V2>& right)
+ShGeneric<N, T>& ShGeneric<N, T>::operator%=(const ShGeneric<1, T2>& right)
 {
   *this = *this % right;
   return *this;
 }
 
-template<int N, ShValueType V>
+template<int N, typename T>
 inline
-ShGeneric<N, V>& ShGeneric<N, V>::operator+=(H right)
+ShGeneric<N, T>& ShGeneric<N, T>::operator+=(host_type right)
 {
   *this = *this + right;
   return *this;
 }
 
-template<int N, ShValueType V>
+template<int N, typename T>
 inline
-ShGeneric<N, V>& ShGeneric<N, V>::operator-=(H right)
+ShGeneric<N, T>& ShGeneric<N, T>::operator-=(host_type right)
 {
   *this = *this - right;
   return *this;
 }
 
-template<int N, ShValueType V>
+template<int N, typename T>
 inline
-ShGeneric<N, V>& ShGeneric<N, V>::operator*=(H right)
+ShGeneric<N, T>& ShGeneric<N, T>::operator*=(host_type right)
 {
   *this = *this * right;
   return *this;
 }
 
-template<int N, ShValueType V>
+template<int N, typename T>
 inline
-ShGeneric<N, V>& ShGeneric<N, V>::operator/=(H right)
+ShGeneric<N, T>& ShGeneric<N, T>::operator/=(host_type right)
 {
   *this = *this / right;
   return *this;
 }
 
-template<int N, ShValueType V>
+template<int N, typename T>
 inline
-ShGeneric<N, V>& ShGeneric<N, V>::operator%=(H right)
+ShGeneric<N, T>& ShGeneric<N, T>::operator%=(host_type right)
 {
   *this = *this % right;
   return *this;
 }
 
-template<int N, ShValueType V>
+template<int N, typename T>
 inline
-ShGeneric<N, V> ShGeneric<N, V>::operator-() const
+ShGeneric<N, T> ShGeneric<N, T>::operator-() const
 {
-  return ShGeneric<N, V>(m_node, m_swizzle, !m_neg);
+  return ShGeneric<N, T>(m_node, m_swizzle, !m_neg);
 }
 
 
-template<int N, ShValueType V>
+template<int N, typename T>
 inline
-ShGeneric<N, V> ShGeneric<N, V>::operator()() const
+ShGeneric<N, T> ShGeneric<N, T>::operator()() const
 {
-  return ShGeneric<N, V>(m_node, m_swizzle, m_neg);
+  return ShGeneric<N, T>(m_node, m_swizzle, m_neg);
 }
 
-template<int N, ShValueType V>
+template<int N, typename T>
 inline
-ShGeneric<1, V> ShGeneric<N, V>::operator()(int i1) const
+ShGeneric<1, T> ShGeneric<N, T>::operator()(int i1) const
 {
-  return ShGeneric<1, V>(m_node, m_swizzle * ShSwizzle(size(), i1), m_neg);
+  return ShGeneric<1, T>(m_node, m_swizzle * ShSwizzle(size(), i1), m_neg);
 }
 
-template<int N, ShValueType V>
+template<int N, typename T>
 inline
-ShGeneric<1, V> ShGeneric<N, V>::operator[](int i1) const
+ShGeneric<1, T> ShGeneric<N, T>::operator[](int i1) const
 {
-  return ShGeneric<1, V>(m_node, m_swizzle * ShSwizzle(size(), i1), m_neg);
+  return ShGeneric<1, T>(m_node, m_swizzle * ShSwizzle(size(), i1), m_neg);
 }
 
-template<int N, ShValueType V>
+template<int N, typename T>
 inline
-ShGeneric<2, V> ShGeneric<N, V>::operator()(int i1, int i2) const
+ShGeneric<2, T> ShGeneric<N, T>::operator()(int i1, int i2) const
 {
-  return ShGeneric<2, V>(m_node, m_swizzle * ShSwizzle(size(), i1, i2), m_neg);
+  return ShGeneric<2, T>(m_node, m_swizzle * ShSwizzle(size(), i1, i2), m_neg);
 }
 
-template<int N, ShValueType V>
+template<int N, typename T>
 inline
-ShGeneric<3, V> ShGeneric<N, V>::operator()(int i1, int i2, int i3) const
+ShGeneric<3, T> ShGeneric<N, T>::operator()(int i1, int i2, int i3) const
 {
-  return ShGeneric<3, V>(m_node, m_swizzle * ShSwizzle(size(), i1, i2, i3), m_neg);
+  return ShGeneric<3, T>(m_node, m_swizzle * ShSwizzle(size(), i1, i2, i3), m_neg);
 }
 
-template<int N, ShValueType V>
+template<int N, typename T>
 inline
-ShGeneric<4, V> ShGeneric<N, V>::operator()(int i1, int i2, int i3, int i4) const
+ShGeneric<4, T> ShGeneric<N, T>::operator()(int i1, int i2, int i3, int i4) const
 {
-  return ShGeneric<4, V>(m_node, m_swizzle * ShSwizzle(size(), i1, i2, i3, i4), m_neg);
+  return ShGeneric<4, T>(m_node, m_swizzle * ShSwizzle(size(), i1, i2, i3, i4), m_neg);
 }
 
-template<int N, ShValueType V>
-void ShGeneric<N, V>::range(H low, H high) 
+template<int N, typename T>
+void ShGeneric<N, T>::range(host_type low, host_type high) 
 {
   rangeVariant(new VariantType(1, low), new VariantType(1, high));
 }
 
-template<int N, ShValueType V>
-typename ShGeneric<N, V>::VariantType ShGeneric<N, V>::lowBound() const
+template<int N, typename T>
+typename ShGeneric<N, T>::VariantType ShGeneric<N, T>::lowBound() const
 {
-  return (*variant_cast<V, SH_HOST>(lowBoundVariant()));
+  return (*variant_cast<T, SH_HOST>(lowBoundVariant()));
 }
 
-template<int N, ShValueType V>
-typename ShGeneric<N, V>::HostType ShGeneric<N, V>::lowBound(int index) const
+template<int N, typename T>
+typename ShGeneric<N, T>::host_type ShGeneric<N, T>::lowBound(int index) const
 {
-  return (*variant_cast<V, SH_HOST>(lowBoundVariant()))[index];
+  return (*variant_cast<T, SH_HOST>(lowBoundVariant()))[index];
 }
 
-template<int N, ShValueType V>
-typename ShGeneric<N, V>::VariantType ShGeneric<N, V>::highBound() const
+template<int N, typename T>
+typename ShGeneric<N, T>::VariantType ShGeneric<N, T>::highBound() const
 {
-  return (*variant_cast<V, SH_HOST>(highBoundVariant()));
+  return (*variant_cast<T, SH_HOST>(highBoundVariant()));
 }
 
-template<int N, ShValueType V>
-typename ShGeneric<N, V>::H ShGeneric<N, V>::highBound(int index) const
+template<int N, typename T>
+typename ShGeneric<N, T>::host_type ShGeneric<N, T>::highBound(int index) const
 {
-  return (*variant_cast<V, SH_HOST>(highBoundVariant()))[index];
+  return (*variant_cast<T, SH_HOST>(highBoundVariant()))[index];
 }
   
-template<int N, ShValueType V> 
+template<int N, typename T> 
 template<int N2>
-ShGeneric<N2, V> ShGeneric<N, V>::swiz(int indices[]) const
+ShGeneric<N2, T> ShGeneric<N, T>::swiz(int indices[]) const
 {
-  return ShGeneric<N2, V>(m_node, m_swizzle * ShSwizzle(N, N2, indices), m_neg);
+  return ShGeneric<N2, T>(m_node, m_swizzle * ShSwizzle(N, N2, indices), m_neg);
 }
 
-template<int N, ShValueType V>
-void ShGeneric<N, V>::getValues(H dest[]) const
+template<int N, typename T>
+void ShGeneric<N, T>::getValues(host_type dest[]) const
 {
-  VariantTypePtr c = variant_cast<V, SH_HOST>(getVariant()); 
+  VariantTypePtr c = variant_cast<T, SH_HOST>(getVariant()); 
   for(int i = 0; i < N; ++i) dest[i] = (*c)[i]; 
 }
 
-template<int N, ShValueType V>
-typename ShGeneric<N, V>::H ShGeneric<N, V>::getValue(int index) const
+template<int N, typename T>
+typename ShGeneric<N, T>::host_type ShGeneric<N, T>::getValue(int index) const
 {
-  VariantTypePtr c = variant_cast<V, SH_HOST>(getVariant(index)); 
+  VariantTypePtr c = variant_cast<T, SH_HOST>(getVariant(index)); 
   return (*c)[0];
 }
 
-template<int N, ShValueType V>
-void ShGeneric<N, V>::setValue(int index, const H &variantValue) 
+template<int N, typename T>
+void ShGeneric<N, T>::setValue(int index, const host_type &variantValue) 
 {
   if(m_swizzle.identity() && !m_neg) {
-    VariantTypePtr c = variant_cast<V, SH_HOST>(m_node->getVariant()); 
+    VariantTypePtr c = variant_cast<T, SH_HOST>(m_node->getVariant()); 
     (*c)[index] = variantValue;
   } else {
     VariantTypePtr variant(new VariantType(1, variantValue));
@@ -349,28 +349,28 @@ void ShGeneric<N, V>::setValue(int index, const H &variantValue)
   }
 }
 
-template<int N, ShValueType V>
-void ShGeneric<N, V>::setValues(const H variantValues[]) 
+template<int N, typename T>
+void ShGeneric<N, T>::setValues(const host_type variantValues[]) 
 {
   if(m_swizzle.identity() && !m_neg) {
-    memcpy(m_node->getVariant()->array(), variantValues, N * sizeof(H));
+    memcpy(m_node->getVariant()->array(), variantValues, N * sizeof(host_type));
   } else {
     VariantTypePtr variantPtr(new VariantType(N, variantValues, false));
     setVariant(variantPtr);
   }
 }
 
-template<ShValueType V>
+template<typename T>
 inline
-ShGeneric<1, V>::ShGeneric(const ShVariableNodePtr& node)
+ShGeneric<1, T>::ShGeneric(const ShVariableNodePtr& node)
   : ShVariable(node)
 {
   SH_DEBUG_ASSERT(node); // DEBUG
 }
 
-template<ShValueType V>
+template<typename T>
 inline
-ShGeneric<1, V>::ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, bool neg)
+ShGeneric<1, T>::ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, bool neg)
   : ShVariable(node)
 {
   m_swizzle = swizzle;
@@ -378,15 +378,15 @@ ShGeneric<1, V>::ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, boo
   SH_DEBUG_ASSERT(node); // DEBUG
 }
 
-template<ShValueType V>
+template<typename T>
 inline
-ShGeneric<1, V>::~ShGeneric()
+ShGeneric<1, T>::~ShGeneric()
 {
 }
 
-//template<ShValueType V>
-//ShGeneric<1, V>::ShGeneric(const ShGeneric<1, V>& other)
-//  : ShVariable(new ShVariableNode(SH_TEMP, 1, V, 
+//template<typename T>
+//ShGeneric<1, T>::ShGeneric(const ShGeneric<1, T>& other)
+//  : ShVariable(new ShVariableNode(SH_TEMP, 1, T, 
 //        other.node()->specialType()))
 //{
 //  SH_DEBUG_ASSERT(other.node());
@@ -395,11 +395,11 @@ ShGeneric<1, V>::~ShGeneric()
 //  shASN(*this, other);
 //}
 
-template<ShValueType V>
-template<ShValueType V2>
+template<typename T>
+template<typename T2>
 inline
-ShGeneric<1, V>::ShGeneric(const ShGeneric<1, V2>& other)
-  : ShVariable(new ShVariableNode(SH_TEMP, 1, V, other.node()->specialType()))
+ShGeneric<1, T>::ShGeneric(const ShGeneric<1, T2>& other)
+  : ShVariable(new ShVariableNode(SH_TEMP, 1, value_type, other.node()->specialType()))
 {
   SH_DEBUG_ASSERT(other.node());
   SH_DEBUG_ASSERT(m_node);
@@ -407,235 +407,235 @@ ShGeneric<1, V>::ShGeneric(const ShGeneric<1, V2>& other)
   shASN(*this, other);
 }
 
-template<ShValueType V>
+template<typename T>
 inline
-ShGeneric<1, V>& ShGeneric<1, V>::operator=(const ShProgram& prg)
+ShGeneric<1, T>& ShGeneric<1, T>::operator=(const ShProgram& prg)
 {
   this->ShVariable::operator=(prg);
   return *this;
 }
 
-template<ShValueType V>
+template<typename T>
 inline
-ShGeneric<1, V>& ShGeneric<1, V>::operator=(const ShGeneric<1, V>& other)
+ShGeneric<1, T>& ShGeneric<1, T>::operator=(const ShGeneric<1, T>& other)
 {
   shASN(*this, other);
   return *this;
 }
 
-template<ShValueType V>
-template<ShValueType V2>
+template<typename T>
+template<typename T2>
 inline
-ShGeneric<1, V>& ShGeneric<1, V>::operator=(const ShGeneric<1, V2>& other)
+ShGeneric<1, T>& ShGeneric<1, T>::operator=(const ShGeneric<1, T2>& other)
 {
   shASN(*this, other);
   return *this;
 }
 
 
-template<ShValueType V>
+template<typename T>
 inline
-ShGeneric<1, V>& ShGeneric<1, V>::operator=(H other)
+ShGeneric<1, T>& ShGeneric<1, T>::operator=(host_type other)
 {
-  shASN(*this, ShAttrib<1, SH_CONST, V>(other));
+  shASN(*this, ShAttrib<1, SH_CONST, T>(other));
   return *this;
 }
 
-template<ShValueType V>
-template<ShValueType V2>
+template<typename T>
+template<typename T2>
 inline
-ShGeneric<1, V>& ShGeneric<1, V>::operator+=(const ShGeneric<1, V2>& right)
+ShGeneric<1, T>& ShGeneric<1, T>::operator+=(const ShGeneric<1, T2>& right)
 {
   *this = *this + right;
   return *this;
 }
 
-template<ShValueType V>
-template<ShValueType V2>
+template<typename T>
+template<typename T2>
 inline
-ShGeneric<1, V>& ShGeneric<1, V>::operator-=(const ShGeneric<1, V2>& right)
+ShGeneric<1, T>& ShGeneric<1, T>::operator-=(const ShGeneric<1, T2>& right)
 {
   *this = *this - right;
   return *this;
 }
 
-template<ShValueType V>
-template<ShValueType V2>
+template<typename T>
+template<typename T2>
 inline
-ShGeneric<1, V>& ShGeneric<1, V>::operator*=(const ShGeneric<1, V2>& right)
+ShGeneric<1, T>& ShGeneric<1, T>::operator*=(const ShGeneric<1, T2>& right)
 {
   *this = *this * right;
   return *this;
 }
 
-template<ShValueType V>
-template<ShValueType V2>
+template<typename T>
+template<typename T2>
 inline
-ShGeneric<1, V>& ShGeneric<1, V>::operator/=(const ShGeneric<1, V2>& right)
+ShGeneric<1, T>& ShGeneric<1, T>::operator/=(const ShGeneric<1, T2>& right)
 {
   *this = *this / right;
   return *this;
 }
 
-template<ShValueType V>
-template<ShValueType V2>
+template<typename T>
+template<typename T2>
 inline
-ShGeneric<1, V>& ShGeneric<1, V>::operator%=(const ShGeneric<1, V2>& right)
+ShGeneric<1, T>& ShGeneric<1, T>::operator%=(const ShGeneric<1, T2>& right)
 {
   *this = *this % right;
   return *this;
 }
 
-template<ShValueType V>
+template<typename T>
 inline
-ShGeneric<1, V>& ShGeneric<1, V>::operator*=(H right)
+ShGeneric<1, T>& ShGeneric<1, T>::operator*=(host_type right)
 {
   *this = *this * right;
   return *this;
 }
 
-template<ShValueType V>
+template<typename T>
 inline
-ShGeneric<1, V>& ShGeneric<1, V>::operator/=(H right)
+ShGeneric<1, T>& ShGeneric<1, T>::operator/=(host_type right)
 {
   *this = *this / right;
   return *this;
 }
 
-template<ShValueType V>
+template<typename T>
 inline
-ShGeneric<1, V>& ShGeneric<1, V>::operator%=(H right)
+ShGeneric<1, T>& ShGeneric<1, T>::operator%=(host_type right)
 {
   *this = *this % right;
   return *this;
 }
 
-template<ShValueType V>
+template<typename T>
 inline
-ShGeneric<1, V>& ShGeneric<1, V>::operator+=(H right)
+ShGeneric<1, T>& ShGeneric<1, T>::operator+=(host_type right)
 {
   *this = *this + right;
   return *this;
 }
 
-template<ShValueType V>
+template<typename T>
 inline
-ShGeneric<1, V>& ShGeneric<1, V>::operator-=(H right)
+ShGeneric<1, T>& ShGeneric<1, T>::operator-=(host_type right)
 {
   *this = *this - right;
   return *this;
 }
 
-template<ShValueType V>
+template<typename T>
 inline
-ShGeneric<1, V> ShGeneric<1, V>::operator-() const
+ShGeneric<1, T> ShGeneric<1, T>::operator-() const
 {
-  return ShGeneric<1, V>(m_node, m_swizzle, !m_neg);
+  return ShGeneric<1, T>(m_node, m_swizzle, !m_neg);
 }
 
 
-template<ShValueType V>
+template<typename T>
 inline
-ShGeneric<1, V> ShGeneric<1, V>::operator()() const
+ShGeneric<1, T> ShGeneric<1, T>::operator()() const
 {
-  return ShGeneric<1, V>(m_node, m_swizzle, m_neg);
+  return ShGeneric<1, T>(m_node, m_swizzle, m_neg);
 }
 
-template<ShValueType V>
+template<typename T>
 inline
-ShGeneric<1, V> ShGeneric<1, V>::operator()(int i1) const
+ShGeneric<1, T> ShGeneric<1, T>::operator()(int i1) const
 {
-  return ShGeneric<1, V>(m_node, m_swizzle * ShSwizzle(size(), i1), m_neg);
+  return ShGeneric<1, T>(m_node, m_swizzle * ShSwizzle(size(), i1), m_neg);
 }
 
-template<ShValueType V>
+template<typename T>
 inline
-ShGeneric<1, V> ShGeneric<1, V>::operator[](int i1) const
+ShGeneric<1, T> ShGeneric<1, T>::operator[](int i1) const
 {
-  return ShGeneric<1, V>(m_node, m_swizzle * ShSwizzle(size(), i1), m_neg);
+  return ShGeneric<1, T>(m_node, m_swizzle * ShSwizzle(size(), i1), m_neg);
 }
 
-template<ShValueType V>
+template<typename T>
 inline
-ShGeneric<2, V> ShGeneric<1, V>::operator()(int i1, int i2) const
+ShGeneric<2, T> ShGeneric<1, T>::operator()(int i1, int i2) const
 {
-  return ShGeneric<2, V>(m_node, m_swizzle * ShSwizzle(size(), i1, i2), m_neg);
+  return ShGeneric<2, T>(m_node, m_swizzle * ShSwizzle(size(), i1, i2), m_neg);
 }
 
-template<ShValueType V>
+template<typename T>
 inline
-ShGeneric<3, V> ShGeneric<1, V>::operator()(int i1, int i2, int i3) const
+ShGeneric<3, T> ShGeneric<1, T>::operator()(int i1, int i2, int i3) const
 {
-  return ShGeneric<3, V>(m_node, m_swizzle * ShSwizzle(size(), i1, i2, i3), m_neg);
+  return ShGeneric<3, T>(m_node, m_swizzle * ShSwizzle(size(), i1, i2, i3), m_neg);
 }
 
-template<ShValueType V>
+template<typename T>
 inline
-ShGeneric<4, V> ShGeneric<1, V>::operator()(int i1, int i2, int i3, int i4) const
+ShGeneric<4, T> ShGeneric<1, T>::operator()(int i1, int i2, int i3, int i4) const
 {
-  return ShGeneric<4, V>(m_node, m_swizzle * ShSwizzle(size(), i1, i2, i3, i4), m_neg);
+  return ShGeneric<4, T>(m_node, m_swizzle * ShSwizzle(size(), i1, i2, i3, i4), m_neg);
 }
 
-template<ShValueType V>
-void ShGeneric<1, V>::range(H low, H high) 
+template<typename T>
+void ShGeneric<1, T>::range(host_type low, host_type high) 
 {
   rangeVariant(new VariantType(1, low), new VariantType(1, high));
 }
 
-template<ShValueType V>
-typename ShGeneric<1, V>::VariantType ShGeneric<1, V>::lowBound() const
+template<typename T>
+typename ShGeneric<1, T>::VariantType ShGeneric<1, T>::lowBound() const
 {
-  return (*variant_cast<V, SH_HOST>(lowBoundVariant()));
+  return (*variant_cast<T, SH_HOST>(lowBoundVariant()));
 }
 
-template<ShValueType V>
-typename ShGeneric<1, V>::H ShGeneric<1, V>::lowBound(int index) const
+template<typename T>
+typename ShGeneric<1, T>::host_type ShGeneric<1, T>::lowBound(int index) const
 {
-  return (*variant_cast<V, SH_HOST>(lowBoundVariant()))[index];
+  return (*variant_cast<T, SH_HOST>(lowBoundVariant()))[index];
 }
 
-template<ShValueType V>
-typename ShGeneric<1, V>::VariantType ShGeneric<1, V>::highBound() const
+template<typename T>
+typename ShGeneric<1, T>::VariantType ShGeneric<1, T>::highBound() const
 {
-  return (*variant_cast<V, SH_HOST>(highBoundVariant()));
+  return (*variant_cast<T, SH_HOST>(highBoundVariant()));
 }
 
-template<ShValueType V>
-typename ShGeneric<1, V>::H ShGeneric<1, V>::highBound(int index) const
+template<typename T>
+typename ShGeneric<1, T>::host_type ShGeneric<1, T>::highBound(int index) const
 {
-  return (*variant_cast<V, SH_HOST>(highBoundVariant()))[index];
+  return (*variant_cast<T, SH_HOST>(highBoundVariant()))[index];
 }
   
-template<ShValueType V> 
+template<typename T> 
 template<int N2>
-ShGeneric<N2, V> ShGeneric<1, V>::swiz(int indices[]) const
+ShGeneric<N2, T> ShGeneric<1, T>::swiz(int indices[]) const
 {
-  return ShGeneric<N2, V>(m_node, m_swizzle * ShSwizzle(1, N2, indices), m_neg);
+  return ShGeneric<N2, T>(m_node, m_swizzle * ShSwizzle(1, N2, indices), m_neg);
 }
 
-template<ShValueType V>
-void ShGeneric<1, V>::getValues(H dest[]) const
+template<typename T>
+void ShGeneric<1, T>::getValues(host_type dest[]) const
 {
-  VariantTypePtr c = variant_cast<V, SH_HOST>(getVariant()); 
+  VariantTypePtr c = variant_cast<T, SH_HOST>(getVariant()); 
   dest[0] = (*c)[0]; 
 }
 
-template<ShValueType V>
-typename ShGeneric<1, V>::H ShGeneric<1, V>::getValue(int index) const
+template<typename T>
+typename ShGeneric<1, T>::host_type ShGeneric<1, T>::getValue(int index) const
 {
-  VariantTypePtr c = variant_cast<V, SH_HOST>(getVariant(index)); 
+  VariantTypePtr c = variant_cast<T, SH_HOST>(getVariant(index)); 
   return (*c)[0];
 }
 
-template<ShValueType V>
-void ShGeneric<1, V>::setValue(int index, const H &variantValue) 
+template<typename T>
+void ShGeneric<1, T>::setValue(int index, const host_type &variantValue) 
 {
   VariantTypePtr variant(new VariantType(1, variantValue));
   setVariant(variant, false, ShSwizzle(1, index));
 }
 
-template<ShValueType V>
-void ShGeneric<1, V>::setValues(const H variantValues[]) 
+template<typename T>
+void ShGeneric<1, T>::setValues(const host_type variantValues[]) 
 {
   setVariant(new VariantType(1, variantValues[0]));
 }

@@ -60,6 +60,9 @@ struct ConstProp : public ShStatementInfo {
         case SH_CONST:
           src[i].push_back(Cell(Cell::CONSTANT, stmt->src[i].getVariant(j)));
           break;
+        default:
+          SH_DEBUG_ASSERT(0 && "Invalid ShBindingType");
+          return;
         }
       }
     }

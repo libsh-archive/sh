@@ -45,6 +45,11 @@ ShStatement::ShStatement(ShVariable dest, ShOperation op)
 ShStatement::ShStatement(ShVariable dest, ShOperation op, ShVariable src1)
   : dest(dest), op(op)
 {
+  if(op == SH_OP_ASN && dest.size() != src1.size()) {
+    SH_DEBUG_PRINT("SH_OP_ASN dest.size() != src.size() (" << dest.size() << " != " << src1.size());
+    SH_DEBUG_PRINT("  dest=" << dest.name() << " src=" << src1.name());
+    SH_DEBUG_ASSERT(dest.size() == src1.size());
+  }
   src[0] = src1;
 }
 

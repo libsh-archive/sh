@@ -33,70 +33,41 @@
 
 namespace SH {
 
-template<ShValueType V, ShDataType DT>
-const typename ShDataTypeInfo<V, DT>::type
-ShDataTypeInfo<V, DT>::Zero = ShDataTypeConstant<V, DT>::Zero; 
+template<typename T, ShDataType DT>
+const typename ShDataTypeInfo<T, DT>::type
+ShDataTypeInfo<T, DT>::Zero = ShDataTypeConstant<T, DT>::Zero; 
 
-template<ShValueType V, ShDataType DT>
-const typename ShDataTypeInfo<V, DT>::type
-ShDataTypeInfo<V, DT>::One = ShDataTypeConstant<V, DT>::One; 
+template<typename T, ShDataType DT>
+const typename ShDataTypeInfo<T, DT>::type
+ShDataTypeInfo<T, DT>::One = ShDataTypeConstant<T, DT>::One; 
 
-template<ShValueType V, ShDataType DT>
-const char* ShDataTypeInfo<V, DT>::name() const 
+template<typename T, ShDataType DT>
+const char* ShDataTypeInfo<T, DT>::name() const 
 {
-  return valueTypeName[V];
+  return ShStorageTypeInfo<T>::name;
 }
 
-template<ShValueType V, ShDataType DT>
-int ShDataTypeInfo<V, DT>::datasize() const 
+template<typename T, ShDataType DT>
+int ShDataTypeInfo<T, DT>::datasize() const 
 {
-  return sizeof(typename ShDataTypeCppType<V, DT>::type); 
+  return sizeof(typename ShDataTypeCppType<T, DT>::type); 
 }
 
-template<ShValueType V, ShDataType DT>
-const ShVariantFactory* ShDataTypeInfo<V, DT>::variantFactory() const
+template<typename T, ShDataType DT>
+const ShVariantFactory* ShDataTypeInfo<T, DT>::variantFactory() const
 {
-  return ShDataVariantFactory<V, DT>::instance();
+  return ShDataVariantFactory<T, DT>::instance();
 }
 
-template<ShValueType V, ShDataType DT>
-const ShDataTypeInfo<V, DT>* ShDataTypeInfo<V, DT>::instance() 
+template<typename T, ShDataType DT>
+const ShDataTypeInfo<T, DT>* ShDataTypeInfo<T, DT>::instance() 
 {
-  if(!m_instance) m_instance = new ShDataTypeInfo<V, DT>();
+  if(!m_instance) m_instance = new ShDataTypeInfo<T, DT>();
   return m_instance;
 }
 
-template<ShValueType V, ShDataType DT>
-ShDataTypeInfo<V, DT>* ShDataTypeInfo<V, DT>::m_instance = 0;
-
-// Type precedence information 
-// 
-// currently available types:
-// float, double, int, ShInterval<double, ShInterval<float>
-template<ShValueType V> 
-struct ShCommonType<V, V> { static const ShValueType valueType = V; };
-
-// implementation of the automatic promotion tree lookup
-// (may need to break this out for non-compliant compilers)
-#define SH_MATCH(V) ((V == V1) || (V == V2))
-template<ShValueType V1, ShValueType V2>
-struct ShCommonType {
-  static const ShValueType valueType = 
-          ((SH_MATCH(SH_INTERVAL_DOUBLE) 
-            || (SH_MATCH(SH_INTERVAL_FLOAT) && SH_MATCH(SH_DOUBLE))) ? 
-              SH_INTERVAL_DOUBLE :
-          (SH_MATCH(SH_INTERVAL_FLOAT) ? 
-              SH_INTERVAL_FLOAT :
-          (SH_MATCH(SH_DOUBLE) ? 
-              SH_DOUBLE :
-          (SH_MATCH(SH_FLOAT) || SH_MATCH(SH_FRAC_INT) || SH_MATCH(SH_FRAC_SHORT) 
-            || SH_MATCH(SH_FRAC_BYTE) || SH_MATCH(SH_FRAC_UINT) 
-            || SH_MATCH(SH_FRAC_USHORT) || SH_MATCH(SH_FRAC_UBYTE)
-            || (SH_MATCH(SH_UINT) && SH_MATCH(SH_INT)) ? 
-              SH_FLOAT :
-              SH_INT))));
-};
-#undef SH_MATCH
+template<typename T, ShDataType DT>
+ShDataTypeInfo<T, DT>* ShDataTypeInfo<T, DT>::m_instance = 0;
 
 
 }

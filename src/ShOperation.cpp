@@ -52,6 +52,7 @@ const ShOperationInfo opInfo[] = {
   {"ASIN", 1, ShOperationInfo::LINEAR, false},
   {"ATAN", 1, ShOperationInfo::LINEAR, false},
   {"ATAN2", 2, ShOperationInfo::LINEAR, false},
+
   {"CBRT", 1, ShOperationInfo::LINEAR, false},
   {"CEIL", 1, ShOperationInfo::LINEAR, false},
   {"COS", 1, ShOperationInfo::LINEAR, false},
@@ -60,23 +61,28 @@ const ShOperationInfo opInfo[] = {
   {"DOT", 2, ShOperationInfo::ALL, true},
   {"DX", 1, ShOperationInfo::EXTERNAL, false},
   {"DY", 1, ShOperationInfo::EXTERNAL, false},
+
   {"EXP", 1, ShOperationInfo::LINEAR, false},
   {"EXP2", 1, ShOperationInfo::LINEAR, false},
   {"EXP10", 1, ShOperationInfo::LINEAR, false},
   {"FLR", 1, ShOperationInfo::LINEAR, false},
   {"FRAC", 1, ShOperationInfo::LINEAR, false},
+
+  {"LOG", 1, ShOperationInfo::LINEAR, false},
+  {"LOG2", 1, ShOperationInfo::LINEAR, false},
+  {"LOG10", 1, ShOperationInfo::LINEAR, false},
   {"LRP", 3, ShOperationInfo::LINEAR, false},
+
   {"MAD", 3, ShOperationInfo::LINEAR, false},
   {"MAX", 2, ShOperationInfo::LINEAR, false},
   {"MIN", 2, ShOperationInfo::LINEAR, true},
   {"MOD", 2, ShOperationInfo::LINEAR, true},
-  {"LOG", 1, ShOperationInfo::LINEAR, false},
-  {"LOG2", 1, ShOperationInfo::LINEAR, false},
-  {"LOG10", 1, ShOperationInfo::LINEAR, false},
+
   {"POW", 2, ShOperationInfo::LINEAR, false},
   {"RCP", 1, ShOperationInfo::LINEAR, false},
   {"RND", 1, ShOperationInfo::LINEAR, false},
   {"RSQ", 1, ShOperationInfo::LINEAR, false},
+
   {"SIN", 1, ShOperationInfo::LINEAR, false},
   {"SGN", 1, ShOperationInfo::LINEAR, false},
   {"SQRT", 1, ShOperationInfo::LINEAR, false},

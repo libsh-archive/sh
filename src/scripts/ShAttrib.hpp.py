@@ -25,7 +25,7 @@ shouldn't. By making swizzled variables separate types we enforce
 calling a conversion constructor instead, which cannot be elided.
 If this paragraph confuses you, and you're not modifying Sh
 internals, you may safely ignore it.""",
-                      "ShGeneric", "<N, V>")
+                      "ShGeneric", "<N, T>")
 
 decl.declare_all()
 

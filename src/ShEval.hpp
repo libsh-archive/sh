@@ -3,11 +3,13 @@
 
 #include <vector>
 #include <map>
+#include "ShHashMap.hpp"
 #include "ShStatement.hpp"
 #include "ShVariant.hpp"
 #include "ShOperation.hpp"
 #include "ShRefCount.hpp"
 #include "ShInterval.hpp"
+#include "ShHalf.hpp"
 
 namespace SH {
 
@@ -102,8 +104,8 @@ ShEval {
     typedef OpInfoList OpInfoMap[SH_OPERATION_END];
     OpInfoMap m_evalOpMap; 
 
-    mutable const ShEvalOpInfo* m_evalOpCache[SH_OPERATION_END][SH_VALUETYPE_END]
-                                             [SH_VALUETYPE_END][SH_VALUETYPE_END];
+    typedef ShPairPairHashMap<ShOperation, ShValueType, ShValueType, ShValueType, const ShEvalOpInfo*> EvalOpCache;
+    mutable EvalOpCache  m_evalOpCache;
 
     static ShEval* m_instance;
 };
@@ -128,7 +130,7 @@ ShEvalOp {
 //
 // 2) Functions 
 //    template<ShOperation S>
-//    static void unaryOp(ShDataVariant<V1> &dest, const ShDataVariant<V2> &src);
+//    static void unaryOp(ShDataVariant<T1> &dest, const ShDataVariant<T2> &src);
 //
 //    and similarly for binary, ternary ops 
 //    (for most ops, only T1 = T2 is supported directly,
@@ -143,7 +145,7 @@ ShEvalOp {
 /** A ShRegularOp is one where all the arguments and the destination
  * are variants of type V (data type SH_HOST).
  */
-template<ShOperation S, ShValueType V>
+template<ShOperation S, typename T>
 struct ShRegularOp: public ShEvalOp {
   void operator()(ShVariant* dest, const ShVariant* a, 
       const ShVariant* b, const ShVariant* c) const; 
@@ -156,9 +158,9 @@ struct ShRegularOp: public ShEvalOp {
 // 1) special float/double cmath functions (for C built in types)
 // 2) other special functions (sgn, rcp, rsq, etc.) that C types don't have
 // OR, use helper functions 
-template<ShOperation S, ShValueType V>
+template<ShOperation S, typename T>
 struct ShConcreteRegularOp {
-  typedef ShDataVariant<V, SH_HOST> Variant;
+  typedef ShDataVariant<T, SH_HOST> Variant;
   typedef Variant* DataPtr; 
   typedef const Variant* DataCPtr; 
 
@@ -171,58 +173,60 @@ struct ShConcreteRegularOp {
 //
 //TODO - not all the functions make sense on integer types...may
 //want to not declare the ones that don't make sense...
-template<ShOperation S, ShValueType V>
+template<ShOperation S, typename T>
 struct ShConcreteCTypeOp {
-  typedef ShDataVariant<V, SH_HOST> Variant;
+  typedef ShDataVariant<T, SH_HOST> Variant;
   typedef Variant* DataPtr; 
   typedef const Variant* DataCPtr; 
 
   static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0);
 };
 
-template<ShOperation S, ShValueType V>
+template<ShOperation S, typename T>
 struct ShRegularOpChooser {
-  typedef ShConcreteRegularOp<S, V> Op;
+  typedef ShConcreteRegularOp<S, T> Op;
 };
 
-#define SHOPC_CTYPE_OP(V)\
+#define SHOPC_CTYPE_OP(T)\
 template<ShOperation S>\
-struct ShRegularOpChooser<S, V> {\
-  typedef ShConcreteCTypeOp<S, V> Op;\
+struct ShRegularOpChooser<S, T> {\
+  typedef ShConcreteCTypeOp<S, T> Op;\
 };
 
-SHOPC_CTYPE_OP(SH_DOUBLE);
-SHOPC_CTYPE_OP(SH_FLOAT);
-SHOPC_CTYPE_OP(SH_INT);
+SHOPC_CTYPE_OP(double);
+SHOPC_CTYPE_OP(float);
+SHOPC_CTYPE_OP(ShHalf);
+SHOPC_CTYPE_OP(int);
 
 /** A ShIntervalOP is one where one argument is an interval type,
  * and the other argument must be its corresponding bound type.
  */
-template<ShOperation S, ShValueType V1, ShValueType V2>
+template<ShOperation S, typename T1, typename T2>
 struct ShIntervalOp: public ShEvalOp {
   void operator()(ShVariant* dest, const ShVariant* a, 
       const ShVariant* b, const ShVariant* c) const; 
 };
 
-template<ShOperation S, ShValueType V1, ShValueType V2>
+template<ShOperation S, typename T1, typename T2>
 struct ShConcreteIntervalOp{
-  static void doop(ShDataVariant<V1, SH_HOST> &dest, 
-      const ShDataVariant<V2, SH_HOST> &a);
+  static void doop(ShDataVariant<T1, SH_HOST> &dest, 
+      const ShDataVariant<T2, SH_HOST> &a);
       
 };
 
 
 // initializes the regular Ops for a floating point type T
-// with ShOpEvalOp<OP, V> objects
-template<ShValueType V>
+// with ShOpEvalOp<OP, T> objects
+template<typename T>
 void _shInitFloatOps();
 
 // initializes the regular Ops for an integer type T
 // (a subset of the floating point ones)
-template<ShValueType V>
+template<typename T>
 void _shInitIntOps();
 
-template<ShValueType V, ShValueType IntervalT>
+// initializes the interval ops for a type T and ShInterval<T>
+template<typename T, typename IntervalT>
 void _shInitIntervalOps();
 
 

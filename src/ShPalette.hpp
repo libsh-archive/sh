@@ -45,8 +45,8 @@ public:
   T& operator[](std::size_t index);
 
   // Sh program runtime lookup
-  template<ShValueType V>
-  T operator[](const ShGeneric<1, V>& index) const;
+  template<typename T2>
+  T operator[](const ShGeneric<1, T2>& index) const;
   
 private:
   ShPaletteNodePtr m_node;

@@ -2,31 +2,32 @@ import common, re
 
 # TODO: SH_CONST
 
-types = {"SH_INTERVAL_DOUBLE": "i_d", 
-         "SH_INTERVAL_FLOAT": "i_f",
+types = {"ShHalf": "h", 
+         "float": "f", 
+         "double": "d", 
 
-         "SH_DOUBLE": "d", 
-         "SH_FLOAT": "f", 
-         "SH_HALF": "h", 
+         "char": "b",
+         "short": "s",
+         "int": "i",
+         "unsigned char": "ub",
+         "unsigned short": "us",
+         "unsigned int": "ui",
 
-         "SH_INT": "i",
-         "SH_SHORT": "s",
-         "SH_BYTE": "b",
-         "SH_UINT": "ui",
-         "SH_USHORT": "us",
-         "SH_UBYTE": "ub",
+         "ShFracByte": "fb",
+         "ShFracShort": "fs",
+         "ShFracInt": "fi",
+         "ShFracUByte": "fub",
+         "ShFracUShort": "fus",
+         "ShFracUInt": "fui", 
 
-         "SH_FRAC_INT": "fi",
-         "SH_FRAC_SHORT": "fs",
-         "SH_FRAC_BYTE": "fb",
-         "SH_FRAC_UINT": "fui",
-         "SH_FRAC_USHORT": "fus",
-         "SH_FRAC_UBYTE": "fub" }
+         "ShInterval<float> ": "i_f",
+         "ShInterval<double> ": "i_d" }
+
 
 
 class Class:
     def __init__(self, name, comment_name, enum, comment, parent = "ShAttrib",
-                 parentargs = "<N, Binding, V, Swizzled>"):
+                 parentargs = "<N, Binding, T, Swizzled>"):
         self.name = "Sh" + name
         self.comment_name = comment_name
         self.enum = enum
@@ -79,15 +80,15 @@ class Class:
         common.doxygen(self.comment)
 
     def open(self):
-        common.inprint("""template<int N, ShBindingType Binding, ShValueType V=SH_FLOAT, bool Swizzled=false>
+        common.inprint("""template<int N, ShBindingType Binding, typename T=float, bool Swizzled=false>
 class """ + self.name + " : public " + self.parent + self.parentargs + """ {
 public:""")
         common.indent()
 
     def open_sized(self, size):
         pa = self.parentargs.replace("N", self.sizevar(size))
-        common.inprint("template<ShBindingType Binding, ShValueType V, bool Swizzled>\n" +
-                       "class " + self.name + "<" + str(size) + ", Binding, V, Swizzled>" +
+        common.inprint("template<ShBindingType Binding, typename T, bool Swizzled>\n" +
+                       "class " + self.name + "<" + str(size) + ", Binding, T, Swizzled>" +
                        " : public " + self.parent + pa + " {\n" +
                        "public:")
         common.indent()
@@ -99,97 +100,95 @@ public:""")
 
     def constructors(self, size):
         common.inprint(self.name + "();")
-        common.inprint("\ntemplate<ShValueType V2>")
-        common.inprint(self.name + "(const ShGeneric<" + self.sizevar(size) + ", V2>& other);")
+        common.inprint("\ntemplate<typename T2>")
+        common.inprint(self.name + "(const ShGeneric<" + self.sizevar(size) + ", T2>& other);")
 
         # note: need to put the default copy constructor, otherwise it is
         # implicitly defined and not what we want 
         common.inprint(self.name + "(const " + self.name + "<" +
-          self.sizevar(size) + ", Binding, V, Swizzled>& other);")
-        common.inprint("\ntemplate<ShValueType V2>")
-        common.inprint(self.name + "(const " + self.name + "<" + self.sizevar(size) + ", Binding, V2, Swizzled>& other);")
+          self.sizevar(size) + ", Binding, T, Swizzled>& other);")
+        common.inprint("\ntemplate<typename T2>")
+        common.inprint(self.name + "(const " + self.name + "<" + self.sizevar(size) + ", Binding, T2, Swizzled>& other);")
         common.inprint(self.name + "(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);")
         # common.inprint(self.name + "(const ShProgram&);")
-        common.inprint("explicit " + self.name + "(H data[" + self.sizevar(size) + "]);")
+        common.inprint("explicit " + self.name + "(host_type data[" + self.sizevar(size) + "]);")
         common.inprint("")
 
     def destructor(self):
         common.inprint("~" + self.name + "();\n")
 
     def constructors_sized(self, size):
-        common.inprint(self.name + "(" + ', '.join(["H"] * size) + ");")
+        common.inprint(self.name + "(" + ', '.join(["host_type"] * size) + ");")
         if size != 1:
-            common.inprint("template<" + ", ".join(["ShValueType V" + str(x) for x in range(2, size + 2)]) + ">")
-            common.inprint(self.name + "(" + ', '.join(["const ShGeneric<1, V" + str(x) + ">&" for x in range(2, size + 2)]) + ");")
+            common.inprint("template<" + ", ".join(["typename T" + str(x) for x in range(2, size + 2)]) + ">")
+            common.inprint(self.name + "(" + ', '.join(["const ShGeneric<1, T" + str(x) + ">&" for x in range(2, size + 2)]) + ");")
         common.inprint('')
 
     def assignments(self, size):
         # note: need to put the default assignment, otherwise it is
         # implicitly defined and not what we want 
-        common.inprint("\ntemplate<ShValueType V2>\n" +
-                       self.name + "& operator=(const ShGeneric<" + self.sizevar(size) + ", V2>& other);\n" +
-                       "\ntemplate<ShValueType V2>\n" +
+        common.inprint("\ntemplate<typename T2>\n" +
+                       self.name + "& operator=(const ShGeneric<" + self.sizevar(size) + ", T2>& other);\n" +
+                       "\ntemplate<typename T2>\n" +
                        self.name + "& operator=(const " + self.name + "<" +
-                       self.sizevar(size) + ", Binding, V2, Swizzled>& other);\n" +
+                       self.sizevar(size) + ", Binding, T2, Swizzled>& other);\n" +
                        self.name + "& operator=(const " + self.name + "<" +
-                       self.sizevar(size) + ", Binding, V, Swizzled>& other);\n")
+                       self.sizevar(size) + ", Binding, T, Swizzled>& other);\n")
         if size == 1:
-            common.inprint(self.name + "& operator=(H other);\n")
+            common.inprint(self.name + "& operator=(host_type other);\n")
         common.inprint(self.name + "& operator=(const ShProgram& prg);\n")
 
     def modifying(self, size):
-        common.inprint("\ntemplate<ShValueType V2>")
-        common.inprint(self.name + "& operator+=(const ShGeneric<" + self.sizevar(size) + ", V2>& right);")
-        common.inprint("\ntemplate<ShValueType V2>")
-        common.inprint(self.name + "& operator-=(const ShGeneric<" + self.sizevar(size) + ", V2>& right);")
-        common.inprint("\ntemplate<ShValueType V2>")
-        common.inprint(self.name + "& operator*=(const ShGeneric<" + self.sizevar(size) + ", V2>& right);")
-        common.inprint("\ntemplate<ShValueType V2>")
-        common.inprint(self.name + "& operator/=(const ShGeneric<" + self.sizevar(size) + ", V2>& right);")
-        common.inprint("\ntemplate<ShValueType V2>")
-        common.inprint(self.name + "& operator%=(const ShGeneric<" + self.sizevar(size) + ", V2>& right);")
+        common.inprint("\ntemplate<typename T2>")
+        common.inprint(self.name + "& operator+=(const ShGeneric<" + self.sizevar(size) + ", T2>& right);")
+        common.inprint("\ntemplate<typename T2>")
+        common.inprint(self.name + "& operator-=(const ShGeneric<" + self.sizevar(size) + ", T2>& right);")
+        common.inprint("\ntemplate<typename T2>")
+        common.inprint(self.name + "& operator*=(const ShGeneric<" + self.sizevar(size) + ", T2>& right);")
+        common.inprint("\ntemplate<typename T2>")
+        common.inprint(self.name + "& operator/=(const ShGeneric<" + self.sizevar(size) + ", T2>& right);")
+        common.inprint("\ntemplate<typename T2>")
+        common.inprint(self.name + "& operator%=(const ShGeneric<" + self.sizevar(size) + ", T2>& right);")
         
-        common.inprint(self.name + "& operator*=(H);")
-        common.inprint(self.name + "& operator/=(H);")
-        common.inprint(self.name + "& operator%=(H);")
-        common.inprint(self.name + "& operator+=(H);")
-        common.inprint(self.name + "& operator-=(H);")
+        common.inprint(self.name + "& operator*=(host_type);")
+        common.inprint(self.name + "& operator/=(host_type);")
+        common.inprint(self.name + "& operator%=(host_type);")
+        common.inprint(self.name + "& operator+=(host_type);")
+        common.inprint(self.name + "& operator-=(host_type);")
         if size != 1:
-            common.inprint("\ntemplate<ShValueType V2>")
-            common.inprint(self.name + "& operator+=(const ShGeneric<1, V2>&);")
-            common.inprint("\ntemplate<ShValueType V2>")
-            common.inprint(self.name + "& operator-=(const ShGeneric<1, V2>&);")
-            common.inprint("\ntemplate<ShValueType V2>")
-            common.inprint(self.name + "& operator*=(const ShGeneric<1, V2>&);")
-            common.inprint("\ntemplate<ShValueType V2>")
-            common.inprint(self.name + "& operator/=(const ShGeneric<1, V2>&);")
-            common.inprint("\ntemplate<ShValueType V2>")
-            common.inprint(self.name + "& operator%=(const ShGeneric<1, V2>&);")
+            common.inprint("\ntemplate<typename T2>")
+            common.inprint(self.name + "& operator+=(const ShGeneric<1, T2>&);")
+            common.inprint("\ntemplate<typename T2>")
+            common.inprint(self.name + "& operator-=(const ShGeneric<1, T2>&);")
+            common.inprint("\ntemplate<typename T2>")
+            common.inprint(self.name + "& operator*=(const ShGeneric<1, T2>&);")
+            common.inprint("\ntemplate<typename T2>")
+            common.inprint(self.name + "& operator/=(const ShGeneric<1, T2>&);")
+            common.inprint("\ntemplate<typename T2>")
+            common.inprint(self.name + "& operator%=(const ShGeneric<1, T2>&);")
 
     def swizzles(self):
         for num in range(1, 5):
             args = ', '.join(["int"] * num)
-            common.inprint(self.name + "<" + str(num) + ", Binding, V, true> operator()(" + args + ") const;")
-        common.inprint(self.name + "<1, Binding, V, true> operator[](int) const;")
+            common.inprint(self.name + "<" + str(num) + ", Binding, T, true> operator()(" + args + ") const;")
+        common.inprint(self.name + "<1, Binding, T, true> operator[](int) const;")
         common.inprint('')
         common.inprint("template<int N2>\n" +
-                       self.name + "<N2, Binding, V, true> swiz(int indices[]) const;")
+                       self.name + "<N2, Binding, T, true> swiz(int indices[]) const;")
         common.inprint('')
         common.inprint(self.name + " operator-() const;")
 
     def constants(self, size):
-        common.inprint("""static const ShValueType value_type = V;
+        common.inprint("""typedef T storage_type;
+typedef typename ShHostType<T>::type host_type; 
+typedef typename ShMemType<T>::type mem_type; 
 static const ShBindingType binding_type = Binding;
-static const ShSemanticType semantic_type = """ + self.enum + """;
-typedef typename ShHostType<V>::type H; 
-typedef H HostType; 
-typedef typename ShMemType<V>::type MemType; 
-static const int typesize = """ + self.sizevar(size) + ";\n")
-        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_INPUT, V> InputType;")
-        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_OUTPUT, V> OutputType;")
-        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_INOUT, V> InOutType;")
-        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_TEMP, V> TempType;")
-        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_CONST, V> ConstType;")
+static const ShSemanticType semantic_type = """ + self.enum + """;\n""")
+        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_INPUT, T> InputType;")
+        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_OUTPUT, T> OutputType;")
+        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_INOUT, T> InOutType;")
+        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_TEMP, T> TempType;")
+        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_CONST, T> ConstType;")
 
     def private_constants(self, size):
         common.inprint("private:")
@@ -242,10 +241,10 @@ class Impl:
         s = "template<"
         if size <= 0:
             s += "int N, "
-        s += "ShBindingType Binding, ShValueType V, bool Swizzled>"
+        s += "ShBindingType Binding, typename T, bool Swizzled>"
         return s
 
-    def tplcls(self, size, swiz = "Swizzled", type="V"):
+    def tplcls(self, size, swiz = "Swizzled", type="T"):
         s = self.name + "<"
         try:
             s += size
@@ -279,19 +278,19 @@ class Impl:
             s = "N"
         else:
             s = str(size)
-        self.constructor([["const ShGeneric<" + s + ", V2>&", "other"]], size, ["ShValueType V2"])
+        self.constructor([["const ShGeneric<" + s + ", T2>&", "other"]], size, ["typename T2"])
         self.constructor([["const " + self.tplcls(size) + "&", "other"]], size)
-        self.constructor([["const " + self.tplcls(size, "Swizzled", "V2") + "&", "other"]], size, ["ShValueType V2"])
+        self.constructor([["const " + self.tplcls(size, "Swizzled", "T2") + "&", "other"]], size, ["typename T2"])
         self.constructor([["const ShVariableNodePtr&", "node"],
                           ["const ShSwizzle&", "swizzle"],
                           ["bool", "neg"]], size)
-        self.constructor([["H", "data[" + self.sizevar(size) + "]"]], size)
+        self.constructor([["host_type", "data[" + self.sizevar(size) + "]"]], size)
         # self.constructor([["const ShProgram&", "prg"]], size)
         if size > 0:
-            self.constructor([["H", "s" + str(x)] for x in range(0, size)], size)
+            self.constructor([["host_type", "s" + str(x)] for x in range(0, size)], size)
         if size > 1:
-            self.constructor([["const ShGeneric<1, V" + str(x + 2) + ">&", "s" + str(x)] for x in range(0, size)], size, 
-                ["ShValueType V" + str(x) for x in range(2, size + 2)])
+            self.constructor([["const ShGeneric<1, T" + str(x + 2) + ">&", "s" + str(x)] for x in range(0, size)], size, 
+                ["typename T" + str(x) for x in range(2, size + 2)])
         
     def destructor(self, size):
         common.inprint(self.tpl(size) + "\n" +
@@ -323,11 +322,11 @@ class Impl:
             s = "N"
         else:
             s = str(size)
-        self.assign("operator=", [["const ShGeneric<" + s + ", V2>&", "other"]], size, ["ShValueType V2"])
+        self.assign("operator=", [["const ShGeneric<" + s + ", T2>&", "other"]], size, ["typename T2"])
         self.assign("operator=", [["const " + self.tplcls(size) + "&", "other"]], size)
-        self.assign("operator=", [["const " + self.tplcls(size, "Swizzled", "V2") + "&", "other"]], size, ["ShValueType V2"])
+        self.assign("operator=", [["const " + self.tplcls(size, "Swizzled", "T2") + "&", "other"]], size, ["typename T2"])
         if size == 1:
-            self.assign("operator=", [["H", "other"]], size)
+            self.assign("operator=", [["host_type", "other"]], size)
         self.assign("operator=", [["const ShProgram&", "prg"]], size)
 
     def modifying(self, size = 0):
@@ -335,23 +334,23 @@ class Impl:
             s = "N"
         else:
             s = str(size)
-        self.assign("operator+=", [["const ShGeneric<" + s + ", V2>&", "right"]], size, ["ShValueType V2"])
-        self.assign("operator-=", [["const ShGeneric<" + s + ", V2>&", "right"]], size, ["ShValueType V2"])
-        self.assign("operator*=", [["const ShGeneric<" + s + ", V2>&", "right"]], size, ["ShValueType V2"])
-        self.assign("operator/=", [["const ShGeneric<" + s + ", V2>&", "right"]], size, ["ShValueType V2"])
-        self.assign("operator%=", [["const ShGeneric<" + s + ", V2>&", "right"]], size, ["ShValueType V2"])
+        self.assign("operator+=", [["const ShGeneric<" + s + ", T2>&", "right"]], size, ["typename T2"])
+        self.assign("operator-=", [["const ShGeneric<" + s + ", T2>&", "right"]], size, ["typename T2"])
+        self.assign("operator*=", [["const ShGeneric<" + s + ", T2>&", "right"]], size, ["typename T2"])
+        self.assign("operator/=", [["const ShGeneric<" + s + ", T2>&", "right"]], size, ["typename T2"])
+        self.assign("operator%=", [["const ShGeneric<" + s + ", T2>&", "right"]], size, ["typename T2"])
 
-        self.assign("operator+=", [["H", "right"]], size)
-        self.assign("operator-=", [["H", "right"]], size)
-        self.assign("operator*=", [["H", "right"]], size)
-        self.assign("operator/=", [["H", "right"]], size)
-        self.assign("operator%=", [["H", "right"]], size)
+        self.assign("operator+=", [["host_type", "right"]], size)
+        self.assign("operator-=", [["host_type", "right"]], size)
+        self.assign("operator*=", [["host_type", "right"]], size)
+        self.assign("operator/=", [["host_type", "right"]], size)
+        self.assign("operator%=", [["host_type", "right"]], size)
         if size != 1:
-            self.assign("operator+=", [["const ShGeneric<1, V2>&", "right"]], size, ["ShValueType V2"])
-            self.assign("operator-=", [["const ShGeneric<1, V2>&", "right"]], size, ["ShValueType V2"])
-            self.assign("operator*=", [["const ShGeneric<1, V2>&", "right"]], size, ["ShValueType V2"])
-            self.assign("operator/=", [["const ShGeneric<1, V2>&", "right"]], size, ["ShValueType V2"])
-            self.assign("operator%=", [["const ShGeneric<1, V2>&", "right"]], size, ["ShValueType V2"])
+            self.assign("operator+=", [["const ShGeneric<1, T2>&", "right"]], size, ["typename T2"])
+            self.assign("operator-=", [["const ShGeneric<1, T2>&", "right"]], size, ["typename T2"])
+            self.assign("operator*=", [["const ShGeneric<1, T2>&", "right"]], size, ["typename T2"])
+            self.assign("operator/=", [["const ShGeneric<1, T2>&", "right"]], size, ["typename T2"])
+            self.assign("operator%=", [["const ShGeneric<1, T2>&", "right"]], size, ["typename T2"])
             
     def swizzle(self, num, size, op = "()"):
         args = ["s" + str(i) for i in range(0, num)]

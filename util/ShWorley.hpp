@@ -81,45 +81,45 @@ struct _IntPow<N, 1> {
 // A Generator point represents the position of a generator relative
 // to the cell origin of a lookup position. 
 //
-template<int D, ShValueType V>
+template<int D, typename T>
 struct Generator {
   Generator() {}
-  ShAttrib<D, SH_TEMP, V> pos; // position 
-  ShAttrib<D, SH_TEMP, V> offset; // offset of the cell relative to lookup point's cell
-  ShAttrib<D, SH_TEMP, V> cell; // integer cell (this should actually be typed T = int, but not possible yet) 
+  ShAttrib<D, SH_TEMP, T> pos; // position 
+  ShAttrib<D, SH_TEMP, T> offset; // offset of the cell relative to lookup point's cell
+  ShAttrib<D, SH_TEMP, T> cell; // integer cell (this should actually be typed T = int, but not possible yet) 
 };
 
 // Generator Factory 
 // A Point Generator must implement a function that 
 // sets a Generator array with P candidate generator points. 
-template<int P, int D, ShValueType V>
+template<int P, int D, typename T>
 struct GeneratorFactory {
   static const int NUM_POINTS = P;
   virtual ~GeneratorFactory() {}
-  virtual void operator()(const ShGeneric<D, V> &p, Generator<D, V> result[]) const = 0;
+  virtual void operator()(const ShGeneric<D, T> &p, Generator<D, T> result[]) const = 0;
 };
 
 // The foundation for the regular grid-based generators
-template<int D, ShValueType V>
-struct GridGenFactory: public GeneratorFactory<_IntPow<3, D>::value, D, V> { 
-  void operator()(const ShGeneric<D, V> &p, Generator<D, V> result[]) const;
+template<int D, typename T>
+struct GridGenFactory: public GeneratorFactory<_IntPow<3, D>::value, D, T> { 
+  void operator()(const ShGeneric<D, T> &p, Generator<D, T> result[]) const;
 
   private:
     // given a Generator that has its cell and offset filled in, this function
     // generates the actual pos.
-    virtual void makePos(Generator<D, V> &g) const = 0; 
+    virtual void makePos(Generator<D, T> &g) const = 0; 
 };
 
 // The default generator - uses a uniform integer grid with one
 // generator point in each grid cell.
 // If PointType is d-dimensional, it generates 3^d points from 
 // p's cell and all adjacent grid cells.
-template<int D, ShValueType V>
-struct DefaultGenFactory: public GridGenFactory<D, V> { 
+template<int D, typename T>
+struct DefaultGenFactory: public GridGenFactory<D, T> { 
   DefaultGenFactory(bool useTexture): m_useTexture(useTexture) {}
 
   private:
-    void makePos(Generator<D, V> &g) const;
+    void makePos(Generator<D, T> &g) const;
     bool m_useTexture;
 };
 
@@ -127,10 +127,10 @@ struct DefaultGenFactory: public GridGenFactory<D, V> {
 // row is offset by 0.5 from the previous one, giving a hexagonal 
 // structure with less adjacent cells than the grid lookup)
 /*
-template<ShValueType V>
+template<typename T>
 struct HexGenFactory {
   HexGenFactory(bool useTexture): m_useTexture(useTexture) {}
-  void operator()(const ShGeneric<D, V> &p, Generator<D, V> result[]) const;
+  void operator()(const ShGeneric<D, T> &p, Generator<D, T> result[]) const;
 
   private:
     bool m_useTexture;
@@ -140,23 +140,23 @@ struct HexGenFactory {
 
 // a null point generator - just makes a non-jittered grid
 // of generators (good for debugging, or certain kinds of patterns...)
-template<int D, ShValueType V>
-struct NullGenFactory: public GridGenFactory<D, V> { 
+template<int D, typename T>
+struct NullGenFactory: public GridGenFactory<D, T> { 
   private:
-    void makePos(Generator<D, V> &g) const;
+    void makePos(Generator<D, T> &g) const;
 };
 
 // An animating point generator - uses same uniform integer grid
 // method as the default, except that it linearly interpolates
 // between pairs of generator point sets, moving through a sequence
 // of point sets as time increases. 
-template<int D, ShValueType V>
-struct LerpGenFactory: GridGenFactory<D, V> {
-  LerpGenFactory(const ShGeneric<1, V> &time, bool useTexture);
+template<int D, typename T>
+struct LerpGenFactory: GridGenFactory<D, T> {
+  LerpGenFactory(const ShGeneric<1, T> &time, bool useTexture);
 
   private:
-    void makePos(Generator<D, V> &g) const;
-    const ShGeneric<1, V> &m_time;
+    void makePos(Generator<D, T> &g) const;
+    const ShGeneric<1, T> &m_time;
     bool m_useTexture;
 };
 
@@ -164,84 +164,78 @@ struct LerpGenFactory: GridGenFactory<D, V> {
 // This takes a Generator and attaches N properties to it.
 // The first property in the result is used to sort the generator points 
 // (and so should probably be a distance metric).
-template<int N, int D, ShValueType V>
+template<int N, int D, typename T>
 struct PropertyFactory {
     static const int NUM_PROPS = N;
     static const int DIM = D;
-    static const ShValueType PropType = V; 
+    typedef T PropType; 
 
     virtual ~PropertyFactory() {} 
-    virtual ShGeneric<N, V> operator()(const ShGeneric<D, V> &p, const Generator<D, V> &g) const = 0; 
+    virtual ShGeneric<N, T> operator()(const ShGeneric<D, T> &p, const Generator<D, T> &g) const = 0; 
 };
 
 // when ShProgram objects can be called like functions, this will 
 // no longer be necessary as it is analogous to the Algebra combine operator.
-template<int N, int D, ShValueType V, typename P1, typename P2>
+template<int N, int D, typename T, typename P1, typename P2>
 struct CombinedPropFactory: 
-public PropertyFactory<N, D, V> {
+public PropertyFactory<N, D, T> {
     CombinedPropFactory(const P1 *propFactory1, 
                                 const P2 *propFactory2);
 
-    ShGeneric<N, V> operator()(const ShGeneric<D, V> &p, const Generator<D, V> &g) const; 
+    ShGeneric<N, T> operator()(const ShGeneric<D, T> &p, const Generator<D, T> &g) const; 
 
   private:
     const P1* m_propFactory1;
     const P2* m_propFactory2;
 };
 
-#ifndef WIN32
-// MSVC++ .NET does not recognize this as being the same as its implementation.
-template<typename P1, typename P2>
-PropertyFactory<P1::NUM_PROPS + P2::NUM_PROPS, P1::DIM, P1::PropType>*
-combine(const P1 *propFactory1, const P2 *propFactory2);
-#endif
 
 // standard distance based property factories 
 // Re-write later to take function pointer (or ShProgram object)
 // to a distance function.
-template<int D, ShValueType V>
-struct DistSqPropFactory: public PropertyFactory<1, D, V> {
-  ShGeneric<1, V> operator()(const ShGeneric<D, V> &p, const Generator<D, V> &g) const; 
+template<int D, typename T>
+struct DistSqPropFactory: public PropertyFactory<1, D, T> {
+  ShGeneric<1, T> operator()(const ShGeneric<D, T> &p, const Generator<D, T> &g) const; 
 };
 
-template<int D, ShValueType V>
-struct Dist_1PropFactory: public PropertyFactory<1, D, V> {
-  ShGeneric<1, V> operator()(const ShGeneric<D, V> &p, const Generator<D, V> &g) const; 
+template<int D, typename T>
+struct Dist_1PropFactory: public PropertyFactory<1, D, T> {
+  ShGeneric<1, T> operator()(const ShGeneric<D, T> &p, const Generator<D, T> &g) const; 
 };
 
-template<int D, ShValueType V>
-struct Dist_InfPropFactory: public PropertyFactory<1, D, V> {
-  ShGeneric<1, V> operator()(const ShGeneric<D, V> &p, const Generator<D, V> &g) const; 
+template<int D, typename T>
+struct Dist_InfPropFactory: public PropertyFactory<1, D, T> {
+  ShGeneric<1, T> operator()(const ShGeneric<D, T> &p, const Generator<D, T> &g) const; 
 };
 
-template<int D, ShValueType V>
-struct DistSqGradientPropFactory: public PropertyFactory<D + 1, D, V> {
-  ShGeneric<D + 1, V> operator()(const ShGeneric<D, V> &p, const Generator<D, V> &g) const; 
+template<int D, typename T>
+struct DistSqGradientPropFactory: public PropertyFactory<D + 1, D, T> {
+  ShGeneric<D + 1, T> operator()(const ShGeneric<D, T> &p, const Generator<D, T> &g) const; 
 };
 
-template<int D, ShValueType V>
-struct Dist_1GradientPropFactory: public PropertyFactory<D + 1, D, V> {
-  ShGeneric<D + 1, V> operator()(const ShGeneric<D, V> &p, const Generator<D, V> &g) const; 
+template<int D, typename T>
+struct Dist_1GradientPropFactory: public PropertyFactory<D + 1, D, T> {
+  ShGeneric<D + 1, T> operator()(const ShGeneric<D, T> &p, const Generator<D, T> &g) const; 
 };
 
-template<int D, ShValueType V>
-struct Dist_InfGradientPropFactory: public PropertyFactory<D + 1, D, V> {
-  ShGeneric<D + 1, V> operator()(const ShGeneric<D, V> &p, const Generator<D, V> &g) const; 
+template<int D, typename T>
+struct Dist_InfGradientPropFactory: public PropertyFactory<D + 1, D, T> {
+  ShGeneric<D + 1, T> operator()(const ShGeneric<D, T> &p, const Generator<D, T> &g) const; 
 };
 
-template<int N, int D, ShValueType V>
-struct CellnoisePropFactory: public PropertyFactory<N, D, V> {
+template<int N, int D, typename T>
+struct CellnoisePropFactory: public PropertyFactory<N, D, T> {
   CellnoisePropFactory(bool useTexture): m_useTexture(useTexture) {}
-  ShGeneric<N, V> operator()(const ShGeneric<D, V> &p, const Generator<D, V> &g) const; 
+  ShGeneric<N, T> operator()(const ShGeneric<D, T> &p, const Generator<D, T> &g) const; 
 
   private:
     bool m_useTexture;
 };
 
-template<typename TexType, ShValueType V>
-struct Tex2DPropFactory: public PropertyFactory<TexType::typesize, 2, V> {
-  Tex2DPropFactory(const ShBaseTexture2D<TexType> &tex, const ShGeneric<1, V> &scale);
-  ShGeneric<TexType::typesize, V> operator()(const ShGeneric<2, V> &p, const Generator<2, V> &g) const
+template<typename TexType, typename T>
+struct Tex2DPropFactory: public PropertyFactory<TexType::typesize, 2, T> {
+  Tex2DPropFactory(const ShBaseTexture2D<TexType> &tex, const ShGeneric<1, T> &scale);
+  ShGeneric<TexType::typesize, T> operator()(const ShGeneric<2, T> &p, const Generator<2, T> &g) const
   {
     // Moved here from WorleyImpl.hpp because MSVC gets confused otherwise
     return m_tex(frac(g.cell * invScale * m_scale)) * ShConstAttrib1f(1.0f);
@@ -249,44 +243,50 @@ struct Tex2DPropFactory: public PropertyFactory<TexType::typesize, 2, V> {
 
   private:
     const ShBaseTexture2D<TexType> &m_tex;
-    const ShGeneric<1, V> &m_scale;
+    const ShGeneric<1, T> &m_scale;
     ShConstAttrib2f invScale;
     // TODO remove invScale and restrict to RECT textures later 
 };
 
+#ifndef WIN32
+// MSVC++ .NET does not recognize these as being the same as their implementation.
+template<typename P1, typename P2>
+PropertyFactory<P1::NUM_PROPS + P2::NUM_PROPS, P1::DIM, typename P1::PropType>*
+combine(const P1 *propFactory1, const P2 *propFactory2);
 
 /** \brief Worley texture generator.
  * This uses the DefaultGeneratorFactory and DistSqPropFactory 
  * TODO allow arbitrary distance function
  * @{
  */
-template<int K, int D, ShValueType V>
-ShGeneric<K, V> worley(const ShGeneric<D, V> &p, bool useTexture = true); 
+template<int K, int D, typename T>
+ShGeneric<K, T> worley(const ShGeneric<D, T> &p, bool useTexture = true); 
 //@}
 
 /** \brief Worley texture generator.
  * This uses a GeneratorFactory and PropertyFactory of your choice.
  */
-template<int K, int L, int P, int D, ShValueType V>
-void worley(ShGeneric<K, V> result[], const ShGeneric<D, V> &p, 
-    const GeneratorFactory<P, D, V> *genFactory,
-    const PropertyFactory<L, D, V> *propFactory);
+template<int K, int L, int P, int D, typename T>
+void worley(ShGeneric<K, T> result[], const ShGeneric<D, T> &p, 
+    const GeneratorFactory<P, D, T> *genFactory,
+    const PropertyFactory<L, D, T> *propFactory);
 
 /** Makes a shader that takes 
  *  IN(1) ShTexCoord<D,T> texcoord; // texture lookup coordinates
  *
  * TODO make Output a struct of some kind when Sh supports structs
- *  OUT(0) ShAttrib<K, V> result[N]; // properties of k-nearest neighbours 
+ *  OUT(0) ShAttrib<K, T> result[N]; // properties of k-nearest neighbours 
  * @{
  */
-template<int K, int D, ShValueType V>
+template<int K, int D, typename T>
 ShProgram shWorley(bool useTexture);
 
-template<int K, int N, int P, int D, ShValueType V>
-ShProgram shWorley(const GeneratorFactory<P, D, V> *genFactory,
-    const PropertyFactory<N, D, V> *propFactory);
+template<int K, int N, int P, int D, typename T>
+ShProgram shWorley(const GeneratorFactory<P, D, T> *genFactory,
+    const PropertyFactory<N, D, T> *propFactory);
 //@}
 
+#endif // ifndef WIN32
 
 } // namespace ShUtil
 

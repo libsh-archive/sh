@@ -161,12 +161,12 @@ ArbCode::ArbCode(const ShProgramNodeCPtr& shader, const std::string& unit,
   m_convertMap[SH_USHORT] = halfSupport ? SH_HALF: SH_FLOAT;
   m_convertMap[SH_UBYTE] = halfSupport ? SH_HALF: SH_FLOAT;
 
-  m_convertMap[SH_FRAC_INT] = SH_FLOAT;
-  m_convertMap[SH_FRAC_SHORT] = SH_FLOAT;
-  m_convertMap[SH_FRAC_BYTE] = halfSupport ? SH_HALF : SH_FLOAT;
-  m_convertMap[SH_FRAC_UINT] = SH_FLOAT;
-  m_convertMap[SH_FRAC_USHORT] = SH_FLOAT;
-  m_convertMap[SH_FRAC_UBYTE] = halfSupport ? SH_HALF : SH_FLOAT;
+  m_convertMap[SH_FINT] = SH_FLOAT;
+  m_convertMap[SH_FSHORT] = SH_FLOAT;
+  m_convertMap[SH_FBYTE] = halfSupport ? SH_HALF : SH_FLOAT;
+  m_convertMap[SH_FUINT] = SH_FLOAT;
+  m_convertMap[SH_FUSHORT] = SH_FLOAT;
+  m_convertMap[SH_FUBYTE] = halfSupport ? SH_HALF : SH_FLOAT;
 }
 
 ArbCode::~ArbCode()
@@ -361,8 +361,8 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
   // (although it probably won't matter with all the other work we're doing...
   // cast to float 
   float values[4];
-  ShPointer<ShDataVariant<SH_FLOAT, SH_HOST> > floatVariant = 
-    new ShDataVariant<SH_FLOAT, SH_HOST>(uniform->size()); 
+  ShPointer<ShDataVariant<float, SH_HOST> > floatVariant = 
+    new ShDataVariant<float, SH_HOST>(uniform->size()); 
   floatVariant->set(uniformVariant);
 
   for (i = 0; i < uniform->size(); i++) {
@@ -528,6 +528,7 @@ std::ostream& ArbCode::print(std::ostream& out)
   for (RegList::const_iterator I = m_reglist.begin();
        I != m_reglist.end(); ++I) {
     if ((*I)->type == SH_ARB_REG_TEMP) continue;
+    if ((*I)->type == SH_ARB_REG_HALF_TEMP) continue;
     if ((*I)->type == SH_ARB_REG_TEXTURE) continue;
     out << "  ";
     (*I)->printDecl(out);
@@ -539,6 +540,7 @@ std::ostream& ArbCode::print(std::ostream& out)
       if (i > 0) out << ", ";
       out << ArbReg(SH_ARB_REG_TEMP, i);
     }
+    if(m_numTemps > 0 && m_numHalfTemps > 0) out << ", ";
     for (int i = 0; i < m_numHalfTemps; i++) {
       if (i > 0) out << ", ";
       out << ArbReg(SH_ARB_REG_HALF_TEMP, i);
@@ -986,8 +988,8 @@ void ArbCode::allocConsts(const ArbLimits& limits)
 
     // @todo type don't really need to copy here, or shold use the
     // ArbReg's array...but whatever
-    ShPointer<ShDataVariant<SH_FLOAT, SH_HOST> > variant =
-        new ShDataVariant<SH_FLOAT, SH_HOST>(node->size());
+    ShPointer<ShDataVariant<float, SH_HOST> > variant =
+        new ShDataVariant<float, SH_HOST>(node->size());
     variant->set(node->getVariant());
 
     // TODO: improve efficiency

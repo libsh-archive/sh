@@ -33,12 +33,12 @@
 
 namespace SH {
 
-template<int M, int N, ShValueType V> 
+template<int M, int N, typename T> 
 inline
-ShGeneric<M, V> cast(const ShGeneric<N, V>& a)
+ShGeneric<M, T> cast(const ShGeneric<N, T>& a)
 {
   int copySize = std::min(M, N);
-  ShAttrib<M, SH_TEMP, V> result;
+  ShAttrib<M, SH_TEMP, T> result;
 
   int* indices = new int[copySize];
   for(int i = 0; i < copySize; ++i) indices[i] = i;
@@ -55,14 +55,14 @@ ShGeneric<M, V> cast(const ShGeneric<N, V>& a)
 
 template<int M> 
 inline
-ShGeneric<M, SH_DOUBLE> cast(double a)
+ShGeneric<M, double> cast(double a)
 {
-  return cast<M>(ShAttrib<1, SH_CONST, SH_DOUBLE>(a));
+  return cast<M>(ShAttrib<1, SH_CONST, double>(a));
 }
 
-template<int M, int N, ShValueType V> 
+template<int M, int N, typename T> 
 inline
-ShGeneric<M, V> fillcast(const ShGeneric<N, V>& a)
+ShGeneric<M, T> fillcast(const ShGeneric<N, T>& a)
 {
   if( M <= N ) return cast<M>(a);
   int indices[M];
@@ -72,33 +72,33 @@ ShGeneric<M, V> fillcast(const ShGeneric<N, V>& a)
 
 template<int M> 
 inline
-ShGeneric<M, SH_DOUBLE> fillcast(double a)
+ShGeneric<M, double> fillcast(double a)
 {
-  return fillcast<M>(ShAttrib<1, SH_CONST, SH_DOUBLE>(a));
+  return fillcast<M>(ShAttrib<1, SH_CONST, double>(a));
 }
 
-template<int M, int N, ShValueType V1, ShValueType V2> 
+template<int M, int N, typename T1, typename T2> 
 inline
-ShGeneric<M+N, CV1V2> join(const ShGeneric<M, V1>& a, const ShGeneric<N, V2>& b)
+ShGeneric<M+N, CT1T2> join(const ShGeneric<M, T1>& a, const ShGeneric<N, T2>& b)
 {
   int indices[M+N];
   for(int i = 0; i < M+N; ++i) indices[i] = i; 
-  ShAttrib<M+N, SH_TEMP, CV1V2> result;
+  ShAttrib<M+N, SH_TEMP, CT1T2> result;
   result.template swiz<M>(indices) = a;
   result.template swiz<N>(indices + M) = b;
   return result;
 }
 
-template<int N, ShValueType V>
+template<int N, typename T>
 inline
-void discard(const ShGeneric<N, V>& c)
+void discard(const ShGeneric<N, T>& c)
 {
   shKIL(c);
 }
 
-template<int N, ShValueType V>
+template<int N, typename T>
 inline
-void kill(const ShGeneric<N, V>& c)
+void kill(const ShGeneric<N, T>& c)
 {
   discard(c);
 }

@@ -1,3 +1,29 @@
+// Sh: A GPU metaprogramming language.
+//
+// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
+// Project administrator: Michael D. McCool
+// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
+//          Michael D. McCool
+// 
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+// 
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+// 
+// 1. The origin of this software must not be misrepresented; you must
+// not claim that you wrote the original software. If you use this
+// software in a product, an acknowledgment in the product documentation
+// would be appreciated but is not required.
+// 
+// 2. Altered source versions must be plainly marked as such, and must
+// not be misrepresented as being the original software.
+// 
+// 3. This notice may not be removed or altered from any source
+// distribution.
+//////////////////////////////////////////////////////////////////////////////
 #ifndef SHLIBINTERVAL_HPP
 #define SHLIBINTERVAL_HPP
 
@@ -5,6 +31,8 @@
 #include "ShInterval.hpp"
 #include "ShLib.hpp"
 
+#define SH_REGULARTYPE(T) typename ShStorageTypeInfo<T>::RegularType
+#define SH_IA_TYPE(T) typename ShStorageTypeInfo<T>::IntervalType
 namespace SH {
 
 /** \defgroup lib_interval Interval Arithmetic  
@@ -15,34 +43,21 @@ namespace SH {
 
 /** lower bound 
  */
-template<int N, ShValueType V>
-ShGeneric<N, V> lo(const ShGeneric<N, ShIntervalValueType<V>::type>& var);
+template<int N, typename T>
+ShGeneric<N, SH_REGULARTYPE(T)> lo(const ShGeneric<N, T>& var);
 
  /** upper bound
  */
-template<int N, ShValueType V>
-ShGeneric<N, V> hi(const ShGeneric<N, ShIntervalValueType<V>::type>& var);
-
-/** Sets lower bound with a regular tuple and returns updated var */ 
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, ShIntervalValueType<V1>::type>& 
-setlo(ShGeneric<N, ShIntervalValueType<V1>::type>& var, const ShGeneric<N, V2> &lo);
-
-/** Sets upper bound with a regular tuple and returns updated var */ 
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, ShIntervalValueType<V1>::type>& 
-sethi(ShGeneric<N, ShIntervalValueType<V1>::type>& var, const ShGeneric<N, V2> &hi);
-
-/** Creates an interval from two tuples 
- */
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, ShIntervalValueType<CV1V2>::type> 
-makeInterval(const ShGeneric<N, V1>& lo, const ShGeneric<N, V2>& hi);
+template<int N, typename T>
+ShGeneric<N, SH_REGULARTYPE(T)> hi(const ShGeneric<N, T>& var);
 
 /*@}*/
 
 }
 
 #include "ShLibIntervalImpl.hpp"
+
+#undef SH_REGULARTYPE
+#undef SH_IA_TYPE
 
 #endif

@@ -100,9 +100,6 @@ void sh_cc_backend_lookupi(const void *texture, IndexType *src, MemoryType *dest
           + TexWidth * index;
 
   int start = index * TexSize; 
-  std::cout << TexWidth << " " << TexHeight << " " << TexDepth << std::endl;
-  for(int i = 0; i < TexDims; ++i) std::cout << src[i] << std::endl;
-  std::cout << "Looking up start=" << start << std::endl;
   for(int i = 0; i < TexSize; ++i) {
     dest[i] = DestClamp::clamp(data[start + i]); 
   }

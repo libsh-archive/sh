@@ -41,7 +41,6 @@ namespace SH {
 template<typename T>
 class ShChannel : public ShMetaForwarder {
 public:
-  static const ShValueType ValueType = T::value_type;
   /// Construct a channel without any associated memory.
   ShChannel();
   /// Construct a channel with \a count elements in \a memory
@@ -62,8 +61,8 @@ public:
   T operator()() const;
 
   /// Indexed lookup from the stream
-  template<ShValueType V>
-  T operator[](const ShGeneric<1, V>& index) const;
+  template<typename T2>
+  T operator[](const ShGeneric<1, T2>& index) const;
 
   /// Return the node internally wrapped by this channel object
   ShChannelNodePtr node();

@@ -111,15 +111,15 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node)
       case SH_DOUBLE:
       case SH_FLOAT:        
       case SH_HALF:
-      case SH_FRAC_INT:
-      case SH_FRAC_SHORT:
-      case SH_FRAC_UINT:
-      case SH_FRAC_USHORT:
+      case SH_FINT:
+      case SH_FSHORT:
+      case SH_FUINT:
+      case SH_FUSHORT:
         formats = shortformats;
         break;
 
-     case SH_FRAC_BYTE:
-     case SH_FRAC_UBYTE:
+     case SH_FBYTE:
+     case SH_FUBYTE:
         formats = byteformats;
         break;
 
@@ -158,15 +158,15 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node)
         else if (float_ati) formats = halfformats_ati;
         break;
 
-      case SH_FRAC_INT:
-      case SH_FRAC_SHORT:
-      case SH_FRAC_UINT:
-      case SH_FRAC_USHORT:
+      case SH_FINT:
+      case SH_FSHORT:
+      case SH_FUINT:
+      case SH_FUSHORT:
         formats = shortformats;
         break;
 
-     case SH_FRAC_BYTE:
-     case SH_FRAC_UBYTE:
+     case SH_FBYTE:
+     case SH_FUBYTE:
         formats = byteformats;
         break;
      default:
@@ -206,8 +206,8 @@ GLenum shGlType(ShValueType valueType, ShValueType &convertedType) {
   convertedType = SH_VALUETYPE_END;
   GLenum result = GL_NONE;
   switch(valueType) {
-    case SH_INTERVAL_DOUBLE:
-    case SH_INTERVAL_FLOAT:
+    case SH_I_DOUBLE:
+    case SH_I_FLOAT:
       SH_DEBUG_ERROR("Interval types not supported in memory");
       result = GL_FLOAT;
       break;
@@ -224,12 +224,12 @@ GLenum shGlType(ShValueType valueType, ShValueType &convertedType) {
     case SH_FLOAT:        result = GL_FLOAT; break;
 
 
-    case SH_FRAC_INT:     result = GL_INT; break;
-    case SH_FRAC_SHORT:   result = GL_SHORT; break;
-    case SH_FRAC_BYTE:    result = GL_BYTE; break;
-    case SH_FRAC_UINT:    result = GL_UNSIGNED_INT; break;
-    case SH_FRAC_USHORT:  result = GL_UNSIGNED_SHORT; break;
-    case SH_FRAC_UBYTE:   result = GL_UNSIGNED_BYTE; break;
+    case SH_FINT:     result = GL_INT; break;
+    case SH_FSHORT:   result = GL_SHORT; break;
+    case SH_FBYTE:    result = GL_BYTE; break;
+    case SH_FUINT:    result = GL_UNSIGNED_INT; break;
+    case SH_FUSHORT:  result = GL_UNSIGNED_SHORT; break;
+    case SH_FUBYTE:   result = GL_UNSIGNED_BYTE; break;
 
     default:
       SH_DEBUG_ERROR("Unsupported value type to glReadPixel type conversion"); 

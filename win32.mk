@@ -4,7 +4,7 @@ BUILD_RELEASE=1
 BUILD_DEBUG=1
 
 # install location
-SH_INSTALLDIR = \home\b8chan\dev\install
+SH_INSTALLDIR = \dev\install
 
 # OpenGL
 OPENGL_DIR = \dev\opengl

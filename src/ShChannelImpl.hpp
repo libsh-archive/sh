@@ -108,8 +108,8 @@ T ShChannel<T>::operator()() const
 }
 
 template<typename T>
-template<ShValueType V>
-T ShChannel<T>::operator[](const ShGeneric<1, V>& index) const
+template<typename T2>
+T ShChannel<T>::operator[](const ShGeneric<1, T2>& index) const
 {
   // TODO: shError() maybe instead.
   if (!ShContext::current()->parsing()) shError(ShScopeException("Indexed stream fetch outside program"));

@@ -27,8 +27,8 @@ class Impl(semantic.Impl):
         if len(extraTplArg) > 0: common.inprint("template<" + ", ".join(extraTplArg) + ">")
         common.inprint("inline")
         common.inprint(self.tplcls(size) + "::" + self.name + "(" + ', '.join([' '.join(x) for x in args]) + ")")
-        common.inprint("  : ShGeneric<" + self.sizevar(size) + ", V>" +
-                       "(new ShVariableNode(Binding, " + self.sizevar(size) + ",V))")
+        common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
+                       "(new ShVariableNode(Binding, " + self.sizevar(size) + ", ShStorageTypeInfo<T>::value_type))")
         common.inprint("{")
         common.indent()
         common.inprint("shASN(*this, " + other + ");")
@@ -52,15 +52,15 @@ class Impl(semantic.Impl):
         if len(extraTplArg) > 0: common.inprint("template<" + ", ".join(extraTplArg) + ">")
         common.inprint("inline")
         common.inprint(self.tplcls(size) + "::" + self.name + "(" + ', '.join([' '.join(x) for x in args]) + ")")
-        common.inprint("  : ShGeneric<" + self.sizevar(size) + ", V>" +
-                       "(new ShVariableNode(Binding, " + self.sizevar(size) + ",V))")
+        common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
+                       "(new ShVariableNode(Binding, " + self.sizevar(size) + ", ShStorageTypeInfo<T>::value_type))")
         common.inprint("{")
         common.indent()
         
         common.inprint("if (Binding == SH_CONST) {")
         common.indent()
         for i in range(0, size):
-            if args[0][0] == "H":
+            if args[0][0] == "host_type":
                 common.inprint("setValue(" + str(i) + ", s" + str(i) + ");")
             else:
                 common.inprint("SH_DEBUG_ASSERT(s" + str(i) + ".hasValues());")
@@ -70,7 +70,7 @@ class Impl(semantic.Impl):
         common.indent()
         for i in range(0, size):
             if args[0][0] == "T":
-                val = "ShAttrib<1, SH_CONST, V>(s" + str(i) + ")"
+                val = "ShAttrib<1, SH_CONST, T>(s" + str(i) + ")"
             else:
                 val = "s" + str(i)
             common.inprint("(*this)[" + str(i) + "] = " + val + ";")
@@ -84,18 +84,18 @@ class Impl(semantic.Impl):
         common.inprint(self.tpl(size))
         common.inprint("inline")
         common.inprint(self.tplcls(size) + "::" + self.name + "()")
-        common.inprint("  : ShGeneric<" + self.sizevar(size) + ", V>" +
-                       "(new ShVariableNode(Binding, " + self.sizevar(size) + ",V))")
+        common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
+                       "(new ShVariableNode(Binding, " + self.sizevar(size) + ", ShStorageTypeInfo<T>::value_type))")
         common.inprint("{")
         common.inprint("}")
         common.inprint("")
 
-        self.copycons([["const ShGeneric<" + self.sizevar(size) + ", V2>&", "other"]], size, ["ShValueType V2"])
+        self.copycons([["const ShGeneric<" + self.sizevar(size) + ", T2>&", "other"]], size, ["typename T2"])
         self.copycons([["const " + self.tplcls(size) + "&","other"]], size)
-        self.copycons([["const " + self.tplcls(size, "Swizzled", "V2") + "&","other"]], size, ["ShValueType V2"])
+        self.copycons([["const " + self.tplcls(size, "Swizzled", "T2") + "&","other"]], size, ["typename T2"])
 #         common.inprint(self.tpl(size))
 #         common.inprint(self.tplcls(size) + "::" + self.name + "(const ShProgram& prg)")
-#         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", V>" +
+#         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
 #                        "(new ShVariableNode(Binding, " + self.sizevar(size) + "))")
 #         common.inprint("{")
 #         common.inprint("  *this = prg;")
@@ -106,7 +106,7 @@ class Impl(semantic.Impl):
         common.inprint("inline")
         common.inprint(self.tplcls(size) + "::" + self.name + "(const ShVariableNodePtr& node,")
         common.inprint("  const ShSwizzle& swizzle, bool neg)")
-        common.inprint("  : ShGeneric<" + self.sizevar(size) + ", V>" + "(node, swizzle, neg)")
+        common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" + "(node, swizzle, neg)")
         common.inprint("{")
         common.indent()
         common.deindent()
@@ -115,9 +115,9 @@ class Impl(semantic.Impl):
 
         common.inprint(self.tpl(size))
         common.inprint("inline")
-        common.inprint(self.tplcls(size) + "::" + self.name + "(H data[" + self.sizevar(size) + "])")
-        common.inprint("  : ShGeneric<" + self.sizevar(size) + ", V>" +
-                       "(new ShVariableNode(Binding, " + self.sizevar(size) + ",V))")
+        common.inprint(self.tplcls(size) + "::" + self.name + "(host_type data[" + self.sizevar(size) + "])")
+        common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
+                       "(new ShVariableNode(Binding, " + self.sizevar(size) + ", ShStorageTypeInfo<T>::value_type))")
         common.inprint("{")
         common.indent()
         common.inprint("if (Binding == SH_CONST) {")
@@ -126,7 +126,7 @@ class Impl(semantic.Impl):
         common.deindent()
         common.inprint("} else {")
         common.indent()
-        common.inprint("(*this) = ShAttrib<" + self.sizevar(size) + ", SH_CONST, V>(data);")
+        common.inprint("(*this) = ShAttrib<" + self.sizevar(size) + ", SH_CONST, T>(data);")
         common.deindent()
         common.inprint("}")
         common.deindent()
@@ -134,9 +134,9 @@ class Impl(semantic.Impl):
         common.inprint("")
 
         if size > 0:
-            self.scalarcons([["H", "s" + str(x)] for x in range(0, size)], size)
+            self.scalarcons([["host_type", "s" + str(x)] for x in range(0, size)], size)
         if size > 1:
-            self.scalarcons([["const ShGeneric<1, V" + str(x + 2) + ">&", "s" + str(x)] for x in range(0, size)], size, ["ShValueType V" + str(x + 2) for x in range(0, size)])
+            self.scalarcons([["const ShGeneric<1, T" + str(x + 2) + ">&", "s" + str(x)] for x in range(0, size)], size, ["typename T" + str(x + 2) for x in range(0, size)])
 
 #     def assign(self, fun, args, size):
 #         common.inprint(self.tpl(size) + "\n" +

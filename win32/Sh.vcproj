@@ -130,8 +130,7 @@
 	<Files>
 		<Filter
 			Name="Source Files"
-			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
+			Filter="">
 			<File
 				RelativePath="..\src\ShAlgebra.cpp">
 			</File>
@@ -244,6 +243,9 @@
 				RelativePath="..\src\ShStatement.cpp">
 			</File>
 			<File
+				RelativePath="..\src\ShStorageType.cpp">
+			</File>
+			<File
 				RelativePath="..\src\ShStream.cpp">
 			</File>
 			<File
@@ -300,8 +302,7 @@
 		</Filter>
 		<Filter
 			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			Filter="">
 			<File
 				RelativePath="..\src\sh.hpp">
 			</File>
@@ -408,6 +409,12 @@
 				RelativePath="..\src\ShFixedManipulator.hpp">
 			</File>
 			<File
+				RelativePath="..\src\ShFraction.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShFractionImpl.hpp">
+			</File>
+			<File
 				RelativePath="..\src\ShGeneric.hpp">
 			</File>
 			<File
@@ -418,6 +425,15 @@
 			</File>
 			<File
 				RelativePath="..\src\ShGraphImpl.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShHalf.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShHalfImpl.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShHashMap.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShImage.hpp">
@@ -616,6 +632,12 @@
 			</File>
 			<File
 				RelativePath="..\src\ShStatement.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShStorageType.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShStorageTypeImpl.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShStream.hpp">

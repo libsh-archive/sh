@@ -28,6 +28,7 @@
 #define SHCASTMANAGER_HPP
 
 #include <map>
+#include "ShHashMap.hpp"
 #include "ShRefCount.hpp"
 #include "ShGraph.hpp"
 #include "ShTypeInfo.hpp"
@@ -113,9 +114,8 @@ ShCastMgrGraph: public ShGraph<ShCastMgrGraphType>
     void addEdge(ShCastMgrEdge* edge); 
 
   protected:
-    typedef ShCastMgrVertex* VertexArray[SH_VALUETYPE_END][SH_DATATYPE_END];
+    typedef ShPairHashMap<ShValueType, ShDataType, ShCastMgrVertex*> VertexArray;
     VertexArray m_vert;
-    
 };
 
 class 
@@ -171,10 +171,10 @@ ShCastManager {
     // add cached versions of cast order for different casts between indices
     // FirstCastMap[dest][destdt][src][srcdt] holds the first caster to use for 
     // getting from src to dest (or 0 if no cast path exists)
-    typedef const ShVariantCast* FirstCastMap[SH_VALUETYPE_END][SH_DATATYPE_END]
-                                             [SH_VALUETYPE_END][SH_DATATYPE_END]; 
+    typedef ShPairPairHashMap<ShValueType, ShDataType, ShValueType, ShDataType, 
+              const ShVariantCast*> FirstCastMap;
 
-    typedef int CastDistMap[SH_VALUETYPE_END][SH_VALUETYPE_END]; 
+    typedef ShPairHashMap<ShValueType, ShValueType, int> CastDistMap;
 
     // shortest paths using any kind of cast
     FirstCastMap m_castStep;
