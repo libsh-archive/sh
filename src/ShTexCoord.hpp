@@ -121,6 +121,8 @@ public:
   
   template<int N2>
   ShTexCoord<N2, Binding, T, true> swiz(int indices[]) const;
+  template<int N2>
+  ShTexCoord<N2, Binding, T, true> swiz(const ShSwizzle& s) const;
   
   ShTexCoord operator-() const;
   private:
@@ -196,6 +198,8 @@ public:
   
   template<int N2>
   ShTexCoord<N2, Binding, T, true> swiz(int indices[]) const;
+  template<int N2>
+  ShTexCoord<N2, Binding, T, true> swiz(const ShSwizzle& s) const;
   
   ShTexCoord operator-() const;
   private:
@@ -286,6 +290,8 @@ public:
   
   template<int N2>
   ShTexCoord<N2, Binding, T, true> swiz(int indices[]) const;
+  template<int N2>
+  ShTexCoord<N2, Binding, T, true> swiz(const ShSwizzle& s) const;
   
   ShTexCoord operator-() const;
   private:
@@ -376,6 +382,8 @@ public:
   
   template<int N2>
   ShTexCoord<N2, Binding, T, true> swiz(int indices[]) const;
+  template<int N2>
+  ShTexCoord<N2, Binding, T, true> swiz(const ShSwizzle& s) const;
   
   ShTexCoord operator-() const;
   private:
@@ -466,6 +474,8 @@ public:
   
   template<int N2>
   ShTexCoord<N2, Binding, T, true> swiz(int indices[]) const;
+  template<int N2>
+  ShTexCoord<N2, Binding, T, true> swiz(const ShSwizzle& s) const;
   
   ShTexCoord operator-() const;
   private:

@@ -317,6 +317,15 @@ ShNormal<N, Binding, T, Swizzled>::swiz(int indices[]) const
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<int N2>
+ShNormal<N2, Binding, T, true>
+ShNormal<N, Binding, T, Swizzled>::swiz(const ShSwizzle& s) const
+{
+  SH_DEBUG_ASSERT(s.size() == N2);
+  return ShNormal<N2, Binding, T, true>(this->m_node, this->m_swizzle * s,this->m_neg);
+}
+
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShNormal<1, Binding, T, true>
 ShNormal<N, Binding, T, Swizzled>::operator[](int s0) const
@@ -574,6 +583,15 @@ ShNormal<N2, Binding, T, true>
 ShNormal<1, Binding, T, Swizzled>::swiz(int indices[]) const
 {
   return ShNormal<N2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(1, N2, indices), this->m_neg);
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<int N2>
+ShNormal<N2, Binding, T, true>
+ShNormal<1, Binding, T, Swizzled>::swiz(const ShSwizzle& s) const
+{
+  SH_DEBUG_ASSERT(s.size() == N2);
+  return ShNormal<N2, Binding, T, true>(this->m_node, this->m_swizzle * s,this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -887,6 +905,15 @@ ShNormal<2, Binding, T, Swizzled>::swiz(int indices[]) const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+template<int N2>
+ShNormal<N2, Binding, T, true>
+ShNormal<2, Binding, T, Swizzled>::swiz(const ShSwizzle& s) const
+{
+  SH_DEBUG_ASSERT(s.size() == N2);
+  return ShNormal<N2, Binding, T, true>(this->m_node, this->m_swizzle * s,this->m_neg);
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShNormal<1, Binding, T, true>
 ShNormal<2, Binding, T, Swizzled>::operator[](int s0) const
@@ -1197,6 +1224,15 @@ ShNormal<3, Binding, T, Swizzled>::swiz(int indices[]) const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+template<int N2>
+ShNormal<N2, Binding, T, true>
+ShNormal<3, Binding, T, Swizzled>::swiz(const ShSwizzle& s) const
+{
+  SH_DEBUG_ASSERT(s.size() == N2);
+  return ShNormal<N2, Binding, T, true>(this->m_node, this->m_swizzle * s,this->m_neg);
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShNormal<1, Binding, T, true>
 ShNormal<3, Binding, T, Swizzled>::operator[](int s0) const
@@ -1504,6 +1540,15 @@ ShNormal<N2, Binding, T, true>
 ShNormal<4, Binding, T, Swizzled>::swiz(int indices[]) const
 {
   return ShNormal<N2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(4, N2, indices), this->m_neg);
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<int N2>
+ShNormal<N2, Binding, T, true>
+ShNormal<4, Binding, T, Swizzled>::swiz(const ShSwizzle& s) const
+{
+  SH_DEBUG_ASSERT(s.size() == N2);
+  return ShNormal<N2, Binding, T, true>(this->m_node, this->m_swizzle * s,this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>

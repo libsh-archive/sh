@@ -317,6 +317,15 @@ ShColor<N, Binding, T, Swizzled>::swiz(int indices[]) const
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<int N2>
+ShColor<N2, Binding, T, true>
+ShColor<N, Binding, T, Swizzled>::swiz(const ShSwizzle& s) const
+{
+  SH_DEBUG_ASSERT(s.size() == N2);
+  return ShColor<N2, Binding, T, true>(this->m_node, this->m_swizzle * s,this->m_neg);
+}
+
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShColor<1, Binding, T, true>
 ShColor<N, Binding, T, Swizzled>::operator[](int s0) const
@@ -574,6 +583,15 @@ ShColor<N2, Binding, T, true>
 ShColor<1, Binding, T, Swizzled>::swiz(int indices[]) const
 {
   return ShColor<N2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(1, N2, indices), this->m_neg);
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<int N2>
+ShColor<N2, Binding, T, true>
+ShColor<1, Binding, T, Swizzled>::swiz(const ShSwizzle& s) const
+{
+  SH_DEBUG_ASSERT(s.size() == N2);
+  return ShColor<N2, Binding, T, true>(this->m_node, this->m_swizzle * s,this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -887,6 +905,15 @@ ShColor<2, Binding, T, Swizzled>::swiz(int indices[]) const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+template<int N2>
+ShColor<N2, Binding, T, true>
+ShColor<2, Binding, T, Swizzled>::swiz(const ShSwizzle& s) const
+{
+  SH_DEBUG_ASSERT(s.size() == N2);
+  return ShColor<N2, Binding, T, true>(this->m_node, this->m_swizzle * s,this->m_neg);
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShColor<1, Binding, T, true>
 ShColor<2, Binding, T, Swizzled>::operator[](int s0) const
@@ -1197,6 +1224,15 @@ ShColor<3, Binding, T, Swizzled>::swiz(int indices[]) const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+template<int N2>
+ShColor<N2, Binding, T, true>
+ShColor<3, Binding, T, Swizzled>::swiz(const ShSwizzle& s) const
+{
+  SH_DEBUG_ASSERT(s.size() == N2);
+  return ShColor<N2, Binding, T, true>(this->m_node, this->m_swizzle * s,this->m_neg);
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShColor<1, Binding, T, true>
 ShColor<3, Binding, T, Swizzled>::operator[](int s0) const
@@ -1504,6 +1540,15 @@ ShColor<N2, Binding, T, true>
 ShColor<4, Binding, T, Swizzled>::swiz(int indices[]) const
 {
   return ShColor<N2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(4, N2, indices), this->m_neg);
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<int N2>
+ShColor<N2, Binding, T, true>
+ShColor<4, Binding, T, Swizzled>::swiz(const ShSwizzle& s) const
+{
+  SH_DEBUG_ASSERT(s.size() == N2);
+  return ShColor<N2, Binding, T, true>(this->m_node, this->m_swizzle * s,this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>

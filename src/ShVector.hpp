@@ -124,6 +124,8 @@ public:
   
   template<int N2>
   ShVector<N2, Binding, T, true> swiz(int indices[]) const;
+  template<int N2>
+  ShVector<N2, Binding, T, true> swiz(const ShSwizzle& s) const;
   
   ShVector operator-() const;
   private:
@@ -199,6 +201,8 @@ public:
   
   template<int N2>
   ShVector<N2, Binding, T, true> swiz(int indices[]) const;
+  template<int N2>
+  ShVector<N2, Binding, T, true> swiz(const ShSwizzle& s) const;
   
   ShVector operator-() const;
   private:
@@ -289,6 +293,8 @@ public:
   
   template<int N2>
   ShVector<N2, Binding, T, true> swiz(int indices[]) const;
+  template<int N2>
+  ShVector<N2, Binding, T, true> swiz(const ShSwizzle& s) const;
   
   ShVector operator-() const;
   private:
@@ -379,6 +385,8 @@ public:
   
   template<int N2>
   ShVector<N2, Binding, T, true> swiz(int indices[]) const;
+  template<int N2>
+  ShVector<N2, Binding, T, true> swiz(const ShSwizzle& s) const;
   
   ShVector operator-() const;
   private:
@@ -469,6 +477,8 @@ public:
   
   template<int N2>
   ShVector<N2, Binding, T, true> swiz(int indices[]) const;
+  template<int N2>
+  ShVector<N2, Binding, T, true> swiz(const ShSwizzle& s) const;
   
   ShVector operator-() const;
   private:

@@ -125,6 +125,8 @@ public:
   
   template<int N2>
   ShPosition<N2, Binding, T, true> swiz(int indices[]) const;
+  template<int N2>
+  ShPosition<N2, Binding, T, true> swiz(const ShSwizzle& s) const;
   
   ShPosition operator-() const;
   private:
@@ -200,6 +202,8 @@ public:
   
   template<int N2>
   ShPosition<N2, Binding, T, true> swiz(int indices[]) const;
+  template<int N2>
+  ShPosition<N2, Binding, T, true> swiz(const ShSwizzle& s) const;
   
   ShPosition operator-() const;
   private:
@@ -290,6 +294,8 @@ public:
   
   template<int N2>
   ShPosition<N2, Binding, T, true> swiz(int indices[]) const;
+  template<int N2>
+  ShPosition<N2, Binding, T, true> swiz(const ShSwizzle& s) const;
   
   ShPosition operator-() const;
   private:
@@ -380,6 +386,8 @@ public:
   
   template<int N2>
   ShPosition<N2, Binding, T, true> swiz(int indices[]) const;
+  template<int N2>
+  ShPosition<N2, Binding, T, true> swiz(const ShSwizzle& s) const;
   
   ShPosition operator-() const;
   private:
@@ -470,6 +478,8 @@ public:
   
   template<int N2>
   ShPosition<N2, Binding, T, true> swiz(int indices[]) const;
+  template<int N2>
+  ShPosition<N2, Binding, T, true> swiz(const ShSwizzle& s) const;
   
   ShPosition operator-() const;
   private:

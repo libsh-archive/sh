@@ -317,6 +317,15 @@ ShTexCoord<N, Binding, T, Swizzled>::swiz(int indices[]) const
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<int N2>
+ShTexCoord<N2, Binding, T, true>
+ShTexCoord<N, Binding, T, Swizzled>::swiz(const ShSwizzle& s) const
+{
+  SH_DEBUG_ASSERT(s.size() == N2);
+  return ShTexCoord<N2, Binding, T, true>(this->m_node, this->m_swizzle * s,this->m_neg);
+}
+
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShTexCoord<1, Binding, T, true>
 ShTexCoord<N, Binding, T, Swizzled>::operator[](int s0) const
@@ -574,6 +583,15 @@ ShTexCoord<N2, Binding, T, true>
 ShTexCoord<1, Binding, T, Swizzled>::swiz(int indices[]) const
 {
   return ShTexCoord<N2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(1, N2, indices), this->m_neg);
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<int N2>
+ShTexCoord<N2, Binding, T, true>
+ShTexCoord<1, Binding, T, Swizzled>::swiz(const ShSwizzle& s) const
+{
+  SH_DEBUG_ASSERT(s.size() == N2);
+  return ShTexCoord<N2, Binding, T, true>(this->m_node, this->m_swizzle * s,this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -887,6 +905,15 @@ ShTexCoord<2, Binding, T, Swizzled>::swiz(int indices[]) const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+template<int N2>
+ShTexCoord<N2, Binding, T, true>
+ShTexCoord<2, Binding, T, Swizzled>::swiz(const ShSwizzle& s) const
+{
+  SH_DEBUG_ASSERT(s.size() == N2);
+  return ShTexCoord<N2, Binding, T, true>(this->m_node, this->m_swizzle * s,this->m_neg);
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShTexCoord<1, Binding, T, true>
 ShTexCoord<2, Binding, T, Swizzled>::operator[](int s0) const
@@ -1197,6 +1224,15 @@ ShTexCoord<3, Binding, T, Swizzled>::swiz(int indices[]) const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+template<int N2>
+ShTexCoord<N2, Binding, T, true>
+ShTexCoord<3, Binding, T, Swizzled>::swiz(const ShSwizzle& s) const
+{
+  SH_DEBUG_ASSERT(s.size() == N2);
+  return ShTexCoord<N2, Binding, T, true>(this->m_node, this->m_swizzle * s,this->m_neg);
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShTexCoord<1, Binding, T, true>
 ShTexCoord<3, Binding, T, Swizzled>::operator[](int s0) const
@@ -1504,6 +1540,15 @@ ShTexCoord<N2, Binding, T, true>
 ShTexCoord<4, Binding, T, Swizzled>::swiz(int indices[]) const
 {
   return ShTexCoord<N2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(4, N2, indices), this->m_neg);
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<int N2>
+ShTexCoord<N2, Binding, T, true>
+ShTexCoord<4, Binding, T, Swizzled>::swiz(const ShSwizzle& s) const
+{
+  SH_DEBUG_ASSERT(s.size() == N2);
+  return ShTexCoord<N2, Binding, T, true>(this->m_node, this->m_swizzle * s,this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
