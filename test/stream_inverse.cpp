@@ -25,26 +25,32 @@ int main(int argc, char** argv)
     ShChannel<ShTexCoord<INDEX_ELEMENTS, SH_TEMP> >
       index(idx_img.memory(), image.width() * image.height());
     
-    ShArrayRect<ShColor3f> picture(image.width(), image.height());
+    ShTableRect<ShColor3f> picture(image.width(), image.height());
     picture.memory(image.memory());
     
     ShImage result(image.width(), image.height(), 3);
     ShChannel<ShColor3f> output(result.memory(), image.width() * image.height());
 
+    /*
     ShMatrix3x3f sobel_x = ShMatrix3x3f(-1.0, 0.0, +1.0,
                                         -2.0, 0.0, +2.0,
                                         -1.0, 0.0, -1.0);
     ShMatrix3x3f sobel_y = transpose(sobel_x);
-    
+    */
     ShProgram invert = SH_BEGIN_PROGRAM("gpu:stream") {
       ShTexCoord<INDEX_ELEMENTS, SH_INPUT> idx;
       ShOutputColor3f outcol;
 
-      ShTexCoord2f t = idx(0,1)
+      ShTexCoord2f t = idx(0,1);
       
-      //      outcol = ShColor3f(1.0, 1.0, 1.0) - picture(idx(0,1));
-      outcol = picture(t - ShConstant2f(1.0, 0.0)) - picture(t);
-      outcol = dot(outcol,outcol)(0,0,0);
+      //outcol = picture(t - ShConstant2f(1.0, 0.0)) - picture(t);
+      //outcol = dot(outcol,outcol)(0,0,0);
+
+      
+      ShAttrib2f l;
+      l(0) = t(0)*t(0)/image.width();
+      l(1) = t(1)*t(1)/image.height();
+      outcol = picture(l);
     } SH_END;
 
     ShStream outstream(output);
