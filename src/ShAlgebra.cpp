@@ -1,5 +1,5 @@
-#include "ShAlgebra.hpp"
 #include <map>
+#include "ShAlgebra.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShDebug.hpp"
 #include "ShError.hpp"
@@ -204,7 +204,7 @@ ShProgram operator<<(const ShProgram& a, const ShProgram& b)
   return connect(a, b);
 }
 
-ShProgram operator+(const ShProgram& a, const ShProgram& b)
+ShProgram operator&(const ShProgram& a, const ShProgram& b)
 {
   return combine(a, b);
 }
@@ -252,6 +252,10 @@ ShProgram replaceUniform(const ShProgram& a, const ShVariable& v)
   program->collectVariables();
 
   return program;
+}
+
+ShProgram permute(const ShProgram& a, int size, ... ) {
+
 }
 
 }

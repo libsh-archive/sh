@@ -20,8 +20,9 @@ ShProgram replaceUniform(const ShProgram &a, const ShVariable &var);
 /// Equiv. to connect(a,b)
 ShProgram operator<<(const ShProgram& a, const ShProgram& b);
 /// Equiv. to combine(a,b)
-ShProgram operator+(const ShProgram& a, const ShProgram& b);
+ShProgram operator&(const ShProgram& a, const ShProgram& b);
 
+/*
 template<typename T>
 struct keep {
   typedef typename T::ValueType ValType;
@@ -53,6 +54,7 @@ struct lose {
     return prog;
   }
 };
+*/
 
 }
 
