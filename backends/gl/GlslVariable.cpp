@@ -31,6 +31,21 @@ namespace shgl {
 using namespace SH;
 using namespace std;
 
+/// Information about the VarBinding members
+const GlslVarBindingInfo GlslVariable::glslVarBindingInfo[] = {
+  {"gl_TexCoord", 4, true},
+  {"gl_Color", 4, false},
+  {"gl_SecondaryColor", 4, false},
+  {"gl_Vertex", 4, false},
+  {"gl_Normal", 3, false},
+  {"gl_FragCoord", 4, false},
+  {"gl_Position", 4, false},
+  {"gl_FrontColor", 4, false},
+  {"gl_FrontSecondaryColor", 4, false},
+  {"gl_FragDepth", 1, false},
+  {"gl_FragColor", 4, false},
+};
+
 GlslVariable::GlslVariable()
   : m_builtin(false), m_name(""), m_size(0),
     m_kind(SH_TEMP), m_type(SH_FLOAT), m_semantic_type(SH_ATTRIB),
@@ -75,37 +90,33 @@ string GlslVariable::declaration() const
 void GlslVariable::name(int i)
 {
   stringstream varname;
-  if (!varying()) {
-    switch (m_kind) {
-    case SH_INPUT:
-      varname << "var_i_";
-      break;
-    case SH_OUTPUT:
-      varname << "var_o_";
-      break;
-    case SH_INOUT:
-      varname << "var_io_";
-      break;
-    case SH_TEMP:
-      varname << "var_t_";
-      break;
-    case SH_CONST:
-      varname << "var_c_";
-      break;
-    case SH_TEXTURE:
-      varname << "var_tex_";
-      break;
-    case SH_STREAM:
-      varname << "var_s_";
-      break;
-    case SH_PALETTE:
-      varname << "var_p_";
-      break;
-    default:
-      varname << "var_";
-    }
-  } else {
-    varname << "varying";
+  switch (m_kind) {
+  case SH_INPUT:
+    varname << "var_i_";
+    break;
+  case SH_OUTPUT:
+    varname << "var_o_";
+    break;
+  case SH_INOUT:
+    varname << "var_io_";
+    break;
+  case SH_TEMP:
+    varname << "var_t_";
+    break;
+  case SH_CONST:
+    varname << "var_c_";
+    break;
+  case SH_TEXTURE:
+    varname << "var_tex_";
+    break;
+  case SH_STREAM:
+    varname << "var_s_";
+    break;
+  case SH_PALETTE:
+    varname << "var_p_";
+    break;
+  default:
+    varname << "var_";
   }
   varname << i;
 
@@ -113,9 +124,16 @@ void GlslVariable::name(int i)
   m_builtin = false;
 }
 
-void GlslVariable::name(const string& name)
+void GlslVariable::builtin(GlslVarBinding binding, int index)
 {
-  m_name = name;
+  stringstream name;
+  name << glslVarBindingInfo[binding].name;
+  if (index > -1) {
+    name << '[' << index << ']';
+  }
+
+  m_name = name.str();
+  m_size = glslVarBindingInfo[binding].size;
   m_builtin = true;
 }
 

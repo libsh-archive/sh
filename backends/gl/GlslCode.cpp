@@ -238,20 +238,13 @@ ostream& GlslCode::print(ostream& out)
   out << "// OpenGL SL " << ((m_unit == SH_GLSL_VP) ? "Vertex" : "Fragment") << " Program" << endl;
   out << endl;
 
-  // Varying variables
-  for (GlslVariableMap::DeclarationList::const_iterator i = m_varmap->varying_begin(); 
-       i != m_varmap->varying_end(); i++) {
-    out  << "varying " << *i << ";" << endl;
-  }
-  out << endl;
-
   out << "void main()" << endl;
   out << "{" << endl;
   string indent = "  ";
 
   // Temporaries and constants
-  for (GlslVariableMap::DeclarationList::const_iterator i = m_varmap->regular_begin(); 
-       i != m_varmap->regular_end(); i++) {
+  for (GlslVariableMap::DeclarationList::const_iterator i = m_varmap->begin(); 
+       i != m_varmap->end(); i++) {
     out << indent << *i << ";" << endl;
   }
   out << endl;
@@ -297,28 +290,27 @@ void GlslCode::emit(const ShStatement &stmt)
   switch(stmt.op) {
   case SH_OP_ADD:
     {
-      m_lines.push_back(resolve(stmt.dest) + " = " + resolve(stmt.src[0]) + " + " + resolve(stmt.src[1]));
+      m_lines.push_back(resolve(stmt.dest, max(stmt.src[0].size(), stmt.src[1].size())) + " = " + resolve(stmt.src[0]) + " + " + resolve(stmt.src[1]));
       break;
     }
   case SH_OP_MUL:
     {
-      m_lines.push_back(resolve(stmt.dest) + " = " + resolve(stmt.src[0]) + " * " + resolve(stmt.src[1]));
+      m_lines.push_back(resolve(stmt.dest, max(stmt.src[0].size(), stmt.src[1].size())) + " = " + resolve(stmt.src[0]) + " * " + resolve(stmt.src[1]));
       break;
     }
   case SH_OP_DOT:
     {
-      SH_DEBUG_ASSERT(stmt.dest.size() == 1);
-      m_lines.push_back(resolve(stmt.dest) + " = dot(" + resolve(stmt.src[0]) + ", " + resolve(stmt.src[1]) + ")");
+      m_lines.push_back(resolve(stmt.dest, 1) + " = dot(" + resolve(stmt.src[0]) + ", " + resolve(stmt.src[1]) + ")");
       break;
     }
   case SH_OP_ASN:
     {
-      m_lines.push_back(resolve(stmt.dest) + " = " + resolve(stmt.src[0]));
+      m_lines.push_back(resolve(stmt.dest, stmt.src[0].size()) + " = " + resolve(stmt.src[0]));
       break;
     }
   case SH_OP_NORM:
     {
-      m_lines.push_back(resolve(stmt.dest) + " = normalize(" + resolve(stmt.src[0]) + ")");
+      m_lines.push_back(resolve(stmt.dest, stmt.src[0].size()) + " = normalize(" + resolve(stmt.src[0]) + ")");
       break;
     }
   default:
@@ -328,49 +320,13 @@ void GlslCode::emit(const ShStatement &stmt)
   }
 }
 
-string GlslCode::resolve(const ShVariable& v)
+string GlslCode::resolve(const ShVariable& v, int src_size) const
 {
   SH_DEBUG_ASSERT(m_varmap);
-  std::string s = m_varmap->resolve(v.node()).name() + swizzle(v);
-  if (v.neg()) {
-    s = std::string("-(") + s + ")";
+  if (0 == src_size) {
+    src_size = v.size();
   }
-  return s;
-}
-
-string GlslCode::resolve(const ShVariable& v, int idx)
-{
-  stringstream ss;
-  ss << resolve(v) << "[" << idx << "]";
-  return ss.str() + swizzle(v);
-}
-
-string GlslCode::swizzle(const ShVariable& v)
-{
-  const ShSwizzle& s(v.swizzle());
-  if (s.identity()) return "";
-
-  stringstream ss;
-  for (int i=0; i < v.size(); i++) {
-    switch (s[i]) {
-    case 0:
-      ss << "x";
-      break;
-    case 1:
-      ss << "y";
-      break;
-    case 2:
-      ss << "z";
-      break;
-    case 3:
-      ss << "w";
-      break;
-    default:
-      ss << " *** ERROR: Invalid swizzle '" << s[i] << "' *** ";
-      return ss.str();
-    }
-  }
-  return "." + ss.str();
+  return m_varmap->resolve(v, src_size);
 }
 
 }

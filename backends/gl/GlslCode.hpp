@@ -82,9 +82,7 @@ private:
   /// Generate code for a single Sh statement.
   void emit(const SH::ShStatement &stmt);
   
-  std::string resolve(const SH::ShVariable& v);
-  std::string resolve(const SH::ShVariable& v, int idx);
-  std::string swizzle(const SH::ShVariable& v); /// returns the proper swizzle to add to the varname
+  std::string resolve(const SH::ShVariable& v, int src_size = 0) const;
 
   void print_infolog(GLhandleARB obj); /// Debug: print the OpenGL SL compiler log
   void print_shader_source(); /// Debug: retrieve and print shader source code from GPU

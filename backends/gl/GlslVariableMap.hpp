@@ -37,34 +37,6 @@
 
 namespace shgl {
 
-/// Possible bindings for an input/output variable
-enum GlslVarBinding {
-  // Input and output for vertex, input for fragment
-  SH_GLSL_VAR_TEXCOORD,
-
-  // Inputs to both units
-  SH_GLSL_VAR_COLOR,
-  SH_GLSL_VAR_SECONDARYCOLOR,
-
-  // Vertex inputs
-  SH_GLSL_VAR_VERTEX,
-  SH_GLSL_VAR_NORMAL,
-
-  // Fragment inputs
-  SH_GLSL_VAR_FRAGCOORD,
-
-  // Vertex outputs
-  SH_GLSL_VAR_POSITION,
-  SH_GLSL_VAR_FRONTCOLOR,
-  SH_GLSL_VAR_FRONTSECONDARYCOLOR,
-
-  // Fragment outputs
-  SH_GLSL_VAR_FRAGDEPTH,
-  SH_GLSL_VAR_FRAGCOLOR,
-
-  SH_GLSL_VAR_NONE
-};
-
 struct GlslBindingSpecs {
   GlslVarBinding binding;
   int max_bindings;
@@ -76,25 +48,21 @@ class GlslVariableMap {
 public:
   GlslVariableMap(SH::ShProgramNode* shader, GlslProgramType unit);
   
-  GlslVariable resolve(const SH::ShVariableNodePtr& v);
+  std::string resolve(const SH::ShVariable& v, int src_size);
 
   typedef std::list<std::string> DeclarationList;
 
-  DeclarationList::const_iterator regular_begin() const;
-  DeclarationList::const_iterator regular_end() const;
-  DeclarationList::const_iterator varying_begin() const;
-  DeclarationList::const_iterator varying_end() const;
+  DeclarationList::const_iterator begin() const;
+  DeclarationList::const_iterator end() const;
   
 private:
   SH::ShProgramNode* m_shader;
   GlslProgramType m_unit;
 
-  unsigned m_nb_regular_variables;
-  unsigned m_nb_varying_variables;
+  unsigned m_nb_variables;
   std::map<SH::ShVariableNodePtr, GlslVariable> m_varmap; /// maps a variable node to a variable
   
-  DeclarationList m_regular_declarations;
-  DeclarationList m_varying_declarations;
+  DeclarationList m_declarations;
 
   std::map<GlslVarBinding, int> m_input_bindings;
   std::map<GlslVarBinding, int> m_output_bindings;
@@ -108,6 +76,8 @@ private:
   void allocate_input(const SH::ShVariableNodePtr& node);
   void allocate_output(const SH::ShVariableNodePtr& node);
   void allocate_temp(const SH::ShVariableNodePtr& node);
+
+  std::string swizzle(const SH::ShVariable& v, int dest_size, int src_size) const;
 };
 
 }

@@ -33,21 +33,56 @@
 
 namespace shgl {
 
+/// Possible bindings for an input/output variable
+enum GlslVarBinding {
+  // Input and output for vertex, input for fragment
+  SH_GLSL_VAR_TEXCOORD,
+
+  // Inputs to both units
+  SH_GLSL_VAR_COLOR,
+  SH_GLSL_VAR_SECONDARYCOLOR,
+
+  // Vertex inputs
+  SH_GLSL_VAR_VERTEX,
+  SH_GLSL_VAR_NORMAL,
+
+  // Fragment inputs
+  SH_GLSL_VAR_FRAGCOORD,
+
+  // Vertex outputs
+  SH_GLSL_VAR_POSITION,
+  SH_GLSL_VAR_FRONTCOLOR,
+  SH_GLSL_VAR_FRONTSECONDARYCOLOR,
+
+  // Fragment outputs
+  SH_GLSL_VAR_FRAGDEPTH,
+  SH_GLSL_VAR_FRAGCOLOR,
+
+  SH_GLSL_VAR_NONE
+};
+
+struct GlslVarBindingInfo {
+  char* name;
+  int size;
+  bool indexed;
+};
+
 class GlslVariable {
 public:
+  static const GlslVarBindingInfo glslVarBindingInfo[SH_GLSL_VAR_NONE];
+
   GlslVariable(const SH::ShVariableNodePtr& v); /// Usual constructor
   GlslVariable(); /// Default constructor (for STL container initialization)
   GlslVariable(const GlslVariable& v); /// Copy constructor
   
   std::string declaration() const;
 
-  bool varying() const { return (m_kind == SH::SH_INPUT) || (m_kind == SH::SH_OUTPUT) || (m_kind == SH::SH_INOUT); }
-  
   const std::string& name() const { return m_name; }
   const SH::ShSemanticType& semantic_type() const { return m_semantic_type; }
+  const int size() const { return m_size; }
 
   void name(int i); /// for regular variables
-  void name(const std::string& name); /// for built-in variables
+  void builtin(GlslVarBinding binding, int index); /// for built-in variables
   
 private:
   bool m_builtin; /// if true, it won't be declared or initialized

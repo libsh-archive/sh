@@ -31,25 +31,6 @@ namespace shgl {
 using namespace SH;
 using namespace std;
 
-/// Information about the VarBinding members
-struct {
-  char* name;
-  bool indexed;
-} glslVarBindingInfo[] = {
-  {"gl_TexCoord", true},
-  {"gl_Color", false},
-  {"gl_SecondaryColor", false},
-  {"gl_Vertex", false},
-  {"gl_Normal", false},
-  {"gl_FragCoord", false},
-  {"gl_Position", false},
-  {"gl_FrontColor", false},
-  {"gl_FrontSecondaryColor", false},
-  {"gl_FragDepth", false},
-  {"gl_FragColor", false},
-  {"<nil>", false}
-};
-
 GlslBindingSpecs glslVertexInputBindingSpecs[] = {
   {SH_GLSL_VAR_VERTEX, 1, SH_POSITION, false},
   {SH_GLSL_VAR_NORMAL, 1, SH_NORMAL, false},
@@ -91,7 +72,7 @@ GlslBindingSpecs* glslBindingSpecs(bool output, GlslProgramType unit)
 }
 
 GlslVariableMap::GlslVariableMap(ShProgramNode* shader, GlslProgramType unit)
-  : m_shader(shader), m_unit(unit), m_nb_regular_variables(0), m_nb_varying_variables(0)
+  : m_shader(shader), m_unit(unit), m_nb_variables(0)
 {
   allocate_builtin_inputs();
   allocate_builtin_outputs();
@@ -124,13 +105,11 @@ void GlslVariableMap::allocate_builtin(const ShVariableNodePtr& node,
       if (bindings[s->binding] >= s->max_bindings) continue;
 
       GlslVariable var(node);
-      std::ostringstream name;
-      name << glslVarBindingInfo[s->binding].name;
-      
-      if (glslVarBindingInfo[s->binding].indexed) {
-        name << '[' << bindings[s->binding] << ']';
+      int index = -1;
+      if (GlslVariable::glslVarBindingInfo[s->binding].indexed) {
+	index = bindings[s->binding];
       }
-      var.name(name.str());
+      var.builtin(s->binding, index);
       m_varmap[node] = var;
 
       bindings[s->binding]++;
@@ -170,47 +149,73 @@ void GlslVariableMap::allocate_output(const ShVariableNodePtr& node)
 void GlslVariableMap::allocate_temp(const ShVariableNodePtr& node)
 {
   GlslVariable var(node);
-  if (var.varying()) {
-    var.name(m_nb_varying_variables++);
-  } else {
-    var.name(m_nb_regular_variables++);
-  }
+  var.name(m_nb_variables++);
   m_varmap[node] = var;
 
   // Since this variable is not built-in, it must be declared
-  if (var.varying()) {
-    m_varying_declarations.push_back(var.declaration());
-  } else {
-    m_regular_declarations.push_back(var.declaration());
-  }
+  m_declarations.push_back(var.declaration());
 }
 
-GlslVariable GlslVariableMap::resolve(const ShVariableNodePtr& v)
+GlslVariableMap::DeclarationList::const_iterator GlslVariableMap::begin() const
+{ 
+  return m_declarations.begin();
+}
+
+GlslVariableMap::DeclarationList::const_iterator GlslVariableMap::end() const
+{ 
+  return m_declarations.end();
+}
+
+string GlslVariableMap::resolve(const ShVariable& v, int src_size)
 {
-  if (m_varmap.find(v) == m_varmap.end()) {
-    allocate_temp(v);
+  if (m_varmap.find(v.node()) == m_varmap.end()) {
+    allocate_temp(v.node());
   }
-  return m_varmap[v];
+
+  GlslVariable var(m_varmap[v.node()]);
+  string s = var.name() + swizzle(v, var.size(), src_size);
+  if (v.neg()) {
+    s =  string("-(") + s + ")";
+  }
+  return s;
 }
 
-GlslVariableMap::DeclarationList::const_iterator GlslVariableMap::regular_begin() const
-{ 
-  return m_regular_declarations.begin();
-}
-
-GlslVariableMap::DeclarationList::const_iterator GlslVariableMap::regular_end() const
-{ 
-  return m_regular_declarations.end();
-}
-
-GlslVariableMap::DeclarationList::const_iterator GlslVariableMap::varying_begin() const
-{ 
-  return m_varying_declarations.begin();
-}
-
-GlslVariableMap::DeclarationList::const_iterator GlslVariableMap::varying_end() const
+string GlslVariableMap::swizzle(const ShVariable& v, int dest_size, int src_size) const
 {
-  return m_varying_declarations.end();
+  ShSwizzle swizzle = v.swizzle();
+
+  if (dest_size != src_size) {
+    // Fit this variable to the variable it's assigned to using the proper write mask
+    int* s = new int[dest_size];
+    for (int i = 0; i < dest_size; i++) s[i] = i;
+    swizzle = ShSwizzle(dest_size, src_size, s);
+    delete s;
+    swizzle = v.swizzle() * swizzle;
+  }
+
+  if (swizzle.identity() && (swizzle.size() == dest_size)) return ""; // no need for a swizzle
+
+  stringstream ss;
+  for (int i=0; i < v.size(); i++) {
+    switch (swizzle[i]) {
+    case 0:
+      ss << "x";
+      break;
+    case 1:
+      ss << "y";
+      break;
+    case 2:
+      ss << "z";
+      break;
+    case 3:
+      ss << "w";
+      break;
+    default:
+      SH_DEBUG_ASSERT(0); // Invalid swizzle
+      return "";
+    }
+  }
+  return "." + ss.str();
 }
 
 }
