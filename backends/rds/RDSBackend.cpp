@@ -1,4 +1,8 @@
 #include "RDSBackend.hpp"
+#include "Pass.hpp"
+#include "../gl/Arb.hpp"
+#include "../gl/GlTextures.hpp"
+#include "../gl/GLXPBufferStreams.hpp"
 #include <fstream>
 
 void RDSBackend::dump(RDS rds, char* complete, char* partitioned) {
@@ -37,6 +41,7 @@ SH::ShBackendCodePtr RDSBackend::generateCode(const std::string& target,
 #ifdef RDS_DEBUG
   SH_DEBUG_PRINT( __FUNCTION__ );
   SH_DEBUG_PRINT("RDS generateCode() call, dumping partitions");
+  compare(shader->clone());
 #endif
   /*
   SH::ShProgramNodePtr s = shader->clone();
@@ -47,8 +52,7 @@ SH::ShBackendCodePtr RDSBackend::generateCode(const std::string& target,
   trans.convertInputOutput(); 
   trans.convertTextureLookups();
   */
-  compare(shader->clone());
-  return NULL;
+  return m_code->generate(target,shader,m_texture);
 }
 
 void RDSBackend::execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest)
@@ -56,14 +60,24 @@ void RDSBackend::execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& des
 #ifdef RDS_DEBUG
   SH_DEBUG_PRINT( __FUNCTION__ );
   SH_DEBUG_PRINT("RDS execute() call, dumping partitions");
-#endif
   compare(program->clone());
+#endif
+  //m_stream->execute(program,dest);
+  program->ctrlGraph->print(std::cout,0);
+  std::cout << program->describe_interface() << std::endl;
+  RDS rds(program->clone());
+  rds.rds();
+  Pass p(rds.get_pdt()->get_root(), "gpu:stream");
+  m_stream->execute(p.get_prog(),dest);
 }
 
 RDSBackend::RDSBackend(void) {
 #ifdef RDS_DEBUG
   SH_DEBUG_PRINT( __FUNCTION__ );
 #endif
+  m_code = new shgl::ArbCodeStrategy();
+  m_texture = new shgl::GlTextures();
+  m_stream =  new shgl::GLXPBufferStreams();
 }
 
 RDSBackend::~RDSBackend(void) {

@@ -11,8 +11,6 @@
 #include "ShDebug.hpp"
 #include "ShUtility.hpp"
 
-#define RDS_DEBUG
-
 using namespace SH;
 
 RDS::RDS(ShProgramNodePtr progPtr)
@@ -65,6 +63,11 @@ void RDS::set_partition() {
 	unvisitall(root);
 	root->m_marked = true;
 	partition(root);
+}
+
+SH::ShBasicBlockPtr RDS::get_block(DAGNode::DAGNode* node)
+{
+  return NULL;
 }
 
 void RDS::rds_search() {
