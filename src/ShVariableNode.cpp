@@ -31,6 +31,16 @@
 
 namespace SH {
 
+const char* ShVariableSpecialTypeName[] = {
+  "ShAttrib",
+  "ShPoint",
+  "ShVector",
+  "ShNormal",
+  "ShColor",
+  "ShTexCoord",
+  "ShPosition"
+};
+
 ShVariableNode::ShVariableNode(ShVariableKind kind, int size, ShVariableSpecialType type)
   : m_uniform(!ShEnvironment::insideShader && kind != SH_VAR_TEXTURE), m_kind(kind), m_specialType(type),
     m_size(size), m_id(m_maxID++), m_values(0)

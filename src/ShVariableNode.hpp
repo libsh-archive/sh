@@ -50,6 +50,9 @@ enum ShVariableSpecialType {
   SH_VAR_POSITION
 };
 
+// ensure this matches the SpecialType enum
+extern const char* ShVariableSpecialTypeName[];
+
 /** A generic n-tuple variable.
  */
 class ShVariableNode : public ShRefCountable {

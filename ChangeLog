@@ -2,6 +2,13 @@
 
 	* src/ShManipulator.cpp (operator<<): Changed SEQ to ASN.
 
+	* backends/arb/ShArb.cpp: Added SEQ operation support
+
+	* src/ShManipulator.?pp: Bug fixes (lots of unmentionable idiocy)
+
+	* src/ShAlgebra.cpp, ShVariableNode.?pp : Better error message 
+	for invalid ShProgram connect (prints output/input types)
+
 2004-01-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShAlgebra.cpp (copyCtrlGraph): Clear head before we do a dfs

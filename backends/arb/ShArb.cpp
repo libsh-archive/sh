@@ -1087,6 +1087,15 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
         SH_DEBUG_ERROR("sin is not implemented for ARB vertex program ");
       m_instructions.push_back(ArbInst(SH_ARB_SIN, stmt.dest, stmt.src[0]));
       break;
+    case SH_OP_SEQ:
+      {
+        ShVariable seq(new ShVariableNode(SH_VAR_TEMP, stmt.src[0].size()));
+        ShVariable seq2(new ShVariableNode(SH_VAR_TEMP, stmt.src[0].size()));
+        m_instructions.push_back(ArbInst(SH_ARB_SGE, seq, stmt.src[0], stmt.src[1]));
+        m_instructions.push_back(ArbInst(SH_ARB_SGE, seq2, stmt.src[1], stmt.src[0]));
+        m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, seq, seq2 ));
+      }
+      break;
     case SH_OP_SLT:
       m_instructions.push_back(ArbInst(SH_ARB_SLT, stmt.dest, stmt.src[0], stmt.src[1]));
       break;

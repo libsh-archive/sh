@@ -15,6 +15,7 @@ class ShManipulator {
     /** \brief Creates empty manipulator of given size
      */
     ShManipulator();
+    ShManipulator( const ShManipulator &m );
     
   protected:
     typedef std::pair<int, int> IndexRange; 
@@ -85,6 +86,9 @@ class permute: public ShManipulator {
 // outputs based on given indices
 class range: public ShManipulator {
   public:
+    range( int i );
+    range( int start, int end );
+
     range operator()( int i );
     range operator()( int start, int end );
 };

@@ -1,10 +1,17 @@
 #include <cstdarg>
-#include "ShManipulator.hpp"
+#include <cassert>
+#include <sstream>
 #include "ShVariableNode.hpp"
+#include "ShError.hpp"
 #include "ShAlgebra.hpp"
+#include "ShManipulator.hpp"
 
 namespace SH {
 ShManipulator::ShManipulator() {} 
+
+ShManipulator::ShManipulator(const ShManipulator &m)
+  : m_ranges(m.m_ranges) {
+} 
 
 void ShManipulator::append(int i) {
   m_ranges.push_back(IndexRange(i, i));
@@ -21,6 +28,7 @@ void ShManipulator::append(IndexRange r) {
 ShProgram operator<<(const ShProgram &p, const ShManipulator &m) {
   int size = p->outputs.size();
 
+  std::cout << "operator<<" << std::endl; 
   ShProgram permuter = SH_BEGIN_PROGRAM() {
     /* Make shader inputs from p's outputs */
     std::vector<ShVariable> inputs;
@@ -40,6 +48,14 @@ ShProgram operator<<(const ShProgram &p, const ShManipulator &m) {
       
       int end = irvIt->second;
       if(end < 0) end = size + end;
+
+      if(start < 0 || start >= size || end < 0 || end >= size) {
+        std::ostringstream os;
+        os << "Invalid ShManipulator Range (" << irvIt->first << ", " <<
+          irvIt->second << ") for an ShProgram with output size " << size;
+         
+        ShError(ShAlgebraException(os.str())); 
+      }
 
       for(int i = start; i <= end; ++i) {
         ShVariable output(new ShVariableNode(SH_VAR_OUTPUT, 
@@ -84,8 +100,10 @@ lose::lose(int n)
 permute::permute(int outputSize, ...) { 
   va_list ap;
   va_start(ap, outputSize);
+  std::cout << "permute" << std::endl; 
   for(int i = 0; i < outputSize; ++i) {
     int index = va_arg(ap, int);
+    std::cout << index << std::endl;
     append(index);
   }
   va_end(ap);
@@ -113,14 +131,28 @@ permute permute::operator*(const permute &p) const {
   return permute(resultIndices);
 }
 
+range::range(int i) {
+  std::cout << "rangei " << i << std::endl;
+  append(i);
+}
+
+range::range(int start, int end) {
+  std::cout << "rangese " << start << " " << end << std::endl;
+  append(start, end);
+}
+
 range range::operator()(int i) {
-  range result = *this;
+  std::cout << "rangei() " << i << std::endl;
+  range result(*this);
   result.append(i);
+  return result;
 }
 
 range range::operator()(int start, int end) {
-  range result = *this;
+  std::cout << "rangese() " << start << " " << end << std::endl;
+  range result(*this); 
   result.append(start, end);
+  return result;
 }
 
 extract::extract(int k) {
@@ -131,7 +163,7 @@ extract::extract(int k) {
 
 drop::drop(int k) {
   if(k >= 0) {
-    append(k + 1, -1); 
+    append(k, -1); 
   } else {
     append(0, k - 1); 
   }

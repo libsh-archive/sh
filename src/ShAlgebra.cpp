@@ -1,4 +1,5 @@
 #include <map>
+#include <sstream>
 #include "ShAlgebra.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShDebug.hpp"
@@ -92,7 +93,21 @@ namespace SH {
 ShProgram connect(const ShProgram& a, const ShProgram& b)
 {
   if (a->outputs.size() != b->inputs.size()) {
-    ShError( ShAlgebraException( "Cannot connect programs.  Number of inputs does not match number of outputs" ) );
+    std::ostringstream os;
+    os << "Cannot connect programs. Number of outputs (" << a->outputs.size() << ") != number of inputs"
+      << b->inputs.size() << std::endl;
+    os << "Outputs: ";
+    for( ShProgramNode::VarList::const_iterator it = a->outputs.begin();
+        it != a->outputs.end(); ++it ) {
+      os << ShVariableSpecialTypeName[ (*it)->specialType() ] << (*it)->size() << " ";
+    }
+    os << std::endl << "Inputs: "; 
+    for( ShProgramNode::VarList::const_iterator it = b->inputs.begin();
+        it != b->inputs.end(); ++it ) {
+      os << ShVariableSpecialTypeName[ (*it)->specialType() ] << (*it)->size() << " ";
+    }
+
+    ShError( ShAlgebraException( os.str() ) ); 
   }
 
   std::string rtarget;
