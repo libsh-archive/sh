@@ -1,3 +1,8 @@
+2004-08-24  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp: Add copy propagation, clean up a few
+	things.
+
 2004-08-23  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/PBufferStreams.cpp (execute): Optimize is spelled

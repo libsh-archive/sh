@@ -724,33 +724,38 @@ struct FinishConstProp
       if (!cp->dest.empty()) {
         // if all dest fields are constants, replace this with a
         // constant assignment
-        
-        ShVariable newconst(new ShVariableNode(SH_CONST, I->dest.size()));
-        bool allconst = true;
-        for (int i = 0; i < I->dest.size(); i++) {
-          if (cp->dest[i].state != ConstProp::Cell::CONSTANT) {
-            allconst = false;
-            break;
-          }
-          newconst.setValue(i, cp->dest[i].value);
-        }
-        if (allconst) {
-          *I = ShStatement(I->dest, SH_OP_ASN, newconst);
-        } else {
-          // otherwise, do the same for each source field.
-          for (int s = 0; s < opInfo[I->op].arity; s++) {
-            
-            ShVariable newconst(new ShVariableNode(SH_CONST, I->src[s].size()));
-            bool allconst = true;
-            for (int i = 0; i < I->src[s].size(); i++) {
-              if (cp->src[s][i].state != ConstProp::Cell::CONSTANT) {
-                allconst = false;
-                break;
-              }
-              newconst.setValue(i, cp->src[s][i].value);
+
+        if (I->op != SH_OP_ASN || I->src[0].node()->kind() != SH_CONST) {
+          ShVariable newconst(new ShVariableNode(SH_CONST, I->dest.size()));
+          bool allconst = true;
+          for (int i = 0; i < I->dest.size(); i++) {
+            if (cp->dest[i].state != ConstProp::Cell::CONSTANT) {
+              allconst = false;
+              break;
             }
-            if (allconst) {
-              I->src[s] = newconst;
+            newconst.setValue(i, cp->dest[i].value);
+          }
+          if (allconst) {
+            //SH_DEBUG_PRINT("Replaced {" << *I << "} with " << newconst);
+            *I = ShStatement(I->dest, SH_OP_ASN, newconst);
+          } else {
+            // otherwise, do the same for each source field.
+            for (int s = 0; s < opInfo[I->op].arity; s++) {
+              if (I->src[s].node()->kind() == SH_CONST) continue;
+            
+              ShVariable newconst(new ShVariableNode(SH_CONST, I->src[s].size()));
+              bool allconst = true;
+              for (int i = 0; i < I->src[s].size(); i++) {
+                if (cp->src[s][i].state != ConstProp::Cell::CONSTANT) {
+                  allconst = false;
+                  break;
+                }
+                newconst.setValue(i, cp->src[s][i].value);
+              }
+              if (allconst) {
+                //SH_DEBUG_PRINT("Replaced {" << *I << "}.src[" << s << "] with " << newconst);
+                I->src[s] = newconst;
+              }
             }
           }
         }
@@ -760,6 +765,64 @@ struct FinishConstProp
       I->template destroy_info<ConstProp>();
     }
   }
+};
+
+// Copy propagation
+
+struct CopyPropagator {
+  CopyPropagator(bool& changed)
+    : changed(changed)
+  {
+  }
+
+  void operator()(const ShCtrlGraphNodePtr& node) {
+    if (!node) return;
+    ShBasicBlockPtr block = node->block;
+    
+    if (!block) return;
+    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+      for (int i = 0; i < opInfo[I->op].arity; i++) copyValue(I->src[i]);
+      removeACP(I->dest);
+      
+      if (I->op == SH_OP_ASN
+          && I->dest.node() != I->src[0].node()
+          && I->dest.node()->kind() == SH_TEMP
+          && I->dest.swizzle().identity()
+          && I->src[0].swizzle().identity()) {
+        m_acp.push_back(std::make_pair(I->dest, I->src[0]));
+      }
+    }
+    m_acp.clear();
+  }
+
+  void removeACP(const ShVariable& var)
+  {
+    for (ACP::iterator I = m_acp.begin(); I != m_acp.end();) {
+      if (I->first.node() == var.node() || I->second.node() == var.node()) {
+        I = m_acp.erase(I);
+        continue;
+      }
+      ++I;
+    }
+  }
+  
+
+  void copyValue(ShVariable& var)
+  {
+    for (ACP::const_iterator I = m_acp.begin(); I != m_acp.end(); ++I) {
+      if (I->first.node() == var.node()) {
+        changed = true;
+        var = ShVariable(I->second.node(), var.swizzle(),
+                         var.neg() ^ (I->first.neg() ^ I->second.neg()));
+        break;
+      }
+    }
+  }
+
+  typedef std::list< std::pair<ShVariable, ShVariable> > ACP;
+  ACP m_acp;
+  
+  bool& changed;
 };
 
 
@@ -965,26 +1028,31 @@ void propagate_constants(ShProgram& p)
     ValueTracking::Def def = worklist.front(); worklist.pop();
     ValueTracking* vt = def.stmt->template get_info<ValueTracking>();
     if (!vt) {
-      SH_DEBUG_PRINT("Statement on worklist does not have VT information?");
-      SH_DEBUG_PRINT(*def.stmt);
+      //SH_DEBUG_PRINT("Statement on worklist does not have VT information?");
+      //SH_DEBUG_PRINT(*def.stmt);
       continue;
     }
 
     ConstProp* dcp = def.stmt->template get_info<ConstProp>();
     if (!dcp) {
-      SH_DEBUG_PRINT("Statement on worklist does not have CP information?");
+      //SH_DEBUG_PRINT("Statement on worklist does not have CP information?");
       continue;
     }
     
     for (ValueTracking::DefUseChain::iterator I = vt->uses[def.index].begin(); I != vt->uses[def.index].end(); ++I) {
       ConstProp* cp = I->stmt->template get_info<ConstProp>();
       if (!cp) {
-        SH_DEBUG_PRINT("Use does not have const prop information!");
+        //SH_DEBUG_PRINT("Use does not have const prop information!");
         continue;
       }
 
       ConstProp::Cell cell = cp->src[I->source][I->index];
-      ConstProp::Cell new_cell = meet(cell, dcp->dest[def.index]);
+      ConstProp::Cell destcell = dcp->dest[def.index];
+      if (destcell.state == ConstProp::Cell::CONSTANT
+          && I->stmt->src[I->source].neg()) {
+        destcell.value = -destcell.value;
+      }
+      ConstProp::Cell new_cell = meet(cell, destcell);
       if (cell != new_cell) {
         cp->src[I->source][I->index] = new_cell;
         cp->updateDest(worklist);
@@ -993,12 +1061,20 @@ void propagate_constants(ShProgram& p)
   }
   // Now do something with our glorious newfound information.
 
+#if 0
   DumpConstProp dump;
   graph->dfs(dump);
+#endif
   
   FinishConstProp finish;
   graph->dfs(finish);
   
+}
+
+void copy_propagate(ShProgram& p, bool& changed)
+{
+  CopyPropagator c(changed);
+  p.node()->ctrlGraph->dfs(c);
 }
 
 void forward_substitute(ShProgram& p, bool& changed)
@@ -1013,9 +1089,9 @@ void optimize(ShProgram& p, int level)
 
   bool changed;
   do {
-    //    SH_DEBUG_PRINT("===================Optimizer Pass Begins========================");
     changed = false;
 
+    copy_propagate(p, changed);
     forward_substitute(p, changed);
     
     p.node()->ctrlGraph->computePredecessors();
@@ -1031,8 +1107,6 @@ void optimize(ShProgram& p, int level)
     remove_dead_code(p, changed);
 
     remove_branch_instructions(p);
-
-    //    SH_DEBUG_PRINT("==================Optimizer Pass Finished=======================");
   } while (changed);
 }
 
