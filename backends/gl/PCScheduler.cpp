@@ -249,7 +249,7 @@ void PCSchedule::draw_quad(double x1, double y1, double x2, double y2,
 
 void PCSchedule::execute_pass(ShPass* pass)
 {
-  if (pass->count) return;
+  if (!pass->count) return;
 
   glPushAttrib(GL_ENABLE_BIT);
   
