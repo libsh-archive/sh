@@ -31,20 +31,6 @@
 
 namespace SH {
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-inline
-ShMatrix<Cols, Rows, SH_TEMP, T>
-transpose(const ShMatrix<Rows, Cols, Binding, T>& m)
-{
-  ShMatrix<Cols, Rows, SH_TEMP, T> result;
-  for (int i = 0; i < Cols; i++) {
-    for (int j = 0; j < Rows; j++) {
-      result[i][j] = m[j][i];
-    }
-  }
-  return result;
-}
-
 template<int M, int N, int P, ShBindingType Binding, ShBindingType Binding2, typename T>
 inline
 ShMatrix<M, P, SH_TEMP, T>
@@ -106,6 +92,156 @@ ShGeneric<M, T> operator*(const ShMatrix<M, N, Binding, T>& a, const ShGeneric<N
 {
   return a | b;
 }
+
+template<int M, int N, ShBindingType Binding, typename T>
+ShMatrix<M, N, SH_TEMP, T>
+operator*(const ShMatrix<M, N, Binding, T>& a, const ShGeneric<1, T>& b)
+{
+  ShMatrix<M, N, SH_TEMP, T> r(a);
+  r *= b;
+  return r;
+}
+
+template<int M, ShBindingType Binding, typename T>
+ShMatrix<M, 1, SH_TEMP, T>
+operator*(const ShMatrix<M, 1, Binding, T>& a, const ShGeneric<1, T>& b)
+{
+  ShMatrix<M, 1, SH_TEMP, T> r(a);
+  r *= b;
+  return r;
+}
+
+template<int M, int N, ShBindingType Binding, typename T>
+ShMatrix<M, N, SH_TEMP, T>
+operator*(const ShGeneric<1, T>& a, const ShMatrix<M, N, Binding, T>& b)
+{
+  ShMatrix<M, N, SH_TEMP, T> r(b);
+  r *= a;
+  return r;
+}
+
+template<int M, int N, ShBindingType Binding, typename T>
+ShMatrix<1, N, SH_TEMP, T>
+operator*(const ShGeneric<1, T>& a, const ShMatrix<1, N, Binding, T>& b)
+{
+  ShMatrix<1, N, SH_TEMP, T> r(b);
+  r *= a;
+  return r;
+}
+
+template<int M, int N, ShBindingType Binding, typename T>
+ShMatrix<M, N, SH_TEMP, T>
+operator/(const ShMatrix<M, N, Binding, T>& a, const ShGeneric<1, T>& b)
+{
+  ShMatrix<M, N, SH_TEMP, T> r(a);
+  r /= b;
+  return r;
+}
+
+
+
+template<ShBindingType Binding, typename T>
+ShAttrib1f
+det(const ShMatrix<1, 1, Binding, T>& matrix)
+{
+  return matrix[0][0];
+}
+
+  
+template<ShBindingType Binding, typename T>
+ShAttrib1f
+det(const ShMatrix<2, 2, Binding, T>& matrix)
+{
+  return (matrix[0][0]*matrix[1][1] - matrix[0][1] * matrix[1][0]);
+}
+ 
+template<int RowsCols, ShBindingType Binding, typename T>
+ShAttrib1f
+det(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix)
+{
+  ShAttrib1f ret = 0.0;
+  bool flip = (RowsCols % 2 == 0);
+
+  for (int i = 0; i < RowsCols; i++) {
+    if (flip) {
+      ret -= matrix[RowsCols - 1][i] * det(matrix.subMatrix(RowsCols - 1, i));
+    } else {
+      ret += matrix[RowsCols - 1][i] * det(matrix.subMatrix(RowsCols - 1, i));
+    }
+  }
+  return ret;
+}
+
+//Matrix of Cofactors
+template<ShBindingType Binding, typename T>
+ShMatrix<1,1,SH_TEMP,T>
+cofactors(const ShMatrix<1, 1, Binding, T>& matrix){
+  return matrix;
+}
+    
+template<ShBindingType Binding, typename T>
+ShMatrix<2,2,SH_TEMP,T>
+cofactors(const ShMatrix<2, 2, Binding, T>& matrix)
+{
+  ShMatrix<2,2,Binding,T> r;
+  r.m_data[0][0]= matrix[1][1];
+  r.m_data[1][0]=-matrix[0][1];
+  r.m_data[0][1]=-matrix[1][0];
+  r.m_data[1][1]= matrix[0][0];
+    
+  return r;
+  //return matrix;
+}
+  
+template<int RowsCols,ShBindingType Binding, typename T>
+ShMatrix<RowsCols,RowsCols, SH_TEMP, T>
+cofactors(const ShMatrix<RowsCols,RowsCols, Binding, T>& matrix)
+{
+  ShMatrix<RowsCols,RowsCols,Binding,T> r;
+
+  for (int i = 0; i < RowsCols; i++) {
+    for (int j = 0; j < RowsCols; j++) {
+      if( (i+j)%2 ==0)	  
+        r[i][j]= det(matrix.subMatrix(i,j));
+      else
+        r[i][j]=-det(matrix.subMatrix(i,j));
+    }
+  }
+  return r;
+}
+
+//Transpose
+template<int M, int N, ShBindingType Binding, typename T>
+ShMatrix<N, M, SH_TEMP, T>
+transpose(const ShMatrix<M, N, Binding, T>& matrix)
+{    
+  ShMatrix<N, M, SH_TEMP, T> r;
+    
+  for (int i = 0; i < N; i++) {
+    for (int j = 0; j < M; j++) {	  
+      r[i][j]= matrix[j][i];	
+    }
+  }
+    
+  return r;
+}
+
+// Adjoint
+template<int RowsCols, ShBindingType Binding, typename T>
+ShMatrix<RowsCols, RowsCols, SH_TEMP, T>
+adjoint(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix)
+{
+  return transpose(cofactors(matrix));
+}
+  
+//Inverse
+template<int RowsCols, ShBindingType Binding, typename T>
+ShMatrix<RowsCols,RowsCols, SH_TEMP, T>
+inverse(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix)
+{
+  return adjoint(matrix) * rcp(det(matrix));
+}
+
 
 }
 

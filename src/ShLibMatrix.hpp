@@ -35,20 +35,8 @@ namespace SH {
 
 /** \defgroup lib_matrix Matrix operations
  * @ingroup library
- * @todo Move all the functions from ShMatrix.hpp here.
  * @{
  */
-
-/** Transpose of a matrix.
- * @todo this implementation is not very smart.   Really, the compiler should
- * keep track of transpose state and swizzle references as needed, so that
- * a copy of the matrix does not need to be formed.   But this needs to be
- * overridden if the transpose of a matrix is taken and then modified
- * (which, however, does not happen very often).
- */
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-ShMatrix<Cols, Rows, SH_TEMP, T>
-transpose(const ShMatrix<Rows, Cols, Binding, T>& m);
 
 /** Matrix multiplication.
  * Only works on matrices of compatible sizes.
@@ -77,6 +65,77 @@ template<int M, int N, ShBindingType Binding, typename T>
 ShGeneric<N, T> operator|(const ShGeneric<M, T>& a, const ShMatrix<M, N, Binding, T>& b);
 template<int M, int N, ShBindingType Binding, typename T>
 ShGeneric<N, T> operator*(const ShGeneric<M, T>& a, const ShMatrix<M, N, Binding, T>& b);
+
+/// Matrix-scalar multiplication
+template<int M, int N, ShBindingType Binding, typename T>
+ShMatrix<M, N, SH_TEMP, T>
+operator*(const ShMatrix<M, N, Binding, T>& a, const ShGeneric<1, T>& b);
+template<int M, ShBindingType Binding, typename T>
+ShMatrix<M, 1, SH_TEMP, T>
+operator*(const ShMatrix<M, 1, Binding, T>& a, const ShGeneric<1, T>& b);
+/// Scalar-matrix multiplication
+template<int M, int N, ShBindingType Binding, typename T>
+ShMatrix<M, N, SH_TEMP, T>
+operator*(const ShGeneric<1, T>& a, const ShMatrix<M, N, Binding, T>& b);
+template<int N, ShBindingType Binding, typename T>
+ShMatrix<1, N, SH_TEMP, T>
+operator*(const ShGeneric<1, T>& a, const ShMatrix<1, N, Binding, T>& b);
+/// Matrix-scalar division
+template<int M, int N, ShBindingType Binding, typename T>
+ShMatrix<1, N, SH_TEMP, T>
+operator/(const ShMatrix<M, N, Binding, T>& a, const ShGeneric<1, T>& b);
+
+/** \brief Returns the determinant for the matrix in parameter
+ *
+ * Returns a ShAttrib1f containing the value of the determinant of the
+ * matrix. NOTE: This method uses an naive recursive algorithm in
+ * O(n!) which could take a long time with large matrices
+ */
+template<ShBindingType Binding2, typename T2>
+ShAttrib1f det(const ShMatrix<1, 1, Binding2, T2>& matrix);
+
+template<ShBindingType Binding2, typename T2>
+ShAttrib1f det(const ShMatrix<2, 2, Binding2, T2>& matrix);
+    
+template<int RowsCols, ShBindingType Binding2, typename T2>
+ShAttrib1f det(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
+
+
+/** \brief Returns the matrix of cofactors for the matrix in parameter
+ *
+ * Returns a ShMatrix containing the same amount of Rows/Colsvalue as
+ * the matrix in parameter
+ */
+template<int RowsCols, ShBindingType Binding2, typename T2>
+ShMatrix<RowsCols, RowsCols, SH_TEMP, T2>
+cofactors(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
+    
+/** \brief Returns the transposed matrix for the matrix in parameter
+ *
+ * Returns a ShMatrix that is the transposed of the one in parameters
+ */
+template<int M, int N, ShBindingType Binding2, typename T2>
+ShMatrix<N, M, SH_TEMP, T2>
+transpose(const ShMatrix<M, N, Binding2, T2>& matrix);
+  
+/** \brief Returns the adjacent matrix for the matrix in parameter
+ *
+ * Returns a ShMatrix that is the adjacent of the one in parameters
+ */
+template<int RowsCols, ShBindingType Binding2, typename T2>
+ShMatrix<RowsCols, RowsCols, SH_TEMP, T2>
+adjoint(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
+
+/** \brief Returns the inverse matrix for the matrix in parameter
+ *
+ * Returns a ShMatrix that is the inverse of the one in parameters
+ * (NOTE: There is no error handling if the determinant is 0, NOTE #2:
+ * We might want to rewrite this method if we have the * operator with
+ * a ShVariableN)
+ */
+template<int RowsCols, ShBindingType Binding2, typename T2>
+ShMatrix<RowsCols,RowsCols, SH_TEMP, T2>
+inverse(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
 
 /*@}*/
 
