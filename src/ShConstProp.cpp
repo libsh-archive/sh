@@ -609,6 +609,9 @@ struct FinishConstProp
                     }
                     indices.push_back(cp->src[s][i].uniform.index);
                   }
+                } else {
+                  // Can't lift this, unless we introduce intermediate instructions.
+                  mixed = true;
                 }
               }
               

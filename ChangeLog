@@ -1,3 +1,8 @@
+2004-09-08  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShConstProp.cpp (struct FinishConstProp): Don't lift values
+	which are partially not uniform.
+
 2004-09-07  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/GlTextures.cpp (bindTexture): Added support for
