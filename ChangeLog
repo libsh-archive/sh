@@ -1,5 +1,32 @@
 2004-03-04  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* backends/gl/PBufferStreams.cpp (execute): Update for new TextureTraits class.
+
+	* backends/gl/GlTextures.cpp (shGlInternalFormat): Support
+	unclamped floating-point textures.
+
+	* backends/gl/GlTextureName.cpp (params): Update for new TextureTraits class.
+
+	* src/ShOptimizer.cpp: Don't mark FETCH statements as dead.
+
+	* src/ShNibblesImpl.hpp (access): Update for new TextureTraits class.
+
+	* src/ShNibbles.hpp (access): Update for new TextureTraits class.
+
+	* src/ShTexture.hpp: Update for new TextureTraits class.
+
+	* src/ShArray.hpp: Update for new TextureTraits class.
+
+	* src/ShTable.hpp: Update for new TextureTraits class.
+
+	* src/ShBaseTextureImpl.hpp: Update for new TextureTraits class.
+
+	* src/ShBaseTexture.hpp: Update for new TextureTraits class.
+
+	* src/ShWrap.hpp: Update for new TextureTraits class.
+
+	* src/ShTextureNode.hpp: Added TextureTraits class and made use of it.
+
 	* test/stream_inverse.cpp: Add this test case.
 
 	* src/ShImage.cpp (savePng): Make this work for non-4-element

@@ -5,38 +5,38 @@
 
 namespace SH {
 
-template<typename T, unsigned int Traits>
-ShBaseTexture1D<T, Traits>::ShBaseTexture1D(int width)
-  : m_node(new ShTextureNode(SH_TEXTURE_1D, T::typesize, Traits, width))
+template<typename T>
+ShBaseTexture1D<T>::ShBaseTexture1D(int width, const ShTextureTraits& traits)
+  : m_node(new ShTextureNode(SH_TEXTURE_1D, T::typesize, traits, width))
 {
 }
 
-template<typename T, unsigned int Traits>
-ShBaseTexture2D<T, Traits>::ShBaseTexture2D(int width, int height)
-  : m_node(new ShTextureNode(SH_TEXTURE_2D, T::typesize, Traits, width, height))
+template<typename T>
+ShBaseTexture2D<T>::ShBaseTexture2D(int width, int height, const ShTextureTraits& traits)
+  : m_node(new ShTextureNode(SH_TEXTURE_2D, T::typesize, traits, width, height))
 {
 }
 
-template<typename T, unsigned int Traits>
-ShBaseTextureRect<T, Traits>::ShBaseTextureRect(int width, int height)
-  : m_node(new ShTextureNode(SH_TEXTURE_RECT, T::typesize, Traits, width, height))
+template<typename T>
+ShBaseTextureRect<T>::ShBaseTextureRect(int width, int height, const ShTextureTraits& traits)
+  : m_node(new ShTextureNode(SH_TEXTURE_RECT, T::typesize, traits, width, height))
 {
 }
 
-template<typename T, unsigned int Traits>
-ShBaseTexture3D<T, Traits>::ShBaseTexture3D(int width, int height, int depth)
-  : m_node(new ShTextureNode(SH_TEXTURE_3D, T::typesize, Traits, width, height, depth))
+template<typename T>
+ShBaseTexture3D<T>::ShBaseTexture3D(int width, int height, int depth, const ShTextureTraits& traits)
+  : m_node(new ShTextureNode(SH_TEXTURE_3D, T::typesize, traits, width, height, depth))
 {
 }
 
-template<typename T, unsigned int Traits>
-ShBaseTextureCube<T, Traits>::ShBaseTextureCube(int width, int height)
-  : m_node(new ShTextureNode(SH_TEXTURE_CUBE, T::typesize, Traits, width, height))
+template<typename T>
+ShBaseTextureCube<T>::ShBaseTextureCube(int width, int height, const ShTextureTraits& traits)
+  : m_node(new ShTextureNode(SH_TEXTURE_CUBE, T::typesize, traits, width, height))
 {
 }
 
-template<typename T, unsigned int Traits>
-T ShBaseTexture1D<T, Traits>::operator()(const ShVariableN<1, float>& coords) const
+template<typename T>
+T ShBaseTexture1D<T>::operator()(const ShVariableN<1, float>& coords) const
 {
   if (ShEnvironment::insideShader) {
     T t;
@@ -51,8 +51,8 @@ T ShBaseTexture1D<T, Traits>::operator()(const ShVariableN<1, float>& coords) co
   }
 }
 
-template<typename T, unsigned int Traits>
-T ShBaseTexture2D<T, Traits>::operator()(const ShVariableN<2, float>& coords) const
+template<typename T>
+T ShBaseTexture2D<T>::operator()(const ShVariableN<2, float>& coords) const
 {
   if (ShEnvironment::insideShader) {
     T t;
@@ -67,8 +67,8 @@ T ShBaseTexture2D<T, Traits>::operator()(const ShVariableN<2, float>& coords) co
   }
 }
 
-template<typename T, unsigned int Traits>
-T ShBaseTextureRect<T, Traits>::operator()(const ShVariableN<2, float>& coords) const
+template<typename T>
+T ShBaseTextureRect<T>::operator()(const ShVariableN<2, float>& coords) const
 {
   if (ShEnvironment::insideShader) {
     T t;
@@ -83,24 +83,8 @@ T ShBaseTextureRect<T, Traits>::operator()(const ShVariableN<2, float>& coords) 
   }
 }
 
-template<typename T, unsigned int Traits>
-T ShBaseTexture3D<T, Traits>::operator()(const ShVariableN<3, float>& coords) const
-{
-  if (ShEnvironment::insideShader) {
-    T t;
-    ShVariable texVar(m_node);
-    ShStatement stmt(t, texVar, SH_OP_TEX, coords);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  } else {
-    // TODO!
-    T t;
-    return t;
-  }
-} 
-
-template<typename T, unsigned int Traits>
-T ShBaseTextureCube<T, Traits>::operator()(const ShVariableN<3, float>& coords) const
+template<typename T>
+T ShBaseTexture3D<T>::operator()(const ShVariableN<3, float>& coords) const
 {
   if (ShEnvironment::insideShader) {
     T t;
@@ -115,8 +99,24 @@ T ShBaseTextureCube<T, Traits>::operator()(const ShVariableN<3, float>& coords) 
   }
 } 
 
-template<typename T, unsigned int Traits>
-T ShBaseTexture1D<T, Traits>::operator[](const ShVariableN<1, float>& coords) const
+template<typename T>
+T ShBaseTextureCube<T>::operator()(const ShVariableN<3, float>& coords) const
+{
+  if (ShEnvironment::insideShader) {
+    T t;
+    ShVariable texVar(m_node);
+    ShStatement stmt(t, texVar, SH_OP_TEX, coords);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  } else {
+    // TODO!
+    T t;
+    return t;
+  }
+} 
+
+template<typename T>
+T ShBaseTexture1D<T>::operator[](const ShVariableN<1, float>& coords) const
 {
   if (ShEnvironment::insideShader) {
     T t;
@@ -131,8 +131,8 @@ T ShBaseTexture1D<T, Traits>::operator[](const ShVariableN<1, float>& coords) co
   }
 }
 
-template<typename T, unsigned int Traits>
-T ShBaseTexture2D<T, Traits>::operator[](const ShVariableN<2, float>& coords) const
+template<typename T>
+T ShBaseTexture2D<T>::operator[](const ShVariableN<2, float>& coords) const
 {
   if (ShEnvironment::insideShader) {
     T t;
@@ -147,8 +147,8 @@ T ShBaseTexture2D<T, Traits>::operator[](const ShVariableN<2, float>& coords) co
   }
 }
 
-template<typename T, unsigned int Traits>
-T ShBaseTextureRect<T, Traits>::operator[](const ShVariableN<2, float>& coords) const
+template<typename T>
+T ShBaseTextureRect<T>::operator[](const ShVariableN<2, float>& coords) const
 {
   if (ShEnvironment::insideShader) {
     T t;
@@ -163,8 +163,8 @@ T ShBaseTextureRect<T, Traits>::operator[](const ShVariableN<2, float>& coords) 
   }
 }
 
-template<typename T, unsigned int Traits>
-T ShBaseTexture3D<T, Traits>::operator[](const ShVariableN<3, float>& coords) const
+template<typename T>
+T ShBaseTexture3D<T>::operator[](const ShVariableN<3, float>& coords) const
 {
   if (ShEnvironment::insideShader) {
     T t;
@@ -179,8 +179,8 @@ T ShBaseTexture3D<T, Traits>::operator[](const ShVariableN<3, float>& coords) co
   }
 }
 
-template<typename T, unsigned int Traits>
-T ShBaseTextureCube<T, Traits>::operator[](const ShVariableN<3, float>& coords) const
+template<typename T>
+T ShBaseTextureCube<T>::operator[](const ShVariableN<3, float>& coords) const
 {
   if (ShEnvironment::insideShader) {
     T t;
@@ -197,64 +197,64 @@ T ShBaseTextureCube<T, Traits>::operator[](const ShVariableN<3, float>& coords) 
 
 // setMemory
 
-template<typename T, unsigned int Traits>
-void ShBaseTexture1D<T, Traits>::memory(ShMemoryPtr memory)
+template<typename T>
+void ShBaseTexture1D<T>::memory(ShMemoryPtr memory)
 {
   m_node->memory(memory);
 }
 
-template<typename T, unsigned int Traits>
-void ShBaseTexture2D<T, Traits>::memory(ShMemoryPtr memory)
+template<typename T>
+void ShBaseTexture2D<T>::memory(ShMemoryPtr memory)
 {
   m_node->memory(memory);
 }
 
-template<typename T, unsigned int Traits>
-void ShBaseTextureRect<T, Traits>::memory(ShMemoryPtr memory)
+template<typename T>
+void ShBaseTextureRect<T>::memory(ShMemoryPtr memory)
 {
   m_node->memory(memory);
 }
 
-template<typename T, unsigned int Traits>
-void ShBaseTexture3D<T, Traits>::memory(ShMemoryPtr memory)
+template<typename T>
+void ShBaseTexture3D<T>::memory(ShMemoryPtr memory)
 {
   m_node->memory(memory);
 }
 
-template<typename T, unsigned int Traits>
-void ShBaseTextureCube<T, Traits>::memory(ShMemoryPtr memory,
+template<typename T>
+void ShBaseTextureCube<T>::memory(ShMemoryPtr memory,
                                           ShCubeDirection face)
 {
   m_node->memory(memory, face);
 }
 
 
-template<typename T, unsigned int Traits>
-ShMemoryPtr ShBaseTexture1D<T, Traits>::memory()
+template<typename T>
+ShMemoryPtr ShBaseTexture1D<T>::memory()
 {
   return m_node->memory();
 }
 
-template<typename T, unsigned int Traits>
-ShMemoryPtr ShBaseTexture2D<T, Traits>::memory()
+template<typename T>
+ShMemoryPtr ShBaseTexture2D<T>::memory()
 {
   return m_node->memory();
 }
 
-template<typename T, unsigned int Traits>
-ShMemoryPtr ShBaseTextureRect<T, Traits>::memory()
+template<typename T>
+ShMemoryPtr ShBaseTextureRect<T>::memory()
 {
   return m_node->memory();
 }
 
-template<typename T, unsigned int Traits>
-ShMemoryPtr ShBaseTexture3D<T, Traits>::memory()
+template<typename T>
+ShMemoryPtr ShBaseTexture3D<T>::memory()
 {
   return m_node->memory();
 }
 
-template<typename T, unsigned int Traits>
-ShMemoryPtr ShBaseTextureCube<T, Traits>::memory(ShCubeDirection face)
+template<typename T>
+ShMemoryPtr ShBaseTextureCube<T>::memory(ShCubeDirection face)
 {
   return m_node->memory(face);
 }

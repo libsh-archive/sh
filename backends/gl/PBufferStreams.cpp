@@ -270,16 +270,16 @@ void PBufferStreams::execute(const ShProgram& program,
       return;
     }
     ShTextureNodePtr tex;
+    ShTextureTraits traits = ShArrayTraits();
+    traits.clamping(ShTextureTraits::SH_UNCLAMPED);
     switch (extension) {
     case SH_ARB_NV_FLOAT_BUFFER:
       tex = new ShTextureNode(SH_TEXTURE_RECT, I->first->size(),
-                              SH_LOOKUP_NEAREST | SH_FILTER_NONE | SH_WRAP_CLAMP,
-                              tex_size, tex_size, 1);
+                              traits, tex_size, tex_size, 1);
       break;
     case SH_ARB_ATI_PIXEL_FORMAT_FLOAT:
       tex = new ShTextureNode(SH_TEXTURE_2D, I->first->size(),
-                              SH_LOOKUP_NEAREST | SH_FILTER_NONE | SH_WRAP_CLAMP,
-                              tex_size, tex_size, 1);
+                              traits, tex_size, tex_size, 1);
       break;
     }
 
@@ -368,6 +368,8 @@ void PBufferStreams::execute(const ShProgram& program,
   shBindShader(vp);
   shBindShader(fp);
 
+  fp->code(ShEnvironment::backend)->print(std::cerr);
+  
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glViewport(0, 0, tex_size, tex_size);

@@ -50,23 +50,67 @@ enum ShCubeDirection {
   SH_CUBE_NEG_Z = 5,
 };
 
-const unsigned int SH_LOOKUP_NEAREST = 0x001;
-const unsigned int SH_LOOKUP_LINEAR  = 0x002;
-const unsigned int SH_LOOKUP_MASK    = 0x00f;
-const unsigned int SH_FILTER_NONE    = 0x010;
-const unsigned int SH_FILTER_MIPMAP  = 0x020;
-const unsigned int SH_FILTER_MASK    = 0x0f0;
-// TODO: different wrapping modes for different texcoords
-// TODO: edges
-const unsigned int SH_WRAP_CLAMP     = 0x100;
-const unsigned int SH_WRAP_REPEAT    = 0x200;
-const unsigned int SH_WRAP_MASK      = 0xf00;
+class ShTextureTraits {
+public:
+  enum Filtering {
+    SH_FILTER_NONE,
+    SH_FILTER_MIPMAP
+  };
+  
+  enum Wrapping {
+    SH_WRAP_CLAMP,
+    SH_WRAP_REPEAT
+  };
+  enum Clamping {
+    SH_CLAMPED,
+    SH_UNCLAMPED
+  };
+
+  ShTextureTraits(unsigned int interpolation,
+                  Filtering filtering,
+                  Wrapping wrapping,
+                  Clamping clamping)
+    : m_interpolation(interpolation),
+      m_filtering(filtering),
+      m_wrapping(wrapping),
+      m_clamping(clamping)
+  {
+  }
+
+  bool operator==(const ShTextureTraits& other) const
+  {
+    return m_interpolation == other.m_interpolation
+      && m_filtering == other.m_filtering
+      && m_wrapping == other.m_wrapping
+      && m_clamping == other.m_clamping;
+  }
+
+  bool operator!=(const ShTextureTraits& other) const { return !(*this == other); }
+  
+  unsigned int interpolation() const { return m_interpolation; }
+  ShTextureTraits& interpolation(unsigned int interp) { m_interpolation = interp; return *this; }
+  
+  Filtering filtering() const { return m_filtering; }
+  ShTextureTraits& filtering(Filtering filtering) { m_filtering = filtering; return *this; }
+  
+  Wrapping wrapping() const { return m_wrapping; }
+  ShTextureTraits& wrapping(Wrapping wrapping) { m_wrapping = wrapping; return *this; }
+  
+  Clamping clamping() const { return m_clamping; }
+  ShTextureTraits& clamping(Clamping clamping) { m_clamping = clamping; return *this; }
+
+private:
+  unsigned int m_interpolation;
+  Filtering m_filtering;
+  Wrapping m_wrapping;
+  Clamping m_clamping;
+};
 
 class ShTextureNode : public ShVariableNode {
 public:
   ShTextureNode(ShTextureDims dims,
                 int size, // scalars per tuple
-                unsigned int traits,
+                const ShTextureTraits&,
                 int width, int height = 0, int depth = 0);
   virtual ~ShTextureNode();
 
@@ -81,8 +125,8 @@ public:
   void memory(ShMemoryPtr memory, ShCubeDirection dir);
 
   // Basic properties - not all may be valid for all types
-  unsigned int traits() const; // valid for all texture nodes
-  void traits(unsigned int traits); // valid for all texture nodes
+  const ShTextureTraits& traits() const; // valid for all texture nodes
+  ShTextureTraits& traits(); // valid for all texture nodes
   int width() const; // valid for all texture nodes
   int height() const; // not for SH_TEXTURE_1D
   int depth() const; // only for SH_TEXTURE_3D
@@ -92,7 +136,7 @@ private:
 
   ShMemoryPtr* m_memory; // array of either 1 or 6 (for cubemaps)
   
-  unsigned int m_traits;
+  ShTextureTraits m_traits;
   int m_width, m_height, m_depth;
   
   // NOT IMPLEMENTED

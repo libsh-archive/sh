@@ -55,32 +55,32 @@ ShProgram lose(const std::string & name = "");
 /** \brief 2D texture lookup nibble 
  * Inputs: IN(0) ShTexCoord1f tc
  * Outputs: OUT(0) name = tex(tc) */
-template<typename T, unsigned int traits> 
-ShProgram access(const ShBaseTexture1D<T, traits> &tex, const std::string & name = "result");
+template<typename T> 
+ShProgram access(const ShBaseTexture1D<T> &tex, const std::string & name = "result");
 
 /** \brief 2D texture lookup nibble 
  * Inputs: IN(0) ShTexCoord2f tc
  * Outputs: OUT(0) name = tex(tc) */
-template<typename T, unsigned int traits> 
-ShProgram access(const ShBaseTexture2D<T, traits> &tex, const std::string & name = "result");
+template<typename T> 
+ShProgram access(const ShBaseTexture2D<T> &tex, const std::string & name = "result");
 
 /** \brief Rect texture lookup nibble 
  * Inputs: IN(0) ShTexCoord2f tc
  * Outputs: OUT(0) name = tex(tc) */
-template<typename T, unsigned int traits> 
-ShProgram access(const ShBaseTextureRect<T, traits> &tex, const std::string & name = "result");
+template<typename T> 
+ShProgram access(const ShBaseTextureRect<T> &tex, const std::string & name = "result");
 
 /** \brief 3D texture lookup nibble 
  * Inputs: IN(0) ShTexCoord3f tc
  * Outputs: OUT(0) name = tex(tc) */
-template<typename T, unsigned int traits> 
-ShProgram access(const ShBaseTexture3D<T, traits> &tex, const std::string & name = "result");
+template<typename T> 
+ShProgram access(const ShBaseTexture3D<T> &tex, const std::string & name = "result");
 
 /** \brief Cube texture lookup nibble 
  * Inputs: IN(0) ShTexCoord3f tc
  * Outputs: OUT(0) name = tex(tc) */
-template<typename T, unsigned int traits> 
-ShProgram access(const ShBaseTextureCube<T, traits> &tex, const std::string & name = "result");
+template<typename T> 
+ShProgram access(const ShBaseTextureCube<T> &tex, const std::string & name = "result");
 
 /** \brief transformation nibble 
  * Creates a nibble that transforms a variable of type T2 by 

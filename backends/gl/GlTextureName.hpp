@@ -14,8 +14,8 @@ public:
 
   GLuint value() const { return m_name; }
   GLenum target() const { return m_target; }
-  unsigned int params() const { return m_params; }
-  void params(unsigned int params);
+  const SH::ShTextureTraits& params() const { return m_params; }
+  void params(const SH::ShTextureTraits& params);
 
   void addStorage(SH::ShStorage* storage);
   void removeStorage(SH::ShStorage* storage);
@@ -42,7 +42,7 @@ private:
   GLuint m_name;
   StorageList m_storages;
   static NameList m_names;
-  unsigned int m_params;
+  SH::ShTextureTraits m_params;
 };
 
 typedef SH::ShRefCount<GlTextureName> GlTextureNamePtr;

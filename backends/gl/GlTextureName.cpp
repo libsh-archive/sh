@@ -5,7 +5,9 @@ namespace shgl {
 using namespace SH;
 
 GlTextureName::GlTextureName(GLenum target)
-  : m_target(target)
+  : m_target(target),
+    m_params(0, SH::ShTextureTraits::SH_FILTER_NONE,
+             SH::ShTextureTraits::SH_WRAP_CLAMP, SH::ShTextureTraits::SH_CLAMPED)
 {
   glGenTextures(1, &m_name);
   m_names.push_back(this);
@@ -27,27 +29,27 @@ void GlTextureName::removeStorage(SH::ShStorage* storage)
   m_storages.erase(std::remove(m_storages.begin(), m_storages.end(), storage));
 }
 
-void GlTextureName::params(unsigned int params)
+void GlTextureName::params(const SH::ShTextureTraits& params)
 {
   Binding binding(this);
 
-  if (params & SH_LOOKUP_NEAREST) {
+  if (params.interpolation() == 0) {
     SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
     SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-  } else if (params & SH_LOOKUP_LINEAR) {
+  } else if (params.interpolation() == 1) {
     SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
     SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
   }
-  // TODO: SH_FILTER (Mipmapping)
-  if (params & SH_WRAP_CLAMP) {
+  if (params.wrapping() == SH::ShTextureTraits::SH_WRAP_CLAMP) {
     SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_CLAMP));
     SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_CLAMP));
     SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_R, GL_CLAMP));
-  } else if (params & SH_WRAP_REPEAT) {
+  } else if (params.wrapping() == SH::ShTextureTraits::SH_WRAP_REPEAT) {
     SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_REPEAT));
     SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_REPEAT));
     SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_R, GL_REPEAT));
   }
+  // TODO: SH_FILTER (Mipmapping)
   
   m_params = params;
 }

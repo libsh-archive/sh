@@ -558,6 +558,8 @@ struct InitLiveCode {
       ShVariableKind nodeKind = I->dest.node()->kind();
       if (I->dest.node()->kind() != SH_TEMP
           || I->op == SH_OP_KIL
+          || I->op == SH_OP_FETCH // Keep stream fetches, since these
+                                  // are like inputs.
           || I->op == SH_OP_OPTBRA) {
         I->marked = true;
         w.push(&(*I));

@@ -43,8 +43,13 @@ ShCubeDirection glToShCubeDir(GLuint target)
 
 GLenum shGlInternalFormat(const ShTextureNodePtr& node)
 {
-  // TODO: floating point etc.
-  return node->size();
+  if (node->size() < 0 || node->size() > 4) return 0;
+  if (node->traits().clamping() == SH::ShTextureTraits::SH_CLAMPED) {
+    return node->size();
+  } else if (node->traits().clamping() == SH::ShTextureTraits::SH_UNCLAMPED) {
+    GLenum fpformats[4] = {GL_FLOAT_R_NV, GL_FLOAT_RG_NV, GL_FLOAT_RGB_NV, GL_FLOAT_RGBA_NV};
+    return fpformats[node->size() - 1];
+  }
 }
 
 GLenum shGlFormat(const ShTextureNodePtr& node)

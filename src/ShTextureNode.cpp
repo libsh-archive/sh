@@ -32,7 +32,7 @@
 namespace SH {
 
 ShTextureNode::ShTextureNode(ShTextureDims dims, int size,
-                             unsigned int traits,
+                             const ShTextureTraits& traits,
                              int width, int height, int depth)
   : ShVariableNode(SH_TEXTURE, size),
     m_dims(dims),
@@ -88,14 +88,14 @@ void ShTextureNode::memory(ShMemoryPtr mem, ShCubeDirection dir)
   memory(mem, static_cast<int>(dir));
 }
 
-unsigned int ShTextureNode::traits() const
+const ShTextureTraits& ShTextureNode::traits() const
 {
   return m_traits;
 }
 
-void ShTextureNode::traits(unsigned int traits)
+ShTextureTraits& ShTextureNode::traits()
 {
-  m_traits = traits;
+  return m_traits;
 }
 
 int ShTextureNode::width() const

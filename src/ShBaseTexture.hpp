@@ -7,10 +7,10 @@
 
 namespace SH {
 
-template<typename T, unsigned int Traits>
+template<typename T>
 class ShBaseTexture1D : public ShRefCountable {
 public:
-  ShBaseTexture1D(int width);
+  ShBaseTexture1D(int width, const ShTextureTraits& traits);
 
   T operator()(const ShVariableN<1, float>& coords) const;
   T operator[](const ShVariableN<1, float>& coords) const;
@@ -22,10 +22,10 @@ protected:
   ShTextureNodePtr m_node;
 };
 
-template<typename T, unsigned int Traits>
+template<typename T>
 class ShBaseTexture2D : public ShRefCountable {
 public:
-  ShBaseTexture2D(int width, int height);
+  ShBaseTexture2D(int width, int height, const ShTextureTraits& traits);
 
   T operator()(const ShVariableN<2, float>& coords) const;
   T operator[](const ShVariableN<2, float>& coords) const;
@@ -37,10 +37,10 @@ protected:
   ShTextureNodePtr m_node;
 };
 
-template<typename T, unsigned int Traits>
+template<typename T>
 class ShBaseTextureRect : public ShRefCountable {
 public:
-  ShBaseTextureRect(int width, int height);
+  ShBaseTextureRect(int width, int height, const ShTextureTraits& traits);
 
   T operator()(const ShVariableN<2, float>& coords) const;
   T operator[](const ShVariableN<2, float>& coords) const;
@@ -52,10 +52,10 @@ protected:
   ShTextureNodePtr m_node;
 };
 
-template<typename T, unsigned int Traits>
+template<typename T>
 class ShBaseTexture3D : public ShRefCountable {
 public:
-  ShBaseTexture3D(int width, int height, int depth);
+  ShBaseTexture3D(int width, int height, int depth, const ShTextureTraits& traits);
 
   T operator()(const ShVariableN<3, float>& coords) const;
   T operator[](const ShVariableN<3, float>& coords) const;
@@ -67,10 +67,10 @@ protected:
   ShTextureNodePtr m_node;
 };
 
-template<typename T, unsigned int Traits>
+template<typename T>
 class ShBaseTextureCube : public ShRefCountable {
 public:
-  ShBaseTextureCube(int width, int height);
+  ShBaseTextureCube(int width, int height, const ShTextureTraits& traits);
 
   T operator()(const ShVariableN<3, float>& coords) const;
   T operator[](const ShVariableN<3, float>& coords) const;
