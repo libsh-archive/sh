@@ -1,3 +1,7 @@
+2004-08-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* test/regress/Makefile.am: Added test.hpp everywhere.
+
 2004-08-18  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/GlBackend.hpp: Check for __APPLE__ when including
