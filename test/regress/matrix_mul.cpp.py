@@ -37,8 +37,17 @@ def mul(p, q, types=[]):
     result = matmult(p, q)
     return shtest.make_test(result, [p, q], types)
 
+def insert_into(test):
+    test.add_test(mul(((0.0, 1.0, 2.0),(0.0, 1.0, 0.0),(0.0, 0.0, 1.0)), ((1.0, 2.0, 3.0),(3.0, 4.0, 5.0),(5.0, 6.0, 7.0))))
+    #test.add_test(mul((0.5, 1.0, 2.0), ((1.0, 2.0, 3.0),(3.0, 4.0, 5.0),(5.0, 6.0, 7.0)))) # not implemented yet
+    
 test = shtest.ImmediateTest('mul', 2)
 test.add_call(shtest.Call(shtest.Call.infix, '*', 2))
-test.add_test(mul(((0.0, 1.0, 2.0),(0.0, 1.0, 0.0),(0.0, 0.0, 1.0)), ((1.0, 2.0, 3.0),(3.0, 4.0, 5.0),(5.0, 6.0, 7.0))))
-#test.add_test(mul((0.5, 1.0, 2.0), ((1.0, 2.0, 3.0),(3.0, 4.0, 5.0),(5.0, 6.0, 7.0)))) # not implemented yet?
+insert_into(test)
 test.output(sys.stdout)
+
+# Not implemented yet:
+#test = shtest.StreamTest('mul', 2)
+#test.add_call(shtest.Call(shtest.Call.infix, '*', 2))
+#insert_into(test)
+#test.output(sys.stdout)
