@@ -112,18 +112,20 @@ OPERATIONS:
 |X|X|X|X| cos
 | | | | | tan
 |X|X|X|/| <, <=, >, >=, ==, != TODO: These are, um, declared as N x 1. They should either be 1 x 1 or N x N.
-| |X| | | ceil
+|X|X|X|X| floor 
+|X|X|X|X| ceil
 |X|X| | | acos
 |X|X| | | asin
 | | | | | atan
-| | | | | cross
+|X|X|X|X| cross
 |X|X|X|X| min
 |X|X|X|X| max
 | | | | | exp
 | | | | | log
-| | | | | fmod
-| | | | | lerp
-| | | | | rcp (?)
+|X|X|X|X| fmod
+|X|X|X|X| lerp
+| | | | | mad
+| | | | | rcp 
 | | | | | rsqrt
 |X|X|X|X| norm
 |X|X|X|X| cond
