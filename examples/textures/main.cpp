@@ -70,7 +70,7 @@ void initShaders()
     color = (normal | lightv) * diffusecolor;
 
     ShVector3f vv = normalize(-posv);
-    ShVector3f hv = normalize(lightv + hv);
+    ShVector3f hv = normalize(lightv + vv);
     ShNormal3f nv = normal;
     color += color*kd(u) + ks(u)*pow(pos(hv | nv), exponent);
   } SH_END;
