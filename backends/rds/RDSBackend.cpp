@@ -1,5 +1,5 @@
 #include "RDSBackend.hpp"
-#include "Pass.hpp"
+//#include "Pass.hpp"
 #include "../gl/Arb.hpp"
 #include "../gl/GlTextures.hpp"
 #include "../gl/GLXPBufferStreams.hpp"
@@ -63,12 +63,12 @@ void RDSBackend::execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& des
   compare(program->clone());
 #endif
   //m_stream->execute(program,dest);
-  program->ctrlGraph->print(std::cout,0);
+/*  program->ctrlGraph->print(std::cout,0);
   std::cout << program->describe_interface() << std::endl;
   RDS rds(program->clone());
   rds.rds();
   Pass p(rds.get_pdt()->get_root(), "gpu:stream");
-  m_stream->execute(p.get_prog(),dest);
+  m_stream->execute(p.get_prog(),dest);*/
 }
 
 RDSBackend::RDSBackend(void) {

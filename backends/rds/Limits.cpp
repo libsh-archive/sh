@@ -103,6 +103,11 @@ ArbLimits::ArbLimits(const std::string& target)
 
 FakeLimits::FakeLimits() {
   m_instrs = 5;
+  m_halftemps = 10; 
+  m_temps = 10; 
+  m_attribs = 10; 
+  m_params = 10; 
+  m_texs = 10;
 }
 
 }

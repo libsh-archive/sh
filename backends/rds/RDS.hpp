@@ -13,11 +13,6 @@
 #include "PDomTree.hpp"
 #include "Limits.hpp"
 
-#define RDS_UNFIXED 0
-#define RDS_MARKED 1
-#define RDS_UNMARKED 2
-
-
 class SH_DLLEXPORT RDS {
 public:
   
@@ -65,6 +60,11 @@ private:
 	// limits
   rds::Limits *m_limits;
   int m_ops_used;
+  int m_halftemps_used;
+  int m_temps_used;
+  int m_params_used;
+  int m_attribs_used;
+  int m_texs_used;
 
 	// true if rdsh; false if rds
 	bool m_rdsh;
@@ -72,8 +72,8 @@ private:
 	DAG::DAG *m_graph;
 	PDomTree::PDomTree *m_pdt;
 
+	void init_used();
 
-    
 	// for next_ksubset
 	int  ksub_h, ksub_m2;
 	bool ksub_mtc;
@@ -104,20 +104,18 @@ private:
 	int cost(DAGNode::DAGNode* v);
 
 	DAGNode::DAGNode *make_merge(DAGNode::DAGNode* v, int *a, int d, 
-			DAGNode::DAGNodeVector kids, DAGNode::DAGNodeVector unmarked_kids);
+	DAGNode::DAGNodeVector kids, DAGNode::DAGNodeVector unmarked_kids);
 	void add_mr(DAGNode::DAGNode* v);
 	int *next_ksubset(int n, int k, int *a);
 	void unfixall(DAGNode::DAGNode *v);
 	void unmarkall(DAGNode::DAGNode *v);
 	
 	int countmarked(DAGNode::DAGNode *v);
-	int countnodes(DAGNode::DAGNode *v);
 	void unvisitall(DAGNode::DAGNode *v);
 
 	// for brute force
 	void set_nodelist(DAGNode::DAGNode *v);
 	NodeVector m_nodelist;
-
 };
 
 #endif
