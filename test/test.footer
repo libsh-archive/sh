@@ -4,6 +4,7 @@
     ShEnvironment::insideShader = true;
     ShBackendPtr backend = ShBackend::lookup("arb");
     ShBackendCodePtr code = backend->generateCode(shader);
+    std::cerr << "Printing code:" << std::endl;
     code->print(std::cerr);
     ShEnvironment::insideShader = false;
     ShEnvironment::shader = 0;

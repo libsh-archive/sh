@@ -1,0 +1,12 @@
+// -*- C++ -*-
+
+ShShader shader = SH_BEGIN_SHADER(0) {
+  ShInputAttrib1f in; NAME(in);
+  ShAttrib1f temp; NAME(temp);
+  ShOutputAttrib1f out; NAME(out);
+  
+  SH_DO {
+    out = temp + temp;
+  } SH_UNTIL(out);
+  temp = in + in;
+} SH_END_SHADER;

@@ -1,0 +1,8 @@
+ShShader shader = SH_BEGIN_SHADER(0) {
+  ShInputAttrib4f in; NAME(in);
+  ShOutputAttrib4f out; NAME(out);
+  
+  ShAttrib4f temp; NAME(temp);
+  temp = in * in;
+  out = temp;
+} SH_END_SHADER;
