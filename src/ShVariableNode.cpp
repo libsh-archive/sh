@@ -75,7 +75,7 @@ ShVariableNode::ShVariableNode(ShBindingType kind, int size, ShValueType valueTy
 }
 
 ShVariableNode::ShVariableNode(const ShVariableNode& old, ShBindingType newKind,
-          ShSemanticType newType, int newSize, ShValueType newValueType, 
+          int newSize, ShValueType newValueType, ShSemanticType newType, 
           bool updateVarList, bool keepUniform)
   : ShMeta(old), 
     m_uniform(old.m_uniform), m_kind(newKind), m_specialType(newType),
@@ -103,38 +103,19 @@ ShVariableNode::~ShVariableNode()
 }
 
 ShVariableNodePtr ShVariableNode::clone(ShBindingType newKind, 
-    bool updateVarList, bool keepUniform) const
+      int newSize, 
+      ShValueType newValueType, 
+      ShSemanticType newType, 
+      bool updateVarList, 
+      bool keepUniform) const
 {
-  return new ShVariableNode(*this, newKind, m_specialType, m_size, m_valueType, 
-      updateVarList, keepUniform);
-}
+  SH_DEBUG_ASSERT(newValueType != 0);
+  ShBindingType kind = (newKind == SH_BINDINGTYPE_END ? m_kind : newKind);
+  int size = (newSize == 0 ? m_size : newSize);
+  ShValueType valueType = (newValueType == SH_VALUETYPE_END ? m_valueType : newValueType);
+  ShSemanticType type = (newType == SH_SEMANTICTYPE_END ? m_specialType : newType);
 
-ShVariableNodePtr ShVariableNode::clone(ShBindingType newKind, 
-    ShSemanticType newType, bool updateVarList, bool keepUniform) const
-{
-  return new ShVariableNode(*this, newKind, newType, m_size, m_valueType, 
-      updateVarList, keepUniform);
-}
-
-ShVariableNodePtr ShVariableNode::clone(ShBindingType newKind, 
-    ShSemanticType newType, int newSize, 
-    bool updateVarList, bool keepUniform) const
-{
-  return new ShVariableNode(*this, newKind, newType, newSize, m_valueType, 
-      updateVarList, keepUniform);
-}
-
-ShVariableNodePtr ShVariableNode::clone(ShValueType newValueType,
-    bool updateVarList, bool keepUniform) const
-{
-  return new ShVariableNode(*this, m_kind, m_specialType, m_size, newValueType, 
-      updateVarList, keepUniform);
-}
-
-ShVariableNodePtr ShVariableNode::clone(ShBindingType newKind, int newSize, 
-    ShValueType newValueType, bool updateVarList, bool keepUniform) const
-{
-  return new ShVariableNode(*this, newKind, m_specialType, newSize, newValueType, 
+  return new ShVariableNode(*this, kind, size, valueType, type, 
       updateVarList, keepUniform);
 }
 
@@ -216,6 +197,8 @@ std::string ShVariableNode::name() const
   case SH_PALETTE:
     stream << "pal";
     break;
+  default:
+    stream << "??";
   }
 
   stream << m_id;

@@ -69,7 +69,7 @@ ShVariant: public ShRefCountable {
     virtual bool typeMatches(ShValueType valueType, ShDataType dataType) const = 0;
 
     //// Gives the associated type name 
-    virtual std::string typeName() const = 0; 
+    virtual const char* typeName() const = 0; 
 
     /// Gives the number of elements stored in this data array 
     virtual int size() const = 0;
@@ -159,12 +159,13 @@ typedef ShPointer<const ShVariant> ShVariantCPtr;
  *
  * @see ShMemory 
  **/ 
-template<ShValueType V, ShDataType DT>
+template<typename T, ShDataType DT>
 class ShDataVariant: public ShVariant {
   public:
-    typedef ShPointer<ShDataVariant<V, DT> > PtrType;
-    typedef ShPointer<const ShDataVariant<V, DT> > CPtrType;
-    typedef typename ShDataTypeCppType<V, DT>::type DataType;
+    static const ShValueType value_type = ShStorageTypeInfo<T>::value_type;
+    typedef ShPointer<ShDataVariant<T, DT> > PtrType;
+    typedef ShPointer<const ShDataVariant<T, DT> > CPtrType;
+    typedef typename ShDataTypeCppType<T, DT>::type DataType;
     typedef DataType* iterator;
     typedef const DataType* const_iterator;
 
@@ -188,8 +189,8 @@ class ShDataVariant: public ShVariant {
 
     /// Constructs a data array using values from another array
     /// swizzled and negated as requested. 
-    ShDataVariant(const ShDataVariant<V, DT> &other);
-    ShDataVariant(const ShDataVariant<V, DT> &other, bool neg, const ShSwizzle &swizzle); 
+    ShDataVariant(const ShDataVariant<T, DT> &other);
+    ShDataVariant(const ShDataVariant<T, DT> &other, bool neg, const ShSwizzle &swizzle); 
 
     ~ShDataVariant();
 
@@ -198,7 +199,7 @@ class ShDataVariant: public ShVariant {
     bool typeMatches(ShValueType valueType, ShDataType dataType) const; 
 
     //// Gives the associated type name 
-    std::string typeName() const; 
+    const char* typeName() const; 
 
     //std::string typeName() const; 
     
@@ -278,23 +279,23 @@ class ShDataVariant: public ShVariant {
 //
 // Refcounted and non-refcounted versions
 //@{
-template<ShValueType V, ShDataType DT>
-ShPointer<ShDataVariant<V, DT> > variant_cast(ShVariantPtr c);
+template<typename T, ShDataType DT>
+ShPointer<ShDataVariant<T, DT> > variant_cast(ShVariantPtr c);
 
-template<ShValueType V, ShDataType DT>
-ShPointer<const ShDataVariant<V, DT> > variant_cast(ShVariantCPtr c);
+template<typename T, ShDataType DT>
+ShPointer<const ShDataVariant<T, DT> > variant_cast(ShVariantCPtr c);
 
-template<ShValueType V, ShDataType DT>
-ShDataVariant<V, DT>* variant_cast(ShVariant* c);
+template<typename T, ShDataType DT>
+ShDataVariant<T, DT>* variant_cast(ShVariant* c);
 
-template<ShValueType V, ShDataType DT>
-const ShDataVariant<V, DT>* variant_cast(const ShVariant* c);
+template<typename T, ShDataType DT>
+const ShDataVariant<T, DT>* variant_cast(const ShVariant* c);
 // @}
 
 // Make a copy of c cast to the requested type 
 //@{
-template<ShValueType V, ShDataType DT>
-ShPointer<ShDataVariant<V, DT> > variant_convert(ShVariantCPtr c);
+template<typename T, ShDataType DT>
+ShPointer<ShDataVariant<T, DT> > variant_convert(ShVariantCPtr c);
 // @}
 
 

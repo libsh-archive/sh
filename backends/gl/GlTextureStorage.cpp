@@ -80,7 +80,7 @@ class HostGlTextureTransfer : public ShTransfer {
         const_cast<void *>(host->data()), count, false);
 
     if(convertedType != SH_VALUETYPE_END) {
-      SH_DEBUG_WARN("ARB backend does not handle " << valueTypeName[valueType] << " natively.  Converting to " << valueTypeName[convertedType]);
+      SH_DEBUG_WARN("ARB backend does not handle " << shValueTypeName(valueType) << " natively.  Converting to " << shValueTypeName(convertedType));
       dataVariant = shVariantFactory(convertedType, SH_MEM)->generate(count);
       dataVariant->set(hostVariant);
     } else {

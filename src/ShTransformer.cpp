@@ -110,7 +110,8 @@ struct VariableSplitter {
       //if(node->uniform()) ShContext::current()->exit(); 
 
       int newSize = n < maxTuple ? n : maxTuple;
-      newNode = node->clone(node->kind(), node->specialType(), newSize, false); 
+      newNode = node->clone(SH_BINDINGTYPE_END, newSize, 
+          SH_VALUETYPE_END, SH_SEMANTICTYPE_END, false); 
 
       // @todo type should not be necessary any more
       // if(node->uniform()) ShContext::current()->enter(0);
@@ -172,7 +173,7 @@ struct StatementSplitter {
       // TODO check that uniforms don't get screwed
       // TODO check that typing works correctly - temporary should
       // have same type as the statement's operation type
-      ShVariable tempVar(v.node()->clone(SH_TEMP, SH_ATTRIB, tsize, true, false)); 
+      ShVariable tempVar(resizeCloneNode(v.node(), tsize));
       vv.push_back(tempVar);
 
       int* tempSwiz = new int[tsize];
@@ -227,6 +228,10 @@ struct StatementSplitter {
     delete [] swizr;
   }
 
+  ShVariableNodePtr resizeCloneNode(ShVariableNodePtr node, int newSize) {
+    return node->clone(SH_TEMP, newSize, SH_VALUETYPE_END, 
+        SH_SEMANTICTYPE_END, true, false);
+  }
   // works on two assumptions
   // 1) special cases for DOT, XPD (and any other future non-componentwise ops) implemented separately
   // 2) Everything else is in the form N = [1|N]+ in terms of tuple sizes involved in dest and src
@@ -250,8 +255,8 @@ struct StatementSplitter {
 
           // TODO check that this works correctly for weird types
           // (temporaries should have same type as the ShStatement's operation type) 
-          ShVariable dott = ShVariable(dest.node()->clone(SH_TEMP, SH_ATTRIB, 1, true, false));
-          ShVariable sumt = ShVariable(dest.node()->clone(SH_TEMP, SH_ATTRIB, 1, true, false));
+          ShVariable dott = ShVariable(resizeCloneNode(dest.node(), 1));
+          ShVariable sumt = ShVariable(resizeCloneNode(dest.node(), 1));
 
           stmts.push_back(ShStatement(sumt, srcVec[0][0], SH_OP_DOT, srcVec[1][0]));
           for(i = 1; i < srcVec[0].size(); ++i) {
@@ -267,7 +272,7 @@ struct StatementSplitter {
               srcVec[1].size() == 1 && srcVec[1][0].size() == 3); 
 
           // TODO check typing
-          ShVariable result = ShVariable(dest.node()->clone(SH_TEMP, SH_ATTRIB, 3, true, false));
+          ShVariable result = ShVariable(resizeCloneNode(dest.node(), 3));
 
           stmts.push_back(ShStatement(result, srcVec[0][0], SH_OP_XPD, srcVec[1][0]));
           resultVec.push_back(result);
@@ -281,7 +286,7 @@ struct StatementSplitter {
           if( srcVec[2].size() > srcVec[maxi].size() ) maxi = 2;
           for(i = 0; i < srcVec[maxi].size(); ++i) {
             // TODO check typing
-            ShVariable resultPart(dest.node()->clone(SH_TEMP, SH_ATTRIB, srcVec[maxi][i].size(), true, false));
+            ShVariable resultPart(resizeCloneNode(dest.node(), srcVec[maxi][i].size()));
 
             ShStatement newStmt(resultPart, oldStmt.op);
             for(j = 0; j < 3 && !srcVec[j].empty(); ++j) {
@@ -356,11 +361,17 @@ struct InputOutputConvertor {
     }
   }
 
+  // Turn node into a temporary, but do not update var list and do not keep
+  // uniform
+  ShVariableNodePtr cloneNode(ShVariableNodePtr node, ShBindingType binding_type=SH_TEMP) {
+    return node->clone(binding_type, 0, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, false, false);
+  }
+
   /* Convert all INOUT nodes that appear in a VarList (use std::for_each with this object)
    * (currently InOuts are always converted) */ 
   void operator()(ShVariableNodePtr node) {
     if (node->kind() != SH_INOUT || m_varMap.count(node) > 0) return;
-    m_varMap[node] = node->clone(SH_TEMP, false, false); 
+    m_varMap[node] = cloneNode(node);
   }
 
   // Convert inputs, outputs only when they appear in incompatible locations
@@ -371,7 +382,7 @@ struct InputOutputConvertor {
       const ShVariableNodePtr &oldNode = stmt.dest.node();
       if(oldNode->kind() == SH_INPUT) { 
         if(m_varMap.count(oldNode) == 0) {
-          m_varMap[oldNode] = oldNode->clone(SH_TEMP, false, false);
+          m_varMap[oldNode] = cloneNode(oldNode);
         }
       }
     }
@@ -380,7 +391,7 @@ struct InputOutputConvertor {
         const ShVariableNodePtr &oldNode = stmt.src[i].node();
         if(oldNode->kind() == SH_OUTPUT) { 
           if(m_varMap.count(oldNode) == 0) {
-            m_varMap[oldNode] = oldNode->clone(SH_TEMP, false, false);
+            m_varMap[oldNode] = cloneNode(oldNode);
           }
         }
       }
@@ -406,8 +417,8 @@ struct InputOutputConvertor {
               ShVariable(it->second), SH_OP_ASN, ShVariable(oldNode)));
       } else if(oldNode->kind() == SH_INOUT) {
         // replace INOUT nodes in input/output lists with INPUT and OUTPUT nodes
-        ShVariableNodePtr newInNode(oldNode->clone(SH_INPUT, false, false));
-        ShVariableNodePtr newOutNode(oldNode->clone(SH_OUTPUT, false, false));
+        ShVariableNodePtr newInNode(cloneNode(oldNode, SH_INPUT));
+        ShVariableNodePtr newOutNode(cloneNode(oldNode, SH_OUTPUT));
 
         std::replace(m_program->inputs.begin(), m_program->inputs.end(),
             oldNode, newInNode);
@@ -458,6 +469,10 @@ struct TextureLookupConverter {
     }
   }
 
+  ShVariableNodePtr cloneNode(ShVariableNodePtr node) {
+    return node->clone(SH_TEMP, 0, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, true, false);
+  }
+
   void convert(ShBasicBlockPtr block, ShBasicBlock::ShStmtList::iterator& I)
   {
     const ShStatement& stmt = *I;
@@ -470,14 +485,14 @@ struct TextureLookupConverter {
     if (stmt.op == SH_OP_TEX && tn->dims() == SH_TEXTURE_RECT) {
       // TODO check typing
       //ShVariable tc(new ShVariableNode(SH_TEMP, tn->texSizeVar().size()));
-      ShVariable tc(tn->texSizeVar().node()->clone(SH_TEMP, true, false));
+      ShVariable tc(cloneNode(tn->texSizeVar().node()));
 
       newStmts.push_back(ShStatement(tc, stmt.src[1], SH_OP_MUL, tn->texSizeVar()));
       newStmts.push_back(ShStatement(stmt.dest, stmt.src[0], SH_OP_TEXI, tc));
     } else if (stmt.op == SH_OP_TEXI && tn->dims() != SH_TEXTURE_RECT) {
       // TODO check typing
       //ShVariable tc(new ShVariableNode(SH_TEMP, tn->texSizeVar().size()));
-      ShVariable tc(tn->texSizeVar().node()->clone(SH_TEMP, true, false));
+      ShVariable tc(cloneNode(tn->texSizeVar().node()));
 
       newStmts.push_back(ShStatement(tc, stmt.src[1], SH_OP_DIV, tn->texSizeVar()));
       newStmts.push_back(ShStatement(stmt.dest, stmt.src[0], SH_OP_TEX, tc));

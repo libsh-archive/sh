@@ -86,6 +86,7 @@ libsh_dll_SOURCES += ShTextureNode.cpp ShImage.cpp ShImage3D.cpp
 libsh_dll_SOURCES += ShVariableType.hpp ShVariableType.cpp
 libsh_dll_SOURCES += ShTypeInfo.hpp ShTypeInfoImpl.hpp ShTypeInfo.cpp
 libsh_dll_SOURCES += ShTypeInfoCasts.cpp ShTypeInfoOps.cpp 
+libsh_dll_SOURCES += ShStorageType.hpp ShStorageTypeImpl.hpp ShStorageType.cpp
 libsh_dll_SOURCES += ShDataType.hpp ShDataTypeImpl.hpp ShDataType.cpp
 libsh_dll_SOURCES += ShGeneric.hpp ShGenericImpl.hpp
 libsh_dll_SOURCES += ShAttrib.hpp ShAttribImpl.hpp
@@ -106,6 +107,8 @@ libsh_dll_SOURCES += ShEval.hpp ShEvalImpl.hpp ShEval.cpp
 libsh_dll_SOURCES += ShConcreteRegularOpImpl.hpp 
 libsh_dll_SOURCES += ShConcreteCTypeOpImpl.hpp  ShConcreteCTypeOp.cpp
 libsh_dll_SOURCES += ShConcreteIntervalOpImpl.hpp 
+libsh_dll_SOURCES += ShHalf.hpp ShHalfImpl.hpp 
+libsh_dll_SOURCES += ShFraction.hpp ShFractionImpl.hpp 
 libsh_dll_SOURCES += ShInterval.hpp ShIntervalImpl.hpp 
 
 

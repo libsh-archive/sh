@@ -146,6 +146,10 @@ struct IntervalSplitter {
       } else ++I;
     }
   }
+
+  ShVariableNodePtr cloneNode(ShVariableNodePtr node, ShValueType rangeValueType) {
+    return node->clone(SH_BINDINGTYPE_END, 0, rangeValueType, SH_SEMANTICTYPE_END, false); 
+  }
   
   void splitVars(ShStatement& stmt) {
     stmt.marked = false;
@@ -161,7 +165,7 @@ struct IntervalSplitter {
   {
     ShValueType valueType = node->valueType(); 
 
-    if(!shIsIntervalValueType(valueType)) return false; 
+    if(!shIsInterval(valueType)) return false; 
     else if(splits.count(node) > 0) return true;
 
     if( node->kind() == SH_TEXTURE || node->kind() == SH_STREAM ) {
@@ -173,8 +177,8 @@ struct IntervalSplitter {
     ShTransformer::VarNodeVec &splitNodes = splits[node];
     ShValueType newValueType = shRegularValueType(valueType);
 
-    splitNodes.push_back(node->clone(newValueType, false));  // lo
-    splitNodes.push_back(node->clone(newValueType, false));  // hi
+    splitNodes.push_back(cloneNode(node, newValueType));  // lo
+    splitNodes.push_back(cloneNode(node, newValueType));  // hi
     // @todo type handle constants/uniforms
 
     return true; 

@@ -29,10 +29,13 @@
 
 #include <string>
 #include <vector>
+#include "ShHashMap.hpp"
 #include "ShVariableType.hpp"
 #include "ShDataType.hpp"
 #include "ShRefCount.hpp"
 #include "ShInterval.hpp"
+#include "ShFraction.hpp"
+#include "ShHalf.hpp"
 
 namespace SH {
 
@@ -40,7 +43,9 @@ namespace SH {
 class ShVariantFactory;
 
 
-/** A holder of information about a type and how to allocate it */ 
+/** A holder of information about a data type and how to allocate it 
+ * @see ShDataType.hpp
+ * */ 
 struct 
 SH_DLLEXPORT
 ShTypeInfo {
@@ -63,9 +68,10 @@ ShTypeInfo {
   /** Returns the type info with the requested value and data types. */ 
   static const ShTypeInfo* get(ShValueType valueType, ShDataType dataType);
 
+  typedef ShPairHashMap<ShValueType, ShDataType, const ShTypeInfo*> TypeInfoMap;
   private:
     /** Holds ShDataTypeInfo instances for all available valuetype/datatypes */
-    static const ShTypeInfo* m_valueTypes[SH_VALUETYPE_END][SH_DATATYPE_END]; 
+    static TypeInfoMap m_valueTypes;
 
     /** Adds automatic promotion and other casts into the ShCastManager */ 
     static void addCasts();
@@ -76,10 +82,10 @@ ShTypeInfo {
 
 // generic level, singleton ShTypeInfo class holding information for
 // a particular type
-template<ShValueType V, ShDataType DT>
+template<typename T, ShDataType DT>
 struct ShDataTypeInfo: public ShTypeInfo {
   public:
-    typedef typename ShDataTypeCppType<V, DT>::type type;
+    typedef typename ShDataTypeCppType<T, DT>::type type;
     static const type Zero;
     static const type One;
 
@@ -94,11 +100,6 @@ struct ShDataTypeInfo: public ShTypeInfo {
     ShDataTypeInfo() {}
 };
 
-/// Returns the number of storage types
-// This means that type indices 0 through result - 1 are all
-// occupied.
-//SH_DLLEXPORT
-//int shNumTypes();
 
 SH_DLLEXPORT
 extern const ShTypeInfo* shTypeInfo(ShValueType valueType, ShDataType dataType = SH_HOST);
@@ -106,25 +107,8 @@ extern const ShTypeInfo* shTypeInfo(ShValueType valueType, ShDataType dataType =
 SH_DLLEXPORT
 extern const ShVariantFactory* shVariantFactory(ShValueType valueType, ShDataType dataType = SH_HOST);
 
-// Provides a least common ancestor in the type tree for 
-// a given pair of types in a typedef named type 
-template<ShValueType V1, ShValueType V2>
-struct ShCommonType;
-
-
-template<ShValueType V1, ShValueType V2, ShValueType V3>
-struct ShCommonType3 {
-  static const ShValueType valueType = 
-    ShCommonType<ShCommonType<V1, V2>::valueType, V3>::valueType;
-};
-
-template<ShValueType V1, ShValueType V2, ShValueType V3, ShValueType V4>
-struct ShCommonType4 {
-  static const ShValueType valueType = 
-    ShCommonType<ShCommonType<V1, V2>::valueType, 
-      ShCommonType<V3, V4>::valueType>::valueType; 
-};
-
+SH_DLLEXPORT
+extern const char* shValueTypeName(ShValueType valueType);
 }
 
 #include "ShTypeInfoImpl.hpp"

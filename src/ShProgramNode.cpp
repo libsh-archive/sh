@@ -211,6 +211,8 @@ void ShProgramNode::collectVar(const ShVariableNodePtr& var)
       palettes.push_back(shref_dynamic_cast<ShPaletteNode>(var));
     }
     break;
+  default:
+    SH_DEBUG_ASSERT(0);
   }
 }
 

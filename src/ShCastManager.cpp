@@ -85,20 +85,15 @@ ShCastMgrVertex::ShCastMgrVertex(const ShCastMgrVertex &other)
 
 ShCastMgrGraph::ShCastMgrGraph() 
 {
-  for(int i = 0; i < (int)SH_VALUETYPE_END; ++i) {
-    for(int j = 0; j < (int)SH_DATATYPE_END; ++j) {
-      m_vert[i][j] = 0;
-    }
-  }
 }
 
 ShCastMgrVertex* ShCastMgrGraph::addVertex(ShValueType valueType, ShDataType dataType)
 {
-  if(!m_vert[valueType][dataType]) {
-    m_vert[valueType][dataType] = new ShCastMgrVertex(valueType, dataType);
-    ShGraph<ShCastMgrGraphType>::addVertex(m_vert[valueType][dataType]);
+  if(!m_vert(valueType, dataType)) {
+    m_vert(valueType, dataType) = new ShCastMgrVertex(valueType, dataType);
+    ShGraph<ShCastMgrGraphType>::addVertex(m_vert(valueType, dataType));
   }
-  return m_vert[valueType][dataType];
+  return m_vert(valueType, dataType);
 }
 
 void ShCastMgrGraph::addEdge( ShCastMgrEdge *edge)
@@ -114,7 +109,7 @@ void ShCastMgrGraph::addEdge( ShCastMgrEdge *edge)
 
 std::ostream& ShCastMgrVertex::graphvizDump(std::ostream& out) const
 {
-  out << "[label=\"" << valueTypeName[m_valueType] << ", " 
+  out << "[label=\"" << shValueTypeName(m_valueType) << ", " 
       << dataTypeName[m_dataType] << "\"]";
   return out;
 }
@@ -139,19 +134,12 @@ void ShCastManager::init()
 
   // initializes m_castStep to zeros
 
-  for(int i = 0; i < (int)SH_VALUETYPE_END; ++i) 
-  for(int j = 0; j < (int)SH_DATATYPE_END; ++j) 
-  for(int k = 0; k < (int)SH_VALUETYPE_END; ++k) 
-  for(int l = 0; l < (int)SH_DATATYPE_END; ++l) {
-    m_castStep[i][j][k][l] = 0; 
-  }
-
   m_casts.floydWarshall(cast_weigher, temp, &step); 
   for(S = step.begin(); S != step.end(); ++S) {
     ShCastMgrVertex &src = *(S->first.first);
     ShCastMgrVertex &dest = *(S->first.second);
-    m_castStep[dest.m_valueType][dest.m_dataType]
-              [src.m_valueType][src.m_dataType] = S->second->m_caster;
+    m_castStep(dest.m_valueType, dest.m_dataType, 
+               src.m_valueType, src.m_dataType) = S->second->m_caster;
   }
 
   m_casts.floydWarshall(auto_weigher, temp, &step); 
@@ -159,7 +147,7 @@ void ShCastManager::init()
     ShCastMgrVertex &src = *(T->first.first);
     ShCastMgrVertex &dest = *(T->first.second);
     if((src.m_dataType != SH_HOST) || (dest.m_dataType != SH_HOST)) continue;
-    m_autoDist[dest.m_valueType][src.m_valueType] = T->second;
+    m_autoDist(dest.m_valueType, src.m_valueType) = T->second;
   }
 }
 
@@ -182,7 +170,7 @@ void ShCastManager::doCast(ShVariant* dest, const ShVariant* src)
   }
 
   for(bool first = true;;first = false) {
-    const ShVariantCast* caster = m_castStep[destVt][destDt][srcVt][srcDt];
+    const ShVariantCast* caster = m_castStep(destVt, destDt, srcVt, srcDt);
     //SH_DEBUG_ASSERT(caster);
 
     caster->getDestTypes(srcVt, srcDt); // get results of next step in cast
@@ -223,7 +211,7 @@ bool ShCastManager::doAllocCast(const ShVariant*& dest, const ShVariant* src,
 
 int ShCastManager::castDist(ShValueType destValueType, ShValueType srcValueType)
 {
-  return m_autoDist[destValueType][srcValueType];
+  return m_autoDist(destValueType, srcValueType);
 }
 
 ShCastManager* ShCastManager::instance() 

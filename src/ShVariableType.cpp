@@ -36,7 +36,9 @@ const char* bindingTypeName[] = {
   "Constant",
   "Texture",
   "Stream",
-  "Palette"
+  "Palette",
+
+  "Invalid Binding Type"
 };
 
 const char* semanticTypeName[] = {
@@ -46,32 +48,9 @@ const char* semanticTypeName[] = {
   "Normal",
   "Color",
   "TexCoord",
-  "Position"
-};
+  "Position",
 
-const char* valueTypeName[] = {
-  "i_d",
-  "i_f",
-
-  "d",
-  "f",
-  "h",
-
-  "i",
-  "s",
-  "b",
-  "ui",
-  "us",
-  "ub",
-
-  "fi",
-  "fs",
-  "fb",
-  "fui",
-  "fus",
-  "fub",
-
-  "unknown"
+  "Invalid Semantic Type"
 };
 
 

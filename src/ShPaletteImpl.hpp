@@ -58,8 +58,8 @@ T& ShPalette<T>::operator[](std::size_t index)
 }
 
 template<typename T>
-template<ShValueType V>
-T ShPalette<T>::operator[](const ShGeneric<1, V>& index) const
+template<typename T2>
+T ShPalette<T>::operator[](const ShGeneric<1, T2>& index) const
 {
   if (ShContext::current()->parsing()) {
     T t;

@@ -4,23 +4,23 @@ import string, sys
 
 from common import * 
 
-value_type_enum = {'d': 'SH_DOUBLE',
-            'f': 'SH_FLOAT',
-            'h': 'SH_HALF',
+value_type_enum = {'d': 'double',
+            'f': 'float',
+            'h': 'ShHalf',
 
-            'i': 'SH_INT',
-            's': 'SH_SHORT',
-            'b': 'SH_BYTE',
-            'ui': 'SH_UINT',
-            'us': 'SH_USHORT',
-            'ub': 'SH_UBYTE',
+            'i': 'int',
+            's': 'short',
+            'b': 'char',
+            'ui': 'unsigned int',
+            'us': 'unsigned short',
+            'ub': 'unsigned char',
 
-            'fi': 'SH_FRAC_INT',
-            'fs': 'SH_FRAC_SHORT',
-            'fb': 'SH_FRAC_BYTE',
-            'fui': 'SH_FRAC_UINT',
-            'fus': 'SH_FRAC_USHORT',
-            'fub': 'SH_FRAC_UBYTE' 
+            'fi': 'ShFracInt',
+            'fs': 'ShFracShort',
+            'fb': 'ShFracByte',
+            'fui': 'ShFracUInt',
+            'fus': 'ShFracUShort',
+            'fub': 'ShFracUByte' 
             }
 
 enum_value_type = dict(zip(value_type_enum.values(), value_type_enum.keys()))
@@ -31,7 +31,7 @@ def make_attrib(size, binding_type, value_type):
 # types are a list of dest then src types ('f' used as default) 
 def make_test(expected, values, types=[]):
     types = [value_type_enum.has_key(x) and value_type_enum[x] or x for x in types] 
-    types = types + (len(values) + 1 - len(types)) * ['SH_FLOAT']
+    types = types + (len(values) + 1 - len(types)) * ['float']
     return (expected, values, types)
 
 # Handles different styles of function calls that assign their value to a
@@ -247,7 +247,7 @@ class ImmediateTest(Test):
 if __name__ == "__main__":
     foo = StreamTest("add", 2)
     foo.add_texture(ImageTexture("ShTexture2D<ShColor3f>", "mytex", "mytex.png")) 
-    foo.add_texture(GenTexture("ShTexture2D<ShColor3f>", "SH_FLOAT", 3, (128, 64), "mytex2", "i / 128.0 + j / 64.0"))
+    foo.add_texture(GenTexture("ShTexture2D<ShColor3f>", "float", 3, (128, 64), "mytex2", "i / 128.0 + j / 64.0"))
     foo.add_call(Call(Call.infix, '+', 2))
     foo.add_call(Call(Call.call, 'add', 2))
     foo.add_make_test((3, 5, 7), [(0, 1, 2), (3, 4, 5)])

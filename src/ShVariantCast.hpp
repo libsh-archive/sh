@@ -68,10 +68,12 @@ ShVariantCast {
  * and may have some extra conversion code (e.g. clamping) applied
  * in addition to the default C cast for those types. 
  */
-template<ShValueType Dest, ShDataType DestDT, 
-  ShValueType Src, ShDataType SrcDT>
+template<typename Dest, ShDataType DestDT, 
+  typename Src, ShDataType SrcDT>
 struct ShDataVariantCast: public ShVariantCast {
   public:
+    static const ShValueType DestValueType = ShStorageTypeInfo<Dest>::value_type;
+    static const ShValueType SrcValueType = ShStorageTypeInfo<Src>::value_type;
     typedef typename ShDataTypeCppType<Dest, DestDT>::type D;
     typedef typename ShDataTypeCppType<Src, SrcDT>::type S;
 
