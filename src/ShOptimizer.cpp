@@ -43,7 +43,6 @@ void ShOptimizer::optimize(int level)
   if (level >= 1) {
     copyPropagation();
     moveElimination();
-    //    unusedTempsRemoval();
 
     insertBraInsts();
     
@@ -55,6 +54,8 @@ void ShOptimizer::optimize(int level)
     removeBraInsts();
   }
 }
+
+// Copy propagation
 
 struct CopyPropagator {
   CopyPropagator(ShOptimizer& o)
@@ -115,6 +116,7 @@ void ShOptimizer::removeACP(const ShVariable& var)
   }
 }
 
+/// A utility routine
 bool inRHS(ShVariableNodePtr node, ShStatement& stmt)
 {
   for (int i = 0; i < opInfo[stmt.op].arity; i++) {
@@ -123,6 +125,8 @@ bool inRHS(ShVariableNodePtr node, ShStatement& stmt)
   
   return false;
 }
+
+// Move elimination
 
 struct MoveEliminator {
   MoveEliminator(ShOptimizer& o)
@@ -188,76 +192,7 @@ void ShOptimizer::removeAME(ShVariableNodePtr node)
   }
 }
 
-// Unused Temporary Removal
-//
-// This isn't particularily smart right now. It only checks if a
-// temporary is _ever_ used and if so marks it live. So, this will
-// not handle chains of dead temporaries or self-assignment in
-// temporaries.
-// 
-// Really a more complicated method, perhaps using du/ud-chains or
-// some form of SSA should be used to do dead code elimination.
-//
-
-struct TempFinder {
-  TempFinder(ShOptimizer& o)
-    : optimizer(o)
-  {
-  }
-
-  void operator()(ShCtrlGraphNodePtr node) {
-    if (!node) return;
-    ShBasicBlockPtr block = node->block;
-    if (!block) return;
-    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-      for (int i = 0; i < opInfo[I->op].arity; i++) {
-        if (I->src[i].node()->kind() == SH_VAR_TEMP) optimizer.m_tum.insert(I->src[i].node());
-      }
-    }
-    for (std::vector<ShCtrlGraphBranch>::const_iterator I = node->successors.begin();
-         I != node->successors.end(); ++I) {
-      if (I->cond.node()->kind() == SH_VAR_TEMP) optimizer.m_tum.insert(I->cond.node());
-    }
-  }
-  
-  ShOptimizer& optimizer;
-};
-
-struct TempRemover {
-  TempRemover(ShOptimizer& o)
-    : optimizer(o)
-  {
-  }
-
-  void operator()(ShCtrlGraphNodePtr node) {
-    if (!node) return;
-    ShBasicBlockPtr block = node->block;
-    if (!block) return;
-    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end();) {
-      if (I->dest.node() && I->dest.node()->kind() == SH_VAR_TEMP
-          && optimizer.m_tum.find(I->dest.node()) == optimizer.m_tum.end()) {
-        I = block->erase(I);
-        continue;
-      }
-      ++I;
-    }
-  }
-  
-  ShOptimizer& optimizer;
-};
-
-void ShOptimizer::unusedTempsRemoval()
-{
-  TempFinder f(*this);
-
-  m_graph->dfs(f);
-  
-  TempRemover r(*this);
-  
-  m_graph->dfs(r);
-
-  m_tum.clear();
-}
+// Solve the reaching definitions problem
 
 struct DefFinder {
   DefFinder(ShOptimizer& o)
@@ -369,7 +304,6 @@ struct DumpRch {
   ShOptimizer::ReachingMap& r;
 };
 
-// Solve the reaching definitions problem
 void ShOptimizer::solveReachDefs()
 {
   ReachingMap gen;
@@ -493,6 +427,8 @@ void ShOptimizer::buildUdDuChains()
   UdDuDumper dumper;
   m_graph->dfs(dumper);
 }
+
+// Dead code removal
 
 typedef std::queue<ShStatement*> DeadCodeWorkList;
 

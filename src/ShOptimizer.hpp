@@ -38,6 +38,10 @@
 
 namespace SH {
 
+/** Program optimizer
+ * Used internally after programs are created to (hopefully) make them
+ * more efficient.
+ */
 class ShOptimizer {
 public:
   ShOptimizer(ShCtrlGraphPtr graph);
@@ -48,6 +52,9 @@ public:
 private:
   ShCtrlGraphPtr m_graph;
 
+  /**@name Copy propagation
+   */
+  //@{
   friend class CopyPropagator;
   typedef std::list< std::pair<ShVariableNodePtr, ShVariableNodePtr> > ACP;
   ACP m_acp;
@@ -55,7 +62,18 @@ private:
   void localCopyProp(ShBasicBlockPtr block);
   void copyValue(ShVariable& var);
   void removeACP(const ShVariable& var);
-
+  //@}
+  
+  /**@name Move elimination
+   * A local optimization, replaces occurences of
+   *  t <- expr
+   *  x <- t
+   * with
+   *  t <- expr
+   *  x <- expr
+   * Which may cause t to be removed.
+   */
+  //@{
   friend class MoveEliminator;
   typedef std::list<ShStatement> AME;
   AME m_ame;
@@ -63,7 +81,12 @@ private:
   void localMoveElim(ShBasicBlockPtr block);
   void eliminateMove(ShStatement& stmt);
   void removeAME(ShVariableNodePtr node);
-
+  //@}
+  
+  /**@name Reaching definitions
+   * Used to build the ud/du chains.
+   */
+  //@{
   friend class DefFinder;
   friend class InitRch;
   friend class IterateRch;
@@ -75,18 +98,34 @@ private:
   typedef std::map<ShCtrlGraphNodePtr, ShBitSet> ReachingMap;
   ReachingMap m_reachIn;
   void solveReachDefs();
+  //@}
 
+  /**@name ud/du chain building
+   */
+  //@{
   friend class UdDuBuilder;
   void buildUdDuChains();
-
+  //@}
+  
+  /**@name Dead code removal
+   */
+  //@{
   friend class InitLiveCode;
   friend class DeadCodeRemover;
   void removeDeadCode();
-
+  //@}
+  
+  /**@name SH_OP_OPTBRA insertion/removal
+   * These instructions are inserted at each conditional branch. This
+   * is to avoid the dead code remover removing code that a branch
+   * depends on.
+   */
+  //@{
   friend class BraInstInserter;
   friend class BraInstRemover;
   void insertBraInsts();
   void removeBraInsts();
+  //@}
   
   /// NOT IMPLEMENTED
   ShOptimizer(const ShOptimizer& other);
