@@ -52,29 +52,25 @@ const GlslVarBindingInfo GlslVariable::glslVarBindingInfo[] = {
 };
 
 GlslVariable::GlslVariable()
-  : m_builtin(false), m_texture(false), m_uniform(false), 
-    m_name(""), m_size(0), m_kind(SH_TEMP), m_type(SH_FLOAT), 
-    m_semantic_type(SH_ATTRIB), m_values("")
+  : m_builtin(false), m_texture(false), m_palette(false), m_uniform(false), 
+    m_name(""), m_size(0), m_dims(SH_TEXTURE_1D), m_length(0), m_kind(SH_TEMP),
+    m_type(SH_FLOAT), m_semantic_type(SH_ATTRIB), m_values("")
 {
 }
 
 GlslVariable::GlslVariable(const GlslVariable& v)
-  : m_builtin(v.m_builtin), m_texture(v.m_texture),
-    m_uniform(v.m_uniform), m_name(v.m_name), 
-    m_kind(v.m_kind), m_type(v.m_type), 
+  : m_builtin(v.m_builtin), m_texture(v.m_texture), m_palette(v.m_palette),
+    m_uniform(v.m_uniform), m_name(v.m_name), m_size(v.m_size), 
+    m_dims(v.m_dims), m_length(v.m_length), m_kind(v.m_kind), m_type(v.m_type),
     m_semantic_type(v.m_semantic_type), m_values(v.m_values)
 {
-  if (m_texture) {
-    m_dims = v.m_dims;
-  } else {
-    m_size = v.m_size;
-  }
 }
 
 GlslVariable::GlslVariable(const ShVariableNodePtr& v)
   : m_builtin(false), m_texture(SH_TEXTURE == v->kind()),
-    m_uniform(m_texture || v->uniform()),
-    m_kind(v->kind()), m_type(v->valueType()), 
+    m_palette(SH_PALETTE == v->kind()),
+    m_uniform(m_texture || m_palette || v->uniform()),
+    m_size(v->size()), m_kind(v->kind()), m_type(v->valueType()), 
     m_semantic_type(v->specialType())
 {
   if (v->hasValues()) {
@@ -83,8 +79,9 @@ GlslVariable::GlslVariable(const ShVariableNodePtr& v)
   if (m_texture) {
     ShTextureNodePtr texture = shref_dynamic_cast<ShTextureNode>(v);
     m_dims = texture->dims();
-  } else {
-    m_size = v->size();
+  } else if (m_palette) {
+    ShPaletteNodePtr palette = shref_dynamic_cast<ShPaletteNode>(v);
+    m_length = palette->palette_length();
   }
 }
 
@@ -92,27 +89,40 @@ string GlslVariable::declaration() const
 {
   if (m_builtin) return "";
 
-  string ret;
+  stringstream s;
   string type = type_string();
 
   if (m_kind == SH_CONST) {
-    ret += "const ";
-  }
-  ret += type + " " + m_name;
-  if (!m_values.empty() && !m_uniform) {
-    ret += " = " + type + "(" + m_values + ")";
+    s << "const ";
   }
 
-  return ret;
+  s << type << " " << m_name;
+
+  if (m_palette) {
+    s << "[" << m_length << "]";
+  }
+
+  if (!m_values.empty() && !m_uniform) {
+    s << " = " << type << "(" << m_values << ")";
+  }
+
+  return s.str();
 }
 
 void GlslVariable::name(int i, enum GlslProgramType unit)
 {
   stringstream varname;
   if (m_uniform) {
-    varname << (m_texture ? "tex" : "uni");
-    varname << (unit == SH_GLSL_FP ? "fp" : "vp");
-  } else {
+    if (m_texture) {
+      varname << "tex";
+    } else if (m_palette) {
+      varname << "pal";
+    } else {
+      varname << "uni";
+    }
+    varname << "_" << (unit == SH_GLSL_FP ? "fp" : "vp");
+  } 
+  else {
     switch (m_kind) {
     case SH_INPUT:
       varname << "var_i";
@@ -138,8 +148,9 @@ void GlslVariable::name(int i, enum GlslProgramType unit)
     case SH_PALETTE:
       varname << "var_p";
       break;
-    default:
-      varname << "var";
+    case SH_BINDINGTYPE_END:
+      SH_DEBUG_ASSERT(0); // Error
+      break;
     }
   }
   varname << "_" << i;

@@ -1,3 +1,10 @@
+2005-03-17  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslVariableMap.cpp, GlslVariableMap.hpp,
+	GlslVariable.cpp, GlslVariable.hpp, GlslEmit.cpp, GlslCode.cpp,
+	GlslCode.hpp: Add support for the PAL operation and initialize the
+	palette uniforms properly.
+	
 2005-03-16  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslCode.hpp, GlslEmit.cpp (allocate_constant): Add

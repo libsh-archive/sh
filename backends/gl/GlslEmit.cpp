@@ -157,6 +157,9 @@ void GlslCode::emit(const ShStatement &stmt)
     case SH_OP_LOG10:
       emit_log(stmt, 10);
       break;
+    case SH_OP_PAL:
+      emit_pal(stmt);
+      break;
     case SH_OP_SEQ:
     case SH_OP_SGE:
     case SH_OP_SGT:
@@ -228,7 +231,7 @@ void GlslCode::emit_cbrt(const ShStatement& stmt)
 
 void GlslCode::emit_discard(const ShStatement& stmt)
 {
-  SH_DEBUG_ASSERT((SH_OP_KIL == stmt.op));
+  SH_DEBUG_ASSERT(SH_OP_KIL == stmt.op);
 
   append_line(string("if (bool(") + resolve(stmt.src[0]) + ")) discard;");
 }
@@ -330,6 +333,13 @@ void GlslCode::emit_logic(const ShStatement& stmt)
   mapping.code = s.c_str();
 
   table_substitution(stmt, mapping);
+}
+
+void GlslCode::emit_pal(const ShStatement& stmt)
+{
+  SH_DEBUG_ASSERT(SH_OP_PAL == stmt.op);
+
+  append_line(resolve(stmt.dest) + " = " + resolve(stmt.src[0], stmt.src[1]));
 }
 
 void GlslCode::emit_prod(const ShStatement& stmt)

@@ -140,6 +140,7 @@ private:
   void emit_lit(const SH::ShStatement& stmt);
   void emit_log(const SH::ShStatement& stmt, double base);
   void emit_logic(const SH::ShStatement& stmt);
+  void emit_pal(const SH::ShStatement& stmt);
   void emit_prod(const SH::ShStatement& stmt);
   void emit_sum(const SH::ShStatement& stmt);
   void emit_texture(const SH::ShStatement& stmt);
@@ -147,10 +148,12 @@ private:
   void table_substitution(const SH::ShStatement& stmt, GlslOpCodeVecs codeVecs);
   
   std::string resolve(const SH::ShVariable& v, int index = -1) const;
+  std::string resolve(const SH::ShVariable& v, const SH::ShVariable& index) const;
   std::string resolve_constant(double constant, const SH::ShVariable& var, int size = 0) const;
 
-  void updateFloatUniform(const SH::ShVariableNodePtr& node, const GLint location);
-  void updateIntUniform(const SH::ShVariableNodePtr& node, const GLint location);
+  void update_float_uniform(const SH::ShVariableNodePtr& node, const GLint location);
+  void update_int_uniform(const SH::ShVariableNodePtr& node, const GLint location);
+  void real_update_uniform(const SH::ShVariableNodePtr& uniform, const std::string& name);
 
   SH::ShVariableNodePtr allocate_constant(const SH::ShStatement& stmt, double constant, int size = 0) const;
   SH::ShVariableNodePtr allocate_temp(const SH::ShStatement& stmt, int size = 0) const;

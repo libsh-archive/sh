@@ -47,6 +47,7 @@ public:
   GlslVariableMap(SH::ShProgramNode* shader, GlslProgramType unit);
   
   std::string resolve(const SH::ShVariable& v, int index = -1);
+  std::string resolve(const SH::ShVariable& v, const SH::ShVariable& index);
   const GlslVariable& variable(const SH::ShVariableNodePtr& node);
   bool contains(const SH::ShVariableNodePtr& node) const;
 
@@ -83,9 +84,11 @@ private:
   void allocate_builtin_inputs();
   void allocate_builtin_outputs();
   void allocate_temp(const SH::ShVariableNodePtr& node);
+  void allocate_palette(const SH::ShPaletteNodePtr& palette);
   
   void map_insert(const SH::ShVariableNodePtr& node, GlslVariable var);
 
+  std::string real_resolve(const SH::ShVariable& v, const std::string& array_index, int index);
   std::string swizzle(const SH::ShVariable& v, int var_size) const;
   std::string repeat_scalar(const std::string& name, SH::ShValueType type, int size) const;
 };

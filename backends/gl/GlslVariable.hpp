@@ -95,15 +95,19 @@ public:
 private:
   bool m_builtin; /// if true, it won't be declared or initialized
   bool m_texture;
+  bool m_palette;
   bool m_uniform;
+
   std::string m_name;
-  union {
-    int m_size;
-    SH::ShTextureDims m_dims; // if m_texture == true
-  };
+
+  int m_size;
+  SH::ShTextureDims m_dims; // if m_texture == true
+  std::size_t m_length; // if m_palette == true
+
   SH::ShBindingType m_kind;
   SH::ShValueType m_type;
   SH::ShSemanticType m_semantic_type;
+
   std::string m_values;
   
   std::string type_string() const;

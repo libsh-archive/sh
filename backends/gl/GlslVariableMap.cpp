@@ -82,6 +82,10 @@ GlslVariableMap::GlslVariableMap(ShProgramNode* shader, GlslProgramType unit)
   allocate_builtin_inputs();
   allocate_builtin_outputs();
 
+  for (ShProgramNode::PaletteList::const_iterator i = m_shader->palettes_begin();
+       i != m_shader->palettes_end(); i++) {
+    allocate_palette(*i);
+  }
   for (ShProgramNode::VarList::const_iterator i = m_shader->temps_begin();
        i != m_shader->temps_end(); i++) {
     allocate_temp(*i);
@@ -153,6 +157,24 @@ void GlslVariableMap::allocate_temp(const ShVariableNodePtr& node)
   }
 }
 
+void GlslVariableMap::allocate_palette(const ShPaletteNodePtr& palette)
+{
+  GlslVariable var(palette);
+  if (var.uniform()) {
+    var.name(m_nb_uniform_variables++, m_unit);
+  } else {
+    var.name(m_nb_regular_variables++, m_unit);
+  }
+  map_insert(palette, var);
+
+  // Since this variable is not built-in, it must be declared
+  if (var.uniform()) {
+    m_uniform_declarations.push_back(var.declaration());
+  } else {
+    m_regular_declarations.push_back(var.declaration());
+  }
+}
+
 void GlslVariableMap::map_insert(const ShVariableNodePtr& node, GlslVariable var)
 {
   m_nodes.push_back(node);
@@ -179,7 +201,7 @@ GlslVariableMap::DeclarationList::const_iterator GlslVariableMap::regular_end() 
   return m_regular_declarations.end();
 }
 
-string GlslVariableMap::resolve(const ShVariable& v, int index)
+string GlslVariableMap::real_resolve(const ShVariable& v, const string& array_index, int index)
 {
   if (m_varmap.find(v.node()) == m_varmap.end()) {
     allocate_temp(v.node());
@@ -187,12 +209,15 @@ string GlslVariableMap::resolve(const ShVariable& v, int index)
 
   GlslVariable var(m_varmap[v.node()]);
   string s = var.name();
-  
+  if (!array_index.empty()) {
+    s += "[" + array_index + "]";
+  }
+ 
   if (!var.texture()) {
     if (-1 == index) {      
       if (1 == var.size()) {
 	// Scalars cannot be swizzled
-	s = repeat_scalar(var.name(), v.valueType(), v.swizzle().size());
+	s = repeat_scalar(s, v.valueType(), v.swizzle().size());
       } else {
 	s += swizzle(v, var.size());
       }
@@ -212,6 +237,16 @@ string GlslVariableMap::resolve(const ShVariable& v, int index)
   }
 
   return s;
+}
+
+string GlslVariableMap::resolve(const ShVariable& v, const ShVariable& index)
+{
+  return real_resolve(v, resolve(index), -1);
+}
+
+string GlslVariableMap::resolve(const ShVariable& v, int index)
+{
+  return real_resolve(v, "", index);
 }
 
 string GlslVariableMap::swizzle(const ShVariable& v, int var_size) const
