@@ -1,3 +1,39 @@
+2004-11-28  Bryan Chan <b8chan@cgl.uwaterloo.ca
+	* src/ShUtility.hpp (MatchTemplateType, TemplateParamterType):
+	Added some mildly useful template voodoo. 
+
+	Cleaned up parts of storage types 
+	Switched all template parameters back to typename from ShValueType.
+	Reorganized some things to make it easier to add user-defined types.
+	* src/ShStorageType.hpp, ShStorageTypeImpl.hpp:
+	Added some infrastructure needed for typename params.
+
+	* src/ShFraction.hpp, ShFractionImpl.hpp:
+	Added a fraction type that uses appropriate temporary types for
+	ops where intermediates may overflow.
+	Handles either clamped or overflow mode (but overflow commented out).
+
+	* src/ShHalf.hpp:
+	Added half type (slow but functional).  Should pop in OpenEXR's half as a
+	replacement at some point, or add a autoconf flag to use one or the other. 
+
+	* src/ShVariableNode.hpp, ShVariableNode.cpp (clone):
+	Turned the different versions of this function into a single function,
+	with parameters ordered by frequency of expected usage.
+
+	* src/ShHashMap.hpp:
+	Wrapper around __gnu_cxx::hash_map when using GNU libstdc++ 
+	and stdext::hash_map when using MS VC.Net that has the subset
+	of methods common to both.
+	Some extra structs for handling multiple keys. 
+
+	* configure.ac:
+	Fixed merge mistake (clobberred version number)
+
+	* the rest:
+	Search & replace lots of ShValueType back to typename 
+  Win32 build.
+
 2004-11-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShSyntax.cpp: Small changes for immediate-mode control flow.
