@@ -34,7 +34,7 @@ namespace SH {
 /** A surface normal with N dimensions.
  */
 
-SH_SPECIAL_TYPE_PARENT_OPEN(ShNormal, surface normal, ShAttrib, SH_VAR_NORMAL);
+SH_SPECIAL_TYPE_PARENT_OPEN(ShNormal, surface normal, ShAttrib, SH_NORMAL);
 ShNormal(); 
 ShNormal(T); 
 ShNormal(T, T); 
@@ -58,12 +58,12 @@ template<typename T2> ShNormal& operator/=(T2 right);
 ShNormal& operator+=(const ShConstant<N, T>& right); 
 ShNormal& operator-=(const ShConstant<N, T>& right); 
                   
-SH_SPECIAL_TYPE_PARENT_CONST_METHODS(ShNormal, surface normal, ShAttrib, SH_VAR_NORMAL);
+SH_SPECIAL_TYPE_PARENT_CONST_METHODS(ShNormal, surface normal, ShAttrib, SH_NORMAL);
 void setUnit(bool flag);
 bool isUnit() const;
-SH_SPECIAL_TYPE_PARENT_MEMBERS(ShNormal, surface normal, ShAttrib, SH_VAR_NORMAL);
+SH_SPECIAL_TYPE_PARENT_MEMBERS(ShNormal, surface normal, ShAttrib, SH_NORMAL);
 bool m_isunit;
-SH_SPECIAL_TYPE_PARENT_CLOSE(ShNormal, surface normal, ShAttrib, SH_VAR_NORMAL);
+SH_SPECIAL_TYPE_PARENT_CLOSE(ShNormal, surface normal, ShAttrib, SH_NORMAL);
 
 SH_SPECIAL_TYPE_TYPEDEFS(Normal);
 
@@ -71,42 +71,42 @@ template<int N, int Kind, typename T, bool Swizzled>
   ShNormal<N, Kind, T, Swizzled>::ShNormal()
   : m_isunit(false)
   { 
-    m_node->specialType(SH_VAR_NORMAL); 
+    m_node->specialType(SH_NORMAL); 
   } 
 
 template<int N, int Kind, typename T, bool Swizzled> 
   ShNormal<N, Kind, T, Swizzled>::ShNormal(T t0) 
   : ParentType(t0), m_isunit(false)
   { 
-    m_node->specialType(SH_VAR_NORMAL); 
+    m_node->specialType(SH_NORMAL); 
   } 
 
 template<int N, int Kind, typename T, bool Swizzled> 
   ShNormal<N, Kind, T, Swizzled>::ShNormal(T t0, T t1) 
   : ParentType(t0, t1), m_isunit(false)
   { 
-    m_node->specialType(SH_VAR_NORMAL); 
+    m_node->specialType(SH_NORMAL); 
   } 
 
 template<int N, int Kind, typename T, bool Swizzled> 
   ShNormal<N, Kind, T, Swizzled>::ShNormal(T t0, T t1, T t2) 
   : ParentType(t0, t1, t2), m_isunit(false)
   { 
-    m_node->specialType(SH_VAR_NORMAL); 
+    m_node->specialType(SH_NORMAL); 
   } 
 
 template<int N, int Kind, typename T, bool Swizzled> 
   ShNormal<N, Kind, T, Swizzled>::ShNormal(T t0, T t1, T t2, T t3) 
   : ParentType(t0, t1, t2, t3), m_isunit(false)
   { 
-    m_node->specialType(SH_VAR_NORMAL); 
+    m_node->specialType(SH_NORMAL); 
   } 
 
 template<int N, int Kind, typename T, bool Swizzled> 
   ShNormal<N, Kind, T, Swizzled>::ShNormal(const ShVariableN<N, T>& other) 
   : ParentType(other), m_isunit(false)
   { 
-    m_node->specialType(SH_VAR_NORMAL); 
+    m_node->specialType(SH_NORMAL); 
   } 
 
 template<int N, int Kind, typename T, bool Swizzled>
@@ -114,7 +114,7 @@ template<int Kind2, bool Swizzled2>
   ShNormal<N, Kind, T, Swizzled>::ShNormal(const ShNormal<N, Kind2, T, Swizzled2>& other) 
   : ParentType(other), m_isunit(other.isUnit())
   { 
-    m_node->specialType(SH_VAR_NORMAL); 
+    m_node->specialType(SH_NORMAL); 
   } 
 
 template<int N, int Kind, typename T, bool Swizzled> 
@@ -122,7 +122,7 @@ template<int N, int Kind, typename T, bool Swizzled>
       const ShSwizzle& swizzle, bool neg) 
   : ParentType(node, swizzle, neg), m_isunit(false)
   { 
-    m_node->specialType(SH_VAR_NORMAL); 
+    m_node->specialType(SH_NORMAL); 
   } 
 
 template<int N, int Kind, typename T, bool Swizzled> 
@@ -216,7 +216,7 @@ template<int N, int Kind, typename T, bool Swizzled>
     setUnit(false);
     return *this; 
   } 
-SH_SPECIAL_TYPE_IMPL_CONST_METHODS(ShNormal, SH_VAR_NORMAL);
+SH_SPECIAL_TYPE_IMPL_CONST_METHODS(ShNormal, SH_NORMAL);
 }
 
 #endif

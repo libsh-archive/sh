@@ -128,8 +128,13 @@ public:
 
   ShCtrlGraphNodePtr entry() const;
   ShCtrlGraphNodePtr exit() const;
-  void setEntry(ShCtrlGraphNodePtr newEntry);
-  void setExit(ShCtrlGraphNodePtr newExit);
+
+  /// Adds an empty node before entry, gives old entry a block and returns it.
+  // New entry is marked (so it does not prevent clearMarking on future DFSes)
+  ShCtrlGraphNodePtr prependEntry();
+
+  /// Adds an empty node after exit, gives old exit a block and returns it. 
+  ShCtrlGraphNodePtr appendExit();
 
   template<typename F>
   void dfs(F& functor);

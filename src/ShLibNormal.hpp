@@ -36,23 +36,23 @@ namespace SH {
 SH_SHLIB_USUAL_NON_UNIT_OPS_RETTYPE(ShNormal, ShNormal);
 
 template<int N, int K1, typename T, bool S1>
-  ShNormal<N, SH_VAR_TEMP, T, false>
+  ShNormal<N, SH_TEMP, T, false>
   abs(const ShNormal<N, K1, T, S1>& var)
   {
     ShVariableN<N, T> t = abs(static_cast< ShVariableN<N, T> >(var));
-    ShNormal<N, SH_VAR_TEMP, T, false> vec(t.node(), t.swizzle(), t.neg());
+    ShNormal<N, SH_TEMP, T, false> vec(t.node(), t.swizzle(), t.neg());
     vec.setUnit(var.isUnit());
     return vec;
   }
 
 template<int N, int K1, typename T, bool S1>
-  ShNormal<N, SH_VAR_TEMP, T, false>
+  ShNormal<N, SH_TEMP, T, false>
   normalize(const ShNormal<N, K1, T, S1>& var)
   {
     if (var.isUnit()) return var;
 
     ShVariableN<N, T> t = normalize(static_cast< ShVariableN<N, T> >(var));
-    ShNormal<N, SH_VAR_TEMP, T, false> vec(t.node(), t.swizzle(), t.neg());
+    ShNormal<N, SH_TEMP, T, false> vec(t.node(), t.swizzle(), t.neg());
     vec.setUnit(true);
     return vec;
   }
@@ -83,10 +83,10 @@ ShVariableN<1, T> operator|(const ShNormal<N, K1, T, S1>& a,
 }
 
 template<int K1, int K2, typename T, bool S1>
-ShNormal<3, SH_VAR_TEMP, T, false> operator|(const ShMatrix<4, 4, K1, T>& m,
+ShNormal<3, SH_TEMP, T, false> operator|(const ShMatrix<4, 4, K1, T>& m,
                                              const ShNormal<3, K2, T, S1>& v)
 {
-  ShNormal<3, SH_VAR_TEMP, T, false> t;
+  ShNormal<3, SH_TEMP, T, false> t;
   for (int i = 0; i < 3; i++) {
     t(i) = dot(m[i](0,1,2), v);
   }
@@ -94,10 +94,10 @@ ShNormal<3, SH_VAR_TEMP, T, false> operator|(const ShMatrix<4, 4, K1, T>& m,
 }
 
 template<int K1, int K2, typename T, bool S1>
-ShNormal<2, SH_VAR_TEMP, T, false> operator|(const ShMatrix<3, 3, K1, T>& m,
+ShNormal<2, SH_TEMP, T, false> operator|(const ShMatrix<3, 3, K1, T>& m,
                                              const ShNormal<2, K2, T, S1>& v)
 {
-  ShNormal<2, SH_VAR_TEMP, T, false> t;
+  ShNormal<2, SH_TEMP, T, false> t;
   for (int i = 0; i < 2; i++) {
     t(i) = dot(m[i](0,1), v);
   }
@@ -105,10 +105,10 @@ ShNormal<2, SH_VAR_TEMP, T, false> operator|(const ShMatrix<3, 3, K1, T>& m,
 }
 
 template<int K1, int K2, typename T, bool S1>
-ShNormal<1, SH_VAR_TEMP, T, false> operator|(const ShMatrix<2, 2, K1, T>& m,
+ShNormal<1, SH_TEMP, T, false> operator|(const ShMatrix<2, 2, K1, T>& m,
                                              const ShNormal<1, K2, T, S1>& v)
 {
-  ShNormal<1, SH_VAR_TEMP, T, false> t;
+  ShNormal<1, SH_TEMP, T, false> t;
   for (int i = 0; i < 1; i++) {
     t(i) = dot(m[i](0), v);
   }

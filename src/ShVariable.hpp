@@ -118,7 +118,7 @@ class ShVariableN : public ShVariable
 public:
   /*
   ShVariableN(T v)
-    : ShVariable(new ShVariableNode(SH_VAR_CONST, N))
+    : ShVariable(new ShVariableNode(SH_CONST, N))
   {
     ShIntEqual<N, 1>();
     m_node->setValue(0, v);

@@ -38,19 +38,37 @@ namespace SH {
  */
 class ShTransformer {
 public:
-  ShTransformer(ShCtrlGraphPtr graph, ShBackendPtr backend);
+  typedef std::vector<ShVariableNodePtr> VarNodeVec;
+  typedef std::map<ShVariableNodePtr, VarNodeVec> VarSplitMap;
+
+  ShTransformer(ShProgram program, ShBackendPtr backend);
 
   ShTransformer::~ShTransformer();
   
-  /// Optimize with the given agressiveness
-  void transform();
+  /// Apply transformations to the IR specific to this backend
+  // Returns true if anything was changed
+  bool transform();
+
+  /// After running transform, this returns any split variables 
+  const VarSplitMap& splits() const;
 
 private:
+  ShProgram m_program;
   ShCtrlGraphPtr m_graph;
   ShBackendPtr m_backend;
+  VarSplitMap m_splits;
 
   /**@name Tuple splitting when backend canot support arbitrary 
    * length tuples.
+   *
+   * If any tuples are split, this adds entries to the splits map
+   * to map from original long tuple ShVariableNode
+   * to a vector of ShVariableNodes all <= max tuple size of the backend.
+   * All long tuples in the intermediate representation are split up into
+   * shorter tuples.
+   *
+   * This is done only if SH_BACKEND_MAX_TUPLE != 0 (default unlimited length tuples)
+   * and it sets the VarSplitMap for use by the backend.
    */
   //@{
   friend struct VariableSplitter; // makes a map of large tuples to split tuples
@@ -63,6 +81,9 @@ private:
    * variable in computation and inputs cannot be used as a dest.  
    * This converts outputs and inputs used in computation 
    * into a temporaries.
+   *
+   * This is done only if SH_BACKEND_USE_INPUT_DEST or 
+   * SH_BACKEND_USE_OUTPUT_SRC are 0.
    */
   friend struct InputOutputConvertor;
   void inputOutputConversion(bool& changed);

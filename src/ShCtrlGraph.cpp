@@ -156,8 +156,14 @@ ShCtrlGraph::ShCtrlGraph(ShBlockListPtr blocks)
   ShCtrlGraphNodePtr head, tail;
 
   ShParser::parse(head, tail, blocks);
-  m_entry->append(head);
-  if (tail) tail->append(m_exit);
+
+  if(!head && !tail) {
+    m_entry->append(m_exit);
+  } else {
+    SH_DEBUG_ASSERT(head && tail);
+    m_entry->append(head);
+    tail->append(m_exit);
+  }
 }
 
 ShCtrlGraph::~ShCtrlGraph()
@@ -174,14 +180,34 @@ ShCtrlGraphNodePtr ShCtrlGraph::exit() const
   return m_exit;
 }
 
-void ShCtrlGraph::setEntry(ShCtrlGraphNodePtr newEntry) {
+ShCtrlGraphNodePtr ShCtrlGraph::prependEntry() {
+  ShCtrlGraphNodePtr newEntry = new ShCtrlGraphNode();
+  ShCtrlGraphNodePtr oldEntry = m_entry;
+  newEntry->append(oldEntry);
+  newEntry->mark();
+  
+  if( oldEntry->block ) {
+    SH_DEBUG_WARN( "Old entry to control graph did not have an empty block!");
+  } else {
+    oldEntry->block = new ShBasicBlock();
+  }
   m_entry = newEntry;
+  return oldEntry;
 }
 
-void ShCtrlGraph::setExit(ShCtrlGraphNodePtr newExit) {
+ShCtrlGraphNodePtr ShCtrlGraph::appendExit() {
+  ShCtrlGraphNodePtr newExit = new ShCtrlGraphNode();
+  ShCtrlGraphNodePtr oldExit = m_exit;
+  oldExit->append(newExit);
+  
+  if( oldExit->block ) {
+    SH_DEBUG_WARN( "Old exit to control graph did not have an empty block!");
+  } else {
+    oldExit->block = new ShBasicBlock();
+  }
   m_exit = newExit;
+  return oldExit;
 }
-
 
 std::ostream& ShCtrlGraph::print(std::ostream& out, int indent) const
 {

@@ -38,7 +38,7 @@ using namespace SH;
 
 
 template<int M, int P>
-ShTexture3D<ShColor<M, SH_VAR_TEMP> > ShPerlin<M, P>::noiseTex(P, P, P); // pseudorandom 3D noise texture
+ShTexture3D<ShColor<M, SH_TEMP> > ShPerlin<M, P>::noiseTex(P, P, P); // pseudorandom 3D noise texture
 
 template<int M, int P>
 bool ShPerlin<M, P>::m_init = false; // whether Perlin is initialized. 
@@ -101,8 +101,8 @@ ShVariableN<M, T> ShPerlin<M, P>::noise(const ShVariableN<K, T> &p, bool useText
   init();
   std::cout << "noise M: " << M << " K: " << K << "T: " << std::endl;
   int i, j, k;
-  typedef ShAttrib<K, SH_VAR_TEMP, T> TempType;
-  typedef ShAttrib<M, SH_VAR_TEMP, T> ResultType;
+  typedef ShAttrib<K, SH_TEMP, T> TempType;
+  typedef ShAttrib<M, SH_TEMP, T> ResultType;
   typedef ShConstant<K, T> ConstTempType;
   static const int NUM_SAMPLES = 1 << K;
   static const float INVP = 1.0 / P; // TODO if optimizer propagates constants, remove this
@@ -133,7 +133,7 @@ ShVariableN<M, T> ShPerlin<M, P>::noise(const ShVariableN<K, T> &p, bool useText
     ConstTempType offsets(flip);
     TempType intLatticePoint = cond(offsets, ip1, ip0);
     if(useTexture) {
-      grad[i] = noiseTex(copycast<3>(intLatticePoint)); // lookup 3D texture
+      grad[i] = noiseTex(fillcast<3>(intLatticePoint)); // lookup 3D texture
     } else {
       grad[i] = cast<M>(hashmrg(intLatticePoint)); 
     }
@@ -164,7 +164,7 @@ ShVariableN<M, T> snoise(const ShVariableN<K, T> &p, bool useTexture) {
 template<int M, int N, int K, typename T>
 ShVariableN<M, T> turbulence(const ShVariableN<N, T> &amp,
       const ShVariableN<K, T> &p, bool useTexture) {
-  ShAttrib<M, SH_VAR_TEMP, T> result = copycast<M>(ShConstant1f(0.0));
+  ShAttrib<M, SH_TEMP, T> result = fillcast<M>(ShConstant1f(0.0));
   T freq = 1.0;
   result *= 0.0; 
   for(int i = 0; i < N; ++i, freq *= 2.0) {
@@ -176,7 +176,7 @@ ShVariableN<M, T> turbulence(const ShVariableN<N, T> &amp,
 template<int M, int N, int K, typename T>
 ShVariableN<M, T> sturbulence(const ShVariableN<N, T> &amp,
       const ShVariableN<K, T> &p, bool useTexture) {
-  ShAttrib<M, SH_VAR_TEMP, T> result = copycast<M>(ShConstant1f(0.0));
+  ShAttrib<M, SH_TEMP, T> result = fillcast<M>(ShConstant1f(0.0));
   T freq = 1.0;
   result *= 0.0; 
   for(int i = 0; i < N; ++i, freq *= 2.0) {

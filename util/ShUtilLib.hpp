@@ -122,7 +122,7 @@ static const int LCG_REPS = 5; // total instructions for hashlcg will be LCG_REP
 // since there may not be enough precision 
 template<int N, typename T>
 ShVariableN<N, T> hashlcg(const ShVariableN<N, T>& p) {
-  ShAttrib<N, SH_VAR_TEMP, T> result = frac(p * 0.01);
+  ShAttrib<N, SH_TEMP, T> result = frac(p * 0.01);
 
   ShVariableN<N, T> a(hasha.node(), ShSwizzle(N), false);
   ShVariableN<N, T> m(hashm.node(), ShSwizzle(N), false);
@@ -149,7 +149,7 @@ static const int MRG_REPS = 2; // total instructions for hashmrg will be MRG_REP
  */
 template<int N, typename T>
 ShVariableN<N, T> hashmrg(const ShVariableN<N, T>& p) {
-  ShAttrib<N, SH_VAR_TEMP, T> result = frac(p * 0.01);
+  ShAttrib<N, SH_TEMP, T> result = frac(p * 0.01);
   ShVariableN<N, T> a(hasha.node(), ShSwizzle(N), false); // use only first N elements of hasha
 
   for(int i = 0; i < MRG_REPS; ++i) {

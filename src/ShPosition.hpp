@@ -31,11 +31,11 @@ namespace SH {
 
 /** A vertex position.
  */
-SH_SPECIAL_TYPE_PARENT(ShPosition, position, ShPoint, SH_VAR_POSITION);
+SH_SPECIAL_TYPE_PARENT(ShPosition, position, ShPoint, SH_POSITION);
 
 SH_SPECIAL_TYPE_TYPEDEFS(Position);
 
-SH_SPECIAL_TYPE_IMPL(ShPosition, SH_VAR_POSITION);
+SH_SPECIAL_TYPE_IMPL(ShPosition, SH_POSITION);
 
 }
 

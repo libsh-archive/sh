@@ -87,7 +87,7 @@ struct CopyPropagator {
       
       if (I->op == SH_OP_ASN
           && I->dest.node() != I->src[0].node()
-          && I->dest.node()->kind() == SH_VAR_TEMP
+          && I->dest.node()->kind() == SH_TEMP
           && I->dest.swizzle().identity()
           && I->src[0].swizzle().identity()) {
         m_acp.push_back(std::make_pair(I->dest, I->src[0]));
@@ -161,7 +161,7 @@ struct MoveEliminator {
       removeAME(I->dest.node());
       
       if (!inRHS(I->dest.node(), *I)
-          && I->dest.node()->kind() == SH_VAR_TEMP
+          && I->dest.node()->kind() == SH_TEMP
           && I->dest.swizzle().identity()) {
         m_ame.push_back(*I);
       }
@@ -173,7 +173,7 @@ struct MoveEliminator {
   {
     if (stmt.op != SH_OP_ASN) return;
     if (stmt.src[0].neg()) return;
-    if (stmt.src[0].node()->kind() != SH_VAR_TEMP) return;
+    if (stmt.src[0].node()->kind() != SH_TEMP) return;
     if (!stmt.src[0].swizzle().identity()) return;
 
     for (AME::const_iterator I = m_ame.begin(); I != m_ame.end(); ++I) {
@@ -283,7 +283,7 @@ struct DefFinder {
     ShBasicBlockPtr block = node->block;
     if (!block) return;
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-      if (I->op != SH_OP_KIL && I->op != SH_OP_OPTBRA && I->dest.node()->kind() == SH_VAR_TEMP) {
+      if (I->op != SH_OP_KIL && I->op != SH_OP_OPTBRA && I->dest.node()->kind() == SH_TEMP) {
         o.m_defs.push_back(&(*I));
         o.m_defNodes.push_back(node);
       }
@@ -319,7 +319,7 @@ struct InitRch {
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
       if (I->op == SH_OP_KIL
           || I->op == SH_OP_OPTBRA
-          || I->dest.node()->kind() != SH_VAR_TEMP
+          || I->dest.node()->kind() != SH_TEMP
           || I->dest.node()->size() != I->dest.size()) continue;
       for (unsigned int i = 0; i < o.m_defs.size(); i++) {
         if (o.m_defs[i]->dest.node() == I->dest.node()) {
@@ -446,7 +446,7 @@ struct UdDuBuilder {
       // Compute the ud chains for the statement's source variables,
       // and contribute to the du chains of the source variables' definitions.
       for (int j = 0; j < opInfo[I->op].arity; j++) {
-        if (I->src[j].node()->kind() == SH_VAR_TEMP) {
+        if (I->src[j].node()->kind() == SH_TEMP) {
           I->ud[j] = defs[I->src[j].node()];
           for (StmtSet::iterator J = defs[I->src[j].node()].begin(); J != defs[I->src[j].node()].end(); J++) {
             (*J)->du.insert(&(*I));
@@ -540,7 +540,7 @@ struct InitLiveCode {
     if (!block) return;
 
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-      if (I->dest.node()->kind() != SH_VAR_TEMP
+      if (I->dest.node()->kind() != SH_TEMP
           || I->op == SH_OP_KIL
           || I->op == SH_OP_OPTBRA) {
         I->marked = true;

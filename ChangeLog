@@ -1,3 +1,24 @@
+2004-02-13  Bryan Chan <b8chan@uwaterloo.ca>
+	The last stand of the _VAR_
+
+	* src/, util/, backend/: Changed all SH_VAR_* to SH_*
+
+	* src/ShVariableNode.?pp, ShAlgebra.cpp, ShAttrib*,
+	ShSpecialType*, ShMatrix.hpp, ShTransformer.cpp:
+	Changed following SH_INOUT variables 
+	  - typedefs
+	  - addition to ShProgram varlists
+	  - algebra connect/combine
+	  - transformation for incompatible backends
+	  - nibbles to use InOut types)
+
+	* src/ShCtrlGraph.cpp: Fixed empty ShProgram problems
+	(if parser gives null head/tail, CtrlGraph connects m_entry to m_exit)
+
+	* src/ShTransformer.cpp: Added long constant tuple splitting
+
+	* src/ShLib.hpp: Changed copycast to fillcast
+	
 2004-02-12  Bryan Chan <b8chan@uwaterloo.ca>
 	* src/ShTransformer.?pp:
 	Moved backend-specific transformations to the IR here.

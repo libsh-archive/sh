@@ -1,0 +1,19 @@
+// -*- C++ -*-
+
+ShProgram foo1 = SH_BEGIN_PROGRAM() {
+  ShInputAttrib1f SH_DECL(in);
+  ShInOutAttrib3f SH_DECL(var);
+  var = pow(in + var(1))(0,0,0);
+} SH_END_PROGRAM;
+
+ShProgram foo2 = SH_BEGIN_PROGRAM() {
+  ShInOutNormal3f SH_DECL(normal);
+  normal *= normal;
+} SH_END_PROGRAM;
+
+ShProgram foo3 = SH_BEGIN_VERTEX_PROGRAM {
+  ShInOutAttrib3f SH_DECL(var);
+  var = frac(var);
+} SH_END_PROGRAM;
+
+ShProgram shader =  foo3 << ( foo1 & foo2); 

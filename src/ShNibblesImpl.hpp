@@ -34,9 +34,7 @@ namespace SH {
 template<typename T>
 ShProgram keep(std::string name) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
-    typename T::InputType SH_NAMEDECL(attr, name); 
-    typename T::OutputType SH_NAMEDECL(out, name);
-    out = attr;
+    typename T::InOutType SH_NAMEDECL(attr, name); 
   } SH_END_PROGRAM;
   return nibble;
 }
@@ -45,7 +43,6 @@ template<typename T>
 ShProgram lose(std::string name) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T::InputType SH_NAMEDECL(attr, name);
-    ShAttrib4f dummy = dummy;
   } SH_END_PROGRAM;
   return nibble;
 };
@@ -80,8 +77,7 @@ ShProgram access(const ShTexture3D<T> &tex, std::string name) {
 template<typename T2, int Rows, int Cols, int Kind, typename T>
 ShProgram transform(const ShMatrix<Rows, Cols, Kind, T> &m, std::string name) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
-    typename T2::InputType SH_NAMEDECL(attrib, name);
-    typename T2::OutputType SH_NAMEDECL(transAttrib, name) = m | attrib; 
+    typename T2::InOutType SH_NAMEDECL(attrib, name) = m | attrib;
   } SH_END;
   return nibble;
 }
@@ -99,21 +95,20 @@ ShProgram cast(std::string name) {
 template<typename T>\
 ShProgram opfunc(std::string name) {\
   ShProgram nibble = SH_BEGIN_PROGRAM() {\
-    typename T::InputType SH_NAMEDECL(in, name);\
-    typename T::OutputType SH_NAMEDECL(out, name) = opcode; \
+    typename T::InOutType SH_NAMEDECL(x, name) = opcode;\
   } SH_END;\
   return nibble; \
 }
 
-SHNIBBLE_UNARY_OP(abs, abs(in));
-SHNIBBLE_UNARY_OP(acos, acos(in));
-SHNIBBLE_UNARY_OP(asin, asin(in));
-SHNIBBLE_UNARY_OP(cos, cos(in));
-SHNIBBLE_UNARY_OP(frac, frac(in));
-SHNIBBLE_UNARY_OP(sin, sin(in));
-SHNIBBLE_UNARY_OP(sqrt, sqrt(in));
-SHNIBBLE_UNARY_OP(normalize, normalize(in));
-SHNIBBLE_UNARY_OP(pos, pos(in));
+SHNIBBLE_UNARY_OP(abs, abs(x));
+SHNIBBLE_UNARY_OP(acos, acos(x));
+SHNIBBLE_UNARY_OP(asin, asin(x));
+SHNIBBLE_UNARY_OP(cos, cos(x));
+SHNIBBLE_UNARY_OP(frac, frac(x));
+SHNIBBLE_UNARY_OP(sin, sin(x));
+SHNIBBLE_UNARY_OP(sqrt, sqrt(x));
+SHNIBBLE_UNARY_OP(normalize, normalize(x));
+SHNIBBLE_UNARY_OP(pos, pos(x));
 
 #define SHNIBBLE_BINARY_OP(opfunc, opcode) \
 template<typename T> \

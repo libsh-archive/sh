@@ -53,7 +53,7 @@ class ShPerlin
 
   private:
     static bool m_init;
-    static ShTexture3D<ShColor<M, SH_VAR_TEMP> > noiseTex; ///< pseudorandom 3D perlin noise texture 
+    static ShTexture3D<ShColor<M, SH_TEMP> > noiseTex; ///< pseudorandom 3D perlin noise texture 
 
     static void init();
 };

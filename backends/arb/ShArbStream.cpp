@@ -84,7 +84,7 @@ public:
       if (stmt.op != SH_OP_FETCH) continue;
 
       // TODO: ought to complain here
-      if (stmt.src[0].node()->kind() != SH_VAR_STREAM) continue;
+      if (stmt.src[0].node()->kind() != SH_STREAM) continue;
 
       ShChannelNodePtr stream_node = stmt.src[0].node();
       input_map.insert(std::make_pair(stream_node, ShTextureNodePtr(0)));
@@ -113,7 +113,7 @@ public:
       ShStatement& stmt = *I;
       if (stmt.op != SH_OP_FETCH) continue;
       
-      if (stmt.src[0].node()->kind() != SH_VAR_STREAM) {
+      if (stmt.src[0].node()->kind() != SH_STREAM) {
         // TODO: complain
         continue;
       }

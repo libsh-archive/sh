@@ -36,7 +36,7 @@ namespace SH {
 ShProgram connect(const ShChannelNodePtr& node, const ShProgram& program)
 {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
-    ShVariable out(new ShVariableNode(SH_VAR_OUTPUT,
+    ShVariable out(new ShVariableNode(SH_OUTPUT,
                                       node->size(), node->specialType()));
     ShVariable streamVar(node);
     ShStatement stmt(out, SH_OP_FETCH, streamVar);

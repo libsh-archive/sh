@@ -1,6 +1,7 @@
 #include <map>
 #include <string>
 #include <sstream>
+#include <algorithm>
 #include "ShAlgebra.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShDebug.hpp"
@@ -10,59 +11,6 @@
 #include "ShEnvironment.hpp"
 #include "ShManipulator.hpp"
 #include "ShFixedManipulator.hpp"
-
-namespace {
-
-using namespace SH;
-
-typedef std::map<ShCtrlGraphNodePtr, ShCtrlGraphNodePtr> CtrlGraphCopyMap;
-
-struct CtrlGraphCopier {
-  CtrlGraphCopier(CtrlGraphCopyMap& copyMap)
-    : copyMap(copyMap)
-  {
-  }
-  
-  void operator()(ShCtrlGraphNodePtr node) {
-    if (!node) return;
-    ShCtrlGraphNodePtr newNode = new ShCtrlGraphNode(*node);
-    copyMap[node] = newNode;
-  }
-
-  CtrlGraphCopyMap& copyMap;
-};
-
-void copyCtrlGraph(ShCtrlGraphNodePtr head, ShCtrlGraphNodePtr tail,
-                   ShCtrlGraphNodePtr& newHead, ShCtrlGraphNodePtr& newTail)
-{
-  CtrlGraphCopyMap copyMap;
-  copyMap[0] = 0;
-  
-  CtrlGraphCopier copier(copyMap);
-  SH_DEBUG_ASSERT(tail); // catch empty tails
-  head->clearMarked();
-  head->dfs(copier);
-
-  // Replace the successors and followers in the new graph with their new equivalents
-  for (CtrlGraphCopyMap::iterator I = copyMap.begin(); I != copyMap.end(); ++I) {
-    ShCtrlGraphNodePtr node = I->second; // Get the new node
-    if (!node) continue;
-    for (std::vector<ShCtrlGraphBranch>::iterator J = node->successors.begin(); J != node->successors.end(); ++J) {
-      J->node = copyMap[J->node];
-    }
-    node->follower = copyMap[node->follower];
-    if (node->block) {
-      ShBasicBlockPtr new_block = new ShBasicBlock(*node->block);
-      node->block = new_block;
-    }
-  }
-  newHead = copyMap[head];
-  newTail = copyMap[tail];
-
-  head->clearMarked();
-}
-
-}
 
 namespace SH {
 
@@ -131,15 +79,54 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   ShEnvironment::insideShader = true;
   
   ShProgramNode::VarList::const_iterator I, J;  
-  for (I = a->outputs.begin(), J = b->inputs.begin(); I != a->outputs.end() && J != b->inputs.end(); ++I, ++J) {
+
+  ShProgramNode::VarList InOutInputs;
+  ShProgramNode::VarList InOutOutputs;
+
+  // replace outputs and inputs connected together by temps 
+  for (I = a->outputs.begin(), J = b->inputs.begin(); 
+      I != a->outputs.end() && J != b->inputs.end(); ++I, ++J) { 
     if((*I)->size() != (*J)->size()) {
       ShError(ShAlgebraException("Cannot smash variables " + 
             (*I)->nameOfType() + " " + (*I)->name() + " and " + 
             (*J)->nameOfType() + " " + (*J)->name() + " with different sizes."));
     }
-    ShVariableNodePtr n = new ShVariableNode(SH_VAR_TEMP, (*I)->size());
+    ShVariableNodePtr n = new ShVariableNode(SH_TEMP, (*I)->size());
     varMap[*I] = n;
     varMap[*J] = n;
+
+    if((*I)->kind() == SH_INOUT) InOutInputs.push_back((*I)); 
+    if((*J)->kind() == SH_INOUT) InOutOutputs.push_back((*J)); 
+  }
+
+  // Change connected InOut variables to either Input or Output only
+  // (since they have been connected and turned into temps internally)
+  ShCtrlGraphNodePtr graphEntry;
+  for (I = InOutInputs.begin(); I != InOutInputs.end(); ++I) {
+    if(!graphEntry) graphEntry = program->ctrlGraph->prependEntry();
+    ShVariableNodePtr newInput(new ShVariableNode(SH_INPUT, (*I)->size(), 
+          (*I)->specialType()));
+    newInput->name((*I)->name());
+    std::replace(program->inputs.begin(), program->inputs.end(),
+        (*I), newInput);
+    program->inputs.pop_back();
+
+    graphEntry->block->addStatement(ShStatement(
+        ShVariable(varMap[*I]), SH_OP_ASN, ShVariable(newInput)));
+  }
+
+  ShCtrlGraphNodePtr graphExit;
+  for (I = InOutOutputs.begin(); I != InOutOutputs.end(); ++I) {
+    if(!graphExit) graphExit = program->ctrlGraph->appendExit();
+    ShVariableNodePtr newOutput(new ShVariableNode(SH_OUTPUT, (*I)->size(), 
+          (*I)->specialType()));
+    newOutput->name((*I)->name());
+    std::replace(program->outputs.begin(), program->outputs.end(),
+        (*I), newOutput);
+    program->outputs.pop_back();
+
+    graphExit->block->addStatement(ShStatement(
+        ShVariable(newOutput), SH_OP_ASN, ShVariable(varMap[*I])));
   }
 
   ShEnvironment::shader = 0;
@@ -323,7 +310,7 @@ ShProgram replaceUniform(const ShProgram& a, const ShVariable& v)
   ShEnvironment::shader = program;
   ShEnvironment::insideShader = true;
   // make a new input
-  ShVariableNodePtr newInput = new ShVariableNode(SH_VAR_INPUT, v.size(), v.node()->specialType()); 
+  ShVariableNodePtr newInput = new ShVariableNode(SH_INPUT, v.size(), v.node()->specialType()); 
   varMap[v.node()] = newInput;
 
   ShEnvironment::shader = 0;

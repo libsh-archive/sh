@@ -151,7 +151,7 @@ ShVariableN<N, T> operator+(const ShVariableN<N, T>& left, const ShVariableN<N, 
     for (int i = 0; i < N; i++) result[i] = lvals[i] + rvals[i];
     return ShConstant<N, T>(result);
   } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, left, SH_OP_ADD, right);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     return t;
@@ -185,7 +185,7 @@ ShVariableN<N, T> operator*(const ShVariableN<N, T>& left, const ShVariableN<M, 
     for (int i = 0; i < N; i++) result[i] = lvals[i] * rvals[M == 1 ? 0 : i];
     return ShConstant<N, T>(result);
   } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, left, SH_OP_MUL, right);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
 
@@ -207,7 +207,7 @@ ShVariableN<M, T> operator*(const ShVariableN<1, T>& left, const ShVariableN<M, 
     for (int i = 0; i < M; i++) result[i] = lvals[0] * rvals[i];
     return ShConstant<M, T>(result);
   } else {
-    ShAttrib<M, SH_VAR_TEMP, T, false> t;
+    ShAttrib<M, SH_TEMP, T, false> t;
     ShStatement stmt(t, left, SH_OP_MUL, right);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
 
@@ -234,7 +234,7 @@ ShVariableN<N, T> operator/(const ShVariableN<N, T>& left, const ShVariableN<M, 
     for (int i = 0; i < N; i++) result[i] = lvals[i] / rvals[M == 1 ? 0 : i];
     return ShConstant<N, T>(result);
   } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, left, SH_OP_DIV, right);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     
@@ -260,7 +260,7 @@ ShVariableN<N, T> pow(const ShVariableN<N, T>& left, const ShVariableN<N, T>& ri
     for (int i = 0; i < N; i++) result[i] = std::pow(lvals[i], rvals[i]);
     return ShConstant<N, T>(result);
   } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, left, SH_OP_POW, right);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     return t;
@@ -295,7 +295,7 @@ ShVariableN<N, T> opfunc(const ShVariableN<N, T>& left, const ShVariableN<M, T>&
     for (int i = 0; i < N; i++) result[i] = (lvals[i] op rvals[(M == 1) ? 0 : i] ? 1.0 : 0.0);\
     return ShConstant<N, T>(result);\
   } else {\
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;\
+    ShAttrib<N, SH_TEMP, T, false> t;\
     ShStatement stmt(t, left, shop, right);\
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);\
     return t;\
@@ -316,7 +316,7 @@ ShVariableN<M, T> opfunc(const ShVariableN<1, T>& left, const ShVariableN<M, T>&
     for (int i = 0; i < M; i++) result[i] = (lvals[0] op rvals[i] ? 1.0 : 0.0);\
     return ShConstant<M, T>(result);\
   } else {\
-    ShAttrib<M, SH_VAR_TEMP, T, false> t;\
+    ShAttrib<M, SH_TEMP, T, false> t;\
     ShStatement stmt(t, left, shop, right);\
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);\
     return t;\
@@ -356,7 +356,7 @@ ShVariableN<N, T> cond(const ShVariableN<M, T>& condition, const ShVariableN<N, 
     for (int i = 0; i < N; i++) result[i] = (cvals[M == 1 ? 0 : i] > 0.0 ? lvals[i] : rvals[i]);
     return ShConstant<N, T>(result);
   } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_COND, condition, left, right);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     return t;
@@ -371,7 +371,7 @@ ShVariableN<N, T> cond(const ShVariableN<M, T>& condition, const ShVariableN<N, 
 template<int M, int N, typename T> 
 ShVariableN<M, T> cast( const ShVariableN<N, T> &a ) {
   int copySize = std::min(M, N);
-  ShAttrib<M, SH_VAR_TEMP, T, false> result;
+  ShAttrib<M, SH_TEMP, T, false> result;
 
   int indices[copySize];
   for(int i = 0; i < copySize; ++i) indices[i] = i;
@@ -386,13 +386,13 @@ ShVariableN<M, T> cast( const ShVariableN<N, T> &a ) {
   return result;
 }
 
-/** Copy Casting
+/** Fill Casting
  * Casts ShVariableN<N, T> to ShVariableN<M, T>
  * If M > N, copies last component to fill extras 
  * Otherwise, discards extra components.
  */
 template<int M, int N, typename T> 
-ShVariableN<M, T> copycast( const ShVariableN<N, T> &a ) {
+ShVariableN<M, T> fillcast( const ShVariableN<N, T> &a ) {
   if( M <= N ) return cast<M>(a);
   int indices[M];
   for(int i = 0; i < M; ++i) indices[i] = i >= N ? N - 1 : i;
@@ -422,7 +422,7 @@ ShVariableN<N, T> abs(const ShVariableN<N, T>& var)
     for (int i = 0; i < N; i++) result[i] = (vals[i] >= 0.0 ? vals[i] : -vals[i]);
     return ShConstant<N, T>(result);
   } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_ABS, var);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     
@@ -442,7 +442,7 @@ ShVariableN<N, T> acos(const ShVariableN<N, T>& var)
     for (int i = 0; i < N; i++) result[i] = std::acos(vals[i]);
     return ShConstant<N, T>(result);
   } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_ACOS, var);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     
@@ -462,7 +462,7 @@ ShVariableN<N, T> asin(const ShVariableN<N, T>& var)
     for (int i = 0; i < N; i++) result[i] = std::asin(vals[i]);
     return ShConstant<N, T>(result);
   } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_ASIN, var);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     
@@ -482,7 +482,7 @@ ShVariableN<N, T> ceil(const ShVariableN<N, T>& var)
     for (int i = 0; i < N; i++) result[i] = std::ceil(vals[i]);
     return ShConstant<N, T>(result);
   } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_CEIL, var);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     return t;
@@ -501,7 +501,7 @@ ShVariableN<N, T> cos(const ShVariableN<N, T>& var)
     for (int i = 0; i < N; i++) result[i] = std::cos(vals[i]);
     return ShConstant<N, T>(result);
   } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_COS, var);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     
@@ -526,7 +526,7 @@ ShVariableN<1,  T> opfunc(const ShVariableN<M, T>& left, const ShVariableN<N, T>
         ( M == 1 ? lvals[0] : lvals[i] ) * ( N == 1 ? rvals[0] : rvals[i] );\
     return ShConstant<1, T>(result);\
   } else {\
-    ShAttrib<1, SH_VAR_TEMP, T, false> t;\
+    ShAttrib<1, SH_TEMP, T, false> t;\
     ShStatement stmt(t, left, SH_OP_DOT, right);\
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);\
     return t;\
@@ -550,7 +550,7 @@ ShVariableN<N, T> floor(const ShVariableN<N, T>& var)
     for (int i = 0; i < N; i++) result[i] = std::floor(vals[i]);
     return ShConstant<N, T>(result);
   } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_FLR, var);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     return t;
@@ -574,7 +574,7 @@ ShVariableN<N,  T> fmod(const ShVariableN<N, T>& left, const ShVariableN<M, T>& 
       std::fmod( lvals[i], rvals[(M == 1 ? 0 : i)] ); 
     return ShConstant<N, T>(result);
   } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, left, SH_OP_FMOD, right);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     return t;
@@ -596,7 +596,7 @@ ShVariableN<N, T> frac(const ShVariableN<N, T>& var)
     for (int i = 0; i < N; i++) result[i] = fmodf(vals[i], 1.0f); // TODO: Check that this is correct
     return ShConstant<N, T>(result);
   } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_FRAC, var);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     return t;
@@ -624,7 +624,7 @@ ShVariableN<N, T> lerp(const ShVariableN<M, T>& f, const ShVariableN<N, T>& a,
     }
     return ShConstant<N, T>(result);
   } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_LRP, f, a, b); 
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     return t;
@@ -672,7 +672,7 @@ ShVariableN<P, T> mad(const ShVariableN<M, T>& m1, const ShVariableN<N, T>& m2,
     }
     return ShConstant<P, T>(result);
   } else {
-    ShAttrib<P, SH_VAR_TEMP, T, false> t;
+    ShAttrib<P, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_MAD, m1, m2, a); 
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     return t;
@@ -719,7 +719,7 @@ ShVariableN<N,  T> max(const ShVariableN<N, T>& left, const ShVariableN<N, T>& r
     for (int i = 0; i < N; i++) result[i] = (lvals[i] > rvals[i] ? lvals[i] : rvals[i]);
     return ShConstant<N, T>(result);
   } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, left, SH_OP_MAX, right);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     return t;
@@ -742,7 +742,7 @@ ShVariableN<N,  T> pos(const ShVariableN<N, T>& x)
     T vals[N];
     for( int i = 0; i < N; ++i ) vals[i] = 0;
     ShConstant<N, T> zero(vals);
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, x, SH_OP_MAX, zero);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     return t;
@@ -764,7 +764,7 @@ ShVariableN<N,  T> min(const ShVariableN<N, T>& left, const ShVariableN<N, T>& r
     for (int i = 0; i < N; i++) result[i] = (lvals[i] < rvals[i] ? lvals[i] : rvals[i]);
     return ShConstant<N, T>(result);
   } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, left, SH_OP_MIN, right);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     return t;
@@ -786,7 +786,7 @@ ShVariableN<N, T> sin(const ShVariableN<N, T>& var)
     for (int i = 0; i < N; i++) result[i] = std::sin(vals[i]);
     return ShConstant<N, T>(result);
   } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_SIN, var);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     
@@ -806,7 +806,7 @@ ShVariableN<N, T> sqrt(const ShVariableN<N, T>& var)
     for (int i = 0; i < N; i++) result[i] = std::sqrt(vals[i]);
     return ShConstant<N, T>(result);
   } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_SQRT, var);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     return t;
@@ -831,7 +831,7 @@ ShVariableN<3, T> cross(const ShVariableN<3, T>& left, const ShVariableN<3, T>& 
     result[2] = lvals[0] * rvals[1] - lvals[1] * rvals[0];
     return ShConstant<3, T>(result);
   } else {
-    ShAttrib<3, SH_VAR_TEMP, T, false> t;
+    ShAttrib<3, SH_TEMP, T, false> t;
     ShStatement stmt(t, left, SH_OP_XPD, right);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     return t;
@@ -852,7 +852,7 @@ ShVariableN<N, T> normalize(const ShVariableN<N, T>& var)
     for (int i = 0; i < N; i++) result[i] = vals[i]/size;
     return ShConstant<N, T>(result);
   } else {
-    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_NORM, var);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     return t;
@@ -863,10 +863,10 @@ ShVariableN<N, T> normalize(const ShVariableN<N, T>& var)
 
 /// Transpose of a matrix
 template<int Rows, int Cols, int Kind, typename T>
-ShMatrix<Cols, Rows, SH_VAR_TEMP, T>
+ShMatrix<Cols, Rows, SH_TEMP, T>
 transpose(const ShMatrix<Rows, Cols, Kind, T>& m)
 {
-  ShMatrix<Cols, Rows, SH_VAR_TEMP, T> result;
+  ShMatrix<Cols, Rows, SH_TEMP, T> result;
   for (int i = 0; i < Cols; i++) {
     for (int j = 0; j < Rows; j++) {
       result[i][j] = m[j][i];
@@ -877,13 +877,13 @@ transpose(const ShMatrix<Rows, Cols, Kind, T>& m)
 
 /// Matrix multiplication
 template<int M, int N, int P, int Kind, int Kind2, typename T>
-ShMatrix<M, P, SH_VAR_TEMP, T>
+ShMatrix<M, P, SH_TEMP, T>
 operator|(const ShMatrix<M, N, Kind, T>& a,
           const ShMatrix<N, P, Kind2, T>& b)
 {
-  ShMatrix<P, N, SH_VAR_TEMP, T> tb = transpose(b);
+  ShMatrix<P, N, SH_TEMP, T> tb = transpose(b);
 
-  ShMatrix<M, P, SH_VAR_TEMP, T> result;
+  ShMatrix<M, P, SH_TEMP, T> result;
   for (int i = 0; i < M; i++) {
     for (int j = 0; j < P; j++) {
       result[i][j] = dot(a[i], tb[j]);
@@ -896,7 +896,7 @@ operator|(const ShMatrix<M, N, Kind, T>& a,
 template<int M, int N, int Kind, typename T>
 ShVariableN<M, T> operator|(const ShMatrix<M, N, Kind, T>& a, const ShVariableN<N, T>& b)
 {
-  ShAttrib<M, SH_VAR_TEMP, T> ret;
+  ShAttrib<M, SH_TEMP, T> ret;
   for (int i = 0; i < M; i++) {
     ret[i] = dot(a[i], b);
   }
@@ -907,11 +907,11 @@ ShVariableN<M, T> operator|(const ShMatrix<M, N, Kind, T>& a, const ShVariableN<
 
 #define SH_SHLIB_UNARY_RETTYPE_OPERATION(libtype, libop, librettype, libretsize) \
 template<int N, int K1, typename T, bool S1> \
-librettype<libretsize, SH_VAR_TEMP, T, false> \
+librettype<libretsize, SH_TEMP, T, false> \
 libop(const libtype<N, K1, T, S1>& var) \
 { \
   ShVariableN<libretsize, T> t = libop(static_cast< ShVariableN<N, T> >(var)); \
-  return librettype<libretsize, SH_VAR_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
+  return librettype<libretsize, SH_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
 }
 
 #define SH_SHLIB_UNARY_OPERATION(libtype, libop, libretsize) \
@@ -919,12 +919,12 @@ libop(const libtype<N, K1, T, S1>& var) \
 
 #define SH_SHLIB_BINARY_RETTYPE_OPERATION(libtype, libop, librettype, libretsize) \
 template<int N, int K1, int K2, typename T, bool S1, bool S2> \
-librettype<libretsize, SH_VAR_TEMP, T, false> \
+librettype<libretsize, SH_TEMP, T, false> \
 libop(const libtype<N, K1, T, S1>& left, const libtype<N, K2, T, S2>& right) \
 { \
   ShVariableN<libretsize, T> t = libop(static_cast< ShVariableN<N, T> >(left), \
                                        static_cast< ShVariableN<N, T> >(right)); \
-  return librettype<libretsize, SH_VAR_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
+  return librettype<libretsize, SH_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
 }
 
 #define SH_SHLIB_BINARY_OPERATION(libtype, libop, libretsize) \
@@ -932,12 +932,12 @@ libop(const libtype<N, K1, T, S1>& left, const libtype<N, K2, T, S2>& right) \
 
 #define SH_SHLIB_UNEQ_BINARY_RETTYPE_OPERATION(libtype, libop, librettype, libretsize) \
 template<int N, int M, int K1, int K2, typename T, bool S1, bool S2> \
-librettype<libretsize, SH_VAR_TEMP, T, false> \
+librettype<libretsize, SH_TEMP, T, false> \
 libop(const libtype<N, K1, T, S1>& left, const libtype<M, K2, T, S2>& right) \
 { \
   ShVariableN<libretsize, T> t = libop(static_cast< ShVariableN<N, T> >(left), \
                                        static_cast< ShVariableN<M, T> >(right)); \
-  return librettype<libretsize, SH_VAR_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
+  return librettype<libretsize, SH_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
 }
 
 #define SH_SHLIB_UNEQ_BINARY_OPERATION(libtype, libop, libretsize) \
@@ -945,12 +945,12 @@ libop(const libtype<N, K1, T, S1>& left, const libtype<M, K2, T, S2>& right) \
 
 #define SH_SHLIB_LEFT_SCALAR_RETTYPE_OPERATION(libtype, libop, librettype) \
 template<int M, int K1, int K2, typename T, bool S1, bool S2> \
-librettype<M, SH_VAR_TEMP, T, false> \
+librettype<M, SH_TEMP, T, false> \
 libop(const libtype<1, K2, T, S2>& left, const libtype<M, K1, T, S1>& right) \
 { \
   ShVariableN<M, T> t = libop(static_cast< ShVariableN<1, T> >(left), \
                               static_cast< ShVariableN<M, T> >(right)); \
-  return librettype<M, SH_VAR_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
+  return librettype<M, SH_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
 }
 
 #define SH_SHLIB_LEFT_SCALAR_OPERATION(libtype, libop) \
@@ -958,7 +958,7 @@ libop(const libtype<1, K2, T, S2>& left, const libtype<M, K1, T, S1>& right) \
 
 #define SH_SHLIB_LEFT_MATRIX_RETTYPE_OPERATION(libtype, libop, librettype, libretsize) \
 template<int M, int N, int K1, int K2, typename T, bool S1> \
-librettype<libretsize, SH_VAR_TEMP, T, false> libop(const ShMatrix<M, N, K1, T>& a, \
+librettype<libretsize, SH_TEMP, T, false> libop(const ShMatrix<M, N, K1, T>& a, \
                                                     const libtype<N, K2, T, S1>& b) \
 { \
   ShVariableN<libretsize, T> t = libop(a, \
@@ -973,25 +973,25 @@ librettype<libretsize, SH_VAR_TEMP, T, false> libop(const ShMatrix<M, N, K1, T>&
 
 #define SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(libtype, libop, librettype, libretsize) \
 template<int K1, typename T, bool S1> \
-librettype<libretsize, SH_VAR_TEMP, T, false> \
+librettype<libretsize, SH_TEMP, T, false> \
 libop(const libtype<1, K1, T, S1>& left, T right) \
 { \
   return libop(left, ShConstant1f(right)); \
 } \
 template<int K1, typename T, bool S1> \
-librettype<libretsize, SH_VAR_TEMP, T, false> \
+librettype<libretsize, SH_TEMP, T, false> \
 libop(T left, const libtype<1, K1, T, S1>& right) \
 { \
   return libop(ShConstant1f(left), right); \
 } \
 template<int K1, typename T, bool S1> \
-librettype<libretsize, SH_VAR_TEMP, T, false> \
+librettype<libretsize, SH_TEMP, T, false> \
 libop(const libtype<1, K1, T, S1>& left, double right) \
 { \
   return libop(left, ShConstant1f(right)); \
 } \
 template<int K1, typename T, bool S1> \
-librettype<libretsize, SH_VAR_TEMP, T, false> \
+librettype<libretsize, SH_TEMP, T, false> \
 libop(double left, const libtype<1, K1, T, S1>& right) \
 { \
   return libop(ShConstant1f(left), right); \
@@ -1002,13 +1002,13 @@ libop(double left, const libtype<1, K1, T, S1>& right) \
 
 #define SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_LEFT(libtype, libop, librettype, libretsize) \
 template<int N, int K1, typename T, bool S1> \
-librettype<libretsize, SH_VAR_TEMP, T, false> \
+librettype<libretsize, SH_TEMP, T, false> \
 libop(const libtype<N, K1, T, S1>& left, T right) \
 { \
   return libop(left, ShConstant1f(right)); \
 } \
 template<int N, int K1, typename T, bool S1> \
-librettype<libretsize, SH_VAR_TEMP, T, false> \
+librettype<libretsize, SH_TEMP, T, false> \
 libop(const libtype<N, K1, T, S1>& left, double right) \
 { \
   return libop(left, ShConstant1f(right)); \
@@ -1018,13 +1018,13 @@ libop(const libtype<N, K1, T, S1>& left, double right) \
 
 #define SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_RIGHT(libtype, libop, librettype, libretsize) \
 template<int N, int K1, typename T, bool S1> \
-librettype<libretsize, SH_VAR_TEMP, T, false> \
+librettype<libretsize, SH_TEMP, T, false> \
 libop(T left, const libtype<N, K1, T, S1>& right) \
 { \
   return libop(ShConstant1f(left), right); \
 } \
 template<int N, int K1, typename T, bool S1> \
-librettype<libretsize, SH_VAR_TEMP, T, false> \
+librettype<libretsize, SH_TEMP, T, false> \
 libop(double left, const libtype<N, K1, T, S1>& right) \
 { \
   return libop(ShConstant1f(left), right); \

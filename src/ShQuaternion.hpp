@@ -57,36 +57,36 @@ public:
   template<int K2>
   ShQuaternion& operator*=(const ShAttrib<1, K2, T>& right);
   template<int K2>
-  ShQuaternion<SH_VAR_TEMP, T> operator+(const ShQuaternion<K2, T>& q2);
+  ShQuaternion<SH_TEMP, T> operator+(const ShQuaternion<K2, T>& q2);
   template<int K2>
-  ShQuaternion<SH_VAR_TEMP, T> operator-(const ShQuaternion<K2, T>& q2);
+  ShQuaternion<SH_TEMP, T> operator-(const ShQuaternion<K2, T>& q2);
   template<int K2>
-  ShQuaternion<SH_VAR_TEMP, T> operator*(const ShQuaternion<K2, T>& q2);
+  ShQuaternion<SH_TEMP, T> operator*(const ShQuaternion<K2, T>& q2);
   template<int K2>
-  ShQuaternion<SH_VAR_TEMP, T> operator*(const ShAttrib<1, K2, T>& c);
+  ShQuaternion<SH_TEMP, T> operator*(const ShAttrib<1, K2, T>& c);
   void normalize();
 
   template<int K2>
-  ShAttrib<1, SH_VAR_TEMP, T> dot(const ShQuaternion<K2, T>& q) const;
-  ShQuaternion<SH_VAR_TEMP, T> conjugate() const;
-  ShQuaternion<SH_VAR_TEMP, T> inverse() const;
-  ShMatrix<4, 4, SH_VAR_TEMP, T> getMatrix() const;
+  ShAttrib<1, SH_TEMP, T> dot(const ShQuaternion<K2, T>& q) const;
+  ShQuaternion<SH_TEMP, T> conjugate() const;
+  ShQuaternion<SH_TEMP, T> inverse() const;
+  ShMatrix<4, 4, SH_TEMP, T> getMatrix() const;
 private:
   ShVector<4, K, T> m_data;
 };
 
 template<int K, typename T, int K2>
-extern ShQuaternion<SH_VAR_TEMP, T> 
+extern ShQuaternion<SH_TEMP, T> 
 operator*(const ShAttrib<1, K2, T>& c, const ShQuaternion<K, T>& q); 
 
 //template<int K1, int K2, typename T>
-//extern ShQuaternion<SH_VAR_TEMP, T>
+//extern ShQuaternion<SH_TEMP, T>
 //slerp(const ShQuaternion<K1, T>& q1, const ShQuaternion<K2, T>& q2, 
 //		const ShAttrib1f& t);
 
-typedef ShQuaternion<SH_VAR_INPUT, float> ShInputQuaternionf;
-typedef ShQuaternion<SH_VAR_OUTPUT, float> ShOutputQuaternionf;
-typedef ShQuaternion<SH_VAR_TEMP, float> ShQuaternionf;
+typedef ShQuaternion<SH_INPUT, float> ShInputQuaternionf;
+typedef ShQuaternion<SH_OUTPUT, float> ShOutputQuaternionf;
+typedef ShQuaternion<SH_TEMP, float> ShQuaternionf;
 }
 
 #include "ShQuaternionImpl.hpp"

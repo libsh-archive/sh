@@ -34,11 +34,11 @@ namespace SH {
 
 /** An N-Point.
  */
-SH_SPECIAL_TYPE(ShPoint, point, SH_VAR_POINT);
+SH_SPECIAL_TYPE(ShPoint, point, SH_POINT);
 
 SH_SPECIAL_TYPE_TYPEDEFS(Point);
 
-SH_SPECIAL_TYPE_IMPL(ShPoint, SH_VAR_POINT);
+SH_SPECIAL_TYPE_IMPL(ShPoint, SH_POINT);
 
 }
 

@@ -34,6 +34,7 @@ namespace SH {
 const char* ShVariableKindName[] = {
   "Input",
   "Output",
+  "InOut",
   "Temp",
   "Constant",
   "Texture",
@@ -51,21 +52,26 @@ const char* ShVariableSpecialTypeName[] = {
 };
 
 ShVariableNode::ShVariableNode(ShVariableKind kind, int size, ShVariableSpecialType type)
-  : m_uniform(!ShEnvironment::insideShader && kind != SH_VAR_TEXTURE), m_kind(kind), m_specialType(type),
+  : m_uniform(!ShEnvironment::insideShader && kind != SH_TEXTURE), m_kind(kind), m_specialType(type),
     m_size(size), m_id(m_maxID++), m_values(0)
 {
-  if (m_kind != SH_VAR_TEXTURE && (m_uniform || m_kind == SH_VAR_CONST)) {
+  if (m_kind != SH_TEXTURE && (m_uniform || m_kind == SH_CONST)) {
     m_values = new ValueType[size];
     for (int i = 0; i < size; i++) m_values[i] = 0.0;
   }
   switch (m_kind) {
-  case SH_VAR_INPUT:
+  case SH_INPUT:
     assert(ShEnvironment::shader);
     ShEnvironment::shader->inputs.push_back(this);
     break;
-  case SH_VAR_OUTPUT:
+  case SH_OUTPUT:
     assert(ShEnvironment::shader);
     ShEnvironment::shader->outputs.push_back(this);
+    break;
+  case SH_INOUT:
+    assert(ShEnvironment::shader);
+    ShEnvironment::shader->outputs.push_back(this);
+    ShEnvironment::shader->inputs.push_back(this);
     break;
   default:
     // Do nothing
@@ -99,7 +105,7 @@ std::string ShVariableNode::name() const
   std::ostringstream stream;
 
   // Special case for constants
-  if (m_kind == SH_VAR_CONST) {
+  if (m_kind == SH_CONST) {
     if (m_size == 1) {
       stream << m_values[0];
     } else {
@@ -116,22 +122,22 @@ std::string ShVariableNode::name() const
   if (!m_name.empty()) return m_name;
   
   switch (m_kind) {
-  case SH_VAR_INPUT:
+  case SH_INPUT:
     stream << "i";
     break;
-  case SH_VAR_OUTPUT:
+  case SH_OUTPUT:
     stream << "o";
     break;
-  case SH_VAR_TEMP:
+  case SH_TEMP:
     stream << "t";
     break;
-  case SH_VAR_CONST:
+  case SH_CONST:
     stream << "c";
     break;
-  case SH_VAR_TEXTURE:
+  case SH_TEXTURE:
     stream << "tex";
     break;
-  case SH_VAR_STREAM:
+  case SH_STREAM:
     stream << "str";
     break;
   }

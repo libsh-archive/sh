@@ -184,7 +184,7 @@ public:
   
   std::string name() const;
 
-  SH::ShBackendCodePtr generateCode(const std::string& kind, const SH::ShProgram& shader);
+  SH::ShBackendCodePtr compile(const std::string& kind, const SH::ShProgram& shader);
 
   int instrs(const std::string& target) { return m_instrs[target]; }
   int temps(const std::string& target) { return m_temps[target]; }

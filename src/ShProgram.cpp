@@ -33,8 +33,6 @@
 #include "ShTextureNode.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShError.hpp"
-#include "ShOptimizer.hpp"
-#include "ShTransformer.hpp"
 
 namespace SH {
 
@@ -59,23 +57,10 @@ void ShProgramNode::compile(const std::string& target, ShRefCount<ShBackend>& ba
 {
   if (!backend) return;
 
-  ShEnvironment::shader = this;
-  ShEnvironment::insideShader = true;
-
-  // apply transformation
-  ShTransformer transformer(ctrlGraph, backend);
-  transformer.transform();
-
-  ShOptimizer optimizer(ctrlGraph);
-  optimizer.optimize(ShEnvironment::optimizationLevel);
-
-  collectVariables();
-
   ShBackendCodePtr code = backend->generateCode(target, this);
 #ifdef SH_DEBUG
   //code->print(std::cerr);
 #endif
-  ShEnvironment::insideShader = false;
   m_code[std::make_pair(target, backend)] = code;
 }
 
@@ -143,20 +128,21 @@ void ShProgramNode::collectNodeVars(const ShCtrlGraphNodePtr& node)
 
 void ShProgramNode::collectVar(const ShVariableNodePtr& var) {
   if (!var) return;
-  if (var->uniform() && var->kind() != SH_VAR_TEXTURE) {
+  if (var->uniform() && var->kind() != SH_TEXTURE) {
     if (std::find(uniforms.begin(), uniforms.end(), var) == uniforms.end()) uniforms.push_back(var);
   } else switch (var->kind()) {
-  case SH_VAR_INPUT:
-  case SH_VAR_OUTPUT:
+  case SH_INPUT:
+  case SH_OUTPUT:
+  case SH_INOUT:
     // Taken care of by ShVariableNode constructor
     break;
-  case SH_VAR_TEMP:
+  case SH_TEMP:
     if (std::find(temps.begin(), temps.end(), var) == temps.end()) temps.push_back(var);
     break;
-  case SH_VAR_CONST:
+  case SH_CONST:
     if (std::find(constants.begin(), constants.end(), var) == constants.end()) constants.push_back(var);
     break;
-  case SH_VAR_TEXTURE:
+  case SH_TEXTURE:
     if (std::find(textures.begin(), textures.end(), var) == textures.end()) {
       textures.push_back(var);
       ShCubeTextureNodePtr cubetex = var;

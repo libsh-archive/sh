@@ -56,7 +56,7 @@ ShProgram operator<<(const ShVariable &var, const ShProgram &p);
 template<int N, typename T>
 ShProgram operator<<(const ShProgram& a, const ShVariableN<N, T>& v) {
   ShProgram vNibble = SH_BEGIN_PROGRAM() {
-    ShAttrib<N, SH_VAR_OUTPUT, T> out;
+    ShAttrib<N, SH_OUTPUT, T> out;
     out.node()->specialType(v.node()->specialType());
     out = v;
   } SH_END_PROGRAM;

@@ -98,7 +98,7 @@ ShProgram connect(const ShChannel<T>& stream,
     // I.e.:
     // T::OutputType out = stream();
     // would be all that's needed.
-    ShVariable out(new ShVariableNode(SH_VAR_OUTPUT,
+    ShVariable out(new ShVariableNode(SH_OUTPUT,
                                       T::typesize, T::special_type));
     ShStatement stmt(out, SH_OP_ASN, stream());
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);

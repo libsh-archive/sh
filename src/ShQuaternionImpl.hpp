@@ -98,14 +98,14 @@ ShQuaternion<K, T>::operator*=(const ShAttrib<1, K2, T>& right)
 
 template<int K, typename T>
 template<int K2>
-ShAttrib<1, SH_VAR_TEMP, T> 
+ShAttrib<1, SH_TEMP, T> 
 ShQuaternion<K, T>::dot(const ShQuaternion<K2, T>& q) const 
 {
   return SH::dot(m_data, q.m_data);
 }
 
 template<int K, typename T>
-ShQuaternion<SH_VAR_TEMP, T> ShQuaternion<K, T>::conjugate() const 
+ShQuaternion<SH_TEMP, T> ShQuaternion<K, T>::conjugate() const 
 {
   ShVector4f conjData = -m_data;
   conjData(0) = -conjData(0);
@@ -115,7 +115,7 @@ ShQuaternion<SH_VAR_TEMP, T> ShQuaternion<K, T>::conjugate() const
 }
 
 template<int K, typename T>
-ShQuaternion<SH_VAR_TEMP, T> ShQuaternion<K, T>::inverse() const 
+ShQuaternion<SH_TEMP, T> ShQuaternion<K, T>::inverse() const 
 {
   if (m_data.isUnit()) {
     return conjugate();
@@ -126,7 +126,7 @@ ShQuaternion<SH_VAR_TEMP, T> ShQuaternion<K, T>::inverse() const
 }
 
 template<int K, typename T>
-ShMatrix<4, 4, SH_VAR_TEMP, T> ShQuaternion<K, T>::getMatrix() const
+ShMatrix<4, 4, SH_TEMP, T> ShQuaternion<K, T>::getMatrix() const
 {
   SH::ShMatrix4x4f m;
   ShAttrib1f xx, xy, xz, xw, yy, yz, yw, zz, zw;
@@ -163,7 +163,7 @@ ShMatrix<4, 4, SH_VAR_TEMP, T> ShQuaternion<K, T>::getMatrix() const
 
 template<int K, typename T>
 template<int K2>
-ShQuaternion<SH_VAR_TEMP, T> 
+ShQuaternion<SH_TEMP, T> 
 ShQuaternion<K, T>::operator+(const ShQuaternion<K2, T>& q)
 {
   ShQuaternion<K, T> r = *this;
@@ -172,7 +172,7 @@ ShQuaternion<K, T>::operator+(const ShQuaternion<K2, T>& q)
 
 template<int K, typename T>
 template<int K2>
-ShQuaternion<SH_VAR_TEMP, T> 
+ShQuaternion<SH_TEMP, T> 
 ShQuaternion<K, T>::operator-(const ShQuaternion<K2, T>& q)
 {
   ShQuaternion<K, T> r = *this;
@@ -181,7 +181,7 @@ ShQuaternion<K, T>::operator-(const ShQuaternion<K2, T>& q)
   
 template<int K, typename T>
 template<int K2>
-ShQuaternion<SH_VAR_TEMP, T> 
+ShQuaternion<SH_TEMP, T> 
 ShQuaternion<K, T>::operator*(const ShQuaternion<K2, T>& q)
 {
   ShQuaternion<K, T> r = *this;
@@ -190,7 +190,7 @@ ShQuaternion<K, T>::operator*(const ShQuaternion<K2, T>& q)
 
 template<int K, typename T>
 template<int K2>
-ShQuaternion<SH_VAR_TEMP, T> 
+ShQuaternion<SH_TEMP, T> 
 ShQuaternion<K, T>::operator*(const ShAttrib<1, K2, T>& c)
 {
   ShQuaternion<K, T> r = *this;
@@ -204,7 +204,7 @@ void ShQuaternion<K, T>::normalize()
 }
 
 template<int K, typename T, int K2>
-ShQuaternion<SH_VAR_TEMP, T> 
+ShQuaternion<SH_TEMP, T> 
 operator*(const ShAttrib<1, K2, T>& c, const ShQuaternion<K, T>& q)
 {
   ShQuaternion<K, T> r = q;
@@ -213,12 +213,12 @@ operator*(const ShAttrib<1, K2, T>& c, const ShQuaternion<K, T>& q)
 
 /*
 template<int K1, int K2, typename T>
-extern ShQuaternion<SH_VAR_TEMP, T>
+extern ShQuaternion<SH_TEMP, T>
 slerp(const ShQuaternion<K1, T>& q1, const ShQuaternion<K2, T>& q2, 
 		const ShAttrib1f& t)
 {
-  ShAttrib<1, SH_VAR_TEMP, T> cosTheta = q1.normalize().dot(q2.normalize());
-  ShAttrib<1, SH_VAR_TEMP, T> sinTheta = sqrt(1.0 - cosTheta*cosTheta);
+  ShAttrib<1, SH_TEMP, T> cosTheta = q1.normalize().dot(q2.normalize());
+  ShAttrib<1, SH_TEMP, T> sinTheta = sqrt(1.0 - cosTheta*cosTheta);
   
   ShQuaternion<K2, T> q2prime = (cosTheta >= 0.0)*q2 - (costTheta < 0.0)*q2;
   

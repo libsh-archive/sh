@@ -354,9 +354,9 @@ namespace SH {
 
   
   template<int Rows, int Cols, int Kind, typename T>
-  ShMatrix<Rows - 1, Cols -1, SH_VAR_TEMP, T> ShMatrix<Rows, Cols, Kind, T>::subMatrix(int rowToRemove,int columnToRemove) const
+  ShMatrix<Rows - 1, Cols -1, SH_TEMP, T> ShMatrix<Rows, Cols, Kind, T>::subMatrix(int rowToRemove,int columnToRemove) const
   {
-    ShMatrix<Rows-1, Cols-1,SH_VAR_TEMP,T> myMatrix;
+    ShMatrix<Rows-1, Cols-1,SH_TEMP,T> myMatrix;
     
     int* indices = new int[Cols - 1];
     for (int i = 0; i < columnToRemove; i++) 
@@ -367,11 +367,11 @@ namespace SH {
     ShSwizzle swizzle(Cols, Cols - 1, indices);
     
     for(int i=0;i<rowToRemove;i++){
-      myMatrix[i]=(ShAttrib<Cols - 1, SH_VAR_TEMP, T, false>(m_data[i].node(), swizzle, m_data[i].neg())); 
+      myMatrix[i]=(ShAttrib<Cols - 1, SH_TEMP, T, false>(m_data[i].node(), swizzle, m_data[i].neg())); 
     }
     
     for(int i=rowToRemove+1;i<Rows;i++){
-      myMatrix[i-1]=(ShAttrib<Cols - 1, SH_VAR_TEMP, T, false>(m_data[i].node(), swizzle, m_data[i].neg()));
+      myMatrix[i-1]=(ShAttrib<Cols - 1, SH_TEMP, T, false>(m_data[i].node(), swizzle, m_data[i].neg()));
     }
     
     delete [] indices;
@@ -526,46 +526,46 @@ template<int Kind, typename T>
   }
 
   template<int Rows, int Cols, typename T>
-  ShMatrix<Rows, Cols, SH_VAR_TEMP, T>
+  ShMatrix<Rows, Cols, SH_TEMP, T>
   ShMatrixRows<Rows, Cols, T>::operator()() const
   {
-    ShMatrix<Rows, Cols, SH_VAR_TEMP, T> r;
+    ShMatrix<Rows, Cols, SH_TEMP, T> r;
     for (int i = 0; i < Rows; i++) r[i] = m_data[i];
     return r;
   }
 
   template<int Rows, int Cols, typename T>
-  ShMatrix<Rows, 1, SH_VAR_TEMP, T>
+  ShMatrix<Rows, 1, SH_TEMP, T>
   ShMatrixRows<Rows, Cols, T>::operator()(int i0) const
   {
-    ShMatrix<Rows, 1, SH_VAR_TEMP, T> r;
+    ShMatrix<Rows, 1, SH_TEMP, T> r;
     for (int i = 0; i < Rows; i++) r[i] = m_data[i](i0);
     return r;
   }
 
   template<int Rows, int Cols, typename T>
-  ShMatrix<Rows, 2, SH_VAR_TEMP, T>
+  ShMatrix<Rows, 2, SH_TEMP, T>
   ShMatrixRows<Rows, Cols, T>::operator()(int i0, int i1) const
   {
-    ShMatrix<Rows, 2, SH_VAR_TEMP, T> r;
+    ShMatrix<Rows, 2, SH_TEMP, T> r;
     for (int i = 0; i < Rows; i++) r[i] = m_data[i](i0, i1);
     return r;
   }
 
   template<int Rows, int Cols, typename T>
-  ShMatrix<Rows, 3, SH_VAR_TEMP, T>
+  ShMatrix<Rows, 3, SH_TEMP, T>
   ShMatrixRows<Rows, Cols, T>::operator()(int i0, int i1, int i2) const
   {
-    ShMatrix<Rows, 3, SH_VAR_TEMP, T> r;
+    ShMatrix<Rows, 3, SH_TEMP, T> r;
     for (int i = 0; i < Rows; i++) r[i] = m_data[i](i0, i1, i2);
     return r;
   }
 
   template<int Rows, int Cols, typename T>
-  ShMatrix<Rows, 4, SH_VAR_TEMP, T>
+  ShMatrix<Rows, 4, SH_TEMP, T>
   ShMatrixRows<Rows, Cols, T>::operator()(int i0, int i1, int i2, int i3) const
   {
-    ShMatrix<Rows, 4, SH_VAR_TEMP, T> r;
+    ShMatrix<Rows, 4, SH_TEMP, T> r;
     for (int i = 0; i < Rows; i++) r[i] = m_data[i](i0, i1, i2, i3);
     return r;
   }

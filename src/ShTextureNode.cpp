@@ -31,7 +31,7 @@
 namespace SH {
 
 ShTextureNode::ShTextureNode(ShTextureDims dims)
-  : ShVariableNode(SH_VAR_TEXTURE, 1),
+  : ShVariableNode(SH_TEXTURE, 1),
     m_dims(dims)
 {
 }

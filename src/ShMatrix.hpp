@@ -222,7 +222,7 @@ namespace SH {
      * Returns a ShMatrix that is the matrix where the row (first parameter), and the column (second parameter) has been removed, the matrix has a size of Rows-1, Cols -1
      * \param other The matrix from which we want to get the submatrix
      */
-    ShMatrix<Rows - 1, Cols -1, SH_VAR_TEMP, T> subMatrix(int,int) const;
+    ShMatrix<Rows - 1, Cols -1, SH_TEMP, T> subMatrix(int,int) const;
 
 
 
@@ -302,67 +302,83 @@ namespace SH {
      * Retrieve a matrix consisting of these rows and the given columns.
      */
     //@{
-    ShMatrix<Rows, Cols, SH_VAR_TEMP, T> operator()() const; ///< Identity swizzle
-    ShMatrix<Rows, 1, SH_VAR_TEMP, T> operator()(int) const;
-    ShMatrix<Rows, 2, SH_VAR_TEMP, T> operator()(int, int) const;
-    ShMatrix<Rows, 3, SH_VAR_TEMP, T> operator()(int, int, int) const;
-    ShMatrix<Rows, 4, SH_VAR_TEMP, T> operator()(int, int, int, int) const;
+    ShMatrix<Rows, Cols, SH_TEMP, T> operator()() const; ///< Identity swizzle
+    ShMatrix<Rows, 1, SH_TEMP, T> operator()(int) const;
+    ShMatrix<Rows, 2, SH_TEMP, T> operator()(int, int) const;
+    ShMatrix<Rows, 3, SH_TEMP, T> operator()(int, int, int) const;
+    ShMatrix<Rows, 4, SH_TEMP, T> operator()(int, int, int, int) const;
     //@}
   private:
-    ShAttrib<Cols, SH_VAR_TEMP, T> m_data[Rows];
+    ShAttrib<Cols, SH_TEMP, T> m_data[Rows];
   };
 
-  typedef ShMatrix<1, 1, SH_VAR_INPUT, float> ShInputMatrix1x1f;
-  typedef ShMatrix<1, 1, SH_VAR_OUTPUT, float> ShOutputMatrix1x1f;
-  typedef ShMatrix<1, 1, SH_VAR_TEMP, float> ShMatrix1x1f;
-  typedef ShMatrix<1, 2, SH_VAR_INPUT, float> ShInputMatrix1x2f;
-  typedef ShMatrix<1, 2, SH_VAR_OUTPUT, float> ShOutputMatrix1x2f;
-  typedef ShMatrix<1, 2, SH_VAR_TEMP, float> ShMatrix1x2f;
-  typedef ShMatrix<1, 3, SH_VAR_INPUT, float> ShInputMatrix1x3f;
-  typedef ShMatrix<1, 3, SH_VAR_OUTPUT, float> ShOutputMatrix1x3f;
-  typedef ShMatrix<1, 3, SH_VAR_TEMP, float> ShMatrix1x3f;
-  typedef ShMatrix<1, 4, SH_VAR_INPUT, float> ShInputMatrix1x4f;
-  typedef ShMatrix<1, 4, SH_VAR_OUTPUT, float> ShOutputMatrix1x4f;
-  typedef ShMatrix<1, 4, SH_VAR_TEMP, float> ShMatrix1x4f;
+  typedef ShMatrix<1, 1, SH_INPUT, float> ShInputMatrix1x1f;
+  typedef ShMatrix<1, 1, SH_OUTPUT, float> ShOutputMatrix1x1f;
+  typedef ShMatrix<1, 1, SH_INOUT, float> ShInOutMatrix1x1f;
+  typedef ShMatrix<1, 1, SH_TEMP, float> ShMatrix1x1f;
+  typedef ShMatrix<1, 2, SH_INPUT, float> ShInputMatrix1x2f;
+  typedef ShMatrix<1, 2, SH_OUTPUT, float> ShOutputMatrix1x2f;
+  typedef ShMatrix<1, 2, SH_INOUT, float> ShInOutMatrix1x2f;
+  typedef ShMatrix<1, 2, SH_TEMP, float> ShMatrix1x2f;
+  typedef ShMatrix<1, 3, SH_INPUT, float> ShInputMatrix1x3f;
+  typedef ShMatrix<1, 3, SH_OUTPUT, float> ShOutputMatrix1x3f;
+  typedef ShMatrix<1, 3, SH_INOUT, float> ShInOutMatrix1x3f;
+  typedef ShMatrix<1, 3, SH_TEMP, float> ShMatrix1x3f;
+  typedef ShMatrix<1, 4, SH_INPUT, float> ShInputMatrix1x4f;
+  typedef ShMatrix<1, 4, SH_OUTPUT, float> ShOutputMatrix1x4f;
+  typedef ShMatrix<1, 4, SH_INOUT, float> ShInOutMatrix1x4f;
+  typedef ShMatrix<1, 4, SH_TEMP, float> ShMatrix1x4f;
 
-  typedef ShMatrix<2, 1, SH_VAR_INPUT, float> ShInputMatrix2x1f;
-  typedef ShMatrix<2, 1, SH_VAR_OUTPUT, float> ShOutputMatrix2x1f;
-  typedef ShMatrix<2, 1, SH_VAR_TEMP, float> ShMatrix2x1f;
-  typedef ShMatrix<2, 2, SH_VAR_INPUT, float> ShInputMatrix2x2f;
-  typedef ShMatrix<2, 2, SH_VAR_OUTPUT, float> ShOutputMatrix2x2f;
-  typedef ShMatrix<2, 2, SH_VAR_TEMP, float> ShMatrix2x2f;
-  typedef ShMatrix<2, 3, SH_VAR_INPUT, float> ShInputMatrix2x3f;
-  typedef ShMatrix<2, 3, SH_VAR_OUTPUT, float> ShOutputMatrix2x3f;
-  typedef ShMatrix<2, 3, SH_VAR_TEMP, float> ShMatrix2x3f;
-  typedef ShMatrix<2, 4, SH_VAR_INPUT, float> ShInputMatrix2x4f;
-  typedef ShMatrix<2, 4, SH_VAR_OUTPUT, float> ShOutputMatrix2x4f;
-  typedef ShMatrix<2, 4, SH_VAR_TEMP, float> ShMatrix2x4f;
+  typedef ShMatrix<2, 1, SH_INPUT, float> ShInputMatrix2x1f;
+  typedef ShMatrix<2, 1, SH_OUTPUT, float> ShOutputMatrix2x1f;
+  typedef ShMatrix<2, 1, SH_INOUT, float> ShInOutMatrix2x1f;
+  typedef ShMatrix<2, 1, SH_TEMP, float> ShMatrix2x1f;
+  typedef ShMatrix<2, 2, SH_INPUT, float> ShInputMatrix2x2f;
+  typedef ShMatrix<2, 2, SH_OUTPUT, float> ShOutputMatrix2x2f;
+  typedef ShMatrix<2, 2, SH_INOUT, float> ShInOutMatrix2x2f;
+  typedef ShMatrix<2, 2, SH_TEMP, float> ShMatrix2x2f;
+  typedef ShMatrix<2, 3, SH_INPUT, float> ShInputMatrix2x3f;
+  typedef ShMatrix<2, 3, SH_OUTPUT, float> ShOutputMatrix2x3f;
+  typedef ShMatrix<2, 3, SH_INOUT, float> ShInOutMatrix2x3f;
+  typedef ShMatrix<2, 3, SH_TEMP, float> ShMatrix2x3f;
+  typedef ShMatrix<2, 4, SH_INPUT, float> ShInputMatrix2x4f;
+  typedef ShMatrix<2, 4, SH_OUTPUT, float> ShOutputMatrix2x4f;
+  typedef ShMatrix<2, 4, SH_INOUT, float> ShInOutMatrix2x4f;
+  typedef ShMatrix<2, 4, SH_TEMP, float> ShMatrix2x4f;
 
-  typedef ShMatrix<3, 1, SH_VAR_INPUT, float> ShInputMatrix3x1f;
-  typedef ShMatrix<3, 1, SH_VAR_OUTPUT, float> ShOutputMatrix3x1f;
-  typedef ShMatrix<3, 1, SH_VAR_TEMP, float> ShMatrix3x1f;
-  typedef ShMatrix<3, 2, SH_VAR_INPUT, float> ShInputMatrix3x2f;
-  typedef ShMatrix<3, 2, SH_VAR_OUTPUT, float> ShOutputMatrix3x2f;
-  typedef ShMatrix<3, 2, SH_VAR_TEMP, float> ShMatrix3x2f;
-  typedef ShMatrix<3, 3, SH_VAR_INPUT, float> ShInputMatrix3x3f;
-  typedef ShMatrix<3, 3, SH_VAR_OUTPUT, float> ShOutputMatrix3x3f;
-  typedef ShMatrix<3, 3, SH_VAR_TEMP, float> ShMatrix3x3f;
-  typedef ShMatrix<3, 4, SH_VAR_INPUT, float> ShInputMatrix3x4f;
-  typedef ShMatrix<3, 4, SH_VAR_OUTPUT, float> ShOutputMatrix3x4f;
-  typedef ShMatrix<3, 4, SH_VAR_TEMP, float> ShMatrix3x4f;
+  typedef ShMatrix<3, 1, SH_INPUT, float> ShInputMatrix3x1f;
+  typedef ShMatrix<3, 1, SH_OUTPUT, float> ShOutputMatrix3x1f;
+  typedef ShMatrix<3, 1, SH_INOUT, float> ShInOutMatrix3x1f;
+  typedef ShMatrix<3, 1, SH_TEMP, float> ShMatrix3x1f;
+  typedef ShMatrix<3, 2, SH_INPUT, float> ShInputMatrix3x2f;
+  typedef ShMatrix<3, 2, SH_OUTPUT, float> ShOutputMatrix3x2f;
+  typedef ShMatrix<3, 2, SH_INOUT, float> ShInOutMatrix3x2f;
+  typedef ShMatrix<3, 2, SH_TEMP, float> ShMatrix3x2f;
+  typedef ShMatrix<3, 3, SH_INPUT, float> ShInputMatrix3x3f;
+  typedef ShMatrix<3, 3, SH_OUTPUT, float> ShOutputMatrix3x3f;
+  typedef ShMatrix<3, 3, SH_INOUT, float> ShInOutMatrix3x3f;
+  typedef ShMatrix<3, 3, SH_TEMP, float> ShMatrix3x3f;
+  typedef ShMatrix<3, 4, SH_INPUT, float> ShInputMatrix3x4f;
+  typedef ShMatrix<3, 4, SH_OUTPUT, float> ShOutputMatrix3x4f;
+  typedef ShMatrix<3, 4, SH_INOUT, float> ShInOutMatrix3x4f;
+  typedef ShMatrix<3, 4, SH_TEMP, float> ShMatrix3x4f;
 
-  typedef ShMatrix<4, 1, SH_VAR_INPUT, float> ShInputMatrix4x1f;
-  typedef ShMatrix<4, 1, SH_VAR_OUTPUT, float> ShOutputMatrix4x1f;
-  typedef ShMatrix<4, 1, SH_VAR_TEMP, float> ShMatrix4x1f;
-  typedef ShMatrix<4, 2, SH_VAR_INPUT, float> ShInputMatrix4x2f;
-  typedef ShMatrix<4, 2, SH_VAR_OUTPUT, float> ShOutputMatrix4x2f;
-  typedef ShMatrix<4, 2, SH_VAR_TEMP, float> ShMatrix4x2f;
-  typedef ShMatrix<4, 3, SH_VAR_INPUT, float> ShInputMatrix4x3f;
-  typedef ShMatrix<4, 3, SH_VAR_OUTPUT, float> ShOutputMatrix4x3f;
-  typedef ShMatrix<4, 3, SH_VAR_TEMP, float> ShMatrix4x3f;
-  typedef ShMatrix<4, 4, SH_VAR_INPUT, float> ShInputMatrix4x4f;
-  typedef ShMatrix<4, 4, SH_VAR_OUTPUT, float> ShOutputMatrix4x4f;
-  typedef ShMatrix<4, 4, SH_VAR_TEMP, float> ShMatrix4x4f;
+  typedef ShMatrix<4, 1, SH_INPUT, float> ShInputMatrix4x1f;
+  typedef ShMatrix<4, 1, SH_OUTPUT, float> ShOutputMatrix4x1f;
+  typedef ShMatrix<4, 1, SH_INOUT, float> ShInOutMatrix4x1f;
+  typedef ShMatrix<4, 1, SH_TEMP, float> ShMatrix4x1f;
+  typedef ShMatrix<4, 2, SH_INPUT, float> ShInputMatrix4x2f;
+  typedef ShMatrix<4, 2, SH_OUTPUT, float> ShOutputMatrix4x2f;
+  typedef ShMatrix<4, 2, SH_INOUT, float> ShInOutMatrix4x2f;
+  typedef ShMatrix<4, 2, SH_TEMP, float> ShMatrix4x2f;
+  typedef ShMatrix<4, 3, SH_INPUT, float> ShInputMatrix4x3f;
+  typedef ShMatrix<4, 3, SH_OUTPUT, float> ShOutputMatrix4x3f;
+  typedef ShMatrix<4, 3, SH_INOUT, float> ShInOutMatrix4x3f;
+  typedef ShMatrix<4, 3, SH_TEMP, float> ShMatrix4x3f;
+  typedef ShMatrix<4, 4, SH_INPUT, float> ShInputMatrix4x4f;
+  typedef ShMatrix<4, 4, SH_OUTPUT, float> ShOutputMatrix4x4f;
+  typedef ShMatrix<4, 4, SH_INOUT, float> ShInOutMatrix4x4f;
+  typedef ShMatrix<4, 4, SH_TEMP, float> ShMatrix4x4f;
 
 }
 

@@ -94,7 +94,7 @@ BackendCode::~BackendCode()
 bool BackendCode::allocateRegister(const SH::ShVariableNodePtr& var)
 {
   if (!var) return true;
-  if (var->kind() != SH_VAR_TEMP) return true; // ignore anything but temporaries
+  if (var->kind() != SH_TEMP) return true; // ignore anything but temporaries
   if (var->uniform()) return true;
   
   if (m_tempRegs.empty()) {
@@ -113,7 +113,7 @@ bool BackendCode::allocateRegister(const SH::ShVariableNodePtr& var)
 void BackendCode::freeRegister(const SH::ShVariableNodePtr& var)
 {
   if (!var) return;
-  if (var->kind() != SH_VAR_TEMP) return; // ignore anything but temporaries
+  if (var->kind() != SH_TEMP) return; // ignore anything but temporaries
   if (var->uniform()) return;
 
   if (m_registers.find(var) == m_registers.end()) {
@@ -232,7 +232,7 @@ std::string BackendCode::printVar(const ShVariable& var)
   
   out += getReg(var.node()).print();
 
-  if (var.node()->kind() == SH_VAR_TEXTURE) return out;
+  if (var.node()->kind() == SH_TEXTURE) return out;
   
   if (var.swizzle().size()) {  
     out += "[\"";
@@ -372,7 +372,7 @@ void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
       genScalarVectorInst(stmt.dest, stmt.src[0], stmt.src[1], OP_MUL);
     case SH_OP_DIV:
       {
-        ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, stmt.src[1].size()));
+        ShVariable rcp(new ShVariableNode(SH_TEMP, stmt.src[1].size()));
         m_instructions.push_back(SmInstruction(OP_RCP, rcp, stmt.src[1]));
 
         if (rcp.size() == 1 && stmt.src[0].size() != 1) {
@@ -438,7 +438,7 @@ void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
         } else if (left.size() == 1) {
           m_instructions.push_back(SmInstruction(OP_MUL, stmt.dest, left, right));
         } else {
-          ShVariable mul(new ShVariableNode(SH_VAR_TEMP, left.size()));
+          ShVariable mul(new ShVariableNode(SH_TEMP, left.size()));
           m_instructions.push_back(SmInstruction(OP_MUL, mul, left, right));
           m_instructions.push_back(SmInstruction(OP_ADD, stmt.dest, mul(0), mul(1)));
           for (int i = 2; i < left.size(); i++) {
@@ -517,7 +517,7 @@ void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
     case SH_OP_SQRT:
       {
         int rsize = stmt.src[0].size();
-        ShVariable rsq(new ShVariableNode(SH_VAR_TEMP, rsize));
+        ShVariable rsq(new ShVariableNode(SH_TEMP, rsize));
         m_instructions.push_back(SmInstruction(OP_RSQ, rsq, stmt.src[0]));
         m_instructions.push_back(SmInstruction(OP_RCP, stmt.dest, rsq));
         break;
@@ -533,12 +533,12 @@ void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
 
         /*
         // Scale the lookup as necessary
-        ShVariableNodePtr scale = new ShVariableNode(SH_VAR_CONST, stmt.src[1].size());
+        ShVariableNodePtr scale = new ShVariableNode(SH_CONST, stmt.src[1].size());
         
         scale->setValue(0, texture->width());
         if (stmt.src[1].size() >= 2) scale->setValue(1, texture->height());
 
-        ShVariable scaled(new ShVariableNode(SH_VAR_TEMP, stmt.src[1].size()));
+        ShVariable scaled(new ShVariableNode(SH_TEMP, stmt.src[1].size()));
         m_instructions.push_back(SmInstruction(OP_MUL, scaled, stmt.src[1], ShVariable(scale)));
         */
         m_instructions.push_back(SmInstruction(OP_TEX, stmt.dest, stmt.src[1], stmt.src[0]));
@@ -617,26 +617,26 @@ SmRegister BackendCode::getReg(const SH::ShVariableNodePtr& var)
   RegMap::const_iterator I = m_registers.find(var);
   if (I != m_registers.end()) return I->second;
   
-  if (var->uniform() && var->kind() != SH_VAR_TEXTURE) {
+  if (var->uniform() && var->kind() != SH_TEXTURE) {
     m_registers[var] = SmRegister(SHSM_REG_CONST, m_maxCR++);
     return m_registers[var];
   }
 
-  if (var->kind() == SH_VAR_TEMP) return SmRegister(SHSM_REG_TEMP, -1);
+  if (var->kind() == SH_TEMP) return SmRegister(SHSM_REG_TEMP, -1);
   
   switch (var->kind()) {
-  case SH_VAR_INPUT:
+  case SH_INPUT:
     m_registers[var] = SmRegister(SHSM_REG_INPUT, m_maxIR++);
     break;
-  case SH_VAR_OUTPUT:
+  case SH_OUTPUT:
     m_registers[var] = SmRegister(SHSM_REG_OUTPUT, m_maxOR++);
     break;
-  case SH_VAR_TEMP:
+  case SH_TEMP:
     break;
-  case SH_VAR_CONST:
+  case SH_CONST:
     m_registers[var] = SmRegister(SHSM_REG_CONST, m_maxCR++);
     break;
-  case SH_VAR_TEXTURE:
+  case SH_TEXTURE:
     SH_DEBUG_PRINT("Allocating texture unit " << m_maxTex);
     m_registers[var] = SmRegister(SHSM_REG_TEXTURE, m_maxTex++);
     break;
@@ -726,7 +726,7 @@ void Backend::generateNode(BackendCodePtr& code, const ShCtrlGraphNodePtr& node)
   }
 }
 
-ShBackendCodePtr Backend::generateCode(const std::string& target, const ShProgram& shader)
+ShBackendCodePtr Backend::compile(const std::string& target, const ShProgram& shader)
 {
   BackendCodePtr code = new BackendCode(this, shader, target);
 

@@ -24,18 +24,19 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#include "ShTransformer.hpp"
 #include <algorithm>
 #include <map>
 #include <list>
 #include "ShError.hpp"
 #include "ShDebug.hpp"
+#include "ShVariableNode.hpp"
 #include "ShInternals.hpp"
+#include "ShTransformer.hpp"
 
 namespace SH {
 
-ShTransformer::ShTransformer(ShCtrlGraphPtr graph, ShBackendPtr backend)
-  : m_graph(graph), m_backend(backend)
+ShTransformer::ShTransformer(ShProgram program, ShBackendPtr backend)
+  : m_program(program), m_graph(program->ctrlGraph), m_backend(backend)
 {
 }
 
@@ -43,26 +44,23 @@ ShTransformer::~ShTransformer()
 {
 }
 
-void ShTransformer::transform() 
+bool ShTransformer::transform() 
 {
   bool changed = false;
   inputOutputConversion(changed);
-
-  // check if tupleSplitting is required
   tupleSplitting(changed);
-
+  return changed;
 }
 
-typedef std::vector<ShVariableNodePtr> VarNodeVec;
-typedef std::map<ShVariableNodePtr, VarNodeVec> VarSplitMap;
+const ShTransformer::VarSplitMap& ShTransformer::splits() const {
+  return m_splits;
+}
 
 // Variable splitting, marks statements for which some variable is split 
 struct VariableSplitter {
 
-  VariableSplitter(ShTransformer& t, bool& changed)
-    : transformer(t), changed(changed) {
-    maxTuple = t.m_backend->getCapability(SH_BACKEND_MAX_TUPLE);
-  }
+  VariableSplitter(ShTransformer& t, int maxTuple, bool& changed)
+    : transformer(t), maxTuple(maxTuple), changed(changed) { }
 
   void operator()(ShCtrlGraphNodePtr node) {
     if (!node) return;
@@ -82,33 +80,39 @@ struct VariableSplitter {
   // returns true if variable split
   bool split(ShVariableNodePtr node)
   {
+    int i, offset;
     int n = node->size();
     if(n <= maxTuple ) return false;
-    else if(splits.count(node) > 0) return true;
+    else if(transformer.m_splits.count(node) > 0) return true;
     SH_DEBUG_PRINT( "Splitting node " << node->name());
-    if( node->kind() != SH_VAR_TEMP ) {
-      ShError( ShTransformerException("Long tuple support is only implemented for temporaries."));
+    if( node->kind() != SH_TEMP && node->kind() != SH_CONST ) {
+      ShError( ShTransformerException("Long tuple support is only implemented for temporaries and constants."));
             
     }
-    VarNodeVec &nodeVarNodeVec = splits[node];
-    for(; n > 0; n -= maxTuple) {
-      nodeVarNodeVec.push_back(new ShVariableNode(node->kind(), 
-            n < maxTuple ? n : maxTuple, node->specialType()));
+    ShTransformer::VarNodeVec &nodeVarNodeVec = transformer.m_splits[node];
+    ShVariableNodePtr newNode;
+    for(offset = 0; n > 0; offset += maxTuple, n -= maxTuple) {
+      newNode = new ShVariableNode(node->kind(), n < maxTuple ? n : maxTuple, node->specialType());
+      if( node->kind() == SH_CONST ) {
+        for(i = 0; i < newNode->size(); ++i){
+          newNode->setValue(i, node->getValue(offset + i));
+        }
+      }
+      nodeVarNodeVec.push_back( newNode );
     }
     return true;
   }
 
   ShTransformer& transformer;
-  bool& changed;
   int maxTuple;
-  VarSplitMap splits;
+  bool& changed;
 };
 
 struct StatementSplitter {
   typedef std::vector<ShVariable> VarVec;
 
-  StatementSplitter(ShTransformer& t, VariableSplitter &vs, bool& changed)
-    : transformer(t), changed(changed), maxTuple(vs.maxTuple), splits(vs.splits) { }
+  StatementSplitter(ShTransformer& t, int maxTuple, bool& changed)
+    : transformer(t), maxTuple(maxTuple), changed(changed) {}
 
   void operator()(ShCtrlGraphNodePtr node) {
     if (!node) return;
@@ -128,16 +132,17 @@ struct StatementSplitter {
     const ShSwizzle &swiz = v.swizzle();
     
     // get VarNodeVec for src
-    VarNodeVec srcVec;
-    if(splits.count(v.node()) > 0) srcVec = splits[v.node()];
-    else srcVec.push_back(v.node());
+    ShTransformer::VarNodeVec srcVec;
+    if(transformer.m_splits.count(v.node()) > 0) {
+      srcVec = transformer.m_splits[v.node()];
+    } else srcVec.push_back(v.node());
 
     // make and assign to a VarVec for temps
     for(i = 0, n = v.size(); n > 0; i += maxTuple, n -= maxTuple) {
       int tsize = n < maxTuple ? n : maxTuple;
       //TODO  make this smarter so that it reuses variable nodes if it's just reswizlling a src node
       // (check that move elimination doesn't do this for us already)
-      ShVariable tempVar(new ShVariableNode(SH_VAR_TEMP, tsize, SH_VAR_ATTRIB));
+      ShVariable tempVar(new ShVariableNode(SH_TEMP, tsize, SH_ATTRIB));
       vv.push_back(tempVar);
 
       int tempSwiz[tsize];
@@ -161,8 +166,8 @@ struct StatementSplitter {
   }
 
   // moves the result to the destination based on the destination swizzle
-  void movToDest(VarNodeVec &destVec, const ShSwizzle &destSwiz, const VarVec &resultVec,
-      ShBasicBlock::ShStmtList &stmts) {
+  void movToDest(ShTransformer::VarNodeVec &destVec, const ShSwizzle &destSwiz, 
+      const VarVec &resultVec, ShBasicBlock::ShStmtList &stmts) {
     int j, k;
     int offset = 0;
     int swizd[maxTuple];
@@ -194,11 +199,12 @@ struct StatementSplitter {
     int i, j;
     ShVariable &dest = oldStmt.dest;
     const ShSwizzle &destSwiz = dest.swizzle();
-    VarNodeVec destVec;
+    ShTransformer::VarNodeVec destVec;
     VarVec resultVec;
 
-    if(splits.count(dest.node()) > 0) destVec = splits[dest.node()];
-    else destVec.push_back(dest.node());
+    if(transformer.m_splits.count(dest.node()) > 0) {
+      destVec = transformer.m_splits[dest.node()];
+    } else destVec.push_back(dest.node());
 
     switch(oldStmt.op) {
       case SH_OP_DOT:
@@ -206,8 +212,8 @@ struct StatementSplitter {
           // TODO for large tuples, may want to use another dot to sum up results instead of 
           // SH_OP_ADD. For now, do naive method
           SH_DEBUG_ASSERT(destSwiz.size() == 1);
-          ShVariable dott = ShVariable(new ShVariableNode(SH_VAR_TEMP, 1, SH_VAR_ATTRIB)); 
-          ShVariable sumt = ShVariable(new ShVariableNode(SH_VAR_TEMP, 1, SH_VAR_ATTRIB)); 
+          ShVariable dott = ShVariable(new ShVariableNode(SH_TEMP, 1, SH_ATTRIB)); 
+          ShVariable sumt = ShVariable(new ShVariableNode(SH_TEMP, 1, SH_ATTRIB)); 
           stmts.push_back(ShStatement(sumt, srcVec[0][0], SH_OP_DOT, srcVec[1][0]));
           for(i = 1; i < srcVec[0].size(); ++i) {
             stmts.push_back(ShStatement(dott, srcVec[0][i], SH_OP_DOT, srcVec[1][i]));
@@ -220,7 +226,7 @@ struct StatementSplitter {
         {
           SH_DEBUG_ASSERT( srcVec[0].size() == 1 && srcVec[0][0].size() == 3 &&
               srcVec[1].size() == 1 && srcVec[1][0].size() == 3); 
-          ShVariable result = ShVariable(new ShVariableNode(SH_VAR_TEMP, 3, SH_VAR_ATTRIB));
+          ShVariable result = ShVariable(new ShVariableNode(SH_TEMP, 3, SH_ATTRIB));
           stmts.push_back(ShStatement(result, srcVec[0][0], SH_OP_XPD, srcVec[1][0]));
           resultVec.push_back(result);
         }
@@ -232,7 +238,7 @@ struct StatementSplitter {
           if( srcVec[1].size() > srcVec[0].size() ) maxi = 1;
           if( srcVec[2].size() > srcVec[maxi].size() ) maxi = 2;
           for(i = 0; i < srcVec[maxi].size(); ++i) {
-            ShVariable resultPart(new ShVariableNode(SH_VAR_TEMP, srcVec[maxi][i].size(), SH_VAR_ATTRIB));
+            ShVariable resultPart(new ShVariableNode(SH_TEMP, srcVec[maxi][i].size(), SH_ATTRIB));
             ShStatement newStmt(resultPart, oldStmt.op);
             for(j = 0; j < 3 && !srcVec[j].empty(); ++j) {
               newStmt.src[j] = srcVec[j].size() > i ? srcVec[j][i] : srcVec[j][0];
@@ -270,19 +276,19 @@ struct StatementSplitter {
   }
 
   ShTransformer& transformer;
-  bool& changed;
   int maxTuple;
-  VarSplitMap &splits;
+  bool& changed;
 };
 
-void ShTransformer::tupleSplitting(bool& changed)
+void ShTransformer::tupleSplitting(bool& changed) 
 { 
-  if( m_backend->getCapability(SH_BACKEND_MAX_TUPLE) == 0 ) return; 
+  int maxTuple = m_backend->getCapability(SH_BACKEND_MAX_TUPLE);
+  if( maxTuple == 0 ) return; 
 
-  VariableSplitter vs(*this, changed);
+  VariableSplitter vs(*this, maxTuple, changed);
   m_graph->dfs(vs);
 
-  StatementSplitter ss(*this, vs, changed);
+  StatementSplitter ss(*this, maxTuple, changed);
   m_graph->dfs(ss);
 }
 
@@ -303,25 +309,31 @@ struct InputOutputConvertor {
       convertIO(*I);
     }
   }
+
+  // dup that works only on nodes without values (inputs, outputs fall into this category)
+  ShVariableNodePtr dupNode(ShVariableNodePtr node, ShVariableKind newKind = SH_TEMP) {
+    ShVariableNodePtr result( new ShVariableNode(newKind,
+          node->size(), node->specialType()));
+    result->name(node->name());
+    return result;
+  }
   
   void convertIO(ShStatement& stmt)
   {
     if(doIn && (!stmt.dest.null())) {
-      if(stmt.dest.node()->kind() == SH_VAR_INPUT) {
-        ShVariableNodePtr &oldNode = stmt.dest.node();
+      ShVariableNodePtr &oldNode = stmt.dest.node();
+      if(oldNode->kind() == SH_INPUT || oldNode->kind() == SH_INOUT) {
         if(varMap.find(oldNode) == varMap.end()) {
-          varMap[oldNode] = new ShVariableNode(SH_VAR_TEMP, 
-              oldNode->size(), oldNode->specialType());
+          varMap[oldNode] = dupNode(oldNode); 
         }
       }
     }
     if(doOut) for(int i = 0; i < 3; ++i) {
       if(!stmt.src[i].null()) {
-        if(stmt.src[i].node()->kind() == SH_VAR_OUTPUT) { 
-          ShVariableNodePtr &oldNode = stmt.src[i].node();
+        ShVariableNodePtr &oldNode = stmt.src[i].node();
+        if(oldNode->kind() == SH_OUTPUT || oldNode->kind() == SH_INOUT) { 
           if(varMap.find(oldNode) == varMap.end()) {
-            varMap[oldNode] = new ShVariableNode(SH_VAR_TEMP, 
-                oldNode->size(), oldNode->specialType());
+            varMap[oldNode] = dupNode(oldNode); 
           }
         }
       }
@@ -333,33 +345,36 @@ struct InputOutputConvertor {
     changed = true;
 
     // create block after exit
-    ShCtrlGraphNodePtr newExit = new ShCtrlGraphNode(); 
-    ShCtrlGraphNodePtr oldExit = transformer.m_graph->exit();
-    oldExit->append(newExit);
-    transformer.m_graph->setExit(newExit);
+    ShCtrlGraphNodePtr oldExit = transformer.m_graph->appendExit(); 
+    ShCtrlGraphNodePtr oldEntry = transformer.m_graph->prependEntry();
 
-    // create block before entry 
-    ShCtrlGraphNodePtr newEntry = new ShCtrlGraphNode(); 
-    ShCtrlGraphNodePtr oldEntry = transformer.m_graph->entry();
-    newEntry->append(oldEntry);
-    transformer.m_graph->setEntry(newEntry); 
-
-    // generate code in the old entry and exit blocks 
-    if(!oldExit->block) {
-      oldExit->block = new ShBasicBlock(); 
-    }
-    if(!oldEntry->block) {
-      oldEntry->block = new ShBasicBlock(); 
-    }
     for(ShVariableReplacer::VarMap::iterator it = varMap.begin(); it != varMap.end(); ++it) {
       // assign temporary to output
       ShVariableNodePtr oldNode = it->first; 
-      if(oldNode->kind() == SH_VAR_OUTPUT) {
+      if(oldNode->kind() == SH_OUTPUT) {
         oldExit->block->addStatement(ShStatement(
               ShVariable(oldNode), SH_OP_ASN, ShVariable(it->second)));
-      } else {
+      } else if(oldNode->kind() == SH_INPUT) {
         oldEntry->block->addStatement(ShStatement(
               ShVariable(it->second), SH_OP_ASN, ShVariable(oldNode)));
+      } else if(oldNode->kind() == SH_INOUT) {
+        // replace INOUT nodes in input/output lists with INPUT and OUTPUT nodes
+        ShVariableNodePtr newInNode(dupNode(oldNode, SH_INPUT));
+        ShVariableNodePtr newOutNode(dupNode(oldNode, SH_OUTPUT));
+
+        std::replace(transformer.m_program->inputs.begin(), transformer.m_program->inputs.end(),
+            oldNode, newInNode);
+        transformer.m_program->inputs.pop_back();
+
+        std::replace(transformer.m_program->outputs.begin(), transformer.m_program->outputs.end(),
+            oldNode, newOutNode);
+        transformer.m_program->outputs.pop_back();
+
+        // add mov statements to/from temporary 
+        oldEntry->block->addStatement(ShStatement(
+              ShVariable(it->second), SH_OP_ASN, ShVariable(newInNode)));
+        oldExit->block->addStatement(ShStatement(
+              ShVariable(newOutNode), SH_OP_ASN, ShVariable(it->second)));
       }
     }
   }
@@ -372,6 +387,9 @@ struct InputOutputConvertor {
 
 void ShTransformer::inputOutputConversion(bool& changed)
 {
+  if(m_backend->getCapability(SH_BACKEND_USE_INPUT_DEST) 
+      && m_backend->getCapability(SH_BACKEND_USE_OUTPUT_SRC)) return;
+
   InputOutputConvertor ioc(*this, changed);
   m_graph->dfs(ioc);
 

@@ -34,7 +34,7 @@ namespace SH {
 
 template<int N, typename T>
 ShConstant<N, T>::ShConstant(T value)
-  : ShVariableN<N, T>(new ShVariableNode(SH_VAR_CONST, N))
+  : ShVariableN<N, T>(new ShVariableNode(SH_CONST, N))
 {
   ShIntEqual<N, 1>();
 
@@ -43,7 +43,7 @@ ShConstant<N, T>::ShConstant(T value)
 
 template<int N, typename T>
 ShConstant<N, T>::ShConstant(T value0, T value1)
-  : ShVariableN<N, T>(new ShVariableNode(SH_VAR_CONST, N))
+  : ShVariableN<N, T>(new ShVariableNode(SH_CONST, N))
 {
   ShIntEqual<N, 2>();
 
@@ -53,7 +53,7 @@ ShConstant<N, T>::ShConstant(T value0, T value1)
 
 template<int N, typename T>
 ShConstant<N, T>::ShConstant(T value0, T value1, T value2)
-  : ShVariableN<N, T>(new ShVariableNode(SH_VAR_CONST, N))
+  : ShVariableN<N, T>(new ShVariableNode(SH_CONST, N))
 {
   ShIntEqual<N, 3>();
 
@@ -64,7 +64,7 @@ ShConstant<N, T>::ShConstant(T value0, T value1, T value2)
 
 template<int N, typename T>
 ShConstant<N, T>::ShConstant(T value0, T value1, T value2, T value3)
-  : ShVariableN<N, T>(new ShVariableNode(SH_VAR_CONST, N))
+  : ShVariableN<N, T>(new ShVariableNode(SH_CONST, N))
 {
   ShIntEqual<N, 4>();
 
@@ -76,7 +76,7 @@ ShConstant<N, T>::ShConstant(T value0, T value1, T value2, T value3)
 
 template<int N, typename T>
 ShConstant<N, T>::ShConstant(T values[N])
-  : ShVariableN<N, T>(new ShVariableNode(SH_VAR_CONST, N))
+  : ShVariableN<N, T>(new ShVariableNode(SH_CONST, N))
 {
   for (int i = 0; i < N; i++)
     m_node->setValue(i, values[i]);

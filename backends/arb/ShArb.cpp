@@ -159,35 +159,35 @@ struct ArbBindingSpecs {
 };
 
 ArbBindingSpecs shArbVertexAttribBindingSpecs[] = {
-  {SH_ARB_REG_VERTEXPOS, 1, SH_VAR_POSITION, false},
-  {SH_ARB_REG_VERTEXNRM, 1, SH_VAR_NORMAL, false},
-  {SH_ARB_REG_VERTEXCOL, 1, SH_VAR_COLOR, false},
-  {SH_ARB_REG_VERTEXTEX, 8, SH_VAR_TEXCOORD, true},
-  {SH_ARB_REG_VERTEXFOG, 1, SH_VAR_ATTRIB, true},
-  {SH_ARB_REG_NONE, 0, SH_VAR_ATTRIB, true}
+  {SH_ARB_REG_VERTEXPOS, 1, SH_POSITION, false},
+  {SH_ARB_REG_VERTEXNRM, 1, SH_NORMAL, false},
+  {SH_ARB_REG_VERTEXCOL, 1, SH_COLOR, false},
+  {SH_ARB_REG_VERTEXTEX, 8, SH_TEXCOORD, true},
+  {SH_ARB_REG_VERTEXFOG, 1, SH_ATTRIB, true},
+  {SH_ARB_REG_NONE, 0, SH_ATTRIB, true}
 };
 
 ArbBindingSpecs shArbFragmentAttribBindingSpecs[] = {
-  {SH_ARB_REG_FRAGMENTPOS, 1, SH_VAR_POSITION, false},
-  {SH_ARB_REG_FRAGMENTCOL, 1, SH_VAR_COLOR, false},
-  {SH_ARB_REG_FRAGMENTTEX, 8, SH_VAR_TEXCOORD, true},
-  {SH_ARB_REG_FRAGMENTFOG, 1, SH_VAR_ATTRIB, true},
-  {SH_ARB_REG_NONE, 0, SH_VAR_ATTRIB, true}
+  {SH_ARB_REG_FRAGMENTPOS, 1, SH_POSITION, false},
+  {SH_ARB_REG_FRAGMENTCOL, 1, SH_COLOR, false},
+  {SH_ARB_REG_FRAGMENTTEX, 8, SH_TEXCOORD, true},
+  {SH_ARB_REG_FRAGMENTFOG, 1, SH_ATTRIB, true},
+  {SH_ARB_REG_NONE, 0, SH_ATTRIB, true}
 };
 
 ArbBindingSpecs shArbVertexOutputBindingSpecs[] = {
-  {SH_ARB_REG_RESULTPOS, 1, SH_VAR_POSITION, false},
-  {SH_ARB_REG_RESULTCOL, 1, SH_VAR_COLOR, false},
-  {SH_ARB_REG_RESULTTEX, 8, SH_VAR_TEXCOORD, true},
-  {SH_ARB_REG_RESULTFOG, 1, SH_VAR_ATTRIB, true},
-  {SH_ARB_REG_RESULTPTS, 1, SH_VAR_ATTRIB, true},
-  {SH_ARB_REG_NONE, 0, SH_VAR_ATTRIB}
+  {SH_ARB_REG_RESULTPOS, 1, SH_POSITION, false},
+  {SH_ARB_REG_RESULTCOL, 1, SH_COLOR, false},
+  {SH_ARB_REG_RESULTTEX, 8, SH_TEXCOORD, true},
+  {SH_ARB_REG_RESULTFOG, 1, SH_ATTRIB, true},
+  {SH_ARB_REG_RESULTPTS, 1, SH_ATTRIB, true},
+  {SH_ARB_REG_NONE, 0, SH_ATTRIB}
 };
 
 ArbBindingSpecs shArbFragmentOutputBindingSpecs[] = {
-  {SH_ARB_REG_RESULTCOL, 1, SH_VAR_COLOR, true},
-  {SH_ARB_REG_RESULTDPT, 1, SH_VAR_ATTRIB, false},
-  {SH_ARB_REG_NONE, 0, SH_VAR_ATTRIB}
+  {SH_ARB_REG_RESULTCOL, 1, SH_COLOR, true},
+  {SH_ARB_REG_RESULTDPT, 1, SH_ATTRIB, false},
+  {SH_ARB_REG_NONE, 0, SH_ATTRIB}
 };
 
 ArbBindingSpecs* shArbBindingSpecs(bool output, const std::string& target)
@@ -224,7 +224,7 @@ void ArbCode::generate()
 bool ArbCode::allocateRegister(const ShVariableNodePtr& var)
 {
   if (!var) return true;
-  if (var->kind() != SH_VAR_TEMP) return true;
+  if (var->kind() != SH_TEMP) return true;
   if (var->uniform()) return true;
 
   if (m_tempRegs.empty()) {
@@ -243,7 +243,7 @@ bool ArbCode::allocateRegister(const ShVariableNodePtr& var)
 void ArbCode::freeRegister(const ShVariableNodePtr& var)
 {
   if (!var) return;
-  if (var->kind() != SH_VAR_TEMP) return;
+  if (var->kind() != SH_TEMP) return;
   if (var->uniform()) return;
 
   SH_DEBUG_ASSERT(m_registers.find(var) != m_registers.end());
@@ -522,7 +522,7 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       genDiv(stmt.dest, stmt.src[0], stmt.src[1]);
       /*
       {
-      ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, stmt.src[1].size()));
+      ShVariable rcp(new ShVariableNode(SH_TEMP, stmt.src[1].size()));
       m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp, stmt.src[1]));
       m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0], rcp));
       }
@@ -586,7 +586,7 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
         } else if (left.size() == 1) {
           m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, left, right));
         } else {
-          ShVariable mul(new ShVariableNode(SH_VAR_TEMP, left.size()));
+          ShVariable mul(new ShVariableNode(SH_TEMP, left.size()));
           m_instructions.push_back(ArbInst(SH_ARB_MUL, mul, left, right));
           m_instructions.push_back(ArbInst(SH_ARB_ADD, stmt.dest, mul(0), mul(1)));
           for (int i = 2; i < left.size(); i++) {
@@ -601,8 +601,8 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
     case SH_OP_FMOD:
       {
         // TODO - is this really optimal?
-        ShVariable t1(new ShVariableNode(SH_VAR_TEMP, stmt.src[0].size()));
-        ShVariable t2(new ShVariableNode(SH_VAR_TEMP, stmt.src[0].size()));
+        ShVariable t1(new ShVariableNode(SH_TEMP, stmt.src[0].size()));
+        ShVariable t2(new ShVariableNode(SH_TEMP, stmt.src[0].size()));
         
         // result = x - sign(x/y)*floor(abs(x/y))*y
         genDiv(t1, stmt.src[0], stmt.src[1]);
@@ -620,7 +620,7 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       break;
     case SH_OP_LRP:
       if(m_target == "gpu:vertex") {
-        ShVariable t(new ShVariableNode(SH_VAR_TEMP, stmt.src[1].size()));
+        ShVariable t(new ShVariableNode(SH_TEMP, stmt.src[1].size()));
         // lerp(f,a,b)=f*a + (1-f)*b = f*(a-b) + b 
         m_instructions.push_back(ArbInst(SH_ARB_ADD, t, stmt.src[1], -stmt.src[2]));
 
@@ -679,7 +679,7 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       break;
     case SH_OP_NORM:
       { // TODO: other than 3 components
-        ShVariable mul(new ShVariableNode(SH_VAR_TEMP, 1));
+        ShVariable mul(new ShVariableNode(SH_TEMP, 1));
         m_instructions.push_back(ArbInst(SH_ARB_DP3, mul, stmt.src[0], stmt.src[0]));
         m_instructions.push_back(ArbInst(SH_ARB_RSQ, mul, mul));
         m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, mul, stmt.src[0]));
@@ -703,8 +703,8 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       {
         int tempsize = stmt.src[0].size();
         if( tempsize < stmt.src[1].size() ) tempsize = stmt.src[1].size();
-        ShVariable seq(new ShVariableNode(SH_VAR_TEMP, tempsize)); 
-        ShVariable seq2(new ShVariableNode(SH_VAR_TEMP, tempsize)); 
+        ShVariable seq(new ShVariableNode(SH_TEMP, tempsize)); 
+        ShVariable seq2(new ShVariableNode(SH_TEMP, tempsize)); 
         genScalarVectorInst(seq, stmt.src[0], stmt.src[1], SH_ARB_SGE);
         genScalarVectorInst(seq2, stmt.src[1], stmt.src[0], SH_ARB_SGE);
         m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, seq, seq2 ));
@@ -724,7 +724,7 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       break;
     case SH_OP_SQRT:
       {
-        ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, stmt.src[0].size()));
+        ShVariable rcp(new ShVariableNode(SH_TEMP, stmt.src[0].size()));
         m_instructions.push_back(ArbInst(SH_ARB_RSQ, rcp, stmt.src[0]));
         m_instructions.push_back(ArbInst(SH_ARB_RCP, stmt.dest, rcp));
       break;
@@ -763,7 +763,7 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
 
 void ArbCode::genDiv(const ShVariable &dest, const ShVariable &op1, const ShVariable &op2) {
   if (op2.size() == 1 && op1.size() != 1) {
-    ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, op2.size())); 
+    ShVariable rcp(new ShVariableNode(SH_TEMP, op2.size())); 
     m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp, op2)); 
 
     int* swizzle = new int[op1.size()];
@@ -772,7 +772,7 @@ void ArbCode::genDiv(const ShVariable &dest, const ShVariable &op1, const ShVari
           rcp(op1.size(), swizzle)));
     delete [] swizzle;
   } else {
-    ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, 1));
+    ShVariable rcp(new ShVariableNode(SH_TEMP, 1));
 
     // TODO arg...component-wise div is ugly, ARB RCP only works on scalars
     for(int i = 0; i < op2.size(); ++i) {
@@ -811,34 +811,34 @@ void ArbCode::genTrigInst( const SH::ShVariable& dest,
   {
     ShVariableNode::ValueType c0_values[] = 
     { 0.0, 1.570796327, -0.5860008052, 0.5860008052 };
-    ShVariable c0(new ShVariableNode(SH_VAR_CONST, 4));
+    ShVariable c0(new ShVariableNode(SH_CONST, 4));
     c0.setValues(c0_values);
     ShVariableNode::ValueType c1_values[] = 
     { 1.571945105, -1.571945105, -1.669668977, 1.669668977 };
-    ShVariable c1(new ShVariableNode(SH_VAR_CONST, 4));
+    ShVariable c1(new ShVariableNode(SH_CONST, 4));
     c1.setValues(c1_values);
     ShVariableNode::ValueType c2_values[] = 
     { 0.8999841642, -0.8999841642, -0.6575341673, 0.6575341673 };
-    ShVariable c2(new ShVariableNode(SH_VAR_CONST, 4));
+    ShVariable c2(new ShVariableNode(SH_CONST, 4));
     c2.setValues(c2_values);
     ShVariableNode::ValueType c3_values[] = 
     { 1.012386649, -1.012386649, 0.9998421793, -0.9998421793 };
-    ShVariable c3(new ShVariableNode(SH_VAR_CONST, 4));
+    ShVariable c3(new ShVariableNode(SH_CONST, 4));
     c3.setValues(c3_values);
     ShVariableNode::ValueType c4_values[] = 
     { 1.0, -1.0, 1.0, -1.0 };
-    ShVariable c4(new ShVariableNode(SH_VAR_CONST, 4));
+    ShVariable c4(new ShVariableNode(SH_CONST, 4));
     c4.setValues(c4_values);
     m_shader->constants.push_back(c0.node());
     m_shader->constants.push_back(c1.node());
     m_shader->constants.push_back(c2.node());
     m_shader->constants.push_back(c3.node());
     m_shader->constants.push_back(c4.node());
-    ShVariable r0(new ShVariableNode(SH_VAR_TEMP, 4));
-    ShVariable r1(new ShVariableNode(SH_VAR_TEMP, 4));
-    ShVariable r2(new ShVariableNode(SH_VAR_TEMP, 4));
-    ShVariable rs(new ShVariableNode(SH_VAR_TEMP, 4));
-    ShVariable offset(new ShVariableNode(SH_VAR_TEMP, 4));
+    ShVariable r0(new ShVariableNode(SH_TEMP, 4));
+    ShVariable r1(new ShVariableNode(SH_TEMP, 4));
+    ShVariable r2(new ShVariableNode(SH_TEMP, 4));
+    ShVariable rs(new ShVariableNode(SH_TEMP, 4));
+    ShVariable offset(new ShVariableNode(SH_TEMP, 4));
     m_instructions.push_back(ArbInst(SH_ARB_MOV, rs, src));
     m_instructions.push_back(ArbInst(SH_ARB_ABS, r0, rs));
     m_instructions.push_back(
@@ -877,33 +877,33 @@ void ArbCode::genTrigInst( const SH::ShVariable& dest,
   {
     ShVariableNode::ValueType c0_values[] = 
     { 0.0, 0.5, 1.0, 0.0 };
-    ShVariable c0(new ShVariableNode(SH_VAR_CONST, 4));
+    ShVariable c0(new ShVariableNode(SH_CONST, 4));
     c0.setValues(c0_values);
     ShVariableNode::ValueType c1_values[] = 
     { 0.25, -9.0, 0.75, 1.0/(2.0*M_PI) };
-    ShVariable c1(new ShVariableNode(SH_VAR_CONST, 4));
+    ShVariable c1(new ShVariableNode(SH_CONST, 4));
     c1.setValues(c1_values);
     ShVariableNode::ValueType c2_values[] = 
     { 24.9808039603, -24.9808039603, -60.1458091736, 60.1458091736 };
-    ShVariable c2(new ShVariableNode(SH_VAR_CONST, 4));
+    ShVariable c2(new ShVariableNode(SH_CONST, 4));
     c2.setValues(c2_values);
     ShVariableNode::ValueType c3_values[] = 
     { 85.4537887573, -85.4537887573, -64.9393539429, 64.9393539429 };
-    ShVariable c3(new ShVariableNode(SH_VAR_CONST, 4));
+    ShVariable c3(new ShVariableNode(SH_CONST, 4));
     c3.setValues(c3_values);
     ShVariableNode::ValueType c4_values[] = 
     { 19.7392082214, -19.7392082214, -1.0, 1.0 };
-    ShVariable c4(new ShVariableNode(SH_VAR_CONST, 4));
+    ShVariable c4(new ShVariableNode(SH_CONST, 4));
     c4.setValues(c4_values);
     m_shader->constants.push_back(c0.node());
     m_shader->constants.push_back(c1.node());
     m_shader->constants.push_back(c2.node());
     m_shader->constants.push_back(c3.node());
     m_shader->constants.push_back(c4.node());
-    ShVariable r0(new ShVariableNode(SH_VAR_TEMP, 4));
-    ShVariable r1(new ShVariableNode(SH_VAR_TEMP, 4));
-    ShVariable r2(new ShVariableNode(SH_VAR_TEMP, 4));
-    ShVariable rs(new ShVariableNode(SH_VAR_TEMP, 4));
+    ShVariable r0(new ShVariableNode(SH_TEMP, 4));
+    ShVariable r1(new ShVariableNode(SH_TEMP, 4));
+    ShVariable r2(new ShVariableNode(SH_TEMP, 4));
+    ShVariable rs(new ShVariableNode(SH_TEMP, 4));
     m_instructions.push_back(ArbInst(SH_ARB_MOV, rs, src));
     if (opcode == SH_OP_SIN)
     {
@@ -969,7 +969,7 @@ void ArbCode::bindSpecial(const ShProgramNode::VarList::const_iterator& begin,
 {
   bindings.push_back(0);
   
-  if (specs.specialType == SH_VAR_ATTRIB) return;
+  if (specs.specialType == SH_ATTRIB) return;
   
   for (ShProgramNode::VarList::const_iterator I = begin; I != end; ++I) {
     ShVariableNodePtr node = *I;
@@ -1070,7 +1070,7 @@ void ArbCode::allocConsts()
 void mark(ShLinearAllocator& allocator, ShVariableNodePtr node, int i)
 {
   if (!node) return;
-  if (node->kind() != SH_VAR_TEMP) return;
+  if (node->kind() != SH_TEMP) return;
   if (node->hasValues()) return;
   allocator.mark(node, i);
 }
@@ -1157,7 +1157,7 @@ std::string ArbBackend::name() const
   return "arb";
 }
 
-ShBackendCodePtr ArbBackend::generateCode(const std::string& target, const ShProgram& shader)
+ShBackendCodePtr ArbBackend::compile(const std::string& target, const ShProgram& shader)
 {
   SH_DEBUG_ASSERT(shader.object());
   ArbCodePtr code = new ArbCode(this, shader, target);

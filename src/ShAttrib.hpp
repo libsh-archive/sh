@@ -98,29 +98,34 @@ public:
 
   static const int typesize = N;
   static const int typekind = Kind;
-  static const ShVariableSpecialType special_type = SH_VAR_ATTRIB;
+  static const ShVariableSpecialType special_type = SH_ATTRIB;
   typedef T ValueType;
 
-  typedef ShAttrib<N, SH_VAR_INPUT, T> InputType;
-  typedef ShAttrib<N, SH_VAR_OUTPUT, T> OutputType;
-  typedef ShAttrib<N, SH_VAR_TEMP, T> TempType;
+  typedef ShAttrib<N, SH_INPUT, T> InputType;
+  typedef ShAttrib<N, SH_OUTPUT, T> OutputType;
+  typedef ShAttrib<N, SH_INOUT, T> InOutType;
+  typedef ShAttrib<N, SH_TEMP, T> TempType;
 };
 
-typedef ShAttrib<1, SH_VAR_INPUT, float> ShInputAttrib1f;
-typedef ShAttrib<1, SH_VAR_OUTPUT, float> ShOutputAttrib1f;
-typedef ShAttrib<1, SH_VAR_TEMP, float> ShAttrib1f;
+typedef ShAttrib<1, SH_INPUT, float> ShInputAttrib1f;
+typedef ShAttrib<1, SH_OUTPUT, float> ShOutputAttrib1f;
+typedef ShAttrib<1, SH_INOUT, float> ShInOutAttrib1f;
+typedef ShAttrib<1, SH_TEMP, float> ShAttrib1f;
 
-typedef ShAttrib<2, SH_VAR_INPUT, float> ShInputAttrib2f;
-typedef ShAttrib<2, SH_VAR_OUTPUT, float> ShOutputAttrib2f;
-typedef ShAttrib<2, SH_VAR_TEMP, float> ShAttrib2f;
+typedef ShAttrib<2, SH_INPUT, float> ShInputAttrib2f;
+typedef ShAttrib<2, SH_OUTPUT, float> ShOutputAttrib2f;
+typedef ShAttrib<2, SH_INOUT, float> ShInOutAttrib2f;
+typedef ShAttrib<2, SH_TEMP, float> ShAttrib2f;
 
-typedef ShAttrib<3, SH_VAR_INPUT, float> ShInputAttrib3f;
-typedef ShAttrib<3, SH_VAR_OUTPUT, float> ShOutputAttrib3f;
-typedef ShAttrib<3, SH_VAR_TEMP, float> ShAttrib3f;
+typedef ShAttrib<3, SH_INPUT, float> ShInputAttrib3f;
+typedef ShAttrib<3, SH_OUTPUT, float> ShOutputAttrib3f;
+typedef ShAttrib<3, SH_INOUT, float> ShInOutAttrib3f;
+typedef ShAttrib<3, SH_TEMP, float> ShAttrib3f;
 
-typedef ShAttrib<4, SH_VAR_INPUT, float> ShInputAttrib4f;
-typedef ShAttrib<4, SH_VAR_OUTPUT, float> ShOutputAttrib4f;
-typedef ShAttrib<4, SH_VAR_TEMP, float> ShAttrib4f;
+typedef ShAttrib<4, SH_INPUT, float> ShInputAttrib4f;
+typedef ShAttrib<4, SH_OUTPUT, float> ShOutputAttrib4f;
+typedef ShAttrib<4, SH_INOUT, float> ShInOutAttrib4f;
+typedef ShAttrib<4, SH_TEMP, float> ShAttrib4f;
 
 
 } // namespace SH

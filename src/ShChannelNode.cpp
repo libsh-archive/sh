@@ -29,14 +29,14 @@
 namespace SH {
 
 ShChannelNode::ShChannelNode(ShVariableSpecialType specType, int elements)
-  : ShVariableNode(SH_VAR_STREAM, elements),
+  : ShVariableNode(SH_STREAM, elements),
     m_data(0), m_count(0)
 {
   specialType(specType);
 }
 
 ShChannelNode::ShChannelNode(ShVariableSpecialType specType, int elements, void* data, int count)
-  : ShVariableNode(SH_VAR_STREAM, elements),
+  : ShVariableNode(SH_STREAM, elements),
     m_data(data), m_count(count)
 {
   specialType(specType);

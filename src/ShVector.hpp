@@ -34,7 +34,7 @@ namespace SH {
 /** An N-Vector.
  */
 
-SH_SPECIAL_TYPE_PARENT_OPEN(ShVector, vector, ShAttrib, SH_VAR_VECTOR);
+SH_SPECIAL_TYPE_PARENT_OPEN(ShVector, vector, ShAttrib, SH_VECTOR);
 ShVector(); 
 ShVector(T); 
 ShVector(T, T); 
@@ -58,12 +58,12 @@ template<typename T2> ShVector& operator/=(T2 right);
 ShVector& operator+=(const ShConstant<N, T>& right); 
 ShVector& operator-=(const ShConstant<N, T>& right); 
                   
-SH_SPECIAL_TYPE_PARENT_CONST_METHODS(ShVector, vector, ShAttrib, SH_VAR_VECTOR);
+SH_SPECIAL_TYPE_PARENT_CONST_METHODS(ShVector, vector, ShAttrib, SH_VECTOR);
 void setUnit(bool flag);
 bool isUnit() const;
-SH_SPECIAL_TYPE_PARENT_MEMBERS(ShVector, vector, ShAttrib, SH_VAR_VECTOR);
+SH_SPECIAL_TYPE_PARENT_MEMBERS(ShVector, vector, ShAttrib, SH_VECTOR);
 bool m_isunit;
-SH_SPECIAL_TYPE_PARENT_CLOSE(ShVector, vector, ShAttrib, SH_VAR_VECTOR);
+SH_SPECIAL_TYPE_PARENT_CLOSE(ShVector, vector, ShAttrib, SH_VECTOR);
 
 SH_SPECIAL_TYPE_TYPEDEFS(Vector);
 
@@ -71,42 +71,42 @@ template<int N, int Kind, typename T, bool Swizzled>
   ShVector<N, Kind, T, Swizzled>::ShVector()
   : m_isunit(false)
   { 
-    m_node->specialType(SH_VAR_VECTOR); 
+    m_node->specialType(SH_VECTOR); 
   } 
 
 template<int N, int Kind, typename T, bool Swizzled> 
   ShVector<N, Kind, T, Swizzled>::ShVector(T t0) 
   : ParentType(t0), m_isunit(false)
   { 
-    m_node->specialType(SH_VAR_VECTOR); 
+    m_node->specialType(SH_VECTOR); 
   } 
 
 template<int N, int Kind, typename T, bool Swizzled> 
   ShVector<N, Kind, T, Swizzled>::ShVector(T t0, T t1) 
   : ParentType(t0, t1), m_isunit(false)
   { 
-    m_node->specialType(SH_VAR_VECTOR); 
+    m_node->specialType(SH_VECTOR); 
   } 
 
 template<int N, int Kind, typename T, bool Swizzled> 
   ShVector<N, Kind, T, Swizzled>::ShVector(T t0, T t1, T t2) 
   : ParentType(t0, t1, t2), m_isunit(false)
   { 
-    m_node->specialType(SH_VAR_VECTOR); 
+    m_node->specialType(SH_VECTOR); 
   } 
 
 template<int N, int Kind, typename T, bool Swizzled> 
   ShVector<N, Kind, T, Swizzled>::ShVector(T t0, T t1, T t2, T t3) 
   : ParentType(t0, t1, t2, t3), m_isunit(false)
   { 
-    m_node->specialType(SH_VAR_VECTOR); 
+    m_node->specialType(SH_VECTOR); 
   } 
 
 template<int N, int Kind, typename T, bool Swizzled> 
   ShVector<N, Kind, T, Swizzled>::ShVector(const ShVariableN<N, T>& other) 
   : ParentType(other), m_isunit(false)
   { 
-    m_node->specialType(SH_VAR_VECTOR); 
+    m_node->specialType(SH_VECTOR); 
   } 
 
 template<int N, int Kind, typename T, bool Swizzled>
@@ -114,7 +114,7 @@ template<int Kind2, bool Swizzled2>
   ShVector<N, Kind, T, Swizzled>::ShVector(const ShVector<N, Kind2, T, Swizzled2>& other) 
   : ParentType(other), m_isunit(other.isUnit())
   { 
-    m_node->specialType(SH_VAR_VECTOR); 
+    m_node->specialType(SH_VECTOR); 
   } 
 
 template<int N, int Kind, typename T, bool Swizzled> 
@@ -122,7 +122,7 @@ template<int N, int Kind, typename T, bool Swizzled>
       const ShSwizzle& swizzle, bool neg) 
   : ParentType(node, swizzle, neg), m_isunit(false)
   { 
-    m_node->specialType(SH_VAR_VECTOR); 
+    m_node->specialType(SH_VECTOR); 
   } 
 
 template<int N, int Kind, typename T, bool Swizzled> 
@@ -216,7 +216,7 @@ template<int N, int Kind, typename T, bool Swizzled>
     setUnit(false);
     return *this; 
   } 
-SH_SPECIAL_TYPE_IMPL_CONST_METHODS(ShVector, SH_VAR_VECTOR);
+SH_SPECIAL_TYPE_IMPL_CONST_METHODS(ShVector, SH_VECTOR);
 }
 
 #endif

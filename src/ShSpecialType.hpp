@@ -110,9 +110,10 @@ public:
   static const int typekind = Kind; \
   static const ShVariableSpecialType special_type = SH_TYPE_ENUM; \
  \
-  typedef SH_TYPE_NAME<N, SH_VAR_INPUT, T> InputType; \
-  typedef SH_TYPE_NAME<N, SH_VAR_OUTPUT, T> OutputType; \
-  typedef SH_TYPE_NAME<N, SH_VAR_TEMP, T> TempType; \
+  typedef SH_TYPE_NAME<N, SH_INPUT, T> InputType; \
+  typedef SH_TYPE_NAME<N, SH_OUTPUT, T> OutputType; \
+  typedef SH_TYPE_NAME<N, SH_INOUT, T> InOutType; \
+  typedef SH_TYPE_NAME<N, SH_TEMP, T> TempType; \
  
 #define SH_SPECIAL_TYPE_PARENT_MEMBERS(SH_TYPE_NAME, SH_COMMENT_NAME, SH_TYPE_PARENT, SH_TYPE_ENUM) \
 private: \
@@ -121,9 +122,10 @@ private: \
 }
 
 #define SH_SPECIAL_TYPE_TYPEDEF(SH_TYPE_NAME_NO_SH, SH_TYPE_SIZE) \
-typedef Sh ## SH_TYPE_NAME_NO_SH < SH_TYPE_SIZE, SH_VAR_INPUT, float> ShInput ## SH_TYPE_NAME_NO_SH ## SH_TYPE_SIZE ## f; \
-typedef Sh ## SH_TYPE_NAME_NO_SH < SH_TYPE_SIZE, SH_VAR_OUTPUT, float> ShOutput ## SH_TYPE_NAME_NO_SH ## SH_TYPE_SIZE ## f; \
-typedef Sh ## SH_TYPE_NAME_NO_SH < SH_TYPE_SIZE, SH_VAR_TEMP, float> Sh ## SH_TYPE_NAME_NO_SH ## SH_TYPE_SIZE ## f; \
+typedef Sh ## SH_TYPE_NAME_NO_SH < SH_TYPE_SIZE, SH_INPUT, float> ShInput ## SH_TYPE_NAME_NO_SH ## SH_TYPE_SIZE ## f; \
+typedef Sh ## SH_TYPE_NAME_NO_SH < SH_TYPE_SIZE, SH_OUTPUT, float> ShOutput ## SH_TYPE_NAME_NO_SH ## SH_TYPE_SIZE ## f; \
+typedef Sh ## SH_TYPE_NAME_NO_SH < SH_TYPE_SIZE, SH_INOUT, float> ShInOut ## SH_TYPE_NAME_NO_SH ## SH_TYPE_SIZE ## f; \
+typedef Sh ## SH_TYPE_NAME_NO_SH < SH_TYPE_SIZE, SH_TEMP, float> Sh ## SH_TYPE_NAME_NO_SH ## SH_TYPE_SIZE ## f; \
 
 #define SH_SPECIAL_TYPE_TYPEDEFS(SH_TYPE_NAME_NO_SH) \
 SH_SPECIAL_TYPE_TYPEDEF(SH_TYPE_NAME_NO_SH, 1) \

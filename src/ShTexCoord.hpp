@@ -34,11 +34,11 @@ namespace SH {
 
 /** A texture coordinate with N dimensions.
  */
-SH_SPECIAL_TYPE(ShTexCoord, texture coordinate, SH_VAR_TEXCOORD);
+SH_SPECIAL_TYPE(ShTexCoord, texture coordinate, SH_TEXCOORD);
 
 SH_SPECIAL_TYPE_TYPEDEFS(TexCoord);
 
-SH_SPECIAL_TYPE_IMPL(ShTexCoord, SH_VAR_TEXCOORD);
+SH_SPECIAL_TYPE_IMPL(ShTexCoord, SH_TEXCOORD);
 
 }
 

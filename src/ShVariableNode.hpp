@@ -33,22 +33,23 @@
 namespace SH {
 
 enum ShVariableKind {
-  SH_VAR_INPUT = 0,
-  SH_VAR_OUTPUT = 1,
-  SH_VAR_TEMP = 2,
-  SH_VAR_CONST = 3,
-  SH_VAR_TEXTURE = 4,
-  SH_VAR_STREAM = 5
+  SH_INPUT = 0,
+  SH_OUTPUT = 1,
+  SH_INOUT = 2,
+  SH_TEMP = 3,
+  SH_CONST = 4,
+  SH_TEXTURE = 5,
+  SH_STREAM = 6
 };
 
 enum ShVariableSpecialType {
-  SH_VAR_ATTRIB,
-  SH_VAR_POINT,
-  SH_VAR_VECTOR,
-  SH_VAR_NORMAL,
-  SH_VAR_COLOR,
-  SH_VAR_TEXCOORD,
-  SH_VAR_POSITION
+  SH_ATTRIB,
+  SH_POINT,
+  SH_VECTOR,
+  SH_NORMAL,
+  SH_COLOR,
+  SH_TEXCOORD,
+  SH_POSITION
 };
 
 // ensure these match the Kind and SpecialType enums
@@ -59,7 +60,7 @@ extern const char* ShVariableSpecialTypeName[];
  */
 class ShVariableNode : public ShRefCountable {
 public:
-  ShVariableNode(ShVariableKind kind, int size, ShVariableSpecialType type = SH_VAR_ATTRIB);
+  ShVariableNode(ShVariableKind kind, int size, ShVariableSpecialType type = SH_ATTRIB);
   virtual ~ShVariableNode();
 
   bool uniform() const; ///< Is this a uniform (non-shader specific) variable?

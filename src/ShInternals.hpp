@@ -49,6 +49,12 @@ struct ShVariableReplacer {
   VarMap& varMap;
 };
 
+// makes a copy of the control graph nodes, blocks, and statements, 
+// but keeps original ShVariableNode objects 
+extern void copyCtrlGraph(ShCtrlGraphNodePtr head, ShCtrlGraphNodePtr tail,
+                       ShCtrlGraphNodePtr& newHead, ShCtrlGraphNodePtr& newTail);
+
+
 }
 
 #endif
