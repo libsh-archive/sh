@@ -10,5 +10,5 @@ else
 ARB_SUBDIR =
 endif
 
-SUBDIRS = $(SM_SUBDIR) $(ARB_SUBDIR)
+SUBDIRS = cpu $(SM_SUBDIR) $(ARB_SUBDIR)
 

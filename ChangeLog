@@ -1,3 +1,12 @@
+2004-03-15  Kevin Moule <krmoule@cgl.uwaterloo.ca>
+
+	* configure.ac: Added cpu backend to AC_CONFIG_FILES
+
+	* backends/Makefile.am: Added cpu backend to SUBDIRS
+		
+	* backends/cpu/.cvsignore, backends/cpu/CPU.cpp, backends/cpu/CPU.hpp,
+	backends/cpu/Makefile.am: Initial implementation of cpu backend
+	
 2004-03-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShProgram.cpp: Collect channels in collectVar().

@@ -76,6 +76,7 @@ AC_CONFIG_FILES([Makefile
 		 src/Makefile
 		 test/Makefile
 		 backends/Makefile
+		 backends/cpu/Makefile
 		 backends/sm/Makefile
 		 backends/gl/Makefile
 		 util/Makefile
