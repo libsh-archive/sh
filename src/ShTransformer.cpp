@@ -62,13 +62,17 @@ struct VariableSplitter {
     }
   }
 
+  // this must be called BEFORE running a DFS on the program
+  // to split temporaries (otherwise the stupid hack marked (#) does not work)
   void splitVarList(ShProgramNode::VarList &vars) {
     for(ShProgramNode::VarList::iterator I = vars.begin();
         I != vars.end();) {
       if(split(*I)) {
-        I = vars.erase(I); 
-        ++I;
+        // (#) erase the stuff that split added to the end of the var list
+        vars.resize(vars.size() - splits[*I].size());
+
         vars.insert(I, splits[*I].begin(), splits[*I].end());
+        I = vars.erase(I); 
       } else ++I;
     }
   }

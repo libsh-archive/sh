@@ -1,3 +1,10 @@
+2004-06-01  Bryan Chan <b8chan@uwaterloo.ca>
+  * src/ShTransformer.cpp (splitVaralist):
+  Fixed input and output variable list splitting (Issue111)
+
+  * test/longtuple.sht, test/test.header:
+  Made test case more comprehensive.  Removed optimizationLevel
+
 2004-05-31  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShVariable.hpp: Remove non-const node() accessor.

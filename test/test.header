@@ -17,5 +17,5 @@ int main(int argc, char** argv)
     backendName = argv[1];
   }
 
-  ShEnvironment::optimizationLevel = 1;
+  // ShEnvironment::optimizationLevel = 1;
   try {
