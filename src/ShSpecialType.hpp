@@ -86,6 +86,8 @@ public: \
   SH_TYPE_NAME<3, Kind, T, true> operator()(int, int, int) const; \
   SH_TYPE_NAME<4, Kind, T, true> operator()(int, int, int, int) const; \
   SH_TYPE_NAME<1, Kind, T, true> operator[](int) const; \
+  template<int N2> \
+  SH_TYPE_NAME<N2, Kind, T, true> operator()(int indices[]) const; \
  \
   SH_TYPE_NAME<N, Kind, T, Swizzled> operator-() const; \
  \
@@ -253,6 +255,12 @@ template<int N, int Kind, typename T, bool Swizzled> \
 SH_TYPE_NAME<4, Kind, T, true> SH_TYPE_NAME<N, Kind, T, Swizzled>::operator()(int i1, int i2, int i3, int i4) const \
 { \
   return SH_TYPE_NAME<4, Kind, T, true>(m_node, m_swizzle * ShSwizzle(N, i1, i2, i3, i4), m_neg); \
+} \
+template<int N, int Kind, typename T, bool Swizzled> \
+template<int N2> \
+SH_TYPE_NAME<N2, Kind, T, true> SH_TYPE_NAME<N, Kind, T, Swizzled>::operator()(int indices[]) const \
+{ \
+  return SH_TYPE_NAME<N2, Kind, T, true>(m_node, m_swizzle * ShSwizzle(N, N2, indices), m_neg); \
 } \
  \
 template<int N, int Kind, typename T, bool Swizzled> \

@@ -81,7 +81,11 @@ public:
   ShAttrib<3, Kind, T, true> operator()(int, int, int) const;
   ShAttrib<4, Kind, T, true> operator()(int, int, int, int) const;
   ShAttrib<1, Kind, T, true> operator[](int) const; ///< Identical to operator()(int)
-  // TODO: Arbitrary swizzles?
+
+  // Arbitrary Swizzle
+  template<int N2>
+  ShAttrib<N2, Kind, T, true> operator()(int indices[]) const;
+
   //@}
 
   /// Negate this attribute.
