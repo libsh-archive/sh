@@ -112,6 +112,7 @@ AC_DEFINE_UNQUOTED(SH_INSTALL_PREFIX, "$prefix", [Installation prefix directory]
 AC_CONFIG_FILES([Makefile
 		 src/Makefile
 		 test/Makefile
+		 test/regress/Makefile
 		 backends/Makefile
 		 backends/cpu/Makefile
 		 backends/sm/Makefile
