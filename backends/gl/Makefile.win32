@@ -40,8 +40,9 @@ libsharb_dll_SOURCES += GlTextureName.hpp GlTextureName.cpp
 libsharb_dll_SOURCES += GlTextures.hpp GlTextures.cpp
 libsharb_dll_SOURCES += GlTextureStorage.hpp GlTextureStorage.cpp
 
-# pbuffer stream
-#libsharb_dll_SOURCES += PBufferStreams.hpp PBufferStreams.cpp
+# Stream support
+libsharb_dll_SOURCES += PBufferStreams.hpp PBufferStreams.cpp
+libsharb_dll_SOURCES += WGLPBufferStreams.hpp WGLPBufferStreams.cpp
 
 libsharb_dll_CXXFILES = $(filter %.cpp,$(libsharb_dll_SOURCES))
 libsharb_dll_RELEASE_OBJECTS = $(libsharb_dll_CXXFILES:.cpp=.r.obj)

@@ -30,11 +30,24 @@
 //#define DO_PBUFFER_TIMING
 
 // Turn this on to debug the fragment programs.
-//#define SH_DEBUG_PBS_PRINTFP
+#define SH_DEBUG_PBS_PRINTFP
 
 #include <map>
 #include <fstream>
 #include <cstdlib>
+
+// Extensions for ATI and Nvidia
+
+#ifndef GLX_ATI_pixel_format_float
+#define GLX_ATI_pixel_format_float  1
+
+#define GLX_RGBA_FLOAT_ATI_BIT				0x00000100
+
+#endif // GLX_ATI_pixel_format_float
+
+#ifndef GLX_FLOAT_COMPONENTS_NV
+#define GLX_FLOAT_COMPONENTS_NV         0x20B0
+#endif // GLX_FLOAT_COMPONENTS_NV
 
 #include "sh.hpp"
 #include "ShOptimizations.hpp"
@@ -140,18 +153,18 @@ public:
       }
       
       ShChannelNodePtr stream_node = shref_dynamic_cast<ShChannelNode>(stmt.src[0].node());
-      StreamInputMap::const_iterator J = input_map.find(stream_node);
-      if (J == input_map.end()) {
+      StreamInputMap::const_iterator I = input_map.find(stream_node);
+      if (I == input_map.end()) {
         SH_DEBUG_WARN("Stream node not found in input map");
         continue;
       }
 
-      if (!J->second) {
+      if (!I->second) {
         SH_DEBUG_WARN("No texture allocated for stream node");
         continue;
       }
 
-      ShVariable texVar(J->second);
+      ShVariable texVar(I->second);
 
       if (indexed) {
         stmt = ShStatement(stmt.dest, texVar, SH_OP_TEXI, coordsVar);
@@ -169,14 +182,46 @@ private:
   bool indexed;
 };
 
+class GlxState {
+public:
+  GlxState()
+    : display(0), drawable(0), context(0)
+  {
+    display = glXGetCurrentDisplay();
+    if (display) {
+      drawable = glXGetCurrentDrawable();
+      context = glXGetCurrentContext();
+    }
+  }
+
+  ~GlxState()
+  {
+    if (display) {
+      glXMakeCurrent(display, drawable, context);
+    }
+  }
+
+private:
+  Display* display;
+  GLXDrawable drawable;
+  GLXContext context;
+};
+
 PBufferStreams::PBufferStreams(int context)
   : m_context(context),
-    m_setup_vp(-1)
+    m_setup_vp(-1),
+    m_display(0)
 {
 }
 
 PBufferStreams::~PBufferStreams()
 {
+  // TODO: destroy our GLX information.
+}
+
+StreamStrategy* PBufferStreams::create(int context)
+{
+  return new PBufferStreams(context);
 }
 
 #ifdef DO_PBUFFER_TIMING
@@ -199,6 +244,119 @@ void fillin()
 #define DECLARE_TIMER(t)
 #define TIMING_RESULT(t) 
 #endif
+
+FloatExtension PBufferStreams::setupContext(int width, int height)
+{
+  if (m_info.valid()
+      && m_info.width == width
+      && m_info.height == height) {
+    DECLARE_TIMER(activatecontext);
+    shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->setContext(m_info.shcontext);
+    glXMakeCurrent(m_display, m_info.pbuffer, m_info.context);
+    TIMING_RESULT(activatecontext);
+    return m_info.extension;
+  }
+  DECLARE_TIMER(makecontext);
+  if (m_info.shcontext >= 0) {
+    shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->setContext(m_info.shcontext);
+    shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->destroyContext();
+  }
+  // Figure out what extension we're using
+  m_info.extension = SH_ARB_NO_FLOAT_EXT;
+  m_info.width = width;
+  m_info.height = height;
+  m_info.pbuffer = 0;
+  m_info.context = 0;
+
+  m_info.shcontext
+    = shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->newContext();
+  
+  // This is glx specific for now
+
+  if (!m_display) {
+    m_display = glXGetCurrentDisplay();
+    if (!m_display) m_display = XOpenDisplay(0);
+    if (!m_display) {
+      shError(PBufferStreamException("Could not open X display"));
+      return m_info.extension;
+    }
+  }
+  
+  int scrnum;
+  scrnum = DefaultScreen(m_display);
+
+  std::vector<int> fb_base_attribs;
+  fb_base_attribs.push_back(GLX_DOUBLEBUFFER); fb_base_attribs.push_back(False);
+  fb_base_attribs.push_back(GLX_RED_SIZE); fb_base_attribs.push_back(32);
+  fb_base_attribs.push_back(GLX_GREEN_SIZE); fb_base_attribs.push_back(32);
+  fb_base_attribs.push_back(GLX_BLUE_SIZE); fb_base_attribs.push_back(32);
+  fb_base_attribs.push_back(GLX_DRAWABLE_TYPE); fb_base_attribs.push_back(GLX_PBUFFER_BIT);
+  
+  int items;
+
+  GLXFBConfig* fb_config = 0;
+
+  // Try NVIDIA
+  if (!fb_config) {
+    std::vector<int> fb_attribs(fb_base_attribs);
+    fb_attribs.push_back(GLX_RENDER_TYPE); fb_attribs.push_back(GLX_RGBA_BIT);
+    fb_attribs.push_back(GLX_FLOAT_COMPONENTS_NV); fb_attribs.push_back(True);
+    fb_attribs.push_back(None);
+    
+    fb_config = glXChooseFBConfig(m_display, scrnum, &fb_attribs.front(), &items);
+    if (fb_config) {
+      m_info.extension = SH_ARB_NV_FLOAT_BUFFER;
+    }
+  }
+  // Try ATI
+  if (!fb_config) {
+    std::vector<int> fb_attribs(fb_base_attribs);
+    fb_attribs.push_back(GLX_RENDER_TYPE); fb_attribs.push_back(GLX_RGBA_FLOAT_ATI_BIT);
+    fb_attribs.push_back(None);
+    
+    fb_config = glXChooseFBConfig(m_display, scrnum, &fb_attribs.front(), &items);
+    if (fb_config) {
+      m_info.extension = SH_ARB_ATI_PIXEL_FORMAT_FLOAT;
+    }
+  }
+
+  if (!fb_config) {
+    shError(PBufferStreamException("Could not get GLX FB Config!\n"
+                                   "Your card may not support the appropriate extensions."));
+    return SH_ARB_NO_FLOAT_EXT;
+  }
+
+  if (m_info.extension == SH_ARB_NO_FLOAT_EXT) {
+    shError(PBufferStreamException("Could not choose a floating-point extension!\n"
+                                   "Your card may not support the appropriate extensions."));
+    return m_info.extension;
+  }
+
+  // Set up the pbuffer
+  int pbuffer_attribs[] = {
+    GLX_PBUFFER_WIDTH, width,
+    GLX_PBUFFER_HEIGHT, height,
+    GLX_LARGEST_PBUFFER, False,
+    None
+  };
+
+  m_info.pbuffer = glXCreatePbuffer(m_display, fb_config[0], pbuffer_attribs);
+  if (!m_info.pbuffer) {
+    shError(PBufferStreamException("Could not make pbuffer!"));
+    return SH_ARB_NO_FLOAT_EXT;
+  }
+  
+  m_info.context = glXCreateNewContext(m_display, fb_config[0], GLX_RGBA_TYPE, 0, True);
+  if (!m_info.context) {
+    shError(PBufferStreamException("Could not create PBuffer context"));
+    XFree(fb_config);
+    return SH_ARB_NO_FLOAT_EXT;
+  }
+  glXMakeCurrent(m_display, m_info.pbuffer, m_info.context);
+  
+  TIMING_RESULT(makecontext);
+  return m_info.extension;
+}
 
 void PBufferStreams::execute(const ShProgramNodeCPtr& program,
                              ShStream& dest)
@@ -263,6 +421,8 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
     tex_size <<= 1;
   }
 
+  GlxState prevstate;
+  
   FloatExtension extension = setupContext(tex_size, tex_size);
 
   if (extension == SH_ARB_NO_FLOAT_EXT) return;
@@ -342,12 +502,16 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   gl_error = glGetError();
   if (gl_error != GL_NO_ERROR) {
     shError(PBufferStreamException("Could not enable GL_VERTEX_PROGRAM_ARB"));
+    //glXDestroyContext(m_display, pbuffer_ctxt);
+    //XFree(fb_config);
     return;
   }
   glEnable(GL_FRAGMENT_PROGRAM_ARB);
   gl_error = glGetError();
   if (gl_error != GL_NO_ERROR) {
     shError(PBufferStreamException("Could not enable GL_FRAGMENT_PROGRAM_ARB"));
+    //glXDestroyContext(m_display, pbuffer_ctxt);
+    //XFree(fb_config);
     return;
   }
 #ifdef SH_DEBUG_PBS_PRINTFP
@@ -441,6 +605,8 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   gl_error = glGetError();
   if (gl_error != GL_NO_ERROR) {
     shError(PBufferStreamException("Could not render"));
+    //glXDestroyContext(m_display, pbuffer_ctxt);
+    //XFree(fb_config);
     return;
   }
   
@@ -486,6 +652,8 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   gl_error = glGetError();
   if (gl_error != GL_NO_ERROR) {
     shError(PBufferStreamException("Could not do glReadPixels()"));
+    //glXDestroyContext(m_display, pbuffer_ctxt);
+    //XFree(fb_config);
     return;
   }
   if (count % tex_size) {
@@ -495,6 +663,8 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
     gl_error = glGetError();
     if (gl_error != GL_NO_ERROR) {
       shError(PBufferStreamException("Could not do rest of glReadPixels()"));
+      //glXDestroyContext(m_display, pbuffer_ctxt);
+      //XFree(fb_config);
       return;
     }
   }
@@ -503,11 +673,8 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   
   // Clean up
   shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->setContext(prev);
-
-  // TODO: I think this is necessary, but it doesn't seem to be. I assume
-  // that GLUT (or whatever UI toolkit) is setting up its one context when
-  // its about to redraw. -Kevin
-  restoreContext();
+  //glXDestroyContext(m_display, pbuffer_ctxt);
+  //XFree(fb_config);
 
   // TODO: This just seems wrong.
   // ShEnvironment::boundShaders().clear();

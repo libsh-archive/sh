@@ -24,36 +24,68 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef PBUFFERSTREAMS_HPP
-#define PBUFFERSTREAMS_HPP
+#ifndef WGLPBUFFERSTREAMS_HPP
+#define WGLPBUFFERSTREAMS_HPP
 
+#include "ShStream.hpp"
 #include "ShProgram.hpp"
-#include "GlBackend.hpp"
+#include "PBufferStreams.hpp"
 
 namespace shgl {
 
-enum FloatExtension {
-  SH_ARB_NV_FLOAT_BUFFER,
-  SH_ARB_ATI_PIXEL_FORMAT_FLOAT,
-  SH_ARB_NO_FLOAT_EXT
-};
+  struct ShWGLPBufferInfo
+    {
+    ShWGLPBufferInfo() :
+      extension(SH_ARB_NO_FLOAT_EXT),
+      pbuffer(0),
+      pbuffer_hdc(0),
+      pbuffer_hglrc(0),
+      width(0),
+      height(0),
+      shcontext(-1)
+      {
+      }
 
-struct PBufferStreams : public StreamStrategy {
-  PBufferStreams(int context = 0);
-  virtual ~PBufferStreams();
+    FloatExtension extension;
+    HPBUFFERARB pbuffer;
+    HDC pbuffer_hdc;
+    HGLRC pbuffer_hglrc;
+    int width, height;
+    int shcontext;
 
-  virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
+    bool valid() 
+      { 
+      if (extension == SH_ARB_NO_FLOAT_EXT ||
+          pbuffer == NULL ||
+          pbuffer_hdc == NULL ||
+          pbuffer_hglrc == NULL)
+        {
+        return false;
+        }
+      else
+        {
+        return true;
+        }
+      }
+    };
 
-private:
-  virtual FloatExtension setupContext(int width, int height) = 0;
-  virtual void restoreContext(void) = 0;
+  struct WGLPBufferStreams: public PBufferStreams
+    {
+    public:
+      WGLPBufferStreams(int context = 0);
+      virtual ~WGLPBufferStreams();
 
-private:
-  int m_context;
+      virtual StreamStrategy* create(int context);
 
-  int m_setup_vp;
-  SH::ShProgram m_vp;
-};
+    private:
+      virtual FloatExtension setupContext(int width, int height);
+      virtual void restoreContext(void);
+
+    private:
+      HDC orig_hdc;
+      HGLRC orig_hglrc;
+      ShWGLPBufferInfo m_info;
+    };
 
 }
 

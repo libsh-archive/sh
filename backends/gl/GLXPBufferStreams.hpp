@@ -24,36 +24,65 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef PBUFFERSTREAMS_HPP
-#define PBUFFERSTREAMS_HPP
+#ifndef GLXPBUFFERSTREAMS_HPP
+#define GLXPBUFFERSTREAMS_HPP
 
+#include "ShStream.hpp"
 #include "ShProgram.hpp"
-#include "GlBackend.hpp"
+#include "PBufferStreams.hpp"
 
 namespace shgl {
 
-enum FloatExtension {
-  SH_ARB_NV_FLOAT_BUFFER,
-  SH_ARB_ATI_PIXEL_FORMAT_FLOAT,
-  SH_ARB_NO_FLOAT_EXT
-};
+  struct ShGLXPBufferInfo
+    {
+    ShGLXPBufferInfo() :
+      extension(SH_ARB_NO_FLOAT_EXT),
+      pbuffer(0),
+      context(0),
+      width(0),
+      height(0),
+      shcontext(-1)
+      {
+      }
 
-struct PBufferStreams : public StreamStrategy {
-  PBufferStreams(int context = 0);
-  virtual ~PBufferStreams();
+    FloatExtension extension;
+    GLXPbuffer pbuffer;
+    GLXContext context;
+    int width, height;
+    int shcontext;
 
-  virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
+    bool valid() 
+      { 
+      if (extension == SH_ARB_NO_FLOAT_EXT ||
+          pbuffer == NULL ||
+          context == NULL)
+        {
+        return false;
+        }
+      else
+        {
+        return true;
+        }
+      }
+    };
 
-private:
-  virtual FloatExtension setupContext(int width, int height) = 0;
-  virtual void restoreContext(void) = 0;
+  struct GLXPBufferStreams: public PBufferStreams
+    {
+    public:
+      GLXPBufferStreams(int context = 0);
+      virtual ~GLXPBufferStreams();
 
-private:
-  int m_context;
+      virtual StreamStrategy* create(int context);
 
-  int m_setup_vp;
-  SH::ShProgram m_vp;
-};
+    private:
+      virtual FloatExtension setupContext(int width, int height);
+      virtual void restoreContext(void);
+
+    private:
+      GLXDrawable orig_drawable;
+      GLXContext orig_context;
+      ShGLXPBufferInfo m_info;
+    };
 
 }
 

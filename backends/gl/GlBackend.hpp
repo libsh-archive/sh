@@ -37,6 +37,7 @@
 
 #include <GL/gl.h>
 #include <GL/glext.h>
+#include <GL/wglext.h>
 
 extern PFNGLPROGRAMSTRINGARBPROC glProgramStringARB;
 extern PFNGLBINDPROGRAMARBPROC glBindProgramARB;
@@ -46,6 +47,18 @@ extern PFNGLPROGRAMLOCALPARAMETER4FVARBPROC glProgramLocalParameter4fvARB;
 extern PFNGLGETPROGRAMIVARBPROC glGetProgramivARB;
 extern PFNGLTEXIMAGE3DPROC glTexImage3D;
 extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
+
+// WGL_ARB_pixel_format
+extern PFNWGLGETPIXELFORMATATTRIBIVARBPROC wglGetPixelFormatAttribivARB;
+extern PFNWGLGETPIXELFORMATATTRIBFVARBPROC wglGetPixelFormatAttribfvARB;
+extern PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB;
+
+// WGL_ARB_pbuffer
+extern PFNWGLCREATEPBUFFERARBPROC wglCreatePbufferARB;
+extern PFNWGLGETPBUFFERDCARBPROC wglGetPbufferDCARB;
+extern PFNWGLRELEASEPBUFFERDCARBPROC wglReleasePbufferDCARB;
+extern PFNWGLDESTROYPBUFFERARBPROC wglDestroyPbufferARB;
+extern PFNWGLQUERYPBUFFERARBPROC wglQueryPbufferARB;
 
 #else
 

@@ -1,3 +1,27 @@
+2004-10-24  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* examples/particle/*: Added a stream example, loosely based
+	on the particle code from the book.
+
+	* backends/gl/Makefile.win32: Added WGL pbuffer source files.
+
+	* backends/gl/ArbBackend.cpp: Changes to instantiate GLX streams
+	on linux and WGL streams on windows.
+
+	* backends/gl/GlBackend.hpp, backends/gl/GlBackend.cpp: Added WGL
+	stuffs to load WGL_ARB_pbuffer and WGL_ARB_pixel_format extensions.
+
+	* backends/gl/PBufferStream.cpp, backends/gl/PBufferStreams.hpp:
+	Factored out the GLX specifics, leaving only the code common to both
+	WGL and GLX. Added a few pure virtual functions that are implemented
+	by the platform dependent classes.
+
+	* backends/gl/WGLPBufferStreams.cpp, backends/gl/WGLPBufferStreams.hpp:
+	Added WGL specific pbuffer code.
+
+	* backends/gl/GLXPBufferStreams.cpp, backends/gl/GLXPBufferStreams.hpp:
+	Added GLX specific pbuffer code (transplanted from old PBufferStreams.cpp).
+
 2004-10-22  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShTransformer.cpp: Instead of popping the current program,
@@ -14,7 +38,7 @@
 	* src/ShException.cpp (ShBackendException): Implement
 	ShBackendException constructor.
 
-2004-10-22 Sylvain Vasseur <sfvsasse@cgl.uwaterloo.ca>
+2004-10-22  Sylvain Vasseur  <sfvsasse@cgl.uwaterloo.ca>
 
 	* src/Makefile.win32: Add ShMemoryDep file.
 
