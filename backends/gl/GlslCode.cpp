@@ -469,11 +469,19 @@ void GlslCode::allocate_textures()
        i != m_shader->textures.end(); i++) {
     ShTextureNodePtr node = *i;
     
-    if (!node->meta("opengl:texunit").empty()) {
+    if (!node->meta("opengl:texunit").empty() ||
+	!node->meta("opengl:preset").empty()) {
       GLuint index;
-      istringstream is(node->meta("opengl:texunit"));
+      std::istringstream is;
+      
+      if (!node->meta("opengl:texunit").empty()) {
+	is.str(node->meta("opengl:texunit"));
+      } else {
+	is.str(node->meta("opengl:preset"));
+      }
+      
       is >> index; // TODO: Check for errors
-
+      
       if (find(reserved.begin(), reserved.end(), index) == reserved.end()) {
 	m_texture_units[node].index = index;
 	m_texture_units[node].preset = true;
@@ -483,18 +491,19 @@ void GlslCode::allocate_textures()
       }
     }
   }
-
+  
   // allocate remaining textures units with respect to the reserved list
   for (ShProgramNode::TexList::const_iterator i = m_shader->textures.begin();
        i != m_shader->textures.end(); i++) {
     ShTextureNodePtr node = *i;
     
-    if (node->meta("opengl:texunit").empty()) {
+    if (node->meta("opengl:texunit").empty() &&
+	node->meta("opengl:preset").empty()) {
       GLuint index;
       const unsigned MAX_TEXTURE_UNITS = (SH_GLSL_VP == m_unit ?
 					  GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS_ARB :
 					  GL_MAX_TEXTURE_IMAGE_UNITS_ARB);
-
+      
       for (index = m_nb_textures; index < MAX_TEXTURE_UNITS; index++) {
 	if (find(reserved.begin(), reserved.end(), index) == reserved.end()) {
 	  break;

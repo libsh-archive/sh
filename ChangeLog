@@ -1,3 +1,8 @@
+2005-02-23  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/Makefile.win32 (libsharb_dll_SOURCES): Update for
+	the new PBufferContext classes. Sorry for forgetting these.
+
 2005-02-22  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl: Folded in some changes from the cflow branch. In
