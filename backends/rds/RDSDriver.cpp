@@ -75,13 +75,10 @@ int main() {
 	//dag->print(0);
 
 	// create an rds object
-	 rds = RDS(program.node());
-	 rds.get_pdt()->printDoms();
-	 //cout << "RDSh...\n";
-	 //rds.rdsh();
-	//cout << "\nRDS...\n";
-	rds.rds();
-	rds.print_partition();
+	rds = RDS(program.node());
+	rds.get_pdt()->printDoms();
+	rds.get_partitions();
+	rds.print_partitions("part.graph");
 
 	return 0;
 }

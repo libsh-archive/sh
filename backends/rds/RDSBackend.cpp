@@ -1,5 +1,12 @@
 #include "RDSBackend.hpp"
-#include "RDS.hpp"
+#include <fstream>
+
+void RDSBackend::dump(RDS rds, char* complete, char* partitioned) {
+  rds.get_pdt()->graphvizDump(complete);
+  rds.get_pdt()->printDoms();
+	rds.get_partitions();
+	rds.print_partitions(partitioned);
+}
 
 SH::ShBackendCodePtr RDSBackend::generateCode(const std::string& target,
                                               const SH::ShProgramNodeCPtr& shader)
@@ -8,7 +15,17 @@ SH::ShBackendCodePtr RDSBackend::generateCode(const std::string& target,
   SH_DEBUG_PRINT( __FUNCTION__ );
   SH_DEBUG_PRINT("RDS generateCode() call, dumping partitions");
 #endif
-  RDS *m_rds = new RDS(shader->clone());
+  /*
+  SH::ShProgramNodePtr s = shader->clone();
+  
+  SH::ShContext::current()->enter(s);
+  SH::ShTransformer trans(s);
+  
+  trans.convertInputOutput(); 
+  trans.convertTextureLookups();
+  */
+  RDS rds(shader->clone());
+  dump(rds,"c.graph","p.graph");
   return NULL;
 }
 
@@ -18,7 +35,8 @@ void RDSBackend::execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& des
   SH_DEBUG_PRINT( __FUNCTION__ );
   SH_DEBUG_PRINT("RDS execute() call, dumping partitions");
 #endif
-  RDS *m_rds = new RDS(program->clone());
+  RDS rds(program->clone());
+  dump(rds,"c.graph","p.graph");
 }
 
 RDSBackend::RDSBackend(void) {

@@ -42,7 +42,7 @@ class SH_DLLEXPORT RDS {
 		return m_pdt;
 	}
 
-	void print_partition();
+	void print_partitions(char* filename);
 
   private:
 	typedef std::set<DAGNode::DAGNode*> ChildrenSet;
@@ -72,9 +72,9 @@ class SH_DLLEXPORT RDS {
 	MRList m_mrlist;
   
 	typedef std::map<DAGNode::DAGNode*, bool> BoolMap;
-    BoolMap m_visited;
-	BoolMap t_visited;
-	BoolMap m_marked;
+  BoolMap m_visited;
+  BoolMap t_visited;
+  BoolMap m_marked;
   
 	// for setting hardware limits
 	void set_limits();
@@ -85,7 +85,7 @@ class SH_DLLEXPORT RDS {
 	// for creating list of passes
 	void partition(DAGNode::DAGNode *v);
 
-  	// from rds paper
+  // from rds paper
 	void rds_subdivide(DAGNode::DAGNode* v);
 	void rds_merge(DAGNode::DAGNode* v);
 	void rds_search();
@@ -106,4 +106,5 @@ class SH_DLLEXPORT RDS {
 	int countnodes(DAGNode::DAGNode *v);
 	void unvisitall(DAGNode::DAGNode *v);
   };
-  #endif
+
+#endif

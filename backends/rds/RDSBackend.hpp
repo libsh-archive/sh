@@ -3,6 +3,7 @@
 
 #include "ShProgram.hpp"
 #include "ShStream.hpp"
+#include "RDS.hpp"
 
 class RDSBackend : public SH::ShBackend {
 public:
@@ -19,6 +20,7 @@ public:
 
   virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
 
+  void RDSBackend::dump(RDS rds, char* complete, char* partitioned);
 };
 
 #endif

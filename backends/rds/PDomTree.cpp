@@ -7,6 +7,7 @@
 
 #include "PDomTree.hpp"
 #include <iostream>
+#include <fstream>
 #include <iostream.h>
 #include "ShDebug.hpp"
 #include "ShUtility.hpp"
@@ -187,4 +188,22 @@ void PDomTree::printGraph(DAGNode::DAGNode *node, int indent) {
 	for (DAGNode::DAGNodeVector::iterator I = node->successors.begin(); I != node->successors.end(); ++I) {
 		printGraph(*I, indent + 2);
 	}
+}
+
+std::ostream& PDomTree::graphvizDump(DAGNode::DAGNode *node, std::ostream& out) {
+  out << "  \"" << node->m_label << numbering(node) << "\";" << std::endl;
+  for (DAGNode::DAGNodeVector::iterator I = node->successors.begin(); I != node->successors.end(); ++I) {
+    graphvizDump( *I, out );
+    out << "  \"" << node->m_label << numbering(node) << "\" -> \"" 
+        << (*I)->m_label << numbering(*I) << "\";" << std::endl;
+  }
+  return out;
+}
+
+void PDomTree::graphvizDump(char* filename) {
+  std::ofstream out(filename);
+  out << "digraph g {" << std::endl;
+  graphvizDump(get_root(),out);
+  out << "}" << std::endl;
+  out.close();
 }
