@@ -7,7 +7,7 @@ INCLUDES += /I$(OPENGL_DIR)\include
 
 # libpng
 LIBPNG_DIR = \dev\libpng
-INCLUDES = /I$(LIBPNG_DIR)
+INCLUDES += /I$(LIBPNG_DIR)
 LIBPNG_RELEASE_LDADD = $(LIBPNG_DIR)\libpng.lib
 LIBPNG_DEBUG_LDADD = $(LIBPNG_DIR)\libpngd.lib
 
