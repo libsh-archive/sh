@@ -733,6 +733,9 @@ ShBackendCodePtr Backend::generateCode(int kind, const ShProgram& shader)
   return code;
 }
 
+void Backend::bindFramebuffer() {
+}
+
 std::string Backend::name() const
 {
   return "sm";

@@ -154,6 +154,7 @@ public:
   ~Backend();
   std::string name() const;
   SH::ShBackendCodePtr generateCode(int kind, const SH::ShProgram& shader);
+  void bindFramebuffer();
 
 private:
   void generateNode(BackendCodePtr& code, const SH::ShCtrlGraphNodePtr& node);
