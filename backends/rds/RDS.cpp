@@ -7,7 +7,6 @@
 
 #include "RDS.hpp"
 #include <iostream>
-#include <fstream>
 #include <iostream.h>
 #include "ShDebug.hpp"
 #include "ShUtility.hpp"
@@ -26,16 +25,12 @@ void RDS::set_limits() {
 	max_ops = 4;
 }
 
-void RDS::print_partitions(char *filename) {
+void RDS::print_partition() {
 	int count = 0;
-  std::ofstream dump(filename);
-  dump << "digraph g {" << std::endl;
 	for(PassVector::iterator I = m_passes.begin(); I != m_passes.end(); ++I) {
-		//cout << "Pass " << ++count << "\n";
-		m_pdt->graphvizDump(*I, dump);
+		cout << "Pass " << ++count << "\n";
+		m_pdt->printGraph(*I, 2);
 	}
-  dump << "}" << std::endl;
-  dump.close();
 }
 
 void RDS::set_partition() {
@@ -81,9 +76,7 @@ void RDS::rds_search() {
 // partitions m_graph by marking nodes to indicate pass boundaries
 // returns a set of passes
 void RDS::rds_subdivide(DAGNode::DAGNode* v) {
-#ifdef SH_DEBUG
-	SH_DEBUG_PRINT( "Subdivide(" << m_pdt->numbering(v) << ")" );
-#endif
+	//cout << "Subdivide(" << m_pdt->numbering(v) << ")\n";
     // stop if subregion v can be mapped in one pass
 	if (valid(v)) return;
         
@@ -134,10 +127,9 @@ void RDS::rds_subdivide(DAGNode::DAGNode* v) {
 
 void RDS::rds_merge(DAGNode::DAGNode* v)
 {
-#ifdef SH_DEBUG
-	SH_DEBUG_PRINT( "Merge(" << m_pdt->numbering(v) << ")" );
-#endif	
-  // check for any fixed nodes (their marked property cannot be changed)
+	//cout << "Merge(" << m_pdt->numbering(v) << ")\n";
+	
+	// check for any fixed nodes (their marked property cannot be changed)
 	DAGNode::DAGNodeVector kids;
 	DAGNode::DAGNodeVector unmarked_kids;
 
@@ -370,12 +362,9 @@ void RDS::unmarkall(DAGNode::DAGNode *v) {
 // partitions graph; roots of partitions based on marked nodes
 void RDS::partition(DAGNode::DAGNode *v)
 {    
-  if (!v) return;
-  if (m_visited[v]) return;
+    if (!v) return;
+	if (m_visited[v]) return;
 
-#ifdef SH_DEBUG
-	SH_DEBUG_PRINT( "Partition(" << m_pdt->numbering(v) << ")" );
-#endif
 	m_visited[v] = true;
     
     // partition each of v's children
@@ -468,6 +457,8 @@ void RDS::full_search() {
 		set_nodelist(*I);
 	}	
 
+	unfixall(root);
+
 	// case zero
 	int n = m_nodelist.size();
 	bool marked[n];
@@ -492,7 +483,7 @@ void RDS::full_search() {
 		// mark according to subsets
 		unmarkall(root);
 
-		for (int j = 0; j < n; j++) {
+		for (int j = 0; j < k; j++) {
 			m_marked[m_nodelist.at(a[j])] = true;
 		}
 
@@ -503,8 +494,8 @@ void RDS::full_search() {
 		if (!valid(root)) 
 			isvalid = false;
 
-		for (int j = 0; j < n && isvalid; j++) {
-			if (!valid(m_nodelist.at(j)))
+		for (int j = 0; j < k && isvalid; j++) {
+			if (!valid(m_nodelist.at(a[j])))
 				isvalid = false;
 		}
 
@@ -533,7 +524,7 @@ void RDS::full_search() {
 			// mark according to subsets
 			unmarkall(root);
 
-			for (int j = 0; j < n; j++) {
+			for (int j = 0; j < k; j++) {
 				m_marked[m_nodelist.at(a[j])] = true;
 			}
 
@@ -544,8 +535,8 @@ void RDS::full_search() {
 			if (!valid(root)) 
 				isvalid = false;
 
-			for (int j = 0; j < n && isvalid; j++) {
-					if (!valid(m_nodelist.at(j)))
+			for (int j = 0; j < k && isvalid; j++) {
+					if (!valid(m_nodelist.at(a[j])))
 						isvalid = false;
 			}
 
