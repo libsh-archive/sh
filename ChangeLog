@@ -1,3 +1,8 @@
+2004-10-12  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShConstProp.cpp (struct FinishConstProp): Skip the statement
+	for uniform lifting if we've replaced it with a constant.
+
 2004-10-08  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShInstructions.cpp: Inline helper functions.
