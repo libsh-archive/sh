@@ -42,7 +42,7 @@ using namespace std;
 GlslCode::GlslCode(const ShProgramNodeCPtr& shader, const std::string& unit,
 		   TextureStrategy* texture) 
   : m_texture(texture), m_target("glsl:" + unit), m_arb_shader(0),
-    m_varmap(NULL), m_nb_textures(0), m_uploaded(false)
+    m_varmap(NULL), m_nb_textures(0), m_bound(false)
 {
   m_originalShader = const_cast<ShProgramNode*>(shader.object());
   
@@ -59,7 +59,10 @@ GlslCode::~GlslCode()
     delete m_shader;
   }
 
-  unbind();
+  if (m_arb_shader != 0) {
+    unbind();
+    SH_GL_CHECK_ERROR(glDeleteObjectARB(m_arb_shader));
+  }
   delete m_varmap;
 }
 
@@ -127,11 +130,6 @@ void GlslCode::generate()
 
 void GlslCode::upload()
 {
-  // Unbind the previously attached shader if necessary
-  if (m_current_shaders[m_unit]) {
-    m_current_shaders[m_unit]->unbind();
-  }
-
   if (SH_GLSL_VP == m_unit) {
     m_arb_shader = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
   } else if (SH_GLSL_FP == m_unit) {
@@ -150,7 +148,7 @@ void GlslCode::upload()
 
   // Check compilation
   int compiled;
-  SH_GL_CHECK_ERROR(glGetObjectParameterivARB(m_arb_shader, GL_OBJECT_COMPILE_STATUS_ARB, &compiled));
+  glGetObjectParameterivARB(m_arb_shader, GL_OBJECT_COMPILE_STATUS_ARB, &compiled);
   if (compiled != GL_TRUE) {
     cout << "Shader compile status (target = " << m_target << "): FAILED" << endl << endl;
     cout << "Shader infolog:" << endl;
@@ -160,46 +158,33 @@ void GlslCode::upload()
     cout << endl;
     return;
   }
-
-  SH_GL_CHECK_ERROR(glAttachObjectARB(m_arb_program, m_arb_shader));
-  SH_GL_CHECK_ERROR(glDeleteObjectARB(m_arb_shader)); // mark for deletion on detachment
-
-  m_current_shaders[m_unit] = this;
-  m_uploaded = true;
 }
 
-void GlslCode::bind()
+void GlslCode::link()
 {
-  if (!m_uploaded) {
-    upload();
-  }
-
   SH_GL_CHECK_ERROR(glLinkProgramARB(m_arb_program));
-
-  // Check linking
+  
   int linked;
-  SH_GL_CHECK_ERROR(glGetObjectParameterivARB(m_arb_program, GL_OBJECT_LINK_STATUS_ARB, &linked));
+  glGetObjectParameterivARB(m_arb_program, GL_OBJECT_LINK_STATUS_ARB, &linked);
   if (linked != GL_TRUE) {
     cout << "Program link status (target = " << m_target << "): FAILED" << endl << endl;
     cout << "Program infolog:" << endl;
     print_infolog(m_arb_program);
-    cout << "Shader code:" << endl;
-    print_shader_source(m_arb_shader);
+    cout << "Program code:" << endl;
+    print_shader_source(m_arb_program);
     cout << endl;
     return;
   }
-
+  
   SH_GL_CHECK_ERROR(glUseProgramObjectARB(m_arb_program));
-  ShContext::current()->set_binding(m_target, ShProgram(m_originalShader));
 
 #ifdef SH_DEBUG_GLSL_BACKEND
   // This is slow, it should not be enable in release code
-  cout << "Program validate status (target = " << m_target << "): ";
   glValidateProgramARB(m_arb_program);
   int validated;
   glGetObjectParameterivARB(m_arb_program, GL_OBJECT_VALIDATE_STATUS_ARB, &validated);
-  cout << (validated == GL_TRUE ? "OK" : "FAILED") << endl;
   if (validated != GL_TRUE) {
+    cout << "Program validate status (target = " << m_target << "): FAILED" << endl;
     cout << "Program infolog:" << endl;
     print_infolog(m_arb_program);
   }
@@ -215,6 +200,31 @@ void GlslCode::bind()
       updateUniform(node);
     }
   }
+}
+
+void GlslCode::bind()
+{
+  if (m_bound) {
+    update();
+    return;
+  }
+
+  // Unbind the previously attached shader if necessary
+  if (m_current_shaders[m_unit]) {
+    m_current_shaders[m_unit]->unbind();
+  }
+  
+  // Compile code if necessary
+  if (!m_arb_shader) {
+    upload();
+  }
+  
+  ShContext::current()->set_binding(m_target, ShProgram(m_originalShader));
+  m_current_shaders[m_unit] = this;
+  m_bound = true; // must be set before the call to link()
+
+  SH_GL_CHECK_ERROR(glAttachObjectARB(m_arb_program, m_arb_shader));
+  link();
 
   // Make sure all textures are loaded.
   bind_textures();
@@ -222,18 +232,25 @@ void GlslCode::bind()
 
 void GlslCode::unbind()
 {
-  if (!m_uploaded) return;
+  if (!m_bound) return;
 
   SH_GL_CHECK_ERROR(glDetachObjectARB(m_arb_program, m_arb_shader));
 
+  ShContext::current()->unset_binding(m_target);
   m_current_shaders[m_unit] = NULL;
-  m_uploaded = false;
+  m_bound = false; // must be set before the call to link()
+
+  // Refresh the current rendering state
+  if (!m_current_shaders[SH_GLSL_FP] && !m_current_shaders[SH_GLSL_VP]) {
+    SH_GL_CHECK_ERROR(glUseProgramObjectARB(0));
+  } else {
+    link();
+  }
 }
 
 void GlslCode::update()
 {
-  if (!m_uploaded) return;
-
+  if (!m_bound) return;
   bind_textures();
 }
 
@@ -289,6 +306,8 @@ void GlslCode::updateIntUniform(const ShVariableNodePtr& node, const GLint locat
 
 void GlslCode::updateUniform(const ShVariableNodePtr& uniform)
 {
+  if (!m_bound) return;
+
   SH_DEBUG_ASSERT(uniform);
 
   if (!m_varmap->contains(uniform)) {
@@ -561,7 +580,7 @@ void GlslCode::bind_textures()
 	m_texture->bindTexture(texture, GL_TEXTURE0 + index);
       }
     } else {
-      cerr << "Cannot find uniform named '" << var.name() << "'." << endl;
+      cerr << "Cannot find uniform texture named '" << var.name() << "'." << endl;
     }
   }
 }

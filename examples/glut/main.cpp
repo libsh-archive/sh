@@ -21,7 +21,6 @@ int cur_x, cur_y;
 int gprintf(int x, int y, char* fmt, ...);
 
 bool show_help = false;
-bool shaders_initialized = false;
 
 void initShaders()
 {
@@ -53,11 +52,8 @@ void initShaders()
 
 void display()
 {
-  if (shaders_initialized) {
-    cerr << "Binding both programs." << endl;
-    shBind(vsh);
-    shBind(fsh);
-  }
+  shBind(vsh);
+  shBind(fsh);
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -65,17 +61,17 @@ void display()
   glutSolidTeapot(2.5);
   glFrontFace(GL_CCW);
 
-   // Help information
-   if (show_help) {
-     gprintf(30, 120, "Sh Glut Example Help");
-     gprintf(30, 100, "  '1' - Colour 1");
-     gprintf(30, 80,  "  '2' - Colour 2");
-     gprintf(30, 65,  "  '3' - Light angle 1");
-     gprintf(30, 50,  "  '4' - Light angle 2");
-     gprintf(30, 30,  "  'Q' - Quit");
-   } else {
-     gprintf(10, 10, "'H' for help...");
-   }
+//   // Help information
+//   if (show_help) {
+//     gprintf(30, 120, "Sh Glut Example Help");
+//     gprintf(30, 95,  "  '1' - Colour 1");
+//     gprintf(30, 80,  "  '2' - Colour 2");
+//     gprintf(30, 65,  "  '3' - Light angle 1");
+//     gprintf(30, 50,  "  '4' - Light angle 2");
+//     gprintf(30, 30,  "  'Q' - Quit");
+//   } else {
+//     gprintf(10, 10, "'H' for help...");
+//   }
   
   glutSwapBuffers();
 }
@@ -146,6 +142,16 @@ void keyboard(unsigned char k, int x, int y)
   case 'h':
   case 'H':
     show_help = !show_help;
+    break;
+  case 'b':
+  case 'B':
+    shBind(vsh);
+    shBind(fsh);
+    break;
+  case 'u':
+  case 'U':
+    shUnbind(vsh);
+    shUnbind(fsh);
     break;
   case 'q':
   case 'Q':
@@ -227,7 +233,9 @@ int main(int argc, char** argv)
 
   initShaders();
 
-  shaders_initialized = true;
+  shBind(vsh);
+  shBind(fsh);
+
 #if 0
   cout << "Vertex Unit:" << endl;
   vsh.node()->code()->print(cout);

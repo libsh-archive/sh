@@ -89,8 +89,9 @@ private:
   /// The long tuple splits applied to this shader before compilation.
   SH::ShTransformer::VarSplitMap m_splits;
 
-  bool m_uploaded; /// true if the program has already been uploaded to the GPU
+  bool m_bound; /// true if the program has already been uploaded to the GPU
 
+  void link();
   void optimize(const SH::ShProgramNodeCPtr& shader);
 
   /// Generate code for this node and those following it.
