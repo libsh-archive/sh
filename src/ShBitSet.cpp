@@ -61,6 +61,8 @@ ShBitRef& ShBitRef::operator=(bool b)
   } else {
     *m_byte &= ~m_mask;
   }
+
+  return (*this);
 }
 
 ShBitRef::ShBitRef(unsigned int* byte, unsigned int mask)
@@ -98,6 +100,8 @@ ShBitSet& ShBitSet::operator=(const ShBitSet& other)
   m_size = other.m_size;
   m_data = new unsigned int[wordsize(m_size)];
   memcpy(m_data, other.m_data, wordsize(m_size) * WORD_SIZE);
+
+  return (*this);
 }
 
 ShBitSet& ShBitSet::operator&=(const ShBitSet& other)
