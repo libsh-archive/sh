@@ -1965,8 +1965,8 @@ namespace ShCc {
     prologue << std::endl;
     prologue << "extern \"C\" typedef void (*CcLookupFunc)(void* t, float* src, float* dst);" << std::endl;
     prologue << std::endl;
-    prologue << "CcLookupFunc sh_cc_backend_lookup;" << std::endl;
-    prologue << "CcLookupFunc sh_cc_backend_lookupi;" << std::endl;
+    prologue << "static CcLookupFunc sh_cc_backend_lookup;" << std::endl;
+    prologue << "static CcLookupFunc sh_cc_backend_lookupi;" << std::endl;
     prologue << std::endl;
     prologue << "extern \"C\"";
 #ifdef WIN32
@@ -2103,8 +2103,7 @@ namespace ShCc {
     if (pid == 0)
       {
       // child
-      execlp("cc", "cc", "-O2", "-shared", "-o", sofile, ccfile,
-             "-L", SH_INSTALL_PREFIX "/lib/sh", "-lshcc", NULL);
+      execlp("cc", "cc", "-O2", "-shared", "-o", sofile, ccfile, NULL);
       SH_CC_DEBUG_PRINT("exec failed (" << errno << ")");
       exit(-1);
       }

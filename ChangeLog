@@ -1,3 +1,9 @@
+2004-10-28  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* backends/cc/Cc.cpp: Generated code changed to use
+	static variable, some linux ld versions caused symbol
+	collisions leading to segfaults
+
 2004-10-27  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
 
 	* backends/gl/GlBackend.*, backends/gl/WGLPBuffersStreams.cpp:
