@@ -34,5 +34,6 @@ bool ShEnvironment::insideShader = false;
 ShProgram ShEnvironment::boundShader[shShaderKinds] = {0, 0};
 ShBackendPtr ShEnvironment::backend = 0;
 int ShEnvironment::optimizationLevel = 1;
+bool ShEnvironment::useExceptions = false;
 
 }

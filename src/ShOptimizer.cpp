@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <queue>
 #include "ShDebug.hpp"
+#include "ShError.hpp"
 
 namespace SH {
 
@@ -336,13 +337,15 @@ struct IterateRch {
   void operator()(ShCtrlGraphNodePtr node)
   {
     if (!node) return;
-    SH_DEBUG_ASSERT(o.m_reachIn.find(node) != o.m_reachIn.end());
+    if (o.m_reachIn.find(node) == o.m_reachIn.end()) {
+      ShError( ShOptimizerException( "Cannot find node in m_reachIn ReachMap." ) );
+    }
     ShBitSet newRchIn(o.m_defs.size());
     
     for (ShCtrlGraphNode::ShPredList::iterator I = node->predecessors.begin(); I != node->predecessors.end(); ++I) {
-      SH_DEBUG_ASSERT(gen.find(*I) != gen.end());
-      SH_DEBUG_ASSERT(prsv.find(*I) != prsv.end());
-      SH_DEBUG_ASSERT(o.m_reachIn.find(*I) != o.m_reachIn.end());
+      if (gen.find(*I) == gen.end()) ShError( ShOptimizerException( "Cannot find predecessor node in gen ReachMap." ) ); 
+      if (prsv.find(*I) == prsv.end()) ShError( ShOptimizerException( "Cannot find predecessor node in prsv ReachMap." ) ); 
+      if (o.m_reachIn.find(*I) == o.m_reachIn.end()) ShError( ShOptimizerException( "Cannot find predecessor node in m_reachIn ReachMap." ) ); 
       
       newRchIn |= (gen[*I] | (o.m_reachIn[*I] & prsv[*I]));
     }

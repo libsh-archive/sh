@@ -6,7 +6,8 @@ libsh_la_LIBADD = $(LIBLTDL)
 libsh_la_LDFLAGS = -export-dynamic -no-undefined
 
 libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
-                   ShEnvironment.cpp ShException.cpp ShParser.cpp ShProgram.cpp \
+                   ShEnvironment.cpp ShException.cpp ShError.cpp \
+                   ShParser.cpp ShProgram.cpp \
                    ShStatement.cpp ShSwizzle.cpp ShSyntax.cpp ShToken.cpp \
                    ShTokenizer.cpp ShUtility.cpp ShVariable.cpp ShVariableNode.cpp \
 		   ShTextureNode.cpp ShImage.cpp \
@@ -15,7 +16,8 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
                    ShOptimizer.cpp \
 		   ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp \
                    ShBlock.hpp ShConstant.hpp ShConstantImpl.hpp ShCtrlGraph.hpp \
-                   ShDebug.hpp ShEnvironment.hpp ShException.hpp ShLib.hpp \
+                   ShDebug.hpp ShEnvironment.hpp ShError.hpp \
+                   ShException.hpp ShLib.hpp \
                    ShParser.hpp ShRefCount.hpp ShProgram.hpp ShStatement.hpp \
                    ShSwizzle.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp \
                    ShUtility.hpp ShVariable.hpp ShVariableNode.hpp sh.hpp \
@@ -35,7 +37,8 @@ incincdir = $(includedir)/sh
 
 incinc_HEADERS = ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp \
                    ShBlock.hpp ShConstant.hpp ShConstantImpl.hpp ShCtrlGraph.hpp \
-                   ShDebug.hpp ShEnvironment.hpp ShException.hpp ShLib.hpp \
+                   ShDebug.hpp ShEnvironment.hpp ShError.hpp \
+                   ShException.hpp ShLib.hpp \
                    ShParser.hpp ShRefCount.hpp ShProgram.hpp ShStatement.hpp \
                    ShSwizzle.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp \
                    ShUtility.hpp ShVariable.hpp ShVariableNode.hpp sh.hpp \

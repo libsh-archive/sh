@@ -2,6 +2,7 @@
 #include <map>
 #include "ShCtrlGraph.hpp"
 #include "ShDebug.hpp"
+#include "ShError.hpp"
 #include "ShOptimizer.hpp"
 #include "ShEnvironment.hpp"
 
@@ -85,7 +86,9 @@ namespace SH {
 
 ShProgram connect(const ShProgram& a, const ShProgram& b)
 {
-  SH_DEBUG_ASSERT(a->outputs.size() == b->inputs.size());
+  if (a->outputs.size() != b->inputs.size()) {
+    ShError( ShAlgebraException( "Cannot connect programs.  Number of inputs does not match number of outputs" ) );
+  }
 
   int rkind;
 
@@ -127,7 +130,10 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   ShProgramNode::VarList::const_iterator I, J;  
   for (I = a->outputs.begin(), J = b->inputs.begin(); I != a->outputs.end(); ++I, ++J) {
     SH_DEBUG_PRINT("Smashing a variable..");
-    SH_DEBUG_ASSERT((*I)->size() == (*J)->size());
+    if( (*I)->size() == (*J)->size() ) {
+      ShError( ShAlgebraException( "Cannot smash variables " + (*I)->name() +
+            " and " + (*J)->name() + " with different sizes." ) );
+    }
     ShVariableNodePtr n = new ShVariableNode(SH_VAR_TEMP, (*I)->size());
     varMap[*I] = n;
     varMap[*J] = n;

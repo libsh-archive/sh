@@ -48,5 +48,15 @@ ShImageException::ShImageException(const std::string& message)
 {
 }
 
+ShAlgebraException::ShAlgebraException(const std::string& message)
+  : ShException("Algebra Error: " + message)
+{
+}
+
+ShOptimizerException::ShOptimizerException(const std::string& message)
+  : ShException("Optimizer Error: " + message)
+{
+}
+
 
 }

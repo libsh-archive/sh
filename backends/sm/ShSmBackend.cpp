@@ -29,6 +29,7 @@
 #include <sstream>
 #include "ShEnvironment.hpp"
 #include "ShDebug.hpp"
+#include "ShError.hpp"
 #include "ShLinearAllocator.hpp"
 #include "ShCtrlGraph.hpp"
 
@@ -112,7 +113,9 @@ void BackendCode::freeRegister(const SH::ShVariableNodePtr& var)
   if (var->kind() != SH_VAR_TEMP) return; // ignore anything but temporaries
   if (var->uniform()) return;
 
-  SH_DEBUG_ASSERT(m_registers.find(var) != m_registers.end());
+  if (m_registers.find(var) == m_registers.end()) {
+    ShError( ShBackendException( "Cannot find register to free" ) );
+  }
   m_tempRegs.push_front(m_registers[var].index);
 }
 
@@ -132,7 +135,9 @@ void BackendCode::upload()
        ++I) {
     if (I->op == OP_TEX) {
       SH_DEBUG_PRINT("Adding an OP_TEX");
-      SH_DEBUG_ASSERT(getReg(I->src2.node()).type == SHSM_REG_TEXTURE);
+      if (getReg(I->src2.node()).type != SHSM_REG_TEXTURE) {
+        ShError( ShBackendException( "src regster for OP_TEX is not a texture register" ) );
+      }
       smInstr(OP_TEX, getSmReg(I->dest), getSmReg(I->src1), getReg(I->src2.node()).index);
     } else if (I->src1.null()) {
       smInstr(I->op, getSmReg(I->dest));

@@ -54,6 +54,9 @@ struct ShEnvironment
 
   /// 0 means no optimizations. The default level is 1.
   static int optimizationLevel;
+
+  /// Whether exceptions are being thrown instead of error messages printed to stdout
+  static bool useExceptions;
 };
 
 }

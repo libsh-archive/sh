@@ -29,6 +29,7 @@
 #include <iostream>
 #include "ShBitSet.hpp"
 #include "ShDebug.hpp"
+#include "ShError.hpp"
 
 #define WORD_SIZE sizeof(unsigned int)
 
@@ -101,7 +102,7 @@ ShBitSet& ShBitSet::operator=(const ShBitSet& other)
 
 ShBitSet& ShBitSet::operator&=(const ShBitSet& other)
 {
-  SH_DEBUG_ASSERT(m_size == other.m_size);
+  if (m_size != other.m_size) ShError( ShException( "ShBitSet operands of &= must be the same size." ) );
   for (std::size_t i = 0; i < wordsize(m_size); i++)
     m_data[i] &= other.m_data[i];
   return *this;
@@ -109,7 +110,7 @@ ShBitSet& ShBitSet::operator&=(const ShBitSet& other)
 
 ShBitSet& ShBitSet::operator|=(const ShBitSet& other)
 {
-  SH_DEBUG_ASSERT(m_size == other.m_size);
+  if (m_size != other.m_size) ShError( ShException( "ShBitSet operands of |= must be the same size." ) );
   for (std::size_t i = 0; i < wordsize(m_size); i++)
     m_data[i] |= other.m_data[i];
   return *this;
@@ -117,7 +118,7 @@ ShBitSet& ShBitSet::operator|=(const ShBitSet& other)
 
 ShBitSet& ShBitSet::operator^=(const ShBitSet& other)
 {
-  SH_DEBUG_ASSERT(m_size == other.m_size);
+  if (m_size != other.m_size) ShError( ShException( "ShBitSet operands of ^= must be the same size." ) );
   for (std::size_t i = 0; i < wordsize(m_size); i++)
     m_data[i] ^= other.m_data[i];
   return *this;
