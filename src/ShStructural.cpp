@@ -3,6 +3,7 @@
 #include <sstream>
 #include <map>
 #include <set>
+#include <algorithm>
 #include "ShDebug.hpp"
 
 // #define SH_STRUCTURAL_DEBUG

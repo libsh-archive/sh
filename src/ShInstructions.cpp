@@ -73,59 +73,78 @@ T cond(T alpha, T a, T b) { return alpha > 0.0f ? a : b; }
 T mad(T a, T b, T c) { return a * b + c; }
 T frac(T a) { return fmodf(a, 1.0f); }
 T sgn(T a) { return (a < 0.0f ? -1.0f : (a == 0.0f ? 0.0f : 1.0f)); }
+
+// TODO: Replace ifdef with an autoconf check
+#ifdef WIN32
+T exp2f(T a) { return powf(2.0, a); }
+T exp10f(T a) { return powf(2.0, a); }
+T log2f(T a) { return logf(a)/logf(2.0); }
+#endif
 }
 
 #define CWISE_BINARY_OP(d, a, b, op) \
 do {\
   has_values(d, a, b);\
-  T v_d[d.size()];\
-  T v_a[a.size()];\
+  T* v_d = new T[d.size()];\
+  T* v_a = new T[a.size()];\
   a.getValues(v_a);\
-  T v_b[b.size()];\
+  T* v_b = new T[b.size()];\
   b.getValues(v_b);\
   for (int i = 0; i < d.size(); i++) v_d[i] = op(v_a[(a.size() == 1 ? 0 : i)],\
                                                  v_b[(b.size() == 1 ? 0 : i)]);\
   d.setValues(v_d);\
+  delete [] v_d;\
+  delete [] v_a;\
+  delete [] v_b;\
 } while (0)
 
 #define CWISE_BINARY_INLOP(d, a, b, op) \
 do {\
   has_values(d, a, b);\
-  T v_d[d.size()];\
-  T v_a[a.size()];\
+  T* v_d = new T[d.size()];\
+  T* v_a = new T[a.size()];\
   a.getValues(v_a);\
-  T v_b[b.size()];\
+  T* v_b = new T[b.size()];\
   b.getValues(v_b);\
   for (int i = 0; i < d.size(); i++) v_d[i] = v_a[(a.size() == 1 ? 0 : i)] op\
                                               v_b[(b.size() == 1 ? 0 : i)];\
   d.setValues(v_d);\
+  delete [] v_d;\
+  delete [] v_a;\
+  delete [] v_b;\
 } while (0)
 
 #define CWISE_TRINARY_OP(d, a, b, c, op) \
 do {\
   has_values(d, a, b, c);\
-  T v_a[a.size()];\
+  T* v_a = new T[a.size()];\
   a.getValues(v_a);\
-  T v_b[b.size()];\
+  T* v_b = new T[b.size()];\
   b.getValues(v_b);\
-  T v_c[c.size()];\
+  T* v_c = new T[c.size()];\
   c.getValues(v_c);\
-  T v_d[d.size()];\
+  T* v_d = new T[d.size()];\
   for (int i = 0; i < d.size(); i++) v_d[i] = op(v_a[(a.size() == 1 ? 0 : i)],\
                                                  v_b[(b.size() == 1 ? 0 : i)],\
                                                  v_c[(c.size() == 1 ? 0 : i)]\
                                                  );\
   d.setValues(v_d);\
+  delete [] v_d;\
+  delete [] v_a;\
+  delete [] v_b;\
+  delete [] v_c;\
 } while (0)
 
 #define CWISE_UNARY_OP(d, a, op) \
 do {\
   has_values(d, a);\
-  T v_a[a.size()];\
-  T v_d[d.size()];\
+  T* v_a = new T[a.size()];\
+  T* v_d = new T[d.size()];\
   a.getValues(v_a);\
   for (int i = 0; i < d.size(); i++) v_d[i] = op(v_a[(a.size() == 1 ? 0 : i)]);\
   d.setValues(v_d);\
+  delete [] v_a;\
+  delete [] v_d;\
 } while (0)
 
 namespace SH {
@@ -135,9 +154,10 @@ void shASN(ShVariable& dest, const ShVariable& src)
   sizes_match(dest, src);
   if (immediate()) {
     has_values(dest, src);
-    T vals[src.size()];
+    T* vals = new T[src.size()];
     src.getValues(vals);
     dest.setValues(vals);
+    delete [] vals;
   } else {
     ShStatement stmt(dest, SH_OP_ASN, src);
     addStatement(stmt);
@@ -325,13 +345,15 @@ void shDOT(ShVariable& dest, const ShVariable& a, const ShVariable& b)
   SH_DEBUG_ASSERT(dest.size() == 1);
   sizes_match(a, b);
   if (immediate()) {
-    T v_a[a.size()];
+    T* v_a = new T[a.size()];
     a.getValues(v_a);
-    T v_b[a.size()];
+    T* v_b = new T[a.size()];
     b.getValues(v_b);
     T f = 0.0;
     for (int i = 0; i < a.size(); i++) f += v_a[i] * v_b[i];
     dest.setValues(&f);
+    delete [] v_a;
+    delete [] v_b;
   } else {
     ShStatement stmt(dest, a, SH_OP_DOT, b);
     addStatement(stmt);
@@ -590,13 +612,14 @@ void shNORM(ShVariable& dest, const ShVariable& a)
 {
   sizes_match(dest, a);
   if (immediate()) {
-    T v_a[a.size()];
+    T* v_a = new T[a.size()];
     a.getValues(v_a);
     T s = 0.0;
     for (int i = 0; i < a.size(); i++) s += v_a[i] * v_a[i];
     s = std::sqrt(s);
     for (int i = 0; i < a.size(); i++) v_a[i] /= s;
     dest.setValues(v_a);
+    delete [] v_a;
   } else {
     ShStatement stmt(dest, SH_OP_NORM, a);
     addStatement(stmt);

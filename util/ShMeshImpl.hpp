@@ -189,7 +189,7 @@ void ShMesh<M>::clear() {
 
 template<typename M>
 typename ShMesh<M>::Face* 
-ShMesh<M>::addFace(const ShMesh<M>::VertexList &vl) {
+ShMesh<M>::addFace(const typename ShMesh<M>::VertexList &vl) {
   verts.insert(vl.begin(), vl.end());  
 
   if( vl.size() < 1 ) {

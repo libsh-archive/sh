@@ -378,11 +378,13 @@ struct DumpRch {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
     if (!block) return;
+#ifdef SH_DEBUG
     SH_DEBUG_PRINT("NODE:");
     node->block->print(std::cerr, 4);
     SH_DEBUG_PRINT("  reachIn: " << r[node]);
     SH_DEBUG_PRINT("  gen: " << gen[node]);
     SH_DEBUG_PRINT("  psrv: " << psrv[node]);
+#endif
   }
 
   ShOptimizer::ReachingMap& r;

@@ -1,0 +1,17 @@
+
+all: libshutil.lib
+
+libshutil_lib_SOURCES = ShKernelLib.cpp ShKernelSurfMap.cpp \
+		        ShObjMesh.cpp 
+
+libshutil_lib_CXXFILES = $(filter %.cpp,$(libshutil_lib_SOURCES))
+libshutil_lib_OBJECTS = $(libshutil_lib_CXXFILES:.cpp=.obj)
+
+libshutil.lib: $(libshutil_lib_OBJECTS)
+	$(LIBRARIAN) /OUT:$@ $^
+
+libshutil_lib_DEPENDS = $(libshutil_lib_CXXFILES:.cpp=.d)
+
+include ../win32.mk
+INCLUDES += -I../src
+include $(libshutil_lib_DEPENDS)

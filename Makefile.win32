@@ -1,0 +1,4 @@
+all: recurse
+
+recurse:
+	cd src ; $(MAKE) ; cd ..

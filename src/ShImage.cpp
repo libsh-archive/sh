@@ -28,6 +28,7 @@
 #include <string>
 #include <cstring>
 #include <cstdio>
+#include <cmath>
 #include <png.h>
 #include <sstream>
 #include "ShException.hpp"
