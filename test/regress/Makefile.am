@@ -8,7 +8,7 @@ TESTS = abs acos add add_im asin atan atan2 cbrt ceil clamp cmul cond \
 	matrix_add matrix_div matrix_madd matrix_mdiv matrix_mmul \
 	matrix_msub matrix_mul matrix_neg matrix_sub max max1 mdiv \
 	min min1 mmod mmul mod msub mul ne neg pos pow rcp rnd rsqrt \
-	sat sign sin sort sqrt sub tan tex
+	sat sign sin sort sqrt sub tan tex trace
 check_PROGRAMS = $(TESTS)
 BACKENDS = arb cc host glsl
 EXTRA_DIST = shtest.py common.py
@@ -199,3 +199,5 @@ tan_SOURCES = tan.cpp $(common)
 EXTRA_DIST += tan.cpp.py
 tex_SOURCES = tex.cpp $(common)
 EXTRA_DIST += tex.cpp.py
+trace_SOURCES = trace.cpp $(common)
+EXTRA_DIST += trace.cpp.py

@@ -1,3 +1,7 @@
+2005-04-05  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibMatrixImpl.hpp (trace): Add this function.
+
 2005-04-04  Francois Marier  <francois@serioushack.com>
 
 	* src/ShMatrix.hpp, ShMatrixImpl.hpp (operator-): Add this method.

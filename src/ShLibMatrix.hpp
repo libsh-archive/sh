@@ -273,6 +273,14 @@ template<int N, typename T>
 ShMatrix<N, N, SH_TEMP, T>
 scale(const ShGeneric<1, T>& a);
 
+/** \brief Trace of a matrix.
+ *
+ * Returns the sum of the diagonal entries of a matrix.
+ */
+template<int RowsCols, ShBindingType Binding, typename T>
+ShGeneric<1, T>
+trace(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix);
+
 /*@}*/
 
 }

@@ -496,6 +496,16 @@ scale(const ShGeneric<1, T>& a)
   return diag(join(fillcast<N - 1>(a), ShConstAttrib1f(1.0)));
 }
 
+template<int RowsCols, ShBindingType Binding, typename T>
+ShGeneric<1, T>
+trace(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix)
+{
+  ShAttrib<1, SH_TEMP, T> r(matrix[0][0]);
+  for (int i=1; i < RowsCols; i++) {
+    r += matrix[i][i];
+  }
+  return r;
+}
 
 }
 
