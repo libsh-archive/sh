@@ -10,5 +10,5 @@ else
 GL_SUBDIR =
 endif
 
-SUBDIRS = gcc $(SM_SUBDIR) $(GL_SUBDIR)
+SUBDIRS = cc $(SM_SUBDIR) $(GL_SUBDIR)
 

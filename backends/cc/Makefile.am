@@ -2,8 +2,8 @@ INCLUDES = -I$(top_srcdir)/src
 
 shbackenddir = $(prefix)/lib/sh
 
-shbackend_LTLIBRARIES = libshgcc.la
+shbackend_LTLIBRARIES = libshcc.la
 
-libshgcc_la_LDFLAGS = -L$(prefix)/lib -module
-libshgcc_la_LIBADD = $(top_srcdir)/src/libsh.la 
-libshgcc_la_SOURCES = Gcc.cpp Gcc.hpp
+libshcc_la_LDFLAGS = -L$(prefix)/lib -module
+libshcc_la_LIBADD = $(top_srcdir)/src/libsh.la 
+libshcc_la_SOURCES = Cc.cpp Cc.hpp

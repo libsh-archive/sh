@@ -114,7 +114,7 @@ AC_CONFIG_FILES([Makefile
 		 test/Makefile
 		 test/regress/Makefile
 		 backends/Makefile
-		 backends/gcc/Makefile
+		 backends/cc/Makefile
 		 backends/sm/Makefile
 		 backends/gl/Makefile
 		 util/Makefile

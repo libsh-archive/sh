@@ -1,3 +1,9 @@
+2004-10-19  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* configure.ac, backends/Makefile.am, backends/cc/Makefile.am,
+	backends/cc/Cc.cpp, backends/cc/Cc.hpp, test/regress/test.cpp:
+	Renamed Gcc to Cc, Windows port of compiler backend to follow...
+
 2004-10-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShConstProp.cpp (ConstProp::ConstProp): Handle palette nodes.
