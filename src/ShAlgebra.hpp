@@ -8,6 +8,10 @@
 namespace SH {
 
 /// Replace inputs of b with outputs of a and connect them together.
+//
+// If B = b->inputs.size() > a->outputs.size() = A,
+// result takes inputs of a, the last B-A inputs of b,
+// and outputs results of b.
 ShProgram connect(const ShProgram& a, const ShProgram& b);
 
 /// Run a and b together (i.e. use both inputs from a and b and both
@@ -21,6 +25,17 @@ ShProgram replaceUniform(const ShProgram &a, const ShVariable &var);
 ShProgram operator<<(const ShProgram& a, const ShProgram& b);
 /// Equiv. to combine(a,b)
 ShProgram operator&(const ShProgram& a, const ShProgram& b);
+
+template<int N, typename T>
+ShProgram operator<<(const ShProgram& a, const ShVariableN<N, T>& v) {
+  ShProgram vNibble = SH_BEGIN_PROGRAM() {
+    ShAttrib<N, SH_VAR_OUTPUT, T> out;
+    out.node()->specialType(v.node()->specialType());
+    out = v;
+  } SH_END_PROGRAM;
+  return connect(vNibble, a); 
+}
+
 
 template<typename T>
 struct keep {

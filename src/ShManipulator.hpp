@@ -68,7 +68,7 @@ class lose: public ShFixedSizeManipulator {
 /// permute( a1, ... ) is a manipulator that permutes 
 // shader outputs based on given indices
 //
-class permute: public ShManipulator {
+class shPermute: public ShManipulator {
   public:
     /** \brief creates a permutation manipulator which
      * gives outputSize outputs when applied to a ShProgram
@@ -76,21 +76,21 @@ class permute: public ShManipulator {
      * if an index >= 0, then uses index'th output
      * if index < 0, then uses program size + index'th output
      */
-    permute( int outputSize, ... ); 
-    permute( std::vector<int> indices );
+    shPermute( int outputSize, ... ); 
+    shPermute( std::vector<int> indices );
 
-    permute operator*( const permute &p ) const;
+    shPermute operator*( const shPermute &p ) const;
 };
 
 /// range manipulator that permutes ranges of shader
 // outputs based on given indices
-class range: public ShManipulator {
+class shRange: public ShManipulator {
   public:
-    range( int i );
-    range( int start, int end );
+    shRange( int i );
+    shRange( int start, int end );
 
-    range operator()( int i );
-    range operator()( int start, int end );
+    shRange operator()( int i );
+    shRange operator()( int start, int end );
 };
 
 /** extract is a manipulator that removes the kth output
@@ -99,9 +99,9 @@ class range: public ShManipulator {
  * if k >= 0, then take element k (indices start at 0) 
  * if k < 0, take element outputs.size + k
  */
-class extract: public ShManipulator {
+class shExtract: public ShManipulator {
   public:
-    extract( int k ); 
+    shExtract( int k ); 
 };
 
 /** drop is a manipulator that discards the k outputs.
@@ -109,9 +109,9 @@ class extract: public ShManipulator {
  * if k >= 0 then discards outputs 0 to k 
  * if k < 0 then discards outputs size + k to size - 1
  */
-class drop: public ShManipulator {
+class shDrop: public ShManipulator {
   public:
-    drop( int k );
+    shDrop( int k );
 };
 
 }

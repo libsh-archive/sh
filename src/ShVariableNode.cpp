@@ -144,6 +144,12 @@ ShVariableSpecialType ShVariableNode::specialType() const
   return m_specialType;
 }
 
+std::string ShVariableNode::nameOfType() const {
+  std::ostringstream os;
+  os << ShVariableSpecialTypeName[ m_specialType ] << m_size;
+  return os.str();
+}
+
 void ShVariableNode::specialType(ShVariableSpecialType type)
 {
   m_specialType = type;

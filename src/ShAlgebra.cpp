@@ -35,6 +35,7 @@ void copyCtrlGraph(ShCtrlGraphNodePtr head, ShCtrlGraphNodePtr tail,
   copyMap[0] = 0;
   
   CtrlGraphCopier copier(copyMap);
+  SH_DEBUG_ASSERT( tail ); // catch empty tails
   head->clearMarked();
   head->dfs(copier);
 
@@ -92,19 +93,23 @@ namespace SH {
 
 ShProgram connect(const ShProgram& a, const ShProgram& b)
 {
-  if (a->outputs.size() != b->inputs.size()) {
+  int aosize, bisize;
+  aosize = a->outputs.size();
+  bisize = b->inputs.size();
+  SH_DEBUG_PRINT( "Connecting " << aosize << " outputs to " << bisize << "inputs" );
+  if (aosize > bisize) {
     std::ostringstream os;
-    os << "Cannot connect programs. Number of outputs (" << a->outputs.size() << ") != number of inputs"
+    os << "Cannot connect programs. Number of outputs (" << a->outputs.size() << ") > number of inputs"
       << b->inputs.size() << std::endl;
     os << "Outputs: ";
     for( ShProgramNode::VarList::const_iterator it = a->outputs.begin();
         it != a->outputs.end(); ++it ) {
-      os << ShVariableSpecialTypeName[ (*it)->specialType() ] << (*it)->size() << " ";
+      os << (*it)->nameOfType() << " "; 
     }
     os << std::endl << "Inputs: "; 
     for( ShProgramNode::VarList::const_iterator it = b->inputs.begin();
         it != b->inputs.end(); ++it ) {
-      os << ShVariableSpecialTypeName[ (*it)->specialType() ] << (*it)->size() << " ";
+      os << (*it)->nameOfType() << " "; 
     }
 
     ShError( ShAlgebraException( os.str() ) ); 
@@ -136,6 +141,16 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   for (ShProgramNode::VarList::const_iterator II = a->inputs.begin(); II != a->inputs.end(); ++II) {
     program->inputs.push_back(*II);
   }
+
+// push back extra inputs from b if aosize < bisize
+  if( aosize < bisize ) {
+    ShProgramNode::VarList::const_iterator II = b->inputs.begin();
+    for(int i = 0; i < aosize; ++i, ++II); 
+    for(; II != b->inputs.end(); ++II) {
+      program->inputs.push_back(*II);
+    }
+  }
+
   for (ShProgramNode::VarList::const_iterator II = b->outputs.begin(); II != b->outputs.end(); ++II) {
     program->outputs.push_back(*II);
   }
@@ -151,8 +166,9 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   for (I = a->outputs.begin(), J = b->inputs.begin(); I != a->outputs.end(); ++I, ++J) {
     SH_DEBUG_PRINT("Smashing a variable..");
     if( (*I)->size() != (*J)->size() ) {
-      ShError( ShAlgebraException( "Cannot smash variables " + (*I)->name() +
-            " and " + (*J)->name() + " with different sizes." ) );
+      ShError( ShAlgebraException( "Cannot smash variables " + 
+            (*I)->nameOfType() + " " + (*I)->name() + " and " + 
+            (*J)->nameOfType() + " " + (*J)->name() + " with different sizes." ) );
     }
     ShVariableNodePtr n = new ShVariableNode(SH_VAR_TEMP, (*I)->size());
     varMap[*I] = n;
@@ -169,6 +185,7 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   optimizer.optimize(ShEnvironment::optimizationLevel);
   
   program->collectVariables();
+  SH_DEBUG_PRINT( "Done");
 
   return program;
 }

@@ -74,6 +74,8 @@ public:
   ShVariableSpecialType specialType() const;
   void specialType(ShVariableSpecialType);
 
+  std::string nameOfType() const; ///< Get a string of this var's specialType & size
+
   typedef double ValueType;
   
   /// For variables with values only. Sets the value of the i'th entry.

@@ -28,7 +28,6 @@ void ShManipulator::append(IndexRange r) {
 ShProgram operator<<(const ShProgram &p, const ShManipulator &m) {
   int size = p->outputs.size();
 
-  std::cout << "operator<<" << std::endl; 
   ShProgram permuter = SH_BEGIN_PROGRAM() {
     /* Make shader inputs from p's outputs */
     std::vector<ShVariable> inputs;
@@ -97,26 +96,24 @@ lose::lose(int n)
   : ShFixedSizeManipulator(n) {}
 #endif
 
-permute::permute(int outputSize, ...) { 
+shPermute::shPermute(int outputSize, ...) { 
   va_list ap;
   va_start(ap, outputSize);
-  std::cout << "permute" << std::endl; 
   for(int i = 0; i < outputSize; ++i) {
     int index = va_arg(ap, int);
-    std::cout << index << std::endl;
     append(index);
   }
   va_end(ap);
 }
 
-permute::permute(std::vector<int> indices) {
+shPermute::shPermute(std::vector<int> indices) {
   for(std::vector<int>::iterator it = indices.begin();
       it != indices.end(); ++it) {
     append(*it);
   }
 }
 
-permute permute::operator*(const permute &p) const {
+shPermute shPermute::operator*(const shPermute &p) const {
   std::vector<int> resultIndices;
   for(IndexRangeVector::const_iterator it = p.m_ranges.begin();
       it != p.m_ranges.end(); ++it) {
@@ -128,40 +125,36 @@ permute permute::operator*(const permute &p) const {
 
     resultIndices.push_back(m_ranges[index].first); 
   }
-  return permute(resultIndices);
+  return shPermute(resultIndices);
 }
 
-range::range(int i) {
-  std::cout << "rangei " << i << std::endl;
+shRange::shRange(int i) {
   append(i);
 }
 
-range::range(int start, int end) {
-  std::cout << "rangese " << start << " " << end << std::endl;
+shRange::shRange(int start, int end) {
   append(start, end);
 }
 
-range range::operator()(int i) {
-  std::cout << "rangei() " << i << std::endl;
-  range result(*this);
+shRange shRange::operator()(int i) {
+  shRange result(*this);
   result.append(i);
   return result;
 }
 
-range range::operator()(int start, int end) {
-  std::cout << "rangese() " << start << " " << end << std::endl;
-  range result(*this); 
+shRange shRange::operator()(int start, int end) {
+  shRange result(*this); 
   result.append(start, end);
   return result;
 }
 
-extract::extract(int k) {
+shExtract::shExtract(int k) {
   append(k);
   append(0, k - 1);
   append(k + 1, -1);
 }
 
-drop::drop(int k) {
+shDrop::shDrop(int k) {
   if(k >= 0) {
     append(k, -1); 
   } else {
