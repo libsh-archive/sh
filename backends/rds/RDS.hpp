@@ -49,7 +49,7 @@ public:
 
 	void print_partitions(char* filename);
 	void print_partition();
-
+	void print_partition_stmt();
 private:
   typedef std::set<DAGNode::DAGNode*> ChildrenSet;
   typedef std::vector<DAGNode::DAGNode*> PassVector;	
@@ -89,7 +89,7 @@ private:
 	// for creating list of passes
 	void partition(DAGNode::DAGNode *v);
 
-  // from rds paper
+	// from rds paper
 	void rds_subdivide(DAGNode::DAGNode* v);
 	void rds_merge(DAGNode::DAGNode* v);
 	void rds_search();
@@ -100,11 +100,12 @@ private:
 	DAGNode::DAGNode *merge(PassVector passes);
 	int cost(DAGNode::DAGNode* v);
 
+	DAGNode::DAGNode *make_merge(DAGNode::DAGNode* v, int *a, int d, 
+			DAGNode::DAGNodeVector kids, DAGNode::DAGNodeVector unmarked_kids);
 	void add_mr(DAGNode::DAGNode* v);
 	int *next_ksubset(int n, int k, int *a);
 	void unfixall(DAGNode::DAGNode *v);
 	void unmarkall(DAGNode::DAGNode *v);
-
 	
 	int countmarked(DAGNode::DAGNode *v);
 	int countnodes(DAGNode::DAGNode *v);

@@ -44,11 +44,11 @@ class SH_DLLEXPORT DAGNode {
 
 	void add_kid(DAGNode *kid);
 	void print(int indent);
+	void dump_stmts();
 	void unvisitall();
 	SH::ShBasicBlock::ShStmtList get_statements(); 
   private:
-
-
+	void print_stmts();
 	SH::ShBasicBlock::ShStmtList dag_to_stmt(SH::ShBasicBlock::ShStmtList stmts);
 };
 

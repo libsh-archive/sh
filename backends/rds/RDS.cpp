@@ -46,8 +46,17 @@ void RDS::print_partitions(char *filename) {
 void RDS::print_partition() {
 	int count = 0;
 	for(PassVector::iterator I = m_passes.begin(); I != m_passes.end(); ++I) {
-    std::cout << "Pass " << ++count << "\n";
+		std::cout << "Pass " << ++count << "\n";
 		m_pdt->printGraph(*I, 2);
+	}
+}
+
+void RDS::print_partition_stmt() {
+	SH_DEBUG_PRINT(__FUNCTION__);
+	int count = 0;
+	for(PassVector::iterator I = m_passes.begin(); I != m_passes.end(); ++I) {
+		std::cout << "Pass " << ++count << "\n";
+		(*I)->dump_stmts();
 	}
 }
 
@@ -154,6 +163,38 @@ void RDS::rds_subdivide(DAGNode::DAGNode* v) {
   rds_merge(v);
 }
 
+DAGNode::DAGNode *RDS::make_merge(DAGNode::DAGNode* v, int *a, int d, DAGNode::DAGNodeVector kids, 
+								DAGNode::DAGNodeVector unmarked_kids)
+{
+	DAGNode::DAGNode *w;
+
+	// create temporary parent node
+	if (v->predecessors.size() == 0) {
+			w = new DAGNode();
+	}
+	else if (v->successors.size() > 0) {
+		w = new DAGNode(v->m_stmt);
+	}
+	else {
+		w = new DAGNode(v->m_var);
+	}
+
+	// attach children in subset
+	if (m_rdsh) {
+		for (int j = 0; j < d; j++)
+			w->successors.push_back(kids.at(a[j]));
+	}
+	else {
+		for (int j = 0; j < d; j++)
+			w->successors.push_back(kids.at(a[j]));
+
+		for (DAGNode::DAGNodeVector::iterator I = unmarked_kids.begin(); I != unmarked_kids.end(); ++I)
+			w->successors.push_back(*I);
+	}
+
+	return w;
+}
+
 void RDS::rds_merge(DAGNode::DAGNode* v) {
 #ifdef RDS_DEBUG
   SH_DEBUG_PRINT("Merge(" << m_pdt->numbering(v) << ")");
@@ -168,6 +209,7 @@ void RDS::rds_merge(DAGNode::DAGNode* v) {
 			rds_merge(*I);
 	}
 
+	// fixed-as-marked nodes not considered kids for subsets
 	if (!m_rdsh) {
 		for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end(); ++I) {
 			if (m_fixed[*I] == RDS_UNMARKED) {
@@ -198,6 +240,7 @@ void RDS::rds_merge(DAGNode::DAGNode* v) {
 		PassVector subsets;
 		int *a;
 
+		// ksubset init stuff
 		a = (int *) malloc(sizeof(int) * (k + 1));
 
 		for (int j = 0; j <= d; j++) {
@@ -208,67 +251,19 @@ void RDS::rds_merge(DAGNode::DAGNode* v) {
 		a = next_ksubset(k, d, a);
 
 		// join v with subset of successors
-		DAGNode::DAGNode *w;
+		DAGNode::DAGNode *w = make_merge(v, a, d, kids, unmarked_kids);
 
-		if (v->successors.size() > 0) {
-			w = new DAGNode(v->m_stmt);
-		}
-		else {
-			w = new DAGNode(v->m_var);
-		}
+		if (valid(w))
+			subsets.push_back(w);
 
-		if (m_rdsh) {
-			for (int j = 0; j < d; j++) {
-				w->successors.push_back(kids.at(a[j]));
-			}
-			
-			if (valid(w)) {
-				subsets.push_back(w);
-			}
-		}
-		else {
-			for (int j = 0; j < d; j++) {
-				w->successors.push_back(kids.at(a[j]));
-			}
-
-			for (DAGNode::DAGNodeVector::iterator I = unmarked_kids.begin(); I != unmarked_kids.end(); ++I) {
-				w->successors.push_back(*I);
-			}
-
-			if (valid(w)) {
-				subsets.push_back(w);
-			}
-		}
-
-		while(ksub_mtc && d!=0) {
-			if (v->successors.size() > 0)
-				w = new DAGNode(v->m_stmt);
-			else
-				w = new DAGNode(v->m_var);
-			
+		// do all the other subsets
+		while(ksub_mtc && d!=0) {			
 			a = next_ksubset(k, d, a);
-			// join v with subset of successors
-			if (m_rdsh) {
-				for (int j = 0; j < d; j++) {
-					w->successors.push_back(kids.at(a[j]));
-				}
-				
-				if (valid(w)) {
-					subsets.push_back(w);
-				}
-			}
-			else {
-				for (int j = 0; j < d; j++) {
-					w->successors.push_back(kids.at(a[j]));
-				}
 
-				for (DAGNode::DAGNodeVector::iterator I = unmarked_kids.begin(); I != unmarked_kids.end(); ++I) {
-					w->successors.push_back(*I);
-				}
+			w = make_merge(v, a, d, kids, unmarked_kids);
 
-				if (valid(w)) {
-					subsets.push_back(w);
-				}
+			if (valid(w)) {
+				subsets.push_back(w);
 			}
 		}
 

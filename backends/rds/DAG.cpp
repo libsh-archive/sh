@@ -78,6 +78,24 @@ void DAGNode::print(int indent) {
 	}
 }
 
+void DAGNode::print_stmts() {
+	for (DAGNodeVector::iterator I = successors.begin(); I != successors.end(); ++I)  {
+		if (!(*I)->m_visited && !m_cut[*I])
+			(*I)->print_stmts();
+	}
+	
+	if (!m_visited && successors.size() > 0 && predecessors.size() > 0) {
+		cout << *m_stmt << "\n";
+		m_visited = true;
+	}
+}
+
+// statement output of this node and its successors
+void DAGNode::dump_stmts() {
+	unvisitall();
+	print_stmts();
+}
+
 // adds an Sh statement to the graph
 void DAG::add_statement(Stmt *stmt) {
 	NodeMap::iterator node_it;
