@@ -1969,7 +1969,11 @@ namespace ShCc {
     prologue << "CcLookupFunc sh_cc_backend_lookupi;" << std::endl;
     prologue << std::endl;
     prologue << "extern \"C\"";
+#ifdef WIN32
     prologue << "void __declspec(dllexport) cc_init(CcLookupFunc lookup, CcLookupFunc lookupi)" << std::endl;
+#else
+    prologue << "void cc_init(CcLookupFunc lookup, CcLookupFunc lookupi)" << std::endl;
+#endif /* WIN32 */
     prologue << "  {" << std::endl;
     prologue << "  sh_cc_backend_lookup = lookup;" << std::endl;
     prologue << "  sh_cc_backend_lookupi = lookupi;" << std::endl;
@@ -2126,6 +2130,14 @@ namespace ShCc {
 	}
       else
 	{
+	m_init_func = (CcInitFunc)dlsym(m_handle, "cc_init");
+
+	if (m_init_func == NULL)
+	  {
+	  SH_CC_DEBUG_PRINT("dlsym failed: " << dlerror());
+	  return false;
+	  }
+
 	m_shader_func = (CcShaderFunc)dlsym(m_handle, "cc_shader");
 
 	if (m_shader_func == NULL)
@@ -2133,6 +2145,8 @@ namespace ShCc {
 	  SH_CC_DEBUG_PRINT("dlsym failed: " << dlerror());
 	  return false;
 	  }
+
+	m_init_func(sh_cc_backend_lookup, sh_cc_backend_lookupi);
 	}
 
       return true;
