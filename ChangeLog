@@ -1,3 +1,7 @@
+2004-10-25  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* examples/particle/main.cpp: Use nicer colours.
+
 2004-10-24  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
 
 	* win32/*: Added Visual Studio .NET solution/project files.

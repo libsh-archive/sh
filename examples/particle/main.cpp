@@ -15,7 +15,7 @@
 using namespace SH;
 
 // defines
-#define NUM_PARTICLES 500
+#define NUM_PARTICLES 4096
 
 // forward declarations
 void init_shaders(void);
@@ -40,6 +40,8 @@ ShChannel<ShVector3f> velB;
 // uniforms 
 ShVector3f gravity(0.0, -9.8, 0.0);
 ShAttrib1f delta(0.02);
+ShAttrib1f simtime(0.0);
+ShConstAttrib1f timedelta(0.005);
 
 // programs
 ShProgram particle;
@@ -57,7 +59,6 @@ ShMatrix4x4f mv;
 ShMatrix4x4f mvd;
 
 // shader uniforms
-ShColor3f point_color = ShColor3f(1.0, 0.0, 0.0);
 ShColor3f diffuse_color = ShColor3f(0.5, 0.7, 0.9);
 
 // programs
@@ -420,6 +421,9 @@ void init_streams(void)
 
 void reset_streams(void)
   {
+  // Set our time counter to zero
+  simtime = 0.0;
+    
   // Use the ShChannels objects to find the associated ShHostStorage and
   // then fetch the raw data and cast to a float pointer.
   ShHostStoragePtr posA_storage = shref_dynamic_cast<ShHostStorage>(posA.memory()->findStorage("host"));
@@ -494,10 +498,15 @@ void init_shaders(void)
   // the transformed normal and generated light vector are simply
   // ignored.
   particle_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShInputPosition4f pos;
     ShOutputColor3f color;
 
-    color = point_color;
+    color = cond(simtime < 0.5,
+                 lerp(simtime * 2.0,
+                      ShConstColor3f(1.0, 0.0, 0.0),   // red
+                      ShConstColor3f(1.0, 1.0, 0.0)),  // yellow
+                 lerp(min((simtime - 0.5) * 2.0, 1.0),
+                      ShConstColor3f(0.0, 0.0, 1.0),   // blue
+                      ShConstColor3f(1.0, 0.0, 0.0))); // red
   } SH_END;
 
   // This fragment shader will be used to shade the other pieces
@@ -534,6 +543,7 @@ void update_streams(void)
       posA & velA = particle_updateB;
       }
     dir = !dir;
+    simtime += timedelta;
     }
   catch (const ShException& e)
     {
