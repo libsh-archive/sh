@@ -147,7 +147,7 @@ ShProgram operator<<(const ShProgram &p, const ShManipulator<T> &m) {
         std::ostringstream os;
         os << "Invalid ShManipulator Range " << irvIt->toString() 
           << " for an ShProgram with output size " << size;
-        ShError(ShAlgebraException(os.str())); 
+        shError(ShAlgebraException(os.str())); 
       }
 
       for(i = start; i <= end; ++i) {
@@ -155,7 +155,7 @@ ShProgram operator<<(const ShProgram &p, const ShManipulator<T> &m) {
           std::ostringstream os;
           os << "Duplicate index " << i << " in range " << irvIt->toString() 
             << " not allowed for input manipulators"; 
-          ShError(ShAlgebraException(os.str()));
+          shError(ShAlgebraException(os.str()));
         }
         used[i] = true;
 
@@ -201,7 +201,7 @@ ShProgram operator<<(const ShManipulator<T> &m, const ShProgram &p) {
         std::ostringstream os;
         os << "Invalid ShManipulator Range " << irvIt->toString() << 
           " for an ShProgram with output size " << size;
-        ShError(ShAlgebraException(os.str())); 
+        shError(ShAlgebraException(os.str())); 
       }
 
       for(int i = start; i <= end; ++i) { // handles end < start case

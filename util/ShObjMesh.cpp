@@ -161,7 +161,7 @@ std::istream& ShObjMesh::readObj(std::istream &in) {
       if( vi == -1 || vi >= (int)vertexVec.size() ) {
         std::ostringstream os;
         os << "Invalid vertex index " << vi << " in OBJ file.";
-        ShError( ShException(os.str()));
+        shError( ShException(os.str()));
       }
       vl.push_back(vertexVec[vi]);
     }
@@ -177,7 +177,7 @@ std::istream& ShObjMesh::readObj(std::istream &in) {
         if( tci >= (int)tcVec.size() ) {
           std::ostringstream os;
           os << "Invalid texcoord index " << tci << " in OBJ file.";
-          ShError( ShException(os.str()));
+          shError( ShException(os.str()));
         }
         edge->texcoord = tcVec[tci]; 
       } else edge->texcoord *= 0.0f;
@@ -186,7 +186,7 @@ std::istream& ShObjMesh::readObj(std::istream &in) {
         if( ni >= (int)normVec.size() ) {
           std::ostringstream os;
           os << "Invalid normal index " << ni << " in OBJ file.";
-          ShError( ShException(os.str()));
+          shError( ShException(os.str()));
         }
         edge->normal = normVec[ni];
 

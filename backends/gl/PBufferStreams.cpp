@@ -267,7 +267,7 @@ FloatExtension PBufferStreams::setupContext(int width, int height)
     m_display = glXGetCurrentDisplay();
     if (!m_display) m_display = XOpenDisplay(0);
     if (!m_display) {
-      ShError(PBufferStreamException("Could not open X display"));
+      shError(PBufferStreamException("Could not open X display"));
       return m_info.extension;
     }
   }
@@ -311,13 +311,13 @@ FloatExtension PBufferStreams::setupContext(int width, int height)
   }
 
   if (!fb_config) {
-    ShError(PBufferStreamException("Could not get GLX FB Config!\n"
+    shError(PBufferStreamException("Could not get GLX FB Config!\n"
                                    "Your card may not support the appropriate extensions."));
     return SH_ARB_NO_FLOAT_EXT;
   }
 
   if (m_info.extension == SH_ARB_NO_FLOAT_EXT) {
-    ShError(PBufferStreamException("Could not choose a floating-point extension!\n"
+    shError(PBufferStreamException("Could not choose a floating-point extension!\n"
                                    "Your card may not support the appropriate extensions."));
     return m_info.extension;
   }
@@ -332,13 +332,13 @@ FloatExtension PBufferStreams::setupContext(int width, int height)
 
   m_info.pbuffer = glXCreatePbuffer(m_display, fb_config[0], pbuffer_attribs);
   if (!m_info.pbuffer) {
-    ShError(PBufferStreamException("Could not make pbuffer!"));
+    shError(PBufferStreamException("Could not make pbuffer!"));
     return SH_ARB_NO_FLOAT_EXT;
   }
   
   m_info.context = glXCreateNewContext(m_display, fb_config[0], GLX_RGBA_TYPE, 0, True);
   if (!m_info.context) {
-    ShError(PBufferStreamException("Could not create PBuffer context"));
+    shError(PBufferStreamException("Could not create PBuffer context"));
     XFree(fb_config);
     return SH_ARB_NO_FLOAT_EXT;
   }
@@ -356,13 +356,13 @@ void PBufferStreams::execute(const ShProgram& program,
 
   // Check program target
   if (program->target() != "gpu:stream") {
-    ShError(PBufferStreamException("This backend can only execute ``gpu:stream'' programs."));
+    shError(PBufferStreamException("This backend can only execute ``gpu:stream'' programs."));
     return;
   }
 
   // Make sure program has no inputs
   if (!program->inputs.empty()) {
-    ShError(PBufferStreamException("Stream program has unbound inputs, and can hence not be executed."));
+    shError(PBufferStreamException("Stream program has unbound inputs, and can hence not be executed."));
     return;
   }
 
@@ -428,7 +428,7 @@ void PBufferStreams::execute(const ShProgram& program,
   TIMING_RESULT(gather);
   
   if (input_map.empty()) {
-    ShError(PBufferStreamException("Stream program does not use any streams!"));
+    shError(PBufferStreamException("Stream program does not use any streams!"));
     return;
   }
 
@@ -491,7 +491,7 @@ void PBufferStreams::execute(const ShProgram& program,
   glEnable(GL_VERTEX_PROGRAM_ARB);
   gl_error = glGetError();
   if (gl_error != GL_NO_ERROR) {
-    ShError(PBufferStreamException("Could not enable GL_VERTEX_PROGRAM_ARB"));
+    shError(PBufferStreamException("Could not enable GL_VERTEX_PROGRAM_ARB"));
     //glXDestroyContext(m_display, pbuffer_ctxt);
     //XFree(fb_config);
     return;
@@ -499,7 +499,7 @@ void PBufferStreams::execute(const ShProgram& program,
   glEnable(GL_FRAGMENT_PROGRAM_ARB);
   gl_error = glGetError();
   if (gl_error != GL_NO_ERROR) {
-    ShError(PBufferStreamException("Could not enable GL_FRAGMENT_PROGRAM_ARB"));
+    shError(PBufferStreamException("Could not enable GL_FRAGMENT_PROGRAM_ARB"));
     //glXDestroyContext(m_display, pbuffer_ctxt);
     //XFree(fb_config);
     return;
@@ -580,7 +580,7 @@ void PBufferStreams::execute(const ShProgram& program,
   
   gl_error = glGetError();
   if (gl_error != GL_NO_ERROR) {
-    ShError(PBufferStreamException("Could not render"));
+    shError(PBufferStreamException("Could not render"));
     //glXDestroyContext(m_display, pbuffer_ctxt);
     //XFree(fb_config);
     return;
@@ -627,7 +627,7 @@ void PBufferStreams::execute(const ShProgram& program,
                GL_FLOAT, outhost->data());
   gl_error = glGetError();
   if (gl_error != GL_NO_ERROR) {
-    ShError(PBufferStreamException("Could not do glReadPixels()"));
+    shError(PBufferStreamException("Could not do glReadPixels()"));
     //glXDestroyContext(m_display, pbuffer_ctxt);
     //XFree(fb_config);
     return;
@@ -638,7 +638,7 @@ void PBufferStreams::execute(const ShProgram& program,
                  + (count - (count % tex_size)) * output->size());
     gl_error = glGetError();
     if (gl_error != GL_NO_ERROR) {
-      ShError(PBufferStreamException("Could not do rest of glReadPixels()"));
+      shError(PBufferStreamException("Could not do rest of glReadPixels()"));
       //glXDestroyContext(m_display, pbuffer_ctxt);
       //XFree(fb_config);
       return;

@@ -59,7 +59,7 @@ std::string ShProgramNode::name() const
 
 void ShProgramNode::compile(const ShPointer<ShBackend>& backend)
 {
-  if (m_target.empty()) ShError( ShException( "Invalid ShProgram target" ) );
+  if (m_target.empty()) shError( ShException( "Invalid ShProgram target" ) );
   compile(m_target, backend);
 }
 
@@ -85,7 +85,7 @@ ShPointer<ShBackendCode> ShProgramNode::code() {
 }
 
 ShPointer<ShBackendCode> ShProgramNode::code(const ShPointer<ShBackend>& backend) {
-  if (m_target.empty()) ShError( ShException( "Invalid ShProgram target" ) );
+  if (m_target.empty()) shError( ShException( "Invalid ShProgram target" ) );
 
   return code(m_target, backend);
 }

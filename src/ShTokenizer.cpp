@@ -55,11 +55,11 @@ bool ShTokenizer::processArg(const ShVariable& result)
 {
   
   if (!m_listStack.top()->isArgument()) {
-    ShError( ShTokenizerException("Attempt to process an argument outside of an argument context.") );
+    shError( ShTokenizerException("Attempt to process an argument outside of an argument context.") );
   }
   
   if (m_argQueueStack.empty()) {
-    ShError( ShTokenizerException("Attempt to process an argument without a context.") );
+    shError( ShTokenizerException("Attempt to process an argument without a context.") );
   }
   
   m_argQueueStack.top().push(ShTokenArgument(result, m_listStack.top()));
@@ -70,7 +70,7 @@ bool ShTokenizer::processArg(const ShVariable& result)
 ShBlockListPtr ShTokenizer::blockList()
 {
   if (m_listStack.empty()) {
-    ShError( ShTokenizerException("No current tokenized list.") );
+    shError( ShTokenizerException("No current tokenized list.") );
   }
   return m_listStack.top();
 }
@@ -78,10 +78,10 @@ ShBlockListPtr ShTokenizer::blockList()
 ShTokenArgument ShTokenizer::getArgument()
 {
   if (m_argQueueStack.empty()) {
-    ShError( ShTokenizerException("getArgument(): Argument stack underflow") );
+    shError( ShTokenizerException("getArgument(): Argument stack underflow") );
   }
   if (m_argQueueStack.top().empty()) {
-    ShError( ShTokenizerException("getArgument(): Argument is empty") );
+    shError( ShTokenizerException("getArgument(): Argument is empty") );
   }
   ShTokenArgument r = m_argQueueStack.top().front();
   m_argQueueStack.top().pop();
@@ -91,7 +91,7 @@ ShTokenArgument ShTokenizer::getArgument()
 void ShTokenizer::popArgQueue()
 {
   if (m_argQueueStack.empty()) {
-    ShError( ShTokenizerException("popArgQueue(): Argument stack underflow") );
+    shError( ShTokenizerException("popArgQueue(): Argument stack underflow") );
   }
   m_argQueueStack.pop();
 }

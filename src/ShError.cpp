@@ -30,7 +30,7 @@
 
 namespace SH {
 
-void ShError( ShException exception ) {
+void shError( ShException exception ) {
     if( ShEnvironment::useExceptions ) {
         throw exception;
     } else {

@@ -87,7 +87,7 @@ struct VariableSplitter {
     if(n <= maxTuple ) return false;
     else if(splits.count(node) > 0) return true;
     if( node->kind() == SH_TEXTURE || node->kind() == SH_STREAM ) {
-      ShError( ShTransformerException(
+      shError( ShTransformerException(
             "Long tuple support is not implemented for textures or streams"));
             
     }

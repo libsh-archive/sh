@@ -193,7 +193,7 @@ ShMesh<M>::addFace(const ShMesh<M>::VertexList &vl) {
   verts.insert(vl.begin(), vl.end());  
 
   if( vl.size() < 1 ) {
-    SH::ShError(SH::ShException("ShMesh::addFace can only handle faces with >= 1 vertices")); 
+    SH::shError(SH::ShException("ShMesh::addFace can only handle faces with >= 1 vertices")); 
   }
   Face *newf = new Face();
   faces.insert(newf);

@@ -90,7 +90,7 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
       err << "to inputs: " << b->inputs << std::endl;
       ShEnvironment::insideShader = false;
       ShEnvironment::shader = 0;
-      ShError(ShAlgebraException(err.str()));
+      shError(ShAlgebraException(err.str()));
       return 0;
     }
     ShVariableNodePtr n = new ShVariableNode(SH_TEMP, (*I)->size());
@@ -351,7 +351,7 @@ ShProgram operator>>(const ShProgram &p, const ShVariable &var) {
 ShProgram replaceUniform(const ShProgram& a, const ShVariable& v)
 {
   if(!v.uniform()) {
-    ShError(ShAlgebraException("Cannot replace non-uniform variable"));
+    shError(ShAlgebraException("Cannot replace non-uniform variable"));
   }
 
   ShProgram program = cloneProgram(a); 

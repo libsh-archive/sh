@@ -1,5 +1,8 @@
 2004-05-21  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShError.hpp: Rename ShError to shError. Fix this in all
+	invocations. Resolves issue9.
+
 	* src/ShInit.cpp: Remove.
 
 	* src/ShSyntax.cpp (shInit): Moved definition here from ShInit.cpp.

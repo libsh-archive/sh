@@ -55,7 +55,7 @@ ShProgram ShKeepNode::applyToInputs(ShManipVarIterator &finger, ShManipVarIterat
   ShProgram result = SH_BEGIN_PROGRAM() {
     for(int i = 0; i < m_numChannels; ++i, ++finger) {
       if(finger == end) {
-        ShError(ShAlgebraException("Not enough ShProgram channels for shKeep manipulator"));
+        shError(ShAlgebraException("Not enough ShProgram channels for shKeep manipulator"));
       }
       ShVariable inout = makeVariable((*finger), SH_INOUT);
     }
@@ -81,7 +81,7 @@ ShProgram ShLoseNode::applyToInputs(ShManipVarIterator &finger, ShManipVarIterat
   ShProgram result = SH_BEGIN_PROGRAM() {
     for(int i = 0; i < m_numChannels; ++i, ++finger) {
       if(finger == end) {
-        ShError(ShAlgebraException("Not enough ShProgram input channels for shLose manipulator"));
+        shError(ShAlgebraException("Not enough ShProgram input channels for shLose manipulator"));
       }
       ShVariable output = makeVariable((*finger), SH_OUTPUT);
     }
@@ -93,7 +93,7 @@ ShProgram ShLoseNode::applyToOutputs(ShManipVarIterator &finger, ShManipVarItera
   ShProgram result = SH_BEGIN_PROGRAM() {
     for(int i = 0; i < m_numChannels; ++i, ++finger) {
       if(finger == end) {
-        ShError(ShAlgebraException("Not enough ShProgram output channels for shLose manipulator"));
+        shError(ShAlgebraException("Not enough ShProgram output channels for shLose manipulator"));
       }
       ShVariable input = makeVariable((*finger), SH_INPUT);
     }
@@ -114,13 +114,13 @@ ShProgram ShDupNode::applyToInputs(ShManipVarIterator &finger, ShManipVarIterato
     ShVariable input;
     for(int i = 0; i < m_numDups; ++i, ++finger) {
       if(finger == end) {
-        ShError(ShAlgebraException("Not enough ShProgram input channels for shDup manipulator"));
+        shError(ShAlgebraException("Not enough ShProgram input channels for shDup manipulator"));
       }
       if(i == 0) {
         input = makeVariable((*finger), SH_INPUT);
       }
       if((*finger)->size() != input.size()) {
-        ShError(ShAlgebraException("Duplicating type " + input.node()->nameOfType()
+        shError(ShAlgebraException("Duplicating type " + input.node()->nameOfType()
               + " to incompatible type " + (*finger)->nameOfType()));
       }
       ShVariable output = makeVariable((*finger), SH_OUTPUT);
@@ -134,7 +134,7 @@ ShProgram ShDupNode::applyToInputs(ShManipVarIterator &finger, ShManipVarIterato
 ShProgram ShDupNode::applyToOutputs(ShManipVarIterator &finger, ShManipVarIterator end) const {
   ShProgram result = SH_BEGIN_PROGRAM() {
     if(finger == end) {
-      ShError(ShAlgebraException("Not enough ShProgram output channels for shDup manipulator"));
+      shError(ShAlgebraException("Not enough ShProgram output channels for shDup manipulator"));
     }
     ShVariable input = makeVariable((*finger), SH_INPUT);
 

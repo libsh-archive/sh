@@ -28,7 +28,7 @@
 #define SHERROR_HPP 
 #include "ShException.hpp"
 
-/** @file ShError.hh
+/** @file shError.hh
  *  Error handling functions 
  */
 
@@ -36,9 +36,8 @@ namespace SH {
 
 /** Throws the given exception when ShEnvironment::useExceptions is on. 
  * Otherwise prints error message and aborts.
- * @todo rename this to shError
  */
-void ShError( ShException exception ); 
+void shError( ShException exception ); 
 
 }
 #endif

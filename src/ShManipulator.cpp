@@ -81,7 +81,7 @@ int OffsetRange<std::string>::absIndex( std::string index, int offset,
     std::ostringstream os;
     os << "Could not find index " << index << (offset >= 0 ? "+" : "")
       << offset << " in variable channels:" << v << std::endl;
-    ShError( ShAlgebraException( os.str()));
+    shError( ShAlgebraException( os.str()));
   }
 
   result += offset;

@@ -106,7 +106,7 @@ ShBitSet& ShBitSet::operator=(const ShBitSet& other)
 
 ShBitSet& ShBitSet::operator&=(const ShBitSet& other)
 {
-  if (m_size != other.m_size) ShError( ShException( "ShBitSet operands of &= must be the same size." ) );
+  if (m_size != other.m_size) shError( ShException( "ShBitSet operands of &= must be the same size." ) );
   for (std::size_t i = 0; i < wordsize(m_size); i++)
     m_data[i] &= other.m_data[i];
   return *this;
@@ -114,7 +114,7 @@ ShBitSet& ShBitSet::operator&=(const ShBitSet& other)
 
 ShBitSet& ShBitSet::operator|=(const ShBitSet& other)
 {
-  if (m_size != other.m_size) ShError( ShException( "ShBitSet operands of |= must be the same size." ) );
+  if (m_size != other.m_size) shError( ShException( "ShBitSet operands of |= must be the same size." ) );
   for (std::size_t i = 0; i < wordsize(m_size); i++)
     m_data[i] |= other.m_data[i];
   return *this;
@@ -122,7 +122,7 @@ ShBitSet& ShBitSet::operator|=(const ShBitSet& other)
 
 ShBitSet& ShBitSet::operator^=(const ShBitSet& other)
 {
-  if (m_size != other.m_size) ShError( ShException( "ShBitSet operands of ^= must be the same size." ) );
+  if (m_size != other.m_size) shError( ShException( "ShBitSet operands of ^= must be the same size." ) );
   for (std::size_t i = 0; i < wordsize(m_size); i++)
     m_data[i] ^= other.m_data[i];
   return *this;

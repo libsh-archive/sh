@@ -178,27 +178,27 @@ void ShImage::loadPng(const std::string& filename)
 
   FILE* in = std::fopen(filename.c_str(), "rb");
 
-  if (!in) ShError( ShImageException("Unable to open " + filename) );
+  if (!in) shError( ShImageException("Unable to open " + filename) );
   
   for (int i = 0; i < 8; i++) {
-    if (!(buf[i] = fgetc(in))) ShError( ShImageException("Not a PNG file") );
+    if (!(buf[i] = fgetc(in))) shError( ShImageException("Not a PNG file") );
   }
-  if (png_sig_cmp(buf, 0, 8)) ShError( ShImageException("Not a PNG file") );
+  if (png_sig_cmp(buf, 0, 8)) shError( ShImageException("Not a PNG file") );
 
   png_structp png_ptr =
     png_create_read_struct(PNG_LIBPNG_VER_STRING,
 			   0, 0, 0); // FIXME: use error handlers
-  if (!png_ptr) ShError( ShImageException("Error initialising libpng (png_ptr)") );
+  if (!png_ptr) shError( ShImageException("Error initialising libpng (png_ptr)") );
 
   png_infop info_ptr = png_create_info_struct(png_ptr);
   if (!info_ptr) {
     png_destroy_read_struct(&png_ptr, 0, 0);
-    ShError( ShImageException("Error initialising libpng (info_ptr)") );
+    shError( ShImageException("Error initialising libpng (info_ptr)") );
   }
 
   if (setjmp(png_jmpbuf(png_ptr))) {
     png_destroy_read_struct(&png_ptr, 0, 0);
-    ShError( ShImageException("Error initialising libpng (setjmp/lngjmp)") );    
+    shError( ShImageException("Error initialising libpng (setjmp/lngjmp)") );    
   }
   
   //  png_set_read_fn(png_ptr, reinterpret_cast<void*>(&in), my_istream_read_data);
@@ -213,7 +213,7 @@ void ShImage::loadPng(const std::string& filename)
     png_destroy_read_struct(&png_ptr, 0, 0);
     std::ostringstream os;
     os << "Invalid bit elements " << bit_depth;
-    ShError( ShImageException(os.str()) );
+    shError( ShImageException(os.str()) );
   }
 
   int colour_type = png_get_color_type(png_ptr, info_ptr);
@@ -231,7 +231,7 @@ void ShImage::loadPng(const std::string& filename)
       && colour_type != PNG_COLOR_TYPE_GRAY
       && colour_type != PNG_COLOR_TYPE_RGBA) {
     png_destroy_read_struct(&png_ptr, 0, 0);
-    ShError( ShImageException("Invalid colour type") );
+    shError( ShImageException("Invalid colour type") );
   }
 
   m_memory = 0;
