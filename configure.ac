@@ -87,5 +87,6 @@ AC_CONFIG_FILES([Makefile
 		 backends/ati/Makefile
 		 util/Makefile
 		 shla/Makefile
+		 shga/Makefile
 		 doc/Makefile])
 AC_OUTPUT
