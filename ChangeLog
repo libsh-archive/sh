@@ -1,3 +1,7 @@
+2004-02-20  Bryan Chan <b8chan@uwaterloo.ca>
+	* util/ShWorley:
+	Added point generator class functionality (now it animates!)
+	
 2004-02-19  Bryan Chan <b8chan@uwaterloo.ca>
 	* util/ShUtil.hpp, util/ShUtilImpl.hpp 
 	(evenOddSort, groupEvenOddSort):

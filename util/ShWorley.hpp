@@ -34,7 +34,6 @@
 namespace ShUtil {
 
 using namespace SH;
-
 /** \file ShWorley.hpp
  * This is an implementation of 2D ShWorley texture.
  */
@@ -46,6 +45,25 @@ enum ShWorleyMetric {
   L2, ///< Euclidean metric
   L2_SQ,  ///< Euclidean metric squared
   LINF, ///< Maximum absolute difference
+};
+
+// Point Generator 
+
+template<typename T>
+class ShWorleyDefaultPointGen {
+  public:
+    ShWorleyDefaultPointGen() {}
+    ShVariableN<2, T> operator()(const ShVariableN<2, T> &p, bool useTexture) const; 
+};
+
+template<typename T>
+class ShWorleyLerpingPointGen {
+  public:
+    ShWorleyLerpingPointGen(const ShVariableN<1, T> &time);
+    ShVariableN<2, T> operator()(const ShVariableN<2, T> &p, bool useTexture) const; 
+
+  private:
+    const ShVariableN<1, T> &m_time;
 };
 
 /** \brief Worley texture generator.
@@ -65,16 +83,26 @@ enum ShWorleyMetric {
  * however, the probability of this happening with uniformly distributed
  * points is small.  With higher values of N, the probability of 
  * discontinuity increases.
+ * @{
  */
+template<int N, typename T, typename PointGen> 
+ShVariableN<3, T> worley(const ShVariableN<2, T> &p, 
+    const ShVariableN<N, T> &c, ShWorleyMetric m, bool useTexture, 
+    const PointGen &generator); 
+
 template<int N, typename T>
 ShVariableN<3, T> worley(const ShVariableN<2, T> &p, 
-    const ShVariableN<N, T> &c, ShWorleyMetric m = L2_SQ,
-    bool useTexture = true); 
+    const ShVariableN<N, T> &c, ShWorleyMetric m = L2_SQ, bool useTexture = true); 
+
+template<int N, typename T, typename PointGen> 
+ShVariableN<1, T> worleyNoGradient(const ShVariableN<2, T> &p, 
+    const ShVariableN<N, T> &c, ShWorleyMetric m, bool useTexture,
+    const PointGen &generator); 
 
 template<int N, typename T>
 ShVariableN<1, T> worleyNoGradient(const ShVariableN<2, T> &p, 
-    const ShVariableN<N, T> &c, ShWorleyMetric m = L2_SQ,
-    bool useTexture = true); 
+    const ShVariableN<N, T> &c, ShWorleyMetric m = L2_SQ, bool useTexture = true);
+//@}
     
 /** Makes a shader that takes 
  *  IN(0) ShAttrib<N,T> coefficients; // worley coefficients
@@ -82,10 +110,15 @@ ShVariableN<1, T> worleyNoGradient(const ShVariableN<2, T> &p,
  *
  *  OUT(0) ShAttrib<1,T> scalar 
  *  OUT(1) ShAttrib<2,T> gradient;
+ * @{
  */
+template<int N, typename T, typename PointGen> 
+ShProgram worleyProgram(ShWorleyMetric m, bool useTexture,
+    const PointGen &generator); 
 
 template<int N, typename T>
 ShProgram worleyProgram(ShWorleyMetric m = L2_SQ, bool useTexture = true);
+//@}
 
 
 } // namespace ShUtil
