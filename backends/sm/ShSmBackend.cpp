@@ -459,6 +459,9 @@ void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
         m_instructions.push_back(SmInstruction(OP_TEX, stmt.dest, stmt.src[1], stmt.src[0]));
         break;
       }
+    case SH_OP_XPD:
+      m_instructions.push_back(SmInstruction(OP_XPD, stmt.dest, stmt.src[0], stmt.src[1]));
+      break;
     case SH_OP_COND:
       if (stmt.src[0].size() == 1 && stmt.src[1].size() != 1) {
         int* swizzle = new int[stmt.src[1].size()];

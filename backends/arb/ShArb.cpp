@@ -985,6 +985,9 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
     case SH_OP_TEX:
       m_instructions.push_back(ArbInst(SH_ARB_TEX, stmt.dest, stmt.src[1], stmt.src[0]));
       break;
+    case SH_OP_XPD:
+      m_instructions.push_back(ArbInst(SH_ARB_XPD, stmt.dest, stmt.src[0], stmt.src[1]));
+      break;
     case SH_OP_COND:
       if (stmt.src[0].size() == 1 && stmt.src[1].size() != 1) {
         int* swizzle = new int[stmt.src[1].size()];
