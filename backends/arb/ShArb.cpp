@@ -578,7 +578,7 @@ void ArbCode::loadTexture(ShTextureNodePtr texture)
     glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   }
-  if (0) {
+  if (1) {
     glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   } else {
