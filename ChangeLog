@@ -1,3 +1,7 @@
+2004-02-10  Jack Wang  <jmwang@uwaterloo.ca>
+	* backends/arb/ShArb.cpp:
+	Implemented cosine and sine on the vertex shaders.
+
 2004-02-04  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShAttribImpl.hpp, src/ShConstantImpl.hpp, src/ShSpecialType:

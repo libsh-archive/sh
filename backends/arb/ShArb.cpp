@@ -539,8 +539,66 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       break;
     case SH_OP_COS:
       if( m_target == "gpu:vertex" ) 
-        SH_DEBUG_ERROR("cosine is not implemented for ARB vertex program ");
-      m_instructions.push_back(ArbInst(SH_ARB_COS, stmt.dest, stmt.src[0]));
+      {
+        ShVariableNode::ValueType c0_values[] = 
+        { 0.0, 0.5, 1.0, 0.0 };
+        ShVariable c0(new ShVariableNode(SH_VAR_CONST, 4));
+        c0.setValues(c0_values);
+        ShVariableNode::ValueType c1_values[] = 
+        { 0.25, -9.0, 0.75, 1.0/(2.0*M_PI) };
+        ShVariable c1(new ShVariableNode(SH_VAR_CONST, 4));
+        c1.setValues(c1_values);
+        ShVariableNode::ValueType c2_values[] = 
+        { 24.9808039603, -24.9808039603, -60.1458091736, 60.1458091736 };
+        ShVariable c2(new ShVariableNode(SH_VAR_CONST, 4));
+        c2.setValues(c2_values);
+        ShVariableNode::ValueType c3_values[] = 
+        { 85.4537887573, -85.4537887573, -64.9393539429, 64.9393539429 };
+        ShVariable c3(new ShVariableNode(SH_VAR_CONST, 4));
+        c3.setValues(c3_values);
+        ShVariableNode::ValueType c4_values[] = 
+        { 19.7392082214, -19.7392082214, -1.0, 1.0 };
+        ShVariable c4(new ShVariableNode(SH_VAR_CONST, 4));
+        c4.setValues(c4_values);
+        m_shader->constants.push_back(c0.node());
+        m_shader->constants.push_back(c1.node());
+        m_shader->constants.push_back(c2.node());
+        m_shader->constants.push_back(c3.node());
+        m_shader->constants.push_back(c4.node());
+        ShVariable r0(new ShVariableNode(SH_VAR_TEMP, 4));
+        ShVariable r1(new ShVariableNode(SH_VAR_TEMP, 4));
+        ShVariable r2(new ShVariableNode(SH_VAR_TEMP, 4));
+        ShVariable rs(new ShVariableNode(SH_VAR_TEMP, 4));
+        m_instructions.push_back(ArbInst(SH_ARB_MOV, rs, stmt.src[0]));
+        m_instructions.push_back(ArbInst(SH_ARB_MUL, rs, c1(3), rs));
+        m_instructions.push_back(ArbInst(SH_ARB_FRC, rs, rs));
+        for (int i = 0; i < stmt.src[0].size(); i++)
+        {
+          m_instructions.push_back(ArbInst(SH_ARB_SLT, r2(0), rs(i), c1(0)));
+          m_instructions.push_back(ArbInst(SH_ARB_SGE, r2(1,2), rs(i), c1(0)));
+          m_instructions.push_back(
+              ArbInst(SH_ARB_DP3, r2(1), r2(0), c4(2,3,2,3)));
+          m_instructions.push_back(
+              ArbInst(SH_ARB_ADD, r0(0,1,2), -rs(i), c0(0)));
+          m_instructions.push_back(ArbInst(SH_ARB_MUL, r0, r0(0), r0(0)));
+          m_instructions.push_back(
+              ArbInst(SH_ARB_MAD, r1, c2(0,1,0,1), r0(0), c2(2,3,2,3)));
+          m_instructions.push_back(
+              ArbInst(SH_ARB_MAD, r1, r1(0), r0(0), c3(0,1,0,1)));
+          m_instructions.push_back(
+              ArbInst(SH_ARB_MAD, r1, r1(0), r0(0), c3(2,3,2,3)));
+          m_instructions.push_back(
+              ArbInst(SH_ARB_MAD, r1, r1(0), r0(0), c4(0,1,0,1)));
+          m_instructions.push_back(
+              ArbInst(SH_ARB_MAD, r1, r1(0), r0(0), c4(2,3,2,3)));
+          m_instructions.push_back(ArbInst(SH_ARB_DP3, r0(0), r1(0), -r2(0)));
+          m_instructions.push_back(ArbInst(SH_ARB_MOV, stmt.dest(i), r0(0)));
+        }
+      }
+      else 
+      {
+        m_instructions.push_back(ArbInst(SH_ARB_COS, stmt.dest, stmt.src[0]));
+      }
       break;
     case SH_OP_DOT:
       {
@@ -667,10 +725,67 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       }
       break;
     case SH_OP_SIN:
-      // TODO fix this
       if( m_target == "gpu:vertex" ) 
-        SH_DEBUG_ERROR("sin is not implemented for ARB vertex program ");
-      m_instructions.push_back(ArbInst(SH_ARB_SIN, stmt.dest, stmt.src[0]));
+      {
+        ShVariableNode::ValueType c0_values[] = 
+        { 0.0, 0.5, 1.0, 0.0 };
+        ShVariable c0(new ShVariableNode(SH_VAR_CONST, 4));
+        c0.setValues(c0_values);
+        ShVariableNode::ValueType c1_values[] = 
+        { 0.25, -9.0, 0.75, 1.0/(2.0*M_PI) };
+        ShVariable c1(new ShVariableNode(SH_VAR_CONST, 4));
+        c1.setValues(c1_values);
+        ShVariableNode::ValueType c2_values[] = 
+        { 24.9808039603, -24.9808039603, -60.1458091736, 60.1458091736 };
+        ShVariable c2(new ShVariableNode(SH_VAR_CONST, 4));
+        c2.setValues(c2_values);
+        ShVariableNode::ValueType c3_values[] = 
+        { 85.4537887573, -85.4537887573, -64.9393539429, 64.9393539429 };
+        ShVariable c3(new ShVariableNode(SH_VAR_CONST, 4));
+        c3.setValues(c3_values);
+        ShVariableNode::ValueType c4_values[] = 
+        { 19.7392082214, -19.7392082214, -1.0, 1.0 };
+        ShVariable c4(new ShVariableNode(SH_VAR_CONST, 4));
+        c4.setValues(c4_values);
+        m_shader->constants.push_back(c0.node());
+        m_shader->constants.push_back(c1.node());
+        m_shader->constants.push_back(c2.node());
+        m_shader->constants.push_back(c3.node());
+        m_shader->constants.push_back(c4.node());
+        ShVariable r0(new ShVariableNode(SH_VAR_TEMP, 4));
+        ShVariable r1(new ShVariableNode(SH_VAR_TEMP, 4));
+        ShVariable r2(new ShVariableNode(SH_VAR_TEMP, 4));
+        ShVariable rs(new ShVariableNode(SH_VAR_TEMP, 4));
+        m_instructions.push_back(ArbInst(SH_ARB_MOV, rs, stmt.src[0]));
+        m_instructions.push_back(ArbInst(SH_ARB_MAD, rs, c1(3), rs, -c1(0)));
+        m_instructions.push_back(ArbInst(SH_ARB_FRC, rs, rs));
+        for (int i = 0; i < stmt.src[0].size(); i++)
+        {
+          m_instructions.push_back(ArbInst(SH_ARB_SLT, r2(0), rs(i), c1(0)));
+          m_instructions.push_back(ArbInst(SH_ARB_SGE, r2(1,2), rs(i), c1(0)));
+          m_instructions.push_back(
+              ArbInst(SH_ARB_DP3, r2(1), r2(0), c4(2,3,2,3)));
+          m_instructions.push_back(
+              ArbInst(SH_ARB_ADD, r0(0,1,2), -rs(i), c0(0)));
+          m_instructions.push_back(ArbInst(SH_ARB_MUL, r0, r0(0), r0(0)));
+          m_instructions.push_back(
+              ArbInst(SH_ARB_MAD, r1, c2(0,1,0,1), r0(0), c2(2,3,2,3)));
+          m_instructions.push_back(
+              ArbInst(SH_ARB_MAD, r1, r1(0), r0(0), c3(0,1,0,1)));
+          m_instructions.push_back(
+              ArbInst(SH_ARB_MAD, r1, r1(0), r0(0), c3(2,3,2,3)));
+          m_instructions.push_back(
+              ArbInst(SH_ARB_MAD, r1, r1(0), r0(0), c4(0,1,0,1)));
+          m_instructions.push_back(
+              ArbInst(SH_ARB_MAD, r1, r1(0), r0(0), c4(2,3,2,3)));
+          m_instructions.push_back(ArbInst(SH_ARB_DP3, r0(0), r1(0), -r2(0)));
+          m_instructions.push_back(ArbInst(SH_ARB_MOV, stmt.dest(i), r0(0)));
+        }
+      }
+      else 
+      {
+        m_instructions.push_back(ArbInst(SH_ARB_SIN, stmt.dest, stmt.src[0]));
+      }
       break;
     case SH_OP_SEQ:
       {
