@@ -34,7 +34,6 @@ namespace SH {
 
 template<typename T>
 ShStream::ShStream(const ShChannel<T>& channel, int _stride, int _offset)
-  : m_stride( _stride ), m_offset( _offset )
 {
   m_nodes.push_back(channel.node());
 }

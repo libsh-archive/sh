@@ -49,16 +49,20 @@ ShProgram connect(const ShChannelNodePtr& node, const ShProgram& program)
 }
 
 ShStream::ShStream(const ShChannelNodePtr& channel, int stride, int offset )
-    : m_stride( stride ), m_offset( offset )
 {
   append(channel);
 }
 
 ShStream::ShStream(const ShStream &other, int _stride, int _offset)
-  : m_stride( _stride ), m_offset( _offset )
 {
   using namespace std;
-  copy( other.begin(), other.end(), back_inserter(m_nodes) );
+  // replace channels with new channels pointing at the same place in memory
+  for( NodeList::const_iterator i= other.begin(); i!= other.end();  ++i ) {
+    ShPointer< ShChannelNode >  ptr(new ShChannelNode( (*i)->specialType(), (*i)->size(),
+						       (*i)->valueType(), _stride, _offset ));
+    ptr->memory( (*i)->memory(), (*i)->count() );
+    m_nodes.push_back( ptr );
+  }
 }
 
 ShStream::NodeList::const_iterator ShStream::begin() const
@@ -84,17 +88,6 @@ ShStream::NodeList::iterator ShStream::end()
 int ShStream::size() const
 {
   return m_nodes.size();
-}
-
-int ShStream::stride() const
-{
-  return m_stride;
-}
-
-
-int ShStream::offset() const
-{
-  return m_offset;
 }
 
 void ShStream::append(const ShChannelNodePtr& node)

@@ -36,9 +36,9 @@ namespace SH {
 class
 SH_DLLEXPORT ShChannelNode : public ShVariableNode {
 public:
-  ShChannelNode(ShSemanticType specType, int elements, ShValueType valueType);
+  ShChannelNode(ShSemanticType specType, int elements, ShValueType valueType, int stride = 1, int offset = 0);
   ShChannelNode(ShSemanticType specType, int elements, ShValueType valueType,
-                const ShMemoryPtr& memory, int count);
+                const ShMemoryPtr& memory, int count, int stride = 1, int offset = 0);
   virtual ~ShChannelNode();
 
   void memory(const ShMemoryPtr& memory, int count);
@@ -46,10 +46,14 @@ public:
   ShMemoryPtr memory();
   
   int count() const;
+  int &stride();
+  int &offset();
   
 private:
   ShMemoryPtr m_memory;
   int m_count;
+  int m_stride; // Tuple lengths between tuples in this stream
+  int m_offset; // Tuple lengths from the beginning where this stream starts
 
   // NOT IMPLEMENTED
   ShChannelNode(const ShChannelNode& other);

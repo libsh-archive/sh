@@ -35,6 +35,8 @@
 
 #include <iostream>
 #include <fstream>
+#include <string>
+#include <ios>
 
 #include "Cc.hpp" 
 #include "ShDebug.hpp" 
@@ -43,6 +45,9 @@
 #include "ShVariantFactory.hpp"
 #include "ShTypeInfo.hpp"
 #include "ShOptimizations.hpp"
+
+#include <algorithm>
+#include <cassert>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -583,9 +588,13 @@ namespace ShCc {
     std::vector<int> output_types(num_outputs);
     std::vector<int> stream_sizes(num_streams); // sizes of each stream element in bytes 
     std::vector<int> stream_types(num_streams);
+    std::vector<int> stream_offsets(num_streams);
+    std::vector<int> stream_strides(num_streams);
+    std::vector<int> stream_index(num_streams); // current index of each channel
+
     
     int sidx = 0;
-    
+
     SH_CC_DEBUG_PRINT("Assigning input channels to arrays");
     for(ShProgramNode::ChannelList::const_iterator I = m_program->channels_begin()
         ;I != m_program->channels_end(); ++I, ++sidx) {
@@ -595,6 +604,8 @@ namespace ShCc {
       int datasize = shTypeInfo(channel->valueType(), SH_MEM)->datasize();
       stream_sizes[sidx] = datasize * channel->size();
       stream_types[sidx] = channel->valueType();
+      stream_offsets[sidx] = channel->offset();
+      stream_strides[sidx] = channel->stride();
 
       if (!storage) {
         storage = new ShHostStorage(channel->memory().object(),
@@ -646,14 +657,22 @@ namespace ShCc {
       if (count == 0) {
         count = channel->count();
       } else if (count != channel->count()) {
+	// wrap, clamp or something... look at storage_traits
+	// At the very least, don't make it silently fail.
         SH_CC_DEBUG_PRINT("channel count discrepancy...");
         return false;
       }
     }
 
-      
-    for(int i = 0; i < count; i++) {
+    // adjust offsets
+   for(int j = 0; j < num_streams; j++) {
+     stream_index[j] = stream_offsets[j];
+     streams[j] = reinterpret_cast<char*>(streams[j]) + stream_offsets[j] * stream_sizes[j]; 
+   }
+
+   for(int i = 0; i < count; i++) {
       SH_CC_DEBUG_PRINT("execution " << i << " of " << count);
+      int exhausted_stream = -1;
       m_shader_func(inputs, m_params, streams, textures, outputs);
 
       for(int j = 0; j < num_streams; j++) {
@@ -664,8 +683,12 @@ namespace ShCc {
            << " bytes." );
         // @todo type - not sure if void pointers inc by 1 byte,
         // so cast
-        streams[j] = reinterpret_cast<char*>(streams[j]) + stream_sizes[j]; 
+        streams[j] = reinterpret_cast<char*>(streams[j]) + stream_strides[j] * stream_sizes[j]; 
+	stream_index[j] += stream_strides[j];
+	if( stream_index[j] >= count ) exhausted_stream = j;
       }
+
+      // @todo type - should output stream pay attention to its offset and stride?... I'm thinking yes.
       for(int j = 0; j < num_outputs; j++) {
         SH_CC_DEBUG_PRINT("advancing output stream "
 		       << j
@@ -674,6 +697,12 @@ namespace ShCc {
            << " bytes." );
         outputs[j] = reinterpret_cast<char*>(outputs[j]) + output_sizes[j]; 
       }
+
+      if ( exhausted_stream != -1 ) {
+        SH_CC_DEBUG_PRINT("Input stream " << exhausted_stream << "exhausted, should wrap." );
+	break;
+      }
+
     }
 
     return true;
@@ -711,4 +740,3 @@ namespace ShCc {
   static CcBackend* backend = new CcBackend();
 
 }
-
