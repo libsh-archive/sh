@@ -19,6 +19,13 @@ make install
 
 ./configure --help will present you with possible options to configure.
 
+For a local installation, the following is useful:
+
+./configure --prefix=$HOME/install/sh
+
+which will install it under the specified directory (absolute path
+is required).
+
 DEVELOPMENT
 
 If compiling from CVS, first run:

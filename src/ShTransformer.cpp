@@ -135,7 +135,8 @@ struct StatementSplitter {
       vv.push_back(v);
       return;
     }
-    std::size_t i, j, k, n;
+    std::size_t i, j, k;
+    int n;
     const ShSwizzle &swiz = v.swizzle();
     
     // get VarNodeVec for src
