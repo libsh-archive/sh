@@ -1,7 +1,8 @@
 CXXFLAGS = -Wall -g -O0 -I../../src/
 LDFLAGS = -g -L../../src
 LDLIBS = -lsh -lGL
-TESTS = ADD MUL DIV DOT NORM XPD POW
+TESTS = ADD MUL DIV SLT SLE SGT SGE SEQ SNE ABS ACOS ASIN ATAN ATAN2 CEIL COS DOT \
+	EXP EXP2 EXP10 FLR FMOD FRAC LRP MAD MAX MIN LOG LOG2 LOG10 POW SIN SQRT NORM XPD COND
 BACKENDS = arb cpu
 
 all: $(TESTS)
@@ -13,8 +14,10 @@ clean:
 	rm -f $(TESTS:=.cpp)
 	rm -rf .libs
 
-check: $(TESTS)
-	for j in $(BACKENDS) ; do echo $$j backend ; for i in $(TESTS) ; do ./$$i $$j 2> /dev/null ; done ; done
+%.check: %
+	@for j in $(BACKENDS) ; do ./$< $$j 2> /dev/null ; done
+
+check: $(TESTS:=.check)
 
 testlist: ./regress.py
 	./regress.py > testlist
