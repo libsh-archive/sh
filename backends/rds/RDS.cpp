@@ -8,7 +8,6 @@
 #include "RDS.hpp"
 #include <iostream>
 #include <fstream>
-#include <iostream.h>
 #include "ShDebug.hpp"
 #include "ShUtility.hpp"
 
@@ -19,17 +18,23 @@ RDS::RDS(ShProgramNodePtr progPtr)
 {
 	// get partial dom tree	
 	m_pdt = new PDomTree(m_graph);
-	set_limits();
-}
-
-void RDS::set_limits() {
-	max_ops = 4;
+#ifdef RDS_FAKE_LIMITS
+	m_limits = new rds::FakeLimits();
+#else
+  m_limits = new rds::ArbLimits("vertex");
+#endif
+#ifdef SH_DEBUG
+  m_limits->dump_limits();
+#endif
 }
 
 void RDS::print_partitions(char *filename) {
   std::ofstream dump(filename);
   dump << "digraph g {" << std::endl;
     for(PassVector::iterator I = m_passes.begin(); I != m_passes.end(); ++I) {
+#ifdef SH_DEBUG
+      SH_DEBUG_PRINT( "Pass starting at " << (*I)->m_label );
+#endif
       m_pdt->graphvizDump(*I, dump);
     }
   dump << "}" << std::endl;
@@ -39,7 +44,7 @@ void RDS::print_partitions(char *filename) {
 void RDS::print_partition() {
 	int count = 0;
 	for(PassVector::iterator I = m_passes.begin(); I != m_passes.end(); ++I) {
-		cout << "Pass " << ++count << "\n";
+    std::cout << "Pass " << ++count << "\n";
 		m_pdt->printGraph(*I, 2);
 	}
 }
@@ -66,6 +71,7 @@ void RDS::rds_search() {
 		// find cost of saving subregion m
 		unmarkall(d);
 		m_fixed[m] = RDS_MARKED;
+    m_ops_used = 0;
 		rds_subdivide(p);
 		unvisitall(p);
 		int cost_s = cost(p);
@@ -73,11 +79,13 @@ void RDS::rds_search() {
 		// find cost of recomputing subregion m
 		unmarkall(d);
 		m_fixed[m] = RDS_UNMARKED;
+    m_ops_used = 0;
 		rds_subdivide(p);
 		unvisitall(p);
 		int cost_r = cost(p); 
-
-		cout << "Cost Save = " << cost_s << " Cost Recompute = " << cost_r << "\n";
+#ifdef SH_DEBUG
+    SH_DEBUG_PRINT( "Cost Save = " << cost_s << " Cost Recompute = " << cost_r );
+#endif
 		if (cost_s < cost_r) {
 			m_fixed[m] = RDS_MARKED;
 		}
@@ -132,8 +140,8 @@ void RDS::rds_subdivide(DAGNode::DAGNode* v) {
         }
     }
 
-	// apply greedy merging
-    rds_merge(v);
+  // apply greedy merging
+  rds_merge(v);
 }
 
 void RDS::rds_merge(DAGNode::DAGNode* v)
@@ -156,12 +164,12 @@ void RDS::rds_merge(DAGNode::DAGNode* v)
 				unmarked_kids.push_back(*I);
 
 				// forcefully ensure that this kid can be merged with v (apply merge with reduced limits)
-				max_ops--;
+				m_ops_used++;
 
 				if (!valid(*I))
 					rds_merge(*I);
 				
-				max_ops++;
+				m_ops_used--;
 			}
 			else if (m_fixed[*I] != RDS_MARKED)
 				kids.push_back(*I);
@@ -226,8 +234,7 @@ void RDS::rds_merge(DAGNode::DAGNode* v)
 			else
 				w = new DAGNode(v->m_var);
 			
-      //FIXME this probably isn't what you wanted to comment out
-			if (d != 0)
+			//if (d != 0) //I'm guessing you don't want this if on the next assignment
 				//cout << "Next k-subset for " << d << "\n";
 			
 			a = next_ksubset(k, d, a);
@@ -374,8 +381,12 @@ void RDS::unmarkall(DAGNode::DAGNode *v) {
 // partitions graph; roots of partitions based on marked nodes
 void RDS::partition(DAGNode::DAGNode *v)
 {    
-    if (!v) return;
+  if (!v) return;
 	if (m_visited[v]) return;
+
+#ifdef SH_DEBUG
+      SH_DEBUG_PRINT(__FUNCTION__ << " node " << v->m_label );
+#endif
 
 	m_visited[v] = true;
     
@@ -390,23 +401,26 @@ void RDS::partition(DAGNode::DAGNode *v)
 		// cut w off from v if it's marked
 		if (m_marked[w]) {
 			v->m_cut[w] = true; 
+#ifdef SH_DEBUG
+      SH_DEBUG_PRINT("Cut at " << w->m_label );
+#endif
 		}
     }
    
     // check if v is a partition root
-	if (m_marked[v]) {
-		m_passes.push_back(v);
-    }   
+  if (m_marked[v]) {
+    m_passes.push_back(v);
+  }
 }
 
 bool RDS::valid(DAGNode::DAGNode* v) {
 	unvisitall(v);
-	return countnodes(v) <= max_ops;
+	return countnodes(v) <= (m_limits->instrs() - m_ops_used);
 }
 
 bool RDS::recompute(DAGNode::DAGNode* v) {
 	unvisitall(v);
-	return countnodes(v) <= (max_ops/2); 
+	return countnodes(v) <= (m_limits->instrs() / 2); 
 }
 
 DAGNode::DAGNode* RDS::merge(PassVector passes) {

@@ -1,8 +1,9 @@
 #include <iostream>
-#include <iostream.h>
+//#include <iostream.h>
 #include "DAG.hpp"
 
 using namespace SH;
+using namespace std;
 
 DAGNode::DAGNode(ShVariable var) 
 	:	m_var(var),

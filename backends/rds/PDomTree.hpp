@@ -9,9 +9,10 @@
 
 #include <set>
 #include <map>
+#include <string>
 #include <vector>
 #include <algorithm>
-//#include "sh.hpp"			 // necessary?
+
 #include "ShDllExport.hpp"
 #include "ShRefCount.hpp"
 #include "DAG.hpp"
@@ -32,6 +33,11 @@ class SH_DLLEXPORT PDomTree {
     typedef std::vector<DAGNode::DAGNode*> PChildVector;
     typedef std::map<DAGNode::DAGNode*, PChildVector> PChildMap;
     PChildMap pchildren;
+
+  typedef std::map<std::string,bool,std::less<std::string>,
+                   std::allocator<std::pair<const std::string, bool> > > NodeList;
+  typedef std::map<std::string,NodeList,std::less<std::string>,
+                   std::allocator<std::pair<const std::string,NodeList> > > NodeGraph;
   
 	void printDoms();
 
@@ -57,12 +63,14 @@ class SH_DLLEXPORT PDomTree {
 		return m_graph->m_root;
 	}
   
-  private:
-    void dfs(DAGNode::DAGNode* v);
-    DAGNode::DAGNode* eval(DAGNode::DAGNode* v);
-    void compress(DAGNode::DAGNode* v);
-    void link(DAGNode::DAGNode* v, DAGNode::DAGNode* w);
-	void build_pdt(DAGNode::DAGNode* v);
+private:
+  void dfs(DAGNode::DAGNode* v);
+  DAGNode::DAGNode* eval(DAGNode::DAGNode* v);
+  void compress(DAGNode::DAGNode* v);
+  void link(DAGNode::DAGNode* v, DAGNode::DAGNode* w);
+  void build_pdt(DAGNode::DAGNode* v);
+
+  NodeGraph *m_connect;
   
   	/* input */
     DAG::DAG *m_graph;

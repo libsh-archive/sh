@@ -15,7 +15,7 @@ void RDSBackend::compare(SH::ShProgramNodePtr p) {
   Timer t;
 	rds.rds();
   std::cout << "Elapsed time: " << t.diff() << std::endl;
-	rds.print_partitions("rds-final.graph");
+  rds.get_pdt()->graphvizDump("rds-final.graph");
 
   RDS rdsh(p->clone());
   rdsh.get_pdt()->graphvizDump("rdsh-initial.graph");
@@ -23,7 +23,7 @@ void RDSBackend::compare(SH::ShProgramNodePtr p) {
   t.start();
 	rdsh.rdsh();
   std::cout << "Elapsed time: " << t.diff() << std::endl;
-	rdsh.print_partitions("rdsh-final.graph");
+  rdsh.get_pdt()->graphvizDump("rdsh-final.graph");
 
 }
 

@@ -8,11 +8,12 @@
 #include "PDomTree.hpp"
 #include <iostream>
 #include <fstream>
-#include <iostream.h>
+//#include <iostream.h>
 #include "ShDebug.hpp"
 #include "ShUtility.hpp"
 
 using namespace SH;
+using namespace std;
 
 PDomTree::PDomTree(DAG::DAG* dag)
 		: m_graph(dag), 
@@ -149,7 +150,7 @@ void PDomTree::build_pdt(DAGNode::DAGNode* v)
 }
 
 void PDomTree::printDoms() {
-	for (int i = 1; i <= dom.size(); i++) {
+	for (unsigned int i = 1; i <= dom.size(); i++) {
 		DAGNode::DAGNode* v = m_vertex[i];
 
 		cout << "Node " << i << " Dom " << numbering(dom[v]) << " Succ";
@@ -196,16 +197,40 @@ void PDomTree::printGraph(DAGNode::DAGNode *node, int indent) {
 }
 
 std::ostream& PDomTree::graphvizDump(DAGNode::DAGNode *node, std::ostream& out) {
-  out << "  \"" << node->m_label << numbering(node) << "\";" << std::endl;
+  //out << "  \"" << node->m_label << numbering(node) << "\";" << std::endl;
   for (DAGNode::DAGNodeVector::iterator I = node->successors.begin(); I != node->successors.end(); ++I) {
+
+    std::string succ = (*I)->m_label + (char)numbering(*I);
+    std::string curr = node->m_label + (char)numbering(node);
+
+    if ( (*m_connect)[succ][curr]) {
+      continue;
+    }
+
+    (*m_connect)[succ][curr] = true;
     graphvizDump( *I, out );
-    out << "  \"" << node->m_label << numbering(node) << "\" -> \"" 
-        << (*I)->m_label << numbering(*I) << "\";" << std::endl;
+    out << "  \"" << (*I)->m_label << numbering(*I) << "\" -> \"" 
+        << node->m_label << numbering(node) << "\"";
+
+#ifdef SH_DEBUG
+    SH_DEBUG_PRINT( "  \"" << (*I)->m_label << numbering(*I) << "\" -> \"" 
+        << node->m_label << numbering(node) << "\" cuts: " << node->m_cut[*I]);
+#endif
+
+    if ( node->m_cut[*I] ) {
+      out << " [len=2.00,style=dashed];" << std::endl;
+      out << "  \"" << (*I)->m_label << numbering(*I) << "\" [shape=box];" << std::endl;
+    }
+    else {
+      out << ";" << std::endl;
+    }
   }
   return out;
 }
 
 void PDomTree::graphvizDump(char* filename) {
+  m_connect = new NodeGraph;
+  
   std::ofstream out(filename);
   out << "digraph g {" << std::endl;
   graphvizDump(get_root(),out);

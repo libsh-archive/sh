@@ -10,13 +10,15 @@
 #include "ShCtrlGraph.hpp"
 #include "ShProgramNode.hpp"
 #include "PDomTree.hpp"
+#include "Limits.hpp"
 
 #define RDS_UNFIXED 0
 #define RDS_MARKED 1
 #define RDS_UNMARKED 2
 
+
 class SH_DLLEXPORT RDS {
-  public:
+public:
   
 	// this sets the control flow graph and runs pdomtree
 	// may accept a SH::ShCtrlGraphNodePtr instead, depending on how callbacks are implemented
@@ -48,13 +50,14 @@ class SH_DLLEXPORT RDS {
 	void print_partitions(char* filename);
 	void print_partition();
 
-  private:
-	typedef std::set<DAGNode::DAGNode*> ChildrenSet;
-    typedef std::vector<DAGNode::DAGNode*> PassVector;	
-	typedef std::vector<DAGNode::DAGNode*> NodeVector;
+private:
+  typedef std::set<DAGNode::DAGNode*> ChildrenSet;
+  typedef std::vector<DAGNode::DAGNode*> PassVector;	
+  typedef std::vector<DAGNode::DAGNode*> NodeVector;
 
 	// limits
-	int max_ops;
+  rds::Limits *m_limits;
+  int m_ops_used;
 
 	// true if rdsh; false if rds
 	bool m_rdsh;
@@ -81,9 +84,6 @@ class SH_DLLEXPORT RDS {
   BoolMap t_visited;
   BoolMap m_marked;
   
-	// for setting hardware limits
-	void set_limits();
-
 	// get list of passes after rds or rdsh
 	void set_partition();
 
@@ -115,6 +115,6 @@ class SH_DLLEXPORT RDS {
 	void set_nodelist(DAGNode::DAGNode *v);
 	NodeVector m_nodelist;
 
-  };
+};
 
 #endif

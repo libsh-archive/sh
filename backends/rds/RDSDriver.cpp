@@ -1,9 +1,10 @@
-#include <iostream.h>
+#include <iostream>
 #include "sh.hpp"
 #include "RDS.hpp"
 #include "DAG.hpp"
 
 using namespace SH;
+using namespace std;
 
 ShProgram test_program() {
 	ShProgram program;
