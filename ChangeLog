@@ -1,5 +1,11 @@
 2005-03-16  Francois Marier  <francois@serioushack.com>
 
+	* backends/gl/GlslCode.hpp, GlslEmit.cpp (allocate_constant): Add
+	this function and make use of it in operations that depend on a
+	constant (cbrt, exp and log).  Instead of using a temporary
+	variable, these operations now use a constant that's initialized
+	beforehand.
+
 	* backends/gl/GlslEmit.cpp (table_substitution): Make use of
 	glsl_typename().
 

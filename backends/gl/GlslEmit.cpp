@@ -176,12 +176,26 @@ void GlslCode::emit(const ShStatement &stmt)
   }
 }
 
+ShVariableNodePtr GlslCode::allocate_constant(const ShStatement& stmt, double constant, int size) const
+{
+  if (size <= 0) size = stmt.dest.size(); // default size is size of destination variable
+
+  const ShVariableNodePtr& dest_node = stmt.dest.node();
+  ShVariableNode* node = new ShVariableNode(SH_CONST, size, dest_node->valueType(), dest_node->specialType());
+  
+  ShDataVariant<double>* variant = new ShDataVariant<double>(size, constant);
+  node->setVariant(variant);
+
+  ShVariableNodePtr node_ptr = ShPointer<ShVariableNode>(node);
+  return node_ptr;
+}
+
 ShVariableNodePtr GlslCode::allocate_temp(const ShStatement& stmt, int size) const
 {
-  // allocate a temporary variable based on the destination variable
+  if (size <= 0) size = stmt.dest.size(); // default size is size of destination variable
+  
   const ShVariableNodePtr& dest_node = stmt.dest.node();
-  ShVariableNode* node = new ShVariableNode(SH_TEMP, (size > 0) ? size : dest_node->size(),
-					    dest_node->valueType(), dest_node->specialType());
+  ShVariableNode* node = new ShVariableNode(SH_TEMP, size, dest_node->valueType(), dest_node->specialType());
   ShVariableNodePtr node_ptr = ShPointer<ShVariableNode>(node);
   return node_ptr;
 }
@@ -208,8 +222,7 @@ void GlslCode::emit_cbrt(const ShStatement& stmt)
 {
   SH_DEBUG_ASSERT(SH_OP_CBRT == stmt.op);
 
-  ShVariable temp(allocate_temp(stmt));
-  append_line(resolve(temp) + " = " + resolve_constant(1.0 / 3.0, temp));
+  ShVariable temp(allocate_constant(stmt, 1.0 / 3.0));
   append_line(resolve(stmt.dest) + " = pow(" + resolve(stmt.src[0]) + ", " + resolve(temp) + ")");
 }
 
@@ -224,8 +237,7 @@ void GlslCode::emit_exp(const ShStatement& stmt, double power)
 {
   SH_DEBUG_ASSERT((SH_OP_EXP == stmt.op) || (SH_OP_EXP10 == stmt.op));
 
-  ShVariable temp(allocate_temp(stmt));
-  append_line(resolve(temp) + " = " + resolve_constant(power, temp));
+  ShVariable temp(allocate_constant(stmt, power));
   append_line(resolve(stmt.dest) + " = pow(" + resolve(temp) + ", " + resolve(stmt.src[0]) + ")");
 }
 
@@ -253,10 +265,9 @@ void GlslCode::emit_log(const ShStatement& stmt, double base)
 {
   SH_DEBUG_ASSERT((SH_OP_LOG == stmt.op) || (SH_OP_LOG10 == stmt.op));
 
-  const double log2_base = log(base) / log(2.0);
+  static const double log2_base = log(base) / log(2.0);
 
-  ShVariable temp(allocate_temp(stmt)); 
-  append_line(resolve(temp) + " = " + resolve_constant(log2_base, temp));
+  ShVariable temp(allocate_constant(stmt, log2_base)); 
   append_line(resolve(stmt.dest) + " = log2(" + resolve(stmt.src[0]) + ") / " + resolve(temp) + "");
 }
 
