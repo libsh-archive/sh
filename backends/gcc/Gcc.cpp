@@ -599,12 +599,12 @@ namespace ShGcc {
     m_cur_temp(0),
     m_params(NULL)
     {
-    SH_Gcc_DEBUG_PRINT(__FUNCTION__);
+    SH_GCC_DEBUG_PRINT(__FUNCTION__);
     }
 
   GccBackendCode::~GccBackendCode(void)
     {
-    SH_Gcc_DEBUG_PRINT(__FUNCTION__);
+    SH_GCC_DEBUG_PRINT(__FUNCTION__);
     }
 
   bool GccBackendCode::allocateRegister(const SH::ShVariableNodePtr& var)
