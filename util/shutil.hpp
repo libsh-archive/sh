@@ -28,8 +28,8 @@
 #define SHUTIL_HPP
 
 #include "ShUtilLib.hpp"
-#include "Worley.hpp"
-#include "Perlin.hpp"
+#include "ShWorley.hpp"
+#include "ShPerlin.hpp"
 
 /** \namespace ShUtil
  * \brief The main ShUtil namespace.

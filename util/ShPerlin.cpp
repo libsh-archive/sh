@@ -25,7 +25,7 @@
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
 #include <cstdlib>
-#include "Perlin.hpp"
+#include "ShPerlin.hpp"
 #include "ShUtilLib.hpp"
 
 namespace ShUtil {
@@ -36,7 +36,7 @@ using namespace SH;
 #define DPERM_SIZE ( ( double ) PERM_SIZE )
 #define INV_PERM_SIZE ( 1.0 / ( double )PERM_SIZE )
 
-Perlin::Perlin( double persistence, int octaves ):
+ShPerlin::ShPerlin( double persistence, int octaves ):
   persistence( persistence ), octaves( octaves ), useTexture( false ), noiseTex( PERM_SIZE * PERM_SIZE, PERM_SIZE )
 {
   int i, j, k;
@@ -60,7 +60,7 @@ Perlin::Perlin( double persistence, int octaves ):
   noiseTex.load( noiseImage ); 
 }
 
-Perlin::~Perlin()
+ShPerlin::~ShPerlin()
 {
 }
 
@@ -71,7 +71,7 @@ ShAttrib3f smootht( ShAttrib3f t )
     mad( t, mad( t, 6.0, ShConstant1f( -15.0 )( 0,0,0 ) ), ShConstant1f( 10.0 )( 0,0,0 ) ); 
 }
 
-ShAttrib1f Perlin::noise( ShAttrib3f p ) 
+ShAttrib1f ShPerlin::noise( ShAttrib3f p ) 
 {
   int i, j, k;
 
@@ -107,22 +107,22 @@ ShAttrib1f Perlin::noise( ShAttrib3f p )
   }
 
   // interpolation in x, then y, then z direction
-  ShAttrib3f t = smootht( rp ); //Perlin's improved polynomial interpolant 
+  ShAttrib3f t = smootht( rp ); //ShPerlin's improved polynomial interpolant 
   ShAttrib4f xgrad = lerp( t(0), xg[1], xg[0] ); 
   ShAttrib2f ygrad = lerp( t(1), xgrad(2,3), xgrad(0,1) );
   return lerp( t(2), ygrad(1), ygrad(0) ); 
 }
 
-void Perlin::useNoiseTexture( bool useNoiseTex ) {
+void ShPerlin::useNoiseTexture( bool useNoiseTex ) {
   useTexture = useNoiseTex;
 }
 
-void Perlin::setTurbulenceParams( double persist, int numOctaves ) {
+void ShPerlin::setTurbulenceParams( double persist, int numOctaves ) {
   persistence = persist;
   octaves = numOctaves;
 }
 
-ShAttrib1f Perlin::turbulence( ShAttrib3f p ) {
+ShAttrib1f ShPerlin::turbulence( ShAttrib3f p ) {
   ShAttrib1f result;
   double freq = 1.0;
   double amp = 1.0;
@@ -136,7 +136,7 @@ ShAttrib1f Perlin::turbulence( ShAttrib3f p ) {
   return result * ( 1.0 / total );
 }
 
-ShAttrib1f Perlin::sturbulence( ShAttrib3f p ) {
+ShAttrib1f ShPerlin::sturbulence( ShAttrib3f p ) {
   return turbulence( p ) * 2.0 - 1.0;
 }
 

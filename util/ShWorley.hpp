@@ -27,17 +27,21 @@
 #ifndef SMASHTEST_WORLEY_HPP 
 #define SMASHTEST_WORLEY_HPP
 
-#include <sh/sh.hpp>
+#include "ShAttrib.hpp"
+#include "ShColor.hpp"
+#include "ShTexture.hpp"
 
 namespace ShUtil {
 
-/** \file Worley.hpp
- * This is an implementation of 2D Worley texture.
+using namespace SH;
+
+/** \file ShWorley.hpp
+ * This is an implementation of 2D ShWorley texture.
  */
 
 /** Kinds of metrics used for finding nearest neighbours.
  */
-enum WorleyMetric {
+enum ShWorleyMetric {
   L1, ///< Sum of absolute componentwise differences
   L2, ///< Euclidean metric
   L2_SQ,  ///< Euclidean metric squared
@@ -46,20 +50,20 @@ enum WorleyMetric {
 
 /** A 2D Worley texture class.
  */
-class Worley {
+class ShWorley {
   public:
-    /** \brief Constructor for Worley.
+    /** \brief Constructor for ShWorley.
      * Creates a Worley texture with the given frequency.
      * (frequency x frequency cells are generated in the [0,1]x[0,1] square) 
      *
      * The texture should tile properly (perhaps...). 
      */  
-    Worley( int frequency, bool useTexture ); 
+    ShWorley( int frequency, bool useTexture ); 
 
-    /** \brief Destructor for Worley.
-     * Destroys a Worley.
+    /** \brief Destructor for ShWorley.
+     * Destroys a ShWorley.
      */
-    ~Worley();
+    ~ShWorley();
 
     /** \brief Toggles texture lookup for cell positions. 
      * The Worley texture function can use either a procedural hash
@@ -78,8 +82,8 @@ class Worley {
     // TODO implement gradients
     // should be real easy, but need to makes odd-even transposition sort 
     // much messier (maybe try bubble sort?)
-    SH::ShAttrib1f worley( SH::ShAttrib2f p, 
-        SH::ShAttrib4f c = SH::ShAttrib4f( 1.0, 0.0, 0.0, 0.0 ), WorleyMetric m = L2_SQ ); 
+    ShAttrib1f worley( ShAttrib2f p, 
+        ShAttrib4f c = ShAttrib4f( 1.0, 0.0, 0.0, 0.0 ), ShWorleyMetric m = L2_SQ ); 
 
   private:
     bool useTexture; ///< toggles whether to use texture lookup for points 
@@ -88,11 +92,11 @@ class Worley {
 
     /** Lookup for the point in the given cell
      */
-    SH::ShTexture2D<SH::ShColor4f> cellPosTex; 
+    ShTexture2D<ShColor4f> cellPosTex; 
 
     /** Lookup for 8 points in cells adjacent to the given cell
      */
-    SH::ShTexture2D<SH::ShColor4f>* adjTex[4]; 
+    ShTexture2D<ShColor4f>* adjTex[4]; 
 };
 
 } // namespace ShUtil

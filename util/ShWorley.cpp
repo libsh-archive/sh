@@ -25,18 +25,19 @@
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
 #include <cstdlib>
-#include "Worley.hpp"
+#include "ShWorley.hpp"
 #include "ShUtilLib.hpp"
 
-using namespace SH;
 
 namespace ShUtil {
+
+using namespace SH;
 
 static const int DX[] = { 1, 1, 0, -1, -1, -1, 0, 1 };
 static const int DY[] = { 0, 1, 1, 1, 0, -1, -1, -1 }; 
 
 
-Worley::Worley( int frequency, bool useTexture ): useTexture(useTexture), freq( frequency ),
+ShWorley::ShWorley( int frequency, bool useTexture ): useTexture(useTexture), freq( frequency ),
   dfreq( freq ), cellPosTex(frequency, frequency)
 {
   int i, j, k, l;
@@ -87,7 +88,7 @@ Worley::Worley( int frequency, bool useTexture ): useTexture(useTexture), freq( 
   }
 }
 
-Worley::~Worley()
+ShWorley::~ShWorley()
 {
   int i;
   for(i = 0; i < 4; ++i) delete adjTex[i];
@@ -95,9 +96,9 @@ Worley::~Worley()
 
 class Metric {
   private:
-    WorleyMetric m;
+    ShWorleyMetric m;
   public:
-    Metric( WorleyMetric m ): m( m ) {}
+    Metric( ShWorleyMetric m ): m( m ) {}
     ShAttrib1f operator()( ShAttrib2f a, ShAttrib2f b ) {
       switch( m ) {
         case L1: return lOneDistance( a, b );
@@ -113,7 +114,7 @@ class Metric {
 
 };
 
-ShAttrib1f Worley::worley(ShAttrib2f p, ShAttrib4f c, WorleyMetric m ) {
+ShAttrib1f ShWorley::worley(ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m ) {
   ShAttrib1f result;
   Metric dist(m);
 
@@ -184,7 +185,7 @@ ShAttrib1f Worley::worley(ShAttrib2f p, ShAttrib4f c, WorleyMetric m ) {
   return result;
 }
 
-void Worley::useNoiseTexture(bool useNoiseTex) {
+void ShWorley::useNoiseTexture(bool useNoiseTex) {
   useTexture = useNoiseTex;
 }
 

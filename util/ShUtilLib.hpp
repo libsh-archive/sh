@@ -1,4 +1,4 @@
-// SH::Sh: A GPU metaprogramming language.
+// Sh: A GPU metaprogramming language.
 //
 // Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
 // Project administrator: Michael D. McCool
@@ -27,16 +27,20 @@
 #ifndef SHUTIL_SHUTILLIB_HPP 
 #define SHUTIL_SHUTILLIB_HPP 
 
-#include <sh/sh.hpp>
-#include <sh/ShSwizzle.hpp>
 #include <cmath>
+#include "ShAttrib.hpp"
+#include "ShConstant.hpp"
+#include "ShSwizzle.hpp" 
+#include "ShVariable.hpp"
 
 namespace ShUtil {
 
+using namespace SH;
+
 //TODO extend to vector versions
 
-/** \file SH::ShUtilLib.hpp
- * \brief A set of small SH::Sh utility functions.  
+/** \file ShUtilLib.hpp
+ * \brief A set of small Sh utility functions.  
  */
 
 /** \brief Clamps value between a and b. 
@@ -47,14 +51,14 @@ namespace ShUtil {
  */
 //@{
 template<typename T>
-SH::ShVariableN<1, T> clamp(const SH::ShVariableN<1, T>& a, const SH::ShVariableN<1, T>& b,
-    const SH::ShVariableN<1, T>& x) {
+ShVariableN<1, T> clamp(const ShVariableN<1, T>& a, const ShVariableN<1, T>& b,
+    const ShVariableN<1, T>& x) {
   return min(max(x, a), b); 
 }
 
 template<typename T>
-SH::ShVariableN<1, T> clamp(double a, double b, const SH::ShVariableN<1, T>& x) {
-  return min(max(x, SH::ShConstant1f(a)), SH::ShConstant1f(b)); 
+ShVariableN<1, T> clamp(double a, double b, const ShVariableN<1, T>& x) {
+  return min(max(x, ShConstant1f(a)), ShConstant1f(b)); 
 }
 //@}
 
@@ -65,17 +69,17 @@ SH::ShVariableN<1, T> clamp(double a, double b, const SH::ShVariableN<1, T>& x) 
  * cubic interpolation between 0 and 1 otherwise
  */
 template<typename T>
-SH::ShVariableN<1, T> smoothstep(const SH::ShVariableN<1, T>& a, const SH::ShVariableN<1, T>& b,
-    const SH::ShVariableN<1, T> x) {
-  SH::ShVariableN<1, T> t = (x - a) / (b - a);
+ShVariableN<1, T> smoothstep(const ShVariableN<1, T>& a, const ShVariableN<1, T>& b,
+    const ShVariableN<1, T> x) {
+  ShVariableN<1, T> t = (x - a) / (b - a);
   t = clamp(0.0, 1.0, t); 
-  return t * t * mad(-2.0, t, SH::ShConstant1f(3.0));
+  return t * t * mad(-2.0, t, ShConstant1f(3.0));
 }
 
 /** \brief Euclidean distance between two points.
  */
 template<int N, typename T>
-SH::ShVariableN<1, T> distance(const SH::ShVariableN<N, T>& a, const SH::ShVariableN<N, T>& b) {
+ShVariableN<1, T> distance(const ShVariableN<N, T>& a, const ShVariableN<N, T>& b) {
   return sqrt(dot(a, b));
 }
 
@@ -83,9 +87,9 @@ SH::ShVariableN<1, T> distance(const SH::ShVariableN<N, T>& a, const SH::ShVaria
  * The L1 distance is a sum of the absolute component-wise differences.
  */
 template<int N, typename T>
-SH::ShVariableN<1, T> lOneDistance(const SH::ShVariableN<N, T>& a, const SH::ShVariableN<N, T>& b) {
+ShVariableN<1, T> lOneDistance(const ShVariableN<N, T>& a, const ShVariableN<N, T>& b) {
   //TODO should use dot product with vector 1
-  SH::ShVariableN<N, T> diff = abs(a - b);
+  ShVariableN<N, T> diff = abs(a - b);
   return dot(1.0, diff); 
 }
 
@@ -93,16 +97,16 @@ SH::ShVariableN<1, T> lOneDistance(const SH::ShVariableN<N, T>& a, const SH::ShV
  * Linfinity distance is the maximum absolute component-wise difference.
  */
 template<int N, typename T>
-SH::ShVariableN<1, T> lInfDistance(const SH::ShVariableN<N, T>& a, const SH::ShVariableN<N, T>& b) {
-  SH::ShVariableN<N, T> diff = abs(a - b);
-  SH::ShVariableN<1, T> result = max(diff(0), diff(1));
+ShVariableN<1, T> lInfDistance(const ShVariableN<N, T>& a, const ShVariableN<N, T>& b) {
+  ShVariableN<N, T> diff = abs(a - b);
+  ShVariableN<1, T> result = max(diff(0), diff(1));
   for(int i = 2; i < N; ++i) result = max(result, diff(i));
   return result;
 }
 
-static SH::ShAttrib4f hasha(M_PI * M_PI * M_PI * M_PI, std::exp(4.0), 
+static ShAttrib4f hasha(M_PI * M_PI * M_PI * M_PI, std::exp(4.0), 
                         std::pow(13.0, M_PI / 2.0), std::sqrt(1997.0));
-static SH::ShAttrib4f hashm(std::sqrt(2.0), 1.0 / M_PI, std::sqrt(3.0), 
+static ShAttrib4f hashm(std::sqrt(2.0), 1.0 / M_PI, std::sqrt(3.0), 
                         std::exp(-1.0));
 
 static const int LCG_REPS = 5; // total instructions for hashlcg will be LCG_REPS * 2 + 2
@@ -110,16 +114,16 @@ static const int LCG_REPS = 5; // total instructions for hashlcg will be LCG_REP
  * 
  * This does not work very well right now.  Use hashmrg instead.
  *
- * \sa  template<int N, typename T> SH::ShVariableN<N, T> hashmrg(const SH::ShVariableN<N, T>& p)
+ * \sa  template<int N, typename T> ShVariableN<N, T> hashmrg(const ShVariableN<N, T>& p)
  */
 // TODO: may not work as intended on 24-bit floats
 // since there may not be enough precision 
 template<int N, typename T>
-SH::ShVariableN<N, T> hashlcg(const SH::ShVariableN<N, T>& p) {
-  SH::ShAttrib<N, SH_VAR_TEMP, T> result = frac(p * 0.01);
+ShVariableN<N, T> hashlcg(const ShVariableN<N, T>& p) {
+  ShAttrib<N, SH_VAR_TEMP, T> result = frac(p * 0.01);
 
-  SH::ShVariableN<N, T> a(hasha.node(), SH::ShSwizzle(N), false);
-  SH::ShVariableN<N, T> m(hashm.node(), SH::ShSwizzle(N), false);
+  ShVariableN<N, T> a(hasha.node(), ShSwizzle(N), false);
+  ShVariableN<N, T> m(hashm.node(), ShSwizzle(N), false);
 
   for(int i = 0; i < LCG_REPS; ++i) {
     result = frac(mad(result, a, m)); 
@@ -139,12 +143,12 @@ static const int MRG_REPS = 2; // total instructions for hashmrg will be MRG_REP
  * This appears to reduce correlation in the output components when input components are 
  * similar, but the behaviour needs to be studied further.
  *
- * \sa template<int N, typename T> SH::ShVariableN<N, T> hashlcg(const SH::ShVariableN<N, T>& p)
+ * \sa template<int N, typename T> ShVariableN<N, T> hashlcg(const ShVariableN<N, T>& p)
  */
 template<int N, typename T>
-SH::ShVariableN<N, T> hashmrg(const SH::ShVariableN<N, T>& p) {
-  SH::ShAttrib<N, SH_VAR_TEMP, T> result = frac(p * 0.01);
-  SH::ShVariableN<N, T> a(hasha.node(), SH::ShSwizzle(N), false); // use only first N elements of hasha
+ShVariableN<N, T> hashmrg(const ShVariableN<N, T>& p) {
+  ShAttrib<N, SH_VAR_TEMP, T> result = frac(p * 0.01);
+  ShVariableN<N, T> a(hasha.node(), ShSwizzle(N), false); // use only first N elements of hasha
 
   for(int i = 0; i < MRG_REPS; ++i) {
     for(int j = 0; j < N; ++j) { 

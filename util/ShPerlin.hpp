@@ -27,41 +27,44 @@
 #ifndef SHDEMO_PERLIN_HPP 
 #define SHDEMO_PERLIN_HPP 
 
-#include <sh/sh.hpp>
+#include "ShAttrib.hpp"
+#include "ShTexture.hpp"
 
 namespace ShUtil {
 
-/** \file Perlin.hpp
+using namespace SH;
+
+/** \file ShPerlin.hpp
  * This is an implementation of Perlin noise.
  */
 
 /** \brief A Perlin noise/turbulence generator.
  */
-class Perlin
+class ShPerlin
 {
   public:
-    /** \brief Constructor for Perlin.
+    /** \brief Constructor for ShPerlin.
      * Constructs a Perlin noise generator that uses the given 
      * persistence and number of octaves for generating turbulence
      */
-    Perlin(double persistence, int octaves);
+    ShPerlin(double persistence, int octaves);
 
-    /** \brief Destructor for Perlin.
+    /** \brief Destructor for ShPerlin.
      * Destroys a Perlin noise generator.
      */
-    ~Perlin();
+    ~ShPerlin();
 
     /** \brief Generates a single octave Perlin noise.
      */
-    SH::ShAttrib1f noise(SH::ShAttrib3f p);
+    ShAttrib1f noise(ShAttrib3f p);
 
     /** \brief Turbulence functions sum several octaves of Perlin noise. 
      * The number of octaves and persistence can be controlled using 
      * setTurbulenceParams.
      * \sa void setTurbulenceParams(double persist, int numOctaves);
      */
-    SH::ShAttrib1f turbulence(SH::ShAttrib3f p);
-    SH::ShAttrib1f sturbulence(SH::ShAttrib3f p);
+    ShAttrib1f turbulence(ShAttrib3f p);
+    ShAttrib1f sturbulence(ShAttrib3f p);
 
     /** \brief Toggles texture lookup Perlin method
      * The Perlin noise function can use either a procedural hash
@@ -88,10 +91,10 @@ class Perlin
     int octaves; ///< number of octaves to use for turbulence
     bool useTexture; ///< toggles whether to use texture lookup for gradients
 
-    SH::ShTexture2D<SH::ShColor4f> noiseTex; ///< pseudorandom 3D perlin noise texture 
+    ShTexture2D<ShColor4f> noiseTex; ///< pseudorandom 3D perlin noise texture 
 
-    SH::ShAttrib4f grad4(SH::ShAttrib3f p); 
-    SH::ShAttrib1f grad(SH::ShAttrib3f p); 
+    ShAttrib4f grad4(ShAttrib3f p); 
+    ShAttrib1f grad(ShAttrib3f p); 
 
 };
 
