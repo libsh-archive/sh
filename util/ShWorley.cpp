@@ -154,12 +154,12 @@ ShAttrib3f ShWorley::worley(ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m ) {
   ShAttrib4f gradAdj[4];
   ShAttrib2f gradCell;
   dcell = dist( cellPoint, fp );
-  gradCell = fp - cellPoint;
+  gradCell = normalize(cellPoint - fp);
   for(i = 0; i < 4; ++i) {
     dadj[0](i) = dist( adjPoints[i](0,1), fp );
     dadj[1](i) = dist( adjPoints[i](2,3), fp );
-    gradAdj[i](0,1) = fp - adjPoints[i](0,1);
-    gradAdj[i](2,3) = fp - adjPoints[i](2,3);
+    gradAdj[i](0,1) = normalize(adjPoints[i](0,1) - fp);
+    gradAdj[i](2,3) = normalize(adjPoints[i](2,3) - fp);
   }
 
   // TODO find faster method to do k-selection for k = { 1, 2, 3, 4 }
@@ -190,10 +190,13 @@ ShAttrib3f ShWorley::worley(ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m ) {
   for (i=0; i<4; i++)
   {
     grads[i] = (resultVec(i)==dcell)*gradCell;
+    //grads[i] = cond((resultVec(i)==dcell), gradCell, ShAttrib2f(0,0));
     for (j=0; j<4; j++)
     {
-      grads[i] = grads[i] + (resultVec(i)==dadj[0](i))*gradAdj[j](0,1);
-      grads[i] = grads[i] + (resultVec(i)==dadj[1](i))*gradAdj[j](2,3);
+      grads[i]+= (resultVec(i)==dadj[0](j))*gradAdj[j](0,1);
+      grads[i]+= (resultVec(i)==dadj[1](j))*gradAdj[j](2,3);
+      //grads[i] = cond((resultVec(i)==dadj[0](j)), gradAdj[j](0,1), grads[i]);
+      //grads[i] = cond((resultVec(i)==dadj[1](j)), gradAdj[j](2,3), grads[i]);
     }
   }
 
