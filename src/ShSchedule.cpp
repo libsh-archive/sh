@@ -207,6 +207,8 @@ struct ScheduleBuilder {
                                                   ShVariable(I->first)));
       }
 
+      pass.program->collectVariables();
+      
       passes.push_back(pass);
       
       // We'll fill in the edges later, using these maps.
