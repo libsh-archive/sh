@@ -70,8 +70,9 @@ std::string SmRegister::print() const
   return stream.str();
 }
 
-BackendCode::BackendCode(ShRefCount<Backend> backend, const ShProgram& shader, int kind)
-  : m_backend(backend), m_shader(shader), m_smShader(0), m_kind(kind),
+BackendCode::BackendCode(ShRefCount<Backend> backend, const ShProgram& shader,
+                         const std::string& target)
+  : m_backend(backend), m_shader(shader), m_smShader(0), m_target(target),
     m_maxCR(0), m_maxTR(0), m_maxIR(0), m_maxOR(0), m_maxTex(0),
     m_cR(0), m_tR(0), m_iR(0), m_oR(0)
 {
@@ -120,10 +121,17 @@ void BackendCode::freeRegister(const SH::ShVariableNodePtr& var)
   m_tempRegs.push_front(m_registers[var].index);
 }
 
+int shSmTarget(const std::string& target)
+{
+  if (target == "gpu:vertex") return 0;
+  if (target == "gpu:fragment") return 1;
+  return -1;
+}
+
 void BackendCode::upload()
 {
   SH_DEBUG_PRINT("Uploading shader");
-  m_smShader = smDeclareShader(m_kind);
+  m_smShader = smDeclareShader(shSmTarget(m_target));
   smShaderBegin(m_smShader);
 
   for (int i = 0; i < m_maxTR; i++) m_tR[i] = smReg();
@@ -162,7 +170,7 @@ void BackendCode::bind()
   SH_DEBUG_PRINT("Binding shader");
   
   smBindShader(m_smShader);
-  SH::ShEnvironment::boundShader[m_kind] = m_shader;
+  SH::ShEnvironment::boundShaders()[m_target] = m_shader;
 
   // Initialize constants
   for (RegMap::const_iterator I = m_registers.begin(); I != m_registers.end(); ++I) {
@@ -177,7 +185,7 @@ void BackendCode::bind()
       for (; i < 4; i++) {
         values[i] = 0.0;
       }
-      smModLocalConstant(m_kind, reg.index, smTuple(values[0], values[1], values[2], values[3]));
+      smModLocalConstant(shSmTarget(m_target), reg.index, smTuple(values[0], values[1], values[2], values[3]));
     }
   }
 
@@ -209,7 +217,7 @@ void BackendCode::bind()
       SH_DEBUG_PRINT("Texture already allocated");
     }
     SH_DEBUG_PRINT("Binding texture " << m_textureMap[texture] << " to texture unit " << getReg(texture).index);
-    smBindTexture(m_kind, getReg(texture).index, m_textureMap[texture]);
+    smBindTexture(shSmTarget(m_target), getReg(texture).index, m_textureMap[texture]);
   }
 }
 
@@ -255,12 +263,12 @@ void BackendCode::updateUniform(const ShVariableNodePtr& uniform)
   for (; i < 4; i++) {
     values[i] = 0.0;
   }
-  smModLocalConstant(m_kind, reg.index, smTuple(values[0], values[1], values[2], values[3]));
+  smModLocalConstant(shSmTarget(m_target), reg.index, smTuple(values[0], values[1], values[2], values[3]));
 }
 
 std::ostream& BackendCode::print(std::ostream& out)
 {
-  out << "SMshader shader = smDeclareShader(" << m_kind << ");" << std::endl;
+  out << "SMshader shader = smDeclareShader(" << shSmTarget(m_target) << ");" << std::endl;
   out << "{" << std::endl;
   out << "smShaderBegin(shader);" << std::endl;
   out << std::endl;
@@ -313,7 +321,7 @@ std::ostream& BackendCode::print(std::ostream& out)
     ShVariableNodePtr node = I->first;
     SmRegister reg = I->second;
     if (node->hasValues() && reg.type == SHSM_REG_CONST) {
-      out << "smModLocalConstant(" << m_kind << ", " << reg.index << ", smTuple(";
+      out << "smModLocalConstant(" << shSmTarget(m_target) << ", " << reg.index << ", smTuple(";
       for (int i = 0; i < node->size(); i++) {
         if (i) out << ", ";
         out << node->getValue(i);
@@ -716,9 +724,9 @@ void Backend::generateNode(BackendCodePtr& code, const ShCtrlGraphNodePtr& node)
   }
 }
 
-ShBackendCodePtr Backend::generateCode(int kind, const ShProgram& shader)
+ShBackendCodePtr Backend::generateCode(const std::string& target, const ShProgram& shader)
 {
-  BackendCodePtr code = new BackendCode(this, shader, kind);
+  BackendCodePtr code = new BackendCode(this, shader, target);
 
   ShCtrlGraphPtr graph = shader->ctrlGraph;
 

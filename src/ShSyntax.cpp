@@ -37,10 +37,10 @@
 
 namespace SH {
 
-ShProgram shBeginShader(int kind)
+ShProgram shBeginShader(const std::string& target)
 {
   assert(!ShEnvironment::insideShader);
-  ShEnvironment::shader = new ShProgramNode(kind);
+  ShEnvironment::shader = new ShProgramNode(target);
   ShEnvironment::insideShader = true;
   return ShEnvironment::shader;
 }
@@ -58,7 +58,7 @@ void shEndShader()
   
   ShEnvironment::insideShader = false;
 
-  if (ShEnvironment::shader->kind() >= 0) {
+  if (!ShEnvironment::shader->target().empty()) {
     shCompileShader(ShEnvironment::shader);
   }
 }
@@ -69,10 +69,10 @@ void shCompileShader(ShProgram& shader)
   shader->compile(ShEnvironment::backend);
 }
 
-void shCompileShader(int kind, ShProgram& shader)
+void shCompileShader(const std::string& target, ShProgram& shader)
 {
   if (!ShEnvironment::backend) return;
-  shader->compile(kind, ShEnvironment::backend);
+  shader->compile(target, ShEnvironment::backend);
 }
 
 void shBindShader(ShProgram& shader)
@@ -81,10 +81,10 @@ void shBindShader(ShProgram& shader)
   shader->code(ShEnvironment::backend)->bind();
 }
 
-void shBindShader(int kind, ShProgram& shader)
+void shBindShader(const std::string& target, ShProgram& shader)
 {
   if (!ShEnvironment::backend) return;
-  shader->code(kind, ShEnvironment::backend)->bind();
+  shader->code(target, ShEnvironment::backend)->bind();
 }
 
 void shIf(bool)

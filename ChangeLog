@@ -1,3 +1,8 @@
+2004-01-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShProgram.hpp, ...: Rename "shader kind" to "shader target",
+	make targets strings instead of ints.
+
 2004-01-12  Bryan Chan  <b8chan@enora.cgl.uwaterloo.ca>
 
 	* src/ShAlgebra.cpp (replaceUniform): Implemented replaceUniform().

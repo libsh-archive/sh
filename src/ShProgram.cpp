@@ -36,55 +36,55 @@
 
 namespace SH {
 
-ShProgramNode::ShProgramNode(int kind)
-  : m_kind(kind)
+ShProgramNode::ShProgramNode(const std::string& target)
+  : m_target(target)
 {
 }
 
 void ShProgramNode::compile(ShRefCount<ShBackend>& backend)
 {
-  if (m_kind < 0) ShError( ShException( "Invalid ShProgram kind" ) );
-  compile(m_kind, backend);
+  if (m_target.empty()) ShError( ShException( "Invalid ShProgram target" ) );
+  compile(m_target, backend);
 }
 
-void ShProgramNode::compile(int kind, ShRefCount<ShBackend>& backend)
+void ShProgramNode::compile(const std::string& target, ShRefCount<ShBackend>& backend)
 {
   if (!backend) return;
 
   ShEnvironment::shader = this;
   ShEnvironment::insideShader = true;
-  ShBackendCodePtr code = backend->generateCode(kind, this);
+  ShBackendCodePtr code = backend->generateCode(target, this);
 #ifdef SH_DEBUG
   code->print(std::cerr);
 #endif
   ShEnvironment::insideShader = false;
-  m_code[std::make_pair(kind, backend)] = code;
+  m_code[std::make_pair(target, backend)] = code;
 }
 
 ShRefCount<ShBackendCode> ShProgramNode::code(ShRefCount<ShBackend>& backend) {
-  if (m_kind < 0) ShError( ShException( "Invalid ShProgram kind" ) );
+  if (m_target.empty()) ShError( ShException( "Invalid ShProgram target" ) );
 
-  return code(m_kind, backend);
+  return code(m_target, backend);
 }
 
-ShRefCount<ShBackendCode> ShProgramNode::code(int kind, ShRefCount<ShBackend>& backend) {
+ShRefCount<ShBackendCode> ShProgramNode::code(const std::string& target, ShRefCount<ShBackend>& backend) {
   if (!backend) return 0;
   assert(!ShEnvironment::insideShader);
 
-  if (m_code.find(std::make_pair(kind, backend)) == m_code.end()) compile(kind, backend);
+  if (m_code.find(std::make_pair(target, backend)) == m_code.end()) compile(target, backend);
 
-  return m_code[std::make_pair(kind, backend)];
+  return m_code[std::make_pair(target, backend)];
 }
 
 void ShProgramNode::updateUniform(const ShVariableNodePtr& uniform)
 {
-  for (int i = 0; i < shShaderKinds; i++) {
-    if (ShEnvironment::boundShader[i] == this) {
-      code(i, ShEnvironment::backend)->updateUniform(uniform);
-    }
+  // Look to see if this program is bound anywhere, and possibly
+  // update some uniforms through the corresponding backend code.
+  for (ShEnvironment::BoundShaderMap::const_iterator I = ShEnvironment::boundShaders().begin();
+       I != ShEnvironment::boundShaders().end(); ++I) {
+    if (I->second == this) code(I->first, ShEnvironment::backend)->updateUniform(uniform);
   }
 }
-
 
 void ShProgramNode::collectVariables()
 {

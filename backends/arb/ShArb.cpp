@@ -90,10 +90,12 @@ using namespace SH;
 #define shGlDeleteProgramsARB glDeleteProgramsARB
 #define shGlBindProgramARB glBindProgramARB
 
-unsigned int shArbTargets[] = {
-  GL_VERTEX_PROGRAM_ARB,
-  GL_FRAGMENT_PROGRAM_ARB
-};
+unsigned int shArbTarget(const std::string& shTarget)
+{
+  if (shTarget == "gpu:vertex") return GL_VERTEX_PROGRAM_ARB;
+  if (shTarget == "gpu:fragment") return GL_FRAGMENT_PROGRAM_ARB;  
+  return 0;
+}
 
 /** All the possible operations in the ARB spec.
  */
@@ -375,11 +377,6 @@ ArbBindingSpecs shArbFragmentAttribBindingSpecs[] = {
   {SH_ARB_REG_NONE, 0, SH_VAR_ATTRIB, true}
 };
 
-ArbBindingSpecs* shArbAttribBindingSpecs[] = {
-  shArbVertexAttribBindingSpecs,
-  shArbFragmentAttribBindingSpecs
-};
-
 ArbBindingSpecs shArbVertexOutputBindingSpecs[] = {
   {SH_ARB_REG_RESULTPOS, 1, SH_VAR_POSITION, false},
   {SH_ARB_REG_RESULTCOL, 1, SH_VAR_COLOR, false},
@@ -395,10 +392,13 @@ ArbBindingSpecs shArbFragmentOutputBindingSpecs[] = {
   {SH_ARB_REG_NONE, 0, SH_VAR_ATTRIB}
 };
 
-ArbBindingSpecs* shArbOutputBindingSpecs[] = {
-  shArbVertexOutputBindingSpecs,
-  shArbFragmentOutputBindingSpecs
-};
+ArbBindingSpecs* shArbBindingSpecs(bool output, const std::string& target)
+{
+  if (target == "gpu:vertex")
+    return output ? shArbVertexOutputBindingSpecs : shArbVertexAttribBindingSpecs;
+  if (target == "gpu:fragment")
+    return output ? shArbFragmentOutputBindingSpecs : shArbFragmentAttribBindingSpecs;
+}
 
 /** An ARB register.
  */
@@ -460,8 +460,8 @@ using namespace SH;
 
 static SH::ShRefCount<ArbBackend> instance = new ArbBackend();
 
-ArbCode::ArbCode(ArbBackendPtr backend, const ShProgram& shader, int kind)
-  : m_backend(backend), m_shader(shader), m_kind(kind),
+ArbCode::ArbCode(ArbBackendPtr backend, const ShProgram& shader, const std::string& target)
+  : m_backend(backend), m_shader(shader), m_target(target),
     m_numTemps(0), m_numInputs(0), m_numOutputs(0), m_numParams(0), m_numConsts(0),
     m_numTextures(0), m_programId(0)
 {
@@ -513,12 +513,12 @@ void ArbCode::upload()
   if (!m_programId)
     shGlGenProgramsARB(1, &m_programId);
 
-  shGlBindProgramARB(shArbTargets[m_kind], m_programId);
+  shGlBindProgramARB(shArbTarget(m_target), m_programId);
   
   std::ostringstream out;
   print(out);
   std::string text = out.str();
-  shGlProgramStringARB(shArbTargets[m_kind], GL_PROGRAM_FORMAT_ASCII_ARB, (GLsizei)text.size(), text.c_str());
+  shGlProgramStringARB(shArbTarget(m_target), GL_PROGRAM_FORMAT_ASCII_ARB, (GLsizei)text.size(), text.c_str());
   int error = glGetError();
   if (error == GL_INVALID_OPERATION) {
     int pos = -1;
@@ -539,9 +539,9 @@ void ArbCode::bind()
     upload();
   }
   
-  shGlBindProgramARB(shArbTargets[m_kind], m_programId);
+  shGlBindProgramARB(shArbTarget(m_target), m_programId);
   
-  SH::ShEnvironment::boundShader[m_kind] = m_shader;
+  SH::ShEnvironment::boundShaders()[m_target] = m_shader;
 
   // Initialize constants
   for (RegMap::const_iterator I = m_registers.begin(); I != m_registers.end(); ++I) {
@@ -729,10 +729,10 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
   if (reg.type != SH_ARB_REG_PARAM) return;
   switch(reg.binding) {
   case SH_ARB_REG_PARAMLOC:
-    shGlProgramLocalParameter4fvARB(shArbTargets[m_kind], reg.bindingIndex, values);
+    shGlProgramLocalParameter4fvARB(shArbTarget(m_target), reg.bindingIndex, values);
     break;
   case SH_ARB_REG_PARAMENV:
-    shGlProgramEnvParameter4fvARB(shArbTargets[m_kind], reg.bindingIndex, values);
+    shGlProgramEnvParameter4fvARB(shArbTarget(m_target), reg.bindingIndex, values);
     break;
   default:
     return;
@@ -830,14 +830,8 @@ std::ostream& ArbCode::print(std::ostream& out)
   LineNumberer endl;
 
   // Print version header
-  switch(m_kind) {
-  case 0:
-    out << "!!ARBvp1.0" << endl;
-    break;
-  case 1:
-    out << "!!ARBfp1.0" << endl;
-    break;
-  }
+  if (m_target == "gpu:vertex") out << "!!ARBvp1.0" << endl;
+  if (m_target == "gpu:fragment") out << "!!ARBfp1.0" << endl;
 
   // Print register declarations
   
@@ -959,7 +953,7 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       }
       break;
     case SH_OP_COS:
-      if( m_kind == SH_VERTEX_PROGRAM ) 
+      if( m_target == "gpu:vertex" ) 
         SH_DEBUG_ERROR("cosine is not implemented for ARB vertex program ");
       m_instructions.push_back(ArbInst(SH_ARB_COS, stmt.dest, stmt.src[0]));
       break;
@@ -1021,7 +1015,7 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       m_instructions.push_back(ArbInst(SH_ARB_FRC, stmt.dest, stmt.src[0]));
       break;
     case SH_OP_LRP:
-      if(m_kind == SH_VERTEX_PROGRAM) {
+      if(m_target == "gpu:vertex") {
         ShVariable t(new ShVariableNode(SH_VAR_TEMP, stmt.src[1].size()));
         // lerp(f,a,b)=f*a + (1-f)*b = f*(a-b) + b 
         m_instructions.push_back(ArbInst(SH_ARB_ADD, t, stmt.src[1], -stmt.src[2]));
@@ -1089,7 +1083,7 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       break;
     case SH_OP_SIN:
       // TODO fix this
-      if( m_kind == SH_VERTEX_PROGRAM ) 
+      if( m_target == "gpu:vertex" ) 
         SH_DEBUG_ERROR("sin is not implemented for ARB vertex program ");
       m_instructions.push_back(ArbInst(SH_ARB_SIN, stmt.dest, stmt.src[0]));
       break;
@@ -1211,9 +1205,9 @@ void ArbCode::bindSpecial(const ShProgramNode::VarList::const_iterator& begin,
 void ArbCode::allocInputs()
 {
   // First, try to assign some "special" output register bindings
-  for (int i = 0; shArbAttribBindingSpecs[m_kind][i].binding != SH_ARB_REG_NONE; i++) {
+  for (int i = 0; shArbBindingSpecs(false, m_target)[i].binding != SH_ARB_REG_NONE; i++) {
     bindSpecial(m_shader->inputs.begin(), m_shader->inputs.end(),
-                shArbAttribBindingSpecs[m_kind][i], m_inputBindings,
+                shArbBindingSpecs(false, m_target)[i], m_inputBindings,
                 SH_ARB_REG_ATTRIB, m_numInputs);
   }
   
@@ -1224,8 +1218,8 @@ void ArbCode::allocInputs()
     m_registers[node] = ArbReg(SH_ARB_REG_ATTRIB, m_numInputs++);
 
     // Binding
-    for (int i = 0; shArbAttribBindingSpecs[m_kind][i].binding != SH_ARB_REG_NONE; i++) {
-      const ArbBindingSpecs& specs = shArbAttribBindingSpecs[m_kind][i];
+    for (int i = 0; shArbBindingSpecs(false, m_target)[i].binding != SH_ARB_REG_NONE; i++) {
+      const ArbBindingSpecs& specs = shArbBindingSpecs(false, m_target)[i];
 
       if (specs.allowGeneric && m_inputBindings[i] < specs.maxBindings) {
         m_registers[node].binding = specs.binding;
@@ -1240,9 +1234,9 @@ void ArbCode::allocInputs()
 void ArbCode::allocOutputs()
 {
   // First, try to assign some "special" output register bindings
-  for (int i = 0; shArbOutputBindingSpecs[m_kind][i].binding != SH_ARB_REG_NONE; i++) {
+  for (int i = 0; shArbBindingSpecs(true, m_target)[i].binding != SH_ARB_REG_NONE; i++) {
     bindSpecial(m_shader->outputs.begin(), m_shader->outputs.end(),
-                shArbOutputBindingSpecs[m_kind][i], m_outputBindings,
+                shArbBindingSpecs(true, m_target)[i], m_outputBindings,
                 SH_ARB_REG_OUTPUT, m_numOutputs);
   }
   
@@ -1253,8 +1247,8 @@ void ArbCode::allocOutputs()
     m_registers[node] = ArbReg(SH_ARB_REG_OUTPUT, m_numOutputs++);
 
     // Binding
-    for (int i = 0; shArbOutputBindingSpecs[m_kind][i].binding != SH_ARB_REG_NONE; i++) {
-      const ArbBindingSpecs& specs = shArbOutputBindingSpecs[m_kind][i];
+    for (int i = 0; shArbBindingSpecs(true, m_target)[i].binding != SH_ARB_REG_NONE; i++) {
+      const ArbBindingSpecs& specs = shArbBindingSpecs(true, m_target)[i];
 
       if (specs.allowGeneric && m_outputBindings[i] < specs.maxBindings) {
         m_registers[node].binding = specs.binding;
@@ -1326,7 +1320,7 @@ void ArbCode::allocTemps()
   
   m_tempRegs.clear();
   m_numTemps = 0;
-  for (int i = 0; i < m_backend->temps(m_kind); i++) {
+  for (int i = 0; i < m_backend->temps(m_target); i++) {
     m_tempRegs.push_back(i);
   }
   
@@ -1359,22 +1353,23 @@ ArbBackend::ArbBackend()
 
   // TODO Max TEX instructions, texture indirections
   for (int i = 0; i < 2; i++) {
-    unsigned int target = shArbTargets[i];
-    m_instrs[i] = (!i ? 128 : 48);
-    shGlGetProgramivARB(target, GL_MAX_PROGRAM_INSTRUCTIONS_ARB, &m_instrs[i]);
-    SH_DEBUG_PRINT("instrs[" << i << "] = " << m_instrs[i]);
-    m_temps[i] = (!i ? 12 : 16);
-    shGlGetProgramivARB(target, GL_MAX_PROGRAM_TEMPORARIES_ARB, &m_temps[i]);
-    SH_DEBUG_PRINT("temps[" << i << "] = " << m_temps[i]);
-    m_attribs[i] = (!i ? 16 : 10);
-    shGlGetProgramivARB(target, GL_MAX_PROGRAM_ATTRIBS_ARB, &m_attribs[i]);
-    SH_DEBUG_PRINT("attribs[" << i << "] = " << m_attribs[i]);
-    m_params[i] = (!i ? 96 : 24);
-    shGlGetProgramivARB(target, GL_MAX_PROGRAM_LOCAL_PARAMETERS_ARB, &m_params[i]);
-    SH_DEBUG_PRINT("params[" << i << "] = " << m_params[i]);
-    m_texs[i] = (!i ? 0 : 24);
-    if (i) shGlGetProgramivARB(target, GL_MAX_PROGRAM_TEX_INSTRUCTIONS_ARB, &m_texs[i]);
-    SH_DEBUG_PRINT("texs[" << i << "] = " << m_texs[i]);
+    std::string sh_target = (i == 0 ? "gpu:vertex" : "gpu:fragment");
+    unsigned int arb_target = shArbTarget(sh_target);
+    m_instrs[sh_target] = (!i ? 128 : 48);
+    shGlGetProgramivARB(arb_target, GL_MAX_PROGRAM_INSTRUCTIONS_ARB, &m_instrs[sh_target]);
+    SH_DEBUG_PRINT("instrs[" << sh_target << "] = " << m_instrs[sh_target]);
+    m_temps[sh_target] = (!i ? 12 : 16);
+    shGlGetProgramivARB(arb_target, GL_MAX_PROGRAM_TEMPORARIES_ARB, &m_temps[sh_target]);
+    SH_DEBUG_PRINT("temps[" << sh_target << "] = " << m_temps[sh_target]);
+    m_attribs[sh_target] = (!i ? 16 : 10);
+    shGlGetProgramivARB(arb_target, GL_MAX_PROGRAM_ATTRIBS_ARB, &m_attribs[sh_target]);
+    SH_DEBUG_PRINT("attribs[" << sh_target << "] = " << m_attribs[sh_target]);
+    m_params[sh_target] = (!i ? 96 : 24);
+    shGlGetProgramivARB(arb_target, GL_MAX_PROGRAM_LOCAL_PARAMETERS_ARB, &m_params[sh_target]);
+    SH_DEBUG_PRINT("params[" << sh_target << "] = " << m_params[sh_target]);
+    m_texs[sh_target] = (!i ? 0 : 24);
+    if (i) shGlGetProgramivARB(arb_target, GL_MAX_PROGRAM_TEX_INSTRUCTIONS_ARB, &m_texs[sh_target]);
+    SH_DEBUG_PRINT("texs[" << sh_target << "] = " << m_texs[sh_target]);
   }
 }
 
@@ -1387,11 +1382,11 @@ std::string ArbBackend::name() const
   return "arb";
 }
 
-ShBackendCodePtr ArbBackend::generateCode(int kind, const ShProgram& shader)
+ShBackendCodePtr ArbBackend::generateCode(const std::string& target, const ShProgram& shader)
 {
 
   SH_DEBUG_ASSERT(shader.object());
-  ArbCodePtr code = new ArbCode(this, shader, kind);
+  ArbCodePtr code = new ArbCode(this, shader, target);
   code->generate();
   return code;
 }

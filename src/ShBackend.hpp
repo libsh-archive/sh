@@ -71,7 +71,7 @@ public:
   /// Generate the backend code for a particular shader. Ensure that
   /// ShEnvironment::shader is the same as shader before calling this,
   /// since extra variables may be declared inside this function!
-  virtual ShBackendCodePtr generateCode(int kind, const ShProgram& shader) = 0;
+  virtual ShBackendCodePtr generateCode(const std::string& target, const ShProgram& shader) = 0;
 
   typedef std::vector< ShRefCount<ShBackend> > ShBackendList;
 

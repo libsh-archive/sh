@@ -90,19 +90,19 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
     ShError( ShAlgebraException( "Cannot connect programs.  Number of inputs does not match number of outputs" ) );
   }
 
-  int rkind;
+  std::string rtarget;
 
-  if (a->kind() < 0) {
-    rkind = b->kind(); // A doesn't have a target. Use b's.
+  if (a->target().empty()) {
+    rtarget = b->target(); // A doesn't have a target. Use b's.
   } else {
-    if (b->kind() < 0) {
-      rkind = a->kind(); // A has a target, b doesn't
+    if (b->target().empty()) {
+      rtarget = a->target(); // A has a target, b doesn't
     } else {
-      rkind = -1; // Connecting different targets.
+      rtarget = ""; // Connecting different targets.
     }
   }
 
-  ShProgram program = new ShProgramNode(rkind);
+  ShProgram program = new ShProgramNode(rtarget);
 
   ShCtrlGraphNodePtr heada, taila, headb, tailb;
   
@@ -155,19 +155,19 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
 
 ShProgram combine(const ShProgram& a, const ShProgram& b)
 {
-  int rkind;
+  std::string rtarget;
 
-  if (a->kind() < 0) {
-    rkind = b->kind(); // A doesn't have a target. Use b's.
+  if (a->target().empty()) {
+    rtarget = b->target(); // A doesn't have a target. Use b's.
   } else {
-    if (b->kind() < 0) {
-      rkind = a->kind(); // A has a target, b doesn't
+    if (b->target().empty()) {
+      rtarget = a->target(); // A has a target, b doesn't
     } else {
-      rkind = -1; // Connecting different targets.
+      rtarget = ""; // Connecting different targets.
     }
   }
 
-  ShProgram program = new ShProgramNode(rkind);
+  ShProgram program = new ShProgramNode(rtarget);
 
   ShCtrlGraphNodePtr heada, taila, headb, tailb;
   
@@ -215,7 +215,7 @@ ShProgram replaceUniform(const ShProgram& a, const ShVariable& v)
     ShError( ShAlgebraException( "Cannot replace non-uniform variable" ) );
   }
 
-  ShProgram program = new ShProgramNode(a->kind());
+  ShProgram program = new ShProgramNode(a->target());
 
   ShCtrlGraphNodePtr heada, taila;
   

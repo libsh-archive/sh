@@ -42,13 +42,13 @@
 
 /// @name Shader definitions
 //@{
-/** \def SH_BEGIN_PROGRAM
- * Begin a new generic program block.
+/** \def SH_BEGIN_PROGRAM(target)
+ * Begin a new program block.
  * Nesting programs is not allowed.
  * @retval ShProgram A reference to the new program.
  * @see SH_END_PROGRAM
  */
-#define SH_BEGIN_PROGRAM ::SH::shBeginShader(-1);
+#define SH_BEGIN_PROGRAM(target) ::SH::shBeginShader(target);
 /** \def SH_END_PROGRAM
  * End the current program definition.
  *
@@ -60,11 +60,10 @@
 #define SH_END_PROGRAM         ::SH::shEndShader();
 //@}
 
-#define SH_VERTEX_PROGRAM 0
-#define SH_FRAGMENT_PROGRAM 1
+#define SH_END                 SH_END_PROGRAM
 
-#define SH_BEGIN_VERTEX_PROGRAM ::SH::shBeginShader(SH_VERTEX_PROGRAM);
-#define SH_BEGIN_FRAGMENT_PROGRAM ::SH::shBeginShader(SH_FRAGMENT_PROGRAM);
+#define SH_BEGIN_VERTEX_PROGRAM ::SH::shBeginShader("gpu:vertex");
+#define SH_BEGIN_FRAGMENT_PROGRAM ::SH::shBeginShader("gpu:fragment");
 
 ///@name If statements
 //@{
@@ -158,18 +157,18 @@
 
 namespace SH {
 
-ShProgram shBeginShader(int kind = -1);
+ShProgram shBeginShader(const std::string& kind = "");
 void shEndShader();
 
 /// Force compilation of a shader. The shader must have a target.
 void shCompileShader(ShProgram& shader);
 /// Force compilation of a shader for a given target
-void shCompileShader(int target, ShProgram& shader);
+void shCompileShader(const std::string& target, ShProgram& shader);
 
 /// Bind a shader. The shader must have a target.
 void shBindShader(ShProgram& shader);
 /// Bind a shader with the given target.
-void shBindShader(int target, ShProgram& shader);
+void shBindShader(const std::string& target, ShProgram& shader);
 
 void shIf(bool);
 void shElse();

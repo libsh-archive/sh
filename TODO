@@ -1,25 +1,25 @@
-RELEASE:
- X rename ShShader to ShProgram
- X add SH_BEGIN_{VERTEX, FRAGMENT}_SHADER macros
- X add licensing blurbs
- X check for libpng in configure
- X check for SM/GL for the backends in configure
- X make sure "make install" works
- X dynamic backend loading
- - have functions to switch the current backend, clearing bound shaders etc. appropriately.
- - port to windows
- X swap around order for cubemaps
- X get an environment map
- X clean up demos
- - figure out drawing environment map on the back, preferably without using a shader
- - upload/bind split in Arb backend 
- X scalar constant operators
+TODO file for libsh
 
-OPTIMIZER/SHADER ALGEBRA:
- / control flow graph optimizations
+OPTIMIZER:
+ X control flow graph optimizations
  X Run the optimizations more than once as necessary.
  X Don't run the optimizer twice in connect(), once the previous item is done.
+ - constant folding
+ - algebraic simplification
+ - refactor some of the optimizer code, in particular uddu chains
+ - improve uddu chain algorithm by using bitsets to keep track of tuple element writes
+
+SHADER ALGEBRA:
  - fix combine() to operate correctly on empty graphs.
+ - operator&() for combine()
+ X replaceUniform()
+ - permute()
+ - extract()
+ - drop()
+ - make connect work with shader b having more inputs than shader a's outputs
+ - add operator<< for uniforms
+ - add constant() for uniforms with operator<<
+ - allow semantic connection
 
 MATRICES:
  X operator()() extracts submatrix
@@ -31,8 +31,6 @@ MATRICES:
  X inverse
  - name()
  - add some matrix expand() call to expand to an ident matrix with top-left submatrix replaced with M
- - identity fetcher
-
 
 TEXTURES:
  X bind texture units in shader
@@ -49,8 +47,14 @@ TEXTURES:
     X high-level
     X ARB
     - SM
+ - in ARB backend, share textures between multiple shaders
+    - maybe a generic bookkeeping mechanism for this
 
-SMALL TASKS:
+ARB BACKEND:
+ - split into multiple files
+ - add extension querying/plugin mechanism for ATI extensions etc.
+
+GENERIC SMALL TASKS:
  X have updating semantics for uniforms
  X need a map of shader kind -> currently bound shader
  X hack constant loading for now by recompiling shader everytime it is bound
@@ -59,9 +63,9 @@ SMALL TASKS:
  X check into CVS
  - improve error handling in ShParser.cpp
  - add line numbers/filenames to tokens, use this in error handling
- - add additional layer for eror handling: don't throw exceptions by
+ X add additional layer for eror handling: don't throw exceptions by
    default, instead just output to stderr or so.
- - break and continue (requires some extra information)
+ - break and continue (requires some extra information in the parser)
  X gather variables in ShShader
  X simple SM register allocation
  X add negation to variables
@@ -76,24 +80,31 @@ SMALL TASKS:
  - add operator*(T) and similar for division to Sh{Lib*,Matrix}.hpp
  X add operator[] to ShAttrib also to do one-element swizzle.
  - use a ShVariableKind instead of an int template parameter in ShAttrib and ShMatrix
- - rename "shader kind" to "shader target" throughout the code.
+ X rename "shader kind" to "shader target" throughout the code.
+ X replace integers for shader targets with strings
+ - add a switchBackend() function that clears boundShaders(), etc.
 
-MEDIUM TASKS:
+GENERIC MEDIUM TASKS:
  X port more of the ShLib calls to the new model.
  X code generator
  - add smarter configuration mechanism
  - add "context" concept
  X vectors, points, colours, positions, texcoords
+ - rethink some of the binding mechanism
 
-LARGE TASKS:
+OVERALL LARGE TASKS:
  X linear register allocator
  X finish the parser
- / begin the optimizer
+ X begin the optimizer
  / matrices
  / textures
- X more backends
+ - directx backend
+ - Cg backend
+ - integrate Kevin's shgl stuff
+ - SSE backend
+ - python interface
 
-OPERATIONS:
+=== OPERATIONS ===
 
 +-----+-+
 |L S S|A|
@@ -132,3 +143,20 @@ OPERATIONS:
 |X|X|X|X| cond
 |X|X| |X| kil
 +-+-+-+-+
+
+=== OLD RELEASES ===
+
+RELEASE (SUMMER 2004):
+ X rename ShShader to ShProgram
+ X add SH_BEGIN_{VERTEX, FRAGMENT}_SHADER macros
+ X add licensing blurbs
+ X check for libpng in configure
+ X check for SM/GL for the backends in configure
+ X make sure "make install" works
+ X dynamic backend loading
+ X port to windows
+ X swap around order for cubemaps
+ X get an environment map
+ X clean up demos
+ X upload/bind split in Arb backend 
+ X scalar constant operators

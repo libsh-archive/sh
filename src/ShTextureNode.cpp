@@ -88,9 +88,12 @@ bool ShDataTextureNode::compatibleWith(ShMemoryObjectPtr memObj) {
 void ShDataTextureNode::setMem(ShMemoryObjectPtr mem)
 {
   assert( compatibleWith(mem) );
-  m_mem = mem;  
-  for (int s = 0; s < shShaderKinds; s++) {
-    if (ShEnvironment::boundShader[s]) ShEnvironment::boundShader[s]->updateUniform(this);
+  m_mem = mem;
+
+  for (ShEnvironment::BoundShaderMap::iterator I = ShEnvironment::boundShaders().begin();
+       I != ShEnvironment::boundShaders().end(); ++I) {
+    // TODO: Why not tell code() directly?
+    if (I->second) I->second->updateUniform(this);
   }
 }
 

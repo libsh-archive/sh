@@ -31,6 +31,7 @@
 #include <vector>
 #include <list>
 #include <set>
+#include <map>
 #include "ShBackend.hpp"
 #include "ShRefCount.hpp"
 #include "ShCtrlGraph.hpp"
@@ -57,7 +58,8 @@ enum ShArbRegType {
 
 class ArbCode : public SH::ShBackendCode {
 public:
-  ArbCode(SH::ShRefCount<ArbBackend> backend, const SH::ShProgram& shader, int kind);
+  ArbCode(SH::ShRefCount<ArbBackend> backend, const SH::ShProgram& shader,
+          const std::string& target);
   virtual ~ArbCode();
 
   virtual bool allocateRegister(const SH::ShVariableNodePtr& var);
@@ -127,7 +129,7 @@ private:
   
   SH::ShRefCount<ArbBackend> m_backend;
   SH::ShProgram m_shader;
-  int m_kind;
+  std::string m_target;
 
   typedef std::vector<ArbInst> ArbInstList;
   ArbInstList m_instructions;
@@ -172,20 +174,20 @@ public:
   
   std::string name() const;
 
-  SH::ShBackendCodePtr generateCode(int kind, const SH::ShProgram& shader);
+  SH::ShBackendCodePtr generateCode(const std::string& kind, const SH::ShProgram& shader);
 
-  int instrs(int kind) { return m_instrs[kind]; }
-  int temps(int kind) { return m_temps[kind]; }
-  int attribs(int kind) { return m_attribs[kind]; }
-  int params(int kind) { return m_params[kind]; }
-  int texs(int kind) { return m_texs[kind]; }
+  int instrs(const std::string& target) { return m_instrs[target]; }
+  int temps(const std::string& target) { return m_temps[target]; }
+  int attribs(const std::string& target) { return m_attribs[target]; }
+  int params(const std::string& target) { return m_params[target]; }
+  int texs(const std::string& target) { return m_texs[target]; }
   
 private:
-  int m_instrs[2]; ///< Maximum number of instructions for each shader kind
-  int m_temps[2]; ///< Maximum number of temporaries for each shader kind
-  int m_attribs[2]; ///<Maximum number of attributes for each shader kind
-  int m_params[2]; ///< Maximum number of parameters for each shader kind
-  int m_texs[2]; ///< Maximum number of TEX instructions for each shader kind
+  std::map<std::string, int> m_instrs; ///< Maximum number of instructions for each shader target
+  std::map<std::string, int> m_temps; ///< Maximum number of temporaries for each shader target
+  std::map<std::string, int> m_attribs; ///<Maximum number of attributes for each shader target
+  std::map<std::string, int> m_params; ///< Maximum number of parameters for each shader target
+  std::map<std::string, int> m_texs; ///< Maximum number of TEX instructions for each shader target
 };
 
 typedef SH::ShRefCount<ArbBackend> ArbBackendPtr;

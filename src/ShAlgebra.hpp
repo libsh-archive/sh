@@ -27,7 +27,7 @@ template<typename T>
 struct keep {
   typedef typename T::ValueType ValType;
   operator ShProgram() {
-    ShProgram prog = SH_BEGIN_PROGRAM {
+    ShProgram prog = SH_BEGIN_PROGRAM() {
       T temp;
       ShAttrib<T::typesize, SH_VAR_INPUT, ValType> attr;
       attr.node()->specialType(temp.node()->specialType());
@@ -44,7 +44,7 @@ template<typename T>
 struct lose {
   typedef typename T::ValueType ValType;
   operator ShProgram() {
-    ShProgram prog = SH_BEGIN_PROGRAM {
+    ShProgram prog = SH_BEGIN_PROGRAM() {
       T temp;
       ShAttrib<T::typesize, SH_VAR_INPUT, ValType> attr;
       attr.node()->specialType(temp.node()->specialType());

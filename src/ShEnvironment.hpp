@@ -28,6 +28,7 @@
 #define SHENVIRONMENT_HPP
 
 #include <map>
+#include <string>
 #include "ShProgram.hpp"
 #include "ShBackend.hpp"
 
@@ -38,16 +39,20 @@ namespace SH {
  * as the currently active shader or whether or not the program is
  * inside a shader definition right now.
  */
-struct ShEnvironment 
+class ShEnvironment 
 {
+public:
+  
   /// The shader currently being defined
   static ShProgram shader;
 
   /// Whether we are in the process of defining a shader
   static bool insideShader;
 
-  /// The shader of a given kind bound under the current backend.
-  static ShProgram boundShader[shShaderKinds];
+  typedef std::map<std::string, ShProgram> BoundShaderMap; 
+  
+  /// The shader of a given target bound under the current backend.
+  static BoundShaderMap& boundShaders();
 
   /// The currently active backend
   static ShBackendPtr backend;
@@ -57,6 +62,9 @@ struct ShEnvironment
 
   /// Whether exceptions are being thrown instead of error messages printed to stdout
   static bool useExceptions;
+
+private:
+  static BoundShaderMap* m_boundShader;
 };
 
 }

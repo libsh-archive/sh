@@ -9,9 +9,9 @@
       return -1;
     }
 
-    SH_DEBUG_ASSERT(shader->kind() >= 0);
+    SH_DEBUG_ASSERT(!shader->target().empty());
 
-    ShBackendCodePtr code = backend->generateCode(shader->kind(), shader);
+    ShBackendCodePtr code = backend->generateCode(shader->target(), shader);
     std::cerr << "Printing code:" << std::endl;
     code->print(std::cout);
 
@@ -19,7 +19,7 @@
     dumpfilename += "-control-0.dot";
 
     std::ofstream dumpfile(dumpfilename.c_str());
-    ShEnvironment::shader->ctrlGraph->graphvizDump(dumpfile);
+    ShEnvironment::shader->ctrlGraph->graphvizDump(/*dumpfile*/ std::cerr);
 
     ShEnvironment::insideShader = false;
     ShEnvironment::shader = 0;

@@ -147,8 +147,10 @@ void ShVariableNode::setValue(int i, ValueType value)
   if (i < 0 || i >= m_size) return;
   m_values[i] = value;
 
-  for (int s = 0; s < shShaderKinds; s++) {
-    if (ShEnvironment::boundShader[s]) ShEnvironment::boundShader[s]->updateUniform(this);
+  for (ShEnvironment::BoundShaderMap::iterator I = ShEnvironment::boundShaders().begin();
+       I != ShEnvironment::boundShaders().end(); ++I) {
+    // TODO: Why not tell code() directly?
+    if (I->second) I->second->updateUniform(this);
   }
 }
 
