@@ -42,10 +42,10 @@ int main(int argc, char** argv)
       out_data2[i] = -1.0;
     }
 
-    ShHostMemoryPtr host1 = new ShHostMemory(elements, data1);
-    ShHostMemoryPtr host2 = new ShHostMemory(elements, data2);
-    ShHostMemoryPtr host_out1 = new ShHostMemory(elements, out_data1);
-    ShHostMemoryPtr host_out2 = new ShHostMemory(elements, out_data2);
+    ShHostMemoryPtr host1 = new ShHostMemory(sizeof(data1), data1);
+    ShHostMemoryPtr host2 = new ShHostMemory(sizeof(data2), data2);
+    ShHostMemoryPtr host_out1 = new ShHostMemory(sizeof(out_data1), out_data1);
+    ShHostMemoryPtr host_out2 = new ShHostMemory(sizeof(out_data2), out_data2);
     ShChannel<ShColor3f> stream1(host1, elements);
     ShChannel<ShColor3f> stream2(host2, elements);
     ShChannel<ShColor3f> output1(host_out1, elements);
@@ -72,7 +72,8 @@ int main(int argc, char** argv)
     final->ctrlGraph->print(std::cout, 0);
 
     ShStream s = output1 & output2;
-    //output1 & output2 = shader << stream1 << stream2;
+
+    output1 & output2 = shader << stream1 << stream2;
     
     ShEnvironment::backend->execute(final, s);
 

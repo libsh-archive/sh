@@ -1,3 +1,10 @@
+2004-03-04  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* test/stream_inverse.cpp: Add this test case.
+
+	* src/ShImage.cpp (savePng): Make this work for non-4-element
+	images, and remove debug statements.
+
 2004-03-04  Jack Wang  <jmwang@uwaterloo.ca>
 
 	* src/ShQuaternion.hpp, src/ShQuaternionImpl.hpp:

@@ -103,67 +103,72 @@ float& ShImage::operator()(int x, int y, int i)
 
 void ShImage::savePng(const std::string& filename, int inverse_alpha)
 {
+  FILE* fout = std::fopen(filename.c_str(), "w");
+  png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+  png_infop info_ptr = png_create_info_struct(png_ptr);
+  setjmp(png_ptr->jmpbuf);
 
-  std::cout<<filename<<std::endl;
-
-   FILE* fout = std::fopen(filename.c_str(), "w");
-   png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-   png_infop info_ptr = png_create_info_struct(png_ptr);
-   setjmp(png_ptr->jmpbuf);
-
-   /* Setup PNG I/O */
-   png_init_io(png_ptr, fout);
+  /* Setup PNG I/O */
+  png_init_io(png_ptr, fout);
 	 
-   /* Optionally setup a callback to indicate when a row has been
-    * written. */  
+  /* Optionally setup a callback to indicate when a row has been
+   * written. */  
 
-   /* Setup filtering. Use Paeth filtering */
-   png_set_filter(png_ptr, 0, PNG_FILTER_PAETH);
+  /* Setup filtering. Use Paeth filtering */
+  png_set_filter(png_ptr, 0, PNG_FILTER_PAETH);
 
-   /* Setup compression level. */
-   png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
+  /* Setup compression level. */
+  png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
 
+  /* Setup PNG header information and write it to the file */
 
-   /* Setup PNG header information and write it to the file */
-   /* assumes RGBA */
-   if(elements()!=4){
-     std::cout<<"Problem!!!!!!!!!! depth is not 4; it is "<<elements()<<std::endl;
-   }
-
-   png_set_IHDR(png_ptr, info_ptr,
-		m_width, m_height,
-		8, 
-		PNG_COLOR_TYPE_RGBA, 
-		PNG_INTERLACE_NONE, 
-		PNG_COMPRESSION_TYPE_DEFAULT, 
-		PNG_FILTER_TYPE_DEFAULT);
-   png_write_info(png_ptr, info_ptr); 
+  int color_type;
+  switch (m_elements) {
+  case 1:
+    color_type = PNG_COLOR_TYPE_GRAY;
+    break;
+  case 2:
+    color_type = PNG_COLOR_TYPE_GRAY_ALPHA;
+    break;
+  case 3:
+    color_type = PNG_COLOR_TYPE_RGB;
+    break;
+  case 4:
+    color_type = PNG_COLOR_TYPE_RGBA;
+    break;
+  default:
+    throw ShImageException("Invalid element size");
+  }
+   
+  png_set_IHDR(png_ptr, info_ptr,
+               m_width, m_height,
+               8, 
+               color_type,
+               PNG_INTERLACE_NONE, 
+               PNG_COMPRESSION_TYPE_DEFAULT, 
+               PNG_FILTER_TYPE_DEFAULT);
+  png_write_info(png_ptr, info_ptr); 
     
+  // Actual writing
+  png_byte* tempLine = (png_byte*)malloc(m_width * sizeof(png_byte) * m_elements);
 
-
-   // Actual writing
-   png_byte* tempLine = (png_byte*)malloc(m_width * sizeof(png_byte) * 4);
-
-   //for(int i=m_height-1;i>=0;i-=1){
-   for(int i=0;i<m_height;i+=1){
-     for(int j=0;j<m_width;j+=1){
-       for(int k = 0;k<4;k+=1)
-	 tempLine[4*j+k] = static_cast<png_byte>((*this)(j, i, k)*255.0); 
+  for(int i=0;i<m_height;i+=1){
+    for(int j=0;j<m_width;j+=1){
+      for(int k = 0;k<m_elements;k+=1)
+        tempLine[m_elements*j+k] = static_cast<png_byte>((*this)(j, i, k)*255.0); 
        
-       // inverse alpha
-       if(inverse_alpha)
-	 tempLine[4*j+3] = 255 - tempLine[4*j+3];
-     }
-     png_write_row(png_ptr, tempLine);
-   }
+      // inverse alpha
+      if(inverse_alpha && m_elements == 4)
+        tempLine[m_elements*j+3] = 255 - tempLine[m_elements*j+3];
+    }
+    png_write_row(png_ptr, tempLine);
+  }
 
-   // closing and freeing the structs
-   png_write_end(png_ptr, info_ptr);
-   png_destroy_write_struct(&png_ptr, &info_ptr);
-   free(tempLine);
-   std::cout<<"Problem here ?"<<std::endl;
-   fclose(fout);
-   std::cout<<"Problem here2 ?"<<std::endl;
+  // closing and freeing the structs
+  png_write_end(png_ptr, info_ptr);
+  png_destroy_write_struct(&png_ptr, &info_ptr);
+  free(tempLine);
+  fclose(fout);
 }
 
 void ShImage::loadPng(const std::string& filename)
