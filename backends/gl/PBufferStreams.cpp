@@ -289,6 +289,10 @@ void PBufferStreams::execute(const ShProgram& program,
     ShTextureNodePtr tex;
     ShTextureTraits traits = ShArrayTraits();
     traits.clamping(ShTextureTraits::SH_UNCLAMPED);
+
+    // TODO!
+    // We're copying a far larger amount of memory in here than we
+    // should. Don't do this.
     switch (extension) {
     case SH_ARB_NV_FLOAT_BUFFER:
       tex = new ShTextureNode(SH_TEXTURE_RECT, I->first->size(),
@@ -445,8 +449,27 @@ void PBufferStreams::execute(const ShProgram& program,
   }
 
   outhost->dirty();
+
+  GLenum format;
+  switch (output->size()) {
+  case 1:
+    format = GL_RED;
+    break;
+  case 2:
+    SH_DEBUG_ASSERT(0 && "Sorry, 2-component outputs aren't working right now!");
+    break;
+  case 3:
+    format = GL_RGB;
+    break;
+  case 4:
+    format = GL_RGBA;
+    break;
+  default:
+    SH_DEBUG_ASSERT(false);
+    break;
+  }
   
-  glReadPixels(0, 0, tex_size, input_count / tex_size, GL_RGB,
+  glReadPixels(0, 0, tex_size, input_count / tex_size, format,
                GL_FLOAT, outhost->data());
   gl_error = glGetError();
   if (gl_error != GL_NO_ERROR) {
@@ -458,7 +481,7 @@ void PBufferStreams::execute(const ShProgram& program,
     return;
   }
   if (input_count % tex_size) {
-    glReadPixels(0, input_count / tex_size, input_count % tex_size, 1, GL_RGB, GL_FLOAT,
+    glReadPixels(0, input_count / tex_size, input_count % tex_size, 1, format, GL_FLOAT,
                  reinterpret_cast<float*>(outhost->data())
                  + (input_count - (input_count % tex_size)) * output->size());
     gl_error = glGetError();

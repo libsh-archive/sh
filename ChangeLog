@@ -1,5 +1,8 @@
 2004-03-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* backends/gl/PBufferStreams.cpp (execute): Use different
+	ReadPixels() format depending on the output channel pitch.
+
 	* Makefile.am: Don't make documentation if doxygen wasn't found or
 	they have been disabled.
 
