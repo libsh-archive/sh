@@ -1,0 +1,14 @@
+SMALL TASKS:
+ - check into CVS
+ - improve error handling in ShParser.cpp
+ - add line numbers/filenames to tokens, use this in error handling
+
+MEDIUM TASKS:
+ - port more of the ShLib calls to the new model.
+ - code generator
+
+LARGE TASKS:
+ - finish the parser
+ - optimizer
+ - matrices
+ - textures

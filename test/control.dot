@@ -1,0 +1,27 @@
+digraph control {
+"0x807a0b8"  [label="", shape=circle, height=0.25];
+"0x807a0f8"  [label="t3 := in MUL in\nt4 := t3\ntemp := t4\n", shape=box];
+"0x807a118"  [label="", shape=circle, height=0.25];
+"0x807a138"  [label="t5 := temp ADD temp\nt6 := t5\nout := t6\n", shape=box];
+"0x807a158"  [label="t7 := in ADD in\nt8 := t7\n", shape=box];
+"0x807a178"  [label="t9 := temp ADD in\nt10 := t9\nout := t10\n", shape=box];
+"0x807a1b8"  [label="", shape=circle, height=0.25];
+"0x8079058"  [label="", shape=circle, height=0.25];
+"0x80791c8"  [label="t13 := in ADD in\nt14 := t13\ntemp := t14\n", shape=box];
+"0x807a0d8"  [label="", shape=circle, height=0.25];
+"0x80791c8" -> "0x807a0d8";
+"0x8079058" -> "0x80791c8";
+"0x807a1b8" -> "0x8079058";
+"0x807a178" -> "0x807a1b8";
+"0x807a158" -> "0x807a178" [style=dashed, label="t8"];
+"0x807a198"  [label="", shape=circle, height=0.25];
+"0x807a198" -> "0x807a1b8";
+"0x807a158" -> "0x807a198";
+"0x807a138" -> "0x807a158";
+"0x807a118" -> "0x807a138" [style=dashed, label="temp"];
+"0x80791a8"  [label="t11 := 0\nout := t11\n", shape=box];
+"0x80791a8" -> "0x8079058";
+"0x807a118" -> "0x80791a8";
+"0x807a0f8" -> "0x807a118";
+"0x807a0b8" -> "0x807a0f8";
+}
