@@ -13,6 +13,6 @@ incincdir = $(includedir)/sh
 incinc_HEADERS = ShgaBase.hpp \
 								 ShgaBaseImpl.hpp \
 								 ShgaConstants.hpp \
-								 ShgaVersor.hpp \
-								 ShgaVersorImpl.hpp \
+								 ShgaMultivector.hpp \
+								 ShgaMultivectorImpl.hpp \
                  shga.hpp

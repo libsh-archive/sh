@@ -30,50 +30,50 @@
 #include <iostream>
 #include <sstream>
 #include "ShDebug.hpp"
-#include "ShgaVersor.hpp"
+#include "ShgaMultivector.hpp"
 
 namespace Shga {
 
   using namespace SH;
 
-/** \file ShgaVersorImpl.hpp
- * TODO add see also ShgaVersor.hpp link (comments are there)
+/** \file ShgaMultivectorImpl.hpp
+ * TODO add see also ShgaMultivector.hpp link (comments are there)
  */
 
 
 
 /* TODO do a more general implementation
- * Currently this is a specialized implementation for ShgaVersor<T, P, N>
+ * Currently this is a specialized implementation for ShgaMultivector<T, P, N>
  */
 
 template<typename T, int P, int N>
-ShgaVersor<T, P, N>::ShgaVersor() 
+ShgaMultivector<T, P, N>::ShgaMultivector() 
   : m_grades( 0 ), size( 0 ) {
 }
 
 template<typename T, int P, int N>
-ShgaVersor<T, P, N>::ShgaVersor( double scalar ) 
+ShgaMultivector<T, P, N>::ShgaMultivector( double scalar ) 
   : m_grades( SHGA_GRADE0 ), size( 0 ) {
     updateSize();
   m_coeff[0](0) = scalar;
 }
 
 template<typename T, int P, int N>
-ShgaVersor<T, P, N>::ShgaVersor( ShAttrib1f scalar ) 
+ShgaMultivector<T, P, N>::ShgaMultivector( ShAttrib1f scalar ) 
   : m_grades( SHGA_GRADE0 ), size( 0 ) {
     updateSize();
   m_coeff[0](0) = scalar;
 }
 
 template<typename T, int P, int N>
-ShgaVersor<T, P, N>::ShgaVersor( int grades ) 
+ShgaMultivector<T, P, N>::ShgaMultivector( int grades ) 
   : m_grades( grades ), size( 0 ) {
   updateSize(); 
 }
 
 /* TODO check if C++ spec requires template<> for specilization */
 template<typename T, int P, int N>
-ShgaVersor<T, P, N>::ShgaVersor( int grades, double coeff[] )
+ShgaMultivector<T, P, N>::ShgaMultivector( int grades, double coeff[] )
   : m_grades( grades ), size( 0 ) {
   updateSize();
   for( int i = 0; i < numElements[m_grades]; ++i ) {
@@ -84,7 +84,7 @@ ShgaVersor<T, P, N>::ShgaVersor( int grades, double coeff[] )
 }
 
 template<typename T, int P, int N>
-ShgaVersor<T, P, N>::ShgaVersor( int grades, ShAttrib1f coeff[] )
+ShgaMultivector<T, P, N>::ShgaMultivector( int grades, ShAttrib1f coeff[] )
   : m_grades( grades ), size( 0 ) {
   updateSize();
   for( int i = 0; i < numElements[m_grades]; ++i ) {
@@ -95,26 +95,26 @@ ShgaVersor<T, P, N>::ShgaVersor( int grades, ShAttrib1f coeff[] )
 }
 
 template<typename T, int P, int N>
-ShgaVersor<T, P, N>::ShgaVersor( int grades, const T coeff[] )
+ShgaMultivector<T, P, N>::ShgaMultivector( int grades, const T coeff[] )
   : m_grades( grades ), size( 0 ) {
   updateSize();
   for( int i = 0; i < size; ++i ) m_coeff[i] = coeff[i]; 
 }
 
 template<typename T, int P, int N>
-ShgaVersor<T, P, N>::ShgaVersor( const ShgaVersor<T, P, N> &b )
+ShgaMultivector<T, P, N>::ShgaMultivector( const ShgaMultivector<T, P, N> &b )
   : m_grades( b.m_grades ), size( 0 ){
   updateSize();
   for( int i = 0; i < size; ++i ) m_coeff[i] = b.m_coeff[i];
 }
 
 template<typename T, int P, int N>
-ShgaVersor<T, P, N>::~ShgaVersor() {
+ShgaMultivector<T, P, N>::~ShgaMultivector() {
   if( size > 0 ) delete[] m_coeff;
 }
 
 template<typename T, int P, int N>
-ShgaVersor<T, P, N>& ShgaVersor<T, P, N>::operator=( const ShgaVersor<T, P, N> &b ) {
+ShgaMultivector<T, P, N>& ShgaMultivector<T, P, N>::operator=( const ShgaMultivector<T, P, N> &b ) {
   m_grades = b.m_grades;
   updateSize();
   for( int i = 0; i < size; ++i ) m_coeff[i] = b.m_coeff[i];
@@ -123,112 +123,134 @@ ShgaVersor<T, P, N>& ShgaVersor<T, P, N>::operator=( const ShgaVersor<T, P, N> &
 
 
 template<typename T, int P, int N>
-ShAttrib1f& ShgaVersor<T, P, N>::operator()( int basisElement ) { 
-  PositionPair &pos = elementPosition[ m_grades ][ basisElement ];
-  return m_coeff[ pos.first ][ pos.second ]; 
+ShAttrib1f ShgaMultivector<T, P, N>::operator()( int basisElement ) const { 
+  if( !( basisGradeBits[ basisElement ] & m_grades ) ) return 0;
+  typename ShgaBase<T, P, N>::Position pos = elementPosition[ m_grades ][ basisElement ];
+  return m_coeff[ pos.vec ]( pos.offset ); 
 }
 
 template<typename T, int P, int N>
-const ShAttrib1f ShgaVersor<T, P, N>::operator()( int basisElement ) const {
-  PositionPair &pos = elementPosition[ m_grades ][ basisElement ];
-  return m_coeff[ pos.first ][ pos.second ]; 
+ShgaMultivector<T, P, N> ShgaMultivector<T, P, N>::grade( int grades ) { 
+  ShgaMultivector<T, P, N> result( grades );
+  runAddSequence( extractGradeOps[grades][m_grades], result );
 }
 
 template<typename T, int P, int N>
-ShgaVersor<T, P, N> ShgaVersor<T, P, N>::grade( int grades ) { 
-  ShgaVersor<T, P, N> result( grades );
-  runCopySequence( extractGradeOps[grades][m_grades], result );
-}
-
-template<typename T, int P, int N>
-ShgaVersor<T, P, N> ShgaVersor<T, P, N>::operator*( const ShgaVersor<T, P, N> &b ) const {
+ShgaMultivector<T, P, N> ShgaMultivector<T, P, N>::operator*( const ShgaMultivector<T, P, N> &b ) const {
   // TODO figure out if this is a bug, or if this is in the C++ spec
   // (I cannot refer to BinaryOpSequence without ShgaBase<T, P, N>)
   typename ShgaBase<T, P, N>::BinaryOpSequence &ops = gpOps[ m_grades ][ b.m_grades ];
-  ShgaVersor<T, P, N> result( ops.resultGrade );
+  ShgaMultivector<T, P, N> result( ops.resultGrade );
   runMadSequence( ops, b, result );
   return result;
 }
 
 template<typename T, int P, int N>
-ShgaVersor<T, P, N>& ShgaVersor<T, P, N>::operator*=( const ShgaVersor<T, P, N> &b ) {
+ShgaMultivector<T, P, N>& ShgaMultivector<T, P, N>::operator*=( const ShgaMultivector<T, P, N> &b ) {
   (*this) = operator*(b);
   return *this;
 }
 
 template<typename T, int P, int N>
-ShgaVersor<T, P, N> ShgaVersor<T, P, N>::operator<<( const ShgaVersor<T, P, N> &b ) const {
+ShgaMultivector<T, P, N> ShgaMultivector<T, P, N>::operator<<( const ShgaMultivector<T, P, N> &b ) const {
   typename ShgaBase<T, P, N>::BinaryOpSequence &ops = lcpOps[ m_grades ][ b.m_grades ];
-  ShgaVersor<T, P, N> result( ops.resultGrade );
+  ShgaMultivector<T, P, N> result( ops.resultGrade );
   runMadSequence( ops, b, result );
   return result;
 }
 
 template<typename T, int P, int N>
-ShgaVersor<T, P, N>& ShgaVersor<T, P, N>::operator<<=( const ShgaVersor<T, P, N> &b ) {
+ShgaMultivector<T, P, N>& ShgaMultivector<T, P, N>::operator<<=( const ShgaMultivector<T, P, N> &b ) {
   (*this) = operator<<( b );
   return *this;
 }
 
 template<typename T, int P, int N>
-ShgaVersor<T, P, N> ShgaVersor<T, P, N>::operator^( const ShgaVersor<T, P, N> &b ) const {
+ShgaMultivector<T, P, N> ShgaMultivector<T, P, N>::operator^( const ShgaMultivector<T, P, N> &b ) const {
   typename ShgaBase<T, P, N>::BinaryOpSequence &ops = opOps[ m_grades ][ b.m_grades ];
-  ShgaVersor<T, P, N> result( ops.resultGrade );
+  ShgaMultivector<T, P, N> result( ops.resultGrade );
   runMadSequence( ops, b, result );
   return result; 
 }
 
 template<typename T, int P, int N>
-ShgaVersor<T, P, N>& ShgaVersor<T, P, N>::operator^=( const ShgaVersor<T, P, N> &b ) {
+ShgaMultivector<T, P, N>& ShgaMultivector<T, P, N>::operator^=( const ShgaMultivector<T, P, N> &b ) {
   (*this) = operator^(b);
   return *this;
 }
 
 template<typename T, int P, int N>
-ShgaVersor<T, P, N> ShgaVersor<T, P, N>::gradeInvolution() const {
-  typename ShgaBase<T, P, N>::UnaryOpSequence &ops = gradeInvolution[ m_grades ];
-  ShgaVersor<T, P, N> result( ops.resultGrade );
-  runCopySequence( ops, result );
+ShgaMultivector<T, P, N> ShgaMultivector<T, P, N>::operator+( const ShgaMultivector<T, P, N> &b ) const {
+  typename ShgaBase<T, P, N>::UnaryOpSequence &ops1 = addOps[0][ m_grades ][ b.m_grades ];
+  typename ShgaBase<T, P, N>::UnaryOpSequence &ops2 = addOps[1][ m_grades ][ b.m_grades ];
+  ShgaMultivector<T, P, N> result( ops1.resultGrade );
+  runAddSequence( ops1, result );
+  b.runAddSequence( ops2, result );
   return result;
 }
 
 template<typename T, int P, int N>
-ShgaVersor<T, P, N> ShgaVersor<T, P, N>::reverse() const {
-  typename ShgaBase<T, P, N>::UnaryOpSequence &ops = gradeInvolution[ m_grades ];
-  ShgaVersor<T, P, N> result( ops.resultGrade );
-  runCopySequence( ops, result );
+ShgaMultivector<T, P, N>& ShgaMultivector<T, P, N>::operator+=( const ShgaMultivector<T, P, N> &b ) {
+  (*this) = operator+( b );
+  return *this;
+}
+
+template<typename T, int P, int N>
+ShgaMultivector<T, P, N> ShgaMultivector<T, P, N>::gradeInvolution() const {
+  typename ShgaBase<T, P, N>::UnaryOpSequence &ops = gradeInvolutionOps[ m_grades ];
+  ShgaMultivector<T, P, N> result( ops.resultGrade );
+  runAddSequence( ops, result );
   return result;
 }
 
 template<typename T, int P, int N>
-ShgaVersor<T, P, N> ShgaVersor<T, P, N>::cliffordConjugate() const {
-  return reverse()->gradeInvolution();
+ShgaMultivector<T, P, N> ShgaMultivector<T, P, N>::reverse() const {
+  typename ShgaBase<T, P, N>::UnaryOpSequence &ops = reverseOps[ m_grades ];
+  ShgaMultivector<T, P, N> result( ops.resultGrade );
+  runAddSequence( ops, result );
+  return result;
 }
 
 template<typename T, int P, int N>
-ShgaVersor<T, P, N> ShgaVersor<T, P, N>::dual() const {
-  double coeff[] = { 1 };
-
-  ShgaVersor<T, P, N>::PseudoScalar( SHGA_GRADE0 << DIMENSION, coeff ); 
-  return operator*( PseudoScalar.inverse() ); 
+ShgaMultivector<T, P, N> ShgaMultivector<T, P, N>::cliffordConjugate() const {
+  return reverse().gradeInvolution();
 }
 
 template<typename T, int P, int N>
-ShgaVersor<T, P, N> ShgaVersor<T, P, N>::inverse() const {
+ShgaMultivector<T, P, N> ShgaMultivector<T, P, N>::dual() const {
+  // TODO fix this for non-euclidean geometric algebras
+  // (currently assumes the gpMatrix entry is the inverse of the pseudoscalar
+  // which is just the pseudoscalar with a different sign)
+  double coeff[] = { gpMatrix[0][MAX_BASIS - 1].front().neg ? -1 : 1 };
+
+  ShgaMultivector<T, P, N> invPseudoscalar( SHGA_GRADE0 << DIMENSION, coeff ); 
+  return operator*( invPseudoscalar ); 
+}
+
+template<typename T, int P, int N>
+ShgaMultivector<T, P, N> ShgaMultivector<T, P, N>::inverse() const {
   // TODO general case
   assert( DIMENSION == 3 );
   // Lounesto's inverse
-  ShgaVersor<T, P, N> conj = cliffordConjugate();
-  ShgaVersor<T, P, N> thisconj = (*this) * conj; 
+  ShgaMultivector<T, P, N> conj = cliffordConjugate();
+  ShgaMultivector<T, P, N> thisconj = (*this) * conj; 
+
   ShAttrib1f scalar = thisconj( 0 ); 
   ShAttrib1f pseudoscalar = thisconj( MAX_BASIS - 1 );
+  std::cout << "Scalar: " << scalar.node()->getValue(0) << std::endl;
+  std::cout << "Pseudo : " << pseudoscalar.node()->getValue(0) << std::endl;
 
-  return conj * ( ( scalar - pseudoscalar ) *  
-    ( scalar * scalar - pseudoscalar * pseudoscalar ).inverse() ); 
+  ShAttrib1f lounestoNumerator[2];
+  lounestoNumerator[0] = scalar;
+  lounestoNumerator[1] = -pseudoscalar;
+  ShAttrib1f lounestoDenominator = rcp( scalar * scalar - pseudoscalar * pseudoscalar ); 
+
+  return conj * ShgaMultivector<T, P, N>( SHGA_GRADE0 | ( SHGA_GRADE0 << DIMENSION ), lounestoNumerator )
+    * ShgaMultivector<T, P, N>( lounestoDenominator );
 }
 
 template<typename T, int P, int N>
-std::string ShgaVersor<T, P, N>::toString() const {
+std::string ShgaMultivector<T, P, N>::toString() const {
   std::ostringstream out;
  
   bool firstTerm = true;
@@ -243,13 +265,14 @@ std::string ShgaVersor<T, P, N>::toString() const {
       firstTerm = false;
     }
   }
+  if( firstTerm ) out << "0";
   return out.str();
 }
 
 
 template<typename T, int P, int N>
-void ShgaVersor<T, P, N>::runMadSequence( typename ShgaBase<T, P, N>::BinaryOpSequence &bos,
-    const ShgaVersor<T, P, N> &b, ShgaVersor<T, P, N> &dest ) const {
+void ShgaMultivector<T, P, N>::runMadSequence( typename ShgaBase<T, P, N>::BinaryOpSequence &bos,
+    const ShgaMultivector<T, P, N> &b, ShgaMultivector<T, P, N> &dest ) const {
   double destData[VECTOR_SIZE];
   double src1Data[VECTOR_SIZE];
   double src2Data[VECTOR_SIZE];
@@ -286,8 +309,8 @@ void ShgaVersor<T, P, N>::runMadSequence( typename ShgaBase<T, P, N>::BinaryOpSe
 }
 
 template<typename T, int P, int N>
-void ShgaVersor<T, P, N>::runCopySequence( typename ShgaBase<T, P, N>::UnaryOpSequence &uos, 
-    ShgaVersor<T, P, N> &dest ) const {
+void ShgaMultivector<T, P, N>::runAddSequence( typename ShgaBase<T, P, N>::UnaryOpSequence &uos, 
+    ShgaMultivector<T, P, N> &dest ) const {
   double destData[VECTOR_SIZE];
   double srcData[VECTOR_SIZE];
   for( typename ShgaBase<T, P, N>::UnaryOpSequence::OpVec::iterator ovit = uos.ops.begin(); 
@@ -297,14 +320,15 @@ void ShgaVersor<T, P, N>::runCopySequence( typename ShgaBase<T, P, N>::UnaryOpSe
     dest.m_coeff[ op.destVec ]( op.destSwiz ) =  
       op.neg ? -m_coeff[ op.srcVec ]( op.srcSwiz ) : m_coeff[ op.srcVec ]( op.srcSwiz ); 
       */
+    std::cout << op.toString() << std::endl;
 
     T& destVec = dest.m_coeff[ op.destVec ];
-    T srcVec = ( op.neg1 ? -m_coeff[ op.vec1 ] : m_coeff[ op.vec1 ] );
+    T& srcVec = m_coeff[ op.srcVec ]; 
 
     destVec.getValues( destData );
     srcVec.getValues( srcData );
     for( int i = 0; i < op.size; ++i ) {
-      destData[ op.destSwiz[i] ] = srcData[ op.srcSwiz[i] ]; 
+      destData[ op.destSwiz[i] ] += ( op.neg ? -1 : 1 ) * srcData[ op.srcSwiz[i] ]; 
     }
     destVec.setValues( destData );
   }
@@ -312,7 +336,7 @@ void ShgaVersor<T, P, N>::runCopySequence( typename ShgaBase<T, P, N>::UnaryOpSe
 
 
 template<typename T, int P, int N>
-void ShgaVersor<T, P, N>::updateSize() {
+void ShgaMultivector<T, P, N>::updateSize() {
   int requiredVecs = numVecs[ m_grades ]; 
   if( size == requiredVecs ) {
     // TODO zero coefficients?

@@ -33,6 +33,10 @@
 
 namespace Shga {
 
+/** TODO this is a minor mess...
+ * Most of the vectorization code should be generalized and whacked into the
+ * Sh optimizer.
+ */
 
 /** \file ShgaBase.hpp
  * This class determines the sequences of operations on coefficients required
@@ -40,7 +44,7 @@ namespace Shga {
  */
 template<typename T, int P, int N>
 class ShgaBase {
-  protected:
+  public:
     enum {
       DIMENSION = P + N,
       VECTOR_SIZE = T::typesize,
@@ -48,6 +52,8 @@ class ShgaBase {
       MAX_GRADE = 1 << ( DIMENSION + 1 ),
       MAX_BASIS = 1 << DIMENSION 
     };
+
+  protected:
 
     struct SignedBasisElement {
       int element;
@@ -85,8 +91,8 @@ class ShgaBase {
       Position dest;
       ScalarUnaryOp(); // uninitialized
       ScalarUnaryOp( Position dest, Position src, bool neg );
-      bool operator<( const ScalarBinaryOp &b ) const;
-      bool matches( const ScalarBinaryOp &b ) const;
+      bool operator<( const ScalarUnaryOp &b ) const;
+      bool matches( const ScalarUnaryOp &b ) const;
     };
 
 
@@ -100,7 +106,7 @@ class ShgaBase {
       VectorBinaryOp(); // uninitialized
       // creates a binary op from scalar ops - neg flags and src vecs must be the 
       // same for all the scalar ops
-      VectorBinaryOp( std::vector<ScalarBinaryOp> ops ); 
+      VectorBinaryOp( const std::vector<ScalarBinaryOp> &ops ); 
       std::string toString() const;
     };
 
@@ -111,13 +117,14 @@ class ShgaBase {
       int srcSwiz[VECTOR_SIZE], destSwiz[VECTOR_SIZE];
 
       VectorUnaryOp(); // uninitialized
-      VectorUnaryOp( std::vector<ScalarUnaryOp> ops ); 
+      VectorUnaryOp( const std::vector<ScalarUnaryOp> &ops ); 
       std::string toString() const;
     };
 
     template<typename OpType> 
     struct OpSequence {
       typedef std::vector< OpType > OpVec; 
+      typedef OpType VecType;
 
       bool init; // whether this op has been initialized
       int resultGrade; // bit representation of resulting grades
@@ -164,6 +171,7 @@ class ShgaBase {
     // extractGrade[dest][src] contains ops to extract dest grade from src 
     // ([MAX_GRADE][MAX_GRADE])
     static UnaryOpSequence** extractGradeOps;
+    static UnaryOpSequence** addOps[2]; // a sequence of unary ops from each src op 
 
     // unaryop[src] ([MAX_GRADE])
     static UnaryOpSequence* gradeInvolutionOps;
@@ -172,12 +180,16 @@ class ShgaBase {
   private:
     // generate a product from the given product matrix
     // into the given OperationVector for the given input grades
-    static int generateProductOp( SignedBasisElementVec **productMatrix,
-        int src1Grades, int src2Grades,
-        std::vector< ScalarBinaryOp > &ops );
+    static void generateProductOp( SignedBasisElementVec **productMatrix,
+        int src1Grades, int src2Grades, BinaryOpSequence& opSeq ); 
 
-    static void makeOpSequence( BinaryOpSequence& opSeq, int resultGrade, 
-        std::vector< ScalarBinaryOp > ops );
+    static void generateExtractOp( int destGrade, int srcGrade );
+    static void generateAddOp( int src1Grade, int src2Grade ); 
+    static void generateGradeInvolutionOp( int srcGrade );
+    static void generateReverseOp( int srcGrade );
+
+    template<typename ScalarOpType, typename OpSequenceType>
+    static void makeOpSequence( OpSequenceType& opSeq, int resultGrade, std::vector< ScalarOpType > ops );
 };
 
 }
