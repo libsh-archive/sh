@@ -13,6 +13,7 @@
 #include "Camera.hpp"
 
 using namespace SH;
+using namespace std;
 
 // defines
 #define NUM_PARTICLES 4096
@@ -339,7 +340,9 @@ int main(int argc, char** argv)
   vsh.node()->code()->print(cout);
   cout << "--" << endl;
   cout << "Fragment Unit:" << endl;
-  fsh.node()->code()->print(cout);
+  particle_fsh.node()->code()->print(cout);
+  cout << "--" << endl;
+  plane_fsh.node()->code()->print(cout);
   cout << "--" << endl;
 #endif
  
