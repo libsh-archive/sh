@@ -101,6 +101,7 @@ ArbOpInfo arbOpInfo[] = {
   {"DDX", 1, false},
   {"DDY", 1, false},
   {"RFL", 2, false},
+  {"TXD", 4, false},
 
   // NV_vertex_program2
   {"SSG", 1, false},

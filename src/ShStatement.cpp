@@ -87,6 +87,7 @@ const ShOperationInfo opInfo[] = {
 
   {"TEX", 2, ShOperationInfo::EXTERNAL, false},
   {"TEXI", 2, ShOperationInfo::EXTERNAL, false},
+  {"TEXD", 3, ShOperationInfo::EXTERNAL, false},
 
   {"COND", 3, ShOperationInfo::LINEAR, false},
 

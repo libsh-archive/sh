@@ -1,5 +1,30 @@
 2004-10-12  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* backends/gl/ArbCode.cpp (printSamplingInstruction): Output
+	SH_ARB_TXD instructions properly.
+
+	* backends/gl/ArbEmit.cpp (emit_tex): Handle SH_OP_TEXD (only 2D
+	for now).
+
+	* backends/gl/ArbInst.hpp (struct ArbInst): Add max_num_sources,
+	set to four, add constructor for four sources.
+
+	* backends/gl/ArbInst.cpp (arbOpInfo): Add operation info for SH_ARB_TXD.
+
+	* backends/gl/ArbInst.hpp (enum ArbOp): Add SH_ARB_TXD.
+
+	* src/ShBaseTextureImpl.hpp (ShBaseTexture2D::operator()):
+	Implemented lookup-with-derivatives operator.
+
+	* src/ShBaseTexture.hpp (ShBaseTexture2D): Added
+	lookup-with-derivatives operator, only for 2D for now.
+
+	* src/ShStatement.cpp (opInfo): Added opInfo for SH_OP_TEXD.
+
+	* src/ShStatement.hpp: Added SH_OP_TEXD.
+
+	* backends/gl/ArbEmit.cpp: Only emit texture lookups on NVVP3 (was NVVP2).
+
 	* src/ShConstProp.cpp (struct FinishConstProp): Skip the statement
 	for uniform lifting if we've replaced it with a constant.
 

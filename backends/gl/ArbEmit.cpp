@@ -153,11 +153,13 @@ ArbMapping ArbCode::table[] = {
   {SH_OP_XPD,  SH_ARB_ANY | SH_ARB_VEC3,   0, SH_ARB_XPD, 0},
 
   // Texture
-  {SH_OP_TEX,  SH_ARB_NVVP2, 0, SH_ARB_FUN, &ArbCode::emit_tex},
+  {SH_OP_TEX,  SH_ARB_NVVP3, 0, SH_ARB_FUN, &ArbCode::emit_tex},
   {SH_OP_TEX,  SH_ARB_FP,    0, SH_ARB_FUN, &ArbCode::emit_tex},
-  {SH_OP_TEXI, SH_ARB_NVVP2, 0, SH_ARB_FUN, &ArbCode::emit_tex},
+  {SH_OP_TEXI, SH_ARB_NVVP3, 0, SH_ARB_FUN, &ArbCode::emit_tex},
   {SH_OP_TEXI, SH_ARB_FP,    0, SH_ARB_FUN, &ArbCode::emit_tex},
 
+  {SH_OP_TEXD,  SH_ARB_NVFP,  0, SH_ARB_FUN, &ArbCode::emit_tex},
+  
   // Misc.
   {SH_OP_COND, SH_ARB_NVFP, 0, SH_ARB_FUN, &ArbCode::emit_nvcond},
   {SH_OP_COND, SH_ARB_NVVP2, 0, SH_ARB_FUN, &ArbCode::emit_nvcond},
@@ -527,8 +529,15 @@ void ArbCode::emit_tex(const ShStatement& stmt)
     delay = true;
   }
 
-  m_instructions.push_back(ArbInst(SH_ARB_TEX,
-                                   (delay ? tmpdest : stmt.dest), stmt.src[1], stmt.src[0]));
+  if (stmt.op == SH_OP_TEXD) {
+    SH_DEBUG_ASSERT(tnode->dims() == SH_TEXTURE_2D);
+    m_instructions.push_back(ArbInst(SH_ARB_TXD,
+                                     (delay ? tmpdest : stmt.dest), stmt.src[1], stmt.src[0],
+                                     stmt.src[2](0,1), stmt.src[2](2,3)));
+  } else {
+    m_instructions.push_back(ArbInst(SH_ARB_TEX,
+                                     (delay ? tmpdest : stmt.dest), stmt.src[1], stmt.src[0]));
+  }
   if (delay) emit(ShStatement(stmt.dest, SH_OP_ASN, tmpsrc));
 }
 

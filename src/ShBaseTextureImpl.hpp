@@ -29,6 +29,8 @@
 
 #include "ShBaseTexture.hpp"
 #include "ShContext.hpp"
+#include "ShError.hpp"
+#include "ShLibMisc.hpp"
 
 namespace SH {
 
@@ -121,6 +123,23 @@ T ShBaseTexture2D<T>::operator()(const ShGeneric<2, float>& coords) const
     // TODO!
     T t;
     return t;
+  }
+}
+
+template<typename T>
+T ShBaseTexture2D<T>::operator()(const ShGeneric<2, float>& coords,
+                                 const ShGeneric<2, float>& dx,
+                                 const ShGeneric<2, float>& dy) const
+{
+  if (ShContext::current()->parsing()) {
+    T t;
+    ShVariable texVar(m_node);
+    ShStatement stmt(t, SH_OP_TEXD, texVar, coords, join(dx, dy));
+    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  } else {
+    shError(ShScopeException("Cannot do derivative texture lookup in immediate mode"));
+    T t; return t;
   }
 }
 
