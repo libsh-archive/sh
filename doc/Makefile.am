@@ -1,6 +1,6 @@
 docs: html/index.html
 
-html/index.html: Doxyfile $(wildcard ../src/*.[hc]pp)
+html/index.html: Doxyfile $(wildcard ../src/*.[hc]pp) $(wildcard ../util/*.[hc]pp)
 	doxygen Doxyfile
 
 upload-docs: docs
