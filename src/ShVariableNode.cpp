@@ -149,6 +149,9 @@ std::string ShVariableNode::name() const
   case SH_OUTPUT:
     stream << "o";
     break;
+  case SH_INOUT:
+    stream << "io";
+    break;
   case SH_TEMP:
     stream << "t";
     break;
