@@ -34,7 +34,7 @@
 #include "ShToken.hpp"
 #include "ShProgram.hpp"
 #include "ShBackend.hpp"
-#include "ShOptimizer.hpp"
+#include "ShOptimizations.hpp"
 
 namespace SH {
 
@@ -54,8 +54,7 @@ void shEndShader()
   
   parsing->ctrlGraph = new ShCtrlGraph(parsing->tokenizer.blockList());
 
-  ShOptimizer optimizer(parsing->ctrlGraph);
-  optimizer.optimize(ShContext::current()->optimization());
+  optimize(parsing);
   
   parsing->collectVariables();
   

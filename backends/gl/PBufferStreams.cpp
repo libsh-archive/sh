@@ -50,7 +50,7 @@
 #endif // GLX_FLOAT_COMPONENTS_NV
 
 #include "sh.hpp"
-#include "ShOptimizer.hpp"
+#include "ShOptimizations.hpp"
 #include "ShException.hpp"
 #include "ShError.hpp"
 #include "ShContext.hpp"
@@ -495,8 +495,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
 
   
   // optimize
-  ShOptimizer optimizer(fp.node()->ctrlGraph);
-  optimizer.optimize(ShContext::current()->optimization());
+  optimze(fp);
 
   int gl_error;
   glEnable(GL_VERTEX_PROGRAM_ARB);

@@ -1,11 +1,14 @@
 #include "ShEvaluate.hpp"
 #include "ShInstructions.hpp"
 #include "ShDebug.hpp"
+#include "ShContext.hpp"
 
 namespace SH {
 
 void evaluate(ShStatement& stmt)
 {
+  // Make sure we are outside of a program definition
+  ShContext::current()->enter(0);
   switch (stmt.op) {
   case SH_OP_ASN:
     shASN(stmt.dest, stmt.src[0]);
@@ -150,6 +153,7 @@ void evaluate(ShStatement& stmt)
     SH_DEBUG_ASSERT(0 && "Invalid Statement");
     break;
   }
+  ShContext::current()->exit();
 }
 
 }

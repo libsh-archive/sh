@@ -10,6 +10,12 @@ namespace SH {
 
 /// Optimize the program with the given optimization level.
 void optimize(ShProgram& p, int level);
+void optimize(const ShProgramNodePtr& p, int level);
+
+/// Optimize the program with the current context's default
+/// optimization level.
+void optimize(ShProgram& p);
+void optimize(const ShProgramNodePtr& p);
 
 // Internal stuff.
 

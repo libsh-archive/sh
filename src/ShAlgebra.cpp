@@ -32,7 +32,7 @@
 #include "ShCtrlGraph.hpp"
 #include "ShDebug.hpp"
 #include "ShError.hpp"
-#include "ShOptimizer.hpp"
+#include "ShOptimizations.hpp"
 #include "ShInternals.hpp"
 #include "ShEnvironment.hpp"
 #include "ShContext.hpp"
@@ -170,8 +170,7 @@ ShProgram connect(ShProgram pa, ShProgram pb)
   ShVariableReplacer replacer(varMap);
   program->ctrlGraph->dfs(replacer);
 
-  ShOptimizer optimizer(program->ctrlGraph);
-  optimizer.optimize(ShContext::current()->optimization());
+  optimize(program);
   
   program->collectVariables();
   return program;
@@ -214,8 +213,7 @@ ShProgram combine(ShProgram pa, ShProgram pb)
   program->outputs = a->outputs;
   program->outputs.insert(program->outputs.end(), b->outputs.begin(), b->outputs.end());
 
-  ShOptimizer optimizer(program->ctrlGraph);
-  optimizer.optimize(ShContext::current()->optimization()); 
+  optimize(program);
  
   program->collectVariables();
   
@@ -413,8 +411,7 @@ ShProgram replaceUniform(ShProgram a, const ShVariable& v)
   ShVariableReplacer replacer(varMap);
   program.node()->ctrlGraph->dfs(replacer);
 
-  ShOptimizer optimizer(program.node()->ctrlGraph);
-  optimizer.optimize(ShContext::current()->optimization());
+  optimize(program);
   
   program.node()->collectVariables();
 

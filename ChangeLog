@@ -1,3 +1,30 @@
+2004-08-23  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp (ConstProp::updateDest): Use SH_CONST
+	for our temporary evaluator variables so that they have values
+	even if we are inside a shader program definition.
+
+	* src/ShEvaluate.cpp (evaluate): Push a null program onto the
+	definition stack in ShContext to force our operations to execute
+	in immediate mode, even if we are in a program definition.
+
+	* src/ShOptimizations.cpp (forward_substitute): Copy this from
+	ShOptimzer.cpp (it used to be called "move elimination" but
+	forward substitution is the proper term).
+
+	* src/ShSyntax.cpp (shEndShader): Use optimize() from
+	ShOptimizations.hpp instead of ShOptimizer. Also did this in
+	backends/*/* and src/ShAlgebra.cpp.
+
+	* src/Makefile.am (libsh_la_SOURCES): Remove ShOptimizer.hpp and
+	ShOptimzer.cpp.
+
+	* src/ShStatement.hpp: Remove ud and du members from ShStatement.
+
+	* src/ShStatement.cpp (operator=): Implement operator=.
+
+	* src/ShStatement.hpp: Add operator=() for ShStatements.
+
 2004-08-21  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShOptimizations.cpp (struct FinishConstProp): Use the

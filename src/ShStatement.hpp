@@ -157,6 +157,9 @@ public:
   ShStatement(const ShStatement& other);
   
   ~ShStatement();
+
+  ShStatement& operator=(const ShStatement& other);
+  
   
   ShVariable dest;
   ShVariable src[3];
@@ -185,11 +188,6 @@ public:
   void remove_info(ShStatementInfo* old_info);
   
   bool marked;
-
-  // The following are used for the optimizer.
-  
-  std::set<ShStatement*> ud[3];
-  std::set<ShStatement*> du;
 };
 
 std::ostream& operator<<(std::ostream& out, const SH::ShStatement& stmt);

@@ -134,14 +134,36 @@ ShStatement::ShStatement(ShVariable dest, ShOperation op, ShVariable src0, ShVar
 ShStatement::ShStatement(const ShStatement& other)
   : dest(other.dest),
     op(other.op),
-    marked(other.marked),
-    du(other.du)
+    marked(other.marked)
 {
   for (int i = 0; i < 3; i++) src[i] = other.src[i];
-  for (int i = 0; i < 3; i++) ud[i] = other.ud[i];  
   for (std::list<ShStatementInfo*>::const_iterator I = other.info.begin(); I != other.info.end(); ++I) {
     info.push_back((*I)->clone());
   }
+}
+
+
+ShStatement& ShStatement::operator=(const ShStatement& other)
+{
+  if (&other == this) return *this;
+  
+  dest = other.dest;
+  op = other.op;
+  marked = other.marked;
+  for (int i = 0; i < 3; i++) src[i] = other.src[i];
+  
+  for (std::list<ShStatementInfo*>::const_iterator I = info.begin();
+       I != info.end(); ++I) {
+    delete *I;
+  }
+  info.clear();
+  
+  for (std::list<ShStatementInfo*>::const_iterator I = other.info.begin();
+       I != other.info.end(); ++I) {
+    info.push_back((*I)->clone());
+  }
+
+  return *this;
 }
 
 ShStatement::~ShStatement()

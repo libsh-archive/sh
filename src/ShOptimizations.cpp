@@ -6,6 +6,7 @@
 #include "ShCtrlGraph.hpp"
 #include "ShDebug.hpp"
 #include "ShEvaluate.hpp"
+#include "ShContext.hpp"
 
 namespace {
 
@@ -523,11 +524,11 @@ struct ConstProp : public ShStatementInfo {
           }
         }
         if (allconst) {
-          ShVariable tmpdest(new ShVariableNode(SH_TEMP, 1));
+          ShVariable tmpdest(new ShVariableNode(SH_CONST, 1));
           ShStatement eval(*stmt);
           eval.dest = tmpdest;
           for (int k = 0; k < opInfo[stmt->op].arity; k++) {
-            ShVariable tmpsrc(new ShVariableNode(SH_TEMP, 1));
+            ShVariable tmpsrc(new ShVariableNode(SH_CONST, 1));
             tmpsrc.setValue(0, src[k][idx(i,k)].value);
             eval.src[k] = tmpsrc;
           }
@@ -556,11 +557,11 @@ struct ConstProp : public ShStatementInfo {
         }
       }
       if (allconst) {
-        ShVariable tmpdest(new ShVariableNode(SH_TEMP, stmt->dest.size()));
+        ShVariable tmpdest(new ShVariableNode(SH_CONST, stmt->dest.size()));
         ShStatement eval(*stmt);
         eval.dest = tmpdest;
         for (int i = 0; i < opInfo[stmt->op].arity; i++) {
-          ShVariable tmpsrc(new ShVariableNode(SH_TEMP, stmt->src[i].size()));
+          ShVariable tmpsrc(new ShVariableNode(SH_CONST, stmt->src[i].size()));
           for (int j = 0; j < stmt->src[i].size(); j++) {
             tmpsrc.setValue(j, src[i][j].value);
           }
@@ -762,6 +763,77 @@ struct FinishConstProp
   }
 };
 
+
+/// Determine whether node is used in the RHS of stmt
+bool inRHS(const ShVariableNodePtr& node,
+           const ShStatement& stmt)
+{
+  for (int i = 0; i < opInfo[stmt.op].arity; i++) {
+    if (stmt.src[i].node() == node) return true;
+  }
+  
+  return false;
+}
+
+struct ForwardSubst {
+  ForwardSubst(bool& changed)
+    : changed(changed)
+  {
+  }
+
+  void operator()(const ShCtrlGraphNodePtr& node) {
+    if (!node) return;
+    ShBasicBlockPtr block = node->block;
+    if (!block) return;
+    for (ShBasicBlock::ShStmtList::iterator I = block->begin();
+         I != block->end(); ++I) {
+      substitute(*I);
+      
+      removeAME(I->dest.node());
+      
+      if (!inRHS(I->dest.node(), *I)
+          && I->dest.node()->kind() == SH_TEMP
+          && I->dest.swizzle().identity()) {
+        m_ame.push_back(*I);
+      }
+    }
+    m_ame.clear();
+  }
+  
+  void substitute(ShStatement& stmt)
+  {
+    if (stmt.op != SH_OP_ASN) return;
+    if (stmt.src[0].neg()) return;
+    if (stmt.src[0].node()->kind() != SH_TEMP) return;
+    if (!stmt.src[0].swizzle().identity()) return;
+
+    for (AME::const_iterator I = m_ame.begin(); I != m_ame.end(); ++I) {
+      if (I->dest.node() == stmt.src[0].node()) {
+        ShVariable v = stmt.dest;
+        stmt = *I;
+        stmt.dest = v;
+        changed = true;
+        break;
+      }
+    }
+  }
+
+  void removeAME(const ShVariableNodePtr& node)
+  {
+    for (AME::iterator I = m_ame.begin(); I != m_ame.end();) {
+      if (I->dest.node() == node || inRHS(node, *I)) {
+        I = m_ame.erase(I);
+        continue;
+      }
+      ++I;
+    }
+  }
+
+  bool& changed;
+  typedef std::list<ShStatement> AME;
+  AME m_ame;
+};
+
 }
 
 namespace SH {
@@ -826,7 +898,7 @@ void add_value_tracking(ShProgram& p)
   UdDuBuilder builder(r);
   graph->dfs(builder);
 
-#if 1
+#if 0
   UdDuDumper dumper;
   graph->dfs(dumper);
 #endif
@@ -930,15 +1002,23 @@ void propagate_constants(ShProgram& p)
   
 }
 
+void forward_substitute(ShProgram& p, bool& changed)
+{
+  ForwardSubst f(changed);
+  p.node()->ctrlGraph->dfs(f);
+}
+
 void optimize(ShProgram& p, int level)
 {
   if (level <= 0) return;
 
   bool changed;
   do {
-    SH_DEBUG_PRINT("===================Optimizer Pass Begins========================");
+    //    SH_DEBUG_PRINT("===================Optimizer Pass Begins========================");
     changed = false;
 
+    forward_substitute(p, changed);
+    
     p.node()->ctrlGraph->computePredecessors();
 
     straighten(p, changed);
@@ -953,9 +1033,25 @@ void optimize(ShProgram& p, int level)
 
     remove_branch_instructions(p);
 
-    SH_DEBUG_PRINT("==================Optimizer Pass Finished=======================");
+    //    SH_DEBUG_PRINT("==================Optimizer Pass Finished=======================");
   } while (changed);
 }
 
+void optimize(const ShProgramNodePtr& n, int level)
+{
+  ShProgram p(n);
+  optimize(p, level);
+}
+
+void optimize(ShProgram& p)
+{
+  optimize(p, ShContext::current()->optimization());
+}
+
+void optimize(const ShProgramNodePtr& n)
+{
+  ShProgram p(n);
+  optimize(p);
+}
 
 }
