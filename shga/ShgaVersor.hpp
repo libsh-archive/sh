@@ -79,8 +79,19 @@ template<typename T, int P, int N>
 class ShgaVersor: public ShgaBase<T, P, N>
 {
   public:
-    typedef ShgaVersorType<T, P, N> VersorType; 
-    static ShgaVersorType<T, P, N> PseudoScalar;
+    typedef ShgaVersor<T, P, N> VersorType; 
+
+    /** \brief Constructor for ShgaVersor
+     * Creates a zero versor
+     */
+    ShgaVersor();
+    ShgaVersor(const VersorType &b);
+
+    /** \brief Scalar construcctor for ShgaVersor
+     * Creates a scalar versor
+     */
+    ShgaVersor( double scalar );
+    ShgaVersor( ShAttrib1f scalar ); 
 
     /** \brief Constructor for ShgaVersors
      * Creates a zeroed versor with the given grade elements
@@ -101,7 +112,7 @@ class ShgaVersor: public ShgaBase<T, P, N>
     ShgaVersor( int grades, ShAttrib1f coeff[] ); 
 
     // TODO determine if this works for general T
-    ShgaVersor( int grades, const T &coeff ); 
+    ShgaVersor( int grades, const T coeff[] ); 
    
 
     /** \brief Destructor for ShgaVersor.
@@ -111,7 +122,7 @@ class ShgaVersor: public ShgaBase<T, P, N>
     /** \brief assignment operator
      * Makes a copy of b's data/memory object
      */
-    VersorType& operator=( VersorType &b );
+    VersorType& operator=( const VersorType &b );
 
     // Gets the specified basis element 
     // basisElement is specified using bitwise-or on SHGA_E? 
@@ -154,24 +165,24 @@ class ShgaVersor: public ShgaBase<T, P, N>
 
     /** \brief implementation of grade involution 
      */
-    VersorType gradeInvolution();
+    VersorType gradeInvolution() const;
 
     /** \brief implementation of reverse 
      */
-    VersorType reverse();
+    VersorType reverse() const;
 
     /** \brief implementation of Clifford conjugate 
      */
-    VersorType cliffordConjugate();
+    VersorType cliffordConjugate() const;
 
 
     /** \brief implementation of dual
      */
-    VersorType dual();
+    VersorType dual() const;
 
     /** \brief implementation of dual
      */
-    VersorType inverse();
+    VersorType inverse() const;
 
     /** \brief meet 
     VersorType meet( const VersorType &b ) const;
@@ -188,7 +199,9 @@ class ShgaVersor: public ShgaBase<T, P, N>
     VersorType& operator-=( const VersorType &b );
     */
 
-    std::string toString();
+    // this function cannot be used on GPU (no way to output text,
+    // no way i'm porting STL strings to the GPU)
+    std::string toString() const;
 
   private:
     // updates size and allocation for m_coeff based on current m_grades 
@@ -196,24 +209,19 @@ class ShgaVersor: public ShgaBase<T, P, N>
     void updateSize(); 
 
     // run binary op sequence where this is implicitly src1, b is src2
-    void runMadSequence( BinaryOpSequence &bos, const VersorType &b, VersorType &dest ) const;
+    void runMadSequence( typename ShgaBase<T, P, N>::BinaryOpSequence &bos, 
+        const VersorType &b, VersorType &dest ) const;
 
     // run unary op sequence where this is implicitly src1
-    void runCopySequence( UnaryOpSequence &uos, VersorType &dest ) const;
+    void runCopySequence( typename ShgaBase<T, P, N>::UnaryOpSequence &uos, 
+        VersorType &dest ) const;
 
     int m_grades;
     int size;  
     T* m_coeff; // coefficients array (each T holds T::typesize coefficients)
 };
 
-/* currently implementing specialized version for e3ga 
- * will move this into the more general framework once
- * difficulties worked out (but may keep lounesto inverse)
- *
- * T must be a subclass of ShAttrib with 4 elements (T::typesize == 4)
- * for now (should check this somewhere)
- */ 
-typedef ShgaVersor<ShAttrib4f,3,0,0> e3ga; 
+typedef ShgaVersor<ShAttrib4f,3,0> e3ga; 
 
 }
 

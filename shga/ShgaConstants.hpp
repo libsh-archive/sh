@@ -47,35 +47,25 @@ enum ShgaGrade {
 };
 
 /* maps integer grade to ShgaGrade constant */ 
-const ShgaGrade ShgaGradeMap[] = { SHGA_GRADE0, SHGA_GRADE1, SHGA_GRADE2, 
-  SHGA_GRADE3, SHGA_GRADE4, SHGA_GRADE5, SHGA_GRADE6, SHGA_GRADE7 }; 
-
-enum ShgaParity {
-  SHGA_EVEN = SHGA_GRADE0 | SHGA_GRADE2 | SHGA_GRADE4 | SHGA_GRADE6;
-  SHGA_ODD = SHGA_GRADE1 | SHGA_GRADE3 | SHGA_GRADE5 | SHGA_GRADE7;
-}
+extern const ShgaGrade ShgaGradeMap[]; 
 
 /* Use similar bit masks for specifying basis elements */
 enum ShgaBasisElement {
-  SHGA_E0 = 1,
-  SHGA_E1 = SHGA_E0 << 1,
+  SHGA_E1 = 1, 
   SHGA_E2 = SHGA_E1 << 1,
   SHGA_E3 = SHGA_E2 << 1,
   SHGA_E4 = SHGA_E3 << 1,
   SHGA_E5 = SHGA_E4 << 1,
   SHGA_E6 = SHGA_E5 << 1,
   SHGA_E7 = SHGA_E6 << 1,
+  SHGA_E8 = SHGA_E7 << 1
 };
 
-const int SHGA_NEGATIVE_BIT = SHGA_E7 << 1; 
-
-
 /* maps integer grade to ShgaGrade constant */ 
-const ShgaBasisElement ShgaBasisElementMap[] = { SHGA_E0, SHGA_E1, SHGA_E2, 
-  SHGA_E3, SHGA_E4, SHGA_E5, SHGA_E6, SHGA_E7 }; 
+extern const ShgaBasisElement ShgaBasisElementMap[]; 
 
-const string ShgaBasisElementName[] = { "e0", "e1", "e2", "e3", "e4",
-  "e5", "e6", "e7" };
+/* maps integer grade to a basis string */
+extern const char* ShgaBasisElementName[]; 
 
 }
 

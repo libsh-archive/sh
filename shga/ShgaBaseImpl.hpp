@@ -28,9 +28,71 @@
 #define BASEIMPL_HPP 
 
 #include <cstring>
+#include <iostream>
+#include <sstream>
+#include "ShDebug.hpp"
 #include "ShgaBase.hpp"
 
 namespace Shga {
+
+template<typename T, int P, int N>
+bool ShgaBase<T, P, N>::initDone = false;
+
+template<typename T, int P, int N>
+int ShgaBase<T, P, N>::numBases[NUM_GRADES];  
+
+template<typename T, int P, int N>
+int ShgaBase<T, P, N>::basisGrade[MAX_BASIS]; 
+
+template<typename T, int P, int N>
+int ShgaBase<T, P, N>::basisGradeBits[MAX_BASIS]; 
+
+template<typename T, int P, int N>
+std::string* ShgaBase<T, P, N>::basisName = 0; 
+
+template<typename T, int P, int N>
+typename ShgaBase<T, P, N>::Position** ShgaBase<T, P, N>::elementPosition = 0;
+
+//< basis element in a given position
+template<typename T, int P, int N>
+std::vector<int>* ShgaBase<T, P, N>::elements = 0; 
+
+template<typename T, int P, int N>
+int ShgaBase<T, P, N>::numElements[MAX_GRADE];
+
+template<typename T, int P, int N>
+int ShgaBase<T, P, N>::numVecs[MAX_GRADE];
+
+// TODO fix these pointer issues - 
+//< geometric product matrix for an element in the GA
+template<typename T, int P, int N>
+typename ShgaBase<T, P, N>::SignedBasisElementVec** ShgaBase<T, P, N>::gpMatrix = 0;
+
+template<typename T, int P, int N>
+typename ShgaBase<T, P, N>::SignedBasisElementVec** ShgaBase<T, P, N>::lcpMatrix = 0;
+
+template<typename T, int P, int N>
+typename ShgaBase<T, P, N>::SignedBasisElementVec** ShgaBase<T, P, N>::opMatrix = 0;
+
+// (each matrix entry is 
+template<typename T, int P, int N>
+typename ShgaBase<T, P, N>::BinaryOpSequence** ShgaBase<T, P, N>::gpOps = 0;
+
+template<typename T, int P, int N>
+typename ShgaBase<T, P, N>::BinaryOpSequence** ShgaBase<T, P, N>::lcpOps = 0;
+
+template<typename T, int P, int N>
+typename ShgaBase<T, P, N>::BinaryOpSequence** ShgaBase<T, P, N>::opOps = 0;
+
+// extractGrade[dest][src] contains ops to extract dest grade from src 
+template<typename T, int P, int N>
+typename ShgaBase<T, P, N>::UnaryOpSequence** ShgaBase<T, P, N>::extractGradeOps = 0;
+
+template<typename T, int P, int N>
+typename ShgaBase<T, P, N>::UnaryOpSequence* ShgaBase<T, P, N>::gradeInvolutionOps = 0;
+
+template<typename T, int P, int N>
+typename ShgaBase<T, P, N>::UnaryOpSequence* ShgaBase<T, P, N>::reverseOps = 0;
 
 template<typename T, int P, int N>
 ShgaBase<T, P, N>::SignedBasisElement::SignedBasisElement( int element, bool neg )
@@ -38,10 +100,10 @@ ShgaBase<T, P, N>::SignedBasisElement::SignedBasisElement( int element, bool neg
 
 template<typename T, int P, int N>
 ShgaBase<T, P, N>::Position::Position() 
-  : vec( -1 ), offset( -1 ) {} 
+  : vec( 0 ), offset( 0 ) {} 
 
 template<typename T, int P, int N>
-ShgaBase<T, P, N>::Position::Position( int vec, int offset ) 
+ShgaBase<T, P, N>::Position::Position( unsigned char vec, unsigned char offset ) 
   : vec( vec ), offset( offset ) {} 
 
 template<typename T, int P, int N>
@@ -50,17 +112,47 @@ ShgaBase<T, P, N>::ScalarBinaryOp::ScalarBinaryOp( Position dest,
   : dest( dest ), src1( src1 ), neg1( neg1 ), src2( src2 ), neg2( neg2 ) {
 }
 
+/* Operations are compatible only if 
+ *    (I) src1.vec, neg, src2.vec, neg, and dest.vec are equal.  
+ * The second condition is that
+ *    (II) only one offset of a dest.vec can be written to at a time
+ * The comparison operator sorts so that each set of scalar ops
+ * that pairwise satisfy condition (I) are in a block in the sorted sequence.
+ *
+ * Also, within the block, the ops are sorted according to condition (II)
+ * to make vectorization easier.
+ */ 
 template<typename T, int P, int N>
-ShgaBase<T, P, N>::ScalarUnaryOp::ScalarUnaryOp( Position dest, 
-    Position src, bool neg ) {
-  : dest( dest ), src( src ), neg( neg ) {
+bool ShgaBase<T, P, N>::ScalarBinaryOp::operator<( 
+    const ShgaBase<T, P, N>::ScalarBinaryOp &b ) const {
+  return src1.vec < b.src1.vec ||
+         ( src1.vec == b.src1.vec && 
+         ( ( !neg1 && b.neg1 ) ||
+         ( neg1 == b.neg1 &&
+         ( src2.vec < b.src2.vec ||
+         ( src2.vec == b.src2.vec &&
+         ( ( !neg2 && b.neg2 ) ||
+         ( neg2 == b.neg2 && 
+         ( dest.vec == b.dest.vec &&
+         ( dest.offset < b.dest.offset )))))))));
+}
+template<typename T, int P, int N>
+bool ShgaBase<T, P, N>::ScalarBinaryOp::matches( const ScalarBinaryOp &b ) const {
+  return( src1.vec == b.src1.vec && neg1 == b.neg1 &&
+          src2.vec == b.src2.vec && neg2 == b.neg2 &&
+          dest.vec == b.dest.vec );
 }
 
+template<typename T, int P, int N>
+ShgaBase<T, P, N>::ScalarUnaryOp::ScalarUnaryOp( Position dest, 
+    Position src, bool neg ) 
+  : dest( dest ), src( src ), neg( neg ) {
+}
 
 template<typename T, int P, int N>
 ShgaBase<T, P, N>::VectorBinaryOp::VectorBinaryOp( 
     std::vector<ScalarBinaryOp> ops ) 
-  : size( vbop.size() ), neg1( ops[0].neg1 ), neg2( ops[0].neg2 ),
+  : size( ops.size() ), neg1( ops[0].neg1 ), neg2( ops[0].neg2 ),
   vec1( ops[0].src1.vec ), vec2( ops[0].src2.vec ), destVec( ops[0].dest.vec ) {
   for( int i = 0; i < size; ++i ) {
     // TODO replace with exceptions
@@ -71,6 +163,23 @@ ShgaBase<T, P, N>::VectorBinaryOp::VectorBinaryOp(
     swiz2[i] = ops[i].src2.offset;
     destSwiz[i] = ops[i].dest.offset;
   }
+}
+
+template<typename T, int P, int N>
+std::string ShgaBase<T, P, N>::VectorBinaryOp::toString() const {
+  std::ostringstream out;
+
+  // TODO make this nice
+  out << "<VectorBinaryOp size: " << (int)size << " vec1: " 
+    << ( neg1 ? "-" : " " ) << (int)vec1 << "(";
+  for( int i = 0; i < size; ++i ) out << swiz1[i] << ( i == size - 1 ? ")" : ","); 
+  out << " vec2: " << ( neg2 ? "-" : " " ) << (int)vec2 << "(";
+  for( int i = 0; i < size; ++i ) out << swiz2[i] << ( i == size - 1 ? ")" : ","); 
+  out << " destVec: " << (int)destVec << "(";
+  for( int i = 0; i < size; ++i ) out << destSwiz[i] << ( i == size - 1 ? ")" : ","); 
+  out << ">";
+
+  return out.str();
 }
 
 template<typename T, int P, int N>
@@ -88,14 +197,60 @@ ShgaBase<T, P, N>::VectorUnaryOp::VectorUnaryOp(
 }
 
 template<typename T, int P, int N>
+std::string ShgaBase<T, P, N>::VectorUnaryOp::toString() const {
+  std::ostringstream out;
+
+  // TODO make this nice
+  out << "<VectorUnaryOp size: " << (int)size 
+    << " src: " << ( neg ? "-" : " " ) << (int)srcVec << "(";
+  for( int i = 0; i < size; ++i ) out << srcSwiz[i] << ( i == size - 1 ? ")" : ","); 
+  out << " destVec: " << (int)destVec << "(";
+  for( int i = 0; i < size; ++i ) out << destSwiz[i] << ( i == size - 1 ? ")" : ","); 
+  out << ">";
+
+  return out.str();
+}
+
+template<typename T, int P, int N>
 template<typename OpType>
-ShgaBase<T, P, N>::BinaryOpSequence<OpType>::BinaryOpSequence()
+ShgaBase<T, P, N>::OpSequence<OpType>::OpSequence()
   : init( false ), resultGrade( 0 ) {}
 
+template<typename T, int P, int N>
+template<typename OpType>
+std::string ShgaBase<T, P, N>::OpSequence<OpType>::toString() const {
+  std::string result;
+  for( typename OpVec::iterator it = ops.begin(); it != ops.end();
+      ++it ) {
+    result += it->toString();
+    result += "\n";
+  }
+  return result;
+}
+
+
+#define ALLOCATE_2D_ARRAY( varname, type, dim1, dim2 ) { \
+  varname = new type*[ dim1 ]; \
+  for( int i = 0; i < dim1; ++i ) varname[i] = new type[dim2]; \
+} \
 
 template<typename T, int P, int N>
 ShgaBase<T, P, N>::ShgaBase( ) {
   if( initDone ) return;
+
+  // allocate all the static arrays
+  basisName = new std::string[ MAX_BASIS ];
+  elements = new std::vector<int>[ MAX_GRADE ];
+  ALLOCATE_2D_ARRAY( elementPosition, Position, MAX_GRADE, MAX_BASIS );
+  ALLOCATE_2D_ARRAY( gpMatrix, SignedBasisElementVec, MAX_BASIS, MAX_BASIS ); 
+  ALLOCATE_2D_ARRAY( lcpMatrix, SignedBasisElementVec, MAX_BASIS, MAX_BASIS ); 
+  ALLOCATE_2D_ARRAY( opMatrix, SignedBasisElementVec, MAX_BASIS, MAX_BASIS ); 
+  ALLOCATE_2D_ARRAY( gpOps, BinaryOpSequence, MAX_GRADE, MAX_GRADE); 
+  ALLOCATE_2D_ARRAY( lcpOps, BinaryOpSequence, MAX_GRADE, MAX_GRADE); 
+  ALLOCATE_2D_ARRAY( opOps, BinaryOpSequence, MAX_GRADE, MAX_GRADE); 
+  ALLOCATE_2D_ARRAY( extractGradeOps, UnaryOpSequence, MAX_GRADE, MAX_GRADE); 
+  gradeInvolutionOps = new UnaryOpSequence[ MAX_GRADE ];
+  reverseOps = new UnaryOpSequence[ MAX_GRADE ];
 
   int i, j, k;
 
@@ -107,38 +262,86 @@ ShgaBase<T, P, N>::ShgaBase( ) {
     }
   }
 
+  // TODO get rid of printout
+  std::cout << "numBases: " ; 
+  for( int i = 0; i < NUM_GRADES; ++i ) {
+    std::cout << numBases[ i ] << " "; 
+  }
+  std::cout << std::endl;
+
   // initialize grade of each basis
-  memset( grade, 0, MAX_BASIS * sizeof( int ) ); 
-  for( i = 0; i < MAX_BASIS; ++i ) for( j = 0; j < DIMENSION; ++j ) {
-    if( i & ShgaBasisElementMap[ j ] ) grade[ i ]++;
+  memset( basisGrade, 0, MAX_BASIS * sizeof( int ) ); 
+  for( i = 0; i < MAX_BASIS; ++i ) {
+    for( j = 0; j < DIMENSION; ++j ) {
+      if( i & ShgaBasisElementMap[ j ] ) basisGrade[ i ]++;
+    }
+    basisGradeBits[i] = ShgaGradeMap[ basisGrade[ i ] ];
   }
 
   // initialize basis names
-  basisName[ 0 ] = ShgaScalarBasisName;
-  for( i = 1; i < MAX_BASIS; ++i ) for( j = 0; j <= DIMENSION; ++j ) {
+  basisName[0] = "1";
+  for( i = 1; i < MAX_BASIS; ++i ) for( j = 0; j < DIMENSION; ++j ) {
     if( i & ShgaBasisElementMap[ j ] ) {
-      basisName[ i ] += basisName[ i ].empty( ) ? "" : "^";
+      if( !basisName[i].empty() ) basisName[i] += "^";
       basisName[ i ] += ShgaBasisElementName[ j ];
     }
   }
 
-  // initialize position map & gradeElement vectors
+  // TODO get rid of printout
+  std::cout << "basisName/Grade: " << std::endl; 
+  for( int i = 0; i < MAX_BASIS; ++i ) { 
+    std::cout << "Basis: " << basisName[i] <<  " grade: " << basisGrade[ i ] << std::endl; 
+  }
+
+  // initialize position map & elements vectors
   int pos;
   // TODO check if this is necessary.  Can't remember if default initization is 0.
   for( i = 0; i < MAX_GRADE; ++i ) {
     for( pos = 0, j = 0; j < NUM_GRADES; ++j ) { 
       for( k = 0; k < MAX_BASIS; ++k ) {
-        if( grade[ k ] == j && ( ShgaGradeMap[ grade[k]] & i ) ) {
-        elementPosition[ i ][ k ] = Position( ceil( pos / VECTOR_SIZE ), pos % VECTOR_SIZE ); 
-        pos++;
-        gradeElement[ i ].push_back( k );
+        if( basisGrade[ k ] == j && ( basisGradeBits[k] & i ) ) {
+          elementPosition[ i ][ k ] = Position( pos / VECTOR_SIZE , pos % VECTOR_SIZE ); 
+          pos++;
+          elements[ i ].push_back( k );
+        }
       }
     }
+  }
+  std::cout << "element positions: " << std::endl;
+  for( i = 0; i < MAX_GRADE; ++i ) {
+    std::cout << "Grade: "; 
+    for( j = 0; j < NUM_GRADES; ++j ) if( i & ( 1 << j ) ) std::cout << j << " ";
+    std::cout << std::endl;
+
+    for( j = 0; j < MAX_BASIS; ++j ) {
+      std::cout << "    " << basisName[ j ] 
+        << " vec: " << (int)elementPosition[ i ][ j ].vec
+        << " offset: " << (int)elementPosition[ i ][ j ].offset << std::endl;
+    }
+  }
+
+  std::cout << "\nelements: " << std::endl; 
+  for( i = 0; i < MAX_GRADE; ++i ) { 
+    std::cout << "Grade: "; 
+    for( j = 0; j < NUM_GRADES; ++j ) if( i & ( 1 << j ) ) std::cout << j << " ";
+    std::cout << " basis elements: ";
+    for( j = 0; j < elements[i].size(); ++j ) {
+      std::cout << basisName[ elements[i][j] ] << " ";
+    }
+    std::cout << std::endl;
   }
 
   for( i = 0; i < MAX_GRADE; ++i ) {
     numElements[i] = elements[i].size();
     numVecs[i] = (int) ceil( numElements[i] / (double) VECTOR_SIZE );
+
+  }
+
+  // TODO get rid of this
+  for( i = 0; i < MAX_GRADE; ++i ) {
+    std::cout << "Grade: "; 
+    for( j = 0; j < NUM_GRADES; ++j ) if( i & ( 1 << j ) ) std::cout << j << " ";
+    std::cout << " num elements: " << numElements[i] << " num vecs: " << numVecs[i] << std::endl;
   }
 
   // initialize operator matrix entries
@@ -159,144 +362,169 @@ ShgaBase<T, P, N>::ShgaBase( ) {
     }
 
     // compute sign due to reordering
+    int tempi = i;
     for( k = 0; k < DIMENSION; ++k ) {
       int basisK = ShgaBasisElementMap[ k ];
+      if( tempi & basisK ) tempi ^= basisK;
       if( basisK & j ) {
         // TODO check if this bit bashing actually works!!!
-        int swaps = grade[ i & !( ( basisK << 1 ) - 1 ) ]; 
+        int swaps = basisGrade[ tempi ];
         if( swaps & 1 ) sign *= -1;
       }
     }
 
     if( sign != 0 ) {
       // TODO depending on grade conditions, 
-      if( grade[ ij ] == grade[ i ] + grade[ j ] ) {
+      if( basisGrade[ ij ] == basisGrade[ i ] + basisGrade[ j ] ) {
         opMatrix[ ij ][ j ].push_back( SignedBasisElement( i, sign < 0 ) );
       }
-      if( grade[ ij ] == gradeOfbasis[ i ] - grade[ j ] ) {
+      if( basisGrade[ ij ] == basisGrade[ i ] - basisGrade[ j ] ) {
         lcpMatrix[ ij ][ j ].push_back( SignedBasisElement( i, sign < 0 ) );
       }
       gpMatrix[ ij ][ j ].push_back( SignedBasisElement( i, sign < 0 ) ); 
     }
   }
 
-  for( i = 0; i < MAX_BASIS; ++i ) {
-    for( j = 0; j < MAX_BASIS; ++j ) {
-      if( !gpMatrix[i][j].empty() ) {
-        std::cout << setw( 10 ) << basisName[ gpMatrix[i][j].front().element ] << " * " 
-          << gpMatrix[i][j].front().sign;
+  std::cout << "Geometric Product Matrix: " << std::endl;
+  for( i = 0; i < numElements[ MAX_GRADE - 1 ]; ++i ) {
+    for( j = 0; j < numElements[ MAX_GRADE - 1 ]; ++j ) {
+      int basisi = elements[ MAX_GRADE - 1 ][ i ];
+      int basisj = elements[ MAX_GRADE - 1 ][ j ];
+      if( !gpMatrix[basisi][basisj].empty() ) {
+        std::cout << ( gpMatrix[basisi][basisj].front().neg ? "-" : " " ) 
+          << basisName[ gpMatrix[basisi][basisj].front().element ] ; 
       } else {
-        std::cout << setw( 15 ) << "0";
+        std::cout << "0";
       }
+      std::cout << ", ";
     }
     std::cout << std::endl;
   }
 
   // Step 2 - merge into vector operations
   // TODO may want to delay this until the particular op is actually used
-  for( i = 0; i < MAX_GRADE; ++i ) {
-    for( j = 0; j < MAX_GRADE; ++j ) {
-      generateProductOp( gpMatrix, gpOps, i, j );
-      generateProductOp( lcpMatrix, lcpOps, i, j );
-      generateProductOp( opMatrix, opOps, i, j );
-    }
+  std::vector< ScalarBinaryOp > sbops;
+  int resultGrade;
+  for( i = 0; i < MAX_GRADE; ++i ) for( j = 0; j < MAX_GRADE; ++j ) {
+    std::cout << "Operator src1 grades: "; 
+    for( k = 0; k < NUM_GRADES; ++k ) if( i & ( 1 << k ) ) std::cout << k << " ";
+    std::cout << " src2 grades: ";
+    for( k = 0; k < NUM_GRADES; ++k ) if( j & ( 1 << k ) ) std::cout << k << " ";
+    std::cout << std::endl;
+
+    std::cout << "  Geometric Product:" << std::endl;
+    resultGrade = generateProductOp( gpMatrix, i, j, sbops );
+    makeOpSequence( gpOps[i][j], resultGrade, sbops );
+    sbops.clear();
+
+    std::cout << "  Left Contraction Product:" << std::endl;
+    resultGrade = generateProductOp( lcpMatrix, i, j, sbops );
+    makeOpSequence( lcpOps[i][j], resultGrade, sbops );
+    sbops.clear();
+
+    std::cout << "  Outer Product:" << std::endl;
+    resultGrade = generateProductOp( opMatrix, i, j, sbops );
+    makeOpSequence( opOps[i][j], resultGrade, sbops );
+    sbops.clear();
   }
-  
 
   initDone = true;
 }
 
 template<typename T, int P, int N>
-void ShgaBase<T, P, N>::generateProductOp( SignedBasisElementVec productMatrix[ MAX_BASIS ][ MAX_BASIS ],
-    BinaryOpSequence &opseq, int src1Grades, int src2Grades ) {
+int ShgaBase<T, P, N>::generateProductOp( 
+    SignedBasisElementVec** productMatrix,
+    int src1Grades, int src2Grades, std::vector< ScalarBinaryOp > &ops ) {
   int resultGrade = 0; // grade usage of the result
   int destGrade; // a single grade in the result to check for 
 
   int src1Elm, src2Elm, destElm;
   // determine grades from results based on non-zero src elements
   for( destElm = 0; destElm < MAX_BASIS; ++destElm ) {
-    destGrade = ShgaGradeMap[ gradeOfbasis[ destElm ] ];
+    destGrade = basisGradeBits[ destElm ];
     for( src2Elm = 0; !( resultGrade & destGrade ) && src2Elm < MAX_BASIS; ++src2Elm ) {
-      if( ( ShgaGradeMap[ grade[ src2Elm ] ] & src2Grades ) == 0  ) continue;
+      if( ( basisGradeBits[ src2Elm ] & src2Grades ) == 0  ) continue;
 
-      for( SignedBasisElementVec::iterator sbev = productMatrix[i][j].begin();
-          sbev != productMatrix[i][j].end(); ++sbev ) {
+      SignedBasisElementVec &matrixEntry = productMatrix[destElm][src2Elm];
+      for( typename SignedBasisElementVec::iterator sbev = matrixEntry.begin();
+          sbev != matrixEntry.end(); ++sbev ) {
         src1Elm = sbev->element;
-        if( ShgaGradeMap[ grade[ src1Elm ] ] & src1Grades ) {
+        if( basisGradeBits[ src1Elm ] & src1Grades ) {
           resultGrade |= destGrade;
           break;
         }
       }
     }
   }
-  OperationVector &opVec = productOperationVector[ src1Grades ][ src2Grades ];
-  opVec.resultGrade = resultGrade;
 
-  // add operations 
-  // first, classify operations by vector
-  //
-  // single scalar ops can be combined if the src1, src2, and dest vecs 
-  // are the same, and there each dest component is written to at most once.
-  // (TODO add different restrictions for other architectures,
-  // optimize for minimal swizzling on current generation Radeons)
-  int destVec, src1Vec, src2Vec, destOffset, src1Offset, src2Offset; 
-  int destBasisElement, src2BasisElement, src2BasisElement;
-  for( destVec = 0; destVec < numVecs[ resultGrade ]; ++destVec ) {
-    for( src2Vec = 0; src2Vec < numVecs[ src2Grades ]; ++src2Vec ) {
+  // add scalar operations to a list (will vectorize later) 
+  for( destElm = 0; destElm < MAX_BASIS; ++destElm ) {
+    if( !( basisGradeBits[ destElm ] & resultGrade ) ) continue;
+    for( src2Elm = 0; src2Elm < MAX_BASIS; ++src2Elm ) {
+      if( !( basisGradeBits[ src2Elm ] & src2Grades ) ) continue;
 
-      // list of src1 & src2 pos 
-      // classified by sr
-      vector< ScalarBinaryOp > scalarOps[ numVecs[ src1Grades ] ][2][VECTOR_SIZE]; 
-
-      // classify operations from productMatrix by vector
-      for( destOffset = 0; destOffset < VECTOR_SIZE; ++destOffset ) {
-        destBasisElement = elements[resultGrade][destVec * VECTOR_SIZE + destOffset ];
-
-        for( src2Offset = 0; src2Offset < VECTOR_SIZE; ++src2Offset ) {
-          src2BasisElement = elements[resultGrade][src2Vec * VECTOR_SIZE + src2Offset ];
-
-          SignedBasisElementVec &productMatrixElms = productMatrix[destBasisElement][src2BasisElement];
-
-          for( SignedBasisElementVec::iterator sbev = productMatrixElms.begin();
-              sbev != productMatrixElms.end(); ++sbev ) {
-            Position &src1Pos = elementPosition[ src1Grades ][ sbev->element ];
-            scalarOps[ src1Pos.vec ][ sbev->neg ? 1 : 0 ][ destOffset ].push_back( 
-                ScalarBinaryOp( Position( destVec, destOffset ), src1Pos, sbev->neg,
-                  Position( src2Vec, src2Offset ), false ) );
-                
-          }
+      SignedBasisElementVec &matrixEntry = productMatrix[destElm][src2Elm];
+      for( typename SignedBasisElementVec::iterator sbev = matrixEntry.begin();
+          sbev != matrixEntry.end(); ++sbev ) {
+        src1Elm = sbev->element;
+        if( basisGradeBits[ src1Elm ] & src1Grades ) {
+          ops.push_back( ScalarBinaryOp( elementPosition[ resultGrade ][ destElm ],
+                elementPosition[ src1Grades ][ src1Elm ], sbev->neg,
+                elementPosition[ src2Grades ][ src2Elm ], false ) );
+          std::cout << "    " << basisName[ destElm ] << " = " 
+            << ( sbev->neg ? "-" : " " ) << basisName[ src1Elm ] 
+            << " * " << basisName[ src2Elm ] << std::endl;
         }
       }
-
-
-      // generate swizzled vector ops by popping scalar ops off 
-      int src1Swiz[VECTOR_SIZE]; 
-      int src2Swiz[VECTOR_SIZE]; 
-      int destSwiz[VECTOR_SIZE]; 
-      for( src1Vec = 0; src1Vec < numVecs[ src1Grades ]; ++src1Vec ) {
-        for( int isNeg = 0; isNeg <= 1; ++isNeg ) {
-          int size = 0;
-          for( destOffset = 0; destOffset < VECTOR_SIZE; ++destOffset ) {
-            vector< pair< int, int > >& sopVec = scalarOps[ src1Vec ][ isNeg ][ destOffset ];
-            if( !sopVec.empty() ) {
-              pair<int, int> scalarOp = sopVec.back(); 
-              sopVec.pop_back();
-              src1Swiz[ size ] = scalarOp.first;
-              src2Swiz[ size ] = scalarOp.second;
-              destSwiz[ size ] = destOffset;
-              size++;
-            }
-          }
-          productOperationVector[ src1Grades ][ src2Grades ].push_back(
-              Operation( size, isNeg, src1Vec, src2Vec, destVec,
-                src1Swiz, src2Swiz, destSwiz ) );
-          if( size == 0 ) break; // no more scalar ops here!
-        }
-      }
-    } 
+    }
   }
-  
+  return resultGrade;
 }
+
+template<typename T, int P, int N>
+void ShgaBase<T, P, N>::makeOpSequence( BinaryOpSequence& opSeq, int resultGrade,
+    std::vector< ScalarBinaryOp > ops ) {
+  opSeq.init = true;
+  opSeq.resultGrade = resultGrade;
+
+  typedef std::multiset< ScalarBinaryOp > ScalarOpSet; 
+  ScalarOpSet opBins; 
+  for( typename std::vector< ScalarBinaryOp >::iterator opIt = ops.begin();
+      opIt != ops.end(); ++opIt ) {
+    opBins.insert( *opIt );
+  }
+
+  for( typename ScalarOpSet::const_iterator it = opBins.begin();
+      it != opBins.end();) {
+    typename ScalarOpSet::const_iterator blockStart, blockEnd, finger, next; 
+    blockStart = blockEnd = it;
+    for(++blockEnd; blockEnd != opBins.end() && blockStart->matches( *blockEnd ); ++blockEnd ) {
+    }
+    it = blockEnd;
+
+    // each subvector of scalar ops can be merged into a vector op (i.e. have the 
+    // same src1 vec, neg, src2 vec, neg, dest vec, and have different dest offsets
+    std::vector< std::vector< ScalarBinaryOp > > vectorOps; 
+    finger = blockStart;
+    next = blockStart;
+    ++next;
+    int insertToVec = 0;
+    for(;; finger = next, ++next ) {
+      if( insertToVec == vectorOps.size() ) vectorOps.push_back( std::vector< ScalarBinaryOp >() ); 
+      vectorOps[ insertToVec ].push_back( *finger );
+      ++insertToVec;
+
+      if( next == blockEnd ) break;
+      if( *finger < *next ) insertToVec = 0;
+    }
+
+    std::cout << "Number of VecOps: " << vectorOps.size() << std::endl;
+    for( int i = 0; i < vectorOps.size(); ++i ) {
+      opSeq.ops.push_back( VectorBinaryOp( vectorOps[i] ) );
+    }
+  }
+}
+
 
 
 

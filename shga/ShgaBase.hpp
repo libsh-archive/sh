@@ -29,10 +29,10 @@
 
 #include <string>
 #include <vector>
-#include <pair>
 #include "ShgaConstants.hpp"
 
 namespace Shga {
+
 
 /** \file ShgaBase.hpp
  * This class determines the sequences of operations on coefficients required
@@ -41,17 +41,19 @@ namespace Shga {
 template<typename T, int P, int N>
 class ShgaBase {
   protected:
-    static const int DIMENSION = P + N; 
-    static const int VECTOR_SIZE = T::typesize;
-    static const int NUM_GRADES= DIMENSION + 1;
-    static const int MAX_GRADE = ShgaGradeMap[DIMENSION] << 1; 
-    static const int MAX_BASIS = ShgaBasisMap[DIMENSION] << 1;
+    enum {
+      DIMENSION = P + N,
+      VECTOR_SIZE = T::typesize,
+      NUM_GRADES= DIMENSION + 1,
+      MAX_GRADE = 1 << ( DIMENSION + 1 ),
+      MAX_BASIS = 1 << DIMENSION 
+    };
 
     struct SignedBasisElement {
       int element;
       bool neg;
       SignedBasisElement( int element, bool neg );
-    }
+    };
 
     //< geometric product matrix 
     //(each matrix entry is a sum of signed basis elements
@@ -60,11 +62,11 @@ class ShgaBase {
     typedef std::vector<SignedBasisElement> SignedBasisElementVec;
 
     struct Position {
-      int vec;
-      int offset;
-      Position(); // default position is (-1, -1)
-      Position( int vec, int offset );
-    }
+      unsigned char vec;
+      unsigned char offset;
+      Position(); // default position is (0, 0);
+      Position( unsigned char vec, unsigned char offset );
+    };
 
     struct ScalarBinaryOp {
       Position dest;
@@ -73,6 +75,8 @@ class ShgaBase {
       ScalarBinaryOp(); // uninitialized 
       ScalarBinaryOp( Position dest, Position src1, bool neg1, 
                        Position src2, bool neg2 ); 
+      bool operator<( const ScalarBinaryOp &b ) const;
+      bool matches( const ScalarBinaryOp &b ) const;
     };
 
     struct ScalarUnaryOp {
@@ -81,29 +85,34 @@ class ShgaBase {
       Position dest;
       ScalarUnaryOp(); // uninitialized
       ScalarUnaryOp( Position dest, Position src, bool neg );
+      bool operator<( const ScalarBinaryOp &b ) const;
+      bool matches( const ScalarBinaryOp &b ) const;
     };
+
 
     // a single sub-operation used for one of the products 
     struct VectorBinaryOp {
-      int size;
+      unsigned char size;
       bool neg1, neg2;
-      int vec1, vec2, destVec; 
+      unsigned char vec1, vec2, destVec; 
       int swiz1[VECTOR_SIZE], swiz2[VECTOR_SIZE], destSwiz[VECTOR_SIZE]; 
 
       VectorBinaryOp(); // uninitialized
       // creates a binary op from scalar ops - neg flags and src vecs must be the 
       // same for all the scalar ops
       VectorBinaryOp( std::vector<ScalarBinaryOp> ops ); 
+      std::string toString() const;
     };
 
     struct VectorUnaryOp {
-      int size;
+      unsigned char size;
       bool neg;
-      int srcVec, destVec;
+      unsigned char srcVec, destVec;
       int srcSwiz[VECTOR_SIZE], destSwiz[VECTOR_SIZE];
 
       VectorUnaryOp(); // uninitialized
       VectorUnaryOp( std::vector<ScalarUnaryOp> ops ); 
+      std::string toString() const;
     };
 
     template<typename OpType> 
@@ -114,10 +123,10 @@ class ShgaBase {
       int resultGrade; // bit representation of resulting grades
       OpVec ops; 
       OpSequence();
-    }
+      std::string toString() const;
+    };
     typedef OpSequence<VectorBinaryOp> BinaryOpSequence;
     typedef OpSequence<VectorUnaryOp> UnaryOpSequence;
-
 
     //< sequences of operations for different products
 
@@ -126,42 +135,49 @@ class ShgaBase {
     static bool initDone;
 
     static int numBases[NUM_GRADES];  //< Number of basis elements in each grade
-    static int grade[MAX_BASIS]; //< grade of each basis element 
-    static string basisName[MAX_BASIS]; //< string names for each basis
+    static int basisGrade[MAX_BASIS]; //< grade of each basis element (as anumber) 
+    static int basisGradeBits[MAX_BASIS]; //< grade of each basis element (as bit-shifted SHGA_GRADE0) 
+    static std::string* basisName; //< string names for each basis
 
     //< coefficients are stored in a linear array of vectors, each holding
     // VECTOR_SIZE coefficients.
     // elementPos gives a pair with the vector and offset (component) within that vector
     // for a given basis for a given grade usage.
-    static Position elementPosition[MAX_GRADE][MAX_BASIS]; 
+    // [MAX_GRADE][MAX_BASIS]
+    static Position **elementPosition;
 
-    //< basis element in a given position
-    static std::vector<int> elements[MAX_GRADE]; 
+    //< basis element in a given position [MAX_GRADE];
+    static std::vector<int>* elements;
     static int numElements[MAX_GRADE];
     static int numVecs[MAX_GRADE];
 
-    //< geometric product matrix for an element in the GA
-    static SignedBasisElementVec gpMatrix[MAX_BASIS][MAX_BASIS];
-    static SignedBasisElementVec lcpMatrix[MAX_BASIS][MAX_BASIS];
-    static SignedBasisElementVec opMatrix[MAX_BASIS][MAX_BASIS];
+    //< geometric product MAX_BASIS * MAX_BASIS matrix for an element in the GA
+    static SignedBasisElementVec** gpMatrix;
+    static SignedBasisElementVec** lcpMatrix;
+    static SignedBasisElementVec** opMatrix;
 
-    // (each matrix entry is 
-    static BinaryOpSequence gpOps[MAX_GRADE][MAX_GRADE];
-    static BinaryOpSequence lcpOps[MAX_GRADE][MAX_GRADE];
-    static BinaryOpSequence opOps[MAX_GRADE][MAX_GRADE];
+    // binary ops indexed by two src grades [MAX_GRADE][MAX_GRADE];
+    static BinaryOpSequence** gpOps;
+    static BinaryOpSequence** lcpOps;
+    static BinaryOpSequence** opOps;
 
     // extractGrade[dest][src] contains ops to extract dest grade from src 
-    static UnaryOpSequence extractGrade[MAX_GRADE][MAX_GRADE]; 
-    static UnaryOpSequence gradeInvolutionOps[MAX_GRADE]; 
-    static UnaryOpSequence reverseOps[MAX_GRADE]; 
+    // ([MAX_GRADE][MAX_GRADE])
+    static UnaryOpSequence** extractGradeOps;
 
+    // unaryop[src] ([MAX_GRADE])
+    static UnaryOpSequence* gradeInvolutionOps;
+    static UnaryOpSequence* reverseOps;
 
   private:
     // generate a product from the given product matrix
     // into the given OperationVector for the given input grades
-    virtual generateProductOp( SignedBasisElementVec productMatrix[ MAX_BASIS ][ MAX_BASIS ],
-        BinaryOpSequence &opseq,
-        &int src1Grades, int src2Grades );
+    static int generateProductOp( SignedBasisElementVec **productMatrix,
+        int src1Grades, int src2Grades,
+        std::vector< ScalarBinaryOp > &ops );
+
+    static void makeOpSequence( BinaryOpSequence& opSeq, int resultGrade, 
+        std::vector< ScalarBinaryOp > ops );
 };
 
 }
