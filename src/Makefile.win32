@@ -38,7 +38,6 @@ libsh_dll_SOURCES += ShInternals.hpp ShInternals.cpp
 libsh_dll_SOURCES += ShBasicBlock.hpp
 libsh_dll_SOURCES += ShBlock.hpp ShCtrlGraph.hpp
 libsh_dll_SOURCES += ShCfgBlock.hpp ShCfgBlock.cpp 
-libsh_dll_SOURCES += ShCtrlGraphWranglers.hpp ShCtrlGraphWranglers.cpp
 libsh_dll_SOURCES += ShDebug.hpp ShEnvironment.hpp ShError.hpp
 libsh_dll_SOURCES += ShException.hpp
 libsh_dll_SOURCES += ShParser.hpp ShRefCount.hpp ShStatement.hpp
