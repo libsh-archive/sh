@@ -59,9 +59,10 @@ void shEndShader()
   
   ShEnvironment::insideShader = false;
 
-  if (!ShEnvironment::shader->target().empty()) {
-    shCompile(ShEnvironment::shader);
-  }
+  // TODO. See issue129.
+//   if (!ShEnvironment::shader->target().empty()) {
+//     shCompile(ShEnvironment::shader);
+//   }
   ShEnvironment::shader = 0;
 }
 

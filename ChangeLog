@@ -1,15 +1,23 @@
+2004-06-01  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* test/regress: Added start of regression test suite.
+
+	* src/ShSyntax.cpp (shEndShader): Don't compile automatically for
+	now. Need to fix this test. See issue129.
+
 2004-06-01  Bryan Chan <b8chan@uwaterloo.ca>
-  * src/ShTransformer.cpp (splitVaralist):
-  Fixed input and output variable list splitting (Issue111)
 
-  * test/longtuple.sht, test/test.header:
-  Made test case more comprehensive.  Removed optimizationLevel
+	* src/ShTransformer.cpp (splitVaralist): Fixed input and output
+	variable list splitting (Issue111)
 
-  * util/ShNoise*, util/ShWorley*:
-  Changed interfaces to match book + added weighted octave versions (Issue90)
+	* test/longtuple.sht, test/test.header: Made test case more
+	comprehensive.  Removed optimizationLevel
 
-  * util/ShKernelPost*:
-  Fixed shHalftone and shNoisify kernels (Issue26, Issue27)
+	* util/ShNoise*, util/ShWorley*: Changed interfaces to match book
+	+ added weighted octave versions (Issue90)
+
+	* util/ShKernelPost*: Fixed shHalftone and shNoisify kernels
+	(Issue26, Issue27)
 
 2004-05-31  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
