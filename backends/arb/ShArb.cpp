@@ -498,8 +498,8 @@ void ArbCode::bind()
     // TODO: Other types of textures.
     // TODO: Element Format
     // TODO: sampling/filtering
-    glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(type, 0, texture->elements(), texture->width(), texture->height(), 0, GL_RGBA, GL_FLOAT,
                  texture->data());
     int error = glGetError();
@@ -629,8 +629,6 @@ bool ArbCode::printSamplingInstruction(std::ostream& out, const ArbInst& instr) 
 
 std::ostream& ArbCode::print(std::ostream& out)
 {
-  SH_DEBUG_PRINT("printing the code");
-
   LineNumberer endl;
 
   // Print version header
