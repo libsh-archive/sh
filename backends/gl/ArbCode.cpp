@@ -43,6 +43,7 @@
 #include "ArbReg.hpp"
 #include "Arb.hpp"
 #include "ShAttrib.hpp"
+#include "ShError.hpp"
 
 namespace shgl {
 
@@ -193,7 +194,7 @@ bool ArbCode::allocateRegister(const ShVariableNodePtr& var)
   if (var->uniform()) return true;
 
   if (m_tempRegs.empty()) {
-    SH_DEBUG_ERROR("Out of temporaries!");
+    shError(ShException("ARB Backend: Out of registers"));
     return false;
   }
 

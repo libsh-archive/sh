@@ -1,5 +1,9 @@
 2004-07-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* backends/gl/ArbCode.cpp (allocateRegister): Instead of
+	asserting, use shError() when we're out of temporaries. Resolves
+	issue139.
+
 	* src/ShLibMatrix.hpp: Moved (and renamed) inverse, adjoint,
 	transpose, cofactors and det here. Resolves issue94.
 	Added diag and rowmat. Resolves issue98 and half of issue97.
