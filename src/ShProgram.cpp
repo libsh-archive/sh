@@ -115,6 +115,7 @@ void ShProgramNode::collectVariables()
   uniforms.clear();
   constants.clear();
   textures.clear();
+  channels.clear();
   if (ctrlGraph->entry()) {
     ctrlGraph->entry()->clearMarked();
     collectNodeVars(ctrlGraph->entry());
@@ -148,7 +149,7 @@ void ShProgramNode::collectNodeVars(const ShCtrlGraphNodePtr& node)
 
 void ShProgramNode::collectVar(const ShVariableNodePtr& var) {
   if (!var) return;
-  if (var->uniform() && var->kind() != SH_TEXTURE) {
+  if (var->uniform()) {
     if (std::find(uniforms.begin(), uniforms.end(), var) == uniforms.end()) {
       uniforms.push_back(var);
     }
@@ -173,6 +174,12 @@ void ShProgramNode::collectVar(const ShVariableNodePtr& var) {
                   shref_dynamic_cast<ShTextureNode>(var)) == textures.end()) {
       textures.push_back(shref_dynamic_cast<ShTextureNode>(var));
     }    
+    break;
+  case SH_STREAM:
+    if (std::find(channels.begin(), channels.end(),
+                  shref_dynamic_cast<ShChannelNode>(var)) == channels.end()) {
+      channels.push_back(shref_dynamic_cast<ShChannelNode>(var));
+    }
     break;
   }
 }

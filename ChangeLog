@@ -1,3 +1,11 @@
+2004-03-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShProgram.cpp: Collect channels in collectVar().
+
+	* src/ShProgram.hpp: Add a list of channels to ShProgramNode.
+
+	* src/ShVariableNode.cpp (ShVariableNode): Channels are not uniform.
+
 2004-03-11  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShNibblesImpl.hpp: Call ShProgramNode::name() for all the

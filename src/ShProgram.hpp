@@ -36,6 +36,7 @@
 #include "ShVariableNode.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShTextureNode.hpp"
+#include "ShChannelNode.hpp"
 
 namespace SH {
 
@@ -98,6 +99,7 @@ public:
   
   typedef std::list<ShVariableNodePtr> VarList;
   typedef std::list<ShTextureNodePtr> TexList;
+  typedef std::list<ShChannelNodePtr> ChannelList;
   
   VarList inputs; ///< Input variables used in this shader
   VarList outputs; ///< Output variables used in this shader
@@ -105,6 +107,7 @@ public:
   VarList constants; ///< Constants used in this shader
   VarList uniforms; ///< Uniform variables used in this shader
   TexList textures; ///< Textures used in this shader
+  ChannelList channels; ///< Channels used in FETCH instructions in this shader
 
   // TODO: add streams
   

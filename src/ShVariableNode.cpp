@@ -52,12 +52,12 @@ const char* ShVariableSpecialTypeName[] = {
 };
 
 ShVariableNode::ShVariableNode(ShVariableKind kind, int size, ShVariableSpecialType type)
-  : m_uniform(!ShEnvironment::insideShader && kind != SH_TEXTURE),
+  : m_uniform(!ShEnvironment::insideShader && kind != SH_TEXTURE && kind != SH_STREAM),
     m_kind(kind), m_specialType(type),
     m_size(size), m_id(m_maxID++), m_values(0),
     m_internal(false)
 {
-  if (m_kind != SH_TEXTURE && (m_uniform || m_kind == SH_CONST)) {
+  if (m_uniform || m_kind == SH_CONST) {
     m_values = new ValueType[size];
     for (int i = 0; i < size; i++) m_values[i] = 0.0;
   }
