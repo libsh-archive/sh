@@ -1,3 +1,7 @@
+2004-10-13  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+  * src/ShConstProp.cpp (updateDest):
+  Temporarily fixed issue with detecting whether all srcs are uniform.  
+
 2004-10-12  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/ArbCode.cpp (printSamplingInstruction): Output

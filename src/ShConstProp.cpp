@@ -90,6 +90,7 @@ struct ConstProp : public ShStatementInfo {
       // Consider each tuple element in turn.
       // Dest and sources are guaranteed to be of the same length.
       // Except that sources might be scalar.
+      bool all_fields_uniform = true;
       for (int i = 0; i < stmt->dest.size(); i++) {
         bool alluniform = true;
         bool allconst = true;
@@ -101,6 +102,7 @@ struct ConstProp : public ShStatementInfo {
             }
           }
         }
+	if (!alluniform) all_fields_uniform = false;
         if (allconst) {
           ShVariable tmpdest(new ShVariableNode(SH_CONST, 1));
           ShStatement eval(*stmt);
@@ -113,13 +115,22 @@ struct ConstProp : public ShStatementInfo {
           evaluate(eval);
           dest.push_back(Cell(Cell::CONSTANT, tmpdest.getValue(0)));
           worklist.push(ValueTracking::Def(stmt, i));
-        } else if (alluniform) {
-          dest.push_back(Cell(Cell::UNIFORM, this, i));
-          worklist.push(ValueTracking::Def(stmt, i));
         } else {
           dest.push_back(Cell(Cell::BOTTOM));
         }
-      }      
+      } 
+
+      // Because making a uniform cell based on a ConstProp requires
+      // generating a value for the entire statement (not just one
+      // field of the destination), we only push said cells if ALL of
+      // the indices are uniform for ALL of their corresponding sources.
+      if (all_fields_uniform) {
+	dest.clear();
+	for (int i = 0; i < stmt->dest.size(); i++) {
+	  dest.push_back(Cell(Cell::UNIFORM, this, i));
+	  worklist.push(ValueTracking::Def(stmt, i));
+	}
+      }
     } else if (opInfo[stmt->op].result_source == ShOperationInfo::ALL) {
       // build statement ONLY if ALL elements of ALL sources are constant
       bool allconst = true;
