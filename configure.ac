@@ -42,6 +42,7 @@ AC_CHECK_FUNCS([pow sqrt])
 # Backends
 
 SM_WITH_SM_DIR
+GL_WITH_GL_DIR
 
 
 # SH_CHECK_BACKEND([sm], [SM])

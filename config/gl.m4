@@ -1,5 +1,15 @@
 # Various checks for GL
 
+# GL_WITH_GL_DIR
+# Adds a --with-gl option to specify the GL installation directory
+AC_DEFUN([GL_WITH_GL_DIR], [
+  AC_ARG_WITH([gl], AC_HELP_STRING([--with-gl=DIR], [specify that OpenGL is installed in DIR]),
+    [CPPFLAGS="$CPPFLAGS -I${withval}/include"
+     CXXFLAGS="$CXXFLAGS -I${withval}/include"
+     LDFLAGS="$LDFLAGS -L${withval}/lib"],
+    [])
+])
+
 # GL_CHECK_GL_HEADERS(if-available, if-not-available)
 #
 AC_DEFUN([GL_CHECK_GL_HEADERS], [
