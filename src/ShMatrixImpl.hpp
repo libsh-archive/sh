@@ -39,9 +39,11 @@ namespace SH {
 //Constructors, destructors
 template<int Rows, int Cols, ShBindingType Binding, typename T>
 ShMatrix<Rows, Cols, Binding, T>::ShMatrix()
-{
-  for (int i = 0; i < std::min(Rows, Cols); i++)
-    m_data[i][i] = 1.0;
+{ 
+  if (Binding != SH_INPUT) {
+    for (int i = 0; i < std::min(Rows, Cols); i++)
+      m_data[i][i] = 1.0;
+  }
 }
 
 template<int Rows, int Cols, ShBindingType Binding, typename T>
@@ -81,6 +83,30 @@ ShMatrix<Rows, Cols, Binding, T>::operator=(const ShMatrix<Rows, Cols, Binding2,
 {
   for (int i = 0; i < Rows; i++)
     m_data[i] = other[i];
+  return *this;
+}
+
+template<int Rows, int Cols, ShBindingType Binding, typename T>
+ShMatrix<Rows, Cols, Binding, T>& ShMatrix<Rows, Cols, Binding, T>::operator=(const T& scalar)
+{
+  for (int i = 0; i < Rows; i++) {
+    m_data[i] = fillcast<Cols>(0.0);
+    if (i < Cols) {
+      m_data[i][i] = scalar;
+    }
+  }
+  return *this;
+}
+
+template<int Rows, int Cols, ShBindingType Binding, typename T>
+ShMatrix<Rows, Cols, Binding, T>& ShMatrix<Rows, Cols, Binding, T>::operator=(const ShGeneric<1, T>& scalar)
+{
+  for (int i = 0; i < Rows; i++) {
+    m_data[i] = fillcast<Cols>(0.0);
+    if (i < Cols) {
+      m_data[i][i] = scalar;
+    }
+  }
   return *this;
 }
 
@@ -448,6 +474,20 @@ void ShMatrix<Rows, Cols, Binding, T>::meta(const std::string& key, const std::s
     }
   }
 
+template<int Rows, int Cols, ShBindingType Binding, typename T>
+void ShMatrix<Rows, Cols, Binding, T>::getValues(host_type dest[]) const
+{
+  int x = 0;
+  for (int i=0; i < Rows; i++) {
+    for (int j=0; j < Cols; j++) {
+      typedef ShDataVariant<T, SH_HOST> VariantType;
+      typedef ShPointer<VariantType> VariantTypePtr;
+      VariantTypePtr c = variant_cast<T, SH_HOST>(m_data[i].getVariant());
+      dest[x] = (*c)[j];
+      x++;
+    }
+  }
+}
 
 }
 

@@ -1,27 +1,16 @@
-2010-02-04 Bryan Chan <b8chan@cgl.uwaterloo.ca>
-	* src/ShLp.hpp ShLpImpl.hpp:
-	Basic simplex-method linear programming straight from CLRS.
-	Was using Sh types, but too slow, so switched to valarrays. 
+2004-02-07 Bryan Chan <b8chan@cgl.uwaterloo.ca>
+	Merged trunk in up to 1972.
 
-	* src/ShAffineTexture.hpp ShAffineTexture.cpp:
-	Added a first attempt at an affine texture (handles 1D, 2D, 3D and RECT,
-	but not wrap modes)
+	* src/ShConcreteRegularOpImpl.hpp (LIT):
+	Fixed some stuff here for interval/affine types.
 
-	Based on Kevin's interval mip-maps from GI'02 paper, except this samples
-	2^n x 2^n ranges at 2^(n-1) offsets so only one lookup is required, but
-	should still have no problems with power of 2 boundaries. 
+	* examples/graph/Makefile.am implicit/Makefile.am:
+	Added these like in the other examples.
 
-	* src/ShAaOpHandler.hpp, ShAaOpHandler.cpp, ShAaSymPlacer.cpp,
-		ShAaOps.hpp, ShAaOps.cpp:
-	Added handling for TEX ops in noise symbol assignment, op replacement.
+2005-02-07  Francois Marier  <francois@serioushack.com>
 
-	* src/ShBaseTexture.hpp (node()):
-	Added a function to access the ShBaseTexture::m_node. 
-	(For debugging)
-
-	* src/scripts/semantic.py, src/ShGeneric.hpp, ShGenericImpl.hpp, 
-		ShAttrib.hpp ShAttribImpl.hpp (swiz(const ShSwizzle&)):
-	Added this arbitrary swiz function.  
+	* src/ShLibMisc.hpp, src/ShLibMiscImpl.hpp (join): Added join
+	functions for three and four tuples.
 
 2004-01-26 Bryan Chan <b8chan@cgl.uwaterloo.ca>
 	* src/ShAaOps.hpp, ShAaOps.cpp ShAaOpHandler.cpp:
@@ -40,6 +29,55 @@
 	* src/ShAaScanErr.hpp ShAaScanErr.cpp (shAaScanErrDump):
 	Outputs a DOT viz of the graph (with section nestings), mapping per-statement
 	errors linearly to a colour gradient.
+
+
+2005-02-04  Francois Marier  <francois@serioushack.com>
+
+	* src/*: Made lit an operation (issue74) and compute it according
+	to the Arb fragment program spec when in immediate mode. 
+
+	* backends/gl/*: The lit function now uses the actual LIT Arb
+	function.
+
+	* backends/cc/*: The lit function is computed according to the Arb
+	Fragment program spec.
+
+	* test/regress/lit.cpp.py: Added more test cases and changed
+	the definition of the lit function to match the Arb fragment
+	program spec.
+
+2005-02-02  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbEmit.cpp (emit_tex): Handle non-four-tuple
+	textures with swizzling/writemasking correctly.
+
+2005-02-01  Francois Marier  <francois@serioushack.com>
+
+	* src/ShMatrix.hpp, src/ShMatrixImpl.hpp: Fixed scalar promotion
+	is now done correctly and efficiently.
+
+2005-01-27  Francois Marier  <francois@serioushack.com>
+
+	* src/ShMatrix.hpp, src/ShMatrixImpl.hpp: Assigning a scalar to a
+	matrix now creates an identity matrix multiplied by that scalar.
+
+2005-01-26  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+	
+	* util/ShObjMesh.cpp:
+        Improved vertex normal generation.
+
+2005-01-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbEmit.cpp (ArbCode::table): Do not scalarize
+	OP_DIVs.
+	(emit_div): Emit a single RCP instruction for scalar-RHS divs.
+
+2005-01-25  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	After release 0.7.6:
+	
+	* src/ShMatrixImpl.hpp (ShMatrix): Fix default constructor to not
+	set matrix to identity for inputs.
 
 2004-01-24 Bryan Chan <b8chan@cgl.uwaterloo.ca>
   Merged trunk in up to 1900

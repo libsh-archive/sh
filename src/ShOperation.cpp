@@ -68,6 +68,7 @@ const ShOperationInfo opInfo[] = {
   {"FLR", 1, ShOperationInfo::LINEAR, true, true, false},
   {"FRAC", 1, ShOperationInfo::LINEAR, true, true, false},
 
+  {"LIT", 1, ShOperationInfo::ALL, true, true, false},
   {"LOG", 1, ShOperationInfo::LINEAR, true, true, false},
   {"LOG2", 1, ShOperationInfo::LINEAR, true, true, false},
   {"LOG10", 1, ShOperationInfo::LINEAR, true, true, false},

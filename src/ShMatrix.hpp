@@ -51,6 +51,7 @@ class ShMatrix: public virtual ShMeta {
 public:
   typedef typename ShHostType<T>::type H; 
   typedef H HostType; 
+  typedef H host_type;
     
   /** \brief Identity constructor.
    *
@@ -91,6 +92,18 @@ public:
    */
   template<ShBindingType Binding2>
   ShMatrix& operator=(const ShMatrix<Rows, Cols, Binding2, T>& other);
+
+  /** \brief Assignment (scalar promotion).
+   * 
+   * Construct an identity matrix multiplied by the scalar.
+   */
+  ShMatrix& operator=(const T& scalar);
+
+  /** \brief Assignment (scalar promotion).
+   * 
+   * Construct an identity matrix multiplied by the scalar.
+   */
+  ShMatrix& operator=(const ShGeneric<1, T>& scalar);
 
   /** \brief Attribute row access.
    *
@@ -193,6 +206,10 @@ public:
 
   virtual std::string meta(const std::string& key) const;
   virtual void meta(const std::string& key, const std::string& value);
+
+  int size() const { return Rows * Cols; }
+  
+  virtual void getValues(host_type dest[]) const;
 
 private:
   /** \brief The Matrix itself

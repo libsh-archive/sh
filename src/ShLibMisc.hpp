@@ -67,6 +67,20 @@ template<int M, int N, typename T1, typename T2>
 ShGeneric<M+N, CT1T2> 
 join(const ShGeneric<M, T1>& a, const ShGeneric<N, T2> &b);
 
+/** Join three tuples 
+ * Creates an M+N+O tuple with components of a first then b and c.
+ */
+template<int M, int N, int O, typename T1, typename T2, typename T3> 
+ShGeneric<M+N+O, CT1T2T3> 
+join(const ShGeneric<M, T1>& a, const ShGeneric<N, T2> &b, const ShGeneric<O, T3> &c);
+
+/** Join four tuples 
+ * Creates an M+N+O+P tuple with components of a first then b, c and d.
+ */
+template<int M, int N, int O, int P, typename T1, typename T2, typename T3, typename T4> 
+ShGeneric<M+N+O+P, CT1T2T3T4> 
+join(const ShGeneric<M, T1>& a, const ShGeneric<N, T2> &b, const ShGeneric<O, T3> &c, const ShGeneric<P, T4> &d);
+
 /** Fragment discard. Only for fragment programs.
  * Discards the current fragment if any(c) > 0.
  */

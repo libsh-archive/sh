@@ -276,7 +276,7 @@ ShProgram getProgram(ShStatement& stmt, SymAllocator& alloc) {
       SH_DEBUG_ASSERT(0 && "Cannot handle non-IA/AA dests yet");
     }
 
-    ShAaVariable *src;
+    ShAaVariable *src = 0;
     if(arity > 0) src = new ShAaVariable[arity];
     for(int i = 0; i < arity; ++i) {
       /* ignore tex sources */

@@ -5,6 +5,8 @@ html/index.html: Doxyfile $(wildcard ../src/*.[hc]pp) $(wildcard ../util/*.[hc]p
 
 upload-docs: docs
 	scp -r html shell.sourceforge.net:/home/groups/l/li/libsh/htdocs/api/@VERSION@
+	date "+%B %d, %Y" > /tmp/@VERSION@.release_date
+	scp /tmp/@VERSION@.release_date shell.sourceforge.net:/home/groups/l/li/libsh/htdocs/api
 
 mostlyclean-local:
 	rm -rf html

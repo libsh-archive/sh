@@ -38,29 +38,29 @@ LDFLAGS =
 RELEASE_LDFLAGS = $(LDFLAGS)
 DEBUG_LDFLAGS = $(LDFLAGS) /DEBUG
 
-shglutex_SOURCES = Camera.hpp Camera.cpp
-shglutex_SOURCES += ShTrackball.hpp ShTrackball.cpp
-shglutex_SOURCES += main.cpp
+shtexturesex_SOURCES = Camera.hpp Camera.cpp
+shtexturesex_SOURCES += ShTrackball.hpp ShTrackball.cpp
+shtexturesex_SOURCES += main.cpp
 
-shglutex_CXXFILES = $(filter %.cpp,$(shglutex_SOURCES))
-shglutex_RELEASE_OBJECTS = $(shglutex_CXXFILES:.cpp=.r.obj)
-shglutex_DEBUG_OBJECTS = $(shglutex_CXXFILES:.cpp=.d.obj)
+shtexturesex_CXXFILES = $(filter %.cpp,$(shtexturesex_SOURCES))
+shtexturesex_RELEASE_OBJECTS = $(shtexturesex_CXXFILES:.cpp=.r.obj)
+shtexturesex_DEBUG_OBJECTS = $(shtexturesex_CXXFILES:.cpp=.d.obj)
 
-shglutex_RELEASE_LDADD = $(SH_RELEASE_LDADD)
-shglutex_RELEASE_LDADD += $(GLUT_LDADD) $(OPENGL_LDADD)
-shglutex_RELEASE_LDADD += kernel32.lib user32.lib gdi32.lib
-shglutex_RELEASE_LDADD += shell32.lib ole32.lib comctl32.lib
-shglutex_RELEASE_LDADD += comdlg32.lib rpcrt4.lib advapi32.lib
+shtexturesex_RELEASE_LDADD = $(SH_RELEASE_LDADD)
+shtexturesex_RELEASE_LDADD += $(GLUT_LDADD) $(OPENGL_LDADD)
+shtexturesex_RELEASE_LDADD += kernel32.lib user32.lib gdi32.lib
+shtexturesex_RELEASE_LDADD += shell32.lib ole32.lib comctl32.lib
+shtexturesex_RELEASE_LDADD += comdlg32.lib rpcrt4.lib advapi32.lib
 
-shglutex_DEBUG_LDADD = $(SH_DEBUG_LDADD)
-shglutex_DEBUG_LDADD += $(GLUT_LDADD) $(OPENGL_LDADD)
-shglutex_DEBUG_LDADD += kernel32.lib user32.lib gdi32.lib
-shglutex_DEBUG_LDADD += shell32.lib ole32.lib comctl32.lib
-shglutex_DEBUG_LDADD += comdlg32.lib rpcrt4.lib advapi32.lib
+shtexturesex_DEBUG_LDADD = $(SH_DEBUG_LDADD)
+shtexturesex_DEBUG_LDADD += $(GLUT_LDADD) $(OPENGL_LDADD)
+shtexturesex_DEBUG_LDADD += kernel32.lib user32.lib gdi32.lib
+shtexturesex_DEBUG_LDADD += shell32.lib ole32.lib comctl32.lib
+shtexturesex_DEBUG_LDADD += comdlg32.lib rpcrt4.lib advapi32.lib
 
 ALL_TARGETS =
-RELEASE_TARGETS = shglutex.exe
-DEBUG_TARGETS = shglutexd.exe
+RELEASE_TARGETS = shtexturesex.exe
+DEBUG_TARGETS = shtexturesexd.exe
 
 ifeq ($(BUILD_RELEASE), 1)
 	ALL_TARGETS += all-release
@@ -74,21 +74,21 @@ all: $(ALL_TARGETS)
 all-release: $(RELEASE_TARGETS)
 all-debug: $(DEBUG_TARGETS)
 
-shglutex.exe: $(shglutex_RELEASE_OBJECTS)
-	$(LD) /out:$@ $^ $(RELEASE_LDFLAGS) $(shglutex_RELEASE_LDADD)
+shtexturesex.exe: $(shtexturesex_RELEASE_OBJECTS)
+	$(LD) /out:$@ $^ $(RELEASE_LDFLAGS) $(shtexturesex_RELEASE_LDADD)
 
-shglutexd.exe: $(shglutex_DEBUG_OBJECTS)
-	$(LD) /out:$@ $^ $(DEBUG_LDFLAGS) $(shglutex_DEBUG_LDADD)
+shtexturesexd.exe: $(shtexturesex_DEBUG_OBJECTS)
+	$(LD) /out:$@ $^ $(DEBUG_LDFLAGS) $(shtexturesex_DEBUG_LDADD)
 
 clean:
 	-del $(RELEASE_TARGETS) $(DEBUG_TARGETS)
 	-del *.obj *.d
 	-del *.pdb *.ilk
 
-shglutex_DEPENDS = $(shglutex_CXXFILES:.cpp=.r.d) $(shglutex_CXXFILES:.cpp=.d.d)
+shtexturesex_DEPENDS = $(shtexturesex_CXXFILES:.cpp=.r.d) $(shtexturesex_CXXFILES:.cpp=.d.d)
 
 ifeq ($(GEN_DEPENDENCIES), 1)
--include $(shglutex_DEPENDS)
+-include $(shtexturesex_DEPENDS)
 endif
 
 %.r.obj: %.cpp
