@@ -53,6 +53,7 @@ void shEndShader()
 void shBindShader(ShShader& shader)
 {
   if (!ShEnvironment::backend) return;
+  shader->code(ShEnvironment::backend)->upload();
   shader->code(ShEnvironment::backend)->bind();
 }
 
