@@ -26,13 +26,15 @@ value_type_enum = {'d': 'double',
 enum_value_type = dict(zip(value_type_enum.values(), value_type_enum.keys()))
 
 def make_variable(arg, binding_type, value_type):
-    if (type(arg[0]) == tuple) or (type(arg[0]) == list):
+    if is_array(arg) and is_array(arg[0]):
         nrows = len(arg[0])
         ncols = len(arg)
         return 'ShMatrix<' + str(nrows) + ', ' + str(ncols) + ', ' + binding_type + ', ' + value_type + '>'    
-    else:
+    elif is_array(arg):
         size = len(arg)
         return 'ShAttrib<' + str(size) + ', ' + binding_type + ', ' + value_type + '>'
+    else:
+        return 'ShAttrib<1, ' + binding_type + ', ' + value_type  + '>'
 
 def init_matrix(indent, arg, argtype, varname):
     out = ''
@@ -55,11 +57,19 @@ def init_attrib(indent, arg, argtype, varname):
     out += ';\n'
     return out
 
+def init_scalar(indent, arg, argtype, varname):
+    out = indent
+    out += make_variable(arg, 'SH_CONST', argtype) + ' ' + varname
+    out += '(' + argtype + '(' + str(arg) + '));\n'
+    return out
+
 def init_variable(indent, arg, argtype, varname):
-    if (type(arg[0]) == tuple) or (type(arg[0]) == list):
+    if is_array(arg) and is_array(arg[0]):
         return init_matrix(indent, arg, argtype, varname)
-    else:
+    elif is_array(arg):
         return init_attrib(indent, arg, argtype, varname)
+    else:
+        return init_scalar(indent, arg, argtype, varname)
 
 def init_inputs(indent, src_arg_types):
     out = ''
@@ -81,6 +91,26 @@ def make_test(expected, values, types=[]):
     types = [value_type_enum.has_key(x) and value_type_enum[x] or x for x in types] 
     types = types + (len(values) + 1 - len(types)) * ['float']
     return (expected, values, types)
+
+def make_testname(src_arg_types, types, key):
+    name = enum_value_type[types[0]]
+    for arg, argtype in src_arg_types:
+        name += '_'
+        if is_array(arg):
+            name += str(len(arg))
+        name += enum_value_type[argtype]
+    name += '_' + key
+    return name
+
+def variable_names(src_arg_types):
+    names = ''
+    i = 0
+    for arg, argtype in src_arg_types:
+        if i != 0:
+            names += ', '
+        names += string.ascii_lowercase[i]
+        i += 1
+    return names
 
 # Handles different styles of function calls that assign their value to a
 # variable out
@@ -251,7 +281,7 @@ class StreamTest(Test):
             types = test[2]
             src_arg_types = zip(test[1], types[1:])
             for i, call in enumerate(testcalls):
-                argkey = enum_value_type[types[0]] + '_' + '_'.join([str(len(arg)) + enum_value_type[argtype] for arg, argtype in src_arg_types]) + '_' + call.key()
+                argkey = make_testname(src_arg_types, types, call.key())
                 if not programs.has_key(argkey):
                     programs[argkey] = []
                     progname = self.name + '_' + string.ascii_lowercase[i] + '_' + argkey
@@ -270,7 +300,7 @@ class StreamTest(Test):
                 out.write(init_expected('    ', test[0], types[0]))
                 out.write('\n')
                 out.write('    if (test.run(' + p + ', '
-                          + ', '.join([ string.ascii_lowercase[a] for a in range(len(src_arg_types))])
+                          + variable_names(src_arg_types)
                           + ', ' + 'exp' + ') != 0) errors++;\n')
                 out.write('  }\n')
                 test_nb += 1
@@ -288,7 +318,7 @@ class ImmediateTest(Test):
             types = test[2]
             src_arg_types = zip(test[1], types[1:])
             for i, call in enumerate(testcalls):
-                testname = enum_value_type[types[0]] + '_' + '_'.join([str(len(arg)) + enum_value_type[argtype] for arg, argtype in src_arg_types]) + '_' + call.key()
+                testname = make_testname(src_arg_types, types, call.key())
                 out.write('  { // ' + testname + '\n')
                 out.write(init_inputs('    ', src_arg_types))
                 out.write(init_expected('    ', test[0], types[0]))

@@ -51,13 +51,13 @@ public:
   template <class T>
   void pretty_print(std::string varname, int size, const T *values)
   {
-    std::cout << varname << " = [ ";
-    std::cout << std::setiosflags(std::ios::right);
+    std::stringstream s;
+    s << std::setiosflags(std::ios::right);
     for(int j = 0; j < size; j++) {
-      if (j != 0) std::cout << ",";
-      std::cout << std::setw(10) << values[j];
+      if (j != 0) s << ",";
+      s << std::setw(10) << values[j];
     }
-    std::cout << " ]" << std::endl;;
+    print_values(varname.c_str(), s.str());
   }
 
   template<typename T>
@@ -66,20 +66,61 @@ public:
     memVariant->set(host.getVariant());
   }
 
-  template <class INPUT1, class OUTPUT>
-  int run(SH::ShProgram& program,
-           const INPUT1& in1,
-           const OUTPUT& res)
+  template<class T>
+  SH::ShProgram bind_input(SH::ShProgram& program, const T& in, std::string& str)
   {
-    if (on_host())
-	 return 0; // skip this test
+    using namespace std;
+    using namespace SH;
+    
+    typedef typename T::mem_type IT;
+    IT* _in = new IT[in.size()];
+    mem_from_host(_in, in);
+    
+    ShHostMemoryPtr mem_in = new ShHostMemory(in.size()*sizeof(IT), _in);
+    ShChannel<typename T::TempType> chan_in(mem_in, 1);
+    
+    stringstream s;
+    s << setiosflags(ios::right);
+    for(int j = 0; j < in.size(); j++) {
+	if (j != 0) s << ",";
+	s << setw(10) << _in[j];
+    }
+    str = s.str();
+    
+    return program << chan_in;
+  }
 
-    typedef typename INPUT1::mem_type IT;
+  template<typename T>
+  int output_result(const std::string& name, const std::vector<std::string>& inputs,
+		    const T& out, const T& exp, int out_size)
+  {
+    for(int i=0; i < out_size; i++) {
+      if (fabs(out[i] - exp[i]) > EPSILON) {
+        print_fail(name);
+	for (unsigned j=0; j < inputs.size(); j++) {
+	  char label[4] = "  A";
+	  label[2] += j;
+	  print_values(label, inputs[j]);
+	}
+        pretty_print("out", out_size, out);
+        pretty_print("exp", out_size, exp);
+        return 1;
+      }
+    }
+#ifdef SH_REGRESS_SHOWALL
+    pretty_print("out", size, out);
+    pretty_print("exp", size, exp);
+    print_pass(name);
+#endif
+    return 0;
+  }
+
+  template <class INPUT1, class OUTPUT>
+  int run(SH::ShProgram& program, const INPUT1& in1, const OUTPUT& res)
+  {
+    if (on_host()) return 0; // skip this test
+
     typedef typename OUTPUT::mem_type OT;
-
-    std::string name = program.name();
-    IT* _in1 = new IT[in1.size()];
-    mem_from_host(_in1, in1);
 
     OT* _out = new OT[res.size()];
     mem_from_host(_out, res);
@@ -89,50 +130,23 @@ public:
     OT* _res = new OT[res.size()];
     mem_from_host(_res, res);
 
-    SH::ShHostMemoryPtr mem_in1 = new SH::ShHostMemory(in1.size()*sizeof(IT), _in1);
-    SH::ShChannel<typename INPUT1::TempType> chan_in1(mem_in1, 1);
-
     SH::ShHostMemoryPtr mem_out = new SH::ShHostMemory(res.size()*sizeof(OT), _out);
     SH::ShChannel<typename OUTPUT::TempType> chan_out(mem_out, 1);
 
-    chan_out = program << chan_in1;
+    std::vector<std::string> inputs(1);
+    SH::ShProgram program1 = bind_input(program, in1, inputs[0]);
+    chan_out = program1;
 
-    for(int i = 0; i < res.size(); i++) {
-      if (fabs(_out[i] - _res[i]) > EPSILON) {
-        print_fail(name);
-        pretty_print("  A", in1.size(), _in1);
-        pretty_print("out", res.size(), _out);
-        pretty_print("exp", res.size(), _res);
-        return 1;
-      }
-    }
-#ifdef SH_REGRESS_SHOWALL
-      /* DEBUG */ pretty_print("out", res.size(), _out);
-      /* DEBUG */ pretty_print("exp", res.size(), _res);
-      /* DEBUG */ print_pass(name);
-#endif
-    return 0;
+    return output_result(program.name(), inputs, _out, _res, res.size());
   }
 
   template <class INPUT1, class INPUT2, class OUTPUT>
-  int run(SH::ShProgram& program,
-           const INPUT1& in1,
-           const INPUT2& in2,
-           const OUTPUT& res)
+  int run(SH::ShProgram& program, const INPUT1& in1, const INPUT2& in2,
+	  const OUTPUT& res)
   {
-    if (on_host())
-	 return 0; // skip this test
+    if (on_host()) return 0; // skip this test
 
-    typedef typename INPUT1::mem_type IT1;
-    typedef typename INPUT2::mem_type IT2;
     typedef typename OUTPUT::mem_type OT;
-
-    std::string name = program.name();
-    IT1* _in1 = new IT1[in1.size()];
-    mem_from_host(_in1, in1);
-
-    IT2* _in2 = new IT2[in2.size()];
-    mem_from_host(_in2, in2);
 
     OT* _out = new OT[res.size()];
     mem_from_host(_out, res);
@@ -142,61 +156,25 @@ public:
     OT* _res = new OT[res.size()];
     mem_from_host(_res, res);
 
-    SH::ShHostMemoryPtr mem_in1 = new SH::ShHostMemory(in1.size()*sizeof(IT1), _in1);
-    SH::ShChannel<typename INPUT1::TempType> chan_in1(mem_in1, 1);
-
-    SH::ShHostMemoryPtr mem_in2 = new SH::ShHostMemory(in2.size()*sizeof(IT2), _in2);
-    SH::ShChannel<typename INPUT2::TempType> chan_in2(mem_in2, 1);
-
     SH::ShHostMemoryPtr mem_out = new SH::ShHostMemory(res.size()*sizeof(OT), _out);
     SH::ShChannel<typename OUTPUT::TempType> chan_out(mem_out, 1);
 
-    chan_out = program << chan_in1 << chan_in2;
+    std::vector<std::string> inputs(2);
+    SH::ShProgram program1 = bind_input(program, in1, inputs[0]);
+    SH::ShProgram program2 = bind_input(program1, in2, inputs[1]);
+    chan_out = program2;
 
-    for(int i = 0; i < res.size(); i++) {
-      if (fabs(_out[i] - _res[i]) > EPSILON) {
-        print_fail(name);
-        pretty_print("  A", in1.size(), _in1);
-        pretty_print("  B", in2.size(), _in2);
-        pretty_print("out", res.size(), _out);
-        pretty_print("exp", res.size(), _res);
-        return 1;
-      }
-    }
-#ifdef SH_REGRESS_SHOWALL
-      /* DEBUG */ pretty_print("out", res.size(), _out);
-      /* DEBUG */ pretty_print("exp", res.size(), _res);
-      /* DEBUG */ print_pass(name);
-#endif    
-    return 0;
+    return output_result(program.name(), inputs, _out, _res, res.size());
   }
 
   template <class INPUT1, class INPUT2, class INPUT3, class OUTPUT>
-  int run(SH::ShProgram& program,
-           const INPUT1& in1,
-           const INPUT2& in2,
-           const INPUT3& in3,
-           const OUTPUT res)
+  int run(SH::ShProgram& program, const INPUT1& in1, const INPUT2& in2,
+           const INPUT3& in3, const OUTPUT res)
   {
-    if (on_host())
-	 return 0; // skip this test
+    if (on_host()) return 0; // skip this test
 
-    typedef typename INPUT1::mem_type IT1;
-    typedef typename INPUT2::mem_type IT2;
-    typedef typename INPUT3::mem_type IT3;
     typedef typename OUTPUT::mem_type OT;
-
-    std::string name = program.name();
   
-    IT1* _in1 = new IT1[in1.size()];
-    mem_from_host(_in1, in1);
-
-    IT2* _in2 = new IT2[in2.size()];
-    mem_from_host(_in2, in2);
-
-    IT3* _in3 = new IT3[in3.size()];
-    mem_from_host(_in3, in3);
-
     OT* _out = new OT[res.size()];
     mem_from_host(_out, res);
     // Arbitrarily change output values
@@ -204,38 +182,17 @@ public:
 
     OT* _res = new OT[res.size()];
     mem_from_host(_res, res);
-
-    SH::ShHostMemoryPtr mem_in1 = new SH::ShHostMemory(in1.size()*sizeof(IT1), _in1);
-    SH::ShChannel<typename INPUT1::TempType> chan_in1(mem_in1, 1);
-
-    SH::ShHostMemoryPtr mem_in2 = new SH::ShHostMemory(in2.size()*sizeof(IT2), _in2);
-    SH::ShChannel<typename INPUT2::TempType> chan_in2(mem_in2, 1);
-
-    SH::ShHostMemoryPtr mem_in3 = new SH::ShHostMemory(in3.size()*sizeof(IT3), _in3);
-    SH::ShChannel<typename INPUT3::TempType> chan_in3(mem_in3, 1);
-
+  
     SH::ShHostMemoryPtr mem_out = new SH::ShHostMemory(res.size()*sizeof(OT), _out);
     SH::ShChannel<typename OUTPUT::TempType> chan_out(mem_out, 1);
 
-    chan_out = program << chan_in1 << chan_in2 << chan_in3;
-  
-    for(int i = 0; i < res.size(); i++) {
-      if (fabs(_out[i] - _res[i]) > EPSILON) {
-        print_fail(name);
-        pretty_print("  A", in1.size(), _in1);
-        pretty_print("  B", in2.size(), _in2);
-        pretty_print("  C", in3.size(), _in3);
-        pretty_print("out", res.size(), _out);
-        pretty_print("exp", res.size(), _res);
-        return 1;
-      }
-    }
-#ifdef SH_REGRESS_SHOWALL
-      /* DEBUG */ pretty_print("out", res.size(), _out);
-      /* DEBUG */ pretty_print("exp", res.size(), _res);
-      /* DEBUG */ print_pass(name);
-#endif
-    return 0;
+    std::vector<std::string> inputs(3);
+    SH::ShProgram program1 = bind_input(program, in1, inputs[0]);
+    SH::ShProgram program2 = bind_input(program1, in2, inputs[1]);
+    SH::ShProgram program3 = bind_input(program2, in3, inputs[2]);
+    chan_out = program3;
+
+    return output_result(program.name(), inputs, _out, _res, res.size());
   }
 
   /// Checks results from running ops on the host
@@ -255,36 +212,20 @@ public:
         return 2;
       }
 
-      for(int i = 0; i < out.size(); ++i) {
-        if (fabs(_out[i] - _res[i]) > EPSILON) {
-          print_fail(name);
-          pretty_print("out", out.size(), _out); 
-          pretty_print("exp", res.size(), _res); 
-          return 1;
-        }
-      }
-#ifdef SH_REGRESS_SHOWALL
-        /* DEBUG */ pretty_print("out", res.size(), _out);
-        /* DEBUG */ pretty_print("exp", res.size(), _res);
-        /* DEBUG */ print_pass(name);
-#endif
-      return 0;
+      std::vector<std::string> inputs(0);
+      return output_result(name, inputs, _out, _res, res.size());
   }
-
-  bool on_host()
-  {
-    return m_backend == "host";
-  }
-
   
 private:
+  void print_values(const char* varname, const std::string& values);
   void print_fail(std::string name);
   void print_pass(std::string name);
+
+  bool on_host() { return m_backend == "host"; }
   
   std::string m_backend;
 };
 
 void init_tests(int argc, char** argv);
-         
 
 #endif
