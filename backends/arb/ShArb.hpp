@@ -24,7 +24,8 @@ enum ShArbRegType {
   SH_ARB_REG_TEMP,
   SH_ARB_REG_ADDRESS,
   SH_ARB_REG_OUTPUT,
-  SH_ARB_REG_CONST
+  SH_ARB_REG_CONST,
+  SH_ARB_REG_TEXTURE
 };
 
 class ArbCode : public SH::ShBackendCode {
@@ -67,6 +68,9 @@ private:
   /// Allocate temporary registers (called by allocRegs)
   void allocTemps();
 
+  /// Allocate textures (called by allocRegs)
+  void allocTextures();
+
   void bindSpecial(const SH::ShShaderNode::VarList::const_iterator& begin,
                    const SH::ShShaderNode::VarList::const_iterator& end,
                    const ArbBindingSpecs& specs, 
@@ -75,6 +79,10 @@ private:
 
   /// Output a use of a variable.
   std::ostream& printVar(std::ostream& out, bool dest, const SH::ShVariable& var) const;
+
+  /// Check whether inst is a sampling instruction. If so, output it
+  /// and return true. Otherwise, output nothing and return false.
+  bool printSamplingInstruction(std::ostream& out, const ArbInst& inst) const;
   
   SH::ShRefCount<ArbBackend> m_backend;
   SH::ShShader m_shader;
@@ -100,6 +108,9 @@ private:
   /// The number of constant 4-tuples used in this shader.
   int m_numConsts;
 
+  /// The number of distinct textures used in this shader.
+  int m_numTextures;
+
   typedef std::map<SH::ShVariableNodePtr, ArbReg> RegMap;
   RegMap m_registers;
 
@@ -122,12 +133,14 @@ public:
   int temps(int kind) { return m_temps[kind]; }
   int attribs(int kind) { return m_attribs[kind]; }
   int params(int kind) { return m_params[kind]; }
+  int texs(int kind) { return m_texs[kind]; }
   
 private:
   int m_instrs[2]; ///< Maximum number of instructions for each shader kind
   int m_temps[2]; ///< Maximum number of temporaries for each shader kind
   int m_attribs[2]; ///<Maximum number of attributes for each shader kind
   int m_params[2]; ///< Maximum number of parameters for each shader kind
+  int m_texs[2]; ///< Maximum number of TEX instructions for each shader kind
 };
 
 typedef SH::ShRefCount<ArbBackend> ArbBackendPtr;

@@ -6,6 +6,7 @@
 #include "ShDebug.hpp"
 #include "ShLinearAllocator.hpp"
 #include "ShEnvironment.hpp"
+#include "ShTextureNode.hpp"
 
 namespace ShArb {
 
@@ -196,7 +197,8 @@ struct {
   {"TEMP", "t"},
   {"ADDRESS", "a"},
   {"OUTPUT", "o"},
-  {"PARAM", "c"}
+  {"PARAM", "c"},
+  {"<texture>", "<texture>"}
 };
 
 /** Possible bindings for a register (see ARB spec).
@@ -380,7 +382,8 @@ static SH::ShRefCount<ArbBackend> instance = new ArbBackend();
 
 ArbCode::ArbCode(ArbBackendPtr backend, const ShShader& shader)
   : m_backend(backend), m_shader(shader),
-    m_numTemps(0), m_numInputs(0), m_numOutputs(0), m_numParams(0), m_numConsts(0)
+    m_numTemps(0), m_numInputs(0), m_numOutputs(0), m_numParams(0), m_numConsts(0),
+    m_numTextures(0)
 {
 }
 
@@ -459,10 +462,69 @@ void ArbCode::bind()
       updateUniform(node);
     }
   }
+  for (ShShaderNode::VarList::const_iterator I = m_shader->textures.begin(); I != m_shader->textures.end();
+       ++I) {
+    ShTextureNodePtr texture = *I;
+    if (!texture) {
+      SH_DEBUG_WARN((*I)->name() << " is not a valid texture!");
+      continue;
+    }
+
+    const ArbReg& texReg = m_registers[texture];
+
+    glActiveTexture(GL_TEXTURE0 + texReg.index);
+    // TODO: Only do this once.
+    unsigned int type;
+    switch (texture->dims()) {
+    case SH_TEXTURE_1D:
+      type = GL_TEXTURE_1D;
+      break;
+    case SH_TEXTURE_2D:
+      type = GL_TEXTURE_2D;
+      break;
+    case SH_TEXTURE_3D:
+      type = GL_TEXTURE_3D;
+      break;
+      //    case SH_TEXTURE_CUBE:
+      //      type = GL_TEXTURE_CUBE;
+      //      break;
+    }
+    
+    SH_DEBUG_PRINT("Binding texture " << texReg.index << " with texture unit " << texReg.bindingIndex);
+
+    glBindTexture(type, texReg.bindingIndex);
+    //    glActiveTexture(m_registers[texture].index);
+    SH_DEBUG_PRINT("Sending texture image");
+    // TODO: Other types of textures.
+    // TODO: Element Format
+    // TODO: sampling/filtering
+    glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(type, 0, texture->elements(), texture->width(), texture->height(), 0, GL_RGBA, GL_FLOAT,
+                 texture->data());
+    int error = glGetError();
+    if (error != GL_NO_ERROR) {
+      SH_DEBUG_ERROR("Error loading texture: " << error);
+      switch(error) {
+      case GL_INVALID_ENUM:
+        SH_DEBUG_ERROR("INVALID_ENUM");
+        break;
+      case GL_INVALID_VALUE:
+        SH_DEBUG_ERROR("INVALID_VALUE");
+        break;
+      case GL_INVALID_OPERATION:
+        SH_DEBUG_ERROR("INVALID_OPERATION");
+        break;
+      }
+    }
+    
+    //    glEnable(type);
+  }
 }
 
 void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
 {
+  // TODO: textures?
   if (!uniform) return;
   RegMap::const_iterator I = m_registers.find(uniform);
   if (I == m_registers.end()) return;
@@ -531,6 +593,40 @@ std::ostream& operator<<(std::ostream& out, LineNumberer& l)
   return out;
 }
 
+bool ArbCode::printSamplingInstruction(std::ostream& out, const ArbInst& instr) const
+{
+  if (instr.op != SH_ARB_TEX && instr.op != SH_ARB_TXP && instr.op != SH_ARB_TXB)
+    return false;
+
+  ShTextureNodePtr texture = instr.src[1].node();
+  RegMap::const_iterator texRegIt = m_registers.find(instr.src[1].node());
+  SH_DEBUG_ASSERT(texRegIt != m_registers.end());
+
+  const ArbReg& texReg = texRegIt->second;
+  
+  out << "  ";
+  out << arbOpInfo[instr.op].name << " ";
+  printVar(out, true, instr.dest) << ", ";
+  printVar(out, false, instr.src[0]) << ", ";
+  out << "texture[" << texReg.index << "], ";
+  switch (texture->dims()) {
+  case SH_TEXTURE_1D:
+    out << "1D";
+    break;
+  case SH_TEXTURE_2D:
+    out << "2D"; // TODO: RECT
+    break;
+  case SH_TEXTURE_3D:
+    out << "3D";
+    break;
+  case SH_TEXTURE_CUBE:
+    out << "CUBE";
+    break;
+  }
+  out << ";" << std::endl;
+  return true;
+}
+
 std::ostream& ArbCode::print(std::ostream& out)
 {
   SH_DEBUG_PRINT("printing the code");
@@ -591,15 +687,17 @@ std::ostream& ArbCode::print(std::ostream& out)
   // Print instructions
   for (ArbInstList::const_iterator I = m_instructions.begin();
        I != m_instructions.end(); ++I) {
-    out << "  ";
-    out << arbOpInfo[I->op].name << " ";
-    printVar(out, true, I->dest);
-    for (int i = 0; i < arbOpInfo[I->op].arity; i++) {
-      out << ", ";
-      printVar(out, false, I->src[i]);
+    if (!printSamplingInstruction(out, *I)) {
+      out << "  ";
+      out << arbOpInfo[I->op].name << " ";
+      printVar(out, true, I->dest);
+      for (int i = 0; i < arbOpInfo[I->op].arity; i++) {
+        out << ", ";
+        printVar(out, false, I->src[i]);
+      }
+      out << ';';
+      out << endl;
     }
-    out << ';';
-    out << endl;
   }
 
   out << "END" << endl;
@@ -677,6 +775,9 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       // TODO: scalarize?
       m_instructions.push_back(ArbInst(SH_ARB_POW, stmt.dest, stmt.src1, stmt.src2));
       break;
+    case SH_OP_TEX:
+      m_instructions.push_back(ArbInst(SH_ARB_TEX, stmt.dest, stmt.src2, stmt.src1));
+      break;
     default:
       SH_DEBUG_WARN(opInfo[stmt.op].name << " not handled by ARB backend");
     }
@@ -700,6 +801,7 @@ void ArbCode::allocRegs()
   
   allocTemps();
 
+  allocTextures();
 }
 
 void ArbCode::bindSpecial(const ShShaderNode::VarList::const_iterator& begin,
@@ -808,6 +910,21 @@ void ArbCode::allocConsts()
   }
 }
 
+void ArbCode::allocTextures()
+{
+  
+  for (ShShaderNode::VarList::const_iterator I = m_shader->textures.begin();
+       I != m_shader->textures.end(); ++I) {
+    ShTextureNodePtr node = *I;
+    int binding, index;
+    index = m_numTextures;
+    glGenTextures(1, (GLuint*)&binding);
+    m_registers[node] = ArbReg(SH_ARB_REG_TEXTURE, index);
+    m_registers[node].bindingIndex = binding;
+    m_numTextures++;
+  }
+}
+
 void mark(ShLinearAllocator& allocator, ShVariableNodePtr node, int i)
 {
   if (!node) return;
@@ -841,20 +958,24 @@ void ArbCode::allocTemps()
 
 ArbBackend::ArbBackend()
 {
+  // TODO Max TEX instructions, texture indirections
   for (int i = 0; i < 2; i++) {
     unsigned int target = shArbTargets[i];
-    m_instrs[i] = 128;
+    m_instrs[i] = (!i ? 128 : 48);
     glGetProgramivARB(target, GL_MAX_PROGRAM_INSTRUCTIONS_ARB, &m_instrs[i]);
     SH_DEBUG_PRINT("instrs[" << i << "] = " << m_instrs[i]);
-    m_temps[i] = 12;
+    m_temps[i] = (!i ? 12 : 16);
     glGetProgramivARB(target, GL_MAX_PROGRAM_TEMPORARIES_ARB, &m_temps[i]);
     SH_DEBUG_PRINT("temps[" << i << "] = " << m_temps[i]);
-    m_attribs[i] = 16;
+    m_attribs[i] = (!i ? 16 : 10);
     glGetProgramivARB(target, GL_MAX_PROGRAM_ATTRIBS_ARB, &m_attribs[i]);
     SH_DEBUG_PRINT("attribs[" << i << "] = " << m_attribs[i]);
-    m_params[i] = 96;
+    m_params[i] = (!i ? 96 : 24);
     glGetProgramivARB(target, GL_MAX_PROGRAM_LOCAL_PARAMETERS_ARB, &m_params[i]);
     SH_DEBUG_PRINT("params[" << i << "] = " << m_params[i]);
+    m_texs[i] = (!i ? 0 : 24);
+    if (i) glGetProgramivARB(target, GL_MAX_PROGRAM_TEX_INSTRUCTIONS_ARB, &m_texs[i]);
+    SH_DEBUG_PRINT("texs[" << i << "] = " << m_texs[i]);
   }
 }
 
