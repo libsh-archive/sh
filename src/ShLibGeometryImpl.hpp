@@ -113,13 +113,7 @@ ShGeneric<4, CT1T2T3> lit(const ShGeneric<1, T1>& a,
 {
   ShAttrib<4, SH_TEMP, CT1T2T3> i;
   ShAttrib<4, SH_TEMP, CT1T2T3> r;
-  // @todo There is no join() that takes 4 arguments, should we create
-  // one or do this by hand ?
-  i[0] = a[0];
-  i[1] = b[0];
-  i[2] = c[0]; // (unused)
-  i[3] = c[0];
-  shLIT(r, i);
+  shLIT(r, join(a, b, c, c));
   return r;
 }
 

@@ -1,3 +1,8 @@
+2005-02-07  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibMisc.hpp, src/ShLibMiscImpl.hpp (join): Added join
+	functions for three and four tuples.
+
 2005-02-04  Francois Marier  <francois@serioushack.com>
 
 	* src/*: Made lit an operation (issue74) and compute it according
