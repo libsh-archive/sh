@@ -20,7 +20,7 @@ struct ChannelGatherer {
 
   void operator()(const SH::ShCtrlGraphNode* node);
   
-  ChannelMap channel_map;
+  ChannelMap& channel_map;
   SH::ShTextureDims dims;
 };
 

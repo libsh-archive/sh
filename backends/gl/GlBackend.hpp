@@ -31,6 +31,7 @@
 #include "ShProgram.hpp"
 #include "ShStream.hpp"
 #include "ShTextureNode.hpp"
+#include "ShSchedule.hpp"
 
 #ifdef WIN32
 
@@ -103,7 +104,7 @@ struct CodeStrategy {
 
 struct ScheduleStrategy {
   virtual ScheduleStrategy* create(void) = 0;
-  virtual SH::ShVoidPtr prepare(SH::ShSchedule* schedule) = 0;
+  virtual SH::ShBackendSchedulePtr prepare(SH::ShSchedule* schedule) = 0;
 };
 
 class GlBackend : public SH::ShBackend {
@@ -114,7 +115,7 @@ public:
   // execute a stream program, if supported
   virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
 
-  virtual SH::ShVoidPtr prepare(SH::ShSchedule* schedule);
+  virtual SH::ShBackendSchedulePtr prepare(SH::ShSchedule* schedule);
   
 protected:
   GlBackend(CodeStrategy* code,

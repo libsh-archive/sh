@@ -95,6 +95,20 @@ void ShMemory::flush()
     (*i)->memory_update();
 }
 
+std::ostream& ShMemory::dump(std::ostream& out)
+{
+  out << "mem[" << timestamp() << "] = {";
+  for (StorageList::iterator I = m_storages.begin(); I != m_storages.end(); ++I) {
+    if (I != m_storages.begin()) out << ", ";
+    
+    ShStoragePtr s = *I;
+
+    out << s->id() << "<" << s->timestamp() << ">";
+  }
+  out << "}";
+  return out;
+}
+
 ////////////////////////
 // --- ShTransfer --- //
 ////////////////////////
@@ -190,7 +204,7 @@ void ShStorage::dirty()
 
 void ShStorage::dirtyall()
 {
-  m_timestamp++;
+  m_timestamp = m_memory->timestamp() + 1;
   m_memory->updateTimestamp(m_timestamp);
 }
 

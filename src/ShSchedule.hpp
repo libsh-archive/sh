@@ -6,6 +6,7 @@
 #include <iosfwd>
 #include "ShProgramNode.hpp"
 #include "ShVariable.hpp"
+#include "ShStream.hpp"
 
 namespace SH {
 
@@ -54,6 +55,14 @@ struct ShPass {
   int count;
 };
 
+struct ShBackendSchedule : public ShRefCountable {
+  virtual void pre_execution(int width, int height, const ShStream& stream) = 0;
+  virtual void execute_pass(ShPass* pass) = 0 ;
+};
+
+typedef ShPointer<ShBackendSchedule> ShBackendSchedulePtr;
+typedef ShPointer<const ShBackendSchedule> ShBackendScheduleCPtr;
+
 class ShSchedule {
 public:
   typedef std::list<ShPass> PassList;
@@ -68,7 +77,7 @@ public:
              const ShProgramNode::VarList& outputs);
 
   void prepare();
-  void execute();
+  void execute(ShStream& out);
   
   void dump_graphviz(std::ostream& out) const;
   
@@ -85,6 +94,9 @@ public:
 
   // Number of temporary buffers used.
   std::size_t num_temps() { return m_num_temps; }
+
+  void remove_eligible(ShPass* pass);
+  void add_eligible(ShPass* pass);
   
 private:
   // The program for which this schedule is generated.
@@ -101,7 +113,7 @@ private:
   // The original inputs and outputs
   ShProgramNode::VarList m_inputs, m_outputs;
 
-  ShVoidPtr m_backend_data;
+  ShBackendSchedulePtr m_backend_data;
 
   std::size_t m_num_temps;
 

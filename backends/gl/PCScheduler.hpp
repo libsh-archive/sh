@@ -8,7 +8,7 @@ namespace shgl {
 struct PCScheduler : public ScheduleStrategy {
   PCScheduler();
 
-  virtual SH::ShVoidPtr prepare(SH::ShSchedule* schedule);
+  virtual SH::ShBackendSchedulePtr prepare(SH::ShSchedule* schedule);
 
   virtual ScheduleStrategy* create();
   

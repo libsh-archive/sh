@@ -715,7 +715,7 @@ void CcBackend::execute(const ShProgramNodeCPtr& program, ShStream& dest) {
   backendcode->execute(dest);
 }
 
-ShVoidPtr CcBackend::prepare(ShSchedule* schedule)
+ShBackendSchedulePtr CcBackend::prepare(ShSchedule* schedule)
 {
   return 0;
 }

@@ -205,4 +205,14 @@ GLXPBufferContextPtr GLXPBufferFactory::create_context(int width, int height,
   return new GLXPBufferContext(width, height, id, m_display, pbuffer, context);
 }
 
+
+GLXPBufferFactory* GLXPBufferFactory::m_instance = 0;
+
+GLXPBufferFactory* GLXPBufferFactory::instance()
+{
+  if (!m_instance) m_instance = new GLXPBufferFactory();
+
+  return m_instance;
+}
+
 }

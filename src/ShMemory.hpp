@@ -31,6 +31,7 @@
 #include <map>
 #include <utility>
 #include <string>
+#include <iosfwd>
 #include "ShDllExport.hpp"
 #include "ShRefCount.hpp"
 #include "ShMemoryDep.hpp"
@@ -76,6 +77,8 @@ public:
   /// modify the memory data by using the links to the dependencies
   void flush();
 
+  std::ostream& dump(std::ostream& out);
+  
 protected:
   ShMemory();
   

@@ -38,6 +38,7 @@
 #include "ShVariant.hpp"
 #include "ShBackend.hpp"
 #include "ShTransformer.hpp"
+#include "ShSchedule.hpp"
 
 // #define SH_CC_DEBUG 1
 
@@ -187,7 +188,7 @@ public:
     
   void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
 
-  SH::ShVoidPtr prepare(SH::ShSchedule* schedule);
+  SH::ShBackendSchedulePtr prepare(SH::ShSchedule* schedule);
 };
 
 

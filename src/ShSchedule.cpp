@@ -94,7 +94,7 @@ struct TempCounter {
 
   std::map<ShVariableNode*, int>& register_count;
   std::map<ShVariableNode*, Mapping>& register_map;
-  std::size_t max_register;
+  std::size_t& max_register;
 };
 
 struct ScheduleBuilder {
@@ -287,7 +287,8 @@ ShSchedule::ShSchedule(const ShProgramNodePtr& program_orig)
   ShTransformer xform(m_program);
 
   xform.convertInputOutput();
-
+  m_program->collectVariables();
+  
   optimize(m_program);
   
   // El cheapo register allocator
@@ -296,6 +297,8 @@ ShSchedule::ShSchedule(const ShProgramNodePtr& program_orig)
   // Aka. the "Tibi register allocator"
   std::map<ShVariableNode*, int> register_count;
   std::map<ShVariableNode*, Mapping> register_map;
+
+  m_num_temps = 0;
   
   ShContext::current()->enter(m_program);
   TempCounter count(register_count, register_map, m_num_temps);
@@ -390,6 +393,48 @@ void ShSchedule::prepare()
   SH_DEBUG_ASSERT(ShEnvironment::backend);
   
   m_backend_data = ShEnvironment::backend->prepare(this);
+}
+
+void ShSchedule::remove_eligible(ShPass* pass)
+{
+  m_eligible_passes.erase(pass);
+}
+
+void ShSchedule::add_eligible(ShPass* pass)
+{
+  m_eligible_passes.insert(pass);
+}
+
+void ShSchedule::execute(ShStream& out)
+{
+  SH_DEBUG_ASSERT(out.begin() != out.end());
+
+  // TODO: Check counts
+
+  std::cerr << "Executing schedule: count = " << (*out.begin())->count() << std::endl;
+  
+  int width = 4, height = 4;
+
+  while (width * height < (*out.begin())->count()) {
+    if (width < 2048) {
+      width <<= 1;
+    } else if (height < 2048) {
+      height <<= 1;
+    } else {
+      SH_DEBUG_ASSERT(false);
+    }
+  }
+  
+  m_backend_data->pre_execution(width, height, out);
+
+  begin()->count = (*out.begin())->count();
+  add_eligible(&*begin());
+  
+  while (!m_eligible_passes.empty()) {
+    ShPass* pass = *m_eligible_passes.begin();
+    std::cerr << "Executing pass " << pass << std::endl;
+    m_backend_data->execute_pass(pass);
+  }
 }
 
 }

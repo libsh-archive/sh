@@ -20,6 +20,9 @@ void ChannelGatherer::operator()(const ShCtrlGraphNode* node)
     // TODO: ought to complain here
     if (stmt.src[0].node()->kind() != SH_STREAM) continue;
     
+
+    std::cerr << "Found something" << std::endl;
+    
     ShChannelNodePtr channel = shref_dynamic_cast<ShChannelNode>(stmt.src[0].node());
 
     ShTextureNodePtr tex;
@@ -65,7 +68,7 @@ void TexFetcher::operator()(ShCtrlGraphNode* node)
     ShChannelNodePtr stream_node = shref_dynamic_cast<ShChannelNode>(stmt.src[0].node());
     ChannelMap::const_iterator J = channel_map.find(stream_node);
     if (J == channel_map.end()) {
-      SH_DEBUG_WARN("Stream node not found in input map");
+      SH_DEBUG_WARN("Stream node " << stream_node.object() << ", " << stream_node->name() << " not found in input map");
       continue;
     }
 

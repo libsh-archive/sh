@@ -288,7 +288,7 @@ GlBackend::execute(const SH::ShProgramNodeCPtr& program,
   m_stream->execute(program, dest);
 }
 
-SH::ShVoidPtr
+SH::ShBackendSchedulePtr
 GlBackend::prepare(SH::ShSchedule* schedule)
 {
   return m_schedule->prepare(schedule);
