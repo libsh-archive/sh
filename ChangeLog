@@ -1,3 +1,17 @@
+2004-10-20 Sylvain Vasseur <sfvsasse@cgl.uwaterloo.ca>
+
+	* src/ShMemoryDep.hpp: Implement dependencies with a memory object
+  
+	* src/ShMemory.hpp (ShMemory::add_dep): Add function to link with
+  dependencies.
+	(ShMemory::flush): Add function to use the dependencies.
+	(ShStorage::dirtyall): Add function to mark dirty without
+  a sync before.
+  
+	* src/sh.hpp: Include ShMemoryDep.hpp.
+  
+	* src/Makefile.am: Add ShMemoryDep files.
+
 2004-10-20  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/ArbCode.cpp (print): Handle ARRAYMOV instructions.
