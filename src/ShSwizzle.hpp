@@ -75,6 +75,9 @@ public:
   ShSwizzle(int srcSize, int size, int* indices);
 
   ShSwizzle(const ShSwizzle& other);
+
+  /* Construct swizzle from repeating other n times */ 
+  ShSwizzle(const ShSwizzle& other, int n);
   ~ShSwizzle();
 
   ShSwizzle& operator=(const ShSwizzle& other);

@@ -29,20 +29,6 @@ void ShRegularOp<OP, T>::operator()(
   ShRegularOpChooser<OP, T>::Op::doop(destVec, aVec, bVec, cVec);
 }
 
-template<ShOperation OP, typename T1, typename T2>
-void ShIntervalOp<OP, T1, T2>::operator()( 
-    ShVariant* dest, const ShVariant* a, const ShVariant* b, const ShVariant* c) const
-{
-
-  SH_DEBUG_ASSERT(dest && a);
-
-  ShDataVariant<T1, SH_HOST>* destVec = variant_cast<T1, SH_HOST>(dest);
-
-  const ShDataVariant<T2, SH_HOST>* aVec = variant_cast<T2, SH_HOST>(a);
-
-  ShConcreteIntervalOp<OP, T1, T2>::doop(*destVec, *aVec);
-}
-
 template<typename T>
 void _shInitFloatOps() {
   ShEval* eval = ShEval::instance();
@@ -140,23 +126,6 @@ void _shInitIntOps() {
 
   // all other ops must use float (since they can potentially give float
   // results)
-}
-
-template<typename T, typename IntervalT>
-void _shInitIntervalOps() {
-  ShEval* eval = ShEval::instance();
-  const ShValueType V = ShStorageTypeInfo<T>::value_type;
-  const ShValueType IntervalV = ShStorageTypeInfo<IntervalT>::value_type; 
-
-  eval->addOp(SH_OP_LO, new ShIntervalOp<SH_OP_LO, T, IntervalT>(), 
-      V, IntervalV);
-  eval->addOp(SH_OP_HI, new ShIntervalOp<SH_OP_HI, T, IntervalT>(), 
-      V, IntervalV);
-
-  eval->addOp(SH_OP_SETLO, new ShIntervalOp<SH_OP_SETLO, IntervalT, T>(), 
-      IntervalV, V);
-  eval->addOp(SH_OP_SETHI, new ShIntervalOp<SH_OP_SETHI, IntervalT, T>(), 
-      IntervalV, V);
 }
 
 }

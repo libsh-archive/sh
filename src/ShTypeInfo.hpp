@@ -33,7 +33,6 @@
 #include "ShVariableType.hpp"
 #include "ShDataType.hpp"
 #include "ShRefCount.hpp"
-#include "ShInterval.hpp"
 #include "ShFraction.hpp"
 #include "ShHalf.hpp"
 

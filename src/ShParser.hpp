@@ -29,6 +29,7 @@
 
 #include "ShDllExport.hpp"
 #include "ShCtrlGraph.hpp"
+#include "ShToken.hpp"
 
 namespace SH {
 
@@ -46,6 +47,9 @@ public:
                     ShBlockListPtr blocks);
   
 private:
+  static void parseBlock(ShCtrlGraphNodePtr& head, 
+                         ShCtrlGraphNodePtr& tail,
+                         ShBasicBlockPtr block);
   static void parseStmts(ShCtrlGraphNodePtr& head,
                          ShCtrlGraphNodePtr& tail,
                          ShBlockListPtr blocks);
@@ -61,6 +65,16 @@ private:
   static void parseDo(ShCtrlGraphNodePtr& head,
                       ShCtrlGraphNodePtr& tail,
                       ShBlockListPtr blocks);
+  static void parseSection(ShCtrlGraphNodePtr& head,
+                           ShCtrlGraphNodePtr& tail,
+                           ShBlockListPtr blocks);
+
+  /* Just pops a token */
+  static ShTokenPtr popToken(ShBlockListPtr blocks);
+
+  /* Checks if front of block list matches expected, pops, and returns */
+  static ShTokenPtr popToken(ShBlockListPtr blocks, ShTokenType expectedType, unsigned int expectedArgs=0);
+
 
   // NOT IMPLEMENTED
   ShParser();

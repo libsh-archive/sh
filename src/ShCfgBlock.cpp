@@ -24,40 +24,70 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHLIBINTERVAL_HPP
-#define SHLIBINTERVAL_HPP
+#include <iostream>
+#include "ShProgram.hpp"
+#include "ShUtility.hpp"
+#include "ShCfgBlock.hpp"
 
-#include "ShGeneric.hpp"
-#include "ShInterval.hpp"
-#include "ShLib.hpp"
-
-#define SH_REGULARTYPE(T) typename ShStorageTypeInfo<T>::RegularType
-#define SH_IA_TYPE(T) typename ShStorageTypeInfo<T>::IntervalType
 namespace SH {
 
-/** \defgroup lib_interval Interval Arithmetic  
- * @ingroup library
- * Operations related to derivatives of values.
- * @{
- */
+ShCfgBlock::ShCfgBlock(const ShProgram &program, bool copy)
+{
+  init(program.node()->ctrlGraph, copy);
+}
 
-/** lower bound 
- */
-template<int N, typename T>
-ShGeneric<N, SH_REGULARTYPE(T)> lo(const ShGeneric<N, T>& var);
+ShCfgBlock::ShCfgBlock(ShCtrlGraphPtr cfg, bool copy)
+{
+  init(cfg, copy);
+}
 
- /** upper bound
- */
-template<int N, typename T>
-ShGeneric<N, SH_REGULARTYPE(T)> hi(const ShGeneric<N, T>& var);
+ShCfgBlock::ShCfgBlock(ShCtrlGraphNodePtr node, bool copy)
+{
+  ShCtrlGraphPtr cfg = new ShCtrlGraph(node, node); 
+  init(cfg, copy);
+}
 
-/*@}*/
+void ShCfgBlock::init(ShCtrlGraphPtr cfg, bool copy)
+{
+  if(copy) {
+    cfg->copy(m_entry, m_exit);
+  } else {
+    m_entry = cfg->entry();
+    m_exit = cfg->exit();
+  }
+}
+
+ShCfgBlock::~ShCfgBlock()
+{
+}
+
+ShCtrlGraphNodePtr ShCfgBlock::entry() const 
+{
+  return m_entry;
+}
+
+ShCtrlGraphNodePtr ShCfgBlock::exit() const 
+{
+  return m_exit;
+}
+
+void ShCfgBlock::print(std::ostream& out, int indent) const
+{
+  using std::endl;
+  
+  shPrintIndent(out, indent);
+  out << "CfgBlock {" << endl;
+    m_entry->print(out, indent + 2);
+  shPrintIndent(out, indent);
+  out << "}" << endl;
+}
+
+void ShCfgBlock::graphvizDump(std::ostream& out) const
+{
+  out << "subgraph cfgblock {";
+    m_entry->graphvizDump(out);
+  out << "}";
+}
 
 }
 
-#include "ShLibIntervalImpl.hpp"
-
-#undef SH_REGULARTYPE
-#undef SH_IA_TYPE
-
-#endif

@@ -559,10 +559,11 @@ void ArbCode::emit_nvcond(const ShStatement& stmt)
 
 void ArbCode::emit_csum(const ShStatement& stmt)
 {
+
   // @todo type make this function handle more than floats
-  ShDataVariant<float, SH_HOST> c1_values(stmt.src[0].size(), 1.0f); 
+  ShVariantPtr c1_values = new ShDataVariant<float, SH_HOST>(stmt.src[0].size(), 1.0f); 
   ShVariable c1(new ShVariableNode(SH_CONST, stmt.src[0].size(), SH_FLOAT));
-  c1.setVariant(&c1_values);
+  c1.setVariant(c1_values);
   m_shader->constants.push_back(c1.node());
   
   emit(ShStatement(stmt.dest, stmt.src[0], SH_OP_DOT, c1));

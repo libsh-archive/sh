@@ -117,6 +117,12 @@ enum ShOperation {
   SH_OP_OPTBRA, ///< Used in the optimizer to indicate a conditional
                 ///  branch dependency. This should never show up in
                 ///  code passed to the backend.
+  SH_OP_DECL,   ///< Used during ShProgram definition to indicate temp declaration points.
+                ///  These are transferred during parsing into a map in each cfg
+                ///  node, and do not appear in actual cfg block statement lists.
+
+  SH_OP_STARTSEC, ///< Indicates the starting point of a hierarchical section
+  SH_OP_ENDSEC,  ///< Indicates the ending point of a hierarchical section
 
   // Streams
   SH_OP_FETCH, ///< Unary (takes a stream). Fetch an element from a stream. Similar to TEX
@@ -126,10 +132,8 @@ enum ShOperation {
   // Palettes
   SH_OP_PAL, ///< Binary. First argument is a palette. Palette array lookup.
 
-  SH_OP_LO,  ///< Extracts a lower bound from a range arithmetic type
-  SH_OP_HI,  ///< Extracts an upper bound from a range arithmetic type
-  SH_OP_SETLO, ///< Sets a lower bound on an interval arithmetic type from a regular tuple
-  SH_OP_SETHI, ///< Sets an upper bound on an interval arithmetic type from a regular tuple
+  SH_OP_COMMENT, ///< For internal use.  Stores a comment at this point in the IR.
+                 ///< Statements of this kind MUST have a ShInfoComment attached
 
   SH_OPERATION_END, ///< End of List marker.  Not an actual op
 };

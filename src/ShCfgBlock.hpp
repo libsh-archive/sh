@@ -24,50 +24,44 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHTYPEINFOIMPL_HPP
-#define SHTYPEINFOIMPL_HPP
+#ifndef SHCFGBLOCK_HPP
+#define SHCFGBLOCK_HPP
 
-#include "ShTypeInfo.hpp"
-#include "ShVariantFactory.hpp"
+#include <list>
+#include "ShBlock.hpp"
+#include "ShCtrlGraph.hpp"
 
 namespace SH {
 
-template<typename T, ShDataType DT>
-const typename ShDataTypeInfo<T, DT>::type
-ShDataTypeInfo<T, DT>::Zero = ShDataTypeConstant<T, DT>::Zero; 
+/** A control-flow graph block 
+ * A cfg block is a block composed a previously defined control graph, 
+ * Normally the block stores a copy, but for internal use you may set copy =
+ * false to use the original graph.  
+ */
+class 
+SH_DLLEXPORT
+ShCfgBlock : public ShBlock {
+public:
+  ShCfgBlock(const ShProgram &program, bool copy=true);
+  ShCfgBlock(ShCtrlGraphPtr cfg, bool copy=true);
+  ShCfgBlock(ShCtrlGraphNodePtr node, bool copy=true); 
 
-template<typename T, ShDataType DT>
-const typename ShDataTypeInfo<T, DT>::type
-ShDataTypeInfo<T, DT>::One = ShDataTypeConstant<T, DT>::One; 
+  ~ShCfgBlock();
 
-template<typename T, ShDataType DT>
-const char* ShDataTypeInfo<T, DT>::name() const 
-{
-  return ShStorageTypeInfo<T>::name;
-}
+  ShCtrlGraphNodePtr entry() const;
+  ShCtrlGraphNodePtr exit() const;
 
-template<typename T, ShDataType DT>
-int ShDataTypeInfo<T, DT>::datasize() const 
-{
-  return sizeof(typename ShDataTypeCppType<T, DT>::type); 
-}
+  void print(std::ostream& out, int indent) const;
+  void graphvizDump(std::ostream& out) const;
 
-template<typename T, ShDataType DT>
-const ShVariantFactory* ShDataTypeInfo<T, DT>::variantFactory() const
-{
-  return ShDataVariantFactory<T, DT>::instance();
-}
+  
+private:
+  void init(ShCtrlGraphPtr cfg, bool copy);
+  ShCtrlGraphNodePtr m_entry, m_exit;
+};
 
-template<typename T, ShDataType DT>
-const ShDataTypeInfo<T, DT>* ShDataTypeInfo<T, DT>::instance() 
-{
-  if(!m_instance) m_instance = new ShDataTypeInfo<T, DT>();
-  return m_instance;
-}
-
-template<typename T, ShDataType DT>
-ShDataTypeInfo<T, DT>* ShDataTypeInfo<T, DT>::m_instance = 0;
-
+typedef ShPointer<ShCfgBlock> ShCfgBlockPtr;
+typedef ShPointer<const ShCfgBlock> ShCfgBlockCPtr;
 
 }
 

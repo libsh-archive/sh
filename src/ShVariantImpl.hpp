@@ -34,7 +34,6 @@
 #include "ShCastManager.hpp"
 #include "ShVariant.hpp"
 #include "ShTypeInfo.hpp"
-#include "ShInterval.hpp"
 
 namespace SH {
 
@@ -81,7 +80,8 @@ ShDataVariant<T, DT>::ShDataVariant(void *data, int N, bool managed)
 {
   if(m_managed) {
     alloc(N);
-    memcpy(m_begin, data, N * datasize());
+    DataType* cast_data = reinterpret_cast<DataType*>(data); 
+    std::copy(cast_data, cast_data + N, m_begin);
   } else {
     m_begin = reinterpret_cast<DataType*>(data);
     m_end = m_begin + N;
@@ -94,7 +94,7 @@ ShDataVariant<T, DT>::ShDataVariant(const ShDataVariant<T, DT> &other)
 {
   int size = other.size();
   alloc(size);
-  memcpy(m_begin, other.m_begin, size * datasize());
+  std::copy(other.begin(), other.end(), m_begin);
 }
 
 template<typename T, ShDataType DT>
@@ -112,7 +112,7 @@ ShDataVariant<T, DT>::ShDataVariant(const ShDataVariant<T, DT> &other,
 template<typename T, ShDataType DT>
 ShDataVariant<T, DT>::~ShDataVariant() 
 {
-  if(m_managed) delete m_begin;
+  if(m_managed) delete[] m_begin;
 }
 
 template<typename T, ShDataType DT>
@@ -165,7 +165,13 @@ template<typename T, ShDataType DT>
 void ShDataVariant<T, DT>::set(const ShVariant* other)
 {
   SH_DEBUG_ASSERT(other->size() == size());
-  ShCastManager::instance()->doCast(this, other);
+
+  CPtrType cast_other = variant_cast<T, DT>(other);
+  if(cast_other) {
+    std::copy(cast_other->begin(), cast_other->end(), begin());
+  } else {
+    ShCastManager::instance()->doCast(this, other);
+  }
 }
 
 template<typename T, ShDataType DT>
@@ -178,10 +184,15 @@ template<typename T, ShDataType DT>
 void ShDataVariant<T, DT>::set(const ShVariant* other, int index)
 {
   SH_DEBUG_ASSERT(other->size() == 1); 
-  // make a new DataVariant that uses the index element as it's array 
-  ShDataVariant *temp = new ShDataVariant(m_begin + index, 1, false);
-  ShCastManager::instance()->doCast(temp, other);
-  delete temp; // okay - it doesn't delete its array
+  CPtrType cast_other = variant_cast<T, DT>(other);
+  if(cast_other) {
+    m_begin[index] = (*cast_other)[0];
+  } else {
+    // make a new DataVariant that uses the index element as it's array 
+    ShDataVariant *temp = new ShDataVariant(m_begin + index, 1, false);
+    ShCastManager::instance()->doCast(temp, other);
+    delete temp; // okay - it doesn't delete its array
+  }
 }
 
 template<typename T, ShDataType DT>
@@ -195,19 +206,29 @@ void ShDataVariant<T, DT>::set(const ShVariant* other, bool neg, const ShSwizzle
 {
   int wmsize = writemask.size();
   SH_DEBUG_ASSERT(wmsize == other->size());
+
   if(writemask.identity() && (wmsize == size())) {
     set(other);
     if(neg) negate();
     return;
   }
 
+
+  CPtrType cast_other = variant_cast<T, DT>(other);
+  if(cast_other) {
+    for(int i = 0; i < wmsize; ++i) {
+      m_begin[writemask[i]] = (*cast_other)[i];
+    }
+    if(neg) negate();
+  } else {
   // otherwise we need a temp buffer variant...doh
-  ShDataVariant *temp = new ShDataVariant(wmsize);
-  ShCastManager::instance()->doCast(temp, other);
-  for(int i = 0; i < wmsize; ++i) {
-    m_begin[writemask[i]] = neg ? -(*temp)[i] : (*temp)[i];
+    ShDataVariant *temp = new ShDataVariant(wmsize);
+    ShCastManager::instance()->doCast(temp, other);
+    for(int i = 0; i < wmsize; ++i) {
+      m_begin[writemask[i]] = neg ? -(*temp)[i] : (*temp)[i];
+    }
+    delete temp;
   }
-  delete temp;
 }
 
 template<typename T, ShDataType DT>
@@ -343,7 +364,6 @@ std::string ShDataVariant<T, DT>::encode(bool neg, const ShSwizzle &swizzle) con
   return out.str();
 }
 
-// @todo type do Interval types
 template<typename T, ShDataType DT>
 std::string ShDataVariant<T, DT>::encodeArray() const {
   if(size() < 1) return "";
@@ -413,7 +433,7 @@ template<typename T, ShDataType DT>
 ShPointer<ShDataVariant<T, DT> > variant_convert(ShVariantCPtr c)
 {
   ShDataVariant<T, DT>* result = new ShDataVariant<T, DT>(c->size());
-  ShCastManager::instance()->doCast(result, c.object());
+  result->set(c);
   return result;
 }
 

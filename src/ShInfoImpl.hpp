@@ -24,51 +24,50 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHTYPEINFOIMPL_HPP
-#define SHTYPEINFOIMPL_HPP
+#ifndef SHINFOIMPL_HPP
+#define SHINFOIMPL_HPP
 
-#include "ShTypeInfo.hpp"
-#include "ShVariantFactory.hpp"
+#include "ShInfo.hpp"
 
 namespace SH {
 
-template<typename T, ShDataType DT>
-const typename ShDataTypeInfo<T, DT>::type
-ShDataTypeInfo<T, DT>::Zero = ShDataTypeConstant<T, DT>::Zero; 
-
-template<typename T, ShDataType DT>
-const typename ShDataTypeInfo<T, DT>::type
-ShDataTypeInfo<T, DT>::One = ShDataTypeConstant<T, DT>::One; 
-
-template<typename T, ShDataType DT>
-const char* ShDataTypeInfo<T, DT>::name() const 
+template<typename T>
+T* ShInfoHolder::get_info()
 {
-  return ShStorageTypeInfo<T>::name;
+  for (InfoList::iterator I = info.begin(); I != info.end(); ++I) {
+    T* item = dynamic_cast<T*>(*I);
+    if (item) {
+      return item;
+    }
+  }
+  return 0;
 }
 
-template<typename T, ShDataType DT>
-int ShDataTypeInfo<T, DT>::datasize() const 
+template<typename T>
+const T* ShInfoHolder::get_info() const
 {
-  return sizeof(typename ShDataTypeCppType<T, DT>::type); 
+  for (InfoList::const_iterator I = info.begin(); I != info.end(); ++I) {
+    const T* item = dynamic_cast<const T*>(*I);
+    if (item) {
+      return item;
+    }
+  }
+  return 0;
 }
 
-template<typename T, ShDataType DT>
-const ShVariantFactory* ShDataTypeInfo<T, DT>::variantFactory() const
+template<typename T>
+void ShInfoHolder::destroy_info()
 {
-  return ShDataVariantFactory<T, DT>::instance();
+  for (InfoList::iterator I = info.begin(); I != info.end();) {
+    T* item = dynamic_cast<T*>(*I);
+    if (item) {
+      I = info.erase(I);
+    } else {
+      ++I;
+    }
+  }
 }
 
-template<typename T, ShDataType DT>
-const ShDataTypeInfo<T, DT>* ShDataTypeInfo<T, DT>::instance() 
-{
-  if(!m_instance) m_instance = new ShDataTypeInfo<T, DT>();
-  return m_instance;
-}
-
-template<typename T, ShDataType DT>
-ShDataTypeInfo<T, DT>* ShDataTypeInfo<T, DT>::m_instance = 0;
-
-
-}
+} // namespace SH
 
 #endif

@@ -54,7 +54,15 @@ public:
 
   ~ShVariable() {}
 
+  /* Executes a program and assigns the result to this variable.
+   *
+   * In retained mode, the prg gets inserted into the ShProgram currently
+   * being defined.
+   */
   ShVariable& operator=(const ShProgram& prg);
+ 
+  /* Attaches a ShProgram to this variable, making it a dependent uniform. */
+  void attach(const ShProgram& prg);
   
   bool null() const; ///< true iff node is a null pointer.
   
@@ -120,7 +128,7 @@ public:
    * @{
    */
   bool loadVariant(ShVariant *&result) const;
-  void updateVariant();
+  void updateVariant() const;
   // @}
 
   
@@ -128,22 +136,22 @@ public:
    * this' writemask and negations
    * @{
    */
-  void setVariant(const ShVariant* other, bool neg, const ShSwizzle &writemask);
-  void setVariant(ShVariantCPtr other, bool neg, const ShSwizzle &writemask);
+  void setVariant(const ShVariant* other, bool neg, const ShSwizzle &writemask) const;
+  void setVariant(ShVariantCPtr other, bool neg, const ShSwizzle &writemask) const;
   // @}
  
   /** Sets the indicated element of this' variant from other 
    * @{
    */
-  void setVariant(const ShVariant* other, int index);
-  void setVariant(ShVariantCPtr other, int index);
+  void setVariant(const ShVariant* other, int index) const;
+  void setVariant(ShVariantCPtr other, int index) const;
   // @}
 
   /** Sets this' variant from the contents of other
    * @{
    */
-  void setVariant(const ShVariant* other);
-  void setVariant(ShVariantCPtr other);
+  void setVariant(const ShVariant* other) const;
+  void setVariant(ShVariantCPtr other) const;
   // @}
 
 
@@ -153,6 +161,8 @@ public:
   ShVariable operator()(int, int, int) const;
   ShVariable operator()(int, int, int, int) const;
   ShVariable operator()(int size, int indices[]) const;
+  ShVariable operator()(const ShSwizzle &swizzle) const;
+
   
   ShVariable operator-() const;
 

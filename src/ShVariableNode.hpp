@@ -98,6 +98,9 @@ public:
   std::string name() const; ///< Get this variable's name
   void name(const std::string& n); ///< Set this variable's name
 
+  /// Whether this variable has ranges set
+  bool hasRange();
+ 
   /// Set a range of possible values for this variable's elements
   // low and high must be scalar elements (otherwise this just uses the first component)
   void rangeVariant(const ShVariant* low, const ShVariant* high);
@@ -196,6 +199,14 @@ protected:
 
 
   void programVarListInit(); /// After kind, size and type are set, this 
+
+  /** Adds this to the declared temps set. 
+   * If current parsing program has cfg node (i.e. this is a transformation,
+   * not a new program specification), then adds to programs entry node.
+   * Else adds an SH_OP_DECL as a dummy statement into current parsing block.
+   */
+  void programDeclInit(); 
+                          
 
   void add_dependent(ShVariableNode* dep);
   void remove_dependent(ShVariableNode* dep);

@@ -101,17 +101,17 @@ const ShOperationInfo opInfo[] = {
   {"KIL", 1, ShOperationInfo::IGNORE, false},
 
   {"OPTBRA", 1, ShOperationInfo::IGNORE, false},
+  {"DECL", 0, ShOperationInfo::IGNORE, false},
+
+  {"STARTSEC", 0, ShOperationInfo::IGNORE, false},
+  {"ENDSEC", 0, ShOperationInfo::IGNORE, false},
 
   {"FETCH", 1, ShOperationInfo::EXTERNAL, false},
   {"LOOKUP", 2, ShOperationInfo::EXTERNAL, false},
 
   {"PAL", 2, ShOperationInfo::EXTERNAL, false},
 
-  {"LO", 1, ShOperationInfo::LINEAR, false},
-  {"HI", 1, ShOperationInfo::LINEAR, false},
-  {"SETLO", 1, ShOperationInfo::LINEAR, false},
-  {"SETHI", 1, ShOperationInfo::LINEAR, false},
-  
+  {"COMMENT", 0, ShOperationInfo::IGNORE, false}, // special comment tag
   {0, 0, ShOperationInfo::IGNORE, false}
 };
 

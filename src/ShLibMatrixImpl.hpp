@@ -156,6 +156,14 @@ det(const ShMatrix<2, 2, Binding, T>& matrix)
 {
   return (matrix[0][0]*matrix[1][1] - matrix[0][1] * matrix[1][0]);
 }
+
+template<ShBindingType Binding, typename T>
+ShAttrib1f
+det(const ShMatrix<3, 3, Binding, T>& matrix)
+{
+  return ((matrix[0] * matrix[1](1,2,0)) | matrix[2](2,0,1)) - 
+         ((matrix[0] * matrix[1](2,0,1)) | matrix[2](1,2,0));
+}
  
 template<int RowsCols, ShBindingType Binding, typename T>
 ShAttrib1f

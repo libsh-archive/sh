@@ -488,28 +488,6 @@ public:
     typedef ShGeneric<4, T> ParentType;
 };
 
-typedef ShAttrib<1, SH_INPUT, ShInterval<double> > ShInputAttrib1i_d;
-typedef ShAttrib<1, SH_OUTPUT, ShInterval<double> > ShOutputAttrib1i_d;
-typedef ShAttrib<1, SH_INOUT, ShInterval<double> > ShInOutAttrib1i_d;
-typedef ShAttrib<1, SH_TEMP, ShInterval<double> > ShAttrib1i_d;
-typedef ShAttrib<1, SH_CONST, ShInterval<double> > ShConstAttrib1i_d;
-typedef ShAttrib<2, SH_INPUT, ShInterval<double> > ShInputAttrib2i_d;
-typedef ShAttrib<2, SH_OUTPUT, ShInterval<double> > ShOutputAttrib2i_d;
-typedef ShAttrib<2, SH_INOUT, ShInterval<double> > ShInOutAttrib2i_d;
-typedef ShAttrib<2, SH_TEMP, ShInterval<double> > ShAttrib2i_d;
-typedef ShAttrib<2, SH_CONST, ShInterval<double> > ShConstAttrib2i_d;
-typedef ShAttrib<3, SH_INPUT, ShInterval<double> > ShInputAttrib3i_d;
-typedef ShAttrib<3, SH_OUTPUT, ShInterval<double> > ShOutputAttrib3i_d;
-typedef ShAttrib<3, SH_INOUT, ShInterval<double> > ShInOutAttrib3i_d;
-typedef ShAttrib<3, SH_TEMP, ShInterval<double> > ShAttrib3i_d;
-typedef ShAttrib<3, SH_CONST, ShInterval<double> > ShConstAttrib3i_d;
-typedef ShAttrib<4, SH_INPUT, ShInterval<double> > ShInputAttrib4i_d;
-typedef ShAttrib<4, SH_OUTPUT, ShInterval<double> > ShOutputAttrib4i_d;
-typedef ShAttrib<4, SH_INOUT, ShInterval<double> > ShInOutAttrib4i_d;
-typedef ShAttrib<4, SH_TEMP, ShInterval<double> > ShAttrib4i_d;
-typedef ShAttrib<4, SH_CONST, ShInterval<double> > ShConstAttrib4i_d;
-
-
 typedef ShAttrib<1, SH_INPUT, ShFracUShort> ShInputAttrib1fus;
 typedef ShAttrib<1, SH_OUTPUT, ShFracUShort> ShOutputAttrib1fus;
 typedef ShAttrib<1, SH_INOUT, ShFracUShort> ShInOutAttrib1fus;
@@ -772,28 +750,6 @@ typedef ShAttrib<4, SH_OUTPUT, ShHalf> ShOutputAttrib4h;
 typedef ShAttrib<4, SH_INOUT, ShHalf> ShInOutAttrib4h;
 typedef ShAttrib<4, SH_TEMP, ShHalf> ShAttrib4h;
 typedef ShAttrib<4, SH_CONST, ShHalf> ShConstAttrib4h;
-
-
-typedef ShAttrib<1, SH_INPUT, ShInterval<float> > ShInputAttrib1i_f;
-typedef ShAttrib<1, SH_OUTPUT, ShInterval<float> > ShOutputAttrib1i_f;
-typedef ShAttrib<1, SH_INOUT, ShInterval<float> > ShInOutAttrib1i_f;
-typedef ShAttrib<1, SH_TEMP, ShInterval<float> > ShAttrib1i_f;
-typedef ShAttrib<1, SH_CONST, ShInterval<float> > ShConstAttrib1i_f;
-typedef ShAttrib<2, SH_INPUT, ShInterval<float> > ShInputAttrib2i_f;
-typedef ShAttrib<2, SH_OUTPUT, ShInterval<float> > ShOutputAttrib2i_f;
-typedef ShAttrib<2, SH_INOUT, ShInterval<float> > ShInOutAttrib2i_f;
-typedef ShAttrib<2, SH_TEMP, ShInterval<float> > ShAttrib2i_f;
-typedef ShAttrib<2, SH_CONST, ShInterval<float> > ShConstAttrib2i_f;
-typedef ShAttrib<3, SH_INPUT, ShInterval<float> > ShInputAttrib3i_f;
-typedef ShAttrib<3, SH_OUTPUT, ShInterval<float> > ShOutputAttrib3i_f;
-typedef ShAttrib<3, SH_INOUT, ShInterval<float> > ShInOutAttrib3i_f;
-typedef ShAttrib<3, SH_TEMP, ShInterval<float> > ShAttrib3i_f;
-typedef ShAttrib<3, SH_CONST, ShInterval<float> > ShConstAttrib3i_f;
-typedef ShAttrib<4, SH_INPUT, ShInterval<float> > ShInputAttrib4i_f;
-typedef ShAttrib<4, SH_OUTPUT, ShInterval<float> > ShOutputAttrib4i_f;
-typedef ShAttrib<4, SH_INOUT, ShInterval<float> > ShInOutAttrib4i_f;
-typedef ShAttrib<4, SH_TEMP, ShInterval<float> > ShAttrib4i_f;
-typedef ShAttrib<4, SH_CONST, ShInterval<float> > ShConstAttrib4i_f;
 
 
 typedef ShAttrib<1, SH_INPUT, ShFracShort> ShInputAttrib1fs;

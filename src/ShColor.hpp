@@ -472,28 +472,6 @@ public:
     typedef ShAttrib<4, Binding, T, Swizzled> ParentType;
 };
 
-typedef ShColor<1, SH_INPUT, ShInterval<double> > ShInputColor1i_d;
-typedef ShColor<1, SH_OUTPUT, ShInterval<double> > ShOutputColor1i_d;
-typedef ShColor<1, SH_INOUT, ShInterval<double> > ShInOutColor1i_d;
-typedef ShColor<1, SH_TEMP, ShInterval<double> > ShColor1i_d;
-typedef ShColor<1, SH_CONST, ShInterval<double> > ShConstColor1i_d;
-typedef ShColor<2, SH_INPUT, ShInterval<double> > ShInputColor2i_d;
-typedef ShColor<2, SH_OUTPUT, ShInterval<double> > ShOutputColor2i_d;
-typedef ShColor<2, SH_INOUT, ShInterval<double> > ShInOutColor2i_d;
-typedef ShColor<2, SH_TEMP, ShInterval<double> > ShColor2i_d;
-typedef ShColor<2, SH_CONST, ShInterval<double> > ShConstColor2i_d;
-typedef ShColor<3, SH_INPUT, ShInterval<double> > ShInputColor3i_d;
-typedef ShColor<3, SH_OUTPUT, ShInterval<double> > ShOutputColor3i_d;
-typedef ShColor<3, SH_INOUT, ShInterval<double> > ShInOutColor3i_d;
-typedef ShColor<3, SH_TEMP, ShInterval<double> > ShColor3i_d;
-typedef ShColor<3, SH_CONST, ShInterval<double> > ShConstColor3i_d;
-typedef ShColor<4, SH_INPUT, ShInterval<double> > ShInputColor4i_d;
-typedef ShColor<4, SH_OUTPUT, ShInterval<double> > ShOutputColor4i_d;
-typedef ShColor<4, SH_INOUT, ShInterval<double> > ShInOutColor4i_d;
-typedef ShColor<4, SH_TEMP, ShInterval<double> > ShColor4i_d;
-typedef ShColor<4, SH_CONST, ShInterval<double> > ShConstColor4i_d;
-
-
 typedef ShColor<1, SH_INPUT, ShFracUShort> ShInputColor1fus;
 typedef ShColor<1, SH_OUTPUT, ShFracUShort> ShOutputColor1fus;
 typedef ShColor<1, SH_INOUT, ShFracUShort> ShInOutColor1fus;
@@ -756,28 +734,6 @@ typedef ShColor<4, SH_OUTPUT, ShHalf> ShOutputColor4h;
 typedef ShColor<4, SH_INOUT, ShHalf> ShInOutColor4h;
 typedef ShColor<4, SH_TEMP, ShHalf> ShColor4h;
 typedef ShColor<4, SH_CONST, ShHalf> ShConstColor4h;
-
-
-typedef ShColor<1, SH_INPUT, ShInterval<float> > ShInputColor1i_f;
-typedef ShColor<1, SH_OUTPUT, ShInterval<float> > ShOutputColor1i_f;
-typedef ShColor<1, SH_INOUT, ShInterval<float> > ShInOutColor1i_f;
-typedef ShColor<1, SH_TEMP, ShInterval<float> > ShColor1i_f;
-typedef ShColor<1, SH_CONST, ShInterval<float> > ShConstColor1i_f;
-typedef ShColor<2, SH_INPUT, ShInterval<float> > ShInputColor2i_f;
-typedef ShColor<2, SH_OUTPUT, ShInterval<float> > ShOutputColor2i_f;
-typedef ShColor<2, SH_INOUT, ShInterval<float> > ShInOutColor2i_f;
-typedef ShColor<2, SH_TEMP, ShInterval<float> > ShColor2i_f;
-typedef ShColor<2, SH_CONST, ShInterval<float> > ShConstColor2i_f;
-typedef ShColor<3, SH_INPUT, ShInterval<float> > ShInputColor3i_f;
-typedef ShColor<3, SH_OUTPUT, ShInterval<float> > ShOutputColor3i_f;
-typedef ShColor<3, SH_INOUT, ShInterval<float> > ShInOutColor3i_f;
-typedef ShColor<3, SH_TEMP, ShInterval<float> > ShColor3i_f;
-typedef ShColor<3, SH_CONST, ShInterval<float> > ShConstColor3i_f;
-typedef ShColor<4, SH_INPUT, ShInterval<float> > ShInputColor4i_f;
-typedef ShColor<4, SH_OUTPUT, ShInterval<float> > ShOutputColor4i_f;
-typedef ShColor<4, SH_INOUT, ShInterval<float> > ShInOutColor4i_f;
-typedef ShColor<4, SH_TEMP, ShInterval<float> > ShColor4i_f;
-typedef ShColor<4, SH_CONST, ShInterval<float> > ShConstColor4i_f;
 
 
 typedef ShColor<1, SH_INPUT, ShFracShort> ShInputColor1fs;

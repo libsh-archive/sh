@@ -206,12 +206,6 @@ GLenum shGlType(ShValueType valueType, ShValueType &convertedType) {
   convertedType = SH_VALUETYPE_END;
   GLenum result = GL_NONE;
   switch(valueType) {
-    case SH_I_DOUBLE:
-    case SH_I_FLOAT:
-      SH_DEBUG_ERROR("Interval types not supported in memory");
-      result = GL_FLOAT;
-      break;
-
     case SH_DOUBLE:
     case SH_HALF:
     case SH_INT: 
