@@ -21,14 +21,21 @@ struct ReachingDefs {
   struct Definition {
     Definition(ShStatement* stmt,
                const ShCtrlGraphNodePtr& node,
-               int offset)
-      : stmt(stmt), node(node), offset(offset)
+               int offset,
+               ShBitSet disable_mask)
+      : stmt(stmt), node(node), offset(offset),
+        disable_mask(disable_mask)
     {
     }
     
     ShStatement* stmt;
     ShCtrlGraphNodePtr node;
     int offset;
+    
+    // Sometimes we want to ignore some of the elements, when
+    // constructing gen, because they are overwritten by later
+    // statements. In that case we mark the ignored components here.
+    ShBitSet disable_mask;
   };
 
   typedef std::map<ShCtrlGraphNodePtr, int> SizeMap;
@@ -52,11 +59,40 @@ struct DefFinder {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
     if (!block) return;
-    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+
+    // Use this data structure to mark assignments to node elements,
+    // so that we can ignore earlier assignments to them in this block.
+    std::map<ShVariableNodePtr, ShBitSet> disable_map;
+
+    // Iterate backwards over the list of statements...
+    ShBasicBlock::ShStmtList::iterator I = block->end();
+    while (1) {
+      if (I == block->begin()) break;
+      --I;
       if (I->op != SH_OP_KIL && I->op != SH_OP_OPTBRA && I->dest.node()->kind() == SH_TEMP) {
-        r.defs.push_back(ReachingDefs::Definition(&(*I), node, offset));
+        // Construct a disable map if this node has not yet been
+        // assigned to in a later statement in this block.
+        if (disable_map.find(I->dest.node()) == disable_map.end()) {
+          disable_map[I->dest.node()] = ShBitSet(I->dest.node()->size());
+        }
+
+        // Construct a bitset containing all elements which this
+        // definition affects.
+        ShBitSet defn_map(I->dest.node()->size());
+        for (int i = 0; i < I->dest.size(); i++) defn_map[I->dest.swizzle()[i]] = true;
+
+        // Skip this definition if all its components have already
+        // been defined in a later statement.
+        if ((defn_map & disable_map[I->dest.node()]) == defn_map) continue;
+
+        // Otherwise, add this definition
+        r.defs.push_back(ReachingDefs::Definition(&(*I), node, offset,
+                                                  disable_map[I->dest.node()]));
         offset += I->dest.size();
         r.defsize += I->dest.size();
+
+        // And update the disable map for the destination node.
+        disable_map[I->dest.node()] |= defn_map;
       }
     }
   }
@@ -86,7 +122,9 @@ struct InitRch {
     for (unsigned int i = 0; i < r.defs.size(); i++) {
       if (r.defs[i].node == node) {
         for (int j = 0; j < r.defs[i].stmt->dest.size(); j++) {
-          r.gen[node][r.defs[i].offset + j] = true;
+          if (!r.defs[i].disable_mask[j]) {
+            r.gen[node][r.defs[i].offset + j] = true;
+          }
         }
       }
     }

@@ -1,5 +1,15 @@
 2004-08-20  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShOptimizations.cpp (ReachingDefs::Definition): Keep a
+	disable_mask bitset to keep track of definitions overwriting each
+	other in a single block. This is used when constructing gen.
+	(DefFinder::operator()): Set up disable_mask appropriately.
+
+	* src/ShBitSet.cpp (full): Implement full.
+	(empty): Implement empty.
+
+	* src/ShBitSet.hpp: Add full and empty member functions.
+
 	* src/ShStatement.cpp (ShStatement): Implement ShStatement copy
 	constructor, cloning info items using new clone() member function.
 
