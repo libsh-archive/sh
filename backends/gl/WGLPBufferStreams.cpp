@@ -38,14 +38,16 @@ namespace shgl {
   class WGLPBufferStreamException: public ShException
     {
     public:
-      WGLPBufferStreamException(const std::string& message):
+      WGLPBufferStreamException(const std::string& message) :
         ShException("WGL PBuffer Stream Execution: " + message)
         {
         }
     };
 
   WGLPBufferStreams::WGLPBufferStreams(int context) :
-    PBufferStreams(context)
+    PBufferStreams(context),
+    m_orig_hdc(NULL),
+    m_orig_hglrc(NULL)
     {
     }
 
@@ -95,8 +97,9 @@ namespace shgl {
 
     m_info.shcontext = shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->newContext();
   
-    orig_hdc = wglGetCurrentDC();
-    orig_hglrc = wglGetCurrentContext();
+    m_orig_hdc = wglGetCurrentDC();
+    m_orig_hglrc = wglGetCurrentContext();
+
     int nfattribs = 0;
     int niattribs = 0;
 
@@ -121,7 +124,7 @@ namespace shgl {
       fb_attribs.push_back(0);
     
       unsigned int nformats = 0;
-      if (!wglChoosePixelFormatARB(orig_hdc, &fb_attribs[0], NULL, 1, &format, &nformats))
+      if (!wglChoosePixelFormatARB(m_orig_hdc, &fb_attribs[0], NULL, 1, &format, &nformats))
         {
         SH_DEBUG_WARN("wglChoosePixelFormatARB failed (" << GetLastError() << ")");
         }
@@ -142,7 +145,7 @@ namespace shgl {
       fb_attribs.push_back(0);
     
       unsigned int nformats = 0;
-      if (!wglChoosePixelFormatARB(orig_hdc, &fb_attribs[0], NULL, 1, &format, &nformats))
+      if (!wglChoosePixelFormatARB(m_orig_hdc, &fb_attribs[0], NULL, 1, &format, &nformats))
         {
         SH_DEBUG_WARN("wglChoosePixelFormatARB failed (" << GetLastError() << ")");
         }
@@ -179,7 +182,7 @@ namespace shgl {
     int temp_width = std::max(m_info.width, 8);
     int temp_height = std::max(m_info.height, 8);
 
-    m_info.pbuffer = wglCreatePbufferARB(orig_hdc, format, temp_width, temp_height, pbuffer_attribs);
+    m_info.pbuffer = wglCreatePbufferARB(m_orig_hdc, format, temp_width, temp_height, pbuffer_attribs);
     if (m_info.pbuffer == NULL)
       {
       std::stringstream msg;
@@ -247,7 +250,7 @@ namespace shgl {
 
   void WGLPBufferStreams::restoreContext(void)
     {
-    if (!wglMakeCurrent(orig_hdc, orig_hglrc))
+    if (!wglMakeCurrent(m_orig_hdc, m_orig_hglrc))
       {
       std::stringstream msg;
       msg << "wglMakeCurrent failed (" << GetLastError() << ")";

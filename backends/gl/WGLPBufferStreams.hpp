@@ -82,8 +82,8 @@ namespace shgl {
       virtual void restoreContext(void);
 
     private:
-      HDC orig_hdc;
-      HGLRC orig_hglrc;
+      HDC m_orig_hdc;
+      HGLRC m_orig_hglrc;
       ShWGLPBufferInfo m_info;
     };
 

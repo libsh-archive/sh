@@ -54,8 +54,8 @@ namespace shgl {
     bool valid() 
       { 
       if (extension == SH_ARB_NO_FLOAT_EXT ||
-          pbuffer == NULL ||
-          context == NULL)
+          pbuffer == 0 ||
+          context == 0)
         {
         return false;
         }
@@ -79,8 +79,9 @@ namespace shgl {
       virtual void restoreContext(void);
 
     private:
-      GLXDrawable orig_drawable;
-      GLXContext orig_context;
+      Display* m_display;
+      GLXDrawable m_orig_drawable;
+      GLXContext m_orig_context;
       ShGLXPBufferInfo m_info;
     };
 
