@@ -341,6 +341,23 @@ ShGeneric<N, T> lerp(T f, const ShGeneric<N, T>& a,
   return t;
 }
 
+template<int N, typename T>
+ShGeneric<1, T> sum(const ShGeneric<N, T>& var)
+{
+  ShAttrib<1, SH_TEMP, T> t;
+  shCSUM(t, var);
+  return t;
+}
+
+template<int N, typename T>
+ShGeneric<1, T> prod(const ShGeneric<N, T>& var)
+{
+  ShAttrib<1, SH_TEMP, T> t;
+  shCMUL(t, var);
+  return t;
+}
+
+
 }
 
 #endif

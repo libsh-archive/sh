@@ -74,6 +74,30 @@ SH_SHLIB_CONST_N_OP_RETSIZE_BOTH(dot, 1);
 
 /*@}*/
 
+/** Euclidean Distance
+ * Computes the Euclidean distance between the two points a and b.
+ */
+template<int N, typename T>
+ShGeneric<1,  T> distance(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b);
+
+/** Manhattan Distance
+ * Computes the Manhattan distance between the two points a and b.
+ */
+template<int N, typename T>
+ShGeneric<1,  T> distance_1(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b);
+
+/** Inf Distance
+ * Computes the Inf norm distance between the two points a and b.
+ */
+template<int N, typename T>
+ShGeneric<1,  T> distance_inf(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b);
+
+/** Euclidean Length
+ * Computes the euclidean distance between the zero vector and a.
+ */
+template<int N, typename T>
+ShGeneric<1,  T> length(const ShGeneric<N, T>& a);
+
 }
 
 #include "ShLibGeometryImpl.hpp"

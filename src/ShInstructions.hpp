@@ -51,6 +51,10 @@ void shCEIL(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
 void shCOS(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
+void shCMUL(ShVariable& dest, const ShVariable& a);
+SH_DLLEXPORT
+void shCSUM(ShVariable& dest, const ShVariable& a);
+SH_DLLEXPORT
 void shDOT(ShVariable& dest, const ShVariable& a, const ShVariable& b);
 SH_DLLEXPORT
 void shDX(ShVariable& dest, const ShVariable& a);

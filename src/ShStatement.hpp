@@ -63,6 +63,8 @@ enum ShOperation {
   SH_OP_ATAN2, ///< Binary arctan of src[1]/src[0] (result between -pi and pi)
   SH_OP_CEIL, ///< Unary smallest integer not less than src[0]
   SH_OP_COS, ///< Unary cosine function
+  SH_OP_CMUL, ///< Unary product of components
+  SH_OP_CSUM, ///< Unary sum of components
   SH_OP_DOT, ///< Binary dot product
   SH_OP_DX, ///< Unary derivative in x
   SH_OP_DY, ///< Unary derivative in y

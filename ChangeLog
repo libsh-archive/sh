@@ -1,4 +1,19 @@
-2004-07-19    <sdt@HUEY>
+2004-07-27  Stefanus Du Toit <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbEmit.cpp: Added emit_csum and emit_cmul functions
+	and table entries.
+
+	* src/ShLibClamp.hpp: Added unary min and max. Resolves issue61.
+
+	* src/ShLibArith.hpp: Added sum and prod. Resolves issue46 and
+	issue47.
+
+	* src/ShLibGeometry.hpp: Added distance* and length*. Resolves
+	issue69, issue70, issue71, issue72.
+
+	* src/ShStatement.hpp: Added SH_OP_CSUM and SH_OP_CMUL.
+
+2004-07-19  Stefanus Du Toit <sjdutoit@uwaterloo.ca>
 
 	* src/ShLibClamp.hpp: Undef max and min if they are defined.
 

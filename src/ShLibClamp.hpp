@@ -91,6 +91,16 @@ ShGeneric<N,  T> min(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
 
 SH_SHLIB_CONST_SCALAR_OP(min);
 
+/** Maximum of all components
+ */
+template<int N, typename T>
+ShGeneric<1, T> max(const ShGeneric<N, T>& a);
+
+/** Minimum of all components
+ */
+template<int N, typename T>
+ShGeneric<1, T> min(const ShGeneric<N, T>& a);
+
 /** Componentwise clamping.
  * Clamps a between b and c.
  */

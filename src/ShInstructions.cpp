@@ -341,6 +341,38 @@ void shCOS(ShVariable& dest, const ShVariable& a)
   }
 }
 
+void shCMUL(ShVariable& dest, const ShVariable& a)
+{
+  SH_DEBUG_ASSERT(dest.size() == 1);
+  if (immediate()) {
+    T* v_a = new T[a.size()];
+    a.getValues(v_a);
+    T f = v_a[0];
+    for (int i = 1; i < a.size(); i++) f *= v_a[i];
+    dest.setValues(&f);
+    delete [] v_a;
+  } else {
+    ShStatement stmt(dest, SH_OP_CMUL, a);
+    addStatement(stmt);
+  }
+}
+
+void shCSUM(ShVariable& dest, const ShVariable& a)
+{
+  SH_DEBUG_ASSERT(dest.size() == 1);
+  if (immediate()) {
+    T* v_a = new T[a.size()];
+    a.getValues(v_a);
+    T f = v_a[0];
+    for (int i = 1; i < a.size(); i++) f += v_a[i];
+    dest.setValues(&f);
+    delete [] v_a;
+  } else {
+    ShStatement stmt(dest, SH_OP_CMUL, a);
+    addStatement(stmt);
+  }
+}
+
 void shDOT(ShVariable& dest, const ShVariable& a, const ShVariable& b)
 {
   SH_DEBUG_ASSERT(dest.size() == 1);

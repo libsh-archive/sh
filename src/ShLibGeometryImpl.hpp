@@ -91,6 +91,43 @@ ShGeneric<4, T> lit(const ShGeneric<1, T>& a,
   return r;
 }
 
+template<int N, typename T>
+ShGeneric<1,  T> distance(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
+{
+  return length(a-b);
+}
+
+template<int N, typename T>
+ShGeneric<1,  T> distance_1(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
+{
+  return length_1(a-b);
+}
+
+template<int N, typename T>
+ShGeneric<1,  T> distance_inf(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
+{
+  return length_inf(a-b);
+}
+
+template<int N, typename T>
+ShGeneric<1,  T> length(const ShGeneric<N, T>& a)
+{
+  return sqrt(dot(a, a));
+}
+
+template<int N, typename T>
+ShGeneric<1,  T> length_1(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
+{
+  return sum(abs(a));
+}
+
+template<int N, typename T>
+ShGeneric<1,  T> length_inf(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
+{
+  return max(abs(a));
+}
+
+
 }
 
 #endif

@@ -61,6 +61,10 @@ ArbMapping ArbCode::table[] = {
   {SH_OP_LRP, SH_ARB_FP,  0, SH_ARB_LRP, 0},
   {SH_OP_LRP, SH_ARB_VP,  0, SH_ARB_FUN, &ArbCode::emit_lerp},
   {SH_OP_MAD, SH_ARB_ANY, 0, SH_ARB_MAD, 0},
+
+  // Sum/product of components
+  {SH_OP_CMUL, SH_ARB_ANY, 0, SH_ARB_FUN, &ArbCode::emit_cmul},
+  {SH_OP_CSUM, SH_ARB_ANY, 0, SH_ARB_FUN, &ArbCode::emit_csum},
   
   // Dot product
   {SH_OP_DOT, SH_ARB_VEC1,                0,         SH_ARB_MUL, 0},
@@ -541,5 +545,30 @@ void ArbCode::emit_nvcond(const ShStatement& stmt)
     m_instructions.push_back(movf);
   }
 }
+
+void ArbCode::emit_csum(const ShStatement& stmt)
+{
+  ShVariableNode::ValueType* c1_values = new ShVariableNode::ValueType[stmt.src[0].size()];
+  for (int i = 0; i < stmt.src[0].size(); i++) c1_values[i] = 1.0;
+  ShVariable c1(new ShVariableNode(SH_CONST, stmt.src[0].size()));
+  c1.setValues(c1_values);
+  m_shader->constants.push_back(c1.node());
+  
+  emit(ShStatement(stmt.dest, stmt.src[0], SH_OP_DOT, c1));
+}
+
+void ArbCode::emit_cmul(const ShStatement& stmt)
+{
+  ShVariable prod(new ShVariableNode(SH_TEMP, 1));
+
+  // TODO: Could use vector mul here.
+  
+  m_instructions.push_back(ArbInst(SH_ARB_MOV, prod, stmt.src[0](0)));
+  for (int i = 1; i < stmt.src[0].size(); i++) {
+    m_instructions.push_back(ArbInst(SH_ARB_MUL, prod, stmt.src[0](i)));
+  }
+  m_instructions.push_back(ArbInst(SH_ARB_MOV, stmt.dest, prod));
+}
+
 
 }

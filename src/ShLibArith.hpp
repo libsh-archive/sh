@@ -193,6 +193,20 @@ ShGeneric<1, T> lerp(const ShGeneric<1, T>& f, const ShGeneric<1, T>& a,
 template<int N, typename T>
 ShGeneric<N, T> lerp(T f, const ShGeneric<N, T>& a, 
                      const ShGeneric<N, T>& b);
+
+
+/* Sum of components.
+ * Addition of all components into a single result.
+ */
+template<int N, typename T>
+ShGeneric<1, T> sum(const ShGeneric<N, T>& var);
+
+/* Product of components.
+ * Multiplication of all components into a single result.
+ */
+template<int N, typename T>
+ShGeneric<1, T> prod(const ShGeneric<N, T>& var);
+
 }
 
 #include "ShLibArithImpl.hpp"

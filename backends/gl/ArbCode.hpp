@@ -86,6 +86,8 @@ private:
   void emit_sgn(const SH::ShStatement& stmt);
   void emit_tex(const SH::ShStatement& stmt);
   void emit_nvcond(const SH::ShStatement& stmt);
+  void emit_cmul(const SH::ShStatement& stmt);
+  void emit_csum(const SH::ShStatement& stmt);
   
   /// Allocate registers, after the code has been generated
   void allocRegs();
