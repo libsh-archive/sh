@@ -33,7 +33,7 @@
 
 namespace shgl {
 
-GLhandleARB GlslCode::m_arb_program = glCreateProgramObjectARB();
+GLhandleARB GlslCode::m_arb_program = 0;
 GlslCode* GlslCode::m_current_shaders[] = { NULL, NULL };
 
 using namespace SH;
@@ -162,6 +162,8 @@ void GlslCode::upload()
 
 void GlslCode::link()
 {
+  SH_DEBUG_ASSERT(m_arb_program);
+
   SH_GL_CHECK_ERROR(glLinkProgramARB(m_arb_program));
   
   int linked;
@@ -175,7 +177,7 @@ void GlslCode::link()
     cout << endl;
     return;
   }
-  
+
   SH_GL_CHECK_ERROR(glUseProgramObjectARB(m_arb_program));
 
 #ifdef SH_DEBUG_GLSL_BACKEND
@@ -190,14 +192,18 @@ void GlslCode::link()
   }
 #endif
 
-  // Whenever the program is linked, we must reinitialize the uniforms
-  // because their values are reset.  Also, we must call
-  // glUseProgramObjectARB before we can get the location of uniforms.
-  for (GlslVariableMap::NodeList::iterator i = m_varmap->node_begin();
-       i != m_varmap->node_end(); i++) {
-    ShVariableNodePtr node = *i;
-    if (node->hasValues() && node->uniform()) {
-      updateUniform(node);
+  if (m_bound) {
+    SH_DEBUG_ASSERT(m_varmap);
+
+    // Whenever the program is linked, we must reinitialize the uniforms
+    // because their values are reset.  Also, we must call
+    // glUseProgramObjectARB before we can get the location of uniforms.
+    for (GlslVariableMap::NodeList::iterator i = m_varmap->node_begin();
+	 i != m_varmap->node_end(); i++) {
+      ShVariableNodePtr node = *i;
+      if (node->hasValues() && node->uniform()) {
+	updateUniform(node);
+      }
     }
   }
 }
@@ -218,11 +224,15 @@ void GlslCode::bind()
   if (!m_arb_shader) {
     upload();
   }
+
+  if (!m_arb_program) {
+    m_arb_program = glCreateProgramObjectARB();
+  }
   
   ShContext::current()->set_binding(m_target, ShProgram(m_originalShader));
   m_current_shaders[m_unit] = this;
   m_bound = true; // must be set before the call to link()
-
+  
   SH_GL_CHECK_ERROR(glAttachObjectARB(m_arb_program, m_arb_shader));
   link();
 
@@ -234,11 +244,14 @@ void GlslCode::unbind()
 {
   if (!m_bound) return;
 
+  SH_DEBUG_ASSERT(m_current_shaders[m_unit] == this);
+  SH_DEBUG_ASSERT(m_arb_shader);
+  SH_DEBUG_ASSERT(m_arb_program);
+
   SH_GL_CHECK_ERROR(glDetachObjectARB(m_arb_program, m_arb_shader));
 
-  ShContext::current()->unset_binding(m_target);
+  m_bound = false; // must be set before the calls to link() and unset_binding()
   m_current_shaders[m_unit] = NULL;
-  m_bound = false; // must be set before the call to link()
 
   // Refresh the current rendering state
   if (!m_current_shaders[SH_GLSL_FP] && !m_current_shaders[SH_GLSL_VP]) {
@@ -246,6 +259,8 @@ void GlslCode::unbind()
   } else {
     link();
   }
+  
+  ShContext::current()->unset_binding(m_target); // calls the destructor
 }
 
 void GlslCode::update()
@@ -308,6 +323,7 @@ void GlslCode::updateUniform(const ShVariableNodePtr& uniform)
 {
   if (!m_bound) return;
 
+  SH_DEBUG_ASSERT(m_arb_program);
   SH_DEBUG_ASSERT(uniform);
 
   if (!m_varmap->contains(uniform)) {
@@ -438,7 +454,11 @@ void GlslCode::emit(const ShStatement &stmt)
   case SH_OP_MAX:
     m_lines.push_back(resolve(stmt.dest) + " = max(" + resolve(stmt.src[0]) + ", " + resolve(stmt.src[1]) + ")");
     break;
+  case SH_OP_COND:
+    m_lines.push_back(resolve(stmt.dest) + " = " + resolve(stmt.src[0]) + " ? " + resolve(stmt.src[1]) + " : " + resolve(stmt.src[2]));
+    break;
   case SH_OP_TEX:
+  case SH_OP_TEXI:
     emit_texture(stmt);
     break;
   default:
@@ -450,7 +470,7 @@ void GlslCode::emit(const ShStatement &stmt)
 
 void GlslCode::emit_texture(const ShStatement &stmt)
 {
-  SH_DEBUG_ASSERT(stmt.op == SH_OP_TEX);
+  SH_DEBUG_ASSERT((SH_OP_TEX == stmt.op) || (SH_OP_TEXI == stmt.op));
   stringstream line;
   line << resolve(stmt.dest) << " = texture";
 
@@ -559,6 +579,8 @@ void GlslCode::allocate_textures()
 
 void GlslCode::bind_textures()
 {
+  SH_DEBUG_ASSERT(m_arb_program);
+
   for (ShProgramNode::TexList::const_iterator i = m_shader->textures.begin();
        i != m_shader->textures.end(); i++) {
     ShTextureNodePtr texture = *i;

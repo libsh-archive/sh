@@ -65,7 +65,7 @@ GlslBindingSpecs glslVertexOutputBindingSpecs[] = {
 
 GlslBindingSpecs glslFragmentOutputBindingSpecs[] = {
   {SH_GLSL_VAR_FRAGDEPTH, 1, SH_POSITION, false},
-  {SH_GLSL_VAR_FRAGCOLOR, 1, SH_COLOR, false},
+  {SH_GLSL_VAR_FRAGCOLOR, 1, SH_COLOR, true},
   {SH_GLSL_VAR_NONE, 0, SH_ATTRIB, false}
 };
 
