@@ -117,6 +117,7 @@ private:
   void emit_csum(const SH::ShStatement& stmt);
   void emit_kil(const SH::ShStatement& stmt);
   void emit_pal(const SH::ShStatement& stmt);
+  void emit_lit(const SH::ShStatement& stmt);
   
   /// Allocate registers, after the code has been generated
   void allocRegs();

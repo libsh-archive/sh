@@ -1,0 +1,50 @@
+Summary
+=======
+
+- 2-space indent (no indentation for namespaces)
+- opening brace on same line as statement except for functions
+- always include braces even with 1-line IF statements
+- methods and member variables are in lowercase with words separated by underscores
+- private members start with a "m_" prefix
+
+
+Example
+=======
+
+namespace SH {
+
+std::string ShObject::name()
+{
+  return m_name;
+}
+
+void ShObject::name(std::string name)
+{
+  m_name = name;
+
+  for (int i = 0; i < m_count; i++) {
+    if (i != 42) {
+      m_objects[i].name = name;
+    }
+  }
+}
+
+}
+
+
+Editor configuration
+====================
+
+Here's what you might put in your ~/.emacs:
+
+  (custom-set-variables
+   '(c-basic-offset 2)
+   '(c-offsets-alist (quote ((innamespace . 0))))
+  )
+
+  (setq-default cc-other-file-alist '(
+                          ("Impl\\.hpp$" (".hpp"))
+                          ("\\.cpp$" (".hpp" ".h"))
+                          ("\\.hpp$" ("Impl.hpp" ".cpp"))
+                          ("\\.h$" (".cpp"))
+                          ))

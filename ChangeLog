@@ -1,3 +1,223 @@
+2005-02-09  Francois Marier  <francois@serioushack.com>
+
+	* src/scripts/ShAttribImpl.hpp.py (Impl.scalarcons):
+	Constant assignment now done as a single statement (issue44).
+
+2005-02-09  Bryan Chan	<b8chan@cgl.uwaterloo.ca>
+	Removed range arithmetics from trunk.  They were only partially working,
+	and the implementation in arithmetic branch is quite different now. 
+
+	This will be merged back in later when it's clean, and some usability problems
+	have been solved (e.g. IA/AA types in textures/streams), that I don't want to deal 
+	with yet. 
+
+	Merged several new features and fixes from arithmetic.
+
+	A) Using ShProgram as a function in other ShPrograms
+		* src/ShRecord.hpp ShRecord.cpp:
+		Morphed ShStream into something similar for ShVariable.	
+		Implements operators like (a & b) = p(c & d & e) for
+		execution in immed mode, insertion into parse in retained mode.
+		(immed mode eval todo - should be just one or two lines)
+
+		* src/ShVariable.hpp ShVariable.cpp (operator=(ShProgram)):
+		Changed original operator= for dep uniforms to attach(ShProgram).
+		New operator= works as program execution/insertion like above for ShRecord.
+
+		* src/ShCfgBlock.hpp:
+		A ShBlock subclass that represents inserting a previously defined 
+		single-entry/single-exit control graph into the current parse. 
+
+		* src/ShProgram.hpp ShProgram.cpp (operator()):
+		Added p(some_args) operators.
+
+		* src/ShProgramNode.hpp, ShProgramNode.cpp (collectDecl, collectVariables,
+																							hasDecl, addDecl)
+			ShOperation.hpp, ShOperation.cpp (SH_OP_DECL),
+			ShCtrlGraph.hpp, ShCtrlGraph.cpp (addDecl, hasDecl, decl_begin, decl_end),
+			ShParser.hpp, ShParser.cpp (parseSection),
+			ShConstProp.cpp (ShConstProp::ShConstProp),
+			ShOptimizations.cpp (optimize, InitLiveCode::operator()),
+			ShVariableNode (programDeclInit):
+		Added a dummy op SH_OP_DECL to indicate declaration points of temps,
+		Changed ShParser to collect SH_OP_DECL into cfg nodes during parse,
+		Changed optimizations to deal with decls 
+			-live code init, constprop - treats non-decl'd temps like INOUTs
+				-assignments are live, initial uses have unknown value
+			-straightener also merges decl sets when coallescing a block 
+		Added decls to CtrlGraphNode dumps.
+		Made variable nodes insert decls into the parse when appropriate.
+
+		* src/ShAlgebra.hpp, ShAlgebra.cpp (replaceUniform -> replaceVariable):
+		Made replace substitue any kind of variable for an input instead of just
+		uniforms. 
+
+	B) User-defined section blocks (DOT dumps are flaky, so for internal use right now)
+		* src/ShSyntax.hpp, ShSyntax.cpp (SH_BEGIN_SECTION, SH_END_SECTION),
+			src/ShParser.hpp ShParser.cpp (parseSection),
+			src/ShOperation.hpp ShOperation.cpp (SH_OP_STARTSEC, SH_OP_ENDSEC),
+			src/ShToken.hpp (SH_TOKEN_STARTSEC, SH_TOKEN_ENDSEC):
+		Added user-defined hierarchical block specifiers (SH_BEGIN_SECTION, SH_END_SECTION)
+		Added dummy statements STARTSEC and ENDSEC that may only appear at the
+		beginning and end of a cfg node respectively to bracket sections (*).
+
+		* src/ShOptimizations.cpp (Straightener):
+		Changed to maintain STARTSEC/ENDSEC invariant (*).
+
+		* src/ShStructural.hpp, src/ShStructural.cpp (ShStructural ctor):
+		Added a SECTION as a "special" kind of BLOCK structure for user-marked 
+		hierarchical sections. (perhaps should just use BLOCK though, but for 
+		now this is the easy thing to do to differentiate the two)
+
+		* src/ShSection.hpp, ShSectionImpl.hpp, ShSection.cpp:
+		Wrapper around ShStructural that only keeps the tree-structure of sections.
+		Graphviz dump that does weird things. 
+
+		* src/ShTransformer.hpp, ShTransformer.cpp (stripDummyOps):
+			Removes uselss ops like SECTION markers and so on before final code
+			generation. 
+
+			Added a mixin foundation for transforms to save typing
+			(@todo haven't actually cleaned up any old transformer, but look at all 
+			the copies of operator()(ShCtrlGraphNodePtr node)...)
+
+		* src/ShStatement.hpp, ShStatement.cpp: 
+			Changed to allow ops with no dests (and dummy ops with no srcs).
+			Fixed a few places elsewhere to deal with this.
+
+	C) Misc Changes 
+		* src/ShInfo.hpp, ShInfoImpl.hpp (ShInfo, ShInfoHolder)
+			src/ShStatement.hpp, ShStatement.cpp:
+		Extracted methods from ShStatementInfo and ShStatement.
+
+		* src/ShOptimizations.hpp, src/ShValueTracking.cpp:
+		Added valuetracking of inputs/outputs. 
+
+		* src/ShEvaluate.hpp, ShEvaluate.cpp (evaluate(ShStatement)),
+			ShEval.cpp (operator()) :
+		Pointed evaluate to ShEval::operator(), and moved over error
+		handling for missing ops to operator().
+		(@todo can refactor some of the code here with ShInstructions.cpp)
+
+		* src/ShInstructions.hpp, ShInstructions.cpp:
+		Changed dest to const& ShVariable  
+
+		* src/ShLibMatrix.hpp (specialized 3x3 det):
+		This was slowing down inverse performance.
+		(Note: the existing recursive det that breaks out scalar elements _sucks_.
+		nxn det should always doable (proof in the margin...) using only swizzled 
+		ops on n-vector rows) 
+
+		* src/ShMeta.hpp (ShMeta):
+		Added copy constructor since the default no longer works
+
+		* src/ShSwizzle.hpp (ShSwizzle):
+		Added a constructor that repeats a given swizzle n times.
+
+	D) Misc Fixes
+		* src/ShConstProp.cpp (updateDest):
+		Changed updateDest to 
+			- init dest to TOP 
+			- keep a vector of previous lattice values on each dest
+			- update worklist iff change to dest lattice value
+
+		* src/ShOptimizations.cpp (CopyPropagator::operator()):
+		Added extra check to prevent copy propagation if ASN is a cast between
+		different storage types.
+
+		Moved collectVariables() to the end of optimize()
+
+		* src/ShInternals.hpp, ShInternals.cpp:
+		ShVariableReplacer deals with cond vars.
+
+		* src/ShTransformer.cpp (StatementSplitter::updateStatement):
+		Long-tuple handling for CSUM, CMUL
+
+		* backends/gl/ArbEmit.cpp (emit_csum):
+		Fixed variant problem here.
+
+		* sh/src/ShVariableNode.cpp (ShVariable - clone constructor):
+		Fixed how keepUniform behaves.
+
+		* src/ShStorageType.hpp (SH_VALUETYPE_SPECIAL_NONE):
+		Changed this constant to the correct value
+
+		* src/ShGenericImpl.hpp, src/ShCastManager.cpp:
+		Replaced memcpy with std::copy (safer for range and other future types).
+
+		* src/ShVariant.hpp, ShVariantImpl.hpp:
+		Worked out some refcounting issues so internally ops pass around bare 
+		pointersinstead of refcounted ones.
+		(This makes it possible to re-use the same ops with statically allocated
+		variants without accidentally destroying them)
+
+		* src/ShConcreteRegularOpImpl.hpp (LIT):
+		Fixed this up a bit 
+
+		* src/ShTextureNode.cpp:
+		Force m_texSizeVar to be uniform, for when the texture is generated while 
+		building a ShProgram 
+
+	E) Removed interval arithmetic from trunk
+
+		Most of the other changes
+		
+	
+2005-02-07  Francois Marier  <francois@serioushack.com>
+
+	* test/regress: Added unit tests for sum and prod.
+
+	* src/ShLibMisc.hpp, src/ShLibMiscImpl.hpp (join): Added join
+	functions for three and four tuples.
+
+2005-02-04  Francois Marier  <francois@serioushack.com>
+
+	* src/*: Made lit an operation (issue74) and compute it according
+	to the Arb fragment program spec when in immediate mode. 
+
+	* backends/gl/*: The lit function now uses the actual LIT Arb
+	function.
+
+	* backends/cc/*: The lit function is computed according to the Arb
+	Fragment program spec.
+
+	* test/regress/lit.cpp.py: Added more test cases and changed
+	the definition of the lit function to match the Arb fragment
+	program spec.
+
+2005-02-02  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbEmit.cpp (emit_tex): Handle non-four-tuple
+	textures with swizzling/writemasking correctly.
+
+2005-02-01  Francois Marier  <francois@serioushack.com>
+
+	* src/ShMatrix.hpp, src/ShMatrixImpl.hpp: Fixed scalar promotion
+	is now done correctly and efficiently.
+
+2005-01-27  Francois Marier  <francois@serioushack.com>
+
+	* src/ShMatrix.hpp, src/ShMatrixImpl.hpp: Assigning a scalar to a
+	matrix now creates an identity matrix multiplied by that scalar.
+
+2005-01-26  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+	
+	* util/ShObjMesh.cpp:
+        Improved vertex normal generation.
+
+2005-01-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbEmit.cpp (ArbCode::table): Do not scalarize
+	OP_DIVs.
+	(emit_div): Emit a single RCP instruction for scalar-RHS divs.
+
+2005-01-25  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	After release 0.7.6:
+	
+	* src/ShMatrixImpl.hpp (ShMatrix): Fix default constructor to not
+	set matrix to identity for inputs.
+
 2005-01-21  Francois Marier  <francois@serioushack.com>
 
 	* src/ShSyntax.hpp, src/ShSyntax.cpp: Added a new function,

@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT(Sh, 0.7.5, libsh-devel@lists.sourceforge.net, libsh)
+AC_INIT(Sh, 0.7.6, libsh-devel@lists.sourceforge.net, libsh)
 AC_CONFIG_SRCDIR([src/ShVariable.hpp])
 AM_INIT_AUTOMAKE
 
@@ -109,6 +109,11 @@ AC_CONFIG_FILES([Makefile
 		 backends/sm/Makefile
 		 backends/gl/Makefile
 		 util/Makefile
+		 examples/Makefile
+		 examples/binding/Makefile
+		 examples/glut/Makefile
+		 examples/particle/Makefile
+		 examples/textures/Makefile
 		 doc/Makefile])
 AC_OUTPUT
 

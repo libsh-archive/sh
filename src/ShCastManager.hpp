@@ -131,8 +131,6 @@ ShCastManager {
     /** Casts the contents of the src variant to dest variant
      * Both must be previously allocated and the same size,
      * and caller should check dest != src.
-     * (If you want to skip this check often, change the internal
-     * implementation to use memmove instead of memcpy)
      *
      * When dest, src have same type, this just becomes a data copy.
      * @{

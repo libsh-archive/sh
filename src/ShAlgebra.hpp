@@ -97,12 +97,12 @@ ShProgram renameOutput(ShProgram a, const std::string& oldName, const std::strin
 SH_DLLEXPORT
 ShProgram namedAlign(ShProgram a, ShProgram b);
 
-/** Replaces parameter with attribute.
- * Replaces a uniform parameter by appending a
- * varying input attribute to the end of the list of inputs.
+/** Replaces variable with input attribute.
+ * Replaces a variable by appending an
+ * input attribute to the end of the list of inputs.
  */
 SH_DLLEXPORT
-ShProgram replaceUniform(ShProgram a, const ShVariable &var); 
+ShProgram replaceVariable(ShProgram a, const ShVariable &var); 
 
 /** Equivalent to combine(a,b).
  */
@@ -114,7 +114,7 @@ ShProgram operator&(ShProgram a, ShProgram b);
 SH_DLLEXPORT
 ShProgram operator<<(ShProgram a, ShProgram b);
 
-/** Equivalent to replaceUniform(p,var).
+/** Equivalent to replaceVariable(p,var).
  */
 SH_DLLEXPORT
 ShProgram operator>>(ShProgram p, const ShVariable &var); 
@@ -124,15 +124,8 @@ ShProgram operator>>(ShProgram p, const ShVariable &var);
  * to a variable.   The implementation supports currying with delayed
  * read, which is equivalent to replacing an input with a parameter.
  */
-template<int N, typename T>
-ShProgram operator<<(ShProgram a, const ShGeneric<N, T>& v) {
-  ShProgram vNibble = SH_BEGIN_PROGRAM() {
-    ShAttrib<N, SH_OUTPUT, T> out;
-    out.node()->specialType(v.node()->specialType());
-    out = v;
-  } SH_END_PROGRAM;
-  return connect(vNibble, a); 
-}
+SH_DLLEXPORT
+ShProgram operator<<(ShProgram a, const ShVariable& var); 
 
 }
 

@@ -26,6 +26,7 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "ArbCode.hpp"
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <cmath>
 #include <bitset>
@@ -59,6 +60,8 @@ using namespace SH;
 #define shGlGenProgramsARB glGenProgramsARB
 #define shGlDeleteProgramsARB glDeleteProgramsARB
 #define shGlBindProgramARB glBindProgramARB
+
+// #define ARBCODE_DEBUG
 
 struct ArbBindingSpecs {
   ArbRegBinding binding;
@@ -177,6 +180,13 @@ ArbCode::~ArbCode()
    }
 }
 
+void dump(ShProgramNodePtr foo, std::string desc) {
+#ifdef ARBCODE_DEBUG
+  optimize(foo);
+  foo->dump(desc + "_" + foo->name() + "_" + foo->target());
+#endif
+}
+
 void ArbCode::generate()
 {
   // Transform code to be ARB_fragment_program compatible
@@ -188,15 +198,20 @@ void ArbCode::generate()
   ShContext::current()->enter(m_shader);
   ShTransformer transform(m_shader);
 
-
+  dump(m_shader, "arbcode_start");
   transform.convertInputOutput(); 
-  transform.splitTuples(4, m_splits);
+  //dump(m_shader, "arbcode_io");
   transform.convertTextureLookups();
+  //dump(m_shader, "arbcode_io");
   transform.convertToFloat(m_convertMap);
-  
+  //dump(m_shader, "arbcode_conv2float");
+  transform.splitTuples(4, m_splits);
+  transform.stripDummyOps();
+  //dump(m_shader, "arbcode_split");
+  dump(m_shader, "arbcode_done");
+ 
   if(transform.changed()) {
     optimize(m_shader);
-    m_shader->collectVariables();
   } else {
     m_shader->releaseRef();
     m_shader = m_originalShader;
@@ -276,6 +291,11 @@ void ArbCode::upload()
   std::ostringstream out;
   print(out);
   std::string text = out.str();
+#ifdef ARBCODE_DEBUG
+  std::ofstream fout((m_originalShader->name() + "_arb.asm").c_str());
+  fout << text;
+  fout.close();
+#endif
   shGlProgramStringARB(arbTarget(m_unit), GL_PROGRAM_FORMAT_ASCII_ARB,
                        (GLsizei)text.size(), text.c_str());
   int error = glGetError();

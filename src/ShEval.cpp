@@ -33,7 +33,7 @@ namespace SH {
 
 ShEval* ShEval::m_instance = 0;
 
-// #define SH_DEBUG_SHEVAL 
+//#define SH_DEBUG_SHEVAL 
 #define SH_EVALOP_CACHE
 
 void ShEval::operator()(ShOperation op, ShVariant* dest, 
@@ -53,11 +53,13 @@ void ShEval::operator()(ShOperation op, ShVariant* dest,
                       b ? b->valueType() : SH_VALUETYPE_END, 
                       c ? c->valueType() : SH_VALUETYPE_END);
   if(!evalOpInfo) {
-#ifdef SH_DEBUG_SHEVAL
-    SH_DEBUG_PRINT("Unable to find eval op!");
-    SH_DEBUG_ASSERT(0);
-    return;
-#endif
+    // @todo range proper error message
+    SH_DEBUG_ERROR("Unable to find eval op for " << opInfo[op].name << 
+        " " << (dest ? shValueTypeName(dest->valueType()) : "") << " <- "
+        << (a ? shValueTypeName(a->valueType()) : "") << ", "
+        << (b ? shValueTypeName(b->valueType()) : "") << ", "
+        << (c ? shValueTypeName(c->valueType()) : "") << ")"); 
+    SH_DEBUG_ASSERT(0); 
   }
 
   const ShEvalOp* evalOp = evalOpInfo->m_evalOp; 
@@ -70,7 +72,13 @@ void ShEval::operator()(ShOperation op, ShVariant* dest,
   ShVariant *cdest; 
   const ShVariant *ca, *cb, *cc;
   bool newd, newa, newb, newc; //< indicate whether castmgr allocated new ShVariants
-  newd = castmgr->doAllocCast(cdest, dest, evalOpInfo->m_dest, SH_HOST);
+  if(dest->typeMatches(evalOpInfo->m_dest, SH_HOST)) {
+    newd = false; 
+    cdest = dest;
+  } else {
+    newd = true;
+    cdest = shVariantFactory(evalOpInfo->m_dest)->generate(dest->size());  
+  }
   newa = castmgr->doAllocCast(ca, a, evalOpInfo->m_src[0], SH_HOST);
   newb = castmgr->doAllocCast(cb, b, evalOpInfo->m_src[1], SH_HOST);
   newc = castmgr->doAllocCast(cc, c, evalOpInfo->m_src[2], SH_HOST);
@@ -94,6 +102,12 @@ void ShEval::operator()(ShOperation op, ShVariant* dest,
       << (b ? b->encodeArray() : "NULL") << ", "
       << (c ? c->encodeArray() : "NULL")); 
 #endif
+}
+
+void ShEval::operator()(ShOperation op, ShVariantPtr dest, 
+    ShVariantCPtr a, ShVariantCPtr b, ShVariantCPtr c) const
+{
+  operator()(op, dest.object(), a.object(), b.object(), c.object());
 }
 
 void ShEval::addOp(ShOperation op, const ShEvalOp* evalOp, ShValueType dest, 
@@ -153,6 +167,12 @@ const ShEvalOpInfo* ShEval::getEvalOpInfo(ShOperation op, ShValueType dest,
     }
   }
 
+  // @todo range identify cases when we haven't found an evaluator properly
+  // instead of making up numbers that we think are big enough
+  if(mindist > 1000) {
+    result = 0;
+  }
+
 #ifdef SH_DEBUG_SHEVAL
   if(result) {
       SH_DEBUG_PRINT("    result=" << result->encode()); 
@@ -162,7 +182,15 @@ const ShEvalOpInfo* ShEval::getEvalOpInfo(ShOperation op, ShValueType dest,
   return result;
 }
 
-ShStatementInfo* ShEvalOpInfo::clone() const 
+const ShEvalOpInfo* ShEval::getEvalOpInfo(const ShStatement &stmt) const
+{
+  return getEvalOpInfo(stmt.op, stmt.dest.valueType(),
+      stmt.src[0].valueType(),
+      stmt.src[1].valueType(),
+      stmt.src[2].valueType()); 
+}
+
+ShInfo* ShEvalOpInfo::clone() const 
 {
   return new ShEvalOpInfo(m_op, m_evalOp, m_dest, m_src[0], m_src[1], m_src[2]); 
 }

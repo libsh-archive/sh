@@ -475,28 +475,6 @@ public:
     typedef ShAttrib<4, Binding, T, Swizzled> ParentType;
 };
 
-typedef ShVector<1, SH_INPUT, ShInterval<double> > ShInputVector1i_d;
-typedef ShVector<1, SH_OUTPUT, ShInterval<double> > ShOutputVector1i_d;
-typedef ShVector<1, SH_INOUT, ShInterval<double> > ShInOutVector1i_d;
-typedef ShVector<1, SH_TEMP, ShInterval<double> > ShVector1i_d;
-typedef ShVector<1, SH_CONST, ShInterval<double> > ShConstVector1i_d;
-typedef ShVector<2, SH_INPUT, ShInterval<double> > ShInputVector2i_d;
-typedef ShVector<2, SH_OUTPUT, ShInterval<double> > ShOutputVector2i_d;
-typedef ShVector<2, SH_INOUT, ShInterval<double> > ShInOutVector2i_d;
-typedef ShVector<2, SH_TEMP, ShInterval<double> > ShVector2i_d;
-typedef ShVector<2, SH_CONST, ShInterval<double> > ShConstVector2i_d;
-typedef ShVector<3, SH_INPUT, ShInterval<double> > ShInputVector3i_d;
-typedef ShVector<3, SH_OUTPUT, ShInterval<double> > ShOutputVector3i_d;
-typedef ShVector<3, SH_INOUT, ShInterval<double> > ShInOutVector3i_d;
-typedef ShVector<3, SH_TEMP, ShInterval<double> > ShVector3i_d;
-typedef ShVector<3, SH_CONST, ShInterval<double> > ShConstVector3i_d;
-typedef ShVector<4, SH_INPUT, ShInterval<double> > ShInputVector4i_d;
-typedef ShVector<4, SH_OUTPUT, ShInterval<double> > ShOutputVector4i_d;
-typedef ShVector<4, SH_INOUT, ShInterval<double> > ShInOutVector4i_d;
-typedef ShVector<4, SH_TEMP, ShInterval<double> > ShVector4i_d;
-typedef ShVector<4, SH_CONST, ShInterval<double> > ShConstVector4i_d;
-
-
 typedef ShVector<1, SH_INPUT, ShFracUShort> ShInputVector1fus;
 typedef ShVector<1, SH_OUTPUT, ShFracUShort> ShOutputVector1fus;
 typedef ShVector<1, SH_INOUT, ShFracUShort> ShInOutVector1fus;
@@ -759,28 +737,6 @@ typedef ShVector<4, SH_OUTPUT, ShHalf> ShOutputVector4h;
 typedef ShVector<4, SH_INOUT, ShHalf> ShInOutVector4h;
 typedef ShVector<4, SH_TEMP, ShHalf> ShVector4h;
 typedef ShVector<4, SH_CONST, ShHalf> ShConstVector4h;
-
-
-typedef ShVector<1, SH_INPUT, ShInterval<float> > ShInputVector1i_f;
-typedef ShVector<1, SH_OUTPUT, ShInterval<float> > ShOutputVector1i_f;
-typedef ShVector<1, SH_INOUT, ShInterval<float> > ShInOutVector1i_f;
-typedef ShVector<1, SH_TEMP, ShInterval<float> > ShVector1i_f;
-typedef ShVector<1, SH_CONST, ShInterval<float> > ShConstVector1i_f;
-typedef ShVector<2, SH_INPUT, ShInterval<float> > ShInputVector2i_f;
-typedef ShVector<2, SH_OUTPUT, ShInterval<float> > ShOutputVector2i_f;
-typedef ShVector<2, SH_INOUT, ShInterval<float> > ShInOutVector2i_f;
-typedef ShVector<2, SH_TEMP, ShInterval<float> > ShVector2i_f;
-typedef ShVector<2, SH_CONST, ShInterval<float> > ShConstVector2i_f;
-typedef ShVector<3, SH_INPUT, ShInterval<float> > ShInputVector3i_f;
-typedef ShVector<3, SH_OUTPUT, ShInterval<float> > ShOutputVector3i_f;
-typedef ShVector<3, SH_INOUT, ShInterval<float> > ShInOutVector3i_f;
-typedef ShVector<3, SH_TEMP, ShInterval<float> > ShVector3i_f;
-typedef ShVector<3, SH_CONST, ShInterval<float> > ShConstVector3i_f;
-typedef ShVector<4, SH_INPUT, ShInterval<float> > ShInputVector4i_f;
-typedef ShVector<4, SH_OUTPUT, ShInterval<float> > ShOutputVector4i_f;
-typedef ShVector<4, SH_INOUT, ShInterval<float> > ShInOutVector4i_f;
-typedef ShVector<4, SH_TEMP, ShInterval<float> > ShVector4i_f;
-typedef ShVector<4, SH_CONST, ShInterval<float> > ShConstVector4i_f;
 
 
 typedef ShVector<1, SH_INPUT, ShFracShort> ShInputVector1fs;

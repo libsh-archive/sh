@@ -24,31 +24,72 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHLIBINTERVALIMPL_HPP
-#define SHLIBINTERVALIMPL_HPP
 
-#include "ShLibInterval.hpp"
+#include "ShDebug.hpp"
+#include "ShInfo.hpp"
 
 namespace SH {
 
-template<int N, typename T>
-inline
-ShGeneric<N, SH_REGULARTYPE(T)> lo(const ShGeneric<N, T>& var)
+ShInfo::~ShInfo()
 {
-  ShAttrib<N, SH_TEMP, SH_REGULARTYPE(T)> t;
-  shLO(t, var);
-  return t;
 }
 
-template<int N, typename T>
-inline
-ShGeneric<N, SH_REGULARTYPE(T)> hi(const ShGeneric<N, T>& var)
+ShInfo::ShInfo() 
 {
-  ShAttrib<N, SH_TEMP, SH_REGULARTYPE(T)> t;
-  shHI(t, var);
-  return t;
 }
 
+ShInfoComment::ShInfoComment(const std::string& comment) 
+  : comment(comment)
+{}
+
+ShInfo* ShInfoComment::clone() const
+{
+  return new ShInfoComment(*this);
 }
 
-#endif
+
+ShInfoHolder::ShInfoHolder()
+{}
+
+ShInfoHolder::~ShInfoHolder()
+{
+  erase_all();
+}
+
+ShInfoHolder::ShInfoHolder(const ShInfoHolder &other)
+{
+  for(InfoList::const_iterator I = other.info.begin(); I != other.info.end(); ++I) {
+    info.push_back((*I)->clone());
+  }
+}
+
+// Makes this list equal to a clone of other's list
+ShInfoHolder& ShInfoHolder::operator=(const ShInfoHolder &other)
+{
+  if(this == &other) return *this;
+  erase_all();
+  for(InfoList::const_iterator I = other.info.begin(); I != other.info.end(); ++I) {
+    info.push_back((*I)->clone());
+  }
+  return *this;
+}
+
+void ShInfoHolder::add_info(ShInfo* new_info)
+{
+  info.push_back(new_info);
+}
+
+void ShInfoHolder::remove_info(ShInfo* old_info)
+{
+  info.remove(old_info);
+}
+
+void ShInfoHolder::erase_all()
+{
+  for(InfoList::const_iterator I = info.begin(); I != info.end(); ++I) {
+    delete *I;
+  }
+  info.clear();
+}
+
+} // namespace SH

@@ -72,7 +72,7 @@ ArbMapping ArbCode::table[] = {
   // Removed this temporarily because of a bug in the NV drivers
   //{SH_OP_DIV,  SH_ARB_NVFP2, scalarize,    SH_ARB_DIV, 0},
   
-  {SH_OP_DIV,  SH_ARB_ANY,   scalarize,    SH_ARB_FUN, &ArbCode::emit_div},
+  {SH_OP_DIV,  SH_ARB_ANY,   0,    SH_ARB_FUN, &ArbCode::emit_div},
   {SH_OP_POW,  SH_ARB_ANY,   scalarize,    SH_ARB_POW, 0},
   {SH_OP_RCP,  SH_ARB_ANY,   scalarize,    SH_ARB_RCP, 0},
   {SH_OP_RSQ,  SH_ARB_ANY,   scalarize,    SH_ARB_RSQ, 0},
@@ -163,10 +163,11 @@ ArbMapping ArbCode::table[] = {
   {SH_OP_TEXD,  SH_ARB_NVFP,  0, SH_ARB_FUN, &ArbCode::emit_tex},
   
   // Misc.
-  {SH_OP_COND, SH_ARB_NVFP, 0, SH_ARB_FUN, &ArbCode::emit_nvcond},
-  {SH_OP_COND, SH_ARB_NVVP2, 0, SH_ARB_FUN, &ArbCode::emit_nvcond},
-  {SH_OP_COND, SH_ARB_ANY, negate_first, SH_ARB_CMP, 0},
-  {SH_OP_KIL,  SH_ARB_FP,  0, SH_ARB_FUN, &ArbCode::emit_kil},
+  {SH_OP_LIT,  SH_ARB_ANY,   0,            SH_ARB_FUN, &ArbCode::emit_lit},
+  {SH_OP_COND, SH_ARB_NVFP,  0,            SH_ARB_FUN, &ArbCode::emit_nvcond},
+  {SH_OP_COND, SH_ARB_NVVP2, 0,            SH_ARB_FUN, &ArbCode::emit_nvcond},
+  {SH_OP_COND, SH_ARB_ANY,   negate_first, SH_ARB_CMP, 0},
+  {SH_OP_KIL,  SH_ARB_FP,    0,            SH_ARB_FUN, &ArbCode::emit_kil},
 
   {SH_OP_PAL,  SH_ARB_VP, 0, SH_ARB_FUN, &ArbCode::emit_pal},
 
@@ -270,8 +271,12 @@ void ArbCode::emit(const ShStatement& stmt)
 void ArbCode::emit_div(const ShStatement& stmt)
 {
   // @todo type should handle other types (half-floats, fixed point)
-  ShVariable rcp(new ShVariableNode(SH_TEMP, 1, SH_FLOAT));
-  m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp, stmt.src[1]));
+
+  ShVariable rcp(new ShVariableNode(SH_TEMP, stmt.src[1].size(), SH_FLOAT));
+
+  for (int i = 0; i < stmt.src[1].size(); i++) {
+    m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp(i), stmt.src[1](i)));
+  }
   m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0], rcp));
 }
 
@@ -486,13 +491,14 @@ void ArbCode::emit_tex(const ShStatement& stmt)
   ShVariable tmpdest;
   ShVariable tmpsrc;
   
+  ShTextureNodePtr tnode = shref_dynamic_cast<ShTextureNode>(stmt.src[0].node());
+
   if (!stmt.dest.swizzle().identity()) {
-    tmpdest = ShVariable(new ShVariableNode(SH_TEMP, 4, SH_FLOAT));
+    tmpdest = ShVariable(new ShVariableNode(SH_TEMP, tnode->size(), SH_FLOAT));
     tmpsrc = tmpdest;
     delay = true;
   }
 
-  ShTextureNodePtr tnode = shref_dynamic_cast<ShTextureNode>(stmt.src[0].node());
 
   SH_DEBUG_ASSERT(tnode);
 
@@ -515,6 +521,7 @@ void ArbCode::emit_tex(const ShStatement& stmt)
     m_instructions.push_back(ArbInst(SH_ARB_TEX,
                                      (delay ? tmpdest : stmt.dest), stmt.src[1], stmt.src[0]));
   }
+
   if (delay) emit(ShStatement(stmt.dest, SH_OP_ASN, tmpsrc));
 }
 
@@ -552,10 +559,11 @@ void ArbCode::emit_nvcond(const ShStatement& stmt)
 
 void ArbCode::emit_csum(const ShStatement& stmt)
 {
+
   // @todo type make this function handle more than floats
-  ShDataVariant<float, SH_HOST> c1_values(stmt.src[0].size(), 1.0f); 
+  ShVariantPtr c1_values = new ShDataVariant<float, SH_HOST>(stmt.src[0].size(), 1.0f); 
   ShVariable c1(new ShVariableNode(SH_CONST, stmt.src[0].size(), SH_FLOAT));
-  c1.setVariant(&c1_values);
+  c1.setVariant(c1_values);
   m_shader->constants.push_back(c1.node());
   
   emit(ShStatement(stmt.dest, stmt.src[0], SH_OP_DOT, c1));
@@ -584,6 +592,15 @@ void ArbCode::emit_pal(const ShStatement& stmt)
 {
   m_instructions.push_back(ArbInst(SH_ARB_ARL, m_address_register, stmt.src[1]));
   m_instructions.push_back(ArbInst(SH_ARB_ARRAYMOV, stmt.dest, stmt.src[0], m_address_register));
+}
+
+void ArbCode::emit_lit(const ShStatement& stmt)
+{
+  ShVariable tmp(new ShVariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
+  ArbInst inst(SH_ARB_LIT, tmp, stmt.src[0]);
+  m_instructions.push_back(inst);
+
+  emit(ShStatement(stmt.dest, SH_OP_ASN, tmp));
 }
 
 }

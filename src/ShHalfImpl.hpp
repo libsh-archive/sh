@@ -27,6 +27,7 @@
 #ifndef SHHALFALIMPL_HPP
 #define SHHALFALIMPL_HPP
 
+#include <iostream>
 #include <cmath>
 #include "ShMath.hpp"
 #include "ShHalf.hpp"

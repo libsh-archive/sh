@@ -165,8 +165,6 @@ ShProgram connect(ShProgram pa, ShProgram pb)
   program->ctrlGraph->dfs(replacer);
 
   optimize(program);
-  
-  program->collectVariables();
   return program;
 }
 
@@ -208,9 +206,6 @@ ShProgram combine(ShProgram pa, ShProgram pb)
   program->outputs.insert(program->outputs.end(), b->outputs.begin(), b->outputs.end());
 
   optimize(program);
- 
-  program->collectVariables();
-  
   return program;
 }
 
@@ -377,15 +372,11 @@ ShProgram operator&(ShProgram a, ShProgram b)
 }
 
 ShProgram operator>>(ShProgram p, const ShVariable &var) { 
-  return replaceUniform(p, var);
+  return replaceVariable(p, var);
 }
 
-ShProgram replaceUniform(ShProgram a, const ShVariable& v)
+ShProgram replaceVariable(ShProgram a, const ShVariable& v)
 {
-  if(!v.uniform()) {
-    shError(ShAlgebraException("Cannot replace non-uniform variable"));
-  }
-
   ShProgram program(a.node()->clone()); 
   
   ShVarMap varMap;
@@ -402,10 +393,15 @@ ShProgram replaceUniform(ShProgram a, const ShVariable& v)
   program.node()->ctrlGraph->dfs(replacer);
 
   optimize(program);
-  
-  program.node()->collectVariables();
-
   return program;
+}
+
+ShProgram operator<<(ShProgram a, const ShVariable& var) {
+  ShProgram vNibble = SH_BEGIN_PROGRAM() {
+    ShVariable out(var.node()->clone(SH_OUTPUT, var.size(), var.valueType(), SH_SEMANTICTYPE_END, true, false));
+    shASN(out, var);
+  } SH_END_PROGRAM;
+  return connect(vNibble, a); 
 }
 
 }

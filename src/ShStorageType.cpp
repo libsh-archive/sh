@@ -50,8 +50,4 @@ SH_STORAGETYPE_NAME_SPEC_DEF(ShFracUByte, "fub");
 SH_STORAGETYPE_NAME_SPEC_DEF(ShFracUShort, "fus");
 SH_STORAGETYPE_NAME_SPEC_DEF(ShFracUInt, "fui");
 
-SH_STORAGETYPE_NAME_SPEC_DEF(ShInterval<ShHalf>, "i_h");
-SH_STORAGETYPE_NAME_SPEC_DEF(ShInterval<float>, "i_f");
-SH_STORAGETYPE_NAME_SPEC_DEF(ShInterval<double>, "i_d");
-
 }

@@ -353,7 +353,8 @@ template<int N, typename T>
 void ShGeneric<N, T>::setValues(const host_type variantValues[]) 
 {
   if(m_swizzle.identity() && !m_neg) {
-    memcpy(m_node->getVariant()->array(), variantValues, N * sizeof(host_type));
+    VariantTypePtr variantPtr(variant_cast<T, SH_HOST>(m_node->getVariant()));
+    std::copy(variantValues, variantValues + N, variantPtr->begin()); 
   } else {
     VariantTypePtr variantPtr(new VariantType(N, variantValues, false));
     setVariant(variantPtr);

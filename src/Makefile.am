@@ -16,12 +16,18 @@ libsh_la_SOURCES += ShEnvironment.cpp ShException.cpp ShError.cpp
 libsh_la_SOURCES += ShParser.cpp 
 libsh_la_SOURCES += ShProgram.cpp ShProgram.hpp
 libsh_la_SOURCES += ShProgramNode.cpp ShProgramNode.hpp
+libsh_la_SOURCES += ShRecord.hpp ShRecord.cpp 
+incinc_HEADERS	 += ShRecord.hpp 
+libsh_la_SOURCES += ShInfo.hpp ShInfoImpl.hpp ShInfo.cpp
+incinc_HEADERS   += ShInfo.hpp ShInfoImpl.hpp
 libsh_la_SOURCES += ShStatement.cpp ShSwizzle.cpp ShSyntax.cpp ShToken.cpp
 libsh_la_SOURCES += ShTokenizer.cpp ShUtility.cpp ShVariable.cpp ShVariableNode.cpp
 libsh_la_SOURCES += ShOperation.hpp ShOperation.cpp 
 libsh_la_SOURCES += ShInternals.hpp ShInternals.cpp
 libsh_la_SOURCES += ShBasicBlock.hpp
 libsh_la_SOURCES += ShBlock.hpp ShCtrlGraph.hpp
+libsh_la_SOURCES += ShCfgBlock.hpp ShCfgBlock.cpp 
+incinc_HEADERS 	 += ShCfgBlock.hpp 
 libsh_la_SOURCES += ShDebug.hpp ShEnvironment.hpp ShError.hpp
 libsh_la_SOURCES += ShException.hpp
 libsh_la_SOURCES += ShParser.hpp ShRefCount.hpp ShRefCount.cpp ShStatement.hpp
@@ -50,7 +56,8 @@ libsh_la_SOURCES += ShTransformer.hpp ShBitSet.hpp
 libsh_la_SOURCES += ShTransformer.cpp ShBitSet.cpp
 incinc_HEADERS   += ShTransformer.hpp ShBitSet.hpp
 libsh_la_SOURCES += ShTypeConvertTransformer.cpp 
-libsh_la_SOURCES += ShIntervalConverter.cpp 
+libsh_la_SOURCES += ShTransformerImpl.hpp 
+incinc_HEADERS	 += ShTransformerImpl.hpp 
 libsh_la_SOURCES += ShOptimizations.cpp ShOptimizations.hpp
 incinc_HEADERS   += ShOptimizations.hpp
 libsh_la_SOURCES += ShValueTracking.cpp ShConstProp.cpp
@@ -58,6 +65,8 @@ libsh_la_SOURCES += ShEvaluate.cpp ShEvaluate.hpp
 incinc_HEADERS   += ShEvaluate.hpp
 libsh_la_SOURCES += ShStructural.hpp ShStructural.cpp
 incinc_HEADERS   += ShStructural.hpp
+libsh_la_SOURCES += ShSection.hpp ShSectionImpl.hpp ShSection.cpp 
+incinc_HEADERS   += ShSection.hpp ShSectionImpl.hpp
 
 # Library functions
 libsh_la_SOURCES += ShLib.hpp
@@ -69,7 +78,6 @@ libsh_la_SOURCES += ShLibMatrix.hpp ShLibMatrixImpl.hpp
 libsh_la_SOURCES += ShLibMisc.hpp ShLibMiscImpl.hpp
 libsh_la_SOURCES += ShLibTrig.hpp ShLibTrigImpl.hpp
 libsh_la_SOURCES += ShLibDeriv.hpp ShLibDerivImpl.hpp
-libsh_la_SOURCES += ShLibInterval.hpp ShLibIntervalImpl.hpp
 
 # Textures and arrays
 libsh_la_SOURCES += ShBaseTexture.hpp ShBaseTextureImpl.hpp ShBaseTexture.cpp
@@ -105,10 +113,8 @@ libsh_la_SOURCES += ShCastManager.hpp ShCastManager.cpp
 libsh_la_SOURCES += ShEval.hpp ShEvalImpl.hpp ShEval.cpp
 libsh_la_SOURCES += ShConcreteRegularOpImpl.hpp 
 libsh_la_SOURCES += ShConcreteCTypeOpImpl.hpp  ShConcreteCTypeOp.cpp
-libsh_la_SOURCES += ShConcreteIntervalOpImpl.hpp 
 libsh_la_SOURCES += ShHalf.hpp ShHalfImpl.hpp 
 libsh_la_SOURCES += ShFraction.hpp ShFractionImpl.hpp 
-libsh_la_SOURCES += ShInterval.hpp ShIntervalImpl.hpp 
 
 
 # Shader Algebra
@@ -139,7 +145,6 @@ incinc_HEADERS += ShLibMatrix.hpp ShLibMatrixImpl.hpp
 incinc_HEADERS += ShLibMisc.hpp ShLibMiscImpl.hpp
 incinc_HEADERS += ShLibTrig.hpp ShLibTrigImpl.hpp
 incinc_HEADERS += ShLibDeriv.hpp ShLibDerivImpl.hpp
-incinc_HEADERS += ShLibInterval.hpp ShLibIntervalImpl.hpp
 incinc_HEADERS += ShParser.hpp ShRefCount.hpp ShRefCountImpl.hpp 
 incinc_HEADERS += ShProgram.hpp ShProgramNode.hpp ShStatement.hpp 
 incinc_HEADERS += ShSwizzle.hpp ShSwizzleImpl.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp
@@ -176,10 +181,8 @@ incinc_HEADERS += ShVariantFactory.hpp ShVariantFactoryImpl.hpp
 incinc_HEADERS += ShVariantCast.hpp ShVariantCastImpl.hpp 
 incinc_HEADERS += ShCastManager.hpp 
 incinc_HEADERS += ShConcreteRegularOpImpl.hpp ShConcreteCTypeOpImpl.hpp 
-incinc_HEADERS += ShConcreteIntervalOpImpl.hpp 
 incinc_HEADERS += ShHalf.hpp ShHalfImpl.hpp 
 incinc_HEADERS += ShFraction.hpp ShFractionImpl.hpp 
-incinc_HEADERS += ShInterval.hpp ShIntervalImpl.hpp 
 incinc_HEADERS += ShMemory.hpp ShClamping.hpp ShInterp.hpp ShMemoryDep.hpp
 incinc_HEADERS += ShInstructions.hpp
 incinc_HEADERS += ShMeta.hpp ShMetaImpl.hpp ShMetaForwarder.hpp 

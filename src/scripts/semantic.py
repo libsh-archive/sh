@@ -18,10 +18,7 @@ types = {"ShHalf": "h",
          "ShFracInt": "fi",
          "ShFracUByte": "fub",
          "ShFracUShort": "fus",
-         "ShFracUInt": "fui", 
-
-         "ShInterval<float> ": "i_f",
-         "ShInterval<double> ": "i_d" }
+         "ShFracUInt": "fui" } 
 
 
 

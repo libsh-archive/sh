@@ -29,7 +29,6 @@
 
 #include "ShTypeInfo.hpp"
 #include "ShVariantFactory.hpp"
-#include "ShInterval.hpp"
 
 namespace SH {
 

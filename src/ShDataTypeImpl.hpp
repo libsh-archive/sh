@@ -54,12 +54,6 @@ bool shDataTypeEqual(const T &a,
   return a == b;
 }
 
-template<typename T>
-inline
-bool shDataTypeEqual(const ShInterval<T> &a, const ShInterval<T> &b)
-{
-  return (a.lo() == b.lo()) && (a.hi() == b.hi()); 
-}
 // @}
 
 /** Returns whether the value is always greater than zero (i.e. true) 
@@ -70,13 +64,6 @@ inline
 bool shDataTypeIsPositive(const T &a)
 {
   return a > 0; 
-}
-
-template<typename T>
-inline
-bool shDataTypeIsPositive(const ShInterval<T> &a)
-{
-  return (a.lo() > 0); 
 }
 
 //@}
@@ -90,7 +77,7 @@ void shDataTypeCast(typename ShDataTypeCppType<T1, DT1>::type &dest,
                     const typename ShDataTypeCppType<T2, DT2>::type &src)
 {
   typedef typename ShDataTypeCppType<T1, DT1>::type desttype; 
-  dest = (desttype)(src);
+  dest = static_cast<desttype>(src);
 }
 
 
