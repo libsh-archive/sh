@@ -29,6 +29,7 @@
 
 #include <iosfwd>
 #include <set>
+#include <list>
 #include "ShDllExport.hpp"
 #include "ShVariable.hpp"
 
@@ -116,6 +117,22 @@ SH_DLLEXPORT ShOperationInfo {
 SH_DLLEXPORT
 extern const ShOperationInfo opInfo[];
 
+/** Dummy class representing additional information that can be stored
+ *  in statements.
+ */
+class ShStatementInfo {
+public:
+  virtual ~ShStatementInfo();
+
+protected:
+  ShStatementInfo();
+
+private:
+  // Not implemented
+  ShStatementInfo(const ShStatementInfo& other);
+  ShStatementInfo& operator=(const ShStatementInfo& other);
+};
+
 /** A single statement.
  * Represent a statement of the form 
  * <pre>dest := src[0] op src[1]</pre>
@@ -131,21 +148,50 @@ public:
   ShStatement(ShVariable dest, ShOperation op, ShVariable src);
   ShStatement(ShVariable dest, ShVariable src0, ShOperation op, ShVariable src1);
   ShStatement(ShVariable dest, ShOperation op, ShVariable src0, ShVariable src1, ShVariable src2);
+  ~ShStatement();
   
   ShVariable dest;
   ShVariable src[3];
   
   ShOperation op;
 
+  // Used by the optimizer and anything else that needs to store extra
+  // information in statements.
+  // Anything in here will be deleted when this statement is deleted.
+  std::list<ShStatementInfo*> info;
+
+  // Return the first entry in info whose type matches T, or 0 if no
+  // such entry exists.
+  template<typename T>
+  T* get_info();
+
+  // Add the given statement information to the end of the info list.
+  void add_info(ShStatementInfo* new_info);
+
+  // Remove the given statement information from the list.
+  // Does not delete it, so be careful!
+  void remove_info(ShStatementInfo* old_info);
+  
+  bool marked;
+
   // The following are used for the optimizer.
   
   std::set<ShStatement*> ud[3];
   std::set<ShStatement*> du;
-
-  bool marked;
 };
 
 std::ostream& operator<<(std::ostream& out, const SH::ShStatement& stmt);
+
+template<typename T>
+T* ShStatement::get_info()
+{
+  for (std::list<ShStatementInfo*>::iterator I = info.begin(); I != info.end();
+       ++I) {
+    T* info = dynamic_cast<T*>(*I);
+    if (info) return info;
+  }
+  return 0;
+}
 
 } // namespace SH
 

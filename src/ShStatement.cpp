@@ -97,6 +97,14 @@ const ShOperationInfo opInfo[] = {
   {0, 0}
 };
 
+ShStatementInfo::ShStatementInfo()
+{
+}
+
+ShStatementInfo::~ShStatementInfo()
+{
+}
+
 ShStatement::ShStatement(ShVariable dest, ShOperation op)
   : dest(dest), op(op)
 {
@@ -121,6 +129,13 @@ ShStatement::ShStatement(ShVariable dest, ShOperation op, ShVariable src0, ShVar
   src[0] = src0;
   src[1] = src1;
   src[2] = src2;
+}
+
+ShStatement::~ShStatement()
+{
+  for (std::list<ShStatementInfo*>::iterator I = info.begin(); I != info.end(); ++I) {
+    delete *I;
+  }
 }
 
 std::ostream& operator<<(std::ostream& out, const ShStatement& stmt)
@@ -154,6 +169,16 @@ std::ostream& operator<<(std::ostream& out, const ShStatement& stmt)
     break;
   }
   return out;
+}
+
+void ShStatement::add_info(ShStatementInfo* new_info)
+{
+  info.push_back(new_info);
+}
+
+void ShStatement::remove_info(ShStatementInfo* old_info)
+{
+  info.remove(old_info);
 }
 
 } // namespace SH
