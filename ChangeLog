@@ -1,3 +1,20 @@
+2005-02-22  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl: Folded in some changes from the cflow branch. In
+	particular, improved PBuffer context handling.
+
+	* src/ShConstProp.cpp (operator<<(ostream&, ConstProp::Cell)):
+	Output the encoded value instead of the value pointer. Doh.
+	(ConstProp::updateDest): Don't mark entirely constant expressions
+	as uniform. Fixes issue159.
+	(struct FinishConstProp): Break out based on uniform < 0 first, so
+	that we get less confusing debugging messages.
+
+	* src/ShInfoImpl.hpp (destroy_info): Actually delete the items we
+	wish to destroy. Should fix some memory leaks...
+
+	* src/ShBitSet.cpp (operator=): Handle self-assignment correctly.
+
 2005-02-18  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
 	
 	* backends/gl/ArbCode.cpp: Added support for "opengl:texunit" and
@@ -16,9 +33,9 @@
 
 2005-02-11  Bryan Chan  <b8chan@cgl.uwaterloo.ca>
 
-	* src/ShInstructions.hpp, ShInstructions.cpp
-		src/ShVariable.hpp, ShVariable.cpp:
-	Backed out some const changes that don't make sense.
+	* src/ShInstructions.hpp, ShInstructions.cpp, src/ShVariable.hpp,
+	ShVariable.cpp: Backed out some const changes that don't make
+	sense.
 
 Merged in some fixes from arithmetic
 	*  src/ShSection.hpp, ShSectionImpl.hpp (realDump):
@@ -28,7 +45,6 @@ Merged in some fixes from arithmetic
 	Changed to use ATI's extensions on NV cards when the tex dims are non-RECT
 	(NV's recent drivers only support 1/2/3D float textures through
 	ATI_texture_float)
-
 
 2005-02-10  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 

@@ -83,19 +83,19 @@ extern PFNWGLQUERYPBUFFERARBPROC wglQueryPbufferARB;
 namespace shgl {
 
 struct TextureStrategy {
-  virtual TextureStrategy* create(void) = 0;
+  virtual TextureStrategy* create() = 0;
   
   virtual void bindTexture(const SH::ShTextureNodePtr& texture,
                            GLenum target) = 0;
 };
 
 struct StreamStrategy {
-  virtual StreamStrategy* create(void) = 0;
+  virtual StreamStrategy* create() = 0;
   virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest) = 0;
 };
 
 struct CodeStrategy {
-  virtual CodeStrategy* create(void) = 0;
+  virtual CodeStrategy* create() = 0;
   virtual SH::ShBackendCodePtr generate(const std::string& target,
                                         const SH::ShProgramNodeCPtr& shader,
                                         TextureStrategy* texture) = 0;

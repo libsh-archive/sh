@@ -15,7 +15,7 @@
 #include <fstream>
 
 // Uncomment to enable constant/uniform propagation debugging (verbose!)
-//#define SH_DEBUG_CONSTPROP
+// #define SH_DEBUG_CONSTPROP
 
 #ifdef SH_DEBUG_OPTIMIZER
 #ifndef SH_DEBUG_CONSTPROP
@@ -126,7 +126,7 @@ struct ConstProp : public ShInfo {
           }
         }
         some_field_bottom |= somebottom;
-        if (!alluniform) all_fields_uniform = false;
+        if (!(alluniform && !allconst)) all_fields_uniform = false;
         if (allconst) {
           ShVariable tmpdest(new ShVariableNode(SH_CONST, 1, stmt->dest.valueType()));
           ShStatement eval(*stmt);
@@ -215,11 +215,10 @@ struct ConstProp : public ShInfo {
     // @todo type...this is my current understanding:
     // May be constant or if !constval, value is not
     // known to be constant
-    Uniform(ShVariantCPtr constval)
+    Uniform(ShVariantCPtr cval)
       : constant(true),
-        constval(0)
+        constval(cval ? cval->get() : ShVariantPtr(0))
     {
-      if(constval) this->constval = constval->get();
     }
     
     Uniform(int valuenum, int index, bool neg)
@@ -530,7 +529,7 @@ std::ostream& operator<<(std::ostream& out, const ConstProp::Cell& cell)
     out << "[bot]";
     break;
   case ConstProp::Cell::CONSTANT:
-    out << "[" << cell.value << "]";
+    out << "[" << cell.value->encode() << "]";
     break;
   case ConstProp::Cell::TOP:
     out << "[top]";
@@ -715,16 +714,15 @@ struct FinishConstProp
                 }
               }
               
-              
-              if (mixed) {
+              if (uniform < 0) {
 #ifdef SH_DEBUG_CONSTPROP
-                SH_DEBUG_PRINT(*I << ".src[" << s << "] is mixed");
+                SH_DEBUG_PRINT("{" << *I << "}.src[" << s << "] is not uniform");
 #endif
                 continue;
               }
-              if (uniform < 0) {
+              if (mixed) {
 #ifdef SH_DEBUG_CONSTPROP
-                SH_DEBUG_PRINT(*I << ".src[" << s << "] is not uniform");
+                SH_DEBUG_PRINT("{" << *I << "}.src[" << s << "] is mixed");
 #endif
                 continue;
               }

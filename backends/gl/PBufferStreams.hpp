@@ -32,22 +32,14 @@
 
 namespace shgl {
 
-enum FloatExtension {
-  SH_ARB_NV_FLOAT_BUFFER,
-  SH_ARB_ATI_PIXEL_FORMAT_FLOAT,
-  SH_ARB_NO_FLOAT_EXT
-};
-
 struct PBufferStreams : public StreamStrategy {
-  PBufferStreams(void);
+  PBufferStreams();
   virtual ~PBufferStreams();
 
-  virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
+  void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
 
-private:
-  virtual FloatExtension setupContext(int width, int height) = 0;
-  virtual void restoreContext(void) = 0;
-
+  virtual StreamStrategy* create();
+  
 private:
   bool m_setup_vp;
   SH::ShProgram m_vp;
