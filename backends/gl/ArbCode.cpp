@@ -672,7 +672,7 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       }
       break;
     case SH_OP_KIL:
-      m_instructions.push_back(ArbInst(SH_ARB_KIL, -stmt.dest));
+      m_instructions.push_back(ArbInst(SH_ARB_KIL, -stmt.src[0]));
       break;
     default:
       SH_DEBUG_WARN(opInfo[stmt.op].name << " not handled by ARB backend");

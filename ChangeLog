@@ -1,3 +1,13 @@
+2004-03-22  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/arb: Remove these old files.
+
+	* backends/gl/ArbCode.cpp (genNode): Use src[0] instead of dest
+	from SH_OP_KIL to determine whether to kill the fragment.
+
+	* src/ShStatement.hpp: Change comment for SH_OP_KIL to use src[0]
+	instead of dst.
+
 2004-03-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/PBufferStreams.cpp (execute): Use different

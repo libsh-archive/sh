@@ -82,7 +82,7 @@ enum ShOperation {
 
   SH_OP_COND, ///< Conditional assignment: dst[i] = (src[0][i] > 0.0 ? src[1][i] : src[2][i])
 
-  SH_OP_KIL, ///< Conditionally kill fragment (if for any i, dst[i] > 0)
+  SH_OP_KIL, ///< Conditionally kill fragment (if for any i, src[0][i] > 0)
 
   SH_OP_OPTBRA, ///< Used in the optimizer to indicate a conditional
                 ///  branch dependency. This should never show up in

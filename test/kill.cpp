@@ -90,7 +90,7 @@ ShProgram doText(const std::string& text)
 
 int main(int argc, char** argv)
 {
-  std::string backendName("sm");
+  std::string backendName("arb");
   if (argc > 1) {
     backendName = argv[1];
   }
@@ -141,10 +141,7 @@ int main(int argc, char** argv)
     dumpfilename += "-control.dot";
 
     std::ofstream dumpfile(dumpfilename.c_str());
-    ShEnvironment::shader->ctrlGraph->graphvizDump(dumpfile);
-
-    ShEnvironment::insideShader = false;
-    ShEnvironment::shader = 0;
+    shader->ctrlGraph->graphvizDump(dumpfile);
  
     return 0;
   } catch (const ShException& e) {
