@@ -104,14 +104,14 @@ public:""")
         common.inprint(self.name + "& operator*=(T);")
         common.inprint(self.name + "& operator/=(T);")
         common.inprint(self.name + "& operator%=(T);")
+        common.inprint(self.name + "& operator+=(T);")
+        common.inprint(self.name + "& operator-=(T);")
         if size != 1:
+            common.inprint(self.name + "& operator+=(const ShGeneric<1, T>&);")
+            common.inprint(self.name + "& operator-=(const ShGeneric<1, T>&);")
             common.inprint(self.name + "& operator*=(const ShGeneric<1, T>&);")
             common.inprint(self.name + "& operator/=(const ShGeneric<1, T>&);")
             common.inprint(self.name + "& operator%=(const ShGeneric<1, T>&);")
-        else:
-            common.inprint(self.name + "& operator+=(T);")
-            common.inprint(self.name + "& operator-=(T);")
-            
 
     def swizzles(self):
         for num in range(1, 5):
@@ -265,16 +265,17 @@ class Impl:
         self.assign("operator/=", [["const ShGeneric<" + s + ", T>&", "right"]], size)
         self.assign("operator%=", [["const ShGeneric<" + s + ", T>&", "right"]], size)
 
+        self.assign("operator+=", [["T", "right"]], size)
+        self.assign("operator-=", [["T", "right"]], size)
         self.assign("operator*=", [["T", "right"]], size)
         self.assign("operator/=", [["T", "right"]], size)
         self.assign("operator%=", [["T", "right"]], size)
         if size != 1:
+            self.assign("operator+=", [["const ShGeneric<1, T>&", "right"]], size)
+            self.assign("operator-=", [["const ShGeneric<1, T>&", "right"]], size)
             self.assign("operator*=", [["const ShGeneric<1, T>&", "right"]], size)
             self.assign("operator/=", [["const ShGeneric<1, T>&", "right"]], size)
             self.assign("operator%=", [["const ShGeneric<1, T>&", "right"]], size)
-        else:
-            self.assign("operator+=", [["T", "right"]], size)
-            self.assign("operator-=", [["T", "right"]], size)
             
     def swizzle(self, num, size, op = "()"):
         args = ["s" + str(i) for i in range(0, num)]

@@ -455,7 +455,7 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       m_instructions.push_back(ArbInst(SH_ARB_MOV, stmt.dest, -stmt.src[0]));
       break;
     case SH_OP_ADD:
-      m_instructions.push_back(ArbInst(SH_ARB_ADD, stmt.dest, stmt.src[0], stmt.src[1]));
+      genScalarVectorInst(stmt.dest, stmt.src[0], stmt.src[1], SH_ARB_ADD);
       break;
     case SH_OP_MUL:
       genScalarVectorInst(stmt.dest, stmt.src[0], stmt.src[1], SH_ARB_MUL);
@@ -769,7 +769,7 @@ void ArbCode::genDiv(const ShVariable &dest, const ShVariable &op1, const ShVari
     // TODO arg...component-wise div is ugly, ARB RCP only works on scalars
     for(int i = 0; i < op2.size(); ++i) {
       m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp, op2(i)));
-      m_instructions.push_back(ArbInst(SH_ARB_MUL, dest(i), op1(i), rcp));
+      m_instructions.push_back(ArbInst(SH_ARB_MUL, dest(i), op1(op1.size() > 1 ? i : 0), rcp));
     }
   }
 }

@@ -1,5 +1,33 @@
 2004-07-05  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* Resolved issue43.
+
+	* backends/cpu/CPU.cpp (encode): Allow scalar ADD and DIV on both
+	sides, clean up implementation of MUL.
+
+	* backends/gl/ArbCode.cpp (genNode): Allow scalar versions of OP_ADD.
+	(genDiv): Allow scalar left-hand side in division.
+
+	* src/scripts/semantic.py (Class.modifying): Add declarations for
+	scalar versions of operator+= and operator-=.
+	(Impl.modifying): Add implementations for scalar versions of
+	operator+= and operator-=.
+
+	* src/ShGenericImpl.hpp: Implemented scalar versions of modifying
+	arithmetic operators.
+
+	* src/ShGeneric.hpp (class ShGeneric): Added scalar versions of
+	modifying arithmetic operators.
+
+	* src/ShInstructions.cpp (shADD): Allow scalars on both sides.
+	(shDIV): Allow scalars on both sides.
+
+	* src/ShLibArithImpl.hpp: Implemented scalar versions of
+	arithmetic operators.
+
+	* src/ShLibArith.hpp: Added scalar versions for both sides of
+	operator+, operator- and operator/.
+
 	* src/ShLibGeometryImpl.hpp (refract): Implement refract. Resolves issue73.
 
 	* src/ShLibGeometry.hpp: Add refract function prototype.

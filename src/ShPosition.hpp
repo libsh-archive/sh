@@ -67,6 +67,10 @@ public:
   ShPosition& operator*=(T);
   ShPosition& operator/=(T);
   ShPosition& operator%=(T);
+  ShPosition& operator+=(T);
+  ShPosition& operator-=(T);
+  ShPosition& operator+=(const ShGeneric<1, T>&);
+  ShPosition& operator-=(const ShGeneric<1, T>&);
   ShPosition& operator*=(const ShGeneric<1, T>&);
   ShPosition& operator/=(const ShGeneric<1, T>&);
   ShPosition& operator%=(const ShGeneric<1, T>&);
@@ -169,6 +173,10 @@ public:
   ShPosition& operator*=(T);
   ShPosition& operator/=(T);
   ShPosition& operator%=(T);
+  ShPosition& operator+=(T);
+  ShPosition& operator-=(T);
+  ShPosition& operator+=(const ShGeneric<1, T>&);
+  ShPosition& operator-=(const ShGeneric<1, T>&);
   ShPosition& operator*=(const ShGeneric<1, T>&);
   ShPosition& operator/=(const ShGeneric<1, T>&);
   ShPosition& operator%=(const ShGeneric<1, T>&);
@@ -221,6 +229,10 @@ public:
   ShPosition& operator*=(T);
   ShPosition& operator/=(T);
   ShPosition& operator%=(T);
+  ShPosition& operator+=(T);
+  ShPosition& operator-=(T);
+  ShPosition& operator+=(const ShGeneric<1, T>&);
+  ShPosition& operator-=(const ShGeneric<1, T>&);
   ShPosition& operator*=(const ShGeneric<1, T>&);
   ShPosition& operator/=(const ShGeneric<1, T>&);
   ShPosition& operator%=(const ShGeneric<1, T>&);
@@ -273,6 +285,10 @@ public:
   ShPosition& operator*=(T);
   ShPosition& operator/=(T);
   ShPosition& operator%=(T);
+  ShPosition& operator+=(T);
+  ShPosition& operator-=(T);
+  ShPosition& operator+=(const ShGeneric<1, T>&);
+  ShPosition& operator-=(const ShGeneric<1, T>&);
   ShPosition& operator*=(const ShGeneric<1, T>&);
   ShPosition& operator/=(const ShGeneric<1, T>&);
   ShPosition& operator%=(const ShGeneric<1, T>&);

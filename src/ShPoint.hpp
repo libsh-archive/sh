@@ -63,6 +63,10 @@ public:
   ShPoint& operator*=(T);
   ShPoint& operator/=(T);
   ShPoint& operator%=(T);
+  ShPoint& operator+=(T);
+  ShPoint& operator-=(T);
+  ShPoint& operator+=(const ShGeneric<1, T>&);
+  ShPoint& operator-=(const ShGeneric<1, T>&);
   ShPoint& operator*=(const ShGeneric<1, T>&);
   ShPoint& operator/=(const ShGeneric<1, T>&);
   ShPoint& operator%=(const ShGeneric<1, T>&);
@@ -165,6 +169,10 @@ public:
   ShPoint& operator*=(T);
   ShPoint& operator/=(T);
   ShPoint& operator%=(T);
+  ShPoint& operator+=(T);
+  ShPoint& operator-=(T);
+  ShPoint& operator+=(const ShGeneric<1, T>&);
+  ShPoint& operator-=(const ShGeneric<1, T>&);
   ShPoint& operator*=(const ShGeneric<1, T>&);
   ShPoint& operator/=(const ShGeneric<1, T>&);
   ShPoint& operator%=(const ShGeneric<1, T>&);
@@ -217,6 +225,10 @@ public:
   ShPoint& operator*=(T);
   ShPoint& operator/=(T);
   ShPoint& operator%=(T);
+  ShPoint& operator+=(T);
+  ShPoint& operator-=(T);
+  ShPoint& operator+=(const ShGeneric<1, T>&);
+  ShPoint& operator-=(const ShGeneric<1, T>&);
   ShPoint& operator*=(const ShGeneric<1, T>&);
   ShPoint& operator/=(const ShGeneric<1, T>&);
   ShPoint& operator%=(const ShGeneric<1, T>&);
@@ -269,6 +281,10 @@ public:
   ShPoint& operator*=(T);
   ShPoint& operator/=(T);
   ShPoint& operator%=(T);
+  ShPoint& operator+=(T);
+  ShPoint& operator-=(T);
+  ShPoint& operator+=(const ShGeneric<1, T>&);
+  ShPoint& operator-=(const ShGeneric<1, T>&);
   ShPoint& operator*=(const ShGeneric<1, T>&);
   ShPoint& operator/=(const ShGeneric<1, T>&);
   ShPoint& operator%=(const ShGeneric<1, T>&);

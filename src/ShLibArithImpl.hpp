@@ -14,6 +14,30 @@ ShGeneric<N, T> operator+(const ShGeneric<N, T>& left, const ShGeneric<N, T>& ri
   shADD(t, left, right);
   return t;
 }
+template<int N, typename T>
+inline
+ShGeneric<N, T> operator+(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right)
+{
+  ShAttrib<N, SH_TEMP, T> t;
+  shADD(t, left, right);
+  return t;
+}
+template<int N, typename T>
+inline
+ShGeneric<N, T> operator+(const ShGeneric<1, T>& left, const ShGeneric<N, T>& right)
+{
+  ShAttrib<N, SH_TEMP, T> t;
+  shADD(t, left, right);
+  return t;
+}
+template<typename T>
+inline
+ShGeneric<1, T> operator+(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right)
+{
+  ShAttrib<1, SH_TEMP, T> t;
+  shADD(t, left, right);
+  return t;
+}
 
 template<int N, typename T>
 inline
@@ -23,6 +47,31 @@ ShGeneric<N, T> operator-(const ShGeneric<N, T>& left, const ShGeneric<N, T>& ri
   shADD(t, left, -right);
   return t;
 }
+template<int N, typename T>
+inline
+ShGeneric<N, T> operator-(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right)
+{
+  ShAttrib<N, SH_TEMP, T> t;
+  shADD(t, left, -right);
+  return t;
+}
+template<int N, typename T>
+inline
+ShGeneric<N, T> operator-(const ShGeneric<1, T>& left, const ShGeneric<N, T>& right)
+{
+  ShAttrib<N, SH_TEMP, T> t;
+  shADD(t, left, -right);
+  return t;
+}
+template<typename T>
+inline
+ShGeneric<1, T> operator-(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right)
+{
+  ShAttrib<1, SH_TEMP, T> t;
+  shADD(t, left, -right);
+  return t;
+}
+
 template<int N, typename T>
 inline
 ShGeneric<N, T> operator*(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
@@ -67,6 +116,14 @@ ShGeneric<N, T> operator/(const ShGeneric<N, T>& left, const ShGeneric<N, T>& ri
 template<int N, typename T>
 inline
 ShGeneric<N, T> operator/(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right)
+{
+  ShAttrib<N, SH_TEMP, T> t;
+  shDIV(t, left, right);
+  return t;
+}
+template<int N, typename T>
+inline
+ShGeneric<N, T> operator/(const ShGeneric<1, T>& left, const ShGeneric<N, T>& right)
 {
   ShAttrib<N, SH_TEMP, T> t;
   shDIV(t, left, right);

@@ -145,7 +145,7 @@ void shASN(ShVariable& dest, const ShVariable& src)
 
 void shADD(ShVariable& dest, const ShVariable& a, const ShVariable& b)
 {
-  sizes_match(dest, a, b);
+  sizes_match(dest, a, b, true, true);
   if (immediate()) {
     CWISE_BINARY_INLOP(dest, a, b, +);
   } else {
@@ -167,7 +167,7 @@ void shMUL(ShVariable& dest, const ShVariable& a, const ShVariable& b)
 
 void shDIV(ShVariable& dest, const ShVariable& a, const ShVariable& b)
 {
-  sizes_match(dest, a, b, false, true);
+  sizes_match(dest, a, b, true, true);
   if (immediate()) {
     CWISE_BINARY_INLOP(dest, a, b, /);
   } else {

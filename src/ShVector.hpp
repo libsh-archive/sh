@@ -66,6 +66,10 @@ public:
   ShVector& operator*=(T);
   ShVector& operator/=(T);
   ShVector& operator%=(T);
+  ShVector& operator+=(T);
+  ShVector& operator-=(T);
+  ShVector& operator+=(const ShGeneric<1, T>&);
+  ShVector& operator-=(const ShGeneric<1, T>&);
   ShVector& operator*=(const ShGeneric<1, T>&);
   ShVector& operator/=(const ShGeneric<1, T>&);
   ShVector& operator%=(const ShGeneric<1, T>&);
@@ -168,6 +172,10 @@ public:
   ShVector& operator*=(T);
   ShVector& operator/=(T);
   ShVector& operator%=(T);
+  ShVector& operator+=(T);
+  ShVector& operator-=(T);
+  ShVector& operator+=(const ShGeneric<1, T>&);
+  ShVector& operator-=(const ShGeneric<1, T>&);
   ShVector& operator*=(const ShGeneric<1, T>&);
   ShVector& operator/=(const ShGeneric<1, T>&);
   ShVector& operator%=(const ShGeneric<1, T>&);
@@ -220,6 +228,10 @@ public:
   ShVector& operator*=(T);
   ShVector& operator/=(T);
   ShVector& operator%=(T);
+  ShVector& operator+=(T);
+  ShVector& operator-=(T);
+  ShVector& operator+=(const ShGeneric<1, T>&);
+  ShVector& operator-=(const ShGeneric<1, T>&);
   ShVector& operator*=(const ShGeneric<1, T>&);
   ShVector& operator/=(const ShGeneric<1, T>&);
   ShVector& operator%=(const ShGeneric<1, T>&);
@@ -272,6 +284,10 @@ public:
   ShVector& operator*=(T);
   ShVector& operator/=(T);
   ShVector& operator%=(T);
+  ShVector& operator+=(T);
+  ShVector& operator-=(T);
+  ShVector& operator+=(const ShGeneric<1, T>&);
+  ShVector& operator-=(const ShGeneric<1, T>&);
   ShVector& operator*=(const ShGeneric<1, T>&);
   ShVector& operator/=(const ShGeneric<1, T>&);
   ShVector& operator%=(const ShGeneric<1, T>&);

@@ -917,91 +917,39 @@ namespace ShCPU {
 	  m_code << "  "
 		 << resolve(stmt.dest, i)
 		 << " = " 
-		 << resolve(stmt.src[0], i)
+		 << resolve(stmt.src[0], (stmt.src[0].size() > 1 ? i : 0))
 		 << " + " 
-		 << resolve(stmt.src[1], i)
+		 << resolve(stmt.src[1], (stmt.src[1].size() > 1 ? i : 0))
 		 << ";" << std::endl;
 	  }
 	break;
 	}
       case SH::SH_OP_MUL:
 	{
-	if (stmt.src[0].swizzle().size() == 1)
+	for(int i = 0; i < stmt.dest.size(); i++)
 	  {
-	  for(int i = 0; i < stmt.dest.size(); i++)
-	    {
-	    m_code << "  ";
-	    m_code << resolve(stmt.dest, i);
-	    m_code << " = " ;
-	    m_code << resolve(stmt.src[0], 0);
-	    m_code << " * " ;
-	    m_code << resolve(stmt.src[1], i);
-	    m_code << ";";
-	    m_code << std::endl;
-	    }
+	  m_code << "  "
+		 << resolve(stmt.dest, i)
+		 << " = " 
+		 << resolve(stmt.src[0], (stmt.src[0].size() > 1 ? i : 0))
+		 << " * " 
+		 << resolve(stmt.src[1], (stmt.src[1].size() > 1 ? i : 0))
+		 << ";" << std::endl;
 	  }
-	else if (stmt.src[1].swizzle().size() == 1)
-	  {
-	  for(int i = 0; i < stmt.dest.size(); i++)
-	    {
-	    m_code << "  ";
-	    m_code << resolve(stmt.dest, i);
-	    m_code << " = " ;
-	    m_code << resolve(stmt.src[0], i);
-	    m_code << " * " ;
-	    m_code << resolve(stmt.src[1], 0);
-	    m_code << ";";
-	    m_code << std::endl;
-	    }
-	  }
-	else
-	  {
-	  for(int i = 0; i < stmt.dest.size(); i++)
-	    {
-	    m_code << "  ";
-	    m_code << resolve(stmt.dest, i);
-	    m_code << " = " ;
-	    m_code << resolve(stmt.src[0], i);
-	    m_code << " * " ;
-	    m_code << resolve(stmt.src[1], i);
-	    m_code << ";";
-	    m_code << std::endl;
-	    }
-	  }
-
 	break;
 	}
       case SH::SH_OP_DIV:
 	{
-	if (stmt.src[1].swizzle().size() == 1)
+	for(int i = 0; i < stmt.dest.size(); i++)
 	  {
-	  for(int i = 0; i < stmt.dest.size(); i++)
-	    {
-	    m_code << "  "
-		   << resolve(stmt.dest, i)
-		   << " = " 
-		   << resolve(stmt.src[0], i)
-		   << " / " 
-		   << resolve(stmt.src[1], 0)
-		   << ";"
-		   << std::endl;
-	    }
+	  m_code << "  "
+		 << resolve(stmt.dest, i)
+		 << " = " 
+		 << resolve(stmt.src[0], (stmt.src[0].size() > 1 ? i : 0))
+		 << " / " 
+		 << resolve(stmt.src[1], (stmt.src[1].size() > 1 ? i : 0))
+		 << ";" << std::endl;
 	  }
-	else
-	  {
-	  for(int i = 0; i < stmt.dest.size(); i++)
-	    {
-	    m_code << "  "
-		   << resolve(stmt.dest, i)
-		   << " = " 
-		   << resolve(stmt.src[0], i)
-		   << " / " 
-		   << resolve(stmt.src[1], i)
-		   << ";"
-		   << std::endl;
-	    }
-	  }
-
 	break;
 	}
       case SH::SH_OP_SLT:

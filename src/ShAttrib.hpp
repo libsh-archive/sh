@@ -79,6 +79,10 @@ public:
   ShAttrib& operator*=(T);
   ShAttrib& operator/=(T);
   ShAttrib& operator%=(T);
+  ShAttrib& operator+=(T);
+  ShAttrib& operator-=(T);
+  ShAttrib& operator+=(const ShGeneric<1, T>&);
+  ShAttrib& operator-=(const ShGeneric<1, T>&);
   ShAttrib& operator*=(const ShGeneric<1, T>&);
   ShAttrib& operator/=(const ShGeneric<1, T>&);
   ShAttrib& operator%=(const ShGeneric<1, T>&);
@@ -181,6 +185,10 @@ public:
   ShAttrib& operator*=(T);
   ShAttrib& operator/=(T);
   ShAttrib& operator%=(T);
+  ShAttrib& operator+=(T);
+  ShAttrib& operator-=(T);
+  ShAttrib& operator+=(const ShGeneric<1, T>&);
+  ShAttrib& operator-=(const ShGeneric<1, T>&);
   ShAttrib& operator*=(const ShGeneric<1, T>&);
   ShAttrib& operator/=(const ShGeneric<1, T>&);
   ShAttrib& operator%=(const ShGeneric<1, T>&);
@@ -233,6 +241,10 @@ public:
   ShAttrib& operator*=(T);
   ShAttrib& operator/=(T);
   ShAttrib& operator%=(T);
+  ShAttrib& operator+=(T);
+  ShAttrib& operator-=(T);
+  ShAttrib& operator+=(const ShGeneric<1, T>&);
+  ShAttrib& operator-=(const ShGeneric<1, T>&);
   ShAttrib& operator*=(const ShGeneric<1, T>&);
   ShAttrib& operator/=(const ShGeneric<1, T>&);
   ShAttrib& operator%=(const ShGeneric<1, T>&);
@@ -285,6 +297,10 @@ public:
   ShAttrib& operator*=(T);
   ShAttrib& operator/=(T);
   ShAttrib& operator%=(T);
+  ShAttrib& operator+=(T);
+  ShAttrib& operator-=(T);
+  ShAttrib& operator+=(const ShGeneric<1, T>&);
+  ShAttrib& operator-=(const ShGeneric<1, T>&);
   ShAttrib& operator*=(const ShGeneric<1, T>&);
   ShAttrib& operator/=(const ShGeneric<1, T>&);
   ShAttrib& operator%=(const ShGeneric<1, T>&);

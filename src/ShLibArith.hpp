@@ -17,7 +17,14 @@ namespace SH {
  */
 template<int N, typename T>
 ShGeneric<N, T> operator+(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
+template<int N, typename T>
+ShGeneric<N, T> operator+(const ShGeneric<1, T>& left, const ShGeneric<N, T>& right);
+template<int N, typename T>
+ShGeneric<N, T> operator+(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
+template<typename T>
+ShGeneric<1, T> operator+(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
 SH_SHLIB_CONST_SCALAR_OP(operator+);
+SH_SHLIB_CONST_N_OP_BOTH(operator+);
 
 /** Subtraction.
  * On tuples, this operator acts componentwise.
@@ -25,7 +32,14 @@ SH_SHLIB_CONST_SCALAR_OP(operator+);
  */
 template<int N, typename T>
 ShGeneric<N, T> operator-(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
+template<int N, typename T>
+ShGeneric<N, T> operator-(const ShGeneric<1, T>& left, const ShGeneric<N, T>& right);
+template<int N, typename T>
+ShGeneric<N, T> operator-(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
+template<typename T>
+ShGeneric<1, T> operator-(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
 SH_SHLIB_CONST_SCALAR_OP(operator-);
+SH_SHLIB_CONST_N_OP_BOTH(operator-);
 
 /** Multiplication.
  * On tuples, this operator acts componentwise.
@@ -40,7 +54,6 @@ template<int N, typename T>
 ShGeneric<N, T> operator*(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
 template<typename T>
 ShGeneric<1, T> operator*(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
-
 SH_SHLIB_CONST_SCALAR_OP(operator*);
 SH_SHLIB_CONST_N_OP_BOTH(operator*);
 
@@ -53,9 +66,10 @@ template<int N, typename T>
 ShGeneric<N, T> operator/(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
 template<int N, typename T>
 ShGeneric<N, T> operator/(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
+template<int N, typename T>
+ShGeneric<N, T> operator/(const ShGeneric<1, T>& left, const ShGeneric<N, T>& right);
 template<typename T>
 ShGeneric<1, T> operator/(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
-
 SH_SHLIB_CONST_SCALAR_OP(operator/);
 SH_SHLIB_CONST_N_OP_LEFT(operator/);
 
