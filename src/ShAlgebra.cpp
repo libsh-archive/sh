@@ -113,11 +113,11 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   
   program->ctrlGraph = new ShCtrlGraph(heada, tailb);
 
-  for (ShProgramNode::VarList::const_iterator I = a->inputs.begin(); I != a->inputs.end(); ++I) {
-    program->inputs.push_back(*I);
+  for (ShProgramNode::VarList::const_iterator II = a->inputs.begin(); II != a->inputs.end(); ++II) {
+    program->inputs.push_back(*II);
   }
-  for (ShProgramNode::VarList::const_iterator I = b->outputs.begin(); I != b->outputs.end(); ++I) {
-    program->outputs.push_back(*I);
+  for (ShProgramNode::VarList::const_iterator II = b->outputs.begin(); II != b->outputs.end(); ++II) {
+    program->outputs.push_back(*II);
   }
   
   VarMap varMap;
