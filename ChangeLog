@@ -1,3 +1,8 @@
+2004-02-04  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShAttribImpl.hpp, src/ShConstantImpl.hpp, src/ShSpecialType:
+	Make type constructors check their size at compile time.
+
 2004-02-02  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/arb/ShArbStream.cpp: Figure out which floating point

@@ -28,6 +28,7 @@
 #define SHCONSTANTIMPL_HPP
 
 #include "ShConstant.hpp"
+#include "ShUtility.hpp"
 
 namespace SH {
 
@@ -35,6 +36,8 @@ template<int N, typename T>
 ShConstant<N, T>::ShConstant(T value)
   : ShVariableN<N, T>(new ShVariableNode(SH_VAR_CONST, N))
 {
+  ShIntEqual<N, 1>();
+
   m_node->setValue(0, value);
 }
 
@@ -42,6 +45,8 @@ template<int N, typename T>
 ShConstant<N, T>::ShConstant(T value0, T value1)
   : ShVariableN<N, T>(new ShVariableNode(SH_VAR_CONST, N))
 {
+  ShIntEqual<N, 2>();
+
   m_node->setValue(0, value0);
   m_node->setValue(1, value1);
 }
@@ -50,6 +55,8 @@ template<int N, typename T>
 ShConstant<N, T>::ShConstant(T value0, T value1, T value2)
   : ShVariableN<N, T>(new ShVariableNode(SH_VAR_CONST, N))
 {
+  ShIntEqual<N, 3>();
+
   m_node->setValue(0, value0);
   m_node->setValue(1, value1);
   m_node->setValue(2, value2);
@@ -59,6 +66,8 @@ template<int N, typename T>
 ShConstant<N, T>::ShConstant(T value0, T value1, T value2, T value3)
   : ShVariableN<N, T>(new ShVariableNode(SH_VAR_CONST, N))
 {
+  ShIntEqual<N, 4>();
+
   m_node->setValue(0, value0);
   m_node->setValue(1, value1);
   m_node->setValue(2, value2);

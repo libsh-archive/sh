@@ -147,6 +147,7 @@ template<int N, int Kind, typename T, bool Swizzled> \
 SH_TYPE_NAME<N, Kind, T, Swizzled>::SH_TYPE_NAME(T t0) \
   : ParentType(t0) \
 { \
+  ShIntEqual<N, 1>(); \
   m_node->specialType(SH_TYPE_ENUM); \
 } \
  \
@@ -154,6 +155,7 @@ template<int N, int Kind, typename T, bool Swizzled> \
 SH_TYPE_NAME<N, Kind, T, Swizzled>::SH_TYPE_NAME(T t0, T t1) \
   : ParentType(t0, t1) \
 { \
+  ShIntEqual<N, 2>(); \
   m_node->specialType(SH_TYPE_ENUM); \
 } \
  \
@@ -161,6 +163,7 @@ template<int N, int Kind, typename T, bool Swizzled> \
 SH_TYPE_NAME<N, Kind, T, Swizzled>::SH_TYPE_NAME(T t0, T t1, T t2) \
   : ParentType(t0, t1, t2) \
 { \
+  ShIntEqual<N, 3>(); \
   m_node->specialType(SH_TYPE_ENUM); \
 } \
  \
@@ -168,6 +171,7 @@ template<int N, int Kind, typename T, bool Swizzled> \
 SH_TYPE_NAME<N, Kind, T, Swizzled>::SH_TYPE_NAME(T t0, T t1, T t2, T t3) \
   : ParentType(t0, t1, t2, t3) \
 { \
+  ShIntEqual<N, 4>(); \
   m_node->specialType(SH_TYPE_ENUM); \
 } \
  \

@@ -32,6 +32,7 @@
 #include "ShStatement.hpp"
 #include "ShEnvironment.hpp"
 #include "ShLib.hpp"
+#include "ShUtility.hpp"
 
 namespace SH {
 
@@ -87,6 +88,7 @@ template<int N, int Kind, typename T, bool Swizzled>
 ShAttrib<N, Kind, T, Swizzled>::ShAttrib(T v1)
   : ShVariableN<N, T>(new ShVariableNode(static_cast<ShVariableKind>(Kind), N))
 {
+  ShIntEqual<N, 1>();
   if (uniform()) {
     m_node->setValue(0, v1);
   } else {
@@ -100,6 +102,7 @@ template<int N, int Kind, typename T, bool Swizzled>
 ShAttrib<N, Kind, T, Swizzled>::ShAttrib(T v1, T v2)
   : ShVariableN<N, T>(new ShVariableNode(static_cast<ShVariableKind>(Kind), N))
 {
+  ShIntEqual<N, 2>();
   if (uniform()) {
     m_node->setValue(0, v1);
     m_node->setValue(1, v2);
@@ -115,6 +118,7 @@ template<int N, int Kind, typename T, bool Swizzled>
 ShAttrib<N, Kind, T, Swizzled>::ShAttrib(T v1, T v2, T v3)
   : ShVariableN<N, T>(new ShVariableNode(static_cast<ShVariableKind>(Kind), N))
 {
+  ShIntEqual<N, 3>();
   if (uniform()) {
     m_node->setValue(0, v1);
     m_node->setValue(1, v2);
@@ -131,6 +135,7 @@ template<int N, int Kind, typename T, bool Swizzled>
 ShAttrib<N, Kind, T, Swizzled>::ShAttrib(T v1, T v2, T v3, T v4)
   : ShVariableN<N, T>(new ShVariableNode(static_cast<ShVariableKind>(Kind), N))
 {
+  ShIntEqual<N, 4>();
   if (uniform()) {
     m_node->setValue(0, v1);
     m_node->setValue(1, v2);

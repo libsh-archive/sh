@@ -1,5 +1,8 @@
 // -*- C++ -*-
 
+// Turn off optimizations...
+ShEnvironment::optimizationLevel = 0;
+
 // TODO: Complete this
 
 #define TEST_SCALAR(type)                       \
@@ -32,7 +35,7 @@ TEST_SCALAR(type) \
 TEST_VECTOR(type)
 
 ShProgram shader = SH_BEGIN_VERTEX_PROGRAM {
-
+  
   TEST_BOTH(Attrib);
   TEST_BOTH(Vector);
   TEST_BOTH(Point);
