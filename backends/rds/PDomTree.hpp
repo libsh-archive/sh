@@ -35,6 +35,8 @@ class SH_DLLEXPORT PDomTree {
   
 	void printDoms();
 
+	void printGraph(DAGNode::DAGNode *node, int indent);
+
     int numbering(DAGNode::DAGNode* node) const {
       	return (int)(std::find( m_vertex.begin(), m_vertex.end(), node) - m_vertex.begin());
     }

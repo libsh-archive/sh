@@ -25,8 +25,6 @@ class SH_DLLEXPORT RDS {
 	// empty constructor, for testing purposes
 	RDS() {};
 
-	void debugDump();
-
 	// perform rds and return resulting set of programs
 	void get_partitions();
   
@@ -34,6 +32,8 @@ class SH_DLLEXPORT RDS {
 	PDomTree::PDomTree *get_pdt() {
 		return m_pdt;
 	}
+
+	void print_partitions();
 
   private:
 	// limits
@@ -44,6 +44,8 @@ class SH_DLLEXPORT RDS {
     
 	DAG::DAG *m_graph;
 	PDomTree::PDomTree *m_pdt;
+
+	PassVector m_passes;
     
 	// for next_ksubset
 	int  ksub_h, ksub_m2;
@@ -57,12 +59,16 @@ class SH_DLLEXPORT RDS {
 	typedef std::vector<DAGNode::DAGNode*> MRList;
 	MRList m_mrlist;
   
-	// true if node already visited
-	typedef std::map<DAGNode::DAGNode*, bool> VisitMap;
-    VisitMap m_visit;
+	typedef std::map<DAGNode::DAGNode*, bool> BoolMap;
+    BoolMap m_visited;
+	BoolMap t_visited;
+	BoolMap m_marked;
   
 	// for setting hardware limits
 	void set_limits();
+
+	// for creating list of passes
+	void partition(DAGNode::DAGNode *v);
 
   	// from rds paper
 	void rds_subdivide(DAGNode::DAGNode* v);
@@ -71,10 +77,13 @@ class SH_DLLEXPORT RDS {
 	// callbacks
 	bool valid(DAGNode::DAGNode* v);
 	bool recompute(DAGNode::DAGNode* v);
-	int merge(PassVector passes);
+	DAGNode::DAGNode *merge(PassVector passes);
 	int cost(DAGNode::DAGNode* v);
 
 	void add_mr(DAGNode::DAGNode* v);
 	int *next_ksubset(int n, int k, int *a);
+
+	int countnodes(DAGNode::DAGNode *v);
+	void unvisitall(DAGNode::DAGNode *v);
   };
   #endif

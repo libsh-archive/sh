@@ -11,6 +11,8 @@
 #include "ShDebug.hpp"
 #include "ShUtility.hpp"
 
+#define SH_RDSH
+
 using namespace SH;
 
 RDS::RDS(ShProgramNodePtr progPtr)
@@ -18,18 +20,27 @@ RDS::RDS(ShProgramNodePtr progPtr)
 {
 	// get partial dom tree	
 	m_pdt = new PDomTree(m_graph);
+	set_limits();
 }
 
 void RDS::set_limits() {
 	max_ops = 4;
 }
 
+void RDS::print_partitions() {
+	int count = 0;
+	for(PassVector::iterator I = m_passes.begin(); I != m_passes.end(); ++I) {
+		cout << "Pass " << ++count << "\n";
+		m_pdt->printGraph(*I, 2);
+	}
+}
 
 // the rds algorithm, as seen in stanford paper
 void RDS::get_partitions() {
-//#ifdef SH_RDSH
-    rds_subdivide(m_pdt->get_root());
-/*#else
+#ifdef SH_RDSH
+	DAGNode::DAGNode *root = m_pdt->get_root();
+    rds_subdivide(root);
+#else
     // rds search algorithm
     ShCtrlGraphNodePtr d = m_graph->entry();
       
@@ -55,47 +66,38 @@ void RDS::get_partitions() {
 			m_fixed[m] = RDS_MARKED;
 		}
     }
-#endif */
-}
-
-void RDS::debugDump()
-{
-#ifdef SH_DEBUG
-      SH_DEBUG_PRINT("Debug Dump");
-      //DebugDumper d( *this);
-      //preorder(d);
-      SH_DEBUG_PRINT("Debug Dump End");
 #endif
+
+	unvisitall(root);
+	m_marked[root] = true;
+	partition(root);
 }
 
 // partitions m_graph by marking nodes to indicate pass boundaries
 // returns a set of passes
 void RDS::rds_subdivide(DAGNode::DAGNode* v) {
-	if (!v) return;
-    
-	// stop if subregion v can be mapped in one pass
+	cout << "Subdivide(" << m_pdt->numbering(v) << ")\n";
+    // stop if subregion v can be mapped in one pass
 	if (valid(v)) return;
         
 	// list of pdt children of v (postorder)
 	PDomTree::PChildVector& kids = m_pdt->pchildren[v];
         
 	for (PDomTree::PChildVector::iterator I = kids.begin(); I != kids.end(); ++I) {
-		DAGNode::DAGNode *w = *I;
-		rds_subdivide(w);
-            
-		// NOTE: not sure if we should use their mark() and clearMarked() in ShCtrlGraph, or define our own
+		DAGNode::DAGNode *k = *I;
+		rds_subdivide(k);
         
-		if (m_pdt->mr(w)) { 
-        //#ifdef SH_RDSH
-			if (recompute(w)) {
-				// recompute w
-//				w->clearMarked();
+		if (m_pdt->mr(k)) { 
+        #ifdef SH_RDSH
+			if (recompute(k)) {
+				// recompute k
+				m_marked[k] = false;
 			}
 			else {
-				// save w
-//				w->mark();
+				// save k
+				m_marked[k] = true;
 			}
-        /*#else
+        #else
           switch(m_fixed[w]) {
             case RDS_MARKED:
               w->mark();  
@@ -114,7 +116,7 @@ void RDS::rds_subdivide(DAGNode::DAGNode* v) {
               }
               break;
           }
-        #endif*/
+        #endif
         }
     }
 
@@ -124,17 +126,71 @@ void RDS::rds_subdivide(DAGNode::DAGNode* v) {
 
 void RDS::rds_merge(DAGNode::DAGNode* v)
 {
+	cout << "Merge(" << m_pdt->numbering(v) << ")\n";
+	
 	// get the number of kids of v
 	int k = v->successors.size();
        
 	for (int d = k; d >= 0; d--) {
 		// get each subset of v's kids with d kids
+		// try to merge each subset with v
+		PassVector subsets;
+		int *a;
 
-		// try to merge all subsets with v
+		a = (int *) malloc(sizeof(int) * (k + 1));
 
-		// if only one can be merged, select and stop
+		for (int j = 0; j <= d; j++) {
+			a[j] = j;
+		}
 
-		// otherwise, use MERGE to pick one
+		ksub_mtc = false;
+		a = next_ksubset(k, d, a);
+
+		// join v with subset of successors
+		DAGNode::DAGNode *w = new DAGNode(v->m_label);
+		for (int j = 0; j < d; j++) {
+			w->successors.push_back(v->successors.at(a[j]));
+		}
+
+		if (valid(w)) {
+			subsets.push_back(w);
+		}
+
+		while(ksub_mtc) {
+			a = next_ksubset(k, d, a);
+			// join v with subset of successors
+			DAGNode::DAGNode *w = new DAGNode(v->m_label);
+			for (int j = 0; j < d; j++) {
+				w->successors.push_back(v->successors.at(a[j]));
+			}
+
+			if (valid(w)) {
+				subsets.push_back(w);
+			}
+		}
+
+		// if a subset can be merged, select and stop
+		if (subsets.size() > 0) {
+			DAGNode::DAGNode *w = *(subsets.begin());
+			// if more than one subset, use MERGE to pick one and stop
+			if (subsets.size() > 1) {
+				w = merge(subsets);
+			}
+
+			// mark all the kids of w
+			for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end(); ++I) {
+				m_marked[*I] = true;
+			}
+
+			// unmark all the kids in the subset
+			for (DAGNode::DAGNodeVector::iterator I = w->successors.begin(); I != w->successors.end(); ++I) {
+				m_marked[*I] = false;
+			}
+
+			// we're done
+			return;
+		}
+
 	}
 }
   
@@ -145,9 +201,9 @@ void RDS::add_mr(DAGNode::DAGNode* v) {
 	#ifdef SH_RDSH
 		// do nothing
 	#else
-		if (m_visit[v]) return; // already visited
+		if (m_visited[v]) return; // already visited
 		
-		m_visit[v] = true;
+		m_visited[v] = true;
     
 		// visit v's children first
 		for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end(); ++I) {
@@ -193,18 +249,82 @@ int *RDS::next_ksubset(int n, int k, int *a) {
 }
   
 
+int RDS::countnodes(DAGNode::DAGNode *v) {
+	if (t_visited[v]) return 0;
+	t_visited[v] = true;
+	int count = 1;
+	for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end(); ++I) {
+		if (!m_marked[*I])
+			count += countnodes(*I);
+	} 
+	return count;
+}
+
+void RDS::unvisitall(DAGNode::DAGNode *v) {
+	t_visited[v] = false;
+	m_visited[v] = false;
+	for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end(); ++I) {
+		unvisitall(*I);
+	}
+}
+
+// partitions graph; roots of partitions based on marked nodes
+void RDS::partition(DAGNode::DAGNode *v)
+{    
+    if (!v) return;
+	if (m_visited[v]) return;
+
+	cout << "Parition(" << m_pdt->numbering(v) << ")\n";
+	m_visited[v] = true;
+    
+    // partition each of v's children
+	for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end();  ) {
+		DAGNode::DAGNode *w = *I;
+      
+		if (!m_visited[w]) {
+			partition(w);
+		}
+      
+		// cut w off from v if it's marked
+		if (m_marked[w]) {
+			I = v->successors.erase(I); 
+		}
+		else {
+			++I;
+		}
+    }
+   
+    // check if v is a partition root
+	if (m_marked[v]) {
+		m_passes.push_back(v);
+    }   
+}
+
 bool RDS::valid(DAGNode::DAGNode* v) {
-	return true;
+	unvisitall(v);
+	return countnodes(v) <= max_ops;
 }
 
 bool RDS::recompute(DAGNode::DAGNode* v) {
-	return true;
+	unvisitall(v);
+	return countnodes(v) <= (max_ops/2); 
 }
 
-int RDS::merge(PassVector passes) {
-	return 0;
+DAGNode::DAGNode* RDS::merge(PassVector passes) {
+	PassVector::iterator I = passes.begin();
+	int lowest = countnodes(*I);
+	DAGNode::DAGNode *winner = *I;
+
+	for(++I; I != passes.end(); ++I) {
+		int count = countnodes(*I);
+		if (lowest < 0 || count < lowest) {
+			lowest = count;
+			winner = *I;
+		}
+	}
+	return winner;
 }
 
-int cost(DAGNode::DAGNode* v) {
+int RDS::cost(DAGNode::DAGNode* v) {
 	return 0;
 }

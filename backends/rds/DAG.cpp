@@ -165,9 +165,7 @@ void DAG::add_statement(Stmt stmt, int src_size) {
 
 DAG::DAG(ShBasicBlockPtr block)
         :   m_statements(block->m_statements)
-{ 
-	block->print(cout, 2);
-	
+{ 	
 	// iterate through all statements
 	for (StmtList::iterator I = m_statements.begin(); I != m_statements.end(); ++I) {
 		add_statement(*I, opInfo[(*I).op].arity);

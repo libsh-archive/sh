@@ -177,3 +177,12 @@ void PDomTree::printDoms() {
 		cout << " MR " << m_mr[v] << "\n";
 	}
 }
+
+void PDomTree::printGraph(DAGNode::DAGNode *node, int indent) {
+	shPrintIndent(cout, indent);
+	cout << numbering(node) << " " << node->m_label << "\n";
+
+	for (DAGNode::DAGNodeVector::iterator I = node->successors.begin(); I != node->successors.end(); ++I) {
+		printGraph(*I, indent + 2);
+	}
+}

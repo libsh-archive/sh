@@ -74,11 +74,13 @@ int main() {
 
 	DAG *dag = new DAG(graph->entry()->follower->block);
 
-	dag->print(0);
+	//dag->print(0);
 
 	// create an rds object
 	rds = RDS(program.node());
 	rds.get_pdt()->printDoms();
+	rds.get_partitions();
+	rds.print_partitions();
 
 	return 0;
 }
