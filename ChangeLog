@@ -1,3 +1,7 @@
+2005-03-02  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+	* backends/gl/ArbCode.cpp (ArbCode::print):
+	Fixed NVFP register decls to use "SHORT TEMP" and "LONG TEMP"
+
 2005-03-01  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* util/ShObjMesh.cpp (ShTriple::ShTriple): Be a little less
