@@ -8,6 +8,8 @@
 
 namespace SH {
 
+/** Base type for 1D Textures.
+ */
 template<typename T>
 class ShBaseTexture1D : public ShRefCountable {
 public:
@@ -26,6 +28,8 @@ protected:
   ShTextureNodePtr m_node;
 };
 
+/** Base type for 2D Textures.
+ */
 template<typename T>
 class ShBaseTexture2D : public ShRefCountable {
 public:
@@ -44,6 +48,8 @@ protected:
   ShTextureNodePtr m_node;
 };
 
+/** Base type for Rectangular Textures.
+ */
 template<typename T>
 class ShBaseTextureRect : public ShRefCountable {
 public:
@@ -62,6 +68,8 @@ protected:
   ShTextureNodePtr m_node;
 };
 
+/** Base type for 3D Textures.
+ */
 template<typename T>
 class ShBaseTexture3D : public ShRefCountable {
 public:
@@ -80,6 +88,8 @@ protected:
   ShTextureNodePtr m_node;
 };
 
+/** Base type for Cube Textures.
+ */
 template<typename T>
 class ShBaseTextureCube : public ShRefCountable {
 public:
