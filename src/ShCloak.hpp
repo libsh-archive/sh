@@ -41,13 +41,14 @@ class ShCloak: public ShRefCountable {
     ShCloak();
     virtual ~ShCloak();
 
-    /// Gives the associated type name 
-    //virtual std::string typeName() const = 0; 
 
     /// Gives the associated type identifier string mapped to a unique integer index 
     // (Note this is here only for convenience and the value is cached
     // somewhere better like in the ShVariableNode)
-    //int typeIndex(); 
+    virtual int typeIndex() const = 0; 
+
+    /// Gives the associated type name 
+    virtual std::string typeName() const = 0; 
 
     // Gives the number of elements stored in this data wrapper 
     virtual int size() const = 0;
@@ -72,11 +73,7 @@ class ShCloak: public ShRefCountable {
     virtual std::string encode() const = 0;
 
     /// Decodes the data value from a string
-    virtual decode(std::string s) = 0;
-
-  protected:
-    virtual void updateTypeIndex() = 0;
-    int m_typeIndex; 
+    virtual int decode(std::string s) = 0;
 };
 
 typedef ShPointer<ShCloak> ShCloakPtr;
@@ -106,6 +103,11 @@ class ShDataCloak: public ShCloak {
     // of the tuple elements
     ShDataCloak(std::string s);
 
+    // gets the type index for this cloak typej 
+    int typeIndex() const; 
+
+    /// Gives the associated type name 
+    std::string typeName() const; 
 
     //std::string typeName() const; 
     int size() const; 

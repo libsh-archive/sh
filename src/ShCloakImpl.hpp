@@ -31,6 +31,7 @@
 #include <sstream>
 #include "ShDebug.hpp"
 #include "ShCloak.hpp"
+#include "ShContext.hpp"
 #include "ShTypeInfo.hpp"
 
 namespace SH {
@@ -63,12 +64,15 @@ ShDataCloak<T>::ShDataCloak(const ShDataCloak<T> &other,
   }
 }
 
-/*
+template<typename T>
+int ShDataCloak<T>::typeIndex() const {
+  return shTypeIndex<T>(); 
+}
+
 template<typename T>
 std::string ShDataCloak<T>::typeName() const {
   return ShConcreteTypeInfo<T>::m_name; 
 }
-*/
 
 template<typename T>
 ShDataCloak<T>::ShDataCloak(std::string s)
@@ -181,7 +185,7 @@ std::string ShDataCloak<T>::encode() const {
 }
 
 template<typename T>
-void ShDataCloak<T>::decode(std::string value) const {
+int ShDataCloak<T>::decode(std::string value) {
   m_data.clear();
 
   std::istringstream in(value);
@@ -196,6 +200,7 @@ void ShDataCloak<T>::decode(std::string value) const {
     in >> component;
     m_data.push_back(component);
   }
+  return size;
 }
 
 }

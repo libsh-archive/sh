@@ -2,15 +2,17 @@
 #define SHEVAL_HPP
 
 #include <vector>
-#include "ShCloak.hpp"
+#include "ShOperation.hpp"
 #include "ShRefCount.hpp"
-#include "ShStatement.hpp"
 
 namespace SH {
 
 /* Type specific definitions for the internal instructions
  * as they are used in host computations.
  */
+
+// forward declarations
+class ShCloak;
 
 class ShEval: public ShRefCountable {
   public:
@@ -19,18 +21,18 @@ class ShEval: public ShRefCountable {
     /// unary op that has no dest (currently only KIL)
     // TODO this is probably not necessary right now since KIL 
     // makes no sense in immediate mode yet
-    virtual void srcUnaryOp(ShOperation op, ShCloakPtr src) const = 0; 
+    virtual void srcUnaryOp(ShOperation op, ShPointer<ShCloak> src) const = 0; 
 
     /// unary operation on cloaked data (properly swizzled/negated)
-    virtual void unaryOp(ShOperation op, ShCloakPtr dest, ShCloakCPtr src) const = 0;
+    virtual void unaryOp(ShOperation op, ShPointer<ShCloak> dest, ShPointer<const ShCloak> src) const = 0;
 
     /// binary operation on cloaked data (properly swizzled/negated)
-    virtual void binaryOp(ShOperation op, ShCloakPtr dest, 
-        ShCloakCPtr a, ShCloakCPtr b) const = 0;
+    virtual void binaryOp(ShOperation op, ShPointer<ShCloak> dest, 
+        ShPointer<const ShCloak> a, ShPointer<const ShCloak> b) const = 0;
 
     /// ternary operation on cloaked data (properly swizzled/negated)
-    virtual void ternaryOp(ShOperation op, ShCloakPtr dest,
-        ShCloakCPtr a, ShCloakCPtr b, ShCloakCPtr c) const = 0;
+    virtual void ternaryOp(ShOperation op, ShPointer<ShCloak> dest,
+        ShPointer<const ShCloak> a, ShPointer<const ShCloak> b, ShPointer<const ShCloak> c) const = 0;
 };
 
 typedef ShPointer<ShEval> ShEvalPtr;
@@ -50,12 +52,12 @@ class ShDataEval: public ShEval {
   public:
     typedef std::vector<T> DataVec;
 
-    void srcUnaryOp(ShOperation op, ShCloakPtr src) const; 
-    void unaryOp(ShOperation op, ShCloakPtr dest, ShCloakCPtr src) const; 
-    void binaryOp(ShOperation op, ShCloakPtr dest, 
-        ShCloakCPtr a, ShCloakCPtr b) const; 
-    void ternaryOp(ShOperation op, ShCloakPtr dest,
-        ShCloakCPtr a, ShCloakCPtr b, ShCloakCPtr c) const; 
+    void srcUnaryOp(ShOperation op, ShPointer<ShCloak> src) const; 
+    void unaryOp(ShOperation op, ShPointer<ShCloak> dest, ShPointer<const ShCloak> src) const; 
+    void binaryOp(ShOperation op, ShPointer<ShCloak> dest, 
+        ShPointer<const ShCloak> a, ShPointer<const ShCloak> b) const; 
+    void ternaryOp(ShOperation op, ShPointer<ShCloak> dest,
+        ShPointer<const ShCloak> a, ShPointer<const ShCloak> b, ShPointer<const ShCloak> c) const; 
 
     static void ASN(DataVec & dest, const DataVec &src);
 
@@ -111,12 +113,6 @@ class ShDataEval: public ShEval {
                 const DataVec& a, const DataVec& b);
 
     static void KIL(const DataVec& cond);
-
-  protected:
-    typedef ShDataCloak<T> CloakType;
-    typedef const ShDataCloak<T> CloakCType;
-    typedef ShPointer<ShDataCloak<T> > CloakPtr;
-    typedef ShPointer<const ShDataCloak<T> > CloakCPtr;
 };
 
 }

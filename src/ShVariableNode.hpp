@@ -28,39 +28,20 @@
 #define SHVARIABLENODE_HPP
 
 #include <string>
+#include "ShVariableType.hpp"
 #include "ShRefCount.hpp"
 #include "ShMeta.hpp"
-#include "ShCloak.hpp"
+#include "ShSwizzle.hpp"
 
 namespace SH {
 
-/** The various ways variables can be bound.
- */
-enum ShBindingType {
-  SH_INPUT = 0,
-  SH_OUTPUT = 1,
-  SH_INOUT = 2,
-  SH_TEMP = 3,
-  SH_CONST = 4,
-  SH_TEXTURE = 5,
-  SH_STREAM = 6
-};
-
-/** The various ways semantic types for variables.
- */
-enum ShSemanticType {
-  SH_ATTRIB,
-  SH_POINT,
-  SH_VECTOR,
-  SH_NORMAL,
-  SH_COLOR,
-  SH_TEXCOORD,
-  SH_POSITION
-};
 
 // ensure these match the BindingType and SemanticType enums
 extern const char* ShBindingTypeName[];
 extern const char* ShSemanticTypeName[];
+
+// forward declarations 
+class ShCloak;
 
 class ShVariableNode;
 typedef ShPointer<ShVariableNode> ShVariableNodePtr;
@@ -125,11 +106,11 @@ public:
 
   /// Set a range of possible values for this variable's elements
   // low and high must be scalar elements (otherwise this just uses the first component)
-  void rangeCloak(ShCloakCPtr low, ShCloakCPtr high);
-  void rangeCloak(ShCloakCPtr low, ShCloakCPtr high, bool neg, const ShSwizzle &writemask);
+  void rangeCloak(ShPointer<const ShCloak> low, ShPointer<const ShCloak> high);
+  void rangeCloak(ShPointer<const ShCloak> low, ShPointer<const ShCloak> high, bool neg, const ShSwizzle &writemask);
 
-  ShCloakPtr lowBoundCloak() const;
-  ShCloakPtr highBoundCloak() const;
+  ShPointer<ShCloak> lowBoundCloak() const;
+  ShPointer<ShCloak> highBoundCloak() const;
 
   ShBindingType kind() const;
   ShSemanticType specialType() const;
@@ -138,11 +119,11 @@ public:
   std::string nameOfType() const; ///< Get a string of this var's specialType, kind, & size
 
   /// Update elements of a cloak applying the given writemask and negation
-  void setCloak(ShCloakCPtr other);
-  void setCloak(ShCloakCPtr other, bool neg, const ShSwizzle &writemask);
+  void setCloak(ShPointer<const ShCloak> other);
+  void setCloak(ShPointer<const ShCloak> other, bool neg, const ShSwizzle &writemask);
 
   /// Retrieve the cloak 
-  ShCloakCPtr cloak() const;
+  ShPointer<const ShCloak> cloak() const;
   //ShDataCloakPtr cloak(); // TODO can't have this function until ShUpdate is implemented, and even then it might not be a good idea
   
 protected:
@@ -169,7 +150,7 @@ protected:
   int m_id;
   int m_locked;
 
-  ShCloakPtr m_cloak;
+  ShPointer<ShCloak> m_cloak;
   static int m_maxID;
 };
 

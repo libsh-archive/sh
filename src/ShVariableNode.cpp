@@ -30,6 +30,7 @@
 #include "ShVariableNode.hpp"
 #include "ShDebug.hpp"
 #include "ShContext.hpp"
+#include "ShCloak.hpp"
 #include "ShCloakFactory.hpp"
 
 namespace SH {
@@ -212,20 +213,20 @@ void ShVariableNode::rangeCloak(ShCloakCPtr low, ShCloakCPtr high)
   int indices[m_size];
   std::fill_n(indices, m_size, 0);
   ShSwizzle swiz(1, m_size, indices); 
-  meta("lowBound", low.get(false, swiz));
-  meta("highBound", high.get(false, swiz));
+  meta("lowBound", low->get(false, swiz)->encode());
+  meta("highBound", high->get(false, swiz)->encode());
 }
 
 void ShVariableNode::rangeCloak(ShCloakCPtr low, ShCloakCPtr high, bool neg, const ShSwizzle &writemask)
 {
   ShTypeInfoPtr typeInfo = shTypeInfo(m_typeIndex);
-  ShCloakFactoryPtr factory = typeInfo->cloakFactory();
+  ShCloakFactoryCPtr factory = typeInfo->cloakFactory();
 
   std::string oldLo, oldHi;
   oldLo = meta("lowBound");
   oldHi = meta("highBound");
 
-  ShCloakCPtr newLo, newHi; 
+  ShCloakPtr newLo, newHi; 
   if(oldLo.empty() || oldHi.empty()) { // TODO they should be either both empty or both not
     newLo = factory->generateLowBound(m_size, m_specialType);
     newHi = factory->generateHighBound(m_size, m_specialType);
@@ -243,7 +244,7 @@ void ShVariableNode::rangeCloak(ShCloakCPtr low, ShCloakCPtr high, bool neg, con
 
 ShCloakPtr ShVariableNode::lowBoundCloak() const
 {
-  ShCloakFactoryPtr factory = shTypeInfo(m_typeIndex)->cloakFactory();
+  ShCloakFactoryCPtr factory = shTypeInfo(m_typeIndex)->cloakFactory();
   std::string metaLow = meta("lowBound");
 
   return (metaLow.empty() ? 
@@ -253,7 +254,7 @@ ShCloakPtr ShVariableNode::lowBoundCloak() const
 
 ShCloakPtr ShVariableNode::highBoundCloak() const
 {
-  ShCloakFactoryPtr factory = shTypeInfo(m_typeIndex)->cloakFactory();
+  ShCloakFactoryCPtr factory = shTypeInfo(m_typeIndex)->cloakFactory();
   std::string metaHigh = meta("highBound");
 
   return (metaHigh.empty() ? 

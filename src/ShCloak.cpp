@@ -31,16 +31,9 @@
 namespace SH {
 
 ShCloak::ShCloak()
-  : m_typeIndex(-1)
 {}
 
 ShCloak::~ShCloak() 
 {}
-
-int ShCloak::typeIndex() 
-{
-  if(m_typeIndex < 0) updateTypeIndex(); 
-  return m_typeIndex;
-}
 
 }

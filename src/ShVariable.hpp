@@ -69,13 +69,13 @@ public:
   
   /// Set a range of values for this variable
   // TODO check if this works when swizzle contains one index more than once
-  void rangeCloak(ShCloakCPtr low, ShCloakCPtr high);
+  void rangeCloak(ShPointer<const ShCloak> low, ShPointer<const ShCloak> high);
 
   /// Obtain a lower bounds on this variable (tuple of same size as this)
-  ShCloakPtr lowBoundCloak() const;
+  ShPointer<ShCloak> lowBoundCloak() const;
 
   /// Obtain an upper bounds on this variable (tuple of same size as this)
-  ShCloakPtr highBoundCloak() const;
+  ShPointer<ShCloak> highBoundCloak() const;
 
   //@}
   
@@ -93,14 +93,14 @@ public:
   ///
   
   /// Gets a copy of the cloak (with swizzling & proper negation)
-  ShCloakPtr cloak() const;
-  ShCloakPtr cloak(int index) const;
+  ShPointer<ShCloak> cloak() const;
+  ShPointer<ShCloak> cloak(int index) const;
 
   /// sets up to num elements starting at index in this cloak 
   /// from the other cloak, accounting for swizzles and negation
-  void setCloak(ShCloakCPtr other, bool neg, const ShSwizzle &writemask);
-  void setCloak(ShCloakCPtr other, int index);
-  void setCloak(ShCloakCPtr other);
+  void setCloak(ShPointer<const ShCloak> other, bool neg, const ShSwizzle &writemask);
+  void setCloak(ShPointer<const ShCloak> other, int index);
+  void setCloak(ShPointer<const ShCloak> other);
 
   ShVariable operator()() const; ///< Identity swizzle
   ShVariable operator()(int) const;

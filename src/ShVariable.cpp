@@ -27,6 +27,7 @@
 #include <iostream>
 
 #include "ShVariable.hpp"
+#include "ShCloak.hpp"
 
 namespace SH {
 

@@ -24,47 +24,34 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHCLOAKFACTORY_HPP
-#define SHCLOAKFACTORY_HPP
-
-#include <string>
-#include "ShCloak.hpp"
+#ifndef SHVARIABLETYPE_HPP
+#define SHVARIABLETYPE_HPP
 
 namespace SH {
 
-
-struct ShCloakFactory: public ShRefCountable {
-  /// Creates a ShCloak object with N components 
-  virtual ShCloakPtr generate(int N) const = 0; 
-
-  /// Creates a ShCloak object by using the 
-  // decode method from the Cloak type corresponding
-  // to this factory
-  virtual ShCloakPtr generate(std::string s) const = 0;
-
-  /// Creates two ShCloaks object with N default low
-  // range values for the given ShSemanticType
-  virtual ShCloakPtr generateLowBound(int N, ShSemanticType type) const = 0; 
-  virtual ShCloakPtr generateHighBound(int N, ShSemanticType type) const = 0; 
+/** The various ways variables can be bound.
+ */
+enum ShBindingType {
+  SH_INPUT = 0,
+  SH_OUTPUT = 1,
+  SH_INOUT = 2,
+  SH_TEMP = 3,
+  SH_CONST = 4,
+  SH_TEXTURE = 5,
+  SH_STREAM = 6
 };
 
-typedef ShPointer<ShCloakFactory> ShCloakFactoryPtr;
-typedef ShPointer<const ShCloakFactory> ShCloakFactoryCPtr;
-
-template<typename T>
-struct ShDataCloakFactory: public ShCloakFactory {
-  ShCloakPtr generate(int N) const;
-
-  /// generates a ShCloak by using  
-  ShCloakPtr generate(std::string s) const; 
-
-  ShCloakPtr generateLowBound(int N, ShSemanticType type) const; 
-  ShCloakPtr generateHighBound(int N, ShSemanticType type) const; 
+/** The various ways semantic types for variables.
+ */
+enum ShSemanticType {
+  SH_ATTRIB,
+  SH_POINT,
+  SH_VECTOR,
+  SH_NORMAL,
+  SH_COLOR,
+  SH_TEXCOORD,
+  SH_POSITION
 };
-
 
 }
-
-#include "ShCloakFactoryImpl.hpp"
-
 #endif

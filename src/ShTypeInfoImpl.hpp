@@ -28,15 +28,16 @@
 #define SHTYPEINFOIMPL_HPP
 
 #include "ShTypeInfo.hpp"
+#include "ShCloakFactory.hpp"
 #include "ShEval.hpp"
 
 namespace SH {
 
 template<typename T>
-ShPointer<ShDataCloakFactory<T> > ShConcreteTypeInfo<T>::m_cloakFactory;   
+ShPointer<ShCloakFactory> ShConcreteTypeInfo<T>::m_cloakFactory;   
 
 template<typename T>
-ShPointer<ShEval > ShConcreteTypeInfo<T>::m_eval;   
+ShPointer<ShEval> ShConcreteTypeInfo<T>::m_eval;   
 
 template<typename T>
 T ShConcreteTypeInfo<T>::defaultLo(ShSemanticType type)

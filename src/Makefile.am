@@ -16,6 +16,7 @@ libsh_la_SOURCES += ShProgram.cpp ShProgram.hpp
 libsh_la_SOURCES += ShProgramNode.cpp ShProgramNode.hpp
 libsh_la_SOURCES += ShStatement.cpp ShSwizzle.cpp ShSyntax.cpp ShToken.cpp
 libsh_la_SOURCES += ShTokenizer.cpp ShUtility.cpp ShVariable.cpp ShVariableNode.cpp
+libsh_la_SOURCES += ShOperation.hpp ShOperation.cpp ShVariableType.hpp 
 libsh_la_SOURCES += ShInternals.hpp ShInternals.cpp
 libsh_la_SOURCES += ShBasicBlock.hpp
 libsh_la_SOURCES += ShBlock.hpp ShCtrlGraph.hpp
@@ -28,7 +29,7 @@ libsh_la_SOURCES += ShUtility.hpp ShVariable.hpp ShVariableNode.hpp sh.hpp
 libsh_la_SOURCES += ShInstructions.hpp ShInstructions.cpp
 libsh_la_SOURCES += ShMeta.hpp ShMeta.cpp
 libsh_la_SOURCES += ShMetaForwarder.hpp ShMetaForwarder.cpp
-libsh_la_SOURCES += ShContext.hpp ShContext.cpp
+libsh_la_SOURCES += ShContext.hpp ShContextImpl.hpp ShContext.cpp
 
 # Backend
 libsh_la_SOURCES += ShBackend.cpp ShBackend.hpp 
@@ -105,6 +106,7 @@ incinc_HEADERS += ShProgram.hpp ShProgramNode.hpp ShStatement.hpp ShStmtData.hpp
 incinc_HEADERS += ShSwizzle.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp
 incinc_HEADERS += ShUtility.hpp
 incinc_HEADERS += ShVariable.hpp ShVariableNode.hpp
+incinc_HEADERS += ShOperation.hpp ShVariableType.hpp 
 incinc_HEADERS += ShGeneric.hpp ShGenericImpl.hpp
 incinc_HEADERS += sh.hpp
 incinc_HEADERS += ShMatrix.hpp ShMatrixImpl.hpp

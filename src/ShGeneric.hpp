@@ -60,6 +60,12 @@ template<int N, typename T>
 class ShGeneric : public ShVariable 
 {
 public:
+  typedef T ValueType;
+  static const int typesize = N;
+  typedef ShDataCloak<T> CloakType; 
+  typedef ShPointer<CloakType> CloakTypePtr;
+  typedef ShPointer<const CloakType> CloakTypeCPtr;
+
   ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, bool neg);
   ~ShGeneric();
 
@@ -112,11 +118,6 @@ public:
   void setValue(int index, const T &value); 
   void setValues(const T values[]);
 
-  typedef T ValueType;
-  static const int typesize = N;
-  typedef ShDataCloak<T> CloakType; 
-  typedef ShPointer<CloakType> CloakTypePtr;
-  typedef ShPointer<const CloakType> CloakTypeCPtr;
 
 protected:
   ShGeneric(const ShVariableNodePtr& node);
@@ -126,6 +127,12 @@ template<typename T>
 class ShGeneric<1, T> : public ShVariable 
 {
 public:
+  typedef T ValueType;
+  static const int typesize = 1;
+  typedef ShDataCloak<T> CloakType; 
+  typedef ShPointer<CloakType> CloakTypePtr;
+  typedef ShPointer<const CloakType> CloakTypeCPtr;
+
   ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, bool neg);
   ~ShGeneric();
 
@@ -173,12 +180,6 @@ public:
   /// writemask.
   void setValue(int index, const T &value); 
   void setValues(const T values[]);
-
-  typedef T ValueType;
-  static const int typesize = 1;
-  typedef ShDataCloak<T> CloakType; 
-  typedef ShPointer<CloakType> CloakTypePtr;
-  typedef ShPointer<const CloakType> CloakTypeCPtr;
 
 protected:
   ShGeneric(const ShVariableNodePtr& node);

@@ -29,18 +29,18 @@
 
 #include <string>
 
+#include "ShVariableType.hpp"
 #include "ShRefCount.hpp"
-#include "ShCloakFactory.hpp"
-#include "ShVariableNode.hpp"
 
 namespace SH {
 
 /// forward declaration of ShEval
 class ShEval;
+class ShCloakFactory;
 
 struct ShTypeInfo: ShRefCountable {
   virtual const char* name() const = 0;
-  virtual ShCloakFactoryCPtr cloakFactory() = 0; 
+  virtual ShPointer<const ShCloakFactory> cloakFactory() = 0; 
   virtual ShPointer<const ShEval> eval()= 0;
 };
 
@@ -63,12 +63,12 @@ struct ShConcreteTypeInfo: public ShTypeInfo  {
     static T defaultHi(ShSemanticType type);
 
     const char* name() const; 
-    ShCloakFactoryCPtr cloakFactory();
+    ShPointer<const ShCloakFactory> cloakFactory();
     ShPointer<const ShEval> eval();
 
   protected:
-    static ShPointer<ShDataCloakFactory<T> > m_cloakFactory;
-    static ShPointer<ShEval > m_eval;
+    static ShPointer<ShCloakFactory> m_cloakFactory;
+    static ShPointer<ShEval> m_eval;
 };
 
 

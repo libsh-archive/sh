@@ -27,6 +27,7 @@
 #include "ShContext.hpp"
 #include "ShDebug.hpp"
 #include "ShEval.hpp"
+#include "ShTypeInfo.hpp"
 
 namespace SH {
 

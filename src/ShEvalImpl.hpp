@@ -2,9 +2,10 @@
 #define SHEVALIMPL_HPP
 
 #include "ShEval.hpp"
-#include "ShTypeInfo.hpp"
+#include "ShCloak.hpp"
 #include "ShDebug.hpp"
 #include "ShError.hpp"
+#include "ShTypeInfo.hpp"
 
 namespace SH {
 
@@ -15,7 +16,7 @@ namespace SH {
 template<typename T> 
 void ShDataEval<T>::srcUnaryOp(ShOperation op, ShCloakPtr src) const
 {
-  CloakCPtr srcCast = shref_dynamic_cast<const ShDataCloak<T> >(src); 
+  ShPointer<const ShDataCloak<T> > srcCast = shref_dynamic_cast<const ShDataCloak<T> >(src); 
   switch(op) {
     case SH_OP_KIL: KIL(srcCast->data());
     default: SH_DEBUG_ASSERT(0);
@@ -26,8 +27,8 @@ void ShDataEval<T>::srcUnaryOp(ShOperation op, ShCloakPtr src) const
 template<typename T> 
 void ShDataEval<T>::unaryOp(ShOperation op, ShCloakPtr dest, ShCloakCPtr src) const
 {
-  CloakPtr destCast = shref_dynamic_cast<ShDataCloak<T> >(dest); 
-  CloakCPtr srcCast = shref_dynamic_cast<const ShDataCloak<T> >(src); 
+  ShPointer<ShDataCloak<T> > destCast = shref_dynamic_cast<ShDataCloak<T> >(dest); 
+  ShPointer<const ShDataCloak<T> > srcCast = shref_dynamic_cast<const ShDataCloak<T> >(src); 
   switch(op) {
     //SHDCE_UNARY_OP(NEG);
     SHDCE_UNARY_OP(ABS);
@@ -62,9 +63,9 @@ template<typename T>
 void ShDataEval<T>::binaryOp(ShOperation op, ShCloakPtr dest, 
     ShCloakCPtr a, ShCloakCPtr b) const
 {
-  CloakPtr destCast = shref_dynamic_cast<ShDataCloak<T> >(dest); 
-  CloakCPtr aCast = shref_dynamic_cast<const ShDataCloak<T> >(a); 
-  CloakCPtr bCast = shref_dynamic_cast<const ShDataCloak<T> >(b); 
+  ShPointer<ShDataCloak<T> > destCast = shref_dynamic_cast<ShDataCloak<T> >(dest); 
+  ShPointer<const ShDataCloak<T> > aCast = shref_dynamic_cast<const ShDataCloak<T> >(a); 
+  ShPointer<const ShDataCloak<T> > bCast = shref_dynamic_cast<const ShDataCloak<T> >(b); 
   switch(op) {
     SHDCE_BINARY_OP(ADD);
     SHDCE_BINARY_OP(MUL);
@@ -91,10 +92,10 @@ template<typename T>
 void ShDataEval<T>::ternaryOp(ShOperation op, ShCloakPtr dest,
     ShCloakCPtr a, ShCloakCPtr b, ShCloakCPtr c) const
 {
-  CloakPtr destCast = shref_dynamic_cast<ShDataCloak<T> >(dest); 
-  CloakCPtr aCast = shref_dynamic_cast<const ShDataCloak<T> >(a); 
-  CloakCPtr bCast = shref_dynamic_cast<const ShDataCloak<T> >(b); 
-  CloakCPtr cCast = shref_dynamic_cast<const ShDataCloak<T> >(c); 
+  ShPointer<ShDataCloak<T> > destCast = shref_dynamic_cast<ShDataCloak<T> >(dest); 
+  ShPointer<const ShDataCloak<T> > aCast = shref_dynamic_cast<const ShDataCloak<T> >(a); 
+  ShPointer<const ShDataCloak<T> > bCast = shref_dynamic_cast<const ShDataCloak<T> >(b); 
+  ShPointer<const ShDataCloak<T> > cCast = shref_dynamic_cast<const ShDataCloak<T> >(c); 
   switch(op) {
     SHDCE_TERNARY_OP(LRP);
     SHDCE_TERNARY_OP(MAD);
