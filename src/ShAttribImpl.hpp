@@ -685,7 +685,8 @@ ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T2>& s0, const Sh
     SH_DEBUG_ASSERT(s1.hasValues());
     setValue(1, s1.getValue(0));
   } else {
-    (*this) = ShAttrib<2, SH_CONST, T>(s0, s1);
+    (*this)[0] = s0;
+    (*this)[1] = s1;
   }
 }
 
@@ -1014,7 +1015,9 @@ ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T2>& s0, const Sh
     SH_DEBUG_ASSERT(s2.hasValues());
     setValue(2, s2.getValue(0));
   } else {
-    (*this) = ShAttrib<3, SH_CONST, T>(s0, s1, s2);
+    (*this)[0] = s0;
+    (*this)[1] = s1;
+    (*this)[2] = s2;
   }
 }
 
@@ -1346,7 +1349,10 @@ ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T2>& s0, const Sh
     SH_DEBUG_ASSERT(s3.hasValues());
     setValue(3, s3.getValue(0));
   } else {
-    (*this) = ShAttrib<4, SH_CONST, T>(s0, s1, s2, s3);
+    (*this)[0] = s0;
+    (*this)[1] = s1;
+    (*this)[2] = s2;
+    (*this)[3] = s3;
   }
 }
 

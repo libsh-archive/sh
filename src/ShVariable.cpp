@@ -156,37 +156,37 @@ bool ShVariable::loadVariant(ShVariant *&result) const
   return true;
 }
 
-void ShVariable::updateVariant() const
+void ShVariable::updateVariant() 
 {
   m_node->update_all();
 }
 
-void ShVariable::setVariant(const ShVariant* other, bool neg, const ShSwizzle &writemask) const
+void ShVariable::setVariant(const ShVariant* other, bool neg, const ShSwizzle &writemask)
 {
   m_node->setVariant(other, neg ^ m_neg, m_swizzle * writemask);
 }
 
-void ShVariable::setVariant(ShVariantCPtr other, bool neg, const ShSwizzle &writemask) const
+void ShVariable::setVariant(ShVariantCPtr other, bool neg, const ShSwizzle &writemask)
 {
   setVariant(other.object(), neg, writemask); 
 }
 
-void ShVariable::setVariant(const ShVariant* other, int index) const
+void ShVariable::setVariant(const ShVariant* other, int index)
 {
   m_node->setVariant(other, m_neg, m_swizzle * ShSwizzle(size(), index));
 }
 
-void ShVariable::setVariant(ShVariantCPtr other, int index) const 
+void ShVariable::setVariant(ShVariantCPtr other, int index)
 {
   setVariant(other.object(), index); 
 }
 
-void ShVariable::setVariant(const ShVariant* other) const
+void ShVariable::setVariant(const ShVariant* other)
 {
   m_node->setVariant(other, m_neg, m_swizzle);
 }
 
-void ShVariable::setVariant(ShVariantCPtr other) const
+void ShVariable::setVariant(ShVariantCPtr other)
 {
   setVariant(other.object());
 }

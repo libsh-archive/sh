@@ -128,7 +128,7 @@ public:
    * @{
    */
   bool loadVariant(ShVariant *&result) const;
-  void updateVariant() const;
+  void updateVariant();
   // @}
 
   
@@ -136,22 +136,22 @@ public:
    * this' writemask and negations
    * @{
    */
-  void setVariant(const ShVariant* other, bool neg, const ShSwizzle &writemask) const;
-  void setVariant(ShVariantCPtr other, bool neg, const ShSwizzle &writemask) const;
+  void setVariant(const ShVariant* other, bool neg, const ShSwizzle &writemask); 
+  void setVariant(ShVariantCPtr other, bool neg, const ShSwizzle &writemask); 
   // @}
  
   /** Sets the indicated element of this' variant from other 
    * @{
    */
-  void setVariant(const ShVariant* other, int index) const;
-  void setVariant(ShVariantCPtr other, int index) const;
+  void setVariant(const ShVariant* other, int index); 
+  void setVariant(ShVariantCPtr other, int index); 
   // @}
 
   /** Sets this' variant from the contents of other
    * @{
    */
-  void setVariant(const ShVariant* other) const;
-  void setVariant(ShVariantCPtr other) const;
+  void setVariant(const ShVariant* other);
+  void setVariant(ShVariantCPtr other);
   // @}
 
 
