@@ -57,6 +57,10 @@ void RDS::set_partition() {
 }
 
 void RDS::rds_search() {
+#ifdef SH_DEBUG
+  SH_DEBUG_PRINT(__FUNCTION__);
+#endif
+
 	DAGNode::DAGNode *p = m_pdt->get_root();
 	DAGNode::DAGNode *d = m_graph->m_root;
 		  
@@ -95,7 +99,11 @@ void RDS::rds_search() {
 // partitions m_graph by marking nodes to indicate pass boundaries
 // returns a set of passes
 void RDS::rds_subdivide(DAGNode::DAGNode* v) {
-	//cout << "Subdivide(" << m_pdt->numbering(v) << ")\n";
+
+#ifdef SH_DEBUG
+	SH_DEBUG_PRINT( "Subdivide(" << m_pdt->numbering(v) << ")");
+#endif
+
     // stop if subregion v can be mapped in one pass
 	if (valid(v)) return;
         
@@ -144,10 +152,10 @@ void RDS::rds_subdivide(DAGNode::DAGNode* v) {
   rds_merge(v);
 }
 
-void RDS::rds_merge(DAGNode::DAGNode* v)
-{
-	//cout << "Merge(" << m_pdt->numbering(v) << ")\n";
-	
+void RDS::rds_merge(DAGNode::DAGNode* v) {
+#ifdef SH_DEBUG
+  SH_DEBUG_PRINT("Merge(" << m_pdt->numbering(v) << ")");
+#endif
 	// check for any fixed nodes (their marked property cannot be changed)
 	DAGNode::DAGNodeVector kids;
 	DAGNode::DAGNodeVector unmarked_kids;
