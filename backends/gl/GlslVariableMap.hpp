@@ -37,6 +37,41 @@
 
 namespace shgl {
 
+/// Possible bindings for an input/output variable
+enum GlslVarBinding {
+  // Input and output for vertex, input for fragment
+  SH_GLSL_VAR_TEXCOORD,
+
+  // Inputs to both units
+  SH_GLSL_VAR_COLOR,
+  SH_GLSL_VAR_SECONDARYCOLOR,
+
+  // Vertex inputs
+  SH_GLSL_VAR_VERTEX,
+  SH_GLSL_VAR_NORMAL,
+
+  // Fragment inputs
+  SH_GLSL_VAR_FRAGCOORD,
+
+  // Vertex outputs
+  SH_GLSL_VAR_POSITION,
+  SH_GLSL_VAR_FRONTCOLOR,
+  SH_GLSL_VAR_FRONTSECONDARYCOLOR,
+
+  // Fragment outputs
+  SH_GLSL_VAR_FRAGDEPTH,
+  SH_GLSL_VAR_FRAGCOLOR,
+
+  SH_GLSL_VAR_NONE
+};
+
+struct GlslBindingSpecs {
+  GlslVarBinding binding;
+  int max_bindings;
+  SH::ShSemanticType semantic_type;
+  bool allow_generic;
+};
+
 class GlslVariableMap {
 public:
   GlslVariableMap(SH::ShProgramNode* shader, GlslProgramType unit);
@@ -60,17 +95,13 @@ private:
   
   DeclarationList m_regular_declarations;
   DeclarationList m_varying_declarations;
-  
-  bool m_gl_Color_allocated;
-  bool m_gl_FragColor_allocated;
-  bool m_gl_FragCoord_allocated;
-  bool m_gl_FragDepth_allocated;
-  bool m_gl_FrontColor_allocated;
-  bool m_gl_FrontSecondaryColor_allocated;
-  bool m_gl_Normal_allocated;
-  bool m_gl_Position_allocated;
-  bool m_gl_SecondaryColor_allocated;
-  bool m_gl_Vertex_allocated;
+
+  std::map<GlslVarBinding, int> m_input_bindings;
+  std::map<GlslVarBinding, int> m_output_bindings;
+
+  void allocate_builtin(const SH::ShProgramNode::VarList::const_iterator& begin, const SH::ShProgramNode::VarList::const_iterator& end, const GlslBindingSpecs& specs, std::map<GlslVarBinding, int>& bindings);
+  void allocate_builtin_inputs();
+  void allocate_builtin_outputs();
   
   void allocate_input(const SH::ShVariableNodePtr& node);
   void allocate_output(const SH::ShVariableNodePtr& node);

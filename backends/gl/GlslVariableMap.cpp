@@ -31,20 +31,71 @@ namespace shgl {
 using namespace SH;
 using namespace std;
 
-GlslVariableMap::GlslVariableMap(ShProgramNode* shader, GlslProgramType unit)
-  : m_shader(shader), m_unit(unit),
-    m_nb_regular_variables(0), m_nb_varying_variables(0),
-    m_gl_Color_allocated(false), 
-    m_gl_FragColor_allocated(false), 
-    m_gl_FragCoord_allocated(false), 
-    m_gl_FragDepth_allocated(false), 
-    m_gl_FrontColor_allocated(false), 
-    m_gl_FrontSecondaryColor_allocated(false), 
-    m_gl_Normal_allocated(false),
-    m_gl_Position_allocated(false), 
-    m_gl_SecondaryColor_allocated(false),
-    m_gl_Vertex_allocated(false) 
+/// Information about the VarBinding members
+struct {
+  char* name;
+  bool indexed;
+} glslVarBindingInfo[] = {
+  {"gl_TexCoord", true},
+  {"gl_Color", false},
+  {"gl_SecondaryColor", false},
+  {"gl_Vertex", false},
+  {"gl_Normal", false},
+  {"gl_FragCoord", false},
+  {"gl_Position", false},
+  {"gl_FrontColor", false},
+  {"gl_FrontSecondaryColor", false},
+  {"gl_FragDepth", false},
+  {"gl_FragColor", false},
+  {"<nil>", false}
+};
+
+GlslBindingSpecs glslVertexInputBindingSpecs[] = {
+  {SH_GLSL_VAR_VERTEX, 1, SH_POSITION, false},
+  {SH_GLSL_VAR_NORMAL, 1, SH_NORMAL, false},
+  {SH_GLSL_VAR_COLOR, 1, SH_COLOR, false},
+  {SH_GLSL_VAR_SECONDARYCOLOR, 1, SH_COLOR, false},
+  //{SH_GLSL_VAR_TEXCOORD, 8, SH_TEXCOORD, true},
+  {SH_GLSL_VAR_NONE, 0, SH_ATTRIB, true}
+};
+
+GlslBindingSpecs glslFragmentInputBindingSpecs[] = {
+  {SH_GLSL_VAR_FRAGCOORD, 1, SH_POSITION, false},
+  {SH_GLSL_VAR_COLOR, 1, SH_COLOR, false},
+  {SH_GLSL_VAR_SECONDARYCOLOR, 1, SH_COLOR, false},
+  //{SH_GLSL_VAR_TEXCOORD, 8, SH_TEXCOORD, true},
+  {SH_GLSL_VAR_NONE, 0, SH_ATTRIB, true}
+};
+
+GlslBindingSpecs glslVertexOutputBindingSpecs[] = {
+  {SH_GLSL_VAR_POSITION, 1, SH_POSITION, false},
+  {SH_GLSL_VAR_FRONTCOLOR, 1, SH_COLOR, false},
+  {SH_GLSL_VAR_FRONTSECONDARYCOLOR, 1, SH_COLOR, false},
+  //{SH_GLSL_VAR_TEXCOORD, 8, SH_TEXCOORD, true},
+  {SH_GLSL_VAR_NONE, 0, SH_ATTRIB}
+};
+
+GlslBindingSpecs glslFragmentOutputBindingSpecs[] = {
+  {SH_GLSL_VAR_FRAGDEPTH, 1, SH_POSITION, false},
+  {SH_GLSL_VAR_FRAGCOLOR, 1, SH_COLOR, false},
+  {SH_GLSL_VAR_NONE, 0, SH_ATTRIB}
+};
+
+GlslBindingSpecs* glslBindingSpecs(bool output, GlslProgramType unit)
 {
+  if (unit == SH_GLSL_VP) {
+    return output ? glslVertexOutputBindingSpecs : glslVertexInputBindingSpecs;
+  } else {
+    return output ? glslFragmentOutputBindingSpecs : glslFragmentInputBindingSpecs;
+  }
+}
+
+GlslVariableMap::GlslVariableMap(ShProgramNode* shader, GlslProgramType unit)
+  : m_shader(shader), m_unit(unit), m_nb_regular_variables(0), m_nb_varying_variables(0)
+{
+  allocate_builtin_inputs();
+  allocate_builtin_outputs();
+
   for (ShProgramNode::VarList::const_iterator i = m_shader->inputs_begin();
        i != m_shader->inputs_end(); i++) {
     allocate_input(*i);
@@ -63,123 +114,45 @@ GlslVariableMap::GlslVariableMap(ShProgramNode* shader, GlslProgramType unit)
   }
 }
 
+void GlslVariableMap::allocate_builtin(const ShProgramNode::VarList::const_iterator& begin,
+				       const ShProgramNode::VarList::const_iterator& end,
+				       const GlslBindingSpecs& specs, map<GlslVarBinding, int>& bindings)
+{
+  for (ShProgramNode::VarList::const_iterator i = begin; i != end; i++) {
+    const ShVariableNodePtr& node(*i);
+    if (specs.semantic_type == node->specialType()) {
+      if (bindings[specs.binding] >= specs.max_bindings) continue;
+      bindings[specs.binding]++;
+
+      GlslVariable var(node);
+      var.name(glslVarBindingInfo[specs.binding].name);
+      m_varmap[node] = var;
+    }
+  }
+}
+
+void GlslVariableMap::allocate_builtin_inputs()
+{
+  for (int i = 0; glslBindingSpecs(false, m_unit)[i].binding != SH_GLSL_VAR_NONE; i++) {
+    allocate_builtin(m_shader->inputs_begin(), m_shader->inputs_end(),
+		     glslBindingSpecs(false, m_unit)[i], m_input_bindings);
+  }
+}
+
+void GlslVariableMap::allocate_builtin_outputs()
+{
+  for (int i = 0; glslBindingSpecs(false, m_unit)[i].binding != SH_GLSL_VAR_NONE; i++) {
+    allocate_builtin(m_shader->outputs_begin(), m_shader->outputs_end(),
+		     glslBindingSpecs(false, m_unit)[i], m_output_bindings);
+  }
+}
+
 void GlslVariableMap::allocate_input(const ShVariableNodePtr& node)
 {
-  bool allocated = false;
-
-  GlslVariable var(node);
-
-  // Common to both units
-  if (var.semantic_type() == SH_COLOR) {
-    if (!m_gl_Color_allocated) {
-      var.name("gl_Color");
-      m_gl_Color_allocated = true;
-      allocated = true;
-    } else if (!m_gl_SecondaryColor_allocated) {
-      var.name("gl_SecondaryColor");
-      m_gl_SecondaryColor_allocated = true;
-      allocated = true;
-    }
-  } else if (m_unit == SH_GLSL_VP) {
-    // Speficic to the vertex unit
-    switch (var.semantic_type()) {
-    case SH_POSITION:
-      if (!m_gl_Vertex_allocated) {
-	var.name("gl_Vertex");
-	m_gl_Vertex_allocated = true;
-	allocated = true;
-      }
-      break;
-    case SH_NORMAL:
-      if (!m_gl_Normal_allocated) {
-	var.name("gl_Normal");
-	m_gl_Normal_allocated = true;
-	allocated = true;
-      }
-      break;
-    case SH_TEXCOORD:
-      // TODO: use gl_MultiTexCoord*
-      break;
-    default:
-      break; // No default allocation
-    }
-  } else {
-    // Specific to the fragment unit
-    switch (var.semantic_type()) {
-    case SH_POSITION:
-      if (!m_gl_FragCoord_allocated) {
-	var.name("gl_FragCoord");
-	m_gl_FragCoord_allocated = true;
-	allocated = true;
-      }
-      break;
-    case SH_TEXCOORD:
-      // TODO: use gl_TexCoord[]
-      break;
-    default:
-      break; // No default allocation
-    }    
-  }
-
-  if (allocated) m_varmap[node] = var;
 }
 
 void GlslVariableMap::allocate_output(const ShVariableNodePtr& node)
 {
-  bool allocated = false;
-
-  GlslVariable var(node);
-
-  if (m_unit == SH_GLSL_VP) {
-    // Speficic to the vertex unit
-    switch (var.semantic_type()) {
-    case SH_POSITION:
-      if (!m_gl_Position_allocated) {
-	var.name("gl_Position");
-	m_gl_Position_allocated = true;
-	allocated = true;
-      }
-      break;
-    case SH_COLOR:
-      if (!m_gl_FrontColor_allocated) {
-	var.name("gl_FrontColor");
-	m_gl_FrontColor_allocated = true;
-	allocated = true;
-      } else if (!m_gl_FrontSecondaryColor_allocated) {
-	var.name("gl_FrontSecondaryColor");
-	m_gl_FrontSecondaryColor_allocated = true;
-	allocated = true;
-      }
-      break;
-    case SH_TEXCOORD:
-      // TODO: use gl_TexCoord[]
-      break;
-    default:
-      break; // No default allocation
-    }
-  } else {
-    // Specific to the fragment unit
-    switch (var.semantic_type()) {
-    case SH_POSITION:
-      if (!m_gl_FragDepth_allocated) {
-	var.name("gl_FragDepth");
-	m_gl_FragDepth_allocated = true;
-	allocated = true;
-      }
-      break;
-    case SH_COLOR:
-      if (!m_gl_FragColor_allocated) {
-	var.name("gl_FragColor");
-	m_gl_FragColor_allocated = true;
-	allocated = true;
-      }
-      break;
-    default:
-      break; // No default allocation
-    }    
-  }
-
-  if (allocated) m_varmap[node] = var;
 }
 
 void GlslVariableMap::allocate_temp(const ShVariableNodePtr& node)
