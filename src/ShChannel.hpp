@@ -40,7 +40,7 @@ namespace SH {
 template<typename T>
 class ShChannel : public ShMetaForwarder {
 public:
-  typedef typename T::ValueType ValueType;
+  static const ShValueType ValueType = T::value_type;
   /// Construct a channel without any associated memory.
   ShChannel();
   /// Construct a channel with \a count elements in \a memory

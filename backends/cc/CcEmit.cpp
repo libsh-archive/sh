@@ -168,8 +168,8 @@ const CcOpCode opCodeTable[] = {
   {SH_OP_LOG10, "log10(#0)"},
   {SH_OP_LRP,   "$0 * ($1 - $2) + $2"},
   {SH_OP_MAD,   "$0 * $1 + $2"},
-  {SH_OP_MAX,   "std::max($0, $1)"},
-  {SH_OP_MIN,   "std::min($0, $1)"}, 
+  {SH_OP_MAX,   "($0 > $1 ? $0 : $1)"},
+  {SH_OP_MIN,   "($0 < $1 ? $0 : $1)"}, 
   {SH_OP_MOD,   "fmod($0, $1)"},
   {SH_OP_POW,   "pow($0, $1)"},
   {SH_OP_RCP,   "1 / #0"},
@@ -182,7 +182,7 @@ const CcOpCode opCodeTable[] = {
   {SH_OP_COND,  "($0 > 0 ? $1 : $2)"},
   {SH_OP_FETCH, "#0"},
 
-  {SH_OP_NONE,  0} 
+  {SH_OPERATION_END,  0} 
   // @todo LO, HI, SETLO, SETHI
 };
 
@@ -211,10 +211,11 @@ void CcBackendCode::emit(const ShStatement& stmt) {
   // fill in opcodeMap from the above table
   if(opcodeMap.empty()) {
     SH_CC_DEBUG_PRINT("ShOperation -> C++ code mappings");
-    for(int i = 0; opCodeTable[i].op != SH_OP_NONE; ++i) {
+    for(int i = 0; opCodeTable[i].op != SH_OPERATION_END; ++i) {
+
       opcodeMap[opCodeTable[i].op] = CcOpCodeVecs(opCodeTable[i]); 
       SH_CC_DEBUG_PRINT(opInfo[opCodeTable[i].op].name << " -> " 
-          << opcodeMap[opCodeTable[i].op]);
+          << opcodeMap[opCodeTable[i].op].encode());
     }
   }
 
@@ -231,7 +232,7 @@ void CcBackendCode::emit(const ShStatement& stmt) {
     CcOpCodeVecs codeVecs = opcodeMap[stmt.op]; 
     for(int i = 0; i < stmt.dest.size(); ++i) {
       m_code << "  " << resolve(stmt.dest, i) << " = (" 
-        << ctype(stmt.dest.typeIndex()) << ")(";
+        << ctype(stmt.dest.valueType()) << ")(";
       unsigned int j;
       for(j = 0; j < codeVecs.index.size(); ++j) { 
         const ShVariable& src = stmt.src[codeVecs.index[j]];
@@ -248,6 +249,7 @@ void CcBackendCode::emit(const ShStatement& stmt) {
   }
 
   // handle remaining ops with some custom code
+  // @todo improve collecting ops
   switch(stmt.op) {
     case SH_OP_DOT:
       {
@@ -268,6 +270,38 @@ void CcBackendCode::emit(const ShStatement& stmt) {
             << resolve(stmt.src[0], s0) 
             << " * "
             << resolve(stmt.src[1], s1)
+            << ";" << std::endl;
+        }
+        break;
+      }
+
+    case SH_OP_CSUM:
+      {
+        SH_DEBUG_ASSERT(stmt.dest.size() == 1);
+        m_code << "  " << resolve(stmt.dest, 0) << " = " 
+          << resolve(stmt.src[0], 0) 
+          << ";" << std::endl;
+
+        int size = stmt.src[0].size();
+        for(int i = 1; i < size; ++i) {
+          m_code << "  " << resolve(stmt.dest, 0) << " += " 
+            << resolve(stmt.src[0], i) 
+            << ";" << std::endl;
+        }
+        break;
+      }
+
+    case SH_OP_CMUL:
+      {
+        SH_DEBUG_ASSERT(stmt.dest.size() == 1);
+        m_code << "  " << resolve(stmt.dest, 0) << " = " 
+          << resolve(stmt.src[0], 0) 
+          << ";" << std::endl;
+
+        int size = stmt.src[0].size();
+        for(int i = 1; i < size; ++i) {
+          m_code << "  " << resolve(stmt.dest, 0) << " *= " 
+            << resolve(stmt.src[0], i) 
             << ";" << std::endl;
         }
         break;
@@ -377,13 +411,13 @@ void CcBackendCode::emitTexLookup(const ShStatement& stmt, const char* texfunc) 
   bool tempsrc = (!stmt.src[1].swizzle().identity()) || stmt.src[1].neg();
 
   if(tempdest) {
-    m_code << "    " << ctype(stmt.dest.typeIndex()) <<  
+    m_code << "    " << ctype(stmt.dest.valueType()) <<  
       " result[" << stmt.dest.size() << "];" << std::endl;
     destvar = "result";
   } else destvar = resolve(stmt.dest);
 
   if(tempsrc) {
-    m_code << "    " << ctype(stmt.src[1].typeIndex()) 
+    m_code << "    " << ctype(stmt.src[1].valueType()) 
       << " input[" << stmt.src[1].size() << "];" << std::endl;
 
     for(int i = 0; i < stmt.src[1].size(); i++) {

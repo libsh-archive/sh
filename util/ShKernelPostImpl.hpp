@@ -2,7 +2,7 @@
 //
 // Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
 // Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
+// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Viberiu S. Popa,
 //          Bryan Chan, Michael D. McCool
 // 
 // This software is provided 'as-is', without any express or implied
@@ -65,7 +65,7 @@ ShProgram shNoisify(bool useTexture) {
   ShProgram kernel = SH_BEGIN_FRAGMENT_PROGRAM {
     ShInputAttrib1f SH_DECL(noise_scale);
     typename T::InputType SH_NAMEDECL(in, "result");
-    ShAttrib<N, SH_INPUT, typename T::ValueType> SH_NAMEDECL(tc, "texcoord");
+    ShAttrib<N, SH_INPUT, T::value_type> SH_NAMEDECL(tc, "texcoord");
 
     typename T::OutputType SH_NAMEDECL(out, "result");
 

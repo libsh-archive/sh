@@ -112,7 +112,7 @@ enum ShOperation {
   SH_OP_SETLO, ///< Sets a lower bound on an interval arithmetic type from a regular tuple
   SH_OP_SETHI, ///< Sets an upper bound on an interval arithmetic type from a regular tuple
 
-  SH_OP_NONE, ///< End of List marker.  Not an actual op
+  SH_OPERATION_END, ///< End of List marker.  Not an actual op
 };
 
 #ifdef IGNORE

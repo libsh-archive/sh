@@ -39,7 +39,7 @@ namespace SH {
  */
 template<typename T>
 struct ShInterval {
-  typedef T ValueType;
+  typedef T DataType;
   T m_lo;
   T m_hi;
 
@@ -51,6 +51,9 @@ struct ShInterval {
 
   /** Constructs an interval with the given bounds */
   ShInterval(const T& lo, const T& hi);
+
+  template<typename T2>
+  ShInterval(const ShInterval<T2> &other);
 
   /** accessor methods **/
   // @todo why are these even here if m_lo, m_hi are public?

@@ -116,10 +116,11 @@ struct VariableSplitter {
       // if(node->uniform()) ShContext::current()->enter(prev);
 
       if( node->hasValues() ) { 
+        // @todo type set up dependent uniforms here 
         for(i = 0; i < newSize; ++i) copySwiz[i] = offset + i;
-        ShVariantCPtr oldVariant = node->getVariant();
-        newNode->setVariant(oldVariant->get(false, 
-            ShSwizzle(oldVariant->size(), newSize, copySwiz)));
+        ShVariantCPtr subVariant = node->getVariant()->get(false,
+            ShSwizzle(node->size(), newSize, copySwiz));
+        newNode->setVariant(subVariant);
       }
       nodeVarNodeVec.push_back( newNode );
     }
@@ -358,7 +359,7 @@ struct InputOutputConvertor {
    * (currently InOuts are always converted) */ 
   void operator()(ShVariableNodePtr node) {
     if (node->kind() != SH_INOUT || m_varMap.count(node) > 0) return;
-    m_varMap[node] = node->clone(SH_TEMP); 
+    m_varMap[node] = node->clone(SH_TEMP, false, false); 
   }
 
   // Convert inputs, outputs only when they appear in incompatible locations
@@ -369,7 +370,7 @@ struct InputOutputConvertor {
       const ShVariableNodePtr &oldNode = stmt.dest.node();
       if(oldNode->kind() == SH_INPUT) { 
         if(m_varMap.count(oldNode) == 0) {
-          m_varMap[oldNode] = oldNode->clone(SH_TEMP);
+          m_varMap[oldNode] = oldNode->clone(SH_TEMP, false, false);
         }
       }
     }
@@ -378,7 +379,7 @@ struct InputOutputConvertor {
         const ShVariableNodePtr &oldNode = stmt.src[i].node();
         if(oldNode->kind() == SH_OUTPUT) { 
           if(m_varMap.count(oldNode) == 0) {
-            m_varMap[oldNode] = oldNode->clone(SH_TEMP);
+            m_varMap[oldNode] = oldNode->clone(SH_TEMP, false, false);
           }
         }
       }
@@ -404,16 +405,14 @@ struct InputOutputConvertor {
               ShVariable(it->second), SH_OP_ASN, ShVariable(oldNode)));
       } else if(oldNode->kind() == SH_INOUT) {
         // replace INOUT nodes in input/output lists with INPUT and OUTPUT nodes
-        ShVariableNodePtr newInNode(oldNode->clone(SH_INPUT));
-        ShVariableNodePtr newOutNode(oldNode->clone(SH_OUTPUT));
+        ShVariableNodePtr newInNode(oldNode->clone(SH_INPUT, false, false));
+        ShVariableNodePtr newOutNode(oldNode->clone(SH_OUTPUT, false, false));
 
         std::replace(m_program->inputs.begin(), m_program->inputs.end(),
             oldNode, newInNode);
-        m_program->inputs.pop_back();
 
         std::replace(m_program->outputs.begin(), m_program->outputs.end(),
             oldNode, newOutNode);
-        m_program->outputs.pop_back();
 
         // add mov statements to/from temporary 
         oldEntry->block->addStatement(ShStatement(
@@ -470,14 +469,14 @@ struct TextureLookupConverter {
     if (stmt.op == SH_OP_TEX && tn->dims() == SH_TEXTURE_RECT) {
       // TODO check typing
       //ShVariable tc(new ShVariableNode(SH_TEMP, tn->texSizeVar().size()));
-      ShVariable tc(tn->texSizeVar().node()->clone(SH_TEMP));
+      ShVariable tc(tn->texSizeVar().node()->clone(SH_TEMP, true, false));
 
       newStmts.push_back(ShStatement(tc, stmt.src[1], SH_OP_MUL, tn->texSizeVar()));
       newStmts.push_back(ShStatement(stmt.dest, stmt.src[0], SH_OP_TEXI, tc));
     } else if (stmt.op == SH_OP_TEXI && tn->dims() != SH_TEXTURE_RECT) {
       // TODO check typing
       //ShVariable tc(new ShVariableNode(SH_TEMP, tn->texSizeVar().size()));
-      ShVariable tc(tn->texSizeVar().node()->clone(SH_TEMP));
+      ShVariable tc(tn->texSizeVar().node()->clone(SH_TEMP, true, false));
 
       newStmts.push_back(ShStatement(tc, stmt.src[1], SH_OP_DIV, tn->texSizeVar()));
       newStmts.push_back(ShStatement(stmt.dest, stmt.src[0], SH_OP_TEX, tc));

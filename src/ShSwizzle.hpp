@@ -54,7 +54,8 @@ namespace SH {
  * particular the size of) the tuple which they are swizzling.
  */
 class
-SH_DLLEXPORT ShSwizzle {
+SH_DLLEXPORT
+ShSwizzle {
 public:
   // Null swizzle
   ShSwizzle();
@@ -95,6 +96,15 @@ public:
   bool operator==(const ShSwizzle& other) const;
   
 private:
+  // deletes indices and throws an exception if index < 0 or index >= m_srcSize
+  void checkSrcSize(int index) const; 
+
+  // deletes indices and throws an exception if index < 0 or index >= m_size 
+  void checkSize(int index) const; 
+
+  // deletes and reallocates m_indices if newsize doesn't match m_size 
+  void realloc(int newsize); 
+
   int m_srcSize;
   //std::vector<int> m_indices;
   int* m_indices;
@@ -113,5 +123,7 @@ public:
 };
   
 }
+
+#include "ShSwizzleImpl.hpp"
   
 #endif

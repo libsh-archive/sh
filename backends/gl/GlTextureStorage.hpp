@@ -27,8 +27,9 @@
 #ifndef SH_GLTEXTURESTORAGE_HPP
 #define SH_GLTEXTURESTORAGE_HPP
 
-#include "GlBackend.hpp"
+#include "ShVariableType.hpp"
 #include "ShMemory.hpp"
+#include "GlBackend.hpp"
 #include "GlTextureName.hpp"
 
 namespace shgl {
@@ -38,7 +39,7 @@ public:
   GlTextureStorage(int context,
                    SH::ShMemory* memory, GLenum target,
                    GLenum format, GLint internalFormat,
-                   int typeIndex, 
+                   SH::ShValueType valueType, 
                    int width, int height, int depth, int tuplesize,
                    GlTextureNamePtr name);
   
@@ -51,7 +52,7 @@ public:
   GLenum target() const { return m_target; }
   GLenum format() const { return m_format; }
   GLint internalFormat() const { return m_internalFormat; }
-  int typeIndex() const { return m_typeIndex; }
+  SH::ShValueType valueType() const { return m_valueType; }
   int width() const { return m_width; }
   int height() const { return m_height; }
   int depth() const { return m_depth; }
@@ -68,7 +69,7 @@ private:
   GLenum m_format;
   GLint m_internalFormat;
 
-  int m_typeIndex; // type index expected of data on host
+  SH::ShValueType m_valueType; // type index expected of data on host
   int m_width, m_height, m_depth, m_tuplesize;
   
   unsigned int m_params;

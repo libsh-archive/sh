@@ -27,7 +27,6 @@
 #include <iostream>
 
 #include "ShVariable.hpp"
-#include "ShVariant.hpp"
 #include "ShProgram.hpp"
 
 namespace SH {
@@ -83,13 +82,13 @@ int ShVariable::size() const
   return m_swizzle.size();
 }
 
-int ShVariable::typeIndex() const 
+ShValueType ShVariable::valueType() const 
 {
-  if(!m_node) return 0;
-  return m_node->typeIndex();
+  if(!m_node) return SH_VALUETYPE_END;
+  return m_node->valueType();
 }
 
-void ShVariable::rangeVariant(ShVariantCPtr low, ShVariantCPtr high)
+void ShVariable::rangeVariant(const ShVariant* low, const ShVariant* high)
 {
   m_node->rangeVariant(low, high, m_neg, m_swizzle);
 }
@@ -134,19 +133,49 @@ ShVariantPtr ShVariable::getVariant(int index) const
   return m_node->getVariant()->get(m_neg, m_swizzle * ShSwizzle(size(), index)); 
 }
 
-void ShVariable::setVariant(ShVariantCPtr other, bool neg, const ShSwizzle &writemask)
+
+bool ShVariable::loadVariant(ShVariant *&result) const
+{
+  if((!m_neg) && m_swizzle.identity()) {
+    result = const_cast<ShVariant*>(m_node->getVariant());
+    return false;
+  }
+  // @todo type figure out a nicer, but just as efficient way than this hackery without
+  // exposing unwanted functionality in ShVariant or ShVariableNode. 
+  ShVariantPtr temp = getVariant();
+  temp->acquireRef();
+  result = temp.object();
+  return true;
+}
+
+void ShVariable::setVariant(const ShVariant* other, bool neg, const ShSwizzle &writemask)
 {
   m_node->setVariant(other, neg ^ m_neg, m_swizzle * writemask);
 }
 
-void ShVariable::setVariant(ShVariantCPtr other, int index) 
+void ShVariable::setVariant(ShVariantCPtr other, bool neg, const ShSwizzle &writemask)
+{
+  setVariant(other.object(), neg, writemask); 
+}
+
+void ShVariable::setVariant(const ShVariant* other, int index) 
 {
   m_node->setVariant(other, m_neg, m_swizzle * ShSwizzle(size(), index));
 }
 
-void ShVariable::setVariant(ShVariantCPtr other)
+void ShVariable::setVariant(ShVariantCPtr other, int index) 
+{
+  setVariant(other.object(), index); 
+}
+
+void ShVariable::setVariant(const ShVariant* other)
 {
   m_node->setVariant(other, m_neg, m_swizzle);
+}
+
+void ShVariable::setVariant(ShVariantCPtr other)
+{
+  setVariant(other.object());
 }
 
 ShVariable ShVariable::operator()() const

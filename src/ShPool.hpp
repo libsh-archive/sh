@@ -1,7 +1,7 @@
 #ifndef SHPOOL_HPP
 #define SHPOOL_HPP
 
-// #define SH_USE_MEMORY_POOL
+#define SH_USE_MEMORY_POOL
 
 #ifdef SH_USE_MEMORY_POOL
 

@@ -2,7 +2,7 @@
 //
 // Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
 // Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
+// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Viberiu S. Popa,
 //          Bryan Chan, Michael D. McCool
 // 
 // This software is provided 'as-is', without any express or implied
@@ -131,9 +131,9 @@ class ShKernelLib {
      *
      *  OUT(-1) ShPosition4f posh       - position (HDCS)
      */
-    template<int N, ShBindingType Binding, typename T>
-    static ShProgram shVsh(const ShMatrix<N, N, Binding, T> &mv,
-                           const ShMatrix<N, N, Binding, T> &mvp,
+    template<int N, ShBindingType Binding, ShValueType V>
+    static ShProgram shVsh(const ShMatrix<N, N, Binding, V> &mv,
+                           const ShMatrix<N, N, Binding, V> &mvp,
                            int numTangents = 0, int numLights = 1); 
 };
 

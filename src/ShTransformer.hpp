@@ -32,6 +32,7 @@
 #include "ShProgram.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShInternals.hpp"
+#include "ShVariableType.hpp"
 
 namespace SH {
 
@@ -106,7 +107,7 @@ public:
   void convertIntervalTypes(VarSplitMap &splits);
 
 
-  typedef std::map<int, int> TypeIndexMap;  
+  typedef std::map<ShValueType, ShValueType> ValueTypeMap;  
   /**@name Arithmetic type conversions
    * Converts ops on other basic non-float Sh types to float storage types based on the
    * floatMapping.  
@@ -117,7 +118,7 @@ public:
    * but j is also floatMapping[k])
    *
    */
-  void convertToFloat(TypeIndexMap &typeMap);
+  void convertToFloat(ValueTypeMap &typeMap);
 
   //@todo  use dependent uniforms in conversion and spliting functions
   //instead of separate VarSplitMaps and ShVarMaps

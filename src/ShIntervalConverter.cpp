@@ -44,16 +44,16 @@ using namespace SH;
 
 // A set of programs that does interval arithmetic operations, except 
 // on 2N-tuples of type T instead of a pair of lo/hi N-tuples
-ShProgram intervalADD(int N, int typeIndex) 
+ShProgram intervalADD(int N, ShValueType valueType) 
 {
   ShProgram result = SH_BEGIN_PROGRAM() {
-    ShVariable a_lo(new ShVariableNode(SH_INPUT, N, typeIndex));
-    ShVariable a_hi(new ShVariableNode(SH_INPUT, N, typeIndex));
-    ShVariable b_lo(new ShVariableNode(SH_INPUT, N, typeIndex));
-    ShVariable b_hi(new ShVariableNode(SH_INPUT, N, typeIndex));
+    ShVariable a_lo(new ShVariableNode(SH_INPUT, N, valueType));
+    ShVariable a_hi(new ShVariableNode(SH_INPUT, N, valueType));
+    ShVariable b_lo(new ShVariableNode(SH_INPUT, N, valueType));
+    ShVariable b_hi(new ShVariableNode(SH_INPUT, N, valueType));
 
-    ShVariable r_lo(new ShVariableNode(SH_OUTPUT, N, typeIndex));
-    ShVariable r_hi(new ShVariableNode(SH_OUTPUT, N, typeIndex));
+    ShVariable r_lo(new ShVariableNode(SH_OUTPUT, N, valueType));
+    ShVariable r_hi(new ShVariableNode(SH_OUTPUT, N, valueType));
 
     shADD(r_lo, a_lo, b_lo);
     shADD(r_hi, a_hi, b_hi);
@@ -61,22 +61,22 @@ ShProgram intervalADD(int N, int typeIndex)
   return result;
 }
 
-ShProgram intervalMUL(int N, int typeIndex) 
+ShProgram intervalMUL(int N, ShValueType valueType) 
 {
   ShProgram result = SH_BEGIN_PROGRAM() {
-    ShVariable a_lo(new ShVariableNode(SH_INPUT, N, typeIndex));
-    ShVariable a_hi(new ShVariableNode(SH_INPUT, N, typeIndex));
-    ShVariable b_lo(new ShVariableNode(SH_INPUT, N, typeIndex));
-    ShVariable b_hi(new ShVariableNode(SH_INPUT, N, typeIndex));
+    ShVariable a_lo(new ShVariableNode(SH_INPUT, N, valueType));
+    ShVariable a_hi(new ShVariableNode(SH_INPUT, N, valueType));
+    ShVariable b_lo(new ShVariableNode(SH_INPUT, N, valueType));
+    ShVariable b_hi(new ShVariableNode(SH_INPUT, N, valueType));
 
-    ShVariable r_lo(new ShVariableNode(SH_OUTPUT, N, typeIndex));
-    ShVariable r_hi(new ShVariableNode(SH_OUTPUT, N, typeIndex));
+    ShVariable r_lo(new ShVariableNode(SH_OUTPUT, N, valueType));
+    ShVariable r_hi(new ShVariableNode(SH_OUTPUT, N, valueType));
 
-    ShVariable ll(new ShVariableNode(SH_TEMP, N, typeIndex));
-    ShVariable lh(new ShVariableNode(SH_TEMP, N, typeIndex));
-    ShVariable hl(new ShVariableNode(SH_TEMP, N, typeIndex));
-    ShVariable hh(new ShVariableNode(SH_TEMP, N, typeIndex));
-    ShVariable temp(new ShVariableNode(SH_TEMP, N, typeIndex));
+    ShVariable ll(new ShVariableNode(SH_TEMP, N, valueType));
+    ShVariable lh(new ShVariableNode(SH_TEMP, N, valueType));
+    ShVariable hl(new ShVariableNode(SH_TEMP, N, valueType));
+    ShVariable hh(new ShVariableNode(SH_TEMP, N, valueType));
+    ShVariable temp(new ShVariableNode(SH_TEMP, N, valueType));
 
     shMUL(ll, a_lo, b_lo);
     shMUL(lh, a_lo, b_hi);
@@ -94,10 +94,10 @@ ShProgram intervalMUL(int N, int typeIndex)
   return result;
 }
 
-ShProgram getProgram(ShOperation op, int N, int typeIndex) {
+ShProgram getProgram(ShOperation op, int N, ShValueType valueType) {
   switch(op) {
-    case SH_OP_ADD:   return intervalADD(N, typeIndex);
-    case SH_OP_MUL:   return intervalMUL(N, typeIndex);
+    case SH_OP_ADD:   return intervalADD(N, valueType);
+    case SH_OP_MUL:   return intervalMUL(N, valueType);
     default:
       shError(ShTransformerException(
             "Cannot translate interval arithmetic"));
@@ -105,7 +105,7 @@ ShProgram getProgram(ShOperation op, int N, int typeIndex) {
   return ShProgram();
 }
 
-typedef std::map<int, int> TypeIndexMap; 
+typedef std::map<int, int> ValueTypeMap; 
 
 // Converts operations on ShInterval<T> to operations on T 
 // This takes the same form as the variable splitters, but does more complicated
@@ -118,8 +118,8 @@ typedef std::map<int, int> TypeIndexMap;
 // code fragments using ShProgram objects in ShSplitIntervalProgram 
 struct IntervalSplitter {
 
-  IntervalSplitter(ShTransformer::VarSplitMap& splits, TypeIndexMap &iaMap, bool &changed)
-    : splits(splits), iaMap(iaMap), changed(changed) {
+  IntervalSplitter(ShTransformer::VarSplitMap& splits, bool &changed)
+    : splits(splits), changed(changed) {
   }
 
   void operator()(ShCtrlGraphNodePtr node) {
@@ -138,7 +138,7 @@ struct IntervalSplitter {
         I != vars.end();) {
       if(split(*I)) {
         // (#) erase the stuff that split added to the end of the var list
-        // TODO check if this is actually no longer needed. 
+        // @todo type check if this is actually no longer needed. 
         //vars.resize(vars.size() - splits[*I].size());
 
         vars.insert(I, splits[*I].begin(), splits[*I].end());
@@ -159,9 +159,9 @@ struct IntervalSplitter {
   // insertions nicely)
   bool split(ShVariableNodePtr node)
   {
-    int typeIndex = node->typeIndex(); 
+    ShValueType valueType = node->valueType(); 
 
-    if(iaMap.count(typeIndex) > 0) return false; 
+    if(!shIsIntervalValueType(valueType)) return false; 
     else if(splits.count(node) > 0) return true;
 
     if( node->kind() == SH_TEXTURE || node->kind() == SH_STREAM ) {
@@ -171,21 +171,20 @@ struct IntervalSplitter {
     changed = true;
 
     ShTransformer::VarNodeVec &splitNodes = splits[node];
-    int newTypeIndex = iaMap[typeIndex];
+    ShValueType newValueType = shRegularValueType(valueType);
 
-    splitNodes.push_back(node->clone(newTypeIndex, false));  // lo
-    splitNodes.push_back(node->clone(newTypeIndex, false));  // hi
-    // TODO handle constants/uniforms
+    splitNodes.push_back(node->clone(newValueType, false));  // lo
+    splitNodes.push_back(node->clone(newValueType, false));  // hi
+    // @todo type handle constants/uniforms
 
     return true; 
   }
 
   ShTransformer::VarSplitMap &splits;
-  TypeIndexMap &iaMap;  // maps from interval arithmetic type index to corresponding non-interval type index
   bool& changed;
 };
 
-// TODO handle negations - remove all negations from interval ShVariables 
+// @todo type handle negations - remove all negations from interval ShVariables 
 // since negating the lo/hi doesn't give a valid interval any more 
 
 /** Splits up operations on intervals into separate non-interval ops
@@ -194,8 +193,8 @@ struct IntervalSplitter {
 struct IntervalStatementFixer {
   typedef std::vector<ShVariable> VarVec;
 
-  IntervalStatementFixer(ShTransformer::VarSplitMap &splits, TypeIndexMap &iaMap)
-    : splits(splits), iaMap(iaMap), dirty(false) {}
+  IntervalStatementFixer(ShTransformer::VarSplitMap &splits)
+    : splits(splits), dirty(false) {}
 
   void operator()(ShCtrlGraphNodePtr node) {
     if (dirty) return;
@@ -250,10 +249,10 @@ struct IntervalStatementFixer {
         // since we used list splices, this should not invalidate the iterator
         // stmtI or variable stmt.
 
-        // TODO handle statements that have some non-interval src/dest
+        // @todo type handle statements that have some non-interval src/dest
         // for now, assume all interval, and all the same interval type
-        int iaType = stmt.dest.typeIndex();
-        int newType = iaMap[iaType];
+        ShValueType iaType = stmt.dest.valueType();
+        ShValueType newType = shRegularValueType(iaType);
 
         ShProgram newProgram = getProgram(stmt.op, opSize, newType);
         
@@ -329,7 +328,6 @@ struct IntervalStatementFixer {
   }
 
   ShTransformer::VarSplitMap &splits;
-  TypeIndexMap &iaMap;
   bool dirty;
 };
 
@@ -338,16 +336,12 @@ struct IntervalStatementFixer {
 namespace SH {
 
 void ShTransformer::convertIntervalTypes(ShTransformer::VarSplitMap &splits) {
-  TypeIndexMap iaMap;
-  iaMap[shTypeIndex<ShInterval<float> >()] = shTypeIndex<float>();
-  iaMap[shTypeIndex<ShInterval<double> >()] = shTypeIndex<double>();
-
-  IntervalSplitter is(splits, iaMap, m_changed);
+  IntervalSplitter is(splits, m_changed);
   is.splitVarList(m_program->inputs);
   is.splitVarList(m_program->outputs);
   m_program->ctrlGraph->dfs(is);
 
-  // TODO this thing is DARNED slow...
+  // @todo type this thing is DARNED slow...
   // To make it faster, need to think about how to continue properly
   // traversing the control graph even if the statement fixer
   // starts mucking around with both the node currently being traversed
@@ -362,7 +356,7 @@ void ShTransformer::convertIntervalTypes(ShTransformer::VarSplitMap &splits) {
   // (It can fix LO, HI, SETLO, and SETHI statements in place without
   // graph mangling)
 
-  IntervalStatementFixer isf(splits, iaMap);
+  IntervalStatementFixer isf(splits);
   do {
     isf.resetDirt();
     m_program->ctrlGraph->dfs(isf);

@@ -1,12 +1,12 @@
 #!/usr/bin/python
 
-import streamtest, sys, common, math
+import shtest, sys, math
 
 def cos(l, types=[]):
-    return streamtest.make_test([math.cos(x) for x in l], [l], types)
+    return shtest.make_test([math.cos(x) for x in l], [l], types)
 
-test = streamtest.StreamTest('cos', 1)
-test.add_call(streamtest.Call(streamtest.Call.call, 'cos', 1))
+test = shtest.StreamTest('cos', 1)
+test.add_call(shtest.Call(shtest.Call.call, 'cos', 1))
 test.add_test(cos((0.0, 1.0, 2.0, 3.0)))
 test.add_test(cos((0.3, 0.5, 0.8, 0.9)))
 test.add_test(cos((math.pi, -math.pi)))

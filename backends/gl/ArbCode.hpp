@@ -48,19 +48,19 @@ class ArbBindingSpecs;
 class ArbMapping;
 
 // Filters for code emission and environment setup
-const unsigned int SH_ARB_ANY   = 0x000; // All targets
-const unsigned int SH_ARB_FP    = 0x001; // ARB_fragment_program
-const unsigned int SH_ARB_VP    = 0x002; // ARB_vertex_program
-const unsigned int SH_ARB_NVFP  = 0x004; // NV_fragment_program_option
-const unsigned int SH_ARB_NVFP2 = 0x008; // NV_fragment_program2
-const unsigned int SH_ARB_ATIDB = 0x010; // ATI_draw_buffers
-const unsigned int SH_ARB_NVVP2 = 0x020; // NV_vertex_program2_option
-const unsigned int SH_ARB_NVVP3 = 0x040; // NV_vertex_program3
-const unsigned int SH_ARB_VEC1  = 0x080; // Maximum source has length 1
-const unsigned int SH_ARB_VEC2  = 0x100; // Maximum source has length 2
-const unsigned int SH_ARB_VEC3  = 0x200; // Maximum source has length 3
-const unsigned int SH_ARB_VEC4  = 0x400; // Maximum source has length 4
-const unsigned int SH_ARB_END   = 0x800; // Not a filter. End of
+const unsigned int SH_ARB_ANY   = 0x0000; // All targets
+const unsigned int SH_ARB_FP    = 0x0001; // ARB_fragment_program
+const unsigned int SH_ARB_VP    = 0x0002; // ARB_vertex_program
+const unsigned int SH_ARB_NVFP  = 0x0004; // NV_fragment_program_option
+const unsigned int SH_ARB_NVFP2 = 0x0008; // NV_fragment_program2
+const unsigned int SH_ARB_ATIDB = 0x0010; // ATI_draw_buffers
+const unsigned int SH_ARB_NVVP2 = 0x0020; // NV_vertex_program2_option
+const unsigned int SH_ARB_NVVP3 = 0x0040; // NV_vertex_program3
+const unsigned int SH_ARB_VEC1  = 0x0080; // Maximum source has length 1
+const unsigned int SH_ARB_VEC2  = 0x0100; // Maximum source has length 2
+const unsigned int SH_ARB_VEC3  = 0x0200; // Maximum source has length 3
+const unsigned int SH_ARB_VEC4  = 0x0400; // Maximum source has length 4
+const unsigned int SH_ARB_END   = 0x1000; // Not a filter. End of
                                          // table.
 
 class ArbCode : public SH::ShBackendCode {
@@ -136,7 +136,9 @@ private:
   void allocConsts(const ArbLimits& limits);
 
   /// Allocate temporary registers (called by allocRegs)
-  void allocTemps(const ArbLimits& limits);
+  /// half indicates whether to allocate the SH_HALF or the SH_FLOAT temporaries 
+  /// on this pass
+  void allocTemps(const ArbLimits& limits, bool half);
 
   /// Allocate textures (called by allocRegs)
   void allocTextures(const ArbLimits& limits);
@@ -179,6 +181,9 @@ private:
   /// The number of temporary registers used in this shader.
   int m_numTemps;
 
+  /// The number of half-float temporary registers used in this shader.
+  int m_numHalfTemps;
+
   /// The number of input registers used in this shader.
   int m_numInputs;
 
@@ -218,7 +223,7 @@ private:
   // floating point types
   //
   // @todo may want more intelligent conversion if hardware 
-  SH::ShTransformer::TypeIndexMap m_convertMap;
+  SH::ShTransformer::ValueTypeMap m_convertMap;
 
   /// ARB Program ID we are bound to. 0 if code hasn't been uploaded yet.
   unsigned int m_programId;

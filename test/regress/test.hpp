@@ -60,25 +60,31 @@ public:
     std::cout << " ]" << std::endl;;
   }
 
+  template<typename T>
+  void mem_from_host(typename T::MemType mem[], T &host) {
+    SH::ShVariantPtr memVariant = new SH::ShDataVariant<T::value_type, SH::SH_MEM>(mem, host.size(), false);
+    memVariant->set(host.getVariant());
+  }
+
   template <class INPUT1, class OUTPUT>
   void run(SH::ShProgram& program,
            const INPUT1& in1,
            const OUTPUT& res)
   {
-    typedef typename INPUT1::MemoryType IT;
-    typedef typename OUTPUT::MemoryType OT;
+    typedef typename INPUT1::MemType IT;
+    typedef typename OUTPUT::MemType OT;
 
     std::string name = program.name();
     IT* _in1 = new IT[in1.size()];
-    in1.getValues(_in1);
+    mem_from_host(_in1, in1);
 
     OT* _out = new OT[res.size()];
-    res.getValues(_out);
+    mem_from_host(_out, res);
     // Arbitrarily change output values
-    for (int i = 0; i < res.size(); i++) _out[i] += 10.0;
+    for (int i = 0; i < res.size(); i++) _out[i] += 10;
 
     OT* _res = new OT[res.size()];
-    res.getValues(_res);
+    mem_from_host(_res, res);
 
     SH::ShHostMemoryPtr mem_in1 = new SH::ShHostMemory(in1.size()*sizeof(IT), _in1);
     SH::ShChannel<typename INPUT1::TempType> chan_in1(mem_in1, 1);
@@ -110,24 +116,24 @@ public:
            const INPUT2& in2,
            const OUTPUT& res)
   {
-    typedef typename INPUT1::MemoryType IT1;
-    typedef typename INPUT2::MemoryType IT2;
-    typedef typename OUTPUT::MemoryType OT;
+    typedef typename INPUT1::MemType IT1;
+    typedef typename INPUT2::MemType IT2;
+    typedef typename OUTPUT::MemType OT;
 
     std::string name = program.name();
     IT1* _in1 = new IT1[in1.size()];
-    in1.getValues(_in1);
+    mem_from_host(_in1, in1);
 
     IT2* _in2 = new IT2[in2.size()];
-    in2.getValues(_in2);
+    mem_from_host(_in2, in2);
 
     OT* _out = new OT[res.size()];
-    res.getValues(_out);
+    mem_from_host(_out, res);
     // Arbitrarily change output values
-    for (int i = 0; i < res.size(); i++) _out[i] += 10.0;
+    for (int i = 0; i < res.size(); i++) _out[i] += 10;
 
     OT* _res = new OT[res.size()];
-    res.getValues(_res);
+    mem_from_host(_res, res);
 
     SH::ShHostMemoryPtr mem_in1 = new SH::ShHostMemory(in1.size()*sizeof(IT1), _in1);
     SH::ShChannel<typename INPUT1::TempType> chan_in1(mem_in1, 1);
@@ -164,29 +170,29 @@ public:
            const INPUT3& in3,
            const OUTPUT res)
   {
-    typedef typename INPUT1::MemoryType IT1;
-    typedef typename INPUT2::MemoryType IT2;
-    typedef typename INPUT3::MemoryType IT3;
-    typedef typename OUTPUT::MemoryType OT;
+    typedef typename INPUT1::MemType IT1;
+    typedef typename INPUT2::MemType IT2;
+    typedef typename INPUT3::MemType IT3;
+    typedef typename OUTPUT::MemType OT;
 
     std::string name = program.name();
   
     IT1* _in1 = new IT1[in1.size()];
-    in1.getValues(_in1);
+    mem_from_host(_in1, in1);
 
     IT2* _in2 = new IT2[in2.size()];
-    in2.getValues(_in2);
+    mem_from_host(_in2, in2);
 
     IT3* _in3 = new IT3[in3.size()];
-    in3.getValues(_in3);
+    mem_from_host(_in3, in3);
 
     OT* _out = new OT[res.size()];
-    res.getValues(_out);
+    mem_from_host(_out, res);
     // Arbitrarily change output values
-    for (int i = 0; i < res.size(); i++) _out[i] += 10.0;
+    for (int i = 0; i < res.size(); i++) _out[i] += 10;
 
     OT* _res = new OT[res.size()];
-    res.getValues(_res);
+    mem_from_host(_res, res);
 
     SH::ShHostMemoryPtr mem_in1 = new SH::ShHostMemory(in1.size()*sizeof(IT1), _in1);
     SH::ShChannel<typename INPUT1::TempType> chan_in1(mem_in1, 1);
@@ -223,7 +229,7 @@ public:
   template <class OUTPUT, class EXPECTED>
   void check(std::string name, const OUTPUT &out, const EXPECTED &res)
   {
-      typedef typename OUTPUT::MemoryType OT;
+      typedef typename OUTPUT::HostType OT;
       OT* _out = new OT[out.size()];
       out.getValues(_out);
 

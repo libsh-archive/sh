@@ -38,6 +38,9 @@ ArbLimits::ArbLimits(const std::string& target)
   SH_GL_CHECK_ERROR(glGetProgramivARB(arb_target, GL_MAX_PROGRAM_INSTRUCTIONS_ARB,
                                         &m_instrs));
 
+  /* @todo implement proper detection of half-float limits. */
+  m_halftemps = (target == "gpu:vertex" ? 0 : 64);
+
   /* TODO implement proper detection of NVIDIA.
    * NVIDIA's GlGetProgramivARB does not update m_temps, so set it to 32 here.
    * ATI will still have the right number because its drivers should set m_temps properly.

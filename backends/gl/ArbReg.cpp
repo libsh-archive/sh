@@ -40,6 +40,7 @@ struct {
   {"ATTRIB", "i"},
   {"PARAM", "u"},
   {"TEMP", "t"},
+  {"HALFTEMP", "h"},
   {"ADDRESS", "a"},
   {"OUTPUT", "o"},
   {"PARAM", "c"},

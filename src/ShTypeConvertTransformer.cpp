@@ -39,15 +39,24 @@
 
 // #define SH_DEBUG_TYPECONVERT
 
+// @file ShTypeConvertTransformer.cpp
+//
+// Currently does something naive.  Assumes all unsupported types in the backend
+// turn into floats, so it is often too conservative.
+// (i.e. in NV for fixed-point registers, may not need to do some of the
+// clamping of operation results, etc.)
+//
+// @todo type may want think about leaving fi and fui types for NV backend to indicate 
+// using _SAT _SSAT modifiers
+//
+// @todo type probably want to use a different set of available operators (or
+// expand on host operator set) for different backends
+
 namespace SH {
 
 // algorithm
 // Converts non-float types into floats (for standard Sh types)
 //
-// @todo allow backend to specify which float format to convert to.
-// eg. short integers may be fine as half-floats for platforms that
-// support that.
-// 
 // Algorithm: 
 // 1) Identify variables of the following types that are not float  
 //   SH_INPUT = 0,
@@ -80,7 +89,7 @@ namespace SH {
 //    This should also operate on the float variables.
 //
 // Conversions in 2&3 should only happen if the type being converted from
-// or to is a key in m_typeMap 
+// or to is a key in m_valueTypeMap 
 //
 // (If neither is the case, then assume that the hardware natively 
 // supports the types and does the appropriate conversions automatically)
@@ -117,21 +126,28 @@ namespace SH {
 //  
 //   SH_STREAM = 
 struct FloatConverter {
-  FloatConverter(ShTransformer::TypeIndexMap &typeMap, ShVarMap &converts)
-    : m_typeMap(typeMap), m_converts(converts), m_eval(ShEval::instance())
+  FloatConverter(ShTransformer::ValueTypeMap &valueTypeMap, ShVarMap &converts)
+    : m_valueTypeMap(valueTypeMap), m_converts(converts), m_eval(ShEval::instance())
   {
-    m_floatIndices.push_back(shTypeIndex<double>());
-    m_floatIndices.push_back(shTypeIndex<float>());
+    m_floatIndices.push_back(SH_DOUBLE);
+    m_floatIndices.push_back(SH_FLOAT);
+    m_floatIndices.push_back(SH_HALF);
 
-    m_intIndices.push_back(shTypeIndex<int>());
-    m_intIndices.push_back(shTypeIndex<short>());
-    m_intIndices.push_back(shTypeIndex<char>());
+    m_intIndices.push_back(SH_INT);
+    m_intIndices.push_back(SH_SHORT);
+    m_intIndices.push_back(SH_BYTE);
     
-    m_uintIndices.push_back(shTypeIndex<unsigned int>());
-    m_uintIndices.push_back(shTypeIndex<unsigned short>());
-    m_uintIndices.push_back(shTypeIndex<unsigned char>());
+    m_uintIndices.push_back(SH_UINT);
+    m_uintIndices.push_back(SH_USHORT);
+    m_uintIndices.push_back(SH_UBYTE);
+
+    m_fracIndices.push_back(SH_FRAC_INT);
+    m_fracIndices.push_back(SH_FRAC_SHORT);
+    m_fracIndices.push_back(SH_FRAC_BYTE);
     
-    //@todo frac types
+    m_ufracIndices.push_back(SH_FRAC_UINT);
+    m_ufracIndices.push_back(SH_FRAC_USHORT);
+    m_ufracIndices.push_back(SH_FRAC_UBYTE);
   }
 
   void operator()(ShCtrlGraphNodePtr node) {
@@ -147,28 +163,28 @@ struct FloatConverter {
 
   // @todo might want to make these more global (perhaps even
   // put it into the TypeInfo for standard types?)
-  bool isFloat(int typeIndex) {
-    return std::find(m_floatIndices.begin(), m_floatIndices.end(), typeIndex) != m_floatIndices.end();
+  bool isFloat(ShValueType valueType) {
+    return std::find(m_floatIndices.begin(), m_floatIndices.end(), valueType) != m_floatIndices.end();
   }
 
-  bool isInt(int typeIndex) {
-    return std::find(m_intIndices.begin(), m_intIndices.end(), typeIndex) != m_intIndices.end();
+  bool isInt(ShValueType valueType) {
+    return std::find(m_intIndices.begin(), m_intIndices.end(), valueType) != m_intIndices.end();
   }
 
   // @todo not implemented yet 
-  bool isUint(int typeIndex) {
-    return std::find(m_uintIndices.begin(), m_uintIndices.end(), typeIndex) != m_uintIndices.end();
+  bool isUint(ShValueType valueType) {
+    return std::find(m_uintIndices.begin(), m_uintIndices.end(), valueType) != m_uintIndices.end();
     return false;
   }
 
   // @todo not implemented yet 
-  bool isFrac(int typeIndex) {
-    //return std::find(m_fracIndices.begin(), m_fracIndices.end(), typeIndex) != m_fracIndices.end();
+  bool isFrac(ShValueType valueType) {
+    //return std::find(m_fracIndices.begin(), m_fracIndices.end(), valueType) != m_fracIndices.end();
     return false;
   }
 
-  bool isUfrac(int typeIndex) {
-    //return std::find(m_ufracIndices.begin(), m_fracIndices.end(), typeIndex) != m_fracIndices.end();
+  bool isUfrac(ShValueType valueType) {
+    //return std::find(m_ufracIndices.begin(), m_fracIndices.end(), valueType) != m_fracIndices.end();
     return false;
   }
 
@@ -189,7 +205,7 @@ struct FloatConverter {
   // but fromType and toType are the original types requested for the statement.
   //
   void insertConversion(ShBasicBlock::ShStmtList &stmtList, const ShBasicBlock::ShStmtList::iterator &I,
-      const ShVariable &var, int fromType, const ShVariable &result, int toType,
+      const ShVariable &var, ShValueType fromType, const ShVariable &result, ShValueType toType,
       unsigned int forced = 0)
   {
     unsigned int operations = forced;
@@ -204,11 +220,19 @@ struct FloatConverter {
       }
       operations |= APPLY_FLR;
     } else if(isFrac(toType)) {
-      // @todo
-      SH_DEBUG_PRINT("Conversion to fractional types not implemented yet.");
+      if (isFloat(fromType) || isInt(fromType)) {
+        operations |= APPLY_MAX_1;
+        operations |= APPLY_MIN1;
+      } else if (isUint(fromType)) {
+        operations |= APPLY_MIN1;
+      }
     } else if(isUfrac(toType)) {
-      // @todo
-      SH_DEBUG_PRINT("Conversion to unsigned fractional types not implemented yet.");
+      if (isFloat(fromType) || isInt(fromType)) {
+        operations |= APPLY_MAX0;
+        operations |= APPLY_MIN1;
+      } else if (isUint(fromType)) {
+        operations |= APPLY_MIN1;
+      }
     }
     // @todo make sure to run make another temp in case
     // one of var/result is an IN/OUT and hence cannot be used in computation 
@@ -218,19 +242,19 @@ struct FloatConverter {
 
     if(operations & APPLY_MAX_1) {
       ShVariable one(var.node()->clone(SH_CONST, SH_ATTRIB, 1, false, false));
-      one.setVariant(shTypeInfo(var.typeIndex())->variantFactory()->generateOne());
+      one.setVariant(shVariantFactory(var.valueType())->generateOne());
       stmtList.insert(I, ShStatement(temp, temp, SH_OP_MAX, one)); 
     }
 
     if(operations & APPLY_MAX0)  {
       ShVariable zero(var.node()->clone(SH_CONST, SH_ATTRIB, 1, false, false));
-      zero.setVariant(shTypeInfo(var.typeIndex())->variantFactory()->generateZero());
+      zero.setVariant(shVariantFactory(var.valueType())->generateZero());
       stmtList.insert(I, ShStatement(temp, temp, SH_OP_MAX, zero)); 
     }
 
     if(operations & APPLY_MIN1)  {
       ShVariable one(var.node()->clone(SH_CONST, SH_ATTRIB, 1, false, false));
-      one.setVariant(shTypeInfo(var.typeIndex())->variantFactory()->generateOne());
+      one.setVariant(shVariantFactory(var.valueType())->generateOne());
       stmtList.insert(I, ShStatement(temp, temp, SH_OP_MIN, one)); 
     }
 
@@ -253,41 +277,55 @@ struct FloatConverter {
     // Get the operation information used for this statement 
     const ShEvalOpInfo* evalOpInfo = m_eval->getEvalOpInfo(
         stmt.op,
-        stmt.dest.typeIndex(), 
-        stmt.src[0].typeIndex(),
-        stmt.src[1].typeIndex(),
-        stmt.src[2].typeIndex());
+        stmt.dest.valueType(), 
+        stmt.src[0].valueType(),
+        stmt.src[1].valueType(),
+        stmt.src[2].valueType());
 
+    ShEvalOpInfo* texInfo = 0;
     if(!evalOpInfo) {
-      // @todo type 
-      // for now, assume its one of the instructions that has no immediate mode functionality (e.g. kill, texture lookup)
-      // It could also be that no operation matched the arguments
-      SH_DEBUG_PRINT("Possible problem finding evaluator for op = " << opInfo[stmt.op].name); 
-      return;
+      switch(stmt.op) {
+        case SH_OP_TEX:
+        case SH_OP_TEXI:
+        case SH_OP_FETCH:
+        case SH_OP_TEXD:
+          // @todo type think of a cleaner solution.
+          // - we probably shouldn't be using the host-side set of operations
+          // anyway - maybe use a functor given by the backend that decides
+          // which types to use for a given set of src/dest types 
+          
+          // temporary hack - make an evalop for this
+          evalOpInfo = texInfo = new ShEvalOpInfo(stmt.op, 0, stmt.dest.valueType(), stmt.src[0].valueType(), stmt.src[1].valueType(), stmt.src[2].valueType());
+          break;
+        default:
+          // It could also be that no operation matched the arguments
+          SH_DEBUG_PRINT("Possible problem finding evaluator for op = " << opInfo[stmt.op].name); 
+          return;
+      }
     }
 
     for(int i = 0; i < 3; ++i) {
-      int srcIndex = stmt.src[i].typeIndex();
-      int opIndex = evalOpInfo->m_src[i]; 
-      if(srcIndex == opIndex) continue;
-      if((m_typeMap.count(srcIndex) == 0) && (m_typeMap.count(opIndex) == 0)) continue;
+      ShValueType srcValueType = stmt.src[i].valueType();
+      ShValueType opValueType = evalOpInfo->m_src[i]; 
+      if(srcValueType == opValueType) continue;
+      if((m_valueTypeMap.count(srcValueType) == 0) && (m_valueTypeMap.count(opValueType) == 0)) continue;
 
 #ifdef SH_DEBUG_TYPECONVERT
-      SH_DEBUG_PRINT("  Converting src[" << i << "] from " << shTypeInfo(srcIndex)->name()
-          << " to " << shTypeInfo(opIndex)->name());
+      SH_DEBUG_PRINT("  Converting src[" << i << "] from " << shTypeInfo(srcValueType)->name()
+          << " to " << shTypeInfo(opValueType)->name());
 #endif
 
       // Step 2: prepend code to convert src[i], making sure all variables
-      // involved are converted if their type is in m_typeMap
-      int tempIndex = opIndex;
-      if(m_typeMap.count(tempIndex) > 0) tempIndex = m_typeMap[tempIndex];
-      ShVariable temp(stmt.src[i].node()->clone(SH_TEMP, stmt.src[i].size(), tempIndex, false, false));
+      // involved are converted if their type is in m_valueTypeMap
+      ShValueType tempValueType = opValueType;
+      if(m_valueTypeMap.count(tempValueType) > 0) tempValueType = m_valueTypeMap[tempValueType];
+      ShVariable temp(stmt.src[i].node()->clone(SH_TEMP, stmt.src[i].size(), tempValueType, false, false));
 
       ShVariableNodePtr varNode = stmt.src[i].node();
       if(m_converts.count(varNode) > 0) varNode = m_converts[varNode];
       ShVariable newsrc(varNode, stmt.src[i].swizzle(), stmt.src[i].neg());
 
-      insertConversion(stmtList, I, newsrc, srcIndex, temp, opIndex); 
+      insertConversion(stmtList, I, newsrc, srcValueType, temp, opValueType); 
 
       stmt.src[i] = temp;
     }
@@ -298,21 +336,21 @@ struct FloatConverter {
     // result as non-float, so the output needs to be fixed...
     //
     // @todo in particular, for int, DIV, POW need flooring afterwards 
-    int destIndex = stmt.dest.typeIndex();
-    int opDest = evalOpInfo->m_dest;
-    if((destIndex != opDest) &&
-       (m_typeMap.count(destIndex) + m_typeMap.count(opDest) > 0)) {
+    ShValueType destValueType = stmt.dest.valueType();
+    ShValueType opDest = evalOpInfo->m_dest;
+    if((destValueType != opDest) &&
+       (m_valueTypeMap.count(destValueType) + m_valueTypeMap.count(opDest) > 0)) {
 
 #ifdef SH_DEBUG_TYPECONVERT
-      SH_DEBUG_PRINT("  Converting dest from " << shTypeInfo(opDest)->name() << " to " << shTypeInfo(destIndex)->name() );
+      SH_DEBUG_PRINT("  Converting dest from " << shTypeInfo(opDest)->name() << " to " << shTypeInfo(destValueType)->name() );
 #endif
 
       ShBasicBlock::ShStmtList::iterator afterI = I;
       ++afterI;
 
-      int tempIndex = opDest;
-      if(m_typeMap.count(tempIndex) > 0) tempIndex = m_typeMap[tempIndex];
-      ShVariable temp(stmt.dest.node()->clone(SH_TEMP, stmt.dest.size(), tempIndex, false, false));
+      ShValueType tempValueType = opDest;
+      if(m_valueTypeMap.count(tempValueType) > 0) tempValueType = m_valueTypeMap[tempValueType];
+      ShVariable temp(stmt.dest.node()->clone(SH_TEMP, stmt.dest.size(), tempValueType, false, false));
 
       ShVariableNodePtr varNode = stmt.dest.node();
       if(m_converts.count(varNode) > 0) varNode = m_converts[varNode];
@@ -321,23 +359,25 @@ struct FloatConverter {
       // @todo type check for other special cases
       unsigned int forcedOps = 0;
       if((stmt.op == SH_OP_DIV || stmt.op == SH_OP_POW) && 
-         (isInt(destIndex) || isUint(destIndex))) {
+         (isInt(destValueType) || isUint(destValueType))) {
         forcedOps |= APPLY_FLR; 
       }
 
-      insertConversion(stmtList, afterI, temp, opDest, newdest, destIndex, forcedOps); 
+      insertConversion(stmtList, afterI, temp, opDest, newdest, destValueType, forcedOps); 
 
       stmt.dest = temp;
     }
+
+    if(texInfo) delete texInfo;
   }
 
   // Adds a conversion for p into the m_converts map 
   void operator()(const ShVariableNodePtr &p) {
     // check if done or conversion not necessary
     if(m_converts.count(p) > 0) return; 
-    if(m_typeMap.count(p->typeIndex()) == 0) return; 
+    if(m_valueTypeMap.count(p->valueType()) == 0) return; 
     ShVariableNodePtr &converted_p = m_converts[p] 
-      = p->clone(m_typeMap[p->typeIndex()], false);
+      = p->clone(m_valueTypeMap[p->valueType()], false);
 
     if(p->hasValues()) {
       converted_p->setVariant(p->getVariant());
@@ -357,13 +397,13 @@ struct FloatConverter {
     }
 
 #ifdef SH_DEBUG_TYPECONVERT
-    SH_DEBUG_PRINT("Converting " << p->name() << " from " << shTypeInfo(p->typeIndex())->name()
-      << " to " << shTypeInfo(m_typeMap[p->typeIndex()])->name()); 
+    SH_DEBUG_PRINT("Converting " << p->name() << " from " << shTypeInfo(p->valueType())->name()
+      << " to " << shTypeInfo(m_valueTypeMap[p->valueType()])->name()); 
 #endif
   }
 
 
-  ShTransformer::TypeIndexMap &m_typeMap;
+  ShTransformer::ValueTypeMap &m_valueTypeMap;
   ShVarMap &m_converts;
 
   private:
@@ -373,14 +413,14 @@ struct FloatConverter {
     TypeIndexSet m_floatIndices;
     TypeIndexSet m_intIndices;
     TypeIndexSet m_uintIndices;
-    //TypeIndexSet m_fracIndices;
-    //TypeIndexSet m_ufracIndices;
+    TypeIndexSet m_fracIndices;
+    TypeIndexSet m_ufracIndices;
 };
 
-void ShTransformer::convertToFloat(TypeIndexMap &typeMap)
+void ShTransformer::convertToFloat(ValueTypeMap &valueTypeMap)
 {
   ShVarMap converts;
-  FloatConverter floatconv(typeMap, converts);
+  FloatConverter floatconv(valueTypeMap, converts);
 
   // Step 1
   m_program->collectVariables(); 

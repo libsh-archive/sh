@@ -5,46 +5,46 @@
 
 namespace SH {
 
-template<int N, typename T>
+template<int N, ShValueType V>
 inline
-ShGeneric<N, T> lo(const ShGeneric<N, ShInterval<T> >& var)
+ShGeneric<N, V> lo(const ShGeneric<N, ShIntervalValueType<V>::type>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  ShAttrib<N, SH_TEMP, V> t;
   shLO(t, var);
   return t;
 }
 
-template<int N, typename T>
+template<int N, ShValueType V>
 inline
-ShGeneric<N, T> hi(const ShGeneric<N, ShInterval<T> >& var)
+ShGeneric<N, V> hi(const ShGeneric<N, ShIntervalValueType<V>::type>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  ShAttrib<N, SH_TEMP, V> t;
   shHI(t, var);
   return t;
 }
 
-template<int N, typename T1, typename T2>
+template<int N, ShValueType V1, ShValueType V2>
 inline
-void setlo(const ShGeneric<N, ShInterval<T1> >& var, const ShGeneric<N, T2> &lo)
+void setlo(const ShGeneric<N, ShIntervalValueType<V1>::type>& var, const ShGeneric<N, V2> &lo)
 {
   shSETLO(var, lo);
   return var;
 }
 
-template<int N, typename T1, typename T2>
+template<int N, ShValueType V1, ShValueType V2>
 inline
-void sethi(const ShGeneric<N, ShInterval<T1> >& var, const ShGeneric<N, T2> &hi)
+void sethi(const ShGeneric<N, ShIntervalValueType<V1>::type>& var, const ShGeneric<N, V2> &hi)
 {
   shSETHI(var, hi);
   return var;
 }
 
-template<int N, typename T1, typename T2>
+template<int N, ShValueType V1, ShValueType V2>
 inline
-ShGeneric<N, ShInterval<CT1T2> > makeInterval(const ShGeneric<N, T1>& lo,
-    const ShGeneric<N, T2> &hi) 
+ShGeneric<N, ShIntervalValueType<CV1V2>::type> makeInterval(const ShGeneric<N, V1>& lo,
+    const ShGeneric<N, V2> &hi) 
 {
-  ShAttrib<N, SH_TEMP, ShInterval<CT1T2> > t;
+  ShAttrib<N, SH_TEMP, ShIntervalValueType<CV1V2>::type> t;
   shSETLO(t, lo);
   shSETHI(t, hi);
   return t;

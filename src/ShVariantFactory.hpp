@@ -29,99 +29,54 @@
 
 #include <string>
 #include "ShDllExport.hpp"
-#include "ShVariant.hpp"
+#include "ShRefCount.hpp"
 #include "ShTypeInfo.hpp"
 
 namespace SH {
 
+struct ShVariant;
 
 struct 
 SH_DLLEXPORT 
 ShVariantFactory {
   virtual ~ShVariantFactory() {}
 
-  /// Functions that generate host storage type variants  
-  //
-  // @see ShHostType 
-  //@{
-  
   /// Creates a ShDataVariant object with N components 
-  virtual ShVariantPtr generate(int N) const = 0; 
+  virtual ShVariant* generate(int N) const = 0; 
 
   /// Creates a ShDataVariant object by using the 
   // decode method from the Variant type corresponding
   // to this factory
-  virtual ShVariantPtr generate(std::string s) const = 0;
+  virtual ShVariant* generate(std::string s) const = 0;
 
   /// Creates an ShDataVariant object with the existing
   /// array as data
   /// @param managed Set to true iff this should make a copy
   //                 rather than using the given array internally.
-  virtual ShVariantPtr generate(void *data, int N, bool managed = true) const = 0;  
-
-  /// Creates ShDataVariant objects with N default low
-  // range values for the given ShSemanticType
-  virtual ShVariantPtr generateLowBound(int N, ShSemanticType type) const = 0; 
-  virtual ShVariantPtr generateHighBound(int N, ShSemanticType type) const = 0; 
+  virtual ShVariant* generate(void *data, int N, bool managed = true) const = 0;  
 
   /// Creates an ShDataVariant object with N elements set to zero.
-  virtual ShVariantPtr generateZero(int N = 1) const = 0;
+  virtual ShVariant* generateZero(int N = 1) const = 0;
 
   /// Creates an ShDataVariant object with N elements set to one. 
-  virtual ShVariantPtr generateOne(int N = 1) const = 0;
-
-  /// Creates an ShDataVariant object with N elements set to true 
-  virtual ShVariantPtr generateTrue(int N = 1) const = 0;
-
-  /// Creates an ShDataVariant object with N elements set to false 
-  virtual ShVariantPtr generateFalse(int N = 1) const = 0;
- 
-  // @}
-
-  /// Functions that generate memory storage type variants
-  //
-  // @see ShMemoryType 
-  //@{
-  
-  /// Creates a ShDataVariant object with N components 
-  //
-  virtual ShVariantPtr generateMemory(int N) const = 0;
-
-  /// Creates an ShDataVariant object with the existing
-  /// array as data
-  /// @param managed Set to true iff this should make a copy
-  //                 rather than using the given array internally.
-  virtual ShVariantPtr generateMemory(void *data, int N, bool managed = true) const = 0;  
-
-  //@}
+  virtual ShVariant* generateOne(int N = 1) const = 0;
 };
 
-template<typename T>
+template<ShValueType V, ShDataType DT>
 struct ShDataVariantFactory: public ShVariantFactory {
-  typedef typename ShConcreteTypeInfo<T>::H H; // host storage type 
-  typedef typename ShConcreteTypeInfo<T>::M M; // memory storage type
+  ShVariant* generate(int N) const;
 
-  ShVariantPtr generate(int N) const;
+  ShVariant* generate(std::string s) const; 
 
-  ShVariantPtr generate(std::string s) const; 
+  ShVariant* generate(void *data, int N, bool managed = true) const;  
 
-  ShVariantPtr generate(void *data, int N, bool managed = true) const;  
+  ShVariant* generateZero(int N = 1) const;
+  ShVariant* generateOne(int N = 1) const;
 
-  ShVariantPtr generateLowBound(int N, ShSemanticType type) const; 
-  ShVariantPtr generateHighBound(int N, ShSemanticType type) const; 
-
-  ShVariantPtr generateZero(int N = 1) const;
-  ShVariantPtr generateOne(int N = 1) const;
-  ShVariantPtr generateTrue(int N = 1) const;
-  ShVariantPtr generateFalse(int N = 1) const;
-
-  ShVariantPtr generateMemory(int N) const;
-  ShVariantPtr generateMemory(void *data, int N, bool managed = true) const;  
-
-  static const ShDataVariantFactory<T>* instance();
+  static const ShDataVariantFactory* instance();
 
   protected:
-    static ShDataVariantFactory<T> *m_instance;
+    static ShDataVariantFactory *m_instance;
 
     ShDataVariantFactory();
 };

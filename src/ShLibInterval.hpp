@@ -15,29 +15,29 @@ namespace SH {
 
 /** lower bound 
  */
-template<int N, typename T>
-ShGeneric<N, T> lo(const ShGeneric<N, ShInterval<T> >& var);
+template<int N, ShValueType V>
+ShGeneric<N, V> lo(const ShGeneric<N, ShIntervalValueType<V>::type>& var);
 
  /** upper bound
  */
-template<int N, typename T>
-ShGeneric<N, T> hi(const ShGeneric<N, ShInterval<T> >& var);
+template<int N, ShValueType V>
+ShGeneric<N, V> hi(const ShGeneric<N, ShIntervalValueType<V>::type>& var);
 
 /** Sets lower bound with a regular tuple and returns updated var */ 
-template<int N, typename T1, typename T2>
-ShGeneric<N, ShInterval<T1> >& 
-setlo(ShGeneric<N, ShInterval<T1> >& var, const ShGeneric<N, T2> &lo);
+template<int N, ShValueType V1, ShValueType V2>
+ShGeneric<N, ShIntervalValueType<V1>::type>& 
+setlo(ShGeneric<N, ShIntervalValueType<V1>::type>& var, const ShGeneric<N, V2> &lo);
 
 /** Sets upper bound with a regular tuple and returns updated var */ 
-template<int N, typename T1, typename T2>
-ShGeneric<N, ShInterval<T1> >& 
-sethi(ShGeneric<N, ShInterval<T1> >& var, const ShGeneric<N, T2> &hi);
+template<int N, ShValueType V1, ShValueType V2>
+ShGeneric<N, ShIntervalValueType<V1>::type>& 
+sethi(ShGeneric<N, ShIntervalValueType<V1>::type>& var, const ShGeneric<N, V2> &hi);
 
 /** Creates an interval from two tuples 
  */
-template<int N, typename T1, typename T2>
-ShGeneric<N, ShInterval<CT1T2> > 
-makeInterval(const ShGeneric<N, T1>& lo, const ShGeneric<N, T2>& hi);
+template<int N, ShValueType V1, ShValueType V2>
+ShGeneric<N, ShIntervalValueType<CV1V2>::type> 
+makeInterval(const ShGeneric<N, V1>& lo, const ShGeneric<N, V2>& hi);
 
 /*@}*/
 

@@ -24,93 +24,57 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHVARIANTFACTORYIMPL_HPP
-#define SHVARIANTFACTORYIMPL_HPP
+#ifndef SH_VARIANTFACTORYIMPL_HPP 
+#define SH_VARIANTFACTORYIMPL_HPP 
 
+#include "ShVariant.hpp"
 #include "ShVariantFactory.hpp"
-#include "ShTypeInfo.hpp"
 
 namespace SH {
 
-template<typename T>
-ShVariantPtr ShDataVariantFactory<T>::generate(int N) const
+template<ShValueType V, ShDataType DT>
+ShVariant* ShDataVariantFactory<V, DT>::generate(int N) const
 {
-  return new ShDataVariant<H>(N);
+  return new ShDataVariant<V, DT>(N);
 }
 
-template<typename T>
-ShVariantPtr ShDataVariantFactory<T>::generate(std::string s) const
+template<ShValueType V, ShDataType DT>
+ShVariant* ShDataVariantFactory<V, DT>::generate(std::string s) const
 {
-  return new ShDataVariant<H>(s);
+  return new ShDataVariant<V, DT>(s);
 }
 
-template<typename T>
-ShVariantPtr ShDataVariantFactory<T>::generate(void *data, int N, bool managed) const
+template<ShValueType V, ShDataType DT>
+ShVariant* ShDataVariantFactory<V, DT>::generate(void *data, int N, bool managed) const
 {
-  return new ShDataVariant<H>(data, N, managed);
+  return new ShDataVariant<V, DT>(data, N, managed);
 }
 
-template<typename T>
-ShVariantPtr ShDataVariantFactory<T>::generateLowBound(int N, ShSemanticType type) const
+template<ShValueType V, ShDataType DT>
+ShVariant* ShDataVariantFactory<V, DT>::generateZero(int N) const
 {
-  return new ShDataVariant<H>(N, ShConcreteTypeInfo<T>::defaultLo(type));
+  return new ShDataVariant<V, DT>(N);
 }
 
-template<typename T>
-ShVariantPtr ShDataVariantFactory<T>::generateHighBound(int N, ShSemanticType type) const
+template<ShValueType V, ShDataType DT>
+ShVariant* ShDataVariantFactory<V, DT>::generateOne(int N) const
 {
-  return new ShDataVariant<H>(N, ShConcreteTypeInfo<T>::defaultHi(type));
+  return new ShDataVariant<V, DT>(N, ShDataTypeConstant<V, DT>::One);
 }
 
-template<typename T>
-ShVariantPtr ShDataVariantFactory<T>::generateZero(int N) const
-{
-  return new ShDataVariant<H>(N, ShConcreteTypeInfo<T>::ZERO);
-}
+template<ShValueType V, ShDataType DT>
+ShDataVariantFactory<V, DT>* ShDataVariantFactory<V, DT>::m_instance = 0;
 
-template<typename T>
-ShVariantPtr ShDataVariantFactory<T>::generateOne(int N) const
+template<ShValueType V, ShDataType DT>
+const ShDataVariantFactory<V, DT>*
+ShDataVariantFactory<V, DT>::instance() 
 {
-  return new ShDataVariant<H>(N, ShConcreteTypeInfo<T>::ONE);
-}
-
-template<typename T>
-ShVariantPtr ShDataVariantFactory<T>::generateTrue(int N) const
-{
-  return new ShDataVariant<H>(N, ShConcreteTypeInfo<T>::TrueVal);
-}
-
-template<typename T>
-ShVariantPtr ShDataVariantFactory<T>::generateFalse(int N) const
-{
-  return new ShDataVariant<H>(N, ShConcreteTypeInfo<T>::FalseVal);
-}
-
-template<typename T>
-ShVariantPtr ShDataVariantFactory<T>::generateMemory(int N) const
-{
-  return new ShDataVariant<M>(N);
-}
-
-template<typename T>
-ShVariantPtr ShDataVariantFactory<T>::generateMemory(void *data, int N, bool managed) const
-{
-  return new ShDataVariant<M>(data, N, managed);
-}
-
-template<typename T>
-ShDataVariantFactory<T>* ShDataVariantFactory<T>::m_instance = 0;
-
-template<typename T>
-const ShDataVariantFactory<T>*
-ShDataVariantFactory<T>::instance() 
-{
-  if(!m_instance) m_instance = new ShDataVariantFactory<T>();
+  if(!m_instance) m_instance = new ShDataVariantFactory<V, DT>();
   return m_instance;
 }
 
-template<typename T>
-ShDataVariantFactory<T>::ShDataVariantFactory()
+template<ShValueType V, ShDataType DT>
+ShDataVariantFactory<V, DT>::ShDataVariantFactory()
 {}
 
 }

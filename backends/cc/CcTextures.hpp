@@ -24,12 +24,6 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHCCTEXTURES_HPP
-#define SHCCTEXTURES_HPP
-
-#include <algorithms>
-
-namespace ShCc {
 
 /** @file CcTextures.hpp
  *
@@ -49,37 +43,35 @@ namespace ShCc {
 // @todo type
 // add casting code for when MemoryType is not equivalent to the type used in computation
 
-// round to integer and clamp to [0, max)
+// floor and clamp to [0, max) for aninteger lookup
 template<typename T>
 int sh_cc_backend_nearest(T value, int max)
 {
-  return std::max(std::min((int)(value + 0.5), 0), max - 1);
+  int result = (int)(floor(value)); 
+  return result < 0 ? 0 : ( result >= max ? max - 1 : result); 
 }
 
 template<int TexDims, int TexSize, int TexWidth, int TexHeight, int TexDepth, typename IndexType, typename MemoryType> 
-sh_cc_backend_lookupi(void *texture, IndexType *src, MemoryType *dest)
+void sh_cc_backend_lookupi(const void *texture, IndexType *src, MemoryType *dest)
 {
-  MemoryType* data = reinterpret_cast<MemoryType *>(texture);
+  const MemoryType* data = reinterpret_cast<const MemoryType *>(texture);
   int index = 0;
   if(TexDims == 3) index = sh_cc_backend_nearest(src[2], TexDepth);
   if(TexDims >= 2) index = sh_cc_backend_nearest(src[1], TexHeight) + TexHeight * index;
   index = sh_cc_backend_nearest(src[0], TexWidth) + TexWidth * index;
 
   int start = index * TexSize; 
-  std::copy(data + start, data + start + TexSize, dest); 
+  for(int i = 0; i < TexSize; ++i) dest[i] = data[start + i]; 
 }
 
 template<int TexDims, int TexSize, int TexWidth, int TexHeight, int TexDepth, typename IndexType, typename MemoryType> 
-sh_cc_backend_lookup(void *texture, IndexType *src, MemoryType *dest)
+void sh_cc_backend_lookup(const void *texture, IndexType *src, MemoryType *dest)
 {
   IndexType scaled_src[TexDims];
   scaled_src[0] = TexWidth * src[0];
   if(TexDims > 1) scaled_src[1] = TexHeight * src[1];
   if(TexDims > 2) scaled_src[2] = TexDepth * src[2];
 
-  sh_cc_backend_lookupi(texture, scaled_src, dest);
+  sh_cc_backend_lookupi<TexDims, TexSize, TexWidth, TexHeight, TexDepth>(texture, scaled_src, dest);
 }
 
-}
-
-#endif

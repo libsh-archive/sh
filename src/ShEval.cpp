@@ -35,8 +35,8 @@ ShEval* ShEval::m_instance = 0;
 
 //#define SH_DEBUG_SHEVAL 
 
-void ShEval::operator()(ShOperation op, ShVariantPtr dest, 
-    ShVariantCPtr a, ShVariantCPtr b, ShVariantCPtr c) const
+void ShEval::operator()(ShOperation op, ShVariant* dest, 
+    const ShVariant* a, const ShVariant* b, const ShVariant* c) const
 {
 #ifdef SH_DEBUG_SHEVAL
   SH_DEBUG_PRINT("PRE OP=" << opInfo[op].name << " "
@@ -47,33 +47,38 @@ void ShEval::operator()(ShOperation op, ShVariantPtr dest,
 #endif
 
   const ShEvalOpInfo *evalOpInfo = 
-    getEvalOpInfo(op, dest ? dest->typeIndex() : 0, 
-                      a ? a->typeIndex() : 0, 
-                      b ? b->typeIndex() : 0, 
-                      c ? c->typeIndex() : 0);
+    getEvalOpInfo(op, dest ? dest->valueType() : SH_VALUETYPE_END, 
+                      a ? a->valueType() : SH_VALUETYPE_END, 
+                      b ? b->valueType() : SH_VALUETYPE_END, 
+                      c ? c->valueType() : SH_VALUETYPE_END);
 
-  SH_DEBUG_ASSERT((evalOpInfo != 0) && (m_evalOpMap.count(*evalOpInfo) > 0));
-  ShPointer<const ShEvalOp> evalOp = m_evalOpMap.find(*evalOpInfo)->second; 
+  const ShEvalOp* evalOp = evalOpInfo->m_evalOp; 
  
   // cast arguments to required types, and set up a destination
   // of the required type
   ShCastManager *castmgr = ShCastManager::instance();
 
-  // note - we do a castdest in case the op only modifies part of the value
-  // in each tuple component of dest (e.g. setting lo on intervals)
-  ShVariantPtr castdest = dest ? castmgr->doCast(evalOpInfo->m_dest, dest) : dest;
-  a = a ? castmgr->doCast(evalOpInfo->m_src[0], a) : a;
-  b = b ? castmgr->doCast(evalOpInfo->m_src[1], b) : b;
-  c = c ? castmgr->doCast(evalOpInfo->m_src[2], c) : c;
+  // cast versions of variables
+  ShVariant *cdest; 
+  const ShVariant *ca, *cb, *cc;
+  bool newd, newa, newb, newc; //< indicate whether castmgr allocated new ShVariants
+  newd = castmgr->doAllocCast(cdest, dest, evalOpInfo->m_dest, SH_HOST);
+  newa = castmgr->doAllocCast(ca, a, evalOpInfo->m_src[0], SH_HOST);
+  newb = castmgr->doAllocCast(cb, b, evalOpInfo->m_src[1], SH_HOST);
+  newc = castmgr->doAllocCast(cc, c, evalOpInfo->m_src[2], SH_HOST);
 
-  (*evalOp)(castdest, a, b, c);
+  (*evalOp)(cdest, ca, cb, cc);
 
   // cast destination back and assign 
   // @todo remove the casting cruft if type indicies are the same
-  if(dest) {
-    castdest = castmgr->doCast(dest->typeIndex(), castdest);
-    dest->set(castdest);
+  if(newd) {
+    castmgr->doCast(dest, cdest);
+    delete cdest; 
   }
+  if(newa) delete const_cast<ShVariant*>(ca);
+  if(newb) delete const_cast<ShVariant*>(cb);
+  if(newc) delete const_cast<ShVariant*>(cc);
+
 #ifdef SH_DEBUG_SHEVAL
   SH_DEBUG_PRINT("   RES=" << opInfo[op].name << " "
       << (dest ? dest->encode() : "NULL") << " = "
@@ -83,88 +88,89 @@ void ShEval::operator()(ShOperation op, ShVariantPtr dest,
 #endif
 }
 
-void ShEval::addOp(ShOperation op, ShPointer<const ShEvalOp> evalOp, int dest, int src0Index, int src1Index, int src2Index)
+void ShEval::addOp(ShOperation op, const ShEvalOp* evalOp, ShValueType dest, 
+    ShValueType src0, ShValueType src1, ShValueType src2)
 {
-  ShEvalOpInfo key(op, dest, src0Index, src1Index, src2Index);
-
-  SH_DEBUG_ASSERT(m_evalOpMap.count(key) == 0);
-  m_evalOpMap[key] = evalOp;
+  m_evalOpMap[op].push_back(ShEvalOpInfo(op, evalOp, dest, src0, src1, src2));
+  m_evalOpCache[op][src0][src1][src2] = &(m_evalOpMap[op].back()); // @todo type no refcount inc is okay since above inc'ed 
 }
 
-const ShEvalOpInfo* ShEval::getEvalOpInfo(ShOperation op, int dest,
-    int src0, int src1, int src2) const
+const ShEvalOpInfo* ShEval::getEvalOpInfo(ShOperation op, ShValueType dest,
+    ShValueType src0, ShValueType src1, ShValueType src2) const
 {
-
 #ifdef SH_DEBUG_SHEVAL
   SH_DEBUG_PRINT("ShEval mapping op=" << opInfo[op].name << " dest,src[0-2]= " 
-      << (dest ? shTypeInfo(dest)->name() : "NULL")
-      << ", " << (src0 ? shTypeInfo(src0)->name() : "NULL")
-      << ", " << (src1 ? shTypeInfo(src1)->name() : "NULL")
-      << ", " << (src2 ? shTypeInfo(src2)->name() : "NULL"));
+      << valueTypeName[dest]
+      << ", " << valueTypeName[src0]
+      << ", " << valueTypeName[src1] 
+      << ", " << valueTypeName[src2]); 
 #endif
+
+  const ShEvalOpInfo* result = m_evalOpCache[op][src0][src1][src2];
+  if(result) {
+#ifdef SH_DEBUG_SHEVAL
+      SH_DEBUG_PRINT("    cached result=" << result->encode()); 
+#endif
+    return result;
+  }
+
   // @todo this really needs to be improved...
   // linear search through a table with hundreds of entries is stupid
   // (for *each* operation ever performed)
   
-  // do the naive thing now.  Can cache results later
-  ShEvalOpInfo key = ShEvalOpInfo(op, dest, src0, src1, src2);
-  if(m_evalOpMap.count(key) > 0) return &m_evalOpMap.find(key)->first;
+  const OpInfoList &oiList = m_evalOpMap[op];
+  OpInfoList::const_iterator I;
+  int mindist = 2000000001; 
 
-  InfoOpMap::const_iterator I;
-  const ShEvalOpInfo* result = 0;
-  int min = 1234567890; // TODO pick something that you didn't pick out 
-                        // of the sky after seeing a UFO.
   ShCastManager* castmgr = ShCastManager::instance();
-  for(I = m_evalOpMap.begin(); I != m_evalOpMap.end(); ++I) {
-    // @todo make this faster than linear search...
-    if(op != I->first.m_op) continue;
-    int dist = castmgr->castDist(I->first.m_src[0], src0) +
-               castmgr->castDist(I->first.m_src[1], src1) +
-               castmgr->castDist(I->first.m_src[2], src2); 
-    if(dist < min) {
-      min = dist;
-      result = &(I->first); 
+  for(I = oiList.begin(); I != oiList.end(); ++I) {
+    // @todo type this is a bit messy...
+    int dist = 0;
+    int arity = opInfo[op].arity;
+    if(arity > 0) dist += castmgr->castDist(I->m_src[0], src0); 
+    if(arity > 1) dist += castmgr->castDist(I->m_src[1], src1); 
+    if(arity > 2) dist += castmgr->castDist(I->m_src[2], src2); 
+
+#ifdef SH_DEBUG_SHEVAL
+      SH_DEBUG_PRINT("    dist=" << mindist << " to " << I->encode()); 
+#endif
+
+    if(dist < mindist) {
+      mindist = dist;
+      result = &*I;
     }
   }
 
+  m_evalOpCache[op][src0][src1][src2] = result;
 #ifdef SH_DEBUG_SHEVAL
-  SH_DEBUG_PRINT("    map to " << result->encode()); 
+      SH_DEBUG_PRINT("    result=" << result->encode()); 
 #endif
 
   return result;
 }
 
-bool ShEvalOpInfo::operator<(const ShEvalOpInfo &other) const 
-{
-  if(m_op < other.m_op) return true;
-  else if(m_op > other.m_op) return false;
-  for(int i = 0; i < 3; ++i) {
-    if(m_src[i] < other.m_src[i]) return true;
-    if(m_src[i] > other.m_src[i]) return false;
-  }
-  return false;
-}
-
 ShStatementInfo* ShEvalOpInfo::clone() const 
 {
-  return new ShEvalOpInfo(m_op, m_dest, m_src[0], m_src[1], m_src[2]); 
+  return new ShEvalOpInfo(m_op, m_evalOp, m_dest, m_src[0], m_src[1], m_src[2]); 
 }
 
 std::string ShEvalOpInfo::encode() const
 {
   std::ostringstream out;
   out << opInfo[m_op].name << ",";
-  out << (m_dest ? shTypeInfo(m_dest)->name() : "NULL");
-  for(int i = 0; i < 3; ++i) out << ", " << (m_src[i] ? shTypeInfo(m_src[i])->name() : "NULL");
+  out << (m_dest != SH_VALUETYPE_END ? shTypeInfo(m_dest)->name() : "NULL");
+  for(int i = 0; i < 3; ++i) out << ", " << (m_src[i] != SH_VALUETYPE_END ? shTypeInfo(m_src[i])->name() : "NULL");
   return out.str();
 }
 
 std::string ShEval::availableOps() const
 {
   std::ostringstream out;
-  for(InfoOpMap::const_iterator I = m_evalOpMap.begin();
-      I != m_evalOpMap.end(); ++I) {
-    out << I->first.encode() << std::endl;
+  for(int i = 0; i < (int)SH_OPERATION_END; ++i) {
+    for(OpInfoList::const_iterator I = m_evalOpMap[i].begin();
+      I != m_evalOpMap[i].end(); ++I) {
+      out << I->encode() << std::endl;
+    }
   }
   return out.str();
 }
@@ -177,10 +183,19 @@ ShEval* ShEval::instance()
 }
 
 ShEval::ShEval()
-{}
+{
+  // clear evalOpCache
+  for(int i = 0; i < (int)SH_OPERATION_END; ++i) 
+  for(int j = 0; j < (int)SH_VALUETYPE_END; ++j)
+  for(int k = 0; k < (int)SH_VALUETYPE_END; ++k)
+  for(int l = 0; l < (int)SH_DATATYPE_END; ++l) {
+    m_evalOpCache[i][j][k][l] = 0;
+  }
+}
 
-ShEvalOpInfo::ShEvalOpInfo(ShOperation op, int dest, int src0, int src1, int src2) 
-  : m_op(op), m_dest(dest)
+ShEvalOpInfo::ShEvalOpInfo(ShOperation op, const ShEvalOp* evalOp, 
+    ShValueType dest, ShValueType src0, ShValueType src1, ShValueType src2) 
+  : m_op(op), m_evalOp(evalOp), m_dest(dest)
 {
   m_src[0] = src0;
   m_src[1] = src1;

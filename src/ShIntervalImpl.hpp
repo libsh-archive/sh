@@ -29,7 +29,6 @@
 
 #include <cmath>
 #include "ShInterval.hpp"
-#include "ShTypeInfo.hpp"
 
 namespace SH {
 
@@ -50,6 +49,12 @@ ShInterval<T>::ShInterval(const T& value)
 template<typename T>
 ShInterval<T>::ShInterval(const T& lo, const T& hi)
   : m_lo(lo), m_hi(hi)
+{}
+
+template<typename T>
+template<typename T2>
+ShInterval<T>::ShInterval(const ShInterval<T2> &other)
+  : m_lo((T)(other.lo())), m_hi((T)(other.hi()))
 {}
 
 /** accessor methods **/
@@ -147,7 +152,7 @@ ShInterval<T>& ShInterval<T>::operator*=(const T &value)
 {
   m_lo = m_lo * value;
   m_hi = m_hi * value;
-  if(value < ShConcreteTypeInfo<T>::ZERO) std::swap(m_lo, m_hi); 
+  if(value < 0) std::swap(m_lo, m_hi); 
   return *this;
 }
 
@@ -333,7 +338,7 @@ ShInterval<T> frac(const ShInterval<T> &a)
 {
   // @todo - if width > 1, then return below,
   // otherwise do some more figuring
-  return ShInterval<T>(ShConcreteTypeInfo<T>::ZERO, ShConcreteTypeInfo<T>::ONE);
+  return ShInterval<T>(0, 1);
 }
 
 template<typename T>
@@ -375,8 +380,8 @@ ShInterval<T> sgn(const ShInterval<T> &a)
   // @todo have constants for positve, negative, zero values
 
   // the usual sgn function is monotonic:
-  return ShInterval<T>(a.m_lo < ShConcreteTypeInfo<T>::ZERO ? -1 : a.m_lo > 0 ? 1 : 0,
-                       a.m_hi < ShConcreteTypeInfo<T>::ZERO ? -1 : a.m_hi > 0 ? 1 : 0);
+  return ShInterval<T>(a.m_lo < 0 ? -1 : a.m_lo > 0 ? 1 : 0,
+                       a.m_hi < 0 ? -1 : a.m_hi > 0 ? 1 : 0);
 }
 
 template<typename T>
@@ -451,10 +456,9 @@ ShInterval<T> __boolean_op(bool trueCond, bool falseCond) {
   // @todo special value for maybe? 
   // @todo make this return something special (other than Interval<T>)?
   
-  if(trueCond) return ShInterval<T>(ShConcreteTypeInfo<T>::TrueVal);
-  if(falseCond) return ShInterval<T>(ShConcreteTypeInfo<T>::FalseVal);
-  return ShInterval<T>(ShConcreteTypeInfo<T>::FalseVal,
-      ShConcreteTypeInfo<T>::TrueVal);
+  if(trueCond) return ShInterval<T>(1);
+  if(falseCond) return ShInterval<T>(0);
+  return ShInterval<T>(0, 1);
 }
 
 template<typename T>
@@ -554,7 +558,7 @@ ShInterval<T> abs(const ShInterval<T> &a)
 
   hi = std::max(std::fabs(a.m_lo), std::fabs(a.m_hi));
   lo = std::min(std::fabs(a.m_lo), std::fabs(a.m_hi));
-  if(a.m_lo <= ShConcreteTypeInfo<T>::ZERO && a.m_hi >= ShConcreteTypeInfo<T>::ZERO) lo = 0;
+  if(a.m_lo <= 0 && a.m_hi >= 0) lo = 0;
   return ShInterval<T>(lo, hi);
 }
 
@@ -563,13 +567,13 @@ template<typename T>
 ShInterval<T> cond(const ShInterval<T> &a, const ShInterval<T> &b, 
     const ShInterval<T> &c)
 {
-  return lerp(a > ShConcreteTypeInfo<T>::ZERO, b, c);
+  return lerp(a > (T)(0), b, c);
 }
 
 template<typename T>
 ShInterval<T> lerp(const ShInterval<T> &a, const ShInterval<T> &b, const ShInterval<T> &c) 
 {
-  return a * b + (ShConcreteTypeInfo<T>::ONE - a) * c;
+  return a * b + ((T)(1) - a) * c;
 }
 
 }

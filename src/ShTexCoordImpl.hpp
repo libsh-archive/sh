@@ -38,1487 +38,1487 @@
 
 namespace SH {
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<N, Binding, T, Swizzled>::ShTexCoord()
+ShTexCoord<N, Binding, V, Swizzled>::ShTexCoord()
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<N, Binding, T, Swizzled>::ShTexCoord(const ShGeneric<N, T2>& other)
+ShTexCoord<N, Binding, V, Swizzled>::ShTexCoord(const ShGeneric<N, V2>& other)
   : ParentType(other)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<N, Binding, T, Swizzled>::ShTexCoord(const ShTexCoord<N, Binding, T, Swizzled>& other)
+ShTexCoord<N, Binding, V, Swizzled>::ShTexCoord(const ShTexCoord<N, Binding, V, Swizzled>& other)
   : ParentType(other)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<N, Binding, T, Swizzled>::ShTexCoord(const ShTexCoord<N, Binding, T2, Swizzled>& other)
+ShTexCoord<N, Binding, V, Swizzled>::ShTexCoord(const ShTexCoord<N, Binding, V2, Swizzled>& other)
   : ParentType(other)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<N, Binding, T, Swizzled>::ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg)
+ShTexCoord<N, Binding, V, Swizzled>::ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg)
   : ParentType(node, swizzle, neg)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<N, Binding, T, Swizzled>::ShTexCoord(H data[N])
+ShTexCoord<N, Binding, V, Swizzled>::ShTexCoord(H data[N])
   : ParentType(data)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<N, Binding, T, Swizzled>::~ShTexCoord()
+ShTexCoord<N, Binding, V, Swizzled>::~ShTexCoord()
 {
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<N, Binding, T, Swizzled>&
-ShTexCoord<N, Binding, T, Swizzled>::operator=(const ShGeneric<N, T2>& other)
-{
-  ParentType::operator=(other);
-  return *this;
-}
-
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
-inline
-ShTexCoord<N, Binding, T, Swizzled>&
-ShTexCoord<N, Binding, T, Swizzled>::operator=(const ShTexCoord<N, Binding, T, Swizzled>& other)
+ShTexCoord<N, Binding, V, Swizzled>&
+ShTexCoord<N, Binding, V, Swizzled>::operator=(const ShGeneric<N, V2>& other)
 {
   ParentType::operator=(other);
   return *this;
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<N, Binding, T, Swizzled>&
-ShTexCoord<N, Binding, T, Swizzled>::operator=(const ShTexCoord<N, Binding, T2, Swizzled>& other)
+ShTexCoord<N, Binding, V, Swizzled>&
+ShTexCoord<N, Binding, V, Swizzled>::operator=(const ShTexCoord<N, Binding, V, Swizzled>& other)
 {
   ParentType::operator=(other);
   return *this;
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<N, Binding, T, Swizzled>&
-ShTexCoord<N, Binding, T, Swizzled>::operator=(const ShProgram& prg)
+ShTexCoord<N, Binding, V, Swizzled>&
+ShTexCoord<N, Binding, V, Swizzled>::operator=(const ShTexCoord<N, Binding, V2, Swizzled>& other)
+{
+  ParentType::operator=(other);
+  return *this;
+}
+
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+inline
+ShTexCoord<N, Binding, V, Swizzled>&
+ShTexCoord<N, Binding, V, Swizzled>::operator=(const ShProgram& prg)
 {
   ParentType::operator=(prg);
   return *this;
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<N, Binding, T, Swizzled>&
-ShTexCoord<N, Binding, T, Swizzled>::operator+=(const ShGeneric<N, T2>& right)
+ShTexCoord<N, Binding, V, Swizzled>&
+ShTexCoord<N, Binding, V, Swizzled>::operator+=(const ShGeneric<N, V2>& right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<N, Binding, T, Swizzled>&
-ShTexCoord<N, Binding, T, Swizzled>::operator-=(const ShGeneric<N, T2>& right)
+ShTexCoord<N, Binding, V, Swizzled>&
+ShTexCoord<N, Binding, V, Swizzled>::operator-=(const ShGeneric<N, V2>& right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<N, Binding, T, Swizzled>&
-ShTexCoord<N, Binding, T, Swizzled>::operator*=(const ShGeneric<N, T2>& right)
+ShTexCoord<N, Binding, V, Swizzled>&
+ShTexCoord<N, Binding, V, Swizzled>::operator*=(const ShGeneric<N, V2>& right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<N, Binding, T, Swizzled>&
-ShTexCoord<N, Binding, T, Swizzled>::operator/=(const ShGeneric<N, T2>& right)
+ShTexCoord<N, Binding, V, Swizzled>&
+ShTexCoord<N, Binding, V, Swizzled>::operator/=(const ShGeneric<N, V2>& right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<N, Binding, T, Swizzled>&
-ShTexCoord<N, Binding, T, Swizzled>::operator%=(const ShGeneric<N, T2>& right)
+ShTexCoord<N, Binding, V, Swizzled>&
+ShTexCoord<N, Binding, V, Swizzled>::operator%=(const ShGeneric<N, V2>& right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<N, Binding, T, Swizzled>&
-ShTexCoord<N, Binding, T, Swizzled>::operator+=(H right)
+ShTexCoord<N, Binding, V, Swizzled>&
+ShTexCoord<N, Binding, V, Swizzled>::operator+=(H right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<N, Binding, T, Swizzled>&
-ShTexCoord<N, Binding, T, Swizzled>::operator-=(H right)
+ShTexCoord<N, Binding, V, Swizzled>&
+ShTexCoord<N, Binding, V, Swizzled>::operator-=(H right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<N, Binding, T, Swizzled>&
-ShTexCoord<N, Binding, T, Swizzled>::operator*=(H right)
+ShTexCoord<N, Binding, V, Swizzled>&
+ShTexCoord<N, Binding, V, Swizzled>::operator*=(H right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<N, Binding, T, Swizzled>&
-ShTexCoord<N, Binding, T, Swizzled>::operator/=(H right)
+ShTexCoord<N, Binding, V, Swizzled>&
+ShTexCoord<N, Binding, V, Swizzled>::operator/=(H right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<N, Binding, T, Swizzled>&
-ShTexCoord<N, Binding, T, Swizzled>::operator%=(H right)
+ShTexCoord<N, Binding, V, Swizzled>&
+ShTexCoord<N, Binding, V, Swizzled>::operator%=(H right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<N, Binding, T, Swizzled>&
-ShTexCoord<N, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T2>& right)
+ShTexCoord<N, Binding, V, Swizzled>&
+ShTexCoord<N, Binding, V, Swizzled>::operator+=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<N, Binding, T, Swizzled>&
-ShTexCoord<N, Binding, T, Swizzled>::operator-=(const ShGeneric<1, T2>& right)
+ShTexCoord<N, Binding, V, Swizzled>&
+ShTexCoord<N, Binding, V, Swizzled>::operator-=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<N, Binding, T, Swizzled>&
-ShTexCoord<N, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T2>& right)
+ShTexCoord<N, Binding, V, Swizzled>&
+ShTexCoord<N, Binding, V, Swizzled>::operator*=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<N, Binding, T, Swizzled>&
-ShTexCoord<N, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T2>& right)
+ShTexCoord<N, Binding, V, Swizzled>&
+ShTexCoord<N, Binding, V, Swizzled>::operator/=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<N, Binding, T, Swizzled>&
-ShTexCoord<N, Binding, T, Swizzled>::operator%=(const ShGeneric<1, T2>& right)
+ShTexCoord<N, Binding, V, Swizzled>&
+ShTexCoord<N, Binding, V, Swizzled>::operator%=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<1, Binding, T, true>
-ShTexCoord<N, Binding, T, Swizzled>::operator()(int s0) const
+ShTexCoord<1, Binding, V, true>
+ShTexCoord<N, Binding, V, Swizzled>::operator()(int s0) const
 {
-  return ShTexCoord<1, Binding, T, true>(m_node, m_swizzle * ShSwizzle(N, s0), m_neg);
+  return ShTexCoord<1, Binding, V, true>(m_node, m_swizzle * ShSwizzle(N, s0), m_neg);
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<2, Binding, T, true>
-ShTexCoord<N, Binding, T, Swizzled>::operator()(int s0, int s1) const
+ShTexCoord<2, Binding, V, true>
+ShTexCoord<N, Binding, V, Swizzled>::operator()(int s0, int s1) const
 {
-  return ShTexCoord<2, Binding, T, true>(m_node, m_swizzle * ShSwizzle(N, s0, s1), m_neg);
+  return ShTexCoord<2, Binding, V, true>(m_node, m_swizzle * ShSwizzle(N, s0, s1), m_neg);
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<3, Binding, T, true>
-ShTexCoord<N, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
+ShTexCoord<3, Binding, V, true>
+ShTexCoord<N, Binding, V, Swizzled>::operator()(int s0, int s1, int s2) const
 {
-  return ShTexCoord<3, Binding, T, true>(m_node, m_swizzle * ShSwizzle(N, s0, s1, s2), m_neg);
+  return ShTexCoord<3, Binding, V, true>(m_node, m_swizzle * ShSwizzle(N, s0, s1, s2), m_neg);
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<4, Binding, T, true>
-ShTexCoord<N, Binding, T, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
+ShTexCoord<4, Binding, V, true>
+ShTexCoord<N, Binding, V, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
 {
-  return ShTexCoord<4, Binding, T, true>(m_node, m_swizzle * ShSwizzle(N, s0, s1, s2, s3), m_neg);
+  return ShTexCoord<4, Binding, V, true>(m_node, m_swizzle * ShSwizzle(N, s0, s1, s2, s3), m_neg);
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
 template<int N2>
-ShTexCoord<N2, Binding, T, true>
-ShTexCoord<N, Binding, T, Swizzled>::swiz(int indices[]) const
+ShTexCoord<N2, Binding, V, true>
+ShTexCoord<N, Binding, V, Swizzled>::swiz(int indices[]) const
 {
-  return ShTexCoord<N2, Binding, T, true>(m_node, m_swizzle * ShSwizzle(N, N2, indices), m_neg);
+  return ShTexCoord<N2, Binding, V, true>(m_node, m_swizzle * ShSwizzle(N, N2, indices), m_neg);
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<1, Binding, T, true>
-ShTexCoord<N, Binding, T, Swizzled>::operator[](int s0) const
+ShTexCoord<1, Binding, V, true>
+ShTexCoord<N, Binding, V, Swizzled>::operator[](int s0) const
 {
-  return ShTexCoord<1, Binding, T, true>(m_node, m_swizzle * ShSwizzle(N, s0), m_neg);
+  return ShTexCoord<1, Binding, V, true>(m_node, m_swizzle * ShSwizzle(N, s0), m_neg);
 }
 
-template<int N, ShBindingType Binding, typename T, bool Swizzled>
-ShTexCoord<N, Binding, T, Swizzled>
-ShTexCoord<N, Binding, T, Swizzled>::operator-() const
+template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+ShTexCoord<N, Binding, V, Swizzled>
+ShTexCoord<N, Binding, V, Swizzled>::operator-() const
 {
-  return ShTexCoord<N, Binding, T, Swizzled>(m_node, m_swizzle, !m_neg);
+  return ShTexCoord<N, Binding, V, Swizzled>(m_node, m_swizzle, !m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<1, Binding, T, Swizzled>::ShTexCoord()
+ShTexCoord<1, Binding, V, Swizzled>::ShTexCoord()
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<1, Binding, T, Swizzled>::ShTexCoord(const ShGeneric<1, T2>& other)
+ShTexCoord<1, Binding, V, Swizzled>::ShTexCoord(const ShGeneric<1, V2>& other)
   : ParentType(other)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<1, Binding, T, Swizzled>::ShTexCoord(const ShTexCoord<1, Binding, T, Swizzled>& other)
+ShTexCoord<1, Binding, V, Swizzled>::ShTexCoord(const ShTexCoord<1, Binding, V, Swizzled>& other)
   : ParentType(other)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<1, Binding, T, Swizzled>::ShTexCoord(const ShTexCoord<1, Binding, T2, Swizzled>& other)
+ShTexCoord<1, Binding, V, Swizzled>::ShTexCoord(const ShTexCoord<1, Binding, V2, Swizzled>& other)
   : ParentType(other)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<1, Binding, T, Swizzled>::ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg)
+ShTexCoord<1, Binding, V, Swizzled>::ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg)
   : ParentType(node, swizzle, neg)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<1, Binding, T, Swizzled>::ShTexCoord(H data[1])
+ShTexCoord<1, Binding, V, Swizzled>::ShTexCoord(H data[1])
   : ParentType(data)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<1, Binding, T, Swizzled>::ShTexCoord(H s0)
+ShTexCoord<1, Binding, V, Swizzled>::ShTexCoord(H s0)
   : ParentType(s0)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<1, Binding, T, Swizzled>::~ShTexCoord()
+ShTexCoord<1, Binding, V, Swizzled>::~ShTexCoord()
 {
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<1, Binding, T, Swizzled>&
-ShTexCoord<1, Binding, T, Swizzled>::operator=(const ShGeneric<1, T2>& other)
-{
-  ParentType::operator=(other);
-  return *this;
-}
-
-template<ShBindingType Binding, typename T, bool Swizzled>
-inline
-ShTexCoord<1, Binding, T, Swizzled>&
-ShTexCoord<1, Binding, T, Swizzled>::operator=(const ShTexCoord<1, Binding, T, Swizzled>& other)
+ShTexCoord<1, Binding, V, Swizzled>&
+ShTexCoord<1, Binding, V, Swizzled>::operator=(const ShGeneric<1, V2>& other)
 {
   ParentType::operator=(other);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<1, Binding, T, Swizzled>&
-ShTexCoord<1, Binding, T, Swizzled>::operator=(const ShTexCoord<1, Binding, T2, Swizzled>& other)
+ShTexCoord<1, Binding, V, Swizzled>&
+ShTexCoord<1, Binding, V, Swizzled>::operator=(const ShTexCoord<1, Binding, V, Swizzled>& other)
 {
   ParentType::operator=(other);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<1, Binding, T, Swizzled>&
-ShTexCoord<1, Binding, T, Swizzled>::operator=(H other)
+ShTexCoord<1, Binding, V, Swizzled>&
+ShTexCoord<1, Binding, V, Swizzled>::operator=(const ShTexCoord<1, Binding, V2, Swizzled>& other)
 {
   ParentType::operator=(other);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<1, Binding, T, Swizzled>&
-ShTexCoord<1, Binding, T, Swizzled>::operator=(const ShProgram& prg)
+ShTexCoord<1, Binding, V, Swizzled>&
+ShTexCoord<1, Binding, V, Swizzled>::operator=(H other)
+{
+  ParentType::operator=(other);
+  return *this;
+}
+
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+inline
+ShTexCoord<1, Binding, V, Swizzled>&
+ShTexCoord<1, Binding, V, Swizzled>::operator=(const ShProgram& prg)
 {
   ParentType::operator=(prg);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<1, Binding, T, Swizzled>&
-ShTexCoord<1, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T2>& right)
+ShTexCoord<1, Binding, V, Swizzled>&
+ShTexCoord<1, Binding, V, Swizzled>::operator+=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<1, Binding, T, Swizzled>&
-ShTexCoord<1, Binding, T, Swizzled>::operator-=(const ShGeneric<1, T2>& right)
+ShTexCoord<1, Binding, V, Swizzled>&
+ShTexCoord<1, Binding, V, Swizzled>::operator-=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<1, Binding, T, Swizzled>&
-ShTexCoord<1, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T2>& right)
+ShTexCoord<1, Binding, V, Swizzled>&
+ShTexCoord<1, Binding, V, Swizzled>::operator*=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<1, Binding, T, Swizzled>&
-ShTexCoord<1, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T2>& right)
+ShTexCoord<1, Binding, V, Swizzled>&
+ShTexCoord<1, Binding, V, Swizzled>::operator/=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<1, Binding, T, Swizzled>&
-ShTexCoord<1, Binding, T, Swizzled>::operator%=(const ShGeneric<1, T2>& right)
+ShTexCoord<1, Binding, V, Swizzled>&
+ShTexCoord<1, Binding, V, Swizzled>::operator%=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<1, Binding, T, Swizzled>&
-ShTexCoord<1, Binding, T, Swizzled>::operator+=(H right)
+ShTexCoord<1, Binding, V, Swizzled>&
+ShTexCoord<1, Binding, V, Swizzled>::operator+=(H right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<1, Binding, T, Swizzled>&
-ShTexCoord<1, Binding, T, Swizzled>::operator-=(H right)
+ShTexCoord<1, Binding, V, Swizzled>&
+ShTexCoord<1, Binding, V, Swizzled>::operator-=(H right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<1, Binding, T, Swizzled>&
-ShTexCoord<1, Binding, T, Swizzled>::operator*=(H right)
+ShTexCoord<1, Binding, V, Swizzled>&
+ShTexCoord<1, Binding, V, Swizzled>::operator*=(H right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<1, Binding, T, Swizzled>&
-ShTexCoord<1, Binding, T, Swizzled>::operator/=(H right)
+ShTexCoord<1, Binding, V, Swizzled>&
+ShTexCoord<1, Binding, V, Swizzled>::operator/=(H right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<1, Binding, T, Swizzled>&
-ShTexCoord<1, Binding, T, Swizzled>::operator%=(H right)
+ShTexCoord<1, Binding, V, Swizzled>&
+ShTexCoord<1, Binding, V, Swizzled>::operator%=(H right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<1, Binding, T, true>
-ShTexCoord<1, Binding, T, Swizzled>::operator()(int s0) const
+ShTexCoord<1, Binding, V, true>
+ShTexCoord<1, Binding, V, Swizzled>::operator()(int s0) const
 {
-  return ShTexCoord<1, Binding, T, true>(m_node, m_swizzle * ShSwizzle(1, s0), m_neg);
+  return ShTexCoord<1, Binding, V, true>(m_node, m_swizzle * ShSwizzle(1, s0), m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<2, Binding, T, true>
-ShTexCoord<1, Binding, T, Swizzled>::operator()(int s0, int s1) const
+ShTexCoord<2, Binding, V, true>
+ShTexCoord<1, Binding, V, Swizzled>::operator()(int s0, int s1) const
 {
-  return ShTexCoord<2, Binding, T, true>(m_node, m_swizzle * ShSwizzle(1, s0, s1), m_neg);
+  return ShTexCoord<2, Binding, V, true>(m_node, m_swizzle * ShSwizzle(1, s0, s1), m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<3, Binding, T, true>
-ShTexCoord<1, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
+ShTexCoord<3, Binding, V, true>
+ShTexCoord<1, Binding, V, Swizzled>::operator()(int s0, int s1, int s2) const
 {
-  return ShTexCoord<3, Binding, T, true>(m_node, m_swizzle * ShSwizzle(1, s0, s1, s2), m_neg);
+  return ShTexCoord<3, Binding, V, true>(m_node, m_swizzle * ShSwizzle(1, s0, s1, s2), m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<4, Binding, T, true>
-ShTexCoord<1, Binding, T, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
+ShTexCoord<4, Binding, V, true>
+ShTexCoord<1, Binding, V, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
 {
-  return ShTexCoord<4, Binding, T, true>(m_node, m_swizzle * ShSwizzle(1, s0, s1, s2, s3), m_neg);
+  return ShTexCoord<4, Binding, V, true>(m_node, m_swizzle * ShSwizzle(1, s0, s1, s2, s3), m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 template<int N2>
-ShTexCoord<N2, Binding, T, true>
-ShTexCoord<1, Binding, T, Swizzled>::swiz(int indices[]) const
+ShTexCoord<N2, Binding, V, true>
+ShTexCoord<1, Binding, V, Swizzled>::swiz(int indices[]) const
 {
-  return ShTexCoord<N2, Binding, T, true>(m_node, m_swizzle * ShSwizzle(1, N2, indices), m_neg);
+  return ShTexCoord<N2, Binding, V, true>(m_node, m_swizzle * ShSwizzle(1, N2, indices), m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<1, Binding, T, true>
-ShTexCoord<1, Binding, T, Swizzled>::operator[](int s0) const
+ShTexCoord<1, Binding, V, true>
+ShTexCoord<1, Binding, V, Swizzled>::operator[](int s0) const
 {
-  return ShTexCoord<1, Binding, T, true>(m_node, m_swizzle * ShSwizzle(1, s0), m_neg);
+  return ShTexCoord<1, Binding, V, true>(m_node, m_swizzle * ShSwizzle(1, s0), m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-ShTexCoord<1, Binding, T, Swizzled>
-ShTexCoord<1, Binding, T, Swizzled>::operator-() const
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+ShTexCoord<1, Binding, V, Swizzled>
+ShTexCoord<1, Binding, V, Swizzled>::operator-() const
 {
-  return ShTexCoord<1, Binding, T, Swizzled>(m_node, m_swizzle, !m_neg);
+  return ShTexCoord<1, Binding, V, Swizzled>(m_node, m_swizzle, !m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<2, Binding, T, Swizzled>::ShTexCoord()
+ShTexCoord<2, Binding, V, Swizzled>::ShTexCoord()
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<2, Binding, T, Swizzled>::ShTexCoord(const ShGeneric<2, T2>& other)
+ShTexCoord<2, Binding, V, Swizzled>::ShTexCoord(const ShGeneric<2, V2>& other)
   : ParentType(other)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<2, Binding, T, Swizzled>::ShTexCoord(const ShTexCoord<2, Binding, T, Swizzled>& other)
+ShTexCoord<2, Binding, V, Swizzled>::ShTexCoord(const ShTexCoord<2, Binding, V, Swizzled>& other)
   : ParentType(other)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<2, Binding, T, Swizzled>::ShTexCoord(const ShTexCoord<2, Binding, T2, Swizzled>& other)
+ShTexCoord<2, Binding, V, Swizzled>::ShTexCoord(const ShTexCoord<2, Binding, V2, Swizzled>& other)
   : ParentType(other)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<2, Binding, T, Swizzled>::ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg)
+ShTexCoord<2, Binding, V, Swizzled>::ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg)
   : ParentType(node, swizzle, neg)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<2, Binding, T, Swizzled>::ShTexCoord(H data[2])
+ShTexCoord<2, Binding, V, Swizzled>::ShTexCoord(H data[2])
   : ParentType(data)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<2, Binding, T, Swizzled>::ShTexCoord(H s0, H s1)
+ShTexCoord<2, Binding, V, Swizzled>::ShTexCoord(H s0, H s1)
   : ParentType(s0, s1)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2, typename T3>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2,ShValueType V3>
 inline
-ShTexCoord<2, Binding, T, Swizzled>::ShTexCoord(const ShGeneric<1, T2>& s0, const ShGeneric<1, T3>& s1)
+ShTexCoord<2, Binding, V, Swizzled>::ShTexCoord(const ShGeneric<1, V2>& s0, const ShGeneric<1, V3>& s1)
   : ParentType(s0, s1)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<2, Binding, T, Swizzled>::~ShTexCoord()
+ShTexCoord<2, Binding, V, Swizzled>::~ShTexCoord()
 {
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<2, Binding, T, Swizzled>&
-ShTexCoord<2, Binding, T, Swizzled>::operator=(const ShGeneric<2, T2>& other)
-{
-  ParentType::operator=(other);
-  return *this;
-}
-
-template<ShBindingType Binding, typename T, bool Swizzled>
-inline
-ShTexCoord<2, Binding, T, Swizzled>&
-ShTexCoord<2, Binding, T, Swizzled>::operator=(const ShTexCoord<2, Binding, T, Swizzled>& other)
+ShTexCoord<2, Binding, V, Swizzled>&
+ShTexCoord<2, Binding, V, Swizzled>::operator=(const ShGeneric<2, V2>& other)
 {
   ParentType::operator=(other);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<2, Binding, T, Swizzled>&
-ShTexCoord<2, Binding, T, Swizzled>::operator=(const ShTexCoord<2, Binding, T2, Swizzled>& other)
+ShTexCoord<2, Binding, V, Swizzled>&
+ShTexCoord<2, Binding, V, Swizzled>::operator=(const ShTexCoord<2, Binding, V, Swizzled>& other)
 {
   ParentType::operator=(other);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<2, Binding, T, Swizzled>&
-ShTexCoord<2, Binding, T, Swizzled>::operator=(const ShProgram& prg)
+ShTexCoord<2, Binding, V, Swizzled>&
+ShTexCoord<2, Binding, V, Swizzled>::operator=(const ShTexCoord<2, Binding, V2, Swizzled>& other)
+{
+  ParentType::operator=(other);
+  return *this;
+}
+
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+inline
+ShTexCoord<2, Binding, V, Swizzled>&
+ShTexCoord<2, Binding, V, Swizzled>::operator=(const ShProgram& prg)
 {
   ParentType::operator=(prg);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<2, Binding, T, Swizzled>&
-ShTexCoord<2, Binding, T, Swizzled>::operator+=(const ShGeneric<2, T2>& right)
+ShTexCoord<2, Binding, V, Swizzled>&
+ShTexCoord<2, Binding, V, Swizzled>::operator+=(const ShGeneric<2, V2>& right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<2, Binding, T, Swizzled>&
-ShTexCoord<2, Binding, T, Swizzled>::operator-=(const ShGeneric<2, T2>& right)
+ShTexCoord<2, Binding, V, Swizzled>&
+ShTexCoord<2, Binding, V, Swizzled>::operator-=(const ShGeneric<2, V2>& right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<2, Binding, T, Swizzled>&
-ShTexCoord<2, Binding, T, Swizzled>::operator*=(const ShGeneric<2, T2>& right)
+ShTexCoord<2, Binding, V, Swizzled>&
+ShTexCoord<2, Binding, V, Swizzled>::operator*=(const ShGeneric<2, V2>& right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<2, Binding, T, Swizzled>&
-ShTexCoord<2, Binding, T, Swizzled>::operator/=(const ShGeneric<2, T2>& right)
+ShTexCoord<2, Binding, V, Swizzled>&
+ShTexCoord<2, Binding, V, Swizzled>::operator/=(const ShGeneric<2, V2>& right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<2, Binding, T, Swizzled>&
-ShTexCoord<2, Binding, T, Swizzled>::operator%=(const ShGeneric<2, T2>& right)
+ShTexCoord<2, Binding, V, Swizzled>&
+ShTexCoord<2, Binding, V, Swizzled>::operator%=(const ShGeneric<2, V2>& right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<2, Binding, T, Swizzled>&
-ShTexCoord<2, Binding, T, Swizzled>::operator+=(H right)
+ShTexCoord<2, Binding, V, Swizzled>&
+ShTexCoord<2, Binding, V, Swizzled>::operator+=(H right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<2, Binding, T, Swizzled>&
-ShTexCoord<2, Binding, T, Swizzled>::operator-=(H right)
+ShTexCoord<2, Binding, V, Swizzled>&
+ShTexCoord<2, Binding, V, Swizzled>::operator-=(H right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<2, Binding, T, Swizzled>&
-ShTexCoord<2, Binding, T, Swizzled>::operator*=(H right)
+ShTexCoord<2, Binding, V, Swizzled>&
+ShTexCoord<2, Binding, V, Swizzled>::operator*=(H right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<2, Binding, T, Swizzled>&
-ShTexCoord<2, Binding, T, Swizzled>::operator/=(H right)
+ShTexCoord<2, Binding, V, Swizzled>&
+ShTexCoord<2, Binding, V, Swizzled>::operator/=(H right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<2, Binding, T, Swizzled>&
-ShTexCoord<2, Binding, T, Swizzled>::operator%=(H right)
+ShTexCoord<2, Binding, V, Swizzled>&
+ShTexCoord<2, Binding, V, Swizzled>::operator%=(H right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<2, Binding, T, Swizzled>&
-ShTexCoord<2, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T2>& right)
+ShTexCoord<2, Binding, V, Swizzled>&
+ShTexCoord<2, Binding, V, Swizzled>::operator+=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<2, Binding, T, Swizzled>&
-ShTexCoord<2, Binding, T, Swizzled>::operator-=(const ShGeneric<1, T2>& right)
+ShTexCoord<2, Binding, V, Swizzled>&
+ShTexCoord<2, Binding, V, Swizzled>::operator-=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<2, Binding, T, Swizzled>&
-ShTexCoord<2, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T2>& right)
+ShTexCoord<2, Binding, V, Swizzled>&
+ShTexCoord<2, Binding, V, Swizzled>::operator*=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<2, Binding, T, Swizzled>&
-ShTexCoord<2, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T2>& right)
+ShTexCoord<2, Binding, V, Swizzled>&
+ShTexCoord<2, Binding, V, Swizzled>::operator/=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<2, Binding, T, Swizzled>&
-ShTexCoord<2, Binding, T, Swizzled>::operator%=(const ShGeneric<1, T2>& right)
+ShTexCoord<2, Binding, V, Swizzled>&
+ShTexCoord<2, Binding, V, Swizzled>::operator%=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<1, Binding, T, true>
-ShTexCoord<2, Binding, T, Swizzled>::operator()(int s0) const
+ShTexCoord<1, Binding, V, true>
+ShTexCoord<2, Binding, V, Swizzled>::operator()(int s0) const
 {
-  return ShTexCoord<1, Binding, T, true>(m_node, m_swizzle * ShSwizzle(2, s0), m_neg);
+  return ShTexCoord<1, Binding, V, true>(m_node, m_swizzle * ShSwizzle(2, s0), m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<2, Binding, T, true>
-ShTexCoord<2, Binding, T, Swizzled>::operator()(int s0, int s1) const
+ShTexCoord<2, Binding, V, true>
+ShTexCoord<2, Binding, V, Swizzled>::operator()(int s0, int s1) const
 {
-  return ShTexCoord<2, Binding, T, true>(m_node, m_swizzle * ShSwizzle(2, s0, s1), m_neg);
+  return ShTexCoord<2, Binding, V, true>(m_node, m_swizzle * ShSwizzle(2, s0, s1), m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<3, Binding, T, true>
-ShTexCoord<2, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
+ShTexCoord<3, Binding, V, true>
+ShTexCoord<2, Binding, V, Swizzled>::operator()(int s0, int s1, int s2) const
 {
-  return ShTexCoord<3, Binding, T, true>(m_node, m_swizzle * ShSwizzle(2, s0, s1, s2), m_neg);
+  return ShTexCoord<3, Binding, V, true>(m_node, m_swizzle * ShSwizzle(2, s0, s1, s2), m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<4, Binding, T, true>
-ShTexCoord<2, Binding, T, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
+ShTexCoord<4, Binding, V, true>
+ShTexCoord<2, Binding, V, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
 {
-  return ShTexCoord<4, Binding, T, true>(m_node, m_swizzle * ShSwizzle(2, s0, s1, s2, s3), m_neg);
+  return ShTexCoord<4, Binding, V, true>(m_node, m_swizzle * ShSwizzle(2, s0, s1, s2, s3), m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 template<int N2>
-ShTexCoord<N2, Binding, T, true>
-ShTexCoord<2, Binding, T, Swizzled>::swiz(int indices[]) const
+ShTexCoord<N2, Binding, V, true>
+ShTexCoord<2, Binding, V, Swizzled>::swiz(int indices[]) const
 {
-  return ShTexCoord<N2, Binding, T, true>(m_node, m_swizzle * ShSwizzle(2, N2, indices), m_neg);
+  return ShTexCoord<N2, Binding, V, true>(m_node, m_swizzle * ShSwizzle(2, N2, indices), m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<1, Binding, T, true>
-ShTexCoord<2, Binding, T, Swizzled>::operator[](int s0) const
+ShTexCoord<1, Binding, V, true>
+ShTexCoord<2, Binding, V, Swizzled>::operator[](int s0) const
 {
-  return ShTexCoord<1, Binding, T, true>(m_node, m_swizzle * ShSwizzle(2, s0), m_neg);
+  return ShTexCoord<1, Binding, V, true>(m_node, m_swizzle * ShSwizzle(2, s0), m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-ShTexCoord<2, Binding, T, Swizzled>
-ShTexCoord<2, Binding, T, Swizzled>::operator-() const
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+ShTexCoord<2, Binding, V, Swizzled>
+ShTexCoord<2, Binding, V, Swizzled>::operator-() const
 {
-  return ShTexCoord<2, Binding, T, Swizzled>(m_node, m_swizzle, !m_neg);
+  return ShTexCoord<2, Binding, V, Swizzled>(m_node, m_swizzle, !m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<3, Binding, T, Swizzled>::ShTexCoord()
+ShTexCoord<3, Binding, V, Swizzled>::ShTexCoord()
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<3, Binding, T, Swizzled>::ShTexCoord(const ShGeneric<3, T2>& other)
+ShTexCoord<3, Binding, V, Swizzled>::ShTexCoord(const ShGeneric<3, V2>& other)
   : ParentType(other)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<3, Binding, T, Swizzled>::ShTexCoord(const ShTexCoord<3, Binding, T, Swizzled>& other)
+ShTexCoord<3, Binding, V, Swizzled>::ShTexCoord(const ShTexCoord<3, Binding, V, Swizzled>& other)
   : ParentType(other)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<3, Binding, T, Swizzled>::ShTexCoord(const ShTexCoord<3, Binding, T2, Swizzled>& other)
+ShTexCoord<3, Binding, V, Swizzled>::ShTexCoord(const ShTexCoord<3, Binding, V2, Swizzled>& other)
   : ParentType(other)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<3, Binding, T, Swizzled>::ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg)
+ShTexCoord<3, Binding, V, Swizzled>::ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg)
   : ParentType(node, swizzle, neg)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<3, Binding, T, Swizzled>::ShTexCoord(H data[3])
+ShTexCoord<3, Binding, V, Swizzled>::ShTexCoord(H data[3])
   : ParentType(data)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<3, Binding, T, Swizzled>::ShTexCoord(H s0, H s1, H s2)
+ShTexCoord<3, Binding, V, Swizzled>::ShTexCoord(H s0, H s1, H s2)
   : ParentType(s0, s1, s2)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2, typename T3, typename T4>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2,ShValueType V3,ShValueType V4>
 inline
-ShTexCoord<3, Binding, T, Swizzled>::ShTexCoord(const ShGeneric<1, T2>& s0, const ShGeneric<1, T3>& s1, const ShGeneric<1, T4>& s2)
+ShTexCoord<3, Binding, V, Swizzled>::ShTexCoord(const ShGeneric<1, V2>& s0, const ShGeneric<1, V3>& s1, const ShGeneric<1, V4>& s2)
   : ParentType(s0, s1, s2)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<3, Binding, T, Swizzled>::~ShTexCoord()
+ShTexCoord<3, Binding, V, Swizzled>::~ShTexCoord()
 {
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<3, Binding, T, Swizzled>&
-ShTexCoord<3, Binding, T, Swizzled>::operator=(const ShGeneric<3, T2>& other)
-{
-  ParentType::operator=(other);
-  return *this;
-}
-
-template<ShBindingType Binding, typename T, bool Swizzled>
-inline
-ShTexCoord<3, Binding, T, Swizzled>&
-ShTexCoord<3, Binding, T, Swizzled>::operator=(const ShTexCoord<3, Binding, T, Swizzled>& other)
+ShTexCoord<3, Binding, V, Swizzled>&
+ShTexCoord<3, Binding, V, Swizzled>::operator=(const ShGeneric<3, V2>& other)
 {
   ParentType::operator=(other);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<3, Binding, T, Swizzled>&
-ShTexCoord<3, Binding, T, Swizzled>::operator=(const ShTexCoord<3, Binding, T2, Swizzled>& other)
+ShTexCoord<3, Binding, V, Swizzled>&
+ShTexCoord<3, Binding, V, Swizzled>::operator=(const ShTexCoord<3, Binding, V, Swizzled>& other)
 {
   ParentType::operator=(other);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<3, Binding, T, Swizzled>&
-ShTexCoord<3, Binding, T, Swizzled>::operator=(const ShProgram& prg)
+ShTexCoord<3, Binding, V, Swizzled>&
+ShTexCoord<3, Binding, V, Swizzled>::operator=(const ShTexCoord<3, Binding, V2, Swizzled>& other)
+{
+  ParentType::operator=(other);
+  return *this;
+}
+
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+inline
+ShTexCoord<3, Binding, V, Swizzled>&
+ShTexCoord<3, Binding, V, Swizzled>::operator=(const ShProgram& prg)
 {
   ParentType::operator=(prg);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<3, Binding, T, Swizzled>&
-ShTexCoord<3, Binding, T, Swizzled>::operator+=(const ShGeneric<3, T2>& right)
+ShTexCoord<3, Binding, V, Swizzled>&
+ShTexCoord<3, Binding, V, Swizzled>::operator+=(const ShGeneric<3, V2>& right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<3, Binding, T, Swizzled>&
-ShTexCoord<3, Binding, T, Swizzled>::operator-=(const ShGeneric<3, T2>& right)
+ShTexCoord<3, Binding, V, Swizzled>&
+ShTexCoord<3, Binding, V, Swizzled>::operator-=(const ShGeneric<3, V2>& right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<3, Binding, T, Swizzled>&
-ShTexCoord<3, Binding, T, Swizzled>::operator*=(const ShGeneric<3, T2>& right)
+ShTexCoord<3, Binding, V, Swizzled>&
+ShTexCoord<3, Binding, V, Swizzled>::operator*=(const ShGeneric<3, V2>& right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<3, Binding, T, Swizzled>&
-ShTexCoord<3, Binding, T, Swizzled>::operator/=(const ShGeneric<3, T2>& right)
+ShTexCoord<3, Binding, V, Swizzled>&
+ShTexCoord<3, Binding, V, Swizzled>::operator/=(const ShGeneric<3, V2>& right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<3, Binding, T, Swizzled>&
-ShTexCoord<3, Binding, T, Swizzled>::operator%=(const ShGeneric<3, T2>& right)
+ShTexCoord<3, Binding, V, Swizzled>&
+ShTexCoord<3, Binding, V, Swizzled>::operator%=(const ShGeneric<3, V2>& right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<3, Binding, T, Swizzled>&
-ShTexCoord<3, Binding, T, Swizzled>::operator+=(H right)
+ShTexCoord<3, Binding, V, Swizzled>&
+ShTexCoord<3, Binding, V, Swizzled>::operator+=(H right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<3, Binding, T, Swizzled>&
-ShTexCoord<3, Binding, T, Swizzled>::operator-=(H right)
+ShTexCoord<3, Binding, V, Swizzled>&
+ShTexCoord<3, Binding, V, Swizzled>::operator-=(H right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<3, Binding, T, Swizzled>&
-ShTexCoord<3, Binding, T, Swizzled>::operator*=(H right)
+ShTexCoord<3, Binding, V, Swizzled>&
+ShTexCoord<3, Binding, V, Swizzled>::operator*=(H right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<3, Binding, T, Swizzled>&
-ShTexCoord<3, Binding, T, Swizzled>::operator/=(H right)
+ShTexCoord<3, Binding, V, Swizzled>&
+ShTexCoord<3, Binding, V, Swizzled>::operator/=(H right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<3, Binding, T, Swizzled>&
-ShTexCoord<3, Binding, T, Swizzled>::operator%=(H right)
+ShTexCoord<3, Binding, V, Swizzled>&
+ShTexCoord<3, Binding, V, Swizzled>::operator%=(H right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<3, Binding, T, Swizzled>&
-ShTexCoord<3, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T2>& right)
+ShTexCoord<3, Binding, V, Swizzled>&
+ShTexCoord<3, Binding, V, Swizzled>::operator+=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<3, Binding, T, Swizzled>&
-ShTexCoord<3, Binding, T, Swizzled>::operator-=(const ShGeneric<1, T2>& right)
+ShTexCoord<3, Binding, V, Swizzled>&
+ShTexCoord<3, Binding, V, Swizzled>::operator-=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<3, Binding, T, Swizzled>&
-ShTexCoord<3, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T2>& right)
+ShTexCoord<3, Binding, V, Swizzled>&
+ShTexCoord<3, Binding, V, Swizzled>::operator*=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<3, Binding, T, Swizzled>&
-ShTexCoord<3, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T2>& right)
+ShTexCoord<3, Binding, V, Swizzled>&
+ShTexCoord<3, Binding, V, Swizzled>::operator/=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<3, Binding, T, Swizzled>&
-ShTexCoord<3, Binding, T, Swizzled>::operator%=(const ShGeneric<1, T2>& right)
+ShTexCoord<3, Binding, V, Swizzled>&
+ShTexCoord<3, Binding, V, Swizzled>::operator%=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<1, Binding, T, true>
-ShTexCoord<3, Binding, T, Swizzled>::operator()(int s0) const
+ShTexCoord<1, Binding, V, true>
+ShTexCoord<3, Binding, V, Swizzled>::operator()(int s0) const
 {
-  return ShTexCoord<1, Binding, T, true>(m_node, m_swizzle * ShSwizzle(3, s0), m_neg);
+  return ShTexCoord<1, Binding, V, true>(m_node, m_swizzle * ShSwizzle(3, s0), m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<2, Binding, T, true>
-ShTexCoord<3, Binding, T, Swizzled>::operator()(int s0, int s1) const
+ShTexCoord<2, Binding, V, true>
+ShTexCoord<3, Binding, V, Swizzled>::operator()(int s0, int s1) const
 {
-  return ShTexCoord<2, Binding, T, true>(m_node, m_swizzle * ShSwizzle(3, s0, s1), m_neg);
+  return ShTexCoord<2, Binding, V, true>(m_node, m_swizzle * ShSwizzle(3, s0, s1), m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<3, Binding, T, true>
-ShTexCoord<3, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
+ShTexCoord<3, Binding, V, true>
+ShTexCoord<3, Binding, V, Swizzled>::operator()(int s0, int s1, int s2) const
 {
-  return ShTexCoord<3, Binding, T, true>(m_node, m_swizzle * ShSwizzle(3, s0, s1, s2), m_neg);
+  return ShTexCoord<3, Binding, V, true>(m_node, m_swizzle * ShSwizzle(3, s0, s1, s2), m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<4, Binding, T, true>
-ShTexCoord<3, Binding, T, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
+ShTexCoord<4, Binding, V, true>
+ShTexCoord<3, Binding, V, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
 {
-  return ShTexCoord<4, Binding, T, true>(m_node, m_swizzle * ShSwizzle(3, s0, s1, s2, s3), m_neg);
+  return ShTexCoord<4, Binding, V, true>(m_node, m_swizzle * ShSwizzle(3, s0, s1, s2, s3), m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 template<int N2>
-ShTexCoord<N2, Binding, T, true>
-ShTexCoord<3, Binding, T, Swizzled>::swiz(int indices[]) const
+ShTexCoord<N2, Binding, V, true>
+ShTexCoord<3, Binding, V, Swizzled>::swiz(int indices[]) const
 {
-  return ShTexCoord<N2, Binding, T, true>(m_node, m_swizzle * ShSwizzle(3, N2, indices), m_neg);
+  return ShTexCoord<N2, Binding, V, true>(m_node, m_swizzle * ShSwizzle(3, N2, indices), m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<1, Binding, T, true>
-ShTexCoord<3, Binding, T, Swizzled>::operator[](int s0) const
+ShTexCoord<1, Binding, V, true>
+ShTexCoord<3, Binding, V, Swizzled>::operator[](int s0) const
 {
-  return ShTexCoord<1, Binding, T, true>(m_node, m_swizzle * ShSwizzle(3, s0), m_neg);
+  return ShTexCoord<1, Binding, V, true>(m_node, m_swizzle * ShSwizzle(3, s0), m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-ShTexCoord<3, Binding, T, Swizzled>
-ShTexCoord<3, Binding, T, Swizzled>::operator-() const
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+ShTexCoord<3, Binding, V, Swizzled>
+ShTexCoord<3, Binding, V, Swizzled>::operator-() const
 {
-  return ShTexCoord<3, Binding, T, Swizzled>(m_node, m_swizzle, !m_neg);
+  return ShTexCoord<3, Binding, V, Swizzled>(m_node, m_swizzle, !m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<4, Binding, T, Swizzled>::ShTexCoord()
+ShTexCoord<4, Binding, V, Swizzled>::ShTexCoord()
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<4, Binding, T, Swizzled>::ShTexCoord(const ShGeneric<4, T2>& other)
+ShTexCoord<4, Binding, V, Swizzled>::ShTexCoord(const ShGeneric<4, V2>& other)
   : ParentType(other)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<4, Binding, T, Swizzled>::ShTexCoord(const ShTexCoord<4, Binding, T, Swizzled>& other)
+ShTexCoord<4, Binding, V, Swizzled>::ShTexCoord(const ShTexCoord<4, Binding, V, Swizzled>& other)
   : ParentType(other)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<4, Binding, T, Swizzled>::ShTexCoord(const ShTexCoord<4, Binding, T2, Swizzled>& other)
+ShTexCoord<4, Binding, V, Swizzled>::ShTexCoord(const ShTexCoord<4, Binding, V2, Swizzled>& other)
   : ParentType(other)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<4, Binding, T, Swizzled>::ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg)
+ShTexCoord<4, Binding, V, Swizzled>::ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg)
   : ParentType(node, swizzle, neg)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<4, Binding, T, Swizzled>::ShTexCoord(H data[4])
+ShTexCoord<4, Binding, V, Swizzled>::ShTexCoord(H data[4])
   : ParentType(data)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<4, Binding, T, Swizzled>::ShTexCoord(H s0, H s1, H s2, H s3)
+ShTexCoord<4, Binding, V, Swizzled>::ShTexCoord(H s0, H s1, H s2, H s3)
   : ParentType(s0, s1, s2, s3)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2, typename T3, typename T4, typename T5>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2,ShValueType V3,ShValueType V4,ShValueType V5>
 inline
-ShTexCoord<4, Binding, T, Swizzled>::ShTexCoord(const ShGeneric<1, T2>& s0, const ShGeneric<1, T3>& s1, const ShGeneric<1, T4>& s2, const ShGeneric<1, T5>& s3)
+ShTexCoord<4, Binding, V, Swizzled>::ShTexCoord(const ShGeneric<1, V2>& s0, const ShGeneric<1, V3>& s1, const ShGeneric<1, V4>& s2, const ShGeneric<1, V5>& s3)
   : ParentType(s0, s1, s2, s3)
 {
   m_node->specialType(SH_TEXCOORD);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<4, Binding, T, Swizzled>::~ShTexCoord()
+ShTexCoord<4, Binding, V, Swizzled>::~ShTexCoord()
 {
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<4, Binding, T, Swizzled>&
-ShTexCoord<4, Binding, T, Swizzled>::operator=(const ShGeneric<4, T2>& other)
-{
-  ParentType::operator=(other);
-  return *this;
-}
-
-template<ShBindingType Binding, typename T, bool Swizzled>
-inline
-ShTexCoord<4, Binding, T, Swizzled>&
-ShTexCoord<4, Binding, T, Swizzled>::operator=(const ShTexCoord<4, Binding, T, Swizzled>& other)
+ShTexCoord<4, Binding, V, Swizzled>&
+ShTexCoord<4, Binding, V, Swizzled>::operator=(const ShGeneric<4, V2>& other)
 {
   ParentType::operator=(other);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<4, Binding, T, Swizzled>&
-ShTexCoord<4, Binding, T, Swizzled>::operator=(const ShTexCoord<4, Binding, T2, Swizzled>& other)
+ShTexCoord<4, Binding, V, Swizzled>&
+ShTexCoord<4, Binding, V, Swizzled>::operator=(const ShTexCoord<4, Binding, V, Swizzled>& other)
 {
   ParentType::operator=(other);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<4, Binding, T, Swizzled>&
-ShTexCoord<4, Binding, T, Swizzled>::operator=(const ShProgram& prg)
+ShTexCoord<4, Binding, V, Swizzled>&
+ShTexCoord<4, Binding, V, Swizzled>::operator=(const ShTexCoord<4, Binding, V2, Swizzled>& other)
+{
+  ParentType::operator=(other);
+  return *this;
+}
+
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+inline
+ShTexCoord<4, Binding, V, Swizzled>&
+ShTexCoord<4, Binding, V, Swizzled>::operator=(const ShProgram& prg)
 {
   ParentType::operator=(prg);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<4, Binding, T, Swizzled>&
-ShTexCoord<4, Binding, T, Swizzled>::operator+=(const ShGeneric<4, T2>& right)
+ShTexCoord<4, Binding, V, Swizzled>&
+ShTexCoord<4, Binding, V, Swizzled>::operator+=(const ShGeneric<4, V2>& right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<4, Binding, T, Swizzled>&
-ShTexCoord<4, Binding, T, Swizzled>::operator-=(const ShGeneric<4, T2>& right)
+ShTexCoord<4, Binding, V, Swizzled>&
+ShTexCoord<4, Binding, V, Swizzled>::operator-=(const ShGeneric<4, V2>& right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<4, Binding, T, Swizzled>&
-ShTexCoord<4, Binding, T, Swizzled>::operator*=(const ShGeneric<4, T2>& right)
+ShTexCoord<4, Binding, V, Swizzled>&
+ShTexCoord<4, Binding, V, Swizzled>::operator*=(const ShGeneric<4, V2>& right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<4, Binding, T, Swizzled>&
-ShTexCoord<4, Binding, T, Swizzled>::operator/=(const ShGeneric<4, T2>& right)
+ShTexCoord<4, Binding, V, Swizzled>&
+ShTexCoord<4, Binding, V, Swizzled>::operator/=(const ShGeneric<4, V2>& right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<4, Binding, T, Swizzled>&
-ShTexCoord<4, Binding, T, Swizzled>::operator%=(const ShGeneric<4, T2>& right)
+ShTexCoord<4, Binding, V, Swizzled>&
+ShTexCoord<4, Binding, V, Swizzled>::operator%=(const ShGeneric<4, V2>& right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<4, Binding, T, Swizzled>&
-ShTexCoord<4, Binding, T, Swizzled>::operator+=(H right)
+ShTexCoord<4, Binding, V, Swizzled>&
+ShTexCoord<4, Binding, V, Swizzled>::operator+=(H right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<4, Binding, T, Swizzled>&
-ShTexCoord<4, Binding, T, Swizzled>::operator-=(H right)
+ShTexCoord<4, Binding, V, Swizzled>&
+ShTexCoord<4, Binding, V, Swizzled>::operator-=(H right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<4, Binding, T, Swizzled>&
-ShTexCoord<4, Binding, T, Swizzled>::operator*=(H right)
+ShTexCoord<4, Binding, V, Swizzled>&
+ShTexCoord<4, Binding, V, Swizzled>::operator*=(H right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<4, Binding, T, Swizzled>&
-ShTexCoord<4, Binding, T, Swizzled>::operator/=(H right)
+ShTexCoord<4, Binding, V, Swizzled>&
+ShTexCoord<4, Binding, V, Swizzled>::operator/=(H right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<4, Binding, T, Swizzled>&
-ShTexCoord<4, Binding, T, Swizzled>::operator%=(H right)
+ShTexCoord<4, Binding, V, Swizzled>&
+ShTexCoord<4, Binding, V, Swizzled>::operator%=(H right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<4, Binding, T, Swizzled>&
-ShTexCoord<4, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T2>& right)
+ShTexCoord<4, Binding, V, Swizzled>&
+ShTexCoord<4, Binding, V, Swizzled>::operator+=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<4, Binding, T, Swizzled>&
-ShTexCoord<4, Binding, T, Swizzled>::operator-=(const ShGeneric<1, T2>& right)
+ShTexCoord<4, Binding, V, Swizzled>&
+ShTexCoord<4, Binding, V, Swizzled>::operator-=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<4, Binding, T, Swizzled>&
-ShTexCoord<4, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T2>& right)
+ShTexCoord<4, Binding, V, Swizzled>&
+ShTexCoord<4, Binding, V, Swizzled>::operator*=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<4, Binding, T, Swizzled>&
-ShTexCoord<4, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T2>& right)
+ShTexCoord<4, Binding, V, Swizzled>&
+ShTexCoord<4, Binding, V, Swizzled>::operator/=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-template<typename T2>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShValueType V2>
 inline
-ShTexCoord<4, Binding, T, Swizzled>&
-ShTexCoord<4, Binding, T, Swizzled>::operator%=(const ShGeneric<1, T2>& right)
+ShTexCoord<4, Binding, V, Swizzled>&
+ShTexCoord<4, Binding, V, Swizzled>::operator%=(const ShGeneric<1, V2>& right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<1, Binding, T, true>
-ShTexCoord<4, Binding, T, Swizzled>::operator()(int s0) const
+ShTexCoord<1, Binding, V, true>
+ShTexCoord<4, Binding, V, Swizzled>::operator()(int s0) const
 {
-  return ShTexCoord<1, Binding, T, true>(m_node, m_swizzle * ShSwizzle(4, s0), m_neg);
+  return ShTexCoord<1, Binding, V, true>(m_node, m_swizzle * ShSwizzle(4, s0), m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<2, Binding, T, true>
-ShTexCoord<4, Binding, T, Swizzled>::operator()(int s0, int s1) const
+ShTexCoord<2, Binding, V, true>
+ShTexCoord<4, Binding, V, Swizzled>::operator()(int s0, int s1) const
 {
-  return ShTexCoord<2, Binding, T, true>(m_node, m_swizzle * ShSwizzle(4, s0, s1), m_neg);
+  return ShTexCoord<2, Binding, V, true>(m_node, m_swizzle * ShSwizzle(4, s0, s1), m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<3, Binding, T, true>
-ShTexCoord<4, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
+ShTexCoord<3, Binding, V, true>
+ShTexCoord<4, Binding, V, Swizzled>::operator()(int s0, int s1, int s2) const
 {
-  return ShTexCoord<3, Binding, T, true>(m_node, m_swizzle * ShSwizzle(4, s0, s1, s2), m_neg);
+  return ShTexCoord<3, Binding, V, true>(m_node, m_swizzle * ShSwizzle(4, s0, s1, s2), m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<4, Binding, T, true>
-ShTexCoord<4, Binding, T, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
+ShTexCoord<4, Binding, V, true>
+ShTexCoord<4, Binding, V, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
 {
-  return ShTexCoord<4, Binding, T, true>(m_node, m_swizzle * ShSwizzle(4, s0, s1, s2, s3), m_neg);
+  return ShTexCoord<4, Binding, V, true>(m_node, m_swizzle * ShSwizzle(4, s0, s1, s2, s3), m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 template<int N2>
-ShTexCoord<N2, Binding, T, true>
-ShTexCoord<4, Binding, T, Swizzled>::swiz(int indices[]) const
+ShTexCoord<N2, Binding, V, true>
+ShTexCoord<4, Binding, V, Swizzled>::swiz(int indices[]) const
 {
-  return ShTexCoord<N2, Binding, T, true>(m_node, m_swizzle * ShSwizzle(4, N2, indices), m_neg);
+  return ShTexCoord<N2, Binding, V, true>(m_node, m_swizzle * ShSwizzle(4, N2, indices), m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
 inline
-ShTexCoord<1, Binding, T, true>
-ShTexCoord<4, Binding, T, Swizzled>::operator[](int s0) const
+ShTexCoord<1, Binding, V, true>
+ShTexCoord<4, Binding, V, Swizzled>::operator[](int s0) const
 {
-  return ShTexCoord<1, Binding, T, true>(m_node, m_swizzle * ShSwizzle(4, s0), m_neg);
+  return ShTexCoord<1, Binding, V, true>(m_node, m_swizzle * ShSwizzle(4, s0), m_neg);
 }
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-ShTexCoord<4, Binding, T, Swizzled>
-ShTexCoord<4, Binding, T, Swizzled>::operator-() const
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+ShTexCoord<4, Binding, V, Swizzled>
+ShTexCoord<4, Binding, V, Swizzled>::operator-() const
 {
-  return ShTexCoord<4, Binding, T, Swizzled>(m_node, m_swizzle, !m_neg);
+  return ShTexCoord<4, Binding, V, Swizzled>(m_node, m_swizzle, !m_neg);
 }
 
 

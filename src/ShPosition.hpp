@@ -45,118 +45,118 @@ namespace SH {
  * 
  *
  */
-template<int N, ShBindingType Binding, typename T=float, bool Swizzled=false>
-class ShPosition : public ShPoint<N, Binding, T, Swizzled> {
+template<int N, ShBindingType Binding, ShValueType V=SH_FLOAT, bool Swizzled=false>
+class ShPosition : public ShPoint<N, Binding, V, Swizzled> {
 public:
-  typedef T ValueType;
-  typedef typename ShHostType<T>::type H; 
-  typedef H HostType; 
-  typedef typename ShMemoryType<T>::type MemoryType; 
-  static const int typesize = N;
+  static const ShValueType value_type = V;
   static const ShBindingType binding_type = Binding;
   static const ShSemanticType semantic_type = SH_POSITION;
+  typedef typename ShHostType<V>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemType<V>::type MemType; 
+  static const int typesize = N;
 
-  typedef ShPosition<N, SH_INPUT, T> InputType;
-  typedef ShPosition<N, SH_OUTPUT, T> OutputType;
-  typedef ShPosition<N, SH_INOUT, T> InOutType;
-  typedef ShPosition<N, SH_TEMP, T> TempType;
-  typedef ShPosition<N, SH_CONST, T> ConstType;
+  typedef ShPosition<N, SH_INPUT, V> InputType;
+  typedef ShPosition<N, SH_OUTPUT, V> OutputType;
+  typedef ShPosition<N, SH_INOUT, V> InOutType;
+  typedef ShPosition<N, SH_TEMP, V> TempType;
+  typedef ShPosition<N, SH_CONST, V> ConstType;
   ShPosition();
   
-  template<typename T2>
-  ShPosition(const ShGeneric<N, T2>& other);
-  ShPosition(const ShPosition<N, Binding, T, Swizzled>& other);
+  template<ShValueType V2>
+  ShPosition(const ShGeneric<N, V2>& other);
+  ShPosition(const ShPosition<N, Binding, V, Swizzled>& other);
   
-  template<typename T2>
-  ShPosition(const ShPosition<N, Binding, T2, Swizzled>& other);
+  template<ShValueType V2>
+  ShPosition(const ShPosition<N, Binding, V2, Swizzled>& other);
   ShPosition(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
   explicit ShPosition(H data[N]);
   
   ~ShPosition();
 
   
-  template<typename T2>
-  ShPosition& operator=(const ShGeneric<N, T2>& other);
+  template<ShValueType V2>
+  ShPosition& operator=(const ShGeneric<N, V2>& other);
   
-  template<typename T2>
-  ShPosition& operator=(const ShPosition<N, Binding, T2, Swizzled>& other);
-  ShPosition& operator=(const ShPosition<N, Binding, T, Swizzled>& other);
+  template<ShValueType V2>
+  ShPosition& operator=(const ShPosition<N, Binding, V2, Swizzled>& other);
+  ShPosition& operator=(const ShPosition<N, Binding, V, Swizzled>& other);
 
   ShPosition& operator=(const ShProgram& prg);
 
   
-  template<typename T2>
-  ShPosition& operator+=(const ShGeneric<N, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator+=(const ShGeneric<N, V2>& right);
   
-  template<typename T2>
-  ShPosition& operator-=(const ShGeneric<N, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator-=(const ShGeneric<N, V2>& right);
   
-  template<typename T2>
-  ShPosition& operator*=(const ShGeneric<N, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator*=(const ShGeneric<N, V2>& right);
   
-  template<typename T2>
-  ShPosition& operator/=(const ShGeneric<N, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator/=(const ShGeneric<N, V2>& right);
   
-  template<typename T2>
-  ShPosition& operator%=(const ShGeneric<N, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator%=(const ShGeneric<N, V2>& right);
   ShPosition& operator*=(H);
   ShPosition& operator/=(H);
   ShPosition& operator%=(H);
   ShPosition& operator+=(H);
   ShPosition& operator-=(H);
   
-  template<typename T2>
-  ShPosition& operator+=(const ShGeneric<1, T2>&);
+  template<ShValueType V2>
+  ShPosition& operator+=(const ShGeneric<1, V2>&);
   
-  template<typename T2>
-  ShPosition& operator-=(const ShGeneric<1, T2>&);
+  template<ShValueType V2>
+  ShPosition& operator-=(const ShGeneric<1, V2>&);
   
-  template<typename T2>
-  ShPosition& operator*=(const ShGeneric<1, T2>&);
+  template<ShValueType V2>
+  ShPosition& operator*=(const ShGeneric<1, V2>&);
   
-  template<typename T2>
-  ShPosition& operator/=(const ShGeneric<1, T2>&);
+  template<ShValueType V2>
+  ShPosition& operator/=(const ShGeneric<1, V2>&);
   
-  template<typename T2>
-  ShPosition& operator%=(const ShGeneric<1, T2>&);
-  ShPosition<1, Binding, T, true> operator()(int) const;
-  ShPosition<2, Binding, T, true> operator()(int, int) const;
-  ShPosition<3, Binding, T, true> operator()(int, int, int) const;
-  ShPosition<4, Binding, T, true> operator()(int, int, int, int) const;
-  ShPosition<1, Binding, T, true> operator[](int) const;
+  template<ShValueType V2>
+  ShPosition& operator%=(const ShGeneric<1, V2>&);
+  ShPosition<1, Binding, V, true> operator()(int) const;
+  ShPosition<2, Binding, V, true> operator()(int, int) const;
+  ShPosition<3, Binding, V, true> operator()(int, int, int) const;
+  ShPosition<4, Binding, V, true> operator()(int, int, int, int) const;
+  ShPosition<1, Binding, V, true> operator[](int) const;
   
   template<int N2>
-  ShPosition<N2, Binding, T, true> swiz(int indices[]) const;
+  ShPosition<N2, Binding, V, true> swiz(int indices[]) const;
   
   ShPosition operator-() const;
   private:
-    typedef ShPoint<N, Binding, T, Swizzled> ParentType;
+    typedef ShPoint<N, Binding, V, Swizzled> ParentType;
 };
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-class ShPosition<1, Binding, T, Swizzled> : public ShPoint<1, Binding, T, Swizzled> {
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+class ShPosition<1, Binding, V, Swizzled> : public ShPoint<1, Binding, V, Swizzled> {
 public:
-  typedef T ValueType;
-  typedef typename ShHostType<T>::type H; 
-  typedef H HostType; 
-  typedef typename ShMemoryType<T>::type MemoryType; 
-  static const int typesize = 1;
+  static const ShValueType value_type = V;
   static const ShBindingType binding_type = Binding;
   static const ShSemanticType semantic_type = SH_POSITION;
+  typedef typename ShHostType<V>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemType<V>::type MemType; 
+  static const int typesize = 1;
 
-  typedef ShPosition<1, SH_INPUT, T> InputType;
-  typedef ShPosition<1, SH_OUTPUT, T> OutputType;
-  typedef ShPosition<1, SH_INOUT, T> InOutType;
-  typedef ShPosition<1, SH_TEMP, T> TempType;
-  typedef ShPosition<1, SH_CONST, T> ConstType;
+  typedef ShPosition<1, SH_INPUT, V> InputType;
+  typedef ShPosition<1, SH_OUTPUT, V> OutputType;
+  typedef ShPosition<1, SH_INOUT, V> InOutType;
+  typedef ShPosition<1, SH_TEMP, V> TempType;
+  typedef ShPosition<1, SH_CONST, V> ConstType;
   ShPosition();
   
-  template<typename T2>
-  ShPosition(const ShGeneric<1, T2>& other);
-  ShPosition(const ShPosition<1, Binding, T, Swizzled>& other);
+  template<ShValueType V2>
+  ShPosition(const ShGeneric<1, V2>& other);
+  ShPosition(const ShPosition<1, Binding, V, Swizzled>& other);
   
-  template<typename T2>
-  ShPosition(const ShPosition<1, Binding, T2, Swizzled>& other);
+  template<ShValueType V2>
+  ShPosition(const ShPosition<1, Binding, V2, Swizzled>& other);
   ShPosition(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
   explicit ShPosition(H data[1]);
   
@@ -165,479 +165,699 @@ public:
   ~ShPosition();
 
   
-  template<typename T2>
-  ShPosition& operator=(const ShGeneric<1, T2>& other);
+  template<ShValueType V2>
+  ShPosition& operator=(const ShGeneric<1, V2>& other);
   
-  template<typename T2>
-  ShPosition& operator=(const ShPosition<1, Binding, T2, Swizzled>& other);
-  ShPosition& operator=(const ShPosition<1, Binding, T, Swizzled>& other);
+  template<ShValueType V2>
+  ShPosition& operator=(const ShPosition<1, Binding, V2, Swizzled>& other);
+  ShPosition& operator=(const ShPosition<1, Binding, V, Swizzled>& other);
 
   ShPosition& operator=(H other);
 
   ShPosition& operator=(const ShProgram& prg);
 
   
-  template<typename T2>
-  ShPosition& operator+=(const ShGeneric<1, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator+=(const ShGeneric<1, V2>& right);
   
-  template<typename T2>
-  ShPosition& operator-=(const ShGeneric<1, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator-=(const ShGeneric<1, V2>& right);
   
-  template<typename T2>
-  ShPosition& operator*=(const ShGeneric<1, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator*=(const ShGeneric<1, V2>& right);
   
-  template<typename T2>
-  ShPosition& operator/=(const ShGeneric<1, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator/=(const ShGeneric<1, V2>& right);
   
-  template<typename T2>
-  ShPosition& operator%=(const ShGeneric<1, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator%=(const ShGeneric<1, V2>& right);
   ShPosition& operator*=(H);
   ShPosition& operator/=(H);
   ShPosition& operator%=(H);
   ShPosition& operator+=(H);
   ShPosition& operator-=(H);
-  ShPosition<1, Binding, T, true> operator()(int) const;
-  ShPosition<2, Binding, T, true> operator()(int, int) const;
-  ShPosition<3, Binding, T, true> operator()(int, int, int) const;
-  ShPosition<4, Binding, T, true> operator()(int, int, int, int) const;
-  ShPosition<1, Binding, T, true> operator[](int) const;
+  ShPosition<1, Binding, V, true> operator()(int) const;
+  ShPosition<2, Binding, V, true> operator()(int, int) const;
+  ShPosition<3, Binding, V, true> operator()(int, int, int) const;
+  ShPosition<4, Binding, V, true> operator()(int, int, int, int) const;
+  ShPosition<1, Binding, V, true> operator[](int) const;
   
   template<int N2>
-  ShPosition<N2, Binding, T, true> swiz(int indices[]) const;
+  ShPosition<N2, Binding, V, true> swiz(int indices[]) const;
   
   ShPosition operator-() const;
   private:
-    typedef ShPoint<1, Binding, T, Swizzled> ParentType;
+    typedef ShPoint<1, Binding, V, Swizzled> ParentType;
 };
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-class ShPosition<2, Binding, T, Swizzled> : public ShPoint<2, Binding, T, Swizzled> {
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+class ShPosition<2, Binding, V, Swizzled> : public ShPoint<2, Binding, V, Swizzled> {
 public:
-  typedef T ValueType;
-  typedef typename ShHostType<T>::type H; 
-  typedef H HostType; 
-  typedef typename ShMemoryType<T>::type MemoryType; 
-  static const int typesize = 2;
+  static const ShValueType value_type = V;
   static const ShBindingType binding_type = Binding;
   static const ShSemanticType semantic_type = SH_POSITION;
+  typedef typename ShHostType<V>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemType<V>::type MemType; 
+  static const int typesize = 2;
 
-  typedef ShPosition<2, SH_INPUT, T> InputType;
-  typedef ShPosition<2, SH_OUTPUT, T> OutputType;
-  typedef ShPosition<2, SH_INOUT, T> InOutType;
-  typedef ShPosition<2, SH_TEMP, T> TempType;
-  typedef ShPosition<2, SH_CONST, T> ConstType;
+  typedef ShPosition<2, SH_INPUT, V> InputType;
+  typedef ShPosition<2, SH_OUTPUT, V> OutputType;
+  typedef ShPosition<2, SH_INOUT, V> InOutType;
+  typedef ShPosition<2, SH_TEMP, V> TempType;
+  typedef ShPosition<2, SH_CONST, V> ConstType;
   ShPosition();
   
-  template<typename T2>
-  ShPosition(const ShGeneric<2, T2>& other);
-  ShPosition(const ShPosition<2, Binding, T, Swizzled>& other);
+  template<ShValueType V2>
+  ShPosition(const ShGeneric<2, V2>& other);
+  ShPosition(const ShPosition<2, Binding, V, Swizzled>& other);
   
-  template<typename T2>
-  ShPosition(const ShPosition<2, Binding, T2, Swizzled>& other);
+  template<ShValueType V2>
+  ShPosition(const ShPosition<2, Binding, V2, Swizzled>& other);
   ShPosition(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
   explicit ShPosition(H data[2]);
   
   ShPosition(H, H);
-  template<typename T2, typename T3>
-  ShPosition(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&);
+  template<ShValueType V2, ShValueType V3>
+  ShPosition(const ShGeneric<1, V2>&, const ShGeneric<1, V3>&);
   
   ~ShPosition();
 
   
-  template<typename T2>
-  ShPosition& operator=(const ShGeneric<2, T2>& other);
+  template<ShValueType V2>
+  ShPosition& operator=(const ShGeneric<2, V2>& other);
   
-  template<typename T2>
-  ShPosition& operator=(const ShPosition<2, Binding, T2, Swizzled>& other);
-  ShPosition& operator=(const ShPosition<2, Binding, T, Swizzled>& other);
+  template<ShValueType V2>
+  ShPosition& operator=(const ShPosition<2, Binding, V2, Swizzled>& other);
+  ShPosition& operator=(const ShPosition<2, Binding, V, Swizzled>& other);
 
   ShPosition& operator=(const ShProgram& prg);
 
   
-  template<typename T2>
-  ShPosition& operator+=(const ShGeneric<2, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator+=(const ShGeneric<2, V2>& right);
   
-  template<typename T2>
-  ShPosition& operator-=(const ShGeneric<2, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator-=(const ShGeneric<2, V2>& right);
   
-  template<typename T2>
-  ShPosition& operator*=(const ShGeneric<2, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator*=(const ShGeneric<2, V2>& right);
   
-  template<typename T2>
-  ShPosition& operator/=(const ShGeneric<2, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator/=(const ShGeneric<2, V2>& right);
   
-  template<typename T2>
-  ShPosition& operator%=(const ShGeneric<2, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator%=(const ShGeneric<2, V2>& right);
   ShPosition& operator*=(H);
   ShPosition& operator/=(H);
   ShPosition& operator%=(H);
   ShPosition& operator+=(H);
   ShPosition& operator-=(H);
   
-  template<typename T2>
-  ShPosition& operator+=(const ShGeneric<1, T2>&);
+  template<ShValueType V2>
+  ShPosition& operator+=(const ShGeneric<1, V2>&);
   
-  template<typename T2>
-  ShPosition& operator-=(const ShGeneric<1, T2>&);
+  template<ShValueType V2>
+  ShPosition& operator-=(const ShGeneric<1, V2>&);
   
-  template<typename T2>
-  ShPosition& operator*=(const ShGeneric<1, T2>&);
+  template<ShValueType V2>
+  ShPosition& operator*=(const ShGeneric<1, V2>&);
   
-  template<typename T2>
-  ShPosition& operator/=(const ShGeneric<1, T2>&);
+  template<ShValueType V2>
+  ShPosition& operator/=(const ShGeneric<1, V2>&);
   
-  template<typename T2>
-  ShPosition& operator%=(const ShGeneric<1, T2>&);
-  ShPosition<1, Binding, T, true> operator()(int) const;
-  ShPosition<2, Binding, T, true> operator()(int, int) const;
-  ShPosition<3, Binding, T, true> operator()(int, int, int) const;
-  ShPosition<4, Binding, T, true> operator()(int, int, int, int) const;
-  ShPosition<1, Binding, T, true> operator[](int) const;
+  template<ShValueType V2>
+  ShPosition& operator%=(const ShGeneric<1, V2>&);
+  ShPosition<1, Binding, V, true> operator()(int) const;
+  ShPosition<2, Binding, V, true> operator()(int, int) const;
+  ShPosition<3, Binding, V, true> operator()(int, int, int) const;
+  ShPosition<4, Binding, V, true> operator()(int, int, int, int) const;
+  ShPosition<1, Binding, V, true> operator[](int) const;
   
   template<int N2>
-  ShPosition<N2, Binding, T, true> swiz(int indices[]) const;
+  ShPosition<N2, Binding, V, true> swiz(int indices[]) const;
   
   ShPosition operator-() const;
   private:
-    typedef ShPoint<2, Binding, T, Swizzled> ParentType;
+    typedef ShPoint<2, Binding, V, Swizzled> ParentType;
 };
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-class ShPosition<3, Binding, T, Swizzled> : public ShPoint<3, Binding, T, Swizzled> {
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+class ShPosition<3, Binding, V, Swizzled> : public ShPoint<3, Binding, V, Swizzled> {
 public:
-  typedef T ValueType;
-  typedef typename ShHostType<T>::type H; 
-  typedef H HostType; 
-  typedef typename ShMemoryType<T>::type MemoryType; 
-  static const int typesize = 3;
+  static const ShValueType value_type = V;
   static const ShBindingType binding_type = Binding;
   static const ShSemanticType semantic_type = SH_POSITION;
+  typedef typename ShHostType<V>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemType<V>::type MemType; 
+  static const int typesize = 3;
 
-  typedef ShPosition<3, SH_INPUT, T> InputType;
-  typedef ShPosition<3, SH_OUTPUT, T> OutputType;
-  typedef ShPosition<3, SH_INOUT, T> InOutType;
-  typedef ShPosition<3, SH_TEMP, T> TempType;
-  typedef ShPosition<3, SH_CONST, T> ConstType;
+  typedef ShPosition<3, SH_INPUT, V> InputType;
+  typedef ShPosition<3, SH_OUTPUT, V> OutputType;
+  typedef ShPosition<3, SH_INOUT, V> InOutType;
+  typedef ShPosition<3, SH_TEMP, V> TempType;
+  typedef ShPosition<3, SH_CONST, V> ConstType;
   ShPosition();
   
-  template<typename T2>
-  ShPosition(const ShGeneric<3, T2>& other);
-  ShPosition(const ShPosition<3, Binding, T, Swizzled>& other);
+  template<ShValueType V2>
+  ShPosition(const ShGeneric<3, V2>& other);
+  ShPosition(const ShPosition<3, Binding, V, Swizzled>& other);
   
-  template<typename T2>
-  ShPosition(const ShPosition<3, Binding, T2, Swizzled>& other);
+  template<ShValueType V2>
+  ShPosition(const ShPosition<3, Binding, V2, Swizzled>& other);
   ShPosition(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
   explicit ShPosition(H data[3]);
   
   ShPosition(H, H, H);
-  template<typename T2, typename T3, typename T4>
-  ShPosition(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&);
+  template<ShValueType V2, ShValueType V3, ShValueType V4>
+  ShPosition(const ShGeneric<1, V2>&, const ShGeneric<1, V3>&, const ShGeneric<1, V4>&);
   
   ~ShPosition();
 
   
-  template<typename T2>
-  ShPosition& operator=(const ShGeneric<3, T2>& other);
+  template<ShValueType V2>
+  ShPosition& operator=(const ShGeneric<3, V2>& other);
   
-  template<typename T2>
-  ShPosition& operator=(const ShPosition<3, Binding, T2, Swizzled>& other);
-  ShPosition& operator=(const ShPosition<3, Binding, T, Swizzled>& other);
+  template<ShValueType V2>
+  ShPosition& operator=(const ShPosition<3, Binding, V2, Swizzled>& other);
+  ShPosition& operator=(const ShPosition<3, Binding, V, Swizzled>& other);
 
   ShPosition& operator=(const ShProgram& prg);
 
   
-  template<typename T2>
-  ShPosition& operator+=(const ShGeneric<3, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator+=(const ShGeneric<3, V2>& right);
   
-  template<typename T2>
-  ShPosition& operator-=(const ShGeneric<3, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator-=(const ShGeneric<3, V2>& right);
   
-  template<typename T2>
-  ShPosition& operator*=(const ShGeneric<3, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator*=(const ShGeneric<3, V2>& right);
   
-  template<typename T2>
-  ShPosition& operator/=(const ShGeneric<3, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator/=(const ShGeneric<3, V2>& right);
   
-  template<typename T2>
-  ShPosition& operator%=(const ShGeneric<3, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator%=(const ShGeneric<3, V2>& right);
   ShPosition& operator*=(H);
   ShPosition& operator/=(H);
   ShPosition& operator%=(H);
   ShPosition& operator+=(H);
   ShPosition& operator-=(H);
   
-  template<typename T2>
-  ShPosition& operator+=(const ShGeneric<1, T2>&);
+  template<ShValueType V2>
+  ShPosition& operator+=(const ShGeneric<1, V2>&);
   
-  template<typename T2>
-  ShPosition& operator-=(const ShGeneric<1, T2>&);
+  template<ShValueType V2>
+  ShPosition& operator-=(const ShGeneric<1, V2>&);
   
-  template<typename T2>
-  ShPosition& operator*=(const ShGeneric<1, T2>&);
+  template<ShValueType V2>
+  ShPosition& operator*=(const ShGeneric<1, V2>&);
   
-  template<typename T2>
-  ShPosition& operator/=(const ShGeneric<1, T2>&);
+  template<ShValueType V2>
+  ShPosition& operator/=(const ShGeneric<1, V2>&);
   
-  template<typename T2>
-  ShPosition& operator%=(const ShGeneric<1, T2>&);
-  ShPosition<1, Binding, T, true> operator()(int) const;
-  ShPosition<2, Binding, T, true> operator()(int, int) const;
-  ShPosition<3, Binding, T, true> operator()(int, int, int) const;
-  ShPosition<4, Binding, T, true> operator()(int, int, int, int) const;
-  ShPosition<1, Binding, T, true> operator[](int) const;
+  template<ShValueType V2>
+  ShPosition& operator%=(const ShGeneric<1, V2>&);
+  ShPosition<1, Binding, V, true> operator()(int) const;
+  ShPosition<2, Binding, V, true> operator()(int, int) const;
+  ShPosition<3, Binding, V, true> operator()(int, int, int) const;
+  ShPosition<4, Binding, V, true> operator()(int, int, int, int) const;
+  ShPosition<1, Binding, V, true> operator[](int) const;
   
   template<int N2>
-  ShPosition<N2, Binding, T, true> swiz(int indices[]) const;
+  ShPosition<N2, Binding, V, true> swiz(int indices[]) const;
   
   ShPosition operator-() const;
   private:
-    typedef ShPoint<3, Binding, T, Swizzled> ParentType;
+    typedef ShPoint<3, Binding, V, Swizzled> ParentType;
 };
 
-template<ShBindingType Binding, typename T, bool Swizzled>
-class ShPosition<4, Binding, T, Swizzled> : public ShPoint<4, Binding, T, Swizzled> {
+template<ShBindingType Binding, ShValueType V, bool Swizzled>
+class ShPosition<4, Binding, V, Swizzled> : public ShPoint<4, Binding, V, Swizzled> {
 public:
-  typedef T ValueType;
-  typedef typename ShHostType<T>::type H; 
-  typedef H HostType; 
-  typedef typename ShMemoryType<T>::type MemoryType; 
-  static const int typesize = 4;
+  static const ShValueType value_type = V;
   static const ShBindingType binding_type = Binding;
   static const ShSemanticType semantic_type = SH_POSITION;
+  typedef typename ShHostType<V>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemType<V>::type MemType; 
+  static const int typesize = 4;
 
-  typedef ShPosition<4, SH_INPUT, T> InputType;
-  typedef ShPosition<4, SH_OUTPUT, T> OutputType;
-  typedef ShPosition<4, SH_INOUT, T> InOutType;
-  typedef ShPosition<4, SH_TEMP, T> TempType;
-  typedef ShPosition<4, SH_CONST, T> ConstType;
+  typedef ShPosition<4, SH_INPUT, V> InputType;
+  typedef ShPosition<4, SH_OUTPUT, V> OutputType;
+  typedef ShPosition<4, SH_INOUT, V> InOutType;
+  typedef ShPosition<4, SH_TEMP, V> TempType;
+  typedef ShPosition<4, SH_CONST, V> ConstType;
   ShPosition();
   
-  template<typename T2>
-  ShPosition(const ShGeneric<4, T2>& other);
-  ShPosition(const ShPosition<4, Binding, T, Swizzled>& other);
+  template<ShValueType V2>
+  ShPosition(const ShGeneric<4, V2>& other);
+  ShPosition(const ShPosition<4, Binding, V, Swizzled>& other);
   
-  template<typename T2>
-  ShPosition(const ShPosition<4, Binding, T2, Swizzled>& other);
+  template<ShValueType V2>
+  ShPosition(const ShPosition<4, Binding, V2, Swizzled>& other);
   ShPosition(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
   explicit ShPosition(H data[4]);
   
   ShPosition(H, H, H, H);
-  template<typename T2, typename T3, typename T4, typename T5>
-  ShPosition(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&, const ShGeneric<1, T5>&);
+  template<ShValueType V2, ShValueType V3, ShValueType V4, ShValueType V5>
+  ShPosition(const ShGeneric<1, V2>&, const ShGeneric<1, V3>&, const ShGeneric<1, V4>&, const ShGeneric<1, V5>&);
   
   ~ShPosition();
 
   
-  template<typename T2>
-  ShPosition& operator=(const ShGeneric<4, T2>& other);
+  template<ShValueType V2>
+  ShPosition& operator=(const ShGeneric<4, V2>& other);
   
-  template<typename T2>
-  ShPosition& operator=(const ShPosition<4, Binding, T2, Swizzled>& other);
-  ShPosition& operator=(const ShPosition<4, Binding, T, Swizzled>& other);
+  template<ShValueType V2>
+  ShPosition& operator=(const ShPosition<4, Binding, V2, Swizzled>& other);
+  ShPosition& operator=(const ShPosition<4, Binding, V, Swizzled>& other);
 
   ShPosition& operator=(const ShProgram& prg);
 
   
-  template<typename T2>
-  ShPosition& operator+=(const ShGeneric<4, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator+=(const ShGeneric<4, V2>& right);
   
-  template<typename T2>
-  ShPosition& operator-=(const ShGeneric<4, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator-=(const ShGeneric<4, V2>& right);
   
-  template<typename T2>
-  ShPosition& operator*=(const ShGeneric<4, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator*=(const ShGeneric<4, V2>& right);
   
-  template<typename T2>
-  ShPosition& operator/=(const ShGeneric<4, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator/=(const ShGeneric<4, V2>& right);
   
-  template<typename T2>
-  ShPosition& operator%=(const ShGeneric<4, T2>& right);
+  template<ShValueType V2>
+  ShPosition& operator%=(const ShGeneric<4, V2>& right);
   ShPosition& operator*=(H);
   ShPosition& operator/=(H);
   ShPosition& operator%=(H);
   ShPosition& operator+=(H);
   ShPosition& operator-=(H);
   
-  template<typename T2>
-  ShPosition& operator+=(const ShGeneric<1, T2>&);
+  template<ShValueType V2>
+  ShPosition& operator+=(const ShGeneric<1, V2>&);
   
-  template<typename T2>
-  ShPosition& operator-=(const ShGeneric<1, T2>&);
+  template<ShValueType V2>
+  ShPosition& operator-=(const ShGeneric<1, V2>&);
   
-  template<typename T2>
-  ShPosition& operator*=(const ShGeneric<1, T2>&);
+  template<ShValueType V2>
+  ShPosition& operator*=(const ShGeneric<1, V2>&);
   
-  template<typename T2>
-  ShPosition& operator/=(const ShGeneric<1, T2>&);
+  template<ShValueType V2>
+  ShPosition& operator/=(const ShGeneric<1, V2>&);
   
-  template<typename T2>
-  ShPosition& operator%=(const ShGeneric<1, T2>&);
-  ShPosition<1, Binding, T, true> operator()(int) const;
-  ShPosition<2, Binding, T, true> operator()(int, int) const;
-  ShPosition<3, Binding, T, true> operator()(int, int, int) const;
-  ShPosition<4, Binding, T, true> operator()(int, int, int, int) const;
-  ShPosition<1, Binding, T, true> operator[](int) const;
+  template<ShValueType V2>
+  ShPosition& operator%=(const ShGeneric<1, V2>&);
+  ShPosition<1, Binding, V, true> operator()(int) const;
+  ShPosition<2, Binding, V, true> operator()(int, int) const;
+  ShPosition<3, Binding, V, true> operator()(int, int, int) const;
+  ShPosition<4, Binding, V, true> operator()(int, int, int, int) const;
+  ShPosition<1, Binding, V, true> operator[](int) const;
   
   template<int N2>
-  ShPosition<N2, Binding, T, true> swiz(int indices[]) const;
+  ShPosition<N2, Binding, V, true> swiz(int indices[]) const;
   
   ShPosition operator-() const;
   private:
-    typedef ShPoint<4, Binding, T, Swizzled> ParentType;
+    typedef ShPoint<4, Binding, V, Swizzled> ParentType;
 };
 
-typedef ShPosition<1, SH_INPUT, ShInterval<double> > ShInputPosition1i_d;
-typedef ShPosition<1, SH_OUTPUT, ShInterval<double> > ShOutputPosition1i_d;
-typedef ShPosition<1, SH_INOUT, ShInterval<double> > ShInOutPosition1i_d;
-typedef ShPosition<1, SH_TEMP, ShInterval<double> > ShPosition1i_d;
-typedef ShPosition<1, SH_CONST, ShInterval<double> > ShConstPosition1i_d;
-typedef ShPosition<2, SH_INPUT, ShInterval<double> > ShInputPosition2i_d;
-typedef ShPosition<2, SH_OUTPUT, ShInterval<double> > ShOutputPosition2i_d;
-typedef ShPosition<2, SH_INOUT, ShInterval<double> > ShInOutPosition2i_d;
-typedef ShPosition<2, SH_TEMP, ShInterval<double> > ShPosition2i_d;
-typedef ShPosition<2, SH_CONST, ShInterval<double> > ShConstPosition2i_d;
-typedef ShPosition<3, SH_INPUT, ShInterval<double> > ShInputPosition3i_d;
-typedef ShPosition<3, SH_OUTPUT, ShInterval<double> > ShOutputPosition3i_d;
-typedef ShPosition<3, SH_INOUT, ShInterval<double> > ShInOutPosition3i_d;
-typedef ShPosition<3, SH_TEMP, ShInterval<double> > ShPosition3i_d;
-typedef ShPosition<3, SH_CONST, ShInterval<double> > ShConstPosition3i_d;
-typedef ShPosition<4, SH_INPUT, ShInterval<double> > ShInputPosition4i_d;
-typedef ShPosition<4, SH_OUTPUT, ShInterval<double> > ShOutputPosition4i_d;
-typedef ShPosition<4, SH_INOUT, ShInterval<double> > ShInOutPosition4i_d;
-typedef ShPosition<4, SH_TEMP, ShInterval<double> > ShPosition4i_d;
-typedef ShPosition<4, SH_CONST, ShInterval<double> > ShConstPosition4i_d;
+typedef ShPosition<1, SH_INPUT, SH_SHORT> ShInputPosition1s;
+typedef ShPosition<1, SH_OUTPUT, SH_SHORT> ShOutputPosition1s;
+typedef ShPosition<1, SH_INOUT, SH_SHORT> ShInOutPosition1s;
+typedef ShPosition<1, SH_TEMP, SH_SHORT> ShPosition1s;
+typedef ShPosition<1, SH_CONST, SH_SHORT> ShConstPosition1s;
+typedef ShPosition<2, SH_INPUT, SH_SHORT> ShInputPosition2s;
+typedef ShPosition<2, SH_OUTPUT, SH_SHORT> ShOutputPosition2s;
+typedef ShPosition<2, SH_INOUT, SH_SHORT> ShInOutPosition2s;
+typedef ShPosition<2, SH_TEMP, SH_SHORT> ShPosition2s;
+typedef ShPosition<2, SH_CONST, SH_SHORT> ShConstPosition2s;
+typedef ShPosition<3, SH_INPUT, SH_SHORT> ShInputPosition3s;
+typedef ShPosition<3, SH_OUTPUT, SH_SHORT> ShOutputPosition3s;
+typedef ShPosition<3, SH_INOUT, SH_SHORT> ShInOutPosition3s;
+typedef ShPosition<3, SH_TEMP, SH_SHORT> ShPosition3s;
+typedef ShPosition<3, SH_CONST, SH_SHORT> ShConstPosition3s;
+typedef ShPosition<4, SH_INPUT, SH_SHORT> ShInputPosition4s;
+typedef ShPosition<4, SH_OUTPUT, SH_SHORT> ShOutputPosition4s;
+typedef ShPosition<4, SH_INOUT, SH_SHORT> ShInOutPosition4s;
+typedef ShPosition<4, SH_TEMP, SH_SHORT> ShPosition4s;
+typedef ShPosition<4, SH_CONST, SH_SHORT> ShConstPosition4s;
 
 
-typedef ShPosition<1, SH_INPUT, short> ShInputPosition1s;
-typedef ShPosition<1, SH_OUTPUT, short> ShOutputPosition1s;
-typedef ShPosition<1, SH_INOUT, short> ShInOutPosition1s;
-typedef ShPosition<1, SH_TEMP, short> ShPosition1s;
-typedef ShPosition<1, SH_CONST, short> ShConstPosition1s;
-typedef ShPosition<2, SH_INPUT, short> ShInputPosition2s;
-typedef ShPosition<2, SH_OUTPUT, short> ShOutputPosition2s;
-typedef ShPosition<2, SH_INOUT, short> ShInOutPosition2s;
-typedef ShPosition<2, SH_TEMP, short> ShPosition2s;
-typedef ShPosition<2, SH_CONST, short> ShConstPosition2s;
-typedef ShPosition<3, SH_INPUT, short> ShInputPosition3s;
-typedef ShPosition<3, SH_OUTPUT, short> ShOutputPosition3s;
-typedef ShPosition<3, SH_INOUT, short> ShInOutPosition3s;
-typedef ShPosition<3, SH_TEMP, short> ShPosition3s;
-typedef ShPosition<3, SH_CONST, short> ShConstPosition3s;
-typedef ShPosition<4, SH_INPUT, short> ShInputPosition4s;
-typedef ShPosition<4, SH_OUTPUT, short> ShOutputPosition4s;
-typedef ShPosition<4, SH_INOUT, short> ShInOutPosition4s;
-typedef ShPosition<4, SH_TEMP, short> ShPosition4s;
-typedef ShPosition<4, SH_CONST, short> ShConstPosition4s;
+typedef ShPosition<1, SH_INPUT, SH_FRAC_UINT> ShInputPosition1fui;
+typedef ShPosition<1, SH_OUTPUT, SH_FRAC_UINT> ShOutputPosition1fui;
+typedef ShPosition<1, SH_INOUT, SH_FRAC_UINT> ShInOutPosition1fui;
+typedef ShPosition<1, SH_TEMP, SH_FRAC_UINT> ShPosition1fui;
+typedef ShPosition<1, SH_CONST, SH_FRAC_UINT> ShConstPosition1fui;
+typedef ShPosition<2, SH_INPUT, SH_FRAC_UINT> ShInputPosition2fui;
+typedef ShPosition<2, SH_OUTPUT, SH_FRAC_UINT> ShOutputPosition2fui;
+typedef ShPosition<2, SH_INOUT, SH_FRAC_UINT> ShInOutPosition2fui;
+typedef ShPosition<2, SH_TEMP, SH_FRAC_UINT> ShPosition2fui;
+typedef ShPosition<2, SH_CONST, SH_FRAC_UINT> ShConstPosition2fui;
+typedef ShPosition<3, SH_INPUT, SH_FRAC_UINT> ShInputPosition3fui;
+typedef ShPosition<3, SH_OUTPUT, SH_FRAC_UINT> ShOutputPosition3fui;
+typedef ShPosition<3, SH_INOUT, SH_FRAC_UINT> ShInOutPosition3fui;
+typedef ShPosition<3, SH_TEMP, SH_FRAC_UINT> ShPosition3fui;
+typedef ShPosition<3, SH_CONST, SH_FRAC_UINT> ShConstPosition3fui;
+typedef ShPosition<4, SH_INPUT, SH_FRAC_UINT> ShInputPosition4fui;
+typedef ShPosition<4, SH_OUTPUT, SH_FRAC_UINT> ShOutputPosition4fui;
+typedef ShPosition<4, SH_INOUT, SH_FRAC_UINT> ShInOutPosition4fui;
+typedef ShPosition<4, SH_TEMP, SH_FRAC_UINT> ShPosition4fui;
+typedef ShPosition<4, SH_CONST, SH_FRAC_UINT> ShConstPosition4fui;
 
 
-typedef ShPosition<1, SH_INPUT, int> ShInputPosition1i;
-typedef ShPosition<1, SH_OUTPUT, int> ShOutputPosition1i;
-typedef ShPosition<1, SH_INOUT, int> ShInOutPosition1i;
-typedef ShPosition<1, SH_TEMP, int> ShPosition1i;
-typedef ShPosition<1, SH_CONST, int> ShConstPosition1i;
-typedef ShPosition<2, SH_INPUT, int> ShInputPosition2i;
-typedef ShPosition<2, SH_OUTPUT, int> ShOutputPosition2i;
-typedef ShPosition<2, SH_INOUT, int> ShInOutPosition2i;
-typedef ShPosition<2, SH_TEMP, int> ShPosition2i;
-typedef ShPosition<2, SH_CONST, int> ShConstPosition2i;
-typedef ShPosition<3, SH_INPUT, int> ShInputPosition3i;
-typedef ShPosition<3, SH_OUTPUT, int> ShOutputPosition3i;
-typedef ShPosition<3, SH_INOUT, int> ShInOutPosition3i;
-typedef ShPosition<3, SH_TEMP, int> ShPosition3i;
-typedef ShPosition<3, SH_CONST, int> ShConstPosition3i;
-typedef ShPosition<4, SH_INPUT, int> ShInputPosition4i;
-typedef ShPosition<4, SH_OUTPUT, int> ShOutputPosition4i;
-typedef ShPosition<4, SH_INOUT, int> ShInOutPosition4i;
-typedef ShPosition<4, SH_TEMP, int> ShPosition4i;
-typedef ShPosition<4, SH_CONST, int> ShConstPosition4i;
+typedef ShPosition<1, SH_INPUT, SH_FRAC_BYTE> ShInputPosition1fb;
+typedef ShPosition<1, SH_OUTPUT, SH_FRAC_BYTE> ShOutputPosition1fb;
+typedef ShPosition<1, SH_INOUT, SH_FRAC_BYTE> ShInOutPosition1fb;
+typedef ShPosition<1, SH_TEMP, SH_FRAC_BYTE> ShPosition1fb;
+typedef ShPosition<1, SH_CONST, SH_FRAC_BYTE> ShConstPosition1fb;
+typedef ShPosition<2, SH_INPUT, SH_FRAC_BYTE> ShInputPosition2fb;
+typedef ShPosition<2, SH_OUTPUT, SH_FRAC_BYTE> ShOutputPosition2fb;
+typedef ShPosition<2, SH_INOUT, SH_FRAC_BYTE> ShInOutPosition2fb;
+typedef ShPosition<2, SH_TEMP, SH_FRAC_BYTE> ShPosition2fb;
+typedef ShPosition<2, SH_CONST, SH_FRAC_BYTE> ShConstPosition2fb;
+typedef ShPosition<3, SH_INPUT, SH_FRAC_BYTE> ShInputPosition3fb;
+typedef ShPosition<3, SH_OUTPUT, SH_FRAC_BYTE> ShOutputPosition3fb;
+typedef ShPosition<3, SH_INOUT, SH_FRAC_BYTE> ShInOutPosition3fb;
+typedef ShPosition<3, SH_TEMP, SH_FRAC_BYTE> ShPosition3fb;
+typedef ShPosition<3, SH_CONST, SH_FRAC_BYTE> ShConstPosition3fb;
+typedef ShPosition<4, SH_INPUT, SH_FRAC_BYTE> ShInputPosition4fb;
+typedef ShPosition<4, SH_OUTPUT, SH_FRAC_BYTE> ShOutputPosition4fb;
+typedef ShPosition<4, SH_INOUT, SH_FRAC_BYTE> ShInOutPosition4fb;
+typedef ShPosition<4, SH_TEMP, SH_FRAC_BYTE> ShPosition4fb;
+typedef ShPosition<4, SH_CONST, SH_FRAC_BYTE> ShConstPosition4fb;
 
 
-typedef ShPosition<1, SH_INPUT, double> ShInputPosition1d;
-typedef ShPosition<1, SH_OUTPUT, double> ShOutputPosition1d;
-typedef ShPosition<1, SH_INOUT, double> ShInOutPosition1d;
-typedef ShPosition<1, SH_TEMP, double> ShPosition1d;
-typedef ShPosition<1, SH_CONST, double> ShConstPosition1d;
-typedef ShPosition<2, SH_INPUT, double> ShInputPosition2d;
-typedef ShPosition<2, SH_OUTPUT, double> ShOutputPosition2d;
-typedef ShPosition<2, SH_INOUT, double> ShInOutPosition2d;
-typedef ShPosition<2, SH_TEMP, double> ShPosition2d;
-typedef ShPosition<2, SH_CONST, double> ShConstPosition2d;
-typedef ShPosition<3, SH_INPUT, double> ShInputPosition3d;
-typedef ShPosition<3, SH_OUTPUT, double> ShOutputPosition3d;
-typedef ShPosition<3, SH_INOUT, double> ShInOutPosition3d;
-typedef ShPosition<3, SH_TEMP, double> ShPosition3d;
-typedef ShPosition<3, SH_CONST, double> ShConstPosition3d;
-typedef ShPosition<4, SH_INPUT, double> ShInputPosition4d;
-typedef ShPosition<4, SH_OUTPUT, double> ShOutputPosition4d;
-typedef ShPosition<4, SH_INOUT, double> ShInOutPosition4d;
-typedef ShPosition<4, SH_TEMP, double> ShPosition4d;
-typedef ShPosition<4, SH_CONST, double> ShConstPosition4d;
+typedef ShPosition<1, SH_INPUT, SH_FRAC_UBYTE> ShInputPosition1fub;
+typedef ShPosition<1, SH_OUTPUT, SH_FRAC_UBYTE> ShOutputPosition1fub;
+typedef ShPosition<1, SH_INOUT, SH_FRAC_UBYTE> ShInOutPosition1fub;
+typedef ShPosition<1, SH_TEMP, SH_FRAC_UBYTE> ShPosition1fub;
+typedef ShPosition<1, SH_CONST, SH_FRAC_UBYTE> ShConstPosition1fub;
+typedef ShPosition<2, SH_INPUT, SH_FRAC_UBYTE> ShInputPosition2fub;
+typedef ShPosition<2, SH_OUTPUT, SH_FRAC_UBYTE> ShOutputPosition2fub;
+typedef ShPosition<2, SH_INOUT, SH_FRAC_UBYTE> ShInOutPosition2fub;
+typedef ShPosition<2, SH_TEMP, SH_FRAC_UBYTE> ShPosition2fub;
+typedef ShPosition<2, SH_CONST, SH_FRAC_UBYTE> ShConstPosition2fub;
+typedef ShPosition<3, SH_INPUT, SH_FRAC_UBYTE> ShInputPosition3fub;
+typedef ShPosition<3, SH_OUTPUT, SH_FRAC_UBYTE> ShOutputPosition3fub;
+typedef ShPosition<3, SH_INOUT, SH_FRAC_UBYTE> ShInOutPosition3fub;
+typedef ShPosition<3, SH_TEMP, SH_FRAC_UBYTE> ShPosition3fub;
+typedef ShPosition<3, SH_CONST, SH_FRAC_UBYTE> ShConstPosition3fub;
+typedef ShPosition<4, SH_INPUT, SH_FRAC_UBYTE> ShInputPosition4fub;
+typedef ShPosition<4, SH_OUTPUT, SH_FRAC_UBYTE> ShOutputPosition4fub;
+typedef ShPosition<4, SH_INOUT, SH_FRAC_UBYTE> ShInOutPosition4fub;
+typedef ShPosition<4, SH_TEMP, SH_FRAC_UBYTE> ShPosition4fub;
+typedef ShPosition<4, SH_CONST, SH_FRAC_UBYTE> ShConstPosition4fub;
 
 
-typedef ShPosition<1, SH_INPUT, float> ShInputPosition1f;
-typedef ShPosition<1, SH_OUTPUT, float> ShOutputPosition1f;
-typedef ShPosition<1, SH_INOUT, float> ShInOutPosition1f;
-typedef ShPosition<1, SH_TEMP, float> ShPosition1f;
-typedef ShPosition<1, SH_CONST, float> ShConstPosition1f;
-typedef ShPosition<2, SH_INPUT, float> ShInputPosition2f;
-typedef ShPosition<2, SH_OUTPUT, float> ShOutputPosition2f;
-typedef ShPosition<2, SH_INOUT, float> ShInOutPosition2f;
-typedef ShPosition<2, SH_TEMP, float> ShPosition2f;
-typedef ShPosition<2, SH_CONST, float> ShConstPosition2f;
-typedef ShPosition<3, SH_INPUT, float> ShInputPosition3f;
-typedef ShPosition<3, SH_OUTPUT, float> ShOutputPosition3f;
-typedef ShPosition<3, SH_INOUT, float> ShInOutPosition3f;
-typedef ShPosition<3, SH_TEMP, float> ShPosition3f;
-typedef ShPosition<3, SH_CONST, float> ShConstPosition3f;
-typedef ShPosition<4, SH_INPUT, float> ShInputPosition4f;
-typedef ShPosition<4, SH_OUTPUT, float> ShOutputPosition4f;
-typedef ShPosition<4, SH_INOUT, float> ShInOutPosition4f;
-typedef ShPosition<4, SH_TEMP, float> ShPosition4f;
-typedef ShPosition<4, SH_CONST, float> ShConstPosition4f;
+typedef ShPosition<1, SH_INPUT, SH_HALF> ShInputPosition1h;
+typedef ShPosition<1, SH_OUTPUT, SH_HALF> ShOutputPosition1h;
+typedef ShPosition<1, SH_INOUT, SH_HALF> ShInOutPosition1h;
+typedef ShPosition<1, SH_TEMP, SH_HALF> ShPosition1h;
+typedef ShPosition<1, SH_CONST, SH_HALF> ShConstPosition1h;
+typedef ShPosition<2, SH_INPUT, SH_HALF> ShInputPosition2h;
+typedef ShPosition<2, SH_OUTPUT, SH_HALF> ShOutputPosition2h;
+typedef ShPosition<2, SH_INOUT, SH_HALF> ShInOutPosition2h;
+typedef ShPosition<2, SH_TEMP, SH_HALF> ShPosition2h;
+typedef ShPosition<2, SH_CONST, SH_HALF> ShConstPosition2h;
+typedef ShPosition<3, SH_INPUT, SH_HALF> ShInputPosition3h;
+typedef ShPosition<3, SH_OUTPUT, SH_HALF> ShOutputPosition3h;
+typedef ShPosition<3, SH_INOUT, SH_HALF> ShInOutPosition3h;
+typedef ShPosition<3, SH_TEMP, SH_HALF> ShPosition3h;
+typedef ShPosition<3, SH_CONST, SH_HALF> ShConstPosition3h;
+typedef ShPosition<4, SH_INPUT, SH_HALF> ShInputPosition4h;
+typedef ShPosition<4, SH_OUTPUT, SH_HALF> ShOutputPosition4h;
+typedef ShPosition<4, SH_INOUT, SH_HALF> ShInOutPosition4h;
+typedef ShPosition<4, SH_TEMP, SH_HALF> ShPosition4h;
+typedef ShPosition<4, SH_CONST, SH_HALF> ShConstPosition4h;
 
 
-typedef ShPosition<1, SH_INPUT, char> ShInputPosition1b;
-typedef ShPosition<1, SH_OUTPUT, char> ShOutputPosition1b;
-typedef ShPosition<1, SH_INOUT, char> ShInOutPosition1b;
-typedef ShPosition<1, SH_TEMP, char> ShPosition1b;
-typedef ShPosition<1, SH_CONST, char> ShConstPosition1b;
-typedef ShPosition<2, SH_INPUT, char> ShInputPosition2b;
-typedef ShPosition<2, SH_OUTPUT, char> ShOutputPosition2b;
-typedef ShPosition<2, SH_INOUT, char> ShInOutPosition2b;
-typedef ShPosition<2, SH_TEMP, char> ShPosition2b;
-typedef ShPosition<2, SH_CONST, char> ShConstPosition2b;
-typedef ShPosition<3, SH_INPUT, char> ShInputPosition3b;
-typedef ShPosition<3, SH_OUTPUT, char> ShOutputPosition3b;
-typedef ShPosition<3, SH_INOUT, char> ShInOutPosition3b;
-typedef ShPosition<3, SH_TEMP, char> ShPosition3b;
-typedef ShPosition<3, SH_CONST, char> ShConstPosition3b;
-typedef ShPosition<4, SH_INPUT, char> ShInputPosition4b;
-typedef ShPosition<4, SH_OUTPUT, char> ShOutputPosition4b;
-typedef ShPosition<4, SH_INOUT, char> ShInOutPosition4b;
-typedef ShPosition<4, SH_TEMP, char> ShPosition4b;
-typedef ShPosition<4, SH_CONST, char> ShConstPosition4b;
+typedef ShPosition<1, SH_INPUT, SH_INT> ShInputPosition1i;
+typedef ShPosition<1, SH_OUTPUT, SH_INT> ShOutputPosition1i;
+typedef ShPosition<1, SH_INOUT, SH_INT> ShInOutPosition1i;
+typedef ShPosition<1, SH_TEMP, SH_INT> ShPosition1i;
+typedef ShPosition<1, SH_CONST, SH_INT> ShConstPosition1i;
+typedef ShPosition<2, SH_INPUT, SH_INT> ShInputPosition2i;
+typedef ShPosition<2, SH_OUTPUT, SH_INT> ShOutputPosition2i;
+typedef ShPosition<2, SH_INOUT, SH_INT> ShInOutPosition2i;
+typedef ShPosition<2, SH_TEMP, SH_INT> ShPosition2i;
+typedef ShPosition<2, SH_CONST, SH_INT> ShConstPosition2i;
+typedef ShPosition<3, SH_INPUT, SH_INT> ShInputPosition3i;
+typedef ShPosition<3, SH_OUTPUT, SH_INT> ShOutputPosition3i;
+typedef ShPosition<3, SH_INOUT, SH_INT> ShInOutPosition3i;
+typedef ShPosition<3, SH_TEMP, SH_INT> ShPosition3i;
+typedef ShPosition<3, SH_CONST, SH_INT> ShConstPosition3i;
+typedef ShPosition<4, SH_INPUT, SH_INT> ShInputPosition4i;
+typedef ShPosition<4, SH_OUTPUT, SH_INT> ShOutputPosition4i;
+typedef ShPosition<4, SH_INOUT, SH_INT> ShInOutPosition4i;
+typedef ShPosition<4, SH_TEMP, SH_INT> ShPosition4i;
+typedef ShPosition<4, SH_CONST, SH_INT> ShConstPosition4i;
 
 
-typedef ShPosition<1, SH_INPUT, ShInterval<float> > ShInputPosition1i_f;
-typedef ShPosition<1, SH_OUTPUT, ShInterval<float> > ShOutputPosition1i_f;
-typedef ShPosition<1, SH_INOUT, ShInterval<float> > ShInOutPosition1i_f;
-typedef ShPosition<1, SH_TEMP, ShInterval<float> > ShPosition1i_f;
-typedef ShPosition<1, SH_CONST, ShInterval<float> > ShConstPosition1i_f;
-typedef ShPosition<2, SH_INPUT, ShInterval<float> > ShInputPosition2i_f;
-typedef ShPosition<2, SH_OUTPUT, ShInterval<float> > ShOutputPosition2i_f;
-typedef ShPosition<2, SH_INOUT, ShInterval<float> > ShInOutPosition2i_f;
-typedef ShPosition<2, SH_TEMP, ShInterval<float> > ShPosition2i_f;
-typedef ShPosition<2, SH_CONST, ShInterval<float> > ShConstPosition2i_f;
-typedef ShPosition<3, SH_INPUT, ShInterval<float> > ShInputPosition3i_f;
-typedef ShPosition<3, SH_OUTPUT, ShInterval<float> > ShOutputPosition3i_f;
-typedef ShPosition<3, SH_INOUT, ShInterval<float> > ShInOutPosition3i_f;
-typedef ShPosition<3, SH_TEMP, ShInterval<float> > ShPosition3i_f;
-typedef ShPosition<3, SH_CONST, ShInterval<float> > ShConstPosition3i_f;
-typedef ShPosition<4, SH_INPUT, ShInterval<float> > ShInputPosition4i_f;
-typedef ShPosition<4, SH_OUTPUT, ShInterval<float> > ShOutputPosition4i_f;
-typedef ShPosition<4, SH_INOUT, ShInterval<float> > ShInOutPosition4i_f;
-typedef ShPosition<4, SH_TEMP, ShInterval<float> > ShPosition4i_f;
-typedef ShPosition<4, SH_CONST, ShInterval<float> > ShConstPosition4i_f;
+typedef ShPosition<1, SH_INPUT, SH_FLOAT> ShInputPosition1f;
+typedef ShPosition<1, SH_OUTPUT, SH_FLOAT> ShOutputPosition1f;
+typedef ShPosition<1, SH_INOUT, SH_FLOAT> ShInOutPosition1f;
+typedef ShPosition<1, SH_TEMP, SH_FLOAT> ShPosition1f;
+typedef ShPosition<1, SH_CONST, SH_FLOAT> ShConstPosition1f;
+typedef ShPosition<2, SH_INPUT, SH_FLOAT> ShInputPosition2f;
+typedef ShPosition<2, SH_OUTPUT, SH_FLOAT> ShOutputPosition2f;
+typedef ShPosition<2, SH_INOUT, SH_FLOAT> ShInOutPosition2f;
+typedef ShPosition<2, SH_TEMP, SH_FLOAT> ShPosition2f;
+typedef ShPosition<2, SH_CONST, SH_FLOAT> ShConstPosition2f;
+typedef ShPosition<3, SH_INPUT, SH_FLOAT> ShInputPosition3f;
+typedef ShPosition<3, SH_OUTPUT, SH_FLOAT> ShOutputPosition3f;
+typedef ShPosition<3, SH_INOUT, SH_FLOAT> ShInOutPosition3f;
+typedef ShPosition<3, SH_TEMP, SH_FLOAT> ShPosition3f;
+typedef ShPosition<3, SH_CONST, SH_FLOAT> ShConstPosition3f;
+typedef ShPosition<4, SH_INPUT, SH_FLOAT> ShInputPosition4f;
+typedef ShPosition<4, SH_OUTPUT, SH_FLOAT> ShOutputPosition4f;
+typedef ShPosition<4, SH_INOUT, SH_FLOAT> ShInOutPosition4f;
+typedef ShPosition<4, SH_TEMP, SH_FLOAT> ShPosition4f;
+typedef ShPosition<4, SH_CONST, SH_FLOAT> ShConstPosition4f;
+
+
+typedef ShPosition<1, SH_INPUT, SH_BYTE> ShInputPosition1b;
+typedef ShPosition<1, SH_OUTPUT, SH_BYTE> ShOutputPosition1b;
+typedef ShPosition<1, SH_INOUT, SH_BYTE> ShInOutPosition1b;
+typedef ShPosition<1, SH_TEMP, SH_BYTE> ShPosition1b;
+typedef ShPosition<1, SH_CONST, SH_BYTE> ShConstPosition1b;
+typedef ShPosition<2, SH_INPUT, SH_BYTE> ShInputPosition2b;
+typedef ShPosition<2, SH_OUTPUT, SH_BYTE> ShOutputPosition2b;
+typedef ShPosition<2, SH_INOUT, SH_BYTE> ShInOutPosition2b;
+typedef ShPosition<2, SH_TEMP, SH_BYTE> ShPosition2b;
+typedef ShPosition<2, SH_CONST, SH_BYTE> ShConstPosition2b;
+typedef ShPosition<3, SH_INPUT, SH_BYTE> ShInputPosition3b;
+typedef ShPosition<3, SH_OUTPUT, SH_BYTE> ShOutputPosition3b;
+typedef ShPosition<3, SH_INOUT, SH_BYTE> ShInOutPosition3b;
+typedef ShPosition<3, SH_TEMP, SH_BYTE> ShPosition3b;
+typedef ShPosition<3, SH_CONST, SH_BYTE> ShConstPosition3b;
+typedef ShPosition<4, SH_INPUT, SH_BYTE> ShInputPosition4b;
+typedef ShPosition<4, SH_OUTPUT, SH_BYTE> ShOutputPosition4b;
+typedef ShPosition<4, SH_INOUT, SH_BYTE> ShInOutPosition4b;
+typedef ShPosition<4, SH_TEMP, SH_BYTE> ShPosition4b;
+typedef ShPosition<4, SH_CONST, SH_BYTE> ShConstPosition4b;
+
+
+typedef ShPosition<1, SH_INPUT, SH_INTERVAL_DOUBLE> ShInputPosition1i_d;
+typedef ShPosition<1, SH_OUTPUT, SH_INTERVAL_DOUBLE> ShOutputPosition1i_d;
+typedef ShPosition<1, SH_INOUT, SH_INTERVAL_DOUBLE> ShInOutPosition1i_d;
+typedef ShPosition<1, SH_TEMP, SH_INTERVAL_DOUBLE> ShPosition1i_d;
+typedef ShPosition<1, SH_CONST, SH_INTERVAL_DOUBLE> ShConstPosition1i_d;
+typedef ShPosition<2, SH_INPUT, SH_INTERVAL_DOUBLE> ShInputPosition2i_d;
+typedef ShPosition<2, SH_OUTPUT, SH_INTERVAL_DOUBLE> ShOutputPosition2i_d;
+typedef ShPosition<2, SH_INOUT, SH_INTERVAL_DOUBLE> ShInOutPosition2i_d;
+typedef ShPosition<2, SH_TEMP, SH_INTERVAL_DOUBLE> ShPosition2i_d;
+typedef ShPosition<2, SH_CONST, SH_INTERVAL_DOUBLE> ShConstPosition2i_d;
+typedef ShPosition<3, SH_INPUT, SH_INTERVAL_DOUBLE> ShInputPosition3i_d;
+typedef ShPosition<3, SH_OUTPUT, SH_INTERVAL_DOUBLE> ShOutputPosition3i_d;
+typedef ShPosition<3, SH_INOUT, SH_INTERVAL_DOUBLE> ShInOutPosition3i_d;
+typedef ShPosition<3, SH_TEMP, SH_INTERVAL_DOUBLE> ShPosition3i_d;
+typedef ShPosition<3, SH_CONST, SH_INTERVAL_DOUBLE> ShConstPosition3i_d;
+typedef ShPosition<4, SH_INPUT, SH_INTERVAL_DOUBLE> ShInputPosition4i_d;
+typedef ShPosition<4, SH_OUTPUT, SH_INTERVAL_DOUBLE> ShOutputPosition4i_d;
+typedef ShPosition<4, SH_INOUT, SH_INTERVAL_DOUBLE> ShInOutPosition4i_d;
+typedef ShPosition<4, SH_TEMP, SH_INTERVAL_DOUBLE> ShPosition4i_d;
+typedef ShPosition<4, SH_CONST, SH_INTERVAL_DOUBLE> ShConstPosition4i_d;
+
+
+typedef ShPosition<1, SH_INPUT, SH_FRAC_USHORT> ShInputPosition1fus;
+typedef ShPosition<1, SH_OUTPUT, SH_FRAC_USHORT> ShOutputPosition1fus;
+typedef ShPosition<1, SH_INOUT, SH_FRAC_USHORT> ShInOutPosition1fus;
+typedef ShPosition<1, SH_TEMP, SH_FRAC_USHORT> ShPosition1fus;
+typedef ShPosition<1, SH_CONST, SH_FRAC_USHORT> ShConstPosition1fus;
+typedef ShPosition<2, SH_INPUT, SH_FRAC_USHORT> ShInputPosition2fus;
+typedef ShPosition<2, SH_OUTPUT, SH_FRAC_USHORT> ShOutputPosition2fus;
+typedef ShPosition<2, SH_INOUT, SH_FRAC_USHORT> ShInOutPosition2fus;
+typedef ShPosition<2, SH_TEMP, SH_FRAC_USHORT> ShPosition2fus;
+typedef ShPosition<2, SH_CONST, SH_FRAC_USHORT> ShConstPosition2fus;
+typedef ShPosition<3, SH_INPUT, SH_FRAC_USHORT> ShInputPosition3fus;
+typedef ShPosition<3, SH_OUTPUT, SH_FRAC_USHORT> ShOutputPosition3fus;
+typedef ShPosition<3, SH_INOUT, SH_FRAC_USHORT> ShInOutPosition3fus;
+typedef ShPosition<3, SH_TEMP, SH_FRAC_USHORT> ShPosition3fus;
+typedef ShPosition<3, SH_CONST, SH_FRAC_USHORT> ShConstPosition3fus;
+typedef ShPosition<4, SH_INPUT, SH_FRAC_USHORT> ShInputPosition4fus;
+typedef ShPosition<4, SH_OUTPUT, SH_FRAC_USHORT> ShOutputPosition4fus;
+typedef ShPosition<4, SH_INOUT, SH_FRAC_USHORT> ShInOutPosition4fus;
+typedef ShPosition<4, SH_TEMP, SH_FRAC_USHORT> ShPosition4fus;
+typedef ShPosition<4, SH_CONST, SH_FRAC_USHORT> ShConstPosition4fus;
+
+
+typedef ShPosition<1, SH_INPUT, SH_UBYTE> ShInputPosition1ub;
+typedef ShPosition<1, SH_OUTPUT, SH_UBYTE> ShOutputPosition1ub;
+typedef ShPosition<1, SH_INOUT, SH_UBYTE> ShInOutPosition1ub;
+typedef ShPosition<1, SH_TEMP, SH_UBYTE> ShPosition1ub;
+typedef ShPosition<1, SH_CONST, SH_UBYTE> ShConstPosition1ub;
+typedef ShPosition<2, SH_INPUT, SH_UBYTE> ShInputPosition2ub;
+typedef ShPosition<2, SH_OUTPUT, SH_UBYTE> ShOutputPosition2ub;
+typedef ShPosition<2, SH_INOUT, SH_UBYTE> ShInOutPosition2ub;
+typedef ShPosition<2, SH_TEMP, SH_UBYTE> ShPosition2ub;
+typedef ShPosition<2, SH_CONST, SH_UBYTE> ShConstPosition2ub;
+typedef ShPosition<3, SH_INPUT, SH_UBYTE> ShInputPosition3ub;
+typedef ShPosition<3, SH_OUTPUT, SH_UBYTE> ShOutputPosition3ub;
+typedef ShPosition<3, SH_INOUT, SH_UBYTE> ShInOutPosition3ub;
+typedef ShPosition<3, SH_TEMP, SH_UBYTE> ShPosition3ub;
+typedef ShPosition<3, SH_CONST, SH_UBYTE> ShConstPosition3ub;
+typedef ShPosition<4, SH_INPUT, SH_UBYTE> ShInputPosition4ub;
+typedef ShPosition<4, SH_OUTPUT, SH_UBYTE> ShOutputPosition4ub;
+typedef ShPosition<4, SH_INOUT, SH_UBYTE> ShInOutPosition4ub;
+typedef ShPosition<4, SH_TEMP, SH_UBYTE> ShPosition4ub;
+typedef ShPosition<4, SH_CONST, SH_UBYTE> ShConstPosition4ub;
+
+
+typedef ShPosition<1, SH_INPUT, SH_FRAC_SHORT> ShInputPosition1fs;
+typedef ShPosition<1, SH_OUTPUT, SH_FRAC_SHORT> ShOutputPosition1fs;
+typedef ShPosition<1, SH_INOUT, SH_FRAC_SHORT> ShInOutPosition1fs;
+typedef ShPosition<1, SH_TEMP, SH_FRAC_SHORT> ShPosition1fs;
+typedef ShPosition<1, SH_CONST, SH_FRAC_SHORT> ShConstPosition1fs;
+typedef ShPosition<2, SH_INPUT, SH_FRAC_SHORT> ShInputPosition2fs;
+typedef ShPosition<2, SH_OUTPUT, SH_FRAC_SHORT> ShOutputPosition2fs;
+typedef ShPosition<2, SH_INOUT, SH_FRAC_SHORT> ShInOutPosition2fs;
+typedef ShPosition<2, SH_TEMP, SH_FRAC_SHORT> ShPosition2fs;
+typedef ShPosition<2, SH_CONST, SH_FRAC_SHORT> ShConstPosition2fs;
+typedef ShPosition<3, SH_INPUT, SH_FRAC_SHORT> ShInputPosition3fs;
+typedef ShPosition<3, SH_OUTPUT, SH_FRAC_SHORT> ShOutputPosition3fs;
+typedef ShPosition<3, SH_INOUT, SH_FRAC_SHORT> ShInOutPosition3fs;
+typedef ShPosition<3, SH_TEMP, SH_FRAC_SHORT> ShPosition3fs;
+typedef ShPosition<3, SH_CONST, SH_FRAC_SHORT> ShConstPosition3fs;
+typedef ShPosition<4, SH_INPUT, SH_FRAC_SHORT> ShInputPosition4fs;
+typedef ShPosition<4, SH_OUTPUT, SH_FRAC_SHORT> ShOutputPosition4fs;
+typedef ShPosition<4, SH_INOUT, SH_FRAC_SHORT> ShInOutPosition4fs;
+typedef ShPosition<4, SH_TEMP, SH_FRAC_SHORT> ShPosition4fs;
+typedef ShPosition<4, SH_CONST, SH_FRAC_SHORT> ShConstPosition4fs;
+
+
+typedef ShPosition<1, SH_INPUT, SH_USHORT> ShInputPosition1us;
+typedef ShPosition<1, SH_OUTPUT, SH_USHORT> ShOutputPosition1us;
+typedef ShPosition<1, SH_INOUT, SH_USHORT> ShInOutPosition1us;
+typedef ShPosition<1, SH_TEMP, SH_USHORT> ShPosition1us;
+typedef ShPosition<1, SH_CONST, SH_USHORT> ShConstPosition1us;
+typedef ShPosition<2, SH_INPUT, SH_USHORT> ShInputPosition2us;
+typedef ShPosition<2, SH_OUTPUT, SH_USHORT> ShOutputPosition2us;
+typedef ShPosition<2, SH_INOUT, SH_USHORT> ShInOutPosition2us;
+typedef ShPosition<2, SH_TEMP, SH_USHORT> ShPosition2us;
+typedef ShPosition<2, SH_CONST, SH_USHORT> ShConstPosition2us;
+typedef ShPosition<3, SH_INPUT, SH_USHORT> ShInputPosition3us;
+typedef ShPosition<3, SH_OUTPUT, SH_USHORT> ShOutputPosition3us;
+typedef ShPosition<3, SH_INOUT, SH_USHORT> ShInOutPosition3us;
+typedef ShPosition<3, SH_TEMP, SH_USHORT> ShPosition3us;
+typedef ShPosition<3, SH_CONST, SH_USHORT> ShConstPosition3us;
+typedef ShPosition<4, SH_INPUT, SH_USHORT> ShInputPosition4us;
+typedef ShPosition<4, SH_OUTPUT, SH_USHORT> ShOutputPosition4us;
+typedef ShPosition<4, SH_INOUT, SH_USHORT> ShInOutPosition4us;
+typedef ShPosition<4, SH_TEMP, SH_USHORT> ShPosition4us;
+typedef ShPosition<4, SH_CONST, SH_USHORT> ShConstPosition4us;
+
+
+typedef ShPosition<1, SH_INPUT, SH_UINT> ShInputPosition1ui;
+typedef ShPosition<1, SH_OUTPUT, SH_UINT> ShOutputPosition1ui;
+typedef ShPosition<1, SH_INOUT, SH_UINT> ShInOutPosition1ui;
+typedef ShPosition<1, SH_TEMP, SH_UINT> ShPosition1ui;
+typedef ShPosition<1, SH_CONST, SH_UINT> ShConstPosition1ui;
+typedef ShPosition<2, SH_INPUT, SH_UINT> ShInputPosition2ui;
+typedef ShPosition<2, SH_OUTPUT, SH_UINT> ShOutputPosition2ui;
+typedef ShPosition<2, SH_INOUT, SH_UINT> ShInOutPosition2ui;
+typedef ShPosition<2, SH_TEMP, SH_UINT> ShPosition2ui;
+typedef ShPosition<2, SH_CONST, SH_UINT> ShConstPosition2ui;
+typedef ShPosition<3, SH_INPUT, SH_UINT> ShInputPosition3ui;
+typedef ShPosition<3, SH_OUTPUT, SH_UINT> ShOutputPosition3ui;
+typedef ShPosition<3, SH_INOUT, SH_UINT> ShInOutPosition3ui;
+typedef ShPosition<3, SH_TEMP, SH_UINT> ShPosition3ui;
+typedef ShPosition<3, SH_CONST, SH_UINT> ShConstPosition3ui;
+typedef ShPosition<4, SH_INPUT, SH_UINT> ShInputPosition4ui;
+typedef ShPosition<4, SH_OUTPUT, SH_UINT> ShOutputPosition4ui;
+typedef ShPosition<4, SH_INOUT, SH_UINT> ShInOutPosition4ui;
+typedef ShPosition<4, SH_TEMP, SH_UINT> ShPosition4ui;
+typedef ShPosition<4, SH_CONST, SH_UINT> ShConstPosition4ui;
+
+
+typedef ShPosition<1, SH_INPUT, SH_DOUBLE> ShInputPosition1d;
+typedef ShPosition<1, SH_OUTPUT, SH_DOUBLE> ShOutputPosition1d;
+typedef ShPosition<1, SH_INOUT, SH_DOUBLE> ShInOutPosition1d;
+typedef ShPosition<1, SH_TEMP, SH_DOUBLE> ShPosition1d;
+typedef ShPosition<1, SH_CONST, SH_DOUBLE> ShConstPosition1d;
+typedef ShPosition<2, SH_INPUT, SH_DOUBLE> ShInputPosition2d;
+typedef ShPosition<2, SH_OUTPUT, SH_DOUBLE> ShOutputPosition2d;
+typedef ShPosition<2, SH_INOUT, SH_DOUBLE> ShInOutPosition2d;
+typedef ShPosition<2, SH_TEMP, SH_DOUBLE> ShPosition2d;
+typedef ShPosition<2, SH_CONST, SH_DOUBLE> ShConstPosition2d;
+typedef ShPosition<3, SH_INPUT, SH_DOUBLE> ShInputPosition3d;
+typedef ShPosition<3, SH_OUTPUT, SH_DOUBLE> ShOutputPosition3d;
+typedef ShPosition<3, SH_INOUT, SH_DOUBLE> ShInOutPosition3d;
+typedef ShPosition<3, SH_TEMP, SH_DOUBLE> ShPosition3d;
+typedef ShPosition<3, SH_CONST, SH_DOUBLE> ShConstPosition3d;
+typedef ShPosition<4, SH_INPUT, SH_DOUBLE> ShInputPosition4d;
+typedef ShPosition<4, SH_OUTPUT, SH_DOUBLE> ShOutputPosition4d;
+typedef ShPosition<4, SH_INOUT, SH_DOUBLE> ShInOutPosition4d;
+typedef ShPosition<4, SH_TEMP, SH_DOUBLE> ShPosition4d;
+typedef ShPosition<4, SH_CONST, SH_DOUBLE> ShConstPosition4d;
+
+
+typedef ShPosition<1, SH_INPUT, SH_INTERVAL_FLOAT> ShInputPosition1i_f;
+typedef ShPosition<1, SH_OUTPUT, SH_INTERVAL_FLOAT> ShOutputPosition1i_f;
+typedef ShPosition<1, SH_INOUT, SH_INTERVAL_FLOAT> ShInOutPosition1i_f;
+typedef ShPosition<1, SH_TEMP, SH_INTERVAL_FLOAT> ShPosition1i_f;
+typedef ShPosition<1, SH_CONST, SH_INTERVAL_FLOAT> ShConstPosition1i_f;
+typedef ShPosition<2, SH_INPUT, SH_INTERVAL_FLOAT> ShInputPosition2i_f;
+typedef ShPosition<2, SH_OUTPUT, SH_INTERVAL_FLOAT> ShOutputPosition2i_f;
+typedef ShPosition<2, SH_INOUT, SH_INTERVAL_FLOAT> ShInOutPosition2i_f;
+typedef ShPosition<2, SH_TEMP, SH_INTERVAL_FLOAT> ShPosition2i_f;
+typedef ShPosition<2, SH_CONST, SH_INTERVAL_FLOAT> ShConstPosition2i_f;
+typedef ShPosition<3, SH_INPUT, SH_INTERVAL_FLOAT> ShInputPosition3i_f;
+typedef ShPosition<3, SH_OUTPUT, SH_INTERVAL_FLOAT> ShOutputPosition3i_f;
+typedef ShPosition<3, SH_INOUT, SH_INTERVAL_FLOAT> ShInOutPosition3i_f;
+typedef ShPosition<3, SH_TEMP, SH_INTERVAL_FLOAT> ShPosition3i_f;
+typedef ShPosition<3, SH_CONST, SH_INTERVAL_FLOAT> ShConstPosition3i_f;
+typedef ShPosition<4, SH_INPUT, SH_INTERVAL_FLOAT> ShInputPosition4i_f;
+typedef ShPosition<4, SH_OUTPUT, SH_INTERVAL_FLOAT> ShOutputPosition4i_f;
+typedef ShPosition<4, SH_INOUT, SH_INTERVAL_FLOAT> ShInOutPosition4i_f;
+typedef ShPosition<4, SH_TEMP, SH_INTERVAL_FLOAT> ShPosition4i_f;
+typedef ShPosition<4, SH_CONST, SH_INTERVAL_FLOAT> ShConstPosition4i_f;
+
+
+typedef ShPosition<1, SH_INPUT, SH_FRAC_INT> ShInputPosition1fi;
+typedef ShPosition<1, SH_OUTPUT, SH_FRAC_INT> ShOutputPosition1fi;
+typedef ShPosition<1, SH_INOUT, SH_FRAC_INT> ShInOutPosition1fi;
+typedef ShPosition<1, SH_TEMP, SH_FRAC_INT> ShPosition1fi;
+typedef ShPosition<1, SH_CONST, SH_FRAC_INT> ShConstPosition1fi;
+typedef ShPosition<2, SH_INPUT, SH_FRAC_INT> ShInputPosition2fi;
+typedef ShPosition<2, SH_OUTPUT, SH_FRAC_INT> ShOutputPosition2fi;
+typedef ShPosition<2, SH_INOUT, SH_FRAC_INT> ShInOutPosition2fi;
+typedef ShPosition<2, SH_TEMP, SH_FRAC_INT> ShPosition2fi;
+typedef ShPosition<2, SH_CONST, SH_FRAC_INT> ShConstPosition2fi;
+typedef ShPosition<3, SH_INPUT, SH_FRAC_INT> ShInputPosition3fi;
+typedef ShPosition<3, SH_OUTPUT, SH_FRAC_INT> ShOutputPosition3fi;
+typedef ShPosition<3, SH_INOUT, SH_FRAC_INT> ShInOutPosition3fi;
+typedef ShPosition<3, SH_TEMP, SH_FRAC_INT> ShPosition3fi;
+typedef ShPosition<3, SH_CONST, SH_FRAC_INT> ShConstPosition3fi;
+typedef ShPosition<4, SH_INPUT, SH_FRAC_INT> ShInputPosition4fi;
+typedef ShPosition<4, SH_OUTPUT, SH_FRAC_INT> ShOutputPosition4fi;
+typedef ShPosition<4, SH_INOUT, SH_FRAC_INT> ShInOutPosition4fi;
+typedef ShPosition<4, SH_TEMP, SH_FRAC_INT> ShPosition4fi;
+typedef ShPosition<4, SH_CONST, SH_FRAC_INT> ShConstPosition4fi;
 
 
 

@@ -37,25 +37,27 @@ namespace SH {
 // forward declarations
 //class ShVariant;
 class ShEvalOp;
-//typedef ShPointer<ShVariant> ShVariantPtr;
-//typedef ShPointer<const ShVariant> ShVariantCPtr;
+//typedef ShPointer<ShVariant> ShVariant*;
+//typedef ShPointer<const ShVariant> const ShVariant*;
 
 struct 
 SH_DLLEXPORT
 ShEvalOpInfo: public ShStatementInfo {
   ShOperation m_op;
 
-  // type indices of the destination and sources
-  // These are non-zer except when the operation does not use
-  // a certain dest/src
-  int m_dest;
-  int m_src[3]; 
+  const ShEvalOp* m_evalOp;
 
-  ShEvalOpInfo(ShOperation op, int dest, 
-      int src0, int src1, int src2);
+  // type indices of the destination and sources
+  // These are set to a valid value type except when the src/dest is not
+  // used for m_op 
+  ShValueType m_dest;
+  ShValueType m_src[3]; 
+
+  ShEvalOpInfo(ShOperation op, const ShEvalOp* evalOp, ShValueType dest, 
+      ShValueType src0, ShValueType src1, ShValueType src2);
+
   ShStatementInfo* clone() const;
 
-  bool operator<(const ShEvalOpInfo &other) const;
   std::string encode() const;
 };
 
@@ -71,18 +73,21 @@ ShEval {
      * TODO (should really break this out into separate functions.  EvalOps can
      * have a single function in th einterface)
      */
-    void operator()(ShOperation op, ShVariantPtr dest,
-        ShVariantCPtr a, ShVariantCPtr b, ShVariantCPtr c) const;
+    void operator()(ShOperation op, ShVariant* dest,
+        const ShVariant* a, const ShVariant* b, const ShVariant* c) const;
 
     /** Registers a evalOp for a certain operation/source type index combination */ 
-    void addOp(ShOperation op, ShPointer<const ShEvalOp> evalOp, int dest, 
-        int src0, int src1 = 0, int src2 = 0); 
+    void addOp(ShOperation op, const ShEvalOp* evalOp, ShValueType dest, 
+        ShValueType src0, ShValueType src1 = SH_VALUETYPE_END, 
+        ShValueType src2 = SH_VALUETYPE_END); 
 
     /** Returns a new op info representing the types that arguments
      * should be cast into for an operation.
+     * Caches the result.
      */
-    const ShEvalOpInfo* getEvalOpInfo(ShOperation op, int dest,
-        int src0, int src1 = 0, int src2 = 0) const;
+    const ShEvalOpInfo* getEvalOpInfo(ShOperation op, ShValueType dest,
+        ShValueType src0, ShValueType src1 = SH_VALUETYPE_END, 
+        ShValueType src2 = SH_VALUETYPE_END) const;
 
     /** debugging function */ 
     std::string availableOps() const;
@@ -93,24 +98,26 @@ ShEval {
     ShEval();
 
 
-    typedef std::map<ShEvalOpInfo, ShPointer<const ShEvalOp> > InfoOpMap;
-    InfoOpMap m_evalOpMap; 
+    typedef std::list<ShEvalOpInfo> OpInfoList;
+    typedef OpInfoList OpInfoMap[SH_OPERATION_END];
+    OpInfoMap m_evalOpMap; 
+
+    mutable const ShEvalOpInfo* m_evalOpCache[SH_OPERATION_END][SH_VALUETYPE_END]
+                                             [SH_VALUETYPE_END][SH_VALUETYPE_END];
 
     static ShEval* m_instance;
 };
 
 class 
 SH_DLLEXPORT
-ShEvalOp: public ShRefCountable {
+ShEvalOp {
   public:
     virtual ~ShEvalOp();
 
     // Wraps an operation where at least dest and a are non-null.
-    virtual void operator()(ShVariantPtr dest, ShVariantCPtr a, ShVariantCPtr b, ShVariantCPtr c) const = 0;
+    virtual void operator()(ShVariant* dest, const ShVariant* a, 
+        const ShVariant* b, const ShVariant* c) const = 0;
 };
-
-typedef ShPointer<ShEvalOp> ShEvalOpPtr;
-typedef ShPointer<const ShEvalOp> ShEvalOpCPtr;
 
 // The strategy for defining ops is to use separate classes to hold
 // and register operations for different categories of types.
@@ -121,7 +128,7 @@ typedef ShPointer<const ShEvalOp> ShEvalOpCPtr;
 //
 // 2) Functions 
 //    template<ShOperation S>
-//    static void unaryOp(ShDataVariant<T1> &dest, const ShDataVariant<T2> &src);
+//    static void unaryOp(ShDataVariant<V1> &dest, const ShDataVariant<V2> &src);
 //
 //    and similarly for binary, ternary ops 
 //    (for most ops, only T1 = T2 is supported directly,
@@ -133,15 +140,13 @@ typedef ShPointer<const ShEvalOp> ShEvalOpCPtr;
 //    ShGenerics without going through ANY layers of virtual 
 //    function calls.
 
-// TODO fix these comments...
-// Defines the set of operations available on a certain types 
-// FloatEvalOp has the usual operations on floating point 
-// values and float-like types (e.g. double, float, half, fixed point types)
-//
-// These include most basic ops (except for range arithmetic specific ops) 
-template<ShOperation S, typename T>
+/** A ShRegularOp is one where all the arguments and the destination
+ * are variants of type V (data type SH_HOST).
+ */
+template<ShOperation S, ShValueType V>
 struct ShRegularOp: public ShEvalOp {
-  void operator()(ShVariantPtr dest, ShVariantCPtr a, ShVariantCPtr b, ShVariantCPtr c) const; 
+  void operator()(ShVariant* dest, const ShVariant* a, 
+      const ShVariant* b, const ShVariant* c) const; 
 };
 
 // If functions could be partially specialized, then wouldn't need
@@ -151,12 +156,13 @@ struct ShRegularOp: public ShEvalOp {
 // 1) special float/double cmath functions (for C built in types)
 // 2) other special functions (sgn, rcp, rsq, etc.) that C types don't have
 // OR, use helper functions 
-template<ShOperation S, typename T>
+template<ShOperation S, ShValueType V>
 struct ShConcreteRegularOp {
-  static void doop(ShPointer<ShDataVariant<T> > dest, 
-      ShPointer<const ShDataVariant<T> > a, 
-      ShPointer<const ShDataVariant<T> > b = 0, 
-      ShPointer<const ShDataVariant<T> > c = 0);
+  typedef ShDataVariant<V, SH_HOST> Variant;
+  typedef ShPointer<Variant> DataPtr; 
+  typedef ShPointer<const Variant> DataCPtr; 
+
+  static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0);
 };
 
 /// evalOp that uses cmath functions and
@@ -165,59 +171,58 @@ struct ShConcreteRegularOp {
 //
 //TODO - not all the functions make sense on integer types...may
 //want to not declare the ones that don't make sense...
-template<ShOperation S, typename T>
+template<ShOperation S, ShValueType V>
 struct ShConcreteCTypeOp {
-  static void doop(ShPointer<ShDataVariant<T> > dest, 
-      ShPointer<const ShDataVariant<T> > a, 
-      ShPointer<const ShDataVariant<T> > b = 0, 
-      ShPointer<const ShDataVariant<T> > c = 0);
+  typedef ShDataVariant<V, SH_HOST> Variant;
+  typedef ShPointer<Variant> DataPtr; 
+  typedef ShPointer<const Variant> DataCPtr; 
+
+  static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0);
 };
 
-template<ShOperation S, typename T>
+template<ShOperation S, ShValueType V>
 struct ShRegularOpChooser {
-  typedef ShConcreteRegularOp<S, T> Op;
+  typedef ShConcreteRegularOp<S, V> Op;
 };
 
-#define SHOPC_CTYPE_OP(T)\
+#define SHOPC_CTYPE_OP(V)\
 template<ShOperation S>\
-struct ShRegularOpChooser<S, T> {\
-  typedef ShConcreteCTypeOp<S, T> Op;\
+struct ShRegularOpChooser<S, V> {\
+  typedef ShConcreteCTypeOp<S, V> Op;\
 };
 
-SHOPC_CTYPE_OP(double);
-SHOPC_CTYPE_OP(float);
-SHOPC_CTYPE_OP(int);
-SHOPC_CTYPE_OP(short);
-SHOPC_CTYPE_OP(char);
-SHOPC_CTYPE_OP(unsigned int);
-SHOPC_CTYPE_OP(unsigned short);
-SHOPC_CTYPE_OP(unsigned char);
+SHOPC_CTYPE_OP(SH_DOUBLE);
+SHOPC_CTYPE_OP(SH_FLOAT);
+SHOPC_CTYPE_OP(SH_INT);
 
-
-template<ShOperation S, typename T1, typename T2>
+/** A ShIntervalOP is one where one argument is an interval type,
+ * and the other argument must be its corresponding bound type.
+ */
+template<ShOperation S, ShValueType V1, ShValueType V2>
 struct ShIntervalOp: public ShEvalOp {
-  void operator()(ShVariantPtr dest, ShVariantCPtr a, ShVariantCPtr b, ShVariantCPtr c) const; 
+  void operator()(ShVariant* dest, const ShVariant* a, 
+      const ShVariant* b, const ShVariant* c) const; 
 };
 
-template<ShOperation S, typename T1, typename T2>
+template<ShOperation S, ShValueType V1, ShValueType V2>
 struct ShConcreteIntervalOp{
-  static void doop(ShDataVariant<T1> &dest, 
-      const ShDataVariant<T2> &a);
+  static void doop(ShDataVariant<V1, SH_HOST> &dest, 
+      const ShDataVariant<V2, SH_HOST> &a);
       
 };
 
 
 // initializes the regular Ops for a floating point type T
-// with ShOpEvalOp<OP, T> objects
-template<typename T>
+// with ShOpEvalOp<OP, V> objects
+template<ShValueType V>
 void _shInitFloatOps();
 
 // initializes the regular Ops for an integer type T
 // (a subset of the floating point ones)
-template<typename T>
+template<ShValueType V>
 void _shInitIntOps();
 
-template<typename T>
+template<ShValueType V, ShValueType IntervalT>
 void _shInitIntervalOps();
 
 

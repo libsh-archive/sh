@@ -16,7 +16,7 @@ namespace SH {
  */
 // TODO make this cleaner?
 // TODO use the information from sdt's ShOperationInfo to decide
-// whether to do the ao/bo/co = 0 special case for scalar
+// whether to do the ao/bo/co special case for scalar
 // ops where we step through the destination tuple but always
 // use the same element from the scalar src tuple. 
 // macros for componentwise operations
@@ -24,55 +24,67 @@ namespace SH {
 // and define the doop function
 //
 #define SHCRO_UNARY_OP(op, opsrc)\
-template<typename T>\
-struct ShConcreteRegularOp<op, T> {\
-  static void doop(ShPointer<ShDataVariant<T> > dest, \
-    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) \
+template<ShValueType V>\
+struct ShConcreteRegularOp<op, V>\
+{ \
+  typedef ShDataVariant<V, SH_HOST> Variant; \
+  typedef ShPointer<Variant> DataPtr; \
+  typedef ShPointer<const Variant> DataCPtr; \
+\
+  static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) \
   {\
     SH_DEBUG_ASSERT(dest && a);\
     int ao = a->size() > 1;\
   \
-    typename ShDataVariant<T>::iterator D = dest->begin();\
-    typename ShDataVariant<T>::const_iterator A = a->begin();\
+    typename Variant::iterator D = dest->begin();\
+    typename Variant::const_iterator A = a->begin();\
     for(; D != dest->end(); A += ao, ++D) {\
       (*D) = opsrc;\
     }\
-  }\
+  } \
 };
 
 #define SHCRO_BINARY_OP(op, opsrc)\
-template<typename T>\
-struct ShConcreteRegularOp<op, T> {\
-  static void doop(ShPointer<ShDataVariant<T> > dest, \
-    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) \
+template<ShValueType V>\
+struct ShConcreteRegularOp<op, V>\
+{ \
+  typedef ShDataVariant<V, SH_HOST> Variant; \
+  typedef ShPointer<Variant> DataPtr; \
+  typedef ShPointer<const Variant> DataCPtr; \
+\
+  static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) \
   {\
     SH_DEBUG_ASSERT(dest && a && b);\
     int ao = a->size() > 1;\
     int bo = b->size() > 1;\
   \
-    typename ShDataVariant<T>::iterator D = dest->begin();\
-    typename ShDataVariant<T>::const_iterator A, B;\
+    typename Variant::iterator D = dest->begin();\
+    typename Variant::const_iterator A, B;\
     A = a->begin();\
     B = b->begin();\
     for(; D != dest->end(); A += ao, B += bo, ++D) {\
       (*D) = opsrc;\
     }\
-  }\
+  } \
 };
 
 #define SHCRO_TERNARY_OP(op, opsrc)\
-template<typename T>\
-struct ShConcreteRegularOp<op, T> {\
-  static void doop(ShPointer<ShDataVariant<T> > dest, \
-    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) \
+template<ShValueType V>\
+struct ShConcreteRegularOp<op, V>\
+{ \
+  typedef ShDataVariant<V, SH_HOST> Variant; \
+  typedef ShPointer<Variant> DataPtr; \
+  typedef ShPointer<const Variant> DataCPtr; \
+\
+  static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) \
   {\
     SH_DEBUG_ASSERT(dest && a && b && c);\
     int ao = a->size() > 1;\
     int bo = b->size() > 1;\
     int co = c->size() > 1;\
   \
-    typename ShDataVariant<T>::iterator D = dest->begin();\
-    typename ShDataVariant<T>::const_iterator A, B, C;\
+    typename Variant::iterator D = dest->begin();\
+    typename Variant::const_iterator A, B, C;\
     A = a->begin();\
     B = b->begin();\
     C = c->begin();\
@@ -91,31 +103,37 @@ SHCRO_UNARY_OP(SH_OP_ATAN, atan(*A));
 SHCRO_UNARY_OP(SH_OP_CBRT, cbrt(*A));
 SHCRO_UNARY_OP(SH_OP_CEIL, ceil(*A));
 
-template<typename T>
-struct ShConcreteRegularOp<SH_OP_CMUL, T> {
-  static void doop(ShPointer<ShDataVariant<T> > dest, 
-    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) 
+template<ShValueType V>
+struct ShConcreteRegularOp<SH_OP_CMUL, V>
+{
+  typedef ShDataVariant<V, SH_HOST> Variant; 
+  typedef ShPointer<Variant> DataPtr; 
+  typedef ShPointer<const Variant> DataCPtr; 
+
+  static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
   {
     // dest->size should be 1 and a->size == b->size
-    T result = ShConcreteTypeInfo<T>::ZERO;
-    typename ShDataVariant<T>::const_iterator A = a->begin();
-    for(; A != a->end(); ++A) result *= (*A); 
-     (*dest)[0] = result;
+    (*dest)[0] = std::accumulate(a->begin(), a->end(), 
+                      ShDataTypeInfo<V, SH_HOST>::Zero, 
+                      std::multiplies<typename Variant::DataType>());
   }
 };
 
 SHCRO_UNARY_OP(SH_OP_COS, cos(*A));
 
-template<typename T>
-struct ShConcreteRegularOp<SH_OP_CSUM, T> {
-  static void doop(ShPointer<ShDataVariant<T> > dest, 
-    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) 
+template<ShValueType V>
+struct ShConcreteRegularOp<SH_OP_CSUM, V>
+{
+  typedef ShDataVariant<V, SH_HOST> Variant; 
+  typedef ShPointer<Variant> DataPtr; 
+  typedef ShPointer<const Variant> DataCPtr; 
+
+  static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
   {
     // dest->size should be 1 and a->size == b->size
-    T result = ShConcreteTypeInfo<T>::ZERO;
-    typename ShDataVariant<T>::const_iterator A = a->begin();
-    for(; A != a->end(); ++A) result += (*A); 
-     (*dest)[0] = result;
+    (*dest)[0] = std::accumulate(a->begin(), a->end(), 
+                      ShDataTypeInfo<V, SH_HOST>::Zero, 
+                      std::plus<typename Variant::DataType>());
   }
 };
 
@@ -128,16 +146,21 @@ SHCRO_UNARY_OP(SH_OP_LOG, log(*A));
 SHCRO_UNARY_OP(SH_OP_LOG2, log(*A));
 SHCRO_UNARY_OP(SH_OP_LOG10, log10(*A));
 
-template<typename T>
-struct ShConcreteRegularOp<SH_OP_NORM, T> {
-  static void doop(ShPointer<ShDataVariant<T> > dest, 
-    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) 
+template<ShValueType V>
+struct ShConcreteRegularOp<SH_OP_NORM, V>
+{
+  typedef ShDataVariant<V, SH_HOST> Variant; 
+  typedef ShPointer<Variant> DataPtr; 
+  typedef ShPointer<const Variant> DataCPtr; 
+
+  static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
   {
     SH_DEBUG_ASSERT(dest && a);
-    T m = sqrt(std::inner_product(a->begin(), a->end(), a->begin(), (T) 0));
-  
-    typename ShDataVariant<T>::iterator D = dest->begin();
-    typename ShDataVariant<T>::const_iterator A = a->begin();
+    typename Variant::DataType m = sqrt(std::inner_product(a->begin(), a->end(), 
+          a->begin(), ShDataTypeInfo<V, SH_HOST>::Zero));
+
+    typename Variant::iterator D = dest->begin();
+    typename Variant::const_iterator A = a->begin();
     for(; D != dest->end(); ++A, ++D) (*D) = (*A) / m;
   }
 };
@@ -160,13 +183,18 @@ SHCRO_BINARY_OP(SH_OP_MOD, (*A) % (*B));
 SHCRO_BINARY_OP(SH_OP_MUL, (*A) * (*B));
 SHCRO_BINARY_OP(SH_OP_POW, pow((*A), (*B)));
 
-template<typename T>
-struct ShConcreteRegularOp<SH_OP_DOT, T> {
-  static void doop(ShPointer<ShDataVariant<T> > dest, 
-    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) 
+template<ShValueType V>
+struct ShConcreteRegularOp<SH_OP_DOT, V>
+{
+  typedef ShDataVariant<V, SH_HOST> Variant; 
+  typedef ShPointer<Variant> DataPtr; 
+  typedef ShPointer<const Variant> DataCPtr; 
+
+  static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
   {
     // dest->size should be 1 and a->size == b->size
-    (*dest)[0] = std::inner_product(a->begin(), a->end(), b->begin(), ShConcreteTypeInfo<T>::ZERO);
+    (*dest)[0] = std::inner_product(a->begin(), a->end(), b->begin(), 
+                      ShDataTypeInfo<V, SH_HOST>::Zero);
   }
 };
 
@@ -177,10 +205,14 @@ SHCRO_BINARY_OP(SH_OP_SLE, (*A) <= (*B));
 SHCRO_BINARY_OP(SH_OP_SLT, (*A) < (*B));
 SHCRO_BINARY_OP(SH_OP_SNE, (*A) != (*B));
 
-template<typename T>
-struct ShConcreteRegularOp<SH_OP_XPD, T> {
-  static void doop(ShPointer<ShDataVariant<T> > dest, 
-    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) 
+template<ShValueType V>
+struct ShConcreteRegularOp<SH_OP_XPD, V>
+{
+  typedef ShDataVariant<V, SH_HOST> Variant; 
+  typedef ShPointer<Variant> DataPtr; 
+  typedef ShPointer<const Variant> DataCPtr; 
+
+  static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
   {
     (*dest)[0] = (*a)[1] * (*b)[2] - (*a)[2] * (*b)[1];
     (*dest)[1] = -((*a)[0] * (*b)[2] - (*a)[2] * (*b)[0]);

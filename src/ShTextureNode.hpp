@@ -125,7 +125,7 @@ SH_DLLEXPORT ShTextureNode : public ShVariableNode {
 public:
   ShTextureNode(ShTextureDims dims,
                 int size, // scalars per tuple 
-                int typeIndex, // type index 
+                ShValueType valueType, // type index 
                 const ShTextureTraits&,
                 int width, int height = 1, int depth = 1);
   virtual ~ShTextureNode();

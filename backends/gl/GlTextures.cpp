@@ -72,52 +72,112 @@ ShCubeDirection glToShCubeDir(GLuint target)
 
 GLenum shGlInternalFormat(const ShTextureNodePtr& node)
 {
+  GLenum byteformats[4] = {GL_LUMINANCE8, GL_LUMINANCE8_ALPHA8, GL_RGB8, GL_RGBA8}; 
+  GLenum shortformats[4] = {GL_LUMINANCE16, GL_LUMINANCE16_ALPHA16, GL_RGB16, GL_RGBA16}; 
+
+  GLenum halfformats_nv[4] = {GL_FLOAT_R16_NV, GL_FLOAT_RGBA16_NV, GL_FLOAT_RGB16_NV, GL_FLOAT_RGBA16_NV};
+  GLenum fpformats_nv[4] = {GL_FLOAT_R32_NV, GL_FLOAT_RGBA32_NV, GL_FLOAT_RGB32_NV, GL_FLOAT_RGBA32_NV};
+
+  GLenum halfformats_ati[4] = {GL_LUMINANCE_FLOAT16_ATI,
+                             GL_LUMINANCE_ALPHA_FLOAT16_ATI,
+                             GL_RGB_FLOAT16_ATI,
+                             GL_RGBA_FLOAT16_ATI};
+
+  GLenum fpformats_ati[4] = {GL_LUMINANCE_FLOAT32_ATI,
+                             GL_LUMINANCE_ALPHA_FLOAT32_ATI,
+                             GL_RGB_FLOAT32_ATI,
+                             GL_RGBA_FLOAT32_ATI};
+  GLenum* formats = 0;
+  bool clamped = (node->traits().clamping() == SH::ShTextureTraits::SH_CLAMPED);
+  // @todo type - assume that !clamped means unclamped for now...
+  // may have other clamping modes later on?
+  
+  std::string exts(reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS)));
+  bool float_nv = (exts.find("NV_float_buffer") != std::string::npos);
+  bool float_ati = (exts.find("ATI_texture_float") != std::string::npos);
+
+  // @todo type respect CLAMPED flag 
   if (node->size() < 0 || node->size() > 4) return 0;
-  if (node->traits().clamping() == SH::ShTextureTraits::SH_CLAMPED) {
-    return node->size();
-  } else if (node->traits().clamping() == SH::ShTextureTraits::SH_UNCLAMPED) {
 
-    std::string exts(reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS)));
 
-    GLenum byteformats[4] = {GL_LUMINANCE8, GL_LUMINANCE8_ALPHA8, GL_RGB8, GL_RGBA8}; 
-    GLenum shortformats[4] = {GL_LUMINANCE16, GL_LUMINANCE16_ALPHA16, GL_RGB16, GL_RGBA16}; 
 
-    GLenum halfformats_nv[4] = {GL_FLOAT_R16_NV, GL_FLOAT_RGBA16_NV, GL_FLOAT_RGB16_NV, GL_FLOAT_RGBA16_NV};
-    GLenum fpformats_nv[4] = {GL_FLOAT_R32_NV, GL_FLOAT_RGBA32_NV, GL_FLOAT_RGB32_NV, GL_FLOAT_RGBA32_NV};
+  // @todo type
+  // handle fractional types
+  // right now all available formats - double, float, signed ints, unsigned ints should
+  // be stored internally as float if possible
 
-    GLenum halfformats_ati[4] = {GL_LUMINANCE_FLOAT16_ATI,
-                               GL_LUMINANCE_ALPHA_FLOAT16_ATI,
-                               GL_RGB_FLOAT16_ATI,
-                               GL_RGBA_FLOAT16_ATI};
+  if(clamped) {
+    switch(node->valueType()) {
+      case SH_DOUBLE:
+      case SH_FLOAT:        
+      case SH_HALF:
+      case SH_FRAC_INT:
+      case SH_FRAC_SHORT:
+      case SH_FRAC_UINT:
+      case SH_FRAC_USHORT:
+        formats = shortformats;
+        break;
 
-    GLenum fpformats_ati[4] = {GL_LUMINANCE_FLOAT32_ATI,
-                               GL_LUMINANCE_ALPHA_FLOAT32_ATI,
-                               GL_RGB_FLOAT32_ATI,
-                               GL_RGBA_FLOAT32_ATI};
+     case SH_FRAC_BYTE:
+     case SH_FRAC_UBYTE:
+        formats = byteformats;
+        break;
 
-    // @todo type
-    // handle fractional types
-    // right now all available formats - double, float, signed ints, unsigned ints should
-    // be stored internally as float if possible
-    //
-    // @todo type
-    // handle half-floats
-    GLenum* fpformats = 0;
-    if (exts.find("NV_float_buffer") != std::string::npos) {
-      fpformats = fpformats_nv;
-    } else if (exts.find("ATI_texture_float") != std::string::npos) {
-      fpformats = fpformats_ati;
+      case SH_INT: 
+      case SH_UINT:
+      case SH_SHORT: 
+      case SH_USHORT:
+      case SH_BYTE:
+      case SH_UBYTE:
+        SH_DEBUG_WARN("Using integer data type for a [0,1] clamped texture format is not advised.");
+        formats = byteformats;
+        break;
+
+     default:
+        SH_DEBUG_ERROR("Could not find appropriate clamped texture format \n"
+                       "Using default instead!");
+        return node->size();
+        break;
     }
+  } else {
+    switch(node->valueType()) {
+      case SH_DOUBLE:
+      case SH_FLOAT:        
+      case SH_INT: 
+      case SH_UINT:
+        if (float_nv) formats = fpformats_nv;
+        else if (float_ati) formats = fpformats_ati;
+        break;
 
-    if (!fpformats) {
-      SH_DEBUG_ERROR("Could not find appropriate floating-point format extension\n"
-                     "Using non-floating point texture instead!");
-      return node->size();
+      case SH_HALF:
+      case SH_SHORT: 
+      case SH_BYTE:
+      case SH_USHORT:
+      case SH_UBYTE:
+        if (float_nv) formats = halfformats_nv;
+        else if (float_ati) formats = halfformats_ati;
+        break;
+
+      case SH_FRAC_INT:
+      case SH_FRAC_SHORT:
+      case SH_FRAC_UINT:
+      case SH_FRAC_USHORT:
+        formats = shortformats;
+        break;
+
+     case SH_FRAC_BYTE:
+     case SH_FRAC_UBYTE:
+        formats = byteformats;
+        break;
+     default:
+        SH_DEBUG_ERROR("Could not find appropriate unclamped texture format \n"
+                       "Using default instead!");
+        return node->size();
+        break;
     }
-    
-    return fpformats[node->size() - 1];
   }
-  return 0;
+  
+  return formats[node->size() - 1];
 }
 
 GLenum shGlFormat(const ShTextureNodePtr& node)
@@ -136,6 +196,58 @@ GLenum shGlFormat(const ShTextureNodePtr& node)
   }
   // TODO: Warn or something
   return 0;
+}
+
+/* Returns glReadPixels/glTexImage type for a given value type 
+ * and returns a value type for the temporary buffer
+ * (or SH_VALUETYPE_END if we can read pixels directly into
+ * the original buffer)*/
+GLenum shGlType(ShValueType valueType, ShValueType &convertedType) {
+  convertedType = SH_VALUETYPE_END;
+  GLenum result = GL_NONE;
+  switch(valueType) {
+    case SH_INTERVAL_DOUBLE:
+    case SH_INTERVAL_FLOAT:
+      SH_DEBUG_ERROR("Interval types not supported in memory");
+      result = GL_FLOAT;
+      break;
+
+    case SH_DOUBLE:
+    case SH_HALF:
+    case SH_INT: 
+    case SH_SHORT: 
+    case SH_BYTE:
+    case SH_UINT:
+    case SH_USHORT:
+    case SH_UBYTE:
+      convertedType = SH_FLOAT;
+    case SH_FLOAT:        result = GL_FLOAT; break;
+
+
+    case SH_FRAC_INT:     result = GL_INT; break;
+    case SH_FRAC_SHORT:   result = GL_SHORT; break;
+    case SH_FRAC_BYTE:    result = GL_BYTE; break;
+    case SH_FRAC_UINT:    result = GL_UNSIGNED_INT; break;
+    case SH_FRAC_USHORT:  result = GL_UNSIGNED_SHORT; break;
+    case SH_FRAC_UBYTE:   result = GL_UNSIGNED_BYTE; break;
+
+    default:
+      SH_DEBUG_ERROR("Unsupported value type to glReadPixel type conversion"); 
+      break;
+  }
+
+  std::string exts(reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS)));
+  if(valueType == SH_HALF) { 
+        if((exts.find("NV_half_float") != std::string::npos)) {
+          convertedType = SH_VALUETYPE_END; 
+          result = GL_HALF_FLOAT_NV; 
+        } else if(exts.find("APPLE_float_pixels") != std::string::npos) {
+          convertedType = SH_VALUETYPE_END; 
+          //result = HALF_APPLE; 
+        }
+  }
+  SH_DEBUG_ASSERT(result != GL_NONE);
+  return result;
 }
 
 struct StorageFinder {
@@ -230,7 +342,7 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node,
                                                            shGlCubeMapTargets[i],
                                                            shGlFormat(node),
                                                            shGlInternalFormat(node),
-                                                           node->typeIndex(),
+                                                           node->valueType(),
                                                            node->width(), node->height(),
                                                            node->depth(), node->size(),
                                                            texname);
@@ -267,7 +379,7 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node,
                                      shGlTargets[node->dims()],
                                      shGlFormat(node),
                                      shGlInternalFormat(node),
-                                     node->typeIndex(),
+                                     node->valueType(),
                                      node->width(), node->height(), 
                                      node->depth(), node->size(),
                                      name);

@@ -2,7 +2,7 @@
 //
 // Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
 // Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
+// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Viberiu S. Popa,
 //          Bryan Chan, Michael D. McCool
 // 
 // This software is provided 'as-is', without any express or implied
@@ -50,9 +50,9 @@ namespace ShUtil {
 
 using namespace SH;
 
-template<int N, ShBindingType Binding, typename T>
-ShProgram ShKernelLib::shVsh(const ShMatrix<N, N, Binding, T> &mv,
-                             const ShMatrix<N, N, Binding, T> &mvp,
+template<int N, ShBindingType Binding, ShValueType V>
+ShProgram ShKernelLib::shVsh(const ShMatrix<N, N, Binding, V> &mv,
+                             const ShMatrix<N, N, Binding, V> &mvp,
                              int numTangents, int numLights)
 {
   int i;

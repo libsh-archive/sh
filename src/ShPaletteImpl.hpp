@@ -31,7 +31,7 @@ namespace SH {
 
 template<typename T>
 ShPalette<T>::ShPalette(std::size_t size)
-  : m_node(new ShPaletteNode(T::typesize, T::semantic_type, shTypeIndex<T::ValueType>(), size)),
+  : m_node(new ShPaletteNode(T::typesize, T::semantic_type, T::value_type, size)),
     m_data(new T[size])
 {
   for (std::size_t i = 0; i < size; i++) {
@@ -58,8 +58,8 @@ T& ShPalette<T>::operator[](std::size_t index)
 }
 
 template<typename T>
-template<typename L>
-T ShPalette<T>::operator[](const ShGeneric<1, L>& index) const
+template<ShValueType V>
+T ShPalette<T>::operator[](const ShGeneric<1, V>& index) const
 {
   if (ShContext::current()->parsing()) {
     T t;

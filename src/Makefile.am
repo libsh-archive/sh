@@ -18,14 +18,14 @@ libsh_la_SOURCES += ShProgram.cpp ShProgram.hpp
 libsh_la_SOURCES += ShProgramNode.cpp ShProgramNode.hpp
 libsh_la_SOURCES += ShStatement.cpp ShSwizzle.cpp ShSyntax.cpp ShToken.cpp
 libsh_la_SOURCES += ShTokenizer.cpp ShUtility.cpp ShVariable.cpp ShVariableNode.cpp
-libsh_la_SOURCES += ShOperation.hpp ShOperation.cpp ShVariableType.hpp 
+libsh_la_SOURCES += ShOperation.hpp ShOperation.cpp 
 libsh_la_SOURCES += ShInternals.hpp ShInternals.cpp
 libsh_la_SOURCES += ShBasicBlock.hpp
 libsh_la_SOURCES += ShBlock.hpp ShCtrlGraph.hpp
 libsh_la_SOURCES += ShDebug.hpp ShEnvironment.hpp ShError.hpp
 libsh_la_SOURCES += ShException.hpp
 libsh_la_SOURCES += ShParser.hpp ShRefCount.hpp ShStatement.hpp
-libsh_la_SOURCES += ShSwizzle.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp
+libsh_la_SOURCES += ShSwizzle.hpp ShSwizzleImpl.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp
 libsh_la_SOURCES += ShUtility.hpp ShVariable.hpp ShVariableNode.hpp sh.hpp
 libsh_la_SOURCES += ShGraph.hpp ShGraphImpl.hpp 
 libsh_la_SOURCES += ShInstructions.hpp ShInstructions.cpp
@@ -75,6 +75,11 @@ libsh_la_SOURCES += ShMemory.hpp ShMemory.cpp ShMemoryDep.hpp
 libsh_la_SOURCES += ShTextureNode.cpp ShImage.cpp ShImage3D.cpp
 
 # Types
+libsh_la_SOURCES += ShVariableType.hpp ShVariableType.cpp
+libsh_la_SOURCES += ShTypeInfo.hpp ShTypeInfoImpl.hpp ShTypeInfo.cpp
+libsh_la_SOURCES += ShTypeInfoCasts.cpp ShTypeInfoOps.cpp 
+libsh_la_SOURCES += ShDataType.hpp ShDataTypeImpl.hpp ShDataType.cpp
+incinc_HEADERS   += ShDataType.hpp ShDataTypeImpl.hpp 
 libsh_la_SOURCES += ShGeneric.hpp ShGenericImpl.hpp
 libsh_la_SOURCES += ShAttrib.hpp ShAttribImpl.hpp
 libsh_la_SOURCES += ShLibAttrib.hpp
@@ -86,7 +91,6 @@ libsh_la_SOURCES += ShNormal.hpp ShNormalImpl.hpp ShLibNormal.hpp
 libsh_la_SOURCES += ShTexCoord.hpp ShTexCoordImpl.hpp ShLibTexCoord.hpp
 libsh_la_SOURCES += ShMatrix.hpp ShMatrixImpl.hpp
 libsh_la_SOURCES += ShQuaternion.hpp ShQuaternionImpl.hpp
-libsh_la_SOURCES += ShTypeInfo.hpp ShTypeInfoImpl.hpp ShTypeInfo.cpp
 libsh_la_SOURCES += ShVariant.hpp ShVariantImpl.hpp ShVariant.cpp
 libsh_la_SOURCES += ShVariantFactory.hpp ShVariantFactoryImpl.hpp 
 libsh_la_SOURCES += ShVariantCast.hpp ShVariantCastImpl.hpp 
@@ -96,7 +100,6 @@ libsh_la_SOURCES += ShConcreteRegularOpImpl.hpp
 libsh_la_SOURCES += ShConcreteCTypeOpImpl.hpp  ShConcreteCTypeOp.cpp
 libsh_la_SOURCES += ShConcreteIntervalOpImpl.hpp 
 libsh_la_SOURCES += ShInterval.hpp ShIntervalImpl.hpp 
-
 
 
 # Shader Algebra
@@ -130,7 +133,7 @@ incinc_HEADERS += ShLibDeriv.hpp ShLibDerivImpl.hpp
 incinc_HEADERS += ShLibInterval.hpp ShLibIntervalImpl.hpp
 incinc_HEADERS += ShParser.hpp ShRefCount.hpp ShRefCountImpl.hpp 
 incinc_HEADERS += ShProgram.hpp ShProgramNode.hpp ShStatement.hpp 
-incinc_HEADERS += ShSwizzle.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp
+incinc_HEADERS += ShSwizzle.hpp ShSwizzleImpl.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp
 incinc_HEADERS += ShUtility.hpp
 incinc_HEADERS += ShGraph.hpp ShGraphImpl.hpp 
 incinc_HEADERS += ShVariable.hpp ShVariableNode.hpp

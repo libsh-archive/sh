@@ -33,14 +33,16 @@
 
 #include "ShVariant.hpp"
 #include "ShBackend.hpp"
+#include "ShTransformer.hpp"
 
 // #define SH_CC_DEBUG 1
 
 // function representing a single kernel
 // Each of the parameters is an array of single storage-typed arrays
 // (The size and type are known during code emission)
+// @todo type - inputs should be allowed to change?
 typedef void (*CcFunc)(void** inputs, 
-			const void** params,
+			void** params,
 			void** channels,
 			void** textures,
 			void** outputs);
@@ -50,12 +52,12 @@ namespace ShCc {
 struct CcVariable
 {
   CcVariable(void);
-  CcVariable(int num, const std::string& name, int size, int typeIndex);
+  CcVariable(int num, const std::string& name, int size, SH::ShValueType valueType);
 
   int m_num;
   std::string m_name;
   int m_size;
-  int m_typeIndex;
+  SH::ShValueType m_valueType;
 };
 
 class CcBackendCode: public SH::ShBackendCode
@@ -109,7 +111,7 @@ class CcBackendCode: public SH::ShBackendCode
 
     std::string resolve(const SH::ShVariable& v);
     std::string resolve(const SH::ShVariable& v, int idx);
-    const char* ctype(int typeIndex);
+    const char* ctype(SH::ShValueType valueType);
 
   class LabelFunctor
 	{
@@ -140,10 +142,17 @@ class CcBackendCode: public SH::ShBackendCode
   void emit(SH::ShCtrlGraphNodePtr node);
       
   private:
-    const SH::ShProgramNodeCPtr& m_program;
+    const SH::ShProgramNodeCPtr& m_original_program;
+    SH::ShProgramNodePtr m_program;
 
     std::map<SH::ShCtrlGraphNodePtr, int> m_label_map;
     std::map<SH::ShVariableNodePtr, CcVariable> m_varmap;
+
+    /// The conversions done to change types not handled in hardware into
+    // floating point types
+    //
+    // @todo may want more intelligent conversion if hardware 
+    SH::ShTransformer::ValueTypeMap m_convertMap;
 
     std::stringstream m_code;
 
@@ -157,7 +166,7 @@ class CcBackendCode: public SH::ShBackendCode
 
     int m_cur_temp;
 
-    const void** m_params;
+    void** m_params;
     std::vector<SH::ShVariantPtr> m_paramVariants;
 
     //std::vector<SH::ShChannelNodePtr> m_channels;

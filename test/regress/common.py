@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+import string
+
 def upzip(a, b):
     if len(a) > len(b):
         return zip(a, b + (b[-1],) * (len(a) - len(b)))

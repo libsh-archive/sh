@@ -9,7 +9,6 @@
 #include "ShError.hpp"
 #include "ShTypeInfo.hpp"
 
-// TODO replace zeros (SH_OP_DOT) with ShConcreteTypeInfo<T>::ZERO
 namespace SH {
 
 /* Partial specialization for different operations */ 
@@ -29,57 +28,69 @@ namespace SH {
 // do a partial specialization on the class
 // and define the doop function
 #define SHCCTO_UNARY_OP(op, opsrc)\
-template<typename T>\
-struct ShConcreteCTypeOp<op, T> {\
-  static void doop(ShPointer<ShDataVariant<T> > dest, \
-    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) \
+template<ShValueType V>\
+struct ShConcreteCTypeOp<op, V>\
+{ \
+  typedef ShDataVariant<V, SH_HOST> Variant; \
+  typedef ShPointer<Variant> DataPtr; \
+  typedef ShPointer<const Variant> DataCPtr; \
+\
+  static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) \
   {\
     SH_DEBUG_ASSERT(dest && a);\
     int ao = a->size() > 1;\
   \
-    typename ShDataVariant<T>::iterator D = dest->begin();\
-    typename ShDataVariant<T>::const_iterator A = a->begin();\
+    typename Variant::iterator D = dest->begin();\
+    typename Variant::const_iterator A = a->begin();\
     for(; D != dest->end(); A += ao, ++D) {\
       (*D) = opsrc;\
     }\
-  }\
+  } \
 };
 
 
 #define SHCCTO_BINARY_OP(op, opsrc)\
-template<typename T>\
-struct ShConcreteCTypeOp<op, T> {\
-  static void doop(ShPointer<ShDataVariant<T> > dest, \
-    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) \
+template<ShValueType V>\
+struct ShConcreteCTypeOp<op, V>\
+{ \
+  typedef ShDataVariant<V, SH_HOST> Variant; \
+  typedef ShPointer<Variant> DataPtr; \
+  typedef ShPointer<const Variant> DataCPtr; \
+\
+  static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) \
   {\
     SH_DEBUG_ASSERT(dest && a && b);\
     int ao = a->size() > 1;\
     int bo = b->size() > 1;\
   \
-    typename ShDataVariant<T>::iterator D = dest->begin();\
-    typename ShDataVariant<T>::const_iterator A, B;\
+    typename Variant::iterator D = dest->begin();\
+    typename Variant::const_iterator A, B;\
     A = a->begin();\
     B = b->begin();\
     for(; D != dest->end(); A += ao, B += bo, ++D) {\
       (*D) = opsrc;\
     }\
-  }\
+  } \
 };
 
 
 #define SHCCTO_TERNARY_OP(op, opsrc)\
-template<typename T>\
-struct ShConcreteCTypeOp<op, T> {\
-  static void doop(ShPointer<ShDataVariant<T> > dest, \
-    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) \
+template<ShValueType V>\
+struct ShConcreteCTypeOp<op, V>\
+{ \
+  typedef ShDataVariant<V, SH_HOST> Variant; \
+  typedef ShPointer<Variant> DataPtr; \
+  typedef ShPointer<const Variant> DataCPtr; \
+\
+  static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) \
   {\
     SH_DEBUG_ASSERT(dest && a && b && c);\
     int ao = a->size() > 1;\
     int bo = b->size() > 1;\
     int co = c->size() > 1;\
   \
-    typename ShDataVariant<T>::iterator D = dest->begin();\
-    typename ShDataVariant<T>::const_iterator A, B, C;\
+    typename Variant::iterator D = dest->begin();\
+    typename Variant::const_iterator A, B, C;\
     A = a->begin();\
     B = b->begin();\
     C = c->begin();\
@@ -89,24 +100,29 @@ struct ShConcreteCTypeOp<op, T> {\
   }\
 };
 
-#define SHCCTO_OP_SPEC(T, op)\
+#define SHCCTO_OP_SPEC(V, op)\
 template<>\
-struct ShConcreteCTypeOp<op, T> {\
-  static void doop(ShPointer<ShDataVariant<T> > dest, \
-    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0);\
-  \
+struct  \
+SH_DLLEXPORT \
+ShConcreteCTypeOp<op, V>\
+{ \
+  typedef ShDataVariant<V, SH_HOST> Variant; \
+  typedef ShPointer<Variant> DataPtr; \
+  typedef ShPointer<const Variant> DataCPtr; \
+\
+  static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0); \
 };
 
 #define SHCCTO_OP_CMATH_SPEC(op)\
-  SHCCTO_OP_SPEC(double, op);\
-  SHCCTO_OP_SPEC(float, op);
+  SHCCTO_OP_SPEC(SH_DOUBLE, op);\
+  SHCCTO_OP_SPEC(SH_FLOAT, op);
 
 // Note that some ops are currently NOT declared for integer types
 // (anything that is only specialized for double/float cmath functions 
 // will not work with ints)
 
 // Unary ops
-SHCCTO_UNARY_OP(SH_OP_ABS, (*A) > ShConcreteTypeInfo<T>::ZERO ? (*A) : -(*A));
+SHCCTO_UNARY_OP(SH_OP_ABS, (shDataTypeIsPositive(*A) ? (*A) : -(*A)));
 
 SHCCTO_OP_CMATH_SPEC(SH_OP_ACOS);
 SHCCTO_OP_CMATH_SPEC(SH_OP_ASIN);
@@ -117,31 +133,37 @@ SHCCTO_OP_CMATH_SPEC(SH_OP_ATAN);
 SHCCTO_OP_CMATH_SPEC(SH_OP_CBRT);
 SHCCTO_OP_CMATH_SPEC(SH_OP_CEIL);
 
-template<typename T>
-struct ShConcreteCTypeOp<SH_OP_CMUL, T> {
-  static void doop(ShPointer<ShDataVariant<T> > dest, 
-    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) 
+template<ShValueType V>
+struct ShConcreteCTypeOp<SH_OP_CMUL, V>
+{ 
+  typedef ShDataVariant<V, SH_HOST> Variant; 
+  typedef ShPointer<Variant> DataPtr; 
+  typedef ShPointer<const Variant> DataCPtr; 
+
+  static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
   {
     // dest->size should be 1 and a->size == b->size
-    T result = ShConcreteTypeInfo<T>::ZERO;
-    typename ShDataVariant<T>::const_iterator A = a->begin();
-    for(; A != a->end(); ++A) result *= (*A); 
-     (*dest)[0] = result;
+    (*dest)[0] = std::accumulate(a->begin(), a->end(), 
+                     ShDataTypeInfo<V, SH_HOST>::Zero, 
+                     std::multiplies<typename Variant::DataType>());
   }
 };
 
 SHCCTO_OP_CMATH_SPEC(SH_OP_COS);
 
-template<typename T>
-struct ShConcreteCTypeOp<SH_OP_CSUM, T> {
-  static void doop(ShPointer<ShDataVariant<T> > dest, 
-    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) 
+template<ShValueType V>
+struct ShConcreteCTypeOp<SH_OP_CSUM, V>
+{ 
+  typedef ShDataVariant<V, SH_HOST> Variant; 
+  typedef ShPointer<Variant> DataPtr; 
+  typedef ShPointer<const Variant> DataCPtr; 
+
+  static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
   {
     // dest->size should be 1 and a->size == b->size
-    T result = ShConcreteTypeInfo<T>::ZERO;
-    typename ShDataVariant<T>::const_iterator A = a->begin();
-    for(; A != a->end(); ++A) result += (*A); 
-     (*dest)[0] = result;
+    (*dest)[0] = std::accumulate(a->begin(), a->end(), 
+                     ShDataTypeInfo<V, SH_HOST>::Zero, 
+                     std::plus<typename Variant::DataType>()); 
   }
 };
 
@@ -174,13 +196,18 @@ SHCCTO_OP_CMATH_SPEC(SH_OP_ATAN2);
 
 SHCCTO_BINARY_OP(SH_OP_DIV, (*A) / (*B));
 
-template<typename T>
-struct ShConcreteCTypeOp<SH_OP_DOT, T> {
-  static void doop(ShPointer<ShDataVariant<T> > dest, 
-    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) 
+template<ShValueType V>
+struct ShConcreteCTypeOp<SH_OP_DOT, V>
+{ 
+  typedef ShDataVariant<V, SH_HOST> Variant; 
+  typedef ShPointer<Variant> DataPtr; 
+  typedef ShPointer<const Variant> DataCPtr; 
+
+  static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
   {
     // dest->size should be 1 and a->size == b->size
-    (*dest)[0] = std::inner_product(a->begin(), a->end(), b->begin(), (T) 0);
+    (*dest)[0] = std::inner_product(a->begin(), a->end(), b->begin(), 
+                      ShDataTypeInfo<V, SH_HOST>::Zero);
   }
 };
 
@@ -197,21 +224,30 @@ SHCCTO_BINARY_OP(SH_OP_POW, __gnu_cxx::power((*A), (*B)));  // only works for in
 SHCCTO_OP_CMATH_SPEC(SH_OP_POW);
 
 
-SHCCTO_BINARY_OP(SH_OP_SEQ, shTypeInfoCond<T>((*A) == (*B)));
-SHCCTO_BINARY_OP(SH_OP_SGE, shTypeInfoCond<T>((*A) >= (*B)));
-SHCCTO_BINARY_OP(SH_OP_SGT, shTypeInfoCond<T>((*A) > (*B)));
-SHCCTO_BINARY_OP(SH_OP_SLE, shTypeInfoCond<T>((*A) <= (*B)));
-SHCCTO_BINARY_OP(SH_OP_SLT, shTypeInfoCond<T>((*A) < (*B)));
-SHCCTO_BINARY_OP(SH_OP_SNE, shTypeInfoCond<T>((*A) != (*B)));
+SHCCTO_BINARY_OP(SH_OP_SEQ, (shDataTypeCond<V, SH_HOST>((*A) == (*B))));
+SHCCTO_BINARY_OP(SH_OP_SGE, (shDataTypeCond<V, SH_HOST>((*A) >= (*B))));
+SHCCTO_BINARY_OP(SH_OP_SGT, (shDataTypeCond<V, SH_HOST>((*A) > (*B))));
+SHCCTO_BINARY_OP(SH_OP_SLE, (shDataTypeCond<V, SH_HOST>((*A) <= (*B))));
+SHCCTO_BINARY_OP(SH_OP_SLT, (shDataTypeCond<V, SH_HOST>((*A) < (*B))));
+SHCCTO_BINARY_OP(SH_OP_SNE, (shDataTypeCond<V, SH_HOST>((*A) != (*B))));
 
-template<typename T>
-struct ShConcreteCTypeOp<SH_OP_XPD, T> {
-  static void doop(ShPointer<ShDataVariant<T> > dest, 
-    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) 
+template<ShValueType V>
+struct ShConcreteCTypeOp<SH_OP_XPD, V>
+{ 
+  typedef ShDataVariant<V, SH_HOST> Variant; 
+  typedef ShPointer<Variant> DataPtr; 
+  typedef ShPointer<const Variant> DataCPtr; 
+
+  static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
   {
-    (*dest)[0] = (*a)[1] * (*b)[2] - (*a)[2] * (*b)[1];
-    (*dest)[1] = -((*a)[0] * (*b)[2] - (*a)[2] * (*b)[0]);
+    // handle case where dest = a and both not swizzed/negged
+    // or similar with dest = b.
+    typename Variant::DataType t0, t1;
+    t0 = (*a)[1] * (*b)[2] - (*a)[2] * (*b)[1];
+    t1 = -((*a)[0] * (*b)[2] - (*a)[2] * (*b)[0]);
     (*dest)[2] = (*a)[0] * (*b)[1] - (*a)[1] * (*b)[0];
+    (*dest)[0] = t0;
+    (*dest)[1] = t1;
   }
 };
 

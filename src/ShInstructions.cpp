@@ -105,9 +105,16 @@ namespace SH {
 #define SHINST_UNARY_OP_CORE(op)\
   if(immediate()) {\
     has_values(dest, src);\
-    ShVariantPtr result = dest.getVariant();\
-    (*ShEval::instance())(SH_OP_ ## op, result, src.getVariant(), 0, 0);\
-    dest.setVariant(result);\
+    ShVariant *dv, *sv;\
+    bool newd, news;\
+    newd = dest.loadVariant(dv);\
+    news = src.loadVariant(sv);\
+    (*ShEval::instance())(SH_OP_ ## op, dv, sv, 0, 0);\
+    if(newd) {\
+      dest.setVariant(dv); \
+      delete dv;\
+    }\
+    if(news) delete sv;\
   } else {\
     ShStatement stmt(dest, SH_OP_ ## op, src);\
     addStatement(stmt);\
@@ -123,9 +130,18 @@ void sh ## op(ShVariable& dest, const ShVariable& src)\
 #define SHINST_BINARY_OP_CORE(op)\
   if(immediate()) {\
     has_values(dest, a, b);\
-    ShVariantPtr result = dest.getVariant();\
-    (*ShEval::instance())(SH_OP_ ## op, result, a.getVariant(), b.getVariant(), 0);\
-    dest.setVariant(result);\
+    ShVariant *dv, *av, *bv;\
+    bool newd, newa, newb;\
+    newd = dest.loadVariant(dv);\
+    newa = a.loadVariant(av);\
+    newb = b.loadVariant(bv);\
+    (*ShEval::instance())(SH_OP_ ## op, dv, av, bv, 0);\
+    if(newd) {\
+      dest.setVariant(dv); \
+      delete dv;\
+    }\
+    if(newa) delete av;\
+    if(newb) delete bv;\
   } else {\
     ShStatement stmt(dest, a, SH_OP_ ## op, b);\
     addStatement(stmt);\
@@ -145,9 +161,20 @@ void sh ## op(ShVariable& dest, const ShVariable& a, const ShVariable &b, const 
   SH_DEBUG_ASSERT(condition);\
   if(immediate()) {\
     has_values(dest, a, b, c);\
-    ShVariantPtr result = dest.getVariant();\
-    (*ShEval::instance())(SH_OP_ ## op, result, a.getVariant(), b.getVariant(), c.getVariant());\
-    dest.setVariant(result);\
+    ShVariant *dv, *av, *bv, *cv;\
+    bool newd, newa, newb, newc;\
+    newd = dest.loadVariant(dv);\
+    newa = a.loadVariant(av);\
+    newb = b.loadVariant(bv);\
+    newc = c.loadVariant(cv);\
+    (*ShEval::instance())(SH_OP_ ## op, dv, av, bv, cv);\
+    if(newd) {\
+      dest.setVariant(dv); \
+      delete dv;\
+    }\
+    if(newa) delete av;\
+    if(newb) delete bv;\
+    if(newc) delete cv;\
   } else {\
     ShStatement stmt(dest, SH_OP_ ## op, a, b, c);\
     addStatement(stmt);\
@@ -156,7 +183,7 @@ void sh ## op(ShVariable& dest, const ShVariable& a, const ShVariable &b, const 
 
 // TODO 
 // intelligent type selection for operators
-// (Instead of just selecting evaluator based on dest.typeIndex,
+// (Instead of just selecting evaluator based on dest.valueType,
 // select based on some kind of type hierarchy)
 
 SHINST_UNARY_OP(ASN);
@@ -265,57 +292,25 @@ SHINST_TERNARY_OP(COND,
 void shLO(ShVariable& dest, const ShVariable& src)
 {
   sizes_match(dest, src); // TODO check types are okay
-  if(immediate()) {
-    has_values(dest, src);
-    ShVariantPtr result = dest.getVariant();
-    (*ShEval::instance())(SH_OP_LO, result, src.getVariant(), 0, 0);
-    dest.setVariant(result);
-  } else {
-    ShStatement stmt(dest, SH_OP_LO, src);
-    addStatement(stmt);
-  }
+  SHINST_UNARY_OP_CORE(LO);
 }
 
 void shHI(ShVariable& dest, const ShVariable& src)
 {
   sizes_match(dest, src); // TODO check types are okay
-  if(immediate()) {
-    has_values(dest, src);
-    ShVariantPtr result = dest.getVariant();
-    (*ShEval::instance())(SH_OP_LO, result, src.getVariant(), 0, 0);
-    dest.setVariant(result);
-  } else {
-    ShStatement stmt(dest, SH_OP_LO, src);
-    addStatement(stmt);
-  }
+  SHINST_UNARY_OP_CORE(HI);
 }
 
 void shSETLO(ShVariable& dest, const ShVariable& src)
 {
   sizes_match(dest, src); // TODO check types are okay
-  if(immediate()) {
-    has_values(dest, src);
-    ShVariantPtr result = dest.getVariant();
-    (*ShEval::instance())(SH_OP_LO, result, src.getVariant(), 0, 0);
-    dest.setVariant(result);
-  } else {
-    ShStatement stmt(dest, SH_OP_LO, src);
-    addStatement(stmt);
-  }
+  SHINST_UNARY_OP_CORE(SETLO);
 }
 
 void shSETHI(ShVariable& dest, const ShVariable& src)
 {
   sizes_match(dest, src); // TODO check types are okay
-  if(immediate()) {
-    has_values(dest, src);
-    ShVariantPtr result = dest.getVariant();
-    (*ShEval::instance())(SH_OP_LO, result, src.getVariant(), 0, 0);
-    dest.setVariant(result);
-  } else {
-    ShStatement stmt(dest, SH_OP_LO, src);
-    addStatement(stmt);
-  }
+  SHINST_UNARY_OP_CORE(SETHI);
 }
 
 void shKIL(const ShVariable& a)

@@ -32,6 +32,7 @@
 #include "ShSwizzle.hpp"
 #include "ShUtility.hpp"
 #include "ShMetaForwarder.hpp"
+#include "ShVariant.hpp"
 #include "ShVariableNode.hpp"
 
 namespace SH {
@@ -64,7 +65,7 @@ public:
   int size() const; ///< Get the number of elements in this variable,
                     /// after swizzling.
                     
-  int typeIndex() const; ///< Returns index of the data type held in this node, or 0 if no node. 
+  ShValueType valueType() const; ///< Returns index of the data type held in this node, or 0 if no node. 
 
   /**@name Metadata
    * This data is useful for various things, including asset
@@ -75,13 +76,14 @@ public:
   
   /// Set a range of values for this variable
   // TODO check if this works when swizzle contains one index more than once
-  void rangeVariant(ShPointer<const ShVariant> low, ShPointer<const ShVariant> high);
+  void rangeVariant(const ShVariant* low, const ShVariant* high);
 
   /// Obtain a lower bounds on this variable (tuple of same size as this)
-  ShPointer<ShVariant> lowBoundVariant() const;
+  // @{
+  ShVariantPtr lowBoundVariant() const;
 
   /// Obtain an upper bounds on this variable (tuple of same size as this)
-  ShPointer<ShVariant> highBoundVariant() const;
+  ShVariantPtr highBoundVariant() const;
 
   //@}
   
@@ -98,15 +100,44 @@ public:
 
   ///
   
-  /// Gets a copy of the variant (with swizzling & proper negation)
-  ShPointer<ShVariant> getVariant() const;
-  ShPointer<ShVariant> getVariant(int index) const;
+  /// Returns a copy of the variant (with swizzling & proper negation)
+  ShVariantPtr getVariant() const;
+  ShVariantPtr getVariant(int index) const;
+
+  /** Sets result to this' variant if possible.
+   * Otherwise, if swizzling or negation are required, then 
+   * makes a copy into result.
+   * @returns whether a copy was allocated
+   *
+   * (This function should only be used internally. the ref count
+   * on result will be 1 if it's allocated as a copy.  You may
+   * assign this to a refcounted pointer, and then manually release a ref.
+   * @todo type figure out a cleaner way) 
+   */
+  bool loadVariant(ShVariant *&result) const;
   
-  /// sets up to num elements starting at index in this variant 
-  /// from the other variant, accounting for swizzles and negation
-  void setVariant(ShPointer<const ShVariant> other, bool neg, const ShSwizzle &writemask);
-  void setVariant(ShPointer<const ShVariant> other, int index);
-  void setVariant(ShPointer<const ShVariant> other);
+  /** Sets the elements of this variant from other accounting for 
+   * this' writemask and negations
+   * @{
+   */
+  void setVariant(const ShVariant* other, bool neg, const ShSwizzle &writemask);
+  void setVariant(ShVariantCPtr other, bool neg, const ShSwizzle &writemask);
+  // @}
+ 
+  /** Sets the indicated element of this' variant from other 
+   * @{
+   */
+  void setVariant(const ShVariant* other, int index);
+  void setVariant(ShVariantCPtr other, int index);
+  // @}
+
+  /** Sets this' variant from the contents of other
+   * @{
+   */
+  void setVariant(const ShVariant* other);
+  void setVariant(ShVariantCPtr other);
+  // @}
+
 
   ShVariable operator()() const; ///< Identity swizzle
   ShVariable operator()(int) const;

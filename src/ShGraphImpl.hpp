@@ -247,6 +247,10 @@ void ShGraph<G>::floydWarshall(W &weigher, VertexPairMap<typename W::WeightType>
   }
 
   // do the bottom-up dynamic programming
+  // loop invariant of the outer loop
+  //    dist(A, B) contains the shortest path from A to B using only the
+  //        nodes in verts.begin() to V as intermediates
+  //    path(A, B) contains the first edge in the above shortest path
   for(V = verts.begin(); V != verts.end(); ++V) {
     for(U = verts.begin(); U != verts.end(); ++U) {
       for(X = verts.begin(); X != verts.end(); ++X) {
@@ -255,7 +259,7 @@ void ShGraph<G>::floydWarshall(W &weigher, VertexPairMap<typename W::WeightType>
         if(oldDist > testDist && (dist(*U, *V) != W::LARGE && 
               dist(*V, *X) != W::LARGE)) {
           oldDist = testDist;
-          if(path) (*path)(*U, *X) = (*path)(*V, *X);
+          if(path) (*path)(*U, *X) = (*path)(*U, *V);
         }
       }
     }

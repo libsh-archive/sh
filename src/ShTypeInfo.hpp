@@ -30,145 +30,99 @@
 #include <string>
 #include <vector>
 #include "ShVariableType.hpp"
+#include "ShDataType.hpp"
 #include "ShRefCount.hpp"
+#include "ShInterval.hpp"
 
 namespace SH {
 
 /// forward declarations 
 class ShVariantFactory;
 
-/// empty structs for non-native host types (half-float, fracs)
-/// @{
-struct ShHalf {};
-struct ShFracInt {};
-struct ShFracShort {};
-struct ShFracByte {};
-struct ShFracUInt {};
-struct ShFracUShort {};
-struct ShFracUByte {};
-// @}
 
-/// Sets the actual host computation and memory storage types for a given type.
-// @{
-template<typename T> struct ShHostType { typedef T type; };
-template<> struct ShHostType<ShHalf> { typedef float type; };
-template<> struct ShHostType<ShFracInt> { typedef float type; };
-template<> struct ShHostType<ShFracShort> { typedef float type; };
-template<> struct ShHostType<ShFracByte> { typedef float type; };
-template<> struct ShHostType<ShFracUInt> { typedef float type; };
-template<> struct ShHostType<ShFracUShort> { typedef float type; };
-template<> struct ShHostType<ShFracUByte> { typedef float type; };
-
-template<typename T> struct ShMemoryType { typedef T type; };
-template<> struct ShMemoryType<ShHalf> { typedef float type; };
-template<> struct ShMemoryType<ShFracInt> { typedef float type; };
-template<> struct ShMemoryType<ShFracShort> { typedef float type; };
-template<> struct ShMemoryType<ShFracByte> { typedef float type; };
-template<> struct ShMemoryType<ShFracUInt> { typedef float type; };
-template<> struct ShMemoryType<ShFracUShort> { typedef float type; };
-template<> struct ShMemoryType<ShFracUByte> { typedef float type; };
-// @}
-
-
+/** A holder of information about a type and how to allocate it */ 
 struct 
 SH_DLLEXPORT
 ShTypeInfo {
   virtual ~ShTypeInfo() {}
 
-  /** Returns a unique string representation for this type */
+  /** Returns a the name of the value type */
   virtual const char* name() const = 0;
 
-  /** Returns size of type when stored in host memory */ 
+  /** Returns size of type */ 
   virtual int datasize() const = 0;
 
   /** Returns the factory that generates ShVariant objects of this type */
   virtual const ShVariantFactory* variantFactory() const = 0; 
+
+  /** Initializes the variant factories, automatic promotions, and
+   * other variant casters.
+   */
+  static void init();
+
+  /** Returns the type info with the requested value and data types. */ 
+  static const ShTypeInfo* get(ShValueType valueType, ShDataType dataType);
+
+  private:
+    /** Holds ShDataTypeInfo instances for all available valuetype/datatypes */
+    static const ShTypeInfo* m_valueTypes[SH_VALUETYPE_END][SH_DATATYPE_END]; 
+
+    /** Adds automatic promotion and other casts into the ShCastManager */ 
+    static void addCasts();
+
+    /** Adds ops to the ShEval class */ 
+    static void addOps();
 };
 
 // generic level, singleton ShTypeInfo class holding information for
 // a particular type
-template<typename T>
-struct ShConcreteTypeInfo: public ShTypeInfo {
+template<ShValueType V, ShDataType DT>
+struct ShDataTypeInfo: public ShTypeInfo {
   public:
-    typedef typename ShHostType<T>::type H; 
-    typedef typename ShMemoryType<T>::type M;
-
-    static const char* m_name; 
-
-    /// default boolean values to use for ops with boolean results
-    static const H TrueVal;
-    static const H FalseVal;
-
-    /// default values for additive/multiplicative identities 
-    static const H ZERO;
-    static const H ONE;
-
-    /// default range information
-    // (0,1) by default
-    static H defaultLo(ShSemanticType type);
-    static H defaultHi(ShSemanticType type);
-
-    /// Equality comparison that returns true iff
-    // the values are equal. 
-    static bool valuesEqual(const H &a, const H &b); 
+    typedef typename ShDataTypeCppType<V, DT>::type type;
+    static const type Zero;
+    static const type One;
 
     const char* name() const; 
     int datasize() const;
     const ShVariantFactory* variantFactory() const;
 
-    static const ShConcreteTypeInfo<T>* instance();
+    static const ShDataTypeInfo* instance();
 
   protected:
-    static ShConcreteTypeInfo<T> *m_instance;
-
-    ShConcreteTypeInfo();
+    static ShDataTypeInfo *m_instance;
+    ShDataTypeInfo() {}
 };
-
-//default initialization (adds concrete type infos and creates 
-// eval providers for core Sh types
-SH_DLLEXPORT
-void shTypeInfoInit(); 
 
 /// Returns the number of storage types
 // This means that type indices 0 through result - 1 are all
 // occupied.
-SH_DLLEXPORT
-int shNumTypes();
+//SH_DLLEXPORT
+//int shNumTypes();
 
 SH_DLLEXPORT
-const ShTypeInfo* shTypeInfo(int typeIndex);  
+extern const ShTypeInfo* shTypeInfo(ShValueType valueType, ShDataType dataType = SH_HOST);
 
-/// Returns the type index of type T in the current context
-template<typename T>
-int shTypeIndex();
-
-// Given a type T, returns ShConcreteTypeInfo<T>::TrueVal if the arg is true
-// ::FalseVal otherwise
-template<typename T>
-typename ShConcreteTypeInfo<T>::H shTypeInfoCond(bool cond);
+SH_DLLEXPORT
+extern const ShVariantFactory* shVariantFactory(ShValueType valueType, ShDataType dataType = SH_HOST);
 
 // Provides a least common ancestor in the type tree for 
 // a given pair of types in a typedef named type 
-template<typename T1, typename T2>
+template<ShValueType V1, ShValueType V2>
 struct ShCommonType; 
 
-template<typename T1, typename T2, typename T3>
+template<ShValueType V1, ShValueType V2, ShValueType V3>
 struct ShCommonType3 {
-  typedef typename ShCommonType<typename ShCommonType<T1, T2>::type, T3>::type type;
+  static const ShValueType valueType = 
+    ShCommonType<ShCommonType<V1, V2>::valueType, V3>::valueType;
 };
 
-template<typename T1, typename T2, typename T3, typename T4>
+template<ShValueType V1, ShValueType V2, ShValueType V3, ShValueType V4>
 struct ShCommonType4 {
-  typedef typename ShCommonType<typename ShCommonType<T1, T2>::type, 
-                                typename ShCommonType<T3, T4>::type>::type type;
+  static const ShValueType valueType = 
+    ShCommonType<ShCommonType<T1, T2>::valueType, 
+      ShCommonType<T3, T4>::valueType>::valueType; 
 };
-
-
-// TODO could make this into a tree traversal to reduce amount
-// of code when we hav 12+ base types
-//
-// But template metapgrogramming that might also lead to very
-// obfuscated code...
 
 }
 

@@ -31,22 +31,13 @@
 #include <list>
 #include "ShDllExport.hpp"
 #include "ShVariableType.hpp"
+#include "ShVariant.hpp"
 #include "ShRefCount.hpp"
 #include "ShMeta.hpp"
 #include "ShSwizzle.hpp"
 #include "ShPool.hpp"
 
 namespace SH {
-
-
-// @todo type 
-// move these over to ShVariableType.hpp
-// ensure these match the BindingType and SemanticType enums
-SH_DLLEXPORT extern const char* ShBindingTypeName[];
-SH_DLLEXPORT extern const char* ShSemanticTypeName[];
-
-// forward declarations 
-class ShVariant;
 
 class ShVariableNode;
 typedef ShPointer<ShVariableNode> ShVariableNodePtr;
@@ -64,8 +55,8 @@ SH_DLLEXPORT ShVariableNode : public virtual ShRefCountable,
                        public virtual ShMeta {
 public:
   /// Constructs a VariableNode that holds a tuple of data of type 
-  //given by the typeIndex.
-  ShVariableNode(ShBindingType kind, int size, int typeIndex, ShSemanticType type = SH_ATTRIB);
+  //given by the valueType.
+  ShVariableNode(ShBindingType kind, int size, ShValueType valueType, ShSemanticType type = SH_ATTRIB);
 
   virtual ~ShVariableNode();
 
@@ -96,10 +87,10 @@ public:
   ShVariableNodePtr clone(ShBindingType newKind, ShSemanticType newType, 
       int newSize, bool updateVarList = true, bool keepUniform = true) const;
 
-  ShVariableNodePtr clone(int newTypeIndex, 
+  ShVariableNodePtr clone(ShValueType newValueType, 
       bool updateVarList = true, bool keepUniform = true) const;
 
-  ShVariableNodePtr clone(ShBindingType newKind, int newSize, int newTypeIndex, 
+  ShVariableNodePtr clone(ShBindingType newKind, int newSize, ShValueType newValueType, 
       bool updateVarList = true, bool keepUniform = true) const;
   // @}
 
@@ -114,7 +105,7 @@ public:
   void lock(); ///< Do not update bound shaders in subsequent setValue calls
   void unlock(); ///< Update bound shader values, and turn off locking
   
-  int typeIndex() const; ///< Returns index of the data type held in this node 
+  ShValueType valueType() const; ///< Returns index of the data type held in this node 
 
   // Metadata
   std::string name() const; ///< Get this variable's name
@@ -122,11 +113,15 @@ public:
 
   /// Set a range of possible values for this variable's elements
   // low and high must be scalar elements (otherwise this just uses the first component)
-  void rangeVariant(ShPointer<const ShVariant> low, ShPointer<const ShVariant> high);
-  void rangeVariant(ShPointer<const ShVariant> low, ShPointer<const ShVariant> high, bool neg, const ShSwizzle &writemask);
+  void rangeVariant(const ShVariant* low, const ShVariant* high);
+  void rangeVariant(const ShVariant* low, const ShVariant* high, 
+      bool neg, const ShSwizzle &writemask);
 
-  ShPointer<ShVariant> lowBoundVariant() const;
-  ShPointer<ShVariant> highBoundVariant() const;
+  /** Generates a new ShVariant holding the lower bound */
+  ShVariantPtr lowBoundVariant() const;
+
+  /** Generates a new ShVariant holding the upper bound */
+  ShVariantPtr highBoundVariant() const;
 
   ShBindingType kind() const;
   ShSemanticType specialType() const;
@@ -134,14 +129,29 @@ public:
 
   std::string nameOfType() const; ///< Get a string of this var's specialType, kind, & size
 
-  /// Update elements of a variant applying the given writemask and negation
-  void setVariant(ShPointer<const ShVariant> other);
-  void setVariant(ShPointer<const ShVariant> other, int index);
-  void setVariant(ShPointer<const ShVariant> other, bool neg, const ShSwizzle &writemask);
+  /// Set the elements of this' variant to those of other 
+  // @{
+  void setVariant(const ShVariant* other);
+  void setVariant(ShVariantCPtr other);
+  // @}
+  
+  /// Update indexed element of this' variant 
+  // @{
+  void setVariant(const ShVariant* other, int index);
+  void setVariant(ShVariantCPtr other, int index);
+  // @}
+  
+  /// Update elements of this' variant applying the given writemask and negation
+  // @{
+  void setVariant(const ShVariant* other, bool neg, const ShSwizzle &writemask);
+  void setVariant(ShVariantCPtr other, bool neg, const ShSwizzle &writemask);
+  // @}
 
   /// Retrieve the variant 
-  ShPointer<const ShVariant> getVariant() const;
-  //ShDataVariantPtr getVariant(); // TODO can't have this function until ShUpdate is implemented, and even then it might not be a good idea
+  const ShVariant* getVariant() const;
+
+  /// Retrieve the variant.  This should probably only be used internally.
+  ShVariant* getVariant();
 
   /// Ensure this node has space to store host-side values.
   /// Normally this is not necessary, but when uniforms are given
@@ -182,8 +192,15 @@ protected:
   // When maintainUniform is true, the old.m_uniform is used instead
   // of setting up the value based on current ShContext state
   ShVariableNode(const ShVariableNode& old, ShBindingType newKind, 
-      ShSemanticType newType, int newSize, int newTypeIndex, 
+      ShSemanticType newType, int newSize, ShValueType newValueType, 
       bool updateVarList, bool keepUniform);
+
+  // Generates default low bound based on current special type
+  ShVariant* makeLow() const;
+
+  // Generates a default high bound baesd on current special type
+  ShVariant* makeHigh() const;
+
   // @todo type find a better function name for this
   // (Later this should just update the backends as part of shUpdate 
   // and all calls to this should be replaced with update_dependents) 
@@ -202,11 +219,13 @@ protected:
   ShBindingType m_kind;
   ShSemanticType m_specialType;
   int m_size;
-  int m_typeIndex;
+  ShValueType m_valueType;
   int m_id;
   int m_locked;
 
-  ShPointer<ShVariant> m_variant;
+  /** Ref-counted pointer to the variant.  ShVariableNode is always
+   * the sole owner of this pointer once the node exists. */
+  ShVariantPtr m_variant;
 
   // Dependent uniform evaluation
   mutable ShVariableNodeEval* m_eval;

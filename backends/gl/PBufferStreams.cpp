@@ -61,31 +61,10 @@
 #include <time.h>
 #endif
 
-namespace {
-
-// @todo type get rid of this when there's a proper framework
-// for manipulating data in memory 
-
-// converts an array of type from to type to using the default cast
-// (should be good enough for now. may want to hook in Sh casting
-// functions if necessary...)
-//
-// @return newly allocated array of type To with size elements 
-template<typename D, typename S>
-void convertData(D* castData, const S* originalData, int size)
-{
-  
-  for(int i = 0; i < size; ++i) {
-    castData[i] = static_cast<D>(originalData[i]);
-  }
-}
-
-
-}
-
 namespace shgl {
 
 using namespace SH;
+
 
 #ifdef DO_PBUFFER_TIMING
 
@@ -270,7 +249,7 @@ void fillin()
 
 FloatExtension PBufferStreams::setupContext(int width, int height)
 {
-  //@todo type change context setup depending out output type 
+  //@todo type change context setup depending on output type?
   
   if (m_info.valid()
       && m_info.width == width
@@ -386,7 +365,6 @@ FloatExtension PBufferStreams::setupContext(int width, int height)
 void PBufferStreams::execute(const ShProgramNodeCPtr& program,
                              ShStream& dest)
 {
-  // @todo type - map weird input memory types to textures properly 
   DECLARE_TIMER(overhead);
   int prev = shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->context();
 
@@ -439,7 +417,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   
   ShChannelNodePtr output = *dest.begin();
   int count = output->count();
-  int typeIndex = output->typeIndex();
+  ShValueType valueType = output->valueType();
 
   // Pick a size for the texture that just fits the output data.
   int tex_size = 1;
@@ -488,11 +466,11 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
     switch (extension) {
     case SH_ARB_NV_FLOAT_BUFFER:
       tex = new ShTextureNode(SH_TEXTURE_RECT, I->first->size(),
-                              I->first->typeIndex(), traits, tex_size, tex_size, 1);
+                              I->first->valueType(), traits, tex_size, tex_size, 1);
       break;
     case SH_ARB_ATI_PIXEL_FORMAT_FLOAT:
       tex = new ShTextureNode(SH_TEXTURE_2D, I->first->size(),
-                              I->first->typeIndex(), traits, tex_size, tex_size, 1);
+                              I->first->valueType(), traits, tex_size, tex_size, 1);
       break;
     default:
       tex = 0;
@@ -642,7 +620,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   ShHostStoragePtr outhost
     = shref_dynamic_cast<ShHostStorage>(output->memory()->findStorage("host"));
   if (!outhost) {
-    int datasize = shTypeInfo(typeIndex)->datasize(); 
+    int datasize = shTypeInfo(valueType)->datasize(); 
     outhost = new ShHostStorage(output->memory().object(),
                                 datasize * output->size() * output->count());
   }
@@ -675,17 +653,23 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
 
   DECLARE_TIMER(readback);
 
-  // @todo type half-float, frac types
-  ShPointer<ShDataVariant<float> > resultBuffer; 
+  // @todo half-float
+  ShVariantPtr  resultBuffer; 
   int resultDatasize = output->size() * count;
-  if(typeIndex != shTypeIndex<float>()) {
-    resultBuffer = new ShDataVariant<float>(resultDatasize);
+  GLenum readpixelType;
+  ShValueType convertedType; 
+  readpixelType = shGlType(valueType, convertedType);
+  if(convertedType != SH_VALUETYPE_END) {
+      SH_DEBUG_WARN("ARB backend does not handle stream output type " << valueTypeName[valueType] << " natively."
+          << "  Using " << valueTypeName[convertedType] << " temporary buffer.");
+      resultBuffer = shVariantFactory(convertedType, SH_MEM)->generate(resultDatasize);
   } else {
-    resultBuffer = new ShDataVariant<float>(outhost->data(), resultDatasize, false);
+      resultBuffer = shVariantFactory(valueType, SH_MEM)->generate(
+          outhost->data(), resultDatasize, false);
   }
 
   glReadPixels(0, 0, tex_size, count / tex_size, format,
-               GL_FLOAT, resultBuffer->begin());
+               readpixelType, resultBuffer->array());
   gl_error = glGetError();
   if (gl_error != GL_NO_ERROR) {
     shError(PBufferStreamException("Could not do glReadPixels()"));
@@ -694,8 +678,8 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
     return;
   }
   if (count % tex_size) {
-    glReadPixels(0, count / tex_size, count % tex_size, 1, format, GL_FLOAT,
-                 resultBuffer->begin() + (count - (count % tex_size)) * output->size());
+    glReadPixels(0, count / tex_size, count % tex_size, 1, format, readpixelType,
+                 (char*)(resultBuffer->array()) + (count - (count % tex_size)) * output->size() * resultBuffer->datasize());
     gl_error = glGetError();
     if (gl_error != GL_NO_ERROR) {
       shError(PBufferStreamException("Could not do rest of glReadPixels()"));
@@ -705,10 +689,9 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
     }
   }
 
-  if(resultBuffer->managed()) { // need to copy to outhoust->data()
-    const ShVariantFactory* variantFactory = shTypeInfo(typeIndex)->variantFactory();
-    ShVariantPtr outhostVariant = 
-      variantFactory->generateMemory(outhost->data(), resultDatasize, false);
+  if(convertedType != SH_VALUETYPE_END) { // need to copy to outhoust->data()
+    ShVariantPtr outhostVariant = shVariantFactory(valueType, SH_MEM)->generate(
+          outhost->data(), resultDatasize, false);
     outhostVariant->set(resultBuffer);
   }
 

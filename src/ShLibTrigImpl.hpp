@@ -2,7 +2,7 @@
 //
 // Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
 // Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
+// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Viberiu S. Popa,
 //          Michael D. McCool
 // 
 // This software is provided 'as-is', without any express or implied
@@ -33,65 +33,65 @@
 
 namespace SH {
 
-template<int N, typename T>
+template<int N, ShValueType V>
 inline
-ShGeneric<N, T> acos(const ShGeneric<N, T>& var)
+ShGeneric<N, V> acos(const ShGeneric<N, V>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  ShAttrib<N, SH_TEMP, V> t;
   shACOS(t, var);
   return t;
 }
 
-template<int N, typename T>
+template<int N, ShValueType V>
 inline
-ShGeneric<N, T> asin(const ShGeneric<N, T>& var)
+ShGeneric<N, V> asin(const ShGeneric<N, V>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  ShAttrib<N, SH_TEMP, V> t;
   shASIN(t, var);
   return t;
 }
 
-template<int N, typename T>
+template<int N, ShValueType V>
 inline
-ShGeneric<N, T> atan(const ShGeneric<N, T>& var)
+ShGeneric<N, V> atan(const ShGeneric<N, V>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  ShAttrib<N, SH_TEMP, V> t;
   shATAN(t, var);
   return t;
 }
 
-template<int N, typename T>
+template<int N, ShValueType V>
 inline
-ShGeneric<N, T> atan2(const ShGeneric<N, T>& y, const ShGeneric<N, T>& x)
+ShGeneric<N, V> atan2(const ShGeneric<N, V>& y, const ShGeneric<N, V>& x)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  ShAttrib<N, SH_TEMP, V> t;
   shATAN2(t, y, x);
   return t;
 }
 
-template<int N, typename T>
+template<int N, ShValueType V>
 inline
-ShGeneric<N, T> cos(const ShGeneric<N, T>& var)
+ShGeneric<N, V> cos(const ShGeneric<N, V>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  ShAttrib<N, SH_TEMP, V> t;
   shCOS(t, var);
   return t;
 }
 
-template<int N, typename T>
+template<int N, ShValueType V>
 inline
-ShGeneric<N, T> sin(const ShGeneric<N, T>& var)
+ShGeneric<N, V> sin(const ShGeneric<N, V>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  ShAttrib<N, SH_TEMP, V> t;
   shSIN(t, var);
   return t;
 }
 
-template<int N, typename T>
+template<int N, ShValueType V>
 inline
-ShGeneric<N, T> tan(const ShGeneric<N, T>& var)
+ShGeneric<N, V> tan(const ShGeneric<N, V>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  ShAttrib<N, SH_TEMP, V> t;
   shTAN(t, var);
   return t;
 }

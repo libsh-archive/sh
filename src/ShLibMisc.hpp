@@ -2,7 +2,7 @@
 //
 // Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
 // Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
+// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Viberiu S. Popa,
 //          Michael D. McCool
 // 
 // This software is provided 'as-is', without any express or implied
@@ -40,43 +40,43 @@ namespace SH {
  */
 
 /** Casting.
- * Casts ShGeneric<N, T> to ShGeneric<M, T>.
+ * Casts ShGeneric<N, V> to ShGeneric<M, V>.
  * If M > N, pads remaining components with 0s (on right).
  * Otherwise, discards extra components.
  */
-template<int M, int N, typename T> 
-ShGeneric<M, T> cast(const ShGeneric<N, T>& a);
+template<int M, int N, ShValueType V> 
+ShGeneric<M, V> cast(const ShGeneric<N, V>& a);
 template<int M> 
-ShGeneric<M, float> cast(float a);
+ShGeneric<M, SH_DOUBLE> cast(double a); // @todo type do a cpp type -> value type map
 
 /** Fill Casting.
- * Casts ShGeneric<N, T> to ShGeneric<M, T>.
+ * Casts ShGeneric<N, V> to ShGeneric<M, V>.
  * If M > N, copies last component to fill extra slots.
  * Otherwise, discards extra components.
  */
-template<int M, int N, typename T> 
-ShGeneric<M, T> fillcast(const ShGeneric<N, T>& a);
+template<int M, int N, ShValueType V> 
+ShGeneric<M, V> fillcast(const ShGeneric<N, V>& a);
 template<int M> 
-ShGeneric<M, float> fillcast(float a);
+ShGeneric<M, SH_DOUBLE> fillcast(double a); // @todo type do a cpp type -> value type map
 
 /** Join two tuples 
  * Creates an M+N tuple with components of a first then b.
  */
-template<int M, int N, typename T1, typename T2> 
-ShGeneric<M+N, CT1T2> 
-join(const ShGeneric<M, T1>& a, const ShGeneric<N, T2> &b);
+template<int M, int N, ShValueType V1, ShValueType V2> 
+ShGeneric<M+N, CV1V2> 
+join(const ShGeneric<M, V1>& a, const ShGeneric<N, V2> &b);
 
 /** Fragment discard. Only for fragment programs.
  * Discards the current fragment if any(c) > 0.
  */
-template<int N, typename T>
-void discard(const ShGeneric<N, T>& c);
+template<int N, ShValueType V>
+void discard(const ShGeneric<N, V>& c);
 
 /** Fragment killing.
  * @deprecated Use discard instead.
  */
-template<int N, typename T>
-void kill(const ShGeneric<N, T>& c);
+template<int N, ShValueType V>
+void kill(const ShGeneric<N, V>& c);
 
 /** Uniform freezing.
  *

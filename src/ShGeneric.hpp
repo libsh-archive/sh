@@ -2,7 +2,7 @@
 //
 // Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
 // Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
+// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Viberiu S. Popa,
 //          Michael D. McCool
 // 
 // This software is provided 'as-is', without any express or implied
@@ -27,9 +27,10 @@
 #ifndef SHGENERIC_HPP
 #define SHGENERIC_HPP
 
+#include "ShVariableType.hpp"
+#include "ShDataType.hpp"
 #include "ShVariable.hpp"
 #include "ShVariant.hpp"
-#include "ShTypeInfo.hpp"
 
 namespace SH {
 
@@ -46,29 +47,30 @@ class ShProgram;
  *
  * Without Generic:
  *
- * template<int N, typename T, ShBindingType B1, ShBindingType B2,
+ * template<int N, ShValueType V, ShBindingType B1, ShBindingType B2,
  *          bool S1, bool S2>
- * ShAttrib<N, SH_TEMP, T> add(const ShAttrib<N, B1, T, S1>& a,
- *                             const ShAttrib<N, B2, T, S2>& b);
+ * ShAttrib<N, SH_TEMP, V> add(const ShAttrib<N, B1, V, S1>& a,
+ *                             const ShAttrib<N, B2, V, S2>& b);
  *
  * With Generic:
  *
- * template<int N, typename T>
- * ShAttrib<N, SH_TEMP, T> add(const ShGeneric<N, T>& a,
- *                             const ShGeneric<N, T>& b);
+ * template<int N, ShValueType V>
+ * ShAttrib<N, SH_TEMP, V> add(const ShGeneric<N, V>& a,
+ *                             const ShGeneric<N, V>& b);
  *
  * This class is explicitly instantiated for T = float with 1 <= N <= 4.
  */
-template<int N, typename T>
+template<int N, ShValueType V>
 class ShGeneric : public ShVariable 
 {
 public:
-  typedef T ValueType;
-  typedef typename ShHostType<T>::type H; 
+  static const ShValueType value_type = V;
+  typedef typename ShHostType<V>::type H; 
   typedef H HostType; 
-  typedef typename ShMemoryType<T>::type MemoryType; 
+  typedef typename ShMemType<V>::type MemType; 
   static const int typesize = N;
-  typedef ShDataVariant<H> VariantType; 
+
+  typedef ShDataVariant<V, SH_HOST> VariantType; 
   typedef ShPointer<VariantType> VariantTypePtr;
   typedef ShPointer<const VariantType> VariantTypeCPtr;
 
@@ -83,10 +85,10 @@ public:
 
   // @todo type get rid of this. default should be okay for 
   // internal usage
-  // ShGeneric(const ShGeneric<N, T> &other);
+  // ShGeneric(const ShGeneric<N, V> &other);
 
-  template<typename T2>
-  ShGeneric(const ShGeneric<N, T2> &other);
+  template<ShValueType V2>
+  ShGeneric(const ShGeneric<N, V2> &other);
   // @}
 
   // This is needed because the templated assignment op is 
@@ -94,40 +96,40 @@ public:
   // is implicitly defined.  Here that doesn't work so well. 
   ShGeneric& operator=(const ShGeneric& other);
 
-  template<typename T2>
-  ShGeneric& operator=(const ShGeneric<N, T2>& other);
+  template<ShValueType V2>
+  ShGeneric& operator=(const ShGeneric<N, V2>& other);
 
   ShGeneric& operator=(const ShProgram& other);
   
-  template<typename T2>
-  ShGeneric& operator+=(const ShGeneric<N, T2>& right);
+  template<ShValueType V2>
+  ShGeneric& operator+=(const ShGeneric<N, V2>& right);
 
-  template<typename T2>
-  ShGeneric& operator-=(const ShGeneric<N, T2>& right);
+  template<ShValueType V2>
+  ShGeneric& operator-=(const ShGeneric<N, V2>& right);
 
-  template<typename T2>
-  ShGeneric& operator*=(const ShGeneric<N, T2>& right);
+  template<ShValueType V2>
+  ShGeneric& operator*=(const ShGeneric<N, V2>& right);
 
-  template<typename T2>
-  ShGeneric& operator/=(const ShGeneric<N, T2>& right);
+  template<ShValueType V2>
+  ShGeneric& operator/=(const ShGeneric<N, V2>& right);
 
-  template<typename T2>
-  ShGeneric& operator%=(const ShGeneric<N, T2>& right);
+  template<ShValueType V2>
+  ShGeneric& operator%=(const ShGeneric<N, V2>& right);
 
-  template<typename T2>
-  ShGeneric& operator+=(const ShGeneric<1, T2>& right);
+  template<ShValueType V2>
+  ShGeneric& operator+=(const ShGeneric<1, V2>& right);
 
-  template<typename T2>
-  ShGeneric& operator-=(const ShGeneric<1, T2>& right);
+  template<ShValueType V2>
+  ShGeneric& operator-=(const ShGeneric<1, V2>& right);
 
-  template<typename T2>
-  ShGeneric& operator*=(const ShGeneric<1, T2>& right);
+  template<ShValueType V2>
+  ShGeneric& operator*=(const ShGeneric<1, V2>& right);
 
-  template<typename T2>
-  ShGeneric& operator/=(const ShGeneric<1, T2>& right);
+  template<ShValueType V2>
+  ShGeneric& operator/=(const ShGeneric<1, V2>& right);
 
-  template<typename T2>
-  ShGeneric& operator%=(const ShGeneric<1, T2>& right);
+  template<ShValueType V2>
+  ShGeneric& operator%=(const ShGeneric<1, V2>& right);
 
   ShGeneric& operator+=(H);
   ShGeneric& operator-=(H);
@@ -138,11 +140,11 @@ public:
   ShGeneric operator-() const;
 
   ShGeneric operator()() const; ///< Identity swizzle
-  ShGeneric<1, T> operator()(int) const;
-  ShGeneric<1, T> operator[](int) const;
-  ShGeneric<2, T> operator()(int, int) const;
-  ShGeneric<3, T> operator()(int, int, int) const;
-  ShGeneric<4, T> operator()(int, int, int, int) const;
+  ShGeneric<1, V> operator()(int) const;
+  ShGeneric<1, V> operator[](int) const;
+  ShGeneric<2, V> operator()(int, int) const;
+  ShGeneric<3, V> operator()(int, int, int) const;
+  ShGeneric<4, V> operator()(int, int, int, int) const;
 
   /// Range Metadata
   void range(H low, H high);
@@ -155,7 +157,7 @@ public:
   
   // Arbitrary Swizzle
   template<int N2>
-  ShGeneric<N2, T> swiz(int indices[]) const;
+  ShGeneric<N2, V> swiz(int indices[]) const;
 
   /// Get the values of this variable, with swizzling taken into account
   void getValues(H dest[]) const;
@@ -172,16 +174,16 @@ protected:
 
 };
 
-template<typename T>
-class ShGeneric<1, T> : public ShVariable 
+template<ShValueType V>
+class ShGeneric<1, V> : public ShVariable 
 {
 public:
-  typedef T ValueType;
-  typedef typename ShHostType<T>::type H; 
+  static const ShValueType value_type = V;
+  typedef typename ShHostType<V>::type H; 
   typedef H HostType;
-  typedef typename ShMemoryType<T>::type MemoryType; 
+  typedef typename ShMemType<V>::type MemType; 
   static const int typesize = 1;
-  typedef ShDataVariant<H> VariantType; 
+  typedef ShDataVariant<V, SH_HOST> VariantType; 
   typedef ShPointer<VariantType> VariantTypePtr;
   typedef ShPointer<const VariantType> VariantTypeCPtr;
 
@@ -196,34 +198,34 @@ public:
   // @{
 
   // @todo type get rid of this
-  // ShGeneric(const ShGeneric<1, T> &other);
+  // ShGeneric(const ShGeneric<1, V> &other);
 
-  template<typename T2>
-  ShGeneric(const ShGeneric<1, T2> &other);
+  template<ShValueType V2>
+  ShGeneric(const ShGeneric<1, V2> &other);
   // @}
 
-  ShGeneric& operator=(const ShGeneric<1, T>& other);
+  ShGeneric& operator=(const ShGeneric<1, V>& other);
 
-  template<typename T2>
-  ShGeneric& operator=(const ShGeneric<1, T2>& other);
+  template<ShValueType V2>
+  ShGeneric& operator=(const ShGeneric<1, V2>& other);
 
   ShGeneric& operator=(H);
   ShGeneric& operator=(const ShProgram& other);
   
-  template<typename T2>
-  ShGeneric& operator+=(const ShGeneric<1, T2>& right);
+  template<ShValueType V2>
+  ShGeneric& operator+=(const ShGeneric<1, V2>& right);
 
-  template<typename T2>
-  ShGeneric& operator-=(const ShGeneric<1, T2>& right);
+  template<ShValueType V2>
+  ShGeneric& operator-=(const ShGeneric<1, V2>& right);
 
-  template<typename T2>
-  ShGeneric& operator*=(const ShGeneric<1, T2>& right);
+  template<ShValueType V2>
+  ShGeneric& operator*=(const ShGeneric<1, V2>& right);
 
-  template<typename T2>
-  ShGeneric& operator/=(const ShGeneric<1, T2>& right);
+  template<ShValueType V2>
+  ShGeneric& operator/=(const ShGeneric<1, V2>& right);
 
-  template<typename T2>
-  ShGeneric& operator%=(const ShGeneric<1, T2>& right);
+  template<ShValueType V2>
+  ShGeneric& operator%=(const ShGeneric<1, V2>& right);
 
   ShGeneric& operator+=(H);
   ShGeneric& operator-=(H);
@@ -234,11 +236,11 @@ public:
   ShGeneric operator-() const;
 
   ShGeneric operator()() const; ///< Identity swizzle
-  ShGeneric<1, T> operator()(int) const;
-  ShGeneric<1, T> operator[](int) const;
-  ShGeneric<2, T> operator()(int, int) const;
-  ShGeneric<3, T> operator()(int, int, int) const;
-  ShGeneric<4, T> operator()(int, int, int, int) const;
+  ShGeneric<1, V> operator()(int) const;
+  ShGeneric<1, V> operator[](int) const;
+  ShGeneric<2, V> operator()(int, int) const;
+  ShGeneric<3, V> operator()(int, int, int) const;
+  ShGeneric<4, V> operator()(int, int, int, int) const;
 
   /// Range Metadata
   void range(H low, H high);
@@ -251,7 +253,7 @@ public:
   
   // Arbitrary Swizzle
   template<int N2>
-  ShGeneric<N2, T> swiz(int indices[]) const;
+  ShGeneric<N2, V> swiz(int indices[]) const;
 
   /// Get the values of this variable, with swizzling taken into account
   void getValues(H dest[]) const;

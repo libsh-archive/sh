@@ -39,7 +39,7 @@ ShContext* ShContext::current()
 
     // must be done this way since
     // init_types requires a ShContext object, 
-    shTypeInfoInit();
+    ShTypeInfo::init();
   }
   return m_instance;
 }

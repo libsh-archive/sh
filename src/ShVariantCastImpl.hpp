@@ -33,48 +33,60 @@
 
 namespace SH {
 
-template<typename DEST, typename SRC>
-ShVariantPtr ShDataVariantCast<DEST, SRC>::operator()(ShVariantPtr value) const
+template<ShValueType Dest, ShDataType DestDT, 
+  ShValueType Src, ShDataType SrcDT> 
+ShDataVariantCast<Dest, DestDT, Src, SrcDT>* 
+ShDataVariantCast<Dest, DestDT, Src, SrcDT>::m_instance = 0;
+
+template<ShValueType Dest, ShDataType DestDT, 
+  ShValueType Src, ShDataType SrcDT> 
+void ShDataVariantCast<Dest, DestDT, Src, SrcDT>::doCast(
+    ShVariant* dest, const ShVariant *src) const
 {
-  if (MatchType<DEST, SRC>::matches) return value;
 
-  ShPointer<ShDataVariant<SRC> > srcVariant = 
-    shref_dynamic_cast<ShDataVariant<SRC> >(value);
-  ShDataVariant<DEST> *result = new ShDataVariant<DEST>(srcVariant->size());
+  SrcVariant* sv = variant_cast<Src, SrcDT>(src);
+  DestVariant* dv = variant_cast<Dest, DestDT>(dest); 
 
-  typename ShDataVariant<SRC>::const_iterator S = srcVariant->begin();
-  typename ShDataVariant<DEST>::iterator D = result->begin();
-  for(;S != srcVariant->end(); ++S, ++D) doCast(*D, *S);
-
-  return result;
+  typename SrcVariant::const_iterator S = sv->begin();
+  typename DestVariant::iterator D = dv->begin();
+  for(;S != sv->end(); ++S, ++D) doCast(*D, *S);
 }
 
-template<typename DEST, typename SRC>
-ShVariantCPtr ShDataVariantCast<DEST, SRC>::operator()(ShVariantCPtr value) const
+template<ShValueType Dest, ShDataType DestDT, 
+  ShValueType Src, ShDataType SrcDT>
+void ShDataVariantCast<Dest, DestDT, Src, SrcDT>::getCastTypes(
+    ShValueType &dest, ShDataType &destDT, 
+    ShValueType &src, ShDataType &srcDT) const
 {
-  if (MatchType<DEST, SRC>::matches) return value;
-
-  ShPointer<const ShDataVariant<SRC> > srcVariant = 
-    shref_dynamic_cast<const ShDataVariant<SRC> >(value);
-  ShDataVariant<DEST> *result = new ShDataVariant<DEST>(srcVariant->size());
-
-  typename ShDataVariant<SRC>::const_iterator S = srcVariant->begin();
-  typename ShDataVariant<DEST>::iterator D = result->begin();
-  for(;S != srcVariant->end(); ++S, ++D) doCast(*D, *S);
-
-  return result;
+  dest = Dest;
+  destDT = DestDT;
+  src = Src;
+  srcDT = SrcDT;
 }
 
-template<typename DEST, typename SRC>
-void ShDataVariantCast<DEST, SRC>::doCast(DEST &dest, const SRC &src) const
+template<ShValueType Dest, ShDataType DestDT, 
+  ShValueType Src, ShDataType SrcDT>
+void ShDataVariantCast<Dest, DestDT, Src, SrcDT>::getDestTypes(
+    ShValueType &valueType, ShDataType &dataType) const
 {
-  // default C++ cast for now.  Users can add their own special weird
-  // casts later on.
-  // (This allows people to use a different cast operation than an existing
-  // one defined in C++ in case they either (a) do not have access to the 
-  // original source code of the type or (b) want to use a different
-  // cast for the special cases.)
-  dest = (DEST)(src);
+  valueType = Dest; 
+  dataType = DestDT;
+}
+
+template<ShValueType Dest, ShDataType DestDT, 
+  ShValueType Src, ShDataType SrcDT>
+void ShDataVariantCast<Dest, DestDT, Src, SrcDT>::doCast(D &dest, const S &src) const
+{
+  shDataTypeCast<Dest, DestDT, Src, SrcDT>(dest, src);
+}
+
+template<ShValueType Dest, ShDataType DestDT, 
+  ShValueType Src, ShDataType SrcDT>
+const ShDataVariantCast<Dest, DestDT, Src, SrcDT>*
+ShDataVariantCast<Dest, DestDT, Src, SrcDT>::instance()
+{
+  if(!m_instance) m_instance = new ShDataVariantCast();
+  return m_instance;
 }
 
 }

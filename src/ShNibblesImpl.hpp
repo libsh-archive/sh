@@ -111,10 +111,10 @@ ShProgram access(const ShBaseTextureCube<T> &tex, const std::string & tcname, co
   return nibble;
 }
 
-template<typename T2, int Rows, int Cols, ShBindingType Binding, typename T>
-ShProgram transform(const ShMatrix<Rows, Cols, Binding, T> &m, const std::string & name) {
+template<typename T, int Rows, int Cols, ShBindingType Binding, ShValueType V>
+ShProgram transform(const ShMatrix<Rows, Cols, Binding, V> &m, const std::string & name) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
-    typename T2::InOutType SH_NAMEDECL(attrib, name) = m | attrib;
+    typename T::InOutType SH_NAMEDECL(attrib, name) = m | attrib;
   } SH_END;
   nibble.name("transform");
   return nibble;

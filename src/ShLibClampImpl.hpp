@@ -2,7 +2,7 @@
 //
 // Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
 // Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
+// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Viberiu S. Popa,
 //          Michael D. McCool
 // 
 // This software is provided 'as-is', without any express or implied
@@ -34,122 +34,122 @@
 
 namespace SH {
 
-template<int N, typename T>
+template<int N, ShValueType V>
 inline
-ShGeneric<N, T> abs(const ShGeneric<N, T>& var)
+ShGeneric<N, V> abs(const ShGeneric<N, V>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  ShAttrib<N, SH_TEMP, V> t;
   shABS(t, var);
   return t;
 }
 
-template<int N, typename T>
+template<int N, ShValueType V>
 inline
-ShGeneric<N, T> ceil(const ShGeneric<N, T>& var)
+ShGeneric<N, V> ceil(const ShGeneric<N, V>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  ShAttrib<N, SH_TEMP, V> t;
   shCEIL(t, var);
   return t;
 }
 
-template<int N, typename T>
+template<int N, ShValueType V>
 inline
-ShGeneric<N, T> floor(const ShGeneric<N, T>& var)
+ShGeneric<N, V> floor(const ShGeneric<N, V>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  ShAttrib<N, SH_TEMP, V> t;
   shFLR(t, var);
   return t;
 }
 
-template<int N, typename T>
+template<int N, ShValueType V>
 inline
-ShGeneric<N, T> round(const ShGeneric<N, T>& var)
+ShGeneric<N, V> round(const ShGeneric<N, V>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  ShAttrib<N, SH_TEMP, V> t;
   shRND(t, var);
   return t;
 }
 
-template<int N, typename T1, typename T2>
+template<int N, ShValueType V1, ShValueType V2>
 inline
-ShGeneric<N, CT1T2> mod(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
+ShGeneric<N, CV1V2> mod(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  ShAttrib<N, SH_TEMP, CV1V2> t;
   shMOD(t, left, right);
   return t;
 }
-template<int N, typename T1, typename T2>
+template<int N, ShValueType V1, ShValueType V2>
 inline
-ShGeneric<N, CT1T2> mod(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right)
+ShGeneric<N, CV1V2> mod(const ShGeneric<N, V1>& left, const ShGeneric<1, V2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  ShAttrib<N, SH_TEMP, CV1V2> t;
   shMOD(t, left, right);
   return t;
 }
-template<typename T1, typename T2>
+template<ShValueType V1, ShValueType V2>
 inline
-ShGeneric<1, CT1T2> mod(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right)
+ShGeneric<1, CV1V2> mod(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right)
 {
-  ShAttrib<1, SH_TEMP, CT1T2> t;
+  ShAttrib<1, SH_TEMP, CV1V2> t;
   shMOD(t, left, right);
   return t;
 }
 
-template<int N, typename T1, typename T2>
+template<int N, ShValueType V1, ShValueType V2>
 inline
-ShGeneric<N, CT1T2> operator%(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
+ShGeneric<N, CV1V2> operator%(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right)
 {
   return mod(left, right);
 }
-template<int N, typename T1, typename T2>
+template<int N, ShValueType V1, ShValueType V2>
 inline
-ShGeneric<N, CT1T2> operator%(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right)
+ShGeneric<N, CV1V2> operator%(const ShGeneric<N, V1>& left, const ShGeneric<1, V2>& right)
 {
   return mod(left, right);
 }
-template<typename T1, typename T2>
+template<ShValueType V1, ShValueType V2>
 inline
-ShGeneric<1, CT1T2> operator%(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right)
+ShGeneric<1, CV1V2> operator%(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right)
 {
   return mod(left, right);
 }
 
-template<int N, typename T>
+template<int N, ShValueType V>
 inline
-ShGeneric<N, T> frac(const ShGeneric<N, T>& var)
+ShGeneric<N, V> frac(const ShGeneric<N, V>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  ShAttrib<N, SH_TEMP, V> t;
   shFRAC(t, var);
   return t;
 }
 
-template<int N, typename T>
+template<int N, ShValueType V>
 inline
-ShGeneric<N,  T> pos(const ShGeneric<N, T>& var)
+ShGeneric<N, V> pos(const ShGeneric<N, V>& var)
 {
   return max(var, fillcast<N>(0.0f));
 }
 
-template<int N, typename T1, typename T2>
+template<int N, ShValueType V1, ShValueType V2>
 inline
-ShGeneric<N,  CT1T2> max(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
+ShGeneric<N,  CV1V2> max(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  ShAttrib<N, SH_TEMP, CV1V2> t;
   shMAX(t, left, right);
   return t;
 }
 
-template<int N, typename T1, typename T2>
+template<int N, ShValueType V1, ShValueType V2>
 inline
-ShGeneric<N,  CT1T2> min(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
+ShGeneric<N,  CV1V2> min(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  ShAttrib<N, SH_TEMP, CV1V2> t;
   shMIN(t, left, right);
   return t;
 }
 
-template<int N, typename T>
-ShGeneric<1, T> max(const ShGeneric<N, T>& a)
+template<int N, ShValueType V>
+ShGeneric<1, V> max(const ShGeneric<N, V>& a)
 {
   int lhswz[N/2 + N%2];
   for (int i = 0; i < N/2 + N%2; i++) {
@@ -163,14 +163,14 @@ ShGeneric<1, T> max(const ShGeneric<N, T>& a)
   return max(max(a.template swiz<N/2 + N%2>(lhswz)), max(a.template swiz<N/2>(rhswz)));
 }
 
-template<typename T>
-ShGeneric<1, T> max(const ShGeneric<1, T>& a)
+template<ShValueType V>
+ShGeneric<1, V> max(const ShGeneric<1, V>& a)
 {
   return a;
 }
 
-template<int N, typename T>
-ShGeneric<1, T> min(const ShGeneric<N, T>& a)
+template<int N, ShValueType V>
+ShGeneric<1, V> min(const ShGeneric<N, V>& a)
 {
   int lhswz[N/2 + N%2];
   for (int i = 0; i < N/2 + N%2; i++) {
@@ -184,47 +184,47 @@ ShGeneric<1, T> min(const ShGeneric<N, T>& a)
   return min(min(a.template swiz<N/2 + N%2>(lhswz)), min(a.template swiz<N/2>(rhswz)));
 }
 
-template<typename T>
-ShGeneric<1, T> min(const ShGeneric<1, T>& a)
+template<ShValueType V>
+ShGeneric<1, V> min(const ShGeneric<1, V>& a)
 {
   return a;
 }
 
-template<int N, typename T1, typename T2, typename T3>
+template<int N, ShValueType V1, ShValueType V2, ShValueType V3>
 inline
-ShGeneric<N, CT1T2T3> clamp(const ShGeneric<N, T1>& a,
-                      const ShGeneric<N, T2>& b, const ShGeneric<N, T3>& c)
+ShGeneric<N, CV1V2V3> clamp(const ShGeneric<N, V1>& a,
+                      const ShGeneric<N, V2>& b, const ShGeneric<N, V3>& c)
 {
   return min(max(a, b), c);
 }
-template<int N, typename T1, typename T2, typename T3>
+template<int N, ShValueType V1, ShValueType V2, ShValueType V3>
 inline
-ShGeneric<N, CT1T2T3> clamp(const ShGeneric<N, T1>& a,
-                      const ShGeneric<1, T2>& b, const ShGeneric<1, T3>& c)
+ShGeneric<N, CV1V2V3> clamp(const ShGeneric<N, V1>& a,
+                      const ShGeneric<1, V2>& b, const ShGeneric<1, V3>& c)
 {
   return min(max(a, fillcast<N>(b)), fillcast<N>(c));
 }
 
-template<typename T1, typename T2, typename T3>
+template<ShValueType V1, ShValueType V2, ShValueType V3>
 inline
-ShGeneric<1, CT1T2T3> clamp(const ShGeneric<1, T1>& a,
-                      const ShGeneric<1, T2>& b, const ShGeneric<1, T3>& c)
+ShGeneric<1, CV1V2V3> clamp(const ShGeneric<1, V1>& a,
+                      const ShGeneric<1, V2>& b, const ShGeneric<1, V3>& c)
 {
   return min(max(a, b), c);
 }
 
-template<int N, typename T>
+template<int N, ShValueType V>
 inline
-ShGeneric<N, T> sat(const ShGeneric<N, T>& var)
+ShGeneric<N, V> sat(const ShGeneric<N, V>& var)
 {
   return min(var, fillcast<N>(ShConstAttrib1f(1.0)));
 }
 
-template<int N, typename T>
+template<int N, ShValueType V>
 inline
-ShGeneric<N, T> sign(const ShGeneric<N, T>& var)
+ShGeneric<N, V> sign(const ShGeneric<N, V>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  ShAttrib<N, SH_TEMP, V> t;
   shSGN(t, var);
   return t;
 }

@@ -43,6 +43,7 @@
 #include "ShVariant.hpp"
 #include "ShVariantFactory.hpp"
 #include "ShTypeInfo.hpp"
+#include "ShOptimizations.hpp"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -57,6 +58,8 @@
 
 namespace ShCc {
   using namespace SH;
+
+#include "CcTexturesString.hpp"
 
   std::string encode(const ShVariable& v) {
     std::stringstream ret;
@@ -77,21 +80,21 @@ namespace ShCc {
   const char* OutputPrefix = "var_o_";
   const char* TempPrefix = "var_t_";
   const char* ConstPrefix = "var_c_";
-  const char* TexturePrefix = "var_t_";
+  const char* TexturePrefix = "var_tex_";
   const char* StreamPrefix = "var_s_";
   const char* UniformPrefix= "var_u_";
 
   CcVariable::CcVariable(void) 
     : m_num(-1), 
       m_size(-1), 
-      m_typeIndex(-1)
+      m_valueType(SH_VALUETYPE_END)
   {}
   
-  CcVariable::CcVariable(int num, const std::string& name, int size, int typeIndex) 
+  CcVariable::CcVariable(int num, const std::string& name, int size, ShValueType valueType) 
     : m_num(num),
       m_name(name),
       m_size(size),
-      m_typeIndex(typeIndex) 
+      m_valueType(valueType) 
   {}
 
   CcBackendCode::LabelFunctor::LabelFunctor(std::map<ShCtrlGraphNodePtr, int>& label_map) 
@@ -114,7 +117,8 @@ namespace ShCc {
   }
   
   CcBackendCode::CcBackendCode(const ShProgramNodeCPtr& program) 
-    : m_program(program),
+    : m_original_program(program),
+    m_program(0),
 #ifdef WIN32
     m_hmodule(NULL),
 #else
@@ -125,6 +129,15 @@ namespace ShCc {
       m_params(NULL) 
   {
     SH_CC_DEBUG_PRINT(__FUNCTION__);
+
+    // convert half floats, fractionals to types we can use
+    m_convertMap[SH_HALF] = SH_FLOAT;
+    m_convertMap[SH_FRAC_INT] = SH_FLOAT;
+    m_convertMap[SH_FRAC_SHORT] = SH_FLOAT;
+    m_convertMap[SH_FRAC_BYTE] = SH_FLOAT;
+    m_convertMap[SH_FRAC_UINT] = SH_FLOAT;
+    m_convertMap[SH_FRAC_USHORT] = SH_FLOAT;
+    m_convertMap[SH_FRAC_UBYTE] = SH_FLOAT;
   }
 
   CcBackendCode::~CcBackendCode(void) 
@@ -181,12 +194,12 @@ namespace ShCc {
       ShVariableNodePtr node = *I; 
 
       const char* name = makeVarname(varPrefix, num);
-      const char* type = ctype(node->typeIndex());
-      m_code << "  " << typePrefix << type << " *" << name 
+      const char* type = ctype(node->valueType());
+      m_code << "  " << typePrefix << " " << type << " *" << name 
         << " = ((" << type << "*) " << arrayName << "[" << num << "]); // " 
         << node->name() << std::endl; 
 
-      m_varmap[node] = CcVariable(num, name, node->size(), node->typeIndex()); 
+      m_varmap[node] = CcVariable(num, name, node->size(), node->valueType()); 
     }
     m_code << std::endl;
 
@@ -203,10 +216,10 @@ namespace ShCc {
       ShVariableNodePtr node = (*I);
       const char* name = makeVarname(ConstPrefix, num);
       
-      m_code << ctype(node->typeIndex()) << name << "[" << node->size() << "] = {" 
+      m_code << "const " << ctype(node->valueType()) << " " << name << "[" << node->size() << "] = {" 
         << node->getVariant()->encodeArray() << "}; // " << node->name() << std::endl;
 
-      m_varmap[node] = CcVariable(num, name, node->size(), node->typeIndex()); 
+      m_varmap[node] = CcVariable(num, name, node->size(), node->valueType()); 
     }
     m_code << std::endl;
 
@@ -222,22 +235,24 @@ namespace ShCc {
   }
 
   void CcBackendCode::allocate_channels(void) {
-    allocate_varlist(m_program->channels, StreamPrefix, "channels"); 
+    allocate_varlist(m_program->channels, StreamPrefix, "channels", "const"); 
   }
 
   void CcBackendCode::allocate_textures(void) {
-    allocate_varlist(m_program->textures, TexturePrefix, "textures"); 
+    allocate_varlist(m_program->textures, TexturePrefix, "textures", "const"); 
   }
 
   void CcBackendCode::allocate_uniforms(void) {
-    allocate_varlist(m_program->uniforms, UniformPrefix, "params", "const"); 
+    allocate_varlist(m_program->uniforms, UniformPrefix, "params"/*, "const"*/);  // let uniforms be assigned to...
     
-    const ShProgramNode::VarList &uniforms = m_program->uniforms;
-    m_params = new const void*[uniforms.size()]; // @todo type assume that all pointers are the same size (probably valid?)
+    ShProgramNode::VarList &uniforms = m_program->uniforms;
+    m_params = new void*[uniforms.size()]; 
 
 
     // @todo type Trying to use the variants' data arrays directly. Hope this works. (<-- stupid comment)
-    ShProgramNode::VarList::const_iterator I = uniforms.begin(); 
+    // @todo note that since ray assigns to uniforms, we're going to allow
+    // this to be non-const...
+    ShProgramNode::VarList::iterator I = uniforms.begin(); 
     for (int i = 0; I != m_program->uniforms.end(); ++I, ++i) {
       ShVariableNodePtr node = *I; 
       m_params[i] = node->getVariant()->array(); 
@@ -251,9 +266,9 @@ namespace ShCc {
       ShVariableNodePtr node = (*I);
       const char* name = makeVarname(TempPrefix, m_cur_temp);
       
-      m_code << ctype(node->typeIndex()) << " " << name << "[" << node->size() << "]"
+      m_code << ctype(node->valueType()) << " " << name << "[" << node->size() << "]"
         << "; // " << node->name() << std::endl;
-      m_varmap[node] = CcVariable(m_cur_temp, name, node->size(), node->typeIndex()); 
+      m_varmap[node] = CcVariable(m_cur_temp, name, node->size(), node->valueType()); 
     }
 
     SH_CC_DEBUG_PRINT("Found " << m_cur_temp << " temps...");
@@ -279,26 +294,31 @@ namespace ShCc {
     return buf.str();
   }
 
-  const char* CcBackendCode::ctype(int typeIndex)
+  const char* CcBackendCode::ctype(ShValueType valueType)
   {
     // outputs a c++ type corresponding to the given type index
     // @todo type enter these strings into the ShTypeInfo objects 
-    static const char* ctype_table[] = {
-      "Invalid",
+    static const char* ctype_table[SH_VALUETYPE_END] = {
       "ShInterval<double>",
       "ShInterval<float>",
       "double",
+      "float",
       "float",
       "int",
       "short",
       "char",
       "unsigned int",
       "unsigned short",
-      "unsigned char"
+      "unsigned char",
+      "float",
+      "float",
+      "float",
+      "float",
+      "float",
+      "float",
     };
 
-    SH_DEBUG_ASSERT(typeIndex > 0 && typeIndex <= 10); // @todo type remove
-    return ctype_table[typeIndex];
+    return ctype_table[valueType];
   }
 
   void CcBackendCode::emit(ShBasicBlockPtr block) {
@@ -352,6 +372,30 @@ namespace ShCc {
   }
 
   bool CcBackendCode::generate(void) {
+    // Transform the code to remove types this backend cannot handle
+    m_program = m_original_program->clone();
+    ShContext::current()->enter(m_program);
+    ShTransformer transform(m_program);
+
+    transform.convertToFloat(m_convertMap);
+    if(transform.changed()) {
+      optimize(m_program);
+      m_program->collectVariables();
+    } else {
+      m_program = shref_const_cast<ShProgramNode>(m_original_program);
+    }
+    ShContext::current()->exit();
+
+    // @todo type add conversion code on 
+    // transformer already fixes the ShProgram.  Now we just need to set up
+    // some storages that hold a copy of texture and input stream data in 
+    // our computation type, and make a temp buffer for output if it needs 
+    // to be type converted.
+    //
+    // a) texture lookups
+    // b) convert input data array to a useable computation type
+    // c) convert output data array to the memory storage type
+
     SH_CC_DEBUG_PRINT("Creating label map...");
     LabelFunctor fl(m_label_map);
     m_program->ctrlGraph->dfs(fl);
@@ -373,6 +417,7 @@ namespace ShCc {
     std::stringstream prologue;
     prologue << "#include <math.h>" << std::endl;
     prologue << "#include <iostream>" << std::endl;
+    prologue << cc_texture_string << std::endl;
     // @todo output the CcTextures.hpp file here
     prologue << std::endl;
     prologue << std::endl;
@@ -383,7 +428,7 @@ namespace ShCc {
 	     << " void func("
 #endif /* WIN32 */
 	   << "void** inputs, "
-	   << "const void** params, "
+	   << "void** params, "
 	   << "void** channels, "
 	   << "void** textures, "
 	   << "void** outputs)" << std::endl;
@@ -395,18 +440,19 @@ namespace ShCc {
     epilogue << "}" << std::endl;
 
     // output code for debugging...
-    SH_CC_DEBUG_PRINT(prologue.str());
-    SH_CC_DEBUG_PRINT(m_code.str());
-    SH_CC_DEBUG_PRINT(epilogue.str());
+    //SH_CC_DEBUG_PRINT(prologue.str());
+    //SH_CC_DEBUG_PRINT(m_code.str());
+    //SH_CC_DEBUG_PRINT(epilogue.str());
 
-#ifdef SH_CC_DEBUG
+//#ifdef SH_CC_DEBUG
+    SH_CC_DEBUG_PRINT("Outputting generated C++ code to ccstream.cpp");
     std::ofstream dbgout("ccstream.cpp");
     dbgout << prologue.str();
     dbgout << m_code.str();
     dbgout << epilogue.str();
     dbgout.flush();
     dbgout.close();
-#endif
+//#endif
 
 #ifdef WIN32
     // generate temporary names for the
@@ -552,9 +598,9 @@ namespace ShCc {
       ShChannelNodePtr channel = (*I);
       ShHostStoragePtr storage = shref_dynamic_cast<ShHostStorage>(channel->memory()->findStorage("host"));
       
-      int datasize = shTypeInfo(channel->typeIndex())->datasize();
+      int datasize = shTypeInfo(channel->valueType(), SH_MEM)->datasize();
       stream_sizes[sidx] = datasize * channel->size();
-      stream_types[sidx] = channel->typeIndex();
+      stream_types[sidx] = channel->valueType();
 
       if (!storage) {
         storage = new ShHostStorage(channel->memory().object(),
@@ -590,9 +636,9 @@ namespace ShCc {
       ShHostStoragePtr storage = shref_dynamic_cast<ShHostStorage>(
           channel->memory()->findStorage("host"));
 
-      int datasize = shTypeInfo(channel->typeIndex())->datasize();
+      int datasize = shTypeInfo(channel->valueType(), SH_MEM)->datasize();
       output_sizes[oidx] = datasize * channel->size();
-      output_types[oidx] = channel->typeIndex();
+      output_types[oidx] = channel->valueType();
 
       if (!storage) {
         SH_CC_DEBUG_PRINT("  Allocating new storage?");

@@ -32,163 +32,69 @@
 #include "ShVariantCast.hpp"
 
 namespace {
-std::vector<const SH::ShTypeInfo*> storageTypes;
-}
-
-namespace {
 using namespace SH;
 
-template<typename DEST, typename SRC>
-void addCast(bool automatic, bool precedence)
-{
-  ShCastManager::instance()->addCast(shTypeIndex<DEST>(), shTypeIndex<SRC>(),  
-      new ShDataVariantCast<DEST, SRC>(), automatic, precedence);
-}
-
-
-// This adds the available automatic and explicit casts 
-// and should only be run after type indices are available from the context.
-void addCasts()
-{
-  // Write a python script to generate these...or come up with a better way.
-  
-  // precedence DAG edges 
-  
-  // @todo addCast<ShInterval<double>, ShInterval<float> >(true, true);
-  addCast<ShInterval<float>, float>(true, true);
-  addCast<ShInterval<double>, double>(true, true);
-
-  // float types
-  addCast<double, float>(true, true);
-
-  // int types
-  addCast<int, short>(true, true);
-  addCast<short, char>(true, true);
-
-  // unsigned int types
-  addCast<unsigned int, unsigned short>(true, true);
-  addCast<unsigned short, unsigned char>(true, true);
-
-  // between int -> float types
-  addCast<float, int>(true, true);
-  addCast<float, short>(true, true); // @todo change this to half
-  addCast<float, char>(true, true); // @todo change this to half
-
-  // between unsigned int -> float types
-  addCast<float, unsigned int>(true, true);
-  addCast<float, unsigned short>(true, true); // @todo change this to half
-  addCast<float, unsigned char>(true, true); // @todo change this to half
-
-  // between unsigned int -> int types
-  addCast<int, unsigned short>(true, true); // @todo change this to half
-  addCast<short, unsigned char>(true, true); // @todo change this to half
-
-  // automatic casts (but not precedence DAG edges)
-  // @todo not sure what to do here.
-  //
-  // choice 1 - always use standard C++ cast, in which case
-  // any cast going up the precedence DAG should be in one step
-
-  // may want to make these explicit...
-  addCast<float, double>(true, false);
-  addCast<int, double>(true, false);
-  addCast<short, double>(true, false);
-  addCast<char, double>(true, false);
-  addCast<unsigned int, double>(true, false);
-  addCast<unsigned short, double>(true, false);
-  addCast<unsigned char, double>(true, false);
-
-  addCast<int, float>(true, false);
-  addCast<short, float>(true, false);
-  addCast<char, float>(true, false);
-  addCast<unsigned int, float>(true, false);
-  addCast<unsigned short, float>(true, false);
-  addCast<unsigned char, float>(true, false);
-
-  // explicit casts 
-  // decide what should be here...
-  // not sure...may want to separate classes some more so
-  // some automatic casts print out warnings
-  // @todo addCast<ShInterval<float>, ShInterval<double> >(false, false);
-
-  ShCastManager::instance()->init();
-
-  /* DEBUG */ //ShCastManager::instance()->graphvizDump(std::cout);
+// sets up m_valueType entries for host & memory type for the given value type
+template<ShValueType V>
+void setTypeInfo(const ShTypeInfo* valueTypes[SH_VALUETYPE_END][SH_DATATYPE_END]) {
+  valueTypes[V][SH_HOST] = ShDataTypeInfo<V, SH_HOST>::instance();
+  valueTypes[V][SH_MEM] = ShDataTypeInfo<V, SH_MEM>::instance();
 }
 
 }
 
 namespace SH {
 
-// names
-template<> const char* ShConcreteTypeInfo<double>::m_name = "d";
-template<> const char* ShConcreteTypeInfo<float>::m_name = "f";
+const ShTypeInfo* ShTypeInfo::m_valueTypes[SH_VALUETYPE_END][SH_DATATYPE_END];
 
-template<> const char* ShConcreteTypeInfo<int>::m_name = "i";
-template<> const char* ShConcreteTypeInfo<short>::m_name = "s";
-template<> const char* ShConcreteTypeInfo<char>::m_name = "b";
-
-template<> const char* ShConcreteTypeInfo<unsigned int>::m_name = "ui";
-template<> const char* ShConcreteTypeInfo<unsigned short>::m_name = "us";
-template<> const char* ShConcreteTypeInfo<unsigned char>::m_name = "ub";
-
-template<> const char* ShConcreteTypeInfo<ShInterval<double> >::m_name = "i_d";
-template<> const char* ShConcreteTypeInfo<ShInterval<float> >::m_name = "i_f";
-
-
-void shTypeInfoInit()
+void ShTypeInfo::init()
 {
-  // set up index->ShTypeInfo mappings
-  if(storageTypes.empty()) {
-    storageTypes.push_back(0);
-    storageTypes.push_back(ShConcreteTypeInfo<ShInterval<double> >::instance());
-    storageTypes.push_back(ShConcreteTypeInfo<ShInterval<float> >::instance());
-    storageTypes.push_back(ShConcreteTypeInfo<double>::instance());
-    storageTypes.push_back(ShConcreteTypeInfo<float>::instance());
-    storageTypes.push_back(ShConcreteTypeInfo<int>::instance());
-    storageTypes.push_back(ShConcreteTypeInfo<short>::instance());
-    storageTypes.push_back(ShConcreteTypeInfo<char>::instance());
-    storageTypes.push_back(ShConcreteTypeInfo<unsigned int>::instance());
-    storageTypes.push_back(ShConcreteTypeInfo<unsigned short>::instance());
-    storageTypes.push_back(ShConcreteTypeInfo<unsigned char>::instance());
-  }
+  setTypeInfo<SH_INTERVAL_DOUBLE>(m_valueTypes);
+  setTypeInfo<SH_INTERVAL_FLOAT>(m_valueTypes);
 
-  // instantiate the regular eval ops 
-  _shInitFloatOps<double>();
-  _shInitFloatOps<float>();
+  setTypeInfo<SH_DOUBLE>(m_valueTypes);
+  setTypeInfo<SH_FLOAT>(m_valueTypes);
+  setTypeInfo<SH_HALF>(m_valueTypes);
 
-  _shInitIntOps<int>();
-  _shInitIntOps<short>();
-  _shInitIntOps<char>();
+  setTypeInfo<SH_INT>(m_valueTypes);
+  setTypeInfo<SH_SHORT>(m_valueTypes);
+  setTypeInfo<SH_BYTE>(m_valueTypes);
+  setTypeInfo<SH_UINT>(m_valueTypes);
+  setTypeInfo<SH_USHORT>(m_valueTypes);
+  setTypeInfo<SH_UBYTE>(m_valueTypes);
 
-  // @todo type
-  _shInitIntOps<unsigned int>();
-  _shInitIntOps<unsigned short>();
-  _shInitIntOps<unsigned char>();
+  setTypeInfo<SH_FRAC_INT>(m_valueTypes);
+  setTypeInfo<SH_FRAC_SHORT>(m_valueTypes);
+  setTypeInfo<SH_FRAC_BYTE>(m_valueTypes);
+  setTypeInfo<SH_FRAC_UINT>(m_valueTypes);
+  setTypeInfo<SH_FRAC_USHORT>(m_valueTypes);
+  setTypeInfo<SH_FRAC_UBYTE>(m_valueTypes);
 
-  _shInitFloatOps<ShInterval<double> >();
-  _shInitFloatOps<ShInterval<float> >();
+  addOps();
 
-  // instantiate range eval ops 
-  _shInitIntervalOps<double>();
-  _shInitIntervalOps<float>();
-
-  // @todo type
-  //SH_DEBUG_PRINT("ShEval ops: \n" << ShEval::instance()->availableOps());
+  /* DEBUG */ //SH_DEBUG_PRINT("ShEval ops: \n" << ShEval::instance()->availableOps());
 
   addCasts();
 }
 
-int shNumTypes()
+const ShTypeInfo* ShTypeInfo::get(ShValueType valueType, ShDataType dataType)
 {
-  return storageTypes.size() - 1;
+  return m_valueTypes[valueType][dataType];
 }
 
-const ShTypeInfo* shTypeInfo(int typeIndex)
+int shNumTypes()
 {
-  // @todo type remove this assert
-  SH_DEBUG_ASSERT(typeIndex >= 0 && (unsigned int) typeIndex < storageTypes.size());
-  return storageTypes[typeIndex];
+  return (int)(SH_VALUETYPE_END); 
+}
+
+const ShTypeInfo* shTypeInfo(ShValueType valueType, ShDataType dataType)
+{
+  return ShTypeInfo::get(valueType, dataType); 
+}
+
+const ShVariantFactory* shVariantFactory(ShValueType valueType, ShDataType dataType)
+{
+  return shTypeInfo(valueType, dataType)->variantFactory();  
 }
 
 }

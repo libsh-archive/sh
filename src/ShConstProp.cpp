@@ -107,12 +107,12 @@ struct ConstProp : public ShStatementInfo {
         }
         if (!alluniform) all_fields_uniform = false;
         if (allconst) {
-          ShVariable tmpdest(new ShVariableNode(SH_CONST, 1, stmt->dest.typeIndex()));
+          ShVariable tmpdest(new ShVariableNode(SH_CONST, 1, stmt->dest.valueType()));
           ShStatement eval(*stmt);
           eval.dest = tmpdest;
           for (int k = 0; k < opInfo[stmt->op].arity; k++) {
             ShVariantCPtr srcValue = src[k][idx(i,k)].value;
-            ShVariable tmpsrc(new ShVariableNode(SH_CONST, 1, srcValue->typeIndex()));
+            ShVariable tmpsrc(new ShVariableNode(SH_CONST, 1, srcValue->valueType()));
             tmpsrc.setVariant(srcValue, 0);
             eval.src[k] = tmpsrc;
           }
@@ -150,13 +150,13 @@ struct ConstProp : public ShStatementInfo {
         }
       }
       if (allconst) {
-        ShVariable tmpdest(new ShVariableNode(SH_CONST, stmt->dest.size(), stmt->dest.typeIndex()));
+        ShVariable tmpdest(new ShVariableNode(SH_CONST, stmt->dest.size(), stmt->dest.valueType()));
         ShStatement eval(*stmt);
         eval.dest = tmpdest;
         for (int i = 0; i < opInfo[stmt->op].arity; i++) {
           SH_DEBUG_ASSERT(src[i][0].value); // @todo type DEBUGGING
-          int srcTypeIndex = src[i][0].value->typeIndex(); 
-          ShVariable tmpsrc(new ShVariableNode(SH_CONST, stmt->src[i].size(), srcTypeIndex));
+          ShValueType srcValueType = src[i][0].value->valueType(); 
+          ShVariable tmpsrc(new ShVariableNode(SH_CONST, stmt->src[i].size(), srcValueType));
           for (int j = 0; j < stmt->src[i].size(); j++) {
             tmpsrc.setVariant(src[i][j].value, j);
           }
@@ -226,10 +226,10 @@ struct ConstProp : public ShStatementInfo {
       }
     }
 
-    int typeIndex() const 
+    ShValueType valueType() const 
     {
-      if(constant) return constval->typeIndex();
-      return Value::get(valuenum)->getTypeIndex();
+      if(constant) return constval->valueType();
+      return Value::get(valuenum)->valueType();
     }
 
     bool operator!=(const Uniform& other) const
@@ -262,7 +262,7 @@ struct ConstProp : public ShStatementInfo {
     // Only for type == STMT:
     ShOperation op;
     int destsize;
-    int destTypeIndex;
+    ShValueType destValueType;
     std::vector<Uniform> src[3];
 
     static void clear()
@@ -285,7 +285,7 @@ struct ConstProp : public ShStatementInfo {
       if (type == NODE) {
         return node == other.node;
       } else if (type == STMT) {
-        if (op != other.op || destsize != other.destsize || destTypeIndex != other.destTypeIndex) return false;
+        if (op != other.op || destsize != other.destsize || destValueType != other.destValueType) return false;
         for (int i = 0; i < opInfo[op].arity; i++) {
           if (src[i].size() != other.src[i].size()) return false;
           for (std::size_t j = 0; j < src[i].size(); j++) {
@@ -319,11 +319,11 @@ struct ConstProp : public ShStatementInfo {
       return m_values.size() - 1;
     }
 
-    int getTypeIndex() {
+    ShValueType valueType() {
       if(type == NODE) {
-        return node->typeIndex();
+        return node->valueType();
       } 
-      return destTypeIndex;
+      return destValueType;
     }
 
     static Value* get(ValueNum n)
@@ -340,15 +340,14 @@ struct ConstProp : public ShStatementInfo {
     }
 
     Value(ConstProp* cp)
-      : type(STMT), node(0), op(cp->stmt->op), destsize(cp->stmt->dest.size()), destTypeIndex(cp->stmt->dest.typeIndex())
+      : type(STMT), node(0), op(cp->stmt->op), destsize(cp->stmt->dest.size()), destValueType(cp->stmt->dest.valueType())
     {
       for (int i = 0; i < opInfo[cp->stmt->op].arity; i++) {
         for (std::size_t j = 0; j < cp->src[i].size(); j++) {
           if (cp->src[i][j].state == Cell::UNIFORM) {
             src[i].push_back(cp->src[i][j].uniform);
           } else {
-            // @todo type ask Stefanus why this is not always true
-            SH_DEBUG_ASSERT(cp->src[i][j].state == Cell::CONSTANT);
+            SH_DEBUG_ASSERT(cp->src[i][j].state == Cell::CONSTANT); // @todo type should be fixed
             src[i].push_back(Uniform(cp->src[i][j].value));
           }
         }
@@ -593,8 +592,8 @@ struct FinishConstProp
           }
           if (allconst) {
             SH_DEBUG_ASSERT(cp->dest[0].value); // @todo type debugging
-            int destTypeIndex = cp->dest[0].value->typeIndex(); 
-            ShVariable newconst(new ShVariableNode(SH_CONST, I->dest.size(), destTypeIndex));
+            ShValueType destValueType = cp->dest[0].value->valueType(); 
+            ShVariable newconst(new ShVariableNode(SH_CONST, I->dest.size(), destValueType));
             for(int i = 0; i < I->dest.size(); ++i) {
               newconst.setVariant(cp->dest[i].value, i);
             }
@@ -607,8 +606,8 @@ struct FinishConstProp
             for (int s = 0; s < opInfo[I->op].arity; s++) {
               if (I->src[s].node()->kind() == SH_CONST) continue;
             
-              int srcTypeIndex = I->src[s].typeIndex();
-              ShVariable newconst(new ShVariableNode(SH_CONST, I->src[s].size(), srcTypeIndex));
+              ShValueType srcValueType = I->src[s].valueType();
+              ShVariable newconst(new ShVariableNode(SH_CONST, I->src[s].size(), srcValueType));
               bool allconst = true;
               for (int i = 0; i < I->src[s].size(); i++) {
                 if (cp->src[s][i].state != ConstProp::Cell::CONSTANT) {
@@ -736,7 +735,7 @@ struct FinishConstProp
     }
     
     ShContext::current()->enter(0);
-    ShVariableNodePtr node = new ShVariableNode(SH_TEMP, value->destsize, value->destTypeIndex);
+    ShVariableNodePtr node = new ShVariableNode(SH_TEMP, value->destsize, value->destValueType);
     {
     std::ostringstream s;
     s << "dep_" << valuenum;
@@ -812,7 +811,7 @@ struct FinishConstProp
     }
     if (!allsame) {
       // Make intermediate variables, combine them together.
-      ShVariable r = ShVariable(new ShVariableNode(SH_TEMP, src.size(), src[0].typeIndex()));
+      ShVariable r = ShVariable(new ShVariableNode(SH_TEMP, src.size(), src[0].valueType()));
       
       for (std::size_t i = 0; i < src.size(); i++) {
         std::vector<ConstProp::Uniform> v;
@@ -825,7 +824,7 @@ struct FinishConstProp
     }
 
     if (!constvals.empty()) {
-      ShVariable var(new ShVariableNode(SH_CONST, constvals.size(), constvals[0]->typeIndex()));
+      ShVariable var(new ShVariableNode(SH_CONST, constvals.size(), constvals[0]->valueType()));
       for(std::size_t i = 0; i < constvals.size(); ++i) var.setVariant(constvals[i], i);
       return var;
     }
@@ -837,7 +836,7 @@ struct FinishConstProp
       return ShVariable(value->node, swizzle, neg);
     }
     if (value->type == ConstProp::Value::STMT) {
-      ShVariableNodePtr node = new ShVariableNode(SH_TEMP, value->destsize, value->destTypeIndex);
+      ShVariableNodePtr node = new ShVariableNode(SH_TEMP, value->destsize, value->destValueType);
       ShStatement stmt(node, value->op);
 
       for (int i = 0; i < opInfo[value->op].arity; i++) {

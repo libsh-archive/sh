@@ -270,14 +270,14 @@ void ArbCode::emit(const ShStatement& stmt)
 void ArbCode::emit_div(const ShStatement& stmt)
 {
   // @todo type should handle other types (half-floats, fixed point)
-  ShVariable rcp(new ShVariableNode(SH_TEMP, 1, shTypeIndex<float>()));
+  ShVariable rcp(new ShVariableNode(SH_TEMP, 1, SH_FLOAT));
   m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp, stmt.src[1]));
   m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0], rcp));
 }
 
 void ArbCode::emit_sqrt(const ShStatement& stmt)
 {
-  ShVariable rsq(new ShVariableNode(SH_TEMP, 1, shTypeIndex<float>()));
+  ShVariable rsq(new ShVariableNode(SH_TEMP, 1, SH_FLOAT));
   m_instructions.push_back(ArbInst(SH_ARB_RSQ, rsq, stmt.src[0]));
   m_instructions.push_back(ArbInst(SH_ARB_RCP, stmt.dest, rsq));
 }
@@ -286,22 +286,22 @@ void ArbCode::emit_lerp(const ShStatement& stmt)
 {
   // lerp(f,a,b)= f*a + (1-f)*b = f*(a-b) + b
   
-  ShVariable t(new ShVariableNode(SH_TEMP, stmt.src[1].size(), shTypeIndex<float>()));
+  ShVariable t(new ShVariableNode(SH_TEMP, stmt.src[1].size(), SH_FLOAT));
   m_instructions.push_back(ArbInst(SH_ARB_ADD, t, stmt.src[1], -stmt.src[2]));
   m_instructions.push_back(ArbInst(SH_ARB_MAD, stmt.dest, stmt.src[0], t, stmt.src[2]));
 }
 
 void ArbCode::emit_dot2(const ShStatement& stmt)
 {
-  ShVariable mul(new ShVariableNode(SH_TEMP, 2, shTypeIndex<float>()));
+  ShVariable mul(new ShVariableNode(SH_TEMP, 2, SH_FLOAT));
   m_instructions.push_back(ArbInst(SH_ARB_MUL, mul, stmt.src[0], stmt.src[1]));
   m_instructions.push_back(ArbInst(SH_ARB_ADD, stmt.dest, mul(0), mul(1)));
 }
 
 void ArbCode::emit_eq(const ShStatement& stmt)
 {
-  ShVariable t1(new ShVariableNode(SH_TEMP, stmt.dest.size(), shTypeIndex<float>()));
-  ShVariable t2(new ShVariableNode(SH_TEMP, stmt.dest.size(), shTypeIndex<float>()));
+  ShVariable t1(new ShVariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
+  ShVariable t2(new ShVariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
 
   ArbOp op;
   if (stmt.op == SH_OP_SEQ) {
@@ -326,8 +326,8 @@ void ArbCode::emit_ceil(const ShStatement& stmt)
 void ArbCode::emit_mod(const ShStatement& stmt)
 {
   // TODO - is this really optimal?
-  ShVariable t1(new ShVariableNode(SH_TEMP, stmt.src[0].size(), shTypeIndex<float>()));
-  ShVariable t2(new ShVariableNode(SH_TEMP, stmt.src[0].size(), shTypeIndex<float>()));
+  ShVariable t1(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
+  ShVariable t2(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
   
   // result = x - sign(x/y)*floor(abs(x/y))*y
   emit(ShStatement(t1, stmt.src[0], SH_OP_DIV, stmt.src[1]));
@@ -354,10 +354,10 @@ void ArbCode::emit_trig(const ShStatement& stmt)
   m_shader->constants.push_back(c3.node());
   m_shader->constants.push_back(c4.node());
   
-  ShVariable r0(new ShVariableNode(SH_TEMP, 4, shTypeIndex<float>()));
-  ShVariable r1(new ShVariableNode(SH_TEMP, 4, shTypeIndex<float>()));
-  ShVariable r2(new ShVariableNode(SH_TEMP, 4, shTypeIndex<float>()));
-  ShVariable rs(new ShVariableNode(SH_TEMP, 4, shTypeIndex<float>()));
+  ShVariable r0(new ShVariableNode(SH_TEMP, 4, SH_FLOAT));
+  ShVariable r1(new ShVariableNode(SH_TEMP, 4, SH_FLOAT));
+  ShVariable r2(new ShVariableNode(SH_TEMP, 4, SH_FLOAT));
+  ShVariable rs(new ShVariableNode(SH_TEMP, 4, SH_FLOAT));
   
   if (stmt.op == SH_OP_SIN) {
     m_instructions.push_back(ArbInst(SH_ARB_MAD, rs, c1(3,3,3,3), stmt.src[0], -c1(0,0,0,0)));
@@ -398,11 +398,11 @@ void ArbCode::emit_invtrig(const ShStatement& stmt)
   m_shader->constants.push_back(c3.node());
   m_shader->constants.push_back(c4.node());
   
-  ShVariable r0(new ShVariableNode(SH_TEMP, 4, shTypeIndex<float>()));
-  ShVariable r1(new ShVariableNode(SH_TEMP, 4, shTypeIndex<float>()));
-  ShVariable r2(new ShVariableNode(SH_TEMP, 4, shTypeIndex<float>()));
-  ShVariable offset(new ShVariableNode(SH_TEMP, 4, shTypeIndex<float>()));
-  ShVariable output(new ShVariableNode(SH_TEMP, stmt.dest.size(), shTypeIndex<float>()));
+  ShVariable r0(new ShVariableNode(SH_TEMP, 4, SH_FLOAT));
+  ShVariable r1(new ShVariableNode(SH_TEMP, 4, SH_FLOAT));
+  ShVariable r2(new ShVariableNode(SH_TEMP, 4, SH_FLOAT));
+  ShVariable offset(new ShVariableNode(SH_TEMP, 4, SH_FLOAT));
+  ShVariable output(new ShVariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
   m_instructions.push_back(ArbInst(SH_ARB_ABS, r0, stmt.src[0]));
   m_instructions.push_back(ArbInst(SH_ARB_MAD, offset, -r0, r0, c4(0,0,0,0)));
   
@@ -432,8 +432,8 @@ void ArbCode::emit_invtrig(const ShStatement& stmt)
 
 void ArbCode::emit_tan(const ShStatement& stmt)
 {
-  ShVariable tmp1(new ShVariableNode(SH_TEMP, stmt.src[0].size(), shTypeIndex<float>()));
-  ShVariable tmp2(new ShVariableNode(SH_TEMP, stmt.src[0].size(), shTypeIndex<float>()));
+  ShVariable tmp1(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
+  ShVariable tmp2(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
 
   emit(ShStatement(tmp1, SH_OP_COS, stmt.src[0]));
   emit(ShStatement(tmp1, SH_OP_RCP, tmp1));
@@ -459,7 +459,7 @@ void ArbCode::emit_log(const ShStatement& stmt)
   ShConstAttrib1f scale(scalef);
   m_shader->constants.push_back(scale.node());
 
-  ShVariable tmp(new ShVariableNode(SH_TEMP, stmt.dest.size(), shTypeIndex<float>()));
+  ShVariable tmp(new ShVariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
   
   emit(ShStatement(tmp, SH_OP_LOG2, stmt.src[0]));
   m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, tmp, scale));
@@ -467,7 +467,7 @@ void ArbCode::emit_log(const ShStatement& stmt)
 
 void ArbCode::emit_norm(const ShStatement& stmt)
 {
-  ShVariable tmp(new ShVariableNode(SH_TEMP, 1, shTypeIndex<float>()));
+  ShVariable tmp(new ShVariableNode(SH_TEMP, 1, SH_FLOAT));
   emit(ShStatement(tmp, stmt.src[0], SH_OP_DOT, stmt.src[0]));
   m_instructions.push_back(ArbInst(SH_ARB_RSQ, tmp, tmp));
   m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, tmp, stmt.src[0]));
@@ -475,7 +475,7 @@ void ArbCode::emit_norm(const ShStatement& stmt)
 
 void ArbCode::emit_sgn(const ShStatement& stmt)
 {
-  ShVariable tmp(new ShVariableNode(SH_TEMP, stmt.src[0].size(), shTypeIndex<float>()));
+  ShVariable tmp(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
   m_instructions.push_back(ArbInst(SH_ARB_ABS, tmp, stmt.src[0]));
   emit(ShStatement(stmt.dest, stmt.src[0], SH_OP_DIV, tmp));
 }
@@ -487,7 +487,7 @@ void ArbCode::emit_tex(const ShStatement& stmt)
   ShVariable tmpsrc;
   
   if (!stmt.dest.swizzle().identity()) {
-    tmpdest = ShVariable(new ShVariableNode(SH_TEMP, 4, shTypeIndex<float>()));
+    tmpdest = ShVariable(new ShVariableNode(SH_TEMP, 4, SH_FLOAT));
     tmpsrc = tmpdest;
     delay = true;
   }
@@ -499,7 +499,7 @@ void ArbCode::emit_tex(const ShStatement& stmt)
   if (tnode->size() == 2) {
     // Special case for LUMINANCE_ALPHA
     if (!delay) {
-      tmpdest = ShVariable(new ShVariableNode(SH_TEMP, 4, shTypeIndex<float>()));
+      tmpdest = ShVariable(new ShVariableNode(SH_TEMP, 4, SH_FLOAT));
       tmpsrc = tmpdest;
     }
     tmpsrc = tmpsrc(0,3);
@@ -521,7 +521,7 @@ void ArbCode::emit_tex(const ShStatement& stmt)
 void ArbCode::emit_nvcond(const ShStatement& stmt)
 {
 
-  ShVariable dummy(new ShVariableNode(SH_TEMP, stmt.src[0].size(), shTypeIndex<float>()));
+  ShVariable dummy(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
   ArbInst updatecc(SH_ARB_MOV, dummy, stmt.src[0]);
   updatecc.update_cc = true;
   m_instructions.push_back(updatecc);
@@ -553,8 +553,8 @@ void ArbCode::emit_nvcond(const ShStatement& stmt)
 void ArbCode::emit_csum(const ShStatement& stmt)
 {
   // @todo type make this function handle more than floats
-  ShDataVariant<float> c1_values(stmt.src[0].size(), 1.0f); 
-  ShVariable c1(new ShVariableNode(SH_CONST, stmt.src[0].size(), shTypeIndex<float>()));
+  ShDataVariant<SH_FLOAT, SH_HOST> c1_values(stmt.src[0].size(), 1.0f); 
+  ShVariable c1(new ShVariableNode(SH_CONST, stmt.src[0].size(), SH_FLOAT));
   c1.setVariant(&c1_values);
   m_shader->constants.push_back(c1.node());
   
@@ -564,7 +564,7 @@ void ArbCode::emit_csum(const ShStatement& stmt)
 void ArbCode::emit_cmul(const ShStatement& stmt)
 {
   // @todo use clone
-  ShVariable prod(new ShVariableNode(SH_TEMP, 1, stmt.dest.typeIndex()));
+  ShVariable prod(new ShVariableNode(SH_TEMP, 1, stmt.dest.valueType()));
 
   // TODO: Could use vector mul here.
   
