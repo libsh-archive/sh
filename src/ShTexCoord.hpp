@@ -55,6 +55,8 @@ public:
   ShTexCoord& operator=(const ShGeneric<N, T>& other);
   ShTexCoord& operator=(const ShTexCoord<N, Binding, T, Swizzled>& other);
 
+  ShTexCoord& operator=(const ShProgram& prg);
+
   ShTexCoord& operator+=(const ShGeneric<N, T>& right);
   ShTexCoord& operator-=(const ShGeneric<N, T>& right);
   ShTexCoord& operator*=(const ShGeneric<N, T>& right);
@@ -112,6 +114,8 @@ public:
 
   ShTexCoord& operator=(T other);
 
+  ShTexCoord& operator=(const ShProgram& prg);
+
   ShTexCoord& operator+=(const ShGeneric<1, T>& right);
   ShTexCoord& operator-=(const ShGeneric<1, T>& right);
   ShTexCoord& operator*=(const ShGeneric<1, T>& right);
@@ -162,6 +166,8 @@ public:
 
   ShTexCoord& operator=(const ShGeneric<2, T>& other);
   ShTexCoord& operator=(const ShTexCoord<2, Binding, T, Swizzled>& other);
+
+  ShTexCoord& operator=(const ShProgram& prg);
 
   ShTexCoord& operator+=(const ShGeneric<2, T>& right);
   ShTexCoord& operator-=(const ShGeneric<2, T>& right);
@@ -219,6 +225,8 @@ public:
   ShTexCoord& operator=(const ShGeneric<3, T>& other);
   ShTexCoord& operator=(const ShTexCoord<3, Binding, T, Swizzled>& other);
 
+  ShTexCoord& operator=(const ShProgram& prg);
+
   ShTexCoord& operator+=(const ShGeneric<3, T>& right);
   ShTexCoord& operator-=(const ShGeneric<3, T>& right);
   ShTexCoord& operator*=(const ShGeneric<3, T>& right);
@@ -274,6 +282,8 @@ public:
 
   ShTexCoord& operator=(const ShGeneric<4, T>& other);
   ShTexCoord& operator=(const ShTexCoord<4, Binding, T, Swizzled>& other);
+
+  ShTexCoord& operator=(const ShProgram& prg);
 
   ShTexCoord& operator+=(const ShGeneric<4, T>& right);
   ShTexCoord& operator-=(const ShGeneric<4, T>& right);

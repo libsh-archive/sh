@@ -60,6 +60,8 @@ void shEndShader()
   
   context->exit();
 
+  parsing->finish();
+
   // TODO. See issue129.
 //   if (!ShEnvironment::shader->target().empty()) {
 //     shCompile(ShEnvironment::shader);

@@ -55,6 +55,8 @@ public:
   ShColor& operator=(const ShGeneric<N, T>& other);
   ShColor& operator=(const ShColor<N, Binding, T, Swizzled>& other);
 
+  ShColor& operator=(const ShProgram& prg);
+
   ShColor& operator+=(const ShGeneric<N, T>& right);
   ShColor& operator-=(const ShGeneric<N, T>& right);
   ShColor& operator*=(const ShGeneric<N, T>& right);
@@ -112,6 +114,8 @@ public:
 
   ShColor& operator=(T other);
 
+  ShColor& operator=(const ShProgram& prg);
+
   ShColor& operator+=(const ShGeneric<1, T>& right);
   ShColor& operator-=(const ShGeneric<1, T>& right);
   ShColor& operator*=(const ShGeneric<1, T>& right);
@@ -162,6 +166,8 @@ public:
 
   ShColor& operator=(const ShGeneric<2, T>& other);
   ShColor& operator=(const ShColor<2, Binding, T, Swizzled>& other);
+
+  ShColor& operator=(const ShProgram& prg);
 
   ShColor& operator+=(const ShGeneric<2, T>& right);
   ShColor& operator-=(const ShGeneric<2, T>& right);
@@ -219,6 +225,8 @@ public:
   ShColor& operator=(const ShGeneric<3, T>& other);
   ShColor& operator=(const ShColor<3, Binding, T, Swizzled>& other);
 
+  ShColor& operator=(const ShProgram& prg);
+
   ShColor& operator+=(const ShGeneric<3, T>& right);
   ShColor& operator-=(const ShGeneric<3, T>& right);
   ShColor& operator*=(const ShGeneric<3, T>& right);
@@ -274,6 +282,8 @@ public:
 
   ShColor& operator=(const ShGeneric<4, T>& other);
   ShColor& operator=(const ShColor<4, Binding, T, Swizzled>& other);
+
+  ShColor& operator=(const ShProgram& prg);
 
   ShColor& operator+=(const ShGeneric<4, T>& right);
   ShColor& operator-=(const ShGeneric<4, T>& right);

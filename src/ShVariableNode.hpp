@@ -28,11 +28,14 @@
 #define SHVARIABLENODE_HPP
 
 #include <string>
+#include <list>
 #include "ShDllExport.hpp"
 #include "ShRefCount.hpp"
 #include "ShMeta.hpp"
 
 namespace SH {
+
+class ShProgramNode;
 
 /** The various ways variables can be bound.
  */
@@ -108,9 +111,35 @@ public:
 
   /// Retrieve a particular value
   ValueType getValue(int i) const;
+
+  /// Ensure this node has space to store host-side values.
+  /// Normally this is not necessary, but when uniforms are given
+  /// dependent programs and evaluated all the temporaries will need
+  /// to store values during an evaluation.
+  void addValues();
+
+  /** @group dependent_uniforms
+   * This code applies only to uniforms.
+   * @{
+   */
+  
+  /// Attaching a null program causes this uniform to no longer become
+  /// dependent.
+  void attach(const ShPointer<ShProgramNode>& evaluator);
+
+  /// Reevaluate a dependent uniform
+  void update();
+  
+  /** @} */
   
 protected:
 
+  void add_dependent(ShVariableNode* dep);
+  void remove_dependent(ShVariableNode* dep);
+
+  void update_dependents();
+  void detach_dependencies();
+  
   bool m_uniform;
   
   ShBindingType m_kind;
@@ -123,6 +152,10 @@ protected:
 
   // Metadata (range)
   ValueType m_lowBound, m_highBound;
+
+  // Dependent uniform evaluation
+  ShPointer<ShProgramNode> m_evaluator;
+  std::list<ShVariableNode*> m_dependents;
   
   static int m_maxID;
 };

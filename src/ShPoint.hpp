@@ -55,6 +55,8 @@ public:
   ShPoint& operator=(const ShGeneric<N, T>& other);
   ShPoint& operator=(const ShPoint<N, Binding, T, Swizzled>& other);
 
+  ShPoint& operator=(const ShProgram& prg);
+
   ShPoint& operator+=(const ShGeneric<N, T>& right);
   ShPoint& operator-=(const ShGeneric<N, T>& right);
   ShPoint& operator*=(const ShGeneric<N, T>& right);
@@ -112,6 +114,8 @@ public:
 
   ShPoint& operator=(T other);
 
+  ShPoint& operator=(const ShProgram& prg);
+
   ShPoint& operator+=(const ShGeneric<1, T>& right);
   ShPoint& operator-=(const ShGeneric<1, T>& right);
   ShPoint& operator*=(const ShGeneric<1, T>& right);
@@ -162,6 +166,8 @@ public:
 
   ShPoint& operator=(const ShGeneric<2, T>& other);
   ShPoint& operator=(const ShPoint<2, Binding, T, Swizzled>& other);
+
+  ShPoint& operator=(const ShProgram& prg);
 
   ShPoint& operator+=(const ShGeneric<2, T>& right);
   ShPoint& operator-=(const ShGeneric<2, T>& right);
@@ -219,6 +225,8 @@ public:
   ShPoint& operator=(const ShGeneric<3, T>& other);
   ShPoint& operator=(const ShPoint<3, Binding, T, Swizzled>& other);
 
+  ShPoint& operator=(const ShProgram& prg);
+
   ShPoint& operator+=(const ShGeneric<3, T>& right);
   ShPoint& operator-=(const ShGeneric<3, T>& right);
   ShPoint& operator*=(const ShGeneric<3, T>& right);
@@ -274,6 +282,8 @@ public:
 
   ShPoint& operator=(const ShGeneric<4, T>& other);
   ShPoint& operator=(const ShPoint<4, Binding, T, Swizzled>& other);
+
+  ShPoint& operator=(const ShProgram& prg);
 
   ShPoint& operator+=(const ShGeneric<4, T>& right);
   ShPoint& operator-=(const ShGeneric<4, T>& right);

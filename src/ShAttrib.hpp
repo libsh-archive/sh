@@ -71,6 +71,8 @@ public:
   ShAttrib& operator=(const ShGeneric<N, T>& other);
   ShAttrib& operator=(const ShAttrib<N, Binding, T, Swizzled>& other);
 
+  ShAttrib& operator=(const ShProgram& prg);
+
   ShAttrib& operator+=(const ShGeneric<N, T>& right);
   ShAttrib& operator-=(const ShGeneric<N, T>& right);
   ShAttrib& operator*=(const ShGeneric<N, T>& right);
@@ -128,6 +130,8 @@ public:
 
   ShAttrib& operator=(T other);
 
+  ShAttrib& operator=(const ShProgram& prg);
+
   ShAttrib& operator+=(const ShGeneric<1, T>& right);
   ShAttrib& operator-=(const ShGeneric<1, T>& right);
   ShAttrib& operator*=(const ShGeneric<1, T>& right);
@@ -178,6 +182,8 @@ public:
 
   ShAttrib& operator=(const ShGeneric<2, T>& other);
   ShAttrib& operator=(const ShAttrib<2, Binding, T, Swizzled>& other);
+
+  ShAttrib& operator=(const ShProgram& prg);
 
   ShAttrib& operator+=(const ShGeneric<2, T>& right);
   ShAttrib& operator-=(const ShGeneric<2, T>& right);
@@ -235,6 +241,8 @@ public:
   ShAttrib& operator=(const ShGeneric<3, T>& other);
   ShAttrib& operator=(const ShAttrib<3, Binding, T, Swizzled>& other);
 
+  ShAttrib& operator=(const ShProgram& prg);
+
   ShAttrib& operator+=(const ShGeneric<3, T>& right);
   ShAttrib& operator-=(const ShGeneric<3, T>& right);
   ShAttrib& operator*=(const ShGeneric<3, T>& right);
@@ -290,6 +298,8 @@ public:
 
   ShAttrib& operator=(const ShGeneric<4, T>& other);
   ShAttrib& operator=(const ShAttrib<4, Binding, T, Swizzled>& other);
+
+  ShAttrib& operator=(const ShProgram& prg);
 
   ShAttrib& operator+=(const ShGeneric<4, T>& right);
   ShAttrib& operator-=(const ShGeneric<4, T>& right);

@@ -39,7 +39,8 @@
 namespace SH {
 
 ShProgramNode::ShProgramNode(const std::string& target)
-  : m_target(target)
+  : m_target(target), m_finished(false),
+    m_assigned_var(0)
 {
 }
 
@@ -296,5 +297,23 @@ ShProgramNode::ChannelList::const_iterator ShProgramNode::channels_end() const
   return channels.end();
 }
 
+bool ShProgramNode::finished() const
+{
+  return m_finished;
+}
+
+void ShProgramNode::finish()
+{
+  m_finished = true;
+  if (m_assigned_var) {
+    m_assigned_var->attach(this);
+    m_assigned_var = 0;
+  }
+}
+
+void ShProgramNode::assign(const ShVariableNodePtr& var) const
+{
+  m_assigned_var = var;
+}
 
 }

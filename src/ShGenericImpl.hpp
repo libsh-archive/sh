@@ -31,6 +31,7 @@
 #include "ShAttrib.hpp"
 #include "ShLib.hpp"
 #include "ShInstructions.hpp"
+#include "ShProgram.hpp"
 
 namespace SH {
 
@@ -51,6 +52,13 @@ ShGeneric<N, T>::ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, boo
 template<int N, typename T>
 ShGeneric<N, T>::~ShGeneric()
 {
+}
+
+template<int N, typename T>
+ShGeneric<N, T>& ShGeneric<N, T>::operator=(const ShProgram& prg)
+{
+  this->ShVariable::operator=(prg);
+  return *this;
 }
 
 template<int N, typename T>
@@ -232,6 +240,13 @@ ShGeneric<1, T>::ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, boo
 template<typename T>
 ShGeneric<1, T>::~ShGeneric()
 {
+}
+
+template<typename T>
+ShGeneric<1, T>& ShGeneric<1, T>::operator=(const ShProgram& prg)
+{
+  this->ShVariable::operator=(prg);
+  return *this;
 }
 
 template<typename T>

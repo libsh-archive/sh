@@ -36,6 +36,8 @@
 
 namespace SH {
 
+class ShProgram;
+
 /** A reference and interface to a generic n-tuple variable.
  * Note: subclasses should not keep any additional data. All data
  * relevant to the node should be stored in m_node. This is due to
@@ -51,6 +53,8 @@ public:
 
   ~ShVariable() {}
 
+  ShVariable& operator=(const ShProgram& prg);
+  
   bool null() const; ///< true iff node is a null pointer.
   
   bool uniform() const; ///< Is this a uniform (non-shader specific) variable?

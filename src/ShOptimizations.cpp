@@ -416,6 +416,7 @@ struct InitLiveCode {
 
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
       if (I->dest.node()->kind() != SH_TEMP
+          || I->dest.node()->uniform()
           || I->op == SH_OP_KIL
           /*
           || I->op == SH_OP_FETCH // Keep stream fetches, since these

@@ -7,6 +7,11 @@ namespace SH {
 
 void evaluate(ShStatement& stmt)
 {
+  // TODO: Maybe not do this _every_ time we call evaluate...
+  stmt.dest.node()->addValues();
+  for (int i = 0; i < opInfo[stmt.op].arity; i++) {
+    stmt.src[i].node()->addValues();
+  }
   // Make sure we are outside of a program definition
   ShContext::current()->enter(0);
   switch (stmt.op) {
@@ -156,4 +161,38 @@ void evaluate(ShStatement& stmt)
   ShContext::current()->exit();
 }
 
+void evaluate(const ShProgramNodePtr& p)
+{
+  ShCtrlGraphNodePtr node = p->ctrlGraph->entry();
+
+  while (node != p->ctrlGraph->exit()) {
+    if (!node) break; // Should never happen!
+    
+    ShBasicBlockPtr block = node->block;
+    if (block) {
+      for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+        evaluate(*I);
+      }
+    }
+
+    bool done = false;
+    
+    for (std::vector<ShCtrlGraphBranch>::const_iterator I = node->successors.begin();
+         I != node->successors.end(); ++I) {
+      I->cond.node()->addValues(); // Make sure the condition has values.
+      bool jmp = false;
+      for (int i = 0; i < I->cond.size(); i++) if (I->cond.getValue(i) > 0.0) jmp = true;
+      if (jmp) {
+        done = true;
+        node = I->node;
+        break;
+      }
+    }
+    if (done) continue;
+
+    node = node->follower;
+  }
 }
+
+}
+
