@@ -109,8 +109,8 @@ public:
 #ifdef SH_REGRESS_SHOWALL
       /* DEBUG */ pretty_print("out", res.size(), _out);
       /* DEBUG */ pretty_print("exp", res.size(), _res);
+      /* DEBUG */ print_pass(name);
 #endif
-    print_pass(name);
     return 0;
   }
 
@@ -166,8 +166,8 @@ public:
 #ifdef SH_REGRESS_SHOWALL
       /* DEBUG */ pretty_print("out", res.size(), _out);
       /* DEBUG */ pretty_print("exp", res.size(), _res);
+      /* DEBUG */ print_pass(name);
 #endif    
-    print_pass(name);
     return 0;
   }
 
@@ -224,7 +224,7 @@ public:
         print_fail(name);
         pretty_print("  A", in1.size(), _in1);
         pretty_print("  B", in2.size(), _in2);
-        pretty_print("  C", in2.size(), _in2);
+        pretty_print("  C", in3.size(), _in3);
         pretty_print("out", res.size(), _out);
         pretty_print("exp", res.size(), _res);
         return 1;
@@ -233,8 +233,8 @@ public:
 #ifdef SH_REGRESS_SHOWALL
       /* DEBUG */ pretty_print("out", res.size(), _out);
       /* DEBUG */ pretty_print("exp", res.size(), _res);
+      /* DEBUG */ print_pass(name);
 #endif
-    print_pass(name);
     return 0;
   }
 
@@ -266,8 +266,8 @@ public:
 #ifdef SH_REGRESS_SHOWALL
         /* DEBUG */ pretty_print("out", res.size(), _out);
         /* DEBUG */ pretty_print("exp", res.size(), _res);
+        /* DEBUG */ print_pass(name);
 #endif
-      print_pass(name);
       return 0;
   }
 

@@ -147,7 +147,6 @@ SH_SHLIB_CONST_TRINARY_OP_011_RETSIZE_DECL(operation, N);
 #include "ShLibMisc.hpp"
 #include "ShLibTrig.hpp"
 #include "ShLibDeriv.hpp"
-#include "ShLibInterval.hpp"
 
 #undef CT1T2 
 #undef CT1T2T3 

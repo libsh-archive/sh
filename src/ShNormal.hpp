@@ -472,28 +472,6 @@ public:
     typedef ShVector<4, Binding, T, Swizzled> ParentType;
 };
 
-typedef ShNormal<1, SH_INPUT, ShInterval<double> > ShInputNormal1i_d;
-typedef ShNormal<1, SH_OUTPUT, ShInterval<double> > ShOutputNormal1i_d;
-typedef ShNormal<1, SH_INOUT, ShInterval<double> > ShInOutNormal1i_d;
-typedef ShNormal<1, SH_TEMP, ShInterval<double> > ShNormal1i_d;
-typedef ShNormal<1, SH_CONST, ShInterval<double> > ShConstNormal1i_d;
-typedef ShNormal<2, SH_INPUT, ShInterval<double> > ShInputNormal2i_d;
-typedef ShNormal<2, SH_OUTPUT, ShInterval<double> > ShOutputNormal2i_d;
-typedef ShNormal<2, SH_INOUT, ShInterval<double> > ShInOutNormal2i_d;
-typedef ShNormal<2, SH_TEMP, ShInterval<double> > ShNormal2i_d;
-typedef ShNormal<2, SH_CONST, ShInterval<double> > ShConstNormal2i_d;
-typedef ShNormal<3, SH_INPUT, ShInterval<double> > ShInputNormal3i_d;
-typedef ShNormal<3, SH_OUTPUT, ShInterval<double> > ShOutputNormal3i_d;
-typedef ShNormal<3, SH_INOUT, ShInterval<double> > ShInOutNormal3i_d;
-typedef ShNormal<3, SH_TEMP, ShInterval<double> > ShNormal3i_d;
-typedef ShNormal<3, SH_CONST, ShInterval<double> > ShConstNormal3i_d;
-typedef ShNormal<4, SH_INPUT, ShInterval<double> > ShInputNormal4i_d;
-typedef ShNormal<4, SH_OUTPUT, ShInterval<double> > ShOutputNormal4i_d;
-typedef ShNormal<4, SH_INOUT, ShInterval<double> > ShInOutNormal4i_d;
-typedef ShNormal<4, SH_TEMP, ShInterval<double> > ShNormal4i_d;
-typedef ShNormal<4, SH_CONST, ShInterval<double> > ShConstNormal4i_d;
-
-
 typedef ShNormal<1, SH_INPUT, ShFracUShort> ShInputNormal1fus;
 typedef ShNormal<1, SH_OUTPUT, ShFracUShort> ShOutputNormal1fus;
 typedef ShNormal<1, SH_INOUT, ShFracUShort> ShInOutNormal1fus;
@@ -756,28 +734,6 @@ typedef ShNormal<4, SH_OUTPUT, ShHalf> ShOutputNormal4h;
 typedef ShNormal<4, SH_INOUT, ShHalf> ShInOutNormal4h;
 typedef ShNormal<4, SH_TEMP, ShHalf> ShNormal4h;
 typedef ShNormal<4, SH_CONST, ShHalf> ShConstNormal4h;
-
-
-typedef ShNormal<1, SH_INPUT, ShInterval<float> > ShInputNormal1i_f;
-typedef ShNormal<1, SH_OUTPUT, ShInterval<float> > ShOutputNormal1i_f;
-typedef ShNormal<1, SH_INOUT, ShInterval<float> > ShInOutNormal1i_f;
-typedef ShNormal<1, SH_TEMP, ShInterval<float> > ShNormal1i_f;
-typedef ShNormal<1, SH_CONST, ShInterval<float> > ShConstNormal1i_f;
-typedef ShNormal<2, SH_INPUT, ShInterval<float> > ShInputNormal2i_f;
-typedef ShNormal<2, SH_OUTPUT, ShInterval<float> > ShOutputNormal2i_f;
-typedef ShNormal<2, SH_INOUT, ShInterval<float> > ShInOutNormal2i_f;
-typedef ShNormal<2, SH_TEMP, ShInterval<float> > ShNormal2i_f;
-typedef ShNormal<2, SH_CONST, ShInterval<float> > ShConstNormal2i_f;
-typedef ShNormal<3, SH_INPUT, ShInterval<float> > ShInputNormal3i_f;
-typedef ShNormal<3, SH_OUTPUT, ShInterval<float> > ShOutputNormal3i_f;
-typedef ShNormal<3, SH_INOUT, ShInterval<float> > ShInOutNormal3i_f;
-typedef ShNormal<3, SH_TEMP, ShInterval<float> > ShNormal3i_f;
-typedef ShNormal<3, SH_CONST, ShInterval<float> > ShConstNormal3i_f;
-typedef ShNormal<4, SH_INPUT, ShInterval<float> > ShInputNormal4i_f;
-typedef ShNormal<4, SH_OUTPUT, ShInterval<float> > ShOutputNormal4i_f;
-typedef ShNormal<4, SH_INOUT, ShInterval<float> > ShInOutNormal4i_f;
-typedef ShNormal<4, SH_TEMP, ShInterval<float> > ShNormal4i_f;
-typedef ShNormal<4, SH_CONST, ShInterval<float> > ShConstNormal4i_f;
 
 
 typedef ShNormal<1, SH_INPUT, ShFracShort> ShInputNormal1fs;

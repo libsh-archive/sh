@@ -29,7 +29,6 @@
 
 #include "ShUtility.hpp"
 #include "ShVariableType.hpp"
-#include "ShInterval.hpp"
 #include "ShHalf.hpp"
 #include "ShFraction.hpp"
 
@@ -97,7 +96,7 @@ enum __ShValueTypeEnum {
   SH_VALUETYPE_TYPE_FRAC  = 0x0020,
 
   SH_VALUETYPE_SPECIAL_MASK = 0x7F00, 
-  SH_VALUETYPE_SPECIAL_NONE = 0x0100, 
+  SH_VALUETYPE_SPECIAL_NONE = 0x0000, 
   SH_VALUETYPE_SPECIAL_I    = 0x0100, 
   SH_VALUETYPE_SPECIAL_A    = 0x0200, 
 
@@ -117,7 +116,6 @@ bool shIsFraction(ShValueType value_type);
 bool shIsSigned(ShValueType value_type);
 
 bool shIsRegularValueType(ShValueType value_type);
-bool shIsInterval(ShValueType value_type);
 
 bool shIsInvalidValueType(ShValueType value_type);
 // @}
@@ -149,10 +147,6 @@ SH_VALUE_STORAGE_TYPE_MAPPING(SH_FUBYTE,  ShFracUByte);
 SH_VALUE_STORAGE_TYPE_MAPPING(SH_FUSHORT, ShFracUShort); 
 SH_VALUE_STORAGE_TYPE_MAPPING(SH_FUINT,   ShFracUInt); 
 
-SH_VALUE_STORAGE_TYPE_MAPPING(SH_I_HALF,  ShInterval<ShHalf>); 
-SH_VALUE_STORAGE_TYPE_MAPPING(SH_I_FLOAT, ShInterval<float>); 
-SH_VALUE_STORAGE_TYPE_MAPPING(SH_I_DOUBLE,ShInterval<double>); 
-
 // @}
 
 /** Mapping from Storage Type to a name 
@@ -181,45 +175,16 @@ SH_STORAGETYPE_NAME_SPEC(ShFracUByte);
 SH_STORAGETYPE_NAME_SPEC(ShFracUShort);
 SH_STORAGETYPE_NAME_SPEC(ShFracUInt);
 
-SH_STORAGETYPE_NAME_SPEC(ShInterval<ShHalf>);
-SH_STORAGETYPE_NAME_SPEC(ShInterval<float>);
-SH_STORAGETYPE_NAME_SPEC(ShInterval<double>);
-
 #undef SH_STORAGETYPE_NAME_SPEC
 //@}
 
 
 
-/** Returns whether a type is an interval type
- * @{ */
-template<typename T>
-struct ShIsInterval: public MatchTemplateType<T, ShInterval> {};
-//@}
-
-/** Returns whether a type is an interval type
+/** Returns whether a type is a fraction type
  * @{ */
 template<typename T>
 struct ShIsFraction: public MatchTemplateType<T, ShFraction> {};
 //@}
-
-/** Returns an interval value type corresponding to a type,
- * or SH_VALUETYPE_NONE if no such type is defined; 
- * @{ */
-
-template<typename T>
-struct __ShIntervalStorageType
-{
-  static const bool invalid = MatchType<T, ShInvalidStorageType>::matches;
-  static const bool is_interval = ShIsInterval<T>::matches;
-  // @todo range - this doesn't quite work once we have other special types,
-  // perhaps...
-  typedef typename SelectType<invalid, ShInvalidStorageType, 
-           typename SelectType<is_interval, T, ShInterval<T> >::type>::type type; 
-};
-
-inline 
-ShValueType shIntervalValueType(ShValueType value_type); 
-// @}
 
 /** Returns the regular value type corresponding to a special templated value type
  * (interval or affine) so far 
@@ -275,11 +240,6 @@ struct ShStorageTypeInfo {
 
   // @todo not sure we want all of these here, since there could be user-defined 
   // special types too.  This might be too restrictive if we depend on these. 
-
-  /** Interval storage type corresponding to T (either T itself or uses T as its
-   * bounds).  May be ShInvalidStorageType if no proper interval type exists */ 
-  typedef typename __ShIntervalStorageType<T>::type IntervalType; 
-  static const ShValueType IntervalValueType = __ShStorageToValueType<IntervalType>::type;
 
   static const char* name; 
 

@@ -111,10 +111,9 @@ ShGeneric<4, CT1T2T3> lit(const ShGeneric<1, T1>& a,
                           const ShGeneric<1, T2>& b,
                           const ShGeneric<1, T3>& c)
 {
+  ShAttrib<4, SH_TEMP, CT1T2T3> i;
   ShAttrib<4, SH_TEMP, CT1T2T3> r;
-  r(0,3) = ShAttrib<2, SH_CONST, CT1T2T3>(1, 1);
-  r(1) = pos(a);
-  r(2) = (a < 0 && b < 0) * pow(b, c);
+  shLIT(r, join(a, b, c, c));
   return r;
 }
 

@@ -99,6 +99,8 @@ void shFLR(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
 void shFRAC(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
+void shLIT(ShVariable& dest, const ShVariable& a);
+SH_DLLEXPORT
 void shLOG(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
 void shLOG2(ShVariable& dest, const ShVariable& a);
@@ -141,20 +143,6 @@ void shXPD(ShVariable& dest, const ShVariable& a, const ShVariable& b);
 SH_DLLEXPORT
 void shCOND(ShVariable& dest, const ShVariable& cond,
             const ShVariable& a, const ShVariable& b);
-
-// interval arithmetic ops 
-SH_DLLEXPORT
-void shLO(ShVariable &dest, const ShVariable &a);
-
-SH_DLLEXPORT
-void shHI(ShVariable &dest, const ShVariable &a);
-
-SH_DLLEXPORT
-void shSETLO(ShVariable &dest, const ShVariable &a);
-
-SH_DLLEXPORT
-void shSETHI(ShVariable &dest, const ShVariable &a);
-
 SH_DLLEXPORT
 void shKIL(const ShVariable& cond);
 

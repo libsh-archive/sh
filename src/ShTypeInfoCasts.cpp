@@ -65,8 +65,6 @@ void ShTypeInfo::addCasts()
   
   // automatic promotion DAG edges 
   // the inverse edges are added as automatic conversions, but not promotions
-  // i_d <- i_f, d 
-  // i_f <- f
   // d <- f
   // f <- h, i, ui, fi, fs, fb, fui, fus, fub
   // i <- s, b, us, ub
@@ -78,11 +76,6 @@ void ShTypeInfo::addCasts()
   // We can add in a few more automatic conversions to turn this down to 2
   // (by making f the direct "supertype" of everything fractional or int)
   
-  addPromotion<ShInterval<double>, ShInterval<float> >();
-  addCast<ShInterval<double>, SH_HOST, double, SH_HOST>(true);
-
-  addCast<ShInterval<float>, SH_HOST, float, SH_HOST>(true);
-
   addPromotion<double, float>();
 
   addPromotion<float, ShHalf>();
@@ -105,10 +98,6 @@ void ShTypeInfo::addCasts()
   addCast<float, SH_HOST, char, SH_HOST>(false);
   addCast<float, SH_HOST, unsigned short, SH_HOST>(false);
   addCast<float, SH_HOST, unsigned char, SH_HOST>(false);
-
-  // these are the memory->SH_HOST, SH_HOST->memory casts
-  addMemoryCast<ShInterval<double> >();
-  addMemoryCast<ShInterval<float> >();
 
   addMemoryCast<double>();
   addMemoryCast<float>();

@@ -159,12 +159,13 @@ typedef ShPointer<const ShVariant> ShVariantCPtr;
  *
  * @see ShMemory 
  **/ 
-template<typename T, ShDataType DT>
+template<typename T, ShDataType DT=SH_HOST>
 class ShDataVariant: public ShVariant {
   public:
     static const ShValueType value_type = ShStorageTypeInfo<T>::value_type;
-    typedef ShPointer<ShDataVariant<T, DT> > PtrType;
-    typedef ShPointer<const ShDataVariant<T, DT> > CPtrType;
+    static const ShDataType data_type = DT;
+    typedef ShDataVariant<T, DT>* PtrType;
+    typedef const ShDataVariant<T, DT>* CPtrType;
     typedef typename ShDataTypeCppType<T, DT>::type DataType;
     typedef DataType* iterator;
     typedef const DataType* const_iterator;
@@ -192,7 +193,7 @@ class ShDataVariant: public ShVariant {
     ShDataVariant(const ShDataVariant<T, DT> &other);
     ShDataVariant(const ShDataVariant<T, DT> &other, bool neg, const ShSwizzle &swizzle); 
 
-    ~ShDataVariant();
+    virtual ~ShDataVariant();
 
     ShValueType valueType() const; 
     ShDataType dataType() const; 

@@ -47,6 +47,8 @@ char* tokenNames[] = {
   "ENDFOR",
   "BREAK",
   "CONTINUE",
+  "SEC",
+  "ENDSEC",
   "SWITCH",
   "ENDSWITCH",
   "CASE",

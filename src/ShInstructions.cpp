@@ -219,7 +219,7 @@ void shDOT(ShVariable& dest, const ShVariable& a, const ShVariable& b)
   SHINST_BINARY_OP_CORE(DOT);
 }
 
-void shDX(ShVariable &dest, const ShVariable& a)
+void shDX(ShVariable& dest, const ShVariable& a)
 {
   if(immediate()) {
       shError(ShScopeException("Cannot take derivatives in immediate mode"));
@@ -228,7 +228,7 @@ void shDX(ShVariable &dest, const ShVariable& a)
   addStatement(stmt);
 }
 
-void shDY(ShVariable &dest, const ShVariable& a)
+void shDY(ShVariable& dest, const ShVariable& a)
 {
   if(immediate()) {
       shError(ShScopeException("Cannot take derivatives in immediate mode"));
@@ -249,6 +249,7 @@ SHINST_TERNARY_OP(LRP,
     dest.size() == c.size() &&
     (dest.size() == a.size() || a.size() == 1)));
 
+SHINST_UNARY_OP(LIT);
 SHINST_UNARY_OP(LOG);
 SHINST_UNARY_OP(LOG2);
 SHINST_UNARY_OP(LOG10);
@@ -281,30 +282,6 @@ SHINST_TERNARY_OP(COND,
     (dest.size() == b.size() &&
     dest.size() == c.size() &&
     (dest.size() == a.size() || a.size() == 1)));
-
-void shLO(ShVariable& dest, const ShVariable& src)
-{
-  sizes_match(dest, src); // TODO check types are okay
-  SHINST_UNARY_OP_CORE(LO);
-}
-
-void shHI(ShVariable& dest, const ShVariable& src)
-{
-  sizes_match(dest, src); // TODO check types are okay
-  SHINST_UNARY_OP_CORE(HI);
-}
-
-void shSETLO(ShVariable& dest, const ShVariable& src)
-{
-  sizes_match(dest, src); // TODO check types are okay
-  SHINST_UNARY_OP_CORE(SETLO);
-}
-
-void shSETHI(ShVariable& dest, const ShVariable& src)
-{
-  sizes_match(dest, src); // TODO check types are okay
-  SHINST_UNARY_OP_CORE(SETHI);
-}
 
 void shKIL(const ShVariable& a)
 {

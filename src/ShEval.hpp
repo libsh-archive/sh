@@ -4,11 +4,11 @@
 #include <vector>
 #include <map>
 #include "ShHashMap.hpp"
+#include "ShInfo.hpp"
 #include "ShStatement.hpp"
 #include "ShVariant.hpp"
 #include "ShOperation.hpp"
 #include "ShRefCount.hpp"
-#include "ShInterval.hpp"
 #include "ShHalf.hpp"
 
 namespace SH {
@@ -44,7 +44,7 @@ class ShEvalOp;
 
 struct 
 SH_DLLEXPORT
-ShEvalOpInfo: public ShStatementInfo {
+ShEvalOpInfo: public ShInfo {
   ShOperation m_op;
 
   const ShEvalOp* m_evalOp;
@@ -58,7 +58,7 @@ ShEvalOpInfo: public ShStatementInfo {
   ShEvalOpInfo(ShOperation op, const ShEvalOp* evalOp, ShValueType dest, 
       ShValueType src0, ShValueType src1, ShValueType src2);
 
-  ShStatementInfo* clone() const;
+  ShInfo* clone() const;
 
   std::string encode() const;
 };
@@ -74,9 +74,13 @@ ShEval {
      *
      * TODO (should really break this out into separate functions.  EvalOps can
      * have a single function in th einterface)
-     */
+     * @{*/
     void operator()(ShOperation op, ShVariant* dest,
         const ShVariant* a, const ShVariant* b, const ShVariant* c) const;
+
+    void operator()(ShOperation op, ShVariantPtr dest,
+        ShVariantCPtr a, ShVariantCPtr b, ShVariantCPtr c) const;
+    // @}
 
     /** Registers a evalOp for a certain operation/source type index combination */ 
     void addOp(ShOperation op, const ShEvalOp* evalOp, ShValueType dest, 
@@ -86,10 +90,14 @@ ShEval {
     /** Returns a new op info representing the types that arguments
      * should be cast into for an operation.
      * Caches the result.
+     *
+     * @{
      */
     const ShEvalOpInfo* getEvalOpInfo(ShOperation op, ShValueType dest,
         ShValueType src0, ShValueType src1 = SH_VALUETYPE_END, 
         ShValueType src2 = SH_VALUETYPE_END) const;
+    const ShEvalOpInfo* getEvalOpInfo(const ShStatement &stmt) const;
+    //@}
 
     /** debugging function */ 
     std::string availableOps() const;
@@ -198,23 +206,6 @@ SHOPC_CTYPE_OP(float);
 SHOPC_CTYPE_OP(ShHalf);
 SHOPC_CTYPE_OP(int);
 
-/** A ShIntervalOP is one where one argument is an interval type,
- * and the other argument must be its corresponding bound type.
- */
-template<ShOperation S, typename T1, typename T2>
-struct ShIntervalOp: public ShEvalOp {
-  void operator()(ShVariant* dest, const ShVariant* a, 
-      const ShVariant* b, const ShVariant* c) const; 
-};
-
-template<ShOperation S, typename T1, typename T2>
-struct ShConcreteIntervalOp{
-  static void doop(ShDataVariant<T1, SH_HOST> &dest, 
-      const ShDataVariant<T2, SH_HOST> &a);
-      
-};
-
-
 // initializes the regular Ops for a floating point type T
 // with ShOpEvalOp<OP, T> objects
 template<typename T>
@@ -225,17 +216,10 @@ void _shInitFloatOps();
 template<typename T>
 void _shInitIntOps();
 
-// initializes the interval ops for a type T and ShInterval<T>
-template<typename T, typename IntervalT>
-void _shInitIntervalOps();
-
-
 }
 
 #include "ShEvalImpl.hpp"
 #include "ShConcreteRegularOpImpl.hpp"
 #include "ShConcreteCTypeOpImpl.hpp"
-#include "ShConcreteIntervalOpImpl.hpp"
-//#include "ShIntervalEvalImpl.hpp"
 
 #endif

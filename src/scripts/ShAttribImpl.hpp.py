@@ -68,12 +68,16 @@ class Impl(semantic.Impl):
         common.deindent()
         common.inprint("} else {")
         common.indent()
-        for i in range(0, size):
-            if args[0][0] == "T":
-                val = "ShAttrib<1, SH_CONST, T>(s" + str(i) + ")"
-            else:
-                val = "s" + str(i)
-            common.inprint("(*this)[" + str(i) + "] = " + val + ";")
+        if args[0][0] != "host_type":
+            for i in range(0, size):
+                common.inprint("(*this)[" + str(i) + "] = s" + str(i) + ";")
+        else:
+            data = ""
+            for i in range(0, size):
+                if data != "":
+                    data += ", "
+                data += "s" + str(i)
+            common.inprint("(*this) = ShAttrib<" + self.sizevar(size) + ", SH_CONST, T>(" + data + ");")
         common.deindent()
         common.inprint("}")
         common.deindent()

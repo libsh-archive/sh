@@ -250,6 +250,7 @@ struct FloatConverter {
   // Adds required conversions for statment *I
   void fixStatement(ShBasicBlock::ShStmtList &stmtList, const ShBasicBlock::ShStmtList::iterator &I) {
     ShStatement &stmt = *I;
+    if(stmt.dest.null()) return;
 #ifdef SH_DEBUG_TYPECONVERT
     SH_DEBUG_PRINT("Checking a statement op=" << opInfo[stmt.op].name);
 #endif
@@ -261,6 +262,8 @@ struct FloatConverter {
       case SH_OP_TEXI:
       case SH_OP_FETCH:
       case SH_OP_TEXD:
+      case SH_OP_DX:
+      case SH_OP_DY:
         // @todo type think of a cleaner solution.
         // - we probably shouldn't be using the host-side set of operations
         // anyway - maybe use a functor given by the backend that decides
@@ -280,10 +283,26 @@ struct FloatConverter {
     }
 
     if(!evalOpInfo) {
-#ifdef SH_DEBUG_TYPECONVERT
-      SH_DEBUG_PRINT("Problem finding evaluator for op = " << opInfo[stmt.op].name); 
-#endif
-      return;
+      switch(stmt.op) {
+        case SH_OP_TEX:
+        case SH_OP_TEXI:
+        case SH_OP_FETCH:
+        case SH_OP_TEXD:
+        case SH_OP_KIL:
+          // @todo type think of a cleaner solution.
+          // - we probably shouldn't be using the host-side set of operations
+          // anyway - maybe use a functor given by the backend that decides
+          // which types to use for a given set of src/dest types 
+          
+          // temporary hack - make an evalop for this
+          evalOpInfo = texInfo = new ShEvalOpInfo(stmt.op, 0, stmt.dest.valueType(), stmt.src[0].valueType(), stmt.src[1].valueType(), stmt.src[2].valueType());
+          break;
+
+        default:
+          // It could also be that no operation matched the arguments
+          SH_DEBUG_PRINT("Possible problem finding evaluator for op = " << opInfo[stmt.op].name); 
+          return;
+      }
     }
 
 

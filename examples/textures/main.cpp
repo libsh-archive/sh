@@ -22,22 +22,19 @@ int cur_x, cur_y;
 
 bool show_help = false;
 
+ShImage kd_images[2];
+ShImage ks_images[2];
+
 void rustTexture()
 {
-  ShImage image1, image2;
-  image1.loadPng("rustkd.png");
-  image2.loadPng("rustks.png");
-  kd.memory(image1.memory());
-  ks.memory(image2.memory());
+  kd.memory(kd_images[0].memory());
+  ks.memory(ks_images[0].memory());
 }
 
 void xTexture()
 {
-  ShImage image1, image2;
-  image1.loadPng("kd.png");
-  image2.loadPng("ks.png");
-  kd.memory(image1.memory());
-  ks.memory(image2.memory());
+  kd.memory(kd_images[1].memory());
+  ks.memory(ks_images[1].memory());
 }
 
 void initShaders()
@@ -56,7 +53,7 @@ void initShaders()
   } SH_END;
 
   ShColor3f SH_DECL(diffusecolor) = ShColor3f(0.2, 0.2, 0.2);
-  ShAttrib1f exponent(1.0);
+  ShAttrib1f exponent(30.0);
 
   fsh = SH_BEGIN_FRAGMENT_PROGRAM {
     ShInputTexCoord2f u;
@@ -73,7 +70,7 @@ void initShaders()
     color = (normal | lightv) * diffusecolor;
 
     ShVector3f vv = normalize(-posv);
-    ShVector3f hv = normalize(lightv + hv);
+    ShVector3f hv = normalize(lightv + vv);
     ShNormal3f nv = normal;
     color += color*kd(u) + ks(u)*pow(pos(hv | nv), exponent);
   } SH_END;
@@ -191,6 +188,11 @@ int main(int argc, char** argv)
   shSetBackend("arb");
 
   initShaders();
+
+  kd_images[0].loadPng("rustkd.png");
+  ks_images[0].loadPng("rustks.png");
+  kd_images[1].loadPng("kd.png");
+  ks_images[1].loadPng("ks.png");
   
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_VERTEX_PROGRAM_ARB);

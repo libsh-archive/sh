@@ -307,6 +307,40 @@ void CcBackendCode::emit(const ShStatement& stmt) {
         break;
       }
 
+    case SH_OP_LIT:
+      {
+        m_code << "  {" << std::endl;
+	
+	// Clamp to zero the first two arguments
+	m_code << "    " << resolve(stmt.src[0], 0) << " = (" 
+	       << resolve(stmt.src[0], 0) << " > 0) ? " 
+	       << resolve(stmt.src[0], 0) << " : 0;" << std::endl;
+	m_code << "    " << resolve(stmt.src[0], 1) << " = (" 
+	       << resolve(stmt.src[0], 1) << " > 0) ? " 
+	       << resolve(stmt.src[0], 1) << " : 0;" << std::endl;
+
+	// Clamp to -128, 128 the third argument
+	m_code << "    " << resolve(stmt.src[0], 2) << " = (" 
+	       << resolve(stmt.src[0], 2) << " > -128.0) ? " 
+	       << resolve(stmt.src[0], 2) << " : -128.0;" << std::endl;
+	m_code << "    " << resolve(stmt.src[0], 2) << " = (" 
+	       << resolve(stmt.src[0], 2) << " < 128.0) ? " 
+	       << resolve(stmt.src[0], 2) << " : 128.0;" << std::endl;
+
+	// Result according to OpenGL spec
+	m_code << "    " << resolve(stmt.dest, 0) << " = 1;" << std::endl;
+	m_code << "    " << resolve(stmt.dest, 1) << " = "
+	       << resolve(stmt.src[0], 0) << ";" << std::endl;
+	m_code << "    " << resolve(stmt.dest, 2) << " = (" 
+	       << resolve(stmt.src[0], 0) << " > 0)" << " * pow(" 
+	       << resolve(stmt.src[0], 1) << ", " << resolve(stmt.src[0], 2)
+	       << ");" << std::endl;
+	m_code << "    " << resolve(stmt.dest, 3) << " = 1;" << std::endl;
+
+	m_code << "  }" << std::endl;
+	break;
+      }
+
     case SH_OP_NORM:
       {
         m_code << "  {" << std::endl;

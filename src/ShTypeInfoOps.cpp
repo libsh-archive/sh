@@ -43,18 +43,9 @@ void ShTypeInfo::addOps()
   /// loss of information. I think prefering loss of precision by going to float 
   /// over losing sign information sounds better) 
   ///
-  /// 1) if either operand is i_d or operands are d x i_f, use i_d
-  /// 2) else if one operand is i_f, use i_f
-  /// 3) else if either operand is d, use d 
-  /// 4) else if either operand is f or we have i x ui, use f 
-  /// 5) else if operands are integers/unsigned integers use i
-  /// 6) else use float (this includes all fractionals)
-  _shInitFloatOps<ShInterval<double> >();
-  _shInitIntervalOps<double, ShInterval<double> >();
-
-  _shInitFloatOps<ShInterval<float> >();
-  _shInitIntervalOps<float, ShInterval<float> >();
-
+  /// 1) else if either operand is d, use d 
+  /// 2) else if either operand is f, h, or fractional, use f
+  /// 3) otherwise, use int
   _shInitFloatOps<double>();
   _shInitFloatOps<float>();
 

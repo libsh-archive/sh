@@ -43,6 +43,8 @@ ShTextureNode::ShTextureNode(ShTextureDims dims, int size,
     m_traits(traits),
     m_width(width), m_height(height), m_depth(depth)
 {
+  ShContext::current()->enter(0); // need m_texSizeVar to be uniform
+
   if (m_dims == SH_TEXTURE_1D) {
     ShAttrib1f v = ShAttrib1f(width);
     m_texSizeVar = ShVariable(v.node());
@@ -53,6 +55,8 @@ ShTextureNode::ShTextureNode(ShTextureDims dims, int size,
     ShAttrib2f v = ShAttrib2f(width, height);
     m_texSizeVar = ShVariable(v.node());
   }
+
+  ShContext::current()->exit(); // need m_texSizeVar to be uniform
 }
 
 ShTextureNode::~ShTextureNode()
@@ -114,16 +118,20 @@ ShTextureTraits& ShTextureNode::traits()
 void ShTextureNode::setTexSize(int w)
 {
   m_width = w;
+  ShContext::current()->enter(0);
   ShAttrib1f s(m_texSizeVar.node(), ShSwizzle(m_texSizeVar().size()), false);
   s = static_cast<float>(w);
+  ShContext::current()->exit();
 }
 
 void ShTextureNode::setTexSize(int w, int h)
 {
   m_width = w;
   m_height = h;
+  ShContext::current()->enter(0);
   ShAttrib2f s(m_texSizeVar.node(), ShSwizzle(m_texSizeVar().size()), false);
   s = ShAttrib2f(w, h);
+  ShContext::current()->exit();
 }
 
 void ShTextureNode::setTexSize(int w, int h, int d)
@@ -131,8 +139,10 @@ void ShTextureNode::setTexSize(int w, int h, int d)
   m_width = w;
   m_height = h;
   m_depth = d;
+  ShContext::current()->enter(0);
   ShAttrib3f s(m_texSizeVar.node(), ShSwizzle(m_texSizeVar().size()), false);
   s = ShAttrib3f(w, h, d);
+  ShContext::current()->exit();
 }
 
 int ShTextureNode::width() const

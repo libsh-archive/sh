@@ -319,7 +319,8 @@ namespace ShCc {
       case SH_USHORT: return "unsigned short";
       case SH_UINT:   return "unsigned int";
       default:
-        SH_DEBUG_ASSERT(0 && "Invalid value type");
+        SH_DEBUG_PRINT("Invalid value type: " << shValueTypeName(valueType));
+        SH_DEBUG_ASSERT(0); 
     }
     return "unknown"; 
   }
@@ -381,9 +382,9 @@ namespace ShCc {
     ShTransformer transform(m_program);
 
     transform.convertToFloat(m_convertMap);
+    transform.stripDummyOps();
     if(transform.changed()) {
       optimize(m_program);
-      m_program->collectVariables();
     } else {
       m_program = shref_const_cast<ShProgramNode>(m_original_program);
     }

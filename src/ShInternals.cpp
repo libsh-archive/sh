@@ -36,10 +36,10 @@ ShVariableReplacer::ShVariableReplacer(ShVarMap& v)
 
 void ShVariableReplacer::operator()(ShCtrlGraphNodePtr node) 
 {
-  // replace variables that are conditions in branches 
+  // replace variables that are conditions in branches
   ShCtrlGraphNode::SuccessorList::iterator I;
   for(I = node->successors.begin(); I != node->successors.end(); ++I) {
-    repVar(I->cond); 
+    repVar(I->cond);
   }
 
   // replace variables in the block
@@ -53,6 +53,15 @@ void ShVariableReplacer::operator()(ShCtrlGraphNodePtr node)
     }
   }
 
+}
+
+void ShVariableReplacer::operator()(ShStructuralNodePtr node) 
+{
+  if(node->cfg_node) operator()(node->cfg_node);
+  for (ShStructuralNode::StructNodeList::iterator I = node->structnodes.begin(); 
+      I != node->structnodes.end(); ++I) {
+    operator()(*I);
+  }
 }
 
 void ShVariableReplacer::operator()(ShProgramNode::VarList &varList) 

@@ -472,28 +472,6 @@ public:
     typedef ShAttrib<4, Binding, T, Swizzled> ParentType;
 };
 
-typedef ShPoint<1, SH_INPUT, ShInterval<double> > ShInputPoint1i_d;
-typedef ShPoint<1, SH_OUTPUT, ShInterval<double> > ShOutputPoint1i_d;
-typedef ShPoint<1, SH_INOUT, ShInterval<double> > ShInOutPoint1i_d;
-typedef ShPoint<1, SH_TEMP, ShInterval<double> > ShPoint1i_d;
-typedef ShPoint<1, SH_CONST, ShInterval<double> > ShConstPoint1i_d;
-typedef ShPoint<2, SH_INPUT, ShInterval<double> > ShInputPoint2i_d;
-typedef ShPoint<2, SH_OUTPUT, ShInterval<double> > ShOutputPoint2i_d;
-typedef ShPoint<2, SH_INOUT, ShInterval<double> > ShInOutPoint2i_d;
-typedef ShPoint<2, SH_TEMP, ShInterval<double> > ShPoint2i_d;
-typedef ShPoint<2, SH_CONST, ShInterval<double> > ShConstPoint2i_d;
-typedef ShPoint<3, SH_INPUT, ShInterval<double> > ShInputPoint3i_d;
-typedef ShPoint<3, SH_OUTPUT, ShInterval<double> > ShOutputPoint3i_d;
-typedef ShPoint<3, SH_INOUT, ShInterval<double> > ShInOutPoint3i_d;
-typedef ShPoint<3, SH_TEMP, ShInterval<double> > ShPoint3i_d;
-typedef ShPoint<3, SH_CONST, ShInterval<double> > ShConstPoint3i_d;
-typedef ShPoint<4, SH_INPUT, ShInterval<double> > ShInputPoint4i_d;
-typedef ShPoint<4, SH_OUTPUT, ShInterval<double> > ShOutputPoint4i_d;
-typedef ShPoint<4, SH_INOUT, ShInterval<double> > ShInOutPoint4i_d;
-typedef ShPoint<4, SH_TEMP, ShInterval<double> > ShPoint4i_d;
-typedef ShPoint<4, SH_CONST, ShInterval<double> > ShConstPoint4i_d;
-
-
 typedef ShPoint<1, SH_INPUT, ShFracUShort> ShInputPoint1fus;
 typedef ShPoint<1, SH_OUTPUT, ShFracUShort> ShOutputPoint1fus;
 typedef ShPoint<1, SH_INOUT, ShFracUShort> ShInOutPoint1fus;
@@ -756,28 +734,6 @@ typedef ShPoint<4, SH_OUTPUT, ShHalf> ShOutputPoint4h;
 typedef ShPoint<4, SH_INOUT, ShHalf> ShInOutPoint4h;
 typedef ShPoint<4, SH_TEMP, ShHalf> ShPoint4h;
 typedef ShPoint<4, SH_CONST, ShHalf> ShConstPoint4h;
-
-
-typedef ShPoint<1, SH_INPUT, ShInterval<float> > ShInputPoint1i_f;
-typedef ShPoint<1, SH_OUTPUT, ShInterval<float> > ShOutputPoint1i_f;
-typedef ShPoint<1, SH_INOUT, ShInterval<float> > ShInOutPoint1i_f;
-typedef ShPoint<1, SH_TEMP, ShInterval<float> > ShPoint1i_f;
-typedef ShPoint<1, SH_CONST, ShInterval<float> > ShConstPoint1i_f;
-typedef ShPoint<2, SH_INPUT, ShInterval<float> > ShInputPoint2i_f;
-typedef ShPoint<2, SH_OUTPUT, ShInterval<float> > ShOutputPoint2i_f;
-typedef ShPoint<2, SH_INOUT, ShInterval<float> > ShInOutPoint2i_f;
-typedef ShPoint<2, SH_TEMP, ShInterval<float> > ShPoint2i_f;
-typedef ShPoint<2, SH_CONST, ShInterval<float> > ShConstPoint2i_f;
-typedef ShPoint<3, SH_INPUT, ShInterval<float> > ShInputPoint3i_f;
-typedef ShPoint<3, SH_OUTPUT, ShInterval<float> > ShOutputPoint3i_f;
-typedef ShPoint<3, SH_INOUT, ShInterval<float> > ShInOutPoint3i_f;
-typedef ShPoint<3, SH_TEMP, ShInterval<float> > ShPoint3i_f;
-typedef ShPoint<3, SH_CONST, ShInterval<float> > ShConstPoint3i_f;
-typedef ShPoint<4, SH_INPUT, ShInterval<float> > ShInputPoint4i_f;
-typedef ShPoint<4, SH_OUTPUT, ShInterval<float> > ShOutputPoint4i_f;
-typedef ShPoint<4, SH_INOUT, ShInterval<float> > ShInOutPoint4i_f;
-typedef ShPoint<4, SH_TEMP, ShInterval<float> > ShPoint4i_f;
-typedef ShPoint<4, SH_CONST, ShInterval<float> > ShConstPoint4i_f;
 
 
 typedef ShPoint<1, SH_INPUT, ShFracShort> ShInputPoint1fs;
