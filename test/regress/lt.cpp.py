@@ -11,6 +11,10 @@ def lt(p, q, types=[]):
 test = shtest.StreamTest('lt', 2)
 test.add_call(shtest.Call(shtest.Call.infix, '<', 2))
 
+test.add_test(lt((1.0,), (2.0,)))
+test.add_test(lt((1.0,), (1.0,)))
+test.add_test(lt((3.0,), (1.0,)))
+
 test.add_test(lt((1.0, 2.0, 3.0), (2.0, 1.0, 3.0)))
 test.add_test(lt((-1.0, -2.0, -3.0), (-2.0, -1.0, -3.0)))
 test.add_test(lt((1.0, -2.0, 3.0), (-2.0, 1.0, -3.0)))

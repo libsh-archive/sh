@@ -11,6 +11,10 @@ def le(p, q, types=[]):
 test = shtest.StreamTest('le', 2)
 test.add_call(shtest.Call(shtest.Call.infix, '<=', 2))
 
+test.add_test(le((1.0,), (2.0,)))
+test.add_test(le((1.0,), (1.0,)))
+test.add_test(le((3.0,), (1.0,)))
+
 test.add_test(le((1.0, 2.0, 3.0), (2.0, 1.0, 3.0)))
 test.add_test(le((-1.0, -2.0, -3.0), (-2.0, -1.0, -3.0)))
 test.add_test(le((1.0, -2.0, 3.0), (-2.0, 1.0, -3.0)))

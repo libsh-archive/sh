@@ -51,7 +51,7 @@ def init_matrix(indent, arg, argtype, varname):
 def init_attrib(indent, arg, argtype, varname):
     out = indent
     out += make_variable(arg, 'SH_CONST', argtype) + ' ' + varname
-    out += '(' + ', '.join([str(a) for a in arg]) + ')'
+    out += '(' + ', '.join([(argtype + "(" + str(a) + ")") for a in arg]) + ')'
     out += ';\n'
     return out
 
