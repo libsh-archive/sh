@@ -303,7 +303,7 @@ struct InitRch {
     if (!block) return;
 
     // Initialize gen
-    for (int i = 0; i < o.m_defs.size(); i++) {
+    for (unsigned int i = 0; i < o.m_defs.size(); i++) {
       if (o.m_defNodes[i] == node) gen[node][i] = true;
     }
 
@@ -313,7 +313,7 @@ struct InitRch {
           || I->op == SH_OP_OPTBRA
           || I->dest.node()->kind() != SH_VAR_TEMP
           || I->dest.node()->size() != I->dest.size()) continue;
-      for (int i = 0; i < o.m_defs.size(); i++) {
+      for (unsigned int i = 0; i < o.m_defs.size(); i++) {
         if (o.m_defs[i]->dest.node() == I->dest.node()) {
           prsv[node][i] = false; // i gets killed by this block
         }
