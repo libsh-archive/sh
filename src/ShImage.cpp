@@ -284,6 +284,12 @@ float* ShImage::data()
   return reinterpret_cast<float*>(m_memory->hostStorage()->data());
 }
 
+void ShImage::dirty() 
+{
+  if (!m_memory) return;
+  m_memory->hostStorage()->dirty();
+}
+
 ShMemoryPtr ShImage::memory()
 {
   return m_memory;

@@ -71,6 +71,7 @@ public:
   const float* data() const;
   float* data();
   
+  void dirty();
   ShMemoryPtr memory();
   ShRefCount<const ShMemory> memory() const;
   
