@@ -135,6 +135,70 @@ void kill(const ShGeneric<N, T>& c)
   discard(c);
 }
 
+template<int N, typename T> 
+ShGeneric<N, T> sort(const ShGeneric<N, T>& a)
+{
+  ShGeneric<N, T> result(a);
+
+  const int NE = (N + 1) / 2; // number of even elements
+  const int NO = N / 2; // number of odd elements
+  const int NU = NO; // number of components to compare for (2i, 2i+1) comparisons
+  const int ND = NE - 1; // number of componnets to compare for (2i, 2i-1) comparisons
+  
+  // hold even/odd temps and condition code for (2i, 2i+1) "up" and (2i, 2i-1) "down" comparisons 
+  ShAttrib<NU, SH_TEMP, T> eu, ou, ccu;
+  ShAttrib<ND, SH_TEMP, T> ed, od, ccd;
+  
+  // even and odd swizzle (elms 0..NE-1 are the "even" subsequence, NE..N-1 "odd")
+  int eswiz[NE], oswiz[NO];
+  for (int i = 0; i < NE; ++i) eswiz[i] = i;
+  for (int i = 0; i < NO; ++i) oswiz[i] = NE + i;
+
+  for (int i = 0; i < NE; ++i) {
+    // TODO note the interesting syntax (does appear to be C++ standard) 
+    // that's required so that the gcc parser does 
+    // not crap out on the template swiz code
+    //
+    // if this doesn't work on other platforms, we may have to
+    // rewrite the swiz function
+
+    // compare 2i, 2i+1
+    eu = result.template swiz<NU>(eswiz);
+    ou = result.template swiz<NU>(oswiz);
+
+    result.template swiz<NU>(eswiz) = max(eu, ou);
+    result.template swiz<NU>(oswiz) = min(eu, ou);
+
+    eu = result.template swiz<NU>(eswiz);
+    ou = result.template swiz<NU>(oswiz);
+    result.template swiz<NU>(eswiz) = cond(ccu, eu, ou);
+    result.template swiz<NU>(oswiz) = cond(ccu, ou, eu);
+
+    // compare 2i, 2i-1
+    ed = result.template swiz<ND>(eswiz + 1);
+    od = result.template swiz<ND>(oswiz);
+
+    result.template swiz<ND>(eswiz + 1) = min(ed, od);
+    result.template swiz<ND>(oswiz) = max(ed, od);
+
+    ed = result.template swiz<ND>(eswiz + 1);
+    od = result.template swiz<ND>(oswiz);
+    result.template swiz<ND>(eswiz + 1) = cond(ccd, ed, od);
+    result.template swiz<ND>(oswiz) = cond(ccd, od, ed);
+
+  }
+
+  // reswizzle "even" to 0, 2, 4,... "odd" to 1, 3, 5, ..
+  int resultEswiz[NE], resultOswiz[NO];
+  for (int i = 0; i < NE; ++i) resultEswiz[i] = i * 2;
+  for (int i = 0; i < NO; ++i) resultOswiz[i] = i * 2 + 1;
+  ShAttrib<NE, SH_TEMP, T> evens = result.template swiz<NE>(eswiz);
+  result.template swiz<NO>(resultOswiz) = result.template swiz<NO>(oswiz);
+  result.template swiz<NE>(resultEswiz) = evens;
+
+  return result;
+}
+
 template<typename T>
 ShProgram freeze(const ShProgram& p,
                  const T& uniform)

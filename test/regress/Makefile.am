@@ -6,7 +6,7 @@ TESTS = add add_im cbrt cmul cos csum div mul rnd sin tex lt le gt ge eq ne \
 	mod floor ceil abs pow dot frac sign max max1 min min1 pos sat clamp \
 	sqrt exp sub madd msub mmul mdiv mmod matrix_mul lit lit_im mad lerp \
 	rsqrt rcp tan acos asin atan length exp2 exp10 log log2 log10 atan2 \
-	cross
+	cross sort
 check_PROGRAMS = $(TESTS)
 BACKENDS = arb cc host glsl
 EXTRA_DIST = shtest.py common.py
@@ -143,3 +143,5 @@ atan2_SOURCES = atan2.cpp test.cpp test.hpp
 EXTRA_DIST += atan2.cpp.py
 cross_SOURCES = cross.cpp test.cpp test.hpp
 EXTRA_DIST += cross.cpp.py
+sort_SOURCES = sort.cpp test.cpp test.hpp
+EXTRA_DIST += sort.cpp.py

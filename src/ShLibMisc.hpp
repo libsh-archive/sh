@@ -93,6 +93,14 @@ void discard(const ShGeneric<N, T>& c);
 template<int N, typename T>
 void kill(const ShGeneric<N, T>& c);
 
+/** Sort components of a in increasing order.
+ *
+ * Creates an N tuple with the components of a * in sorted increasing
+ * order using an even-odd transposition sort.
+ */
+template<int N, typename T> 
+ShGeneric<N, T> sort(const ShGeneric<N, T>& a);
+
 /** Uniform freezing.
  *
  * Replace uses of the given uniform in the given program with a

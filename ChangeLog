@@ -1,3 +1,8 @@
+2005-03-23  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibMiscImpl.hpp, ShLibMisc.hpp (sort): Add this function
+	based on a similar function in util/ShFunc.hpp
+
 2005-03-21  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/GlslEmit.cpp (emit_discard): Fix discard.
