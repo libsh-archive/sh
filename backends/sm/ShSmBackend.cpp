@@ -400,21 +400,37 @@ void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
       break;
     case SH_OP_DOT:
       {
-        if (stmt.src[0].size() == 3) {
-          m_instructions.push_back(SmInstruction(OP_DP3, stmt.dest, stmt.src[0], stmt.src[1]));
-        } else if (stmt.src[0].size() == 4) {
-          m_instructions.push_back(SmInstruction(OP_DP4, stmt.dest, stmt.src[0], stmt.src[1]));
-        } else if (stmt.src[0].size() == 1) {
-          m_instructions.push_back(SmInstruction(OP_MUL, stmt.dest, stmt.src[0], stmt.src[1]));
+        ShVariable left = stmt.src[0];
+        ShVariable right = stmt.src[1];
+
+        // expand left/right if they are scalar
+        if( left.size() < right.size() ) {
+          int *swizzle = new int[ right.size() ];
+          for( int i = 0; i < right.size(); ++i ) swizzle[i] = 0; 
+          left = left( right.size(), swizzle ); 
+          delete swizzle;
+        } else if( right.size() < left.size() ) {
+          int *swizzle = new int[ left.size() ];
+          for( int i = 0; i < left.size(); ++i ) swizzle[i] = 0; 
+          right = right( left.size(), swizzle ); 
+          delete swizzle;
+        }
+
+        if (left.size() == 3) {
+          m_instructions.push_back(SmInstruction(OP_DP3, stmt.dest, left, right));
+        } else if (left.size() == 4) {
+          m_instructions.push_back(SmInstruction(OP_DP4, stmt.dest, left, right));
+        } else if (left.size() == 1) {
+          m_instructions.push_back(SmInstruction(OP_MUL, stmt.dest, left, right));
         } else {
-          ShVariable mul(new ShVariableNode(SH_VAR_TEMP, stmt.src[0].size()));
-          m_instructions.push_back(SmInstruction(OP_MUL, mul, stmt.src[0], stmt.src[1]));
+          ShVariable mul(new ShVariableNode(SH_VAR_TEMP, left.size()));
+          m_instructions.push_back(SmInstruction(OP_MUL, mul, left, right));
           m_instructions.push_back(SmInstruction(OP_ADD, stmt.dest, mul(0), mul(1)));
-          for (int i = 2; i < stmt.src[0].size(); i++) {
+          for (int i = 2; i < left.size(); i++) {
             m_instructions.push_back(SmInstruction(OP_ADD, stmt.dest, stmt.dest, mul(i)));
           }
         }
-      break;
+        break;
       }
     case SH_OP_FLR:
       m_instructions.push_back(SmInstruction(OP_FLR, stmt.dest, stmt.src[0]));
