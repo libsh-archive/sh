@@ -24,8 +24,8 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHUTIL_SHUTIL_HPP 
-#define SHUTIL_SHUTIL_HPP 
+#ifndef SHUTIL_FUNC_HPP 
+#define SHUTIL_FUNC_HPP 
 
 #include "ShVariable.hpp"
 #include "ShAttrib.hpp"
@@ -36,8 +36,8 @@ using namespace SH;
 
 //TODO extend to vector versions
 
-/** \file ShUtilLib.hpp
- * \brief A set of small Sh utility functions.  
+/** \file ShFunc.hpp
+ * \brief Miscellaneous small Sh utility functions.  
  */
 
 /** \brief Clamps value between a and b. 
@@ -132,6 +132,6 @@ ShGeneric<3, T> changeBasis(const ShGeneric<3, T> &b0,
 
 }
 
-#include "ShUtilImpl.hpp"
+#include "ShFuncImpl.hpp"
 
-#endif // SHUTIL_SHUTILLIB_HPP 
+#endif // SHUTIL_FUNC_HPP 

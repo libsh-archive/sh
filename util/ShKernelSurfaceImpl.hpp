@@ -35,7 +35,7 @@
 #include "ShProgram.hpp"
 #include "ShNibbles.hpp"
 #include "ShKernelSurface.hpp"
-#include "ShUtil.hpp"
+#include "ShFunc.hpp"
 
 /** \file ShKernelSurfaceImpl.hpp
  * This is an implementation of useful surface kernels 

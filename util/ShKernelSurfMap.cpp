@@ -25,7 +25,7 @@
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
 #include "ShKernelSurfMap.hpp"
-#include "ShUtil.hpp"
+#include "ShFunc.hpp"
 #include "ShSyntax.hpp"
 #include "ShNormal.hpp"
 #include "ShLib.hpp"

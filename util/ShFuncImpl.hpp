@@ -24,15 +24,15 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHUTIL_SHUTILIMPL_HPP 
-#define SHUTIL_SHUTILIMPL_HPP 
+#ifndef SHUTIL_FUNCIMPL_HPP 
+#define SHUTIL_FUNCIMPL_HPP 
 
 #include <cmath>
 #include <numeric>
 #include "ShAttrib.hpp"
 #include "ShSwizzle.hpp" 
 #include "ShVariable.hpp"
-#include "ShUtil.hpp"
+#include "ShFunc.hpp"
 #include "ShLib.hpp"
 
 namespace ShUtil {
@@ -235,4 +235,4 @@ ShGeneric<3, T> changeBasis(const ShGeneric<3, T> &b0,
 
 }
 
-#endif // SHUTIL_SHUTILLIB_HPP 
+#endif // SHUTIL_FUNCIMPL_HPP 

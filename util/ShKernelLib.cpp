@@ -26,7 +26,7 @@
 //////////////////////////////////////////////////////////////////////////////
 #include <sstream>
 #include "ShKernelLib.hpp"
-#include "ShUtil.hpp"
+#include "ShFunc.hpp"
 
 namespace ShUtil {
 

@@ -13,8 +13,8 @@ incinc_HEADERS = ShNoise.hpp \
 								 ShNoiseImpl.hpp \
                  ShWorley.hpp \
                  ShWorleyImpl.hpp \
-                 ShUtil.hpp \
-                 ShUtilImpl.hpp \
+                 ShFunc.hpp \
+                 ShFuncImpl.hpp \
 								 ShKernelLib.hpp \
 								 ShKernelLibImpl.hpp \
 								 ShKernelLight.hpp \

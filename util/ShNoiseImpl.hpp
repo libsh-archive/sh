@@ -30,7 +30,7 @@
 #include <cstdlib>
 #include "ShDebug.hpp"
 #include "ShNoise.hpp"
-#include "ShUtil.hpp"
+#include "ShFunc.hpp"
 #include "ShImage3D.hpp"
 #include "ShLib.hpp"
 

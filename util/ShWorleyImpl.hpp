@@ -32,7 +32,7 @@
 #include "ShSyntax.hpp"
 #include "ShWorley.hpp"
 #include "ShNoise.hpp"
-#include "ShUtil.hpp"
+#include "ShFunc.hpp"
 #include "ShImage.hpp"
 #include "ShAttribImpl.hpp"
 #include "ShGenericImpl.hpp"

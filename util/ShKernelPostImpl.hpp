@@ -35,7 +35,7 @@
 #include "ShProgram.hpp"
 #include "ShNibbles.hpp"
 #include "ShKernelPost.hpp"
-#include "ShUtil.hpp"
+#include "ShFunc.hpp"
 
 /** \file ShKernelPostImpl.hpp
  * This is an implementation of useful postprocessing kernels 

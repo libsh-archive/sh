@@ -35,7 +35,7 @@
 #include "ShProgram.hpp"
 #include "ShNibbles.hpp"
 #include "ShKernelLib.hpp"
-#include "ShUtil.hpp"
+#include "ShFunc.hpp"
 #include "ShTexCoord.hpp"
 #include "ShVector.hpp"
 #include "ShPoint.hpp"
