@@ -32,6 +32,7 @@
 #include "ShError.hpp"
 #include "ShLinearAllocator.hpp"
 #include "ShCtrlGraph.hpp"
+#include "ShVariable.hpp"
 
 namespace ShSm {
 
@@ -391,6 +392,9 @@ void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
     case SH_OP_ABS:
       m_instructions.push_back(SmInstruction(OP_ABS, stmt.dest, stmt.src[0]));
       break;
+    case SH_OP_CEIL:
+      m_instructions.push_back(SmInstruction(OP_CEIL, stmt.dest, stmt.src[0]));
+      break;
     case SH_OP_COS:
       m_instructions.push_back(SmInstruction(OP_COS, stmt.dest, stmt.src[0]));
       break;
@@ -412,8 +416,34 @@ void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
         }
       break;
       }
+    case SH_OP_FLR:
+      m_instructions.push_back(SmInstruction(OP_FLR, stmt.dest, stmt.src[0]));
+      break;
+    case SH_OP_FMOD:
+        if (stmt.src[1].size() == 1 && stmt.src[0].size() != 1) {
+          int* swizzle = new int[stmt.src[0].size()];
+          for (int i = 0; i < stmt.src[0].size(); i++) swizzle[i] = 0;
+          m_instructions.push_back(SmInstruction(OP_FMOD, stmt.dest, stmt.src[0],
+                                                 stmt.src[1](stmt.src[0].size(), swizzle)));
+          delete [] swizzle;
+        } else {
+          m_instructions.push_back(SmInstruction(OP_FMOD, stmt.dest, stmt.src[0], stmt.src[1]));
+        }
+        break;
     case SH_OP_FRAC:
       m_instructions.push_back(SmInstruction(OP_FRC, stmt.dest, stmt.src[0]));
+      break;
+    case SH_OP_LRP:
+      {
+        if (stmt.src[0].size() == 1 && stmt.src[1].size() != 1) {
+            int* swizzle = new int[stmt.src[1].size()];
+            for (int i = 0; i < stmt.src[1].size(); i++) swizzle[i] = 0;
+            m_instructions.push_back(SmInstruction(OP_LRP, stmt.dest, stmt.src[0](stmt.src[1].size(),swizzle), stmt.src[1], stmt.src[2])); 
+            delete [] swizzle;
+        } else {
+            m_instructions.push_back(SmInstruction(OP_LRP, stmt.dest, stmt.src[0], stmt.src[1], stmt.src[2])); 
+        }
+      }
       break;
     case SH_OP_MAX:
       m_instructions.push_back(SmInstruction(OP_MAX, stmt.dest, stmt.src[0], stmt.src[1]));
@@ -670,6 +700,7 @@ void initOps()
   opNames[OP_ADD] = "ADD";
   opNames[OP_BRA] = "BRA";
   opNames[OP_CAL] = "CAL";
+  opNames[OP_CEIL] = "CEIL";
   opNames[OP_CMP] = "CMP";
   opNames[OP_COS] = "COS";
   opNames[OP_DDX] = "DDX";
@@ -681,6 +712,7 @@ void initOps()
   opNames[OP_EX2] = "EX2";
   opNames[OP_EXP] = "EXP";
   opNames[OP_FLR] = "FLR";
+  opNames[OP_FMOD] = "FMOD";
   opNames[OP_FRC] = "FRC";
   opNames[OP_KIL] = "KIL";
   opNames[OP_LG2] = "LG2";
