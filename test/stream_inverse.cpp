@@ -1,3 +1,6 @@
+#include <exception>
+#include <iostream>
+#include <fstream>
 #include "sh.hpp"
 
 using namespace SH;
@@ -18,8 +21,8 @@ int main(int argc, char** argv)
     idx_img.memory()->findStorage("host")->dirty();
     for (int y = 0; y < image.height(); ++y) {
       for (int x = 0; x < image.width(); ++x) {
-        idx_img(x, y, 0) = (float)x;
-        idx_img(x, y, 1) = (float)y;
+        idx_img(x, y, 0) = (float)x/image.width();
+        idx_img(x, y, 1) = (float)y/image.height();
       }
     }
     ShChannel<ShTexCoord<INDEX_ELEMENTS, SH_TEMP> >
@@ -48,8 +51,8 @@ int main(int argc, char** argv)
 
       
       ShAttrib2f l;
-      l(0) = t(0)*t(0)/image.width();
-      l(1) = t(1)*t(1)/image.height();
+      l(0) = t(0)*t(0);// /image.width();
+      l(1) = t(1)*t(1);// /image.height();
       outcol = picture(l);
     } SH_END;
 
@@ -60,8 +63,11 @@ int main(int argc, char** argv)
   } catch (const ShException& e) {
     std::cerr << "SH Exception: " << e.message() << std::endl;
     return -1;
+  } catch (const std::exception& e) {
+    std::cerr << "C++ Exception: " << e.what() << std::endl;
+    return -1;
   } catch (...) {
     std::cerr << "Unknown exception caught." << std::endl;
-    return -1;
+    abort();
   }
 }

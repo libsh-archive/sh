@@ -1,6 +1,7 @@
 // -*- C++ -*-
 #include <iostream>
 #include <fstream>
+#include <exception>
 #include "sh.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShDebug.hpp"
@@ -11,7 +12,7 @@ using namespace SH;
 
 int main(int argc, char** argv)
 {
-  std::string backendName("sm");
+  std::string backendName("arb");
   if (argc > 1) {
     backendName = argv[1];
   }

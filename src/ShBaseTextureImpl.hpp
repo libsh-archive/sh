@@ -223,11 +223,12 @@ void ShBaseTexture3D<T>::memory(ShMemoryPtr memory)
 
 template<typename T>
 void ShBaseTextureCube<T>::memory(ShMemoryPtr memory,
-                                          ShCubeDirection face)
+                                  ShCubeDirection face)
 {
   m_node->memory(memory, face);
 }
 
+// get memory
 
 template<typename T>
 ShMemoryPtr ShBaseTexture1D<T>::memory()
@@ -257,6 +258,90 @@ template<typename T>
 ShMemoryPtr ShBaseTextureCube<T>::memory(ShCubeDirection face)
 {
   return m_node->memory(face);
+}
+
+// get size
+
+template<typename T>
+ShAttrib1f ShBaseTexture1D<T>::size() const
+{
+  ShAttrib1f t(m_node->texSizeVar().node(), ShSwizzle(m_node->texSizeVar().size()), false);
+  return t;
+}
+
+template<typename T>
+ShAttrib2f ShBaseTexture2D<T>::size() const
+{
+  ShAttrib2f t(m_node->texSizeVar().node(), ShSwizzle(m_node->texSizeVar().size()), false);
+  return t;
+}
+
+template<typename T>
+ShAttrib2f ShBaseTextureRect<T>::size() const
+{
+  ShAttrib2f t(m_node->texSizeVar().node(), ShSwizzle(m_node->texSizeVar().size()), false);
+  return t;
+}
+
+template<typename T>
+ShAttrib3f ShBaseTexture3D<T>::size() const
+{
+  ShAttrib3f t(m_node->texSizeVar().node(), ShSwizzle(m_node->texSizeVar().size()), false);
+  return t;
+}
+
+template<typename T>
+ShAttrib2f ShBaseTextureCube<T>::size() const
+{
+  ShAttrib2f t(m_node->texSizeVar().node(), ShSwizzle(m_node->texSizeVar().size()), false);
+  return t;
+}
+
+// set size
+
+template<typename T>
+void ShBaseTexture1D<T>::size(int width)
+{
+  ShAttrib1f s(m_node->texSizeVar().node(), ShSwizzle(m_node->texSizeVar().size()), false);
+  s = static_cast<float>(width);
+  m_node->width(width);
+}
+
+template<typename T>
+void ShBaseTexture2D<T>::size(int width, int height)
+{
+  ShAttrib2f s(m_node->texSizeVar().node(), ShSwizzle(m_node->texSizeVar().size()), false);
+  s = ShAttrib2f(width, height);
+  m_node->width(width);
+  m_node->height(height);
+}
+
+template<typename T>
+void ShBaseTextureRect<T>::size(int width, int height)
+{
+  ShAttrib2f s(m_node->texSizeVar().node(), ShSwizzle(m_node->texSizeVar().size()), false);
+  s = ShAttrib2f(width, height);
+  m_node->width(width);
+  m_node->height(height);
+}
+
+template<typename T>
+void ShBaseTexture3D<T>::size(int width, int height, int depth)
+{
+  ShAttrib3f s(m_node->texSizeVar().node(), ShSwizzle(m_node->texSizeVar().size()), false);
+  s = ShAttrib3f(width, height, depth);
+  m_node->width(width);
+  m_node->height(height);
+  m_node->depth(depth);
+}
+
+template<typename T>
+void ShBaseTextureCube<T>::size(int width, int height)
+{
+  ShAttrib2f s(m_node->texSizeVar().node(), ShSwizzle(m_node->texSizeVar().size()), false);
+  s = ShAttrib2f(width, height);
+  m_node->width(width);
+  m_node->height(height);
 }
 
 }

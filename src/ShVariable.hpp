@@ -54,7 +54,8 @@ public:
   bool hasValues() const; ///< Does this variable have constant
                           ///(host-local) values?
   
-  int size() const; ///< Get the number of elements in this variable
+  int size() const; ///< Get the number of elements in this variable,
+                    /// after swizzling.
 
   /**@name Metadata
    * This data is useful for various things, including asset

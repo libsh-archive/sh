@@ -48,49 +48,59 @@ namespace SH {
  * ShEnvironment::insideShader = true
  */
 class ShTransformer {
-  public:
-    ShTransformer(ShProgram program);
-    ShTransformer::~ShTransformer();
-    bool changed(); //< returns true iff one of the transformations changed the shader
+public:
+  ShTransformer(ShProgram program);
+  ShTransformer::~ShTransformer();
+  bool changed(); //< returns true iff one of the transformations changed the shader
 
-    /**@name Tuple splitting when backend canot support arbitrary 
-     * length tuples.
-     *
-     * If any tuples are split, this adds entries to the splits map
-     * to map from original long tuple ShVariableNode
-     * to a vector of ShVariableNodes all <= max tuple size of the backend.
-     * All long tuples in the intermediate representation are split up into
-     * shorter tuples.
-     */
-    //@{
-    typedef std::vector<ShVariableNodePtr> VarNodeVec;
-    typedef std::map<ShVariableNodePtr, VarNodeVec> VarSplitMap;
-    friend struct VariableSplitter;
-    friend struct StatementSplitter;
-    void splitTuples(int maxTuple, VarSplitMap &splits);
-    //@}
+  /**@name Tuple splitting when backend canot support arbitrary 
+   * length tuples.
+   *
+   * If any tuples are split, this adds entries to the splits map
+   * to map from original long tuple ShVariableNode
+   * to a vector of ShVariableNodes all <= max tuple size of the backend.
+   * All long tuples in the intermediate representation are split up into
+   * shorter tuples.
+   */
+  //@{
+  typedef std::vector<ShVariableNodePtr> VarNodeVec;
+  typedef std::map<ShVariableNodePtr, VarNodeVec> VarSplitMap;
+  friend struct VariableSplitter;
+  friend struct StatementSplitter;
+  void splitTuples(int maxTuple, VarSplitMap &splits);
+  //@}
   
-    /**@name Input and Output variable to temp convertor
-     * In most GPU shading languages/assembly, outputs cannot be used as src
-     * variable in computation and inputs cannot be used as a dest, and
-     * inout variables are not supported directly.
-     *
-     *
-     */
-    friend struct InputOutputConvertor;
-    void convertInputOutput();
-    // TODO currently all or none approach to conversion.
-    // could parameterize this with flags to choose INPUT, OUTPUT, INOUT
+  /**@name Input and Output variable to temp convertor
+   * In most GPU shading languages/assembly, outputs cannot be used as src
+   * variable in computation and inputs cannot be used as a dest, and
+   * inout variables are not supported directly.
+   *
+   *
+   */
+  //@{
+  friend struct InputOutputConvertor;
+  void convertInputOutput();
+  // TODO currently all or none approach to conversion.
+  // could parameterize this with flags to choose INPUT, OUTPUT, INOUT
+  //@}
+  
+  /**@name Texture lookup conversion
+   * Most GPUs only do indexed lookup for rectangular textures, so
+   * convert other kinds of lookup with appropriate scales.
+   */
+  //@{
+  void convertTextureLookups();
+  //@}
+  
+private:
+  /// NOT IMPLEMENTED
+  ShTransformer(const ShTransformer& other);
+  /// NOT IMPLEMENTED
+  ShTransformer& operator=(const ShTransformer& other);
 
-  private:
-    /// NOT IMPLEMENTED
-    ShTransformer(const ShTransformer& other);
-    /// NOT IMPLEMENTED
-    ShTransformer& operator=(const ShTransformer& other);
-
-    ShProgram m_program;
-    ShCtrlGraphPtr m_graph;
-    bool m_changed;
+  ShProgram m_program;
+  ShCtrlGraphPtr m_graph;
+  bool m_changed;
 };
 
 }

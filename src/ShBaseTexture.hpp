@@ -4,6 +4,7 @@
 #include "ShTextureNode.hpp"
 #include "ShMemory.hpp"
 #include "ShVariable.hpp"
+#include "ShAttrib.hpp"
 
 namespace SH {
 
@@ -17,7 +18,10 @@ public:
 
   ShMemoryPtr memory();
   void memory(ShMemoryPtr memory);
-  
+  void size(int width);
+
+  ShAttrib1f size() const;
+
 protected:
   ShTextureNodePtr m_node;
 };
@@ -32,6 +36,9 @@ public:
 
   ShMemoryPtr memory();
   void memory(ShMemoryPtr memory);
+  void size(int width, int height);
+
+  ShAttrib2f size() const;
   
 protected:
   ShTextureNodePtr m_node;
@@ -47,7 +54,10 @@ public:
 
   ShMemoryPtr memory();
   void memory(ShMemoryPtr memory);
+  void size(int width, int height);
   
+  ShAttrib2f size() const;
+
 protected:
   ShTextureNodePtr m_node;
 };
@@ -62,7 +72,10 @@ public:
 
   ShMemoryPtr memory();
   void memory(ShMemoryPtr memory);
-  
+  void size(int width, int height, int depth);
+
+  ShAttrib3f size() const;
+
 protected:
   ShTextureNodePtr m_node;
 };
@@ -77,6 +90,9 @@ public:
 
   ShMemoryPtr memory(ShCubeDirection face);
   void memory(ShMemoryPtr memory, ShCubeDirection face);
+  void size(int width, int height);
+  
+  ShAttrib2f size() const;
   
 protected:
   ShTextureNodePtr m_node;

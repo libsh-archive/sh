@@ -28,6 +28,7 @@
 #include "ShTextureNode.hpp"
 #include "ShEnvironment.hpp"
 #include "ShDebug.hpp"
+#include "ShAttrib.hpp"
 
 namespace SH {
 
@@ -40,6 +41,16 @@ ShTextureNode::ShTextureNode(ShTextureDims dims, int size,
     m_traits(traits),
     m_width(width), m_height(height), m_depth(depth)
 {
+  if (m_dims == SH_TEXTURE_1D) {
+    ShAttrib1f v = ShAttrib1f(width);
+    m_texSizeVar = ShVariable(v.node());
+  } else if (m_dims == SH_TEXTURE_3D) {
+    ShAttrib3f v = ShAttrib3f(width, height, depth);
+    m_texSizeVar = ShVariable(v.node());
+  } else {
+    ShAttrib2f v = ShAttrib2f(width, height);
+    m_texSizeVar = ShVariable(v.node());
+  }
 }
 
 ShTextureNode::~ShTextureNode()
@@ -98,6 +109,21 @@ ShTextureTraits& ShTextureNode::traits()
   return m_traits;
 }
 
+void ShTextureNode::width(int s)
+{
+  m_width = s;
+}
+
+void ShTextureNode::height(int s)
+{
+  m_height = s;
+}
+
+void ShTextureNode::depth(int s)
+{
+  m_depth = s;
+}
+
 int ShTextureNode::width() const
 {
   return m_width;
@@ -111,6 +137,11 @@ int ShTextureNode::height() const
 int ShTextureNode::depth() const
 {
   return m_depth;
+}
+
+const ShVariable& ShTextureNode::texSizeVar() const
+{
+  return m_texSizeVar;
 }
 
 }

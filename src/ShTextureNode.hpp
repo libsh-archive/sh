@@ -30,6 +30,7 @@
 #include "ShVariableNode.hpp"
 #include "ShMemory.hpp"
 #include "ShRefCount.hpp"
+#include "ShVariable.hpp"
 
 namespace SH {
 
@@ -131,13 +132,21 @@ public:
   int height() const; // not for SH_TEXTURE_1D
   int depth() const; // only for SH_TEXTURE_3D
 
+  void width(int w);
+  void height(int h);
+  void depth(int d);
+
+  const ShVariable& texSizeVar() const;
+  
 private:
   ShTextureDims m_dims;
-
+  
   ShMemoryPtr* m_memory; // array of either 1 or 6 (for cubemaps)
   
   ShTextureTraits m_traits;
   int m_width, m_height, m_depth;
+
+  ShVariable m_texSizeVar;
   
   // NOT IMPLEMENTED
   ShTextureNode(const ShTextureNode& other);

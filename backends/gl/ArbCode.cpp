@@ -117,11 +117,13 @@ void ArbCode::generate()
 {
   // Transform code to be ARB_fragment_program compatible
   m_shader = cloneProgram(m_originalShader);
+  ShEnvironment::insideShader = true;
   ShEnvironment::shader = m_shader;
   ShTransformer transform(m_shader);
 
   transform.convertInputOutput(); 
   transform.splitTuples(4, m_splits);
+  transform.convertTextureLookups();
   
   if(transform.changed()) {
     ShOptimizer optimizer(m_shader->ctrlGraph);
@@ -136,6 +138,9 @@ void ArbCode::generate()
   genNode(m_shader->ctrlGraph->entry());
   m_shader->ctrlGraph->entry()->clearMarked();
   allocRegs();
+
+  ShEnvironment::insideShader = false;
+  ShEnvironment::shader = 0;
 }
 
 bool ArbCode::allocateRegister(const ShVariableNodePtr& var)
@@ -680,6 +685,7 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       m_instructions.push_back(ArbInst(SH_ARB_POW, stmt.dest, stmt.src[0], stmt.src[1]));
       break;
     case SH_OP_TEX:
+    case SH_OP_TEXI:
       m_instructions.push_back(ArbInst(SH_ARB_TEX, stmt.dest, stmt.src[1], stmt.src[0]));
       break;
     case SH_OP_XPD:

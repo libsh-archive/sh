@@ -29,14 +29,14 @@
     dumpfilename += "-control.dot";
 
     std::ofstream dumpfile(dumpfilename.c_str());
-    ShEnvironment::shader->ctrlGraph->graphvizDump(dumpfile);
-
-    ShEnvironment::insideShader = false;
-    ShEnvironment::shader = 0;
+    shader->ctrlGraph->graphvizDump(dumpfile);
  
     return 0;
   } catch (const ShException& e) {
     std::cerr << "SH Exception: " << e.message() << std::endl;
+    return -1;
+  } catch (const std::exception& e) {
+    std::cerr << "C++ Exception: " << e.what() << std::endl;
     return -1;
   } catch (...) {
     std::cerr << "Unknown exception caught." << std::endl;

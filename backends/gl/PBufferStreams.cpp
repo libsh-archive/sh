@@ -90,9 +90,11 @@ private:
 class TexFetcher {
 public:
   TexFetcher(StreamInputMap& input_map,
-             ShVariableNodePtr tc_node)
+             ShVariableNodePtr tc_node,
+             bool indexed)
     : input_map(input_map),
-      tc_node(tc_node)
+      tc_node(tc_node),
+      indexed(indexed)
   {
   }
 
@@ -123,8 +125,12 @@ public:
       }
 
       ShVariable texVar(I->second);
-      
-      stmt = ShStatement(stmt.dest, texVar, SH_OP_TEX, coordsVar);
+
+      if (indexed) {
+        stmt = ShStatement(stmt.dest, texVar, SH_OP_TEXI, coordsVar);
+      } else {
+        stmt = ShStatement(stmt.dest, texVar, SH_OP_TEX, coordsVar);
+      }
       // The following is useful for debugging
       // stmt = ShStatement(stmt.dest, SH_OP_ASN, coordsVar);
     }
@@ -133,6 +139,7 @@ public:
 private:
   StreamInputMap& input_map;
   ShVariableNodePtr tc_node;
+  bool indexed;
 };
 
 PBufferStreams::PBufferStreams(int context)
@@ -307,7 +314,7 @@ void PBufferStreams::execute(const ShProgram& program,
   ShVariableNodePtr tc_node = fp->inputs.back(); // there should be only one input anyways
 
   // replace FETCH with TEX
-  TexFetcher texFetcher(input_map, tc_node);
+  TexFetcher texFetcher(input_map, tc_node, extension == SH_ARB_NV_FLOAT_BUFFER);
   fp->ctrlGraph->dfs(texFetcher);
   fp->collectVariables(); // necessary to collect all the new textures
   

@@ -418,5 +418,53 @@ void ShTransformer::convertInputOutput()
   ioc.updateGraph(); 
 }
 
+struct TextureLookupConverter {
+  TextureLookupConverter() : changed(false) {}
+  
+  void operator()(const ShCtrlGraphNodePtr& node)
+  {
+    if (!node) return;
+    ShBasicBlockPtr block = node->block;
+    if (!block) return;
+    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+      convert(block, I);
+    }
+  }
+
+  void convert(ShBasicBlockPtr block, ShBasicBlock::ShStmtList::iterator& I)
+  {
+    const ShStatement& stmt = *I;
+    if (stmt.op != SH_OP_TEX && stmt.op != SH_OP_TEXI) return;
+    ShTextureNodePtr tn = shref_dynamic_cast<ShTextureNode>(stmt.src[0].node());
+
+    ShBasicBlock::ShStmtList newStmts;
+    
+    if (!tn) { SH_DEBUG_ERROR("TEX Instruction from non-texture"); return; }
+    if (stmt.op == SH_OP_TEX && tn->dims() == SH_TEXTURE_RECT) {
+      ShVariable tc(new ShVariableNode(SH_TEMP, tn->texSizeVar().size()));
+      newStmts.push_back(ShStatement(tc, stmt.src[1], SH_OP_MUL, tn->texSizeVar()));
+      newStmts.push_back(ShStatement(stmt.dest, stmt.src[0], SH_OP_TEXI, tc));
+    } else if (stmt.op == SH_OP_TEXI && tn->dims() != SH_TEXTURE_RECT) {
+      ShVariable tc(new ShVariableNode(SH_TEMP, tn->texSizeVar().size()));
+      newStmts.push_back(ShStatement(tc, stmt.src[1], SH_OP_DIV, tn->texSizeVar()));
+      newStmts.push_back(ShStatement(stmt.dest, stmt.src[0], SH_OP_TEX, tc));
+    } else {
+      return;
+    }
+    I = block->erase(I);
+    block->splice(I, newStmts);
+    changed = true;
+  }
+
+  bool changed;
+};
+
+void ShTransformer::convertTextureLookups()
+{
+  TextureLookupConverter conv;
+  m_graph->dfs(conv);
+  if (conv.changed) m_changed = true;
+}
+
 }
 

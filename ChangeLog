@@ -1,5 +1,18 @@
 2004-03-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShTransformer.cpp (convertTextureLookups): Add this function
+	to convert texture lookups to appropriate metrics. operator() and
+	operator[] do The Right Thing on textures now.
+
+	* src/ShTextureNode.hpp: Include a uniform to keep track of the
+	texture's size.
+
+	* src/ShBaseTexture.hpp, src/ShBaseTextureImpl.hpp: Include a size
+	variable and size-setting functions.
+
+	* backends/gl/ArbCode.cpp (generate): Set ShEnvironment::shader to
+	0 after generating the code.
+
 	* backends/cpu/CPU.cpp (encode): Include math.h in generated code. 
 
 	* src/ShVariableNode.cpp (name): Output names for InOut variables.
