@@ -32,23 +32,19 @@
 namespace {
 
 struct LifeToken {
-  LifeToken(const SH::ShVariableNodePtr& var, int index, bool end, int index2)
-    : var(var), index(index), end(end), index2(index2)
+  LifeToken(const SH::ShVariableNodePtr& var, int index, bool end)
+    : var(var), index(index), end(end) 
   {
   }
   
   SH::ShVariableNodePtr var;
   int index;
   bool end;
-  int index2;
 
-  // order by index, then end, then index2
+  // order by index, then end
   bool operator<(const LifeToken& other) const
   {
     if (index == other.index) {
-      if(end == other.end) {
-        return index2 < other.index2;
-      }
       return !end;
     }
     return index < other.index;
@@ -87,24 +83,14 @@ void ShLinearAllocator::debugDump()
 
 void ShLinearAllocator::allocate()
 {
-  std::set<LifeToken> starters;
-  std::set<LifeToken> enders;
+  std::multiset<LifeToken> temps;
 
-  int i = 0;
-  for (LifetimeMap::const_iterator I = m_lifetimes.begin(); I != m_lifetimes.end(); ++I, ++i) {
-    starters.insert(LifeToken(I->first, I->second.first, false, i));
-    enders.insert(LifeToken(I->first, I->second.last, true, i));
+  for (LifetimeMap::const_iterator I = m_lifetimes.begin(); I != m_lifetimes.end(); ++I) {
+    temps.insert(LifeToken(I->first, I->second.first, false));
+    temps.insert(LifeToken(I->first, I->second.last, true));
   }
 
-  std::list<LifeToken> tokens;
-
-  std::back_insert_iterator< std::list<LifeToken> > bii(tokens);
-  
-  std::set_union(starters.begin(), starters.end(),
-                 enders.begin(), enders.end(),
-                 bii);
-
-  for (std::list<LifeToken>::const_iterator I = tokens.begin(); I != tokens.end(); ++I) {
+  for (std::multiset<LifeToken>::const_iterator I = temps.begin(); I != temps.end(); ++I) {
     if (!I->end) {
       if (!m_backendCode->allocateRegister(I->var)) {
         // TODO: Error
