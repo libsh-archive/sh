@@ -59,7 +59,7 @@ ShProgram shTransform(const ShMatrix<Rows, Cols, Kind, T> &m) {
 }
 
 template<typename T>
-ShProgram shAccess(const ShTexture1D<T> &tex) {
+ShProgram access(const ShTexture1D<T> &tex) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     ShInputTexCoord1f SH_DECL(tc);
     ATTRIB_DECL(T, SH_VAR_OUTPUT, result); 
@@ -69,7 +69,7 @@ ShProgram shAccess(const ShTexture1D<T> &tex) {
 }
 
 template<typename T>
-ShProgram shAccess(const ShTexture2D<T> &tex) {
+ShProgram access(const ShTexture2D<T> &tex) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     ShInputTexCoord2f SH_DECL(tc);
     ATTRIB_DECL(T, SH_VAR_OUTPUT, result); 
@@ -79,7 +79,7 @@ ShProgram shAccess(const ShTexture2D<T> &tex) {
 }
 
 template<typename T>
-ShProgram shAccess(const ShTexture3D<T> &tex) {
+ShProgram access(const ShTexture3D<T> &tex) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     ShInputTexCoord3f SH_DECL(tc);
     ATTRIB_DECL(T, SH_VAR_OUTPUT, result); 

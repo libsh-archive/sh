@@ -70,19 +70,19 @@ static ShProgram shScale();
  * Inputs: IN(0) ShTexCoord1f tc
  * Outputs: OUT(0) result = tex(tc) */ 
 template<typename T> 
-static ShProgram shAccess( const ShTexture1D<T> &tex );
+static ShProgram access( const ShTexture1D<T> &tex );
 
 /* 2D texture lookup nibble 
  * Inputs: IN(0) ShTexCoord2f tc
  * Outputs: OUT(0) result = tex(tc) */ 
 template<typename T> 
-static ShProgram shAccess( const ShTexture2D<T> &tex );
+static ShProgram access( const ShTexture2D<T> &tex );
 
 /* 2D texture lookup nibble 
  * Inputs: IN(0) ShTexCoord3f tc
  * Outputs: OUT(0) result = tex(tc) */ 
 template<typename T> 
-static ShProgram shAccess( const ShTexture3D<T> &tex );
+static ShProgram access( const ShTexture3D<T> &tex );
 
 /* lerping nibble 
  * Inputs: IN(0) ShAttrib1f alpha
