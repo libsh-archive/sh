@@ -82,7 +82,7 @@ ShMatrix<1, N, SH_TEMP, T>
 operator*(const ShGeneric<1, T>& a, const ShMatrix<1, N, Binding, T>& b);
 /// Matrix-scalar division
 template<int M, int N, ShBindingType Binding, typename T>
-ShMatrix<1, N, SH_TEMP, T>
+ShMatrix<M, N, SH_TEMP, T>
 operator/(const ShMatrix<M, N, Binding, T>& a, const ShGeneric<1, T>& b);
 
 /** \brief Returns the determinant for the matrix in parameter

@@ -168,6 +168,7 @@ det(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix)
     } else {
       ret += matrix[RowsCols - 1][i] * det(matrix.subMatrix(RowsCols - 1, i));
     }
+    flip = !flip;
   }
   return ret;
 }
@@ -239,7 +240,7 @@ template<int RowsCols, ShBindingType Binding, typename T>
 ShMatrix<RowsCols,RowsCols, SH_TEMP, T>
 inverse(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix)
 {
-  return adjoint(matrix) * rcp(det(matrix));
+  return adjoint(matrix)/det(matrix);
 }
 
 template<int N, typename T>
