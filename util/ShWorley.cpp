@@ -114,8 +114,8 @@ class Metric {
 
 };
 
-ShAttrib1f ShWorley::worley(ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m ) {
-  ShAttrib1f result;
+ShAttrib3f ShWorley::worley(ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m ) {
+  ShAttrib3f result;
   Metric dist(m);
 
   int i, j;
@@ -154,9 +154,12 @@ ShAttrib1f ShWorley::worley(ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m ) {
   ShAttrib4f gradAdj[4];
   ShAttrib2f gradCell;
   dcell = dist( cellPoint, fp );
+  gradCell = fp - cellPoint;
   for(i = 0; i < 4; ++i) {
     dadj[0](i) = dist( adjPoints[i](0,1), fp );
     dadj[1](i) = dist( adjPoints[i](2,3), fp );
+    gradAdj[i](0,1) = fp - adjPoints[i](0,1);
+    gradAdj[i](2,3) = fp - adjPoints[i](2,3);
   }
 
   // TODO find faster method to do k-selection for k = { 1, 2, 3, 4 }
@@ -181,7 +184,24 @@ ShAttrib1f ShWorley::worley(ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m ) {
   resultVec(0,2) = even(0,1);
   resultVec(1,3) = odd(0,1);
 
-  result = dot(resultVec, c);
+  //TODO integrate this gradient selection into the above sort.
+  //This is a really really UGLY hack
+  ShAttrib2f grads[4];
+  for (i=0; i<4; i++)
+  {
+    grads[i] = (resultVec(i)==dcell)*gradCell;
+    for (j=0; j<4; j++)
+    {
+      grads[i] = grads[i] + (resultVec(i)==dadj[0](i))*gradAdj[j](0,1);
+      grads[i] = grads[i] + (resultVec(i)==dadj[1](i))*gradAdj[j](2,3);
+    }
+  }
+
+  result(0,1) = c(0)*grads[0] + 
+	  	c(1)*grads[1] +
+		c(2)*grads[2] +
+		c(3)*grads[3];
+  result(2) = dot(resultVec, c);
   return result;
 }
 
