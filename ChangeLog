@@ -1,3 +1,17 @@
+2003-08-25  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/Makefile.am (CXXFLAGS): Enable optimizations.
+
+	* src/ShStatement.hpp: Add an XPD statement.
+
+	* src/ShVariableNode.cpp (ShVariableNode): Initialize variables
+	with 0 in each element.
+
+	* src/ShMatrixImpl.hpp (ShMatrix): Initialize matrices with
+	identity matrices.
+
+	* src/ShLib.hpp (cross): Add a cross product routine for 3-tuples.
+
 2003-08-22  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShOptimizer.cpp (copyValue): Improve efficiency slightly.

@@ -37,6 +37,7 @@ ShVariableNode::ShVariableNode(ShVariableKind kind, int size, ShVariableSpecialT
 {
   if (m_kind != SH_VAR_TEXTURE && (m_uniform || m_kind == SH_VAR_CONST)) {
     m_values = new ValueType[size];
+    for (int i = 0; i < size; i++) m_values[i] = 0.0;
   }
   switch (m_kind) {
   case SH_VAR_INPUT:

@@ -45,6 +45,8 @@ public:
   ShVariable();
   ShVariable(const ShVariableNodePtr& node);
 
+  ~ShVariable() {}
+
   bool null() const; ///< true iff node is a null pointer.
   
   bool uniform() const; ///< Is this a uniform (non-shader specific) variable?

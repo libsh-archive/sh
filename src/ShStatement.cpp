@@ -63,6 +63,7 @@ const ShOperationInfo opInfo[] = {
   {"SQRT", 1},
 
   {"NORM", 1},
+  {"XPD", 2},
 
   {"TEX", 2},
 

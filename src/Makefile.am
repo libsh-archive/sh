@@ -1,4 +1,3 @@
-AM_CXXFLAGS = -O0 -g
 INCLUDES = $(LTDLINCL)
 
 lib_LTLIBRARIES = libsh.la

@@ -501,7 +501,6 @@ ShVariableN<N, T> cos(const ShVariableN<N, T>& var)
   }
 }
 
-
 // Dot product
 template<int N, typename T>
 ShVariableN<1,  T> dot(const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
@@ -629,6 +628,28 @@ ShVariableN<N, T> sqrt(const ShVariableN<N, T>& var)
 }
 
 // Geometrical operations
+
+template<typename T>
+ShVariableN<3, T> cross(const ShVariableN<3, T>& left, const ShVariableN<3, T>& right)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(left.hasValues());
+    T lvals[3];
+    left.getValues(lvals);
+    T rvals[3];
+    right.getValues(rvals);
+    T result[3];
+    result[0] = lvals[1] * rvals[2] - lvals[2] * rvals[1];
+    result[1] = -(lvals[0] * rvals[2] - lvals[2] * rvals[0]);
+    result[2] = lvals[0] * rvals[1] - lvals[1] * rvals[0];
+    return ShConstant<3, T>(result);
+  } else {
+    ShAttrib<3, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, left, SH_OP_XPD, right);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
 
 template<int N, typename T>
 ShVariableN<N, T> normalize(const ShVariableN<N, T>& var)

@@ -68,6 +68,7 @@ enum ShOperation {
   SH_OP_SQRT, ///< Unary square root
 
   SH_OP_NORM, ///< Normalize vector
+  SH_OP_XPD, ///< Cross product
 
   SH_OP_TEX, ///< Texture lookup
 

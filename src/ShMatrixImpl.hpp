@@ -35,6 +35,10 @@ namespace SH {
 template<int Rows, int Cols, int Kind, typename T>
 ShMatrix<Rows, Cols, Kind, T>::ShMatrix()
 {
+  if (Rows == Cols) {
+    for (int i = 0; i < Rows; i++)
+      m_data[i][i] = 1.0;
+  }
 }
 
 template<int Rows, int Cols, int Kind, typename T>
