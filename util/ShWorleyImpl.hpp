@@ -34,169 +34,212 @@
 #include "ShNoise.hpp"
 #include "ShFunc.hpp"
 #include "ShImage.hpp"
-#include "ShAttribImpl.hpp"
-#include "ShGenericImpl.hpp"
 #include "ShTexCoord.hpp"
+#include "shimpl.hpp"
 
 namespace ShUtil {
 
 using namespace SH;
 
-static const int DX[] = { 0, 1, 1, 0, -1, -1, -1, 0, 1 };
-static const int DY[] = { 0, 0, 1, 1, 1, 0, -1, -1, -1 }; 
-static const int DSIZE = 9; 
+template<int D, typename T>
+void GridGenFactory<D, T>::operator()(const ShGeneric<D, T> &p, Generator<D, T> result[]) const {
+  ShAttrib<D, SH_TEMP, T> pCell = floor(p);
 
-class Metric {
-  private:
-    ShWorleyMetric m;
-  public:
-    Metric(ShWorleyMetric m): m(m) {}
-    ShAttrib1f operator()(ShAttrib2f a, ShAttrib2f b) {
-      switch(m) {
-        case L1: return lOneDistance(a, b);
-        case L2: return distance(a, b);
-        case L2_SQ: 
-        {
-          ShAttrib2f temp = a - b;
-          return dot(temp, temp);
-        }
-        case LINF: return lInfDistance(a, b);
-      }
+  // each set of two bits represents offset along one dimension
+  // if the bit value = 0, offset by -1, 1 = no offset, 2 = offset by 1 
+  int i, j, offsetBits;
+  ShConstAttrib3f offsets(-1, 0, 1);
+  int offsetSwiz[D];
+  j = 0;
+  for(offsetBits = 0; offsetBits < (1 << (D * 2)); ++offsetBits) {
+    for(i = 0; i < D; ++i) {
+      offsetSwiz[i] = ((offsetBits >> (i * 2)) & 3); 
+      if(offsetSwiz[i] == 3) break;
     }
+    if(i < D) continue;
 
+    Generator<D, T> gen;
+    result[j].offset = offsets.template swiz<D>(offsetSwiz); 
+    SH_DEBUG_PRINT("Offset:" << result[j].offset); 
+    result[j].cell = pCell + result[j].offset;
+    makePos(result[j]);
+    ++j;
+  }
+}
+
+
+template<int D, typename T>
+void DefaultGenFactory<D, T>::makePos(Generator<D, T> &g) const {
+  g.pos = g.cell + cellnoise<D>(g.cell, m_useTexture, true);
+}
+
+template<int D, typename T>
+ShConstAttrib1f NullGenFactory<D, T>::half(0.5f);
+
+template<int D, typename T>
+void NullGenFactory<D, T>::makePos(Generator<D, T> &g) const {
+  g.pos = g.cell + fillcast<D>(half); 
+}
+
+template<int D, typename T>
+LerpGenFactory<D, T>::LerpGenFactory(const ShGeneric<1, T> &time, bool useTexture)
+  : m_time(time), m_useTexture(useTexture) {}
+
+template<int D, typename T>
+void LerpGenFactory<D, T>::makePos(Generator<D, T> &g) const {
+  ShAttrib<1, SH_TEMP, T> lastTime = floor(m_time);
+  ShAttrib<1, SH_TEMP, T> timeOffset = frac(m_time);
+  ShAttrib<D + 1, SH_TEMP, T> offsetCell;
+
+  offsetCell = fillcast<D+1>(g.cell);
+  offsetCell(D) = lastTime;
+  ShAttrib<D, SH_TEMP, T> p1 = cellnoise<D>(offsetCell, m_useTexture, true); 
+
+  offsetCell(D) += 1;
+  ShAttrib<D, SH_TEMP, T> p2 = cellnoise<D>(offsetCell, m_useTexture, true); 
+
+  g.pos = g.cell + lerp(timeOffset, p2, p1);
+}
+
+template<int N, int D, typename T, typename P1, typename P2>
+CombinedPropFactory<N, D, T, P1, P2>::CombinedPropFactory(const P1 *propFactory1, const P2 *propFactory2)
+  : m_propFactory1(propFactory1), m_propFactory2(propFactory2) {}
+
+template<int N, int D, typename T, typename P1, typename P2>
+ShGeneric<N, T> CombinedPropFactory<N, D, T, P1, P2>::operator()(
+    const ShGeneric<D, T> &p, const Generator<D, T> &g) const {
+  return join((*m_propFactory1)(p, g), (*m_propFactory2)(p, g));
+}
+
+template<typename P1, typename P2>
+PropertyFactory<P1::NUM_PROPS + P2::NUM_PROPS, P1::DIM, typename P1::PropType>*
+combine(const P1 *propFactory1, const P2 *propFactory2) {
+  const int N = P1::NUM_PROPS + P2::NUM_PROPS;
+  return new CombinedPropFactory<N, P1::DIM, typename P1::PropType, P1, P2>(propFactory1, propFactory2);
+}
+
+template<int D, typename T>
+ShGeneric<1, T> DistSqPropFactory<D, T>::operator()(
+    const ShGeneric<D, T> &p, const Generator<D, T> &g) const {
+  ShAttrib<D, SH_TEMP, T> delta = p - g.pos;
+  return delta | delta; 
+}
+
+template<int D, typename T>
+ShGeneric<1, T> Dist_1PropFactory<D, T>::operator() (
+    const ShGeneric<D, T> &p, const Generator<D, T> &g) const {
+  ShAttrib<D, SH_TEMP, T> delta = abs(p - g.pos);
+  return delta | fillcast<D>(ShConstAttrib1f(1.0f)); 
+}
+
+template<int D, typename T>
+ShGeneric<3, T> DistSqGradientPropFactory<D, T>::operator() (
+    const ShGeneric<D, T> &p, const Generator<D, T> &g) const {
+  ShAttrib<3, SH_TEMP, T> result;
+  ShAttrib<D, SH_TEMP, T> delta = p - g.pos;
+
+  result(0) = delta | delta; 
+  result(1,2) = delta * result(0);
+  return result;
 };
 
-template<typename T>
-ShGeneric<2, T> ShWorleyDefaultPointGen<T>::operator()(const ShGeneric<2, T> &p, bool useTexture) const {
-    return cellnoise<2>(p, useTexture, true); 
-}
-template<typename T>
-ShWorleyLerpingPointGen<T>::ShWorleyLerpingPointGen(const ShGeneric<1, T> &time)
-  : m_time(time) {}
+template<int N, int D, typename T>
+ShGeneric<N, T> CellnoisePropFactory<N, D, T>::operator() (
+    const ShGeneric<D, T> &p, const Generator<D, T> &g) const {
+  return cellnoise<N>(g.cell, m_useTexture, true);
+};
 
-template<typename T>
-ShGeneric<2, T> ShWorleyLerpingPointGen<T>::operator()(const ShGeneric<2, T> &p, bool useTexture) const {
-    ShAttrib<1, SH_TEMP, T> lastTime = floor(m_time);
-    ShAttrib<1, SH_TEMP, T> timeoffset = frac(m_time);
-    ShAttrib<3, SH_TEMP, T> offsetp;
+template<typename TexType, typename T>
+Tex2DPropFactory<TexType, T>::Tex2DPropFactory(
+    const ShBaseTexture2D<TexType> &tex, const ShGeneric<1, T> &scale)
+  : m_tex(tex), m_scale(scale), invScale(ShConstAttrib2f(1.0f, 1.0f) / tex.size()) {}
 
-    // get point position for last time step
-    offsetp(0,1) = p;
-    offsetp(2) = lastTime;
-    ShAttrib<2, SH_TEMP, T> p1 = cellnoise<2>(offsetp, useTexture, true); 
-
-    // get point position for next time step
-    offsetp(2) += 1.0f;
-    ShAttrib<2, SH_TEMP, T> p2 = cellnoise<2>(offsetp, useTexture, true);
-
-    return lerp(timeoffset, p2, p1);
+template<typename TexType, typename T>
+ShGeneric<TexType::typesize, T> Tex2DPropFactory<TexType, T>::operator()(
+    const ShGeneric<2, T> &p, const Generator<2, T> &g) const {
+  return m_tex(frac(g.cell * invScale * m_scale)) * ShConstAttrib1f(1.0f);
 }
 
-// TODO split off the point generation section 
-//   (can allow weird (i.e. fXXXing slow) methods
-//   like interpolating between a sequence of points for animated worley,
-//   or using textures for partial data and noise for the rest (i.e. make 
-//   some worley cells spell out letters)
-//
-// Split off sorting section (can sort other data, like cellnoise colour
-// geneated for each cell, etc.)
-//
+template<int N, int K, int P, typename T>
+void kSelect(const ShGeneric<P, T> vals[N], ShGeneric<K, T> result[N], float LARGE = 1e10) {
+  result[0] = fillcast<K>(ShConstAttrib1f(LARGE));
 
-template<int N, typename T, typename PointGen>
-void doWorley(const ShGeneric<2, T> &p, const ShGeneric<N, T> &c, 
-              ShWorleyMetric m,
-              ShGeneric<1, T> &scalarResult, 
-              ShGeneric<2, T> &gradientResult, bool useTexture, 
-              const PointGen &generator) {
-  int i;
-  Metric dist(m);
+  int i, j, k, l;
+  int shiftswiz[K];
+  ShAttrib1f c;
+  for(i = 0; i < K; ++i) shiftswiz[i] = (i == 0 ? 0 : i - 1);
 
-  // get integer lattice point & offset from integer lattice point
-  ShAttrib<2, SH_TEMP, T> ip = floor(p);
-  ShAttrib<2, SH_TEMP, T> op = frac(p); 
+  // insert into result one by one
+  for(i = 0; i < P; ++i) {
+    // check if smaller than the first one
+    c = vals[0](i) < result[0](0);
+    for(j = 0; j < N; ++j) {
+      result[0] = lerp(c, result[0].template swiz<K>(shiftswiz), result[0]); 
+      result[0](0) = lerp(c, vals[0](i), result[0](0));
+    }
 
-  // find distances & gradients to neighbours
-  // adj[0](i) stores distance to point i, adj[1](i), adj[2](i) hold gradient
-  ShAttrib<2, SH_TEMP, T> point; 
-  ShAttrib<DSIZE, SH_TEMP, T> adj[3]; 
-  ShAttrib<2, SH_TEMP, T> gradTemp;
-  
-  for(i = 0; i < DSIZE; ++i) {
-    ShAttrib<2, SH_CONST, T> offset(DX[i], DY[i]);
-    point = generator(ip + offset, useTexture) + offset;
+    // check for the other ones
+    for(j = 1; j < K; ++j) {
+      c = (result[0](j-1) < vals[0](i)) * (vals[0](i) < result[0](j));
+      for(k = 0; k < N; ++k) {
+        for(l = 0; l < K; ++l) shiftswiz[l] = l + ( l >= j ? -1 : 0); 
+        result[k] = lerp(c, result[k].template swiz<K>(shiftswiz), result[k]);
+        result[k](j) = lerp(c, vals[k](i), result[k](j));
+      }
+    }
+  }
+}
 
-    adj[0](i) = dist(point, op);
-    gradTemp = normalize(point - op); 
-    adj[1](i) = gradTemp(0);
-    adj[2](i) = gradTemp(1);
+template<int K, int N, int P, int D, typename T>
+ShGeneric<N, T> worley(const ShGeneric<D, T> &p, const ShGeneric<K, T> coeff[N],
+    const GeneratorFactory<P, D, T> *genFactory,
+    const PropertyFactory<N, D, T> *propFactory) {
+
+  int i, j;
+  Generator<D, T> generators[P];
+  ShAttrib<P, SH_TEMP, T> props[N]; 
+  ShAttrib<N, SH_TEMP, T> propTemp; 
+
+  (*genFactory)(p, generators); // make generators
+  for(i = 0; i < P; ++i) {
+    propTemp = (*propFactory)(p, generators[i]);
+    for(j = 0; j < N; ++j) props[j](i) = propTemp(j);
   }
 
   // sort points & gradients by distance
-  groupEvenOddSort<3>(adj); 
+  groupEvenOddSort<N>(props); 
 
   // weighted sum of basis function values to get final result
-  scalarResult = dot(fillcast<N>(adj[0]), c);
-  gradientResult(0) = dot(fillcast<N>(adj[1]), c);
-  gradientResult(1) = dot(fillcast<N>(adj[2]), c);
-}
-
-template<int N, typename T, typename PointGen>
-ShGeneric<3, T> worley(const ShGeneric<2, T> &p,
-    const ShGeneric<N, T> &c, ShWorleyMetric m, bool useTexture, 
-    const PointGen &generator) {
-  ShAttrib<3, SH_TEMP, T> result;
-  ShAttrib<1, SH_TEMP, T> scalar;
-  ShAttrib<2, SH_TEMP, T> grad;
-
-  doWorley(p, c, m, scalar, grad, useTexture, generator);
-
-  result(0) = scalar;
-  result(1,2) = grad;
+  ShAttrib<N, SH_TEMP, T> result;
+  for(j = 0; j < N; ++j) result(j) = dot(cast<K>(props[j]), coeff[j]);
   return result;
 }
 
-template<int N, typename T>
-ShGeneric<3, T> worley(const ShGeneric<2, T> &p,
-    const ShGeneric<N, T> &c, ShWorleyMetric m, bool useTexture) {
-  ShWorleyDefaultPointGen<T> generator;
-  return worley<N, T>(p, c, m, useTexture, generator);
+template<int K, int D, typename T>
+ShGeneric<1, T> worley(const ShGeneric<D, T> &p, const ShGeneric<K, T> &coeff,
+        bool useTexture = true) {
+  DefaultGenFactory<D, T> genFactory(useTexture);
+  DistSqPropFactory<D, T> propFactory;
+  return worley(p, &coeff, &genFactory, &propFactory);
 }
 
-template<int N, typename T, typename PointGen>
-ShGeneric<1, T> worleyNoGradient(const ShGeneric<2, T> &p,
-    const ShGeneric<N, T> &c, ShWorleyMetric m, bool useTexture,
-    const PointGen &generator) {
-  ShAttrib<1, SH_TEMP, T> result;
-  ShAttrib<2, SH_TEMP, T> dummy;
-  doWorley(p, c, m, result, dummy, useTexture, generator); 
-  return result;
+template<int K, int D, typename T>
+ShProgram shWorley(bool useTexture) {
+  DefaultGenFactory<D, T> genFactory(useTexture);
+  DistSqPropFactory<D, T> propFactory;
+  return shWorley<K>(&genFactory, &propFactory); 
 }
 
-template<int N, typename T>
-ShGeneric<1, T> worleyNoGradient(const ShGeneric<2, T> &p,
-    const ShGeneric<N, T> &c, ShWorleyMetric m, bool useTexture) {
-  ShWorleyDefaultPointGen<T> generator;
-  return worleyNoGradient<N, T>(p, c, m, useTexture, generator);
-}
-
-template<int N, typename T, typename PointGen>
-ShProgram worleyProgram(ShWorleyMetric m, bool useTexture,
-    const PointGen &generator) {
+template<int K, int N, int P, int D, typename T>
+ShProgram shWorley(const GeneratorFactory<P, D, T> *genFactory,
+        const PropertyFactory<N, D, T> *propFactory) {
   ShProgram program = SH_BEGIN_PROGRAM() {
-    ShAttrib<N, SH_INPUT, T> SH_DECL(coefficients);
-    ShTexCoord<2, SH_INPUT, T> SH_DECL(texcoord);
+    ShAttrib<K, SH_INPUT, T> coefficients[N];
+    ShTexCoord<D, SH_INPUT, T> SH_DECL(texcoord);
 
-    ShAttrib<1, SH_OUTPUT, T> SH_DECL(scalar); 
-    ShAttrib<2, SH_OUTPUT, T> SH_DECL(gradient);
-    doWorley(texcoord, coefficients, m, scalar, gradient, useTexture, generator); 
+    ShAttrib<N, SH_OUTPUT, T> SH_DECL(result) = worley(texcoord, coefficients, genFactory, propFactory); 
   } SH_END_PROGRAM;
   return program;
-}
-
-template<int N, typename T> 
-ShProgram worleyProgram(ShWorleyMetric m, bool useTexture) {
-  ShWorleyDefaultPointGen<T> generator;
-  return worleyProgram<N, T>(m, useTexture, generator); 
 }
 
 }

@@ -46,6 +46,12 @@ template<int M, typename T, int P>
 bool ShNoise<M, T, P>::m_init = false; // whether Perlin is initialized. 
 
 template<int M, typename T, int P>
+ShAttrib<1, SH_CONST, T> ShNoise<M, T, P>::constP(P);
+
+template<int M, typename T, int P>
+ShAttrib<1, SH_CONST, T> ShNoise<M, T, P>::invP(1.0 / P);
+
+template<int M, typename T, int P>
 void ShNoise<M, T, P>::init() {
   if(m_init) return;
 
@@ -106,20 +112,18 @@ ShGeneric<M, T> ShNoise<M, T, P>::noise(const ShGeneric<K, T> &p, bool useTextur
   typedef ShAttrib<M, SH_TEMP, T> ResultType;
   typedef ShAttrib<K, SH_CONST, T> ConstTempType;
   static const int NUM_SAMPLES = 1 << K;
-  static const float INVP = 1.0 / P; // TODO if optimizer propagates constants, remove this
-  static const float DP = (float)P; 
 
   TempType rp = frac(p); // offset from integer lattice point
   TempType p0, p1; // positive coordinates in [0, P)^3
   TempType ip0, ip1; // integer lattice point in [0,P)^3 for hash, [0,1)^3 for tex lookup
 
-  p0 = frac(p * INVP) * DP; 
-  p1 = frac(_pmad(p, INVP, INVP)) * DP;
+  p0 = frac(p * invP) * constP; 
+  p1 = frac(mad(p, invP, fillcast<K>(invP))) * constP;
   ip0 = floor(p0);
   ip1 = floor(p1);
   if(useTexture) { // convert to tex coordiantes (TODO remove when we have RECT textures)
-    ip0 = _padd(ip0, 0.5f) * INVP; 
-    ip1 = _padd(ip1, 0.5f) * INVP; 
+    ip0 = _padd(ip0, 0.5f) * invP; 
+    ip1 = _padd(ip1, 0.5f) * invP; 
   } 
 
   // find gradients at the NUM_SAMPLES adjacent grid points (NUM_SAMPLES = 2^K for dimension K lookup)
@@ -158,13 +162,12 @@ ShGeneric<M, T> ShNoise<M, T, P>::cellnoise(const ShGeneric<K, T> &p, bool useTe
 {
   init();
   ShAttrib<K, SH_TEMP, T> ip;
-  static const float INVP = 1.0 / P; // TODO if optimizer propagates constants, remove this
 
   if(intPoint) ip = p;
   else ip = floor(p);
 
   if( useTexture ) {
-    ip = frac(ip * INVP);
+    ip = frac(ip * invP);
     return noiseTex(fillcast<3>(ip));
   } 
   return fillcast<M>(hashmrg(ip));
@@ -198,7 +201,7 @@ ShGeneric<M, T> turbulence(const ShGeneric<N, T> &amp,
   T freq = 1.0;
   result *= 0.0; 
   for(int i = 0; i < N; ++i, freq *= 2.0) {
-    result = mad(noise<M>(p * freq, useTexture), amp(i), result);
+    result = mad(abs(snoise<M>(p * freq, useTexture)), amp(i), result);
   }
   return result;
 }
@@ -206,13 +209,7 @@ ShGeneric<M, T> turbulence(const ShGeneric<N, T> &amp,
 template<int M, int N, int K, typename T>
 ShGeneric<M, T> sturbulence(const ShGeneric<N, T> &amp,
       const ShGeneric<K, T> &p, bool useTexture) {
-  ShAttrib<M, SH_TEMP, T> result = fillcast<M>(ShConstAttrib1f(0.0));
-  T freq = 1.0;
-  result *= 0.0; 
-  for(int i = 0; i < N; ++i, freq *= 2.0) {
-    result = mad(snoise<M>(p * freq, useTexture), amp(i), result);
-  }
-  return result;
+  return _pmad(turbulence<M>(amp, p, useTexture), 2.0f, -1.0f);
 }
 
 } // namespace ShUtil

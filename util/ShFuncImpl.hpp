@@ -219,6 +219,57 @@ void groupEvenOddSort(ShAttrib<N, Binding, T> v[]) {
   }
 }
 
+template<int S, int N, ShBindingType Binding, typename T>
+void groupBitonicSort(ShAttrib<N, Binding, T> v[]) {
+  static const int C = N >> 1; // number of comparators
+
+  int i, j;
+  int log2N, ceilN; 
+  int strideBit, flipBit, stride, flip;
+  bool doFlip;
+  int swiz[2][C];
+  ShAttrib<C, SH_TEMP, T> temp[2], condition; 
+  
+  for(log2N = 0; N > (1 << log2N); log2N++);  // figure out ceil(log_2(N))
+  ceilN = 1 << log2N;
+
+  std::cout << "N = " << N << ", ceilN = " << ceilN << ", log2N = " << log2N << std::endl;
+
+  for(flipBit = 1; flipBit < log2N; ++flipBit) {
+    flip = 1 << flipBit; 
+    for(strideBit = flipBit - 1; strideBit >= 0; --strideBit) {
+      stride = 1 << strideBit; 
+      // prepare the swiz for this pass
+      doFlip = false;
+      for(i = j = 0; i < N - stride; ++j) {
+        // handle non-power of 2 N (see http://www.iti.fh-flensburg.de/lang/algorithmen/sortieren/bitonic/oddn.htm)
+        if(i >= ceilN - N) { 
+          swiz[0][j] = i + (doFlip ? stride : 0); 
+          swiz[1][j] = i + (doFlip ? 0 : stride);
+        }
+        ++i;
+        if(i % stride == 0) i += stride;
+        if(i % flip == 0) doFlip = !doFlip;
+      }
+      std::cout << "Comparators:" << std::endl;
+      for(i = 0; i < C; ++i) std::cout << "    " << swiz[0][i] << " " << swiz[1][i] << std::endl;
+
+      // do the comparison using the first element 
+      for(i = 0; i < 2; ++i) temp[i] = v[0].template swiz<C>(swiz[i]);
+      if(S > 1) condition = temp[0] < temp[1]; 
+      v[0].template swiz<C>(swiz[0]) = min(temp[0], temp[1]);
+      v[0].template swiz<C>(swiz[1]) = max(temp[0], temp[1]);
+
+      // sort remaining elements based on first element comparison 
+      for(i = 1; i < S; ++i) {
+        for(j = 0; j < 2; ++j) temp[j] = v[j].template swiz<C>(swiz[j]);
+        v[i].template swiz<C>(swiz[0]) = cond(condition, temp[0], temp[1]); 
+        v[i].template swiz<C>(swiz[1]) = cond(condition, temp[1], temp[0]); 
+      }
+    }
+  }
+}
+
 /** \brief Given 3 orthonormal basis vectors b0, b1, b2, specified relative to a coordinate space C, 
  * this does a change of basis on a vector v in space C to the orthonormal basis
  */

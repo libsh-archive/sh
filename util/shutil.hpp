@@ -29,6 +29,7 @@
 
 #include "ShFunc.hpp"
 #include "ShWorley.hpp"
+#include "ShWorleyImpl.hpp"
 #include "ShNoise.hpp"
 #include "ShKernelLib.hpp"
 #include "ShKernelLight.hpp"

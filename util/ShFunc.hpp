@@ -123,6 +123,13 @@ ShAttrib<N, Binding, T> evenOddSort(const ShAttrib<N, Binding, T>& v);
 template<int S, int N, ShBindingType Binding, typename T>
 void groupEvenOddSort(ShAttrib<N, Binding, T> v[]);
 
+/** \brief Sorts groups of components v[i](j), 0 <= i < S
+ * by the components in v[0](j) 0 <= j < N.
+ * This uses a bitonic sorting network 
+ */
+//template<int S, int N, ShBindingType Binding, typename T>
+//void groupBitonicSort(ShAttrib<N, Binding, T> v[]);
+
 /** \brief Given orthonormal basis b0, b1, b2 and vector v relative to coordinate space C,
  * does change of basis on v to the orthonormal basis b0, b1, b2
  */

@@ -1,3 +1,19 @@
+2004-05-20  Bryan Chan <b8chan@uwaterloo.ca>
+  * sh/ShLibMisc.hpp:
+  Added join library function from ref manual.
+
+  * sh/ShNibbles.hpp:
+  Added named input params from ref manual (only for binary ops).
+
+  * util/ShWorley*: 
+  Rewrote all the worley functions.  Modularized properly into
+  generator and property factories (although it's still not
+  flexible enough to handle non-linear combinations). 
+
+  * util/ShNoise.hpp:
+  Added a constant to the class to prevent recalculation
+  of the noise texture width inverse.
+
 2004-04-20  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* util/ShKernelLib.cpp (inputPass): Implemented inputPass().
