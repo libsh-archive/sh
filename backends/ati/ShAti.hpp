@@ -74,6 +74,10 @@ public:
 
   /// Actually generate the code, and do register allocation.
   void generate();
+
+  /// TODO Get rid of this when textures are implemented properly
+  // Prints out texture bindings to uber buffers
+  static void printTexBindings();
   
 private:
 
@@ -110,10 +114,10 @@ private:
   void loadTexture(SH::ShTextureNodePtr texture);
   
   /// Allocate a data texture
-  void loadDataTexture(SH::ShDataTextureNodePtr texture, unsigned int type = 0);
+  void loadDataTexture(SH::ShDataTextureNodePtr texture, const AtiReg &texReg, unsigned int type = 0 ); 
 
   /// Allocate a cube map
-  void loadCubeTexture(SH::ShCubeTextureNodePtr cube);
+  void loadCubeTexture(SH::ShCubeTextureNodePtr cube, const AtiReg &texReg);
   
   void bindSpecial(const SH::ShProgramNode::VarList::const_iterator& begin,
                    const SH::ShProgramNode::VarList::const_iterator& end,
@@ -161,6 +165,9 @@ private:
   typedef std::map<SH::ShVariableNodePtr, AtiReg> RegMap;
   RegMap m_registers;
 
+  typedef std::map<int, std::map<int, int> > TexBindingMap;
+  static TexBindingMap texBindings;
+
   std::vector<int> m_outputBindings;
   std::vector<int> m_inputBindings;
 
@@ -194,9 +201,6 @@ public:
   void allocUberbuffer(SH::ShUberbufferPtr ub);
   // TODO add flag to force allocation
   
-  /// Checks for uber buffer errors and prints them
-  void printUbErrors();
-
   void init2(void);
   void render(SH::ShVertexArray& array);
   void render_planar(SH::ShVertexArray& array);
@@ -213,6 +217,8 @@ private:
   int m_attribs[2]; ///<Maximum number of attributes for each shader kind
   int m_params[2]; ///< Maximum number of parameters for each shader kind
   int m_texs[2]; ///< Maximum number of TEX instructions for each shader kind
+
+  int m_framebufBinding; ///< Uberbuffer that GL_AUX0 is bound to (TODO accomodate other aux buffres later)
 };
 
 typedef SH::ShRefCount<AtiBackend> AtiBackendPtr;

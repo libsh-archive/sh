@@ -490,6 +490,8 @@ std::ostream& operator<<(std::ostream& out, const AtiReg& reg)
 
 using namespace SH;
 
+AtiCode::TexBindingMap AtiCode::texBindings;
+
 AtiCode::AtiCode(AtiBackendPtr backend, const ShProgram& shader, int kind)
   : m_backend(backend), m_shader(shader), m_kind(kind),
     m_numTemps(0), m_numInputs(0), m_numOutputs(0), m_numParams(0), m_numConsts(0),
@@ -507,6 +509,18 @@ void AtiCode::generate()
   genNode(m_shader->ctrlGraph->entry());
   m_shader->ctrlGraph->entry()->clearMarked();
   allocRegs();
+}
+
+void AtiCode::printTexBindings() {
+  std::cout << "Current Texture <-> Uber-Buffer Bindings" << std::endl;
+  for( TexBindingMap::iterator tbmIt = texBindings.begin();
+      tbmIt != texBindings.end(); ++tbmIt ) {
+    std::cout << "  Texture Unit " << tbmIt->first << std::endl;
+    for( std::map< int, int >::iterator it = tbmIt->second.begin();
+        it != tbmIt->second.end(); ++it ) {
+      std::cout << "    binding: " << it->first << " ubuf mem: " << it->second << std::endl;
+    }
+  }
 }
 
 bool AtiCode::allocateRegister(const ShVariableNodePtr& var)
@@ -606,6 +620,7 @@ void AtiCode::loadTexture(ShTextureNodePtr texture)
   shGlActiveTextureARB(GL_TEXTURE0 + texReg.index);
   
   glBindTexture(shGlTextureType[texture->dims()], texReg.bindingIndex);
+  SH_DEBUG_PRINT( "Active Texture Unit: " << texReg.index << " binding: " << texReg.bindingIndex ); 
   
   if (1) {
     glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -624,20 +639,21 @@ void AtiCode::loadTexture(ShTextureNodePtr texture)
     
   ShDataTextureNodePtr datatex = texture;
   if (datatex) {
-    loadDataTexture(datatex);
+    loadDataTexture(datatex, texReg);
+    printTexBindings();
     return;
   }
 
   ShCubeTextureNodePtr cubetex = texture;
   if (cubetex) {
-    loadCubeTexture(cubetex);
+    loadCubeTexture(cubetex, texReg);
     return;
   }
     
   SH_DEBUG_WARN(texture->name() << " is not a valid texture!");
 }
 
-void AtiCode::loadDataTexture(ShDataTextureNodePtr texture, unsigned int type)
+void AtiCode::loadDataTexture(ShDataTextureNodePtr texture, const AtiReg &texReg, unsigned int type)
 {
 
   /// reset the error OpenGL counter
@@ -672,7 +688,11 @@ void AtiCode::loadDataTexture(ShDataTextureNodePtr texture, unsigned int type)
   // TODO handle 1D/3D for uber buffer attaches
   ShDataMemoryObjectPtr dataMem = texture->mem();
   if( dataMem ) { // 
-    glAttachMemATI( GL_TEXTURE_2D, 0 );
+    if( texBindings[texReg.index].count(texReg.bindingIndex) != 0 ) {
+      glAttachMemATI( GL_TEXTURE_2D, 0 );
+      SH_DEBUG_PRINT( "Detach GL_TEXTURE_2D" ); 
+      texBindings[texReg.index].erase(texReg.bindingIndex);
+    }
 
     //TODO fix this hard-coded float stuff
     switch (texture->elements()) {
@@ -723,12 +743,29 @@ void AtiCode::loadDataTexture(ShDataTextureNodePtr texture, unsigned int type)
     ShUberbufferPtr ub = texture->mem(); 
     if( ub ) {
       m_backend->allocUberbuffer( ub );
-      glAttachMemATI( GL_TEXTURE_2D, ub->mem() );
 
-      m_backend->printUbErrors();
+      int oldBinding = 0;
+      if( texBindings[texReg.index].count( texReg.bindingIndex ) > 0 ) {
+        oldBinding = texBindings[texReg.index][texReg.bindingIndex];
+      }
+      if( oldBinding != ub->mem() ) {
+        if( oldBinding != 0 ) {
+          glAttachMemATI( GL_TEXTURE_2D, 0 );
+          SH_DEBUG_PRINT( "Detach GL_TEXTURE_2D" ); 
+          texBindings[texReg.index].erase( texReg.bindingIndex );
+        }
+        if( ub->mem() != 0 ) {
+          glAttachMemATI( GL_TEXTURE_2D, ub->mem() );
+          SH_DEBUG_PRINT( "Attach GL_TEXTURE_2D to mem " << ub->mem() ); 
+          texBindings[texReg.index][texReg.bindingIndex] = ub->mem();
+        }
+      }
     } else {
-      glAttachMemATI( GL_TEXTURE_2D, 0 );
-      m_backend->printUbErrors();
+      if( texBindings[texReg.index].count( texReg.bindingIndex ) != 0 ) { 
+        glAttachMemATI( GL_TEXTURE_2D, 0 );
+        SH_DEBUG_PRINT( "Detach GL_TEXTURE_2D" ); 
+        texBindings[texReg.index].erase(texReg.bindingIndex);
+      }
     }
   } 
 
@@ -749,10 +786,10 @@ void AtiCode::loadDataTexture(ShDataTextureNodePtr texture, unsigned int type)
   }
 }
 
-void AtiCode::loadCubeTexture(ShCubeTextureNodePtr cube)
+void AtiCode::loadCubeTexture(ShCubeTextureNodePtr cube, const AtiReg &texReg)
 {
   for (int i = 0; i < 6; i++) {
-    loadDataTexture(cube->face(static_cast<ShCubeDirection>(i)), shGlCubeMapTargets[i]);
+    loadDataTexture(cube->face(static_cast<ShCubeDirection>(i)), texReg, shGlCubeMapTargets[i]);
   }
 }
 
@@ -1393,6 +1430,7 @@ void AtiCode::allocTemps()
 
 AtiBackend::AtiBackend()
 {
+  m_framebufBinding = 0;
 #ifdef WIN32
 	DWORD err;
 	if ((glProgramStringARB = (PFNGLPROGRAMSTRINGARBPROC)wglGetProcAddress("glProgramStringARB")) == NULL)
@@ -1511,22 +1549,14 @@ void AtiBackend::allocUberbuffer( ShUberbufferPtr ub) {
   }
   ub->setFormat( format );
 
-  SH_DEBUG_PRINT(ub->format()<<"; "<<GL_RGBA);
-
   ub->setMem( glAllocMem2DATI(format, ub->width(), ub->height(), 
 			  i/2, propsArray ) );
   
-  SH_DEBUG_PRINT("Alocated: "<<ub->mem());
+  SH_DEBUG_PRINT("Alocated mem "<<ub->mem());
 
   delete[] propsArray;
 
   PRINT_GL_ERROR( "Allocating ubuf" );
-}
-
-void AtiBackend::printUbErrors() {
-  // TODO fix when this function is documented
-  //const GLcharARB *msg = glGetMemInfoLogATI(0);
-  //if(msg) SH_DEBUG_WARN( msg ); 
 }
 
 void AtiBackend::bindFramebuffer() {
@@ -1539,26 +1569,37 @@ void AtiBackend::bindFramebuffer() {
     ShUberbufferPtr ub = fb->getUberbuffer();
     if( ub ) {
       allocUberbuffer( ub );
-      //TODO may not be necessary
-      glAttachMemATI( GL_AUX0, ub->mem() );
 
-      SH_DEBUG_PRINT( "Attach GL_AUX0 to " << ub->mem() );
+      if( ub->mem() != m_framebufBinding ) {
+        if( m_framebufBinding != 0 ) {
+          glAttachMemATI( GL_AUX0, 0 );
+          SH_DEBUG_PRINT( "Detach GL_AUX0 from mem " << m_framebufBinding ); 
+        }
+        glAttachMemATI( GL_AUX0, ub->mem() );
+        m_framebufBinding = ub->mem();
+        SH_DEBUG_PRINT( "Attach GL_AUX0 to mem " << ub->mem() ); 
+      }
 
       //TODO other buffers 
       glDrawBuffer( GL_AUX0 ); 
+      SH_DEBUG_PRINT( "Set DrawBuffer to GL_AUX0" );
     } else {
-      glAttachMemATI( GL_AUX0, 0 );
-
-      SH_DEBUG_PRINT( "Detach GL_AUX0" ); 
-
-      glDrawBuffer( GL_BACK );
+      if( m_framebufBinding != 0 ) {
+        glAttachMemATI( GL_AUX0, 0 );
+        SH_DEBUG_PRINT( "Detach GL_AUX0 from mem " << m_framebufBinding );
+        m_framebufBinding = 0;
+      }
+      glDrawBuffer( GL_AUX0 );
+      SH_DEBUG_PRINT( "Set DrawBuffer to GL_AUX0" ); 
     }
   } else {
-      glAttachMemATI( GL_AUX0, 0 );
-
-      SH_DEBUG_PRINT( "Detach GL_AUX0" ); 
-
+      if( m_framebufBinding != 0 ) {
+        glAttachMemATI( GL_AUX0, 0 );
+        SH_DEBUG_PRINT( "Detach GL_AUX0 from mem " << m_framebufBinding );
+        m_framebufBinding = 0;
+      }
       glDrawBuffer( GL_BACK );
+      SH_DEBUG_PRINT( "Set DrawBuffer to GL_BACK" ); 
   }
 
   PRINT_GL_ERROR( "Binding Framebuffer" );
@@ -1570,19 +1611,21 @@ void AtiBackend::setUberbufferData(ShUberbufferPtr ub, const float *data) {
   if( !mem ) return; 
   //TODO replace all this junk with a glMemImage(...) call when it's implemented
 
-
+  SH_DEBUG_PRINT( "Setting data for ubuf " << mem );
   CHECK_GL_ERROR();
 
   //bind the texture 
   GLuint texBinding;
   glGenTextures(1, &texBinding);
-  shGlActiveTextureARB(GL_TEXTURE0);
+  shGlActiveTextureARB(GL_TEXTURE1);
 
   //TODO handle other dimensions
   glBindTexture(GL_TEXTURE_2D, texBinding); 
-  
+  SH_DEBUG_PRINT( "Active Texture Unit: " << 1 << " binding: " << texBinding ); 
+
   //attach the uber buffer
   glAttachMemATI( GL_TEXTURE_2D, mem ); 
+  SH_DEBUG_PRINT( "Attach GL_TEXTURE_2D temporarily to mem " << mem ); 
 
   //use glTexImage to upload data
   // TODO support other dimensions
@@ -1599,6 +1642,7 @@ void AtiBackend::setUberbufferData(ShUberbufferPtr ub, const float *data) {
 
   //detach uber buffer
   glAttachMemATI( GL_TEXTURE_2D, 0 );
+  SH_DEBUG_PRINT( "Detach GL_TEXTURE_2D" ); 
 
   //delete texture
   glDeleteTextures(1, (GLuint*)&texBinding);
@@ -1624,13 +1668,11 @@ float* AtiBackend::getUberbufferData(const ShUberbuffer *ub) {
   float* data = new float[ ub->width() * ub->height() * ub->elements() ];
 
 
-  glAttachMemATI( GL_AUX0, 0 );
-  SH_DEBUG_PRINT( "Detach GL_AUX0" );
+  CHECK_GL_ERROR();
+  glAttachMemATI( GL_AUX1, mem );
+  SH_DEBUG_PRINT( "Attach GL_AUX1 temporarily to mem " << mem );
 
-  glAttachMemATI( GL_AUX0, mem );
-  SH_DEBUG_PRINT( "Attach GL_AUX0 to " << mem );
-
-  glReadBuffer( GL_AUX0 );
+  glReadBuffer( GL_AUX1 );
 
   GLenum format;
   switch (ub->elements()) {
@@ -1640,25 +1682,12 @@ float* AtiBackend::getUberbufferData(const ShUberbuffer *ub) {
     case 4: format = GL_RGBA; break;
     default: format = 0; break;
   }
+  //TODO foo
+  SH_DEBUG_PRINT( "width " << ub->width() << "height " << ub->height() );
   glReadPixels( 0, 0, ub->width(), ub->height(), format, GL_FLOAT, data ); 
 
-  /*
-  for( int i = 0; i < ub->height(); ++i ) {
-    std::cout << "Row " << i << ": ";
-    for( int j = 0; j < ub->width(); ++j ) {
-      std::cout << "( ";
-      for( int k = 0; k < ub->elements(); ++k ) {
-        std::cout << data[ ub->elements() * ( ub->width() * i + j ) + k ] << " ";
-      }
-      std::cout << " )";
-    }
-    std::cout << std::endl;
-  }
-  */
-
-
-  glAttachMemATI( GL_AUX0, 0 );
-  SH_DEBUG_PRINT( "Detach GL_AUX0" ); 
+  glAttachMemATI( GL_AUX1, 0 );
+  SH_DEBUG_PRINT( "Detach GL_AUX1 from mem " << mem ); 
 
   glReadBuffer( oldReadBuf );
 
@@ -1717,8 +1746,9 @@ void AtiBackend::deleteUberbuffer(const ShUberbuffer* ub) {
 
   if( !ub->mem() ) return; 
   glDeleteMemATI(ub->mem());
+  SH_DEBUG_PRINT( "Deleting mem " << ub->mem() );
 
-  PRINT_GL_ERROR( "Deleting Ubuf " << ub->mem() );
+  PRINT_GL_ERROR( "Deleting uber buffer " ); 
 }
 
 }
