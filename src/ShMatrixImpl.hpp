@@ -39,9 +39,11 @@ namespace SH {
 //Constructors, destructors
 template<int Rows, int Cols, ShBindingType Binding, typename T>
 ShMatrix<Rows, Cols, Binding, T>::ShMatrix()
-{
-  for (int i = 0; i < std::min(Rows, Cols); i++)
-    m_data[i][i] = 1.0;
+{ 
+  if (Binding != SH_INPUT) {
+    for (int i = 0; i < std::min(Rows, Cols); i++)
+      m_data[i][i] = 1.0;
+  }
 }
 
 template<int Rows, int Cols, ShBindingType Binding, typename T>

@@ -1,3 +1,8 @@
+2005-01-25  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShMatrixImpl.hpp (ShMatrix): Fix default constructor to not
+	set matrix to identity for inputs.
+
 2005-01-21  Francois Marier  <francois@serioushack.com>
 
 	* src/ShSyntax.hpp, src/ShSyntax.cpp: Added a new function,
