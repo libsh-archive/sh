@@ -1,3 +1,8 @@
+2004-10-20  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* backends/cc/Cc.cpp, backends/cc/Cc.hpp: Win32 port of compiler
+	backend.
+
 2004-10-19  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
 
 	* configure.ac, backends/Makefile.am, backends/cc/Makefile.am,

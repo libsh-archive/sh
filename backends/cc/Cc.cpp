@@ -24,9 +24,14 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
+#ifdef WIN32
+#include <windows.h>
+#include <math.h>
+#else
 #include <dlfcn.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#endif /* WIN32 */
 
 #include "Cc.hpp" 
 #include "ShDebug.hpp" 
@@ -1904,7 +1909,9 @@ namespace ShCc {
       for(int i = 0; i < (*itr).cond.size(); i++)
 	{
 	if (i != 0) 
+	  {
 	  m_code << " || ";
+	  }
 
 	m_code << "(";
 	m_code << resolve((*itr).cond, i) << " > 0.0f";
@@ -1955,12 +1962,16 @@ namespace ShCc {
     prologue << "extern \"C\" void sh_cc_backend_lookupi(void*, float*, float*);" << std::endl;
     prologue << std::endl;
     prologue << "extern \"C\" "
-	   << " void func("
-	   << "float** inputs, "
-	   << "float** params, "
-	   << "float** streams, "
-	   << "void** textures, "
-	   << "float** outputs)" << std::endl;
+#ifdef WIN32
+	     << " void __declspec(dllexport) func("
+#else
+	     << " void func("
+#endif /* WIN32 */
+	     << "float** inputs, "
+	     << "float** params, "
+	     << "float** streams, "
+	     << "void** textures, "
+	     << "float** outputs)" << std::endl;
     prologue << "  {" << std::endl;
 
     // output temp declarations
@@ -1970,8 +1981,8 @@ namespace ShCc {
       {
       // output temp declaration
       prologue << "  float "
-	     << (*itr).m_name << "[" << (*itr).m_size << "]"
-	     << ";" << std::endl;
+	       << (*itr).m_name << "[" << (*itr).m_size << "]"
+	       << ";" << std::endl;
       }
 
     // epilogue
@@ -1983,6 +1994,70 @@ namespace ShCc {
     SH_CC_DEBUG_PRINT(m_code.str());
     SH_CC_DEBUG_PRINT(epilogue.str());
 
+#ifdef WIN32
+    // generate temporary names for the
+    // code and the dll
+    char path[1024];
+    GetTempPath(1024, path);
+
+    char prefix[1024];
+    GetTempFileName(path, "shcc", 0, prefix);
+
+    char cppfile[1024];
+    char dllfile[1024];
+    sprintf(cppfile, "%s.cpp", prefix);
+    sprintf(dllfile, "%s.dll", prefix);
+
+    // write the code out to cppfile
+    FILE* f = fopen(cppfile, "w");
+    fprintf(f, "%s", prologue.str().c_str());
+    fprintf(f, "%s", m_code.str().c_str());
+    fprintf(f, "%s", epilogue.str().c_str());
+    fflush(f);
+    fclose(f);
+
+    // run cl on cppfile and generate dllfile
+    char cmdline[1024];
+    sprintf(cmdline, "cl /LD /Fe\"%s\" \"%s\"", dllfile, cppfile);
+
+    SH_CC_DEBUG_PRINT("cmdline: \"" << cmdline << "\"");
+
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+    ZeroMemory(&si, sizeof(STARTUPINFO));   
+    ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));   
+    si.cb = sizeof(STARTUPINFO);
+
+    if (!CreateProcess(NULL, cmdline, NULL, NULL,
+                      TRUE, 0, NULL, NULL, &si, &pi))
+      {
+      SH_CC_DEBUG_PRINT("CreateProcess failed!" << GetLastError());
+      return false;
+      }
+
+    // TODO: do not use INFINITE
+    WaitForSingleObject(pi.hProcess, INFINITE);
+
+    // Attempt to load the dll and fetch our function
+    m_handle = LoadLibrary(dllfile);
+    if (m_handle == NULL)
+      {
+      SH_CC_DEBUG_PRINT("LoadLibrary failed: " << GetLastError());
+      return false;
+      }
+    else
+      {
+      m_func = (CcFunc)GetProcAddress(m_handle, "func");
+
+      if (m_func == NULL)
+        {
+        SH_CC_DEBUG_PRINT("GetProcAddress failed: " << GetLastError());
+        return false;
+        }
+      }
+
+    return true;
+#else
     char name[32];
     tmpnam(name);
     char ccfile[32];
@@ -1994,6 +2069,7 @@ namespace ShCc {
     fprintf(f, "%s", m_code.str().c_str());
     fprintf(f, "%s", epilogue.str().c_str());
     fflush(f);
+    fclose(f);
 
     pid_t pid = fork();
     if (pid == 0)
@@ -2021,7 +2097,7 @@ namespace ShCc {
       m_handle = dlopen(sofile, RTLD_NOW);
       if (m_handle == NULL)
 	{
-          SH_CC_DEBUG_PRINT("dlopen failed: " << dlerror());
+	SH_CC_DEBUG_PRINT("dlopen failed: " << dlerror());
 	return false;
 	}
       else
@@ -2030,7 +2106,7 @@ namespace ShCc {
 
 	if (m_func == NULL)
 	  {
-            SH_CC_DEBUG_PRINT("dlsym failed: " << dlerror());
+	  SH_CC_DEBUG_PRINT("dlsym failed: " << dlerror());
 	  return false;
 	  }
 	}
@@ -2043,6 +2119,7 @@ namespace ShCc {
       SH_CC_DEBUG_PRINT("fork failed...");
       return false;
       }
+#endif /* WIN32 */
     }
 
   bool CcBackendCode::execute(SH::ShStream& dest)
@@ -2129,17 +2206,17 @@ namespace ShCc {
       for(int j = 0; j < num_streams; j++)
 	{
 	SH_CC_DEBUG_PRINT("advancing input stream "
-		       << j
-		       << " by "
-		       << stream_sizes[j]);
+			  << j
+			  << " by "
+			  << stream_sizes[j]);
 	streams[j] += stream_sizes[j];
 	}
       for(int j = 0; j < num_outputs; j++)
 	{
 	SH_CC_DEBUG_PRINT("advancing output stream "
-		       << j
-		       << " by "
-		       << output_sizes[j]);
+			  << j
+			  << " by "
+			  << output_sizes[j]);
 	outputs[j] += output_sizes[j];
 	}
       }
@@ -2165,7 +2242,7 @@ namespace ShCc {
     }
 
   SH::ShBackendCodePtr CcBackend::generateCode(const std::string& target,
-						const SH::ShProgramNodeCPtr& program)
+					       const SH::ShProgramNodeCPtr& program)
     {
     SH_CC_DEBUG_PRINT(__FUNCTION__);
     CcBackendCodePtr backendcode = new CcBackendCode(program);
