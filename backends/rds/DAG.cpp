@@ -44,47 +44,62 @@ void DAGNode::unvisitall()
 	}
 }
 
+int DAGNode::countmarked() {
+	if (m_visited) return 0;
+	m_visited = true;
+	
+	int count = 0;
+
+	if (m_marked) count++;
+	
+	for (DAGNode::DAGNodeVector::iterator I = successors.begin(); I != successors.end(); ++I) {
+		count += (*I)->countmarked();
+	} 
+	return count;
+}
+
+int DAGNode::num_passes() {
+	unvisitall();
+	int count = 0;
+	if (!m_marked) count++;
+	return countmarked() + count;
+}
+
 // reset all resource consumption fields
 void DAGNode::init_resources(){
-	m_instrs = 0;		
-	m_params = 0;		
-	m_attribs = 0;		
-	m_temps = 0;		
-	m_halftemps = 0;	
-	m_texs = 0;			
-	m_consts = 0;		
-	m_outputs = 0;
-	m_channels = 0;
+	m_num_instrs = 0;		
+	m_params.clear();		
+	m_attribs.clear();	
+	m_temps.clear();		
+	m_halftemps.clear();
+	m_texs.clear();			
+	m_consts.clear();		
+	m_outputs.clear();
+	m_channels.clear();
 }
 
 // converts dag nodes to statements, adding to statement list
 // cut = true if final partition (m_cut set); cut = false if intermediate partition (cuts at marked nodes)
-ShBasicBlock::ShStmtList DAGNode::dag_to_stmt(ShBasicBlock::ShStmtList stmts, bool cut)
+ShBasicBlock::ShStmtList DAGNode::dag_to_stmt(ShBasicBlock::ShStmtList stmts)
 {
-	// do nothing for a leaf node
-	if (successors.size() == 0 && m_stmt == NULL) {
-		m_visited = true;
-		return stmts;	
-	}
+	if (m_visited) 
+		return stmts;
+	
+	m_visited = true;
 
 	// add statements for successors that are not cut off or marked
 	for (DAGNodeVector::iterator I = successors.begin(); I != successors.end(); ++I) {
 		DAGNode *v = *I;
 
-		if (!(v->m_visited)) {
-			if (cut && !m_cut[v]) {
-				stmts = v->dag_to_stmt(stmts, cut);
-			}
-			else if (!cut && !(v->m_marked || v->m_fixed == RDS_MARKED)) {
-				stmts = v->dag_to_stmt(stmts, cut);
-			}
+		if (!v->m_marked) {
+			stmts = v->dag_to_stmt(stmts);
 		}
 	}
 
-	if (!m_visited && predecessors.size() > 0) {
+	if (m_stmt != NULL) {
 		stmts.push_back(*m_stmt);
-		m_visited = true;
 	}
+
 	return stmts;
 }
 
@@ -101,7 +116,7 @@ void DAGNode::cuts()
 ShBasicBlock::ShStmtList DAGNode::get_statements() {
 	unvisitall();
 	ShBasicBlock::ShStmtList stmts;
-	stmts = dag_to_stmt(stmts, true); 
+	stmts = dag_to_stmt(stmts); 
 	return stmts;
 }
 
@@ -119,18 +134,6 @@ void DAGNode::print(int indent) {
 	}
 }
 
-void DAGNode::print_stmts() {
-	for (DAGNodeVector::iterator I = successors.begin(); I != successors.end(); ++I)  {
-		if (!(*I)->m_visited && !m_cut[*I])
-			(*I)->print_stmts();
-	}
-	
-	if (!m_visited && successors.size() > 0 && predecessors.size() > 0) {
-		cout << *m_stmt << "\n";
-		m_visited = true;
-	}
-}
-
 // statement output of this node and its successors
 void DAGNode::dump_stmts() {
 	ShBasicBlock::ShStmtList stmts = get_statements(); 
@@ -139,11 +142,11 @@ void DAGNode::dump_stmts() {
 	}
 }
 
+// set # of instructions, textures, params, attribs, etc for pass starting at this node
 void DAGNode::set_resources() {
-	unvisitall();
 	init_resources();
-	ShBasicBlock::ShStmtList stmts;
-	stmts = dag_to_stmt(stmts, false);
+	unvisitall();
+	ShBasicBlock::ShStmtList stmts = get_statements();
 		 
     for (ShBasicBlock::ShStmtList::const_iterator I = stmts.begin(); I != stmts.end(); ++I) {      
       set_var(I->dest.node());
@@ -152,8 +155,8 @@ void DAGNode::set_resources() {
       set_var(I->src[2].node());
     }
 
+	m_num_instrs = stmts.size();
 	unvisitall();
-	m_instrs = count_instrs();
 }
 
 void DAGNode::set_resources_stmt() {
@@ -164,76 +167,85 @@ void DAGNode::set_resources_stmt() {
 		set_var(m_stmt->src[0].node());
 		set_var(m_stmt->src[1].node());
 		set_var(m_stmt->src[2].node());
-		m_instrs++;
+		m_num_instrs++;
 	}
+}
+
+void DAGNode::add_var_to_list(DAGNode::VarList *vlist, const ShVariableNodePtr& var) {
+	if (vlist->find(var) == vlist->end())
+		vlist->insert(var);
 }
 
 void DAGNode::set_var(const ShVariableNodePtr& var) {
   if (!var) return;
   if (var->uniform()) {
-    m_params++;
+	add_var_to_list(&m_params, var);  
   } 
-  else switch (var->kind()) {
+  else 
+	  switch (var->kind()) {
 	  case SH_INPUT:
-	  	m_attribs++;
+		add_var_to_list(&m_attribs, var);
 		break;
 	  case SH_OUTPUT:
-	  	m_outputs++;
+		add_var_to_list(&m_outputs, var);
 		break;
 	  case SH_INOUT:
-		m_outputs++;
-		m_attribs++;
+		add_var_to_list(&m_outputs, var);
+		add_var_to_list(&m_attribs, var);
 		break;
 	  case SH_TEMP:		
 		// right now Sh allocates all temps twice; once for temps and
 	    // once for half-temps (see ArbCode)
-		m_temps++;
-		m_halftemps++;
+		add_var_to_list(&m_temps, var);
+		add_var_to_list(&m_halftemps, var);
 	  	break;
 	  case SH_CONST:
-		m_consts++;
+		add_var_to_list(&m_consts, var);
 		break;
 	  case SH_TEXTURE:
-		m_texs++;   
+		add_var_to_list(&m_texs, var);   
 		break;
 	  case SH_STREAM:
-		m_channels++;
+		add_var_to_list(&m_channels, var);
 		break;
 	  case SH_PALETTE:
-		m_params += (shref_dynamic_cast<ShPaletteNode>(var))->palette_length();
+		for (unsigned int j = 0; j < (shref_dynamic_cast<ShPaletteNode>(var))->palette_length(); j++) {
+		  add_var_to_list(&m_params, (shref_dynamic_cast<ShPaletteNode>(var))->get_node(j));
+		}
 		break;
 	  default:
 		SH_DEBUG_PRINT(0);
 		break;
-	}
+	} 
 }
 
-int DAGNode::count_instrs() {
-	if (m_visited || successors.size() < 1) return 0;
-	
+void DAGNode::prune_vars() {
+	if (m_visited) return;
+
 	m_visited = true;
-	
-	int count = 1;
-	
-	for (DAGNode::DAGNodeVector::iterator I = successors.begin(); I != successors.end(); ++I) {
-		if (!(m_marked || m_fixed == RDS_MARKED)) {
-			count += (*I)->count_instrs();
+
+	for (DAGNodeVector::iterator I = successors.begin(); I != successors.end(); ++I) {
+		if (!(*I)->m_visited)
+			(*I)->prune_vars();
+		
+		if ((*I)->m_stmt == NULL && (*I)->successors.size() == 0) {
+			I = successors.erase(I);
+			--I;
 		}
-	} 
-	return count;
+	}
 }
 
 void DAGNode::print_resources() {
 	cout << "Resources:\n";
-	cout << "\tInstructions: " << m_instrs << "\n";
-	cout << "\tHalf-float Temporaries " << m_halftemps << "\n";
-	cout << "\tTemporaries " << m_temps << "\n";
-	cout << "\tAttributes " << m_attribs << "\n";
-	cout << "\tParameters " << m_params << "\n";
-	cout << "\tTextures " << m_texs << "\n";
-	cout << "\tConstants " << m_consts << "\n";
-	cout << "\tChannels " << m_channels << "\n";
-	cout << "\tOutputs " << m_outputs << "\n";
+	cout << "\tInstructions: " << m_num_instrs << "\n";
+	cout << "\tHalf-float Temporaries " << m_halftemps.size() << "\n";
+	cout << "\tTemporaries " << m_temps.size() << "\n";
+	cout << "\tAttributes " << m_attribs.size() << "\n";
+	cout << "\tParameters " << m_params.size() << "\n";
+	cout << "\tTextures " << m_texs.size() << "\n";
+	cout << "\tConstants " << m_consts.size() << "\n";
+	cout << "\tChannels " << m_channels.size() << "\n";
+	cout << "\tOutputs " << m_outputs.size() << "\n";
 } 
 
 // returns variable associated with this variable
@@ -264,9 +276,6 @@ ShVariable *DAG::find_var(ShVariable *var) {
 // adds an Sh statement to the graph
 void DAG::add_statement(Stmt *stmt) {
 	NodeMap::iterator node_it;
-	//OpMap::iterator op_it;
-	//OpVector op_v;
-	//bool created = false;  // for common subexpressions
 	int src_size = opInfo[stmt->op].arity;
 	DAGNode *src[src_size], *n;
 	
@@ -293,8 +302,6 @@ void DAG::add_statement(Stmt *stmt) {
 	for (int i = 0; i < src_size; i++) {
 		n->add_kid(src[i]);
 	}
-	
-	//ops[src_size][stmt.op].push_back(n);
 
 	// Step 3
 	// delete dest from list of ids for node(dest)
@@ -336,6 +343,11 @@ DAG::DAG(ShBasicBlockPtr block)
 			n->predecessors.push_back(m_root);
 		}
 	}
+
+	// prune the variables (we don't care about predecessors anymore)
+	m_root->unvisitall();
+	m_root->prune_vars();
+	m_root->unvisitall();
 
 	return;
 }

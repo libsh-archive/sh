@@ -102,12 +102,12 @@ ArbLimits::ArbLimits(const std::string& target)
 }
 
 FakeLimits::FakeLimits() {
-  m_instrs = 5;
+  m_instrs = 3;
   m_halftemps=6;
   m_temps=6;
-  m_attribs=6;
-  m_params=6;
-  m_texs=6;
+  m_attribs=5;
+  m_params=5;
+  m_texs=5;
 }
 
 GraphLimits::GraphLimits() {

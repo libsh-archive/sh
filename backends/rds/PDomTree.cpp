@@ -162,14 +162,6 @@ void PDomTree::printDoms() {
 				cout << " " << numbering(w);
 		}
 
-		cout << " Pred";
-		// print this node's predecessors, in numerical form
-		for (DAGNode::DAGNodeVector::iterator I = v->predecessors.begin(); I != v->predecessors.end(); ++I) {
-			DAGNode::DAGNode *w = *I;
-			if (w)
-				cout << " " << numbering(w);
-		}
-
 		// print this node's successors in the pdom tree
 		cout << " PSucc";
 		for (PChildVector::iterator I = pchildren[v].begin(); I != pchildren[v].end(); ++I) {

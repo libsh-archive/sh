@@ -11,11 +11,19 @@
 #include "ShDebug.hpp"
 #include "ShUtility.hpp"
 
+
+#define RDS_DEBUG 
+//#define RDS_TRACE
 using namespace SH;
 
 RDS::RDS(ShProgramNodePtr progPtr)
 	: m_graph(new DAG(progPtr->ctrlGraph->entry()->follower->block))	
 {
+	// set cost params
+	c_pass = 15.7;
+	c_tex = 1.36;
+	c_instr = 1.0;
+	
 	// get partial dom tree	
 	m_pdt = new PDomTree(m_graph);
 #ifdef RDS_FAKE_LIMITS
@@ -102,25 +110,31 @@ void RDS::rds_search() {
 		
 		// find cost of saving subregion m
 		unmarkall(d);
+		unvisitall(d);
 		m->fix(RDS_MARKED);
 		init_used();
 		rds_subdivide(p);
 		unvisitall(d);
-		int cost_s = cost(d);
+		d->m_marked = true;
+		float cost_s = cost(d);
 
 		// find cost of recomputing subregion m
 		unmarkall(d);
+		unvisitall(d);
 		m->fix(RDS_UNMARKED);
 		init_used();
 		rds_subdivide(p);
 		unvisitall(d);
-		int cost_r = cost(d); 
+		d->m_marked = true;
+		float cost_r = cost(d); 
 #ifdef RDS_DEBUG
     SH_DEBUG_PRINT( "Cost Save = " << cost_s << " Cost Recompute = " << cost_r );
 #endif
-		if (cost_s < cost_r) {
+		unvisitall(d);
+		if (cost_s < cost_r || !all_passes_valid(p)) {
 			m->fix(RDS_MARKED);
 		}
+		unvisitall(d);
 	}
 
 	unmarkall(d);
@@ -129,16 +143,31 @@ void RDS::rds_search() {
 	rds_subdivide(p);
 #ifdef RDS_DEBUG
 	unvisitall(d);
+	d->m_marked = true;
 	SH_DEBUG_PRINT("Cost Final = " << cost(d));
 #endif
 	unvisitall(d);
+}
+
+bool RDS::all_passes_valid(DAGNode::DAGNode* v) {
+	if (v->m_visited) return true;
+	v->m_visited = true;
+
+	if ((v->m_marked || v->fixed() == RDS_MARKED) && !valid(v)) return false;
+	
+	for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end(); ++I) {
+		if (!all_passes_valid(*I))
+			return false;
+	}
+
+	return true;
 }
 
 // partitions m_graph by marking nodes to indicate pass boundaries
 // returns a set of passes
 void RDS::rds_subdivide(DAGNode::DAGNode* v) {
 
-#ifdef RDS_DEBUG
+#ifdef RDS_TRACE
 	SH_DEBUG_PRINT( "Subdivide(" << m_pdt->numbering(v) << ")");
 #endif
 
@@ -197,13 +226,10 @@ DAGNode::DAGNode *RDS::make_merge(DAGNode::DAGNode* v, int *a, int d, DAGNode::D
 
 	// create temporary parent node
 	if (v->predecessors.size() == 0) {
-			w = new DAGNode();
-	}
-	else if (v->successors.size() > 0) {
-		w = new DAGNode(v->m_stmt);
+		w = new DAGNode();
 	}
 	else {
-		w = new DAGNode(v->m_var);
+		w = new DAGNode(v->m_stmt);
 	}
 
 	// attach children in subset
@@ -212,40 +238,55 @@ DAGNode::DAGNode *RDS::make_merge(DAGNode::DAGNode* v, int *a, int d, DAGNode::D
 			w->successors.push_back(kids.at(a[j]));
 	}
 	else {
-		for (int j = 0; j < d; j++)
-			w->successors.push_back(kids.at(a[j]));
+		for (int j = 0; j < d; j++) {
+			w->add_kid(kids.at(a[j]));
+		}
 
-		for (DAGNode::DAGNodeVector::iterator I = unmarked_kids.begin(); I != unmarked_kids.end(); ++I)
-			w->successors.push_back(*I);
+		for (DAGNode::DAGNodeVector::iterator I = unmarked_kids.begin(); I != unmarked_kids.end(); ++I) {
+			w->add_kid(*I);
+		}	
 	}
-
 	return w;
 }
 
+void RDS::set_cost_vars(DAGNode::DAGNode *v) {
+	if (v->m_visited) return;
+	v->m_visited = true;
+
+	// add to cumulative values for this pass
+	if (v->m_marked) {
+		v->set_resources();
+		m_num_passes++;
+		m_num_texs += v->texs();
+		m_num_instrs += v->instrs();
+	}
+	
+	for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end(); ++I) {
+		set_cost_vars(*I);
+	}
+}
+
 void RDS::rds_merge(DAGNode::DAGNode* v) {
-#ifdef RDS_DEBUG
+#ifdef RDS_TRACE
   SH_DEBUG_PRINT("Merge(" << m_pdt->numbering(v) << ")");
 #endif
-	// check for any fixed nodes (their marked property cannot be changed)
+
+	// cannot merge if no kids
+	if (v->successors.size() == 0) return;
+
+	// vectors used to check for any fixed nodes (their marked property cannot be changed)
 	DAGNode::DAGNodeVector kids;
 	DAGNode::DAGNodeVector unmarked_kids;
-
-	// ensure all subregions are valid before merging
-	for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end(); ++I) {
-		if (!valid(*I)) 
-			rds_merge(*I);
-	}
 
 	DAGNode::DAGNode *z;
 
 	// figure out what this particular node consumes
-	if (v->successors.size() > 0 && v->predecessors.size() > 0) {
+	if (v->predecessors.size() > 0) {
 		z = new DAGNode(v->m_stmt);
 		z->set_resources_stmt();
 	}
 	else {
 		z = new DAGNode();
-		z->init_resources();
 	}
 
 	// fixed-as-marked nodes not considered kids for subsets
@@ -274,11 +315,25 @@ void RDS::rds_merge(DAGNode::DAGNode* v) {
 				m_attribs_used -= z->attribs();
 				m_texs_used -= z->texs();
 			}
-			else if ((*I)->fixed() != RDS_MARKED)
-				kids.push_back(*I);
+			else {
+				if (!valid(*I)) 
+					rds_merge(*I);
+
+				if ((*I)->fixed() != RDS_MARKED) {
+					kids.push_back(*I);
+				}
+			}
 		}
 	}
 	else {
+		// ensure all subregions are valid before merging
+		for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end(); ++I) {
+			(*I)->m_marked = true;
+			if (!valid(*I)) 
+				rds_merge(*I);
+			(*I)->m_marked = false;
+		}
+
 		kids = v->successors;
 	}
 
@@ -304,8 +359,11 @@ void RDS::rds_merge(DAGNode::DAGNode* v) {
 		// join v with subset of successors
 		DAGNode::DAGNode *w = make_merge(v, a, d, kids, unmarked_kids);
 
-		if (valid(w))
+		if (valid(w)) {
+			//w->print_resources();
+			//w->dump_stmts();
 			subsets.push_back(w);
+		}
 
 		// do all the other subsets
 		while(ksub_mtc && d!=0) {			
@@ -314,6 +372,8 @@ void RDS::rds_merge(DAGNode::DAGNode* v) {
 			w = make_merge(v, a, d, kids, unmarked_kids);
 
 			if (valid(w)) {
+				//w->print_resources();
+				//w->dump_stmts();
 				subsets.push_back(w);
 			}
 		}
@@ -424,7 +484,7 @@ void RDS::partition(DAGNode::DAGNode *v)
 	if (!v) return;
 	if (v->m_visited) return;
 
-#ifdef RDS_DEBUG
+#ifdef RDS_TRACE
       SH_DEBUG_PRINT(__FUNCTION__ << " node " << v->m_label );
 #endif
 
@@ -440,12 +500,17 @@ void RDS::partition(DAGNode::DAGNode *v)
       
 		// cut w off from v if it's marked
 		if (w->m_marked) {
-			SH::ShVariable *var = m_graph->find_var( &(w->m_stmt->dest) );
+			if (w->m_stmt != NULL) {
+				SH::ShVariable *var = m_graph->find_var( &(w->m_stmt->dest) );
+				m_shared_vars.push_back(var);
+			}
+
 			v->m_cut[w] = true; 
-			m_shared_vars.push_back(var);
-#ifdef RDS_DEBUG
-    SH_DEBUG_PRINT("Cut: " << w->m_label );
-	  SH_DEBUG_PRINT("Shared variable: " << var->name() << " " << var->swizzle() );
+			
+#ifdef RDS_TRACE
+	  SH_DEBUG_PRINT("Cut: " << w->m_label );
+	  if (w->m_stmt != NULL)
+		SH_DEBUG_PRINT("Shared variable: " << m_graph->find_var( &(w->m_stmt->dest) )->name());
 #endif
 		}
     }
@@ -459,6 +524,15 @@ void RDS::partition(DAGNode::DAGNode *v)
 // true if pass starting at v can execute in one pass
 bool RDS::valid(DAGNode::DAGNode* v) {
   v->set_resources();
+  //SH_DEBUG_PRINT(__FUNCTION__);
+  //v->print_resources();
+
+  /*SH_DEBUG_PRINT("halftemps_used " << m_halftemps_used);		
+  SH_DEBUG_PRINT("temps_used " << m_temps_used);
+  SH_DEBUG_PRINT("attribs_used " << m_attribs_used);
+  SH_DEBUG_PRINT("params_used " << m_params_used);
+  SH_DEBUG_PRINT("texs_used " << m_texs_used);
+  SH_DEBUG_PRINT("instrs_used " << m_ops_used);*/
 
   if (m_rdsh) {
     return  v->halftemps() <= m_limits->halftemps() &&
@@ -469,7 +543,7 @@ bool RDS::valid(DAGNode::DAGNode* v) {
 			v->instrs() <= m_limits->instrs();
   }
 
- return v->halftemps() <= (m_limits->halftemps() - m_halftemps_used) &&
+ return		v->halftemps() <= (m_limits->halftemps() - m_halftemps_used) &&
 			v->temps() <= (m_limits->temps() - m_temps_used) &&
 			v->attribs() <= (m_limits->attribs() - m_attribs_used) &&
 			v->params() <= (m_limits->params()  - m_params_used) &&
@@ -480,7 +554,7 @@ bool RDS::valid(DAGNode::DAGNode* v) {
 // true if pass starting at v consumes less than 1/2 the max resources
 bool RDS::recompute(DAGNode::DAGNode* v) {
 	v->set_resources();
-	unvisitall(v);
+
 	return  v->halftemps() <= m_limits->halftemps()/2 &&
 			v->temps() <= m_limits->temps()/2 &&
 			v->attribs() <= m_limits->attribs()/2 &&
@@ -492,13 +566,13 @@ bool RDS::recompute(DAGNode::DAGNode* v) {
 // chooses pass that uses fewest instructions
 DAGNode::DAGNode* RDS::merge(PassVector passes) {
 	PassVector::iterator I = passes.begin();
-	(*I)->unvisitall();
-	int lowest = (*I)->count_instrs();
+	(*I)->set_resources();
+	int lowest = (*I)->instrs();
 	DAGNode::DAGNode *winner = *I;
 
 	for(++I; I != passes.end(); ++I) {
-		(*I)->unvisitall();
-		int count = (*I)->count_instrs();
+		(*I)->set_resources();
+		int count = (*I)->instrs();
 		if (lowest < 0 || count < lowest) {
 			lowest = count;
 			winner = *I;
@@ -507,25 +581,13 @@ DAGNode::DAGNode* RDS::merge(PassVector passes) {
 	return winner;
 }
 
-int RDS::countmarked(DAGNode::DAGNode* v) {
-	if (v->m_visited) return 0;
-	v->m_visited = true;
-	
-	int count = 0;
-
-	if (v->m_marked) count++;
-	
-	for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end(); ++I) {
-			count += countmarked(*I);
-	} 
-	return count;
+float RDS::cost(DAGNode::DAGNode* v) {
+	m_num_passes = 0;
+	m_num_texs = 0;
+	m_num_instrs = 0;
+	set_cost_vars(v);
+	return c_pass*v->num_passes() + c_tex*v->texs() + c_instr*v->instrs();
 }
-
-int RDS::cost(DAGNode::DAGNode* v) {
-	unvisitall(v);
-	return countmarked(v);
-}
-
 
 void RDS::set_nodelist(DAGNode::DAGNode *v) {
 	if (v->m_visited) return;
@@ -542,7 +604,7 @@ void RDS::set_nodelist(DAGNode::DAGNode *v) {
 void RDS::full_search() {
 	DAGNode::DAGNode *root = m_graph->m_root;
 	bool found = false;
-	int low_cost = 0;
+	float low_cost = 0.0;
 
 	// get a list of all the nodes in the graph
 	for (DAGNode::DAGNodeVector::iterator I = root->successors.begin(); I != root->successors.end(); ++I) {
@@ -554,7 +616,13 @@ void RDS::full_search() {
 	// case zero
 	int n = m_nodelist.size();
 	bool marked[n];
+	
+	for (int j = 0; j < n; j++) {
+		marked[j] = false;
+	}
+
 	unmarkall(root);
+	root->m_marked = true;
 
 	if(valid(root)) {
 		found = true;
@@ -592,7 +660,7 @@ void RDS::full_search() {
 		}
 
 		if (isvalid) {
-			int this_cost = cost(root);
+			float this_cost = cost(root);
 
 			// see if present optimal partition
 			if (!found || this_cost < low_cost) {
@@ -633,8 +701,7 @@ void RDS::full_search() {
 			}
 
 			if (isvalid) {
-				int this_cost = cost(root);
-
+				float this_cost = cost(root);
 				// see if present optimal partition
 				if (!found || this_cost < low_cost) {
 					for (int j = 0; j < n; j++) {
@@ -660,6 +727,6 @@ void RDS::full_search() {
 		if (marked[i])
 			m_nodelist.at(i)->m_marked = true;
 	}
-
+	root->m_marked = true;
 	set_partition();
 }

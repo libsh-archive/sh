@@ -29,33 +29,15 @@ class SH_DLLEXPORT DAGNode {
 	DAGNode(SH::ShVariable *var);
 	DAGNode(SH::ShStatement *stmt);
 
-	SH::ShVariable *m_var;
-	SH::ShStatement *m_stmt;
-
-	std::string m_label;
-
-	bool m_visited;
-	bool m_marked;
-	
-	typedef std::map<DAGNode *, bool> CutMap;
-	CutMap m_cut;
-
-	typedef std::set<SH::ShVariable*> IdSet;
-	IdSet id_list;
-
-	typedef std::vector<DAGNode*> DAGNodeVector;
-	DAGNodeVector predecessors;
-	DAGNodeVector successors;
-
-	// returns number of instructions/resources consumed pass starting at this node
-	int instrs() const { return m_instrs; }
-	int params() const { return m_params; }
-	int attribs() const { return m_attribs; }
-	int temps() const { return m_temps; }
-	int halftemps() const { return m_halftemps; }
-	int texs() const { return m_texs; }
-	int consts() const { return m_consts; }
-	int outputs() const { return m_outputs; }
+	// returns number of instructions/resources consumed by pass starting at this node
+	int instrs() const { return m_num_instrs; }
+	int params() const { return m_params.size(); }
+	int attribs() const { return m_attribs.size(); }
+	int temps() const { return m_temps.size(); }
+	int halftemps() const { return m_halftemps.size(); }
+	int texs() const { return m_texs.size(); }
+	int consts() const { return m_consts.size(); }
+	int outputs() const { return m_outputs.size(); }
 
 	void mark() { m_marked = true; }
 	void unmark() { m_marked = false; }
@@ -72,24 +54,46 @@ class SH_DLLEXPORT DAGNode {
 	void set_resources();
 	void set_resources_stmt();
 	void print_resources();
-	SH::ShBasicBlock::ShStmtList get_statements(); 
-	int count_instrs();
-	void init_resources();
-  private:
-  	void set_var(const SH::ShVariableNodePtr& var); 
-	void print_stmts();
+	int num_passes();
 
-	SH::ShBasicBlock::ShStmtList dag_to_stmt(SH::ShBasicBlock::ShStmtList stmts, bool cut);
+	SH::ShBasicBlock::ShStmtList get_statements(); 
+	void prune_vars();
+
+	SH::ShVariable *m_var;
+	SH::ShStatement *m_stmt;
+
+	std::string m_label;
+
+	bool m_visited;
+	bool m_marked;
 	
-	int m_instrs;		// number of instructions
-	int m_params;		// number of uniforms (including palettes)
-	int m_attribs;		// number of inputs
-	int m_temps;		// number of temporaries
-	int m_halftemps;	// number of half-float temporaries
-	int m_texs;			// number of textures
-	int m_consts;		// number of constants
-	int m_outputs;		// number of outputs
-	int m_channels;		// number of channels
+	typedef std::map<DAGNode *, bool> CutMap;
+	CutMap m_cut;
+
+	typedef std::set<SH::ShVariable*> IdSet;
+	IdSet id_list;
+
+	typedef std::vector<DAGNode*> DAGNodeVector;
+	DAGNodeVector predecessors;
+	DAGNodeVector successors;	
+  private:
+	typedef std::set<SH::ShVariableNodePtr> VarList;
+	void init_resources();
+  	void set_var(const SH::ShVariableNodePtr& var); 
+	int countmarked(); 
+	SH::ShBasicBlock::ShStmtList dag_to_stmt(SH::ShBasicBlock::ShStmtList stmts);
+	void add_var_to_list(VarList *vlist, const SH::ShVariableNodePtr& var);
+
+	
+	int m_num_instrs;	// number of instructions
+	VarList m_params;		// list of uniforms (including palettes)
+	VarList m_attribs;		// list of inputs
+	VarList m_temps;		// list of temporaries
+	VarList m_halftemps;	// list of half-float temporaries
+	VarList m_texs;			// list of textures
+	VarList m_consts;		// list of constants
+	VarList m_outputs;		// list of outputs
+	VarList m_channels;		// list of channels
 
 	//bool m_marked;
 

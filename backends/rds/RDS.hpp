@@ -49,8 +49,7 @@ public:
 
   typedef std::vector<DAGNode::DAGNode*> PassVector;	
   PassVector get_passes() { return m_passes; }
-  
-
+ 
 	void print_partitions(char* filename);
 	void print_partition();
 	void print_partition_stmt();
@@ -62,17 +61,26 @@ public:
 	typedef std::vector<SH::ShVariable*> VarVector;
 	VarVector m_shared_vars;
 private:
-  typedef std::set<DAGNode::DAGNode*> ChildrenSet;
-  typedef std::vector<DAGNode::DAGNode*> NodeVector;
+	typedef std::set<DAGNode::DAGNode*> ChildrenSet;
+	typedef std::vector<DAGNode::DAGNode*> NodeVector;
 
 	// limits
-  rds::Limits *m_limits;
-  int m_ops_used;
-  int m_halftemps_used;
-  int m_temps_used;
-  int m_params_used;
-  int m_attribs_used;
-  int m_texs_used;
+	rds::Limits *m_limits;
+	int m_ops_used;
+	int m_halftemps_used;
+	int m_temps_used;
+	int m_params_used;
+	int m_attribs_used;
+	int m_texs_used;
+
+	// cost params
+	float c_pass;
+	float c_tex;
+	float c_instr;
+
+  	int m_num_instrs;
+	int m_num_texs;
+	int m_num_passes;
 
 	// true if rdsh; false if rds
 	bool m_rdsh;
@@ -109,8 +117,9 @@ private:
 	bool valid(DAGNode::DAGNode* v);
 	bool recompute(DAGNode::DAGNode* v);
 	DAGNode::DAGNode *merge(PassVector passes);
-	int cost(DAGNode::DAGNode* v);
+	float cost(DAGNode::DAGNode* v);
 
+	void set_cost_vars(DAGNode::DAGNode *v);
 	DAGNode::DAGNode *make_merge(DAGNode::DAGNode* v, int *a, int d, 
 	DAGNode::DAGNodeVector kids, DAGNode::DAGNodeVector unmarked_kids);
 	void add_mr(DAGNode::DAGNode* v);
@@ -120,6 +129,7 @@ private:
 	
 	int countmarked(DAGNode::DAGNode *v);
 	void unvisitall(DAGNode::DAGNode *v);
+	bool all_passes_valid(DAGNode::DAGNode* v);
 
 	// for brute force
 	void set_nodelist(DAGNode::DAGNode *v);
