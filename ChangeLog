@@ -1,3 +1,10 @@
+2004-08-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp: Implementation file for the new
+	tuple-aware optimizer.
+
+	* src/ShOptimizations.hpp: Header file for the new tuple-aware optimizer.
+
 2004-08-04  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
 
 	* util/ShNoiseImpl.hpp: fixed random number generation under Win32.

@@ -8,10 +8,27 @@
 
 namespace SH {
 
+/// Optimize the program with the given optimization level.
+void optimize(ShProgram& p, int level);
+
+// Internal stuff.
+
 // Add value tracking information to the given program's CFG
 // statements.
 // If it already exists, overwrite it.
 void add_value_tracking(ShProgram& prg);
+
+/// Insert instructions representing each conditional branch
+void insert_branch_instructions(ShProgram& prg);
+
+/// Remove instructions representing conditional branches
+void remove_branch_instructions(ShProgram& prg);
+
+/// Merge blocks with redundant edges
+void straighten(ShProgram& p, bool& changed);
+
+/// Remove code that serves no purpose in the given program
+void remove_dead_code(ShProgram& p, bool& changed);
 
 struct ValueTracking : public ShStatementInfo {
   ValueTracking(ShStatement* stmt);

@@ -276,6 +276,148 @@ struct UdDuDumper {
   }
 };
 
+// Branch instruction insertion/removal
+
+struct BraInstInserter {
+  void operator()(ShCtrlGraphNodePtr node)
+  {
+    if (!node) return;
+
+    for (std::vector<ShCtrlGraphBranch>::const_iterator I = node->successors.begin();
+         I != node->successors.end(); ++I) {
+      if (!node->block) node->block = new ShBasicBlock();
+      node->block->addStatement(ShStatement(I->cond, SH_OP_OPTBRA, I->cond));
+    }
+  }
+};
+
+struct BraInstRemover {
+  void operator()(ShCtrlGraphNodePtr node)
+  {
+    if (!node) return;
+    ShBasicBlockPtr block = node->block;
+    if (!block) return;
+    
+    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end();) {
+      if (I->op == SH_OP_OPTBRA) {
+        I = block->erase(I);
+        continue;
+      }
+      ++I;
+    }
+  }
+};
+
+// Straightening
+struct Straightener {
+  Straightener(const ShCtrlGraphPtr& graph, bool& changed)
+    : graph(graph), changed(changed)
+  {
+  }
+
+  void operator()(const ShCtrlGraphNodePtr& node)
+  {
+    if (!node) return;
+    if (!node->follower) return;
+    if (node == graph->entry()) return;
+    if (node->follower == graph->exit()) return;
+    if (!node->successors.empty()) return;
+    if (node->follower->predecessors.size() > 1) return;
+    
+    if (!node->block) node->block = new ShBasicBlock();
+    if (!node->follower->block) node->follower->block = new ShBasicBlock();
+
+    for (ShBasicBlock::ShStmtList::iterator I = node->follower->block->begin(); I != node->follower->block->end(); ++I) {
+      node->block->addStatement(*I);
+    }
+    node->successors = node->follower->successors;
+
+    // Update predecessors
+    
+    for (std::vector<ShCtrlGraphBranch>::iterator I = node->follower->successors.begin();
+         I != node->follower->successors.end(); ++I) {
+      replacePredecessors(I->node, node->follower.object(), node.object());
+    }
+    if (node->follower->follower) replacePredecessors(node->follower->follower, node->follower.object(), node.object());
+    
+    node->follower = node->follower->follower;
+
+    changed = true;
+  }
+
+  void replacePredecessors(ShCtrlGraphNodePtr node,
+                           ShCtrlGraphNode* old,
+                           ShCtrlGraphNode* replacement)
+  {
+    for (ShCtrlGraphNode::ShPredList::iterator I = node->predecessors.begin(); I != node->predecessors.end(); ++I) {
+      if (*I == old) {
+        *I = replacement;
+        break;
+      }
+    }
+  }
+  
+  ShCtrlGraphPtr graph;
+  bool& changed;
+};
+
+typedef std::queue<ShStatement*> DeadCodeWorkList;
+
+struct InitLiveCode {
+  InitLiveCode(DeadCodeWorkList& w)
+    : w(w)
+  {
+  }
+  
+  void operator()(ShCtrlGraphNodePtr node) {
+    if (!node) return;
+    ShBasicBlockPtr block = node->block;
+    if (!block) return;
+
+    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+      if (I->dest.node()->kind() == SH_OUTPUT
+          || I->dest.node()->kind() == SH_INOUT
+          || I->op == SH_OP_KIL
+          /*
+          || I->op == SH_OP_FETCH // Keep stream fetches, since these
+                                  // are like inputs.
+          */
+          || I->op == SH_OP_OPTBRA) {
+        I->marked = true;
+        w.push(&(*I));
+        continue;
+      }
+      I->marked = false;
+    }
+  }
+
+  DeadCodeWorkList& w;
+};
+
+struct DeadCodeRemover {
+  DeadCodeRemover(bool& changed)
+    : changed(changed)
+  {
+  }
+  
+  void operator()(ShCtrlGraphNodePtr node) {
+    if (!node) return;
+    ShBasicBlockPtr block = node->block;
+    if (!block) return;
+    
+    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end();) {
+      if (!I->marked) {
+        changed = true;
+        I = block->erase(I);
+        continue;
+      }
+      ++I;
+    }
+  }
+
+  bool& changed;
+};
+
 }
 
 namespace SH {
@@ -295,7 +437,6 @@ void add_value_tracking(ShProgram& p)
   ReachingDefs r;
 
   ShCtrlGraphPtr graph = p.node()->ctrlGraph;
-  graph->computePredecessors();
   
   DefFinder finder(r);
   graph->dfs(finder);
@@ -340,5 +481,78 @@ void add_value_tracking(ShProgram& p)
   graph->dfs(dumper);
 
 }
+
+void insert_branch_instructions(ShProgram& p)
+{
+  BraInstInserter r;
+  p.node()->ctrlGraph->dfs(r);
+}
+
+void remove_branch_instructions(ShProgram& p)
+{
+  BraInstRemover r;
+  p.node()->ctrlGraph->dfs(r);
+}
+
+void straighten(ShProgram& p, bool& changed)
+{
+  Straightener s(p.node()->ctrlGraph, changed);
+  p.node()->ctrlGraph->dfs(s);
+}
+
+void remove_dead_code(ShProgram& p, bool& changed)
+{
+  DeadCodeWorkList w;
+
+  ShCtrlGraphPtr graph = p.node()->ctrlGraph;
+
+  
+  InitLiveCode init(w);
+  graph->dfs(init);
+
+  while (!w.empty()) {
+    ShStatement* stmt = w.front(); w.pop();
+    ValueTracking* vt = stmt->template get_info<ValueTracking>();
+    if (!vt) continue; // Should never happen!
+    
+    for (int i = 0; i < opInfo[stmt->op].arity; i++) {
+      
+      for (ValueTracking::TupleUseDefChain::iterator C = vt->defs[i].begin();
+           C != vt->defs[i].end(); ++C) {
+        for (ValueTracking::UseDefChain::iterator I = C->begin(); I != C->end(); ++I) {
+          if (I->stmt->marked) continue;
+          I->stmt->marked = true;
+          w.push(I->stmt);
+        }
+      }
+    }
+  }
+
+  DeadCodeRemover r(changed);
+  graph->dfs(r);
+}
+
+void optimize(ShProgram& p, int level)
+{
+  if (level <= 0) return;
+
+  bool changed;
+  do {
+    changed = false;
+
+    p.node()->ctrlGraph->computePredecessors();
+
+    straighten(p, changed);
+    
+    insert_branch_instructions(p);
+    add_value_tracking(p);
+
+    remove_dead_code(p, changed);
+
+    remove_branch_instructions(p);
+
+  } while (changed);
+}
+
 
 }
