@@ -36,6 +36,25 @@ ShGeneric<N, T> normalize(const ShGeneric<N, T>& var);
 template<int N, typename T>
 ShGeneric<N, T> reflect(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b);
 
+/** Make a vector face the same way as another
+ * Negates b if it does not face the same way as a (i.e. the dot
+ * product between a and b is negative).
+ */
+template<int N, typename T>
+ShGeneric<N, T> faceforward(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b);
+
+/** Compute lighting coefficents.
+ * returns a 4-vector consisting of:
+ *  - 1
+ *  - max(a,0)
+ *  - b^c if (a > 0 and b < 0), 0 otherwise
+ *  - 1
+ */
+template<typename T>
+ShGeneric<4, T> lit(const ShGeneric<1, T>& a,
+                    const ShGeneric<1, T>& b,
+                    const ShGeneric<1, T>& c);
+
 /** Inner (dot) product.
  */
 template<int N, typename T>

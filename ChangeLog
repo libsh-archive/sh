@@ -1,5 +1,11 @@
 2004-07-05  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShLibGeometryImpl.hpp (lit): Implement this function.
+	(faceforward): Implement this function.
+	Resolves one more part of issue73.
+
+	* src/ShLibGeometry.hpp: Add faceforward() and lit() library functions.
+
 	* src/ShProgram.hpp: Add describe_interface() member function wrapper.
 
 	* src/ShProgramNode.hpp: Rename operator<< for VarLists to static

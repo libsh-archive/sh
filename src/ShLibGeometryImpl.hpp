@@ -56,6 +56,26 @@ ShGeneric<N, T> reflect(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
   return 2.0 * dot(a, b) * b - a;
 }
 
+template<int N, typename T>
+inline
+ShGeneric<N, T> faceforward(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
+{
+  return (2.0 * (dot(a, b) > 0.0) - 1.0) * b;
+}
+
+template<typename T>
+inline
+ShGeneric<4, T> lit(const ShGeneric<1, T>& a,
+                    const ShGeneric<1, T>& b,
+                    const ShGeneric<1, T>& c)
+{
+  ShAttrib<4, SH_TEMP, T> r;
+  r(0,3) = ShConstAttrib2f(1.0, 1.0);
+  r(1) = pos(a);
+  r(2) = (a < 0 && b < 0) * pow(b, c);
+  return r;
+}
+
 }
 
 #endif
