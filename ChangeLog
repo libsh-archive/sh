@@ -1,3 +1,8 @@
+2004-06-19  Bryan Chan <b8chan@uwaterloo.ca
+  * util/ShWorley*.?pp:
+  Updated worley slightly to return all k-nearest results instead
+  of returning a weighted average.
+  
 2004-06-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* Everywhere: Replaced ShProgram typedef with real class. Moved
