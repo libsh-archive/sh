@@ -1,3 +1,7 @@
+2004-03-01  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/*: Fixed up ATI uberbuffer backend.
+
 2004-02-28  Bryan Chan <b8chan@uwaterloo.ca>
 	* util/*Mesh*:
 	First cleanup pass.  Still not satisfied with 
