@@ -24,14 +24,19 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#include <algorithm>
-#include <ltdl.h>
-#include "ShBackend.hpp"
-#include "ShProgram.hpp"
-#include "ShDebug.hpp"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+
+#ifndef WIN32
+#include <ltdl.h>
+#endif
+
+#include <algorithm>
+
+#include "ShBackend.hpp"
+#include "ShProgram.hpp"
+#include "ShDebug.hpp"
 
 namespace SH {
 
@@ -73,7 +78,7 @@ ShRefCount<ShBackend> ShBackend::lookup(const std::string& name)
   for (ShBackendList::iterator I = begin(); I != end(); ++I) {
     if ((*I)->name() == name) return *I;
   }
-
+#ifndef WIN32
   std::string libname(SH_INSTALL_PREFIX);
   libname += "/lib/sh/libsh" + name + ".so";
   
@@ -91,6 +96,9 @@ ShRefCount<ShBackend> ShBackend::lookup(const std::string& name)
   SH_DEBUG_ERROR("Could not find " << name << "backend");
 
   return 0;
+#else
+  return 0;
+#endif
 }
 
 void ShBackend::init()
@@ -100,6 +108,7 @@ void ShBackend::init()
   
   m_backends = new ShBackendList();
 
+#ifndef WIN32
   if (lt_dlinit()) {
     SH_DEBUG_ERROR("Error initializing ltdl: " << lt_dlerror());
   }
@@ -110,6 +119,7 @@ void ShBackend::init()
   if (lt_dladdsearchdir(searchpath.c_str())) {
     SH_DEBUG_ERROR("Could not add " + searchpath + " to search dir: " << lt_dlerror());
   }
+#endif
 
   m_doneInit = true;
 }
