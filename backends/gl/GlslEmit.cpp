@@ -49,7 +49,6 @@ static GlslMapping opCodeTable[] = {
   {SH_OP_EXP2,  "exp2($0)"},
   {SH_OP_FLR,   "floor($0)"},
   {SH_OP_FRAC,  "fract($0)"},
-  {SH_OP_KIL,   "if ($0) discard"},
   {SH_OP_LOG2,  "log2($0)"},
   {SH_OP_LRP,   "mix($2, $1, $0)"},
   {SH_OP_MAD,   "$0 * $1 + $2"},
@@ -150,6 +149,9 @@ void GlslCode::emit(const ShStatement &stmt)
     case SH_OP_EXP10:
       emit_exp(stmt, 10);
       break;
+    case SH_OP_KIL:
+      emit_discard(stmt);
+      break;
     case SH_OP_LIT:
       emit_lit(stmt);
       break;
@@ -190,6 +192,13 @@ void GlslCode::emit_exp(const ShStatement& stmt, double power)
   
   m_lines.push_back(resolve(temp) + " = " + s.str());
   m_lines.push_back(resolve(stmt.dest) + " = pow(" + resolve(temp) + ", " + resolve(stmt.src[0]) + ")");
+}
+
+void GlslCode::emit_discard(const ShStatement& stmt)
+{
+  SH_DEBUG_ASSERT((SH_OP_KIL == stmt.op));
+
+  m_lines.push_back(std::string("if (") + resolve(stmt.src[0]) + ") discard;");
 }
 
 void GlslCode::emit_lit(const ShStatement& stmt)

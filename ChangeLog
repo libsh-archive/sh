@@ -1,5 +1,8 @@
 2005-03-04  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> (glsl branch)
 
+	* backends/gl/GlslEmit.cpp (emit_discard): Fix KIL implementation
+	(KIL doesn't return anything).
+
 	* src/ShSyntax.cpp (shUnbind): Use ShBackend::unbind_all().
 
 	* backends/gl/GlBackend.hpp: Add unbind_all() to CodeStrategy.

@@ -132,6 +132,7 @@ private:
   void emit_prod(const SH::ShStatement& stmt);
   void emit_sum(const SH::ShStatement& stmt);
   void emit_texture(const SH::ShStatement& stmt);
+  void emit_discard(const SH::ShStatement& stmt);
 
   void table_substitution(const SH::ShStatement& stmt, GlslOpCodeVecs codeVecs);
   
