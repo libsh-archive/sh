@@ -1,0 +1,9 @@
+do
+if
+for
+while
+control.dot
+Makefile
+Makefile.in
+.deps
+.libs

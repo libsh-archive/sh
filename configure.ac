@@ -22,5 +22,6 @@ AC_CHECK_HEADER([sstream], [], [AC_MSG_ERROR([sh requires <sstream>. Please use 
 # Checks for library functions.
 
 AC_CONFIG_FILES([Makefile
-		 src/Makefile])
+		 src/Makefile
+		 test/Makefile])
 AC_OUTPUT
