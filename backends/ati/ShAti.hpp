@@ -178,6 +178,7 @@ public:
 
   SH::ShBackendCodePtr generateCode(int kind, const SH::ShProgram& shader);
   virtual void bindFramebuffer();
+  virtual void deleteUberbuffer(SH::ShUberbufferPtr ub);
 
   /// Allocate uber buffers (called by allocRegs)
   void allocFramebuffer(SH::ShFramebufferPtr fb);

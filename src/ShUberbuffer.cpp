@@ -1,6 +1,8 @@
 #include <cassert>
 #include "ShUberbuffer.hpp"
 #include "ShDebug.hpp"
+#include "ShBackend.hpp"
+#include "ShEnvironment.hpp"
 
 using namespace std;
 
@@ -13,9 +15,8 @@ ShUberbuffer::ShUberbuffer(int width, int height, int depth,
 }
 
 ShUberbuffer::~ShUberbuffer() {
-  if( m_mem != 0 ) {
-    printf( "glDeleteMemATI( %d )\n", m_mem );
-//    glDeleteMemATI( m_mem );
+  if( m_mem != 0 && ShEnvironment::backend ) {
+    ShEnvironment::backend->deleteUberbuffer( this );
   }
 }
 

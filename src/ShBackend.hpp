@@ -33,6 +33,7 @@
 #include "ShRefCount.hpp"
 #include "ShProgram.hpp"
 #include "ShVariableNode.hpp"
+#include "ShUberbuffer.hpp"
 
 namespace SH  {
 
@@ -73,6 +74,7 @@ public:
   /// since extra variables may be declared inside this function!
   virtual ShBackendCodePtr generateCode(int kind, const ShProgram& shader) = 0;
   virtual void bindFramebuffer() = 0;
+  virtual void deleteUberbuffer(ShUberbufferPtr ub);
 
   virtual void init2(void);
 

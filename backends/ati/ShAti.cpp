@@ -1495,4 +1495,9 @@ void AtiBackend::bindFramebuffer() {
   }
 }
 
+void AtiBackend::deleteUberbuffer(ShUberbufferPtr ub) {
+  if( !ub->mem() ) return; 
+  glDeleteMemATI(ub->mem());
+}
+
 }
