@@ -1,5 +1,16 @@
 2004-05-28  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* backends/gl/ArbCode.cpp (genNode): Implemented EXP, EXP2, LOG, LOG2.
+
+	* src/ShInstructions.hpp: Added sh{EXP,LOG}{,2,10}() functions.
+
+	* src/ShLibArith.hpp: Added {log,exp}{,2,10}
+	instructions. Resolves issue80 and issue82, but not tested yet.
+
+	* src/ShStatement.cpp: Added opInfo for SH_{EXP,LOG}{,2,10} operations.
+
+	* src/ShStatement.hpp: Added SH_{EXP,LOG}{,2,10} operations.
+
 	* src/ShContext.hpp: Added ShContext type. Moved optimization
 	level and error throwing settings here from ShEnvironment. Changed
 	uses of ShEnvironment to refer to ShContext::current() where

@@ -63,6 +63,9 @@ enum ShOperation {
   SH_OP_CEIL, ///< Unary smallest integer not less than src[0]
   SH_OP_COS, ///< Unary cosine function
   SH_OP_DOT, ///< Binary dot product
+  SH_OP_EXP, ///< Unary natural exponent
+  SH_OP_EXP2, ///< Unary base-2 exponent
+  SH_OP_EXP10, ///< Unary base-10 exponent
   SH_OP_FLR, ///< Unary smallest integer not greater than src[0]
   SH_OP_FMOD, ///< Binary float modulus, result has same sign as src[0] 
   SH_OP_FRAC, ///< Unary fractional part
@@ -70,6 +73,9 @@ enum ShOperation {
   SH_OP_MAD, ///< Multiply and add src[0] * src[1] + src[2]
   SH_OP_MAX, ///< Binary componentwise maximum
   SH_OP_MIN, ///< Binary componentwise minimum
+  SH_OP_LOG, ///< Unary natural log
+  SH_OP_LOG2, ///< Unary base-2 log
+  SH_OP_LOG10, ///< Unary base-10 log
   SH_OP_POW, ///< Binary power
   SH_OP_SIN, ///< Unary sine function
   SH_OP_SQRT, ///< Unary square root

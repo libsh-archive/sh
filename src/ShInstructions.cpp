@@ -336,6 +336,39 @@ void shDOT(ShVariable& dest, const ShVariable& a, const ShVariable& b)
   }
 }
 
+void shEXP(ShVariable& dest, const ShVariable& a)
+{
+  sizes_match(dest, a);
+  if (immediate()) {
+    CWISE_UNARY_OP(dest, a, expf);
+  } else {
+    ShStatement stmt(dest, SH_OP_EXP, a);
+    addStatement(stmt);
+  }
+}
+  
+void shEXP2(ShVariable& dest, const ShVariable& a)
+{
+  sizes_match(dest, a);
+  if (immediate()) {
+    CWISE_UNARY_OP(dest, a, exp2f);
+  } else {
+    ShStatement stmt(dest, SH_OP_EXP2, a);
+    addStatement(stmt);
+  }
+}
+
+void shEXP10(ShVariable& dest, const ShVariable& a)
+{
+  sizes_match(dest, a);
+  if (immediate()) {
+    CWISE_UNARY_OP(dest, a, exp10f);
+  } else {
+    ShStatement stmt(dest, SH_OP_EXP10, a);
+    addStatement(stmt);
+  }
+}
+
 void shFLR(ShVariable& dest, const ShVariable& a)
 {
   sizes_match(dest, a);
@@ -379,6 +412,39 @@ void shLRP(ShVariable& dest, const ShVariable& alpha,
     CWISE_TRINARY_OP(dest, alpha, a, b, lrp);
   } else {
     ShStatement stmt(dest, SH_OP_LRP, alpha, a, b);
+    addStatement(stmt);
+  }
+}
+
+void shLOG(ShVariable& dest, const ShVariable& a)
+{
+  sizes_match(dest, a);
+  if (immediate()) {
+    CWISE_UNARY_OP(dest, a, logf);
+  } else {
+    ShStatement stmt(dest, SH_OP_LOG, a);
+    addStatement(stmt);
+  }
+}
+  
+void shLOG2(ShVariable& dest, const ShVariable& a)
+{
+  sizes_match(dest, a);
+  if (immediate()) {
+    CWISE_UNARY_OP(dest, a, log2f);
+  } else {
+    ShStatement stmt(dest, SH_OP_LOG2, a);
+    addStatement(stmt);
+  }
+}
+
+void shLOG10(ShVariable& dest, const ShVariable& a)
+{
+  sizes_match(dest, a);
+  if (immediate()) {
+    CWISE_UNARY_OP(dest, a, log10f);
+  } else {
+    ShStatement stmt(dest, SH_OP_LOG10, a);
     addStatement(stmt);
   }
 }

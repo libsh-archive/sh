@@ -516,6 +516,12 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
     case SH_OP_DOT: 
       genDot(stmt.dest, stmt.src[0], stmt.src[1]);
       break;
+    case SH_OP_EXP:
+      genScalarVectorInst(stmt.dest, stmt.src[1], stmt.src[0], SH_ARB_EXP);
+      break;
+    case SH_OP_EXP2:
+      genScalarVectorInst(stmt.dest, stmt.src[1], stmt.src[0], SH_ARB_EX2);
+      break;
     case SH_OP_FLR:
       m_instructions.push_back(ArbInst(SH_ARB_FLR, stmt.dest, stmt.src[0]));
       break;
@@ -538,6 +544,12 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       break;
     case SH_OP_FRAC:
       m_instructions.push_back(ArbInst(SH_ARB_FRC, stmt.dest, stmt.src[0]));
+      break;
+    case SH_OP_LOG:
+      genScalarVectorInst(stmt.dest, stmt.src[1], stmt.src[0], SH_ARB_LOG);
+      break;
+    case SH_OP_LOG2:
+      genScalarVectorInst(stmt.dest, stmt.src[1], stmt.src[0], SH_ARB_LG2);
       break;
     case SH_OP_LRP:
       if(m_target == "gpu:vertex") {

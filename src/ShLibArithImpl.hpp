@@ -82,6 +82,54 @@ ShGeneric<1, T> operator/(const ShGeneric<1, T>& left, const ShGeneric<1, T>& ri
 }
 
 template<int N, typename T>
+ShGeneric<N, T> exp(const ShGeneric<N, T>& var)
+{
+  ShAttrib<N, SH_TEMP, T> t;
+  shEXP(t, var);
+  return t;
+}
+
+template<int N, typename T>
+ShGeneric<N, T> exp2(const ShGeneric<N, T>& var)
+{
+  ShAttrib<N, SH_TEMP, T> t;
+  shEXP2(t, var);
+  return t;
+}
+
+template<int N, typename T>
+ShGeneric<N, T> exp10(const ShGeneric<N, T>& var)
+{
+  ShAttrib<N, SH_TEMP, T> t;
+  shEXP10(t, var);
+  return t;
+}
+
+template<int N, typename T>
+ShGeneric<N, T> log(const ShGeneric<N, T>& var)
+{
+  ShAttrib<N, SH_TEMP, T> t;
+  shLOG(t, var);
+  return t;
+}
+
+template<int N, typename T>
+ShGeneric<N, T> log2(const ShGeneric<N, T>& var)
+{
+  ShAttrib<N, SH_TEMP, T> t;
+  shLOG2(t, var);
+  return t;
+}
+
+template<int N, typename T>
+ShGeneric<N, T> log10(const ShGeneric<N, T>& var)
+{
+  ShAttrib<N, SH_TEMP, T> t;
+  shLOG10(t, var);
+  return t;
+}
+
+template<int N, typename T>
 inline
 ShGeneric<N, T> pow(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
 {

@@ -59,6 +59,49 @@ ShGeneric<1, T> operator/(const ShGeneric<1, T>& left, const ShGeneric<1, T>& ri
 SH_SHLIB_CONST_SCALAR_OP(operator/);
 SH_SHLIB_CONST_N_OP_LEFT(operator/);
 
+
+/** Natural Exponent.
+ * Operates componentwise on tuples.
+ * Returns the natural exponent of x.
+ */
+template<int N, typename T>
+ShGeneric<N, T> exp(const ShGeneric<N, T>& var);
+
+/** Exponent base 2.
+ * Operates componentwise on tuples.
+ * Returns the exponent of x using base 2.
+ */
+template<int N, typename T>
+ShGeneric<N, T> exp2(const ShGeneric<N, T>& var);
+
+/** Exponent base 10.
+ * Operates componentwise on tuples.
+ * Returns the exponent of x using base 10.
+ */
+template<int N, typename T>
+ShGeneric<N, T> exp(const ShGeneric<N, T>& var);
+
+/** Natural Logarithm.
+ * Operates componentwise on tuples.
+ * Returns the natural logarithm of x.
+ */
+template<int N, typename T>
+ShGeneric<N, T> log(const ShGeneric<N, T>& var);
+
+/** Logarithm base 2.
+ * Operates componentwise on tuples.
+ * Returns the logarithm of x using base 2.
+ */
+template<int N, typename T>
+ShGeneric<N, T> log2(const ShGeneric<N, T>& var);
+
+/** Logarithm base 10.
+ * Operates componentwise on tuples.
+ * Returns the logarithm of x using base 10.
+ */
+template<int N, typename T>
+ShGeneric<N, T> log(const ShGeneric<N, T>& var);
+
 /** Power.
  * Raise a tuple to a power.
  * @todo scalar promotion.
