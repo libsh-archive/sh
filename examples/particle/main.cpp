@@ -15,12 +15,14 @@
 using namespace SH;
 
 // defines
-#define NUM_PARTICLES 200
+#define NUM_PARTICLES 500
 
 // forward declarations
-void init_streams(void);
 void init_shaders(void);
+void init_streams(void);
+void reset_streams(void);
 void update_streams(void);
+int gprintf(int x, int y, char* fmt, ...);
 
 //-------------------------------------------------------------------
 // stream data
@@ -37,16 +39,18 @@ ShChannel<ShVector3f> velB;
 
 // uniforms 
 ShVector3f gravity(0.0, -9.8, 0.0);
-ShAttrib1f delta(0.01);
+ShAttrib1f delta(0.02);
 
 // programs
 ShProgram particle;
 ShProgram particle_updateA;
 ShProgram particle_updateB;
 
+//-------------------------------------------------------------------
 // shader data
+//-------------------------------------------------------------------
 
-// viewing uniform
+// viewing uniforms
 Camera camera;
 ShPoint3f lightPos;
 ShMatrix4x4f mv;
@@ -56,14 +60,18 @@ ShMatrix4x4f mvd;
 ShColor3f point_color = ShColor3f(1.0, 0.0, 0.0);
 ShColor3f diffuse_color = ShColor3f(0.5, 0.7, 0.9);
 
-// program
+// programs
 ShProgram vsh;
 ShProgram particle_fsh;
 ShProgram plane_fsh;
 
+//-------------------------------------------------------------------
 // GLUT data
+//-------------------------------------------------------------------
 int buttons[5] = {GLUT_UP, GLUT_UP, GLUT_UP, GLUT_UP, GLUT_UP};
 int cur_x, cur_y;
+
+bool show_help = false;
 
 void setup_view()
   {
@@ -75,40 +83,63 @@ void display()
   {
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
+  // Bind in the programs used to shade the particles
   shBind(vsh);
   shBind(particle_fsh);
 
-  ShHostStoragePtr posA_storage = shref_dynamic_cast<ShHostStorage>(posA.memory()->findStorage("host"));
-  if (posA_storage)
+  // The updating of the stream is done using double buffering, if we just
+  // ran particle_updateA then the latest data state is in stream 'B', otherwise
+  // its in stream 'A' (because particle_updateB was the last to be run). Based
+  // on the value of dir, render the appropriate stream
+  if (dir == 0)
     {
-    float* posA_data = (float*)posA_storage->data();
+    // Use the ShChannel object to fetch the ShHostStorage object
+    ShHostStoragePtr posA_storage = shref_dynamic_cast<ShHostStorage>(posA.memory()->findStorage("host"));
+    if (posA_storage)
+      {
+      // The ShHostStorage object may be out data with respect to
+      // the lastest copy on the graphics card, call sync() first
+      // to make sure that the ShHostStorage updated
+      posA_storage->sync();
 
-    point_color = ShColor3f(1, 0, 0);
+      // fetch the raw data pointer and simply render the particles as points
+      float* posA_data = (float*)posA_storage->data();
+      glBegin(GL_POINTS);
+      for(int i = 0; i < NUM_PARTICLES; i++)
+       {
+       glVertex3fv(&posA_data[3*i]);
+       }
+      glEnd();
+      }
+    }
+  else
+    {
+    // Use the ShChannel object to fetch the ShHostStorage object
+    ShHostStoragePtr posB_storage = shref_dynamic_cast<ShHostStorage>(posB.memory()->findStorage("host"));
+    if (posB_storage)
+      {
+      // The ShHostStorage object may be out data with respect to
+      // the lastest copy on the graphics card, call sync() first
+      // to make sure that the ShHostStorage updated
+      posB_storage->sync();
 
-    glBegin(GL_POINTS);
-    for(int i = 0; i < NUM_PARTICLES; i++)
-     {
-     glVertex3fv(&posA_data[3*i]);
-     }
-    glEnd();
+      float* posB_data = (float*)posB_storage->data();
+
+      // fetch the raw data pointer and simply render the particles as points
+      glBegin(GL_POINTS);
+      for(int i = 0; i < NUM_PARTICLES; i++)
+       {
+       glVertex3fv(&posB_data[3*i]);
+       }
+      glEnd();
+      }
     }
 
-  ShHostStoragePtr posB_storage = shref_dynamic_cast<ShHostStorage>(posB.memory()->findStorage("host"));
-  if (posB_storage)
-    {
-    float* posB_data = (float*)posB_storage->data();
-
-    point_color = ShColor3f(0, 1, 0);
-
-    glBegin(GL_POINTS);
-    for(int i = 0; i < NUM_PARTICLES; i++)
-     {
-     glVertex3fv(&posB_data[3*i]);
-     }
-    glEnd();
-    }
-
+  // Bind in the fragment program to shade the plane pillar
   shBind(plane_fsh);
+
+  // set the color and render the plane as a simple quad
+  diffuse_color = ShColor3f(0.5, 0.7, 0.9);
   glBegin(GL_QUADS);
   glNormal3f(0, 1, 0);
   glVertex3f(-5, 0, -5);
@@ -116,6 +147,56 @@ void display()
   glVertex3f( 5, 0,  5);
   glVertex3f(-5, 0,  5);
   glEnd();
+
+  // set a different color and draw a small pillar from
+  // which the particles 'shoot' out of.
+  diffuse_color = ShColor3f(0.7, 0.5, 0.3);
+  glBegin(GL_QUADS);
+  glNormal3f(0, 1, 0);
+  glVertex3f(-.2, 1, -.2);
+  glVertex3f( .2, 1, -.2);
+  glVertex3f( .2, 1,  .2);
+  glVertex3f(-.2, 1,  .2);
+
+  glNormal3f(0, 0, -1);
+  glVertex3f(-.2, 0, -.2);
+  glVertex3f( .2, 0, -.2);
+  glVertex3f( .2, 1, -.2);
+  glVertex3f(-.2, 1, -.2);
+
+  glNormal3f(1, 0, 0);
+  glVertex3f( .2, 0, -.2);
+  glVertex3f( .2, 0,  .2);
+  glVertex3f( .2, 1,  .2);
+  glVertex3f( .2, 1, -.2);
+
+  glNormal3f(0, 0, 1);
+  glVertex3f( .2, 0,  .2);
+  glVertex3f(-.2, 0,  .2);
+  glVertex3f(-.2, 1,  .2);
+  glVertex3f( .2, 1,  .2);
+
+  glNormal3f(-1, 0, 0);
+  glVertex3f(-.2, 0,  .2);
+  glVertex3f(-.2, 0, -.2);
+  glVertex3f(-.2, 1, -.2);
+  glVertex3f(-.2, 1,  .2);
+  glEnd();
+
+  // Help information
+  if (show_help)
+    {
+    gprintf(30, 160, "Sh Stream Example Help");
+    gprintf(30, 135, "  'R' - Reset simulation");
+    gprintf(30, 120, "  'S' - Single step simulation");
+    gprintf(30, 105, "Space - Start/stop simulation");
+    gprintf(30, 90,  "  'H' - Show/hide help");
+    gprintf(30, 75,  "  'Q' - Quit");
+    }
+  else
+    {
+    gprintf(10, 10, "'H' for help...");
+    }
   
   glutSwapBuffers();
   }
@@ -173,9 +254,10 @@ void keyboard(unsigned char k, int x, int y)
   switch(k)
     {
     case 'q':
+    case 'Q':
       exit(0);
       break;
-    case 'i':
+    case ' ':
       {
       static bool idling = false;
       if (idling) glutIdleFunc(NULL);
@@ -183,9 +265,22 @@ void keyboard(unsigned char k, int x, int y)
       idling = !idling;
       break;
       }
-    case ' ':
+    case 'r':
+    case 'R':
+      {
+      reset_streams();
+      break;
+      }
+    case 's':
+    case 'S':
       {
       update_streams();
+      break;
+      }
+    case 'h':
+    case 'H':
+      {
+      show_help = !show_help;
       break;
       }
     }
@@ -219,8 +314,10 @@ int main(int argc, char** argv)
     init_streams();
   
     // Place the camera at its initial position
-    setup_view();
     camera.move(0.0, 0.0, -15.0);
+    camera.rotate(-45, 0.0, 1.0, 0.0);
+    camera.rotate(30, 1.0, 0.0, 0.0);
+    setup_view();
 
     // Set up the light position
     lightPos = ShPoint3f(5.0, 5.0, 5.0);
@@ -257,15 +354,15 @@ void init_streams(void)
     vel += acc*delta;
 
     // clamp velocity to zero if small to force particles to settle
-    //vel = cond((vel|vel) < 0.01, ShVector3f(0.0, 0.0, 0.0), vel);
+    //vel = cond((vel|vel) < 0.5, ShVector3f(0.0, 0.0, 0.0), vel);
 
     // integrate velocity to update position
     pos += vel*delta;
     
-    // Sphere collisions
-    ShAttrib1f mu(0.1), eps(0.3);
-
-    // Handle collision with ground
+    // parameters controlling the amount of momentum
+    // tranfer on collision
+    ShAttrib1f mu(0.3);
+    ShAttrib1f eps(0.6);
 
     // check if below ground level
     ShAttrib1f under = pos(1) < 0.0;
@@ -279,6 +376,9 @@ void init_streams(void)
     vel = cond(under, (1.0 - mu)*velt - eps*veln, vel);
     pos(1) = cond(min(under, (vel|vel) < 0.1), ShPoint1f(0.0f), pos(1));
 
+    // clamp to the edge of the plane, just to make it look nice
+    pos(0) = min(max(pos(0), -5), 5);
+    pos(2) = min(max(pos(2), -5), 5);
   } SH_END;
 
   // Allocate ShHostMemory objects that will hold the particle position
@@ -313,18 +413,29 @@ void init_streams(void)
   particle_updateA = shSwizzle(0, 1) << (particle << dataA << gravity << delta);
   particle_updateB = shSwizzle(0, 1) << (particle << dataB << gravity << delta);
 
-  // Everything has been setup for the particle system to operate, but there
-  // is no initial data. Only the 'A' data needs to be initialized, the
-  // first run of particle_updateA will fill the 'B' data.
+  // Everything has been setup for the particle system to operate, last
+  // thing is to set the initial data.
+  reset_streams();
+  }
 
-  // Use the ShHostMemory objects to fetch the raw data and cast to
-  // a float pointer. Then iterate over the particle and initialize
-  // their state
-  float* posA_data = (float*)host_posA->hostStorage()->data();
-  float* velA_data = (float*)host_velA->hostStorage()->data();
-  float* posB_data = (float*)host_posB->hostStorage()->data();
-  float* velB_data = (float*)host_velB->hostStorage()->data();
+void reset_streams(void)
+  {
+  // Use the ShChannels objects to find the associated ShHostStorage and
+  // then fetch the raw data and cast to a float pointer.
+  ShHostStoragePtr posA_storage = shref_dynamic_cast<ShHostStorage>(posA.memory()->findStorage("host"));
+  ShHostStoragePtr velA_storage = shref_dynamic_cast<ShHostStorage>(velA.memory()->findStorage("host"));
 
+  // these storages maybe cached on the graphics card, flag them
+  // as dirty so that:
+  // 1) the latest copies will be on the host 
+  // 2) after reseting the stream, the graphics card copy will be updated
+  posA_storage->dirty();
+  velA_storage->dirty();
+
+  float* posA_data = (float*)posA_storage->data();
+  float* velA_data = (float*)velA_storage->data();
+
+  // Iterate over the particle and initialize their state
   for(int i = 0; i < NUM_PARTICLES; i++)
     {
     // All the particles will start at the same places
@@ -332,19 +443,25 @@ void init_streams(void)
     posA_data[3*i+1] = 1;
     posA_data[3*i+2] = 0;
 
-    // The velocities will vary over a small cone of angles.
+    // The velocity direction will vary over a small cone of angles.
     float theta = 2*M_PI*((float)rand()/(RAND_MAX-1));
-    float phi = 0.6*M_PI + 0.2*M_PI*((float)rand()/(RAND_MAX-1));
+    float phi = 0.7*(M_PI/2) + 0.2*(M_PI/2)*((float)rand()/(RAND_MAX-1));
 
     float cost = cos(theta);
     float sint = sin(theta);
     float cosp = cos(phi);
     float sinp = sin(phi);
 
-    velA_data[3*i+0] = 2*sint*cosp;
-    velA_data[3*i+1] = 2*sinp;
-    velA_data[3*i+2] = 2*cost*cosp;
+    // Additionally, vary the speed (i.e. magnitude of the velocity vector)
+    float power = 5 + 3*((float)rand()/(RAND_MAX-1));
+
+    velA_data[3*i+0] = power*sint*cosp;
+    velA_data[3*i+1] = power*sinp;
+    velA_data[3*i+2] = power*cost*cosp;
     }
+
+  // reset the dir flag to that the simulation will start with the 'A' stream
+  dir = 0;
   }
 
 void init_shaders(void)
@@ -403,11 +520,16 @@ void update_streams(void)
   {
   try 
     {
+    // The value of dir specifcies whether to run particle_updateA, which
+    // will take the data from stream 'A' and run the particle program to
+    // generate stream 'B', or the opposite using 'B' to generate 'A'. The
+    // rendering code uses dir in the same way to decided which stream has
+    // the latest state data for draw drawing the particle.
     if (dir == 0)
       {
       posB & velB = particle_updateA;
       }
-      else
+    else
       {
       posA & velA = particle_updateB;
       }
@@ -423,3 +545,50 @@ void update_streams(void)
     }
   }
 
+int gprintf(int x, int y, char* fmt, ...)
+  {
+  char temp[1024];
+  va_list va;
+  va_start(va, fmt);
+  vsprintf(temp, fmt, va);
+  va_end(va);
+
+  // setup the matrices for a direct
+  // screen coordinate transform when
+  // using glRasterPos
+  int vp[4];
+  glGetIntegerv(GL_VIEWPORT, vp);
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+  glOrtho(0, vp[2], 0, vp[3], -1, 1);
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glLoadIdentity();
+
+  // just in case, turn lighting and
+  // texturing off and disable depth testing
+  glPushAttrib(GL_ENABLE_BIT);
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_VERTEX_PROGRAM_ARB);
+  glDisable(GL_FRAGMENT_PROGRAM_ARB);
+
+  // render the character through glut
+  char* p = temp;
+  glRasterPos2f(x, y);
+  while(*p)
+    {
+    glutBitmapCharacter(GLUT_BITMAP_8_BY_13, (*p));
+    p++;
+    }
+
+  // reset OpenGL to what is was
+  // before we started
+  glPopAttrib();
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
+
+  return p-temp;
+  }
