@@ -45,27 +45,30 @@ void setTypeInfo(ShTypeInfo::TypeInfoMap &valueTypes) {
 
 namespace SH {
 
-ShTypeInfo::TypeInfoMap ShTypeInfo::m_valueTypes;
+ShTypeInfo::TypeInfoMap* ShTypeInfo::m_valueTypes;
 
 void ShTypeInfo::init()
 {
-  setTypeInfo<double>(m_valueTypes);
-  setTypeInfo<float>(m_valueTypes);
-  setTypeInfo<ShHalf>(m_valueTypes);
+  if(m_valueTypes) return;
+  m_valueTypes = new TypeInfoMap();
 
-  setTypeInfo<int>(m_valueTypes);
-  setTypeInfo<short>(m_valueTypes);
-  setTypeInfo<char>(m_valueTypes);
-  setTypeInfo<unsigned int>(m_valueTypes);
-  setTypeInfo<unsigned short>(m_valueTypes);
-  setTypeInfo<unsigned char>(m_valueTypes);
+  setTypeInfo<double>(*m_valueTypes);
+  setTypeInfo<float>(*m_valueTypes);
+  setTypeInfo<ShHalf>(*m_valueTypes);
 
-  setTypeInfo<ShFracInt> (m_valueTypes);
-  setTypeInfo<ShFracShort> (m_valueTypes);
-  setTypeInfo<ShFracByte> (m_valueTypes);
-  setTypeInfo<ShFracUInt> (m_valueTypes);
-  setTypeInfo<ShFracUShort> (m_valueTypes);
-  setTypeInfo<ShFracUByte> (m_valueTypes);
+  setTypeInfo<int>(*m_valueTypes);
+  setTypeInfo<short>(*m_valueTypes);
+  setTypeInfo<char>(*m_valueTypes);
+  setTypeInfo<unsigned int>(*m_valueTypes);
+  setTypeInfo<unsigned short>(*m_valueTypes);
+  setTypeInfo<unsigned char>(*m_valueTypes);
+
+  setTypeInfo<ShFracInt> (*m_valueTypes);
+  setTypeInfo<ShFracShort> (*m_valueTypes);
+  setTypeInfo<ShFracByte> (*m_valueTypes);
+  setTypeInfo<ShFracUInt> (*m_valueTypes);
+  setTypeInfo<ShFracUShort> (*m_valueTypes);
+  setTypeInfo<ShFracUByte> (*m_valueTypes);
 
   addOps();
 
@@ -76,7 +79,8 @@ void ShTypeInfo::init()
 
 const ShTypeInfo* ShTypeInfo::get(ShValueType valueType, ShDataType dataType)
 {
-  const ShTypeInfo* result = m_valueTypes(valueType, dataType);
+  init();
+  const ShTypeInfo* result = (*m_valueTypes)(valueType, dataType);
   if(!result) SH_DEBUG_PRINT("Null ShTypeInfo");
   return result;
 }

@@ -70,7 +70,7 @@ ShTypeInfo {
   typedef ShPairHashMap<ShValueType, ShDataType, const ShTypeInfo*> TypeInfoMap;
   private:
     /** Holds ShDataTypeInfo instances for all available valuetype/datatypes */
-    static TypeInfoMap m_valueTypes;
+    static TypeInfoMap* m_valueTypes;
 
     /** Adds automatic promotion and other casts into the ShCastManager */ 
     static void addCasts();

@@ -1,3 +1,7 @@
+2005-03-09  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+  * src/ShTypeInfo.hpp, ShTypeInfo.cpp (m_valueTypes):
+  Changed to pointer to avoid static initialization snafus. 
+
 2005-03-04  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* configure.ac: Bump glext.h version to 21 for the GLSL backend.
