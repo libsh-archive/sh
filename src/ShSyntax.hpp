@@ -28,11 +28,6 @@ void shEndFor();
 void shBreak();
 void shContinue();
 
-void shSwitch(bool);
-void shEndSwitch(bool);
-void shCase(bool);
-void shDefault();
-
 }
 
 /// @internal
@@ -146,34 +141,6 @@ void shDefault();
  * @see SH_FOR
  */
 #define SH_CONTINUE ::SH::shBreak();
-//@}
-
-/// @name Switch statements
-//@{
-/** Begin a switch statement, selecting on \a value.
- * @see SH_CASE
- * @see SH_DEFAULT
- * @see SH_ENDSWITCH
- */
-#define SH_SWITCH(value)    ::SH::shSwitch(SH_PUSH_ARG_QUEUE && SH_PUSH_ARG && SH_PROCESS_ARG(value)); {{{{{{
-/** Begin a particular case in a switch statement
- * @see SH_SWITCH
- * @see SH_DEFAULT
- * @see SH_ENDSWITCH
- */
-#define SH_CASE(cond)      ::SH::shCase(SH_PUSH_ARG_QUEUE && SH_PUSH_ARG && SH_PROCESS_ARG(cond));
-/** Indicate the default case in a switch statement.
- * @see SH_SWITCH
- * @see SH_CASE
- * @see SH_ENDSWITCH
- */
-#define SH_DEFAULT      ::SH::shDefault();
-/** End a switch statement.
- * @see SH_SWITCH
- * @see SH_CASE
- * @see SH_DEFAULT
- */
-#define SH_ENDSWITCH ::SH::shEndSwitch();}}}}}}
 //@}
 
 #endif

@@ -31,7 +31,8 @@ public:
   ShAttrib(const ShVariableN<N, T>& other);
   ShAttrib(const ShAttrib<N, Kind, T, Swizzled>& other);
   explicit ShAttrib(const ShVariableNodePtr& node,
-                    const ShSwizzle& swizzle);
+                    const ShSwizzle& swizzle,
+                    bool neg);
 
   ~ShAttrib();
 
@@ -55,7 +56,9 @@ public:
   ShAttrib<4, Kind, T, true> operator()(int, int, int, int) const;
   // TODO: Arbitrary swizzles?
   //@}
-  
+
+  /// Negate this attribute.
+  ShAttrib<N, Kind, T, Swizzled> operator-() const;
 };
 
 typedef ShAttrib<1, SH_VAR_INPUT, double> ShInputAttrib1f;

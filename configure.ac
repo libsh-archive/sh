@@ -10,7 +10,20 @@ AC_PROG_LIBTOOL
 
 # Set up some stuff
 AC_LANG(C++)
-AC_SUBST(CXXFLAGS, [-Wall])
+AC_ARG_ENABLE([debug], AC_HELP_STRING([--enable-debug], [enable debugging information (default=yes)]),
+  [AC_MSG_CHECKING([for debugging information])
+   msg=disabled
+   if test ".$enableval" = ".yes" ; then
+       AC_DEFINE(SH_DEBUG)
+       msg=enabled
+   fi
+   AC_MSG_RESULT($msg)
+  ],
+  [AC_MSG_CHECKING([for debugging information])
+   AC_DEFINE(SH_DEBUG)
+   AC_MSG_RESULT(default (yes))
+   ])
+CXXFLAGS="-g -Wall -O2"
 
 # Checks for libraries.
 

@@ -15,7 +15,6 @@ enum ShOperation {
   SH_OP_ASN, ///< Assignment
   SH_OP_NEG, ///< Unary negation
   SH_OP_ADD, ///< Binary addition
-  SH_OP_SUB, ///< Binary subtraction
   SH_OP_MUL, ///< Binary multiplication
   SH_OP_DIV, ///< Binary division
   // TODO: finish these

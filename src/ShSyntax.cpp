@@ -34,6 +34,8 @@ void shEndShader()
   std::ofstream dotfile("control.dot");
   ShEnvironment::shader->ctrlGraph->graphvizDump(dotfile);
 
+  ShEnvironment::shader->collectVariables();
+  
   std::cerr << "--- SM code:" << std::endl;
   ShBackendPtr backend = ShBackend::lookup("sm");
   if (backend) {
@@ -120,36 +122,5 @@ void ShContinue()
 {
   ShEnvironment::shader->tokenizer.blockList()->addBlock(new ShToken(SH_TOKEN_CONTINUE));
 }
-
-void ShSwitch(bool)
-{
-  ShRefCount<ShToken> token = new ShToken(SH_TOKEN_SWITCH);
-
-  token->arguments.push_back(ShEnvironment::shader->tokenizer.getArgument());
-  ShEnvironment::shader->tokenizer.popArgQueue();
-
-  ShEnvironment::shader->tokenizer.blockList()->addBlock(token);
-}
-
-void ShEndSwitch()
-{
-  ShEnvironment::shader->tokenizer.blockList()->addBlock(new ShToken(SH_TOKEN_ENDSWITCH));
-}
-
-void ShCase(bool)
-{
-  ShRefCount<ShToken> token = new ShToken(SH_TOKEN_CASE);
-
-  token->arguments.push_back(ShEnvironment::shader->tokenizer.getArgument());
-  ShEnvironment::shader->tokenizer.popArgQueue();
-
-  ShEnvironment::shader->tokenizer.blockList()->addBlock(token);
-}
-
-void ShDefault()
-{
-  ShEnvironment::shader->tokenizer.blockList()->addBlock(new ShToken(SH_TOKEN_DEFAULT));
-}
-
 
 }

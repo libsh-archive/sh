@@ -56,15 +56,14 @@ void ShParser::parseStmts(ShCtrlGraphNodePtr& head,
     case SH_TOKEN_DO:
       parseDo(head, tail, blocks);
       break;
-      // TODO: break, continue, switch
+    case SH_TOKEN_BREAK:
+    case SH_TOKEN_CONTINUE:
+      return; // TODO: break, continue semantics
     case SH_TOKEN_ELSE:
     case SH_TOKEN_ENDIF:
     case SH_TOKEN_ENDWHILE:
     case SH_TOKEN_UNTIL:
     case SH_TOKEN_ENDFOR:
-    case SH_TOKEN_ENDSWITCH:
-    case SH_TOKEN_CASE:
-    case SH_TOKEN_DEFAULT:
       return;
     }
   } else { // not a basic block, not a token

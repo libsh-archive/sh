@@ -2,13 +2,19 @@ SMALL TASKS:
  X check into CVS
  - improve error handling in ShParser.cpp
  - add line numbers/filenames to tokens, use this in error handling
- - finish SM backend
- - add "context" concept
+ - add additional layer for eror handling: don't throw exceptions by
+   default, instead just output to stderr or so.
+ - break and continue (requires some extra information)
+ X gather variables in ShShader
+ X simple SM register allocation
+ X add negation to variables
 
 MEDIUM TASKS:
+ - set constants and uniforms in the sm backend
  - port more of the ShLib calls to the new model.
  X code generator
- - add smarted configuration mechanism
+ - add smarter configuration mechanism
+ - add "context" concept
 
 LARGE TASKS:
  X finish the parser

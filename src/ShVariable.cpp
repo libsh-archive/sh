@@ -3,7 +3,7 @@
 namespace SH {
 
 ShVariable::ShVariable(const ShVariableNodePtr& node)
-  : m_node(node)
+  : m_node(node), m_neg(false)
 {
 }
 
@@ -35,6 +35,16 @@ void ShVariable::name(const std::string& name)
 const ShSwizzle& ShVariable::swizzle() const
 {
   return m_swizzle;
+}
+
+const ShVariableNodePtr& ShVariable::node() const
+{
+  return m_node;
+}
+
+bool ShVariable::neg() const
+{
+  return m_neg;
 }
 
 }

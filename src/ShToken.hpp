@@ -25,10 +25,6 @@ enum ShTokenType {
   SH_TOKEN_ENDFOR,
   SH_TOKEN_BREAK,
   SH_TOKEN_CONTINUE,
-  SH_TOKEN_SWITCH,
-  SH_TOKEN_ENDSWITCH,
-  SH_TOKEN_CASE,
-  SH_TOKEN_DEFAULT
 };
 
 /** A token in the (unparsed) parse tree.

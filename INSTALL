@@ -1,0 +1,10 @@
+If compiling from CVS, first run:
+$ ./bootstrap
+(also run this if you change any Makefile.am or the configure.ac)
+
+Then you will want to run:
+./configure
+make
+
+You may also run make check to build some tests.
+

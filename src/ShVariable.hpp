@@ -30,11 +30,18 @@ public:
 
   /// Obtain the swizzling (if any) applied to this variable.
   const ShSwizzle& swizzle() const;
-  
-protected:
 
+  /// Obtain the actual node this variable refers to.
+  const ShVariableNodePtr& node() const;
+
+  /// Return true if this variable is negated
+  bool neg() const;
+
+protected:
+  
   ShVariableNodePtr m_node; ///< The actual variable node we refer to.
   ShSwizzle m_swizzle; ///< Swizzling applied to this variable.
+  bool m_neg; ///< True iff this variable is negated
 };
 
 /** A variable of length N.
@@ -51,7 +58,21 @@ public:
   {
   }
   ~ShVariableN() {}
+
+  ShVariableN<N, T> operator-() const
+  {
+    return ShVariableN<N, T>(m_node, !m_neg);
+  }
+
+private:
+  ShVariableN(const ShVariableNodePtr& node,
+              bool neg)
+    : ShVariable(node)
+  {
+    m_neg = neg;
+  }
 };
+
 
 }
 

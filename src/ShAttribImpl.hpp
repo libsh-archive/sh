@@ -38,7 +38,6 @@ ShAttrib<N, Kind, T, Swizzled>::ShAttrib(T v1)
   if (uniform()) {
     m_node->setValue(0, v1);
   } else {
-    // TODO: Write mask?
     ShConstant<1, T> value(v1);
     ShStatement asn(*this, SH_OP_ASN, value);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
@@ -53,7 +52,6 @@ ShAttrib<N, Kind, T, Swizzled>::ShAttrib(T v1, T v2)
     m_node->setValue(0, v1);
   } else {
     T values[2] = {v1, v2};
-    // TODO: Write mask?
     ShConstant<2, T> value(values);
     ShStatement asn(*this, SH_OP_ASN, value);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
@@ -68,7 +66,6 @@ ShAttrib<N, Kind, T, Swizzled>::ShAttrib(T v1, T v2, T v3)
     m_node->setValue(0, v1);
   } else {
     T values[3] = {v1, v2, v3};
-    // TODO: Write mask?
     ShConstant<3, T> value(values);
     ShStatement asn(*this, SH_OP_ASN, value);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
@@ -83,7 +80,6 @@ ShAttrib<N, Kind, T, Swizzled>::ShAttrib(T v1, T v2, T v3, T v4)
     m_node->setValue(0, v1);
   } else {
     T values[4] = {v1, v2, v3, v4};
-    // TODO: Write mask?
     ShConstant<4, T> value(values);
     ShStatement asn(*this, SH_OP_ASN, value);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
@@ -98,6 +94,8 @@ ShAttrib<N, Kind, T, Swizzled>::operator=(const ShVariableN<N, T>& other)
   ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
   return *this;
 }
+
+
 
 template<int N, int Kind, typename T, bool Swizzled>
 ShAttrib<N, Kind, T, Swizzled>&
@@ -158,38 +156,47 @@ ShAttrib<N, Kind, T, Swizzled>::~ShAttrib()
 template<int N, int Kind, typename T, bool Swizzled>
 ShAttrib<N, Kind, T, true> ShAttrib<N, Kind, T, Swizzled>::operator()() const
 {
-  return ShAttrib<N, Kind, T, true>(m_node, m_swizzle);
+  return ShAttrib<N, Kind, T, true>(m_node, m_swizzle, m_neg);
 }
 
 template<int N, int Kind, typename T, bool Swizzled>
 ShAttrib<1, Kind, T, true> ShAttrib<N, Kind, T, Swizzled>::operator()(int i1) const
 {
-  return ShAttrib<1, Kind, T, true>(m_node, m_swizzle * ShSwizzle(i1));
+  return ShAttrib<1, Kind, T, true>(m_node, m_swizzle * ShSwizzle(i1), m_neg);
 }
 
 template<int N, int Kind, typename T, bool Swizzled>
 ShAttrib<2, Kind, T, true> ShAttrib<N, Kind, T, Swizzled>::operator()(int i1, int i2) const
 {
-  return ShAttrib<2, Kind, T, true>(m_node, m_swizzle * ShSwizzle(i1, i2));
+  return ShAttrib<2, Kind, T, true>(m_node, m_swizzle * ShSwizzle(i1, i2), m_neg);
 }
 
 template<int N, int Kind, typename T, bool Swizzled>
 ShAttrib<3, Kind, T, true> ShAttrib<N, Kind, T, Swizzled>::operator()(int i1, int i2, int i3) const
 {
-  return ShAttrib<3, Kind, T, true>(m_node, m_swizzle * ShSwizzle(i1, i2, i3));
+  return ShAttrib<3, Kind, T, true>(m_node, m_swizzle * ShSwizzle(i1, i2, i3), m_neg);
 }
 
 template<int N, int Kind, typename T, bool Swizzled>
 ShAttrib<4, Kind, T, true> ShAttrib<N, Kind, T, Swizzled>::operator()(int i1, int i2, int i3, int i4) const
 {
-  return ShAttrib<4, Kind, T, true>(m_node, m_swizzle * ShSwizzle(i1, i2, i3, i4));
+  return ShAttrib<4, Kind, T, true>(m_node, m_swizzle * ShSwizzle(i1, i2, i3, i4), m_neg);
 }
 
 template<int N, int Kind, typename T, bool Swizzled>
-ShAttrib<N, Kind, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node, const ShSwizzle& swizzle)
+ShAttrib<N, Kind, T, Swizzled>
+ShAttrib<N, Kind, T, Swizzled>::operator-() const
+{
+  return ShAttrib<4, Kind, T, true>(m_node, m_swizzle, !m_neg);
+}
+
+template<int N, int Kind, typename T, bool Swizzled>
+ShAttrib<N, Kind, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node, const ShSwizzle& swizzle,
+                                         bool neg)
   : ShVariableN<N, T>(node)
 {
   m_swizzle = swizzle;
+  m_neg = neg;
 }
 
 }

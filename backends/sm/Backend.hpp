@@ -9,7 +9,6 @@
 #include "ShVariableNode.hpp"
 #include "ShBasicBlock.hpp"
 #include "sm.hpp"
-#include "SmShaderObject.hpp"
 #include "ShRefCount.hpp"
 
 namespace ShSm {
@@ -34,9 +33,29 @@ struct SmInstruction {
   SH::ShVariable src1, src2, src3;
 };
 
+enum SmRegType {
+  SHSM_REG_INPUT,
+  SHSM_REG_OUTPUT,
+  SHSM_REG_TEMP,
+  SHSM_REG_CONST,
+};
+
+struct SmRegister {
+  SmRegister() {}
+  SmRegister(SmRegType type, int index)
+    : type(type), index(index)
+  {
+  }
+  SmRegType type;
+  int index;
+
+  std::string print() const;
+};
+
+
 class BackendCode : public SH::ShBackendCode {
 public:
-  BackendCode();
+  BackendCode(const SH::ShShader& shader);
   ~BackendCode();
 
   void upload();
@@ -44,17 +63,36 @@ public:
   std::ostream& print(std::ostream& out);
 
   int label(const SH::ShBasicBlockPtr& block);
-
-  typedef std::list<SmInstruction> SmInstList;
-  
   void addBasicBlock(const SH::ShBasicBlockPtr& block);
 
+  void allocRegs();
+
 private:
+  SH::ShShader m_shader;
+  SMshader m_smShader;
+  
   int m_maxLabel;
   std::map<SH::ShBasicBlockPtr, int> m_labels;
 
-  std::map<SH::ShVariableNodePtr, SMreg> m_registers; ///< Really Simple(TM) register allocation
+  typedef std::list<SmInstruction> SmInstList;
   SmInstList m_instructions; ///< The actual code.
+
+  SmRegister getReg(const SH::ShVariableNodePtr& var);
+  SMreg getSmReg(const SH::ShVariableNodePtr& var);
+
+  int m_maxCR;
+  int m_maxTR;
+  int m_maxIR;
+  int m_maxOR;
+  typedef std::map<SH::ShVariableNodePtr, SmRegister> RegMap;
+  RegMap m_registers; ///< Really Simple(TM) register allocation
+
+  SMreg* m_cR;
+  SMreg* m_tR;
+  SMreg* m_iR;
+  SMreg* m_oR;
+
+  std::string printVar(const SH::ShVariable& var);
 };
 
 typedef SH::ShRefCount<BackendCode> BackendCodePtr;

@@ -1,12 +1,13 @@
-check_PROGRAMS = do if for while
+check_PROGRAMS = do if for ops simple while
 
 AM_CPPFLAGS = -I../src
 
+LDADD = ../../smash/software/libsm.a ../src/libsh.la ../backends/sm/Backend.o
+LDFLAGS = -all-static
+
 do_SOURCES = do.cpp
-do_LDADD = ../src/libsh.la ../backends/sm/libshsm.la
 if_SOURCES = if.cpp
-if_LDADD = ../src/libsh.la ../backends/sm/libshsm.la
 for_SOURCES = for.cpp
-for_LDADD = ../src/libsh.la ../backends/sm/libshsm.la
+ops_SOURCES = ops.cpp
+simple_SOURCES = simple.cpp
 while_SOURCES = while.cpp
-while_LDADD = ../src/libsh.la ../backends/sm/libshsm.la

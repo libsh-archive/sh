@@ -7,3 +7,5 @@ Makefile
 Makefile.in
 .deps
 .libs
+ops
+simple

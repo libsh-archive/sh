@@ -54,11 +54,7 @@ ShAttrib<N, SH_VAR_TEMP, T, false> operator+(const ShVariableN<N, T>& left, cons
 template<int N, typename T>
 ShAttrib<N, SH_VAR_TEMP, T, false> operator-(const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
 {
-  ShAttrib<N, SH_VAR_TEMP, T, false> t;
-  ShStatement stmt(t, left, SH_OP_SUB, right);
-  ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
-
-  return t;
+  return left + (-right);
 }
 
 /// Componentwise/scalar multiplication

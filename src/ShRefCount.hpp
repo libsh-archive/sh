@@ -1,6 +1,8 @@
 #ifndef SHREFCOUNT_HPP
 #define SHREFCOUNT_HPP
 
+#include <utility>
+
 namespace SH {
 
 /** A class which can be reference-counted.
@@ -53,6 +55,12 @@ public:
   /// Attempt to dynamically cast another object to an object of this type.
   template<typename T1>
   ShRefCount<T>& operator=(const ShRefCount<T1>& other);
+
+  /// Two references are equal if they point to the same object.
+  bool operator==(const ShRefCount<T>& other) const;
+
+  /// Actually compares the pointers.
+  bool operator<(const ShRefCount<T>& other) const;
 
   T& operator*();
   const T& operator*() const;
@@ -149,6 +157,19 @@ ShRefCount<T>& ShRefCount<T>::operator=(T* object)
 }
 
 template<typename T>
+bool ShRefCount<T>::operator==(const ShRefCount<T>& other) const
+{
+  return m_object == other.m_object;
+}
+
+template<typename T>
+bool ShRefCount<T>::operator<(const ShRefCount<T>& other) const
+{
+  return m_object < other.m_object; // TODO: Make sure this is portable...
+}
+
+
+template<typename T>
 T& ShRefCount<T>::operator*()
 {
   return *m_object;
@@ -181,7 +202,7 @@ ShRefCount<T>::operator bool() const
 template<typename T>
 int ShRefCount<T>::refCount() const
 {
-  if (m_object)
+  if (!m_object)
     return 0; // TODO: Maybe -1?
   else
     return m_object->refCount();

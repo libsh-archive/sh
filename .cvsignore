@@ -13,3 +13,4 @@ missing
 mkinstalldirs
 stamp-h.in
 autom4te.cache
+control.dot
