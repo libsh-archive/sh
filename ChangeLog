@@ -1,3 +1,22 @@
+2004-10-08  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShLib.hpp (SH_SHLIB_USUAL_NON_UNIT_OPS_RETTYPE): Add all
+	versions of operator/.
+
+	* test/regress/regress.py: Remove this file.
+
+	* test/regress/add.cpp.py, test/regress/mul.cpp.py,
+	test/regress/div.cpp.py, test/regress/cos.cpp.py,
+	test/regress/sin.cpp.py: Added the first of the new regression
+	tests.
+
+	* test/regress/common.py: Add file containing some useful
+	functions for regression testing (well, just one right now).
+
+	* test/regress/streamtest.py: Add beginnings of new regression test engine.
+
+	* test/regress/Makefile.am: Remove old regression testing cruft.
+
 2004-10-08  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
 
 	* Makefile.win32, backends/Makefile.win32, backends/gl/Makefile.win32,

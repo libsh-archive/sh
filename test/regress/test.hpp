@@ -61,10 +61,10 @@ public:
     res.getValues(_res);
 
     SH::ShHostMemoryPtr mem_in1 = new SH::ShHostMemory(in1.size()*sizeof(float), _in1);
-    SH::ShChannel<INPUT1> chan_in1(mem_in1, 1);
+    SH::ShChannel<typename INPUT1::TempType> chan_in1(mem_in1, 1);
 
     SH::ShHostMemoryPtr mem_out = new SH::ShHostMemory(res.size()*sizeof(float), _out);
-    SH::ShChannel<OUTPUT> chan_out(mem_out, 1);
+    SH::ShChannel<typename OUTPUT::TempType> chan_out(mem_out, 1);
 
     chan_out = program << chan_in1;
 
@@ -129,13 +129,13 @@ public:
     res.getValues(_res);
 
     SH::ShHostMemoryPtr mem_in1 = new SH::ShHostMemory(in1.size()*sizeof(float), _in1);
-    SH::ShChannel<INPUT1> chan_in1(mem_in1, 1);
+    SH::ShChannel<typename INPUT1::TempType> chan_in1(mem_in1, 1);
 
     SH::ShHostMemoryPtr mem_in2 = new SH::ShHostMemory(in2.size()*sizeof(float), _in2);
-    SH::ShChannel<INPUT2> chan_in2(mem_in2, 1);
+    SH::ShChannel<typename INPUT2::TempType> chan_in2(mem_in2, 1);
 
     SH::ShHostMemoryPtr mem_out = new SH::ShHostMemory(res.size()*sizeof(float), _out);
-    SH::ShChannel<OUTPUT> chan_out(mem_out, 1);
+    SH::ShChannel<typename OUTPUT::TempType> chan_out(mem_out, 1);
 
     chan_out = program << chan_in1 << chan_in2;
 
@@ -205,16 +205,16 @@ public:
     res.getValues(_res);
 
     SH::ShHostMemoryPtr mem_in1 = new SH::ShHostMemory(in1.size()*sizeof(float), _in1);
-    SH::ShChannel<INPUT1> chan_in1(mem_in1, 1);
+    SH::ShChannel<typename INPUT1::TempType> chan_in1(mem_in1, 1);
 
     SH::ShHostMemoryPtr mem_in2 = new SH::ShHostMemory(in2.size()*sizeof(float), _in2);
-    SH::ShChannel<INPUT2> chan_in2(mem_in2, 1);
+    SH::ShChannel<typename INPUT2::TempType> chan_in2(mem_in2, 1);
 
     SH::ShHostMemoryPtr mem_in3 = new SH::ShHostMemory(in3.size()*sizeof(float), _in3);
-    SH::ShChannel<INPUT3> chan_in3(mem_in3, 1);
+    SH::ShChannel<typename INPUT3::TempType> chan_in3(mem_in3, 1);
 
     SH::ShHostMemoryPtr mem_out = new SH::ShHostMemory(res.size()*sizeof(float), _out);
-    SH::ShChannel<OUTPUT> chan_out(mem_out, 1);
+    SH::ShChannel<typename OUTPUT::TempType> chan_out(mem_out, 1);
 
     chan_out = program << chan_in1 << chan_in2 << chan_in3;
   
