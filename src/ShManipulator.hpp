@@ -214,6 +214,20 @@ ShManipulator<T> shRange(T start, T end);
 template<typename T>
 ShManipulator<T> shExtract(T k); 
 
+/** insert is a manipulator that does the opposite of extract.
+ * It moves the first output to the kth output and shifts
+ * the rest of the outputs accordingly.
+ *
+ * int version:
+ * if k >= 0, then move to element k (indices start at 0) 
+ * if k < 0, move to element outputs.size + k
+ *
+ * string version:
+ * inserts first output to the position of the given name 
+ */
+template<typename T>
+ShManipulator<T> shInsert(T k); 
+
 /** drop is a manipulator that discards the k outputs.
  *
  * int version:

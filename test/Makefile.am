@@ -1,11 +1,11 @@
 check_PROGRAMS = algebra combine connect constants copy do if for julia matrix ops point \
 		 rch simple texture uniforms shvector while neg stream io2temp ref mem \
-		 longtuple inout error stream_inverse kill stream_timing
+		 longtuple inout error stream_inverse kill stream_timing manip
 
 INCLUDES = -I../src
 
 AM_LDFLAGS = -L/usr/X11R6/lib
-AM_LDADD =  -lGL ../src/libsh.la
+LDADD =  -lGL ../src/libsh.la
 
 AM_CXXFLAGS = -g -O0
 
@@ -41,6 +41,7 @@ longtuple_SOURCES = longtuple.cpp
 inout_SOURCES = inout.cpp
 error_SOURCES = error.cpp
 kill_SOURCES = kill.cpp
+manip_SOURCES = manip.cpp
 
 %.cpp: %.sht test.header test.footer
 	cat test.header > $@

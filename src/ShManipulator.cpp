@@ -49,6 +49,7 @@ namespace SH {
 template<>
 int OffsetRange<int>::absIndex( int index, int offset, const ShProgramNode::VarList &v ) const {
   if( offset == _FIRST ) return 0;
+  else if( offset == _SECOND ) return 1;
   else if( offset == _LAST ) return v.size() - 1;
   if( index < 0 ) index += v.size();
   if( index < 0 || index >= static_cast<int>(v.size()) ) return OFFSET_RANGE_BAD_INDEX; 
@@ -63,6 +64,7 @@ template<>
 int OffsetRange<std::string>::absIndex( std::string index, int offset, 
     const ShProgramNode::VarList &v ) const {
   if( offset == _FIRST ) return 0;
+  else if( offset == _SECOND ) return 1;
   else if( offset == _LAST ) return v.size() - 1;
 
   int result;

@@ -41,6 +41,7 @@ namespace SH {
 
 // TODO figure out a better way...
 #define _FIRST -54545454
+#define _SECOND -54545453
 #define _LAST 54545454
 
 template<typename T>
@@ -319,6 +320,18 @@ ShManipulator<T> shExtract(T k) {
   typedef typename ShManipulator<T>::IndexRange Range;
   m(Range(k,_FIRST,k,-1));
   m(Range(k,1,k,_LAST));
+  return m;
+}
+
+template<typename T>
+ShManipulator<T> shInsert(T k) {
+  ShManipulator<T> m;
+  typedef typename ShManipulator<T>::IndexRange Range;
+  
+  m(Range(k,_SECOND,k,0));
+  m(Range(k,_FIRST,k,_FIRST));
+  m(Range(k,1,k,_LAST));
+  std::cout << m.toString() << std::endl;
   return m;
 }
 
