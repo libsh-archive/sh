@@ -31,6 +31,7 @@
 #include "GlBackend.hpp"
 #include "ShBackend.hpp"
 #include "ShProgram.hpp"
+#include "ShException.hpp"
 
 namespace shgl {
 
@@ -49,6 +50,11 @@ private:
 };
 
 unsigned int arbTarget(const std::string& unit);
+
+class ArbException : public SH::ShBackendException {
+public:
+  ArbException(const std::string& message);
+};
 
 }
 

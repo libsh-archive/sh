@@ -68,5 +68,10 @@ ShTransformerException::ShTransformerException(const std::string& message)
 {
 }
 
+ShBackendException::ShBackendException(const std::string& message)
+  : ShException("Backend Error: " + message)
+{
+}
+
 
 }

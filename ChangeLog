@@ -1,3 +1,12 @@
+2004-10-22  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbCode.cpp (upload): Call shError() when the driver
+	doesn't allow code to be uploaded (e.g. due to failing instruction
+	limits).
+
+	* src/ShException.cpp (ShBackendException): Implement
+	ShBackendException constructor.
+
 2004-10-22 Sylvain Vasseur <sfvsasse@cgl.uwaterloo.ca>
 
 	* src/Makefile.win32: Add ShMemoryDep file.
