@@ -100,7 +100,7 @@ template<int K>
 ShVariableN<M, T> ShNoise<M, T, P>::noise(const ShVariableN<K, T> &p, bool useTexture) 
 {
   init();
-  int i, j, k;
+  int i, j;
   typedef ShAttrib<K, SH_TEMP, T> TempType;
   typedef ShAttrib<M, SH_TEMP, T> ResultType;
   typedef ShConstant<K, T> ConstTempType;
