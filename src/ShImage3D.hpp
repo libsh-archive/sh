@@ -24,8 +24,8 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHIMAGE_HPP
-#define SHIMAGE_HPP
+#ifndef SHIMAGE3D_HPP
+#define SHIMAGE3D_HPP
 
 #include <string>
 #include "ShRefCount.hpp"
@@ -35,32 +35,30 @@ namespace SH {
 
 /** An image, consisting of a rectangle of floating-point elements.
  */
-class ShImage : public ShRefCountable {
+class ShImage3D : public ShRefCountable {
 public:
-  ShImage(); ///< Construct an empty image
-  ShImage(int width, int height, int depth); ///< Construct a black
-                                             ///image at the given width/height/depth
-  ShImage(const ShImage& other); ///< Copy an image
+  ShImage3D(); ///< Construct an empty image
+  ShImage3D(int width, int height, int depth, int elements); ///< Construct a black
+                                             ///image at the given width/height/elements
+  ShImage3D(const ShImage3D& other); ///< Copy an image
 
-  ~ShImage();
+  ~ShImage3D();
 
-  ShImage& operator=(const ShImage& other); ///< Copy the data from
+  ShImage3D& operator=(const ShImage3D& other); ///< Copy the data from
                                             ///one image to another
 
   int width() const; ///< Determine the width of the image
   int height() const; ///< Determine the height of the image
-  int elements() const; ///< Determine the depth (floats per pixel) of
-                        ///the image
+  int depth() const; ///< Determine the depth of the image
+  int elements() const; ///< Determine the elements (floats per pixel) of
+                     ///the image
 
-  float operator()(int x, int y, int i) const; ///< Retrieve a
+  float operator()(int x, int y, int z, int i) const; ///< Retrieve a
                                                ///particular component
                                                ///from the image.
-  float& operator()(int x, int y, int i);  ///< Retrieve a
+  float& operator()(int x, int y, int z, int i);  ///< Retrieve a
                                                ///particular component
                                                ///from the image.
-
-  void loadPng(const std::string& filename); ///< Load a PNG file into
-                                             ///this image.
 
   const float* data() const;
   float* data();
@@ -69,7 +67,7 @@ public:
   ShRefCount<const ShMemory> memory() const;
   
 private:
-  int m_width, m_height;
+  int m_width, m_height, m_depth;
   int m_elements;
   ShHostMemoryPtr m_memory;
 };

@@ -51,8 +51,8 @@ void ShBlockList::addStatement(const ShStatement& statement)
 {
   ShBasicBlockPtr basicBlock;
   if (!m_blocks.empty()) {
-    basicBlock = m_blocks.back();
-    if (!basicBlock.object()) {
+    basicBlock = shref_dynamic_cast<ShBasicBlock>(m_blocks.back());
+    if (!basicBlock) {
       basicBlock = new ShBasicBlock();
       m_blocks.push_back(ShBlockPtr(basicBlock));
     }

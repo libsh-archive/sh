@@ -32,6 +32,10 @@
  * basic operations.
  */
 
+#include "ShBaseTexture.hpp"
+#include "ShProgram.hpp"
+#include "ShMatrix.hpp"
+
 namespace SH {
 
 /** \brief Creates a keep nibble.
@@ -50,21 +54,33 @@ ShProgram lose(std::string name = "");
 
 /** \brief 2D texture lookup nibble 
  * Inputs: IN(0) ShTexCoord1f tc
- * Outputs: OUT(0) name = tex(tc) */ 
-template<typename T> 
-ShProgram access(const ShTexture1D<T> &tex, std::string name = "result");
+ * Outputs: OUT(0) name = tex(tc) */
+template<typename T, unsigned int traits> 
+ShProgram access(const ShBaseTexture1D<T, traits> &tex, std::string name = "result");
 
 /** \brief 2D texture lookup nibble 
  * Inputs: IN(0) ShTexCoord2f tc
- * Outputs: OUT(0) name = tex(tc) */ 
-template<typename T> 
-ShProgram access(const ShTexture2D<T> &tex, std::string name = "result");
+ * Outputs: OUT(0) name = tex(tc) */
+template<typename T, unsigned int traits> 
+ShProgram access(const ShBaseTexture2D<T, traits> &tex, std::string name = "result");
 
-/** \brief 2D texture lookup nibble 
+/** \brief Rect texture lookup nibble 
+ * Inputs: IN(0) ShTexCoord2f tc
+ * Outputs: OUT(0) name = tex(tc) */
+template<typename T, unsigned int traits> 
+ShProgram access(const ShBaseTextureRect<T, traits> &tex, std::string name = "result");
+
+/** \brief 3D texture lookup nibble 
  * Inputs: IN(0) ShTexCoord3f tc
- * Outputs: OUT(0) name = tex(tc) */ 
-template<typename T> 
-ShProgram access(const ShTexture3D<T> &tex, std::string name = "result");
+ * Outputs: OUT(0) name = tex(tc) */
+template<typename T, unsigned int traits> 
+ShProgram access(const ShBaseTexture3D<T, traits> &tex, std::string name = "result");
+
+/** \brief Cube texture lookup nibble 
+ * Inputs: IN(0) ShTexCoord3f tc
+ * Outputs: OUT(0) name = tex(tc) */
+template<typename T, unsigned int traits> 
+ShProgram access(const ShBaseTextureCube<T, traits> &tex, std::string name = "result");
 
 /** \brief transformation nibble 
  * Creates a nibble that transforms a variable of type T2 by 

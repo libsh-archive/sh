@@ -32,40 +32,46 @@
 #include <sstream>
 #include "ShException.hpp"
 #include "ShError.hpp"
+#include "ShDebug.hpp"
 
 namespace SH {
 
 ShImage::ShImage()
-  : m_width(0), m_height(0), m_depth(0), m_data(0)
+  : m_width(0), m_height(0), m_elements(0), m_memory(0)
 {
 }
 
-ShImage::ShImage(int width, int height, int depth)
-  : m_width(width), m_height(height), m_depth(depth),
-    m_data(new float[m_width * m_height * m_depth])
+ShImage::ShImage(int width, int height, int elements)
+  : m_width(width), m_height(height), m_elements(elements),
+    m_memory(new ShHostMemory(sizeof(float) * m_width * m_height * m_elements))
 {
 }
 
 ShImage::ShImage(const ShImage& other)
-  : m_width(other.m_width), m_height(other.m_height), m_depth(other.m_depth),
-    m_data(new float[m_width * m_height * m_depth])
+  : m_width(other.m_width), m_height(other.m_height), m_elements(other.m_elements),
+    m_memory(other.m_memory ? new ShHostMemory(sizeof(float) * m_width * m_height * m_elements) : 0)
 {
-  std::memcpy(m_data, other.m_data, m_width * m_height * m_depth * sizeof(float));
+  if (m_memory) {
+    std::memcpy(m_memory->hostStorage()->data(),
+                other.m_memory->hostStorage()->data(),
+                m_width * m_height * m_elements * sizeof(float));
+  }
 }
 
 ShImage::~ShImage()
 {
-  delete [] m_data;
 }
 
 ShImage& ShImage::operator=(const ShImage& other)
 {
-  delete [] m_data;
   m_width = other.m_width;
   m_height = other.m_height;
-  m_depth = other.m_depth;
-  m_data = new float[m_width * m_height * m_depth];
-  std::memcpy(m_data, other.m_data, m_width * m_height * m_depth * sizeof(float));
+  m_elements = other.m_elements;
+  m_memory = (other.m_memory ? new ShHostMemory(sizeof(float) * m_width * m_height * m_elements) : 0);
+  std::memcpy(m_memory->hostStorage()->data(),
+              other.m_memory->hostStorage()->data(),
+              m_width * m_height * m_elements * sizeof(float));
+  
   return *this;
 }
 
@@ -79,19 +85,20 @@ int ShImage::height() const
   return m_height;
 }
 
-int ShImage::depth() const
+int ShImage::elements() const
 {
-  return m_depth;
+  return m_elements;
 }
 
 float ShImage::operator()(int x, int y, int i) const
 {
-  return m_data[m_depth * (m_width * y + x) + i];
+  SH_DEBUG_ASSERT(m_memory);
+  return data()[m_elements * (m_width * y + x) + i];
 }
 
 float& ShImage::operator()(int x, int y, int i)
 {
-  return m_data[m_depth * (m_width * y + x) + i];
+  return data()[m_elements * (m_width * y + x) + i];
 }
 
 void ShImage::loadPng(const std::string& filename)
@@ -135,7 +142,7 @@ void ShImage::loadPng(const std::string& filename)
   if (bit_depth % 8) {
     png_destroy_read_struct(&png_ptr, 0, 0);
     std::ostringstream os;
-    os << "Invalid bit depth " << bit_depth;
+    os << "Invalid bit elements " << bit_depth;
     ShError( ShImageException(os.str()) );
   }
 
@@ -157,37 +164,37 @@ void ShImage::loadPng(const std::string& filename)
     ShError( ShImageException("Invalid colour type") );
   }
 
-  delete [] m_data;
+  m_memory = 0;
 
   m_width = png_get_image_width(png_ptr, info_ptr);
   m_height = png_get_image_height(png_ptr, info_ptr);
   switch (colour_type) {
   case PNG_COLOR_TYPE_RGB:
-    m_depth = 3;
+    m_elements = 3;
     break;
   case PNG_COLOR_TYPE_RGBA:
-    m_depth = 4;
+    m_elements = 4;
     break;
   default:
-    m_depth = 1;
+    m_elements = 1;
     break;
   }
   
   png_bytep* row_pointers = png_get_rows(png_ptr, info_ptr);
 
-  m_data = new float[m_width * m_height * m_depth];
+  m_memory = new ShHostMemory(sizeof(float) * m_width * m_height * m_elements);
 
   for (int y = 0; y < m_height; y++) {
     for (int x = 0; x < m_width; x++) {
-      for (int i = 0; i < m_depth; i++) {
+      for (int i = 0; i < m_elements; i++) {
 	png_byte *row = row_pointers[y];
-	int index = m_depth * (y * m_width + x) + i;
-	long data = 0;
+	int index = m_elements * (y * m_width + x) + i;
+	long element = 0;
 	for (int j = 0; j < bit_depth/8; j++) {
-	  data <<= 8;
-	  data += row[(x * m_depth + i) * bit_depth/8 + j];
+	  element <<= 8;
+	  element += row[(x * m_elements + i) * bit_depth/8 + j];
 	}
-	m_data[index] = data / static_cast<float>((1 << bit_depth) - 1);
+	data()[index] = element / static_cast<float>((1 << bit_depth) - 1);
       }
     }
   }
@@ -197,7 +204,24 @@ void ShImage::loadPng(const std::string& filename)
 
 const float* ShImage::data() const
 {
-  return m_data;
+  if (!m_memory) return 0;
+  return reinterpret_cast<const float*>(m_memory->hostStorage()->data());
+}
+
+float* ShImage::data()
+{
+  if (!m_memory) return 0;
+  return reinterpret_cast<float*>(m_memory->hostStorage()->data());
+}
+
+ShMemoryPtr ShImage::memory()
+{
+  return m_memory;
+}
+
+ShRefCount<const ShMemory> ShImage::memory() const
+{
+  return m_memory;
 }
 
 }

@@ -1,119 +1,58 @@
-// Sh: A GPU metaprogramming language.
-//
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
-// 
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-// 
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-// 
-// 1. The origin of this software must not be misrepresented; you must
-// not claim that you wrote the original software. If you use this
-// software in a product, an acknowledgment in the product documentation
-// would be appreciated but is not required.
-// 
-// 2. Altered source versions must be plainly marked as such, and must
-// not be misrepresented as being the original software.
-// 
-// 3. This notice may not be removed or altered from any source
-// distribution.
-//////////////////////////////////////////////////////////////////////////////
 #ifndef SHTEXTURE_HPP
 #define SHTEXTURE_HPP
 
-#include "ShRefCount.hpp"
-#include "ShTextureNode.hpp"
-#include "ShImage.hpp"
+#include "ShBaseTexture.hpp"
 
 namespace SH {
 
-template<typename T>
-class ShTexture : public ShRefCountable {
-public:
-  ~ShTexture();
-
-  ShTextureNodePtr node() const;
-
-  /// Attach a memory object to this texture
-  // This currently does not work with cube maps
-  void attach(ShMemoryObjectPtr memObj);
-
-protected:
-  ShTexture(ShTextureNodePtr node);
-  
-  ShTextureNodePtr m_node;
-
-  void loadImage(const ShImage& image, int slice = 0);
-};  
+const unsigned int SH_TEXTURE_TRAITS =
+  SH_LOOKUP_LINEAR | SH_FILTER_MIPMAP | SH_WRAP_CLAMP;
 
 template<typename T>
-class ShTexture1D : public ShTexture<T> {
+class ShTexture1D
+  : public ShBaseTexture1D<T, SH_TEXTURE_TRAITS> {
 public:
-  ShTexture1D(int length);
-
-  /// Lookup a value, coords being in [0,1]
-  T operator()(const ShVariableN<1, float>& coords) const;
-
-  void load(const ShImage& image);
+  ShTexture1D(int width)
+    : ShBaseTexture1D<T, SH_TEXTURE_TRAITS>(width)
+  {}
 };
 
 template<typename T>
-class ShTexture2D : public ShTexture<T> {
+class ShTexture2D
+  : public ShBaseTexture2D<T, SH_TEXTURE_TRAITS> {
 public:
-  ShTexture2D(int width, int height);
-
-  /// Lookup a value, coords being in [0,1] x [0,1]
-  T operator()(const ShVariableN<2, float>& coords) const;
-
-  void load(const ShImage& image);
+  ShTexture2D(int width, int height)
+    : ShBaseTexture2D<T, SH_TEXTURE_TRAITS>(width, height)
+  {}
 };
 
 template<typename T>
-class ShTexture3D : public ShTexture<T> {
+class ShTextureRect
+  : public ShBaseTextureRect<T, SH_TEXTURE_TRAITS> {
 public:
-  ShTexture3D(int width, int height, int depth);
-
-  /// Lookup a value, coords being in [0,1] x [0,1] x [0,1]
-  T operator()(const ShVariableN<3, float>& coords) const;
-
-  /// Load the given image at the given depth slice 
-  // (loads the 2D plane with tex coords (x,y,slice), 
-  // (x,y) in [0,1] x [0,1]
-  void load(const ShImage& image, int slice);
+  ShTextureRect(int width, int height)
+    : ShBaseTextureRect<T, SH_TEXTURE_TRAITS>(width, height)
+  {}
 };
 
 template<typename T>
-class ShTextureCube {
+class ShTexture3D
+  : public ShBaseTexture3D<T, SH_TEXTURE_TRAITS> {
 public:
-  ShTextureCube();
-
-  void set(ShCubeDirection dir, const ShTexture2D<T>& texture);
-
-  T operator()(const ShVariableN<3, float>& direction) const;
-  
-private:
-  ShCubeTextureNodePtr m_node;
+  ShTexture3D(int width, int height, int depth)
+    : ShBaseTexture3D<T, SH_TEXTURE_TRAITS>(width, height, depth)
+  {}
 };
 
 template<typename T>
-class ShTextureRect : public ShTexture<T> {
+class ShTextureCube
+  : public ShBaseTextureCube<T, SH_TEXTURE_TRAITS> {
 public:
-  ShTextureRect(int width, int height);
-
-  /// Lookup a value, coords being in [0,width] x [0,height]
-  T operator[](const ShVariableN<2, float>& coords) const;
-
-  void load(const ShImage& image);
+  ShTextureCube(int width, int height)
+    : ShBaseTextureCube<T, SH_TEXTURE_TRAITS>(width, height)
+  {}
 };
 
 }
-
-#include "ShTextureImpl.hpp"
 
 #endif

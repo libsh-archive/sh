@@ -111,8 +111,12 @@ class ShWorley {
      */
     ShTexture2D<ShColor4f>* adjTex[4]; 
 
-    void doWorley( ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m, ShAttrib1f &result, ShAttrib2f &gradientResult ); 
+    void doWorley( ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m, ShAttrib1f &result, ShAttrib2f &gradientResult );
+
+  void generateTexture();
 };
+
+
 
 } // namespace ShUtil
 

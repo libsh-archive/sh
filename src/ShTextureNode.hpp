@@ -28,17 +28,17 @@
 #define SHTEXTURENODE_HPP
 
 #include "ShVariableNode.hpp"
-#include "ShMemoryObject.hpp"
+#include "ShMemory.hpp"
 #include "ShRefCount.hpp"
 
 namespace SH {
 
 enum ShTextureDims {
-  SH_TEXTURE_1D,
-  SH_TEXTURE_2D,
-  SH_TEXTURE_3D,
-  SH_TEXTURE_CUBE,
-  SH_TEXTURE_RECT
+  SH_TEXTURE_1D,   // Power of two
+  SH_TEXTURE_2D,   // Power of two
+  SH_TEXTURE_RECT, // Non power of two
+  SH_TEXTURE_3D,   // Power of two, but depth may not be
+  SH_TEXTURE_CUBE, // 6 "2D" memory objects, power of two
 };
 
 enum ShCubeDirection {
@@ -50,15 +50,50 @@ enum ShCubeDirection {
   SH_CUBE_NEG_Z = 5,
 };
 
+const unsigned int SH_LOOKUP_NEAREST = 0x001;
+const unsigned int SH_LOOKUP_LINEAR  = 0x002;
+const unsigned int SH_LOOKUP_MASK    = 0x00f;
+const unsigned int SH_FILTER_NONE    = 0x010;
+const unsigned int SH_FILTER_MIPMAP  = 0x020;
+const unsigned int SH_FILTER_MASK    = 0x0f0;
+// TODO: different wrapping modes for different texcoords
+// TODO: edges
+const unsigned int SH_WRAP_CLAMP     = 0x100;
+const unsigned int SH_WRAP_REPEAT    = 0x200;
+const unsigned int SH_WRAP_MASK      = 0xf00;
+
 class ShTextureNode : public ShVariableNode {
 public:
-  ShTextureNode(ShTextureDims dims);
+  ShTextureNode(ShTextureDims dims,
+                int size, // scalars per tuple
+                unsigned int traits,
+                int width, int height = 0, int depth = 0);
   virtual ~ShTextureNode();
 
   ShTextureDims dims() const;
-  
+
+  // Memory
+  ShRefCount<const ShMemory> memory(int n = 0) const;
+  ShRefCount<const ShMemory> memory(ShCubeDirection dir) const;
+  ShMemoryPtr memory(int n = 0);
+  ShMemoryPtr memory(ShCubeDirection dir);
+  void memory(ShMemoryPtr memory, int n = 0);
+  void memory(ShMemoryPtr memory, ShCubeDirection dir);
+
+  // Basic properties - not all may be valid for all types
+  unsigned int traits() const; // valid for all texture nodes
+  void traits(unsigned int traits); // valid for all texture nodes
+  int width() const; // valid for all texture nodes
+  int height() const; // not for SH_TEXTURE_1D
+  int depth() const; // only for SH_TEXTURE_3D
+
 private:
   ShTextureDims m_dims;
+
+  ShMemoryPtr* m_memory; // array of either 1 or 6 (for cubemaps)
+  
+  unsigned int m_traits;
+  int m_width, m_height, m_depth;
   
   // NOT IMPLEMENTED
   ShTextureNode(const ShTextureNode& other);
@@ -66,57 +101,6 @@ private:
 };
 
 typedef ShRefCount<ShTextureNode> ShTextureNodePtr;
-
-/// A variable node for textures 
-class ShDataTextureNode : public ShTextureNode {
-public:
-  ShDataTextureNode(ShTextureDims dims, int width, int height, int depth, int elements);
-  virtual ~ShDataTextureNode();
-  
-  int width() const;
-  int height() const;
-  int depth() const;
-  int elements() const;
-
-  // TODO make ShMemoryObjectPtr constant 
-  void setMem(ShMemoryObjectPtr data);
-
-  ShMemoryObjectPtr mem() const;
-  
-private:
-  int m_width, m_height, m_depth, m_elements;
-
-  ShMemoryObjectPtr m_mem;
-
-  /// returns true only if width, height, depth, and elements match
-  bool compatibleWith(ShMemoryObjectPtr memObj);
-
-  // NOT IMPLEMENTED
-  ShDataTextureNode(const ShDataTextureNode& other);
-  ShDataTextureNode& operator=(const ShDataTextureNode& other);
-
-};
-
-typedef ShRefCount<ShDataTextureNode> ShDataTextureNodePtr;
-
-/// A variable node for cube map textures
-class ShCubeTextureNode : public ShTextureNode {
-public:
-  ShCubeTextureNode();
-  virtual ~ShCubeTextureNode();
-
-  ShDataTextureNodePtr& face(ShCubeDirection dir);
-  const ShDataTextureNodePtr face(ShCubeDirection dir) const;
-  
-private:
-  ShDataTextureNodePtr m_faces[6];
-
-  // NOT IMPLEMENTED
-  ShCubeTextureNode(const ShCubeTextureNode& other);
-  ShCubeTextureNode& operator=(const ShCubeTextureNode& other);
-};
-
-typedef ShRefCount<ShCubeTextureNode> ShCubeTextureNodePtr;
 
 }
 #endif

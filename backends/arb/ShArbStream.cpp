@@ -86,7 +86,7 @@ public:
       // TODO: ought to complain here
       if (stmt.src[0].node()->kind() != SH_STREAM) continue;
 
-      ShChannelNodePtr stream_node = stmt.src[0].node();
+      ShChannelNodePtr stream_node = shref_dynamic_cast<ShChannelNode>(stmt.src[0].node());
       input_map.insert(std::make_pair(stream_node, ShTextureNodePtr(0)));
     }
   }
@@ -118,7 +118,7 @@ public:
         continue;
       }
       
-      ShChannelNodePtr stream_node = stmt.src[0].node();
+      ShChannelNodePtr stream_node = shref_dynamic_cast<ShChannelNode>(stmt.src[0].node());
       StreamInputMap::const_iterator I = input_map.find(stream_node);
       if (I == input_map.end()) {
         // TODO: complain
@@ -146,6 +146,9 @@ private:
 void ArbBackend::execute(const ShProgram& program,
                          ShStream& dest)
 {
+  // TODO: Reenable
+#if 0
+  
   // Check program target
   if (program->target() != "gpu:stream") {
     ShError(ArbStreamException("ShArb can only execute ``gpu:stream'' programs."));
@@ -277,14 +280,14 @@ void ArbBackend::execute(const ShProgram& program,
                      << input_count << " != " << I->first->count() << ")");
       return;
     }
-    ShDataTextureNodePtr tex;
+    ShTextureNodePtr tex;
     switch (extension) {
     case SH_ARB_NV_FLOAT_BUFFER:
-      tex = new ShDataTextureNode(SH_TEXTURE_RECT, tex_size, tex_size, 1,
+      tex = new ShTextureNode(SH_TEXTURE_RECT, tex_size, tex_size, 1,
                                   I->first->size());
       break;
     case SH_ARB_ATI_PIXEL_FORMAT_FLOAT:
-      tex = new ShDataTextureNode(SH_TEXTURE_2D, tex_size, tex_size, 1,
+      tex = new ShTextureNode(SH_TEXTURE_2D, tex_size, tex_size, 1,
                                   I->first->size());
       break;
     }
@@ -438,6 +441,8 @@ void ArbBackend::execute(const ShProgram& program,
   XCloseDisplay(dpy);
 
   ShEnvironment::boundShaders().clear();
+#endif
 }
+
 
 }

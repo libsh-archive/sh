@@ -70,6 +70,7 @@ const ShOperationInfo opInfo[] = {
   {"XPD", 2},
 
   {"TEX", 2},
+  {"TEXI", 2},
 
   {"COND", 3},
 

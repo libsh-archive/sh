@@ -35,6 +35,7 @@
 #include "ShTokenizer.hpp"
 #include "ShVariableNode.hpp"
 #include "ShCtrlGraph.hpp"
+#include "ShTextureNode.hpp"
 
 namespace SH {
 
@@ -54,19 +55,19 @@ public:
   /// code.
   /// This operation will fail if this program does not have a
   /// particular target.
-  void compile(ShRefCount<ShBackend>& backend);
+  void compile(const ShRefCount<ShBackend>& backend);
 
   /// Forcefully compile this shader for a particular backend, even if
   /// it has been compiled previously. Use code() to obtain the actual code.
-  void compile(const std::string& target, ShRefCount<ShBackend>& backend);
+  void compile(const std::string& target, const ShRefCount<ShBackend>& backend);
   
   /// Obtain the code for a particular backend. Generates it if necessary.
   /// This operation will fail if this program does not have a
   /// particular target.
-  ShRefCount<ShBackendCode> code(ShRefCount<ShBackend>& backend);
+  ShRefCount<ShBackendCode> code(const ShRefCount<ShBackend>& backend);
 
   /// Obtain the code for a particular backend. Generates it if necessary.
-  ShRefCount<ShBackendCode> code(const std::string& target, ShRefCount<ShBackend>& backend);
+  ShRefCount<ShBackendCode> code(const std::string& target, const ShRefCount<ShBackend>& backend);
 
   /// Notify this shader that a uniform variable has changed.
   void updateUniform(const ShVariableNodePtr& uniform);
@@ -85,14 +86,17 @@ public:
   void collectVariables();
   
   typedef std::list<ShVariableNodePtr> VarList;
+  typedef std::list<ShTextureNodePtr> TexList;
   
   VarList inputs; ///< Input variables used in this shader
   VarList outputs; ///< Output variables used in this shader
   VarList temps; ///< Temporary variables used in this shader
   VarList constants; ///< Constants used in this shader
   VarList uniforms; ///< Uniform variables used in this shader
-  VarList textures; ///< Textures used in this shader
+  TexList textures; ///< Textures used in this shader
 
+  // TODO: add streams
+  
   /// Can be empty, if there is no target associated with this program.
   std::string target() const { return m_target; }
 

@@ -28,7 +28,7 @@
 #include "ShSyntax.hpp"
 #include "ShWorley.hpp"
 #include "ShUtilLib.hpp"
-
+#include "ShImage.hpp"
 
 namespace ShUtil {
 
@@ -41,52 +41,7 @@ static const int DY[] = { 0, 1, 1, 1, 0, -1, -1, -1 };
 ShWorley::ShWorley( int frequency, bool useTexture ): useTexture(useTexture), freq( frequency ),
   dfreq( freq ), cellPosTex(frequency, frequency)
 {
-  int i, j, k, l;
-  srand48(13);
-
-  // generate cell positions 
-  double* posx[freq];
-  double* posy[freq];
-  for(i = 0; i < freq; ++i) {
-    posx[i] = new double[freq];
-    posy[i] = new double[freq];
-  }
-  for(i = 0; i < freq; ++i) for(j = 0; j < freq; ++j) for(k = 0; k < 2; ++k) {
-    posx[i][j] = drand48();
-    posy[i][j] = drand48();
-  }
-
-  ShImage adjImage[4];
-  ShImage cellPosImage(freq, freq, 4);
-  for(i = 0; i < 4; ++i) {
-    adjImage[i] = ShImage(freq, freq, 4);
-    adjTex[i] = new ShTexture2D< ShColor4f >(freq, freq);
-  }
-
-  for(i = 0; i < freq; ++i) for(j = 0; j < freq; ++j){ 
-    cellPosImage(i, j, 0) = posx[i][j];
-    cellPosImage(i, j, 1) = posy[i][j];
-    for(k = 0; k < 4; ++k) {
-      //TODO until we have floating point textures, we need to map the adjacent points
-      // which are in [-1,2]^2 to [0,1]^2
-      double px = posx[ ( i + DX[k] + freq ) % freq ][ ( j + DY[k] + freq ) % freq ]; 
-      double py = posy[ ( i + DX[k] + freq ) % freq ][ ( j + DY[k] + freq ) % freq ]; 
-      adjImage[k](i, j, 0) = (px + DX[k] + 1.0) / 3.0; 
-      adjImage[k](i, j, 1) = (py + DY[k] + 1.0) / 3.0; 
-
-      px = posx[ ( i + DX[k + 4] + freq ) % freq ][ ( j + DY[k + 4] + freq ) % freq ]; 
-      py = posy[ ( i + DX[k + 4] + freq ) % freq ][ ( j + DY[k + 4] + freq ) % freq ]; 
-      adjImage[k](i, j, 2) = (px + DX[k + 4] + 1.0) / 3.0; 
-      adjImage[k](i, j, 3) = (py + DY[k + 4] + 1.0) / 3.0; 
-    }
-  }
-  for(i = 0; i < 4; ++i) adjTex[i]->load(adjImage[i]);
-  cellPosTex.load(cellPosImage); 
-
-  for(i = 0; i < freq; ++i) {
-    delete[] posx[i];
-    delete[] posy[i];
-  }
+  if (useTexture) generateTexture();
 }
 
 ShWorley::~ShWorley()
@@ -287,6 +242,59 @@ ShProgram ShWorley::worleyProgram( ShWorleyMetric m ) {
 
 void ShWorley::useNoiseTexture(bool useNoiseTex) {
   useTexture = useNoiseTex;
+  if (useTexture) generateTexture();
+}
+
+void ShWorley::generateTexture()
+{
+  if (cellPosTex.memory()) return;
+  
+  int i, j, k, l;
+  srand48(13);
+
+  // generate cell positions 
+  double* posx[freq];
+  double* posy[freq];
+  for(i = 0; i < freq; ++i) {
+    posx[i] = new double[freq];
+    posy[i] = new double[freq];
+  }
+  for(i = 0; i < freq; ++i) for(j = 0; j < freq; ++j) for(k = 0; k < 2; ++k) {
+    posx[i][j] = drand48();
+    posy[i][j] = drand48();
+  }
+
+  ShImage adjImage[4];
+  ShImage cellPosImage(freq, freq, 4);
+  for(i = 0; i < 4; ++i) {
+    adjImage[i] = ShImage(freq, freq, 4);
+    adjTex[i] = new ShTexture2D< ShColor4f >(freq, freq);
+  }
+
+  for(i = 0; i < freq; ++i) for(j = 0; j < freq; ++j){ 
+    cellPosImage(i, j, 0) = posx[i][j];
+    cellPosImage(i, j, 1) = posy[i][j];
+    for(k = 0; k < 4; ++k) {
+      //TODO until we have floating point textures, we need to map the adjacent points
+      // which are in [-1,2]^2 to [0,1]^2
+      double px = posx[ ( i + DX[k] + freq ) % freq ][ ( j + DY[k] + freq ) % freq ]; 
+      double py = posy[ ( i + DX[k] + freq ) % freq ][ ( j + DY[k] + freq ) % freq ]; 
+      adjImage[k](i, j, 0) = (px + DX[k] + 1.0) / 3.0; 
+      adjImage[k](i, j, 1) = (py + DY[k] + 1.0) / 3.0; 
+
+      px = posx[ ( i + DX[k + 4] + freq ) % freq ][ ( j + DY[k + 4] + freq ) % freq ]; 
+      py = posy[ ( i + DX[k + 4] + freq ) % freq ][ ( j + DY[k + 4] + freq ) % freq ]; 
+      adjImage[k](i, j, 2) = (px + DX[k + 4] + 1.0) / 3.0; 
+      adjImage[k](i, j, 3) = (py + DY[k + 4] + 1.0) / 3.0; 
+    }
+  }
+  for(i = 0; i < 4; ++i) adjTex[i]->memory(adjImage[i].memory());
+  cellPosTex.memory(cellPosImage.memory()); 
+
+  for(i = 0; i < freq; ++i) {
+    delete[] posx[i];
+    delete[] posy[i];
+  }
 }
 
 }

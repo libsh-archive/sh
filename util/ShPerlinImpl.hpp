@@ -31,6 +31,7 @@
 #include "ShDebug.hpp"
 #include "ShPerlin.hpp"
 #include "ShUtilLib.hpp"
+#include "ShImage3D.hpp"
 
 namespace ShUtil {
 
@@ -38,7 +39,7 @@ using namespace SH;
 
 
 template<int M, int P>
-ShTexture3D<ShColor<M, SH_TEMP> > ShPerlin<M, P>::noiseTex(P, P, P); // pseudorandom 3D noise texture
+ShArray3D<ShColor<M, SH_TEMP> > ShPerlin<M, P>::noiseTex(P, P, P); // pseudorandom 3D noise texture
 
 template<int M, int P>
 bool ShPerlin<M, P>::m_init = false; // whether Perlin is initialized. 
@@ -53,13 +54,13 @@ void ShPerlin<M, P>::init() {
   // 1D gradient components for lattice points (x, y, z), (x, y, z + 1), (x, y + 1, z),
   // and (x, y + 1, z + 1)
   srand48(13);
-  ShImage noiseImage(P, P, M);
+  ShImage3D noiseImage(P, P, P, M);
   for(k = 0; k < P; ++k) {
-    for(i = 0; i < P; ++i) for(j = 0; j < P; ++j) for(l = 0; l < M; ++l) {
-      noiseImage(i, j, l) = drand48();
+   for(i = 0; i < P; ++i) for(j = 0; j < P; ++j) for(l = 0; l < M; ++l) {
+      noiseImage(i, j, k, l) = drand48();
     }
-    noiseTex.load(noiseImage, k);
   }
+  noiseTex.memory(noiseImage.memory());
 }
 
 // runs x * d + e, d may be an Attrib or a float 

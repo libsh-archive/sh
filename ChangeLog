@@ -1,3 +1,9 @@
+2004-02-13  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* Added the new memory management/texture management code. Too
+	many changes to list. Should have kept changelogs while going
+	along, but alas.
+
 2004-02-13  Bryan Chan <b8chan@uwaterloo.ca>
 	The last stand of the _VAR_
 

@@ -84,7 +84,7 @@ private:
       const SH::ShVariable &op2 );
 
   /// Generate code for a scalar/vector binary op where the scalar
-  // should be promoted to a vector by duplicating components
+  /// should be promoted to a vector by duplicating components
   void genScalarVectorInst( const SH::ShVariable &dest, const SH::ShVariable &op1, 
       const SH::ShVariable &op2, int opcode );
  
@@ -113,15 +113,12 @@ private:
   /// Allocate textures (called by allocRegs)
   void allocTextures();
 
-  /// Allocate a texture, either data or cubemap
-  void loadTexture(SH::ShTextureNodePtr texture);
-  
-  /// Allocate a data texture
-  void loadDataTexture(SH::ShDataTextureNodePtr texture, unsigned int type = 0);
+  /// Make sure the textures are bound and sync'd for this code to run.
+  void bindTextures();
 
-  /// Allocate a cube map
-  void loadCubeTexture(SH::ShCubeTextureNodePtr cube);
-  
+  /// Make sure this texture is bound and sync'd for this code to run.
+  void bindTexture(const SH::ShTextureNodePtr& node);
+    
   void bindSpecial(const SH::ShProgramNode::VarList::const_iterator& begin,
                    const SH::ShProgramNode::VarList::const_iterator& end,
                    const ArbBindingSpecs& specs, 
@@ -378,6 +375,8 @@ struct ArbInst {
   SH::ShVariable src[3];
 };
 
+void shGlCheckError(const char* desc = "");
+#define SH_GL_CHECK_ERROR(op) op; shGlCheckError( # op );
 
 }
 

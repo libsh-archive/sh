@@ -47,8 +47,8 @@ ShProgram lose(std::string name) {
   return nibble;
 };
 
-template<typename T>
-ShProgram access(const ShTexture1D<T> &tex, std::string name) {
+template<typename T, unsigned int traits>
+ShProgram access(const ShBaseTexture1D<T, traits> &tex, std::string name) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     ShInputTexCoord1f SH_NAMEDECL(tc, name);
     typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
@@ -56,8 +56,8 @@ ShProgram access(const ShTexture1D<T> &tex, std::string name) {
   return nibble;
 }
 
-template<typename T>
-ShProgram access(const ShTexture2D<T> &tex, std::string name) {
+template<typename T, unsigned int traits>
+ShProgram access(const ShBaseTexture2D<T, traits> &tex, std::string name) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     ShInputTexCoord2f SH_NAMEDECL(tc, name);
     typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
@@ -65,8 +65,26 @@ ShProgram access(const ShTexture2D<T> &tex, std::string name) {
   return nibble;
 }
 
-template<typename T>
-ShProgram access(const ShTexture3D<T> &tex, std::string name) {
+template<typename T, unsigned int traits>
+ShProgram access(const ShBaseTextureRect<T, traits> &tex, std::string name) {
+  ShProgram nibble = SH_BEGIN_PROGRAM() {
+    ShInputTexCoord2f SH_NAMEDECL(tc, name);
+    typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
+  } SH_END;
+  return nibble;
+}
+
+template<typename T, unsigned int traits>
+ShProgram access(const ShBaseTexture3D<T, traits> &tex, std::string name) {
+  ShProgram nibble = SH_BEGIN_PROGRAM() {
+    ShInputTexCoord3f SH_NAMEDECL(tc, name);
+    typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
+  } SH_END;
+  return nibble;
+}
+
+template<typename T, unsigned int traits>
+ShProgram access(const ShBaseTextureCube<T, traits> &tex, std::string name) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     ShInputTexCoord3f SH_NAMEDECL(tc, name);
     typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);

@@ -76,7 +76,7 @@ public:
   virtual ~ShRefCountable() {}   
 #endif
   
-  int acquireRef() 
+  int acquireRef() const
   {
 #ifdef SH_REFCOUNT_DEBUGGING
     SH_RCDEBUG_GREEN;
@@ -87,7 +87,7 @@ public:
     return ++m_refCount;
   }
   
-  int releaseRef()
+  int releaseRef() const
   {
 #ifdef SH_REFCOUNT_DEBUGGING
     SH_RCDEBUG_RED;
@@ -104,7 +104,7 @@ public:
   }
 
 private:
-  int m_refCount;
+  mutable int m_refCount;
 };
 
 /** A reference-counting smart pointer. */
@@ -114,42 +114,37 @@ class ShRefCount
 public:
   ShRefCount();
   ShRefCount(T* object);
-  ShRefCount(const ShRefCount<T>& other);
-  /// Attempt to dynamically cast another object to an object of this type.
-  template<typename T1>
-  ShRefCount(const ShRefCount<T1>& other);
+  ShRefCount(const ShRefCount& other);
+  template<typename S>
+  ShRefCount(const ShRefCount<S>& other);
   
   ~ShRefCount();
 
-  ShRefCount<T>& operator=(const ShRefCount<T>& other);
-  ShRefCount<T>& operator=(T* other);
-
-  /// Attempt to dynamically cast another object to an object of this type.
-  template<typename T1>
-  ShRefCount<T>& operator=(const ShRefCount<T1>& other);
+  ShRefCount& operator=(T* other);
+  ShRefCount& operator=(const ShRefCount& other);
+  template<typename S>
+  ShRefCount& operator=(const ShRefCount<S>& other);
 
   /// Two references are equal if they point to the same object.
-  bool operator==(const ShRefCount<T>& other) const;
+  bool operator==(const ShRefCount& other) const;
 
   /// Two references are equal if they point to the same object.
-  bool operator!=(const ShRefCount<T>& other) const;
+  bool operator!=(const ShRefCount& other) const;
 
   /// Actually compares the pointers.
-  bool operator<(const ShRefCount<T>& other) const;
+  bool operator<(const ShRefCount& other) const;
 
-  T& operator*();
-  const T& operator*() const;
-  T* operator->();
-  const T* operator->() const;
+  T& operator*() const;
+  T* operator->() const;
 
+  // TODO: Maybe use boost's unspecified-bool-type trick
   /// Return true iff this is not a reference to a null pointer
   operator bool() const;
 
   /// Obtain the total amount of references to the referenced object.
   int refCount() const;
 
-  /// Provided only for backwards compatibility
-  /// Try not to call the function below if possible.
+  /// Obtain a pointer to the object we reference count
   T* object() const;
 
 private:
@@ -158,215 +153,17 @@ private:
   T* m_object;
 };
 
-template<typename T>
-ShRefCount<T>::ShRefCount()
-  : m_object(0)
-{
-#ifdef SH_REFCOUNT_DEBUGGING
-  SH_RCDEBUG_BLUE;
-  std::cerr << "[cons] " << std::setw(10) << "0" << " (default)" << std::endl;
-  SH_RCDEBUG_NORMAL;
-#endif
-}
+template<typename T, typename S>
+ShRefCount<T> shref_static_cast(const ShRefCount<S>& other);
 
-template<typename T>
-ShRefCount<T>::ShRefCount(T* object)
-  : m_object(object)
-{
-#ifdef SH_REFCOUNT_DEBUGGING
-  SH_RCDEBUG_BLUE;
-  std::cerr << "[cons] " << std::setw(10) << object << " <" << (object ? typeid(*(object)).name() : "n/a") << ">" << std::endl;
-  SH_RCDEBUG_NORMAL;
-#endif
-  if (m_object) m_object->acquireRef();
-}
+template<typename T, typename S>
+ShRefCount<T> shref_dynamic_cast(const ShRefCount<S>& other);
 
-template<typename T>
-ShRefCount<T>::ShRefCount(const ShRefCount<T>& other)
-  : m_object(other.m_object)
-{
-#ifdef SH_REFCOUNT_DEBUGGING
-  SH_RCDEBUG_BLUE;
-  std::cerr << "[copy] " << std::setw(10) << other.m_object << " <" << (other.m_object ? typeid(*(other.m_object)).name() : "n/a") << ">" << std::endl;
-  SH_RCDEBUG_NORMAL;
-#endif
-
-  if (m_object) m_object->acquireRef();
-}
-
-
-template<typename T>
-template<typename T1>
-ShRefCount<T>::ShRefCount(const ShRefCount<T1>& other)
-  : m_object(0)
-{
-#ifdef SH_REFCOUNT_DEBUGGING
-  SH_RCDEBUG_BLUE;
-  std::cerr << "[cast] " << std::setw(10) << other.object() << " <" << (other.object() ? typeid(*(other.object())).name() : "n/a") << ">"
-            << "(to <" << typeid(*this).name() << ">)" << std::endl;
-  SH_RCDEBUG_NORMAL;
-#endif
-
-  if (other.object()) {
-    m_object = dynamic_cast<T*>(other.object());
-    if (m_object) m_object->acquireRef();
-  }
-}
-
-template<typename T>
-ShRefCount<T>::~ShRefCount()
-{
-#ifdef SH_REFCOUNT_DEBUGGING
-  SH_RCDEBUG_BLUE;
-  std::cerr << "[dest] " << std::setw(10) << m_object << " <" << (m_object ? typeid(*(m_object)).name() : "n/a") << ">" << std::endl;
-  SH_RCDEBUG_NORMAL;
-#endif
-
-  releaseRef();
-}
-
-template<typename T>
-ShRefCount<T>& ShRefCount<T>::operator=(const ShRefCount<T>& other)
-{
-#ifdef SH_REFCOUNT_DEBUGGING
-  SH_RCDEBUG_BLUE;
-  std::cerr << "[assn] " << std::setw(10) << other.m_object << " <" << (other.m_object ? typeid(*(other.m_object)).name() : "n/a") << ">" << " (was " << m_object << " <" << (m_object ? typeid(*(m_object)).name() : "n/a") << ">" << ")" << std::endl;
-  SH_RCDEBUG_NORMAL;
-#endif
-  if (m_object == other.m_object) return *this;
-
-  // Bug fix - must aquireRef to other.m_object first in case
-  // m_object has the only current pointer to other.m_object
-  if(other.m_object) other.m_object->acquireRef();
-  releaseRef();
-
-  m_object = other.m_object;
-
-  return *this;
-}
-
-template<typename T>
-template<typename T1>
-ShRefCount<T>& ShRefCount<T>::operator=(const ShRefCount<T1>& other)
-{
-#ifdef SH_REFCOUNT_DEBUGGING
-  SH_RCDEBUG_BLUE;
-  std::cerr << "[cst=] " << std::setw(10) << other.object() << " <" << (other.object() ? typeid(*(other.object())).name() : "n/a") << ">" << " (was " << " <" << (m_object ? typeid(*(m_object)).name() : "n/a") << ">" << ")"
-            << "(to <" << typeid(*this).name() << ">)" << std::endl;
-
-  SH_RCDEBUG_NORMAL;
-#endif
-  
-  if (m_object == other.object()) return *this;
-
-  // Bug fix - moved releaseRef down to prevent same problem as above
-  if (!other.object()) {
-    releaseRef();
-    m_object = 0;
-  } else {
-    T* temp = dynamic_cast<T*>(other.object());
-    if (temp) temp->acquireRef();
-    releaseRef();
-    m_object = temp;
-  }
-  
-  return *this;
-}
-
-template<typename T>
-ShRefCount<T>& ShRefCount<T>::operator=(T* object)
-{
-#ifdef SH_REFCOUNT_DEBUGGING
-  SH_RCDEBUG_BLUE;
-  std::cerr << "[asn*] " << std::setw(10) << object << " <" << (object ? typeid(*(object)).name() : "n/a") << ">" << " (was " << m_object << " <" << (m_object ? typeid(*(m_object)).name() : "n/a") << ">" << ")" << std::endl;
-  SH_RCDEBUG_NORMAL;
-#endif
-  
-  if (m_object == object) return *this;
-  if( object ) object->acquireRef();
-  releaseRef();
-
-  m_object = object;
-  
-  return *this;
-}
-
-template<typename T>
-bool ShRefCount<T>::operator==(const ShRefCount<T>& other) const
-{
-  return m_object == other.m_object;
-}
-
-template<typename T>
-bool ShRefCount<T>::operator!=(const ShRefCount<T>& other) const
-{
-  return m_object != other.m_object;
-}
-
-template<typename T>
-bool ShRefCount<T>::operator<(const ShRefCount<T>& other) const
-{
-  return m_object < other.m_object; // TODO: Make sure this is portable...
-}
-
-
-template<typename T>
-T& ShRefCount<T>::operator*()
-{
-  return *m_object;
-}
-
-template<typename T>
-const T& ShRefCount<T>::operator*() const
-{
-  return *m_object;
-}
-
-template<typename T>
-T* ShRefCount<T>::operator->()
-{
-  return m_object;
-}
-
-template<typename T>
-const T* ShRefCount<T>::operator->() const
-{
-  return m_object;
-}
-
-template<typename T>
-ShRefCount<T>::operator bool() const
-{
-  return m_object != 0;
-}
-
-template<typename T>
-int ShRefCount<T>::refCount() const
-{
-  if (!m_object)
-    return 0; // TODO: Maybe -1?
-  else
-    return m_object->refCount();
-}
-
-
-template<typename T>
-T* ShRefCount<T>::object() const
-{
-  return m_object;
-}
-
-template<typename T>
-void ShRefCount<T>::releaseRef()
-{
-  if (m_object && m_object->releaseRef() <= 0) {
-    delete m_object;
-#ifdef SH_REFCOUNT_DEBUGGING
-    m_object = 0;
-#endif
-  }
-}
+template<typename T, typename S>
+ShRefCount<T> shref_const_cast(const ShRefCount<S>& other);
 
 } // namespace SH
+
+#include "ShRefCountImpl.hpp"
 
 #endif

@@ -60,8 +60,8 @@ void ShParser::parseStmts(ShCtrlGraphNodePtr& head,
     return;
   }
   
-  ShBasicBlockPtr basic = next;
-  ShTokenPtr token = next;
+  ShBasicBlockPtr basic = shref_dynamic_cast<ShBasicBlock>(next);
+  ShTokenPtr token = shref_dynamic_cast<ShToken>(next);
 
   if (basic) {
     // This is a basic block. Just make a node for it.
@@ -111,7 +111,7 @@ void ShParser::parseIf(ShCtrlGraphNodePtr& head,
 {
   head = tail = 0;
   
-  ShTokenPtr ifToken = blocks->getFront();
+  ShTokenPtr ifToken = shref_dynamic_cast<ShToken>(blocks->getFront());
   blocks->removeFront();
   
   checkCond(ifToken);
@@ -128,14 +128,14 @@ void ShParser::parseIf(ShCtrlGraphNodePtr& head,
   ShCtrlGraphNodePtr headIf = 0, tailIf = 0, headElse = 0, tailElse = 0;
   parseStmts(headIf, tailIf, blocks);
   
-  ShTokenPtr nt = blocks->getFront();
+  ShTokenPtr nt = shref_dynamic_cast<ShToken>(blocks->getFront());
   checkCond(nt);
 
   if (nt->type() == SH_TOKEN_ELSE) {
     blocks->removeFront();
     parseStmts(headElse, tailElse, blocks);
     
-    nt = blocks->getFront();
+    nt = shref_dynamic_cast<ShToken>(blocks->getFront());
     checkCond(nt);
   }
   checkCond(nt->type() == SH_TOKEN_ENDIF);
@@ -159,7 +159,7 @@ void ShParser::parseFor(ShCtrlGraphNodePtr& head,
 {
   head = tail = 0;
   
-  ShTokenPtr forToken = blocks->getFront();
+  ShTokenPtr forToken = shref_dynamic_cast<ShToken>(blocks->getFront());
   checkCond(forToken);
   checkCond(forToken->type() == SH_TOKEN_FOR);
   checkCond(forToken->arguments.size() == 3);
@@ -192,7 +192,7 @@ void ShParser::parseFor(ShCtrlGraphNodePtr& head,
     headBody = tailBody = new ShCtrlGraphNode();
   }
   
-  ShTokenPtr nt = blocks->getFront();
+  ShTokenPtr nt = shref_dynamic_cast<ShToken>(blocks->getFront());
   checkCond(nt);
   checkCond(nt->type() == SH_TOKEN_ENDFOR);
   blocks->removeFront();
@@ -209,7 +209,7 @@ void ShParser::parseWhile(ShCtrlGraphNodePtr& head,
 {
   head = tail = 0;
   
-  ShTokenPtr whileToken = blocks->getFront();
+  ShTokenPtr whileToken = shref_dynamic_cast<ShToken>(blocks->getFront());
   checkCond(whileToken);
   checkCond(whileToken->type() == SH_TOKEN_WHILE);
   checkCond(whileToken->arguments.size() == 1);
@@ -228,7 +228,7 @@ void ShParser::parseWhile(ShCtrlGraphNodePtr& head,
     headBody = tailBody = new ShCtrlGraphNode();
   }
   
-  ShTokenPtr nt = blocks->getFront();
+  ShTokenPtr nt = shref_dynamic_cast<ShToken>(blocks->getFront());
   checkCond(nt);
   checkCond(nt->type() == SH_TOKEN_ENDWHILE);
   blocks->removeFront();
@@ -242,7 +242,7 @@ void ShParser::parseDo(ShCtrlGraphNodePtr& head,
 {
   head = tail = 0;
   
-  ShTokenPtr doToken = blocks->getFront();
+  ShTokenPtr doToken = shref_dynamic_cast<ShToken>(blocks->getFront());
   checkCond(doToken);
   checkCond(doToken->type() == SH_TOKEN_DO);
   blocks->removeFront();
@@ -252,7 +252,7 @@ void ShParser::parseDo(ShCtrlGraphNodePtr& head,
     head = tail = new ShCtrlGraphNode();
   }
 
-  ShTokenPtr nt = blocks->getFront();
+  ShTokenPtr nt = shref_dynamic_cast<ShToken>(blocks->getFront());
   checkCond(nt);
   checkCond(nt->type() == SH_TOKEN_UNTIL);
   checkCond(nt->arguments.size() == 1);

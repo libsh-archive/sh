@@ -77,6 +77,8 @@ public:
   
   /// Get the values of this variable, with swizzling taken into account
   void getValues(ShVariableNode::ValueType dest[]) const;
+  ShVariableNode::ValueType getValue(int index) const;
+  
   /// Set the values of this variable, using the swizzle as a
   /// writemask.
   void setValues(ShVariableNode::ValueType values[]);
@@ -87,7 +89,6 @@ public:
   ShVariable operator()(int, int, int) const;
   ShVariable operator()(int, int, int, int) const;
   ShVariable operator()(int size, int indices[]) const;
-  
   
   ShVariable operator-() const;
   
@@ -142,6 +143,9 @@ public:
   ShVariableN<3, T> operator()(int, int, int) const;
   ShVariableN<4, T> operator()(int, int, int, int) const;
 
+  // This only works for uniforms!
+  T operator[](int index) const;
+  
   // Arbitrary Swizzle
   template<int N2>
   ShVariableN<N2, T> swiz(int indices[]) const;
@@ -188,6 +192,12 @@ template<int N, typename T>
 ShVariableN<4, T> ShVariableN<N, T>::operator()(int i1, int i2, int i3, int i4) const
 {
   return ShVariableN<4, T>(m_node, m_swizzle * ShSwizzle(size(), i1, i2, i3, i4), m_neg);
+}
+  
+template<int N, typename T>
+T ShVariableN<N, T>::operator[](int index) const
+{
+  return getValue(0);
 }
 
 template<int N, typename T> 

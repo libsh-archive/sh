@@ -1,5 +1,6 @@
 check_PROGRAMS = algebra combine connect constants copy do if for julia matrix ops point \
-		 rch simple texture uniforms shvector while neg stream io2temp longtuple inout ref
+		 rch simple texture uniforms shvector while neg stream io2temp ref mem \
+		 longtuple inout
 
 INCLUDES = -I../src
 
@@ -15,6 +16,7 @@ if_SOURCES = if.cpp
 for_SOURCES = for.cpp
 julia_SOURCES = julia.cpp
 matrix_SOURCES = matrix.cpp
+mem_SOURCES = mem.cpp
 neg_SOURCES = neg.cpp
 rch_SOURCES = rch.cpp
 ref_SOURCES = ref.cpp

@@ -28,7 +28,7 @@
 #define SHUTIL_PERLIN_HPP 
 
 #include "ShAttrib.hpp"
-#include "ShTexture.hpp"
+#include "ShArray.hpp"
 
 namespace ShUtil {
 
@@ -53,7 +53,7 @@ class ShPerlin
 
   private:
     static bool m_init;
-    static ShTexture3D<ShColor<M, SH_TEMP> > noiseTex; ///< pseudorandom 3D perlin noise texture 
+    static ShArray3D<ShColor<M, SH_TEMP> > noiseTex; ///< pseudorandom 2D perlin noise texture 
 
     static void init();
 };

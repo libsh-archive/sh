@@ -1,62 +1,20 @@
-// Sh: A GPU metaprogramming language.
-//
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
-// 
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-// 
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-// 
-// 1. The origin of this software must not be misrepresented; you must
-// not claim that you wrote the original software. If you use this
-// software in a product, an acknowledgment in the product documentation
-// would be appreciated but is not required.
-// 
-// 2. Altered source versions must be plainly marked as such, and must
-// not be misrepresented as being the original software.
-// 
-// 3. This notice may not be removed or altered from any source
-// distribution.
-//////////////////////////////////////////////////////////////////////////////
+#include <GL/gl.h>
+#include <GL/glext.h>
 #include "ShArb.hpp"
-#include <iostream>
-#include <sstream>
-
-#ifdef WIN32
-
-#include <windows.h>
-
-#include <GL/gl.h>
-#include <GL/glext.h>
-
-#else
-
-#define GL_GLEXT_PROTOTYPES 1
-#include <GL/gl.h>
-#include <GL/glext.h>
-#include <GL/glx.h>
-#undef GL_GLEXT_PROTOTYPES
-
-#endif /* WIN32 */
-
-#include "ShVariable.hpp"
+#include "ShArbMemory.hpp"
 #include "ShDebug.hpp"
-#include "ShLinearAllocator.hpp"
-#include "ShEnvironment.hpp"
-#include "ShTextureNode.hpp"
-#include "ShSyntax.hpp"
-
-#define shGlActiveTextureARB glActiveTextureARB
 
 namespace ShArb {
 
 using namespace SH;
+
+const unsigned int shGlTargets[] = {
+  GL_TEXTURE_1D,
+  GL_TEXTURE_2D,
+  GL_TEXTURE_RECTANGLE_NV,
+  GL_TEXTURE_3D,
+  GL_TEXTURE_CUBE_MAP,
+};
 
 const unsigned int shGlCubeMapTargets[] = {
   GL_TEXTURE_CUBE_MAP_POSITIVE_X,
@@ -67,189 +25,164 @@ const unsigned int shGlCubeMapTargets[] = {
   GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
 };
 
-const unsigned int shGlTextureType[] = {
-  GL_TEXTURE_1D,
-  GL_TEXTURE_2D,
-  GL_TEXTURE_3D,
-  GL_TEXTURE_CUBE_MAP,
-  GL_TEXTURE_RECTANGLE_NV,
+ShCubeDirection glToShCubeDir(GLuint target)
+{
+  switch (target) {
+  case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
+    return SH_CUBE_POS_X;
+  case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
+    return SH_CUBE_NEG_X;
+  case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
+    return SH_CUBE_POS_Y;
+  case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
+    return SH_CUBE_NEG_Y;
+  case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
+    return SH_CUBE_POS_Z;
+  case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
+    return SH_CUBE_NEG_Z;
+  }
+}
+
+GLenum shGlInternalFormat(const ShTextureNodePtr& node)
+{
+  // TODO: floating point etc.
+  return node->size();
+}
+
+GLenum shGlFormat(const ShTextureNodePtr& node)
+{
+  switch (node->size()) {
+  case 1:
+    return GL_LUMINANCE;
+  case 2:
+    return GL_LUMINANCE_ALPHA;
+  case 3:
+    return GL_RGB;
+  case 4:
+    return GL_RGBA;
+  default:
+    // TODO: Warn or something
+    return 0;
+  }
+}
+
+void ArbCode::bindTextures()
+{
+  for (ShProgramNode::TexList::const_iterator I = m_shader->textures.begin();
+       I != m_shader->textures.end(); ++I) {
+    bindTexture(*I);
+  }
+}
+
+struct StorageFinder {
+  StorageFinder(const ShTextureNodePtr& node, bool ignoreTarget = false)
+    : node(node), ignoreTarget(ignoreTarget)
+  {
+  }
+  
+  bool operator()(const ShStoragePtr& storage) const
+  {
+    TextureStoragePtr t = shref_dynamic_cast<TextureStorage>(storage);
+    if (!t) return false;
+    if (!ignoreTarget) {
+      if (t->texName()->params() != node->traits()) return false;
+      if (t->target() != shGlTargets[node->dims()]) return false;
+    }
+    if (t->width() != node->width()) return false;
+    if (t->height() != node->height()) return false;
+    if (t->depth() != node->depth()) return false;
+    return true;
+  }
+  
+  const ShTextureNodePtr& node;
+  bool ignoreTarget;
 };
 
-void ArbCode::loadTexture(ShTextureNodePtr texture) 
+
+void ArbCode::bindTexture(const ShTextureNodePtr& node)
 {
-  if (!texture) return;
-  
-  RegMap::const_iterator texRegIterator = m_registers.find(texture);
-  
+  if (!node) return;
+
+  RegMap::const_iterator texRegIterator = m_registers.find(node);
   SH_DEBUG_ASSERT(texRegIterator != m_registers.end());
-  
   const ArbReg& texReg = texRegIterator->second;
+
+  // TODO: Check for memories that are 0
   
-  shGlActiveTextureARB(GL_TEXTURE0 + texReg.index);
-  
-  glBindTexture(shGlTextureType[texture->dims()], texReg.bindingIndex);
-  
-  if (shGlTextureType[texture->dims()] != GL_TEXTURE_RECTANGLE_NV) {
-    if (1) {
-      glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    } else {
-      glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-      glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    }
-    if (1) {
-      glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    } else {
-      glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_WRAP_S, GL_REPEAT);
-      glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_WRAP_T, GL_REPEAT);
-    }
-  }
+  if (node->dims() == SH_TEXTURE_CUBE) {
+    // Look for a cubemap that happens to have just the right storages
     
-  ShDataTextureNodePtr datatex = texture;
-  if (datatex) {
-    loadDataTexture(datatex);
-    return;
-  }
-
-  ShCubeTextureNodePtr cubetex = texture;
-  if (cubetex) {
-    loadCubeTexture(cubetex);
-    return;
-  }
-    
-  SH_DEBUG_WARN(texture->name() << " is not a valid texture!");
-}
-
-void ArbCode::loadDataTexture(ShDataTextureNodePtr texture, unsigned int type)
-{
-  if (!type) {
-    switch (texture->dims()) {
-    case SH_TEXTURE_1D:
-      type = GL_TEXTURE_1D;
-      break;
-    case SH_TEXTURE_2D:
-      type = GL_TEXTURE_2D;
-      break;
-    case SH_TEXTURE_3D:
-      type = GL_TEXTURE_3D;
-      break;
-    case SH_TEXTURE_RECT:
-      type = GL_TEXTURE_RECTANGLE_NV;
-      break;
-    default:
-      SH_DEBUG_ERROR("No type specified and no known type for this texture.");
-      break;
-    }
-  }
-
-  // TODO: Other types of textures.
-  // TODO: Element Format
-  // TODO: sampling/filtering
-  // TODO: wrap/clamp
-  unsigned int format;
-
-  ShDataMemoryObjectPtr dataMem = texture->mem();
-  if( dataMem ) { // 
-    switch (texture->elements()) {
-    case 1:
-      format = GL_LUMINANCE;
-      break;
-    case 2:
-      format = GL_LUMINANCE_ALPHA;
-      break;
-    case 3:
-      format = GL_RGB;
-      break;
-    case 4:
-      format = GL_RGBA;
-      break;
-    default:
-      format = 0;
-      break;
-    }
-    int internal_format = texture->elements();
-    if (type == GL_TEXTURE_RECTANGLE_NV) {
-      if (texture->elements() >= 1 && texture->elements() <= 4) {
-        // TODO: 16 bit formats?
-        int nv_formats[4] = {GL_FLOAT_R32_NV, GL_FLOAT_RG32_NV,
-                             GL_FLOAT_RGB32_NV, GL_FLOAT_RGBA32_NV};
-        internal_format = nv_formats[texture->elements() - 1];
-      } else {
-        internal_format = 0;
+    TextureName::NameList::const_iterator I;
+    for (I = TextureName::beginNames(); I != TextureName::endNames(); ++I) {
+      const TextureName* name = *I;
+      if (name->target() != GL_TEXTURE_CUBE_MAP) continue;
+      if (name->params() != node->traits()) continue;
+      
+      TextureName::StorageList::const_iterator S;
+      for (S = name->beginStorages(); S != name->endStorages(); ++S) {
+        ShCubeDirection dir = glToShCubeDir((*S)->target());
+        if ((*S)->memory() != node->memory(dir).object() || !StorageFinder(node, true)(*S))
+          break;
       }
-    };
-
-    float* data = dataMem->data();
-    switch(type) {
-    case GL_TEXTURE_1D:
-      glTexImage1D(type, 0, internal_format, texture->width(), 0, format, GL_FLOAT, data);
-      break;
-    case GL_TEXTURE_2D:
-    case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
-    case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
-    case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
-    case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
-    case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
-    case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
-    case GL_TEXTURE_RECTANGLE_NV:
-      glTexImage2D(type, 0, internal_format, texture->width(), texture->height(), 0, format,
-                   GL_FLOAT, data);
-      break;
-    case GL_TEXTURE_3D:
-      glTexImage3D(type, 0, internal_format, texture->width(), texture->height(), texture->depth(),
-                   0, format, GL_FLOAT, data);
-      break;
-    default:
-      SH_DEBUG_WARN("Texture type not handled by ARB backend");
-      break;
+      // If we got through the whole list, we've found a matching list.
+      if (S == name->endStorages()) break;
     }
-    delete [] data; // <-- ShMemoryObjects are just _ever_ so useful!
     
-  } else {
-    ShExternalMemoryObjectPtr extMem = texture->mem();
-    if( extMem ) {
-      extMem->attach();
+    if (I == TextureName::endNames()) {
+      // Need to allocate new storages
+      TextureNamePtr texname = new TextureName(GL_TEXTURE_CUBE_MAP);
+      texname->params(node->traits());
+      for (int i = 0; i < 6; i++) {
+        ShCubeDirection dir = static_cast<ShCubeDirection>(i);
+        TextureStoragePtr storage = new TextureStorage(node->memory(dir).object(),
+                                                       shGlCubeMapTargets[i],
+                                                       shGlFormat(node),
+                                                       shGlInternalFormat(node),
+                                                       node->width(), node->height(),
+                                                       node->depth(),
+                                                       texname);
+        storage->sync();
+      }
+      SH_GL_CHECK_ERROR(glActiveTextureARB(GL_TEXTURE0 + texReg.index));
+      SH_GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_CUBE_MAP, texname->value()));
     } else {
-      SH_DEBUG_ERROR("No memory object/image loaded for texture"); 
+      // Just synchronize the storages
+      TextureName::StorageList::const_iterator S;
+      for (S = (*I)->beginStorages(); S != (*I)->endStorages(); ++S) {
+        (*S)->sync();
+      }
+      SH_GL_CHECK_ERROR(glActiveTextureARB(GL_TEXTURE0 + texReg.index));
+      SH_GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_CUBE_MAP, (*I)->value()));
     }
-  } 
-
-  int error = glGetError();
-  if (error != GL_NO_ERROR) {
-    SH_DEBUG_ERROR("Error loading texture: " << error);
-    switch(error) {
-    case GL_INVALID_ENUM:
-      SH_DEBUG_ERROR("INVALID_ENUM");
-      break;
-    case GL_INVALID_VALUE:
-      SH_DEBUG_ERROR("INVALID_VALUE");
-      break;
-    case GL_INVALID_OPERATION:
-      SH_DEBUG_ERROR("INVALID_OPERATION");
-      break;
+  } else {
+    StorageFinder finder(node);
+    TextureStoragePtr storage =
+      shref_dynamic_cast<TextureStorage>(node->memory()->findStorage("arb:texture", finder));
+    if (!storage) {
+      TextureNamePtr name = new TextureName(shGlTargets[node->dims()]);
+      storage = new TextureStorage(node->memory().object(),
+                                   shGlTargets[node->dims()],
+                                   shGlFormat(node),
+                                   shGlInternalFormat(node),
+                                   node->width(), node->height(), node->depth(),
+                                   name);
+      name->params(node->traits());
     }
-  }
-}
 
-void ArbCode::loadCubeTexture(ShCubeTextureNodePtr cube)
-{
-  for (int i = 0; i < 6; i++) {
-    loadDataTexture(cube->face(static_cast<ShCubeDirection>(i)), shGlCubeMapTargets[i]);
+    SH_GL_CHECK_ERROR(glActiveTextureARB(GL_TEXTURE0 + texReg.index));
+    storage->sync();
+    SH_GL_CHECK_ERROR(glBindTexture(shGlTargets[node->dims()], storage->name()));
   }
 }
 
 void ArbCode::allocTextures()
 {
-  
-  for (ShProgramNode::VarList::const_iterator I = m_shader->textures.begin();
+  for (ShProgramNode::TexList::const_iterator I = m_shader->textures.begin();
        I != m_shader->textures.end(); ++I) {
     ShTextureNodePtr node = *I;
-    int binding, index;
+    int index;
     index = m_numTextures;
-    glGenTextures(1, (GLuint*)&binding);
     m_registers[node] = ArbReg(SH_ARB_REG_TEXTURE, index);
-    m_registers[node].bindingIndex = binding;
     m_numTextures++;
   }
 }

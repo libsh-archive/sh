@@ -10,7 +10,7 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
                    ShParser.cpp ShProgram.cpp \
                    ShStatement.cpp ShSwizzle.cpp ShSyntax.cpp ShToken.cpp \
                    ShTokenizer.cpp ShUtility.cpp ShVariable.cpp ShVariableNode.cpp \
-		   ShTextureNode.cpp ShImage.cpp \
+		   ShTextureNode.cpp ShImage.cpp ShImage3D.cpp \
                    ShLinearAllocator.cpp \
                    ShDomTree.cpp \
                    ShOptimizer.cpp \
@@ -24,9 +24,11 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
                    ShSwizzle.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp \
                    ShUtility.hpp ShVariable.hpp ShVariableNode.hpp sh.hpp \
                    ShMatrix.hpp ShMatrixImpl.hpp \
-                   ShMemoryObject.hpp ShMemoryObject.cpp \
-                   ShTexture.hpp ShTextureImpl.hpp \
-                   ShTextureNode.hpp ShImage.hpp ShLinearAllocator.hpp \
+                   ShBaseTexture.hpp ShBaseTextureImpl.hpp \
+                   ShArray.hpp ShTable.hpp ShTexture.hpp \
+                   ShWrap.hpp \
+                   ShTextureNode.hpp ShImage.hpp ShImage3D.hpp \
+		   ShLinearAllocator.hpp \
                    ShLibAttrib.hpp ShSpecialType.hpp \
                    ShVector.hpp ShLibVector.hpp \
                    ShPoint.hpp ShLibPoint.hpp \
@@ -43,7 +45,8 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
 		   ShChannel.hpp ShChannelImpl.hpp \
 		   ShStream.hpp ShStreamImpl.hpp ShStream.cpp \
 		   ShInit.cpp \
-			 ShQuaternion.hpp ShQuaternionImpl.hpp
+		   ShQuaternion.hpp ShQuaternionImpl.hpp \
+		   ShMemory.hpp ShMemory.cpp
 
 incincdir = $(includedir)/sh
 
@@ -51,12 +54,15 @@ incinc_HEADERS = ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp \
                    ShBlock.hpp ShConstant.hpp ShConstantImpl.hpp ShCtrlGraph.hpp \
                    ShDebug.hpp ShEnvironment.hpp ShError.hpp \
                    ShException.hpp ShLib.hpp \
-                   ShParser.hpp ShRefCount.hpp ShProgram.hpp ShStatement.hpp \
+                   ShParser.hpp ShRefCount.hpp ShRefCountImpl.hpp ShProgram.hpp ShStatement.hpp \
                    ShSwizzle.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp \
                    ShUtility.hpp ShVariable.hpp ShVariableNode.hpp sh.hpp \
-                   ShMatrix.hpp ShMatrixImpl.hpp ShTexture.hpp ShTextureImpl.hpp \
-                   ShMemoryObject.hpp \
-                   ShTextureNode.hpp ShImage.hpp ShLinearAllocator.hpp \
+                   ShMatrix.hpp ShMatrixImpl.hpp \
+		   ShArray.hpp ShTable.hpp ShTexture.hpp \
+		   ShWrap.hpp \
+                   ShBaseTexture.hpp ShBaseTextureImpl.hpp \
+                   ShTextureNode.hpp ShImage.hpp ShImage3D.hpp \
+		   ShLinearAllocator.hpp \
                    ShLibAttrib.hpp ShSpecialType.hpp \
                    ShVector.hpp ShLibVector.hpp \
                    ShPoint.hpp ShLibPoint.hpp \
@@ -67,8 +73,9 @@ incinc_HEADERS = ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp \
                    ShDomTree.hpp ShOptimizer.hpp ShTransformer.hpp ShAlgebra.hpp ShInternals.hpp\
 		   ShFixedManipulator.hpp \
 		   ShManipulator.hpp ShManipulatorImpl.hpp \
-			 ShNibbles.hpp ShNibblesImpl.hpp \
+		   ShNibbles.hpp ShNibblesImpl.hpp \
 		   ShChannelNode.hpp ShChannel.hpp ShChannelImpl.hpp \
 		   ShStream.hpp ShStreamImpl.hpp \
-			 ShQuaternion.hpp ShQuaternionImpl.hpp
+		   ShQuaternion.hpp ShQuaternionImpl.hpp \
+		   ShMemory.hpp
 

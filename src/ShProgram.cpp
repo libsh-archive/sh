@@ -47,13 +47,13 @@ ShProgramNode::~ShProgramNode()
   // take care of it.
 }
 
-void ShProgramNode::compile(ShRefCount<ShBackend>& backend)
+void ShProgramNode::compile(const ShRefCount<ShBackend>& backend)
 {
   if (m_target.empty()) ShError( ShException( "Invalid ShProgram target" ) );
   compile(m_target, backend);
 }
 
-void ShProgramNode::compile(const std::string& target, ShRefCount<ShBackend>& backend)
+void ShProgramNode::compile(const std::string& target, const ShRefCount<ShBackend>& backend)
 {
   if (!backend) return;
 
@@ -64,13 +64,13 @@ void ShProgramNode::compile(const std::string& target, ShRefCount<ShBackend>& ba
   m_code[std::make_pair(target, backend)] = code;
 }
 
-ShRefCount<ShBackendCode> ShProgramNode::code(ShRefCount<ShBackend>& backend) {
+ShRefCount<ShBackendCode> ShProgramNode::code(const ShRefCount<ShBackend>& backend) {
   if (m_target.empty()) ShError( ShException( "Invalid ShProgram target" ) );
 
   return code(m_target, backend);
 }
 
-ShRefCount<ShBackendCode> ShProgramNode::code(const std::string& target, ShRefCount<ShBackend>& backend) {
+ShRefCount<ShBackendCode> ShProgramNode::code(const std::string& target, const ShRefCount<ShBackend>& backend) {
   if (!backend) return 0;
   assert(!ShEnvironment::insideShader);
 
@@ -129,7 +129,9 @@ void ShProgramNode::collectNodeVars(const ShCtrlGraphNodePtr& node)
 void ShProgramNode::collectVar(const ShVariableNodePtr& var) {
   if (!var) return;
   if (var->uniform() && var->kind() != SH_TEXTURE) {
-    if (std::find(uniforms.begin(), uniforms.end(), var) == uniforms.end()) uniforms.push_back(var);
+    if (std::find(uniforms.begin(), uniforms.end(), var) == uniforms.end()) {
+      uniforms.push_back(var);
+    }
   } else switch (var->kind()) {
   case SH_INPUT:
   case SH_OUTPUT:
@@ -137,22 +139,19 @@ void ShProgramNode::collectVar(const ShVariableNodePtr& var) {
     // Taken care of by ShVariableNode constructor
     break;
   case SH_TEMP:
-    if (std::find(temps.begin(), temps.end(), var) == temps.end()) temps.push_back(var);
+    if (std::find(temps.begin(), temps.end(), var) == temps.end()) {
+      temps.push_back(var);
+    }
     break;
   case SH_CONST:
-    if (std::find(constants.begin(), constants.end(), var) == constants.end()) constants.push_back(var);
+    if (std::find(constants.begin(), constants.end(), var) == constants.end()) {
+      constants.push_back(var);
+    }
     break;
   case SH_TEXTURE:
-    if (std::find(textures.begin(), textures.end(), var) == textures.end()) {
-      textures.push_back(var);
-      ShCubeTextureNodePtr cubetex = var;
-      if (cubetex) {
-        for (int i = 0; i < 6; i++) {
-          ShVariableNodePtr face = cubetex->face(static_cast<ShCubeDirection>(i));
-          if (!face) continue;
-          if (std::find(textures.begin(), textures.end(), face) == textures.end()) textures.push_back(face);
-        }
-      }
+    if (std::find(textures.begin(), textures.end(),
+                  shref_dynamic_cast<ShTextureNode>(var)) == textures.end()) {
+      textures.push_back(shref_dynamic_cast<ShTextureNode>(var));
     }    
     break;
   }

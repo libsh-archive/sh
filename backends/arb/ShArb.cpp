@@ -65,6 +65,41 @@ namespace ShArb {
 
 using namespace SH;
 
+void shGlCheckError(const char* desc)
+{
+  GLenum errnum = glGetError();
+  char* error = 0;
+  switch (errnum) {
+  case GL_NO_ERROR:
+    return;
+  case GL_INVALID_ENUM:
+    error = "GL_INVALID_ENUM";
+    break;
+  case GL_INVALID_VALUE:
+    error = "GL_INVALID_VALUE";
+    break;
+  case GL_INVALID_OPERATION:
+    error = "GL_INVALID_OPERATION";
+    break;
+  case GL_STACK_OVERFLOW:
+    error = "GL_STACK_OVERFLOW";
+    break;
+  case GL_STACK_UNDERFLOW:
+    error = "GL_STACK_UNDERFLOW";
+    break;
+  case GL_OUT_OF_MEMORY:
+    error = "GL_OUT_OF_MEMORY";
+    break;
+  case GL_TABLE_TOO_LARGE:
+    error = "GL_TABLE_TOO_LARGE";
+    break;
+  default:
+    error = "Unknown error!";
+    break;
+  }
+  SH_DEBUG_ERROR("GL ERROR " << desc << ": " << error);
+}
+
 #define shGlProgramStringARB glProgramStringARB
 #define shGlActiveTextureARB glActiveTextureARB
 #define shGlProgramLocalParameter4fvARB glProgramLocalParameter4fvARB
@@ -297,10 +332,9 @@ void ArbCode::bind()
       updateUniform(node);
     }
   }
-  for (ShProgramNode::VarList::const_iterator I = m_shader->textures.begin(); I != m_shader->textures.end();
-       ++I) {
-    loadTexture(*I);
-  }
+  // Make sure all textures are loaded.
+
+  bindTextures();
 }
 
 void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
@@ -310,9 +344,8 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
   RegMap::const_iterator I = m_registers.find(uniform);
   if (I == m_registers.end()) return;
 
-  ShTextureNodePtr tex = uniform;
+  ShTextureNodePtr tex = shref_dynamic_cast<ShTextureNode>(uniform);
   if (tex) {
-    loadTexture(tex);
     return;
   }
     
@@ -397,7 +430,7 @@ bool ArbCode::printSamplingInstruction(std::ostream& out, const ArbInst& instr) 
   if (instr.op != SH_ARB_TEX && instr.op != SH_ARB_TXP && instr.op != SH_ARB_TXB)
     return false;
 
-  ShTextureNodePtr texture = instr.src[1].node();
+  ShTextureNodePtr texture = shref_dynamic_cast<ShTextureNode>(instr.src[1].node());
   RegMap::const_iterator texRegIt = m_registers.find(instr.src[1].node());
   SH_DEBUG_ASSERT(texRegIt != m_registers.end());
 

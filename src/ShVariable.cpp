@@ -103,7 +103,12 @@ void ShVariable::getValues(ShVariableNode::ValueType dest[]) const
   }
 }
 
-
+ShVariableNode::ValueType ShVariable::getValue(int i) const
+{
+  ShVariableNode::ValueType value = m_node->getValue(m_swizzle[i]);
+  if (m_neg) value = -value;
+  return value;
+}
 
 void ShVariable::setValues(ShVariableNode::ValueType values[])
 {

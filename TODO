@@ -1,5 +1,62 @@
 TODO file for libsh
 
+GENERIC SMALL TASKS:
+ - add ShFooCPtr typedefs everywhere (for RefCountable types)
+ - rename ShRefCount to ShPointer or something else more useful
+ - everywhere where we pass a ShFooPtr into a function, replace it with
+   const ShFooPtr&
+ - use ShFooCPtrs where appropriate
+ X have updating semantics for uniforms
+ X need a map of shader kind -> currently bound shader
+ X hack constant loading for now by recompiling shader everytime it is bound
+ X hack constant loading for now by recompiling shader everytime a uniform is changed.
+ - have a setValues() call in ShVariableNode taking an array of indices and an array of values.
+ X check into CVS
+ - improve error handling in ShParser.cpp
+ - add line numbers/filenames to tokens, use this in error handling
+ X add additional layer for eror handling: don't throw exceptions by
+   default, instead just output to stderr or so.
+ - break and continue (requires some extra information in the parser)
+ X gather variables in ShShader
+ X simple SM register allocation
+ X add negation to variables
+ X compute uniform constant operations in the host
+ X send uniform values to SM in the SM backend
+ X add Swizzling operators to ShVariable
+ - make ShVariable operators return ShVariableN
+ X add Swizzling operators to ShVariableN
+ X negation in SM backend code upload
+ X store ShBackendCode objects in ShShader
+ - replace assert() with exceptions/error function
+ - add operator*(T) and similar for division to Sh{Lib*,Matrix}.hpp
+ X add operator[] to ShAttrib also to do one-element swizzle.
+ - use a ShVariableKind instead of an int template parameter in ShAttrib and ShMatrix
+ X rename "shader kind" to "shader target" throughout the code.
+ X replace integers for shader targets with strings
+ - add a switchBackend() function that clears boundShaders(), etc.
+ - add ShIOVariable types as a single variable used for both Input and Output
+ - add more tests to test/constant.sht
+
+GENERIC MEDIUM TASKS:
+ X port more of the ShLib calls to the new model.
+ X code generator
+ - add smarter configuration mechanism
+ - add "context" concept, or campaigns
+ X vectors, points, colours, positions, texcoords
+ - rethink some of the binding mechanism
+
+OVERALL LARGE TASKS:
+ X linear register allocator
+ X finish the parser
+ X begin the optimizer
+ / matrices
+ / textures
+ - directx backend
+ - Cg backend
+ - integrate Kevin's shgl stuff
+ - SSE backend
+ - python interface
+
 OPTIMIZER:
  X control flow graph optimizations
  X Run the optimizations more than once as necessary.
@@ -71,57 +128,6 @@ ARB BACKEND:
  X split into multiple files
  / add extension querying/plugin mechanism for ATI extensions etc.
 
-GENERIC SMALL TASKS:
- X have updating semantics for uniforms
- X need a map of shader kind -> currently bound shader
- X hack constant loading for now by recompiling shader everytime it is bound
- X hack constant loading for now by recompiling shader everytime a uniform is changed.
- - have a setValues() call in ShVariableNode taking an array of indices and an array of values.
- X check into CVS
- - improve error handling in ShParser.cpp
- - add line numbers/filenames to tokens, use this in error handling
- X add additional layer for eror handling: don't throw exceptions by
-   default, instead just output to stderr or so.
- - break and continue (requires some extra information in the parser)
- X gather variables in ShShader
- X simple SM register allocation
- X add negation to variables
- X compute uniform constant operations in the host
- X send uniform values to SM in the SM backend
- X add Swizzling operators to ShVariable
- - make ShVariable operators return ShVariableN
- X add Swizzling operators to ShVariableN
- X negation in SM backend code upload
- X store ShBackendCode objects in ShShader
- - replace assert() with exceptions/error function
- - add operator*(T) and similar for division to Sh{Lib*,Matrix}.hpp
- X add operator[] to ShAttrib also to do one-element swizzle.
- - use a ShVariableKind instead of an int template parameter in ShAttrib and ShMatrix
- X rename "shader kind" to "shader target" throughout the code.
- X replace integers for shader targets with strings
- - add a switchBackend() function that clears boundShaders(), etc.
- - add ShIOVariable types as a single variable used for both Input and Output
- - add more tests to test/constant.sht
-
-GENERIC MEDIUM TASKS:
- X port more of the ShLib calls to the new model.
- X code generator
- - add smarter configuration mechanism
- - add "context" concept, or campaigns
- X vectors, points, colours, positions, texcoords
- - rethink some of the binding mechanism
-
-OVERALL LARGE TASKS:
- X linear register allocator
- X finish the parser
- X begin the optimizer
- / matrices
- / textures
- - directx backend
- - Cg backend
- - integrate Kevin's shgl stuff
- - SSE backend
- - python interface
 
 === OPERATIONS ===
 

@@ -1,4 +1,5 @@
-ShTexture2D<ShAttrib3f> texture(320, 200);
+// -*- C++ -*-
+ShBaseTexture2D<ShAttrib3f, 0> texture(320, 200);
 
 ShProgram shader = SH_BEGIN_VERTEX_PROGRAM {
   ShOutputAttrib3f value;
