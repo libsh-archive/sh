@@ -6,4 +6,4 @@ shbackend_LTLIBRARIES = libshcpu.la
 
 libshcpu_la_LDFLAGS = -L$(prefix)/lib -module
 libshcpu_la_LIBADD = $(top_srcdir)/src/libsh.la 
-libshcpu_la_SOURCES = CPU.cpp
+libshcpu_la_SOURCES = CPU.cpp CPU.hpp
