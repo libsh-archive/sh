@@ -77,7 +77,7 @@ ShQuaternion<K, T>::operator*=(const ShQuaternion<K2, T>& right)
 {
   ShVector4f result;
   result(0) = 
-    m_data(0)*right.m_data(0) - dot(m_data(1,2,3), right.m_data(1,2,3));
+    m_data(0)*right.m_data(0) - SH::dot(m_data(1,2,3), right.m_data(1,2,3));
   result(1,2,3) = 
     m_data(0)*right.m_data(1,2,3) + right.m_data(0)*m_data(1,2,3) + 
     cross(m_data(1,2,3), right.m_data(1,2,3));
@@ -97,6 +97,14 @@ ShQuaternion<K, T>::operator*=(const ShAttrib<1, K2, T>& right)
 }
 
 template<int K, typename T>
+template<int K2>
+ShAttrib<1, SH_VAR_TEMP, T> 
+ShQuaternion<K, T>::dot(const ShQuaternion<K2, T>& q) const 
+{
+  return SH::dot(m_data, q.m_data);
+}
+
+template<int K, typename T>
 ShQuaternion<SH_VAR_TEMP, T> ShQuaternion<K, T>::conjugate() const 
 {
   ShVector4f conjData = -m_data;
@@ -112,7 +120,7 @@ ShQuaternion<SH_VAR_TEMP, T> ShQuaternion<K, T>::inverse() const
   if (m_data.isUnit()) {
     return conjugate();
   } else {
-    ShAttrib1f norm = dot(m_data, m_data); 
+    ShAttrib1f norm = SH::dot(m_data, m_data); 
     return conjugate() * (1.0 / norm);
   }
 }
@@ -189,6 +197,12 @@ ShQuaternion<K, T>::operator*(const ShAttrib<1, K2, T>& c)
   return (r *= c);
 }
 
+template<int K, typename T>
+void ShQuaternion<K, T>::normalize()
+{
+	m_data = normalize(m_data);
+}
+
 template<int K, typename T, int K2>
 ShQuaternion<SH_VAR_TEMP, T> 
 operator*(const ShAttrib<1, K2, T>& c, const ShQuaternion<K, T>& q)
@@ -197,11 +211,22 @@ operator*(const ShAttrib<1, K2, T>& c, const ShQuaternion<K, T>& q)
   return (r *= c);
 }
 
-template<int K, typename T>
-void ShQuaternion<K, T>::normalize()
+/*
+template<int K1, int K2, typename T>
+extern ShQuaternion<SH_VAR_TEMP, T>
+slerp(const ShQuaternion<K1, T>& q1, const ShQuaternion<K2, T>& q2, 
+		const ShAttrib1f& t)
 {
-	m_data = normalize(m_data);
-}
+  ShAttrib<1, SH_VAR_TEMP, T> cosTheta = q1.normalize().dot(q2.normalize());
+  ShAttrib<1, SH_VAR_TEMP, T> sinTheta = sqrt(1.0 - cosTheta*cosTheta);
+  
+  ShQuaternion<K2, T> q2prime = (cosTheta >= 0.0)*q2 - (costTheta < 0.0)*q2;
+  
+
+  
+  
+}*/
+
 
 
 }
