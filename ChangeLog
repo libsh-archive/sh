@@ -1,6 +1,15 @@
 2004-07-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
-	* backends/gl/ArbCode.cpp (allocTemps): Handle loops in the
+	* src/ShStructural.cpp: Implement "reach under" set computation
+	and therefore handle while and do loops. Yay!
+
+	* backends/gl/ArbInst.cpp (arbOpInfo): Add info for REP, BRK and ENDREP.
+
+	* backends/gl/ArbInst.hpp: Add REP, BRK and ENDREP.
+
+	* backends/gl/ArbCode.cpp: Support generation of REP statements
+	for while loops. Emit proper code for REP, BRK and ENDREP.
+	(allocTemps): Handle loops in the
 	allocator. It's not graph colouring, but it works and it's not
 	completely stupid either :).
 
