@@ -101,6 +101,13 @@ void kill(const ShGeneric<N, T>& c);
 template<int N, typename T> 
 ShGeneric<N, T> sort(const ShGeneric<N, T>& a);
 
+/** \brief Sorts groups of components v[i](j), 0 <= i < S
+  * by the components in v[0](j) 0 <= j < N.
+  * Uses an even-odd transposition sort.
+  */
+template<int S, int N, typename T>
+void groupsort(ShGeneric<N, T> v[]);
+
 /** Uniform freezing.
  *
  * Replace uses of the given uniform in the given program with a
