@@ -10,7 +10,7 @@ all-debug: $(DEBUG_TARGETS)
 
 CLEANFILES = $(RELEASE_TARGETS) $(DEBUG_TARGETS) *.exp *.pdb *.idb *.ilk
 
-libsh_dll_SOURCES  = sh.hpp
+libsh_dll_SOURCES = sh.hpp
 libsh_dll_SOURCES += ShBasicBlock.hpp ShBasicBlock.cpp
 libsh_dll_SOURCES += ShBlock.hpp ShBlock.cpp
 libsh_dll_SOURCES += ShCtrlGraph.hpp ShCtrlGraph.cpp
@@ -121,6 +121,7 @@ install: $(RELEASE_TARGETS) $(DEBUG_TARGETS) $(wildcard *.hpp)
 	-mkdir $(SH_INSTALLDIR)\lib
 	copy libsh.dll $(SH_INSTALLDIR)
 	copy libshd.dll $(SH_INSTALLDIR)
+	copy libshd.pdb $(SH_INSTALLDIR)
 	copy libsh.lib $(SH_INSTALLDIR)\lib
 	copy libshd.lib $(SH_INSTALLDIR)\lib
 	copy *.hpp $(SH_INSTALLDIR)\include\sh
@@ -128,5 +129,5 @@ install: $(RELEASE_TARGETS) $(DEBUG_TARGETS) $(wildcard *.hpp)
 libsh_dll_DEPENDS = $(libsh_dll_CXXFILES:.cpp=.r.d) $(libsh_dll_CXXFILES:.cpp=.d.d)
 
 include ../win32.mk
-CPPFLAGS += -DSH_DLLEXPORT="__declspec(dllexport)"
+CPPFLAGS += /DSH_DLLEXPORT="__declspec(dllexport)"
 -include $(libsh_dll_DEPENDS)

@@ -10,7 +10,7 @@ all-debug: $(DEBUG_TARGETS)
 
 CLEANFILES = $(RELEASE_TARGETS) $(DEBUG_TARGETS) *.exp *.pdb *.idb *.ilk
 
-libshutil_lib_SOURCES  = ShFunc.hpp ShFuncImpl.hpp
+libshutil_lib_SOURCES = ShFunc.hpp ShFuncImpl.hpp
 libshutil_lib_SOURCES += ShKernelLib.cpp ShKernelLib.hpp ShKernelLibImpl.hpp
 libshutil_lib_SOURCES += ShKernelLight.hpp ShKernelLightImpl.hpp
 libshutil_lib_SOURCES += ShKernelPost.hpp ShKernelPostImpl.hpp

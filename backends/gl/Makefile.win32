@@ -10,7 +10,7 @@ all-debug: $(DEBUG_TARGETS)
 
 CLEANFILES = $(RELEASE_TARGETS) $(DEBUG_TARGETS) *.exp *.pdb *.idb *.ilk
 
-libsharb_dll_SOURCES  = Arb.hpp Arb.cpp
+libsharb_dll_SOURCES = Arb.hpp Arb.cpp
 libsharb_dll_SOURCES += ArbBackend.cpp
 libsharb_dll_SOURCES += ArbCode.hpp ArbCode.cpp
 libsharb_dll_SOURCES += ArbEmit.cpp
@@ -48,6 +48,7 @@ install: $(RELEASE_TARGETS) $(DEBUG_TARGETS) $(wildcard *.hpp)
 	-mkdir $(SH_INSTALLDIR)
 	copy libsharb.dll $(SH_INSTALLDIR)
 	copy libsharbd.dll $(SH_INSTALLDIR)
+	copy libsharbd.pdb $(SH_INSTALLDIR)
 
 libsharb_dll_DEPENDS = $(libsharb_dll_CXXFILES:.cpp=.r.d) $(libsharb_dll_CXXFILES:.cpp=.d.d)
 
