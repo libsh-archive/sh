@@ -58,7 +58,7 @@ class Backend;
 
 class BackendCode : public SH::ShBackendCode {
 public:
-  BackendCode(SH::ShRefCount<Backend> backend, const SH::ShShader& shader);
+  BackendCode(SH::ShRefCount<Backend> backend, const SH::ShProgram& shader);
   virtual ~BackendCode();
 
   virtual bool allocateRegister(const SH::ShVariableNodePtr& var);
@@ -77,7 +77,7 @@ public:
 
 private:
   SH::ShRefCount<Backend> m_backend;
-  SH::ShShader m_shader;
+  SH::ShProgram m_shader;
   SMshader m_smShader;
 
   typedef std::vector<SmInstruction> SmInstList;
@@ -123,7 +123,7 @@ public:
   Backend();
   ~Backend();
   std::string name() const;
-  SH::ShBackendCodePtr generateCode(const SH::ShShader& shader);
+  SH::ShBackendCodePtr generateCode(const SH::ShProgram& shader);
 
 private:
   void generateNode(BackendCodePtr& code, const SH::ShCtrlGraphNodePtr& node);

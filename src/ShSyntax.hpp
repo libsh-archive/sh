@@ -1,7 +1,33 @@
+// Sh: A GPU metaprogramming language.
+//
+// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
+// Project administrator: Michael D. McCool
+// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
+//          Michael D. McCool
+// 
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+// 
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+// 
+// 1. The origin of this software must not be misrepresented; you must
+// not claim that you wrote the original software. If you use this
+// software in a product, an acknowledgment in the product documentation
+// would be appreciated but is not required.
+// 
+// 2. Altered source versions must be plainly marked as such, and must
+// not be misrepresented as being the original software.
+// 
+// 3. This notice may not be removed or altered from any source
+// distribution.
+//////////////////////////////////////////////////////////////////////////////
 #ifndef SHSYNTAX_HPP
 #define SHSYNTAX_HPP
 
-#include "ShShader.hpp"
+#include "ShProgram.hpp"
 
 /** \file ShSyntax.hpp
  * Sh syntactical definitions.
@@ -9,10 +35,10 @@
 
 namespace SH {
 
-ShShader shBeginShader(int kind);
+ShProgram shBeginShader(int kind);
 void shEndShader();
 
-void shBindShader(ShShader& shader);
+void shBindShader(ShProgram& shader);
 
 void shIf(bool);
 void shElse();
@@ -44,7 +70,7 @@ void shContinue();
 /** \def SH_BEGIN_SHADER(kind)
  * Begin a new shader of the given \a kind.
  * Nesting shaders is not allowed.
- * @retval ShShader A reference to the new shader.
+ * @retval ShProgram A reference to the new shader.
  * @see SH_END_SHADER
  */
 #define SH_BEGIN_SHADER(kind) ::SH::shBeginShader(kind);
@@ -54,6 +80,9 @@ void shContinue();
  */
 #define SH_END_SHADER         ::SH::shEndShader();
 //@}
+
+#define SH_BEGIN_VERTEX_SHADER ::SH::shBeginShader(0);
+#define SH_BEGIN_FRAGMENT_SHADER ::SH::shBeginShader(1);
 
 ///@name If statements
 //@{

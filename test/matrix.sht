@@ -1,6 +1,6 @@
 // -*- C++ -*-
 ShMatrix4x4f mv;
-ShShader shader = SH_BEGIN_SHADER(0) {
+ShProgram shader = SH_BEGIN_SHADER(0) {
   ShInputAttrib4f in; NAME(in);
   ShOutputMatrix4x4f matrix;
   

@@ -3,7 +3,7 @@ ShAttrib4f computed; NAME(computed);
 
 computed(3) = uniform(1) + uniform(2) - uniform(0);
 
-ShShader shader = SH_BEGIN_SHADER(0) {
+ShProgram shader = SH_BEGIN_SHADER(0) {
   ShInputAttrib4f in1; NAME(in1);
   ShInputAttrib4f in2; NAME(in2);
   ShOutputAttrib4f out; NAME(out);

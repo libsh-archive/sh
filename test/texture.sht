@@ -1,6 +1,6 @@
 ShTexture2D<ShAttrib3f> texture(320, 200);
 
-ShShader shader = SH_BEGIN_SHADER(0) {
+ShProgram shader = SH_BEGIN_SHADER(0) {
   ShOutputAttrib3f value;
   
   value = texture(ShAttrib2f(0.5, 0.3));

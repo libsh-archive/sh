@@ -399,7 +399,7 @@ using namespace SH;
 
 static SH::ShRefCount<ArbBackend> instance = new ArbBackend();
 
-ArbCode::ArbCode(ArbBackendPtr backend, const ShShader& shader)
+ArbCode::ArbCode(ArbBackendPtr backend, const ShProgram& shader)
   : m_backend(backend), m_shader(shader),
     m_numTemps(0), m_numInputs(0), m_numOutputs(0), m_numParams(0), m_numConsts(0),
     m_numTextures(0)
@@ -481,7 +481,7 @@ void ArbCode::bind()
       updateUniform(node);
     }
   }
-  for (ShShaderNode::VarList::const_iterator I = m_shader->textures.begin(); I != m_shader->textures.end();
+  for (ShProgramNode::VarList::const_iterator I = m_shader->textures.begin(); I != m_shader->textures.end();
        ++I) {
     ShTextureNodePtr texture = *I;
     if (!texture) {
@@ -691,28 +691,28 @@ std::ostream& ArbCode::print(std::ostream& out)
 
   // Print register declarations
   
-  for (ShShaderNode::VarList::const_iterator I = m_shader->inputs.begin();
+  for (ShProgramNode::VarList::const_iterator I = m_shader->inputs.begin();
        I != m_shader->inputs.end(); ++I) {
     out << "  ";
     m_registers[*I].printDecl(out);
     out << endl;
   }
 
-  for (ShShaderNode::VarList::const_iterator I = m_shader->outputs.begin();
+  for (ShProgramNode::VarList::const_iterator I = m_shader->outputs.begin();
        I != m_shader->outputs.end(); ++I) {
     out << "  ";
     m_registers[*I].printDecl(out);
     out << endl;
   }
 
-  for (ShShaderNode::VarList::const_iterator I = m_shader->uniforms.begin();
+  for (ShProgramNode::VarList::const_iterator I = m_shader->uniforms.begin();
        I != m_shader->uniforms.end(); ++I) {
     out << "  ";
     m_registers[*I].printDecl(out);
     out << endl;
   }
 
-  for (ShShaderNode::VarList::const_iterator I = m_shader->constants.begin();
+  for (ShProgramNode::VarList::const_iterator I = m_shader->constants.begin();
        I != m_shader->constants.end(); ++I) {
     out << "  ";
     m_registers[*I].printDecl(out);
@@ -878,7 +878,7 @@ void ArbCode::allocRegs()
   
   allocOutputs();
   
-  for (ShShaderNode::VarList::const_iterator I = m_shader->uniforms.begin();
+  for (ShProgramNode::VarList::const_iterator I = m_shader->uniforms.begin();
        I != m_shader->uniforms.end(); ++I) {
     allocParam(*I);
   }
@@ -890,8 +890,8 @@ void ArbCode::allocRegs()
   allocTextures();
 }
 
-void ArbCode::bindSpecial(const ShShaderNode::VarList::const_iterator& begin,
-                          const ShShaderNode::VarList::const_iterator& end,
+void ArbCode::bindSpecial(const ShProgramNode::VarList::const_iterator& begin,
+                          const ShProgramNode::VarList::const_iterator& end,
                           const ArbBindingSpecs& specs, 
                           std::vector<int>& bindings,
                           ShArbRegType type, int& num)
@@ -900,7 +900,7 @@ void ArbCode::bindSpecial(const ShShaderNode::VarList::const_iterator& begin,
   
   if (specs.specialType == SH_VAR_ATTRIB) return;
   
-  for (ShShaderNode::VarList::const_iterator I = begin; I != end; ++I) {
+  for (ShProgramNode::VarList::const_iterator I = begin; I != end; ++I) {
     ShVariableNodePtr node = *I;
     
     if (m_registers.find(node) != m_registers.end()) continue;
@@ -924,7 +924,7 @@ void ArbCode::allocInputs()
                 SH_ARB_REG_ATTRIB, m_numInputs);
   }
   
-  for (ShShaderNode::VarList::const_iterator I = m_shader->inputs.begin();
+  for (ShProgramNode::VarList::const_iterator I = m_shader->inputs.begin();
        I != m_shader->inputs.end(); ++I) {
     ShVariableNodePtr node = *I;
     if (m_registers.find(node) != m_registers.end()) continue;
@@ -953,7 +953,7 @@ void ArbCode::allocOutputs()
                 SH_ARB_REG_OUTPUT, m_numOutputs);
   }
   
-  for (ShShaderNode::VarList::const_iterator I = m_shader->outputs.begin();
+  for (ShProgramNode::VarList::const_iterator I = m_shader->outputs.begin();
        I != m_shader->outputs.end(); ++I) {
     ShVariableNodePtr node = *I;
     if (m_registers.find(node) != m_registers.end()) continue;
@@ -985,7 +985,7 @@ void ArbCode::allocParam(ShVariableNodePtr node)
 
 void ArbCode::allocConsts()
 {
-  for (ShShaderNode::VarList::const_iterator I = m_shader->constants.begin();
+  for (ShProgramNode::VarList::const_iterator I = m_shader->constants.begin();
        I != m_shader->constants.end(); ++I) {
     ShVariableNodePtr node = *I;
     m_registers[node] = ArbReg(SH_ARB_REG_CONST, m_numConsts);
@@ -999,7 +999,7 @@ void ArbCode::allocConsts()
 void ArbCode::allocTextures()
 {
   
-  for (ShShaderNode::VarList::const_iterator I = m_shader->textures.begin();
+  for (ShProgramNode::VarList::const_iterator I = m_shader->textures.begin();
        I != m_shader->textures.end(); ++I) {
     ShTextureNodePtr node = *I;
     int binding, index;
@@ -1083,7 +1083,7 @@ std::string ArbBackend::name() const
   return "arb";
 }
 
-ShBackendCodePtr ArbBackend::generateCode(const ShShader& shader)
+ShBackendCodePtr ArbBackend::generateCode(const ShProgram& shader)
 {
   SH_DEBUG_ASSERT(shader.object());
   ArbCodePtr code = new ArbCode(this, shader);

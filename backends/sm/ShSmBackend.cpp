@@ -42,7 +42,7 @@ std::string SmRegister::print() const
   return stream.str();
 }
 
-BackendCode::BackendCode(ShRefCount<Backend> backend, const ShShader& shader)
+BackendCode::BackendCode(ShRefCount<Backend> backend, const ShProgram& shader)
   : m_backend(backend), m_shader(shader),
     m_maxCR(0), m_maxTR(0), m_maxIR(0), m_maxOR(0), m_maxTex(0),
     m_cR(0), m_tR(0), m_iR(0), m_oR(0)
@@ -148,7 +148,7 @@ void BackendCode::bind()
   }
 
   SH_DEBUG_PRINT("Uploading textures...");
-  for (ShShaderNode::VarList::const_iterator I = m_shader->textures.begin(); I != m_shader->textures.end();
+  for (ShProgramNode::VarList::const_iterator I = m_shader->textures.begin(); I != m_shader->textures.end();
        ++I) {
     ShTextureNodePtr texture = *I;
     if (!texture) {
@@ -433,11 +433,11 @@ void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
 
 void BackendCode::allocRegs()
 {
-  for (ShShaderNode::VarList::const_iterator I = m_shader->inputs.begin();
+  for (ShProgramNode::VarList::const_iterator I = m_shader->inputs.begin();
        I != m_shader->inputs.end(); ++I) {
     getReg(*I);
   }
-  for (ShShaderNode::VarList::const_iterator I = m_shader->outputs.begin();
+  for (ShProgramNode::VarList::const_iterator I = m_shader->outputs.begin();
        I != m_shader->outputs.end(); ++I) {
     getReg(*I);
   }
@@ -591,7 +591,7 @@ void Backend::generateNode(BackendCodePtr& code, const ShCtrlGraphNodePtr& node)
   }
 }
 
-ShBackendCodePtr Backend::generateCode(const ShShader& shader)
+ShBackendCodePtr Backend::generateCode(const ShProgram& shader)
 {
   BackendCodePtr code = new BackendCode(this, shader);
 

@@ -15,7 +15,7 @@ static ShAttrib1f f()
 }
 };
 
-ShShader shader = SH_BEGIN_SHADER(0) {
+ShProgram shader = SH_BEGIN_SHADER(0) {
   ShInputAttrib1f in; NAME(in);
   ShAttrib1f temp; NAME(temp);
   ShOutputAttrib1f out; NAME(out);

@@ -108,4 +108,5 @@ OPERATIONS:
 | | | | rsqrt
 |X|X|X| norm
 |X|X|X| cond
+|X|X| | kil
 +-+-+-+

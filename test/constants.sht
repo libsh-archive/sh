@@ -1,5 +1,5 @@
 // -*- C++ -*-
-ShShader shader = SH_BEGIN_SHADER(0) {
+ShProgram shader = SH_BEGIN_SHADER(0) {
   
   ShInputAttrib4f in1; NAME(in1);
   ShOutputAttrib4f out1; NAME(out1);

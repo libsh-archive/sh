@@ -5,7 +5,7 @@ ShAttrib2f julia_c(1.0, -0.3);
 
 ShTexture2D<ShColor3f> julia_map(20, 1);
 
-ShShader shader = SH_BEGIN_SHADER(1) {
+ShProgram shader = SH_BEGIN_SHADER(1) {
   ShInputTexCoord2f u; NAME(u);
   ShInputPosition2f pdxy; NAME(pdxy);
 

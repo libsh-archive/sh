@@ -30,7 +30,7 @@ enum ShArbRegType {
 
 class ArbCode : public SH::ShBackendCode {
 public:
-  ArbCode(SH::ShRefCount<ArbBackend> backend, const SH::ShShader& shader);
+  ArbCode(SH::ShRefCount<ArbBackend> backend, const SH::ShProgram& shader);
   virtual ~ArbCode();
 
   virtual bool allocateRegister(const SH::ShVariableNodePtr& var);
@@ -71,8 +71,8 @@ private:
   /// Allocate textures (called by allocRegs)
   void allocTextures();
 
-  void bindSpecial(const SH::ShShaderNode::VarList::const_iterator& begin,
-                   const SH::ShShaderNode::VarList::const_iterator& end,
+  void bindSpecial(const SH::ShProgramNode::VarList::const_iterator& begin,
+                   const SH::ShProgramNode::VarList::const_iterator& end,
                    const ArbBindingSpecs& specs, 
                    std::vector<int>& bindings,
                    ShArbRegType type, int& num);
@@ -85,7 +85,7 @@ private:
   bool printSamplingInstruction(std::ostream& out, const ArbInst& inst) const;
   
   SH::ShRefCount<ArbBackend> m_backend;
-  SH::ShShader m_shader;
+  SH::ShProgram m_shader;
 
   typedef std::vector<ArbInst> ArbInstList;
   ArbInstList m_instructions;
@@ -127,7 +127,7 @@ public:
   
   std::string name() const;
 
-  SH::ShBackendCodePtr generateCode(const SH::ShShader& shader);
+  SH::ShBackendCodePtr generateCode(const SH::ShProgram& shader);
 
   int instrs(int kind) { return m_instrs[kind]; }
   int temps(int kind) { return m_temps[kind]; }
