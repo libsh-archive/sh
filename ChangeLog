@@ -1,3 +1,10 @@
+2004-04-01  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShVariableNode.hpp: Added size() member function to change
+	size of variables. Don't use this if you're not sure what you're doing.
+
+	* src/ShNibbles.hpp: Added dup nibble.
+
 2004-03-30  Kevin Moule <krmoule@cgl.uwaterloo.ca>
 
 	* backends/cpu/CPU.cpp: removed extra ")" present in OP_MAD

@@ -8,6 +8,8 @@ endif
 
 SUBDIRS = libltdl src backends test util $(DOC_SUBDIR)
 
+EXTRA_DIST = BUGS
+
 docs:
 	cd doc ; $(MAKE) docs ; cd ..
 

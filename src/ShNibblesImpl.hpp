@@ -41,6 +41,17 @@ ShProgram keep(const std::string & name) {
 }
 
 template<typename T>
+ShProgram dup(const std::string & name) {
+  ShProgram nibble = SH_BEGIN_PROGRAM() {
+    typename T::InputType SH_NAMEDECL(attr, name); 
+    typename T::OutputType SH_NAMEDECL(attr1, name + "_1") = attr; 
+    typename T::OutputType SH_NAMEDECL(attr2, name + "_2") = attr; 
+  } SH_END_PROGRAM;
+  nibble->name("dup");
+  return nibble;
+}
+
+template<typename T>
 ShProgram lose(const std::string & name) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T::InputType SH_NAMEDECL(attr, name);

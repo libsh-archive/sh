@@ -67,6 +67,10 @@ public:
   bool hasValues() const; ///< Does this variable have values in the
                           ///host, e.g. for constants and uniforms.
   int size() const; ///< Get the number of elements in this variable
+
+  // Don't call this on uniforms!
+  void size(int size);
+  
   std::string name() const; ///< Get this variable's name
 
   /// Set this variable's name. If set to the empty string, defaults

@@ -28,6 +28,7 @@
 #include <cassert>
 #include "ShEnvironment.hpp"
 #include "ShVariableNode.hpp"
+#include "ShDebug.hpp"
 
 namespace SH {
 
@@ -119,6 +120,12 @@ bool ShVariableNode::hasValues() const
 int ShVariableNode::size() const
 {
   return m_size;
+}
+
+void ShVariableNode::size(int s)
+{
+  SH_DEBUG_ASSERT(!m_values);
+  m_size = s;
 }
 
 std::string ShVariableNode::name() const

@@ -45,6 +45,13 @@ namespace SH {
 template<typename T>
 ShProgram keep(const std::string & name = ""); 
 
+/** \brief Creates a dup nibble.
+ * The dup nibble makes an extra copy of on input of type T named with
+ * the given name.
+ */
+template<typename T>
+ShProgram dup(const std::string & name = "var"); 
+
 /** \brief Creates a lose nibble.
  * The lose nibble discards through one input of type T named with
  * the given name.
