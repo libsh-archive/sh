@@ -1,5 +1,9 @@
 2004-02-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShUtility.hpp: Added the SelectType utility template.
+
+	* src/ShLib.hpp (cond): Fix conditional assignment check.
+
 	* src/ShSyntax.hpp (SH_DECL): Make use of ShIgnore to avoid
 	warnings with -Wall.
 

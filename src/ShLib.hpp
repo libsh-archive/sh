@@ -307,7 +307,7 @@ SH_SHLIB_BOOLEAN_OP(operator!=, !=, SH_OP_SNE);
 template<int M, int N, typename T>
 ShVariableN<N, T> cond(const ShVariableN<M, T>& condition, const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
 {
-  SH_STATIC_CHECK(N == M, Conditional_Assignment_Components_Do_Not_Match);
+  SH_STATIC_CHECK(N == M || M == 1, Conditional_Assignment_Components_Do_Not_Match);
   if (!ShEnvironment::insideShader) {
     assert(condition.hasValues());
     assert(left.hasValues());
