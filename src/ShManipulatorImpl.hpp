@@ -117,7 +117,6 @@ template<typename T>
 ShProgram operator<<(const ShProgram &p, const ShManipulator<T> &m) {
   typedef typename ShManipulator<T>::IndexRangeVector RangeVec;
   RangeVec mranges = m.getRanges();
-  int size = p->inputs.size();
   int i;
 
   ShProgram permuter = SH_BEGIN_PROGRAM() {
@@ -176,7 +175,6 @@ template<typename T>
 ShProgram operator<<(const ShManipulator<T> &m, const ShProgram &p) {
   typedef typename ShManipulator<T>::IndexRangeVector RangeVec;
   RangeVec mranges = m.getRanges();
-  int size = p->outputs.size();
 
   ShProgram permuter = SH_BEGIN_PROGRAM() {
     /* Make shader inputs from p's outputs */
