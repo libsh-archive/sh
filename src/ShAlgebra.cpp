@@ -292,7 +292,7 @@ ShProgram renameInput(const ShProgram &a, std::string oldName, std::string newNa
         var.name(name);
       }
     }
-  }
+  } SH_END;
   return connect(renamer, a);
 }
 
@@ -311,7 +311,7 @@ ShProgram renameOutput(const ShProgram &a, std::string oldName, std::string newN
         var.name(name);
       }
     }
-  }
+  } SH_END;
   return connect(a, renamer);
 }
 
