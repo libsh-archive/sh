@@ -191,6 +191,17 @@ public:
   void execute(const SH::ShProgram& program, SH::ShStream& dest);
   
 private:
+  class GlExtensions {
+  public:
+    GlExtensions();
+    
+    bool have(const std::string& name);
+
+    void dump();
+  private:
+    std::set<std::string> m_extlist;
+  };
+
   std::map<std::string, int> m_instrs; ///< Maximum number of instructions for each shader target
   std::map<std::string, int> m_temps; ///< Maximum number of temporaries for each shader target
   std::map<std::string, int> m_attribs; ///<Maximum number of attributes for each shader target
@@ -361,6 +372,7 @@ struct ArbInst {
   SH::ShVariable dest;
   SH::ShVariable src[3];
 };
+
 
 }
 

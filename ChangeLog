@@ -1,3 +1,12 @@
+2004-02-02  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/arb/ShArbStream.cpp: Figure out which floating point
+	pbuffers extension (ATI or NV) to use automatically.
+	Add proper error reporting.
+
+	* src/ShQuaternion.hpp, src/ShQuaternionImpl.hpp: Indented these
+	to match the rest of Sh.
+
 2004-02-01  Jack Wang  <jmwang@uwaterloo.ca>
 	* src/ShQuaternion.?pp, src/ShQuaternionImpl.hpp:
 	Made ShQuaternion a templated class, and hence renamed the cpp file to
