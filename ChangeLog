@@ -1,13 +1,18 @@
-2004-10-13  Bryan Chan  <b8chan@cgl.uwaterloo.ca>
-  Merged main branch up to r1543 into this branch.
+2004-10-14  Bryan Chan  <b8chan@cgl.uwaterloo.ca>
+  Merged main branch up to r1559 into this branch.
+
+  * src/ShTypeConvertTransformer.cpp:
+  Bug fix for uniform flag on temp variables.
+
+2004-10-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShGenericImpl.hpp (operator%=): Actually do a modulo, not a
+	divide. Woops.
 
 2004-10-13  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
-  * src/ShConstProp.cpp (updateDest):
-  Temporarily fixed issue with detecting whether all srcs are uniform.  
 
-  * configure.ac:
-  Changed AC_CONFIG_SRCDIR to ShVariable.hpp, since ShAttrib.hpp is now 
-  generated automatically.
+	* src/ShConstProp.cpp (updateDest): Temporarily fixed issue with
+	detecting whether all srcs are uniform.
 
 2004-10-13  Bryan Chan <b8chan@cgl.uwaterloo.ca>
   Merged main branch up to r1510 into this branch, minor
@@ -19,6 +24,9 @@
 
   * src/ShCloak*:
   Changed to ShVariant* to prevent potential Star Trek licensing issues. 
+
+	* configure.ac: Changed AC_CONFIG_SRCDIR to ShVariable.hpp, since
+	ShAttrib.hpp is now generated automatically.
 
 2004-10-12  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 

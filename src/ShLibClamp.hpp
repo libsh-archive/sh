@@ -93,6 +93,8 @@ operator%(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right);
 
 SH_SHLIB_CONST_SCALAR_OP(mod);
 SH_SHLIB_CONST_N_OP_LEFT(mod);
+SH_SHLIB_CONST_SCALAR_OP(operator%);
+SH_SHLIB_CONST_N_OP_LEFT(operator%);
 
 /** Fractional part.
  * Discards the integer part of each componenent in var.

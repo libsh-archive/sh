@@ -192,7 +192,7 @@ template<typename T2>
 inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator%=(const ShGeneric<1, T2>& right)
 {
-  *this = *this / right;
+  *this = *this % right;
   return *this;
 }
 

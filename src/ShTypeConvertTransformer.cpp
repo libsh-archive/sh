@@ -207,7 +207,7 @@ struct FloatConverter {
     }
     // @todo make sure to run make another temp in case
     // one of var/result is an IN/OUT and hence cannot be used in computation 
-    ShVariable temp(var.node()->clone(SH_TEMP, SH_ATTRIB, var.size(), false));
+    ShVariable temp(var.node()->clone(SH_TEMP, SH_ATTRIB, var.size(), false, false));
 
     stmtList.insert(I, ShStatement(temp, SH_OP_ASN, var));
     //if(operations & APPLY_MAX_1) stmtList.insert(I, ShStatement(temp, SH_OP_FLR, temp)); 
@@ -260,7 +260,7 @@ struct FloatConverter {
       // involved are converted if their type is in m_typeMap
       int tempIndex = opIndex;
       if(m_typeMap.count(tempIndex) > 0) tempIndex = m_typeMap[tempIndex];
-      ShVariable temp(stmt.src[i].node()->clone(SH_TEMP, stmt.src[i].size(), tempIndex, false, true));
+      ShVariable temp(stmt.src[i].node()->clone(SH_TEMP, stmt.src[i].size(), tempIndex, false, false));
 
       ShVariableNodePtr varNode = stmt.src[i].node();
       if(m_converts.count(varNode) > 0) varNode = m_converts[varNode];
@@ -291,7 +291,7 @@ struct FloatConverter {
 
       int tempIndex = opDest;
       if(m_typeMap.count(tempIndex) > 0) tempIndex = m_typeMap[tempIndex];
-      ShVariable temp(stmt.dest.node()->clone(SH_TEMP, stmt.dest.size(), tempIndex, false, true));
+      ShVariable temp(stmt.dest.node()->clone(SH_TEMP, stmt.dest.size(), tempIndex, false, false));
 
       ShVariableNodePtr varNode = stmt.dest.node();
       if(m_converts.count(varNode) > 0) varNode = m_converts[varNode];
