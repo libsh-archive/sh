@@ -50,8 +50,8 @@ public:
   virtual const std::string& description() const;
   virtual void description(const std::string& d);
 
-  virtual std::string meta(std::string key) const;
-  virtual void meta(std::string key, std::string value);
+  virtual std::string meta(const std::string& key) const;
+  virtual void meta(const std::string& key, const std::string& value);
 
 private:
   std::string m_name;

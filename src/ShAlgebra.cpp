@@ -109,7 +109,9 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
     if(!graphEntry) graphEntry = program->ctrlGraph->prependEntry();
     ShVariableNodePtr newInput(new ShVariableNode(SH_INPUT, (*I)->size(), 
           (*I)->specialType()));
-    newInput->name((*I)->name());
+    if ((*I)->has_name()) {
+      newInput->name((*I)->name());
+    }
     std::replace(program->inputs.begin(), program->inputs.end(),
         (*I), newInput);
     program->inputs.pop_back();
@@ -123,7 +125,9 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
     if(!graphExit) graphExit = program->ctrlGraph->appendExit();
     ShVariableNodePtr newOutput(new ShVariableNode(SH_OUTPUT, (*I)->size(), 
           (*I)->specialType()));
-    newOutput->name((*I)->name());
+    if ((*I)->has_name()) {
+      newOutput->name((*I)->name());
+    }
     std::replace(program->outputs.begin(), program->outputs.end(),
         (*I), newOutput);
     program->outputs.pop_back();

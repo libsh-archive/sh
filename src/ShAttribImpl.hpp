@@ -82,10 +82,8 @@ ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShAttrib<N, Binding, T, Swizzl
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
   const ShSwizzle& swizzle, bool neg)
-  : ShGeneric<N, T>(node)
+  : ShGeneric<N, T>(node, swizzle, neg)
 {
-  m_swizzle = swizzle;
-  m_neg = neg;
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
@@ -275,10 +273,8 @@ ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShAttrib<1, Binding, T, Swizzl
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
   const ShSwizzle& swizzle, bool neg)
-  : ShGeneric<1, T>(node)
+  : ShGeneric<1, T>(node, swizzle, neg)
 {
-  m_swizzle = swizzle;
-  m_neg = neg;
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -479,10 +475,8 @@ ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShAttrib<2, Binding, T, Swizzl
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
   const ShSwizzle& swizzle, bool neg)
-  : ShGeneric<2, T>(node)
+  : ShGeneric<2, T>(node, swizzle, neg)
 {
-  m_swizzle = swizzle;
-  m_neg = neg;
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -700,10 +694,8 @@ ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShAttrib<3, Binding, T, Swizzl
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
   const ShSwizzle& swizzle, bool neg)
-  : ShGeneric<3, T>(node)
+  : ShGeneric<3, T>(node, swizzle, neg)
 {
-  m_swizzle = swizzle;
-  m_neg = neg;
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -926,10 +918,8 @@ ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShAttrib<4, Binding, T, Swizzl
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
   const ShSwizzle& swizzle, bool neg)
-  : ShGeneric<4, T>(node)
+  : ShGeneric<4, T>(node, swizzle, neg)
 {
-  m_swizzle = swizzle;
-  m_neg = neg;
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>

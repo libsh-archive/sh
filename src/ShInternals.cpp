@@ -48,7 +48,7 @@ void ShVariableReplacer::operator()(ShCtrlGraphNodePtr node) {
 void ShVariableReplacer::repVar(ShVariable& var) {
   VarMap::iterator I = varMap.find(var.node());
   if (I == varMap.end()) return;
-  var.node() = I->second;
+  var = ShVariable(I->second, var.swizzle(), var.neg());
 }
 
 typedef std::map<ShCtrlGraphNodePtr, ShCtrlGraphNodePtr> CtrlGraphCopyMap;

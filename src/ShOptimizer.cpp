@@ -113,8 +113,8 @@ struct CopyPropagator {
     for (ACP::const_iterator I = m_acp.begin(); I != m_acp.end(); ++I) {
       if (I->first.node() == var.node()) {
         changed = true;
-        var.node() = I->second.node();
-        var.neg() = var.neg() ^ (I->first.neg() ^ I->second.neg());
+        var = ShVariable(I->second.node(), var.swizzle(),
+                         var.neg() ^ (I->first.neg() ^ I->second.neg()));
         break;
       }
     }

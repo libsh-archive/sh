@@ -83,14 +83,14 @@ void ShMeta::description(const std::string& d)
   m_description = d;
 }
 
-std::string ShMeta::meta(std::string key) const
+std::string ShMeta::meta(const std::string& key) const
 {
   MetaMap::const_iterator I = m_meta.find(key);
   if (I == m_meta.end()) return std::string();
   return I->second;
 }
 
-void ShMeta::meta(std::string key, std::string value)
+void ShMeta::meta(const std::string& key, const std::string& value)
 {
   m_meta[key] = value;
 }

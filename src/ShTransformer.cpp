@@ -340,7 +340,7 @@ struct InputOutputConvertor {
   void convertIO(ShStatement& stmt)
   {
     if(!stmt.dest.null()) {
-      ShVariableNodePtr &oldNode = stmt.dest.node();
+      const ShVariableNodePtr &oldNode = stmt.dest.node();
       if(oldNode->kind() == SH_INPUT) { 
         if(m_varMap.count(oldNode) == 0) {
           m_varMap[oldNode] = dupNode(oldNode); 
@@ -349,7 +349,7 @@ struct InputOutputConvertor {
     }
     for(int i = 0; i < 3; ++i) {
       if(!stmt.src[i].null()) {
-        ShVariableNodePtr &oldNode = stmt.src[i].node();
+        const ShVariableNodePtr &oldNode = stmt.src[i].node();
         if(oldNode->kind() == SH_OUTPUT) { 
           if(m_varMap.count(oldNode) == 0) {
             m_varMap[oldNode] = dupNode(oldNode); 
