@@ -1,3 +1,11 @@
+2004-08-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp (ConstProp): Set destinations to either
+	BOTTOM or CONSTANT but never top.
+	(propagate_constants): Consider all use-def information for uses
+	that need to be updated when computing the new lattice cell
+	values.
+
 2004-08-24  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShOptimizations.cpp: Add copy propagation, clean up a few

@@ -8,6 +8,14 @@
 #include "ShEvaluate.hpp"
 #include "ShContext.hpp"
 
+// Uncomment this to turn on optimizer debugging using dot.
+//#define SH_DEBUG_OPTIMIZER
+
+#ifdef SH_DEBUG_OPTIMIZER
+#include <sstream>
+#include <fstream>
+#endif
+
 namespace {
 
 using namespace SH;
@@ -506,7 +514,6 @@ struct ConstProp : public ShStatementInfo {
       // E.g. texture fetches, stream fetches.
       for (int i = 0; i < stmt->dest.size(); i++) {
         dest.push_back(Cell(Cell::BOTTOM));
-        worklist.push(ValueTracking::Def(stmt, i));
       }
     } else if (opInfo[stmt->op].result_source == ShOperationInfo::LINEAR) {
       // Consider each tuple element in turn.
@@ -514,13 +521,9 @@ struct ConstProp : public ShStatementInfo {
       // Except that sources might be scalar.
       for (int i = 0; i < stmt->dest.size(); i++) {
         bool allconst = true;
-        bool bottom = false;
         for (int s = 0; s < opInfo[stmt->op].arity; s++) {
           if (src[s][idx(i,s)].state != Cell::CONSTANT) {
             allconst = false;
-          }
-          if (src[s][idx(i,s)].state == Cell::BOTTOM) {
-            bottom = true;
           }
         }
         if (allconst) {
@@ -535,24 +538,17 @@ struct ConstProp : public ShStatementInfo {
           evaluate(eval);
           dest.push_back(Cell(Cell::CONSTANT, tmpdest.getValue(0)));
           worklist.push(ValueTracking::Def(stmt, i));
-        } else if (bottom) {
-          dest.push_back(Cell(Cell::BOTTOM));
-          worklist.push(ValueTracking::Def(stmt, i));
         } else {
-          dest.push_back(Cell(Cell::TOP));
+          dest.push_back(Cell(Cell::BOTTOM));
         }
       }      
     } else if (opInfo[stmt->op].result_source == ShOperationInfo::ALL) {
       // build statement ONLY if ALL elements of ALL sources are constant
       bool allconst = true;
-      bool bottom = false;
       for (int s = 0; s < opInfo[stmt->op].arity; s++) {
         for (unsigned int k = 0; k < src[s].size(); k++) {
           if (src[s][k].state != Cell::CONSTANT) {
             allconst = false;
-          }
-          if (src[s][k].state == Cell::BOTTOM) {
-            bottom = true;
           }
         }
       }
@@ -572,14 +568,10 @@ struct ConstProp : public ShStatementInfo {
           dest.push_back(Cell(Cell::CONSTANT, tmpdest.getValue(i)));
           worklist.push(ValueTracking::Def(stmt, i));
         }
-      } else if (bottom) {
+      } else {
         for (int i = 0; i < stmt->dest.size(); i++) {
           dest.push_back(Cell(Cell::BOTTOM));
           worklist.push(ValueTracking::Def(stmt, i));
-        }
-      } else {
-        for (int i = 0; i < stmt->dest.size(); i++) {
-          dest.push_back(Cell(Cell::TOP));
         }
       }
     } else {
@@ -935,7 +927,7 @@ void add_value_tracking(ShProgram& p)
     graph->dfs(iter);
   } while (changed);
 
-#if 0
+#ifdef SH_DEBUG_OPTIMIZER
   SH_DEBUG_PRINT("Dumping Reaching Defs");
   SH_DEBUG_PRINT("defsize = " << r.defsize);
   SH_DEBUG_PRINT("defs.size() = " << r.defs.size());
@@ -961,7 +953,7 @@ void add_value_tracking(ShProgram& p)
   UdDuBuilder builder(r);
   graph->dfs(builder);
 
-#if 0
+#ifdef SH_DEBUG_OPTIMIZER
   UdDuDumper dumper;
   graph->dfs(dumper);
 #endif
@@ -1034,35 +1026,53 @@ void propagate_constants(ShProgram& p)
       continue;
     }
 
-    ConstProp* dcp = def.stmt->template get_info<ConstProp>();
-    if (!dcp) {
-      //SH_DEBUG_PRINT("Statement on worklist does not have CP information?");
-      continue;
-    }
-    
-    for (ValueTracking::DefUseChain::iterator I = vt->uses[def.index].begin(); I != vt->uses[def.index].end(); ++I) {
-      ConstProp* cp = I->stmt->template get_info<ConstProp>();
+
+    for (ValueTracking::DefUseChain::iterator use = vt->uses[def.index].begin();
+         use != vt->uses[def.index].end(); ++use) {
+      ConstProp* cp = use->stmt->template get_info<ConstProp>();
       if (!cp) {
         //SH_DEBUG_PRINT("Use does not have const prop information!");
         continue;
       }
 
-      ConstProp::Cell cell = cp->src[I->source][I->index];
-      ConstProp::Cell destcell = dcp->dest[def.index];
-      if (destcell.state == ConstProp::Cell::CONSTANT
-          && I->stmt->src[I->source].neg()) {
-        destcell.value = -destcell.value;
+      ConstProp::Cell cell = cp->src[use->source][use->index];
+
+      ValueTracking* ut = use->stmt->template get_info<ValueTracking>();
+      if (!ut) {
+        // Should never happen...
+        //SH_DEBUG_PRINT("Statement on worklist does not have VT information?");
+        //SH_DEBUG_PRINT(*def.stmt);
+        continue;
       }
-      ConstProp::Cell new_cell = meet(cell, destcell);
+
+      ConstProp::Cell new_cell = cell;
+      
+      for (ValueTracking::UseDefChain::iterator possdef
+             = ut->defs[use->source][use->index].begin();
+           possdef != ut->defs[use->source][use->index].end(); ++possdef) {
+        ConstProp* dcp = possdef->stmt->template get_info<ConstProp>();
+        if (!dcp) {
+          //SH_DEBUG_PRINT("Statement on worklist does not have CP information?");
+          continue;
+        }
+        
+        ConstProp::Cell destcell = dcp->dest[possdef->index];
+        if (destcell.state == ConstProp::Cell::CONSTANT
+            && use->stmt->src[use->source].neg()) {
+          destcell.value = -destcell.value;
+        }
+        new_cell = meet(destcell, new_cell);
+      }
+      
       if (cell != new_cell) {
-        cp->src[I->source][I->index] = new_cell;
+        cp->src[use->source][use->index] = new_cell;
         cp->updateDest(worklist);
       }
     }
   }
   // Now do something with our glorious newfound information.
 
-#if 0
+#ifdef SH_DEBUG_OPTIMIZER
   DumpConstProp dump;
   graph->dfs(dump);
 #endif
@@ -1088,8 +1098,25 @@ void optimize(ShProgram& p, int level)
 {
   if (level <= 0) return;
 
+#ifdef SH_DEBUG_OPTIMIZER
+  int pass = 0;
+#endif
+  
   bool changed;
   do {
+
+#ifdef SH_DEBUG_OPTIMIZER
+    SH_DEBUG_PRINT("---Optimizer pass " << pass << " BEGIN---");
+    std::ostringstream s;
+    s << "opt_" << pass;
+    std::string filename = s.str() + ".dot";
+    std::ofstream out(filename.c_str());
+    p.node()->ctrlGraph->graphvizDump(out);
+    out.close();
+    std::string cmdline = std::string("dot -Tps -o ") + s.str() + ".ps " + s.str() + ".dot";
+    system(cmdline.c_str());
+#endif
+
     changed = false;
 
     copy_propagate(p, changed);
@@ -1108,6 +1135,11 @@ void optimize(ShProgram& p, int level)
     remove_dead_code(p, changed);
 
     remove_branch_instructions(p);
+
+#ifdef SH_DEBUG_OPTIMIZER
+    SH_DEBUG_PRINT("---Optimizer pass " << pass << " END---");
+    pass++;
+#endif
   } while (changed);
 }
 
