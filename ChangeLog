@@ -1,3 +1,25 @@
+2004-04-04  Michael McCool  <mmccool@uwaterloo.ca>
+
+        * src/ShTexture.hpp: added default sizes in constructors
+	* src/ShWrap.hpp: Hack to add trait wrappers for 1D, 2D, 3D.
+	* src/ShClamping.hpp: Ditto.
+
+	Lack of default constructor was making it hard to allocate
+	arrays of textures.   Adding default sizes worked, but then
+	also had to add default sizes to trait wrappers.   But then,
+	needed different trait wrappers for each number of dimensions...
+	ARRRGGH!
+
+	I have concluded that although this works, this is NOT how we
+	should do this.   I have commited this code for now but I think
+	we should do something else, like make the size a template
+	argument (with 0 indicating a "resizable" texture, with no
+	memory initially allocated).   To discuss...
+
+	Also added some structured comments in various places.   Many
+	classes don't even show up under doxygen since not even the
+	most minimal commenting has been done. 
+
 2004-04-01  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShVariableNode.hpp: Added size() member function to change
