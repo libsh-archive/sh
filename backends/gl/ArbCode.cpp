@@ -960,10 +960,10 @@ void ArbCode::allocParam(const ArbLimits& limits, const ShVariableNodePtr& node)
 
   m_registers[node] = new ArbReg(SH_ARB_REG_PARAM, m_numParams, node->name());
 
-  if (!node->meta("opengl:binding").empty())
+  if (!node->meta("opengl:state").empty())
     {
     m_registers[node]->binding.type = SH_ARB_REG_STATE;
-    m_registers[node]->binding.name = node->meta("opengl:binding");
+    m_registers[node]->binding.name = node->meta("opengl:state");
     } 
   else
     {

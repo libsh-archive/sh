@@ -138,15 +138,15 @@ void init_sh()
   ShColor3f ambient;
 
   // setup OpenGL bindings
-  mv.meta("opengl:binding", "state.matrix.modelview");
+  mv.meta("opengl:state", "state.matrix.modelview");
   mv.meta("opengl:readonly", "true");
-  mvp.meta("opengl:binding", "state.matrix.mvp");
+  mvp.meta("opengl:state", "state.matrix.mvp");
   mvp.meta("opengl:readonly", "true");
-  lightp.meta("opengl:binding", "state.light[0].position");
+  lightp.meta("opengl:state", "state.light[0].position");
   lightp.meta("opengl:readonly", "true");
-  diffuse.meta("opengl:binding", "state.material.diffuse");
+  diffuse.meta("opengl:state", "state.material.diffuse");
   diffuse.meta("opengl:readonly", "true");
-  ambient.meta("opengl:binding", "state.material.ambient");
+  ambient.meta("opengl:state", "state.material.ambient");
   ambient.meta("opengl:readonly", "true");
   
   // construct vertex program

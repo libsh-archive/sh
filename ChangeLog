@@ -1,3 +1,8 @@
+2005-01-11  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbCode.cpp (allocParam): Renamed opengl:binding to
+	opengl:state.
+
 2004-12-20  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
 
 	* examples/binding/*: Small example of using the new
