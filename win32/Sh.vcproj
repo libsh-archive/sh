@@ -153,6 +153,9 @@
 				RelativePath="..\src\ShCastManager.cpp">
 			</File>
 			<File
+				RelativePath="..\src\ShCfgBlock.cpp">
+			</File>
+			<File
 				RelativePath="..\src\ShChannelNode.cpp">
 			</File>
 			<File
@@ -198,13 +201,13 @@
 				RelativePath="..\src\ShImage3D.cpp">
 			</File>
 			<File
+				RelativePath="..\src\ShInfo.cpp">
+			</File>
+			<File
 				RelativePath="..\src\ShInstructions.cpp">
 			</File>
 			<File
 				RelativePath="..\src\ShInternals.cpp">
-			</File>
-			<File
-				RelativePath="..\src\ShIntervalConverter.cpp">
 			</File>
 			<File
 				RelativePath="..\src\ShLinearAllocator.cpp">
@@ -238,6 +241,9 @@
 			</File>
 			<File
 				RelativePath="..\src\ShProgramNode.cpp">
+			</File>
+			<File
+				RelativePath="..\src\ShRecord.cpp">
 			</File>
 			<File
 				RelativePath="..\src\ShStatement.cpp">
@@ -340,6 +346,9 @@
 				RelativePath="..\src\ShCastManager.hpp">
 			</File>
 			<File
+				RelativePath="..\src\ShCfgBlock.hpp">
+			</File>
+			<File
 				RelativePath="..\src\ShChannel.hpp">
 			</File>
 			<File
@@ -359,9 +368,6 @@
 			</File>
 			<File
 				RelativePath="..\src\ShConcreteCTypeOpImpl.hpp">
-			</File>
-			<File
-				RelativePath="..\src\ShConcreteIntervalOpImpl.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShConcreteRegularOpImpl.hpp">
@@ -442,6 +448,12 @@
 				RelativePath="..\src\ShImage3D.hpp">
 			</File>
 			<File
+				RelativePath="..\src\ShInfo.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShInfoImpl.hpp">
+			</File>
+			<File
 				RelativePath="..\src\ShInstructions.hpp">
 			</File>
 			<File
@@ -449,12 +461,6 @@
 			</File>
 			<File
 				RelativePath="..\src\ShInterp.hpp">
-			</File>
-			<File
-				RelativePath="..\src\ShInterval.hpp">
-			</File>
-			<File
-				RelativePath="..\src\ShIntervalImpl.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShLib.hpp">
@@ -494,12 +500,6 @@
 			</File>
 			<File
 				RelativePath="..\src\ShLibGeometryImpl.hpp">
-			</File>
-			<File
-				RelativePath="..\src\ShLibInterval.hpp">
-			</File>
-			<File
-				RelativePath="..\src\ShLibIntervalImpl.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShLibMatrix.hpp">
@@ -623,6 +623,9 @@
 			</File>
 			<File
 				RelativePath="..\src\ShQuaternionImpl.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShRecord.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShRefCount.hpp">
