@@ -1,3 +1,7 @@
+2004-07-12  Gabriel Moreno-Fortuny  <gmoreno@fezzik.cgl.uwaterloo.ca>
+
+	* backends/cpu/CPU.cpp: Added -O2 flag to CPU execution.
+
 2004-07-12  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/cpu/CPU.cpp: Rename the functions starting with __ to

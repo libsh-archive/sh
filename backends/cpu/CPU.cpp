@@ -1999,7 +1999,7 @@ namespace ShCPU {
     if (pid == 0)
       {
       // child
-      execlp("gcc", "gcc", "-g", "-shared", "-o", sofile, ccfile,
+      execlp("gcc", "gcc", "-O2", "-shared", "-o", sofile, ccfile,
              "-L", SH_INSTALL_PREFIX "/lib/sh", "-lshcpu", NULL);
       SH_CPU_DEBUG_PRINT("exec failed (" << errno << ")");
       exit(-1);
