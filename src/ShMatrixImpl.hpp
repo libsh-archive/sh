@@ -381,13 +381,13 @@ bool ShMatrix<Rows, Cols, Binding, T>::internal() const
   }
 
 template<int Rows, int Cols, ShBindingType Binding, typename T>
-void ShMatrix<Rows, Cols, Binding, T>::internal(bool i)
+void ShMatrix<Rows, Cols, Binding, T>::internal(bool internal)
   {
-  ShMeta::internal(i);
+  ShMeta::internal(internal);
   
   for (int i = 0; i < Rows; i++)
     {
-    m_data[i].internal(i);
+    m_data[i].internal(internal);
     }
   }
 

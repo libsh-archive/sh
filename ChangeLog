@@ -1,4 +1,9 @@
-2004-12-14  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+2004-12-20  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShMatrixImpl.hpp (internal):  Fix two  variables  with same
+	name to be different.
+
+2004-12-22  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
 
 	* src/ShMatrix.hpp, src/ShMatrixImpl.hpp: ShMatrix now
 	inherits from ShMeta. Removed the existing name() and internal()
