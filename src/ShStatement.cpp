@@ -33,6 +33,9 @@ const ShOperationInfo opInfo[] = {
   {"POW", 2},
   {"SIN", 1},
   {"SQRT", 1},
+
+  {"NORM", 1},
+  
   {0, 0}
 };
 

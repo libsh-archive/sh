@@ -19,12 +19,12 @@ enum ShOperation {
   SH_OP_MUL, ///< Binary multiplication
   SH_OP_DIV, ///< Binary division
 
-  SH_OP_SLT,
-  SH_OP_SLE,
-  SH_OP_SGT,
-  SH_OP_SGE,
-  SH_OP_SEQ,
-  SH_OP_SNE,
+  SH_OP_SLT, ///< Set less than
+  SH_OP_SLE, ///< Set less than or equal
+  SH_OP_SGT, ///< Set greater than
+  SH_OP_SGE, ///< Set greater than or equal
+  SH_OP_SEQ, ///< Set equal
+  SH_OP_SNE, ///< Set not equal
   
   SH_OP_ABS, ///< Unary absolute value
   SH_OP_ACOS, ///< Unary arccosine (result between -pi/2 and pi/2)
@@ -38,6 +38,8 @@ enum ShOperation {
   SH_OP_POW, ///< Binary power
   SH_OP_SIN, ///< Unary sine function
   SH_OP_SQRT, ///< Unary square root
+
+  SH_OP_NORM, ///< Normalize vector
   // TODO: finish these
 };
 

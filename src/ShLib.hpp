@@ -294,7 +294,7 @@ ShVariableN<N, T> operator!=(const ShVariableN<N, T>& left, const ShVariableN<1,
 
 
 
-//--- Library calls "ported" from Cg
+//--- Mathematics Library
 
 /// Absolute value
 template<int N, typename T>
@@ -452,6 +452,29 @@ ShVariableN<N, T> sqrt(const ShVariableN<N, T>& var)
   } else {
     ShAttrib<N, SH_VAR_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_SQRT, var);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
+
+// Geometrical operations
+
+template<int N, typename T>
+ShVariableN<N, T> normalize(const ShVariableN<N, T>& var)
+{
+  if (!ShEnvironment::insideShader) {
+    ShAttrib1f sizeVar = sqrt(dot(var, var));
+    double size;
+    sizeVar.getValues(&size);
+    assert(var.hasValues());
+    T vals[N];
+    var.getValues(vals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = vals[i]/size;
+    return ShConstant<N, T>(result);
+  } else {
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, SH_OP_NORM, var);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     return t;
   }

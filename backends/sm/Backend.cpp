@@ -63,23 +63,6 @@ void BackendCode::upload()
   for (int i = 0; i < m_maxCR; i++) m_cR[i] = smConstantReg(i);
 
 
-  // Initialize constants
-  for (RegMap::const_iterator I = m_registers.begin(); I != m_registers.end(); ++I) {
-    ShVariableNodePtr node = I->first;
-    SmRegister reg = I->second;
-    if (node->hasValues()) {
-      float values[4];
-      int i;
-      for (i = 0; i < node->size(); i++) {
-        values[i] = node->getValue(i);
-      }
-      for (; i < 4; i++) {
-        values[i] = 0.0;
-      }
-      smModConstReg(reg.index, smTuple(values[0], values[1], values[2], values[3]));
-    }
-  }
-
   for (SmInstList::const_iterator I = m_instructions.begin(); I != m_instructions.end();
        ++I) {
     if (I->src1.null()) {
@@ -98,16 +81,28 @@ void BackendCode::upload()
 
 void BackendCode::bind()
 {
-  // TODO: Don't recompile. Instead, just load the constant registers
-  
-  // This is dirty but for now necessary, until SM has proper
-  // constant reloading semantics.
-  upload();
-
   SH_DEBUG_PRINT("Binding shader");
   
   smBindShader(m_smShader);
   SH::ShEnvironment::boundShader[m_shader->kind()] = m_shader;
+
+  // Initialize constants
+  for (RegMap::const_iterator I = m_registers.begin(); I != m_registers.end(); ++I) {
+    ShVariableNodePtr node = I->first;
+    SmRegister reg = I->second;
+    if (node->hasValues()) {
+      float values[4];
+      int i;
+      for (i = 0; i < node->size(); i++) {
+        values[i] = node->getValue(i);
+      }
+      for (; i < 4; i++) {
+        values[i] = 0.0;
+      }
+      smModLocalConstant(m_shader->kind(), reg.index, smTuple(values[0], values[1], values[2], values[3]));
+    }
+  }
+
 }
 
 std::string BackendCode::printVar(const ShVariable& var)
@@ -138,10 +133,18 @@ std::string BackendCode::printVar(const ShVariable& var)
 void BackendCode::updateUniform(const ShVariableNodePtr& uniform)
 {
   if (!haveReg(uniform)) return;
-  
-  // TODO: Just change the particular register.
 
-  bind();
+  SmRegister reg = getReg(uniform);
+  
+  float values[4];
+  int i;
+  for (i = 0; i < uniform->size(); i++) {
+    values[i] = uniform->getValue(i);
+  }
+  for (; i < 4; i++) {
+    values[i] = 0.0;
+  }
+  smModLocalConstant(m_shader->kind(), reg.index, smTuple(values[0], values[1], values[2], values[3]));
 }
 
 std::ostream& BackendCode::print(std::ostream& out)
@@ -192,7 +195,7 @@ std::ostream& BackendCode::print(std::ostream& out)
     ShVariableNodePtr node = I->first;
     SmRegister reg = I->second;
     if (node->hasValues()) {
-      out << "smModConstReg(" << reg.index << ", smTuple(";
+      out << "smModLocalConstant(" << m_shader->kind() << ", " << reg.index << ", smTuple(";
       for (int i = 0; i < node->size(); i++) {
         if (i) out << ", ";
         out << node->getValue(i);
@@ -314,6 +317,9 @@ void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
         m_instructions.push_back(SmInstruction(OP_RCP, stmt.dest, rsq));
         break;
       }
+    case SH_OP_NORM:
+      m_instructions.push_back(SmInstruction(OP_NORM, stmt.dest, stmt.src1));
+      break;
     default:
       // TODO: other ops
       SH_DEBUG_WARN(opInfo[stmt.op].name << " not implement in SM backend");

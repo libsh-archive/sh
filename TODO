@@ -2,7 +2,7 @@ MATRICES:
  X operator()() extracts submatrix
  X operator[] extracts single row
  X operator{+,-,*,/}=
- - add linear algebra
+ X add linear algebra
 
 SMALL TASKS:
  X have updating semantics for uniforms
@@ -30,6 +30,7 @@ SMALL TASKS:
  - replace assert() with exceptions/error function
  - add operator*(T) and similar for division to Sh{Lib,Attrib,Matrix}.hpp
  - add operator[] to ShAttrib also to do one-element swizzle.
+ - use a ShVariableKind instead of an int template parameter in ShAttrib and ShMatrix
 
 MEDIUM TASKS:
  - port more of the ShLib calls to the new model.
@@ -43,7 +44,7 @@ MEDIUM TASKS:
 LARGE TASKS:
  X finish the parser
  - begin the optimizer
- / matrices
+ X matrices
  - textures
  - more backends
 
@@ -64,11 +65,12 @@ OPERATIONS:
 |X|X|X| sin
 |X|X|X| cos
 |X|X|X| <, <=, >, >=, ==, !=
+| |X| | ceil
 | | | | exp
 | | | | log
 | | | | fmod
 | | | | lerp
 | | | | rcp (?)
 | | | | rsqrt
-| |X| | ceil
+|X|X|X| norm
 +-+-+-+
