@@ -1,5 +1,5 @@
 #include "RDSBackend.hpp"
-//#include "Pass.hpp"
+#include "Pass.hpp"
 #include "../gl/Arb.hpp"
 #include "../gl/GlTextures.hpp"
 #include "../gl/GLXPBufferStreams.hpp"
@@ -35,6 +35,16 @@ void RDSBackend::compare(SH::ShProgramNodePtr p) {
 
 }
 
+void RDSBackend::time_rds(SH::ShProgramNodeCPtr p) {
+  RDS *rds = new RDS(p->clone());
+  rds->force_graph_limits();
+  Timer t;
+	rds->rds();
+  std::cout << "RDS took: " << t.diff() << " ns" << std::endl;
+  //rds->print_partition();
+  delete rds;
+}
+
 SH::ShBackendCodePtr RDSBackend::generateCode(const std::string& target,
                                               const SH::ShProgramNodeCPtr& shader)
 {
@@ -52,6 +62,9 @@ SH::ShBackendCodePtr RDSBackend::generateCode(const std::string& target,
   trans.convertInputOutput(); 
   trans.convertTextureLookups();
   */
+#ifdef RDS_DEMO
+  time_rds(shader->clone());
+#endif
   return m_code->generate(target,shader,m_texture);
 }
 
@@ -63,12 +76,24 @@ void RDSBackend::execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& des
   compare(program->clone());
 #endif
   //m_stream->execute(program,dest);
-/*  program->ctrlGraph->print(std::cout,0);
+#ifdef RDS_DEMO
+  std::cout << "RDS Demo program trace" << std::endl << std::endl;
+  program->ctrlGraph->print(std::cout,0);
+  std::cout << "RDS Demo program interface" << std::endl << std::endl;
   std::cout << program->describe_interface() << std::endl;
+#endif
+
   RDS rds(program->clone());
+  rds.force_fake_limits();
   rds.rds();
-  Pass p(rds.get_pdt()->get_root(), "gpu:stream");
-  m_stream->execute(p.get_prog(),dest);*/
+  Schedule s(rds.m_passes, rds.m_shared_vars);
+  
+  for (std::vector<Pass*>::iterator I = s.get_passes()->begin(); I != s.get_passes()->end(); ++I) {
+    std::cout << "Executing pass " << (*I)->id << std::endl;
+    std::cout << (*I)->get_prog()->describe_interface() << std::endl;
+    (*I)->get_bb()->print(std::cout,2);
+    m_stream->execute((*I)->get_prog(),dest);
+  }
 }
 
 RDSBackend::RDSBackend(void) {

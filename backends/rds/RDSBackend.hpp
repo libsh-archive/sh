@@ -26,6 +26,7 @@ public:
 
   void RDSBackend::dump(RDS rds, char* complete, char* partitioned);
   void RDSBackend::compare(SH::ShProgramNodePtr p);
+  void RDSBackend::time_rds(SH::ShProgramNodeCPtr p);
 private:
   shgl::CodeStrategy* m_code;
   shgl::TextureStrategy* m_texture;

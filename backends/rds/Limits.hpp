@@ -43,6 +43,13 @@ public:
 
 };
 
+class GraphLimits : public Limits {
+public:
+
+  GraphLimits();
+
+};
+
 }
 
 #endif

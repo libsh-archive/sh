@@ -6,8 +6,6 @@
 #include <set>
 #include <map>
 
-#define RDS_DEBUG
-
 #ifdef RDS_DEBUG
 #include <iostream>
 #endif
@@ -18,17 +16,157 @@ Pass::Pass(DAGNode* node, std::string target)
 {
   m_prog = new ShProgramNode(target);
   ShCtrlGraphNodePtr start = new ShCtrlGraphNode();
-  start->block = new ShBasicBlock();
-  start->block->m_statements = node->get_statements();
+  m_bb = start->block = new ShBasicBlock();
+  m_bb->m_statements = node->get_statements();
 #ifdef RDS_DEBUG
-  start->block->print(std::cout,2);
+  m_bb->print(std::cout,2);
   node->cuts();
 #endif
   m_prog->ctrlGraph = new ShCtrlGraph(start, start);
-  alloc_shared_mem(node, start->block);
+  this->target = new ShStream();
 }
 
-void Pass::alloc_shared_mem(DAGNode* dag,ShBasicBlockPtr bb) {
+void Schedule::make_channel(ShVariableNodePtr v)
+{
+  if (channels.find(v) != channels.end()) return;
+
+  channels[v] = new ShChannelNode(v->specialType(),v->size(),v->valueType());
+#ifdef RDS_DEBUG
+  std::cout << "Made channel for " << v->name() << std::endl;
+#endif
+}
+
+Schedule::Schedule(RDS::PassVector p, RDS::VarVector v)
+{
+  for (RDS::PassVector::iterator I = p.begin(); I != p.end(); ++I) {
+    m_passes.push_back(new Pass(*I,"gpu:stream"));
+  }
+  for (RDS::VarVector::iterator I = v.begin(); I != v.end(); ++I) {
+    make_channel( (*I)->node().object() );
+  }
+  int i = 0;
+  for (std::vector<Pass*>::iterator I = m_passes.begin(); I != m_passes.end(); ++I) {
+    (*I)->id = ++i;
+    fix_instructions( *I );
+  }
+
+}
+
+void Schedule::fix_instructions(Pass* p)
+{
+  ShContext::current()->enter(p->get_prog());
+  ShBasicBlockPtr bb = p->get_bb();
+
+  for (ShBasicBlock::ShStmtList::iterator I = bb->begin(); I != bb->end(); ++I) {
+    std::set<ShVariableNodePtr> temp_inputs, temp_outputs;
+    temp_inputs.clear(); temp_outputs.clear();
+
+    if (I->dest.node()) {
+      ShVariableNode* vnode = I->dest.node().object();
+      if (vnode->kind() == SH_TEMP && temp_outputs.find(vnode) == temp_outputs.end()
+          && channels.find(vnode) != channels.end() ) {
+        temp_outputs.insert(vnode); 
+#ifdef RDS_DEBUG
+        std::cout << "Shared variable " << vnode->name() 
+                  << " defined in pass " << p->id << std::endl;
+#endif
+      }
+    }
+
+    for (int i = 0; i < opInfo[I->op].arity; i++) {
+      if (!I->src[i].node()) continue;
+      ShVariableNodePtr vnode = I->src[i].node().object();
+
+      if (vnode->kind() == SH_TEMP && temp_inputs.find(vnode) == temp_inputs.end()
+          && channels.find(vnode) != channels.end() ) {
+        temp_inputs.insert(vnode); 
+#ifdef RDS_DEBUG
+        std::cout << "Shared variable " << vnode->name() 
+                  << " used in pass " << p->id << std::endl;
+#endif
+      }
+    }
+
+    for (std::set<ShVariableNodePtr>::const_iterator I = temp_inputs.begin();
+         I != temp_inputs.end(); ++I) {
+#ifdef RDS_DEBUG
+      std::cout << "Trying to fix " << (*I)->name() << std::endl;
+#endif
+      ShVariable *dst = new ShVariable(*I);
+      ShVariable *src = new ShVariable(channels[*I]);
+      bb->prependStatement(ShStatement(*dst, SH_OP_FETCH, *src));
+#ifdef RDS_DEBUG
+        std::cout << "Added fetch " << dst->name() << " from " << src->name() << std::endl;
+#endif
+    }
+
+    for (std::set<ShVariableNodePtr>::const_iterator I = temp_outputs.begin();
+         I != temp_outputs.end(); ++I) {
+#ifdef RDS_DEBUG
+      std::cout << "Trying to fix " << (*I)->name() << std::endl;
+#endif
+      ShVariable *src = new ShVariable(*I);
+      ShVariableNodePtr outnode = new ShVariableNode(SH_OUTPUT, (*I)->size(), (*I)->valueType());
+      ShVariable *dst = new ShVariable(outnode);
+      bb->addStatement(ShStatement(*dst, SH_OP_ASN, *src));
+      p->target->append(channels[*I]);
+#ifdef RDS_DEBUG
+        std::cout << "Added " << (*I)->name() << " to stream" << std::endl;
+#endif
+    }
+
+  }
+  p->get_prog()->collectVariables();
+  
+  ShContext::current()->exit();
+}
+
+
+/* Dead code lies below */
+
+/*
+void Schedule::mk_def_use()
+{
+  for (std::vector<Pass*>::iterator P = m_passes.begin(); P != m_passes.end(); ++P) {
+    ShBasicBlockPtr bb = (*P)->get_bb();
+    for (ShBasicBlock::ShStmtList::iterator I = bb->begin(); I != bb->end(); ++I) {
+
+      if (I->dest.node()) {
+        ShVariableNodePtr vnode = I->dest.node().object();
+        if (def.find(vnode) == def.end()) {
+          def[vnode] = *P;
+        }
+        else {
+          def[vnode] = NULL;
+#ifdef RDS_DEBUG
+          std::cout << vnode->name() << " defined in multiple passes" << std::endl;
+#endif
+        }
+
+        if (use.find(vnode) != use.end() && (use[vnode] != *P))
+          make_channel(vnode);
+      }
+
+      for (int i = 0; i < opInfo[I->op].arity; i++) {
+        if (!I->src[i].node()) continue;
+        ShVariableNodePtr vnode = I->src[i].node().object();
+        if (use.find(vnode) == use.end())
+          use[vnode] = *P;
+        else {
+          use[vnode] = NULL;
+#ifdef RDS_DEBUG
+          std::cout << vnode->name() << " used in multiple passes" << std::endl;
+#endif
+        }
+
+        if (def.find(vnode) != def.end() && (def[vnode] != *P))
+          make_channel(vnode);
+      }
+    }
+  }
+}
+*/
+void Pass::alloc_shared_mem(DAGNode* dag) {
 
   std::set<ShVariableNode*> handled_output;
   std::set<ShVariableNode*> handled_input;
@@ -38,8 +176,8 @@ void Pass::alloc_shared_mem(DAGNode* dag,ShBasicBlockPtr bb) {
   
   ShContext::current()->enter(m_prog);
     
-  for (ShBasicBlock::ShStmtList::iterator I = bb->begin();
-       I != bb->end(); ++I) {
+  for (ShBasicBlock::ShStmtList::iterator I = m_bb->begin();
+       I != m_bb->end(); ++I) {
     if (I->dest.node()) {
       ShVariableNode* vnode = I->dest.node().object();
       if (vnode->kind() == SH_TEMP
@@ -102,11 +240,11 @@ void Pass::alloc_shared_mem(DAGNode* dag,ShBasicBlockPtr bb) {
     ShChannelNodePtr str = new ShChannelNode(I->first->specialType(),
                                              dst.size(),dst.valueType());
     ShVariable src(str);
-    bb->prependStatement(ShStatement(dst, SH_OP_FETCH, src));
+    m_bb->prependStatement(ShStatement(dst, SH_OP_FETCH, src));
   }
   /*
   for (TempList::const_iterator I = output_temps.begin(); I != output_temps.end(); ++I){
-    bb->addStatement(ShStatement(ShVariable(I->second), SH_OP_ASN,
+    m_bb->addStatement(ShStatement(ShVariable(I->second), SH_OP_ASN,
                                               ShVariable(I->first)));
   }*/
 
@@ -125,7 +263,7 @@ void Pass::alloc_shared_mem(DAGNode* dag,ShBasicBlockPtr bb) {
   for (int i=0; i<I.size(); ++i)
     std::cout << "Input " << I[i]->name() << std::endl;*/
   std::cout << m_prog->describe_interface() << std::endl;
-  bb->print(std::cout,2);
+  m_bb->print(std::cout,2);
   /*
   for (ShProgramNode::VarList::const_iterator I = m_prog->inputs_begin(); 
        I != m_prog->inputs_end(); ++I) {

@@ -35,6 +35,10 @@ public:
 		set_partition();
 	};
 
+  void force_fake_limits();
+  void force_graph_limits();
+  void force_real_limits();
+
 	// brute force
 	void full_search();
   
@@ -42,6 +46,10 @@ public:
 	PDomTree::PDomTree *get_pdt() {
 		return m_pdt;
 	}
+
+  typedef std::vector<DAGNode::DAGNode*> PassVector;	
+  PassVector get_passes() { return m_passes; }
+  
 
 	void print_partitions(char* filename);
 	void print_partition();
