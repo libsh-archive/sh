@@ -29,7 +29,7 @@
 
 #include <utility>
 
-//#define SH_REFCOUNT_DEBUGGING
+// #define SH_REFCOUNT_DEBUGGING
 
 #ifdef SH_REFCOUNT_DEBUGGING
 #include <iostream>

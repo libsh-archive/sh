@@ -33,10 +33,12 @@ ShRefCount<T>::ShRefCount(const ShRefCount<T>& other)
   : m_object(other.m_object)
 {
 #ifdef SH_REFCOUNT_DEBUGGING
+  SH_DEBUG_ASSERT((unsigned long)m_object < 0xb0000000L);
   SH_RCDEBUG_BLUE;
   std::cerr << "[copy] " << std::setw(10) << other.m_object << " <" << (other.m_object ? typeid(*(other.m_object)).name() : "n/a") << ">" << std::endl;
   SH_RCDEBUG_NORMAL;
 #endif
+
 
   if (m_object) m_object->acquireRef();
 }
@@ -48,8 +50,9 @@ ShRefCount<T>::ShRefCount(const ShRefCount<S>& other)
 {
 #ifdef SH_REFCOUNT_DEBUGGING
   SH_RCDEBUG_BLUE;
-  std::cerr << "[copy] " << std::setw(10) << other.object()
-            << " <" << (other.object() ? typeid(*(other.m_object)).name() : "n/a") << ">"
+  std::cerr << "[cpct] " << std::setw(10) << other.object()
+            << " <" << (other.object() ? typeid(*(other.object())).name() : "n/a") << ">"
+            << " -> " << typeid(T).name()
             << std::endl;
   SH_RCDEBUG_NORMAL;
 #endif
@@ -185,6 +188,11 @@ template<typename T>
 void ShRefCount<T>::releaseRef()
 {
   if (m_object && m_object->releaseRef() == 0) {
+#ifdef SH_REFCOUNT_DEBUGGING
+    SH_RCDEBUG_RED;
+    std::cerr << "[dstr] " << std::setw(10) << m_object << " <" << typeid(*m_object).name() << ">" << std::endl;
+    SH_RCDEBUG_NORMAL;
+#endif
     delete m_object;
 #ifdef SH_REFCOUNT_DEBUGGING
     m_object = 0;
@@ -195,18 +203,37 @@ void ShRefCount<T>::releaseRef()
 template<typename T, typename S>
 ShRefCount<T> shref_static_cast(const ShRefCount<S>& other)
 {
+#ifdef SH_REFCOUNT_DEBUGGING
+  SH_RCDEBUG_BLUE;
+  std::cerr << "[csts] " << std::setw(10) << other.object() << " <" << (other.object() ? typeid(*(other.object())).name() : "n/a") << ">"
+	    << " -> " << typeid(T).name() << std::endl;
+  SH_RCDEBUG_NORMAL;
+#endif
+
   return ShRefCount<T>(static_cast<T*>(other.object()));
 }
 
 template<typename T, typename S>
 ShRefCount<T> shref_dynamic_cast(const ShRefCount<S>& other)
 {
+#ifdef SH_REFCOUNT_DEBUGGING
+  SH_RCDEBUG_BLUE;
+  std::cerr << "[cstd] " << std::setw(10) << other.object() << " <" << (other.object() ? typeid(*(other.object())).name() : "n/a") << ">"
+	    << " -> " << typeid(T).name() << std::endl;
+  SH_RCDEBUG_NORMAL;
+#endif
   return ShRefCount<T>(dynamic_cast<T*>(other.object()));
 }
 
 template<typename T, typename S>
 ShRefCount<T> shref_const_cast(const ShRefCount<S>& other)
 {
+#ifdef SH_REFCOUNT_DEBUGGING
+  SH_RCDEBUG_BLUE;
+  std::cerr << "[cstc] " << std::setw(10) << other.object() << " <" << (other.object() ? typeid(*(other.object())).name() : "n/a") << ">"
+	    << " -> " << typeid(T).name() << std::endl;
+  SH_RCDEBUG_NORMAL;
+#endif
   return ShRefCount<T>(const_cast<T*>(other.object()));
 }
 

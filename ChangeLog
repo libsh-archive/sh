@@ -1,3 +1,8 @@
+2004-03-10  Tiberiu Stefan Popa  <stpopa@pentane.math.uwaterloo.ca>
+
+	* src/ShStream.cpp (combine): Actually return the stream that we
+	create.
+
 2004-03-04  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShMemory.hpp (ShStorage): Add a default constructor that

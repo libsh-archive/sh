@@ -92,6 +92,7 @@ ShStream combine(const ShStream& left, const ShStream& right)
        ++I) {
     stream.append(*I);
   }
+  return stream;
 }
 
 ShStream operator&(const ShStream& left, const ShStream& right)
