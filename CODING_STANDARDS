@@ -43,7 +43,8 @@ Here's what you might put in your ~/.emacs:
   )
 
   (setq-default cc-other-file-alist '(
+                          ("Impl\\.hpp$" (".hpp"))
                           ("\\.cpp$" (".hpp" ".h"))
-                          ("\\.hpp$" (".cpp"))
+                          ("\\.hpp$" ("Impl.hpp" ".cpp"))
                           ("\\.h$" (".cpp"))
                           ))
