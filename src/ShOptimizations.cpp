@@ -734,7 +734,7 @@ struct ConstProp : public ShStatementInfo {
 
     Cell(State state, ConstProp* cp, int index) 
       : state(state), value(0.0),
-        uniform(Value::lookup(cp), cp->stmt->dest.swizzle()[index], false)
+        uniform(Value::lookup(cp), index, false)
     {
     }
 
@@ -996,7 +996,10 @@ struct FinishConstProp
 
               if (value->type == ConstProp::Value::NODE) continue;
 
-              ShSwizzle swizzle(value->destsize, I->src[s].size(), &(*indices.begin()));
+              SH_DEBUG_PRINT("Lifting uniform with " << indices.size() << " indices");
+              
+              ShSwizzle swizzle(value->destsize, indices.size(), &(*indices.begin()));
+              SH_DEBUG_PRINT("Swizzle = " << swizzle);
               // Build a uniform to represent this computation.
               ShVariableNodePtr node = build_uniform(value, uniform);
               I->src[s] = ShVariable(node, swizzle, neg);
@@ -1041,6 +1044,9 @@ struct FinishConstProp
     }
 
     node->attach(prg.node());
+
+    value->type = ConstProp::Value::NODE;
+    value->node = node;
     
     return node;
   }
@@ -1071,7 +1077,9 @@ struct FinishConstProp
     ConstProp::Value* value = ConstProp::Value::get(v);
     
     if (value->type == ConstProp::Value::NODE) {
-      ShSwizzle swizzle(value->node->size(), indices.size(), &*(indices.begin()));
+      SH_DEBUG_PRINT("compute: Returning simple uniform with " << indices.size() << " indices");
+      ShSwizzle swizzle(value->node->size(), indices.size(), &*indices.begin());
+      SH_DEBUG_PRINT("compute: Swizzle = " << swizzle);
       return ShVariable(value->node, swizzle, neg);
     }
     if (value->type == ConstProp::Value::STMT) {
@@ -1083,7 +1091,9 @@ struct FinishConstProp
       }
 
       ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
-      ShSwizzle swizzle(node->size(), indices.size(), &*(indices.begin()));
+      SH_DEBUG_PRINT("compute: Returning computed uniform with " << indices.size() << " indices");
+      ShSwizzle swizzle(node->size(), indices.size(), &*indices.begin());
+      SH_DEBUG_PRINT("compute: Swizzle = " << swizzle);
       return ShVariable(node, swizzle, neg);
     }
 
@@ -1350,7 +1360,7 @@ void propagate_constants(ShProgram& p)
 
   ConstWorkList worklist;
 
-  ConstProp::Value::clear();
+  //ConstProp::Value::clear();
   
   InitConstProp init(worklist);
   graph->dfs(init);
@@ -1399,6 +1409,10 @@ void propagate_constants(ShProgram& p)
             && use->stmt->src[use->source].neg()) {
           destcell.value = -destcell.value;
         }
+        if (destcell.state == ConstProp::Cell::UNIFORM
+            && use->stmt->src[use->source].neg()) {
+          destcell.uniform.neg = !destcell.uniform.neg;
+        }
         new_cell = meet(destcell, new_cell);
       }
       
@@ -1442,6 +1456,8 @@ void optimize(ShProgram& p, int level)
 #ifdef SH_DEBUG_OPTIMIZER
   int pass = 0;
 #endif
+
+  SH_DEBUG_PRINT("Begin optimization for program with target " << p.node()->target());
   
   bool changed;
   do {

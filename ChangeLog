@@ -1,3 +1,11 @@
+2004-08-28  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp (Cell::Cell): Don't use the swizzle to
+	make the index, the swizzling is represented implicitly when
+	setting up a statement-based cell.
+	(propagate_constants): Set negatives appropriately when
+	propagating uniforms.
+
 2004-08-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShOptimizations.cpp: Added most of the uniform lifting code.
