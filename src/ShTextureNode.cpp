@@ -28,9 +28,9 @@
 
 namespace SH {
 
-ShTextureNode::ShTextureNode(ShTextureDims dims, int width, int height, int elements)
+ShTextureNode::ShTextureNode(ShTextureDims dims, int width, int height, int depth, int elements)
   : ShVariableNode(SH_VAR_TEXTURE, 1), m_dims(dims),
-    m_width(width), m_height(height), m_elements(elements),
+    m_width(width), m_height(height), m_depth(depth), m_elements(elements),
     m_data(new float[width * height * elements])
 {
 }
@@ -53,6 +53,11 @@ int ShTextureNode::width() const
 int ShTextureNode::height() const
 {
   return m_height;
+}
+
+int ShTextureNode::depth() const
+{
+  return m_depth;
 }
 
 int ShTextureNode::elements() const

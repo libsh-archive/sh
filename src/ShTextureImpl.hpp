@@ -44,24 +44,7 @@ ShTexture<T>::ShTexture(ShTextureNodePtr node)
 }
 
 template<typename T>
-ShTexture2D<T>::ShTexture2D(int width, int height)
-  : ShTexture<T>(new ShTextureNode(SH_TEXTURE_2D, width, height, T().size()))
-{
-}
-
-template<typename T>
-T ShTexture2D<T>::operator()(const ShVariableN<2, double>& coords)
-{
-  T t;
-  ShVariable texVar(m_node);
-  ShStatement stmt(t, texVar, SH_OP_TEX, coords);
-  
-  ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
-  return t;
-}
-
-template<typename T>
-void ShTexture2D<T>::load(const ShImage& image)
+void ShTexture<T>::loadImage(const ShImage& image)
 {
   SH_DEBUG_PRINT("Loading image");
   
@@ -88,6 +71,52 @@ void ShTexture2D<T>::load(const ShImage& image)
     assert(m_node->elements() == image.depth());
     m_node->setData(image.data());
   }
+}
+
+template<typename T>
+ShTexture1D<T>::ShTexture1D(int length)
+  : ShTexture<T>(new ShTextureNode(SH_TEXTURE_1D, length, 1, 1, T().size()))
+{
+}
+
+template<typename T>
+T ShTexture1D<T>::operator()(const ShVariableN<1, double>& coords)
+{
+  T t;
+  ShVariable texVar(m_node);
+  ShStatement stmt(t, texVar, SH_OP_TEX, coords);
+  
+  ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+  return t;
+}
+
+template<typename T>
+void ShTexture1D<T>::load(const ShImage& image)
+{
+  loadImage(image);
+}
+
+template<typename T>
+ShTexture2D<T>::ShTexture2D(int width, int height)
+  : ShTexture<T>(new ShTextureNode(SH_TEXTURE_2D, width, height, 1, T().size()))
+{
+}
+
+template<typename T>
+T ShTexture2D<T>::operator()(const ShVariableN<2, double>& coords)
+{
+  T t;
+  ShVariable texVar(m_node);
+  ShStatement stmt(t, texVar, SH_OP_TEX, coords);
+  
+  ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+  return t;
+}
+
+template<typename T>
+void ShTexture2D<T>::load(const ShImage& image)
+{
+  loadImage(image);
 }
 
 }

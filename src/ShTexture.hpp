@@ -42,14 +42,26 @@ protected:
   ShTexture(ShTextureNodePtr node);
   
   ShTextureNodePtr m_node;
+
+  void loadImage(const ShImage& image);
 };  
+
+template<typename T>
+class ShTexture1D : public ShTexture<T> {
+public:
+  ShTexture1D(int length);
+
+  /// Lookup a value, coords being in [0,1]
+  T operator()(const ShVariableN<1, double>& coords);
+
+  void load(const ShImage& image);
+};
 
 template<typename T>
 class ShTexture2D : public ShTexture<T> {
 public:
   ShTexture2D(int width, int height);
 
-  // TODO: Use some sort of TexCoord class instead?
   /// Lookup a value, coords being in [0,1] x [0,1]
   T operator()(const ShVariableN<2, double>& coords);
 

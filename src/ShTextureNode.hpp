@@ -41,13 +41,14 @@ enum ShTextureDims {
 
 class ShTextureNode : public ShVariableNode {
 public:
-  ShTextureNode(ShTextureDims dims, int width, int height, int elements);
+  ShTextureNode(ShTextureDims dims, int width, int height, int depth, int elements);
   virtual ~ShTextureNode();
   
   ShTextureDims dims() const;
 
   int width() const;
   int height() const;
+  int depth() const;
   int elements() const;
 
   void setData(const float* data);
@@ -56,7 +57,7 @@ public:
   
 private:
   ShTextureDims m_dims;
-  int m_width, m_height;
+  int m_width, m_height, m_depth;
   int m_elements;
 
   float* m_data;

@@ -573,9 +573,23 @@ void ArbCode::bind()
       format = 0;
       break;
     }
-    
-    glTexImage2D(type, 0, texture->elements(), texture->width(), texture->height(), 0, format, GL_FLOAT,
-                 texture->data());
+
+    switch(type) {
+    case GL_TEXTURE_1D:
+      glTexImage1D(type, 0, texture->elements(), texture->width(), 0, format, GL_FLOAT, texture->data());
+      break;
+    case GL_TEXTURE_2D:
+      glTexImage2D(type, 0, texture->elements(), texture->width(), texture->height(), 0, format, GL_FLOAT,
+                   texture->data());
+      break;
+    case GL_TEXTURE_3D:
+      glTexImage3D(type, 0, texture->elements(), texture->width(), texture->height(), texture->depth(),
+                   0, format, GL_FLOAT, texture->data());
+      break;
+    default:
+      SH_DEBUG_WARN("Texture type not handled by ARB backend");
+      break;
+    }
     int error = glGetError();
     if (error != GL_NO_ERROR) {
       SH_DEBUG_ERROR("Error loading texture: " << error);
