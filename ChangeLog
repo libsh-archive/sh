@@ -1,5 +1,14 @@
 2005-01-11  Francois Marier  <francois@serioushack.com>
 
+	* test/regress/test.cpp: The default backend is set to the
+	SH_REGRESS_BACKEND environment variable if it exists. It's still
+	possible to override this default on the command line.
+
+	* test/regress/Makefile.am (AM_CXXFLAGS): Added a checkall target
+	to run "make check" on all backends.
+	
+2005-01-11  Francois Marier  <francois@serioushack.com>
+
 	* backends/gl/ArbCode.cpp (allocParam): Renamed opengl:binding to
 	opengl:state.
 
@@ -60,7 +69,7 @@
 	* src/ShFractionImpl.hpp (cbrt, exp, exp2, exp10):
 	Fixed bug. 
 
-2004-11-28  Bryan Chan <b8chan@cgl.uwaterloo.ca
+2004-11-28  Bryan Chan <b8chan@cgl.uwaterloo.ca>
 	* src/ShUtility.hpp (MatchTemplateType, TemplateParamterType):
 	Added some mildly useful template voodoo. 
 

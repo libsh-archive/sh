@@ -4,8 +4,11 @@ AM_LDFLAGS = -g -L../../src
 LDADD = -lsh -lGL
 TESTS = add add_im cbrt cmul cos csum div mul rnd sin tex
 check_PROGRAMS = $(TESTS)
-BACKENDS = arb gcc host
+BACKENDS = arb cc host
 EXTRA_DIST = shtest.py common.py
+
+checkall:
+	for i in $(BACKENDS) ; do SH_REGRESS_BACKEND=$$i $(MAKE) check ; done
 
 clean:
 	rm -f *.log
