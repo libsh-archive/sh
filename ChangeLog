@@ -1,3 +1,14 @@
+2005-03-25  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibClampImpl.hpp: Add scalar version of mod.
+
+	* src/ShLibArithImpl.hpp: Add scalar version of pow.
+
+	* src/ShInstructions.cpp: Enable scalar versions of mod and pow.
+	
+	* backends/gl/GlslEmit.cpp: Fixed cond so that it behaves
+	according to the book when a < 0.
+
 2005-03-23  Francois Marier  <francois@serioushack.com>
 
 	* src/ShLibMiscImpl.hpp, ShLibMisc.hpp (sort, groupsort): Add
