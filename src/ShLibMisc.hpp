@@ -39,8 +39,14 @@ ShGeneric<M, float> fillcast(float a);
 template<int M, int N, typename T> 
 ShGeneric<M+N, T> join(const ShGeneric<M, T>& a, const ShGeneric<N, T> &b);
 
-/** Fragment killing. Only for fragment programs.
- * Kills the current fragment if any(c) > 0.
+/** Fragment discard. Only for fragment programs.
+ * Discards the current fragment if any(c) > 0.
+ */
+template<int N, typename T>
+void discard(const ShGeneric<N, T>& c);
+
+/** Fragment killing.
+ * @deprecated Use discard instead.
  */
 template<int N, typename T>
 void kill(const ShGeneric<N, T>& c);

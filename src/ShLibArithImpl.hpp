@@ -163,6 +163,12 @@ ShGeneric<N, T> exp10(const ShGeneric<N, T>& var)
 }
 
 template<int N, typename T>
+ShGeneric<N, T> expm1(const ShGeneric<N, T>& var)
+{
+  return exp(var - 1.0);
+}
+
+template<int N, typename T>
 ShGeneric<N, T> log(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
@@ -184,6 +190,12 @@ ShGeneric<N, T> log10(const ShGeneric<N, T>& var)
   ShAttrib<N, SH_TEMP, T> t;
   shLOG10(t, var);
   return t;
+}
+
+template<int N, typename T>
+ShGeneric<N, T> logp1(const ShGeneric<N, T>& var)
+{
+  return log(var + 1.0);
 }
 
 template<int N, typename T>

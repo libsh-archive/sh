@@ -100,6 +100,22 @@ public:
 
   /// It may be useful to change a program's target sometimes.
   std::string& target() { return m_node->target(); }
+
+  ShProgramNode::VarList::const_iterator inputs_begin() const { return m_node->inputs_begin(); }
+  ShProgramNode::VarList::const_iterator inputs_end() const { return m_node->inputs_end(); }
+  ShProgramNode::VarList::const_iterator outputs_begin() const { return m_node->outputs_begin(); }
+  ShProgramNode::VarList::const_iterator outputs_end() const { return m_node->outputs_end(); }
+  ShProgramNode::VarList::const_iterator temps_begin() const { return m_node->temps_begin(); }
+  ShProgramNode::VarList::const_iterator temps_end() const { return m_node->temps_end(); }
+  ShProgramNode::VarList::const_iterator constants_begin() const { return m_node->constants_begin(); }
+  ShProgramNode::VarList::const_iterator constants_end() const { return m_node->constants_end(); }
+  ShProgramNode::VarList::const_iterator uniforms_begin() const { return m_node->uniforms_begin(); }
+  ShProgramNode::VarList::const_iterator uniforms_end() const { return m_node->uniforms_end(); }
+  ShProgramNode::TexList::const_iterator textures_begin() const { return m_node->textures_begin(); }
+  ShProgramNode::TexList::const_iterator textures_end() const { return m_node->textures_end(); }
+  ShProgramNode::ChannelList::const_iterator channels_begin() const { return m_node->channels_begin(); }
+  ShProgramNode::ChannelList::const_iterator channels_end() const { return m_node->channels_end(); }
+
   
 private:
 

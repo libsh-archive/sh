@@ -64,9 +64,16 @@ ShGeneric<M+N, T> join(const ShGeneric<M, T>& a, const ShGeneric<N, T>& b)
 
 template<int N, typename T>
 inline
-void kill(const ShGeneric<N, T>& c)
+void discard(const ShGeneric<N, T>& c)
 {
   shKIL(c);
+}
+
+template<int N, typename T>
+inline
+void kill(const ShGeneric<N, T>& c)
+{
+  discard(c);
 }
 
 }

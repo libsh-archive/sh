@@ -95,6 +95,13 @@ ShGeneric<N, T> exp2(const ShGeneric<N, T>& var);
 template<int N, typename T>
 ShGeneric<N, T> exp(const ShGeneric<N, T>& var);
 
+/** Minus-one Exponent base 10.
+ * Operates componentwise on tuples.
+ * Returns the exponent of x - 1 using base 10.
+ */
+template<int N, typename T>
+ShGeneric<N, T> expm1(const ShGeneric<N, T>& x);
+
 /** Natural Logarithm.
  * Operates componentwise on tuples.
  * Returns the natural logarithm of x.
@@ -115,6 +122,13 @@ ShGeneric<N, T> log2(const ShGeneric<N, T>& var);
  */
 template<int N, typename T>
 ShGeneric<N, T> log(const ShGeneric<N, T>& var);
+
+/** Plus-One Logarithm base 10.
+ * Operates componentwise on tuples.
+ * Returns the logarithm of x + 1 using base 10.
+ */
+template<int N, typename T>
+ShGeneric<N, T> logp1(const ShGeneric<N, T>& x);
 
 /** Power.
  * Raise a tuple to a power.

@@ -100,6 +100,24 @@ public:
   typedef std::list<ShVariableNodePtr> VarList;
   typedef std::list<ShTextureNodePtr> TexList;
   typedef std::list<ShChannelNodePtr> ChannelList;
+
+  VarList::const_iterator inputs_begin() const;
+  VarList::const_iterator inputs_end() const;
+  VarList::const_iterator outputs_begin() const;
+  VarList::const_iterator outputs_end() const;
+  VarList::const_iterator temps_begin() const;
+  VarList::const_iterator temps_end() const;
+  VarList::const_iterator constants_begin() const;
+  VarList::const_iterator constants_end() const;
+  VarList::const_iterator uniforms_begin() const;
+  VarList::const_iterator uniforms_end() const;
+
+  TexList::const_iterator textures_begin() const;
+  TexList::const_iterator textures_end() const;
+
+  ChannelList::const_iterator channels_begin() const;
+  ChannelList::const_iterator channels_end() const;
+  
   
   VarList inputs; ///< Input variables used in this program
   VarList outputs; ///< Output variables used in this program

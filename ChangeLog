@@ -1,4 +1,12 @@
-2004-07-27  Stefanus Du Toit <sjdutoit@uwaterloo.ca>
+2004-07-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShProgram.hpp: Added introspection iterators. Resolves issue37.
+
+	* src/ShProgramNode.hpp: Added introspection iterators.
+
+	* src/ShLibMisc.hpp: Rename kill to discard. Resolves issue83.
+
+	* src/ShLibArith.hpp: Added expm1 and logp1. Resolves issue81.
 
 	* backends/gl/ArbEmit.cpp: Added emit_csum and emit_cmul functions
 	and table entries.
@@ -13,7 +21,7 @@
 
 	* src/ShStatement.hpp: Added SH_OP_CSUM and SH_OP_CMUL.
 
-2004-07-19  Stefanus Du Toit <sjdutoit@uwaterloo.ca>
+2004-07-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShLibClamp.hpp: Undef max and min if they are defined.
 
