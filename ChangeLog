@@ -1,3 +1,7 @@
+2005-03-21  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/GlslEmit.cpp (emit_discard): Fix discard.
+
 2005-03-18  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslVariable.cpp (GlslVariable): Use the contents of
