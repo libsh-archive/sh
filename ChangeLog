@@ -1,3 +1,10 @@
+2004-01-21  Bryan Chan  <b8chan@uwaterloo.
+	* src/ShRefCount.hpp: fixed count in operator=
+	(was releasing ref before acquiring ref, so if the old object
+	had the only pointer to the new object, the new object would be
+	deleted before assignment)
+
+	* src/ShOptimizer.cpp: small fixes to the Input/Output convertor
 2004-01-21  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	The 2601-line patch of doom!

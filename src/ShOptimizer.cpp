@@ -229,39 +229,41 @@ struct InputOutputConvertor {
   
   void convertIO(ShStatement& stmt)
   {
-    if(!stmt.dest.null() && stmt.dest.node()->kind() == SH_VAR_INPUT) {
+    if(!stmt.dest.null()) {
+      if(stmt.dest.node()->kind() == SH_VAR_INPUT) {
         ShVariableNodePtr &oldNode = stmt.dest.node();
-      if( varMap.find( oldNode ) == varMap.end() ) {
-        varMap[oldNode] = new ShVariableNode(SH_VAR_TEMP, 
-            oldNode->size(), oldNode->specialType());
-      }
-    }
-    for(int i = 0; i < 3; ++i) {
-      if(!stmt.src[i].null() && stmt.src[i].node()->kind() == SH_VAR_OUTPUT) {
-        ShVariableNodePtr &oldNode = stmt.src[i].node();
         if( varMap.find( oldNode ) == varMap.end() ) {
           varMap[oldNode] = new ShVariableNode(SH_VAR_TEMP, 
               oldNode->size(), oldNode->specialType());
         }
       }
     }
-    if( !varMap.empty() ) changed = true;
+    for(int i = 0; i < 3; ++i) {
+      if(!stmt.src[i].null()) {
+        if(stmt.src[i].node()->kind() == SH_VAR_OUTPUT) {
+          ShVariableNodePtr &oldNode = stmt.src[i].node();
+          if( varMap.find( oldNode ) == varMap.end() ) {
+            varMap[oldNode] = new ShVariableNode(SH_VAR_TEMP, 
+                oldNode->size(), oldNode->specialType());
+          }
+        }
+      }
+    }
   }
 
   void updateGraph() {
     if( varMap.empty() ) return;
+    changed = true;
 
     // create block after exit
     ShCtrlGraphNodePtr newExit = new ShCtrlGraphNode(); 
     ShCtrlGraphNodePtr oldExit = optimizer.m_graph->exit();
-    oldExit->block = new ShBasicBlock();
     oldExit->append( newExit );
     optimizer.m_graph->setExit( newExit );
 
     // create block before entry 
     ShCtrlGraphNodePtr newEntry = new ShCtrlGraphNode(); 
     ShCtrlGraphNodePtr oldEntry = optimizer.m_graph->entry();
-    newEntry->block = new ShBasicBlock();
     newEntry->append( oldEntry );
     optimizer.m_graph->setEntry( newEntry ); 
 
@@ -292,7 +294,6 @@ struct InputOutputConvertor {
 
 void ShOptimizer::inputOutputConversion(bool& changed)
 {
-  SH_DEBUG_PRINT( "Input Output Conversion" );
   InputOutputConvertor ioc(*this, changed);
   m_graph->dfs(ioc);
 

@@ -60,6 +60,7 @@ struct ShCtrlGraphBranch {
 class ShCtrlGraphNode : public ShRefCountable {
 public:
   ShCtrlGraphNode();
+  ~ShCtrlGraphNode();
 
   ShBasicBlockPtr block;
   std::vector<ShCtrlGraphBranch> successors; ///< Conditional successors

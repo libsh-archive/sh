@@ -31,12 +31,16 @@
 #include "ShToken.hpp"
 #include "ShUtility.hpp"
 #include "ShParser.hpp"
+#include "ShDebug.hpp"
 
 namespace SH {
 
 ShCtrlGraphNode::ShCtrlGraphNode()
   : follower(0), m_marked(false)
 {
+}
+
+ShCtrlGraphNode::~ShCtrlGraphNode() {
 }
 
 std::ostream& ShCtrlGraphNode::print(std::ostream& out, int indent) const

@@ -154,10 +154,13 @@ template<typename T>
 ShRefCount<T>& ShRefCount<T>::operator=(const ShRefCount<T>& other)
 {
   if (m_object == other.m_object) return *this;
+
+  // Bug fix - must aquireRef to other.m_object first in case
+  // m_object has the only current pointer to other.m_object
+  if(other.m_object) other.m_object->acquireRef();
   releaseRef();
 
   m_object = other.m_object;
-  if (m_object) m_object->acquireRef();
   
   return *this;
 }
@@ -167,13 +170,16 @@ template<typename T1>
 ShRefCount<T>& ShRefCount<T>::operator=(const ShRefCount<T1>& other)
 {
   if (m_object == other.object()) return *this;
-  releaseRef();
 
+  // Bug fix - moved releaseRef down to prevent same problem as above
   if (!other.object()) {
+    releaseRef();
     m_object = 0;
   } else {
-    m_object = dynamic_cast<T*>(other.object());
-    if (m_object) m_object->acquireRef();
+    T* temp = dynamic_cast<T*>(other.object());
+    if (temp) temp->acquireRef();
+    releaseRef();
+    m_object = temp;
   }
   
   return *this;
@@ -183,10 +189,10 @@ template<typename T>
 ShRefCount<T>& ShRefCount<T>::operator=(T* object)
 {
   if (m_object == object) return *this;
+  if( object ) object->acquireRef();
   releaseRef();
 
   m_object = object;
-  if (m_object) m_object->acquireRef();
   
   return *this;
 }

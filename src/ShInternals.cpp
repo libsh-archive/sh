@@ -38,7 +38,7 @@ void ShVariableReplacer::operator()(ShCtrlGraphNodePtr node) {
   ShBasicBlockPtr block = node->block;
   if (!block) return;
   for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-    repVar(I->dest);
+    if(!I->dest.null()) repVar(I->dest);
     for (int i = 0; i < 3; i++) {
       if( !I->src[i].null() ) repVar(I->src[i]);
     }
@@ -48,7 +48,6 @@ void ShVariableReplacer::operator()(ShCtrlGraphNodePtr node) {
 void ShVariableReplacer::repVar(ShVariable& var) {
   VarMap::iterator I = varMap.find(var.node());
   if (I == varMap.end()) return;
-  // SH_DEBUG_PRINT("Replacing " << var.node()->name() << " with " << I->second->name());
   var.node() = I->second;
 }
 
