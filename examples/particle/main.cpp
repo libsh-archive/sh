@@ -303,8 +303,6 @@ int main(int argc, char** argv)
   glutKeyboardFunc(keyboard);
   
   glEnable(GL_DEPTH_TEST);
-  glEnable(GL_VERTEX_PROGRAM_ARB);
-  glEnable(GL_FRAGMENT_PROGRAM_ARB);
   glClearColor(0.0, 0.0, 0.0, 1.0);
   glPointSize(5);
 
@@ -592,8 +590,9 @@ int gprintf(int x, int y, char* fmt, ...)
   // texturing off and disable depth testing
   glPushAttrib(GL_ENABLE_BIT);
   glDisable(GL_DEPTH_TEST);
-  glDisable(GL_VERTEX_PROGRAM_ARB);
-  glDisable(GL_FRAGMENT_PROGRAM_ARB);
+  shUnbind(vsh);
+  shUnbind(particle_fsh);
+  shUnbind(plane_fsh);
 
   // render the character through glut
   char* p = temp;

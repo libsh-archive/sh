@@ -342,10 +342,21 @@ void ArbCode::bind()
 
   // Make sure all textures are loaded.
   bindTextures();
+  
+  if (m_unit == "vertex") {
+    SH_GL_CHECK_ERROR(glEnable(GL_VERTEX_PROGRAM_ARB));
+  } else if (m_unit == "fragment") {
+    SH_GL_CHECK_ERROR(glEnable(GL_FRAGMENT_PROGRAM_ARB));
+  }
 }
 
 void ArbCode::unbind()
 {
+  if (m_unit == "vertex") {
+    SH_GL_CHECK_ERROR(glDisable(GL_VERTEX_PROGRAM_ARB));
+  } else if (m_unit == "fragment") {
+    SH_GL_CHECK_ERROR(glDisable(GL_FRAGMENT_PROGRAM_ARB));
+  }
 }
 
 void ArbCode::update()

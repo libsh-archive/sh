@@ -88,16 +88,16 @@ void display()
   glutSolidTeapot(2.5);
   glFrontFace(GL_CCW);
 
-  // Help information
-  if (show_help) {
-    gprintf(30, 100, "Sh Texture Example Help");
-    gprintf(30, 80,  "  '1' - Default texture");
-    gprintf(30, 65,  "  '2' - Rusty texture");
-    gprintf(30, 50,  "  'U' - Invoke shUpdate()");
-    gprintf(30, 30,  "  'Q' - Quit");
-  } else {
-    gprintf(10, 10, "'H' for help...");
-  }
+//   // Help information
+//   if (show_help) {
+//     gprintf(30, 100, "Sh Texture Example Help");
+//     gprintf(30, 80,  "  '1' - Default texture");
+//     gprintf(30, 65,  "  '2' - Rusty texture");
+//     gprintf(30, 50,  "  'U' - Invoke shUpdate()");
+//     gprintf(30, 30,  "  'Q' - Quit");
+//   } else {
+//     gprintf(10, 10, "'H' for help...");
+//   }
   
   glutSwapBuffers();
 }
@@ -200,8 +200,8 @@ int gprintf(int x, int y, char* fmt, ...)
   // texturing off and disable depth testing
   glPushAttrib(GL_ENABLE_BIT);
   glDisable(GL_DEPTH_TEST);
-  glDisable(GL_VERTEX_PROGRAM_ARB);
-  glDisable(GL_FRAGMENT_PROGRAM_ARB);
+  shUnbind(vsh);
+  shUnbind(fsh);
 
   // render the character through glut
   char* p = temp;
