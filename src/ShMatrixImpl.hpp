@@ -63,9 +63,6 @@ namespace SH {
   {
   }
 
-
-
-
   //Operators
   template<int Rows, int Cols, int Kind, typename T>
   ShMatrix<Rows, Cols, Kind, T>&
@@ -86,8 +83,6 @@ namespace SH {
     return *this;
   }
 
-
-
   template<int Rows, int Cols, int Kind, typename T>
   ShAttrib<Cols, Kind, T>& ShMatrix<Rows, Cols, Kind, T>::operator[](int i)
   {
@@ -99,9 +94,6 @@ namespace SH {
   {
     return m_data[i];
   }
-
-
-
 
   template<int Rows, int Cols, int Kind, typename T>
   template<int Kind2>
@@ -152,7 +144,6 @@ namespace SH {
     return *this;
   }
   
-
   template<int Rows, int Cols, int Kind, typename T>
   ShMatrix<Rows, Cols, Kind, T>&
   ShMatrix<Rows, Cols, Kind, T>::operator/=(const ShVariableN<1, T>& other)
@@ -162,11 +153,6 @@ namespace SH {
     return *this;
   }
 
-
-  
-
-
-  
   template<int Rows, int Cols, int Kind, typename T>
   ShMatrixRows<Rows, Cols, T>
   ShMatrix<Rows, Cols, Kind, T>::operator()() const
@@ -202,30 +188,20 @@ namespace SH {
     return ShMatrixRows<4, Cols, T>(*this, i0, i1, i2, i3);
   }
 
-
-
-
-
-
-
-
-
-
-
   template<int Rows, int Cols, int Kind, typename T>
-  std::ostream& operator<<(std::ostream& _out, const ShMatrix<Rows, Cols, Kind, T>& shMatrixToPrint){
+  std::ostream& operator<<(std::ostream& out, const ShMatrix<Rows, Cols, Kind, T>& shMatrixToPrint){
     
-    if (!shMatrixToPrint.m_data){
-      _out<<"[null]";
-      return _out;
+    if (!shMatrixToPrint.m_data) {
+      out << "[null]";
+      return out;
     }
     
     for (int k = 0; k < Rows; k++) {   
-      _out<<shMatrixToPrint.m_data[k];
-      _out<<endl;
-   }
+      out << shMatrixToPrint.m_data[k];
+	  out << std::endl;
+    }
     
-    return _out;
+    return out;
   }
   
  
@@ -373,13 +349,6 @@ namespace SH {
   
 
 
-
-
-  //Needs to be removed
-  template<int Rows, int Cols, int Kind, typename T>
-  void ShMatrix<Rows, Cols, Kind, T>::setRow(ShAttrib<Cols, SH_VAR_TEMP, T, false> rowToSet,int rowNumber){      
-    m_data[rowNumber] = rowToSet;    
-  }
 
 
 

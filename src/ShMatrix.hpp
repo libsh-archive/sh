@@ -36,12 +36,6 @@ namespace SH {
   template<int Rows, int Cols, int Kind, typename T>
   class ShMatrix;
 
-
-
-  
-
-
-
   template<int Rows, int Cols, typename T>
   class ShMatrixRows;
 
@@ -183,7 +177,7 @@ namespace SH {
      */
     template <int RowsCols, int Kind2, typename T2>
     friend
-	ShMatrix<RowsCols,RowsCols,Kind2,T2> cofactors(const ShMatrix<RowsCols,RowsCols, Kind2, T2>& matrix);
+	ShMatrix<RowsCols, RowsCols, Kind2, T2> cofactors(const ShMatrix<RowsCols, RowsCols, Kind2, T2>& matrix);
     
     /** \brief Returns the transposed matrix for the matrix in parameter
      *
@@ -211,30 +205,20 @@ namespace SH {
 	template <int RowsCols, int Kind2, typename T2>
 	friend
 	ShMatrix<RowsCols,RowsCols, Kind2, T2> inv(const ShMatrix<RowsCols, RowsCols, Kind2, T2>& matrix);
-    
-   /** \brief Returns a submatrix of the original matrix where the row (first parameter), and the column (second parameter) has been removed
+   
+    /** \brief Operator << (used for iostream)
+     *
+     * This operator uses the << operator defined in ShAttrib on each of its rows to give the output
+     */
+    template<int R, int C, int K, typename Ty>
+    friend std::ostream& operator<<(std::ostream& out, const ShMatrix<R, C, K, Ty>& shMatrixToPrint);
+
+    /** \brief Returns a submatrix of the original matrix where the row (first parameter), and the column (second parameter) has been removed
      *
      * Returns a ShMatrix that is the matrix where the row (first parameter), and the column (second parameter) has been removed, the matrix has a size of Rows-1, Cols -1
      * \param other The matrix from which we want to get the submatrix
      */
     ShMatrix<Rows - 1, Cols -1, SH_VAR_TEMP, T> subMatrix(int,int) const;
-
-    /*
-    void setTranslation<>(const ShVariableN<1, T>& transX,
-			const ShVariableN<1, T>& transY,
-			const ShVariableN<1, T>& transZ);
-    //  template ShMatrix<4, 4, Kind, T>
-    void setScaling<>(const ShVariableN<1, T>& scaleX,
-		    const ShVariableN<1, T>& scaleY,
-		    const ShVariableN<1, T>& scaleZ);
-    // template ShMatrix<4, 4, Kind, T>
-    void setRotationX<>(const ShVariableN<1, T>& angle);
-    template ShMatrix<4, 4, Kind, T>
-    void setRotationY<>(const ShVariableN<1, T>& angle);
-    template ShMatrix<4, 4, Kind, T>
-    void setRotationZ<>(const ShVariableN<1, T>& angle);
-    */
-
 
     /** \brief Definition of the scalar multiplication operation
      *
@@ -250,15 +234,6 @@ namespace SH {
      */
     ShMatrix& operator/=(const ShVariableN<1, T>& other);
 
-
-    
-    //Need to be removed
-    void setRow(ShAttrib<Cols, SH_VAR_TEMP, T, false> rowToSet,int rowNumber);
-
-
-
-
-
     /**@name Swizzling
      * Retrieve some set of rows from this matrix. These must be
      * swizzled again to operate on them.
@@ -269,31 +244,18 @@ namespace SH {
     ShMatrixRows<2, Cols, T> operator()(int, int) const;
     ShMatrixRows<3, Cols, T> operator()(int, int, int) const;
     ShMatrixRows<4, Cols, T> operator()(int, int, int, int) const;
-
-    
     
     //@}
   
-
-
   private:
     /** \brief The Matrix itself
      *
      * The data structure that hold the data
      */
     ShAttrib<Cols, Kind, T> m_data[Rows];
-    
-    /** \brief Operator << (used for iostream)
-     *
-     * This operator uses the << operator defined in ShAttrib on each of its rows to give the output
-     */
-    template<int R, int C, int K, typename Ty>
-    friend std::ostream& operator<<(std::ostream& out, const ShMatrix<R, C, K, Ty>& shMatrixToPrint);
+ 
   };//end ShMatrix
   
-
-
-
 
   /** A few rows from a matrix.
    * This is an intermediate structure representing some rows that have
