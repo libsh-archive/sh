@@ -1,9 +1,7 @@
 #!/usr/bin/python
 
+from common import dot_product
 import shtest, sys, common
-
-def dot_product(a, b):
-    return sum([x*y for (x,y) in zip(a,b)])
  
 def dot(p, q, types=[]):
     result = dot_product(p, q)
