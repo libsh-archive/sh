@@ -27,6 +27,7 @@
 #ifndef GLSLVARIABLE_HPP
 #define GLSLVARIABLE_HPP
 
+#include "Glsl.hpp"
 #include "ShVariableType.hpp"
 #include "ShVariableNode.hpp"
 #include <string>
@@ -81,11 +82,12 @@ public:
   const SH::ShSemanticType& semantic_type() const { return m_semantic_type; }
   const int size() const { return m_size; }
 
-  void name(int i); /// for regular variables
+  void name(int i, enum GlslProgramType unit); /// for regular variables
   void builtin(GlslVarBinding binding, int index); /// for built-in variables
   
 private:
   bool m_builtin; /// if true, it won't be declared or initialized
+  bool m_uniform;
   std::string m_name;
   int m_size;
   SH::ShBindingType m_kind;

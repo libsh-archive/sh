@@ -86,6 +86,9 @@ private:
 
   void print_infolog(GLhandleARB obj); /// Debug: print the OpenGL SL compiler log
   void print_shader_source(); /// Debug: retrieve and print shader source code from GPU
+
+  void updateFloatUniform(const SH::ShVariableNodePtr& node, const GLint location);
+  void updateIntUniform(const SH::ShVariableNodePtr& node, const GLint location);
 };
 
 typedef SH::ShPointer<GlslCode> GlslCodePtr;

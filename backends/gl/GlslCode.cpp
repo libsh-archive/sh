@@ -81,8 +81,8 @@ void GlslCode::generate()
   ShTransformer transform(m_shader);
   transform.convertInputOutput(); 
   transform.convertTextureLookups();
-  //transform.convertToFloat(m_convertMap);
-  //transform.splitTuples(4, m_splits);
+  //transform.convertToFloat(m_convertMap); // TODO
+  //transform.splitTuples(4, m_splits); // TODO
   transform.stripDummyOps();
 
   if (transform.changed()) {
@@ -209,7 +209,19 @@ void GlslCode::bind()
   glUseProgramObjectARB(m_arb_program);
   ShContext::current()->set_binding(m_target, ShProgram(m_originalShader));
 
+  // Whenever the program is linked, we must reinitialize the uniforms
+  // because their values are reset.  Also, we must call
+  // glUseProgramObjectARB before we can get the location of uniforms.
+  for (GlslVariableMap::NodeList::iterator i = m_varmap->node_begin();
+       i != m_varmap->node_end(); i++) {
+    ShVariableNodePtr node = *i;
+    if (node->hasValues() && node->uniform()) {
+      updateUniform(node);
+    }
+  }
+
 #ifdef SH_DEBUG_GLSL_BACKEND
+  // This is slow, it should not be enable in release code
   cout << "Program validate status (target = " << m_target << "): ";
   glValidateProgramARB(m_arb_program);
   int validated;
@@ -226,9 +238,74 @@ void GlslCode::update()
 {
 }
 
+void GlslCode::updateFloatUniform(const ShVariableNodePtr& node, const GLint location)
+{
+  float values[4];
+  for (int i=0; i < node->size(); i++) {
+    values[i] = ((float*)(node->getVariant()->array()))[i];
+  }
+
+  switch (node->size()) {
+  case 1:
+    glUniform1fARB(location, values[0]);
+    break;
+  case 2:
+    glUniform2fARB(location, values[0], values[1]);
+    break;
+  case 3:
+    glUniform3fARB(location, values[0], values[1], values[2]);
+    break;
+  case 4:
+    glUniform4fARB(location, values[0], values[1], values[2], values[3]);
+    break;
+  default:
+    SH_DEBUG_ASSERT(0); // Unsupported size
+  }
+}
+
+void GlslCode::updateIntUniform(const ShVariableNodePtr& node, const GLint location)
+{
+  int values[4];
+  for (int i=0; i < node->size(); i++) {
+    values[i] = ((int*)(node->getVariant()->array()))[i];
+  }
+
+  switch (node->size()) {
+  case 1:
+    glUniform1iARB(location, values[0]);
+    break;
+  case 2:
+    glUniform2iARB(location, values[0], values[1]);
+    break;
+  case 3:
+    glUniform3iARB(location, values[0], values[1], values[2]);
+    break;
+  case 4:
+    glUniform4iARB(location, values[0], values[1], values[2], values[3]);
+    break;
+  default:
+    SH_DEBUG_ASSERT(0); // Unsupported size
+  }
+}
+
 void GlslCode::updateUniform(const ShVariableNodePtr& uniform)
 {
-  // After updating the uniform variables, we must relink the shaders (hence, call bind())
+  SH_DEBUG_ASSERT(uniform);
+
+  if (!m_varmap->contains(uniform)) return;
+
+  const GlslVariable& var(m_varmap->variable(uniform));
+
+  GLint location = glGetUniformLocationARB(m_arb_program, var.name().c_str());
+  if (location != -1) {
+    if (shIsInteger(uniform->valueType())) {
+      updateIntUniform(uniform, location);
+    } else {
+      updateFloatUniform(uniform, location);
+    }
+  } else {
+    cerr << "ERROR: Could not find uniform '" << var.name() << "'." << endl;
+  }
 }
 
 ostream& GlslCode::print(ostream& out)
@@ -238,16 +315,27 @@ ostream& GlslCode::print(ostream& out)
   out << "// OpenGL SL " << ((m_unit == SH_GLSL_VP) ? "Vertex" : "Fragment") << " Program" << endl;
   out << endl;
 
+  // Declare Uniforms
+  if (m_varmap->uniform_begin() != m_varmap->uniform_end()) {
+    for (GlslVariableMap::DeclarationList::const_iterator i = m_varmap->uniform_begin(); 
+	 i != m_varmap->uniform_end(); i++) {
+      out << "uniform " << *i << ";" << endl;
+    }
+    out << endl;
+  }
+
   out << "void main()" << endl;
   out << "{" << endl;
   string indent = "  ";
 
-  // Temporaries and constants
-  for (GlslVariableMap::DeclarationList::const_iterator i = m_varmap->begin(); 
-       i != m_varmap->end(); i++) {
-    out << indent << *i << ";" << endl;
+  // Declare and initialize temporaries and constants
+  if (m_varmap->regular_begin() != m_varmap->regular_end()) {
+    for (GlslVariableMap::DeclarationList::const_iterator i = m_varmap->regular_begin(); 
+	 i != m_varmap->regular_end(); i++) {
+      out << indent << *i << ";" << endl;
+    }
+    out << endl;
   }
-  out << endl;
 
   // Print lines of code
   for (vector<string>::const_iterator i = m_lines.begin(); i != m_lines.end(); i++) {
@@ -260,6 +348,7 @@ ostream& GlslCode::print(ostream& out)
 
 ostream& GlslCode::describe_interface(ostream& out)
 {
+  // TODO
   return out;
 }
 
@@ -289,30 +378,20 @@ void GlslCode::emit(const ShStatement &stmt)
 {
   switch(stmt.op) {
   case SH_OP_ADD:
-    {
-      m_lines.push_back(resolve(stmt.dest, max(stmt.src[0].size(), stmt.src[1].size())) + " = " + resolve(stmt.src[0]) + " + " + resolve(stmt.src[1]));
-      break;
-    }
+    m_lines.push_back(resolve(stmt.dest, max(stmt.src[0].size(), stmt.src[1].size())) + " = " + resolve(stmt.src[0]) + " + " + resolve(stmt.src[1]));
+    break;
   case SH_OP_MUL:
-    {
-      m_lines.push_back(resolve(stmt.dest, max(stmt.src[0].size(), stmt.src[1].size())) + " = " + resolve(stmt.src[0]) + " * " + resolve(stmt.src[1]));
-      break;
-    }
+    m_lines.push_back(resolve(stmt.dest, max(stmt.src[0].size(), stmt.src[1].size())) + " = " + resolve(stmt.src[0]) + " * " + resolve(stmt.src[1]));
+    break;
   case SH_OP_DOT:
-    {
-      m_lines.push_back(resolve(stmt.dest, 1) + " = dot(" + resolve(stmt.src[0]) + ", " + resolve(stmt.src[1]) + ")");
-      break;
-    }
+    m_lines.push_back(resolve(stmt.dest, 1) + " = dot(" + resolve(stmt.src[0]) + ", " + resolve(stmt.src[1]) + ")");
+    break;
   case SH_OP_ASN:
-    {
-      m_lines.push_back(resolve(stmt.dest, stmt.src[0].size()) + " = " + resolve(stmt.src[0]));
-      break;
-    }
+    m_lines.push_back(resolve(stmt.dest, stmt.src[0].size()) + " = " + resolve(stmt.src[0]));
+    break;
   case SH_OP_NORM:
-    {
-      m_lines.push_back(resolve(stmt.dest, stmt.src[0].size()) + " = normalize(" + resolve(stmt.src[0]) + ")");
-      break;
-    }
+    m_lines.push_back(resolve(stmt.dest, stmt.src[0].size()) + " = normalize(" + resolve(stmt.src[0]) + ")");
+    break;
   default:
     m_lines.push_back("// *** unhandled operation " + 
 		      string(opInfo[stmt.op].name) + " ***");

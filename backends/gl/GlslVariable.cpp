@@ -47,22 +47,23 @@ const GlslVarBindingInfo GlslVariable::glslVarBindingInfo[] = {
 };
 
 GlslVariable::GlslVariable()
-  : m_builtin(false), m_name(""), m_size(0),
+  : m_builtin(false), m_uniform(false), m_name(""), m_size(0),
     m_kind(SH_TEMP), m_type(SH_FLOAT), m_semantic_type(SH_ATTRIB),
-    m_values("") 
+    m_values("")
 {
 }
 
 GlslVariable::GlslVariable(const GlslVariable& v)
-  : m_builtin(v.m_builtin), m_name(v.m_name), m_size(v.m_size),
-    m_kind(v.m_kind), m_type(v.m_type), m_semantic_type(v.m_semantic_type),
-    m_values(v.m_values) 
+  : m_builtin(v.m_builtin), m_uniform(v.m_uniform), m_name(v.m_name), 
+    m_size(v.m_size), m_kind(v.m_kind), m_type(v.m_type), 
+    m_semantic_type(v.m_semantic_type), m_values(v.m_values)
 {
 }
 
 GlslVariable::GlslVariable(const ShVariableNodePtr& v)
-  : m_builtin(false), m_size(v->size()), m_kind(v->kind()), 
-    m_type(v->valueType()), m_semantic_type(v->specialType())
+  : m_builtin(false), m_uniform(v->uniform()), m_size(v->size()),
+    m_kind(v->kind()), m_type(v->valueType()), 
+    m_semantic_type(v->specialType())
 {
   if (v->hasValues()) {
     m_values = v->getVariant()->encodeArray();
@@ -80,45 +81,50 @@ string GlslVariable::declaration() const
     ret += "const ";
   }
   ret += type + " " + m_name;
-  if (!m_values.empty()) {
+  if (!m_values.empty() && !m_uniform) {
     ret += " = " + type + "(" + m_values + ")";
   }
 
   return ret;
 }
 
-void GlslVariable::name(int i)
+void GlslVariable::name(int i, enum GlslProgramType unit)
 {
   stringstream varname;
-  switch (m_kind) {
-  case SH_INPUT:
-    varname << "var_i_";
-    break;
-  case SH_OUTPUT:
-    varname << "var_o_";
-    break;
-  case SH_INOUT:
-    varname << "var_io_";
-    break;
-  case SH_TEMP:
-    varname << "var_t_";
-    break;
-  case SH_CONST:
-    varname << "var_c_";
-    break;
-  case SH_TEXTURE:
-    varname << "var_tex_";
-    break;
-  case SH_STREAM:
-    varname << "var_s_";
-    break;
-  case SH_PALETTE:
-    varname << "var_p_";
-    break;
-  default:
-    varname << "var_";
+  if (m_uniform) {
+    varname << "uni";
+    varname << (unit == SH_GLSL_FP ? "fp" : "vp");
+  } else {
+    switch (m_kind) {
+    case SH_INPUT:
+      varname << "var_i";
+      break;
+    case SH_OUTPUT:
+      varname << "var_o";
+      break;
+    case SH_INOUT:
+      varname << "var_io";
+      break;
+    case SH_TEMP:
+      varname << "var_t";
+      break;
+    case SH_CONST:
+      varname << "var_c";
+      break;
+    case SH_TEXTURE:
+      varname << "var_tex";
+      break;
+    case SH_STREAM:
+      varname << "var_s";
+      break;
+    case SH_PALETTE:
+      varname << "var_p";
+      break;
+    default:
+      varname << "var";
+    }
   }
-  varname << i;
+  varname << "_" << i;
 
   m_name = varname.str();
   m_builtin = false;

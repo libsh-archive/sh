@@ -49,20 +49,32 @@ public:
   GlslVariableMap(SH::ShProgramNode* shader, GlslProgramType unit);
   
   std::string resolve(const SH::ShVariable& v, int src_size);
+  const GlslVariable& variable(const SH::ShVariableNodePtr& node);
+  bool contains(const SH::ShVariableNodePtr& node) const;
 
   typedef std::list<std::string> DeclarationList;
 
-  DeclarationList::const_iterator begin() const;
-  DeclarationList::const_iterator end() const;
+  DeclarationList::const_iterator uniform_begin() const;
+  DeclarationList::const_iterator uniform_end() const;
+  DeclarationList::const_iterator regular_begin() const;
+  DeclarationList::const_iterator regular_end() const;
+
+  typedef std::list<SH::ShVariableNodePtr> NodeList;
   
+  NodeList::iterator node_begin() { return m_nodes.begin(); }
+  NodeList::iterator node_end() { return m_nodes.end(); }
+
 private:
   SH::ShProgramNode* m_shader;
   GlslProgramType m_unit;
 
-  unsigned m_nb_variables;
-  std::map<SH::ShVariableNodePtr, GlslVariable> m_varmap; /// maps a variable node to a variable
+  unsigned m_nb_uniform_variables;
+  unsigned m_nb_regular_variables;
+  std::map<const SH::ShVariableNodePtr, GlslVariable> m_varmap;
+  NodeList m_nodes;
   
-  DeclarationList m_declarations;
+  DeclarationList m_uniform_declarations;
+  DeclarationList m_regular_declarations;
 
   std::map<GlslVarBinding, int> m_input_bindings;
   std::map<GlslVarBinding, int> m_output_bindings;
@@ -72,10 +84,9 @@ private:
                         bool generic);
   void allocate_builtin_inputs();
   void allocate_builtin_outputs();
-  
-  void allocate_input(const SH::ShVariableNodePtr& node);
-  void allocate_output(const SH::ShVariableNodePtr& node);
   void allocate_temp(const SH::ShVariableNodePtr& node);
+  
+  void map_insert(const SH::ShVariableNodePtr& node, GlslVariable var);
 
   std::string swizzle(const SH::ShVariable& v, int dest_size, int src_size) const;
 };

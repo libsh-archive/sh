@@ -72,19 +72,12 @@ GlslBindingSpecs* glslBindingSpecs(bool output, GlslProgramType unit)
 }
 
 GlslVariableMap::GlslVariableMap(ShProgramNode* shader, GlslProgramType unit)
-  : m_shader(shader), m_unit(unit), m_nb_variables(0)
+  : m_shader(shader), m_unit(unit), m_nb_uniform_variables(0),
+    m_nb_regular_variables(0)
 {
   allocate_builtin_inputs();
   allocate_builtin_outputs();
 
-  for (ShProgramNode::VarList::const_iterator i = m_shader->inputs_begin();
-       i != m_shader->inputs_end(); i++) {
-    allocate_input(*i);
-  }
-  for (ShProgramNode::VarList::const_iterator i = m_shader->outputs_begin();
-       i != m_shader->outputs_end(); i++) {
-    allocate_output(*i);
-  }
   for (ShProgramNode::VarList::const_iterator i = m_shader->temps_begin();
        i != m_shader->temps_end(); i++) {
     allocate_temp(*i);
@@ -110,7 +103,7 @@ void GlslVariableMap::allocate_builtin(const ShVariableNodePtr& node,
 	index = bindings[s->binding];
       }
       var.builtin(s->binding, index);
-      m_varmap[node] = var;
+      map_insert(node, var);
 
       bindings[s->binding]++;
       return;
@@ -138,32 +131,48 @@ void GlslVariableMap::allocate_builtin_outputs()
   }
 }
 
-void GlslVariableMap::allocate_input(const ShVariableNodePtr& node)
-{
-}
-
-void GlslVariableMap::allocate_output(const ShVariableNodePtr& node)
-{
-}
-
 void GlslVariableMap::allocate_temp(const ShVariableNodePtr& node)
 {
   GlslVariable var(node);
-  var.name(m_nb_variables++);
-  m_varmap[node] = var;
+  if (node->uniform()) {
+    var.name(m_nb_uniform_variables++, m_unit);
+  } else {
+    var.name(m_nb_regular_variables++, m_unit);
+  }
+  map_insert(node, var);
 
   // Since this variable is not built-in, it must be declared
-  m_declarations.push_back(var.declaration());
+  if (node->uniform()) {
+    m_uniform_declarations.push_back(var.declaration());
+  } else {
+    m_regular_declarations.push_back(var.declaration());
+  }
 }
 
-GlslVariableMap::DeclarationList::const_iterator GlslVariableMap::begin() const
-{ 
-  return m_declarations.begin();
+void GlslVariableMap::map_insert(const ShVariableNodePtr& node, GlslVariable var)
+{
+  m_nodes.push_back(node);
+  m_varmap[node] = var;
 }
 
-GlslVariableMap::DeclarationList::const_iterator GlslVariableMap::end() const
+GlslVariableMap::DeclarationList::const_iterator GlslVariableMap::uniform_begin() const
 { 
-  return m_declarations.end();
+  return m_uniform_declarations.begin();
+}
+
+GlslVariableMap::DeclarationList::const_iterator GlslVariableMap::uniform_end() const
+{ 
+  return m_uniform_declarations.end();
+}
+
+GlslVariableMap::DeclarationList::const_iterator GlslVariableMap::regular_begin() const
+{ 
+  return m_regular_declarations.begin();
+}
+
+GlslVariableMap::DeclarationList::const_iterator GlslVariableMap::regular_end() const
+{ 
+  return m_regular_declarations.end();
 }
 
 string GlslVariableMap::resolve(const ShVariable& v, int src_size)
@@ -216,6 +225,16 @@ string GlslVariableMap::swizzle(const ShVariable& v, int dest_size, int src_size
     }
   }
   return "." + ss.str();
+}
+
+const GlslVariable& GlslVariableMap::variable(const ShVariableNodePtr& node)
+{
+  return m_varmap[node];
+}
+
+bool GlslVariableMap::contains(const ShVariableNodePtr& node) const
+{
+  return (m_varmap.find(node) != m_varmap.end());
 }
 
 }
