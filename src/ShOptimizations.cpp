@@ -291,7 +291,7 @@ struct UdDuDumper {
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
       ValueTracking* vt = I->template get_info<ValueTracking>();
       if (!vt) {
-        SH_DEBUG_PRINT(*I << "HAS NO VALUE TRACKING");
+        SH_DEBUG_PRINT(*I << " HAS NO VALUE TRACKING");
         continue;
       }
       for (int i = 0; i < opInfo[I->op].arity; i++) {
@@ -505,6 +505,7 @@ struct ConstProp : public ShStatementInfo {
       // E.g. texture fetches, stream fetches.
       for (int i = 0; i < stmt->dest.size(); i++) {
         dest.push_back(Cell(Cell::BOTTOM));
+        worklist.push(ValueTracking::Def(stmt, i));
       }
     } else if (opInfo[stmt->op].result_source == ShOperationInfo::LINEAR) {
       // Consider each tuple element in turn.
@@ -535,6 +536,7 @@ struct ConstProp : public ShStatementInfo {
           worklist.push(ValueTracking::Def(stmt, i));
         } else if (bottom) {
           dest.push_back(Cell(Cell::BOTTOM));
+          worklist.push(ValueTracking::Def(stmt, i));
         } else {
           dest.push_back(Cell(Cell::TOP));
         }
@@ -572,6 +574,7 @@ struct ConstProp : public ShStatementInfo {
       } else if (bottom) {
         for (int i = 0; i < stmt->dest.size(); i++) {
           dest.push_back(Cell(Cell::BOTTOM));
+          worklist.push(ValueTracking::Def(stmt, i));
         }
       } else {
         for (int i = 0; i < stmt->dest.size(); i++) {
@@ -704,6 +707,58 @@ struct DumpConstProp {
       std::cerr << std::endl;
     }
     
+  }
+};
+
+struct FinishConstProp
+{
+  void operator()(const ShCtrlGraphNodePtr& node) {
+    if (!node) return;
+    ShBasicBlockPtr block = node->block;
+    if (!block) return;
+    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+      ConstProp* cp = I->template get_info<ConstProp>();
+
+      if (!cp) continue;
+
+      if (!cp->dest.empty()) {
+        // if all dest fields are constants, replace this with a
+        // constant assignment
+        
+        ShVariable newconst(new ShVariableNode(SH_CONST, I->dest.size()));
+        bool allconst = true;
+        for (int i = 0; i < I->dest.size(); i++) {
+          if (cp->dest[i].state != ConstProp::Cell::CONSTANT) {
+            allconst = false;
+            break;
+          }
+          newconst.setValue(i, cp->dest[i].value);
+        }
+        if (allconst) {
+          *I = ShStatement(I->dest, SH_OP_ASN, newconst);
+        } else {
+          // otherwise, do the same for each source field.
+          for (int s = 0; s < opInfo[I->op].arity; s++) {
+            
+            ShVariable newconst(new ShVariableNode(SH_CONST, I->src[s].size()));
+            bool allconst = true;
+            for (int i = 0; i < I->src[s].size(); i++) {
+              if (cp->src[s][i].state != ConstProp::Cell::CONSTANT) {
+                allconst = false;
+                break;
+              }
+              newconst.setValue(i, cp->src[s][i].value);
+            }
+            if (allconst) {
+              I->src[s] = newconst;
+            }
+          }
+        }
+      }
+
+      // Remove constant propagation information.
+      I->template destroy_info<ConstProp>();
+    }
   }
 };
 
@@ -869,6 +924,9 @@ void propagate_constants(ShProgram& p)
 
   DumpConstProp dump;
   graph->dfs(dump);
+  
+  FinishConstProp finish;
+  graph->dfs(finish);
   
 }
 

@@ -1,3 +1,8 @@
+2004-08-21  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp (struct FinishConstProp): Use the
+	constant propagation information, and remove it when we're done.
+
 2004-08-20  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShOptimizations.cpp (ReachingDefs::Definition): Keep a
