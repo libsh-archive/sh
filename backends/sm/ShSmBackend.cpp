@@ -421,7 +421,7 @@ void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
         break;
       }
     case SH_OP_COND:
-      m_instructions.push_back(SmInstruction(OP_CMP, stmt.dest, stmt.src1, stmt.src2, stmt.src3));
+      m_instructions.push_back(SmInstruction(OP_CMP, stmt.dest, -stmt.src1, stmt.src2, stmt.src3));
       break;
     default:
       // TODO: other ops
