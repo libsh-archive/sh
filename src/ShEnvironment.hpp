@@ -57,7 +57,7 @@ public:
   /// The currently active backend
   static ShBackendPtr backend;
 
-  /// 0 means no optimizations. The default level is 1.
+  /// 0 means no optimizations. The default level is 1 for all current optimizations. 
   static int optimizationLevel;
 
   /// Whether exceptions are being thrown instead of error messages printed to stdout
