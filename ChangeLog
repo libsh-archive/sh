@@ -1,5 +1,7 @@
 2004-10-24  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
 
+	* win32/*: Added Visual Studio .NET solution/project files.
+
 	* examples/particle/*: Added a stream example, loosely based
 	on the particle code from the book.
 
