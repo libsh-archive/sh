@@ -77,8 +77,10 @@ public:
 
   // Metadata
   void range(ShVariableNode::ValueType low, ShVariableNode::ValueType high);
-  ShVariableNode::ValueType lowBound();
-  ShVariableNode::ValueType highBound();
+  ShVariableNode::ValueType lowBound() const;
+  ShVariableNode::ValueType highBound() const;
+  void internal(bool setting);
+  bool internal() const;
 
   ShVariableKind kind() const;
   ShVariableSpecialType specialType() const;
@@ -105,8 +107,10 @@ protected:
   int m_id;
   std::string m_name;
 
+  // Metadata
   ValueType* m_values;
   ValueType m_lowBound, m_highBound;
+  bool m_internal;
   
   static int m_maxID;
 };

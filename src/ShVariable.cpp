@@ -75,14 +75,24 @@ void ShVariable::range(ShVariableNode::ValueType low, ShVariableNode::ValueType 
   m_node->range(low, high);
 }
 
-ShVariableNode::ValueType ShVariable::lowBound()
+ShVariableNode::ValueType ShVariable::lowBound() const
 {
   return m_node->lowBound();
 }
 
-ShVariableNode::ValueType ShVariable::highBound()
+ShVariableNode::ValueType ShVariable::highBound() const
 {
   return m_node->highBound();
+}
+
+void ShVariable::internal(bool setting)
+{
+  m_node->internal(setting);
+}
+
+bool ShVariable::internal() const
+{
+  return m_node->internal();
 }
 
 const ShSwizzle& ShVariable::swizzle() const

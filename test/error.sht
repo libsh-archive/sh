@@ -1,5 +1,4 @@
 ShProgram shader = SH_BEGIN_FRAGMENT_PROGRAM {
-  ShAttrib1f x;
+  ShAttrib2f x(1.0);
   ShAttrib3f y;
-  y = x * y * x;
 } SH_END_PROGRAM;

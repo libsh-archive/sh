@@ -42,10 +42,8 @@ std::ostream& shPrintIndent(std::ostream& out, int indent);
 template<bool B> struct ShCompileTimeChecker
 {
   ShCompileTimeChecker(...);
-private:
 };
 template<> struct ShCompileTimeChecker<false> {
-private:
 };
 
 #define SH_STATIC_CHECK(expr, msg) \

@@ -55,16 +55,37 @@ public:
                           ///(host-local) values?
   
   int size() const; ///< Get the number of elements in this variable
-  std::string name() const; ///< Get this variable's name
+
+  /**@name Metadata
+   * This data is useful for various things, including asset
+   * management.
+   */
+  //@{
 
   /// Set this variable's name. If set to the empty string, defaults
   /// to the type and id of the variable.
   void name(const std::string& name);
-
-  // Metadata
+  std::string name() const; ///< Get this variable's name
+  
+  /// Set a range of values for this variable
   void range(ShVariableNode::ValueType low, ShVariableNode::ValueType high);
-  ShVariableNode::ValueType lowBound();
-  ShVariableNode::ValueType highBound();
+  /// Obtain a lower bound on this variable
+  ShVariableNode::ValueType lowBound() const;
+  /// Obtain an upper bound on this variable
+  ShVariableNode::ValueType highBound() const;
+
+  /// If this is true, this variable should not be able to be set by
+  /// e.g. a user in a UI. For example the model-view matrix should
+  /// probably have this set to true.
+  /// This is false by default.
+  void internal(bool setting);
+  /// If this is true, this variable should not be able to be set by
+  /// e.g. a user in a UI. For example the model-view matrix should
+  /// probably have this set to true.
+  /// This is false by default.
+  bool internal() const;
+
+  //@}
   
   /// Obtain the swizzling (if any) applied to this variable.
   const ShSwizzle& swizzle() const;

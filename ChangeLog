@@ -1,3 +1,22 @@
+2004-02-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShUtility.hpp (ShCompileTimeChecker): Remove unnecessary
+	private declarations.
+
+	* src/ShMatrixImpl.hpp: Implemented ShMatrix metadata functions.
+
+	* src/ShMatrix.hpp: Added metadata functions to ShMatrix.
+
+	* src/ShVariableNode.cpp (internal): Implemented these.
+
+	* src/ShVariableNode.hpp: Added "internal" metadata to variable
+	nodes.
+
+	* src/ShVariable.cpp (internal): Implemented internal functions.
+
+	* src/ShVariable.hpp: Added "internal" metadata value to
+	variables.
+
 2004-02-18  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShConstantImpl.hpp: Ditto.

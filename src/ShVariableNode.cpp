@@ -52,8 +52,10 @@ const char* ShVariableSpecialTypeName[] = {
 };
 
 ShVariableNode::ShVariableNode(ShVariableKind kind, int size, ShVariableSpecialType type)
-  : m_uniform(!ShEnvironment::insideShader && kind != SH_TEXTURE), m_kind(kind), m_specialType(type),
-    m_size(size), m_id(m_maxID++), m_values(0)
+  : m_uniform(!ShEnvironment::insideShader && kind != SH_TEXTURE),
+    m_kind(kind), m_specialType(type),
+    m_size(size), m_id(m_maxID++), m_values(0),
+    m_internal(false)
 {
   if (m_kind != SH_TEXTURE && (m_uniform || m_kind == SH_CONST)) {
     m_values = new ValueType[size];
@@ -177,14 +179,24 @@ void ShVariableNode::range(ShVariableNode::ValueType low, ShVariableNode::ValueT
   m_highBound = high;
 }
 
-ShVariableNode::ValueType ShVariableNode::lowBound()
+ShVariableNode::ValueType ShVariableNode::lowBound() const
 {
   return m_lowBound;
 }
 
-ShVariableNode::ValueType ShVariableNode::highBound()
+ShVariableNode::ValueType ShVariableNode::highBound() const
 {
   return m_highBound;
+}
+
+void ShVariableNode::internal(bool setting)
+{
+  m_internal = setting;
+}
+
+bool ShVariableNode::internal() const
+{
+  return m_internal;
 }
 
 ShVariableKind ShVariableNode::kind() const
