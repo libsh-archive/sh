@@ -1515,6 +1515,8 @@ void AtiBackend::bindFramebuffer() {
     ShUberbufferPtr ub = fb->getUberbuffer();
     if( ub ) {
       allocUberbuffer( ub );
+      //TODO may not be necessary
+      glAttachMemATI( GL_AUX0, 0 );
       glAttachMemATI( GL_AUX0, ub->mem() );
       //TODO other buffers 
       glDrawBuffer( GL_AUX0 ); 
