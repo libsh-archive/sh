@@ -228,30 +228,34 @@ void ShObjMesh::generateFaceNormals() {
 
 int ShObjMesh::generateVertexNormals(bool force) {
   typedef std::map<Vertex*, ShPoint3f> NormalSumMap;
-  typedef std::map<Vertex*, int> NormalSumCount;
   NormalSumMap nsm;
-  NormalSumCount nscount;
   for(EdgeSet::iterator I = edges.begin(); I != edges.end(); ++I) {
     Edge &e = **I;
     if( force || dot(e.normal, e.normal).getValue(0) == 0 ) { 
       nsm[e.start] = ShConstAttrib3f(0.0f, 0.0f, 0.0f);
-      nscount[e.start] = 0;
     }
   }
   if( nsm.empty() ) return 0;
 
+  /* For each pair of edges e1->e2 in a face, add the following 
+   * scaling of the face vector to that vertex's cumulative normal */ 
   for(EdgeSet::iterator I = edges.begin(); I != edges.end(); ++I) {
-    Vertex *v = (*I)->start;
-    if( nsm.count(v) > 0 ) {
-      nsm[v] += (*I)->face->normal; 
-      nscount[v]++;
+    Vertex *v = (*I)->end;
+
+    if(nsm.count(v) > 0) {
+      Edge* e1 = *I;
+      Edge* e2 = e1->next;
+      ShVector3f ve1 = e1->end->pos - e1->start->pos;
+      ShVector3f ve2 = e2->end->pos - e2->start->pos;
+      ShAttrib1f scale = length(cross(ve1, ve2)) / ((ve1 | ve1) + (ve2 | ve2));
+      nsm[v] += scale * (*I)->face->normal; 
     }
   }
 
   for(EdgeSet::iterator I = edges.begin(); I != edges.end(); ++I) {
     Vertex *v = (*I)->start;
-    if( nsm.count(v) > 0 ) {
-      (*I)->normal = nsm[v] / (float)nscount[v];
+    if(nsm.count(v) > 0) {
+      (*I)->normal = normalize((nsm[v])); 
     }
   }
   return nsm.size();

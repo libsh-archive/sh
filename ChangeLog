@@ -1,3 +1,7 @@
+2005-01-26  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+  * util/ShObjMesh.cpp:
+  Improved vertex normal generation.
+
 2005-01-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/ArbEmit.cpp (ArbCode::table): Do not scalarize
