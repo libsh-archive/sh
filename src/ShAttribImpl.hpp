@@ -42,360 +42,360 @@
 
 namespace SH {
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<N, Binding, V, Swizzled>::ShAttrib()
-  : ShGeneric<N, V>(new ShVariableNode(Binding, N,V))
+ShAttrib<N, Binding, T, Swizzled>::ShAttrib()
+  : ShGeneric<N, T>(new ShVariableNode(Binding, N, ShStorageTypeInfo<T>::value_type))
 {
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<N, Binding, V, Swizzled>::ShAttrib(const ShGeneric<N, V2>& other)
-  : ShGeneric<N, V>(new ShVariableNode(Binding, N,V))
-{
-  shASN(*this, other);
-}
-
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
-inline
-ShAttrib<N, Binding, V, Swizzled>::ShAttrib(const ShAttrib<N, Binding, V, Swizzled>& other)
-  : ShGeneric<N, V>(new ShVariableNode(Binding, N,V))
+ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShGeneric<N, T2>& other)
+  : ShGeneric<N, T>(new ShVariableNode(Binding, N, ShStorageTypeInfo<T>::value_type))
 {
   shASN(*this, other);
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<N, Binding, V, Swizzled>::ShAttrib(const ShAttrib<N, Binding, V2, Swizzled>& other)
-  : ShGeneric<N, V>(new ShVariableNode(Binding, N,V))
+ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShAttrib<N, Binding, T, Swizzled>& other)
+  : ShGeneric<N, T>(new ShVariableNode(Binding, N, ShStorageTypeInfo<T>::value_type))
 {
   shASN(*this, other);
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<N, Binding, V, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
+ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShAttrib<N, Binding, T2, Swizzled>& other)
+  : ShGeneric<N, T>(new ShVariableNode(Binding, N, ShStorageTypeInfo<T>::value_type))
+{
+  shASN(*this, other);
+}
+
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
   const ShSwizzle& swizzle, bool neg)
-  : ShGeneric<N, V>(node, swizzle, neg)
+  : ShGeneric<N, T>(node, swizzle, neg)
 {
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<N, Binding, V, Swizzled>::ShAttrib(H data[N])
-  : ShGeneric<N, V>(new ShVariableNode(Binding, N,V))
+ShAttrib<N, Binding, T, Swizzled>::ShAttrib(host_type data[N])
+  : ShGeneric<N, T>(new ShVariableNode(Binding, N, ShStorageTypeInfo<T>::value_type))
 {
   if (Binding == SH_CONST) {
     for (int i = 0; i < N; i++) setValue(i, data[i]);
   } else {
-    (*this) = ShAttrib<N, SH_CONST, V>(data);
+    (*this) = ShAttrib<N, SH_CONST, T>(data);
   }
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<N, Binding, V, Swizzled>::~ShAttrib()
+ShAttrib<N, Binding, T, Swizzled>::~ShAttrib()
 {
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<N, Binding, V, Swizzled>&
-ShAttrib<N, Binding, V, Swizzled>::operator=(const ShGeneric<N, V2>& other)
-{
-  ParentType::operator=(other);
-  return *this;
-}
-
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
-inline
-ShAttrib<N, Binding, V, Swizzled>&
-ShAttrib<N, Binding, V, Swizzled>::operator=(const ShAttrib<N, Binding, V, Swizzled>& other)
+ShAttrib<N, Binding, T, Swizzled>&
+ShAttrib<N, Binding, T, Swizzled>::operator=(const ShGeneric<N, T2>& other)
 {
   ParentType::operator=(other);
   return *this;
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<N, Binding, V, Swizzled>&
-ShAttrib<N, Binding, V, Swizzled>::operator=(const ShAttrib<N, Binding, V2, Swizzled>& other)
+ShAttrib<N, Binding, T, Swizzled>&
+ShAttrib<N, Binding, T, Swizzled>::operator=(const ShAttrib<N, Binding, T, Swizzled>& other)
 {
   ParentType::operator=(other);
   return *this;
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<N, Binding, V, Swizzled>&
-ShAttrib<N, Binding, V, Swizzled>::operator=(const ShProgram& prg)
+ShAttrib<N, Binding, T, Swizzled>&
+ShAttrib<N, Binding, T, Swizzled>::operator=(const ShAttrib<N, Binding, T2, Swizzled>& other)
+{
+  ParentType::operator=(other);
+  return *this;
+}
+
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShAttrib<N, Binding, T, Swizzled>&
+ShAttrib<N, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 {
   ParentType::operator=(prg);
   return *this;
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<N, Binding, V, Swizzled>&
-ShAttrib<N, Binding, V, Swizzled>::operator+=(const ShGeneric<N, V2>& right)
+ShAttrib<N, Binding, T, Swizzled>&
+ShAttrib<N, Binding, T, Swizzled>::operator+=(const ShGeneric<N, T2>& right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<N, Binding, V, Swizzled>&
-ShAttrib<N, Binding, V, Swizzled>::operator-=(const ShGeneric<N, V2>& right)
+ShAttrib<N, Binding, T, Swizzled>&
+ShAttrib<N, Binding, T, Swizzled>::operator-=(const ShGeneric<N, T2>& right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<N, Binding, V, Swizzled>&
-ShAttrib<N, Binding, V, Swizzled>::operator*=(const ShGeneric<N, V2>& right)
+ShAttrib<N, Binding, T, Swizzled>&
+ShAttrib<N, Binding, T, Swizzled>::operator*=(const ShGeneric<N, T2>& right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<N, Binding, V, Swizzled>&
-ShAttrib<N, Binding, V, Swizzled>::operator/=(const ShGeneric<N, V2>& right)
+ShAttrib<N, Binding, T, Swizzled>&
+ShAttrib<N, Binding, T, Swizzled>::operator/=(const ShGeneric<N, T2>& right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<N, Binding, V, Swizzled>&
-ShAttrib<N, Binding, V, Swizzled>::operator%=(const ShGeneric<N, V2>& right)
+ShAttrib<N, Binding, T, Swizzled>&
+ShAttrib<N, Binding, T, Swizzled>::operator%=(const ShGeneric<N, T2>& right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<N, Binding, V, Swizzled>&
-ShAttrib<N, Binding, V, Swizzled>::operator+=(H right)
+ShAttrib<N, Binding, T, Swizzled>&
+ShAttrib<N, Binding, T, Swizzled>::operator+=(host_type right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<N, Binding, V, Swizzled>&
-ShAttrib<N, Binding, V, Swizzled>::operator-=(H right)
+ShAttrib<N, Binding, T, Swizzled>&
+ShAttrib<N, Binding, T, Swizzled>::operator-=(host_type right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<N, Binding, V, Swizzled>&
-ShAttrib<N, Binding, V, Swizzled>::operator*=(H right)
+ShAttrib<N, Binding, T, Swizzled>&
+ShAttrib<N, Binding, T, Swizzled>::operator*=(host_type right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<N, Binding, V, Swizzled>&
-ShAttrib<N, Binding, V, Swizzled>::operator/=(H right)
+ShAttrib<N, Binding, T, Swizzled>&
+ShAttrib<N, Binding, T, Swizzled>::operator/=(host_type right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<N, Binding, V, Swizzled>&
-ShAttrib<N, Binding, V, Swizzled>::operator%=(H right)
+ShAttrib<N, Binding, T, Swizzled>&
+ShAttrib<N, Binding, T, Swizzled>::operator%=(host_type right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<N, Binding, V, Swizzled>&
-ShAttrib<N, Binding, V, Swizzled>::operator+=(const ShGeneric<1, V2>& right)
+ShAttrib<N, Binding, T, Swizzled>&
+ShAttrib<N, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<N, Binding, V, Swizzled>&
-ShAttrib<N, Binding, V, Swizzled>::operator-=(const ShGeneric<1, V2>& right)
+ShAttrib<N, Binding, T, Swizzled>&
+ShAttrib<N, Binding, T, Swizzled>::operator-=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<N, Binding, V, Swizzled>&
-ShAttrib<N, Binding, V, Swizzled>::operator*=(const ShGeneric<1, V2>& right)
+ShAttrib<N, Binding, T, Swizzled>&
+ShAttrib<N, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<N, Binding, V, Swizzled>&
-ShAttrib<N, Binding, V, Swizzled>::operator/=(const ShGeneric<1, V2>& right)
+ShAttrib<N, Binding, T, Swizzled>&
+ShAttrib<N, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<N, Binding, V, Swizzled>&
-ShAttrib<N, Binding, V, Swizzled>::operator%=(const ShGeneric<1, V2>& right)
+ShAttrib<N, Binding, T, Swizzled>&
+ShAttrib<N, Binding, T, Swizzled>::operator%=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<1, Binding, V, true>
-ShAttrib<N, Binding, V, Swizzled>::operator()(int s0) const
+ShAttrib<1, Binding, T, true>
+ShAttrib<N, Binding, T, Swizzled>::operator()(int s0) const
 {
-  return ShAttrib<1, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(N, s0), this->m_neg);
+  return ShAttrib<1, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(N, s0), this->m_neg);
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<2, Binding, V, true>
-ShAttrib<N, Binding, V, Swizzled>::operator()(int s0, int s1) const
+ShAttrib<2, Binding, T, true>
+ShAttrib<N, Binding, T, Swizzled>::operator()(int s0, int s1) const
 {
-  return ShAttrib<2, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(N, s0, s1), this->m_neg);
+  return ShAttrib<2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(N, s0, s1), this->m_neg);
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<3, Binding, V, true>
-ShAttrib<N, Binding, V, Swizzled>::operator()(int s0, int s1, int s2) const
+ShAttrib<3, Binding, T, true>
+ShAttrib<N, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
 {
-  return ShAttrib<3, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(N, s0, s1, s2), this->m_neg);
+  return ShAttrib<3, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(N, s0, s1, s2), this->m_neg);
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<4, Binding, V, true>
-ShAttrib<N, Binding, V, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
+ShAttrib<4, Binding, T, true>
+ShAttrib<N, Binding, T, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
 {
-  return ShAttrib<4, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(N, s0, s1, s2, s3), this->m_neg);
+  return ShAttrib<4, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(N, s0, s1, s2, s3), this->m_neg);
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 template<int N2>
-ShAttrib<N2, Binding, V, true>
-ShAttrib<N, Binding, V, Swizzled>::swiz(int indices[]) const
+ShAttrib<N2, Binding, T, true>
+ShAttrib<N, Binding, T, Swizzled>::swiz(int indices[]) const
 {
-  return ShAttrib<N2, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(N, N2, indices), this->m_neg);
+  return ShAttrib<N2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(N, N2, indices), this->m_neg);
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<1, Binding, V, true>
-ShAttrib<N, Binding, V, Swizzled>::operator[](int s0) const
+ShAttrib<1, Binding, T, true>
+ShAttrib<N, Binding, T, Swizzled>::operator[](int s0) const
 {
-  return ShAttrib<1, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(N, s0), this->m_neg);
+  return ShAttrib<1, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(N, s0), this->m_neg);
 }
 
-template<int N, ShBindingType Binding, ShValueType V, bool Swizzled>
-ShAttrib<N, Binding, V, Swizzled>
-ShAttrib<N, Binding, V, Swizzled>::operator-() const
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
+ShAttrib<N, Binding, T, Swizzled>
+ShAttrib<N, Binding, T, Swizzled>::operator-() const
 {
-  return ShAttrib<N, Binding, V, Swizzled>(this->m_node, this->m_swizzle, !this->m_neg);
+  return ShAttrib<N, Binding, T, Swizzled>(this->m_node, this->m_swizzle, !this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<1, Binding, V, Swizzled>::ShAttrib()
-  : ShGeneric<1, V>(new ShVariableNode(Binding, 1,V))
+ShAttrib<1, Binding, T, Swizzled>::ShAttrib()
+  : ShGeneric<1, T>(new ShVariableNode(Binding, 1, ShStorageTypeInfo<T>::value_type))
 {
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<1, Binding, V, Swizzled>::ShAttrib(const ShGeneric<1, V2>& other)
-  : ShGeneric<1, V>(new ShVariableNode(Binding, 1,V))
+ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T2>& other)
+  : ShGeneric<1, T>(new ShVariableNode(Binding, 1, ShStorageTypeInfo<T>::value_type))
 {
   shASN(*this, other);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<1, Binding, V, Swizzled>::ShAttrib(const ShAttrib<1, Binding, V, Swizzled>& other)
-  : ShGeneric<1, V>(new ShVariableNode(Binding, 1,V))
+ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShAttrib<1, Binding, T, Swizzled>& other)
+  : ShGeneric<1, T>(new ShVariableNode(Binding, 1, ShStorageTypeInfo<T>::value_type))
 {
   shASN(*this, other);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<1, Binding, V, Swizzled>::ShAttrib(const ShAttrib<1, Binding, V2, Swizzled>& other)
-  : ShGeneric<1, V>(new ShVariableNode(Binding, 1,V))
+ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShAttrib<1, Binding, T2, Swizzled>& other)
+  : ShGeneric<1, T>(new ShVariableNode(Binding, 1, ShStorageTypeInfo<T>::value_type))
 {
   shASN(*this, other);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<1, Binding, V, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
+ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
   const ShSwizzle& swizzle, bool neg)
-  : ShGeneric<1, V>(node, swizzle, neg)
+  : ShGeneric<1, T>(node, swizzle, neg)
 {
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<1, Binding, V, Swizzled>::ShAttrib(H data[1])
-  : ShGeneric<1, V>(new ShVariableNode(Binding, 1,V))
+ShAttrib<1, Binding, T, Swizzled>::ShAttrib(host_type data[1])
+  : ShGeneric<1, T>(new ShVariableNode(Binding, 1, ShStorageTypeInfo<T>::value_type))
 {
   if (Binding == SH_CONST) {
     for (int i = 0; i < 1; i++) setValue(i, data[i]);
   } else {
-    (*this) = ShAttrib<1, SH_CONST, V>(data);
+    (*this) = ShAttrib<1, SH_CONST, T>(data);
   }
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<1, Binding, V, Swizzled>::ShAttrib(H s0)
-  : ShGeneric<1, V>(new ShVariableNode(Binding, 1,V))
+ShAttrib<1, Binding, T, Swizzled>::ShAttrib(host_type s0)
+  : ShGeneric<1, T>(new ShVariableNode(Binding, 1, ShStorageTypeInfo<T>::value_type))
 {
   if (Binding == SH_CONST) {
     setValue(0, s0);
@@ -404,266 +404,266 @@ ShAttrib<1, Binding, V, Swizzled>::ShAttrib(H s0)
   }
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<1, Binding, V, Swizzled>::~ShAttrib()
+ShAttrib<1, Binding, T, Swizzled>::~ShAttrib()
 {
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<1, Binding, V, Swizzled>&
-ShAttrib<1, Binding, V, Swizzled>::operator=(const ShGeneric<1, V2>& other)
-{
-  ParentType::operator=(other);
-  return *this;
-}
-
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-inline
-ShAttrib<1, Binding, V, Swizzled>&
-ShAttrib<1, Binding, V, Swizzled>::operator=(const ShAttrib<1, Binding, V, Swizzled>& other)
+ShAttrib<1, Binding, T, Swizzled>&
+ShAttrib<1, Binding, T, Swizzled>::operator=(const ShGeneric<1, T2>& other)
 {
   ParentType::operator=(other);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<1, Binding, V, Swizzled>&
-ShAttrib<1, Binding, V, Swizzled>::operator=(const ShAttrib<1, Binding, V2, Swizzled>& other)
+ShAttrib<1, Binding, T, Swizzled>&
+ShAttrib<1, Binding, T, Swizzled>::operator=(const ShAttrib<1, Binding, T, Swizzled>& other)
 {
   ParentType::operator=(other);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<1, Binding, V, Swizzled>&
-ShAttrib<1, Binding, V, Swizzled>::operator=(H other)
+ShAttrib<1, Binding, T, Swizzled>&
+ShAttrib<1, Binding, T, Swizzled>::operator=(const ShAttrib<1, Binding, T2, Swizzled>& other)
 {
   ParentType::operator=(other);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<1, Binding, V, Swizzled>&
-ShAttrib<1, Binding, V, Swizzled>::operator=(const ShProgram& prg)
+ShAttrib<1, Binding, T, Swizzled>&
+ShAttrib<1, Binding, T, Swizzled>::operator=(host_type other)
+{
+  ParentType::operator=(other);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShAttrib<1, Binding, T, Swizzled>&
+ShAttrib<1, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 {
   ParentType::operator=(prg);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<1, Binding, V, Swizzled>&
-ShAttrib<1, Binding, V, Swizzled>::operator+=(const ShGeneric<1, V2>& right)
+ShAttrib<1, Binding, T, Swizzled>&
+ShAttrib<1, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<1, Binding, V, Swizzled>&
-ShAttrib<1, Binding, V, Swizzled>::operator-=(const ShGeneric<1, V2>& right)
+ShAttrib<1, Binding, T, Swizzled>&
+ShAttrib<1, Binding, T, Swizzled>::operator-=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<1, Binding, V, Swizzled>&
-ShAttrib<1, Binding, V, Swizzled>::operator*=(const ShGeneric<1, V2>& right)
+ShAttrib<1, Binding, T, Swizzled>&
+ShAttrib<1, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<1, Binding, V, Swizzled>&
-ShAttrib<1, Binding, V, Swizzled>::operator/=(const ShGeneric<1, V2>& right)
+ShAttrib<1, Binding, T, Swizzled>&
+ShAttrib<1, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<1, Binding, V, Swizzled>&
-ShAttrib<1, Binding, V, Swizzled>::operator%=(const ShGeneric<1, V2>& right)
+ShAttrib<1, Binding, T, Swizzled>&
+ShAttrib<1, Binding, T, Swizzled>::operator%=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<1, Binding, V, Swizzled>&
-ShAttrib<1, Binding, V, Swizzled>::operator+=(H right)
+ShAttrib<1, Binding, T, Swizzled>&
+ShAttrib<1, Binding, T, Swizzled>::operator+=(host_type right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<1, Binding, V, Swizzled>&
-ShAttrib<1, Binding, V, Swizzled>::operator-=(H right)
+ShAttrib<1, Binding, T, Swizzled>&
+ShAttrib<1, Binding, T, Swizzled>::operator-=(host_type right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<1, Binding, V, Swizzled>&
-ShAttrib<1, Binding, V, Swizzled>::operator*=(H right)
+ShAttrib<1, Binding, T, Swizzled>&
+ShAttrib<1, Binding, T, Swizzled>::operator*=(host_type right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<1, Binding, V, Swizzled>&
-ShAttrib<1, Binding, V, Swizzled>::operator/=(H right)
+ShAttrib<1, Binding, T, Swizzled>&
+ShAttrib<1, Binding, T, Swizzled>::operator/=(host_type right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<1, Binding, V, Swizzled>&
-ShAttrib<1, Binding, V, Swizzled>::operator%=(H right)
+ShAttrib<1, Binding, T, Swizzled>&
+ShAttrib<1, Binding, T, Swizzled>::operator%=(host_type right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<1, Binding, V, true>
-ShAttrib<1, Binding, V, Swizzled>::operator()(int s0) const
+ShAttrib<1, Binding, T, true>
+ShAttrib<1, Binding, T, Swizzled>::operator()(int s0) const
 {
-  return ShAttrib<1, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(1, s0), this->m_neg);
+  return ShAttrib<1, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(1, s0), this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<2, Binding, V, true>
-ShAttrib<1, Binding, V, Swizzled>::operator()(int s0, int s1) const
+ShAttrib<2, Binding, T, true>
+ShAttrib<1, Binding, T, Swizzled>::operator()(int s0, int s1) const
 {
-  return ShAttrib<2, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(1, s0, s1), this->m_neg);
+  return ShAttrib<2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(1, s0, s1), this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<3, Binding, V, true>
-ShAttrib<1, Binding, V, Swizzled>::operator()(int s0, int s1, int s2) const
+ShAttrib<3, Binding, T, true>
+ShAttrib<1, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
 {
-  return ShAttrib<3, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(1, s0, s1, s2), this->m_neg);
+  return ShAttrib<3, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(1, s0, s1, s2), this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<4, Binding, V, true>
-ShAttrib<1, Binding, V, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
+ShAttrib<4, Binding, T, true>
+ShAttrib<1, Binding, T, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
 {
-  return ShAttrib<4, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(1, s0, s1, s2, s3), this->m_neg);
+  return ShAttrib<4, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(1, s0, s1, s2, s3), this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 template<int N2>
-ShAttrib<N2, Binding, V, true>
-ShAttrib<1, Binding, V, Swizzled>::swiz(int indices[]) const
+ShAttrib<N2, Binding, T, true>
+ShAttrib<1, Binding, T, Swizzled>::swiz(int indices[]) const
 {
-  return ShAttrib<N2, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(1, N2, indices), this->m_neg);
+  return ShAttrib<N2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(1, N2, indices), this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<1, Binding, V, true>
-ShAttrib<1, Binding, V, Swizzled>::operator[](int s0) const
+ShAttrib<1, Binding, T, true>
+ShAttrib<1, Binding, T, Swizzled>::operator[](int s0) const
 {
-  return ShAttrib<1, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(1, s0), this->m_neg);
+  return ShAttrib<1, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(1, s0), this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-ShAttrib<1, Binding, V, Swizzled>
-ShAttrib<1, Binding, V, Swizzled>::operator-() const
+template<ShBindingType Binding, typename T, bool Swizzled>
+ShAttrib<1, Binding, T, Swizzled>
+ShAttrib<1, Binding, T, Swizzled>::operator-() const
 {
-  return ShAttrib<1, Binding, V, Swizzled>(this->m_node, this->m_swizzle, !this->m_neg);
+  return ShAttrib<1, Binding, T, Swizzled>(this->m_node, this->m_swizzle, !this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<2, Binding, V, Swizzled>::ShAttrib()
-  : ShGeneric<2, V>(new ShVariableNode(Binding, 2,V))
+ShAttrib<2, Binding, T, Swizzled>::ShAttrib()
+  : ShGeneric<2, T>(new ShVariableNode(Binding, 2, ShStorageTypeInfo<T>::value_type))
 {
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<2, Binding, V, Swizzled>::ShAttrib(const ShGeneric<2, V2>& other)
-  : ShGeneric<2, V>(new ShVariableNode(Binding, 2,V))
+ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShGeneric<2, T2>& other)
+  : ShGeneric<2, T>(new ShVariableNode(Binding, 2, ShStorageTypeInfo<T>::value_type))
 {
   shASN(*this, other);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<2, Binding, V, Swizzled>::ShAttrib(const ShAttrib<2, Binding, V, Swizzled>& other)
-  : ShGeneric<2, V>(new ShVariableNode(Binding, 2,V))
+ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShAttrib<2, Binding, T, Swizzled>& other)
+  : ShGeneric<2, T>(new ShVariableNode(Binding, 2, ShStorageTypeInfo<T>::value_type))
 {
   shASN(*this, other);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<2, Binding, V, Swizzled>::ShAttrib(const ShAttrib<2, Binding, V2, Swizzled>& other)
-  : ShGeneric<2, V>(new ShVariableNode(Binding, 2,V))
+ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShAttrib<2, Binding, T2, Swizzled>& other)
+  : ShGeneric<2, T>(new ShVariableNode(Binding, 2, ShStorageTypeInfo<T>::value_type))
 {
   shASN(*this, other);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<2, Binding, V, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
+ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
   const ShSwizzle& swizzle, bool neg)
-  : ShGeneric<2, V>(node, swizzle, neg)
+  : ShGeneric<2, T>(node, swizzle, neg)
 {
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<2, Binding, V, Swizzled>::ShAttrib(H data[2])
-  : ShGeneric<2, V>(new ShVariableNode(Binding, 2,V))
+ShAttrib<2, Binding, T, Swizzled>::ShAttrib(host_type data[2])
+  : ShGeneric<2, T>(new ShVariableNode(Binding, 2, ShStorageTypeInfo<T>::value_type))
 {
   if (Binding == SH_CONST) {
     for (int i = 0; i < 2; i++) setValue(i, data[i]);
   } else {
-    (*this) = ShAttrib<2, SH_CONST, V>(data);
+    (*this) = ShAttrib<2, SH_CONST, T>(data);
   }
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<2, Binding, V, Swizzled>::ShAttrib(H s0, H s1)
-  : ShGeneric<2, V>(new ShVariableNode(Binding, 2,V))
+ShAttrib<2, Binding, T, Swizzled>::ShAttrib(host_type s0, host_type s1)
+  : ShGeneric<2, T>(new ShVariableNode(Binding, 2, ShStorageTypeInfo<T>::value_type))
 {
   if (Binding == SH_CONST) {
     setValue(0, s0);
@@ -674,11 +674,11 @@ ShAttrib<2, Binding, V, Swizzled>::ShAttrib(H s0, H s1)
   }
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2, ShValueType V3>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2, typename T3>
 inline
-ShAttrib<2, Binding, V, Swizzled>::ShAttrib(const ShGeneric<1, V2>& s0, const ShGeneric<1, V3>& s1)
-  : ShGeneric<2, V>(new ShVariableNode(Binding, 2,V))
+ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T2>& s0, const ShGeneric<1, T3>& s1)
+  : ShGeneric<2, T>(new ShVariableNode(Binding, 2, ShStorageTypeInfo<T>::value_type))
 {
   if (Binding == SH_CONST) {
     SH_DEBUG_ASSERT(s0.hasValues());
@@ -691,307 +691,307 @@ ShAttrib<2, Binding, V, Swizzled>::ShAttrib(const ShGeneric<1, V2>& s0, const Sh
   }
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<2, Binding, V, Swizzled>::~ShAttrib()
+ShAttrib<2, Binding, T, Swizzled>::~ShAttrib()
 {
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<2, Binding, V, Swizzled>&
-ShAttrib<2, Binding, V, Swizzled>::operator=(const ShGeneric<2, V2>& other)
-{
-  ParentType::operator=(other);
-  return *this;
-}
-
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-inline
-ShAttrib<2, Binding, V, Swizzled>&
-ShAttrib<2, Binding, V, Swizzled>::operator=(const ShAttrib<2, Binding, V, Swizzled>& other)
+ShAttrib<2, Binding, T, Swizzled>&
+ShAttrib<2, Binding, T, Swizzled>::operator=(const ShGeneric<2, T2>& other)
 {
   ParentType::operator=(other);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<2, Binding, V, Swizzled>&
-ShAttrib<2, Binding, V, Swizzled>::operator=(const ShAttrib<2, Binding, V2, Swizzled>& other)
+ShAttrib<2, Binding, T, Swizzled>&
+ShAttrib<2, Binding, T, Swizzled>::operator=(const ShAttrib<2, Binding, T, Swizzled>& other)
 {
   ParentType::operator=(other);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<2, Binding, V, Swizzled>&
-ShAttrib<2, Binding, V, Swizzled>::operator=(const ShProgram& prg)
+ShAttrib<2, Binding, T, Swizzled>&
+ShAttrib<2, Binding, T, Swizzled>::operator=(const ShAttrib<2, Binding, T2, Swizzled>& other)
+{
+  ParentType::operator=(other);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShAttrib<2, Binding, T, Swizzled>&
+ShAttrib<2, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 {
   ParentType::operator=(prg);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<2, Binding, V, Swizzled>&
-ShAttrib<2, Binding, V, Swizzled>::operator+=(const ShGeneric<2, V2>& right)
+ShAttrib<2, Binding, T, Swizzled>&
+ShAttrib<2, Binding, T, Swizzled>::operator+=(const ShGeneric<2, T2>& right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<2, Binding, V, Swizzled>&
-ShAttrib<2, Binding, V, Swizzled>::operator-=(const ShGeneric<2, V2>& right)
+ShAttrib<2, Binding, T, Swizzled>&
+ShAttrib<2, Binding, T, Swizzled>::operator-=(const ShGeneric<2, T2>& right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<2, Binding, V, Swizzled>&
-ShAttrib<2, Binding, V, Swizzled>::operator*=(const ShGeneric<2, V2>& right)
+ShAttrib<2, Binding, T, Swizzled>&
+ShAttrib<2, Binding, T, Swizzled>::operator*=(const ShGeneric<2, T2>& right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<2, Binding, V, Swizzled>&
-ShAttrib<2, Binding, V, Swizzled>::operator/=(const ShGeneric<2, V2>& right)
+ShAttrib<2, Binding, T, Swizzled>&
+ShAttrib<2, Binding, T, Swizzled>::operator/=(const ShGeneric<2, T2>& right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<2, Binding, V, Swizzled>&
-ShAttrib<2, Binding, V, Swizzled>::operator%=(const ShGeneric<2, V2>& right)
+ShAttrib<2, Binding, T, Swizzled>&
+ShAttrib<2, Binding, T, Swizzled>::operator%=(const ShGeneric<2, T2>& right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<2, Binding, V, Swizzled>&
-ShAttrib<2, Binding, V, Swizzled>::operator+=(H right)
+ShAttrib<2, Binding, T, Swizzled>&
+ShAttrib<2, Binding, T, Swizzled>::operator+=(host_type right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<2, Binding, V, Swizzled>&
-ShAttrib<2, Binding, V, Swizzled>::operator-=(H right)
+ShAttrib<2, Binding, T, Swizzled>&
+ShAttrib<2, Binding, T, Swizzled>::operator-=(host_type right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<2, Binding, V, Swizzled>&
-ShAttrib<2, Binding, V, Swizzled>::operator*=(H right)
+ShAttrib<2, Binding, T, Swizzled>&
+ShAttrib<2, Binding, T, Swizzled>::operator*=(host_type right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<2, Binding, V, Swizzled>&
-ShAttrib<2, Binding, V, Swizzled>::operator/=(H right)
+ShAttrib<2, Binding, T, Swizzled>&
+ShAttrib<2, Binding, T, Swizzled>::operator/=(host_type right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<2, Binding, V, Swizzled>&
-ShAttrib<2, Binding, V, Swizzled>::operator%=(H right)
+ShAttrib<2, Binding, T, Swizzled>&
+ShAttrib<2, Binding, T, Swizzled>::operator%=(host_type right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<2, Binding, V, Swizzled>&
-ShAttrib<2, Binding, V, Swizzled>::operator+=(const ShGeneric<1, V2>& right)
+ShAttrib<2, Binding, T, Swizzled>&
+ShAttrib<2, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<2, Binding, V, Swizzled>&
-ShAttrib<2, Binding, V, Swizzled>::operator-=(const ShGeneric<1, V2>& right)
+ShAttrib<2, Binding, T, Swizzled>&
+ShAttrib<2, Binding, T, Swizzled>::operator-=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<2, Binding, V, Swizzled>&
-ShAttrib<2, Binding, V, Swizzled>::operator*=(const ShGeneric<1, V2>& right)
+ShAttrib<2, Binding, T, Swizzled>&
+ShAttrib<2, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<2, Binding, V, Swizzled>&
-ShAttrib<2, Binding, V, Swizzled>::operator/=(const ShGeneric<1, V2>& right)
+ShAttrib<2, Binding, T, Swizzled>&
+ShAttrib<2, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<2, Binding, V, Swizzled>&
-ShAttrib<2, Binding, V, Swizzled>::operator%=(const ShGeneric<1, V2>& right)
+ShAttrib<2, Binding, T, Swizzled>&
+ShAttrib<2, Binding, T, Swizzled>::operator%=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<1, Binding, V, true>
-ShAttrib<2, Binding, V, Swizzled>::operator()(int s0) const
+ShAttrib<1, Binding, T, true>
+ShAttrib<2, Binding, T, Swizzled>::operator()(int s0) const
 {
-  return ShAttrib<1, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(2, s0), this->m_neg);
+  return ShAttrib<1, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(2, s0), this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<2, Binding, V, true>
-ShAttrib<2, Binding, V, Swizzled>::operator()(int s0, int s1) const
+ShAttrib<2, Binding, T, true>
+ShAttrib<2, Binding, T, Swizzled>::operator()(int s0, int s1) const
 {
-  return ShAttrib<2, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(2, s0, s1), this->m_neg);
+  return ShAttrib<2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(2, s0, s1), this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<3, Binding, V, true>
-ShAttrib<2, Binding, V, Swizzled>::operator()(int s0, int s1, int s2) const
+ShAttrib<3, Binding, T, true>
+ShAttrib<2, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
 {
-  return ShAttrib<3, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(2, s0, s1, s2), this->m_neg);
+  return ShAttrib<3, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(2, s0, s1, s2), this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<4, Binding, V, true>
-ShAttrib<2, Binding, V, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
+ShAttrib<4, Binding, T, true>
+ShAttrib<2, Binding, T, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
 {
-  return ShAttrib<4, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(2, s0, s1, s2, s3), this->m_neg);
+  return ShAttrib<4, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(2, s0, s1, s2, s3), this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 template<int N2>
-ShAttrib<N2, Binding, V, true>
-ShAttrib<2, Binding, V, Swizzled>::swiz(int indices[]) const
+ShAttrib<N2, Binding, T, true>
+ShAttrib<2, Binding, T, Swizzled>::swiz(int indices[]) const
 {
-  return ShAttrib<N2, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(2, N2, indices), this->m_neg);
+  return ShAttrib<N2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(2, N2, indices), this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<1, Binding, V, true>
-ShAttrib<2, Binding, V, Swizzled>::operator[](int s0) const
+ShAttrib<1, Binding, T, true>
+ShAttrib<2, Binding, T, Swizzled>::operator[](int s0) const
 {
-  return ShAttrib<1, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(2, s0), this->m_neg);
+  return ShAttrib<1, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(2, s0), this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-ShAttrib<2, Binding, V, Swizzled>
-ShAttrib<2, Binding, V, Swizzled>::operator-() const
+template<ShBindingType Binding, typename T, bool Swizzled>
+ShAttrib<2, Binding, T, Swizzled>
+ShAttrib<2, Binding, T, Swizzled>::operator-() const
 {
-  return ShAttrib<2, Binding, V, Swizzled>(this->m_node, this->m_swizzle, !this->m_neg);
+  return ShAttrib<2, Binding, T, Swizzled>(this->m_node, this->m_swizzle, !this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<3, Binding, V, Swizzled>::ShAttrib()
-  : ShGeneric<3, V>(new ShVariableNode(Binding, 3,V))
+ShAttrib<3, Binding, T, Swizzled>::ShAttrib()
+  : ShGeneric<3, T>(new ShVariableNode(Binding, 3, ShStorageTypeInfo<T>::value_type))
 {
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<3, Binding, V, Swizzled>::ShAttrib(const ShGeneric<3, V2>& other)
-  : ShGeneric<3, V>(new ShVariableNode(Binding, 3,V))
+ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShGeneric<3, T2>& other)
+  : ShGeneric<3, T>(new ShVariableNode(Binding, 3, ShStorageTypeInfo<T>::value_type))
 {
   shASN(*this, other);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<3, Binding, V, Swizzled>::ShAttrib(const ShAttrib<3, Binding, V, Swizzled>& other)
-  : ShGeneric<3, V>(new ShVariableNode(Binding, 3,V))
+ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShAttrib<3, Binding, T, Swizzled>& other)
+  : ShGeneric<3, T>(new ShVariableNode(Binding, 3, ShStorageTypeInfo<T>::value_type))
 {
   shASN(*this, other);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<3, Binding, V, Swizzled>::ShAttrib(const ShAttrib<3, Binding, V2, Swizzled>& other)
-  : ShGeneric<3, V>(new ShVariableNode(Binding, 3,V))
+ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShAttrib<3, Binding, T2, Swizzled>& other)
+  : ShGeneric<3, T>(new ShVariableNode(Binding, 3, ShStorageTypeInfo<T>::value_type))
 {
   shASN(*this, other);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<3, Binding, V, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
+ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
   const ShSwizzle& swizzle, bool neg)
-  : ShGeneric<3, V>(node, swizzle, neg)
+  : ShGeneric<3, T>(node, swizzle, neg)
 {
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<3, Binding, V, Swizzled>::ShAttrib(H data[3])
-  : ShGeneric<3, V>(new ShVariableNode(Binding, 3,V))
+ShAttrib<3, Binding, T, Swizzled>::ShAttrib(host_type data[3])
+  : ShGeneric<3, T>(new ShVariableNode(Binding, 3, ShStorageTypeInfo<T>::value_type))
 {
   if (Binding == SH_CONST) {
     for (int i = 0; i < 3; i++) setValue(i, data[i]);
   } else {
-    (*this) = ShAttrib<3, SH_CONST, V>(data);
+    (*this) = ShAttrib<3, SH_CONST, T>(data);
   }
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<3, Binding, V, Swizzled>::ShAttrib(H s0, H s1, H s2)
-  : ShGeneric<3, V>(new ShVariableNode(Binding, 3,V))
+ShAttrib<3, Binding, T, Swizzled>::ShAttrib(host_type s0, host_type s1, host_type s2)
+  : ShGeneric<3, T>(new ShVariableNode(Binding, 3, ShStorageTypeInfo<T>::value_type))
 {
   if (Binding == SH_CONST) {
     setValue(0, s0);
@@ -1004,11 +1004,11 @@ ShAttrib<3, Binding, V, Swizzled>::ShAttrib(H s0, H s1, H s2)
   }
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2, ShValueType V3, ShValueType V4>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2, typename T3, typename T4>
 inline
-ShAttrib<3, Binding, V, Swizzled>::ShAttrib(const ShGeneric<1, V2>& s0, const ShGeneric<1, V3>& s1, const ShGeneric<1, V4>& s2)
-  : ShGeneric<3, V>(new ShVariableNode(Binding, 3,V))
+ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T2>& s0, const ShGeneric<1, T3>& s1, const ShGeneric<1, T4>& s2)
+  : ShGeneric<3, T>(new ShVariableNode(Binding, 3, ShStorageTypeInfo<T>::value_type))
 {
   if (Binding == SH_CONST) {
     SH_DEBUG_ASSERT(s0.hasValues());
@@ -1024,307 +1024,307 @@ ShAttrib<3, Binding, V, Swizzled>::ShAttrib(const ShGeneric<1, V2>& s0, const Sh
   }
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<3, Binding, V, Swizzled>::~ShAttrib()
+ShAttrib<3, Binding, T, Swizzled>::~ShAttrib()
 {
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<3, Binding, V, Swizzled>&
-ShAttrib<3, Binding, V, Swizzled>::operator=(const ShGeneric<3, V2>& other)
-{
-  ParentType::operator=(other);
-  return *this;
-}
-
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-inline
-ShAttrib<3, Binding, V, Swizzled>&
-ShAttrib<3, Binding, V, Swizzled>::operator=(const ShAttrib<3, Binding, V, Swizzled>& other)
+ShAttrib<3, Binding, T, Swizzled>&
+ShAttrib<3, Binding, T, Swizzled>::operator=(const ShGeneric<3, T2>& other)
 {
   ParentType::operator=(other);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<3, Binding, V, Swizzled>&
-ShAttrib<3, Binding, V, Swizzled>::operator=(const ShAttrib<3, Binding, V2, Swizzled>& other)
+ShAttrib<3, Binding, T, Swizzled>&
+ShAttrib<3, Binding, T, Swizzled>::operator=(const ShAttrib<3, Binding, T, Swizzled>& other)
 {
   ParentType::operator=(other);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<3, Binding, V, Swizzled>&
-ShAttrib<3, Binding, V, Swizzled>::operator=(const ShProgram& prg)
+ShAttrib<3, Binding, T, Swizzled>&
+ShAttrib<3, Binding, T, Swizzled>::operator=(const ShAttrib<3, Binding, T2, Swizzled>& other)
+{
+  ParentType::operator=(other);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShAttrib<3, Binding, T, Swizzled>&
+ShAttrib<3, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 {
   ParentType::operator=(prg);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<3, Binding, V, Swizzled>&
-ShAttrib<3, Binding, V, Swizzled>::operator+=(const ShGeneric<3, V2>& right)
+ShAttrib<3, Binding, T, Swizzled>&
+ShAttrib<3, Binding, T, Swizzled>::operator+=(const ShGeneric<3, T2>& right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<3, Binding, V, Swizzled>&
-ShAttrib<3, Binding, V, Swizzled>::operator-=(const ShGeneric<3, V2>& right)
+ShAttrib<3, Binding, T, Swizzled>&
+ShAttrib<3, Binding, T, Swizzled>::operator-=(const ShGeneric<3, T2>& right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<3, Binding, V, Swizzled>&
-ShAttrib<3, Binding, V, Swizzled>::operator*=(const ShGeneric<3, V2>& right)
+ShAttrib<3, Binding, T, Swizzled>&
+ShAttrib<3, Binding, T, Swizzled>::operator*=(const ShGeneric<3, T2>& right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<3, Binding, V, Swizzled>&
-ShAttrib<3, Binding, V, Swizzled>::operator/=(const ShGeneric<3, V2>& right)
+ShAttrib<3, Binding, T, Swizzled>&
+ShAttrib<3, Binding, T, Swizzled>::operator/=(const ShGeneric<3, T2>& right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<3, Binding, V, Swizzled>&
-ShAttrib<3, Binding, V, Swizzled>::operator%=(const ShGeneric<3, V2>& right)
+ShAttrib<3, Binding, T, Swizzled>&
+ShAttrib<3, Binding, T, Swizzled>::operator%=(const ShGeneric<3, T2>& right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<3, Binding, V, Swizzled>&
-ShAttrib<3, Binding, V, Swizzled>::operator+=(H right)
+ShAttrib<3, Binding, T, Swizzled>&
+ShAttrib<3, Binding, T, Swizzled>::operator+=(host_type right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<3, Binding, V, Swizzled>&
-ShAttrib<3, Binding, V, Swizzled>::operator-=(H right)
+ShAttrib<3, Binding, T, Swizzled>&
+ShAttrib<3, Binding, T, Swizzled>::operator-=(host_type right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<3, Binding, V, Swizzled>&
-ShAttrib<3, Binding, V, Swizzled>::operator*=(H right)
+ShAttrib<3, Binding, T, Swizzled>&
+ShAttrib<3, Binding, T, Swizzled>::operator*=(host_type right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<3, Binding, V, Swizzled>&
-ShAttrib<3, Binding, V, Swizzled>::operator/=(H right)
+ShAttrib<3, Binding, T, Swizzled>&
+ShAttrib<3, Binding, T, Swizzled>::operator/=(host_type right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<3, Binding, V, Swizzled>&
-ShAttrib<3, Binding, V, Swizzled>::operator%=(H right)
+ShAttrib<3, Binding, T, Swizzled>&
+ShAttrib<3, Binding, T, Swizzled>::operator%=(host_type right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<3, Binding, V, Swizzled>&
-ShAttrib<3, Binding, V, Swizzled>::operator+=(const ShGeneric<1, V2>& right)
+ShAttrib<3, Binding, T, Swizzled>&
+ShAttrib<3, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<3, Binding, V, Swizzled>&
-ShAttrib<3, Binding, V, Swizzled>::operator-=(const ShGeneric<1, V2>& right)
+ShAttrib<3, Binding, T, Swizzled>&
+ShAttrib<3, Binding, T, Swizzled>::operator-=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<3, Binding, V, Swizzled>&
-ShAttrib<3, Binding, V, Swizzled>::operator*=(const ShGeneric<1, V2>& right)
+ShAttrib<3, Binding, T, Swizzled>&
+ShAttrib<3, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<3, Binding, V, Swizzled>&
-ShAttrib<3, Binding, V, Swizzled>::operator/=(const ShGeneric<1, V2>& right)
+ShAttrib<3, Binding, T, Swizzled>&
+ShAttrib<3, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<3, Binding, V, Swizzled>&
-ShAttrib<3, Binding, V, Swizzled>::operator%=(const ShGeneric<1, V2>& right)
+ShAttrib<3, Binding, T, Swizzled>&
+ShAttrib<3, Binding, T, Swizzled>::operator%=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<1, Binding, V, true>
-ShAttrib<3, Binding, V, Swizzled>::operator()(int s0) const
+ShAttrib<1, Binding, T, true>
+ShAttrib<3, Binding, T, Swizzled>::operator()(int s0) const
 {
-  return ShAttrib<1, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(3, s0), this->m_neg);
+  return ShAttrib<1, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(3, s0), this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<2, Binding, V, true>
-ShAttrib<3, Binding, V, Swizzled>::operator()(int s0, int s1) const
+ShAttrib<2, Binding, T, true>
+ShAttrib<3, Binding, T, Swizzled>::operator()(int s0, int s1) const
 {
-  return ShAttrib<2, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(3, s0, s1), this->m_neg);
+  return ShAttrib<2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(3, s0, s1), this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<3, Binding, V, true>
-ShAttrib<3, Binding, V, Swizzled>::operator()(int s0, int s1, int s2) const
+ShAttrib<3, Binding, T, true>
+ShAttrib<3, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
 {
-  return ShAttrib<3, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(3, s0, s1, s2), this->m_neg);
+  return ShAttrib<3, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(3, s0, s1, s2), this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<4, Binding, V, true>
-ShAttrib<3, Binding, V, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
+ShAttrib<4, Binding, T, true>
+ShAttrib<3, Binding, T, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
 {
-  return ShAttrib<4, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(3, s0, s1, s2, s3), this->m_neg);
+  return ShAttrib<4, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(3, s0, s1, s2, s3), this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 template<int N2>
-ShAttrib<N2, Binding, V, true>
-ShAttrib<3, Binding, V, Swizzled>::swiz(int indices[]) const
+ShAttrib<N2, Binding, T, true>
+ShAttrib<3, Binding, T, Swizzled>::swiz(int indices[]) const
 {
-  return ShAttrib<N2, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(3, N2, indices), this->m_neg);
+  return ShAttrib<N2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(3, N2, indices), this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<1, Binding, V, true>
-ShAttrib<3, Binding, V, Swizzled>::operator[](int s0) const
+ShAttrib<1, Binding, T, true>
+ShAttrib<3, Binding, T, Swizzled>::operator[](int s0) const
 {
-  return ShAttrib<1, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(3, s0), this->m_neg);
+  return ShAttrib<1, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(3, s0), this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-ShAttrib<3, Binding, V, Swizzled>
-ShAttrib<3, Binding, V, Swizzled>::operator-() const
+template<ShBindingType Binding, typename T, bool Swizzled>
+ShAttrib<3, Binding, T, Swizzled>
+ShAttrib<3, Binding, T, Swizzled>::operator-() const
 {
-  return ShAttrib<3, Binding, V, Swizzled>(this->m_node, this->m_swizzle, !this->m_neg);
+  return ShAttrib<3, Binding, T, Swizzled>(this->m_node, this->m_swizzle, !this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<4, Binding, V, Swizzled>::ShAttrib()
-  : ShGeneric<4, V>(new ShVariableNode(Binding, 4,V))
+ShAttrib<4, Binding, T, Swizzled>::ShAttrib()
+  : ShGeneric<4, T>(new ShVariableNode(Binding, 4, ShStorageTypeInfo<T>::value_type))
 {
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<4, Binding, V, Swizzled>::ShAttrib(const ShGeneric<4, V2>& other)
-  : ShGeneric<4, V>(new ShVariableNode(Binding, 4,V))
+ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShGeneric<4, T2>& other)
+  : ShGeneric<4, T>(new ShVariableNode(Binding, 4, ShStorageTypeInfo<T>::value_type))
 {
   shASN(*this, other);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<4, Binding, V, Swizzled>::ShAttrib(const ShAttrib<4, Binding, V, Swizzled>& other)
-  : ShGeneric<4, V>(new ShVariableNode(Binding, 4,V))
+ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShAttrib<4, Binding, T, Swizzled>& other)
+  : ShGeneric<4, T>(new ShVariableNode(Binding, 4, ShStorageTypeInfo<T>::value_type))
 {
   shASN(*this, other);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<4, Binding, V, Swizzled>::ShAttrib(const ShAttrib<4, Binding, V2, Swizzled>& other)
-  : ShGeneric<4, V>(new ShVariableNode(Binding, 4,V))
+ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShAttrib<4, Binding, T2, Swizzled>& other)
+  : ShGeneric<4, T>(new ShVariableNode(Binding, 4, ShStorageTypeInfo<T>::value_type))
 {
   shASN(*this, other);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<4, Binding, V, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
+ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
   const ShSwizzle& swizzle, bool neg)
-  : ShGeneric<4, V>(node, swizzle, neg)
+  : ShGeneric<4, T>(node, swizzle, neg)
 {
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<4, Binding, V, Swizzled>::ShAttrib(H data[4])
-  : ShGeneric<4, V>(new ShVariableNode(Binding, 4,V))
+ShAttrib<4, Binding, T, Swizzled>::ShAttrib(host_type data[4])
+  : ShGeneric<4, T>(new ShVariableNode(Binding, 4, ShStorageTypeInfo<T>::value_type))
 {
   if (Binding == SH_CONST) {
     for (int i = 0; i < 4; i++) setValue(i, data[i]);
   } else {
-    (*this) = ShAttrib<4, SH_CONST, V>(data);
+    (*this) = ShAttrib<4, SH_CONST, T>(data);
   }
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<4, Binding, V, Swizzled>::ShAttrib(H s0, H s1, H s2, H s3)
-  : ShGeneric<4, V>(new ShVariableNode(Binding, 4,V))
+ShAttrib<4, Binding, T, Swizzled>::ShAttrib(host_type s0, host_type s1, host_type s2, host_type s3)
+  : ShGeneric<4, T>(new ShVariableNode(Binding, 4, ShStorageTypeInfo<T>::value_type))
 {
   if (Binding == SH_CONST) {
     setValue(0, s0);
@@ -1339,11 +1339,11 @@ ShAttrib<4, Binding, V, Swizzled>::ShAttrib(H s0, H s1, H s2, H s3)
   }
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2, ShValueType V3, ShValueType V4, ShValueType V5>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2, typename T3, typename T4, typename T5>
 inline
-ShAttrib<4, Binding, V, Swizzled>::ShAttrib(const ShGeneric<1, V2>& s0, const ShGeneric<1, V3>& s1, const ShGeneric<1, V4>& s2, const ShGeneric<1, V5>& s3)
-  : ShGeneric<4, V>(new ShVariableNode(Binding, 4,V))
+ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T2>& s0, const ShGeneric<1, T3>& s1, const ShGeneric<1, T4>& s2, const ShGeneric<1, T5>& s3)
+  : ShGeneric<4, T>(new ShVariableNode(Binding, 4, ShStorageTypeInfo<T>::value_type))
 {
   if (Binding == SH_CONST) {
     SH_DEBUG_ASSERT(s0.hasValues());
@@ -1362,248 +1362,248 @@ ShAttrib<4, Binding, V, Swizzled>::ShAttrib(const ShGeneric<1, V2>& s0, const Sh
   }
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<4, Binding, V, Swizzled>::~ShAttrib()
+ShAttrib<4, Binding, T, Swizzled>::~ShAttrib()
 {
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<4, Binding, V, Swizzled>&
-ShAttrib<4, Binding, V, Swizzled>::operator=(const ShGeneric<4, V2>& other)
-{
-  ParentType::operator=(other);
-  return *this;
-}
-
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-inline
-ShAttrib<4, Binding, V, Swizzled>&
-ShAttrib<4, Binding, V, Swizzled>::operator=(const ShAttrib<4, Binding, V, Swizzled>& other)
+ShAttrib<4, Binding, T, Swizzled>&
+ShAttrib<4, Binding, T, Swizzled>::operator=(const ShGeneric<4, T2>& other)
 {
   ParentType::operator=(other);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<4, Binding, V, Swizzled>&
-ShAttrib<4, Binding, V, Swizzled>::operator=(const ShAttrib<4, Binding, V2, Swizzled>& other)
+ShAttrib<4, Binding, T, Swizzled>&
+ShAttrib<4, Binding, T, Swizzled>::operator=(const ShAttrib<4, Binding, T, Swizzled>& other)
 {
   ParentType::operator=(other);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<4, Binding, V, Swizzled>&
-ShAttrib<4, Binding, V, Swizzled>::operator=(const ShProgram& prg)
+ShAttrib<4, Binding, T, Swizzled>&
+ShAttrib<4, Binding, T, Swizzled>::operator=(const ShAttrib<4, Binding, T2, Swizzled>& other)
+{
+  ParentType::operator=(other);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShAttrib<4, Binding, T, Swizzled>&
+ShAttrib<4, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 {
   ParentType::operator=(prg);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<4, Binding, V, Swizzled>&
-ShAttrib<4, Binding, V, Swizzled>::operator+=(const ShGeneric<4, V2>& right)
+ShAttrib<4, Binding, T, Swizzled>&
+ShAttrib<4, Binding, T, Swizzled>::operator+=(const ShGeneric<4, T2>& right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<4, Binding, V, Swizzled>&
-ShAttrib<4, Binding, V, Swizzled>::operator-=(const ShGeneric<4, V2>& right)
+ShAttrib<4, Binding, T, Swizzled>&
+ShAttrib<4, Binding, T, Swizzled>::operator-=(const ShGeneric<4, T2>& right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<4, Binding, V, Swizzled>&
-ShAttrib<4, Binding, V, Swizzled>::operator*=(const ShGeneric<4, V2>& right)
+ShAttrib<4, Binding, T, Swizzled>&
+ShAttrib<4, Binding, T, Swizzled>::operator*=(const ShGeneric<4, T2>& right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<4, Binding, V, Swizzled>&
-ShAttrib<4, Binding, V, Swizzled>::operator/=(const ShGeneric<4, V2>& right)
+ShAttrib<4, Binding, T, Swizzled>&
+ShAttrib<4, Binding, T, Swizzled>::operator/=(const ShGeneric<4, T2>& right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<4, Binding, V, Swizzled>&
-ShAttrib<4, Binding, V, Swizzled>::operator%=(const ShGeneric<4, V2>& right)
+ShAttrib<4, Binding, T, Swizzled>&
+ShAttrib<4, Binding, T, Swizzled>::operator%=(const ShGeneric<4, T2>& right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<4, Binding, V, Swizzled>&
-ShAttrib<4, Binding, V, Swizzled>::operator+=(H right)
+ShAttrib<4, Binding, T, Swizzled>&
+ShAttrib<4, Binding, T, Swizzled>::operator+=(host_type right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<4, Binding, V, Swizzled>&
-ShAttrib<4, Binding, V, Swizzled>::operator-=(H right)
+ShAttrib<4, Binding, T, Swizzled>&
+ShAttrib<4, Binding, T, Swizzled>::operator-=(host_type right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<4, Binding, V, Swizzled>&
-ShAttrib<4, Binding, V, Swizzled>::operator*=(H right)
+ShAttrib<4, Binding, T, Swizzled>&
+ShAttrib<4, Binding, T, Swizzled>::operator*=(host_type right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<4, Binding, V, Swizzled>&
-ShAttrib<4, Binding, V, Swizzled>::operator/=(H right)
+ShAttrib<4, Binding, T, Swizzled>&
+ShAttrib<4, Binding, T, Swizzled>::operator/=(host_type right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<4, Binding, V, Swizzled>&
-ShAttrib<4, Binding, V, Swizzled>::operator%=(H right)
+ShAttrib<4, Binding, T, Swizzled>&
+ShAttrib<4, Binding, T, Swizzled>::operator%=(host_type right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<4, Binding, V, Swizzled>&
-ShAttrib<4, Binding, V, Swizzled>::operator+=(const ShGeneric<1, V2>& right)
+ShAttrib<4, Binding, T, Swizzled>&
+ShAttrib<4, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator+=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<4, Binding, V, Swizzled>&
-ShAttrib<4, Binding, V, Swizzled>::operator-=(const ShGeneric<1, V2>& right)
+ShAttrib<4, Binding, T, Swizzled>&
+ShAttrib<4, Binding, T, Swizzled>::operator-=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator-=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<4, Binding, V, Swizzled>&
-ShAttrib<4, Binding, V, Swizzled>::operator*=(const ShGeneric<1, V2>& right)
+ShAttrib<4, Binding, T, Swizzled>&
+ShAttrib<4, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator*=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<4, Binding, V, Swizzled>&
-ShAttrib<4, Binding, V, Swizzled>::operator/=(const ShGeneric<1, V2>& right)
+ShAttrib<4, Binding, T, Swizzled>&
+ShAttrib<4, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator/=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-template<ShValueType V2>
+template<ShBindingType Binding, typename T, bool Swizzled>
+template<typename T2>
 inline
-ShAttrib<4, Binding, V, Swizzled>&
-ShAttrib<4, Binding, V, Swizzled>::operator%=(const ShGeneric<1, V2>& right)
+ShAttrib<4, Binding, T, Swizzled>&
+ShAttrib<4, Binding, T, Swizzled>::operator%=(const ShGeneric<1, T2>& right)
 {
   ParentType::operator%=(right);
   return *this;
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<1, Binding, V, true>
-ShAttrib<4, Binding, V, Swizzled>::operator()(int s0) const
+ShAttrib<1, Binding, T, true>
+ShAttrib<4, Binding, T, Swizzled>::operator()(int s0) const
 {
-  return ShAttrib<1, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(4, s0), this->m_neg);
+  return ShAttrib<1, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(4, s0), this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<2, Binding, V, true>
-ShAttrib<4, Binding, V, Swizzled>::operator()(int s0, int s1) const
+ShAttrib<2, Binding, T, true>
+ShAttrib<4, Binding, T, Swizzled>::operator()(int s0, int s1) const
 {
-  return ShAttrib<2, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(4, s0, s1), this->m_neg);
+  return ShAttrib<2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(4, s0, s1), this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<3, Binding, V, true>
-ShAttrib<4, Binding, V, Swizzled>::operator()(int s0, int s1, int s2) const
+ShAttrib<3, Binding, T, true>
+ShAttrib<4, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
 {
-  return ShAttrib<3, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(4, s0, s1, s2), this->m_neg);
+  return ShAttrib<3, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(4, s0, s1, s2), this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<4, Binding, V, true>
-ShAttrib<4, Binding, V, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
+ShAttrib<4, Binding, T, true>
+ShAttrib<4, Binding, T, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
 {
-  return ShAttrib<4, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(4, s0, s1, s2, s3), this->m_neg);
+  return ShAttrib<4, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(4, s0, s1, s2, s3), this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 template<int N2>
-ShAttrib<N2, Binding, V, true>
-ShAttrib<4, Binding, V, Swizzled>::swiz(int indices[]) const
+ShAttrib<N2, Binding, T, true>
+ShAttrib<4, Binding, T, Swizzled>::swiz(int indices[]) const
 {
-  return ShAttrib<N2, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(4, N2, indices), this->m_neg);
+  return ShAttrib<N2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(4, N2, indices), this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
+template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShAttrib<1, Binding, V, true>
-ShAttrib<4, Binding, V, Swizzled>::operator[](int s0) const
+ShAttrib<1, Binding, T, true>
+ShAttrib<4, Binding, T, Swizzled>::operator[](int s0) const
 {
-  return ShAttrib<1, Binding, V, true>(this->m_node, this->m_swizzle * ShSwizzle(4, s0), this->m_neg);
+  return ShAttrib<1, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(4, s0), this->m_neg);
 }
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-ShAttrib<4, Binding, V, Swizzled>
-ShAttrib<4, Binding, V, Swizzled>::operator-() const
+template<ShBindingType Binding, typename T, bool Swizzled>
+ShAttrib<4, Binding, T, Swizzled>
+ShAttrib<4, Binding, T, Swizzled>::operator-() const
 {
-  return ShAttrib<4, Binding, V, Swizzled>(this->m_node, this->m_swizzle, !this->m_neg);
+  return ShAttrib<4, Binding, T, Swizzled>(this->m_node, this->m_swizzle, !this->m_neg);
 }
 
 

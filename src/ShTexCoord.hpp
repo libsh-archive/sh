@@ -41,819 +41,809 @@ namespace SH {
  * 
  *
  */
-template<int N, ShBindingType Binding, ShValueType V=SH_FLOAT, bool Swizzled=false>
-class ShTexCoord : public ShAttrib<N, Binding, V, Swizzled> {
+template<int N, ShBindingType Binding, typename T=float, bool Swizzled=false>
+class ShTexCoord : public ShAttrib<N, Binding, T, Swizzled> {
 public:
-  static const ShValueType value_type = V;
+  typedef T storage_type;
+  typedef typename ShHostType<T>::type host_type; 
+  typedef typename ShMemType<T>::type mem_type; 
   static const ShBindingType binding_type = Binding;
   static const ShSemanticType semantic_type = SH_TEXCOORD;
-  typedef typename ShHostType<V>::type H; 
-  typedef H HostType; 
-  typedef typename ShMemType<V>::type MemType; 
-  static const int typesize = N;
 
-  typedef ShTexCoord<N, SH_INPUT, V> InputType;
-  typedef ShTexCoord<N, SH_OUTPUT, V> OutputType;
-  typedef ShTexCoord<N, SH_INOUT, V> InOutType;
-  typedef ShTexCoord<N, SH_TEMP, V> TempType;
-  typedef ShTexCoord<N, SH_CONST, V> ConstType;
+  typedef ShTexCoord<N, SH_INPUT, T> InputType;
+  typedef ShTexCoord<N, SH_OUTPUT, T> OutputType;
+  typedef ShTexCoord<N, SH_INOUT, T> InOutType;
+  typedef ShTexCoord<N, SH_TEMP, T> TempType;
+  typedef ShTexCoord<N, SH_CONST, T> ConstType;
   ShTexCoord();
   
-  template<ShValueType V2>
-  ShTexCoord(const ShGeneric<N, V2>& other);
-  ShTexCoord(const ShTexCoord<N, Binding, V, Swizzled>& other);
+  template<typename T2>
+  ShTexCoord(const ShGeneric<N, T2>& other);
+  ShTexCoord(const ShTexCoord<N, Binding, T, Swizzled>& other);
   
-  template<ShValueType V2>
-  ShTexCoord(const ShTexCoord<N, Binding, V2, Swizzled>& other);
+  template<typename T2>
+  ShTexCoord(const ShTexCoord<N, Binding, T2, Swizzled>& other);
   ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShTexCoord(H data[N]);
+  explicit ShTexCoord(host_type data[N]);
   
   ~ShTexCoord();
 
   
-  template<ShValueType V2>
-  ShTexCoord& operator=(const ShGeneric<N, V2>& other);
+  template<typename T2>
+  ShTexCoord& operator=(const ShGeneric<N, T2>& other);
   
-  template<ShValueType V2>
-  ShTexCoord& operator=(const ShTexCoord<N, Binding, V2, Swizzled>& other);
-  ShTexCoord& operator=(const ShTexCoord<N, Binding, V, Swizzled>& other);
+  template<typename T2>
+  ShTexCoord& operator=(const ShTexCoord<N, Binding, T2, Swizzled>& other);
+  ShTexCoord& operator=(const ShTexCoord<N, Binding, T, Swizzled>& other);
 
   ShTexCoord& operator=(const ShProgram& prg);
 
   
-  template<ShValueType V2>
-  ShTexCoord& operator+=(const ShGeneric<N, V2>& right);
+  template<typename T2>
+  ShTexCoord& operator+=(const ShGeneric<N, T2>& right);
   
-  template<ShValueType V2>
-  ShTexCoord& operator-=(const ShGeneric<N, V2>& right);
+  template<typename T2>
+  ShTexCoord& operator-=(const ShGeneric<N, T2>& right);
   
-  template<ShValueType V2>
-  ShTexCoord& operator*=(const ShGeneric<N, V2>& right);
+  template<typename T2>
+  ShTexCoord& operator*=(const ShGeneric<N, T2>& right);
   
-  template<ShValueType V2>
-  ShTexCoord& operator/=(const ShGeneric<N, V2>& right);
+  template<typename T2>
+  ShTexCoord& operator/=(const ShGeneric<N, T2>& right);
   
-  template<ShValueType V2>
-  ShTexCoord& operator%=(const ShGeneric<N, V2>& right);
-  ShTexCoord& operator*=(H);
-  ShTexCoord& operator/=(H);
-  ShTexCoord& operator%=(H);
-  ShTexCoord& operator+=(H);
-  ShTexCoord& operator-=(H);
+  template<typename T2>
+  ShTexCoord& operator%=(const ShGeneric<N, T2>& right);
+  ShTexCoord& operator*=(host_type);
+  ShTexCoord& operator/=(host_type);
+  ShTexCoord& operator%=(host_type);
+  ShTexCoord& operator+=(host_type);
+  ShTexCoord& operator-=(host_type);
   
-  template<ShValueType V2>
-  ShTexCoord& operator+=(const ShGeneric<1, V2>&);
+  template<typename T2>
+  ShTexCoord& operator+=(const ShGeneric<1, T2>&);
   
-  template<ShValueType V2>
-  ShTexCoord& operator-=(const ShGeneric<1, V2>&);
+  template<typename T2>
+  ShTexCoord& operator-=(const ShGeneric<1, T2>&);
   
-  template<ShValueType V2>
-  ShTexCoord& operator*=(const ShGeneric<1, V2>&);
+  template<typename T2>
+  ShTexCoord& operator*=(const ShGeneric<1, T2>&);
   
-  template<ShValueType V2>
-  ShTexCoord& operator/=(const ShGeneric<1, V2>&);
+  template<typename T2>
+  ShTexCoord& operator/=(const ShGeneric<1, T2>&);
   
-  template<ShValueType V2>
-  ShTexCoord& operator%=(const ShGeneric<1, V2>&);
-  ShTexCoord<1, Binding, V, true> operator()(int) const;
-  ShTexCoord<2, Binding, V, true> operator()(int, int) const;
-  ShTexCoord<3, Binding, V, true> operator()(int, int, int) const;
-  ShTexCoord<4, Binding, V, true> operator()(int, int, int, int) const;
-  ShTexCoord<1, Binding, V, true> operator[](int) const;
+  template<typename T2>
+  ShTexCoord& operator%=(const ShGeneric<1, T2>&);
+  ShTexCoord<1, Binding, T, true> operator()(int) const;
+  ShTexCoord<2, Binding, T, true> operator()(int, int) const;
+  ShTexCoord<3, Binding, T, true> operator()(int, int, int) const;
+  ShTexCoord<4, Binding, T, true> operator()(int, int, int, int) const;
+  ShTexCoord<1, Binding, T, true> operator[](int) const;
   
   template<int N2>
-  ShTexCoord<N2, Binding, V, true> swiz(int indices[]) const;
+  ShTexCoord<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShTexCoord operator-() const;
   private:
-    typedef ShAttrib<N, Binding, V, Swizzled> ParentType;
+    typedef ShAttrib<N, Binding, T, Swizzled> ParentType;
 };
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-class ShTexCoord<1, Binding, V, Swizzled> : public ShAttrib<1, Binding, V, Swizzled> {
+template<ShBindingType Binding, typename T, bool Swizzled>
+class ShTexCoord<1, Binding, T, Swizzled> : public ShAttrib<1, Binding, T, Swizzled> {
 public:
-  static const ShValueType value_type = V;
+  typedef T storage_type;
+  typedef typename ShHostType<T>::type host_type; 
+  typedef typename ShMemType<T>::type mem_type; 
   static const ShBindingType binding_type = Binding;
   static const ShSemanticType semantic_type = SH_TEXCOORD;
-  typedef typename ShHostType<V>::type H; 
-  typedef H HostType; 
-  typedef typename ShMemType<V>::type MemType; 
-  static const int typesize = 1;
 
-  typedef ShTexCoord<1, SH_INPUT, V> InputType;
-  typedef ShTexCoord<1, SH_OUTPUT, V> OutputType;
-  typedef ShTexCoord<1, SH_INOUT, V> InOutType;
-  typedef ShTexCoord<1, SH_TEMP, V> TempType;
-  typedef ShTexCoord<1, SH_CONST, V> ConstType;
+  typedef ShTexCoord<1, SH_INPUT, T> InputType;
+  typedef ShTexCoord<1, SH_OUTPUT, T> OutputType;
+  typedef ShTexCoord<1, SH_INOUT, T> InOutType;
+  typedef ShTexCoord<1, SH_TEMP, T> TempType;
+  typedef ShTexCoord<1, SH_CONST, T> ConstType;
   ShTexCoord();
   
-  template<ShValueType V2>
-  ShTexCoord(const ShGeneric<1, V2>& other);
-  ShTexCoord(const ShTexCoord<1, Binding, V, Swizzled>& other);
+  template<typename T2>
+  ShTexCoord(const ShGeneric<1, T2>& other);
+  ShTexCoord(const ShTexCoord<1, Binding, T, Swizzled>& other);
   
-  template<ShValueType V2>
-  ShTexCoord(const ShTexCoord<1, Binding, V2, Swizzled>& other);
+  template<typename T2>
+  ShTexCoord(const ShTexCoord<1, Binding, T2, Swizzled>& other);
   ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShTexCoord(H data[1]);
+  explicit ShTexCoord(host_type data[1]);
   
-  ShTexCoord(H);
+  ShTexCoord(host_type);
   
   ~ShTexCoord();
 
   
-  template<ShValueType V2>
-  ShTexCoord& operator=(const ShGeneric<1, V2>& other);
+  template<typename T2>
+  ShTexCoord& operator=(const ShGeneric<1, T2>& other);
   
-  template<ShValueType V2>
-  ShTexCoord& operator=(const ShTexCoord<1, Binding, V2, Swizzled>& other);
-  ShTexCoord& operator=(const ShTexCoord<1, Binding, V, Swizzled>& other);
+  template<typename T2>
+  ShTexCoord& operator=(const ShTexCoord<1, Binding, T2, Swizzled>& other);
+  ShTexCoord& operator=(const ShTexCoord<1, Binding, T, Swizzled>& other);
 
-  ShTexCoord& operator=(H other);
+  ShTexCoord& operator=(host_type other);
 
   ShTexCoord& operator=(const ShProgram& prg);
 
   
-  template<ShValueType V2>
-  ShTexCoord& operator+=(const ShGeneric<1, V2>& right);
+  template<typename T2>
+  ShTexCoord& operator+=(const ShGeneric<1, T2>& right);
   
-  template<ShValueType V2>
-  ShTexCoord& operator-=(const ShGeneric<1, V2>& right);
+  template<typename T2>
+  ShTexCoord& operator-=(const ShGeneric<1, T2>& right);
   
-  template<ShValueType V2>
-  ShTexCoord& operator*=(const ShGeneric<1, V2>& right);
+  template<typename T2>
+  ShTexCoord& operator*=(const ShGeneric<1, T2>& right);
   
-  template<ShValueType V2>
-  ShTexCoord& operator/=(const ShGeneric<1, V2>& right);
+  template<typename T2>
+  ShTexCoord& operator/=(const ShGeneric<1, T2>& right);
   
-  template<ShValueType V2>
-  ShTexCoord& operator%=(const ShGeneric<1, V2>& right);
-  ShTexCoord& operator*=(H);
-  ShTexCoord& operator/=(H);
-  ShTexCoord& operator%=(H);
-  ShTexCoord& operator+=(H);
-  ShTexCoord& operator-=(H);
-  ShTexCoord<1, Binding, V, true> operator()(int) const;
-  ShTexCoord<2, Binding, V, true> operator()(int, int) const;
-  ShTexCoord<3, Binding, V, true> operator()(int, int, int) const;
-  ShTexCoord<4, Binding, V, true> operator()(int, int, int, int) const;
-  ShTexCoord<1, Binding, V, true> operator[](int) const;
+  template<typename T2>
+  ShTexCoord& operator%=(const ShGeneric<1, T2>& right);
+  ShTexCoord& operator*=(host_type);
+  ShTexCoord& operator/=(host_type);
+  ShTexCoord& operator%=(host_type);
+  ShTexCoord& operator+=(host_type);
+  ShTexCoord& operator-=(host_type);
+  ShTexCoord<1, Binding, T, true> operator()(int) const;
+  ShTexCoord<2, Binding, T, true> operator()(int, int) const;
+  ShTexCoord<3, Binding, T, true> operator()(int, int, int) const;
+  ShTexCoord<4, Binding, T, true> operator()(int, int, int, int) const;
+  ShTexCoord<1, Binding, T, true> operator[](int) const;
   
   template<int N2>
-  ShTexCoord<N2, Binding, V, true> swiz(int indices[]) const;
+  ShTexCoord<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShTexCoord operator-() const;
   private:
-    typedef ShAttrib<1, Binding, V, Swizzled> ParentType;
+    typedef ShAttrib<1, Binding, T, Swizzled> ParentType;
 };
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-class ShTexCoord<2, Binding, V, Swizzled> : public ShAttrib<2, Binding, V, Swizzled> {
+template<ShBindingType Binding, typename T, bool Swizzled>
+class ShTexCoord<2, Binding, T, Swizzled> : public ShAttrib<2, Binding, T, Swizzled> {
 public:
-  static const ShValueType value_type = V;
+  typedef T storage_type;
+  typedef typename ShHostType<T>::type host_type; 
+  typedef typename ShMemType<T>::type mem_type; 
   static const ShBindingType binding_type = Binding;
   static const ShSemanticType semantic_type = SH_TEXCOORD;
-  typedef typename ShHostType<V>::type H; 
-  typedef H HostType; 
-  typedef typename ShMemType<V>::type MemType; 
-  static const int typesize = 2;
 
-  typedef ShTexCoord<2, SH_INPUT, V> InputType;
-  typedef ShTexCoord<2, SH_OUTPUT, V> OutputType;
-  typedef ShTexCoord<2, SH_INOUT, V> InOutType;
-  typedef ShTexCoord<2, SH_TEMP, V> TempType;
-  typedef ShTexCoord<2, SH_CONST, V> ConstType;
+  typedef ShTexCoord<2, SH_INPUT, T> InputType;
+  typedef ShTexCoord<2, SH_OUTPUT, T> OutputType;
+  typedef ShTexCoord<2, SH_INOUT, T> InOutType;
+  typedef ShTexCoord<2, SH_TEMP, T> TempType;
+  typedef ShTexCoord<2, SH_CONST, T> ConstType;
   ShTexCoord();
   
-  template<ShValueType V2>
-  ShTexCoord(const ShGeneric<2, V2>& other);
-  ShTexCoord(const ShTexCoord<2, Binding, V, Swizzled>& other);
+  template<typename T2>
+  ShTexCoord(const ShGeneric<2, T2>& other);
+  ShTexCoord(const ShTexCoord<2, Binding, T, Swizzled>& other);
   
-  template<ShValueType V2>
-  ShTexCoord(const ShTexCoord<2, Binding, V2, Swizzled>& other);
+  template<typename T2>
+  ShTexCoord(const ShTexCoord<2, Binding, T2, Swizzled>& other);
   ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShTexCoord(H data[2]);
+  explicit ShTexCoord(host_type data[2]);
   
-  ShTexCoord(H, H);
-  template<ShValueType V2, ShValueType V3>
-  ShTexCoord(const ShGeneric<1, V2>&, const ShGeneric<1, V3>&);
+  ShTexCoord(host_type, host_type);
+  template<typename T2, typename T3>
+  ShTexCoord(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&);
   
   ~ShTexCoord();
 
   
-  template<ShValueType V2>
-  ShTexCoord& operator=(const ShGeneric<2, V2>& other);
+  template<typename T2>
+  ShTexCoord& operator=(const ShGeneric<2, T2>& other);
   
-  template<ShValueType V2>
-  ShTexCoord& operator=(const ShTexCoord<2, Binding, V2, Swizzled>& other);
-  ShTexCoord& operator=(const ShTexCoord<2, Binding, V, Swizzled>& other);
+  template<typename T2>
+  ShTexCoord& operator=(const ShTexCoord<2, Binding, T2, Swizzled>& other);
+  ShTexCoord& operator=(const ShTexCoord<2, Binding, T, Swizzled>& other);
 
   ShTexCoord& operator=(const ShProgram& prg);
 
   
-  template<ShValueType V2>
-  ShTexCoord& operator+=(const ShGeneric<2, V2>& right);
+  template<typename T2>
+  ShTexCoord& operator+=(const ShGeneric<2, T2>& right);
   
-  template<ShValueType V2>
-  ShTexCoord& operator-=(const ShGeneric<2, V2>& right);
+  template<typename T2>
+  ShTexCoord& operator-=(const ShGeneric<2, T2>& right);
   
-  template<ShValueType V2>
-  ShTexCoord& operator*=(const ShGeneric<2, V2>& right);
+  template<typename T2>
+  ShTexCoord& operator*=(const ShGeneric<2, T2>& right);
   
-  template<ShValueType V2>
-  ShTexCoord& operator/=(const ShGeneric<2, V2>& right);
+  template<typename T2>
+  ShTexCoord& operator/=(const ShGeneric<2, T2>& right);
   
-  template<ShValueType V2>
-  ShTexCoord& operator%=(const ShGeneric<2, V2>& right);
-  ShTexCoord& operator*=(H);
-  ShTexCoord& operator/=(H);
-  ShTexCoord& operator%=(H);
-  ShTexCoord& operator+=(H);
-  ShTexCoord& operator-=(H);
+  template<typename T2>
+  ShTexCoord& operator%=(const ShGeneric<2, T2>& right);
+  ShTexCoord& operator*=(host_type);
+  ShTexCoord& operator/=(host_type);
+  ShTexCoord& operator%=(host_type);
+  ShTexCoord& operator+=(host_type);
+  ShTexCoord& operator-=(host_type);
   
-  template<ShValueType V2>
-  ShTexCoord& operator+=(const ShGeneric<1, V2>&);
+  template<typename T2>
+  ShTexCoord& operator+=(const ShGeneric<1, T2>&);
   
-  template<ShValueType V2>
-  ShTexCoord& operator-=(const ShGeneric<1, V2>&);
+  template<typename T2>
+  ShTexCoord& operator-=(const ShGeneric<1, T2>&);
   
-  template<ShValueType V2>
-  ShTexCoord& operator*=(const ShGeneric<1, V2>&);
+  template<typename T2>
+  ShTexCoord& operator*=(const ShGeneric<1, T2>&);
   
-  template<ShValueType V2>
-  ShTexCoord& operator/=(const ShGeneric<1, V2>&);
+  template<typename T2>
+  ShTexCoord& operator/=(const ShGeneric<1, T2>&);
   
-  template<ShValueType V2>
-  ShTexCoord& operator%=(const ShGeneric<1, V2>&);
-  ShTexCoord<1, Binding, V, true> operator()(int) const;
-  ShTexCoord<2, Binding, V, true> operator()(int, int) const;
-  ShTexCoord<3, Binding, V, true> operator()(int, int, int) const;
-  ShTexCoord<4, Binding, V, true> operator()(int, int, int, int) const;
-  ShTexCoord<1, Binding, V, true> operator[](int) const;
+  template<typename T2>
+  ShTexCoord& operator%=(const ShGeneric<1, T2>&);
+  ShTexCoord<1, Binding, T, true> operator()(int) const;
+  ShTexCoord<2, Binding, T, true> operator()(int, int) const;
+  ShTexCoord<3, Binding, T, true> operator()(int, int, int) const;
+  ShTexCoord<4, Binding, T, true> operator()(int, int, int, int) const;
+  ShTexCoord<1, Binding, T, true> operator[](int) const;
   
   template<int N2>
-  ShTexCoord<N2, Binding, V, true> swiz(int indices[]) const;
+  ShTexCoord<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShTexCoord operator-() const;
   private:
-    typedef ShAttrib<2, Binding, V, Swizzled> ParentType;
+    typedef ShAttrib<2, Binding, T, Swizzled> ParentType;
 };
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-class ShTexCoord<3, Binding, V, Swizzled> : public ShAttrib<3, Binding, V, Swizzled> {
+template<ShBindingType Binding, typename T, bool Swizzled>
+class ShTexCoord<3, Binding, T, Swizzled> : public ShAttrib<3, Binding, T, Swizzled> {
 public:
-  static const ShValueType value_type = V;
+  typedef T storage_type;
+  typedef typename ShHostType<T>::type host_type; 
+  typedef typename ShMemType<T>::type mem_type; 
   static const ShBindingType binding_type = Binding;
   static const ShSemanticType semantic_type = SH_TEXCOORD;
-  typedef typename ShHostType<V>::type H; 
-  typedef H HostType; 
-  typedef typename ShMemType<V>::type MemType; 
-  static const int typesize = 3;
 
-  typedef ShTexCoord<3, SH_INPUT, V> InputType;
-  typedef ShTexCoord<3, SH_OUTPUT, V> OutputType;
-  typedef ShTexCoord<3, SH_INOUT, V> InOutType;
-  typedef ShTexCoord<3, SH_TEMP, V> TempType;
-  typedef ShTexCoord<3, SH_CONST, V> ConstType;
+  typedef ShTexCoord<3, SH_INPUT, T> InputType;
+  typedef ShTexCoord<3, SH_OUTPUT, T> OutputType;
+  typedef ShTexCoord<3, SH_INOUT, T> InOutType;
+  typedef ShTexCoord<3, SH_TEMP, T> TempType;
+  typedef ShTexCoord<3, SH_CONST, T> ConstType;
   ShTexCoord();
   
-  template<ShValueType V2>
-  ShTexCoord(const ShGeneric<3, V2>& other);
-  ShTexCoord(const ShTexCoord<3, Binding, V, Swizzled>& other);
+  template<typename T2>
+  ShTexCoord(const ShGeneric<3, T2>& other);
+  ShTexCoord(const ShTexCoord<3, Binding, T, Swizzled>& other);
   
-  template<ShValueType V2>
-  ShTexCoord(const ShTexCoord<3, Binding, V2, Swizzled>& other);
+  template<typename T2>
+  ShTexCoord(const ShTexCoord<3, Binding, T2, Swizzled>& other);
   ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShTexCoord(H data[3]);
+  explicit ShTexCoord(host_type data[3]);
   
-  ShTexCoord(H, H, H);
-  template<ShValueType V2, ShValueType V3, ShValueType V4>
-  ShTexCoord(const ShGeneric<1, V2>&, const ShGeneric<1, V3>&, const ShGeneric<1, V4>&);
+  ShTexCoord(host_type, host_type, host_type);
+  template<typename T2, typename T3, typename T4>
+  ShTexCoord(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&);
   
   ~ShTexCoord();
 
   
-  template<ShValueType V2>
-  ShTexCoord& operator=(const ShGeneric<3, V2>& other);
+  template<typename T2>
+  ShTexCoord& operator=(const ShGeneric<3, T2>& other);
   
-  template<ShValueType V2>
-  ShTexCoord& operator=(const ShTexCoord<3, Binding, V2, Swizzled>& other);
-  ShTexCoord& operator=(const ShTexCoord<3, Binding, V, Swizzled>& other);
+  template<typename T2>
+  ShTexCoord& operator=(const ShTexCoord<3, Binding, T2, Swizzled>& other);
+  ShTexCoord& operator=(const ShTexCoord<3, Binding, T, Swizzled>& other);
 
   ShTexCoord& operator=(const ShProgram& prg);
 
   
-  template<ShValueType V2>
-  ShTexCoord& operator+=(const ShGeneric<3, V2>& right);
+  template<typename T2>
+  ShTexCoord& operator+=(const ShGeneric<3, T2>& right);
   
-  template<ShValueType V2>
-  ShTexCoord& operator-=(const ShGeneric<3, V2>& right);
+  template<typename T2>
+  ShTexCoord& operator-=(const ShGeneric<3, T2>& right);
   
-  template<ShValueType V2>
-  ShTexCoord& operator*=(const ShGeneric<3, V2>& right);
+  template<typename T2>
+  ShTexCoord& operator*=(const ShGeneric<3, T2>& right);
   
-  template<ShValueType V2>
-  ShTexCoord& operator/=(const ShGeneric<3, V2>& right);
+  template<typename T2>
+  ShTexCoord& operator/=(const ShGeneric<3, T2>& right);
   
-  template<ShValueType V2>
-  ShTexCoord& operator%=(const ShGeneric<3, V2>& right);
-  ShTexCoord& operator*=(H);
-  ShTexCoord& operator/=(H);
-  ShTexCoord& operator%=(H);
-  ShTexCoord& operator+=(H);
-  ShTexCoord& operator-=(H);
+  template<typename T2>
+  ShTexCoord& operator%=(const ShGeneric<3, T2>& right);
+  ShTexCoord& operator*=(host_type);
+  ShTexCoord& operator/=(host_type);
+  ShTexCoord& operator%=(host_type);
+  ShTexCoord& operator+=(host_type);
+  ShTexCoord& operator-=(host_type);
   
-  template<ShValueType V2>
-  ShTexCoord& operator+=(const ShGeneric<1, V2>&);
+  template<typename T2>
+  ShTexCoord& operator+=(const ShGeneric<1, T2>&);
   
-  template<ShValueType V2>
-  ShTexCoord& operator-=(const ShGeneric<1, V2>&);
+  template<typename T2>
+  ShTexCoord& operator-=(const ShGeneric<1, T2>&);
   
-  template<ShValueType V2>
-  ShTexCoord& operator*=(const ShGeneric<1, V2>&);
+  template<typename T2>
+  ShTexCoord& operator*=(const ShGeneric<1, T2>&);
   
-  template<ShValueType V2>
-  ShTexCoord& operator/=(const ShGeneric<1, V2>&);
+  template<typename T2>
+  ShTexCoord& operator/=(const ShGeneric<1, T2>&);
   
-  template<ShValueType V2>
-  ShTexCoord& operator%=(const ShGeneric<1, V2>&);
-  ShTexCoord<1, Binding, V, true> operator()(int) const;
-  ShTexCoord<2, Binding, V, true> operator()(int, int) const;
-  ShTexCoord<3, Binding, V, true> operator()(int, int, int) const;
-  ShTexCoord<4, Binding, V, true> operator()(int, int, int, int) const;
-  ShTexCoord<1, Binding, V, true> operator[](int) const;
+  template<typename T2>
+  ShTexCoord& operator%=(const ShGeneric<1, T2>&);
+  ShTexCoord<1, Binding, T, true> operator()(int) const;
+  ShTexCoord<2, Binding, T, true> operator()(int, int) const;
+  ShTexCoord<3, Binding, T, true> operator()(int, int, int) const;
+  ShTexCoord<4, Binding, T, true> operator()(int, int, int, int) const;
+  ShTexCoord<1, Binding, T, true> operator[](int) const;
   
   template<int N2>
-  ShTexCoord<N2, Binding, V, true> swiz(int indices[]) const;
+  ShTexCoord<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShTexCoord operator-() const;
   private:
-    typedef ShAttrib<3, Binding, V, Swizzled> ParentType;
+    typedef ShAttrib<3, Binding, T, Swizzled> ParentType;
 };
 
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-class ShTexCoord<4, Binding, V, Swizzled> : public ShAttrib<4, Binding, V, Swizzled> {
+template<ShBindingType Binding, typename T, bool Swizzled>
+class ShTexCoord<4, Binding, T, Swizzled> : public ShAttrib<4, Binding, T, Swizzled> {
 public:
-  static const ShValueType value_type = V;
+  typedef T storage_type;
+  typedef typename ShHostType<T>::type host_type; 
+  typedef typename ShMemType<T>::type mem_type; 
   static const ShBindingType binding_type = Binding;
   static const ShSemanticType semantic_type = SH_TEXCOORD;
-  typedef typename ShHostType<V>::type H; 
-  typedef H HostType; 
-  typedef typename ShMemType<V>::type MemType; 
-  static const int typesize = 4;
 
-  typedef ShTexCoord<4, SH_INPUT, V> InputType;
-  typedef ShTexCoord<4, SH_OUTPUT, V> OutputType;
-  typedef ShTexCoord<4, SH_INOUT, V> InOutType;
-  typedef ShTexCoord<4, SH_TEMP, V> TempType;
-  typedef ShTexCoord<4, SH_CONST, V> ConstType;
+  typedef ShTexCoord<4, SH_INPUT, T> InputType;
+  typedef ShTexCoord<4, SH_OUTPUT, T> OutputType;
+  typedef ShTexCoord<4, SH_INOUT, T> InOutType;
+  typedef ShTexCoord<4, SH_TEMP, T> TempType;
+  typedef ShTexCoord<4, SH_CONST, T> ConstType;
   ShTexCoord();
   
-  template<ShValueType V2>
-  ShTexCoord(const ShGeneric<4, V2>& other);
-  ShTexCoord(const ShTexCoord<4, Binding, V, Swizzled>& other);
+  template<typename T2>
+  ShTexCoord(const ShGeneric<4, T2>& other);
+  ShTexCoord(const ShTexCoord<4, Binding, T, Swizzled>& other);
   
-  template<ShValueType V2>
-  ShTexCoord(const ShTexCoord<4, Binding, V2, Swizzled>& other);
+  template<typename T2>
+  ShTexCoord(const ShTexCoord<4, Binding, T2, Swizzled>& other);
   ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShTexCoord(H data[4]);
+  explicit ShTexCoord(host_type data[4]);
   
-  ShTexCoord(H, H, H, H);
-  template<ShValueType V2, ShValueType V3, ShValueType V4, ShValueType V5>
-  ShTexCoord(const ShGeneric<1, V2>&, const ShGeneric<1, V3>&, const ShGeneric<1, V4>&, const ShGeneric<1, V5>&);
+  ShTexCoord(host_type, host_type, host_type, host_type);
+  template<typename T2, typename T3, typename T4, typename T5>
+  ShTexCoord(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&, const ShGeneric<1, T5>&);
   
   ~ShTexCoord();
 
   
-  template<ShValueType V2>
-  ShTexCoord& operator=(const ShGeneric<4, V2>& other);
+  template<typename T2>
+  ShTexCoord& operator=(const ShGeneric<4, T2>& other);
   
-  template<ShValueType V2>
-  ShTexCoord& operator=(const ShTexCoord<4, Binding, V2, Swizzled>& other);
-  ShTexCoord& operator=(const ShTexCoord<4, Binding, V, Swizzled>& other);
+  template<typename T2>
+  ShTexCoord& operator=(const ShTexCoord<4, Binding, T2, Swizzled>& other);
+  ShTexCoord& operator=(const ShTexCoord<4, Binding, T, Swizzled>& other);
 
   ShTexCoord& operator=(const ShProgram& prg);
 
   
-  template<ShValueType V2>
-  ShTexCoord& operator+=(const ShGeneric<4, V2>& right);
+  template<typename T2>
+  ShTexCoord& operator+=(const ShGeneric<4, T2>& right);
   
-  template<ShValueType V2>
-  ShTexCoord& operator-=(const ShGeneric<4, V2>& right);
+  template<typename T2>
+  ShTexCoord& operator-=(const ShGeneric<4, T2>& right);
   
-  template<ShValueType V2>
-  ShTexCoord& operator*=(const ShGeneric<4, V2>& right);
+  template<typename T2>
+  ShTexCoord& operator*=(const ShGeneric<4, T2>& right);
   
-  template<ShValueType V2>
-  ShTexCoord& operator/=(const ShGeneric<4, V2>& right);
+  template<typename T2>
+  ShTexCoord& operator/=(const ShGeneric<4, T2>& right);
   
-  template<ShValueType V2>
-  ShTexCoord& operator%=(const ShGeneric<4, V2>& right);
-  ShTexCoord& operator*=(H);
-  ShTexCoord& operator/=(H);
-  ShTexCoord& operator%=(H);
-  ShTexCoord& operator+=(H);
-  ShTexCoord& operator-=(H);
+  template<typename T2>
+  ShTexCoord& operator%=(const ShGeneric<4, T2>& right);
+  ShTexCoord& operator*=(host_type);
+  ShTexCoord& operator/=(host_type);
+  ShTexCoord& operator%=(host_type);
+  ShTexCoord& operator+=(host_type);
+  ShTexCoord& operator-=(host_type);
   
-  template<ShValueType V2>
-  ShTexCoord& operator+=(const ShGeneric<1, V2>&);
+  template<typename T2>
+  ShTexCoord& operator+=(const ShGeneric<1, T2>&);
   
-  template<ShValueType V2>
-  ShTexCoord& operator-=(const ShGeneric<1, V2>&);
+  template<typename T2>
+  ShTexCoord& operator-=(const ShGeneric<1, T2>&);
   
-  template<ShValueType V2>
-  ShTexCoord& operator*=(const ShGeneric<1, V2>&);
+  template<typename T2>
+  ShTexCoord& operator*=(const ShGeneric<1, T2>&);
   
-  template<ShValueType V2>
-  ShTexCoord& operator/=(const ShGeneric<1, V2>&);
+  template<typename T2>
+  ShTexCoord& operator/=(const ShGeneric<1, T2>&);
   
-  template<ShValueType V2>
-  ShTexCoord& operator%=(const ShGeneric<1, V2>&);
-  ShTexCoord<1, Binding, V, true> operator()(int) const;
-  ShTexCoord<2, Binding, V, true> operator()(int, int) const;
-  ShTexCoord<3, Binding, V, true> operator()(int, int, int) const;
-  ShTexCoord<4, Binding, V, true> operator()(int, int, int, int) const;
-  ShTexCoord<1, Binding, V, true> operator[](int) const;
+  template<typename T2>
+  ShTexCoord& operator%=(const ShGeneric<1, T2>&);
+  ShTexCoord<1, Binding, T, true> operator()(int) const;
+  ShTexCoord<2, Binding, T, true> operator()(int, int) const;
+  ShTexCoord<3, Binding, T, true> operator()(int, int, int) const;
+  ShTexCoord<4, Binding, T, true> operator()(int, int, int, int) const;
+  ShTexCoord<1, Binding, T, true> operator[](int) const;
   
   template<int N2>
-  ShTexCoord<N2, Binding, V, true> swiz(int indices[]) const;
+  ShTexCoord<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShTexCoord operator-() const;
   private:
-    typedef ShAttrib<4, Binding, V, Swizzled> ParentType;
+    typedef ShAttrib<4, Binding, T, Swizzled> ParentType;
 };
 
-typedef ShTexCoord<1, SH_INPUT, SH_SHORT> ShInputTexCoord1s;
-typedef ShTexCoord<1, SH_OUTPUT, SH_SHORT> ShOutputTexCoord1s;
-typedef ShTexCoord<1, SH_INOUT, SH_SHORT> ShInOutTexCoord1s;
-typedef ShTexCoord<1, SH_TEMP, SH_SHORT> ShTexCoord1s;
-typedef ShTexCoord<1, SH_CONST, SH_SHORT> ShConstTexCoord1s;
-typedef ShTexCoord<2, SH_INPUT, SH_SHORT> ShInputTexCoord2s;
-typedef ShTexCoord<2, SH_OUTPUT, SH_SHORT> ShOutputTexCoord2s;
-typedef ShTexCoord<2, SH_INOUT, SH_SHORT> ShInOutTexCoord2s;
-typedef ShTexCoord<2, SH_TEMP, SH_SHORT> ShTexCoord2s;
-typedef ShTexCoord<2, SH_CONST, SH_SHORT> ShConstTexCoord2s;
-typedef ShTexCoord<3, SH_INPUT, SH_SHORT> ShInputTexCoord3s;
-typedef ShTexCoord<3, SH_OUTPUT, SH_SHORT> ShOutputTexCoord3s;
-typedef ShTexCoord<3, SH_INOUT, SH_SHORT> ShInOutTexCoord3s;
-typedef ShTexCoord<3, SH_TEMP, SH_SHORT> ShTexCoord3s;
-typedef ShTexCoord<3, SH_CONST, SH_SHORT> ShConstTexCoord3s;
-typedef ShTexCoord<4, SH_INPUT, SH_SHORT> ShInputTexCoord4s;
-typedef ShTexCoord<4, SH_OUTPUT, SH_SHORT> ShOutputTexCoord4s;
-typedef ShTexCoord<4, SH_INOUT, SH_SHORT> ShInOutTexCoord4s;
-typedef ShTexCoord<4, SH_TEMP, SH_SHORT> ShTexCoord4s;
-typedef ShTexCoord<4, SH_CONST, SH_SHORT> ShConstTexCoord4s;
+typedef ShTexCoord<1, SH_INPUT, ShInterval<double> > ShInputTexCoord1i_d;
+typedef ShTexCoord<1, SH_OUTPUT, ShInterval<double> > ShOutputTexCoord1i_d;
+typedef ShTexCoord<1, SH_INOUT, ShInterval<double> > ShInOutTexCoord1i_d;
+typedef ShTexCoord<1, SH_TEMP, ShInterval<double> > ShTexCoord1i_d;
+typedef ShTexCoord<1, SH_CONST, ShInterval<double> > ShConstTexCoord1i_d;
+typedef ShTexCoord<2, SH_INPUT, ShInterval<double> > ShInputTexCoord2i_d;
+typedef ShTexCoord<2, SH_OUTPUT, ShInterval<double> > ShOutputTexCoord2i_d;
+typedef ShTexCoord<2, SH_INOUT, ShInterval<double> > ShInOutTexCoord2i_d;
+typedef ShTexCoord<2, SH_TEMP, ShInterval<double> > ShTexCoord2i_d;
+typedef ShTexCoord<2, SH_CONST, ShInterval<double> > ShConstTexCoord2i_d;
+typedef ShTexCoord<3, SH_INPUT, ShInterval<double> > ShInputTexCoord3i_d;
+typedef ShTexCoord<3, SH_OUTPUT, ShInterval<double> > ShOutputTexCoord3i_d;
+typedef ShTexCoord<3, SH_INOUT, ShInterval<double> > ShInOutTexCoord3i_d;
+typedef ShTexCoord<3, SH_TEMP, ShInterval<double> > ShTexCoord3i_d;
+typedef ShTexCoord<3, SH_CONST, ShInterval<double> > ShConstTexCoord3i_d;
+typedef ShTexCoord<4, SH_INPUT, ShInterval<double> > ShInputTexCoord4i_d;
+typedef ShTexCoord<4, SH_OUTPUT, ShInterval<double> > ShOutputTexCoord4i_d;
+typedef ShTexCoord<4, SH_INOUT, ShInterval<double> > ShInOutTexCoord4i_d;
+typedef ShTexCoord<4, SH_TEMP, ShInterval<double> > ShTexCoord4i_d;
+typedef ShTexCoord<4, SH_CONST, ShInterval<double> > ShConstTexCoord4i_d;
 
 
-typedef ShTexCoord<1, SH_INPUT, SH_FRAC_UINT> ShInputTexCoord1fui;
-typedef ShTexCoord<1, SH_OUTPUT, SH_FRAC_UINT> ShOutputTexCoord1fui;
-typedef ShTexCoord<1, SH_INOUT, SH_FRAC_UINT> ShInOutTexCoord1fui;
-typedef ShTexCoord<1, SH_TEMP, SH_FRAC_UINT> ShTexCoord1fui;
-typedef ShTexCoord<1, SH_CONST, SH_FRAC_UINT> ShConstTexCoord1fui;
-typedef ShTexCoord<2, SH_INPUT, SH_FRAC_UINT> ShInputTexCoord2fui;
-typedef ShTexCoord<2, SH_OUTPUT, SH_FRAC_UINT> ShOutputTexCoord2fui;
-typedef ShTexCoord<2, SH_INOUT, SH_FRAC_UINT> ShInOutTexCoord2fui;
-typedef ShTexCoord<2, SH_TEMP, SH_FRAC_UINT> ShTexCoord2fui;
-typedef ShTexCoord<2, SH_CONST, SH_FRAC_UINT> ShConstTexCoord2fui;
-typedef ShTexCoord<3, SH_INPUT, SH_FRAC_UINT> ShInputTexCoord3fui;
-typedef ShTexCoord<3, SH_OUTPUT, SH_FRAC_UINT> ShOutputTexCoord3fui;
-typedef ShTexCoord<3, SH_INOUT, SH_FRAC_UINT> ShInOutTexCoord3fui;
-typedef ShTexCoord<3, SH_TEMP, SH_FRAC_UINT> ShTexCoord3fui;
-typedef ShTexCoord<3, SH_CONST, SH_FRAC_UINT> ShConstTexCoord3fui;
-typedef ShTexCoord<4, SH_INPUT, SH_FRAC_UINT> ShInputTexCoord4fui;
-typedef ShTexCoord<4, SH_OUTPUT, SH_FRAC_UINT> ShOutputTexCoord4fui;
-typedef ShTexCoord<4, SH_INOUT, SH_FRAC_UINT> ShInOutTexCoord4fui;
-typedef ShTexCoord<4, SH_TEMP, SH_FRAC_UINT> ShTexCoord4fui;
-typedef ShTexCoord<4, SH_CONST, SH_FRAC_UINT> ShConstTexCoord4fui;
+typedef ShTexCoord<1, SH_INPUT, ShFracUShort> ShInputTexCoord1fus;
+typedef ShTexCoord<1, SH_OUTPUT, ShFracUShort> ShOutputTexCoord1fus;
+typedef ShTexCoord<1, SH_INOUT, ShFracUShort> ShInOutTexCoord1fus;
+typedef ShTexCoord<1, SH_TEMP, ShFracUShort> ShTexCoord1fus;
+typedef ShTexCoord<1, SH_CONST, ShFracUShort> ShConstTexCoord1fus;
+typedef ShTexCoord<2, SH_INPUT, ShFracUShort> ShInputTexCoord2fus;
+typedef ShTexCoord<2, SH_OUTPUT, ShFracUShort> ShOutputTexCoord2fus;
+typedef ShTexCoord<2, SH_INOUT, ShFracUShort> ShInOutTexCoord2fus;
+typedef ShTexCoord<2, SH_TEMP, ShFracUShort> ShTexCoord2fus;
+typedef ShTexCoord<2, SH_CONST, ShFracUShort> ShConstTexCoord2fus;
+typedef ShTexCoord<3, SH_INPUT, ShFracUShort> ShInputTexCoord3fus;
+typedef ShTexCoord<3, SH_OUTPUT, ShFracUShort> ShOutputTexCoord3fus;
+typedef ShTexCoord<3, SH_INOUT, ShFracUShort> ShInOutTexCoord3fus;
+typedef ShTexCoord<3, SH_TEMP, ShFracUShort> ShTexCoord3fus;
+typedef ShTexCoord<3, SH_CONST, ShFracUShort> ShConstTexCoord3fus;
+typedef ShTexCoord<4, SH_INPUT, ShFracUShort> ShInputTexCoord4fus;
+typedef ShTexCoord<4, SH_OUTPUT, ShFracUShort> ShOutputTexCoord4fus;
+typedef ShTexCoord<4, SH_INOUT, ShFracUShort> ShInOutTexCoord4fus;
+typedef ShTexCoord<4, SH_TEMP, ShFracUShort> ShTexCoord4fus;
+typedef ShTexCoord<4, SH_CONST, ShFracUShort> ShConstTexCoord4fus;
 
 
-typedef ShTexCoord<1, SH_INPUT, SH_FRAC_BYTE> ShInputTexCoord1fb;
-typedef ShTexCoord<1, SH_OUTPUT, SH_FRAC_BYTE> ShOutputTexCoord1fb;
-typedef ShTexCoord<1, SH_INOUT, SH_FRAC_BYTE> ShInOutTexCoord1fb;
-typedef ShTexCoord<1, SH_TEMP, SH_FRAC_BYTE> ShTexCoord1fb;
-typedef ShTexCoord<1, SH_CONST, SH_FRAC_BYTE> ShConstTexCoord1fb;
-typedef ShTexCoord<2, SH_INPUT, SH_FRAC_BYTE> ShInputTexCoord2fb;
-typedef ShTexCoord<2, SH_OUTPUT, SH_FRAC_BYTE> ShOutputTexCoord2fb;
-typedef ShTexCoord<2, SH_INOUT, SH_FRAC_BYTE> ShInOutTexCoord2fb;
-typedef ShTexCoord<2, SH_TEMP, SH_FRAC_BYTE> ShTexCoord2fb;
-typedef ShTexCoord<2, SH_CONST, SH_FRAC_BYTE> ShConstTexCoord2fb;
-typedef ShTexCoord<3, SH_INPUT, SH_FRAC_BYTE> ShInputTexCoord3fb;
-typedef ShTexCoord<3, SH_OUTPUT, SH_FRAC_BYTE> ShOutputTexCoord3fb;
-typedef ShTexCoord<3, SH_INOUT, SH_FRAC_BYTE> ShInOutTexCoord3fb;
-typedef ShTexCoord<3, SH_TEMP, SH_FRAC_BYTE> ShTexCoord3fb;
-typedef ShTexCoord<3, SH_CONST, SH_FRAC_BYTE> ShConstTexCoord3fb;
-typedef ShTexCoord<4, SH_INPUT, SH_FRAC_BYTE> ShInputTexCoord4fb;
-typedef ShTexCoord<4, SH_OUTPUT, SH_FRAC_BYTE> ShOutputTexCoord4fb;
-typedef ShTexCoord<4, SH_INOUT, SH_FRAC_BYTE> ShInOutTexCoord4fb;
-typedef ShTexCoord<4, SH_TEMP, SH_FRAC_BYTE> ShTexCoord4fb;
-typedef ShTexCoord<4, SH_CONST, SH_FRAC_BYTE> ShConstTexCoord4fb;
+typedef ShTexCoord<1, SH_INPUT, short> ShInputTexCoord1s;
+typedef ShTexCoord<1, SH_OUTPUT, short> ShOutputTexCoord1s;
+typedef ShTexCoord<1, SH_INOUT, short> ShInOutTexCoord1s;
+typedef ShTexCoord<1, SH_TEMP, short> ShTexCoord1s;
+typedef ShTexCoord<1, SH_CONST, short> ShConstTexCoord1s;
+typedef ShTexCoord<2, SH_INPUT, short> ShInputTexCoord2s;
+typedef ShTexCoord<2, SH_OUTPUT, short> ShOutputTexCoord2s;
+typedef ShTexCoord<2, SH_INOUT, short> ShInOutTexCoord2s;
+typedef ShTexCoord<2, SH_TEMP, short> ShTexCoord2s;
+typedef ShTexCoord<2, SH_CONST, short> ShConstTexCoord2s;
+typedef ShTexCoord<3, SH_INPUT, short> ShInputTexCoord3s;
+typedef ShTexCoord<3, SH_OUTPUT, short> ShOutputTexCoord3s;
+typedef ShTexCoord<3, SH_INOUT, short> ShInOutTexCoord3s;
+typedef ShTexCoord<3, SH_TEMP, short> ShTexCoord3s;
+typedef ShTexCoord<3, SH_CONST, short> ShConstTexCoord3s;
+typedef ShTexCoord<4, SH_INPUT, short> ShInputTexCoord4s;
+typedef ShTexCoord<4, SH_OUTPUT, short> ShOutputTexCoord4s;
+typedef ShTexCoord<4, SH_INOUT, short> ShInOutTexCoord4s;
+typedef ShTexCoord<4, SH_TEMP, short> ShTexCoord4s;
+typedef ShTexCoord<4, SH_CONST, short> ShConstTexCoord4s;
 
 
-typedef ShTexCoord<1, SH_INPUT, SH_FRAC_UBYTE> ShInputTexCoord1fub;
-typedef ShTexCoord<1, SH_OUTPUT, SH_FRAC_UBYTE> ShOutputTexCoord1fub;
-typedef ShTexCoord<1, SH_INOUT, SH_FRAC_UBYTE> ShInOutTexCoord1fub;
-typedef ShTexCoord<1, SH_TEMP, SH_FRAC_UBYTE> ShTexCoord1fub;
-typedef ShTexCoord<1, SH_CONST, SH_FRAC_UBYTE> ShConstTexCoord1fub;
-typedef ShTexCoord<2, SH_INPUT, SH_FRAC_UBYTE> ShInputTexCoord2fub;
-typedef ShTexCoord<2, SH_OUTPUT, SH_FRAC_UBYTE> ShOutputTexCoord2fub;
-typedef ShTexCoord<2, SH_INOUT, SH_FRAC_UBYTE> ShInOutTexCoord2fub;
-typedef ShTexCoord<2, SH_TEMP, SH_FRAC_UBYTE> ShTexCoord2fub;
-typedef ShTexCoord<2, SH_CONST, SH_FRAC_UBYTE> ShConstTexCoord2fub;
-typedef ShTexCoord<3, SH_INPUT, SH_FRAC_UBYTE> ShInputTexCoord3fub;
-typedef ShTexCoord<3, SH_OUTPUT, SH_FRAC_UBYTE> ShOutputTexCoord3fub;
-typedef ShTexCoord<3, SH_INOUT, SH_FRAC_UBYTE> ShInOutTexCoord3fub;
-typedef ShTexCoord<3, SH_TEMP, SH_FRAC_UBYTE> ShTexCoord3fub;
-typedef ShTexCoord<3, SH_CONST, SH_FRAC_UBYTE> ShConstTexCoord3fub;
-typedef ShTexCoord<4, SH_INPUT, SH_FRAC_UBYTE> ShInputTexCoord4fub;
-typedef ShTexCoord<4, SH_OUTPUT, SH_FRAC_UBYTE> ShOutputTexCoord4fub;
-typedef ShTexCoord<4, SH_INOUT, SH_FRAC_UBYTE> ShInOutTexCoord4fub;
-typedef ShTexCoord<4, SH_TEMP, SH_FRAC_UBYTE> ShTexCoord4fub;
-typedef ShTexCoord<4, SH_CONST, SH_FRAC_UBYTE> ShConstTexCoord4fub;
+typedef ShTexCoord<1, SH_INPUT, ShFracUInt> ShInputTexCoord1fui;
+typedef ShTexCoord<1, SH_OUTPUT, ShFracUInt> ShOutputTexCoord1fui;
+typedef ShTexCoord<1, SH_INOUT, ShFracUInt> ShInOutTexCoord1fui;
+typedef ShTexCoord<1, SH_TEMP, ShFracUInt> ShTexCoord1fui;
+typedef ShTexCoord<1, SH_CONST, ShFracUInt> ShConstTexCoord1fui;
+typedef ShTexCoord<2, SH_INPUT, ShFracUInt> ShInputTexCoord2fui;
+typedef ShTexCoord<2, SH_OUTPUT, ShFracUInt> ShOutputTexCoord2fui;
+typedef ShTexCoord<2, SH_INOUT, ShFracUInt> ShInOutTexCoord2fui;
+typedef ShTexCoord<2, SH_TEMP, ShFracUInt> ShTexCoord2fui;
+typedef ShTexCoord<2, SH_CONST, ShFracUInt> ShConstTexCoord2fui;
+typedef ShTexCoord<3, SH_INPUT, ShFracUInt> ShInputTexCoord3fui;
+typedef ShTexCoord<3, SH_OUTPUT, ShFracUInt> ShOutputTexCoord3fui;
+typedef ShTexCoord<3, SH_INOUT, ShFracUInt> ShInOutTexCoord3fui;
+typedef ShTexCoord<3, SH_TEMP, ShFracUInt> ShTexCoord3fui;
+typedef ShTexCoord<3, SH_CONST, ShFracUInt> ShConstTexCoord3fui;
+typedef ShTexCoord<4, SH_INPUT, ShFracUInt> ShInputTexCoord4fui;
+typedef ShTexCoord<4, SH_OUTPUT, ShFracUInt> ShOutputTexCoord4fui;
+typedef ShTexCoord<4, SH_INOUT, ShFracUInt> ShInOutTexCoord4fui;
+typedef ShTexCoord<4, SH_TEMP, ShFracUInt> ShTexCoord4fui;
+typedef ShTexCoord<4, SH_CONST, ShFracUInt> ShConstTexCoord4fui;
 
 
-typedef ShTexCoord<1, SH_INPUT, SH_HALF> ShInputTexCoord1h;
-typedef ShTexCoord<1, SH_OUTPUT, SH_HALF> ShOutputTexCoord1h;
-typedef ShTexCoord<1, SH_INOUT, SH_HALF> ShInOutTexCoord1h;
-typedef ShTexCoord<1, SH_TEMP, SH_HALF> ShTexCoord1h;
-typedef ShTexCoord<1, SH_CONST, SH_HALF> ShConstTexCoord1h;
-typedef ShTexCoord<2, SH_INPUT, SH_HALF> ShInputTexCoord2h;
-typedef ShTexCoord<2, SH_OUTPUT, SH_HALF> ShOutputTexCoord2h;
-typedef ShTexCoord<2, SH_INOUT, SH_HALF> ShInOutTexCoord2h;
-typedef ShTexCoord<2, SH_TEMP, SH_HALF> ShTexCoord2h;
-typedef ShTexCoord<2, SH_CONST, SH_HALF> ShConstTexCoord2h;
-typedef ShTexCoord<3, SH_INPUT, SH_HALF> ShInputTexCoord3h;
-typedef ShTexCoord<3, SH_OUTPUT, SH_HALF> ShOutputTexCoord3h;
-typedef ShTexCoord<3, SH_INOUT, SH_HALF> ShInOutTexCoord3h;
-typedef ShTexCoord<3, SH_TEMP, SH_HALF> ShTexCoord3h;
-typedef ShTexCoord<3, SH_CONST, SH_HALF> ShConstTexCoord3h;
-typedef ShTexCoord<4, SH_INPUT, SH_HALF> ShInputTexCoord4h;
-typedef ShTexCoord<4, SH_OUTPUT, SH_HALF> ShOutputTexCoord4h;
-typedef ShTexCoord<4, SH_INOUT, SH_HALF> ShInOutTexCoord4h;
-typedef ShTexCoord<4, SH_TEMP, SH_HALF> ShTexCoord4h;
-typedef ShTexCoord<4, SH_CONST, SH_HALF> ShConstTexCoord4h;
+typedef ShTexCoord<1, SH_INPUT, ShFracByte> ShInputTexCoord1fb;
+typedef ShTexCoord<1, SH_OUTPUT, ShFracByte> ShOutputTexCoord1fb;
+typedef ShTexCoord<1, SH_INOUT, ShFracByte> ShInOutTexCoord1fb;
+typedef ShTexCoord<1, SH_TEMP, ShFracByte> ShTexCoord1fb;
+typedef ShTexCoord<1, SH_CONST, ShFracByte> ShConstTexCoord1fb;
+typedef ShTexCoord<2, SH_INPUT, ShFracByte> ShInputTexCoord2fb;
+typedef ShTexCoord<2, SH_OUTPUT, ShFracByte> ShOutputTexCoord2fb;
+typedef ShTexCoord<2, SH_INOUT, ShFracByte> ShInOutTexCoord2fb;
+typedef ShTexCoord<2, SH_TEMP, ShFracByte> ShTexCoord2fb;
+typedef ShTexCoord<2, SH_CONST, ShFracByte> ShConstTexCoord2fb;
+typedef ShTexCoord<3, SH_INPUT, ShFracByte> ShInputTexCoord3fb;
+typedef ShTexCoord<3, SH_OUTPUT, ShFracByte> ShOutputTexCoord3fb;
+typedef ShTexCoord<3, SH_INOUT, ShFracByte> ShInOutTexCoord3fb;
+typedef ShTexCoord<3, SH_TEMP, ShFracByte> ShTexCoord3fb;
+typedef ShTexCoord<3, SH_CONST, ShFracByte> ShConstTexCoord3fb;
+typedef ShTexCoord<4, SH_INPUT, ShFracByte> ShInputTexCoord4fb;
+typedef ShTexCoord<4, SH_OUTPUT, ShFracByte> ShOutputTexCoord4fb;
+typedef ShTexCoord<4, SH_INOUT, ShFracByte> ShInOutTexCoord4fb;
+typedef ShTexCoord<4, SH_TEMP, ShFracByte> ShTexCoord4fb;
+typedef ShTexCoord<4, SH_CONST, ShFracByte> ShConstTexCoord4fb;
 
 
-typedef ShTexCoord<1, SH_INPUT, SH_INT> ShInputTexCoord1i;
-typedef ShTexCoord<1, SH_OUTPUT, SH_INT> ShOutputTexCoord1i;
-typedef ShTexCoord<1, SH_INOUT, SH_INT> ShInOutTexCoord1i;
-typedef ShTexCoord<1, SH_TEMP, SH_INT> ShTexCoord1i;
-typedef ShTexCoord<1, SH_CONST, SH_INT> ShConstTexCoord1i;
-typedef ShTexCoord<2, SH_INPUT, SH_INT> ShInputTexCoord2i;
-typedef ShTexCoord<2, SH_OUTPUT, SH_INT> ShOutputTexCoord2i;
-typedef ShTexCoord<2, SH_INOUT, SH_INT> ShInOutTexCoord2i;
-typedef ShTexCoord<2, SH_TEMP, SH_INT> ShTexCoord2i;
-typedef ShTexCoord<2, SH_CONST, SH_INT> ShConstTexCoord2i;
-typedef ShTexCoord<3, SH_INPUT, SH_INT> ShInputTexCoord3i;
-typedef ShTexCoord<3, SH_OUTPUT, SH_INT> ShOutputTexCoord3i;
-typedef ShTexCoord<3, SH_INOUT, SH_INT> ShInOutTexCoord3i;
-typedef ShTexCoord<3, SH_TEMP, SH_INT> ShTexCoord3i;
-typedef ShTexCoord<3, SH_CONST, SH_INT> ShConstTexCoord3i;
-typedef ShTexCoord<4, SH_INPUT, SH_INT> ShInputTexCoord4i;
-typedef ShTexCoord<4, SH_OUTPUT, SH_INT> ShOutputTexCoord4i;
-typedef ShTexCoord<4, SH_INOUT, SH_INT> ShInOutTexCoord4i;
-typedef ShTexCoord<4, SH_TEMP, SH_INT> ShTexCoord4i;
-typedef ShTexCoord<4, SH_CONST, SH_INT> ShConstTexCoord4i;
+typedef ShTexCoord<1, SH_INPUT, int> ShInputTexCoord1i;
+typedef ShTexCoord<1, SH_OUTPUT, int> ShOutputTexCoord1i;
+typedef ShTexCoord<1, SH_INOUT, int> ShInOutTexCoord1i;
+typedef ShTexCoord<1, SH_TEMP, int> ShTexCoord1i;
+typedef ShTexCoord<1, SH_CONST, int> ShConstTexCoord1i;
+typedef ShTexCoord<2, SH_INPUT, int> ShInputTexCoord2i;
+typedef ShTexCoord<2, SH_OUTPUT, int> ShOutputTexCoord2i;
+typedef ShTexCoord<2, SH_INOUT, int> ShInOutTexCoord2i;
+typedef ShTexCoord<2, SH_TEMP, int> ShTexCoord2i;
+typedef ShTexCoord<2, SH_CONST, int> ShConstTexCoord2i;
+typedef ShTexCoord<3, SH_INPUT, int> ShInputTexCoord3i;
+typedef ShTexCoord<3, SH_OUTPUT, int> ShOutputTexCoord3i;
+typedef ShTexCoord<3, SH_INOUT, int> ShInOutTexCoord3i;
+typedef ShTexCoord<3, SH_TEMP, int> ShTexCoord3i;
+typedef ShTexCoord<3, SH_CONST, int> ShConstTexCoord3i;
+typedef ShTexCoord<4, SH_INPUT, int> ShInputTexCoord4i;
+typedef ShTexCoord<4, SH_OUTPUT, int> ShOutputTexCoord4i;
+typedef ShTexCoord<4, SH_INOUT, int> ShInOutTexCoord4i;
+typedef ShTexCoord<4, SH_TEMP, int> ShTexCoord4i;
+typedef ShTexCoord<4, SH_CONST, int> ShConstTexCoord4i;
 
 
-typedef ShTexCoord<1, SH_INPUT, SH_FLOAT> ShInputTexCoord1f;
-typedef ShTexCoord<1, SH_OUTPUT, SH_FLOAT> ShOutputTexCoord1f;
-typedef ShTexCoord<1, SH_INOUT, SH_FLOAT> ShInOutTexCoord1f;
-typedef ShTexCoord<1, SH_TEMP, SH_FLOAT> ShTexCoord1f;
-typedef ShTexCoord<1, SH_CONST, SH_FLOAT> ShConstTexCoord1f;
-typedef ShTexCoord<2, SH_INPUT, SH_FLOAT> ShInputTexCoord2f;
-typedef ShTexCoord<2, SH_OUTPUT, SH_FLOAT> ShOutputTexCoord2f;
-typedef ShTexCoord<2, SH_INOUT, SH_FLOAT> ShInOutTexCoord2f;
-typedef ShTexCoord<2, SH_TEMP, SH_FLOAT> ShTexCoord2f;
-typedef ShTexCoord<2, SH_CONST, SH_FLOAT> ShConstTexCoord2f;
-typedef ShTexCoord<3, SH_INPUT, SH_FLOAT> ShInputTexCoord3f;
-typedef ShTexCoord<3, SH_OUTPUT, SH_FLOAT> ShOutputTexCoord3f;
-typedef ShTexCoord<3, SH_INOUT, SH_FLOAT> ShInOutTexCoord3f;
-typedef ShTexCoord<3, SH_TEMP, SH_FLOAT> ShTexCoord3f;
-typedef ShTexCoord<3, SH_CONST, SH_FLOAT> ShConstTexCoord3f;
-typedef ShTexCoord<4, SH_INPUT, SH_FLOAT> ShInputTexCoord4f;
-typedef ShTexCoord<4, SH_OUTPUT, SH_FLOAT> ShOutputTexCoord4f;
-typedef ShTexCoord<4, SH_INOUT, SH_FLOAT> ShInOutTexCoord4f;
-typedef ShTexCoord<4, SH_TEMP, SH_FLOAT> ShTexCoord4f;
-typedef ShTexCoord<4, SH_CONST, SH_FLOAT> ShConstTexCoord4f;
+typedef ShTexCoord<1, SH_INPUT, double> ShInputTexCoord1d;
+typedef ShTexCoord<1, SH_OUTPUT, double> ShOutputTexCoord1d;
+typedef ShTexCoord<1, SH_INOUT, double> ShInOutTexCoord1d;
+typedef ShTexCoord<1, SH_TEMP, double> ShTexCoord1d;
+typedef ShTexCoord<1, SH_CONST, double> ShConstTexCoord1d;
+typedef ShTexCoord<2, SH_INPUT, double> ShInputTexCoord2d;
+typedef ShTexCoord<2, SH_OUTPUT, double> ShOutputTexCoord2d;
+typedef ShTexCoord<2, SH_INOUT, double> ShInOutTexCoord2d;
+typedef ShTexCoord<2, SH_TEMP, double> ShTexCoord2d;
+typedef ShTexCoord<2, SH_CONST, double> ShConstTexCoord2d;
+typedef ShTexCoord<3, SH_INPUT, double> ShInputTexCoord3d;
+typedef ShTexCoord<3, SH_OUTPUT, double> ShOutputTexCoord3d;
+typedef ShTexCoord<3, SH_INOUT, double> ShInOutTexCoord3d;
+typedef ShTexCoord<3, SH_TEMP, double> ShTexCoord3d;
+typedef ShTexCoord<3, SH_CONST, double> ShConstTexCoord3d;
+typedef ShTexCoord<4, SH_INPUT, double> ShInputTexCoord4d;
+typedef ShTexCoord<4, SH_OUTPUT, double> ShOutputTexCoord4d;
+typedef ShTexCoord<4, SH_INOUT, double> ShInOutTexCoord4d;
+typedef ShTexCoord<4, SH_TEMP, double> ShTexCoord4d;
+typedef ShTexCoord<4, SH_CONST, double> ShConstTexCoord4d;
 
 
-typedef ShTexCoord<1, SH_INPUT, SH_BYTE> ShInputTexCoord1b;
-typedef ShTexCoord<1, SH_OUTPUT, SH_BYTE> ShOutputTexCoord1b;
-typedef ShTexCoord<1, SH_INOUT, SH_BYTE> ShInOutTexCoord1b;
-typedef ShTexCoord<1, SH_TEMP, SH_BYTE> ShTexCoord1b;
-typedef ShTexCoord<1, SH_CONST, SH_BYTE> ShConstTexCoord1b;
-typedef ShTexCoord<2, SH_INPUT, SH_BYTE> ShInputTexCoord2b;
-typedef ShTexCoord<2, SH_OUTPUT, SH_BYTE> ShOutputTexCoord2b;
-typedef ShTexCoord<2, SH_INOUT, SH_BYTE> ShInOutTexCoord2b;
-typedef ShTexCoord<2, SH_TEMP, SH_BYTE> ShTexCoord2b;
-typedef ShTexCoord<2, SH_CONST, SH_BYTE> ShConstTexCoord2b;
-typedef ShTexCoord<3, SH_INPUT, SH_BYTE> ShInputTexCoord3b;
-typedef ShTexCoord<3, SH_OUTPUT, SH_BYTE> ShOutputTexCoord3b;
-typedef ShTexCoord<3, SH_INOUT, SH_BYTE> ShInOutTexCoord3b;
-typedef ShTexCoord<3, SH_TEMP, SH_BYTE> ShTexCoord3b;
-typedef ShTexCoord<3, SH_CONST, SH_BYTE> ShConstTexCoord3b;
-typedef ShTexCoord<4, SH_INPUT, SH_BYTE> ShInputTexCoord4b;
-typedef ShTexCoord<4, SH_OUTPUT, SH_BYTE> ShOutputTexCoord4b;
-typedef ShTexCoord<4, SH_INOUT, SH_BYTE> ShInOutTexCoord4b;
-typedef ShTexCoord<4, SH_TEMP, SH_BYTE> ShTexCoord4b;
-typedef ShTexCoord<4, SH_CONST, SH_BYTE> ShConstTexCoord4b;
+typedef ShTexCoord<1, SH_INPUT, unsigned char> ShInputTexCoord1ub;
+typedef ShTexCoord<1, SH_OUTPUT, unsigned char> ShOutputTexCoord1ub;
+typedef ShTexCoord<1, SH_INOUT, unsigned char> ShInOutTexCoord1ub;
+typedef ShTexCoord<1, SH_TEMP, unsigned char> ShTexCoord1ub;
+typedef ShTexCoord<1, SH_CONST, unsigned char> ShConstTexCoord1ub;
+typedef ShTexCoord<2, SH_INPUT, unsigned char> ShInputTexCoord2ub;
+typedef ShTexCoord<2, SH_OUTPUT, unsigned char> ShOutputTexCoord2ub;
+typedef ShTexCoord<2, SH_INOUT, unsigned char> ShInOutTexCoord2ub;
+typedef ShTexCoord<2, SH_TEMP, unsigned char> ShTexCoord2ub;
+typedef ShTexCoord<2, SH_CONST, unsigned char> ShConstTexCoord2ub;
+typedef ShTexCoord<3, SH_INPUT, unsigned char> ShInputTexCoord3ub;
+typedef ShTexCoord<3, SH_OUTPUT, unsigned char> ShOutputTexCoord3ub;
+typedef ShTexCoord<3, SH_INOUT, unsigned char> ShInOutTexCoord3ub;
+typedef ShTexCoord<3, SH_TEMP, unsigned char> ShTexCoord3ub;
+typedef ShTexCoord<3, SH_CONST, unsigned char> ShConstTexCoord3ub;
+typedef ShTexCoord<4, SH_INPUT, unsigned char> ShInputTexCoord4ub;
+typedef ShTexCoord<4, SH_OUTPUT, unsigned char> ShOutputTexCoord4ub;
+typedef ShTexCoord<4, SH_INOUT, unsigned char> ShInOutTexCoord4ub;
+typedef ShTexCoord<4, SH_TEMP, unsigned char> ShTexCoord4ub;
+typedef ShTexCoord<4, SH_CONST, unsigned char> ShConstTexCoord4ub;
 
 
-typedef ShTexCoord<1, SH_INPUT, SH_INTERVAL_DOUBLE> ShInputTexCoord1i_d;
-typedef ShTexCoord<1, SH_OUTPUT, SH_INTERVAL_DOUBLE> ShOutputTexCoord1i_d;
-typedef ShTexCoord<1, SH_INOUT, SH_INTERVAL_DOUBLE> ShInOutTexCoord1i_d;
-typedef ShTexCoord<1, SH_TEMP, SH_INTERVAL_DOUBLE> ShTexCoord1i_d;
-typedef ShTexCoord<1, SH_CONST, SH_INTERVAL_DOUBLE> ShConstTexCoord1i_d;
-typedef ShTexCoord<2, SH_INPUT, SH_INTERVAL_DOUBLE> ShInputTexCoord2i_d;
-typedef ShTexCoord<2, SH_OUTPUT, SH_INTERVAL_DOUBLE> ShOutputTexCoord2i_d;
-typedef ShTexCoord<2, SH_INOUT, SH_INTERVAL_DOUBLE> ShInOutTexCoord2i_d;
-typedef ShTexCoord<2, SH_TEMP, SH_INTERVAL_DOUBLE> ShTexCoord2i_d;
-typedef ShTexCoord<2, SH_CONST, SH_INTERVAL_DOUBLE> ShConstTexCoord2i_d;
-typedef ShTexCoord<3, SH_INPUT, SH_INTERVAL_DOUBLE> ShInputTexCoord3i_d;
-typedef ShTexCoord<3, SH_OUTPUT, SH_INTERVAL_DOUBLE> ShOutputTexCoord3i_d;
-typedef ShTexCoord<3, SH_INOUT, SH_INTERVAL_DOUBLE> ShInOutTexCoord3i_d;
-typedef ShTexCoord<3, SH_TEMP, SH_INTERVAL_DOUBLE> ShTexCoord3i_d;
-typedef ShTexCoord<3, SH_CONST, SH_INTERVAL_DOUBLE> ShConstTexCoord3i_d;
-typedef ShTexCoord<4, SH_INPUT, SH_INTERVAL_DOUBLE> ShInputTexCoord4i_d;
-typedef ShTexCoord<4, SH_OUTPUT, SH_INTERVAL_DOUBLE> ShOutputTexCoord4i_d;
-typedef ShTexCoord<4, SH_INOUT, SH_INTERVAL_DOUBLE> ShInOutTexCoord4i_d;
-typedef ShTexCoord<4, SH_TEMP, SH_INTERVAL_DOUBLE> ShTexCoord4i_d;
-typedef ShTexCoord<4, SH_CONST, SH_INTERVAL_DOUBLE> ShConstTexCoord4i_d;
+typedef ShTexCoord<1, SH_INPUT, float> ShInputTexCoord1f;
+typedef ShTexCoord<1, SH_OUTPUT, float> ShOutputTexCoord1f;
+typedef ShTexCoord<1, SH_INOUT, float> ShInOutTexCoord1f;
+typedef ShTexCoord<1, SH_TEMP, float> ShTexCoord1f;
+typedef ShTexCoord<1, SH_CONST, float> ShConstTexCoord1f;
+typedef ShTexCoord<2, SH_INPUT, float> ShInputTexCoord2f;
+typedef ShTexCoord<2, SH_OUTPUT, float> ShOutputTexCoord2f;
+typedef ShTexCoord<2, SH_INOUT, float> ShInOutTexCoord2f;
+typedef ShTexCoord<2, SH_TEMP, float> ShTexCoord2f;
+typedef ShTexCoord<2, SH_CONST, float> ShConstTexCoord2f;
+typedef ShTexCoord<3, SH_INPUT, float> ShInputTexCoord3f;
+typedef ShTexCoord<3, SH_OUTPUT, float> ShOutputTexCoord3f;
+typedef ShTexCoord<3, SH_INOUT, float> ShInOutTexCoord3f;
+typedef ShTexCoord<3, SH_TEMP, float> ShTexCoord3f;
+typedef ShTexCoord<3, SH_CONST, float> ShConstTexCoord3f;
+typedef ShTexCoord<4, SH_INPUT, float> ShInputTexCoord4f;
+typedef ShTexCoord<4, SH_OUTPUT, float> ShOutputTexCoord4f;
+typedef ShTexCoord<4, SH_INOUT, float> ShInOutTexCoord4f;
+typedef ShTexCoord<4, SH_TEMP, float> ShTexCoord4f;
+typedef ShTexCoord<4, SH_CONST, float> ShConstTexCoord4f;
 
 
-typedef ShTexCoord<1, SH_INPUT, SH_FRAC_USHORT> ShInputTexCoord1fus;
-typedef ShTexCoord<1, SH_OUTPUT, SH_FRAC_USHORT> ShOutputTexCoord1fus;
-typedef ShTexCoord<1, SH_INOUT, SH_FRAC_USHORT> ShInOutTexCoord1fus;
-typedef ShTexCoord<1, SH_TEMP, SH_FRAC_USHORT> ShTexCoord1fus;
-typedef ShTexCoord<1, SH_CONST, SH_FRAC_USHORT> ShConstTexCoord1fus;
-typedef ShTexCoord<2, SH_INPUT, SH_FRAC_USHORT> ShInputTexCoord2fus;
-typedef ShTexCoord<2, SH_OUTPUT, SH_FRAC_USHORT> ShOutputTexCoord2fus;
-typedef ShTexCoord<2, SH_INOUT, SH_FRAC_USHORT> ShInOutTexCoord2fus;
-typedef ShTexCoord<2, SH_TEMP, SH_FRAC_USHORT> ShTexCoord2fus;
-typedef ShTexCoord<2, SH_CONST, SH_FRAC_USHORT> ShConstTexCoord2fus;
-typedef ShTexCoord<3, SH_INPUT, SH_FRAC_USHORT> ShInputTexCoord3fus;
-typedef ShTexCoord<3, SH_OUTPUT, SH_FRAC_USHORT> ShOutputTexCoord3fus;
-typedef ShTexCoord<3, SH_INOUT, SH_FRAC_USHORT> ShInOutTexCoord3fus;
-typedef ShTexCoord<3, SH_TEMP, SH_FRAC_USHORT> ShTexCoord3fus;
-typedef ShTexCoord<3, SH_CONST, SH_FRAC_USHORT> ShConstTexCoord3fus;
-typedef ShTexCoord<4, SH_INPUT, SH_FRAC_USHORT> ShInputTexCoord4fus;
-typedef ShTexCoord<4, SH_OUTPUT, SH_FRAC_USHORT> ShOutputTexCoord4fus;
-typedef ShTexCoord<4, SH_INOUT, SH_FRAC_USHORT> ShInOutTexCoord4fus;
-typedef ShTexCoord<4, SH_TEMP, SH_FRAC_USHORT> ShTexCoord4fus;
-typedef ShTexCoord<4, SH_CONST, SH_FRAC_USHORT> ShConstTexCoord4fus;
+typedef ShTexCoord<1, SH_INPUT, char> ShInputTexCoord1b;
+typedef ShTexCoord<1, SH_OUTPUT, char> ShOutputTexCoord1b;
+typedef ShTexCoord<1, SH_INOUT, char> ShInOutTexCoord1b;
+typedef ShTexCoord<1, SH_TEMP, char> ShTexCoord1b;
+typedef ShTexCoord<1, SH_CONST, char> ShConstTexCoord1b;
+typedef ShTexCoord<2, SH_INPUT, char> ShInputTexCoord2b;
+typedef ShTexCoord<2, SH_OUTPUT, char> ShOutputTexCoord2b;
+typedef ShTexCoord<2, SH_INOUT, char> ShInOutTexCoord2b;
+typedef ShTexCoord<2, SH_TEMP, char> ShTexCoord2b;
+typedef ShTexCoord<2, SH_CONST, char> ShConstTexCoord2b;
+typedef ShTexCoord<3, SH_INPUT, char> ShInputTexCoord3b;
+typedef ShTexCoord<3, SH_OUTPUT, char> ShOutputTexCoord3b;
+typedef ShTexCoord<3, SH_INOUT, char> ShInOutTexCoord3b;
+typedef ShTexCoord<3, SH_TEMP, char> ShTexCoord3b;
+typedef ShTexCoord<3, SH_CONST, char> ShConstTexCoord3b;
+typedef ShTexCoord<4, SH_INPUT, char> ShInputTexCoord4b;
+typedef ShTexCoord<4, SH_OUTPUT, char> ShOutputTexCoord4b;
+typedef ShTexCoord<4, SH_INOUT, char> ShInOutTexCoord4b;
+typedef ShTexCoord<4, SH_TEMP, char> ShTexCoord4b;
+typedef ShTexCoord<4, SH_CONST, char> ShConstTexCoord4b;
 
 
-typedef ShTexCoord<1, SH_INPUT, SH_UBYTE> ShInputTexCoord1ub;
-typedef ShTexCoord<1, SH_OUTPUT, SH_UBYTE> ShOutputTexCoord1ub;
-typedef ShTexCoord<1, SH_INOUT, SH_UBYTE> ShInOutTexCoord1ub;
-typedef ShTexCoord<1, SH_TEMP, SH_UBYTE> ShTexCoord1ub;
-typedef ShTexCoord<1, SH_CONST, SH_UBYTE> ShConstTexCoord1ub;
-typedef ShTexCoord<2, SH_INPUT, SH_UBYTE> ShInputTexCoord2ub;
-typedef ShTexCoord<2, SH_OUTPUT, SH_UBYTE> ShOutputTexCoord2ub;
-typedef ShTexCoord<2, SH_INOUT, SH_UBYTE> ShInOutTexCoord2ub;
-typedef ShTexCoord<2, SH_TEMP, SH_UBYTE> ShTexCoord2ub;
-typedef ShTexCoord<2, SH_CONST, SH_UBYTE> ShConstTexCoord2ub;
-typedef ShTexCoord<3, SH_INPUT, SH_UBYTE> ShInputTexCoord3ub;
-typedef ShTexCoord<3, SH_OUTPUT, SH_UBYTE> ShOutputTexCoord3ub;
-typedef ShTexCoord<3, SH_INOUT, SH_UBYTE> ShInOutTexCoord3ub;
-typedef ShTexCoord<3, SH_TEMP, SH_UBYTE> ShTexCoord3ub;
-typedef ShTexCoord<3, SH_CONST, SH_UBYTE> ShConstTexCoord3ub;
-typedef ShTexCoord<4, SH_INPUT, SH_UBYTE> ShInputTexCoord4ub;
-typedef ShTexCoord<4, SH_OUTPUT, SH_UBYTE> ShOutputTexCoord4ub;
-typedef ShTexCoord<4, SH_INOUT, SH_UBYTE> ShInOutTexCoord4ub;
-typedef ShTexCoord<4, SH_TEMP, SH_UBYTE> ShTexCoord4ub;
-typedef ShTexCoord<4, SH_CONST, SH_UBYTE> ShConstTexCoord4ub;
+typedef ShTexCoord<1, SH_INPUT, unsigned short> ShInputTexCoord1us;
+typedef ShTexCoord<1, SH_OUTPUT, unsigned short> ShOutputTexCoord1us;
+typedef ShTexCoord<1, SH_INOUT, unsigned short> ShInOutTexCoord1us;
+typedef ShTexCoord<1, SH_TEMP, unsigned short> ShTexCoord1us;
+typedef ShTexCoord<1, SH_CONST, unsigned short> ShConstTexCoord1us;
+typedef ShTexCoord<2, SH_INPUT, unsigned short> ShInputTexCoord2us;
+typedef ShTexCoord<2, SH_OUTPUT, unsigned short> ShOutputTexCoord2us;
+typedef ShTexCoord<2, SH_INOUT, unsigned short> ShInOutTexCoord2us;
+typedef ShTexCoord<2, SH_TEMP, unsigned short> ShTexCoord2us;
+typedef ShTexCoord<2, SH_CONST, unsigned short> ShConstTexCoord2us;
+typedef ShTexCoord<3, SH_INPUT, unsigned short> ShInputTexCoord3us;
+typedef ShTexCoord<3, SH_OUTPUT, unsigned short> ShOutputTexCoord3us;
+typedef ShTexCoord<3, SH_INOUT, unsigned short> ShInOutTexCoord3us;
+typedef ShTexCoord<3, SH_TEMP, unsigned short> ShTexCoord3us;
+typedef ShTexCoord<3, SH_CONST, unsigned short> ShConstTexCoord3us;
+typedef ShTexCoord<4, SH_INPUT, unsigned short> ShInputTexCoord4us;
+typedef ShTexCoord<4, SH_OUTPUT, unsigned short> ShOutputTexCoord4us;
+typedef ShTexCoord<4, SH_INOUT, unsigned short> ShInOutTexCoord4us;
+typedef ShTexCoord<4, SH_TEMP, unsigned short> ShTexCoord4us;
+typedef ShTexCoord<4, SH_CONST, unsigned short> ShConstTexCoord4us;
 
 
-typedef ShTexCoord<1, SH_INPUT, SH_FRAC_SHORT> ShInputTexCoord1fs;
-typedef ShTexCoord<1, SH_OUTPUT, SH_FRAC_SHORT> ShOutputTexCoord1fs;
-typedef ShTexCoord<1, SH_INOUT, SH_FRAC_SHORT> ShInOutTexCoord1fs;
-typedef ShTexCoord<1, SH_TEMP, SH_FRAC_SHORT> ShTexCoord1fs;
-typedef ShTexCoord<1, SH_CONST, SH_FRAC_SHORT> ShConstTexCoord1fs;
-typedef ShTexCoord<2, SH_INPUT, SH_FRAC_SHORT> ShInputTexCoord2fs;
-typedef ShTexCoord<2, SH_OUTPUT, SH_FRAC_SHORT> ShOutputTexCoord2fs;
-typedef ShTexCoord<2, SH_INOUT, SH_FRAC_SHORT> ShInOutTexCoord2fs;
-typedef ShTexCoord<2, SH_TEMP, SH_FRAC_SHORT> ShTexCoord2fs;
-typedef ShTexCoord<2, SH_CONST, SH_FRAC_SHORT> ShConstTexCoord2fs;
-typedef ShTexCoord<3, SH_INPUT, SH_FRAC_SHORT> ShInputTexCoord3fs;
-typedef ShTexCoord<3, SH_OUTPUT, SH_FRAC_SHORT> ShOutputTexCoord3fs;
-typedef ShTexCoord<3, SH_INOUT, SH_FRAC_SHORT> ShInOutTexCoord3fs;
-typedef ShTexCoord<3, SH_TEMP, SH_FRAC_SHORT> ShTexCoord3fs;
-typedef ShTexCoord<3, SH_CONST, SH_FRAC_SHORT> ShConstTexCoord3fs;
-typedef ShTexCoord<4, SH_INPUT, SH_FRAC_SHORT> ShInputTexCoord4fs;
-typedef ShTexCoord<4, SH_OUTPUT, SH_FRAC_SHORT> ShOutputTexCoord4fs;
-typedef ShTexCoord<4, SH_INOUT, SH_FRAC_SHORT> ShInOutTexCoord4fs;
-typedef ShTexCoord<4, SH_TEMP, SH_FRAC_SHORT> ShTexCoord4fs;
-typedef ShTexCoord<4, SH_CONST, SH_FRAC_SHORT> ShConstTexCoord4fs;
+typedef ShTexCoord<1, SH_INPUT, ShFracUByte> ShInputTexCoord1fub;
+typedef ShTexCoord<1, SH_OUTPUT, ShFracUByte> ShOutputTexCoord1fub;
+typedef ShTexCoord<1, SH_INOUT, ShFracUByte> ShInOutTexCoord1fub;
+typedef ShTexCoord<1, SH_TEMP, ShFracUByte> ShTexCoord1fub;
+typedef ShTexCoord<1, SH_CONST, ShFracUByte> ShConstTexCoord1fub;
+typedef ShTexCoord<2, SH_INPUT, ShFracUByte> ShInputTexCoord2fub;
+typedef ShTexCoord<2, SH_OUTPUT, ShFracUByte> ShOutputTexCoord2fub;
+typedef ShTexCoord<2, SH_INOUT, ShFracUByte> ShInOutTexCoord2fub;
+typedef ShTexCoord<2, SH_TEMP, ShFracUByte> ShTexCoord2fub;
+typedef ShTexCoord<2, SH_CONST, ShFracUByte> ShConstTexCoord2fub;
+typedef ShTexCoord<3, SH_INPUT, ShFracUByte> ShInputTexCoord3fub;
+typedef ShTexCoord<3, SH_OUTPUT, ShFracUByte> ShOutputTexCoord3fub;
+typedef ShTexCoord<3, SH_INOUT, ShFracUByte> ShInOutTexCoord3fub;
+typedef ShTexCoord<3, SH_TEMP, ShFracUByte> ShTexCoord3fub;
+typedef ShTexCoord<3, SH_CONST, ShFracUByte> ShConstTexCoord3fub;
+typedef ShTexCoord<4, SH_INPUT, ShFracUByte> ShInputTexCoord4fub;
+typedef ShTexCoord<4, SH_OUTPUT, ShFracUByte> ShOutputTexCoord4fub;
+typedef ShTexCoord<4, SH_INOUT, ShFracUByte> ShInOutTexCoord4fub;
+typedef ShTexCoord<4, SH_TEMP, ShFracUByte> ShTexCoord4fub;
+typedef ShTexCoord<4, SH_CONST, ShFracUByte> ShConstTexCoord4fub;
 
 
-typedef ShTexCoord<1, SH_INPUT, SH_USHORT> ShInputTexCoord1us;
-typedef ShTexCoord<1, SH_OUTPUT, SH_USHORT> ShOutputTexCoord1us;
-typedef ShTexCoord<1, SH_INOUT, SH_USHORT> ShInOutTexCoord1us;
-typedef ShTexCoord<1, SH_TEMP, SH_USHORT> ShTexCoord1us;
-typedef ShTexCoord<1, SH_CONST, SH_USHORT> ShConstTexCoord1us;
-typedef ShTexCoord<2, SH_INPUT, SH_USHORT> ShInputTexCoord2us;
-typedef ShTexCoord<2, SH_OUTPUT, SH_USHORT> ShOutputTexCoord2us;
-typedef ShTexCoord<2, SH_INOUT, SH_USHORT> ShInOutTexCoord2us;
-typedef ShTexCoord<2, SH_TEMP, SH_USHORT> ShTexCoord2us;
-typedef ShTexCoord<2, SH_CONST, SH_USHORT> ShConstTexCoord2us;
-typedef ShTexCoord<3, SH_INPUT, SH_USHORT> ShInputTexCoord3us;
-typedef ShTexCoord<3, SH_OUTPUT, SH_USHORT> ShOutputTexCoord3us;
-typedef ShTexCoord<3, SH_INOUT, SH_USHORT> ShInOutTexCoord3us;
-typedef ShTexCoord<3, SH_TEMP, SH_USHORT> ShTexCoord3us;
-typedef ShTexCoord<3, SH_CONST, SH_USHORT> ShConstTexCoord3us;
-typedef ShTexCoord<4, SH_INPUT, SH_USHORT> ShInputTexCoord4us;
-typedef ShTexCoord<4, SH_OUTPUT, SH_USHORT> ShOutputTexCoord4us;
-typedef ShTexCoord<4, SH_INOUT, SH_USHORT> ShInOutTexCoord4us;
-typedef ShTexCoord<4, SH_TEMP, SH_USHORT> ShTexCoord4us;
-typedef ShTexCoord<4, SH_CONST, SH_USHORT> ShConstTexCoord4us;
+typedef ShTexCoord<1, SH_INPUT, ShHalf> ShInputTexCoord1h;
+typedef ShTexCoord<1, SH_OUTPUT, ShHalf> ShOutputTexCoord1h;
+typedef ShTexCoord<1, SH_INOUT, ShHalf> ShInOutTexCoord1h;
+typedef ShTexCoord<1, SH_TEMP, ShHalf> ShTexCoord1h;
+typedef ShTexCoord<1, SH_CONST, ShHalf> ShConstTexCoord1h;
+typedef ShTexCoord<2, SH_INPUT, ShHalf> ShInputTexCoord2h;
+typedef ShTexCoord<2, SH_OUTPUT, ShHalf> ShOutputTexCoord2h;
+typedef ShTexCoord<2, SH_INOUT, ShHalf> ShInOutTexCoord2h;
+typedef ShTexCoord<2, SH_TEMP, ShHalf> ShTexCoord2h;
+typedef ShTexCoord<2, SH_CONST, ShHalf> ShConstTexCoord2h;
+typedef ShTexCoord<3, SH_INPUT, ShHalf> ShInputTexCoord3h;
+typedef ShTexCoord<3, SH_OUTPUT, ShHalf> ShOutputTexCoord3h;
+typedef ShTexCoord<3, SH_INOUT, ShHalf> ShInOutTexCoord3h;
+typedef ShTexCoord<3, SH_TEMP, ShHalf> ShTexCoord3h;
+typedef ShTexCoord<3, SH_CONST, ShHalf> ShConstTexCoord3h;
+typedef ShTexCoord<4, SH_INPUT, ShHalf> ShInputTexCoord4h;
+typedef ShTexCoord<4, SH_OUTPUT, ShHalf> ShOutputTexCoord4h;
+typedef ShTexCoord<4, SH_INOUT, ShHalf> ShInOutTexCoord4h;
+typedef ShTexCoord<4, SH_TEMP, ShHalf> ShTexCoord4h;
+typedef ShTexCoord<4, SH_CONST, ShHalf> ShConstTexCoord4h;
 
 
-typedef ShTexCoord<1, SH_INPUT, SH_UINT> ShInputTexCoord1ui;
-typedef ShTexCoord<1, SH_OUTPUT, SH_UINT> ShOutputTexCoord1ui;
-typedef ShTexCoord<1, SH_INOUT, SH_UINT> ShInOutTexCoord1ui;
-typedef ShTexCoord<1, SH_TEMP, SH_UINT> ShTexCoord1ui;
-typedef ShTexCoord<1, SH_CONST, SH_UINT> ShConstTexCoord1ui;
-typedef ShTexCoord<2, SH_INPUT, SH_UINT> ShInputTexCoord2ui;
-typedef ShTexCoord<2, SH_OUTPUT, SH_UINT> ShOutputTexCoord2ui;
-typedef ShTexCoord<2, SH_INOUT, SH_UINT> ShInOutTexCoord2ui;
-typedef ShTexCoord<2, SH_TEMP, SH_UINT> ShTexCoord2ui;
-typedef ShTexCoord<2, SH_CONST, SH_UINT> ShConstTexCoord2ui;
-typedef ShTexCoord<3, SH_INPUT, SH_UINT> ShInputTexCoord3ui;
-typedef ShTexCoord<3, SH_OUTPUT, SH_UINT> ShOutputTexCoord3ui;
-typedef ShTexCoord<3, SH_INOUT, SH_UINT> ShInOutTexCoord3ui;
-typedef ShTexCoord<3, SH_TEMP, SH_UINT> ShTexCoord3ui;
-typedef ShTexCoord<3, SH_CONST, SH_UINT> ShConstTexCoord3ui;
-typedef ShTexCoord<4, SH_INPUT, SH_UINT> ShInputTexCoord4ui;
-typedef ShTexCoord<4, SH_OUTPUT, SH_UINT> ShOutputTexCoord4ui;
-typedef ShTexCoord<4, SH_INOUT, SH_UINT> ShInOutTexCoord4ui;
-typedef ShTexCoord<4, SH_TEMP, SH_UINT> ShTexCoord4ui;
-typedef ShTexCoord<4, SH_CONST, SH_UINT> ShConstTexCoord4ui;
+typedef ShTexCoord<1, SH_INPUT, ShInterval<float> > ShInputTexCoord1i_f;
+typedef ShTexCoord<1, SH_OUTPUT, ShInterval<float> > ShOutputTexCoord1i_f;
+typedef ShTexCoord<1, SH_INOUT, ShInterval<float> > ShInOutTexCoord1i_f;
+typedef ShTexCoord<1, SH_TEMP, ShInterval<float> > ShTexCoord1i_f;
+typedef ShTexCoord<1, SH_CONST, ShInterval<float> > ShConstTexCoord1i_f;
+typedef ShTexCoord<2, SH_INPUT, ShInterval<float> > ShInputTexCoord2i_f;
+typedef ShTexCoord<2, SH_OUTPUT, ShInterval<float> > ShOutputTexCoord2i_f;
+typedef ShTexCoord<2, SH_INOUT, ShInterval<float> > ShInOutTexCoord2i_f;
+typedef ShTexCoord<2, SH_TEMP, ShInterval<float> > ShTexCoord2i_f;
+typedef ShTexCoord<2, SH_CONST, ShInterval<float> > ShConstTexCoord2i_f;
+typedef ShTexCoord<3, SH_INPUT, ShInterval<float> > ShInputTexCoord3i_f;
+typedef ShTexCoord<3, SH_OUTPUT, ShInterval<float> > ShOutputTexCoord3i_f;
+typedef ShTexCoord<3, SH_INOUT, ShInterval<float> > ShInOutTexCoord3i_f;
+typedef ShTexCoord<3, SH_TEMP, ShInterval<float> > ShTexCoord3i_f;
+typedef ShTexCoord<3, SH_CONST, ShInterval<float> > ShConstTexCoord3i_f;
+typedef ShTexCoord<4, SH_INPUT, ShInterval<float> > ShInputTexCoord4i_f;
+typedef ShTexCoord<4, SH_OUTPUT, ShInterval<float> > ShOutputTexCoord4i_f;
+typedef ShTexCoord<4, SH_INOUT, ShInterval<float> > ShInOutTexCoord4i_f;
+typedef ShTexCoord<4, SH_TEMP, ShInterval<float> > ShTexCoord4i_f;
+typedef ShTexCoord<4, SH_CONST, ShInterval<float> > ShConstTexCoord4i_f;
 
 
-typedef ShTexCoord<1, SH_INPUT, SH_DOUBLE> ShInputTexCoord1d;
-typedef ShTexCoord<1, SH_OUTPUT, SH_DOUBLE> ShOutputTexCoord1d;
-typedef ShTexCoord<1, SH_INOUT, SH_DOUBLE> ShInOutTexCoord1d;
-typedef ShTexCoord<1, SH_TEMP, SH_DOUBLE> ShTexCoord1d;
-typedef ShTexCoord<1, SH_CONST, SH_DOUBLE> ShConstTexCoord1d;
-typedef ShTexCoord<2, SH_INPUT, SH_DOUBLE> ShInputTexCoord2d;
-typedef ShTexCoord<2, SH_OUTPUT, SH_DOUBLE> ShOutputTexCoord2d;
-typedef ShTexCoord<2, SH_INOUT, SH_DOUBLE> ShInOutTexCoord2d;
-typedef ShTexCoord<2, SH_TEMP, SH_DOUBLE> ShTexCoord2d;
-typedef ShTexCoord<2, SH_CONST, SH_DOUBLE> ShConstTexCoord2d;
-typedef ShTexCoord<3, SH_INPUT, SH_DOUBLE> ShInputTexCoord3d;
-typedef ShTexCoord<3, SH_OUTPUT, SH_DOUBLE> ShOutputTexCoord3d;
-typedef ShTexCoord<3, SH_INOUT, SH_DOUBLE> ShInOutTexCoord3d;
-typedef ShTexCoord<3, SH_TEMP, SH_DOUBLE> ShTexCoord3d;
-typedef ShTexCoord<3, SH_CONST, SH_DOUBLE> ShConstTexCoord3d;
-typedef ShTexCoord<4, SH_INPUT, SH_DOUBLE> ShInputTexCoord4d;
-typedef ShTexCoord<4, SH_OUTPUT, SH_DOUBLE> ShOutputTexCoord4d;
-typedef ShTexCoord<4, SH_INOUT, SH_DOUBLE> ShInOutTexCoord4d;
-typedef ShTexCoord<4, SH_TEMP, SH_DOUBLE> ShTexCoord4d;
-typedef ShTexCoord<4, SH_CONST, SH_DOUBLE> ShConstTexCoord4d;
+typedef ShTexCoord<1, SH_INPUT, ShFracShort> ShInputTexCoord1fs;
+typedef ShTexCoord<1, SH_OUTPUT, ShFracShort> ShOutputTexCoord1fs;
+typedef ShTexCoord<1, SH_INOUT, ShFracShort> ShInOutTexCoord1fs;
+typedef ShTexCoord<1, SH_TEMP, ShFracShort> ShTexCoord1fs;
+typedef ShTexCoord<1, SH_CONST, ShFracShort> ShConstTexCoord1fs;
+typedef ShTexCoord<2, SH_INPUT, ShFracShort> ShInputTexCoord2fs;
+typedef ShTexCoord<2, SH_OUTPUT, ShFracShort> ShOutputTexCoord2fs;
+typedef ShTexCoord<2, SH_INOUT, ShFracShort> ShInOutTexCoord2fs;
+typedef ShTexCoord<2, SH_TEMP, ShFracShort> ShTexCoord2fs;
+typedef ShTexCoord<2, SH_CONST, ShFracShort> ShConstTexCoord2fs;
+typedef ShTexCoord<3, SH_INPUT, ShFracShort> ShInputTexCoord3fs;
+typedef ShTexCoord<3, SH_OUTPUT, ShFracShort> ShOutputTexCoord3fs;
+typedef ShTexCoord<3, SH_INOUT, ShFracShort> ShInOutTexCoord3fs;
+typedef ShTexCoord<3, SH_TEMP, ShFracShort> ShTexCoord3fs;
+typedef ShTexCoord<3, SH_CONST, ShFracShort> ShConstTexCoord3fs;
+typedef ShTexCoord<4, SH_INPUT, ShFracShort> ShInputTexCoord4fs;
+typedef ShTexCoord<4, SH_OUTPUT, ShFracShort> ShOutputTexCoord4fs;
+typedef ShTexCoord<4, SH_INOUT, ShFracShort> ShInOutTexCoord4fs;
+typedef ShTexCoord<4, SH_TEMP, ShFracShort> ShTexCoord4fs;
+typedef ShTexCoord<4, SH_CONST, ShFracShort> ShConstTexCoord4fs;
 
 
-typedef ShTexCoord<1, SH_INPUT, SH_INTERVAL_FLOAT> ShInputTexCoord1i_f;
-typedef ShTexCoord<1, SH_OUTPUT, SH_INTERVAL_FLOAT> ShOutputTexCoord1i_f;
-typedef ShTexCoord<1, SH_INOUT, SH_INTERVAL_FLOAT> ShInOutTexCoord1i_f;
-typedef ShTexCoord<1, SH_TEMP, SH_INTERVAL_FLOAT> ShTexCoord1i_f;
-typedef ShTexCoord<1, SH_CONST, SH_INTERVAL_FLOAT> ShConstTexCoord1i_f;
-typedef ShTexCoord<2, SH_INPUT, SH_INTERVAL_FLOAT> ShInputTexCoord2i_f;
-typedef ShTexCoord<2, SH_OUTPUT, SH_INTERVAL_FLOAT> ShOutputTexCoord2i_f;
-typedef ShTexCoord<2, SH_INOUT, SH_INTERVAL_FLOAT> ShInOutTexCoord2i_f;
-typedef ShTexCoord<2, SH_TEMP, SH_INTERVAL_FLOAT> ShTexCoord2i_f;
-typedef ShTexCoord<2, SH_CONST, SH_INTERVAL_FLOAT> ShConstTexCoord2i_f;
-typedef ShTexCoord<3, SH_INPUT, SH_INTERVAL_FLOAT> ShInputTexCoord3i_f;
-typedef ShTexCoord<3, SH_OUTPUT, SH_INTERVAL_FLOAT> ShOutputTexCoord3i_f;
-typedef ShTexCoord<3, SH_INOUT, SH_INTERVAL_FLOAT> ShInOutTexCoord3i_f;
-typedef ShTexCoord<3, SH_TEMP, SH_INTERVAL_FLOAT> ShTexCoord3i_f;
-typedef ShTexCoord<3, SH_CONST, SH_INTERVAL_FLOAT> ShConstTexCoord3i_f;
-typedef ShTexCoord<4, SH_INPUT, SH_INTERVAL_FLOAT> ShInputTexCoord4i_f;
-typedef ShTexCoord<4, SH_OUTPUT, SH_INTERVAL_FLOAT> ShOutputTexCoord4i_f;
-typedef ShTexCoord<4, SH_INOUT, SH_INTERVAL_FLOAT> ShInOutTexCoord4i_f;
-typedef ShTexCoord<4, SH_TEMP, SH_INTERVAL_FLOAT> ShTexCoord4i_f;
-typedef ShTexCoord<4, SH_CONST, SH_INTERVAL_FLOAT> ShConstTexCoord4i_f;
+typedef ShTexCoord<1, SH_INPUT, ShFracInt> ShInputTexCoord1fi;
+typedef ShTexCoord<1, SH_OUTPUT, ShFracInt> ShOutputTexCoord1fi;
+typedef ShTexCoord<1, SH_INOUT, ShFracInt> ShInOutTexCoord1fi;
+typedef ShTexCoord<1, SH_TEMP, ShFracInt> ShTexCoord1fi;
+typedef ShTexCoord<1, SH_CONST, ShFracInt> ShConstTexCoord1fi;
+typedef ShTexCoord<2, SH_INPUT, ShFracInt> ShInputTexCoord2fi;
+typedef ShTexCoord<2, SH_OUTPUT, ShFracInt> ShOutputTexCoord2fi;
+typedef ShTexCoord<2, SH_INOUT, ShFracInt> ShInOutTexCoord2fi;
+typedef ShTexCoord<2, SH_TEMP, ShFracInt> ShTexCoord2fi;
+typedef ShTexCoord<2, SH_CONST, ShFracInt> ShConstTexCoord2fi;
+typedef ShTexCoord<3, SH_INPUT, ShFracInt> ShInputTexCoord3fi;
+typedef ShTexCoord<3, SH_OUTPUT, ShFracInt> ShOutputTexCoord3fi;
+typedef ShTexCoord<3, SH_INOUT, ShFracInt> ShInOutTexCoord3fi;
+typedef ShTexCoord<3, SH_TEMP, ShFracInt> ShTexCoord3fi;
+typedef ShTexCoord<3, SH_CONST, ShFracInt> ShConstTexCoord3fi;
+typedef ShTexCoord<4, SH_INPUT, ShFracInt> ShInputTexCoord4fi;
+typedef ShTexCoord<4, SH_OUTPUT, ShFracInt> ShOutputTexCoord4fi;
+typedef ShTexCoord<4, SH_INOUT, ShFracInt> ShInOutTexCoord4fi;
+typedef ShTexCoord<4, SH_TEMP, ShFracInt> ShTexCoord4fi;
+typedef ShTexCoord<4, SH_CONST, ShFracInt> ShConstTexCoord4fi;
 
 
-typedef ShTexCoord<1, SH_INPUT, SH_FRAC_INT> ShInputTexCoord1fi;
-typedef ShTexCoord<1, SH_OUTPUT, SH_FRAC_INT> ShOutputTexCoord1fi;
-typedef ShTexCoord<1, SH_INOUT, SH_FRAC_INT> ShInOutTexCoord1fi;
-typedef ShTexCoord<1, SH_TEMP, SH_FRAC_INT> ShTexCoord1fi;
-typedef ShTexCoord<1, SH_CONST, SH_FRAC_INT> ShConstTexCoord1fi;
-typedef ShTexCoord<2, SH_INPUT, SH_FRAC_INT> ShInputTexCoord2fi;
-typedef ShTexCoord<2, SH_OUTPUT, SH_FRAC_INT> ShOutputTexCoord2fi;
-typedef ShTexCoord<2, SH_INOUT, SH_FRAC_INT> ShInOutTexCoord2fi;
-typedef ShTexCoord<2, SH_TEMP, SH_FRAC_INT> ShTexCoord2fi;
-typedef ShTexCoord<2, SH_CONST, SH_FRAC_INT> ShConstTexCoord2fi;
-typedef ShTexCoord<3, SH_INPUT, SH_FRAC_INT> ShInputTexCoord3fi;
-typedef ShTexCoord<3, SH_OUTPUT, SH_FRAC_INT> ShOutputTexCoord3fi;
-typedef ShTexCoord<3, SH_INOUT, SH_FRAC_INT> ShInOutTexCoord3fi;
-typedef ShTexCoord<3, SH_TEMP, SH_FRAC_INT> ShTexCoord3fi;
-typedef ShTexCoord<3, SH_CONST, SH_FRAC_INT> ShConstTexCoord3fi;
-typedef ShTexCoord<4, SH_INPUT, SH_FRAC_INT> ShInputTexCoord4fi;
-typedef ShTexCoord<4, SH_OUTPUT, SH_FRAC_INT> ShOutputTexCoord4fi;
-typedef ShTexCoord<4, SH_INOUT, SH_FRAC_INT> ShInOutTexCoord4fi;
-typedef ShTexCoord<4, SH_TEMP, SH_FRAC_INT> ShTexCoord4fi;
-typedef ShTexCoord<4, SH_CONST, SH_FRAC_INT> ShConstTexCoord4fi;
+typedef ShTexCoord<1, SH_INPUT, unsigned int> ShInputTexCoord1ui;
+typedef ShTexCoord<1, SH_OUTPUT, unsigned int> ShOutputTexCoord1ui;
+typedef ShTexCoord<1, SH_INOUT, unsigned int> ShInOutTexCoord1ui;
+typedef ShTexCoord<1, SH_TEMP, unsigned int> ShTexCoord1ui;
+typedef ShTexCoord<1, SH_CONST, unsigned int> ShConstTexCoord1ui;
+typedef ShTexCoord<2, SH_INPUT, unsigned int> ShInputTexCoord2ui;
+typedef ShTexCoord<2, SH_OUTPUT, unsigned int> ShOutputTexCoord2ui;
+typedef ShTexCoord<2, SH_INOUT, unsigned int> ShInOutTexCoord2ui;
+typedef ShTexCoord<2, SH_TEMP, unsigned int> ShTexCoord2ui;
+typedef ShTexCoord<2, SH_CONST, unsigned int> ShConstTexCoord2ui;
+typedef ShTexCoord<3, SH_INPUT, unsigned int> ShInputTexCoord3ui;
+typedef ShTexCoord<3, SH_OUTPUT, unsigned int> ShOutputTexCoord3ui;
+typedef ShTexCoord<3, SH_INOUT, unsigned int> ShInOutTexCoord3ui;
+typedef ShTexCoord<3, SH_TEMP, unsigned int> ShTexCoord3ui;
+typedef ShTexCoord<3, SH_CONST, unsigned int> ShConstTexCoord3ui;
+typedef ShTexCoord<4, SH_INPUT, unsigned int> ShInputTexCoord4ui;
+typedef ShTexCoord<4, SH_OUTPUT, unsigned int> ShOutputTexCoord4ui;
+typedef ShTexCoord<4, SH_INOUT, unsigned int> ShInOutTexCoord4ui;
+typedef ShTexCoord<4, SH_TEMP, unsigned int> ShTexCoord4ui;
+typedef ShTexCoord<4, SH_CONST, unsigned int> ShConstTexCoord4ui;
 
 
 
