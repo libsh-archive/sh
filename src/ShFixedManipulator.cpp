@@ -71,7 +71,7 @@ ShLoseNode::ShLoseNode(int numChannels)
 }
 
 ShProgram ShLoseNode::applyToInputs(ShManipVarIterator &finger, ShManipVarIterator end) const {
-  SH_DEBUG_PRINT( "Applying lose " << m_numChannels  );
+  //SH_DEBUG_PRINT( "Applying lose " << m_numChannels  );
   ShProgram result = SH_BEGIN_PROGRAM() {
     for(int i = 0; i < m_numChannels; ++i, ++finger) {
       if(finger == end) {

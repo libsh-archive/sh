@@ -103,6 +103,18 @@ void shBind(const std::string& target, ShProgram& prg)
   prg.code(target, ShEnvironment::backend)->bind();
 }
 
+typedef std::map<std::string, ShProgram> BoundProgramMap;
+
+void shUpdate()
+{
+  if (!ShEnvironment::backend) return;
+  
+  for (BoundProgramMap::iterator i = ShContext::current()->begin_bound(); 
+       i != ShContext::current()->end_bound(); i++) {
+    i->second.code(ShEnvironment::backend)->update();
+  }
+}
+
 void shBindShader(ShProgram& shader)
 {
   shBind(shader);

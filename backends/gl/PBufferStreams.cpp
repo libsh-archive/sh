@@ -324,11 +324,11 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
     switch (extension) {
     case SH_ARB_NV_FLOAT_BUFFER:
       tex = new ShTextureNode(SH_TEXTURE_RECT, I->first->size(),
-                              I->first->valueType(), traits, tex_size, tex_size, 1);
+                              I->first->valueType(), traits, tex_size, tex_size, 1, count);
       break;
     case SH_ARB_ATI_PIXEL_FORMAT_FLOAT:
       tex = new ShTextureNode(SH_TEXTURE_2D, I->first->size(),
-                              I->first->valueType(), traits, tex_size, tex_size, 1);
+                              I->first->valueType(), traits, tex_size, tex_size, 1, count);
       break;
     default:
       tex = 0;

@@ -36,8 +36,8 @@ namespace SH {
 ShTextureNode::ShTextureNode(ShTextureDims dims, int size,
                              ShValueType valueType,
                              const ShTextureTraits& traits,
-                             int width, int height, int depth)
-  : ShVariableNode(SH_TEXTURE, size, valueType),
+                             int width, int height, int depth, int max_nb_elements)
+  : ShVariableNode(SH_TEXTURE, size, valueType), m_count(max_nb_elements),
     m_dims(dims),
     m_memory(new ShMemoryPtr[dims == SH_TEXTURE_CUBE ? 6 : 1]),
     m_traits(traits),
@@ -152,7 +152,7 @@ int ShTextureNode::depth() const
 
 int ShTextureNode::count() const
 {
-  return m_width * m_height * m_depth;
+  return (m_count != -1) ? m_count : m_width * m_height * m_depth;
 }
 
 const ShVariable& ShTextureNode::texSizeVar() const

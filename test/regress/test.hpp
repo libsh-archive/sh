@@ -67,10 +67,13 @@ public:
   }
 
   template <class INPUT1, class OUTPUT>
-  void run(SH::ShProgram& program,
+  int run(SH::ShProgram& program,
            const INPUT1& in1,
            const OUTPUT& res)
   {
+    if (on_host())
+	 return 0; // skip this test
+
     typedef typename INPUT1::mem_type IT;
     typedef typename OUTPUT::mem_type OT;
 
@@ -99,23 +102,27 @@ public:
         print_fail(name);
         pretty_print("  A", in1.size(), _in1);
         pretty_print("out", res.size(), _out);
-        pretty_print("res", res.size(), _res);
-        return;
+        pretty_print("exp", res.size(), _res);
+        return 1;
       }
     }
 #ifdef SH_REGRESS_SHOWALL
       /* DEBUG */ pretty_print("out", res.size(), _out);
-      /* DEBUG */ pretty_print("res", res.size(), _res);
+      /* DEBUG */ pretty_print("exp", res.size(), _res);
 #endif
     print_pass(name);
+    return 0;
   }
 
   template <class INPUT1, class INPUT2, class OUTPUT>
-  void run(SH::ShProgram& program,
+  int run(SH::ShProgram& program,
            const INPUT1& in1,
            const INPUT2& in2,
            const OUTPUT& res)
   {
+    if (on_host())
+	 return 0; // skip this test
+
     typedef typename INPUT1::mem_type IT1;
     typedef typename INPUT2::mem_type IT2;
     typedef typename OUTPUT::mem_type OT;
@@ -152,24 +159,28 @@ public:
         pretty_print("  A", in1.size(), _in1);
         pretty_print("  B", in2.size(), _in2);
         pretty_print("out", res.size(), _out);
-        pretty_print("res", res.size(), _res);
-        return;
+        pretty_print("exp", res.size(), _res);
+        return 1;
       }
     }
 #ifdef SH_REGRESS_SHOWALL
       /* DEBUG */ pretty_print("out", res.size(), _out);
-      /* DEBUG */ pretty_print("res", res.size(), _res);
+      /* DEBUG */ pretty_print("exp", res.size(), _res);
 #endif    
     print_pass(name);
+    return 0;
   }
 
   template <class INPUT1, class INPUT2, class INPUT3, class OUTPUT>
-  void run(SH::ShProgram& program,
+  int run(SH::ShProgram& program,
            const INPUT1& in1,
            const INPUT2& in2,
            const INPUT3& in3,
            const OUTPUT res)
   {
+    if (on_host())
+	 return 0; // skip this test
+
     typedef typename INPUT1::mem_type IT1;
     typedef typename INPUT2::mem_type IT2;
     typedef typename INPUT3::mem_type IT3;
@@ -215,19 +226,21 @@ public:
         pretty_print("  B", in2.size(), _in2);
         pretty_print("  C", in2.size(), _in2);
         pretty_print("out", res.size(), _out);
-        pretty_print("res", res.size(), _res);
-        return;
+        pretty_print("exp", res.size(), _res);
+        return 1;
       }
     }
 #ifdef SH_REGRESS_SHOWALL
       /* DEBUG */ pretty_print("out", res.size(), _out);
-      /* DEBUG */ pretty_print("res", res.size(), _res);
+      /* DEBUG */ pretty_print("exp", res.size(), _res);
 #endif
+    print_pass(name);
+    return 0;
   }
 
   /// Checks results from running ops on the host
   template <class OUTPUT, class EXPECTED>
-  void check(std::string name, const OUTPUT &out, const EXPECTED &res)
+  int check(std::string name, const OUTPUT &out, const EXPECTED &res)
   {
       typedef typename OUTPUT::host_type OT;
       OT* _out = new OT[out.size()];
@@ -239,22 +252,23 @@ public:
       if(out.size() != res.size()) {
         print_fail(name);
         std::cout << "Test data size mismatch" << std::endl;
-        return;
+        return 2;
       }
 
       for(int i = 0; i < out.size(); ++i) {
         if (fabs(_out[i] - _res[i]) > EPSILON) {
           print_fail(name);
           pretty_print("out", out.size(), _out); 
-          pretty_print("res", res.size(), _res); 
-          return;
+          pretty_print("exp", res.size(), _res); 
+          return 1;
         }
       }
 #ifdef SH_REGRESS_SHOWALL
         /* DEBUG */ pretty_print("out", res.size(), _out);
-        /* DEBUG */ pretty_print("res", res.size(), _res);
+        /* DEBUG */ pretty_print("exp", res.size(), _res);
 #endif
       print_pass(name);
+      return 0;
   }
 
   bool on_host()

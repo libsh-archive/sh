@@ -165,6 +165,11 @@ namespace ShCc {
     SH_CC_DEBUG_PRINT(__FUNCTION__);
   }
 
+  void CcBackendCode::update(void) 
+  {
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
+  }
+
   void CcBackendCode::updateUniform(const ShVariableNodePtr& uniform) 
   {
     SH_CC_DEBUG_PRINT(__FUNCTION__);

@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT(Sh, 0.7.5, libsh-devel@lists.sourceforge.net, libsh)
+AC_INIT(Sh, 0.7.6, libsh-devel@lists.sourceforge.net, libsh)
 AC_CONFIG_SRCDIR([src/ShVariable.hpp])
 AM_INIT_AUTOMAKE
 
@@ -7,7 +7,7 @@ AM_CONFIG_HEADER(config.h)
 
 # Checks for programs.
 if test "x$CXXFLAGS" = x ; then
-    CXXFLAGS="-Wall -g" 
+    CXXFLAGS="-Wall -g -O2" 
 fi
 
 AC_PROG_CXX
@@ -72,20 +72,7 @@ if test "x$sh_backend_arb" = xtrue ; then
 fi
 AM_CONDITIONAL(ENABLE_ARB_BACKEND, test x$sh_backend_arb = xtrue)
 
-SH_CHECK_NONDEFAULT_BACKEND([ati], [ATI])
-if test "x$sh_backend_ati" = xtrue ; then
-  GL_CHECK_GL_HEADERS([],
-    [SH_BACKEND_MESSAGE([ati], [OpenGL headers (GL/gl.h and GL/glext.h) not found. Disabling ATI backend.])
-     sh_backend_ati=false])
-  GL_CHECK_GLEXT_VERSION([18], [], [
-    SH_BACKEND_MESSAGE([ati], [glext.h version 18 or greater (available at http://oss.sgi.com/projects/ogl-sample/regi\
-stry/) not found. Disabling ATI backend.])
-    sh_backend_ati=false
-  ])
-fi
-AM_CONDITIONAL(ENABLE_ATI_BACKEND, test x$sh_backend_ati = xtrue)
-
-AM_CONDITIONAL(ENABLE_GL_BACKENDS, test x$sh_backend_ati = xtrue -o x$sh_backend_arb = xtrue)
+AM_CONDITIONAL(ENABLE_GL_BACKENDS, test x$sh_backend_arb = xtrue)
 
 AC_ARG_ENABLE([docs],
 	      AC_HELP_STRING([--enable-docs],
@@ -106,7 +93,11 @@ fi
 AM_CONDITIONAL(ENABLE_DOXYGEN_DOCS, test x$sh_enable_docs = xtrue)
 
 # Store the prefix as a variable
-AC_DEFINE_UNQUOTED(SH_INSTALL_PREFIX, "$prefix", [Installation prefix directory])
+if test "x$prefix" = xNONE ; then
+   AC_DEFINE_UNQUOTED(SH_INSTALL_PREFIX, "/usr/local", [Installation prefix directory])
+else
+   AC_DEFINE_UNQUOTED(SH_INSTALL_PREFIX, "$prefix", [Installation prefix directory])
+fi
 
 
 AC_CONFIG_FILES([Makefile

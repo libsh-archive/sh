@@ -1,4 +1,7 @@
 2004-01-24 Bryan Chan <b8chan@cgl.uwaterloo.ca>
+  Merged trunk in up to 1900
+
+2004-01-24 Bryan Chan <b8chan@cgl.uwaterloo.ca>
 Change to merge back to trunk:
   * src/ShTransformer.cpp (StatementSplitter::updateStatement):
   Long-tuple handling for CSUM, CMUL
@@ -100,7 +103,59 @@ Affine Arithmetic Updates:
 		Strips dummy ops (comments, section markers, internal affine stuff) from the
 		IR before final compilation. 
 
+2005-01-21  Francois Marier  <francois@serioushack.com>
+
+	* src/ShSyntax.hpp, src/ShSyntax.cpp: Added a new function,
+	shUpdate(), which uploads any textures and uniform parameters
+	which are out-of-date but required on all compilation targets that
+	have any programs bound.
+
+	* src/ShBackend.hpp, backends/gl/ArbCode.cpp,
+	backends/gl/ArbCode.hpp, backends/cc/Cc.cpp, backends/cc/Cc.hpp:
+	The backend code now has an update() method which is called by
+	shUpdate().
+
+2005-01-19  Francois Marier  <francois@serioushack.com>
+
+	* src/ShTextureNode.cpp, src/ShTextureNode.hpp,
+	backends/gl/GlTextures.cpp, backends/gl/PBufferStreams.cpp: Added
+	an option count parameter to the constructor that is used to
+	restrict the copy of non-existing data to texture memory.
+
+	* backends/gl/GlTextureStorage.hpp, GlTextureStorage.cpp: Changed
+	the glTexImage calls to only allocate the necessary space and
+	added glTexSubImage calls to do the actual copying.  Fixes issue151.
+
+2005-01-17  Francois Marier  <francois@serioushack.com>
+
+	* test/regres: Added tests for exp, clamp, frac, sign, max, min,
+	pos, sat and sqrt.
+
+	* test/regress/test.hpp: Prevent the host backend from running
+	stream programs and segfaulting.
+
+	* test/regress/shtest.py, test/regress/test.hpp: Instead of always
+	returning 0, the generated test programs now return 1 if any of
+	the tests failed, 2 on ShErrors and 3 on C++ errors.
+
+2005-01-12  Francois Marier  <francois@serioushack.com>
+
+	* test/regress: Added tests for abs, ceil, dot, floor, mod, pow, 
+	==, !=, >=, >, <=, and <.
 	
+	* test/regress/test.hpp: Renamed "res" to "exp" in the test output
+	to make it clear that the last line refers to expected output.
+
+	* test/regress/shtest.py (Test.output_footer): Prevent compile
+	warning by adding an extra \n at the end of each cpp file that's
+	generated.
+
+	* test/regress/test.cpp: The default backend is set to the
+	SH_REGRESS_BACKEND environment variable if it exists. It's still
+	possible to override this default on the command line.
+
+	* test/regress/Makefile.am: Added a checkall target
+	to run "make check" on all backends.
 
 2004-01-11 Bryan Chan <b8chan@cgl.uwaterloo.ca>
 Probably should have checked a good chunk of this in a month ago...ah well.
@@ -327,9 +382,7 @@ IA/AA changes:
 		* src/ShLibBoolean.hpp ShLibBooleanImpl.hpp (cond):
 		Put 011 scalar version of cond in (perhaps I deleted this by mistake at some
 		point).
-
-
-
+	
 2005-01-11  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/ArbCode.cpp (allocParam): Renamed opengl:binding to
@@ -398,7 +451,7 @@ IA/AA changes:
 	* src/ShFractionImpl.hpp (cbrt, exp, exp2, exp10):
 	Fixed bug. 
 
-2004-11-28  Bryan Chan <b8chan@cgl.uwaterloo.ca
+2004-11-28  Bryan Chan <b8chan@cgl.uwaterloo.ca>
 	* src/ShUtility.hpp (MatchTemplateType, TemplateParamterType):
 	Added some mildly useful template voodoo. 
 
