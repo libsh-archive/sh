@@ -1,5 +1,11 @@
 2004-01-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShRefCount.hpp (ShRefCountable): Actually, the
+	ShRefCountable operator=() should not do anything. Realised this
+	on the way home. Hence also removed the warning comment at the
+	top, since luckily this will actually be the behaviour if a
+	derived class provides a operator=() but does not call ours!
+
 	* test/ref.sht: Added this simple test to fix bugs in reference
 	counting.
 

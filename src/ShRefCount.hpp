@@ -48,19 +48,6 @@ namespace SH {
 /** A class which can be reference-counted.
     These are classes you can wrap in an ShRefCount. Inherit from this
     if you want to reference-count your class.
-
-    Note: It is VERY IMPORTANT that you call the operator= from this
-    class if you define your own operator=() in your derived class.
-
-    E.g:
-
-    MyClass& MyClass::operator=(const MyClass& other) {
-      // Do this first:
-      static_cast<ShRefCountable&>(*this) = static_cast<const ShRefCountable&>(other);
-
-      // Now do your other stuff
-      ...
-    }
 */
 class ShRefCountable 
 {
@@ -72,12 +59,15 @@ public:
 
   ShRefCountable(const ShRefCountable&)
     : m_refCount(0)
+    // any new RefCountable should have a zero refcount, even if it's
+    // made as a copy
   {
   }
 
   ShRefCountable& operator=(const ShRefCountable&)
   {
-    m_refCount = 0;
+    // we don't actually change refCount here
+    // this is indeed the intended behaviour
     return *this;
   }
 
