@@ -1,3 +1,11 @@
+2004-02-16  Bryan Chan <b8chan@uwaterloo.ca>
+	* src/ShAlgebra.hpp (operator>>):
+	Removed the default templated >> operator that automatically defines
+	>> whenever << is defined with one arg as ShProgram.
+
+	* src/ShTransformer.cpp (convertInputOutput):
+	Fixed mishandling of SH_INOUTs.
+	
 2004-02-15  Bryan Chan <b8chan@uwaterloo.ca>
 	* src/ShAlgebra.cpp (connect,combine):
 	Small cleanups to use STL list ops for copying inputs/outputs

@@ -317,6 +317,13 @@ struct InputOutputConvertor {
     }
   }
 
+  /* Convert all INOUT nodes that appear in a VarList (use std::for_each with this object)
+   * (currently InOuts are always converted) */ 
+  void operator()(ShVariableNodePtr node) {
+    if (node->kind() != SH_INOUT || varMap.count(node) > 0) return;
+    varMap[node] = dupNode(node);
+  }
+
   // dup that works only on nodes without values (inputs, outputs fall into this category)
   ShVariableNodePtr dupNode(ShVariableNodePtr node, ShVariableKind newKind = SH_TEMP) {
     ShVariableNodePtr result( new ShVariableNode(newKind,
@@ -325,11 +332,13 @@ struct InputOutputConvertor {
     return result;
   }
   
+  // Convert inputs, outputs only when they appear in incompatible locations
+  // (inputs used as dest, outputs used as src)
   void convertIO(ShStatement& stmt)
   {
     if(!stmt.dest.null()) {
       ShVariableNodePtr &oldNode = stmt.dest.node();
-      if(oldNode->kind() == SH_INPUT || oldNode->kind() == SH_INOUT) {
+      if(oldNode->kind() == SH_INPUT) { 
         if(varMap.find(oldNode) == varMap.end()) {
           varMap[oldNode] = dupNode(oldNode); 
         }
@@ -338,7 +347,7 @@ struct InputOutputConvertor {
     for(int i = 0; i < 3; ++i) {
       if(!stmt.src[i].null()) {
         ShVariableNodePtr &oldNode = stmt.src[i].node();
-        if(oldNode->kind() == SH_OUTPUT || oldNode->kind() == SH_INOUT) { 
+        if(oldNode->kind() == SH_OUTPUT) { 
           if(varMap.find(oldNode) == varMap.end()) {
             varMap[oldNode] = dupNode(oldNode); 
           }
@@ -395,6 +404,8 @@ struct InputOutputConvertor {
 void ShTransformer::convertInputOutput()
 {
   InputOutputConvertor ioc(m_program, m_changed);
+  std::for_each(m_program->inputs.begin(), m_program->inputs.end(), ioc);
+  std::for_each(m_program->outputs.begin(), m_program->outputs.end(), ioc);
   m_graph->dfs(ioc);
 
   ShVariableReplacer vr(ioc.varMap);
