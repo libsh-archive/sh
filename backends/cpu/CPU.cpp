@@ -78,7 +78,7 @@ namespace ShCPU {
     m_label_map(label_map)
     {
     }
-  
+
   void CPUBackendCode::LabelFunctor::operator()(SH::ShCtrlGraphNode* node)
     {
     m_label_map[node] = m_cur_label++;
@@ -848,7 +848,7 @@ namespace ShCPU {
 		   << resolve(stmt.dest, i)
 		   << " = "
 		   << resolve(stmt.src[0], i)
-		   << " * (" 
+		   << " * ("
 		   << resolve(stmt.src[1], i)
 		   << " - " 
 		   << resolve(stmt.src[2], i)
@@ -885,9 +885,9 @@ namespace ShCPU {
 		   << resolve(stmt.dest, i)
 		   << " = "
 		   << resolve(stmt.src[0], i)
-		   << " * " 
+		   << " * "
 		   << resolve(stmt.src[1], 0)
-		   << " + " 
+		   << " + "
 		   << resolve(stmt.src[2], i)
 		   << ");" << std::endl;
 	    }
@@ -900,9 +900,9 @@ namespace ShCPU {
 		   << resolve(stmt.dest, i)
 		   << " = "
 		   << resolve(stmt.src[0], i)
-		   << " * " 
+		   << " * "
 		   << resolve(stmt.src[1], i)
-		   << " + " 
+		   << " + "
 		   << resolve(stmt.src[2], i)
 		   << ");" << std::endl;
 	    }
@@ -1355,8 +1355,14 @@ namespace ShCPU {
       {
       m_code << "  goto label_" << m_label_map[node->follower] << ";" << std::endl;
       }
+
+    if (node->successors.empty() && !node->follower)
+      {
+      // Last block, need to return from the function
+      m_code << "  return;" << std::endl;
+      }
     }
-  
+
   bool CPUBackendCode::generate(void)
     {
     SH_DEBUG_PRINT("Creating label map...");
