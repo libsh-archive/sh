@@ -30,6 +30,7 @@
 #include "ShVariable.hpp"
 #include "ShAttrib.hpp"
 
+#ifndef WIN32
 namespace ShUtil {
 
 using namespace SH;
@@ -123,6 +124,7 @@ ShGeneric<3, V> changeBasis(const ShGeneric<3, V> &b0,
     const ShGeneric<3, V> &b1, const ShGeneric<3, V> &b2, const ShGeneric<3, V> &v); 
 
 }
+#endif
 
 #include "ShFuncImpl.hpp"
 

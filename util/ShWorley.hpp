@@ -189,12 +189,6 @@ public PropertyFactory<N, D, V> {
     const P2* m_propFactory2;
 };
 
-#ifndef WIN32
-// MSVC++ .NET does not recognize this as being the same as its implementation.
-template<typename P1, typename P2>
-PropertyFactory<P1::NUM_PROPS + P2::NUM_PROPS, P1::DIM, P1::PropType>*
-combine(const P1 *propFactory1, const P2 *propFactory2);
-#endif
 
 // standard distance based property factories 
 // Re-write later to take function pointer (or ShProgram object)
@@ -254,6 +248,11 @@ struct Tex2DPropFactory: public PropertyFactory<TexType::typesize, 2, V> {
     // TODO remove invScale and restrict to RECT textures later 
 };
 
+#ifndef WIN32
+// MSVC++ .NET does not recognize these as being the same as their implementation.
+template<typename P1, typename P2>
+PropertyFactory<P1::NUM_PROPS + P2::NUM_PROPS, P1::DIM, P1::PropType>*
+combine(const P1 *propFactory1, const P2 *propFactory2);
 
 /** \brief Worley texture generator.
  * This uses the DefaultGeneratorFactory and DistSqPropFactory 
@@ -287,6 +286,7 @@ ShProgram shWorley(const GeneratorFactory<P, D, V> *genFactory,
     const PropertyFactory<N, D, V> *propFactory);
 //@}
 
+#endif // ifndef WIN32
 
 } // namespace ShUtil
 

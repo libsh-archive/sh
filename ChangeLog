@@ -1,3 +1,10 @@
+2004-11-09  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+  * util/ShFunc.hpp, ShWorley.hpp ShNoise.hpp:
+  hid some function declarations from the compiler
+
+  * win32.mk:
+  Fixed error. 
+
 2004-11-08  Bryan Chan <b8chan@cgl.uwaterloo.ca>
   Merged arithmetic r1672 into main branch
   

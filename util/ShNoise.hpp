@@ -70,6 +70,8 @@ class ShNoise
     static void init();
 };
 
+#ifndef WIN32
+
 // Returns summed octaves of Perlin improved noise
 // @{
 template<int N, int M, ShValueType V>
@@ -136,6 +138,8 @@ template<int N, int M, int K, ShValueType V1, ShValueType V2>
 ShGeneric<N, CV1V2> sturbulence(const ShGeneric<M, V1> &p, const ShGeneric<K, V2> &amp, 
     bool useTexture = true);
 // @}
+
+#endif // ifndef WIN32
 
 }
 #include "ShNoiseImpl.hpp" 

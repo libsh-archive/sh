@@ -258,7 +258,11 @@ void worley(ShGeneric<K, V> result[], const ShGeneric<D, V> &p,
 }
 
 template<int K, int D, ShValueType V>
-ShGeneric<K, V> worley(const ShGeneric<D, V> &p, bool useTexture) {
+#ifdef WIn32
+ShGeneric<K, V> worley(const ShGeneric<D, V> &p, bool useTexture=true) {
+#else
+ShGeneric<K, V> worley(const ShGeneric<D, V> &p, bool useTexture=true) {
+#endif
   DefaultGenFactory<D, V> genFactory(useTexture);
   DistSqPropFactory<D, V> propFactory;
   ShAttrib<K, SH_TEMP, V> result;
@@ -267,7 +271,11 @@ ShGeneric<K, V> worley(const ShGeneric<D, V> &p, bool useTexture) {
 }
 
 template<int K, int D, ShValueType V>
+#ifdef WIn32
+ShProgram shWorley(bool useTexture=true) {
+#else
 ShProgram shWorley(bool useTexture) {
+#endif
   DefaultGenFactory<D, V> genFactory(useTexture);
   DistSqPropFactory<D, V> propFactory;
   return shWorley<K>(&genFactory, &propFactory); 
