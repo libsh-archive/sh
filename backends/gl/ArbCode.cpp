@@ -38,6 +38,7 @@
 #include "ShEnvironment.hpp"
 #include "ShContext.hpp"
 #include "ShTypeInfo.hpp"
+#include "ShVariant.hpp"
 #include "ShTextureNode.hpp"
 #include "ShSyntax.hpp"
 #include "ArbReg.hpp"
@@ -336,7 +337,7 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
   float values[4];
   uniformVariant = ShCastManager::instance()->doCast(shTypeIndex<float>(), uniformVariant);
   const ShDataVariant<float> floatVariant = 
-    (*shref_dynamic_cast<const ShDataVariant<float> >(uniformVariant));
+    (*variant_cast<float>(uniformVariant));
   for (i = 0; i < uniform->size(); i++) {
     // TODO clean this up and handle different types
     values[i] = floatVariant[i]; 
@@ -890,7 +891,7 @@ void ArbCode::allocConsts(const ArbLimits& limits)
   for (ShProgramNode::VarList::const_iterator I = m_shader->constants.begin();
        I != m_shader->constants.end(); ++I) {
     ShVariableNodePtr node = *I;
-    const ShDataVariant<float>& variant = (*shref_dynamic_cast<const ShDataVariant<float> >(node->getVariant()));
+    const ShDataVariant<float>& variant = (*variant_cast<float>(node->getVariant()));
 
     // TODO: improve efficiency
     RegMap::const_iterator J;

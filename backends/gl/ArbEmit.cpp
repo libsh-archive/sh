@@ -339,29 +339,6 @@ void ArbCode::emit_mod(const ShStatement& stmt)
 
 void ArbCode::emit_trig(const ShStatement& stmt)
 {
-  /*
-  ShVariableNode::ValueType c0_values[] = 
-    { 0.0, 0.5, 1.0, 0.0 };
-  ShVariable c0(new ShVariableNode(SH_CONST, 4, shTypeIndex<float>()));
-  c0.setValues(c0_values);
-  ShVariableNode::ValueType c1_values[] = 
-    { 0.25, -9.0, 0.75, 1.0/(2.0*M_PI) };
-  ShVariable c1(new ShVariableNode(SH_CONST, 4, shTypeIndex<float>()));
-  c1.setValues(c1_values);
-  ShVariableNode::ValueType c2_values[] = 
-    { 24.9808039603, -24.9808039603, -60.1458091736, 60.1458091736 };
-  ShVariable c2(new ShVariableNode(SH_CONST, 4, shTypeIndex<float>()));
-  c2.setValues(c2_values);
-  ShVariableNode::ValueType c3_values[] = 
-    { 85.4537887573, -85.4537887573, -64.9393539429, 64.9393539429 };
-  ShVariable c3(new ShVariableNode(SH_CONST, 4, shTypeIndex<float>()));
-  c3.setValues(c3_values);
-  ShVariableNode::ValueType c4_values[] = 
-    { 19.7392082214, -19.7392082214, -1.0, 1.0 };
-  ShVariable c4(new ShVariableNode(SH_CONST, 4, shTypeIndex<float>()));
-  c4.setValues(c4_values);
-  */
-
   // Use float constants.  Conversions will take place as necessary
   ShConstAttrib4f c0(0.0, 0.5, 1.0, 0.0);
   ShConstAttrib4f c1(0.25, -9.0, 0.75, 1.0/(2.0*M_PI));
@@ -406,29 +383,6 @@ void ArbCode::emit_trig(const ShStatement& stmt)
 
 void ArbCode::emit_invtrig(const ShStatement& stmt)
 {
-  /*
-  ShVariableNode::ValueType c0_values[] = 
-    { 0.0, 1.570796327, -0.5860008052, 0.5860008052 };
-  ShVariable c0(new ShVariableNode(SH_CONST, 4, shTypeIndex<float>()));
-  c0.setValues(c0_values);
-  ShVariableNode::ValueType c1_values[] = 
-    { 1.571945105, -1.571945105, -1.669668977, 1.669668977 };
-  ShVariable c1(new ShVariableNode(SH_CONST, 4, shTypeIndex<float>()));
-  c1.setValues(c1_values);
-  ShVariableNode::ValueType c2_values[] = 
-    { 0.8999841642, -0.8999841642, -0.6575341673, 0.6575341673 };
-  ShVariable c2(new ShVariableNode(SH_CONST, 4, shTypeIndex<float>()));
-  c2.setValues(c2_values);
-  ShVariableNode::ValueType c3_values[] = 
-    { 1.012386649, -1.012386649, 0.9998421793, -0.9998421793 };
-  ShVariable c3(new ShVariableNode(SH_CONST, 4, shTypeIndex<float>()));
-  c3.setValues(c3_values);
-  ShVariableNode::ValueType c4_values[] = 
-    { 1.0, -1.0, 1.0, -1.0 };
-  ShVariable c4(new ShVariableNode(SH_CONST, 4, shTypeIndex<float>()));
-  c4.setValues(c4_values);
-  */
-
   // Use float constants.  Conversions will take place to other types as necessary 
   ShConstAttrib4f c0(0.0, 1.570796327, -0.5860008052, 0.5860008052);
   ShConstAttrib4f c1(1.571945105, -1.571945105, -1.669668977, 1.669668977);

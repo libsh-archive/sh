@@ -1,3 +1,23 @@
+2004-10-21 Bryan Chan <b8chan@cgl.uwaterloo.ca>
+  Foundations of half-float/fractional types.  Still TODO: 
+  backend transformers, casting memory lookup values in cc backend, immediate
+  mode clamping for fractionals.
+
+  * src/ShTypeInfo.hpp, ShTypeInfoImpl.hpp: 
+  Added typedefs for host & memory storage types. 
+
+  * src/ShVariantFactory.hpp, ShVariantFactoryImpl.hpp
+    backends/gl/PBufferStream.cpp GlTextureSTorage.cpp:
+  Added methods to allocate variants using the memory storage type.
+  
+  * src/scripts/semantic.py, ShAttribImpl.hpp.py, 
+    src/ShGeneric.hpp, ShGenericImpl.hpp :
+  Changed all scalar value constructors/returns to use 
+  the host storage type instead of T.
+
+  * test/regress/test.hpp:
+  Changed streams to use MemoryType instead of ValueType.
+  
 2004-10-20 Bryan Chan  <b8chan@cgl.uwaterloo.ca>
   Merged trunk up to r1595 into arithmetic (but did not test out the windows
   changes).

@@ -199,7 +199,7 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator%=(const ShGeneric<1, T2>& right)
 
 template<int N, typename T>
 inline
-ShGeneric<N, T>& ShGeneric<N, T>::operator+=(T right)
+ShGeneric<N, T>& ShGeneric<N, T>::operator+=(H right)
 {
   *this = *this + right;
   return *this;
@@ -207,7 +207,7 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator+=(T right)
 
 template<int N, typename T>
 inline
-ShGeneric<N, T>& ShGeneric<N, T>::operator-=(T right)
+ShGeneric<N, T>& ShGeneric<N, T>::operator-=(H right)
 {
   *this = *this - right;
   return *this;
@@ -215,7 +215,7 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator-=(T right)
 
 template<int N, typename T>
 inline
-ShGeneric<N, T>& ShGeneric<N, T>::operator*=(T right)
+ShGeneric<N, T>& ShGeneric<N, T>::operator*=(H right)
 {
   *this = *this * right;
   return *this;
@@ -223,7 +223,7 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator*=(T right)
 
 template<int N, typename T>
 inline
-ShGeneric<N, T>& ShGeneric<N, T>::operator/=(T right)
+ShGeneric<N, T>& ShGeneric<N, T>::operator/=(H right)
 {
   *this = *this / right;
   return *this;
@@ -231,7 +231,7 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator/=(T right)
 
 template<int N, typename T>
 inline
-ShGeneric<N, T>& ShGeneric<N, T>::operator%=(T right)
+ShGeneric<N, T>& ShGeneric<N, T>::operator%=(H right)
 {
   *this = *this % right;
   return *this;
@@ -288,31 +288,31 @@ ShGeneric<4, T> ShGeneric<N, T>::operator()(int i1, int i2, int i3, int i4) cons
 }
 
 template<int N, typename T>
-void ShGeneric<N, T>::range(T low, T high) 
+void ShGeneric<N, T>::range(H low, H high) 
 {
-  rangeVariant(new ShDataVariant<T>(1, low), new ShDataVariant<T>(1, high));
+  rangeVariant(new VariantType(1, low), new VariantType(1, high));
 }
 
 template<int N, typename T>
-ShDataVariant<T> ShGeneric<N, T>::lowBound() const
+typename ShGeneric<N, T>::VariantType ShGeneric<N, T>::lowBound() const
 {
   return (*shref_dynamic_cast<VariantType>(lowBoundVariant()));
 }
 
 template<int N, typename T>
-T ShGeneric<N, T>::lowBound(int index) const
+typename ShGeneric<N, T>::HostType ShGeneric<N, T>::lowBound(int index) const
 {
   return (*shref_dynamic_cast<VariantType>(lowBoundVariant()))[index];
 }
 
 template<int N, typename T>
-ShDataVariant<T> ShGeneric<N, T>::highBound() const
+typename ShGeneric<N, T>::VariantType ShGeneric<N, T>::highBound() const
 {
   return (*shref_dynamic_cast<VariantType>(highBoundVariant()));
 }
 
 template<int N, typename T>
-T ShGeneric<N, T>::highBound(int index) const
+typename ShGeneric<N, T>::H ShGeneric<N, T>::highBound(int index) const
 {
   return (*shref_dynamic_cast<VariantType>(highBoundVariant()))[index];
 }
@@ -325,28 +325,28 @@ ShGeneric<N2, T> ShGeneric<N, T>::swiz(int indices[]) const
 }
 
 template<int N, typename T>
-void ShGeneric<N, T>::getValues(T dest[]) const
+void ShGeneric<N, T>::getValues(H dest[]) const
 {
   VariantTypePtr c = shref_dynamic_cast<VariantType>(getVariant()); 
   for(int i = 0; i < N; ++i) dest[i] = (*c)[i]; 
 }
 
 template<int N, typename T>
-T ShGeneric<N, T>::getValue(int index) const
+typename ShGeneric<N, T>::H ShGeneric<N, T>::getValue(int index) const
 {
   VariantTypePtr c = shref_dynamic_cast<VariantType>(getVariant(index)); 
   return (*c)[0];
 }
 
 template<int N, typename T>
-void ShGeneric<N, T>::setValue(int index, const T &variantValue) 
+void ShGeneric<N, T>::setValue(int index, const H &variantValue) 
 {
   VariantTypePtr variant(new VariantType(1, variantValue));
   setVariant(variant, false, ShSwizzle(N, index));
 }
 
 template<int N, typename T>
-void ShGeneric<N, T>::setValues(const T variantValues[]) 
+void ShGeneric<N, T>::setValues(const H variantValues[]) 
 {
   VariantTypePtr variantPtr(new VariantType(N));
   for(int i = 0; i < N; ++i) {
@@ -431,7 +431,7 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator=(const ShGeneric<1, T2>& other)
 
 template<typename T>
 inline
-ShGeneric<1, T>& ShGeneric<1, T>::operator=(T other)
+ShGeneric<1, T>& ShGeneric<1, T>::operator=(H other)
 {
   shASN(*this, ShAttrib<1, SH_CONST, T>(other));
   return *this;
@@ -484,7 +484,7 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator%=(const ShGeneric<1, T2>& right)
 
 template<typename T>
 inline
-ShGeneric<1, T>& ShGeneric<1, T>::operator*=(T right)
+ShGeneric<1, T>& ShGeneric<1, T>::operator*=(H right)
 {
   *this = *this * right;
   return *this;
@@ -492,7 +492,7 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator*=(T right)
 
 template<typename T>
 inline
-ShGeneric<1, T>& ShGeneric<1, T>::operator/=(T right)
+ShGeneric<1, T>& ShGeneric<1, T>::operator/=(H right)
 {
   *this = *this / right;
   return *this;
@@ -500,7 +500,7 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator/=(T right)
 
 template<typename T>
 inline
-ShGeneric<1, T>& ShGeneric<1, T>::operator%=(T right)
+ShGeneric<1, T>& ShGeneric<1, T>::operator%=(H right)
 {
   *this = *this % right;
   return *this;
@@ -508,7 +508,7 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator%=(T right)
 
 template<typename T>
 inline
-ShGeneric<1, T>& ShGeneric<1, T>::operator+=(T right)
+ShGeneric<1, T>& ShGeneric<1, T>::operator+=(H right)
 {
   *this = *this + right;
   return *this;
@@ -516,7 +516,7 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator+=(T right)
 
 template<typename T>
 inline
-ShGeneric<1, T>& ShGeneric<1, T>::operator-=(T right)
+ShGeneric<1, T>& ShGeneric<1, T>::operator-=(H right)
 {
   *this = *this - right;
   return *this;
@@ -573,31 +573,31 @@ ShGeneric<4, T> ShGeneric<1, T>::operator()(int i1, int i2, int i3, int i4) cons
 }
 
 template<typename T>
-void ShGeneric<1, T>::range(T low, T high) 
+void ShGeneric<1, T>::range(H low, H high) 
 {
-  rangeVariant(new ShDataVariant<T>(1, low), new ShDataVariant<T>(1, high));
+  rangeVariant(new VariantType(1, low), new VariantType(1, high));
 }
 
 template<typename T>
-ShDataVariant<T> ShGeneric<1, T>::lowBound() const
+typename ShGeneric<1, T>::VariantType ShGeneric<1, T>::lowBound() const
 {
   return (*shref_dynamic_cast<VariantType>(lowBoundVariant()));
 }
 
 template<typename T>
-T ShGeneric<1, T>::lowBound(int index) const
+typename ShGeneric<1, T>::H ShGeneric<1, T>::lowBound(int index) const
 {
   return (*shref_dynamic_cast<VariantType>(lowBoundVariant()))[index];
 }
 
 template<typename T>
-ShDataVariant<T> ShGeneric<1, T>::highBound() const
+typename ShGeneric<1, T>::VariantType ShGeneric<1, T>::highBound() const
 {
   return (*shref_dynamic_cast<VariantType>(highBoundVariant()));
 }
 
 template<typename T>
-T ShGeneric<1, T>::highBound(int index) const
+typename ShGeneric<1, T>::H ShGeneric<1, T>::highBound(int index) const
 {
   return (*shref_dynamic_cast<VariantType>(highBoundVariant()))[index];
 }
@@ -610,28 +610,28 @@ ShGeneric<N2, T> ShGeneric<1, T>::swiz(int indices[]) const
 }
 
 template<typename T>
-void ShGeneric<1, T>::getValues(T dest[]) const
+void ShGeneric<1, T>::getValues(H dest[]) const
 {
   VariantTypePtr c = shref_dynamic_cast<VariantType>(getVariant()); 
   dest[0] = (*c)[0]; 
 }
 
 template<typename T>
-T ShGeneric<1, T>::getValue(int index) const
+typename ShGeneric<1, T>::H ShGeneric<1, T>::getValue(int index) const
 {
   VariantTypePtr c = shref_dynamic_cast<VariantType>(getVariant(index)); 
   return (*c)[0];
 }
 
 template<typename T>
-void ShGeneric<1, T>::setValue(int index, const T &variantValue) 
+void ShGeneric<1, T>::setValue(int index, const H &variantValue) 
 {
   VariantTypePtr variant(new VariantType(1, variantValue));
   setVariant(variant, false, ShSwizzle(1, index));
 }
 
 template<typename T>
-void ShGeneric<1, T>::setValues(const T variantValues[]) 
+void ShGeneric<1, T>::setValues(const H variantValues[]) 
 {
   VariantTypePtr variant(new VariantType(1));
   for(int i = 0; i < N; ++i) {

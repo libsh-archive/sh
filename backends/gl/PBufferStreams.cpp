@@ -708,7 +708,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   if(resultBuffer->managed()) { // need to copy to outhoust->data()
     const ShVariantFactory* variantFactory = shTypeInfo(typeIndex)->variantFactory();
     ShVariantPtr outhostVariant = 
-      variantFactory->generate(outhost->data(), resultDatasize, false);
+      variantFactory->generateMemory(outhost->data(), resultDatasize, false);
     outhostVariant->set(resultBuffer);
   }
 

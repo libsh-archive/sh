@@ -53,17 +53,14 @@ namespace SH {
 template<typename T> const char* ShConcreteTypeInfo<T>::m_name = "unknown type"; 
 
 // values that should usually work
-template<typename T> const T ShConcreteTypeInfo<T>::TrueVal = (T) 1;
-template<typename T> const T ShConcreteTypeInfo<T>::FalseVal = (T) 0;
+template<typename T> const typename ShConcreteTypeInfo<T>::H ShConcreteTypeInfo<T>::TrueVal = (T) 1;
+template<typename T> const typename ShConcreteTypeInfo<T>::H ShConcreteTypeInfo<T>::FalseVal = (T) 0;
 
-template<typename T> const T ShConcreteTypeInfo<T>::ZERO = (T) 0;
-template<typename T> const T ShConcreteTypeInfo<T>::ONE = (T) 1;
-
-template<typename T> const int ShConcreteTypeInfo<T>::DataSize = sizeof(T);
-
+template<typename T> const typename ShConcreteTypeInfo<T>::H ShConcreteTypeInfo<T>::ZERO = (T) 0;
+template<typename T> const typename ShConcreteTypeInfo<T>::H ShConcreteTypeInfo<T>::ONE = (T) 1;
 
 template<typename T>
-T ShConcreteTypeInfo<T>::defaultLo(ShSemanticType type)
+typename ShConcreteTypeInfo<T>::H ShConcreteTypeInfo<T>::defaultLo(ShSemanticType type)
 {
   switch(type) {
     case SH_POINT:
@@ -77,7 +74,7 @@ T ShConcreteTypeInfo<T>::defaultLo(ShSemanticType type)
 }
 
 template<typename T>
-T ShConcreteTypeInfo<T>::defaultHi(ShSemanticType type)
+typename ShConcreteTypeInfo<T>::H ShConcreteTypeInfo<T>::defaultHi(ShSemanticType type)
 {
   return 1;
 }
@@ -91,11 +88,11 @@ const char* ShConcreteTypeInfo<T>::name() const
 template<typename T>
 int ShConcreteTypeInfo<T>::datasize() const 
 {
-  return DataSize; 
+  return sizeof(M); 
 }
 
 template<typename T>
-bool ShConcreteTypeInfo<T>::valuesEqual(const T &a, const T &b)
+bool ShConcreteTypeInfo<T>::valuesEqual(const H &a, const H &b)
 {
   return ShConcreteTypeEquals(a, b);
 }
@@ -121,7 +118,7 @@ ShConcreteTypeInfo<T>::ShConcreteTypeInfo()
 {}
 
 template<typename T>
-T shTypeInfoCond(bool cond) 
+typename ShConcreteTypeInfo<T>::H shTypeInfoCond(bool cond) 
 {
   return cond ? ShConcreteTypeInfo<T>::TrueVal : ShConcreteTypeInfo<T>::FalseVal;
 }

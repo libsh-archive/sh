@@ -46,6 +46,9 @@ namespace ShCc {
  * are all template parameters.
  */
 
+// @todo type
+// add casting code for when MemoryType is not equivalent to the type used in computation
+
 // round to integer and clamp to [0, max)
 template<typename T>
 int sh_cc_backend_nearest(T value, int max)
@@ -53,10 +56,10 @@ int sh_cc_backend_nearest(T value, int max)
   return std::max(std::min((int)(value + 0.5), 0), max - 1);
 }
 
-template<int TexDims, int TexSize, int TexWidth, int TexHeight, int TexDepth, typename IndexType, typename ValueType> 
-sh_cc_backend_lookupi(void *texture, IndexType *src, ValueType *dest)
+template<int TexDims, int TexSize, int TexWidth, int TexHeight, int TexDepth, typename IndexType, typename MemoryType> 
+sh_cc_backend_lookupi(void *texture, IndexType *src, MemoryType *dest)
 {
-  ValueType* data = reinterpret_cast<ValueType *>(texture);
+  MemoryType* data = reinterpret_cast<MemoryType *>(texture);
   int index = 0;
   if(TexDims == 3) index = sh_cc_backend_nearest(src[2], TexDepth);
   if(TexDims >= 2) index = sh_cc_backend_nearest(src[1], TexHeight) + TexHeight * index;
@@ -66,8 +69,8 @@ sh_cc_backend_lookupi(void *texture, IndexType *src, ValueType *dest)
   std::copy(data + start, data + start + TexSize, dest); 
 }
 
-template<int TexDims, int TexSize, int TexWidth, int TexHeight, int TexDepth, typename IndexType, typename ValueType> 
-sh_cc_backend_lookup(void *texture, IndexType *src, ValueType *dest)
+template<int TexDims, int TexSize, int TexWidth, int TexHeight, int TexDepth, typename IndexType, typename MemoryType> 
+sh_cc_backend_lookup(void *texture, IndexType *src, MemoryType *dest)
 {
   IndexType scaled_src[TexDims];
   scaled_src[0] = TexWidth * src[0];

@@ -38,7 +38,7 @@ namespace SH {
 
 
 /** An ShVariant is a wrapper around a fixed-size array of data
- * of a single storage type.  It is used internally for
+ * of a single host storage type.  It is used internally for
  * holding tuple data for ShVariableNodes, and occasionally as temporaries
  * for larger data arrays.
  *

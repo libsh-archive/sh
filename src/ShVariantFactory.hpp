@@ -30,6 +30,7 @@
 #include <string>
 #include "ShDllExport.hpp"
 #include "ShVariant.hpp"
+#include "ShTypeInfo.hpp"
 
 namespace SH {
 
@@ -39,6 +40,11 @@ SH_DLLEXPORT
 ShVariantFactory {
   virtual ~ShVariantFactory() {}
 
+  /// Functions that generate host storage type variants  
+  //
+  // @see ShHostType 
+  //@{
+  
   /// Creates a ShDataVariant object with N components 
   virtual ShVariantPtr generate(int N) const = 0; 
 
@@ -69,10 +75,32 @@ ShVariantFactory {
 
   /// Creates an ShDataVariant object with N elements set to false 
   virtual ShVariantPtr generateFalse(int N = 1) const = 0;
+ 
+  // @}
+
+  /// Functions that generate memory storage type variants
+  //
+  // @see ShMemoryType 
+  //@{
+  
+  /// Creates a ShDataVariant object with N components 
+  //
+  virtual ShVariantPtr generateMemory(int N) const = 0;
+
+  /// Creates an ShDataVariant object with the existing
+  /// array as data
+  /// @param managed Set to true iff this should make a copy
+  //                 rather than using the given array internally.
+  virtual ShVariantPtr generateMemory(void *data, int N, bool managed = true) const = 0;  
+
+  //@}
 };
 
 template<typename T>
 struct ShDataVariantFactory: public ShVariantFactory {
+  typedef typename ShConcreteTypeInfo<T>::H H; // host storage type 
+  typedef typename ShConcreteTypeInfo<T>::M M; // memory storage type
+
   ShVariantPtr generate(int N) const;
 
   ShVariantPtr generate(std::string s) const; 
@@ -86,6 +114,9 @@ struct ShDataVariantFactory: public ShVariantFactory {
   ShVariantPtr generateOne(int N = 1) const;
   ShVariantPtr generateTrue(int N = 1) const;
   ShVariantPtr generateFalse(int N = 1) const;
+
+  ShVariantPtr generateMemory(int N) const;
+  ShVariantPtr generateMemory(void *data, int N, bool managed = true) const;  
 
   static const ShDataVariantFactory<T>* instance();
 

@@ -29,6 +29,7 @@
 
 #include "ShVariable.hpp"
 #include "ShVariant.hpp"
+#include "ShTypeInfo.hpp"
 
 namespace SH {
 
@@ -63,8 +64,11 @@ class ShGeneric : public ShVariable
 {
 public:
   typedef T ValueType;
+  typedef typename ShHostType<T>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemoryType<T>::type MemoryType; 
   static const int typesize = N;
-  typedef ShDataVariant<T> VariantType; 
+  typedef ShDataVariant<H> VariantType; 
   typedef ShPointer<VariantType> VariantTypePtr;
   typedef ShPointer<const VariantType> VariantTypeCPtr;
 
@@ -125,11 +129,11 @@ public:
   template<typename T2>
   ShGeneric& operator%=(const ShGeneric<1, T2>& right);
 
-  ShGeneric& operator+=(T);
-  ShGeneric& operator-=(T);
-  ShGeneric& operator*=(T);
-  ShGeneric& operator/=(T);
-  ShGeneric& operator%=(T);
+  ShGeneric& operator+=(H);
+  ShGeneric& operator-=(H);
+  ShGeneric& operator*=(H);
+  ShGeneric& operator/=(H);
+  ShGeneric& operator%=(H);
 
   ShGeneric operator-() const;
 
@@ -141,26 +145,26 @@ public:
   ShGeneric<4, T> operator()(int, int, int, int) const;
 
   /// Range Metadata
-  void range(T low, T high);
+  void range(H low, H high);
 
   VariantType lowBound() const; 
-  T lowBound(int index) const;
+  H lowBound(int index) const;
 
   VariantType highBound() const;
-  T highBound(int index) const;
+  H highBound(int index) const;
   
   // Arbitrary Swizzle
   template<int N2>
   ShGeneric<N2, T> swiz(int indices[]) const;
 
   /// Get the values of this variable, with swizzling taken into account
-  void getValues(T dest[]) const;
-  T getValue(int index) const;
+  void getValues(H dest[]) const;
+  H getValue(int index) const;
   
   /// Set the values of this variable, using the swizzle as a
   /// writemask.
-  void setValue(int index, const T &value); 
-  void setValues(const T values[]);
+  void setValue(int index, const H &value); 
+  void setValues(const H values[]);
 
 
 protected:
@@ -173,8 +177,11 @@ class ShGeneric<1, T> : public ShVariable
 {
 public:
   typedef T ValueType;
+  typedef typename ShHostType<T>::type H; 
+  typedef H HostType;
+  typedef typename ShMemoryType<T>::type MemoryType; 
   static const int typesize = 1;
-  typedef ShDataVariant<T> VariantType; 
+  typedef ShDataVariant<H> VariantType; 
   typedef ShPointer<VariantType> VariantTypePtr;
   typedef ShPointer<const VariantType> VariantTypeCPtr;
 
@@ -200,7 +207,7 @@ public:
   template<typename T2>
   ShGeneric& operator=(const ShGeneric<1, T2>& other);
 
-  ShGeneric& operator=(T);
+  ShGeneric& operator=(H);
   ShGeneric& operator=(const ShProgram& other);
   
   template<typename T2>
@@ -218,11 +225,11 @@ public:
   template<typename T2>
   ShGeneric& operator%=(const ShGeneric<1, T2>& right);
 
-  ShGeneric& operator+=(T);
-  ShGeneric& operator-=(T);
-  ShGeneric& operator*=(T);
-  ShGeneric& operator/=(T);
-  ShGeneric& operator%=(T);
+  ShGeneric& operator+=(H);
+  ShGeneric& operator-=(H);
+  ShGeneric& operator*=(H);
+  ShGeneric& operator/=(H);
+  ShGeneric& operator%=(H);
 
   ShGeneric operator-() const;
 
@@ -234,26 +241,26 @@ public:
   ShGeneric<4, T> operator()(int, int, int, int) const;
 
   /// Range Metadata
-  void range(T low, T high);
+  void range(H low, H high);
 
   VariantType lowBound() const; 
-  T lowBound(int index) const;
+  H lowBound(int index) const;
 
   VariantType highBound() const;
-  T highBound(int index) const;
+  H highBound(int index) const;
   
   // Arbitrary Swizzle
   template<int N2>
   ShGeneric<N2, T> swiz(int indices[]) const;
 
   /// Get the values of this variable, with swizzling taken into account
-  void getValues(T dest[]) const;
-  T getValue(int index) const;
+  void getValues(H dest[]) const;
+  H getValue(int index) const;
   
   /// Set the values of this variable, using the swizzle as a
   /// writemask.
-  void setValue(int index, const T &value); 
-  void setValues(const T values[]);
+  void setValue(int index, const H &value); 
+  void setValues(const H values[]);
 
 protected:
   ShGeneric(const ShVariableNodePtr& node);

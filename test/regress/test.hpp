@@ -31,6 +31,7 @@
 #include <iomanip>
 #include <sh.hpp>
 
+// @todo type fix epsilon checks
 #define EPSILON 1e-2
 
 #define COLOR_GREEN "[32m"
@@ -64,8 +65,8 @@ public:
            const INPUT1& in1,
            const OUTPUT& res)
   {
-    typedef typename INPUT1::ValueType IT;
-    typedef typename OUTPUT::ValueType OT;
+    typedef typename INPUT1::MemoryType IT;
+    typedef typename OUTPUT::MemoryType OT;
 
     std::string name = program.name();
     IT* _in1 = new IT[in1.size()];
@@ -109,9 +110,9 @@ public:
            const INPUT2& in2,
            const OUTPUT& res)
   {
-    typedef typename INPUT1::ValueType IT1;
-    typedef typename INPUT2::ValueType IT2;
-    typedef typename OUTPUT::ValueType OT;
+    typedef typename INPUT1::MemoryType IT1;
+    typedef typename INPUT2::MemoryType IT2;
+    typedef typename OUTPUT::MemoryType OT;
 
     std::string name = program.name();
     IT1* _in1 = new IT1[in1.size()];
@@ -163,10 +164,10 @@ public:
            const INPUT3& in3,
            const OUTPUT res)
   {
-    typedef typename INPUT1::ValueType IT1;
-    typedef typename INPUT2::ValueType IT2;
-    typedef typename INPUT3::ValueType IT3;
-    typedef typename OUTPUT::ValueType OT;
+    typedef typename INPUT1::MemoryType IT1;
+    typedef typename INPUT2::MemoryType IT2;
+    typedef typename INPUT3::MemoryType IT3;
+    typedef typename OUTPUT::MemoryType OT;
 
     std::string name = program.name();
   
@@ -222,11 +223,11 @@ public:
   template <class OUTPUT, class EXPECTED>
   void check(std::string name, const OUTPUT &out, const EXPECTED &res)
   {
-      typedef typename OUTPUT::ValueType ValType;
-      ValType* _out = new ValType[out.size()];
+      typedef typename OUTPUT::MemoryType OT;
+      OT* _out = new OT[out.size()];
       out.getValues(_out);
 
-      ValType* _res = new ValType[res.size()];
+      OT* _res = new OT[res.size()];
       res.getValues(_res);
 
       if(out.size() != res.size()) {

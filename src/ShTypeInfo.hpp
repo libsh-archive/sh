@@ -37,6 +37,37 @@ namespace SH {
 /// forward declarations 
 class ShVariantFactory;
 
+/// empty structs for non-native host types (half-float, fracs)
+/// @{
+struct ShHalf {};
+struct ShFracInt {};
+struct ShFracShort {};
+struct ShFracByte {};
+struct ShFracUInt {};
+struct ShFracUShort {};
+struct ShFracUByte {};
+// @}
+
+/// Sets the actual host computation and memory storage types for a given type.
+// @{
+template<typename T> struct ShHostType { typedef T type; };
+template<> struct ShHostType<ShHalf> { typedef float type; };
+template<> struct ShHostType<ShFracInt> { typedef float type; };
+template<> struct ShHostType<ShFracShort> { typedef float type; };
+template<> struct ShHostType<ShFracByte> { typedef float type; };
+template<> struct ShHostType<ShFracUInt> { typedef float type; };
+template<> struct ShHostType<ShFracUShort> { typedef float type; };
+template<> struct ShHostType<ShFracUByte> { typedef float type; };
+
+template<typename T> struct ShMemoryType { typedef T type; };
+template<> struct ShMemoryType<ShHalf> { typedef float type; };
+template<> struct ShMemoryType<ShFracInt> { typedef float type; };
+template<> struct ShMemoryType<ShFracShort> { typedef float type; };
+template<> struct ShMemoryType<ShFracByte> { typedef float type; };
+template<> struct ShMemoryType<ShFracUInt> { typedef float type; };
+template<> struct ShMemoryType<ShFracUShort> { typedef float type; };
+template<> struct ShMemoryType<ShFracUByte> { typedef float type; };
+// @}
 
 
 struct 
@@ -59,30 +90,27 @@ ShTypeInfo {
 template<typename T>
 struct ShConcreteTypeInfo: public ShTypeInfo {
   public:
+    typedef typename ShHostType<T>::type H; 
+    typedef typename ShMemoryType<T>::type M;
+
     static const char* m_name; 
 
     /// default boolean values to use for ops with boolean results
-    static const T TrueVal;
-    static const T FalseVal;
+    static const H TrueVal;
+    static const H FalseVal;
 
     /// default values for additive/multiplicative identities 
-    static const T ZERO;
-    static const T ONE;
-
-    /// size in bytes when stored in host memory. 
-    // note - not equivalent to sizeof(T) for types like ShHalf
-    // where the type used in host computation is usually a 32-bit float,
-    // but stored in memory are always 16-bit.
-    static const int DataSize;
+    static const H ZERO;
+    static const H ONE;
 
     /// default range information
     // (0,1) by default
-    static T defaultLo(ShSemanticType type);
-    static T defaultHi(ShSemanticType type);
+    static H defaultLo(ShSemanticType type);
+    static H defaultHi(ShSemanticType type);
 
     /// Equality comparison that returns true iff
     // the values are equal. 
-    static bool valuesEqual(const T &a, const T &b); 
+    static bool valuesEqual(const H &a, const H &b); 
 
     const char* name() const; 
     int datasize() const;
@@ -117,7 +145,7 @@ int shTypeIndex();
 // Given a type T, returns ShConcreteTypeInfo<T>::TrueVal if the arg is true
 // ::FalseVal otherwise
 template<typename T>
-T shTypeInfoCond(bool cond);
+typename ShConcreteTypeInfo<T>::H shTypeInfoCond(bool cond);
 
 // Provides a least common ancestor in the type tree for 
 // a given pair of types in a typedef named type 

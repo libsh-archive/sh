@@ -103,7 +103,7 @@ class HostGlTextureTransfer : public ShTransfer {
       // @todo type shouldn't really use this trickery...
       // But knowing ShDataVariant internals, it will not change host->data() 
       ShVariantCPtr hostVariant = 
-        variantFactory->generate(const_cast<void *>(host->data()), count, false);
+        variantFactory->generateMemory(const_cast<void *>(host->data()), count, false);
 
       dataVariant = new ShDataVariant<float>(count); 
       dataVariant->set(hostVariant);

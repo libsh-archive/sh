@@ -29,62 +29,73 @@
 
 #include "ShVariantFactory.hpp"
 #include "ShTypeInfo.hpp"
-//#include "ShContext.hpp"
 
 namespace SH {
 
 template<typename T>
 ShVariantPtr ShDataVariantFactory<T>::generate(int N) const
 {
-  return new ShDataVariant<T>(N);
+  return new ShDataVariant<H>(N);
 }
 
 template<typename T>
 ShVariantPtr ShDataVariantFactory<T>::generate(std::string s) const
 {
-  return new ShDataVariant<T>(s);
+  return new ShDataVariant<H>(s);
 }
 
 template<typename T>
 ShVariantPtr ShDataVariantFactory<T>::generate(void *data, int N, bool managed) const
 {
-  return new ShDataVariant<T>(data, N, managed);
+  return new ShDataVariant<H>(data, N, managed);
 }
 
 template<typename T>
 ShVariantPtr ShDataVariantFactory<T>::generateLowBound(int N, ShSemanticType type) const
 {
-  return new ShDataVariant<T>(N, ShConcreteTypeInfo<T>::defaultLo(type));
+  return new ShDataVariant<H>(N, ShConcreteTypeInfo<T>::defaultLo(type));
 }
 
 template<typename T>
 ShVariantPtr ShDataVariantFactory<T>::generateHighBound(int N, ShSemanticType type) const
 {
-  return new ShDataVariant<T>(N, ShConcreteTypeInfo<T>::defaultHi(type));
+  return new ShDataVariant<H>(N, ShConcreteTypeInfo<T>::defaultHi(type));
 }
 
 template<typename T>
 ShVariantPtr ShDataVariantFactory<T>::generateZero(int N) const
 {
-  return new ShDataVariant<T>(N, ShConcreteTypeInfo<T>::ZERO);
+  return new ShDataVariant<H>(N, ShConcreteTypeInfo<T>::ZERO);
 }
 
 template<typename T>
 ShVariantPtr ShDataVariantFactory<T>::generateOne(int N) const
 {
-  return new ShDataVariant<T>(N, ShConcreteTypeInfo<T>::ONE);
+  return new ShDataVariant<H>(N, ShConcreteTypeInfo<T>::ONE);
 }
 
 template<typename T>
 ShVariantPtr ShDataVariantFactory<T>::generateTrue(int N) const
 {
-  return new ShDataVariant<T>(N, ShConcreteTypeInfo<T>::TrueVal);
+  return new ShDataVariant<H>(N, ShConcreteTypeInfo<T>::TrueVal);
 }
 
 template<typename T>
 ShVariantPtr ShDataVariantFactory<T>::generateFalse(int N) const
 {
-  return new ShDataVariant<T>(N, ShConcreteTypeInfo<T>::FalseVal);
+  return new ShDataVariant<H>(N, ShConcreteTypeInfo<T>::FalseVal);
+}
+
+template<typename T>
+ShVariantPtr ShDataVariantFactory<T>::generateMemory(int N) const
+{
+  return new ShDataVariant<M>(N);
+}
+
+template<typename T>
+ShVariantPtr ShDataVariantFactory<T>::generateMemory(void *data, int N, bool managed) const
+{
+  return new ShDataVariant<M>(data, N, managed);
 }
 
 template<typename T>
