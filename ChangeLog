@@ -2,6 +2,10 @@
   * src/ShConstProp.cpp (updateDest):
   Temporarily fixed issue with detecting whether all srcs are uniform.  
 
+  * configure.ac:
+  Changed AC_CONFIG_SRCDIR to ShVariable.hpp, since ShAttrib.hpp is now 
+  generated automatically.
+
 2004-10-12  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/ArbCode.cpp (printSamplingInstruction): Output
