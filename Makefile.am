@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS = foreign
-SUBDIRS = libltdl src backends test util doc
+SUBDIRS = libltdl src backends test util shla doc
 
 docs:
 	cd doc ; $(MAKE) docs ; cd ..
