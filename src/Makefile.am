@@ -1,3 +1,4 @@
+AM_CXXFLAGS = -O0 -g
 lib_LTLIBRARIES = libsh.la
 libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
                    ShEnvironment.cpp ShException.cpp ShParser.cpp ShShader.cpp \
@@ -17,5 +18,7 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
                    ShColor.hpp ShLibColor.hpp \
                    ShNormal.hpp ShLibNormal.hpp \
                    ShTexCoord.hpp ShLibTexCoord.hpp \
-                   ShLinearAllocator.hpp ShLinearAllocator.cpp
+                   ShLinearAllocator.hpp ShLinearAllocator.cpp \
+                   ShDomTree.hpp ShDomTree.cpp \
+                   ShOptimizer.hpp ShOptimizer.cpp
 

@@ -39,5 +39,6 @@ AC_CONFIG_FILES([Makefile
 		 src/Makefile
 		 test/Makefile
 		 backends/Makefile
-		 backends/sm/Makefile])
+		 backends/sm/Makefile
+		 doc/Makefile])
 AC_OUTPUT

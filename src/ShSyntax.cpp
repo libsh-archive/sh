@@ -7,6 +7,7 @@
 #include "ShToken.hpp"
 #include "ShShader.hpp"
 #include "ShBackend.hpp"
+#include "ShDomTree.hpp"
 
 namespace SH {
 
@@ -27,6 +28,9 @@ void shEndShader()
   std::cerr << *ShEnvironment::shader->tokenizer.blockList();
   
   ShEnvironment::shader->ctrlGraph = new ShCtrlGraph(ShEnvironment::shader->tokenizer.blockList());
+
+  ShDomTree domTree(ShEnvironment::shader->ctrlGraph);
+  domTree.debugDump();
 
   /*
   std::cerr << "--- Control graph: " << std::endl;

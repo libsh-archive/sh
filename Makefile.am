@@ -1,1 +1,1 @@
-SUBDIRS = src backends test
+SUBDIRS = src backends test doc
