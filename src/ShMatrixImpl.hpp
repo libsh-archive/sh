@@ -87,28 +87,26 @@ ShMatrix<Rows, Cols, Binding, T>::operator=(const ShMatrix<Rows, Cols, Binding2,
 }
 
 template<int Rows, int Cols, ShBindingType Binding, typename T>
-ShMatrix<Rows, Cols, Binding, T>& ShMatrix<Rows, Cols, Binding, T>::operator=(double scalar)
+ShMatrix<Rows, Cols, Binding, T>& ShMatrix<Rows, Cols, Binding, T>::operator=(const T& scalar)
 {
-  for (int i = 0; i < Rows; i++)
-    for (int j = 0; j < Cols; j++) {
-      if (i == j)
-	m_data[i][j] = scalar;
-      else
-	m_data[i][j] = 0;
+  for (int i = 0; i < Rows; i++) {
+    m_data[i] = fillcast<Cols>(0.0);
+    if (i < Cols) {
+      m_data[i][i] = scalar;
     }
+  }
   return *this;
 }
 
 template<int Rows, int Cols, ShBindingType Binding, typename T>
-ShMatrix<Rows, Cols, Binding, T>& ShMatrix<Rows, Cols, Binding, T>::operator=(int scalar)
+ShMatrix<Rows, Cols, Binding, T>& ShMatrix<Rows, Cols, Binding, T>::operator=(const ShGeneric<1, T>& scalar)
 {
-  for (int i = 0; i < Rows; i++)
-    for (int j = 0; j < Cols; j++) {
-      if (i == j)
-	m_data[i][j] = scalar;
-      else
-	m_data[i][j] = 0;
+  for (int i = 0; i < Rows; i++) {
+    m_data[i] = fillcast<Cols>(0.0);
+    if (i < Cols) {
+      m_data[i][i] = scalar;
     }
+  }
   return *this;
 }
 

@@ -97,13 +97,13 @@ public:
    * 
    * Construct an identity matrix multiplied by the scalar.
    */
-  ShMatrix& operator=(double scalar);
+  ShMatrix& operator=(const T& scalar);
 
   /** \brief Assignment (scalar promotion).
    * 
    * Construct an identity matrix multiplied by the scalar.
    */
-  ShMatrix& operator=(int scalar);
+  ShMatrix& operator=(const ShGeneric<1, T>& scalar);
 
   /** \brief Attribute row access.
    *
