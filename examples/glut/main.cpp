@@ -8,14 +8,19 @@
 using namespace SH;
 using namespace std;
 
-//ShMatrix4x4f mv, mvd;
-//ShPoint3f lightPos;
+ShMatrix4x4f mv, mvd;
+ShPoint3f lightPos;
 Camera camera;
 ShProgram vsh, fsh;
+ShColor3f diffusecolor;
 
 // Glut data
 int buttons[5] = {GLUT_UP, GLUT_UP, GLUT_UP, GLUT_UP, GLUT_UP};
 int cur_x, cur_y;
+
+int gprintf(int x, int y, char* fmt, ...);
+
+bool show_help = false;
 
 void initShaders()
 {
@@ -24,20 +29,6 @@ void initShaders()
     ShInOutNormal3f normal;
     ShOutputVector3f lightv;
 
-    ShConstPoint3f lightPos(5.0, 5.0, 5.0);
-    ShMatrix4x4f mv;
-    ShMatrix4x4f mvd;
-
-    mv[0] = ShAttrib4f(1, 0, 0, 0);
-    mv[1] = ShAttrib4f(0, 1, 0, 0);
-    mv[2] = ShAttrib4f(0, 0, 1, -15);
-    mv[3] = ShAttrib4f(0, 0, 0, 1);
-    
-    mvd[0] = ShAttrib4f(2.41421, 0, 0, 0);
-    mvd[1] = ShAttrib4f(0, 2.41421, 0, 0);
-    mvd[2] = ShAttrib4f(0, 0, -1.002, 14.8298);
-    mvd[3] = ShAttrib4f(0, 0, -1, 15);
-
     ShPoint3f posv = (mv | pos)(0,1,2); // Compute viewspace position
     lightv = lightPos - posv; // Compute light direction
     
@@ -45,8 +36,6 @@ void initShaders()
     normal = mv | normal; // Project normal
   } SH_END;
 
-  //ShColor3f SH_DECL(diffusecolor) = ShColor3f(0.5, 0.7, 0.9);
-  
   fsh = SH_BEGIN_FRAGMENT_PROGRAM {
     ShInputPosition4f pos;
     ShInputNormal3f normal;
@@ -57,8 +46,7 @@ void initShaders()
     normal = normalize(normal);
     lightv = normalize(lightv);
     
-    //color = (normal | lightv) * diffusecolor;
-    color = (normal | lightv) * ShColor3f(0.5, 0.7, 0.9);
+    color = (normal | lightv) * diffusecolor;
   } SH_END;
 }
 
@@ -69,14 +57,26 @@ void display()
   glFrontFace(GL_CW);
   glutSolidTeapot(2.5);
   glFrontFace(GL_CCW);
+
+  // Help information
+  if (show_help) {
+    gprintf(30, 100, "Sh Glut Example Help");
+    gprintf(30, 80,  "  '1' - Colour 1");
+    gprintf(30, 65,  "  '2' - Colour 2");
+    gprintf(30, 50,  "  '3' - Light angle 1");
+    gprintf(30, 45,  "  '4' - Light angle 2");
+    gprintf(30, 30,  "  'Q' - Quit");
+  } else {
+    gprintf(10, 10, "'H' for help...");
+  }
   
   glutSwapBuffers();
 }
 
 void setupView()
 {
-  //mv = camera.shModelView();
-  //mvd = camera.shModelViewProjection(ShMatrix4x4f());
+  mv = camera.shModelView();
+  mvd = camera.shModelViewProjection(ShMatrix4x4f());
 }
 
 void reshape(int width, int height)
@@ -121,6 +121,80 @@ void mouse(int button, int state, int x, int y)
   cur_y = y;
 }
 
+void keyboard(unsigned char k, int x, int y)
+{
+  switch(k) {
+  case '1':
+    diffusecolor = ShColor3f(0.5, 0.1, 0.2);
+    break;
+  case '2':
+    diffusecolor = ShColor3f(0.5, 0.7, 0.9);
+    break;
+  case '3':
+    lightPos = ShPoint3f(5.0, 5.0, 5.0);
+    break;
+  case '4':
+    lightPos = ShPoint3f(20.0, 20.0, 20.0);
+    break;
+  case 'h':
+  case 'H':
+    show_help = !show_help;
+    break;
+  case 'q':
+  case 'Q':
+    exit(0);
+    break;
+  }
+  glutPostRedisplay();
+}
+
+int gprintf(int x, int y, char* fmt, ...)
+{
+  char temp[1024];
+  va_list va;
+  va_start(va, fmt);
+  vsprintf(temp, fmt, va);
+  va_end(va);
+  
+  // setup the matrices for a direct
+  // screen coordinate transform when
+  // using glRasterPos
+  int vp[4];
+  glGetIntegerv(GL_VIEWPORT, vp);
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+  glOrtho(0, vp[2], 0, vp[3], -1, 1);
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glLoadIdentity();
+
+  // just in case, turn lighting and
+  // texturing off and disable depth testing
+  glPushAttrib(GL_ENABLE_BIT);
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_VERTEX_PROGRAM_ARB);
+  glDisable(GL_FRAGMENT_PROGRAM_ARB);
+
+  // render the character through glut
+  char* p = temp;
+  glRasterPos2f(x, y);
+  while(*p) {
+    glutBitmapCharacter(GLUT_BITMAP_8_BY_13, (*p));
+    p++;
+  }
+  
+  // reset OpenGL to what is was
+  // before we started
+  glPopAttrib();
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
+  
+  return p-temp;
+}
+
 int main(int argc, char** argv)
 {
   glutInit(&argc, argv);
@@ -131,6 +205,7 @@ int main(int argc, char** argv)
   glutReshapeFunc(reshape);
   glutMouseFunc(mouse);
   glutMotionFunc(motion);
+  glutKeyboardFunc(keyboard);
   
   shSetBackend("glsl");
 
@@ -142,11 +217,10 @@ int main(int argc, char** argv)
   glClearColor(0.0, 0.0, 0.0, 1.0);
   setupView();
 
-  // Place the camera at its initial position
+  // Initial values for the uniforms
   camera.move(0.0, 0.0, -15.0);
-
-  // Set up the light position
-  //lightPos = ShPoint3f(5.0, 5.0, 5.0);
+  lightPos = ShPoint3f(5.0, 5.0, 5.0);
+  diffusecolor = ShColor3f(0.5, 0.1, 0.2);
   
   initShaders();
 
