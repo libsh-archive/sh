@@ -32,7 +32,33 @@
 
 namespace SH {
 
-SH_SHLIB_USUAL_OPERATIONS(ShVector);
+SH_SHLIB_USUAL_NON_UNIT_OPS_RETTYPE(ShVector, ShVector);
+
+template<int N, int K1, typename T, bool S1> 
+  ShVector<N, SH_VAR_TEMP, T, false> 
+  abs(const ShVector<N, K1, T, S1>& var) 
+  { 
+    ShVariableN<N, T> t = abs(static_cast< ShVariableN<N, T> >(var)); 
+    ShVector<N, SH_VAR_TEMP, T, false> vec(t.node(), t.swizzle(), t.neg()); 
+    vec.setUnit(var.isUnit());
+    return vec;
+  }
+
+template<int N, int K1, typename T, bool S1> 
+  ShVector<N, SH_VAR_TEMP, T, false> 
+  normalize(const ShVector<N, K1, T, S1>& var) 
+  {
+    if (var.isUnit()) return var;
+
+    ShVariableN<N, T> t = normalize(static_cast< ShVariableN<N, T> >(var)); 
+    ShVector<N, SH_VAR_TEMP, T, false> vec(t.node(), t.swizzle(), t.neg()); 
+    vec.setUnit(true);
+    return vec;
+  }
+
+
+
+
 SH_SHLIB_USUAL_SUBTRACT(ShVector);
 
 SH_SHLIB_LEFT_MATRIX_OPERATION(ShVector, operator|, M);
@@ -76,6 +102,7 @@ ShVector<1, SH_VAR_TEMP, T, false> operator|(const ShMatrix<2, 2, K1, T>& m,
   }
   return t;
 }
+
 
 }
 

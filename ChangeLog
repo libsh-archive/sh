@@ -1,3 +1,18 @@
+2004-01-29  Jack Wang  <jmwang@uwaterloo.ca>
+	* src/ShVector.hpp: Added a m_isunit flag to ShVector, this 
+	required changing a number of functions so they can no longer
+	be specified by the macros.
+
+	* src/ShLib.hpp: SH_SHLIB_USUAL_OPERATIONS_RETTYPE was broken
+	down to normalize, abs, and everything else.  
+
+	* src/ShLibVector.hpp: Modified normalize and abs to update
+	the new ShVector m_isunit flag as necessary.
+
+	* src/ShSpecialType.hpp: SH_SPECIAL_TYPE_PARENT was broken down
+	to OPEN, CONSTRUCTORS, NON_CONST_METHODS, CONST_METHODS, MEMBERS,
+	and CLOSE to allow more flexibility.	
+	
 2004-01-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShRefCount.hpp (ShRefCountable): Actually, the

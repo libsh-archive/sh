@@ -1032,6 +1032,11 @@ SH_SHLIB_SPECIAL_CONST_N_OP_RIGHT(libtype, operation);
   SH_SHLIB_USUAL_OPERATIONS_RETTYPE(type, type)
 
 #define SH_SHLIB_USUAL_OPERATIONS_RETTYPE(type, rettype) \
+  SH_SHLIB_USUAL_NON_UNIT_OPS_RETTYPE(type, rettype)\
+  SH_SHLIB_UNARY_RETTYPE_OPERATION(type, normalize, rettype, N);       \
+  SH_SHLIB_UNARY_RETTYPE_OPERATION(type, abs, rettype, N);           
+
+#define SH_SHLIB_USUAL_NON_UNIT_OPS_RETTYPE(type, rettype) \
 SH_SHLIB_BINARY_RETTYPE_OPERATION(type, operator+, rettype, N);      \
 SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, operator+, rettype, 1);  \
                                                         \
@@ -1065,7 +1070,6 @@ SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, operator==, rettype, 1); \
 SH_SHLIB_BINARY_RETTYPE_OPERATION(type, operator!=, rettype, N);     \
 SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, operator!=, rettype, 1); \
                                                         \
-SH_SHLIB_UNARY_RETTYPE_OPERATION(type, abs, rettype, N);             \
 SH_SHLIB_UNARY_RETTYPE_OPERATION(type, acos, rettype, N);            \
 SH_SHLIB_UNARY_RETTYPE_OPERATION(type, asin, rettype, N);            \
 SH_SHLIB_UNARY_RETTYPE_OPERATION(type, cos, rettype, N);             \
@@ -1077,7 +1081,6 @@ SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, fmod, rettype, 1);       \
 SH_SHLIB_UNARY_RETTYPE_OPERATION(type, frac, rettype, N);            \
 SH_SHLIB_UNARY_RETTYPE_OPERATION(type, sin, rettype, N);             \
 SH_SHLIB_UNARY_RETTYPE_OPERATION(type, sqrt, rettype, N);            \
-SH_SHLIB_UNARY_RETTYPE_OPERATION(type, normalize, rettype, N);       \
                                                         \
 SH_SHLIB_BINARY_RETTYPE_OPERATION(type, min, rettype, N);            \
 SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, min, rettype, 1);        \

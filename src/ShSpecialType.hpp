@@ -55,10 +55,19 @@
 #define SH_SPECIAL_TYPE(SH_TYPE_NAME, SH_COMMENT_NAME, SH_TYPE_ENUM) \
   SH_SPECIAL_TYPE_PARENT(SH_TYPE_NAME, SH_COMMENT_NAME, ShAttrib, SH_TYPE_ENUM)
 
-#define SH_SPECIAL_TYPE_PARENT(SH_TYPE_NAME, SH_COMMENT_NAME, SH_TYPE_PARENT, SH_TYPE_ENUM) \
+#define SH_SPECIAL_TYPE_PARENT(SH_TYPE_NAME, SH_COMMENT_NAME, ShAttrib, SH_TYPE_ENUM) \
+  SH_SPECIAL_TYPE_PARENT_OPEN(SH_TYPE_NAME, SH_COMMENT_NAME, ShAttrib, SH_TYPE_ENUM)\
+  SH_SPECIAL_TYPE_PARENT_CONSTRUCTORS(SH_TYPE_NAME, SH_COMMENT_NAME, ShAttrib, SH_TYPE_ENUM)\
+  SH_SPECIAL_TYPE_PARENT_NON_CONST_METHODS(SH_TYPE_NAME, SH_COMMENT_NAME, ShAttrib, SH_TYPE_ENUM)\
+  SH_SPECIAL_TYPE_PARENT_CONST_METHODS(SH_TYPE_NAME, SH_COMMENT_NAME, ShAttrib, SH_TYPE_ENUM)\
+  SH_SPECIAL_TYPE_PARENT_MEMBERS(SH_TYPE_NAME, SH_COMMENT_NAME, ShAttrib, SH_TYPE_ENUM)\
+  SH_SPECIAL_TYPE_PARENT_CLOSE(SH_TYPE_NAME, SH_COMMENT_NAME, ShAttrib, SH_TYPE_ENUM)
+  
+#define SH_SPECIAL_TYPE_PARENT_OPEN(SH_TYPE_NAME, SH_COMMENT_NAME, SH_TYPE_PARENT, SH_TYPE_ENUM) \
 template<int N, int Kind, typename T=float, bool Swizzled=false> \
 class SH_TYPE_NAME : public SH_TYPE_PARENT<N, Kind, T, Swizzled> { \
-public: \
+public: 
+#define SH_SPECIAL_TYPE_PARENT_CONSTRUCTORS(SH_TYPE_NAME, SH_COMMENT_NAME, SH_TYPE_PARENT, SH_TYPE_ENUM) \
   SH_TYPE_NAME(); \
    \
   SH_TYPE_NAME(T); \
@@ -71,8 +80,8 @@ public: \
   SH_TYPE_NAME(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg); \
  \
   ~SH_TYPE_NAME(); \
- \
- \
+ 
+#define SH_SPECIAL_TYPE_PARENT_NON_CONST_METHODS(SH_TYPE_NAME, SH_COMMENT_NAME, SH_TYPE_PARENT, SH_TYPE_ENUM) \
   SH_TYPE_NAME& operator=(const ShVariableN<N, T>& other); \
   SH_TYPE_NAME& operator=(const SH_TYPE_NAME<N, Kind, T, Swizzled>& other); \
  \
@@ -83,7 +92,8 @@ public: \
 \
   SH_TYPE_NAME& operator+=(const ShConstant<N, T>& right); \
   SH_TYPE_NAME& operator-=(const ShConstant<N, T>& right); \
- \
+
+#define SH_SPECIAL_TYPE_PARENT_CONST_METHODS(SH_TYPE_NAME, SH_COMMENT_NAME, SH_TYPE_PARENT, SH_TYPE_ENUM) \
   SH_TYPE_NAME<N, Kind, T, true> operator()() const; \
   SH_TYPE_NAME<1, Kind, T, true> operator()(int) const; \
   SH_TYPE_NAME<2, Kind, T, true> operator()(int, int) const; \
@@ -94,7 +104,7 @@ public: \
   template<int N2> \
   SH_TYPE_NAME<N2, Kind, T, true> swiz(int indices[]) const; \
  \
-  SH_TYPE_NAME<N, Kind, T, Swizzled> operator-() const; \
+  SH_TYPE_NAME<N, Kind, T, Swizzled> operator-() const;\
   typedef T ValueType; \
   static const int typesize = N; \
   static const int typekind = Kind; \
@@ -103,9 +113,11 @@ public: \
   typedef SH_TYPE_NAME<N, SH_VAR_INPUT, T> InputType; \
   typedef SH_TYPE_NAME<N, SH_VAR_OUTPUT, T> OutputType; \
   typedef SH_TYPE_NAME<N, SH_VAR_TEMP, T> TempType; \
- \
+ 
+#define SH_SPECIAL_TYPE_PARENT_MEMBERS(SH_TYPE_NAME, SH_COMMENT_NAME, SH_TYPE_PARENT, SH_TYPE_ENUM) \
 private: \
-  typedef SH_TYPE_PARENT<N, Kind, float, Swizzled> ParentType; \
+  typedef SH_TYPE_PARENT<N, Kind, float, Swizzled> ParentType; 
+#define SH_SPECIAL_TYPE_PARENT_CLOSE(SH_TYPE_NAME, SH_COMMENT_NAME, SH_TYPE_PARENT, SH_TYPE_ENUM) \
 }
 
 #define SH_SPECIAL_TYPE_TYPEDEF(SH_TYPE_NAME_NO_SH, SH_TYPE_SIZE) \
@@ -120,7 +132,11 @@ SH_SPECIAL_TYPE_TYPEDEF(SH_TYPE_NAME_NO_SH, 3) \
 SH_SPECIAL_TYPE_TYPEDEF(SH_TYPE_NAME_NO_SH, 4) \
 
 #define SH_SPECIAL_TYPE_IMPL(SH_TYPE_NAME, SH_TYPE_ENUM) \
- \
+  SH_SPECIAL_TYPE_IMPL_CONSTRUCTORS(SH_TYPE_NAME, SH_TYPE_ENUM)\
+  SH_SPECIAL_TYPE_IMPL_NON_CONST_METHODS(SH_TYPE_NAME, SH_TYPE_ENUM)\
+  SH_SPECIAL_TYPE_IMPL_CONST_METHODS(SH_TYPE_NAME, SH_TYPE_ENUM)
+  
+#define SH_SPECIAL_TYPE_IMPL_CONSTRUCTORS(SH_TYPE_NAME, SH_TYPE_ENUM)\
 template<int N, int Kind, typename T, bool Swizzled> \
 SH_TYPE_NAME<N, Kind, T, Swizzled>::SH_TYPE_NAME() \
 { \
@@ -181,7 +197,8 @@ template<int N, int Kind, typename T, bool Swizzled> \
 SH_TYPE_NAME<N, Kind, T, Swizzled>::~SH_TYPE_NAME() \
 { \
 } \
- \
+
+#define SH_SPECIAL_TYPE_IMPL_NON_CONST_METHODS(SH_TYPE_NAME, SH_TYPE_ENUM)\
 template<int N, int Kind, typename T, bool Swizzled> \
 SH_TYPE_NAME<N, Kind, T, Swizzled>& \
 SH_TYPE_NAME<N, Kind, T, Swizzled>::operator=(const ShVariableN<N, T>& other) \
@@ -248,6 +265,8 @@ SH_TYPE_NAME<N, Kind, T, Swizzled>::operator-=(const ShConstant<N, T>& other) \
   return *this; \
 } \
  \
+ 
+#define SH_SPECIAL_TYPE_IMPL_CONST_METHODS(SH_TYPE_NAME, SH_TYPE_ENUM)\
 template<int N, int Kind, typename T, bool Swizzled> \
 SH_TYPE_NAME<N, Kind, T, true> \
 SH_TYPE_NAME<N, Kind, T, Swizzled>::operator()() const \
