@@ -1,0 +1,9 @@
+ - turn LHS reordering into RHS reordering
+    - check whether LHS swizzle is a reorder:
+       max = -1; for i = 1 to n do if s[i] < max stop else max = s[i]
+ X allocate registers
+ - bind input and output registers to opengl state
+ - allocate and update uniform parameters
+ - remaining operations
+ - check binding code
+ - test
