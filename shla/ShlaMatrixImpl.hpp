@@ -128,7 +128,7 @@ ShlaVector<VecT, M, N> ShlaBandedMatrix<T, M, N>::operator|( ShlaVector<VecT, M,
   static ShTexture2D<T> &diagTex = ShlaRenderGlobal<T, M, N>::op1; 
   static ShTexture2D<VecT> &vecTex = vecGlobal::op2; 
   static ShTexture2D<VecT> &vecAccum = vecGlobal::accum; 
-  static ShAttrib1f diag; 
+  static ShAttrib2f diag;  // for current diagonal d, stores ( d % M, d / M );
   static ShProgram fsh; 
 
   if( !fsh ) {
@@ -139,9 +139,8 @@ ShlaVector<VecT, M, N> ShlaBandedMatrix<T, M, N>::operator|( ShlaVector<VecT, M,
       ShInputPosition4f p;
       ShInputTexCoord2f tc;
 
-      ShTexCoord2f offsetTc;
-      offsetTc(0) = tc(0) + diag;
-      offsetTc(1) = mad( floor( offsetTc(0) ), ( 1.0 / N ), tc(1) ); 
+      ShTexCoord2f offsetTc = tc + diag;
+      offsetTc(1) += ( offsetTc(0) > 1.0 ) * ShConstant1f( 1.0 / N );
       offsetTc = frac( offsetTc );
 
       typename vecGlobal::OutputColorType out;
@@ -176,7 +175,7 @@ ShlaVector<VecT, M, N> ShlaBandedMatrix<T, M, N>::operator|( ShlaVector<VecT, M,
     // calculate the i'th column
     SH_DEBUG_PRINT( "Attaching diagTex for diagonal " << diagIt->first );
     diagTex.attach( diagIt->second.getMem() );
-    diag = diagIt->first / (double) M;
+    diag = ShConstant2f( (double)( diagIt->first % M ) / M, (double)( diagIt->first / M ) / N );
 
     vecGlobal::useRenderbuf();
     vecGlobal::drawQuad();
