@@ -1,0 +1,15 @@
+// -*- C++ -*-
+
+ShProgram shader = SH_BEGIN_VERTEX_PROGRAM {
+  ShInputAttrib1f in; NAME(in);
+  ShAttrib1f temp; NAME(temp);
+  ShOutputAttrib1f out; NAME(out);
+  
+  SH_FOR(temp = in*in, temp, temp -= in) {
+    out = temp + temp;
+    /*        SH_IF(in + in) {
+              out = temp + in;
+              } SH_ENDIF; */
+  } SH_ENDFOR;
+  temp = in + in;
+} SH_END_PROGRAM;

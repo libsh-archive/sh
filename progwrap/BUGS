@@ -1,0 +1,4 @@
+Right now, when you use an ShStream, it will read more
+input data than there actually is. This may cause issues
+under certain circumstances.
+

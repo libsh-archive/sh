@@ -1,0 +1,19 @@
+// -*- C++ -*-
+
+ShProgram pos = SH_BEGIN_VERTEX_PROGRAM {
+  ShInputPosition4f ipos;
+  ShOutputPosition4f opos;
+
+  opos = ipos + ShConstant4f(0.5, -0.5, 3.0, 4.0);
+} SH_END_PROGRAM;
+
+ShProgram norm = SH_BEGIN_VERTEX_PROGRAM {
+  ShInputNormal3f inorm;
+  ShOutputNormal3f onorm;
+
+  onorm = inorm * 3.0;
+} SH_END_PROGRAM;
+
+ShProgram shader = combine(pos, norm);
+
+

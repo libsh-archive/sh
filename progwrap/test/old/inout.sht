@@ -1,0 +1,25 @@
+// -*- C++ -*-
+
+ShProgram foo1 = SH_BEGIN_PROGRAM() {
+  ShInputAttrib1f SH_DECL(in);
+  ShInOutAttrib3f SH_DECL(var);
+  var = frac(in + var(1))(0,0,0);
+} SH_END_PROGRAM;
+
+ShProgram foo2 = SH_BEGIN_PROGRAM() {
+  ShInputVector3f SH_DECL(vec1);
+  ShOutputVector3f SH_DECL(veco1) = vec1;
+  ShInOutAttrib3f SH_DECL(var) = pos(var);
+  ShInputVector3f SH_DECL(vec2);
+  ShOutputVector3f SH_DECL(veco2) = vec2;
+} SH_END_PROGRAM;
+
+ShProgram foo3 = SH_BEGIN_VERTEX_PROGRAM {
+  ShInputVector3f SH_DECL(vec1);
+  ShOutputVector3f SH_DECL(veco1) = vec1;
+  ShInOutAttrib3f SH_DECL(var) = frac(var);
+  ShInputVector3f SH_DECL(vec2);
+  ShOutputVector3f SH_DECL(veco2) = vec2;
+} SH_END_PROGRAM;
+
+ShProgram shader =  (foo3 << ( foo1 & foo2 ) )& keep<ShColor3f>("keep1") & keep<ShColor3f>("keep2"); 
