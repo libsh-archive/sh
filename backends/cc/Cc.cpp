@@ -165,7 +165,7 @@ namespace ShCc {
     SH_CC_DEBUG_PRINT(__FUNCTION__);
   }
 
-  void CcBackendCode::unbind(void) 
+  void CcBackendCode::unbind(void)
   {
     SH_CC_DEBUG_PRINT(__FUNCTION__);
   }
@@ -703,8 +703,8 @@ namespace ShCc {
     return "cc";
   }
 
-  ShBackendCodePtr CcBackend::generateCode(const std::string& target,
-						const ShProgramNodeCPtr& program) {
+  ShBackendCodePtr CcBackend::generate_code(const std::string& target,
+                                            const ShProgramNodeCPtr& program) {
     SH_CC_DEBUG_PRINT(__FUNCTION__);
     CcBackendCodePtr backendcode = new CcBackendCode(program);
     backendcode->generate();

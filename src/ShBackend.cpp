@@ -42,6 +42,7 @@
 #include "ShEnvironment.hpp"
 #include "ShInternals.hpp"
 #include "ShTransformer.hpp"
+#include "ShSyntax.hpp"
 
 namespace SH {
 
@@ -52,6 +53,64 @@ ShBackendCode::~ShBackendCode()
 {
 }
 
+ShBackendSet::~ShBackendSet()
+{
+}
+
+// A default implementation of ShBackendSet, usable for any backends
+// that don't involve special linking.
+class ShTrivialBackendSet : public ShBackendSet {
+public:
+  ShTrivialBackendSet(const ShProgramSet& s,
+                      const ShBackendPtr& backend);
+  
+  virtual ~ShTrivialBackendSet();
+
+  virtual void link();
+
+  virtual void bind();
+  virtual void unbind();
+
+protected:
+  std::list<ShBackendCodePtr> m_code;
+};
+
+typedef ShPointer<ShTrivialBackendSet> ShTrivialBackendSetPtr;
+typedef ShPointer<const ShTrivialBackendSet> ShTrivialBackendSetCPtr;
+
+ShTrivialBackendSet::ShTrivialBackendSet(const ShProgramSet& s,
+                                         const ShBackendPtr& backend)
+{
+  for (ShProgramSet::const_iterator I = s.begin(); I != s.end(); ++I) {
+    m_code.push_back((*I)->code(backend));
+  }
+}
+
+ShTrivialBackendSet::~ShTrivialBackendSet()
+{
+}
+
+void ShTrivialBackendSet::link()
+{
+}
+
+void ShTrivialBackendSet::bind()
+{
+  for (std::list<ShBackendCodePtr>::iterator I = m_code.begin(); I != m_code.end(); ++I) {
+    (*I)->bind();
+  }
+}
+
+void ShTrivialBackendSet::unbind()
+{
+  // TODO: This may not quite have the correct semantics
+  // I'm wondering whether we want to allow unbinding backendsets at
+  // all...
+  for (std::list<ShBackendCodePtr>::iterator I = m_code.begin(); I != m_code.end(); ++I) {
+    (*I)->unbind();
+  }
+}
+ 
 ShBackend::ShBackend()
 {
   init();
@@ -61,6 +120,11 @@ ShBackend::ShBackend()
 ShBackend::~ShBackend()
 {
   m_backends->erase(std::remove(begin(), end(), ShBackendPtr(this)), end());
+}
+
+ShBackendSetPtr ShBackend::generate_set(const ShProgramSet& s)
+{
+  return new ShTrivialBackendSet(s, this);
 }
 
 ShBackend::ShBackendList::iterator ShBackend::begin()
@@ -152,6 +216,16 @@ void ShBackend::init()
 #endif
 
   m_doneInit = true;
+}
+
+void ShBackend::unbind_all()
+{
+  // This won't really work with multiple backends, but is good enough
+  // for now -- sdt
+  
+  while (ShContext::current()->begin_bound() != ShContext::current()->end_bound()) {
+    shUnbind(ShContext::current()->begin_bound()->second);
+  }
 }
 
 }

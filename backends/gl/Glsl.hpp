@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -24,27 +21,44 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef PBUFFERSTREAMS_HPP
-#define PBUFFERSTREAMS_HPP
+#ifndef GLSL_HPP
+#define GLSL_HPP
 
-#include "ShProgram.hpp"
+#include <string>
 #include "GlBackend.hpp"
+#include "ShBackend.hpp"
+#include "ShProgram.hpp"
+#include "ShException.hpp"
 
 namespace shgl {
 
-struct PBufferStreams : public StreamStrategy {
-  PBufferStreams();
-  virtual ~PBufferStreams();
-
-  void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
-
-  virtual StreamStrategy* create();
+class GlslCodeStrategy : public CodeStrategy {
+public:
+  GlslCodeStrategy(void);
   
-private:
-  SH::ShProgramSet* m_shaders;
-  bool m_setup_vp;
-  SH::ShProgram m_vp;
+  SH::ShBackendCodePtr generate(const std::string& target,
+                                const SH::ShProgramNodeCPtr& shader,
+                                TextureStrategy* textures);
+  SH::ShBackendSetPtr generate_set(const SH::ShProgramSet& s);
+  bool use_default_set() const;
+
+  void unbind_all();
+  bool use_default_unbind_all() const;
+  
+  GlslCodeStrategy* create(void);
 };
+
+unsigned int glslTarget(const std::string& unit);
+
+class GlslException : public SH::ShBackendException {
+public:
+  GlslException(const std::string& message);
+};
+
+enum GlslProgramType { SH_GLSL_FP, SH_GLSL_VP }; 
+
+void print_infolog(GLhandleARB obj, std::ostream& out = std::cerr);
+void print_shader_source(GLhandleARB shader, std::ostream& out = std::cerr);
 
 }
 

@@ -30,6 +30,8 @@
 #include "ShDllExport.hpp"
 #include "ShException.hpp"
 #include "ShContext.hpp"
+#include "ShProgramNode.hpp"
+#include "ShProgramSet.hpp"
 #include "ShProgram.hpp"
 #include "ShSyntax.hpp"
 #include "ShHalf.hpp"

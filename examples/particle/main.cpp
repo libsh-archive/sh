@@ -13,6 +13,7 @@
 #include "Camera.hpp"
 
 using namespace SH;
+using namespace std;
 
 // defines
 #define NUM_PARTICLES 4096
@@ -66,6 +67,9 @@ ShProgram vsh;
 ShProgram particle_fsh;
 ShProgram plane_fsh;
 
+ShProgramSet* particle_shaders;
+ShProgramSet* plane_shaders;
+
 //-------------------------------------------------------------------
 // GLUT data
 //-------------------------------------------------------------------
@@ -83,15 +87,13 @@ void setup_view()
 void display()
   {
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
+  
   // Bind in the programs used to shade the particles
-  shBind(vsh);
-  shBind(particle_fsh);
-
   // The updating of the stream is done using double buffering, if we just
   // ran particle_updateA then the latest data state is in stream 'B', otherwise
   // its in stream 'A' (because particle_updateB was the last to be run). Based
   // on the value of dir, render the appropriate stream
+  float* particle_positions = 0;
   if (dir == 0)
     {
     // Use the ShChannel object to fetch the ShHostStorage object
@@ -104,13 +106,7 @@ void display()
       posA_storage->sync();
 
       // fetch the raw data pointer and simply render the particles as points
-      float* posA_data = (float*)posA_storage->data();
-      glBegin(GL_POINTS);
-      for(int i = 0; i < NUM_PARTICLES; i++)
-       {
-       glVertex3fv(&posA_data[3*i]);
-       }
-      glEnd();
+      particle_positions = (float*)posA_storage->data();
       }
     }
   else
@@ -124,20 +120,22 @@ void display()
       // to make sure that the ShHostStorage updated
       posB_storage->sync();
 
-      float* posB_data = (float*)posB_storage->data();
-
-      // fetch the raw data pointer and simply render the particles as points
-      glBegin(GL_POINTS);
-      for(int i = 0; i < NUM_PARTICLES; i++)
-       {
-       glVertex3fv(&posB_data[3*i]);
-       }
-      glEnd();
+      particle_positions = (float*)posB_storage->data();
       }
     }
 
-  // Bind in the fragment program to shade the plane pillar
-  shBind(plane_fsh);
+  if (particle_positions) {
+    shBind(*particle_shaders);
+    glBegin(GL_POINTS);
+    for(int i = 0; i < NUM_PARTICLES; i++)
+      {
+        glVertex3fv(&particle_positions[3*i]);
+      }
+    glEnd();
+  }
+  
+  // Bind in the programs to shade the plane pillar
+  shBind(*plane_shaders);
 
   // set the color and render the plane as a simple quad
   diffuse_color = ShColor3f(0.5, 0.7, 0.9);
@@ -184,6 +182,7 @@ void display()
   glVertex3f(-.2, 1,  .2);
   glEnd();
 
+  shUnbind(*plane_shaders);
   // Help information
   if (show_help)
     {
@@ -198,7 +197,6 @@ void display()
     {
     gprintf(10, 10, "'H' for help...");
     }
-  
   glutSwapBuffers();
   }
 
@@ -307,7 +305,11 @@ int main(int argc, char** argv)
 
   try
     {
-    shSetBackend("arb");
+    std::string backend_name("arb");
+    if (argc > 1) {
+      backend_name = argv[1];
+    }
+    shSetBackend(backend_name);
 
     init_shaders();
     init_streams();
@@ -331,6 +333,17 @@ int main(int argc, char** argv)
     std::cerr << "Unknown exception caught." << std::endl;
     return 1;
     }
+
+#if 0
+  cout << "Vertex Unit:" << endl;
+  vsh.node()->code()->print(cout);
+  cout << "--" << endl;
+  cout << "Fragment Unit:" << endl;
+  particle_fsh.node()->code()->print(cout);
+  cout << "--" << endl;
+  plane_fsh.node()->code()->print(cout);
+  cout << "--" << endl;
+#endif
  
   glutMainLoop();
   return 0;
@@ -521,10 +534,16 @@ void init_shaders(void)
     
     color = (normal|lightv)*diffuse_color;
   } SH_END;
+
+  particle_shaders = new ShProgramSet(vsh, particle_fsh);
+  plane_shaders = new ShProgramSet(vsh, plane_fsh);
   }
 
 void update_streams(void)
   {
+  shUnbind(*plane_shaders);
+  shUnbind(*particle_shaders);
+
   try 
     {
     // The value of dir specifcies whether to run particle_updateA, which
@@ -574,13 +593,9 @@ int gprintf(int x, int y, char* fmt, ...)
   glPushMatrix();
   glLoadIdentity();
 
-  // just in case, turn lighting and
-  // texturing off and disable depth testing
+  // just in case, turn lighting off and disable depth testing
   glPushAttrib(GL_ENABLE_BIT);
   glDisable(GL_DEPTH_TEST);
-  shUnbind(vsh);
-  shUnbind(particle_fsh);
-  shUnbind(plane_fsh);
 
   // render the character through glut
   char* p = temp;

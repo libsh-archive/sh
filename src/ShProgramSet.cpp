@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -24,28 +21,37 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef PBUFFERSTREAMS_HPP
-#define PBUFFERSTREAMS_HPP
+#include "ShProgramSet.hpp"
+#include "ShBackend.hpp"
 
-#include "ShProgram.hpp"
-#include "GlBackend.hpp"
+namespace SH {
 
-namespace shgl {
-
-struct PBufferStreams : public StreamStrategy {
-  PBufferStreams();
-  virtual ~PBufferStreams();
-
-  void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
-
-  virtual StreamStrategy* create();
-  
-private:
-  SH::ShProgramSet* m_shaders;
-  bool m_setup_vp;
-  SH::ShProgram m_vp;
-};
-
+ShProgramSet::ShProgramSet()
+{
 }
 
-#endif
+ShProgramSet::ShProgramSet(const ShProgram& a)
+{
+  m_nodes.push_back(shref_const_cast<ShProgramNode>(a.node()));
+}
+
+ShProgramSet::ShProgramSet(const ShProgram& a, const ShProgram& b)
+{
+  m_nodes.push_back(shref_const_cast<ShProgramNode>(a.node()));
+  m_nodes.push_back(shref_const_cast<ShProgramNode>(b.node()));
+}
+
+ShPointer<ShBackendSet> ShProgramSet::backend_set(const ShPointer<ShBackend>& backend) const
+{
+  if (!backend) return 0;
+
+  if (m_backend_sets.find(backend) == m_backend_sets.end()) {
+    ShBackendSetPtr bs = backend->generate_set(*this);
+    if (!bs) return 0;
+    m_backend_sets[backend] = bs;
+  }
+  
+  return m_backend_sets[backend];
+}
+
+}

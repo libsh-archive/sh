@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -24,28 +21,49 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef PBUFFERSTREAMS_HPP
-#define PBUFFERSTREAMS_HPP
+#ifndef GLSLSET_HPP
+#define GLSLSET_HPP
 
-#include "ShProgram.hpp"
-#include "GlBackend.hpp"
+#include "ShBackend.hpp"
 
 namespace shgl {
 
-struct PBufferStreams : public StreamStrategy {
-  PBufferStreams();
-  virtual ~PBufferStreams();
+class GlslCode;
 
-  void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
+class GlslSet : public SH::ShBackendSet {
+public:
+  GlslSet();
+  GlslSet(const SH::ShPointer<GlslCode>& code);
+  GlslSet(const SH::ShProgramSet& s);
+  GlslSet(const GlslSet& s);
+  ~GlslSet();
 
-  virtual StreamStrategy* create();
+  GlslSet& operator=(const GlslSet& s);
+  
+  void link();
+  void bind();
+  void unbind();
+
+  bool empty() const;
+  
+  void attach(const SH::ShPointer<GlslCode>& code);
+  void detach(const SH::ShPointer<GlslCode>& code);
+  void replace(const SH::ShPointer<GlslCode>& code);
+
+  // Currently bound set
+  static GlslSet* current() { return m_current; }
   
 private:
-  SH::ShProgramSet* m_shaders;
-  bool m_setup_vp;
-  SH::ShProgram m_vp;
+  SH::ShPointer<GlslCode> m_shaders[2];
+  GLhandleARB m_arb_program;
+
+  bool m_linked, m_bound;
+
+  static GlslSet* m_current;
 };
 
-}
+typedef SH::ShPointer<GlslSet> GlslSetPtr;
+typedef SH::ShPointer<const GlslSet> GlslSetCPtr;
 
+}
 #endif

@@ -55,6 +55,29 @@ PFNWGLRELEASEPBUFFERDCARBPROC wglReleasePbufferDCARB = 0;
 PFNWGLDESTROYPBUFFERARBPROC wglDestroyPbufferARB = 0;
 PFNWGLQUERYPBUFFERARBPROC wglQueryPbufferARB = 0;
 
+PFNGLGETOBJECTPARAMETERIVARBPROC glGetObjectParameterivARB = 0;
+PFNGLGETINFOLOGARBPROC glGetInfoLogARB = 0;
+PFNGLGETSHADERSOURCEARBPROC glGetShaderSourceARB = 0;
+PFNGLDELETEOBJECTARBPROC glDeleteObjectARB = 0;
+PFNGLCREATESHADEROBJECTARBPROC glCreateShaderObjectARB = 0;
+PFNGLSHADERSOURCEARBPROC glShaderSourceARB = 0;
+PFNGLUNIFORM1FARBPROC glUniform1fARB = 0;
+PFNGLUNIFORM2FARBPROC glUniform2fARB = 0;
+PFNGLUNIFORM3FARBPROC glUniform3fARB = 0;
+PFNGLUNIFORM4FARBPROC glUniform4fARB = 0;
+PFNGLUNIFORM1IARBPROC glUniform1iARB = 0;
+PFNGLUNIFORM2IARBPROC glUniform2iARB = 0;
+PFNGLUNIFORM3IARBPROC glUniform3iARB = 0;
+PFNGLUNIFORM4IARBPROC glUniform4iARB = 0;
+PFNGLGETUNIFORMLOCATIONARBPROC glGetUniformLocationARB = 0;
+PFNGLCOMPILESHADERARBPROC glCompileShaderARB = 0;
+PFNGLCREATEPROGRAMOBJECTARBPROC glCreateProgramObjectARB = 0;
+PFNGLDETACHOBJECTARBPROC glDetachObjectARB = 0;
+PFNGLATTACHOBJECTARBPROC glAttachObjectARB = 0;
+PFNGLLINKPROGRAMARBPROC glLinkProgramARB = 0;
+PFNGLUSEPROGRAMOBJECTARBPROC glUseProgramObjectARB = 0;
+PFNGLVALIDATEPROGRAMARBPROC glValidateProgramARB = 0;
+
 #endif /* WIN32 */
 
 namespace shgl {
@@ -118,6 +141,29 @@ if ((x = reinterpret_cast<PFN ## T ## PROC>(wglGetProcAddress(#x))) == NULL) \
   shError(ShException(msg.str())); \
   }
 #endif /* WIN32 */
+
+SH::ShBackendSetPtr CodeStrategy::generate_set(const SH::ShProgramSet& s)
+{
+  SH_DEBUG_ERROR("shgl::CodeStrategy::generate_set() called!");
+  SH_DEBUG_ASSERT(false);
+  return 0;
+}
+
+bool CodeStrategy::use_default_set() const
+{
+  return true;
+}
+
+void CodeStrategy::unbind_all()
+{
+  SH_DEBUG_ERROR("shgl::CodeStrategy::unbind_all() called!");
+  SH_DEBUG_ASSERT(false);
+}
+
+bool CodeStrategy::use_default_unbind_all() const
+{
+  return true;
+}
 
 GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrategy* stream) :
   m_code(code),
@@ -272,6 +318,29 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
   GET_WGL_PROCEDURE(wglDestroyPbufferARB, WGLDESTROYPBUFFERARB);
   GET_WGL_PROCEDURE(wglQueryPbufferARB, WGLQUERYPBUFFERARB);
 
+  GET_WGL_PROCEDURE(glGetObjectParameterivARB, GLGETOBJECTPARAMETERIVARB);
+  GET_WGL_PROCEDURE(glGetInfoLogARB, GLGETINFOLOGARB);
+  GET_WGL_PROCEDURE(glGetShaderSourceARB, GLGETSHADERSOURCEARB);
+  GET_WGL_PROCEDURE(glDeleteObjectARB, GLDELETEOBJECTARB);
+  GET_WGL_PROCEDURE(glCreateShaderObjectARB, GLCREATESHADEROBJECTARB);
+  GET_WGL_PROCEDURE(glShaderSourceARB, GLSHADERSOURCEARB);
+  GET_WGL_PROCEDURE(glUniform1fARB, GLUNIFORM1FARB);
+  GET_WGL_PROCEDURE(glUniform2fARB, GLUNIFORM2FARB);
+  GET_WGL_PROCEDURE(glUniform3fARB, GLUNIFORM3FARB);
+  GET_WGL_PROCEDURE(glUniform4fARB, GLUNIFORM4FARB);
+  GET_WGL_PROCEDURE(glUniform1iARB, GLUNIFORM1IARB);
+  GET_WGL_PROCEDURE(glUniform2iARB, GLUNIFORM2IARB);
+  GET_WGL_PROCEDURE(glUniform3iARB, GLUNIFORM3IARB);
+  GET_WGL_PROCEDURE(glUniform4iARB, GLUNIFORM4IARB);
+  GET_WGL_PROCEDURE(glGetUniformLocationARB, GLGETUNIFORMLOCATIONARB);
+  GET_WGL_PROCEDURE(glCompileShaderARB, GLCOMPILESHADERARB);
+  GET_WGL_PROCEDURE(glCreateProgramObjectARB, GLCREATEPROGRAMOBJECTARB);
+  GET_WGL_PROCEDURE(glDetachObjectARB, GLDETACHOBJECTARB);
+  GET_WGL_PROCEDURE(glAttachObjectARB, GLATTACHOBJECTARB);
+  GET_WGL_PROCEDURE(glLinkProgramARB, GLLINKPROGRAMARB);
+  GET_WGL_PROCEDURE(glUseProgramObjectARB, GLUSEPROGRAMOBJECTARB);
+  GET_WGL_PROCEDURE(glValidateProgramARB, GLVALIDATEPROGRAMARB);
+
   if (hWnd)
     {
     wglMakeCurrent(NULL, NULL);
@@ -284,10 +353,30 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
   }
 
 SH::ShBackendCodePtr
-GlBackend::generateCode(const std::string& target,
-                        const SH::ShProgramNodeCPtr& shader)
+GlBackend::generate_code(const std::string& target,
+                         const SH::ShProgramNodeCPtr& shader)
 {
   return m_code->generate(target, shader, m_texture);
+}
+
+SH::ShBackendSetPtr
+GlBackend::generate_set(const ShProgramSet& s)
+{
+  if (m_code->use_default_set()) {
+    return SH::ShBackend::generate_set(s);
+  } else {
+    return m_code->generate_set(s);
+  }
+}
+
+void
+GlBackend::unbind_all()
+{
+  if (m_code->use_default_unbind_all()) {
+    SH::ShBackend::unbind_all();
+  } else {
+    m_code->unbind_all();
+  }
 }
 
 void

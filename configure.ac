@@ -72,7 +72,19 @@ if test "x$sh_backend_arb" = xtrue ; then
 fi
 AM_CONDITIONAL(ENABLE_ARB_BACKEND, test x$sh_backend_arb = xtrue)
 
-AM_CONDITIONAL(ENABLE_GL_BACKENDS, test x$sh_backend_arb = xtrue)
+SH_CHECK_BACKEND([glsl], [OpenGL Shading Language])
+if test "x$sh_backend_glsl" = xtrue ; then
+  GL_CHECK_GL_HEADERS([],
+    [SH_BACKEND_MESSAGE([glsl], [OpenGL headers (GL/gl.h and GL/glext.h) not found. Disabling GLSL backend.])
+     sh_backend_glsl=false])
+  GL_CHECK_GLEXT_VERSION([21], [], [
+    SH_BACKEND_MESSAGE([glsl], [glext.h version 21 or greater (available at http://oss.sgi.com/projects/ogl-sample/registry/) not found. Disabling GLSL backend.])
+    sh_backend_glsl=false
+  ])
+fi
+AM_CONDITIONAL(ENABLE_GLSL_BACKEND, test x$sh_backend_glsl = xtrue)
+
+AM_CONDITIONAL(ENABLE_GL_BACKENDS, test x$sh_backend_arb = xtrue -o x$sh_backend_glsl = xtrue)
 
 AC_ARG_ENABLE([docs],
 	      AC_HELP_STRING([--enable-docs],

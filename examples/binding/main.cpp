@@ -9,8 +9,10 @@
 #include <GL/glut.h>
 
 #include <sh/sh.hpp>
+#include <iostream>
 
 using namespace SH;
+using namespace std;
 
 int gprintf(int x, int y, char* fmt, ...);
 
@@ -183,6 +185,16 @@ void init_sh()
     // standard diffuse shading
     oclr = pos(inrm|ilightv)*diffuse + ambient;
   } SH_END;
+
+
+#if 1
+  cout << "Vertex Unit:" << endl;
+  vsh.node()->code()->print(cout);
+  cout << "--" << endl;
+  cout << "Fragment Unit:" << endl;
+  fsh.node()->code()->print(cout);
+  cout << "--" << endl;
+#endif
 
   }
 

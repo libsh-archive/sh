@@ -298,12 +298,28 @@ void shBindShader(ShProgram& shader);
 SH_DLLEXPORT
 void shBindShader(const std::string& target, ShProgram& shader);
 
+/// Bind a set of programs
+SH_DLLEXPORT
+void shBind(const ShProgramSet& s);
+
+/// Unbind all currently bound programs
+SH_DLLEXPORT
+void shUnbind();
+
 /// Unbind a program.
 SH_DLLEXPORT
 void shUnbind(ShProgram& prg);
 /// Unbind a program with the given target.
 SH_DLLEXPORT
 void shUnbind(const std::string& target, ShProgram& shader);
+
+/// Unbind a set of programs, if it's bound
+SH_DLLEXPORT
+void shUnbind(const ShProgramSet& s);
+
+/// Link a set of programs
+SH_DLLEXPORT
+void shLink(const ShProgramSet& s);
 
 /// Upload any textures and uniform parameters which are out-of-date
 /// but required on all compilation targets that have any programs
@@ -314,7 +330,6 @@ void shUpdate();
 /// Switch to a particular backend
 SH_DLLEXPORT
 bool shSetBackend(const std::string& name);
-
 
 /** \brief SH Initialization Function.
  *

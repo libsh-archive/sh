@@ -188,8 +188,8 @@ class CcBackend: public SH::ShBackend
 
     std::string name(void) const;
 
-    SH::ShBackendCodePtr generateCode(const std::string& target,
-        const SH::ShProgramNodeCPtr& program);
+    SH::ShBackendCodePtr generate_code(const std::string& target,
+                                       const SH::ShProgramNodeCPtr& program);
     
     void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
 };
