@@ -89,7 +89,6 @@ enum ShOperation {
                 ///  code passed to the backend.
 
   SH_OP_FETCH, ///< Unary (takes a stream). Fetch an element from a stream. Similar to TEX
-  // TODO: finish these
 };
 
 /** Information related to a specific operation */

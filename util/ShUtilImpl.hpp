@@ -74,7 +74,7 @@ template<int N, typename T>
 ShGeneric<1, T> lOneDistance(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b) {
   //TODO should use dot product with vector 1
   ShGeneric<N, T> diff = abs(a - b);
-  return dot(1.0, diff); 
+  return dot(fillcast<N>(1.0f), diff); 
 }
 
 /** \brief Linfinity distance between two points 

@@ -27,8 +27,6 @@
 #ifndef SHLINEARALLOCATOR_HPP
 #define SHLINEARALLOCATOR_HPP
 
-// TODO: This should probably move to backends/ or something.
-
 #include <map>
 #include "ShVariableNode.hpp"
 #include "ShBackend.hpp"

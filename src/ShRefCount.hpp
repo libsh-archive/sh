@@ -138,8 +138,8 @@ public:
   T& operator*() const;
   T* operator->() const;
 
-  // TODO: Maybe use boost's unspecified-bool-type trick
   /// Return true iff this is not a reference to a null pointer
+  /// @todo Maybe use boost's unspecified-bool-type trick
   operator bool() const;
 
   /// Obtain the total amount of references to the referenced object.

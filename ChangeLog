@@ -1,5 +1,12 @@
 2004-04-12  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* Once more, a gigantic patch. ShLib has been split up into
+	multiple files, and ShInstructions.{c,h}pp have been added,
+	providing "intrinsics" for every intermediate language
+	operation. All ShLib functions use these intrinsics. Doxygen
+	comments have been fixed up in many places. Compile time has been
+	improved. Everything is wonderful. Hurrah!
+
 	* src/scripts/ShAttribImpl.hpp.py (Impl.assign): Use ShGeneric's
 	implementations of these functions instead of providing our own.
 	No longer include ShLib.hpp.

@@ -75,13 +75,12 @@ public:
    * variable in computation and inputs cannot be used as a dest, and
    * inout variables are not supported directly.
    *
-   *
+   * @todo currently all or none approach to conversion.
+   * could parameterize this with flags to choose INPUT, OUTPUT, INOUT
    */
   //@{
   friend struct InputOutputConvertor;
   void convertInputOutput();
-  // TODO currently all or none approach to conversion.
-  // could parameterize this with flags to choose INPUT, OUTPUT, INOUT
   //@}
   
   /**@name Texture lookup conversion

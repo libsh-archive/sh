@@ -109,8 +109,6 @@ public:
   TexList textures; ///< Textures used in this shader
   ChannelList channels; ///< Channels used in FETCH instructions in this shader
 
-  // TODO: add streams
-  
   /// Can be empty, if there is no target associated with this program.
   std::string target() const { return m_target; }
 

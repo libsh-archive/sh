@@ -29,6 +29,7 @@
 
 #include "ShGeneric.hpp"
 #include "ShLib.hpp"
+#include "ShInstructions.hpp"
 
 namespace SH {
 
@@ -54,16 +55,7 @@ ShGeneric<N, T>::~ShGeneric()
 template<int N, typename T>
 ShGeneric<N, T>& ShGeneric<N, T>::operator=(const ShGeneric<N, T>& other)
 {
-  if (m_node->kind() == SH_CONST || uniform()) {
-    assert(!ShEnvironment::insideShader);
-    assert(other.hasValues());
-    T data[N];
-    other.getValues(data);
-    setValues(data);
-  } else {
-    ShStatement asn(*this, SH_OP_ASN, other);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
-  }
+  shASN(*this, other);
   return *this;
 }
 
@@ -195,16 +187,7 @@ ShGeneric<1, T>::~ShGeneric()
 template<typename T>
 ShGeneric<1, T>& ShGeneric<1, T>::operator=(const ShGeneric<1, T>& other)
 {
-  if (m_node->kind() == SH_CONST || uniform()) {
-    assert(!ShEnvironment::insideShader);
-    assert(other.hasValues());
-    T data[1];
-    other.getValues(data);
-    setValues(data);
-  } else {
-    ShStatement asn(*this, SH_OP_ASN, other);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
-  }
+  shASN(*this, other);
   return *this;
 }
 

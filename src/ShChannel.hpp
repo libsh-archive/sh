@@ -35,33 +35,44 @@ namespace SH {
 /** The client interface to a single-channel typed data stream.
  * Really this hides an ShChannelNode which is the true representation
  * of the channel.   The template argument is the element type stored.
+ * @todo copy constructor, operator=(), etc.
  */
 template<typename T>
 class ShChannel {
 public:
   typedef typename T::ValueType ValueType;
+  /// Construct a channel without any associated memory.
   ShChannel();
+  /// Construct a channel with \a count elements in \a memory
   ShChannel(const ShMemoryPtr& memory, int count);
 
-  // TODO: copy constructor, operator=(), etc.
-  
+  /// Set this channel to use \a count elements in \a memory
   void memory(const ShMemoryPtr& memory, int count);
 
+  /// Return the number of elements in this channel
   int count() const;
+  /// Return this channel's memory
   ShRefCount<const ShMemory> memory() const;
+  /// Return this channel's memory
   ShMemoryPtr memory();
 
-  // Stream element fetch operator
+  /// Fetch the current element from this stream.
+  /// This is only useful in stream programs
   T operator()();
+  /// Fetch the current element from this stream.
+  /// This is only useful in stream programs
   const T operator()() const;
 
+  /// Return the node internally wrapped by this channel object
   ShChannelNodePtr node();
+  /// Return the node internally wrapped by this channel object
   const ShChannelNodePtr node() const;
 
-  // Execute fully bound single-output stream program and place result in channel.
+  /// Execute fully bound single-output stream program and place result in channel.
   ShChannel& operator=(const ShProgram& program);
   
 private:
+  /// The node this object is a thin wrapper for
   ShChannelNodePtr m_node;
 };
 

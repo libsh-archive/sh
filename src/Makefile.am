@@ -29,6 +29,13 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
                    ShBlock.hpp ShCtrlGraph.hpp \
                    ShDebug.hpp ShEnvironment.hpp ShError.hpp \
                    ShException.hpp ShLib.hpp \
+		   ShLibArith.hpp ShLibArithImpl.hpp \
+		   ShLibBoolean.hpp ShLibBooleanImpl.hpp \
+		   ShLibClamp.hpp ShLibClampImpl.hpp \
+		   ShLibGeometry.hpp ShLibGeometryImpl.hpp \
+		   ShLibMatrix.hpp ShLibMatrixImpl.hpp \
+		   ShLibMisc.hpp ShLibMiscImpl.hpp \
+		   ShLibTrig.hpp ShLibTrigImpl.hpp \
                    ShParser.hpp ShRefCount.hpp ShProgram.hpp ShStatement.hpp \
                    ShSwizzle.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp \
                    ShUtility.hpp ShVariable.hpp ShVariableNode.hpp sh.hpp \
@@ -56,7 +63,8 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
 		   ShStream.hpp ShStreamImpl.hpp ShStream.cpp \
 		   ShInit.cpp \
 		   ShQuaternion.hpp ShQuaternionImpl.hpp \
-		   ShMemory.hpp ShMemory.cpp ShClamping.hpp
+		   ShMemory.hpp ShMemory.cpp ShClamping.hpp \
+		   ShInstructions.hpp ShInstructions.cpp
 
 incincdir = $(includedir)/sh
 
@@ -64,6 +72,13 @@ incinc_HEADERS = ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp \
                    ShBlock.hpp ShCtrlGraph.hpp \
                    ShDebug.hpp ShEnvironment.hpp ShError.hpp \
                    ShException.hpp ShLib.hpp \
+		   ShLibArith.hpp ShLibArithImpl.hpp \
+		   ShLibBoolean.hpp ShLibBooleanImpl.hpp \
+		   ShLibClamp.hpp ShLibClampImpl.hpp \
+		   ShLibGeometry.hpp ShLibGeometryImpl.hpp \
+		   ShLibMatrix.hpp ShLibMatrixImpl.hpp \
+		   ShLibMisc.hpp ShLibMiscImpl.hpp \
+		   ShLibTrig.hpp ShLibTrigImpl.hpp \
                    ShParser.hpp ShRefCount.hpp ShRefCountImpl.hpp ShProgram.hpp ShStatement.hpp \
                    ShSwizzle.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp \
                    ShUtility.hpp \
@@ -90,7 +105,8 @@ incinc_HEADERS = ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp \
 		   ShChannelNode.hpp ShChannel.hpp ShChannelImpl.hpp \
 		   ShStream.hpp ShStreamImpl.hpp \
 		   ShQuaternion.hpp ShQuaternionImpl.hpp \
-		   ShMemory.hpp ShClamping.hpp
+		   ShMemory.hpp ShClamping.hpp \
+		   ShInstructions.hpp
 
 %.hpp: scripts/%.hpp.py scripts/common.py scripts/semantic.py
 	rm -f $@
