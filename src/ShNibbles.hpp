@@ -50,90 +50,90 @@ ShProgram lose(std::string name = "");
 
 /** \brief 2D texture lookup nibble 
  * Inputs: IN(0) ShTexCoord1f tc
- * Outputs: OUT(0) result = tex(tc) */ 
+ * Outputs: OUT(0) name = tex(tc) */ 
 template<typename T> 
-ShProgram access( const ShTexture1D<T> &tex );
+ShProgram access(const ShTexture1D<T> &tex, std::string name = "result");
 
 /** \brief 2D texture lookup nibble 
  * Inputs: IN(0) ShTexCoord2f tc
- * Outputs: OUT(0) result = tex(tc) */ 
+ * Outputs: OUT(0) name = tex(tc) */ 
 template<typename T> 
-ShProgram access( const ShTexture2D<T> &tex );
+ShProgram access(const ShTexture2D<T> &tex, std::string name = "result");
 
 /** \brief 2D texture lookup nibble 
  * Inputs: IN(0) ShTexCoord3f tc
- * Outputs: OUT(0) result = tex(tc) */ 
+ * Outputs: OUT(0) name = tex(tc) */ 
 template<typename T> 
-ShProgram access( const ShTexture3D<T> &tex );
+ShProgram access(const ShTexture3D<T> &tex, std::string name = "result");
 
 /** \brief transformation nibble 
  * Creates a nibble that transforms a variable of type T2 by 
  * a matrix of type ShMatrix<Rows, Cols, Kind, T>
  * Inputs: IN(0) attrib
- * Outputs: OUT(0) T2 transAttrib = m | attrib
+ * Outputs: OUT(0) T2 name = m | attrib
  */
 template<typename T2, int Rows, int Cols, int Kind, typename T>
-ShProgram transform( const ShMatrix<Rows, Cols, Kind, T> &m );
+ShProgram transform(const ShMatrix<Rows, Cols, Kind, T> &m, std::string name = "result");
 
 /** \brief Casting nibble 
  * Casts from tuple type T to type T2
  * If T::typesize < T2::typesize, pads with 0 components at end.
  * If T::typesize > T2::typesize, truncates components at end. 
  * Inputs: IN(0) T in
- * Outputs: OUT(0) T2 out
+ * Outputs: OUT(0) T2 name 
  *
  */
 template<typename T, typename T2>
-ShProgram cast();
+ShProgram cast(std::string name = "result");
 
 /**@{ \brief Nibbles for unary operators
- * Inputs: IN(0) T in
- * Outputs: OUT(0) T result 
+ * Inputs: IN(0) T name 
+ * Outputs: OUT(0) T name 
  */
-template<typename T> ShProgram abs();
-template<typename T> ShProgram acos();
-template<typename T> ShProgram asin();
-template<typename T> ShProgram cos();
-template<typename T> ShProgram frac();
-template<typename T> ShProgram sin();
-template<typename T> ShProgram sqrt();
-template<typename T> ShProgram normalize();
-template<typename T> ShProgram pos();
+template<typename T> ShProgram abs(std::string name = "result");
+template<typename T> ShProgram acos(std::string name = "result");
+template<typename T> ShProgram asin(std::string name = "result");
+template<typename T> ShProgram cos(std::string name = "result");
+template<typename T> ShProgram frac(std::string name = "result");
+template<typename T> ShProgram sin(std::string name = "result");
+template<typename T> ShProgram sqrt(std::string name = "result");
+template<typename T> ShProgram normalize(std::string name = "result");
+template<typename T> ShProgram pos(std::string name = "result");
 //@}
 
 /**@{ \brief Nibbles for binary operators
  * Inputs: IN(0) T a
  *         IN(1) T b
- * Outputs: OUT(0) T result
+ * Outputs: OUT(0) T name 
  */
-template<typename T> ShProgram add();
-template<typename T> ShProgram mul();
-template<typename T> ShProgram div();
-template<typename T> ShProgram pow();
-template<typename T> ShProgram slt();
-template<typename T> ShProgram sle();
-template<typename T> ShProgram sgt();
-template<typename T> ShProgram sge();
-template<typename T> ShProgram seq();
-template<typename T> ShProgram sne();
-template<typename T> ShProgram fmod();
-template<typename T> ShProgram min();
-template<typename T> ShProgram max();
+template<typename T> ShProgram add(std::string name = "result");
+template<typename T> ShProgram mul(std::string name = "result");
+template<typename T> ShProgram div(std::string name = "result");
+template<typename T> ShProgram pow(std::string name = "result");
+template<typename T> ShProgram slt(std::string name = "result");
+template<typename T> ShProgram sle(std::string name = "result");
+template<typename T> ShProgram sgt(std::string name = "result");
+template<typename T> ShProgram sge(std::string name = "result");
+template<typename T> ShProgram seq(std::string name = "result");
+template<typename T> ShProgram sne(std::string name = "result");
+template<typename T> ShProgram fmod(std::string name = "result");
+template<typename T> ShProgram min(std::string name = "result");
+template<typename T> ShProgram max(std::string name = "result");
 
 /** @{ \brief Nibble for dot product operator
  * Inputs: IN(0) T a
  *         IN(1) T b
- * Outputs: OUT(0) ShAttrib1f result 
+ * Outputs: OUT(0) ShAttrib1f name  
  */
-template<typename T> ShProgram dot();
+template<typename T> ShProgram dot(std::string name = "result");
 
 /** @{ \brief Nibble for lerp operator
- * Inputs: IN(0) T alpha
- *         IN(1) T a
- *         IN(2) T b
- * Outputs: OUT(0) T result = a * alpha + b * ( 1 - alpha ) 
+ * Inputs: IN(0) T a
+ *         IN(1) T b
+ *         IN(2) T alpha
+ * Outputs: OUT(0) T name = a * alpha + b * (1 - alpha) 
  */
-template<typename T> ShProgram lerp();
+template<typename T> ShProgram lerp(std::string name = "result");
 
 
 

@@ -82,7 +82,7 @@ ShVariableN<M, T> _pmad(const ShVariableN<M, T> &x, const ShVariableN<M, T> &d, 
 template<int M, typename T>
 ShVariableN<M, T> _psmootht(const ShVariableN<M, T> &t) 
 {
-  return t * t * t * _pmad(t, _pmad(t, 6.0, -15.0), 10.0); 
+  return t * t * t * _pmad(t, _pmad(t, 6.0f, -15.0f), 10.0f); 
 }
 
 // adds x to a float d componentwise
@@ -105,20 +105,20 @@ ShVariableN<M, T> ShPerlin<M, P>::noise(const ShVariableN<K, T> &p, bool useText
   typedef ShAttrib<M, SH_VAR_TEMP, T> ResultType;
   typedef ShConstant<K, T> ConstTempType;
   static const int NUM_SAMPLES = 1 << K;
-  static const double INVP = 1.0 / P; // TODO if optimizer propagates constants, remove this
-  static const double DP = (double)P; 
+  static const float INVP = 1.0 / P; // TODO if optimizer propagates constants, remove this
+  static const float DP = (float)P; 
 
   TempType rp = frac(p); // offset from integer lattice point
   TempType p0, p1; // positive coordinates in [0, P)^3
   TempType ip0, ip1; // integer lattice point in [0,P)^3 for hash, [0,1)^3 for tex lookup
 
-  p0 = frac(p * INV_P) * DP; 
+  p0 = frac(p * INVP) * DP; 
   p1 = frac(_pmad(p, INVP, INVP)) * DP;
   ip0 = floor(p0);
   ip1 = floor(p1);
   if(useTexture) { // convert to tex coordiantes (TODO remove when we have RECT textures)
-    ip0 = _padd(ip0, 0.5) * INVP; 
-    ip1 = _padd(ip1, 0.5) * INVP; 
+    ip0 = _padd(ip0, 0.5f) * INVP; 
+    ip1 = _padd(ip1, 0.5f) * INVP; 
   } 
 
   // find gradients at the NUM_SAMPLES adjacent grid points (NUM_SAMPLES = 2^K for dimension K lookup)
@@ -133,9 +133,9 @@ ShVariableN<M, T> ShPerlin<M, P>::noise(const ShVariableN<K, T> &p, bool useText
     ConstTempType offsets(flip);
     TempType intLatticePoint = cond(offsets, ip1, ip0);
     if(useTexture) {
-      grad[i] = noiseTex(cast<ShTexCoord3f>(intLatticePoint)); // lookup 3D texture
+      grad[i] = noiseTex(cast<3>(intLatticePoint)); // lookup 3D texture
     } else {
-      grad[i] = cast<ResultType>(hashmrg(intLatticePoint)); 
+      grad[i] = cast<M>(hashmrg(intLatticePoint)); 
     }
   }
 
@@ -148,12 +148,17 @@ ShVariableN<M, T> ShPerlin<M, P>::noise(const ShVariableN<K, T> &p, bool useText
   }
 
   //result is in grad[0], cast into the result size 
-  return cast<ResultType>(grad[0]);
+  return cast<M>(grad[0]);
 }
 
 template<int M, int K, typename T>
 ShVariableN<M, T> noise(const ShVariableN<K, T> &p, bool useTexture = true) {
   return ShPerlin<M>::noise(p, useTexture);
+}
+
+template<int M, int K, typename T>
+ShVariableN<M, T> snoise(const ShVariableN<K, T> &p, bool useTexture = true) {
+  return _pmad( noise<M>(p, useTexture), 2.0f, -1.0f );
 }
 
 
@@ -173,7 +178,7 @@ ShVariableN<M, T> sturbulence(const ShVariableN<N, T> &amp,
       const ShVariableN<K, T> &p, bool useTexture) {
   ShAttrib<M, SH_VAR_TEMP, T> result;
   result = turbulence<M>(amp, p, useTexture);
-  return _pmad(result, 2.0, - 1.0); 
+  return _pmad(result, 2.0f, - 1.0f); 
 }
 
 } // namespace ShUtil

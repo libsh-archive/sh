@@ -46,13 +46,13 @@ using namespace SH;
 template<typename T>
 ShProgram ShKernelLib::shDiffuse() {
   ShProgram kernel = SH_BEGIN_FRAGMENT_PROGRAM {
-    typename T::InputType SH_DECL( kd );
+    typename T::InputType SH_DECL(kd);
     ShInputNormal3f SH_DECL(normal);
     ShInputVector3f SH_DECL(lightVec);
     ShInputPosition4f SH_DECL(posh);
 
     ShAttrib1f irrad = pos(dot(normalize(normal), normalize(lightVec)));
-    typename T::OutputType SH_DECL( result );
+    typename T::OutputType SH_DECL(result);
     result = irrad * kd; 
   } SH_END;
   return kernel;
@@ -61,7 +61,7 @@ ShProgram ShKernelLib::shDiffuse() {
 template<typename T>
 ShProgram ShKernelLib::shSpecular() {
   ShProgram kernel = SH_BEGIN_FRAGMENT_PROGRAM {
-    typename T::InputType SH_DECL( ks );
+    typename T::InputType SH_DECL(ks);
     ShInputAttrib1f SH_DECL(specExp);
     ShInputNormal3f SH_DECL(normal);
     ShInputVector3f SH_DECL(halfVec);
@@ -73,7 +73,7 @@ ShProgram ShKernelLib::shSpecular() {
     lightVec = normalize(lightVec);
     ShAttrib1f irrad = pos(normal | lightVec);
 
-    typename T::OutputType SH_DECL( result );
+    typename T::OutputType SH_DECL(result);
     result = irrad * ks * ((normal | halfVec)^specExp); 
   } SH_END;
   return kernel;
@@ -82,14 +82,24 @@ ShProgram ShKernelLib::shSpecular() {
 
 template<typename T>
 ShProgram ShKernelLib::shPhong() {
-  // TODO find a better way of expressing this - manipulating inputs
-  // across vertex/fragment shader (don't want to manipulate vsh outputs)
-  ShProgram permuter = keep<T>("kd") & keep<T>("ks") & keep<ShAttrib1f>("specExp") 
-    & keep<ShNormal3f>("normal") & keep<ShVector3f>("halfVec") 
-    & keep<ShVector3f>("lightVec") & keep<ShPosition4f>("posh"); 
+  ShProgram kernel = SH_BEGIN_PROGRAM("gpu:fragment") {
+    typename T::InputType SH_DECL(kd);
+    typename T::InputType SH_DECL(ks);
+    ShInputAttrib1f SH_DECL(specExp);
+    ShInputNormal3f SH_DECL(normal);
+    ShInputVector3f SH_DECL(halfVec);
+    ShInputVector3f SH_DECL(lightVec);
+    ShInputPosition4f SH_DECL(posh);
 
-  return permuter >> shRange("kd")("normal")("lightVec")("posh")("ks","posh") >>
-    ( shDiffuse<T>() & shSpecular<T>() ) >> add<T>(); 
+    typename T::OutputType SH_DECL(result);
+
+    normal = normalize(normal);
+    halfVec = normalize(halfVec);
+    lightVec = normalize(lightVec);
+    ShAttrib1f irrad = pos(normal | lightVec);
+    result = kd * irrad + ks * pow(normal | halfVec, specExp); 
+  } SH_END;
+  return kernel;
 }
 
 
@@ -133,47 +143,23 @@ ShProgram ShKernelLib::shVsh(const ShMatrix<N, N, Kind, T> &mv, const ShMatrix<N
 template<int N, int Kind, typename T>
 ShProgram ShKernelLib::shVshTangentSpace(const ShMatrix<N, N, Kind, T> &mv, 
     const ShMatrix<N, N, Kind, T> &mvp) {
-  // permute inputs to match specified inputs
   ShProgram vsh = shVsh(mv, mvp) & keep<ShVector3f>("tangent") & keep<ShVector3f>("tangent2");
-  vsh = vsh << shSwizzle( "texcoord", "normal", "tangent", "tangent2", "lightPos", "posm");
 
-  // permute outputs to match tangentVsh below
-  vsh = vsh >> shRange("normal", "lightVec")("tangent")("tangent2")("texcoord")("posv")("posh");
+  // convert view, half, and light to orthonormal bases {normal, tangent, tangent2}
+  ShProgram ConvertToTCS = ShKernelLib::shConvertBasis("viewVec", "normal", "tangent", "tangent2");
+  ConvertToTCS = namedCombine(ConvertToTCS, 
+      ShKernelLib::shConvertBasis("halfVec", "normal", "tangent", "tangent2"));
+  ConvertToTCS = namedCombine(ConvertToTCS, 
+      ShKernelLib::shConvertBasis("lightVec", "normal", "tangent", "tangent2"));
 
-  ShProgram tangentVsh = SH_BEGIN_VERTEX_PROGRAM {
-    ShInputNormal3f SH_NAMEDECL(nv, "normal");     // IN(1): normalized normal vector (VCS)
-    ShInputVector3f SH_NAMEDECL(vv, "viewVec");    // IN(2): normalized viewVec (VCS)
-    ShInputVector3f SH_NAMEDECL(hv, "halfVec");    // IN(3): normalized halfVec (VCS)
-    ShInputVector3f SH_NAMEDECL(lv, "lightVec");   // IN(4): normalized lightVec (VCS)
-    ShInputVector3f SH_NAMEDECL(t1m, "tangent");   // IN(5): primary tangent (MCS)
-    ShInputVector3f SH_NAMEDECL(t2m, "tangent2");  // IN(6): secondary tangent (MCS)
+  // normal becomes (1.0,0.0,0.0) in TCS
+  vsh = namedConnect(vsh, ConvertToTCS) & 
+    (keep<ShNormal3f>("normal") << ShConstant3f(1.0, 0.0, 0.0));
 
-    ShOutputNormal3f SH_NAMEDECL(nt, "normal");      // OUT(0): normal vector (TCS) 
-    ShOutputVector3f SH_NAMEDECL(vt, "viewVec");     // OUT(1): view vector (TCS)
-    ShOutputVector3f SH_NAMEDECL(ht, "halfVec");     // OUT(2): half vector (TCS)
-    ShOutputVector3f SH_NAMEDECL(lt, "lightVec");    // OUT(3): light vector (TCS)
-
-
-    ShVector3f t1v = normalize(mv | t1m);
-    ShVector3f t2v = normalize(mv | t2m);
-
-    nt = ShConstant3f(1.0, 0.0, 0.0);
-
-    vt(0) = dot(vv, nv);
-    vt(1) = dot(vv, t1v);
-    vt(2) = dot(vv, t2v);
-
-    ht(0) = dot(hv, nv);
-    ht(1) = dot(hv, t1v);
-    ht(2) = dot(hv, t2v);
-
-    lt(0) = dot(lv, nv);
-    lt(1) = dot(lv, t1v);
-    lt(2) = dot(lv, t2v);
-  } SH_END;
-
-  // permute outputs to match specified outputs
-  return vsh >> tangentVsh >> shRange("texcoord")("posv")("normal", "lightVec")("posh"); 
+  // swizzle inputs/outputs to match specs
+  return  shSwizzle("texcoord", "posv", "normal", "viewVec", "halfVec", "lightVec", "posh")
+    << vsh 
+    << shSwizzle("texcoord", "normal", "tangent", "tangent2", "lightPos", "posm");
 }
 
 

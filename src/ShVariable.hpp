@@ -142,6 +142,10 @@ public:
   ShVariableN<3, T> operator()(int, int, int) const;
   ShVariableN<4, T> operator()(int, int, int, int) const;
 
+  // Arbitrary Swizzle
+  template<int N2>
+  ShVariableN<N2, T> swiz(int indices[]) const;
+
   ShVariableN(const ShVariableNodePtr& node,
               ShSwizzle swizzle,
               bool neg)
@@ -184,6 +188,13 @@ template<int N, typename T>
 ShVariableN<4, T> ShVariableN<N, T>::operator()(int i1, int i2, int i3, int i4) const
 {
   return ShVariableN<4, T>(m_node, m_swizzle * ShSwizzle(size(), i1, i2, i3, i4), m_neg);
+}
+
+template<int N, typename T> 
+template<int N2>
+ShVariableN<N2, T> ShVariableN<N, T>::swiz(int indices[]) const
+{
+  return ShVariableN<N2, T>(m_node, m_swizzle * ShSwizzle(N, N2, indices), m_neg);
 }
 
 

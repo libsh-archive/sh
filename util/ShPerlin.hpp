@@ -62,6 +62,10 @@ class ShPerlin
 template<int M, int K, typename T>
 ShVariableN<M, T> noise(const ShVariableN<K, T> &p, bool useTexture = true);
 
+// Returns one octave of signed perlin noise
+template<int M, int K, typename T>
+ShVariableN<M, T> snoise(const ShVariableN<K, T> &p, bool useTexture = true);
+
 // Returns M octaves of turbulence in N-dimensional space (currently 1 <= N <= 4,
 // 1 <= M <= 2, 1 <= K <= 4 is supported)
 // The ith octave has double the frequency of the (i-1)th octave and 

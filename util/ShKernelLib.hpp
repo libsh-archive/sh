@@ -74,12 +74,13 @@ class ShKernelLib {
      * vector.
      *
      * Hardcoded for 3f right now
-     * IN(0,1,2) ShVector3f v0, v1, v2;
-     * IN(3) ShVector3f vec;
+     * IN(0,1,2) ShVector3f b0Name, b1Name, b2Name 
+     * IN(3) ShVector3f name;
      *
-     * OUT(0) ShVector3f vec;
+     * OUT(0) ShVector3f name;
      */
-    static ShProgram shConvertBasis(); 
+    static ShProgram shConvertBasis(std::string name="vec", 
+        std::string b0Name="b0", std::string b1Name="b1", std::string b2Name="b2"); 
 
     /** Diffuse fragment program 
      * IN(0) T kd                 - diffuse coefficient (kd) could be ShColor?f

@@ -124,7 +124,7 @@ class Metric {
 // even[0](0) <= odd[0](0) <= even[0](1) <= odd[0](1) <= etc. <= last[0]
 // (so the smallest 4 elements are in even[](0), even[](1) and odd[](0), odd[](1)
 //
-void EvenOddSort( ShAttrib4f even[], ShAttrib4f odd[], ShAttrib3f &last ) {
+void EvenOddSort( ShAttrib4f even[], ShAttrib4f odd[], ShAttrib1f last[] ) {
   ShAttrib4f c; // condition
 
   // temporaries for holding even values when swapping elements between even/odd 
@@ -136,25 +136,35 @@ void EvenOddSort( ShAttrib4f even[], ShAttrib4f odd[], ShAttrib3f &last ) {
     //  -packing scalar ops into vector ops
     //  -not using temporary to save odd vals by always assigning to odd after reading from odd
     //  -reusing c(1) as a scalar temporary for saving last(j)
+    //  -use cond for gradients, min/max for distances
     // Most of this will not be possible until optimization can be done on individual vector components.
+
     c = even[0] < odd[0];
-    for(j = 0; j < numChannels; ++j) { 
+    et[0] = min(even[0], odd[0]);
+    odd[0] = max(even[0], odd[0]);
+    for(j = 1; j < numChannels; ++j) { 
       et[j] = cond(c, even[j], odd[j] );
       odd[j] = cond(c, odd[j], even[j] );
     }
 
     c(0,1,2) = et[0](1,2,3) > odd[0](0,1,2); 
-    for(j = 0; j < numChannels; ++j ) {
+    even[0](1,2,3) = max(et[0](1,2,3), odd[0](0,1,2));
+    even[0](0) = et[0](0);
+    odd[0](0,1,2) = min(et[0](1,2,3), odd[0](0,1,2));
+    for(j = 1; j < numChannels; ++j ) {
       even[j](1,2,3) = cond(c(0,1,2), et[j](1,2,3), odd[j](0,1,2));
       even[j](0) = et[j](0);
       odd[j](0,1,2) = cond(c(0,1,2), odd[j](0,1,2), et[j](1,2,3));
     }
 
-    c(0) = odd[0](3) < last(0);
-    for( j = 0; j < numChannels; ++j ) {
-      c(1) = last(j);
-      last(j) = cond(c(0),last(j), odd[j](3));
-      odd[j](3) = cond(c(0), odd[j](3), c(1));
+    c(0) = odd[0](3) < last[0];
+    ShAttrib1f temp = last[0];
+    last[0] = max(temp, odd[0](3));
+    odd[0](3) = min(temp, odd[0](3));
+    for( j = 1; j < numChannels; ++j ) {
+      temp = last[j];
+      last[j] = cond(c(0),temp, odd[j](3));
+      odd[j](3) = cond(c(0), odd[j](3), temp);
     }
   }
 }
@@ -216,16 +226,16 @@ void ShWorley::doWorley(ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m, ShAttrib1f
   // Currently does an even-odd transposition sort
   // TODO - When arbitrary length vectors implemented, make this a library function
   ShAttrib4f even[3], odd[3];
-  ShAttrib3f last;
+  ShAttrib1f last[3];
   even[0] = dadj[0];
   even[1] = gradAdjX[0];
   even[2] = gradAdjY[0];
   odd[0] = dadj[1];
   odd[1] = gradAdjX[1];
   odd[2] = gradAdjY[1];
-  last(0) = dcell;
-  last(1) = gradCell(0);
-  last(2) = gradCell(1);
+  last[0] = dcell;
+  last[1] = gradCell(0);
+  last[2] = gradCell(1);
   EvenOddSort( even, odd, last );
 
   ShAttrib4f resultVec;

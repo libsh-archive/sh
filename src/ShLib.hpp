@@ -364,25 +364,39 @@ ShVariableN<N, T> cond(const ShVariableN<M, T>& condition, const ShVariableN<N, 
 }
 
 /** Casting
- * Casts ShAttrib type T2 to type T1.
- * If T1::typesize < T2::typesize, pads remaining components with 0s (on right).
+ * Casts ShVariableN<N, T> to ShVariableN<M, T>
+ * If M > N, pads remaining components with 0s (on right).
  * Otherwise, discards extra components.
  */
-template<typename T1, typename T2> 
-T1 cast( const T2 &a ) {
-  const int s1 = T1::typesize;
-  const int s2 = T2::typesize;
-  int copySize = std::min(s1, s2);
-  typename T1::TempType result;
+template<int M, int N, typename T> 
+ShVariableN<M, T> cast( const ShVariableN<N, T> &a ) {
+  int copySize = std::min(M, N);
+  ShAttrib<M, SH_VAR_TEMP, T, false> result;
 
   int indices[copySize];
   for(int i = 0; i < copySize; ++i) indices[i] = i;
-  if(s1 < s2) {
-    result = a.template swiz<s1>(indices);
-  } else {
-    result.template swiz<s2>(indices) = a;
+  if(M < N) {
+    result = a.template swiz<M>(indices);
+  } else if( M > N ) {
+    result.template swiz<N>(indices) = a;
+  } else { // M == N
+    ShStatement stmt(result, SH_OP_ASN, a);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
   }
   return result;
+}
+
+/** Copy Casting
+ * Casts ShVariableN<N, T> to ShVariableN<M, T>
+ * If M > N, copies last component to fill extras 
+ * Otherwise, discards extra components.
+ */
+template<int M, int N, typename T> 
+ShVariableN<M, T> copycast( const ShVariableN<N, T> &a ) {
+  if( M <= N ) return cast<M>(a);
+  int indices[M];
+  for(int i = 0; i < M; ++i) indices[i] = i >= N ? N - 1 : i;
+  return a.template swiz<M>(indices);
 }
 
 // Fragment killing

@@ -57,8 +57,8 @@ ShVariableN<1, T> clamp(const ShVariableN<1, T>& a, const ShVariableN<1, T>& b,
 }
 
 template<typename T>
-ShVariableN<1, T> clamp(double a, double b, const ShVariableN<1, T>& x) {
-  return min(max(x, ShConstant1f(a)), ShConstant1f(b)); 
+ShVariableN<1, T> clamp(T a, T b, const ShVariableN<1, T>& x) {
+  return min(max(x, ShConstant<1,T>(a)), ShConstant<1,T>(b)); 
 }
 //@}
 

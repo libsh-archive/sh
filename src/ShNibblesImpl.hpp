@@ -32,75 +32,75 @@
 namespace SH {
 
 template<typename T>
-ShProgram keep(std::string name = "") {
-  ShProgram prog = SH_BEGIN_PROGRAM() {
+ShProgram keep(std::string name) {
+  ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T::InputType SH_NAMEDECL(attr, name); 
     typename T::OutputType SH_NAMEDECL(out, name);
     out = attr;
   } SH_END_PROGRAM;
-  return prog;
+  return nibble;
 }
 
 template<typename T>
-ShProgram lose(std::string name = "") {
-  ShProgram prog = SH_BEGIN_PROGRAM() {
+ShProgram lose(std::string name) {
+  ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T::InputType SH_NAMEDECL(attr, name);
     ShAttrib4f dummy = dummy;
   } SH_END_PROGRAM;
-  return prog;
+  return nibble;
 };
 
 template<typename T>
-ShProgram access(const ShTexture1D<T> &tex) {
+ShProgram access(const ShTexture1D<T> &tex, std::string name) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
-    ShInputTexCoord1f SH_DECL(tc);
-    typename T::OutputType SH_DECL(result) = tex(tc);
+    ShInputTexCoord1f SH_NAMEDECL(tc, name);
+    typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
   } SH_END;
   return nibble;
 }
 
 template<typename T>
-ShProgram access(const ShTexture2D<T> &tex) {
+ShProgram access(const ShTexture2D<T> &tex, std::string name) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
-    ShInputTexCoord2f SH_DECL(tc);
-    typename T::OutputType SH_DECL(result) = tex(tc);
+    ShInputTexCoord2f SH_NAMEDECL(tc, name);
+    typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
   } SH_END;
   return nibble;
 }
 
 template<typename T>
-ShProgram access(const ShTexture3D<T> &tex) {
+ShProgram access(const ShTexture3D<T> &tex, std::string name) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
-    ShInputTexCoord3f SH_DECL(tc);
-    typename T::OutputType SH_DECL(result) = tex(tc);
+    ShInputTexCoord3f SH_NAMEDECL(tc, name);
+    typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
   } SH_END;
   return nibble;
 }
 
 template<typename T2, int Rows, int Cols, int Kind, typename T>
-ShProgram transform(const ShMatrix<Rows, Cols, Kind, T> &m) {
+ShProgram transform(const ShMatrix<Rows, Cols, Kind, T> &m, std::string name) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
-    typename T2::InputType SH_DECL(attrib);
-    typename T2::OutputType SH_DECL(transAttrib) = m | attrib; 
+    typename T2::InputType SH_NAMEDECL(attrib, name);
+    typename T2::OutputType SH_NAMEDECL(transAttrib, name) = m | attrib; 
   } SH_END;
   return nibble;
 }
 
 template<typename T, typename T2>
-ShProgram cast() {
+ShProgram cast(std::string name) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
-    typename T::InputType SH_DECL(in);
-    typename T2::OutputType SH_DECL(out) = cast<T2>( in );
+    typename T::InputType SH_NAMEDECL(in, name);
+    typename T2::OutputType SH_NAMEDECL(out, name) = cast<T2::typesize>( in );
   } SH_END;
   return nibble;
 }
 
 #define SHNIBBLE_UNARY_OP(opfunc, opcode) \
 template<typename T>\
-ShProgram opfunc() {\
+ShProgram opfunc(std::string name) {\
   ShProgram nibble = SH_BEGIN_PROGRAM() {\
-    typename T::InputType SH_DECL(in);\
-    typename T::OutputType SH_DECL(out) = opcode; \
+    typename T::InputType SH_NAMEDECL(in, name);\
+    typename T::OutputType SH_NAMEDECL(out, name) = opcode; \
   } SH_END;\
   return nibble; \
 }
@@ -117,11 +117,11 @@ SHNIBBLE_UNARY_OP(pos, pos(in));
 
 #define SHNIBBLE_BINARY_OP(opfunc, opcode) \
 template<typename T> \
-ShProgram opfunc() { \
+ShProgram opfunc(std::string name) { \
   ShProgram nibble = SH_BEGIN_PROGRAM() { \
     typename T::InputType SH_DECL(a); \
     typename T::InputType SH_DECL(b); \
-    typename T::OutputType SH_DECL(result) = opcode; \
+    typename T::OutputType SH_NAMEDECL(result, name) = opcode; \
   } SH_END; \
   return nibble; \
 }
@@ -141,22 +141,24 @@ SHNIBBLE_BINARY_OP(min, min(a, b))
 SHNIBBLE_BINARY_OP(max, max(a, b))
 
 template<typename T> 
-ShProgram dot() { 
+ShProgram dot(std::string name) { 
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T::InputType SH_DECL(a); 
     typename T::InputType SH_DECL(b); 
-    ShAttrib1f (result) = dot(a, b); 
+    ShOutputAttrib1f SH_NAMEDECL(result, name) = dot(a, b); 
   } SH_END; 
+  return nibble;
 }
 
 template<typename T> 
-ShProgram lerp() { 
+ShProgram lerp(std::string name) { 
   ShProgram nibble = SH_BEGIN_PROGRAM() {
-    typename T::InputType SH_DECL(alpha); 
     typename T::InputType SH_DECL(a); 
     typename T::InputType SH_DECL(b); 
-    typename T::OutputType SH_DECL(result) = lerp(alpha, a, b); 
+    typename T::InputType SH_DECL(alpha); 
+    typename T::OutputType SH_NAMEDECL(result, name) = lerp(alpha, a, b); 
   } SH_END; 
+  return nibble;
 }
 
 }

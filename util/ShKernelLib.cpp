@@ -46,16 +46,17 @@ ShProgram ShKernelLib::outputPass( const ShProgram &p ) {
   return passer;
 }
 
-ShProgram ShKernelLib::shConvertBasis() {
-  ShProgram kernel = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShInputVector3f SH_DECL( v0 );
-    ShInputVector3f SH_DECL( v1 );
-    ShInputVector3f SH_DECL( v2 );
-    ShInputVector3f SH_DECL( vec );
-    ShOutputVector3f SH_NAMEDECL( veco, "vec" );
-    veco(0) = vec | v0;
-    veco(1) = vec | v1;
-    veco(2) = vec | v2;
+ShProgram ShKernelLib::shConvertBasis(std::string name, 
+    std::string b0Name, std::string b1Name, std::string b2Name) {
+  ShProgram kernel = SH_BEGIN_PROGRAM() {
+    ShInputVector3f SH_NAMEDECL( b0, b0Name );
+    ShInputVector3f SH_NAMEDECL( b1, b1Name );
+    ShInputVector3f SH_NAMEDECL( b2, b2Name );
+    ShInputVector3f SH_NAMEDECL( vec, name );
+    ShOutputVector3f SH_NAMEDECL( veco, name );
+    veco(0) = vec | b0;
+    veco(1) = vec | b1;
+    veco(2) = vec | b2;
   } SH_END;
   return kernel;
 }

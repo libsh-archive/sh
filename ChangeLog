@@ -1,3 +1,20 @@
+2004-01-30  Bryan Chan  <b8chan@uwaterloo.ca>
+	* util/ShWorley.cpp (EvenOddSort): Made some changes to allow
+	  more efficient dead code removal when either distances or gradients
+	  are discarded
+
+	* util/ShPerlin.hpp, util/ShPerlinImpl.hpp: Fixed the templatized
+	  versions with proper casting code (but still non-working)
+
+	* src/ShAlgebra.?pp (namedConnect, namedCombine):
+	  Added connect & combine by name operations. (may be flaky)
+
+	* util/ShKernelLib.hpp (shPhong,shTangentVsh): Cleaned up
+	  with the new named combine/connect operators.
+
+  * src/ShNibbles.hpp, ShNibblesImpl.hpp: Added name arguments 
+    to give nibble inputs/outputs names (easier named connect/combine)
+
 2004-01-30  Jack Wang  <jmwang@uwaterloo.ca>
 	* src/ShNormal.hpp: Added m_isunit flag to ShNormal to identify 
 	unit normals, similar to ShVector.hpp.
