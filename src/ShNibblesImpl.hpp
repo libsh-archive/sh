@@ -162,20 +162,22 @@ SHNIBBLE_UNARY_OP(pos, pos(x));
 
 #define SHNIBBLE_BINARY_OP(opfunc, opcode) \
 template<typename T1, typename T2> \
-ShProgram opfunc(const std::string & name) { \
+ShProgram opfunc(const std::string & output_name, \
+    const std::string & input_name0, const std::string & input_name1) { \
   ShProgram nibble = SH_BEGIN_PROGRAM() { \
-    typename T1::InputType SH_DECL(a); \
-    typename T2::InputType SH_DECL(b); \
+    typename T1::InputType SH_NAMEDECL(a, input_name0); \
+    typename T2::InputType SH_NAMEDECL(b, input_name1); \
     typename SelectType<(T1::typesize > T2::typesize), typename T1::OutputType, typename T2::OutputType>::type\
-      SH_NAMEDECL(result, name) = opcode; \
+      SH_NAMEDECL(result, output_name) = opcode; \
   } SH_END; \
   nibble->name(# opfunc); \
   return nibble; \
 } \
 \
 template<typename T1> \
-ShProgram opfunc(const std::string & name) { \
-  return opfunc<T1, T1>(name); \
+ShProgram opfunc(const std::string & output_name,\
+    const std::string & input_name0, const std::string & input_name1 ) { \
+  return opfunc<T1, T1>(output_name, input_name0, input_name1); \
 }
 
 SHNIBBLE_BINARY_OP(add, a + b)

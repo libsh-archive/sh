@@ -49,6 +49,18 @@ ShGeneric<M, float> fillcast(float a)
   return fillcast<M>(ShAttrib<1, SH_CONST, float>(a));
 }
 
+template<int M, int N, typename T> 
+inline
+ShGeneric<M+N, T> join(const ShGeneric<M, T>& a, const ShGeneric<N, T>& b)
+{
+  int indices[M+N];
+  for(int i = 0; i < M+N; ++i) indices[i] = i; 
+  ShAttrib<M+N, SH_TEMP, T> result;
+  result.template swiz<M>(indices) = a;
+  result.template swiz<N>(indices + M) = b;
+  return result;
+}
+
 template<int N, typename T>
 inline
 void kill(const ShGeneric<N, T>& c)

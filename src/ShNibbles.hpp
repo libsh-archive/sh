@@ -141,8 +141,10 @@ template<typename T> ShProgram pos(const std::string & name = "result");
  * Outputs: OUT(0) name  (type is T1 or T2, whichever has more components)
  */
 #define SHNIBBLE_BINARY_OP_DECL(opname) \
-  template<typename T1, typename T2> ShProgram opname(const std::string & name = "result"); \
-  template<typename T1> ShProgram opname(const std::string & name = "result");
+  template<typename T1, typename T2> ShProgram opname(const std::string & output_name = "result",\
+      const std::string & input_name0 = "x", const std::string & input_name1 = "y"); \
+  template<typename T1> ShProgram opname(const std::string & output_name = "result",\
+      const std::string & input_name0 = "x", const std::string & input_name1 = "y"); 
 SHNIBBLE_BINARY_OP_DECL(add);
 SHNIBBLE_BINARY_OP_DECL(sub);
 SHNIBBLE_BINARY_OP_DECL(mul);
