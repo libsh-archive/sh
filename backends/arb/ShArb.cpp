@@ -458,7 +458,7 @@ std::ostream& operator<<(std::ostream& out, const ArbReg& reg)
 
 using namespace SH;
 
-//static SH::ShRefCount<ArbBackend> instance = new ArbBackend();
+static SH::ShRefCount<ArbBackend> instance = new ArbBackend();
 
 ArbCode::ArbCode(ArbBackendPtr backend, const ShProgram& shader, int kind)
   : m_backend(backend), m_shader(shader), m_kind(kind),
