@@ -103,6 +103,7 @@ SH_SHLIB_CONST_N_OP_RETSIZE_RIGHT(operation, retsize);
 #include "ShLibMatrix.hpp"
 #include "ShLibMisc.hpp"
 #include "ShLibTrig.hpp"
+#include "ShLibDeriv.hpp"
 
 // Semantic stuff
 

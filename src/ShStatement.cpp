@@ -55,6 +55,8 @@ const ShOperationInfo opInfo[] = {
   {"CEIL", 1},
   {"COS", 1},
   {"DOT", 2},
+  {"DX", 1},
+  {"DY", 1},
   {"EXP", 1},
   {"EXP2", 1},
   {"EXP10", 1},

@@ -3,6 +3,7 @@
 #include "ShStatement.hpp"
 #include "ShContext.hpp"
 #include "ShDebug.hpp"
+#include "ShError.hpp"
 
 namespace {
 
@@ -332,6 +333,28 @@ void shDOT(ShVariable& dest, const ShVariable& a, const ShVariable& b)
     dest.setValues(&f);
   } else {
     ShStatement stmt(dest, a, SH_OP_DOT, b);
+    addStatement(stmt);
+  }
+}
+
+void shDX(ShVariable& dest, const ShVariable& a)
+{
+  sizes_match(dest, a);
+  if (immediate()) {
+    shError(ShScopeException("Cannot take derivatives in immediate mode"));
+  } else {
+    ShStatement stmt(dest, SH_OP_DX, a);
+    addStatement(stmt);
+  }
+}
+
+void shDY(ShVariable& dest, const ShVariable& a)
+{
+  sizes_match(dest, a);
+  if (immediate()) {
+    shError(ShScopeException("Cannot take derivatives in immediate mode"));
+  } else {
+    ShStatement stmt(dest, SH_OP_DY, a);
     addStatement(stmt);
   }
 }

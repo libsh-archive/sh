@@ -43,6 +43,7 @@ libsh_la_SOURCES += ShLibGeometry.hpp ShLibGeometryImpl.hpp
 libsh_la_SOURCES += ShLibMatrix.hpp ShLibMatrixImpl.hpp
 libsh_la_SOURCES += ShLibMisc.hpp ShLibMiscImpl.hpp
 libsh_la_SOURCES += ShLibTrig.hpp ShLibTrigImpl.hpp
+libsh_la_SOURCES += ShLibDeriv.hpp ShLibDerivImpl.hpp
 
 # Textures and arrays
 libsh_la_SOURCES += ShBaseTexture.hpp ShBaseTextureImpl.hpp ShBaseTexture.cpp
@@ -89,6 +90,7 @@ incinc_HEADERS += ShLibGeometry.hpp ShLibGeometryImpl.hpp
 incinc_HEADERS += ShLibMatrix.hpp ShLibMatrixImpl.hpp
 incinc_HEADERS += ShLibMisc.hpp ShLibMiscImpl.hpp
 incinc_HEADERS += ShLibTrig.hpp ShLibTrigImpl.hpp
+incinc_HEADERS += ShLibDeriv.hpp ShLibDerivImpl.hpp
 incinc_HEADERS += ShParser.hpp ShRefCount.hpp ShRefCountImpl.hpp 
 incinc_HEADERS += ShProgram.hpp ShProgramNode.hpp ShStatement.hpp
 incinc_HEADERS += ShSwizzle.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp

@@ -33,6 +33,8 @@ void shATAN2(ShVariable& dest, const ShVariable& a, const ShVariable& b);
 void shCEIL(ShVariable& dest, const ShVariable& a);
 void shCOS(ShVariable& dest, const ShVariable& a);
 void shDOT(ShVariable& dest, const ShVariable& a, const ShVariable& b);
+void shDX(ShVariable& dest, const ShVariable& a);
+void shDY(ShVariable& dest, const ShVariable& a);
 void shEXP(ShVariable& dest, const ShVariable& a);
 void shEXP2(ShVariable& dest, const ShVariable& a);
 void shEXP10(ShVariable& dest, const ShVariable& a);

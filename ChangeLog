@@ -1,5 +1,19 @@
 2004-06-30  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShInstructions.cpp: Implemented shDX() and shDY().
+
+	* src/ShInstructions.hpp: Added shDX and shDY functions.
+
+	* src/ShStatement.cpp: Added opInfo for DX and DY.
+
+	* src/ShStatement.hpp: Added DX and DY ops.
+
+	* src/ShLibDerivImpl.hpp: Implemented derivative functions.
+
+	* src/ShLibDeriv.hpp: Added derivative functions, which of course
+	don't work in the backend yet. Resolves issue65, issue66, issue67
+	and makes issue64 an in-progress item.
+
 	* backends/gl/ArbCode.cpp (print): Don't print out declarations
 	for textures.
 

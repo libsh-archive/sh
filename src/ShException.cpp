@@ -43,6 +43,11 @@ ShParseException::ShParseException(const std::string& message)
 {
 }
 
+ShScopeException::ShScopeException(const std::string& message)
+  : ShException("Scoping Violation: " + message)
+{
+}
+
 ShImageException::ShImageException(const std::string& message)
   : ShException("Image Error: " + message)
 {
