@@ -53,6 +53,7 @@
 #include "ShTexture.hpp"
 #include "ShWrap.hpp"
 #include "ShClamping.hpp"
+#include "ShInterp.hpp"
 #include "ShBackend.hpp"
 #include "ShImage.hpp"
 #include "ShImage3D.hpp"

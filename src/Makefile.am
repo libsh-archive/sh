@@ -48,9 +48,9 @@ libsh_la_SOURCES += ShLibDeriv.hpp ShLibDerivImpl.hpp
 # Textures and arrays
 libsh_la_SOURCES += ShBaseTexture.hpp ShBaseTextureImpl.hpp ShBaseTexture.cpp
 libsh_la_SOURCES += ShArray.hpp ShTable.hpp ShTexture.hpp
-libsh_la_SOURCES += ShWrap.hpp
+libsh_la_SOURCES += ShWrap.hpp ShClamping.hpp ShInterp.hpp
 libsh_la_SOURCES += ShTextureNode.hpp ShImage.hpp ShImage3D.hpp
-libsh_la_SOURCES += ShMemory.hpp ShMemory.cpp ShClamping.hpp
+libsh_la_SOURCES += ShMemory.hpp ShMemory.cpp
 libsh_la_SOURCES += ShTextureNode.cpp ShImage.cpp ShImage3D.cpp
 
 # Types
@@ -118,7 +118,7 @@ incinc_HEADERS += ShNibbles.hpp ShNibblesImpl.hpp
 incinc_HEADERS += ShChannelNode.hpp ShChannel.hpp ShChannelImpl.hpp
 incinc_HEADERS += ShStream.hpp ShStreamImpl.hpp
 incinc_HEADERS += ShQuaternion.hpp ShQuaternionImpl.hpp
-incinc_HEADERS += ShMemory.hpp ShClamping.hpp
+incinc_HEADERS += ShMemory.hpp ShClamping.hpp ShInterp.hpp
 incinc_HEADERS += ShInstructions.hpp
 incinc_HEADERS += ShMeta.hpp ShMetaForwarder.hpp
 incinc_HEADERS += ShContext.hpp

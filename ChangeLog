@@ -1,5 +1,8 @@
 2004-07-05  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShInterp.hpp: Added ShInterp<L> texture trait wrapper
+	template. Resolves issue38.
+
 	* src/ShLibClampImpl.hpp (sat): Implement sat. Resolves issue62.
 
 	* src/ShLibClamp.hpp: Add sat function.
