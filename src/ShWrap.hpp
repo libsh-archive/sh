@@ -57,6 +57,8 @@ public:
   {
     m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP);
   }
+
+  typedef typename T::return_type return_type;
 };
 
 /** Set WrapClampToEdge trait in Texture type.
@@ -87,6 +89,8 @@ public:
   {
     m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE);
   }
+
+  typedef typename T::return_type return_type;
 };
 
 /** Set WrapRepeat trait in Texture type.
@@ -117,6 +121,8 @@ public:
   {
     m_node->traits().wrapping(ShTextureTraits::SH_WRAP_REPEAT);
   }
+
+  typedef typename T::return_type return_type;
 };
 
 }

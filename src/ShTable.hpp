@@ -48,6 +48,7 @@ public:
   ShTable1D(int width)
     : ShBaseTexture1D<T>(width, ShTableTraits())
   {}
+  typedef T return_type;
 };
 
 template<typename T>
@@ -60,6 +61,7 @@ public:
   ShTable2D(int width, int height)
     : ShBaseTexture2D<T>(width, height, ShTableTraits())
   {}
+  typedef T return_type;
 };
 
 template<typename T>
@@ -72,6 +74,7 @@ public:
   ShTableRect(int width, int height)
     : ShBaseTextureRect<T>(width, height, ShTableTraits())
   {}
+  typedef T return_type;
 };
 
 template<typename T>
@@ -84,6 +87,7 @@ public:
   ShTable3D(int width, int height, int depth)
     : ShBaseTexture3D<T>(width, height, depth, ShTableTraits())
   {}
+  typedef T return_type;
 };
 
 template<typename T>
@@ -96,6 +100,7 @@ public:
   ShTableCube(int width, int height)
     : ShBaseTextureCube<T>(width, height, ShTableTraits())
   {}
+  typedef T return_type;
 };
 
 }

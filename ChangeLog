@@ -1,7 +1,20 @@
+2004-06-25  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShClamping.hpp: Added return_type typedefs.
+
+	* src/ShWrap.hpp: Added return_type typedefs.
+
+	* src/ShTexture.hpp: Added return_type typedefs.
+
+	* src/ShTable.hpp: Added return_type typedefs.
+
+	* src/ShArray.hpp: Added return_type typedefs.
+
+	* src/ShBaseTexture.hpp: Added return_type typedefs.
+
 2004-06-19  Bryan Chan <b8chan@uwaterloo.ca
-  * util/ShWorley*.?pp:
-  Updated worley slightly to return all k-nearest results instead
-  of returning a weighted average.
+	* util/ShWorley*.?pp: Updated worley slightly to return all
+	k-nearest results instead of returning a weighted average.
   
 2004-06-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
