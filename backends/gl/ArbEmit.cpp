@@ -9,22 +9,6 @@ namespace shgl {
 
 using namespace SH;
 
-// Filters
-const unsigned int SH_ARB_ANY   = 0x000; // All targets
-const unsigned int SH_ARB_FP    = 0x001; // ARB_fragment_program
-const unsigned int SH_ARB_VP    = 0x002; // ARB_vertex_program
-const unsigned int SH_ARB_NVFP  = 0x004; // NV_fragment_program_option
-const unsigned int SH_ARB_NVFP2 = 0x008; // NV_fragment_program2
-const unsigned int SH_ARB_ATIDB = 0x010; // ATI_draw_buffers
-const unsigned int SH_ARB_NVVP2 = 0x020; // NV_vertex_program2_option
-const unsigned int SH_ARB_NVVP3 = 0x040; // NV_vertex_program3
-const unsigned int SH_ARB_VEC1  = 0x080; // Maximum source has length 1
-const unsigned int SH_ARB_VEC2  = 0x100; // Maximum source has length 2
-const unsigned int SH_ARB_VEC3  = 0x200; // Maximum source has length 3
-const unsigned int SH_ARB_VEC4  = 0x400; // Maximum source has length 4
-const unsigned int SH_ARB_END   = 0x800; // Not a filter. End of
-                                         // table.
-
 // Transformations
 namespace {
 const unsigned int scalarize    = 0x01; // Split into scalar instructions
@@ -118,9 +102,9 @@ ArbMapping ArbCode::table[] = {
   {SH_OP_LOG10, SH_ARB_ANY, 0,         SH_ARB_FUN, &ArbCode::emit_log},
 
   // Geometric
-  {SH_OP_NORM, SH_ARB_NVFP2, 0, SH_ARB_NRM, 0},
-  {SH_OP_NORM, SH_ARB_ANY,   0, SH_ARB_FUN, &ArbCode::emit_norm},
-  {SH_OP_XPD,  SH_ARB_ANY,   0, SH_ARB_XPD, 0},
+  {SH_OP_NORM, SH_ARB_NVFP2 | SH_ARB_VEC3, 0, SH_ARB_NRM, 0},
+  {SH_OP_NORM, SH_ARB_ANY,                 0, SH_ARB_FUN, &ArbCode::emit_norm},
+  {SH_OP_XPD,  SH_ARB_ANY | SH_ARB_VEC3,   0, SH_ARB_XPD, 0},
 
   // Texture
   {SH_OP_TEX,  SH_ARB_NVVP2, swap_sources | delay_mask, SH_ARB_TEX, 0},
@@ -142,12 +126,7 @@ void ArbCode::emit(const ShStatement& stmt)
     if (stmt.src[i].size() > maxlen) maxlen = stmt.src[i].size();
   }
 
-  // TODO: move this elsewhere, detect extensions
-  unsigned int environment = 0;
-  if (m_unit == "vertex") environment |= SH_ARB_VP;
-  if (m_unit == "fragment") environment |= SH_ARB_FP;
-  
-  unsigned int match = environment;
+  unsigned int match = m_environment;
   switch(maxlen) {
   case 1: match |= SH_ARB_VEC1; break;
   case 2: match |= SH_ARB_VEC2; break;

@@ -20,6 +20,22 @@ class ArbCode;
 class ArbBindingSpecs;
 class ArbMapping;
 
+// Filters for code emission and environment setup
+const unsigned int SH_ARB_ANY   = 0x000; // All targets
+const unsigned int SH_ARB_FP    = 0x001; // ARB_fragment_program
+const unsigned int SH_ARB_VP    = 0x002; // ARB_vertex_program
+const unsigned int SH_ARB_NVFP  = 0x004; // NV_fragment_program_option
+const unsigned int SH_ARB_NVFP2 = 0x008; // NV_fragment_program2
+const unsigned int SH_ARB_ATIDB = 0x010; // ATI_draw_buffers
+const unsigned int SH_ARB_NVVP2 = 0x020; // NV_vertex_program2_option
+const unsigned int SH_ARB_NVVP3 = 0x040; // NV_vertex_program3
+const unsigned int SH_ARB_VEC1  = 0x080; // Maximum source has length 1
+const unsigned int SH_ARB_VEC2  = 0x100; // Maximum source has length 2
+const unsigned int SH_ARB_VEC3  = 0x200; // Maximum source has length 3
+const unsigned int SH_ARB_VEC4  = 0x400; // Maximum source has length 4
+const unsigned int SH_ARB_END   = 0x800; // Not a filter. End of
+                                         // table.
+
 class ArbCode : public SH::ShBackendCode {
 public:
   ArbCode(const SH::ShProgramNodeCPtr& program, const std::string& target,
@@ -150,6 +166,9 @@ private:
   unsigned int m_programId;
 
   static ArbMapping table[];
+
+  // Extensions and language alternatives available. See list above
+  unsigned int m_environment;
 };
 
 typedef SH::ShPointer<ArbCode> ArbCodePtr;

@@ -108,8 +108,34 @@ ArbCode::ArbCode(const ShProgramNodeCPtr& shader, const std::string& unit,
                  TextureStrategy* textures)
   : m_textures(textures), m_shader(0), m_originalShader(shader), m_unit(unit),
     m_numTemps(0), m_numInputs(0), m_numOutputs(0), m_numParams(0), m_numConsts(0),
-    m_numTextures(0), m_programId(0)
+    m_numTextures(0), m_programId(0), m_environment(0)
 {
+  if (unit == "fragment") m_environment |= SH_ARB_FP;
+  if (unit == "vertex") m_environment |= SH_ARB_VP;
+
+  const GLubyte* extensions = glGetString(GL_EXTENSIONS);
+
+  std::string extstr(reinterpret_cast<const char*>(extensions));
+
+  if (unit == "fragment") {
+    if (extstr.find("NV_fragment_program_option") != std::string::npos) {
+      m_environment |= SH_ARB_NVFP;
+    }
+    if (extstr.find("NV_fragment_program2") != std::string::npos) {
+      m_environment |= SH_ARB_NVFP2;
+    }
+    if (extstr.find("ATI_draw_buffers") != std::string::npos) {
+      m_environment |= SH_ARB_ATIDB;
+    }
+  }
+  if (unit == "vertex") {
+    if (extstr.find("NV_vertex_program2_option") != std::string::npos) {
+      m_environment |= SH_ARB_NVVP2;
+    }
+    if (extstr.find("NV_vertex_program3") != std::string::npos) {
+      m_environment |= SH_ARB_NVVP3;
+    }
+  }
 }
 
 ArbCode::~ArbCode()
@@ -383,9 +409,20 @@ std::ostream& ArbCode::print(std::ostream& out)
   LineNumberer endl;
 
   // Print version header
-  if (m_unit == "vertex") out << "!!ARBvp1.0" << endl;
-  if (m_unit == "fragment") out << "!!ARBfp1.0" << endl;
+  if (m_unit == "vertex") {
+    out << "!!ARBvp1.0" << endl;
+    if (m_environment & SH_ARB_NVVP3) out << "OPTION NV_vertex_program3;" << endl;
+    else if (m_environment & SH_ARB_NVVP2) out << "OPTION NV_vertex_program2;" << endl;
+  }
+  if (m_unit == "fragment") {
+    out << "!!ARBfp1.0" << endl;
 
+    if (m_environment & SH_ARB_NVFP2) out << "OPTION NV_fragment_program2;" << endl;
+    else if (m_environment & SH_ARB_NVFP) out << "OPTION NV_fragment_program;" << endl;
+
+    if (m_environment & SH_ARB_ATIDB) out << "OPTION ATI_draw_buffers;" << endl;
+  }
+  
   // Print register declarations
   
   for (RegList::const_iterator I = m_reglist.begin();

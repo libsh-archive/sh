@@ -1,3 +1,19 @@
+2004-07-08  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbInst.cpp (arbOpInfo): DP2 is a collectingOp.
+
+	* backends/gl/ArbEmit.cpp: Only turn three-vector normalizations
+	into NRM instructions (on nvfp2).
+
+	* backends/gl/ArbCode.cpp (ArbCode): Initialize m_environment
+	using GL_EXTENSIONS information.
+
+	* backends/gl/ArbCode.hpp: Move filters here from ArbEmit.cpp.
+	(class ArbCode): Add m_environment member.
+
+	* util/ShNoiseImpl.hpp (perlin): Avoid using a cond here, use lerp
+	instead. Approximately 35% speedup for marble :).
+
 2004-07-07  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/ArbEmit.cpp: Add a delay_mask transformation to do

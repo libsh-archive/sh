@@ -71,7 +71,7 @@ ArbOpInfo arbOpInfo[] = {
   
   // NV_fragment_program2
   {"DIV", false, true, 2, false, false},
-  {"DP2", false, true, 2, false, false},
+  {"DP2", false, true, 2, true, true},
   {"NRM", false, true, 1, false, false},
 
   {"<fun>", false, false, 0, false, false}

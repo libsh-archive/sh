@@ -136,7 +136,7 @@ ShGeneric<M, T> ShNoise<M, T, P>::perlin(const ShGeneric<K, T> &p, bool useTextu
       else flip[j] = (i >> j) & 1;
     }
     ConstTempType offsets(flip);
-    TempType intLatticePoint = cond(offsets, ip1, ip0);
+    TempType intLatticePoint = lerp(offsets, ip1, ip0);
     if(useTexture) {
       grad[i] = noiseTex(fillcast<3>(intLatticePoint)); // lookup 3D texture
     } else {
