@@ -1,3 +1,15 @@
+2005-01-19  Francois Marier  <francois@serioushack.com>
+
+	* src/ShTextureNode.cpp, src/ShTextureNode.hpp,
+	backends/gl/GlTextures.cpp, backends/gl/PBufferStreams.cpp: Added
+	an option count parameter to the constructor that is used to
+	restrict the copy of non-existing data to texture memory.
+
+	* backends/gl/GlTextureStorage.hpp, GlTextureStorage.cpp: Changed
+	the glTexImage calls to only allocate the necessary space and
+	added glTexSubImage calls to do the actual copying.  Fixes issue151.
+	
+
 2005-01-17  Francois Marier  <francois@serioushack.com>
 
 	* test/regres: Added tests for exp, clamp, frac, sign, max, min,

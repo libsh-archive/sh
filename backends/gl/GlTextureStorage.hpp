@@ -40,7 +40,7 @@ public:
                    GLenum format, GLint internalFormat,
                    SH::ShValueType valueType, 
                    int width, int height, int depth, int tuplesize,
-                   GlTextureNamePtr name);
+                   int count, GlTextureNamePtr name);
   
   ~GlTextureStorage();
   
@@ -56,7 +56,7 @@ public:
   int height() const { return m_height; }
   int depth() const { return m_depth; }
   int tuplesize() const { return m_tuplesize; }
-  int count() const { return m_width * m_height * m_depth * m_tuplesize; }
+  int count() const { return (m_count != -1) ? m_count : m_width * m_height * m_depth; }
   
 private:
   GlTextureNamePtr m_name;
@@ -67,7 +67,7 @@ private:
   GLint m_internalFormat;
 
   SH::ShValueType m_valueType; // type index expected of data on host
-  int m_width, m_height, m_depth, m_tuplesize;
+  int m_width, m_height, m_depth, m_tuplesize, m_count;
   
   unsigned int m_params;
 

@@ -338,7 +338,7 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node,
                                                            node->valueType(),
                                                            node->width(), node->height(),
                                                            node->depth(), node->size(),
-                                                           texname);
+                                                           node->count(), texname);
         storage->sync();
       }
       SH_GL_CHECK_ERROR(glActiveTextureARB(target));
@@ -374,7 +374,7 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node,
                                      node->valueType(),
                                      node->width(), node->height(), 
                                      node->depth(), node->size(),
-                                     name);
+                                     node->count(), name);
       name->params(node->traits());
     }
 
