@@ -68,6 +68,8 @@ public:
   ShVector& operator=(const ShVector<N, Binding, T2, Swizzled>& other);
   ShVector& operator=(const ShVector<N, Binding, T, Swizzled>& other);
 
+  ShVector& operator=(const ShProgram& prg);
+
   
   template<typename T2>
   ShVector& operator+=(const ShGeneric<N, T2>& right);
@@ -155,6 +157,8 @@ public:
 
   ShVector& operator=(T other);
 
+  ShVector& operator=(const ShProgram& prg);
+
   
   template<typename T2>
   ShVector& operator+=(const ShGeneric<1, T2>& right);
@@ -226,6 +230,8 @@ public:
   template<typename T2>
   ShVector& operator=(const ShVector<2, Binding, T2, Swizzled>& other);
   ShVector& operator=(const ShVector<2, Binding, T, Swizzled>& other);
+
+  ShVector& operator=(const ShProgram& prg);
 
   
   template<typename T2>
@@ -314,6 +320,8 @@ public:
   ShVector& operator=(const ShVector<3, Binding, T2, Swizzled>& other);
   ShVector& operator=(const ShVector<3, Binding, T, Swizzled>& other);
 
+  ShVector& operator=(const ShProgram& prg);
+
   
   template<typename T2>
   ShVector& operator+=(const ShGeneric<3, T2>& right);
@@ -400,6 +408,8 @@ public:
   template<typename T2>
   ShVector& operator=(const ShVector<4, Binding, T2, Swizzled>& other);
   ShVector& operator=(const ShVector<4, Binding, T, Swizzled>& other);
+
+  ShVector& operator=(const ShProgram& prg);
 
   
   template<typename T2>

@@ -33,9 +33,9 @@
 
 namespace SH {
 
-class ShCloak;
-class ShCloakCast;
-typedef ShPointer<ShCloakCast> ShCloakCastPtr;
+class ShVariant;
+class ShVariantCast;
+typedef ShPointer<ShVariantCast> ShVariantCastPtr;
 
 /** 
  * The ShCastManager class holds information about automatically 
@@ -75,12 +75,12 @@ struct ShCastMgrEdge: public ShGraphEdge<ShCastMgrGraphType>
   // Creates an edges describing a relationship between two types.
   // automatic = true iff the cast is automatic
   // precedence = true iff this is an edge in the precedenced DAG 
-  ShCastMgrEdge(ShCloakCastPtr caster, bool automatic, bool precedence);
+  ShCastMgrEdge(ShVariantCastPtr caster, bool automatic, bool precedence);
   ShCastMgrEdge(const ShCastMgrEdge &other);
 
   std::ostream& graphvizDump(std::ostream& out) const;
 
-  ShCloakCastPtr m_caster;
+  ShVariantCastPtr m_caster;
   bool m_automatic;
   bool m_precedence;
 };
@@ -113,17 +113,17 @@ class ShCastMgrGraph: public ShGraph<ShCastMgrGraphType>
 
 class ShCastManager {
   public:
-    void addCast(int destIndex, int srcIndex, ShCloakCastPtr caster, 
+    void addCast(int destIndex, int srcIndex, ShVariantCastPtr caster, 
         bool automatic, bool precedence); 
 
     // initializes caches, checks cast graph for errors 
     // (duplicate edges, cycles) 
     void init();
 
-    ShPointer<ShCloak> doCast(int destIndex, ShPointer<ShCloak> srcValue, 
+    ShPointer<ShVariant> doCast(int destIndex, ShPointer<ShVariant> srcValue, 
         bool autoOnly = true);
-    ShPointer<const ShCloak> doCast(int destIndex, 
-        ShPointer<const ShCloak> srcValue, 
+    ShPointer<const ShVariant> doCast(int destIndex, 
+        ShPointer<const ShVariant> srcValue, 
         bool autoOnly = true);
 
     // returns distance of a cast in the precedence DAG 
@@ -135,7 +135,7 @@ class ShCastManager {
     static ShCastManager* instance();
 
   protected:
-    // graph of available ShCloakCast objects (explicit and automatic)
+    // graph of available ShVariantCast objects (explicit and automatic)
     ShCastMgrGraph m_casts;
 
     // TODO the two graphs should realy be one with a different 
@@ -144,7 +144,7 @@ class ShCastManager {
     // add cached versions of cast order for different casts between indices
     // FirstCastMap[dest][src] holds the first caster to use for getting from
     // src to dest (or 0 if no cast path exists)
-    typedef std::vector<std::vector<ShCloakCastPtr> > FirstCastMap; 
+    typedef std::vector<std::vector<ShVariantCastPtr> > FirstCastMap; 
     typedef std::vector<std::vector<int> > CastDistMap; 
 
     // shortest paths using any kind of cast

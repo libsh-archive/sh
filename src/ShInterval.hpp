@@ -53,6 +53,8 @@ struct ShInterval {
   ShInterval(const T& lo, const T& hi);
 
   /** accessor methods **/
+  // @todo why are these even here if m_lo, m_hi are public?
+  // @todo why are m_lo and m_hi public?
   T& lo();
   const T& lo() const;
 
@@ -184,6 +186,9 @@ template<typename T>
 ShInterval<T> tan(const ShInterval<T> &a);
 
 /** Comparison Operators **/
+// @todo should think about how to represent tri-state logic values.
+// For now output is interval (follows the t x t -> t convention of
+// types for the standard operators)
 template<typename T>
 ShInterval<T> operator<(const ShInterval<T> &a, const ShInterval<T> &b);
 
@@ -204,6 +209,10 @@ ShInterval<T> operator==(const ShInterval<T> &a, const ShInterval<T> &b);
 
 template<typename T>
 ShInterval<T> operator!=(const ShInterval<T> &a, const ShInterval<T> &b);
+
+/// Returns true iff lo = a.lo and hi = a.hi 
+template<typename T>
+bool boundsEqual(const ShInterval<T> &a);
 
 
 /** Clamping operators **/

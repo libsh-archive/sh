@@ -29,6 +29,7 @@
 
 #include <string>
 #include <map>
+#include "ShDllExport.hpp"
 #include "ShProgram.hpp"
 
 namespace SH {
@@ -36,7 +37,8 @@ namespace SH {
 // forward declarations
 class ShTypeInfo;
 
-class ShContext {
+class
+SH_DLLEXPORT ShContext {
 public:
   static ShContext* current();
 
@@ -49,6 +51,15 @@ public:
   bool throw_errors() const;
   void throw_errors(bool on);
 
+  /// Disable a particular optimization. All optimizations are
+  /// enabled by default. Disabling an optimization takes place in
+  /// addition to whatever effects the optimization level has.
+  void disable_optimization(const std::string& name);
+  /// Enable a particular optimization (rather, stop disabling it)
+  void enable_optimization(const std::string& name);
+  /// Check whether an optimization is disabled
+  bool optimization_disabled(const std::string& name) const;
+  
   typedef std::map<std::string, ShProgram> BoundProgramMap;
 
   BoundProgramMap::iterator begin_bound();
@@ -89,6 +100,8 @@ private:
   
   BoundProgramMap m_bound;
   std::stack<ShProgramNodePtr> m_parsing;
+
+  std::set<std::string> m_disabled_optimizations;
   
   static ShContext* m_instance;
 
@@ -108,13 +121,16 @@ private:
 typedef ShContext::BoundProgramMap::iterator ShBoundIterator;
 
 /// Get beginning of bound program map for current context
+SH_DLLEXPORT
 ShBoundIterator shBeginBound();
 
 /// Get end of bound program map for current context
+SH_DLLEXPORT
 ShBoundIterator shEndBound();
 
 /// Returns the ShTypeInfo object for the given type index in
 // the current context.
+SH_DLLEXPORT
 ShPointer<ShTypeInfo> shTypeInfo(int type_index);  
 
 /// Returns the type index of type T in the current context

@@ -106,12 +106,9 @@ ShPointer<T>& ShPointer<T>::operator=(T* object)
   std::cerr << "[asn*] " << std::setw(10) << object << " <" << (object ? typeid(*(object)).name() : "n/a") << ">" << " (was " << m_object << " <" << (m_object ? typeid(*(m_object)).name() : "n/a") << ">" << ")" << std::endl;
   SH_RCDEBUG_NORMAL;
 #endif
-  
-  if (m_object == object) return *this;
-  if( object ) object->acquireRef();
-  releaseRef();
 
-  m_object = object;
+  ShPointer<T> t(object);
+  t.swap(*this);
   
   return *this;
 }
@@ -124,15 +121,10 @@ ShPointer<T>& ShPointer<T>::operator=(const ShPointer<T>& other)
   std::cerr << "[assn] " << std::setw(10) << other.m_object << " <" << (other.m_object ? typeid(*(other.m_object)).name() : "n/a") << ">" << " (was " << m_object << " <" << (m_object ? typeid(*(m_object)).name() : "n/a") << ">" << ")" << std::endl;
   SH_RCDEBUG_NORMAL;
 #endif
-  if (m_object == other.m_object) return *this;
 
-  // Bug fix - must aquireRef to other.m_object first in case
-  // m_object has the only current pointer to other.m_object
-  if(other.m_object) other.m_object->acquireRef();
-  releaseRef();
-
-  m_object = other.m_object;
-
+  ShPointer<T> t(other);
+  t.swap(*this);
+  
   return *this;
 }
 
@@ -145,14 +137,9 @@ ShPointer<T>& ShPointer<T>::operator=(const ShPointer<S>& other)
   std::cerr << "[assn] " << std::setw(10) << other.object() << " <" << (other.object() ? typeid(*(other.object())).name() : "n/a") << ">" << " (was " << m_object << " <" << (m_object ? typeid(*(m_object)).name() : "n/a") << ">" << ")" << std::endl;
   SH_RCDEBUG_NORMAL;
 #endif
-  if (m_object == other.object()) return *this;
 
-  // Bug fix - must aquireRef to other.object() first in case
-  // m_object has the only current pointer to other.object()
-  if(other.object()) other.object()->acquireRef();
-  releaseRef();
-
-  m_object = other.object();
+  ShPointer<T> t(other);
+  t.swap(*this);
 
   return *this;
 }
@@ -208,6 +195,14 @@ template<typename T>
 T* ShPointer<T>::object() const
 {
   return m_object;
+}
+
+template<typename T>
+void ShPointer<T>::swap(ShPointer<T>& other)
+{
+  T* t = m_object;
+  m_object = other.m_object;
+  other.m_object = t;
 }
 
 template<typename T>

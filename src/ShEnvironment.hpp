@@ -29,6 +29,7 @@
 
 #include <map>
 #include <string>
+#include "ShDllExport.hpp"
 #include "ShProgram.hpp"
 #include "ShBackend.hpp"
 
@@ -39,7 +40,8 @@ namespace SH {
  * as the currently active shader or whether or not the program is
  * inside a shader definition right now.
  */
-class ShEnvironment {
+class
+SH_DLLEXPORT ShEnvironment {
 public:
   
   /// The currently active backend

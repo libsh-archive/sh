@@ -27,6 +27,7 @@
 #ifndef SHVARIABLE_HPP
 #define SHVARIABLE_HPP
 
+#include "ShDllExport.hpp"
 #include "ShRefCount.hpp"
 #include "ShSwizzle.hpp"
 #include "ShUtility.hpp"
@@ -35,13 +36,16 @@
 
 namespace SH {
 
+class ShProgram;
+
 /** A reference and interface to a generic n-tuple variable.
  * Note: subclasses should not keep any additional data. All data
  * relevant to the node should be stored in m_node. This is due to
  * instances of subclasses of ShVariable being sliced when they get
  * placed in ShStatements.
 */
-class ShVariable : public ShMetaForwarder {
+class 
+SH_DLLEXPORT ShVariable : public ShMetaForwarder {
 public:
   ShVariable();
   ShVariable(const ShVariableNodePtr& node);
@@ -49,6 +53,8 @@ public:
 
   ~ShVariable() {}
 
+  ShVariable& operator=(const ShProgram& prg);
+  
   bool null() const; ///< true iff node is a null pointer.
   
   bool uniform() const; ///< Is this a uniform (non-shader specific) variable?
@@ -69,13 +75,13 @@ public:
   
   /// Set a range of values for this variable
   // TODO check if this works when swizzle contains one index more than once
-  void rangeCloak(ShPointer<const ShCloak> low, ShPointer<const ShCloak> high);
+  void rangeVariant(ShPointer<const ShVariant> low, ShPointer<const ShVariant> high);
 
   /// Obtain a lower bounds on this variable (tuple of same size as this)
-  ShPointer<ShCloak> lowBoundCloak() const;
+  ShPointer<ShVariant> lowBoundVariant() const;
 
   /// Obtain an upper bounds on this variable (tuple of same size as this)
-  ShPointer<ShCloak> highBoundCloak() const;
+  ShPointer<ShVariant> highBoundVariant() const;
 
   //@}
   
@@ -92,15 +98,15 @@ public:
 
   ///
   
-  /// Gets a copy of the cloak (with swizzling & proper negation)
-  ShPointer<ShCloak> cloak() const;
-  ShPointer<ShCloak> cloak(int index) const;
-
-  /// sets up to num elements starting at index in this cloak 
-  /// from the other cloak, accounting for swizzles and negation
-  void setCloak(ShPointer<const ShCloak> other, bool neg, const ShSwizzle &writemask);
-  void setCloak(ShPointer<const ShCloak> other, int index);
-  void setCloak(ShPointer<const ShCloak> other);
+  /// Gets a copy of the variant (with swizzling & proper negation)
+  ShPointer<ShVariant> getVariant() const;
+  ShPointer<ShVariant> getVariant(int index) const;
+  
+  /// sets up to num elements starting at index in this variant 
+  /// from the other variant, accounting for swizzles and negation
+  void setVariant(ShPointer<const ShVariant> other, bool neg, const ShSwizzle &writemask);
+  void setVariant(ShPointer<const ShVariant> other, int index);
+  void setVariant(ShPointer<const ShVariant> other);
 
   ShVariable operator()() const; ///< Identity swizzle
   ShVariable operator()(int) const;
@@ -120,7 +126,7 @@ protected:
   ShSwizzle m_swizzle; ///< Swizzling applied to this variable.
   bool m_neg; ///< True iff this variable is negated
 
-  friend std::ostream& operator<<(std::ostream& out, const ShVariable& shVariableToPrint);
+  friend SH_DLLEXPORT std::ostream& operator<<(std::ostream& out, const ShVariable& shVariableToPrint);
 };
 
 }

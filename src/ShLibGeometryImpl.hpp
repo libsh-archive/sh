@@ -1,3 +1,29 @@
+// Sh: A GPU metaprogramming language.
+//
+// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
+// Project administrator: Michael D. McCool
+// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
+//          Michael D. McCool
+// 
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+// 
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+// 
+// 1. The origin of this software must not be misrepresented; you must
+// not claim that you wrote the original software. If you use this
+// software in a product, an acknowledgment in the product documentation
+// would be appreciated but is not required.
+// 
+// 2. Altered source versions must be plainly marked as such, and must
+// not be misrepresented as being the original software.
+// 
+// 3. This notice may not be removed or altered from any source
+// distribution.
+//////////////////////////////////////////////////////////////////////////////
 #ifndef SHLIBGEOMETRYIMPL_HPP
 #define SHLIBGEOMETRYIMPL_HPP
 
@@ -90,6 +116,43 @@ ShGeneric<4, CT1T2T3> lit(const ShGeneric<1, T1>& a,
   r(2) = (a < 0 && b < 0) * pow(b, c);
   return r;
 }
+
+template<int N, typename T>
+ShGeneric<1,  T> distance(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
+{
+  return length(a-b);
+}
+
+template<int N, typename T>
+ShGeneric<1,  T> distance_1(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
+{
+  return length_1(a-b);
+}
+
+template<int N, typename T>
+ShGeneric<1,  T> distance_inf(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
+{
+  return length_inf(a-b);
+}
+
+template<int N, typename T>
+ShGeneric<1,  T> length(const ShGeneric<N, T>& a)
+{
+  return sqrt(dot(a, a));
+}
+
+template<int N, typename T>
+ShGeneric<1,  T> length_1(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
+{
+  return sum(abs(a));
+}
+
+template<int N, typename T>
+ShGeneric<1,  T> length_inf(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
+{
+  return max(abs(a));
+}
+
 
 }
 

@@ -81,6 +81,8 @@ public:
   ShAttrib& operator=(const ShAttrib<N, Binding, T2, Swizzled>& other);
   ShAttrib& operator=(const ShAttrib<N, Binding, T, Swizzled>& other);
 
+  ShAttrib& operator=(const ShProgram& prg);
+
   
   template<typename T2>
   ShAttrib& operator+=(const ShGeneric<N, T2>& right);
@@ -168,6 +170,8 @@ public:
 
   ShAttrib& operator=(T other);
 
+  ShAttrib& operator=(const ShProgram& prg);
+
   
   template<typename T2>
   ShAttrib& operator+=(const ShGeneric<1, T2>& right);
@@ -239,6 +243,8 @@ public:
   template<typename T2>
   ShAttrib& operator=(const ShAttrib<2, Binding, T2, Swizzled>& other);
   ShAttrib& operator=(const ShAttrib<2, Binding, T, Swizzled>& other);
+
+  ShAttrib& operator=(const ShProgram& prg);
 
   
   template<typename T2>
@@ -327,6 +333,8 @@ public:
   ShAttrib& operator=(const ShAttrib<3, Binding, T2, Swizzled>& other);
   ShAttrib& operator=(const ShAttrib<3, Binding, T, Swizzled>& other);
 
+  ShAttrib& operator=(const ShProgram& prg);
+
   
   template<typename T2>
   ShAttrib& operator+=(const ShGeneric<3, T2>& right);
@@ -413,6 +421,8 @@ public:
   template<typename T2>
   ShAttrib& operator=(const ShAttrib<4, Binding, T2, Swizzled>& other);
   ShAttrib& operator=(const ShAttrib<4, Binding, T, Swizzled>& other);
+
+  ShAttrib& operator=(const ShProgram& prg);
 
   
   template<typename T2>

@@ -1,1 +1,1 @@
-SUBDIRS = regress old
+SUBDIRS = regress 

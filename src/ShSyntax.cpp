@@ -34,7 +34,7 @@
 #include "ShToken.hpp"
 #include "ShProgram.hpp"
 #include "ShBackend.hpp"
-#include "ShOptimizer.hpp"
+#include "ShOptimizations.hpp"
 
 namespace SH {
 
@@ -54,12 +54,13 @@ void shEndShader()
   
   parsing->ctrlGraph = new ShCtrlGraph(parsing->tokenizer.blockList());
 
-  ShOptimizer optimizer(parsing->ctrlGraph);
-  optimizer.optimize(ShContext::current()->optimization());
+  optimize(parsing);
   
   parsing->collectVariables();
   
   context->exit();
+
+  parsing->finish();
 
   // TODO. See issue129.
 //   if (!ShEnvironment::shader->target().empty()) {
@@ -121,9 +122,7 @@ bool shSetBackend(const std::string& name)
 
 void shInit()
 {
-#ifdef WIN32
-  static SH::ShPointer<ShArb::ArbBackend> instance = new ShArb::ArbBackend();
-#endif /* WIN32 */
+  // TODO: Initialize backends
 }
 
 void shIf(bool)

@@ -31,19 +31,16 @@
 #include <set>
 #include <list>
 #include "ShOperation.hpp"
+#include "ShDllExport.hpp"
 #include "ShVariable.hpp"
 
 namespace SH {
-
-#ifdef IGNORE
-#undef IGNORE
-#endif
-
 
 /** Dummy class representing additional information that can be stored
  *  in statements.
  */
 class 
+SH_DLLEXPORT
 ShStatementInfo {
 public:
   virtual ~ShStatementInfo();
@@ -64,7 +61,7 @@ protected:
  * <pre>dest := src[0]</pre>
  */
 class
-ShStatement {
+SH_DLLEXPORT ShStatement {
 public:
   ShStatement(ShVariable dest, ShOperation op);
   ShStatement(ShVariable dest, ShOperation op, ShVariable src);
@@ -86,11 +83,6 @@ public:
   // information in statements.
   // Anything in here will be deleted when this statement is deleted.
   std::list<ShStatementInfo*> info;
-
-  // The following are used for the optimizer.
-  
-  std::set<ShStatement*> ud[3];
-  std::set<ShStatement*> du;
 
   // Return the first entry in info whose type matches T, or 0 if no
   // such entry exists.

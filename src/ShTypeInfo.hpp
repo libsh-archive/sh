@@ -35,14 +35,14 @@
 namespace SH {
 
 /// forward declarations 
-class ShCloakFactory;
+class ShVariantFactory;
 
 struct ShTypeInfo: ShRefCountable {
   /** Returns a unique string representation for this type */
   virtual const char* name() const = 0;
 
-  /** Returns the factory that generates ShCloak objects of this type */
-  virtual ShPointer<const ShCloakFactory> cloakFactory() = 0; 
+  /** Returns the factory that generates ShVariant objects of this type */
+  virtual ShPointer<const ShVariantFactory> variantFactory() = 0; 
 };
 
 typedef ShPointer<ShTypeInfo> ShTypeInfoPtr;
@@ -69,11 +69,15 @@ struct ShConcreteTypeInfo: public ShTypeInfo {
     static T defaultLo(ShSemanticType type);
     static T defaultHi(ShSemanticType type);
 
+    /// Equality comparison that returns true iff
+    // the values are equal. 
+    static bool valuesEqual(const T &a, const T &b); 
+
     const char* name() const; 
-    ShPointer<const ShCloakFactory> cloakFactory();
+    ShPointer<const ShVariantFactory> variantFactory();
 
   protected:
-    static ShPointer<ShCloakFactory> m_cloakFactory;
+    static ShPointer<ShVariantFactory> m_variantFactory;
 };
 
 //default initialization (adds concrete type infos and creates 
@@ -93,6 +97,12 @@ struct ShCommonType;
 template<typename T1, typename T2, typename T3>
 struct ShCommonType3 {
   typedef typename ShCommonType<typename ShCommonType<T1, T2>::type, T3>::type type;
+};
+
+template<typename T1, typename T2, typename T3, typename T4>
+struct ShCommonType4 {
+  typedef typename ShCommonType<typename ShCommonType<T1, T2>::type, 
+                                typename ShCommonType<T3, T4>::type>::type type;
 };
 
 

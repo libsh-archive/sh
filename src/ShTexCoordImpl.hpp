@@ -113,6 +113,14 @@ ShTexCoord<N, Binding, T, Swizzled>::operator=(const ShTexCoord<N, Binding, T2, 
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+ShTexCoord<N, Binding, T, Swizzled>&
+ShTexCoord<N, Binding, T, Swizzled>::operator=(const ShProgram& prg)
+{
+  ParentType::operator=(prg);
+  return *this;
+}
+
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
 ShTexCoord<N, Binding, T, Swizzled>&
 ShTexCoord<N, Binding, T, Swizzled>::operator+=(const ShGeneric<N, T2>& right)
@@ -382,6 +390,14 @@ ShTexCoord<1, Binding, T, Swizzled>::operator=(T other)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+ShTexCoord<1, Binding, T, Swizzled>&
+ShTexCoord<1, Binding, T, Swizzled>::operator=(const ShProgram& prg)
+{
+  ParentType::operator=(prg);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
 ShTexCoord<1, Binding, T, Swizzled>&
 ShTexCoord<1, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T2>& right)
@@ -602,6 +618,14 @@ ShTexCoord<2, Binding, T, Swizzled>&
 ShTexCoord<2, Binding, T, Swizzled>::operator=(const ShTexCoord<2, Binding, T2, Swizzled>& other)
 {
   ParentType::operator=(other);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+ShTexCoord<2, Binding, T, Swizzled>&
+ShTexCoord<2, Binding, T, Swizzled>::operator=(const ShProgram& prg)
+{
+  ParentType::operator=(prg);
   return *this;
 }
 
@@ -875,6 +899,14 @@ ShTexCoord<3, Binding, T, Swizzled>::operator=(const ShTexCoord<3, Binding, T2, 
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+ShTexCoord<3, Binding, T, Swizzled>&
+ShTexCoord<3, Binding, T, Swizzled>::operator=(const ShProgram& prg)
+{
+  ParentType::operator=(prg);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
 ShTexCoord<3, Binding, T, Swizzled>&
 ShTexCoord<3, Binding, T, Swizzled>::operator+=(const ShGeneric<3, T2>& right)
@@ -1140,6 +1172,14 @@ ShTexCoord<4, Binding, T, Swizzled>&
 ShTexCoord<4, Binding, T, Swizzled>::operator=(const ShTexCoord<4, Binding, T2, Swizzled>& other)
 {
   ParentType::operator=(other);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+ShTexCoord<4, Binding, T, Swizzled>&
+ShTexCoord<4, Binding, T, Swizzled>::operator=(const ShProgram& prg)
+{
+  ParentType::operator=(prg);
   return *this;
 }
 

@@ -24,48 +24,48 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHCLOAKCASTIMPL_HPP
-#define SHCLOAKCASTIMPL_HPP
+#ifndef SHVARIANTCASTIMPL_HPP
+#define SHVARIANTCASTIMPL_HPP
 
-#include "ShCloak.hpp"
-#include "ShCloakCast.hpp"
+#include "ShVariant.hpp"
+#include "ShVariantCast.hpp"
 
 namespace SH {
 
 template<typename DEST, typename SRC>
-ShCloakPtr ShDataCloakCast<DEST, SRC>::operator()(ShCloakPtr value) const
+ShVariantPtr ShDataVariantCast<DEST, SRC>::operator()(ShVariantPtr value) const
 {
   if (MatchType<DEST, SRC>::matches) return value;
 
-  ShPointer<ShDataCloak<SRC> > srcCloak = 
-    shref_dynamic_cast<ShDataCloak<SRC> >(value);
-  ShDataCloak<DEST> *result = new ShDataCloak<DEST>(srcCloak->size());
+  ShPointer<ShDataVariant<SRC> > srcVariant = 
+    shref_dynamic_cast<ShDataVariant<SRC> >(value);
+  ShDataVariant<DEST> *result = new ShDataVariant<DEST>(srcVariant->size());
 
-  typename ShDataCloak<SRC>::const_iterator S = srcCloak->begin();
-  typename ShDataCloak<DEST>::iterator D = result->begin();
-  for(;S != srcCloak->end(); ++S, ++D) doCast(*D, *S);
+  typename ShDataVariant<SRC>::const_iterator S = srcVariant->begin();
+  typename ShDataVariant<DEST>::iterator D = result->begin();
+  for(;S != srcVariant->end(); ++S, ++D) doCast(*D, *S);
 
   return result;
 }
 
 template<typename DEST, typename SRC>
-ShCloakCPtr ShDataCloakCast<DEST, SRC>::operator()(ShCloakCPtr value) const
+ShVariantCPtr ShDataVariantCast<DEST, SRC>::operator()(ShVariantCPtr value) const
 {
   if (MatchType<DEST, SRC>::matches) return value;
 
-  ShPointer<const ShDataCloak<SRC> > srcCloak = 
-    shref_dynamic_cast<const ShDataCloak<SRC> >(value);
-  ShDataCloak<DEST> *result = new ShDataCloak<DEST>(srcCloak->size());
+  ShPointer<const ShDataVariant<SRC> > srcVariant = 
+    shref_dynamic_cast<const ShDataVariant<SRC> >(value);
+  ShDataVariant<DEST> *result = new ShDataVariant<DEST>(srcVariant->size());
 
-  typename ShDataCloak<SRC>::const_iterator S = srcCloak->begin();
-  typename ShDataCloak<DEST>::iterator D = result->begin();
-  for(;S != srcCloak->end(); ++S, ++D) doCast(*D, *S);
+  typename ShDataVariant<SRC>::const_iterator S = srcVariant->begin();
+  typename ShDataVariant<DEST>::iterator D = result->begin();
+  for(;S != srcVariant->end(); ++S, ++D) doCast(*D, *S);
 
   return result;
 }
 
 template<typename DEST, typename SRC>
-void ShDataCloakCast<DEST, SRC>::doCast(DEST &dest, const SRC &src) const
+void ShDataVariantCast<DEST, SRC>::doCast(DEST &dest, const SRC &src) const
 {
   // default C++ cast for now.  Users can add their own special weird
   // casts later on.

@@ -95,7 +95,7 @@ class ShKernelLib {
     // make a version with names like Houdini globals
 
     /** Generalized vertex program that computes *lots* of different outputs 
-     * If numTangents = 0, then tangnet, tangent 2 are not included in the inputs and any TCS outputs are invalid
+     * If numTangents = 0, then tangent, tangent 2 are not included in the inputs and any TCS outputs are invalid
      * If numTangents = 1, then only tangent is an input, tangent2 is computed from normal and tangent.  All TCS outputs are valid
      * If numTangent > 2, then both tangent and tangent2 are inputs.  
      *
@@ -126,7 +126,7 @@ class ShKernelLib {
      *  ShVector3f viewVec      - view vector (TCS)
      *  ShVector3f halfVect      - half Vector (TCS) = halfVect0
      *  ShVector3f halfVecti      - half Vector (TCS), for i = 0..numLights - 1 
-     *  ShVector3f halfVect      - light Vector (TCS) = lightVect0 
+     *  ShVector3f lightVect      - light Vector (TCS) = lightVect0 
      *  ShVector3f lightVecti     - light Vector (TCS), for i  0..numLights - 1 
      *
      *  OUT(-1) ShPosition4f posh       - position (HDCS)

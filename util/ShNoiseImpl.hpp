@@ -57,30 +57,40 @@ void ShNoise<M, T, P>::init() {
 
   int i, j, k, l;
 
-  // generate pseudorandom noise noiseImage[x + y * P][z] holds the four
+  // generate pseudorand noise noiseImage[x + y * P][z] holds the four
   // 1D gradient components for lattice points (x, y, z), (x, y, z + 1), (x, y + 1, z),
   // and (x, y + 1, z + 1)
+#ifdef WIN32
+  srand(13);
+#else
   srand48(13);
+#endif
   ShImage3D noiseImage(P, P, P, M);
   for(k = 0; k < P; ++k) {
    for(i = 0; i < P; ++i) for(j = 0; j < P; ++j) for(l = 0; l < M; ++l) {
-      noiseImage(i, j, k, l) = drand48();
+#ifdef WIN32
+     noiseImage(i, j, k, l) = ((float)rand())/(RAND_MAX+1.0);
+#else
+     noiseImage(i, j, k, l) = drand48();
+#endif
     }
   }
   noiseTex.memory(noiseImage.memory());
 }
 
+// @todo type remove doubles 
+
 // runs x * d + e, d may be an Attrib or a float 
 template<int M, typename T>
-ShGeneric<M, T> _pmad(const ShGeneric<M, T> &x, T d, T e) {
+ShGeneric<M, T> _pmad(const ShGeneric<M, T> &x, double  d, double e) {
   T vals[M];
   for(int i = 0; i < M; ++i) vals[i] = e;
   ShAttrib<M, SH_CONST, T> ec(vals);
-  return mad(x, d, ec);
+  return mad(x, (T)d, ec);
 }
 
 template<int M, typename T>
-ShGeneric<M, T> _pmad(const ShGeneric<M, T> &x, const ShGeneric<M, T> &d, T e) {
+ShGeneric<M, T> _pmad(const ShGeneric<M, T> &x, const ShGeneric<M, T> &d, double e) {
   T vals[M];
   for(int i = 0; i < M; ++i) vals[i] = e;
   ShAttrib<M, SH_CONST, T> ec(vals);
@@ -95,7 +105,7 @@ ShGeneric<M, T> _psmootht(const ShGeneric<M, T> &t)
 
 // adds x to a float d componentwise
 template<int M, typename T>
-ShGeneric<M, T> _padd(const ShGeneric<M, T> &x, T d) {
+ShGeneric<M, T> _padd(const ShGeneric<M, T> &x, double d) {
   T vals[M];
   for(int i = 0; i < M; ++i) vals[i] = d;
   ShAttrib<M, SH_CONST, T> c(vals);
@@ -172,12 +182,12 @@ ShGeneric<M, T> ShNoise<M, T, P>::cellnoise(const ShGeneric<K, T> &p, bool useTe
 }
 
 #define SHNOISE_WITH_AMP(name) \
-template<int N, int M, int K, typename T>\
-  ShGeneric<N, T> name(const ShGeneric<M, T> &p, const ShGeneric<K, T> &amp, bool useTexture) {\
-    ShAttrib<N, SH_TEMP, T> result; \
-    T freq = 1;\
-    result *= 0; \
-    for(int i = 0; i < K; ++i, freq *= 2.0) {\
+template<int N, int M, int K, typename T1, typename T2>\
+  ShGeneric<N, CT1T2> name(const ShGeneric<M, T1> &p, const ShGeneric<K, T2> &amp, bool useTexture) {\
+    ShAttrib<N, SH_TEMP, CT1T2> result; \
+    CT1T2 freq = ShConcreteTypeInfo<CT1T2>::ONE;\
+    result *= ShConcreteTypeInfo<CT1T2>::ZERO; \
+    for(int i = 0; i < K; ++i, freq *= 2) {\
       result = mad(name<N>(p * freq, useTexture), amp(i), result);\
     }\
     return result;\

@@ -24,39 +24,40 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHCLOAK_IMPL_HPP
-#define SHCLOAK_IMPL_HPP
+#ifndef SHVARIANT_IMPL_HPP
+#define SHVARIANT_IMPL_HPP
 
 #include <algorithm>
 #include <sstream>
 #include "ShDebug.hpp"
 #include "ShCastManager.hpp"
-#include "ShCloak.hpp"
+#include "ShVariant.hpp"
 #include "ShContext.hpp"
 #include "ShTypeInfo.hpp"
+#include "ShInterval.hpp"
 
 namespace SH {
 
 template<typename T>
-ShDataCloak<T>::ShDataCloak(int N)
+ShDataVariant<T>::ShDataVariant(int N)
   : m_data(N, 0)
 {
 }
 
 template<typename T>
-ShDataCloak<T>::ShDataCloak(int N, const T &value)
+ShDataVariant<T>::ShDataVariant(int N, const T &value)
   : m_data(N, value)
 {
 }
 
 template<typename T>
-ShDataCloak<T>::ShDataCloak(const ShDataCloak<T> &other)
+ShDataVariant<T>::ShDataVariant(const ShDataVariant<T> &other)
   : m_data(other.m_data)
 {
 }
 
 template<typename T>
-ShDataCloak<T>::ShDataCloak(const ShDataCloak<T> &other, 
+ShDataVariant<T>::ShDataVariant(const ShDataVariant<T> &other, 
     bool neg, const ShSwizzle &swizzle)
   : m_data(swizzle.size())
 {
@@ -66,40 +67,40 @@ ShDataCloak<T>::ShDataCloak(const ShDataCloak<T> &other,
 }
 
 template<typename T>
-int ShDataCloak<T>::typeIndex() const {
+int ShDataVariant<T>::typeIndex() const {
   return shTypeIndex<T>(); 
 }
 
 
 template<typename T>
-std::string ShDataCloak<T>::typeName() const {
+std::string ShDataVariant<T>::typeName() const {
   return ShConcreteTypeInfo<T>::m_name; 
 }
 
 template<typename T>
-ShDataCloak<T>::ShDataCloak(std::string s)
+ShDataVariant<T>::ShDataVariant(std::string s)
 {
    decode(s);
 }
 
 template<typename T>
-int ShDataCloak<T>::size() const
+int ShDataVariant<T>::size() const
 {
   return m_data.size();
 }
 
 template<typename T>
-void ShDataCloak<T>::negate()
+void ShDataVariant<T>::negate()
 {
   transform(m_data.begin(), m_data.end(), m_data.begin(), std::negate<T>());
 }
 
 template<typename T>
-void ShDataCloak<T>::set(ShCloakCPtr other)
+void ShDataVariant<T>::set(ShVariantCPtr other)
 {
-  CPtrType castOther = shref_dynamic_cast<const ShDataCloak<T> >(
+  CPtrType castOther = shref_dynamic_cast<const ShDataVariant<T> >(
       ShCastManager::instance()->doCast(shTypeIndex<T>(), other));
-//  CPtrType castOther = shref_dynamic_cast<const ShDataCloak<T> >(other);
+//  CPtrType castOther = shref_dynamic_cast<const ShDataVariant<T> >(other);
   if(!castOther) { 
     // TODO throw some kind of exception
     SH_DEBUG_WARN("Cannot cast " << other->typeName() << " to " << typeName());
@@ -110,11 +111,11 @@ void ShDataCloak<T>::set(ShCloakCPtr other)
 }
 
 template<typename T>
-void ShDataCloak<T>::set(ShCloakCPtr other, int index)
+void ShDataVariant<T>::set(ShVariantCPtr other, int index)
 {
-  CPtrType castOther = shref_dynamic_cast<const ShDataCloak<T> >(
+  CPtrType castOther = shref_dynamic_cast<const ShDataVariant<T> >(
       ShCastManager::instance()->doCast(shTypeIndex<T>(), other));
-  //CPtrType castOther = shref_dynamic_cast<const ShDataCloak<T> >(other);
+  //CPtrType castOther = shref_dynamic_cast<const ShDataVariant<T> >(other);
   if(!castOther) { 
     // TODO throw some kind of exception
     SH_DEBUG_WARN("Cannot cast " << other->typeName() << " to " << typeName());
@@ -125,11 +126,11 @@ void ShDataCloak<T>::set(ShCloakCPtr other, int index)
 }
 
 template<typename T>
-void ShDataCloak<T>::set(ShCloakCPtr other, bool neg, const ShSwizzle &writemask) 
+void ShDataVariant<T>::set(ShVariantCPtr other, bool neg, const ShSwizzle &writemask) 
 {
-  CPtrType castOther = shref_dynamic_cast<const ShDataCloak<T> >(
+  CPtrType castOther = shref_dynamic_cast<const ShDataVariant<T> >(
       ShCastManager::instance()->doCast(shTypeIndex<T>(), other));
-  //CPtrType castOther = shref_dynamic_cast<const ShDataCloak<T> >(other);
+  //CPtrType castOther = shref_dynamic_cast<const ShDataVariant<T> >(other);
   if(!castOther) { 
     // TODO throw some kind of exception
     SH_DEBUG_WARN("Cannot cast " << other->typeName() << " to " << typeName());
@@ -141,67 +142,92 @@ void ShDataCloak<T>::set(ShCloakCPtr other, bool neg, const ShSwizzle &writemask
 }
 
 template<typename T>
-ShCloakPtr ShDataCloak<T>::get() const
+ShVariantPtr ShDataVariant<T>::get() const
 {
-  return new ShDataCloak<T>(*this);
+  return new ShDataVariant<T>(*this);
 }
 
 template<typename T>
-ShCloakPtr ShDataCloak<T>::get(int index) const
+ShVariantPtr ShDataVariant<T>::get(int index) const
 {
-  return new ShDataCloak<T>(1, m_data[index]);
+  return new ShDataVariant<T>(1, m_data[index]);
 }
 
 template<typename T>
-ShCloakPtr ShDataCloak<T>::get(bool neg, const ShSwizzle &swizzle) const 
+ShVariantPtr ShDataVariant<T>::get(bool neg, const ShSwizzle &swizzle) const 
 {
-  return new ShDataCloak<T>(*this, neg, swizzle);
+  return new ShDataVariant<T>(*this, neg, swizzle);
+}
+
+
+
+template<typename T>
+bool ShDataVariant<T>::equals(ShVariantCPtr other) const 
+{
+  if(!other || size() != other->size() || typeIndex() != other->typeIndex()) return false;
+  CPtrType castOther = shref_dynamic_cast<const ShDataVariant<T> >(other);
+  const_iterator I, J;
+  I = begin();
+  J = castOther->begin(); 
+  for(;I != end(); ++I, ++J) {
+    if(!ShConcreteTypeInfo<T>::valuesEqual((*I), (*J))) return false;
+  }
+  return true;
 }
 
 template<typename T>
-T& ShDataCloak<T>::operator[](int index) 
+bool ShDataVariant<T>::isTrue() const 
+{
+  for(const_iterator I = begin(); I != end(); ++I) {
+    if(!ShConcreteTypeInfo<T>::valuesEqual((*I), ShConcreteTypeInfo<T>::TrueVal)) return false;
+  }
+  return true;
+}
+
+template<typename T>
+T& ShDataVariant<T>::operator[](int index) 
 {
   return m_data[index];
 }
 
 template<typename T>
-const T& ShDataCloak<T>::operator[](int index) const
+const T& ShDataVariant<T>::operator[](int index) const
 {
   return m_data[index];
 }
 
 template<typename T>
-std::vector<T>& ShDataCloak<T>::data() {
+std::vector<T>& ShDataVariant<T>::data() {
   return m_data;
 }
 
 template<typename T>
-const std::vector<T>& ShDataCloak<T>::data() const {
+const std::vector<T>& ShDataVariant<T>::data() const {
   return m_data;
 }
 
 template<typename T>
-typename std::vector<T>::iterator ShDataCloak<T>::begin() {
+typename std::vector<T>::iterator ShDataVariant<T>::begin() {
   return m_data.begin();
 }
 
 template<typename T>
-typename std::vector<T>::iterator ShDataCloak<T>::end() {
+typename std::vector<T>::iterator ShDataVariant<T>::end() {
   return m_data.end();
 }
 
 template<typename T>
-typename std::vector<T>::const_iterator ShDataCloak<T>::begin() const {
+typename std::vector<T>::const_iterator ShDataVariant<T>::begin() const {
   return m_data.begin();
 }
 
 template<typename T>
-typename std::vector<T>::const_iterator ShDataCloak<T>::end() const {
+typename std::vector<T>::const_iterator ShDataVariant<T>::end() const {
   return m_data.end();
 }
 
 template<typename T>
-std::string ShDataCloak<T>::encode() const {
+std::string ShDataVariant<T>::encode() const {
   if(size() < 1) return "";
 
   std::ostringstream out;
@@ -213,7 +239,7 @@ std::string ShDataCloak<T>::encode() const {
 }
 
 template<typename T>
-int ShDataCloak<T>::decode(std::string value) {
+int ShDataVariant<T>::decode(std::string value) {
   m_data.clear();
 
   std::istringstream in(value);
@@ -232,15 +258,15 @@ int ShDataCloak<T>::decode(std::string value) {
 }
 
 template<typename T>
-ShPointer<ShDataCloak<T> > cloak_cast(ShCloakPtr c)
+ShPointer<ShDataVariant<T> > variant_cast(ShVariantPtr c)
 {
-  return shref_dynamic_cast<ShDataCloak<T> >(c);
+  return shref_dynamic_cast<ShDataVariant<T> >(c);
 }
 
 template<typename T>
-ShPointer<const ShDataCloak<T> > cloak_cast(ShCloakCPtr c)
+ShPointer<const ShDataVariant<T> > variant_cast(ShVariantCPtr c)
 {
-  return shref_dynamic_cast<const ShDataCloak<T> >(c);
+  return shref_dynamic_cast<const ShDataVariant<T> >(c);
 }
 
 }

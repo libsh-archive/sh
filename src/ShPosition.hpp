@@ -69,6 +69,8 @@ public:
   ShPosition& operator=(const ShPosition<N, Binding, T2, Swizzled>& other);
   ShPosition& operator=(const ShPosition<N, Binding, T, Swizzled>& other);
 
+  ShPosition& operator=(const ShProgram& prg);
+
   
   template<typename T2>
   ShPosition& operator+=(const ShGeneric<N, T2>& right);
@@ -156,6 +158,8 @@ public:
 
   ShPosition& operator=(T other);
 
+  ShPosition& operator=(const ShProgram& prg);
+
   
   template<typename T2>
   ShPosition& operator+=(const ShGeneric<1, T2>& right);
@@ -227,6 +231,8 @@ public:
   template<typename T2>
   ShPosition& operator=(const ShPosition<2, Binding, T2, Swizzled>& other);
   ShPosition& operator=(const ShPosition<2, Binding, T, Swizzled>& other);
+
+  ShPosition& operator=(const ShProgram& prg);
 
   
   template<typename T2>
@@ -315,6 +321,8 @@ public:
   ShPosition& operator=(const ShPosition<3, Binding, T2, Swizzled>& other);
   ShPosition& operator=(const ShPosition<3, Binding, T, Swizzled>& other);
 
+  ShPosition& operator=(const ShProgram& prg);
+
   
   template<typename T2>
   ShPosition& operator+=(const ShGeneric<3, T2>& right);
@@ -401,6 +409,8 @@ public:
   template<typename T2>
   ShPosition& operator=(const ShPosition<4, Binding, T2, Swizzled>& other);
   ShPosition& operator=(const ShPosition<4, Binding, T, Swizzled>& other);
+
+  ShPosition& operator=(const ShProgram& prg);
 
   
   template<typename T2>

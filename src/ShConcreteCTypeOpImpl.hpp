@@ -4,7 +4,7 @@
 #include <numeric>
 #include <ext/numeric> // TODO implement clone of std::power(T, int) for non-GNU libstdc++ compatibility (using the "Russian peasant algorithm")
 #include "ShEval.hpp"
-#include "ShCloak.hpp"
+#include "ShVariant.hpp"
 #include "ShDebug.hpp"
 #include "ShError.hpp"
 #include "ShTypeInfo.hpp"
@@ -115,7 +115,35 @@ SHCCTO_UNARY_OP(SH_OP_ASN, (*A));
 
 SHCCTO_OP_CMATH_SPEC(SH_OP_ATAN);
 SHCCTO_OP_CMATH_SPEC(SH_OP_CEIL);
+
+template<typename T>
+struct ShConcreteCTypeOp<SH_OP_CMUL, T> {
+  static void doop(std::vector<T> *dest, 
+    const std::vector<T> *a, const std::vector<T> *b = 0, const std::vector<T> *c = 0) 
+  {
+    // dest->size should be 1 and a->size == b->size
+    T result = ShConcreteTypeInfo<T>::ZERO;
+    typename std::vector<T>::const_iterator A = a->begin();
+    for(; A != a->end(); ++A) result *= (*A); 
+     (*dest)[0] = result;
+  }
+};
+
 SHCCTO_OP_CMATH_SPEC(SH_OP_COS);
+
+template<typename T>
+struct ShConcreteCTypeOp<SH_OP_CSUM, T> {
+  static void doop(std::vector<T> *dest, 
+    const std::vector<T> *a, const std::vector<T> *b = 0, const std::vector<T> *c = 0) 
+  {
+    // dest->size should be 1 and a->size == b->size
+    T result = ShConcreteTypeInfo<T>::ZERO;
+    typename std::vector<T>::const_iterator A = a->begin();
+    for(; A != a->end(); ++A) result += (*A); 
+     (*dest)[0] = result;
+  }
+};
+
 SHCCTO_OP_CMATH_SPEC(SH_OP_EXP);
 SHCCTO_OP_CMATH_SPEC(SH_OP_EXP2);
 SHCCTO_OP_CMATH_SPEC(SH_OP_EXP10);

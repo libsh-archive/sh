@@ -1,3 +1,29 @@
+// Sh: A GPU metaprogramming language.
+//
+// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
+// Project administrator: Michael D. McCool
+// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
+//          Michael D. McCool
+// 
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+// 
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+// 
+// 1. The origin of this software must not be misrepresented; you must
+// not claim that you wrote the original software. If you use this
+// software in a product, an acknowledgment in the product documentation
+// would be appreciated but is not required.
+// 
+// 2. Altered source versions must be plainly marked as such, and must
+// not be misrepresented as being the original software.
+// 
+// 3. This notice may not be removed or altered from any source
+// distribution.
+//////////////////////////////////////////////////////////////////////////////
 #ifndef SHLIBARITH_HPP
 #define SHLIBARITH_HPP
 
@@ -95,6 +121,13 @@ ShGeneric<N, T> exp2(const ShGeneric<N, T>& var);
 template<int N, typename T>
 ShGeneric<N, T> exp(const ShGeneric<N, T>& var);
 
+/** Minus-one Exponent base 10.
+ * Operates componentwise on tuples.
+ * Returns the exponent of x - 1 using base 10.
+ */
+template<int N, typename T>
+ShGeneric<N, T> expm1(const ShGeneric<N, T>& x);
+
 /** Natural Logarithm.
  * Operates componentwise on tuples.
  * Returns the natural logarithm of x.
@@ -115,6 +148,13 @@ ShGeneric<N, T> log2(const ShGeneric<N, T>& var);
  */
 template<int N, typename T>
 ShGeneric<N, T> log(const ShGeneric<N, T>& var);
+
+/** Plus-One Logarithm base 10.
+ * Operates componentwise on tuples.
+ * Returns the logarithm of x + 1 using base 10.
+ */
+template<int N, typename T>
+ShGeneric<N, T> logp1(const ShGeneric<N, T>& x);
 
 /** Power.
  * Raise a tuple to a power.
@@ -155,12 +195,20 @@ ShGeneric<1, CT1T2T3> mad(const ShGeneric<1, T1>& m1, const ShGeneric<1, T2>& m2
 
 //@todo type should not use double here, but overloading problems need to be
 //resolved
+//template<int N, typename T> 
+//ShGeneric<N, T> 
+//mad(T m1, const ShGeneric<N, T>& m2, const ShGeneric<N, T>& a);
+//template<int N, typename T> 
+//ShGeneric<N, T>
+//mad(const ShGeneric<N, T>& m1, T m2, const ShGeneric<N, T>& a);
+
+//@todo type not sure these are a good idea
 template<int N, typename T> 
 ShGeneric<N, T> 
-mad(T m1, const ShGeneric<N, T>& m2, const ShGeneric<N, T>& a);
+mad(double m1, const ShGeneric<N, T>& m2, const ShGeneric<N, T>& a);
 template<int N, typename T> 
 ShGeneric<N, T>
-mad(const ShGeneric<N, T>& m1, T m2, const ShGeneric<N, T>& a);
+mad(const ShGeneric<N, T>& m1, double m2, const ShGeneric<N, T>& a);
 
 /* Reciprocal
  * One divided by the given value, for each component.
@@ -204,6 +252,20 @@ lerp(const ShGeneric<1, T1>& f, const ShGeneric<1, T2>& a,
 template<int N, typename T>
 ShGeneric<N, T>
 lerp(T f, const ShGeneric<N, T>& a, const ShGeneric<N, T>& b);
+
+
+/* Sum of components.
+ * Addition of all components into a single result.
+ */
+template<int N, typename T>
+ShGeneric<1, T> sum(const ShGeneric<N, T>& var);
+
+/* Product of components.
+ * Multiplication of all components into a single result.
+ */
+template<int N, typename T>
+ShGeneric<1, T> prod(const ShGeneric<N, T>& var);
+
 }
 
 #include "ShLibArithImpl.hpp"

@@ -1,3 +1,29 @@
+// Sh: A GPU metaprogramming language.
+//
+// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
+// Project administrator: Michael D. McCool
+// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
+//          Michael D. McCool
+// 
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+// 
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+// 
+// 1. The origin of this software must not be misrepresented; you must
+// not claim that you wrote the original software. If you use this
+// software in a product, an acknowledgment in the product documentation
+// would be appreciated but is not required.
+// 
+// 2. Altered source versions must be plainly marked as such, and must
+// not be misrepresented as being the original software.
+// 
+// 3. This notice may not be removed or altered from any source
+// distribution.
+//////////////////////////////////////////////////////////////////////////////
 #include <cmath>
 #include "ShInstructions.hpp"
 #include "ShStatement.hpp"
@@ -58,31 +84,46 @@ void addStatement(const ShStatement& stmt)
   ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
 }
 
+
+// TODO: Replace ifdef with an autoconf check
+// @todo type 
+// Might need to move these to somewhere else (ShEval*.hpp)
+// for win/mac
+//#ifdef WIN32
+//T exp2f(T a) { return powf(2.0, a); }
+//T exp10f(T a) { return powf(10.0, a); }
+//T log2f(T a) { return logf(a)/logf(2.0); }
+//#endif
+//#ifdef __APPLE__
+//T exp10f(T a) { return powf(10.0, a); }
+//#endif
 }
 
 namespace SH {
+#define SHINST_UNARY_OP_CORE(op)\
+  if(immediate()) {\
+    has_values(dest, src);\
+    ShVariantPtr result = dest.getVariant();\
+    (*ShEval::instance())(SH_OP_ ## op, result, src.getVariant(), 0, 0);\
+    dest.setVariant(result);\
+  } else {\
+    ShStatement stmt(dest, SH_OP_ ## op, src);\
+    addStatement(stmt);\
+  }
 
 #define SHINST_UNARY_OP(op)\
 void sh ## op(ShVariable& dest, const ShVariable& src)\
 {\
   sizes_match(dest, src);\
-  if(immediate()) {\
-    has_values(dest, src);\
-    ShCloakPtr result = dest.cloak();\
-    (*ShEval::instance())(SH_OP_ ## op, result, src.cloak(), 0, 0);\
-    dest.setCloak(result);\
-  } else {\
-    ShStatement stmt(dest, SH_OP_ ## op, src);\
-    addStatement(stmt);\
-  }\
+  SHINST_UNARY_OP_CORE(op);\
 }
 
 #define SHINST_BINARY_OP_CORE(op)\
   if(immediate()) {\
     has_values(dest, a, b);\
-    ShCloakPtr result = dest.cloak();\
-    (*ShEval::instance())(SH_OP_ ## op, result, a.cloak(), b.cloak(), 0);\
-    dest.setCloak(result);\
+    ShVariantPtr result = dest.getVariant();\
+    (*ShEval::instance())(SH_OP_ ## op, result, a.getVariant(), b.getVariant(), 0);\
+    dest.setVariant(result);\
   } else {\
     ShStatement stmt(dest, a, SH_OP_ ## op, b);\
     addStatement(stmt);\
@@ -102,9 +143,9 @@ void sh ## op(ShVariable& dest, const ShVariable& a, const ShVariable &b, const 
   SH_DEBUG_ASSERT(condition);\
   if(immediate()) {\
     has_values(dest, a, b, c);\
-    ShCloakPtr result = dest.cloak();\
-    (*ShEval::instance())(SH_OP_ ## op, result, a.cloak(), b.cloak(), c.cloak());\
-    dest.setCloak(result);\
+    ShVariantPtr result = dest.getVariant();\
+    (*ShEval::instance())(SH_OP_ ## op, result, a.getVariant(), b.getVariant(), c.getVariant());\
+    dest.setVariant(result);\
   } else {\
     ShStatement stmt(dest, SH_OP_ ## op, a, b, c);\
     addStatement(stmt);\
@@ -135,6 +176,18 @@ SHINST_UNARY_OP(ATAN);
 SHINST_BINARY_OP(ATAN2, false, false);
 SHINST_UNARY_OP(CEIL);
 SHINST_UNARY_OP(COS);
+
+void shCMUL(ShVariable& dest, const ShVariable& src)
+{
+  SH_DEBUG_ASSERT(dest.size() == 1);
+  SHINST_UNARY_OP_CORE(CMUL);
+}
+
+void shCSUM(ShVariable& dest, const ShVariable& src)
+{
+  SH_DEBUG_ASSERT(dest.size() == 1);
+  SHINST_UNARY_OP_CORE(CSUM);
+}
 
 void shDOT(ShVariable& dest, const ShVariable& a, const ShVariable& b)
 {
@@ -210,9 +263,9 @@ void shLO(ShVariable& dest, const ShVariable& src)
   sizes_match(dest, src); // TODO check types are okay
   if(immediate()) {
     has_values(dest, src);
-    ShCloakPtr result = dest.cloak();
-    (*ShEval::instance())(SH_OP_LO, result, src.cloak(), 0, 0);
-    dest.setCloak(result);
+    ShVariantPtr result = dest.getVariant();
+    (*ShEval::instance())(SH_OP_LO, result, src.getVariant(), 0, 0);
+    dest.setVariant(result);
   } else {
     ShStatement stmt(dest, SH_OP_LO, src);
     addStatement(stmt);
@@ -224,9 +277,9 @@ void shHI(ShVariable& dest, const ShVariable& src)
   sizes_match(dest, src); // TODO check types are okay
   if(immediate()) {
     has_values(dest, src);
-    ShCloakPtr result = dest.cloak();
-    (*ShEval::instance())(SH_OP_LO, result, src.cloak(), 0, 0);
-    dest.setCloak(result);
+    ShVariantPtr result = dest.getVariant();
+    (*ShEval::instance())(SH_OP_LO, result, src.getVariant(), 0, 0);
+    dest.setVariant(result);
   } else {
     ShStatement stmt(dest, SH_OP_LO, src);
     addStatement(stmt);
@@ -238,9 +291,9 @@ void shSETLO(ShVariable& dest, const ShVariable& src)
   sizes_match(dest, src); // TODO check types are okay
   if(immediate()) {
     has_values(dest, src);
-    ShCloakPtr result = dest.cloak();
-    (*ShEval::instance())(SH_OP_LO, result, src.cloak(), 0, 0);
-    dest.setCloak(result);
+    ShVariantPtr result = dest.getVariant();
+    (*ShEval::instance())(SH_OP_LO, result, src.getVariant(), 0, 0);
+    dest.setVariant(result);
   } else {
     ShStatement stmt(dest, SH_OP_LO, src);
     addStatement(stmt);
@@ -252,9 +305,9 @@ void shSETHI(ShVariable& dest, const ShVariable& src)
   sizes_match(dest, src); // TODO check types are okay
   if(immediate()) {
     has_values(dest, src);
-    ShCloakPtr result = dest.cloak();
-    (*ShEval::instance())(SH_OP_LO, result, src.cloak(), 0, 0);
-    dest.setCloak(result);
+    ShVariantPtr result = dest.getVariant();
+    (*ShEval::instance())(SH_OP_LO, result, src.getVariant(), 0, 0);
+    dest.setVariant(result);
   } else {
     ShStatement stmt(dest, SH_OP_LO, src);
     addStatement(stmt);

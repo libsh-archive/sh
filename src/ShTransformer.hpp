@@ -27,6 +27,7 @@
 #ifndef SHTRANSFORMER_HPP
 #define SHTRANSFORMER_HPP
 
+#include "ShDllExport.hpp"
 #include "ShBackend.hpp"
 #include "ShProgram.hpp"
 #include "ShCtrlGraph.hpp"
@@ -47,7 +48,8 @@ namespace SH {
  * Global requirements for running ShTransformer:
  * ShContext::current()->parsing() == program
  */
-class ShTransformer {
+class 
+SH_DLLEXPORT ShTransformer {
 public:
   ShTransformer(const ShProgramNodePtr& program);
   ShTransformer::~ShTransformer();

@@ -1,0 +1,12 @@
+all: recurse-all
+clean: recurse-clean
+install: recurse-install
+
+recurse-all:
+	$(MAKE) -C gl -f Makefile.win32 all
+
+recurse-clean:
+	$(MAKE) -C gl -f Makefile.win32 clean
+
+recurse-install:
+	$(MAKE) -C gl -f Makefile.win32 install

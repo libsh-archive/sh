@@ -24,22 +24,24 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHCLOAK_HPP
-#define SHCLOAK_HPP
+#ifndef SHVARIANT_HPP
+#define SHVARIANT_HPP
 
 #include <string>
 #include <vector>
 #include <ostream>
+#include "ShDllExport.hpp"
 #include "ShSwizzle.hpp"
 #include "ShRefCount.hpp"
 
 namespace SH {
 
 
-class ShCloak: public ShRefCountable {
+class 
+SH_DLLEXPORT ShVariant: public ShRefCountable {
   public:
-    ShCloak();
-    virtual ~ShCloak();
+    ShVariant();
+    virtual ~ShVariant();
 
 
     /// Gives the associated type identifier string mapped to a unique integer index 
@@ -62,15 +64,23 @@ class ShCloak: public ShRefCountable {
     //
     // @todo if other is not the same type as this, then it must be
     // automatically castable (implement explicit cast?)
-    virtual void set(ShPointer<const ShCloak> other) = 0;
-    virtual void set(ShPointer<const ShCloak> other, int index) = 0;
-    virtual void set(ShPointer<const ShCloak> other, bool neg, const ShSwizzle &writemask) = 0;
+    virtual void set(ShPointer<const ShVariant> other) = 0;
+    virtual void set(ShPointer<const ShVariant> other, int index) = 0;
+    virtual void set(ShPointer<const ShVariant> other, bool neg, const ShSwizzle &writemask) = 0;
 
-    // Creates a copy of the Cloak with the given swizzle and negation
+    // Creates a copy of the Variant with the given swizzle and negation
     // swizzle.m_srcSize must equal size()
-    virtual ShPointer<ShCloak> get() const = 0;
-    virtual ShPointer<ShCloak> get(int index) const = 0;
-    virtual ShPointer<ShCloak> get(bool neg, const ShSwizzle &swizzle) const = 0; 
+    virtual ShPointer<ShVariant> get() const = 0;
+    virtual ShPointer<ShVariant> get(int index) const = 0;
+    virtual ShPointer<ShVariant> get(bool neg, const ShSwizzle &swizzle) const = 0; 
+
+    // Returns true iff other is the same size, type, and has the same values
+    // (values must be EqualityComparable)
+    virtual bool equals(ShPointer<const ShVariant> other) const = 0;
+
+    // Returns true iff the value of every tuple element equals
+    // the TRUE value for the storage type
+    virtual bool isTrue() const = 0;
 
     /// Encodes the data value as a string
     virtual std::string encode() const = 0;
@@ -79,14 +89,14 @@ class ShCloak: public ShRefCountable {
     virtual int decode(std::string s) = 0;
 };
 
-typedef ShPointer<ShCloak> ShCloakPtr;
-typedef ShPointer<const ShCloak> ShCloakCPtr;
+typedef ShPointer<ShVariant> ShVariantPtr;
+typedef ShPointer<const ShVariant> ShVariantCPtr;
 
 template<typename T>
-class ShDataCloak: public ShCloak {
+class ShDataVariant: public ShVariant {
   public:
-    typedef ShPointer<ShDataCloak<T> > PtrType;
-    typedef ShPointer<const ShDataCloak<T> > CPtrType;
+    typedef ShPointer<ShDataVariant<T> > PtrType;
+    typedef ShPointer<const ShDataVariant<T> > CPtrType;
     typedef T DataType;
     typedef std::vector<DataType> DataVec;
     typedef typename DataVec::iterator iterator;
@@ -94,21 +104,21 @@ class ShDataCloak: public ShCloak {
 
     // Constructs a data holding wrapper and sets the value to a default value
     // (typically zero)
-    ShDataCloak(int N); 
+    ShDataVariant(int N); 
 
     // Constructs a data holding wrapper and sets the value to a given value 
-    ShDataCloak(int N, const T &value); 
+    ShDataVariant(int N, const T &value); 
 
     // Constructs a data holding wrapper using values from another wrapper
     // swizzled and negated as requested. 
-    ShDataCloak(const ShDataCloak<T> &other);
-    ShDataCloak(const ShDataCloak<T> &other, bool neg, const ShSwizzle &swizzle); 
+    ShDataVariant(const ShDataVariant<T> &other);
+    ShDataVariant(const ShDataVariant<T> &other, bool neg, const ShSwizzle &swizzle); 
 
     /// Decodes a string from encode() to initialize both the size and values
     // of the tuple elements
-    ShDataCloak(std::string s);
+    ShDataVariant(std::string s);
 
-    // gets the type index for this cloak typej 
+    // gets the type index for this variant typej 
     int typeIndex() const; 
 
     /// Gives the associated type name 
@@ -119,13 +129,17 @@ class ShDataCloak: public ShCloak {
 
     void negate();
 
-    void set(ShCloakCPtr other);
-    void set(ShCloakCPtr other, int index);
-    void set(ShCloakCPtr other, bool neg, const ShSwizzle &writemask);
+    void set(ShVariantCPtr other);
+    void set(ShVariantCPtr other, int index);
+    void set(ShVariantCPtr other, bool neg, const ShSwizzle &writemask);
 
-    ShCloakPtr get() const; 
-    ShCloakPtr get(int index) const; 
-    ShCloakPtr get(bool neg, const ShSwizzle &swizzle) const; 
+    ShVariantPtr get() const; 
+    ShVariantPtr get(int index) const; 
+    ShVariantPtr get(bool neg, const ShSwizzle &swizzle) const; 
+
+    bool equals(ShVariantCPtr other) const; 
+
+    bool isTrue() const;
 
     T& operator[](int index);
     const T& operator[](int index) const;
@@ -166,29 +180,29 @@ class ShDataCloak: public ShCloak {
 
 // utility functions
 template<typename T>
-ShPointer<ShDataCloak<T> > cloak_cast(ShCloakPtr c);
+ShPointer<ShDataVariant<T> > variant_cast(ShVariantPtr c);
 
 template<typename T>
-ShPointer<const ShDataCloak<T> > cloak_cast(ShCloakCPtr c);
+ShPointer<const ShDataVariant<T> > variant_cast(ShVariantCPtr c);
 
-#define SH_CLOAK_POINTER_TYPE(name, typeString) \
-  typedef ShPointer<ShDataCloak<name> > Sh ## typeString ## CloakPtr; \
-  typedef ShPointer<const ShDataCloak<name> > Sh ## typeString ## CloakCPtr;
+#define SH_VARIANT_POINTER_TYPE(name, typeString) \
+  typedef ShPointer<ShDataVariant<name> > Sh ## typeString ## VariantPtr; \
+  typedef ShPointer<const ShDataVariant<name> > Sh ## typeString ## VariantCPtr;
 
-SH_CLOAK_POINTER_TYPE(double, d );
-SH_CLOAK_POINTER_TYPE(float, f );
+SH_VARIANT_POINTER_TYPE(double, d );
+SH_VARIANT_POINTER_TYPE(float, f );
 
 /*
-SH_CLOAK_POINTER_TYPE(int, "i");
-SH_CLOAK_POINTER_TYPE(short, "s");
-SH_CLOAK_POINTER_TYPE(char, "b");
-SH_CLOAK_POINTER_TYPE(unsigned int, "ui");
-SH_CLOAK_POINTER_TYPE(unsigned short, "us");
-SH_CLOAK_POINTER_TYPE(unsigned char, "ub");
+SH_VARIANT_POINTER_TYPE(int, "i");
+SH_VARIANT_POINTER_TYPE(short, "s");
+SH_VARIANT_POINTER_TYPE(char, "b");
+SH_VARIANT_POINTER_TYPE(unsigned int, "ui");
+SH_VARIANT_POINTER_TYPE(unsigned short, "us");
+SH_VARIANT_POINTER_TYPE(unsigned char, "ub");
 */
 
 }
 
-#include "ShCloakImpl.hpp"
+#include "ShVariantImpl.hpp"
 
 #endif

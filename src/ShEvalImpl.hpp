@@ -3,7 +3,7 @@
 
 #include <numeric>
 #include "ShEval.hpp"
-#include "ShCloak.hpp"
+#include "ShVariant.hpp"
 #include "ShDebug.hpp"
 #include "ShError.hpp"
 #include "ShTypeInfo.hpp"
@@ -12,19 +12,19 @@ namespace SH {
 
 template<ShOperation OP, typename T>
 void ShRegularOp<OP, T>::operator()( 
-    ShCloakPtr dest, ShCloakCPtr a, ShCloakCPtr b, ShCloakCPtr c) const
+    ShVariantPtr dest, ShVariantCPtr a, ShVariantCPtr b, ShVariantCPtr c) const
 {
   typename std::vector<T> *destVec;
   const typename std::vector<T> *aVec, *bVec, *cVec;
 
   SH_DEBUG_ASSERT(dest && a);
-  destVec = &shref_dynamic_cast<ShDataCloak<T> >(dest)->data();
-  aVec = &shref_dynamic_cast<const ShDataCloak<T> >(a)->data();
+  destVec = &shref_dynamic_cast<ShDataVariant<T> >(dest)->data();
+  aVec = &shref_dynamic_cast<const ShDataVariant<T> >(a)->data();
 
-  if(b) bVec = &shref_dynamic_cast<const ShDataCloak<T> >(b)->data(); 
+  if(b) bVec = &shref_dynamic_cast<const ShDataVariant<T> >(b)->data(); 
   else bVec = 0;
 
-  if(c) cVec = &shref_dynamic_cast<const ShDataCloak<T> >(c)->data();  
+  if(c) cVec = &shref_dynamic_cast<const ShDataVariant<T> >(c)->data();  
   else cVec = 0;
 
   ShRegularOpChooser<OP, T>::Op::doop(destVec, aVec, bVec, cVec);
@@ -32,16 +32,16 @@ void ShRegularOp<OP, T>::operator()(
 
 template<ShOperation OP, typename T1, typename T2>
 void ShIntervalOp<OP, T1, T2>::operator()( 
-    ShCloakPtr dest, ShCloakCPtr a, ShCloakCPtr b, ShCloakCPtr c) const
+    ShVariantPtr dest, ShVariantCPtr a, ShVariantCPtr b, ShVariantCPtr c) const
 {
 
   SH_DEBUG_ASSERT(dest && a);
 
   typename std::vector<T1> &destVec = 
-    shref_dynamic_cast<ShDataCloak<T1> >(dest)->data();
+    shref_dynamic_cast<ShDataVariant<T1> >(dest)->data();
 
   const typename std::vector<T2> &aVec = 
-    shref_dynamic_cast<const ShDataCloak<T2> >(a)->data();
+    shref_dynamic_cast<const ShDataVariant<T2> >(a)->data();
 
   ShConcreteIntervalOp<OP, T1, T2>::doop(destVec, aVec);
 }
@@ -58,6 +58,8 @@ void _shInitFloatOps() {
   eval->addOp(SH_OP_ATAN, new ShRegularOp<SH_OP_ATAN, T>(), typeIndex, typeIndex);
   eval->addOp(SH_OP_CEIL, new ShRegularOp<SH_OP_CEIL, T>(), typeIndex, typeIndex);
   eval->addOp(SH_OP_COS, new ShRegularOp<SH_OP_COS, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_CSUM, new ShRegularOp<SH_OP_CSUM, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_CMUL, new ShRegularOp<SH_OP_CMUL, T>(), typeIndex, typeIndex);
   eval->addOp(SH_OP_EXP, new ShRegularOp<SH_OP_EXP, T>(), typeIndex, typeIndex);
   eval->addOp(SH_OP_EXP2, new ShRegularOp<SH_OP_EXP2, T>(), typeIndex, typeIndex);
   eval->addOp(SH_OP_EXP10, new ShRegularOp<SH_OP_EXP10, T>(), typeIndex, typeIndex);
@@ -105,6 +107,8 @@ void _shInitIntOps() {
   eval->addOp(SH_OP_ABS, new ShRegularOp<SH_OP_ABS, T>(), typeIndex, typeIndex);
   eval->addOp(SH_OP_ASN, new ShRegularOp<SH_OP_ASN, T>(), typeIndex, typeIndex);
   //eval->addOp(SH_OP_NEG, new ShRegularOp<SH_OP_NEG, T>());
+  eval->addOp(SH_OP_CSUM, new ShRegularOp<SH_OP_CSUM, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_CMUL, new ShRegularOp<SH_OP_CMUL, T>(), typeIndex, typeIndex);
   eval->addOp(SH_OP_SGN, new ShRegularOp<SH_OP_SGN, T>(), typeIndex, typeIndex);
 
   eval->addOp(SH_OP_ADD, new ShRegularOp<SH_OP_ADD, T>(), typeIndex, typeIndex, typeIndex);

@@ -27,8 +27,8 @@
 #include "ShContext.hpp"
 #include "ShDebug.hpp"
 #include "ShTypeInfo.hpp"
-#include "ShCloak.hpp"
-#include "ShCloakCast.hpp"
+#include "ShVariant.hpp"
+#include "ShVariantCast.hpp"
 #include "ShCastManager.hpp"
 
 namespace {
@@ -59,7 +59,7 @@ namespace SH {
 
 ShCastManager* ShCastManager::m_instance = 0;
 
-ShCastMgrEdge::ShCastMgrEdge(ShCloakCastPtr caster, bool automatic, bool precedence)
+ShCastMgrEdge::ShCastMgrEdge(ShVariantCastPtr caster, bool automatic, bool precedence)
   : m_caster(caster), m_automatic(automatic), m_precedence(precedence)
 {
 }
@@ -113,7 +113,7 @@ std::ostream& ShCastMgrVertex::graphvizDump(std::ostream& out) const
 }
 
 void ShCastManager::addCast(int destIndex, 
-    int srcIndex, ShCloakCastPtr caster, bool automatic, bool precedence) {
+    int srcIndex, ShVariantCastPtr caster, bool automatic, bool precedence) {
   m_casts.addEdge(srcIndex, destIndex, new ShCastMgrEdge(caster, automatic, precedence));
 }
 
@@ -171,13 +171,13 @@ void ShCastManager::init()
   }
 }
 
-ShCloakPtr ShCastManager::doCast(int destIndex, ShCloakPtr srcValue, bool autoOnly)
+ShVariantPtr ShCastManager::doCast(int destIndex, ShVariantPtr srcValue, bool autoOnly)
 {
   // start as srcValue and cast step by step to destIndex type 
-  ShCloakPtr result = srcValue; 
+  ShVariantPtr result = srcValue; 
   for(int srcIndex = result->typeIndex(); srcIndex != destIndex; 
       srcIndex = result->typeIndex()) {
-    ShCloakCastPtr caster;
+    ShVariantCastPtr caster;
 
     if(autoOnly) caster = m_autoStep[destIndex][srcIndex];
     else caster = m_castStep[destIndex][srcIndex];
@@ -188,12 +188,12 @@ ShCloakPtr ShCastManager::doCast(int destIndex, ShCloakPtr srcValue, bool autoOn
   return result;
 }
 
-ShCloakCPtr ShCastManager::doCast(int destIndex, ShCloakCPtr srcValue, bool autoOnly)
+ShVariantCPtr ShCastManager::doCast(int destIndex, ShVariantCPtr srcValue, bool autoOnly)
 {
-  ShCloakCPtr result = srcValue;
+  ShVariantCPtr result = srcValue;
   for(int srcIndex = result->typeIndex(); srcIndex != destIndex; 
       srcIndex = result->typeIndex()) {
-    ShCloakCastPtr caster;
+    ShVariantCastPtr caster;
 
     if(autoOnly) caster = m_autoStep[destIndex][srcIndex];
     else caster = m_castStep[destIndex][srcIndex];

@@ -26,21 +26,25 @@
 //////////////////////////////////////////////////////////////////////////////
 #include <sstream>
 #include "ShEval.hpp"
-#include "ShCloak.hpp"
+#include "ShVariant.hpp"
 #include "ShCastManager.hpp"
 
 namespace SH {
 
 ShEval* ShEval::m_instance = 0;
 
-void ShEval::operator()(ShOperation op, ShCloakPtr dest, 
-    ShCloakCPtr a, ShCloakCPtr b, ShCloakCPtr c) const
+//#define SH_DEBUG_SHEVAL 
+
+void ShEval::operator()(ShOperation op, ShVariantPtr dest, 
+    ShVariantCPtr a, ShVariantCPtr b, ShVariantCPtr c) const
 {
-//  SH_DEBUG_PRINT("PRE OP=" << opInfo[op].name << " "
-//      << (dest ? dest->encode() : "NULL") << " = "
-//      << (a ? a->encode() : "NULL") << ", "
-//      << (b ? b->encode() : "NULL") << ", "
-//      << (c ? c->encode() : "NULL")); 
+#ifdef SH_DEBUG_SHEVAL
+  SH_DEBUG_PRINT("PRE OP=" << opInfo[op].name << " "
+      << (dest ? dest->encode() : "NULL") << " = "
+      << (a ? a->encode() : "NULL") << ", "
+      << (b ? b->encode() : "NULL") << ", "
+      << (c ? c->encode() : "NULL")); 
+#endif
 
   const ShEvalOpInfo *evalOpInfo = 
     getEvalOpInfo(op, dest ? dest->typeIndex() : 0, 
@@ -57,7 +61,7 @@ void ShEval::operator()(ShOperation op, ShCloakPtr dest,
 
   // note - we do a castdest in case the op only modifies part of the value
   // in each tuple component of dest (e.g. setting lo on intervals)
-  ShCloakPtr castdest = dest ? castmgr->doCast(evalOpInfo->m_dest, dest) : dest;
+  ShVariantPtr castdest = dest ? castmgr->doCast(evalOpInfo->m_dest, dest) : dest;
   a = a ? castmgr->doCast(evalOpInfo->m_src[0], a) : a;
   b = b ? castmgr->doCast(evalOpInfo->m_src[1], b) : b;
   c = c ? castmgr->doCast(evalOpInfo->m_src[2], c) : c;
@@ -70,11 +74,13 @@ void ShEval::operator()(ShOperation op, ShCloakPtr dest,
     castdest = castmgr->doCast(dest->typeIndex(), castdest);
     dest->set(castdest);
   }
-//  SH_DEBUG_PRINT("   RES=" << opInfo[op].name << " "
-//      << (dest ? dest->encode() : "NULL") << " = "
-//      << (a ? a->encode() : "NULL") << ", "
-//      << (b ? b->encode() : "NULL") << ", "
-//      << (c ? c->encode() : "NULL")); 
+#ifdef SH_DEBUG_SHEVAL
+  SH_DEBUG_PRINT("   RES=" << opInfo[op].name << " "
+      << (dest ? dest->encode() : "NULL") << " = "
+      << (a ? a->encode() : "NULL") << ", "
+      << (b ? b->encode() : "NULL") << ", "
+      << (c ? c->encode() : "NULL")); 
+#endif
 }
 
 void ShEval::addOp(ShOperation op, ShPointer<const ShEvalOp> evalOp, int dest, int src0Index, int src1Index, int src2Index)
@@ -88,6 +94,18 @@ void ShEval::addOp(ShOperation op, ShPointer<const ShEvalOp> evalOp, int dest, i
 const ShEvalOpInfo* ShEval::getEvalOpInfo(ShOperation op, int dest,
     int src0, int src1, int src2) const
 {
+
+#ifdef SH_DEBUG_SHEVAL
+  SH_DEBUG_PRINT("ShEval mapping op=" << opInfo[op].name << " dest,src[0-2]= " 
+      << (dest ? shTypeInfo(dest)->name() : "NULL")
+      << ", " << (src0 ? shTypeInfo(src0)->name() : "NULL")
+      << ", " << (src1 ? shTypeInfo(src1)->name() : "NULL")
+      << ", " << (src2 ? shTypeInfo(src2)->name() : "NULL"));
+#endif
+  // @todo this really needs to be improved...
+  // linear search through a table with hundreds of entries is stupid
+  // (for *each* operation ever performed)
+  
   // do the naive thing now.  Can cache results later
   ShEvalOpInfo key = ShEvalOpInfo(op, dest, src0, src1, src2);
   if(m_evalOpMap.count(key) > 0) return &m_evalOpMap.find(key)->first;
@@ -108,13 +126,10 @@ const ShEvalOpInfo* ShEval::getEvalOpInfo(ShOperation op, int dest,
       result = &(I->first); 
     }
   }
-//  SH_DEBUG_PRINT("Mapping op=" << opInfo[op].name << " dest,src[0-2]= " 
-//      << (dest ? shTypeInfo(dest)->name() : "NULL")
-//      << ", " << (src0 ? shTypeInfo(src0)->name() : "NULL")
-//      << ", " << (src1 ? shTypeInfo(src1)->name() : "NULL")
-//      << ", " << (src2 ? shTypeInfo(src2)->name() : "NULL"));
 
-//  SH_DEBUG_PRINT("    to " << result->encode()); 
+#ifdef SH_DEBUG_SHEVAL
+  SH_DEBUG_PRINT("    map to " << result->encode()); 
+#endif
 
   return result;
 }

@@ -27,6 +27,7 @@
 #ifndef SH_HPP
 #define SH_HPP
 
+#include "ShDllExport.hpp"
 #include "ShException.hpp"
 #include "ShContext.hpp"
 #include "ShProgram.hpp"
@@ -65,7 +66,7 @@
 #include "ShChannel.hpp"
 #include "ShStream.hpp"
 #include "ShQuaternion.hpp"
-#include "ShCloak.hpp"
+#include "ShVariant.hpp"
 #include "ShTypeInfo.hpp"
 
 /** \namespace SH

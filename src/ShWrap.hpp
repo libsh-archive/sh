@@ -58,6 +58,8 @@ public:
     m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP);
   }
 
+	typedef ShWrapClamp<typename T::rectangular_type> rectangular_type;
+	typedef typename T::base_type base_type;
   typedef typename T::return_type return_type;
 };
 
@@ -90,6 +92,8 @@ public:
     m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE);
   }
 
+	typedef ShWrapClampToEdge<typename T::rectangular_type> rectangular_type;
+	typedef typename T::base_type base_type;
   typedef typename T::return_type return_type;
 };
 
@@ -122,6 +126,8 @@ public:
     m_node->traits().wrapping(ShTextureTraits::SH_WRAP_REPEAT);
   }
 
+	typedef ShWrapRepeat<typename T::rectangular_type> rectangular_type;
+	typedef typename T::base_type base_type;
   typedef typename T::return_type return_type;
 };
 

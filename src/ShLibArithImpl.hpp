@@ -1,3 +1,29 @@
+// Sh: A GPU metaprogramming language.
+//
+// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
+// Project administrator: Michael D. McCool
+// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
+//          Michael D. McCool
+// 
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+// 
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+// 
+// 1. The origin of this software must not be misrepresented; you must
+// not claim that you wrote the original software. If you use this
+// software in a product, an acknowledgment in the product documentation
+// would be appreciated but is not required.
+// 
+// 2. Altered source versions must be plainly marked as such, and must
+// not be misrepresented as being the original software.
+// 
+// 3. This notice may not be removed or altered from any source
+// distribution.
+//////////////////////////////////////////////////////////////////////////////
 #ifndef SHLIBARITHIMPL_HPP
 #define SHLIBARITHIMPL_HPP
 
@@ -179,6 +205,12 @@ ShGeneric<N, T> exp10(const ShGeneric<N, T>& var)
 }
 
 template<int N, typename T>
+ShGeneric<N, T> expm1(const ShGeneric<N, T>& var)
+{
+  return exp(var - 1.0);
+}
+
+template<int N, typename T>
 ShGeneric<N, T> log(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
@@ -200,6 +232,12 @@ ShGeneric<N, T> log10(const ShGeneric<N, T>& var)
   ShAttrib<N, SH_TEMP, T> t;
   shLOG10(t, var);
   return t;
+}
+
+template<int N, typename T>
+ShGeneric<N, T> logp1(const ShGeneric<N, T>& var)
+{
+  return log(var + 1.0);
 }
 
 template<int N, typename T1, typename T2>
@@ -264,9 +302,26 @@ ShGeneric<1, CT1T2T3> mad(const ShGeneric<1, T1>& m1, const ShGeneric<1, T2>& m2
   return t;
 }
 
+//template<int N, typename T> 
+//inline
+//ShGeneric<N, T> mad(T m1, const ShGeneric<N, T>& m2, const ShGeneric<N, T>& a)
+//{
+//  ShAttrib<N, SH_TEMP, T> t;
+//  shMAD(t, ShAttrib<1, SH_CONST, T>(m1), m2, a);
+//  return t;
+//}
+//template<int N, typename T>
+//inline
+//ShGeneric<N, T> mad(const ShGeneric<N, T>& m1, T m2, const ShGeneric<N, T>& a)
+//{
+//  ShAttrib<N, SH_TEMP, T> t;
+//  shMAD(t, m1, ShAttrib<1, SH_CONST, T>(m2), a);
+//  return t;
+//}
+
 template<int N, typename T> 
 inline
-ShGeneric<N, T> mad(T m1, const ShGeneric<N, T>& m2, const ShGeneric<N, T>& a)
+ShGeneric<N, T> mad(double m1, const ShGeneric<N, T>& m2, const ShGeneric<N, T>& a)
 {
   ShAttrib<N, SH_TEMP, T> t;
   shMAD(t, ShAttrib<1, SH_CONST, T>(m1), m2, a);
@@ -274,7 +329,7 @@ ShGeneric<N, T> mad(T m1, const ShGeneric<N, T>& m2, const ShGeneric<N, T>& a)
 }
 template<int N, typename T>
 inline
-ShGeneric<N, T> mad(const ShGeneric<N, T>& m1, T m2, const ShGeneric<N, T>& a)
+ShGeneric<N, T> mad(const ShGeneric<N, T>& m1, double m2, const ShGeneric<N, T>& a)
 {
   ShAttrib<N, SH_TEMP, T> t;
   shMAD(t, m1, ShAttrib<1, SH_CONST, T>(m2), a);
@@ -341,6 +396,23 @@ ShGeneric<N, T> lerp(T f, const ShGeneric<N, T>& a,
   shLRP(t, f, a, b);
   return t;
 }
+
+template<int N, typename T>
+ShGeneric<1, T> sum(const ShGeneric<N, T>& var)
+{
+  ShAttrib<1, SH_TEMP, T> t;
+  shCSUM(t, var);
+  return t;
+}
+
+template<int N, typename T>
+ShGeneric<1, T> prod(const ShGeneric<N, T>& var)
+{
+  ShAttrib<1, SH_TEMP, T> t;
+  shCMUL(t, var);
+  return t;
+}
+
 
 }
 

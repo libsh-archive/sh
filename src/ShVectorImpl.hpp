@@ -113,6 +113,14 @@ ShVector<N, Binding, T, Swizzled>::operator=(const ShVector<N, Binding, T2, Swiz
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+ShVector<N, Binding, T, Swizzled>&
+ShVector<N, Binding, T, Swizzled>::operator=(const ShProgram& prg)
+{
+  ParentType::operator=(prg);
+  return *this;
+}
+
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
 ShVector<N, Binding, T, Swizzled>&
 ShVector<N, Binding, T, Swizzled>::operator+=(const ShGeneric<N, T2>& right)
@@ -382,6 +390,14 @@ ShVector<1, Binding, T, Swizzled>::operator=(T other)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+ShVector<1, Binding, T, Swizzled>&
+ShVector<1, Binding, T, Swizzled>::operator=(const ShProgram& prg)
+{
+  ParentType::operator=(prg);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
 ShVector<1, Binding, T, Swizzled>&
 ShVector<1, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T2>& right)
@@ -602,6 +618,14 @@ ShVector<2, Binding, T, Swizzled>&
 ShVector<2, Binding, T, Swizzled>::operator=(const ShVector<2, Binding, T2, Swizzled>& other)
 {
   ParentType::operator=(other);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+ShVector<2, Binding, T, Swizzled>&
+ShVector<2, Binding, T, Swizzled>::operator=(const ShProgram& prg)
+{
+  ParentType::operator=(prg);
   return *this;
 }
 
@@ -875,6 +899,14 @@ ShVector<3, Binding, T, Swizzled>::operator=(const ShVector<3, Binding, T2, Swiz
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+ShVector<3, Binding, T, Swizzled>&
+ShVector<3, Binding, T, Swizzled>::operator=(const ShProgram& prg)
+{
+  ParentType::operator=(prg);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
 ShVector<3, Binding, T, Swizzled>&
 ShVector<3, Binding, T, Swizzled>::operator+=(const ShGeneric<3, T2>& right)
@@ -1140,6 +1172,14 @@ ShVector<4, Binding, T, Swizzled>&
 ShVector<4, Binding, T, Swizzled>::operator=(const ShVector<4, Binding, T2, Swizzled>& other)
 {
   ParentType::operator=(other);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+ShVector<4, Binding, T, Swizzled>&
+ShVector<4, Binding, T, Swizzled>::operator=(const ShProgram& prg)
+{
+  ParentType::operator=(prg);
   return *this;
 }
 

@@ -27,6 +27,7 @@
 #ifndef SHPARSER_HPP
 #define SHPARSER_HPP
 
+#include "ShDllExport.hpp"
 #include "ShCtrlGraph.hpp"
 
 namespace SH {
@@ -35,7 +36,8 @@ namespace SH {
  * This parser takes a list of blocks containing tokens and basic
  * blocks and parses it into a control graph.
  */
-class ShParser {
+class
+SH_DLLEXPORT ShParser {
 public:
   /** Parse blocks into the control graph between head and tail.
    */

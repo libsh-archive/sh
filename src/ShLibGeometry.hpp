@@ -1,3 +1,29 @@
+// Sh: A GPU metaprogramming language.
+//
+// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
+// Project administrator: Michael D. McCool
+// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
+//          Michael D. McCool
+// 
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+// 
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+// 
+// 1. The origin of this software must not be misrepresented; you must
+// not claim that you wrote the original software. If you use this
+// software in a product, an acknowledgment in the product documentation
+// would be appreciated but is not required.
+// 
+// 2. Altered source versions must be plainly marked as such, and must
+// not be misrepresented as being the original software.
+// 
+// 3. This notice may not be removed or altered from any source
+// distribution.
+//////////////////////////////////////////////////////////////////////////////
 #ifndef SHLIBGEOMETRY_HPP
 #define SHLIBGEOMETRY_HPP
 
@@ -80,6 +106,30 @@ operator|(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right);
 SH_SHLIB_CONST_N_OP_RETSIZE_BOTH(dot, 1);
 
 /*@}*/
+
+/** Euclidean Distance
+ * Computes the Euclidean distance between the two points a and b.
+ */
+template<int N, typename T>
+ShGeneric<1,  T> distance(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b);
+
+/** Manhattan Distance
+ * Computes the Manhattan distance between the two points a and b.
+ */
+template<int N, typename T>
+ShGeneric<1,  T> distance_1(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b);
+
+/** Inf Distance
+ * Computes the Inf norm distance between the two points a and b.
+ */
+template<int N, typename T>
+ShGeneric<1,  T> distance_inf(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b);
+
+/** Euclidean Length
+ * Computes the euclidean distance between the zero vector and a.
+ */
+template<int N, typename T>
+ShGeneric<1,  T> length(const ShGeneric<N, T>& a);
 
 }
 

@@ -1,3 +1,29 @@
+// Sh: A GPU metaprogramming language.
+//
+// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
+// Project administrator: Michael D. McCool
+// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
+//          Michael D. McCool
+// 
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+// 
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+// 
+// 1. The origin of this software must not be misrepresented; you must
+// not claim that you wrote the original software. If you use this
+// software in a product, an acknowledgment in the product documentation
+// would be appreciated but is not required.
+// 
+// 2. Altered source versions must be plainly marked as such, and must
+// not be misrepresented as being the original software.
+// 
+// 3. This notice may not be removed or altered from any source
+// distribution.
+//////////////////////////////////////////////////////////////////////////////
 #include "GlBackend.hpp"
 #include "ShDebug.hpp"
 
@@ -53,11 +79,34 @@ void shGlCheckError(const char* desc, const char* file, int line)
   SH_DEBUG_PRINT("GL ERROR call: " << desc);
 }
 
+#ifdef WIN32
+#define GET_WGL_PROCEDURE(x, T) do { x = reinterpret_cast<PFN ## T ## PROC>(wglGetProcAddress(#x)); } while(0)
+#else
+#define GET_WGL_PROCEDURE(x, T) do { } while (0)
+#endif
+
 GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* textures,
                      StreamStrategy* streams)
   : m_curContext(0)
 {
   m_contexts.push_back(Context(code, textures, streams));
+
+  GET_WGL_PROCEDURE(glProgramStringARB,
+		    GLPROGRAMSTRINGARB);
+  GET_WGL_PROCEDURE(glBindProgramARB,
+		    GLBINDPROGRAMARB);
+  GET_WGL_PROCEDURE(glGenProgramsARB,
+		    GLGENPROGRAMSARB);
+  GET_WGL_PROCEDURE(glActiveTextureARB,
+		    GLACTIVETEXTUREARB);
+  GET_WGL_PROCEDURE(glTexImage3D,
+		    GLTEXIMAGE3D);
+  GET_WGL_PROCEDURE(glProgramEnvParameter4fvARB,
+		    GLPROGRAMENVPARAMETER4FVARB);
+  GET_WGL_PROCEDURE(glProgramLocalParameter4fvARB,
+		    GLPROGRAMLOCALPARAMETER4FVARB);
+  GET_WGL_PROCEDURE(glGetProgramivARB,
+		    GLGETPROGRAMIVARB);
 }
 
 SH::ShBackendCodePtr
@@ -97,7 +146,7 @@ int GlBackend::context() const
 
 void GlBackend::setContext(int context)
 {
-  SH_DEBUG_ASSERT(0 <= context < m_contexts.size());
+  SH_DEBUG_ASSERT(0 <= context && context < m_contexts.size());
   m_curContext = context;
 }
 

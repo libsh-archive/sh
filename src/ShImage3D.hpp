@@ -28,6 +28,7 @@
 #define SHIMAGE3D_HPP
 
 #include <string>
+#include "ShDllExport.hpp"
 #include "ShRefCount.hpp"
 #include "ShMemory.hpp"
 
@@ -39,7 +40,8 @@ namespace SH {
  * texture.
  * @see ShImage
  */
-class ShImage3D : public ShRefCountable {
+class
+SH_DLLEXPORT ShImage3D : public ShRefCountable {
 public:
   ShImage3D(); ///< Construct an empty image
   ShImage3D(int width, int height, int depth, int elements); ///< Construct a black

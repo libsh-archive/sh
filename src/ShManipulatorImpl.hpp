@@ -76,7 +76,6 @@ std::string OffsetRange<T>::toString() const {
 template<typename T>
 ShManipulator<T>::ShManipulator() {} 
 
-
 template<typename T>
 ShManipulator<T>::~ShManipulator() {
 } 

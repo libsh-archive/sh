@@ -116,9 +116,9 @@ struct VariableSplitter {
 
       if( node->hasValues() ) { 
         for(i = 0; i < newSize; ++i) copySwiz[i] = offset + i;
-        ShCloakCPtr oldCloak = node->cloak();
-        newNode->setCloak(oldCloak->get(false, 
-            ShSwizzle(oldCloak->size(), newSize, copySwiz)));
+        ShVariantCPtr oldVariant = node->getVariant();
+        newNode->setVariant(oldVariant->get(false, 
+            ShSwizzle(oldVariant->size(), newSize, copySwiz)));
       }
       nodeVarNodeVec.push_back( newNode );
     }
@@ -172,8 +172,8 @@ struct StatementSplitter {
       ShVariable tempVar(v.node()->clone(SH_TEMP, SH_ATTRIB, tsize, true, false)); 
       vv.push_back(tempVar);
 
-      int tempSwiz[tsize];
-      int srcSwiz[tsize];
+      int* tempSwiz = new int[tsize];
+      int* srcSwiz = new int[tsize];
       int tempSize;
       for(j = 0; j < srcVec.size(); ++j) {
         tempSize = 0;
@@ -189,6 +189,8 @@ struct StatementSplitter {
           stmts.push_back(ShStatement(tempVar(tempSize, tempSwiz), SH_OP_ASN, srcVar(tempSize, srcSwiz)));
         }
       }
+      delete [] tempSwiz;
+      delete [] srcSwiz;
     }
   }
 
@@ -198,8 +200,8 @@ struct StatementSplitter {
     std::size_t j;
     int k;
     int offset = 0;
-    int swizd[maxTuple];
-    int swizr[maxTuple];
+    int* swizd = new int[maxTuple];
+    int* swizr = new int[maxTuple];
     int size;
     for(VarVec::const_iterator I = resultVec.begin(); I != resultVec.end(); 
         offset += I->size(), ++I) {
@@ -218,6 +220,8 @@ struct StatementSplitter {
         }
       }
     }
+    delete [] swizd;
+    delete [] swizr;
   }
 
   // works on two assumptions

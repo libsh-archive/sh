@@ -65,6 +65,8 @@ public:
   ShTexCoord& operator=(const ShTexCoord<N, Binding, T2, Swizzled>& other);
   ShTexCoord& operator=(const ShTexCoord<N, Binding, T, Swizzled>& other);
 
+  ShTexCoord& operator=(const ShProgram& prg);
+
   
   template<typename T2>
   ShTexCoord& operator+=(const ShGeneric<N, T2>& right);
@@ -152,6 +154,8 @@ public:
 
   ShTexCoord& operator=(T other);
 
+  ShTexCoord& operator=(const ShProgram& prg);
+
   
   template<typename T2>
   ShTexCoord& operator+=(const ShGeneric<1, T2>& right);
@@ -223,6 +227,8 @@ public:
   template<typename T2>
   ShTexCoord& operator=(const ShTexCoord<2, Binding, T2, Swizzled>& other);
   ShTexCoord& operator=(const ShTexCoord<2, Binding, T, Swizzled>& other);
+
+  ShTexCoord& operator=(const ShProgram& prg);
 
   
   template<typename T2>
@@ -311,6 +317,8 @@ public:
   ShTexCoord& operator=(const ShTexCoord<3, Binding, T2, Swizzled>& other);
   ShTexCoord& operator=(const ShTexCoord<3, Binding, T, Swizzled>& other);
 
+  ShTexCoord& operator=(const ShProgram& prg);
+
   
   template<typename T2>
   ShTexCoord& operator+=(const ShGeneric<3, T2>& right);
@@ -397,6 +405,8 @@ public:
   template<typename T2>
   ShTexCoord& operator=(const ShTexCoord<4, Binding, T2, Swizzled>& other);
   ShTexCoord& operator=(const ShTexCoord<4, Binding, T, Swizzled>& other);
+
+  ShTexCoord& operator=(const ShProgram& prg);
 
   
   template<typename T2>

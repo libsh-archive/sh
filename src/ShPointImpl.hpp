@@ -113,6 +113,14 @@ ShPoint<N, Binding, T, Swizzled>::operator=(const ShPoint<N, Binding, T2, Swizzl
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+ShPoint<N, Binding, T, Swizzled>&
+ShPoint<N, Binding, T, Swizzled>::operator=(const ShProgram& prg)
+{
+  ParentType::operator=(prg);
+  return *this;
+}
+
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
 ShPoint<N, Binding, T, Swizzled>&
 ShPoint<N, Binding, T, Swizzled>::operator+=(const ShGeneric<N, T2>& right)
@@ -382,6 +390,14 @@ ShPoint<1, Binding, T, Swizzled>::operator=(T other)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+ShPoint<1, Binding, T, Swizzled>&
+ShPoint<1, Binding, T, Swizzled>::operator=(const ShProgram& prg)
+{
+  ParentType::operator=(prg);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
 ShPoint<1, Binding, T, Swizzled>&
 ShPoint<1, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T2>& right)
@@ -602,6 +618,14 @@ ShPoint<2, Binding, T, Swizzled>&
 ShPoint<2, Binding, T, Swizzled>::operator=(const ShPoint<2, Binding, T2, Swizzled>& other)
 {
   ParentType::operator=(other);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+ShPoint<2, Binding, T, Swizzled>&
+ShPoint<2, Binding, T, Swizzled>::operator=(const ShProgram& prg)
+{
+  ParentType::operator=(prg);
   return *this;
 }
 
@@ -875,6 +899,14 @@ ShPoint<3, Binding, T, Swizzled>::operator=(const ShPoint<3, Binding, T2, Swizzl
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+ShPoint<3, Binding, T, Swizzled>&
+ShPoint<3, Binding, T, Swizzled>::operator=(const ShProgram& prg)
+{
+  ParentType::operator=(prg);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
 ShPoint<3, Binding, T, Swizzled>&
 ShPoint<3, Binding, T, Swizzled>::operator+=(const ShGeneric<3, T2>& right)
@@ -1140,6 +1172,14 @@ ShPoint<4, Binding, T, Swizzled>&
 ShPoint<4, Binding, T, Swizzled>::operator=(const ShPoint<4, Binding, T2, Swizzled>& other)
 {
   ParentType::operator=(other);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+ShPoint<4, Binding, T, Swizzled>&
+ShPoint<4, Binding, T, Swizzled>::operator=(const ShProgram& prg)
+{
+  ParentType::operator=(prg);
   return *this;
 }
 

@@ -1,0 +1,49 @@
+# -*- makefile -*-
+
+RELEASE_TARGETS = libshutil.lib
+DEBUG_TARGETS = libshutild.lib
+
+all: all-release all-debug
+
+all-release: $(RELEASE_TARGETS)
+all-debug: $(DEBUG_TARGETS)
+
+CLEANFILES = $(RELEASE_TARGETS) $(DEBUG_TARGETS) *.exp *.pdb *.idb *.ilk
+
+libshutil_lib_SOURCES = ShFunc.hpp ShFuncImpl.hpp
+libshutil_lib_SOURCES += ShKernelLib.cpp ShKernelLib.hpp ShKernelLibImpl.hpp
+libshutil_lib_SOURCES += ShKernelLight.hpp ShKernelLightImpl.hpp
+libshutil_lib_SOURCES += ShKernelPost.hpp ShKernelPostImpl.hpp
+libshutil_lib_SOURCES += ShKernelSurface.hpp ShKernelSurfaceImpl.hpp
+libshutil_lib_SOURCES += ShKernelSurfMap.cpp ShKernelSurfMap.hpp
+libshutil_lib_SOURCES += ShMesh.hpp ShMeshImpl.hpp
+libshutil_lib_SOURCES += ShNoise.hpp ShNoiseImpl.hpp
+libshutil_lib_SOURCES += ShObjMesh.cpp ShObjMesh.hpp
+libshutil_lib_SOURCES += ShWorley.hpp ShWorleyImpl.hpp
+libshutil_lib_SOURCES += shutil.hpp
+
+libshutil_lib_CXXFILES = $(filter %.cpp,$(libshutil_lib_SOURCES))
+libshutil_lib_RELEASE_OBJECTS = $(libshutil_lib_CXXFILES:.cpp=.r.obj)
+libshutil_lib_DEBUG_OBJECTS = $(libshutil_lib_CXXFILES:.cpp=.d.obj)
+
+libshutil.lib: $(libshutil_lib_RELEASE_OBJECTS)
+	$(AR) /OUT:$@ $^
+
+libshutild.lib: $(libshutil_lib_DEBUG_OBJECTS)
+	$(AR) /OUT:$@ $^
+
+install: $(RELEASE_TARGETS) $(DEBUG_TARGETS) $(wildcard *.hpp)
+	-mkdir $(SH_INSTALLDIR)
+	-mkdir $(SH_INSTALLDIR)\include
+	-mkdir $(SH_INSTALLDIR)\include\sh
+	-mkdir $(SH_INSTALLDIR)\lib
+	copy libshutil.lib $(SH_INSTALLDIR)\lib
+	copy libshutild.lib $(SH_INSTALLDIR)\lib
+	copy *.hpp $(SH_INSTALLDIR)\include\sh
+
+libshutil_lib_DEPENDS = $(libshutil_lib_CXXFILES:.cpp=.r.d) $(libshutil_lib_CXXFILES:.cpp=.d.d)
+
+include ../win32.mk
+INCLUDES += -I../src
+CPPFLAGS += -DSH_DLLEXPORT="__declspec(dllimport)"
+-include $(libshutil_lib_DEPENDS)

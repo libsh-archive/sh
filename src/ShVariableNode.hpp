@@ -28,6 +28,8 @@
 #define SHVARIABLENODE_HPP
 
 #include <string>
+#include <list>
+#include "ShDllExport.hpp"
 #include "ShVariableType.hpp"
 #include "ShRefCount.hpp"
 #include "ShMeta.hpp"
@@ -36,20 +38,28 @@
 namespace SH {
 
 
+// @todo type 
+// move these over to ShVariableType.hpp
 // ensure these match the BindingType and SemanticType enums
-extern const char* ShBindingTypeName[];
-extern const char* ShSemanticTypeName[];
+SH_DLLEXPORT extern const char* ShBindingTypeName[];
+SH_DLLEXPORT extern const char* ShSemanticTypeName[];
 
 // forward declarations 
-class ShCloak;
+class ShVariant;
 
 class ShVariableNode;
 typedef ShPointer<ShVariableNode> ShVariableNodePtr;
 typedef ShPointer<const ShVariableNode> ShVariableNodeCPtr;
 
+class ShProgramNode;
+
+// Used to hide our use of ShProgramNodePtr, since MSVC7 doesn't allow it.
+struct ShVariableNodeEval;
+
 /** A generic n-tuple variable.
  */
-class ShVariableNode : public virtual ShRefCountable,
+class 
+SH_DLLEXPORT ShVariableNode : public virtual ShRefCountable,
                        public virtual ShMeta {
 public:
   /// Constructs a VariableNode that holds a tuple of data of type 
@@ -70,9 +80,9 @@ public:
   //
   // @todo Currently this does not work if the newKind is SH_CONST
   // and old kind was not CONST/uniform since the old one won't have 
-  // a ShCloak node to clone...
+  // a ShVariant node to clone...
   // To fix this, VariableNode should hold the type_index of its data
-  // as well, so that it can generate new cloaks on demand.
+  // as well, so that it can generate new variants on demand.
   //
   // @todo clean this up...eventually we will need dozens of these functions...
   // @{
@@ -111,11 +121,11 @@ public:
 
   /// Set a range of possible values for this variable's elements
   // low and high must be scalar elements (otherwise this just uses the first component)
-  void rangeCloak(ShPointer<const ShCloak> low, ShPointer<const ShCloak> high);
-  void rangeCloak(ShPointer<const ShCloak> low, ShPointer<const ShCloak> high, bool neg, const ShSwizzle &writemask);
+  void rangeVariant(ShPointer<const ShVariant> low, ShPointer<const ShVariant> high);
+  void rangeVariant(ShPointer<const ShVariant> low, ShPointer<const ShVariant> high, bool neg, const ShSwizzle &writemask);
 
-  ShPointer<ShCloak> lowBoundCloak() const;
-  ShPointer<ShCloak> highBoundCloak() const;
+  ShPointer<ShVariant> lowBoundVariant() const;
+  ShPointer<ShVariant> highBoundVariant() const;
 
   ShBindingType kind() const;
   ShSemanticType specialType() const;
@@ -123,14 +133,37 @@ public:
 
   std::string nameOfType() const; ///< Get a string of this var's specialType, kind, & size
 
-  /// Update elements of a cloak applying the given writemask and negation
-  void setCloak(ShPointer<const ShCloak> other);
-  void setCloak(ShPointer<const ShCloak> other, int index);
-  void setCloak(ShPointer<const ShCloak> other, bool neg, const ShSwizzle &writemask);
+  /// Update elements of a variant applying the given writemask and negation
+  void setVariant(ShPointer<const ShVariant> other);
+  void setVariant(ShPointer<const ShVariant> other, int index);
+  void setVariant(ShPointer<const ShVariant> other, bool neg, const ShSwizzle &writemask);
 
-  /// Retrieve the cloak 
-  ShPointer<const ShCloak> cloak() const;
-  //ShDataCloakPtr cloak(); // TODO can't have this function until ShUpdate is implemented, and even then it might not be a good idea
+  /// Retrieve the variant 
+  ShPointer<const ShVariant> getVariant() const;
+  //ShDataVariantPtr getVariant(); // TODO can't have this function until ShUpdate is implemented, and even then it might not be a good idea
+
+  /// Ensure this node has space to store host-side values.
+  /// Normally this is not necessary, but when uniforms are given
+  /// dependent programs and evaluated all the temporaries will need
+  /// to store values during an evaluation.
+  void addVariant();
+
+  /** @group dependent_uniforms
+   * This code applies only to uniforms.
+   * @{
+   */
+  
+  /// Attaching a null program causes this uniform to no longer become
+  /// dependent.
+  void attach(const ShPointer<ShProgramNode>& evaluator);
+
+  /// Reevaluate a dependent uniform
+  void update();
+
+  /// Obtain the program defining this uniform, if any.
+  const ShPointer<ShProgramNode>& evaluator() const;
+  
+  /** @} */
   
 protected:
   /// Creates a new variable node that holds the same data type as old
@@ -144,9 +177,19 @@ protected:
   ShVariableNode(const ShVariableNode& old, ShBindingType newKind, 
       ShSemanticType newType, int newSize, int newTypeIndex, 
       bool updateVarList, bool keepUniform);
-  void uniformUpdate(); /// Updates a uniform in currently bound shaders
+  // @todo type find a better function name for this
+  // (Later this should just update the backends as part of shUpdate 
+  // and all calls to this should be replaced with update_dependents) 
+  void update_all(); /// Updates a uniform in currently bound shaders and all dependencies
+
   void programVarListInit(); /// After kind, size and type are set, this 
 
+  void add_dependent(ShVariableNode* dep);
+  void remove_dependent(ShVariableNode* dep);
+
+  void update_dependents();
+  void detach_dependencies();
+  
   bool m_uniform;
   
   ShBindingType m_kind;
@@ -156,10 +199,14 @@ protected:
   int m_id;
   int m_locked;
 
-  ShPointer<ShCloak> m_cloak;
+  ShPointer<ShVariant> m_variant;
+
+  // Dependent uniform evaluation
+  ShVariableNodeEval* m_eval;
+  std::list<ShVariableNode*> m_dependents;
+  
   static int m_maxID;
 };
-
 
 }
 

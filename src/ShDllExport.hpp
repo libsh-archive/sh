@@ -24,38 +24,15 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHCLOAKCAST_HPP
-#define SHCLOAKCAST_HPP
+#ifndef SHDLLEXPORT_HPP
+#define SHDLLEXPORT_HPP
 
-#include "ShRefCount.hpp"
-
-namespace SH {
-
-class ShCloak;
-struct ShCloakCast: public ShRefCountable {
-  public:
-    virtual ~ShCloakCast();
-
-    virtual ShPointer<ShCloak> operator()(ShPointer<ShCloak> value) const = 0;
-    virtual ShPointer<const ShCloak> operator()(
-        ShPointer<const ShCloak> value) const = 0;
-};
-
-typedef ShPointer<ShCloakCast> ShCloakCastPtr;
-typedef ShPointer<const ShCloakCast> ShCloakCastCPtr;
-
-template<typename DEST, typename SRC>
-struct ShDataCloakCast: public ShCloakCast {
-  public:
-    ShPointer<ShCloak> operator()(ShPointer<ShCloak> value) const;
-    ShPointer<const ShCloak> operator()(ShPointer<const ShCloak> value) const;
-
-    void doCast(DEST &dest, const SRC &src) const;
-};
-
-
-}
-
-#include "ShCloakCastImpl.hpp"
+#ifndef SH_DLLEXPORT
+# ifdef WIN32
+#  define SH_DLLEXPORT __declspec(dllimport)
+# else
+#  define SH_DLLEXPORT
+# endif
+#endif
 
 #endif

@@ -162,6 +162,8 @@ ShInterval<T>& ShInterval<T>::operator*=(const ShInterval<T> &other)
 
   m_lo = std::min(std::min(ll, lh), std::min(hl, hh));
   m_hi = std::max(std::max(ll, lh), std::max(hl, hh));
+
+  return *this;
 }
 
 template<typename T>
@@ -492,6 +494,12 @@ ShInterval<T> operator!=(const ShInterval<T> &a, const ShInterval<T> &b)
   return __boolean_op<T>(
       a.m_hi < b.m_lo || a.m_lo > b.m_hi,
       a.m_hi == b.m_hi && a.m_lo == b.m_lo && a.m_lo == a.m_hi);
+}
+
+template<typename T>
+bool boundsEqual(const ShInterval<T> &a, const ShInterval<T> &b) 
+{
+  return (a.lo() == b.lo()) && (a.hi() == b.hi());
 }
 
 

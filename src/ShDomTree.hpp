@@ -32,7 +32,7 @@
 #include <map>
 #include <vector>
 #include <algorithm>
-
+#include "ShDllExport.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShRefCount.hpp"
 
@@ -40,7 +40,8 @@ namespace SH {
 
   /** A dominator tree in a flowgraph.
    */
-  class ShDomTree {
+  class
+  SH_DLLEXPORT ShDomTree {
   public:
     ShDomTree(ShCtrlGraphPtr ctrlGraph);
 

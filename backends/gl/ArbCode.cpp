@@ -34,7 +34,7 @@
 #include "ShDebug.hpp"
 #include "ShLinearAllocator.hpp"
 #include "ShInternals.hpp"
-#include "ShOptimizer.hpp"
+#include "ShOptimizations.hpp"
 #include "ShEnvironment.hpp"
 #include "ShContext.hpp"
 #include "ShTextureNode.hpp"
@@ -43,6 +43,7 @@
 #include "Arb.hpp"
 #include "ShAttrib.hpp"
 #include "ShCastManager.hpp"
+#include "ShError.hpp"
 
 namespace shgl {
 
@@ -178,8 +179,7 @@ void ArbCode::generate()
   transform.convertToFloat(m_convertMap, m_converts);
   
   if(transform.changed()) {
-    ShOptimizer optimizer(m_shader->ctrlGraph);
-    optimizer.optimize(ShContext::current()->optimization());
+    optimize(m_shader);
     m_shader->collectVariables();
   } else {
     m_shader = shref_const_cast<ShProgramNode>(m_originalShader);
@@ -215,7 +215,7 @@ bool ArbCode::allocateRegister(const ShVariableNodePtr& var)
   if (var->uniform()) return true;
 
   if (m_tempRegs.empty()) {
-    SH_DEBUG_ERROR("Out of temporaries!");
+    shError(ShException("ARB Backend: Out of registers"));
     return false;
   }
 
@@ -303,7 +303,7 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
 
   if (!uniform) return;
 
-  ShCloakCPtr uniformCloak = uniform->cloak();
+  ShVariantCPtr uniformVariant = uniform->getVariant();
   RegMap::const_iterator I = m_registers.find(uniform);
   if (I == m_registers.end()) { // perhaps uniform was split
     if( m_splits.count(uniform) > 0 ) {
@@ -315,7 +315,7 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
           it != splitVec.end(); offset += (*it)->size(), ++it) {
         // TODO switch to properly swizzled version
         for(i = 0; i < (*it)->size(); ++i) copySwiz[i] = i + offset;
-        (*it)->setCloak(uniformCloak->get(false,
+        (*it)->setVariant(uniformVariant->get(false,
             ShSwizzle(uniform->size(), (*it)->size(), copySwiz))); 
         updateUniform(*it);
       }
@@ -333,12 +333,12 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
   // cast to float
   // @todo type handle half-floats, etc. 
   float values[4];
-  uniformCloak = ShCastManager::instance()->doCast(shTypeIndex<float>(), uniformCloak);
-  const ShDataCloak<float> floatCloak = 
-    (*shref_dynamic_cast<const ShDataCloak<float> >(uniformCloak));
+  uniformVariant = ShCastManager::instance()->doCast(shTypeIndex<float>(), uniformVariant);
+  const ShDataVariant<float> floatVariant = 
+    (*shref_dynamic_cast<const ShDataVariant<float> >(uniformVariant));
   for (i = 0; i < uniform->size(); i++) {
     // TODO clean this up and handle different types
-    values[i] = floatCloak[i]; 
+    values[i] = floatVariant[i]; 
   }
   for (; i < 4; i++) {
     values[i] = 0.0;
@@ -526,11 +526,12 @@ std::ostream& ArbCode::print(std::ostream& out)
       }
       out << "  BRA label" << I->label;
       if (I->src[0].node()) {
-        out << "  (GT)";
+        out << "  (GT";
         out << ".";
         for (int i = 0; i < I->src[0].swizzle().size(); i++) {
           out << swizChars[I->src[0].swizzle()[i]];
         }
+        out << ")";
       }
       out << ";";
     } else if (I->op == SH_ARB_REP) {
@@ -883,7 +884,7 @@ void ArbCode::allocConsts(const ArbLimits& limits)
   for (ShProgramNode::VarList::const_iterator I = m_shader->constants.begin();
        I != m_shader->constants.end(); ++I) {
     ShVariableNodePtr node = *I;
-    const ShDataCloak<float>& cloak = (*shref_dynamic_cast<const ShDataCloak<float> >(node->cloak()));
+    const ShDataVariant<float>& variant = (*shref_dynamic_cast<const ShDataVariant<float> >(node->getVariant()));
 
     // TODO: improve efficiency
     RegMap::const_iterator J;
@@ -892,7 +893,7 @@ void ArbCode::allocConsts(const ArbLimits& limits)
       int f = 0;
       // TODO handle other stuff
       for (int i = 0; i < node->size(); i++) {
-        if (J->second->values[i] == cloak[i]) f++;
+        if (J->second->values[i] == variant[i]) f++;
       }
       if (f == node->size()) break;
     }
@@ -900,7 +901,7 @@ void ArbCode::allocConsts(const ArbLimits& limits)
       m_registers[node] = new ArbReg(SH_ARB_REG_CONST, m_numConsts, node->name());
       m_reglist.push_back(m_registers[node]);
       for (int i = 0; i < 4; i++) {
-        m_registers[node]->values[i] = (float)(i < node->size() ? cloak[i] : 0.0);
+        m_registers[node]->values[i] = (float)(i < node->size() ? variant[i] : 0.0);
       }
       m_numConsts++;
     } else {

@@ -24,16 +24,11 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#include <iostream>
-#include <sstream>
-#include "ShCloak.hpp"
+#include "ShVariantCast.hpp"
 
 namespace SH {
 
-ShCloak::ShCloak()
-{}
-
-ShCloak::~ShCloak() 
+ShVariantCast::~ShVariantCast()
 {}
 
 }

@@ -31,6 +31,7 @@
 #include <map>
 #include <utility>
 #include <string>
+#include "ShDllExport.hpp"
 #include "ShRefCount.hpp"
 #include "ShTokenizer.hpp"
 #include "ShVariableNode.hpp"
@@ -46,7 +47,8 @@ class ShBackend;
 
 /** A particular Sh program.
  */
-class ShProgramNode : public virtual ShRefCountable, public virtual ShMeta {
+class
+SH_DLLEXPORT ShProgramNode : public virtual ShRefCountable, public virtual ShMeta {
 public:
   ShProgramNode(const std::string& target);
 
@@ -98,6 +100,24 @@ public:
   typedef std::list<ShVariableNodePtr> VarList;
   typedef std::list<ShTextureNodePtr> TexList;
   typedef std::list<ShChannelNodePtr> ChannelList;
+
+  VarList::const_iterator inputs_begin() const;
+  VarList::const_iterator inputs_end() const;
+  VarList::const_iterator outputs_begin() const;
+  VarList::const_iterator outputs_end() const;
+  VarList::const_iterator temps_begin() const;
+  VarList::const_iterator temps_end() const;
+  VarList::const_iterator constants_begin() const;
+  VarList::const_iterator constants_end() const;
+  VarList::const_iterator uniforms_begin() const;
+  VarList::const_iterator uniforms_end() const;
+
+  TexList::const_iterator textures_begin() const;
+  TexList::const_iterator textures_end() const;
+
+  ChannelList::const_iterator channels_begin() const;
+  ChannelList::const_iterator channels_end() const;
+  
   
   VarList inputs; ///< Input variables used in this program
   VarList outputs; ///< Output variables used in this program
@@ -118,6 +138,17 @@ public:
 
   /// Print a description of a list of variables
   static std::ostream& print(std::ostream& out, const VarList& list);
+
+  /// True if this program has been completed with SH_END.
+  bool finished() const;
+
+  /// @internal Set finished to true. Only shEndShader() needs to call this.
+  void finish();
+
+  /// @internal Indicate that we have been assigned to a uniform
+  /// during construction. This is so we can call back that uniform
+  /// when the program is finished constructing.
+  void assign(const ShVariableNodePtr& var) const;
   
 private:
 
@@ -129,6 +160,11 @@ private:
   typedef std::map< std::pair< std::string, ShPointer<ShBackend> >,
                     ShPointer<ShBackendCode> > CodeMap;
   CodeMap m_code; ///< Compiled code is cached here.
+
+  bool m_finished; ///< True if this program has been constructed
+                   /// completely.
+
+  mutable ShVariableNodePtr m_assigned_var;
 };
 
 typedef ShPointer<ShProgramNode> ShProgramNodePtr;

@@ -88,7 +88,35 @@ SHCRO_UNARY_OP(SH_OP_ASIN, asin(*A));
 SHCRO_UNARY_OP(SH_OP_ASN, (*A));
 SHCRO_UNARY_OP(SH_OP_ATAN, atan(*A));
 SHCRO_UNARY_OP(SH_OP_CEIL, ceil(*A));
+
+template<typename T>
+struct ShConcreteRegularOp<SH_OP_CMUL, T> {
+  static void doop(std::vector<T> *dest, 
+    const std::vector<T> *a, const std::vector<T> *b = 0, const std::vector<T> *c = 0) 
+  {
+    // dest->size should be 1 and a->size == b->size
+    T result = ShConcreteTypeInfo<T>::ZERO;
+    typename std::vector<T>::const_iterator A = a->begin();
+    for(; A != a->end(); ++A) result *= (*A); 
+     (*dest)[0] = result;
+  }
+};
+
 SHCRO_UNARY_OP(SH_OP_COS, cos(*A));
+
+template<typename T>
+struct ShConcreteRegularOp<SH_OP_CSUM, T> {
+  static void doop(std::vector<T> *dest, 
+    const std::vector<T> *a, const std::vector<T> *b = 0, const std::vector<T> *c = 0) 
+  {
+    // dest->size should be 1 and a->size == b->size
+    T result = ShConcreteTypeInfo<T>::ZERO;
+    typename std::vector<T>::const_iterator A = a->begin();
+    for(; A != a->end(); ++A) result += (*A); 
+     (*dest)[0] = result;
+  }
+};
+
 SHCRO_UNARY_OP(SH_OP_EXP, exp(*A));
 SHCRO_UNARY_OP(SH_OP_EXP2, exp2(*A));
 SHCRO_UNARY_OP(SH_OP_EXP10, exp10(*A));

@@ -1,5 +1,7 @@
 INCLUDES = $(LTDLINCL)
 
+EXTRA_DIST = Makefile.win32
+
 lib_LTLIBRARIES = libsh.la
 
 libsh_la_LIBADD = $(LIBLTDL)
@@ -30,17 +32,24 @@ libsh_la_SOURCES += ShInstructions.hpp ShInstructions.cpp
 libsh_la_SOURCES += ShMeta.hpp ShMeta.cpp
 libsh_la_SOURCES += ShMetaForwarder.hpp ShMetaForwarder.cpp
 libsh_la_SOURCES += ShContext.hpp ShContextImpl.hpp ShContext.cpp
+libsh_la_SOURCES += ShDllExport.hpp
+incinc_HEADERS   += ShDllExport.hpp
 
 # Backend
 libsh_la_SOURCES += ShBackend.cpp ShBackend.hpp 
 libsh_la_SOURCES += ShLinearAllocator.hpp ShLinearAllocator.cpp
 
 # Optimizer and compiler internals
-libsh_la_SOURCES += ShDomTree.hpp ShOptimizer.hpp ShTransformer.hpp ShBitSet.hpp
-libsh_la_SOURCES += ShDomTree.cpp ShOptimizer.cpp ShTransformer.cpp ShTypeConvertTransformer.cpp ShBitSet.cpp
+libsh_la_SOURCES += ShTransformer.hpp ShBitSet.hpp
+libsh_la_SOURCES += ShTransformer.cpp ShBitSet.cpp
+incinc_HEADERS   += ShTransformer.hpp ShBitSet.hpp
+libsh_la_SOURCES += ShTypeConvertTransformer.cpp 
 libsh_la_SOURCES += ShIntervalConverter.cpp 
-libsh_la_SOURCES += ShStructural.hpp ShStructural.cpp
-incinc_HEADERS   += ShDomTree.hpp ShOptimizer.hpp ShTransformer.hpp ShBitSet.hpp
+libsh_la_SOURCES += ShOptimizations.cpp ShOptimizations.hpp
+incinc_HEADERS   += ShOptimizations.hpp
+libsh_la_SOURCES += ShValueTracking.cpp ShConstProp.cpp
+libsh_la_SOURCES += ShEvaluate.cpp ShEvaluate.hpp
+incinc_HEADERS   += ShEvaluate.hpp
 incinc_HEADERS   += ShStructural.hpp
 
 # Library functions
@@ -76,9 +85,9 @@ libsh_la_SOURCES += ShTexCoord.hpp ShTexCoordImpl.hpp ShLibTexCoord.hpp
 libsh_la_SOURCES += ShMatrix.hpp ShMatrixImpl.hpp
 libsh_la_SOURCES += ShQuaternion.hpp ShQuaternionImpl.hpp
 libsh_la_SOURCES += ShTypeInfo.hpp ShTypeInfoImpl.hpp ShTypeInfo.cpp
-libsh_la_SOURCES += ShCloak.hpp ShCloakImpl.hpp ShCloak.cpp
-libsh_la_SOURCES += ShCloakFactory.hpp ShCloakFactoryImpl.hpp 
-libsh_la_SOURCES += ShCloakCast.hpp ShCloakCastImpl.hpp ShCloakCast.cpp 
+libsh_la_SOURCES += ShVariant.hpp ShVariantImpl.hpp ShVariant.cpp
+libsh_la_SOURCES += ShVariantFactory.hpp ShVariantFactoryImpl.hpp 
+libsh_la_SOURCES += ShVariantCast.hpp ShVariantCastImpl.hpp ShVariantCast.cpp 
 libsh_la_SOURCES += ShCastManager.hpp ShCastManager.cpp 
 libsh_la_SOURCES += ShEval.hpp ShEvalImpl.hpp ShEval.cpp
 libsh_la_SOURCES += ShConcreteRegularOpImpl.hpp 
@@ -142,9 +151,9 @@ incinc_HEADERS += ShChannelNode.hpp ShChannel.hpp ShChannelImpl.hpp
 incinc_HEADERS += ShStream.hpp ShStreamImpl.hpp
 incinc_HEADERS += ShQuaternion.hpp ShQuaternionImpl.hpp
 incinc_HEADERS += ShTypeInfo.hpp ShTypeInfoImpl.hpp 
-incinc_HEADERS += ShCloak.hpp ShCloakImpl.hpp ShEval.hpp ShEvalImpl.hpp
-incinc_HEADERS += ShCloakFactory.hpp ShCloakFactoryImpl.hpp 
-incinc_HEADERS += ShCloakCast.hpp ShCloakCastImpl.hpp 
+incinc_HEADERS += ShVariant.hpp ShVariantImpl.hpp ShEval.hpp ShEvalImpl.hpp
+incinc_HEADERS += ShVariantFactory.hpp ShVariantFactoryImpl.hpp 
+incinc_HEADERS += ShVariantCast.hpp ShVariantCastImpl.hpp 
 incinc_HEADERS += ShCastManager.hpp 
 incinc_HEADERS += ShConcreteRegularOpImpl.hpp ShConcreteCTypeOpImpl.hpp 
 incinc_HEADERS += ShConcreteIntervalOpImpl.hpp 

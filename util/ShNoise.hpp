@@ -29,8 +29,13 @@
 
 #include "ShAttrib.hpp"
 #include "ShArray.hpp"
+#include "ShTypeInfo.hpp"
+
+// @todo type remove these later when noise becomes part of standard library 
+#define CT1T2 typename ShCommonType<T1, T2>::type
 
 namespace ShUtil {
+
 
 using namespace SH;
 
@@ -70,8 +75,8 @@ class ShNoise
 template<int N, int M, typename T>
 ShGeneric<N, T> perlin(const ShGeneric<M, T> &p, bool useTexture = true);
 
-template<int N, int M, int K, typename T>
-ShGeneric<N, T> perlin(const ShGeneric<M, T> &p, const ShGeneric<K, T> &amp, bool useTexture = true);
+template<int N, int M, int K, typename T1, typename T2>
+ShGeneric<N, CT1T2> perlin(const ShGeneric<M, T1> &p, const ShGeneric<K, T2> &amp, bool useTexture = true);
 // @}
 
 // Returns summed octaves of signed Perlin improved noise
@@ -79,8 +84,8 @@ ShGeneric<N, T> perlin(const ShGeneric<M, T> &p, const ShGeneric<K, T> &amp, boo
 template<int N, int M, typename T>
 ShGeneric<N, T> sperlin(const ShGeneric<M, T> &p, bool useTexture = true);
 
-template<int N, int M, int K, typename T>
-ShGeneric<N, T> sperlin(const ShGeneric<M, T> &p, const ShGeneric<K, T> &amp, bool useTexture = true);
+template<int N, int M, int K, typename T1, typename T2>
+ShGeneric<N, CT1T2> sperlin(const ShGeneric<M, T1> &p, const ShGeneric<K, T2> &amp, bool useTexture = true);
 // @}
 
 // Returns summed octaves of cell noise 
@@ -88,8 +93,8 @@ ShGeneric<N, T> sperlin(const ShGeneric<M, T> &p, const ShGeneric<K, T> &amp, bo
 template<int N, int M, typename T>
 ShGeneric<N, T> cellnoise(const ShGeneric<M, T> &p, bool useTexture = true);
 
-template<int N, int M, int K, typename T>
-ShGeneric<N, T> cellnoise(const ShGeneric<M, T> &p, const ShGeneric<K, T> &amp, 
+template<int N, int M, int K, typename T1, typename T2>
+ShGeneric<N, CT1T2> cellnoise(const ShGeneric<M, T1> &p, const ShGeneric<K, T2> &amp, 
     bool useTexture = true);
 // @}
 
@@ -98,8 +103,8 @@ ShGeneric<N, T> cellnoise(const ShGeneric<M, T> &p, const ShGeneric<K, T> &amp,
 template<int N, int M, typename T>
 ShGeneric<N, T> scellnoise(const ShGeneric<M, T> &p, bool useTexture = true);
 
-template<int N, int M, int K, typename T>
-ShGeneric<N, T> scellnoise(const ShGeneric<M, T> &p, const ShGeneric<K, T> &amp,
+template<int N, int M, int K, typename T1, typename T2>
+ShGeneric<N, CT1T2> scellnoise(const ShGeneric<M, T1> &p, const ShGeneric<K, T2> &amp,
     bool useTexture = true); 
 // @}
 
@@ -116,8 +121,8 @@ ShGeneric<N, T> scellnoise(const ShGeneric<M, T> &p, const ShGeneric<K, T> &amp,
 template<int N, int M, typename T>
 ShGeneric<N, T> turbulence(const ShGeneric<M, T> &p, bool useTexture = true);
 
-template<int N, int M, int K, typename T>
-ShGeneric<N, T> turbulence(const ShGeneric<M, T> &p, const ShGeneric<K, T> &amp, 
+template<int N, int M, int K, typename T1, typename T2>
+ShGeneric<N, CT1T2> turbulence(const ShGeneric<M, T1> &p, const ShGeneric<K, T2> &amp, 
     bool useTexture = true);
 // @}
 
@@ -127,11 +132,14 @@ ShGeneric<N, T> turbulence(const ShGeneric<M, T> &p, const ShGeneric<K, T> &amp,
 template<int N, int M, typename T>
 ShGeneric<N, T> sturbulence(const ShGeneric<M, T> &p, bool useTexture = true);
 
-template<int N, int M, int K, typename T>
-ShGeneric<N, T> sturbulence(const ShGeneric<M, T> &p, const ShGeneric<K, T> &amp, 
+template<int N, int M, int K, typename T1, typename T2>
+ShGeneric<N, CT1T2> sturbulence(const ShGeneric<M, T1> &p, const ShGeneric<K, T2> &amp, 
     bool useTexture = true);
 // @}
+
 }
 #include "ShNoiseImpl.hpp" 
 
+//@todo type remove these later
+#undef CT1T2
 #endif

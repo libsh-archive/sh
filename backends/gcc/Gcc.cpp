@@ -31,7 +31,7 @@
 #include "Gcc.hpp" 
 #include "ShDebug.hpp" 
 #include "ShStream.hpp" 
-#include "ShCloak.hpp"
+#include "ShVariant.hpp"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -662,14 +662,14 @@ namespace ShGcc {
 
       // output constant definition
       m_code << "float " << name << "[" << node->size() << "] = {";
-      const SH::ShDataCloak<float> &cloak = (*SH::shref_dynamic_cast<const SH::ShDataCloak<float> >(node->cloak()));
+      const SH::ShDataVariant<float> &variant = (*SH::shref_dynamic_cast<const SH::ShDataVariant<float> >(node->getVariant()));
       for (int i = 0; i < node->size(); i++)
 	{
     // TODO handle different types
 	if (i == 0)
-	  m_code << cloak[i]; 
+	  m_code << variant[i]; 
 	else
-	  m_code << ", " << cloak[i]; 
+	  m_code << ", " << variant[i]; 
 	}
       m_code << "};" << std::endl;
       }
@@ -777,10 +777,10 @@ namespace ShGcc {
 
       if (node->hasValues())
 	{
-      const SH::ShDataCloak<float> &cloak = (*SH::shref_dynamic_cast<const SH::ShDataCloak<float> >(node->cloak()));
+      const SH::ShDataVariant<float> &variant = (*SH::shref_dynamic_cast<const SH::ShDataVariant<float> >(node->getVariant()));
 	for(int j = 0; j < node->size(); j++)
 	  {
-	  m_params[i][j] = cloak[j]; 
+	  m_params[i][j] = variant[j]; 
 	  }
 	}
       else

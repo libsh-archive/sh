@@ -1,3 +1,14 @@
+2004-10-08  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+  Merged main branch up to r1510 into this branch, minor
+	fixes for shrike (which now unfortunately takes > 30
+	seconds to initialize on kurr :-O )
+
+  Still a few known bugs, but will check if moving to the latest trunk 
+  fixes the problems.
+
+  * src/ShCloak*:
+  Changed to ShVariant* to prevent potential Star Trek licensing issues. 
+
 2004-10-05  Bryan Chan <b8chan@cgl.uwaterloo.ca>
   Small fixes to make shrike work.  Merging in main branch next.  
 
@@ -10,6 +21,23 @@
   * src/ShTypeConvertTransformer.cpp, src/ShInstructions.cpp,
     backends/gl/Arb.cpp backends/gl/ArbCode.cpp:
   Removed obsolete debug messages. 
+
+2004-10-05  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* win32.mk: Updated for building with Visual C++ 2005
+	Express Beta 1
+	
+2004-10-04  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* backends/gl/ArbCode.cpp, backends/gl/ArbEmit.cpp,
+	src/ShImage.cpp, src/ShInstructions.cpp, src/ShLib.hpp,
+	src/ShLibClamp.hpp, util/ShFuncImpl.hpp: Removed use of
+	_USE_MATH_DEFINES and undefines of min and max, now
+	controlled via win32.mk.
+
+	* backends/gl/Makefile.win32, src/Makefile.win32,
+	util/Makefile.win32, win32.mk: General WIN32 makefile
+	cleanup/overhaul.
 
 2004-10-01  Bryan Chan <b8chan@uwaterloo.ca>
   Another checkin for storage types. Transformers are now in place
@@ -55,6 +83,223 @@
 	Changed binary/ternary/assignment operators and texture lookup to 
 	allow operands of different variable storage types.
 
+2004-09-24  Sylvain Vasseur  <sfvvasse@cgl.uwaterloo.ca>
+
+	* src/ShLibClampImpl.hpp (max): Specialize unary max for N==1.
+	(min): Specialize unary min for N==1.
+
+2004-09-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbEmit.cpp: Implement emit_kil and use it to emit
+	KIL instructions. Fixes issue146. Thanks to Bryan Chan for
+	pointing this out.
+
+	* backends/gl/ArbCode.hpp: Add emit_kil member function.
+
+2004-09-09  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* Fixed some brokenness on Windows.
+
+2004-09-08  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShConstProp.cpp: Fix a bunch of harmless warnings.
+
+	* src/ShOptimizations.cpp (optimize): Don't do constant
+	propagation/uniform lifting unless the optimization level is at
+	least two.
+
+	* src/ShConstProp.cpp (struct FinishConstProp): Don't lift values
+	which are partially not uniform.
+
+2004-09-07  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/GlTextures.cpp (bindTexture): Added support for
+	opengl:preset metadata, and set opengl:texid metadata.
+
+2004-09-01  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShConstProp.cpp (ConstProp::updateDest): Push definitions
+	onto the worklist when op = SH_OP_ASN if appropriate.
+	(Uniform::operator==): Two constant uniforms are equal if their
+	values are equal.
+	(Value): Add an operator==, and simplify lookup() using this.
+	Add lots of debugging support.
+	(propagate_constants): Use TOP as the base case for building the
+	meet over all possible values, instead of the current value of the
+	use's cell.
+
+	* src/ShContext.hpp: Add mechanism to disable particular
+	optimizations (not used by the optimizer yet).
+
+2004-08-30  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShConstProp.cpp (struct FinishConstProp): Ignore nodes whose
+	RHS is all (uniform OR constant), unless they're writing to output
+	(or inout) nodes.
+	(struct FinishConstProp): Fix boolean expressions.
+
+	* src/Makefile.am (libsh_la_SOURCES): Split some of
+	ShOptimizations.cpp into ShConstProp.cpp and ShValueTracking.cpp
+
+2004-08-28  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp (Cell::Cell): Don't use the swizzle to
+	make the index, the swizzling is represented implicitly when
+	setting up a statement-based cell.
+	(propagate_constants): Set negatives appropriately when
+	propagating uniforms.
+	(...): Added support for mixed (constant/uniform) operations to be
+	lifted. Seems to be slightly broken still.
+	(ConstProp::updateDest): Handle SH_OP_ASN specially.
+
+2004-08-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp: Added most of the uniform lifting code.
+
+2004-08-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp (ConstProp): Set destinations to either
+	BOTTOM or CONSTANT but never top.
+	(propagate_constants): Consider all use-def information for uses
+	that need to be updated when computing the new lattice cell
+	values.
+	* test/regress/Makefile.am: Added test.hpp everywhere.
+
+2004-08-24  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp: Add copy propagation, clean up a few
+	things.
+
+2004-08-23  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/PBufferStreams.cpp (execute): Optimize is spelled
+	"optimize", not "optmize".
+
+	* src/ShOptimizations.cpp: Mark writes to inputs as live. This is
+	actually over pessimistic, but works for now.
+
+	* src/ShVariableNode.cpp (ShVariableNode): Constants are not
+	uniforms.
+
+	* src/ShOptimizations.cpp (ConstProp::updateDest): Use SH_CONST
+	for our temporary evaluator variables so that they have values
+	even if we are inside a shader program definition.
+
+	* src/ShEvaluate.cpp (evaluate): Push a null program onto the
+	definition stack in ShContext to force our operations to execute
+	in immediate mode, even if we are in a program definition.
+
+	* src/ShOptimizations.cpp (forward_substitute): Copy this from
+	ShOptimzer.cpp (it used to be called "move elimination" but
+	forward substitution is the proper term).
+
+	* src/ShSyntax.cpp (shEndShader): Use optimize() from
+	ShOptimizations.hpp instead of ShOptimizer. Also did this in
+	backends/*/* and src/ShAlgebra.cpp.
+
+	* src/Makefile.am (libsh_la_SOURCES): Remove ShOptimizer.hpp and
+	ShOptimzer.cpp.
+
+	* src/ShStatement.hpp: Remove ud and du members from ShStatement.
+
+	* src/ShStatement.cpp (operator=): Implement operator=.
+
+	* src/ShStatement.hpp: Add operator=() for ShStatements.
+
+2004-08-21  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp (struct FinishConstProp): Use the
+	constant propagation information, and remove it when we're done.
+
+2004-08-20  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp (ReachingDefs::Definition): Keep a
+	disable_mask bitset to keep track of definitions overwriting each
+	other in a single block. This is used when constructing gen.
+	(DefFinder::operator()): Set up disable_mask appropriately. Constant
+	propagation now works, but isn't used yet.
+
+	* src/ShBitSet.cpp (full): Implement full.
+	(empty): Implement empty.
+
+	* src/ShBitSet.hpp: Add full and empty member functions.
+
+	* src/ShStatement.cpp (ShStatement): Implement ShStatement copy
+	constructor, cloning info items using new clone() member function.
+
+	* src/ShStatement.hpp (destroy_info): Fix destroy_info to iterate
+	correctly.
+	(class ShStatementInfo): Add clone() virtual member function.
+	(class ShStatement): Add explicit copy constructor.
+
+	* src/ShOptimizations.cpp: Added lots of code for constant
+	propagation.
+
+2004-08-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp: Implementation file for the new
+	tuple-aware optimizer.
+
+	* src/ShOptimizations.hpp: Header file for the new tuple-aware optimizer.
+
+2004-08-18  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/GlBackend.hpp: Check for __APPLE__ when including
+	opengl headers.
+
+	* backends/gl/Arb.cpp: Let GlBackend.hpp include our GL headers
+	for us.
+
+	* src/ShInstructions.cpp: Define exp10f on OSX.
+
+	* config/gl.m4: Look for either <GL/gl.h> or <OpenGL/gl.h> for
+	MacOS X.
+
+	* src/ShInstructions.cpp: Fix exp10f on WIN32. Thanks to Evan Wies
+	for pointing this out.
+
+2004-08-04  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* util/ShNoiseImpl.hpp: fixed random number generation under Win32.
+
+2004-07-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbCode.cpp (allocateRegister): Instead of
+	asserting, use shError() when we're out of temporaries. Resolves
+	issue139.
+
+	* src/ShLibMatrix.hpp: Moved (and renamed) inverse, adjoint,
+	transpose, cofactors and det here. Resolves issue94.
+	Added diag and rowmat. Resolves issue98 and half of issue97.
+
+	* Added copyright statements to the heads of all the files that
+	were missing.
+
+	* src/ShLibMatrix.hpp: Added operator* for existing matrix
+	multiplication functions. Resolves issue92.
+	Added row vector / matrix multiplication. Resolves issue93.
+
+	* src/ShProgram.hpp: Added introspection iterators. Resolves issue37.
+
+	* src/ShProgramNode.hpp: Added introspection iterators.
+
+	* src/ShLibMisc.hpp: Rename kill to discard. Resolves issue83.
+
+	* src/ShLibArith.hpp: Added expm1 and logp1. Resolves issue81.
+
+	* backends/gl/ArbEmit.cpp: Added emit_csum and emit_cmul functions
+	and table entries.
+
+	* src/ShLibClamp.hpp: Added unary min and max. Resolves issue61.
+
+	* src/ShLibArith.hpp: Added sum and prod. Resolves issue46 and
+	issue47.
+
+	* src/ShLibGeometry.hpp: Added distance* and length*. Resolves
+	issue69, issue70, issue71, issue72.
+
+	* src/ShStatement.hpp: Added SH_OP_CSUM and SH_OP_CMUL.
+
 2004-07-19  Bryan Chan <b8chan@uwaterloo.ca>
   Changes in progress for adding extra storage types to Sh.
   Current copy is still non-working.
@@ -75,6 +320,43 @@
   * ShTransformer* :
   Moronic implementation right now only converts ops on other floating point
   types to single precision float.  Other types still TODO.
+
+2004-07-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShLibClamp.hpp: Undef max and min if they are defined.
+
+	* backends/gl/GlBackend.cpp (setContext): Fix assertion.
+
+	* backends/gl/ArbEmit.cpp: Add some stuff missing on win32.
+
+	* backends/gl/ArbBackend.cpp: Add a DllMain for win32.
+
+	* backends/gl/Arb.cpp: Include windows.h on win32.
+
+	* backends/gl/Makefile.win32: Added Makefile for win32.
+
+2004-07-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShTransformer.cpp: Get rid of some more stack-based variable
+	array initializers.
+
+	* src/ShSyntax.cpp (shInit): Empty for now.
+
+	* src/ShOptimizer.cpp: Only output node block in DumpRch if
+	SH_DEBUG is enabled.
+
+	* src/ShInstructions.cpp: Use new instead of stack-based
+	variable-sized arrays.
+
+	* src/ShImage.cpp: Include <cmath> for sqrt.
+
+	* util/Makefile.win32: Added Win32 Makefile.
+
+	* src/Makefile.win32: Added Win32 Makefile.
+
+	* win32.mk: Added global win32 make settings.
+
+	* test/sandbox/Makefile.win32: Added Win32 makefile.
 
 2004-07-17  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 

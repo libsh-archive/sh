@@ -34,12 +34,15 @@ namespace SH {
 /** Default traits for ShArray.
  * An array is a texture that does not support filtering or interpolation.
  */
-struct ShArrayTraits : public ShTextureTraits {
+struct
+ShArrayTraits : public ShTextureTraits {
   ShArrayTraits()
     : ShTextureTraits(0, SH_FILTER_NONE, SH_WRAP_CLAMP_TO_EDGE, SH_CLAMPED)
   {
   }
 };
+
+template<typename T> class ShArrayRect;
 
 /** One-dimensional array.
  */
@@ -53,6 +56,8 @@ public:
   ShArray1D(int width)
     : ShBaseTexture1D<T>(width, ShArrayTraits())
   {}
+	typedef ShArrayRect<T> rectangular_type;
+	typedef ShBaseTexture1D<T> base_type;
   typedef T return_type;
 };
 
@@ -68,6 +73,8 @@ public:
   ShArray2D(int width, int height)
     : ShBaseTexture2D<T>(width, height, ShArrayTraits())
   {}
+	typedef ShArrayRect<T> rectangular_type;
+	typedef ShBaseTexture2D<T> base_type;
   typedef T return_type;
 };
 
@@ -83,6 +90,8 @@ public:
   ShArrayRect(int width, int height)
     : ShBaseTextureRect<T>(width, height, ShArrayTraits())
   {}
+	typedef ShArrayRect<T> rectangular_type;
+	typedef ShBaseTextureRect<T> base_type;
   typedef T return_type;
 };
 
@@ -98,6 +107,8 @@ public:
   ShArray3D(int width, int height, int depth)
     : ShBaseTexture3D<T>(width, height, depth, ShArrayTraits())
   {}
+	typedef ShArrayRect<T> rectangular_type;
+	typedef ShBaseTexture3D<T> base_type;
   typedef T return_type;
 };
 
@@ -115,6 +126,8 @@ public:
   ShArrayCube(int width, int height)
     : ShBaseTextureCube<T>(width, height, ShArrayTraits())
   {}
+	typedef ShArrayRect<T> rectangular_type;
+	typedef ShBaseTextureCube<T> base_type;
   typedef T return_type;
 };
 

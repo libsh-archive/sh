@@ -34,10 +34,10 @@ namespace SH {
 #include "ShStatement.hpp"
 
 // forward declarations
-class ShCloak;
+class ShVariant;
 class ShEvalOp;
-typedef ShPointer<ShCloak> ShCloakPtr;
-typedef ShPointer<const ShCloak> ShCloakCPtr;
+typedef ShPointer<ShVariant> ShVariantPtr;
+typedef ShPointer<const ShVariant> ShVariantCPtr;
 
 struct ShEvalOpInfo: public ShStatementInfo {
   ShOperation m_op;
@@ -66,8 +66,8 @@ class ShEval {
      * TODO (should really break this out into separate functions.  EvalOps can
      * have a single function in th einterface)
      */
-    void operator()(ShOperation op, ShCloakPtr dest,
-        ShCloakCPtr a, ShCloakCPtr b, ShCloakCPtr c) const;
+    void operator()(ShOperation op, ShVariantPtr dest,
+        ShVariantCPtr a, ShVariantCPtr b, ShVariantCPtr c) const;
 
     /** Registers a evalOp for a certain operation/source type index combination */ 
     void addOp(ShOperation op, ShPointer<const ShEvalOp> evalOp, int dest, 
@@ -99,7 +99,7 @@ class ShEvalOp: public ShRefCountable {
     virtual ~ShEvalOp();
 
     // Wraps an operation where at least dest and a are non-null.
-    virtual void operator()(ShCloakPtr dest, ShCloakCPtr a, ShCloakCPtr b, ShCloakCPtr c) const = 0;
+    virtual void operator()(ShVariantPtr dest, ShVariantCPtr a, ShVariantCPtr b, ShVariantCPtr c) const = 0;
 };
 
 typedef ShPointer<ShEvalOp> ShEvalOpPtr;
@@ -134,7 +134,7 @@ typedef ShPointer<const ShEvalOp> ShEvalOpCPtr;
 // These include most basic ops (except for range arithmetic specific ops) 
 template<ShOperation S, typename T>
 struct ShRegularOp: public ShEvalOp {
-  void operator()(ShCloakPtr dest, ShCloakCPtr a, ShCloakCPtr b, ShCloakCPtr c) const; 
+  void operator()(ShVariantPtr dest, ShVariantCPtr a, ShVariantCPtr b, ShVariantCPtr c) const; 
 };
 
 // If functions could be partially specialized, then wouldn't need
@@ -189,7 +189,7 @@ SHOPC_CTYPE_OP(unsigned char);
 
 template<ShOperation S, typename T1, typename T2>
 struct ShIntervalOp: public ShEvalOp {
-  void operator()(ShCloakPtr dest, ShCloakCPtr a, ShCloakCPtr b, ShCloakCPtr c) const; 
+  void operator()(ShVariantPtr dest, ShVariantCPtr a, ShVariantCPtr b, ShVariantCPtr c) const; 
 };
 
 template<ShOperation S, typename T1, typename T2>

@@ -29,10 +29,12 @@
 
 #include <string>
 #include <map>
+#include "ShDllExport.hpp"
 
 namespace SH {
 
-class ShMeta {
+class
+SH_DLLEXPORT ShMeta {
 public:
   ShMeta();
   virtual ~ShMeta();

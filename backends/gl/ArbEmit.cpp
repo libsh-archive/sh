@@ -1,10 +1,42 @@
+// Sh: A GPU metaprogramming language.
+//
+// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
+// Project administrator: Michael D. McCool
+// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
+//          Michael D. McCool
+// 
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+// 
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+// 
+// 1. The origin of this software must not be misrepresented; you must
+// not claim that you wrote the original software. If you use this
+// software in a product, an acknowledgment in the product documentation
+// would be appreciated but is not required.
+// 
+// 2. Altered source versions must be plainly marked as such, and must
+// not be misrepresented as being the original software.
+// 
+// 3. This notice may not be removed or altered from any source
+// distribution.
+//////////////////////////////////////////////////////////////////////////////
 #include "ArbCode.hpp"
 #include <algorithm>
-
+#include <cmath>
 #include "ShDebug.hpp"
 #include "ShError.hpp"
 #include "ShAttrib.hpp"
 #include "ShContext.hpp"
+
+#ifdef WIN32
+namespace {
+double log2(double x) { return log(x)/log(2.0); }
+}
+#endif
 
 namespace shgl {
 
@@ -49,6 +81,10 @@ ArbMapping ArbCode::table[] = {
   {SH_OP_LRP, SH_ARB_FP,  0, SH_ARB_LRP, 0},
   {SH_OP_LRP, SH_ARB_VP,  0, SH_ARB_FUN, &ArbCode::emit_lerp},
   {SH_OP_MAD, SH_ARB_ANY, 0, SH_ARB_MAD, 0},
+
+  // Sum/product of components
+  {SH_OP_CMUL, SH_ARB_ANY, 0, SH_ARB_FUN, &ArbCode::emit_cmul},
+  {SH_OP_CSUM, SH_ARB_ANY, 0, SH_ARB_FUN, &ArbCode::emit_csum},
   
   // Dot product
   {SH_OP_DOT, SH_ARB_VEC1,                0,         SH_ARB_MUL, 0},
@@ -128,7 +164,7 @@ ArbMapping ArbCode::table[] = {
   {SH_OP_COND, SH_ARB_NVFP, 0, SH_ARB_FUN, &ArbCode::emit_nvcond},
   {SH_OP_COND, SH_ARB_NVVP2, 0, SH_ARB_FUN, &ArbCode::emit_nvcond},
   {SH_OP_COND, SH_ARB_ANY, negate_first, SH_ARB_CMP, 0},
-  {SH_OP_KIL,  SH_ARB_FP,  negate_first, SH_ARB_KIL, 0},
+  {SH_OP_KIL,  SH_ARB_FP,  0, SH_ARB_FUN, &ArbCode::emit_kil},
 
   {SH_OP_ASN, SH_ARB_END, 0, SH_ARB_FUN, 0}
 };
@@ -547,6 +583,36 @@ void ArbCode::emit_nvcond(const ShStatement& stmt)
     movf.ccswiz = stmt.src[0].swizzle();
     m_instructions.push_back(movf);
   }
+}
+
+void ArbCode::emit_csum(const ShStatement& stmt)
+{
+  // @todo type make this function handle more than floats
+  ShDataVariant<float> c1_values(stmt.src[0].size(), 1.0f); 
+  ShVariable c1(new ShVariableNode(SH_CONST, stmt.src[0].size(), shTypeIndex<float>()));
+  c1.setVariant(&c1_values);
+  m_shader->constants.push_back(c1.node());
+  
+  emit(ShStatement(stmt.dest, stmt.src[0], SH_OP_DOT, c1));
+}
+
+void ArbCode::emit_cmul(const ShStatement& stmt)
+{
+  // @todo use clone
+  ShVariable prod(new ShVariableNode(SH_TEMP, 1, stmt.dest.typeIndex()));
+
+  // TODO: Could use vector mul here.
+  
+  m_instructions.push_back(ArbInst(SH_ARB_MOV, prod, stmt.src[0](0)));
+  for (int i = 1; i < stmt.src[0].size(); i++) {
+    m_instructions.push_back(ArbInst(SH_ARB_MUL, prod, stmt.src[0](i)));
+  }
+  m_instructions.push_back(ArbInst(SH_ARB_MOV, stmt.dest, prod));
+}
+
+void ArbCode::emit_kil(const ShStatement& stmt)
+{
+  m_instructions.push_back(ArbInst(SH_ARB_KIL, -stmt.src[0]));
 }
 
 }

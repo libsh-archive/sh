@@ -29,7 +29,7 @@
 #include "ShInterval.hpp"
 #include "ShEval.hpp"
 #include "ShCastManager.hpp"
-#include "ShCloakCast.hpp"
+#include "ShVariantCast.hpp"
 
 namespace {
 using namespace SH;
@@ -38,7 +38,7 @@ template<typename DEST, typename SRC>
 void addCast(bool automatic, bool precedence)
 {
   ShCastManager::instance()->addCast(shTypeIndex<DEST>(), shTypeIndex<SRC>(),  
-      new ShDataCloakCast<DEST, SRC>(), automatic, precedence);
+      new ShDataVariantCast<DEST, SRC>(), automatic, precedence);
 }
 
 

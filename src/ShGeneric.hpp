@@ -28,9 +28,11 @@
 #define SHGENERIC_HPP
 
 #include "ShVariable.hpp"
-#include "ShCloak.hpp"
+#include "ShVariant.hpp"
 
 namespace SH {
+
+class ShProgram;
 
 /** A variable of length N.
  *
@@ -62,13 +64,26 @@ class ShGeneric : public ShVariable
 public:
   typedef T ValueType;
   static const int typesize = N;
-  typedef ShDataCloak<T> CloakType; 
-  typedef ShPointer<CloakType> CloakTypePtr;
-  typedef ShPointer<const CloakType> CloakTypeCPtr;
+  typedef ShDataVariant<T> VariantType; 
+  typedef ShPointer<VariantType> VariantTypePtr;
+  typedef ShPointer<const VariantType> VariantTypeCPtr;
 
 
   ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, bool neg);
   ~ShGeneric();
+
+  // Copy constructor 
+  // This should only be used internally.
+  // It generates a ShVariableNode of type SH_TEMP 
+  // @{
+
+  // @todo type get rid of this. default should be okay for 
+  // internal usage
+  // ShGeneric(const ShGeneric<N, T> &other);
+
+  template<typename T2>
+  ShGeneric(const ShGeneric<N, T2> &other);
+  // @}
 
   // This is needed because the templated assignment op is 
   // non-default, hence C++ spec 12.8.10 says the default
@@ -77,6 +92,8 @@ public:
 
   template<typename T2>
   ShGeneric& operator=(const ShGeneric<N, T2>& other);
+
+  ShGeneric& operator=(const ShProgram& other);
   
   template<typename T2>
   ShGeneric& operator+=(const ShGeneric<N, T2>& right);
@@ -126,10 +143,10 @@ public:
   /// Range Metadata
   void range(T low, T high);
 
-  CloakType lowBound() const; 
+  VariantType lowBound() const; 
   T lowBound(int index) const;
 
-  CloakType highBound() const;
+  VariantType highBound() const;
   T highBound(int index) const;
   
   // Arbitrary Swizzle
@@ -157,13 +174,26 @@ class ShGeneric<1, T> : public ShVariable
 public:
   typedef T ValueType;
   static const int typesize = 1;
-  typedef ShDataCloak<T> CloakType; 
-  typedef ShPointer<CloakType> CloakTypePtr;
-  typedef ShPointer<const CloakType> CloakTypeCPtr;
+  typedef ShDataVariant<T> VariantType; 
+  typedef ShPointer<VariantType> VariantTypePtr;
+  typedef ShPointer<const VariantType> VariantTypeCPtr;
 
 
   ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, bool neg);
   ~ShGeneric();
+
+  // Copy constructor 
+  // This should only be used internally.  It generates a SH_TEMP, 
+  // SH_ATTRIB, with the only characteristic copied from other being
+  // the storage type.
+  // @{
+
+  // @todo type get rid of this
+  // ShGeneric(const ShGeneric<1, T> &other);
+
+  template<typename T2>
+  ShGeneric(const ShGeneric<1, T2> &other);
+  // @}
 
   ShGeneric& operator=(const ShGeneric<1, T>& other);
 
@@ -171,6 +201,7 @@ public:
   ShGeneric& operator=(const ShGeneric<1, T2>& other);
 
   ShGeneric& operator=(T);
+  ShGeneric& operator=(const ShProgram& other);
   
   template<typename T2>
   ShGeneric& operator+=(const ShGeneric<1, T2>& right);
@@ -205,10 +236,10 @@ public:
   /// Range Metadata
   void range(T low, T high);
 
-  CloakType lowBound() const; 
+  VariantType lowBound() const; 
   T lowBound(int index) const;
 
-  CloakType highBound() const;
+  VariantType highBound() const;
   T highBound(int index) const;
   
   // Arbitrary Swizzle

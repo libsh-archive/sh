@@ -26,12 +26,15 @@
 //////////////////////////////////////////////////////////////////////////////
 #include <sstream>
 #include <cassert>
+#include <algorithm>
 #include "ShEnvironment.hpp"
 #include "ShVariableNode.hpp"
 #include "ShDebug.hpp"
 #include "ShContext.hpp"
-#include "ShCloak.hpp"
-#include "ShCloakFactory.hpp"
+#include "ShVariant.hpp"
+#include "ShVariantFactory.hpp"
+#include "ShProgramNode.hpp"
+#include "ShEvaluate.hpp"
 
 namespace SH {
 
@@ -55,16 +58,19 @@ const char* ShSemanticTypeName[] = {
   "Position"
 };
 
+struct ShVariableNodeEval {
+  ShPointer<ShProgramNode> value;
+};
+
 ShVariableNode::ShVariableNode(ShBindingType kind, int size, int typeIndex, ShSemanticType type)
-  : m_uniform(!ShContext::current()->parsing() && kind != SH_TEXTURE && kind != SH_STREAM),
+  : m_uniform(!ShContext::current()->parsing() && kind == SH_TEMP),
     m_kind(kind), m_specialType(type),
     m_size(size), m_typeIndex(typeIndex), 
     m_id(m_maxID++), m_locked(0),
-    m_cloak(0)
+    m_variant(0),
+    m_eval(new ShVariableNodeEval)
 {
-  if (m_uniform || m_kind == SH_CONST) {
-    m_cloak = shTypeInfo(m_typeIndex)->cloakFactory()->generate(m_size);
-  }
+  if (m_uniform || m_kind == SH_CONST) addVariant();
   programVarListInit();
 }
 
@@ -75,22 +81,22 @@ ShVariableNode::ShVariableNode(const ShVariableNode& old, ShBindingType newKind,
     m_uniform(old.m_uniform), m_kind(newKind), m_specialType(newType),
     m_size(newSize), m_typeIndex(newTypeIndex),
     m_id(m_maxID++), m_locked(0),
-    m_cloak(0)
+    m_variant(0),
+    m_eval(new ShVariableNodeEval)
 {
   if(!keepUniform) m_uniform = false;
 
-  if(m_uniform || m_kind == SH_CONST) {
-    m_cloak = shTypeInfo(m_typeIndex)->cloakFactory()->generate(m_size);
-  }
+  if(m_uniform || m_kind == SH_CONST) addVariant(); 
   if(updateVarList) programVarListInit();
 }
 
 ShVariableNode::~ShVariableNode()
 {
+  detach_dependencies();
   /* TODO using a smart pointer now - probably shouldn't be though, so leave
    * these here just in case
-  delete m_cloak; 
-  m_cloak = 0;
+  delete m_variant; 
+  m_variant = 0;
   */
 }
 
@@ -137,7 +143,7 @@ bool ShVariableNode::uniform() const
 
 bool ShVariableNode::hasValues() const
 {
-  return (m_cloak);
+  return (m_variant);
 }
 
 void ShVariableNode::lock()
@@ -148,13 +154,7 @@ void ShVariableNode::lock()
 void ShVariableNode::unlock()
 {
   m_locked--;
-  if (m_locked == 0 && m_uniform) {
-    
-    for (ShBoundIterator I = shBeginBound(); I != shEndBound(); ++I) {
-      // TODO: Maybe pass in the backend unit to updateUniform
-      if (I->second.node()) I->second.updateUniform(this);
-    }
-  }
+  update_all();
 }
 
 int ShVariableNode::typeIndex() const {
@@ -168,7 +168,7 @@ int ShVariableNode::size() const
 
 void ShVariableNode::size(int s)
 {
-  SH_DEBUG_ASSERT(!m_cloak);
+  SH_DEBUG_ASSERT(!m_variant);
   m_size = s;
 }
 
@@ -186,7 +186,7 @@ std::string ShVariableNode::name() const
   
   // Special case for constants
   if (m_kind == SH_CONST) {
-    return m_cloak->encode();
+    return m_variant->encode();
   }
 
   switch (m_kind) {
@@ -218,7 +218,7 @@ std::string ShVariableNode::name() const
   return stream.str();
 }
 
-void ShVariableNode::rangeCloak(ShCloakCPtr low, ShCloakCPtr high) 
+void ShVariableNode::rangeVariant(ShVariantCPtr low, ShVariantCPtr high) 
 {
   // TODO slow, possibly?
   int indices[m_size];
@@ -228,16 +228,16 @@ void ShVariableNode::rangeCloak(ShCloakCPtr low, ShCloakCPtr high)
   meta("highBound", high->get(false, swiz)->encode());
 }
 
-void ShVariableNode::rangeCloak(ShCloakCPtr low, ShCloakCPtr high, bool neg, const ShSwizzle &writemask)
+void ShVariableNode::rangeVariant(ShVariantCPtr low, ShVariantCPtr high, bool neg, const ShSwizzle &writemask)
 {
   ShTypeInfoPtr typeInfo = shTypeInfo(m_typeIndex);
-  ShCloakFactoryCPtr factory = typeInfo->cloakFactory();
+  ShVariantFactoryCPtr factory = typeInfo->variantFactory();
 
   std::string oldLo, oldHi;
   oldLo = meta("lowBound");
   oldHi = meta("highBound");
 
-  ShCloakPtr newLo, newHi; 
+  ShVariantPtr newLo, newHi; 
   if(oldLo.empty() || oldHi.empty()) { // TODO they should be either both empty or both not
     newLo = factory->generateLowBound(m_size, m_specialType);
     newHi = factory->generateHighBound(m_size, m_specialType);
@@ -253,9 +253,9 @@ void ShVariableNode::rangeCloak(ShCloakCPtr low, ShCloakCPtr high, bool neg, con
   meta("highBound", newHi->encode());
 }
 
-ShCloakPtr ShVariableNode::lowBoundCloak() const
+ShVariantPtr ShVariableNode::lowBoundVariant() const
 {
-  ShCloakFactoryCPtr factory = shTypeInfo(m_typeIndex)->cloakFactory();
+  ShVariantFactoryCPtr factory = shTypeInfo(m_typeIndex)->variantFactory();
   std::string metaLow = meta("lowBound");
 
   return (metaLow.empty() ? 
@@ -263,9 +263,9 @@ ShCloakPtr ShVariableNode::lowBoundCloak() const
     : factory->generate(metaLow));
 }
 
-ShCloakPtr ShVariableNode::highBoundCloak() const
+ShVariantPtr ShVariableNode::highBoundVariant() const
 {
-  ShCloakFactoryCPtr factory = shTypeInfo(m_typeIndex)->cloakFactory();
+  ShVariantFactoryCPtr factory = shTypeInfo(m_typeIndex)->variantFactory();
   std::string metaHigh = meta("highBound");
 
   return (metaHigh.empty() ? 
@@ -298,39 +298,41 @@ void ShVariableNode::specialType(ShSemanticType type)
 
 // TODO: also have an n-length set value, since updating the uniforms
 // will otherwise be horribly inefficient.
-void ShVariableNode::setCloak(ShCloakCPtr other)
+void ShVariableNode::setVariant(ShVariantCPtr other)
 {
-  assert(m_cloak);
-  m_cloak->set(other);
-  uniformUpdate();
+  assert(m_variant);
+  m_variant->set(other);
+  update_all();
 }
 
-void ShVariableNode::setCloak(ShCloakCPtr other, int index) 
+void ShVariableNode::setVariant(ShVariantCPtr other, int index) 
 {
-  assert(m_cloak);
-  m_cloak->set(other, index); 
-  uniformUpdate();
+  assert(m_variant);
+  m_variant->set(other, index); 
+  update_all();
 }
 
-void ShVariableNode::setCloak(ShCloakCPtr other, bool neg, const ShSwizzle &writemask)
+void ShVariableNode::setVariant(ShVariantCPtr other, bool neg, const ShSwizzle &writemask)
 {
-  assert(m_cloak);
-  m_cloak->set(other, neg, writemask);
-  uniformUpdate();
+  assert(m_variant);
+  m_variant->set(other, neg, writemask);
+  update_all();
 }
 
-ShCloakCPtr ShVariableNode::cloak() const
+ShVariantCPtr ShVariableNode::getVariant() const
 {
-  return m_cloak;
+  return m_variant;
 }
 
-void ShVariableNode::uniformUpdate() 
+void ShVariableNode::update_all() 
 {
   if (m_uniform && !m_locked) {
     for (ShBoundIterator I = shBeginBound(); I != shEndBound(); ++I) {
       // TODO: Maybe pass in the backend unit to updateUniform
       if (I->second.node()) I->second.updateUniform(this);
     }
+
+    update_dependents();
   }
 }
 
@@ -353,6 +355,75 @@ void ShVariableNode::programVarListInit()
   default:
     // Do nothing
     break;
+  }
+}
+
+void ShVariableNode::addVariant()
+{
+  if (m_variant) return;
+  m_variant = shTypeInfo(m_typeIndex)->variantFactory()->generate(m_size);
+}
+
+void ShVariableNode::attach(const ShProgramNodePtr& evaluator)
+{
+  SH_DEBUG_ASSERT(uniform());
+  // TODO: Check that the program really evaluates this variable.
+
+  detach_dependencies();
+
+  m_eval->value = evaluator;
+
+  if (m_eval->value) {
+    for (ShProgramNode::VarList::const_iterator I = m_eval->value->uniforms_begin();
+         I != m_eval->value->uniforms_end(); ++I) {
+      if ((*I).object() == this) continue;
+      (*I)->add_dependent(this);
+    }
+    
+    update();
+  }
+}
+
+void ShVariableNode::update()
+{
+  if (!m_eval->value) return;
+
+  evaluate(m_eval->value);
+}
+
+const ShPointer<ShProgramNode>& ShVariableNode::evaluator() const
+{
+  return m_eval->value;
+}
+
+void ShVariableNode::add_dependent(ShVariableNode* dep)
+{
+  if (std::find(m_dependents.begin(), m_dependents.end(), dep) != m_dependents.end()) return;
+  m_dependents.push_back(dep);
+}
+
+void ShVariableNode::remove_dependent(ShVariableNode* dep)
+{
+  m_dependents.remove(dep);
+}
+
+void ShVariableNode::update_dependents()
+{
+  for (std::list<ShVariableNode*>::iterator I = m_dependents.begin();
+       I != m_dependents.end(); ++I) {
+    (*I)->update();
+  }
+}
+
+void ShVariableNode::detach_dependencies()
+{
+  if (m_eval->value) {
+    for (ShProgramNode::VarList::const_iterator I = m_eval->value->uniforms_begin();
+         I != m_eval->value->uniforms_end(); ++I) {
+      if ((*I).object() == this) continue;
+      (*I)->remove_dependent(this);
+    }
+    m_eval->value = 0;
   }
 }
 

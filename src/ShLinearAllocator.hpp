@@ -28,12 +28,14 @@
 #define SHLINEARALLOCATOR_HPP
 
 #include <map>
+#include "ShDllExport.hpp"
 #include "ShVariableNode.hpp"
 #include "ShBackend.hpp"
 
 namespace SH {
 
-struct ShLifeTime {
+struct
+SH_DLLEXPORT ShLifeTime {
   ShLifeTime()
   {
   }
@@ -60,7 +62,8 @@ struct ShLifeTime {
 
 /** A simple, basic-block based linear register allocator.
  */
-class ShLinearAllocator {
+class
+SH_DLLEXPORT ShLinearAllocator {
 public:
   ShLinearAllocator(ShBackendCodePtr backendCode);
   

@@ -118,16 +118,6 @@ ShMatrix<Rows, Cols, Binding, T>::operator-=(const ShMatrix<Rows, Cols, Binding2
 template<int Rows, int Cols, ShBindingType Binding, typename T>
 template<ShBindingType Binding2>
 ShMatrix<Rows, Cols, Binding, T>&
-ShMatrix<Rows, Cols, Binding, T>::operator*=(const ShMatrix<Rows, Cols, Binding2, T>& other)
-{
-  for (int i = 0; i < Rows; i++)
-    m_data[i] *= other[i];
-  return *this;
-}
-
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-template<ShBindingType Binding2>
-ShMatrix<Rows, Cols, Binding, T>&
 ShMatrix<Rows, Cols, Binding, T>::operator/=(const ShMatrix<Rows, Cols, Binding2, T>& other)
 {
   for (int i = 0; i < Rows; i++)
@@ -204,107 +194,6 @@ std::ostream& operator<<(std::ostream& out, const ShMatrix<Rows, Cols, Binding, 
   return out;
 }
   
-template<ShBindingType Binding, typename T>
-ShAttrib1f
-det(const ShMatrix<1, 1, Binding, T>& matrix)
-{
-  return matrix.m_data[0][0];
-}
-
-  
-template<ShBindingType Binding, typename T>
-ShAttrib1f
-det(const ShMatrix<2, 2, Binding, T>& matrix)
-{
-  return (matrix.m_data[0][0]*matrix.m_data[1][1] - matrix.m_data[0][1] * matrix.m_data[1][0]);
-}
- 
-template<int RowsCols, ShBindingType Binding, typename T>
-ShAttrib1f
-det(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix)
-{
-  ShAttrib1f ret = 0.0;   
-  ShAttrib1f dir = RowsCols % 2 ? 1.0 : -1.0;
-
-  for (int i = 0; i < RowsCols; i++) {
-    ret += dir * matrix.m_data[RowsCols - 1][i] * det(matrix.subMatrix(RowsCols - 1, i));
-    dir *= -1.0;
-  }
-  return ret;
-}
-
-//Matrix of Cofactors
-template<ShBindingType Binding, typename T>
-ShMatrix<1,1,Binding,T>
-cofactors(const ShMatrix<1, 1, Binding, T>& matrix){
-  return matrix;
-}
-    
-template<ShBindingType Binding, typename T>
-ShMatrix<2,2,Binding,T>
-cofactors(const ShMatrix<2, 2, Binding, T>& matrix)
-{
-  ShMatrix<2,2,Binding,T> matrixToReturn;
-  ShAttrib1f minusOne = -1.0;
-  matrixToReturn.m_data[0][0]=         matrix[1][1];
-  matrixToReturn.m_data[1][0]=minusOne*matrix[0][1];
-  matrixToReturn.m_data[0][1]=minusOne*matrix[1][0];
-  matrixToReturn.m_data[1][1]=         matrix[0][0];
-    
-  return matrixToReturn;
-  //return matrix;
-}
-  
-template<int RowsCols,ShBindingType Binding, typename T>
-ShMatrix<RowsCols,RowsCols,Binding,T>
-cofactors(const ShMatrix<RowsCols,RowsCols, Binding, T>& matrix)
-{
-  ShMatrix<RowsCols,RowsCols,Binding,T> matrixToReturn;
-  ShAttrib1f minusOne = -1.0;
-
-  for (int i = 0; i < RowsCols; i++) {
-    for (int j = 0; j < RowsCols; j++) {
-      if( (i+j)%2 ==0)	  
-        matrixToReturn.m_data[i][j]=         det(matrix.subMatrix(i,j));
-      else
-        matrixToReturn.m_data[i][j]=minusOne*det(matrix.subMatrix(i,j));
-    }
-  }
-  return matrixToReturn;
-}
-
-//Transpose
-template<int RowsCols, ShBindingType Binding, typename T>
-ShMatrix<RowsCols, RowsCols, Binding, T>
-trans(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix){    
-   
-  ShMatrix<RowsCols,RowsCols,Binding,T> matrixToReturn;
-    
-  for (int i = 0; i < RowsCols; i++) {
-    for (int j = 0; j < RowsCols; j++) {	  
-      matrixToReturn.m_data[i][j]= matrix[j][i];	
-    }
-  }
-    
-  return matrixToReturn;
-}
-
-// Adjoint
-template<int RowsCols, ShBindingType Binding, typename T>
-ShMatrix<RowsCols, RowsCols, Binding, T>
-adj(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix){
-  return trans(cofactors(matrix));
-    
-}
-  
-//Inverse
-template<int RowsCols, ShBindingType Binding, typename T>
-ShMatrix<RowsCols,RowsCols, Binding, T>
-inv(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix){
-  ShMatrix<RowsCols, RowsCols, Binding, T> temp (adj(matrix));
-  temp*=(1.0f/det(matrix));
-  return temp;
-}
   
 template<int Rows, int Cols, ShBindingType Binding, typename T>
 ShMatrix<Rows - 1, Cols -1, SH_TEMP, T>
@@ -512,7 +401,7 @@ template<int Rows, int Cols, ShBindingType Binding, typename T>
 void ShMatrix<Rows, Cols, Binding, T>::name(const std::string& name)
 {
   // TODO: add a row number
-  for (int i = 0; i < Rows; i++) r[i] = m_data[i].name(name);
+  for (int i = 0; i < Rows; i++) m_data[i].name(name);
 }
 
 template<int Rows, int Cols, ShBindingType Binding, typename T>

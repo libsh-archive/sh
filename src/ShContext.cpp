@@ -71,6 +71,21 @@ void ShContext::throw_errors(bool on)
   m_throw_errors = on;
 }
 
+void ShContext::disable_optimization(const std::string& name)
+{
+  m_disabled_optimizations.insert(name);
+}
+
+void ShContext::enable_optimization(const std::string& name)
+{
+  m_disabled_optimizations.erase(name);
+}
+
+bool ShContext::optimization_disabled(const std::string& name) const
+{
+  return m_disabled_optimizations.find(name) != m_disabled_optimizations.end();
+}
+
 ShContext::BoundProgramMap::iterator ShContext::begin_bound()
 {
   return m_bound.begin();

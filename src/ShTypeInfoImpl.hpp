@@ -28,8 +28,26 @@
 #define SHTYPEINFOIMPL_HPP
 
 #include "ShTypeInfo.hpp"
-#include "ShCloakFactory.hpp"
+#include "ShVariantFactory.hpp"
+#include "ShInterval.hpp"
 #include "ShEval.hpp"
+
+namespace {
+
+/// Used to implement the valuesEqual method.
+template<typename T>
+bool ShConcreteTypeEquals(const T &a, const T &b) 
+{
+  return a == b;
+}
+
+template<typename T>
+bool ShConcreteTypeEquals(const SH::ShInterval<T> &a, const SH::ShInterval<T> &b) 
+{
+  return SH::boundsEqual(a, b); 
+}
+
+}
 
 namespace SH {
 
@@ -41,7 +59,7 @@ template<typename T> const T ShConcreteTypeInfo<T>::ZERO = (T) 0;
 template<typename T> const T ShConcreteTypeInfo<T>::ONE = (T) 1;
 
 template<typename T>
-ShPointer<ShCloakFactory> ShConcreteTypeInfo<T>::m_cloakFactory;   
+ShPointer<ShVariantFactory> ShConcreteTypeInfo<T>::m_variantFactory;   
 
 template<typename T>
 ShConcreteTypeInfo<T>::ShConcreteTypeInfo()
@@ -74,12 +92,18 @@ const char* ShConcreteTypeInfo<T>::name() const
 }
 
 template<typename T>
-ShCloakFactoryCPtr ShConcreteTypeInfo<T>::cloakFactory() 
+bool ShConcreteTypeInfo<T>::valuesEqual(const T &a, const T &b)
 {
-  if(!m_cloakFactory) {
-    m_cloakFactory = new ShDataCloakFactory<T>();
+  return ShConcreteTypeEquals(a, b);
+}
+
+template<typename T>
+ShVariantFactoryCPtr ShConcreteTypeInfo<T>::variantFactory() 
+{
+  if(!m_variantFactory) {
+    m_variantFactory = new ShDataVariantFactory<T>();
   }
-  return m_cloakFactory;
+  return m_variantFactory;
 }
 
 template<typename T>

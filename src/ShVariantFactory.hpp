@@ -24,38 +24,50 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHCLOAKFACTORYIMPL_HPP
-#define SHCLOAKFACTORYIMPL_HPP
+#ifndef SHVARIANTFACTORY_HPP
+#define SHVARIANTFACTORY_HPP
 
-#include "ShCloakFactory.hpp"
-#include "ShTypeInfo.hpp"
-//#include "ShContext.hpp"
+#include <string>
+#include "ShDllExport.hpp"
+#include "ShVariant.hpp"
 
 namespace SH {
 
-template<typename T>
-ShCloakPtr ShDataCloakFactory<T>::generate(int N) const
-{
-  return new ShDataCloak<T>(N);
-}
+
+struct 
+SH_DLLEXPORT ShVariantFactory: public ShRefCountable {
+  /// Creates a ShVariant object with N components 
+  virtual ShVariantPtr generate(int N) const = 0; 
+
+  /// Creates a ShVariant object by using the 
+  // decode method from the Variant type corresponding
+  // to this factory
+  virtual ShVariantPtr generate(std::string s) const = 0;
+
+  /// Creates two ShVariants object with N default low
+  // range values for the given ShSemanticType
+  virtual ShVariantPtr generateLowBound(int N, ShSemanticType type) const = 0; 
+  virtual ShVariantPtr generateHighBound(int N, ShSemanticType type) const = 0; 
+};
+
+typedef ShPointer<ShVariantFactory> ShVariantFactoryPtr;
+typedef ShPointer<const ShVariantFactory> ShVariantFactoryCPtr;
 
 template<typename T>
-ShCloakPtr ShDataCloakFactory<T>::generate(std::string s) const
-{
-  return new ShDataCloak<T>(s);
-}
+struct 
+SH_DLLEXPORT ShDataVariantFactory: public ShVariantFactory {
+  ShVariantPtr generate(int N) const;
 
-template<typename T>
-ShCloakPtr ShDataCloakFactory<T>::generateLowBound(int N, ShSemanticType type) const
-{
-  return new ShDataCloak<T>(N, ShConcreteTypeInfo<T>::defaultLo(type));
-}
+  /// generates a ShVariant by using  
+  ShVariantPtr generate(std::string s) const; 
 
-template<typename T>
-ShCloakPtr ShDataCloakFactory<T>::generateHighBound(int N, ShSemanticType type) const
-{
-  return new ShDataCloak<T>(N, ShConcreteTypeInfo<T>::defaultHi(type));
-}
+  ShVariantPtr generateLowBound(int N, ShSemanticType type) const; 
+  ShVariantPtr generateHighBound(int N, ShSemanticType type) const; 
+};
+
 
 }
+
+#include "ShVariantFactoryImpl.hpp"
+
 #endif

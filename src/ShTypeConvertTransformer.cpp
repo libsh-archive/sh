@@ -314,10 +314,10 @@ struct FloatConverter {
     if(m_typeMap.count(p->typeIndex()) == 0) return; 
     m_converts[p] = p->clone(m_typeMap[p->typeIndex()], false);
     if(p->hasValues()) {
-      m_converts[p]->setCloak(p->cloak());
+      m_converts[p]->setVariant(p->getVariant());
 
 #ifdef SH_DEBUG_TYPECONVERT
-      SH_DEBUG_PRINT("Setting values on replacement = " << m_converts[p]->cloak()->encode() << " original = " << p->cloak()->encode());
+      SH_DEBUG_PRINT("Setting values on replacement = " << m_converts[p]->getVariant()->encode() << " original = " << p->getVariant()->encode());
 #endif
     }
 

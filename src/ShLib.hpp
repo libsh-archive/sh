@@ -39,6 +39,7 @@
 
 #define CT1T2 typename ShCommonType<T1, T2>::type
 #define CT1T2T3 typename ShCommonType3<T1, T2, T3>::type
+#define CT1T2T3T4 typename ShCommonType4<T1, T2, T3, T4>::type
 
 #define SH_SHLIB_CONST_SCALAR_OP(operation) \
 template<typename T1, typename T2> \
@@ -109,6 +110,7 @@ SH_SHLIB_CONST_TRINARY_OP_011_RETSIZE(operation, N);
 
 #undef CT1T2 
 #undef CT1T2T3 
+#undef CT1T2T3T4 
 
 // Semantic stuff
 

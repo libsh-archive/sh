@@ -26,6 +26,8 @@
 //////////////////////////////////////////////////////////////////////////////
 #ifndef SHERROR_HPP
 #define SHERROR_HPP 
+
+#include "ShDllExport.hpp"
 #include "ShException.hpp"
 
 /** @file shError.hh
@@ -37,6 +39,7 @@ namespace SH {
 /** Throws the given exception when ShContext::current()->throw_errors() is on. 
  * Otherwise prints error message.
  */
+SH_DLLEXPORT
 void shError(const ShException& exception); 
 
 }

@@ -65,6 +65,8 @@ public:
   ShPoint& operator=(const ShPoint<N, Binding, T2, Swizzled>& other);
   ShPoint& operator=(const ShPoint<N, Binding, T, Swizzled>& other);
 
+  ShPoint& operator=(const ShProgram& prg);
+
   
   template<typename T2>
   ShPoint& operator+=(const ShGeneric<N, T2>& right);
@@ -152,6 +154,8 @@ public:
 
   ShPoint& operator=(T other);
 
+  ShPoint& operator=(const ShProgram& prg);
+
   
   template<typename T2>
   ShPoint& operator+=(const ShGeneric<1, T2>& right);
@@ -223,6 +227,8 @@ public:
   template<typename T2>
   ShPoint& operator=(const ShPoint<2, Binding, T2, Swizzled>& other);
   ShPoint& operator=(const ShPoint<2, Binding, T, Swizzled>& other);
+
+  ShPoint& operator=(const ShProgram& prg);
 
   
   template<typename T2>
@@ -311,6 +317,8 @@ public:
   ShPoint& operator=(const ShPoint<3, Binding, T2, Swizzled>& other);
   ShPoint& operator=(const ShPoint<3, Binding, T, Swizzled>& other);
 
+  ShPoint& operator=(const ShProgram& prg);
+
   
   template<typename T2>
   ShPoint& operator+=(const ShGeneric<3, T2>& right);
@@ -397,6 +405,8 @@ public:
   template<typename T2>
   ShPoint& operator=(const ShPoint<4, Binding, T2, Swizzled>& other);
   ShPoint& operator=(const ShPoint<4, Binding, T, Swizzled>& other);
+
+  ShPoint& operator=(const ShProgram& prg);
 
   
   template<typename T2>

@@ -92,6 +92,7 @@ public:""")
         common.inprint("\ntemplate<typename T2>")
         common.inprint(self.name + "(const " + self.name + "<" + self.sizevar(size) + ", Binding, T2, Swizzled>& other);")
         common.inprint(self.name + "(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);")
+        # common.inprint(self.name + "(const ShProgram&);")
         common.inprint("explicit " + self.name + "(T data[" + self.sizevar(size) + "]);")
         common.inprint("")
 
@@ -116,6 +117,7 @@ public:""")
                        self.name + "& operator=(const " + self.name + "<" + self.sizevar(size) + ", Binding, T, Swizzled>& other);\n")
         if size == 1:
             common.inprint(self.name + "& operator=(T other);\n")
+        common.inprint(self.name + "& operator=(const ShProgram& prg);\n")
 
     def modifying(self, size):
         common.inprint("\ntemplate<typename T2>")
@@ -260,6 +262,7 @@ class Impl:
                           ["const ShSwizzle&", "swizzle"],
                           ["bool", "neg"]], size)
         self.constructor([["T", "data[" + self.sizevar(size) + "]"]], size)
+        # self.constructor([["const ShProgram&", "prg"]], size)
         if size > 0:
             self.constructor([["T", "s" + str(x)] for x in range(0, size)], size)
         if size > 1:
@@ -299,6 +302,7 @@ class Impl:
         self.assign("operator=", [["const " + self.tplcls(size, "Swizzled", "T2") + "&", "other"]], size, ["T2"])
         if size == 1:
             self.assign("operator=", [["T", "other"]], size)
+        self.assign("operator=", [["const ShProgram&", "prg"]], size)
 
     def modifying(self, size = 0):
         if size <= 0:
