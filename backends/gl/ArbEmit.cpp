@@ -490,13 +490,14 @@ void ArbCode::emit_tex(const ShStatement& stmt)
   ShVariable tmpdest;
   ShVariable tmpsrc;
   
+  ShTextureNodePtr tnode = shref_dynamic_cast<ShTextureNode>(stmt.src[0].node());
+
   if (!stmt.dest.swizzle().identity()) {
-    tmpdest = ShVariable(new ShVariableNode(SH_TEMP, 4, SH_FLOAT));
+    tmpdest = ShVariable(new ShVariableNode(SH_TEMP, tnode->size(), SH_FLOAT));
     tmpsrc = tmpdest;
     delay = true;
   }
 
-  ShTextureNodePtr tnode = shref_dynamic_cast<ShTextureNode>(stmt.src[0].node());
 
   SH_DEBUG_ASSERT(tnode);
 
@@ -519,6 +520,7 @@ void ArbCode::emit_tex(const ShStatement& stmt)
     m_instructions.push_back(ArbInst(SH_ARB_TEX,
                                      (delay ? tmpdest : stmt.dest), stmt.src[1], stmt.src[0]));
   }
+
   if (delay) emit(ShStatement(stmt.dest, SH_OP_ASN, tmpsrc));
 }
 
