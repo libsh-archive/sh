@@ -219,6 +219,19 @@ void groupEvenOddSort(ShAttrib<N, Kind, T> v[]) {
   }
 }
 
+/** \brief Given 3 orthonormal basis vectors b0, b1, b2, specified relative to a coordinate space C, 
+ * this does a change of basis on a vector v in space C to the orthonormal basis
+ */
+template<typename T>
+ShVariableN<3, T> changeBasis(const ShVariableN<3, T> &b0, 
+    const ShVariableN<3, T> &b1, const ShVariableN<3, T> &b2, const ShVariableN<3, T> &v) {
+  ShAttrib<3, SH_TEMP, T> result;
+  result(0) = b0 | v;
+  result(1) = b1 | v;
+  result(2) = b2 | v;
+  return result;
+}
+
 
 }
 

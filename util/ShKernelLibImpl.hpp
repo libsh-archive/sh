@@ -27,6 +27,7 @@
 #ifndef SHUTIL_KERNELLIBIMPL_HPP 
 #define SHUTIL_KERNELLIBIMPL_HPP 
 
+#include <sstream>
 #include "ShSyntax.hpp"
 #include "ShPosition.hpp"
 #include "ShManipulator.hpp"
@@ -34,6 +35,7 @@
 #include "ShProgram.hpp"
 #include "ShNibbles.hpp"
 #include "ShKernelLib.hpp"
+#include "ShUtil.hpp"
 
 /** \file ShKernelLibImpl.hpp
  * This is an implementation of useful kernels and nibbles (simple kernels).
@@ -43,128 +45,93 @@ namespace ShUtil {
 
 using namespace SH;
 
-template<typename T>
-ShProgram ShKernelLib::shDiffuse() {
-  ShProgram kernel = SH_BEGIN_FRAGMENT_PROGRAM {
-    typename T::InputType SH_DECL(kd);
-    ShInputNormal3f SH_DECL(normal);
-    ShInputVector3f SH_DECL(lightVec);
-    ShInputPosition4f SH_DECL(posh);
-
-    ShAttrib1f irrad = pos(dot(normalize(normal), normalize(lightVec)));
-    typename T::OutputType SH_DECL(result);
-    result = irrad * kd; 
-  } SH_END;
-  return kernel;
-}
-
-template<typename T>
-ShProgram ShKernelLib::shSpecular() {
-  ShProgram kernel = SH_BEGIN_FRAGMENT_PROGRAM {
-    typename T::InputType SH_DECL(ks);
-    ShInputAttrib1f SH_DECL(specExp);
-    ShInputNormal3f SH_DECL(normal);
-    ShInputVector3f SH_DECL(halfVec);
-    ShInputVector3f SH_DECL(lightVec);
-    ShInputPosition4f SH_DECL(posh);
-
-    normal = normalize(normal);
-    halfVec = normalize(halfVec);
-    lightVec = normalize(lightVec);
-    ShAttrib1f irrad = pos(normal | lightVec);
-
-    typename T::OutputType SH_DECL(result);
-    result = irrad * ks * pow(pos(normal | halfVec),specExp); 
-  } SH_END;
-  return kernel;
-}
-
-
-template<typename T>
-ShProgram ShKernelLib::shPhong() {
-  ShProgram kernel = SH_BEGIN_PROGRAM("gpu:fragment") {
-    typename T::InputType SH_DECL(kd);
-    typename T::InputType SH_DECL(ks);
-    ShInputAttrib1f SH_DECL(specExp);
-    ShInputNormal3f SH_DECL(normal);
-    ShInputVector3f SH_DECL(halfVec);
-    ShInputVector3f SH_DECL(lightVec);
-    ShInputPosition4f SH_DECL(posh);
-
-    typename T::OutputType SH_DECL(result);
-
-    normal = normalize(normal);
-    halfVec = normalize(halfVec);
-    lightVec = normalize(lightVec);
-    ShAttrib1f irrad = pos(normal | lightVec);
-    result = kd * irrad + ks * pow(pos(normal | halfVec), specExp); 
-  } SH_END;
-  return kernel;
-}
-
-
 template<int N, int Kind, typename T>
-ShProgram ShKernelLib::shVsh(const ShMatrix<N, N, Kind, T> &mv, const ShMatrix<N, N, Kind, T> &mvp) {
+ShProgram ShKernelLib::shVsh(const ShMatrix<N, N, Kind, T> &mv, const ShMatrix<N, N, Kind, T> &mvp, int numTangents, int numLights) {
+  int i;
   ShProgram generalVsh = SH_BEGIN_VERTEX_PROGRAM {
-    ShInputTexCoord2f SH_NAMEDECL(u, "texcoord");  // IN(0): texture coordinate 
-    ShInputNormal3f SH_NAMEDECL(nm, "normal");     // IN(1): normal vector (MCS)
-    ShInputPoint3f SH_NAMEDECL(lpv, "lightPos");   // IN(2): light position (VCS)
-    ShInputPosition4f SH_NAMEDECL(pm, "posm");     // IN(3): position (MCS)
+    // INPUTS
+    ShInputTexCoord2f SH_NAMEDECL(u, "texcoord");  
+    ShInputNormal3f SH_NAMEDECL(nm, "normal");     
+    ShVector3f tgt; 
+    ShVector3f tgt2; 
+    if(numTangents > 0) {
+      ShInputVector3f SH_NAMEDECL(inTangent, "tangent");
+      tgt = inTangent;
+      if( numTangents > 1) {
+        ShInputVector3f SH_NAMEDECL(inTangent2, "tangent2");
+        tgt2 = inTangent2;
+      }  else {
+        tgt2 = cross(nm, tgt);
+      }
+    }
+    ShInputPoint3f lpv[numLights];                 
+    for(i = 0; i < numLights; ++i) lpv[i].name(makeName("lightPos", i));
+    ShInputPosition4f SH_NAMEDECL(pm, "posm");     
 
+    // OUTPUTS
+    ShOutputTexCoord2f SH_NAMEDECL(uo, "texcoord");  
+    ShOutputPoint3f SH_NAMEDECL(pv, "posv");         
+    ShOutputPoint4f SH_NAMEDECL(pmo, "posm");
+    
+    // VCS outputs
+    ShOutputNormal3f SH_NAMEDECL(nv, "normal");      
+    ShOutputVector3f SH_NAMEDECL(vv, "viewVec");     
+    ShOutputVector3f SH_NAMEDECL(hv0, "halfVec");
+    ShOutputVector3f hv[numLights];    
+    for(i = 0; i < numLights; ++i) hv[i].name(makeName("halfVec", i).c_str());
+    ShOutputVector3f SH_NAMEDECL(lv0, "lightVec");
+    ShOutputVector3f lv[numLights];    
+    for(i = 0; i < numLights; ++i) lv[i].name(makeName("lightVec", i).c_str()); 
 
-    ShOutputTexCoord2f SH_NAMEDECL(uo, "texcoord");  // OUT(0): texture coordinate
-    ShOutputPoint3f SH_NAMEDECL(pv, "posv");         // OUT(1): output point (VCS)
-    ShOutputNormal3f SH_NAMEDECL(nv, "normal");      // OUT(2): normal vector (VCS) 
-    ShOutputVector3f SH_NAMEDECL(vv, "viewVec");     // OUT(3): view vector (VCS)
-    ShOutputVector3f SH_NAMEDECL(hv, "halfVec");     // OUT(4): half vector (VCS)
-    ShOutputVector3f SH_NAMEDECL(lv, "lightVec");    // OUT(5): light vector (VCS)
-    ShOutputPosition4f SH_NAMEDECL(pd, "posh");      // OUT(6): position (HDCS)
+    ShOutputPoint3f SH_NAMEDECL(lpo0, "lightPos");
+    ShOutputPoint3f lpo[numLights];    
+    for(i = 0; i < numLights; ++i) lpo[i].name(makeName("lightPos", i).c_str()); 
+
+    // TCS outputs
+    ShOutputNormal3f SH_NAMEDECL(nvt, "normalt");      
+    ShOutputVector3f SH_NAMEDECL(vvt, "viewVect");     
+    ShOutputVector3f SH_NAMEDECL(hvt0, "halfVect");
+    ShOutputVector3f hvt[numLights];    
+    for(i = 0; i < numLights; ++i) hvt[i].name(makeName("halfVect", i).c_str());
+    ShOutputVector3f SH_NAMEDECL(lvt0, "lightVect");
+    ShOutputVector3f lvt[numLights];    
+    for(i = 0; i < numLights; ++i) lvt[i].name(makeName("lightVect", i).c_str()); 
+
+    ShOutputPosition4f SH_NAMEDECL(pd, "posh");      
 
     uo = u;
     pv = (mv | pm)(0,1,2); 
+    pmo = pm;
+
+    // VCS outputs
     nv = normalize(mv | nm); 
     vv = normalize(-pv);
-    lv = normalize(lpv - pv); 
-    hv = normalize(vv + lv); 
+    for(i = 0; i < numLights; ++i) {
+      lv[i] = normalize(lpv[i] - pv); 
+      hv[i] = normalize(vv + lv[i]); 
+      lpo[i] = lpv[i];
+    }
+    hv0 = hv[0];
+    lv0 = lv[0];
+    lpo0 = lpo[0];
+
+    // TCS outputs
+    tgt = mv | tgt;
+    tgt2 = mv | tgt2;
+    nvt = normalize(changeBasis(nv, tgt, tgt2, nv));
+    vvt = normalize(changeBasis(nv, tgt, tgt2, vv));
+    for(i = 0; i < numLights; ++i) {
+      hvt[i] = normalize(changeBasis(nv, tgt, tgt2, hv[i]));
+      lvt[i] = normalize(changeBasis(nv, tgt, tgt2, lv[i])); 
+    }
+    hvt0 = hvt[0];
+    lvt0 = lvt[0];
+
 
     pd = mvp | pm;
   } SH_END;
   return generalVsh;
 }
-
-template<int N, int Kind, typename T>
-ShProgram ShKernelLib::shVshTangentSpace(const ShMatrix<N, N, Kind, T> &mv, 
-    const ShMatrix<N, N, Kind, T> &mvp, bool hasSecondTangent) {
-  ShProgram vsh = shVsh(mv, mvp) & transform<ShVector3f>(mv, "tangent");
-  if( hasSecondTangent ) {
-    vsh = vsh & transform<ShVector3f>(mv, "tangent2");
-    vsh = vsh << shSwizzle("texcoord", "normal", "tangent", "tangent2", "lightPos", "posm");
-  } else {
-    ShProgram makeSecondTangent = SH_BEGIN_PROGRAM() {
-      ShInOutNormal3f SH_DECL(normal); // VCS normal
-      ShInOutVector3f SH_DECL(tangent); // VCS tangent
-      ShOutputVector3f SH_DECL(tangent2) = cross(normal, tangent);
-    } SH_END
-    vsh = namedConnect(vsh, makeSecondTangent);
-    vsh = vsh << shSwizzle("texcoord", "normal", "tangent", "lightPos", "posm");
-  }
-
-  // convert view, half, and light to orthonormal bases {normal, tangent, tangent2}
-  ShProgram ConvertToTCS = ShKernelLib::shConvertBasis("viewVec", "normal", "tangent", "tangent2");
-  ConvertToTCS = namedCombine(ConvertToTCS, 
-      ShKernelLib::shConvertBasis("halfVec", "normal", "tangent", "tangent2"));
-  ConvertToTCS = namedCombine(ConvertToTCS, 
-      ShKernelLib::shConvertBasis("lightVec", "normal", "tangent", "tangent2"));
-
-  // normal becomes (1.0,0.0,0.0) in TCS
-  vsh = namedConnect(vsh, ConvertToTCS) & 
-    (keep<ShNormal3f>("normal") << ShConstant3f(1.0, 0.0, 0.0));
-
-  // swizzle inputs/outputs to match specs
-  vsh = shSwizzle("texcoord", "posv", "normal", "viewVec", "halfVec", "lightVec", "posh") << vsh;
-  return vsh;
-}
-
 
 }
 

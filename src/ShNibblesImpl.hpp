@@ -50,9 +50,9 @@ ShProgram lose(const std::string & name) {
 };
 
 template<typename T>
-ShProgram access(const ShBaseTexture1D<T> &tex, const std::string & name) {
+ShProgram access(const ShBaseTexture1D<T> &tex, const std::string &tcname, const std::string & name) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
-    ShInputTexCoord1f SH_NAMEDECL(tc, name);
+    ShInputTexCoord1f SH_NAMEDECL(tc, tcname);
     typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
   } SH_END;
   nibble->name("access");
@@ -60,9 +60,9 @@ ShProgram access(const ShBaseTexture1D<T> &tex, const std::string & name) {
 }
 
 template<typename T>
-ShProgram access(const ShBaseTexture2D<T> &tex, const std::string & name) {
+ShProgram access(const ShBaseTexture2D<T> &tex, const std::string & tcname, const std::string & name) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
-    ShInputTexCoord2f SH_NAMEDECL(tc, name);
+    ShInputTexCoord2f SH_NAMEDECL(tc, tcname);
     typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
   } SH_END;
   nibble->name("access");
@@ -70,9 +70,9 @@ ShProgram access(const ShBaseTexture2D<T> &tex, const std::string & name) {
 }
 
 template<typename T>
-ShProgram access(const ShBaseTextureRect<T> &tex, const std::string & name) {
+ShProgram access(const ShBaseTextureRect<T> &tex, const std::string & tcname, const std::string & name) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
-    ShInputTexCoord2f SH_NAMEDECL(tc, name);
+    ShInputTexCoord2f SH_NAMEDECL(tc, tcname);
     typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
   } SH_END;
   nibble->name("access");
@@ -80,9 +80,9 @@ ShProgram access(const ShBaseTextureRect<T> &tex, const std::string & name) {
 }
 
 template<typename T>
-ShProgram access(const ShBaseTexture3D<T> &tex, const std::string & name) {
+ShProgram access(const ShBaseTexture3D<T> &tex, const std::string & tcname, const std::string & name) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
-    ShInputTexCoord3f SH_NAMEDECL(tc, name);
+    ShInputTexCoord3f SH_NAMEDECL(tc, tcname);
     typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
   } SH_END;
   nibble->name("access");
@@ -90,9 +90,9 @@ ShProgram access(const ShBaseTexture3D<T> &tex, const std::string & name) {
 }
 
 template<typename T>
-ShProgram access(const ShBaseTextureCube<T> &tex, const std::string & name) {
+ShProgram access(const ShBaseTextureCube<T> &tex, const std::string & tcname, const std::string & name) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
-    ShInputTexCoord3f SH_NAMEDECL(tc, name);
+    ShInputTexCoord3f SH_NAMEDECL(tc, tcname);
     typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
   } SH_END;
   nibble->name("access");

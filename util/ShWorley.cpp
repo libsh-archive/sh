@@ -27,7 +27,7 @@
 #include <cstdlib>
 #include "ShSyntax.hpp"
 #include "ShWorley.hpp"
-#include "ShUtilLib.hpp"
+#include "ShUtil.hpp"
 #include "ShImage.hpp"
 
 namespace ShUtil {

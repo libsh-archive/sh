@@ -1,3 +1,16 @@
+2004-03-25  Bryan Chan <b8chan@uwaterloo.ca>
+	* util/ShKernel*:
+	Rewrote the generalized vsh.
+	Added other kernels into sepearte categories:
+	Surface, Light, Postprocessing.
+
+	* src/ShAlgebra.cpp:
+	Added some operations on named ShPrograms
+	Changed named connect/combine to automatically duplicate
+	values to inputs that have matching name/type.
+	Added namedAlign function (namedAlign(a, b) automatically swizzles
+	position of a's outputs to match inputs of b by matching names)
+	
 2004-03-24  Jack Wang <jmwang@uwaterloo.ca>
 	
 	* src/ShQuaternionImpl.hpp: Bug fix in normalize().

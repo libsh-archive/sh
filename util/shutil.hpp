@@ -31,6 +31,9 @@
 #include "ShWorley.hpp"
 #include "ShNoise.hpp"
 #include "ShKernelLib.hpp"
+#include "ShKernelLight.hpp"
+#include "ShKernelSurface.hpp"
+#include "ShKernelPost.hpp"
 #include "ShMesh.hpp"
 #include "ShObjMesh.hpp"
 

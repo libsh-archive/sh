@@ -27,6 +27,7 @@
 #ifndef SHUTIL_KERNELLIB_HPP 
 #define SHUTIL_KERNELLIB_HPP 
 
+#include <string>
 #include "ShLib.hpp"
 #include "ShMatrix.hpp"
 #include "ShTexture.hpp"
@@ -43,6 +44,10 @@
  *  -names for inputs/outputs that should be joined together on connect have the same
  *  name and are usually in the same order (allows either connect by position or by 
  *  name without too many manipulators)
+ *
+ * Note that in the comments for each kernel, there's a list of input/output attributes
+ * with their string names and positional ordering. Negative positions denote
+ * position from the end (-1 means last attribute, -2 means second last, etc.)
  */
 
 namespace ShUtil {
@@ -50,6 +55,10 @@ namespace ShUtil {
 using namespace SH;
 
 class ShKernelLib {
+  private:
+    // returns the string prefix concatenated with index
+    static std::string makeName(std::string prefix, int index); 
+
   public:
 /// Kernels - some commonly used programs
     /** Generates a passthrough program using the outputs of a given ShProgram
@@ -79,99 +88,51 @@ class ShKernelLib {
      *
      * OUT(0) ShVector3f name;
      */
-    static ShProgram shConvertBasis(std::string name="vec", 
+    static ShProgram shChangeBasis(std::string name="vec", 
         std::string b0Name="b0", std::string b1Name="b1", std::string b2Name="b2"); 
 
-    /** Diffuse fragment program 
-     * IN(0) T kd                 - diffuse coefficient (kd) could be ShColor?f
-     * IN(1) ShNormal3f normal    - normal (xCS)
-     * IN(2) ShVector3f lightVec  - light vector (xCS)
-     * IN(3) ShPosition4f posh    - positino (HDCS)
-     *
-     * OUT(0) T result            - output result 
-     *
-     * xCS is usually either VCS or tangent space 
-     */
-    template<typename T>
-    static ShProgram shDiffuse();
-
-    /** Specular fragment program 
-     * IN(0) T ks                 - specular coefficient (ks) could be ShColor?f
-     * IN(1) ShAttrib1f specExp   - specular exponent 
-     * IN(2) ShNormal3f normal    - normal (xCS)
-     * IN(3) ShVector3f halfVec   - half vector (xCS)
-     * IN(4) ShVector3f lightVec  - light vector (xCS)
-     * IN(5) ShPosition4f posh    - positino (HDCS)
-     *
-     * OUT(0) T result            - output result 
-     *
-     * xCS is usually either VCS or tangent space 
-     */
-    template<typename T>
-    static ShProgram shSpecular();
-
-    /** Phong fragment program 
-     * IN(0) T kd                 - diffuse coefficient (kd) could be ShColor?f
-     * IN(1) T ks                 - specular coefficient (ks) could be ShColor?f
-     * IN(2) ShAttrib1f specExp   - specular exponent
-     * IN(3) ShNormal3f normal    - normal (xCS)
-     * IN(4) ShVector3f halfVec   - half vector (xCS)
-     * IN(5) ShVector3f lightVec  - light vector (xCS)
-     * IN(6) ShPosition4f posh    - position (HDCS)
-     *
-     * OUT(0) T result            - output colour 
-     *
-     * xCS is usually either VCS or tangent space 
-     */
-    template<typename T>
-    static ShProgram shPhong();
-
 /// Cobs - Massive, general programs designed to be specialized  
-    /** Generalized vertex program that computes lots of different outputs
-     * Inputs:
-     *  IN(0) ShTexCoord2f texcoord   - texture coordinate
-     *  IN(1) ShNormal3f normal       - normal vector (MCS)
-     *  IN(2) ShPoint3f lightPos      - light position (VCS)
-     *  IN(3) ShPosition4f posm       - position (MCS)
-     *
-     *  OUT(0) ShTexCoord2f texcoord   - texture coordinate
-     *  OUT(1) ShPoint3f posv          - output point (VCS)
-     *  OUT(2) ShNormal3f normal       - normal vector (VCS) 
-     *  OUT(4) ShVector3f halfVec      - half vector (VCS)
-     *  OUT(5) ShVector3f lightVec     - light vector (VCS)
-     *  OUT(3) ShVector3f viewVec      - view vector (VCS)
-     *  OUT(6) ShPosition4f posh       - position (HDCS)
-     *
-     *  Input specializations
-     *  - remove inputs (1,2) if outputs (5-7) not needed
-     *  - remove texcoord (it's just here for convenience) 
-     */
-    template<int N, int Kind, typename T>
-    static ShProgram shVsh(const ShMatrix<N, N, Kind, T> &mv, const ShMatrix<N, N, Kind, T> &mvp ); 
+    // TODO make a version of this with names like RenderMan globals
+    // make a version with names like Houdini globals
 
-    /** Uses shVsh to build a more advanced vertex program 
-     * that transform normal, view, half, and lightVec to tangent coordinate space
+    /** Generalized vertex program that computes *lots* of different outputs 
+     * If numTangents = 0, then tangnet, tangent 2 are not included in the inputs and any TCS outputs are invalid
+     * If numTangents = 1, then only tangent is an input, tangent2 is computed from normal and tangent.  All TCS outputs are valid
+     * If numTangent > 2, then both tangent and tangent2 are inputs.  
+     *
      * (using new orthonormal bases {normal, tangent, tangent2} at each given point
      *  IN(0) ShTexCoord2f texcoord   - texture coordinate
      *  IN(1) ShNormal3f normal       - normal vector (MCS)
-     *  IN(2) ShVector3f tangent      - primary tangent (MCS)
-     *  IN(3) ShVector3f tangent2     - secondary tangent (MCS) 
-     *  (only included if hasSecondTangent=true, otherwise generated using tangent2 = normal x tangent)
-     *
-     *  IN(4) ShPoint3f lightPos      - light position (VCS)
-     *  IN(5) ShPosition4f posm       - position (MCS)
+     *  ShVector3f tangent            - primary tangent (MCS) (only included if numTangents > 0)
+     *  ShVector3f tangent2           - secondary tangent (MCS) (only included if numTangents > 1) 
+     *  ShPoint3f lightPosi           - light position (VCS), for i = 0..numLights - 1 
+     *  IN(-1) ShPosition4f posm       - position (MCS)
      *
      *  OUT(0) ShTexCoord2f texcoord   - texture coordinate
      *  OUT(1) ShPoint3f posv          - output point (VCS)
-     *  OUT(2) ShNormal3f normal       - normal vector (TCS) 
-     *  OUT(3) ShVector3f viewVec      - view vector (TCS)
-     *  OUT(4) ShVector3f halfVec      - half vector (TCS)
-     *  OUT(5) ShVector3f lightVec     - light vector (TCS)
-     *  OUT(6) ShPosition4f posh       - position (HDCS)
+     *  OUT(2) ShPoint4f posm          - position (MCS)
+     *
+     *  ShNormal3f normal       - normal vector (VCS) 
+     *  ShVector3f viewVec      - view vector (VCS)
+     *  ShVector3f halfVec       - half Vector (VCS) = halfVec0
+     *  ShVector3f halfVeci      - half Vector (VCS), for i = 0..numLights - 1 
+     *  ShVector3f lightVec      - light Vector (VCS) = lightVec0 
+     *  ShVector3f lightVeci     - light Vecor (VCS), for i = 0..numLights - 1 
+     *  ShVector3f lightPos      - light position (VCS) = lightPos0 
+     *  ShPoint3f lightPosi      - light position (VCS), for i = 0..numLights -1 
+     *
+     *  ShNormal3f normalt       - normal vector (TCS) 
+     *  ShVector3f viewVec      - view vector (TCS)
+     *  ShVector3f halfVect      - half Vector (TCS) = halfVect0
+     *  ShVector3f halfVecti      - half Vector (TCS), for i = 0..numLights - 1 
+     *  ShVector3f halfVect      - light Vector (TCS) = lightVect0 
+     *  ShVector3f lightVecti     - light Vector (TCS), for i  0..numLights - 1 
+     *
+     *  OUT(-1) ShPosition4f posh       - position (HDCS)
      */
     template<int N, int Kind, typename T>
-    static ShProgram shVshTangentSpace( const ShMatrix<N, N, Kind, T> &mv, const ShMatrix<N, N, Kind, T> &mvp,
-        bool hasSecondTangent = true ); 
+    static ShProgram shVsh( const ShMatrix<N, N, Kind, T> &mv, const ShMatrix<N, N, Kind, T> &mvp,
+        int numTangents = 0, int numLights = 1); 
 };
 
 }

@@ -17,6 +17,12 @@ incinc_HEADERS = ShNoise.hpp \
                  ShUtilImpl.hpp \
 								 ShKernelLib.hpp \
 								 ShKernelLibImpl.hpp \
+								 ShKernelLight.hpp \
+								 ShKernelLightImpl.hpp \
+								 ShKernelSurface.hpp \
+								 ShKernelSurfaceImpl.hpp \
+								 ShKernelPost.hpp \
+								 ShKernelPostImpl.hpp \
 								 ShMesh.hpp \
 								 ShMeshImpl.hpp \
 								 ShObjMesh.hpp \

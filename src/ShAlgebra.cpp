@@ -82,9 +82,13 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   for (I = a->outputs.begin(), J = b->inputs.begin(); 
       I != a->outputs.end() && J != b->inputs.end(); ++I, ++J) { 
     if((*I)->size() != (*J)->size()) {
-      ShError(ShAlgebraException("Cannot smash variables " + 
-            (*I)->nameOfType() + " " + (*I)->name() + " and " + 
-            (*J)->nameOfType() + " " + (*J)->name() + " with different sizes."));
+      std::ostringstream err;
+      err << "Cannot smash variables "  
+          << (*I)->nameOfType() << " " << (*I)->name() << " and " 
+          << (*J)->nameOfType() << " " << (*J)->name() << " with different sizes" << std::endl;
+      err << "while connecting outputs: " << a->outputs << std::endl;
+      err << "to inputs: " << b->inputs << std::endl;
+      ShError(ShAlgebraException(err.str()));
     }
     ShVariableNodePtr n = new ShVariableNode(SH_TEMP, (*I)->size());
     varMap[*I] = n;
@@ -179,20 +183,19 @@ ShProgram combine(const ShProgram& a, const ShProgram& b)
   return program;
 }
 
-ShProgram namedCombine(const ShProgram &a, const ShProgram &b) {
-  ShProgram ab = combine(a, b);
-
+// Duplicates to inputs with matching name/type
+ShProgram mergeNames(const ShProgram &p) {
   typedef std::pair<std::string, int> InputType;
   typedef std::map< InputType, int > FirstOccurenceMap;  // position of first occurence of an input type
   typedef std::vector< std::vector<int> > Duplicates;
   FirstOccurenceMap firsts;
   // dups[i] stores the set of positions that have matching input types with position i.
   // The whole set is stored in the smallest i position.
-  Duplicates dups( ab->inputs.size(), std::vector<int>()); 
+  Duplicates dups( p->inputs.size(), std::vector<int>()); 
 
   std::size_t i = 0;
-  for(ShProgramNode::VarList::const_iterator I = ab->inputs.begin();
-      I != ab->inputs.end(); ++I, ++i) {
+  for(ShProgramNode::VarList::const_iterator I = p->inputs.begin();
+      I != p->inputs.end(); ++I, ++i) {
     InputType it( (*I)->name(), (*I)->size() );
     if( firsts.find( it ) != firsts.end() ) { // duplicate
       dups[ firsts[it] ].push_back(i); 
@@ -209,7 +212,13 @@ ShProgram namedCombine(const ShProgram &a, const ShProgram &b) {
     if( duplicator ) duplicator = duplicator & shDup(dups[i].size());
     else duplicator = shDup(dups[i].size());
   }
-  return ab << shSwizzle(swizzle) << duplicator; 
+  ShProgram result = p << shSwizzle(swizzle);
+  if( duplicator ) result = result << duplicator;
+  return result; 
+}
+
+ShProgram namedCombine(const ShProgram &a, const ShProgram &b) {
+  return mergeNames(combine(a, b));
 }
 
 ShProgram namedConnect(const ShProgram &a, const ShProgram &b, bool keepExtra) {
@@ -266,7 +275,55 @@ ShProgram namedConnect(const ShProgram &a, const ShProgram &b, bool keepExtra) {
     }
   }
    
-  return b << ( shSwizzle(swiz) << aPass ); 
+  return mergeNames(b << ( shSwizzle(swiz) << aPass )); 
+}
+
+ShProgram renameInput(const ShProgram &a, std::string oldName, std::string newName) {
+  ShProgram renamer = SH_BEGIN_PROGRAM() {
+    for(ShProgramNode::VarList::const_iterator I = a->inputs.begin();
+        I != a->inputs.end(); ++I) {
+      ShVariable var(new ShVariableNode(SH_INOUT, (*I)->size(), 
+            (*I)->specialType()));
+
+      std::string name = (*I)->name();
+      if( name == oldName ) {
+        var.name(newName);
+      } else {
+        var.name(name);
+      }
+    }
+  }
+  return connect(renamer, a);
+}
+
+// TODO factor out common code from renameInput, renameOutput
+ShProgram renameOutput(const ShProgram &a, std::string oldName, std::string newName) {
+  ShProgram renamer = SH_BEGIN_PROGRAM() {
+    for(ShProgramNode::VarList::const_iterator I = a->outputs.begin();
+        I != a->outputs.end(); ++I) {
+      ShVariable var(new ShVariableNode(SH_INOUT, (*I)->size(), 
+            (*I)->specialType()));
+
+      std::string name = (*I)->name();
+      if( name == oldName ) {
+        var.name(newName);
+      } else {
+        var.name(name);
+      }
+    }
+  }
+  return connect(a, renamer);
+}
+
+ShProgram namedAlign(const ShProgram &a, const ShProgram &b) {
+  ShManipulator<std::string> ordering;
+
+  for(ShProgramNode::VarList::const_iterator I = b->inputs.begin();
+      I != b->inputs.end(); ++I) {
+    ordering((*I)->name());
+  }
+
+  return ordering << a; 
 }
 
 ShProgram operator<<(const ShProgram& a, const ShProgram& b)

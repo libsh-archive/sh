@@ -124,6 +124,13 @@ ShAttrib<N, Kind, T> evenOddSort(const ShAttrib<N, Kind, T>& v);
 template<int S, int N, int Kind, typename T>
 void groupEvenOddSort(ShAttrib<N, Kind, T> v[]);
 
+/** \brief Given orthonormal basis b0, b1, b2 and vector v relative to coordinate space C,
+ * does change of basis on v to the orthonormal basis b0, b1, b2
+ */
+template<typename T>
+ShVariableN<3, T> changeBasis(const ShVariableN<3, T> &b0, 
+    const ShVariableN<3, T> &b1, const ShVariableN<3, T> &b2, const ShVariableN<3, T> &v); 
+
 }
 
 #include "ShUtilImpl.hpp"

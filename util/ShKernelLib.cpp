@@ -24,9 +24,18 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
+#include <sstream>
 #include "ShKernelLib.hpp"
+#include "ShUtil.hpp"
 
 namespace ShUtil {
+
+std::string ShKernelLib::makeName(std::string prefix, int index) {
+  std::ostringstream name;
+  if( index == 0 ) return prefix;
+  name << prefix << index;
+  return name.str();
+}
 
 ShProgram ShKernelLib::outputPass( const ShProgram &p ) {
   ShProgram passer = SH_BEGIN_PROGRAM() {
@@ -40,17 +49,13 @@ ShProgram ShKernelLib::outputPass( const ShProgram &p ) {
   return passer;
 }
 
-ShProgram ShKernelLib::shConvertBasis(std::string name, 
+ShProgram ShKernelLib::shChangeBasis(std::string name, 
     std::string b0Name, std::string b1Name, std::string b2Name) {
   ShProgram kernel = SH_BEGIN_PROGRAM() {
     ShInputVector3f SH_NAMEDECL( b0, b0Name );
     ShInputVector3f SH_NAMEDECL( b1, b1Name );
     ShInputVector3f SH_NAMEDECL( b2, b2Name );
-    ShInputVector3f SH_NAMEDECL( vec, name );
-    ShOutputVector3f SH_NAMEDECL( veco, name );
-    veco(0) = vec | b0;
-    veco(1) = vec | b1;
-    veco(2) = vec | b2;
+    ShInOutVector3f SH_NAMEDECL( vec, name ) = changeBasis(b0, b1, b2, vec);
   } SH_END;
   return kernel;
 }

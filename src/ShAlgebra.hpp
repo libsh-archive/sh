@@ -21,8 +21,8 @@ ShProgram combine(const ShProgram& a, const ShProgram& b);
 /// Run a and b together (i.e. use both inputs from a and b and both
 // outputs from a and b).
 // This combine detects pairs of inputs with matching names and types.
-// If this occurs, the later input is discarded and automatically 
-// gets the same value as the earlier input.
+// If this occurs, the later input is discarded and replaced with
+// the earlier one.
 //
 // E.g. if a has inputs x, y, k, x, z and b has inputs w, y, x, v
 // The result has inputs x, y, k, z, w, v
@@ -35,7 +35,18 @@ ShProgram namedCombine(const ShProgram& a, const ShProgram& b);
 // input of b of the same name/type that is not already connected with
 // another output of a.
 // Extra inputs remain at the end.  Extra outputs remain iff keepExtra = true 
-ShProgram namedConnect(const ShProgram& a, const ShProgram& b, bool keepExtra = true );
+ShProgram namedConnect(const ShProgram& a, const ShProgram& b, bool keepExtra = false );
+
+// Renames all inputs named oldName to newName
+ShProgram renameInput(const ShProgram &a, std::string oldName, std::string newName);
+
+// Renames all outputs named oldName to newName
+ShProgram renameOutput(const ShProgram &a, std::string oldName, std::string newName);
+
+// Swizzles outputs of a to match inputs of b
+// This only works on programs with inputs/outputs that all have unique names 
+// Also, the inputs of b must be a subset of the outputs of a
+ShProgram namedAlign(const ShProgram &a, const ShProgram &b);
 
 /// Replaces uniform by appending an input to the end of the list
 ShProgram replaceUniform(const ShProgram &a, const ShVariable &var); 
