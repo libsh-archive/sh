@@ -1,9 +1,29 @@
 #include "ArbCode.hpp"
 #include <algorithm>
-
+#include <cmath>
 #include "ShDebug.hpp"
 #include "ShError.hpp"
 
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+#ifndef M_E
+#define M_E 2.7182818284590452354
+#endif
+
+#ifdef WIN32
+namespace {
+double log2(double x) { return log(x)/log(2.0); }
+}
+#endif
 
 namespace shgl {
 

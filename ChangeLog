@@ -1,3 +1,17 @@
+2004-07-19    <sdt@HUEY>
+
+	* src/ShLibClamp.hpp: Undef max and min if they are defined.
+
+	* backends/gl/GlBackend.cpp (setContext): Fix assertion.
+
+	* backends/gl/ArbEmit.cpp: Add some stuff missing on win32.
+
+	* backends/gl/ArbBackend.cpp: Add a DllMain for win32.
+
+	* backends/gl/Arb.cpp: Include windows.h on win32.
+
+	* backends/gl/Makefile.win32: Added Makefile for win32.
+
 2004-07-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShTransformer.cpp: Get rid of some more stack-based variable

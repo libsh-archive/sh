@@ -97,7 +97,7 @@ int GlBackend::context() const
 
 void GlBackend::setContext(int context)
 {
-  SH_DEBUG_ASSERT(0 <= context < m_contexts.size());
+  SH_DEBUG_ASSERT(0 <= context && context < m_contexts.size());
   m_curContext = context;
 }
 

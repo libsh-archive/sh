@@ -1,0 +1,31 @@
+GLBACKEND_SOURCES = GlBackend.cpp GlBackend.hpp \
+		  GlTextureName.hpp GlTextureName.cpp
+GLTEXTURE_SOURCES = GlTextureStorage.hpp GlTextureStorage.cpp \
+		     GlTextures.hpp GlTextures.cpp 
+# PBUFFERSTREAM_SOURCES = PBufferStreams.hpp PBufferStreams.cpp
+
+# For now..
+PBUFFERSTREAM_SOURCES = 
+
+# libsharb_dll_LDFLAGS = -L$(prefix)/lib -module
+libsharb_dll_SOURCES =  Arb.cpp ArbCode.cpp ArbEmit.cpp ArbInst.cpp
+libsharb_dll_SOURCES += ArbLimits.cpp ArbReg.cpp
+libsharb_dll_SOURCES += Arb.hpp ArbCode.hpp ArbInst.hpp ArbLimits.hpp
+libsharb_dll_SOURCES += ArbReg.hpp ArbBackend.cpp
+libsharb_dll_SOURCES += $(GLBACKEND_SOURCES) $(GLTEXTURE_SOURCES) $(PBUFFERSTREAM_SOURCES)
+
+libsharb_dll_CXXFILES = $(filter %.cpp,$(libsharb_dll_SOURCES))
+libsharb_dll_OBJECTS = $(libsharb_dll_CXXFILES:.cpp=.obj)
+
+libshard_dll_LDADD = ../../src/libsh.lib 
+libshard_dll_LDADD += $(OPENGL_DIR)\lib\OPENGL32.LIB
+
+
+libsharb.dll: $(libsharb_dll_OBJECTS)
+	$(CXX) /Felibsharb /LD $^ $(libshard_dll_LDADD) $(LDFLAGS)
+
+libsharb_dll_DEPENDS = $(libsharb_dll_CXXFILES:.cpp=.d)
+
+include ../../win32.mk
+INCLUDES += -I../../src
+include $(libsharb_dll_DEPENDS)
