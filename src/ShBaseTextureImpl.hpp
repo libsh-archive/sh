@@ -314,26 +314,19 @@ void ShBaseTexture2D<T>::size(int width, int height)
 template<typename T>
 void ShBaseTextureRect<T>::size(int width, int height)
 {
-  m_node->setTexSize(width, height, depth);
+  m_node->setTexSize(width, height);
 }
 
 template<typename T>
 void ShBaseTexture3D<T>::size(int width, int height, int depth)
 {
-  ShAttrib3f s(m_node->texSizeVar().node(), ShSwizzle(m_node->texSizeVar().size()), false);
-  s = ShAttrib3f(width, height, depth);
-  m_node->width(width);
-  m_node->height(height);
-  m_node->depth(depth);
+  m_node->setTexSize(width, height, depth);
 }
 
 template<typename T>
 void ShBaseTextureCube<T>::size(int width, int height)
 {
-  ShAttrib2f s(m_node->texSizeVar().node(), ShSwizzle(m_node->texSizeVar().size()), false);
-  s = ShAttrib2f(width, height);
-  m_node->width(width);
-  m_node->height(height);
+  m_node->setTexSize(width, height);
 }
 
 }
