@@ -39,8 +39,8 @@
 namespace ShArb {
 
 class ArbBackend;
-class ArbInst;
-class ArbReg;
+struct ArbInst;
+struct ArbReg;
 struct ArbBindingSpecs;
 
 /** Possible register types in the ARB spec.
