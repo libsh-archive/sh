@@ -1,5 +1,18 @@
 2004-07-09  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* backends/gl/ArbCode.cpp (print): Add LABEL and BRA printing cases.
+	(getLabel): Implement this function.
+	(genNode): Handle branches for NVVP2.
+
+	* backends/gl/ArbCode.hpp: Add label map.
+
+	* backends/gl/ArbInst.cpp (arbOpInfo): Clean up table, add BRA and
+	LABEL info.
+
+	* backends/gl/ArbInst.hpp: Add instructions for BRA and a fake
+	LABEL instruction.
+	(ArbOpInfo): Remove useless members (fp, vp, vector).
+
 	* backends/cpu/CPU.cpp (encode): Implement SH_OP_SGN.
 
 	* src/ShLibDerivImpl.hpp (fwidth): Fix this function (use "var"

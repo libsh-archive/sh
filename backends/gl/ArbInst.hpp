@@ -84,12 +84,14 @@ enum ArbOp {
 
   // NV_vertex_program2
   SH_ARB_SSG,
+  SH_ARB_BRA,
+  SH_ARB_LABEL, // Special label "instruction"
   
   // NV_fragment_program2
   SH_ARB_DIV,
   SH_ARB_DP2,
   SH_ARB_NRM,
-  
+
   // Special "operations" for emit
   SH_ARB_FUN
 };
@@ -98,9 +100,7 @@ enum ArbOp {
  */
 struct ArbOpInfo {
   char* name;
-  bool vp, fp;
   int arity;
-  bool vector;
   bool collectingOp;
 };
 
@@ -109,6 +109,17 @@ extern ArbOpInfo arbOpInfo[];
 /** An ARB instruction.
  */
 struct ArbInst {
+  ArbInst(ArbOp op, int label)
+    : op(op), label(label)
+  {
+  }
+
+  ArbInst(ArbOp op, int label, const SH::ShVariable& condition)
+    : op(op), label(label)
+  {
+    src[0] = condition;
+  }
+  
   ArbInst(ArbOp op, const SH::ShVariable& dest)
     : op(op), dest(dest)
   {
@@ -139,6 +150,9 @@ struct ArbInst {
   ArbOp op;
   SH::ShVariable dest;
   SH::ShVariable src[3];
+
+  int label; // For branching instructions and labels
+  
 };
 
 }

@@ -108,7 +108,7 @@ ArbCode::ArbCode(const ShProgramNodeCPtr& shader, const std::string& unit,
                  TextureStrategy* textures)
   : m_textures(textures), m_shader(0), m_originalShader(shader), m_unit(unit),
     m_numTemps(0), m_numInputs(0), m_numOutputs(0), m_numParams(0), m_numConsts(0),
-    m_numTextures(0), m_programId(0), m_environment(0)
+    m_numTextures(0), m_programId(0), m_environment(0), m_max_label(0)
 {
   if (unit == "fragment") m_environment |= SH_ARB_FP;
   if (unit == "vertex") m_environment |= SH_ARB_VP;
@@ -165,6 +165,10 @@ void ArbCode::generate()
 
   m_shader->ctrlGraph->entry()->clearMarked();
   genNode(m_shader->ctrlGraph->entry());
+
+  if (m_environment & SH_ARB_NVVP2) {
+    m_instructions.push_back(ArbInst(SH_ARB_LABEL, getLabel(m_shader->ctrlGraph->exit())));
+  }
   m_shader->ctrlGraph->entry()->clearMarked();
   allocRegs();
   
@@ -401,6 +405,7 @@ bool ArbCode::printSamplingInstruction(std::ostream& out, const ArbInst& instr) 
     out << "RECT";
     break;
   }
+  out << ";";
   return true;
 }
 
@@ -447,7 +452,22 @@ std::ostream& ArbCode::print(std::ostream& out)
   // Print instructions
   for (ArbInstList::const_iterator I = m_instructions.begin();
        I != m_instructions.end(); ++I) {
-    if (!printSamplingInstruction(out, *I)) {
+    if (I->op == SH_ARB_LABEL) {
+      out << "label" << I->label << ": ";
+    } else if (I->op == SH_ARB_BRA) {
+      if (I->src[0].node()) {
+        out << "  MOVC ";
+        printVar(out, true, I->src[0], false);
+        out << ", ";
+        printVar(out, false, I->src[0], false, I->src[0].swizzle());
+        out << ";" << endl;
+      }
+      out << "  BRA label" << I->label;
+      if (I->src[0].node()) {
+        out << "  (GT)";
+      }
+      out << ";";
+    } else if (!printSamplingInstruction(out, *I)) {
       out << "  ";
       out << arbOpInfo[I->op].name << " ";
       printVar(out, true, I->dest, arbOpInfo[I->op].collectingOp);
@@ -455,8 +475,8 @@ std::ostream& ArbCode::print(std::ostream& out)
         out << ", ";
         printVar(out, false, I->src[i], arbOpInfo[I->op].collectingOp, I->dest.swizzle());
       }
+      out << ';';
     }
-    out << ';';
     out << endl;
   }
 
@@ -482,15 +502,41 @@ std::ostream& ArbCode::printInputOutputFormat(std::ostream& out) {
   return out;
 }
 
+int ArbCode::getLabel(ShCtrlGraphNodePtr node)
+{
+  if (m_label_map.find(node) == m_label_map.end()) {
+    m_label_map[node] = m_max_label++;
+  }
+  return m_label_map[node];
+}
+
 void ArbCode::genNode(ShCtrlGraphNodePtr node)
 {
   if (!node || node->marked()) return;
   node->mark();
 
+  if (node == m_shader->ctrlGraph->exit()) return;
+  
+  if (m_environment & SH_ARB_NVVP2) {
+    m_instructions.push_back(ArbInst(SH_ARB_LABEL, getLabel(node)));
+  }
+  
   if (node->block) for (ShBasicBlock::ShStmtList::const_iterator I = node->block->begin();
        I != node->block->end(); ++I) {
     const ShStatement& stmt = *I;
     emit(stmt);
+  }
+
+  if (m_environment & SH_ARB_NVVP2) {
+    for(std::vector<SH::ShCtrlGraphBranch>::iterator I = node->successors.begin();
+	I != node->successors.end(); I++) {
+      m_instructions.push_back(ArbInst(SH_ARB_BRA, getLabel(I->node), I->cond));
+    }
+    m_instructions.push_back(ArbInst(SH_ARB_BRA, getLabel(node->follower)));
+    for(std::vector<SH::ShCtrlGraphBranch>::iterator I = node->successors.begin();
+	I != node->successors.end(); I++) {
+      genNode(I->node);
+    }
   }
 
   genNode(node->follower);

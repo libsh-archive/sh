@@ -120,6 +120,8 @@ private:
   /// Check whether inst is a sampling instruction. If so, output it
   /// and return true. Otherwise, output nothing and return false.
   bool printSamplingInstruction(std::ostream& out, const ArbInst& inst) const;
+
+  int getLabel(SH::ShCtrlGraphNodePtr node);
   
   TextureStrategy* m_textures;
   SH::ShProgramNodePtr m_shader; // internally visible shader ShTransformered to fit this target (ARB)
@@ -170,6 +172,10 @@ private:
 
   // Extensions and language alternatives available. See list above
   unsigned int m_environment;
+
+  typedef std::map<SH::ShCtrlGraphNodePtr, int> LabelMap;
+  LabelMap m_label_map; 
+  int m_max_label;
 };
 
 typedef SH::ShPointer<ArbCode> ArbCodePtr;
