@@ -128,7 +128,7 @@ ShSectionNodePtr ShSectionTree::operator[](ShCtrlGraphNodePtr cfgNode)
 
 bool ShSectionTree::contains(ShSectionNodePtr section, ShCtrlGraphNodePtr cfgNode)
 {
-  for(ShSectionNodePtr s = cfgSection[cfgNode]; s; s = s->parent) {
+  for(ShSectionNodePtr s = operator[](cfgNode); s; s = s->parent) {
     if(s == section) return true;
   }
   return false;

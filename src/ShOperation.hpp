@@ -113,6 +113,11 @@ enum ShOperation {
   // Fragment kill
   SH_OP_KIL, ///< Conditionally kill fragment (if for any i, src[0][i] > 0)
 
+  // Fragment debug
+  SH_OP_DBG, ///< @todo range stupid hack for debugging
+             ///< Makes the first colour output of the program equal to src[0]. 
+             ///< The two must be the same size.
+
   // Special
   SH_OP_OPTBRA, ///< Used in the optimizer to indicate a conditional
                 ///  branch dependency. This should never show up in

@@ -12,6 +12,8 @@ using namespace std;
 using namespace SH;
 using namespace ShUtil;
 
+int gprintf(int x, int y, char* fmt, ...);
+
 // replace with an RPN parser soon
 enum Graph {
   GR_LINE, // just a line with slope (MUL) 
@@ -25,6 +27,8 @@ enum Graph {
   GR_FLR, // floor (FLR)
   GR_FRAC, // frac
   GR_NORM, // norm
+  GR_TEX, // texture lookup (1D)
+  GR_TEXI, // texture lookup (RECT)
   GR_LRP  // lerp between EXP and LOG (LRP, EXP, LOG)
 };
 const int NUMGRAPHS = (int)(GR_LRP) + 1;
@@ -41,6 +45,8 @@ const char* GraphName[] = {
   "floor",
   "frac",
   "norm",
+  "tex",
+  "texi",
   "lrp"
 };
 
@@ -49,10 +55,15 @@ ShAttrib1f eps;
 ShAttrib2f offset;
 ShAttrib1f myscale;
 ShProgram vsh, fsh[NUMGRAPHS];
-Graph mode = GR_FRAC; 
+#define DBG_MODE
+Graph mode = GR_TEX; 
 
 ShAttrib<5, SH_TEMP, float> coeff;
 ShAttrib<3, SH_TEMP, float> denom;
+
+const size_t TEX_SIZE = 128;
+// @todo range cannot deal with interpolation yet
+ShInterp<0, ShUnclamped<ShTexture1D<ShColor1f> > > tex(TEX_SIZE);
 
 // Glut data
 int buttons[5] = {GLUT_UP, GLUT_UP, GLUT_UP, GLUT_UP, GLUT_UP};
@@ -70,43 +81,54 @@ struct PlotFunction {
   PlotFunction(string name) : m_name(name) {}
   ShProgram func(Graph g) {
     ShProgram result = SH_BEGIN_PROGRAM() {
-      ShInputAttrib1f SH_NAMEDECL(t, m_name);
-      ShOutputAttrib1f SH_DECL(value);
+        ShInputAttrib1f SH_NAMEDECL(t, m_name);
+        ShOutputAttrib1f SH_DECL(value);
 
-      switch(g) {
-        case GR_LINE:
-          value = mad(t, coeff(1), coeff(0)); 
-          break;
-        case GR_POLY:
-          //value = mad(t, mad(t, coeff(2), coeff(1)), coeff(0)); 
-          value = t * mad(t, mad(t, coeff(3), coeff(2)), coeff(1)) + coeff(0); break; 
+        switch(g) {
+          case GR_LINE:
+            value = mad(t, coeff(1), coeff(0)); 
             break;
-        case GR_RATPOLY:
-          value = (t * mad(t, mad(t, coeff(3), coeff(2)), coeff(1)) + coeff(0))
-            * rcp(mad(t, mad(t, denom(2), denom(1)), denom(0))); break; 
-        case GR_EXP:
-          value = exp(t); break;
-  //        value = exp(t) * coeff(0) + exp2(t) * coeff(1) + exp10(t) * coeff(2); break;
-        case GR_LOG:
-          value = log(t); break;
-   //       value = log(t) * coeff(0) + log2(t) * coeff(1) + log10(t) * coeff(2); break;
-        case GR_RCP:
-          value = rcp(t); break;
-        case GR_SQRT:
-          value = sqrt(t); break;
-        case GR_RSQ:
-          value = rsqrt(t); break;
-        case GR_FLR:
-          value = floor(t); break;
-        case GR_FRAC:
-          value = frac(t); break;
-        case GR_NORM:
-          value = normalize(t); break;
-        case GR_LRP:
-          value = lerp(coeff(0), exp(t), log(t)); break;
-        default:
-          std::cout << "Not Good!" << std::endl;
-      }
+          case GR_POLY:
+            //value = mad(t, mad(t, coeff(2), coeff(1)), coeff(0)); 
+            value = t * mad(t, mad(t, coeff(3), coeff(2)), coeff(1)) + coeff(0); break; 
+              break;
+          case GR_RATPOLY:
+            value = (t * mad(t, mad(t, coeff(3), coeff(2)), coeff(1)) + coeff(0))
+              * rcp(mad(t, mad(t, denom(2), denom(1)), denom(0))); break; 
+          case GR_EXP:
+            value = exp(t); break;
+    //        value = exp(t) * coeff(0) + exp2(t) * coeff(1) + exp10(t) * coeff(2); break;
+          case GR_LOG:
+            value = log(t); break;
+     //       value = log(t) * coeff(0) + log2(t) * coeff(1) + log10(t) * coeff(2); break;
+          case GR_RCP:
+            value = rcp(t); break;
+          case GR_SQRT:
+            value = sqrt(t); break;
+          case GR_RSQ:
+            value = rsqrt(t); break;
+          case GR_FLR:
+            value = floor(t); break;
+          case GR_FRAC:
+            value = frac(t); break;
+          case GR_NORM:
+            value = normalize(t); break;
+
+          case GR_TEX:
+            {
+              value = tex(t); break; 
+            }
+
+          case GR_TEXI:
+            {
+              value = tex[t]; break; 
+            }
+
+          case GR_LRP:
+            value = lerp(coeff(0), exp(t), log(t)); break;
+          default:
+            std::cout << "Not Good!" << std::endl;
+        }
     } SH_END;
     return result;
   }
@@ -135,7 +157,7 @@ void initShaders() {
     ShColor3f SH_DECL(funcColor) = ShConstAttrib3f(0, 0, 0);
     ShColor3f SH_DECL(bkgdColor) = ShConstAttrib3f(1, 1, 1);
     ShColor3f SH_DECL(gridColor) = ShConstAttrib3f(0, 0, 1);
-    ShColor3f SH_DECL(inrangeColor) = ShConstAttrib3f(1, 0.5, 0.5);
+    ShColor3f SH_DECL(inrangeColor) = ShConstAttrib3f(0, 0, 0);
 
     // take plot function, find if there's an intersection,
     // kill if no isct
@@ -143,6 +165,9 @@ void initShaders() {
     PlotFunction plotfunc("texcoord");
 
     for(int i = GR_LINE; i <= GR_LRP; i = i + 1) {
+#ifdef DBG_MODE // debugging
+      if(i != mode) continue;
+#endif
       ShProgram func = plotfunc.func(static_cast<Graph>(i));
       ShProgram ifunc = inclusion(func);
 
@@ -169,32 +194,50 @@ void initShaders() {
         ShAttrib1f inCurve = abs(val - pos(1)) < scaled_eps; 
 
         // check if in range
+        ShAttrib1f SH_DECL(inRange) = 0.0f;
+        ShColor3f rangeColor = inrangeColor;
+
         ShAttrib1f start = floor(pos(0) / rangeWidth) * rangeWidth; 
         ShAttrib1f end = ceil(pos(0) / rangeWidth) * rangeWidth; 
         ShAttrib1a_f SH_DECL(range) = make_interval(start, end);
         ShAttrib1f SH_DECL(center) = range_center(range);
 
+        // check if in affine range
+#if 1
         ShAttrib1a_f SH_DECL(result_range) = afunc(range);
         ShAttrib1f SH_DECL(result_center) = range_center(result_range);
         ShAttrib1f SH_DECL(result_inerr) = affine_lasterr(result_range, range);
         ShAttrib1f SH_DECL(result_radius) = range_radius(result_range);
         ShAttrib1f SH_DECL(result_other) = result_radius - abs(result_inerr);
 
-        ShAttrib1i_f SH_DECL(result_rangei) = ifunc(range);
-
-        ShAttrib1f SH_DECL(inRange);
-        ShAttrib1f SH_DECL(inRangei);
-        
-        ShColor3f rangeColor = inrangeColor;
-
-        // should show affine shape, but doesn't quite work
         ShAttrib1f errValue = (pos(0) - center) / range_radius(range);
+        
         inRange = abs(errValue * result_inerr + result_center - pos(1)) < result_other;
-        inRangei = range_lo(range_contains(result_rangei, pos(1)));
         rangeColor(0) = inRange; 
+/*
+        // @todo debug
+        inRange = 1;
+    //    rangeColor = range_center(result_range)(0,0,0); 
+        SH_BEGIN_SECTION("foo") {
+          SH_BEGIN_SECTION("foo2") {
+            rangeColor(0,1) = abs(result_inerr)(0,0); 
+          } SH_END_SECTION;
+          rangeColor(2) = (result_inerr < 0); 
+        } SH_END_SECTION;
+        */
+#endif
+
+        // check if in IA range
+#if 1
+        ShAttrib1i_f SH_DECL(rangei) = make_interval(start, end); 
+        ShAttrib1i_f SH_DECL(result_rangei) = ifunc(rangei);
+
+        ShAttrib1f SH_DECL(inRangei);
+        inRangei = range_lo(range_contains(result_rangei, pos(1)));
         rangeColor(1) = inRangei; 
-        //rangeColor(2) = abs(result_center - pos(1)) < eps;
         inRange = inRange || inRangei;
+#endif
+
 
         // check if in grid
         ShAttrib1f inGrid = (abs(pos(0)) < scaled_eps) + (abs(pos(1)) < scaled_eps); 
@@ -205,7 +248,7 @@ void initShaders() {
 
       fsh[i].node()->dump(std::string("fsh_") + GraphName[i]);
     }
-    vsh = namedAlign(vsh, fsh[0]);
+    vsh = namedAlign(vsh, fsh[mode]);
     vsh.node()->dump("vsh");
 }
 
@@ -216,6 +259,11 @@ void display()
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glCallList(displayList);
+
+  gprintf(30, 100, "Sh Graph Info");
+  gprintf(30, 80, "Mode - %s", GraphName[mode]);
+  gprintf(30, 60, "Width - %f", rangeWidth.getValue(0));
+
   glutSwapBuffers();
 }
 
@@ -241,6 +289,14 @@ void setup()
       glVertex2f(-1.0f, 1.0f);
     glEnd();
   glEndList();
+
+  ShHostMemoryPtr texmem = new ShHostMemory(TEX_SIZE * sizeof(float));
+  float* data = reinterpret_cast<float*>(texmem->hostStorage()->data());
+  for(size_t i = 0; i < TEX_SIZE; ++i) {
+    data[i] = 0.5 + 0.5 * sin(M_PI * 2.0 * i / float(TEX_SIZE));   
+  }
+
+  tex.memory(texmem);
 }
 
 void reshape(int width, int height)
@@ -287,8 +343,8 @@ void keyboard(unsigned char k, int x, int y)
       case 'Q':
         exit(0);
         break;
-      case 'r': rangeWidth /= 1.1f; break;
-      case 'R': rangeWidth *= 1.1f; break;
+      case 'r': rangeWidth /= 1.01f; break;
+      case 'R': rangeWidth *= 1.01f; break;
       case 'e': eps /= 1.1f; break;
       case 'E': eps *= 1.1f; break;
 
@@ -323,12 +379,6 @@ void keyboard(unsigned char k, int x, int y)
                 else mode = static_cast<Graph>(mode - 1);
                 shBind(fsh[mode]); break;
     }
-  std::cout << "Current Settings: " << std::endl;
-  std::cout << "  mode = " << GraphName[mode] << std::endl;
-  std::cout << "  epsilon = " << eps << std::endl;
-  std::cout << "  width = " << rangeWidth << std::endl;
-  std::cout << "  coeff = " << coeff << std::endl;
-  std::cout << "  denom = " << denom << std::endl;
   glutPostRedisplay();
 }
 
@@ -375,4 +425,53 @@ int main(int argc, char** argv)
   }
   
   glutMainLoop();
+}
+
+int gprintf(int x, int y, char* fmt, ...)
+{
+  char temp[1024];
+  va_list va;
+  va_start(va, fmt);
+  vsprintf(temp, fmt, va);
+  va_end(va);
+  
+  // setup the matrices for a direct
+  // screen coordinate transform when
+  // using glRasterPos
+  int vp[4];
+  glGetIntegerv(GL_VIEWPORT, vp);
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+  glOrtho(0, vp[2], 0, vp[3], -1, 1);
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glLoadIdentity();
+
+  // just in case, turn lighting and
+  // texturing off and disable depth testing
+  glPushAttrib(GL_ENABLE_BIT);
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_VERTEX_PROGRAM_ARB);
+  glDisable(GL_FRAGMENT_PROGRAM_ARB);
+
+  glColor3f(0, 0, 0);
+
+  // render the character through glut
+  char* p = temp;
+  glRasterPos2f(x, y);
+  while(*p) {
+    glutBitmapCharacter(GLUT_BITMAP_8_BY_13, (*p));
+    p++;
+  }
+  
+  // reset OpenGL to what is was
+  // before we started
+  glPopAttrib();
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
+  
+  return p-temp;
 }

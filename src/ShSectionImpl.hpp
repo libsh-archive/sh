@@ -27,6 +27,7 @@
 #ifndef SHSECTIONIMPL_HPP
 #define SHSECTIONIMPL_HPP
 
+#include <sstream>
 #include "ShSection.hpp"
 
 /** @file ShSectionImpl.hpp
@@ -51,14 +52,17 @@ void ShSectionTree::realDfs(ShSectionNodePtr node, F& functor)
 template<class F>
 std::ostream& ShSectionTree::dump(std::ostream& out, F& functor)
 {
-  out << "digraph structural {" << std::endl;
-    realDump(out, root, functor);
+  std::ostringstream cfgout;
+  out << "digraph sectiontree {" << std::endl;
+    realDump(out, cfgout, root, functor);
+    out << cfgout.str() << std::endl;
   out << "}";
   return out;
 }
 
 template<class F>
-void ShSectionTree::realDump(std::ostream& out, ShSectionNodePtr node, F& functor)
+void ShSectionTree::realDump(std::ostream& out, std::ostream& cfgout, 
+                             ShSectionNodePtr node, F& functor)
 {
   out << "subgraph " << "cluster_" << node.object() << " {" << std::endl; 
     functor(out, node);
@@ -80,25 +84,29 @@ void ShSectionTree::realDump(std::ostream& out, ShSectionNodePtr node, F& functo
 #endif
       out << ";" << std::endl;
 
+
       // @todo this is copied from CtrlGraph.cpp...
       for (ShCtrlGraphNode::SuccessorList::const_iterator I = c->successors.begin();
            I != c->successors.end(); ++I) {
-        out << "\"cfg_" << c.object() << "\" ";
-        out << "-> ";
-        out << "\"cfg_" << I->node.object() << "\" ";
+        std::ostream& curout = contains(node, I->node) ? out : cfgout; 
+        curout << "\"cfg_" << c.object() << "\" ";
+        curout << "-> ";
+        curout << "\"cfg_" << I->node.object() << "\" ";
 
-        out << "[style=dashed, label=\"" << I->cond.name() << "\"]";
-        out << ";" << std::endl;
+        curout << "[style=dashed, label=\"" << I->cond.name() << "\"]";
+        curout << ";" << std::endl;
       }
 
       if (c->follower) {
-        out << "\"cfg_" << c.object() << "\" ";
-        out << "-> ";
-        out << "\"cfg_" << c->follower.object() << "\";" << std::endl;
+        std::ostream& curout = contains(node, c->follower) ? out : cfgout; 
+        curout << "\"cfg_" << c.object() << "\" ";
+        curout << "-> ";
+        curout << "\"cfg_" << c->follower.object() << "\";" << std::endl;
       }
     }
+
     for(ShSectionNode::iterator S = node->begin(); S != node->end(); ++S) {
-      realDump(out, *S, functor);
+      realDump(out, cfgout, *S, functor);
     }
   out << "}" << std::endl; 
 }

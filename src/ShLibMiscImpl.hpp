@@ -142,6 +142,13 @@ ShProgram freeze(const ShProgram& p,
   return (p >> uniform) << (T::ConstType)(uniform);
 }
 
+template<int N, typename T>
+inline
+void dbg_output(const ShGeneric<N, T>& a)
+{
+  shDBG(c);
+}
+
 }
 
 #endif

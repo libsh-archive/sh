@@ -1,5 +1,44 @@
+2004-02-11 Bryan Chan <b8chan@cgl.uwaterloo.ca>
+	Reverted parts of several files to trunk versions while
+	doing the partial merge at r1978 (mostly debugging crud). 
+
+	Also some additions 
+	* src/ShAffineTexture.hpp, .cpp
+		src/ShIntervalTexture.hpp, .cpp
+		src/ShIntervalConverter.cpp,
+		src/ShMultiArray.hpp:
+	Cleanup and bug fixes on IA/AA texture conversions.
+	Multidimensional array class (very crappy - using std::valarray and std::gslice)
+
+	* test/sandbox/iateximg, aateximg:
+	Test cases dump generated 2D textures from ShAffineTexture.hpp and
+	ShIntervalTexture.hpp to PNG.
+
+	* examples/graph:
+	Tests texture conversion on 1D textures.
+
+	* ShOperation.hpp, ShOperation.cpp (SH_OP_DBG),
+		ShLibMisc.hpp, ShLibMiscImpl.hpp (dbg_output)
+		ShTransformer.cpp	(handleDbgOps):
+	dbg_output(x) replaces first SH_COLOR output with x.
+	Replacement happens during backend compile, so you can call this 
+	while building intermediate subprograms without color outputs, as long 
+	as the final combined program has a colour output.
+
+
+To merge into trunk:
+
+	* src/ShSection.hpp, ShSectionImpl.hpp:
+	Changed the edge output code so cfg edges appear in the correct DOT subgraphs.
+	(Should stop DOT from putting cfg nodes in the wrong sections)
+	Still doesn't route inter-section edges properly around section labels...arg. 
+
+	* backends/gl/GlTextures.cpp (shGlInternalFormat):
+	Since NV only supports float 1/2/3D through ATI_texture_float, use the ati 
+	caps when the texture dims are not RECT. 
+
 2004-02-07 Bryan Chan <b8chan@cgl.uwaterloo.ca>
-	Merged trunk in up to 1972.
+	Merged trunk in up to 1973.
 
 	* src/ShConcreteRegularOpImpl.hpp (LIT):
 	Fixed some stuff here for interval/affine types.
@@ -11,25 +50,6 @@
 
 	* src/ShLibMisc.hpp, src/ShLibMiscImpl.hpp (join): Added join
 	functions for three and four tuples.
-
-2004-01-26 Bryan Chan <b8chan@cgl.uwaterloo.ca>
-	* src/ShAaOps.hpp, ShAaOps.cpp ShAaOpHandler.cpp:
-	Added FRAC, FLR, RSQ ops.  That should cover the needs for perlin, except
-  TEX (which will be coming shortly once I cook up some LP goodness).
-	Fixed NaN problems by clamping some inputs to valid function domains. 
-
-	* src/ShSection.hpp, ShSectionImpl.hpp, ShSection.cpp:
-	Wrapper around ShStructural that only keeps the tree-structure of sections.
-  Replaces the garbage code in ShSectionUtil.?pp
-
-	* src/ShAaHier.hpp, ShAaHier.cpp, ShAaSymPlacer.cpp:
-	Updated to use ShSection.  Changed some things to use the input/output info
-  from value tracking.
-
-	* src/ShAaScanErr.hpp ShAaScanErr.cpp (shAaScanErrDump):
-	Outputs a DOT viz of the graph (with section nestings), mapping per-statement
-	errors linearly to a colour gradient.
-
 
 2005-02-04  Francois Marier  <francois@serioushack.com>
 
@@ -45,6 +65,31 @@
 	* test/regress/lit.cpp.py: Added more test cases and changed
 	the definition of the lit function to match the Arb fragment
 	program spec.
+
+2004-02-04 Bryan Chan <b8chan@cgl.uwaterloo.ca>
+	* src/ShLp.hpp ShLpImpl.hpp:
+	Basic simplex-method linear programming straight from CLRS.
+	Was using Sh types, but too slow, so switched to valarrays. 
+
+	* src/ShAffineTexture.hpp ShAffineTexture.cpp:
+	Added a first attempt at an affine texture (handles 1D, 2D, 3D and RECT,
+	but not wrap modes)
+
+	Based on Kevin's interval mip-maps from GI'02 paper, except this samples
+	2^n x 2^n ranges at 2^(n-1) offsets so only one lookup is required, but
+	should still have no problems with power of 2 boundaries. 
+
+	* src/ShAaOpHandler.hpp, ShAaOpHandler.cpp, ShAaSymPlacer.cpp,
+		ShAaOps.hpp, ShAaOps.cpp:
+	Added handling for TEX ops in noise symbol assignment, op replacement.
+
+	* src/ShBaseTexture.hpp (node()):
+	Added a function to access the ShBaseTexture::m_node. 
+	(For debugging)
+
+	* src/scripts/semantic.py, src/ShGeneric.hpp, ShGenericImpl.hpp, 
+		ShAttrib.hpp ShAttribImpl.hpp (swiz(const ShSwizzle&)):
+	Added this arbitrary swiz function.  
 
 2005-02-02  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
@@ -65,6 +110,24 @@
 	
 	* util/ShObjMesh.cpp:
         Improved vertex normal generation.
+
+2004-01-26 Bryan Chan <b8chan@cgl.uwaterloo.ca>
+	* src/ShAaOps.hpp, ShAaOps.cpp ShAaOpHandler.cpp:
+	Added FRAC, FLR, RSQ ops.  That should cover the needs for perlin, except
+  TEX (which will be coming shortly once I cook up some LP goodness).
+	Fixed NaN problems by clamping some inputs to valid function domains. 
+
+	* src/ShSection.hpp, ShSectionImpl.hpp, ShSection.cpp:
+	Wrapper around ShStructural that only keeps the tree-structure of sections.
+  Replaces the garbage code in ShSectionUtil.?pp
+
+	* src/ShAaHier.hpp, ShAaHier.cpp, ShAaSymPlacer.cpp:
+	Updated to use ShSection.  Changed some things to use the input/output info
+  from value tracking.
+
+	* src/ShAaScanErr.hpp ShAaScanErr.cpp (shAaScanErrDump):
+	Outputs a DOT viz of the graph (with section nestings), mapping per-statement
+	errors linearly to a colour gradient.
 
 2005-01-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 

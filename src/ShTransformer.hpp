@@ -169,7 +169,10 @@ public:
   /** Strips out dummy statements (SECTION in particular) 
    */
   void stripDummyOps();
-  
+
+  /** Handles semantics of SH_OP_DBG. */
+  void handleDbgOps(); 
+
 private:
   /// NOT IMPLEMENTED
   ShTransformer(const ShTransformer& other);

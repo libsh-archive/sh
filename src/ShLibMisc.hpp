@@ -60,7 +60,7 @@ ShGeneric<M, T> fillcast(const ShGeneric<N, T>& a);
 template<int M> 
 ShGeneric<M, double> fillcast(double a); // @todo type do a cpp type -> value type map
 
-/** Concatenate two tuples 
+/** Join two tuples 
  * Creates an M+N tuple with components of a first then b.
  */
 template<int M, int N, typename T1, typename T2> 
@@ -102,6 +102,15 @@ void kill(const ShGeneric<N, T>& c);
 template<typename T>
 ShProgram freeze(const ShProgram& p,
                  const T& uniform);
+
+/** Debugging op 
+ *
+ * Replace the first color output with the given variable. 
+ * (If there are multiple calls to this, the last one executed
+ * takes precedence) 
+ */
+template<int N, typename T>
+void dbg_output(const ShGeneric<N, T>& a);
 
 /*@}*/
 

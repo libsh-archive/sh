@@ -144,9 +144,16 @@ class ShSectionTree {
     template<class F>
     static void realDfs(ShSectionNodePtr node, F& functor);
 
-    /* Dump a node and subtree using the given functor (functor described above in dump()) */
+    /* Dump a node and subtree using the given functor (functor described above in dump()) 
+     *
+     * @param out Actual output stream to use
+     * @param cfgout Output stream to use for edges that cross section
+     *   boundaries (These must be specified after all involved sections are,
+     *   otherwise DOT does stupid things with the cfg nodes) 
+     * @param node The root of the section subtree to process
+     * @param F functor as described above in dump*/
     template<class F>
-    void realDump(std::ostream& out, ShSectionNodePtr node, F& functor);
+    void realDump(std::ostream& out, std::ostream& cfgout, ShSectionNodePtr node, F& functor);
 };
 
 }

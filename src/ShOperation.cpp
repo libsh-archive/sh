@@ -100,6 +100,8 @@ const ShOperationInfo opInfo[] = {
 
   {"KIL", 1, ShOperationInfo::IGNORE, false, false, false},
 
+  {"DBG", 1, ShOperationInfo::IGNORE, false, false, false},
+
   {"OPTBRA", 1, ShOperationInfo::IGNORE, false, false, false},
   {"DECL", 0, ShOperationInfo::IGNORE, false, false, false},
   {"PHI", 1, ShOperationInfo::LINEAR, false, false, false},

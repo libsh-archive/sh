@@ -265,7 +265,7 @@ struct StatementSplitter {
           ShVariable sumt = ShVariable(resizeCloneNode(dest.node(), 1));
 
           stmts.push_back(ShStatement(sumt, SH_OP_CSUM, srcVec[0][0]));
-          for(int i = 1; i < srcVec[0].size(); ++i) {
+          for(size_t i = 1; i < srcVec[0].size(); ++i) {
             stmts.push_back(ShStatement(partialt, SH_OP_CSUM, srcVec[0][i]));
             stmts.push_back(ShStatement(sumt, sumt, SH_OP_ADD, partialt));
           }
@@ -279,7 +279,7 @@ struct StatementSplitter {
           ShVariable prodt = ShVariable(resizeCloneNode(dest.node(), 1));
 
           stmts.push_back(ShStatement(prodt, SH_OP_CMUL, srcVec[0][0]));
-          for(int i = 1; i < srcVec[0].size(); ++i) {
+          for(size_t i = 1; i < srcVec[0].size(); ++i) {
             stmts.push_back(ShStatement(partialt, SH_OP_CMUL, srcVec[0][i]));
             stmts.push_back(ShStatement(prodt, prodt, SH_OP_MUL, partialt));
           }
@@ -352,7 +352,6 @@ struct StatementSplitter {
         return; 
       }
     }
-    SH_DEBUG_PRINT("Splitting stmt=" << stmt);
     changed = true;
     ShBasicBlock::ShStmtList newStmts;
     VarVec srcVec[3];
@@ -384,7 +383,6 @@ void ShTransformer::splitTuples(int maxTuple, ShTransformer::VarSplitMap &splits
 #ifdef SH_DBG_TRANSFORMER
   m_program->dump("splittupl_vars");
 #endif
-
 
   StatementSplitter ss(maxTuple, splits, m_changed);
   m_program->ctrlGraph->dfs(ss);
@@ -529,8 +527,8 @@ struct TextureLookupConverter {
     }
   }
 
-  ShVariableNodePtr cloneNode(ShVariableNodePtr node) {
-    return node->clone(SH_TEMP, 0, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, true, false);
+  ShVariableNodePtr cloneNode(const ShVariable& var) {
+    return var.node()->clone(SH_TEMP, var.size(), SH_VALUETYPE_END, SH_SEMANTICTYPE_END, true, false);
   }
 
   void convert(ShBasicBlockPtr block, ShBasicBlock::ShStmtList::iterator& I)
@@ -543,16 +541,12 @@ struct TextureLookupConverter {
     
     if (!tn) { SH_DEBUG_ERROR("TEX Instruction from non-texture"); return; }
     if (stmt.op == SH_OP_TEX && tn->dims() == SH_TEXTURE_RECT) {
-      // TODO check typing
-      //ShVariable tc(new ShVariableNode(SH_TEMP, tn->texSizeVar().size()));
-      ShVariable tc(cloneNode(tn->texSizeVar().node()));
+      ShVariable tc(cloneNode(stmt.src[1]));
 
       newStmts.push_back(ShStatement(tc, stmt.src[1], SH_OP_MUL, tn->texSizeVar()));
       newStmts.push_back(ShStatement(stmt.dest, stmt.src[0], SH_OP_TEXI, tc));
     } else if (stmt.op == SH_OP_TEXI && tn->dims() != SH_TEXTURE_RECT) {
-      // TODO check typing
-      //ShVariable tc(new ShVariableNode(SH_TEMP, tn->texSizeVar().size()));
-      ShVariable tc(cloneNode(tn->texSizeVar().node()));
+      ShVariable tc(cloneNode(stmt.src[1]));
 
       newStmts.push_back(ShStatement(tc, stmt.src[1], SH_OP_DIV, tn->texSizeVar()));
       newStmts.push_back(ShStatement(stmt.dest, stmt.src[0], SH_OP_TEX, tc));
@@ -612,6 +606,59 @@ void ShTransformer::stripDummyOps()
 {
   DummyOpStripper dos;
   m_changed |= dos.transform(m_program);
+}
+
+struct DbgOpHandlerBase: public ShTransformerParent 
+{
+  DbgOpHandlerBase()
+    : m_has_dbg(false) 
+  {}
+ 
+  void handleVarList(ShProgramNode::VarList &varlist, ShBindingType type) 
+  {
+    if(type != SH_OUTPUT) return;
+    for(ShProgramNode::VarList::iterator I = varlist.begin(); I != varlist.end(); ++I) {
+      if((*I)->specialType() == SH_COLOR) {
+        m_temp = ShVariable((*I)->clone(SH_TEMP));
+        m_output = ShVariable(*I);
+        break;
+      }
+    }
+  }
+
+  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node) 
+  { 
+    if(m_temp.null() || I->op != SH_OP_DBG) return false;
+    m_has_dbg = true;
+    I->op = SH_OP_ASN;
+    I->dest = m_temp;
+    return false; 
+  }
+
+  void finish() 
+  {
+    if(!m_has_dbg) return;
+    ShCtrlGraphNodePtr last = m_program->ctrlGraph->exit();
+
+    if(!last->block) {
+      last->block = new ShBasicBlock();
+    }
+    last->block->addStatement(ShStatement(m_output, SH_OP_ASN, m_temp));
+  }
+
+  private:
+    ShVariable m_temp;
+    ShVariable m_output;
+    bool m_has_dbg;
+};
+typedef ShDefaultTransformer<DbgOpHandlerBase> DbgOpHandler;
+
+void ShTransformer::handleDbgOps()
+{
+  ShContext::current()->enter(m_program);
+  DbgOpHandler doh;
+  m_changed |= doh.transform(m_program);
+  ShContext::current()->exit();
 }
 
 }

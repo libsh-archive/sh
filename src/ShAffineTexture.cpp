@@ -26,6 +26,7 @@
 //////////////////////////////////////////////////////////////////////////////
 #include <valarray>
 #include "ShMath.hpp"
+#include "ShMultiArray.hpp"
 #include "ShSyntax.hpp"
 #include "ShStatement.hpp"
 #include "ShTexCoord.hpp"
@@ -34,7 +35,7 @@
 #include "ShLp.hpp"
 #include "ShAffineTexture.hpp"
 
-//#define SH_DBG_AAT
+// #define SH_DBG_AAT
 
 #ifdef SH_DBG_AAT
 #define SH_DEBUG_PRINT_AAT(x) { SH_DEBUG_PRINT(x); }
@@ -42,230 +43,17 @@
 #define SH_DEBUG_PRINT_AAT(x) {}
 #endif
 
-namespace {
-
-// @todo range -- this is turning into a mess since valarrays do some things
-// well, and others not so well.  Clean this up (go write/find
-// a multidimensional array class)
-
-using namespace SH;
-
-template<typename T>
-std::ostream& operator<<(std::ostream& out, const std::valarray<T>& v)
-{
-  out << "(";
-  for(size_t i = 0; i < v.size(); ++i) {
-    if(i != 0) out << ", ";
-    out << v[i];
-  }
-  out << ")";
-  return out;
-}
-
-typedef std::valarray<size_t> size_t_array;
-typedef std::valarray<float> float_array;
-
-template<typename T>
-T product(const std::valarray<T>& w) {
-  T result = w[0];
-  for(size_t i = 1; i < w.size(); result *= w[i], ++i);
-  return result;
-}
-
-/* Represents a sequence of multidimensional indices 
- * (slices in each dimension at the given stride) */
-struct ArrayIndex {
-  ArrayIndex(const size_t_array& start, const size_t_array& lengths, 
-      const size_t_array& strides) 
-    : m_dims(start.size()), m_start(start), 
-      m_cur(static_cast<size_t>(0), start.size()), 
-      m_lengths(lengths), 
-      m_strides(strides)
-  {
-    SH_DEBUG_ASSERT(m_lengths.size() == m_dims && m_strides.size() == m_dims);
-  }
-
-  // prefix ++ operator
-  ArrayIndex& operator++()
-  {
-    for(int i = m_dims - 1; i >= 0; --i) {
-      if(m_cur[i] == m_lengths[i] - 1) {
-        m_cur[i] = 0;
-      } else {
-        m_cur[i]++; 
-        break;
-      }
-    }
-    return *this;
-  }
-
-  // tests whether this has reached the end
-  bool end() 
-  {
-    std::valarray<bool> done = (m_cur == m_lengths - static_cast<size_t>(1));
-    return product(done);
-  }
-
-  size_t_array index() const {
-    return m_start + m_cur * m_strides; 
-  }
-
-  size_t length() {
-    return product(m_lengths);
-  }
-
-  friend std::ostream& operator<<(std::ostream& out, const ArrayIndex& idx)
-  {
-    out << idx.index() << " cur=" << idx.m_cur;
-    return out;
-  }
-
- private:
-  size_t m_dims;
-  size_t_array m_start, m_cur; 
-  size_t_array m_lengths, m_strides;
-};
-
-
-// makes a copy of a multidimensional data array stored in a 1d array and 
-// allows convenient indexing. 
+// @todo range, new texture really only needs to be 3 * as wide, 
+// but right now because of power-of-2 restrictions, it uses 4 *.
 //
-// The higher the index in widths, the faster it increments in the 1D array
-// (i.e. consecutive widths[widths.size()-1] are consecutive in the 1D array) 
-// This may seem backwards for typical 1D packing of x,y,z... 
-// but matches the way std::gslice_array works.
-template<typename T>
-struct ArrayAdaptor {
-  ArrayAdaptor() {}
-
-  ArrayAdaptor(T* data, size_t_array widths) 
-    : m_dims(widths.size()), 
-      m_size(product(widths)),
-      m_data(data, m_size),
-      m_widths(widths)
-  {
-    init();
-  }
-
-  ArrayAdaptor(size_t_array widths)
-    : m_dims(widths.size()), 
-      m_size(product(widths)),
-      m_data(product(widths)),
-      m_widths(widths)
-  {
-    init();
-  }
-
-  void init() {
-    m_strides.resize(m_dims);
-    m_strides[m_dims - 1] = 1;
-    for(int i = m_dims - 1; i > 0;  --i) {
-      m_strides[i - 1] = m_strides[i] * m_widths[i];
-    }
-  }
-
-  T& operator[](int idx) {
-    return m_data[idx];
-  }
-
-  /* Conversions between nD <-> 1D indices 
-   * @{ */
-  int indexOf(size_t_array idx) {
-    SH_DEBUG_ASSERT(idx.size() == m_dims);
-    return (idx * m_strides).sum();
-  }
-
-  size_t size() const {
-    return m_size;
-  }
-
-  size_t_array indexOf(int idx) {
-    size_t_array result(m_dims);
-    for(int i = m_dims - 1; i >= 0; --i) {
-      result[i] = idx % m_widths[i];
-      idx /= m_widths[i];
-    }
-    return result;
-  }
-  /* @} */
-
-  T& operator[](size_t_array idx) {
-    return m_data[indexOf(idx)];
-  }
-
-  ArrayAdaptor& operator=(const ArrayAdaptor& other)
-  {
-    /* vararrays have undefined behaviour on assignment with a different sized
-     * vararray */ 
-    m_data.resize(other.m_data.size());
-    m_widths.resize(other.m_widths.size());
-    m_strides.resize(other.m_strides.size());
-
-    m_dims = other.m_dims;
-    m_size = other.m_size;
-    m_data = other.m_data;
-    m_widths = other.m_widths;
-    m_strides = other.m_strides;
-
-    return *this;
-  }
-
-
-
-  ArrayAdaptor& operator=(const T& value)
-  {
-    m_data = value;
-    return *this;
-  }
-
-  /* copies out values to data, which must be large enough to hold them */ 
-  void copyTo(T* data)
-  {
-    for(int i = 0; i < m_size; ++i) {
-      data[i] = m_data[i];
-    }
-  }
-
-  /* returns a copy of the data using the given ranges */
-  std::valarray<T> rangeSlice(const size_t_array& start, const size_t_array& lengths)
-  {
-    SH_DEBUG_PRINT_AAT("dims = " << m_dims << " start = " << start << " lengths = " << lengths << " strides = " << m_strides);
-    SH_DEBUG_ASSERT(start.size() == m_dims && lengths.size() == m_dims);
-    return m_data[std::gslice(indexOf(start), lengths, m_strides)];
-  }
-
-  /* assigns other to the range slice */ 
-  void rangeSliceAsn(const size_t_array& start, const size_t_array& lengths, const std::valarray<T>& other)
-  {
-    SH_DEBUG_ASSERT(start.size() == m_dims && lengths.size() == m_dims);
-    SH_DEBUG_PRINT_AAT("start = " << indexOf(start) << " lengths = " << lengths << " strides = " << m_strides);
-    m_data[std::gslice(indexOf(start), lengths, m_strides)] = other;
-  }
-
-  size_t m_dims;
-  int m_size; // total size 
-  std::valarray<T> m_data;
-  size_t_array m_widths;
-  size_t_array m_strides;
-};
-
-
-template<typename T>
-std::ostream& operator<<(std::ostream& out, const ArrayAdaptor<T>& a)
-{
-  out << "{ widths = " << a.m_widths;
-  out << ", strides = " << a.m_strides;
-  out << ", data = " << a.m_data << " }";
-  return out;
-}
-
-}
-
+// What I should really do for efficiency is keep the constant separate so we only need 2 * width for the 
+// affine blending factors and new error term.
+#define AATEX_EXPAND 4
 namespace SH {
 
 ShAffineTexture::ShAffineTexture(ShTextureNodePtr other) 
   : m_other(other),
-    m_width(other->width() * 3)
+    m_width(other->width() * AATEX_EXPAND)
 {
   SH_DEBUG_ASSERT(shIsRegularValueType(other->valueType()));
 
@@ -285,6 +73,7 @@ ShAffineTexture::ShAffineTexture(ShTextureNodePtr other)
     m_node[i] = new ShTextureNode(other->dims(), other->size(), SH_FLOAT, 
         other->traits(), m_width, other->height(), other->depth());
   }
+  m_node[0]->name(other->name() + "_iat-lo");
 
   m_other->memory()->add_dep(this);
   m_other->memory()->flush(); // update the data
@@ -322,7 +111,7 @@ void ShAffineTexture::memory_update() {
   // access the original data
   ShHostStoragePtr oldmem = shref_dynamic_cast<ShHostStorage>(m_other->memory()->findStorage("host"));
   // @todo range handle non-float
-  ArrayAdaptor<float> olddata(reinterpret_cast<float*>(oldmem->data()), widths);
+  MultiArray<float> olddata(reinterpret_cast<float*>(oldmem->data()), widths);
 
   // create a new memory for the new texture
   
@@ -330,16 +119,16 @@ void ShAffineTexture::memory_update() {
   // + mip-map requirements * 2^(m_dims)
   // for the 2^(m_dims) 1/2 offsets in each dimension for each mip-map level. 
   size_t_array newWidths = widths;
-  newWidths[FIRST] *= 3;
+  newWidths[FIRST] *= AATEX_EXPAND;
 
   size_t CONST_FACTOR = m_dims; // index of the constant factor in newdata
   size_t DELTA = m_dims + 1; // index of the approximation factor
   size_t OUTPUTS = m_dims + 2; // total number of outputs - m_dims affine scaling factors, 1 constant, 1 approx error 
-  ArrayAdaptor<float> *newdata = new ArrayAdaptor<float>[OUTPUTS];
+  MultiArray<float> *newdata = new MultiArray<float>[OUTPUTS];
 
   // Generate a zeroed out array for each new texture
   for(i = 0; i < OUTPUTS; ++i) {
-    newdata[i] = ArrayAdaptor<float>(newWidths);
+    newdata[i] = MultiArray<float>(newWidths);
     newdata[i] = 0;
   }
 
@@ -361,7 +150,7 @@ void ShAffineTexture::memory_update() {
   Awidths[std::slice(0,constr_size,1)] = constr_widths; 
   Awidths[constr_size] = OUTPUTS;
 
-  ArrayAdaptor<float> A(Awidths);
+  MultiArray<float> A(Awidths);
   SH_DEBUG_PRINT_AAT("A= " << A);
 
   // A = [ texcoord indices, 1, +-1 ] (with two rows for each texel texcoord in olddata
@@ -377,9 +166,9 @@ void ShAffineTexture::memory_update() {
     A[base + DELTA] = -1; 
   }
 
-  ArrayAdaptor<float> *b = new ArrayAdaptor<float>[tupleSize];
+  MultiArray<float> *b = new MultiArray<float>[tupleSize];
   for(i = 0; i < tupleSize; ++i) {
-    b[i] = ArrayAdaptor<float>(constr_widths);
+    b[i] = MultiArray<float>(constr_widths);
     float_array olddata_i(olddata.m_data[std::slice(i, count, tupleSize)]); 
     b[i].m_data[std::slice(0, count, 2)] = olddata_i; 
     b[i].m_data[std::slice(1, count, 2)] = -olddata_i; 
@@ -426,8 +215,8 @@ void ShAffineTexture::memory_update() {
       
       SH_DEBUG_PRINT_AAT("output_start = " << output_start << " lengths = " << lengths << " output_strides = " << output_strides);
 
-      ArrayIndex R(range_start, lengths, range_strides); 
-      ArrayIndex O(output_start, lengths, output_strides); 
+      MultiArrayIndex R(range_start, lengths, range_strides); 
+      MultiArrayIndex O(output_start, lengths, output_strides); 
 
       for(;; ++R, ++O) { // assuming this happens at least once...else bad
         SH_DEBUG_PRINT_AAT("    R = " << R << " O = " << O);
@@ -495,89 +284,120 @@ ShVariableNodePtr ShAffineTexture::makeTemp(const ShVariable &v, const std::stri
 ShRecord ShAffineTexture::rect_lookup(const ShVariable &lo, const ShVariable &hi) const 
 {
   ShRecord result;
+  SH_BEGIN_SECTION("aatex_rect_lookup") {
 
-  // find out which level we should be looking at
-  // * first get a potential level (that may have ranges one level too small),
-  // * check if it works (special case level 0, since the original texels do not
-  //   have an overlapping sampling offsets)
-  // * decide on actual level
-  // * get lookup coordinates
-  // * lookup & translate constant value from center of 0,0 to center of lookup range
+    // find out which level we should be looking at
+    // * for now, clamp low/hi to [0, tex_size]
+    // * first get a potential level (that may have ranges one level too small),
+    // * check if it works (special case level 0, since the original texels do not
+    //   have an overlapping sampling offsets)
+    // * decide on actual level
+    // * get lookup coordinates
+    // * lookup & translate constant value from center of 0,0 to center of lookup range
+    
+    ShConstAttrib1f ZERO(0.0f);
+    ShConstAttrib1f HALF(0.5f);
+    ShConstAttrib1f ONE(1.0f);
 
-  size_t size = lo.size();
-  ShVariable width(makeTemp(lo, "width"));
-  shADD(width, hi, -lo);
+    size_t size = lo.size();
 
-  ShConstAttrib1f ZERO(0.0f);
-  ShConstAttrib1f ONE(1.0f);
-  ShVariable level(makeTemp(lo, "level")); // start with a guess about the level
-  shLOG2(level, width);
-  shCEIL(level, level);
-  shMAX(level, level, ZERO.repeat(size));
+    // clamp
+    shMAX(lo, lo, ZERO.repeat(size));
+    shMIN(hi, hi, m_other->texSizeVar());
 
-  ShVariable gt0(makeTemp(lo, "level > 0"));
-  shSGT(gt0, level, ZERO.repeat(size));
+    ShVariable center(makeTemp(lo, "center"));
+    shLRP(center, lo, hi, HALF.repeat(size));
+    
+    ShVariable width(makeTemp(lo, "width"));
+    shADD(width, hi, -lo);
 
-  ShVariable scale(makeTemp(lo, "scale"));
-  ShConstAttrib1f HALF(0.5f);
-  shADD(scale, level, -gt0);
-  shPOW(scale, HALF.repeat(size), scale); // we have (1/2)^s where s = level - (level == 0 ? 0 : 1);
+    ShVariable level(makeTemp(lo, "level")); // start with a guess about the level
+    shLOG2(level, width);
+    shCEIL(level, level);
+    shMAX(level, level, ZERO.repeat(size));
 
-  ShVariable diff(makeTemp(lo, "diff")); // difference threshold between cells to force a level increase
-  shADD(diff, HALF.repeat(size), gt0);
+    ShVariable gt0(makeTemp(lo, "level > 0"));
+    shSGT(gt0, level, ZERO.repeat(size));
 
-  ShVariable cell_lo(makeTemp(lo, "cell_lo"));
-  ShVariable cell_hi(makeTemp(hi, "cell_hi"));
+    ShVariable scale(makeTemp(lo, "scale"));
+    shADD(scale, level, -gt0);
+    shPOW(scale, HALF.repeat(size), scale); // we have (1/2)^s where s = level - (level == 0 ? 0 : 1);
 
-  shMUL(cell_lo, lo, scale);
-  shFLR(cell_lo, cell_lo); 
+    ShVariable diff(makeTemp(lo, "diff")); // difference threshold between cells to force a level increase
+    shADD(diff, HALF.repeat(size), gt0);
 
-  shMUL(cell_hi, hi, scale);
-  shFLR(cell_hi, cell_hi); 
+    ShVariable cell_lo(makeTemp(lo, "cell_lo"));
+    ShVariable cell_hi(makeTemp(hi, "cell_hi"));
 
-  ShVariable inc_level(makeTemp(lo, "inc_level")); // should be bool - whether to increase level
-  shADD(inc_level, cell_hi, -cell_lo);
-  shSGT(inc_level, inc_level, diff);
+    shMUL(cell_lo, lo, scale);
+    shFLR(cell_lo, cell_lo); 
 
-  shADD(level, level, inc_level);
+    shMUL(cell_hi, hi, scale);
+    shFLR(cell_hi, cell_hi); 
 
-  ShVariable max_level(makeTemp(lo, "max_level", 1));
-  if(level.size() == 1) {
-    shASN(max_level, level);
-  } else {
-    // slow...
-    shMAX(max_level, level(0), level(1));
-    for(int i = 2; i < level.size(); ++i) {
-      shMAX(max_level, max_level, level(i));
+    ShVariable inc_level(makeTemp(lo, "inc_level")); // should be bool - whether to increase level
+    shADD(inc_level, cell_hi, -cell_lo);
+    shSGT(inc_level, inc_level, diff);
+
+    shADD(level, level, inc_level);
+
+    ShVariable max_level(makeTemp(lo, "max_level", 1));
+    if(level.size() == 1) {
+      shASN(max_level, level);
+    } else {
+      // slow...
+      shMAX(max_level, level(0), level(1));
+      for(int i = 2; i < level.size(); ++i) {
+        shMAX(max_level, max_level, level(i));
+      }
     }
-  }
 
-  ShVariable offset(makeTemp(lo, "offset"));
-  ShVariable texscale(makeTemp(lo, "texscale"));
+    ShVariable offset(makeTemp(lo, "offset", 1));
+    ShVariable texscale(makeTemp(lo, "texscale", 1));
 
-  shADD(texscale, max_level, -ONE); 
-  shPOW(texscale, HALF, texscale);
-  
-  shASN(offset, texscale);
-  shADD(offset, offset, ONE);
-  shMUL(offset, offset, ShConstAttrib1f(m_width));
+    shADD(texscale, max_level, -ONE); 
+    shPOW(texscale, HALF, texscale);
+    
+    shASN(offset, texscale);
+    shADD(offset, offset, ONE);
+    shMUL(offset, offset, ShConstAttrib1f(m_width));
 
-  // handle level 0 case
-  shCOND(offset, max_level, offset, ZERO); 
-  shCOND(texscale, max_level, texscale, ONE);
+    // handle level 0 case
+    shCOND(offset, max_level, offset, ZERO); 
+    shCOND(texscale, max_level, texscale, ONE);
 
-  ShVariable texcoord(makeTemp(lo, "texcoord"));
-  shMAD(texcoord, lo, scale, offset);
+    ShVariable texcoord(makeTemp(lo, "texcoord"));
+    shMUL(texcoord, lo, texscale);
+    shADD(texcoord(0), texcoord(0), offset);
 
-  for(size_t i = 0; i < m_dims + 2; ++i) {
-    ShVariable resulti(m_node[i]->clone(SH_TEMP, 0, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, true, false));
-    ShVariable texVar(m_node[i]);
+    for(size_t i = 0; i < m_dims + 2; ++i) {
+      ShVariable resulti(m_node[i]->clone(SH_TEMP, 0, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, true, false));
+      ShVariable texVar(m_node[i]);
 
-    ShStatement stmt(resulti, texVar, SH_OP_TEXI, texcoord);
-    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+      ShStatement stmt(resulti, texVar, SH_OP_TEXI, texcoord);
+      ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
 
-    result.append(resulti);
-  }
+
+#if 0
+      if(i == m_dims) { // change constant factor properly 
+        // @todo range
+        
+      } 
+
+      // @todo debug - shouldn't use the CONST for debugging like this 
+      if(i == m_dims) {
+        //shASN(resulti, texscale.repeat(resulti.size()));
+        ShVariable texVar(m_node[0]);
+
+        ShStatement stmt(resulti, texVar, SH_OP_TEXI, texcoord);
+        ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+      }
+      else shASN(resulti, ZERO.repeat(resulti.size())); 
+#endif
+
+      result.append(resulti);
+    }
+  } SH_END_SECTION;
   return result;
 }
     
