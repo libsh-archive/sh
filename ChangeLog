@@ -55,6 +55,7 @@
 	(propagate_constants): Consider all use-def information for uses
 	that need to be updated when computing the new lattice cell
 	values.
+	* test/regress/Makefile.am: Added test.hpp everywhere.
 
 2004-08-24  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
@@ -132,6 +133,22 @@
 	tuple-aware optimizer.
 
 	* src/ShOptimizations.hpp: Header file for the new tuple-aware optimizer.
+
+2004-08-18  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/GlBackend.hpp: Check for __APPLE__ when including
+	opengl headers.
+
+	* backends/gl/Arb.cpp: Let GlBackend.hpp include our GL headers
+	for us.
+
+	* src/ShInstructions.cpp: Define exp10f on OSX.
+
+	* config/gl.m4: Look for either <GL/gl.h> or <OpenGL/gl.h> for
+	MacOS X.
+
+	* src/ShInstructions.cpp: Fix exp10f on WIN32. Thanks to Evan Wies
+	for pointing this out.
 
 2004-08-04  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
 

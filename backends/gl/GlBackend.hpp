@@ -51,10 +51,17 @@ extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
 
 #define GL_GLEXT_VERBOSE 1
 #define GL_GLEXT_PROTOTYPES 1
+
+#ifdef __APPLE__
+#include <OpenGL/OpenGL.h>
+#include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
+#else
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include <GL/glx.h>
 //#include <GL/glut.h>
+#endif /* __APPLE */
 
 #endif /* WIN32 */
 

@@ -11,14 +11,40 @@ AC_DEFUN([GL_WITH_GL_DIR], [
 ])
 
 # GL_CHECK_GL_HEADERS(if-available, if-not-available)
+# Finds GL headers in GL/ or OpenGL/.
 #
 AC_DEFUN([GL_CHECK_GL_HEADERS], [
-  AC_CHECK_HEADERS([GL/gl.h])
-  AC_CHECK_HEADERS([GL/glext.h], [$1],
-    [$2],
+  # First check for GL/gl.h and GL/glext.h
+  AC_CHECK_HEADERS([GL/gl.h], [have_gl_gl_h=true], [have_gl_gl_h=false])
+  AC_CHECK_HEADERS([GL/glext.h], [have_gl_glext_h=true],
+    [have_gl_glext_h=false],
     [#if HAVE_GL_GL_H
 #include <GL/gl.h>
 #endif])
+  if test "x$have_gl_gl_h" = "xtrue" -a "x$have_gl_glext_h" = "xtrue" ; then
+    found_gl_headers=true
+  fi
+
+  # If we haven't found those, try OpenGL/gl.h and OpenGL/glext.h
+  # This is the case on OSX.
+  if test "x$found_gl_headers" = "xtrue" ; then :; else
+    AC_CHECK_HEADERS([OpenGL/gl.h], [have_opengl_gl_h=true], [have_opengl_gl_h=false])
+    AC_CHECK_HEADERS([OpenGL/glext.h], [have_opengl_glext_h=true],
+      [have_opengl_glext_h=false],
+      [#if HAVE_OPENGL_GL_H
+#include <OpenGL/gl.h>
+#endif])
+    if test "x$have_opengl_gl_h" = "xtrue" -a "x$have_opengl_glext_h" = "xtrue" ; then
+      found_gl_headers=true
+    fi
+  fi
+
+  # Finally check if we've found any headers at all and act appropriately.
+  if test "x$found_gl_headers" = "xtrue" ; then
+    :; $1
+  else
+    :; $2
+  fi
 ])
 
 # GL_CHECK_GLEXT_VERSION(version, if-avail, if-not-avail)
