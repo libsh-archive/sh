@@ -1,3 +1,13 @@
+2005-03-29  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> osx branch
+
+	* util/: Fix this directory from being a strange mix of old and
+	new revisions to be the same as trunk at r2203.
+
+2005-03-28  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> osx branch
+
+	* config/gl.m4 (GL_CHECK_GL_HEADERS): We don't need -framework
+	AGL. Remove it.
+
 2005-03-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> osx branch
 
 	* README.osx: Continue to increase the accuracy of this document.

@@ -42,7 +42,7 @@ ShProgram ShKernelLib::outputPass( const ShProgram &p ) {
     for( ShProgramNode::VarList::const_iterator it = p.node()->outputs.begin();
         it != p.node()->outputs.end(); ++it ) {
       ShVariableNodePtr var = *it;
-      ShVariable inout(new ShVariableNode(SH_INOUT, var->size(), var->specialType()));
+      ShVariable inout(new ShVariableNode(SH_INOUT, var->size(), var->valueType(), var->specialType()));
       inout.name( var->name() ); 
     }
   } SH_END;
@@ -54,7 +54,7 @@ ShProgram ShKernelLib::inputPass( const ShProgram &p ) {
     for( ShProgramNode::VarList::const_iterator it = p.node()->inputs.begin();
         it != p.node()->inputs.end(); ++it ) {
       ShVariableNodePtr var = *it;
-      ShVariable inout(new ShVariableNode(SH_INOUT, var->size(), var->specialType()));
+      ShVariable inout(new ShVariableNode(SH_INOUT, var->size(), var->valueType(), var->specialType()));
       inout.name( var->name() ); 
     }
   } SH_END;

@@ -25,7 +25,7 @@ AC_DEFUN([GL_CHECK_GL_HEADERS], [
     have_gl_glext_h=true
     gl_gl_dir=OpenGL
     gl_glext_dir=OpenGL
-    GL_LIBS="-framework OpenGL -framework AGL"
+    GL_LIBS="-framework OpenGL"
     GLUT_LIBS="-framework GLUT"
     ;;
   # other systems
