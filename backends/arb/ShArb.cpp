@@ -734,7 +734,7 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
   genNode(node->follower);
 }
 
-void ArbCode::genDiv(ShVariable dest, ShVariable op1, ShVariable op2) {
+void ArbCode::genDiv(const ShVariable &dest, const ShVariable &op1, const ShVariable &op2) {
   if (op2.size() == 1 && op1.size() != 1) {
     ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, op2.size())); 
     m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp, op2)); 
@@ -755,8 +755,8 @@ void ArbCode::genDiv(ShVariable dest, ShVariable op1, ShVariable op2) {
   }
 }
 
-void ArbCode::genScalarVectorInst( SH::ShVariable dest, SH::ShVariable op1, 
-    SH::ShVariable op2, int opcode ) {
+void ArbCode::genScalarVectorInst( const SH::ShVariable &dest, const SH::ShVariable &op1, 
+    const SH::ShVariable &op2, int opcode ) {
   if (op1.size() != 1 || op2.size() != 1) {
     if (op1.size() == 1) {
       int* swizzle = new int[op2.size()];
