@@ -651,6 +651,8 @@ template<int N> class ShCheckMad<1, N, N>
 {public: ShCheckMad() {}};
 template<int N> class ShCheckMad<N, 1, N>
 {public: ShCheckMad() {}};
+template<> class ShCheckMad<1, 1, 1>
+{public: ShCheckMad() {}};
 
 /// Multiply and add
 template<int N, int M, int P, typename T>
