@@ -1,0 +1,24 @@
+DirectX Port Remaining Tasks
+
+Binding external constants: DirectX allows you to pass constants like the world matrix to a shader; the catch is that the DirectX code needs to know the indices that the shader will use in order to put the constant in the right spot.
+
+Instructions: I didn't implement some of the instructions that are supported under OpenGL shaders but not DirectX shaders, and I didn't do flow control. The missing Sh operations that aren't supported are SH_OP_SLE, SH_OP_SGT, SH_OP_SEQ, SH_OP_SNE, SH_OP_SGN, SH_OP_TEX, SH_OP_TEXI, SH_OP_COND, and SH_OP_KIL.
+
+Trig operations are supported using the emit_trig method. DirectX does have trig built in, but it packs sin and cos into one instruction.
+
+I didn't implement branching and conditional code, although the PS 3.0 spec supports it.
+
+
+
+Other outstanding issues:
+When I compiled the Blinn-Phong shader, DirectX complained that my vertex shader tried to use an output register as the output of a nrm operation. Strangely, this isn't a generalization; I also had an add instruction write to an output register, and that was allowed to compile. For a temporary fix, I wrote emit_no_output_norm, which uses the DirectX nrm instruction if the destination is a temporary register or uses a combination of a nrm and a mov if the destination is an output register. I haven't found anything in the documentation specifying what operations are and aren't allowed to have an output register as the destination, so it might be necessary to write more such code, or if this is a problem for more than a couple instructions, add a way of flagging which instructions can't write to output registers and replace them with instruction/mov pairs in the DirectX shader code.
+
+As a thought, the nrm instruction occurred in the vertex shader, while the add writing to an output register was in the pixel shader. Maybe there's a difference based on whether it's a vertex or pixel shader?
+
+
+
+Assumptions: To use this, you have to have the DirectX SDK downloaded (http://www.microsoft.com/downloads/details.aspx?FamilyID=b7bc31fa-2df1-44fd-95a4-c2555446aed4&DisplayLang=en); I assumed the default install directory of C:\DXSDK, and I only installed the release versions of the DirectX runtime on Quince (you have the choice to install either on setup, and you can install your choice of debug or release runtimes from an icon on the start menu).
+
+
+
+Minor annoyance: DirectX shader instructions aren't case sensitive, so all the Arb instruction names needed to be converted to lowercase. Just a caution for anyone else working with DirectX, especially after being used to the uppercase instructions we use in the Arb code.
