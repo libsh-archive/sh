@@ -1,12 +1,15 @@
 #include "Arb.hpp"
 #include "GlTextures.hpp"
 #include "GlBackend.hpp"
+#include "PBufferStreams.hpp"
 
 namespace shgl {
 
 struct ArbBackend : public GlBackend {
   ArbBackend()
-    : GlBackend(new ArbCodeStrategy(), new GlTextures(), 0) // new PBufferStreams())
+    : GlBackend(new ArbCodeStrategy(),
+                new GlTextures(),
+                new PBufferStreams())
   {
   }
 

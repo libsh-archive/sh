@@ -82,7 +82,7 @@ struct StorageFinder {
     }
     if (t->width() != node->width()) return false;
     if (t->height() != node->height()) return false;
-    if (t->pitch() != node->dims()) return false;
+    if (t->pitch() != node->size()) return false;
     //    if (t->depth() != node->depth()) return false;
     return true;
   }

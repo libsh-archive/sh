@@ -1,3 +1,12 @@
+2004-03-02  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbBackend.cpp: Use PBufferStreams.
+
+	* backends/gl/PBufferStreams.cpp: Added pbuffer streams.
+
+	* backends/gl/UberTextures.cpp: StorageFinder checks that pitch ==
+	size instead of pitch == dims.
+
 2004-03-02  Tiberiu Stefan Popa  <stpopa@pentane.math.uwaterloo.ca>
 
 	* backends/gl/UberTextures.cpp (bindTexture): Use node->size()
