@@ -27,6 +27,7 @@
 #include <iostream>
 
 #include "ShVariable.hpp"
+#include "ShProgram.hpp"
 
 namespace SH {
 
@@ -48,6 +49,17 @@ ShVariable::ShVariable(const ShVariableNodePtr& node,
   : ShMetaForwarder(node.object()),
     m_node(node), m_swizzle(swizzle), m_neg(neg)
 {
+}
+
+ShVariable& ShVariable::operator=(const ShProgram& prgc)
+{
+  ShProgram prg(prgc);
+  if (prg.node()->finished()) {
+    m_node->attach(prg.node());
+  } else {
+    prg.node()->assign(m_node);
+  }
+  return *this;
 }
 
 bool ShVariable::null() const
@@ -128,6 +140,11 @@ void ShVariable::setValues(ShVariableNode::ValueType values[])
   }
   m_node->unlock();
   m_neg = false;
+}
+
+void ShVariable::setValue(int index, ShVariableNode::ValueType value)
+{
+  m_node->setValue(m_swizzle[index], (m_neg ? -value : value)); 
 }
 
 ShVariable ShVariable::operator()() const

@@ -48,6 +48,15 @@ public:
   bool throw_errors() const;
   void throw_errors(bool on);
 
+  /// Disable a particular optimization. All optimizations are
+  /// enabled by default. Disabling an optimization takes place in
+  /// addition to whatever effects the optimization level has.
+  void disable_optimization(const std::string& name);
+  /// Enable a particular optimization (rather, stop disabling it)
+  void enable_optimization(const std::string& name);
+  /// Check whether an optimization is disabled
+  bool optimization_disabled(const std::string& name) const;
+  
   typedef std::map<std::string, ShProgram> BoundProgramMap;
 
   BoundProgramMap::iterator begin_bound();
@@ -73,6 +82,8 @@ private:
   
   BoundProgramMap m_bound;
   std::stack<ShProgramNodePtr> m_parsing;
+
+  std::set<std::string> m_disabled_optimizations;
   
   static ShContext* m_instance;
 

@@ -55,6 +55,8 @@ public:
   ShNormal& operator=(const ShGeneric<N, T>& other);
   ShNormal& operator=(const ShNormal<N, Binding, T, Swizzled>& other);
 
+  ShNormal& operator=(const ShProgram& prg);
+
   ShNormal& operator+=(const ShGeneric<N, T>& right);
   ShNormal& operator-=(const ShGeneric<N, T>& right);
   ShNormal& operator*=(const ShGeneric<N, T>& right);
@@ -112,6 +114,8 @@ public:
 
   ShNormal& operator=(T other);
 
+  ShNormal& operator=(const ShProgram& prg);
+
   ShNormal& operator+=(const ShGeneric<1, T>& right);
   ShNormal& operator-=(const ShGeneric<1, T>& right);
   ShNormal& operator*=(const ShGeneric<1, T>& right);
@@ -162,6 +166,8 @@ public:
 
   ShNormal& operator=(const ShGeneric<2, T>& other);
   ShNormal& operator=(const ShNormal<2, Binding, T, Swizzled>& other);
+
+  ShNormal& operator=(const ShProgram& prg);
 
   ShNormal& operator+=(const ShGeneric<2, T>& right);
   ShNormal& operator-=(const ShGeneric<2, T>& right);
@@ -219,6 +225,8 @@ public:
   ShNormal& operator=(const ShGeneric<3, T>& other);
   ShNormal& operator=(const ShNormal<3, Binding, T, Swizzled>& other);
 
+  ShNormal& operator=(const ShProgram& prg);
+
   ShNormal& operator+=(const ShGeneric<3, T>& right);
   ShNormal& operator-=(const ShGeneric<3, T>& right);
   ShNormal& operator*=(const ShGeneric<3, T>& right);
@@ -274,6 +282,8 @@ public:
 
   ShNormal& operator=(const ShGeneric<4, T>& other);
   ShNormal& operator=(const ShNormal<4, Binding, T, Swizzled>& other);
+
+  ShNormal& operator=(const ShProgram& prg);
 
   ShNormal& operator+=(const ShGeneric<4, T>& right);
   ShNormal& operator-=(const ShGeneric<4, T>& right);

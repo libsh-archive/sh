@@ -33,69 +33,77 @@ namespace SH {
  * @see ShOperation
  */
 const ShOperationInfo opInfo[] = {
-  {"ASN", 1},
+  {"ASN", 1, ShOperationInfo::LINEAR, false},
   
-  {"NEG", 1},
-  {"ADD", 2},
-  {"MUL", 2},
-  {"DIV", 2},
+  {"NEG", 1, ShOperationInfo::LINEAR, false},
+  {"ADD", 2, ShOperationInfo::LINEAR, true},
+  {"MUL", 2, ShOperationInfo::LINEAR, true},
+  {"DIV", 2, ShOperationInfo::LINEAR, false},
 
-  {"SLT", 2},
-  {"SLE", 2},
-  {"SGT", 2},
-  {"SGE", 2},
-  {"SEQ", 2},
-  {"SNE", 2},
+  {"SLT", 2, ShOperationInfo::LINEAR, false},
+  {"SLE", 2, ShOperationInfo::LINEAR, false},
+  {"SGT", 2, ShOperationInfo::LINEAR, false},
+  {"SGE", 2, ShOperationInfo::LINEAR, false},
+  {"SEQ", 2, ShOperationInfo::LINEAR, false},
+  {"SNE", 2, ShOperationInfo::LINEAR, false},
   
-  {"ABS", 1},
-  {"ACOS", 1},
-  {"ASIN", 1},
-  {"ATAN", 1},
-  {"ATAN2", 2},
-  {"CEIL", 1},
-  {"COS", 1},
-  {"CMUL", 1},
-  {"CSUM", 1},
-  {"DOT", 2},
-  {"DX", 1},
-  {"DY", 1},
-  {"EXP", 1},
-  {"EXP2", 1},
-  {"EXP10", 1},
-  {"FLR", 1},
-  {"FRAC", 1},
-  {"LRP", 3},
-  {"MAD", 3},
-  {"MAX", 2},
-  {"MIN", 2},
-  {"MOD", 2},
-  {"LOG", 1},
-  {"LOG2", 1},
-  {"LOG10", 1},
-  {"POW", 2},
-  {"RCP", 1},
-  {"RSQ", 1},
-  {"SIN", 1},
-  {"SGN", 1},
-  {"SQRT", 1},
-  {"TAN", 1},
+  {"ABS", 1, ShOperationInfo::LINEAR, false},
+  {"ACOS", 1, ShOperationInfo::LINEAR, false},
+  {"ASIN", 1, ShOperationInfo::LINEAR, false},
+  {"ATAN", 1, ShOperationInfo::LINEAR, false},
+  {"ATAN2", 2, ShOperationInfo::LINEAR, false},
+  {"CEIL", 1, ShOperationInfo::LINEAR, false},
+  {"COS", 1, ShOperationInfo::LINEAR, false},
+  {"CMUL", 1, ShOperationInfo::ALL, false},
+  {"CSUM", 1, ShOperationInfo::ALL, false},
+  {"DOT", 2, ShOperationInfo::ALL, true},
+  {"DX", 1, ShOperationInfo::EXTERNAL, false},
+  {"DY", 1, ShOperationInfo::EXTERNAL, false},
+  {"EXP", 1, ShOperationInfo::LINEAR, false},
+  {"EXP2", 1, ShOperationInfo::LINEAR, false},
+  {"EXP10", 1, ShOperationInfo::LINEAR, false},
+  {"FLR", 1, ShOperationInfo::LINEAR, false},
+  {"FRAC", 1, ShOperationInfo::LINEAR, false},
+  {"LRP", 3, ShOperationInfo::LINEAR, false},
+  {"MAD", 3, ShOperationInfo::LINEAR, false},
+  {"MAX", 2, ShOperationInfo::LINEAR, false},
+  {"MIN", 2, ShOperationInfo::LINEAR, true},
+  {"MOD", 2, ShOperationInfo::LINEAR, true},
+  {"LOG", 1, ShOperationInfo::LINEAR, false},
+  {"LOG2", 1, ShOperationInfo::LINEAR, false},
+  {"LOG10", 1, ShOperationInfo::LINEAR, false},
+  {"POW", 2, ShOperationInfo::LINEAR, false},
+  {"RCP", 1, ShOperationInfo::LINEAR, false},
+  {"RSQ", 1, ShOperationInfo::LINEAR, false},
+  {"SIN", 1, ShOperationInfo::LINEAR, false},
+  {"SGN", 1, ShOperationInfo::LINEAR, false},
+  {"SQRT", 1, ShOperationInfo::LINEAR, false},
+  {"TAN", 1, ShOperationInfo::LINEAR, false},
 
-  {"NORM", 1},
-  {"XPD", 2},
+  {"NORM", 1, ShOperationInfo::ALL, false},
+  {"XPD", 2, ShOperationInfo::ALL, false}, // Not quite true, but probably good enough
 
-  {"TEX", 2},
-  {"TEXI", 2},
+  {"TEX", 2, ShOperationInfo::EXTERNAL, false},
+  {"TEXI", 2, ShOperationInfo::EXTERNAL, false},
 
-  {"COND", 3},
+  {"COND", 3, ShOperationInfo::LINEAR, false},
 
-  {"KIL", 1},
+  {"KIL", 1, ShOperationInfo::IGNORE, false},
 
-  {"OPTBRA", 1},
+  {"OPTBRA", 1, ShOperationInfo::IGNORE, false},
 
-  {"FETCH", 1},
+  {"FETCH", 1, ShOperationInfo::EXTERNAL, false},
   
-  {0, 0}
+  {0, 0, ShOperationInfo::IGNORE, false}
 };
+
+ShStatementInfo::ShStatementInfo()
+{
+}
+
+ShStatementInfo::~ShStatementInfo()
+{
+}
 
 ShStatement::ShStatement(ShVariable dest, ShOperation op)
   : dest(dest), op(op)
@@ -121,6 +129,48 @@ ShStatement::ShStatement(ShVariable dest, ShOperation op, ShVariable src0, ShVar
   src[0] = src0;
   src[1] = src1;
   src[2] = src2;
+}
+
+ShStatement::ShStatement(const ShStatement& other)
+  : dest(other.dest),
+    op(other.op),
+    marked(other.marked)
+{
+  for (int i = 0; i < 3; i++) src[i] = other.src[i];
+  for (std::list<ShStatementInfo*>::const_iterator I = other.info.begin(); I != other.info.end(); ++I) {
+    info.push_back((*I)->clone());
+  }
+}
+
+
+ShStatement& ShStatement::operator=(const ShStatement& other)
+{
+  if (&other == this) return *this;
+  
+  dest = other.dest;
+  op = other.op;
+  marked = other.marked;
+  for (int i = 0; i < 3; i++) src[i] = other.src[i];
+  
+  for (std::list<ShStatementInfo*>::const_iterator I = info.begin();
+       I != info.end(); ++I) {
+    delete *I;
+  }
+  info.clear();
+  
+  for (std::list<ShStatementInfo*>::const_iterator I = other.info.begin();
+       I != other.info.end(); ++I) {
+    info.push_back((*I)->clone());
+  }
+
+  return *this;
+}
+
+ShStatement::~ShStatement()
+{
+  for (std::list<ShStatementInfo*>::iterator I = info.begin(); I != info.end(); ++I) {
+    delete *I;
+  }
 }
 
 std::ostream& operator<<(std::ostream& out, const ShStatement& stmt)
@@ -154,6 +204,16 @@ std::ostream& operator<<(std::ostream& out, const ShStatement& stmt)
     break;
   }
   return out;
+}
+
+void ShStatement::add_info(ShStatementInfo* new_info)
+{
+  info.push_back(new_info);
+}
+
+void ShStatement::remove_info(ShStatementInfo* old_info)
+{
+  info.remove(old_info);
 }
 
 } // namespace SH

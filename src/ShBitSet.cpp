@@ -180,6 +180,25 @@ std::size_t ShBitSet::size() const
   return m_size;
 }
 
+bool ShBitSet::full() const
+{
+  for (int i = 0; i < fullwordsize(m_size); i++) {
+    if (~m_data[i]) return false;
+  }
+  if (m_size % WORD_SIZE) {
+    unsigned int mask = (1 << ((m_size % WORD_SIZE) + 1)) - 1;
+    return (m_data[m_size / WORD_SIZE] & mask) == mask;
+  }
+  
+  return true;
+}
+
+bool ShBitSet::empty() const
+{
+  for (int i = 0; i < wordsize(m_size); i++) if (m_data[i]) return false;
+  return true;
+}
+
 bool ShBitSet::operator[](std::size_t i) const
 {
   return ((m_data[i / WORD_SIZE] & (1 << (i % WORD_SIZE))) != 0);

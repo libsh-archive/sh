@@ -85,6 +85,11 @@ public:
 
   bool operator==(const ShBitSet& other) const;
   bool operator!=(const ShBitSet& other) const;
+
+  // Return true iff all entries are 1
+  bool full() const;
+  // Return true iff all entries are 0
+  bool empty() const;
   
   std::size_t size() const;
 

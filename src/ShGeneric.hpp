@@ -31,6 +31,8 @@
 
 namespace SH {
 
+class ShProgram;
+
 /** A variable of length N.
  *
  * This class is provided to make definition of functions that work
@@ -63,6 +65,7 @@ public:
   ~ShGeneric();
 
   ShGeneric& operator=(const ShGeneric& other);
+  ShGeneric& operator=(const ShProgram& other);
   
   ShGeneric& operator+=(const ShGeneric& right);
   ShGeneric& operator-=(const ShGeneric& right);
@@ -109,6 +112,7 @@ public:
 
   ShGeneric& operator=(const ShGeneric& other);
   ShGeneric& operator=(T);
+  ShGeneric& operator=(const ShProgram& other);
   
   ShGeneric& operator+=(const ShGeneric& right);
   ShGeneric& operator-=(const ShGeneric& right);

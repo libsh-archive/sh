@@ -29,6 +29,7 @@
 
 #include <iosfwd>
 #include <set>
+#include <list>
 #include "ShDllExport.hpp"
 #include "ShVariable.hpp"
 
@@ -111,10 +112,34 @@ struct
 SH_DLLEXPORT ShOperationInfo {
   const char* name; ///< The operation's name, e.g. "ASN"
   int arity; ///< The arity of the operation. 1, 2 or 3.
+
+  enum ResultSource {
+    LINEAR,   // dest[i] depends only on src_j[i] for all 0 <= j < arity
+    ALL,      // dest[i] depends on all elements of src_j for all 0 <= j < arity
+    EXTERNAL, // Statement yields its results from an external source
+              // (e.g. TEX)
+    IGNORE   // Does not yield a result
+  } result_source;
+
+  bool commutative; ///< True if order of sources does not matter.
 };
 
 SH_DLLEXPORT
 extern const ShOperationInfo opInfo[];
+
+/** Dummy class representing additional information that can be stored
+ *  in statements.
+ */
+class ShStatementInfo {
+public:
+  virtual ~ShStatementInfo();
+
+  virtual ShStatementInfo* clone() const = 0;
+  
+protected:
+  ShStatementInfo();
+
+};
 
 /** A single statement.
  * Represent a statement of the form 
@@ -131,21 +156,69 @@ public:
   ShStatement(ShVariable dest, ShOperation op, ShVariable src);
   ShStatement(ShVariable dest, ShVariable src0, ShOperation op, ShVariable src1);
   ShStatement(ShVariable dest, ShOperation op, ShVariable src0, ShVariable src1, ShVariable src2);
+  ShStatement(const ShStatement& other);
+  
+  ~ShStatement();
+
+  ShStatement& operator=(const ShStatement& other);
+  
   
   ShVariable dest;
   ShVariable src[3];
   
   ShOperation op;
 
-  // The following are used for the optimizer.
-  
-  std::set<ShStatement*> ud[3];
-  std::set<ShStatement*> du;
+  // Used by the optimizer and anything else that needs to store extra
+  // information in statements.
+  // Anything in here will be deleted when this statement is deleted.
+  std::list<ShStatementInfo*> info;
 
+  // Return the first entry in info whose type matches T, or 0 if no
+  // such entry exists.
+  template<typename T>
+  T* get_info();
+
+  // Delete and remove all info entries matching the given type.
+  template<typename T>
+  void destroy_info();
+
+  // Add the given statement information to the end of the info list.
+  void add_info(ShStatementInfo* new_info);
+
+  // Remove the given statement information from the list.
+  // Does not delete it, so be careful!
+  void remove_info(ShStatementInfo* old_info);
+  
   bool marked;
 };
 
 std::ostream& operator<<(std::ostream& out, const SH::ShStatement& stmt);
+
+template<typename T>
+T* ShStatement::get_info()
+{
+  for (std::list<ShStatementInfo*>::iterator I = info.begin(); I != info.end(); ++I) {
+    T* item = dynamic_cast<T*>(*I);
+    if (item) {
+      return item;
+    }
+  }
+  return 0;
+}
+
+template<typename T>
+void ShStatement::destroy_info()
+{
+  for (std::list<ShStatementInfo*>::iterator I = info.begin(); I != info.end();) {
+    T* item = dynamic_cast<T*>(*I);
+    if (item) {
+      I = info.erase(I);
+      delete item;
+    } else {
+      ++I;
+    }
+  }
+}
 
 } // namespace SH
 

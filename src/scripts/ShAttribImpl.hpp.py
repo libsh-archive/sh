@@ -85,6 +85,15 @@ class Impl(semantic.Impl):
         common.inprint("}")
         common.inprint("")
 
+#         common.inprint(self.tpl(size))
+#         common.inprint(self.tplcls(size) + "::" + self.name + "(const ShProgram& prg)")
+#         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
+#                        "(new ShVariableNode(Binding, " + self.sizevar(size) + "))")
+#         common.inprint("{")
+#         common.inprint("  *this = prg;")
+#         common.inprint("}")
+#         common.inprint("")
+
         self.copycons([["const ShGeneric<" + self.sizevar(size) + ", T>&", "other"]], size)
         self.copycons([["const " + self.tplcls(size) + "&", "other"]], size)
 

@@ -58,6 +58,8 @@ public:
   ShVector& operator=(const ShGeneric<N, T>& other);
   ShVector& operator=(const ShVector<N, Binding, T, Swizzled>& other);
 
+  ShVector& operator=(const ShProgram& prg);
+
   ShVector& operator+=(const ShGeneric<N, T>& right);
   ShVector& operator-=(const ShGeneric<N, T>& right);
   ShVector& operator*=(const ShGeneric<N, T>& right);
@@ -115,6 +117,8 @@ public:
 
   ShVector& operator=(T other);
 
+  ShVector& operator=(const ShProgram& prg);
+
   ShVector& operator+=(const ShGeneric<1, T>& right);
   ShVector& operator-=(const ShGeneric<1, T>& right);
   ShVector& operator*=(const ShGeneric<1, T>& right);
@@ -165,6 +169,8 @@ public:
 
   ShVector& operator=(const ShGeneric<2, T>& other);
   ShVector& operator=(const ShVector<2, Binding, T, Swizzled>& other);
+
+  ShVector& operator=(const ShProgram& prg);
 
   ShVector& operator+=(const ShGeneric<2, T>& right);
   ShVector& operator-=(const ShGeneric<2, T>& right);
@@ -222,6 +228,8 @@ public:
   ShVector& operator=(const ShGeneric<3, T>& other);
   ShVector& operator=(const ShVector<3, Binding, T, Swizzled>& other);
 
+  ShVector& operator=(const ShProgram& prg);
+
   ShVector& operator+=(const ShGeneric<3, T>& right);
   ShVector& operator-=(const ShGeneric<3, T>& right);
   ShVector& operator*=(const ShGeneric<3, T>& right);
@@ -277,6 +285,8 @@ public:
 
   ShVector& operator=(const ShGeneric<4, T>& other);
   ShVector& operator=(const ShVector<4, Binding, T, Swizzled>& other);
+
+  ShVector& operator=(const ShProgram& prg);
 
   ShVector& operator+=(const ShGeneric<4, T>& right);
   ShVector& operator-=(const ShGeneric<4, T>& right);

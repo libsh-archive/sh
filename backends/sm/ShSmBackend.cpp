@@ -31,6 +31,7 @@
 #include "ShContext.hpp"
 #include "ShDebug.hpp"
 #include "ShError.hpp"
+#include "ShOptimizations.hpp"
 #include "ShLinearAllocator.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShVariable.hpp"
@@ -279,8 +280,7 @@ void BackendCode::generate() {
   transform.splitTuples(4, m_splits);
 
   if(transform.changed()) {
-    ShOptimizer optimizer(m_shader->ctrlGraph);
-    optimizer.optimize(ShContext::current()->optimization());
+    optimize(m_shader);
     m_shader->collectVariables();
   } else {
     m_shader = m_originalShader;

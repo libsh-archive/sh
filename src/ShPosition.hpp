@@ -59,6 +59,8 @@ public:
   ShPosition& operator=(const ShGeneric<N, T>& other);
   ShPosition& operator=(const ShPosition<N, Binding, T, Swizzled>& other);
 
+  ShPosition& operator=(const ShProgram& prg);
+
   ShPosition& operator+=(const ShGeneric<N, T>& right);
   ShPosition& operator-=(const ShGeneric<N, T>& right);
   ShPosition& operator*=(const ShGeneric<N, T>& right);
@@ -116,6 +118,8 @@ public:
 
   ShPosition& operator=(T other);
 
+  ShPosition& operator=(const ShProgram& prg);
+
   ShPosition& operator+=(const ShGeneric<1, T>& right);
   ShPosition& operator-=(const ShGeneric<1, T>& right);
   ShPosition& operator*=(const ShGeneric<1, T>& right);
@@ -166,6 +170,8 @@ public:
 
   ShPosition& operator=(const ShGeneric<2, T>& other);
   ShPosition& operator=(const ShPosition<2, Binding, T, Swizzled>& other);
+
+  ShPosition& operator=(const ShProgram& prg);
 
   ShPosition& operator+=(const ShGeneric<2, T>& right);
   ShPosition& operator-=(const ShGeneric<2, T>& right);
@@ -223,6 +229,8 @@ public:
   ShPosition& operator=(const ShGeneric<3, T>& other);
   ShPosition& operator=(const ShPosition<3, Binding, T, Swizzled>& other);
 
+  ShPosition& operator=(const ShProgram& prg);
+
   ShPosition& operator+=(const ShGeneric<3, T>& right);
   ShPosition& operator-=(const ShGeneric<3, T>& right);
   ShPosition& operator*=(const ShGeneric<3, T>& right);
@@ -278,6 +286,8 @@ public:
 
   ShPosition& operator=(const ShGeneric<4, T>& other);
   ShPosition& operator=(const ShPosition<4, Binding, T, Swizzled>& other);
+
+  ShPosition& operator=(const ShProgram& prg);
 
   ShPosition& operator+=(const ShGeneric<4, T>& right);
   ShPosition& operator-=(const ShGeneric<4, T>& right);

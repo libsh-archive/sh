@@ -26,10 +26,13 @@
 //////////////////////////////////////////////////////////////////////////////
 #include <sstream>
 #include <cassert>
+#include <algorithm>
 #include "ShEnvironment.hpp"
 #include "ShVariableNode.hpp"
 #include "ShDebug.hpp"
 #include "ShContext.hpp"
+#include "ShProgramNode.hpp"
+#include "ShEvaluate.hpp"
 
 namespace SH {
 
@@ -54,15 +57,12 @@ const char* ShSemanticTypeName[] = {
 };
 
 ShVariableNode::ShVariableNode(ShBindingType kind, int size, ShSemanticType type)
-  : m_uniform(!ShContext::current()->parsing() && kind != SH_TEXTURE && kind != SH_STREAM),
+  : m_uniform(!ShContext::current()->parsing() && kind == SH_TEMP),
     m_kind(kind), m_specialType(type),
     m_size(size), m_id(m_maxID++), m_locked(0),
     m_values(0)
 {
-  if (m_uniform || m_kind == SH_CONST) {
-    m_values = new ValueType[size];
-    for (int i = 0; i < size; i++) m_values[i] = 0.0;
-  }
+  if (m_uniform || m_kind == SH_CONST) addValues();
   switch (m_kind) {
   case SH_INPUT:
     assert(ShContext::current()->parsing());
@@ -104,6 +104,7 @@ ShVariableNode::ShVariableNode(ShBindingType kind, int size, ShSemanticType type
 
 ShVariableNode::~ShVariableNode()
 {
+  detach_dependencies();
   delete [] m_values;
   m_values = 0;
 }
@@ -132,6 +133,8 @@ void ShVariableNode::unlock()
       // TODO: Maybe pass in the backend unit to updateUniform
       if (I->second.node()) I->second.updateUniform(this);
     }
+
+    update_dependents();
   }
 }
 
@@ -253,6 +256,8 @@ void ShVariableNode::setValue(int i, ValueType value)
       // TODO: Maybe pass in the backend unit to updateUniform
       if (I->second.node()) I->second.updateUniform(this);
     }
+
+    update_dependents();
   }
 }
 
@@ -261,6 +266,76 @@ ShVariableNode::ValueType ShVariableNode::getValue(int i) const
   assert(m_values);
   assert(i >= 0 && i < m_size);
   return m_values[i];
+}
+
+void ShVariableNode::addValues()
+{
+  if (m_values) return;
+  m_values = new ValueType[m_size];
+  for (int i = 0; i < m_size; i++) m_values[i] = 0.0;
+}
+
+void ShVariableNode::attach(const ShProgramNodePtr& evaluator)
+{
+  SH_DEBUG_ASSERT(uniform());
+  // TODO: Check that the program really evaluates this variable.
+
+  detach_dependencies();
+
+  m_evaluator = evaluator;
+
+  if (m_evaluator) {
+    for (ShProgramNode::VarList::const_iterator I = m_evaluator->uniforms_begin();
+         I != m_evaluator->uniforms_end(); ++I) {
+      if ((*I).object() == this) continue;
+      (*I)->add_dependent(this);
+    }
+    
+    update();
+  }
+}
+
+void ShVariableNode::update()
+{
+  if (!m_evaluator) return;
+
+  evaluate(m_evaluator);
+}
+
+const ShPointer<ShProgramNode>& ShVariableNode::evaluator() const
+{
+  return m_evaluator;
+}
+
+void ShVariableNode::add_dependent(ShVariableNode* dep)
+{
+  if (std::find(m_dependents.begin(), m_dependents.end(), dep) != m_dependents.end()) return;
+  m_dependents.push_back(dep);
+}
+
+void ShVariableNode::remove_dependent(ShVariableNode* dep)
+{
+  m_dependents.remove(dep);
+}
+
+void ShVariableNode::update_dependents()
+{
+  for (std::list<ShVariableNode*>::iterator I = m_dependents.begin();
+       I != m_dependents.end(); ++I) {
+    (*I)->update();
+  }
+}
+
+void ShVariableNode::detach_dependencies()
+{
+  if (m_evaluator) {
+    for (ShProgramNode::VarList::const_iterator I = m_evaluator->uniforms_begin();
+         I != m_evaluator->uniforms_end(); ++I) {
+      if ((*I).object() == this) continue;
+      (*I)->remove_dependent(this);
+    }
+    m_evaluator = 0;
+  }
 }
 
 int ShVariableNode::m_maxID = 0;

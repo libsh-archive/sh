@@ -138,6 +138,17 @@ public:
 
   /// Print a description of a list of variables
   static std::ostream& print(std::ostream& out, const VarList& list);
+
+  /// True if this program has been completed with SH_END.
+  bool finished() const;
+
+  /// @internal Set finished to true. Only shEndShader() needs to call this.
+  void finish();
+
+  /// @internal Indicate that we have been assigned to a uniform
+  /// during construction. This is so we can call back that uniform
+  /// when the program is finished constructing.
+  void assign(const ShVariableNodePtr& var) const;
   
 private:
 
@@ -149,6 +160,11 @@ private:
   typedef std::map< std::pair< std::string, ShPointer<ShBackend> >,
                     ShPointer<ShBackendCode> > CodeMap;
   CodeMap m_code; ///< Compiled code is cached here.
+
+  bool m_finished; ///< True if this program has been constructed
+                   /// completely.
+
+  mutable ShVariableNodePtr m_assigned_var;
 };
 
 typedef ShPointer<ShProgramNode> ShProgramNodePtr;

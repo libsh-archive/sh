@@ -1,11 +1,138 @@
+2004-09-08  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShConstProp.cpp (struct FinishConstProp): Don't lift values
+	which are partially not uniform.
+
 2004-09-07  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/GlTextures.cpp (bindTexture): Added support for
 	opengl:preset metadata, and set opengl:texid metadata.
 
+2004-09-01  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShConstProp.cpp (ConstProp::updateDest): Push definitions
+	onto the worklist when op = SH_OP_ASN if appropriate.
+	(Uniform::operator==): Two constant uniforms are equal if their
+	values are equal.
+	(Value): Add an operator==, and simplify lookup() using this.
+	Add lots of debugging support.
+	(propagate_constants): Use TOP as the base case for building the
+	meet over all possible values, instead of the current value of the
+	use's cell.
+
+	* src/ShContext.hpp: Add mechanism to disable particular
+	optimizations (not used by the optimizer yet).
+
+2004-08-30  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShConstProp.cpp (struct FinishConstProp): Ignore nodes whose
+	RHS is all (uniform OR constant), unless they're writing to output
+	(or inout) nodes.
+	(struct FinishConstProp): Fix boolean expressions.
+
+	* src/Makefile.am (libsh_la_SOURCES): Split some of
+	ShOptimizations.cpp into ShConstProp.cpp and ShValueTracking.cpp
+
+2004-08-28  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp (Cell::Cell): Don't use the swizzle to
+	make the index, the swizzling is represented implicitly when
+	setting up a statement-based cell.
+	(propagate_constants): Set negatives appropriately when
+	propagating uniforms.
+	(...): Added support for mixed (constant/uniform) operations to be
+	lifted. Seems to be slightly broken still.
+	(ConstProp::updateDest): Handle SH_OP_ASN specially.
+
+2004-08-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp: Added most of the uniform lifting code.
+
 2004-08-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShOptimizations.cpp (ConstProp): Set destinations to either
+	BOTTOM or CONSTANT but never top.
+	(propagate_constants): Consider all use-def information for uses
+	that need to be updated when computing the new lattice cell
+	values.
 	* test/regress/Makefile.am: Added test.hpp everywhere.
+
+2004-08-24  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp: Add copy propagation, clean up a few
+	things.
+
+2004-08-23  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/PBufferStreams.cpp (execute): Optimize is spelled
+	"optimize", not "optmize".
+
+	* src/ShOptimizations.cpp: Mark writes to inputs as live. This is
+	actually over pessimistic, but works for now.
+
+	* src/ShVariableNode.cpp (ShVariableNode): Constants are not
+	uniforms.
+
+	* src/ShOptimizations.cpp (ConstProp::updateDest): Use SH_CONST
+	for our temporary evaluator variables so that they have values
+	even if we are inside a shader program definition.
+
+	* src/ShEvaluate.cpp (evaluate): Push a null program onto the
+	definition stack in ShContext to force our operations to execute
+	in immediate mode, even if we are in a program definition.
+
+	* src/ShOptimizations.cpp (forward_substitute): Copy this from
+	ShOptimzer.cpp (it used to be called "move elimination" but
+	forward substitution is the proper term).
+
+	* src/ShSyntax.cpp (shEndShader): Use optimize() from
+	ShOptimizations.hpp instead of ShOptimizer. Also did this in
+	backends/*/* and src/ShAlgebra.cpp.
+
+	* src/Makefile.am (libsh_la_SOURCES): Remove ShOptimizer.hpp and
+	ShOptimzer.cpp.
+
+	* src/ShStatement.hpp: Remove ud and du members from ShStatement.
+
+	* src/ShStatement.cpp (operator=): Implement operator=.
+
+	* src/ShStatement.hpp: Add operator=() for ShStatements.
+
+2004-08-21  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp (struct FinishConstProp): Use the
+	constant propagation information, and remove it when we're done.
+
+2004-08-20  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp (ReachingDefs::Definition): Keep a
+	disable_mask bitset to keep track of definitions overwriting each
+	other in a single block. This is used when constructing gen.
+	(DefFinder::operator()): Set up disable_mask appropriately. Constant
+	propagation now works, but isn't used yet.
+
+	* src/ShBitSet.cpp (full): Implement full.
+	(empty): Implement empty.
+
+	* src/ShBitSet.hpp: Add full and empty member functions.
+
+	* src/ShStatement.cpp (ShStatement): Implement ShStatement copy
+	constructor, cloning info items using new clone() member function.
+
+	* src/ShStatement.hpp (destroy_info): Fix destroy_info to iterate
+	correctly.
+	(class ShStatementInfo): Add clone() virtual member function.
+	(class ShStatement): Add explicit copy constructor.
+
+	* src/ShOptimizations.cpp: Added lots of code for constant
+	propagation.
+
+2004-08-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp: Implementation file for the new
+	tuple-aware optimizer.
+
+	* src/ShOptimizations.hpp: Header file for the new tuple-aware optimizer.
 
 2004-08-18  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 

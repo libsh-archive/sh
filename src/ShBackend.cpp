@@ -41,7 +41,6 @@
 #include "ShDebug.hpp"
 #include "ShEnvironment.hpp"
 #include "ShInternals.hpp"
-#include "ShOptimizer.hpp"
 #include "ShTransformer.hpp"
 
 namespace SH {

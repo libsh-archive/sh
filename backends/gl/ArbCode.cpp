@@ -35,7 +35,7 @@
 #include "ShDebug.hpp"
 #include "ShLinearAllocator.hpp"
 #include "ShInternals.hpp"
-#include "ShOptimizer.hpp"
+#include "ShOptimizations.hpp"
 #include "ShEnvironment.hpp"
 #include "ShContext.hpp"
 #include "ShTextureNode.hpp"
@@ -158,8 +158,7 @@ void ArbCode::generate()
   transform.convertTextureLookups();
   
   if(transform.changed()) {
-    ShOptimizer optimizer(m_shader->ctrlGraph);
-    optimizer.optimize(ShContext::current()->optimization());
+    optimize(m_shader);
     m_shader->collectVariables();
   } else {
     m_shader = shref_const_cast<ShProgramNode>(m_originalShader);
