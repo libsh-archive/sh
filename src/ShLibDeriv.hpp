@@ -42,28 +42,28 @@ namespace SH {
 
 /** Screen-space x derivatives
  */
-template<int N, ShValueType V>
-ShGeneric<N, V> dx(const ShGeneric<N, V>& var);
+template<int N, typename T>
+ShGeneric<N, T> dx(const ShGeneric<N, T>& var);
 
 /** Screen-space y derivatives
  */
-template<int N, ShValueType V>
-ShGeneric<N, V> dy(const ShGeneric<N, V>& var);
+template<int N, typename T>
+ShGeneric<N, T> dy(const ShGeneric<N, T>& var);
 
 /** Maximum value of absolute derivatives
  */
-template<int N, ShValueType V>
-ShGeneric<N, V> fwidth(const ShGeneric<N, V>& var);
+template<int N, typename T>
+ShGeneric<N, T> fwidth(const ShGeneric<N, T>& var);
 
 /** Pair of screen-space derivatives
  */
-template<ShValueType V>
-ShGeneric<2, V> gradient(const ShGeneric<1, V>& var);
+template<typename T>
+ShGeneric<2, T> gradient(const ShGeneric<1, T>& var);
 
 /** Jacobian matrix
  */
-template<int N, ShValueType V>
-ShMatrix<2, N, SH_TEMP, V> jacobian(const ShGeneric<N, V>& var);
+template<int N, typename T>
+ShMatrix<2, N, SH_TEMP, T> jacobian(const ShGeneric<N, T>& var);
 
 /*@}*/
 
