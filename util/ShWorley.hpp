@@ -82,7 +82,11 @@ class ShWorley {
     // TODO implement gradients
     // should be real easy, but need to makes odd-even transposition sort 
     // much messier (maybe try bubble sort?)
+    // UPDATE: has an ugly gradient selection
     ShAttrib3f worley( ShAttrib2f p, 
+        ShAttrib4f c = ShAttrib4f( 1.0, 0.0, 0.0, 0.0 ), ShWorleyMetric m = L2_SQ ); 
+    // same as above, without gradients
+    ShAttrib1f worleyNoGradient( ShAttrib2f p, 
         ShAttrib4f c = ShAttrib4f( 1.0, 0.0, 0.0, 0.0 ), ShWorleyMetric m = L2_SQ ); 
     
     /** Makes a shader that takes 

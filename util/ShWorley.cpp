@@ -267,6 +267,75 @@ ShProgram ShWorley::worleyProgram( ShWorleyMetric m ) {
   return program;
 }
 
+ShAttrib1f ShWorley::worleyNoGradient(ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m ) {
+  ShAttrib1f result;
+  Metric dist(m);
+
+  int i, j;
+  //TODO: handle p(i) values outside of [0,1]
+
+  // get integer lattice point & offset from integer lattice point
+  ShPoint2f pp = p * dfreq;
+  ShPoint2f fp = frac(pp);
+
+
+  // get points from adjacent cells (one per cell)
+  ShAttrib2f cellPoint; 
+  ShAttrib4f adjPoints[4];
+  if(useTexture) {
+    pp = ( floor(pp) + ShConstant2f( 0.5, 0.5 ) ) * ( 1.0 / dfreq ); 
+    cellPoint = cellPosTex(pp)(0,1);
+    // unmap adjacent points from [0,1]^2 back to [-1,2]^2
+    for(i = 0; i < 4; ++i) adjPoints[i] = 
+      mad(3.0, (*(adjTex[i]))(pp), ShConstant4f(-1, -1, -1, -1));
+  } else {
+    pp = floor( pp );
+    cellPoint = hashmrg( pp );
+
+    for( i = 0; i < 4; ++i ) { 
+      ShAttrib2f adjp = pp + ShConstant2f( DX[i], DY[i] );
+      adjPoints[i](0,1) = hashmrg( adjp ) + ShConstant2f( DX[i], DY[i] ); 
+
+      adjp = pp + ShConstant2f( DX[i + 4], DY[i + 4] );
+      adjPoints[i](2,3) = hashmrg( adjp ) + ShConstant2f( DX[i + 4], DY[i + 4] );
+    }
+  }
+
+  // find distances & gradients to neighbours
+  ShAttrib4f dadj[2];
+  ShAttrib1f dcell;
+  dcell = dist( cellPoint, fp );
+  for(i = 0; i < 4; ++i) {
+    dadj[0](i) = dist( adjPoints[i](0,1), fp );
+    dadj[1](i) = dist( adjPoints[i](2,3), fp );
+  }
+
+  // TODO find faster method to do k-selection for k = { 1, 2, 3, 4 }
+  // Currently does an even-odd transposition sort
+  ShAttrib4f even, odd;
+  ShAttrib1f last;
+  even = dadj[0];
+  odd = dadj[1];
+  last = dcell;
+  ShAttrib4f et, ot, t;
+  for(i = 0; i < 5; ++i ) {
+    et = min( even, odd );
+    ot = max( even, odd );
+
+    even(1,2,3) = max( et(1,2,3), ot(0,1,2) );
+    even(0) = et(0);
+    odd(0,1,2) = min( et(1,2,3), ot(0,1,2) );
+    odd(3) = min( ot(3), last );
+    last = max( ot(3), last );
+  }
+  ShAttrib4f resultVec;
+  resultVec(0,2) = even(0,1);
+  resultVec(1,3) = odd(0,1);
+
+  result = dot(resultVec, c);
+  return result;
+}
+
 void ShWorley::useNoiseTexture(bool useNoiseTex) {
   useTexture = useNoiseTex;
 }
