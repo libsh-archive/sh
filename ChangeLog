@@ -1,3 +1,15 @@
+2003-11-24  Bryan Chan (b8chan@cgl.uwaterloo.ca)
+  
+  * src/ShMemoryObject.hpp src/ShMemoryObject.cpp
+    backends/arb/ShArb.cpp:
+    Experimental implementation of memory objects
+    for über buffer support.
+
+  * src/ShTexture.hpp src/ShTextureImpl.hpp
+    src/ShTextureNode.hpp src/ShTextureNode.cpp
+    util/ShPerlin.hpp util/ShPerlin.cpp:
+    Added 3D Texture support.
+
 2003-11-21  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShOptimizer.cpp (MoveEliminator): Don't eliminate moves
@@ -13,12 +25,13 @@
 	* backends/arb/ShArb.cpp: re-added Backend instance, accidentally
 	  removed during WIN32 port
 
-2003-11-16 Bryan Can (b8chan@cgl.uwaterloo.ca)
+2003-11-16 Bryan Chan (b8chan@cgl.uwaterloo.ca)
 
 	* util/Makefile.am, util/Perlin.cpp, util/Perlin.hpp, util/ShPerlin.cpp,
 	  util/ShPerlin.hpp, util/ShUtilLib.hpp, util/ShWorley.cpp, util/ShWorley.hpp,
-	  util/Worley.cpp, util/Worley.hpp, util/shutil.hpp: fixed some include bugs in
-	  utils renamed utils to match other sh files
+	  util/Worley.cpp, util/Worley.hpp, util/shutil.hpp: 
+    fixed some include bugs in utils 
+    renamed utils to match other sh files
 
 2003-11-16  Kevin Moule (krmoule@cgl.uwaterloo.ca)
 
@@ -42,17 +55,18 @@
 
 	* Makefile.am, configure.ac: Added util directory
 
-	* backends/arb/ShArb.cpp, backends/arb/ShArb.hpp: Stefanus' fix for
-	write masking Changed dot product to accept scalars
+	* backends/arb/ShArb.cpp, backends/arb/ShArb.hpp: 
+    Stefanus' fix for write masking 
+    Changed dot product to accept scalars
 
 	* backends/sm/ShSmBackend.cpp: Changed dot to accept scalars
 
 	* src/ShLib.hpp: Made dot product also accept scalars
 
 	* util/Makefile.am, util/Perlin.cpp, util/Perlin.hpp,
-	util/ShUtilLib.hpp, util/Worley.cpp, util/Worley.hpp: Initial
-	checkin of utilities including hash functions, Perlin noise 
-	and Worley textures
+	util/ShUtilLib.hpp, util/Worley.cpp, util/Worley.hpp: 
+  Initial checkin of utilities including hash functions, 
+  Perlin noise and Worley textures
 
 2003-11-11  Kevin Moule (krmoule@cgl.uwaterloo.ca)
 

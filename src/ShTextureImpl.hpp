@@ -49,13 +49,23 @@ ShTextureNodePtr ShTexture<T>::node() const
 }
 
 template<typename T>
-void ShTexture<T>::loadImage(const ShImage& image)
+void ShTexture<T>::loadImage(const ShImage& image, int slice)
 {
   ShDataTextureNodePtr node = m_node;
   assert(node);
   
   assert(node->width() == image.width()
          && node->height() == image.height());
+
+  // give node a data memory object
+  ShDataMemoryObjectPtr nodeData = node->mem();
+  if( !nodeData ) {
+    node->setMem( new ShDataMemoryObject(node->width(), node->height(), 
+          node->depth(), node->elements()));
+    nodeData = node->mem();
+    assert( nodeData );
+  }
+
   if (node->elements() > image.depth()) {
     float* data = new float[image.width() * image.height() * node->elements()];
     for (int y = 0; y < image.height(); y++) {
@@ -69,12 +79,19 @@ void ShTexture<T>::loadImage(const ShImage& image)
         }
       }
     }
-    node->setData(data);
+    nodeData->setData(data, slice);
     delete [] data;
   } else {
     assert(node->elements() == image.depth());
-    node->setData(image.data());
+    nodeData->setData(image.data(), slice);
   }
+}
+
+template<typename T>
+void ShTexture<T>::attach(ShMemoryObjectPtr memObj) {
+  ShDataTextureNodePtr node = m_node;
+  assert( node );
+  node->setMem( memObj );
 }
 
 template<typename T>
@@ -122,6 +139,30 @@ void ShTexture2D<T>::load(const ShImage& image)
 {
   loadImage(image);
 }
+
+template<typename T>
+ShTexture3D<T>::ShTexture3D(int width, int height, int depth)
+  : ShTexture<T>(new ShDataTextureNode(SH_TEXTURE_3D, width, height, depth, T().size()))
+{
+}
+
+template<typename T>
+T ShTexture3D<T>::operator()(const ShVariableN<3, double>& coords)
+{
+  T t;
+  ShVariable texVar(m_node);
+  ShStatement stmt(t, texVar, SH_OP_TEX, coords);
+  
+  ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+  return t;
+}
+
+template<typename T>
+void ShTexture3D<T>::load(const ShImage& image, int slice)
+{
+  loadImage(image, slice);
+}
+
 
 template<typename T>
 ShTextureCube<T>::ShTextureCube()

@@ -40,6 +40,7 @@
 #include "ShPosition.hpp"
 #include "ShLib.hpp"
 #include "ShTexture.hpp"
+#include "ShMemoryObject.hpp"
 #include "ShBackend.hpp"
 #include "ShImage.hpp"
 #include "ShAlgebra.hpp"

@@ -91,7 +91,7 @@ class ShPerlin
     int octaves; ///< number of octaves to use for turbulence
     bool useTexture; ///< toggles whether to use texture lookup for gradients
 
-    ShTexture2D<ShColor4f> noiseTex; ///< pseudorandom 3D perlin noise texture 
+    ShTexture3D<ShColor4f> noiseTex; ///< pseudorandom 3D perlin noise texture 
 
     ShAttrib4f grad4(ShAttrib3f p); 
     ShAttrib1f grad(ShAttrib3f p); 

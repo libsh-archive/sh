@@ -37,7 +37,7 @@ using namespace SH;
 #define INV_PERM_SIZE ( 1.0 / ( double )PERM_SIZE )
 
 ShPerlin::ShPerlin( double persistence, int octaves ):
-  persistence( persistence ), octaves( octaves ), useTexture( false ), noiseTex( PERM_SIZE * PERM_SIZE, PERM_SIZE )
+  persistence( persistence ), octaves( octaves ), useTexture( false ), noiseTex( PERM_SIZE, PERM_SIZE, PERM_SIZE )
 {
   int i, j, k;
   srand48( 13 );
@@ -45,19 +45,19 @@ ShPerlin::ShPerlin( double persistence, int octaves ):
   // generate pseudorandom noise noiseImage[x + y * PERM_SIZE][z] holds the four
   // 1D gradient components for lattice points (x, y, z), (x, y, z + 1), (x, y + 1, z),
   // and (x, y + 1, z + 1 )
-  ShImage noiseImage( PERM_SIZE * PERM_SIZE, PERM_SIZE, 4 );
+  ShImage noiseImage( PERM_SIZE, PERM_SIZE, 4 );
   double grads[ PERM_SIZE ][ PERM_SIZE ][ PERM_SIZE ];
   for( i = 0; i < PERM_SIZE; ++i ) for( j = 0; j < PERM_SIZE; ++j ) for( k = 0; k < PERM_SIZE; ++k ) {
     grads[i][j][k] = drand48();
   }
-  for( i = 0; i < PERM_SIZE; ++i ) for( j = 0; j < PERM_SIZE; ++j ) for( k = 0; k < PERM_SIZE; ++k ) { 
+  for( k = 0; k < PERM_SIZE; ++k ) for( i = 0; i < PERM_SIZE; ++i ) for( j = 0; j < PERM_SIZE; ++j ) { 
     int index1 = i + j * PERM_SIZE;
-    noiseImage( index1, k, 0 ) = grads[i][j][k];
-    noiseImage( index1, k, 1 ) = grads[i][j][(k + 1) % PERM_SIZE]; 
-    noiseImage( index1, k, 2 ) = grads[i][(j + 1) % PERM_SIZE][k]; 
-    noiseImage( index1, k, 3 ) = grads[i][(j + 1) % PERM_SIZE][(k + 1) % PERM_SIZE]; 
+    noiseImage( i, j, 0 ) = grads[i][j][k];
+    noiseImage( i, j, 1 ) = grads[i][j][(k + 1) % PERM_SIZE]; 
+    noiseImage( i, j, 2 ) = grads[i][(j + 1) % PERM_SIZE][k]; 
+    noiseImage( i, j, 3 ) = grads[i][(j + 1) % PERM_SIZE][(k + 1) % PERM_SIZE]; 
+    noiseTex.load( noiseImage, k ); 
   }
-  noiseTex.load( noiseImage ); 
 }
 
 ShPerlin::~ShPerlin()
@@ -97,12 +97,10 @@ ShAttrib1f ShPerlin::noise( ShAttrib3f p )
       xg[i](j * 2 + k) = hashmrg( ip[0] + dip * ShConstant3f( i, j, k ) )(2); 
     }
   } else {
-    ShAttrib2f tc;
-    tc(0) = mad( ip[0](0), INV_PERM_SIZE, ip[0](1) );
-    tc(1) = ip[0](2);
+    ShAttrib3f tc = ip[0];
     xg[0] = noiseTex( tc ); 
 
-    tc(0) = mad( ip[1](0),  INV_PERM_SIZE, ip[0](1) );
+    tc(0) = ip[1](0); 
     xg[1] = noiseTex( tc ); 
   }
 

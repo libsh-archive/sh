@@ -28,6 +28,7 @@
 #define SHTEXTURENODE_HPP
 
 #include "ShVariableNode.hpp"
+#include "ShMemoryObject.hpp"
 #include "ShRefCount.hpp"
 
 namespace SH {
@@ -65,6 +66,7 @@ private:
 
 typedef ShRefCount<ShTextureNode> ShTextureNodePtr;
 
+/// A variable node for textures 
 class ShDataTextureNode : public ShTextureNode {
 public:
   ShDataTextureNode(ShTextureDims dims, int width, int height, int depth, int elements);
@@ -75,15 +77,19 @@ public:
   int depth() const;
   int elements() const;
 
-  void setData(const float* data);
+  // TODO make ShMemoryObjectPtr constant 
+  void setMem(ShMemoryObjectPtr data);
 
-  const float* data() const;
+  ShMemoryObjectPtr mem() const;
   
 private:
-  int m_width, m_height, m_depth;
-  int m_elements;
+  int m_width, m_height, m_depth, m_elements;
 
-  float* m_data;
+  ShMemoryObjectPtr m_mem;
+
+  /// returns true only if width, height, depth, and elements match
+  bool compatibleWith(ShMemoryObjectPtr memObj);
+
   // NOT IMPLEMENTED
   ShDataTextureNode(const ShDataTextureNode& other);
   ShDataTextureNode& operator=(const ShDataTextureNode& other);
@@ -92,6 +98,7 @@ private:
 
 typedef ShRefCount<ShDataTextureNode> ShDataTextureNodePtr;
 
+/// A variable node for cube map textures
 class ShCubeTextureNode : public ShTextureNode {
 public:
   ShCubeTextureNode();
@@ -103,7 +110,7 @@ public:
 private:
   ShDataTextureNodePtr m_faces[6];
 
-  // NOTE IMPLEMENTED
+  // NOT IMPLEMENTED
   ShCubeTextureNode(const ShCubeTextureNode& other);
   ShCubeTextureNode& operator=(const ShCubeTextureNode& other);
 };

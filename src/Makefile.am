@@ -21,7 +21,9 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
                    ShParser.hpp ShRefCount.hpp ShProgram.hpp ShStatement.hpp \
                    ShSwizzle.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp \
                    ShUtility.hpp ShVariable.hpp ShVariableNode.hpp sh.hpp \
-                   ShMatrix.hpp ShMatrixImpl.hpp ShTexture.hpp ShTextureImpl.hpp \
+                   ShMatrix.hpp ShMatrixImpl.hpp \
+                   ShMemoryObject.hpp ShMemoryObject.cpp \
+                   ShTexture.hpp ShTextureImpl.hpp \
                    ShTextureNode.hpp ShImage.hpp ShLinearAllocator.hpp \
                    ShLibAttrib.hpp ShSpecialType.hpp \
                    ShVector.hpp ShLibVector.hpp \
@@ -44,6 +46,7 @@ incinc_HEADERS = ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp \
                    ShSwizzle.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp \
                    ShUtility.hpp ShVariable.hpp ShVariableNode.hpp sh.hpp \
                    ShMatrix.hpp ShMatrixImpl.hpp ShTexture.hpp ShTextureImpl.hpp \
+                   ShMemoryObject.hpp \
                    ShTextureNode.hpp ShImage.hpp ShLinearAllocator.hpp \
                    ShLibAttrib.hpp ShSpecialType.hpp \
                    ShVector.hpp ShLibVector.hpp \

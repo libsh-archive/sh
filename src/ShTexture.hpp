@@ -39,13 +39,17 @@ public:
   ~ShTexture();
 
   ShTextureNodePtr node() const;
-  
+
+  /// Attach a memory object to this texture
+  // This currently does not work with cube maps
+  void attach(ShMemoryObjectPtr memObj);
+
 protected:
   ShTexture(ShTextureNodePtr node);
   
   ShTextureNodePtr m_node;
 
-  void loadImage(const ShImage& image);
+  void loadImage(const ShImage& image, int slice = 0);
 };  
 
 template<typename T>
@@ -68,6 +72,20 @@ public:
   T operator()(const ShVariableN<2, double>& coords);
 
   void load(const ShImage& image);
+};
+
+template<typename T>
+class ShTexture3D : public ShTexture<T> {
+public:
+  ShTexture3D(int width, int height, int depth);
+
+  /// Lookup a value, coords being in [0,1] x [0,1] x [0,1]
+  T operator()(const ShVariableN<3, double>& coords);
+
+  /// Load the given image at the given depth slice 
+  // (loads the 2D plane with tex coords (x,y,slice), 
+  // (x,y) in [0,1] x [0,1]
+  void load(const ShImage& image, int slice);
 };
 
 template<typename T>

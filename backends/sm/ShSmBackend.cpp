@@ -190,12 +190,17 @@ void BackendCode::bind()
       continue;
     }
     if (m_textureMap.find(texture) == m_textureMap.end()) {
+      ShDataMemoryObjectPtr texmem = texture->mem();
+      if( !texmem ) {
+        SH_DEBUG_WARN((*I)->name() << " has invalid texture data!"); 
+        continue;
+      }
       // TODO: Other types of textures.
       
       m_textureMap[texture] = smNewTexture2DRect(texture->width(), texture->height(),
                                                  texture->elements(), SM_FLOAT);
       SMtexture smTex = m_textureMap[texture];
-      smTexImage2D(smTex, 0, const_cast<float*>(texture->data()));
+      smTexImage2D(smTex, 0, const_cast<float*>(texmem->data()));
 
       // TODO: Capabilities
       smTexWrapS(smTex, SM_REPEAT);

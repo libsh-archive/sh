@@ -24,6 +24,7 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
+#include <cassert>
 #include "ShTextureNode.hpp"
 #include "ShEnvironment.hpp"
 
@@ -45,16 +46,16 @@ ShTextureDims ShTextureNode::dims() const
   return m_dims;
 }
 
-ShDataTextureNode::ShDataTextureNode(ShTextureDims dims, int width, int height, int depth, int elements)
+ShDataTextureNode::ShDataTextureNode(ShTextureDims dims, int width, int height, 
+    int depth, int elements)
   : ShTextureNode(dims),
-    m_width(width), m_height(height), m_depth(depth), m_elements(elements),
-    m_data(new float[width * height * elements])
+    m_width(width), m_height(height), m_depth(depth),
+    m_elements(elements), m_mem(0) 
 {
 }
 
 ShDataTextureNode::~ShDataTextureNode()
 {
-  delete [] m_data;
 }
 
 int ShDataTextureNode::width() const
@@ -77,17 +78,25 @@ int ShDataTextureNode::elements() const
   return m_elements;
 }
 
-void ShDataTextureNode::setData(const float* data)
+bool ShDataTextureNode::compatibleWith(ShMemoryObjectPtr memObj) {
+  return m_width == memObj->width() &&
+         m_height == memObj->height() &&
+         m_depth == memObj->depth() &&
+         m_elements == memObj->elements();
+}
+
+void ShDataTextureNode::setMem(ShMemoryObjectPtr mem)
 {
-  memcpy(m_data, data, m_width * m_height * m_elements * sizeof(float));
+  assert( compatibleWith(mem) );
+  m_mem = mem;  
   for (int s = 0; s < shShaderKinds; s++) {
     if (ShEnvironment::boundShader[s]) ShEnvironment::boundShader[s]->updateUniform(this);
   }
 }
 
-const float* ShDataTextureNode::data() const
+ShMemoryObjectPtr ShDataTextureNode::mem() const
 {
-  return m_data;
+  return m_mem;
 }
 
 ShCubeTextureNode::ShCubeTextureNode()
