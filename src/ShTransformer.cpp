@@ -452,9 +452,11 @@ struct TextureLookupConverter {
     } else {
       return;
     }
-    I = block->erase(I);
+    I = block->erase(I); // I is pointing one past its original value now
     block->splice(I, newStmts);
+    I--; // Make I point to its original value, it will be inc'd later.
     changed = true;
+    return;
   }
 
   bool changed;
