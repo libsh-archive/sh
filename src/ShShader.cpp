@@ -11,24 +11,36 @@ ShShaderNode::ShShaderNode(int kind)
 {
 }
 
+void ShShaderNode::compile(ShRefCount<ShBackend>& backend)
+{
+  if (!backend) return;
+  
+  ShEnvironment::shader = this;
+  ShEnvironment::insideShader = true;
+  ShBackendCodePtr code = backend->generateCode(this);
+#ifdef SH_DEBUG
+  code->print(std::cerr);
+#endif
+  ShEnvironment::insideShader = false;
+  m_code[backend] = code;
+}
+
 ShRefCount<ShBackendCode> ShShaderNode::code(ShRefCount<ShBackend>& backend) {
   if (!backend) return 0;
   assert(!ShEnvironment::insideShader);
 
-  if (m_code.find(backend) == m_code.end()) {
-    ShEnvironment::shader = this;
-    ShEnvironment::insideShader = true;
-    ShBackendCodePtr code = backend->generateCode(this);
-#ifdef SH_DEBUG
-    code->print(std::cerr);
-#endif
-    ShEnvironment::insideShader = false;
-    m_code[backend] = code;
-  }
+  if (m_code.find(backend) == m_code.end()) compile(backend);
 
   return m_code[backend];
 }
-  
+
+void ShShaderNode::updateUniform(const ShVariableNodePtr& uniform)
+{
+  if (ShEnvironment::boundShader[m_kind] == this) {
+    code(ShEnvironment::backend)->updateUniform(uniform);
+  }
+}
+
 
 void ShShaderNode::collectVariables()
 {

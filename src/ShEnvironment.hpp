@@ -1,6 +1,7 @@
 #ifndef SHENVIRONMENT_HPP
 #define SHENVIRONMENT_HPP
 
+#include <map>
 #include "ShShader.hpp"
 #include "ShBackend.hpp"
 
@@ -19,8 +20,8 @@ struct ShEnvironment
   /// Whether we are in the process of defining a shader
   static bool insideShader;
 
-  /// The shader bound under the current backend
-  static ShShader boundShader;
+  /// The shader of a given kind bound under the current backend.
+  static ShShader boundShader[shShaderKinds];
 
   /// The currently active backend
   static ShBackendPtr backend;

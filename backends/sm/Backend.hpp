@@ -52,14 +52,17 @@ struct SmRegister {
   std::string print() const;
 };
 
+class Backend;
 
 class BackendCode : public SH::ShBackendCode {
 public:
-  BackendCode(const SH::ShShader& shader);
+  BackendCode(SH::ShRefCount<Backend> backend, const SH::ShShader& shader);
   ~BackendCode();
 
   void upload();
   void bind();
+  void updateUniform(const SH::ShVariableNodePtr& uniform);
+  
   std::ostream& print(std::ostream& out);
 
   int label(const SH::ShBasicBlockPtr& block);
@@ -68,16 +71,20 @@ public:
   void allocRegs();
 
 private:
+  SH::ShRefCount<Backend> m_backend;
   SH::ShShader m_shader;
   SMshader m_smShader;
-  
-  int m_maxLabel;
-  std::map<SH::ShBasicBlockPtr, int> m_labels;
 
   typedef std::list<SmInstruction> SmInstList;
   SmInstList m_instructions; ///< The actual code.
 
+  /// Returns true if a register has been allocated to var.
+  bool haveReg(const SH::ShVariableNodePtr& var);
+
+  /// Allocates a register if there is none yet.
   SmRegister getReg(const SH::ShVariableNodePtr& var);
+  
+  /// Allocates a register if there is none yet.
   SMreg getSmReg(const SH::ShVariable& var);
 
   int m_maxCR;
@@ -107,6 +114,8 @@ public:
 private:
   void generateNode(BackendCodePtr& code, const SH::ShCtrlGraphNodePtr& node);
 };
+
+typedef SH::ShRefCount<Backend> BackendPtr;
 
 }
 #endif

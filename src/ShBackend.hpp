@@ -6,14 +6,22 @@
 #include <string>
 #include "ShRefCount.hpp"
 #include "ShShader.hpp"
+#include "ShVariableNode.hpp"
 
 namespace SH  {
 
 class ShBackendCode : public ShRefCountable {
 public:
   virtual ~ShBackendCode();
+
+  /// Upload this shader code to the GPU.
   virtual void upload() = 0;
+
+  /// Bind this shader code after it has been uploaded.
   virtual void bind() = 0;
+
+  /// Update the value of a uniform parameter after it has changed.
+  virtual void updateUniform(const ShVariableNodePtr& uniform) = 0;
 
   virtual std::ostream& print(std::ostream& out) = 0;
 };
@@ -24,7 +32,10 @@ class ShBackend : public ShRefCountable {
 public:
   virtual ~ShBackend();
   virtual std::string name() const = 0;
-  
+
+  /// Generate the backend code for a particular shader. Ensure that
+  /// ShEnvironment::shader is the same as shader before calling this,
+  /// since extra variables may be declared inside this function!
   virtual ShBackendCodePtr generateCode(const ShShader& shader) = 0;
 
   typedef std::vector< ShRefCount<ShBackend> > ShBackendList;

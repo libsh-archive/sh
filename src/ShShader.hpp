@@ -10,6 +10,9 @@
 
 namespace SH {
 
+/// How many kinds of shaders there are in the pipeline at most.
+const int shShaderKinds = 2;
+
 class ShBackendCode;
 class ShBackend;
 
@@ -20,6 +23,16 @@ class ShBackend;
 class ShShaderNode : public ShRefCountable {
 public:
   ShShaderNode(int kind);
+
+  /// Forcefully compile this shader for a particular backend, even if
+  /// it has been compiled previously. Use code() to obtain the actual code.
+  void compile(ShRefCount<ShBackend>& backend);
+  
+  /// Obtain the code for a particular backend. Generates it if necessary.
+  ShRefCount<ShBackendCode> code(ShRefCount<ShBackend>& backend);
+
+  /// Notify this shader that a uniform variable has changed.
+  void updateUniform(const ShVariableNodePtr& uniform);
 
   /// The tokenizer for this shader's body
   ShTokenizer tokenizer;
@@ -40,9 +53,6 @@ public:
   VarList uniforms; ///< Uniform variables used in this shader
 
   int kind() const { return m_kind; }
-
-  /// Obtain the code for a particular backend. Generates it if necessary.
-  ShRefCount<ShBackendCode> code(ShRefCount<ShBackend>& backend);
   
 private:
 

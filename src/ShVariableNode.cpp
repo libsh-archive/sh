@@ -101,11 +101,17 @@ ShVariableKind ShVariableNode::kind() const
   return m_kind;
 }
 
+// TODO: also have an n-length set value, since updating the uniforms
+// will otherwise be horribly inefficient.
 void ShVariableNode::setValue(int i, ValueType value)
 {
   assert(m_values);
   if (i < 0 || i >= m_size) return;
   m_values[i] = value;
+
+  for (int s = 0; s < shShaderKinds; s++) {
+    if (ShEnvironment::boundShader[s]) ShEnvironment::boundShader[s]->updateUniform(this);
+  }
 }
 
 ShVariableNode::ValueType ShVariableNode::getValue(int i) const

@@ -36,8 +36,8 @@ std::string SmRegister::print() const
   return stream.str();
 }
 
-BackendCode::BackendCode(const ShShader& shader)
-  : m_shader(shader), m_maxLabel(0),
+BackendCode::BackendCode(ShRefCount<Backend> backend, const ShShader& shader)
+  : m_backend(backend), m_shader(shader),
     m_maxCR(0), m_maxTR(0), m_maxIR(0), m_maxOR(0),
     m_cR(0), m_tR(0), m_iR(0), m_oR(0)
 {
@@ -98,10 +98,16 @@ void BackendCode::upload()
 
 void BackendCode::bind()
 {
+  // TODO: Don't recompile. Instead, just load the constant registers
+  
+  // This is dirty but for now necessary, until SM has proper
+  // constant reloading semantics.
+  upload();
+
   SH_DEBUG_PRINT("Binding shader");
+  
   smBindShader(m_smShader);
-  SH::ShEnvironment::boundShader = m_shader;
-  //  smLoadConstReg(m_shader->kind());
+  SH::ShEnvironment::boundShader[m_shader->kind()] = m_shader;
 }
 
 std::string BackendCode::printVar(const ShVariable& var)
@@ -127,6 +133,15 @@ std::string BackendCode::printVar(const ShVariable& var)
     }
   }
   return out;
+}
+
+void BackendCode::updateUniform(const ShVariableNodePtr& uniform)
+{
+  if (!haveReg(uniform)) return;
+  
+  // TODO: Just change the particular register.
+
+  bind();
 }
 
 std::ostream& BackendCode::print(std::ostream& out)
@@ -330,6 +345,11 @@ void BackendCode::allocRegs()
   m_oR = new SMreg[m_maxOR];
 }
 
+bool BackendCode::haveReg(const SH::ShVariableNodePtr& var)
+{
+  return m_registers.find(var) != m_registers.end();
+}
+
 SmRegister BackendCode::getReg(const SH::ShVariableNodePtr& var)
 {
   if (!var) return SmRegister(SHSM_REG_TEMP, -1);
@@ -439,7 +459,7 @@ void Backend::generateNode(BackendCodePtr& code, const ShCtrlGraphNodePtr& node)
 
 ShBackendCodePtr Backend::generateCode(const ShShader& shader)
 {
-  BackendCodePtr code = new BackendCode(shader);
+  BackendCodePtr code = new BackendCode(this, shader);
 
   ShCtrlGraphPtr graph = shader->ctrlGraph;
 

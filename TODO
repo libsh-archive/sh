@@ -1,4 +1,10 @@
 SMALL TASKS:
+ X have updating semantics for uniforms
+ - have functions to switch the current backend, clearing bound shaders etc. appropriately.
+ X need a map of shader kind -> currently bound shader
+ X hack constant loading for now by recompiling shader everytime it is bound
+ X hack constant loading for now by recompiling shader everytime a uniform is changed.
+ - have a setValues() call in ShVariableNode taking an array of indices and an array of values.
  X check into CVS
  - improve error handling in ShParser.cpp
  - add line numbers/filenames to tokens, use this in error handling
@@ -10,14 +16,12 @@ SMALL TASKS:
  X add negation to variables
  X compute uniform constant operations in the host
  X send uniform values to SM in the SM backend
- - have updating semantics for uniforms
  X add Swizzling operators to ShVariable
  - make ShVariable operators return ShVariableN
  - add Swizzling operators to ShVariableN
  X negation in SM backend code upload
  X store ShBackendCode objects in ShShader
  - replace assert() with exceptions/error function
- - fix Constant Loading in SM backend... Need to talk to Kevin
 
 MEDIUM TASKS:
  - port more of the ShLib calls to the new model.

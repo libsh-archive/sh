@@ -4,7 +4,7 @@ namespace SH {
 
 ShShader ShEnvironment::shader = 0;
 bool ShEnvironment::insideShader = false;
-ShShader ShEnvironment::boundShader = 0;
+ShShader ShEnvironment::boundShader[shShaderKinds] = {0, 0};
 ShBackendPtr ShEnvironment::backend = 0;
 
 }
