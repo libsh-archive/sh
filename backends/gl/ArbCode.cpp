@@ -111,13 +111,15 @@ ArbBindingSpecs* arbBindingSpecs(bool output, const std::string& unit)
 using namespace SH;
 
 ArbCode::ArbCode(const ShProgramNodeCPtr& shader, const std::string& unit,
-                 TextureStrategy* textures)
-  : m_textures(textures), m_shader(0), m_originalShader(shader), m_unit(unit),
+                 TextureStrategy* texture)
+  : m_texture(texture), m_shader(0), m_originalShader(0), m_unit(unit),
     m_numTemps(0), m_numHalfTemps(0), m_numInputs(0), m_numOutputs(0), m_numParams(0), m_numParamBindings(0),
     m_numConsts(0),
     m_numTextures(0), m_programId(0), m_environment(0), m_max_label(0),
     m_address_register(new ShVariableNode(SH_TEMP, 1, SH_FLOAT))
 {
+  m_originalShader =  const_cast<ShProgramNode*>(shader.object());
+
   if (unit == "fragment") m_environment |= SH_ARB_FP;
   if (unit == "vertex") m_environment |= SH_ARB_VP;
 
@@ -169,12 +171,20 @@ ArbCode::ArbCode(const ShProgramNodeCPtr& shader, const std::string& unit,
 
 ArbCode::~ArbCode()
 {
+ if (m_shader != m_originalShader)
+   {
+   delete m_shader;
+   }
 }
 
 void ArbCode::generate()
 {
   // Transform code to be ARB_fragment_program compatible
-  m_shader = m_originalShader->clone();
+  ShProgramNodePtr temp_shader = m_originalShader->clone();
+  m_shader = temp_shader.object();
+  m_shader->acquireRef();
+  temp_shader = NULL;
+
   ShContext::current()->enter(m_shader);
   ShTransformer transform(m_shader);
 
@@ -188,7 +198,8 @@ void ArbCode::generate()
     optimize(m_shader);
     m_shader->collectVariables();
   } else {
-    m_shader = shref_const_cast<ShProgramNode>(m_originalShader);
+    m_shader->releaseRef();
+    m_shader = m_originalShader;
     ShContext::current()->exit();
     ShContext::current()->enter(m_shader);
   }
@@ -298,9 +309,7 @@ void ArbCode::bind()
   
   SH_GL_CHECK_ERROR(shGlBindProgramARB(arbTarget(m_unit), m_programId));
   
-
-  ShContext::current()->set_binding(std::string("arb:") + m_unit,
-                                    shref_const_cast<ShProgramNode>(m_originalShader));
+  ShContext::current()->set_binding(std::string("arb:") + m_unit, ShProgram(m_originalShader));
 
   // Initialize constants
   for (RegMap::const_iterator I = m_registers.begin(); I != m_registers.end(); ++I) {
@@ -1234,7 +1243,7 @@ void ArbCode::bindTextures()
 {
   for (ShProgramNode::TexList::const_iterator I = m_shader->textures.begin();
        I != m_shader->textures.end(); ++I) {
-    m_textures->bindTexture(*I, GL_TEXTURE0 + m_registers[*I]->index);
+    m_texture->bindTexture(*I, GL_TEXTURE0 + m_registers[*I]->index);
   }
 }
 

@@ -1,10 +1,17 @@
 2004-11-02  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+   Merged trunk up to r1654
+   Fixed the spacing in the table below.
+
+2004-11-02  Bryan Chan <b8chan@cgl.uwaterloo.ca>
 	* src/ShMeta.hpp, ShMetaImpl.hpp:
 	  Make ShMeta only contain an unallocated MetaMap. 
 		Inline all functions (I)
+    (Other easy ways to slim the ShVariableNode include 
+    pulling out the dependency information and uniform locking
+    variables into a structure indexed by node ID)
 
 	* src/ShSwizzle.hpp, ShSwizzleImpl.hpp ShSwizzle.cpp:
-		Backed changes from Oct. 28 (r1647) and started over. 
+		Backed out changes from Oct. 28 (r1647) and started over. 
     Union uchar[4] and int* to make it less restrictive. 
     The uchar only gets used for m_srcSize < 256 and m_size <= 4.
 		Sped up identity check.  (II)
@@ -20,14 +27,14 @@
 	  Checked in some tests & added a few more.  
 		results/ holds prospect logs from r1647 and checked in version.
 
-    All tests run x 5 on inigo (P4 2.60 Ghz, gcc 3.3.4-6sarge1, -O2) 
-									 trunk		arith -> (I) -> (II) -> (III) -> (IV)
-		compile        10.54    11.20     #     10.96     #				 # 
-		mat_asn_scal    4.54     9.70    8.65    5.85     #				 #	 
-		mat_asn_vec     0.77     3.28    3.00    2.25    2.17			0.81 
-		mat_mul         7.85     8.75    8.44    6.03    5.65			 # 
-		vec3_add        4.14     4.89    4.30    3.17    2.95			2.88 
-		vec3_add_swiz   8.00    10.91   10.45    6.56    6.15			6.02 
+    All tests run x 5 on inigo (P4 2.60 Ghz, gcc 3.3.4-6sarge1, -O2)
+                   trunk    arith -> (I) ->  (II) -> (III) -> (IV)
+    compile        10.54    11.20     #     10.96     #        # 
+    mat_asn_scal    4.54     9.70    8.65    5.85     #        #	 
+    mat_asn_vec     0.77     3.28    3.00    2.25    2.17     0.81 
+    mat_mul         7.85     8.75    8.44    6.03    5.65      # 
+    vec3_add        4.14     4.89    4.30    3.17    2.95     2.88 
+    vec3_add_swiz   8.00    10.91   10.45    6.56    6.15     6.02 
     (constprop in compile is slightly slower since it now needs to work on
     variants, but otherwise computation is a bit faster)   
 
@@ -40,18 +47,18 @@
     but prospect logs point to the texture lookup function)
 
     trunk = r1652, arith = r1647
-		# = change < 1% 
-		Times are usually repeatable to within +-2% between runs,
-		The occasional test varies wildly (over 5%) between compiles 
-    probably because of dynamic memory allocation overhead.		
+    # = change < 1% 
+    Times are usually repeatable to within +-2% between runs,
+    The occasional test varies wildly (over 5%) between compiles 
+    probably because of dynamic memory allocation overhead.    
 
-		Descriptions
-		compile         5000 compiles to cc backend with optimizations
-		mat_asn_scal    100000 asn matrix elements as scalars	(from libsh-devel list)
-		mat_asn_vec     100000 asn matrix rows as vectors (from libsh-devel list)
-		mat_mul         30000 4x4 matrix-matrix multiplication
-		vec3_add        1000000 vec adds (twice simple vec below)	
-		vec3_add_swiz   1000000 vec adds, all operands swizzed	
+    Descriptions
+    compile         5000 compiles to cc backend with optimizations
+    mat_asn_scal    100000 asn matrix elements as scalars  (from libsh-devel list)
+    mat_asn_vec     100000 asn matrix rows as vectors (from libsh-devel list)
+    mat_mul         30000 4x4 matrix-matrix multiplication
+    vec3_add        1000000 vec adds (twice simple vec below)  
+    vec3_add_swiz   1000000 vec adds, all operands swizzed  
     sphere, scene   Gabo's raytracer
 
 
@@ -191,6 +198,33 @@ Testing
 
 	* test/regress/cbrt.cpp.py, cmul.cpp.py, csum.cpp.py, rnd.cpp.py:
 	Tests for new ops. (some need to be implemented in the backends) 
+
+2004-10-28  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* backends/gl/WGLPBufferStreams.*: Changed pbuffer management
+	code, removed context tracking and replaced with list of
+	cached pbuffer/contexts. 
+
+2004-10-28  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* backends/gl/ArbCode.*: The ArbCode was holding a reference
+	to its associated program causing a cyclic dependency. The smart
+	pointer was changed to a raw pointer, alleviating most of the memory
+	leaks.
+
+	* backends/gl/WGLPBufferStreams.*: Changed pbuffer management
+	code, removed context tracking and replaced with list of
+	cached pbuffer/contexts. 
+
+	* backends/gl/GLXPBufferStreams.*: Changed pbuffer management
+	code, removed context tracking and replaced with list of
+	cached pbuffer/contexts. 
+
+	* backends/gl/GlTextures.*, backends/gl/GlTextureStorage.*,
+	backends/gl/Arb.*, backends/gl/GlBackend.*,
+	backends/gl/PBufferStreams.*: Removed all the context bookkeeping
+	code. We now assume that contexts share the same texture/program/
+	display list space.
 
 2004-10-28  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
 

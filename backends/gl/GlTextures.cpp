@@ -251,9 +251,8 @@ GLenum shGlType(ShValueType valueType, ShValueType &convertedType) {
 }
 
 struct StorageFinder {
-  StorageFinder(const ShTextureNodePtr& node, int context,
-                bool ignoreTarget = false)
-    : node(node), context(context), ignoreTarget(ignoreTarget)
+  StorageFinder(const ShTextureNodePtr& node, bool ignoreTarget = false)
+    : node(node), ignoreTarget(ignoreTarget)
   {
   }
   
@@ -261,9 +260,6 @@ struct StorageFinder {
   {
     GlTextureStoragePtr t = shref_dynamic_cast<GlTextureStorage>(storage);
     if (!t) {
-      return false;
-    }
-    if (t->context() != context) {
       return false;
     }
     if (!ignoreTarget) {
@@ -277,18 +273,16 @@ struct StorageFinder {
   }
   
   const ShTextureNodePtr& node;
-  int context;
   bool ignoreTarget;
 };
 
-GlTextures::GlTextures(int context)
-  : m_context(context)
+GlTextures::GlTextures(void)
 {
 }
 
-TextureStrategy* GlTextures::create(int context)
+TextureStrategy* GlTextures::create(void)
 {
-  return new GlTextures(context);
+  return new GlTextures;
 }
 
 
@@ -324,7 +318,7 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node,
         GlTextureStorage* s = dynamic_cast<GlTextureStorage*>(*S);
         if (!s) continue;
         ShCubeDirection dir = glToShCubeDir(s->target());
-        if (s->memory() != node->memory(dir).object() || !StorageFinder(node, m_context, true)(s))
+        if (s->memory() != node->memory(dir).object() || !StorageFinder(node, true)(s))
           break;
       }
       // If we got through the whole list, we've found a matching list.
@@ -337,8 +331,7 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node,
       texname->params(node->traits());
       for (int i = 0; i < 6; i++) {
         ShCubeDirection dir = static_cast<ShCubeDirection>(i);
-        GlTextureStoragePtr storage = new GlTextureStorage(m_context,
-                                                           node->memory(dir).object(),
+        GlTextureStoragePtr storage = new GlTextureStorage(node->memory(dir).object(),
                                                            shGlCubeMapTargets[i],
                                                            shGlFormat(node),
                                                            shGlInternalFormat(node),
@@ -369,13 +362,12 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node,
     }
   } else {
 
-    StorageFinder finder(node, m_context);
+    StorageFinder finder(node);
     GlTextureStoragePtr storage =
       shref_dynamic_cast<GlTextureStorage>(node->memory()->findStorage("opengl:texture", finder));
     if (!storage) {
       GlTextureNamePtr name = new GlTextureName(shGlTargets[node->dims()]);
-      storage = new GlTextureStorage(m_context,
-                                     node->memory().object(),
+      storage = new GlTextureStorage(node->memory().object(),
                                      shGlTargets[node->dims()],
                                      shGlFormat(node),
                                      shGlInternalFormat(node),

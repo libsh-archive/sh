@@ -32,13 +32,12 @@ namespace shgl {
 
 using namespace SH;
 
-GlTextureStorage::GlTextureStorage(int context,
-                                   ShMemory* memory, GLenum target,
+GlTextureStorage::GlTextureStorage(ShMemory* memory, GLenum target,
                                    GLenum format, GLint internalFormat,
                                    ShValueType valueType, 
                                    int width, int height, int depth, int tuplesize,
                                    GlTextureNamePtr name)
-  : ShStorage(memory), m_context(context),
+  : ShStorage(memory),
     m_name(name), m_target(target), m_format(format), 
     m_internalFormat(internalFormat),
     m_valueType(valueType), 

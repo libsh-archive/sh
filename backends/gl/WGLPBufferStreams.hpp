@@ -41,8 +41,7 @@ namespace shgl {
       pbuffer_hdc(0),
       pbuffer_hglrc(0),
       width(0),
-      height(0),
-      shcontext(-1)
+      height(0)
       {
       }
 
@@ -51,7 +50,6 @@ namespace shgl {
     HDC pbuffer_hdc;
     HGLRC pbuffer_hglrc;
     int width, height;
-    int shcontext;
 
     bool valid() 
       { 
@@ -72,19 +70,22 @@ namespace shgl {
   struct WGLPBufferStreams: public PBufferStreams
     {
     public:
-      WGLPBufferStreams(int context = 0);
+      WGLPBufferStreams(void);
       virtual ~WGLPBufferStreams();
 
-      virtual StreamStrategy* create(int context);
+      virtual StreamStrategy* create(void);
 
     private:
       virtual FloatExtension setupContext(int width, int height);
       virtual void restoreContext(void);
 
     private:
+      ShWGLPBufferInfo createContext(int width, int height);
+
+    private:
       HDC m_orig_hdc;
       HGLRC m_orig_hglrc;
-      ShWGLPBufferInfo m_info;
+      std::list<ShWGLPBufferInfo> m_infos;
     };
 
 }

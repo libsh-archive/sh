@@ -171,9 +171,8 @@ private:
   bool indexed;
 };
 
-PBufferStreams::PBufferStreams(int context)
-  : m_context(context),
-    m_setup_vp(-1)
+PBufferStreams::PBufferStreams(void) :
+  m_setup_vp(false)
 {
 }
 
@@ -206,7 +205,6 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
                              ShStream& dest)
 {
   DECLARE_TIMER(overhead);
-  int prev = shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->context();
 
   // Check program target
   if (program->target() != "gpu:stream") {
@@ -320,7 +318,6 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   }
   TIMING_RESULT(texsetup);
   
-
   DECLARE_TIMER(fpsetup);
   // Add in the texcoord variable
   ShProgram fp = ShProgram(shref_const_cast<ShProgramNode>(program))
@@ -336,7 +333,6 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   fp.node()->ctrlGraph->dfs(texFetcher);
   fp.node()->collectVariables(); // necessary to collect all the new textures
 
-  
   // optimize
   optimize(fp);
 
@@ -375,16 +371,14 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
 
   DECLARE_TIMER(vpsetup);
 
-  int curcontext = shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->context();
-  if (m_setup_vp != curcontext) {
+  if (!m_setup_vp)
+    {
     // The (trivial) vertex program
-    if (m_setup_vp < 0) {
-      m_vp = keep<ShPosition4f>() & keep<ShTexCoord2f>();
-      m_vp.node()->target() = "gpu:vertex";
-    }
+    m_vp = keep<ShPosition4f>() & keep<ShTexCoord2f>();
+    m_vp.node()->target() = "gpu:vertex";
     shCompile(m_vp);
-    m_setup_vp = curcontext;
-  }
+    m_setup_vp = true;
+    }
 
   TIMING_RESULT(vpsetup);
 
@@ -525,9 +519,6 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
 
   TIMING_RESULT(readback);
   
-  // Clean up
-  shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->setContext(prev);
-
   // TODO: I think this is necessary, but it doesn't seem to be. I assume
   // that GLUT (or whatever UI toolkit) is setting up its one context when
   // its about to redraw. -Kevin

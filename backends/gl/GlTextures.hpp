@@ -33,15 +33,12 @@ namespace shgl {
 
 class GlTextures : public TextureStrategy {
 public:
-  GlTextures(int context = 0);
+  GlTextures(void);
 
-  TextureStrategy* create(int context);
+  TextureStrategy* create(void);
   
   void bindTexture(const SH::ShTextureNodePtr& texture,
                    GLenum target);
-
-private:
-  int m_context;
 };
 
 }

@@ -40,8 +40,7 @@ namespace shgl {
       pbuffer(0),
       context(0),
       width(0),
-      height(0),
-      shcontext(-1)
+      height(0)
       {
       }
 
@@ -49,7 +48,6 @@ namespace shgl {
     GLXPbuffer pbuffer;
     GLXContext context;
     int width, height;
-    int shcontext;
 
     bool valid() 
       { 
@@ -69,20 +67,23 @@ namespace shgl {
   struct GLXPBufferStreams: public PBufferStreams
     {
     public:
-      GLXPBufferStreams(int context = 0);
+      GLXPBufferStreams(void);
       virtual ~GLXPBufferStreams();
 
-      virtual StreamStrategy* create(int context);
+      virtual StreamStrategy* create(void);
 
     private:
       virtual FloatExtension setupContext(int width, int height);
       virtual void restoreContext(void);
 
     private:
+      ShGLXPBufferInfo createContext(int width, int height);
+
+    private:
       Display* m_display;
       GLXDrawable m_orig_drawable;
       GLXContext m_orig_context;
-      ShGLXPBufferInfo m_info;
+      std::list<ShGLXPBufferInfo> m_infos;
     };
 
 }

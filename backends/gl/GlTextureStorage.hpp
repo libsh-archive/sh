@@ -36,8 +36,7 @@ namespace shgl {
 
 class GlTextureStorage : public SH::ShStorage {
 public:
-  GlTextureStorage(int context,
-                   SH::ShMemory* memory, GLenum target,
+  GlTextureStorage(SH::ShMemory* memory, GLenum target,
                    GLenum format, GLint internalFormat,
                    SH::ShValueType valueType, 
                    int width, int height, int depth, int tuplesize,
@@ -58,10 +57,8 @@ public:
   int depth() const { return m_depth; }
   int tuplesize() const { return m_tuplesize; }
   int count() const { return m_width * m_height * m_depth * m_tuplesize; }
-  int context() const { return m_context; }
   
 private:
-  int m_context;
   GlTextureNamePtr m_name;
 
   // OpenGL texture params.  type will be determined by the Transfer function
