@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import string, sys, datetime, math
+import string, sys, datetime, math, operator
 
 tests = [
     ['ADD', ['v', 'v'], 'v', ['A + B'],
@@ -29,7 +29,16 @@ tests = [
     ['ATAN', ['v'], 'v', ['atan(A)'], []],
     ['ATAN2', ['v', 'v'], 'v', ['atan2(A, B)'], []],
     ['CEIL', ['v'], 'v', ['ceil(A)'], []],
-    ['COS', ['v'], 'v', ['cos(A)'], []],
+    ['COS', ['v'], 'v', ['cos(A)'],
+     [[l, [math.cos(x) for x in l]]
+       for l in [[0.0, 1.0, 2.0],
+                 [0.5, 0.8, 0.9],
+                 [math.pi, math.pi/2.0, math.pi*2.0],
+                 [-math.pi, -math.pi/2.0, -math.pi*2.0],
+                 [3.0, 4.0, 5.0],
+                 [-1.0, -3.0, -4.0],
+                 [0.5, 1.5, 2.5]]]
+     ],
     
     ['DOT', ['v', 'v'], '1', ['dot(A, B)', '(A | B)'],
      [[[1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [0.0]],
@@ -43,17 +52,27 @@ tests = [
     
     ['EXP', ['v'], 'v', ['exp(A)'], []],
     ['EXP2', ['v'], 'v', ['exp2(A)'],
-     [[[0.0, 1.0, 2.0], [1.0, 2.0, 4.0]],
-      [[3.0, 4.0, 5.0], [8.0, 16.0, 32.0]]
-      ]],
+     [[l, [math.pow(2.0,x) for x in l]]
+       for l in [[0.0, 1.0, 2.0],
+                 [3.0, 4.0, 5.0],
+                 [-1.0, -3.0, -4.0],
+                 [0.5, 1.5, 2.5]]]
+     ],
     ['EXP10', ['v'], 'v', ['exp10(A)'], []],
     ['FLR', ['v'], 'v', ['floor(A)'], []],
-    ['FMOD', ['v', 'v'], 'v', ['fmod(A, B)'], []],
     ['FRAC', ['v'], 'v', ['frac(A)'], []],
     ['LRP', ['vs', 'v', 'v'], 'v', ['lerp(A, B, C)'], []],
     ['MAD', ['vs', 'v', 'v'], 'v', ['mad(A, B, C)'], []], # should really be vs vs v... hrm
     ['MAX', ['v', 'v'], 'v', ['max(A, B)'], []],
     ['MIN', ['v', 'v'], 'v', ['min(A, B)'], []],
+    ['MOD', ['v', 'v'], 'v', ['mod(A, B)'],
+     [[a, b, [math.fmod(x,y) for (x, y) in zip(a, b)]]
+       for (a, b) in [([1.0, 1.2, 1.6], [1.0, 1.0, 1.0]),
+                      ([0.0, 0.2, 0.6], [1.0, 1.0, 1.0]),
+                      ([-1.0, -1.2, -1.6], [1.0, 1.0, 1.0]),
+                      ([4.2, 6.7, 12.33], [2.2, 4.3, 5.7]),
+                      ]]
+     ],
     ['LOG', ['v'], 'v', ['log(A)'], []],
     ['LOG2', ['v'], 'v', ['log2(A)'], []],
     ['LOG10', ['v'], 'v', ['log10(A)'], []],
@@ -122,7 +141,7 @@ for test in tests:
 using namespace SH;
 
 int main(int argc, char** argv) {
-  init_tests(argc, argv);
+  Test test(argc, argv);
 ''')
     terms = test[1]
     ops = test[3]
@@ -149,11 +168,11 @@ int main(int argc, char** argv) {
             f.write('\n')
             for case in cases:
                 if len(case) - 1 != len(combination): continue
-                if not reduce(lambda a, b: a and b,
+                if not reduce(operator.__and__,
                               [len(x[0]) == int(varsize(x[1]))
                                for x in zip(case[:-1], combination)], 1):
                     continue
-                f.write('  run(' + prgname + ', ')
+                f.write('  test.run(' + prgname + ', ')
                 f.write(', '.join(['ShAttrib' + str(len(x)) + 'f(' + ', '.join([str(y) for y in x]) + ')' for x in case]) + ');\n')
             f.write('\n')
     f.write('''}

@@ -1,3 +1,38 @@
+2004-06-04  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/cpu/CPU.cpp (encode): Use SH_OP_MOD instead of SH_OP_FMOD.
+
+	* backends/gl/ArbCode.cpp (genNode): Use SH_OP_MOD instead of SH_OP_FMOD.
+
+	* backends/sm/ShSmBackend.cpp (addBasicBlock): Use SH_OP_MOD
+	instead of SH_OP_FMOD.
+
+	* src/ShNibblesImpl.hpp: Rename fmod to mod.
+
+	* src/ShNibbles.hpp: Rename fmod to mod.
+
+	* src/ShInstructions.cpp (shMOD): Rename from shFMOD().
+
+	* src/ShInstructions.hpp: Rename shFMOD() to shMOD().
+
+	* src/ShLibClampImpl.hpp (mod): Rename from fmod.
+
+	* src/ShLibClamp.hpp: Rename fmod to mod. Fixes issue57.
+
+	* src/ShLib.hpp (SH_SHLIB_USUAL_NON_UNIT_OPS_RETTYPE): Use mod
+	instead of fmod.
+
+	* src/ShStatement.hpp: Rename FMOD to MOD.
+
+	* test/regress/Makefile (%.check): Generate log files.
+
+	* test/regress/test.cpp (Test::Test): Implement.
+
+	* test/regress/test.hpp: Made the Test class.
+
+	* test/regress/regress.py: Added some more test data. Adopted to
+	new Test class.
+
 2004-06-02  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/cpu/CPU.cpp (encode): Fix POW to work with scalar RHS

@@ -2,7 +2,7 @@ CXXFLAGS = -Wall -g -O0 -I../../src/
 LDFLAGS = -g -L../../src
 LDLIBS = -lsh -lGL
 TESTS = ADD MUL DIV SLT SLE SGT SGE SEQ SNE ABS ACOS ASIN ATAN ATAN2 CEIL COS DOT \
-	EXP EXP2 EXP10 FLR FMOD FRAC LRP MAD MAX MIN LOG LOG2 LOG10 POW SIN SQRT NORM XPD COND
+	EXP EXP2 EXP10 FLR FRAC LRP MAD MAX MIN MOD LOG LOG2 LOG10 POW SIN SQRT NORM XPD COND
 BACKENDS = arb cpu
 
 all: $(TESTS)
@@ -15,7 +15,7 @@ clean:
 	rm -rf .libs
 
 %.check: %
-	@for j in $(BACKENDS) ; do ./$< $$j 2> /dev/null ; done
+	@for j in $(BACKENDS) ; do ./$< $$j 2> $*.$$j.log ; done
 
 check: $(TESTS:=.check)
 

@@ -1279,21 +1279,6 @@ namespace ShCPU {
 
 	break;
 	}
-      case SH::SH_OP_FMOD:
-	{
-	for(int i = 0; i < stmt.dest.size(); i++)
-	  {
-	  m_code << "  "
-		 << resolve(stmt.dest, i)
-		 << " = fmod("
-		 << resolve(stmt.src[0], i)
-		 << ", "
-		 << resolve(stmt.src[1], i)
-		 << ");" << std::endl;
-	  }
-
-	break;
-	}
       case SH::SH_OP_FRAC:
 	{
 	for(int i = 0; i < stmt.dest.size(); i++)
@@ -1430,6 +1415,21 @@ namespace ShCPU {
 		 << " ? "
 		 << resolve(stmt.src[0], i)
 		 << " : "
+		 << resolve(stmt.src[1], i)
+		 << ");" << std::endl;
+	  }
+
+	break;
+	}
+      case SH::SH_OP_MOD:
+	{
+	for(int i = 0; i < stmt.dest.size(); i++)
+	  {
+	  m_code << "  "
+		 << resolve(stmt.dest, i)
+		 << " = fmod("
+		 << resolve(stmt.src[0], i)
+		 << ", "
 		 << resolve(stmt.src[1], i)
 		 << ");" << std::endl;
 	  }

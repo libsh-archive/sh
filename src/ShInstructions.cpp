@@ -380,13 +380,13 @@ void shFLR(ShVariable& dest, const ShVariable& a)
   }
 }
 
-void shFMOD(ShVariable& dest, const ShVariable& a, const ShVariable& b)
+void shMOD(ShVariable& dest, const ShVariable& a, const ShVariable& b)
 {
   sizes_match(dest, a, b);
   if (immediate()) {
     CWISE_BINARY_OP(dest, a, b, fmodf);
   } else {
-    ShStatement stmt(dest, a, SH_OP_FMOD, b);
+    ShStatement stmt(dest, a, SH_OP_MOD, b);
     addStatement(stmt);
   }
 }

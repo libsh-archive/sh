@@ -191,7 +191,7 @@ SHNIBBLE_BINARY_OP(sgt, a > b)
 SHNIBBLE_BINARY_OP(sge, a >= b) 
 SHNIBBLE_BINARY_OP(seq, a == b) 
 SHNIBBLE_BINARY_OP(sne, a != b) 
-SHNIBBLE_BINARY_OP(fmod, fmod(a, b))
+SHNIBBLE_BINARY_OP(mod, mod(a, b))
 SHNIBBLE_BINARY_OP(min, min(a, b))
 SHNIBBLE_BINARY_OP(max, max(a, b))
 

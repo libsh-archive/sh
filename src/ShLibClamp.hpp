@@ -37,20 +37,17 @@ template<int N, typename T>
 ShGeneric<N, T> floor(const ShGeneric<N, T>& var);
 
 /** Float modulus. 
- * Given a value f, returns f - floor(f).   Note that this is the
- * same as frac (the fractional part) for positive values, but is
- * equal to 1-frac for negative values.   The result is always 
- * postive.
+ * The result is always positive.
  */
 template<int N, typename T>
-ShGeneric<N, T> fmod(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
+ShGeneric<N, T> mod(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
 template<int N, typename T>
-ShGeneric<N, T> fmod(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
+ShGeneric<N, T> mod(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
 template<typename T>
-ShGeneric<1, T> fmod(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
+ShGeneric<1, T> mod(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
 
-SH_SHLIB_CONST_SCALAR_OP(fmod);
-SH_SHLIB_CONST_N_OP_LEFT(fmod);
+SH_SHLIB_CONST_SCALAR_OP(mod);
+SH_SHLIB_CONST_N_OP_LEFT(mod);
 
 /** Fractional part.
  * Discards the integer part of each componenent in var.

@@ -529,23 +529,6 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
     case SH_OP_FLR:
       m_instructions.push_back(ArbInst(SH_ARB_FLR, stmt.dest, stmt.src[0]));
       break;
-    case SH_OP_FMOD:
-      {
-        // TODO - is this really optimal?
-        ShVariable t1(new ShVariableNode(SH_TEMP, stmt.src[0].size()));
-        ShVariable t2(new ShVariableNode(SH_TEMP, stmt.src[0].size()));
-        
-        // result = x - sign(x/y)*floor(abs(x/y))*y
-        genDiv(t1, stmt.src[0], stmt.src[1]);
-        m_instructions.push_back(ArbInst(SH_ARB_ABS, t2, t1));
-
-        genDiv(t1, t1, t2);
-        m_instructions.push_back(ArbInst(SH_ARB_FLR, t2, t2)); 
-        m_instructions.push_back(ArbInst(SH_ARB_MUL, t1, t1, t2)); 
-        m_instructions.push_back(ArbInst(SH_ARB_MUL, t1, t1, stmt.src[1])); 
-        m_instructions.push_back(ArbInst(SH_ARB_SUB, stmt.dest, stmt.src[0], t1)); 
-      }
-      break;
     case SH_OP_FRAC:
       m_instructions.push_back(ArbInst(SH_ARB_FRC, stmt.dest, stmt.src[0]));
       break;
@@ -613,6 +596,23 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       break;
     case SH_OP_MIN:
       m_instructions.push_back(ArbInst(SH_ARB_MIN, stmt.dest, stmt.src[0], stmt.src[1]));
+      break;
+    case SH_OP_MOD:
+      {
+        // TODO - is this really optimal?
+        ShVariable t1(new ShVariableNode(SH_TEMP, stmt.src[0].size()));
+        ShVariable t2(new ShVariableNode(SH_TEMP, stmt.src[0].size()));
+        
+        // result = x - sign(x/y)*floor(abs(x/y))*y
+        genDiv(t1, stmt.src[0], stmt.src[1]);
+        m_instructions.push_back(ArbInst(SH_ARB_ABS, t2, t1));
+
+        genDiv(t1, t1, t2);
+        m_instructions.push_back(ArbInst(SH_ARB_FLR, t2, t2)); 
+        m_instructions.push_back(ArbInst(SH_ARB_MUL, t1, t1, t2)); 
+        m_instructions.push_back(ArbInst(SH_ARB_MUL, t1, t1, stmt.src[1])); 
+        m_instructions.push_back(ArbInst(SH_ARB_SUB, stmt.dest, stmt.src[0], t1)); 
+      }
       break;
     case SH_OP_NORM:
       { 

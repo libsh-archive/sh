@@ -482,17 +482,6 @@ void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
     case SH_OP_FLR:
       m_instructions.push_back(SmInstruction(OP_FLR, stmt.dest, stmt.src[0]));
       break;
-    case SH_OP_FMOD:
-        if (stmt.src[1].size() == 1 && stmt.src[0].size() != 1) {
-          int* swizzle = new int[stmt.src[0].size()];
-          for (int i = 0; i < stmt.src[0].size(); i++) swizzle[i] = 0;
-          m_instructions.push_back(SmInstruction(OP_FMOD, stmt.dest, stmt.src[0],
-                                                 stmt.src[1](stmt.src[0].size(), swizzle)));
-          delete [] swizzle;
-        } else {
-          m_instructions.push_back(SmInstruction(OP_FMOD, stmt.dest, stmt.src[0], stmt.src[1]));
-        }
-        break;
     case SH_OP_FRAC:
       m_instructions.push_back(SmInstruction(OP_FRC, stmt.dest, stmt.src[0]));
       break;
@@ -538,6 +527,17 @@ void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
     case SH_OP_MIN:
       m_instructions.push_back(SmInstruction(OP_MIN, stmt.dest, stmt.src[0], stmt.src[1]));
       break;
+    case SH_OP_MOD:
+        if (stmt.src[1].size() == 1 && stmt.src[0].size() != 1) {
+          int* swizzle = new int[stmt.src[0].size()];
+          for (int i = 0; i < stmt.src[0].size(); i++) swizzle[i] = 0;
+          m_instructions.push_back(SmInstruction(OP_FMOD, stmt.dest, stmt.src[0],
+                                                 stmt.src[1](stmt.src[0].size(), swizzle)));
+          delete [] swizzle;
+        } else {
+          m_instructions.push_back(SmInstruction(OP_FMOD, stmt.dest, stmt.src[0], stmt.src[1]));
+        }
+        break;
     case SH_OP_POW:
       for (int i = 0; i < stmt.src[0].size(); i++) {
         m_instructions.push_back(SmInstruction(OP_POW, stmt.dest(i), stmt.src[0](i), stmt.src[1](i)));

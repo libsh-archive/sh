@@ -37,26 +37,26 @@ ShGeneric<N, T> floor(const ShGeneric<N, T>& var)
 
 template<int N, typename T>
 inline
-ShGeneric<N, T> fmod(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
+ShGeneric<N, T> mod(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
 {
   ShAttrib<N, SH_TEMP, T> t;
-  shFMOD(t, left, right);
+  shMOD(t, left, right);
   return t;
 }
 template<int N, typename T>
 inline
-ShGeneric<N, T> fmod(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right)
+ShGeneric<N, T> mod(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right)
 {
   ShAttrib<N, SH_TEMP, T> t;
-  shFMOD(t, left, right);
+  shMOD(t, left, right);
   return t;
 }
 template<typename T>
 inline
-ShGeneric<1, T> fmod(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right)
+ShGeneric<1, T> mod(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right)
 {
   ShAttrib<1, SH_TEMP, T> t;
-  shFMOD(t, left, right);
+  shMOD(t, left, right);
   return t;
 }
 

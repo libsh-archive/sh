@@ -37,7 +37,6 @@ void shEXP(ShVariable& dest, const ShVariable& a);
 void shEXP2(ShVariable& dest, const ShVariable& a);
 void shEXP10(ShVariable& dest, const ShVariable& a);
 void shFLR(ShVariable& dest, const ShVariable& a);
-void shFMOD(ShVariable& dest, const ShVariable& a, const ShVariable& b);
 void shFRAC(ShVariable& dest, const ShVariable& a);
 void shLOG(ShVariable& dest, const ShVariable& a);
 void shLOG2(ShVariable& dest, const ShVariable& a);
@@ -48,6 +47,7 @@ void shMAD(ShVariable& dest, const ShVariable& a,
            const ShVariable& b, const ShVariable& c);
 void shMAX(ShVariable& dest, const ShVariable& a, const ShVariable& b);
 void shMIN(ShVariable& dest, const ShVariable& a, const ShVariable& b);
+void shMOD(ShVariable& dest, const ShVariable& a, const ShVariable& b);
 void shPOW(ShVariable& dest, const ShVariable& a, const ShVariable& b);
 void shSIN(ShVariable& dest, const ShVariable& a);
 void shSQRT(ShVariable& dest, const ShVariable& a);

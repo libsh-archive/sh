@@ -1,8 +1,8 @@
 #include "test.hpp"
 
-void init_tests(int argc, char** argv)
+Test::Test(int argc, char** argv)
 {
-  std::string backend = "cpu";
-  if (argc >= 2) backend = argv[1];
-  SH::shSetBackend(backend);
+  m_backend = "cpu";
+  if (argc >= 2) m_backend = argv[1];
+  SH::shSetBackend(m_backend);
 }
