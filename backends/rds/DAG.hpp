@@ -30,13 +30,13 @@ class SH_DLLEXPORT DAGNode {
 	DAGNode(SH::ShStatement *stmt);
 
 	// returns number of instructions/resources consumed by pass starting at this node
-	int instrs() const { return m_num_instrs; }
+	int instrs() const { return m_num_instrs + m_extra_instrs; }
 	int params() const { return m_params.size(); }
 	int attribs() const { return m_attribs.size(); }
-	int temps() const { return m_temps.size(); }
-	int halftemps() const { return m_halftemps.size(); }
+	int temps() const { return m_temps.size() + m_extra_temps; }
+	int halftemps() const { return m_halftemps.size() + m_extra_temps; }
 	int texs() const { return m_texs.size(); }
-	int consts() const { return m_consts.size(); }
+	int consts() const { return m_consts.size() + m_extra_consts; }
 	int outputs() const { return m_outputs.size(); }
 
 	void mark() { m_marked = true; }
@@ -46,10 +46,17 @@ class SH_DLLEXPORT DAGNode {
 	void fix(int fix_type) { m_fixed = fix_type; }
 	int fixed() { return m_fixed; }
 
+	void visit() { m_visited = true; }
+	void unvisit() { m_visited = false; }
+	bool visited() { return m_visited; }
+
+	void unvisitall();
+	void unfixall();
+	void unmarkall();
+
 	void add_kid(DAGNode *kid);
 	void print(int indent);
 	void dump_stmts();
-	void unvisitall();
   	void cuts();
 	void set_resources();
 	void set_resources_stmt();
@@ -63,9 +70,6 @@ class SH_DLLEXPORT DAGNode {
 	SH::ShStatement *m_stmt;
 
 	std::string m_label;
-
-	bool m_visited;
-	bool m_marked;
 	
 	typedef std::map<DAGNode *, bool> CutMap;
 	CutMap m_cut;
@@ -83,9 +87,9 @@ class SH_DLLEXPORT DAGNode {
 	int countmarked(); 
 	SH::ShBasicBlock::ShStmtList dag_to_stmt(SH::ShBasicBlock::ShStmtList stmts);
 	void add_var_to_list(VarList *vlist, const SH::ShVariableNodePtr& var);
-
+	void add_extras(const SH::ShStatement& stmt);
 	
-	int m_num_instrs;	// number of instructions
+	int m_num_instrs;		// number of instructions
 	VarList m_params;		// list of uniforms (including palettes)
 	VarList m_attribs;		// list of inputs
 	VarList m_temps;		// list of temporaries
@@ -95,9 +99,13 @@ class SH_DLLEXPORT DAGNode {
 	VarList m_outputs;		// list of outputs
 	VarList m_channels;		// list of channels
 
-	//bool m_marked;
+	int m_extra_instrs;
+	int m_extra_temps;
+	int m_extra_consts;
 
 	int m_fixed;
+	bool m_visited;
+	bool m_marked;
 };
 
 class SH_DLLEXPORT DAG {

@@ -44,6 +44,24 @@ void DAGNode::unvisitall()
 	}
 }
 
+// sets m_marked for this node and all children to false
+void DAGNode::unmarkall() 
+{
+	m_marked = false;
+	for (DAGNodeVector::iterator I = successors.begin(); I != successors.end(); ++I) {
+		(*I)->unmarkall();
+	}
+}
+
+// sets m_fixed for this node and all children to RDS_UNFIXED
+void DAGNode::unfixall() 
+{
+	m_fixed = RDS_UNFIXED;
+	for (DAGNodeVector::iterator I = successors.begin(); I != successors.end(); ++I) {
+		(*I)->unfixall();
+	}
+}
+
 int DAGNode::countmarked() {
 	if (m_visited) return 0;
 	m_visited = true;
@@ -76,6 +94,9 @@ void DAGNode::init_resources(){
 	m_consts.clear();		
 	m_outputs.clear();
 	m_channels.clear();
+	m_extra_instrs = 0;
+	m_extra_temps = 0;
+	m_extra_consts = 0;
 }
 
 // converts dag nodes to statements, adding to statement list
@@ -153,6 +174,7 @@ void DAGNode::set_resources() {
       set_var(I->src[0].node());
       set_var(I->src[1].node());
       set_var(I->src[2].node());
+	  add_extras(*I);
     }
 
 	m_num_instrs = stmts.size();
@@ -237,15 +259,14 @@ void DAGNode::prune_vars() {
 
 void DAGNode::print_resources() {
 	cout << "Resources:\n";
-	cout << "\tInstructions: " << m_num_instrs << "\n";
-	cout << "\tHalf-float Temporaries " << m_halftemps.size() << "\n";
-	cout << "\tTemporaries " << m_temps.size() << "\n";
-	cout << "\tAttributes " << m_attribs.size() << "\n";
-	cout << "\tParameters " << m_params.size() << "\n";
-	cout << "\tTextures " << m_texs.size() << "\n";
-	cout << "\tConstants " << m_consts.size() << "\n";
-	cout << "\tChannels " << m_channels.size() << "\n";
-	cout << "\tOutputs " << m_outputs.size() << "\n";
+	cout << "\tInstructions: " << instrs() << "\n";
+	cout << "\tHalf-float Temporaries " << halftemps() << "\n";
+	cout << "\tTemporaries " << temps() << "\n";
+	cout << "\tAttributes " << attribs() << "\n";
+	cout << "\tParameters " << params() << "\n";
+	cout << "\tTextures " << texs() << "\n";
+	cout << "\tConstants " << consts() << "\n";
+	cout << "\tOutputs " << outputs() << "\n";
 } 
 
 // returns variable associated with this variable
@@ -354,4 +375,84 @@ DAG::DAG(ShBasicBlockPtr block)
 
 void DAG::print(int indent) {
 	m_root->print(indent);
+}
+
+void DAGNode::add_extras(const ShStatement& stmt) {
+	switch(stmt.op) {
+		case SH_OP_DIV:
+		case SH_OP_SQRT:
+		case SH_OP_LRP:
+		case SH_OP_DOT:
+			m_extra_instrs += 1;
+			m_extra_temps += 2;
+			break;
+		case SH_OP_SEQ:
+		case SH_OP_SNE:
+			m_extra_instrs += 3;
+			m_extra_temps += 2;
+			break;
+		case SH_OP_CEIL:
+			m_extra_instrs += 2;
+			break;
+		case SH_OP_MOD:
+			m_extra_instrs += 8;
+			m_extra_temps += 5;
+			break;
+		case SH_OP_COS:
+		case SH_OP_SIN:
+			m_extra_instrs += 2 + 12 * stmt.src[0].size();
+			m_extra_temps += 4;
+			m_extra_consts += 5;
+			break;
+		case SH_OP_TAN:
+			m_extra_instrs += 5 + 24 * stmt.src[0].size();
+			m_extra_temps += 10;
+			m_extra_consts += 10;
+			break;
+		case SH_OP_ACOS:
+		case SH_OP_ASIN:
+		case SH_OP_ATAN:
+		case SH_OP_ATAN2:
+			m_extra_instrs += 4 + 12 * stmt.src[0].size();
+			m_extra_temps += 5;
+			m_extra_consts += 5;
+			break;
+		case SH_OP_EXP:
+		case SH_OP_EXP10:
+			m_extra_instrs += 1;
+			m_extra_consts += 1;
+			break;
+		case SH_OP_LOG:
+		case SH_OP_LOG2:
+			m_extra_instrs += 2;
+			m_extra_temps += 1;
+			m_extra_consts += 1;
+			break;
+		case SH_OP_NORM:
+			m_extra_instrs += 3;
+			m_extra_temps += 2;
+			break;
+		case SH_OP_SGN:
+			m_extra_instrs += 3;
+			m_extra_temps += 2;
+			break;
+		case SH_OP_TEX:
+		case SH_OP_COND:
+			m_extra_instrs += 2;
+			m_extra_temps += 1;
+			break;
+		case SH_OP_CSUM:
+		case SH_OP_CMUL:
+			m_extra_instrs += 2 + stmt.src[0].size();
+			m_extra_temps += 1;
+			break;
+		case SH_OP_KIL:
+			m_extra_instrs += 1;
+			break;
+		case SH_OP_PAL:
+			m_extra_instrs += 2;
+			break;
+		default:
+			break;
+	}
 }
