@@ -28,6 +28,9 @@ public:
   ShTexture2D(int width, int height)
     : ShBaseTexture2D<T>(width, height, ShFilteredTextureTraits())
   {}
+   ShTexture2D(int width, int height, ShTextureTraits& traits)
+    : ShBaseTexture2D<T>(width, height, traits)
+  {}
 };
 
 template<typename T>
@@ -36,6 +39,9 @@ class ShTextureRect
 public:
   ShTextureRect(int width, int height)
     : ShBaseTextureRect<T>(width, height, ShFilteredTextureTraits())
+  {}
+   ShTextureRect(int width, int height, ShTextureTraits& traits)
+    : ShBaseTextureRect<T>(width, height, traits)
   {}
 };
 
