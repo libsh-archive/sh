@@ -86,7 +86,7 @@ void RDS::rds_search() {
 		// find cost of saving subregion m
 		unmarkall(d);
 		m_fixed[m] = RDS_MARKED;
-    m_ops_used = 0;
+		m_ops_used = 0;
 		rds_subdivide(p);
 		unvisitall(p);
 		int cost_s = cost(p);
@@ -94,7 +94,7 @@ void RDS::rds_search() {
 		// find cost of recomputing subregion m
 		unmarkall(d);
 		m_fixed[m] = RDS_UNMARKED;
-    m_ops_used = 0;
+		m_ops_used = 0;
 		rds_subdivide(p);
 		unvisitall(p);
 		int cost_r = cost(p); 
@@ -105,6 +105,9 @@ void RDS::rds_search() {
 			m_fixed[m] = RDS_MARKED;
 		}
 	}
+
+	unmarkall(d);
+	rds_subdivide(p);
 }
 
 // partitions m_graph by marking nodes to indicate pass boundaries
