@@ -2,6 +2,7 @@
 
 	* backends/cpu/CPU.cpp: Rename the functions starting with __ to
 	functions starting with sh_gcc_backend_.
+	(encode): Link with libshcpu for the lookup functions. Resolves issue145.
 
 	* src/ShParser.cpp (parseDo): Until means until, not
 	while. Resolves issue144.

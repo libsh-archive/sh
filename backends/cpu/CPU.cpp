@@ -32,18 +32,28 @@
 #include "ShDebug.hpp" 
 #include "ShStream.hpp" 
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifdef SH_CPU_DEBUG
+#  define SH_CPU_DEBUG_PRINT(x) SH_DEBUG_PRINT(x)
+#else
+#  define SH_CPU_DEBUG_PRINT(x) do { } while(0)
+#endif
+
 void sh_gcc_backend_lookup1D(SH::ShTextureNode* tex, float* src, float* dst)
   {
   if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
     {
-    SH_DEBUG_PRINT("1D/SH_FILTER_MIPMAP textures unsupported...");
+    SH_CPU_DEBUG_PRINT("1D/SH_FILTER_MIPMAP textures unsupported...");
     return;
     }
 
   SH::ShHostStoragePtr storage = SH::shref_dynamic_cast<SH::ShHostStorage>(tex->memory()->findStorage("host"));
   if (!storage)
     {
-    SH_DEBUG_PRINT("failed to find host storage...");
+    SH_CPU_DEBUG_PRINT("failed to find host storage...");
     }
   float* data = (float*)storage->data();
   
@@ -86,7 +96,7 @@ void sh_gcc_backend_lookup1D(SH::ShTextureNode* tex, float* src, float* dst)
       }
     case 1:
       // linear interpolation
-      SH_DEBUG_PRINT("1D/LINEAR textures unsupported...");
+      SH_CPU_DEBUG_PRINT("1D/LINEAR textures unsupported...");
       break;
     }
   }
@@ -95,14 +105,14 @@ void sh_gcc_backend_lookup2D(SH::ShTextureNode* tex, float* src, float* dst)
   {
   if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
     {
-    SH_DEBUG_PRINT("2D/SH_FILTER_MIPMAP textures unsupported...");
+    SH_CPU_DEBUG_PRINT("2D/SH_FILTER_MIPMAP textures unsupported...");
     return;
     }
 
   SH::ShHostStoragePtr storage = SH::shref_dynamic_cast<SH::ShHostStorage>(tex->memory()->findStorage("host"));
   if (!storage)
     {
-    SH_DEBUG_PRINT("failed to find host storage...");
+    SH_CPU_DEBUG_PRINT("failed to find host storage...");
     }
   float* data = (float*)storage->data();
   
@@ -162,7 +172,7 @@ void sh_gcc_backend_lookup2D(SH::ShTextureNode* tex, float* src, float* dst)
       }
     case 1:
       // linear interpolation
-      SH_DEBUG_PRINT("2D/LINEAR textures unsupported...");
+      SH_CPU_DEBUG_PRINT("2D/LINEAR textures unsupported...");
       break;
     }
   }
@@ -171,14 +181,14 @@ void sh_gcc_backend_lookupRECT(SH::ShTextureNode* tex, float* src, float* dst)
   {
   if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
     {
-    SH_DEBUG_PRINT("RECT/SH_FILTER_MIPMAP textures unsupported...");
+    SH_CPU_DEBUG_PRINT("RECT/SH_FILTER_MIPMAP textures unsupported...");
     return;
     }
 
   SH::ShHostStoragePtr storage = SH::shref_dynamic_cast<SH::ShHostStorage>(tex->memory()->findStorage("host"));
   if (!storage)
     {
-    SH_DEBUG_PRINT("failed to find host storage...");
+    SH_CPU_DEBUG_PRINT("failed to find host storage...");
     }
   float* data = (float*)storage->data();
   
@@ -238,19 +248,19 @@ void sh_gcc_backend_lookupRECT(SH::ShTextureNode* tex, float* src, float* dst)
       }
     case 1:
       // linear interpolation
-      SH_DEBUG_PRINT("RECT/LINEAR textures unsupported...");
+      SH_CPU_DEBUG_PRINT("RECT/LINEAR textures unsupported...");
       break;
     }
   }
 
 void sh_gcc_backend_lookup3D(SH::ShTextureNode* tex, float* src, float* dst)
   {
-  SH_DEBUG_PRINT("3D textures unsupported...");
+  SH_CPU_DEBUG_PRINT("3D textures unsupported...");
   }
 
 void sh_gcc_backend_lookupCUBE(SH::ShTextureNode* tex, float* src, float* dst)
   {
-  SH_DEBUG_PRINT("CUBE textures unsupported...");
+  SH_CPU_DEBUG_PRINT("CUBE textures unsupported...");
   }
 
 extern "C" void sh_gcc_backend_lookup(void *t, float* src, float* dst)
@@ -276,7 +286,7 @@ extern "C" void sh_gcc_backend_lookup(void *t, float* src, float* dst)
       sh_gcc_backend_lookupCUBE(tex, src, dst);
       break;
     default:
-      SH_DEBUG_PRINT("unknown texture dimension (" << tex->dims() << ")");
+      SH_CPU_DEBUG_PRINT("unknown texture dimension (" << tex->dims() << ")");
       break;
     }
   }
@@ -285,14 +295,14 @@ void sh_gcc_backend_lookupi1D(SH::ShTextureNode* tex, float* src, float* dst)
   {
   if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
     {
-    SH_DEBUG_PRINT("1D/SH_FILTER_MIPMAP textures unsupported...");
+    SH_CPU_DEBUG_PRINT("1D/SH_FILTER_MIPMAP textures unsupported...");
     return;
     }
 
   SH::ShHostStoragePtr storage = SH::shref_dynamic_cast<SH::ShHostStorage>(tex->memory()->findStorage("host"));
   if (!storage)
     {
-    SH_DEBUG_PRINT("failed to find host storage...");
+    SH_CPU_DEBUG_PRINT("failed to find host storage...");
     }
   float* data = (float*)storage->data();
   
@@ -335,7 +345,7 @@ void sh_gcc_backend_lookupi1D(SH::ShTextureNode* tex, float* src, float* dst)
       }
     case 1:
       // linear interpolation
-      SH_DEBUG_PRINT("1D/LINEAR textures unsupported...");
+      SH_CPU_DEBUG_PRINT("1D/LINEAR textures unsupported...");
       break;
     }
   }
@@ -344,14 +354,14 @@ void sh_gcc_backend_lookupi2D(SH::ShTextureNode* tex, float* src, float* dst)
   {
   if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
     {
-    SH_DEBUG_PRINT("2D/SH_FILTER_MIPMAP textures unsupported...");
+    SH_CPU_DEBUG_PRINT("2D/SH_FILTER_MIPMAP textures unsupported...");
     return;
     }
 
   SH::ShHostStoragePtr storage = SH::shref_dynamic_cast<SH::ShHostStorage>(tex->memory()->findStorage("host"));
   if (!storage)
     {
-    SH_DEBUG_PRINT("failed to find host storage...");
+    SH_CPU_DEBUG_PRINT("failed to find host storage...");
     }
   float* data = (float*)storage->data();
   
@@ -411,7 +421,7 @@ void sh_gcc_backend_lookupi2D(SH::ShTextureNode* tex, float* src, float* dst)
       }
     case 1:
       // linear interpolation
-      SH_DEBUG_PRINT("2D/LINEAR textures unsupported...");
+      SH_CPU_DEBUG_PRINT("2D/LINEAR textures unsupported...");
       break;
     }
   }
@@ -420,14 +430,14 @@ void sh_gcc_backend_lookupiRECT(SH::ShTextureNode* tex, float* src, float* dst)
   {
   if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
     {
-    SH_DEBUG_PRINT("RECT/SH_FILTER_MIPMAP textures unsupported...");
+    SH_CPU_DEBUG_PRINT("RECT/SH_FILTER_MIPMAP textures unsupported...");
     return;
     }
 
   SH::ShHostStoragePtr storage = SH::shref_dynamic_cast<SH::ShHostStorage>(tex->memory()->findStorage("host"));
   if (!storage)
     {
-    SH_DEBUG_PRINT("failed to find host storage...");
+    SH_CPU_DEBUG_PRINT("failed to find host storage...");
     }
   float* data = (float*)storage->data();
   
@@ -487,19 +497,19 @@ void sh_gcc_backend_lookupiRECT(SH::ShTextureNode* tex, float* src, float* dst)
       }
     case 1:
       // linear interpolation
-      SH_DEBUG_PRINT("RECT/LINEAR textures unsupported...");
+      SH_CPU_DEBUG_PRINT("RECT/LINEAR textures unsupported...");
       break;
     }
   }
 
 void sh_gcc_backend_lookupi3D(SH::ShTextureNode* tex, float* src, float* dst)
   {
-  SH_DEBUG_PRINT("3D textures unsupported...");
+  SH_CPU_DEBUG_PRINT("3D textures unsupported...");
   }
 
 void sh_gcc_backend_lookupiCUBE(SH::ShTextureNode* tex, float* src, float* dst)
   {
-  SH_DEBUG_PRINT("CUBE textures unsupported...");
+  SH_CPU_DEBUG_PRINT("CUBE textures unsupported...");
   }
 
 extern "C" void sh_gcc_backend_lookupi(void* t, float* src, float* dst)
@@ -525,7 +535,7 @@ extern "C" void sh_gcc_backend_lookupi(void* t, float* src, float* dst)
       sh_gcc_backend_lookupiCUBE(tex, src, dst);
       break;
     default:
-      SH_DEBUG_PRINT("unknown texture dimension (" << tex->dims() << ")");
+      SH_CPU_DEBUG_PRINT("unknown texture dimension (" << tex->dims() << ")");
       break;
     }
   }
@@ -589,49 +599,49 @@ namespace ShCPU {
     m_cur_temp(0),
     m_params(NULL)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_CPU_DEBUG_PRINT(__FUNCTION__);
     }
 
   CPUBackendCode::~CPUBackendCode(void)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_CPU_DEBUG_PRINT(__FUNCTION__);
     }
 
   bool CPUBackendCode::allocateRegister(const SH::ShVariableNodePtr& var)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_CPU_DEBUG_PRINT(__FUNCTION__);
     return false;
     }
 
   void CPUBackendCode::freeRegister(const SH::ShVariableNodePtr& var)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_CPU_DEBUG_PRINT(__FUNCTION__);
     }
 
   void CPUBackendCode::upload(void)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_CPU_DEBUG_PRINT(__FUNCTION__);
     }
 
   void CPUBackendCode::bind(void)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_CPU_DEBUG_PRINT(__FUNCTION__);
     }
 
   void CPUBackendCode::updateUniform(const SH::ShVariableNodePtr& uniform)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_CPU_DEBUG_PRINT(__FUNCTION__);
     }
 
   std::ostream& CPUBackendCode::print(std::ostream& out)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_CPU_DEBUG_PRINT(__FUNCTION__);
     return out;
     }
 
   std::ostream& CPUBackendCode::printInputOutputFormat(std::ostream& out)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_CPU_DEBUG_PRINT(__FUNCTION__);
     return out;
     }
   
@@ -661,7 +671,7 @@ namespace ShCPU {
       m_code << "};" << std::endl;
       }
 
-    SH_DEBUG_PRINT("Found " << cur_const << " consts...");
+    SH_CPU_DEBUG_PRINT("Found " << cur_const << " consts...");
     }
 
   void CPUBackendCode::allocate_inputs(void)
@@ -679,7 +689,7 @@ namespace ShCPU {
       m_varmap[node] = CPUVariable(cur_input++, name);
       }
 
-    SH_DEBUG_PRINT("Found " << cur_input << " inputs...");
+    SH_CPU_DEBUG_PRINT("Found " << cur_input << " inputs...");
     }
 
   void CPUBackendCode::allocate_outputs(void)
@@ -697,7 +707,7 @@ namespace ShCPU {
       m_varmap[node] = CPUVariable(cur_output++, name);
       }
 
-    SH_DEBUG_PRINT("Found " << cur_output << " outputs...");
+    SH_CPU_DEBUG_PRINT("Found " << cur_output << " outputs...");
     }
 
   void CPUBackendCode::allocate_streams(void)
@@ -716,7 +726,7 @@ namespace ShCPU {
       m_streams.push_back(node);
       }
 
-    SH_DEBUG_PRINT("Found " << cur_stream << " streams...");
+    SH_CPU_DEBUG_PRINT("Found " << cur_stream << " streams...");
     }
 
   void CPUBackendCode::allocate_textures(void)
@@ -735,7 +745,7 @@ namespace ShCPU {
       m_textures.push_back(node);
       }
 
-    SH_DEBUG_PRINT("Found " << cur_texture << " textures...");
+    SH_CPU_DEBUG_PRINT("Found " << cur_texture << " textures...");
     }
 
   void CPUBackendCode::allocate_uniforms(void)
@@ -778,7 +788,7 @@ namespace ShCPU {
 	}
       }
 
-    SH_DEBUG_PRINT("Found " << cur_uniform << " uniforms...");
+    SH_CPU_DEBUG_PRINT("Found " << cur_uniform << " uniforms...");
     }
 
   std::string CPUBackendCode::resolve(const SH::ShVariable& v)
@@ -1921,7 +1931,7 @@ namespace ShCPU {
 
   bool CPUBackendCode::generate(void)
     {
-    SH_DEBUG_PRINT("Creating label map...");
+    SH_CPU_DEBUG_PRINT("Creating label map...");
     LabelFunctor fl(m_label_map);
     m_program->ctrlGraph->dfs(fl);
 
@@ -1933,7 +1943,7 @@ namespace ShCPU {
     allocate_uniforms();
 
     // emit code
-    SH_DEBUG_PRINT("Emitting code...");
+    SH_CPU_DEBUG_PRINT("Emitting code...");
     EmitFunctor fe(this);
     m_program->ctrlGraph->dfs(fe);
 
@@ -1969,9 +1979,9 @@ namespace ShCPU {
     epilogue << "  }" << std::endl;
 
     // output code for debugging...
-    SH_DEBUG_PRINT(prologue.str());
-    SH_DEBUG_PRINT(m_code.str());
-    SH_DEBUG_PRINT(epilogue.str());
+    SH_CPU_DEBUG_PRINT(prologue.str());
+    SH_CPU_DEBUG_PRINT(m_code.str());
+    SH_CPU_DEBUG_PRINT(epilogue.str());
 
     char name[32];
     tmpnam(name);
@@ -1989,8 +1999,9 @@ namespace ShCPU {
     if (pid == 0)
       {
       // child
-      execlp("gcc", "gcc", "-g", "-shared", "-o", sofile, ccfile, NULL);
-      SH_DEBUG_PRINT("exec failed (" << errno << ")");
+      execlp("gcc", "gcc", "-g", "-shared", "-o", sofile, ccfile,
+             "-L", SH_INSTALL_PREFIX "/lib/sh", "-lshcpu", NULL);
+      SH_CPU_DEBUG_PRINT("exec failed (" << errno << ")");
       exit(-1);
       }
     else if (pid > 0)
@@ -1999,18 +2010,18 @@ namespace ShCPU {
       pid_t ret = waitpid(pid, &status, 0);
       if (ret == -1)
 	{
-	SH_DEBUG_PRINT("wait failed...");
+	SH_CPU_DEBUG_PRINT("wait failed...");
 	return false;
 	}
       else
 	{
-	SH_DEBUG_PRINT("status = " << status);
+	SH_CPU_DEBUG_PRINT("status = " << status);
 	}
 
       m_handle = dlopen(sofile, RTLD_NOW);
       if (m_handle == NULL)
 	{
-          SH_DEBUG_PRINT("dlopen failed: " << dlerror());
+          SH_CPU_DEBUG_PRINT("dlopen failed: " << dlerror());
 	return false;
 	}
       else
@@ -2019,7 +2030,7 @@ namespace ShCPU {
 
 	if (m_func == NULL)
 	  {
-            SH_DEBUG_PRINT("dlsym failed: " << dlerror());
+            SH_CPU_DEBUG_PRINT("dlsym failed: " << dlerror());
 	  return false;
 	  }
 	}
@@ -2029,7 +2040,7 @@ namespace ShCPU {
     else 
       {
       // fork failed
-      SH_DEBUG_PRINT("fork failed...");
+      SH_CPU_DEBUG_PRINT("fork failed...");
       return false;
       }
     }
@@ -2040,7 +2051,7 @@ namespace ShCPU {
       {
       if (!generate())
 	{
-	SH_DEBUG_PRINT("failed to generate program..."); 
+	SH_CPU_DEBUG_PRINT("failed to generate program..."); 
 	return false;
 	}
       }
@@ -2103,7 +2114,7 @@ namespace ShCPU {
 	{
 	if (count != channel->count())
 	  {
-	  SH_DEBUG_PRINT("channel count discrepancy...");
+	  SH_CPU_DEBUG_PRINT("channel count discrepancy...");
 	  return false;
 	  }
 	}
@@ -2112,12 +2123,12 @@ namespace ShCPU {
       
     for(int i = 0; i < count; i++)
       {
-      SH_DEBUG_PRINT("execution " << i << " of " << count);
+      SH_CPU_DEBUG_PRINT("execution " << i << " of " << count);
       m_func(inputs, params, streams, textures, outputs);
 
       for(int j = 0; j < num_streams; j++)
 	{
-	SH_DEBUG_PRINT("advancing input stream "
+	SH_CPU_DEBUG_PRINT("advancing input stream "
 		       << j
 		       << " by "
 		       << stream_sizes[j]);
@@ -2125,7 +2136,7 @@ namespace ShCPU {
 	}
       for(int j = 0; j < num_outputs; j++)
 	{
-	SH_DEBUG_PRINT("advancing output stream "
+	SH_CPU_DEBUG_PRINT("advancing output stream "
 		       << j
 		       << " by "
 		       << output_sizes[j]);
@@ -2139,24 +2150,24 @@ namespace ShCPU {
 
   CPUBackend::CPUBackend(void)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_CPU_DEBUG_PRINT(__FUNCTION__);
     }
 
   CPUBackend::~CPUBackend(void)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_CPU_DEBUG_PRINT(__FUNCTION__);
     }
 
   std::string CPUBackend::name(void) const
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_CPU_DEBUG_PRINT(__FUNCTION__);
     return "cpu";
     }
 
   SH::ShBackendCodePtr CPUBackend::generateCode(const std::string& target,
 						const SH::ShProgramNodeCPtr& program)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_CPU_DEBUG_PRINT(__FUNCTION__);
     CPUBackendCodePtr backendcode = new CPUBackendCode(program);
     backendcode->generate();
     return backendcode;
@@ -2164,7 +2175,7 @@ namespace ShCPU {
 
   void CPUBackend::execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_CPU_DEBUG_PRINT(__FUNCTION__);
 
     CPUBackendCodePtr backendcode = new CPUBackendCode(program);
     backendcode->execute(dest);
