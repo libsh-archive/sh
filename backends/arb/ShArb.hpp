@@ -185,6 +185,8 @@ public:
   int attribs(const std::string& target) { return m_attribs[target]; }
   int params(const std::string& target) { return m_params[target]; }
   int texs(const std::string& target) { return m_texs[target]; }
+
+  void execute(const SH::ShProgram& program, SH::ShStream& dest);
   
 private:
   std::map<std::string, int> m_instrs; ///< Maximum number of instructions for each shader target

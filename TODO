@@ -20,6 +20,17 @@ SHADER ALGEBRA:
  - add operator<< for uniforms
  - add constant() for uniforms with operator<<
  - allow semantic connection
+ - implement named temporary extraction
+
+STREAMS:
+ - implement execute() for Arb
+ - implement execute() for Sm
+ X add ShChannelNode
+ X add ShChannel
+ X add ShStream
+ X implement combine/connect operations
+ - implement stream _extraction_ operation
+    (replace stream usages with an input variable)
 
 MATRICES:
  X operator()() extracts submatrix

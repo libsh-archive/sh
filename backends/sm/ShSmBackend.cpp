@@ -33,6 +33,7 @@
 #include "ShLinearAllocator.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShVariable.hpp"
+#include "ShStream.hpp"
 
 namespace ShSm {
 
@@ -805,6 +806,11 @@ void initOps()
   opNames[OP_X2D] = "X2D";
   opNames[OP_XPD] = "XPD";
   opNames[OP_HLT] = "HLT";
+}
+
+void Backend::execute(const ShProgram& program, ShStream& dest)
+{
+  // TODO: NOT YET IMPLEMENTED
 }
 
 }

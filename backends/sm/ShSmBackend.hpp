@@ -162,6 +162,8 @@ public:
   std::string name() const;
   SH::ShBackendCodePtr generateCode(const std::string& target, const SH::ShProgram& shader);
 
+  void execute(const SH::ShProgram& program, SH::ShStream& dest);
+
 private:
   void generateNode(BackendCodePtr& code, const SH::ShCtrlGraphNodePtr& node);
 };

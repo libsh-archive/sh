@@ -37,6 +37,7 @@
 #include "ShBackend.hpp"
 #include "ShProgram.hpp"
 #include "ShDebug.hpp"
+#include "ShEnvironment.hpp"
 
 namespace SH {
 

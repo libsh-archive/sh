@@ -36,6 +36,8 @@
 
 namespace SH  {
 
+class ShStream;
+
 class ShBackendCode : public ShRefCountable {
 public:
   virtual ~ShBackendCode();
@@ -73,6 +75,9 @@ public:
   /// since extra variables may be declared inside this function!
   virtual ShBackendCodePtr generateCode(const std::string& target, const ShProgram& shader) = 0;
 
+  // execute a stream program, if supported
+  virtual void execute(const ShProgram& program, ShStream& dest) = 0;
+  
   typedef std::vector< ShRefCount<ShBackend> > ShBackendList;
 
   static ShBackendList::iterator begin();

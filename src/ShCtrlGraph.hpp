@@ -97,9 +97,15 @@ public:
   template<typename F>
   void dfs(F& functor);
 
+  template<typename F>
+  void dfs(F& functor) const;
+
 private:
   template<typename F>
   void real_dfs(F& functor);
+
+  template<typename F>
+  void real_dfs(F& functor) const;
 
   mutable bool m_marked;
 };
@@ -124,6 +130,9 @@ public:
 
   template<typename F>
   void dfs(F& functor);
+  
+  template<typename F>
+  void dfs(F& functor) const;
   
   /// Determine the predecessors in this graph
   void computePredecessors();
@@ -151,6 +160,20 @@ void ShCtrlGraphNode::real_dfs(F& functor)
 }
 
 template<typename F>
+void ShCtrlGraphNode::real_dfs(F& functor) const
+{
+  if (this == 0) return;
+  if (m_marked) return;
+  mark();
+  functor(this);
+  for (std::vector<ShCtrlGraphBranch>::const_iterator I = successors.begin();
+       I != successors.end(); ++I) {
+    I->node->real_dfs(functor);
+  }
+  if (follower) follower->real_dfs(functor);
+}
+
+template<typename F>
 void ShCtrlGraphNode::dfs(F& functor)
 {
   clearMarked();
@@ -159,7 +182,21 @@ void ShCtrlGraphNode::dfs(F& functor)
 }
 
 template<typename F>
+void ShCtrlGraphNode::dfs(F& functor) const
+{
+  clearMarked();
+  real_dfs(functor);
+  clearMarked();
+}
+
+template<typename F>
 void ShCtrlGraph::dfs(F& functor)
+{
+  m_entry->dfs(functor);
+}
+
+template<typename F>
+void ShCtrlGraph::dfs(F& functor) const
 {
   m_entry->dfs(functor);
 }

@@ -126,6 +126,11 @@ class ShDataMemoryObject: public ShMemoryObject {
      */
     void setData(const float *data);
 
+    /** \brief Writes a partial set of data into this memory object
+     * Writes a chunk of memory of length count*elements to this memory object.
+     */
+     void setPartialData(const float* data, int count);
+  
     /** \brief Reads the data from this memory object
      * Returns a float array of the data allocated with new, or 0 if memory object
      * is not initialized.

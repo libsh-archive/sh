@@ -1,5 +1,29 @@
 2004-01-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/sh.hpp: Added ShChannelNode.hpp, ShChannel.hpp to the list
+	of included files.
+
+	* src/ShMemoryObject.cpp (ShDataMemoryObject::setPartialData):
+	Implemented this function.
+
+	* src/ShMemoryObject.hpp (ShDataMemoryObject): Added the
+	setPartialData() function, used by ArbBackend::execute().
+
+	* backends/sm/ShSmBackend.cpp (execute): Added an empty
+	ShSmBackend::execute() imeplementation.
+
+	* backends/arb/ShArbStream.cpp: Beginnings of an
+	ArbBackend::execute() implementation.
+
+	* backends/arb/ShArb.hpp (ArbBackend): Added ArbBackend::execute()
+	prototype.
+
+	* src/ShBackend.hpp (ShBackend): Added the execute() virtual
+	function for stream programs.
+
+	* src/ShCtrlGraph.hpp: Added constant versions of the dfs()
+	algorithms.
+
 	* src/Sh{Stream,Channel,ChannelNode}{,Impl}.{c,h}pp: Renamed
 	streams to channels, stream lists to streams, removed
 	ShCombinedStream, added operators to connect the new dynamic

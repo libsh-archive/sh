@@ -46,6 +46,8 @@
 #include "ShAlgebra.hpp"
 #include "ShManipulator.hpp"
 #include "ShFixedManipulator.hpp"
+#include "ShChannelNode.hpp"
+#include "ShChannel.hpp"
 #include "ShStream.hpp"
 
 /** \namespace SH
