@@ -2,6 +2,8 @@
 
 import shtest, sys, add_test
 
+# all the tests use nearest-neighbour lookup right now
+
 # test float textures
 test = shtest.StreamTest('tex', 1)
 test.add_texture(shtest.ImageTexture("ShTexture2D<ShColor3f>", "test2d_tex", "tex_squares.png")) 
@@ -10,6 +12,21 @@ test.add_make_test((1.0, 0.0, 0.0), [(0.0, 0.0)])
 test.add_make_test((0.0, 1.0, 0.0), [(1.0, 0.0)])
 test.add_make_test((0.0, 0.0, 1.0), [(1.0, 1.0)])
 test.add_make_test((0.5, 0.5, 0.5), [(0.0, 1.0)])
+
+# test wrap repeat
+test.add_texture(shtest.ImageTexture("ShWrapRepeat<ShTexture2D<ShColor3f> >", "repeat_tex", "tex_squares.png")) 
+test.clear_call()
+test.add_call(shtest.Call(shtest.Call.call, 'repeat_tex', 1))
+test.add_make_test((1.0, 0.0, 0.0), [(0.5/4.0, 0.5/4.0)])
+test.add_make_test((1.0, 0.0, 0.0), [(4.5/4.0, -3.5/4.0)])
+
+# test clamping
+test.add_texture(shtest.GenTexture("ShClamped< ShTexture2D<ShColor<3, SH_TEMP, SH_FLOAT> > >",
+    "SH_FLOAT", 3, (16, 16), "clamp_tex", "(i - 2 * j + 4 * elem) / 2"))
+test.clear_call()
+test.add_call(shtest.Call(shtest.Call.call, 'clamp_tex', 1))
+test.add_make_test((0, 1, 1), [(0, 0)], ['i', 'i'])
+test.add_make_test((0, 0, 0), [(1.0, 1.0)])
 
 # test fractional textures
 test.add_texture(shtest.GenTexture("ShTexture2D<ShColor<4, SH_TEMP, SH_FRAC_UINT> >",

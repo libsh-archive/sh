@@ -404,6 +404,40 @@ void CcBackendCode::emitTexLookup(const ShStatement& stmt, const char* texfunc) 
       SH_DEBUG_ERROR("Unhandled texture dim");
   }
 
+  // names of the functors to use for different texture lookup types 
+  std::string srcInterp, srcFilter, srcWrap, destClamp; 
+
+  if(node->traits().interpolation() != 0) {
+      //shError(ShBackendException("cc backend supports only nearest-neighbour texture lookup."));
+      SH_DEBUG_WARN("cc backend supports only nearest-neighbour texture lookup.");
+  }
+
+  if (node->traits().filtering() != ShTextureTraits::SH_FILTER_NONE) {
+      //shError(ShBackendException("cc backend does not support texture filtering."));
+      SH_DEBUG_WARN("cc backend does not support texture filtering.");
+  }
+
+  switch(node->traits().wrapping()) {
+    case ShTextureTraits::SH_WRAP_CLAMP:
+    case ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE:
+      srcWrap = "sh_gcc_backend_wrap_clamp";
+      break;
+    case ShTextureTraits::SH_WRAP_REPEAT:
+      srcWrap = "sh_gcc_backend_wrap_repeat";
+      break;
+    default:
+      shError(ShBackendException("cc backend does not support requested texture wrapping mode."));
+      break;
+  }
+
+  switch(node->traits().clamping()) {
+    case ShTextureTraits::SH_CLAMPED:
+      destClamp = "sh_gcc_backend_clamped";
+      break;
+    default:
+      destClamp = "sh_gcc_backend_unclamped";
+  }
+
   m_code << "  {" << std::endl;
   std::string destvar; 
   std::string srcvar;
@@ -433,7 +467,9 @@ void CcBackendCode::emitTexLookup(const ShStatement& stmt, const char* texfunc) 
      << node->size() << ", "
      << node->width() << ", "
      << node->height() << ", "
-     << node->depth() << ">("
+     << node->depth() <<  ", "
+     << srcWrap << ", "
+     << destClamp << ">("
    << resolve(stmt.src[0])
    << ", "
    << srcvar

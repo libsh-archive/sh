@@ -121,8 +121,8 @@ struct ShCommonType3 {
 template<ShValueType V1, ShValueType V2, ShValueType V3, ShValueType V4>
 struct ShCommonType4 {
   static const ShValueType valueType = 
-    ShCommonType<ShCommonType<T1, T2>::valueType, 
-      ShCommonType<T3, T4>::valueType>::valueType; 
+    ShCommonType<ShCommonType<V1, V2>::valueType, 
+      ShCommonType<V3, V4>::valueType>::valueType; 
 };
 
 }

@@ -240,7 +240,7 @@ struct UdDuBuilder {
       // and contribute to the du chains of the source variables' definitions.
       for (int j = 0; j < opInfo[I->op].arity; j++) {
         if (I->src[j].node()->kind() == SH_TEMP) {
-          ValueTracking* vt = I->template get_info<ValueTracking>();
+          ValueTracking* vt = I->get_info<ValueTracking>();
           if (!vt) {
             vt = new ValueTracking(&(*I));
             I->add_info(vt);
@@ -250,7 +250,7 @@ struct UdDuBuilder {
 
             vt->defs[j][i] = ds;
             for (DefSet::const_iterator J = ds.begin(); J != ds.end(); J++) {
-              ValueTracking* ut = J->stmt->template get_info<ValueTracking>();
+              ValueTracking* ut = J->stmt->get_info<ValueTracking>();
               if (!ut) {
                 ut = new ValueTracking(J->stmt);
                 J->stmt->add_info(ut);
@@ -281,7 +281,7 @@ struct UdDuClearer {
     if (!block) return;
     
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-      I->template destroy_info<ValueTracking>();
+      I->destroy_info<ValueTracking>();
     }
   }
 };
@@ -293,7 +293,7 @@ struct UdDuDumper {
     if (!block) return;
 
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-      ValueTracking* vt = I->template get_info<ValueTracking>();
+      ValueTracking* vt = I->get_info<ValueTracking>();
       if (!vt) {
         SH_DEBUG_PRINT(*I << " HAS NO VALUE TRACKING");
         continue;

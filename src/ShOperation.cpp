@@ -96,6 +96,7 @@ const ShOperationInfo opInfo[] = {
   {"OPTBRA", 1, ShOperationInfo::IGNORE, false},
 
   {"FETCH", 1, ShOperationInfo::EXTERNAL, false},
+  {"LOOKUP", 2, ShOperationInfo::EXTERNAL, false},
 
   {"PAL", 2, ShOperationInfo::EXTERNAL, false},
 

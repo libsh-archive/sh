@@ -116,28 +116,31 @@ class TexFetcher {
 public:
   TexFetcher(StreamInputMap& input_map,
              ShVariableNodePtr tc_node,
-             bool indexed)
+             bool indexed,
+             ShVariableNodePtr width_var,
+             ShProgramNodePtr program)
     : input_map(input_map),
       tc_node(tc_node),
-      indexed(indexed)
+      indexed(indexed),
+      width_var(width_var),
+      program(program)
   {
   }
 
   void operator()(ShCtrlGraphNode* node)
   {
-    ShVariable coordsVar(tc_node);
     if (!node->block) return;
     for (ShBasicBlock::ShStmtList::iterator I = node->block->begin();
          I != node->block->end(); ++I) {
       ShStatement& stmt = *I;
-      if (stmt.op != SH_OP_FETCH) continue;
+      if (stmt.op != SH_OP_FETCH && stmt.op != SH_OP_LOOKUP) continue;
       
       if (!stmt.src[0].node()) {
-        SH_DEBUG_WARN("FETCH from null stream");
+        SH_DEBUG_WARN("FETCH/LOOKUP from null stream");
         continue;
       }
       if (stmt.src[0].node()->kind() != SH_STREAM) {
-        SH_DEBUG_WARN("FETCH from non-stream");
+        SH_DEBUG_WARN("FETCH/LOOKUP from non-stream");
         continue;
       }
       
@@ -155,10 +158,26 @@ public:
 
       ShVariable texVar(J->second);
 
-      if (indexed) {
-        stmt = ShStatement(stmt.dest, texVar, SH_OP_TEXI, coordsVar);
+      if (stmt.op == SH_OP_FETCH) {
+        ShVariable coordsVar(tc_node);
+        if (indexed) {
+          stmt = ShStatement(stmt.dest, texVar, SH_OP_TEXI, coordsVar);
+        } else {
+          stmt = ShStatement(stmt.dest, texVar, SH_OP_TEX, coordsVar);
+        }
       } else {
-        stmt = ShStatement(stmt.dest, texVar, SH_OP_TEX, coordsVar);
+        // Make sure our actualy index is a temporary in the program.
+        ShContext::current()->enter(program);
+        ShVariable coordsVar(new ShVariableNode(SH_TEMP, 2, SH_FLOAT));
+        ShContext::current()->exit();
+        
+        ShBasicBlock::ShStmtList new_stmts;
+        new_stmts.push_back(ShStatement(coordsVar(0), stmt.src[1], SH_OP_MOD, width_var));
+        new_stmts.push_back(ShStatement(coordsVar(1), stmt.src[1], SH_OP_DIV, width_var));
+        new_stmts.push_back(ShStatement(stmt.dest, texVar, SH_OP_TEXI, coordsVar));
+        I = node->block->erase(I);
+        node->block->splice(I, new_stmts);
+        I--;
       }
       // The following is useful for debugging
       // stmt = ShStatement(stmt.dest, SH_OP_ASN, coordsVar);
@@ -169,6 +188,8 @@ private:
   StreamInputMap& input_map;
   ShVariableNodePtr tc_node;
   bool indexed;
+  ShVariableNodePtr width_var;
+  ShProgramNodePtr program;
 };
 
 PBufferStreams::PBufferStreams(void) :
@@ -328,8 +349,14 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   
   ShVariableNodePtr tc_node = fp.node()->inputs.back(); // there should be only one input anyways
 
+  // Make a guaranteed uniform variable, by "pushing" the global scope
+  ShContext::current()->enter(0);
+  ShAttrib1f width = tex_size;
+  ShContext::current()->exit();
+  
   // replace FETCH with TEX
-  TexFetcher texFetcher(input_map, tc_node, extension == SH_ARB_NV_FLOAT_BUFFER);
+  TexFetcher texFetcher(input_map, tc_node, extension == SH_ARB_NV_FLOAT_BUFFER,
+                        width.node(), fp.node());
   fp.node()->ctrlGraph->dfs(texFetcher);
   fp.node()->collectVariables(); // necessary to collect all the new textures
 

@@ -38,13 +38,15 @@ namespace SH {
  */
 enum ShOperation {
   SH_OP_ASN, ///< Assignment
-  
+
+  // Simple arithmetic
   SH_OP_NEG, ///< Unary negation
   SH_OP_ADD, ///< Binary addition
   SH_OP_MUL, ///< Binary multiplication. Can be scalar on left or
              ///  right side.
   SH_OP_DIV, ///< Binary division. Can be scalar on right side.
 
+  // Comparisons
   // All of the following set dst to either 1 or 0.
   SH_OP_SLT, ///< Set less than
   SH_OP_SLE, ///< Set less than or equal
@@ -52,7 +54,8 @@ enum ShOperation {
   SH_OP_SGE, ///< Set greater than or equal
   SH_OP_SEQ, ///< Set equal
   SH_OP_SNE, ///< Set not equal
-  
+
+  // The bulk
   SH_OP_ABS, ///< Unary absolute value
   SH_OP_ACOS, ///< Unary arccosine (result between -pi/2 and pi/2)
   SH_OP_ASIN, ///< Unary arcsine (result between 0 and pi)
@@ -88,24 +91,33 @@ enum ShOperation {
   SH_OP_SQRT, ///< Unary square root
   SH_OP_TAN, ///< Unary tangent
 
+  // "Vector" operations
   SH_OP_NORM, ///< Normalize vector
   SH_OP_XPD, ///< Cross product
 
+  // Textures
   SH_OP_TEX, ///< Texture lookup (0..1)
   SH_OP_TEXI, ///< Texture lookup, indexed mode (0..width - 1)
   SH_OP_TEXD, ///< Texture lookup with derivatives
 
+  // Conditionals
   SH_OP_COND, ///< Conditional assignment: dst[i] = (src[0][i] > 0.0 ? src[1][i] : src[2][i])
 
+  // Fragment kill
   SH_OP_KIL, ///< Conditionally kill fragment (if for any i, src[0][i] > 0)
 
+  // Special
   SH_OP_OPTBRA, ///< Used in the optimizer to indicate a conditional
                 ///  branch dependency. This should never show up in
                 ///  code passed to the backend.
 
+  // Streams
   SH_OP_FETCH, ///< Unary (takes a stream). Fetch an element from a stream. Similar to TEX
+  SH_OP_LOOKUP, ///< Binary (first argument is a stream). Fetch an
+                /// element from a stream with a given index. Similar to TEX
 
-  SH_OP_PAL, ///< Palette fetch
+  // Palettes
+  SH_OP_PAL, ///< Binary. First argument is a palette. Palette array lookup.
 
   SH_OP_LO,  ///< Extracts a lower bound from a range arithmetic type
   SH_OP_HI,  ///< Extracts an upper bound from a range arithmetic type
