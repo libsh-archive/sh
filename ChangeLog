@@ -1,5 +1,7 @@
 2005-02-07  Francois Marier  <francois@serioushack.com>
 
+	* test/regress: Added unit tests for sum and prod.
+
 	* src/ShLibMisc.hpp, src/ShLibMiscImpl.hpp (join): Added join
 	functions for three and four tuples.
 
