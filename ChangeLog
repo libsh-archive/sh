@@ -1,5 +1,9 @@
 2004-07-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* backends/gl/ArbInst.hpp: Add an "invert" field for BRKs.
+
+	* backends/gl/ArbCode.cpp (genStructNode): Handle SELFLOOPs.
+
 	* src/ShStructural.cpp: Implement "reach under" set computation
 	and therefore handle while and do loops. Yay!
 

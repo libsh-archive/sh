@@ -110,8 +110,7 @@ ArbCode::ArbCode(const ShProgramNodeCPtr& shader, const std::string& unit,
                  TextureStrategy* textures)
   : m_textures(textures), m_shader(0), m_originalShader(shader), m_unit(unit),
     m_numTemps(0), m_numInputs(0), m_numOutputs(0), m_numParams(0), m_numConsts(0),
-    m_numTextures(0), m_programId(0), m_environment(0), m_max_label(0),
-    m_regalloc_hack(false)
+    m_numTextures(0), m_programId(0), m_environment(0), m_max_label(0)
 {
   if (unit == "fragment") m_environment |= SH_ARB_FP;
   if (unit == "vertex") m_environment |= SH_ARB_VP;
@@ -498,7 +497,13 @@ std::ostream& ArbCode::print(std::ostream& out)
       }
       out << "  BRK ";
       if (I->src[0].node()) {
-        out << " (LE.";
+        out << " (";
+        if (I->invert) {
+          out << "LE";
+        } else {
+          out << "GT";
+        }
+        out << ".";
         for (int i = 0; i < I->src[0].swizzle().size(); i++) {
           out << swizChars[I->src[0].swizzle()[i]];
         }
@@ -615,7 +620,6 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
       genStructNode(*I);
     }
   } else if (node->type == ShStructuralNode::IFELSE) {
-    m_regalloc_hack = true;
     ShStructuralNodePtr header = node->structnodes.front();
     // TODO Check that header->successors is only two.
     ShVariable cond;
@@ -636,7 +640,6 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
       genStructNode(elsenode);
     } m_instructions.push_back(ArbInst(SH_ARB_ENDIF, ShVariable()));
   } else if (node->type == ShStructuralNode::WHILELOOP) {
-    m_regalloc_hack = true;
     ShStructuralNodePtr header = node->structnodes.front();
 
     ShVariable cond = header->succs.front().first;
@@ -649,9 +652,37 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
     m_shader->constants.push_back(maxloop.node());
     m_instructions.push_back(ArbInst(SH_ARB_REP, ShVariable(), maxloop));
     genStructNode(header);
-    m_instructions.push_back(ArbInst(SH_ARB_BRK, ShVariable(), cond));
+    ArbInst brk(SH_ARB_BRK, ShVariable(), cond);
+    brk.invert = true;
+    m_instructions.push_back(brk);
     genStructNode(body);
     
+    m_instructions.push_back(ArbInst(SH_ARB_ENDREP, ShVariable()));
+  } else if (node->type == ShStructuralNode::SELFLOOP) {
+    ShStructuralNodePtr loopnode = node->structnodes.front();
+
+    bool condexit = true; // true if the condition causes us to exit the
+                          // loop, rather than continue it
+    ShVariable cond;
+    for (ShStructuralNode::SuccessorList::iterator I = loopnode->succs.begin();
+         I != loopnode->succs.end(); ++I) {
+      if (I->first.node()) {
+        if (I->second == loopnode) condexit = false; else condexit = true;
+        cond = I->first;
+      }
+    }
+    
+    ShVariable maxloop(new ShVariableNode(SH_CONST, 1));
+    float maxloopval = 255.0;
+    maxloop.setValues(&maxloopval);
+    m_shader->constants.push_back(maxloop.node());
+    m_instructions.push_back(ArbInst(SH_ARB_REP, ShVariable(), maxloop));
+    genStructNode(loopnode);
+    ArbInst brk(SH_ARB_BRK, ShVariable(), cond);
+    if (!condexit) {
+      brk.invert = true;
+    } 
+    m_instructions.push_back(brk);
     m_instructions.push_back(ArbInst(SH_ARB_ENDREP, ShVariable()));
   }
 }

@@ -182,8 +182,6 @@ private:
   typedef std::map<SH::ShCtrlGraphNodePtr, int> LabelMap;
   LabelMap m_label_map; 
   int m_max_label;
-
-  bool m_regalloc_hack;
 };
 
 typedef SH::ShPointer<ArbCode> ArbCodePtr;

@@ -116,37 +116,37 @@ extern ArbOpInfo arbOpInfo[];
  */
 struct ArbInst {
   ArbInst(ArbOp op, int label)
-    : op(op), label(label)
+    : op(op), label(label), invert(false)
   {
   }
 
   ArbInst(ArbOp op, int label, const SH::ShVariable& condition)
-    : op(op), label(label)
+    : op(op), label(label), invert(false)
   {
     src[0] = condition;
   }
   
   ArbInst(ArbOp op, const SH::ShVariable& dest)
-    : op(op), dest(dest)
+    : op(op), dest(dest), invert(false)
   {
   }
 
   ArbInst(ArbOp op, const SH::ShVariable& dest, const SH::ShVariable& src0)
-    : op(op), dest(dest)
+    : op(op), dest(dest), invert(false)
   {
     src[0] = src0;
   }
 
   ArbInst(ArbOp op, const SH::ShVariable& dest, const SH::ShVariable& src0,
           const SH::ShVariable& src1)
-    : op(op), dest(dest)
+    : op(op), dest(dest), invert(false)
   {
     src[0] = src0;
     src[1] = src1;
   }
   ArbInst(ArbOp op, const SH::ShVariable& dest, const SH::ShVariable& src0,
           const SH::ShVariable& src1, const SH::ShVariable& src2)
-    : op(op), dest(dest)
+    : op(op), dest(dest), invert(false)
   {
     src[0] = src0;
     src[1] = src1;
@@ -158,7 +158,7 @@ struct ArbInst {
   SH::ShVariable src[3];
 
   int label; // For branching instructions and labels
-  
+  bool invert; // Invert the sense of a break condition.
 };
 
 }
