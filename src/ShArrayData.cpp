@@ -115,6 +115,7 @@ namespace SH {
   ShArrayData<T, N>& ShArrayData<T, N>::operator=(const ShArrayData<T, N>& o){
     clear();
     copy(o);
+	return *this;
   }
 
   template<typename T, typename  N>

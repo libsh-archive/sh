@@ -110,8 +110,12 @@ void ShProgramNode::print() const {
     // how many variables of each type
     std::cout<<"in\tout\ttemp\tconst\tunif\ttxt"<<std::endl;
     
-    std::cout<<inputs.size()<<'\t'<<outputs.size()<<'\t'<<temps.size()<<'\t';
-    std::cout<<constants.size()<<'\t'<<uniforms.size()<<'\t'<<textures.size()<<std::endl; 
+    std::cout<< (unsigned int) inputs.size()<<'\t'
+			 << (unsigned int) outputs.size()<<'\t'
+			 << (unsigned int) temps.size()<<'\t';
+    std::cout<< (unsigned int) constants.size()<<'\t'
+			 << (unsigned int) uniforms.size()<<'\t'
+			 << (unsigned int) textures.size()<<std::endl; 
 
 
 }
