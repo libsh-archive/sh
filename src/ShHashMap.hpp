@@ -183,6 +183,7 @@ struct ShPairHash {
 
 template<class Key1, class Key2, class Data, class Hash1=SH_STD_HASH(Key1), class Hash2=SH_STD_HASH(Key2)>
 class ShPairHashMap: public ShHashMap<std::pair<Key1, Key2>, Data, ShPairHash<Key1, Key2, Hash1, Hash2> > {
+  typedef std::pair<Key1, Key2> key_type; 
   public:
     Data& operator()(const Key1& key1, const Key2& key2) 
     {

@@ -70,5 +70,12 @@ test.add_make_test((-880, -879, -878), [(0, 0)], ['i', 'i'])
 test.add_make_test((770, 771, 772), [(15, 15.0)])
 test.add_make_test((10, 11, 12), [(8, 9)])
 test.add_make_test((-730, -729, -728), [(-20, 20)]) # should clamp to 0,1 
+test.add_make_test((-730, -729, -728), [(-20, 20)]) # should clamp to 0,1 
+
+test.add_texture(shtest.GenTexture("ShUnclamped< ShArrayRect<ShColor<3, SH_TEMP, float> > >",
+    "float", 3, (16, 16), "float_array", "i + 3 * j"))
+test.clear_call()
+test.add_call(shtest.Call(shtest.Call.lookup, 'float_array', 1))
+test.add_make_test((32, 32, 32), [(8, 8)], ['i', 'i'])
 
 test.output(sys.stdout)

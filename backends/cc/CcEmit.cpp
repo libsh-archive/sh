@@ -409,7 +409,7 @@ void CcBackendCode::emitTexLookup(const ShStatement& stmt, const char* texfunc) 
 
   if(node->traits().interpolation() != 0) {
       //shError(ShBackendException("cc backend supports only nearest-neighbour texture lookup."));
-      SH_DEBUG_WARN("cc backend supports only nearest-neighbour texture lookup.");
+      //SH_DEBUG_WARN("cc backend supports only nearest-neighbour texture lookup.");
   }
 
   if (node->traits().filtering() != ShTextureTraits::SH_FILTER_NONE) {
@@ -468,6 +468,7 @@ void CcBackendCode::emitTexLookup(const ShStatement& stmt, const char* texfunc) 
      << node->width() << ", "
      << node->height() << ", "
      << node->depth() <<  ", "
+     << ctype(node->valueType()) << "," 
      << srcWrap << ", "
      << destClamp << ">("
    << resolve(stmt.src[0])

@@ -34,6 +34,7 @@
 #include "ShToken.hpp"
 #include "ShProgram.hpp"
 #include "ShBackend.hpp"
+#include "ShTransformer.hpp"
 #include "ShOptimizations.hpp"
 
 namespace SH {
@@ -53,10 +54,8 @@ void shEndShader()
   assert(parsing);
   
   parsing->ctrlGraph = new ShCtrlGraph(parsing->tokenizer.blockList());
-
-  optimize(parsing);
   
-  parsing->collectVariables();
+  optimize(parsing);
   
   context->exit();
 
@@ -96,7 +95,7 @@ void shBind(ShProgram& prg)
   prg.code(ShEnvironment::backend)->bind();
 }
 
-void shBind(ShProgram& prg, const std::string& target)
+void shBind(const std::string& target, ShProgram& prg)
 {
   if (!ShEnvironment::backend) return;
   prg.code(target, ShEnvironment::backend)->bind();
@@ -109,7 +108,7 @@ void shBindShader(ShProgram& shader)
 
 void shBindShader(const std::string& target, ShProgram& shader)
 {
-  shBind(shader, target);
+  shBind(target, shader);
 }
 
 bool shSetBackend(const std::string& name)

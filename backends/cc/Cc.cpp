@@ -314,7 +314,8 @@ namespace ShCc {
       case SH_USHORT: return "unsigned short";
       case SH_UINT:   return "unsigned int";
       default:
-        SH_DEBUG_ASSERT(0 && "Invalid value type");
+        SH_DEBUG_PRINT("Invalid value type: " << shValueTypeName(valueType));
+        SH_DEBUG_ASSERT(0); 
     }
     return "unknown"; 
   }
@@ -375,10 +376,11 @@ namespace ShCc {
     ShContext::current()->enter(m_program);
     ShTransformer transform(m_program);
 
+    transform.convertAffineTypes();
+    transform.convertIntervalTypes();
     transform.convertToFloat(m_convertMap);
     if(transform.changed()) {
       optimize(m_program);
-      m_program->collectVariables();
     } else {
       m_program = shref_const_cast<ShProgramNode>(m_original_program);
     }
@@ -703,7 +705,10 @@ namespace ShCc {
   void CcBackend::execute(const ShProgramNodeCPtr& program, ShStream& dest) {
     SH_CC_DEBUG_PRINT(__FUNCTION__);
 
-    CcBackendCodePtr backendcode = new CcBackendCode(program);
+    ShProgramNodePtr prg = shref_const_cast<ShProgramNode>(program);
+    ShPointer<ShBackend> b(this);
+    
+    CcBackendCodePtr backendcode = shref_dynamic_cast<CcBackendCode>(prg->code(b)); // = new CcBackendCode(program);
     backendcode->execute(dest);
   }
 

@@ -4,12 +4,13 @@ OBJECTS = $(SOURCES:.cpp=.o)
 DEPENDS = $(SOURCES:.cpp=.d)
 CPPFLAGS = -I../../src 
 #CXXFLAGS = -g -O0 -Wall
-CXXFLAGS = -g -O2 -Wall
-LDFLAGS = ../../src/libsh.la -lGL
+CXX=g++ 
+CXXFLAGS = -g -Wall -DSH_DEBUG
+LDFLAGS = ../../src/libsh.la 
 
 # LDFLAGS = ../../src/libsh.la
 
-all:
+all: $(EXECUTABLES)
 
 clean:
 	rm -f *.o $(EXECUTABLES) *.d

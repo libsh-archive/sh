@@ -109,7 +109,7 @@
   ::SH::shWhile(SH_PUSH_ARG_QUEUE && SH_PUSH_ARG && SH_PROCESS_ARG(cond, &sh__internal_cond)); \
   bool sh__internal_firsttime = true; \
   while ((sh__internal_firsttime && (ShContext::current()->parsing() || sh__internal_cond)) \
-         || (!ShContext::current()->parsing() && ::SH::shEvaluateCondition(cond))) {{{ \
+         || (!ShContext::current()->parsing() && ::SH::shEvaluateCondition(cond))) {{{
 /** \def SH_ENDWHILE
  * Indicate the end of a while-statement.
  * @see SH_WHILE

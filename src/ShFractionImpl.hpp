@@ -280,28 +280,28 @@ ShFraction<T> operator%(const ShFraction<T> &a, const ShFraction<T> &b)
 template<typename T/* @todo clamp , bool Clamp */>
 ShFraction<T> cbrt(const ShFraction<T> &a) 
 {
-  return ShFraction<T>(pow(double(a), 1.0 / 3.0)); 
+  return ShFraction<T>(std::pow(double(a), 1.0 / 3.0)); 
 }
 
 
 template<typename T/* @todo clamp , bool Clamp */>
 ShFraction<T> exp(const ShFraction<T> &a) 
 {
-  return ShFraction<T>(exp(double(a))); 
+  return ShFraction<T>(std::exp(double(a))); 
 }
 
 
 template<typename T/* @todo clamp , bool Clamp */>
 ShFraction<T> exp2(const ShFraction<T> &a) 
 {
-  return ShFraction<T>(exp2(double(a))); 
+  return ShFraction<T>(std::pow(2.0, double(a))); 
 }
 
 
 template<typename T/* @todo clamp , bool Clamp */>
 ShFraction<T> exp10(const ShFraction<T> &a) 
 {
-  return ShFraction<T>(exp10(double(a))); 
+  return ShFraction<T>(std::pow(10.0, double(a))); 
 }
 
 
