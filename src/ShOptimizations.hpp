@@ -6,6 +6,9 @@
 #include <vector>
 #include <set>
 
+// Uncomment this to turn on optimizer debugging using dot.
+// #define SH_DEBUG_OPTIMIZER
+
 namespace SH {
 
 /// Optimize the program with the given optimization level.
@@ -35,6 +38,9 @@ void straighten(ShProgram& p, bool& changed);
 
 /// Remove code that serves no purpose in the given program
 void remove_dead_code(ShProgram& p, bool& changed);
+
+/// Propagate constants and lift uniform computations
+void propagate_constants(ShProgram& p);
 
 struct ValueTracking : public ShStatementInfo {
   ValueTracking(ShStatement* stmt);

@@ -129,6 +129,9 @@ public:
 
   /// Reevaluate a dependent uniform
   void update();
+
+  /// Obtain the program defining this uniform, if any.
+  const ShPointer<ShProgramNode>& evaluator() const;
   
   /** @} */
   

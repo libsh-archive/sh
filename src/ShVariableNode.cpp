@@ -302,6 +302,11 @@ void ShVariableNode::update()
   evaluate(m_evaluator);
 }
 
+const ShPointer<ShProgramNode>& ShVariableNode::evaluator() const
+{
+  return m_evaluator;
+}
+
 void ShVariableNode::add_dependent(ShVariableNode* dep)
 {
   if (std::find(m_dependents.begin(), m_dependents.end(), dep) != m_dependents.end()) return;

@@ -1,3 +1,12 @@
+2004-08-30  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShConstProp.cpp (struct FinishConstProp): Ignore nodes whose
+	RHS is all (uniform OR constant), unless they're writing to output
+	(or inout) nodes.
+
+	* src/Makefile.am (libsh_la_SOURCES): Split some of
+	ShOptimizations.cpp into ShConstProp.cpp and ShValueTracking.cpp
+
 2004-08-28  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShOptimizations.cpp (Cell::Cell): Don't use the swizzle to
