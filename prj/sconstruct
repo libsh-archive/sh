@@ -1,0 +1,5 @@
+env = Environment( LIBS    = Split('sh GL png'),
+                   CPPPATH = Split('. .. ../src'),
+                   CCFLAGS = '-g -O0 -Wall' )
+
+env.Program('add-im',Split('add_im.cpp test.cpp'))
