@@ -263,7 +263,7 @@ int main(int argc, char** argv)
   shBind(vsh);
   shBind(fsh);
 
-#if 1
+#if 0
   cout << "Vertex Unit:" << endl;
   vsh.node()->code()->print(cout);
   cout << "--" << endl;

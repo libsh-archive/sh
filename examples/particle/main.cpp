@@ -309,7 +309,7 @@ int main(int argc, char** argv)
 
   try
     {
-    shSetBackend("arb");
+    shSetBackend("glsl");
 
     init_shaders();
     init_streams();
@@ -333,6 +333,15 @@ int main(int argc, char** argv)
     std::cerr << "Unknown exception caught." << std::endl;
     return 1;
     }
+
+#if 1
+  cout << "Vertex Unit:" << endl;
+  vsh.node()->code()->print(cout);
+  cout << "--" << endl;
+  cout << "Fragment Unit:" << endl;
+  fsh.node()->code()->print(cout);
+  cout << "--" << endl;
+#endif
  
   glutMainLoop();
   return 0;
