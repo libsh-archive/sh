@@ -1,97 +1,81 @@
 TODO file for libsh
 
+ - needs to be done
+ / in progress
+ X done
+ I moved to issue tracker: http://esen.uwaterloo.ca/cgi-bin/roundup.cgi/sh/
+
+Note that this is mostly out of date. Check the issue tracker instead.
+
 BEFORE BETA:
  X lock/unlock variable nodes
- - cache pbuffer context in pbufferstreams
- - add ShFooCPtr typedefs everywhere (for RefCountable types)
- - rename ShRefCount to ShPointer or something else more useful
- - everywhere where we pass a ShFooPtr into a function, replace it with
+ X cache pbuffer context in pbufferstreams
+ X add ShFooCPtr typedefs everywhere (for RefCountable types)
+ X rename ShRefCount to ShPointer or something else more useful
+ I everywhere where we pass a ShFooPtr into a function, replace it with
    const ShFooPtr&
- - use ShFooCPtrs where appropriate
- - shUnbind() or something similar
- - shUpdate(), perhaps, maybe with an shAutoUpdate(bool) function
- - lock matrices
- - make immediate-mode matrix operations more efficient
- - missing library functions from the reference manual
- - use python to generate ShVector etc.
- - use python to generate ShAttrib, and be rid of implicit instantiation where aprpriate
- - replace ShConstant with ShConstAttrib, etc.
- - rename SpecialType -> SemanticType
- - mipmapping
- - ShInterp
- - finalize Quaternion interface
- - clean up texture/image/memory interface
+ I use ShFooCPtrs where appropriate
+ I shUnbind() or something similar
+ I shUpdate(), perhaps, maybe with an shAutoUpdate(bool) function
+ I lock matrices
+ I make immediate-mode matrix operations more efficient
+ I missing library functions from the reference manual
+ X use python to generate ShVector etc.
+ X use python to generate ShAttrib, and be rid of implicit instantiation where aprpriate
+ X replace ShConstant with ShConstAttrib, etc.
+ X rename SpecialType -> SemanticType
+ I mipmapping
+ I ShInterp
+ I finalize Quaternion interface
 
 GENERIC SMALL TASKS:
  X have updating semantics for uniforms
  X need a map of shader kind -> currently bound shader
  X hack constant loading for now by recompiling shader everytime it is bound
  X hack constant loading for now by recompiling shader everytime a uniform is changed.
- - have a setValues() call in ShVariableNode taking an array of indices and an array of values.
  X check into CVS
- - improve error handling in ShParser.cpp
- - add line numbers/filenames to tokens, use this in error handling
  X add additional layer for eror handling: don't throw exceptions by
    default, instead just output to stderr or so.
- - break and continue (requires some extra information in the parser)
+ I break and continue (requires some extra information in the parser)
  X gather variables in ShShader
  X simple SM register allocation
  X add negation to variables
  X compute uniform constant operations in the host
  X send uniform values to SM in the SM backend
  X add Swizzling operators to ShVariable
- - make ShVariable operators return ShVariableN
  X add Swizzling operators to ShVariableN
  X negation in SM backend code upload
  X store ShBackendCode objects in ShShader
- - replace assert() with exceptions/error function
- - add operator*(T) and similar for division to Sh{Lib*,Matrix}.hpp
+ I replace assert() with exceptions/error function
+ X add operator*(T) and similar for division to Sh{Lib*,Matrix}.hpp
  X add operator[] to ShAttrib also to do one-element swizzle.
- - use a ShVariableKind instead of an int template parameter in ShAttrib and ShMatrix
+ X use a ShVariableKind instead of an int template parameter in ShAttrib and ShMatrix
  X rename "shader kind" to "shader target" throughout the code.
  X replace integers for shader targets with strings
- - add a switchBackend() function that clears boundShaders(), etc.
- - add ShIOVariable types as a single variable used for both Input and Output
- - add more tests to test/constant.sht
-    - in particular, cond
+ X add ShIOVariable types as a single variable used for both Input and Output
 
 GENERIC MEDIUM TASKS:
  X port more of the ShLib calls to the new model.
  X code generator
- - add smarter configuration mechanism
- - add "context" concept, or campaigns
  X vectors, points, colours, positions, texcoords
- - rethink some of the binding mechanism
 
 OVERALL LARGE TASKS:
  X linear register allocator
  X finish the parser
  X begin the optimizer
- / matrices
- / textures
-    - just mipmapping missing, pretty much
- - directx backend
- - Cg backend
- - integrate Kevin's shgl stuff
- - SSE backend
- - python interface
- - get the SM backend back up to speed
+ I matrices
+ I textures
+ I directx backend
+ I Cg backend
+ I get the SM backend back up to speed
 
 OPTIMIZER:
  X control flow graph optimizations
  X Run the optimizations more than once as necessary.
  X Don't run the optimizer twice in connect(), once the previous item is done.
- - Do dead code on inputs/outputs/inouts (currently only does temps)
- - constant folding
- - algebraic simplification
- - refactor some of the optimizer code, in particular uddu chains
- - improve uddu chain algorithm by using bitsets to keep track of tuple element writes
 
 TRANSFORMER:
  X Replace inputs/outputs in computation & inouts when not supported by target
- / Split long tuples
-   X temps, constants (and uniforms), inputs/outputs/inouts 
-   - textures, streams
 
 SHADER ALGEBRA:
  X fix combine() to operate correctly on empty graphs.
@@ -105,20 +89,14 @@ SHADER ALGEBRA:
  X shKeep(), shLose(), shDup()
  X make connect work with inputs != outputs 
  X add operator<< for uniforms
- - add constant() for uniforms with operator<<
- - implement named temporary extraction (maybe)
 
 STREAMS:
  X implement execute() for Arb
- - implement execute() for Sm
+ I implement execute() for Sm
  X add ShChannelNode
  X add ShChannel
  X add ShStream
  X implement combine/connect operations
- - implement stream _extraction_ operation
-    (replace stream usages with an input variable)
- - allow using a stream as both input and output with multiple output streams
-    (cache output first, then copy at the very end)
 
 MATRICES:
  X operator()() extracts submatrix
@@ -128,43 +106,24 @@ MATRICES:
  X adjunct
  X determinant
  X inverse
- - name()
- - add some matrix expand() call to expand to an ident matrix with top-left submatrix replaced with M
 
 TEXTURES:
  X bind texture units in shader
  X scale lookups in SM backend
  X load data into textures
- - turn 3-textures into 4-textures automatically... in sm backend!
  X update notification
- - mip mapping
+ I mip mapping
  X other lookup mechanisms (bilinear etc.)
  X generic traits mechanism
  X 1D
  X 3D
- / cube maps
-    X high-level
-    X ARB
-    - SM
  X share textures between multiple shaders
 
 ARB BACKEND:
  X split into multiple files
- / add extension querying/plugin mechanism for ATI extensions etc.
- / long tuples
-   X updateUniform
-   - textures
-   - streams
-   - proper input/output handling
- - check more limits when allocating
 
 SM BACKEND:
- - fix it up. this is a lot of work.
- / long tuples 
-   - updateUniform
-   - textures
-   - streams
-   - proper input/output handling
+ I fix it up. this is a lot of work.
 
 === OPERATIONS ===
 
@@ -208,7 +167,7 @@ SM BACKEND:
 
 === OLD RELEASES ===
 
-RELEASE (SUMMER 2004):
+RELEASE (SUMMER 2003):
  X rename ShShader to ShProgram
  X add SH_BEGIN_{VERTEX, FRAGMENT}_SHADER macros
  X add licensing blurbs
