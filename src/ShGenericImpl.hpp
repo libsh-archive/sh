@@ -259,7 +259,7 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator=(const ShGeneric<1, T>& other)
 template<typename T>
 ShGeneric<1, T>& ShGeneric<1, T>::operator=(T other)
 {
-  shASN(*this, ShAttrib<1, SH_TEMP, T>(other));
+  shASN(*this, ShAttrib<1, SH_CONST, T>(other));
   return *this;
 }
 

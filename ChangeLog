@@ -1,3 +1,36 @@
+2004-10-06  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShInstructions.cpp: Implement shCBRT and shRND.
+
+	* src/ShProgram.cpp: Add operator() on streams here.
+
+	* src/ShChannelImpl.hpp (operator()): Add operators for programs
+	to channels.
+
+	* src/ShLibClamp.hpp (round): Add this function.
+
+	* src/ShLibArith.hpp (cbrt): Add this function.
+
+	* src/ShStatement.cpp: Add opInfo for CBRT and RND.
+
+	* src/ShStatement.hpp: Add CBRT and RND.
+
+	* src/ShLibMisc.hpp (freeze): Add this function to turn uniforms
+	into constants.
+
+	* src/ShLibMatrixImpl.hpp: Added colmat, rotate, translate, scale
+	(although 2D rotate is still missing).
+
+	* src/ShMatrix.hpp: Many much needed comment fixes. Also, moved
+	operator<< out of ShMatrix.
+
+	* src/ShVariable.hpp (ShVariable): Add clone member function.
+
+2004-10-05  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShGenericImpl.hpp (operator=(T)): Make the temporary
+	constant attribute an SH_CONST instead of an SH_TEMP.
+
 2004-10-05  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
 
 	* win32.mk: Updated for building with Visual C++ 2005

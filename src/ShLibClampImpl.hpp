@@ -63,6 +63,15 @@ ShGeneric<N, T> floor(const ShGeneric<N, T>& var)
 
 template<int N, typename T>
 inline
+ShGeneric<N, T> round(const ShGeneric<N, T>& var)
+{
+  ShAttrib<N, SH_TEMP, T> t;
+  shRND(t, var);
+  return t;
+}
+
+template<int N, typename T>
+inline
 ShGeneric<N, T> mod(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
 {
   ShAttrib<N, SH_TEMP, T> t;

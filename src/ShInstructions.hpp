@@ -73,6 +73,8 @@ void shATAN(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
 void shATAN2(ShVariable& dest, const ShVariable& a, const ShVariable& b);
 SH_DLLEXPORT
+void shCBRT(ShVariable& dest, const ShVariable& a);
+SH_DLLEXPORT
 void shCEIL(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
 void shCOS(ShVariable& dest, const ShVariable& a);
@@ -118,6 +120,8 @@ SH_DLLEXPORT
 void shPOW(ShVariable& dest, const ShVariable& a, const ShVariable& b);
 SH_DLLEXPORT
 void shRCP(ShVariable& dest, const ShVariable& a);
+SH_DLLEXPORT
+void shRND(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
 void shRSQ(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT

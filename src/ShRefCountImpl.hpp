@@ -37,7 +37,7 @@ ShPointer<T>::ShPointer()
 {
 #ifdef SH_REFCOUNT_DEBUGGING
   SH_RCDEBUG_BLUE;
-  std::cerr << "[cons] " << std::setw(10) << "0" << " (default)" << std::endl;
+  std::cerr << "[cons] " << std::flush << std::setw(10) << "0" << " (default)" << std::endl;
   SH_RCDEBUG_NORMAL;
 #endif
 }
@@ -48,7 +48,7 @@ ShPointer<T>::ShPointer(T* object)
 {
 #ifdef SH_REFCOUNT_DEBUGGING
   SH_RCDEBUG_BLUE;
-  std::cerr << "[cons] " << std::setw(10) << object << " <" << (object ? typeid(*(object)).name() : "n/a") << ">" << std::endl;
+  std::cerr << "[cons] " << std::flush << std::setw(10) << object << " <" << (object ? typeid(*(object)).name() : "n/a") << ">" << std::endl;
   SH_RCDEBUG_NORMAL;
 #endif
   if (m_object) m_object->acquireRef();
@@ -61,7 +61,7 @@ ShPointer<T>::ShPointer(const ShPointer<T>& other)
 #ifdef SH_REFCOUNT_DEBUGGING
   SH_DEBUG_ASSERT((unsigned long)m_object < 0xb0000000L);
   SH_RCDEBUG_BLUE;
-  std::cerr << "[copy] " << std::setw(10) << other.m_object << " <" << (other.m_object ? typeid(*(other.m_object)).name() : "n/a") << ">" << std::endl;
+  std::cerr << "[copy] " << std::flush << std::setw(10) << other.m_object << " <" << (other.m_object ? typeid(*(other.m_object)).name() : "n/a") << ">" << std::endl;
   SH_RCDEBUG_NORMAL;
 #endif
 
@@ -76,7 +76,7 @@ ShPointer<T>::ShPointer(const ShPointer<S>& other)
 {
 #ifdef SH_REFCOUNT_DEBUGGING
   SH_RCDEBUG_BLUE;
-  std::cerr << "[cpct] " << std::setw(10) << other.object()
+  std::cerr << "[cpct] " << std::flush << std::setw(10) << other.object()
             << " <" << (other.object() ? typeid(*(other.object())).name() : "n/a") << ">"
             << " -> " << typeid(T).name()
             << std::endl;
@@ -91,7 +91,7 @@ ShPointer<T>::~ShPointer()
 {
 #ifdef SH_REFCOUNT_DEBUGGING
   SH_RCDEBUG_BLUE;
-  std::cerr << "[dest] " << std::setw(10) << m_object << " <" << (m_object ? typeid(*(m_object)).name() : "n/a") << ">" << std::endl;
+  std::cerr << "[dest] " << std::flush << std::setw(10) << m_object << " <" << (m_object ? typeid(*(m_object)).name() : "n/a") << ">" << std::endl;
   SH_RCDEBUG_NORMAL;
 #endif
 
@@ -103,7 +103,7 @@ ShPointer<T>& ShPointer<T>::operator=(T* object)
 {
 #ifdef SH_REFCOUNT_DEBUGGING
   SH_RCDEBUG_BLUE;
-  std::cerr << "[asn*] " << std::setw(10) << object << " <" << (object ? typeid(*(object)).name() : "n/a") << ">" << " (was " << m_object << " <" << (m_object ? typeid(*(m_object)).name() : "n/a") << ">" << ")" << std::endl;
+  std::cerr << "[asn*] " << std::flush << std::setw(10) << object << " <" << (object ? typeid(*(object)).name() : "n/a") << ">" << " (was " << m_object << " <" << (m_object ? typeid(*(m_object)).name() : "n/a") << ">" << ")" << std::endl;
   SH_RCDEBUG_NORMAL;
 #endif
 
@@ -118,7 +118,7 @@ ShPointer<T>& ShPointer<T>::operator=(const ShPointer<T>& other)
 {
 #ifdef SH_REFCOUNT_DEBUGGING
   SH_RCDEBUG_BLUE;
-  std::cerr << "[assn] " << std::setw(10) << other.m_object << " <" << (other.m_object ? typeid(*(other.m_object)).name() : "n/a") << ">" << " (was " << m_object << " <" << (m_object ? typeid(*(m_object)).name() : "n/a") << ">" << ")" << std::endl;
+  std::cerr << "[assn] " << std::flush << std::setw(10) << other.m_object << " <" << (other.m_object ? typeid(*(other.m_object)).name() : "n/a") << ">" << " (was " << m_object << " <" << (m_object ? typeid(*(m_object)).name() : "n/a") << ">" << ")" << std::endl;
   SH_RCDEBUG_NORMAL;
 #endif
 
@@ -134,7 +134,7 @@ ShPointer<T>& ShPointer<T>::operator=(const ShPointer<S>& other)
 {
 #ifdef SH_REFCOUNT_DEBUGGING
   SH_RCDEBUG_BLUE;
-  std::cerr << "[assn] " << std::setw(10) << other.object() << " <" << (other.object() ? typeid(*(other.object())).name() : "n/a") << ">" << " (was " << m_object << " <" << (m_object ? typeid(*(m_object)).name() : "n/a") << ">" << ")" << std::endl;
+  std::cerr << "[assn] " << std::flush << std::setw(10) << other.object() << " <" << (other.object() ? typeid(*(other.object())).name() : "n/a") << ">" << " (was " << m_object << " <" << (m_object ? typeid(*(m_object)).name() : "n/a") << ">" << ")" << std::endl;
   SH_RCDEBUG_NORMAL;
 #endif
 
@@ -200,6 +200,11 @@ T* ShPointer<T>::object() const
 template<typename T>
 void ShPointer<T>::swap(ShPointer<T>& other)
 {
+#ifdef SH_REFCOUNT_DEBUGGING
+  SH_RCDEBUG_BLUE;
+  std::cerr << "[swap] " << std::flush << std::setw(10) << other.m_object << " <" << (other.m_object ? typeid(*(other.m_object)).name() : "n/a") << ">" << " (was " << m_object << " <" << (m_object ? typeid(*(m_object)).name() : "n/a") << ">" << ")" << std::endl;
+  SH_RCDEBUG_NORMAL;
+#endif
   T* t = m_object;
   m_object = other.m_object;
   other.m_object = t;
@@ -211,7 +216,7 @@ void ShPointer<T>::releaseRef()
   if (m_object && m_object->releaseRef() == 0) {
 #ifdef SH_REFCOUNT_DEBUGGING
     SH_RCDEBUG_RED;
-    std::cerr << "[dstr] " << std::setw(10) << m_object << " <" << typeid(*m_object).name() << ">" << std::endl;
+    std::cerr << "[dstr] " << std::flush << std::setw(10) << m_object << " <" << typeid(*m_object).name() << ">" << std::endl;
     SH_RCDEBUG_NORMAL;
 #endif
     delete m_object;
@@ -226,7 +231,7 @@ ShPointer<T> shref_static_cast(const ShPointer<S>& other)
 {
 #ifdef SH_REFCOUNT_DEBUGGING
   SH_RCDEBUG_BLUE;
-  std::cerr << "[csts] " << std::setw(10) << other.object() << " <" << (other.object() ? typeid(*(other.object())).name() : "n/a") << ">"
+  std::cerr << "[csts] " << std::flush << std::setw(10) << other.object() << " <" << (other.object() ? typeid(*(other.object())).name() : "n/a") << ">"
 	    << " -> " << typeid(T).name() << std::endl;
   SH_RCDEBUG_NORMAL;
 #endif
@@ -239,7 +244,7 @@ ShPointer<T> shref_dynamic_cast(const ShPointer<S>& other)
 {
 #ifdef SH_REFCOUNT_DEBUGGING
   SH_RCDEBUG_BLUE;
-  std::cerr << "[cstd] " << std::setw(10) << other.object() << " <" << (other.object() ? typeid(*(other.object())).name() : "n/a") << ">"
+  std::cerr << "[cstd] " << std::flush << std::setw(10) << other.object() << " <" << (other.object() ? typeid(*(other.object())).name() : "n/a") << ">"
 	    << " -> " << typeid(T).name() << std::endl;
   SH_RCDEBUG_NORMAL;
 #endif
@@ -251,7 +256,7 @@ ShPointer<T> shref_const_cast(const ShPointer<S>& other)
 {
 #ifdef SH_REFCOUNT_DEBUGGING
   SH_RCDEBUG_BLUE;
-  std::cerr << "[cstc] " << std::setw(10) << other.object() << " <" << (other.object() ? typeid(*(other.object())).name() : "n/a") << ">"
+  std::cerr << "[cstc] " << std::flush << std::setw(10) << other.object() << " <" << (other.object() ? typeid(*(other.object())).name() : "n/a") << ">"
 	    << " -> " << typeid(T).name() << std::endl;
   SH_RCDEBUG_NORMAL;
 #endif

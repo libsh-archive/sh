@@ -347,6 +347,16 @@ void shATAN2(ShVariable& dest, const ShVariable& a, const ShVariable& b)
   }
 }
 
+void shCBRT(ShVariable& dest, const ShVariable& a)
+{
+  sizes_match(dest, a);
+  if (immediate()) {
+    CWISE_UNARY_OP(dest, a, cbrtf);
+  } else {
+    ShStatement stmt(dest, SH_OP_CBRT, a);
+    addStatement(stmt);
+  }
+}
 void shCEIL(ShVariable& dest, const ShVariable& a)
 {
   sizes_match(dest, a);
@@ -610,6 +620,17 @@ void shRCP(ShVariable& dest, const ShVariable& a)
     CWISE_UNARY_OP(dest, a, 1.0f / );
   } else {
     ShStatement stmt(dest, SH_OP_RCP, a);
+    addStatement(stmt);
+  }
+}
+
+void shRND(ShVariable& dest, const ShVariable& a)
+{
+  sizes_match(dest, a);
+  if (immediate()) {
+    CWISE_UNARY_OP(dest, a, roundf);
+  } else {
+    ShStatement stmt(dest, SH_OP_RND, a);
     addStatement(stmt);
   }
 }

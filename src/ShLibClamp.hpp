@@ -62,6 +62,13 @@ ShGeneric<N, T> ceil(const ShGeneric<N, T>& var);
 template<int N, typename T>
 ShGeneric<N, T> floor(const ShGeneric<N, T>& var);
 
+/** Round.
+ * Returns the nearest integer to the argument.
+ * Operates componentwise on tuples.
+ */
+template<int N, typename T>
+ShGeneric<N, T> round(const ShGeneric<N, T>& var);
+
 /** Float modulus. 
  * The result is always positive.
  */

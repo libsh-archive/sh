@@ -143,6 +143,49 @@ ShChannel<T>& ShChannel<T>::operator=(const ShProgram& program)
   return *this;
 }
 
+// Put these here for dependency reasons, even though they are member
+// functions of ShProgram
+template<typename T0>
+ShProgram ShProgram::operator()(const ShChannel<T0>& t0) const
+{
+  return (*this) << t0;
+}
+
+template<typename T0, typename T1>
+ShProgram ShProgram::operator()(const ShChannel<T0>& t0,
+                                 const ShChannel<T1>& t1) const
+{
+  return (*this) << t0 << t1;
+}
+
+template<typename T0, typename T1, typename T2>
+ShProgram ShProgram::operator()(const ShChannel<T0>& t0,
+                                 const ShChannel<T1>& t1,
+                                 const ShChannel<T2>& t2) const
+{
+  return (*this) << t0 << t1 << t2;
+}
+
+template<typename T0, typename T1, typename T2, typename T3>
+ShProgram ShProgram::operator()(const ShChannel<T0>& t0,
+                                 const ShChannel<T1>& t1,
+                                 const ShChannel<T2>& t2,
+                                 const ShChannel<T3>& t3) const
+{
+  return (*this) << t0 << t1 << t2 << t3;
+}
+
+template<typename T0, typename T1, typename T2, typename T3,
+         typename T4>
+ShProgram ShProgram::operator()(const ShChannel<T0>& t0,
+                                 const ShChannel<T1>& t1,
+                                 const ShChannel<T2>& t2,
+                                 const ShChannel<T3>& t3,
+                                 const ShChannel<T4>& t4) const
+{
+  return (*this) << t0 << t1 << t2 << t3 << t4;
+}
+
 }
 
 

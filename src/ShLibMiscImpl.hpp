@@ -102,6 +102,13 @@ void kill(const ShGeneric<N, T>& c)
   discard(c);
 }
 
+template<typename T>
+ShProgram freeze(const ShProgram& p,
+                 const T& uniform)
+{
+  return (p >> uniform) << (typename T::ConstType)(uniform);
+}
+
 }
 
 #endif
