@@ -39,13 +39,37 @@ enum ShTextureDims {
   SH_TEXTURE_CUBE
 };
 
+enum ShCubeDirection {
+  SH_CUBE_NEG_X = 0,
+  SH_CUBE_POS_X = 1,
+  SH_CUBE_NEG_Y = 2,
+  SH_CUBE_POS_Y = 3,
+  SH_CUBE_NEG_Z = 4,
+  SH_CUBE_POS_Z = 5
+};
+
 class ShTextureNode : public ShVariableNode {
 public:
-  ShTextureNode(ShTextureDims dims, int width, int height, int depth, int elements);
+  ShTextureNode(ShTextureDims dims);
   virtual ~ShTextureNode();
-  
-  ShTextureDims dims() const;
 
+  ShTextureDims dims() const;
+  
+private:
+  ShTextureDims m_dims;
+  
+  // NOT IMPLEMENTED
+  ShTextureNode(const ShTextureNode& other);
+  ShTextureNode& operator=(const ShTextureNode& other);
+};
+
+typedef ShRefCount<ShTextureNode> ShTextureNodePtr;
+
+class ShDataTextureNode : public ShTextureNode {
+public:
+  ShDataTextureNode(ShTextureDims dims, int width, int height, int depth, int elements);
+  virtual ~ShDataTextureNode();
+  
   int width() const;
   int height() const;
   int depth() const;
@@ -56,18 +80,35 @@ public:
   const float* data() const;
   
 private:
-  ShTextureDims m_dims;
   int m_width, m_height, m_depth;
   int m_elements;
 
   float* m_data;
-
   // NOT IMPLEMENTED
-  ShTextureNode(const ShTextureNode& other);
-  ShTextureNode& operator=(const ShTextureNode& other);
+  ShDataTextureNode(const ShDataTextureNode& other);
+  ShDataTextureNode& operator=(const ShDataTextureNode& other);
+
 };
 
-typedef ShRefCount<ShTextureNode> ShTextureNodePtr;
+typedef ShRefCount<ShDataTextureNode> ShDataTextureNodePtr;
+
+class ShCubeTextureNode : public ShTextureNode {
+public:
+  ShCubeTextureNode();
+  virtual ~ShCubeTextureNode();
+
+  ShDataTextureNodePtr& face(ShCubeDirection dir);
+  const ShDataTextureNodePtr face(ShCubeDirection dir) const;
+  
+private:
+  ShDataTextureNodePtr m_faces[6];
+
+  // NOTE IMPLEMENTED
+  ShCubeTextureNode(const ShCubeTextureNode& other);
+  ShCubeTextureNode& operator=(const ShCubeTextureNode& other);
+};
+
+typedef ShRefCount<ShCubeTextureNode> ShCubeTextureNodePtr;
 
 }
 #endif

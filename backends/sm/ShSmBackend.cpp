@@ -176,7 +176,7 @@ void BackendCode::bind()
   SH_DEBUG_PRINT("Uploading textures...");
   for (ShProgramNode::VarList::const_iterator I = m_shader->textures.begin(); I != m_shader->textures.end();
        ++I) {
-    ShTextureNodePtr texture = *I;
+    ShDataTextureNodePtr texture = *I;
     if (!texture) {
       SH_DEBUG_WARN((*I)->name() << " is not a valid texture!");
       continue;

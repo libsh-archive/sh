@@ -28,16 +28,15 @@
 
 namespace SH {
 
-ShTextureNode::ShTextureNode(ShTextureDims dims, int width, int height, int depth, int elements)
-  : ShVariableNode(SH_VAR_TEXTURE, 1), m_dims(dims),
-    m_width(width), m_height(height), m_depth(depth), m_elements(elements),
-    m_data(new float[width * height * elements])
+ShTextureNode::ShTextureNode(ShTextureDims dims)
+  : ShVariableNode(SH_VAR_TEXTURE, 1),
+    m_dims(dims)
 {
 }
 
 ShTextureNode::~ShTextureNode()
 {
-  delete [] m_data;
+  
 }
 
 ShTextureDims ShTextureNode::dims() const
@@ -45,34 +44,65 @@ ShTextureDims ShTextureNode::dims() const
   return m_dims;
 }
 
-int ShTextureNode::width() const
+ShDataTextureNode::ShDataTextureNode(ShTextureDims dims, int width, int height, int depth, int elements)
+  : ShTextureNode(dims),
+    m_width(width), m_height(height), m_depth(depth), m_elements(elements),
+    m_data(new float[width * height * elements])
+{
+}
+
+ShDataTextureNode::~ShDataTextureNode()
+{
+  delete [] m_data;
+}
+
+int ShDataTextureNode::width() const
 {
   return m_width;
 }
 
-int ShTextureNode::height() const
+int ShDataTextureNode::height() const
 {
   return m_height;
 }
 
-int ShTextureNode::depth() const
+int ShDataTextureNode::depth() const
 {
   return m_depth;
 }
 
-int ShTextureNode::elements() const
+int ShDataTextureNode::elements() const
 {
   return m_elements;
 }
 
-void ShTextureNode::setData(const float* data)
+void ShDataTextureNode::setData(const float* data)
 {
   memcpy(m_data, data, m_width * m_height * m_elements * sizeof(float));
 }
 
-const float* ShTextureNode::data() const
+const float* ShDataTextureNode::data() const
 {
   return m_data;
+}
+
+ShCubeTextureNode::ShCubeTextureNode()
+  : ShTextureNode(SH_TEXTURE_CUBE)
+{
+}
+
+ShCubeTextureNode::~ShCubeTextureNode()
+{
+}
+
+ShDataTextureNodePtr& ShCubeTextureNode::face(ShCubeDirection dir)
+{
+  return m_faces[dir];
+}
+
+const ShDataTextureNodePtr ShCubeTextureNode::face(ShCubeDirection dir) const
+{
+  return m_faces[dir];
 }
 
 }

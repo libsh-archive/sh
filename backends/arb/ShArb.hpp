@@ -34,6 +34,7 @@
 #include "ShBackend.hpp"
 #include "ShRefCount.hpp"
 #include "ShCtrlGraph.hpp"
+#include "ShTextureNode.hpp"
 
 namespace ShArb {
 
@@ -97,6 +98,12 @@ private:
   /// Allocate textures (called by allocRegs)
   void allocTextures();
 
+  /// Allocate a data texture
+  void loadTexture(SH::ShDataTextureNodePtr texture, unsigned int type = 0);
+
+  /// Allocate a cube map
+  void loadCubeTexture(SH::ShCubeTextureNodePtr cube);
+  
   void bindSpecial(const SH::ShProgramNode::VarList::const_iterator& begin,
                    const SH::ShProgramNode::VarList::const_iterator& end,
                    const ArbBindingSpecs& specs, 

@@ -44,38 +44,47 @@ ShTexture<T>::ShTexture(ShTextureNodePtr node)
 }
 
 template<typename T>
+ShTextureNodePtr ShTexture<T>::node() const
+{
+  return m_node;
+}
+
+template<typename T>
 void ShTexture<T>::loadImage(const ShImage& image)
 {
   SH_DEBUG_PRINT("Loading image");
+
+  ShDataTextureNodePtr node = m_node;
+  assert(node);
   
-  assert(m_node->width() == image.width()
-         && m_node->height() == image.height());
-  if (m_node->elements() > image.depth()) {
-    float* data = new float[image.width() * image.height() * m_node->elements()];
+  assert(node->width() == image.width()
+         && node->height() == image.height());
+  if (node->elements() > image.depth()) {
+    float* data = new float[image.width() * image.height() * node->elements()];
     for (int y = 0; y < image.height(); y++) {
       for (int x = 0; x < image.width(); x++) {
         int d;
         for (d = 0; d < image.depth(); d++) {
-          data[(y * image.width() + x) * m_node->elements() + d] = image(x, y, d);
+          data[(y * image.width() + x) * node->elements() + d] = image(x, y, d);
         }
-        for (; d < m_node->elements(); d++) {
-          data[(y * image.width() + x) * m_node->elements() + d] = 0.0;
+        for (; d < node->elements(); d++) {
+          data[(y * image.width() + x) * node->elements() + d] = 0.0;
         }
       }
     }
-    m_node->setData(data);
+    node->setData(data);
     delete [] data;
   } else {
     SH_DEBUG_PRINT("Setting image data directly");
     
-    assert(m_node->elements() == image.depth());
-    m_node->setData(image.data());
+    assert(node->elements() == image.depth());
+    node->setData(image.data());
   }
 }
 
 template<typename T>
 ShTexture1D<T>::ShTexture1D(int length)
-  : ShTexture<T>(new ShTextureNode(SH_TEXTURE_1D, length, 1, 1, T().size()))
+  : ShTexture<T>(new ShDataTextureNode(SH_TEXTURE_1D, length, 1, 1, T().size()))
 {
 }
 
@@ -98,7 +107,7 @@ void ShTexture1D<T>::load(const ShImage& image)
 
 template<typename T>
 ShTexture2D<T>::ShTexture2D(int width, int height)
-  : ShTexture<T>(new ShTextureNode(SH_TEXTURE_2D, width, height, 1, T().size()))
+  : ShTexture<T>(new ShDataTextureNode(SH_TEXTURE_2D, width, height, 1, T().size()))
 {
 }
 
@@ -117,6 +126,29 @@ template<typename T>
 void ShTexture2D<T>::load(const ShImage& image)
 {
   loadImage(image);
+}
+
+template<typename T>
+ShTextureCube<T>::ShTextureCube()
+  : m_node(new ShCubeTextureNode())
+{
+}
+
+template<typename T>
+void ShTextureCube<T>::set(ShCubeDirection dir, const ShTexture2D<T>& texture)
+{
+  m_node->face(dir) = texture.node();
+}
+
+template<typename T>
+T ShTextureCube<T>::operator()(const ShVariableN<3, double>& dir)
+{
+  T t;
+  ShVariable texVar(m_node);
+  ShStatement stmt(t, texVar, SH_OP_TEX, dir);
+  
+  ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+  return t;
 }
 
 }

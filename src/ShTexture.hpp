@@ -37,6 +37,8 @@ template<typename T>
 class ShTexture : public ShRefCountable {
 public:
   ~ShTexture();
+
+  ShTextureNodePtr node() const;
   
 protected:
   ShTexture(ShTextureNodePtr node);
@@ -66,6 +68,19 @@ public:
   T operator()(const ShVariableN<2, double>& coords);
 
   void load(const ShImage& image);
+};
+
+template<typename T>
+class ShTextureCube {
+public:
+  ShTextureCube();
+
+  void set(ShCubeDirection dir, const ShTexture2D<T>& texture);
+
+  T operator()(const ShVariableN<3, double>& direction);
+  
+private:
+  ShCubeTextureNodePtr m_node;
 };
 
 }

@@ -28,9 +28,12 @@ TEXTURES:
  - mip mapping
  - other lookup mechanisms (bilinear etc.)
  - generic traits mechanism
- - 1D
+ X 1D
  - 3D
- - cube maps
+ / cube maps
+    X high-level
+    X ARB
+    - SM
 
 SMALL TASKS:
  X have updating semantics for uniforms

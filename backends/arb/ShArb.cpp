@@ -40,6 +40,22 @@
 
 namespace ShArb {
 
+const unsigned int shGlCubeMapTargets[] = {
+  GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+  GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+  GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+  GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+  GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
+  GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+};
+
+const unsigned int shGlTextureType[] = {
+  GL_TEXTURE_1D,
+  GL_TEXTURE_2D,
+  GL_TEXTURE_3D,
+  GL_TEXTURE_CUBE_MAP,
+};
+
 using namespace SH;
 /*
 PFNGLPROGRAMSTRINGARBPROC shGlProgramStringARB;
@@ -514,18 +530,55 @@ void ArbCode::bind()
       SH_DEBUG_WARN((*I)->name() << " is not a valid texture!");
       continue;
     }
-
+    
     RegMap::const_iterator texRegIterator = m_registers.find(texture);
-
+    
     SH_DEBUG_ASSERT(texRegIterator != m_registers.end());
     
     const ArbReg& texReg = texRegIterator->second;
-
+    
     SH_DEBUG_PRINT("Setting active texture to " << texReg.index << ", my shader is " << m_shader.object());
     
     shGlActiveTextureARB(GL_TEXTURE0 + texReg.index);
-    // TODO: Only do this once.
-    unsigned int type;
+
+    SH_DEBUG_PRINT("Binding texture " << texReg.index << " with texture unit " << texReg.bindingIndex);
+
+    glBindTexture(shGlTextureType[texture->dims()], texReg.bindingIndex);
+
+    if (1) {
+      glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    } else {
+      glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    }
+    if (1) {
+      glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    } else {
+      glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_WRAP_S, GL_REPEAT);
+      glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_WRAP_T, GL_REPEAT);
+    }
+    
+    ShDataTextureNodePtr datatex = texture;
+    if (datatex) {
+      loadTexture(datatex);
+      continue;
+    }
+
+    ShCubeTextureNodePtr cubetex = texture;
+    if (cubetex) {
+      loadCubeTexture(cubetex);
+      continue;
+    }
+    
+    SH_DEBUG_WARN((*I)->name() << " is not a valid texture!");
+  }
+}
+
+void ArbCode::loadTexture(ShDataTextureNodePtr texture, unsigned int type)
+{
+  if (!type) {
     switch (texture->dims()) {
     case SH_TEXTURE_1D:
       type = GL_TEXTURE_1D;
@@ -536,77 +589,80 @@ void ArbCode::bind()
     case SH_TEXTURE_3D:
       type = GL_TEXTURE_3D;
       break;
-      //    case SH_TEXTURE_CUBE:
-      //      type = GL_TEXTURE_CUBE;
-      //      break;
-    }
-    
-    SH_DEBUG_PRINT("Binding texture " << texReg.index << " with texture unit " << texReg.bindingIndex);
-
-    glBindTexture(type, texReg.bindingIndex);
-
-    SH_DEBUG_PRINT("Sending texture image");
-    // TODO: Other types of textures.
-    // TODO: Element Format
-    // TODO: sampling/filtering
-    // TODO: wrap/
-    glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    unsigned int format;
-
-    switch (texture->elements()) {
-    case 1:
-      format = GL_LUMINANCE;
-      break;
-    case 2:
-      format = GL_LUMINANCE_ALPHA;
-      break;
-    case 3:
-      format = GL_RGB;
-      break;
-    case 4:
-      format = GL_RGBA;
-      break;
     default:
-      format = 0;
+      SH_DEBUG_ERROR("No type specified and no known type for this texture.");
       break;
     }
+  }
 
-    switch(type) {
-    case GL_TEXTURE_1D:
-      glTexImage1D(type, 0, texture->elements(), texture->width(), 0, format, GL_FLOAT, texture->data());
+  SH_DEBUG_PRINT("Sending texture image");
+  // TODO: Other types of textures.
+  // TODO: Element Format
+  // TODO: sampling/filtering
+  // TODO: wrap/clamp
+  unsigned int format;
+
+  switch (texture->elements()) {
+  case 1:
+    format = GL_LUMINANCE;
+    break;
+  case 2:
+    format = GL_LUMINANCE_ALPHA;
+    break;
+  case 3:
+    format = GL_RGB;
+    break;
+  case 4:
+    format = GL_RGBA;
+    break;
+  default:
+    format = 0;
+    break;
+  }
+
+  switch(type) {
+  case GL_TEXTURE_1D:
+    glTexImage1D(type, 0, texture->elements(), texture->width(), 0, format, GL_FLOAT, texture->data());
+    break;
+  case GL_TEXTURE_2D:
+  case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
+  case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
+  case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
+  case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
+  case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
+  case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
+    glTexImage2D(type, 0, texture->elements(), texture->width(), texture->height(), 0, format, GL_FLOAT,
+                 texture->data());
+    break;
+  case GL_TEXTURE_3D:
+    glTexImage3D(type, 0, texture->elements(), texture->width(), texture->height(), texture->depth(),
+                 0, format, GL_FLOAT, texture->data());
+    break;
+  default:
+    SH_DEBUG_WARN("Texture type not handled by ARB backend");
+    break;
+  }
+  int error = glGetError();
+  if (error != GL_NO_ERROR) {
+    SH_DEBUG_ERROR("Error loading texture: " << error);
+    switch(error) {
+    case GL_INVALID_ENUM:
+      SH_DEBUG_ERROR("INVALID_ENUM");
       break;
-    case GL_TEXTURE_2D:
-      glTexImage2D(type, 0, texture->elements(), texture->width(), texture->height(), 0, format, GL_FLOAT,
-                   texture->data());
+    case GL_INVALID_VALUE:
+      SH_DEBUG_ERROR("INVALID_VALUE");
       break;
-    case GL_TEXTURE_3D:
-      glTexImage3D(type, 0, texture->elements(), texture->width(), texture->height(), texture->depth(),
-                   0, format, GL_FLOAT, texture->data());
-      break;
-    default:
-      SH_DEBUG_WARN("Texture type not handled by ARB backend");
+    case GL_INVALID_OPERATION:
+      SH_DEBUG_ERROR("INVALID_OPERATION");
       break;
     }
-    int error = glGetError();
-    if (error != GL_NO_ERROR) {
-      SH_DEBUG_ERROR("Error loading texture: " << error);
-      switch(error) {
-      case GL_INVALID_ENUM:
-        SH_DEBUG_ERROR("INVALID_ENUM");
-        break;
-      case GL_INVALID_VALUE:
-        SH_DEBUG_ERROR("INVALID_VALUE");
-        break;
-      case GL_INVALID_OPERATION:
-        SH_DEBUG_ERROR("INVALID_OPERATION");
-        break;
-      }
-    }
-    
-    //    glEnable(type);
+  }
+}
+
+void ArbCode::loadCubeTexture(ShCubeTextureNodePtr cube)
+{
+  for (int i = 0; i < 6; i++) {
+    loadTexture(cube->face(static_cast<ShCubeDirection>(i)), shGlCubeMapTargets[i]);
   }
 }
 
