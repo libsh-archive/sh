@@ -1,5 +1,16 @@
 2004-01-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* test/stream.cpp: Added initial stream test.
+
+	* src/ShAttrib.hpp (ShAttrib), src/ShSpecialType.hpp
+	(ShSpecialType), ...: Added special_type.
+
+	* src/ShStatement.hpp (ShOperation), src/ShStatement.cpp (opInfo):
+	Added SH_OP_FETCH for streams.
+
+	* src/ShStream.hpp, src/ShStreamImpl.hpp, src/ShStreamNode.hpp,
+	src/ShStreamNode.cpp: Added (the start of) a stream abstraction.
+
 	* test/algebra.sht: Use operator&() instead of operator+() for
 	combine().
 
