@@ -30,13 +30,12 @@
 #include "ShBasicBlock.hpp"
 #include "ShTokenizer.hpp"
 #include "ShException.hpp"
-#include "ShError.hpp"
 
 namespace SH {
 
 void checkCond(bool cond, const std::string& message = "Internal Error")
 {
-  if (!cond) ShError( ShParseException(message) );
+  if (!cond) throw ShParseException(message);
 }
 
 

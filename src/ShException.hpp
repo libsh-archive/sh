@@ -60,27 +60,6 @@ public:
   ShImageException(const std::string& message);
 };
 
-/** An exception relating to an ShAlgebra operation.
- */
-class ShAlgebraException : public ShException {
-public:
-  ShAlgebraException(const std::string& message);
-};
-
-/** An exception relating to an ShOptimizer operation.
- */
-class ShOptimizerException : public ShException {
-public:
-  ShOptimizerException(const std::string& message);
-};
-
-/** An exception relating to an ShBackend operation.
- */
-class ShBackendException : public ShException {
-public:
-  ShBackendException(const std::string& message);
-};
-
 }
 
 #endif

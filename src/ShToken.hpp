@@ -33,7 +33,7 @@
 
 namespace SH {
 
-class ShTokenArgument;
+struct ShTokenArgument;
   
 /** Possible types a token can have.
  * If you add to this list or change it, be sure to change tokenNames in

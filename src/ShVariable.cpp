@@ -24,8 +24,6 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#include <iostream>
-
 #include "ShVariable.hpp"
 
 namespace SH {
@@ -98,8 +96,6 @@ void ShVariable::getValues(ShVariableNode::ValueType dest[]) const
   }
 }
 
-
-
 void ShVariable::setValues(ShVariableNode::ValueType values[])
 {
   for (int i = 0; i < size(); i++) {
@@ -136,29 +132,6 @@ ShVariable ShVariable::operator()(int n, int indices[]) const
 {
   return ShVariable(m_node, m_swizzle * ShSwizzle(size(), n, indices), m_neg);
 }
-
-
-std::ostream& operator<<(std::ostream& _out, const ShVariable& shVariableToPrint){
- 
-  if (!shVariableToPrint.m_node){
-    _out<<"[null]";
-    return _out;
-  }
-
-  _out<<'[';
-
-  if(shVariableToPrint.size() > 0)
-    _out<<shVariableToPrint.m_node->getValue(shVariableToPrint.swizzle()[0]);
-
-  for (int k = 1; k < shVariableToPrint.size(); k++) {
-    _out<<", ";
-    _out<<shVariableToPrint.m_node->getValue(shVariableToPrint.swizzle()[k]);
-   }
-
-  _out<<']';
-  return _out;
-}
-
 
 ShVariable ShVariable::operator-() const
 {

@@ -32,7 +32,6 @@
 #include "ShSwizzle.hpp"
 #include "ShUtility.hpp"
 
-
 namespace SH {
 
 /** A reference and interface to a generic n-tuple variable.
@@ -73,7 +72,6 @@ public:
   /// Return true if this variable is negated
   bool neg() const;
 
-  
   /// Get the values of this variable, with swizzling taken into account
   void getValues(ShVariableNode::ValueType dest[]) const;
   /// Set the values of this variable, using the swizzle as a
@@ -86,11 +84,9 @@ public:
   ShVariable operator()(int, int, int) const;
   ShVariable operator()(int, int, int, int) const;
   ShVariable operator()(int size, int indices[]) const;
-  
-  
+
   ShVariable operator-() const;
   
-
 protected:
   ShVariable(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg)
     : m_node(node), m_swizzle(swizzle), m_neg(neg)
@@ -100,10 +96,7 @@ protected:
   ShVariableNodePtr m_node; ///< The actual variable node we refer to.
   ShSwizzle m_swizzle; ///< Swizzling applied to this variable.
   bool m_neg; ///< True iff this variable is negated
-
-  friend std::ostream& operator<<(std::ostream& out, const ShVariable& shVariableToPrint);
 };
-
 
 /** A variable of length N.
  * This is only provided so that subclasses can derive from it and

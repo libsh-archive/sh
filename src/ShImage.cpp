@@ -31,7 +31,6 @@
 #include <png.h>
 #include <sstream>
 #include "ShException.hpp"
-#include "ShError.hpp"
 
 namespace SH {
 
@@ -99,29 +98,29 @@ void ShImage::loadPng(const std::string& filename)
   // check that the file is a png file
   png_byte buf[8];
 
-  FILE* in = std::fopen(filename.c_str(), "r");
+  FILE* in = std::fopen(filename.c_str(), "rb");
 
-  if (!in) ShError( ShImageException("Unable to open " + filename) );
+  if (!in) throw ShImageException("Unable to open " + filename);
   
   for (int i = 0; i < 8; i++) {
-    if (!(buf[i] = fgetc(in))) ShError( ShImageException("Not a PNG file") );
+    if (!(buf[i] = fgetc(in))) throw ShImageException("Not a PNG file");
   }
-  if (png_sig_cmp(buf, 0, 8)) ShError( ShImageException("Not a PNG file") );
+  if (png_sig_cmp(buf, 0, 8)) throw ShImageException("Not a PNG file");
 
   png_structp png_ptr =
     png_create_read_struct(PNG_LIBPNG_VER_STRING,
 			   0, 0, 0); // FIXME: use error handlers
-  if (!png_ptr) ShError( ShImageException("Error initialising libpng (png_ptr)") );
+  if (!png_ptr) throw ShImageException("Error initialising libpng (png_ptr)");
 
   png_infop info_ptr = png_create_info_struct(png_ptr);
   if (!info_ptr) {
     png_destroy_read_struct(&png_ptr, 0, 0);
-    ShError( ShImageException("Error initialising libpng (info_ptr)") );
+    throw ShImageException("Error initialising libpng (info_ptr)");
   }
 
   if (setjmp(png_jmpbuf(png_ptr))) {
     png_destroy_read_struct(&png_ptr, 0, 0);
-    ShError( ShImageException("Error initialising libpng (setjmp/lngjmp)") );    
+    throw ShImageException("Error initialising libpng (setjmp/lngjmp)");    
   }
   
   //  png_set_read_fn(png_ptr, reinterpret_cast<void*>(&in), my_istream_read_data);
@@ -136,7 +135,7 @@ void ShImage::loadPng(const std::string& filename)
     png_destroy_read_struct(&png_ptr, 0, 0);
     std::ostringstream os;
     os << "Invalid bit depth " << bit_depth;
-    ShError( ShImageException(os.str()) );
+    throw ShImageException(os.str());
   }
 
   int colour_type = png_get_color_type(png_ptr, info_ptr);
@@ -154,7 +153,7 @@ void ShImage::loadPng(const std::string& filename)
       && colour_type != PNG_COLOR_TYPE_GRAY
       && colour_type != PNG_COLOR_TYPE_RGBA) {
     png_destroy_read_struct(&png_ptr, 0, 0);
-    ShError( ShImageException("Invalid colour type") );
+    throw ShImageException("Invalid colour type");
   }
 
   delete [] m_data;

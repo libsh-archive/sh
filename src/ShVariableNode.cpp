@@ -67,7 +67,7 @@ bool ShVariableNode::uniform() const
 
 bool ShVariableNode::hasValues() const
 {
-  return m_values;
+  return (m_values != NULL);
 }
 
 int ShVariableNode::size() const

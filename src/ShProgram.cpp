@@ -32,7 +32,6 @@
 #include "ShDebug.hpp"
 #include "ShTextureNode.hpp"
 #include "ShCtrlGraph.hpp"
-#include "ShError.hpp"
 
 namespace SH {
 
@@ -43,7 +42,8 @@ ShProgramNode::ShProgramNode(int kind)
 
 void ShProgramNode::compile(ShRefCount<ShBackend>& backend)
 {
-  if (m_kind < 0) ShError( ShException( "Invalid ShProgram kind" ) );
+  // TODO: Throw an exception here instead.
+  SH_DEBUG_ASSERT(m_kind >= 0);
   compile(m_kind, backend);
 }
 
@@ -62,7 +62,8 @@ void ShProgramNode::compile(int kind, ShRefCount<ShBackend>& backend)
 }
 
 ShRefCount<ShBackendCode> ShProgramNode::code(ShRefCount<ShBackend>& backend) {
-  if (m_kind < 0) ShError( ShException( "Invalid ShProgram kind" ) );
+  // TODO: Throw an exception instead
+  SH_DEBUG_ASSERT(m_kind >= 0);
 
   return code(m_kind, backend);
 }
