@@ -158,6 +158,14 @@
 
 /// @name Named Declaration macros 
 //@{
+/** \def SH_NAME
+ * Set the name of a variable to be its C++ name.
+ *
+ * @see SH_DECL
+ * @see SH_NAMEDECL
+ */
+#define SH_NAME(var) do { var.name( # var); } while (0)
+
 /** \def SH_DECL
  * Declare variable with the same name as var.
  * Usage:

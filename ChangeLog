@@ -1,3 +1,7 @@
+2004-07-13  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShSyntax.hpp (SH_NAME): Added this macro.
+
 2004-07-12  Gabriel Moreno-Fortuny  <gmoreno@fezzik.cgl.uwaterloo.ca>
 
 	* backends/cpu/CPU.cpp: Added -O2 flag to CPU execution.
