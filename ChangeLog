@@ -1,3 +1,8 @@
+2005-04-06  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslEmit.cpp (emit_log): Removed the static constant
+	to fix a bug when using both log and log10 in the same program.
+
 2005-04-05  Francois Marier  <francois@serioushack.com>
 
 	* src/ShLibMatrixImpl.hpp (trace): Add this function.
