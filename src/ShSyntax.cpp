@@ -24,20 +24,20 @@ void shEndShader()
   assert(ShEnvironment::insideShader);
 
   // DEBUG
-  std::cerr << "--- Tokenized: " << std::endl;
-  std::cerr << *ShEnvironment::shader->tokenizer.blockList();
+  //std::cerr << "--- Tokenized: " << std::endl;
+  //std::cerr << *ShEnvironment::shader->tokenizer.blockList();
   
   ShEnvironment::shader->ctrlGraph = new ShCtrlGraph(ShEnvironment::shader->tokenizer.blockList());
 
-  ShDomTree domTree(ShEnvironment::shader->ctrlGraph);
-  domTree.debugDump();
+  //ShDomTree domTree(ShEnvironment::shader->ctrlGraph);
+  //domTree.debugDump();
 
   /*
   std::cerr << "--- Control graph: " << std::endl;
   ShEnvironment::shader->ctrlGraph->print(std::cerr, 0);
   */
-  std::ofstream dotfile("control.dot");
-  ShEnvironment::shader->ctrlGraph->graphvizDump(dotfile);
+  //std::ofstream dotfile("control.dot");
+  //ShEnvironment::shader->ctrlGraph->graphvizDump(dotfile);
 
   ShEnvironment::shader->collectVariables();
 

@@ -1,13 +1,15 @@
-check_PROGRAMS = do if for matrix ops point simple texture uniforms shvector while
+check_PROGRAMS = constants do if for julia matrix ops point simple texture uniforms shvector while
 
 AM_CPPFLAGS = -I../src
 
-LDADD = -lGL ../../sm/src/libsm.la ../src/libsh.la ../backends/sm/ShSmBackend.o ../backends/arb/ShArb.o
+LDADD = -lGL ../../sm/src/libsm.la ../src/libsh.la ../backends/sm/ShSmBackend.o # ../backends/arb/ShArb.o
 # LDFLAGS = -all-static
 
+constants_SOURCES = constants.cpp
 do_SOURCES = do.cpp
 if_SOURCES = if.cpp
 for_SOURCES = for.cpp
+julia_SOURCES = julia.cpp
 matrix_SOURCES = matrix.cpp
 ops_SOURCES = ops.cpp
 point_SOURCES = point.cpp
@@ -21,3 +23,6 @@ while_SOURCES = while.cpp
 	cat test.header > $@
 	cat $< >> $@
 	cat test.footer >> $@
+
+%.ps: %.dot
+	dot -Tps -o $@ $<

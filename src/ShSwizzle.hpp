@@ -57,8 +57,12 @@ public:
   int size() const;
   /// Obtain the index of the \a i'th element. 0 <= i < size().
   int operator[](int i) const;
+
+  /// Determine whether this is an identity swizzle.
+  bool identity() const;
   
 private:
+  std::size_t m_srcSize;
   std::vector<int> m_indices;
 
   friend std::ostream& operator<<(std::ostream& out, const ShSwizzle& swizzle);

@@ -299,6 +299,34 @@ ShVariableN<N, T> operator!=(const ShVariableN<N, T>& left, const ShVariableN<1,
   }
 }
 
+/** Conditional assignment (COND/CMP)
+ *  dest[i] = (src1[i] > 0.0 ? src2[i] : src3[i])
+ *  Note: CMP in the ARB_{vertex,fragment}_program spec has
+ *  src1[i] < 0.0, not greater than.
+ */
+template<int N, typename T>
+ShVariableN<N, T> cond(const ShVariableN<N, T>& condition, const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(condition.hasValues());
+    assert(left.hasValues());
+    assert(right.hasValues());
+    T cvals[N];
+    condition.getValues(cvals);
+    T lvals[N];
+    left.getValues(lvals);
+    T rvals[N];
+    right.getValues(rvals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = (cvals[i] > 0.0 ? lvals[i] : rvals[i]);
+    return ShConstant<N, T>(result);
+  } else {
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, SH_OP_COND, condition, left, right);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
 
 
 //--- Mathematics Library

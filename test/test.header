@@ -1,10 +1,12 @@
+// -*- C++ -*-
 #include "sh.hpp"
 #include <iostream>
+#include <fstream>
 
 using namespace SH;
 
 #define NAME(x) {x.name(#x);}
 
-int main()
+int main(int argc, char** argv)
 {
   try {

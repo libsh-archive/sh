@@ -1,0 +1,13 @@
+// -*- C++ -*-
+ShShader shader = SH_BEGIN_SHADER(0) {
+  
+  ShInputAttrib4f in1; NAME(in1);
+  ShOutputAttrib4f out1; NAME(out1);
+  ShOutputAttrib1f out2; NAME(out2);
+
+  //  out1 = in1 * 4.0;
+  out2 = in1(1) < ShConstant1f(3.0);
+  
+} SH_END_SHADER;
+
+

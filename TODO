@@ -1,3 +1,8 @@
+RELEASE:
+ - rename ShShader to ShProgram
+ - add SH_BEGIN_{VERTEX, FRAGMENT}_SHADER macros
+
+
 MATRICES:
  X operator()() extracts submatrix
  X operator[] extracts single row
@@ -20,6 +25,7 @@ TEXTURES:
  - mip mapping
  - other lookup mechanisms (bilinear etc.)
  - generic traits mechanism
+ - cube maps etc.
 
 SMALL TASKS:
  - check for libpng in configure
@@ -46,7 +52,7 @@ SMALL TASKS:
  X negation in SM backend code upload
  X store ShBackendCode objects in ShShader
  - replace assert() with exceptions/error function
- - add operator*(T) and similar for division to Sh{Lib,Attrib,Matrix}.hpp
+ - add operator*(T) and similar for division to Sh{Lib*,Matrix}.hpp
  X add operator[] to ShAttrib also to do one-element swizzle.
  - use a ShVariableKind instead of an int template parameter in ShAttrib and ShMatrix
 
@@ -65,7 +71,7 @@ LARGE TASKS:
  - begin the optimizer
  / matrices
  - textures
- - more backends
+ X more backends
 
 OPERATIONS:
 
@@ -86,7 +92,7 @@ OPERATIONS:
 |X|X|X| sin
 |X|X|X| cos
 | | | | tan
-|X|X|X| <, <=, >, >=, ==, !=
+|X|X|X| <, <=, >, >=, ==, != TODO: These are, um, declared as N x 1. They should either be 1 x 1 or N x N.
 | |X| | ceil
 |X|X| | acos
 |X|X| | asin
@@ -101,4 +107,5 @@ OPERATIONS:
 | | | | rcp (?)
 | | | | rsqrt
 |X|X|X| norm
+|X|X|X| cond
 +-+-+-+

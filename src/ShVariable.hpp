@@ -4,6 +4,7 @@
 #include "ShRefCount.hpp"
 #include "ShVariableNode.hpp"
 #include "ShSwizzle.hpp"
+#include "ShUtility.hpp"
 
 namespace SH {
 
@@ -76,6 +77,15 @@ template<int N, typename T>
 class ShVariableN : public ShVariable 
 {
 public:
+  /*
+  ShVariableN(T v)
+    : ShVariable(new ShVariableNode(SH_VAR_CONST, N))
+  {
+    ShIntEqual<N, 1>();
+    m_node->setValue(0, v);
+  }
+  */
+  
   ShVariableN(const ShVariableNodePtr& node)
     : ShVariable(node)
   {

@@ -42,6 +42,8 @@ enum ShOperation {
   SH_OP_NORM, ///< Normalize vector
 
   SH_OP_TEX, ///< Texture lookup
+
+  SH_OP_COND, ///< Conditional assignment: dst[i] = (src1[i] > 0.0 ? src2[i] : src3[i])
   // TODO: finish these
 };
 
@@ -65,10 +67,13 @@ class ShStatement {
 public:
   ShStatement(ShVariable dest, ShOperation op, ShVariable src);
   ShStatement(ShVariable dest, ShVariable src1, ShOperation op, ShVariable src2);
-              
+  ShStatement(ShVariable dest, ShOperation op, ShVariable src1, ShVariable src2, ShVariable src3);
+  
   ShVariable dest;
   ShVariable src1;
   ShVariable src2;
+  ShVariable src3;
+  
   ShOperation op;
 };
 

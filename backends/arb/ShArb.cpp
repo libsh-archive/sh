@@ -1,7 +1,11 @@
 #include "ShArb.hpp"
 #include <iostream>
 #include <sstream>
+#define GL_GLEXT_PROTOTYPES 1
 #include <GL/gl.h>
+#include <GL/glext.h>
+#include <GL/glx.h>
+#undef GL_GLEXT_PROTOTYPES
 #include "ShVariable.hpp"
 #include "ShDebug.hpp"
 #include "ShLinearAllocator.hpp"
@@ -11,6 +15,20 @@
 namespace ShArb {
 
 using namespace SH;
+/*
+PFNGLPROGRAMSTRINGARBPROC shGlProgramStringARB;
+PFNGLACTIVETEXTUREPROC shGlActiveTexture;
+PFNGLPROGRAMLOCALPARAMETER4FVARBPROC shGlProgramLocalParameter4fvARB;
+PFNGLPROGRAMENVPARAMETER4FVARBPROC shGlProgramEnvParameter4fvARB;
+PFNGLGETPROGRAMIVARBPROC shGlGetProgramivARB;
+*/
+
+#define shGlProgramStringARB glProgramStringARB
+#define shGlActiveTextureARB glActiveTextureARB
+#define shGlProgramLocalParameter4fvARB glProgramLocalParameter4fvARB
+#define shGlProgramEnvParameter4fvARB glProgramEnvParameter4fvARB
+#define shGlGetProgramivARB glGetProgramivARB
+
 
 unsigned int shArbTargets[] = {
   GL_VERTEX_PROGRAM_ARB,
@@ -276,23 +294,24 @@ struct ArbBindingSpecs {
   ShArbRegBinding binding;
   int maxBindings;
   ShVariableSpecialType specialType;
+  bool allowGeneric;
 };
 
 ArbBindingSpecs shArbVertexAttribBindingSpecs[] = {
-  {SH_ARB_REG_VERTEXPOS, 1, SH_VAR_POSITION},
-  {SH_ARB_REG_VERTEXNRM, 1, SH_VAR_NORMAL},
-  {SH_ARB_REG_VERTEXCOL, 1, SH_VAR_COLOR},
-  {SH_ARB_REG_VERTEXTEX, 8, SH_VAR_TEXCOORD},
-  {SH_ARB_REG_VERTEXFOG, 1, SH_VAR_ATTRIB},
-  {SH_ARB_REG_NONE, 0, SH_VAR_ATTRIB}
+  {SH_ARB_REG_VERTEXPOS, 1, SH_VAR_POSITION, false},
+  {SH_ARB_REG_VERTEXNRM, 1, SH_VAR_NORMAL, false},
+  {SH_ARB_REG_VERTEXCOL, 1, SH_VAR_COLOR, false},
+  {SH_ARB_REG_VERTEXTEX, 8, SH_VAR_TEXCOORD, true},
+  {SH_ARB_REG_VERTEXFOG, 1, SH_VAR_ATTRIB, true},
+  {SH_ARB_REG_NONE, 0, SH_VAR_ATTRIB, true}
 };
 
 ArbBindingSpecs shArbFragmentAttribBindingSpecs[] = {
-  {SH_ARB_REG_FRAGMENTPOS, 1, SH_VAR_POSITION},
-  {SH_ARB_REG_FRAGMENTCOL, 1, SH_VAR_COLOR},
-  {SH_ARB_REG_FRAGMENTTEX, 8, SH_VAR_TEXCOORD},
-  {SH_ARB_REG_FRAGMENTFOG, 1, SH_VAR_ATTRIB},
-  {SH_ARB_REG_NONE, 0, SH_VAR_ATTRIB}
+  {SH_ARB_REG_FRAGMENTPOS, 1, SH_VAR_POSITION, false},
+  {SH_ARB_REG_FRAGMENTCOL, 1, SH_VAR_COLOR, false},
+  {SH_ARB_REG_FRAGMENTTEX, 8, SH_VAR_TEXCOORD, true},
+  {SH_ARB_REG_FRAGMENTFOG, 1, SH_VAR_ATTRIB, true},
+  {SH_ARB_REG_NONE, 0, SH_VAR_ATTRIB, true}
 };
 
 ArbBindingSpecs* shArbAttribBindingSpecs[] = {
@@ -301,17 +320,17 @@ ArbBindingSpecs* shArbAttribBindingSpecs[] = {
 };
 
 ArbBindingSpecs shArbVertexOutputBindingSpecs[] = {
-  {SH_ARB_REG_RESULTPOS, 1, SH_VAR_POSITION},
-  {SH_ARB_REG_RESULTCOL, 1, SH_VAR_COLOR},
-  {SH_ARB_REG_RESULTTEX, 8, SH_VAR_TEXCOORD},
-  {SH_ARB_REG_RESULTFOG, 1, SH_VAR_ATTRIB},
-  {SH_ARB_REG_RESULTPTS, 1, SH_VAR_ATTRIB},
+  {SH_ARB_REG_RESULTPOS, 1, SH_VAR_POSITION, false},
+  {SH_ARB_REG_RESULTCOL, 1, SH_VAR_COLOR, false},
+  {SH_ARB_REG_RESULTTEX, 8, SH_VAR_TEXCOORD, true},
+  {SH_ARB_REG_RESULTFOG, 1, SH_VAR_ATTRIB, true},
+  {SH_ARB_REG_RESULTPTS, 1, SH_VAR_ATTRIB, true},
   {SH_ARB_REG_NONE, 0, SH_VAR_ATTRIB}
 };
 
 ArbBindingSpecs shArbFragmentOutputBindingSpecs[] = {
-  {SH_ARB_REG_RESULTCOL, 1, SH_VAR_COLOR},
-  {SH_ARB_REG_RESULTDPT, 1, SH_VAR_ATTRIB},
+  {SH_ARB_REG_RESULTCOL, 1, SH_VAR_COLOR, false},
+  {SH_ARB_REG_RESULTDPT, 1, SH_VAR_ATTRIB, false},
   {SH_ARB_REG_NONE, 0, SH_VAR_ATTRIB}
 };
 
@@ -438,7 +457,7 @@ void ArbCode::bind()
   std::ostringstream out;
   print(out);
   std::string text = out.str();
-  glProgramStringARB(shArbTargets[m_shader->kind()], GL_PROGRAM_FORMAT_ASCII_ARB, text.size(), text.c_str());
+  shGlProgramStringARB(shArbTargets[m_shader->kind()], GL_PROGRAM_FORMAT_ASCII_ARB, text.size(), text.c_str());
   int error = glGetError();
   if (error == GL_INVALID_OPERATION) {
     int pos = -1;
@@ -470,9 +489,15 @@ void ArbCode::bind()
       continue;
     }
 
-    const ArbReg& texReg = m_registers[texture];
+    RegMap::const_iterator texRegIterator = m_registers.find(texture);
 
-    glActiveTexture(GL_TEXTURE0 + texReg.index);
+    SH_DEBUG_ASSERT(texRegIterator != m_registers.end());
+    
+    const ArbReg& texReg = texRegIterator->second;
+
+    SH_DEBUG_PRINT("Setting active texture to " << texReg.index << ", my shader is " << m_shader.object());
+    
+    shGlActiveTextureARB(GL_TEXTURE0 + texReg.index);
     // TODO: Only do this once.
     unsigned int type;
     switch (texture->dims()) {
@@ -493,14 +518,37 @@ void ArbCode::bind()
     SH_DEBUG_PRINT("Binding texture " << texReg.index << " with texture unit " << texReg.bindingIndex);
 
     glBindTexture(type, texReg.bindingIndex);
-    //    glActiveTexture(m_registers[texture].index);
+
     SH_DEBUG_PRINT("Sending texture image");
     // TODO: Other types of textures.
     // TODO: Element Format
     // TODO: sampling/filtering
+    // TODO: wrap/
     glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexImage2D(type, 0, texture->elements(), texture->width(), texture->height(), 0, GL_RGBA, GL_FLOAT,
+    glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    unsigned int format;
+
+    switch (texture->elements()) {
+    case 1:
+      format = GL_LUMINANCE;
+      break;
+    case 2:
+      format = GL_LUMINANCE_ALPHA;
+      break;
+    case 3:
+      format = GL_RGB;
+      break;
+    case 4:
+      format = GL_RGBA;
+      break;
+    default:
+      format = 0;
+      break;
+    }
+    
+    glTexImage2D(type, 0, texture->elements(), texture->width(), texture->height(), 0, format, GL_FLOAT,
                  texture->data());
     int error = glGetError();
     if (error != GL_NO_ERROR) {
@@ -543,10 +591,10 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
   if (reg.type != SH_ARB_REG_PARAM) return;
   switch(reg.binding) {
   case SH_ARB_REG_PARAMLOC:
-    glProgramLocalParameter4fvARB(shArbTargets[m_shader->kind()], reg.bindingIndex, values);
+    shGlProgramLocalParameter4fvARB(shArbTargets[m_shader->kind()], reg.bindingIndex, values);
     break;
   case SH_ARB_REG_PARAMENV:
-    glProgramEnvParameter4fvARB(shArbTargets[m_shader->kind()], reg.bindingIndex, values);
+    shGlProgramEnvParameter4fvARB(shArbTargets[m_shader->kind()], reg.bindingIndex, values);
     break;
   default:
     return;
@@ -721,14 +769,51 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       m_instructions.push_back(ArbInst(SH_ARB_ADD, stmt.dest, stmt.src1, stmt.src2));
       break;
     case SH_OP_MUL:
+      {
+      if (stmt.src1.size() != 1 || stmt.src2.size() != 1) {
+        if (stmt.src1.size() == 1) {
+          int* swizzle = new int[stmt.src2.size()];
+          for (int i = 0; i < stmt.src2.size(); i++) swizzle[i] = 0;
+          m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest,
+                                                 stmt.src1(stmt.src2.size(), swizzle), stmt.src2));
+          delete [] swizzle;
+          break;
+        } else if (stmt.src2.size() == 1) {
+          int* swizzle = new int[stmt.src1.size()];
+          for (int i = 0; i < stmt.src1.size(); i++) swizzle[i] = 0;
+          m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src1,
+                                                 stmt.src2(stmt.src1.size(), swizzle)));
+          delete [] swizzle;
+          break;
+        }
+      }
+
       m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src1, stmt.src2));
       break;
+      }
     case SH_OP_DIV:
+      {
+        ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, stmt.src2.size()));
+        m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp, stmt.src2));
+
+        if (rcp.size() == 1 && stmt.src1.size() != 1) {
+          int* swizzle = new int[stmt.src1.size()];
+          for (int i = 0; i < stmt.src1.size(); i++) swizzle[i] = 0;
+          m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src1,
+                                                 rcp(stmt.src1.size(), swizzle)));
+          delete [] swizzle;
+        } else {
+          m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src1, rcp));
+        }
+        break;
+      }
+      /*
       {
       ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, stmt.src2.size()));
       m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp, stmt.src2));
       m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src1, rcp));
       }
+      */
       break;
     case SH_OP_DOT:
       {
@@ -775,6 +860,9 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       break;
     case SH_OP_TEX:
       m_instructions.push_back(ArbInst(SH_ARB_TEX, stmt.dest, stmt.src2, stmt.src1));
+      break;
+    case SH_OP_COND:
+      m_instructions.push_back(ArbInst(SH_ARB_CMP, stmt.dest, -stmt.src1, stmt.src2, stmt.src3));
       break;
     default:
       SH_DEBUG_WARN(opInfo[stmt.op].name << " not handled by ARB backend");
@@ -846,7 +934,7 @@ void ArbCode::allocInputs()
     for (int i = 0; shArbAttribBindingSpecs[m_shader->kind()][i].binding != SH_ARB_REG_NONE; i++) {
       const ArbBindingSpecs& specs = shArbAttribBindingSpecs[m_shader->kind()][i];
 
-      if (m_inputBindings[i] < specs.maxBindings) {
+      if (specs.allowGeneric && m_inputBindings[i] < specs.maxBindings) {
         m_registers[node].binding = specs.binding;
         m_registers[node].bindingIndex = m_inputBindings[i];
         m_inputBindings[i]++;
@@ -875,7 +963,7 @@ void ArbCode::allocOutputs()
     for (int i = 0; shArbOutputBindingSpecs[m_shader->kind()][i].binding != SH_ARB_REG_NONE; i++) {
       const ArbBindingSpecs& specs = shArbOutputBindingSpecs[m_shader->kind()][i];
 
-      if (m_outputBindings[i] < specs.maxBindings) {
+      if (specs.allowGeneric && m_outputBindings[i] < specs.maxBindings) {
         m_registers[node].binding = specs.binding;
         m_registers[node].bindingIndex = m_outputBindings[i];
         m_outputBindings[i]++;
@@ -956,23 +1044,32 @@ void ArbCode::allocTemps()
 
 ArbBackend::ArbBackend()
 {
+  /*
+#define SH_ARB_GL_EXT_LOOKUP(type, name) shGl ## name = (PFNGL ## type ## PROC)glXGetProcAddressARB((const GLubyte*) "gl" # name ); SH_DEBUG_PRINT("Looked up " << # name << " as " << &shGl ## name)
+  SH_ARB_GL_EXT_LOOKUP(PROGRAMSTRINGARB, ProgramStringARB);
+  SH_ARB_GL_EXT_LOOKUP(ACTIVETEXTURE, ActiveTextureARB);
+  SH_ARB_GL_EXT_LOOKUP(PROGRAMLOCALPARAMETER4FVARB, ProgramLocalParameter4fvARB);
+  SH_ARB_GL_EXT_LOOKUP(PROGRAMENVPARAMETER4FVARB, ProgramEnvParameter4fvARB);
+  SH_ARB_GL_EXT_LOOKUP(GETPROGRAMIVARB, GetProgramivARB);
+#undef SH_ARB_GL_EXT_LOOKUP  
+  */
   // TODO Max TEX instructions, texture indirections
   for (int i = 0; i < 2; i++) {
     unsigned int target = shArbTargets[i];
     m_instrs[i] = (!i ? 128 : 48);
-    glGetProgramivARB(target, GL_MAX_PROGRAM_INSTRUCTIONS_ARB, &m_instrs[i]);
+    shGlGetProgramivARB(target, GL_MAX_PROGRAM_INSTRUCTIONS_ARB, &m_instrs[i]);
     SH_DEBUG_PRINT("instrs[" << i << "] = " << m_instrs[i]);
     m_temps[i] = (!i ? 12 : 16);
-    glGetProgramivARB(target, GL_MAX_PROGRAM_TEMPORARIES_ARB, &m_temps[i]);
+    shGlGetProgramivARB(target, GL_MAX_PROGRAM_TEMPORARIES_ARB, &m_temps[i]);
     SH_DEBUG_PRINT("temps[" << i << "] = " << m_temps[i]);
     m_attribs[i] = (!i ? 16 : 10);
-    glGetProgramivARB(target, GL_MAX_PROGRAM_ATTRIBS_ARB, &m_attribs[i]);
+    shGlGetProgramivARB(target, GL_MAX_PROGRAM_ATTRIBS_ARB, &m_attribs[i]);
     SH_DEBUG_PRINT("attribs[" << i << "] = " << m_attribs[i]);
     m_params[i] = (!i ? 96 : 24);
-    glGetProgramivARB(target, GL_MAX_PROGRAM_LOCAL_PARAMETERS_ARB, &m_params[i]);
+    shGlGetProgramivARB(target, GL_MAX_PROGRAM_LOCAL_PARAMETERS_ARB, &m_params[i]);
     SH_DEBUG_PRINT("params[" << i << "] = " << m_params[i]);
     m_texs[i] = (!i ? 0 : 24);
-    if (i) glGetProgramivARB(target, GL_MAX_PROGRAM_TEX_INSTRUCTIONS_ARB, &m_texs[i]);
+    if (i) shGlGetProgramivARB(target, GL_MAX_PROGRAM_TEX_INSTRUCTIONS_ARB, &m_texs[i]);
     SH_DEBUG_PRINT("texs[" << i << "] = " << m_texs[i]);
   }
 }
@@ -988,6 +1085,7 @@ std::string ArbBackend::name() const
 
 ShBackendCodePtr ArbBackend::generateCode(const ShShader& shader)
 {
+  SH_DEBUG_ASSERT(shader.object());
   ArbCodePtr code = new ArbCode(this, shader);
   code->generate();
   return code;

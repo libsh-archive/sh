@@ -2,10 +2,16 @@
 
     ShEnvironment::shader = shader;
     ShEnvironment::insideShader = true;
-    ShBackendPtr backend = ShBackend::lookup("arb");
+    ShBackendPtr backend = ShBackend::lookup("sm");
     ShBackendCodePtr code = backend->generateCode(shader);
     std::cerr << "Printing code:" << std::endl;
     code->print(std::cerr);
+    std::string dumpfilename = argv[0];
+    dumpfilename += "-control.dot";
+
+    std::ofstream dumpfile(dumpfilename.c_str());
+    ShEnvironment::shader->ctrlGraph->graphvizDump(dumpfile);
+
     ShEnvironment::insideShader = false;
     ShEnvironment::shader = 0;
 

@@ -5,17 +5,20 @@
 namespace SH {
 
 ShSwizzle::ShSwizzle(int srcSize)
+  : m_srcSize(srcSize)
 {
   for (int i = 0; i < srcSize; i++) m_indices.push_back(i);
 }
 
 ShSwizzle::ShSwizzle(int srcSize, int i0)
+  : m_srcSize(srcSize)
 {
   if (i0 < 0 || i0 >= srcSize) throw ShSwizzleException(*this, i0, srcSize);
   m_indices.push_back(i0);
 }
 
 ShSwizzle::ShSwizzle(int srcSize, int i0, int i1)
+  : m_srcSize(srcSize)
 {
   if (i0 < 0 || i0 >= srcSize) throw ShSwizzleException(*this, i0, srcSize);
   m_indices.push_back(i0);
@@ -24,6 +27,7 @@ ShSwizzle::ShSwizzle(int srcSize, int i0, int i1)
 }
 
 ShSwizzle::ShSwizzle(int srcSize, int i0, int i1, int i2)
+  : m_srcSize(srcSize)
 {
   if (i0 < 0 || i0 >= srcSize) throw ShSwizzleException(*this, i0, srcSize);
   m_indices.push_back(i0);
@@ -34,6 +38,7 @@ ShSwizzle::ShSwizzle(int srcSize, int i0, int i1, int i2)
 }
 
 ShSwizzle::ShSwizzle(int srcSize, int i0, int i1, int i2, int i3)
+  : m_srcSize(srcSize)
 {
   if (i0 < 0 || i0 >= srcSize) throw ShSwizzleException(*this, i0, srcSize);
   m_indices.push_back(i0);
@@ -46,6 +51,7 @@ ShSwizzle::ShSwizzle(int srcSize, int i0, int i1, int i2, int i3)
 }
 
 ShSwizzle::ShSwizzle(int srcSize, int size, int* indices)
+  : m_srcSize(srcSize)
 {
   for (int i = 0; i < size; i++) {
     if (indices[i] < 0 || indices[i] >= srcSize) throw ShSwizzleException(*this, indices[i], srcSize);
@@ -54,6 +60,7 @@ ShSwizzle::ShSwizzle(int srcSize, int size, int* indices)
 }
 
 ShSwizzle::ShSwizzle(const ShSwizzle& other)
+  : m_srcSize(other.m_srcSize)
 {
   *this = other;
 }
@@ -64,6 +71,7 @@ ShSwizzle::~ShSwizzle()
 
 ShSwizzle& ShSwizzle::operator=(const ShSwizzle& other)
 {
+  m_srcSize = other.m_srcSize;
   m_indices = other.m_indices;
   //  m_indices.clear();
   //  for (int i = 0; i < other.size(); i++) {
@@ -82,6 +90,7 @@ ShSwizzle::ShSwizzle& ShSwizzle::operator*=(const ShSwizzle& other)
     }
     indices.push_back(m_indices[other[i]]);
   }
+  m_srcSize = other.m_srcSize;
   m_indices = indices;
   return *this;
 }
@@ -113,8 +122,18 @@ ShSwizzleException::ShSwizzleException(const ShSwizzle& s, int index, int size)
   m_message = out.str();
 }
 
+bool ShSwizzle::identity() const
+{
+  if (m_indices.size() != m_srcSize) return false;
+  for (std::size_t i = 0; i < m_indices.size(); i++) {
+    if (m_indices[i] != i) return false;
+  }
+  return true;
+}
+
 std::ostream& operator<<(std::ostream& out, const ShSwizzle& swizzle)
 {
+  if (swizzle.identity()) return out;
   out << "(";
   for (int i = 0; i < swizzle.size(); i++) {
     if (i > 0) out << ", ";

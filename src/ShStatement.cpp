@@ -37,6 +37,8 @@ const ShOperationInfo opInfo[] = {
   {"NORM", 1},
 
   {"TEX", 2},
+
+  {"COND", 3},
   
   {0, 0}
 };
@@ -48,6 +50,11 @@ ShStatement::ShStatement(ShVariable dest, ShOperation op, ShVariable src)
 
 ShStatement::ShStatement(ShVariable dest, ShVariable src1, ShOperation op, ShVariable src2)
   : dest(dest), src1(src1), src2(src2), op(op)
+{
+}
+
+ShStatement::ShStatement(ShVariable dest, ShOperation op, ShVariable src1, ShVariable src2, ShVariable src3)
+  : dest(dest), src1(src1), src2(src2), src3(src3), op(op)
 {
 }
 
@@ -67,6 +74,12 @@ std::ostream& operator<<(std::ostream& out, const ShStatement& stmt)
   case 2:
     out << stmt.dest.name() << stmt.dest.swizzle() << " := " << stmt.src1.name() << stmt.src1.swizzle()
         << " " << SH::opInfo[stmt.op].name << " " << stmt.src2.name() << stmt.src2.swizzle();
+    break;
+  case 3:
+    out << stmt.dest.name() << stmt.dest.swizzle() << " := " << SH::opInfo[stmt.op].name << " "
+        << stmt.src1.name() << stmt.src1.swizzle() << ", " 
+        << stmt.src2.name() << stmt.src2.swizzle() << ", "
+        << stmt.src3.name() << stmt.src3.swizzle();
     break;
   default:
     out << "<<<Unknown arity>>>";

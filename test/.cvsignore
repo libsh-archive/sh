@@ -15,3 +15,7 @@ shvector
 texture
 point
 *.cpp
+*.ps
+*.dot
+julia
+constants

@@ -22,4 +22,6 @@ ShShader shader = SH_BEGIN_SHADER(0) {
   out = frac(in1);
   out = sin(in1);
   out = sqrt(in1);
+  out = cond(in1, in1, in2);
+  
 } SH_END_SHADER;
