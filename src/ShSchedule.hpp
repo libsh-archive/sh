@@ -36,6 +36,8 @@ struct Mapping {
   unsigned int length;
 };
 
+std::ostream& operator<<(std::ostream& out, const Mapping& mapping);
+
 struct ShPass {
   ShProgramNodePtr program;
   std::list<Mapping> inputs, outputs;

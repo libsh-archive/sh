@@ -8,6 +8,8 @@
 #include "ShOperation.hpp"
 #include "ShVariableNode.hpp"
 #include "ShContext.hpp"
+#include "ShTransformer.hpp"
+#include "ShOptimizations.hpp"
 
 namespace {
 using namespace SH;
@@ -122,12 +124,7 @@ struct ScheduleBuilder {
     pass.program->ctrlGraph = new ShCtrlGraph(new_head, new_tail);
     
     pass.count = 0;
-    passes.push_back(pass);
     
-    // We'll fill in the edges later, using these maps.
-    // Not efficient, but simple.
-    node_to_pass[node.object()] = &passes.back();
-    pass_to_node[&passes.back()] = node.object();
 
     // We need to turn shared temporaries into inputs/outputs
 
@@ -139,12 +136,15 @@ struct ScheduleBuilder {
     
     ShContext::current()->enter(pass.program);
     if (new_body->block) {
+      
+      
       for (ShBasicBlock::ShStmtList::iterator I = new_body->block->begin();
            I != new_body->block->end(); ++I) {
-        if (I->dest.node() && I->dest.node()->kind() == SH_TEMP) {
+        if (I->dest.node()) {
           ShVariableNode* vnode = I->dest.node().object();
-          if (handled_output.find(vnode) == handled_output.end() &&
-              register_map.find(vnode) != register_map.end()) {
+          if (vnode->kind() == SH_TEMP
+              && handled_output.find(vnode) == handled_output.end()
+              && register_map.find(vnode) != register_map.end()) {
             // Need to add an output for this node
             ShVariableNodePtr outnode = new ShVariableNode(SH_OUTPUT,
                                                            vnode->size(),
@@ -152,33 +152,48 @@ struct ScheduleBuilder {
           
             {
               std::ostringstream os;
-              os << "buf[" << register_map[vnode].id << "]_out";
+              os << "T[" << register_map[vnode].id << "]_out";
               outnode->name(os.str());
             }
             pass.outputs.push_back(register_map[vnode]);
             handled_output.insert(vnode);
             output_temps.push_back(std::make_pair(vnode, outnode.object()));
+          } else if (vnode->kind() == SH_OUTPUT
+                     && handled_output.find(vnode) == handled_output.end()) {
+            SH_DEBUG_ASSERT(register_map.find(vnode) != register_map.end());
+            
+            pass.outputs.push_back(register_map[vnode]);
+            handled_output.insert(vnode);
           }
         }
+        
         for (int i = 0; i < opInfo[I->op].arity; i++) {
-          if (!I->src[i].node() || I->src[i].node()->kind() != SH_TEMP) continue;
+          if (!I->src[i].node()) continue;
           ShVariableNode* vnode = I->src[i].node().object();
 
-          if (handled_input.find(vnode) != handled_input.end() ||
-              register_map.find(vnode) == register_map.end()) continue;
+          if (vnode->kind() == SH_TEMP
+              && handled_input.find(vnode) == handled_input.end() 
+              && register_map.find(vnode) != register_map.end()) {
 
-          // Need to add an input for this node
-          ShVariableNodePtr innode = new ShVariableNode(SH_INPUT,
-                                                        vnode->size(),
-                                                        vnode->valueType());
-          {
-            std::ostringstream os;
-            os << "buf[" << register_map[vnode].id << "]_in";
-            innode->name(os.str());
+            // Need to add an input for this node
+            ShVariableNodePtr innode = new ShVariableNode(SH_INPUT,
+                                                          vnode->size(),
+                                                          vnode->valueType());
+            {
+              std::ostringstream os;
+              os << "T[" << register_map[vnode].id << "]_in";
+              innode->name(os.str());
+            }
+            pass.inputs.push_back(register_map[vnode]);
+            handled_input.insert(vnode);
+            input_temps.push_back(std::make_pair(vnode, innode.object()));
+          } else if (vnode->kind() == SH_INPUT
+                     && handled_input.find(vnode) == handled_input.end()) {
+            SH_DEBUG_ASSERT(register_map.find(vnode) != register_map.end());
+            
+            pass.inputs.push_back(register_map[vnode]);
+            handled_input.insert(vnode);
           }
-          pass.inputs.push_back(register_map[vnode]);
-          handled_input.insert(vnode);
-          input_temps.push_back(std::make_pair(vnode, innode.object()));
         }
       }
 
@@ -191,6 +206,13 @@ struct ScheduleBuilder {
         new_body->block->addStatement(ShStatement(ShVariable(I->second), SH_OP_ASN,
                                                   ShVariable(I->first)));
       }
+
+      passes.push_back(pass);
+      
+      // We'll fill in the edges later, using these maps.
+      // Not efficient, but simple.
+      node_to_pass[node.object()] = &passes.back();
+      pass_to_node[&passes.back()] = node.object();
     }
     
     ShContext::current()->exit();
@@ -234,12 +256,37 @@ struct ScheduleBuilder {
 
 namespace SH {
 
+std::ostream& operator<<(std::ostream& out, const Mapping& mapping)
+{
+  switch (mapping.type) {
+  case MAPPING_NULL:
+    out << "[null]";
+    break;
+  case MAPPING_TEMP:
+    out << "T[" << mapping.id << "]";
+    break;
+  case MAPPING_INPUT:
+    out << "I[" << mapping.id << "]";
+    break;
+  case MAPPING_OUTPUT:
+    out << "O[" << mapping.id << "]";
+    break;
+  }
+  return out;
+}
+
 ShSchedule::ShSchedule(const ShProgramNodePtr& program_orig)
   : m_program(program_orig->clone()),
     m_root(m_passes.end()),
     m_inputs(m_program->inputs),
     m_outputs(m_program->outputs)
 {
+  ShTransformer xform(m_program);
+
+  xform.convertInputOutput();
+
+  optimize(m_program);
+  
   // El cheapo register allocator
   // Just make registers for those temporaries used in more than one
   // block.
@@ -251,6 +298,20 @@ ShSchedule::ShSchedule(const ShProgramNodePtr& program_orig)
   TempCounter count(register_count, register_map, max_register);
   m_program->ctrlGraph->dfs(count);
   ShContext::current()->exit();
+
+  int i = 0;
+  for (ShProgramNode::VarList::const_iterator I = m_program->inputs_begin();
+       I != m_program->inputs_end(); ++I, ++i) {
+    ShVariableNode* node = I->object();
+    register_map[node] = Mapping(MAPPING_INPUT, i, 0, node->size());
+  }
+  i = 0;
+  for (ShProgramNode::VarList::const_iterator I = m_program->outputs_begin();
+       I != m_program->outputs_end(); ++I, ++i) {
+    ShVariableNode* node = I->object();
+    register_map[node] = Mapping(MAPPING_OUTPUT, i, 0, node->size());
+  }
+
 
   // Now, break each block into its own program.
 
@@ -280,13 +341,30 @@ void ShSchedule::dump_graphviz(std::ostream& out)
   out << "digraph schedule { " << std::endl;
   for (PassList::const_iterator I = m_passes.begin(); I != m_passes.end(); ++I) {
     const ShPass& pass = *I;
+    
     out << "  \"" << &pass << "\" [label=\"";
+    out << "{";
+    for (std::list<Mapping>::const_iterator J = pass.inputs.begin();
+         J != pass.inputs.end(); ++J) {
+      if (J != pass.inputs.begin()) out << ", ";
+      out << *J;
+    }
+    out << "}\\n";
+    
     ShCtrlGraphNodePtr body_node = pass.program->ctrlGraph->entry()->follower;
     if (body_node->block) {
       body_node->block->graphvizDump(out);
     }
+    out << "{";
+    for (std::list<Mapping>::const_iterator J = pass.outputs.begin();
+         J != pass.outputs.end(); ++J) {
+      if (J != pass.outputs.begin()) out << ", ";
+      out << *J;
+    }
+    out << "}";
     out << "\", shape=box]";
     out << ";" << std::endl;
+    
     if (pass.predicate_pass) {
       out << "  \"" << &pass << "\" -> \"" << pass.predicate_pass << "\""
           << " [label=\"buf[" << pass.predicate.id << "]\"];" << std::endl;
