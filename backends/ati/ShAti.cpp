@@ -36,6 +36,8 @@
 #include <GL/gl.h>
 #include <GL/glext.h>
 
+#include "ShArrayData.hpp"
+
 //TODO uber buffer stuff
 
 PFNGLPROGRAMSTRINGARBPROC glProgramStringARB = NULL;
@@ -59,9 +61,6 @@ PFNGLGETPROGRAMIVARBPROC glGetProgramivARB = NULL;
 #include "glati.h"
 #include "extensions.h"
 
-
-
-
 #endif /* WIN32 */
 
 #include "ShVariable.hpp"
@@ -70,6 +69,7 @@ PFNGLGETPROGRAMIVARBPROC glGetProgramivARB = NULL;
 #include "ShEnvironment.hpp"
 #include "ShTextureNode.hpp"
 #include "ShSyntax.hpp"
+
 
 namespace ShAti {
 
@@ -520,6 +520,9 @@ void AtiCode::freeRegister(const ShVariableNodePtr& var)
 
 void AtiCode::upload()
 {
+  /// clean-up previous errors
+  glGetError();
+
   if (!m_programId)
     shGlGenProgramsARB(1, &m_programId);
 
@@ -620,6 +623,10 @@ void AtiCode::loadTexture(ShTextureNodePtr texture)
 
 void AtiCode::loadDataTexture(ShDataTextureNodePtr texture, unsigned int type)
 {
+
+  /// reset the error OpenGL counter
+  glGetError();
+
   if (!type) {
     switch (texture->dims()) {
     case SH_TEXTURE_1D:
@@ -700,6 +707,9 @@ void AtiCode::loadDataTexture(ShDataTextureNodePtr texture, unsigned int type)
     if( ub ) {
       m_backend->allocUberbuffer( ub );
       glAttachMemATI( GL_TEXTURE_2D, ub->mem() );
+
+      SH_DEBUG_ERROR("Memory object: "<<ub->mem());
+
       m_backend->printUbErrors();
     } else {
       glAttachMemATI( GL_TEXTURE_2D, 0 );
@@ -1449,6 +1459,8 @@ void AtiBackend::allocUberbuffer( ShUberbufferPtr ub) {
   GLmem mem = ub->mem();
   if( mem ) return;
 
+  SH_DEBUG_PRINT("Allocating uber buffer ");
+
   ShUberbuffer::PropertyMap props = ub->properties();
   int numProps = props.size();
   GLint* propsArray = new GLint[ numProps * 2 + 4 ];
@@ -1466,8 +1478,12 @@ void AtiBackend::allocUberbuffer( ShUberbufferPtr ub) {
   propsArray[2] = GL_COLOR_BUFFER_ATI;
   propsArray[3] = GL_TRUE;
 
+  SH_DEBUG_PRINT(ub->format()<<"; "<<GL_RGBA);
+
   ub->setMem( glAllocMem2DATI(ub->format(), ub->width(), ub->height(), 
 			  numProps + 2, propsArray ) );
+  
+  SH_DEBUG_PRINT("Alocated: "<<ub->mem());
 
   delete[] propsArray;
 
@@ -1500,6 +1516,51 @@ void AtiBackend::bindFramebuffer() {
       glDrawBuffer( GL_BACK );
   }
 }
+
+void AtiBackend::render(SH::ShVertexArray& data){
+
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glEnableClientState(GL_NORMAL_ARRAY);
+  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+  glVertexPointer(3, GL_DOUBLE, 0, data.getData(0));
+  glNormalPointer(GL_DOUBLE, 0, data.getData(1));
+
+  glDrawElements(GL_TRIANGLES, data.getIndexSize(0), GL_UNSIGNED_SHORT, data.getIndex(0));
+
+  glDisableClientState(GL_VERTEX_ARRAY);
+  glDisableClientState(GL_NORMAL_ARRAY);
+  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+  glFinish();
+  glutSwapBuffers();
+
+}
+
+void AtiBackend::render_planar(SH::ShVertexArray& data){
+
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glEnableClientState(GL_NORMAL_ARRAY);
+  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+  
+  glVertexPointer(2, GL_DOUBLE, 0, data.getData(3));
+  glNormalPointer(GL_DOUBLE, 0, data.getData(1));
+  
+  glDrawElements(GL_TRIANGLES, data.getIndexSize(0), GL_UNSIGNED_SHORT, data.getIndex(0));
+
+  glDisableClientState(GL_VERTEX_ARRAY);
+  glDisableClientState(GL_NORMAL_ARRAY);
+  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+  
+  glFinish();
+  //glutSwapBuffers();
+
+}
+
 
 void AtiBackend::deleteUberbuffer(ShUberbufferPtr ub) {
   if( !ub->mem() ) return; 

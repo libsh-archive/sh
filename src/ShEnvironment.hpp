@@ -32,7 +32,12 @@
 #include "ShBackend.hpp"
 #include "ShFramebuffer.hpp"
 
+
 namespace SH {
+
+
+// forward declaration
+class ShScheduler;
 
 /** Global settings for the current program.
  * This class with only static members contains global settings such
@@ -61,6 +66,10 @@ struct ShEnvironment
 
   /// Whether exceptions are being thrown instead of error messages printed to stdout
   static bool useExceptions;
+
+  /// The global scheduler
+  static ShScheduler scheduler;
+
 };
 
 }

@@ -37,6 +37,8 @@
 #include "ShBackend.hpp"
 #include "ShProgram.hpp"
 #include "ShDebug.hpp"
+#include "ShBackend.hpp"
+
 
 namespace SH {
 
@@ -51,6 +53,14 @@ ShBackend::ShBackend()
 {
   init();
   m_backends->push_back(this);
+}
+
+void ShBackend::render(ShVertexArray& array){
+SH_DEBUG_ERROR("render is not available in this backend");
+}
+
+void ShBackend::render_planar(ShVertexArray& array){
+SH_DEBUG_ERROR("render is not available in this backend");
 }
 
 ShBackend::~ShBackend()

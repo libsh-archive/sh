@@ -35,6 +35,8 @@
 #include "ShVariableNode.hpp"
 #include "ShUberbuffer.hpp"
 
+#include "ShArrayData.hpp"
+
 namespace SH  {
 
 class ShBackendCode : public ShRefCountable {
@@ -77,6 +79,10 @@ public:
   virtual void deleteUberbuffer(ShUberbufferPtr ub);
 
   virtual void init2(void);
+
+  // render a vertex array
+  virtual void render(ShVertexArray& array);
+  virtual void render_planar(ShVertexArray& array);
 
   typedef std::vector< ShRefCount<ShBackend> > ShBackendList;
 

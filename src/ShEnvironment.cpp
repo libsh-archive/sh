@@ -27,6 +27,8 @@
 #include "ShEnvironment.hpp"
 #include "ShCtrlGraph.hpp"
 
+#include "ShScheduler.hpp"
+
 namespace SH {
 
 ShProgram ShEnvironment::shader = 0;
@@ -36,5 +38,7 @@ ShBackendPtr ShEnvironment::backend = 0;
 ShFramebufferPtr ShEnvironment::framebuffer = 0;
 int ShEnvironment::optimizationLevel = 1;
 bool ShEnvironment::useExceptions = false;
+
+  ShScheduler ShEnvironment::scheduler;
 
 }

@@ -170,4 +170,6 @@ void ShContinue()
   ShEnvironment::shader->tokenizer.blockList()->addBlock(new ShToken(SH_TOKEN_CONTINUE));
 }
 
-}
+
+
+}// SH

@@ -37,6 +37,7 @@
 #include "ShTextureNode.hpp"
 #include "ShFramebuffer.hpp"
 #include "ShUberbuffer.hpp"
+#include "ShArrayData.hpp"
 
 namespace ShAti {
 
@@ -191,13 +192,15 @@ public:
   void printUbErrors();
 
   void init2(void);
+  void render(SH::ShVertexArray& array);
+  void render_planar(SH::ShVertexArray& array);
 
   int instrs(int kind) { return m_instrs[kind]; }
   int temps(int kind) { return m_temps[kind]; }
   int attribs(int kind) { return m_attribs[kind]; }
   int params(int kind) { return m_params[kind]; }
   int texs(int kind) { return m_texs[kind]; }
-  
+
 private:
   int m_instrs[2]; ///< Maximum number of instructions for each shader kind
   int m_temps[2]; ///< Maximum number of temporaries for each shader kind

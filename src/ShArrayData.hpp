@@ -122,6 +122,8 @@ private:
   void clear();
 };
 
+typedef ShArrayData<double, unsigned short> ShVertexArray;
+
 }
 
 #endif

@@ -37,6 +37,8 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
                    ShDomTree.hpp ShOptimizer.hpp ShBitSet.hpp ShBitSet.cpp \
 		   ShAlgebra.hpp ShAlgebra.cpp \
 		   ShArrayData.hpp ShArrayData.cpp \
+		   ShScheduler.hpp ShScheduler.cpp \
+		   ShProgramGraph.hpp ShProgramGraph.cpp \
 		   ShInit.cpp
 
 
@@ -50,7 +52,7 @@ incinc_HEADERS = ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp \
                    ShSwizzle.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp \
                    ShUtility.hpp ShVariable.hpp ShVariableNode.hpp sh.hpp \
                    ShMatrix.hpp ShMatrixImpl.hpp ShTexture.hpp ShTextureImpl.hpp \
-		   ShArrayData.hpp \
+		   ShArrayData.hpp ShScheduler.hpp ShProgramGraph.hpp \
                    ShUberbuffer.hpp \
                    ShFramebuffer.hpp \
                    ShMemoryObject.hpp \

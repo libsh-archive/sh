@@ -96,6 +96,8 @@ public:
   /// Can be -1, if there is no kind associated with this program.
   int kind() const { return m_kind; }
   
+  void ShProgramNode::print() const ;
+
 private:
 
   int m_kind; ///< Can be -1, if there is no kind associated with this program.

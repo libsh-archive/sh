@@ -76,6 +76,7 @@ ShRefCount<ShBackendCode> ShProgramNode::code(int kind, ShRefCount<ShBackend>& b
   return m_code[std::make_pair(kind, backend)];
 }
 
+
 void ShProgramNode::updateUniform(const ShVariableNodePtr& uniform)
 {
   for (int i = 0; i < shShaderKinds; i++) {
@@ -97,6 +98,21 @@ void ShProgramNode::collectVariables()
     collectNodeVars(ctrlGraph->entry());
     ctrlGraph->entry()->clearMarked();
   }
+}
+
+
+void ShProgramNode::print() const {
+    
+    ctrlGraph->print(std::cout, 5);
+    std::cout<<std::endl;
+
+    // how many variables of each type
+    std::cout<<"in\tout\ttemp\tconst\tunif\ttxt"<<std::endl;
+    
+    std::cout<<inputs.size()<<'\t'<<outputs.size()<<'\t'<<temps.size()<<'\t';
+    std::cout<<constants.size()<<'\t'<<uniforms.size()<<'\t'<<textures.size()<<std::endl; 
+
+
 }
 
 void ShProgramNode::collectNodeVars(const ShCtrlGraphNodePtr& node)
