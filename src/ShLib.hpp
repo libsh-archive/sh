@@ -359,7 +359,7 @@ template<int N, typename T>
 void kill(const ShVariableN<N, T>& c)
 {
   assert(ShEnvironment::insideShader);
-  ShStatement stmt(SH_OP_KIL, c);
+  ShStatement stmt(c, SH_OP_KIL);
   ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
 }
 

@@ -95,6 +95,7 @@ extern const ShOperationInfo opInfo[];
  */
 class ShStatement {
 public:
+  ShStatement(ShVariable dest, ShOperation op);
   ShStatement(ShVariable dest, ShOperation op, ShVariable src);
   ShStatement(ShVariable dest, ShVariable src1, ShOperation op, ShVariable src2);
   ShStatement(ShVariable dest, ShOperation op, ShVariable src1, ShVariable src2, ShVariable src3);

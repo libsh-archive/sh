@@ -93,7 +93,8 @@ if test "x$ac_backend_arb" = xtrue ; then
 #else
   return 1;
 #endif]), [],
-    [AC_MSG_WARN([glext.h version 18 or greater (available at http://oss.sgi.com/projects/ogl-sample/registry/) not found. Disabling ARB backend.])])
+    [AC_MSG_WARN([glext.h version 18 or greater (available at http://oss.sgi.com/projects/ogl-sample/registry/) not found. Disabling ARB backend.])
+    ac_backend_arb=false])
 fi
 AM_CONDITIONAL(ENABLE_ARB_BACKEND, test x$ac_backend_arb = xtrue)
 

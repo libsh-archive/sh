@@ -73,13 +73,18 @@ const ShOperationInfo opInfo[] = {
   {0, 0}
 };
 
+ShStatement::ShStatement(ShVariable dest, ShOperation op)
+  : dest(dest), src1(0), src2(0), src3(0), op(op)
+{
+}
+
 ShStatement::ShStatement(ShVariable dest, ShOperation op, ShVariable src)
-  : dest(dest), src1(src), src2(0), op(op)
+  : dest(dest), src1(src), src2(0), src3(0), op(op)
 {
 }
 
 ShStatement::ShStatement(ShVariable dest, ShVariable src1, ShOperation op, ShVariable src2)
-  : dest(dest), src1(src1), src2(src2), op(op)
+  : dest(dest), src1(src1), src2(src2), src3(0), op(op)
 {
 }
 
