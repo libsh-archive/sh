@@ -16,6 +16,11 @@ When I compiled the Blinn-Phong shader, DirectX complained that my vertex shader
 As a thought, the nrm instruction occurred in the vertex shader, while the add writing to an output register was in the pixel shader. Maybe there's a difference based on whether it's a vertex or pixel shader?
 
 
+setBackendData: Everything in DirectX requires a COM object, and we can't generate a Direct3DDevice COM object ourselves without knowing the user's requested display settings.
+
+To get around this, I added setBackendData to ShSyntax.cpp and as a virtual member method to ShBackend. The version in ShSyntax accepts a void pointer and passes it to a backend, if one exists, and the version in ShBackend does nothing. It's overloaded in DxBackend, the DirectX backend class, to cast the pointer to a Direct3DDevice object and use that for binding and compiling the shaders.
+
+
 
 Assumptions: To use this, you have to have the DirectX SDK downloaded (http://www.microsoft.com/downloads/details.aspx?FamilyID=b7bc31fa-2df1-44fd-95a4-c2555446aed4&DisplayLang=en); I assumed the default install directory of C:\DXSDK, and I only installed the release versions of the DirectX runtime on Quince (you have the choice to install either on setup, and you can install your choice of debug or release runtimes from an icon on the start menu).
 
