@@ -1,0 +1,23 @@
+Some less obvious design decisions are listed here.
+
+=== Matrices ===
+
+Obviously, it would be nice if a swizzled submatrix obtained from
+another matrix shared the data and then did copy-on-write for
+efficiency.
+
+On the other hand, doing the copy directly simplifies the code
+drastically. We can rely on the optimizer to in fact propagate values
+in such a way that we get the same (possibly more fine-grained even!)
+effect as we would with a COW optimisation but in a much more
+self-contained way.
+
+Another issue is that of operator[] vs operator(). Since operator() is
+used to swizzle attributes it would seem obvious to also use it to
+swizzle matrices (obtaining a proper submatrix every two swizzles). In
+many situations however one will want to obtain a particular row as an
+actual attribute, rather than a matrix itself. Thus it seemed sensible
+to make this the job of operator[], to extract exactly one row (since
+it can only take one parameter anyways).
+
+

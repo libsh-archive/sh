@@ -5,6 +5,7 @@
 #include "ShShader.hpp"
 #include "ShSyntax.hpp"
 #include "ShAttrib.hpp"
+#include "ShMatrix.hpp"
 #include "ShLib.hpp"
 #include "ShBackend.hpp"
 

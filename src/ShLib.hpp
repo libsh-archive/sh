@@ -5,6 +5,7 @@
 #include <cassert>
 #include "ShVariable.hpp"
 #include "ShAttrib.hpp"
+#include "ShMatrix.hpp"
 
 namespace SH {
 
@@ -456,8 +457,50 @@ ShVariableN<N, T> sqrt(const ShVariableN<N, T>& var)
   }
 }
 
+// Operations on matrices
 
+/// Transpose of a matrix
+template<int Rows, int Cols, int Kind, typename T>
+ShMatrix<Cols, Rows, SH_VAR_TEMP, T>
+transpose(const ShMatrix<Rows, Cols, Kind, T>& m)
+{
+  ShMatrix<Cols, Rows, SH_VAR_TEMP, T> result;
+  for (int i = 0; i < Cols; i++) {
+    for (int j = 0; j < Rows; j++) {
+      result[i][j] = m[j][i];
+    }
+  }
+  return result;
 }
 
+/// Matrix multiplication
+template<int M, int N, int P, int Kind, int Kind2, typename T>
+ShMatrix<M, P, SH_VAR_TEMP, T>
+operator|(const ShMatrix<M, N, Kind, T>& a,
+          const ShMatrix<N, P, Kind2, T>& b)
+{
+  ShMatrix<P, N, SH_VAR_TEMP, T> tb = transpose(b);
+
+  ShMatrix<M, P, SH_VAR_TEMP, T> result;
+  for (int i = 0; i < M; i++) {
+    for (int j = 0; j < P; j++) {
+      result[i][j] = dot(a[i], tb[j]);
+    }
+  }
+  return result;
+}
+
+/// Treat a variable as a column vector and multiply it with a matrix
+template<int M, int N, int Kind, typename T>
+ShVariableN<M, T> operator|(const ShMatrix<M, N, Kind, T>& a, const ShVariableN<N, T>& b)
+{
+  ShAttrib<M, SH_VAR_TEMP, T> ret;
+  for (int i = 0; i < M; i++) {
+    ret[i] = dot(a[i], b);
+  }
+  return ret;
+}
+
+}
 
 #endif

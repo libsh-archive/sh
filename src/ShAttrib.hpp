@@ -23,16 +23,14 @@ class ShAttrib : public ShVariableN<N, T> {
 public:
   ShAttrib();
   
-  explicit ShAttrib(T);
-  explicit ShAttrib(T, T);
-  explicit ShAttrib(T, T, T);
-  explicit ShAttrib(T, T, T, T);
+  ShAttrib(T);
+  ShAttrib(T, T);
+  ShAttrib(T, T, T);
+  ShAttrib(T, T, T, T);
 
   ShAttrib(const ShVariableN<N, T>& other);
   ShAttrib(const ShAttrib<N, Kind, T, Swizzled>& other);
-  explicit ShAttrib(const ShVariableNodePtr& node,
-                    const ShSwizzle& swizzle,
-                    bool neg);
+  ShAttrib(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
 
   ~ShAttrib();
 
@@ -54,6 +52,7 @@ public:
   ShAttrib<2, Kind, T, true> operator()(int, int) const;
   ShAttrib<3, Kind, T, true> operator()(int, int, int) const;
   ShAttrib<4, Kind, T, true> operator()(int, int, int, int) const;
+  ShAttrib<1, Kind, T, true> operator[](int) const; ///< Identical to operator()(int)
   // TODO: Arbitrary swizzles?
   //@}
 

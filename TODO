@@ -1,3 +1,9 @@
+MATRICES:
+ X operator()() extracts submatrix
+ X operator[] extracts single row
+ X operator{+,-,*,/}=
+ - add linear algebra
+
 SMALL TASKS:
  X have updating semantics for uniforms
  - have functions to switch the current backend, clearing bound shaders etc. appropriately.
@@ -18,10 +24,12 @@ SMALL TASKS:
  X send uniform values to SM in the SM backend
  X add Swizzling operators to ShVariable
  - make ShVariable operators return ShVariableN
- - add Swizzling operators to ShVariableN
+ X add Swizzling operators to ShVariableN
  X negation in SM backend code upload
  X store ShBackendCode objects in ShShader
  - replace assert() with exceptions/error function
+ - add operator*(T) and similar for division to Sh{Lib,Attrib,Matrix}.hpp
+ - add operator[] to ShAttrib also to do one-element swizzle.
 
 MEDIUM TASKS:
  - port more of the ShLib calls to the new model.
@@ -35,7 +43,7 @@ MEDIUM TASKS:
 LARGE TASKS:
  X finish the parser
  - begin the optimizer
- - matrices
+ / matrices
  - textures
  - more backends
 
