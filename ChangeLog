@@ -1,5 +1,8 @@
 2004-05-21  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShRefCount.hpp (class ShPointer): Rename ShRefCount to
+	ShPointer. Also change all references to this. Resolves issue15.
+
 	* src/ShSyntax.hpp, src/ShSyntax.cpp: Add shBind, shCompile and
 	deprecate old functions with "Shader" in the names. Fixes issue1.
 

@@ -53,7 +53,7 @@ void ShChannelNode::memory(const ShMemoryPtr& memory, int count)
   m_count = count;
 }
 
-ShRefCount<const ShMemory> ShChannelNode::memory() const
+ShPointer<const ShMemory> ShChannelNode::memory() const
 {
   return m_memory;
 }

@@ -68,7 +68,7 @@ public:
   virtual std::ostream& printInputOutputFormat(std::ostream& out) = 0;
 };
 
-typedef ShRefCount<ShBackendCode> ShBackendCodePtr;
+typedef ShPointer<ShBackendCode> ShBackendCodePtr;
 
 class ShTransformer;
 class ShBackend : public ShRefCountable {
@@ -84,12 +84,12 @@ public:
   // execute a stream program, if supported
   virtual void execute(const ShProgram& program, ShStream& dest) = 0;
   
-  typedef std::vector< ShRefCount<ShBackend> > ShBackendList;
+  typedef std::vector< ShPointer<ShBackend> > ShBackendList;
 
   static ShBackendList::iterator begin();
   static ShBackendList::iterator end();
 
-  static ShRefCount<ShBackend> lookup(const std::string& name);
+  static ShPointer<ShBackend> lookup(const std::string& name);
 
 protected:
   ShBackend();
@@ -101,7 +101,7 @@ private:
   static bool m_doneInit;
 };
 
-typedef ShRefCount<ShBackend> ShBackendPtr;
+typedef ShPointer<ShBackend> ShBackendPtr;
 
 }
 

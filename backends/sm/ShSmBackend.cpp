@@ -41,7 +41,7 @@ const int SmMaxTR = 256;
 
 using namespace SH;
 
-static SH::ShRefCount<Backend> instance = new Backend();
+static SH::ShPointer<Backend> instance = new Backend();
 static std::string* opNames;
 
 void initOps();
@@ -71,7 +71,7 @@ std::string SmRegister::print() const
   return stream.str();
 }
 
-BackendCode::BackendCode(ShRefCount<Backend> backend, const ShProgram& shader,
+BackendCode::BackendCode(ShPointer<Backend> backend, const ShProgram& shader,
                          const std::string& target)
   : m_backend(backend), m_shader(shader), m_originalShader(shader), 
     m_smShader(0), m_target(target),

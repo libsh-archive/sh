@@ -40,7 +40,7 @@ public:
   virtual ~ShChannelNode();
 
   void memory(const ShMemoryPtr& memory, int count);
-  ShRefCount<const ShMemory> memory() const;
+  ShPointer<const ShMemory> memory() const;
   ShMemoryPtr memory();
   
   int count() const;
@@ -54,7 +54,7 @@ private:
   ShChannelNode& operator=(const ShChannelNode& other);
 };
 
-typedef ShRefCount<ShChannelNode> ShChannelNodePtr;
+typedef ShPointer<ShChannelNode> ShChannelNodePtr;
 
 }
 #endif

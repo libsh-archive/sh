@@ -70,7 +70,7 @@ ShMemoryPtr ShTextureNode::memory(int n)
   return m_memory[n];
 }
 
-ShRefCount<const ShMemory> ShTextureNode::memory(int n) const
+ShPointer<const ShMemory> ShTextureNode::memory(int n) const
 {
   SH_DEBUG_ASSERT((n == 0)
                   || (m_dims == SH_TEXTURE_CUBE && n >= 0 && n < 6));
@@ -89,7 +89,7 @@ ShMemoryPtr ShTextureNode::memory(ShCubeDirection dir)
   return memory(static_cast<int>(dir));
 }
 
-ShRefCount<const ShMemory> ShTextureNode::memory(ShCubeDirection dir) const
+ShPointer<const ShMemory> ShTextureNode::memory(ShCubeDirection dir) const
 {
   return memory(static_cast<int>(dir));
 }

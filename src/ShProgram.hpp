@@ -56,24 +56,24 @@ public:
   /// code.
   /// This operation will fail if this program does not have a
   /// particular target.
-  void compile(const ShRefCount<ShBackend>& backend);
+  void compile(const ShPointer<ShBackend>& backend);
 
   /// Forcefully compile this shader for a particular backend, even if
   /// it has been compiled previously. Use code() to obtain the actual code.
-  void compile(const std::string& target, const ShRefCount<ShBackend>& backend);
+  void compile(const std::string& target, const ShPointer<ShBackend>& backend);
   
   /// Obtain the code for currently active backend. 
   /// This operation will fail if this program does not have a
   /// particular target.
-  ShRefCount<ShBackendCode> code(); 
+  ShPointer<ShBackendCode> code(); 
   
   /// Obtain the code for a particular backend. Generates it if necessary.
   /// This operation will fail if this program does not have a
   /// particular target.
-  ShRefCount<ShBackendCode> code(const ShRefCount<ShBackend>& backend);
+  ShPointer<ShBackendCode> code(const ShPointer<ShBackend>& backend);
 
   /// Obtain the code for a particular backend. Generates it if necessary.
-  ShRefCount<ShBackendCode> code(const std::string& target, const ShRefCount<ShBackend>& backend);
+  ShPointer<ShBackendCode> code(const std::string& target, const ShPointer<ShBackend>& backend);
 
   /// Notify this shader that a uniform variable has changed.
   void updateUniform(const ShVariableNodePtr& uniform);
@@ -85,7 +85,7 @@ public:
   /// The control graph (the parsed form of the token
   /// list). Constructed during the parsing step, when shEndShader()
   /// is called.
-  ShRefCount<ShCtrlGraph> ctrlGraph;
+  ShPointer<ShCtrlGraph> ctrlGraph;
 
   /// Call after contructing the control graph [after optimization!]
   /// to make lists of all the variables used in the shader.
@@ -121,13 +121,13 @@ private:
 
   std::string m_name; ///< Can be empty, until one is set with name().
   
-  void collectNodeVars(const ShRefCount<ShCtrlGraphNode>& node);
+  void collectNodeVars(const ShPointer<ShCtrlGraphNode>& node);
   void collectVar(const ShVariableNodePtr& node);
 
-  std::map< std::pair< std::string, ShRefCount<ShBackend> >, ShRefCount<ShBackendCode> > m_code; ///< Compiled code is cached here.
+  std::map< std::pair< std::string, ShPointer<ShBackend> >, ShPointer<ShBackendCode> > m_code; ///< Compiled code is cached here.
 };
 
-typedef ShRefCount<ShProgramNode> ShProgram;
+typedef ShPointer<ShProgramNode> ShProgram;
 
 extern std::ostream& operator<<( std::ostream& out, const ShProgramNode::VarList &varList );
  

@@ -78,7 +78,7 @@ public:
   
   void dirty();
   ShMemoryPtr memory();
-  ShRefCount<const ShMemory> memory() const;
+  ShPointer<const ShMemory> memory() const;
   
 private:
   int m_width, m_height;

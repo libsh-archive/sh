@@ -67,7 +67,7 @@ private:
   ShStmtList m_statements;
 };
 
-typedef ShRefCount<ShBasicBlock> ShBasicBlockPtr;
+typedef ShPointer<ShBasicBlock> ShBasicBlockPtr;
 
 }
 

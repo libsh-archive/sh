@@ -395,7 +395,7 @@ ShMemoryPtr ShImage::memory()
   return m_memory;
 }
 
-ShRefCount<const ShMemory> ShImage::memory() const
+ShPointer<const ShMemory> ShImage::memory() const
 {
   return m_memory;
 }

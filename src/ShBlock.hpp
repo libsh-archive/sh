@@ -45,7 +45,7 @@ public:
   virtual void print(std::ostream& out, int indent) const = 0;
 };
 
-typedef ShRefCount<ShBlock> ShBlockPtr;
+typedef ShPointer<ShBlock> ShBlockPtr;
 
 /** A list of generic blocks.
  */
@@ -81,7 +81,7 @@ private:
   std::vector<ShBlockPtr> m_blocks;
 };
 
-typedef ShRefCount<ShBlockList> ShBlockListPtr;
+typedef ShPointer<ShBlockList> ShBlockListPtr;
 
 }
 

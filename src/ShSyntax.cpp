@@ -118,7 +118,7 @@ bool shSetBackend(const std::string& name)
 
 void shIf(bool)
 {
-  ShRefCount<ShToken> token = new ShToken(SH_TOKEN_IF);
+  ShPointer<ShToken> token = new ShToken(SH_TOKEN_IF);
 
   token->arguments.push_back(ShEnvironment::shader->tokenizer.getArgument());
   ShEnvironment::shader->tokenizer.popArgQueue();
@@ -138,7 +138,7 @@ void shElse()
 
 void shWhile(bool)
 {
-  ShRefCount<ShToken> token = new ShToken(SH_TOKEN_WHILE);
+  ShPointer<ShToken> token = new ShToken(SH_TOKEN_WHILE);
 
   token->arguments.push_back(ShEnvironment::shader->tokenizer.getArgument());
   ShEnvironment::shader->tokenizer.popArgQueue();
@@ -158,7 +158,7 @@ void shDo()
 
 void shUntil(bool)
 {
-  ShRefCount<ShToken> token = new ShToken(SH_TOKEN_UNTIL);
+  ShPointer<ShToken> token = new ShToken(SH_TOKEN_UNTIL);
 
   token->arguments.push_back(ShEnvironment::shader->tokenizer.getArgument());
   ShEnvironment::shader->tokenizer.popArgQueue();
@@ -168,7 +168,7 @@ void shUntil(bool)
 
 void shFor(bool)
 {
-  ShRefCount<ShToken> token = new ShToken(SH_TOKEN_FOR);
+  ShPointer<ShToken> token = new ShToken(SH_TOKEN_FOR);
 
   for (int i = 0; i < 3; i++) {
     token->arguments.push_back(ShEnvironment::shader->tokenizer.getArgument());

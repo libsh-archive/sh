@@ -58,7 +58,7 @@ class ShFixedManipulatorNode: public ShRefCountable {
      */
     virtual ShProgram applyToOutputs(ShManipVarIterator &finger, ShManipVarIterator end) const = 0;
 };
-typedef ShRefCount<ShFixedManipulatorNode> ShFixedManipulator;
+typedef ShPointer<ShFixedManipulatorNode> ShFixedManipulator;
 
 class ShKeepNode: public ShFixedManipulatorNode {
   public:

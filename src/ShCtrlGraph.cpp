@@ -124,20 +124,20 @@ void ShCtrlGraphNode::clearMarked() const
   }
 }
 
-void ShCtrlGraphNode::append(const ShRefCount<ShCtrlGraphNode>& node)
+void ShCtrlGraphNode::append(const ShPointer<ShCtrlGraphNode>& node)
 {
   if (!node) return;
   assert(!follower);
   follower = node;
 }
 
-void ShCtrlGraphNode::append(const ShRefCount<ShCtrlGraphNode>& node,
+void ShCtrlGraphNode::append(const ShPointer<ShCtrlGraphNode>& node,
                              ShVariable cond)
 {
   if (node) successors.push_back(ShCtrlGraphBranch(node, cond));
 }
 
-ShCtrlGraphBranch::ShCtrlGraphBranch(const ShRefCount<ShCtrlGraphNode>& node,
+ShCtrlGraphBranch::ShCtrlGraphBranch(const ShPointer<ShCtrlGraphNode>& node,
                                      ShVariable cond)
   : node(node), cond(cond)
 {

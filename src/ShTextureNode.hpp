@@ -129,8 +129,8 @@ public:
   ShTextureDims dims() const;
 
   // Memory
-  ShRefCount<const ShMemory> memory(int n = 0) const;
-  ShRefCount<const ShMemory> memory(ShCubeDirection dir) const;
+  ShPointer<const ShMemory> memory(int n = 0) const;
+  ShPointer<const ShMemory> memory(ShCubeDirection dir) const;
   ShMemoryPtr memory(int n = 0);
   ShMemoryPtr memory(ShCubeDirection dir);
   void memory(ShMemoryPtr memory, int n = 0);
@@ -163,7 +163,7 @@ private:
   ShTextureNode& operator=(const ShTextureNode& other);
 };
 
-typedef ShRefCount<ShTextureNode> ShTextureNodePtr;
+typedef ShPointer<ShTextureNode> ShTextureNodePtr;
 
 }
 #endif

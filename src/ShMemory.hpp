@@ -57,15 +57,15 @@ public:
   int timestamp() const;
 
   /// Find a storage of a given id.
-  ShRefCount<ShStorage> findStorage(const std::string& id);
+  ShPointer<ShStorage> findStorage(const std::string& id);
 
   /// Find a storage of a given id selected by an external functor.
   /// @arg functor A functor of ShStoragePtr -> bool.
   template<typename Functor>
-  ShRefCount<ShStorage> findStorage(const std::string& id, const Functor& f);
+  ShPointer<ShStorage> findStorage(const std::string& id, const Functor& f);
 
   /// Discard this storage from this memory
-  void removeStorage(const ShRefCount<ShStorage>& storage);
+  void removeStorage(const ShPointer<ShStorage>& storage);
 
 protected:
   ShMemory();
@@ -73,9 +73,9 @@ protected:
 private:
   void updateTimestamp(int timestamp);
 
-  void addStorage(const ShRefCount<ShStorage>& storage);
+  void addStorage(const ShPointer<ShStorage>& storage);
 
-  typedef std::list< ShRefCount<ShStorage> > StorageList;
+  typedef std::list< ShPointer<ShStorage> > StorageList;
   StorageList m_storages;
   int m_timestamp;
 
@@ -87,8 +87,8 @@ private:
   ShMemory(const ShMemory& other);
 };
 
-typedef ShRefCount<ShMemory> ShMemoryPtr;
-typedef ShRefCount<const ShMemory> ShMemoryCPtr;
+typedef ShPointer<ShMemory> ShMemoryPtr;
+typedef ShPointer<const ShMemory> ShMemoryCPtr;
 
 /** A Storage Transfer function.
  * A transfer specifies the cost and manner of transferring data from
@@ -191,8 +191,8 @@ private:
   ShStorage& operator=(const ShStorage& other);
 };
 
-typedef ShRefCount<ShStorage> ShStoragePtr;
-typedef ShRefCount<const ShStorage> ShStorageCPtr;
+typedef ShPointer<ShStorage> ShStoragePtr;
+typedef ShPointer<const ShStorage> ShStorageCPtr;
 
 /** An ShStorage representing data stored on the CPU host memory.
  * You probably want to use ShHostMemory to construct this.
@@ -230,8 +230,8 @@ private:
   ShHostStorage(const ShHostStorage& other);
 };
 
-typedef ShRefCount<ShHostStorage> ShHostStoragePtr;
-typedef ShRefCount<const ShHostStorage> ShHostStorageCPtr;
+typedef ShPointer<ShHostStorage> ShHostStoragePtr;
+typedef ShPointer<const ShHostStorage> ShHostStorageCPtr;
 
 /** An ShMemory initially originating in CPU host memory.
  * @see ShMemory
@@ -245,7 +245,7 @@ public:
   ~ShHostMemory();
 
   ShHostStoragePtr hostStorage();
-  ShRefCount<const ShHostStorage> hostStorage() const;
+  ShPointer<const ShHostStorage> hostStorage() const;
 
 private:
   ShHostStoragePtr m_hostStorage;
@@ -254,11 +254,11 @@ private:
   ShHostMemory(const ShHostMemory& other);
 };
 
-typedef ShRefCount<ShHostMemory> ShHostMemoryPtr;
-typedef ShRefCount<const ShHostMemory> ShHostMemoryCPtr;
+typedef ShPointer<ShHostMemory> ShHostMemoryPtr;
+typedef ShPointer<const ShHostMemory> ShHostMemoryCPtr;
 
 template<typename Functor>
-ShRefCount<ShStorage> ShMemory::findStorage(const std::string& id, const Functor& f)
+ShPointer<ShStorage> ShMemory::findStorage(const std::string& id, const Functor& f)
 {
   for (StorageList::iterator I = m_storages.begin(); I != m_storages.end(); ++I) {
     if ((*I)->id() == id && f(*I)) return *I;

@@ -75,7 +75,7 @@ private:
   ShTokenType m_type;
 };
 
-typedef ShRefCount<ShToken> ShTokenPtr;
+typedef ShPointer<ShToken> ShTokenPtr;
 
 
 }

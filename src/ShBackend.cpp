@@ -75,7 +75,7 @@ ShBackend::ShBackendList::iterator ShBackend::end()
   return m_backends->end();
 }
 
-ShRefCount<ShBackend> ShBackend::lookup(const std::string& name)
+ShPointer<ShBackend> ShBackend::lookup(const std::string& name)
 {
   init();
   

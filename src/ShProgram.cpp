@@ -57,13 +57,13 @@ std::string ShProgramNode::name() const
   return m_name;
 }
 
-void ShProgramNode::compile(const ShRefCount<ShBackend>& backend)
+void ShProgramNode::compile(const ShPointer<ShBackend>& backend)
 {
   if (m_target.empty()) ShError( ShException( "Invalid ShProgram target" ) );
   compile(m_target, backend);
 }
 
-void ShProgramNode::compile(const std::string& target, const ShRefCount<ShBackend>& backend)
+void ShProgramNode::compile(const std::string& target, const ShPointer<ShBackend>& backend)
 {
   if (!backend) return;
 
@@ -80,17 +80,17 @@ void ShProgramNode::compile(const std::string& target, const ShRefCount<ShBacken
   m_code[std::make_pair(target, backend)] = code;
 }
 
-ShRefCount<ShBackendCode> ShProgramNode::code() {
+ShPointer<ShBackendCode> ShProgramNode::code() {
   return code(ShEnvironment::backend);
 }
 
-ShRefCount<ShBackendCode> ShProgramNode::code(const ShRefCount<ShBackend>& backend) {
+ShPointer<ShBackendCode> ShProgramNode::code(const ShPointer<ShBackend>& backend) {
   if (m_target.empty()) ShError( ShException( "Invalid ShProgram target" ) );
 
   return code(m_target, backend);
 }
 
-ShRefCount<ShBackendCode> ShProgramNode::code(const std::string& target, const ShRefCount<ShBackend>& backend) {
+ShPointer<ShBackendCode> ShProgramNode::code(const std::string& target, const ShPointer<ShBackend>& backend) {
   if (!backend) return 0;
   assert(!ShEnvironment::insideShader);
 

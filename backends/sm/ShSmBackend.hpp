@@ -86,7 +86,7 @@ class Backend;
 
 class BackendCode : public SH::ShBackendCode {
 public:
-  BackendCode(SH::ShRefCount<Backend> backend, const SH::ShProgram& shader,
+  BackendCode(SH::ShPointer<Backend> backend, const SH::ShProgram& shader,
               const std::string& target);
   virtual ~BackendCode();
 
@@ -110,7 +110,7 @@ public:
   const std::string& target() const { return m_target; }
 
 private:
-  SH::ShRefCount<Backend> m_backend;
+  SH::ShPointer<Backend> m_backend;
   SH::ShProgram m_shader;
   SH::ShProgram m_originalShader;
   SMshader m_smShader;
@@ -160,7 +160,7 @@ private:
   std::string printVar(const SH::ShVariable& var);
 };
 
-typedef SH::ShRefCount<BackendCode> BackendCodePtr;
+typedef SH::ShPointer<BackendCode> BackendCodePtr;
 
 class Backend : public SH::ShBackend {
 public:
@@ -175,7 +175,7 @@ private:
   void generateNode(BackendCodePtr& code, const SH::ShCtrlGraphNodePtr& node);
 };
 
-typedef SH::ShRefCount<Backend> BackendPtr;
+typedef SH::ShPointer<Backend> BackendPtr;
 
 }
 #endif

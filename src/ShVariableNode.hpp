@@ -130,7 +130,7 @@ protected:
   static int m_maxID;
 };
 
-typedef ShRefCount<ShVariableNode> ShVariableNodePtr;
+typedef ShPointer<ShVariableNode> ShVariableNodePtr;
 
 }
 

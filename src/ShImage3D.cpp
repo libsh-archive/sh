@@ -128,7 +128,7 @@ ShMemoryPtr ShImage3D::memory()
   return m_memory;
 }
 
-ShRefCount<const ShMemory> ShImage3D::memory() const
+ShPointer<const ShMemory> ShImage3D::memory() const
 {
   return m_memory;
 }

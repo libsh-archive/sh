@@ -45,7 +45,7 @@ private:
   // TODO: Mipmapping?
 };
 
-typedef SH::ShRefCount<GlTextureStorage> GlTextureStoragePtr;
+typedef SH::ShPointer<GlTextureStorage> GlTextureStoragePtr;
 
 }
 

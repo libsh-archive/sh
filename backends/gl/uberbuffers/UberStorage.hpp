@@ -68,7 +68,7 @@ private:
   friend class UberUberTransfer;
 };
 
-typedef SH::ShRefCount<UberStorage> UberStoragePtr;
+typedef SH::ShPointer<UberStorage> UberStoragePtr;
 
 class UberUberTransfer : public SH::ShTransfer {
 public:

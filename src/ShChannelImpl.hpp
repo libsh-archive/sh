@@ -68,7 +68,7 @@ ShMemoryPtr ShChannel<T>::memory()
 }
 
 template<typename T>
-ShRefCount<const ShMemory> ShChannel<T>::memory() const
+ShPointer<const ShMemory> ShChannel<T>::memory() const
 {
   return m_node->memory();
 }

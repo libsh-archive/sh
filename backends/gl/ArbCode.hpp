@@ -145,7 +145,7 @@ private:
   unsigned int m_programId;
 };
 
-typedef SH::ShRefCount<ArbCode> ArbCodePtr;
+typedef SH::ShPointer<ArbCode> ArbCodePtr;
 
 
 }

@@ -60,7 +60,7 @@ void GlTextureName::params(const SH::ShTextureTraits& params)
 
 GlTextureName::NameList GlTextureName::m_names = GlTextureName::NameList();
 
-GlTextureName::Binding::Binding(const ShRefCount<const GlTextureName>& name)
+GlTextureName::Binding::Binding(const ShPointer<const GlTextureName>& name)
 {
   target = name->target();
   

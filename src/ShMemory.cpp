@@ -22,7 +22,7 @@ int ShMemory::timestamp() const
   return m_timestamp;
 }
 
-ShRefCount<ShStorage> ShMemory::findStorage(const std::string& id)
+ShPointer<ShStorage> ShMemory::findStorage(const std::string& id)
 {
   for (StorageList::iterator I = m_storages.begin(); I != m_storages.end(); ++I) {
     if ((*I)->id() == id) return *I;
@@ -41,12 +41,12 @@ void ShMemory::updateTimestamp(int timestamp)
   m_timestamp = timestamp;
 }
 
-void ShMemory::addStorage(const ShRefCount<ShStorage>& storage)
+void ShMemory::addStorage(const ShPointer<ShStorage>& storage)
 {
   m_storages.push_back(storage);
 }
 
-void ShMemory::removeStorage(const ShRefCount<ShStorage>& storage)
+void ShMemory::removeStorage(const ShPointer<ShStorage>& storage)
 {
   StorageList::iterator I = std::find(m_storages.begin(), m_storages.end(), storage);
   if (I == m_storages.end()) return;
@@ -274,7 +274,7 @@ ShHostStoragePtr ShHostMemory::hostStorage()
   return m_hostStorage;
 }
 
-ShRefCount<const ShHostStorage> ShHostMemory::hostStorage() const
+ShPointer<const ShHostStorage> ShHostMemory::hostStorage() const
 {
   return m_hostStorage;
 }

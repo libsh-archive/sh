@@ -52,7 +52,7 @@ public:
   /// Return the number of elements in this channel
   int count() const;
   /// Return this channel's memory
-  ShRefCount<const ShMemory> memory() const;
+  ShPointer<const ShMemory> memory() const;
   /// Return this channel's memory
   ShMemoryPtr memory();
 

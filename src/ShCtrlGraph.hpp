@@ -40,10 +40,10 @@ namespace SH {
 class ShCtrlGraphNode;
 
 struct ShCtrlGraphBranch {
-  ShCtrlGraphBranch(const ShRefCount<ShCtrlGraphNode>& node,
+  ShCtrlGraphBranch(const ShPointer<ShCtrlGraphNode>& node,
                     ShVariable cond);
   
-  ShRefCount<ShCtrlGraphNode> node; ///< The successor node
+  ShPointer<ShCtrlGraphNode> node; ///< The successor node
   ShVariable cond; ///< If this is 1, take this branch.
 };
 
@@ -64,7 +64,7 @@ public:
 
   ShBasicBlockPtr block;
   std::vector<ShCtrlGraphBranch> successors; ///< Conditional successors
-  ShRefCount<ShCtrlGraphNode> follower; ///< Unconditional successor
+  ShPointer<ShCtrlGraphNode> follower; ///< Unconditional successor
 
   typedef std::list<ShCtrlGraphNode*> ShPredList;
   ShPredList predecessors;
@@ -78,10 +78,10 @@ public:
   std::ostream& graphvizDump(std::ostream& out) const;
 
   /// Append an unconditional successor, if node is not null.
-  void append(const ShRefCount<ShCtrlGraphNode>& node);
+  void append(const ShPointer<ShCtrlGraphNode>& node);
 
   /// Append an conditional successor, if node is not null.
-  void append(const ShRefCount<ShCtrlGraphNode>& node,
+  void append(const ShPointer<ShCtrlGraphNode>& node,
               ShVariable cond);
 
   /// Whether this node has been "marked". Useful for mark and sweep
@@ -111,7 +111,7 @@ private:
   mutable bool m_marked;
 };
 
-typedef ShRefCount<ShCtrlGraphNode> ShCtrlGraphNodePtr;
+typedef ShPointer<ShCtrlGraphNode> ShCtrlGraphNodePtr;
 
 /** A control-flow graph.
  * This is the parsed form of a shader body.
@@ -152,7 +152,7 @@ private:
   //  void parse(ShCtrlGraphNodePtr& tail, ShBlockListPtr blocks);
 };
 
-typedef ShRefCount<ShCtrlGraph> ShCtrlGraphPtr;
+typedef ShPointer<ShCtrlGraph> ShCtrlGraphPtr;
 
 template<typename F>
 void ShCtrlGraphNode::real_dfs(F& functor)

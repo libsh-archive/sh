@@ -149,8 +149,8 @@ namespace ShCPU {
     };
 
 
-  typedef SH::ShRefCount<CPUBackendCode> CPUBackendCodePtr;
-  typedef SH::ShRefCount<CPUBackend> CPUBackendPtr;
+  typedef SH::ShPointer<CPUBackendCode> CPUBackendCodePtr;
+  typedef SH::ShPointer<CPUBackend> CPUBackendPtr;
 }
 
 #endif

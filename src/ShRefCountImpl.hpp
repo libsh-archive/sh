@@ -32,7 +32,7 @@
 namespace SH {
 
 template<typename T>
-ShRefCount<T>::ShRefCount()
+ShPointer<T>::ShPointer()
   : m_object(0)
 {
 #ifdef SH_REFCOUNT_DEBUGGING
@@ -43,7 +43,7 @@ ShRefCount<T>::ShRefCount()
 }
 
 template<typename T>
-ShRefCount<T>::ShRefCount(T* object)
+ShPointer<T>::ShPointer(T* object)
   : m_object(object)
 {
 #ifdef SH_REFCOUNT_DEBUGGING
@@ -55,7 +55,7 @@ ShRefCount<T>::ShRefCount(T* object)
 }
 
 template<typename T>
-ShRefCount<T>::ShRefCount(const ShRefCount<T>& other)
+ShPointer<T>::ShPointer(const ShPointer<T>& other)
   : m_object(other.m_object)
 {
 #ifdef SH_REFCOUNT_DEBUGGING
@@ -71,7 +71,7 @@ ShRefCount<T>::ShRefCount(const ShRefCount<T>& other)
 
 template<typename T>
 template<typename S>
-ShRefCount<T>::ShRefCount(const ShRefCount<S>& other)
+ShPointer<T>::ShPointer(const ShPointer<S>& other)
   : m_object(other.object())
 {
 #ifdef SH_REFCOUNT_DEBUGGING
@@ -87,7 +87,7 @@ ShRefCount<T>::ShRefCount(const ShRefCount<S>& other)
 }
 
 template<typename T>
-ShRefCount<T>::~ShRefCount()
+ShPointer<T>::~ShPointer()
 {
 #ifdef SH_REFCOUNT_DEBUGGING
   SH_RCDEBUG_BLUE;
@@ -99,7 +99,7 @@ ShRefCount<T>::~ShRefCount()
 }
 
 template<typename T>
-ShRefCount<T>& ShRefCount<T>::operator=(T* object)
+ShPointer<T>& ShPointer<T>::operator=(T* object)
 {
 #ifdef SH_REFCOUNT_DEBUGGING
   SH_RCDEBUG_BLUE;
@@ -117,7 +117,7 @@ ShRefCount<T>& ShRefCount<T>::operator=(T* object)
 }
 
 template<typename T>
-ShRefCount<T>& ShRefCount<T>::operator=(const ShRefCount<T>& other)
+ShPointer<T>& ShPointer<T>::operator=(const ShPointer<T>& other)
 {
 #ifdef SH_REFCOUNT_DEBUGGING
   SH_RCDEBUG_BLUE;
@@ -138,7 +138,7 @@ ShRefCount<T>& ShRefCount<T>::operator=(const ShRefCount<T>& other)
 
 template<typename T>
 template<typename S>
-ShRefCount<T>& ShRefCount<T>::operator=(const ShRefCount<S>& other)
+ShPointer<T>& ShPointer<T>::operator=(const ShPointer<S>& other)
 {
 #ifdef SH_REFCOUNT_DEBUGGING
   SH_RCDEBUG_BLUE;
@@ -158,44 +158,44 @@ ShRefCount<T>& ShRefCount<T>::operator=(const ShRefCount<S>& other)
 }
 
 template<typename T>
-bool ShRefCount<T>::operator==(const ShRefCount<T>& other) const
+bool ShPointer<T>::operator==(const ShPointer<T>& other) const
 {
   return m_object == other.m_object;
 }
 
 template<typename T>
-bool ShRefCount<T>::operator!=(const ShRefCount<T>& other) const
+bool ShPointer<T>::operator!=(const ShPointer<T>& other) const
 {
   return m_object != other.m_object;
 }
 
 template<typename T>
-bool ShRefCount<T>::operator<(const ShRefCount<T>& other) const
+bool ShPointer<T>::operator<(const ShPointer<T>& other) const
 {
   return m_object < other.m_object; // TODO: Make sure this is portable...
 }
 
 
 template<typename T>
-T& ShRefCount<T>::operator*() const
+T& ShPointer<T>::operator*() const
 {
   return *m_object;
 }
 
 template<typename T>
-T* ShRefCount<T>::operator->() const
+T* ShPointer<T>::operator->() const
 {
   return m_object;
 }
 
 template<typename T>
-ShRefCount<T>::operator bool() const
+ShPointer<T>::operator bool() const
 {
   return m_object != 0;
 }
 
 template<typename T>
-int ShRefCount<T>::refCount() const
+int ShPointer<T>::refCount() const
 {
   if (!m_object)
     return 0; // TODO: Maybe -1?
@@ -205,13 +205,13 @@ int ShRefCount<T>::refCount() const
 
 
 template<typename T>
-T* ShRefCount<T>::object() const
+T* ShPointer<T>::object() const
 {
   return m_object;
 }
 
 template<typename T>
-void ShRefCount<T>::releaseRef()
+void ShPointer<T>::releaseRef()
 {
   if (m_object && m_object->releaseRef() == 0) {
 #ifdef SH_REFCOUNT_DEBUGGING
@@ -227,7 +227,7 @@ void ShRefCount<T>::releaseRef()
 }
 
 template<typename T, typename S>
-ShRefCount<T> shref_static_cast(const ShRefCount<S>& other)
+ShPointer<T> shref_static_cast(const ShPointer<S>& other)
 {
 #ifdef SH_REFCOUNT_DEBUGGING
   SH_RCDEBUG_BLUE;
@@ -236,11 +236,11 @@ ShRefCount<T> shref_static_cast(const ShRefCount<S>& other)
   SH_RCDEBUG_NORMAL;
 #endif
 
-  return ShRefCount<T>(static_cast<T*>(other.object()));
+  return ShPointer<T>(static_cast<T*>(other.object()));
 }
 
 template<typename T, typename S>
-ShRefCount<T> shref_dynamic_cast(const ShRefCount<S>& other)
+ShPointer<T> shref_dynamic_cast(const ShPointer<S>& other)
 {
 #ifdef SH_REFCOUNT_DEBUGGING
   SH_RCDEBUG_BLUE;
@@ -248,11 +248,11 @@ ShRefCount<T> shref_dynamic_cast(const ShRefCount<S>& other)
 	    << " -> " << typeid(T).name() << std::endl;
   SH_RCDEBUG_NORMAL;
 #endif
-  return ShRefCount<T>(dynamic_cast<T*>(other.object()));
+  return ShPointer<T>(dynamic_cast<T*>(other.object()));
 }
 
 template<typename T, typename S>
-ShRefCount<T> shref_const_cast(const ShRefCount<S>& other)
+ShPointer<T> shref_const_cast(const ShPointer<S>& other)
 {
 #ifdef SH_REFCOUNT_DEBUGGING
   SH_RCDEBUG_BLUE;
@@ -260,7 +260,7 @@ ShRefCount<T> shref_const_cast(const ShRefCount<S>& other)
 	    << " -> " << typeid(T).name() << std::endl;
   SH_RCDEBUG_NORMAL;
 #endif
-  return ShRefCount<T>(const_cast<T*>(other.object()));
+  return ShPointer<T>(const_cast<T*>(other.object()));
 }
 
 }

@@ -30,7 +30,7 @@ public:
 
   // Utility class to bind texture temporarily
   struct Binding {
-    Binding(const SH::ShRefCount<const GlTextureName>& name);
+    Binding(const SH::ShPointer<const GlTextureName>& name);
     ~Binding();
   
     GLenum target;
@@ -45,7 +45,7 @@ private:
   SH::ShTextureTraits m_params;
 };
 
-typedef SH::ShRefCount<GlTextureName> GlTextureNamePtr;
+typedef SH::ShPointer<GlTextureName> GlTextureNamePtr;
 
 }
 

@@ -110,30 +110,30 @@ private:
 /** A reference-counting smart pointer. 
  */
 template<typename T>
-class ShRefCount 
+class ShPointer 
 {
 public:
-  ShRefCount();
-  ShRefCount(T* object);
-  ShRefCount(const ShRefCount& other);
+  ShPointer();
+  ShPointer(T* object);
+  ShPointer(const ShPointer& other);
   template<typename S>
-  ShRefCount(const ShRefCount<S>& other);
+  ShPointer(const ShPointer<S>& other);
   
-  ~ShRefCount();
+  ~ShPointer();
 
-  ShRefCount& operator=(T* other);
-  ShRefCount& operator=(const ShRefCount& other);
+  ShPointer& operator=(T* other);
+  ShPointer& operator=(const ShPointer& other);
   template<typename S>
-  ShRefCount& operator=(const ShRefCount<S>& other);
+  ShPointer& operator=(const ShPointer<S>& other);
 
   /// Two references are equal if they point to the same object.
-  bool operator==(const ShRefCount& other) const;
+  bool operator==(const ShPointer& other) const;
 
   /// Two references are equal if they point to the same object.
-  bool operator!=(const ShRefCount& other) const;
+  bool operator!=(const ShPointer& other) const;
 
   /// Actually compares the pointers.
-  bool operator<(const ShRefCount& other) const;
+  bool operator<(const ShPointer& other) const;
 
   T& operator*() const;
   T* operator->() const;
@@ -155,13 +155,13 @@ private:
 };
 
 template<typename T, typename S>
-ShRefCount<T> shref_static_cast(const ShRefCount<S>& other);
+ShPointer<T> shref_static_cast(const ShPointer<S>& other);
 
 template<typename T, typename S>
-ShRefCount<T> shref_dynamic_cast(const ShRefCount<S>& other);
+ShPointer<T> shref_dynamic_cast(const ShPointer<S>& other);
 
 template<typename T, typename S>
-ShRefCount<T> shref_const_cast(const ShRefCount<S>& other);
+ShPointer<T> shref_const_cast(const ShPointer<S>& other);
 
 } // namespace SH
 
