@@ -1,10 +1,33 @@
+REQUIREMENTS
+
+ - g++ > 3.0.0, 3.2 is recommended.
+ - libpng
+ - for the ARB backend, a recent glext.h as well as GL drivers and headers
+ - for the SM backend, an installed version of SM (use configure --with-sm=DIR
+   to specify the installation directory of SM)
+
+Currently Sh has only been tested on GNU/Linux, but we are planning to
+suppot more platforms soon.
+
+INSTALLING
+
+Quick compile and installation:
+./configure
+make
+make install
+[optional] make check
+
+./configure --help will present you with possible options to configure.
+
+DEVELOPMENT
+
 If compiling from CVS, first run:
 $ ./bootstrap
 (also run this if you change any Makefile.am or the configure.ac)
+You will need recent versions of autoconf, automake, libtool and
+libltdl.
+Ignore the mesage about needing to run aclocal.
 
-Then you will want to run:
-./configure
-make
+MORE HELP
 
-You may also run make check to build some tests.
-
+See the homepage at http://libsh.sf.net/ for mailing list info, etc.

@@ -931,6 +931,12 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
         }
       }
       break;
+    case SH_OP_COS:
+      m_instructions.push_back(ArbInst(SH_ARB_COS, stmt.dest, stmt.src1));
+      break;
+    case SH_OP_FRAC:
+      m_instructions.push_back(ArbInst(SH_ARB_FRC, stmt.dest, stmt.src1, stmt.src2));
+      break;
     case SH_OP_MAX:
       m_instructions.push_back(ArbInst(SH_ARB_MAX, stmt.dest, stmt.src1, stmt.src2));
       break;
@@ -944,6 +950,9 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
         m_instructions.push_back(ArbInst(SH_ARB_RSQ, mul, mul));
         m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, mul, stmt.src1));
       }
+      break;
+    case SH_OP_SIN:
+      m_instructions.push_back(ArbInst(SH_ARB_SIN, stmt.dest, stmt.src1));
       break;
     case SH_OP_SLT:
       m_instructions.push_back(ArbInst(SH_ARB_SLT, stmt.dest, stmt.src1, stmt.src2));

@@ -1,0 +1,34 @@
+INSTALLATION
+
+See the "INSTALL" file for directions.
+
+STATUS
+
+Sh is currently roughly in the "alpha" stage.
+
+This means it works, but there are several things which are by no
+means completed.
+
+The biggest outstanding issue is optimization. There is very little
+code related to this in CVS but the developers are working hard on it.
+This means however that the quality of the generated code is rather
+poor at the moment. On the other hand it _is_ functional.
+
+The backends aren't quite complete yet either. Some operations are
+missing from the ARB backend, and in partiuclar texturing is rather
+poorly done in the SM backend (only 2D 4-component textures will work
+at the moment). This is due to SM not supporting anything else at the
+time of writing and also because of the texture management system
+needing some work, which should happen in the Fall of 2003 at the
+latest.
+
+The syntax for branching and loops is there and it will compile to
+proper intermediate code, but these features are not currently
+implemented in any of the backends, partly because the targets
+themselves (e.g. the ARB specs) don't really support these features at
+the moment.
+
+The good news is that it works. Undoubtedly there are bugs here and
+there; we welcome you to submit bug reports at http://libsh.sf.net/.
+
+ - the Sh team

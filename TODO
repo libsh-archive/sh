@@ -96,12 +96,12 @@ OPERATIONS:
 |X|X|X|X| div
 |X|X|X|X| add
 |X|X|X|X| sub
-|X|X|X| | sqrt
+|X|X|X|X| sqrt
 |X|X|X|X| dot
 |X|X|X|X| pow   TODO: vector x scalar
-|X|X|X| | frac
-|X|X|X| | sin
-|X|X|X| | cos
+|X|X|X|X| frac
+|X|X|X|X| sin
+|X|X|X|X| cos
 | | | | | tan
 |X|X|X|/| <, <=, >, >=, ==, != TODO: These are, um, declared as N x 1. They should either be 1 x 1 or N x N.
 | |X| | | ceil
