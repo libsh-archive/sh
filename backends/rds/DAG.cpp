@@ -57,29 +57,27 @@ void DAGNode::init_resources(){
 	m_channels = 0;
 }
 
+// converts dag nodes to statements, adding to statement list
+// cut = true if final partition (m_cut set); cut = false if intermediate partition (cuts at marked nodes)
 ShBasicBlock::ShStmtList DAGNode::dag_to_stmt(ShBasicBlock::ShStmtList stmts, bool cut)
 {
-	if (successors.size() == 0) {
+	// do nothing for a leaf node
+	if (successors.size() == 0 && m_stmt == NULL) {
 		m_visited = true;
-
-		if (m_stmt == NULL) {
-			return stmts;
-		}
+		return stmts;	
 	}
 
+	// add statements for successors that are not cut off or marked
 	for (DAGNodeVector::iterator I = successors.begin(); I != successors.end(); ++I) {
-		if (!((*I)->m_visited)) {
-			if ((cut && !m_cut[*I]) || (!cut && !((*I)->m_marked || (*I)->m_fixed == RDS_MARKED))) {
-				stmts = (*I)->dag_to_stmt(stmts, cut);
+		DAGNode *v = *I;
+
+		if (!(v->m_visited)) {
+			if (cut && !m_cut[v]) {
+				stmts = v->dag_to_stmt(stmts, cut);
 			}
-		}
-		else if (cut) {
-#ifdef RDS_DEBUG
-	cout << "Cut at " << (*I)->m_label << endl;
-	//(*I)->print_stmts();
-	if ( (*I)->m_stmt != NULL)
-	cout << "  STMT " << *(*I)->m_stmt << endl;
-#endif
+			else if (!cut && !(v->m_marked || v->m_fixed == RDS_MARKED)) {
+				stmts = v->dag_to_stmt(stmts, cut);
+			}
 		}
 	}
 
@@ -102,7 +100,8 @@ void DAGNode::cuts()
 // return statement list for dag starting at this node
 ShBasicBlock::ShStmtList DAGNode::get_statements() {
 	unvisitall();
-	ShBasicBlock::ShStmtList stmts = dag_to_stmt(stmts, true); 
+	ShBasicBlock::ShStmtList stmts;
+	stmts = dag_to_stmt(stmts, true); 
 	return stmts;
 }
 
@@ -134,8 +133,10 @@ void DAGNode::print_stmts() {
 
 // statement output of this node and its successors
 void DAGNode::dump_stmts() {
-	unvisitall();
-	print_stmts();
+	ShBasicBlock::ShStmtList stmts = get_statements(); 
+	for (ShBasicBlock::ShStmtList::const_iterator I = stmts.begin(); I != stmts.end(); ++I) {      
+		cout << *I << "\n";
+	}
 }
 
 void DAGNode::set_resources() {
