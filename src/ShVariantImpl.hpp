@@ -369,7 +369,6 @@ void* ShDataVariant<V, DT>::operator new(std::size_t size)
 {
   if (size != sizeof(ShDataVariant)) return ::operator new(size);
   if (!m_pool) {
-    std::cout << "made new pool " << valueTypeName[V] << " " << dataTypeName[DT] << " " << size << " " << sizeof(ShDataVariant) << std::endl;
     m_pool = new ShPool(sizeof(ShDataVariant), 32768);
   }
   return m_pool->alloc();

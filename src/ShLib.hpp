@@ -55,6 +55,15 @@ operation(double left, const ShGeneric<1, V>& right) \
   return operation(ShAttrib<1, SH_CONST, V>(left), right); \
 } 
 
+#define SH_SHLIB_CONST_SCALAR_OP_DECL(operation) \
+template<ShValueType V> \
+ShGeneric<1, V> \
+operation(const ShGeneric<1, V>& left, double right); \
+ \
+template<ShValueType V> \
+ShGeneric<1, V> \
+operation(double left, const ShGeneric<1, V>& right);
+
 #define SH_SHLIB_CONST_N_OP_RETSIZE_LEFT(operation, retsize) \
 template<int N, ShValueType V> \
 ShGeneric<retsize, V> \
@@ -63,6 +72,11 @@ operation(const ShGeneric<N, V>& left, double right) \
   return operation(left, ShAttrib<1, SH_CONST, V>(right)); \
 } 
 
+#define SH_SHLIB_CONST_N_OP_RETSIZE_LEFT_DECL(operation, retsize) \
+template<int N, ShValueType V> \
+ShGeneric<retsize, V> \
+operation(const ShGeneric<N, V>& left, double right);
+
 #define SH_SHLIB_CONST_N_OP_RETSIZE_RIGHT(operation, retsize) \
 template<int N, ShValueType V> \
 ShGeneric<retsize, V> \
@@ -70,6 +84,11 @@ operation(double left, const ShGeneric<N, V>& right) \
 { \
   return operation(ShAttrib<1, SH_CONST, V>(left), right); \
 } 
+
+#define SH_SHLIB_CONST_N_OP_RETSIZE_RIGHT_DECL(operation, retsize) \
+template<int N, ShValueType V> \
+ShGeneric<retsize, V> \
+operation(double left, const ShGeneric<N, V>& right); 
 
 #define SH_SHLIB_CONST_N_OP_LEFT(operation) \
   SH_SHLIB_CONST_N_OP_RETSIZE_LEFT(operation, N);
@@ -85,6 +104,20 @@ SH_SHLIB_CONST_N_OP_RIGHT(operation);
 SH_SHLIB_CONST_N_OP_RETSIZE_LEFT(operation, retsize); \
 SH_SHLIB_CONST_N_OP_RETSIZE_RIGHT(operation, retsize);
 
+#define SH_SHLIB_CONST_N_OP_LEFT_DECL(operation) \
+  SH_SHLIB_CONST_N_OP_RETSIZE_LEFT_DECL(operation, N);
+
+#define SH_SHLIB_CONST_N_OP_RIGHT_DECL(operation) \
+  SH_SHLIB_CONST_N_OP_RETSIZE_RIGHT_DECL(operation, N);
+
+#define SH_SHLIB_CONST_N_OP_BOTH_DECL(operation) \
+SH_SHLIB_CONST_N_OP_LEFT_DECL(operation); \
+SH_SHLIB_CONST_N_OP_RIGHT_DECL(operation);
+
+#define SH_SHLIB_CONST_N_OP_RETSIZE_BOTH_DECL(operation, retsize) \
+SH_SHLIB_CONST_N_OP_RETSIZE_LEFT_DECL(operation, retsize); \
+SH_SHLIB_CONST_N_OP_RETSIZE_RIGHT_DECL(operation, retsize);
+
 //@todo type fix scalar types here.  Should be arbitrary templated types instead of
 // just T , but that casues overload problems 
 #define SH_SHLIB_CONST_TRINARY_OP_011_RETSIZE(operation, retsize) \
@@ -95,8 +128,16 @@ operation(const ShGeneric<N, V>& a, double b, double c) \
   return operation(a, ShAttrib<1, SH_CONST, V>(b), ShAttrib<1, SH_CONST, V>(c)); \
 } 
 
+#define SH_SHLIB_CONST_TRINARY_OP_011_RETSIZE_DECL(operation, retsize) \
+template<int N, ShValueType V> \
+ShGeneric<retsize, V> \
+operation(const ShGeneric<N, V>& a, double b, double c); 
+
 #define SH_SHLIB_CONST_TRINARY_OP_011(operation) \
 SH_SHLIB_CONST_TRINARY_OP_011_RETSIZE(operation, N);
+
+#define SH_SHLIB_CONST_TRINARY_OP_011_DECL(operation) \
+SH_SHLIB_CONST_TRINARY_OP_011_RETSIZE_DECL(operation, N);
 
 #include "ShLibArith.hpp"
 #include "ShLibBoolean.hpp"

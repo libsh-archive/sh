@@ -416,7 +416,7 @@ namespace ShCc {
     std::stringstream prologue;
     prologue << "#include <math.h>" << std::endl;
     prologue << "#include <iostream>" << std::endl;
-    for(int i = 0; cc_texture_string[i][0] != 0;) {
+    for(int i = 0; cc_texture_string[i][0] != 0; ++i) {
       prologue << cc_texture_string[i]; 
     }
     // @todo output the CcTextures.hpp file here

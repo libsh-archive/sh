@@ -1,3 +1,11 @@
+2004-11-05  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+  Checked win32 changes against linux.
+
+  * backends/cc/Cc.cpp:
+  I will not write infinite loops. I will not write infinite loops. I will 
+  not write...
+
+
 2004-11-04  Bryan Chan <b8chan@cgl.uwaterloo.ca>
   Win32 port.  Not well tested yet, but examples run fine.
 

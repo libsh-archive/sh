@@ -6,6 +6,7 @@
 #ifdef SH_USE_MEMORY_POOL
 
 #include <cstddef>
+#include "ShDllExport.hpp"
 
 namespace SH {
 
