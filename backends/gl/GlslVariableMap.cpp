@@ -182,7 +182,7 @@ GlslVariableMap::DeclarationList::const_iterator GlslVariableMap::regular_end() 
   return m_regular_declarations.end();
 }
 
-string GlslVariableMap::resolve(const ShVariable& v)
+string GlslVariableMap::resolve(const ShVariable& v, int index)
 {
   if (m_varmap.find(v.node()) == m_varmap.end()) {
     allocate_temp(v.node());
@@ -192,7 +192,18 @@ string GlslVariableMap::resolve(const ShVariable& v)
   string s = var.name();
   
   if (!var.texture()) {
-    s += swizzle(v, var.size());
+    if (-1 == index) {
+      s += swizzle(v, var.size());
+    } else if (0 == index) {
+	s += ".x";
+    } else if (1 == index) {
+	s += ".y";
+    } else if (2 == index) {
+      s += ".z";
+    } else if (3 == index) {
+      s += ".w";
+    }
+
     if (v.neg()) {
       s =  string("-(") + s + ")";
     }

@@ -99,9 +99,10 @@ private:
   
   /// Generate code for a single Sh statement.
   void emit(const SH::ShStatement &stmt);
-  std::string emit_texture(const SH::ShStatement &stmt);
+  void emit_lit(const SH::ShStatement &stmt);
+  void emit_texture(const SH::ShStatement &stmt);
   
-  std::string resolve(const SH::ShVariable& v) const;
+  std::string resolve(const SH::ShVariable& v, int index = -1) const;
 
   void updateFloatUniform(const SH::ShVariableNodePtr& node, const GLint location);
   void updateIntUniform(const SH::ShVariableNodePtr& node, const GLint location);

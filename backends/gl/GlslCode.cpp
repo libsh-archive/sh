@@ -430,10 +430,10 @@ void GlslCode::gen_node(ShCtrlGraphNodePtr node)
   gen_node(node->follower);
 }
 
-string GlslCode::resolve(const ShVariable& v) const
+string GlslCode::resolve(const ShVariable& v, int index) const
 {
   SH_DEBUG_ASSERT(m_varmap);
-  return m_varmap->resolve(v);
+  return m_varmap->resolve(v, index);
 }
 
 void GlslCode::allocate_textures()

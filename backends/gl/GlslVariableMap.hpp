@@ -48,7 +48,7 @@ class GlslVariableMap {
 public:
   GlslVariableMap(SH::ShProgramNode* shader, GlslProgramType unit);
   
-  std::string resolve(const SH::ShVariable& v);
+  std::string resolve(const SH::ShVariable& v, int index = -1);
   const GlslVariable& variable(const SH::ShVariableNodePtr& node);
   bool contains(const SH::ShVariableNodePtr& node) const;
 

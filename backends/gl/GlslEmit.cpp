@@ -38,14 +38,34 @@ struct GlslMapping {
 };
 
 static GlslMapping opCodeTable[] = {
+  {SH_OP_ABS,   "abs($0)"},
   {SH_OP_ASN,   "$0"},
   {SH_OP_ADD,   "$0 + $1"},
+  {SH_OP_CBRT,  "pow($0, 1.0f/3.0f)"},
+  {SH_OP_CEIL,  "ceil($0)"},
   {SH_OP_COND,  "$0 ? $1 : $2"},
+  {SH_OP_COS,   "cos($0)"},
   {SH_OP_DOT,   "dot($0, $1)"},
+  {SH_OP_DIV,   "$0 / $1"},
+  {SH_OP_FLR,   "floor($0)"},
+  {SH_OP_FRAC,  "fract($0)"},
   {SH_OP_MAX,   "max($0, $1)"},
+  {SH_OP_MIN,   "min($0, $1)"},
+  {SH_OP_MOD,   "mod($0, $1)"},
   {SH_OP_MUL,   "$0 * $1"},
+  {SH_OP_NEG,   "-($0)"},
   {SH_OP_NORM,  "normalize($0)"},
   {SH_OP_POW,   "pow($0, $1)"},
+  {SH_OP_RND,   "floor($0 + 0.5)"},
+  {SH_OP_SEQ,   "equal($0, $1)"},
+  {SH_OP_SGE,   "greaterThanEqual($0, $1)"},
+  {SH_OP_SGN,   "sign($0)"},
+  {SH_OP_SGT,   "greaterThan($0, $1)"},
+  {SH_OP_SIN,   "sin($0)"},
+  {SH_OP_SLE,   "lessThanEqual($0, $1)"},
+  {SH_OP_SLT,   "lessThan($0, $1)"},
+  {SH_OP_SNE,   "not(equal($0, $1))"},
+  {SH_OP_SQRT,  "sqrt($0)"},
 
   {SH_OPERATION_END,  0} 
 };
@@ -113,29 +133,47 @@ void GlslCode::emit(const ShStatement &stmt)
     }
 
     line << codeVecs.frag[i]; // code fragment after the last variable
+    
+    m_lines.push_back(line.str());
   } 
   else {
     // Handle the rest of the operations
     switch(stmt.op) {
+    case SH_OP_LIT:
+      emit_lit(stmt);
+      break;
     case SH_OP_TEX:
     case SH_OP_TEXI:
-      line << emit_texture(stmt);
+      emit_texture(stmt);
       break;
     default:
-      line.str("// *** unhandled operation " + string(opInfo[stmt.op].name) + " ***");
+      m_lines.push_back("// *** unhandled operation " + string(opInfo[stmt.op].name) + " ***");
       break;
     }
   }
-
-  m_lines.push_back(line.str());
 }
 
-string GlslCode::emit_texture(const ShStatement &stmt)
+void GlslCode::emit_lit(const ShStatement &stmt)
+{
+  // Result according to OpenGL spec
+  m_lines.push_back(resolve(stmt.dest, 0) + " = 1.0f");
+
+  m_lines.push_back(resolve(stmt.dest, 1) + " = max(0.0, " + resolve(stmt.src[0], 0) + ")");
+
+  m_lines.push_back(resolve(stmt.dest, 2) + " = " + resolve(stmt.src[0], 0) + 
+		    " > 0 ? pow(max(0.0, " + resolve(stmt.src[0], 1) + 
+		    "), clamp(" + resolve(stmt.src[0], 2) + 
+		    ", -128.0f, 128.0f)) : 0.0");
+
+  m_lines.push_back(resolve(stmt.dest, 3) + " = 1.0f");
+}
+
+void GlslCode::emit_texture(const ShStatement &stmt)
 {
   SH_DEBUG_ASSERT((SH_OP_TEX == stmt.op) || (SH_OP_TEXI == stmt.op));
 
   stringstream line;
-  line << "texture";
+  line << resolve(stmt.dest) << " = texture";
 
   ShTextureNodePtr texture = shref_dynamic_cast<ShTextureNode>(stmt.src[0].node());
   switch (texture->dims()) {
@@ -158,7 +196,7 @@ string GlslCode::emit_texture(const ShStatement &stmt)
 
   line << "(" << resolve(stmt.src[0]) << ", " << resolve(stmt.src[1]) << ")";
 
-  return line.str();
+  m_lines.push_back(line.str());
 }
 
 }
