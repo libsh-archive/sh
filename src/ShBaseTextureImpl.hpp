@@ -36,6 +36,36 @@ ShBaseTextureCube<T>::ShBaseTextureCube(int width, int height, const ShTextureTr
 }
 
 template<typename T>
+ShBaseTexture1D<T>::ShBaseTexture1D(const ShTextureTraits& traits)
+  : m_node(new ShTextureNode(SH_TEXTURE_1D, T::typesize, traits, 0))
+{
+}
+
+template<typename T>
+ShBaseTexture2D<T>::ShBaseTexture2D(const ShTextureTraits& traits)
+  : m_node(new ShTextureNode(SH_TEXTURE_2D, T::typesize, traits, 0, 0))
+{
+}
+
+template<typename T>
+ShBaseTextureRect<T>::ShBaseTextureRect(const ShTextureTraits& traits)
+  : m_node(new ShTextureNode(SH_TEXTURE_RECT, T::typesize, traits, 0, 0))
+{
+}
+
+template<typename T>
+ShBaseTexture3D<T>::ShBaseTexture3D(const ShTextureTraits& traits)
+  : m_node(new ShTextureNode(SH_TEXTURE_3D, T::typesize, traits, 0, 0, 0))
+{
+}
+
+template<typename T>
+ShBaseTextureCube<T>::ShBaseTextureCube(const ShTextureTraits& traits)
+  : m_node(new ShTextureNode(SH_TEXTURE_CUBE, T::typesize, traits, 0, 0))
+{
+}
+
+template<typename T>
 T ShBaseTexture1D<T>::operator()(const ShVariableN<1, float>& coords) const
 {
   if (ShEnvironment::insideShader) {

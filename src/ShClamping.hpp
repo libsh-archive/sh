@@ -32,12 +32,16 @@ namespace SH {
 /** Set Clamp trait in Texture type.
  * Use this template to indicate that a texture should be set up with
  * the clamp trait enabled.   This version can be
- * used with any dimension of texture; however, a resolution must
- * be provided during construction.
+ * used with any dimension of texture.
  */
 template<typename T>
 class ShClamped : public T {
 public:
+  ShClamped()
+    : T()
+  {
+    m_node->traits().clamping(ShTextureTraits::SH_CLAMPED);
+  }
   ShClamped(int width)
     : T(width)
   {
@@ -55,51 +59,19 @@ public:
   }
 };
 
-/** Set Clamp trait in 1D Texture type.
- */
-template<typename T>
-class ShClamped1D : public T {
-public:
-  ShClamped1D(int width = 1)
-    : T(width)
-  {
-    m_node->traits().clamping(ShTextureTraits::SH_CLAMPED);
-  }
-};
-
-/** Set Clamp trait in 2D Texture type.
- */
-template<typename T>
-class ShClamped2D : public T {
-public:
-  ShClamped2D(int width = 1, int height = 1)
-    : T(width, height)
-  {
-    m_node->traits().clamping(ShTextureTraits::SH_CLAMPED);
-  }
-};
-
-/** Set Clamp trait in 3D Texture type.
- */
-template<typename T>
-class ShClamped3D : public T {
-public:
-  ShClamped3D(int width = 1, int height = 1, int depth = 1)
-    : T(width, height, depth)
-  {
-    m_node->traits().clamping(ShTextureTraits::SH_CLAMPED);
-  }
-};
-
 /** Reset Clamp trait in Texture type.
  * Use this template to indicate that a texture should be set up without
  * the clamp trait enabled.   This version can be
- * used with any dimension of texture; however, a resolution must
- * be provided during construction.
+ * used with any dimension of texture.
  */
 template<typename T>
 class ShUnclamped : public T {
 public:
+  ShUnclamped()
+    : T()
+  {
+    m_node->traits().clamping(ShTextureTraits::SH_UNCLAMPED);
+  }
   ShUnclamped(int width)
     : T(width)
   {
@@ -111,40 +83,6 @@ public:
     m_node->traits().clamping(ShTextureTraits::SH_UNCLAMPED);
   }
   ShUnclamped(int width, int height, int depth)
-    : T(width, height, depth)
-  {
-    m_node->traits().clamping(ShTextureTraits::SH_UNCLAMPED);
-  }
-};
-
-/** Reset Clamp trait in 1D Texture type.
- */
-template<typename T>
-class ShUnclamped1D : public T {
-public:
-  ShUnclamped1D(int width = 1)
-    : T(width)
-  {
-    m_node->traits().clamping(ShTextureTraits::SH_UNCLAMPED);
-  }
-};
-/** Reset Clamp trait in 2D Texture type.
- */
-template<typename T>
-class ShUnclamped2D : public T {
-public:
-  ShUnclamped2D(int width = 1, int height = 1)
-    : T(width, height)
-  {
-    m_node->traits().clamping(ShTextureTraits::SH_UNCLAMPED);
-  }
-};
-/** Reset Clamp trait in 3D Texture type.
- */
-template<typename T>
-class ShUnclamped3D : public T {
-public:
-  ShUnclamped3D(int width = 1, int height = 1, int depth = 1)
     : T(width, height, depth)
   {
     m_node->traits().clamping(ShTextureTraits::SH_UNCLAMPED);

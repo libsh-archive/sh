@@ -81,6 +81,9 @@ public:
 
   // Don't call this on uniforms!
   void size(int size);
+
+  void lock(); ///< Do not update bound shaders in subsequent setValue calls
+  void unlock(); ///< Update bound shader values, and turn off locking
   
   std::string name() const; ///< Get this variable's name
 
@@ -124,6 +127,7 @@ protected:
   int m_size;
   int m_id;
   std::string m_name;
+  int m_locked;
 
   // Metadata
   ValueType* m_values;

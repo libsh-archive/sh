@@ -13,6 +13,7 @@ namespace SH {
 template<typename T>
 class ShBaseTexture1D : public ShRefCountable {
 public:
+  ShBaseTexture1D(const ShTextureTraits& traits);
   ShBaseTexture1D(int width, const ShTextureTraits& traits);
 
   T operator()(const ShVariableN<1, float>& coords) const;
@@ -33,6 +34,7 @@ protected:
 template<typename T>
 class ShBaseTexture2D : public ShRefCountable {
 public:
+  ShBaseTexture2D(const ShTextureTraits& traits);
   ShBaseTexture2D(int width, int height, const ShTextureTraits& traits);
 
   T operator()(const ShVariableN<2, float>& coords) const;
@@ -53,6 +55,7 @@ protected:
 template<typename T>
 class ShBaseTextureRect : public ShRefCountable {
 public:
+  ShBaseTextureRect(const ShTextureTraits& traits);
   ShBaseTextureRect(int width, int height, const ShTextureTraits& traits);
 
   T operator()(const ShVariableN<2, float>& coords) const;
@@ -73,6 +76,7 @@ protected:
 template<typename T>
 class ShBaseTexture3D : public ShRefCountable {
 public:
+  ShBaseTexture3D(const ShTextureTraits& traits);
   ShBaseTexture3D(int width, int height, int depth, const ShTextureTraits& traits);
 
   T operator()(const ShVariableN<3, float>& coords) const;
@@ -93,6 +97,7 @@ protected:
 template<typename T>
 class ShBaseTextureCube : public ShRefCountable {
 public:
+  ShBaseTextureCube(const ShTextureTraits& traits);
   ShBaseTextureCube(int width, int height, const ShTextureTraits& traits);
 
   T operator()(const ShVariableN<3, float>& coords) const;

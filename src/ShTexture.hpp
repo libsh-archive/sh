@@ -46,7 +46,10 @@ template<typename T>
 class ShTexture1D
   : public ShBaseTexture1D<T> {
 public:
-  ShTexture1D(int width = 1)
+  ShTexture1D()
+    : ShBaseTexture1D<T>(ShFilteredTextureTraits())
+  {}
+  ShTexture1D(int width)
     : ShBaseTexture1D<T>(width, ShFilteredTextureTraits())
   {}
 };
@@ -57,12 +60,15 @@ template<typename T>
 class ShTexture2D
   : public ShBaseTexture2D<T> {
 public:
-  ShTexture2D(int width = 1, int height = 1)
+  ShTexture2D()
+    : ShBaseTexture2D<T>(ShFilteredTextureTraits())
+  {}
+  ShTexture2D(int width, int height)
     : ShBaseTexture2D<T>(width, height, ShFilteredTextureTraits())
   {}
-   ShTexture2D(int width, int height, ShTextureTraits& traits)
-    : ShBaseTexture2D<T>(width, height, traits)
-  {}
+//    ShTexture2D(int width, int height, ShTextureTraits& traits)
+//     : ShBaseTexture2D<T>(width, height, traits)
+//   {}
 };
 
 /** Two-dimensional rectangular texture type.
@@ -71,12 +77,15 @@ template<typename T>
 class ShTextureRect
   : public ShBaseTextureRect<T> {
 public:
-  ShTextureRect(int width = 1, int height = 1)
+  ShTextureRect()
+    : ShBaseTextureRect<T>(ShFilteredTextureTraits())
+  {}
+  ShTextureRect(int width, int height)
     : ShBaseTextureRect<T>(width, height, ShFilteredTextureTraits())
   {}
-   ShTextureRect(int width, int height, ShTextureTraits& traits)
-    : ShBaseTextureRect<T>(width, height, traits)
-  {}
+//    ShTextureRect(int width, int height, ShTextureTraits& traits)
+//     : ShBaseTextureRect<T>(width, height, traits)
+//   {}
 };
 
 /** Three-dimensional texture type.
@@ -85,7 +94,10 @@ template<typename T>
 class ShTexture3D
   : public ShBaseTexture3D<T> {
 public:
-  ShTexture3D(int width = 1, int height = 1, int depth = 1)
+  ShTexture3D()
+    : ShBaseTexture3D<T>(ShFilteredTextureTraits())
+  {}
+  ShTexture3D(int width, int height, int depth)
     : ShBaseTexture3D<T>(width, height, depth, ShFilteredTextureTraits())
   {}
 };
@@ -99,7 +111,10 @@ template<typename T>
 class ShTextureCube
   : public ShBaseTextureCube<T> {
 public:
-  ShTextureCube(int width = 1, int height = 1)
+  ShTextureCube()
+    : ShBaseTextureCube<T>(ShFilteredTextureTraits())
+  {}
+  ShTextureCube(int width, int height)
     : ShBaseTextureCube<T>(width, height, ShFilteredTextureTraits())
   {}
 };

@@ -137,9 +137,11 @@ ShVariableNode::ValueType ShVariable::getValue(int i) const
 
 void ShVariable::setValues(ShVariableNode::ValueType values[])
 {
+  m_node->lock();
   for (int i = 0; i < size(); i++) {
     m_node->setValue(m_swizzle[i], values[i]); 
   }
+  m_node->unlock();
   m_neg = false;
 }
 

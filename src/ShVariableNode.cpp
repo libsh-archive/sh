@@ -56,6 +56,7 @@ ShVariableNode::ShVariableNode(ShVariableKind kind, int size, ShVariableSpecialT
   : m_uniform(!ShEnvironment::insideShader && kind != SH_TEXTURE && kind != SH_STREAM),
     m_kind(kind), m_specialType(type),
     m_size(size), m_id(m_maxID++), m_values(0),
+    m_locked(0),
     m_internal(false)
 {
   if (m_uniform || m_kind == SH_CONST) {
@@ -115,6 +116,22 @@ bool ShVariableNode::uniform() const
 bool ShVariableNode::hasValues() const
 {
   return (m_values != NULL);
+}
+
+void ShVariableNode::lock()
+{
+  m_locked++;
+}
+
+void ShVariableNode::unlock()
+{
+  m_locked--;
+  if (m_locked == 0 && m_uniform) {
+    for (ShEnvironment::BoundShaderMap::iterator I = ShEnvironment::boundShaders().begin();
+         I != ShEnvironment::boundShaders().end(); ++I) {
+      if (I->second) I->second->code(I->first, ShEnvironment::backend)->updateUniform(this);
+    }
+  }
 }
 
 int ShVariableNode::size() const
@@ -244,11 +261,10 @@ void ShVariableNode::setValue(int i, ValueType value)
   if (i < 0 || i >= m_size) return;
   m_values[i] = value;
 
-  if (m_uniform) {
+  if (m_uniform && !m_locked) {
     for (ShEnvironment::BoundShaderMap::iterator I = ShEnvironment::boundShaders().begin();
          I != ShEnvironment::boundShaders().end(); ++I) {
-      // TODO: Why not tell code() directly?
-      if (I->second) I->second->updateUniform(this);
+      if (I->second) I->second->code(I->first, ShEnvironment::backend)->updateUniform(this);
     }
   }
 }
