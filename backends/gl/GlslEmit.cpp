@@ -31,7 +31,7 @@ using namespace SH;
 using namespace std;
 
 static GlslMapping opCodeTable[] = {
-  {SH_OP_ABS,   "abs($0)"},
+  {SH_OP_ABS,   "abs($0)",},
   {SH_OP_ACOS,  "acos($0)"},
   {SH_OP_ADD,   "$0 + $1"},
   {SH_OP_ASIN,  "asin($0)"},
@@ -99,6 +99,12 @@ void GlslCode::table_substitution(const ShStatement& stmt, GlslOpCodeVecs codeVe
 {
   stringstream line;
   line << resolve(stmt.dest) << " = ";
+
+  if (stmt.dest.size() > 1) {
+    line << "vec" << stmt.dest().size() << "(";
+  } else {
+    line << "float" << "(";
+  }
   
   unsigned i;
   for (i=0; i < codeVecs.index.size(); i++) { 
@@ -107,7 +113,8 @@ void GlslCode::table_substitution(const ShStatement& stmt, GlslOpCodeVecs codeVe
   }
 
   line << codeVecs.frag[i]; // code fragment after the last variable
-    
+
+  line << ")";
   append_line(line.str());
 }
 
@@ -287,6 +294,16 @@ void GlslCode::emit_logic(const ShStatement& stmt)
 
   // TODO: cache these mappings
 
+  // TODO: Do this more generally
+  std::ostringstream os;
+  if (stmt.dest.size() > 1) {
+    os << "vec" << stmt.dest().size() << "(" << mapping.code << ")";
+  } else {
+    os << "float" << "(" << mapping.code << ")";
+  }
+
+  mapping.code = os.str().c_str();
+  
   table_substitution(stmt, mapping);
 }
 
