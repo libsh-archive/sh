@@ -318,7 +318,8 @@ using namespace SH;
 static SH::ShRefCount<ArbBackend> instance = new ArbBackend();
 
 ArbCode::ArbCode(ArbBackendPtr backend, const ShShader& shader)
-  : m_backend(backend), m_shader(shader)
+  : m_backend(backend), m_shader(shader),
+    m_numTemps(0), m_numInputs(0), m_numOutputs(0), m_numParams(0)
 {
 }
 
