@@ -1,3 +1,7 @@
+2004-08-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp: Added most of the uniform lifting code.
+
 2004-08-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShOptimizations.cpp (ConstProp): Set destinations to either
