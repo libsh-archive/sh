@@ -75,13 +75,5 @@
  * You should only have to include this file to use Sh.
  */
 
-namespace SH {
-    /** \brief SH Initialization Function.
-     *
-     * The function needs to be called prior to the use of any other SH functions. Additionally,
-	 * in Windows, this function needs to be called after a OpenGL context/window has been created.
-     */
-    void ShInit();
-}
 
 #endif

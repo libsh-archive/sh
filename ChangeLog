@@ -1,5 +1,12 @@
 2004-05-21  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShInit.cpp: Remove.
+
+	* src/ShSyntax.cpp (shInit): Moved definition here from ShInit.cpp.
+
+	* src/ShSyntax.hpp: Renamed ShInit as shInit and moved declaration
+	here. Fixes issue105.
+
 	* src/ShRefCount.hpp (class ShPointer): Rename ShRefCount to
 	ShPointer. Also change all references to this. Resolves issue15.
 

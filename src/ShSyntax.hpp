@@ -210,6 +210,14 @@ void shBindShader(const std::string& target, ShProgram& shader);
 /// Switch to a particular backend
 bool shSetBackend(const std::string& name);
 
+
+/** \brief SH Initialization Function.
+ *
+ * The function needs to be called prior to the use of any other SH functions. Additionally,
+ * in Windows, this function needs to be called after a OpenGL context/window has been created.
+ */
+void shInit();
+
 /// \internal
 void shIf(bool);
 /// \internal

@@ -61,7 +61,6 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
 		   ShChannelNode.hpp ShChannelNode.cpp \
 		   ShChannel.hpp ShChannelImpl.hpp \
 		   ShStream.hpp ShStreamImpl.hpp ShStream.cpp \
-		   ShInit.cpp \
 		   ShQuaternion.hpp ShQuaternionImpl.hpp \
 		   ShMemory.hpp ShMemory.cpp ShClamping.hpp \
 		   ShInstructions.hpp ShInstructions.cpp
