@@ -481,6 +481,25 @@ ShVariableN<N, T> asin(const ShVariableN<N, T>& var)
   }
 }
 
+/// least integer <= argument 
+template<int N, typename T>
+ShVariableN<N, T> ceil(const ShVariableN<N, T>& var)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(var.hasValues());
+    T vals[N];
+    var.getValues(vals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = std::ceil(vals[i]);
+    return ShConstant<N, T>(result);
+  } else {
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, SH_OP_CEIL, var);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
+
 /// Cosine of x.
 template<int N, typename T>
 ShVariableN<N, T> cos(const ShVariableN<N, T>& var)
@@ -522,6 +541,51 @@ ShVariableN<1,  T> dot(const ShVariableN<N, T>& left, const ShVariableN<N, T>& r
   }
 }
 
+/// greatest integer >= argument 
+template<int N, typename T>
+ShVariableN<N, T> floor(const ShVariableN<N, T>& var)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(var.hasValues());
+    T vals[N];
+    var.getValues(vals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = std::floor(vals[i]);
+    return ShConstant<N, T>(result);
+  } else {
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, SH_OP_FLR, var);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
+
+/// Float modulus 
+template<int N, int M, typename T>
+ShVariableN<N,  T> fmod(const ShVariableN<N, T>& left, const ShVariableN<M, T>& right)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(left.hasValues()); 
+    assert(right.hasValues());
+    T lvals[N];
+    left.getValues(lvals);
+    T rvals[N];
+    right.getValues(rvals);
+    T result[N]; 
+    for (int i = 0; i < N; i++) result[i] = 
+      std::fmod( lvals[i], rvals[(M == 1 ? 0 : i)] ); 
+    return ShConstant<N, T>(result);
+  } else {
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, left, SH_OP_FMOD, right);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
+
+SH_SHLIB_CONST_SCALAR_OP(fmod);
+SH_SHLIB_CONST_N_OP_LEFT(fmod);
+
 /// Fractional part.
 template<int N, typename T>
 ShVariableN<N, T> frac(const ShVariableN<N, T>& var)
@@ -531,7 +595,7 @@ ShVariableN<N, T> frac(const ShVariableN<N, T>& var)
     T vals[N];
     var.getValues(vals);
     T result[N];
-    for (int i = 0; i < N; i++) result[i] = fmod(vals[i], 1.0); // TODO: Check that this is correct
+    for (int i = 0; i < N; i++) result[i] = std::fmod(vals[i], 1.0); // TODO: Check that this is correct
     return ShConstant<N, T>(result);
   } else {
     ShAttrib<N, SH_VAR_TEMP, T, false> t;
@@ -540,6 +604,40 @@ ShVariableN<N, T> frac(const ShVariableN<N, T>& var)
     return t;
   }
 }
+
+/// linear interpolation.
+template<int N, int M, typename T>
+ShVariableN<N, T> lerp(const ShVariableN<M, T>& f, const ShVariableN<N, T>& a, 
+    const ShVariableN<N,T>& b)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(a.hasValues()); 
+    assert(b.hasValues());
+    assert(f.hasValues());
+    T avals[N], bvals[N], fvals[M];
+    a.getValues(avals);
+    b.getValues(bvals);
+    f.getValues(fvals);
+    T result[N];
+    for (int i = 0; i < N; i++) {
+        double fi = ( M == 1 ? fvals[0] : fvals[i] ); 
+        result[i] = fi * avals[i] + (1 - fi) * bvals[i]; 
+    }
+    return ShConstant<N, T>(result);
+  } else {
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, SH_OP_LRP, f, a, b); 
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
+
+template<int N, typename T> 
+ShVariableN<N, T> lerp(T f, const ShVariableN<N, T>& a, const ShVariableN<N, T>& b)
+{ 
+  return lerp(ShConstant1f(f), a, b); 
+}
+
 
 /// Componentwise maximum
 template<int N, typename T>
