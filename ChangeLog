@@ -1,3 +1,8 @@
+2005-02-01  Francois Marier  <francois@serioushack.com>
+
+	* src/ShMatrix.hpp, src/ShMatrixImpl.hpp: Fixed scalar promotion
+	is now done correctly and efficiently.
+
 2005-01-27  Francois Marier  <francois@serioushack.com>
 
 	* src/ShMatrix.hpp, src/ShMatrixImpl.hpp: Assigning a scalar to a
