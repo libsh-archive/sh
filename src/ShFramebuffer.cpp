@@ -58,6 +58,10 @@ int ShFramebuffer::elements() const {
 
 void ShFramebuffer::bind( ShUberbufferPtr ub ) {
   m_ub = ub;
+  if( ShEnvironment::framebuffer == this ) {
+    // update backend if this is the active draw buffer
+    if( ShEnvironment::backend ) ShEnvironment::backend->bindFramebuffer();
+  }
 }
 
 ShUberbufferPtr ShFramebuffer::getUberbuffer() {
