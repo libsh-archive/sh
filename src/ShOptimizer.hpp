@@ -55,7 +55,7 @@ private:
   /**@name Copy propagation
    */
   //@{
-  friend class CopyPropagator;
+  friend struct CopyPropagator;
   void copyPropagation(bool& changed);
   //@}
   
@@ -69,7 +69,7 @@ private:
    * Which may cause t to be removed.
    */
   //@{
-  friend class MoveEliminator;
+  friend struct MoveEliminator;
   void moveElimination(bool& changed);
   //@}
 
@@ -77,7 +77,7 @@ private:
    * Combines basic blocks which can be connected with another.
    */
   //@{
-  friend class Straightener;
+  friend struct Straightener;
   void straighten(bool& changed);
   //@}
   
@@ -85,10 +85,10 @@ private:
    * Used to build the ud/du chains.
    */
   //@{
-  friend class DefFinder;
-  friend class InitRch;
-  friend class IterateRch;
-  friend class DumpRch;
+  friend struct DefFinder;
+  friend struct InitRch;
+  friend struct IterateRch;
+  friend struct DumpRch;
   typedef std::vector<ShStatement*> DefList;
   DefList m_defs; ///< All definition statements
   typedef std::vector<ShCtrlGraphNodePtr> DefNodeList;
@@ -101,15 +101,15 @@ private:
   /**@name ud/du chain building
    */
   //@{
-  friend class UdDuBuilder;
+  friend struct UdDuBuilder;
   void buildUdDuChains();
   //@}
   
   /**@name Dead code removal
    */
   //@{
-  friend class InitLiveCode;
-  friend class DeadCodeRemover;
+  friend struct InitLiveCode;
+  friend struct DeadCodeRemover;
   void removeDeadCode(bool& changed);
   //@}
   
@@ -119,8 +119,8 @@ private:
    * depends on.
    */
   //@{
-  friend class BraInstInserter;
-  friend class BraInstRemover;
+  friend struct BraInstInserter;
+  friend struct BraInstRemover;
   void insertBraInsts();
   void removeBraInsts();
   //@}
