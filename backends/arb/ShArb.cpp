@@ -578,7 +578,7 @@ void ArbCode::loadTexture(ShTextureNodePtr texture)
     glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   }
-  if (1) {
+  if (0) {
     glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   } else {
@@ -1070,8 +1070,10 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       break;
     case SH_OP_SEQ:
       {
-        ShVariable seq(new ShVariableNode(SH_VAR_TEMP, stmt.src[0].size()));
-        ShVariable seq2(new ShVariableNode(SH_VAR_TEMP, stmt.src[0].size()));
+        int tempsize = stmt.src[0].size();
+        if( tempsize < stmt.src[1].size() ) tempsize = stmt.src[1].size();
+        ShVariable seq(new ShVariableNode(SH_VAR_TEMP, tempsize)); 
+        ShVariable seq2(new ShVariableNode(SH_VAR_TEMP, tempsize)); 
         genScalarVectorInst(seq, stmt.src[0], stmt.src[1], SH_ARB_SGE);
         genScalarVectorInst(seq2, stmt.src[1], stmt.src[0], SH_ARB_SGE);
         m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, seq, seq2 ));
@@ -1371,7 +1373,13 @@ ArbBackend::ArbBackend()
     m_instrs[sh_target] = (!i ? 128 : 48);
     shGlGetProgramivARB(arb_target, GL_MAX_PROGRAM_INSTRUCTIONS_ARB, &m_instrs[sh_target]);
     SH_DEBUG_PRINT("instrs[" << sh_target << "] = " << m_instrs[sh_target]);
-    m_temps[sh_target] = (!i ? 12 : 16);
+
+    /** TODO big ugly hack follows:
+    /* TODO implement proper detection of NVIDIA.
+     * NVIDIA's GlGetProgramivARB does not update m_temps, so set it to 32 here.
+     * ATI will still have the right number because its drivers should set m_temps properly.
+     */
+    m_temps[sh_target] = (!i ? 12 : 32);
     shGlGetProgramivARB(arb_target, GL_MAX_PROGRAM_TEMPORARIES_ARB, &m_temps[sh_target]);
     SH_DEBUG_PRINT("temps[" << sh_target << "] = " << m_temps[sh_target]);
     m_attribs[sh_target] = (!i ? 16 : 10);
