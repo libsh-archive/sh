@@ -45,6 +45,7 @@
 #include "ShImage.hpp"
 #include "ShAlgebra.hpp"
 #include "ShManipulator.hpp"
+#include "ShStream.hpp"
 
 /** \namespace SH
  * \brief The main Sh namespace.

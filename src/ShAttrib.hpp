@@ -89,6 +89,7 @@ public:
 
   static const int typesize = N;
   static const int typekind = Kind;
+  static const ShVariableSpecialType special_type = SH_VAR_ATTRIB;
   typedef T ValueType;
 };
 

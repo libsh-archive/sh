@@ -34,7 +34,7 @@ namespace SH {
 
 /** A surface normal with N dimensions.
  */
-SH_SPECIAL_TYPE(ShNormal, surface normal);
+SH_SPECIAL_TYPE(ShNormal, surface normal, SH_VAR_NORMAL);
 
 SH_SPECIAL_TYPE_TYPEDEFS(Normal);
 

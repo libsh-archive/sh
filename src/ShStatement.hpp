@@ -86,6 +86,8 @@ enum ShOperation {
   SH_OP_OPTBRA, ///< Used in the optimizer to indicate a conditional
                 ///  branch dependency. This should never show up in
                 ///  code passed to the backend.
+
+  SH_OP_FETCH, ///< Unary (takes a stream). Fetch an element from a stream. Similar to TEX
   // TODO: finish these
 };
 

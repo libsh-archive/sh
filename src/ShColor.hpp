@@ -34,7 +34,7 @@ namespace SH {
 
 /** An N-color.
  */
-SH_SPECIAL_TYPE(ShColor, color);
+SH_SPECIAL_TYPE(ShColor, color, SH_VAR_COLOR);
 
 SH_SPECIAL_TYPE_TYPEDEFS(Color);
 

@@ -24,19 +24,35 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHPOSITION_HPP
-#define SHPOSITION_HPP
+#ifndef SHSTREAMNODE_HPP
+#define SHSTREAMNODE_HPP
+
+#include "ShVariableNode.hpp"
 
 namespace SH {
 
-/** A vertex position.
- */
-SH_SPECIAL_TYPE_PARENT(ShPosition, position, ShPoint, SH_VAR_POSITION);
+class ShStreamNode : public ShVariableNode {
+public:
+  ShStreamNode(int elements);
+  ShStreamNode(int elements, void* data, int count);
+  virtual ~ShStreamNode();
 
-SH_SPECIAL_TYPE_TYPEDEFS(Position);
+  void attach(void* data, int count);
 
-SH_SPECIAL_TYPE_IMPL(ShPosition, SH_VAR_POSITION);
+  const void* data() const;
+  void* data();
+  int count() const;
+  
+private:
+  void* m_data;
+  int m_count;
+
+  // NOT IMPLEMENTED
+  ShStreamNode(const ShStreamNode& other);
+  ShStreamNode& operator=(const ShStreamNode& other);
+};
+
+typedef ShRefCount<ShStreamNode> ShStreamNodePtr;
 
 }
-
 #endif

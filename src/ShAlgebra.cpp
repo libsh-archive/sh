@@ -96,11 +96,11 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   int aosize, bisize;
   aosize = a->outputs.size();
   bisize = b->inputs.size();
-  SH_DEBUG_PRINT( "Connecting " << aosize << " outputs to " << bisize << "inputs" );
+  SH_DEBUG_PRINT( "Connecting " << aosize << " outputs to " << bisize << " inputs" );
   if (aosize > bisize) {
     std::ostringstream os;
-    os << "Cannot connect programs. Number of outputs (" << a->outputs.size() << ") > number of inputs"
-      << b->inputs.size() << std::endl;
+    os << "Cannot connect programs. Number of outputs (" << a->outputs.size() << ") > number of inputs ("
+       << b->inputs.size() << ")" << std::endl;
     os << "Outputs: ";
     for( ShProgramNode::VarList::const_iterator it = a->outputs.begin();
         it != a->outputs.end(); ++it ) {

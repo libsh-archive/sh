@@ -37,7 +37,8 @@ enum ShVariableKind {
   SH_VAR_OUTPUT = 1,
   SH_VAR_TEMP = 2,
   SH_VAR_CONST = 3,
-  SH_VAR_TEXTURE = 4
+  SH_VAR_TEXTURE = 4,
+  SH_VAR_STREAM = 5
 };
 
 enum ShVariableSpecialType {

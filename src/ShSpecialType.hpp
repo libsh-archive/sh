@@ -34,7 +34,8 @@
  * are really just wrappers around ShAttrib.
  */ 
 
-/** \def SH_SPECIAL_TYPE(SH_TYPE_NAME, SH_COMMENT_NAME) \
+/** \def SH_SPECIAL_TYPE(SH_TYPE_NAME, SH_COMMENT_NAME, \
+ *                       SH_TYPE_ENUM) \
  * \brief Declare an ShAttrib-wrapping type called SH_TYPE_NAME.
  * @param SH_COMMENT_NAME The name used in commenting the type.
  */
@@ -51,10 +52,10 @@
  * be generated.
  */
 
-#define SH_SPECIAL_TYPE(SH_TYPE_NAME, SH_COMMENT_NAME) \
-  SH_SPECIAL_TYPE_PARENT(SH_TYPE_NAME, SH_COMMENT_NAME, ShAttrib)
+#define SH_SPECIAL_TYPE(SH_TYPE_NAME, SH_COMMENT_NAME, SH_TYPE_ENUM) \
+  SH_SPECIAL_TYPE_PARENT(SH_TYPE_NAME, SH_COMMENT_NAME, ShAttrib, SH_TYPE_ENUM)
 
-#define SH_SPECIAL_TYPE_PARENT(SH_TYPE_NAME, SH_COMMENT_NAME, SH_TYPE_PARENT) \
+#define SH_SPECIAL_TYPE_PARENT(SH_TYPE_NAME, SH_COMMENT_NAME, SH_TYPE_PARENT, SH_TYPE_ENUM) \
 template<int N, int Kind, typename T, bool Swizzled=false> \
 class SH_TYPE_NAME : public SH_TYPE_PARENT<N, Kind, T, Swizzled> { \
 public: \
@@ -88,6 +89,10 @@ public: \
   SH_TYPE_NAME<1, Kind, T, true> operator[](int) const; \
  \
   SH_TYPE_NAME<N, Kind, T, Swizzled> operator-() const; \
+  typedef T ValueType; \
+  static const int typesize = N; \
+  static const int typekind = Kind; \
+  static const ShVariableSpecialType special_type = SH_TYPE_ENUM; \
  \
 private: \
   typedef SH_TYPE_PARENT<N, Kind, double, Swizzled> ParentType; \

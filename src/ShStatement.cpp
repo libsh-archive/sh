@@ -76,6 +76,8 @@ const ShOperationInfo opInfo[] = {
   {"KIL", 1},
 
   {"OPTBRA", 1},
+
+  {"FETCH", 1},
   
   {0, 0}
 };

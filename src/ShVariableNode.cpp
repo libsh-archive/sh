@@ -122,6 +122,9 @@ std::string ShVariableNode::name() const
   case SH_VAR_TEXTURE:
     stream << "tex";
     break;
+  case SH_VAR_STREAM:
+    stream << "str";
+    break;
   }
 
   stream << m_id;

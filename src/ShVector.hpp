@@ -34,7 +34,7 @@ namespace SH {
 
 /** An N-Vector.
  */
-SH_SPECIAL_TYPE(ShVector, vector);
+SH_SPECIAL_TYPE(ShVector, vector, SH_VAR_VECTOR);
 
 SH_SPECIAL_TYPE_TYPEDEFS(Vector);
 

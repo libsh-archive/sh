@@ -35,6 +35,8 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
                    ShDomTree.hpp ShOptimizer.hpp ShBitSet.hpp ShBitSet.cpp \
 		   ShAlgebra.hpp ShAlgebra.cpp \
 		   ShManipulator.hpp ShManipulator.cpp \
+		   ShStreamNode.hpp ShStreamNode.cpp \
+		   ShStream.hpp ShStreamImpl.hpp \
 		   ShInit.cpp
 
 incincdir = $(includedir)/sh
