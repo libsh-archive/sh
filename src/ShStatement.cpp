@@ -71,6 +71,8 @@ const ShOperationInfo opInfo[] = {
   {"LOG2", 1},
   {"LOG10", 1},
   {"POW", 2},
+  {"RCP", 1},
+  {"RSQ", 1},
   {"SIN", 1},
   {"SQRT", 1},
   {"TAN", 1},

@@ -519,6 +519,28 @@ void shPOW(ShVariable& dest, const ShVariable& a, const ShVariable& b)
   }
 }
 
+void shRCP(ShVariable& dest, const ShVariable& a)
+{
+  sizes_match(dest, a);
+  if (immediate()) {
+    CWISE_UNARY_OP(dest, a, 1.0f / );
+  } else {
+    ShStatement stmt(dest, SH_OP_RCP, a);
+    addStatement(stmt);
+  }
+}
+
+void shRSQ(ShVariable& dest, const ShVariable& a)
+{
+  sizes_match(dest, a);
+  if (immediate()) {
+    CWISE_UNARY_OP(dest, a, 1.0f / sqrt);
+  } else {
+    ShStatement stmt(dest, SH_OP_RSQ, a);
+    addStatement(stmt);
+  }
+}
+
 void shSIN(ShVariable& dest, const ShVariable& a)
 {
   sizes_match(dest, a);

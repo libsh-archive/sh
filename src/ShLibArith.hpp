@@ -143,12 +143,23 @@ ShGeneric<N, T> mad(const ShGeneric<N, T>& m1, T m2, const ShGeneric<N, T>& a);
 template<int N, typename T> 
 ShGeneric<N, T> mad(const ShGeneric<N, T>& m1, double m2, const ShGeneric<N, T>& a);
 
+/* Reciprocal
+ * One divided by the given value, for each component.
+ */
+template<int N, typename T>
+ShGeneric<N, T> rcp(const ShGeneric<N, T>& var);
+
 /* Square root.
  * The square root of each component of the input is evaluated.
- * @todo should add reciprocal square root (rsqrt) as an intrinsic.
  */
 template<int N, typename T>
 ShGeneric<N, T> sqrt(const ShGeneric<N, T>& var);
+
+/* Reciprocal square root.
+ * The inverse of the square root of each component of the input is evaluated.
+ */
+template<int N, typename T>
+ShGeneric<N, T> rsqrt(const ShGeneric<N, T>& var);
 
 /*@}*/
 

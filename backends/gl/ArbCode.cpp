@@ -382,34 +382,6 @@ std::ostream& ArbCode::print(std::ostream& out)
 
   // Print register declarations
   
-//   for (ShProgramNode::VarList::const_iterator I = m_shader->inputs.begin();
-//        I != m_shader->inputs.end(); ++I) {
-//     out << "  ";
-//     m_registers[*I]->printDecl(out);
-//     out << endl;
-//   }
-
-//   for (ShProgramNode::VarList::const_iterator I = m_shader->outputs.begin();
-//        I != m_shader->outputs.end(); ++I) {
-//     out << "  ";
-//     m_registers[*I]->printDecl(out);
-//     out << endl;
-//   }
-
-//   for (ShProgramNode::VarList::const_iterator I = m_shader->uniforms.begin();
-//        I != m_shader->uniforms.end(); ++I) {
-//     out << "  ";
-//     m_registers[*I]->printDecl(out);
-//     out << endl;
-//   }
-
-//   for (ShProgramNode::VarList::const_iterator I = m_shader->constants.begin();
-//        I != m_shader->constants.end(); ++I) {
-//     out << "  ";
-//     m_registers[*I]->printDecl(out);
-//     out << endl;
-//   }
-
   for (RegList::const_iterator I = m_reglist.begin();
        I != m_reglist.end(); ++I) {
     if ((*I)->type == SH_ARB_REG_TEMP) continue;
@@ -669,6 +641,20 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
         m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, mul, stmt.src[0]));
       }
       break;
+    case SH_OP_RCP:
+      for (int i = 0; i < stmt.src[0].size(); i++)
+        {
+          m_instructions.push_back(
+              ArbInst(SH_ARB_RCP, stmt.dest(i), stmt.src[0](i)));
+        }
+      break;
+    case SH_OP_RSQ:
+      for (int i = 0; i < stmt.src[0].size(); i++)
+        {
+          m_instructions.push_back(
+              ArbInst(SH_ARB_RSQ, stmt.dest(i), stmt.src[0](i)));
+        }
+      break;
     case SH_OP_SIN:
       if( m_unit == "vertex" ) 
       {
@@ -709,8 +695,11 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
     case SH_OP_SQRT:
       {
         ShVariable rcp(new ShVariableNode(SH_TEMP, stmt.src[0].size()));
-        m_instructions.push_back(ArbInst(SH_ARB_RSQ, rcp, stmt.src[0]));
-        m_instructions.push_back(ArbInst(SH_ARB_RCP, stmt.dest, rcp));
+        for (int i = 0; i < stmt.src[0].size(); i++)
+        {
+          m_instructions.push_back(ArbInst(SH_ARB_RSQ, rcp(i), stmt.src[0](i)));
+          m_instructions.push_back(ArbInst(SH_ARB_RCP, stmt.dest(i), rcp(i)));
+        }
       break;
       }
     case SH_OP_POW:

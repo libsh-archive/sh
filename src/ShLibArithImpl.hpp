@@ -226,10 +226,28 @@ ShGeneric<N, T> mad(const ShGeneric<N, T>& m1, double m2, const ShGeneric<N, T>&
 
 template<int N, typename T>
 inline
+ShGeneric<N, T> rcp(const ShGeneric<N, T>& var)
+{
+  ShAttrib<N, SH_TEMP, T> t;
+  shRCP(t, var);
+  return t;
+}
+
+template<int N, typename T>
+inline
 ShGeneric<N, T> sqrt(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
   shSQRT(t, var);
+  return t;
+}
+
+template<int N, typename T>
+inline
+ShGeneric<N, T> rsqrt(const ShGeneric<N, T>& var)
+{
+  ShAttrib<N, SH_TEMP, T> t;
+  shRSQ(t, var);
   return t;
 }
 

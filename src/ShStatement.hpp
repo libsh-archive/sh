@@ -79,6 +79,8 @@ enum ShOperation {
   SH_OP_LOG2, ///< Unary base-2 log
   SH_OP_LOG10, ///< Unary base-10 log
   SH_OP_POW, ///< Binary power
+  SH_OP_RCP, ///< Unary reciprocal
+  SH_OP_RSQ, ///< Unary reciprocal square root
   SH_OP_SIN, ///< Unary sine function
   SH_OP_SQRT, ///< Unary square root
   SH_OP_TAN, ///< Unary tangent

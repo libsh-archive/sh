@@ -1,5 +1,26 @@
 2004-06-30  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* backends/cpu/CPU.cpp (encode): Handle RCP and RSQ.
+
+	* test/regress/regress.py (tests): Add tests for RCP, RSQ and SQRT.
+
+	* backends/gl/ArbCode.cpp (genNode): Handle RCP and RSQ.
+
+	* src/ShInstructions.cpp: Implement shRCP() and shRSQ().
+
+	* src/ShInstructions.hpp: Add shRCP() and shRSQ().
+
+	* src/ShLibArithImpl.hpp: Implement rcp() and rsqrt().
+
+	* src/ShLibArith.hpp: Add rcp and rsqrt functions.
+
+	* src/ShStatement.cpp: Add RCP and RSQ opInfo.
+
+	* src/ShStatement.hpp: Add RCP and RSQ operations. Fixes issue48
+	and issue49, together with related changes.
+
+	* backends/gl/ArbCode.cpp (genNode): Scalarize sqrt.
+
 	* src/ShInstructions.cpp: Implemented shDX() and shDY().
 
 	* src/ShInstructions.hpp: Added shDX and shDY functions.

@@ -1529,6 +1529,32 @@ namespace ShCPU {
 
 	break;
 	}
+      case SH::SH_OP_RCP:
+	{
+	for(int i = 0; i < stmt.dest.size(); i++)
+	  {
+	  m_code << "  "
+		 << resolve(stmt.dest, i)
+		 << " = 1.0/("
+		 << resolve(stmt.src[0], i)
+		 << ");" << std::endl;
+	  }
+
+	break;
+	}
+      case SH::SH_OP_RSQ:
+	{
+	for(int i = 0; i < stmt.dest.size(); i++)
+	  {
+	  m_code << "  "
+		 << resolve(stmt.dest, i)
+		 << " = 1.0/sqrt("
+		 << resolve(stmt.src[0], i)
+		 << ");" << std::endl;
+	  }
+
+	break;
+	}
       case SH::SH_OP_SIN:
 	{
 	for(int i = 0; i < stmt.dest.size(); i++)
