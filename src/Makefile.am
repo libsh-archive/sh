@@ -36,8 +36,9 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
 		   ShAlgebra.hpp ShAlgebra.cpp \
 		   ShManipulator.hpp ShManipulatorImpl.hpp ShManipulator.cpp \
 		   ShFixedManipulator.hpp ShFixedManipulator.cpp \
-		   ShStreamNode.hpp ShStreamNode.cpp \
-		   ShStream.hpp ShStreamImpl.hpp \
+		   ShChannelNode.hpp ShChannelNode.cpp \
+		   ShChannel.hpp ShChannelImpl.hpp \
+		   ShStream.hpp ShStreamImpl.hpp ShStream.cpp \
 		   ShInit.cpp
 
 incincdir = $(includedir)/sh
@@ -60,6 +61,8 @@ incinc_HEADERS = ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp \
                    ShNormal.hpp ShLibNormal.hpp \
                    ShTexCoord.hpp ShLibTexCoord.hpp \
                    ShDomTree.hpp ShOptimizer.hpp ShAlgebra.hpp \
-									 ShManipulator.hpp ShManipulatorImpl.hpp \
-									 ShFixedManipulator.hpp \
-									 ShStreamNode.hpp ShStream.hpp ShStreamImpl.hpp 
+		   ShFixedManipulator.hpp \
+		   ShManipulator.hpp ShManipulatorImpl.hpp \
+		   ShChannelNode.hpp ShChannel.hpp ShChannelImpl.hpp \
+		   ShStream.hpp ShStreamImpl.hpp
+

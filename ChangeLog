@@ -1,3 +1,10 @@
+2004-01-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/Sh{Stream,Channel,ChannelNode}{,Impl}.{c,h}pp: Renamed
+	streams to channels, stream lists to streams, removed
+	ShCombinedStream, added operators to connect the new dynamic
+	streams to ShPrograms, following Mike's new naming suggestions.
+
 2004-01-18  Bryan Chan  <b8chan@cgl.uwaterloo.ca>
 	* util/ShWorley.cpp: Added good worley bump-mapping
 	

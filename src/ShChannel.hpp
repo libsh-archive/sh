@@ -24,35 +24,51 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHSTREAMNODE_HPP
-#define SHSTREAMNODE_HPP
+#ifndef SHCHANNEL_HPP
+#define SHCHANNEL_HPP
 
-#include "ShVariableNode.hpp"
+#include "ShChannelNode.hpp"
+#include "ShProgram.hpp"
 
 namespace SH {
 
-class ShStreamNode : public ShVariableNode {
+// The client interface to a single-channel stream.
+// Really this hides an ShChannelNode which is the true representation
+// of the stream.
+template<typename T>
+class ShChannel {
 public:
-  ShStreamNode(int elements);
-  ShStreamNode(int elements, void* data, int count);
-  virtual ~ShStreamNode();
+  typedef typename T::ValueType ValueType;
+  ShChannel();
+  ShChannel(ValueType* data, int count);
 
-  void attach(void* data, int count);
+  // TODO: copy constructor, operator=(), etc.
+  
+  void attach(ValueType* data, int count);
 
-  const void* data() const;
-  void* data();
   int count() const;
+  ValueType* data();
+  const ValueType* data() const;
+  
+  T operator()();
+  const T operator()() const;
+
+  ShChannelNodePtr node();
+  const ShChannelNodePtr node() const;
   
 private:
-  void* m_data;
-  int m_count;
-
-  // NOT IMPLEMENTED
-  ShStreamNode(const ShStreamNode& other);
-  ShStreamNode& operator=(const ShStreamNode& other);
+  ShChannelNodePtr m_node;
 };
 
-typedef ShRefCount<ShStreamNode> ShStreamNodePtr;
+// Bind a channel as an input to a program
+template<typename T>
+ShProgram connect(const ShChannel<T>& channel, const ShProgram& program);
+
+template<typename T>
+ShProgram operator<<(const ShProgram& program, const ShChannel<T>& channel);
 
 }
+
+#include "ShChannelImpl.hpp"
+
 #endif

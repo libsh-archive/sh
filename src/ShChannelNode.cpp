@@ -24,43 +24,45 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#include "ShStreamNode.hpp"
+#include "ShChannelNode.hpp"
 
 namespace SH {
 
-ShStreamNode::ShStreamNode(int elements)
+ShChannelNode::ShChannelNode(ShVariableSpecialType specType, int elements)
   : ShVariableNode(SH_VAR_STREAM, elements),
     m_data(0), m_count(0)
 {
+  specialType(specType);
 }
 
-ShStreamNode::ShStreamNode(int elements, void* data, int count)
+ShChannelNode::ShChannelNode(ShVariableSpecialType specType, int elements, void* data, int count)
   : ShVariableNode(SH_VAR_STREAM, elements),
     m_data(data), m_count(count)
 {
+  specialType(specType);
 }
 
-ShStreamNode::~ShStreamNode()
+ShChannelNode::~ShChannelNode()
 {
 }
 
-void ShStreamNode::attach(void* data, int count)
+void ShChannelNode::attach(void* data, int count)
 {
   m_data = data;
   m_count = count;
 }
 
-const void* ShStreamNode::data() const
+const void* ShChannelNode::data() const
 {
   return m_data;
 }
 
-void* ShStreamNode::data() 
+void* ShChannelNode::data() 
 {
   return m_data;
 }
 
-int ShStreamNode::count() const
+int ShChannelNode::count() const
 {
   return m_count;
 }
