@@ -334,26 +334,26 @@ void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
       break;
     case SH_OP_MUL:
       {
-      if (stmt.src[0].size() != 1 || stmt.src[1].size() != 1) {
-        if (stmt.src[0].size() == 1) {
-          int* swizzle = new int[stmt.src[1].size()];
-          for (int i = 0; i < stmt.src[1].size(); i++) swizzle[i] = 0;
-          m_instructions.push_back(SmInstruction(OP_MUL, stmt.dest,
-                                                 stmt.src[0](stmt.src[1].size(), swizzle), stmt.src[1]));
-          delete [] swizzle;
-          break;
-        } else if (stmt.src[1].size() == 1) {
-          int* swizzle = new int[stmt.src[0].size()];
-          for (int i = 0; i < stmt.src[0].size(); i++) swizzle[i] = 0;
-          m_instructions.push_back(SmInstruction(OP_MUL, stmt.dest, stmt.src[0],
-                                                 stmt.src[1](stmt.src[0].size(), swizzle)));
-          delete [] swizzle;
-          break;
+        if (stmt.src[0].size() != 1 || stmt.src[1].size() != 1) {
+          if (stmt.src[0].size() == 1) {
+            int* swizzle = new int[stmt.src[1].size()];
+            for (int i = 0; i < stmt.src[1].size(); i++) swizzle[i] = 0;
+            m_instructions.push_back(SmInstruction(OP_MUL, stmt.dest,
+                                                   stmt.src[0](stmt.src[1].size(), swizzle), stmt.src[1]));
+            delete [] swizzle;
+            break;
+          } else if (stmt.src[1].size() == 1) {
+            int* swizzle = new int[stmt.src[0].size()];
+            for (int i = 0; i < stmt.src[0].size(); i++) swizzle[i] = 0;
+            m_instructions.push_back(SmInstruction(OP_MUL, stmt.dest, stmt.src[0],
+                                                   stmt.src[1](stmt.src[0].size(), swizzle)));
+            delete [] swizzle;
+            break;
+          }
         }
-      }
-      
-      m_instructions.push_back(SmInstruction(OP_MUL, stmt.dest, stmt.src[0], stmt.src[1]));
-      break;
+        
+        m_instructions.push_back(SmInstruction(OP_MUL, stmt.dest, stmt.src[0], stmt.src[1]));
+        break;
       }
     case SH_OP_DIV:
       {
@@ -445,6 +445,30 @@ void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
         }
       }
       break;
+    case SH_OP_MAD:
+      {
+        if (stmt.src[0].size() != 1 || stmt.src[1].size() != 1) {
+          if (stmt.src[0].size() == 1) {
+            int* swizzle = new int[stmt.src[1].size()];
+            for (int i = 0; i < stmt.src[1].size(); i++) swizzle[i] = 0;
+            m_instructions.push_back(SmInstruction(OP_MAD, stmt.dest,
+                                                   stmt.src[0](stmt.src[1].size(), swizzle), stmt.src[1], stmt.src[2]));
+            delete [] swizzle;
+            break;
+          } else if (stmt.src[1].size() == 1) {
+            int* swizzle = new int[stmt.src[0].size()];
+            for (int i = 0; i < stmt.src[0].size(); i++) swizzle[i] = 0;
+            m_instructions.push_back(SmInstruction(OP_MAD, stmt.dest, stmt.src[0],
+                                                   stmt.src[1](stmt.src[0].size(), swizzle), stmt.src[2]));
+            delete [] swizzle;
+            break;
+          }
+        }
+        
+        m_instructions.push_back(SmInstruction(OP_MAD, stmt.dest, stmt.src[0], stmt.src[1], stmt.src[2]));
+        break;
+      }
+
     case SH_OP_MAX:
       m_instructions.push_back(SmInstruction(OP_MAX, stmt.dest, stmt.src[0], stmt.src[1]));
       break;

@@ -59,6 +59,7 @@ const ShOperationInfo opInfo[] = {
   {"FMOD", 2},
   {"FRAC", 1},
   {"LRP", 3},
+  {"MAD", 3},
   {"MAX", 2},
   {"MIN", 2},
   {"POW", 2},

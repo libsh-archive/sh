@@ -914,7 +914,7 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       break;
     case SH_OP_CEIL:
       {
-        m_instructions.push_back(ArbInst(SH_ARB_FLR, stmt.dest, stmt.src[0])); 
+        m_instructions.push_back(ArbInst(SH_ARB_FLR, stmt.dest, -stmt.src[0])); 
         m_instructions.push_back(ArbInst(SH_ARB_MOV, stmt.dest, -stmt.dest));
       }
       break;
@@ -942,7 +942,7 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       }
       break;
     case SH_OP_FLR:
-      m_instructions.push_back(ArbInst(SH_ARB_FLR, stmt.dest, stmt.src[0], stmt.src[1]));
+      m_instructions.push_back(ArbInst(SH_ARB_FLR, stmt.dest, stmt.src[0]));
       break;
     case SH_OP_FMOD:
       {
@@ -995,6 +995,28 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
         }
       }
       break;
+    case SH_OP_MAD:
+      if (stmt.src[0].size() != 1 || stmt.src[1].size() != 1) {
+        if (stmt.src[0].size() == 1) {
+          int* swizzle = new int[stmt.src[1].size()];
+          for (int i = 0; i < stmt.src[1].size(); i++) swizzle[i] = 0; 
+          m_instructions.push_back(ArbInst(SH_ARB_MAD, stmt.dest, 
+                stmt.src[0](stmt.src[1].size(), swizzle), stmt.src[1], stmt.src[2]));
+          delete [] swizzle;
+          break;
+        } else if (stmt.src[1].size() == 1) {
+          int* swizzle = new int[stmt.src[0].size()];
+          for (int i = 0; i < stmt.src[0].size(); i++) swizzle[i] = 0;
+          m_instructions.push_back(ArbInst(SH_ARB_MAD, stmt.dest, stmt.src[0],
+                stmt.src[1](stmt.src[0].size(), swizzle), stmt.src[2]));
+          delete [] swizzle;
+          break;
+        }
+      } 
+      m_instructions.push_back(ArbInst(SH_ARB_MAD, stmt.dest, stmt.src[0], 
+            stmt.src[1], stmt.src[2])); 
+      break;
+
     case SH_OP_MAX:
       m_instructions.push_back(ArbInst(SH_ARB_MAX, stmt.dest, stmt.src[0], stmt.src[1]));
       break;

@@ -67,6 +67,7 @@ enum ShOperation {
   SH_OP_FMOD, ///< Binary float modulus, result has same sign as src[0] 
   SH_OP_FRAC, ///< Unary fractional part
   SH_OP_LRP, ///< Trinary linear interpolation src[0] * src[1]  +  (1-src[0]) * src[2]
+  SH_OP_MAD, ///< Multiply and add src[0] * src[1] + src[2]
   SH_OP_MAX, ///< Binary componentwise maximum
   SH_OP_MIN, ///< Binary componentwise minimum
   SH_OP_POW, ///< Binary power

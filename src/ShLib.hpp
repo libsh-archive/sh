@@ -639,6 +639,48 @@ ShVariableN<N, T> lerp(T f, const ShVariableN<N, T>& a, const ShVariableN<N, T>&
 }
 
 
+/// Multiply and add
+template<int N, int M, int P, typename T>
+ShVariableN<P, T> mad(const ShVariableN<M, T>& m1, const ShVariableN<N, T>& m2, 
+    const ShVariableN<P,T>& a)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(m1.hasValues()); 
+    assert(m2.hasValues());
+    assert(a.hasValues());
+    //TODO better error message.  can this method be cleaner?
+    assert( ( M == P && N == P ) || ( M == 1 && N == P ) || ( N == 1 && M == P ) );
+    T m1vals[M], m2vals[N], avals[P];
+    m1.getValues(m1vals);
+    m2.getValues(m2vals);
+    a.getValues(avals);
+    T result[P];
+    for (int i = 0; i < P; i++) {
+        result[i] = ( M == 1 ? m1vals[0] : m1vals[i] ) * ( N == 1 ? m2vals[0] : m2vals[i] ) + avals[i]; 
+    }
+    return ShConstant<P, T>(result);
+  } else {
+    ShAttrib<P, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, SH_OP_MAD, m1, m2, a); 
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
+
+/// Use template specialization for the N, 1, N case
+
+template<int N, typename T> 
+ShVariableN<N, T> mad(T m1, const ShVariableN<N, T>& m2, const ShVariableN<N, T>& a)
+{ 
+  return mad(ShConstant1f(m1), m2, a); 
+}
+
+template<int N, typename T> 
+ShVariableN<N, T> mad(const ShVariableN<N, T>& m1, T m2, const ShVariableN<N, T>& a)
+{ 
+  return mad(m1, ShConstant1f(m2), a); 
+}
+
 /// Componentwise maximum
 template<int N, typename T>
 ShVariableN<N,  T> max(const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
