@@ -11,6 +11,8 @@
 #include "ShDebug.hpp"
 #include "ShUtility.hpp"
 
+#define RDS_DEBUG
+
 using namespace SH;
 
 RDS::RDS(ShProgramNodePtr progPtr)
@@ -207,11 +209,13 @@ void RDS::rds_merge(DAGNode::DAGNode* v) {
 
 		// join v with subset of successors
 		DAGNode::DAGNode *w;
-		
-		if (v->m_type == DAG_OP)
-			w = new DAGNode(v->m_op);
-		else
+
+		if (v->successors.size() > 0) {
+			w = new DAGNode(v->m_stmt);
+		}
+		else {
 			w = new DAGNode(v->m_var);
+		}
 
 		if (m_rdsh) {
 			for (int j = 0; j < d; j++) {
@@ -237,13 +241,10 @@ void RDS::rds_merge(DAGNode::DAGNode* v) {
 		}
 
 		while(ksub_mtc && d!=0) {
-			if (v->m_type == DAG_OP)
-				w = new DAGNode(v->m_op);
+			if (v->successors.size() > 0)
+				w = new DAGNode(v->m_stmt);
 			else
 				w = new DAGNode(v->m_var);
-			
-			//if (d != 0) //I'm guessing you don't want this if on the next assignment
-				//cout << "Next k-subset for " << d << "\n";
 			
 			a = next_ksubset(k, d, a);
 			// join v with subset of successors
@@ -304,9 +305,9 @@ void RDS::rds_merge(DAGNode::DAGNode* v) {
 void RDS::add_mr(DAGNode::DAGNode* v) {
 	if (!v) return;
  
-	if (m_visited[v]) return; // already visited
+	if (v->m_visited) return; // already visited
 		
-	m_visited[v] = true;
+	v->m_visited = true;
     
 	// visit v's children first
 	for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end(); ++I) {
@@ -366,7 +367,7 @@ int RDS::countnodes(DAGNode::DAGNode *v) {
 
 void RDS::unvisitall(DAGNode::DAGNode *v) {
 	t_visited[v] = false;
-	m_visited[v] = false;
+	v->m_visited = false;
 	for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end(); ++I) {
 		unvisitall(*I);
 	}
@@ -390,19 +391,19 @@ void RDS::unmarkall(DAGNode::DAGNode *v) {
 void RDS::partition(DAGNode::DAGNode *v)
 {    
   if (!v) return;
-	if (m_visited[v]) return;
+	if (v->m_visited) return;
 
 #ifdef RDS_DEBUG
       SH_DEBUG_PRINT(__FUNCTION__ << " node " << v->m_label );
 #endif
 
-	m_visited[v] = true;
+	v->m_visited = true;
     
     // partition each of v's children
 	for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end(); ++I) {
 		DAGNode::DAGNode *w = *I;
       
-		if (!m_visited[w]) {
+		if (!(w->m_visited)) {
 			partition(w);
 		}
       
@@ -472,9 +473,9 @@ int RDS::cost(DAGNode::DAGNode* v) {
 
 
 void RDS::set_nodelist(DAGNode::DAGNode *v) {
-	if (m_visited[v]) return;
+	if (v->m_visited) return;
 
-	m_visited[v] = true;
+	v->m_visited = true;
 	m_nodelist.push_back(v);
 
 	for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end(); ++I) {

@@ -153,7 +153,7 @@ void PDomTree::printDoms() {
 	for (unsigned int i = 1; i <= dom.size(); i++) {
 		DAGNode::DAGNode* v = m_vertex[i];
 
-		cout << "Node " << i << " Dom " << numbering(dom[v]) << " Succ";
+		cout << "Node " << i << "{ " << v->m_label << "} Dom " << numbering(dom[v]) << " Succ";
 
 		// print this node's successors, in numerical form
 		for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end(); ++I) {

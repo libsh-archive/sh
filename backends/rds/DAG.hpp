@@ -15,9 +15,6 @@
 #include "ShOperation.hpp"
 #include "ShVariableNode.hpp"
 
-#define DAG_OP 0
-#define DAG_LEAF 1
-
 /***
  * Creates a directed acyclic graph for a basic block
  */
@@ -26,20 +23,20 @@ class SH_DLLEXPORT DAGNode {
   public:
 	DAGNode() {}	
 	DAGNode(SH::ShVariable var);
-	DAGNode(SH::ShOperation op);
+	DAGNode(SH::ShStatement *stmt);
 
 	SH::ShVariable m_var;
-	SH::ShOperation m_op;
+	SH::ShStatement *m_stmt;
 
 	std::string m_label;
-	
-	int m_type;
 
-	typedef std::set<SH::ShVariableNodePtr> IdSet;
-	IdSet id_list;
+	bool m_visited;
 
 	typedef std::map<DAGNode *, bool> CutMap;
 	CutMap m_cut;
+
+	typedef std::set<SH::ShVariableNodePtr> IdSet;
+	IdSet id_list;
 
 	typedef std::vector<DAGNode *> DAGNodeVector;
 	DAGNodeVector predecessors;
@@ -47,8 +44,12 @@ class SH_DLLEXPORT DAGNode {
 
 	void add_kid(DAGNode *kid);
 	void print(int indent);
+	void unvisitall();
+	SH::ShBasicBlock::ShStmtList get_statements(); 
   private:
-	
+
+
+	SH::ShBasicBlock::ShStmtList dag_to_stmt(SH::ShBasicBlock::ShStmtList stmts);
 };
 
 class SH_DLLEXPORT DAG {
@@ -72,7 +73,7 @@ class SH_DLLEXPORT DAG {
 	typedef std::map<SH::ShOperation, OpVector> OpMap;
 	OpMap ops[4];
 
-	void DAG::add_statement(SH::ShStatement stmt);
+	void DAG::add_statement(SH::ShStatement *stmt);
 };
 
 #endif

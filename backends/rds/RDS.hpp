@@ -80,9 +80,8 @@ private:
 	MRList m_mrlist;
   
 	typedef std::map<DAGNode::DAGNode*, bool> BoolMap;
-  BoolMap m_visited;
-  BoolMap t_visited;
-  BoolMap m_marked;
+	BoolMap t_visited;
+	BoolMap m_marked;
   
 	// get list of passes after rds or rdsh
 	void set_partition();
