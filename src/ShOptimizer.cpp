@@ -241,6 +241,7 @@ struct TempRemover {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
     if (!block) return;
+  redo:
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
       if (!I->dest.node()) continue;
       if (I->dest.node()->kind() != SH_VAR_TEMP) continue;
@@ -248,7 +249,7 @@ struct TempRemover {
         //        ShBasicBlock::ShStmtList::iterator J = I;
         //        J++;
         block->erase(I);
-        //        I = J;
+        goto redo; // yikes, this is sure inefficient
       }
     }
   }

@@ -1,5 +1,11 @@
 2003-08-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShEnvironment.hpp (struct ShEnvironment): Added the
+	optimizationLevel variable indication the level of
+	optimizations. Set this to 1 to turn on optimizations.
+
+	* src/ShSyntax.cpp (shEndShader): Run the optimizer after parsing.
+
 	* src/ShOptimizer.hpp, src/ShOptimizer.cpp: Added (simple) copy
 	propagation, "move elimination" and unused temporary removal.
 
