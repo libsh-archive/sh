@@ -92,7 +92,7 @@ struct ShFraction {
 
   // The usual type used in computation
   // @todo clamp typedef typename SelectType<Clamp, LongType, T>::type CompType; 
-  typedef typename LongType CompType; 
+  typedef LongType CompType; 
 
   // Some information about the type and constant values representable by
   // this fraction type
