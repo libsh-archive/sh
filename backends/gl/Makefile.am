@@ -41,7 +41,7 @@ libshglsl_la_LDFLAGS = -L$(prefix)/lib -module
 libshglsl_la_LIBADD = $(top_srcdir)/src/libsh.la 
 libshglsl_la_SOURCES = Glsl.cpp Glsl.hpp GlslCode.cpp GlslCode.hpp \
 		       GlslBackend.cpp GlslVariable.cpp GlslVariable.hpp \
-		       GlslVariableMap.cpp GlslVariableMap.hpp \
+		       GlslVariableMap.cpp GlslVariableMap.hpp GlslEmit.cpp \
 		       $(GLBACKEND_SOURCES) $(GLTEXTURE_SOURCES) \
 		       $(PBUFFERSTREAM_SOURCES)
 endif
