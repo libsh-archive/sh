@@ -103,6 +103,18 @@ void shBind(const std::string& target, ShProgram& prg)
   prg.code(target, ShEnvironment::backend)->bind();
 }
 
+void shUnbind(ShProgram& prg)
+{
+  if (!ShEnvironment::backend) return;
+  prg.code(ShEnvironment::backend)->unbind();
+}
+
+void shUnbind(const std::string& target, ShProgram& prg)
+{
+  if (!ShEnvironment::backend) return;
+  prg.code(target, ShEnvironment::backend)->unbind();
+}
+
 typedef std::map<std::string, ShProgram> BoundProgramMap;
 
 void shUpdate()

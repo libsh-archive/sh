@@ -298,6 +298,13 @@ void shBindShader(ShProgram& shader);
 SH_DLLEXPORT
 void shBindShader(const std::string& target, ShProgram& shader);
 
+/// Unbind a program.
+SH_DLLEXPORT
+void shUnbind(ShProgram& prg);
+/// Unbind a program with the given target.
+SH_DLLEXPORT
+void shUnbind(const std::string& target, ShProgram& shader);
+
 /// Upload any textures and uniform parameters which are out-of-date
 /// but required on all compilation targets that have any programs
 /// bound

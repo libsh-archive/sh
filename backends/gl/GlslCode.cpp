@@ -64,7 +64,7 @@ GlslCode::~GlslCode()
     delete m_shader;
   }
 
-  if (m_arb_shader != 0) {
+  if (m_uploaded) {
     SH_GL_CHECK_ERROR(glDetachObjectARB(m_arb_program, m_arb_shader));
   }
 
@@ -215,8 +215,18 @@ void GlslCode::bind()
   bind_textures();
 }
 
+void GlslCode::unbind()
+{
+  if (!m_uploaded) return;
+
+  SH_GL_CHECK_ERROR(glDetachObjectARB(m_arb_program, m_arb_shader));
+  m_uploaded = false;
+}
+
 void GlslCode::update()
 {
+  if (!m_uploaded) return;
+
   bind_textures();
 }
 

@@ -344,6 +344,10 @@ void ArbCode::bind()
   bindTextures();
 }
 
+void ArbCode::unbind()
+{
+}
+
 void ArbCode::update()
 {
   bindTextures();
