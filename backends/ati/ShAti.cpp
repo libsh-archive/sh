@@ -512,13 +512,13 @@ void AtiCode::generate()
 }
 
 void AtiCode::printTexBindings() {
-  std::cout << "Current Texture <-> Uber-Buffer Bindings" << std::endl;
+  SH_DEBUG_PRINT( "Current Texture <-> Uber-Buffer Bindings" );
   for( TexBindingMap::iterator tbmIt = texBindings.begin();
       tbmIt != texBindings.end(); ++tbmIt ) {
-    std::cout << "  Texture Unit " << tbmIt->first << std::endl;
+    SH_DEBUG_PRINT( "  Texture Unit " << tbmIt->first );
     for( std::map< int, int >::iterator it = tbmIt->second.begin();
         it != tbmIt->second.end(); ++it ) {
-      std::cout << "    binding: " << it->first << " ubuf mem: " << it->second << std::endl;
+      SH_DEBUG_PRINT( "    binding: " << it->first << " ubuf mem: " << it->second ); 
     }
   }
 }
@@ -1178,6 +1178,15 @@ void AtiCode::genNode(ShCtrlGraphNodePtr node)
         m_instructions.push_back(AtiInst(SH_ATI_MUL, stmt.dest, mul, stmt.src[0]));
       }
       break;
+    case SH_OP_RCP:
+      { 
+        ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, stmt.src[0].size()));
+        for(int i = 0; i < stmt.src[0].size(); ++i) {
+          m_instructions.push_back(AtiInst(SH_ATI_RCP, rcp(i), stmt.src[0](i)));
+        }
+        m_instructions.push_back(AtiInst(SH_ATI_MOV, stmt.dest, rcp));
+      }
+      break;
     case SH_OP_SIN:
       // TODO fix this
       if( m_kind == SH_VERTEX_PROGRAM ) 
@@ -1514,8 +1523,6 @@ void AtiBackend::allocUberbuffer( ShUberbufferPtr ub) {
   GLmem mem = ub->mem();
   if( mem ) return;
 
-  SH_DEBUG_PRINT("Allocating uber buffer ");
-
   ShUberbuffer::PropertyMap props = ub->properties();
   int numProps = props.size();
   GLint* propsArray = new GLint[ numProps * 2 + 4 ];
@@ -1552,7 +1559,8 @@ void AtiBackend::allocUberbuffer( ShUberbufferPtr ub) {
   ub->setMem( glAllocMem2DATI(format, ub->width(), ub->height(), 
 			  i/2, propsArray ) );
   
-  SH_DEBUG_PRINT("Alocated mem "<<ub->mem());
+  SH_DEBUG_PRINT("Alocated mem "<< ub->mem() << " w: " << ub->width() <<
+      " h: " << ub->height() << " format: " << ub->format() );
 
   delete[] propsArray;
 
@@ -1665,23 +1673,28 @@ void AtiBackend::getUberbufferData(const ShUberbuffer *ub, int xoffset, int yoff
 
   // save existing state 
   GLint oldReadBuf, oldDrawBuf;
+  GLint frontFace;
   GLboolean vertEnabled;
   GLboolean fragEnabled;
   glGetIntegerv( GL_READ_BUFFER, &oldReadBuf );
   glGetIntegerv( GL_DRAW_BUFFER, &oldDrawBuf );
+  glGetIntegerv( GL_FRONT_FACE, &frontFace );
   vertEnabled = glIsEnabled( GL_VERTEX_PROGRAM_ARB );
   fragEnabled = glIsEnabled( GL_FRAGMENT_PROGRAM_ARB );
 
   glDisable( GL_VERTEX_PROGRAM_ARB );
   glDisable( GL_FRAGMENT_PROGRAM_ARB );
+  glFrontFace( GL_CCW );
   SH_DEBUG_PRINT( "Temporarily glDisabled vertex/fragment programs" );
 
   // attach ubuf to texture
   GLuint texBinding;
   glGenTextures(1, &texBinding);
   glActiveTextureARB( GL_TEXTURE7 );
+  glEnable( GL_TEXTURE_2D );
   glBindTexture( GL_TEXTURE_2D, texBinding );
-  //TODO save all this state before messing with it
+  //TODO save all this state before messing with it (for now just assume nobody uses
+  //texture unit 7
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
@@ -1693,15 +1706,13 @@ void AtiBackend::getUberbufferData(const ShUberbuffer *ub, int xoffset, int yoff
   GLint propsArray[] = { GL_TEXTURE_2D, GL_TRUE, GL_COLOR_BUFFER_ATI, GL_TRUE };
   GLmem dummyMem = glAllocMem2DATI( ub->format(), ub->width(), ub->height(), 2, propsArray );
 
-  CHECK_GL_ERROR();
   glAttachMemATI( GL_TEXTURE_2D, mem );
-  SH_DEBUG_PRINT( "Attach GL_AUX3 temporarily to mem " << mem );
+  SH_DEBUG_PRINT( "Attach GL_TEXTURE_2D temporarily to mem " << mem );
 
   glAttachMemATI( GL_AUX3, dummyMem );
   SH_DEBUG_PRINT( "Attach GL_AUX3 temporarily to dummy mem " << dummyMem );
 
   glDrawBuffer( GL_AUX3 ); 
-  glClearColor( 0, 0, 0, 0 );
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
   // setup matrices 
@@ -1719,7 +1730,8 @@ void AtiBackend::getUberbufferData(const ShUberbuffer *ub, int xoffset, int yoff
   double tcy1 = yoffset / (double) ub->height();
   double tcx2 = ( xoffset + width ) / (double) ub->width();
   double tcy2 = ( yoffset + height ) / (double) ub->height();
-  glEnable( GL_TEXTURE_2D );
+  SH_DEBUG_PRINT( "tex coords (min)/(max): (" << tcx1 << ", " << tcy1 << ")/("
+      << tcx2 << ", " << tcy2 << ")" ); 
   glBegin( GL_QUADS );
     glMultiTexCoord2fARB( GL_TEXTURE7, tcx1, tcy1 ); 
     glVertex3f( xoffset, yoffset, 0.0 );
@@ -1770,6 +1782,8 @@ void AtiBackend::getUberbufferData(const ShUberbuffer *ub, int xoffset, int yoff
 
   glMatrixMode(GL_MODELVIEW);
   glPopMatrix();
+
+  glFrontFace( frontFace );
 
   glDeleteMemATI( dummyMem );
   SH_DEBUG_PRINT( "Delete dummy mem " << dummyMem ); 

@@ -1082,6 +1082,15 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
         m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, mul, stmt.src[0]));
       }
       break;
+    case SH_OP_RCP:
+      {
+        ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, stmt.src[0].size()));
+        for(int i = 0; i < stmt.src[0].size(); ++i) {
+          m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp(i), stmt.src[0](i)));
+        }
+        m_instructions.push_back(ArbInst(SH_ARB_MOV, stmt.dest, rcp));
+      }
+      break;
     case SH_OP_SIN:
       // TODO fix this
       if( m_kind == SH_VERTEX_PROGRAM ) 

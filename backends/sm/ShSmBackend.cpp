@@ -501,6 +501,15 @@ void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
         m_instructions.push_back(SmInstruction(OP_POW, stmt.dest(i), stmt.src[0](i), stmt.src[1](i)));
       }
       break;
+    case SH_OP_RCP:
+      {
+        ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, stmt.src[0].size()));
+        for(int i = 0; i < stmt.src[0].size(); ++i) {
+          m_instructions.push_back(SmInstruction(OP_RCP, rcp(i), stmt.src[0](i)));
+        }
+        m_instructions.push_back(SmInstruction(OP_MOV, stmt.dest, rcp));
+      }
+      break;
     case SH_OP_SIN:
       m_instructions.push_back(SmInstruction(OP_SIN, stmt.dest, stmt.src[0]));
       break;
