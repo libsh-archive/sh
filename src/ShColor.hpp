@@ -211,7 +211,8 @@ public:
   explicit ShColor(T data[2]);
   
   ShColor(T, T);
-  ShColor(const ShGeneric<1, T>&, const ShGeneric<1, T>&);
+  template<typename T2, typename T3>
+  ShColor(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&);
   
   ~ShColor();
 
@@ -297,7 +298,8 @@ public:
   explicit ShColor(T data[3]);
   
   ShColor(T, T, T);
-  ShColor(const ShGeneric<1, T>&, const ShGeneric<1, T>&, const ShGeneric<1, T>&);
+  template<typename T2, typename T3, typename T4>
+  ShColor(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&);
   
   ~ShColor();
 
@@ -383,7 +385,8 @@ public:
   explicit ShColor(T data[4]);
   
   ShColor(T, T, T, T);
-  ShColor(const ShGeneric<1, T>&, const ShGeneric<1, T>&, const ShGeneric<1, T>&, const ShGeneric<1, T>&);
+  template<typename T2, typename T3, typename T4, typename T5>
+  ShColor(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&, const ShGeneric<1, T5>&);
   
   ~ShColor();
 

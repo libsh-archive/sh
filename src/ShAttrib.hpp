@@ -227,7 +227,8 @@ public:
   explicit ShAttrib(T data[2]);
   
   ShAttrib(T, T);
-  ShAttrib(const ShGeneric<1, T>&, const ShGeneric<1, T>&);
+  template<typename T2, typename T3>
+  ShAttrib(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&);
   
   ~ShAttrib();
 
@@ -313,7 +314,8 @@ public:
   explicit ShAttrib(T data[3]);
   
   ShAttrib(T, T, T);
-  ShAttrib(const ShGeneric<1, T>&, const ShGeneric<1, T>&, const ShGeneric<1, T>&);
+  template<typename T2, typename T3, typename T4>
+  ShAttrib(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&);
   
   ~ShAttrib();
 
@@ -399,7 +401,8 @@ public:
   explicit ShAttrib(T data[4]);
   
   ShAttrib(T, T, T, T);
-  ShAttrib(const ShGeneric<1, T>&, const ShGeneric<1, T>&, const ShGeneric<1, T>&, const ShGeneric<1, T>&);
+  template<typename T2, typename T3, typename T4, typename T5>
+  ShAttrib(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&, const ShGeneric<1, T5>&);
   
   ~ShAttrib();
 

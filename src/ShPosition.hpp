@@ -215,7 +215,8 @@ public:
   explicit ShPosition(T data[2]);
   
   ShPosition(T, T);
-  ShPosition(const ShGeneric<1, T>&, const ShGeneric<1, T>&);
+  template<typename T2, typename T3>
+  ShPosition(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&);
   
   ~ShPosition();
 
@@ -301,7 +302,8 @@ public:
   explicit ShPosition(T data[3]);
   
   ShPosition(T, T, T);
-  ShPosition(const ShGeneric<1, T>&, const ShGeneric<1, T>&, const ShGeneric<1, T>&);
+  template<typename T2, typename T3, typename T4>
+  ShPosition(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&);
   
   ~ShPosition();
 
@@ -387,7 +389,8 @@ public:
   explicit ShPosition(T data[4]);
   
   ShPosition(T, T, T, T);
-  ShPosition(const ShGeneric<1, T>&, const ShGeneric<1, T>&, const ShGeneric<1, T>&, const ShGeneric<1, T>&);
+  template<typename T2, typename T3, typename T4, typename T5>
+  ShPosition(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&, const ShGeneric<1, T5>&);
   
   ~ShPosition();
 

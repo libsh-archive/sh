@@ -211,7 +211,8 @@ public:
   explicit ShTexCoord(T data[2]);
   
   ShTexCoord(T, T);
-  ShTexCoord(const ShGeneric<1, T>&, const ShGeneric<1, T>&);
+  template<typename T2, typename T3>
+  ShTexCoord(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&);
   
   ~ShTexCoord();
 
@@ -297,7 +298,8 @@ public:
   explicit ShTexCoord(T data[3]);
   
   ShTexCoord(T, T, T);
-  ShTexCoord(const ShGeneric<1, T>&, const ShGeneric<1, T>&, const ShGeneric<1, T>&);
+  template<typename T2, typename T3, typename T4>
+  ShTexCoord(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&);
   
   ~ShTexCoord();
 
@@ -383,7 +385,8 @@ public:
   explicit ShTexCoord(T data[4]);
   
   ShTexCoord(T, T, T, T);
-  ShTexCoord(const ShGeneric<1, T>&, const ShGeneric<1, T>&, const ShGeneric<1, T>&, const ShGeneric<1, T>&);
+  template<typename T2, typename T3, typename T4, typename T5>
+  ShTexCoord(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&, const ShGeneric<1, T5>&);
   
   ~ShTexCoord();
 

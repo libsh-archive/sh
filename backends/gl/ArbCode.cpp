@@ -166,20 +166,16 @@ ArbCode::~ArbCode()
 
 void ArbCode::generate()
 {
-  SH_DEBUG_PRINT("Entering ArbCode::generate");
   // Transform code to be ARB_fragment_program compatible
   m_shader = m_originalShader->clone();
   ShContext::current()->enter(m_shader);
   ShTransformer transform(m_shader);
 
-  SH_DEBUG_PRINT("Old Interface" << std::endl << m_shader->describe_interface());
 
   transform.convertInputOutput(); 
   transform.splitTuples(4, m_splits);
   transform.convertTextureLookups();
-  SH_DEBUG_PRINT("ArbCode::generate starting convertToFloat");
   transform.convertToFloat(m_convertMap, m_converts);
-  SH_DEBUG_PRINT("ArbCode::generate finished convertToFloat");
   
   if(transform.changed()) {
     ShOptimizer optimizer(m_shader->ctrlGraph);
@@ -207,9 +203,6 @@ void ArbCode::generate()
     }
   }
   m_shader->ctrlGraph->entry()->clearMarked();
-  SH_DEBUG_PRINT("New Control Graph");
-  m_shader->ctrlGraph->graphvizDump(std::cout);
-  SH_DEBUG_PRINT("New Interface" << std::endl << m_shader->describe_interface());
   allocRegs();
   
   ShContext::current()->exit();

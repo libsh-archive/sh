@@ -36,11 +36,11 @@ ShEval* ShEval::m_instance = 0;
 void ShEval::operator()(ShOperation op, ShCloakPtr dest, 
     ShCloakCPtr a, ShCloakCPtr b, ShCloakCPtr c) const
 {
-  SH_DEBUG_PRINT("PRE OP=" << opInfo[op].name << " "
-      << (dest ? dest->encode() : "NULL") << " = "
-      << (a ? a->encode() : "NULL") << ", "
-      << (b ? b->encode() : "NULL") << ", "
-      << (c ? c->encode() : "NULL")); 
+//  SH_DEBUG_PRINT("PRE OP=" << opInfo[op].name << " "
+//      << (dest ? dest->encode() : "NULL") << " = "
+//      << (a ? a->encode() : "NULL") << ", "
+//      << (b ? b->encode() : "NULL") << ", "
+//      << (c ? c->encode() : "NULL")); 
 
   const ShEvalOpInfo *evalOpInfo = 
     getEvalOpInfo(op, dest ? dest->typeIndex() : 0, 
@@ -70,11 +70,11 @@ void ShEval::operator()(ShOperation op, ShCloakPtr dest,
     castdest = castmgr->doCast(dest->typeIndex(), castdest);
     dest->set(castdest);
   }
-  SH_DEBUG_PRINT("   RES=" << opInfo[op].name << " "
-      << (dest ? dest->encode() : "NULL") << " = "
-      << (a ? a->encode() : "NULL") << ", "
-      << (b ? b->encode() : "NULL") << ", "
-      << (c ? c->encode() : "NULL")); 
+//  SH_DEBUG_PRINT("   RES=" << opInfo[op].name << " "
+//      << (dest ? dest->encode() : "NULL") << " = "
+//      << (a ? a->encode() : "NULL") << ", "
+//      << (b ? b->encode() : "NULL") << ", "
+//      << (c ? c->encode() : "NULL")); 
 }
 
 void ShEval::addOp(ShOperation op, ShPointer<const ShEvalOp> evalOp, int dest, int src0Index, int src1Index, int src2Index)
@@ -108,13 +108,13 @@ const ShEvalOpInfo* ShEval::getEvalOpInfo(ShOperation op, int dest,
       result = &(I->first); 
     }
   }
-  SH_DEBUG_PRINT("Mapping op=" << opInfo[op].name << " dest,src[0-2]= " 
-      << (dest ? shTypeInfo(dest)->name() : "NULL")
-      << ", " << (src0 ? shTypeInfo(src0)->name() : "NULL")
-      << ", " << (src1 ? shTypeInfo(src1)->name() : "NULL")
-      << ", " << (src2 ? shTypeInfo(src2)->name() : "NULL"));
+//  SH_DEBUG_PRINT("Mapping op=" << opInfo[op].name << " dest,src[0-2]= " 
+//      << (dest ? shTypeInfo(dest)->name() : "NULL")
+//      << ", " << (src0 ? shTypeInfo(src0)->name() : "NULL")
+//      << ", " << (src1 ? shTypeInfo(src1)->name() : "NULL")
+//      << ", " << (src2 ? shTypeInfo(src2)->name() : "NULL"));
 
-  SH_DEBUG_PRINT("    to " << result->encode()); 
+//  SH_DEBUG_PRINT("    to " << result->encode()); 
 
   return result;
 }

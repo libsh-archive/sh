@@ -50,7 +50,6 @@ ShAttrib<N, Binding, T, Swizzled>::ShAttrib()
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
-
 ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShGeneric<N, T2>& other)
   : ShGeneric<N, T>(new ShVariableNode(Binding, N,shTypeIndex<T>()))
 {
@@ -58,7 +57,6 @@ ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShGeneric<N, T2>& other)
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
-
 ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShAttrib<N, Binding, T, Swizzled>& other)
   : ShGeneric<N, T>(new ShVariableNode(Binding, N,shTypeIndex<T>()))
 {
@@ -67,7 +65,6 @@ ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShAttrib<N, Binding, T, Swizzl
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
-
 ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShAttrib<N, Binding, T2, Swizzled>& other)
   : ShGeneric<N, T>(new ShVariableNode(Binding, N,shTypeIndex<T>()))
 {
@@ -311,7 +308,6 @@ ShAttrib<1, Binding, T, Swizzled>::ShAttrib()
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
-
 ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T2>& other)
   : ShGeneric<1, T>(new ShVariableNode(Binding, 1,shTypeIndex<T>()))
 {
@@ -319,7 +315,6 @@ ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T2>& other)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
-
 ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShAttrib<1, Binding, T, Swizzled>& other)
   : ShGeneric<1, T>(new ShVariableNode(Binding, 1,shTypeIndex<T>()))
 {
@@ -328,7 +323,6 @@ ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShAttrib<1, Binding, T, Swizzl
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
-
 ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShAttrib<1, Binding, T2, Swizzled>& other)
   : ShGeneric<1, T>(new ShVariableNode(Binding, 1,shTypeIndex<T>()))
 {
@@ -546,7 +540,6 @@ ShAttrib<2, Binding, T, Swizzled>::ShAttrib()
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
-
 ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShGeneric<2, T2>& other)
   : ShGeneric<2, T>(new ShVariableNode(Binding, 2,shTypeIndex<T>()))
 {
@@ -554,7 +547,6 @@ ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShGeneric<2, T2>& other)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
-
 ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShAttrib<2, Binding, T, Swizzled>& other)
   : ShGeneric<2, T>(new ShVariableNode(Binding, 2,shTypeIndex<T>()))
 {
@@ -563,7 +555,6 @@ ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShAttrib<2, Binding, T, Swizzl
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
-
 ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShAttrib<2, Binding, T2, Swizzled>& other)
   : ShGeneric<2, T>(new ShVariableNode(Binding, 2,shTypeIndex<T>()))
 {
@@ -602,7 +593,8 @@ ShAttrib<2, Binding, T, Swizzled>::ShAttrib(T s0, T s1)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
-ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T>& s0, const ShGeneric<1, T>& s1)
+template<typename T2, typename T3>
+ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T2>& s0, const ShGeneric<1, T3>& s1)
   : ShGeneric<2, T>(new ShVariableNode(Binding, 2,shTypeIndex<T>()))
 {
   if (Binding == SH_CONST) {
@@ -835,7 +827,6 @@ ShAttrib<3, Binding, T, Swizzled>::ShAttrib()
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
-
 ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShGeneric<3, T2>& other)
   : ShGeneric<3, T>(new ShVariableNode(Binding, 3,shTypeIndex<T>()))
 {
@@ -843,7 +834,6 @@ ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShGeneric<3, T2>& other)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
-
 ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShAttrib<3, Binding, T, Swizzled>& other)
   : ShGeneric<3, T>(new ShVariableNode(Binding, 3,shTypeIndex<T>()))
 {
@@ -852,7 +842,6 @@ ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShAttrib<3, Binding, T, Swizzl
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
-
 ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShAttrib<3, Binding, T2, Swizzled>& other)
   : ShGeneric<3, T>(new ShVariableNode(Binding, 3,shTypeIndex<T>()))
 {
@@ -893,7 +882,8 @@ ShAttrib<3, Binding, T, Swizzled>::ShAttrib(T s0, T s1, T s2)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
-ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T>& s0, const ShGeneric<1, T>& s1, const ShGeneric<1, T>& s2)
+template<typename T2, typename T3, typename T4>
+ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T2>& s0, const ShGeneric<1, T3>& s1, const ShGeneric<1, T4>& s2)
   : ShGeneric<3, T>(new ShVariableNode(Binding, 3,shTypeIndex<T>()))
 {
   if (Binding == SH_CONST) {
@@ -1129,7 +1119,6 @@ ShAttrib<4, Binding, T, Swizzled>::ShAttrib()
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
-
 ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShGeneric<4, T2>& other)
   : ShGeneric<4, T>(new ShVariableNode(Binding, 4,shTypeIndex<T>()))
 {
@@ -1137,7 +1126,6 @@ ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShGeneric<4, T2>& other)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
-
 ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShAttrib<4, Binding, T, Swizzled>& other)
   : ShGeneric<4, T>(new ShVariableNode(Binding, 4,shTypeIndex<T>()))
 {
@@ -1146,7 +1134,6 @@ ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShAttrib<4, Binding, T, Swizzl
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
-
 ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShAttrib<4, Binding, T2, Swizzled>& other)
   : ShGeneric<4, T>(new ShVariableNode(Binding, 4,shTypeIndex<T>()))
 {
@@ -1189,7 +1176,8 @@ ShAttrib<4, Binding, T, Swizzled>::ShAttrib(T s0, T s1, T s2, T s3)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
-ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T>& s0, const ShGeneric<1, T>& s1, const ShGeneric<1, T>& s2, const ShGeneric<1, T>& s3)
+template<typename T2, typename T3, typename T4, typename T5>
+ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T2>& s0, const ShGeneric<1, T3>& s1, const ShGeneric<1, T4>& s2, const ShGeneric<1, T5>& s3)
   : ShGeneric<4, T>(new ShVariableNode(Binding, 4,shTypeIndex<T>()))
 {
   if (Binding == SH_CONST) {

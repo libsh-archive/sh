@@ -60,7 +60,7 @@ void addCasts()
   addCast<short, char>(true, true);
 
   // between int and float types
-  addCast<double, int>(true, true);
+  addCast<float, int>(true, true);
   addCast<float, short>(true, true); // @todo change this to half
   addCast<float, char>(true, true); // @todo change this to half
 
@@ -152,7 +152,8 @@ void shTypeInfoInit()
   _shInitIntervalOps<double>();
   _shInitIntervalOps<float>();
 
-  SH_DEBUG_PRINT("ShEval ops: \n" << ShEval::instance()->availableOps());
+  // @todo type
+  //SH_DEBUG_PRINT("ShEval ops: \n" << ShEval::instance()->availableOps());
 
   addCasts();
 }

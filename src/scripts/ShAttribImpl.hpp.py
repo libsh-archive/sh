@@ -20,12 +20,11 @@ class Impl(semantic.Impl):
     def __init__(self):
         semantic.Impl.__init__(self, "Attrib", "attribute", "SH_ATTRIB", "ShGeneric")
 
-    def copycons(self, args, size, extraTplArg=""):
+    def copycons(self, args, size, extraTplArg=[]):
         other = args[0][1]
 
-        if extraTplArg != "": extraTplArg = "template<typename " + extraTplArg + ">\n"
         common.inprint(self.tpl(size))
-        common.inprint(extraTplArg);
+        if len(extraTplArg) > 0: common.inprint("template<" + ", ".join(["typename " + x for x in extraTplArg]) + ">")
         common.inprint(self.tplcls(size) + "::" + self.name + "(" + ', '.join([' '.join(x) for x in args]) + ")")
         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
                        "(new ShVariableNode(Binding, " + self.sizevar(size) + ",shTypeIndex<T>()))")
@@ -47,9 +46,9 @@ class Impl(semantic.Impl):
         common.inprint("}")
         common.inprint("")
 
-    def scalarcons(self, size, type):
+    def scalarcons(self, args, size, extraTplArg=[]):
         common.inprint(self.tpl(size))
-        args = [[type, "s" + str(i)] for i in range(0, size)]
+        if len(extraTplArg) > 0: common.inprint("template<" + ", ".join(["typename " + x for x in extraTplArg]) + ">")
         common.inprint(self.tplcls(size) + "::" + self.name + "(" + ', '.join([' '.join(x) for x in args]) + ")")
         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
                        "(new ShVariableNode(Binding, " + self.sizevar(size) + ",shTypeIndex<T>()))")
@@ -59,7 +58,7 @@ class Impl(semantic.Impl):
         common.inprint("if (Binding == SH_CONST) {")
         common.indent()
         for i in range(0, size):
-            if type == "T":
+            if args[0][0] == "T":
                 common.inprint("setValue(" + str(i) + ", s" + str(i) + ");")
             else:
                 common.inprint("SH_DEBUG_ASSERT(s" + str(i) + ".hasValues());")
@@ -68,7 +67,7 @@ class Impl(semantic.Impl):
         common.inprint("} else {")
         common.indent()
         for i in range(0, size):
-            if type == "T":
+            if args[0][0] == "T":
                 val = "ShAttrib<1, SH_CONST, T>(s" + str(i) + ")"
             else:
                 val = "s" + str(i)
@@ -88,9 +87,9 @@ class Impl(semantic.Impl):
         common.inprint("}")
         common.inprint("")
 
-        self.copycons([["const ShGeneric<" + self.sizevar(size) + ", T2>&", "other"]], size, "T2")
+        self.copycons([["const ShGeneric<" + self.sizevar(size) + ", T2>&", "other"]], size, ["T2"])
         self.copycons([["const " + self.tplcls(size) + "&","other"]], size)
-        self.copycons([["const " + self.tplcls(size, "Swizzled", "T2") + "&","other"]], size, "T2")
+        self.copycons([["const " + self.tplcls(size, "Swizzled", "T2") + "&","other"]], size, ["T2"])
 
         common.inprint(self.tpl(size))
         common.inprint(self.tplcls(size) + "::" + self.name + "(const ShVariableNodePtr& node,")
@@ -122,9 +121,9 @@ class Impl(semantic.Impl):
         common.inprint("")
 
         if size > 0:
-            self.scalarcons(size, "T")
+            self.scalarcons([["T", "s" + str(x)] for x in range(0, size)], size)
         if size > 1:
-            self.scalarcons(size, "const ShGeneric<1, T>&")
+            self.scalarcons([["const ShGeneric<1, T" + str(x + 2) + ">&", "s" + str(x)] for x in range(0, size)], size, ["T" + str(x + 2) for x in range(0, size)])
 
 #     def assign(self, fun, args, size):
 #         common.inprint(self.tpl(size) + "\n" +

@@ -67,7 +67,6 @@ void sh ## op(ShVariable& dest, const ShVariable& src)\
 {\
   sizes_match(dest, src);\
   if(immediate()) {\
-    SH_DEBUG_PRINT(__FILE__ << ":" << __LINE__); \
     has_values(dest, src);\
     ShCloakPtr result = dest.cloak();\
     (*ShEval::instance())(SH_OP_ ## op, result, src.cloak(), 0, 0);\

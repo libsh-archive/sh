@@ -1,3 +1,16 @@
+2004-10-05  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+  Small fixes to make shrike work.  Merging in main branch next.  
+
+  * src/scripts/semantic.py, src/scripts/ShAttribImpl.hpp.py:
+  Added templated versions of the scalar constructors.
+
+  * src/ShLib.hpp, src/shLibArith.hpp, src/ShLibGeometry.hpp:
+  Fixed some template argument bugs.
+
+  * src/ShTypeConvertTransformer.cpp, src/ShInstructions.cpp,
+    backends/gl/Arb.cpp backends/gl/ArbCode.cpp:
+  Removed obsolete debug messages. 
+
 2004-10-01  Bryan Chan <b8chan@uwaterloo.ca>
   Another checkin for storage types. Transformers are now in place
 	so floating point (not including half) and signed int types 

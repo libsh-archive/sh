@@ -214,7 +214,8 @@ public:
   explicit ShVector(T data[2]);
   
   ShVector(T, T);
-  ShVector(const ShGeneric<1, T>&, const ShGeneric<1, T>&);
+  template<typename T2, typename T3>
+  ShVector(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&);
   
   ~ShVector();
 
@@ -300,7 +301,8 @@ public:
   explicit ShVector(T data[3]);
   
   ShVector(T, T, T);
-  ShVector(const ShGeneric<1, T>&, const ShGeneric<1, T>&, const ShGeneric<1, T>&);
+  template<typename T2, typename T3, typename T4>
+  ShVector(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&);
   
   ~ShVector();
 
@@ -386,7 +388,8 @@ public:
   explicit ShVector(T data[4]);
   
   ShVector(T, T, T, T);
-  ShVector(const ShGeneric<1, T>&, const ShGeneric<1, T>&, const ShGeneric<1, T>&, const ShGeneric<1, T>&);
+  template<typename T2, typename T3, typename T4, typename T5>
+  ShVector(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&, const ShGeneric<1, T5>&);
   
   ~ShVector();
 

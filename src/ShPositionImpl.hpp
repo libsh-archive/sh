@@ -567,7 +567,8 @@ ShPosition<2, Binding, T, Swizzled>::ShPosition(T s0, T s1)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
-ShPosition<2, Binding, T, Swizzled>::ShPosition(const ShGeneric<1, T>& s0, const ShGeneric<1, T>& s1)
+template<typename T2, typename T3>
+ShPosition<2, Binding, T, Swizzled>::ShPosition(const ShGeneric<1, T2>& s0, const ShGeneric<1, T3>& s1)
   : ParentType(s0, s1)
 {
   m_node->specialType(SH_POSITION);
@@ -835,7 +836,8 @@ ShPosition<3, Binding, T, Swizzled>::ShPosition(T s0, T s1, T s2)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
-ShPosition<3, Binding, T, Swizzled>::ShPosition(const ShGeneric<1, T>& s0, const ShGeneric<1, T>& s1, const ShGeneric<1, T>& s2)
+template<typename T2, typename T3, typename T4>
+ShPosition<3, Binding, T, Swizzled>::ShPosition(const ShGeneric<1, T2>& s0, const ShGeneric<1, T3>& s1, const ShGeneric<1, T4>& s2)
   : ParentType(s0, s1, s2)
 {
   m_node->specialType(SH_POSITION);
@@ -1103,7 +1105,8 @@ ShPosition<4, Binding, T, Swizzled>::ShPosition(T s0, T s1, T s2, T s3)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
-ShPosition<4, Binding, T, Swizzled>::ShPosition(const ShGeneric<1, T>& s0, const ShGeneric<1, T>& s1, const ShGeneric<1, T>& s2, const ShGeneric<1, T>& s3)
+template<typename T2, typename T3, typename T4, typename T5>
+ShPosition<4, Binding, T, Swizzled>::ShPosition(const ShGeneric<1, T2>& s0, const ShGeneric<1, T3>& s1, const ShGeneric<1, T4>& s2, const ShGeneric<1, T5>& s3)
   : ParentType(s0, s1, s2, s3)
 {
   m_node->specialType(SH_POSITION);

@@ -63,9 +63,9 @@ ShGeneric<N, CT1T2T3> refract(const ShGeneric<N, T1>& v, const ShGeneric<N, T2>&
   ShGeneric<N, T1> vn = normalize(v);
   ShGeneric<N, T2> nn = normalize(n);
   ShGeneric<1, CT1T2T3> c = (vn|nn);
-  ShGeneric<1, CT1T2T3> k = c*c - 1;
-  k = 1 + theta*theta*k;
-  k = clamp(k, 0, 1); 
+  ShGeneric<1, CT1T2T3> k = c*c - ShConcreteTypeInfo<CT1T2T3>::ONE;
+  k = ShConcreteTypeInfo<CT1T2T3>::ONE + theta*theta*k;
+  k = clamp(k, ShConcreteTypeInfo<CT1T2T3>::ZERO, ShConcreteTypeInfo<CT1T2T3>::ONE); 
   ShGeneric<1, CT1T2T3> a = theta;
   ShGeneric<1, CT1T2T3> b = theta*c + sqrt(k);
   return (a*vn + b*nn);

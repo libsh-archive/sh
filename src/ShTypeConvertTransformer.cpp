@@ -35,6 +35,8 @@
 #include "ShEval.hpp"
 #include "ShTransformer.hpp"
 
+// #define SH_DEBUG_TYPECONVERT
+
 namespace SH {
 
 // algorithm
@@ -223,24 +225,36 @@ struct FloatConverter {
   // Adds required conversions for statment *I
   void fixStatement(ShBasicBlock::ShStmtList &stmtList, const ShBasicBlock::ShStmtList::iterator &I) {
     ShStatement &stmt = *I;
+#ifdef SH_DEBUG_TYPECONVERT
     SH_DEBUG_PRINT("Checking a statement op=" << opInfo[stmt.op].name);
+#endif
 
     // Get the operation information used for this statement 
-    const ShEvalOpInfo* opInfo = m_eval->getEvalOpInfo(
+    const ShEvalOpInfo* evalOpInfo = m_eval->getEvalOpInfo(
         stmt.op,
         stmt.dest.typeIndex(), 
         stmt.src[0].typeIndex(),
         stmt.src[1].typeIndex(),
         stmt.src[2].typeIndex());
 
+    if(!evalOpInfo) {
+      // @todo type 
+      // for now, assume its one of the instructions that has no immediate mode functionality (e.g. kill, texture lookup)
+      // It could also be that no operation matched the arguments
+      SH_DEBUG_PRINT("Possible problem finding evaluator for op = " << opInfo[stmt.op].name); 
+      return;
+    }
+
     for(int i = 0; i < 3; ++i) {
       int srcIndex = stmt.src[i].typeIndex();
-      int opIndex = opInfo->m_src[i]; 
+      int opIndex = evalOpInfo->m_src[i]; 
       if(srcIndex == opIndex) continue;
       if((m_typeMap.count(srcIndex) == 0) && (m_typeMap.count(opIndex) == 0)) continue;
 
+#ifdef SH_DEBUG_TYPECONVERT
       SH_DEBUG_PRINT("  Converting src[" << i << "] from " << shTypeInfo(srcIndex)->name()
           << " to " << shTypeInfo(opIndex)->name());
+#endif
 
       // Step 2: prepend code to convert src[i], making sure all variables
       // involved are converted if their type is in m_typeMap
@@ -264,10 +278,14 @@ struct FloatConverter {
     //
     // @todo in particular, for int, DIV, POW need flooring afterwards 
     int destIndex = stmt.dest.typeIndex();
-    int opDest = opInfo->m_dest;
+    int opDest = evalOpInfo->m_dest;
     if((destIndex != opDest) &&
        (m_typeMap.count(destIndex) + m_typeMap.count(opDest) > 0)) {
+
+#ifdef SH_DEBUG_TYPECONVERT
       SH_DEBUG_PRINT("  Converting dest from " << shTypeInfo(opDest)->name() << " to " << shTypeInfo(destIndex)->name() );
+#endif
+
       ShBasicBlock::ShStmtList::iterator afterI = I;
       ++afterI;
 
@@ -297,10 +315,16 @@ struct FloatConverter {
     m_converts[p] = p->clone(m_typeMap[p->typeIndex()], false);
     if(p->hasValues()) {
       m_converts[p]->setCloak(p->cloak());
+
+#ifdef SH_DEBUG_TYPECONVERT
       SH_DEBUG_PRINT("Setting values on replacement = " << m_converts[p]->cloak()->encode() << " original = " << p->cloak()->encode());
+#endif
     }
+
+#ifdef SH_DEBUG_TYPECONVERT
     SH_DEBUG_PRINT("Converting " << p->name() << " from " << shTypeInfo(p->typeIndex())->name()
       << " to " << shTypeInfo(m_typeMap[p->typeIndex()])->name()); 
+#endif
   }
 
 

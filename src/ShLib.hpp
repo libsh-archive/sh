@@ -84,14 +84,14 @@ SH_SHLIB_CONST_N_OP_RIGHT(operation);
 SH_SHLIB_CONST_N_OP_RETSIZE_LEFT(operation, retsize); \
 SH_SHLIB_CONST_N_OP_RETSIZE_RIGHT(operation, retsize);
 
-//@todo type fix doubles here.  Should be templated types, but those
-//will cause overload problems
+//@todo type fix scalar types here.  Should be arbitrary templated types instead of
+// just T , but that casues overload problems 
 #define SH_SHLIB_CONST_TRINARY_OP_011_RETSIZE(operation, retsize) \
-template<int N, typename T1> \
-ShGeneric<retsize, double> \
-operation(const ShGeneric<N, T1>& a, double b, double c) \
+template<int N, typename T> \
+ShGeneric<retsize, T> \
+operation(const ShGeneric<N, T>& a, T b, T c) \
 { \
-  return operation(a, ShAttrib<1, SH_CONST, double>(b), ShAttrib<1, SH_CONST, double>(c)); \
+  return operation(a, ShAttrib<1, SH_CONST, T>(b), ShAttrib<1, SH_CONST, T>(c)); \
 } \
 
 #define SH_SHLIB_CONST_TRINARY_OP_011(operation) \

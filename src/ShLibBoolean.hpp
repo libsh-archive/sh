@@ -137,12 +137,12 @@ template<int N, typename T>
 ShGeneric<N, T> operator!(const ShGeneric<N, T>& a);
 
 /// Componentwise minimum
-template<int N, typename T>
-ShGeneric<N, T> operator&&(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator&&(const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b);
 
 /// Componentwise maximum
-template<int N, typename T>
-ShGeneric<N, T> operator||(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator||(const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b);
 
 /// Maximum of all components
 template<int N, typename T>

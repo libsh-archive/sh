@@ -211,7 +211,8 @@ public:
   explicit ShPoint(T data[2]);
   
   ShPoint(T, T);
-  ShPoint(const ShGeneric<1, T>&, const ShGeneric<1, T>&);
+  template<typename T2, typename T3>
+  ShPoint(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&);
   
   ~ShPoint();
 
@@ -297,7 +298,8 @@ public:
   explicit ShPoint(T data[3]);
   
   ShPoint(T, T, T);
-  ShPoint(const ShGeneric<1, T>&, const ShGeneric<1, T>&, const ShGeneric<1, T>&);
+  template<typename T2, typename T3, typename T4>
+  ShPoint(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&);
   
   ~ShPoint();
 
@@ -383,7 +385,8 @@ public:
   explicit ShPoint(T data[4]);
   
   ShPoint(T, T, T, T);
-  ShPoint(const ShGeneric<1, T>&, const ShGeneric<1, T>&, const ShGeneric<1, T>&, const ShGeneric<1, T>&);
+  template<typename T2, typename T3, typename T4, typename T5>
+  ShPoint(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&, const ShGeneric<1, T5>&);
   
   ~ShPoint();
 

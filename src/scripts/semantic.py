@@ -101,7 +101,8 @@ public:""")
     def constructors_sized(self, size):
         common.inprint(self.name + "(" + ', '.join(["T"] * size) + ");")
         if size != 1:
-            common.inprint(self.name + "(" + ', '.join(["const ShGeneric<1, T>&"] * size) + ");")
+            common.inprint("template<" + ", ".join(["typename T" + str(x) for x in range(2, size + 2)]) + ">")
+            common.inprint(self.name + "(" + ', '.join(["const ShGeneric<1, T" + str(x) + ">&" for x in range(2, size + 2)]) + ");")
         common.inprint('')
 
     def assignments(self, size):
@@ -231,10 +232,11 @@ class Impl:
         s += ", Binding, " + type + ", " + swiz + ">"
         return s
 
-    def constructor(self, args, size, extraTplArg=""):
-        if extraTplArg != "": extraTplArg = "template<typename " + extraTplArg + ">\n"
+    def constructor(self, args, size, extraTplArg=[]):
+        extraTplStr = ""
+        if len(extraTplArg) > 0: extraTplStr = "template<" + ", ".join(["typename " + x for x in extraTplArg]) + ">\n"
         common.inprint(self.tpl(size) + "\n" +
-                       extraTplArg +
+                       extraTplStr +
                        self.tplcls(size) + "::" + self.name + "(" + ', '.join([' '.join(x) for x in args]) + ")")
         if len(args) > 0:
             common.inprint("  : ParentType(" + ', '.join([re.sub(r'\[.*\]', r'', x[-1]) for x in args]) + ")")
@@ -251,9 +253,9 @@ class Impl:
             s = "N"
         else:
             s = str(size)
-        self.constructor([["const ShGeneric<" + s + ", T2>&", "other"]], size, "T2")
+        self.constructor([["const ShGeneric<" + s + ", T2>&", "other"]], size, ["T2"])
         self.constructor([["const " + self.tplcls(size) + "&", "other"]], size)
-        self.constructor([["const " + self.tplcls(size, "Swizzled", "T2") + "&", "other"]], size, "T2")
+        self.constructor([["const " + self.tplcls(size, "Swizzled", "T2") + "&", "other"]], size, ["T2"])
         self.constructor([["const ShVariableNodePtr&", "node"],
                           ["const ShSwizzle&", "swizzle"],
                           ["bool", "neg"]], size)
@@ -261,7 +263,8 @@ class Impl:
         if size > 0:
             self.constructor([["T", "s" + str(x)] for x in range(0, size)], size)
         if size > 1:
-            self.constructor([["const ShGeneric<1, T>&", "s" + str(x)] for x in range(0, size)], size)
+            self.constructor([["const ShGeneric<1, T" + str(x + 2) + ">&", "s" + str(x)] for x in range(0, size)], size, 
+                ["T" + str(x) for x in range(2, size + 2)])
         
     def destructor(self, size):
         common.inprint(self.tpl(size) + "\n" +
@@ -270,10 +273,11 @@ class Impl:
         common.inprint("}")
         common.inprint("")
 
-    def assign(self, fun, args, size, extraTplArg=""):
-        if extraTplArg != "": extraTplArg = "template<typename " + extraTplArg + ">\n"
+    def assign(self, fun, args, size, extraTplArg=[]):
+        extraTplStr = ""
+        if len(extraTplArg) > 0: extraTplStr = "template<" + ", ".join(["typename " + x for x in extraTplArg]) + ">\n"
         common.inprint(self.tpl(size) + "\n" +
-                       extraTplArg +
+                       extraTplStr +
                        self.tplcls(size) + "&\n" +
                        self.tplcls(size) + "::" + fun +
                        "(" + ', '.join([' '.join(x) for x in args]) + ")")
@@ -290,9 +294,9 @@ class Impl:
             s = "N"
         else:
             s = str(size)
-        self.assign("operator=", [["const ShGeneric<" + s + ", T2>&", "other"]], size, "T2")
+        self.assign("operator=", [["const ShGeneric<" + s + ", T2>&", "other"]], size, ["T2"])
         self.assign("operator=", [["const " + self.tplcls(size) + "&", "other"]], size)
-        self.assign("operator=", [["const " + self.tplcls(size, "Swizzled", "T2") + "&", "other"]], size, "T2")
+        self.assign("operator=", [["const " + self.tplcls(size, "Swizzled", "T2") + "&", "other"]], size, ["T2"])
         if size == 1:
             self.assign("operator=", [["T", "other"]], size)
 
@@ -301,11 +305,11 @@ class Impl:
             s = "N"
         else:
             s = str(size)
-        self.assign("operator+=", [["const ShGeneric<" + s + ", T2>&", "right"]], size, "T2")
-        self.assign("operator-=", [["const ShGeneric<" + s + ", T2>&", "right"]], size, "T2")
-        self.assign("operator*=", [["const ShGeneric<" + s + ", T2>&", "right"]], size, "T2")
-        self.assign("operator/=", [["const ShGeneric<" + s + ", T2>&", "right"]], size, "T2")
-        self.assign("operator%=", [["const ShGeneric<" + s + ", T2>&", "right"]], size, "T2")
+        self.assign("operator+=", [["const ShGeneric<" + s + ", T2>&", "right"]], size, ["T2"])
+        self.assign("operator-=", [["const ShGeneric<" + s + ", T2>&", "right"]], size, ["T2"])
+        self.assign("operator*=", [["const ShGeneric<" + s + ", T2>&", "right"]], size, ["T2"])
+        self.assign("operator/=", [["const ShGeneric<" + s + ", T2>&", "right"]], size, ["T2"])
+        self.assign("operator%=", [["const ShGeneric<" + s + ", T2>&", "right"]], size, ["T2"])
 
         self.assign("operator+=", [["T", "right"]], size)
         self.assign("operator-=", [["T", "right"]], size)
@@ -313,11 +317,11 @@ class Impl:
         self.assign("operator/=", [["T", "right"]], size)
         self.assign("operator%=", [["T", "right"]], size)
         if size != 1:
-            self.assign("operator+=", [["const ShGeneric<1, T2>&", "right"]], size, "T2")
-            self.assign("operator-=", [["const ShGeneric<1, T2>&", "right"]], size, "T2")
-            self.assign("operator*=", [["const ShGeneric<1, T2>&", "right"]], size, "T2")
-            self.assign("operator/=", [["const ShGeneric<1, T2>&", "right"]], size, "T2")
-            self.assign("operator%=", [["const ShGeneric<1, T2>&", "right"]], size, "T2")
+            self.assign("operator+=", [["const ShGeneric<1, T2>&", "right"]], size, ["T2"])
+            self.assign("operator-=", [["const ShGeneric<1, T2>&", "right"]], size, ["T2"])
+            self.assign("operator*=", [["const ShGeneric<1, T2>&", "right"]], size, ["T2"])
+            self.assign("operator/=", [["const ShGeneric<1, T2>&", "right"]], size, ["T2"])
+            self.assign("operator%=", [["const ShGeneric<1, T2>&", "right"]], size, ["T2"])
             
     def swizzle(self, num, size, op = "()"):
         args = ["s" + str(i) for i in range(0, num)]

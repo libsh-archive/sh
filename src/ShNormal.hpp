@@ -211,7 +211,8 @@ public:
   explicit ShNormal(T data[2]);
   
   ShNormal(T, T);
-  ShNormal(const ShGeneric<1, T>&, const ShGeneric<1, T>&);
+  template<typename T2, typename T3>
+  ShNormal(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&);
   
   ~ShNormal();
 
@@ -297,7 +298,8 @@ public:
   explicit ShNormal(T data[3]);
   
   ShNormal(T, T, T);
-  ShNormal(const ShGeneric<1, T>&, const ShGeneric<1, T>&, const ShGeneric<1, T>&);
+  template<typename T2, typename T3, typename T4>
+  ShNormal(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&);
   
   ~ShNormal();
 
@@ -383,7 +385,8 @@ public:
   explicit ShNormal(T data[4]);
   
   ShNormal(T, T, T, T);
-  ShNormal(const ShGeneric<1, T>&, const ShGeneric<1, T>&, const ShGeneric<1, T>&, const ShGeneric<1, T>&);
+  template<typename T2, typename T3, typename T4, typename T5>
+  ShNormal(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&, const ShGeneric<1, T5>&);
   
   ~ShNormal();
 
