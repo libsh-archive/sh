@@ -24,8 +24,8 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHDEMO_PERLIN_HPP 
-#define SHDEMO_PERLIN_HPP 
+#ifndef SHUTIL_PERLIN_HPP 
+#define SHUTIL_PERLIN_HPP 
 
 #include "ShAttrib.hpp"
 #include "ShTexture.hpp"
@@ -40,66 +40,44 @@ using namespace SH;
 
 /** \brief A Perlin noise/turbulence generator.
  */
+template<int M>
 class ShPerlin
 {
   public:
-    /** \brief Constructor for ShPerlin.
-     * Constructs a Perlin noise generator that uses the given 
-     * persistence and number of octaves for generating turbulence
-     */
-    ShPerlin(double persistence, int octaves);
-
-    /** \brief Destructor for ShPerlin.
-     * Destroys a Perlin noise generator.
-     */
-    ~ShPerlin();
-
     /** \brief Generates a single octave Perlin noise.
      */
-    ShAttrib1f noise(ShAttrib3f p);
-
-    /** \brief Turbulence functions sum several octaves of Perlin noise. 
-     * The number of octaves and persistence can be controlled using 
-     * setTurbulenceParams.
-     * \sa void setTurbulenceParams(double persist, int numOctaves);
-     */
-    ShAttrib1f turbulence(ShAttrib3f p);
-    ShAttrib1f sturbulence(ShAttrib3f p);
-
-    /** \brief Toggles texture lookup Perlin method
-     * The Perlin noise function can use either a procedural hash
-     * function to generate gradients on the integer lattice or use
-     * 3D texture lookup.
-     *
-     * This toggles whether to use the texture lookup method, which is 
-     * currently much faster than the procedural method.
-     */
-    void useNoiseTexture(bool useNoiseTex);
-
-    /** \brief Sets parameters used for turbulence.
-     * Sets the persistence and number of octaves to use when
-     * summing Perlin noise functions together for turbulence.
-     *
-     * The ith octave used in the sum has period
-     * 2^i and is scaled by persist^i 
-     */
-    void setTurbulenceParams(double persist, int numOctaves);
-
+    template<int K, typename T> 
+    static ShVariableN<M, T> noise(const ShVariableN<K, T> &p, bool useTexture);
 
   private:
-    double persistence; ///< persistence to use for turbulence
-    int octaves; ///< number of octaves to use for turbulence
-    bool useTexture; ///< toggles whether to use texture lookup for gradients
+    static bool m_init;
+    static ShTexture3D<ShColor<M, SH_VAR_TEMP> > noiseTex; ///< pseudorandom 3D perlin noise texture 
 
-    ShTexture3D<ShColor4f> noiseTex; ///< pseudorandom 3D perlin noise texture 
-
-    ShAttrib4f grad4(ShAttrib3f p); 
-    ShAttrib1f grad(ShAttrib3f p); 
-
+    static void init();
 };
 
-extern ShAttrib1f sturbulence(ShAttrib3f p);
+
+// Returns M octaves of turbulence in N-dimensional space (currently 1 <= N <= 4,
+// 1 <= M <= 2, 1 <= K <= 4 is supported)
+// The ith octave has double the frequency of the (i-1)th octave and 
+// is weighted by amp(i).
+// 
+// The maximum M size supported is determined by the color depth of the noise texture.
+// The reason it is set at 2 right now is  
+//
+// useTexture determines whether procedureal hash is used or texture lookup
+template<int M, int N, int K, typename T>
+ShVariableN<M, T> turbulence(const ShVariableN<N, T> &amp, 
+    const ShVariableN<K, T> &p, bool useTexture = true);
+
+/** \brief Turbulence functions sum several octaves of Perlin noise. 
+ */
+template<int M, int N, int K, typename T>
+ShVariableN<M, T> sturbulence(const ShVariableN<N, T> &amp, 
+    const ShVariableN<K, T> &p, bool useTexture = true);
 
 }
+
+#include "ShPerlinImpl.hpp" 
 
 #endif

@@ -31,6 +31,8 @@
 #include "ShPosition.hpp"
 #include "ShManipulator.hpp"
 #include "ShAlgebra.hpp"
+#include "ShProgram.hpp"
+#include "ShNibbles.hpp"
 #include "ShKernelLib.hpp"
 
 /** \file ShKernelLibImpl.hpp
@@ -41,125 +43,16 @@ namespace ShUtil {
 
 using namespace SH;
 
-#define ATTRIB_NAMED_DECL(Type, K, var, varName) \
-  ShAttrib< Type::typesize, K, typename Type::ValueType > SH_NAMEDECL( var, varName ); \
-  var.node()->specialType(Type::special_type);
-
-#define ATTRIB_DECL(Type, K, var) \
-  ATTRIB_NAMED_DECL(Type, K, var, # var)
-
-template< int Rows, int Cols, int Kind, typename T>
-ShProgram shTransform(const ShMatrix<Rows, Cols, Kind, T> &m) {
-  ShProgram nibble = SH_BEGIN_PROGRAM() {
-    ShAttrib<Cols, SH_VAR_INPUT, T> attrib; SH_NAMEVAR( attrib ); 
-    ShAttrib<Rows, SH_VAR_OUTPUT, T> transAttrib; SH_NAMEVAR( transAttrib );
-    transAttrib = m | input;
-  } SH_END;
-  return nibble;
-}
-
-template<typename T>
-ShProgram access(const ShTexture1D<T> &tex) {
-  ShProgram nibble = SH_BEGIN_PROGRAM() {
-    ShInputTexCoord1f SH_DECL(tc);
-    ATTRIB_DECL(T, SH_VAR_OUTPUT, result); 
-    result = tex(tc);
-  } SH_END;
-  return nibble;
-}
-
-template<typename T>
-ShProgram access(const ShTexture2D<T> &tex) {
-  ShProgram nibble = SH_BEGIN_PROGRAM() {
-    ShInputTexCoord2f SH_DECL(tc);
-    ATTRIB_DECL(T, SH_VAR_OUTPUT, result); 
-    result = tex(tc);
-  } SH_END;
-  return nibble;
-}
-
-template<typename T>
-ShProgram access(const ShTexture3D<T> &tex) {
-  ShProgram nibble = SH_BEGIN_PROGRAM() {
-    ShInputTexCoord3f SH_DECL(tc);
-    ATTRIB_DECL(T, SH_VAR_OUTPUT, result); 
-    result = tex(tc);
-  } SH_END;
-  return nibble;
-}
-
-template<typename T>
-ShProgram shScale() {
-  ShProgram nibble = SH_BEGIN_PROGRAM() {
-    ShInputAttrib1f SH_DECL(scale);
-    ATTRIB_DECL(T, SH_VAR_INPUT, attrib);
-    ATTRIB_DECL(T, SH_VAR_OUTPUT, result);
-    result = scale * attrib; 
-  } SH_END;
-  return nibble;
-}
-
-template<typename T>
-ShProgram shLerp() {
-  ShProgram nibble = SH_BEGIN_PROGRAM() {
-    ShInputAttrib1f SH_DECL(alpha);
-    ATTRIB_DECL(T, SH_VAR_INPUT, a);
-    ATTRIB_DECL(T, SH_VAR_INPUT, b);
-    ATTRIB_DECL(T, SH_VAR_OUTPUT, result);
-    result = lerp(alpha, a, b); 
-  } SH_END;
-  return nibble;
-}
-
-template<typename T>
-ShProgram shDot() {
-  ShProgram nibble = SH_BEGIN_PROGRAM() {
-    ATTRIB_DECL(T, SH_VAR_INPUT, a);
-    ATTRIB_DECL(T, SH_VAR_INPUT, b);
-    ShAttrib<1, SH_VAR_OUTPUT, typename T::ValueType> SH_DECL(result);
-    result = dot(a, b); 
-  } SH_END;
-  return nibble;
-}
-
-// TODO - macro for all binary operations
-template<typename T>
-ShProgram shAdd() {
-  ShProgram nibble = SH_BEGIN_PROGRAM() {
-    ATTRIB_DECL(T, SH_VAR_INPUT, a);
-    ATTRIB_DECL(T, SH_VAR_INPUT, b);
-    ATTRIB_DECL(T, SH_VAR_OUTPUT, result);
-    result = a + b;
-  } SH_END;
-  return nibble;
-}
-
-template<typename T, typename T2>
-ShProgram shCast() {
-  ShProgram nibble = SH_BEGIN_PROGRAM() {
-    ATTRIB_DECL(T, SH_VAR_INPUT, in);
-    ATTRIB_DECL(T2, SH_VAR_OUTPUT, out);
-    int copySize = std::min(T::typesize, T2::typesize);
-    for(int i = 0; i < copySize; ++i) {
-      // TODO make this a swizzled op (or let future vectorizer deal with it)
-      out(i) = in(i);
-    }
-  } SH_END;
-  return nibble;
-}
-
 template<typename T>
 ShProgram ShKernelLib::shDiffuse() {
   ShProgram kernel = SH_BEGIN_FRAGMENT_PROGRAM {
-    ATTRIB_DECL(T, SH_VAR_INPUT, kd);
+    typename T::InputType SH_DECL( kd );
     ShInputNormal3f SH_DECL(normal);
     ShInputVector3f SH_DECL(lightVec);
     ShInputPosition4f SH_DECL(posh);
 
-    ShAttrib1f irrad = dot(normalize(normal), normalize(lightVec));
-    irrad *= (irrad > 0.0);
-
-    ATTRIB_DECL(T, SH_VAR_OUTPUT, result);
+    ShAttrib1f irrad = pos(dot(normalize(normal), normalize(lightVec)));
+    typename T::OutputType SH_DECL( result );
     result = irrad * kd; 
   } SH_END;
   return kernel;
@@ -168,20 +61,20 @@ ShProgram ShKernelLib::shDiffuse() {
 template<typename T>
 ShProgram ShKernelLib::shSpecular() {
   ShProgram kernel = SH_BEGIN_FRAGMENT_PROGRAM {
-    ATTRIB_DECL(T, SH_VAR_INPUT, ks);
+    typename T::InputType SH_DECL( ks );
     ShInputAttrib1f SH_DECL(specExp);
     ShInputNormal3f SH_DECL(normal);
     ShInputVector3f SH_DECL(halfVec);
     ShInputVector3f SH_DECL(lightVec);
     ShInputPosition4f SH_DECL(posh);
 
-    ShNormal3f nnv = normalize(normal);
-    ShVector3f nhv = normalize(halfVec);
-    ShAttrib1f irrad = dot(nnv, normalize(lightVec));
-    irrad *= (irrad > 0.0);
+    normal = normalize(normal);
+    halfVec = normalize(halfVec);
+    lightVec = normalize(lightVec);
+    ShAttrib1f irrad = pos(normal | lightVec);
 
-    ATTRIB_DECL(T, SH_VAR_OUTPUT, result);
-    result = irrad * ks * (dot(nhv,nnv)^specExp); 
+    typename T::OutputType SH_DECL( result );
+    result = irrad * ks * ((normal | halfVec)^specExp); 
   } SH_END;
   return kernel;
 }
@@ -196,7 +89,7 @@ ShProgram ShKernelLib::shPhong() {
     & keep<ShVector3f>("lightVec") & keep<ShPosition4f>("posh"); 
 
   return permuter >> shRange("kd")("normal")("lightVec")("posh")("ks","posh") >>
-    ( shDiffuse<T>() & shSpecular<T>() ) >> shAdd<T>(); 
+    ( shDiffuse<T>() & shSpecular<T>() ) >> add<T>(); 
 }
 
 

@@ -44,6 +44,7 @@
 #include "ShBackend.hpp"
 #include "ShImage.hpp"
 #include "ShAlgebra.hpp"
+#include "ShNibbles.hpp"
 #include "ShManipulator.hpp"
 #include "ShFixedManipulator.hpp"
 #include "ShChannelNode.hpp"

@@ -59,35 +59,6 @@ ShProgram operator>>(const T& x, const ShProgram& p) {
   return p << x; 
 }
 
-template<typename T>
-ShProgram keep(std::string name = "") {
-  ShProgram prog = SH_BEGIN_PROGRAM() {
-    T temp;
-    ShAttrib<T::typesize, SH_VAR_INPUT, typename T::ValueType> attr;
-    attr.name( name );
-    attr.node()->specialType(temp.node()->specialType());
-
-    ShAttrib<T::typesize, SH_VAR_OUTPUT, typename T::ValueType> out;
-    out.name( name );
-    out.node()->specialType(temp.node()->specialType());
-    out = attr;
-  } SH_END_PROGRAM;
-  return prog;
-}
-
-template<typename T>
-ShProgram lose(std::string name = "") {
-  ShProgram prog = SH_BEGIN_PROGRAM() {
-    T temp;
-    ShAttrib<T::typesize, SH_VAR_INPUT, typename T::ValueType> attr;
-    attr.name( name );
-    attr.node()->specialType(temp.node()->specialType());
-
-    ShAttrib4f dummy = dummy;
-  } SH_END_PROGRAM;
-  return prog;
-};
-
 }
 
 #endif

@@ -20,6 +20,20 @@ ShProgram ShKernelLib::outputPass( const ShProgram &p ) {
   return passer;
 }
 
+ShProgram ShKernelLib::shConvertBasis() {
+  ShProgram kernel = SH_BEGIN_FRAGMENT_PROGRAM {
+    ShInputVector3f SH_DECL( v0 );
+    ShInputVector3f SH_DECL( v1 );
+    ShInputVector3f SH_DECL( v2 );
+    ShInputVector3f SH_DECL( vec );
+    ShOutputVector3f SH_NAMEDECL( veco, "vec" );
+    veco(0) = vec | v0;
+    veco(1) = vec | v1;
+    veco(2) = vec | v2;
+  } SH_END;
+  return kernel;
+}
+
 ShProgram ShKernelLib::bump() {
   ShProgram kernel = SH_BEGIN_PROGRAM() {
     ShInputAttrib2f SH_DECL(gradient);

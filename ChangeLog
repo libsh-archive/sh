@@ -1,3 +1,11 @@
+2004-01-21  Bryan Chan  <b8chan@uwaterloo.ca>
+	* src/ShNibbles.hpp, src/ShNibblesImpl.hpp: 
+	Added some useful nibbles.
+
+	* src/ShAttrib.hpp, src/ShSpecialType.hpp:
+	Added typedefs for InputType, OutputType, and TempType for Attribs
+	and special types
+	
 2004-01-21  Bryan Chan  <b8chan@uwaterloo.
 	* src/ShRefCount.hpp: fixed count in operator=
 	(was releasing ref before acquiring ref, so if the old object

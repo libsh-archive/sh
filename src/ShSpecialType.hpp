@@ -90,12 +90,19 @@ public: \
   SH_TYPE_NAME<3, Kind, T, true> operator()(int, int, int) const; \
   SH_TYPE_NAME<4, Kind, T, true> operator()(int, int, int, int) const; \
   SH_TYPE_NAME<1, Kind, T, true> operator[](int) const; \
+  \
+  template<int N2> \
+  SH_TYPE_NAME<N2, Kind, T, true> operator()(int indices[]) const; \
  \
   SH_TYPE_NAME<N, Kind, T, Swizzled> operator-() const; \
   typedef T ValueType; \
   static const int typesize = N; \
   static const int typekind = Kind; \
   static const ShVariableSpecialType special_type = SH_TYPE_ENUM; \
+ \
+  typedef SH_TYPE_NAME<N, SH_VAR_INPUT, T> InputType; \
+  typedef SH_TYPE_NAME<N, SH_VAR_OUTPUT, T> OutputType; \
+  typedef SH_TYPE_NAME<N, SH_VAR_TEMP, T> TempType; \
  \
 private: \
   typedef SH_TYPE_PARENT<N, Kind, float, Swizzled> ParentType; \
@@ -278,6 +285,13 @@ SH_TYPE_NAME<4, Kind, T, true> SH_TYPE_NAME<N, Kind, T, Swizzled>::operator()(in
 { \
   return SH_TYPE_NAME<4, Kind, T, true>(m_node, m_swizzle * ShSwizzle(N, i1, i2, i3, i4), m_neg); \
 } \
+\
+template<int N, int Kind, typename T, bool Swizzled>\
+template<int N2>\
+SH_TYPE_NAME<N2, Kind, T, true> SH_TYPE_NAME<N, Kind, T, Swizzled>::operator()(int indices[]) const\
+{\
+  return SH_TYPE_NAME<N2, Kind, T, true>(m_node, m_swizzle * ShSwizzle(N, N2, indices), m_neg);\
+}\
  \
 template<int N, int Kind, typename T, bool Swizzled> \
 SH_TYPE_NAME<N, Kind, T, Swizzled> \

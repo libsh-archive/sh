@@ -86,7 +86,11 @@ public:
   ShAttrib<3, Kind, T, true> operator()(int, int, int) const;
   ShAttrib<4, Kind, T, true> operator()(int, int, int, int) const;
   ShAttrib<1, Kind, T, true> operator[](int) const; ///< Identical to operator()(int)
-  // TODO: Arbitrary swizzles?
+
+  // Arbitrary Swizzle
+  template<int N2>
+  ShAttrib<N2, Kind, T, true> operator()(int indices[]) const;
+
   //@}
 
   /// Negate this attribute.
@@ -96,6 +100,10 @@ public:
   static const int typekind = Kind;
   static const ShVariableSpecialType special_type = SH_VAR_ATTRIB;
   typedef T ValueType;
+
+  typedef ShAttrib<N, SH_VAR_INPUT, T> InputType;
+  typedef ShAttrib<N, SH_VAR_OUTPUT, T> OutputType;
+  typedef ShAttrib<N, SH_VAR_TEMP, T> TempType;
 };
 
 typedef ShAttrib<1, SH_VAR_INPUT, float> ShInputAttrib1f;
