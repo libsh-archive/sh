@@ -2,7 +2,7 @@ check_PROGRAMS = constants do if for julia matrix ops point simple texture unifo
 
 AM_CPPFLAGS = -I../src
 
-LDADD = -lGL ../../sm/src/libsm.la ../src/libsh.la ../backends/sm/ShSmBackend.o # ../backends/arb/ShArb.o
+LDADD = ../../sm/src/libsm.la ../src/libsh.la ../backends/sm/ShSmBackend.o # ../backends/arb/ShArb.o
 # LDFLAGS = -all-static
 
 constants_SOURCES = constants.cpp

@@ -486,6 +486,48 @@ ShVariableN<N, T> frac(const ShVariableN<N, T>& var)
   }
 }
 
+/// Componentwise maximum
+template<int N, typename T>
+ShVariableN<N,  T> max(const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(left.hasValues());
+    T lvals[N];
+    left.getValues(lvals);
+    T rvals[N];
+    right.getValues(rvals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = (lvals[i] > rvals[i] ? lvals[i] : rvals[i]);
+    return ShConstant<N, T>(result);
+  } else {
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, left, SH_OP_MAX, right);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
+
+/// Componentwise minimum
+template<int N, typename T>
+ShVariableN<N,  T> min(const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(left.hasValues());
+    T lvals[N];
+    left.getValues(lvals);
+    T rvals[N];
+    right.getValues(rvals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = (lvals[i] < rvals[i] ? lvals[i] : rvals[i]);
+    return ShConstant<N, T>(result);
+  } else {
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, left, SH_OP_MIN, right);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
+
 
 /// Sine of x.
 template<int N, typename T>

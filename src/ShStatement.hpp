@@ -61,6 +61,8 @@ enum ShOperation {
   SH_OP_COS, ///< Unary cosine function
   SH_OP_DOT, ///< Binary dot product
   SH_OP_FRAC, ///< Unary fractional part
+  SH_OP_MAX, ///< Binary componentwise maximum
+  SH_OP_MIN, ///< Binary componentwise minimum
   SH_OP_POW, ///< Binary power
   SH_OP_SIN, ///< Unary sine function
   SH_OP_SQRT, ///< Unary square root

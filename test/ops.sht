@@ -23,5 +23,7 @@ ShProgram shader = SH_BEGIN_SHADER(0) {
   out = sin(in1);
   out = sqrt(in1);
   out = cond(in1, in1, in2);
+  out = min(in1, in2);
+  out = max(in1, in2);
   
 } SH_END_SHADER;

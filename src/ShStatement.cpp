@@ -56,6 +56,8 @@ const ShOperationInfo opInfo[] = {
   {"COS", 1},
   {"DOT", 2},
   {"FRAC", 1},
+  {"MAX", 2},
+  {"MIN", 2},
   {"POW", 2},
   {"SIN", 1},
   {"SQRT", 1},
