@@ -16,10 +16,19 @@
     code->print(std::cout);
 
     std::string dumpfilename = argv[0];
-    dumpfilename += "-control-0.dot";
+
+    // Get rid of some libtool annoyingness
+    int slash;
+    for (slash = dumpfilename.size() - 1; slash >= 0; slash--) {
+      if (dumpfilename[slash] == '/') break;
+    }
+    if (dumpfilename[slash] == '/') dumpfilename = dumpfilename.substr(slash + 1);
+    if (dumpfilename.substr(0, 3) == "lt-") dumpfilename = dumpfilename.substr(3);
+
+    dumpfilename += "-control.dot";
 
     std::ofstream dumpfile(dumpfilename.c_str());
-    ShEnvironment::shader->ctrlGraph->graphvizDump(/*dumpfile*/ std::cerr);
+    ShEnvironment::shader->ctrlGraph->graphvizDump(dumpfile);
 
     ShEnvironment::insideShader = false;
     ShEnvironment::shader = 0;

@@ -11,4 +11,4 @@ ShProgram orig = SH_BEGIN_VERTEX_PROGRAM {
   
 } SH_END_PROGRAM;
 
-ShProgram shader = (orig << (keep<ShPosition4f>() + lose<ShNormal4f>() + keep<ShTexCoord2f>()));
+ShProgram shader = (orig << (keep<ShPosition4f>() & lose<ShNormal4f>() & keep<ShTexCoord2f>()));

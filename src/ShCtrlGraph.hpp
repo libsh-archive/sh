@@ -98,6 +98,9 @@ public:
   void dfs(F& functor);
 
 private:
+  template<typename F>
+  void real_dfs(F& functor);
+
   mutable bool m_marked;
 };
 
@@ -135,24 +138,30 @@ private:
 typedef ShRefCount<ShCtrlGraph> ShCtrlGraphPtr;
 
 template<typename F>
-void ShCtrlGraphNode::dfs(F& functor)
+void ShCtrlGraphNode::real_dfs(F& functor)
 {
   if (this == 0) return;
   if (m_marked) return;
   mark();
   functor(this);
   for (std::vector<ShCtrlGraphBranch>::iterator I = successors.begin(); I != successors.end(); ++I) {
-    I->node->dfs(functor);
+    I->node->real_dfs(functor);
   }
-  if (follower) follower->dfs(functor);
+  if (follower) follower->real_dfs(functor);
+}
+
+template<typename F>
+void ShCtrlGraphNode::dfs(F& functor)
+{
+  clearMarked();
+  real_dfs(functor);
+  clearMarked();
 }
 
 template<typename F>
 void ShCtrlGraph::dfs(F& functor)
 {
-  m_entry->clearMarked();
   m_entry->dfs(functor);
-  m_entry->clearMarked();
 }
 
 }
