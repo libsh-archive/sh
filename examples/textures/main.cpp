@@ -78,7 +78,8 @@ void initShaders()
 
 void display()
 {
-  shUpdate();
+  shBind(vsh);
+  shBind(fsh);
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -173,48 +174,6 @@ void keyboard(unsigned char k, int x, int y)
   glutPostRedisplay();
 }
 
-int main(int argc, char** argv)
-{
-  glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-  glutInitWindowSize(512, 512);
-  glutCreateWindow("Sh Texture Example");
-  glutDisplayFunc(display);
-  glutReshapeFunc(reshape);
-  glutMouseFunc(mouse);
-  glutMotionFunc(motion);
-  glutKeyboardFunc(keyboard);
-    
-  shSetBackend("arb");
-
-  initShaders();
-
-  kd_images[0].loadPng("rustkd.png");
-  ks_images[0].loadPng("rustks.png");
-  kd_images[1].loadPng("kd.png");
-  ks_images[1].loadPng("ks.png");
-  
-  glEnable(GL_DEPTH_TEST);
-  glClearColor(0.0, 0.0, 0.0, 1.0);
-  setupView();
-
-  // Place the camera at its initial position
-  camera.move(0.0, 0.0, -15.0);
-
-  // Set up the light position
-  lightPos = ShPoint3f(5.0, 5.0, 5.0);
-  
-  initShaders();
-
-  // Set the initial texture
-  xTexture();
-
-  shBind(vsh);
-  shBind(fsh);
-  
-  glutMainLoop();
-}
-
 int gprintf(int x, int y, char* fmt, ...)
 {
   char temp[1024];
@@ -260,4 +219,43 @@ int gprintf(int x, int y, char* fmt, ...)
   glPopMatrix();
   
   return p-temp;
+}
+
+int main(int argc, char** argv)
+{
+  glutInit(&argc, argv);
+  glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+  glutInitWindowSize(512, 512);
+  glutCreateWindow("Sh Texture Example");
+  glutDisplayFunc(display);
+  glutReshapeFunc(reshape);
+  glutMouseFunc(mouse);
+  glutMotionFunc(motion);
+  glutKeyboardFunc(keyboard);
+    
+  shSetBackend("arb");
+
+  initShaders();
+
+  kd_images[0].loadPng("rustkd.png");
+  ks_images[0].loadPng("rustks.png");
+  kd_images[1].loadPng("kd.png");
+  ks_images[1].loadPng("ks.png");
+  
+  glEnable(GL_DEPTH_TEST);
+  glClearColor(0.0, 0.0, 0.0, 1.0);
+  setupView();
+
+  // Place the camera at its initial position
+  camera.move(0.0, 0.0, -15.0);
+
+  // Set up the light position
+  lightPos = ShPoint3f(5.0, 5.0, 5.0);
+  
+  initShaders();
+
+  // Set the initial texture
+  xTexture();
+  
+  glutMainLoop();
 }
