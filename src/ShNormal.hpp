@@ -110,6 +110,8 @@ public:
   ShNormal& operator=(const ShGeneric<1, T>& other);
   ShNormal& operator=(const ShNormal<1, Binding, T, Swizzled>& other);
 
+  ShNormal& operator=(T other);
+
   ShNormal& operator+=(const ShGeneric<1, T>& right);
   ShNormal& operator-=(const ShGeneric<1, T>& right);
   ShNormal& operator*=(const ShGeneric<1, T>& right);

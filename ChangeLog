@@ -1,3 +1,16 @@
+2004-07-10  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* test/sandbox: Added sandbox directory for simple tests.
+
+	* src/scripts/semantic.py (Class.assignments): Add operatxor=(T)
+	for single element types.
+	(Impl.assignments): Implement operator=(T) for single element
+	types. Resolves issue141.
+
+	* src/ShGenericImpl.hpp: Implemented operator=(T).
+
+	* src/ShGeneric.hpp: Added operator=(T) to 1-element generic.
+
 2004-07-09  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/ArbCode.cpp (print): Add LABEL and BRA printing cases.

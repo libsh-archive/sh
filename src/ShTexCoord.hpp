@@ -110,6 +110,8 @@ public:
   ShTexCoord& operator=(const ShGeneric<1, T>& other);
   ShTexCoord& operator=(const ShTexCoord<1, Binding, T, Swizzled>& other);
 
+  ShTexCoord& operator=(T other);
+
   ShTexCoord& operator+=(const ShGeneric<1, T>& right);
   ShTexCoord& operator-=(const ShGeneric<1, T>& right);
   ShTexCoord& operator*=(const ShGeneric<1, T>& right);

@@ -327,6 +327,14 @@ ShPoint<1, Binding, T, Swizzled>::operator=(const ShPoint<1, Binding, T, Swizzle
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShPoint<1, Binding, T, Swizzled>&
+ShPoint<1, Binding, T, Swizzled>::operator=(T other)
+{
+  ParentType::operator=(other);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+ShPoint<1, Binding, T, Swizzled>&
 ShPoint<1, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T>& right)
 {
   ParentType::operator+=(right);

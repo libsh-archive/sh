@@ -126,6 +126,8 @@ public:
   ShAttrib& operator=(const ShGeneric<1, T>& other);
   ShAttrib& operator=(const ShAttrib<1, Binding, T, Swizzled>& other);
 
+  ShAttrib& operator=(T other);
+
   ShAttrib& operator+=(const ShGeneric<1, T>& right);
   ShAttrib& operator-=(const ShGeneric<1, T>& right);
   ShAttrib& operator*=(const ShGeneric<1, T>& right);

@@ -108,6 +108,7 @@ public:
   ~ShGeneric();
 
   ShGeneric& operator=(const ShGeneric& other);
+  ShGeneric& operator=(T);
   
   ShGeneric& operator+=(const ShGeneric& right);
   ShGeneric& operator-=(const ShGeneric& right);

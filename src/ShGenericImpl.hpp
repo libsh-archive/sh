@@ -28,6 +28,7 @@
 #define SHGENERICIMPL_HPP
 
 #include "ShGeneric.hpp"
+#include "ShAttrib.hpp"
 #include "ShLib.hpp"
 #include "ShInstructions.hpp"
 
@@ -237,6 +238,13 @@ template<typename T>
 ShGeneric<1, T>& ShGeneric<1, T>::operator=(const ShGeneric<1, T>& other)
 {
   shASN(*this, other);
+  return *this;
+}
+
+template<typename T>
+ShGeneric<1, T>& ShGeneric<1, T>::operator=(T other)
+{
+  shASN(*this, ShAttrib<1, SH_TEMP, T>(other));
   return *this;
 }
 

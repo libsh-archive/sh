@@ -114,6 +114,8 @@ public:
   ShPosition& operator=(const ShGeneric<1, T>& other);
   ShPosition& operator=(const ShPosition<1, Binding, T, Swizzled>& other);
 
+  ShPosition& operator=(T other);
+
   ShPosition& operator+=(const ShGeneric<1, T>& right);
   ShPosition& operator-=(const ShGeneric<1, T>& right);
   ShPosition& operator*=(const ShGeneric<1, T>& right);

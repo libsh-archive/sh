@@ -113,6 +113,8 @@ public:
   ShVector& operator=(const ShGeneric<1, T>& other);
   ShVector& operator=(const ShVector<1, Binding, T, Swizzled>& other);
 
+  ShVector& operator=(T other);
+
   ShVector& operator+=(const ShGeneric<1, T>& right);
   ShVector& operator-=(const ShGeneric<1, T>& right);
   ShVector& operator*=(const ShGeneric<1, T>& right);

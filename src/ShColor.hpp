@@ -110,6 +110,8 @@ public:
   ShColor& operator=(const ShGeneric<1, T>& other);
   ShColor& operator=(const ShColor<1, Binding, T, Swizzled>& other);
 
+  ShColor& operator=(T other);
+
   ShColor& operator+=(const ShGeneric<1, T>& right);
   ShColor& operator-=(const ShGeneric<1, T>& right);
   ShColor& operator*=(const ShGeneric<1, T>& right);

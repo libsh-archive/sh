@@ -327,6 +327,14 @@ ShTexCoord<1, Binding, T, Swizzled>::operator=(const ShTexCoord<1, Binding, T, S
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShTexCoord<1, Binding, T, Swizzled>&
+ShTexCoord<1, Binding, T, Swizzled>::operator=(T other)
+{
+  ParentType::operator=(other);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+ShTexCoord<1, Binding, T, Swizzled>&
 ShTexCoord<1, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T>& right)
 {
   ParentType::operator+=(right);

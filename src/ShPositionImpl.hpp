@@ -327,6 +327,14 @@ ShPosition<1, Binding, T, Swizzled>::operator=(const ShPosition<1, Binding, T, S
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShPosition<1, Binding, T, Swizzled>&
+ShPosition<1, Binding, T, Swizzled>::operator=(T other)
+{
+  ParentType::operator=(other);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+ShPosition<1, Binding, T, Swizzled>&
 ShPosition<1, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T>& right)
 {
   ParentType::operator+=(right);

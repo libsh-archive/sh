@@ -93,6 +93,8 @@ public:""")
     def assignments(self, size):
         common.inprint(self.name + "& operator=(const ShGeneric<" + self.sizevar(size) + ", T>& other);\n" +
                        self.name + "& operator=(const " + self.name + "<" + self.sizevar(size) + ", Binding, T, Swizzled>& other);\n")
+        if size == 1:
+            common.inprint(self.name + "& operator=(T other);\n")
 
     def modifying(self, size):
         common.inprint(self.name + "& operator+=(const ShGeneric<" + self.sizevar(size) + ", T>& right);")
@@ -253,6 +255,8 @@ class Impl:
             s = str(size)
         self.assign("operator=", [["const ShGeneric<" + s + ", T>&", "other"]], size)
         self.assign("operator=", [["const " + self.tplcls(size) + "&", "other"]], size)
+        if size == 1:
+            self.assign("operator=", [["T", "other"]], size)
 
     def modifying(self, size = 0):
         if size <= 0:

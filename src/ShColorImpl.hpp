@@ -327,6 +327,14 @@ ShColor<1, Binding, T, Swizzled>::operator=(const ShColor<1, Binding, T, Swizzle
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShColor<1, Binding, T, Swizzled>&
+ShColor<1, Binding, T, Swizzled>::operator=(T other)
+{
+  ParentType::operator=(other);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+ShColor<1, Binding, T, Swizzled>&
 ShColor<1, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T>& right)
 {
   ParentType::operator+=(right);

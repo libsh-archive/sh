@@ -110,6 +110,8 @@ public:
   ShPoint& operator=(const ShGeneric<1, T>& other);
   ShPoint& operator=(const ShPoint<1, Binding, T, Swizzled>& other);
 
+  ShPoint& operator=(T other);
+
   ShPoint& operator+=(const ShGeneric<1, T>& right);
   ShPoint& operator-=(const ShGeneric<1, T>& right);
   ShPoint& operator*=(const ShGeneric<1, T>& right);
