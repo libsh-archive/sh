@@ -1,12 +1,3 @@
-// Partitioning v 1.0
-//
-// Last Revised: Nov. 28 by Cynthia
-//
-//
-// Makes a vector of flowgraph partitions at the moment (ShCtrlGraphNodePtr).
-// Will probably then have to convert each into its own ShProgram.
-//////////////////////////////////////////////////////////////////////////////
-
 #ifndef DAG_HPP
 #define DAG_HPP
 
