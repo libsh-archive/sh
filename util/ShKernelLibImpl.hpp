@@ -242,7 +242,7 @@ ShProgram ShKernelLib::shVshTangentSpace(const ShMatrix<N, N, Kind, T> &mv,
     const ShMatrix<N, N, Kind, T> &mvp) {
   // permute inputs to match specified inputs
   ShProgram vsh = shVsh(mv, mvp) & keep<ShVector3f>("tangent") & keep<ShVector3f>("tangent2");
-  vsh = vsh << shPermute( "texcoord", "normal", "tangent", "tangent2", "lightPos", "posm");
+  vsh = vsh << shSwizzle( "texcoord", "normal", "tangent", "tangent2", "lightPos", "posm");
 
   // permute outputs to match tangentVsh below
   vsh = vsh >> shRange("normal", "lightVec")("tangent")("tangent2")("texcoord")("posv")("posh");
