@@ -25,6 +25,7 @@
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
 #include "GlTextures.hpp"
+#include <sstream>
 #include "GlTextureName.hpp"
 #include "GlTextureStorage.hpp"
 
@@ -166,7 +167,18 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node,
 
   // TODO: Check for memories that are 0
   
+  if (!node->meta("opengl:preset").empty()) {
+    SH_GL_CHECK_ERROR(glActiveTextureARB(target));
+    GLuint name;
+    std::istringstream is(node->meta("opengl:preset"));
+    is >> name; // TODO: Check for errors
+    SH_GL_CHECK_ERROR(glBindTexture(shGlTargets[node->dims()], name));
+    node->meta("opengl:texid", node->meta("opengl:preset"));
+    return;
+  } 
+  
   if (node->dims() == SH_TEXTURE_CUBE) {
+    
     // Look for a cubemap that happens to have just the right storages
     
     GlTextureName::NameList::const_iterator I;
@@ -205,6 +217,9 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node,
       }
       SH_GL_CHECK_ERROR(glActiveTextureARB(target));
       SH_GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_CUBE_MAP, texname->value()));
+      std::ostringstream os;
+      os << texname->value();
+      node->meta("opengl:texid", os.str());
     } else {
       // Just synchronize the storages
       GlTextureName::StorageList::const_iterator S;
@@ -215,8 +230,12 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node,
       }
       SH_GL_CHECK_ERROR(glActiveTextureARB(target));
       SH_GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_CUBE_MAP, (*I)->value()));
+      std::ostringstream os;
+      os << (*I)->value();
+      node->meta("opengl:texid", os.str());
     }
   } else {
+
     StorageFinder finder(node, m_context);
     GlTextureStoragePtr storage =
       shref_dynamic_cast<GlTextureStorage>(node->memory()->findStorage("opengl:texture", finder));
@@ -235,6 +254,10 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node,
     SH_GL_CHECK_ERROR(glActiveTextureARB(target));
     storage->sync();
     SH_GL_CHECK_ERROR(glBindTexture(shGlTargets[node->dims()], storage->name()));
+
+    std::ostringstream os;
+    os << storage->name();
+    node->meta("opengl:texid", os.str());
   }
 }
 

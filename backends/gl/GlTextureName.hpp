@@ -36,6 +36,10 @@ namespace shgl {
 class GlTextureName : public SH::ShRefCountable {
 public:
   GlTextureName(GLenum target);
+  // Create an unmanaged texture name, i.e. one that is not allocated
+  // and destroyed by this object
+  GlTextureName(GLenum target, GLuint name);
+  
   ~GlTextureName();
 
   GLuint value() const { return m_name; }
@@ -69,6 +73,8 @@ private:
   StorageList m_storages;
   static NameList m_names;
   SH::ShTextureTraits m_params;
+
+  bool m_managed; // True if we generated our own name
 };
 
 typedef SH::ShPointer<GlTextureName> GlTextureNamePtr;
