@@ -45,6 +45,7 @@
 #include "ShImage.hpp"
 #include "ShAlgebra.hpp"
 #include "ShManipulator.hpp"
+#include "ShFixedManipulator.hpp"
 #include "ShStream.hpp"
 
 /** \namespace SH

@@ -1,3 +1,23 @@
+2004-01-17  Bryan Chan  <b8chan@cgl.uwaterloo.ca>
+	* src/ShFixedManipulator.??: Added shKeep, shLose
+	manipulators that support combine with ShProgram and 
+	other ShFixedManipulators.
+
+	* src/ShManipulator.?pp, src/ShManipulatorImpl.hpp:
+	Reworked all manipulators to take string parameters as well.           
+
+	* src/ShSyntax.hpp, src/ShAlgebra.hpp, util/ShKernelLib.?pp: 
+	Added macros to declare vars with names, and updated util 
+	nibbles/kernels with names.
+
+	* src/ShManipulatorImpl.hpp: Removed default 0 value for
+	extra inputs when connecting an input manipulator
+	(Reverts to old behaviour of passing through the channel)
+
+	* src/ShAlgebra.hpp: added >> operator for replaceUniform
+
+	* src/ShLib.hpp: added pow(x, exp) function
+	
 2004-01-15.5  Bryan Chan  <b8chan@enora.cgl.uwaterloo.ca>
 	* src/Makefile.am: Added missing headers
 

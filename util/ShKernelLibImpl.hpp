@@ -41,65 +41,70 @@ namespace ShUtil {
 
 using namespace SH;
 
-#define ATTRIB_DECL(ATTRIB_TYPE, Kind, var) \
-  ShAttrib< ATTRIB_TYPE::typesize, Kind, typename ATTRIB_TYPE::ValueType > var; \
-  var.node()->specialType(ATTRIB_TYPE::special_type);
+#define ATTRIB_NAMED_DECL(Type, K, var, varName) \
+  ShAttrib< Type::typesize, K, typename Type::ValueType > SH_NAMEDECL( var, varName ); \
+  var.node()->specialType(Type::special_type);
+
+#define ATTRIB_DECL(Type, K, var) \
+  ATTRIB_NAMED_DECL(Type, K, var, # var)
 
 template< int Rows, int Cols, int Kind, typename T>
-ShProgram ShKernelLib::transformNibble(const ShMatrix<Rows, Cols, Kind, T> &m) {
+ShProgram ShKernelLib::shTransform(const ShMatrix<Rows, Cols, Kind, T> &m) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
-    ShAttrib<Cols, SH_VAR_INPUT, T> input;
-    ShAttrib<Rows, SH_VAR_OUTPUT, T> output = m | input;
-  } SH_END_PROGRAM;
+    ShAttrib<Cols, SH_VAR_INPUT, T> attrib; SH_NAMEVAR( attrib ); 
+    ShAttrib<Rows, SH_VAR_OUTPUT, T> transAttrib; SH_NAMEVAR( transAttrib );
+    transAttrib = m | input;
+  } SH_END;
   return nibble;
 }
 
 template<typename T>
-ShProgram ShKernelLib::textureNibble(const ShTexture2D<T> &tex) {
+ShProgram ShKernelLib::shAccess(const ShTexture2D<T> &tex) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
-    ShInputTexCoord2f tc;
-    ATTRIB_DECL(T, SH_VAR_OUTPUT, output);
-    output = tex(tc);
-  } SH_END_PROGRAM;
+    ShInputTexCoord2f SH_DECL(tc);
+    ATTRIB_DECL(T, SH_VAR_OUTPUT, result); 
+    result = tex(tc);
+  } SH_END;
   return nibble;
 }
 
 template<typename T>
-ShProgram ShKernelLib::lerpNibble() {
+ShProgram ShKernelLib::shLerp() {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     ShInputAttrib1f alpha;
     ATTRIB_DECL(T, SH_VAR_INPUT, a);
     ATTRIB_DECL(T, SH_VAR_INPUT, b);
     ATTRIB_DECL(T, SH_VAR_OUTPUT, result);
     result = lerp(alpha, a, b); 
-  } SH_END_PROGRAM;
+  } SH_END;
   return nibble;
 }
 
 template<typename T>
-ShProgram ShKernelLib::dotNibble() {
+ShProgram ShKernelLib::shDot() {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     ATTRIB_DECL(T, SH_VAR_INPUT, a);
     ATTRIB_DECL(T, SH_VAR_INPUT, b);
-    ShAttrib<1, SH_VAR_OUTPUT, typename T::ValueType> result = dot(a, b); 
-  } SH_END_PROGRAM;
+    ShAttrib<1, SH_VAR_OUTPUT, typename T::ValueType> SH_DECL(result);
+    result = dot(a, b); 
+  } SH_END;
   return nibble;
 }
 
 // TODO - macro for all binary operations
 template<typename T>
-ShProgram ShKernelLib::addNibble() {
+ShProgram ShKernelLib::shAdd() {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     ATTRIB_DECL(T, SH_VAR_INPUT, a);
     ATTRIB_DECL(T, SH_VAR_INPUT, b);
     ATTRIB_DECL(T, SH_VAR_OUTPUT, result);
     result = a + b;
-  } SH_END_PROGRAM;
+  } SH_END;
   return nibble;
 }
 
 template<typename T, typename T2>
-ShProgram ShKernelLib::castNibble() {
+ShProgram ShKernelLib::shCast() {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     ATTRIB_DECL(T, SH_VAR_INPUT, in);
     ATTRIB_DECL(T2, SH_VAR_OUTPUT, out);
@@ -108,90 +113,82 @@ ShProgram ShKernelLib::castNibble() {
       // TODO make this a swizzled op (or let future vectorizer deal with it)
       out(i) = in(i);
     }
-  } SH_END_PROGRAM;
+  } SH_END;
   return nibble;
 }
 
 template<typename T>
-ShProgram ShKernelLib::diffuse() {
+ShProgram ShKernelLib::shDiffuse() {
   ShProgram kernel = SH_BEGIN_FRAGMENT_PROGRAM {
     ATTRIB_DECL(T, SH_VAR_INPUT, kd);
-    ShInputNormal3f n;
-    ShInputVector3f lv;
-    ShInputPosition4f pd;
+    ShInputNormal3f SH_DECL(normal);
+    ShInputVector3f SH_DECL(lightVec);
+    ShInputPosition4f SH_DECL(posh);
 
-    ShAttrib1f irrad = dot(normalize(n), normalize(lv));
+    ShAttrib1f irrad = dot(normalize(normal), normalize(lightVec));
     irrad *= (irrad > 0.0);
 
-    ATTRIB_DECL(T, SH_VAR_OUTPUT, outColour);
-    outColour = irrad * kd; 
-  } SH_END_PROGRAM;
+    ATTRIB_DECL(T, SH_VAR_OUTPUT, result);
+    result = irrad * kd; 
+  } SH_END;
   return kernel;
 }
 
 template<typename T>
-ShProgram ShKernelLib::specular() {
+ShProgram ShKernelLib::shSpecular() {
   ShProgram kernel = SH_BEGIN_FRAGMENT_PROGRAM {
     ATTRIB_DECL(T, SH_VAR_INPUT, ks);
-    ShInputAttrib1f exp;
-    ShInputNormal3f n;
-    ShInputVector3f vv;
-    ShInputVector3f hv;
-    ShInputVector3f lv;
-    ShInputPosition4f pd;
+    ShInputAttrib1f SH_DECL(specExp);
+    ShInputNormal3f SH_DECL(normal);
+    ShInputVector3f SH_DECL(halfVec);
+    ShInputVector3f SH_DECL(lightVec);
+    ShInputPosition4f SH_DECL(posh);
 
-    ShNormal3f nnv = normalize(n);
-    ShVector3f nhv = normalize(hv);
-    ShAttrib1f irrad = dot(nnv, normalize(lv));
+    ShNormal3f nnv = normalize(normal);
+    ShVector3f nhv = normalize(halfVec);
+    ShAttrib1f irrad = dot(nnv, normalize(lightVec));
     irrad *= (irrad > 0.0);
 
-    ATTRIB_DECL(T, SH_VAR_OUTPUT, outColour);
-    outColour = irrad * ks * (dot(nhv,nnv)^exp); 
-  } SH_END_PROGRAM;
+    ATTRIB_DECL(T, SH_VAR_OUTPUT, result);
+    result = irrad * ks * (dot(nhv,nnv)^specExp); 
+  } SH_END;
   return kernel;
 }
 
 
 template<typename T>
-ShProgram ShKernelLib::phong() {
+ShProgram ShKernelLib::shPhong() {
   // TODO find a better way of expressing this - manipulating inputs
   // across vertex/fragment shader (don't want to manipulate vsh outputs)
-  ShProgram permuter = keep<T>() &  keep<T>() & keep<ShAttrib1f>() & keep<ShNormal3f>() 
-    & keep<ShVector3f>() & keep<ShVector3f>() & keep<ShVector3f>() & keep<ShPosition4f>(); 
+  ShProgram permuter = keep<T>("kd") & keep<T>("ks") & keep<ShAttrib1f>("specExp") 
+    & keep<ShNormal3f>("normal") & keep<ShVector3f>("halfVec") 
+    & keep<ShVector3f>("lightVec") & keep<ShPosition4f>("posh"); 
 
-  ShManipulator inManip = shRange(0)(3)(6,7)(1,7); // manipulate for diffuse & specular inputs
-  ShProgram diffuseSpecular = diffuse<T>() & specular<T>();
-
-  return permuter >> inManip >> diffuseSpecular >> addNibble<T>();
+  return permuter >> shRange("kd")("normal")("lightVec")("posh")("ks","posh") >>
+    ( shDiffuse<T>() & shSpecular<T>() ) >> shAdd<T>(); 
 }
 
 
 template<int N, int Kind, typename T>
-ShProgram ShKernelLib::vsh(const ShMatrix<N, N, Kind, T> &mv, const ShMatrix<N, N, Kind, T> &mvp) {
+ShProgram ShKernelLib::shVsh(const ShMatrix<N, N, Kind, T> &mv, const ShMatrix<N, N, Kind, T> &mvp) {
   ShProgram generalVsh = SH_BEGIN_VERTEX_PROGRAM {
-    ShInputTexCoord2f u;    // IN(0): texture coordinate 
-    ShInputNormal3f nm;     // IN(1): normal vector (MCS)
-    ShInputVector3f t1m;    // IN(2): tangent (MCS) 
-    ShInputVector3f t2m;    // IN(3): secondary tangent (MCS)
-    ShInputPoint3f lpv;      // IN(4): light position (VCS)
-    ShInputPosition4f pm;   // IN(5): position (MCS)
+    ShInputTexCoord2f SH_NAMEDECL(u, "texcoord");  // IN(0): texture coordinate 
+    ShInputNormal3f SH_NAMEDECL(nm, "normal");     // IN(1): normal vector (MCS)
+    ShInputPoint3f SH_NAMEDECL(lpv, "lightPos");   // IN(2): light position (VCS)
+    ShInputPosition4f SH_NAMEDECL(pm, "posm");     // IN(3): position (MCS)
 
 
-    ShOutputTexCoord2f uo;    // OUT(0): texture coordinate
-    ShOutputPoint3f  pv;      // OUT(1): output point (VCS)
-    ShOutputNormal3f nv;      // OUT(2): normal vector (VCS) 
-    ShOutputVector3f vv;      // OUT(3): view vector (VCS)
-    ShOutputVector3f hv;      // OUT(4): half vector (VCS)
-    ShOutputVector3f lv;      // OUT(5): light vector (VCS)
-    ShOutputVector3f vt;      // OUT(6): view vector (tangent coordinate space)
-    ShOutputVector3f ht;      // OUT(7): half vector (tangent coordinate space)
-    ShOutputVector3f lt;      // OUT(8): light vector (tangent coordinate space)
-    ShOutputPosition4f pd;    // OUT(9): position (HDCS)
+    ShOutputTexCoord2f SH_NAMEDECL(uo, "texcoord");  // OUT(0): texture coordinate
+    ShOutputPoint3f SH_NAMEDECL(pv, "posv");         // OUT(1): output point (VCS)
+    ShOutputNormal3f SH_NAMEDECL(nv, "normal");      // OUT(2): normal vector (VCS) 
+    ShOutputVector3f SH_NAMEDECL(vv, "viewVec");     // OUT(3): view vector (VCS)
+    ShOutputVector3f SH_NAMEDECL(hv, "halfVec");     // OUT(4): half vector (VCS)
+    ShOutputVector3f SH_NAMEDECL(lv, "lightVec");    // OUT(5): light vector (VCS)
+    ShOutputPosition4f SH_NAMEDECL(pd, "posh");      // OUT(6): position (HDCS)
+
 
     ShPoint3f pvTemp = (mv | pm)(0,1,2); 
     ShNormal3f nvTemp = normalize(mv | nm); 
-    ShVector3f t1v = normalize(mv | t1m);
-    ShVector3f t2v = normalize(mv | t2m);
     ShVector3f vvTemp = normalize(-pvTemp);
     ShVector3f lvTemp = normalize(lpv - pvTemp); 
     ShVector3f hvTemp = normalize(vvTemp + lvTemp); 
@@ -202,6 +199,38 @@ ShProgram ShKernelLib::vsh(const ShMatrix<N, N, Kind, T> &mv, const ShMatrix<N, 
     vv = vvTemp;
     hv = hvTemp;
     lv = lvTemp;
+
+
+    pd = mvp | pm;
+  } SH_END;
+  return generalVsh;
+}
+
+template<int N, int Kind, typename T>
+ShProgram ShKernelLib::shVshTangentSpace(const ShMatrix<N, N, Kind, T> &mv, 
+    const ShMatrix<N, N, Kind, T> &mvp) {
+  ShProgram vsh = shVsh(mv, mvp) & keep<ShVector3f>("tangent") & keep<ShVector3f>("tangent2");
+  vsh = vsh << shPermute( "texcoord", "normal", "tangent", "tangent2", "lightPos", "posm");
+  vsh = vsh >> shRange("normal", "lightVec")("tangent")("tangent2")("texcoord")("posv")("posh");
+
+  ShProgram tangentVsh = SH_BEGIN_VERTEX_PROGRAM {
+    ShInputNormal3f SH_NAMEDECL(nv, "normal");     // IN(1): normalized normal vector (VCS)
+    ShInputVector3f SH_NAMEDECL(vv, "viewVec");    // IN(2): normalized viewVec (VCS)
+    ShInputVector3f SH_NAMEDECL(hv, "halfVec");    // IN(3): normalized halfVec (VCS)
+    ShInputVector3f SH_NAMEDECL(lv, "lightVec");   // IN(4): normalized lightVec (VCS)
+    ShInputVector3f SH_NAMEDECL(t1m, "tangent");   // IN(5): primary tangent (MCS)
+    ShInputVector3f SH_NAMEDECL(t2m, "tangent2");  // IN(6): secondary tangent (MCS)
+
+    ShOutputNormal3f SH_NAMEDECL(nt, "normal");      // OUT(0): normal vector (TCS) 
+    ShOutputVector3f SH_NAMEDECL(vt, "viewVec");     // OUT(1): view vector (TCS)
+    ShOutputVector3f SH_NAMEDECL(ht, "halfVec");     // OUT(2): half vector (TCS)
+    ShOutputVector3f SH_NAMEDECL(lt, "lightVec");    // OUT(3): light vector (TCS)
+
+
+    ShVector3f t1v = normalize(mv | t1m);
+    ShVector3f t2v = normalize(mv | t2m);
+
+    nt = ShConstant3f(1.0, 0.0, 0.0);
 
     vt(0) = dot(vv, nv);
     vt(1) = dot(vv, t1v);
@@ -214,11 +243,10 @@ ShProgram ShKernelLib::vsh(const ShMatrix<N, N, Kind, T> &mv, const ShMatrix<N, 
     lt(0) = dot(lv, nv);
     lt(1) = dot(lv, t1v);
     lt(2) = dot(lv, t2v);
-
-    pd = mvp | pm;
-  } SH_END_PROGRAM;
-  return generalVsh;
+  } SH_END;
+  return vsh >> tangentVsh >> shRange("texcoord")("posv")("normal", "lightVec")("posh"); 
 }
+
 
 }
 

@@ -251,6 +251,10 @@ ShProgram operator&(const ShProgram& a, const ShProgram& b)
   return combine(a, b);
 }
 
+ShProgram operator>>(const ShProgram &p, const ShVariable &var) {
+  return replaceUniform(p, var);
+}
+
 ShProgram replaceUniform(const ShProgram& a, const ShVariable& v)
 {
   if(!v.uniform()) {

@@ -155,6 +155,45 @@
 #define SH_CONTINUE ::SH::shBreak();
 //@}
 
+/// @name Named Declaration macros 
+//@{
+/** \def SH_DECL
+ * Declare variable with the same name as var.
+ * Usage:
+ *  Sh_Some_Type SH_DECL(var);
+ *
+ * @see SH_NAMEDDECL
+ */
+#define SH_DECL(var) var; var.name( # var );
+
+/** \def SH_NAMEDECL
+ * Declare variable with the given name 
+ * Usage:
+ *  Sh_Some_Type SH_NAMEDECL(var, "name");
+ *
+ * @see SH_DECL
+ */
+#define SH_NAMEDECL(var, varName) var; var.name( varName );
+
+/** \def SH_DECL_INIT
+ * Declare variable with the given name, and initialize 
+ * Usage:
+ *  Sh_Some_Type SH_DECL_INIT(var) = initizliation;
+ *
+ * @see SH_DECL
+ */
+#define SH_DECL_INIT(var) var; var.name( # var ); var
+
+/** \def SH_NAMEDECL_INIT
+ * Declare variable with the given name, and initialize 
+ * Usage:
+ *  Sh_Some_Type SH_NAMEDECL_INIT(var, "name") = initizliation;
+ *
+ * @see SH_DECL
+ */
+#define SH_NAMEDECL_INIT(var, varName) var; var.name( varName ); var
+//@}
+
 namespace SH {
 
 ShProgram shBeginShader(const std::string& kind = "");

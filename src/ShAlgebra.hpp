@@ -1,6 +1,7 @@
 #ifndef SHALGEBRA_HPP
 #define SHALGEBRA_HPP
 
+#include <string>
 #include "ShProgram.hpp"
 #include "ShSyntax.hpp"
 #include "ShAttrib.hpp"
@@ -30,6 +31,9 @@ ShProgram operator>>(const ShProgram& a, const ShProgram& b);
 /// Equiv. to combine(a,b)
 ShProgram operator&(const ShProgram& a, const ShProgram& b);
 
+/// Equiv. to replaceUniform( p, var );
+ShProgram operator>>(const ShProgram &p, const ShVariable &var);
+
 template<int N, typename T>
 ShProgram operator<<(const ShProgram& a, const ShVariableN<N, T>& v) {
   ShProgram vNibble = SH_BEGIN_PROGRAM() {
@@ -42,35 +46,32 @@ ShProgram operator<<(const ShProgram& a, const ShVariableN<N, T>& v) {
 
 
 template<typename T>
-struct keep {
-  typedef typename T::ValueType ValType;
-  operator ShProgram() {
-    ShProgram prog = SH_BEGIN_PROGRAM() {
-      T temp;
-      ShAttrib<T::typesize, SH_VAR_INPUT, ValType> attr;
-      attr.node()->specialType(temp.node()->specialType());
+ShProgram keep(std::string name = "") {
+  ShProgram prog = SH_BEGIN_PROGRAM() {
+    T temp;
+    ShAttrib<T::typesize, SH_VAR_INPUT, typename T::ValueType> attr;
+    attr.name( name );
+    attr.node()->specialType(temp.node()->specialType());
 
-      ShAttrib<T::typesize, SH_VAR_OUTPUT, ValType> out;
-      out.node()->specialType(temp.node()->specialType());
-      out = attr;
-    } SH_END_PROGRAM;
-    return prog;
-  }
-};
+    ShAttrib<T::typesize, SH_VAR_OUTPUT, typename T::ValueType> out;
+    out.name( name );
+    out.node()->specialType(temp.node()->specialType());
+    out = attr;
+  } SH_END_PROGRAM;
+  return prog;
+}
 
 template<typename T>
-struct lose {
-  typedef typename T::ValueType ValType;
-  operator ShProgram() {
-    ShProgram prog = SH_BEGIN_PROGRAM() {
-      T temp;
-      ShAttrib<T::typesize, SH_VAR_INPUT, ValType> attr;
-      attr.node()->specialType(temp.node()->specialType());
+ShProgram lose(std::string name = "") {
+  ShProgram prog = SH_BEGIN_PROGRAM() {
+    T temp;
+    ShAttrib<T::typesize, SH_VAR_INPUT, typename T::ValueType> attr;
+    attr.name( name );
+    attr.node()->specialType(temp.node()->specialType());
 
-      ShAttrib4f dummy = dummy;
-    } SH_END_PROGRAM;
-    return prog;
-  }
+    ShAttrib4f dummy = dummy;
+  } SH_END_PROGRAM;
+  return prog;
 };
 
 }

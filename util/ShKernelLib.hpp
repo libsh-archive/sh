@@ -36,6 +36,13 @@
  * This is an implementation of useful kernels and nibbles (simple kernels).
  *
  * Much of this is bits and pieces gathered from smashtest & shdemo
+ *
+ * Fundamental design decisions that makes these easy to use:
+ *  -commonly curried inputs are always at the begining to reduce need for extract
+ *  -all inputs/outputs are named parameters (allows manipulate by name)
+ *  -names for inputs/outputs that should be joined together on connect have the same
+ *  name and are usually in the same order (allows either connect by position or by 
+ *  name without too many manipulators)
  */
 
 namespace ShUtil {
@@ -49,20 +56,20 @@ using namespace SH;
  */
 class ShKernelLib {
   public:
-/// Nibblets - very simple programs encapsulating single operations/types
+/// Nibbles - very simple programs encapsulating single operations/types
     /* transformation nibble (transforms ShAttrib of type T using matrix
      * of type ShMatrix<Rows, Cols, Kind, MT> 
-     * Inputs: IN(0) attrib
-     * Outputs: OUT(0) T transformedAttrib = m | attrib
+     * Inputs: IN(0) attrib 
+     * Outputs: OUT(0) T transAttrib = m | attrib
      */
     template<int Rows, int Cols, int Kind, typename T>
-    static ShProgram transformNibble( const ShMatrix<Rows, Cols, Kind, T> &m ); 
+    static ShProgram shTransform( const ShMatrix<Rows, Cols, Kind, T> &m ); 
 
     /* 2D texture lookup nibble 
      * Inputs: IN(0) ShTexCoord2f tc
-     * Outputs: OUT(0) T texLookupResult = tex(tc) */ 
+     * Outputs: OUT(0) result = tex(tc) */ 
     template<typename T> 
-    static ShProgram textureNibble( const ShTexture2D<T> &tex );
+    static ShProgram shAccess( const ShTexture2D<T> &tex );
 
     /* lerping nibble 
      * Inputs: IN(0) ShAttrib1f alpha
@@ -70,103 +77,126 @@ class ShKernelLib {
      *         IN(2) T b
      * Outputs: OUT(0) T result = lerp( alpha, a, b )*/
     template<typename T>
-    static ShProgram lerpNibble(); 
+    static ShProgram shLerp(); 
 
     template<typename T>
-    static ShProgram dotNibble(); 
+    static ShProgram shDot(); 
 
     template<typename T>
-    static ShProgram addNibble(); 
+    static ShProgram shAdd(); 
 
     /* casts to the given type either by padding with 0 channels
      * or truncating channels
      */
     template<typename T, typename T2>
-    static ShProgram castNibble();
+    static ShProgram shCast();
 
 
 /// Kernels - some commonly used programs
+    /** Generates a passthrough program using the outputs of a given ShProgram
+     * and keeps all the names.
+     *
+     * Useful in a cases where vsh outputs need to be duplicated before
+     * being passed to fsh 
+     */
+    static ShProgram outputPass( const ShProgram &p );
+
     /** Bump program
      * Takes a gradient direction and applies 
-     * IN(0) ShAttrib2f       - gradient
-     * IN(1) ShVector3f       - normalized normal vector (tangent space) 
+     * IN(0) ShAttrib2f gradient  - gradient
+     * IN(1) ShNormal3f normal    - normalized normal vector (tangent space) 
+     *
+     * OUT(0) ShNormal3f normal   - perturbed normal (tangent space)
      */
     static ShProgram bump();
 
     /** Diffuse fragment program 
-     * IN(0) T                - diffuse coefficient (kd) could be ShColor?f
-     * IN(1) ShNormal3f       - normal (xCS)
-     * IN(2) ShVector3f       - light vector (xCS)
-     * IN(3) ShPosition4f     - positino (HDCS)
+     * IN(0) T kd                 - diffuse coefficient (kd) could be ShColor?f
+     * IN(1) ShNormal3f normal    - normal (xCS)
+     * IN(2) ShVector3f lightVec  - light vector (xCS)
+     * IN(3) ShPosition4f posh    - positino (HDCS)
      *
-     * OUT(0) T               - output colour
+     * OUT(0) T result            - output result 
      *
      * xCS is usually either VCS or tangent space 
      */
     template<typename T>
-    static ShProgram diffuse();
+    static ShProgram shDiffuse();
 
     /** Specular fragment program 
-     * IN(0) T                - specular coefficient (ks) could be ShColor?f
-     * IN(1) ShAttrib1f       - specular exponent 
-     * IN(2) ShNormal3f       - normal (xCS)
-     * IN(3) ShVector3f       - view vector (xCS)
-     * IN(4) ShVector3f       - half vector (xCS)
-     * IN(5) ShVector3f       - light vector (xCS)
-     * IN(6) ShPosition4f     - positino (HDCS)
+     * IN(0) T ks                 - specular coefficient (ks) could be ShColor?f
+     * IN(1) ShAttrib1f specExp   - specular exponent 
+     * IN(2) ShNormal3f normal    - normal (xCS)
+     * IN(3) ShVector3f halfVec   - half vector (xCS)
+     * IN(4) ShVector3f lightVec  - light vector (xCS)
+     * IN(5) ShPosition4f posh    - positino (HDCS)
      *
-     * OUT(0) T               - output colour 
+     * OUT(0) T result            - output result 
      *
      * xCS is usually either VCS or tangent space 
      */
     template<typename T>
-    static ShProgram specular();
+    static ShProgram shSpecular();
 
     /** Phong fragment program 
-     * IN(0) T                - diffuse coefficient (kd) could be ShColor?f
-     * IN(1) T                - specular coefficient (ks) could be ShColor?f
-     * IN(2) ShAttrib1f       - specular exponent
-     * IN(3) ShNormal3f       - normal (xCS)
-     * IN(4) ShVector3f       - view vector (xCS)
-     * IN(5) ShVector3f       - half vector (xCS)
-     * IN(6) ShVector3f       - light vector (xCS)
-     * IN(7) ShPosition4f     - positino (HDCS)
+     * IN(0) T kd                 - diffuse coefficient (kd) could be ShColor?f
+     * IN(1) T ks                 - specular coefficient (ks) could be ShColor?f
+     * IN(2) ShAttrib1f specExp   - specular exponent
+     * IN(3) ShNormal3f normal    - normal (xCS)
+     * IN(4) ShVector3f halfVec   - half vector (xCS)
+     * IN(5) ShVector3f lightVec  - light vector (xCS)
+     * IN(6) ShPosition4f posh    - positino (HDCS)
      *
-     * OUT(0) T               - output colour 
+     * OUT(0) T result            - output colour 
      *
      * xCS is usually either VCS or tangent space 
      */
     template<typename T>
-    static ShProgram phong();
-
+    static ShProgram shPhong();
 
 /// Cobs - Massive, general programs designed to be specialized  
     /** Generalized vertex program that computes lots of different outputs
      * Inputs:
-     *  IN(0) ShTexCoord2f    - texture coordinate
-     *  IN(1) ShNormal3f      - normal vector (MCS)
-     *  IN(2) ShVector3f      - tangent (MCS)
-     *  IN(3) ShVector3f      - secondary tangent (MCS)
-     *  IN(4) ShPoint3f       - light position (VCS)
-     *  IN(5) ShPosition4f    - position (MCS)
+     *  IN(0) ShTexCoord2f texcoord   - texture coordinate
+     *  IN(1) ShNormal3f normal       - normal vector (MCS)
+     *  IN(2) ShPoint3f lightPos      - light position (VCS)
+     *  IN(3) ShPosition4f posm       - position (MCS)
      *
-     *  OUT(0) ShTexCoord2f   - texture coordinate
-     *  OUT(1) ShPoint3f      - output point (VCS)
-     *  OUT(2) ShNormal3f     - normal vector (VCS) 
-     *  OUT(3) ShVector3f     - view vector (VCS)
-     *  OUT(4) ShVector3f     - half vector (VCS)
-     *  OUT(5) ShVector3f     - light vector (VCS)
-     *  OUT(6) ShVector3f     - view vector (tangent coordinate space)
-     *  OUT(7) ShVector3f     - half vector (tangent coordinate space)
-     *  OUT(8) ShVector3f     - light vector (tangent coordinate space)
-     *  OUT(9) ShPosition4f  - position (HDCS)
+     *  OUT(0) ShTexCoord2f texcoord   - texture coordinate
+     *  OUT(1) ShPoint3f posv          - output point (VCS)
+     *  OUT(2) ShNormal3f normal       - normal vector (VCS) 
+     *  OUT(4) ShVector3f halfVec      - half vector (VCS)
+     *  OUT(5) ShVector3f lightVec     - light vector (VCS)
+     *  OUT(3) ShVector3f viewVec      - view vector (VCS)
+     *  OUT(6) ShPosition4f posh       - position (HDCS)
      *
      *  Input specializations
      *  - remove inputs (1,2) if outputs (5-7) not needed
      *  - remove texcoord (it's just here for convenience) 
      */
     template<int N, int Kind, typename T>
-    static ShProgram vsh(const ShMatrix<N, N, Kind, T> &mv, const ShMatrix<N, N, Kind, T> &mvp ); 
+    static ShProgram shVsh(const ShMatrix<N, N, Kind, T> &mv, const ShMatrix<N, N, Kind, T> &mvp ); 
+
+    /** Uses shVsh to build a more advanced vertex program 
+     * that transform normal, view, half, and lightVec to tangent coordinate space
+     * (using new orthonormal bases {normal, tangent, tangent2} at each given point
+     *  IN(0) ShTexCoord2f texcoord   - texture coordinate
+     *  IN(1) ShNormal3f normal       - normal vector (MCS)
+     *  IN(2) ShVector3f tangent      - primary tangent (MCS)
+     *  IN(3) ShVector3f tangent2     - secondary tangent (MCS)
+     *  IN(4) ShPoint3f lightPos      - light position (VCS)
+     *  IN(5) ShPosition4f posm       - position (MCS)
+     *
+     *  OUT(0) ShTexCoord2f texcoord   - texture coordinate
+     *  OUT(1) ShPoint3f posv          - output point (VCS)
+     *  OUT(2) ShNormal3f normal       - normal vector (TCS) 
+     *  OUT(3) ShVector3f viewVec      - view vector (TCS)
+     *  OUT(4) ShVector3f halfVec      - half vector (TCS)
+     *  OUT(5) ShVector3f lightVec     - light vector (TCS)
+     *  OUT(6) ShPosition4f posh       - position (HDCS)
+     */
+    template<int N, int Kind, typename T>
+    static ShProgram shVshTangentSpace( const ShMatrix<N, N, Kind, T> &mv, const ShMatrix<N, N, Kind, T> &mvp ); 
 };
 
 }

@@ -217,7 +217,7 @@ SH_SHLIB_CONST_N_OP_LEFT(operator/);
 
 /// Conventional power operation.
 template<int N, typename T>
-ShVariableN<N, T> operator^(const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
+ShVariableN<N, T> pow(const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
 {
   if (!ShEnvironment::insideShader) {
     assert(left.hasValues());
@@ -235,6 +235,14 @@ ShVariableN<N, T> operator^(const ShVariableN<N, T>& left, const ShVariableN<N, 
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     return t;
   }
+}
+
+SH_SHLIB_CONST_SCALAR_OP(pow);
+SH_SHLIB_CONST_N_OP_RIGHT(pow);
+
+template<int N, typename T>
+ShVariableN<N, T> operator^(const ShVariableN<N, T>& left, const ShVariableN<N, T>& right) {
+  return pow(left, right);
 }
 
 SH_SHLIB_CONST_SCALAR_OP(operator^);
