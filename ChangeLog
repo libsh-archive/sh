@@ -3,6 +3,16 @@
   * src/ShMatrix.hpp src/ShMatrixImpl.hpp:
   Fixed Matrix determinant template friend issues 
 
+2003-11-27 Tiberiu Popa (stpopa@cgl.uwaterloo.ca), Bryan Chan
+(b8chan@cgl.uwaterloo.ca)
+
+  * src/ShMemoryObject.hpp, src/ShMemoryObject.cpp
+    src/ShFramebuffer.hpp, src/ShFramebuffer.cpp
+    src/ShUberbuffer.hpp , src/ShUberbuffer.cpp
+    src/ShBackend.hpp, src/ShBackend.cpp
+    backends/ati/ShAti.hpp, backends/ati/ShAti.cpp:
+    Basic Über buffer support with a custom ATI backend.
+
 2003-11-24  Bryan Chan (b8chan@cgl.uwaterloo.ca)
   
   * src/ShMemoryObject.hpp src/ShMemoryObject.cpp

@@ -50,6 +50,22 @@ TEXTURES:
     X ARB
     - SM
 
+UBER BUFFERS:
+ X formats in constructor
+ / read/write to host 
+   (need glGetMemImage, glMemImage) 
+   (currently hacked with glReadPixels/glTexImage)
+ - read/write to subregions of memory
+ - invalidate uber buffer
+ - 1D/3D
+ - sub memory objects 
+   (slices, mipmapping, cube mapping)
+ - multiple framebuffers support(GL_AUX*)
+ - set ubuf properties
+   (currently hard coded to GL_COLOR_BUFFER, GL_TEXTURE_2D)
+ - standardize on either attach or bind
+   (currently texture->attach, framebuf->bind)
+
 SMALL TASKS:
  X have updating semantics for uniforms
  X need a map of shader kind -> currently bound shader
