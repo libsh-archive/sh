@@ -90,8 +90,7 @@ GlslSet& GlslSet::operator=(const GlslSet& other)
 
 GlslSet::~GlslSet()
 {
-  // Necessary?
-  unbind();
+  unbind(); // this is necessary
   SH_GL_CHECK_ERROR(glDeleteObjectARB(m_arb_program));
   m_arb_program = 0;
 }

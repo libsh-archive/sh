@@ -42,15 +42,19 @@ static GlslMapping opCodeTable[] = {
   {SH_OP_ASIN,  "asin($0)"},
   {SH_OP_ASN,   "$0"},
   {SH_OP_ATAN,  "atan($0)"},
+  //{SH_OP_ATAN2, "atan($1 / $0)"}, // FIXME
   {SH_OP_CBRT,  "pow($0, 1.0f/3.0f)"},
   {SH_OP_CEIL,  "ceil($0)"},
   {SH_OP_COND,  "$0 ? $1 : $2"},
   {SH_OP_COS,   "cos($0)"},
   {SH_OP_DOT,   "dot($0, $1)"},
   {SH_OP_DIV,   "$0 / $1"},
+  {SH_OP_DX,    "dFdx($0)"},
+  {SH_OP_DY,    "dFdy($0)"},
   {SH_OP_EXP2,  "exp2($0)"},
   {SH_OP_FLR,   "floor($0)"},
   {SH_OP_FRAC,  "fract($0)"},
+  {SH_OP_KIL,   "if ($0) discard"},
   {SH_OP_LOG2,  "log2($0)"},
   {SH_OP_LRP,   "mix($2, $1, $0)"},
   {SH_OP_MAD,   "$0 * $1 + $2"},
@@ -74,7 +78,7 @@ static GlslMapping opCodeTable[] = {
   {SH_OP_SNE,   "not(equal($0, $1))"}, // notEqual() doesn't work on NVIDIA
   {SH_OP_SQRT,  "sqrt($0)"},
   {SH_OP_TAN,   "tan($0)"},
-
+  {SH_OP_XPD,   "cross($0, $1)"},
 
   {SH_OPERATION_END,  0} 
 };
@@ -174,22 +178,38 @@ void GlslCode::emit(const ShStatement &stmt)
       emit_texture(stmt);
       break;
     default:
-      m_lines.push_back("// *** unhandled operation " + string(opInfo[stmt.op].name) + " ***");
+      shError(ShException(string("Glsl Code: Unknown operation ") + opInfo[stmt.op].name));
       break;
     }
   }
 }
 
+ShVariableNodePtr GlslCode::allocate_temp(const ShStatement& stmt) const
+{
+  // allocate a temporary variable based on the destination variable
+  const ShVariableNodePtr& dest_node = stmt.dest.node();
+  ShVariableNode* node = new ShVariableNode(dest_node->kind(), dest_node->size(), 
+					    dest_node->valueType(), dest_node->specialType());
+  ShVariableNodePtr node_ptr = ShPointer<ShVariableNode>(node);
+  return node_ptr;
+}
+
 void GlslCode::emit_exp(const ShStatement& stmt, double power)
 {
+  SH_DEBUG_ASSERT((SH_OP_EXP == stmt.op) || (SH_OP_EXP10 == stmt.op));
+
+  ShVariable temp(allocate_temp(stmt));
   stringstream s;
   s << power;
-  m_lines.push_back(resolve(stmt.dest) + " = " + s.str());
-  m_lines.push_back(resolve(stmt.dest) + " = pow(" + resolve(stmt.dest) + ", " + resolve(stmt.src[0]) + ")");
+  
+  m_lines.push_back(resolve(temp) + " = " + s.str());
+  m_lines.push_back(resolve(stmt.dest) + " = pow(" + resolve(temp) + ", " + resolve(stmt.src[0]) + ")");
 }
 
 void GlslCode::emit_lit(const ShStatement& stmt)
 {
+  SH_DEBUG_ASSERT(SH_OP_LIT == stmt.op);
+
   // Result according to OpenGL spec
   m_lines.push_back(resolve(stmt.dest, 0) + " = 1.0f");
 
@@ -205,30 +225,46 @@ void GlslCode::emit_lit(const ShStatement& stmt)
 
 void GlslCode::emit_log(const ShStatement& stmt, double base)
 {
+  SH_DEBUG_ASSERT((SH_OP_LOG == stmt.op) || (SH_OP_LOG10 == stmt.op));
+
+  const double log2_base = log(base) / log(2.0);
+
+  ShVariable temp(allocate_temp(stmt)); 
   stringstream s;
-  s << base;
-  m_lines.push_back(resolve(stmt.dest) + " = " + s.str());
-  m_lines.push_back(resolve(stmt.dest) + " = log2(" + resolve(stmt.src[0]) + ") / log2(" + resolve(stmt.dest) + ")");
+  s << log2_base;
+
+  m_lines.push_back(resolve(temp) + " = " + s.str());
+  m_lines.push_back(resolve(stmt.dest) + " = log2(" + resolve(stmt.src[0]) + ") / " + resolve(temp) + "");
 }
 
 void GlslCode::emit_prod(const ShStatement& stmt)
 {
-  m_lines.push_back(resolve(stmt.dest) + " = 1");
+  SH_DEBUG_ASSERT(SH_OP_CMUL == stmt.op);
+
+  ShVariable temp(allocate_temp(stmt));
+  m_lines.push_back(resolve(temp) + " = 1");
 
   int size = stmt.src[0].size();
   for (int i=0; i < size; i++) {
-    m_lines.push_back(resolve(stmt.dest) + " *= " + resolve(stmt.src[0], i));
+    m_lines.push_back(resolve(temp) + " *= " + resolve(stmt.src[0], i));
   }
+
+  m_lines.push_back(resolve(stmt.dest) + " = " + resolve(temp));
 }
 
 void GlslCode::emit_sum(const ShStatement& stmt)
 {
-  m_lines.push_back(resolve(stmt.dest) + " = 0");
+  SH_DEBUG_ASSERT(SH_OP_CSUM == stmt.op);
+
+  ShVariable temp(allocate_temp(stmt));
+  m_lines.push_back(resolve(temp) + " = 0");
 
   int size = stmt.src[0].size();
   for (int i=0; i < size; i++) {
-    m_lines.push_back(resolve(stmt.dest) + " += " + resolve(stmt.src[0], i));
+    m_lines.push_back(resolve(temp) + " += " + resolve(stmt.src[0], i));
   }
+
+  m_lines.push_back(resolve(stmt.dest) + " = " + resolve(temp));
 }
 
 void GlslCode::emit_texture(const ShStatement& stmt)

@@ -194,7 +194,7 @@ private:
 };
 
 PBufferStreams::PBufferStreams(void) :
-  m_setup_vp(false)
+  m_shaders(NULL), m_setup_vp(false)
 {
 }
 
@@ -412,8 +412,9 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
 
   DECLARE_TIMER(binding);
   // Then, bind vertex (pass-through) and fragment program
-  shBind(m_vp);
-  shBind(fp);
+  delete m_shaders;
+  m_shaders = new ShProgramSet(m_vp, fp);
+  shBind(*m_shaders);
   TIMING_RESULT(binding);
 
   DECLARE_TIMER(clear);

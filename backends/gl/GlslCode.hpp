@@ -120,6 +120,7 @@ private:
   void updateFloatUniform(const SH::ShVariableNodePtr& node, const GLint location);
   void updateIntUniform(const SH::ShVariableNodePtr& node, const GLint location);
 
+  SH::ShVariableNodePtr allocate_temp(const SH::ShStatement& stmt) const;
   void allocate_textures();
 };
 
