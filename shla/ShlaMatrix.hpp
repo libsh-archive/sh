@@ -83,8 +83,8 @@ class ShlaDenseMatrix  {
      */
     ~ShlaDenseMatrix();
 
-    template<typename VecT>
-    ShlaVector<VecT, M, N> operator|( const ShlaVector<VecT, M, N> &v ) const; 
+    template<typename VecT, ShlaVectorKind K>
+    ShlaVector<VecT, M, N> operator|( const ShlaVector<VecT, M, N, K> &v ) const; 
 
     const float& operator()( int r, int c, int element ) const;
     float& operator()( int r, int c, int element );
@@ -111,8 +111,10 @@ class ShlaBandedMatrix {
      */
     ~ShlaBandedMatrix();
 
-    template<typename VecT>
-    ShlaVector<VecT, M, N> operator|( const ShlaVector<VecT, M, N> &v ) const; 
+    template<typename VecT, ShlaVectorKind K>
+    ShlaVector<VecT, M, N> operator|( const ShlaVector<VecT, M, N, K> &v ) const; 
+
+    ShlaBandedMatrix<T, M, N> operator*( const ShlaBandedMatrix<T, M, N> &m ) const; 
 
     const float& operator()( int r, int c, int element ) const;
     float& operator()( int r, int c, int element );
@@ -123,6 +125,11 @@ class ShlaBandedMatrix {
       */
     const ShlaVector<T, M, N>& operator[]( int d ) const; 
     ShlaVector<T, M, N>& operator[]( int d ); 
+
+    /** \brief Returns true if there are non-zero entries set in the 
+     * given band i (diagonal that starts in column i on the first row)
+     */
+    bool hasBand( int i ) const;
 
   private:
     typedef std::map< int, ShlaVector<T, M, N> > DiagonalMap;

@@ -38,6 +38,11 @@ using namespace SH;
  * This is an implementation of vector. 
  */
 
+enum ShlaVectorKind {
+  SHLA_DEFAULT_VECTOR,
+  SHLA_TEMP_VECTOR
+};
+
 /** \brief A vector with M * N elements of type T stored in a 
  * 2D texture of width M and height N. T must be a subclass of 
  * ShAttrib.
@@ -48,7 +53,7 @@ using namespace SH;
  * The ith element of the vector (0 <= i < M * N) is stored in 
  * 2D location (i % M, i / M)
  */
-template<typename T, int M, int N>
+template<typename T, int M, int N, ShlaVectorKind K = SHLA_DEFAULT_VECTOR>
 class ShlaVector
 {
   public:
@@ -60,7 +65,8 @@ class ShlaVector
     /** \brief Copy constructor
      * Makes a copy of b's data/memory object
      */
-    ShlaVector( const ShlaVector<T, M, N> &b );
+    template<ShlaVectorKind K2>
+    ShlaVector( const ShlaVector<T, M, N, K2> &b );
 
     /** \brief Destructor for ShPerlin.
      * Destroys a Perlin noise generator.
@@ -70,7 +76,8 @@ class ShlaVector
     /** \brief assignment operator
      * Makes a copy of b's data/memory object
      */
-    ShlaVector<T, M, N>& operator=( const ShlaVector<T, M, N> &b );
+    template<ShlaVectorKind K2>
+    ShlaVector<T, M, N, K>& operator=( const ShlaVector<T, M, N, K2> &b );
 
     /** \brief Returns a memory object for the vector
      */

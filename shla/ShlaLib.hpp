@@ -32,6 +32,7 @@
 #include "ShlaVector.hpp"
 #include "ShlaRenderGlobal.hpp"
 #include "ShlaMatrix.hpp"
+//#include "Timer.hpp"
 
 namespace Shla {
 
@@ -49,8 +50,9 @@ using namespace SH;
 
 // TODO handle operands with different T
 #define SHLA_LIB_VEC_OP( op, op_src ) \
-  template<typename T, int M, int N>  \
-  ShlaVector<T, M, N> op( const ShlaVector<T, M, N> &a, const ShlaVector<T, M, N> &b ) { \
+  template<typename T, int M, int N, ShlaVectorKind K1, ShlaVectorKind K2>  \
+  ShlaVector<T, M, N> op( const ShlaVector<T, M, N, K1> &a, const ShlaVector<T, M, N, K2> &b ) { \
+    /*ShTimer start = ShTimer::now(); */\
     /* only use static variables in the shader */ \
     typedef ShlaRenderGlobal<T, M, N> global; \
     /* static */ ShProgram fsh; \
@@ -67,12 +69,14 @@ using namespace SH;
       } SH_END_PROGRAM;\
     }\
     \
+    /*std::cout << "Compile Shader " << ( ShTimer::now() - start ).value() / 1000.0 << "s" << std::endl; */\
+    /*start = ShTimer::now(); */\
     ShlaVector<T, M, N> result; \
 \
     global::renderbuf->bind( result.getMem() );\
     op1.attach( a.getMem() );\
     op2.attach( b.getMem() );\
-\
+    \
     global::bindDefault( fsh ); \
 \
     ShFramebufferPtr oldfb = ShEnvironment::framebuffer;\
@@ -80,6 +84,8 @@ using namespace SH;
     global::drawQuad();\
     global::detachAll();\
     shDrawBuffer( oldfb );\
+    glFinish();\
+    /*std::cout << "Done binary op" << ( ShTimer::now() - start ).value() / 1000.0 << "s" << std::endl; */\
 \
     return result; \
   }
@@ -93,8 +99,8 @@ SHLA_LIB_VEC_OP( operator-, op1(tc) - op2(tc) );
 
 // TODO allow second operand to be of different type
 #define SHLA_LIB_RIGHT_SCALAR_OP( op, op_src ) \
-  template<typename T, typename T2, int M, int N>  \
-  ShlaVector<T, M, N> op( const ShlaVector<T, M, N> &a, const T2 &s ) { \
+  template<typename T, typename T2, int M, int N, ShlaVectorKind K>  \
+  ShlaVector<T, M, N> op( const ShlaVector<T, M, N, K> &a, const T2 &s ) { \
     ShCheckDims<T::typesize, false, T2::typesize, true>(); \
 \
     /* only use static variables in the shader */ \
@@ -131,20 +137,20 @@ SHLA_LIB_VEC_OP( operator-, op1(tc) - op2(tc) );
 // uses RIGHT_SCALAR_OP to make a commutative vector-scalar operator
 #define SHLA_LIB_COMMUTATIVE_SCALAR_OP( op, op_src ) \
   SHLA_LIB_RIGHT_SCALAR_OP( op, op_src ); \
-  template< typename T, typename T2, int M, int N> \
-    ShlaVector<T, M, N> op( const T2 &s, const ShlaVector<T, M, N> &a ) { \
+  template< typename T, typename T2, int M, int N, ShlaVectorKind K> \
+    ShlaVector<T, M, N> op( const T2 &s, const ShlaVector<T, M, N, K> &a ) { \
       return op( a, s ); \
     } 
 SHLA_LIB_COMMUTATIVE_SCALAR_OP( operator*, op1(tc) * s ); 
 SHLA_LIB_COMMUTATIVE_SCALAR_OP( operator+, op1(tc) + s ); 
 
 #define SHLA_LIB_CONSTANT_OP_BOTH( op ) \
-  template< typename T, int M, int N> \
-  ShlaVector<T, M, N> op( double s, const ShlaVector<T, M, N> &a ) { \
+  template< typename T, int M, int N, ShlaVectorKind K> \
+  ShlaVector<T, M, N> op( double s, const ShlaVector<T, M, N, K> &a ) { \
     return op( ShAttrib1f( s ), a ); \
   } \
-  template< typename T, int M, int N> \
-  ShlaVector<T, M, N> op( const ShlaVector<T, M, N> &a, double s ) { \
+  template< typename T, int M, int N, ShlaVectorKind K> \
+  ShlaVector<T, M, N> op( const ShlaVector<T, M, N, K> &a, double s ) { \
     return op( a, ShAttrib1f( s ) ); \
   }
 SHLA_LIB_CONSTANT_OP_BOTH( operator* );
@@ -156,8 +162,10 @@ SHLA_LIB_CONSTANT_OP_BOTH( operator+ );
 // implement for non-square, non-power of 2 vectors
 // reduces in half until reaching size. (must have size < N / 2, power of 2)
 #define SHLA_LIB_REDUCE_OP( op, op_src ) \
-template<typename T, int N> \
-T op( const ShlaVector<T, N, N> &a, int size = 1 ) { \
+template<typename T, int N, ShlaVectorKind K> \
+/*ShlaVector<T, N, N> op( const ShlaVector<T, N, N, K> &a, int size = 1 ) { */\
+T op( const ShlaVector<T, N, N, K> &a, int size = 1 ) { \
+  /*ShTimer start= ShTimer::now(); */\
   /* only use static variables in the shader */ \
   typedef ShlaRenderGlobal<T, N, N> global;\
   /* static */ ShProgram fsh; \
@@ -177,6 +185,8 @@ T op( const ShlaVector<T, N, N> &a, int size = 1 ) { \
     } SH_END_PROGRAM;\
   }\
 \
+  /*std::cout << "Compile Shader " << ( ShTimer::now() - start ).value() / 1000.0 << "s" << std::endl; */\
+  /*start = ShTimer::now(); */\
   ShlaVector<T, N, N> resultVec; \
   global::bindReduce( fsh );\
   ShFramebufferPtr oldfb = ShEnvironment::framebuffer;\
@@ -192,13 +202,17 @@ T op( const ShlaVector<T, N, N> &a, int size = 1 ) { \
     /* TODO find way to get rid of the clearing \
      * and just draw smaller quads */\
     global::useRenderbuf();\
+    /*global::drawQuad(curN +2, curN +2); */\
     global::drawQuad();\
     shDrawBuffer( 0 ); /* TODO get rid of temp fix for u-buffer bugs */\
   }\
   global::detachAll();\
   shDrawBuffer( oldfb );\
+  glFinish();\
 \
-  return resultVec(0); \
+  /*std::cout << "Done Reduce Op" << ( ShTimer::now() - start ).value() / 1000.0 << "s" << std::endl; */\
+  return resultVec(0);\
+  /*return resultVec; */\
 }
 
 SHLA_LIB_REDUCE_OP( reduceAbs, abs( c[0] ) + abs( c[1] ) + abs( c[2] ) + abs( c[3] ) );
@@ -211,12 +225,12 @@ SHLA_LIB_REDUCE_OP( reduceMul, c[0] * c[1] * c[2] * c[3] );
  * Algorithm taken from pseudocode of the [Krüger 2003] siggraph paper
  * and [Shewchuk 94] intro to the CG method without the agonizing pain 
  */
-template<typename T, int N>
-ShlaVector<T, N, N> conjugateGradient( const ShlaBandedMatrix<T, N, N> &A, const ShlaVector<T, N, N> &b, 
-    ShlaVector<T, N, N> &initialGuess, int iter = 3, double errorTol = 1e-3 ) {
+template<typename T, int N, ShlaVectorKind K1, ShlaVectorKind K2>
+ShlaVector<T, N, N> conjugateGradient( const ShlaBandedMatrix<T, N, N> &A, const ShlaVector<T, N, N, K1> &b, 
+    ShlaVector<T, N, N, K2> &initialGuess, int iter = 5, double errorTol = 1e-3 ) {
   T alpha, beta;
   T deltaOld, deltaNew, delta0;
-  ShlaVector<T, N, N> d, q, r, x;
+  static ShlaVector<T, N, N, SHLA_TEMP_VECTOR> d, q, r, x;
   
   SH_DEBUG_PRINT( "Starting Conjugate Gradient" );
   x = initialGuess;
@@ -264,8 +278,8 @@ ShlaVector<T, N, N> conjugateGradient( const ShlaBandedMatrix<T, N, N> &A, const
 /** \brief Runs a fragment shader on vector data
  *
  */
-template<typename T, int M, int N>  
-ShlaVector<T, M, N> applyFsh( ShProgram fsh, const ShlaVector<T, M, N> &a ) { 
+template<typename T, int M, int N, ShlaVectorKind K> 
+ShlaVector<T, M, N> applyFsh( ShProgram fsh, const ShlaVector<T, M, N, K> &a ) { 
   ShlaVector<T, M, N> result;
   return result;
 }
@@ -275,8 +289,8 @@ ShlaVector<T, M, N> applyFsh( ShProgram fsh, const ShlaVector<T, M, N> &a ) {
  *  * ShTexCoord2f
  *  * ShPosition4f
  */
-template<typename T, int M, int N>  
-void initFsh( ShProgram fsh, ShlaVector<T, M, N> &a ) { 
+template<typename T, int M, int N, ShlaVectorKind K>  
+void initFsh( ShProgram fsh, ShlaVector<T, M, N, K> &a ) { 
   typedef ShlaRenderGlobal<T, M, N> global;
 
   ShFramebufferPtr oldfb = ShEnvironment::framebuffer;

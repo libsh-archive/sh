@@ -67,13 +67,10 @@ class ShlaRenderGlobal {
 
     /** draws a quad covering the rectangle with diagonal (0,0) to (w, h)
      * with texture coordinates (0,0) to (w/M, h/N).
-     *
-     * The z parameter changes the depth of the quad.
      */
-    static void drawQuad(int w, int h, double z ); 
+    static void drawQuad(int w, int h);
 
     /** draws a quad covering the entire M*N rectangle
-     * at z = 0.0;
      */
     static void drawQuad();
 

@@ -36,31 +36,41 @@ namespace Shla {
 
 using namespace SH;
 
-template< typename T, int M, int N >
-ShlaVector<T, M, N>::ShlaVector()
+template< typename T, int M, int N, ShlaVectorKind K >
+ShlaVector<T, M, N, K>::ShlaVector()
   : m_mem(new ShUberbuffer( M, N, 1, T::typesize )) { 
 }
 
-template< typename T, int M, int N >
-ShlaVector<T, M, N>::ShlaVector( const ShlaVector<T, M, N> &b ) { 
+template< typename T, int M, int N, ShlaVectorKind K >
+template<ShlaVectorKind K2>
+ShlaVector<T, M, N, K>::ShlaVector( const ShlaVector<T, M, N, K2> &b ) { 
   SH_DEBUG_WARN( "Copy Constructor may not work\n" );
-  m_mem = b.m_mem; // TODO should use cloning
+  m_mem = b.getMem(); // TODO should use cloning
 }
 
-template< typename T, int M, int N >
-ShlaVector<T, M, N>::~ShlaVector() {
+template< typename T, int M, int N, ShlaVectorKind K >
+ShlaVector<T, M, N, K>::~ShlaVector() {
 }
 
-template< typename T, int M, int N >
-ShlaVector<T, M, N>& ShlaVector<T, M, N>::operator=( const ShlaVector<T, M, N> &b ) { 
-  //TODO do this properly (copy uber buffers)
-  m_mem = new ShUberbuffer( M, N, 1, T::typesize );
-  m_mem->copy( b.m_mem );
+template< typename T, int M, int N, ShlaVectorKind K >
+template<ShlaVectorKind K2>
+ShlaVector<T, M, N, K>& ShlaVector<T, M, N, K>::operator=( const ShlaVector<T, M, N, K2> &b ) { 
+  switch( K ) {
+    case SHLA_DEFAULT_VECTOR:
+      m_mem = new ShUberbuffer( M, N, 1, T::typesize );
+      m_mem->copy( b.getMem() );
+      break;
+    case SHLA_TEMP_VECTOR:
+      m_mem = b.getMem();
+      break;
+    default:
+      SH_DEBUG_ERROR( "Unsupported ShlaVectorKind " << K );
+  }
   return *this;
 }
 
-template< typename T, int M, int N >
-ShUberbufferPtr ShlaVector<T, M, N>::getMem() const { 
+template< typename T, int M, int N, ShlaVectorKind K >
+ShUberbufferPtr ShlaVector<T, M, N, K>::getMem() const { 
   // TODO fix this (clone ubufs on assignment) 
   // or shield access to the memory object in some way
   if( m_mem.refCount() > 1 ) {
@@ -70,8 +80,8 @@ ShUberbufferPtr ShlaVector<T, M, N>::getMem() const {
   return m_mem;
 }
 
-template< typename T, int M, int N >
-T ShlaVector<T, M, N>::operator()( int i ) const {
+template< typename T, int M, int N, ShlaVectorKind K >
+T ShlaVector<T, M, N, K>::operator()( int i ) const {
   T result;
   float *elementData = m_mem->data( i % M, i / M ); 
   // TODO hack because setValues requires a double array
@@ -82,8 +92,8 @@ T ShlaVector<T, M, N>::operator()( int i ) const {
   return result; 
 }
 
-template< typename T, int M, int N >
-void ShlaVector<T, M, N>::setData( const float* data ) {
+template< typename T, int M, int N, ShlaVectorKind K >
+void ShlaVector<T, M, N, K>::setData( const float* data ) {
   if( m_mem.refCount() > 1 ) {
     SH_DEBUG_PRINT( "Found shared mem object on setData.  Making new buf" );
     m_mem = new ShUberbuffer( M, N, 1, T::typesize );
@@ -91,8 +101,8 @@ void ShlaVector<T, M, N>::setData( const float* data ) {
   m_mem->setData( data );
 }
 
-template< typename T, int M, int N >
-void ShlaVector<T, M, N>::printData(int c) { 
+template< typename T, int M, int N, ShlaVectorKind K >
+void ShlaVector<T, M, N, K>::printData(int c) { 
   ShlaRenderGlobal<T, M, N>::printData( m_mem, c );
 }
 

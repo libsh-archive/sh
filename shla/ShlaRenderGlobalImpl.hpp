@@ -66,17 +66,17 @@ ShUberbufferPtr ShlaRenderGlobal<T, M, N>::zero = 0;
 template<typename T, int M, int N>
 void ShlaRenderGlobal<T, M, N>::useRenderbuf() {
   shDrawBuffer( renderbuf );
-  glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+  //glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 }
 
 template<typename T, int M, int N>
-void ShlaRenderGlobal<T, M, N>::drawQuad( int w, int h, double z ) {
+void ShlaRenderGlobal<T, M, N>::drawQuad( int w, int h ) {
   // TODO hacked in for now
   // This should be in the backend when backends support drawing geometry
   double tcx = w / (double) M; 
   double tcy = h / (double) N; 
   double maxx = -1.0 + 2.0 * tcx; 
-  double miny = 1.0 - 2.0 * tcy; 
+  double miny = 1.0 - 2.0 * tcy;
 
   //TODO fix ShVertexArray stuff
   /*
@@ -108,22 +108,22 @@ void ShlaRenderGlobal<T, M, N>::drawQuad( int w, int h, double z ) {
   */
   glBegin( GL_QUADS );
     glTexCoord2f( 0.0, 0.0 );
-    glVertex3f( -1.0, 1.0, z );
+    glVertex3f( -1.0, 1.0, 0.0 );
 
     glTexCoord2f( tcx, 0.0 );
-    glVertex3f( maxx, 1.0, z );
+    glVertex3f( maxx, 1.0, 0.0 );
 
     glTexCoord2f( tcx, tcy );
-    glVertex3f( maxx, miny, z );
+    glVertex3f( maxx, miny, 0.0 );
 
     glTexCoord2f( 0.0, tcy );
-    glVertex3f( -1.0, miny, z );
+    glVertex3f( -1.0, miny, 0.0 );
   glEnd();
 }
 
 template<typename T, int M, int N>
 void ShlaRenderGlobal<T, M, N>::drawQuad() {
-  drawQuad( M, N, 0.0 ); 
+  drawQuad( M, N ); 
 }
 
 template<typename T, int M, int N>
