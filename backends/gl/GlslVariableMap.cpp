@@ -189,12 +189,17 @@ string GlslVariableMap::resolve(const ShVariable& v, int index)
   string s = var.name();
   
   if (!var.texture()) {
-    if (-1 == index) {
-      s += swizzle(v, var.size());
-    } else if (0 == index) {
-	s += ".x";
+    if (-1 == index) {      
+      if (1 == var.size()) {
+	// Scalars cannot be swizzled
+	s = repeat_scalar(var.name(), v.valueType(), v.swizzle().size());
+      } else {
+	s += swizzle(v, var.size());
+      }
+    } else if ((0 == index) && (v.size() > 1)) {
+      s += ".x";
     } else if (1 == index) {
-	s += ".y";
+      s += ".y";
     } else if (2 == index) {
       s += ".z";
     } else if (3 == index) {
@@ -209,11 +214,11 @@ string GlslVariableMap::resolve(const ShVariable& v, int index)
   return s;
 }
 
-string GlslVariableMap::swizzle(const ShVariable& v, int dest_size) const
+string GlslVariableMap::swizzle(const ShVariable& v, int var_size) const
 {
   ShSwizzle swizzle = v.swizzle();
 
-  if (swizzle.identity() && (swizzle.size() == dest_size)) return ""; // no need for a swizzle
+  if (swizzle.identity() && (swizzle.size() == var_size)) return ""; // no need for a swizzle
 
   stringstream ss;
   for (int i=0; i < v.size(); i++) {
@@ -235,7 +240,25 @@ string GlslVariableMap::swizzle(const ShVariable& v, int dest_size) const
       return "";
     }
   }
+
   return "." + ss.str();
+}
+
+string GlslVariableMap::repeat_scalar(const string& name, ShValueType type, int size) const
+{
+  if (1 == size) return name; // no need for a swizzle
+
+  stringstream s;
+  s << glsl_typename(type, size);
+
+  s << "(";
+  for (int i=0; i < size; i++) {
+    if (i > 0) s << ", ";
+    s << name;
+  }
+  s << ")";
+
+  return s.str();
 }
 
 const GlslVariable& GlslVariableMap::variable(const ShVariableNodePtr& node)

@@ -1,9 +1,26 @@
 2005-03-15  Francois Marier  <francois@serioushack.com>
 
+	Fixes for ATI support in the glsl backend.
+	
+	* backends/gl/GlslVariableMap.cpp: Repeat scalars instead of
+	swizzling them. 
+
 	* backends/gl/GlslEmit.cpp, GlslCode.hpp: Cast all literals
 	properly through a new resolve_constant() method.
-	Remove superfluous operation and constant in prod and sum.
 
+	* backends/gl/GlslEmit.cpp: Remove superfluous operation and
+	constant in prod and sum.  Remove the "f" from float literals.
+
+	* backends/gl/GlslVariableMap.cpp, GlslVariableMap.hpp (resolve):
+	The swizzle to access the first component is unnecessary when the
+	variable is a scalar.
+
+	* backends/gl/Glsl.cpp, Glsl.hpp (glsl_typename): Add this
+	function.
+
+	* backends/gl/GlslVariable.cpp (type_string): Make use of
+	glsl_typename.
+	
 2005-03-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/GlslEmit.cpp (emit_texture): Swizzle texture lookups

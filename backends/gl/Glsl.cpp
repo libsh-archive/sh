@@ -29,6 +29,7 @@
 namespace shgl {
 
 using namespace SH;
+using namespace std;
 
 GlslCodeStrategy::GlslCodeStrategy(void)
 {
@@ -118,6 +119,27 @@ void print_shader_source(GLhandleARB shader, std::ostream& out)
 
     free(source);
   }
+}
+
+string glsl_typename(ShValueType type, int size)
+{
+  stringstream s;
+  if (shIsInteger(type)) {
+    if (size > 1) {
+      s << "ivec";
+    } else {
+      return "int";
+    }
+  } else {
+    if (size > 1) {
+      s << "vec";
+    } else {
+      return "float";
+    }
+  }
+  s << size;
+
+  return s.str();
 }
 
 }

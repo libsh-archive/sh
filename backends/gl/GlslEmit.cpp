@@ -38,7 +38,7 @@ static GlslMapping opCodeTable[] = {
   {SH_OP_ASN,   "$0"},
   {SH_OP_ATAN,  "atan($0)"},
   //{SH_OP_ATAN2, "atan($1 / $0)"}, // FIXME
-  {SH_OP_CBRT,  "pow($0, 1.0f/3.0f)"},
+  {SH_OP_CBRT,  "pow($0, 1.0/3.0)"},
   {SH_OP_CEIL,  "ceil($0)"},
   {SH_OP_COND,  "bool($0) ? $1 : $2"},
   {SH_OP_COS,   "cos($0)"},
@@ -59,7 +59,7 @@ static GlslMapping opCodeTable[] = {
   {SH_OP_NEG,   "-($0)"},
   {SH_OP_NORM,  "normalize($0)"},
   {SH_OP_POW,   "pow($0, $1)"},
-  {SH_OP_RCP,   "1.0f / $0"},
+  {SH_OP_RCP,   "1.0 / $0"},
   {SH_OP_RND,   "floor($0 + 0.5)"},
   {SH_OP_RSQ,   "inversesqrt($0)"},
   {SH_OP_SGN,   "sign($0)"},
@@ -189,15 +189,20 @@ ShVariableNodePtr GlslCode::allocate_temp(const ShStatement& stmt, int size) con
   return node_ptr;
 }
 
-string GlslCode::resolve_constant(double constant, const ShVariable& var) const
+string GlslCode::resolve_constant(double constant, const ShVariable& var, int size) const
 {
+  if (size <= 0) size = var.size(); // default size is size of variable
+
   stringstream s;
-  if (shIsInteger(var.valueType())) {
-    s << "int";
-  } else {
-    s << "float";
+  s << glsl_typename(var.valueType(), size);
+
+  s << "(";
+  for (int i=0; i < size; i++) {
+    if (i > 0) s << ", ";
+    s << constant;
   }
-  s << "(" << constant << ")";
+  s << ")";
+
   return s.str();
 }
 
@@ -222,19 +227,19 @@ void GlslCode::emit_lit(const ShStatement& stmt)
   SH_DEBUG_ASSERT(SH_OP_LIT == stmt.op);
   
   // Result according to OpenGL spec
-  append_line(resolve(stmt.dest, 0) + " = " + resolve_constant(1, stmt.dest));
+  append_line(resolve(stmt.dest, 0) + " = " + resolve_constant(1, stmt.dest, 1));
 
-  append_line(resolve(stmt.dest, 1) + " = max(" + resolve_constant(0, stmt.dest) +
+  append_line(resolve(stmt.dest, 1) + " = max(" + resolve_constant(0, stmt.dest, 1) +
 	      ", " + resolve(stmt.src[0], 0) + ")");
 
   append_line(resolve(stmt.dest, 2) + " = " + resolve(stmt.src[0], 0) + 
-	      " > " + resolve_constant(0, stmt.src[0]) + " ? pow(max(" + 
+	      " > " + resolve_constant(0, stmt.src[0], 1) + " ? pow(max(" + 
 	      resolve_constant(0, stmt.dest) + ", " + resolve(stmt.src[0], 1) + 
 	      "), clamp(" + resolve(stmt.src[0], 2) + ", " + 
-	      resolve_constant(-128, stmt.dest) + ", " + 
-	      resolve_constant(128, stmt.dest) + ")) : " + resolve_constant(0, stmt.dest));
+	      resolve_constant(-128, stmt.dest, 1) + ", " + 
+	      resolve_constant(128, stmt.dest, 1) + ")) : " + resolve_constant(0, stmt.dest, 1));
 
-  append_line(resolve(stmt.dest, 3) + " = " + resolve_constant(1, stmt.dest));
+  append_line(resolve(stmt.dest, 3) + " = " + resolve_constant(1, stmt.dest, 1));
 }
 
 void GlslCode::emit_log(const ShStatement& stmt, double base)

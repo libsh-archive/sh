@@ -163,8 +163,8 @@ void GlslVariable::builtin(GlslVarBinding binding, int index)
 
 string GlslVariable::type_string() const
 {
-  stringstream s;
   if (m_texture) {
+    stringstream s;
     s << "sampler";
     switch (m_dims) {
     case SH_TEXTURE_1D:
@@ -183,24 +183,11 @@ string GlslVariable::type_string() const
       s << "2DRect";
       break;
     }
-  } else {
-    if (shIsInteger(m_type)) {
-      if (m_size > 1) {
-	s << "ivec";
-      } else {
-	return "int";
-      }
-    } else {
-      if (m_size > 1) {
-	s << "vec";
-      } else {
-	return "float";
-      }
-    }
-    s << m_size;
+    return s.str();
   }
-
-  return s.str();
+  else {
+    return glsl_typename(m_type, m_size);
+  }
 }
 
 }

@@ -146,7 +146,7 @@ private:
   void table_substitution(const SH::ShStatement& stmt, GlslOpCodeVecs codeVecs);
   
   std::string resolve(const SH::ShVariable& v, int index = -1) const;
-  std::string resolve_constant(double constant, const SH::ShVariable& var) const;
+  std::string resolve_constant(double constant, const SH::ShVariable& var, int size = 0) const;
 
   void updateFloatUniform(const SH::ShVariableNodePtr& node, const GLint location);
   void updateIntUniform(const SH::ShVariableNodePtr& node, const GLint location);

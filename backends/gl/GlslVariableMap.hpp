@@ -31,6 +31,7 @@
 #include <map>
 #include <string>
 #include <list>
+#include <string>
 
 namespace shgl {
 
@@ -85,7 +86,8 @@ private:
   
   void map_insert(const SH::ShVariableNodePtr& node, GlslVariable var);
 
-  std::string swizzle(const SH::ShVariable& v, int dest_size) const;
+  std::string swizzle(const SH::ShVariable& v, int var_size) const;
+  std::string repeat_scalar(const std::string& name, SH::ShValueType type, int size) const;
 };
 
 }
