@@ -15,13 +15,14 @@ typedef ShRefCount<ShUberbuffer> ShUberbufferPtr;
 
 class ShUberbuffer: public ShMemoryObject {
   public:
-    ShUberbuffer(int width, int height, int depth, int elements, unsigned int format);
+    ShUberbuffer(int width, int height, int depth, int elements, unsigned int format = 0);
     virtual ~ShUberbuffer();
 
     /* ShUberbuffer methods */
-    unsigned int format();
-    unsigned int mem();
+    unsigned int format() const;
+    unsigned int mem() const;
     void setMem( unsigned int mem );
+    void setFormat( unsigned int format );
 
     /// special case for copying another uber buffer 
     // Checks that dimensions still match and uses clone method 
@@ -30,6 +31,13 @@ class ShUberbuffer: public ShMemoryObject {
     /** \brief Writes data into this memory object
      * Writes a chunk of memory with size width * height * depth * elements
      * into this memory object.
+     *
+     * WARNING - this function may not work properly.  Use at your own risk
+     * until ATI drivers support uploading data into an uber buffer.
+     *
+     * (Currently this commandeers a texture and uses glTexImage to upload
+     * the data, so always do this BEFORE binding the shader to prevent
+     * clobbering an active texture)
      */
     void setData(const float *data);
 

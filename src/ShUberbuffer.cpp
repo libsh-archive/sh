@@ -15,30 +15,26 @@ ShUberbuffer::ShUberbuffer(int width, int height, int depth,
 }
 
 
-/// TO DO FIX the destructor problem
 ShUberbuffer::~ShUberbuffer() {
-  
-  static int called = 0;
-  called+=1;
-  std::cout<<"Destructor called {}{}{} "<<called<<std::endl;
-
-#if 0
   if( m_mem != 0 && ShEnvironment::backend ) {
     ShEnvironment::backend->deleteUberbuffer( this );
   }
-#endif
 }
 
-unsigned int ShUberbuffer::format() {
+unsigned int ShUberbuffer::format() const {
   return m_format;
 }
 
-unsigned int ShUberbuffer::mem() {
+unsigned int ShUberbuffer::mem() const {
   return m_mem;
 }
 
 void ShUberbuffer::setMem( unsigned int mem ) {
   m_mem = mem;
+}
+
+void ShUberbuffer::setFormat( unsigned int format ) {
+  m_format = format;
 }
 
 bool ShUberbuffer::copy( ShUberbufferPtr b ) {
@@ -57,16 +53,20 @@ bool ShUberbuffer::copy( ShUberbufferPtr b ) {
 }
 
 void ShUberbuffer::setData(const float* data) {
-  SH_DEBUG_WARN( "setData not implemented" );
+  if( ShEnvironment::backend ) {
+    ShEnvironment::backend->setUberbufferData( this, data );
+  }
 }
 
 float* ShUberbuffer::data() const {
-  SH_DEBUG_WARN( "data not implemented" );
+  if( ShEnvironment::backend ) {
+    return ShEnvironment::backend->getUberbufferData( this );
+  }
   return 0;
 }
 
 void ShUberbuffer::invalidate() {
-  printf( "invalidate() %d\n", m_mem );
+  printf( "invalidate() not implemented %d\n", m_mem );
 //  glInvalidateMemATI( m_mem );
   //printErr();
 }
@@ -85,20 +85,11 @@ const ShUberbuffer::PropertyMap& ShUberbuffer::properties() {
 }
 
 void ShUberbuffer::detach() {
-  printf( "detach() %d\n", m_mem );
+  printf( "detach() not implemented %d\n", m_mem );
 //  glDetachMemATI( m_mem );
   //printErr();
 }
 
-/*
-void ShUberbuffer::printErr() const {
-  if( unsigned int glerr = glGetError() ) {
-    printf( "GL error: %s\n", gluErrorString(glerr) ); 
-  }
-  const GLcharARB *msg = glGetMemInfoLogATI(0);
-  if(msg) cerr << "Error is <" << msg << ">" << endl; 
-}
-*/
 
 /*
 int* ShUberbuffer::getPropertiesArray() {

@@ -88,7 +88,7 @@ void shBindShader(int kind, ShProgram& shader)
 }
 
 void shDrawBuffer(ShFramebufferPtr fb ) {
-  if (!ShEnvironment::backend) return;
+  if (!ShEnvironment::backend || ShEnvironment::framebuffer == fb) return;
   ShEnvironment::framebuffer = fb;
   ShEnvironment::backend->bindFramebuffer();
 }

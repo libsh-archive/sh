@@ -27,6 +27,7 @@
 #include <cstring>
 #include <cassert>
 #include "ShMemoryObject.hpp"
+#include "ShDebug.hpp"
 
 namespace SH {
 
@@ -73,6 +74,7 @@ bool ShMemoryObject::compatibleWith( ShMemoryObjectPtr b ) {
 ShDataMemoryObject::ShDataMemoryObject(int width, int height, int depth, int elements)
   : ShMemoryObject(width, height, depth, elements),
     m_data(new float[m_width * m_height * m_depth * m_elements]) {
+  memset( m_data, 0, m_width * m_height * m_depth * m_elements );
 }
 
 void ShDataMemoryObject::setData(const float *data, int slice) {
@@ -85,11 +87,23 @@ void ShDataMemoryObject::setData(const float *data) {
 }
 
 float* ShDataMemoryObject::data() const {
-  int size = width() * height() * depth() * elements();
+  int size = m_width * m_height * m_depth * m_elements; 
   float* result = new float[ size ];
   memcpy( result, m_data, size * sizeof( float ) );
   return result; 
 }
 
+const float& ShDataMemoryObject::operator()(int w, int h, int d, int e) const {
+  int index = m_elements * ( m_width * ( m_height * d + h ) + w ) + e;
+  // TODO - is this assert necessary?
+  assert( index >= 0 && index < m_width * m_height * m_depth * m_elements );
+  return m_data[ index ]; 
+}
+
+float& ShDataMemoryObject::operator()(int w, int h, int d, int e) {
+  int index = m_elements * ( m_width * ( m_height * d + h ) + w ) + e;
+  assert( index >= 0 && index < m_width * m_height * m_depth * m_elements );
+  return m_data[ index ]; 
+} 
 
 };

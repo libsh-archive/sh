@@ -132,6 +132,11 @@ class ShDataMemoryObject: public ShMemoryObject {
      */
     float* data() const;
 
+    /** \brief Gets one element of the data
+     */
+    const float& operator()(int w, int h, int d, int e) const;
+    float& operator()(int w, int h, int d, int e);
+
   private:
     float *m_data;
 };

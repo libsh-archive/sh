@@ -28,6 +28,7 @@
 #define SHTEXTUREIMPL_HPP
 
 #include "ShTexture.hpp"
+#include "ShEnvironment.hpp"
 
 namespace SH {
 

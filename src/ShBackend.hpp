@@ -76,7 +76,9 @@ public:
   /// since extra variables may be declared inside this function!
   virtual ShBackendCodePtr generateCode(int kind, const ShProgram& shader) = 0;
   virtual void bindFramebuffer() = 0;
-  virtual void deleteUberbuffer(ShUberbufferPtr ub);
+  virtual void setUberbufferData(ShUberbufferPtr ub, const float *data);
+  virtual float* getUberbufferData(const ShUberbuffer *ub);
+  virtual void deleteUberbuffer(const ShUberbuffer *ub);
 
   virtual void init2(void);
 
