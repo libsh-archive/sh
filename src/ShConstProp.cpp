@@ -899,7 +899,8 @@ void propagate_constants(ShProgram& p)
   graph->dfs(dump);
 #endif
   
-  FinishConstProp finish(p.node()->target().find("gpu:") == 0);
+  FinishConstProp finish(p.node()->target().find("gpu:") == 0
+                         && !ShContext::current()->optimization_disabled("uniform lifting"));
   graph->dfs(finish);
   
 }

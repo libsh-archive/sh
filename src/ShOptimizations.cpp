@@ -378,20 +378,30 @@ void optimize(ShProgram& p, int level)
 
     changed = false;
 
-    copy_propagate(p, changed);
-    forward_substitute(p, changed);
+    if (!ShContext::current()->optimization_disabled("copy propagation")) {
+      copy_propagate(p, changed);
+    }
+    if (!ShContext::current()->optimization_disabled("forward substitution")) {
+      forward_substitute(p, changed);
+    }
     
     p.node()->ctrlGraph->computePredecessors();
 
-    straighten(p, changed);
+    if (!ShContext::current()->optimization_disabled("straightening")) {
+      straighten(p, changed);
+    }
     
     insert_branch_instructions(p);
 
-    add_value_tracking(p);
-    propagate_constants(p);
+    if (!ShContext::current()->optimization_disabled("propagation")) {
+      add_value_tracking(p);
+      propagate_constants(p);
+    }
 
-    add_value_tracking(p); // TODO: Really necessary?
-    remove_dead_code(p, changed);
+    if (!ShContext::current()->optimization_disabled("deadcode")) {
+      add_value_tracking(p); // TODO: Really necessary?
+      remove_dead_code(p, changed);
+    }
 
     remove_branch_instructions(p);
 
