@@ -1,5 +1,9 @@
 2004-03-30  Kevin Moule <krmoule@cgl.uwaterloo.ca>
 
+	* backends/cpu/CPU.cpp: changed '<' to '>' in OP_COND
+
+2004-03-30  Kevin Moule <krmoule@cgl.uwaterloo.ca>
+
 	* backends/cpu/CPU.cpp: added sqrt to OP_NORM, implemented
 	OP_TEX and OP_TEXI for a subset of texture types (more to follow)
 

@@ -1722,7 +1722,7 @@ namespace ShCPU {
 		   << resolve(stmt.dest, i)
 		   << " = ("
 		   << resolve(stmt.src[0], 0)
-		   << " < 0 ? "
+		   << " > 0 ? "
 		   << resolve(stmt.src[1], i)
 		   << " : "
 		   << resolve(stmt.src[2], i)
@@ -1737,7 +1737,7 @@ namespace ShCPU {
 		   << resolve(stmt.dest, i)
 		   << " = ("
 		   << resolve(stmt.src[0], i)
-		   << " < 0 ? "
+		   << " > 0 ? "
 		   << resolve(stmt.src[1], i)
 		   << " : "
 		   << resolve(stmt.src[2], i)
