@@ -168,6 +168,8 @@ ArbMapping ArbCode::table[] = {
   {SH_OP_COND, SH_ARB_ANY, negate_first, SH_ARB_CMP, 0},
   {SH_OP_KIL,  SH_ARB_FP,  0, SH_ARB_FUN, &ArbCode::emit_kil},
 
+  {SH_OP_PAL,  SH_ARB_VP, 0, SH_ARB_FUN, &ArbCode::emit_pal},
+
   {SH_OP_ASN, SH_ARB_END, 0, SH_ARB_FUN, 0}
 };
 
@@ -576,6 +578,12 @@ void ArbCode::emit_cmul(const ShStatement& stmt)
 void ArbCode::emit_kil(const ShStatement& stmt)
 {
   m_instructions.push_back(ArbInst(SH_ARB_KIL, -stmt.src[0]));
+}
+
+void ArbCode::emit_pal(const ShStatement& stmt)
+{
+  m_instructions.push_back(ArbInst(SH_ARB_ARL, m_address_register, stmt.src[1]));
+  m_instructions.push_back(ArbInst(SH_ARB_ARRAYMOV, stmt.dest, stmt.src[0], m_address_register));
 }
 
 }

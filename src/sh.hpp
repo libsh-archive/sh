@@ -68,6 +68,7 @@
 #include "ShQuaternion.hpp"
 #include "ShVariant.hpp"
 #include "ShTypeInfo.hpp"
+#include "ShMemoryDep.hpp"
 #include "ShPalette.hpp"
 
 /** \namespace SH
