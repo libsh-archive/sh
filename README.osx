@@ -5,15 +5,16 @@ The OSX version of Sh has been tested on limited platforms.  It works
 on OSX v10.3.5.  It may work in previous versions. TODO: check opengl
 versions on diferent OS's
 
-In order to build this, you need to have fink installed, as well as
-the following packages:
+If you have checked out Sh from Subversion, you will need to have
+fink installed with the following packages:
 	automake1.7 or newer  (Panther comes with 1.6.3 and Sh needs >=1.7)
 	libtool14
+If you have downloaded a release of Sh you should not need fink.
 
 Configure Sh just as you would for any other backend, i.e.
   ./configure [any additional options]
 
-The gcc and ARB backends are known to work.
+The cc and ARB backends are known to work.
 
 Floating point textures should work, but are untested. PBufferStreams
 (i.e. stream programs in the ARB backend) have not been implemented on
