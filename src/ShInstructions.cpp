@@ -110,7 +110,7 @@ namespace SH {
   }
 
 #define SHINST_UNARY_OP(op)\
-void sh ## op(const ShVariable& dest, const ShVariable& src)\
+void sh ## op(ShVariable& dest, const ShVariable& src)\
 {\
   sizes_match(dest, src);\
   SHINST_UNARY_OP_CORE(op);\
@@ -139,7 +139,7 @@ void sh ## op(const ShVariable& dest, const ShVariable& src)\
   }\
 
 #define SHINST_BINARY_OP(op, scalar_a, scalar_b)\
-void sh ## op(const ShVariable& dest, const ShVariable& a, const ShVariable &b)\
+void sh ## op(ShVariable& dest, const ShVariable& a, const ShVariable &b)\
 {\
   sizes_match(dest, a, b, scalar_a, scalar_b);\
   SHINST_BINARY_OP_CORE(op);\
@@ -147,7 +147,7 @@ void sh ## op(const ShVariable& dest, const ShVariable& a, const ShVariable &b)\
 
 
 #define SHINST_TERNARY_OP(op, condition)\
-void sh ## op(const ShVariable& dest, const ShVariable& a, const ShVariable &b, const ShVariable &c)\
+void sh ## op(ShVariable& dest, const ShVariable& a, const ShVariable &b, const ShVariable &c)\
 {\
   SH_DEBUG_ASSERT(condition);\
   if(immediate()) {\
@@ -200,26 +200,26 @@ SHINST_UNARY_OP(CBRT);
 SHINST_UNARY_OP(CEIL);
 SHINST_UNARY_OP(COS);
 
-void shCMUL(const ShVariable& dest, const ShVariable& src)
+void shCMUL(ShVariable& dest, const ShVariable& src)
 {
   SH_DEBUG_ASSERT(dest.size() == 1);
   SHINST_UNARY_OP_CORE(CMUL);
 }
 
-void shCSUM(const ShVariable& dest, const ShVariable& src)
+void shCSUM(ShVariable& dest, const ShVariable& src)
 {
   SH_DEBUG_ASSERT(dest.size() == 1);
   SHINST_UNARY_OP_CORE(CSUM);
 }
 
-void shDOT(const ShVariable& dest, const ShVariable& a, const ShVariable& b)
+void shDOT(ShVariable& dest, const ShVariable& a, const ShVariable& b)
 {
   SH_DEBUG_ASSERT(dest.size() == 1);
   sizes_match(a, b);
   SHINST_BINARY_OP_CORE(DOT);
 }
 
-void shDX(const ShVariable& dest, const ShVariable& a)
+void shDX(ShVariable& dest, const ShVariable& a)
 {
   if(immediate()) {
       shError(ShScopeException("Cannot take derivatives in immediate mode"));
@@ -228,7 +228,7 @@ void shDX(const ShVariable& dest, const ShVariable& a)
   addStatement(stmt);
 }
 
-void shDY(const ShVariable& dest, const ShVariable& a)
+void shDY(ShVariable& dest, const ShVariable& a)
 {
   if(immediate()) {
       shError(ShScopeException("Cannot take derivatives in immediate mode"));
@@ -272,7 +272,7 @@ SHINST_UNARY_OP(TAN);
 SHINST_UNARY_OP(NORM);
 
 
-void shXPD(const ShVariable& dest, const ShVariable& a, const ShVariable& b)
+void shXPD(ShVariable& dest, const ShVariable& a, const ShVariable& b)
 {
   SH_DEBUG_ASSERT(dest.size() == 3 && a.size() == 3 && b.size() == 3);
   SHINST_BINARY_OP_CORE(XPD);

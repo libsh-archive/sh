@@ -93,7 +93,12 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node)
   // may have other clamping modes later on?
   
   std::string exts(reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS)));
-  bool float_nv = (exts.find("NV_float_buffer") != std::string::npos);
+
+  // note that right now 1/2/3D float textures on NV are only supported through
+  // the ATI extension, so we only use nv for RECT. 
+  bool float_nv = (exts.find("NV_float_buffer") != std::string::npos) && 
+                  (node->dims() == SH_TEXTURE_RECT);
+
   bool float_ati = (exts.find("ATI_texture_float") != std::string::npos);
 
   // @todo type respect CLAMPED flag 

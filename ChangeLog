@@ -1,3 +1,19 @@
+2005-02-11  Bryan Chan  <b8chan@cgl.uwaterloo.ca>
+
+	* src/ShInstructions.hpp, ShInstructions.cpp
+		src/ShVariable.hpp, ShVariable.cpp:
+	Backed out some const changes that don't make sense.
+
+Merged in some fixes from arithmetic
+	*  src/ShSection.hpp, ShSectionImpl.hpp (realDump):
+	Graphviz dump should work now (no more cfg nodes in wrong places).
+
+	* backends/gl/GlTextures.cpp (shGlInternalFormat):
+	Changed to use ATI's extensions on NV cards when the tex dims are non-RECT
+	(NV's recent drivers only support 1/2/3D float textures through
+	ATI_texture_float)
+
+
 2005-02-10  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/scripts/ShAttribImpl.hpp.py (Impl.scalarcons): Only do
