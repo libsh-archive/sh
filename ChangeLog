@@ -1,3 +1,9 @@
+2005-03-15  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslEmit.cpp, GlslCode.hpp: Cast all literals
+	properly through a new resolve_constant() method.
+	Remove superfluous operation and constant in prod and sum.
+
 2005-03-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/GlslEmit.cpp (emit_texture): Swizzle texture lookups

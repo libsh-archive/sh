@@ -31,7 +31,7 @@ using namespace SH;
 using namespace std;
 
 static GlslMapping opCodeTable[] = {
-  {SH_OP_ABS,   "abs($0)",},
+  {SH_OP_ABS,   "abs($0)"},
   {SH_OP_ACOS,  "acos($0)"},
   {SH_OP_ADD,   "$0 + $1"},
   {SH_OP_ASIN,  "asin($0)"},
@@ -179,14 +179,26 @@ void GlslCode::emit(const ShStatement &stmt)
   }
 }
 
-ShVariableNodePtr GlslCode::allocate_temp(const ShStatement& stmt) const
+ShVariableNodePtr GlslCode::allocate_temp(const ShStatement& stmt, int size) const
 {
   // allocate a temporary variable based on the destination variable
   const ShVariableNodePtr& dest_node = stmt.dest.node();
-  ShVariableNode* node = new ShVariableNode(dest_node->kind(), dest_node->size(), 
+  ShVariableNode* node = new ShVariableNode(dest_node->kind(), (size > 0) ? size : dest_node->size(),
 					    dest_node->valueType(), dest_node->specialType());
   ShVariableNodePtr node_ptr = ShPointer<ShVariableNode>(node);
   return node_ptr;
+}
+
+string GlslCode::resolve_constant(double constant, const ShVariable& var) const
+{
+  stringstream s;
+  if (shIsInteger(var.valueType())) {
+    s << "int";
+  } else {
+    s << "float";
+  }
+  s << "(" << constant << ")";
+  return s.str();
 }
 
 void GlslCode::emit_exp(const ShStatement& stmt, double power)
@@ -194,10 +206,7 @@ void GlslCode::emit_exp(const ShStatement& stmt, double power)
   SH_DEBUG_ASSERT((SH_OP_EXP == stmt.op) || (SH_OP_EXP10 == stmt.op));
 
   ShVariable temp(allocate_temp(stmt));
-  stringstream s;
-  s << power;
-  
-  append_line(resolve(temp) + " = " + s.str());
+  append_line(resolve(temp) + " = " + resolve_constant(power, temp));
   append_line(resolve(stmt.dest) + " = pow(" + resolve(temp) + ", " + resolve(stmt.src[0]) + ")");
 }
 
@@ -211,18 +220,21 @@ void GlslCode::emit_discard(const ShStatement& stmt)
 void GlslCode::emit_lit(const ShStatement& stmt)
 {
   SH_DEBUG_ASSERT(SH_OP_LIT == stmt.op);
-
+  
   // Result according to OpenGL spec
-  append_line(resolve(stmt.dest, 0) + " = 1.0f");
+  append_line(resolve(stmt.dest, 0) + " = " + resolve_constant(1, stmt.dest));
 
-  append_line(resolve(stmt.dest, 1) + " = max(0.0, " + resolve(stmt.src[0], 0) + ")");
+  append_line(resolve(stmt.dest, 1) + " = max(" + resolve_constant(0, stmt.dest) +
+	      ", " + resolve(stmt.src[0], 0) + ")");
 
   append_line(resolve(stmt.dest, 2) + " = " + resolve(stmt.src[0], 0) + 
-	      " > 0 ? pow(max(0.0, " + resolve(stmt.src[0], 1) + 
-	      "), clamp(" + resolve(stmt.src[0], 2) + 
-	      ", -128.0f, 128.0f)) : 0.0");
+	      " > " + resolve_constant(0, stmt.src[0]) + " ? pow(max(" + 
+	      resolve_constant(0, stmt.dest) + ", " + resolve(stmt.src[0], 1) + 
+	      "), clamp(" + resolve(stmt.src[0], 2) + ", " + 
+	      resolve_constant(-128, stmt.dest) + ", " + 
+	      resolve_constant(128, stmt.dest) + ")) : " + resolve_constant(0, stmt.dest));
 
-  append_line(resolve(stmt.dest, 3) + " = 1.0f");
+  append_line(resolve(stmt.dest, 3) + " = " + resolve_constant(1, stmt.dest));
 }
 
 void GlslCode::emit_log(const ShStatement& stmt, double base)
@@ -232,10 +244,7 @@ void GlslCode::emit_log(const ShStatement& stmt, double base)
   const double log2_base = log(base) / log(2.0);
 
   ShVariable temp(allocate_temp(stmt)); 
-  stringstream s;
-  s << log2_base;
-
-  append_line(resolve(temp) + " = " + s.str());
+  append_line(resolve(temp) + " = " + resolve_constant(log2_base, temp));
   append_line(resolve(stmt.dest) + " = log2(" + resolve(stmt.src[0]) + ") / " + resolve(temp) + "");
 }
 
@@ -311,11 +320,11 @@ void GlslCode::emit_prod(const ShStatement& stmt)
 {
   SH_DEBUG_ASSERT(SH_OP_CMUL == stmt.op);
 
-  ShVariable temp(allocate_temp(stmt));
-  append_line(resolve(temp) + " = 1");
+  ShVariable temp(allocate_temp(stmt, 1));
+  append_line(resolve(temp) + " = " + resolve(stmt.src[0], 0));
 
   int size = stmt.src[0].size();
-  for (int i=0; i < size; i++) {
+  for (int i=1; i < size; i++) {
     append_line(resolve(temp) + " *= " + resolve(stmt.src[0], i));
   }
 
@@ -326,11 +335,11 @@ void GlslCode::emit_sum(const ShStatement& stmt)
 {
   SH_DEBUG_ASSERT(SH_OP_CSUM == stmt.op);
 
-  ShVariable temp(allocate_temp(stmt));
-  append_line(resolve(temp) + " = 0");
+  ShVariable temp(allocate_temp(stmt, 1));
+  append_line(resolve(temp) + " = " + resolve(stmt.src[0], 0));
 
   int size = stmt.src[0].size();
-  for (int i=0; i < size; i++) {
+  for (int i=1; i < size; i++) {
     append_line(resolve(temp) + " += " + resolve(stmt.src[0], i));
   }
 
