@@ -54,13 +54,15 @@ bool ShUberbuffer::copy( ShUberbufferPtr b ) {
 
 void ShUberbuffer::setData(const float* data) {
   if( ShEnvironment::backend ) {
-    ShEnvironment::backend->setUberbufferData( this, data );
+    ShEnvironment::backend->setUberbufferData( this, 0, 0, m_width, m_height, data );
   }
 }
 
 float* ShUberbuffer::data() const {
   if( ShEnvironment::backend ) {
-    return ShEnvironment::backend->getUberbufferData( this );
+    float *data = new float[ m_width * m_height * m_elements ];
+    ShEnvironment::backend->getUberbufferData( this, 0, 0, m_width, m_height, data );
+    return data;
   }
   return 0;
 }

@@ -77,8 +77,12 @@ public:
   virtual ShBackendCodePtr generateCode(int kind, const ShProgram& shader) = 0;
   virtual void bindFramebuffer() = 0;
   virtual void clearFrameBuffer();
-  virtual void setUberbufferData(ShUberbufferPtr ub, const float *data);
-  virtual float* getUberbufferData(const ShUberbuffer *ub);
+  virtual void setUberbufferData(SH::ShUberbufferPtr ub, int xoffset, int yoffset,
+         int width, int height, const float *data );
+  virtual void getUberbufferData(const SH::ShUberbuffer *ub, int xoffset, int yoffset,
+          int width, int height, float *data );
+  virtual void copyUberbufferData(SH::ShUberbufferPtr dest, const SH::ShUberbuffer *src );
+
   virtual void deleteUberbuffer(const ShUberbuffer *ub);
 
   virtual void init2(void);

@@ -190,8 +190,23 @@ public:
   // It may be a good idea to split this off into a Buffer manager class
   // that works with the Backend.
   virtual void bindFramebuffer();
-  virtual void setUberbufferData(SH::ShUberbufferPtr ub, const float *data );
-  virtual float* getUberbufferData(const SH::ShUberbuffer *ub);
+
+  // set subregion of uberbuffer with given data
+  // (works like glTexSubImage and should be implemented using glMemSubImage 
+  // or similar function when it is available)
+  virtual void setUberbufferData(SH::ShUberbufferPtr ub, int xoffset, int yoffset,
+      int width, int height, const float *data );
+
+  // get a subregion of uber buffer data.
+  // Works like glGetMemSubImage, but currently hacked together using
+  // glReadPixels.
+  virtual void getUberbufferData(const SH::ShUberbuffer *ub, int xoffset, int yoffset,
+      int width, int height, float *data );
+
+  // copies data from one ubuf to another
+  // Should use glCloneMem later, but for now does something unforgivably stupid.
+  virtual void copyUberbufferData(SH::ShUberbufferPtr dest, const SH::ShUberbuffer *src );
+
   virtual void deleteUberbuffer(const SH::ShUberbuffer *ub);
 
   /// Allocate uber buffers (called by allocRegs)

@@ -1605,7 +1605,8 @@ void AtiBackend::bindFramebuffer() {
   PRINT_GL_ERROR( "Binding Framebuffer" );
 }
 
-void AtiBackend::setUberbufferData(ShUberbufferPtr ub, const float *data) {
+void AtiBackend::setUberbufferData(ShUberbufferPtr ub, int xoffset, int yoffset,
+    int width, int height, const float *data) {
   allocUberbuffer( ub );
   unsigned int mem = ub->mem();
   if( !mem ) return; 
@@ -1617,11 +1618,11 @@ void AtiBackend::setUberbufferData(ShUberbufferPtr ub, const float *data) {
   //bind the texture 
   GLuint texBinding;
   glGenTextures(1, &texBinding);
-  shGlActiveTextureARB(GL_TEXTURE10);
+  shGlActiveTextureARB(GL_TEXTURE7);
 
   //TODO handle other dimensions
   glBindTexture(GL_TEXTURE_2D, texBinding); 
-  SH_DEBUG_PRINT( "Active Texture Unit: " << 10 << " binding: " << texBinding ); 
+  SH_DEBUG_PRINT( "Active Texture Unit: " << 7 << " binding: " << texBinding ); 
 
   //attach the uber buffer
   glAttachMemATI( GL_TEXTURE_2D, mem ); 
@@ -1637,7 +1638,7 @@ void AtiBackend::setUberbufferData(ShUberbufferPtr ub, const float *data) {
     case 4: format = GL_RGBA; break;
     default: format = 0; break;
   }
-  glTexImage2D(GL_TEXTURE_2D, 0, ub->format(), ub->width(), ub->height(), 0, format, GL_FLOAT,
+  glTexSubImage2D(GL_TEXTURE_2D, 0, xoffset, yoffset, width, height, format, GL_FLOAT,
                data);
 
   //detach uber buffer
@@ -1652,27 +1653,86 @@ void AtiBackend::setUberbufferData(ShUberbufferPtr ub, const float *data) {
 
 //TODO use glGetImage on the super buffer when it's implemented
 //instead of rendering to a buffer and reading pixels
-float* AtiBackend::getUberbufferData(const ShUberbuffer *ub) {
+void AtiBackend::getUberbufferData(const ShUberbuffer *ub, int xoffset, int yoffset,
+    int width, int height, float *data) {
   unsigned int mem = ub->mem();
   if( !mem ) {
     SH_DEBUG_WARN( "Cannot get uber buffer data from unininitialized uber buffer\n" );
-    return 0; 
   }
-  SH_DEBUG_WARN( "Getting ubuf data (Warning - experimental - bindShader again before accessing textures)" ); 
+  SH_DEBUG_WARN( "Getting ubuf data (Warning - experimental - clobbers GL_AUX3 and GL_TEXTURE7)" ); 
 
   CHECK_GL_ERROR();
 
-  GLint oldReadBuf;
+  // save existing state 
+  GLint oldReadBuf, oldDrawBuf;
+  GLboolean vertEnabled;
+  GLboolean fragEnabled;
   glGetIntegerv( GL_READ_BUFFER, &oldReadBuf );
+  glGetIntegerv( GL_DRAW_BUFFER, &oldDrawBuf );
+  vertEnabled = glIsEnabled( GL_VERTEX_PROGRAM_ARB );
+  fragEnabled = glIsEnabled( GL_FRAGMENT_PROGRAM_ARB );
 
-  float* data = new float[ ub->width() * ub->height() * ub->elements() ];
+  glDisable( GL_VERTEX_PROGRAM_ARB );
+  glDisable( GL_FRAGMENT_PROGRAM_ARB );
+  SH_DEBUG_PRINT( "Temporarily glDisabled vertex/fragment programs" );
 
+  // attach ubuf to texture
+  GLuint texBinding;
+  glGenTextures(1, &texBinding);
+  glActiveTextureARB( GL_TEXTURE7 );
+  glBindTexture( GL_TEXTURE_2D, texBinding );
+  //TODO save all this state before messing with it
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+
+  // use this dummy memory object to force GL_AUXn to be
+  // a float framebuffer, so ReadPixels can return unclamped values with full precision
+  GLint propsArray[] = { GL_TEXTURE_2D, GL_TRUE, GL_COLOR_BUFFER_ATI, GL_TRUE };
+  GLmem dummyMem = glAllocMem2DATI( ub->format(), ub->width(), ub->height(), 2, propsArray );
 
   CHECK_GL_ERROR();
-  glAttachMemATI( GL_AUX1, mem );
-  SH_DEBUG_PRINT( "Attach GL_AUX1 temporarily to mem " << mem );
+  glAttachMemATI( GL_TEXTURE_2D, mem );
+  SH_DEBUG_PRINT( "Attach GL_AUX3 temporarily to mem " << mem );
 
-  glReadBuffer( GL_AUX1 );
+  glAttachMemATI( GL_AUX3, dummyMem );
+  SH_DEBUG_PRINT( "Attach GL_AUX3 temporarily to dummy mem " << dummyMem );
+
+  glDrawBuffer( GL_AUX3 ); 
+  glClearColor( 0, 0, 0, 0 );
+  glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+  // setup matrices 
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+  gluOrtho2D(0.0, ub->width(), 0.0, ub->height());
+
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glLoadIdentity();
+
+  // find tex coords && draw quad
+  double tcx1 = xoffset / (double) ub->width();
+  double tcy1 = yoffset / (double) ub->height();
+  double tcx2 = ( xoffset + width ) / (double) ub->width();
+  double tcy2 = ( yoffset + height ) / (double) ub->height();
+  glEnable( GL_TEXTURE_2D );
+  glBegin( GL_QUADS );
+    glMultiTexCoord2fARB( GL_TEXTURE7, tcx1, tcy1 ); 
+    glVertex3f( xoffset, yoffset, 0.0 );
+    glMultiTexCoord2fARB( GL_TEXTURE7, tcx2, tcy1 );
+    glVertex3f( xoffset + width, yoffset, 0.0 );
+    glMultiTexCoord2fARB( GL_TEXTURE7, tcx2, tcy2 ); 
+    glVertex3f( xoffset + width, yoffset + height, 0.0 );
+    glMultiTexCoord2fARB( GL_TEXTURE7, tcx1, tcy2 ); 
+    glVertex3f( xoffset, yoffset + height, 0.0 );
+  glEnd();
+
+  glReadBuffer( GL_AUX3 );
 
   GLenum format;
   switch (ub->elements()) {
@@ -1684,16 +1744,39 @@ float* AtiBackend::getUberbufferData(const ShUberbuffer *ub) {
   }
   //TODO foo
   SH_DEBUG_PRINT( "width " << ub->width() << "height " << ub->height() );
-  glReadPixels( 0, 0, ub->width(), ub->height(), format, GL_FLOAT, data ); 
+  glReadPixels( xoffset, yoffset, width, height, format, GL_FLOAT, data ); 
 
-  glAttachMemATI( GL_AUX1, 0 );
-  SH_DEBUG_PRINT( "Detach GL_AUX1 from mem " << mem ); 
+  // detach/free mem objects
+  glAttachMemATI( GL_TEXTURE_2D, 0 );
+  SH_DEBUG_PRINT( "Detach from mem " << mem ); 
 
+  glAttachMemATI( GL_AUX3, 0 );
+  SH_DEBUG_PRINT( "Detach GL_AUX3 from dummy mem " << dummyMem ); 
+
+  // restore state && clean up temporary tex/ubuf
+  if( vertEnabled ) {
+    SH_DEBUG_PRINT( "Re-enabled vertex programs" );
+    glEnable( GL_VERTEX_PROGRAM_ARB );
+  }
+  if( fragEnabled ) {
+    SH_DEBUG_PRINT( "Re-enabled fragment programs" );
+    glEnable( GL_FRAGMENT_PROGRAM_ARB );
+  }
   glReadBuffer( oldReadBuf );
+  glDrawBuffer( oldDrawBuf );
+  glDeleteTextures( 1, &texBinding );
+
+  glDeleteMemATI( dummyMem );
+  SH_DEBUG_PRINT( "Delete dummy mem " << dummyMem ); 
 
   PRINT_GL_ERROR( "Getting data from ubuf " << mem );
+}
 
-  return data;
+//TODO use glCloneMem on the super buffer when it's implemented
+//instead of rendering to a buffer and reading pixels
+void AtiBackend::copyUberbufferData(SH::ShUberbufferPtr dest, const SH::ShUberbuffer *src ) {
+  SH_DEBUG_ERROR( "Not implemented yet" );
+  // TODO copy most of getUberBufferData, except render to dest instead of dummy
 }
 
 void AtiBackend::render(SH::ShVertexArray& data){

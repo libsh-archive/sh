@@ -119,11 +119,18 @@ ShRefCount<ShBackend> ShBackend::lookup(const std::string& name)
 #endif
 }
 
-void ShBackend::setUberbufferData(ShUberbufferPtr ub, const float *data) {
+
+void ShBackend::setUberbufferData(SH::ShUberbufferPtr ub, int xoffset, int yoffset,
+               int width, int height, const float *data ) {
   printf("no uberbuffer support for this backend...\n");
 }
 
-float* ShBackend::getUberbufferData(const ShUberbuffer *ub) {
+void ShBackend::getUberbufferData(const SH::ShUberbuffer *ub, int xoffset, int yoffset,
+                int width, int height, float *data ) {
+  printf("no uberbuffer support for this backend...\n");
+}
+
+void ShBackend::copyUberbufferData(SH::ShUberbufferPtr dest, const SH::ShUberbuffer *src ) {
   printf("no uberbuffer support for this backend...\n");
 }
 
