@@ -63,6 +63,11 @@ struct GlslOpCodeVecs
   std::vector<std::string> frag;
 };
 
+struct GlslLine {
+  int indent;
+  std::string code;
+};
+
 class GlslCode : public SH::ShBackendCode {
 public:
   GlslCode(const SH::ShProgramNodeCPtr& program, const std::string& target,
@@ -108,7 +113,8 @@ private:
 
   GLhandleARB m_arb_shader; /// shader program uploaded to the GPU
 
-  std::vector<std::string> m_lines; /// raw lines of code (unindented)
+  std::vector<GlslLine> m_lines; /// raw lines of code (unindented)
+  int m_indent;
   GlslVariableMap* m_varmap;
   std::map<SH::ShTextureNodePtr, TextureInfo> m_texture_units;
   int m_nb_textures;
@@ -120,9 +126,12 @@ private:
   // bound, if any
   GLhandleARB m_bound;
 
+  /// Add a line to the source code (m_lines)
+  void append_line(const std::string& line, bool append_semicolon = true);
+
   /// Generate code for this node and those following it.
-  void gen_node(SH::ShCtrlGraphNodePtr node);
-  
+  void gen_structural_node(const SH::ShStructuralNodePtr& node);
+
   /// Generate code for a single Sh statement.
   void emit(const SH::ShStatement& stmt);
   void emit_exp(const SH::ShStatement& stmt, double power);

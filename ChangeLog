@@ -1,3 +1,11 @@
+2005-03-14  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslCode.cpp, GlslCode.hpp: Support for control flow
+	constructs.
+		
+	* backends/gl/GlslEmit.cpp: Cast variables to bool when they are
+	used in a conditional or loop statement.
+
 2005-03-09  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/ArbEmit.cpp (emit_ceil): Allocate a temporary

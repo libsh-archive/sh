@@ -45,7 +45,7 @@ GlslSet* GlslSet::m_current = 0;
 GlslCode::GlslCode(const ShProgramNodeCPtr& shader, const std::string& unit,
 		   TextureStrategy* texture) 
   : m_texture(texture), m_target("glsl:" + unit), m_arb_shader(0),
-    m_varmap(NULL), m_nb_textures(0), m_bound(0)
+    m_indent(0), m_varmap(NULL), m_nb_textures(0), m_bound(0)
 {
   m_originalShader = const_cast<ShProgramNode*>(shader.object());
   
@@ -118,8 +118,9 @@ void GlslCode::generate()
   
   // Code generation
   try {
+    ShStructural structural(m_shader->ctrlGraph);
     m_shader->ctrlGraph->entry()->clearMarked();
-    gen_node(m_shader->ctrlGraph->entry());
+    gen_structural_node(structural.head());
     m_shader->ctrlGraph->entry()->clearMarked();
     allocate_textures();
   } 
@@ -339,6 +340,7 @@ void GlslCode::updateUniform(const ShVariableNodePtr& uniform)
 ostream& GlslCode::print(ostream& out)
 {
   SH_DEBUG_ASSERT(m_varmap);
+  const string BLOCK_INDENT("    ");
 
   out << "// OpenGL SL " << ((m_unit == SH_GLSL_VP) ? "Vertex" : "Fragment") << " Program" << endl;
   out << endl;
@@ -354,20 +356,21 @@ ostream& GlslCode::print(ostream& out)
 
   out << "void main()" << endl;
   out << "{" << endl;
-  string indent = "  ";
 
   // Declare and initialize temporaries and constants
   if (m_varmap->regular_begin() != m_varmap->regular_end()) {
     for (GlslVariableMap::DeclarationList::const_iterator i = m_varmap->regular_begin(); 
 	 i != m_varmap->regular_end(); i++) {
-      out << indent << *i << ";" << endl;
+      out << BLOCK_INDENT << *i << ";" << endl;
     }
     out << endl;
   }
 
   // Print lines of code
-  for (vector<string>::const_iterator i = m_lines.begin(); i != m_lines.end(); i++) {
-    out << indent << *i << ";" << endl;
+  for (vector<GlslLine>::const_iterator i = m_lines.begin(); i != m_lines.end(); i++) {
+    stringstream indent;
+    for (int j=0; j <= (*i).indent; j++) indent << BLOCK_INDENT;
+    out << indent.str() << (*i).code << endl;
   }
   
   out << "}" << endl;
@@ -380,22 +383,117 @@ ostream& GlslCode::describe_interface(ostream& out)
   return out;
 }
 
-void GlslCode::gen_node(ShCtrlGraphNodePtr node)
+void GlslCode::append_line(const string& line, bool append_semicolon)
 {
-  if (!node || node->marked()) return;
-  node->mark();
+  GlslLine l;
+  l.indent = m_indent;
+  l.code = append_semicolon ? line + ";" : line;  
+  m_lines.push_back(l);
+}
 
-  if (node == m_shader->ctrlGraph->exit()) return;
-  
-  if (node->block) {
-    for (ShBasicBlock::ShStmtList::const_iterator I = node->block->begin();
-	 I != node->block->end(); ++I) {
+void GlslCode::gen_structural_node(const ShStructuralNodePtr& node)
+{
+  if (!node) return;
+
+  if (node->type == ShStructuralNode::UNREDUCED) {
+    ShBasicBlockPtr block = node->cfg_node->block;
+    if (block) for (ShBasicBlock::ShStmtList::const_iterator I = block->begin();
+                    I != block->end(); ++I) {
       const ShStatement& stmt = *I;
       emit(stmt);
     }
+  } 
+  else if (node->type == ShStructuralNode::BLOCK) {
+    for (ShStructuralNode::StructNodeList::const_iterator I = node->structnodes.begin();
+         I != node->structnodes.end(); ++I) {
+      gen_structural_node(*I);
+    }
+  } 
+  else if (node->type == ShStructuralNode::IFELSE) {
+    ShStructuralNodePtr header = node->structnodes.front();
+    SH_DEBUG_ASSERT(2 == header->succs.size());
+
+    ShVariable cond;
+    ShStructuralNodePtr ifnode, elsenode;
+    for (ShStructuralNode::SuccessorList::iterator I = header->succs.begin();
+         I != header->succs.end(); ++I) {
+      if (I->first.node()) {
+        ifnode = I->second;
+        cond = I->first;
+      } else {
+        elsenode = I->second;
+      }
+    }
+    gen_structural_node(header);
+    append_line("if (bool(" + resolve(cond.node()) + ")) {", false);
+    m_indent++;
+    gen_structural_node(ifnode);
+    m_indent--;
+
+    append_line("} else {", false);
+    m_indent++;
+    gen_structural_node(elsenode);
+    m_indent--;
+
+    append_line("} // if", false);
+  } 
+  else if (node->type == ShStructuralNode::WHILELOOP) {
+    ShStructuralNodePtr header = node->structnodes.front();
+    ShVariable cond = header->succs.front().first;
+    ShStructuralNodePtr body = node->structnodes.back();
+
+    ShVariable tmp(new ShVariableNode(SH_TEMP, 1, SH_BYTE));
+    append_line(resolve(tmp) + " = 1");
+    append_line("while (" + resolve(tmp) + " > 0) {", false);
+
+    m_indent++;
+    append_line("// evaluate loop condition:", false);
+    gen_structural_node(header);
+    append_line("if (bool(" + resolve(cond.node()) + ")) {", false);
+    
+    m_indent++;
+    append_line("// execute loop body:", false);
+    gen_structural_node(body);
+    m_indent--;
+    
+    // Can't use the 'break' keyword because it's broken on NVIDIA
+    append_line("} else {", false);
+    m_indent++;
+    append_line("// break out of the loop", false);
+    append_line(resolve(tmp) + " = 0");
+    m_indent--;
+
+    append_line("} // if", false);
+    m_indent--;
+    append_line("} // for", false);
+  } 
+  else if (node->type == ShStructuralNode::SELFLOOP) {
+    ShStructuralNodePtr loopnode = node->structnodes.front();
+
+    bool condexit = true; // true if the condition causes us to exit the
+                          // loop, rather than continue it
+    ShVariable cond;
+    for (ShStructuralNode::SuccessorList::iterator I = loopnode->succs.begin();
+         I != loopnode->succs.end(); ++I) {
+      if (I->first.node()) {
+        condexit = (I->second != loopnode);
+        cond = I->first;
+      }
+    }
+
+    // We convert the loop to a while loop since do..while loops don't
+    // compile properly on NVIDIA
+    append_line("// execute do-until body at least once:", false);
+    gen_structural_node(loopnode);
+
+    append_line("while (" + string((condexit) ? "!" : "") + "(bool(" + resolve(cond.node()) + "))) {", false);
+
+    m_indent++;
+    gen_structural_node(loopnode);
+    m_indent--;
+
+    append_line("} // while", false);
   }
-  
-  gen_node(node->follower);
 }
 
 string GlslCode::resolve(const ShVariable& v, int index) const

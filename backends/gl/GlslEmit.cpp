@@ -40,7 +40,7 @@ static GlslMapping opCodeTable[] = {
   //{SH_OP_ATAN2, "atan($1 / $0)"}, // FIXME
   {SH_OP_CBRT,  "pow($0, 1.0f/3.0f)"},
   {SH_OP_CEIL,  "ceil($0)"},
-  {SH_OP_COND,  "$0 ? $1 : $2"},
+  {SH_OP_COND,  "bool($0) ? $1 : $2"},
   {SH_OP_COS,   "cos($0)"},
   {SH_OP_DOT,   "dot($0, $1)"},
   {SH_OP_DIV,   "$0 / $1"},
@@ -108,7 +108,7 @@ void GlslCode::table_substitution(const ShStatement& stmt, GlslOpCodeVecs codeVe
 
   line << codeVecs.frag[i]; // code fragment after the last variable
     
-  m_lines.push_back(line.str());
+  append_line(line.str());
 }
 
 void GlslCode::emit(const ShStatement &stmt)
@@ -190,15 +190,15 @@ void GlslCode::emit_exp(const ShStatement& stmt, double power)
   stringstream s;
   s << power;
   
-  m_lines.push_back(resolve(temp) + " = " + s.str());
-  m_lines.push_back(resolve(stmt.dest) + " = pow(" + resolve(temp) + ", " + resolve(stmt.src[0]) + ")");
+  append_line(resolve(temp) + " = " + s.str());
+  append_line(resolve(stmt.dest) + " = pow(" + resolve(temp) + ", " + resolve(stmt.src[0]) + ")");
 }
 
 void GlslCode::emit_discard(const ShStatement& stmt)
 {
   SH_DEBUG_ASSERT((SH_OP_KIL == stmt.op));
 
-  m_lines.push_back(std::string("if (") + resolve(stmt.src[0]) + ") discard;");
+  append_line(string("if (bool(") + resolve(stmt.src[0]) + ")) discard;");
 }
 
 void GlslCode::emit_lit(const ShStatement& stmt)
@@ -206,16 +206,16 @@ void GlslCode::emit_lit(const ShStatement& stmt)
   SH_DEBUG_ASSERT(SH_OP_LIT == stmt.op);
 
   // Result according to OpenGL spec
-  m_lines.push_back(resolve(stmt.dest, 0) + " = 1.0f");
+  append_line(resolve(stmt.dest, 0) + " = 1.0f");
 
-  m_lines.push_back(resolve(stmt.dest, 1) + " = max(0.0, " + resolve(stmt.src[0], 0) + ")");
+  append_line(resolve(stmt.dest, 1) + " = max(0.0, " + resolve(stmt.src[0], 0) + ")");
 
-  m_lines.push_back(resolve(stmt.dest, 2) + " = " + resolve(stmt.src[0], 0) + 
-		    " > 0 ? pow(max(0.0, " + resolve(stmt.src[0], 1) + 
-		    "), clamp(" + resolve(stmt.src[0], 2) + 
-		    ", -128.0f, 128.0f)) : 0.0");
+  append_line(resolve(stmt.dest, 2) + " = " + resolve(stmt.src[0], 0) + 
+	      " > 0 ? pow(max(0.0, " + resolve(stmt.src[0], 1) + 
+	      "), clamp(" + resolve(stmt.src[0], 2) + 
+	      ", -128.0f, 128.0f)) : 0.0");
 
-  m_lines.push_back(resolve(stmt.dest, 3) + " = 1.0f");
+  append_line(resolve(stmt.dest, 3) + " = 1.0f");
 }
 
 void GlslCode::emit_log(const ShStatement& stmt, double base)
@@ -228,8 +228,8 @@ void GlslCode::emit_log(const ShStatement& stmt, double base)
   stringstream s;
   s << log2_base;
 
-  m_lines.push_back(resolve(temp) + " = " + s.str());
-  m_lines.push_back(resolve(stmt.dest) + " = log2(" + resolve(stmt.src[0]) + ") / " + resolve(temp) + "");
+  append_line(resolve(temp) + " = " + s.str());
+  append_line(resolve(stmt.dest) + " = log2(" + resolve(stmt.src[0]) + ") / " + resolve(temp) + "");
 }
 
 void GlslCode::emit_logic(const ShStatement& stmt)
@@ -295,14 +295,14 @@ void GlslCode::emit_prod(const ShStatement& stmt)
   SH_DEBUG_ASSERT(SH_OP_CMUL == stmt.op);
 
   ShVariable temp(allocate_temp(stmt));
-  m_lines.push_back(resolve(temp) + " = 1");
+  append_line(resolve(temp) + " = 1");
 
   int size = stmt.src[0].size();
   for (int i=0; i < size; i++) {
-    m_lines.push_back(resolve(temp) + " *= " + resolve(stmt.src[0], i));
+    append_line(resolve(temp) + " *= " + resolve(stmt.src[0], i));
   }
 
-  m_lines.push_back(resolve(stmt.dest) + " = " + resolve(temp));
+  append_line(resolve(stmt.dest) + " = " + resolve(temp));
 }
 
 void GlslCode::emit_sum(const ShStatement& stmt)
@@ -310,14 +310,14 @@ void GlslCode::emit_sum(const ShStatement& stmt)
   SH_DEBUG_ASSERT(SH_OP_CSUM == stmt.op);
 
   ShVariable temp(allocate_temp(stmt));
-  m_lines.push_back(resolve(temp) + " = 0");
+  append_line(resolve(temp) + " = 0");
 
   int size = stmt.src[0].size();
   for (int i=0; i < size; i++) {
-    m_lines.push_back(resolve(temp) + " += " + resolve(stmt.src[0], i));
+    append_line(resolve(temp) + " += " + resolve(stmt.src[0], i));
   }
 
-  m_lines.push_back(resolve(stmt.dest) + " = " + resolve(temp));
+  append_line(resolve(stmt.dest) + " = " + resolve(temp));
 }
 
 void GlslCode::emit_texture(const ShStatement& stmt)
@@ -348,7 +348,7 @@ void GlslCode::emit_texture(const ShStatement& stmt)
 
   line << "(" << resolve(stmt.src[0]) << ", " << resolve(stmt.src[1]) << ")";
 
-  m_lines.push_back(line.str());
+  append_line(line.str());
 }
 
 }
