@@ -533,14 +533,17 @@ ShVariableN<M, T> operator|(const ShMatrix<M, N, Kind, T>& a, const ShVariableN<
 
 }
 
-#define SH_SHLIB_UNARY_OPERATION(libtype, libop, libretsize) \
+#define SH_SHLIB_UNARY_RETTYPE_OPERATION(libtype, libop, librettype, libretsize) \
 template<int N, int K1, typename T, bool S1> \
-libtype<libretsize, SH_VAR_TEMP, T, false> \
+librettype<libretsize, SH_VAR_TEMP, T, false> \
 libop(const libtype<N, K1, T, S1>& var) \
 { \
   ShVariableN<libretsize, T> t = libop(static_cast< ShVariableN<N, T> >(var)); \
-  return libtype<libretsize, SH_VAR_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
+  return librettype<libretsize, SH_VAR_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
 }
+
+#define SH_SHLIB_UNARY_OPERATION(libtype, libop, libretsize) \
+  SH_SHLIB_UNARY_RETTYPE_OPERATION(libtype, libop, libtype, libretsize)
 
 #define SH_SHLIB_BINARY_RETTYPE_OPERATION(libtype, libop, librettype, libretsize) \
 template<int N, int K1, int K2, typename T, bool S1, bool S2> \
@@ -555,35 +558,44 @@ libop(const libtype<N, K1, T, S1>& left, const libtype<N, K2, T, S2>& right) \
 #define SH_SHLIB_BINARY_OPERATION(libtype, libop, libretsize) \
   SH_SHLIB_BINARY_RETTYPE_OPERATION(libtype, libop, libtype, libretsize)
 
-#define SH_SHLIB_UNEQ_BINARY_OPERATION(libtype, libop, libretsize) \
+#define SH_SHLIB_UNEQ_BINARY_RETTYPE_OPERATION(libtype, libop, librettype, libretsize) \
 template<int N, int M, int K1, int K2, typename T, bool S1, bool S2> \
-libtype<libretsize, SH_VAR_TEMP, T, false> \
+librettype<libretsize, SH_VAR_TEMP, T, false> \
 libop(const libtype<N, K1, T, S1>& left, const libtype<M, K2, T, S2>& right) \
 { \
   ShVariableN<libretsize, T> t = libop(static_cast< ShVariableN<N, T> >(left), \
                                        static_cast< ShVariableN<M, T> >(right)); \
-  return libtype<libretsize, SH_VAR_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
+  return librettype<libretsize, SH_VAR_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
 }
 
-#define SH_SHLIB_LEFT_SCALAR_OPERATION(libtype, libop) \
+#define SH_SHLIB_UNEQ_BINARY_OPERATION(libtype, libop, libretsize) \
+  SH_SHLIB_UNEQ_BINARY_RETTYPE_OPERATION(libtype, libop, libtype, libretsize)
+
+#define SH_SHLIB_LEFT_SCALAR_RETTYPE_OPERATION(libtype, libop, librettype) \
 template<int M, int K1, int K2, typename T, bool S1, bool S2> \
-libtype<M, SH_VAR_TEMP, T, false> \
+librettype<M, SH_VAR_TEMP, T, false> \
 libop(const libtype<1, K2, T, S2>& left, const libtype<M, K1, T, S1>& right) \
 { \
   ShVariableN<M, T> t = libop(static_cast< ShVariableN<1, T> >(left), \
                               static_cast< ShVariableN<M, T> >(right)); \
-  return libtype<M, SH_VAR_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
+  return librettype<M, SH_VAR_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
 }
 
-#define SH_SHLIB_LEFT_MATRIX_OPERATION(libtype, libop, libretsize) \
+#define SH_SHLIB_LEFT_SCALAR_OPERATION(libtype, libop) \
+  SH_SHLIB_LEFT_SCALAR_RETTYPE_OPERATION(libtype, libop, libtype)
+
+#define SH_SHLIB_LEFT_MATRIX_RETTYPE_OPERATION(libtype, libop, librettype, libretsize) \
 template<int M, int N, int K1, int K2, typename T, bool S1> \
-libtype<libretsize, SH_VAR_TEMP, T, false> libop(const ShMatrix<M, N, K1, T>& a, \
-                                                 const libtype<N, K2, T, S1>& b) \
+librettype<libretsize, SH_VAR_TEMP, T, false> libop(const ShMatrix<M, N, K1, T>& a, \
+                                                    const libtype<N, K2, T, S1>& b) \
 { \
   ShVariableN<libretsize, T> t = libop(a, \
                                        static_cast< ShVariableN<N, T> >(b)); \
-  return libtype<libretsize, K1, T, S1>(t.node(), t.swizzle(), t.neg()); \
+  return librettype<libretsize, K1, T, S1>(t.node(), t.swizzle(), t.neg()); \
 }
+
+#define SH_SHLIB_LEFT_MATRIX_OPERATION(libtype, libop, libretsize) \
+  SH_SHLIB_LEFT_MATRIX_RETTYPE_OPERATION(libtype, libop, libtype, libretsize)
 
 #include "ShLibAttrib.hpp"
 #include "ShLibVector.hpp"
@@ -591,5 +603,6 @@ libtype<libretsize, SH_VAR_TEMP, T, false> libop(const ShMatrix<M, N, K1, T>& a,
 #include "ShLibColor.hpp"
 #include "ShLibTexCoord.hpp"
 #include "ShLibNormal.hpp"
+#include "ShLibPosition.hpp"
 
 #endif

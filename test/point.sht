@@ -1,6 +1,7 @@
 // -*- C++ -*-
 
 ShPoint4f p1; NAME(p1);
+ShPosition3f pos1; NAME(pos1);
 ShMatrix4x4f mvw;
 
 ShShader shader = SH_BEGIN_SHADER(0) {
@@ -13,6 +14,6 @@ ShShader shader = SH_BEGIN_SHADER(0) {
   ShOutputVector4f out; NAME(out);
   
   //      out(0) = (a - b) | (b - a);
-  out(0,1,2) = mvw | p;
+  out(0,1,2) = mvw | pos1;
   
 } SH_END_SHADER;

@@ -14,6 +14,18 @@ namespace ShArb {
 class ArbBackend;
 class ArbInst;
 class ArbReg;
+struct ArbBindingSpecs;
+
+/** Possible register types in the ARB spec.
+ */
+enum ShArbRegType {
+  SH_ARB_REG_ATTRIB,
+  SH_ARB_REG_PARAM,
+  SH_ARB_REG_TEMP,
+  SH_ARB_REG_ADDRESS,
+  SH_ARB_REG_OUTPUT,
+  SH_ARB_REG_CONST
+};
 
 class ArbCode : public SH::ShBackendCode {
 public:
@@ -41,16 +53,25 @@ private:
   void allocRegs();
 
   /// Allocate an input register, if necessary.
-  void allocInput(SH::ShVariableNodePtr node);
+  void allocInputs();
   
   /// Allocate an output register, if necessary.
-  void allocOutput(SH::ShVariableNodePtr node);
+  void allocOutputs();
   
   /// Allocate a uniform register, if necessary.
   void allocParam(SH::ShVariableNodePtr node);
 
+  /// Allocate constants (called by allocRegs)
+  void allocConsts();
+
   /// Allocate temporary registers (called by allocRegs)
   void allocTemps();
+
+  void bindSpecial(const SH::ShShaderNode::VarList::const_iterator& begin,
+                   const SH::ShShaderNode::VarList::const_iterator& end,
+                   const ArbBindingSpecs& specs, 
+                   std::vector<int>& bindings,
+                   ShArbRegType type, int& num);
 
   /// Output a use of a variable.
   std::ostream& printVar(std::ostream& out, bool dest, const SH::ShVariable& var) const;
@@ -76,8 +97,14 @@ private:
   /// The number of parameter registers used in this shader.
   int m_numParams;
 
+  /// The number of constant 4-tuples used in this shader.
+  int m_numConsts;
+
   typedef std::map<SH::ShVariableNodePtr, ArbReg> RegMap;
   RegMap m_registers;
+
+  std::vector<int> m_outputBindings;
+  std::vector<int> m_inputBindings;
 };
 
 typedef SH::ShRefCount<ArbCode> ArbCodePtr;

@@ -12,7 +12,7 @@ SH_SPECIAL_TYPE(ShTexCoord, texture coordinate);
 
 SH_SPECIAL_TYPE_TYPEDEFS(TexCoord);
 
-SH_SPECIAL_TYPE_IMPL(ShTexCoord);
+SH_SPECIAL_TYPE_IMPL(ShTexCoord, SH_VAR_TEXCOORD);
 
 }
 

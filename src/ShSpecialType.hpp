@@ -18,7 +18,7 @@
  * @param SH_TYPE_NAME_NO_SH The name of the type without the leading "Sh".
  */
 
-/** \def SH_SPECIAL_TYPE_IMPL(SH_TYPE_NAME) \
+/** \def SH_SPECIAL_TYPE_IMPL(SH_TYPE_NAME, SH_COMMENT_NAME, SH_TYPE_PARENT = ShAttrib)
  * \brief Generate code implementing the member functions of a given
  * Special Type.
  * @param SH_TYPE_NAME The type for which the member function definitions should
@@ -26,8 +26,11 @@
  */
 
 #define SH_SPECIAL_TYPE(SH_TYPE_NAME, SH_COMMENT_NAME) \
+  SH_SPECIAL_TYPE_PARENT(SH_TYPE_NAME, SH_COMMENT_NAME, ShAttrib)
+
+#define SH_SPECIAL_TYPE_PARENT(SH_TYPE_NAME, SH_COMMENT_NAME, SH_TYPE_PARENT) \
 template<int N, int Kind, typename T, bool Swizzled=false> \
-class SH_TYPE_NAME : public ShAttrib<N, Kind, T, Swizzled> { \
+class SH_TYPE_NAME : public SH_TYPE_PARENT<N, Kind, T, Swizzled> { \
 public: \
   SH_TYPE_NAME(); \
    \
@@ -61,7 +64,7 @@ public: \
   SH_TYPE_NAME<N, Kind, T, Swizzled> operator-() const; \
  \
 private: \
-  typedef ShAttrib<N, Kind, double, Swizzled> ParentType; \
+  typedef SH_TYPE_PARENT<N, Kind, double, Swizzled> ParentType; \
 }
 
 #define SH_SPECIAL_TYPE_TYPEDEF(SH_TYPE_NAME_NO_SH, SH_TYPE_SIZE) \
@@ -75,47 +78,54 @@ SH_SPECIAL_TYPE_TYPEDEF(SH_TYPE_NAME_NO_SH, 2) \
 SH_SPECIAL_TYPE_TYPEDEF(SH_TYPE_NAME_NO_SH, 3) \
 SH_SPECIAL_TYPE_TYPEDEF(SH_TYPE_NAME_NO_SH, 4) \
 
-#define SH_SPECIAL_TYPE_IMPL(SH_TYPE_NAME) \
+#define SH_SPECIAL_TYPE_IMPL(SH_TYPE_NAME, SH_TYPE_ENUM) \
  \
 template<int N, int Kind, typename T, bool Swizzled> \
 SH_TYPE_NAME<N, Kind, T, Swizzled>::SH_TYPE_NAME() \
 { \
+  m_node->specialType(SH_TYPE_ENUM); \
 } \
  \
 template<int N, int Kind, typename T, bool Swizzled> \
 SH_TYPE_NAME<N, Kind, T, Swizzled>::SH_TYPE_NAME(T t0) \
   : ParentType(t0) \
 { \
+  m_node->specialType(SH_TYPE_ENUM); \
 } \
  \
 template<int N, int Kind, typename T, bool Swizzled> \
 SH_TYPE_NAME<N, Kind, T, Swizzled>::SH_TYPE_NAME(T t0, T t1) \
   : ParentType(t0, t1) \
 { \
+  m_node->specialType(SH_TYPE_ENUM); \
 } \
  \
 template<int N, int Kind, typename T, bool Swizzled> \
 SH_TYPE_NAME<N, Kind, T, Swizzled>::SH_TYPE_NAME(T t0, T t1, T t2) \
   : ParentType(t0, t1, t2) \
 { \
+  m_node->specialType(SH_TYPE_ENUM); \
 } \
  \
 template<int N, int Kind, typename T, bool Swizzled> \
 SH_TYPE_NAME<N, Kind, T, Swizzled>::SH_TYPE_NAME(T t0, T t1, T t2, T t3) \
   : ParentType(t0, t1, t2, t3) \
 { \
+  m_node->specialType(SH_TYPE_ENUM); \
 } \
  \
 template<int N, int Kind, typename T, bool Swizzled> \
 SH_TYPE_NAME<N, Kind, T, Swizzled>::SH_TYPE_NAME(const ShVariableN<N, T>& other) \
   : ParentType(other) \
 { \
+  m_node->specialType(SH_TYPE_ENUM); \
 } \
  \
 template<int N, int Kind, typename T, bool Swizzled> \
 SH_TYPE_NAME<N, Kind, T, Swizzled>::SH_TYPE_NAME(const SH_TYPE_NAME<N, Kind, T, Swizzled>& other) \
   : ParentType(other) \
 { \
+  m_node->specialType(SH_TYPE_ENUM); \
 } \
  \
 template<int N, int Kind, typename T, bool Swizzled> \
@@ -123,6 +133,7 @@ SH_TYPE_NAME<N, Kind, T, Swizzled>::SH_TYPE_NAME(const ShVariableNodePtr& node, 
                                          const ShSwizzle& swizzle, bool neg) \
   : ParentType(node, swizzle, neg) \
 { \
+  m_node->specialType(SH_TYPE_ENUM); \
 } \
  \
 template<int N, int Kind, typename T, bool Swizzled> \

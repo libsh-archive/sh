@@ -14,12 +14,21 @@ enum ShVariableKind {
   SH_VAR_TEXTURE = 4
 };
 
+enum ShVariableSpecialType {
+  SH_VAR_ATTRIB,
+  SH_VAR_POINT,
+  SH_VAR_VECTOR,
+  SH_VAR_NORMAL,
+  SH_VAR_COLOR,
+  SH_VAR_TEXCOORD,
+  SH_VAR_POSITION
+};
 
 /** A generic n-tuple variable.
  */
 class ShVariableNode : public ShRefCountable {
 public:
-  ShVariableNode(ShVariableKind kind, int size);
+  ShVariableNode(ShVariableKind kind, int size, ShVariableSpecialType type = SH_VAR_ATTRIB);
   virtual ~ShVariableNode();
 
   bool uniform() const; ///< Is this a uniform (non-shader specific) variable?
@@ -33,6 +42,8 @@ public:
   void name(const std::string& name);
 
   ShVariableKind kind() const;
+  ShVariableSpecialType specialType() const;
+  void specialType(ShVariableSpecialType);
 
   typedef double ValueType;
   
@@ -50,6 +61,7 @@ protected:
   bool m_uniform;
   
   ShVariableKind m_kind;
+  ShVariableSpecialType m_specialType;
   int m_size;
   int m_id;
   std::string m_name;

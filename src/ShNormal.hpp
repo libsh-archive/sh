@@ -12,7 +12,7 @@ SH_SPECIAL_TYPE(ShNormal, surface normal);
 
 SH_SPECIAL_TYPE_TYPEDEFS(Normal);
 
-SH_SPECIAL_TYPE_IMPL(ShNormal);
+SH_SPECIAL_TYPE_IMPL(ShNormal, SH_VAR_NORMAL);
 
 }
 

@@ -1,3 +1,4 @@
+// -*- C++ -*-
 ShMatrix4x4f mv;
 ShShader shader = SH_BEGIN_SHADER(0) {
   ShInputAttrib4f in; NAME(in);
@@ -6,7 +7,7 @@ ShShader shader = SH_BEGIN_SHADER(0) {
   //matrix = mv | matrix;
   ShAttrib4f prod = mv | in; NAME(prod);
   //      matrix(0,1)(0,1) = mv(1,2)(1,2);
-  //      matrix[0] = ShAttrib4f(1.0, 2.0, 3.0, 4.0);
+          matrix[0] = ShAttrib4f(1.0, 2.0, 3.0, 4.0);
   /*      matrix += mv;
           matrix -= mv;
           matrix *= mv;

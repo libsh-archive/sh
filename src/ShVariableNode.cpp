@@ -5,9 +5,9 @@
 
 namespace SH {
 
-ShVariableNode::ShVariableNode(ShVariableKind kind, int size)
-  : m_uniform(!ShEnvironment::insideShader && kind != SH_VAR_TEXTURE), m_kind(kind), m_size(size),
-    m_id(m_maxID++), m_values(0)
+ShVariableNode::ShVariableNode(ShVariableKind kind, int size, ShVariableSpecialType type)
+  : m_uniform(!ShEnvironment::insideShader && kind != SH_VAR_TEXTURE), m_kind(kind), m_specialType(type),
+    m_size(size), m_id(m_maxID++), m_values(0)
 {
   if (m_kind != SH_VAR_TEXTURE && (m_uniform || m_kind == SH_VAR_CONST)) {
     m_values = new ValueType[size];
@@ -100,6 +100,16 @@ void ShVariableNode::name(const std::string& name)
 ShVariableKind ShVariableNode::kind() const
 {
   return m_kind;
+}
+
+ShVariableSpecialType ShVariableNode::specialType() const
+{
+  return m_specialType;
+}
+
+void ShVariableNode::specialType(ShVariableSpecialType type)
+{
+  m_specialType = type;
 }
 
 // TODO: also have an n-length set value, since updating the uniforms
