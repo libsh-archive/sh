@@ -11,7 +11,7 @@ int main()
     ShAttrib4f uniform(2.0, 3.0, 4.0, 5.0); NAME(uniform);
     ShAttrib4f computed; NAME(computed);
 
-    computed(3) = uniform(1) + uniform(1) - uniform(0);
+    computed(3) = uniform(1) + uniform(2) - uniform(0);
     
     SH_BEGIN_SHADER(0) {
       ShInputAttrib4f in1; NAME(in1);

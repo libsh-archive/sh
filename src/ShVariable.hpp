@@ -69,14 +69,16 @@ public:
 
   ShVariableN<N, T> operator-() const
   {
-    return ShVariableN<N, T>(m_node, !m_neg);
+    return ShVariableN<N, T>(m_node, m_swizzle, !m_neg);
   }
 
 private:
   ShVariableN(const ShVariableNodePtr& node,
+              ShSwizzle swizzle,
               bool neg)
     : ShVariable(node)
   {
+    m_swizzle = swizzle;
     m_neg = neg;
   }
 };
