@@ -1,3 +1,7 @@
+2004-03-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShVariableNode.cpp (name): Output names for InOut variables.
+
 2004-03-15  Kevin Moule <krmoule@cgl.uwaterloo.ca>
 
 	* configure.ac: Added cpu backend to AC_CONFIG_FILES
