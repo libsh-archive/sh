@@ -34,8 +34,8 @@ namespace SH {
 template<typename T>
 ShProgram keep(std::string name = "") {
   ShProgram prog = SH_BEGIN_PROGRAM() {
-    typename T::InputType SH_NAMEDECL( attr, name ); 
-    typename T::OutputType SH_NAMEDECL( out, name );
+    typename T::InputType SH_NAMEDECL(attr, name); 
+    typename T::OutputType SH_NAMEDECL(out, name);
     out = attr;
   } SH_END_PROGRAM;
   return prog;
@@ -44,7 +44,7 @@ ShProgram keep(std::string name = "") {
 template<typename T>
 ShProgram lose(std::string name = "") {
   ShProgram prog = SH_BEGIN_PROGRAM() {
-    typename T::InputType SH_NAMEDECL( attr, name );
+    typename T::InputType SH_NAMEDECL(attr, name);
     ShAttrib4f dummy = dummy;
   } SH_END_PROGRAM;
   return prog;
@@ -90,92 +90,72 @@ template<typename T, typename T2>
 ShProgram cast() {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T::InputType SH_DECL(in);
-    typename T2::OutputType SH_DECL(out); 
-    int size1 = T::typesize;
-    int size2 = T2::typesize;
-    int copySize = std::min(size1, size2);
-
-    int indices[copySize];
-    for(int i = 0; i < copySize; ++i) swiz[i] = i;
-    if( T::typesize < T2::typesize ) {
-      out<size2>(indices) = in;
-    } else {
-      out = in<size1>(indices);
-    }
-  } SH_END;
-  return nibble;
-}
-template<typename T, typename T2>
-ShProgram rcast() {
-  ShProgram nibble = SH_BEGIN_PROGRAM() {
-    typename T::InputType SH_DECL(in);
-    typename T2::OutputType SH_DECL(out); 
-    int size1 = T::typesize;
-    int size2 = T2::typesize;
-    int copySize = std::min(size1, size2);
-
-    int indices[copySize];
-    for(int i = 0; i < copySize; ++i) swiz[i] = i + size1 - copySize;
-    if( T::typesize < T2::typesize ) {
-      out<size2>(indices) = in;
-    } else {
-      out = in<size1>(indices);
-    }
+    typename T2::OutputType SH_DECL(out) = cast<T2>( in );
   } SH_END;
   return nibble;
 }
 
-#define SHNIBBLE_UNARY_OP( opfunc, opcode ) \
+#define SHNIBBLE_UNARY_OP(opfunc, opcode) \
 template<typename T>\
 ShProgram opfunc() {\
   ShProgram nibble = SH_BEGIN_PROGRAM() {\
-    typename T::InputType SH_DECL( in );\
-    typename T::OutputType SH_DECL( out ) = opcode; \
+    typename T::InputType SH_DECL(in);\
+    typename T::OutputType SH_DECL(out) = opcode; \
   } SH_END;\
   return nibble; \
 }
 
-SHNIBBLE_UNARY_OP( abs, abs(in) );
-SHNIBBLE_UNARY_OP( acos, acos(in) );
-SHNIBBLE_UNARY_OP( asin, asin(in) );
-SHNIBBLE_UNARY_OP( cos, cos(in) );
-SHNIBBLE_UNARY_OP( frac, frac(in) );
-SHNIBBLE_UNARY_OP( sin, sin(in) );
-SHNIBBLE_UNARY_OP( sqrt, sqrt(in) );
-SHNIBBLE_UNARY_OP( normalize, normalize(in) );
-SHNIBBLE_UNARY_OP( pos, pos(in) );
+SHNIBBLE_UNARY_OP(abs, abs(in));
+SHNIBBLE_UNARY_OP(acos, acos(in));
+SHNIBBLE_UNARY_OP(asin, asin(in));
+SHNIBBLE_UNARY_OP(cos, cos(in));
+SHNIBBLE_UNARY_OP(frac, frac(in));
+SHNIBBLE_UNARY_OP(sin, sin(in));
+SHNIBBLE_UNARY_OP(sqrt, sqrt(in));
+SHNIBBLE_UNARY_OP(normalize, normalize(in));
+SHNIBBLE_UNARY_OP(pos, pos(in));
 
-#define SHNIBBLE_BINARY_OP( opfunc, opcode ) \
+#define SHNIBBLE_BINARY_OP(opfunc, opcode) \
 template<typename T> \
 ShProgram opfunc() { \
   ShProgram nibble = SH_BEGIN_PROGRAM() { \
     typename T::InputType SH_DECL(a); \
     typename T::InputType SH_DECL(b); \
-    typename T::OutputType SH_DECL( result ) = opcode; \
+    typename T::OutputType SH_DECL(result) = opcode; \
   } SH_END; \
   return nibble; \
 }
 
-SHNIBBLE_BINARY_OP( add, add( a, b ) )
-SHNIBBLE_BINARY_OP( mul, mul( a, b ) )
-SHNIBBLE_BINARY_OP( div, div( a, b ) )
-SHNIBBLE_BINARY_OP( pow, pow( a, b ) )
-SHNIBBLE_BINARY_OP( slt, slt( a, b ) )
-SHNIBBLE_BINARY_OP( sle, sle( a, b ) )
-SHNIBBLE_BINARY_OP( sgt, sgt( a, b ) )
-SHNIBBLE_BINARY_OP( sge, sge( a, b ) )
-SHNIBBLE_BINARY_OP( seq, seq( a, b ) )
-SHNIBBLE_BINARY_OP( sne, sne( a, b ) )
-SHNIBBLE_BINARY_OP( fmod, fmod( a, b ) )
-SHNIBBLE_BINARY_OP( min, min( a, b ) )
-SHNIBBLE_BINARY_OP( max, max( a, b ) )
+SHNIBBLE_BINARY_OP(add, a + b)
+SHNIBBLE_BINARY_OP(mul, a * b)
+SHNIBBLE_BINARY_OP(div, a / b) 
+SHNIBBLE_BINARY_OP(pow, pow(a, b))
+SHNIBBLE_BINARY_OP(slt, a < b) 
+SHNIBBLE_BINARY_OP(sle, a <= b) 
+SHNIBBLE_BINARY_OP(sgt, a > b) 
+SHNIBBLE_BINARY_OP(sge, a >= b) 
+SHNIBBLE_BINARY_OP(seq, a == b) 
+SHNIBBLE_BINARY_OP(sne, a != b) 
+SHNIBBLE_BINARY_OP(fmod, fmod(a, b))
+SHNIBBLE_BINARY_OP(min, min(a, b))
+SHNIBBLE_BINARY_OP(max, max(a, b))
 
 template<typename T> 
 ShProgram dot() { 
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T::InputType SH_DECL(a); 
     typename T::InputType SH_DECL(b); 
-    ShAttrib1f ( result ) = dot( a, b ); 
+    ShAttrib1f (result) = dot(a, b); 
+  } SH_END; 
+}
+
+template<typename T> 
+ShProgram lerp() { 
+  ShProgram nibble = SH_BEGIN_PROGRAM() {
+    typename T::InputType SH_DECL(alpha); 
+    typename T::InputType SH_DECL(a); 
+    typename T::InputType SH_DECL(b); 
+    typename T::OutputType SH_DECL(result) = lerp(alpha, a, b); 
   } SH_END; 
 }
 

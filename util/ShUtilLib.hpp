@@ -3,7 +3,7 @@
 // Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
 // Project administrator: Michael D. McCool
 // Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+//          Bryan Chan, Michael D. McCool
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages

@@ -89,7 +89,7 @@ public:
 
   // Arbitrary Swizzle
   template<int N2>
-  ShAttrib<N2, Kind, T, true> operator()(int indices[]) const;
+  ShAttrib<N2, Kind, T, true> swiz(int indices[]) const;
 
   //@}
 

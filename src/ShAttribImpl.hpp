@@ -267,7 +267,7 @@ ShAttrib<1, Kind, T, true> ShAttrib<N, Kind, T, Swizzled>::operator()(int i1) co
 
 template<int N, int Kind, typename T, bool Swizzled>
 template<int N2>
-ShAttrib<N2, Kind, T, true> ShAttrib<N, Kind, T, Swizzled>::operator()(int indices[]) const
+ShAttrib<N2, Kind, T, true> ShAttrib<N, Kind, T, Swizzled>::swiz(int indices[]) const
 {
   return ShAttrib<N2, Kind, T, true>(m_node, m_swizzle * ShSwizzle(N, N2, indices), m_neg);
 }

@@ -92,7 +92,7 @@ public: \
   SH_TYPE_NAME<1, Kind, T, true> operator[](int) const; \
   \
   template<int N2> \
-  SH_TYPE_NAME<N2, Kind, T, true> operator()(int indices[]) const; \
+  SH_TYPE_NAME<N2, Kind, T, true> swiz(int indices[]) const; \
  \
   SH_TYPE_NAME<N, Kind, T, Swizzled> operator-() const; \
   typedef T ValueType; \
@@ -288,7 +288,7 @@ SH_TYPE_NAME<4, Kind, T, true> SH_TYPE_NAME<N, Kind, T, Swizzled>::operator()(in
 \
 template<int N, int Kind, typename T, bool Swizzled>\
 template<int N2>\
-SH_TYPE_NAME<N2, Kind, T, true> SH_TYPE_NAME<N, Kind, T, Swizzled>::operator()(int indices[]) const\
+SH_TYPE_NAME<N2, Kind, T, true> SH_TYPE_NAME<N, Kind, T, Swizzled>::swiz(int indices[]) const\
 {\
   return SH_TYPE_NAME<N2, Kind, T, true>(m_node, m_swizzle * ShSwizzle(N, N2, indices), m_neg);\
 }\

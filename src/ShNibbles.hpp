@@ -82,20 +82,9 @@ ShProgram transform( const ShMatrix<Rows, Cols, Kind, T> &m );
  * Inputs: IN(0) T in
  * Outputs: OUT(0) T2 out
  *
- * \sa rcast
  */
 template<typename T, typename T2>
 ShProgram cast();
-
-/** \brief Casting nibble
- * Casts from tuple type T to type T2
- * If T::typesize < T2::typesize, pads with 0 components at begining
- * If T::typesize > T2::typesize, truncatse components at beginning
- * Inputs: IN(0) T in
- * Outputs: OUT(0) T2 out
- */
-template<typename T, typename T2> 
-ShProgram rcast();
 
 /**@{ \brief Nibbles for unary operators
  * Inputs: IN(0) T in
@@ -137,6 +126,14 @@ template<typename T> ShProgram max();
  * Outputs: OUT(0) ShAttrib1f result 
  */
 template<typename T> ShProgram dot();
+
+/** @{ \brief Nibble for lerp operator
+ * Inputs: IN(0) T alpha
+ *         IN(1) T a
+ *         IN(2) T b
+ * Outputs: OUT(0) T result = a * alpha + b * ( 1 - alpha ) 
+ */
+template<typename T> ShProgram lerp();
 
 
 

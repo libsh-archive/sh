@@ -363,6 +363,28 @@ ShVariableN<N, T> cond(const ShVariableN<M, T>& condition, const ShVariableN<N, 
   }
 }
 
+/** Casting
+ * Casts ShAttrib type T2 to type T1.
+ * If T1::typesize < T2::typesize, pads remaining components with 0s (on right).
+ * Otherwise, discards extra components.
+ */
+template<typename T1, typename T2> 
+T1 cast( const T2 &a ) {
+  const int s1 = T1::typesize;
+  const int s2 = T2::typesize;
+  int copySize = std::min(s1, s2);
+  typename T1::TempType result;
+
+  int indices[copySize];
+  for(int i = 0; i < copySize; ++i) indices[i] = i;
+  if(s1 < s2) {
+    result = a.template swiz<s1>(indices);
+  } else {
+    result.template swiz<s2>(indices) = a;
+  }
+  return result;
+}
+
 // Fragment killing
 template<int N, typename T>
 void kill(const ShVariableN<N, T>& c)

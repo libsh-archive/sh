@@ -3,7 +3,7 @@
 // Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
 // Project administrator: Michael D. McCool
 // Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+//          Bryan Chan, Michael D. McCool
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -39,8 +39,10 @@ using namespace SH;
  */
 
 /** \brief A Perlin noise/turbulence generator.
+ * M = dimensions of the result (1 <= M <= 4 currently)
+ * P = period of the noise texture
  */
-template<int M>
+template<int M, int P = 32>
 class ShPerlin
 {
   public:
@@ -56,6 +58,9 @@ class ShPerlin
     static void init();
 };
 
+// Returns one octave of perlin noise
+template<int M, int K, typename T>
+ShVariableN<M, T> noise(const ShVariableN<K, T> &p, bool useTexture = true);
 
 // Returns M octaves of turbulence in N-dimensional space (currently 1 <= N <= 4,
 // 1 <= M <= 2, 1 <= K <= 4 is supported)
@@ -75,9 +80,7 @@ ShVariableN<M, T> turbulence(const ShVariableN<N, T> &amp,
 template<int M, int N, int K, typename T>
 ShVariableN<M, T> sturbulence(const ShVariableN<N, T> &amp, 
     const ShVariableN<K, T> &p, bool useTexture = true);
-
 }
-
 #include "ShPerlinImpl.hpp" 
 
 #endif

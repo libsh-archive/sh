@@ -3,7 +3,7 @@
 // Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
 // Project administrator: Michael D. McCool
 // Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+//          Bryan Chan, Michael D. McCool
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -251,6 +251,14 @@ ShAttrib3f ShWorley::worley(ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m ) {
   result(2) = scalarResult;
   return result;
 }
+
+ShAttrib1f ShWorley::worleyNoGradient( ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m ) {
+  ShAttrib1f scalarResult;
+  ShAttrib2f gradientResult;
+  doWorley( p, c, m, scalarResult, gradientResult );
+  return scalarResult; 
+}
+
 
 ShProgram ShWorley::worleyProgram( ShWorleyMetric m ) {
   ShProgram program = SH_BEGIN_PROGRAM() {
