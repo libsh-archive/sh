@@ -233,7 +233,7 @@ void GlslCode::emit_discard(const ShStatement& stmt)
 {
   SH_DEBUG_ASSERT(SH_OP_KIL == stmt.op);
 
-  append_line(string("if (") + resolve(stmt.src[0]) + " > 0) discard"); // missing ';'?
+  append_line(string("if (") + resolve(stmt.src[0]) + " > 0) discard");
 }
 
 void GlslCode::emit_exp(const ShStatement& stmt, double power)

@@ -1,5 +1,12 @@
 2005-03-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> osx branch
 
+	* backends/gl/GlslEmit.cpp (emit_discard): Remove an incorrect
+	comment.
+
+	* src/ShLibClampImpl.hpp: Uncommented some commented out code.
+
+	* win32/Sh.sln: Added this missing file from the trunk.
+
 	* examples/glut/Makefile.am (LDADD): Use GLUT_LIBS and GL_LIBS.
 
 	* examples/glut/main.cpp: Make this compile on Apple.
