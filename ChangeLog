@@ -1,3 +1,10 @@
+2004-11-28  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+  * src/ShHashMap.hpp (ShPairHashMap::operator()):
+	Added missing typedef.
+
+	* src/ShFractionImpl.hpp (cbrt, exp, exp2, exp10):
+	Fixed bug. 
+
 2004-11-28  Bryan Chan <b8chan@cgl.uwaterloo.ca
 	* src/ShUtility.hpp (MatchTemplateType, TemplateParamterType):
 	Added some mildly useful template voodoo. 
@@ -32,7 +39,7 @@
 
 	* the rest:
 	Search & replace lots of ShValueType back to typename 
-  Win32 build.
+  Added new files to the Win32 build scripts.
 
 2004-11-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
