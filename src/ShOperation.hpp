@@ -122,6 +122,11 @@ enum ShOperation {
   SH_OP_PHI,    ///< Used in certain range arithmetic transforms as an SSA phi function 
                 ///  This should never show up in code passed to the backend.
                 ///  Right now it is also not safe to use this in the optimizer.
+  SH_OP_ESCJOIN, ///< Acts as an assignment in hierarchical AA where error symbols
+                 /// for variables that escape a hierarchical region are merged together
+
+  SH_OP_STARTSEC, ///< Indicates the starting point of a hierarchical section
+  SH_OP_ENDSEC,  ///< Indicates the ending point of a hierarchical section
 
   // Streams
   SH_OP_FETCH, ///< Unary (takes a stream). Fetch an element from a stream. Similar to TEX
@@ -134,12 +139,23 @@ enum ShOperation {
   SH_OP_LO,  ///< Extracts a lower bound from a range arithmetic type
   SH_OP_HI,  ///< Extracts an upper bound from a range arithmetic type
   SH_OP_WIDTH, ///< Returns the width of a range type 
+  SH_OP_RADIUS, ///< Returns the radius = width/2 of a range type 
   SH_OP_CENTER, ///< Returns the center of a range type 
 
   SH_OP_IVAL, ///< Make an interval out of the given lower bound (src[0]) and upper bound (src[1])
   SH_OP_UNION, ///< Union two ranges 
   SH_OP_ISCT, ///< Intersect two ranges 
   SH_OP_CONTAINS, ///< Intersect two ranges 
+
+  SH_OP_ERRFROM, ///< Binary operation, returns affine error in src[0] due to src[1]
+               /// Result is an affine term centered at 0 containing the
+               /// appropriate error terms. 
+               
+  SH_OP_LASTERR, ///< Like err_from, but returns just the magnitudes from the last error term in src[1],
+                ///< src[1] must be scalar
+
+  SH_OP_COMMENT, ///< For internal use.  Stores a comment at this point in the IR.
+                 ///< Statements of this kind MUST have a ShInfoComment attached
 
   SH_OPERATION_END, ///< End of List marker.  Not an actual op
 };

@@ -932,6 +932,7 @@ void propagate_constants(ShProgram& p)
 
     for (ValueTracking::DefUseChain::iterator use = vt->uses[def.index].begin();
          use != vt->uses[def.index].end(); ++use) {
+      if (use->kind != ValueTracking::Use::STMT) continue;
       ConstProp* cp = use->stmt->get_info<ConstProp>();
       if (!cp) {
 #ifdef SH_DEBUG_CONSTPROP

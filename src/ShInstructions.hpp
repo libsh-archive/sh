@@ -153,6 +153,9 @@ SH_DLLEXPORT
 void shWIDTH(const ShVariable& dest, const ShVariable& a);
 
 SH_DLLEXPORT
+void shRADIUS(const ShVariable& dest, const ShVariable& a);
+
+SH_DLLEXPORT
 void shCENTER(const ShVariable& dest, const ShVariable& a);
 
 SH_DLLEXPORT
@@ -166,6 +169,12 @@ void shISCT(const ShVariable& dest, const ShVariable& a, const ShVariable& b);
 
 SH_DLLEXPORT
 void shCONTAINS(const ShVariable& dest, const ShVariable& a, const ShVariable& b);
+
+SH_DLLEXPORT
+void shERRFROM(const ShVariable& dest, const ShVariable& a, const ShVariable& b);
+
+SH_DLLEXPORT
+void shLASTERR(const ShVariable& dest, const ShVariable& a, const ShVariable& b);
 
 
 SH_DLLEXPORT

@@ -1,3 +1,107 @@
+2004-01-24 Bryan Chan <b8chan@cgl.uwaterloo.ca>
+Change to merge back to trunk:
+  * src/ShTransformer.cpp (StatementSplitter::updateStatement):
+  Long-tuple handling for CSUM, CMUL
+
+  * backends/gl/ArbEmit.cpp (emit_csum):
+  Fixed variant problem here.
+
+	* sh/src/ShVariableNode.cpp (ShVariable - clone constructor):
+	Fixed how keepUniform behaves.
+
+	* src/ShRecStream.hpp:
+	Contains functions to interface between	ShRecord and ShStream.   
+	May not be suitable for merging.  
+
+	* src/ShStorageType.hpp (SH_VALUETYPE_SPECIAL_NONE):
+	Changed this constant to the correct value
+
+Affine Arithmetic Updates:
+	A) Hierarchical Affine Arithmetic 
+		* src/ShParser.hpp ShParser.cpp (parseSection),
+			src/ShOperation.hpp ShOperation.cpp (SH_OP_STARTSEC, SH_OP_ENDSEC),
+			src/ShToken.hpp (SH_TOKEN_STARTSEC, SH_TOKEN_ENDSEC):
+		Added user-defined hierarchical block specifiers (SH_BEGIN_SECTION, SH_END_SECTION)
+		Added dummy statements STARTSEC and ENDSEC that may only appear at the
+		beginning and end of a cfg node respectively to bracket sections (*).
+
+		* src/ShOptimizations.cpp (Straightener):
+		Changed to maintain STARTSEC/ENDSEC invariant (*).
+
+		* src/ShOptimizations.hpp, ShValueTracking.cpp:
+		Now generates tuple du chains for inputs, ud chains for outputs.  
+		(Needed to easily determine what static symbols make it to the outputs)
+
+		* src/ShStructural.hpp, src/ShStructural.cpp (ShStructural ctor):
+		Added a SECTION as a "special" kind of BLOCK structure for user-marked 
+		hierarchical sections. (perhaps should just use BLOCK though, but for 
+		now this is the easy thing to do to differentiate the two)
+
+		* src/ShSectionUtil.hpp, src/ShSectionUtil.cpp:
+		Several useful utility functions on nested sections.
+		(Get nesting levels, postorder index ranges, etc.)
+		
+		* src/ShAaHier.hpp, ShAaHier.cpp:
+		Per section input/escape analysis.
+
+		* src/ShAaSymPlacer.cpp (placeAaSyms)
+			src/ShAaOpHandler.cpp:
+			Updated static noise symbol assignment to handle hierarchy.
+			Updated op handler to merge noise symbols as required at the end
+			of hierarchical sections.
+			(Merging is quite dumb right now.  To make tighter bounds,
+			will need to write up some linear programming code perhaps) 
+	
+
+	B) Analysis Framework 
+		* src/ShInclusion.hpp, ShInclusion.cpp (add_stmt_indices, ShStmtIndex),
+			ShAaSymPlacer.cpp (SymInit::handleStmt):
+			Tags stmts with int indices, for mapping structures btw the affine
+			program and non-affine program.
+
+		* src/ShAaScanCore.hpp, ShAaScanCore.cpp (ShAaScanCore):
+			Does the heavy lifting for analysis. 
+			Currently allows passing in a stream of ranges for one input,
+			and using default range metadata for the rest of the inputs.
+			(Very easy to extend to streams for multiple inputs).
+	
+		* src/ShAaScanErr.hpp (shAaScanLightnessErr):
+			Functions that generate a per-statement error value go here.
+			Currently only implemented one generates a lightness error 
+			(perceived luminance) without domain splitting.
+	
+		@todo - DOT visualization of error results
+		@todo - Basic greedy simplification candidate selector 
+		@todo - GUI for display program hierarchy tree and tweaking simplification selection results 
+	
+	C) Other 
+		* src/ShAaVariable.hpp, src/ShAaVariable.cpp:
+		Added a packed representation (all noise syms in one tuple) instead of one 
+		noise sym tuple per each original tuple element.
+
+		* src/ShAaOps.cpp, ShAaOpHandler.cpp:
+		Added a few more op transformations (LOG family, EXP family, RCP, LRP, SQRT, POW).
+
+		* src/ShOperation.hpp, ShOperation.cpp, (SH_OP_ERRFROM, SH_OP_LASTERR)
+			ShLibRange.hpp ShLibRangeImpl.hpp (affine_errfrom)
+			ShAaSymPlacer.cpp (updateDest)
+			ShAaOpHandler.cpp (getProgram):
+		Added two functions (errfrom, lasterr) that extract certain noise symbols.
+		Good for debugging, normal usage of AA (but mostly pointless for analysis).
+
+		* examples/graph/main.cpp:
+		Updated to test newly added functions.  Now displays both affine and interval
+		results on the same graph for comparison.
+
+		* src/ShOptimizations.cpp, ShValueTracking.cpp:
+		Made some changes to handle stmts with no dests, more than 3 srcs.
+
+		* src/ShTransformer.cpp (stripDummyOps):
+		Strips dummy ops (comments, section markers, internal affine stuff) from the
+		IR before final compilation. 
+
+	
+
 2004-01-11 Bryan Chan <b8chan@cgl.uwaterloo.ca>
 Probably should have checked a good chunk of this in a month ago...ah well.
 
@@ -150,8 +254,6 @@ IA/AA changes:
 
 		* examples/graph:
 		Cheesy 2D function plotter that also displays range arithmetic bounds for debugging.
-		Works fine, except @todo affine version shouldn't convert ranges to IA before
-		rendering bounds. 
 
 		Both examples demonstrate the use of the inclusion and affine_inclusion
 		transformers to convert a standard function into equivalent range arithmetic

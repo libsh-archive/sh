@@ -32,20 +32,23 @@
 #include <iosfwd>
 #include "ShDllExport.hpp"
 #include "ShRefCount.hpp"
+#include "ShInfo.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShVariable.hpp"
+#include "ShStatement.hpp"
 
 namespace SH {
 
 class
-SH_DLLEXPORT ShStructuralNode : public ShRefCountable {
+SH_DLLEXPORT ShStructuralNode : public virtual ShRefCountable /*, public virtual ShInfo */ {
 public:
   friend class ShStructural;
   
   enum NodeType {
     UNREDUCED,
     BLOCK,
-    IF,
+    SECTION,
+    IF, ///< never used - we only make ifelses
     IFELSE,
     SELFLOOP,
     WHILELOOP
@@ -76,6 +79,13 @@ public:
   PredecessorList preds;
 
   // Functions to access underlying CFG structure
+  
+  /** Flags whether entry is marked by a STARTSEC and
+   * exit marked by an ENDSEC that has not already been
+   * handled in a SECTION reduced block 
+   * Remember to set these when building reduced nodes */
+  ShStatement *secStart, *secEnd; 
+ 
  
   /** Describes a cfg edge.
    * Used in searching for cfg edges that match criteria in the structural

@@ -86,7 +86,9 @@ ShVariableNode::ShVariableNode(const ShVariableNode& old, ShBindingType newKind,
     m_variant(0),
     m_eval(new ShVariableNodeEval)
 {
-  if(!keepUniform) m_uniform = false;
+  if(!keepUniform) {
+    m_uniform = !ShContext::current()->parsing() && m_kind == SH_TEMP;
+  }
 
   if(m_uniform || m_kind == SH_CONST) addVariant(); 
   if(updateVarList) programVarListInit();
@@ -209,6 +211,11 @@ std::string ShVariableNode::name() const
   return stream.str();
 }
 
+bool ShVariableNode::hasRange()
+{
+  return has_meta("lowBound") && has_meta("highBound");
+}
+
 void ShVariableNode::rangeVariant(const ShVariant* low, const ShVariant* high) 
 {
   meta("lowBound", low->encode(0, m_size));
@@ -326,6 +333,12 @@ void ShVariableNode::setVariant(ShVariantCPtr other, bool neg, const ShSwizzle &
 const ShVariant* ShVariableNode::getVariant() const
 {
   return m_variant.object();
+}
+
+void ShVariableNode::changeVariant(ShVariantPtr other)
+{
+  SH_DEBUG_ASSERT(other && other->size() == size() && other->valueType() == m_valueType); 
+  m_variant = other;
 }
 
 ShVariant* ShVariableNode::getVariant() 

@@ -25,9 +25,15 @@
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
 #include <iostream>
+#include "ShInclusion.hpp"
 #include "ShStatement.hpp"
 
 namespace SH {
+
+ShStatement::ShStatement(ShOperation op)
+  : src(3), op(op), marked(false)
+{
+}
 
 ShStatement::ShStatement(ShVariable dest, ShOperation op)
   : dest(dest), src(3), op(op), marked(false)
@@ -63,18 +69,27 @@ ShStatement::ShStatement(ShVariable dest, ShOperation op, ShVariable src0, ShVar
 
 std::ostream& operator<<(std::ostream& out, const ShStatement& stmt)
 {
+  if(stmt.op == SH_OP_COMMENT) return out;
   ShStatement::dumpVar(out, stmt.dest) << " := ";
   if(stmt.op != SH_OP_ASN) out << opInfo[stmt.op].name << " ";
   for(int i = 0; i < opInfo[stmt.op].arity; ++i) {
     if(i != 0) out << ", ";
     ShStatement::dumpVar(out, stmt.src[i]); 
   }
+  const ShStmtIndex* idx = stmt.get_info<ShStmtIndex>();
+  if(idx) {
+    out << " # " << idx->index();
+  }
   return out;
 }
 
 std::ostream& ShStatement::dumpVar(std::ostream &out, const ShVariable& var)
 {
-  out << (var.neg() ? "-" : "") << var.name() << var.swizzle();
+  if(var.null()) {
+    out << "[null]";
+  } else {
+    out << (var.neg() ? "-" : "") << var.name() << var.swizzle();
+  }
   return out;
 }
 

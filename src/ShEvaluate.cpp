@@ -8,6 +8,7 @@ namespace SH {
 
 void evaluate(ShStatement& stmt)
 {
+  if(stmt.dest.null()) return;
   // TODO: Maybe not do this _every_ time we call evaluate...
   stmt.dest.node()->addVariant();
   int arity = opInfo[stmt.op].arity;

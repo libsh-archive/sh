@@ -42,6 +42,7 @@
 #include "ShError.hpp"
 #include "ShTypeInfo.hpp"
 #include "ShVariant.hpp"
+#include "ShTransformer.hpp"
 
 #ifdef DO_PBUFFER_TIMING
 #include <sys/time.h>
@@ -343,6 +344,13 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   // Add in the texcoord variable
   ShProgram fp = ShProgram(shref_const_cast<ShProgramNode>(program))
     & lose<ShTexCoord2f>("streamcoord");
+
+  // Handle affine conversion first
+  ShContext::current()->enter(fp.node());
+  ShTransformer transform(fp.node());
+  transform.convertInputOutput();
+  transform.convertAffineTypes();
+  ShContext::current()->exit();
 
   // Make it a fragment program
   fp.node()->target() = "gpu:fragment";

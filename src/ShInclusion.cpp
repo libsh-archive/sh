@@ -46,9 +46,16 @@
 
 namespace {
 
+using namespace SH;
+
 #define SH_DEBUG_INCL
 
-using namespace SH;
+void dump(ShProgram a, const char* name) {
+#ifdef SH_DEBUG_INCL
+    a.node()->dump(name);
+#endif
+}
+
 
 
 #if 0
@@ -95,6 +102,43 @@ AffineInfo::RangeTexMapping AffineInfo::rangeTexMap;
 }
 
 namespace SH  {
+
+unsigned long long ShStmtIndex::cur_index = 0;
+
+ShStmtIndex::ShStmtIndex()
+  : m_index(cur_index++) 
+{}
+
+ShInfo* ShStmtIndex::clone() const
+{
+  return new ShStmtIndex(*this);
+}
+
+long long ShStmtIndex::index() const
+{
+  return m_index;
+}
+
+bool ShStmtIndex::operator<(const ShStmtIndex& other) const
+{
+  return m_index < other.m_index;
+}
+
+struct StmtIndexAdderBase: public ShTransformerParent {
+  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr cfg_node)
+  {
+    if(!I->get_info<ShStmtIndex>()) {
+      I->add_info(new ShStmtIndex());
+    }
+    return false;
+  }
+};
+typedef ShDefaultTransformer<StmtIndexAdderBase> StmtIndexAdder;
+
+void add_stmt_indices(ShProgram a) {
+  StmtIndexAdder sia;
+  sia.transform(a.node());
+}
 
 /* isInterval detector
  * regular -> interval mapping
@@ -281,10 +325,9 @@ typedef ShDefaultTransformer<AffineOutputToIntervalBase> AffineOutputToInterval;
 // FloatToIntervalConverter to p 
 ShProgram inclusion(ShProgram a)
 {
+  add_stmt_indices(a);
   ShProgram result(a.node()->clone());
-#ifdef SH_DEBUG_INCL
-  result.node()->dump("inclusion_start");
-#endif
+  dump(result,"inclusion_start");
 
   ShContext::current()->enter(result.node());
     FloatToIntervalConverter ftic;
@@ -293,44 +336,39 @@ ShProgram inclusion(ShProgram a)
     optimize(result);
   ShContext::current()->exit();
 
-#ifdef SH_DEBUG_INCL
-  result.node()->dump("inclusion_done");
-#endif
+  dump(result, "inclusion_done");
   return result;
 }
 
 ShProgram affine_inclusion(ShProgram a)
 {
+  ShProgram result = affine_inclusion_syms(a);
+  affine_to_interval_inputs(result);
+  affine_to_interval_outputs(result);
+  return result;
+}
+
+ShProgram affine_inclusion_syms(ShProgram a)
+{
+  add_stmt_indices(a);
   ShProgram result(a.node()->clone());
-#ifdef SH_DEBUG_INCL
-  result.node()->dump("aaincl_start");
-#endif
+  dump(result, "aaincl_start");
 
   ShContext::current()->enter(result.node());
     FloatToAffineConverter ftac;
     ftac.transform(result.node());
-#ifdef SH_DEBUG_INCL
-  result.node()->dump("aaincl_ftac");
-#endif
-
-    affine_to_interval_inputs(result);
-    affine_to_interval_outputs(result);
-
-    fixRangeBranches(result);
+  dump(result, "aaincl_ftac");
+    //fixRangeBranches(result);
     optimize(result);
   ShContext::current()->exit();
 
-#ifdef SH_DEBUG_INCL
-  result.node()->dump("aaincl_done");
-#endif
+  dump(result, "aaincl_done");
   return result;
 }
 
 void affine_to_interval_inputs(ShProgram a)
 {
-#ifdef SH_DEBUG_INCL 
-  a.node()->dump("atoi_inputs_start");
-#endif
+  dump(a, "atoi_inputs_start");
 
   int oldOptimization = ShContext::current()->optimization();
   ShContext::current()->optimization(0);
@@ -339,16 +377,12 @@ void affine_to_interval_inputs(ShProgram a)
     aii.transform(a.node());
   ShContext::current()->exit();
   ShContext::current()->optimization(oldOptimization);
-#ifdef SH_DEBUG_INCL 
-  a.node()->dump("atoi_inputs_done");
-#endif
+  dump(a, "atoi_inputs_done");
 }
 
 void affine_to_interval_outputs(ShProgram a)
 {
-#ifdef SH_DEBUG_INCL 
-  a.node()->dump("atoi_outputs_start");
-#endif
+  dump(a, "atoi_outputs_start");
   int oldOptimization = ShContext::current()->optimization();
   ShContext::current()->optimization(0);
   ShContext::current()->enter(a.node());
@@ -356,9 +390,7 @@ void affine_to_interval_outputs(ShProgram a)
     aii.transform(a.node());
   ShContext::current()->exit();
   ShContext::current()->optimization(oldOptimization);
-#ifdef SH_DEBUG_INCL 
-  a.node()->dump("atoi_outputs_done");
-#endif
+  dump(a, "atoi_outputs_done");
 }
 
 // @todo range - add something after affine_inclusion to 

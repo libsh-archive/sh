@@ -53,7 +53,7 @@ SH_DLLEXPORT
 ShInfoComment: public ShInfo {
 public:
   ShInfoComment(const std::string& comment); 
-  ShInfo* ShInfoComment::clone() const;
+  ShInfo* clone() const;
 
   std::string comment; 
 };
@@ -66,8 +66,6 @@ public:
 class
 SH_DLLEXPORT ShInfoHolder {
 public:
-  typedef std::list<ShInfo*> InfoList;
-  InfoList info;
 
   ShInfoHolder();
 
@@ -98,6 +96,12 @@ public:
   // Remove the given statement information from the list.
   // Does not delete it, so be careful!
   void remove_info(ShInfo* old_info);
+
+private:
+  void erase_all();
+
+  typedef std::list<ShInfo*> InfoList;
+  InfoList info;
 
 };
 

@@ -54,6 +54,7 @@ struct ShConcreteRangeOp<op, T1, T2> {\
 SHCIO_UNARY_OP(SH_OP_LO, (*D) = A->lo());
 SHCIO_UNARY_OP(SH_OP_HI, (*D) = A->hi());
 SHCIO_UNARY_OP(SH_OP_WIDTH, (*D) = A->width());
+SHCIO_UNARY_OP(SH_OP_RADIUS, (*D) = A->radius());
 SHCIO_UNARY_OP(SH_OP_CENTER, (*D) = A->center());
 
 SHCIO_BINARY_OP(SH_OP_IVAL, ((*D).lo() = (*A), (*D).hi() = (*B)));

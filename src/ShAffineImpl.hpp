@@ -862,6 +862,14 @@ ShAffine<TT> pow(const ShAffine<TT>& a, const ShAffine<TT>& b)
 }
 
 template<typename TT>
+ShAffine<TT> pow(const ShAffine<TT>& a,  const TT& b) 
+{
+  // @todo check if this is optimal
+  // @todo do integer special cases? - see NuS.cc
+  return exp(log(a)*b);
+}
+
+template<typename TT>
 struct __sh_aa_rcp {
   static const bool use_fdf = false;
   static TT f(TT x) { return 1.0 / x; }

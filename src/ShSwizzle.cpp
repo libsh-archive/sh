@@ -42,7 +42,7 @@ ShSwizzle::ShSwizzle(const ShSwizzle& other, int n)
       m_index.ptr[j] = other[j];
     }
     for(i = 1; i < n; ++i) for(j = 0; j < other.m_size; ++j) {
-      m_index.ptr[i * n + j] = m_index.ptr[j];
+      m_index.ptr[i * other.m_size + j] = m_index.ptr[j];
     }
   } else {
     SH_DEBUG_ASSERT(other.local());

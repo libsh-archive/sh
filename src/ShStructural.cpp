@@ -45,6 +45,7 @@ namespace {
 const char* nodetypename[] ={
   "CFGNODE",
   "BLOCK",
+  "SECTION",
   "IF",
   "IFELSE",
   "SELFLOOP",
@@ -166,14 +167,26 @@ ShStructuralNode::ShStructuralNode(const ShCtrlGraphNodePtr& node)
   : type(UNREDUCED),
     container(0),
     cfg_node(node),
+    secStart(0),
+    secEnd(0), 
     parent(0)
 {
+  if(node->block && !node->block->empty()) {
+    if(node->block->begin()->op == SH_OP_STARTSEC) {
+      secStart = &*node->block->begin();
+    }
+    if(node->block->rbegin()->op == SH_OP_ENDSEC) {
+      secEnd = &*node->block->rbegin();
+    }
+  }
 }
 
 ShStructuralNode::ShStructuralNode(NodeType type)
   : type(type),
     container(0),
     cfg_node(0),
+    secStart(0),
+    secEnd(0),
     parent(0)
 {
 }
@@ -389,15 +402,54 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
         }
         if (s && n != node) nodeset.push_front(n);
 
-        if (nodeset.size() >= 2) {
-          SH_STR_DEBUG_PRINT("FOUND BLOCK of size " << nodeset.size());
-          for (NodeSet::iterator I = nodeset.begin(); I != nodeset.end(); ++I) {
-            SH_STR_DEBUG_PRINT("  node " << I->object());
+        // search for a section
+        // find the last START (if there is one)
+        // the next END after that must represent a SECTION
+        NodeSet::iterator S, E;
+        for(S = nodeset.end(); !newnode && S != nodeset.begin();) {
+          --S;
+          if((*S)->secStart) {
+            for(E = S;; ++E) {
+              if(E == nodeset.end()) {
+                SH_STR_DEBUG_PRINT("Found STARTSEC with no ENDSEC!");
+                SH_DEBUG_ASSERT(0);
+                break;
+              }
+
+              // great...have a section, erase other nodes, and make a newnode
+              if((*E)->secEnd) { 
+                newnode = new ShStructuralNode(ShStructuralNode::SECTION);
+                // @todo range - do we need to check if these are empty
+                // ranges?
+                ++E;
+                nodeset.erase(E, nodeset.end());
+                nodeset.erase(nodeset.begin(), S);
+                SH_STR_DEBUG_PRINT("FOUND SECTION of size " << nodeset.size());
+                for (NodeSet::iterator I = nodeset.begin(); I != nodeset.end(); ++I) {
+                  SH_STR_DEBUG_PRINT("  node " << I->object());
+                }
+                break;
+              }
+            }
+            break;
           }
-          //node = n.object();
-          newnode = new ShStructuralNode(ShStructuralNode::BLOCK);
-        } else {
-          nodeset.clear();
+        }
+
+        // otherwise may be block
+        if(!newnode) {
+          if (nodeset.size() >= 2) {
+            SH_STR_DEBUG_PRINT("FOUND BLOCK of size " << nodeset.size());
+            for (NodeSet::iterator I = nodeset.begin(); I != nodeset.end(); ++I) {
+              SH_STR_DEBUG_PRINT("  node " << I->object());
+            }
+            //node = n.object();
+            newnode = new ShStructuralNode(ShStructuralNode::BLOCK);
+            newnode->secStart = nodeset.front()->secStart;
+            newnode->secEnd = nodeset.back()->secEnd;
+            SH_DEBUG_ASSERT(!(newnode->secStart && newnode->secEnd));
+          } else {
+            nodeset.clear();
+          }
         }
       } else {
         SH_STR_DEBUG_PRINT("Not a block. |succs| = " << node->succs.size());
@@ -422,6 +474,7 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
           nodeset.push_back(m);
           nodeset.push_back(n);
           newnode = new ShStructuralNode(ShStructuralNode::IFELSE);
+          newnode->secStart = node->secStart;
         }
       }
 
@@ -464,12 +517,14 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
             nodeset.push_back(node);
             nodeset.push_back(S->second);
             newnode = new ShStructuralNode(ShStructuralNode::WHILELOOP);
+            SH_DEBUG_ASSERT(!(node->secStart || S->second->secEnd));
             break;
           }
           // self loop?
           if (S->second == node) {
             nodeset.push_back(node);
             newnode = new ShStructuralNode(ShStructuralNode::SELFLOOP);
+            SH_DEBUG_ASSERT(!(node->secStart || node->secEnd));
             break;
           }
         }

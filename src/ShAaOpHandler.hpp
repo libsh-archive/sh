@@ -28,6 +28,7 @@
 #define SHAAOPHANDLER_HPP
 
 #include "ShProgram.hpp"
+#include "ShAaVariable.hpp"
 #include "ShDllExport.hpp"
 
 namespace SH {

@@ -6,7 +6,7 @@ CPPFLAGS = -I../../src
 #CXXFLAGS = -g -O0 -Wall
 CXX=g++ 
 CXXFLAGS = -g -Wall -DSH_DEBUG
-LDFLAGS = ../../src/libsh.la 
+LDFLAGS = ../../src/libsh.la -lGL -lGLU
 
 # LDFLAGS = ../../src/libsh.la
 

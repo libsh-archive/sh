@@ -379,6 +379,7 @@ namespace ShCc {
     transform.convertAffineTypes();
     transform.convertIntervalTypes();
     transform.convertToFloat(m_convertMap);
+    transform.stripDummyOps();
     if(transform.changed()) {
       optimize(m_program);
     } else {

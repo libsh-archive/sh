@@ -288,12 +288,34 @@ SHINST_TERNARY_OP(COND,
 SHINST_UNARY_OP(LO);
 SHINST_UNARY_OP(HI);
 SHINST_UNARY_OP(WIDTH);
+SHINST_UNARY_OP(RADIUS);
 SHINST_UNARY_OP(CENTER);
 
 SHINST_BINARY_OP(IVAL, true, true);
 SHINST_BINARY_OP(UNION, true, true);
 SHINST_BINARY_OP(ISCT, true, true);
 SHINST_BINARY_OP(CONTAINS, true, true);
+
+void shERRFROM(const ShVariable& dest, const ShVariable& a, const ShVariable& b)
+{
+  sizes_match(dest, a);
+  if(immediate()) {
+    shError(ShScopeException("Cannot compute affine err_from right now in immediate mode")); 
+  }
+  ShStatement stmt(dest, a, SH_OP_ERRFROM, b);
+  addStatement(stmt);
+}
+
+void shLASTERR(const ShVariable& dest, const ShVariable& a, const ShVariable& b)
+{
+  sizes_match(dest, a);
+  SH_DEBUG_ASSERT(b.size() == 1);
+  if(immediate()) {
+    shError(ShScopeException("Cannot compute affine lasterr right now in immediate mode")); 
+  }
+  ShStatement stmt(dest, a, SH_OP_LASTERR, b);
+  addStatement(stmt);
+}
 
 void shKIL(const ShVariable& a)
 {

@@ -62,7 +62,6 @@ void ShInfoHolder::destroy_info()
     T* item = dynamic_cast<T*>(*I);
     if (item) {
       I = info.erase(I);
-      delete item;
     } else {
       ++I;
     }

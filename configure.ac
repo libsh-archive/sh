@@ -7,7 +7,7 @@ AM_CONFIG_HEADER(config.h)
 
 # Checks for programs.
 if test "x$CXXFLAGS" = x ; then
-    CXXFLAGS="-Wall -g -O2"
+    CXXFLAGS="-Wall -g" 
 fi
 
 AC_PROG_CXX

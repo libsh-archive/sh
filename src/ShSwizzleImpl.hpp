@@ -119,6 +119,7 @@ inline ShSwizzle::ShSwizzle(int srcSize, int size, int* indices)
   : m_srcSize(srcSize),
     m_size(size)
 {
+  SH_DEBUG_ASSERT(size > 0);
   int i;
   for (i = 0; i < size; i++) checkSrcSize(indices[i]);
   if(alloc()) {

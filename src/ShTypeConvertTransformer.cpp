@@ -248,6 +248,7 @@ struct FloatConverter {
   // Adds required conversions for statment *I
   void fixStatement(ShBasicBlock::ShStmtList &stmtList, const ShBasicBlock::ShStmtList::iterator &I) {
     ShStatement &stmt = *I;
+    if(stmt.dest.null()) return;
 #ifdef SH_DEBUG_TYPECONVERT
     SH_DEBUG_PRINT("Checking a statement op=" << opInfo[stmt.op].name);
 #endif

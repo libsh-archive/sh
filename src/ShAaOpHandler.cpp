@@ -38,7 +38,10 @@
 #include "ShAaOps.hpp"
 #include "ShAaOpHandler.hpp"
 
+#ifdef SH_DBG_AA
 #define SH_DEBUG_AAOPHANDLER
+#endif
+//#define SH_DEBUG_AAOPHANDLER
 
 #ifdef SH_DEBUG_AAOPHANDLER
 #define SH_DEBUG_PRINT_AHO(x) { SH_DEBUG_PRINT(x) }
@@ -117,11 +120,15 @@ struct SymAllocator {
 
         // if the variable is used in the program, then it should be in vars as
         // well and we need to do an assignment from output to temp
-        if(progSyms->vars.find(node) == progSyms->vars.end()) continue;
+        if(progSyms->vars.find(node) == progSyms->vars.end()) {
+          SH_DEBUG_PRINT("Output was not initialized");
+          SH_DEBUG_PRINT("  " << (*I)->name());
+          continue;
+        }
         ShAaVariable outputVar(outputAaNode);
         ShAaVariable tempVar(m_nodes[node]);
-        outputVar.ZERO();
-        outputVar.ASN(tempVar);
+        // @todo range not necessary - outputVar.ZERO();
+        outputVar.ASN(tempVar, outputSyms);
       }
     } SH_END;
     m_program->ctrlGraph->append(outputMapper.node()->ctrlGraph);
@@ -148,7 +155,7 @@ struct SymAllocator {
     SH_DEBUG_ASSERT(m_nodes.find(var.node()) != m_nodes.end());
 
     ShAaVariableNodePtr node = m_nodes[var.node()];
-    return ShAaVariable(node, var.swizzle(), var.neg(), &use); 
+    return ShAaVariable(node, var.swizzle(), var.neg(), use); 
   }
 
   ShAaVariable operator()(const ShVariable& var) {
@@ -157,10 +164,14 @@ struct SymAllocator {
       SH_DEBUG_ASSERT(0);
     }
     SH_DEBUG_PRINT_AHO("alloc - lookup on " << var.name());
-    SH_DEBUG_ASSERT(var.swizzle().identity());
 
     ShAaVariableNodePtr node = m_nodes[var.node()];
-    return ShAaVariable(node, var.swizzle(), var.neg(), &node->syms()); 
+    if(var.swizzle().identity()) {
+      return ShAaVariable(node, var.swizzle(), var.neg(), node->syms()); 
+    } else {
+      return ShAaVariable(node, var.swizzle(), var.neg(), 
+          node->syms().swizSyms(var.swizzle())); 
+    }
   }
   // @}
 
@@ -171,6 +182,10 @@ struct SymAllocator {
     AaNodeMap m_nodes; 
 };
 
+/* Returns a program representing the affine computation for a given statement.
+ * (Must be a statement that can be translated (not one of the special null dest
+ * ones))
+ */
 ShProgram getProgram(ShStatement& stmt, SymAllocator& alloc) {
   const ShAaStmtSyms *stmtSyms = stmt.get_info<ShAaStmtSyms>();
   if(!stmtSyms) {
@@ -197,12 +212,22 @@ ShProgram getProgram(ShStatement& stmt, SymAllocator& alloc) {
         SH_DEBUG_ASSERT(shIsAffine(stmt.src[0].valueType()));
         shASN(stmt.dest, alloc(stmt.src[0]).width()); 
         break;
+      case SH_OP_RADIUS: 
+        SH_DEBUG_ASSERT(shIsAffine(stmt.src[0].valueType()));
+        shASN(stmt.dest, alloc(stmt.src[0]).radius()); 
+        break;
       case SH_OP_CENTER: 
         SH_DEBUG_ASSERT(shIsAffine(stmt.src[0].valueType()));
         shASN(stmt.dest, alloc(stmt.src[0]).center()); 
         break;
       case SH_OP_IVAL:
         alloc(stmt.dest).ASN(aaIVAL(stmt.src[0], stmt.src[1], stmtSyms->newdest));
+        break;
+      case SH_OP_LASTERR:
+        {
+          SH_DEBUG_ASSERT(shIsRegularValueType(stmt.dest.valueType()));
+          shASN(stmt.dest, aaLASTERR(alloc(stmt.src[0], stmtSyms->src[0]), stmtSyms->src[1])); 
+        }
         break;
       case SH_OP_ASN:
         if(shIsAffine(stmt.dest.valueType())) {
@@ -212,7 +237,12 @@ ShProgram getProgram(ShStatement& stmt, SymAllocator& alloc) {
           } else if (shIsInterval(srcvt)) { // assign to new errsyms
             alloc(stmt.dest).ASN(aaFROMIVAL(stmt.src[0], stmtSyms->newdest));
           } else { //  
-            SH_DEBUG_ASSERT(shIsRegularValueType(stmt.src[0].valueType()));
+            if(!shIsRegularValueType(srcvt)) {
+              SH_DEBUG_PRINT("Expecting regular src[0], actual type = "
+                  << srcvt << " " << shValueTypeName(srcvt) 
+                  << " stmt = " << stmt);
+              SH_DEBUG_ASSERT(0);
+            }
             shASN(alloc(stmt.dest).center(), stmt.src[0]);
           }
         } else if(shIsInterval(stmt.dest.valueType())) {
@@ -221,6 +251,7 @@ ShProgram getProgram(ShStatement& stmt, SymAllocator& alloc) {
         } else { 
           SH_DEBUG_ASSERT(shIsAffine(stmt.src[0].valueType()));
           // shouldn't be here...this ASN doesn't work.
+          SH_DEBUG_PRINT("Offensive statement: " << stmt);
           SH_DEBUG_ASSERT(0 && "It's the end of the world! Is your data properly backed up off-site?");
         }
         break;
@@ -292,31 +323,39 @@ ShProgram getProgram(ShStatement& stmt, SymAllocator& alloc) {
       case SH_OP_CSUM:   return affineCSUM(N, valueType);
 #endif
       case SH_OP_DOT:   dest.ASN(aaDOT(src[0], src[1], stmtSyms->newdest)); break; 
+      case SH_OP_EXP:   dest.ASN(aaEXP(src[0], stmtSyms->newdest)); break; 
+      case SH_OP_EXP2:  dest.ASN(aaEXP2(src[0], stmtSyms->newdest)); break;  
+      case SH_OP_EXP10: dest.ASN(aaEXP10(src[0], stmtSyms->newdest)); break;   
 #if 0
-      case SH_OP_EXP:   return affineBinaryMonotonic<SH_OP_EXP>(N, valueType);
-      case SH_OP_EXP2:   return affineBinaryMonotonic<SH_OP_EXP2>(N, valueType);
-      case SH_OP_EXP10:   return affineBinaryMonotonic<SH_OP_EXP10>(N, valueType);
       case SH_OP_FLR:   return affineBinaryMonotonic<SH_OP_FLR>(N, valueType);
-      case SH_OP_LOG:   return affineBinaryMonotonic<SH_OP_LOG>(N, valueType);
-      case SH_OP_LOG2:   return affineBinaryMonotonic<SH_OP_LOG2>(N, valueType);
-      case SH_OP_LOG10:   return affineBinaryMonotonic<SH_OP_LOG10>(N, valueType);
 #endif
+      case SH_OP_LOG:   dest.ASN(aaLOG(src[0], stmtSyms->newdest)); break; 
+      case SH_OP_LOG2:  dest.ASN(aaLOG2(src[0], stmtSyms->newdest)); break; 
+      case SH_OP_LOG10: dest.ASN(aaLOG10(src[0], stmtSyms->newdest)); break; 
+      case SH_OP_LRP:   dest.ASN(aaLRP(src[0], src[1], src[2], stmtSyms->newdest)); break; 
       case SH_OP_MAD:   dest.ASN(aaMAD(src[0], src[1], src[2], stmtSyms->newdest)); break; 
 #if 0
       case SH_OP_MAX:   return affineBinaryMonotonic<SH_OP_MAX>(N, valueType);
       case SH_OP_MIN:   return affineBinaryMonotonic<SH_OP_MIN>(N, valueType);
-      case SH_OP_RCP:   return affineRCP(N, valueType);
+#endif
+      case SH_OP_POW:   dest.ASN(aaPOW(src[0], src[1], stmtSyms->newdest)); break;
+      case SH_OP_RCP:   dest.ASN(aaRCP(src[0], stmtSyms->newdest)); break; 
+#if 0
       case SH_OP_RND:   return affineBinaryMonotonic<SH_OP_RND>(N, valueType);
       case SH_OP_SGN:   return affineBinaryMonotonic<SH_OP_SGN>(N, valueType);
-      case SH_OP_SQRT:   return affineBinaryMonotonic<SH_OP_SQRT>(N, valueType);
+#endif
+      case SH_OP_SQRT:  dest.ASN(aaSQRT(src[0], stmtSyms->newdest)); break; 
+#if 0
 
       case SH_OP_UNION:   return affineUNION(N, valueType);
       case SH_OP_ISCT:   return affineISCT(N, valueType);
       case SH_OP_CONTAINS:   avCONTAINS(dest, src[0]); break;
       // @todo type add in some more operations
 #endif
+      case SH_OP_ESCJOIN: dest.ASN(aaESCJOIN(src[0], stmtSyms->dest, stmtSyms->newdest)); break;
+      case SH_OP_ERRFROM: dest.ASN(src[0], stmtSyms->dest, false); break;
       default:
-        SH_DEBUG_PRINT_AHO("Unable to translate op: " << opInfo[stmt.op].name << " in " << stmt);
+        SH_DEBUG_PRINT("Unable to translate op: " << opInfo[stmt.op].name << " in " << stmt);
         shError(ShTransformerException(
               "Cannot translate affine arithmetic operator" ));
     }
@@ -346,6 +385,8 @@ struct SymOpSplitterBase: public ShTransformerParent {
   bool handleStmt(ShBasicBlock::ShStmtList::iterator& I, ShCtrlGraphNodePtr node)
   {
     ShStatement& stmt = *I;
+    if(stmt.dest.null()) return false;
+
     if(!shIsAffine(stmt.dest.valueType())) {
       bool hasAffine = false;
       for(int i = 0; i < opInfo[stmt.op].arity; ++i) {

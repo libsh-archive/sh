@@ -27,9 +27,11 @@
 #ifndef SH_AAVARIABLE_HPP
 #define SH_AAVARIABLE_HPP
 
+#include <iosfwd>
 #include "ShRefCount.hpp"
-#include "ShAaSyms.hpp"
 #include "ShVariable.hpp"
+#include "ShRecord.hpp"
+#include "ShAaSyms.hpp"
 
 namespace SH {
 
@@ -112,7 +114,7 @@ struct ShAaVariableNode: public ShRefCountable {
   ShVariable center() { return m_center; }
 
   /** Returns the error sym variable for tuple element i */
-  ShVariable operator[](int i) { return m_symvar[i]; }
+  ShVariable operator[](int i) { return (m_packed ? m_symvar[0](i) : m_symvar[i]); }
 
   /** Returns the name of the variable */
   const std::string& name() const { return m_name; }
@@ -121,8 +123,16 @@ struct ShAaVariableNode: public ShRefCountable {
    * attached to name() */
   ShVariable makeTemp(int size, const std::string& suffix); 
 
+  /** Makes a record from this node's variables */
+  ShRecord record(); 
+
 
   protected:
+    bool m_packed; // whether m_symvar contains separate variables per tuple element, or if 
+                   // all are packed into m_symvar[0]
+                   // Currently only supports packed if m_syms.isSingles() (i.e.
+                   // one symbol per tuple element)
+
     /* After m_syms, m_center, m_name are set up, this sets up symvar */
     void init();
 
@@ -164,7 +174,7 @@ struct ShAaVariable {
   /** Constructs an ShAaVariable with given swizzle, negation, and set of used
    * symbol info. 
    */
-  ShAaVariable(ShAaVariableNodePtr node, const ShSwizzle& swizzle, bool neg, const ShAaSyms* use);
+  ShAaVariable(ShAaVariableNodePtr node, const ShSwizzle& swizzle, bool neg, const ShAaSyms& use);
 
 
   // default copy constructor copies other without assignment
@@ -176,15 +186,16 @@ struct ShAaVariable {
   ShAaVariable clone() const;
 
   /** Swizzles this node 
+   * Note that these ops are VERY expensive as they copy the syms...
+   *
+   * @todo range don't copy syms...
    * @{*/
-#if 0
-  ShAaVariable swiz(int) const;
-  ShAaVariable swiz(int, int) const;
-  ShAaVariable swiz(int, int, int) const;
-  ShAaVariable swiz(int, int, int, int) const;
-  ShAaVariable swiz(int size, int indices[]) const;
-  ShAaVariable swiz(const ShSwizzle& swizzle) const;
-#endif
+  ShAaVariable operator()(int) const;
+  ShAaVariable operator()(int, int) const;
+  ShAaVariable operator()(int, int, int) const;
+  ShAaVariable operator()(int, int, int, int) const;
+  ShAaVariable operator()(int swizSize, int indices[]) const;
+  ShAaVariable operator()(const ShSwizzle& swizzle) const;
   // @}
 
   /** Returns the ShAaVariableNode */
@@ -263,7 +274,9 @@ struct ShAaVariable {
   ShAaVariable& setErr(const ShVariable& other, const ShAaSyms& used); 
 
   /** Adds to error symbols indicated by used with the values in other.
-   * Like ASN, this takes only the first sym from each tuple element in used */
+   * Like ASN, this takes only the first sym from each tuple element in used 
+   * Takes absolute value of existing error first, so the total magnitude works
+   * out */
   ShAaVariable& addErr(const ShVariable& other, const ShAaSyms& used); 
 
   /** Methods that return certain computed quantities from the affine 
@@ -278,6 +291,11 @@ struct ShAaVariable {
   /** Returns a temporary of the same size() as this, using a regular base storage
    * type of this affine arithmetic storage type */ 
   ShVariable temp(std::string name) const; 
+
+  /** Returns a ShRecord structure representing the wrapped variables in this */
+  ShRecord record();
+
+  friend std::ostream& operator<<(std::ostream& out, const ShAaVariable &var);
 
   private:
     /** Returns the swizzle that should be applied to the allocated error sym
@@ -301,7 +319,7 @@ struct ShAaVariable {
      * disappear if we switch to SSA-form, where each SSA variable will only
      * ever use a single set of error symbols, but in that case we would need to
      * add in merges on error symbol sequences as a tradeoff). */
-    const ShAaSyms* m_used;
+    ShAaSyms m_used;
 };
 
 }

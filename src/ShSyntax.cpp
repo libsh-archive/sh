@@ -32,6 +32,8 @@
 #include "ShContext.hpp"
 #include "ShTokenizer.hpp"
 #include "ShToken.hpp"
+#include "ShInfo.hpp"
+#include "ShStatement.hpp"
 #include "ShProgram.hpp"
 #include "ShBackend.hpp"
 #include "ShTransformer.hpp"
@@ -244,6 +246,26 @@ void ShContinue()
 {
   if (!ShContext::current()->parsing()) return;
   ShContext::current()->parsing()->tokenizer.blockList()->addBlock(new ShToken(SH_TOKEN_CONTINUE));
+}
+
+void shBeginSection()
+{
+  if (!ShContext::current()->parsing()) return;
+  ShContext::current()->parsing()->tokenizer.blockList()->addBlock(new ShToken(SH_TOKEN_STARTSEC));
+}
+
+void shEndSection()
+{
+  if (!ShContext::current()->parsing()) return;
+  ShContext::current()->parsing()->tokenizer.blockList()->addBlock(new ShToken(SH_TOKEN_ENDSEC));
+}
+
+void shComment(const std::string& comment)
+{
+  if (!ShContext::current()->parsing()) return;
+  ShStatement stmt(SH_OP_COMMENT);
+  stmt.add_info(new ShInfoComment(comment));
+  ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
 }
 
 }

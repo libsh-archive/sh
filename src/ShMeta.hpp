@@ -60,6 +60,7 @@ public:
 
   virtual std::string meta(const std::string& key) const;
   virtual void meta(const std::string& key, const std::string& value);
+  virtual bool has_meta(const std::string& key) const;
 
 private:
   typedef std::map<std::string, std::string> MetaMap;

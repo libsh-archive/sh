@@ -45,10 +45,15 @@ ShAaIndexSet& ShAaIndexSet::operator|=(int idx)
   return *this;
 }
 
-int ShAaIndexSet::first() const
+int ShAaIndexSet::last() const
 {
   SH_DEBUG_ASSERT(!m_idx.empty());
-  return *m_idx.begin();
+  return *m_idx.rbegin();
+}
+
+bool ShAaIndexSet::contains(int idx) const
+{
+  return m_idx.find(idx) != m_idx.end();
 }
 
 ShAaIndexSet operator|(const ShAaIndexSet &a, const ShAaIndexSet &b)
@@ -83,22 +88,22 @@ std::ostream& operator<<(std::ostream& out, const ShAaIndexSet& a)
   return out;
 }
 
+long ShAaSyms::m_max_index = 0;
+
 ShAaSyms::ShAaSyms()
 {}
 
-ShAaSyms::ShAaSyms(int size)
-  : m_tidx(size)
-{}
-
-ShAaSyms::ShAaSyms(int size, int& cur_index)
+ShAaSyms::ShAaSyms(int size, bool empty)
   : m_tidx(size)
 {
-  for(iterator I = m_tidx.begin(); I != m_tidx.end(); ++I) {
-    (*I) |= cur_index++; 
+  if(!empty) {
+    for(iterator I = m_tidx.begin(); I != m_tidx.end(); ++I) {
+      (*I) |= m_max_index++; 
+    }
   }
 }
 
-ShAaSyms::ShAaSyms(const ShSwizzle& swiz, int& cur_index)
+ShAaSyms::ShAaSyms(const ShSwizzle& swiz)
   : m_tidx(swiz.size())
 {
   std::map<int, int> swizIdxMap;
@@ -107,9 +112,27 @@ ShAaSyms::ShAaSyms(const ShSwizzle& swiz, int& cur_index)
     if(swizIdxMap.find(swiz[i]) != swizIdxMap.end()) {
       *I |= swizIdxMap[swiz[i]]; 
     } else {
-      *I |= swizIdxMap[swiz[i]] = cur_index++;
+      *I |= swizIdxMap[swiz[i]] = m_max_index++;
     }
   }
+}
+
+ShAaSyms ShAaSyms::swizSyms(const ShSwizzle& swiz) const
+{
+  ShAaSyms result(swiz.size());
+  for(int i = 0; i < swiz.size(); ++i) {
+    SH_DEBUG_ASSERT(swiz[i] < size());
+    result[i] = m_tidx[swiz[i]];
+  }
+  return result;
+}
+
+bool ShAaSyms::isSingles() const
+{
+  for(const_iterator I = begin(); I != end(); ++I) {
+    if(I->size() != 1) return false;
+  }
+  return true;
 }
 
 ShAaSyms& ShAaSyms::operator|=(const ShAaSyms& other)

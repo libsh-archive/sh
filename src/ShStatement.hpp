@@ -52,6 +52,7 @@ public:
   /** Constructs a statement with the given operator, src(s), and dest
    * variables. Sets marked to false.
    * @{ */
+  ShStatement(ShOperation op);
   ShStatement(ShVariable dest, ShOperation op);
   ShStatement(ShVariable dest, ShOperation op, ShVariable src);
   ShStatement(ShVariable dest, ShVariable src0, ShOperation op, ShVariable src1);

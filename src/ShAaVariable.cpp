@@ -26,13 +26,17 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include <sstream>
+#include <iostream>
 #include "ShDebug.hpp"
 #include "ShInstructions.hpp"
 #include "ShVariableNode.hpp"
 #include "ShAttrib.hpp"
 #include "ShAaVariable.hpp"
 
+#ifdef SH_DBG_AA
 #define SH_DBG_AAVARIABLE
+#endif
+// #define SH_DBG_AAVARIABLE
   
 #ifdef SH_DBG_AAVARIABLE                                                               
 #define SH_DEBUG_PRINT_AV(x) { SH_DEBUG_PRINT(x); }                                    
@@ -40,15 +44,20 @@
 #define SH_DEBUG_PRINT_AV(x) {}
 #endif  
 
+//@todo range
+// There's a number of checks in place here for zero-length noise symbol
+// assignments.  verify correctness and improve "elegantness".
+
 namespace SH {
 
 //@todo range refactor code in these three constructors
 ShAaVariableNode::ShAaVariableNode(ShVariableNodeCPtr node, const ShAaSyms& syms,
     ShBindingType kind, const char* suffix)
-  : m_syms(syms),
+  : m_packed(syms.isSingles()),
+    m_syms(syms),
     m_center(node->clone(kind, syms.size(), shRegularValueType(node->valueType()), 
                        SH_SEMANTICTYPE_END, false, false)),
-    m_symvar(syms.size()),
+    m_symvar(syms.isSingles() ? 1 : syms.size()),
     m_name(node->name() + suffix)
 {
   SH_DEBUG_PRINT_AV("  creating AaVariableNode for ShVariable " << m_name); 
@@ -57,10 +66,11 @@ ShAaVariableNode::ShAaVariableNode(ShVariableNodeCPtr node, const ShAaSyms& syms
 
 ShAaVariableNode::ShAaVariableNode(const std::string& name, ShBindingType kind, 
       ShValueType valueType, ShSemanticType type,  const ShAaSyms& syms)
-  : m_syms(syms),
+  : m_packed(syms.isSingles()), 
+    m_syms(syms),
     m_center(ShVariable(new ShVariableNode(kind, syms.size(), 
             shRegularValueType(valueType), type))),
-    m_symvar(syms.size()),
+    m_symvar(syms.isSingles() ? 1 : syms.size()),
     m_name(name)
 {
   SH_DEBUG_PRINT_AV("  creating AaVariableNode from scratch named " << m_name); 
@@ -69,10 +79,11 @@ ShAaVariableNode::ShAaVariableNode(const std::string& name, ShBindingType kind,
 
 
 ShAaVariableNode::ShAaVariableNode(const ShAaVariableNode& other, const ShAaSyms &syms) 
-  : m_syms(syms),
+  : m_packed(syms.isSingles()), 
+    m_syms(syms),
     m_center(other.m_center.node()->clone(SH_TEMP, syms.size(), 
           SH_VALUETYPE_END, SH_SEMANTICTYPE_END, true, false)),
-    m_symvar(syms.size()),
+    m_symvar(syms.isSingles() ? 1 : syms.size()),
     m_name(other.m_name + "_saClone")
 {
   SH_DEBUG_PRINT_AV("  cloning AaVariableNode from " << other.name() << " syms=" << syms); 
@@ -92,8 +103,23 @@ void ShAaVariableNode::varlistInsert(ShProgramNode::VarList& varlist, ShProgramN
 }
 
 ShVariable ShAaVariableNode::makeTemp(int size, const std::string& suffix) {
-  ShVariable result(m_center.node()->clone(SH_TEMP, size));
+  ShVariable result(m_center.node()->clone(SH_TEMP, size,
+        SH_VALUETYPE_END, SH_SEMANTICTYPE_END, true, false));
   result.name(m_name + suffix);
+  return result;
+}
+
+ShRecord ShAaVariableNode::record() {
+  ShRecord result;
+  result.append(m_center);
+  if(m_packed) {
+    result.append(m_symvar[0]);
+  } else {
+    for(int i = 0; i < size(); ++i) {
+      if(m_syms[i].empty()) continue;
+      result.append(m_symvar[i]);
+    }
+  }
   return result;
 }
 
@@ -101,37 +127,77 @@ void ShAaVariableNode::init()
 {
   m_center.name(m_name + "_center");
 
-  for(int i = 0; i < size(); ++i) {
-    m_symvar[i] = ShVariable(m_center.node()->clone(SH_BINDINGTYPE_END, 
-          m_syms[i].size(), SH_VALUETYPE_END, SH_SEMANTICTYPE_END, true, false));
+  if(m_packed) {
+    m_symvar[0] = ShVariable(m_center.node()->clone(SH_BINDINGTYPE_END, 
+          0, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, true, false));
     std::ostringstream out;
-    out << m_name << "[" << i << "]" << m_syms[i];
-    m_symvar[i].name(out.str());
+    out << m_name << "_pk_" << m_syms;
+    m_symvar[0].name(out.str());
+  } else {
+    for(int i = 0; i < size(); ++i) {
+      if(m_syms[i].empty()) continue;
+
+      m_symvar[i] = ShVariable(m_center.node()->clone(SH_BINDINGTYPE_END, 
+            m_syms[i].size(), SH_VALUETYPE_END, SH_SEMANTICTYPE_END, true, false));
+      std::ostringstream out;
+      out << m_name << "[" << i << "]" << m_syms[i];
+      m_symvar[i].name(out.str());
+    }
   }
 }
 
 
 ShAaVariable::ShAaVariable()
-  : m_node(0),
-    m_used(0)
+  : m_node(0)
 {}
 
 ShAaVariable::ShAaVariable(ShAaVariableNodePtr node)
   : m_node(node),
     m_swizzle(ShSwizzle(node->size())),
     m_neg(false),
-    m_used(&node->syms())
+    m_used(node->syms())
 {}
  
-ShAaVariable::ShAaVariable(ShAaVariableNodePtr node, const ShSwizzle& swizzle, bool neg, const ShAaSyms* use)
+ShAaVariable::ShAaVariable(ShAaVariableNodePtr node, const ShSwizzle& swizzle, bool neg, const ShAaSyms& use)
   : m_node(node), m_swizzle(swizzle), m_neg(neg), m_used(use) 
 {}
 
 ShAaVariable ShAaVariable::clone() const
 {
-  ShAaVariableNodePtr cloneNode(new ShAaVariableNode(*m_node, *m_used));
+  ShAaVariableNodePtr cloneNode(new ShAaVariableNode(*m_node, m_used));
   ShAaVariable result(cloneNode); 
   return result.ASN(*this);
+}
+
+ShAaVariable ShAaVariable::operator()(int i0) const
+{
+  return operator()(ShSwizzle(size(), i0)); 
+}
+
+ShAaVariable ShAaVariable::operator()(int i0, int i1) const
+{
+  return operator()(ShSwizzle(size(), i0, i1)); 
+}
+
+ShAaVariable ShAaVariable::operator()(int i0, int i1, int i2) const
+{
+  return operator()(ShSwizzle(size(), i0, i1, i2)); 
+}
+
+ShAaVariable ShAaVariable::operator()(int i0, int i1, int i2, int i3) const
+{
+  return operator()(ShSwizzle(size(), i0, i1, i2, i3)); 
+}
+
+ShAaVariable ShAaVariable::operator()(int swizSize, int indices[]) const
+{
+  return operator()(ShSwizzle(size(), swizSize, indices)); 
+}
+
+ShAaVariable ShAaVariable::operator()(const ShSwizzle& swizzle) const
+{
+  // Construct a new set of syms
+  return ShAaVariable(m_node, m_swizzle * swizzle, m_neg, m_used.swizSyms(swizzle));
 }
 
 ShVariable ShAaVariable::center() const {
@@ -153,19 +219,23 @@ ShVariable ShAaVariable::err(int i, const ShAaIndexSet& use) const {
 }
 
 ShVariable ShAaVariable::err(int i, int idx) const {
-  ShVariable result = (*m_node)[m_swizzle[i]](getSymSwiz(i, idx));
-  if(m_neg) return -result;
+  ShVariable result;
+
+  if(!m_used[i].contains(idx)) {
+    result = ShConstAttrib1f(0.0f);
+  } else {
+    result = (*m_node)[m_swizzle[i]](getSymSwiz(i, idx));
+    if(m_neg) return -result;
+  }
   return result;
 }
 
 const ShAaSyms& ShAaVariable::use() const {
-  SH_DEBUG_ASSERT(m_used);
-  return *m_used;
+  return m_used;
 }
 
 const ShAaIndexSet& ShAaVariable::use(int i) const {
-  SH_DEBUG_ASSERT(m_used);
-  return (*m_used)[i];
+  return m_used[i];
 }
 
 ShAaVariable ShAaVariable::NEG() const {
@@ -274,7 +344,7 @@ ShAaVariable& ShAaVariable::MAD(const ShAaVariable& other, const ShVariable& sca
 ShAaVariable& ShAaVariable::setErr(const ShVariable& other, const ShAaSyms &used) {
   SH_DEBUG_ASSERT(size() == used.size());
   for(int i = 0; i < size(); ++i) {
-    shASN(err(i, used[i].first()), other(i)); 
+    shASN(err(i, used[i].last()), other(i)); 
   }
   return *this;
 }
@@ -282,7 +352,8 @@ ShAaVariable& ShAaVariable::setErr(const ShVariable& other, const ShAaSyms &used
 ShAaVariable& ShAaVariable::addErr(const ShVariable& other, const ShAaSyms &used) {
   SH_DEBUG_ASSERT(size() == used.size());
   for(int i = 0; i < size(); ++i) {
-    ShVariable erri = err(i, used[i].first());
+    ShVariable erri = err(i, used[i].last());
+    shABS(erri, erri);
     shADD(erri, erri, other(i)); 
   }
   return *this;
@@ -330,6 +401,39 @@ ShVariable ShAaVariable::temp(std::string name) const {
   return result;
 }
 
+ShRecord ShAaVariable::record() {
+  ShRecord result;
+  result.append(center()); 
+  for(int i = 0; i < size(); ++i) {
+    if(m_used[i].empty()) continue;
+    result.append(err(i));
+  }
+  return result;
+}
+
+std::ostream& operator<<(std::ostream& out, const ShAaVariable &var)
+{
+  int i, j;
+  out << "{" << var.center() << " + (";
+  for(i = 0; i < var.size(); ++i) {
+    if(i > 0) out << ", ";
+    const ShAaIndexSet usei = var.use(i); 
+    if(usei.empty()) {
+      out << "[null]";
+      continue;
+    }
+    ShVariable erri = var.err(i);
+    ShAaIndexSet::const_iterator U = usei.begin();
+    SH_DEBUG_ASSERT(erri.size() == usei.size());
+    for(j = 0; j < erri.size(); ++j, ++U) {
+      if(j != 0) out << " "; 
+      out << erri(j) << "_" << *U; 
+    }
+  }
+  out << ")}";
+  return out;
+}
+
 // @todo range - need to check these
 ShSwizzle ShAaVariable::getSymSwiz(int i, const ShAaIndexSet& used) const {
   int num = used.size();
@@ -348,6 +452,7 @@ ShSwizzle ShAaVariable::getSymSwiz(int i, const ShAaIndexSet& used) const {
     SH_DEBUG_PRINT("Could not match used sym set to syms available on this at element " << m_swizzle[i]);
     SH_DEBUG_PRINT("  used = " << used);
     SH_DEBUG_PRINT("  myset = " << myset);
+    SH_DEBUG_ASSERT(0);
   }
   ShSwizzle result(myset.size(), num, s);
   delete[] s;
@@ -361,16 +466,18 @@ ShSwizzle ShAaVariable::getSymSwiz(int i, int idx) const {
   J = myset.begin(); 
   for(j = 0; *J != idx && J != myset.end(); ++J, ++j);
   if(J == myset.end()) {
-    SH_DEBUG_PRINT("Could not match used sym set to syms available on this at element " << m_swizzle[i]);
-    SH_DEBUG_PRINT("  m_used = " << (*m_used));
+    SH_DEBUG_PRINT("On AaVariable " << name()); 
+    SH_DEBUG_PRINT("  could not match used sym set to syms available on this at element " << m_swizzle[i]);
+    SH_DEBUG_PRINT("  m_used = " << m_used);
     SH_DEBUG_PRINT("  myset = " << myset);
+    SH_DEBUG_ASSERT(0);
   }
   ShSwizzle result(myset.size(), j);
   return result;
 }
 
 ShSwizzle ShAaVariable::getSymSwiz(int i) const {
-  return getSymSwiz(i, (*m_used)[i]);
+  return getSymSwiz(i, m_used[i]);
 }
 
 ShVariable ShAaVariable::makeTemp(const std::string& suffix) const {

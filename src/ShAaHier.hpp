@@ -24,64 +24,53 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHTOKEN_HPP
-#define SHTOKEN_HPP
+#ifndef SHAAHIER_HPP
+#define SHAAHIER_HPP
 
 #include <vector>
+#include <iosfwd>
 #include "ShDllExport.hpp"
-#include "ShRefCount.hpp"
-#include "ShBlock.hpp"
+#include "ShInfo.hpp"
+#include "ShStructural.hpp"
 
 namespace SH {
 
-struct ShTokenArgument;
-  
-/** Possible types a token can have.
- * If you add to this list or change it, be sure to change tokenNames in
- * ShToken.cpp.
- */
-enum ShTokenType {
-  SH_TOKEN_IF,
-  SH_TOKEN_ELSE,
-  SH_TOKEN_ENDIF,
-  SH_TOKEN_WHILE,
-  SH_TOKEN_ENDWHILE,
-  SH_TOKEN_DO,
-  SH_TOKEN_UNTIL,
-  SH_TOKEN_FOR,
-  SH_TOKEN_ENDFOR,
-  SH_TOKEN_BREAK,
-  SH_TOKEN_CONTINUE,
-  SH_TOKEN_STARTSEC,
-  SH_TOKEN_ENDSEC
+struct ShInEscInfo: public ShInfo
+{
+  typedef std::vector<ShVariable> VarVec;
+  VarVec in, esc;
+
+  friend std::ostream& operator<<(std::ostream& out, const ShInEscInfo& iei); 
+
+  ShInfo* clone() const;
 };
 
-/** A token in the (unparsed) parse tree.
- * This represents a token such as SH_IF. The token can optionally
- * have some arguments, see ShTokenArgument. Later these tokens
- * will be parsed into real control structures by the parser.
+/* Adds ShInEscInfo to the STARTSEC, ENDSEC statements.
+ * Inserts SH_OP_ESCJOIN operations right before ENDSEC statements (using the 
+ * same ShStmtIndex as the ENDSEC stmt) for escaping variables.
  */
-class 
-SH_DLLEXPORT ShToken : public ShBlock {
-public:
-  ShToken(ShTokenType type);
-  ~ShToken();
+SH_DLLEXPORT void inEscAnalysis(ShStructural &structural, ShProgramNodePtr p);
 
-  /// Return the type of this token.
-  ShTokenType type();
-  
-  void print(std::ostream& out, int indent) const;
 
-  /// Any arguments bound to the token. May be empty.
-  std::vector<ShTokenArgument> arguments;
-  
-private:
-  ShTokenType m_type;
+struct ShSectionInfo: public ShInfo
+{
+  // Constructs a section info for the program scope (no section, level=0)
+  ShSectionInfo();
+
+  // Constructions a section info for a particular section
+  ShSectionInfo(ShStatement* start, ShStatement* end, int level); 
+
+  int level; ///< nesting level 
+  ShStatement *start, *end;
+
+  friend std::ostream& operator<<(std::ostream& out, const ShSectionInfo& si);
+  ShInfo* clone() const;
 };
-
-typedef ShPointer<ShToken> ShTokenPtr;
-typedef ShPointer<const ShToken> ShTokenCPtr;
-
+/* Adds ShSectionInfo objects to control graph nodes in sections 
+ * Inserts SH_OP_ESCJOIN operations right before ENDSEC statements
+ * for escaping variables.
+ */
+SH_DLLEXPORT void addSectionInfo(ShStructural &s, ShProgramNodePtr p);
 
 }
 

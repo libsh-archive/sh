@@ -34,6 +34,9 @@
 #include "ShSyntax.hpp"
 #include "ShAlgebra.hpp"
 #include "ShCtrlGraphWranglers.hpp"
+#include "ShMemory.hpp"
+#include "ShChannelNode.hpp"
+#include "ShStream.hpp"
 #include "ShRecord.hpp"
 
 namespace SH {

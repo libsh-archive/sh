@@ -105,6 +105,11 @@ inline void ShMeta::meta(const std::string& key, const std::string& value)
   (*m_meta)[key] = value;
 }
 
+inline bool ShMeta::has_meta(const std::string& key) const
+{
+  return m_meta && (m_meta->find(key) != m_meta->end());
+}
+
 }
 
 #endif

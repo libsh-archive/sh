@@ -41,7 +41,7 @@ void ShBasicBlock::print(std::ostream& out, int indent) const
   
   shPrintIndent(out, indent);
   out << "{" << endl;
-  for (ShStmtList::const_iterator I = m_statements.begin();
+  for (const_iterator I = m_statements.begin();
        I != m_statements.end(); ++I) {
     shPrintIndent(out, indent + 2);
     out << *I << endl;
@@ -52,7 +52,7 @@ void ShBasicBlock::print(std::ostream& out, int indent) const
 
 void ShBasicBlock::graphvizDump(std::ostream& out) const
 {
-  for (ShStmtList::const_iterator I = m_statements.begin();
+  for (const_iterator I = m_statements.begin();
        I != m_statements.end(); ++I) {
     const ShInfoComment* comment = I->get_info<ShInfoComment>();    
     if(comment) {
@@ -72,25 +72,5 @@ void ShBasicBlock::prependStatement(const ShStatement& stmt)
   m_statements.push_front(stmt);
 }
 
-ShBasicBlock::ShStmtList::const_iterator ShBasicBlock::begin() const
-{
-  return m_statements.begin();
 }
 
-ShBasicBlock::ShStmtList::const_iterator ShBasicBlock::end() const
-{
-  return m_statements.end();
-}
-
-ShBasicBlock::ShStmtList::iterator ShBasicBlock::begin()
-{
-  return m_statements.begin();
-}
-
-ShBasicBlock::ShStmtList::iterator ShBasicBlock::end()
-{
-  return m_statements.end();
-}
-
-
-}

@@ -28,6 +28,7 @@
 #define SHSYNTAX_HPP
 
 #include "ShDllExport.hpp"
+#include "ShRecord.hpp"
 #include "ShProgram.hpp"
 #include "ShUtility.hpp"
 
@@ -193,6 +194,26 @@
 #define SH_CONTINUE if (!ShContext::current()->parsing()) { continue; } else { ::SH::shBreak(); }
 //@}
 
+/** \def SH_BEGIN_SECTION
+ * Starts a block grouping - for affine analysis and organization of code for
+ * visual languages.
+ *
+ * @todo range This interface is really quite crappy
+ * @param name - String name of the block (this shouldn't be required... 
+ *               This is only to keep me sane when debugging 
+ */
+#define SH_BEGIN_SECTION(name) \
+  {{{{{{ \
+    if(ShContext::current()->parsing()) { \
+      ::SH::shBeginSection(); \
+      ::SH::shComment(name); \
+    }
+
+#define SH_END_SECTION \
+    if(ShContext::current()->parsing()) { ::SH::shEndSection(); } \
+  }}}}}} 
+
+
 /// @name Named Declaration macros 
 //@{
 /** \def SH_NAME
@@ -328,6 +349,21 @@ void shBreak();
 /// \internal
 SH_DLLEXPORT
 void shContinue();
+
+/// \internal
+SH_DLLEXPORT
+void shBeginSection();
+/// \internal
+SH_DLLEXPORT
+void shEndSection();
+
+/// \internal
+/// Adds a comment to the immediate representation 
+/// @todo range - this is just me (BC) adding ridiculous stuff to the IR.
+///               Can remove this clutter after it's no longer useful for
+///               debugging. 
+SH_DLLEXPORT
+void shComment(const std::string& comment);
 
 }
 

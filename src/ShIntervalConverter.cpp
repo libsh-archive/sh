@@ -33,6 +33,7 @@
 #include "ShTypeInfo.hpp"
 #include "ShVariable.hpp"
 #include "ShVariableNode.hpp"
+#include "ShRecord.hpp"
 #include "ShInternals.hpp"
 #include "ShSyntax.hpp"
 #include "ShProgram.hpp"
@@ -55,6 +56,11 @@ struct ShVariablePair {
     : lo(new ShVariableNode(Binding, N, V)),
       hi(new ShVariableNode(Binding, N, V)) 
   {}
+
+  ShRecord record() 
+  {
+    return (lo & hi);
+  }
 };
 
 
@@ -196,11 +202,40 @@ ShProgram intervalDOT(int N, ShValueType valueType)
   return csum << mul; 
 }
 
+ShProgram intervalNEG(int N, ShValueType valueType)
+{
+  ShProgram result = SH_BEGIN_PROGRAM() {
+    ShVariablePair a(SH_INPUT, N, valueType);
+    ShVariablePair r(SH_OUTPUT, N, valueType);
+
+    shASN(r.lo, -a.hi);
+    shASN(r.hi, -a.lo);
+  } SH_END;
+  return result;
+}
+
 ShProgram intervalMAD(int N, ShValueType valueType) 
 {
   ShProgram mul = intervalMUL(N, valueType);
   ShProgram add = intervalBinaryMonotonic<SH_OP_ADD>(N, valueType);
   return add << mul; 
+}
+
+ShProgram intervalLRP(int N, ShValueType valueType) 
+{
+  ShProgram mad = intervalMAD(N, valueType);
+  ShProgram result = SH_BEGIN_PROGRAM() {
+    ShVariablePair a(SH_INPUT, N, valueType);
+    ShVariablePair b(SH_INPUT, N, valueType);
+    ShVariablePair c(SH_INPUT, N, valueType);
+    ShVariablePair bsc(SH_TEMP, N, valueType);
+    ShVariablePair r(SH_OUTPUT, N, valueType);
+
+    shADD(bsc.lo, b.lo, -c.hi);
+    shADD(bsc.hi, b.hi, -c.lo);
+    r.record() = mad(a.record() & bsc.record() & c.record());
+  } SH_END;
+  return result; 
 }
 
 
@@ -282,6 +317,7 @@ ShProgram getProgram(ShOperation op, int N, ShValueType valueType) {
     case SH_OP_LOG2:   return intervalBinaryMonotonic<SH_OP_LOG2>(N, valueType);
     case SH_OP_LOG10:   return intervalBinaryMonotonic<SH_OP_LOG10>(N, valueType);
     case SH_OP_MAD:   return intervalMAD(N, valueType);
+    case SH_OP_LRP:   return intervalLRP(N, valueType);
     case SH_OP_MAX:   return intervalBinaryMonotonic<SH_OP_MAX>(N, valueType);
     case SH_OP_MIN:   return intervalBinaryMonotonic<SH_OP_MIN>(N, valueType);
     case SH_OP_RCP:   return intervalRCP(N, valueType);
@@ -513,11 +549,25 @@ struct IntervalStatementFixer {
         stmt.op = SH_OP_ADD;
         return false;
 
-      case SH_OP_CENTER:
+      case SH_OP_RADIUS:
 #ifdef SH_DEBUG_ICONV
         SH_DEBUG_PRINT("Handling " << opInfo[stmt.op].name);
 #endif
         SH_DEBUG_ASSERT(shIsInterval(stmt.src[0].valueType()));
+        stmt.src[2] = ShVariable(splits[stmt.src[0].node()][1], stmt.src[0].swizzle(), stmt.src[0].neg());
+        stmt.src[1] = -ShVariable(splits[stmt.src[0].node()][0], stmt.src[0].swizzle(), stmt.src[0].neg());
+        stmt.src[0] = ShConstAttrib1f(0.5f);
+        stmt.op = SH_OP_LRP;
+        return false;
+
+      case SH_OP_CENTER:
+#ifdef SH_DEBUG_ICONV
+        SH_DEBUG_PRINT("Handling " << opInfo[stmt.op].name);
+#endif
+        if(!shIsInterval(stmt.src[0].valueType())) {
+          SH_DEBUG_PRINT("Expecting interval value in src[0] in stmt=" << stmt);
+          SH_DEBUG_ASSERT(0);
+        }
         stmt.src[2] = ShVariable(splits[stmt.src[0].node()][1], stmt.src[0].swizzle(), stmt.src[0].neg());
         stmt.src[1] = ShVariable(splits[stmt.src[0].node()][0], stmt.src[0].swizzle(), stmt.src[0].neg());
         stmt.src[0] = ShConstAttrib1f(0.5f);

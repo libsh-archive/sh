@@ -112,6 +112,8 @@ std::string ShProgramNode::describe_interface() const
   os << describe(inputs) << std::endl;
   os << "Outputs:" << std::endl;
   os << describe(outputs) << std::endl;
+  os << "Channels:" << std::endl;
+  os << describe(channels) << std::endl;
   os << "Uniforms:" << std::endl;
   os << describe(uniforms) << std::endl;
   return os.str();
@@ -311,6 +313,7 @@ ShPointer<ShProgramNode> ShProgramNode::clone() const
   ctrlGraph->copy(head, tail);
 
   ShProgramNodePtr result = new ShProgramNode(target());
+  result->ShInfoHolder::operator=(*this);
   result->ctrlGraph = new ShCtrlGraph(head, tail);
   result->inputs = inputs;
   result->outputs = outputs;
@@ -421,6 +424,14 @@ void ShProgramNode::assign(const ShVariableNodePtr& var) const
 std::string ShProgramNode::describe(const VarList &varlist) {
   std::ostringstream os;
   for(VarList::const_iterator I = varlist.begin(); I != varlist.end(); ++I) {
+    os << "  " << (*I)->nameOfType() << " " << (*I)->name() << std::endl;
+  }
+  return os.str();
+}
+
+std::string ShProgramNode::describe(const ChannelList& chanlist) {
+  std::ostringstream os;
+  for(ChannelList::const_iterator I = chanlist.begin(); I != chanlist.end(); ++I) {
     os << "  " << (*I)->nameOfType() << " " << (*I)->name() << std::endl;
   }
   return os.str();

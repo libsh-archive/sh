@@ -189,6 +189,7 @@ public:
   
 private:
   static std::string describe(const VarList &varlist); 
+  static std::string describe(const ChannelList &chanlist); 
 
   std::string m_target; ///< Can be empty, if there is no target associated with this program.
 

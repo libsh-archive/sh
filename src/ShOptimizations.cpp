@@ -62,6 +62,11 @@ struct Straightener {
     if (node->follower == graph->exit()) return;
     if (!node->successors.empty()) return;
     if (node->follower->predecessors.size() > 1) return;
+
+    // conditions added for maintaining section START/END marker invariants
+    // node cannot end in an ENDSEC, node->follower cannot start with a STARTSEC
+    if (node->block && !node->block->empty() && node->block->rbegin()->op == SH_OP_ENDSEC) return; 
+    if (node->follower->block && !node->follower->block->empty() && node->follower->block->begin()->op == SH_OP_STARTSEC) return; 
     
     if (!node->block) node->block = new ShBasicBlock();
     if (!node->follower->block) node->follower->block = new ShBasicBlock();
@@ -118,11 +123,15 @@ struct InitLiveCode {
 
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
 #ifdef SH_DEBUG_OPTIMIZER
-      if(I->dest.node()->kind() == SH_TEMP && !p->hasDecl(I->dest.node())) {
+      if(!I->dest.null() && I->dest.node()->kind() == SH_TEMP && !p->hasDecl(I->dest.node())) {
         SH_DEBUG_PRINT("No decl for " << I->dest.name());
       }
 #endif
-      if (I->op == SH_OP_KIL
+      // @todo range check if IGNORE is right
+      // maybe use a different flag
+      // @todo range conditions here are probably too conservative for 
+      // inputs, outputs used in computation -> use the valuetracking
+      if (opInfo[I->op].result_source == ShOperationInfo::IGNORE
           || I->dest.node()->kind() != SH_TEMP
           || I->dest.node()->uniform()
           || !p->hasDecl(I->dest.node())
@@ -251,6 +260,7 @@ struct ForwardSubst {
     if (!block) return;
     for (ShBasicBlock::ShStmtList::iterator I = block->begin();
          I != block->end(); ++I) {
+      if(I->dest.null()) continue;
       substitute(*I);
       
       removeAME(I->dest.node());
@@ -339,6 +349,7 @@ void remove_dead_code(ShProgram& p, bool& changed)
       for (ValueTracking::TupleUseDefChain::iterator C = vt->defs[i].begin();
            C != vt->defs[i].end(); ++C) {
         for (ValueTracking::UseDefChain::iterator I = C->begin(); I != C->end(); ++I) {
+          if (I->kind != ValueTracking::Def::STMT) continue;
           if (I->stmt->marked) continue;
           I->stmt->marked = true;
           w.push(I->stmt);

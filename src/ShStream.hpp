@@ -42,17 +42,20 @@ namespace SH {
 class
 SH_DLLEXPORT ShStream {
 public:
+  typedef std::list<ShChannelNodePtr> NodeList;
+  typedef NodeList::iterator iterator;
+  typedef NodeList::const_iterator const_iterator;
+
+  ShStream();
   ShStream(const ShChannelNodePtr& node);
   
   template<typename T>
   ShStream(const ShChannel<T>& channel);
 
-  typedef std::list<ShChannelNodePtr> NodeList;
-
-  NodeList::const_iterator begin() const;
-  NodeList::const_iterator end() const;
-  NodeList::iterator begin();
-  NodeList::iterator end();
+  const_iterator begin() const;
+  const_iterator end() const;
+  iterator begin();
+  iterator end();
   int size() const;
 
   template<typename T>
@@ -66,7 +69,7 @@ public:
   ShStream& operator=(const ShProgram& program);
   
 private:
-  std::list<ShChannelNodePtr> m_nodes;
+  NodeList m_nodes;
 };
 
 /** Combine two streams.

@@ -38,7 +38,7 @@
 #include "ShAaOpHandler.hpp"
 #include "ShTransformer.hpp"
 
-#define SH_DBG_TRANSFORMER
+// #define SH_DBG_TRANSFORMER
 
 namespace SH {
 
@@ -258,6 +258,34 @@ struct StatementSplitter {
     } else destVec.push_back(dest.node());
 
     switch(oldStmt.op) {
+      case SH_OP_CSUM:
+        {
+          SH_DEBUG_ASSERT(destSwiz.size() == 1);
+          ShVariable partialt = ShVariable(resizeCloneNode(dest.node(), 1));
+          ShVariable sumt = ShVariable(resizeCloneNode(dest.node(), 1));
+
+          stmts.push_back(ShStatement(sumt, SH_OP_CSUM, srcVec[0][0]));
+          for(int i = 1; i < srcVec[0].size(); ++i) {
+            stmts.push_back(ShStatement(partialt, SH_OP_CSUM, srcVec[0][i]));
+            stmts.push_back(ShStatement(sumt, sumt, SH_OP_ADD, partialt));
+          }
+          resultVec.push_back(sumt);
+        }
+        break;
+      case SH_OP_CMUL:
+        {
+          SH_DEBUG_ASSERT(destSwiz.size() == 1);
+          ShVariable partialt = ShVariable(resizeCloneNode(dest.node(), 1));
+          ShVariable prodt = ShVariable(resizeCloneNode(dest.node(), 1));
+
+          stmts.push_back(ShStatement(prodt, SH_OP_CMUL, srcVec[0][0]));
+          for(int i = 1; i < srcVec[0].size(); ++i) {
+            stmts.push_back(ShStatement(partialt, SH_OP_CMUL, srcVec[0][i]));
+            stmts.push_back(ShStatement(prodt, prodt, SH_OP_MUL, partialt));
+          }
+          resultVec.push_back(prodt);
+        }
+        break;
       case SH_OP_DOT:
         { 
           // TODO for large tuples, may want to use another dot to sum up results instead of 
@@ -324,6 +352,7 @@ struct StatementSplitter {
         return; 
       }
     }
+    SH_DEBUG_PRINT("Splitting stmt=" << stmt);
     changed = true;
     ShBasicBlock::ShStmtList newStmts;
     VarVec srcVec[3];
@@ -351,6 +380,10 @@ void ShTransformer::splitTuples(int maxTuple, ShTransformer::VarSplitMap &splits
   vs.splitVarList(m_program->inputs);
   vs.splitVarList(m_program->outputs);
   m_program->ctrlGraph->dfs(vs);
+
+#ifdef SH_DBG_TRANSFORMER
+  m_program->dump("splittupl_vars");
+#endif
 
 
   StatementSplitter ss(maxTuple, splits, m_changed);
@@ -556,6 +589,29 @@ void ShTransformer::convertAffineTypes()
   ShAaVarSymsMap empty;
   placeAaSyms(m_program, empty);
   m_changed |= handleAaOps(m_program);
+}
+
+struct DummyOpStripperBase: public ShTransformerParent 
+{
+ bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node) { 
+   switch(I->op) {
+     case SH_OP_STARTSEC:
+     case SH_OP_ENDSEC:
+     case SH_OP_COMMENT:
+       I = node->block->erase(I);
+       return true;
+     default:
+       break;
+   }
+   return false; 
+ }
+};
+typedef ShDefaultTransformer<DummyOpStripperBase> DummyOpStripper;
+
+void ShTransformer::stripDummyOps()
+{
+  DummyOpStripper dos;
+  m_changed |= dos.transform(m_program);
 }
 
 }

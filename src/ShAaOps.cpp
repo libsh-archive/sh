@@ -38,7 +38,10 @@
 #include "ShAaVariable.hpp"
 #include "ShAaOpHandler.hpp"
 
+#ifdef SH_DBG_AA
 #define SH_DEBUG_AAOPS
+#endif
+// #define SH_DEBUG_AAOPS
 
 #ifdef SH_DEBUG_AAOPS
 #define SH_DEBUG_PRINT_AOP(x) { SH_DEBUG_PRINT(x) }
@@ -49,14 +52,26 @@
 namespace {
 using namespace SH;
 
-void affineApprox(ShAaVariable &dest, ShAaVariable src, 
+// Affine approximation
+// Detects if src already has newsyms, in which case it adds the error on
+// as an absolute value
+void affineApprox(ShAaVariable &dest, const ShAaVariable &src, 
                   ShVariable alpha, ShVariable beta, 
                   ShVariable delta, const ShAaSyms &newsyms)
 {
-  dest.ASN(aaMUL(src, alpha)).ADD(beta).setErr(delta, newsyms);
+  dest.ASN(aaMUL(src, alpha)).ADD(beta);
+
+  if((src.use() & newsyms).empty()) { 
+    dest.setErr(delta, newsyms);
+  } else {
+    dest.addErr(delta, newsyms);
+  }
 }
 
 
+// Affine approximation 
+// Detects if a or b already has newsyms, in which case it adds the error on
+// as an absolute value
 void affineApprox(ShAaVariable &dest,
                   const ShAaVariable &a, const ShAaVariable &b,
                   ShVariable alpha, ShVariable beta, ShVariable gamma, 
@@ -71,7 +86,67 @@ void affineApprox(ShAaVariable &dest,
   dest.ASN(aaMUL(b, beta), bonly, false); 
   dest.MAD(b, beta, isct, true);
   dest.ADD(gamma);
-  dest.setErr(delta, newsyms);
+
+  if((a.use() & newsyms).empty() && (b.use() & newsyms).empty()) { 
+    dest.setErr(delta, newsyms);
+  } else {
+    dest.addErr(delta, newsyms);
+  }
+}
+
+
+/* Given a functor F that defines three functions similar to ShAffine.hpp's
+ * convexApprox (except the arguments are now ShVariable tuples),
+ * this does line for line the same thing.
+ *
+ * @see ShAffine.hpp
+ */
+template<typename F>
+void convexApprox(ShAaVariable &dest, const ShAaVariable &src, const ShAaSyms &newsyms, bool poslo=false)
+{
+  // Translated directly from ShAffineImpl.hpp
+  ShVariable lo = src.lo();
+  if(poslo) {
+    ShVariable ZERO = ShConstAttrib1f(0.0f);
+    shMAX(lo, lo, ZERO(ShSwizzle(ZERO.swizzle(), lo.size()))); 
+  }
+  ShVariable hi = src.hi();
+  ShVariable flo = src.temp("fhi"); 
+  ShVariable fhi = src.temp("flo"); 
+  F::f(flo, lo);
+  F::f(fhi, hi);
+
+  ShVariable alpha, ss, bpd, bmd, beta, delta; 
+  alpha = src.temp("alpha");
+
+  ShVariable hilo = src.temp("hi-lo");
+  ShVariable fhiflo = src.temp("fhi-flo");
+  shADD(hilo, hi, -lo);
+  shADD(fhiflo, fhi, -flo);
+  shDIV(alpha, fhiflo, hilo);
+  ss = src.temp("ss");
+  F::dfinv(ss, alpha, lo, hi);
+
+  //if(lo > ss || hi < ss) std::cout << "  WARNING - ss out of bounds" << std::endl;
+  bmd = src.temp("bmd"); 
+  shMAD(bmd, -alpha, lo, flo);
+
+  bpd = src.temp("bpd");
+  ShVariable fdfinv = src.temp("fdfinv");
+  if(F::use_fdf) {
+    F::fdfinv(fdfinv, alpha);
+  } else {
+    F::f(fdfinv, ss);
+  }
+  shMAD(bpd, -alpha, ss, fdfinv); 
+
+  beta = src.temp("beta");
+  shLRP(beta, ShConstAttrib1f(0.5f), bpd, bmd);
+  delta = src.temp("delta");
+  shLRP(delta, ShConstAttrib1f(0.5f), bpd, -bmd);
+
+  shABS(delta, delta);
+  return affineApprox(dest, src, alpha, beta, delta, newsyms);
 }
 
 /* Return the union of the two syms */
@@ -142,10 +217,14 @@ ShAaVariable aaMUL(const ShAaVariable &a, const ShAaVariable &b,
 
   // @see ShAffineImpl.hpp
   // This is just a vectorized copy of operator* from ShAffineImpl
-  ShVariable alpha = b.center(); 
-  ShVariable beta = a.center(); 
-  ShVariable gamma(result.temp("gamma"));
-  ShVariable delta(result.temp("delta"));
+  ShVariable alpha(result.temp("aopMULalpha"));
+  shASN(alpha, b.center()); 
+
+  ShVariable beta(result.temp("aopMULbeta"));
+  shASN(beta, a.center()); 
+
+  ShVariable gamma(result.temp("aopMULgamma"));
+  ShVariable delta(result.temp("aopMULdelta"));
 
   // @todo range - this is bad numerically
   // should just assign the new center to this
@@ -162,6 +241,12 @@ ShAaVariable aaMUL(const ShAaVariable &a, const ShVariable &b)
   return result.MUL(b);
 }
 
+ShAaVariable aaLRP(const ShAaVariable &a, const ShAaVariable &b,
+           const ShAaVariable &c, const ShAaSyms &newsyms)
+{
+  return aaMAD(a, aaADD(b, c.NEG()), c, newsyms);
+}
+
 ShAaVariable aaMAD(const ShAaVariable &a, const ShAaVariable &b,
            const ShAaVariable &c, const ShAaSyms &newsyms)
 {
@@ -169,18 +254,189 @@ ShAaVariable aaMAD(const ShAaVariable &a, const ShAaVariable &b,
   return aaADD(ab, c);
 }
 
+struct __aaop_rcp {
+  typedef ShVariable V; 
+  static const bool use_fdf = false;
+  static void f(V r, V x) { shRCP(r, x); }
+  static void dfinv(V r, V x, V lo, V hi) { 
+    shRSQ(r, -x); 
+    V rSgtHi(r.node()->clone(SH_TEMP));
+    shSGT(rSgtHi, r, hi);
+    shCOND(r, rSgtHi, -r, r);
+  }
+  static void fdfinv(V r, V x) { shSQRT(r, -x); }
+};
+
+
+ShAaVariable aaPOW(const ShAaVariable& a, const ShAaVariable& b, const ShAaSyms& newsyms)
+{
+  return aaEXP(aaMUL(aaLOG(a, newsyms), b, newsyms), newsyms);
+}
+
+ShAaVariable aaRCP(const ShAaVariable& a, const ShAaSyms& newsyms)
+{
+  ShAaVariable result(new ShAaVariableNode(*a.node(), a.use() | newsyms));
+  convexApprox<__aaop_rcp>(result, a, newsyms); // @todo range - fix this
+  return result;
+}
+
+struct __aaop_sqrt {
+  typedef ShVariable V; 
+  static const bool use_fdf = true;
+  static void f(V r, V x) { shSQRT(r, x); }
+  static void dfinv(V r, V x, V lo, V hi) { 
+    shMUL(r, x, x); 
+    shMUL(r, r, ShConstAttrib1f(4.0f));
+    shRCP(r, r);
+  }
+  static void fdfinv(V r, V x) { 
+    shRCP(r, x); 
+    shMUL(r, r, ShConstAttrib1f(0.5f));
+  }
+};
+
+
+ShAaVariable aaSQRT(const ShAaVariable& a, const ShAaSyms& newsyms)
+{
+  // deal with bounds < 0 case...
+  ShAaVariable result(new ShAaVariableNode(*a.node(), a.use() | newsyms));
+  convexApprox<__aaop_sqrt>(result, a, newsyms, true); 
+  return result;
+}
+
 ShAaVariable aaDOT(const ShAaVariable &a, const ShAaVariable &b,
            const ShAaSyms &newsyms)
 {
   SH_DEBUG_ASSERT(a.size() == b.size());
-  ShAaVariable result;
-  SH_DEBUG_ASSERT(0 && "DOT not done");
-#if 0
-  = aaMUL(a(0), b(0), newsyms);
-  for(int i = 1; i <= a.size(); ++i) {
+  ShAaVariable result = aaMUL(a(0), b(0), newsyms);
+  for(int i = 1; i < a.size(); ++i) {
+    // @todo range - should use MAD, but then we just need to change
+    // some of the functions to allow adding to existing error symbols
+    // (after taking absolute values of them...)
     result = aaADD(result, aaMUL(a(i), b(i), newsyms));
   }
-#endif
+  return result;
+}
+
+struct __aaop_exp {
+  typedef ShVariable V; 
+  static const bool use_fdf = true;
+  static void f(V r, V x) { shEXP(r, x); }
+  static void dfinv(V r, V x, V lo, V hi) { shLOG(r, x); }
+  static void fdfinv(V r, V x) { shASN(r, x); }
+};
+
+
+ShAaVariable aaEXP(const ShAaVariable& a, const ShAaSyms& newsyms)
+{
+  ShAaVariable result(new ShAaVariableNode(*a.node(), a.use() | newsyms));
+  convexApprox<__aaop_exp>(result, a, newsyms);
+  return result;
+}
+
+struct __aaop_exp2 {
+  typedef ShVariable V; 
+  static const bool use_fdf = true;
+  static void f(V r, V x) { shEXP2(r, x); }
+  static void dfinv(V r, V x, V lo, V hi) { shLOG2(r, x); }
+  static void fdfinv(V r, V x) { shASN(r, x); }
+};
+
+ShAaVariable aaEXP2(const ShAaVariable& a, const ShAaSyms& newsyms)
+{
+  ShAaVariable result(new ShAaVariableNode(*a.node(), a.use() | newsyms));
+  convexApprox<__aaop_exp2>(result, a, newsyms); 
+  return result;
+}
+
+struct __aaop_exp10 {
+  typedef ShVariable V; 
+  static const bool use_fdf = true;
+  static void f(V r, V x) { shEXP10(r, x); }
+  static void dfinv(V r, V x, V lo, V hi) { shLOG10(r, x); }
+  static void fdfinv(V r, V x) { shASN(r, x); }
+};
+
+ShAaVariable aaEXP10(const ShAaVariable& a, const ShAaSyms& newsyms)
+{
+  ShAaVariable result(new ShAaVariableNode(*a.node(), a.use() | newsyms));
+  convexApprox<__aaop_exp10>(result, a, newsyms); // @todo range - fix this
+  return result;
+}
+
+struct __aaop_log {
+  typedef ShVariable V; 
+  static const bool use_fdf = true;
+  static void f(V r, V x) { shLOG(r, x); }
+  static void dfinv(V r, V x, V lo, V hi) { shRCP(r, x); }
+  static void fdfinv(V r, V x) { 
+    shLOG(r, x); 
+    shASN(r, -r);
+  }
+};
+
+
+ShAaVariable aaLOG(const ShAaVariable& a, const ShAaSyms& newsyms)
+{
+  ShAaVariable result(new ShAaVariableNode(*a.node(), a.use() | newsyms));
+  convexApprox<__aaop_log>(result, a, newsyms, true); // @todo range - fix this
+  return result;
+}
+
+struct __aaop_log2 {
+  typedef ShVariable V; 
+  static const bool use_fdf = true;
+  static void f(V r, V x) { shLOG2(r, x); }
+  static void dfinv(V r, V x, V lo, V hi) { shRCP(r, x); }
+  static void fdfinv(V r, V x) { 
+    shLOG2(r, x); 
+    shASN(r, -r);
+  }
+};
+
+
+ShAaVariable aaLOG2(const ShAaVariable& a, const ShAaSyms& newsyms)
+{
+  ShAaVariable result(new ShAaVariableNode(*a.node(), a.use() | newsyms));
+  convexApprox<__aaop_log2>(result, a, newsyms); // @todo range - fix this
+  return result;
+}
+
+struct __aaop_log10 {
+  typedef ShVariable V; 
+  static const bool use_fdf = true;
+  static void f(V r, V x) { shLOG10(r, x); }
+  static void dfinv(V r, V x, V lo, V hi) { shRCP(r, x); }
+  static void fdfinv(V r, V x) { 
+    shLOG10(r, x); 
+    shASN(r, -r);
+  }
+};
+
+
+ShAaVariable aaLOG10(const ShAaVariable& a, const ShAaSyms& newsyms)
+{
+  ShAaVariable result(new ShAaVariableNode(*a.node(), a.use() | newsyms));
+  convexApprox<__aaop_log10>(result, a, newsyms); // @todo range - fix this
+  return result;
+}
+
+ShAaVariable aaESCJOIN(const ShAaVariable& a, const ShAaSyms& destsyms, const ShAaSyms& newsyms) 
+{
+  // only keep the nonhier syms, and merge the rest
+  ShAaVariable result(new ShAaVariableNode(*a.node(), destsyms));
+  ShAaSyms isct = a.use() & destsyms; 
+  ShAaSyms joinSyms = a.use() - destsyms;
+  result.ASN(a, isct, true); 
+
+  ShVariable joinerr = result.temp(a.name() + "_joinerr");
+  for(int i = 0; i < a.size(); ++i) {
+    ShVariable joinErri = a.err(i, joinSyms[i]);
+    ShVariable absErri = a.node()->makeTemp(joinErri.size(), "_jointemp");
+    shABS(absErri, joinErri); 
+    shCSUM(joinerr(i), absErri); 
+  }
+  result.setErr(joinerr, newsyms);
   return result;
 }
 
@@ -192,6 +448,18 @@ ShAaVariable aaIVAL(const ShVariable& a, const ShVariable& b,
         shIntervalValueType(a.valueType())));
   shIVAL(iaValue, a, b);
   return aaFROMIVAL(iaValue, newsyms);
+}
+
+ShVariable aaLASTERR(const ShAaVariable& a, const ShAaSyms& syms)
+{
+  // @todo range handl case where syms is empty
+  SH_DEBUG_ASSERT(!syms[0].empty());
+  int idx = syms[0].last();
+  ShVariable result(a.temp(a.name() + "_lasterr"));
+  for(int i = 0; i < a.size(); ++i) {
+    shASN(result(i), a.err(i, idx)); 
+  }
+  return result;
 }
 
 ShAaVariable aaFROMIVAL(const ShVariable& a, const ShAaSyms& newsyms)

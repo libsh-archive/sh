@@ -155,7 +155,7 @@ ShCtrlGraphNodePtr ShCtrlGraphNode::split(ShBasicBlock::ShStmtList::iterator stm
 {
   // make a new node to hold the statements after stmt
   // and move over the successors/follower info
-  ShCtrlGraphNode *after = new ShCtrlGraphNode();
+  ShCtrlGraphNodePtr after = new ShCtrlGraphNode();
   after->successors = successors;
   after->follower = follower;
   successors.clear();

@@ -33,6 +33,9 @@
 #include "ShSwizzle.hpp"
 #include "ShDllExport.hpp"
 
+// enable this to turn on all AA debugging
+#define SH_DBG_AA
+
 namespace SH {
 
 /** @file ShAaSyms.hpp
@@ -48,7 +51,6 @@ struct ShAaIndexSet {
   typedef IndexSet::iterator iterator;
   typedef IndexSet::const_iterator const_iterator;
 
-  IndexSet m_idx;
 
   /* Merges this index set with the other index set */
   ShAaIndexSet& operator|=(const ShAaIndexSet& other);
@@ -62,9 +64,12 @@ struct ShAaIndexSet {
   /* Returns the size of the index set */
   int size() const { return m_idx.size(); }
 
-  /* Returns the smallest error symbol, bombs out with an assertion if no such 
+  /* Returns the largest error symbol, bombs out with an assertion if no such 
    * symbol exists. */
-  int first() const;
+  int last() const;
+
+  /* Returns whether the index set contains a certain error symbol */
+  bool contains(int idx) const;
 
   /* Set Ops (union, intesrection, difference) 
    * @{ */
@@ -83,6 +88,9 @@ struct ShAaIndexSet {
   iterator end() { return m_idx.end(); } 
   const_iterator end() const { return m_idx.end(); } 
   // @}
+  
+  private:
+    IndexSet m_idx;
 };
 
 
@@ -97,16 +105,15 @@ struct ShAaSyms {
   // Generates empty syms.
   ShAaSyms(); 
 
-  // Generates empty index sets for a tuple with the given size. 
-  ShAaSyms(int size);
-
   // Generates index sets for a tuple with the given size, assigning
-  // one unique sym per set starting from cur_index.
-  ShAaSyms(int size, int& cur_index);
+  // one unique sym per set. 
+  //
+  // @param empty - don't assign syms at all
+  ShAaSyms(int size, bool empty=true);
 
   // Generates index sets for a tuple with the size of the swizzle, 
-  // assigning one unique sym per swizzle index starting from cur_index.
-  ShAaSyms(const ShSwizzle& swiz, int& cur_index);
+  // assigning one unique sym per swizzle index starting from. 
+  ShAaSyms(const ShSwizzle& swiz);
 
   // Returns size of syms
   int size() const { return m_tidx.size(); } 
@@ -114,11 +121,17 @@ struct ShAaSyms {
   // Resizes 
   void resize(int size) { m_tidx.resize(size); }
 
+  // Returns a swizzling of this aasyms
+  ShAaSyms swizSyms(const ShSwizzle& swiz) const;
+
   // Returns the index set for a given tuple element 
   // @{
   const ShAaIndexSet& operator[](int i) const { return m_tidx[i]; }
   ShAaIndexSet& operator[](int i) { return m_tidx[i]; }
   // @}
+  
+  // Returns whether each tuple element contains exacly one noise sym
+  bool isSingles() const;
 
   // Iterators for the sequence of index sets
   // @{
@@ -150,6 +163,8 @@ struct ShAaSyms {
   friend ShAaSyms operator-(const ShAaSyms &a, const ShAaSyms &b);
   // @}
   friend std::ostream& operator<<(std::ostream& out, const ShAaSyms& syms);
+private:
+  static long m_max_index;
 };
 
 }

@@ -156,6 +156,8 @@ void __shInitRangeOps() {
 
   eval->addOp(SH_OP_WIDTH, new ShRangeOp<SH_OP_WIDTH, T, RangeT>(), 
       V, RangeV);
+  eval->addOp(SH_OP_RADIUS, new ShRangeOp<SH_OP_RADIUS, T, RangeT>(), 
+      V, RangeV);
   eval->addOp(SH_OP_CENTER, new ShRangeOp<SH_OP_CENTER, T, RangeT>(), 
       V, RangeV);
 

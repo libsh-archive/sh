@@ -76,6 +76,12 @@ inline bool shIsAffine(ShValueType value_type)
     (value_type & SH_VALUETYPE_SPECIAL_MASK) == SH_VALUETYPE_SPECIAL_A; 
 }
 
+inline bool shIsRange(ShValueType value_type)
+{
+  // @todo range - this doesn't make it very extendable for user defined types
+  return shIsInterval(value_type) || shIsAffine(value_type); 
+}
+
 inline bool shIsInvalidValueType(ShValueType value_type)
 {
   return value_type == SH_VALUETYPE_END; 

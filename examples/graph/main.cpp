@@ -12,11 +12,36 @@ using namespace std;
 using namespace SH;
 using namespace ShUtil;
 
+// replace with an RPN parser soon
+enum Graph {
+  GR_LINE, // just a line with slope (MUL) 
+  GR_POLY, // polynomial (tests MAD, ADD, MUL)
+  GR_RATPOLY, // rational polynomial (MAD, ADD, MUL, RCP, DIV)
+  GR_EXP, // exponential (EXP, EXP2, EXP10)
+  GR_LOG, // logarithm (LOG, LOG2, LOG10)
+  GR_RCP, // reciprocal (RCP) 
+  GR_SQRT, // square root (SQRT)
+  GR_LRP  // lerp between EXP and LOG (LRP, EXP, LOG)
+};
+const int NUMGRAPHS = (int)(GR_LRP) + 1;
+
+const char* GraphName[] = {
+  "line",
+  "poly",
+  "ratpoly",
+  "exp",
+  "log",
+  "rcp",
+  "sqrt",
+  "lrp"
+};
+
 ShAttrib1f rangeWidth;
 ShAttrib1f eps;
 ShAttrib2f offset;
 ShAttrib1f myscale;
-ShProgram vsh, ifsh, afsh;
+ShProgram vsh, fsh[NUMGRAPHS];
+Graph mode = GR_POLY;
 
 ShAttrib<5, SH_TEMP, float> coeff;
 ShAttrib<3, SH_TEMP, float> denom;
@@ -32,51 +57,44 @@ int cur_x, cur_y;
 
 // implicit form of  a function in 3D space
 // and its gradient (which should be calculated automatically in the future...)
-#if 0
 struct PlotFunction {
   string m_name;
   PlotFunction(string name) : m_name(name) {}
-  ShProgram func() {
-    ShProgram result = SH_BEGIN_PROGRAM() {
-      ShInputPoint3f SH_NAMEDECL(point, m_name);
-      ShOutputAttrib1f SH_DECL(value);
-
-      value = point | point; // euclidean squared distance from 0
-
-    } SH_END;
-    return result;
-  }
-
-  ShProgram grad() {
-    ShProgram result = SH_BEGIN_PROGRAM() {
-      ShInputPoint3f SH_NAMEDECL(point, m_name);
-      ShOutputAttrib3f SH_DECL(gradient);
-
-      gradient = point * 0.5;
-    } SH_END;
-    return result;
-  }
-};
-#else
-struct PlotFunction {
-  string m_name;
-  PlotFunction(string name) : m_name(name) {}
-  ShProgram func() {
+  ShProgram func(Graph g) {
     ShProgram result = SH_BEGIN_PROGRAM() {
       ShInputAttrib1f SH_NAMEDECL(t, m_name);
       ShOutputAttrib1f SH_DECL(value);
 
-     // value = mad(t, mad(t, mad(t, mad(t, coeff(4), coeff(3)), coeff(2)), coeff(1)), coeff(0))
-      //   mad(t, mad(t, denom(2), denom(1)), denom(0));
-
-        value = t * t * coeff(2)  + t * coeff(1) + coeff(0);
-  //        value = t + t; 
-  //      value = t * coeff(0); 
+      switch(g) {
+        case GR_LINE:
+          value = mad(t, coeff(1), coeff(0)); 
+          break;
+        case GR_POLY:
+          //value = mad(t, mad(t, coeff(2), coeff(1)), coeff(0)); 
+          value = t * mad(t, mad(t, coeff(3), coeff(2)), coeff(1)) + coeff(0); break; 
+            break;
+        case GR_RATPOLY:
+          value = (t * mad(t, mad(t, coeff(3), coeff(2)), coeff(1)) + coeff(0))
+            * rcp(mad(t, mad(t, denom(2), denom(1)), denom(0))); break; 
+        case GR_EXP:
+          value = exp(t); break;
+  //        value = exp(t) * coeff(0) + exp2(t) * coeff(1) + exp10(t) * coeff(2); break;
+        case GR_LOG:
+          value = log(t); break;
+   //       value = log(t) * coeff(0) + log2(t) * coeff(1) + log10(t) * coeff(2); break;
+        case GR_RCP:
+          value = rcp(t); break;
+        case GR_SQRT:
+          value = sqrt(t); break;
+        case GR_LRP:
+          value = lerp(coeff(0), exp(t), log(t)); break;
+        default:
+          std::cout << "Not Good!" << std::endl;
+      }
     } SH_END;
     return result;
   }
 };
-#endif
 
 void initShaders() {
     ShMatrix4x4f id;
@@ -98,92 +116,81 @@ void initShaders() {
     coeff.name("coeff");
     denom.name("denom");
 
+    ShColor3f SH_DECL(funcColor) = ShConstAttrib3f(0, 0, 0);
+    ShColor3f SH_DECL(bkgdColor) = ShConstAttrib3f(1, 1, 1);
+    ShColor3f SH_DECL(gridColor) = ShConstAttrib3f(0, 0, 1);
+    ShColor3f SH_DECL(inrangeColor) = ShConstAttrib3f(1, 0.5, 0.5);
 
     // take plot function, find if there's an intersection,
     // kill if no isct
     // or use the gradient function to get a normal if there is an isct. 
     PlotFunction plotfunc("texcoord");
 
-    ShProgram func = plotfunc.func();
-    func.node()->dump("func");
+    for(int i = GR_LINE; i <= GR_LRP; i = i + 1) {
+      ShProgram func = plotfunc.func(static_cast<Graph>(i));
+      ShProgram ifunc = inclusion(func);
 
-    ShProgram ifunc = inclusion(func);
-    ifunc.node()->dump("ifunc");
+      func.node()->dump(std::string("func_") + GraphName[i]); 
+      ifunc.node()->dump(std::string("ifunc_") + GraphName[i]); 
 
-    ShProgram afunc = affine_inclusion(func);
-    afunc.node()->dump("afunc");
+      ShProgram afunc = affine_inclusion_syms(func);
+      afunc.node()->dump(std::string("afunc_") + GraphName[i]); 
 
-    ShColor3f SH_DECL(funcColor) = ShConstAttrib3f(0, 0, 0);
-    ShColor3f SH_DECL(bkgdColor) = ShConstAttrib3f(1, 1, 1);
-    ShColor3f SH_DECL(gridColor) = ShConstAttrib3f(0, 0, 1);
-    ShColor3f SH_DECL(inrangeColor) = ShConstAttrib3f(1, 0.5, 0.5);
+      // if programs could take ShProgram parameters, we wouldn't have to do this 
+      // (although this could be factored out in C++ too...)
+      fsh[i] = SH_BEGIN_FRAGMENT_PROGRAM {
+        ShInputTexCoord2f SH_DECL(texcoord);
+        ShInputPosition4f SH_DECL(posh);
 
-    ifsh = SH_BEGIN_FRAGMENT_PROGRAM {
-      ShInputTexCoord2f SH_DECL(texcoord);
-      ShInputPosition4f SH_DECL(posh);
+        ShOutputColor3f SH_DECL(color);
 
-      ShOutputColor3f SH_DECL(color);
+        ShPoint2f pos = texcoord * myscale + offset;
 
-      ShPoint2f pos = texcoord * myscale + offset;
+        ShAttrib1f scaled_eps = eps * myscale;
 
-      ShAttrib1f scaled_eps = eps * myscale;
+        // check if in curve
+        ShAttrib1f SH_DECL(val) = func(pos(0));  // evaluate function 
+        ShAttrib1f inCurve = abs(val - pos(1)) < scaled_eps; 
 
-      // check if in curve
-      ShAttrib1f SH_DECL(val) = func(pos(0));  // evaluate function 
-      ShAttrib1f inCurve = abs(val - pos(1)) < scaled_eps; 
+        // check if in range
+        ShAttrib1f start = floor(pos(0) / rangeWidth) * rangeWidth; 
+        ShAttrib1f end = ceil(pos(0) / rangeWidth) * rangeWidth; 
+        ShAttrib1a_f SH_DECL(range) = make_interval(start, end);
+        ShAttrib1f SH_DECL(center) = range_center(range);
 
-      // check if in range
-      ShAttrib1f start = floor(pos(0) / rangeWidth) * rangeWidth; 
-      ShAttrib1f end = ceil(pos(0) / rangeWidth) * rangeWidth; 
-      ShAttrib1i_f range = make_interval(start, end);
-      ShAttrib1i_f SH_DECL(result_range) = ifunc(range);
-      ShAttrib1f inRange;
-      
-      inRange = range_lo(range_contains(result_range, pos(1)));
+        ShAttrib1a_f SH_DECL(result_range) = afunc(range);
+        ShAttrib1f SH_DECL(result_center) = range_center(result_range);
+        ShAttrib1f SH_DECL(result_inerr) = affine_lasterr(result_range, range);
+        ShAttrib1f SH_DECL(result_radius) = range_radius(result_range);
+        ShAttrib1f SH_DECL(result_other) = result_radius - abs(result_inerr);
 
-      // check if in grid
-      ShAttrib1f inGrid = (abs(pos(0)) < scaled_eps) + (abs(pos(1)) < scaled_eps); 
+        ShAttrib1i_f SH_DECL(result_rangei) = ifunc(range);
 
-      color = lerp(inGrid, gridColor, lerp(inCurve, funcColor, lerp(inRange, inrangeColor, bkgdColor)));
-      //color=pos(0,1,0);
-    } SH_END;
+        ShAttrib1f SH_DECL(inRange);
+        ShAttrib1f SH_DECL(inRangei);
+        
+        ShColor3f rangeColor = inrangeColor;
 
-    // if programs could take ShProgram parameters, we wouldn't have to do this 
-    // (although this could be factored out in C++ too...)
-    afsh = SH_BEGIN_FRAGMENT_PROGRAM {
-      ShInputTexCoord2f SH_DECL(texcoord);
-      ShInputPosition4f SH_DECL(posh);
+        // should show affine shape, but doesn't quite work
+        ShAttrib1f errValue = (pos(0) - center) / range_radius(range);
+        inRange = abs(errValue * result_inerr + result_center - pos(1)) < result_other;
+        inRangei = range_lo(range_contains(result_rangei, pos(1)));
+        rangeColor(0) = inRange; 
+        rangeColor(1) = inRangei; 
+        //rangeColor(2) = abs(result_center - pos(1)) < eps;
+        inRange = inRange || inRangei;
 
-      ShOutputColor3f SH_DECL(color);
+        // check if in grid
+        ShAttrib1f inGrid = (abs(pos(0)) < scaled_eps) + (abs(pos(1)) < scaled_eps); 
 
-      ShPoint2f pos = texcoord * myscale + offset;
+        color = lerp(inGrid, gridColor, lerp(inCurve, funcColor, lerp(inRange, rangeColor, bkgdColor)));
+        //color=pos(0,1,0);
+      } SH_END;
 
-      ShAttrib1f scaled_eps = eps * myscale;
-
-      // check if in curve
-      ShAttrib1f SH_DECL(val) = func(pos(0));  // evaluate function 
-      ShAttrib1f inCurve = abs(val - pos(1)) < scaled_eps; 
-
-      // check if in range
-      ShAttrib1f start = floor(pos(0) / rangeWidth) * rangeWidth; 
-      ShAttrib1f end = ceil(pos(0) / rangeWidth) * rangeWidth; 
-      ShAttrib1i_f range = make_interval(start, end);
-      ShAttrib1i_f SH_DECL(result_range) = afunc(range);
-      ShAttrib1f inRange;
-      
-      inRange = range_lo(range_contains(result_range, pos(1)));
-
-      // check if in grid
-      ShAttrib1f inGrid = (abs(pos(0)) < scaled_eps) + (abs(pos(1)) < scaled_eps); 
-
-      color = lerp(inGrid, gridColor, lerp(inCurve, funcColor, lerp(inRange, inrangeColor, bkgdColor)));
-      //color=pos(0,1,0);
-    } SH_END;
-    vsh = namedAlign(vsh, ifsh);
-
+      fsh[i].node()->dump(std::string("fsh_") + GraphName[i]);
+    }
+    vsh = namedAlign(vsh, fsh[0]);
     vsh.node()->dump("vsh");
-    ifsh.node()->dump("ifsh");
-    afsh.node()->dump("afsh");
 }
 
 GLuint displayList;
@@ -293,20 +300,15 @@ void keyboard(unsigned char k, int x, int y)
       case '9': denom(2) -= 0.1f; break;
       case '(': denom(2) += 0.1f; break;
 
-      case 'i': 
-        {
-          std::cout << "Changing to IA" << std::endl;
-          shBind(ifsh); 
-          break; 
-        }
-      case 'a': 
-        {
-          std::cout << "Changing to AA" << std::endl;
-          shBind(afsh); 
-          break; 
-        }
+      case '+': if(mode == GR_LRP) mode = GR_LINE; 
+                else mode = static_cast<Graph>(mode + 1);
+                shBind(fsh[mode]); break;
+      case '-': if(mode == GR_LINE) mode = GR_LRP; 
+                else mode = static_cast<Graph>(mode - 1);
+                shBind(fsh[mode]); break;
     }
   std::cout << "Current Settings: " << std::endl;
+  std::cout << "  mode = " << GraphName[mode] << std::endl;
   std::cout << "  epsilon = " << eps << std::endl;
   std::cout << "  width = " << rangeWidth << std::endl;
   std::cout << "  coeff = " << coeff << std::endl;
@@ -316,10 +318,10 @@ void keyboard(unsigned char k, int x, int y)
 
 int main(int argc, char** argv)
 {
-  coeff(0) = 5.0f;;
-  coeff(1) = -1.0f;
-  coeff(2) = 0.04;;
-  coeff(3) = 2.0f;
+  coeff(0) = 0.0f; 
+  coeff(1) = 0.0f; 
+  coeff(2) = 3.0f;;
+  coeff(3) = -2.0f;
 
   denom(0) = 1.0f;
 
@@ -349,7 +351,7 @@ int main(int argc, char** argv)
   try {
     initShaders();
     shBind(vsh);
-    shBind(ifsh);
+    shBind(fsh[mode]);
   } catch(const ShException &e) {
     cout << "Error: " << e.message() << endl;
   } catch(...) {

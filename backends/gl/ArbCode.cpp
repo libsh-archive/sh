@@ -61,7 +61,7 @@ using namespace SH;
 #define shGlDeleteProgramsARB glDeleteProgramsARB
 #define shGlBindProgramARB glBindProgramARB
 
-#define ARBCODE_DEBUG
+// #define ARBCODE_DEBUG
 
 struct ArbBindingSpecs {
   ArbRegBinding binding;
@@ -210,6 +210,7 @@ void ArbCode::generate()
   transform.convertToFloat(m_convertMap);
   //dump(m_shader, "arbcode_conv2float");
   transform.splitTuples(4, m_splits);
+  transform.stripDummyOps();
   //dump(m_shader, "arbcode_split");
   dump(m_shader, "arbcode_done");
  

@@ -102,6 +102,10 @@ const ShOperationInfo opInfo[] = {
   {"OPTBRA", 1, ShOperationInfo::IGNORE, false, false, false},
   {"DECL", 0, ShOperationInfo::IGNORE, false, false, false},
   {"PHI", 1, ShOperationInfo::LINEAR, false, false, false},
+  {"ESCJOIN", 1, ShOperationInfo::IGNORE, false, true, false},
+
+  {"STARTSEC", 0, ShOperationInfo::IGNORE, false, false, false},
+  {"ENDSEC", 0, ShOperationInfo::IGNORE, false, false, false},
 
   {"FETCH", 1, ShOperationInfo::EXTERNAL, true, true, false},
   {"LOOKUP", 2, ShOperationInfo::EXTERNAL, true, true, false},
@@ -111,11 +115,17 @@ const ShOperationInfo opInfo[] = {
   {"LO", 1, ShOperationInfo::LINEAR, true, false, false},
   {"HI", 1, ShOperationInfo::LINEAR, true, false, false},
   {"WIDTH", 1, ShOperationInfo::LINEAR, false, false, false},
+  {"RADIUS", 1, ShOperationInfo::LINEAR, false, false, false},
   {"CENTER", 1, ShOperationInfo::LINEAR, false, false, false},
   {"IVAL", 2, ShOperationInfo::LINEAR, true, true, false},
   {"UNION", 2, ShOperationInfo::LINEAR, true, false, true},
   {"ISCT", 2, ShOperationInfo::LINEAR, true, false, true},
   {"CONTAINS", 2, ShOperationInfo::LINEAR, false, true, false},
+
+  {"ERRFROM", 2, ShOperationInfo::IGNORE, false, false, false}, // this is a special case, ignore the affine_ flags 
+  {"LASTERR", 2, ShOperationInfo::IGNORE, false, false, false}, // this is a special case, ignore the affine_ flags 
+
+  {"COMMENT", 0, ShOperationInfo::IGNORE, false, false, false}, // special comment tag
   
   {0, 0, ShOperationInfo::IGNORE, true, true, false}
 };

@@ -32,6 +32,11 @@ ShGeneric<N, SH_REGULARTYPE(T)> range_hi(const ShGeneric<N, T>& var);
 template<int N, typename T>
 ShGeneric<N, SH_REGULARTYPE(T)> range_width(const ShGeneric<N, T>& var);
 
+ /** radius of a range type 
+  * @todo range could extend this to give 0 for non-range types */ 
+template<int N, typename T>
+ShGeneric<N, SH_REGULARTYPE(T)> range_radius(const ShGeneric<N, T>& var);
+
 /** center of a range type 
  * @todo range could extend this to give var for non-range types*/
 template<int N, typename T>
@@ -72,6 +77,17 @@ SH_SHLIB_CONST_SCALAR_OP_DECL(range_contains);
 SH_SHLIB_CONST_N_OP_BOTH_DECL(range_contains);
 
 /*@}*/
+
+/** Returns the error symbols from a due to b
+ * @todo range this may not be very useful... */
+template<int N1, typename T1, int N2, typename T2>
+ShGeneric<N1, T1>
+affine_errfrom(const ShGeneric<N1, T1>& a, const ShGeneric<N2, T2>& b);
+
+/** Returns the error in a due to last error symbol in b (useful for both getting errors from inputs and stmts) */ 
+template<int N1, typename T1, int N2, typename T2>
+ShGeneric<N1, SH_REGULARTYPE(T1)>
+affine_lasterr(const ShGeneric<N1, T1>& a, const ShGeneric<N2, T2>& b);
 
 }
 #endif

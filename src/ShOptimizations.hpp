@@ -1,11 +1,13 @@
 #ifndef SHOPTIMIZATIONS_HPP
 #define SHOPTIMIZATIONS_HPP
 
+#include <iosfwd>
+#include <vector>
+#include <set>
+#include <map>
 #include "ShProgram.hpp"
 #include "ShInfo.hpp"
 #include "ShStatement.hpp"
-#include <vector>
-#include <set>
 
 // Uncomment this to turn on optimizer debugging using dot.
 // Warning: This is very verbose!
@@ -54,55 +56,134 @@ void remove_dead_code(ShProgram& p, bool& changed);
 SH_DLLEXPORT
 void propagate_constants(ShProgram& p);
 
+/* per statement uddu chains */
 struct 
 SH_DLLEXPORT
 ValueTracking : public ShInfo {
   ValueTracking(ShStatement* stmt);
 
   ShInfo* clone() const;
+
   
   struct Def {
+    enum Kind {
+      INPUT,
+      STMT
+    };
+
     Def(ShStatement* stmt, int index)
-      : stmt(stmt), index(index)
+      : kind(STMT), node(0), stmt(stmt), index(index)
     {
     }
+
+    Def(ShVariableNodePtr node, int index)
+      : kind(INPUT), node(node), stmt(0), index(index) 
+    {}
     
+    Kind kind;
+    ShVariableNodePtr node;
     ShStatement* stmt;
-    int index;
+    int index; ///< represents swizzled index (no swizzling for INPUTS)
 
     bool operator<(const Def& other) const
     {
-      return stmt < other.stmt || (stmt == other.stmt && index < other.index);
+      return kind < other.kind ||
+             (kind == other.kind && 
+             (node < other.node ||
+             (node == other.node &&
+             (stmt < other.stmt || 
+             (stmt == other.stmt && index < other.index)))));
     }
+
+    int absIndex() const
+    {
+      if(kind == INPUT) return index;
+      return stmt->dest.swizzle()[index];
+    }
+
+    friend std::ostream& operator<<(std::ostream& out, const Def& def);
   };
+
   struct Use {
+    enum Kind {
+      OUTPUT,
+      STMT
+    };
+
     Use(ShStatement* stmt, int source, int index)
-      : stmt(stmt), source(source), index(index)
+      : kind(STMT), node(0), stmt(stmt), source(source), index(index)
+    {
+    }
+
+    Use(ShVariableNodePtr node, int index)
+      : kind(OUTPUT), node(node), stmt(0), source(0), index(index)
     {
     }
 
     bool operator<(const Use& other) const
     {
-      return stmt < other.stmt
-        || (stmt == other.stmt && (source < other.source
-                                   || (source == other.source && index < other.index)));
+      return kind < other.kind ||
+             (kind == other.kind && 
+             (node < other.node ||
+             (node == other.node &&
+             (stmt < other.stmt || 
+             (stmt == other.stmt && 
+             (source < other.source ||
+             (source == other.source && index < other.index)))))));
     }
 
+    int absIndex() const
+    {
+      if(kind == OUTPUT) return index;
+      return stmt->src[source].swizzle()[index];
+    }
+
+    friend std::ostream& operator<<(std::ostream& out, const Use& use);
+
+    Kind kind;
+    ShVariableNodePtr node;
     ShStatement* stmt;
     int source; // source variable
-    int index; // tuple index
+    int index; // tuple index (swizzled)
   };
 
   // For each tuple element, track all of the uses of our definition.
   typedef std::set<Use> DefUseChain;
   typedef std::vector<DefUseChain> TupleDefUseChain;
   TupleDefUseChain uses;
+
+  friend std::ostream& operator<<(std::ostream& out, const TupleDefUseChain& tdu);
   
   // For each tuple element in each of our sources, track all the
   // definition points.
   typedef std::set<Def> UseDefChain;
   typedef std::vector<UseDefChain> TupleUseDefChain;
-  TupleUseDefChain defs[3];
+  typedef std::vector<TupleUseDefChain> TupleUseDefChainVec;
+  TupleUseDefChainVec defs;
+
+  friend std::ostream& operator<<(std::ostream& out, const TupleUseDefChain& tud);
+};
+
+/* du chains for all inputs in a program */
+struct InputValueTracking: public ShInfo 
+{
+  ShInfo* clone() const;
+  
+  friend std::ostream& operator<<(std::ostream& out, const InputValueTracking& ivt);
+
+  typedef std::map<ShVariableNodePtr, ValueTracking::TupleDefUseChain> InputTupleDefUseChain; 
+  InputTupleDefUseChain inputUses;
+};
+
+/* ud chains for all outputs in a program */
+struct OutputValueTracking: public ShInfo 
+{
+  ShInfo* clone() const;
+
+  friend std::ostream& operator<<(std::ostream& out, const OutputValueTracking& ovt);
+
+  typedef std::map<ShVariableNodePtr, ValueTracking::TupleUseDefChain> OutputTupleUseDefChain; 
+  OutputTupleUseDefChain outputDefs;
 };
 
 }

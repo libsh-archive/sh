@@ -35,6 +35,7 @@
 #include "ShVariableNode.hpp"
 #include "ShStatement.hpp"
 #include "ShProgramNode.hpp"
+#include "ShInclusion.hpp"
 #include "ShAaSyms.hpp"
 
 namespace SH {
@@ -46,6 +47,7 @@ namespace SH {
 
 /** Holds symbol information for a statement */     
 struct ShAaStmtSyms: public ShInfo {
+  unsigned int level; // nesting level of this statement
   ShStatement *stmt;
   typedef std::vector<ShAaSyms> SymsVec; 
 
@@ -59,7 +61,7 @@ struct ShAaStmtSyms: public ShInfo {
   SymsVec src;
 
   // Generates empty syms sets with sizes based on stmt 
-  ShAaStmtSyms(ShStatement* stmt);
+  ShAaStmtSyms(int level, ShStatement* stmt);
 
   ShInfo* clone() const; 
 
@@ -68,6 +70,9 @@ struct ShAaStmtSyms: public ShInfo {
 
 typedef std::map<ShVariableNodePtr, ShAaSyms> ShAaVarSymsMap;
 std::ostream& operator<<(std::ostream& out, const ShAaVarSymsMap& vsmap);
+
+typedef std::map<ShStmtIndex, ShAaSyms> ShAaStmtSymsMap;
+std::ostream& operator<<(std::ostream& out, const ShAaStmtSymsMap& ssmap);
 
 typedef std::set<ShVariableNodePtr> ShAaVarSet;
 
@@ -79,6 +84,7 @@ typedef std::set<ShVariableNodePtr> ShAaVarSet;
  */
 struct ShAaProgramSyms: public ShInfo {
   ShAaVarSymsMap inputs, vars, outputs;
+  ShAaStmtSymsMap stmts;
 
   ShInfo* clone() const;
 
@@ -98,6 +104,8 @@ struct ShAaProgramSyms: public ShInfo {
  * this map, will be assigned a single unique error symbol per tuple element. 
  *               
  */
+SH_DLLEXPORT 
+void placeAaSyms(ShProgramNodePtr programNode);
 SH_DLLEXPORT 
 void placeAaSyms(ShProgramNodePtr programNode, const ShAaVarSymsMap& inputs);
 

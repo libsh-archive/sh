@@ -77,6 +77,8 @@
 #include "ShMemoryDep.hpp"
 #include "ShPalette.hpp"
 #include "ShInclusion.hpp"
+#include "ShAaScanCore.hpp"
+#include "ShAaScanErr.hpp"
 
 /** \namespace SH
  * \brief The main Sh namespace.

@@ -98,7 +98,7 @@ enum __ShValueTypeEnum {
   SH_VALUETYPE_TYPE_FRAC  = 0x0020,
 
   SH_VALUETYPE_SPECIAL_MASK = 0x7F00, 
-  SH_VALUETYPE_SPECIAL_NONE = 0x0100, 
+  SH_VALUETYPE_SPECIAL_NONE = 0x0000, 
   SH_VALUETYPE_SPECIAL_I    = 0x0100, 
   SH_VALUETYPE_SPECIAL_A    = 0x0200, 
 
@@ -120,6 +120,7 @@ bool shIsSigned(ShValueType value_type);
 bool shIsRegularValueType(ShValueType value_type);
 bool shIsInterval(ShValueType value_type);
 bool shIsAffine(ShValueType value_type);
+bool shIsRange(ShValueType value_type);
 
 bool shIsInvalidValueType(ShValueType value_type);
 // @}

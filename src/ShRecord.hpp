@@ -51,13 +51,11 @@ public:
   ShRecord();
   ShRecord(const ShVariable &var);
   
-
   const_iterator begin() const;
   const_iterator end() const;
   iterator begin();
   iterator end();
   int size() const;
-
 
   void append(const ShVariable& variable);
   void prepend(const ShVariable& variable);
@@ -72,6 +70,14 @@ public:
 
   // Execute fully bound record program and place results in record.
   ShRecord& operator=(const ShProgram& program);
+
+  // Converts a ShRecord containing only uniforms into a stream
+  // (Must be unswizzled uniforms (and not constants), as this uses the variable's
+  // variant arrays directly as the channel memory
+  //
+  // If you change any of the values here, you must call 
+  // update_all on the nodes
+  //ShStream toStream();
   
 private:
   VarList m_vars;

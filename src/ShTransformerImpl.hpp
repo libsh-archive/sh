@@ -47,6 +47,7 @@ struct CastExtractorBase: public ShTransformerParent
   bool handleStmt(ShBasicBlock::ShStmtList::iterator& I, ShCtrlGraphNodePtr node)
   {
     ShStatement &stmt = *I;
+    if(stmt.dest.null()) return false;
 
     // get eval op
     const ShEvalOpInfo* evalInfo = ShEval::instance()->getEvalOpInfo(stmt);  

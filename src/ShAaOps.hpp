@@ -86,30 +86,39 @@ ShAaVariable aaDOT(const ShAaVariable& a, const ShAaVariable& b, const ShAaSyms&
 #if 0
 ShAaVariable aaDX(const ShAaVariable& a);
 ShAaVariable aaDY(const ShAaVariable& a);
-ShAaVariable aaEXP(const ShAaVariable& a);
-ShAaVariable aaEXP2(const ShAaVariable& a);
-ShAaVariable aaEXP10(const ShAaVariable& a);
+#endif
+ShAaVariable aaEXP(const ShAaVariable& a, const ShAaSyms& newsyms);
+ShAaVariable aaEXP2(const ShAaVariable& a, const ShAaSyms& newsyms);
+ShAaVariable aaEXP10(const ShAaVariable& a, const ShAaSyms& newsyms);
+#if 0
 ShAaVariable aaFLR(const ShAaVariable& a);
 ShAaVariable aaFRAC(const ShAaVariable& a);
-ShAaVariable aaLOG(const ShAaVariable& a);
-ShAaVariable aaLOG2(const ShAaVariable& a);
-ShAaVariable aaLOG10(const ShAaVariable& a);
-ShAaVariable aaLRP(const ShAaVariable& alpha,
-           const ShAaVariable& a, const ShAaVariable& b);
 #endif
+ShAaVariable aaLOG(const ShAaVariable& a, const ShAaSyms& newsyms);
+ShAaVariable aaLOG2(const ShAaVariable& a, const ShAaSyms& newsyms);
+ShAaVariable aaLOG10(const ShAaVariable& a, const ShAaSyms& newsyms);
+
+// @todo range - scalar version 
+ShAaVariable aaLRP(const ShAaVariable& alpha, const ShAaVariable& a, 
+                   const ShAaVariable& b, const ShAaSyms& newsyms);
+// @todo range - scalar version 
 ShAaVariable aaMAD(const ShAaVariable& a, const ShAaVariable& b, 
                    const ShAaVariable& c, const ShAaSyms& newsyms);
 #if 0
 ShAaVariable aaMAX(const ShAaVariable& a, const ShAaVariable& b);
 ShAaVariable aaMIN(const ShAaVariable& a, const ShAaVariable& b);
 ShAaVariable aaMOD(const ShAaVariable& a, const ShAaVariable& b);
-ShAaVariable aaPOW(const ShAaVariable& a, const ShAaVariable& b);
-ShAaVariable aaRCP(const ShAaVariable& a);
+#endif
+ShAaVariable aaPOW(const ShAaVariable& a, const ShAaVariable& b, const ShAaSyms& newsyms);
+ShAaVariable aaRCP(const ShAaVariable& a, const ShAaSyms& newsyms);
+#if 0
 ShAaVariable aaRND(const ShAaVariable& a);
 ShAaVariable aaRSQ(const ShAaVariable& a);
 ShAaVariable aaSGN(const ShAaVariable& a);
 ShAaVariable aaSIN(const ShAaVariable& a);
-ShAaVariable aaSQRT(const ShAaVariable& a);
+#endif
+ShAaVariable aaSQRT(const ShAaVariable& a, const ShAaSyms& newsyms);
+#if 0
 ShAaVariable aaTAN(const ShAaVariable& a);
 
 ShAaVariable aaNORM(const ShAaVariable& a);
@@ -118,12 +127,23 @@ ShAaVariable aaXPD(const ShAaVariable& a, const ShAaVariable& b);
 ShAaVariable aaCOND(const ShAaVariable& cond,
             const ShAaVariable& a, const ShAaVariable& b);
 
+#endif
+// special escaped variable join function
+// @todo range will have to make this better in the future to handle
+//  a) joint shape on input ranges
+//  b) make output an affine approx of section inputs 
+
+ShAaVariable aaESCJOIN(const ShAaVariable& a, const ShAaSyms& destsyms, const ShAaSyms& newsyms); 
+
+#if 0
 // interval arithmetic ops 
 ShAaVariable aaLO(const ShAaVariable& a);
 
 ShAaVariable aaHI(const ShAaVariable& a);
 
 ShAaVariable aaWIDTH(const ShAaVariable& a);
+
+ShAaVariable aaRADIUS(const ShAaVariable& a);
 
 ShAaVariable aaCENTER(const ShAaVariable& a);
 
@@ -137,6 +157,9 @@ ShAaVariable aaUNION(const ShAaVariable& a, const ShAaVariable& b);
 ShAaVariable aaISCT(const ShAaVariable& a, const ShAaVariable& b);
 
 ShAaVariable aaCONTAINS(const ShAaVariable& a, const ShAaVariable& b);
+#endif
+ShVariable aaLASTERR(const ShAaVariable& a, const ShAaSyms& syms); 
+#if 0
 
 
 ShAaVariable aaKIL(const ShAaVariable& cond);

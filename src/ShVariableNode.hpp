@@ -98,6 +98,9 @@ public:
   std::string name() const; ///< Get this variable's name
   void name(const std::string& n); ///< Set this variable's name
 
+  /// Whether this variable has ranges set
+  bool hasRange();
+ 
   /// Set a range of possible values for this variable's elements
   // low and high must be scalar elements (otherwise this just uses the first component)
   void rangeVariant(const ShVariant* low, const ShVariant* high);
@@ -140,6 +143,9 @@ public:
   /// Retrieve the variant.  This should probably only be used internally.
   // You need to call update_all if you change the values here
   ShVariant* getVariant();
+
+  /// @internal Changes the the internal variant to the given one.
+  void changeVariant(ShVariantPtr other);
 
   /// Ensure this node has space to store host-side values.
   /// Normally this is not necessary, but when uniforms are given

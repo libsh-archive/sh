@@ -38,6 +38,16 @@ range_width(const ShGeneric<N, T>& var)
 template<int N, typename T>
 inline
 ShGeneric<N, SH_REGULARTYPE(T)> 
+range_radius(const ShGeneric<N, T>& var)
+{
+  ShAttrib<N, SH_TEMP, SH_REGULARTYPE(T)> t;
+  shRADIUS(t, var);
+  return t;
+}
+
+template<int N, typename T>
+inline
+ShGeneric<N, SH_REGULARTYPE(T)> 
 range_center(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, SH_REGULARTYPE(T)> t;
@@ -95,6 +105,26 @@ ShGeneric<N, CT1T2> range_contains(const ShGeneric<N, T1>& a,
 }
 SH_SHLIB_CONST_SCALAR_OP(range_contains);
 SH_SHLIB_CONST_N_OP_BOTH(range_contains);
+
+template<int N1, typename T1, int N2, typename T2>
+ShGeneric<N1, T1>
+affine_errfrom(const ShGeneric<N1, T1>& a, const ShGeneric<N2, T2>& b)
+{
+  SH_DEBUG_ASSERT(ShIsAffine<T1>::matches && ShIsAffine<T2>::matches);
+  ShAttrib<N1, SH_TEMP, T1> t;
+  shERRFROM(t, a, b);
+  return t;
+}
+
+template<int N1, typename T1, int N2, typename T2>
+ShGeneric<N1, SH_REGULARTYPE(T1)>
+affine_lasterr(const ShGeneric<N1, T1>& a, const ShGeneric<N2, T2>& b)
+{
+  SH_DEBUG_ASSERT(ShIsAffine<T1>::matches && ShIsAffine<T2>::matches);
+  ShAttrib<N1, SH_TEMP, SH_REGULARTYPE(T1)> t;
+  shLASTERR(t, a, b);
+  return t;
+}
 
 }
 

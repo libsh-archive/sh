@@ -29,9 +29,13 @@
 #include "ShDebug.hpp"
 #include "ShTransformer.hpp"
 #include "ShOptimizations.hpp"
+#include "ShAaHier.hpp"
 #include "ShAaSymPlacer.hpp"
 
+#ifdef SH_DBG_AA
 #define SH_DBG_AASYMPLACER
+#endif
+// #define SH_DBG_AASYMPLACER
 
 #ifdef SH_DBG_AASYMPLACER
 #define SH_DEBUG_PRINT_ASP(x) { SH_DEBUG_PRINT(x); }
@@ -39,10 +43,14 @@
 #define SH_DEBUG_PRINT_ASP(x) {}
 #endif
 
+// @todo range
+// - check if m_changed is always being set correctly 
+
 namespace {
 using namespace SH;
 
 typedef std::queue<ValueTracking::Def> WorkList;
+typedef std::vector<ShAaIndexSet> SymLevelVec; ///< used to hold symbols at each nesting level
 
 /* Looks at sources and initializes symbols for dest.
  * If dest is non-empty, adds the definition to the worklist 
@@ -50,7 +58,7 @@ typedef std::queue<ValueTracking::Def> WorkList;
  * @param worklist The worklist to add Definitions to
  * @param addAlways If true, then always adds a dest if it is not empty.
  *                  else only adds if it has changed */
-void updateDest(ShAaStmtSyms *stmtSyms, WorkList &worklist, bool addAlways=false)
+void updateDest(ShAaStmtSyms *stmtSyms, const SymLevelVec& levelSyms, WorkList &worklist, bool addAlways=false)
 {
   ShStatement* stmt = stmtSyms->stmt;
   ShAaSyms &dest = stmtSyms->dest;
@@ -58,15 +66,63 @@ void updateDest(ShAaStmtSyms *stmtSyms, WorkList &worklist, bool addAlways=false
 
   std::vector<bool> destChanged(dest.size(), false);
 
-  if(opInfo[stmt->op].affine_keep) {
+  if(stmt->op == SH_OP_ERRFROM) {
+    SH_DEBUG_PRINT_ASP("    ERRFROM");
+    ShAaIndexSet all; 
+
+    for(int i = 0; i < src[1].size(); ++i) {
+      all |= src[1][i];
+    }
+
+    SH_DEBUG_ASSERT(dest.size() == src[0].size());
+    for(int i = 0; i < dest.size(); ++i) {
+      int oldsize = dest[i].size();
+      dest.merge(i, src[0][i] & all);
+      destChanged[i] = (oldsize != dest[i].size());
+    }
+#if 0
+  // @todo range - result of LASTERR is non-affine
+  } else if(stmt->op == SH_OP_LASTERR) {
+    SH_DEBUG_ASSERT(src[1].size() == 1);
+
+    if(!src[1][0].empty()) {
+      SH_DEBUG_ASSERT(dest.size() == src[0].size());
+      for(int i = 0; i < dest.size(); ++i) {
+        int oldsize = dest[i].size();
+        dest[i] |= src[1][0].last();
+        destChanged[i] = (oldsize != dest[i].size());
+      }
+    }
+#endif
+  } else if(stmt->op == SH_OP_ESCJOIN) {
+    SH_DEBUG_PRINT_ASP("    ESCJOIN");
+    SH_DEBUG_ASSERT(dest.size() == src[0].size());
+    unsigned int myLevel = stmtSyms->level;
+    if(myLevel < levelSyms.size()) {
+      for(int i = 0; i < dest.size(); ++i) {
+        int oldsize = dest[i].size();
+        // get symbols added in level lower than current level
+        // @todo range check that the set on the right cannot get smaller, hence
+        // meaning we have to remove syms from dest... (that may not be
+        // good...inf loops, nonconvergence)
+        dest.merge(i, src[0][i] - levelSyms[myLevel]);
+        destChanged[i] = (oldsize != dest[i].size());
+      }
+    }
+  } else if(opInfo[stmt->op].affine_keep) {
     switch(opInfo[stmt->op].result_source) {
       case ShOperationInfo::IGNORE: 
         break;
 
-      case ShOperationInfo::LINEAR:
       case ShOperationInfo::EXTERNAL: // assume component-wise error sym propagation 
+        SH_DEBUG_PRINT_ASP("    EXTERNAL");
+        SH_DEBUG_PRINT("Did not deal with external op " << *stmt);
+        break;
+
+
+      case ShOperationInfo::LINEAR:
         {
-          SH_DEBUG_PRINT_ASP("    LINEAR/EXTERNAL"); 
+          SH_DEBUG_PRINT_ASP("    LINEAR"); 
           for(int i = 0; i < dest.size(); ++i) {
             int oldsize = dest[i].size();
             for(int j = 0; j < opInfo[stmt->op].arity; ++j) {
@@ -153,11 +209,23 @@ struct SymInitBase: public ShTransformerParent {
       if(!shIsAffine(node->valueType())) continue; 
       else if(psyms->inputs.find(node) != psyms->inputs.end()) continue;
 
-      psyms->inputs[node] = ShAaSyms(node->size(), cur_index);
+      psyms->inputs[node] = ShAaSyms(node->size(), false);
+      insertSyms(0, psyms->inputs[node]);
       m_changed = true;
 
-      SH_DEBUG_PRINT_ASP("Allocating error sym " << psyms->inputs[node] << " for input " << node->name());
+      SH_DEBUG_PRINT_ASP("Allocating error sym " << psyms->inputs[node] << " for input " << node->name() << " at level 0");
     }
+  }
+
+  void insertSyms(int level, const ShAaSyms& syms) {
+    // resize level vec resize up to level if necessary
+    if(levelSyms.size() <= (unsigned int) level) {
+      levelSyms.resize(level + 1);
+    }
+    for(ShAaSyms::const_iterator I = syms.begin(); I != syms.end(); ++I) {
+      levelSyms[level] |= *I;
+    }
+    SH_DEBUG_PRINT_ASP("Inserting level " << level << " syms=" << syms);
   }
 
 
@@ -166,11 +234,19 @@ struct SymInitBase: public ShTransformerParent {
     ShStatement& stmt = *I;
     if(stmt.dest.null()) return false;
 
-    ShAaStmtSyms *stmtSyms = new ShAaStmtSyms(&stmt); 
+    // get node nesting level
+    ShSectionInfo* sectionInfo = node->get_info<ShSectionInfo>();
+    SH_DEBUG_ASSERT(sectionInfo);
+    int level = sectionInfo->level; 
+
+    ShAaStmtSyms *stmtSyms = new ShAaStmtSyms(level, &stmt); 
     stmt.destroy_info<ShAaStmtSyms>();
     stmt.add_info(stmtSyms);
 
+    ValueTracking* vt = stmt.get_info<ValueTracking>();
+
     SH_DEBUG_PRINT_ASP("handleStmt stmt=" << stmt << " cur_index=" << cur_index);
+
 
     // @todo range - don't bother placing symbols if there are no affine sources
     // or dests in the statement.
@@ -179,28 +255,50 @@ struct SymInitBase: public ShTransformerParent {
     for(int i = 0; i < opInfo[stmt.op].arity; ++i) {
 
       if(psyms->inputs.find(stmt.src[i].node()) != psyms->inputs.end()) {
-        // affine inputs already have assigned error symbols
-        // @todo range (being conservative here.  Should check if input value
-        // actually reaches this point of the program) 
-        stmtSyms->src[i].merge(stmt.src[i].swizzle(), psyms->inputs[stmt.src[i].node()]); 
+        if(!vt) {
+          SH_DEBUG_PRINT("vt missing for stmt=" << stmt);
+          stmtSyms->src[i].merge(stmt.src[i].swizzle(), psyms->inputs[stmt.src[i].node()]); 
+        } else {
+          ValueTracking::TupleUseDefChain& srcDefs = vt->defs[i]; 
+          for(int j = 0; j < stmt.src[i].size(); ++j) {
+            for(ValueTracking::UseDefChain::iterator J = srcDefs[j].begin();
+                J != srcDefs[j].end(); ++J) {
+              if(J->kind == ValueTracking::Def::INPUT) {
+                stmtSyms->src[i][j] |= psyms->inputs[stmt.src[i].node()][stmt.src[i].swizzle()[j]];
+              }
+            }
+          }
+        }
         m_changed = true;
         SH_DEBUG_PRINT_ASP("  fetched input sym " << stmtSyms->src[i] << " for src[" << i << "]"); 
 
       } else if(shIsInterval(stmt.src[i].valueType())) {
         // Assign new error symbols for IA source arguments
-        stmtSyms->src[i] = ShAaSyms(stmt.src[i].swizzle(), cur_index);
+        stmtSyms->src[i] = ShAaSyms(stmt.src[i].swizzle());
+        insertSyms(level, stmtSyms->src[i]);
         m_changed = true;
-        SH_DEBUG_PRINT_ASP("  allocating error sym " << stmtSyms->src[i] << " for src[" << i << "]"); 
+        SH_DEBUG_PRINT_ASP("  allocating error sym " << stmtSyms->src[i] << " for src[" << i << "] at level " << level); 
       }
     }
 
     // check if op adds a symbol to the output, if so, add it 
-    if(opInfo[stmt.op].affine_add) { 
-      stmtSyms->dest = stmtSyms->newdest = ShAaSyms(stmt.dest.size(), cur_index);
+    if(opInfo[stmt.op].affine_add && shIsRange(stmt.dest.valueType())) { 
+      stmtSyms->dest = stmtSyms->newdest = ShAaSyms(stmt.dest.size(), false);
+
+      // insert ESCJOIN new syms up one level
+      if(stmt.op == SH_OP_ESCJOIN) {
+        insertSyms(level - 1, stmtSyms->newdest);
+      } else {
+        insertSyms(level, stmtSyms->newdest);
+      }
+      const ShStmtIndex* sidx = stmt.get_info<ShStmtIndex>();
+      if(sidx) {
+        psyms->stmts[*sidx] = stmtSyms->newdest;
+      }
       m_changed = true;
-      SH_DEBUG_PRINT_ASP("  allocating error sym " << stmtSyms->dest << " for dest"); 
+      SH_DEBUG_PRINT_ASP("  allocating error sym " << stmtSyms->dest << " for dest at level " << level); 
     }
-    updateDest(stmtSyms, *worklist, true);
+    updateDest(stmtSyms, levelSyms, *worklist, true);
     return false;
   }
 
@@ -214,6 +312,9 @@ struct SymInitBase: public ShTransformerParent {
   ShAaProgramSyms* psyms;
   WorkList* worklist;
   int cur_index;
+
+  // levelSyms[i] represents the symbols inserted at nesting level i 
+  SymLevelVec levelSyms;
 };
 typedef ShDefaultTransformer<SymInitBase> SymInit;
 
@@ -230,35 +331,55 @@ struct SymGatherBase: public ShTransformerParent {
   bool handleStmt(ShBasicBlock::ShStmtList::iterator& I, ShCtrlGraphNodePtr node)
   {
     ShStatement& stmt = *I;
+    if(stmt.dest.null()) return false;
+    ValueTracking* vt = stmt.get_info<ValueTracking>();
+
     const ShAaStmtSyms* stmtSyms = stmt.get_info<ShAaStmtSyms>();
+    if(stmtSyms) {
+      SH_DEBUG_PRINT_ASP("  gathering " << stmt);
+      SH_DEBUG_PRINT_ASP("     syms= " << *stmtSyms);
+    }
     if(stmtSyms && !stmtSyms->dest.empty()) {
       if(psyms->vars.find(stmt.dest.node()) == psyms->vars.end()) {
         psyms->vars[stmt.dest.node()] = ShAaSyms(stmt.dest.node()->size());
       }
       psyms->vars[stmt.dest.node()].mask_merge(stmt.dest.swizzle(), stmtSyms->dest);
-      SH_DEBUG_PRINT_ASP("  gathering sym " << psyms->vars[stmt.dest.node()]
-          << " for stmt=" << stmt);
+
+      // attach a comment
+      std::ostringstream sout;
+      sout << *stmtSyms; 
+      stmt.destroy_info<ShInfoComment>();
+      stmt.add_info(new ShInfoComment(sout.str()));
+
+      // update outputs
+      ShBindingType kind = stmt.dest.node()->kind();
+      if(vt && (kind == SH_OUTPUT || kind == SH_INOUT) && 
+          shIsAffine(stmt.dest.valueType())) { 
+        for(int i = 0; i < stmt.dest.size(); ++i) {
+          ValueTracking::DefUseChain::iterator I;
+          for(I = vt->uses[i].begin(); I != vt->uses[i].end(); ++I) {
+            if(I->kind == ValueTracking::Use::OUTPUT) {
+              ShAaSyms& outSyms = psyms->outputs[stmt.dest.node()];
+              if(outSyms.empty()) {
+                outSyms.resize(stmt.dest.size());
+              }
+              outSyms[stmt.dest.swizzle()[i]] |= stmtSyms->dest[i];
+            }
+          }
+        }
+      }
     }
     return false;
   }
 
-  /* Set syms for outputs */ 
-  void finish()
-  {
-    ShProgramNode::VarList::const_iterator V = m_program->outputs.begin();
-    for(; V != m_program->outputs.end(); ++V) {
-      ShVariableNodePtr node = *V;
-      if(!shIsAffine(node->valueType())) continue; 
-
-      if(psyms->vars.find(node) == psyms->vars.end()) { // make empty syms
-        psyms->outputs[node] = ShAaSyms(node->size()); 
-      } else {
-        // @todo range - should not really do this.  Remove symbols that are not
-        // active at the output 
-        psyms->outputs[node] = psyms->vars[node];
+  // make sure all outputs have syms (in case there's an output never asn'd to)
+  void finish() {
+    for(ShProgramNode::VarList::iterator O = m_program->outputs.begin();
+        O != m_program->outputs.end(); ++O) {
+      if(!shIsAffine((*O)->valueType())) continue;
+      if(psyms->outputs.find(*O) == psyms->outputs.end()) {
+        psyms->outputs[*O].resize((*O)->size());
       }
-      SH_DEBUG_PRINT_ASP("  output sym " << node->name() <<  "=" << psyms->outputs[node]); 
-      m_changed = true;
     }
   }
 
@@ -284,8 +405,9 @@ typedef ShDefaultTransformer<SymRemoverBase> SymRemover;
 
 namespace SH {
 
-ShAaStmtSyms::ShAaStmtSyms(ShStatement* stmt)
-  : stmt(stmt), 
+ShAaStmtSyms::ShAaStmtSyms(int level, ShStatement* stmt)
+  : level(level), 
+    stmt(stmt), 
     newdest(stmt->dest.size()),
     dest(stmt->dest.size()),
     src(opInfo[stmt->op].arity)
@@ -301,8 +423,8 @@ ShInfo* ShAaStmtSyms::clone() const {
 
 std::ostream& operator<<(std::ostream& out, const ShAaStmtSyms& stmtSyms)
 {
-  out << "AaStmtSyms { " 
-      << " stmt=" << *(stmtSyms.stmt); 
+  out << "StmtSyms { ";
+  out << " level=" << stmtSyms.level;
   if(!stmtSyms.newdest.empty()) {
     out << " new=" << stmtSyms.newdest;
   }
@@ -313,7 +435,7 @@ std::ostream& operator<<(std::ostream& out, const ShAaStmtSyms& stmtSyms)
   out << " )";
   out << " src=[";
   for(int i = 0; i < opInfo[stmtSyms.stmt->op].arity; ++i) {
-    out << " " << i << "->";
+    if(i > 0) out << ", ";
     for(int j = 0; j < stmtSyms.src[i].size(); ++j) {
       out << stmtSyms.src[i][j];
     }
@@ -333,6 +455,16 @@ std::ostream& operator<<(std::ostream& out, const ShAaVarSymsMap& vsmap)
   return out;
 }
 
+std::ostream& operator<<(std::ostream& out, const ShAaStmtSymsMap& ssmap)
+{
+  out << "(( ";
+  for(ShAaStmtSymsMap::const_iterator I = ssmap.begin(); I != ssmap.end(); ++I) {
+    out << " " << I->first.index() << "=" << I->second; 
+  }
+  out << "))";
+  return out;
+}
+
 ShInfo* ShAaProgramSyms::clone() const {
   return new ShAaProgramSyms(*this);
 }
@@ -347,10 +479,29 @@ std::ostream& operator<<(std::ostream& out, const ShAaProgramSyms& progSyms)
   return out;
 }
 
+void placeAaSyms(ShProgramNodePtr programNode)
+{
+  ShAaVarSymsMap foo;
+  placeAaSyms(programNode, foo);
+}
+
 void placeAaSyms(ShProgramNodePtr programNode, const ShAaVarSymsMap& inputs)
 {
   WorkList worklist;
   ShProgram program(programNode);
+
+  SH_DEBUG_PRINT_ASP("Clearing any old syms");
+  clearAaSyms(programNode);
+
+  SH_DEBUG_PRINT_ASP("Hierarchical Initialization"); 
+  ShStructural programStruct(programNode->ctrlGraph);
+  inEscAnalysis(programStruct, programNode);
+#ifdef SH_DBG_AASYMPLACER 
+  programNode->dump("sap_inesc");
+#endif
+
+  SH_DEBUG_PRINT_ASP("Adding Section Info"); 
+  addSectionInfo(programStruct, programNode);
 
   SH_DEBUG_PRINT_ASP("Adding Value Tracking");
   programNode->ctrlGraph->computePredecessors();
@@ -364,6 +515,7 @@ void placeAaSyms(ShProgramNodePtr programNode, const ShAaVarSymsMap& inputs)
   SymInit si; 
   si.init(&inputs, &worklist);
   si.transform(programNode);
+  ShAaProgramSyms* psyms = si.psyms;
 
   // Propagate error symbols over control graph 
   SH_DEBUG_PRINT_ASP("Propagating syms");
@@ -385,6 +537,9 @@ void placeAaSyms(ShProgramNodePtr programNode, const ShAaVarSymsMap& inputs)
 
     for (ValueTracking::DefUseChain::iterator use = vt->uses[def.index].begin();
          use != vt->uses[def.index].end(); ++use) {
+
+      if(use->kind != ValueTracking::Use::STMT) continue;
+
       ShAaStmtSyms* useStmtSyms = use->stmt->get_info<ShAaStmtSyms>();
       if (!useStmtSyms) {
         SH_DEBUG_PRINT_ASP("Use " << *use->stmt << " does not have ESU information!");
@@ -394,12 +549,11 @@ void placeAaSyms(ShProgramNodePtr programNode, const ShAaVarSymsMap& inputs)
           << " stmt=" << *use->stmt); 
       SH_DEBUG_PRINT_ASP("    syms=" << *useStmtSyms);
       useStmtSyms->src[use->source][use->index] |= defStmtSyms->dest[def.index];
-      updateDest(useStmtSyms, worklist);
+      updateDest(useStmtSyms, si.levelSyms, worklist); 
     }
   }
 
   // Gather syms for vars, outputs
-  ShAaProgramSyms* psyms = si.psyms;
   SymGather sg;
   sg.init(psyms);
   sg.transform(programNode);

@@ -238,9 +238,13 @@ std::ostream& operator<<(std::ostream& out, const ShVariable& v)
     return out;
   }
 
-  out << '[';
+  if(v.size() > 1) {
+    out << '[';
+  }
   out << v.getVariant()->encodeArray();
-  out<<']';
+  if(v.size() > 1) {
+    out<<']';
+  }
   return out;
 }
 

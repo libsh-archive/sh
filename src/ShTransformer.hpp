@@ -165,6 +165,10 @@ public:
   template<class DoVec>
   void vectorizeScalars();
 #endif
+
+  /** Strips out dummy statements (SECTION in particular) 
+   */
+  void stripDummyOps();
   
 private:
   /// NOT IMPLEMENTED
