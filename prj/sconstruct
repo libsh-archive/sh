@@ -1,5 +1,14 @@
+import socket,re
+
 env = Environment( LIBS    = Split('sh GL png'),
                    CPPPATH = Split('. .. ../src'),
                    CCFLAGS = '-g -O0 -Wall' )
 
-env.Program('add-im',Split('add_im.cpp test.cpp'))
+runcom = './add-im'
+
+if re.compile("p[\d]+.ecf").match(socket.gethostname()):
+	env['LIBPATH'] = ['/u/0T5/merchan/usr/lib']
+	runcom = 'LD_LIBRARY_PATH="/u/0T5/merchan/usr/lib" ' + runcom
+
+prog = env.Program('add-im',Split('add_im.cpp test.cpp'))
+test = env.Command('test',prog,runcom)

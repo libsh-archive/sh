@@ -1,6 +1,6 @@
 # Change this location to where you installed Sh
 # E.g. /usr/local
-SH_INSTALL_DIR = ${HOME}/install-sh
+SH_INSTALL_DIR = ${HOME}/usr
 
 SOURCES = $(wildcard *.cpp)
 OBJECTS = $(SOURCES:.cpp=.o)
