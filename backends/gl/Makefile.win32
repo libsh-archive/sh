@@ -49,9 +49,9 @@ libsharb_dll_RELEASE_OBJECTS = $(libsharb_dll_CXXFILES:.cpp=.r.obj)
 libsharb_dll_DEBUG_OBJECTS = $(libsharb_dll_CXXFILES:.cpp=.d.obj)
 
 libsharb_dll_RELEASE_LDADD = ../../src/libsh.lib 
-libsharb_dll_RELEASE_LDADD += OPENGL32.LIB
+libsharb_dll_RELEASE_LDADD += GDI32.LIB USER32.LIB OPENGL32.LIB
 libsharb_dll_DEBUG_LDADD = ../../src/libshd.lib 
-libsharb_dll_DEBUG_LDADD += OPENGL32.LIB
+libsharb_dll_DEBUG_LDADD += GDI32.LIB USER32.LIB OPENGL32.LIB
 
 libsharb.dll: $(libsharb_dll_RELEASE_OBJECTS)
 	$(LD) /DLL /OUT:$@ $^ $(RELEASE_LDFLAGS) $(libsharb_dll_RELEASE_LDADD)
