@@ -82,6 +82,9 @@ public:
   PassList::const_iterator root() const { return m_root; }
 
   std::size_t num_passes() { return m_passes.size(); }
+
+  // Number of temporary buffers used.
+  std::size_t num_temps() { return m_num_temps; }
   
 private:
   // The program for which this schedule is generated.
@@ -98,11 +101,13 @@ private:
   // The original inputs and outputs
   ShProgramNode::VarList m_inputs, m_outputs;
 
+  ShVoidPtr m_backend_data;
+
+  std::size_t m_num_temps;
+
   // NOT IMPLEMENTED
   ShSchedule(const ShSchedule&);
   ShSchedule& operator=(const ShSchedule&);
-
-  ShVoidPtr m_backend_data;
 };
 
 }

@@ -18,7 +18,7 @@ using namespace SH;
 struct TempCounter {
   TempCounter(std::map<ShVariableNode*, int>& register_count,
               std::map<ShVariableNode*, Mapping>& register_map,
-              int& max_register)
+              std::size_t& max_register)
     : register_count(register_count),
       register_map(register_map),
       max_register(max_register)
@@ -94,7 +94,7 @@ struct TempCounter {
 
   std::map<ShVariableNode*, int>& register_count;
   std::map<ShVariableNode*, Mapping>& register_map;
-  int max_register;
+  std::size_t max_register;
 };
 
 struct ScheduleBuilder {
@@ -296,9 +296,9 @@ ShSchedule::ShSchedule(const ShProgramNodePtr& program_orig)
   // Aka. the "Tibi register allocator"
   std::map<ShVariableNode*, int> register_count;
   std::map<ShVariableNode*, Mapping> register_map;
-  int max_register = 0;
+  
   ShContext::current()->enter(m_program);
-  TempCounter count(register_count, register_map, max_register);
+  TempCounter count(register_count, register_map, m_num_temps);
   m_program->ctrlGraph->dfs(count);
   ShContext::current()->exit();
 
