@@ -1,3 +1,19 @@
+2004-10-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShConstProp.cpp (ConstPropInfo): Respect "opt:lifting"
+	metadata. This should be particularily useful for bypassing Sh's
+	uniform updating facilities (to trade convenience for speed).
+
+	* backends/gl/ArbCode.cpp (generate): Remove debugging output.
+	(allocateRegister): Throw exception from here to be caught further up.
+	(allocRegs): Catch exception from allocateRegister and provide
+	more useful error message.
+
+	* src/ShLinearAllocator.hpp: Remove spurious semicolon
+
+	* src/ShStatement.cpp: Set arity of PAL to 2 instead of 1.
+	This took a while to track down!
+
 2004-10-25  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* examples/particle/main.cpp: Use nicer colours.

@@ -82,6 +82,6 @@ private:
   LifetimeMap m_lifetimes;
 };
 
-};
+}
 
 #endif

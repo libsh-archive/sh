@@ -45,7 +45,13 @@ struct ConstProp : public ShStatementInfo {
           break;
         case SH_TEMP:
           if (stmt->src[i].uniform()) {
-            src[i].push_back(Cell(Cell::UNIFORM, stmt->src[i], j));
+            // Don't lift computations dependent on uniforms which
+            // have been marked with "opt:lifting" == "never"
+            if (stmt->src[i].meta("opt:lifting") != "never") {
+              src[i].push_back(Cell(Cell::UNIFORM, stmt->src[i], j));
+            } else {
+              src[i].push_back(Cell(Cell::BOTTOM));
+            }
           } else {
             src[i].push_back(Cell(Cell::TOP));
           }

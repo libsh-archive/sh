@@ -185,11 +185,8 @@ void ArbCode::generate()
     m_shader->ctrlGraph->entry()->clearMarked();
     allocRegs();
   } catch (...) {
-    std::cerr << "Caught exception in ARB code generation" << std::endl;
     m_shader->ctrlGraph->entry()->clearMarked();
-    std::cerr << "parsing: " << ShContext::current()->parsing() << std::endl;
     ShContext::current()->exit();
-    std::cerr << "parsing: " << ShContext::current()->parsing() << std::endl;
     throw;
   }
   ShContext::current()->exit();
@@ -202,8 +199,9 @@ bool ArbCode::allocateRegister(const ShVariableNodePtr& var)
   if (var->uniform()) return true;
 
   if (m_tempRegs.empty()) {
-    shError(ShException("ARB Backend: Out of registers"));
-    return false;
+    // This gets caught around allocTemps.
+    throw 1; // yes, it's hacky. Instead we should throw a different
+             // type, or store the limit information.
   }
 
   int idx = m_tempRegs.front();
@@ -777,8 +775,17 @@ void ArbCode::allocRegs()
   }
 
   allocConsts(limits);
-  
-  allocTemps(limits);
+
+  try {
+    allocTemps(limits);
+  } catch (int) {
+    std::ostringstream os;
+    os << "Out of temporary registers (" << limits.temps()
+       << " were available)";
+    throw ArbException(os.str());
+  } catch (...) {
+    throw;
+  }
 
   // Allocate array register
   if (m_shader->palettes_begin() != m_shader->palettes.end()) {
