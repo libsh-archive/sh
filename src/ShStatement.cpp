@@ -8,16 +8,31 @@ namespace SH {
  */
 const ShOperationInfo opInfo[] = {
   {"ASN", 1},
+  
   {"NEG", 1},
   {"ADD", 2},
   {"MUL", 2},
   {"DIV", 2},
+
+  {"SLT", 2},
+  {"SLE", 2},
+  {"SGT", 2},
+  {"SGE", 2},
+  {"SEQ", 2},
+  {"SNE", 2},
+  
   {"ABS", 1},
   {"ACOS", 1},
   {"ASIN", 1},
   {"ATAN", 1},
   {"ATAN2", 2},
   {"CEIL", 1},
+  {"COS", 1},
+  {"DOT", 2},
+  {"FRAC", 1},
+  {"POW", 2},
+  {"SIN", 1},
+  {"SQRT", 1},
   {0, 0}
 };
 

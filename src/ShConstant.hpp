@@ -12,7 +12,7 @@ template<int N, typename T>
 class ShConstant : public ShVariableN<N, T> 
 {
 public:
-  explicit ShConstant(T value);
+  ShConstant(T value);
   explicit ShConstant(T values[N]);
 
 private:

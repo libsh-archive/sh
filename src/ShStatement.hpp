@@ -13,16 +13,31 @@ namespace SH {
  */
 enum ShOperation {
   SH_OP_ASN, ///< Assignment
+  
   SH_OP_NEG, ///< Unary negation
   SH_OP_ADD, ///< Binary addition
   SH_OP_MUL, ///< Binary multiplication
   SH_OP_DIV, ///< Binary division
+
+  SH_OP_SLT,
+  SH_OP_SLE,
+  SH_OP_SGT,
+  SH_OP_SGE,
+  SH_OP_SEQ,
+  SH_OP_SNE,
+  
   SH_OP_ABS, ///< Unary absolute value
   SH_OP_ACOS, ///< Unary arccosine (result between -pi/2 and pi/2)
   SH_OP_ASIN, ///< Unary arcsine (result between 0 and pi)
   SH_OP_ATAN, ///< Unary arctan (result between -pi/2 and pi/2)
   SH_OP_ATAN2, ///< Binary arctan of src2/src1 (result between -pi and pi)
   SH_OP_CEIL, ///< Unary smallest integer not less than src1
+  SH_OP_COS, ///< Unary cosine function
+  SH_OP_DOT, ///< Binary dot product
+  SH_OP_FRAC, ///< Unary fractional part
+  SH_OP_POW, ///< Binary power
+  SH_OP_SIN, ///< Unary sine function
+  SH_OP_SQRT, ///< Unary square root
   // TODO: finish these
 };
 

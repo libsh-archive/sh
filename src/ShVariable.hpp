@@ -44,8 +44,19 @@ public:
   /// Set the values of this variable, using the swizzle as a
   /// writemask.
   void setValues(ShVariableNode::ValueType values[]);
+
+  ShVariable operator()() const; ///< Identity swizzle
+  ShVariable operator()(int) const;
+  ShVariable operator()(int, int) const;
+  ShVariable operator()(int, int, int) const;
+  ShVariable operator()(int, int, int, int) const;
+  ShVariable operator()(int size, int indices[]) const;
   
 protected:
+  ShVariable(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg)
+    : m_node(node), m_swizzle(swizzle), m_neg(neg)
+  {
+  }
   
   ShVariableNodePtr m_node; ///< The actual variable node we refer to.
   ShSwizzle m_swizzle; ///< Swizzling applied to this variable.

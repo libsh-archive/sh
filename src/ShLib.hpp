@@ -141,6 +141,158 @@ ShVariableN<N, T> operator/(const ShVariableN<N, T>& left, const ShVariableN<M, 
   }
 }
 
+/// Conventional power operation.
+template<int N, typename T>
+ShVariableN<N, T> operator^(const ShVariableN<N, T>& left, const ShVariableN<1, T>& right)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(left.hasValues());
+    assert(right.hasValues());
+    T lvals[N];
+    left.getValues(lvals);
+    T rvals[1];
+    right.getValues(rvals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = std::pow(lvals[i], rvals[0]);
+    return ShConstant<N, T>(result);
+  } else {
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, left, SH_OP_POW, right);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
+
+// "Boolean" operators
+
+template<int N, typename T>
+ShVariableN<N, T> operator<(const ShVariableN<N, T>& left, const ShVariableN<1, T>& right)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(left.hasValues());
+    assert(right.hasValues());
+    T lvals[N];
+    left.getValues(lvals);
+    T rvals[1];
+    right.getValues(rvals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = (lvals[i] < rvals[0] ? 1.0 : 0.0);
+    return ShConstant<N, T>(result);
+  } else {
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, left, SH_OP_SLT, right);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
+
+template<int N, typename T>
+ShVariableN<N, T> operator<=(const ShVariableN<N, T>& left, const ShVariableN<1, T>& right)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(left.hasValues());
+    assert(right.hasValues());
+    T lvals[N];
+    left.getValues(lvals);
+    T rvals[1];
+    right.getValues(rvals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = (lvals[i] <= rvals[0] ? 1.0 : 0.0);
+    return ShConstant<N, T>(result);
+  } else {
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, left, SH_OP_SLE, right);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
+
+template<int N, typename T>
+ShVariableN<N, T> operator>(const ShVariableN<N, T>& left, const ShVariableN<1, T>& right)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(left.hasValues());
+    assert(right.hasValues());
+    T lvals[N];
+    left.getValues(lvals);
+    T rvals[1];
+    right.getValues(rvals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = (lvals[i] > rvals[0] ? 1.0 : 0.0);
+    return ShConstant<N, T>(result);
+  } else {
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, left, SH_OP_SGT, right);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
+
+template<int N, typename T>
+ShVariableN<N, T> operator>=(const ShVariableN<N, T>& left, const ShVariableN<1, T>& right)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(left.hasValues());
+    assert(right.hasValues());
+    T lvals[N];
+    left.getValues(lvals);
+    T rvals[1];
+    right.getValues(rvals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = (lvals[i] >= rvals[0] ? 1.0 : 0.0);
+    return ShConstant<N, T>(result);
+  } else {
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, left, SH_OP_SGE, right);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
+
+template<int N, typename T>
+ShVariableN<N, T> operator==(const ShVariableN<N, T>& left, const ShVariableN<1, T>& right)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(left.hasValues());
+    assert(right.hasValues());
+    T lvals[N];
+    left.getValues(lvals);
+    T rvals[1];
+    right.getValues(rvals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = (lvals[i] == rvals[0] ? 1.0 : 0.0);
+    return ShConstant<N, T>(result);
+  } else {
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, left, SH_OP_SEQ, right);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
+
+template<int N, typename T>
+ShVariableN<N, T> operator!=(const ShVariableN<N, T>& left, const ShVariableN<1, T>& right)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(left.hasValues());
+    assert(right.hasValues());
+    T lvals[N];
+    left.getValues(lvals);
+    T rvals[1];
+    right.getValues(rvals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = (lvals[i] != rvals[0] ? 1.0 : 0.0);
+    return ShConstant<N, T>(result);
+  } else {
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, left, SH_OP_SNE, right);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
+
+
+
 //--- Library calls "ported" from Cg
 
 /// Absolute value
@@ -199,6 +351,107 @@ ShVariableN<N, T> asin(const ShVariableN<N, T>& var)
     ShStatement stmt(t, SH_OP_ASIN, var);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     
+    return t;
+  }
+}
+
+/// Cosine of x.
+template<int N, typename T>
+ShVariableN<N, T> cos(const ShVariableN<N, T>& var)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(var.hasValues());
+    T vals[N];
+    var.getValues(vals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = std::cos(vals[i]);
+    return ShConstant<N, T>(result);
+  } else {
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, SH_OP_COS, var);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    
+    return t;
+  }
+}
+
+
+// Dot product
+template<int N, typename T>
+ShVariableN<1,  T> dot(const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(left.hasValues());
+    T lvals[N];
+    left.getValues(lvals);
+    T rvals[N];
+    right.getValues(rvals);
+    T result = 0.0;
+    for (int i = 0; i < N; i++) result += lvals[i] * rvals[i];
+    return ShConstant<1, T>(result);
+  } else {
+    ShAttrib<1, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, left, SH_OP_DOT, right);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
+
+/// Fractional part.
+template<int N, typename T>
+ShVariableN<N, T> frac(const ShVariableN<N, T>& var)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(var.hasValues());
+    T vals[N];
+    var.getValues(vals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = fmod(vals[i], 1.0); // TODO: Check that this is correct
+    return ShConstant<N, T>(result);
+  } else {
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, SH_OP_FRAC, var);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
+
+
+/// Sine of x.
+template<int N, typename T>
+ShVariableN<N, T> sin(const ShVariableN<N, T>& var)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(var.hasValues());
+    T vals[N];
+    var.getValues(vals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = std::sin(vals[i]);
+    return ShConstant<N, T>(result);
+  } else {
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, SH_OP_SIN, var);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    
+    return t;
+  }
+}
+
+// Square root.
+template<int N, typename T>
+ShVariableN<N, T> sqrt(const ShVariableN<N, T>& var)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(var.hasValues());
+    T vals[N];
+    var.getValues(vals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = std::sqrt(vals[i]);
+    return ShConstant<N, T>(result);
+  } else {
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, SH_OP_SQRT, var);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
     return t;
   }
 }

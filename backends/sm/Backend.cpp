@@ -202,22 +202,103 @@ void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
       m_instructions.push_back(SmInstruction(OP_ADD, stmt.dest, stmt.src1, stmt.src2));
       break;
     case SH_OP_MUL:
-      // TODO: Scalar mult
+      {
+      if (stmt.src1.size() != 1 || stmt.src2.size() != 1) {
+        if (stmt.src1.size() == 1) {
+          int* swizzle = new int[stmt.src2.size()];
+          for (int i = 0; i < stmt.src2.size(); i++) swizzle[i] = 0;
+          m_instructions.push_back(SmInstruction(OP_MUL, stmt.dest,
+                                                 stmt.src1(stmt.src2.size(), swizzle), stmt.src2));
+          delete [] swizzle;
+          break;
+        } else if (stmt.src2.size() == 1) {
+          int* swizzle = new int[stmt.src1.size()];
+          for (int i = 0; i < stmt.src1.size(); i++) swizzle[i] = 0;
+          m_instructions.push_back(SmInstruction(OP_MUL, stmt.dest, stmt.src1,
+                                                 stmt.src2(stmt.src1.size(), swizzle)));
+          delete [] swizzle;
+          break;
+        }
+      }
+      
       m_instructions.push_back(SmInstruction(OP_MUL, stmt.dest, stmt.src1, stmt.src2));
       break;
+      }
     case SH_OP_DIV:
       {
-      int rsize = stmt.src2.swizzle().size();
-      if (!rsize) rsize = stmt.src2.size();
-      ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, rsize));
-      m_instructions.push_back(SmInstruction(OP_RCP, rcp, stmt.src2));
-      // TODO: scalar
-      m_instructions.push_back(SmInstruction(OP_MUL, stmt.dest, stmt.src1, rcp));
-      break;
+        ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, stmt.src2.size()));
+        m_instructions.push_back(SmInstruction(OP_RCP, rcp, stmt.src2));
+
+        if (rcp.size() == 1 && stmt.src1.size() != 1) {
+          int* swizzle = new int[stmt.src1.size()];
+          for (int i = 0; i < stmt.src1.size(); i++) swizzle[i] = 0;
+          m_instructions.push_back(SmInstruction(OP_MUL, stmt.dest, stmt.src1,
+                                                 rcp(stmt.src1.size(), swizzle)));
+          delete [] swizzle;
+        } else {
+          m_instructions.push_back(SmInstruction(OP_MUL, stmt.dest, stmt.src1, rcp));
+        }
+        break;
       }
+    case SH_OP_SLT:
+      m_instructions.push_back(SmInstruction(OP_SLT, stmt.dest, stmt.src1, stmt.src2));
+      break;
+    case SH_OP_SLE:
+      m_instructions.push_back(SmInstruction(OP_SLE, stmt.dest, stmt.src1, stmt.src2));
+      break;
+    case SH_OP_SGT:
+      m_instructions.push_back(SmInstruction(OP_SGT, stmt.dest, stmt.src1, stmt.src2));
+      break;
+    case SH_OP_SGE:
+      m_instructions.push_back(SmInstruction(OP_SGE, stmt.dest, stmt.src1, stmt.src2));
+      break;
+    case SH_OP_SEQ:
+      m_instructions.push_back(SmInstruction(OP_SEQ, stmt.dest, stmt.src1, stmt.src2));
+      break;
+    case SH_OP_SNE:
+      m_instructions.push_back(SmInstruction(OP_SNE, stmt.dest, stmt.src1, stmt.src2));
+      break;
     case SH_OP_ABS:
       m_instructions.push_back(SmInstruction(OP_ABS, stmt.dest, stmt.src1));
       break;
+    case SH_OP_COS:
+      m_instructions.push_back(SmInstruction(OP_COS, stmt.dest, stmt.src1));
+      break;
+    case SH_OP_DOT:
+      {
+        if (stmt.src1.size() == 3) {
+          m_instructions.push_back(SmInstruction(OP_DP3, stmt.dest, stmt.src1, stmt.src2));
+        } else if (stmt.src1.size() == 4) {
+          m_instructions.push_back(SmInstruction(OP_DP4, stmt.dest, stmt.src1, stmt.src2));
+        } else if (stmt.src1.size() == 1) {
+          m_instructions.push_back(SmInstruction(OP_MUL, stmt.dest, stmt.src1, stmt.src2));
+        } else {
+          ShVariable mul(new ShVariableNode(SH_VAR_TEMP, stmt.src1.size()));
+          m_instructions.push_back(SmInstruction(OP_MUL, mul, stmt.src1, stmt.src2));
+          m_instructions.push_back(SmInstruction(OP_ADD, stmt.dest, mul(0), mul(1)));
+          for (int i = 2; i < stmt.src1.size(); i++) {
+            m_instructions.push_back(SmInstruction(OP_ADD, stmt.dest, stmt.dest, mul(i)));
+          }
+        }
+      break;
+      }
+    case SH_OP_FRAC:
+      m_instructions.push_back(SmInstruction(OP_FRC, stmt.dest, stmt.src1));
+      break;
+    case SH_OP_POW:
+      m_instructions.push_back(SmInstruction(OP_POW, stmt.dest, stmt.src1, stmt.src2));
+      break;
+    case SH_OP_SIN:
+      m_instructions.push_back(SmInstruction(OP_SIN, stmt.dest, stmt.src1));
+      break;
+    case SH_OP_SQRT:
+      {
+        int rsize = stmt.src1.size();
+        ShVariable rsq(new ShVariableNode(SH_VAR_TEMP, rsize));
+        m_instructions.push_back(SmInstruction(OP_RSQ, rsq, stmt.src1));
+        m_instructions.push_back(SmInstruction(OP_RCP, stmt.dest, rsq));
+        break;
+      }
     default:
       // TODO: other ops
       SH_DEBUG_WARN(opInfo[stmt.op].name << " not implement in SM backend");
@@ -260,9 +341,6 @@ SmRegister BackendCode::getReg(const SH::ShVariableNodePtr& var)
     return m_registers[var];
   }
 
-  // TODO: Mark uniforms here, perhaps, so they can be rebound.
-  // OTOH we could just use the shader's uniform list.
-  
   switch (var->kind()) {
   case SH_VAR_INPUT:
     m_registers[var] = SmRegister(SHSM_REG_INPUT, m_maxIR++);

@@ -11,6 +11,8 @@ SMALL TASKS:
  X compute uniform constant operations in the host
  X send uniform values to SM in the SM backend
  - have updating semantics for uniforms
+ X add Swizzling operators to ShVariable
+ - make ShVariable operators return ShVariableN
  - add Swizzling operators to ShVariableN
  X negation in SM backend code upload
  X store ShBackendCode objects in ShShader
@@ -33,3 +35,28 @@ LARGE TASKS:
  - textures
  - more backends
 
+OPERATIONS:
+
++-----+
+|L S S|
+|i t M|
+|b m  |
+|  t  |
+|-+-+-+
+|X|X|X| mul
+|X|X|X| div
+|X|X|X| sqrt
+|X|X|X| dot
+|X|X|X| pow
+|X|X|X| frac
+|X|X|X| sin
+|X|X|X| cos
+|X|X|X| <, <=, >, >=, ==, !=
+| | | | exp
+| | | | log
+| | | | fmod
+| | | | lerp
+| | | | rcp (?)
+| | | | rsqrt
+| |X| | ceil
++-+-+-+

@@ -67,4 +67,34 @@ void ShVariable::setValues(ShVariableNode::ValueType values[])
   }
 }
 
+ShVariable ShVariable::operator()() const
+{
+  return ShVariable(m_node, m_swizzle, m_neg);
+}
+
+ShVariable ShVariable::operator()(int i1) const
+{
+  return ShVariable(m_node, m_swizzle * ShSwizzle(size(), i1), m_neg);
+}
+
+ShVariable ShVariable::operator()(int i1, int i2) const
+{
+  return ShVariable(m_node, m_swizzle * ShSwizzle(size(), i1, i2), m_neg);
+}
+
+ShVariable ShVariable::operator()(int i1, int i2, int i3) const
+{
+  return ShVariable(m_node, m_swizzle * ShSwizzle(size(), i1, i2, i3), m_neg);
+}
+
+ShVariable ShVariable::operator()(int i1, int i2, int i3, int i4) const
+{
+  return ShVariable(m_node, m_swizzle * ShSwizzle(size(), i1, i2, i3, i4), m_neg);
+}
+
+ShVariable ShVariable::operator()(int n, int indices[]) const
+{
+  return ShVariable(m_node, m_swizzle * ShSwizzle(size(), n, indices), m_neg);
+}
+
 }
