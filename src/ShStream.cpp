@@ -31,6 +31,8 @@
 #include "ShAlgebra.hpp"
 #include "ShContext.hpp"
 
+#include <algorithm>
+
 namespace SH {
 
 // May want to move this elsewhere
@@ -50,6 +52,13 @@ ShStream::ShStream(const ShChannelNodePtr& channel, int stride, int offset )
     : m_stride( stride ), m_offset( offset )
 {
   append(channel);
+}
+
+ShStream::ShStream(const ShStream &other, int _stride, int _offset)
+  : m_stride( _stride ), m_offset( _offset )
+{
+  using namespace std;
+  copy( other.begin(), other.end(), back_inserter(m_nodes) );
 }
 
 ShStream::NodeList::const_iterator ShStream::begin() const
