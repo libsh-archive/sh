@@ -28,7 +28,7 @@ ShProgram ShKernelLib::bump() {
     ShOutputNormal3f SH_DECL(normal);
     ShNormal3f tempNormal = inNormal;
     tempNormal(1,2) += gradient;
-    normal = tempNormal;
+    normal = normalize( tempNormal );
   } SH_END;
   return kernel;
 }

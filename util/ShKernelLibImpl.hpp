@@ -69,6 +69,17 @@ ShProgram ShKernelLib::shAccess(const ShTexture2D<T> &tex) {
 }
 
 template<typename T>
+ShProgram ShKernelLib::shScale() {
+  ShProgram nibble = SH_BEGIN_PROGRAM() {
+    ShInputAttrib1f SH_DECL(scale);
+    ATTRIB_DECL(T, SH_VAR_INPUT, attrib);
+    ATTRIB_DECL(T, SH_VAR_OUTPUT, result);
+    result = scale * attrib; 
+  } SH_END;
+  return nibble;
+}
+
+template<typename T>
 ShProgram ShKernelLib::shLerp() {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     ShInputAttrib1f SH_DECL(alpha);

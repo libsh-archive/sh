@@ -1,4 +1,6 @@
 2004-01-18  Bryan Chan  <b8chan@cgl.uwaterloo.ca>
+	* util/ShWorley.cpp: Added good worley bump-mapping
+	
 	* backends/ati/ShArb.?pp, backends/sm/ShSmBackend.?pp:
 	Changed boolean <,<=,>,>=,==,!= operators to accept vec/vec
 	and scalar/vec arguments in addition to original vec/scalar.

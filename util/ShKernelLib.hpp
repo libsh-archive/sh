@@ -65,6 +65,14 @@ class ShKernelLib {
     template<int Rows, int Cols, int Kind, typename T>
     static ShProgram shTransform( const ShMatrix<Rows, Cols, Kind, T> &m ); 
 
+    /** Scales given type by a constant factor
+     * IN(0) ShAttrib1f scale
+     * IN(1) T attrib
+     * OUT(1) T attrib
+     */
+    template<typename T>
+    static ShProgram shScale(); 
+
     /* 2D texture lookup nibble 
      * Inputs: IN(0) ShTexCoord2f tc
      * Outputs: OUT(0) result = tex(tc) */ 

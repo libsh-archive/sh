@@ -115,6 +115,51 @@ class Metric {
 
 };
 
+// hardcoded sort for 9 structs (each struct has 3 scalar elements)
+// distance (in array[0]), x gradient (array[1]), y gradient (array[2])
+//
+// Data is sorted by the distance (comparisons are only done on element[0] each ShAttrib array) 
+//
+// Result is sorted so that
+// even[0](0) <= odd[0](0) <= even[0](1) <= odd[0](1) <= etc. <= last[0]
+// (so the smallest 4 elements are in even[](0), even[](1) and odd[](0), odd[](1)
+//
+void EvenOddSort( ShAttrib4f even[], ShAttrib4f odd[], ShAttrib3f &last ) {
+  ShAttrib4f c; // condition
+
+  // temporaries for holding even values when swapping elements between even/odd 
+  static const int numChannels = 3; // one for position + two for gradients
+  ShAttrib4f et[numChannels]; 
+  int i, j;
+  for(i = 0; i < 5; ++i ) { // must run ceil( 9 / 2 ) iterations to ensure sorted
+    // hand optimizations that maybe the compiler should be doing later:
+    //  -packing scalar ops into vector ops
+    //  -not using temporary to save odd vals by always assigning to odd after reading from odd
+    //  -reusing c(1) as a scalar temporary for saving last(j)
+    // Most of this will not be possible until optimization can be done on individual vector components.
+    c = even[0] < odd[0];
+    for(j = 0; j < numChannels; ++j) { 
+      et[j] = cond(c, even[j], odd[j] );
+      odd[j] = cond(c, odd[j], even[j] );
+    }
+
+    c(0,1,2) = et[0](1,2,3) > odd[0](0,1,2); 
+    for(j = 0; j < numChannels; ++j ) {
+      even[j](1,2,3) = cond(c(0,1,2), et[j](1,2,3), odd[j](0,1,2));
+      even[j](0) = et[j](0);
+      odd[j](0,1,2) = cond(c(0,1,2), odd[j](0,1,2), et[j](1,2,3));
+    }
+
+    c(0) = odd[0](3) < last(0);
+    for( j = 0; j < numChannels; ++j ) {
+      c(1) = last(j);
+      last(j) = cond(c(0),last(j), odd[j](3));
+      odd[j](3) = cond(c(0), odd[j](3), c(1));
+    }
+  }
+}
+
+
 void ShWorley::doWorley(ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m, ShAttrib1f &scalarResult, ShAttrib2f &gradientResult ) {
   ShAttrib3f result;
   Metric dist(m);
@@ -152,60 +197,49 @@ void ShWorley::doWorley(ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m, ShAttrib1f
   // find distances & gradients to neighbours
   ShAttrib4f dadj[2];
   ShAttrib1f dcell;
-  ShAttrib4f gradAdj[4];
+  ShAttrib4f gradAdjX[2], gradAdjY[2];
   ShAttrib2f gradCell;
   dcell = dist( cellPoint, fp );
   gradCell = normalize(cellPoint - fp);
   for(i = 0; i < 4; ++i) {
     dadj[0](i) = dist( adjPoints[i](0,1), fp );
     dadj[1](i) = dist( adjPoints[i](2,3), fp );
-    gradAdj[i](0,1) = normalize(adjPoints[i](0,1) - fp);
-    gradAdj[i](2,3) = normalize(adjPoints[i](2,3) - fp);
+    ShAttrib2f temp = normalize(adjPoints[i](0,1) - fp); 
+    gradAdjX[0](i) = temp(0); 
+    gradAdjY[0](i) = temp(1); 
+    temp = normalize(adjPoints[i](2,3) - fp); 
+    gradAdjX[1](i) = temp(0); 
+    gradAdjY[1](i) = temp(1); 
   }
 
   // TODO find faster method to do k-selection for k = { 1, 2, 3, 4 }
   // Currently does an even-odd transposition sort
-  ShAttrib4f even, odd;
-  ShAttrib1f last;
-  even = dadj[0];
-  odd = dadj[1];
-  last = dcell;
-  ShAttrib4f et, ot, t;
-  for(i = 0; i < 5; ++i ) {
-    et = min( even, odd );
-    ot = max( even, odd );
+  // TODO - When arbitrary length vectors implemented, make this a library function
+  ShAttrib4f even[3], odd[3];
+  ShAttrib3f last;
+  even[0] = dadj[0];
+  even[1] = gradAdjX[0];
+  even[2] = gradAdjY[0];
+  odd[0] = dadj[1];
+  odd[1] = gradAdjX[1];
+  odd[2] = gradAdjY[1];
+  last(0) = dcell;
+  last(1) = gradCell(0);
+  last(2) = gradCell(1);
+  EvenOddSort( even, odd, last );
 
-    even(1,2,3) = max( et(1,2,3), ot(0,1,2) );
-    even(0) = et(0);
-    odd(0,1,2) = min( et(1,2,3), ot(0,1,2) );
-    odd(3) = min( ot(3), last );
-    last = max( ot(3), last );
-  }
   ShAttrib4f resultVec;
-  resultVec(0,2) = even(0,1);
-  resultVec(1,3) = odd(0,1);
-
-  //TODO integrate this gradient selection into the above sort.
-  //This is a really really UGLY hack
-  ShAttrib2f grads[4];
-  for (i=0; i<4; i++)
-  {
-    grads[i] = (resultVec(i)==dcell)*gradCell;
-    //grads[i] = cond((resultVec(i)==dcell), gradCell, ShAttrib2f(0,0));
-    for (j=0; j<4; j++)
-    {
-      grads[i]= mad((resultVec(i)==dadj[0](j)),gradAdj[j](0,1), grads[i]); // normalize?
-      grads[i]= mad((resultVec(i)==dadj[1](j)),gradAdj[j](2,3), grads[i]);
-      //grads[i] = cond((resultVec(i)==dadj[0](j)), gradAdj[j](0,1), grads[i]);
-      //grads[i] = cond((resultVec(i)==dadj[1](j)), gradAdj[j](2,3), grads[i]);
-    }
-  }
-
-  gradientResult = c(0)*grads[0] + 
-                   c(1)*grads[1] +
-                   c(2)*grads[2] +
-                   c(3)*grads[3];
+  resultVec(0,2) = even[0](0,1);
+  resultVec(1,3) = odd[0](0,1);
   scalarResult = dot(resultVec, c);
+
+  ShAttrib4f gradsX, gradsY; 
+  gradsX(0,2) = even[1](0,1);
+  gradsY(0,2) = even[2](0,1);
+  gradsX(1,3) = odd[1](0,1);
+  gradsY(1,3) = odd[2](0,1);
+  gradientResult(0) = dot(gradsX,c);
+  gradientResult(1) = dot(gradsY,c);
 }
 
 ShAttrib3f ShWorley::worley(ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m ) {
