@@ -36,6 +36,13 @@ ShGeneric<N, T> normalize(const ShGeneric<N, T>& var);
 template<int N, typename T>
 ShGeneric<N, T> reflect(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b);
 
+/** Compute refraction vector.
+ * Refract vector a about normal b using relative index of refraction c.
+ */
+template<int N, typename T>
+ShGeneric<N, T> refract(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b,
+                        const ShGeneric<1, T>& c);
+
 /** Make a vector face the same way as another
  * Negates b if it does not face the same way as a (i.e. the dot
  * product between a and b is negative).

@@ -57,6 +57,21 @@ ShGeneric<N, T> reflect(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
 }
 
 template<int N, typename T>
+ShGeneric<N, T> refract(const ShGeneric<N, T>& v, const ShGeneric<N, T>& n,
+                        const ShGeneric<1, T>& theta)
+{
+  ShGeneric<N, T> vn = normalize(v);
+  ShGeneric<N, T> nn = normalize(n);
+  ShAttrib1f c = (vn|nn);
+  ShAttrib1f k = c*c - 1.0f;
+  k = 1.0f + theta*theta*k;
+  k = clamp(k, 0.0f, 1.0f);
+  ShAttrib1f a = theta;
+  ShAttrib1f b = theta*c + sqrt(k);
+  return (a*vn + b*nn);
+}
+
+template<int N, typename T>
 inline
 ShGeneric<N, T> faceforward(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
 {

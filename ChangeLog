@@ -1,5 +1,9 @@
 2004-07-05  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShLibGeometryImpl.hpp (refract): Implement refract. Resolves issue73.
+
+	* src/ShLibGeometry.hpp: Add refract function prototype.
+
 	* src/scripts/semantic.py (Class.modifying): Add operator%=.
 	(Impl.modifying): Implemented operator%=. Resolves other half of issue45.
 
