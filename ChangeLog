@@ -1,11 +1,12 @@
-2005-03-02  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+2005-03-02  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+	* backends/gl/ArbCode.cpp (ArbCode::print):
+	Fixed NVFP register decls to use "SHORT TEMP" and "LONG TEMP"
 
-	* examples/glut/main.cpp (main): Use arb backend by default, allow
-	passing in a backend name.
-	(display): Add back in the gprintfs.
+2005-03-01  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
-	* backends/gl/GlslCode.cpp (link): Update uniforms for *all* bound
-	shaders upon relinking.
+	* util/ShObjMesh.cpp (ShTriple::ShTriple): Be a little less
+	aggressive about unexpected characters, and in particular restore
+	skipws.
 
 2005-02-25  Francois Marier  <francois@serioushack.com>
 

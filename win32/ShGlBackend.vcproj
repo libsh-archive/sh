@@ -165,10 +165,13 @@
 				RelativePath="..\backends\gl\GlTextureStorage.cpp">
 			</File>
 			<File
+				RelativePath="..\backends\gl\PBufferContext.cpp">
+			</File>
+			<File
 				RelativePath="..\backends\gl\PBufferStreams.cpp">
 			</File>
 			<File
-				RelativePath="..\backends\gl\WGLPBufferStreams.cpp">
+				RelativePath="..\backends\gl\WGLPBufferContext.cpp">
 			</File>
 		</Filter>
 		<Filter
@@ -203,10 +206,13 @@
 				RelativePath="..\backends\gl\GlTextureStorage.hpp">
 			</File>
 			<File
+				RelativePath="..\backends\gl\PBufferContext.hpp">
+			</File>
+			<File
 				RelativePath="..\backends\gl\PBufferStreams.hpp">
 			</File>
 			<File
-				RelativePath="..\backends\gl\WGLPBufferStreams.hpp">
+				RelativePath="..\backends\gl\WGLPBufferContext.hpp">
 			</File>
 		</Filter>
 		<Filter

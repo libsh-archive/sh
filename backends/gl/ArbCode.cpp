@@ -154,7 +154,7 @@ ArbCode::ArbCode(const ShProgramNodeCPtr& shader, const std::string& unit,
   // initialize m_convertMap
   m_convertMap[SH_DOUBLE] = SH_FLOAT; 
 
-  bool halfSupport = m_environment & (SH_ARB_NVFP | SH_ARB_NVFP2);
+  bool halfSupport = m_environment & SH_ARB_NVFP; 
   if(!halfSupport) m_convertMap[SH_HALF] = SH_FLOAT;
 
   m_convertMap[SH_INT] = SH_FLOAT;
@@ -583,13 +583,23 @@ std::ostream& ArbCode::print(std::ostream& out)
     (*I)->printDecl(out);
     out << endl;
   }
-  if (m_numTemps +  m_numHalfTemps > 0) {
-    out << "  TEMP ";
+  bool halfSupport = m_environment & SH_ARB_NVFP;
+  if (m_numTemps > 0) { 
+    if(halfSupport) {
+      out << "  LONG TEMP ";
+    } else {
+      out << "  TEMP ";
+    }
     for (int i = 0; i < m_numTemps; i++) {
       if (i > 0) out << ", ";
       out << ArbReg(SH_ARB_REG_TEMP, i);
     }
-    if(m_numTemps > 0 && m_numHalfTemps > 0) out << ", ";
+    out << ";" << endl;
+  }
+
+  if(m_numHalfTemps > 0) { 
+    SH_DEBUG_ASSERT(halfSupport); // assume half support...
+    out << "  SHORT TEMP ";
     for (int i = 0; i < m_numHalfTemps; i++) {
       if (i > 0) out << ", ";
       out << ArbReg(SH_ARB_REG_HALF_TEMP, i);
@@ -887,7 +897,7 @@ void ArbCode::allocRegs()
 
   try {
     allocTemps(limits, false);
-    bool halfSupport = m_environment & (SH_ARB_NVFP | SH_ARB_NVFP2);
+    bool halfSupport = m_environment & SH_ARB_NVFP; 
     if(halfSupport) {
       allocTemps(limits, true);
     }
