@@ -46,26 +46,28 @@ public:
 	~ShScheduler();       // whatever cleanups we might need
 private:
   struct Pass{
-    ShProgramNode prog;
-	list<int> inputs;
-	list<int> outputs;
-  };
+    ShProgramNode &prog;
+	std::ist<int> inputs;
+	std::list<int> outputs;
+  } pass;
 
   struct Output{
     bool isStream;
 	ShChannelNode out;
-  }
+  } out;
 
   struct Input{
     bool isStream;
 	ShChannelNode in;
-  };
+  } in;
 
   struct Schedule{
     Pass::const_iterator begin() const;
 	Pass::const_iterator end() const;
 	push_back(Pass p);
-  };
+  private:
+	std::list<Pass> passes;
+  } sched;
 
 };
 
