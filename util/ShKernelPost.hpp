@@ -49,7 +49,7 @@ using namespace SH;
 class ShKernelPost {
   public:
     /** screen space Halftoning/Hatching in each color channel using tex as a threshold image
-     * IN(0) ShAttrib1f halftoneScale - scaling on posh(0,1) before doing texture lookup
+     * IN(0) ShAttrib1f scaling   - scaling on posh(0,1) before doing texture lookup
      * IN(1) T result 
      * IN(0) ShPosition4f posh    - homogeneous position (HDCS)
      *

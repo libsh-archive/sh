@@ -70,4 +70,18 @@ ShProgram ShKernelLib::bump() {
   return kernel;
 }
 
+ShProgram ShKernelLib::vcsBump() {
+  ShProgram kernel = SH_BEGIN_PROGRAM() {
+    ShInputAttrib2f SH_DECL(gradient);
+    ShInOutNormal3f SH_DECL(normal);
+    ShInputVector3f SH_DECL(tangent);
+    ShInputVector3f SH_DECL(tangent2);
+
+    normal += gradient(0) * tangent;
+    normal += gradient(1) * tangent2;
+    normal = normalize( normal );
+  } SH_END;
+  return kernel;
+}
+
 };

@@ -48,13 +48,15 @@ using namespace SH;
 template<typename T>
 ShProgram ShKernelPost::halftone(const ShBaseTexture2D<T> &tex) {
   ShProgram kernel = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShInputAttrib1f SH_NAMEDECL(scale, "halftoneScale");
+    ShInputAttrib1f SH_NAMEDECL(scale, "scaling");
     typename T::InputType SH_NAMEDECL(in, "result");
     ShInputPosition4f SH_DECL(posh);
 
     typename T::OutputType SH_NAMEDECL(out, "result");
-    //out = in > tex(posh(0,1) * scale);
-    out(0,1) = posh(0,1) * ShConstant1f(1.0f/400.0f); 
+
+    ShAttrib2f tcr = frac(posh(0,1) * scale); 
+    ShAttrib2f tcg, tcb;
+    out = in > tex(texcoord);
   } SH_END;
   return kernel;
 }

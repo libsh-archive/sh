@@ -78,6 +78,17 @@ class ShKernelLib {
      */
     static ShProgram bump();
 
+    /** VCS Bump program
+     * Takes a gradient direction and applies 
+     * IN(0) ShAttrib2f gradient  - gradient
+     * IN(1) ShNormal3f normal    - normalized normal vector (VCS)
+     * IN(2) ShVector3f tangent   - normalized tangent vector (VCS)
+     * IN(3) ShVector3f tangent2  - normalized secondary tangent (VCS)
+     *
+     * OUT(0) ShNormal3f normal   - perturbed normal (VCS)
+     */
+    static ShProgram vcsBump();
+
     /** Basis Conversion program 
      * Takes 3 vectors for an orthonormal basis and converts the fourth 
      * vector.
@@ -113,6 +124,8 @@ class ShKernelLib {
      *  OUT(2) ShPoint4f posm          - position (MCS)
      *
      *  ShNormal3f normal       - normal vector (VCS) 
+     *  ShVector3f tangent      - primary tangent (VCS) (only valid if numTangents > 0)
+     *  ShVector3f tangent2     - secondary tangent (VCS) (only valid if numTangents > 0) 
      *  ShVector3f viewVec      - view vector (VCS)
      *  ShVector3f halfVec       - half Vector (VCS) = halfVec0
      *  ShVector3f halfVeci      - half Vector (VCS), for i = 0..numLights - 1 

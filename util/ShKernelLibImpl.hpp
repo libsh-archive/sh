@@ -75,6 +75,8 @@ ShProgram ShKernelLib::shVsh(const ShMatrix<N, N, Kind, T> &mv, const ShMatrix<N
     
     // VCS outputs
     ShOutputNormal3f SH_NAMEDECL(nv, "normal");      
+    ShOutputVector3f SH_NAMEDECL(tv, "tangent");
+    ShOutputVector3f SH_NAMEDECL(tv2, "tangent2");
     ShOutputVector3f SH_NAMEDECL(vv, "viewVec");     
     ShOutputVector3f SH_NAMEDECL(hv0, "halfVec");
     ShOutputVector3f hv[numLights];    
@@ -116,13 +118,13 @@ ShProgram ShKernelLib::shVsh(const ShMatrix<N, N, Kind, T> &mv, const ShMatrix<N
     lpo0 = lpo[0];
 
     // TCS outputs
-    tgt = mv | tgt;
-    tgt2 = mv | tgt2;
-    nvt = normalize(changeBasis(nv, tgt, tgt2, nv));
-    vvt = normalize(changeBasis(nv, tgt, tgt2, vv));
+    tv = mv | tgt;
+    tv2 = mv | tgt2;
+    nvt = normalize(changeBasis(nv, tv, tv2, nv));
+    vvt = normalize(changeBasis(nv, tv, tv2, vv));
     for(i = 0; i < numLights; ++i) {
-      hvt[i] = normalize(changeBasis(nv, tgt, tgt2, hv[i]));
-      lvt[i] = normalize(changeBasis(nv, tgt, tgt2, lv[i])); 
+      hvt[i] = normalize(changeBasis(nv, tv, tv2, hv[i]));
+      lvt[i] = normalize(changeBasis(nv, tv, tv2, lv[i])); 
     }
     hvt0 = hvt[0];
     lvt0 = lvt[0];
