@@ -84,7 +84,12 @@ public:
     return ShVariableN<N, T>(m_node, m_swizzle, !m_neg);
   }
 
-private:
+  ShVariableN<N, T> operator()() const; ///< Identity swizzle
+  ShVariableN<1, T> operator()(int) const;
+  ShVariableN<2, T> operator()(int, int) const;
+  ShVariableN<3, T> operator()(int, int, int) const;
+  ShVariableN<4, T> operator()(int, int, int, int) const;
+
   ShVariableN(const ShVariableNodePtr& node,
               ShSwizzle swizzle,
               bool neg)
@@ -94,6 +99,41 @@ private:
     m_neg = neg;
   }
 };
+
+
+}
+
+namespace SH {
+
+template<int N, typename T>
+ShVariableN<N, T> ShVariableN<N, T>::operator()() const
+{
+  return ShVariableN<N, T>(m_node, m_swizzle, m_neg);
+}
+
+template<int N, typename T>
+ShVariableN<1, T> ShVariableN<N, T>::operator()(int i1) const
+{
+  return ShVariableN<1, T>(m_node, m_swizzle * ShSwizzle(size(), i1), m_neg);
+}
+
+template<int N, typename T>
+ShVariableN<2, T> ShVariableN<N, T>::operator()(int i1, int i2) const
+{
+  return ShVariableN<2, T>(m_node, m_swizzle * ShSwizzle(size(), i1, i2), m_neg);
+}
+
+template<int N, typename T>
+ShVariableN<3, T> ShVariableN<N, T>::operator()(int i1, int i2, int i3) const
+{
+  return ShVariableN<3, T>(m_node, m_swizzle * ShSwizzle(size(), i1, i2, i3), m_neg);
+}
+
+template<int N, typename T>
+ShVariableN<4, T> ShVariableN<N, T>::operator()(int i1, int i2, int i3, int i4) const
+{
+  return ShVariableN<4, T>(m_node, m_swizzle * ShSwizzle(size(), i1, i2, i3, i4), m_neg);
+}
 
 
 }
