@@ -1,3 +1,12 @@
+2004-01-20  Bryan Chan  <b8chan@uwaterloo.ca>
+	* util/ShPerlin.hpp, util/ShPerlinImpl.hpp: Templatized and cleaned up 
+	the old Perlin code
+
+	* util/ShKernelLib.?pp: moved nibbles outside of ShKernelLib to make
+	them easier to use.
+	
+	* src/ShLib.hpp: Added pos, | for dot product on ShVariableN.
+		
 2004-01-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/arb/ShArbStream.cpp (execute): Generates fragment

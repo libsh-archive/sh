@@ -49,7 +49,7 @@ using namespace SH;
   ATTRIB_NAMED_DECL(Type, K, var, # var)
 
 template< int Rows, int Cols, int Kind, typename T>
-ShProgram ShKernelLib::shTransform(const ShMatrix<Rows, Cols, Kind, T> &m) {
+ShProgram shTransform(const ShMatrix<Rows, Cols, Kind, T> &m) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     ShAttrib<Cols, SH_VAR_INPUT, T> attrib; SH_NAMEVAR( attrib ); 
     ShAttrib<Rows, SH_VAR_OUTPUT, T> transAttrib; SH_NAMEVAR( transAttrib );
@@ -59,7 +59,17 @@ ShProgram ShKernelLib::shTransform(const ShMatrix<Rows, Cols, Kind, T> &m) {
 }
 
 template<typename T>
-ShProgram ShKernelLib::shAccess(const ShTexture2D<T> &tex) {
+ShProgram shAccess(const ShTexture1D<T> &tex) {
+  ShProgram nibble = SH_BEGIN_PROGRAM() {
+    ShInputTexCoord1f SH_DECL(tc);
+    ATTRIB_DECL(T, SH_VAR_OUTPUT, result); 
+    result = tex(tc);
+  } SH_END;
+  return nibble;
+}
+
+template<typename T>
+ShProgram shAccess(const ShTexture2D<T> &tex) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     ShInputTexCoord2f SH_DECL(tc);
     ATTRIB_DECL(T, SH_VAR_OUTPUT, result); 
@@ -69,7 +79,17 @@ ShProgram ShKernelLib::shAccess(const ShTexture2D<T> &tex) {
 }
 
 template<typename T>
-ShProgram ShKernelLib::shScale() {
+ShProgram shAccess(const ShTexture3D<T> &tex) {
+  ShProgram nibble = SH_BEGIN_PROGRAM() {
+    ShInputTexCoord3f SH_DECL(tc);
+    ATTRIB_DECL(T, SH_VAR_OUTPUT, result); 
+    result = tex(tc);
+  } SH_END;
+  return nibble;
+}
+
+template<typename T>
+ShProgram shScale() {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     ShInputAttrib1f SH_DECL(scale);
     ATTRIB_DECL(T, SH_VAR_INPUT, attrib);
@@ -80,7 +100,7 @@ ShProgram ShKernelLib::shScale() {
 }
 
 template<typename T>
-ShProgram ShKernelLib::shLerp() {
+ShProgram shLerp() {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     ShInputAttrib1f SH_DECL(alpha);
     ATTRIB_DECL(T, SH_VAR_INPUT, a);
@@ -92,7 +112,7 @@ ShProgram ShKernelLib::shLerp() {
 }
 
 template<typename T>
-ShProgram ShKernelLib::shDot() {
+ShProgram shDot() {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     ATTRIB_DECL(T, SH_VAR_INPUT, a);
     ATTRIB_DECL(T, SH_VAR_INPUT, b);
@@ -104,7 +124,7 @@ ShProgram ShKernelLib::shDot() {
 
 // TODO - macro for all binary operations
 template<typename T>
-ShProgram ShKernelLib::shAdd() {
+ShProgram shAdd() {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     ATTRIB_DECL(T, SH_VAR_INPUT, a);
     ATTRIB_DECL(T, SH_VAR_INPUT, b);
@@ -115,7 +135,7 @@ ShProgram ShKernelLib::shAdd() {
 }
 
 template<typename T, typename T2>
-ShProgram ShKernelLib::shCast() {
+ShProgram shCast() {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     ATTRIB_DECL(T, SH_VAR_INPUT, in);
     ATTRIB_DECL(T2, SH_VAR_OUTPUT, out);

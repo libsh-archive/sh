@@ -49,57 +49,71 @@ namespace ShUtil {
 
 using namespace SH;
 
-/* Shaders
- * Mix - color/scalar inputs, add colors
- * Bump - input - normal, 2 tangents, perturb, output - normal
- *
+/// Nibbles - very simple programs encapsulating single operations/types
+/* transformation nibble (transforms ShAttrib of type T using matrix
+ * of type ShMatrix<Rows, Cols, Kind, MT> 
+ * Inputs: IN(0) attrib 
+ * Outputs: OUT(0) T transAttrib = m | attrib
  */
+template<int Rows, int Cols, int Kind, typename T>
+static ShProgram shTransform( const ShMatrix<Rows, Cols, Kind, T> &m ); 
+
+/** Scales given type by a constant factor
+ * IN(0) ShAttrib1f scale
+ * IN(1) T attrib
+ * OUT(1) T attrib
+ */
+template<typename T>
+static ShProgram shScale(); 
+
+/* 2D texture lookup nibble 
+ * Inputs: IN(0) ShTexCoord1f tc
+ * Outputs: OUT(0) result = tex(tc) */ 
+template<typename T> 
+static ShProgram shAccess( const ShTexture1D<T> &tex );
+
+/* 2D texture lookup nibble 
+ * Inputs: IN(0) ShTexCoord2f tc
+ * Outputs: OUT(0) result = tex(tc) */ 
+template<typename T> 
+static ShProgram shAccess( const ShTexture2D<T> &tex );
+
+/* 2D texture lookup nibble 
+ * Inputs: IN(0) ShTexCoord3f tc
+ * Outputs: OUT(0) result = tex(tc) */ 
+template<typename T> 
+static ShProgram shAccess( const ShTexture3D<T> &tex );
+
+/* lerping nibble 
+ * Inputs: IN(0) ShAttrib1f alpha
+ *         IN(1) T a
+ *         IN(2) T b
+ * Outputs: OUT(0) T result = lerp( alpha, a, b )*/
+template<typename T>
+static ShProgram shLerp(); 
+
+/* dot product nibble 
+ * Inputs: IN(0) T a
+ *         IN(1) T b
+ * Outputs: OUT(0) T result = dot( a, b ) */ 
+template<typename T>
+static ShProgram shDot(); 
+
+/* sum nibble 
+ * Inputs: IN(0) T a
+ *         IN(1) T b
+ * Outputs: OUT(0) T result = a + b */ 
+template<typename T>
+static ShProgram shAdd(); 
+
+/* casts to the given type either by padding with 0 channels
+ * or truncating channels
+ */
+template<typename T, typename T2>
+static ShProgram shCast();
+
 class ShKernelLib {
   public:
-/// Nibbles - very simple programs encapsulating single operations/types
-    /* transformation nibble (transforms ShAttrib of type T using matrix
-     * of type ShMatrix<Rows, Cols, Kind, MT> 
-     * Inputs: IN(0) attrib 
-     * Outputs: OUT(0) T transAttrib = m | attrib
-     */
-    template<int Rows, int Cols, int Kind, typename T>
-    static ShProgram shTransform( const ShMatrix<Rows, Cols, Kind, T> &m ); 
-
-    /** Scales given type by a constant factor
-     * IN(0) ShAttrib1f scale
-     * IN(1) T attrib
-     * OUT(1) T attrib
-     */
-    template<typename T>
-    static ShProgram shScale(); 
-
-    /* 2D texture lookup nibble 
-     * Inputs: IN(0) ShTexCoord2f tc
-     * Outputs: OUT(0) result = tex(tc) */ 
-    template<typename T> 
-    static ShProgram shAccess( const ShTexture2D<T> &tex );
-
-    /* lerping nibble 
-     * Inputs: IN(0) ShAttrib1f alpha
-     *         IN(1) T a
-     *         IN(2) T b
-     * Outputs: OUT(0) T result = lerp( alpha, a, b )*/
-    template<typename T>
-    static ShProgram shLerp(); 
-
-    template<typename T>
-    static ShProgram shDot(); 
-
-    template<typename T>
-    static ShProgram shAdd(); 
-
-    /* casts to the given type either by padding with 0 channels
-     * or truncating channels
-     */
-    template<typename T, typename T2>
-    static ShProgram shCast();
-
-
 /// Kernels - some commonly used programs
     /** Generates a passthrough program using the outputs of a given ShProgram
      * and keeps all the names.
