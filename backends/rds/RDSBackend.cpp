@@ -8,32 +8,32 @@
 #define RDS_DEBUG
 
 void RDSBackend::dump(RDS rds, char* complete, char* partitioned) {
-  rds.get_pdt()->graphvizDump(complete);
-  rds.get_pdt()->printDoms();
+	rds.pdt()->graphvizDump(complete);
+	rds.pdt()->printDoms();
 	rds.rds();
 	rds.print_partitions(partitioned);
 }
 
 void RDSBackend::compare(SH::ShProgramNodePtr p) {
   RDS rds(p->clone());
-  rds.get_pdt()->graphvizDump("rds-initial.graph");
+  rds.pdt()->graphvizDump("rds-initial.graph");
 #ifdef RDS_DEBUG
-  rds.get_pdt()->printDoms();
+  rds.pdt()->printDoms();
 #endif
   Timer t;
 	rds.rds();
   std::cout << "Elapsed time: " << t.diff() << " ns" << std::endl;
-  rds.get_pdt()->graphvizDump("rds-final.graph");
+  rds.pdt()->graphvizDump("rds-final.graph");
 
   RDS rdsh(p->clone());
-  rdsh.get_pdt()->graphvizDump("rdsh-initial.graph");
+  rdsh.pdt()->graphvizDump("rdsh-initial.graph");
 #ifdef RDS_DEBUG
-  rds.get_pdt()->printDoms();
+  rds.pdt()->printDoms();
 #endif
   t.start();
-	rdsh.rdsh();
+  rdsh.rdsh();
   std::cout << "Elapsed time: " << t.diff() << " ns" << std::endl;
-  rdsh.get_pdt()->graphvizDump("rdsh-final.graph");
+  rdsh.pdt()->graphvizDump("rdsh-final.graph");
 
 }
 
@@ -99,7 +99,7 @@ void RDSBackend::execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& des
 #ifdef RDS_DEBUG
   SH_DEBUG_PRINT("Scheduling passes");
 #endif
-  Schedule s(rds.m_passes, rds.m_shared_vars);
+  Schedule s(rds.passes(), rds.shared_vars());
  
   for (std::vector<Pass*>::iterator I = s.get_passes()->begin(); I != s.get_passes()->end(); ++I) {
     std::cout << "Executing pass " << (*I)->id << std::endl;

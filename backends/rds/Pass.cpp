@@ -40,19 +40,19 @@ void Schedule::make_channel(ShVariableNodePtr v)
 #endif
 }
 
-Schedule::Schedule(RDS::PassVector p, RDS::VarVector v)
+Schedule::Schedule(Partition::PassVector p, Partition::VarVector v)
 {
 #ifdef RDS_DEBUG
   SH_DEBUG_PRINT("Making passes");
 #endif
-  for (RDS::PassVector::iterator I = p.begin(); I != p.end(); ++I) {
+  for (Partition::PassVector::iterator I = p.begin(); I != p.end(); ++I) {
     m_passes.push_back(new Pass(*I,"gpu:stream"));
   }
 
 #ifdef RDS_DEBUG
   SH_DEBUG_PRINT("Making channels/allocing memory");
 #endif
-  for (RDS::VarVector::iterator I = v.begin(); I != v.end(); ++I) {
+  for (Partition::VarVector::iterator I = v.begin(); I != v.end(); ++I) {
     make_channel( (*I)->node().object() );
   }
 

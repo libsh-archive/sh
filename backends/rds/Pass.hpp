@@ -6,6 +6,7 @@
 
 #include "DAG.hpp"
 #include "RDS.hpp"
+#include "Partition.hpp"
 #include "ShProgramNode.hpp"
 #include "ShStream.hpp"
 
@@ -27,7 +28,7 @@ private:
 
 class Schedule {
 public:
-  Schedule::Schedule(RDS::PassVector p, RDS::VarVector v);
+  Schedule::Schedule(Partition::PassVector p, Partition::VarVector v);
 
   typedef std::map<SH::ShVariableNodePtr,Pass* > VarMap;
   VarMap def,use;
