@@ -21,7 +21,7 @@ void ShManipulator::append(IndexRange r) {
 ShProgram operator<<(const ShProgram &p, const ShManipulator &m) {
   int size = p->outputs.size();
 
-  ShProgram permuter = SH_BEGIN_PROGRAM {
+  ShProgram permuter = SH_BEGIN_PROGRAM() {
     /* Make shader inputs from p's outputs */
     std::vector<ShVariable> inputs;
     for(ShProgramNode::VarList::const_iterator outIt = p->outputs.begin();
@@ -54,6 +54,7 @@ ShProgram operator<<(const ShProgram &p, const ShManipulator &m) {
   return connect(p, permuter); 
 }
 
+#if 0
 ShFixedSizeManipulator::ShFixedSizeManipulator(int srcSize)
   : m_srcSize(srcSize) {}
 
@@ -78,7 +79,7 @@ keep::keep(int n)
 
 lose::lose(int n) 
   : ShFixedSizeManipulator(n) {}
-
+#endif
 
 permute::permute(int outputSize, ...) { 
   va_list ap;

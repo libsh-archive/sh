@@ -34,6 +34,7 @@ class ShManipulator {
 ShProgram operator<<( const ShProgram &p, const ShManipulator &m );
 
 
+#if 0
 /** \brief A ShFixedSizeManipulator is a ShProgram output manipulator. 
  * Fixed size manipulators can be combined with each other
  * to give "wider" fixed size manipulators that handle more 
@@ -60,6 +61,8 @@ class lose: public ShFixedSizeManipulator {
   public:
     lose( int n = 1 );
 };
+
+#endif
 
 /// permute( a1, ... ) is a manipulator that permutes 
 // shader outputs based on given indices
@@ -106,10 +109,6 @@ class drop: public ShManipulator {
   public:
     drop( int k );
 };
-
-class permuteRange: public ShManipulator {
-};
-
 
 }
 

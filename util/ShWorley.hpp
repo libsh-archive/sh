@@ -84,6 +84,17 @@ class ShWorley {
     // much messier (maybe try bubble sort?)
     ShAttrib3f worley( ShAttrib2f p, 
         ShAttrib4f c = ShAttrib4f( 1.0, 0.0, 0.0, 0.0 ), ShWorleyMetric m = L2_SQ ); 
+    
+    /** Makes a shader that takes 
+     * Inputs:
+     *  ShAttrib4f coefficients; // worley coefficients
+     *  ShTexCoord2f tc; // texture lookup coordinates
+     *
+     * Outputs:
+     *  ShAttrib1f  worleyValue 
+     *  ShAttrib2f  gradients;
+     */
+    ShProgram worleyProgram( ShWorleyMetric m = L2_SQ );
 
   private:
     bool useTexture; ///< toggles whether to use texture lookup for points 
@@ -97,6 +108,8 @@ class ShWorley {
     /** Lookup for 8 points in cells adjacent to the given cell
      */
     ShTexture2D<ShColor4f>* adjTex[4]; 
+
+    void doWorley( ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m, ShAttrib1f &result, ShAttrib2f &gradientResult ); 
 };
 
 } // namespace ShUtil

@@ -22,7 +22,6 @@ ShProgram operator<<(const ShProgram& a, const ShProgram& b);
 /// Equiv. to combine(a,b)
 ShProgram operator&(const ShProgram& a, const ShProgram& b);
 
-/*
 template<typename T>
 struct keep {
   typedef typename T::ValueType ValType;
@@ -54,7 +53,6 @@ struct lose {
     return prog;
   }
 };
-*/
 
 }
 

@@ -25,6 +25,7 @@
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
 #include <cstdlib>
+#include "ShSyntax.hpp"
 #include "ShWorley.hpp"
 #include "ShUtilLib.hpp"
 
@@ -114,7 +115,7 @@ class Metric {
 
 };
 
-ShAttrib3f ShWorley::worley(ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m ) {
+void ShWorley::doWorley(ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m, ShAttrib1f &scalarResult, ShAttrib2f &gradientResult ) {
   ShAttrib3f result;
   Metric dist(m);
 
@@ -193,19 +194,43 @@ ShAttrib3f ShWorley::worley(ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m ) {
     //grads[i] = cond((resultVec(i)==dcell), gradCell, ShAttrib2f(0,0));
     for (j=0; j<4; j++)
     {
-      grads[i]+= (resultVec(i)==dadj[0](j))*gradAdj[j](0,1);
+      grads[i]+= (resultVec(i)==dadj[0](j))*gradAdj[j](0,1); // normalize?
       grads[i]+= (resultVec(i)==dadj[1](j))*gradAdj[j](2,3);
       //grads[i] = cond((resultVec(i)==dadj[0](j)), gradAdj[j](0,1), grads[i]);
       //grads[i] = cond((resultVec(i)==dadj[1](j)), gradAdj[j](2,3), grads[i]);
     }
   }
 
-  result(0,1) = c(0)*grads[0] + 
-	  	c(1)*grads[1] +
-		c(2)*grads[2] +
-		c(3)*grads[3];
-  result(2) = dot(resultVec, c);
+  gradientResult = c(0)*grads[0] + 
+                   c(1)*grads[1] +
+                   c(2)*grads[2] +
+                   c(3)*grads[3];
+  scalarResult = dot(resultVec, c);
+}
+
+ShAttrib3f ShWorley::worley(ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m ) {
+  ShAttrib3f result;
+  ShAttrib1f scalarResult;
+  ShAttrib2f gradientResult;
+  doWorley( p, c, m, scalarResult, gradientResult );
+  result(0,1) = gradientResult;
+  result(2) = scalarResult;
   return result;
+}
+
+ShProgram ShWorley::worleyProgram( ShWorleyMetric m ) {
+  ShProgram program = SH_BEGIN_PROGRAM() {
+    ShInputAttrib2f p;
+    ShInputAttrib4f coefficient;
+
+    ShAttrib1f tempScalar;
+    ShAttrib2f tempGradient;
+    doWorley( p, coefficient, m, tempScalar, tempGradient );
+
+    ShOutputAttrib1f scalar = tempScalar;
+    ShOutputAttrib2f gradient = tempGradient;
+  } SH_END_PROGRAM;
+  return program;
 }
 
 void ShWorley::useNoiseTexture(bool useNoiseTex) {
