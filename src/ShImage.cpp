@@ -99,7 +99,7 @@ void ShImage::loadPng(const std::string& filename)
   // check that the file is a png file
   png_byte buf[8];
 
-  FILE* in = std::fopen(filename.c_str(), "r");
+  FILE* in = std::fopen(filename.c_str(), "rb");
 
   if (!in) ShError( ShImageException("Unable to open " + filename) );
   
