@@ -35,6 +35,13 @@ Test::Test(int argc, char** argv)
   if (m_backend != "host") SH::shSetBackend(m_backend);
 }
 
+void Test::print_values(const char* varname, const std::string& values)
+{
+  std::cout << varname << " = [ ";
+  std::cout << values;
+  std::cout << " ]" << std::endl;;
+}
+
 void Test::print_fail(std::string name)
 {
     std::cout << COLOR_YELLOW << "Test: " << COLOR_NORMAL

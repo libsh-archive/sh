@@ -2,7 +2,11 @@
 #include <windows.h>
 #endif /* WIN32 */
 
-#include <GL/gl.h>
+#ifdef __APPLE__
+# include <OpenGL/gl.h>
+#else
+# include <GL/gl.h>
+#endif
 
 #include "Camera.hpp"
 #include "ShTrackball.hpp"

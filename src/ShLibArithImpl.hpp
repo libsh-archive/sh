@@ -272,6 +272,14 @@ ShGeneric<N, CT1T2> pow(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& ri
   shPOW(t, left, right);
   return t;
 }
+template<int N, typename T1, typename T2>
+inline
+ShGeneric<N, CT1T2> pow(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right)
+{
+  ShAttrib<N, SH_TEMP, CT1T2> t;
+  shPOW(t, left, right);
+  return t;
+}
 template<typename T1, typename T2>
 inline
 ShGeneric<1, CT1T2> pow(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right)

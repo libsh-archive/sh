@@ -6,7 +6,7 @@ TESTS = add add_im cbrt cmul cos csum div mul rnd sin tex lt le gt ge eq ne \
 	mod floor ceil abs pow dot frac sign max max1 min min1 pos sat clamp \
 	sqrt exp sub madd msub mmul mdiv mmod matrix_mul lit lit_im mad lerp \
 	rsqrt rcp tan acos asin atan length exp2 exp10 log log2 log10 atan2 \
-	cross
+	cross sort cond
 check_PROGRAMS = $(TESTS)
 BACKENDS = arb cc host glsl
 EXTRA_DIST = shtest.py common.py
@@ -25,9 +25,23 @@ clean:
 %.cpp: %.cpp.py shtest.py common.py
 	python $< > $@
 
-add_SOURCES = add.cpp test.cpp test.hpp
+add.cpp: add_test.py
+madd.cpp: add_test.py
+add_im.cpp: add_test.py
+sub.cpp: sub_test.py
+msub.cpp: sub_test.py
+mul.cpp: mul_test.py
+mmul.cpp: mul_test.py
+div.cpp: div_test.py
+mdiv.cpp: div_test.py
+mod.cpp: mod_test.py
+mmod.cpp: mod_test.py
+lit.cpp: lit_test.py
+lit_im.cpp: lit_test.py
+
+add_SOURCES = add.cpp test.cpp test.hpp add_test.py
 EXTRA_DIST += add.cpp.py add_test.py
-add_im_SOURCES = add_im.cpp test.cpp test.hpp
+add_im_SOURCES = add_im.cpp test.cpp test.hpp add_test.py
 EXTRA_DIST += add_im.cpp.py add_test.py
 cbrt_SOURCES = cbrt.cpp test.cpp test.hpp
 EXTRA_DIST += cbrt.cpp.py
@@ -37,10 +51,10 @@ cos_SOURCES = cos.cpp test.cpp test.hpp
 EXTRA_DIST += cos.cpp.py
 csum_SOURCES = csum.cpp test.cpp test.hpp
 EXTRA_DIST += csum.cpp.py
-div_SOURCES = div.cpp test.cpp test.hpp
-EXTRA_DIST += div.cpp.py
-mul_SOURCES = mul.cpp test.cpp test.hpp
-EXTRA_DIST += mul.cpp.py
+div_SOURCES = div.cpp test.cpp test.hpp div_test.py
+EXTRA_DIST += div.cpp.py div_test.py
+mul_SOURCES = mul.cpp test.cpp test.hpp mul_test.py
+EXTRA_DIST += mul.cpp.py mul_test.py
 rnd_SOURCES = rnd.cpp test.cpp test.hpp
 EXTRA_DIST += rnd.cpp.py
 sin_SOURCES = sin.cpp test.cpp test.hpp
@@ -59,8 +73,8 @@ eq_SOURCES = eq.cpp test.cpp test.hpp
 EXTRA_DIST += eq.cpp.py
 ne_SOURCES = ne.cpp test.cpp test.hpp
 EXTRA_DIST += ne.cpp.py
-mod_SOURCES = mod.cpp test.cpp test.hpp
-EXTRA_DIST += mod.cpp.py
+mod_SOURCES = mod.cpp test.cpp test.hpp mod_test.py
+EXTRA_DIST += mod.cpp.py mod_test.py
 floor_SOURCES = floor.cpp test.cpp test.hpp
 EXTRA_DIST += floor.cpp.py
 ceil_SOURCES = ceil.cpp test.cpp test.hpp
@@ -93,18 +107,18 @@ sqrt_SOURCES = sqrt.cpp test.cpp test.hpp
 EXTRA_DIST += sqrt.cpp.py
 exp_SOURCES = exp.cpp test.cpp test.hpp
 EXTRA_DIST += exp.cpp.py
-sub_SOURCES = sub.cpp test.cpp test.hpp
-EXTRA_DIST += sub.cpp.py
-madd_SOURCES = madd.cpp test.cpp test.hpp
-EXTRA_DIST += madd.cpp.py
-msub_SOURCES = msub.cpp test.cpp test.hpp
-EXTRA_DIST += msub.cpp.py
-mmul_SOURCES = mmul.cpp test.cpp test.hpp
-EXTRA_DIST += mmul.cpp.py
-mdiv_SOURCES = mdiv.cpp test.cpp test.hpp
-EXTRA_DIST += mdiv.cpp.py
-mmod_SOURCES = mmod.cpp test.cpp test.hpp
-EXTRA_DIST += mmod.cpp.py
+sub_SOURCES = sub.cpp test.cpp test.hpp sub_test.py
+EXTRA_DIST += sub.cpp.py sub_test.py
+madd_SOURCES = madd.cpp test.cpp test.hpp add_test.py
+EXTRA_DIST += madd.cpp.py add_test.py
+msub_SOURCES = msub.cpp test.cpp test.hpp sub_test.py
+EXTRA_DIST += msub.cpp.py sub_test.py
+mmul_SOURCES = mmul.cpp test.cpp test.hpp mul_test.py
+EXTRA_DIST += mmul.cpp.py mul_test.py
+mdiv_SOURCES = mdiv.cpp test.cpp test.hpp div_test.py
+EXTRA_DIST += mdiv.cpp.py div_test.py
+mmod_SOURCES = mmod.cpp test.cpp test.hpp mod_test.py
+EXTRA_DIST += mmod.cpp.py mod_test.py
 matrix_mul_SOURCES = matrix_mul.cpp test.cpp test.hpp
 EXTRA_DIST += matrix_mul.cpp.py
 lit_SOURCES = lit.cpp test.cpp test.hpp lit_test.py
@@ -143,3 +157,7 @@ atan2_SOURCES = atan2.cpp test.cpp test.hpp
 EXTRA_DIST += atan2.cpp.py
 cross_SOURCES = cross.cpp test.cpp test.hpp
 EXTRA_DIST += cross.cpp.py
+sort_SOURCES = sort.cpp test.cpp test.hpp
+EXTRA_DIST += sort.cpp.py
+cond_SOURCES = cond.cpp test.cpp test.hpp
+EXTRA_DIST += cond.cpp.py

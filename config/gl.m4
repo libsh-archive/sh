@@ -26,6 +26,7 @@ AC_DEFUN([GL_CHECK_GL_HEADERS], [
     gl_gl_dir=OpenGL
     gl_glext_dir=OpenGL
     GL_LIBS="-framework OpenGL -framework AGL"
+    GLUT_LIBS="-framework GLUT"
     ;;
   # other systems
   *)
@@ -36,6 +37,7 @@ AC_DEFUN([GL_CHECK_GL_HEADERS], [
       #include <GL/gl.h>
     #endif])
     GL_LIBS="-lGL"
+    GLUT_LIBS="-lglut"
     ;;
   esac
 
@@ -49,6 +51,8 @@ AC_DEFUN([GL_CHECK_GL_HEADERS], [
   else
     :; $2
   fi
+  AC_SUBST(GL_LIBS)
+  AC_SUBST(GLUT_LIBS)
 ])
 
 # GL_CHECK_GLEXT_VERSION(version, if-avail, if-not-avail)
@@ -63,6 +67,26 @@ AC_DEFUN([GL_CHECK_GLEXT_VERSION], [
 # define GL_GLEXT_VERSION 0
 #endif],
     [#if GL_GLEXT_VERSION >= $1
+  return 0;
+#else
+  return 1;
+#endif]),
+  [AC_MSG_RESULT([yes])
+   $2],
+  [AC_MSG_RESULT([no])
+   $3])
+])
+
+# GL_CHECK_GLEXT_EXTENSION(extension, if-avail, if-not-avail)
+#
+AC_DEFUN([GL_CHECK_GLEXT_EXTENSION], [
+  AC_MSG_CHECKING([for OpenGL extension $1])
+  AC_RUN_IFELSE(
+    AC_LANG_PROGRAM([#if HAVE_GL_GLEXT_H
+# include <$gl_gl_dir/gl.h>
+# include <$gl_glext_dir/glext.h>
+#endif],
+    [#ifdef GL_$1
   return 0;
 #else
   return 1;

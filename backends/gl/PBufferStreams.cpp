@@ -128,7 +128,7 @@ PBufferStreamCache::PBufferStreamCache(ShProgramNode* stream_program,
     m_vertex_program(vertex_program)
 {
   FloatExtension extension = PBufferFactory::instance()->get_extension();
-  ShTextureDims dims;
+  ShTextureDims dims(SH_TEXTURE_2D);
   
   switch (extension) {
   case SH_ARB_NV_FLOAT_BUFFER:
@@ -163,50 +163,6 @@ PBufferStreamCache::PBufferStreamCache(ShProgramNode* stream_program,
 
   build_sets(vertex_program);
 }
-
-
-class GlSaveState {
-#if defined( WIN32 )
-#elif defined( __APPLE__ )
-public:
-  GlSaveState()
-    : context(0)
-  {
-      context = aglGetCurrentContext();
-  }
-
-  ~GlSaveState()
-  {
-    if (context) {
-      aglSetCurrentContext(context);
-    }
-  }
-
-private:
-  AGLContext context;
-
-#else // Linux
-
-public:
-  GlSaveState()
-    : display(0), drawable(0), context(0)
-  {
-    display = glXGetCurrentDisplay();
-    if (display) {
-      drawable = glXGetCurrentDrawable();
-      context = glXGetCurrentContext();
-    }
-  }
-
-  ~GlSaveState()
-  {
-    if (display) {
-      glXMakeCurrent(display, drawable, context);
-    }
-  }
-#endif
-};
-
 
 ShInfo* PBufferStreamCache::clone() const
 {
@@ -243,16 +199,6 @@ PBufferStreams::PBufferStreams(void) :
 {
 }
 
-
-PBufferStreams::PBufferStreams(int context)
-  : m_context(context),
-    m_setup_vp(-1)
-#if !defined( __APPLE__ )
-  , m_display(0)
-#endif
-{
-}
-
 PBufferStreams::~PBufferStreams()
 {
 }
@@ -279,7 +225,7 @@ void fillin()
 #endif
 
 void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
-                                ShStream& dest)
+                             ShStream& dest)
 {
   // Let's get rid of that constness... Yes, yes, I know...
   ShProgramNodePtr program = shref_const_cast<ShProgramNode>(program_const);
@@ -329,8 +275,6 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
   while (tex_size * tex_size < count) {
     tex_size <<= 1;
   }
-
-  GlSaveState prevstate; // MacOS port addition
   
   DECLARE_TIMER(onerun);
 

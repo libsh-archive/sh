@@ -36,6 +36,9 @@ def upzip3(a, b, c):
     
     return zip(out_a, out_b, out_c)
 
+def is_array(a):
+    return (type(a) == tuple) or (type(a) == list)
+
 if __name__ == "__main__":
     print upzip((0,1,2), (3,))
     print upzip((0,), (3,4,5))

@@ -1,3 +1,84 @@
+2005-03-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> osx branch
+
+	* examples/glut/Makefile.am (LDADD): Use GLUT_LIBS and GL_LIBS.
+
+	* examples/glut/main.cpp: Make this compile on Apple.
+
+	* backends/gl/Makefile.am: No pbuffer streams on Apple... 
+
+	* backends/gl/ArbBackend.cpp: No pbuffer streams on Apple.
+
+	* configure.ac: Check for ARB_shading_language_100 for GLSL
+	support.
+	Disable PBuffer streams on darwin.
+
+	* config/gl.m4: Substitute GL_LIBS and GLUT_LIBS.
+	(GL_CHECK_GLEXT_EXTENSION): Added this function.
+
+	* examples/binding/Makefile.am (LDADD): Use GLUT_LIBS, GL_LIBS.
+
+	* examples/binding/main.cpp (main): Catch exceptions.
+	Handle Apple headers.
+
+	* Merge trunk up to r2189.
+
+	* backends/gl/GlTextures.cpp: Implement APPLE_float_pixels
+	support.
+
+	* README.osx: Update this a little.
+
+2005-03-25  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibClampImpl.hpp: Add scalar version of mod.
+
+	* src/ShLibArithImpl.hpp: Add scalar version of pow.
+
+	* src/ShInstructions.cpp: Enable scalar versions of mod and pow.
+	
+	* backends/gl/GlslEmit.cpp: Fixed cond so that it behaves
+	according to the book when a < 0.
+
+2005-03-23  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibMiscImpl.hpp, ShLibMisc.hpp (sort, groupsort): Add
+	these functions based on util/ShFunc.hpp
+
+2005-03-21  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/GlslEmit.cpp (emit_discard): Fix discard.
+
+2005-03-18  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslVariable.cpp (GlslVariable): Use the contents of
+	meta("opengl:state") to initialize m_name and m_builtin.
+
+	* backends/gl/GlslVariable.hpp: Add a builtin() method.
+
+	* backends/gl/GlslVariableMap.cpp (allocate_temp): Add a check to
+	avoid double insertions in the map.
+	Don't set the name for built-in variables.
+	Use the new builtin() method to determine whether or not a
+	variable is built-in.
+
+	* backends/gl/GlslVariableMap.hpp, GlslVariableMap.cpp: Remove
+	allocate_palette() since it's the same as allocate_temp().
+
+	* backends/gl/GlslVariableMap.cpp (GlslVariableMap): Use
+	allocate_temp() instead of allocate_palette().
+	
+	* backends/gl/GlslCode.cpp (updateUniform): Remove warning about
+	unknown uniform.  This caused unnecessary output in the examples.
+
+	* examples/binding/main.cpp: Remove debugging output.
+	Remove unnecessary glDisable() calls in gprintf().
+
+2005-03-17  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslVariableMap.cpp, GlslVariableMap.hpp,
+	GlslVariable.cpp, GlslVariable.hpp, GlslEmit.cpp, GlslCode.cpp,
+	GlslCode.hpp: Add support for the PAL operation and initialize the
+	palette uniforms properly.
+	
 2005-03-16  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslCode.hpp, GlslEmit.cpp (allocate_constant): Add

@@ -56,14 +56,18 @@ AC_CHECK_FUNCS([pow sqrt])
 required_glext_version=21
 
 # Mac OSX Tests
-case $host_os in darwin*)
-  AC_MSG_NOTICE([configuring OSX build, you have $host_os])
-  AC_CHECK_LIB([mx], [log2f])
-  LDFLAGS="$LDFLAGS -flat_namespace"
-  required_glext_version=7
-  ;;
+case $host_os in 
+  darwin*)
+    AC_MSG_NOTICE([configuring OSX build, you have $host_os])
+    AC_CHECK_LIB([mx], [log2f])
+    LDFLAGS="$LDFLAGS -flat_namespace"
+    required_glext_version=7
+    enable_pbuffer_streams=false
+    ;;
+  *) enable_pbuffer_streams=true ;;
 esac
 
+AM_CONDITIONAL(INCLUDE_PBUFFERSTREAMS, test x$enable_pbuffer_streams = xtrue)
 # Backends
 
 SM_WITH_SM_DIR
@@ -99,10 +103,9 @@ if test "x$sh_backend_glsl" = xtrue ; then
   GL_CHECK_GL_HEADERS([],
     [SH_BACKEND_MESSAGE([glsl], [OpenGL headers (GL/gl.h and GL/glext.h) not found. Disabling GLSL backend.])
      sh_backend_glsl=false])
-  GL_CHECK_GLEXT_VERSION([$required_glext_version], [], [
-    SH_BACKEND_MESSAGE([glsl], [glext.h version 21 or greater (available at http://oss.sgi.com/projects/ogl-sample/registry/) not found. Disabling GLSL backend.])
-    sh_backend_glsl=false
-  ])
+  GL_CHECK_GLEXT_EXTENSION([ARB_shading_language_100], [], [
+    SH_BACKEND_MESSAGE([glsl], [Headers for ARB_shading_language_100 not found. You may need to upgrade your glext.h from http://oss.sgi.com/projects/ogl-sample/registry/. Disabling GLSL backend.])
+    sh_backend_glsl=false])
 fi
 AM_CONDITIONAL(ENABLE_GLSL_BACKEND, test x$sh_backend_glsl = xtrue)
 

@@ -79,9 +79,9 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node)
   GLenum byteformats[4] = {GL_LUMINANCE8, GL_LUMINANCE8_ALPHA8, GL_RGB8, GL_RGBA8}; 
   GLenum shortformats[4] = {GL_LUMINANCE16, GL_LUMINANCE16_ALPHA16, GL_RGB16, GL_RGBA16}; 
 
+#ifndef __APPLE__
   GLenum halfformats_nv[4] = {GL_FLOAT_R16_NV, GL_FLOAT_RGBA16_NV, GL_FLOAT_RGB16_NV, GL_FLOAT_RGBA16_NV};
   GLenum fpformats_nv[4] = {GL_FLOAT_R32_NV, GL_FLOAT_RGBA32_NV, GL_FLOAT_RGB32_NV, GL_FLOAT_RGBA32_NV};
-
   GLenum halfformats_ati[4] = {GL_LUMINANCE_FLOAT16_ATI,
                              GL_LUMINANCE_ALPHA_FLOAT16_ATI,
                              GL_RGB_FLOAT16_ATI,
@@ -91,6 +91,16 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node)
                              GL_LUMINANCE_ALPHA_FLOAT32_ATI,
                              GL_RGB_FLOAT32_ATI,
                              GL_RGBA_FLOAT32_ATI};
+#else
+  GLenum halfformats_apple[4] = {GL_LUMINANCE_FLOAT16_APPLE,
+                                 GL_LUMINANCE_ALPHA_FLOAT16_APPLE,
+                                 GL_RGB_FLOAT16_APPLE,
+                                 GL_RGBA_FLOAT16_APPLE};
+  GLenum fpformats_apple[4] = {GL_LUMINANCE_FLOAT32_APPLE,
+                               GL_LUMINANCE_ALPHA_FLOAT32_APPLE,
+                               GL_RGB_FLOAT32_APPLE,
+                               GL_RGBA_FLOAT32_APPLE};
+#endif
   GLenum* formats = 0;
   bool clamped = (node->traits().clamping() == SH::ShTextureTraits::SH_CLAMPED);
   // @todo type - assume that !clamped means unclamped for now...
@@ -98,6 +108,10 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node)
   
   std::string exts(reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS)));
 
+  GLenum* float_formats = 0;
+  GLenum* half_formats = 0;
+  
+#ifndef __APPLE__
   // note that right now 1/2/3D float textures on NV are only supported through
   // the ATI extension, so we only use nv for RECT. 
   bool float_nv = (exts.find("NV_float_buffer") != std::string::npos) && 
@@ -105,17 +119,24 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node)
 
   bool float_ati = (exts.find("ATI_texture_float") != std::string::npos);
 
+  if (float_ati) {
+    float_formats = fpformats_ati;
+    half_formats = halfformats_ati;
+  } else if (float_nv) {
+    float_formats = fpformats_nv;
+    half_formats = halfformats_nv;
+  }
+#else
+  bool float_apple = (exts.find("APPLE_float_pixels") != std::string::npos);
+
+  if (float_apple) {
+    float_formats = fpformats_apple;
+    half_formats = halfformats_apple;
+  }
+#endif
+  
   // @todo type respect CLAMPED flag 
   if (node->size() < 0 || node->size() > 4) return 0;
-#if defined( __APPLE__ )
-    //    std::string exts(reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS)));
-    //GLenum fpformats_apple[4] = { 
-    //  GL_RGBA_FLOAT32_APPLE,  GL_RGBA_FLOAT32_APPLE,  GL_RGBA_FLOAT32_APPLE,  GL_RGBA_FLOAT32_APPLE };
-    
-    GLenum* fpformats = 0;
-    //    if (exts.find("GL_APPLE_float_pixels") != std::string::npos) 
-    //fpformats = fpformats_apple;
-#endif // __APPLE
   // @todo type
   // handle fractional types
   // right now all available formats - double, float, signed ints, unsigned ints should
@@ -123,53 +144,51 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node)
 
   if(clamped) {
     switch(node->valueType()) {
-      case SH_DOUBLE:
-      case SH_FLOAT:        
-      case SH_HALF:
-      case SH_FINT:
-      case SH_FSHORT:
-      case SH_FUINT:
-      case SH_FUSHORT:
-        formats = shortformats;
-        break;
+    case SH_DOUBLE:
+    case SH_FLOAT:        
+    case SH_HALF:
+    case SH_FINT:
+    case SH_FSHORT:
+    case SH_FUINT:
+    case SH_FUSHORT:
+      formats = shortformats;
+      break;
 
-     case SH_FBYTE:
-     case SH_FUBYTE:
-        formats = byteformats;
-        break;
+    case SH_FBYTE:
+    case SH_FUBYTE:
+      formats = byteformats;
+      break;
 
-      case SH_INT: 
-      case SH_UINT:
-      case SH_SHORT: 
-      case SH_USHORT:
-      case SH_BYTE:
-      case SH_UBYTE:
-        SH_DEBUG_WARN("Using integer data type for a [0,1] clamped texture format is not advised.");
-        formats = byteformats;
-        break;
+    case SH_INT: 
+    case SH_UINT:
+    case SH_SHORT: 
+    case SH_USHORT:
+    case SH_BYTE:
+    case SH_UBYTE:
+      SH_DEBUG_WARN("Using integer data type for a [0,1] clamped texture format is not advised.");
+      formats = byteformats;
+      break;
 
-     default:
-        SH_DEBUG_ERROR("Could not find appropriate clamped texture format \n"
-                       "Using default instead!");
-        return node->size();
-        break;
+    default:
+      SH_DEBUG_ERROR("Could not find appropriate clamped texture format \n"
+                     "Using default instead!");
+      return node->size();
+      break;
     }
   } else { // if ( clamped )
     switch(node->valueType()) {
-      case SH_DOUBLE:
-      case SH_FLOAT:        
-      case SH_INT: 
-      case SH_UINT:
-        if (float_nv) formats = fpformats_nv;
-        else if (float_ati) formats = fpformats_ati;
-        break;
+    case SH_DOUBLE:
+    case SH_FLOAT:        
+    case SH_INT: 
+    case SH_UINT:
+      formats = float_formats;
+      break;
     case SH_HALF:
     case SH_SHORT: 
     case SH_BYTE:
     case SH_USHORT:
     case SH_UBYTE:
-      if (float_nv) formats = halfformats_nv;
-      else if (float_ati) formats = halfformats_ati;
+      formats = half_formats;
       break;
 
     case SH_FINT:
@@ -245,14 +264,18 @@ GLenum shGlType(ShValueType valueType, ShValueType &convertedType) {
   }
 
   std::string exts(reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS)));
-  if(valueType == SH_HALF) { 
-        if((exts.find("NV_half_float") != std::string::npos)) {
-          convertedType = SH_VALUETYPE_END; 
-          result = GL_HALF_FLOAT_NV; 
-        } else if(exts.find("APPLE_float_pixels") != std::string::npos) {
-          convertedType = SH_VALUETYPE_END; 
-          //result = HALF_APPLE; 
-        }
+  if(valueType == SH_HALF) {
+#ifndef __APPLE__
+    if (exts.find("NV_half_float") != std::string::npos) {
+      convertedType = SH_VALUETYPE_END; 
+      result = GL_HALF_FLOAT_NV; 
+    }
+#else
+    if (exts.find("APPLE_float_pixels") != std::string::npos) {
+      convertedType = SH_VALUETYPE_END; 
+      result = GL_HALF_APPLE; 
+    }
+#endif
   }
   SH_DEBUG_ASSERT(result != GL_NONE);
   return result;
