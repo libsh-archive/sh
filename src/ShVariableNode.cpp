@@ -1,4 +1,4 @@
-#include <strstream>
+#include <sstream>
 #include "ShEnvironment.hpp"
 #include "ShVariableNode.hpp"
 
@@ -36,7 +36,7 @@ int ShVariableNode::size() const
 
 std::string ShVariableNode::name() const
 {
-  std::ostrstream stream;
+  std::ostringstream stream;
 
   // Special case for constants
   if (m_kind == SH_VAR_CONST) {
@@ -66,8 +66,8 @@ std::string ShVariableNode::name() const
   case SH_VAR_TEMP:
     stream << "t";
     break;
-  default:
-    stream << "<kind?>";
+  case SH_VAR_CONST:
+    stream << "c";
     break;
   }
 
