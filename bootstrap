@@ -52,7 +52,7 @@ export ACLOCAL
 # ltdl seems to require these now...
 case ${MACHTYPE}
     in *apple*darwin*)
-	M4PRFX=/usr/share/aclocal
+	M4PRFX=/sw/share/aclocal
 	M4DEST=config
 	;;
     *)
