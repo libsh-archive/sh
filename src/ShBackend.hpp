@@ -112,6 +112,9 @@ public:
   
   // execute a stream program, if supported
   virtual void execute(const ShProgramNodeCPtr& program, ShStream& dest) = 0;
+
+  // Unbind all programs bound under this backend
+  virtual void unbind_all();
   
   typedef std::vector< ShPointer<ShBackend> > ShBackendList;
 

@@ -1,5 +1,20 @@
 2005-03-04  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> (glsl branch)
 
+	* src/ShSyntax.cpp (shUnbind): Use ShBackend::unbind_all().
+
+	* backends/gl/GlBackend.hpp: Add unbind_all() to CodeStrategy.
+
+	* backends/gl/Glsl.hpp: Add unbind_all().
+
+	* backends/gl/Glsl.cpp (unbind_all): Implement glsl-specific
+	unbind_all() using GlslSet.
+
+	* src/ShBackend.cpp (unbind_all): Default implementation.
+
+	* src/ShBackend.hpp: Added unbind_all() functions
+
+	* backends/gl/GlslCode.hpp: Remove the optimize() function.
+
 	* backends/gl/GlslCode.cpp (unbind): Keep around the old
 	GlslSet::current() (it can become null if it already was
 	m_fallback_set). This fixes a segfault related to binding.

@@ -104,6 +104,9 @@ struct CodeStrategy {
   // generate_set, and override use_default_set() to return false.
   virtual SH::ShBackendSetPtr generate_set(const SH::ShProgramSet& s);
   virtual bool use_default_set() const;
+
+  virtual void unbind_all();
+  virtual bool use_default_unbind_all() const;
 };
 
 class GlBackend : public SH::ShBackend {
@@ -111,6 +114,7 @@ public:
   virtual SH::ShBackendCodePtr generate_code(const std::string& target,
                                              const SH::ShProgramNodeCPtr& shader);
   virtual SH::ShBackendSetPtr generate_set(const SH::ShProgramSet& s);
+  virtual void unbind_all();
 
   // execute a stream program, if supported
   virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);

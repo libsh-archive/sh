@@ -61,6 +61,16 @@ bool GlslCodeStrategy::use_default_set() const
   return false;
 }
 
+void GlslCodeStrategy::unbind_all()
+{
+  if (GlslSet::current()) GlslSet::current()->unbind();
+}
+
+bool GlslCodeStrategy::use_default_unbind_all() const
+{
+  return false;
+}
+
 
 unsigned int glslTarget(const std::string& unit)
 {

@@ -25,6 +25,7 @@
 #include <iostream>
 
 #include "ShStorageType.hpp"
+#include "ShOptimizations.hpp"
 
 namespace shgl {
 
@@ -145,7 +146,7 @@ void GlslCode::upload()
   string s = code.str(); // w/o this extra copy, the last bytes of the shader code become garbage
 
   const char* code_string = s.c_str();
-  GLint code_len = strlen(code_string);
+  GLint code_len = s.size();
   SH_GL_CHECK_ERROR(glShaderSourceARB(m_arb_shader, 1, &code_string, &code_len));
   SH_GL_CHECK_ERROR(glCompileShaderARB(m_arb_shader));
 
@@ -377,10 +378,6 @@ ostream& GlslCode::describe_interface(ostream& out)
 {
   // TODO
   return out;
-}
-
-void GlslCode::optimize(const ShProgramNodeCPtr& shader)
-{
 }
 
 void GlslCode::gen_node(ShCtrlGraphNodePtr node)

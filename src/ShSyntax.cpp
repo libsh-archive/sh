@@ -111,9 +111,8 @@ void shBind(const std::string& target, ShProgram& prg)
 
 void shUnbind()
 {
-  while (ShContext::current()->begin_bound() != ShContext::current()->end_bound()) {
-    shUnbind(ShContext::current()->begin_bound()->second);
-  }
+  if (!ShEnvironment::backend) return;
+  ShEnvironment::backend->unbind_all();
 }
 
 void shUnbind(ShProgram& prg)

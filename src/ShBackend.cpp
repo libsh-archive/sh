@@ -42,6 +42,7 @@
 #include "ShEnvironment.hpp"
 #include "ShInternals.hpp"
 #include "ShTransformer.hpp"
+#include "ShSyntax.hpp"
 
 namespace SH {
 
@@ -215,6 +216,16 @@ void ShBackend::init()
 #endif
 
   m_doneInit = true;
+}
+
+void ShBackend::unbind_all()
+{
+  // This won't really work with multiple backends, but is good enough
+  // for now -- sdt
+  
+  while (ShContext::current()->begin_bound() != ShContext::current()->end_bound()) {
+    shUnbind(ShContext::current()->begin_bound()->second);
+  }
 }
 
 }

@@ -41,6 +41,9 @@ public:
                                 TextureStrategy* textures);
   SH::ShBackendSetPtr generate_set(const SH::ShProgramSet& s);
   bool use_default_set() const;
+
+  void unbind_all();
+  bool use_default_unbind_all() const;
   
   GlslCodeStrategy* create(void);
 };

@@ -131,6 +131,17 @@ bool CodeStrategy::use_default_set() const
   return true;
 }
 
+void CodeStrategy::unbind_all()
+{
+  SH_DEBUG_ERROR("shgl::CodeStrategy::unbind_all() called!");
+  SH_DEBUG_ASSERT(false);
+}
+
+bool CodeStrategy::use_default_unbind_all() const
+{
+  return true;
+}
+
 GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrategy* stream) :
   m_code(code),
   m_texture(texture),
@@ -309,6 +320,16 @@ GlBackend::generate_set(const ShProgramSet& s)
     return SH::ShBackend::generate_set(s);
   } else {
     return m_code->generate_set(s);
+  }
+}
+
+void
+GlBackend::unbind_all()
+{
+  if (m_code->use_default_unbind_all()) {
+    SH::ShBackend::unbind_all();
+  } else {
+    m_code->unbind_all();
   }
 }
 

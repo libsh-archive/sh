@@ -120,8 +120,6 @@ private:
   // bound, if any
   GLhandleARB m_bound;
 
-  void optimize(const SH::ShProgramNodeCPtr& shader);
-
   /// Generate code for this node and those following it.
   void gen_node(SH::ShCtrlGraphNodePtr node);
   
