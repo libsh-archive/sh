@@ -563,7 +563,7 @@ struct FinishConstProp
             }
           }
 
-          if (!lift_uniforms) {
+          if (!lift_uniforms || allconst) {
             //SH_DEBUG_PRINT("Skipping uniform lifting");
             continue;
           }
@@ -656,7 +656,10 @@ struct FinishConstProp
           }
         }
       }
+    }
 
+    // Clean up
+    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
       // Remove constant propagation information.
       I->template destroy_info<ConstProp>();
     }

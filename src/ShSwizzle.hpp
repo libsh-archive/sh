@@ -28,7 +28,7 @@
 #define SHSWIZZLE_HPP
 
 #include <iosfwd>
-#include <vector>
+//#include <vector>
 #include "ShDllExport.hpp"
 #include "ShException.hpp"
 
@@ -84,7 +84,7 @@ public:
   ShSwizzle operator*(const ShSwizzle& other) const;
 
   /// Determine how many elements this swizzle results in.
-  int size() const;
+  int size() const { return m_size; }
   /// Obtain the index of the \a i'th element. 0 <= i < size().
   int operator[](int i) const;
 
@@ -95,8 +95,10 @@ public:
   bool operator==(const ShSwizzle& other) const;
   
 private:
-  std::size_t m_srcSize;
-  std::vector<int> m_indices;
+  int m_srcSize;
+  //std::vector<int> m_indices;
+  int* m_indices;
+  int m_size;
 
   friend SH_DLLEXPORT std::ostream& operator<<(std::ostream& out, const ShSwizzle& swizzle);
 };

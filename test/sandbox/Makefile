@@ -3,8 +3,11 @@ EXECUTABLES = $(SOURCES:.cpp=)
 OBJECTS = $(SOURCES:.cpp=.o)
 DEPENDS = $(SOURCES:.cpp=.d)
 CPPFLAGS = -I../../src 
-CXXFLAGS = -g -O0 -Wall
-LDFLAGS = ../../src/libsh.la -lGL
+#CXXFLAGS = -g -O0 -Wall
+CXXFLAGS = -g -O2 -Wall
+# LDFLAGS = ../../src/libsh.la -lGL
+
+LDFLAGS = ../../src/libsh.la
 
 all:
 

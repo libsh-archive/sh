@@ -28,11 +28,6 @@
 
 namespace SH {
 
-ShMeta::ShMeta()
-  : m_has_name(false), m_internal(false)
-{
-}
-
 ShMeta::~ShMeta()
 {
 }
