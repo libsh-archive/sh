@@ -77,7 +77,7 @@ int main() {
 	// create an rds object
 	rds = RDS(program.node());
 	rds.get_pdt()->printDoms();
-	rds.get_partitions();
+	rds.rds();
 	rds.print_partitions("part.graph");
 
 	return 0;

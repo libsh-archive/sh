@@ -7,6 +7,7 @@
 
 #include "RDS.hpp"
 #include <iostream>
+#include <fstream>
 #include <iostream.h>
 #include "ShDebug.hpp"
 #include "ShUtility.hpp"
@@ -23,6 +24,16 @@ RDS::RDS(ShProgramNodePtr progPtr)
 
 void RDS::set_limits() {
 	max_ops = 4;
+}
+
+void RDS::print_partitions(char *filename) {
+  std::ofstream dump(filename);
+  dump << "digraph g {" << std::endl;
+    for(PassVector::iterator I = m_passes.begin(); I != m_passes.end(); ++I) {
+      m_pdt->graphvizDump(*I, dump);
+    }
+  dump << "}" << std::endl;
+  dump.close();
 }
 
 void RDS::print_partition() {
@@ -215,6 +226,7 @@ void RDS::rds_merge(DAGNode::DAGNode* v)
 			else
 				w = new DAGNode(v->m_var);
 			
+      //FIXME this probably isn't what you wanted to comment out
 			if (d != 0)
 				//cout << "Next k-subset for " << d << "\n";
 			

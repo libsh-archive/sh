@@ -46,6 +46,7 @@ class SH_DLLEXPORT RDS {
 	}
 
 	void print_partitions(char* filename);
+	void print_partition();
 
   private:
 	typedef std::set<DAGNode::DAGNode*> ChildrenSet;

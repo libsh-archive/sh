@@ -5,6 +5,9 @@
 #include "ShStream.hpp"
 #include "RDS.hpp"
 
+#include <sys/time.h>
+#include <time.h>
+
 class RDSBackend : public SH::ShBackend {
 public:
 
@@ -21,6 +24,25 @@ public:
   virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
 
   void RDSBackend::dump(RDS rds, char* complete, char* partitioned);
+  void RDSBackend::compare(SH::ShProgramNodePtr p);
 };
+
+class Timer {
+public:
+  Timer() { start(); }
+
+  void start() { gettimeofday(&startval, 0); }
+
+  long diff() {
+    timeval endval;
+    gettimeofday(&endval, 0);
+    return (endval.tv_sec - startval.tv_sec)*1000
+           + (endval.tv_usec/1000 - startval.tv_usec/1000);
+  }
+
+private:
+  timeval startval;
+};
+
 
 #endif
