@@ -23,7 +23,7 @@ RDS::RDS(ShProgramNodePtr progPtr)
 #else
   m_limits = new rds::ArbLimits("vertex");
 #endif
-#ifdef SH_DEBUG
+#ifdef RDS_DEBUG
   m_limits->dump_limits();
 #endif
 }
@@ -32,7 +32,7 @@ void RDS::print_partitions(char *filename) {
   std::ofstream dump(filename);
   dump << "digraph g {" << std::endl;
     for(PassVector::iterator I = m_passes.begin(); I != m_passes.end(); ++I) {
-#ifdef SH_DEBUG
+#ifdef RDS_DEBUG
       SH_DEBUG_PRINT( "Pass starting at " << (*I)->m_label );
 #endif
       m_pdt->graphvizDump(*I, dump);
@@ -57,7 +57,7 @@ void RDS::set_partition() {
 }
 
 void RDS::rds_search() {
-#ifdef SH_DEBUG
+#ifdef RDS_DEBUG
   SH_DEBUG_PRINT(__FUNCTION__);
 #endif
 
@@ -87,7 +87,7 @@ void RDS::rds_search() {
 		rds_subdivide(p);
 		unvisitall(p);
 		int cost_r = cost(p); 
-#ifdef SH_DEBUG
+#ifdef RDS_DEBUG
     SH_DEBUG_PRINT( "Cost Save = " << cost_s << " Cost Recompute = " << cost_r );
 #endif
 		if (cost_s < cost_r) {
@@ -100,7 +100,7 @@ void RDS::rds_search() {
 // returns a set of passes
 void RDS::rds_subdivide(DAGNode::DAGNode* v) {
 
-#ifdef SH_DEBUG
+#ifdef RDS_DEBUG
 	SH_DEBUG_PRINT( "Subdivide(" << m_pdt->numbering(v) << ")");
 #endif
 
@@ -153,7 +153,7 @@ void RDS::rds_subdivide(DAGNode::DAGNode* v) {
 }
 
 void RDS::rds_merge(DAGNode::DAGNode* v) {
-#ifdef SH_DEBUG
+#ifdef RDS_DEBUG
   SH_DEBUG_PRINT("Merge(" << m_pdt->numbering(v) << ")");
 #endif
 	// check for any fixed nodes (their marked property cannot be changed)
@@ -392,7 +392,7 @@ void RDS::partition(DAGNode::DAGNode *v)
   if (!v) return;
 	if (m_visited[v]) return;
 
-#ifdef SH_DEBUG
+#ifdef RDS_DEBUG
       SH_DEBUG_PRINT(__FUNCTION__ << " node " << v->m_label );
 #endif
 
@@ -409,7 +409,7 @@ void RDS::partition(DAGNode::DAGNode *v)
 		// cut w off from v if it's marked
 		if (m_marked[w]) {
 			v->m_cut[w] = true; 
-#ifdef SH_DEBUG
+#ifdef RDS_DEBUG
       SH_DEBUG_PRINT("Cut at " << w->m_label );
 #endif
 		}
@@ -423,6 +423,11 @@ void RDS::partition(DAGNode::DAGNode *v)
 
 bool RDS::valid(DAGNode::DAGNode* v) {
 	unvisitall(v);
+
+  if (m_rdsh) {
+    return countnodes(v) <= m_limits->instrs();
+  }
+
 	return countnodes(v) <= (m_limits->instrs() - m_ops_used);
 }
 

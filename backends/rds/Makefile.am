@@ -1,5 +1,6 @@
 INCLUDES = -I$(top_srcdir)/src
-AM_CXXFLAGS = -DSH_DEBUG -DRDS_FAKE_LIMITS -g
+# AM_CXXFLAGS = -DSH_DEBUG -DRDS_FAKE_LIMITS -g
+AM_CXXFLAGS = -DRDS_FAKE_LIMITS -g
 
 libshrds_la_PROGRAMS = rdsdriver
 libshrds_ladir = $(prefix)/lib/sh

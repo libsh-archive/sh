@@ -212,7 +212,7 @@ std::ostream& PDomTree::graphvizDump(DAGNode::DAGNode *node, std::ostream& out) 
     out << "  \"" << (*I)->m_label << numbering(*I) << "\" -> \"" 
         << node->m_label << numbering(node) << "\"";
 
-#ifdef SH_DEBUG
+#ifdef RDS_DEBUG
     SH_DEBUG_PRINT( "  \"" << (*I)->m_label << numbering(*I) << "\" -> \"" 
         << node->m_label << numbering(node) << "\" cuts: " << node->m_cut[*I]);
 #endif

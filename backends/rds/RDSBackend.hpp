@@ -36,8 +36,8 @@ public:
   long diff() {
     timeval endval;
     gettimeofday(&endval, 0);
-    return (endval.tv_sec - startval.tv_sec)*1000
-           + (endval.tv_usec/1000 - startval.tv_usec/1000);
+    return (endval.tv_sec - startval.tv_sec)*1000000
+           + (endval.tv_usec - startval.tv_usec);
   }
 
 private:
