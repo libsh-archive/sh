@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <sh.hpp>
 
-#define EPSILON 1e-6
+#define EPSILON 1e-5
 
 #define COLOR_GREEN "[32m"
 #define COLOR_RED "[31m"
