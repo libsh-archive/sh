@@ -22,7 +22,7 @@ public:
            const INPUT1& in1,
            const OUTPUT& res)
   {
-    std::string name = program->name();
+    std::string name = program.name();
     float* _in1 = new float[in1.size()];
     in1.getValues(_in1);
 
@@ -87,7 +87,7 @@ public:
            const INPUT2& in2,
            const OUTPUT& res)
   {
-    std::string name = program->name();
+    std::string name = program.name();
     float* _in1 = new float[in1.size()];
     in1.getValues(_in1);
 
@@ -159,7 +159,7 @@ public:
            const INPUT3& in3,
            const OUTPUT res)
   {
-    std::string name = program->name();
+    std::string name = program.name();
   
     float* _in1 = new float[in1.size()];
     in1.getValues(_in1);

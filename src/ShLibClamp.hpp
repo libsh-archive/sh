@@ -45,6 +45,12 @@ template<int N, typename T>
 ShGeneric<N, T> mod(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
 template<typename T>
 ShGeneric<1, T> mod(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
+template<int N, typename T>
+ShGeneric<N, T> operator%(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
+template<int N, typename T>
+ShGeneric<N, T> operator%(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
+template<typename T>
+ShGeneric<1, T> operator%(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
 
 SH_SHLIB_CONST_SCALAR_OP(mod);
 SH_SHLIB_CONST_N_OP_LEFT(mod);
@@ -77,6 +83,35 @@ template<int N, typename T>
 ShGeneric<N,  T> min(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
 
 SH_SHLIB_CONST_SCALAR_OP(min);
+
+/** Componentwise clamping.
+ * Clamps a between b and c.
+ */
+template<int N, typename T>
+ShGeneric<N, T> clamp(const ShGeneric<N, T>& a,
+                      const ShGeneric<N, T>& b, const ShGeneric<N, T>& c);
+template<int N, typename T>
+ShGeneric<N, T> clamp(const ShGeneric<N, T>& a,
+                      const ShGeneric<1, T>& b, const ShGeneric<1, T>& c);
+template<typename T>
+ShGeneric<1, T> clamp(const ShGeneric<1, T>& a,
+                      const ShGeneric<1, T>& b, const ShGeneric<1, T>& c);
+
+SH_SHLIB_CONST_TRINARY_OP_011(clamp);
+
+/** Componentwise saturation.
+ * Equivalent to componentwise minimum with 1.
+ */
+template<int N, typename T>
+ShGeneric<N, T> sat(const ShGeneric<N, T>& a);
+
+/** Componentwise sign.
+ * Returns -1.0 if argument is less than 0.0, 1.0 if argument is greater
+ * than 0.0, 0.0 otherwise.
+ * Operates componentwise on tuples.
+ */
+template<int N, typename T>
+ShGeneric<N, T> sign(const ShGeneric<N, T>& var);
 
 /*@}*/
 

@@ -267,8 +267,16 @@ void ShParser::parseDo(ShCtrlGraphNodePtr& head,
   }
 
   tail->append(headCond);
-  tailCond->append(head, condArg.result);
-  tail = tailCond;
+
+  // Add empty fallthrough node.
+  ShCtrlGraphNodePtr fallthrough = new ShCtrlGraphNode();
+
+  // If the result of the UNTIL test is true, break out of the loop
+  tailCond->append(fallthrough, condArg.result);
+
+  // Otherwise, continue looping.
+  tailCond->append(head);
+  tail = fallthrough;
 }
 
 }

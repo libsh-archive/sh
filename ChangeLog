@@ -1,3 +1,336 @@
+2004-07-17  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShVariable.hpp (ShVariable): Add operator!=.
+
+	* src/ShSwizzle.cpp (ShSwizzle): Implement default constructor.
+
+	* src/ShSwizzle.hpp (ShSwizzle): Add default constructor.
+
+	* src/ShStructural.cpp (ShStructural): Rewrote cycle discovery code.
+	(ShStructural): Fix duplicate removal code.
+
+	* backends/gl/GlTextures.cpp (shGlInternalFormat): Use
+	GL_FLOAT_RGBA_NV for 2-component floating-point textures with
+	NV_float_buffer so that the appropriate components are extracted.
+
+	* backends/gl/PBufferStreams.cpp (execute): Added fragment program
+	dumping code.
+
+	* backends/gl/ArbCode.cpp (print): Handle condition codes.
+	(allocTemps): Allocate temporaries (mostly) correctly in the
+	presence of REPs.
+
+	* backends/gl/ArbInst.hpp (ArbInst): Add condition code data.
+
+	* backends/gl/ArbEmit.cpp: Use emit_div even on NV40, because we
+	found a bug with DIV in the drivers.
+	(emit_nvcond): Use condition-codes for COND instructions on NV backends.
+	(emit_tex): Fixed texture lookups, in particular for 2-tuple textures.
+
+2004-07-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbInst.hpp: Add an "invert" field for BRKs.
+
+	* backends/gl/ArbCode.cpp (genStructNode): Handle SELFLOOPs.
+
+	* src/ShStructural.cpp: Implement "reach under" set computation
+	and therefore handle while and do loops. Yay!
+
+	* backends/gl/ArbInst.cpp (arbOpInfo): Add info for REP, BRK and ENDREP.
+
+	* backends/gl/ArbInst.hpp: Add REP, BRK and ENDREP.
+
+	* backends/gl/ArbCode.cpp: Support generation of REP statements
+	for while loops. Emit proper code for REP, BRK and ENDREP.
+	(allocTemps): Handle loops in the
+	allocator. It's not graph colouring, but it works and it's not
+	completely stupid either :).
+
+2004-07-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbCode.cpp: Implement conditionals using IF on the
+	NV40 using the new Structural Analysis discovery code.
+
+	* backends/gl/ArbCode.hpp: Add genStructNode() prototype.
+
+	* backends/gl/ArbInst.cpp (arbOpInfo): Operation info for IF,
+	ELSE, ENDIF.
+
+	* backends/gl/ArbInst.hpp: Add IF, ELSE, ENDIF.
+
+	* src/ShStructural.cpp: Implementation of Structural Analysis algorithm.
+
+	* src/ShStructural.hpp: Added Structural Analysis
+	algorithm. Doesn't do loops yet.
+
+	* test/sandbox/Makefile: Improve Makefile overall, add dependencies.
+
+	* src/ShSwizzle.hpp: Added comparison (==) operator.
+
+	* src/ShVariable.hpp: Added comparison (==) operator.
+
+2004-07-13  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShSyntax.hpp (SH_NAME): Added this macro.
+
+2004-07-12  Gabriel Moreno-Fortuny  <gmoreno@fezzik.cgl.uwaterloo.ca>
+
+	* backends/cpu/CPU.cpp: Added -O2 flag to CPU execution.
+
+2004-07-12  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/cpu/CPU.cpp: Rename the functions starting with __ to
+	functions starting with sh_gcc_backend_.
+	(encode): Link with libshcpu for the lookup functions. Resolves issue145.
+
+	* src/ShParser.cpp (parseDo): Until means until, not
+	while. Resolves issue144.
+
+2004-07-10  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* test/sandbox: Added sandbox directory for simple tests.
+
+	* src/scripts/semantic.py (Class.assignments): Add operatxor=(T)
+	for single element types.
+	(Impl.assignments): Implement operator=(T) for single element
+	types. Resolves issue141.
+
+	* src/ShGenericImpl.hpp: Implemented operator=(T).
+
+	* src/ShGeneric.hpp: Added operator=(T) to 1-element generic.
+
+2004-07-09  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbCode.cpp (print): Add LABEL and BRA printing cases.
+	(getLabel): Implement this function.
+	(genNode): Handle branches for NVVP2.
+
+	* backends/gl/ArbCode.hpp: Add label map.
+
+	* backends/gl/ArbInst.cpp (arbOpInfo): Clean up table, add BRA and
+	LABEL info.
+
+	* backends/gl/ArbInst.hpp: Add instructions for BRA and a fake
+	LABEL instruction.
+	(ArbOpInfo): Remove useless members (fp, vp, vector).
+
+	* backends/cpu/CPU.cpp (encode): Implement SH_OP_SGN.
+
+	* src/ShLibDerivImpl.hpp (fwidth): Fix this function (use "var"
+	instead of "t").
+
+	* src/ShLibClampImpl.hpp (sign): Implemented this
+	function. Resolves issue60.
+
+	* src/ShLibClamp.hpp: Added sign() function.
+
+	* src/ShInstructions.cpp (shSGN): Implemented this function.
+
+	* src/ShInstructions.hpp: Added shSGN() function.
+
+2004-07-08  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbEmit.cpp: Added rules for SH_OP_SGN.
+	(emit_sgn): Implemented this function.
+	(emit_mod): Use SH_OP_SGN.
+
+	* backends/gl/ArbCode.hpp (ArbCode): Added emit_sgn() member function.
+
+	* src/ShStatement.cpp: Added opInfo for SGN.
+
+	* src/ShStatement.hpp: Added SH_OP_SGN statement.
+
+	* backends/gl/ArbInst.hpp: Added SGT, SLE, SFL, STR, RFL, SSG
+	instructions.
+
+	* backends/gl/ArbInst.cpp (arbOpInfo): DP2 is a collectingOp.
+	(arbOpInfo): Added SGT, SLE, SFL, STR, RFL, SSG instructions.
+
+	* backends/gl/ArbEmit.cpp: Only turn three-vector normalizations
+	into NRM instructions (on nvfp2).
+
+	* backends/gl/ArbCode.cpp (ArbCode): Initialize m_environment
+	using GL_EXTENSIONS information.
+
+	* backends/gl/ArbCode.hpp: Move filters here from ArbEmit.cpp.
+	(class ArbCode): Add m_environment member.
+
+	* util/ShNoiseImpl.hpp (perlin): Avoid using a cond here, use lerp
+	instead. Approximately 35% speedup for marble :).
+
+2004-07-07  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbEmit.cpp: Add a delay_mask transformation to do
+	the writemasking of a statement in a separate assignment. Use this
+	for texture lookups. Resolves issue58.
+
+	* backends/gl/ArbCode.cpp (genNode): Use emit function to generate code.
+	(printVar): Fix the way destination writemasks are emitted.
+
+	* backends/gl/ArbCode.hpp: Add emit* functions.
+
+	* backends/gl/ArbEmit.cpp: Add new table-driven emit code.
+
+2004-07-06  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbCode.cpp (genNode): Handle SH_OP_SNE.
+
+2004-07-05  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* Resolved issue43.
+
+	* backends/cpu/CPU.cpp (encode): Allow scalar ADD and DIV on both
+	sides, clean up implementation of MUL.
+
+	* backends/gl/ArbCode.cpp (genNode): Allow scalar versions of OP_ADD.
+	(genDiv): Allow scalar left-hand side in division.
+
+	* src/scripts/semantic.py (Class.modifying): Add declarations for
+	scalar versions of operator+= and operator-=.
+	(Impl.modifying): Add implementations for scalar versions of
+	operator+= and operator-=.
+
+	* src/ShGenericImpl.hpp: Implemented scalar versions of modifying
+	arithmetic operators.
+
+	* src/ShGeneric.hpp (class ShGeneric): Added scalar versions of
+	modifying arithmetic operators.
+
+	* src/ShInstructions.cpp (shADD): Allow scalars on both sides.
+	(shDIV): Allow scalars on both sides.
+
+	* src/ShLibArithImpl.hpp: Implemented scalar versions of
+	arithmetic operators.
+
+	* src/ShLibArith.hpp: Added scalar versions for both sides of
+	operator+, operator- and operator/.
+
+	* src/ShLibGeometryImpl.hpp (refract): Implement refract. Resolves issue73.
+
+	* src/ShLibGeometry.hpp: Add refract function prototype.
+
+	* src/scripts/semantic.py (Class.modifying): Add operator%=.
+	(Impl.modifying): Implemented operator%=. Resolves other half of issue45.
+
+	* src/ShGenericImpl.hpp (operator%): Implemented operator%=.
+
+	* src/ShGeneric.hpp (class ShGeneric): Add operator%=.
+
+	* src/ShLibClampImpl.hpp: Implemented operator%. Resolves half of issue45.
+
+	* src/ShLibClamp.hpp: Added operator%.
+
+	* src/ShInterp.hpp: Added ShInterp<L> texture trait wrapper
+	template. Resolves issue38.
+
+	* src/ShLibClampImpl.hpp (sat): Implement sat. Resolves issue62.
+
+	* src/ShLibClamp.hpp: Add sat function.
+
+	* util/ShFunc.hpp: Remove clamp functions.
+
+	* src/ShLibClampImpl.hpp (clamp): Implement. Resolves issue55.
+
+	* src/ShLibClamp.hpp: Add clamp library function.
+
+	* src/ShLibGeometryImpl.hpp (lit): Implement this function.
+	(faceforward): Implement this function.
+	Resolves one more part of issue73.
+
+	* src/ShLibGeometry.hpp: Add faceforward() and lit() library functions.
+
+	* src/ShProgram.hpp: Add describe_interface() member function wrapper.
+
+	* src/ShProgramNode.hpp: Rename operator<< for VarLists to static
+	member function "print" of ShProgramNode, add describe_interface
+	member function.
+
+	* src/ShProgramNode.cpp (describe_interface): Implement this
+	function. Resolves issue18.
+
+	* src/ShVariableNode.cpp (shBindingTypeName): Change name of temp
+	types to the empty string.
+
+2004-06-30  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShLibGeometryImpl.hpp (reflect): Implemented reflect
+	function. Makes issue73 in progress.
+
+	* src/ShLibGeometry.hpp: Added reflect function.
+
+	* backends/cpu/CPU.cpp (encode): Handle RCP and RSQ.
+
+	* test/regress/regress.py (tests): Add tests for RCP, RSQ and SQRT.
+
+	* backends/gl/ArbCode.cpp (genNode): Handle RCP and RSQ.
+
+	* src/ShInstructions.cpp: Implement shRCP() and shRSQ().
+
+	* src/ShInstructions.hpp: Add shRCP() and shRSQ().
+
+	* src/ShLibArithImpl.hpp: Implement rcp() and rsqrt().
+
+	* src/ShLibArith.hpp: Add rcp and rsqrt functions.
+
+	* src/ShStatement.cpp: Add RCP and RSQ opInfo.
+
+	* src/ShStatement.hpp: Add RCP and RSQ operations. Fixes issue48
+	and issue49, together with related changes.
+
+	* backends/gl/ArbCode.cpp (genNode): Scalarize sqrt.
+
+	* src/ShInstructions.cpp: Implemented shDX() and shDY().
+
+	* src/ShInstructions.hpp: Added shDX and shDY functions.
+
+	* src/ShStatement.cpp: Added opInfo for DX and DY.
+
+	* src/ShStatement.hpp: Added DX and DY ops.
+
+	* src/ShLibDerivImpl.hpp: Implemented derivative functions.
+
+	* src/ShLibDeriv.hpp: Added derivative functions, which of course
+	don't work in the backend yet. Resolves issue65, issue66, issue67
+	and makes issue64 an in-progress item.
+
+	* backends/gl/ArbCode.cpp (print): Don't print out declarations
+	for textures.
+
+	* backends/gl/ArbReg.hpp: A few changes for the constant-joining code.
+
+	* backends/gl/ArbCode.cpp: More constant-joining goodness.
+
+	* backends/gl/ArbCode.hpp: Add constant-joining code. Find
+	constants with the same values and allocate them to the same
+	register. This helps particularily on ATI and Mesa.
+
+2004-06-25  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShClamping.hpp: Added return_type typedefs.
+
+	* src/ShWrap.hpp: Added return_type typedefs.
+
+	* src/ShTexture.hpp: Added return_type typedefs.
+
+	* src/ShTable.hpp: Added return_type typedefs.
+
+	* src/ShArray.hpp: Added return_type typedefs.
+
+	* src/ShBaseTexture.hpp: Added return_type typedefs.
+
+2004-06-19  Bryan Chan <b8chan@uwaterloo.ca
+	* util/ShWorley*.?pp: Updated worley slightly to return all
+	k-nearest results instead of returning a weighted average.
+  
+2004-06-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* Everywhere: Replaced ShProgram typedef with real class. Moved
+	bound program list to ShContext. Moved ShEnvironment::shader to
+	ShContext::parsing(), and use a stack. Move copyCtrlGraph from
+	ShInternals to ShCtrlGraph and cloneProgram to
+	ShProgramNode. Fixes issue3, issue4, issue13 and a bunch of things
+	that should have been issues but aren't.
+
 2004-06-04  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShLibTrig.hpp: Added a couple of trig functions.

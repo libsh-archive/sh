@@ -53,6 +53,7 @@ public:
   ShArray1D(int width)
     : ShBaseTexture1D<T>(width, ShArrayTraits())
   {}
+  typedef T return_type;
 };
 
 /** Two-dimensional square power-of-two array.
@@ -67,6 +68,7 @@ public:
   ShArray2D(int width, int height)
     : ShBaseTexture2D<T>(width, height, ShArrayTraits())
   {}
+  typedef T return_type;
 };
 
 /** Two-dimensional non-square array.
@@ -81,6 +83,7 @@ public:
   ShArrayRect(int width, int height)
     : ShBaseTextureRect<T>(width, height, ShArrayTraits())
   {}
+  typedef T return_type;
 };
 
 /** Three-dimensional array.
@@ -95,6 +98,7 @@ public:
   ShArray3D(int width, int height, int depth)
     : ShBaseTexture3D<T>(width, height, depth, ShArrayTraits())
   {}
+  typedef T return_type;
 };
 
 /** Cube array.
@@ -111,6 +115,7 @@ public:
   ShArrayCube(int width, int height)
     : ShBaseTextureCube<T>(width, height, ShArrayTraits())
   {}
+  typedef T return_type;
 };
 
 }

@@ -31,6 +31,11 @@
 
 namespace SH {
 
+ShSwizzle::ShSwizzle()
+  : m_srcSize(0)
+{
+}
+
 ShSwizzle::ShSwizzle(int srcSize)
   : m_srcSize(srcSize)
 {
@@ -156,6 +161,11 @@ bool ShSwizzle::identity() const
     if (m_indices[i] != i) return false;
   }
   return true;
+}
+
+bool ShSwizzle::operator==(const ShSwizzle& other) const
+{
+  return m_srcSize == other.m_srcSize && m_indices == other.m_indices;
 }
 
 std::ostream& operator<<(std::ostream& out, const ShSwizzle& swizzle)

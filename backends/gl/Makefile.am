@@ -25,7 +25,7 @@ PBUFFERSTREAM_SOURCES = PBufferStreams.hpp PBufferStreams.cpp
 if ENABLE_ARB_BACKEND
 libsharb_la_LDFLAGS = -L$(prefix)/lib -module
 libsharb_la_LIBADD = $(top_srcdir)/src/libsh.la 
-libsharb_la_SOURCES = Arb.cpp ArbCode.cpp ArbInst.cpp ArbLimits.cpp \
+libsharb_la_SOURCES = Arb.cpp ArbCode.cpp ArbEmit.cpp ArbInst.cpp ArbLimits.cpp \
 		      ArbReg.cpp \
 		      Arb.hpp ArbCode.hpp ArbInst.hpp ArbLimits.hpp \
 		      ArbReg.hpp ArbBackend.cpp \
@@ -39,7 +39,7 @@ nodist_libshati_la_SOURCES = uberbuffers/UberTextures.hpp uberbuffers/UberTextur
 			     uberbuffers/UberStorage.hpp uberbuffers/UberStorage.cpp \
 		             uberbuffers/AtiBackend.cpp uberbuffers/uberbuffers.hpp
 
-dist_libshati_la_SOURCES = Arb.cpp ArbCode.cpp ArbInst.cpp ArbLimits.cpp \
+dist_libshati_la_SOURCES = Arb.cpp ArbCode.cpp ArbEmit.cpp ArbInst.cpp ArbLimits.cpp \
 			   ArbReg.cpp \
 			   Arb.hpp ArbCode.hpp ArbInst.hpp ArbLimits.hpp \
 		      	   ArbReg.hpp \

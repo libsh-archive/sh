@@ -57,6 +57,8 @@ public:
   {
     m_node->traits().clamping(ShTextureTraits::SH_CLAMPED);
   }
+
+  typedef typename T::return_type return_type;
 };
 
 /** Reset Clamp trait in Texture type.
@@ -87,6 +89,8 @@ public:
   {
     m_node->traits().clamping(ShTextureTraits::SH_UNCLAMPED);
   }
+
+  typedef typename T::return_type return_type;
 };
 
 }

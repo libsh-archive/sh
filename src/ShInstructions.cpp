@@ -1,8 +1,9 @@
 #include <cmath>
 #include "ShInstructions.hpp"
 #include "ShStatement.hpp"
-#include "ShEnvironment.hpp"
+#include "ShContext.hpp"
 #include "ShDebug.hpp"
+#include "ShError.hpp"
 
 namespace {
 
@@ -10,7 +11,7 @@ using namespace SH;
 
 bool immediate()
 {
-  return !ShEnvironment::insideShader;
+  return !ShContext::current()->parsing();
 }
 
 void sizes_match(const ShVariable& a, const ShVariable& b)
@@ -54,7 +55,7 @@ void has_values(const ShVariable& a, const ShVariable& b,
 
 void addStatement(const ShStatement& stmt)
 {
-  ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+  ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
 }
 
 typedef float T;
@@ -71,6 +72,7 @@ T lrp(T alpha, T a, T b) { return alpha*a + (1.0f-alpha)*b; }
 T cond(T alpha, T a, T b) { return alpha > 0.0f ? a : b; }
 T mad(T a, T b, T c) { return a * b + c; }
 T frac(T a) { return fmodf(a, 1.0f); }
+T sgn(T a) { return (a < 0.0f ? -1.0f : (a == 0.0f ? 0.0f : 1.0f)); }
 }
 
 #define CWISE_BINARY_OP(d, a, b, op) \
@@ -144,7 +146,7 @@ void shASN(ShVariable& dest, const ShVariable& src)
 
 void shADD(ShVariable& dest, const ShVariable& a, const ShVariable& b)
 {
-  sizes_match(dest, a, b);
+  sizes_match(dest, a, b, true, true);
   if (immediate()) {
     CWISE_BINARY_INLOP(dest, a, b, +);
   } else {
@@ -166,7 +168,7 @@ void shMUL(ShVariable& dest, const ShVariable& a, const ShVariable& b)
 
 void shDIV(ShVariable& dest, const ShVariable& a, const ShVariable& b)
 {
-  sizes_match(dest, a, b, false, true);
+  sizes_match(dest, a, b, true, true);
   if (immediate()) {
     CWISE_BINARY_INLOP(dest, a, b, /);
   } else {
@@ -336,6 +338,28 @@ void shDOT(ShVariable& dest, const ShVariable& a, const ShVariable& b)
   }
 }
 
+void shDX(ShVariable& dest, const ShVariable& a)
+{
+  sizes_match(dest, a);
+  if (immediate()) {
+    shError(ShScopeException("Cannot take derivatives in immediate mode"));
+  } else {
+    ShStatement stmt(dest, SH_OP_DX, a);
+    addStatement(stmt);
+  }
+}
+
+void shDY(ShVariable& dest, const ShVariable& a)
+{
+  sizes_match(dest, a);
+  if (immediate()) {
+    shError(ShScopeException("Cannot take derivatives in immediate mode"));
+  } else {
+    ShStatement stmt(dest, SH_OP_DY, a);
+    addStatement(stmt);
+  }
+}
+
 void shEXP(ShVariable& dest, const ShVariable& a)
 {
   sizes_match(dest, a);
@@ -492,6 +516,39 @@ void shPOW(ShVariable& dest, const ShVariable& a, const ShVariable& b)
     CWISE_BINARY_OP(dest, a, b, powf);
   } else {
     ShStatement stmt(dest, a, SH_OP_POW, b);
+    addStatement(stmt);
+  }
+}
+
+void shRCP(ShVariable& dest, const ShVariable& a)
+{
+  sizes_match(dest, a);
+  if (immediate()) {
+    CWISE_UNARY_OP(dest, a, 1.0f / );
+  } else {
+    ShStatement stmt(dest, SH_OP_RCP, a);
+    addStatement(stmt);
+  }
+}
+
+void shRSQ(ShVariable& dest, const ShVariable& a)
+{
+  sizes_match(dest, a);
+  if (immediate()) {
+    CWISE_UNARY_OP(dest, a, 1.0f / sqrt);
+  } else {
+    ShStatement stmt(dest, SH_OP_RSQ, a);
+    addStatement(stmt);
+  }
+}
+
+void shSGN(ShVariable& dest, const ShVariable& a)
+{
+  sizes_match(dest, a);
+  if (immediate()) {
+    CWISE_UNARY_OP(dest, a, sgn);
+  } else {
+    ShStatement stmt(dest, SH_OP_SGN, a);
     addStatement(stmt);
   }
 }

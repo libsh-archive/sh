@@ -73,11 +73,8 @@ void DefaultGenFactory<D, T>::makePos(Generator<D, T> &g) const {
 }
 
 template<int D, typename T>
-ShConstAttrib1f NullGenFactory<D, T>::half(0.5f);
-
-template<int D, typename T>
 void NullGenFactory<D, T>::makePos(Generator<D, T> &g) const {
-  g.pos = g.cell + fillcast<D>(half); 
+  g.pos = g.cell + fillcast<D>(ShAttrib<1, SH_CONST, T>(0.5f)); 
 }
 
 template<int D, typename T>
@@ -132,20 +129,67 @@ ShGeneric<1, T> Dist_1PropFactory<D, T>::operator() (
 }
 
 template<int D, typename T>
-ShGeneric<3, T> DistSqGradientPropFactory<D, T>::operator() (
+ShGeneric<1, T> Dist_InfPropFactory<D, T>::operator() (
     const ShGeneric<D, T> &p, const Generator<D, T> &g) const {
-  ShAttrib<3, SH_TEMP, T> result;
+  ShAttrib<D, SH_TEMP, T> delta = abs(p - g.pos);
+
+  // TODO replace with tuple max function when implemented 
+  ShAttrib<1, SH_TEMP, T> result = 0; 
+  for(int i = 0; i < D; ++i) result = max(result, delta(i));
+  return result;
+}
+
+template<int D, typename T>
+ShGeneric<D + 1, T> DistSqGradientPropFactory<D, T>::operator() (
+    const ShGeneric<D, T> &p, const Generator<D, T> &g) const {
+  ShAttrib<D + 1, SH_TEMP, T> result;
   ShAttrib<D, SH_TEMP, T> delta = p - g.pos;
 
   result(0) = delta | delta; 
-  result(1,2) = delta * result(0);
+  for(int i = 1; i < D + 1; ++i) {
+    result(i) = delta(i-1) * result(0);
+  }
+  return result;
+};
+
+template<int D, typename T>
+ShGeneric<D + 1, T> Dist_1GradientPropFactory<D, T>::operator() (
+    const ShGeneric<D, T> &p, const Generator<D, T> &g) const {
+
+  ShAttrib<D + 1, SH_TEMP, T> result;
+  ShAttrib<D, SH_TEMP, T> delta = p - g.pos;
+
+  ShAttrib<1, SH_CONST, T> ONE(1);
+  result(0) = abs(delta) | fillcast<D>(ONE);
+  for(int i = 1; i < D + 1; ++i) { // TODO switch to a swizzled version
+    result(i) = cond(delta(i-1), ONE, -ONE); 
+  }
+  return result;
+};
+
+template<int D, typename T>
+ShGeneric<D + 1, T> Dist_InfGradientPropFactory<D, T>::operator() (
+    const ShGeneric<D, T> &p, const Generator<D, T> &g) const {
+  ShAttrib<D + 1, SH_TEMP, T> result;
+  ShAttrib<D, SH_TEMP, T> delta = p - g.pos;
+  ShAttrib<D, SH_TEMP, T> absDelta = abs(delta); 
+
+  result(0) = 0;
+  for(int i = 0; i < D; ++i) result(0) = max(result(0), absDelta(i)); 
+
+  // TODO remove this when constant folding is available
+  ShAttrib<1, SH_CONST, T> ONE(1);
+  for(int i = 1; i < D + 1; ++i) { // TODO switch to a swizzled version
+    result(i) = (absDelta(i-1) >= result(0)) * cond(delta(i-1), ONE, -ONE); 
+  }
   return result;
 };
 
 template<int N, int D, typename T>
 ShGeneric<N, T> CellnoisePropFactory<N, D, T>::operator() (
     const ShGeneric<D, T> &p, const Generator<D, T> &g) const {
-  return cellnoise<N>(g.cell, m_useTexture);
+  // TODO remove frac once Issue58 fixed
+  return frac(cellnoise<N>(g.cell, m_useTexture));
 };
 
 template<typename TexType, typename T>
@@ -190,7 +234,7 @@ void kSelect(const ShGeneric<P, T> vals[N], ShGeneric<K, T> result[N], float LAR
 }
 
 template<int K, int N, int P, int D, typename T>
-ShGeneric<N, T> worley(const ShGeneric<D, T> &p, const ShGeneric<K, T> coeff[N],
+void worley(ShGeneric<K, T> result[N], const ShGeneric<D, T> &p,
     const GeneratorFactory<P, D, T> *genFactory,
     const PropertyFactory<N, D, T> *propFactory) {
 
@@ -209,22 +253,16 @@ ShGeneric<N, T> worley(const ShGeneric<D, T> &p, const ShGeneric<K, T> coeff[N],
   groupEvenOddSort<N>(props); 
 
   // weighted sum of basis function values to get final result
-  ShAttrib<N, SH_TEMP, T> result;
-  for(j = 0; j < N; ++j) result(j) = dot(cast<K>(props[j]), coeff[j]);
-  return result;
+  for(j = 0; j < N; ++j) result[j] = cast<K>(props[j]);
 }
 
 template<int K, int D, typename T>
-ShGeneric<1, T> worley(const ShGeneric<D, T> &p, const ShGeneric<K, T> &coeff,
-        bool useTexture = true) {
+ShGeneric<K, T> worley(const ShGeneric<D, T> &p, bool useTexture = true) {
   DefaultGenFactory<D, T> genFactory(useTexture);
   DistSqPropFactory<D, T> propFactory;
-  return worley(p, &coeff, &genFactory, &propFactory);
-}
-
-template<int D, typename T>
-ShGeneric<1, T> worley(const ShGeneric<D, T> &p, bool useTexture = true) {
-  return worley(p, ShAttrib<1, SH_CONST, T>(1), useTexture);
+  ShAttrib<K, SH_TEMP, T> result;
+  worley(&result, p, &genFactory, &propFactory);
+  return result;
 }
 
 template<int K, int D, typename T>
@@ -238,10 +276,10 @@ template<int K, int N, int P, int D, typename T>
 ShProgram shWorley(const GeneratorFactory<P, D, T> *genFactory,
         const PropertyFactory<N, D, T> *propFactory) {
   ShProgram program = SH_BEGIN_PROGRAM() {
-    ShAttrib<K, SH_INPUT, T> coefficients[N];
     ShTexCoord<D, SH_INPUT, T> SH_DECL(texcoord);
 
-    ShAttrib<N, SH_OUTPUT, T> SH_DECL(result) = worley(texcoord, coefficients, genFactory, propFactory); 
+    ShAttrib<K, SH_OUTPUT, T> result[N]; 
+    worley(result, texcoord, genFactory, propFactory); 
   } SH_END_PROGRAM;
   return program;
 }

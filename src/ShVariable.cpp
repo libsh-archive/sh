@@ -190,4 +190,10 @@ ShVariable ShVariable::operator-() const
   return ShVariable(m_node, m_swizzle, !m_neg);
 }
 
+bool ShVariable::operator==(const ShVariable& other) const
+{
+  return m_node == other.m_node && m_swizzle == other.m_swizzle && m_neg == other.m_neg;
+}
+
+
 }

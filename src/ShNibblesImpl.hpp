@@ -37,7 +37,7 @@ ShProgram keep(const std::string & name) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T::InOutType SH_NAMEDECL(attr, name); 
   } SH_END_PROGRAM;
-  nibble->name("keep");
+  nibble.name("keep");
   return nibble;
 }
 
@@ -48,7 +48,7 @@ ShProgram dup(const std::string & name) {
     typename T::OutputType SH_NAMEDECL(attr1, name + "_1") = attr; 
     typename T::OutputType SH_NAMEDECL(attr2, name + "_2") = attr; 
   } SH_END_PROGRAM;
-  nibble->name("dup");
+  nibble.name("dup");
   return nibble;
 }
 
@@ -57,7 +57,7 @@ ShProgram lose(const std::string & name) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T::InputType SH_NAMEDECL(attr, name);
   } SH_END_PROGRAM;
-  nibble->name("lose");
+  nibble.name("lose");
   return nibble;
 };
 
@@ -67,7 +67,7 @@ ShProgram access(const ShBaseTexture1D<T> &tex, const std::string &tcname, const
     ShInputTexCoord1f SH_NAMEDECL(tc, tcname);
     typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
   } SH_END;
-  nibble->name("access");
+  nibble.name("access");
   return nibble;
 }
 
@@ -77,7 +77,7 @@ ShProgram access(const ShBaseTexture2D<T> &tex, const std::string & tcname, cons
     ShInputTexCoord2f SH_NAMEDECL(tc, tcname);
     typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
   } SH_END;
-  nibble->name("access");
+  nibble.name("access");
   return nibble;
 }
 
@@ -87,7 +87,7 @@ ShProgram access(const ShBaseTextureRect<T> &tex, const std::string & tcname, co
     ShInputTexCoord2f SH_NAMEDECL(tc, tcname);
     typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
   } SH_END;
-  nibble->name("access");
+  nibble.name("access");
   return nibble;
 }
 
@@ -97,7 +97,7 @@ ShProgram access(const ShBaseTexture3D<T> &tex, const std::string & tcname, cons
     ShInputTexCoord3f SH_NAMEDECL(tc, tcname);
     typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
   } SH_END;
-  nibble->name("access");
+  nibble.name("access");
   return nibble;
 }
 
@@ -107,7 +107,7 @@ ShProgram access(const ShBaseTextureCube<T> &tex, const std::string & tcname, co
     ShInputTexCoord3f SH_NAMEDECL(tc, tcname);
     typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
   } SH_END;
-  nibble->name("access");
+  nibble.name("access");
   return nibble;
 }
 
@@ -116,7 +116,7 @@ ShProgram transform(const ShMatrix<Rows, Cols, Binding, T> &m, const std::string
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T2::InOutType SH_NAMEDECL(attrib, name) = m | attrib;
   } SH_END;
-  nibble->name("transform");
+  nibble.name("transform");
   return nibble;
 }
 
@@ -126,7 +126,7 @@ ShProgram cast(const std::string & name) {
     typename T::InputType SH_NAMEDECL(in, name);
     typename T2::OutputType SH_NAMEDECL(out, name) = cast<T2::typesize>( in );
   } SH_END;
-  nibble->name("cast");
+  nibble.name("cast");
   return nibble;
 }
 
@@ -136,7 +136,7 @@ ShProgram fillcast(const std::string & name) {
     typename T::InputType SH_NAMEDECL(in, name);
     typename T2::OutputType SH_NAMEDECL(out, name) = fillcast<T2::typesize>( in );
   } SH_END;
-  nibble->name("fillcast");
+  nibble.name("fillcast");
   return nibble;
 }
 
@@ -146,7 +146,7 @@ ShProgram opfunc(const std::string & name) {\
   ShProgram nibble = SH_BEGIN_PROGRAM() {\
     typename T::InOutType SH_NAMEDECL(x, name) = opcode;\
   } SH_END;\
-  nibble->name(# opfunc); \
+  nibble.name(# opfunc); \
   return nibble; \
 }
 
@@ -170,7 +170,7 @@ ShProgram opfunc(const std::string & output_name, \
     typename SelectType<(T1::typesize > T2::typesize), typename T1::OutputType, typename T2::OutputType>::type\
       SH_NAMEDECL(result, output_name) = opcode; \
   } SH_END; \
-  nibble->name(# opfunc); \
+  nibble.name(# opfunc); \
   return nibble; \
 } \
 \
@@ -202,7 +202,7 @@ ShProgram dot(const std::string & name) {
     typename T::InputType SH_DECL(b); 
     ShOutputAttrib1f SH_NAMEDECL(result, name) = dot(a, b); 
   } SH_END; 
-  nibble->name("dot");
+  nibble.name("dot");
   return nibble;
 }
 
@@ -214,7 +214,7 @@ ShProgram lerp(const std::string & name) {
     typename T2::InputType SH_DECL(alpha); 
     typename T1::OutputType SH_NAMEDECL(result, name) = lerp(alpha, a, b); 
   } SH_END; 
-  nibble->name("lerp");
+  nibble.name("lerp");
   return nibble;
 }
 

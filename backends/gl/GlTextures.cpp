@@ -50,7 +50,7 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node)
   } else if (node->traits().clamping() == SH::ShTextureTraits::SH_UNCLAMPED) {
 
     std::string exts(reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS)));
-    GLenum fpformats_nv[4] = {GL_FLOAT_R_NV, GL_FLOAT_RG_NV, GL_FLOAT_RGB_NV, GL_FLOAT_RGBA_NV};
+    GLenum fpformats_nv[4] = {GL_FLOAT_R_NV, GL_FLOAT_RGBA_NV, GL_FLOAT_RGB_NV, GL_FLOAT_RGBA_NV};
     GLenum fpformats_ati[4] = {GL_LUMINANCE_FLOAT32_ATI,
                                GL_LUMINANCE_ALPHA_FLOAT32_ATI,
                                GL_RGB_FLOAT32_ATI,

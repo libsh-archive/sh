@@ -17,7 +17,14 @@ namespace SH {
  */
 template<int N, typename T>
 ShGeneric<N, T> operator+(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
+template<int N, typename T>
+ShGeneric<N, T> operator+(const ShGeneric<1, T>& left, const ShGeneric<N, T>& right);
+template<int N, typename T>
+ShGeneric<N, T> operator+(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
+template<typename T>
+ShGeneric<1, T> operator+(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
 SH_SHLIB_CONST_SCALAR_OP(operator+);
+SH_SHLIB_CONST_N_OP_BOTH(operator+);
 
 /** Subtraction.
  * On tuples, this operator acts componentwise.
@@ -25,7 +32,14 @@ SH_SHLIB_CONST_SCALAR_OP(operator+);
  */
 template<int N, typename T>
 ShGeneric<N, T> operator-(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
+template<int N, typename T>
+ShGeneric<N, T> operator-(const ShGeneric<1, T>& left, const ShGeneric<N, T>& right);
+template<int N, typename T>
+ShGeneric<N, T> operator-(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
+template<typename T>
+ShGeneric<1, T> operator-(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
 SH_SHLIB_CONST_SCALAR_OP(operator-);
+SH_SHLIB_CONST_N_OP_BOTH(operator-);
 
 /** Multiplication.
  * On tuples, this operator acts componentwise.
@@ -40,7 +54,6 @@ template<int N, typename T>
 ShGeneric<N, T> operator*(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
 template<typename T>
 ShGeneric<1, T> operator*(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
-
 SH_SHLIB_CONST_SCALAR_OP(operator*);
 SH_SHLIB_CONST_N_OP_BOTH(operator*);
 
@@ -53,9 +66,10 @@ template<int N, typename T>
 ShGeneric<N, T> operator/(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
 template<int N, typename T>
 ShGeneric<N, T> operator/(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
+template<int N, typename T>
+ShGeneric<N, T> operator/(const ShGeneric<1, T>& left, const ShGeneric<N, T>& right);
 template<typename T>
 ShGeneric<1, T> operator/(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
-
 SH_SHLIB_CONST_SCALAR_OP(operator/);
 SH_SHLIB_CONST_N_OP_LEFT(operator/);
 
@@ -143,12 +157,23 @@ ShGeneric<N, T> mad(const ShGeneric<N, T>& m1, T m2, const ShGeneric<N, T>& a);
 template<int N, typename T> 
 ShGeneric<N, T> mad(const ShGeneric<N, T>& m1, double m2, const ShGeneric<N, T>& a);
 
+/* Reciprocal
+ * One divided by the given value, for each component.
+ */
+template<int N, typename T>
+ShGeneric<N, T> rcp(const ShGeneric<N, T>& var);
+
 /* Square root.
  * The square root of each component of the input is evaluated.
- * @todo should add reciprocal square root (rsqrt) as an intrinsic.
  */
 template<int N, typename T>
 ShGeneric<N, T> sqrt(const ShGeneric<N, T>& var);
+
+/* Reciprocal square root.
+ * The inverse of the square root of each component of the input is evaluated.
+ */
+template<int N, typename T>
+ShGeneric<N, T> rsqrt(const ShGeneric<N, T>& var);
 
 /*@}*/
 

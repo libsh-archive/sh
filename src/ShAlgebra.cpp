@@ -15,14 +15,17 @@
 
 namespace SH {
 
-ShProgram connect(const ShProgram& a, const ShProgram& b)
+ShProgram connect(ShProgram pa, ShProgram pb)
 {
-  int aosize, bisize;
+  ShProgramNodePtr a = pa.node();
+  ShProgramNodePtr b = pb.node();
+  
   if( !a || !b ) SH_DEBUG_WARN( "Connecting with a null ShProgram" );
   if( !a ) return b;
   if( !b ) return a;
-  aosize = a->outputs.size();
-  bisize = b->inputs.size();
+  
+  int aosize = a->outputs.size();
+  int bisize = b->inputs.size();
   std::string rtarget;
 
   if (a->target().empty()) {
@@ -31,16 +34,17 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
     if (b->target().empty() || a->target() == b->target()) {
       rtarget = a->target(); // A has a target, b doesn't
     } else {
+      SH_DEBUG_WARN("Connecting two different targets. Using empty target for result.");
       rtarget = ""; // Connecting different targets.
     }
   }
 
-  ShProgram program = new ShProgramNode(rtarget);
+  ShProgramNodePtr program = new ShProgramNode(rtarget);
 
   ShCtrlGraphNodePtr heada, taila, headb, tailb;
-  
-  copyCtrlGraph(a->ctrlGraph->entry(), a->ctrlGraph->exit(), heada, taila);
-  copyCtrlGraph(b->ctrlGraph->entry(), b->ctrlGraph->exit(), headb, tailb);
+
+  a->ctrlGraph->copy(heada, taila);
+  b->ctrlGraph->copy(headb, tailb);
 
   taila->append(headb);
 
@@ -70,9 +74,7 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   
   ShVariableReplacer::VarMap varMap;
 
-  
-  ShEnvironment::shader = program;
-  ShEnvironment::insideShader = true;
+  ShContext::current()->enter(program);
   
   ShProgramNode::VarList::const_iterator I, J;  
 
@@ -87,12 +89,13 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
       err << "Cannot smash variables "  
           << (*I)->nameOfType() << " " << (*I)->name() << " and " 
           << (*J)->nameOfType() << " " << (*J)->name() << " with different sizes" << std::endl;
-      err << "while connecting outputs: " << a->outputs << std::endl;
-      err << "to inputs: " << b->inputs << std::endl;
-      ShEnvironment::insideShader = false;
-      ShEnvironment::shader = 0;
+      err << "while connecting outputs: ";
+      ShProgramNode::print(err, a->outputs) << std::endl;
+      err << "to inputs: ";
+      ShProgramNode::print(err, b->inputs) << std::endl;
+      ShContext::current()->exit();
       shError(ShAlgebraException(err.str()));
-      return 0;
+      return ShProgram(ShProgramNodePtr(0));
     }
     ShVariableNodePtr n = new ShVariableNode(SH_TEMP, (*I)->size());
     varMap[*I] = n;
@@ -136,8 +139,7 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
         ShVariable(newOutput), SH_OP_ASN, ShVariable(varMap[*I])));
   }
 
-  ShEnvironment::shader = 0;
-  ShEnvironment::insideShader = false;
+  ShContext::current()->exit();
 
   ShVariableReplacer replacer(varMap);
   program->ctrlGraph->dfs(replacer);
@@ -149,12 +151,15 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   return program;
 }
 
-ShProgram combine(const ShProgram& a, const ShProgram& b)
+ShProgram combine(ShProgram pa, ShProgram pb)
 {
+  ShProgramNodePtr a = pa.node();
+  ShProgramNodePtr b = pb.node();
+  
   std::string rtarget;
   if( !a || !b ) SH_DEBUG_WARN( "Connecting with a null ShProgram" );
-  if(!a) return b;
-  if(!b) return a;
+  if (!a) return b;
+  if (!b) return a;
 
   if (a->target().empty()) {
     rtarget = b->target(); // A doesn't have a target. Use b's.
@@ -166,12 +171,12 @@ ShProgram combine(const ShProgram& a, const ShProgram& b)
     }
   }
 
-  ShProgram program = new ShProgramNode(rtarget);
+  ShProgramNodePtr program = new ShProgramNode(rtarget);
 
   ShCtrlGraphNodePtr heada, taila, headb, tailb;
 
-  copyCtrlGraph(a->ctrlGraph->entry(), a->ctrlGraph->exit(), heada, taila);
-  copyCtrlGraph(b->ctrlGraph->entry(), b->ctrlGraph->exit(), headb, tailb);
+  a->ctrlGraph->copy(heada, taila);
+  b->ctrlGraph->copy(headb, tailb);
 
   taila->append(headb);
 
@@ -192,18 +197,19 @@ ShProgram combine(const ShProgram& a, const ShProgram& b)
 }
 
 // Duplicates to inputs with matching name/type
-ShProgram mergeNames(const ShProgram &p) {
+ShProgram mergeNames(ShProgram p)
+{
   typedef std::pair<std::string, int> InputType;
   typedef std::map< InputType, int > FirstOccurenceMap;  // position of first occurence of an input type
   typedef std::vector< std::vector<int> > Duplicates;
   FirstOccurenceMap firsts;
   // dups[i] stores the set of positions that have matching input types with position i.
   // The whole set is stored in the smallest i position.
-  Duplicates dups( p->inputs.size(), std::vector<int>()); 
+  Duplicates dups( p.node()->inputs.size(), std::vector<int>()); 
 
   std::size_t i = 0;
-  for(ShProgramNode::VarList::const_iterator I = p->inputs.begin();
-      I != p->inputs.end(); ++I, ++i) {
+  for(ShProgramNode::VarList::const_iterator I = p.node()->inputs.begin();
+      I != p.node()->inputs.end(); ++I, ++i) {
     InputType it( (*I)->name(), (*I)->size() );
     if( firsts.find( it ) != firsts.end() ) { // duplicate
       dups[ firsts[it] ].push_back(i); 
@@ -222,14 +228,17 @@ ShProgram mergeNames(const ShProgram &p) {
   }
   ShProgram result = p << shSwizzle(swizzle);
   if( duplicator ) result = result << duplicator;
-  return result; 
+  return result.node(); 
 }
 
-ShProgram namedCombine(const ShProgram &a, const ShProgram &b) {
+ShProgram namedCombine(ShProgram a, ShProgram b) {
   return mergeNames(combine(a, b));
 }
 
-ShProgram namedConnect(const ShProgram &a, const ShProgram &b, bool keepExtra) {
+ShProgram namedConnect(ShProgram pa, ShProgram pb, bool keepExtra)
+{
+  ShProgramNodeCPtr a = pa.node();
+  ShProgramNodeCPtr b = pb.node();
   // positions of a pair of matched a output and b input 
   typedef std::map<int, int> MatchedChannelMap; 
 
@@ -275,7 +284,7 @@ ShProgram namedConnect(const ShProgram &a, const ShProgram &b, bool keepExtra) {
       swiz[j] = newInputIdx++;
     }
   }
-  ShProgram aPass = combine(a, passer);
+  ShProgram aPass = combine(pa, passer);
 
   if( keepExtra ) {
     for(i = 0; i < aMatch.size(); ++i) {
@@ -283,16 +292,18 @@ ShProgram namedConnect(const ShProgram &a, const ShProgram &b, bool keepExtra) {
     }
   }
    
-  return mergeNames(b << ( shSwizzle(swiz) << aPass )); 
+  return mergeNames(pb << ( shSwizzle(swiz) << aPass )); 
 }
 
-ShProgram renameInput(const ShProgram &a, std::string oldName, std::string newName) {
+ShProgram renameInput(ShProgram a,
+                      const std::string& oldName, const std::string& newName) {
   ShProgram renamer = SH_BEGIN_PROGRAM() {
-    for(ShProgramNode::VarList::const_iterator I = a->inputs.begin();
-        I != a->inputs.end(); ++I) {
+    for(ShProgramNode::VarList::const_iterator I = a.node()->inputs.begin();
+        I != a.node()->inputs.end(); ++I) {
       ShVariable var(new ShVariableNode(SH_INOUT, (*I)->size(), 
             (*I)->specialType()));
 
+      if (!(*I)->has_name()) continue;
       std::string name = (*I)->name();
       if( name == oldName ) {
         var.name(newName);
@@ -305,13 +316,15 @@ ShProgram renameInput(const ShProgram &a, std::string oldName, std::string newNa
 }
 
 // TODO factor out common code from renameInput, renameOutput
-ShProgram renameOutput(const ShProgram &a, std::string oldName, std::string newName) {
+ShProgram renameOutput(ShProgram a,
+                       const std::string& oldName, const std::string& newName) {
   ShProgram renamer = SH_BEGIN_PROGRAM() {
-    for(ShProgramNode::VarList::const_iterator I = a->outputs.begin();
-        I != a->outputs.end(); ++I) {
+    for(ShProgramNode::VarList::const_iterator I = a.node()->outputs.begin();
+        I != a.node()->outputs.end(); ++I) {
       ShVariable var(new ShVariableNode(SH_INOUT, (*I)->size(), 
-            (*I)->specialType()));
+                                        (*I)->specialType()));
 
+      if (!(*I)->has_name()) continue;
       std::string name = (*I)->name();
       if( name == oldName ) {
         var.name(newName);
@@ -323,62 +336,61 @@ ShProgram renameOutput(const ShProgram &a, std::string oldName, std::string newN
   return connect(a, renamer);
 }
 
-ShProgram namedAlign(const ShProgram &a, const ShProgram &b) {
+ShProgram namedAlign(ShProgram a, ShProgram b) {
   ShManipulator<std::string> ordering;
 
-  for(ShProgramNode::VarList::const_iterator I = b->inputs.begin();
-      I != b->inputs.end(); ++I) {
+  for(ShProgramNode::VarList::const_iterator I = b.node()->inputs.begin();
+      I != b.node()->inputs.end(); ++I) {
     ordering((*I)->name());
   }
 
   return ordering << a; 
 }
 
-ShProgram operator<<(const ShProgram& a, const ShProgram& b)
+ShProgram operator<<(ShProgram a, ShProgram b)
 {
   return connect(b,a);
 }
 
-ShProgram operator>>(const ShProgram& a, const ShProgram& b)
+ShProgram operator>>(ShProgram a, ShProgram b)
 {
   return connect(a,b);
 }
 
-ShProgram operator&(const ShProgram& a, const ShProgram& b)
+ShProgram operator&(ShProgram a, ShProgram b)
 {
   return combine(a, b);
 }
 
-ShProgram operator>>(const ShProgram &p, const ShVariable &var) { 
+ShProgram operator>>(ShProgram p, const ShVariable &var) { 
   return replaceUniform(p, var);
 }
 
-ShProgram replaceUniform(const ShProgram& a, const ShVariable& v)
+ShProgram replaceUniform(ShProgram a, const ShVariable& v)
 {
   if(!v.uniform()) {
     shError(ShAlgebraException("Cannot replace non-uniform variable"));
   }
 
-  ShProgram program = cloneProgram(a); 
+  ShProgram program(a.node()->clone()); 
   
   ShVariableReplacer::VarMap varMap;
 
-  ShEnvironment::shader = program;
-  ShEnvironment::insideShader = true;
+  ShContext::current()->enter(program.node());
+
   // make a new input
   ShVariableNodePtr newInput = new ShVariableNode(SH_INPUT, v.size(), v.node()->specialType()); 
   varMap[v.node()] = newInput;
 
-  ShEnvironment::shader = 0;
-  ShEnvironment::insideShader = false;
+  ShContext::current()->exit();
 
   ShVariableReplacer replacer(varMap);
-  program->ctrlGraph->dfs(replacer);
+  program.node()->ctrlGraph->dfs(replacer);
 
-  ShOptimizer optimizer(program->ctrlGraph);
+  ShOptimizer optimizer(program.node()->ctrlGraph);
   optimizer.optimize(ShContext::current()->optimization());
   
-  program->collectVariables();
+  program.node()->collectVariables();
 
   return program;
 }

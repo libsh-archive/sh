@@ -29,7 +29,12 @@
 /// Turn this on if you want timings on std::cerr
 //#define DO_PBUFFER_TIMING
 
+// Turn this on to debug the fragment programs.
+#define SH_DEBUG_PBS_PRINTFP
+
 #include <map>
+#include <fstream>
+#include <cstdlib>
 
 // Extensions for ATI and Nvidia
 
@@ -138,20 +143,24 @@ public:
       ShStatement& stmt = *I;
       if (stmt.op != SH_OP_FETCH) continue;
       
+      if (!stmt.src[0].node()) {
+        SH_DEBUG_WARN("FETCH from null stream");
+        continue;
+      }
       if (stmt.src[0].node()->kind() != SH_STREAM) {
-        // TODO: complain
+        SH_DEBUG_WARN("FETCH from non-stream");
         continue;
       }
       
       ShChannelNodePtr stream_node = shref_dynamic_cast<ShChannelNode>(stmt.src[0].node());
       StreamInputMap::const_iterator I = input_map.find(stream_node);
       if (I == input_map.end()) {
-        // TODO: complain
+        SH_DEBUG_WARN("Stream node not found in input map");
         continue;
       }
 
       if (!I->second) {
-        // TODO: complain
+        SH_DEBUG_WARN("No texture allocated for stream node");
         continue;
       }
 
@@ -349,7 +358,7 @@ FloatExtension PBufferStreams::setupContext(int width, int height)
   return m_info.extension;
 }
 
-void PBufferStreams::execute(const ShProgram& program,
+void PBufferStreams::execute(const ShProgramNodeCPtr& program,
                              ShStream& dest)
 {
   DECLARE_TIMER(overhead);
@@ -391,9 +400,9 @@ void PBufferStreams::execute(const ShProgram& program,
     for (ShStream::NodeList::iterator I = dest.begin(); I != dest.end(); ++I, ++i) {
       ShStream s(*I);
       DECLARE_TIMER(specialize);
-      ShProgram p = shSwizzle(i) << program;
+      ShProgram p = shSwizzle(i) << shref_const_cast<ShProgramNode>(program);
       TIMING_RESULT(specialize);
-      execute(p, s);
+      execute(p.node(), s);
     }
     TIMING_RESULT(overall);
     return;
@@ -471,21 +480,22 @@ void PBufferStreams::execute(const ShProgram& program,
 
   DECLARE_TIMER(fpsetup);
   // Add in the texcoord variable
-  ShProgram fp = program & lose<ShTexCoord2f>();
+  ShProgram fp = ShProgram(shref_const_cast<ShProgramNode>(program))
+    & lose<ShTexCoord2f>("streamcoord");
 
   // Make it a fragment program
-  fp->target() = "gpu:fragment";
+  fp.node()->target() = "gpu:fragment";
   
-  ShVariableNodePtr tc_node = fp->inputs.back(); // there should be only one input anyways
+  ShVariableNodePtr tc_node = fp.node()->inputs.back(); // there should be only one input anyways
 
   // replace FETCH with TEX
   TexFetcher texFetcher(input_map, tc_node, extension == SH_ARB_NV_FLOAT_BUFFER);
-  fp->ctrlGraph->dfs(texFetcher);
-  fp->collectVariables(); // necessary to collect all the new textures
+  fp.node()->ctrlGraph->dfs(texFetcher);
+  fp.node()->collectVariables(); // necessary to collect all the new textures
 
   
   // optimize
-  ShOptimizer optimizer(fp->ctrlGraph);
+  ShOptimizer optimizer(fp.node()->ctrlGraph);
   optimizer.optimize(ShContext::current()->optimization());
 
   int gl_error;
@@ -505,9 +515,23 @@ void PBufferStreams::execute(const ShProgram& program,
     //XFree(fb_config);
     return;
   }
+#ifdef SH_DEBUG_PBS_PRINTFP
+  {
+  std::ofstream fpgv("pb.dot");
+  fp.node()->ctrlGraph->graphvizDump(fpgv);
+  }
+  system("dot -Tps -o pb.ps pb.dot");
+#endif
 
   // generate code
   shCompile(fp);
+
+#ifdef SH_DEBUG_PBS_PRINTFP
+ {
+  std::ofstream fpdbg("pbufferstream.fp");
+  fp.code()->print(fpdbg);
+ }
+#endif
 
   TIMING_RESULT(fpsetup);
 
@@ -518,7 +542,7 @@ void PBufferStreams::execute(const ShProgram& program,
     // The (trivial) vertex program
     if (m_setup_vp < 0) {
       m_vp = keep<ShPosition4f>() & keep<ShTexCoord2f>();
-      m_vp->target() = "gpu:vertex";
+      m_vp.node()->target() = "gpu:vertex";
     }
     shCompile(m_vp);
     m_setup_vp = curcontext;
@@ -533,7 +557,7 @@ void PBufferStreams::execute(const ShProgram& program,
   TIMING_RESULT(binding);
 
   DECLARE_TIMER(clear);
-  //glClear(GL_COLOR_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT);
   TIMING_RESULT(clear);
 
   DECLARE_TIMER(rendersetup);
@@ -652,8 +676,10 @@ void PBufferStreams::execute(const ShProgram& program,
   shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->setContext(prev);
   //glXDestroyContext(m_display, pbuffer_ctxt);
   //XFree(fb_config);
+
+  // TODO: This just seems wrong.
+  // ShEnvironment::boundShaders().clear();
   
-  ShEnvironment::boundShaders().clear();
   TIMING_RESULT(onerun);
 }
 

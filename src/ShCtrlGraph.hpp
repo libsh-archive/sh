@@ -63,7 +63,8 @@ public:
   ~ShCtrlGraphNode();
 
   ShBasicBlockPtr block;
-  std::vector<ShCtrlGraphBranch> successors; ///< Conditional successors
+  typedef std::vector<ShCtrlGraphBranch> SuccessorList;
+  SuccessorList successors; ///< Conditional successors
   ShPointer<ShCtrlGraphNode> follower; ///< Unconditional successor
 
   typedef std::list<ShCtrlGraphNode*> ShPredList;
@@ -145,6 +146,9 @@ public:
   
   /// Determine the predecessors in this graph
   void computePredecessors();
+
+  // Make a copy of this control graph placing the result into head and tail.
+  void copy(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail) const;
   
 private:
   ShCtrlGraphNodePtr m_entry;

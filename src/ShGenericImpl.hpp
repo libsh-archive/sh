@@ -28,6 +28,7 @@
 #define SHGENERICIMPL_HPP
 
 #include "ShGeneric.hpp"
+#include "ShAttrib.hpp"
 #include "ShLib.hpp"
 #include "ShInstructions.hpp"
 
@@ -88,6 +89,27 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator/=(const ShGeneric<N, T>& right)
 }
 
 template<int N, typename T>
+ShGeneric<N, T>& ShGeneric<N, T>::operator%=(const ShGeneric<N, T>& right)
+{
+  *this = *this % right;
+  return *this;
+}
+
+template<int N, typename T>
+ShGeneric<N, T>& ShGeneric<N, T>::operator+=(const ShGeneric<1, T>& right)
+{
+  *this = *this + right;
+  return *this;
+}
+
+template<int N, typename T>
+ShGeneric<N, T>& ShGeneric<N, T>::operator-=(const ShGeneric<1, T>& right)
+{
+  *this = *this - right;
+  return *this;
+}
+
+template<int N, typename T>
 ShGeneric<N, T>& ShGeneric<N, T>::operator*=(const ShGeneric<1, T>& right)
 {
   *this = *this * right;
@@ -102,6 +124,27 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator/=(const ShGeneric<1, T>& right)
 }
 
 template<int N, typename T>
+ShGeneric<N, T>& ShGeneric<N, T>::operator%=(const ShGeneric<1, T>& right)
+{
+  *this = *this / right;
+  return *this;
+}
+
+template<int N, typename T>
+ShGeneric<N, T>& ShGeneric<N, T>::operator+=(T right)
+{
+  *this = *this + right;
+  return *this;
+}
+
+template<int N, typename T>
+ShGeneric<N, T>& ShGeneric<N, T>::operator-=(T right)
+{
+  *this = *this - right;
+  return *this;
+}
+
+template<int N, typename T>
 ShGeneric<N, T>& ShGeneric<N, T>::operator*=(T right)
 {
   *this = *this * right;
@@ -112,6 +155,13 @@ template<int N, typename T>
 ShGeneric<N, T>& ShGeneric<N, T>::operator/=(T right)
 {
   *this = *this / right;
+  return *this;
+}
+
+template<int N, typename T>
+ShGeneric<N, T>& ShGeneric<N, T>::operator%=(T right)
+{
+  *this = *this % right;
   return *this;
 }
 
@@ -192,6 +242,13 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator=(const ShGeneric<1, T>& other)
 }
 
 template<typename T>
+ShGeneric<1, T>& ShGeneric<1, T>::operator=(T other)
+{
+  shASN(*this, ShAttrib<1, SH_TEMP, T>(other));
+  return *this;
+}
+
+template<typename T>
 ShGeneric<1, T>& ShGeneric<1, T>::operator+=(const ShGeneric<1, T>& right)
 {
   *this = *this + right;
@@ -220,6 +277,13 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator/=(const ShGeneric<1, T>& right)
 }
 
 template<typename T>
+ShGeneric<1, T>& ShGeneric<1, T>::operator%=(const ShGeneric<1, T>& right)
+{
+  *this = *this % right;
+  return *this;
+}
+
+template<typename T>
 ShGeneric<1, T>& ShGeneric<1, T>::operator*=(T right)
 {
   *this = *this * right;
@@ -230,6 +294,13 @@ template<typename T>
 ShGeneric<1, T>& ShGeneric<1, T>::operator/=(T right)
 {
   *this = *this / right;
+  return *this;
+}
+
+template<typename T>
+ShGeneric<1, T>& ShGeneric<1, T>::operator%=(T right)
+{
+  *this = *this % right;
   return *this;
 }
 

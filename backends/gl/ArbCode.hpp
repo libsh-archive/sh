@@ -10,6 +10,7 @@
 #include "ShProgram.hpp"
 #include "ShSwizzle.hpp"
 #include "ShRefCount.hpp"
+#include "ShStructural.hpp"
 #include "ArbLimits.hpp"
 #include "ArbReg.hpp"
 #include "ArbInst.hpp"
@@ -18,10 +19,27 @@ namespace shgl {
 
 class ArbCode;
 class ArbBindingSpecs;
+class ArbMapping;
+
+// Filters for code emission and environment setup
+const unsigned int SH_ARB_ANY   = 0x000; // All targets
+const unsigned int SH_ARB_FP    = 0x001; // ARB_fragment_program
+const unsigned int SH_ARB_VP    = 0x002; // ARB_vertex_program
+const unsigned int SH_ARB_NVFP  = 0x004; // NV_fragment_program_option
+const unsigned int SH_ARB_NVFP2 = 0x008; // NV_fragment_program2
+const unsigned int SH_ARB_ATIDB = 0x010; // ATI_draw_buffers
+const unsigned int SH_ARB_NVVP2 = 0x020; // NV_vertex_program2_option
+const unsigned int SH_ARB_NVVP3 = 0x040; // NV_vertex_program3
+const unsigned int SH_ARB_VEC1  = 0x080; // Maximum source has length 1
+const unsigned int SH_ARB_VEC2  = 0x100; // Maximum source has length 2
+const unsigned int SH_ARB_VEC3  = 0x200; // Maximum source has length 3
+const unsigned int SH_ARB_VEC4  = 0x400; // Maximum source has length 4
+const unsigned int SH_ARB_END   = 0x800; // Not a filter. End of
+                                         // table.
 
 class ArbCode : public SH::ShBackendCode {
 public:
-  ArbCode(const SH::ShProgram& shader, const std::string& target,
+  ArbCode(const SH::ShProgramNodeCPtr& program, const std::string& target,
           TextureStrategy* textures);
   virtual ~ArbCode();
 
@@ -43,24 +61,32 @@ private:
   /// Generate code for this node and those following it.
   void genNode(SH::ShCtrlGraphNodePtr node);
 
-  /// Generate code for DIV (either op2 is scalar or op1.size() == op2.size())
-  void genDiv( const SH::ShVariable &dest, const SH::ShVariable &op1, 
-      const SH::ShVariable &op2 );
+  /// Generate code for this structural node and those contained by
+  /// it.
+  /// Right now this is geared specifically at NV_fragment_program2.
+  void genStructNode(const SH::ShStructuralNodePtr& node);
 
-  /// Generate code for a Dot Product 
+  /// Generate code for a single Sh statement.
+  void emit(const SH::ShStatement& stmt);
 
-  /// Generate code for a scalar/vector binary op where the scalar
-  /// should be promoted to a vector by duplicating components
-  void genScalarVectorInst( const SH::ShVariable &dest, const SH::ShVariable &op1, 
-      const SH::ShVariable &op2, int opcode );
- 
-  /// Generate code for polynomial approximations of trig functions.
-  void genTrigInst( const SH::ShVariable &dest, const SH::ShVariable& src,
-      int opcode );
-
-  void genDot( const SH::ShVariable &dest, const SH::ShVariable& src0,
-      const SH::ShVariable& src1);
-
+  /// Special code cases
+  void emit_div(const SH::ShStatement& stmt);
+  void emit_sqrt(const SH::ShStatement& stmt);
+  void emit_lerp(const SH::ShStatement& stmt);
+  void emit_dot2(const SH::ShStatement& stmt);
+  void emit_eq(const SH::ShStatement& stmt);
+  void emit_ceil(const SH::ShStatement& stmt);
+  void emit_mod(const SH::ShStatement& stmt);
+  void emit_trig(const SH::ShStatement& stmt);
+  void emit_invtrig(const SH::ShStatement& stmt);
+  void emit_tan(const SH::ShStatement& stmt);
+  void emit_exp(const SH::ShStatement& stmt);
+  void emit_log(const SH::ShStatement& stmt);
+  void emit_norm(const SH::ShStatement& stmt);
+  void emit_sgn(const SH::ShStatement& stmt);
+  void emit_tex(const SH::ShStatement& stmt);
+  void emit_nvcond(const SH::ShStatement& stmt);
+  
   /// Allocate registers, after the code has been generated
   void allocRegs();
 
@@ -102,11 +128,13 @@ private:
   /// Check whether inst is a sampling instruction. If so, output it
   /// and return true. Otherwise, output nothing and return false.
   bool printSamplingInstruction(std::ostream& out, const ArbInst& inst) const;
+
+  int getLabel(SH::ShCtrlGraphNodePtr node);
   
   TextureStrategy* m_textures;
-  SH::ShProgram m_shader; // internally visible shader ShTransformered to fit this target (ARB)
-  SH::ShProgram m_originalShader; // original shader (should alway use this for external (e.g. globals))
-  std::string m_target;
+  SH::ShProgramNodePtr m_shader; // internally visible shader ShTransformered to fit this target (ARB)
+  SH::ShProgramNodeCPtr m_originalShader; // original shader (should alway use this for external (e.g. globals))
+  std::string m_unit;
 
   typedef std::vector<ArbInst> ArbInstList;
   ArbInstList m_instructions;
@@ -132,8 +160,12 @@ private:
   /// The number of distinct textures used in this shader.
   int m_numTextures;
 
-  typedef std::map<SH::ShVariableNodePtr, ArbReg> RegMap;
+  typedef std::map<SH::ShVariableNodePtr,
+                   SH::ShPointer<ArbReg> > RegMap;
   RegMap m_registers;
+
+  typedef std::list< SH::ShPointer<ArbReg> > RegList;
+  RegList m_reglist;
 
   std::vector<int> m_outputBindings;
   std::vector<int> m_inputBindings;
@@ -143,6 +175,15 @@ private:
 
   /// ARB Program ID we are bound to. 0 if code hasn't been uploaded yet.
   unsigned int m_programId;
+
+  static ArbMapping table[];
+
+  // Extensions and language alternatives available. See list above
+  unsigned int m_environment;
+
+  typedef std::map<SH::ShCtrlGraphNodePtr, int> LabelMap;
+  LabelMap m_label_map; 
+  int m_max_label;
 };
 
 typedef SH::ShPointer<ArbCode> ArbCodePtr;

@@ -93,23 +93,27 @@ public:""")
     def assignments(self, size):
         common.inprint(self.name + "& operator=(const ShGeneric<" + self.sizevar(size) + ", T>& other);\n" +
                        self.name + "& operator=(const " + self.name + "<" + self.sizevar(size) + ", Binding, T, Swizzled>& other);\n")
+        if size == 1:
+            common.inprint(self.name + "& operator=(T other);\n")
 
     def modifying(self, size):
-        # TODO: Scalar op* and op/
         common.inprint(self.name + "& operator+=(const ShGeneric<" + self.sizevar(size) + ", T>& right);")
         common.inprint(self.name + "& operator-=(const ShGeneric<" + self.sizevar(size) + ", T>& right);")
         common.inprint(self.name + "& operator*=(const ShGeneric<" + self.sizevar(size) + ", T>& right);")
         common.inprint(self.name + "& operator/=(const ShGeneric<" + self.sizevar(size) + ", T>& right);")
+        common.inprint(self.name + "& operator%=(const ShGeneric<" + self.sizevar(size) + ", T>& right);")
         
         common.inprint(self.name + "& operator*=(T);")
         common.inprint(self.name + "& operator/=(T);")
+        common.inprint(self.name + "& operator%=(T);")
+        common.inprint(self.name + "& operator+=(T);")
+        common.inprint(self.name + "& operator-=(T);")
         if size != 1:
+            common.inprint(self.name + "& operator+=(const ShGeneric<1, T>&);")
+            common.inprint(self.name + "& operator-=(const ShGeneric<1, T>&);")
             common.inprint(self.name + "& operator*=(const ShGeneric<1, T>&);")
             common.inprint(self.name + "& operator/=(const ShGeneric<1, T>&);")
-        else:
-            common.inprint(self.name + "& operator+=(T);")
-            common.inprint(self.name + "& operator-=(T);")
-            
+            common.inprint(self.name + "& operator%=(const ShGeneric<1, T>&);")
 
     def swizzles(self):
         for num in range(1, 5):
@@ -251,6 +255,8 @@ class Impl:
             s = str(size)
         self.assign("operator=", [["const ShGeneric<" + s + ", T>&", "other"]], size)
         self.assign("operator=", [["const " + self.tplcls(size) + "&", "other"]], size)
+        if size == 1:
+            self.assign("operator=", [["T", "other"]], size)
 
     def modifying(self, size = 0):
         if size <= 0:
@@ -261,15 +267,19 @@ class Impl:
         self.assign("operator-=", [["const ShGeneric<" + s + ", T>&", "right"]], size)
         self.assign("operator*=", [["const ShGeneric<" + s + ", T>&", "right"]], size)
         self.assign("operator/=", [["const ShGeneric<" + s + ", T>&", "right"]], size)
+        self.assign("operator%=", [["const ShGeneric<" + s + ", T>&", "right"]], size)
 
+        self.assign("operator+=", [["T", "right"]], size)
+        self.assign("operator-=", [["T", "right"]], size)
         self.assign("operator*=", [["T", "right"]], size)
         self.assign("operator/=", [["T", "right"]], size)
+        self.assign("operator%=", [["T", "right"]], size)
         if size != 1:
+            self.assign("operator+=", [["const ShGeneric<1, T>&", "right"]], size)
+            self.assign("operator-=", [["const ShGeneric<1, T>&", "right"]], size)
             self.assign("operator*=", [["const ShGeneric<1, T>&", "right"]], size)
             self.assign("operator/=", [["const ShGeneric<1, T>&", "right"]], size)
-        else:
-            self.assign("operator+=", [["T", "right"]], size)
-            self.assign("operator-=", [["T", "right"]], size)
+            self.assign("operator%=", [["const ShGeneric<1, T>&", "right"]], size)
             
     def swizzle(self, num, size, op = "()"):
         args = ["s" + str(i) for i in range(0, num)]

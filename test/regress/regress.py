@@ -112,8 +112,41 @@ tests = [
       [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]]
      ],
 
-    ['SIN', ['v'], 'v', ['sin(A)'], []],
-    ['SQRT', ['v'], 'v', ['sqrt(A)'], []],
+    ['RCP', ['v'], 'v', ['rcp(A)'],
+     [[l, [1.0/x for x in l]]
+       for l in [[0.1, 0.3, 0.7],
+                 [1.0, 2.0, 3.0],
+                 [-0.1, -0.3, -0.7],
+                 [-1.0, -2.0, -3.0],
+                 [4.0, 5.0, 12.0],
+                 [1.4, 2.7, 3.9]]]
+     ],
+    ['RSQ', ['v'], 'v', ['rsqrt(A)'],
+     [[l, [1.0/math.sqrt(x) for x in l]]
+       for l in [[0.1, 0.3, 0.7],
+                 [1.0, 2.0, 3.0],
+                 [4.0, 5.0, 12.0],
+                 [1.4, 2.7, 3.9]]]
+     ],
+     
+    
+    ['SIN', ['v'], 'v', ['sin(A)'],
+     [[l, [math.sin(x) for x in l]]
+       for l in [[0.0, 1.0, 2.0],
+                 [0.5, 0.8, 0.9],
+                 [math.pi, math.pi/2.0, math.pi*2.0],
+                 [-math.pi, -math.pi/2.0, -math.pi*2.0],
+                 [3.0, 4.0, 5.0],
+                 [-1.0, -3.0, -4.0],
+                 [0.5, 1.5, 2.5]]]
+     ],
+    ['SQRT', ['v'], 'v', ['sqrt(A)'],
+     [[l, [math.sqrt(x) for x in l]]
+       for l in [[0.1, 0.3, 0.7],
+                 [1.0, 2.0, 3.0],
+                 [4.0, 5.0, 12.0],
+                 [1.4, 2.7, 3.9]]]
+     ],
 
     ['TAN', ['v'], 'v', [],
      [[l, [math.tan(x) for x in l]]
@@ -205,7 +238,7 @@ int main(int argc, char** argv) {
             f.write('    ShAttrib<' + outsize + ', SH_OUTPUT> out;\n')
             f.write('    ' + op + ';\n')
             f.write('  } SH_END;\n')
-            f.write('  ' + prgname + '->name("' + op + ' [' + ' x '.join(combination) + ']");\n')
+            f.write('  ' + prgname + '.name("' + op + ' [' + ' x '.join(combination) + ']");\n')
             f.write('\n')
             for case in cases:
                 if len(case) - 1 != len(combination): continue

@@ -34,6 +34,8 @@ public:
   void size(int width);
 
   ShAttrib1f size() const;
+
+  typedef T return_type;
 };
 
 /** Base type for 2D Textures.
@@ -52,7 +54,9 @@ public:
   void size(int width, int height);
 
   ShAttrib2f size() const;
-  };
+
+  typedef T return_type;
+};
 
 /** Base type for Rectangular Textures.
  */
@@ -70,6 +74,8 @@ public:
   void size(int width, int height);
 
   ShAttrib2f size() const;
+
+  typedef T return_type;
 };
 
 /** Base type for 3D Textures.
@@ -88,6 +94,8 @@ public:
   void size(int width, int height, int depth);
 
   ShAttrib3f size() const;
+
+  typedef T return_type;
 };
 
 /** Base type for Cube Textures.
@@ -105,6 +113,8 @@ public:
   void size(int width, int height);
 
   ShAttrib2f size() const;
+
+  typedef T return_type;
 };
 
 }

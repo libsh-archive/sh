@@ -54,6 +54,8 @@ namespace SH {
  */
 class ShSwizzle {
 public:
+  // Null swizzle
+  ShSwizzle();
   /// Identity swizzle: does nothing at all.
   ShSwizzle(int srcSize);
   /// Use one element from the original tuple.
@@ -86,6 +88,9 @@ public:
 
   /// Determine whether this is an identity swizzle.
   bool identity() const;
+
+  /// Determine whether two swizzles are identical
+  bool operator==(const ShSwizzle& other) const;
   
 private:
   std::size_t m_srcSize;

@@ -36,9 +36,9 @@
 
 /// @internal
 //@{
-#define SH_PUSH_ARG_QUEUE ::SH::ShEnvironment::shader->tokenizer.pushArgQueue()
-#define SH_PUSH_ARG ::SH::ShEnvironment::shader->tokenizer.pushArg()
-#define SH_PROCESS_ARG(arg) ::SH::ShEnvironment::shader->tokenizer.processArg(arg)
+#define SH_PUSH_ARG_QUEUE ::SH::ShContext::current()->parsing()->tokenizer.pushArgQueue()
+#define SH_PUSH_ARG ::SH::ShContext::current()->parsing()->tokenizer.pushArg()
+#define SH_PROCESS_ARG(arg) ::SH::ShContext::current()->parsing()->tokenizer.processArg(arg)
 //@}
 
 /// @name Shader definitions
@@ -158,6 +158,14 @@
 
 /// @name Named Declaration macros 
 //@{
+/** \def SH_NAME
+ * Set the name of a variable to be its C++ name.
+ *
+ * @see SH_DECL
+ * @see SH_NAMEDECL
+ */
+#define SH_NAME(var) do { var.name( # var); } while (0)
+
 /** \def SH_DECL
  * Declare variable with the same name as var.
  * Usage:

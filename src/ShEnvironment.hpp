@@ -39,26 +39,12 @@ namespace SH {
  * as the currently active shader or whether or not the program is
  * inside a shader definition right now.
  */
-class ShEnvironment 
-{
+class ShEnvironment {
 public:
   
-  /// The shader currently being defined
-  static ShProgram shader;
-
-  /// Whether we are in the process of defining a shader
-  static bool insideShader;
-
-  typedef std::map<std::string, ShProgram> BoundShaderMap; 
-  
-  /// The shader of a given target bound under the current backend.
-  static BoundShaderMap& boundShaders();
-
   /// The currently active backend
   static ShBackendPtr backend;
 
-private:
-  static BoundShaderMap* m_boundShader;
 };
 
 }

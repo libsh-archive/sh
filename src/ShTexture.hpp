@@ -52,6 +52,7 @@ public:
   ShTexture1D(int width)
     : ShBaseTexture1D<T>(width, ShFilteredTextureTraits())
   {}
+  typedef T return_type;
 };
 
 /** Two-dimensional square power-of-two texture type.
@@ -69,6 +70,7 @@ public:
 //    ShTexture2D(int width, int height, ShTextureTraits& traits)
 //     : ShBaseTexture2D<T>(width, height, traits)
 //   {}
+  typedef T return_type;
 };
 
 /** Two-dimensional rectangular texture type.
@@ -86,6 +88,7 @@ public:
 //    ShTextureRect(int width, int height, ShTextureTraits& traits)
 //     : ShBaseTextureRect<T>(width, height, traits)
 //   {}
+  typedef T return_type;
 };
 
 /** Three-dimensional texture type.
@@ -100,6 +103,7 @@ public:
   ShTexture3D(int width, int height, int depth)
     : ShBaseTexture3D<T>(width, height, depth, ShFilteredTextureTraits())
   {}
+  typedef T return_type;
 };
 
 /** Cubic texture type.
@@ -117,6 +121,7 @@ public:
   ShTextureCube(int width, int height)
     : ShBaseTextureCube<T>(width, height, ShFilteredTextureTraits())
   {}
+  typedef T return_type;
 };
 
 }

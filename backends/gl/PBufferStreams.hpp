@@ -61,7 +61,7 @@ struct PBufferStreams : public StreamStrategy {
   PBufferStreams(int context = 0);
   virtual ~PBufferStreams();
   virtual StreamStrategy* create(int context);
-  virtual void execute(const SH::ShProgram& program, SH::ShStream& dest);
+  virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
 
 private:
   int m_context;

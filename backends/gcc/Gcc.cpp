@@ -28,22 +28,32 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-#include "CPU.hpp" 
+#include "Gcc.hpp" 
 #include "ShDebug.hpp" 
 #include "ShStream.hpp" 
 
-void __cpu_lookup1D(SH::ShTextureNode* tex, float* src, float* dst)
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifdef SH_GCC_DEBUG
+#  define SH_GCC_DEBUG_PRINT(x) SH_DEBUG_PRINT(x)
+#else
+#  define SH_GCC_DEBUG_PRINT(x) do { } while(0)
+#endif
+
+void sh_gcc_backend_lookup1D(SH::ShTextureNode* tex, float* src, float* dst)
   {
   if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
     {
-    SH_DEBUG_PRINT("1D/SH_FILTER_MIPMAP textures unsupported...");
+    SH_GCC_DEBUG_PRINT("1D/SH_FILTER_MIPMAP textures unsupported...");
     return;
     }
 
   SH::ShHostStoragePtr storage = SH::shref_dynamic_cast<SH::ShHostStorage>(tex->memory()->findStorage("host"));
   if (!storage)
     {
-    SH_DEBUG_PRINT("failed to find host storage...");
+    SH_GCC_DEBUG_PRINT("failed to find host storage...");
     }
   float* data = (float*)storage->data();
   
@@ -86,23 +96,23 @@ void __cpu_lookup1D(SH::ShTextureNode* tex, float* src, float* dst)
       }
     case 1:
       // linear interpolation
-      SH_DEBUG_PRINT("1D/LINEAR textures unsupported...");
+      SH_GCC_DEBUG_PRINT("1D/LINEAR textures unsupported...");
       break;
     }
   }
 
-void __cpu_lookup2D(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_gcc_backend_lookup2D(SH::ShTextureNode* tex, float* src, float* dst)
   {
   if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
     {
-    SH_DEBUG_PRINT("2D/SH_FILTER_MIPMAP textures unsupported...");
+    SH_GCC_DEBUG_PRINT("2D/SH_FILTER_MIPMAP textures unsupported...");
     return;
     }
 
   SH::ShHostStoragePtr storage = SH::shref_dynamic_cast<SH::ShHostStorage>(tex->memory()->findStorage("host"));
   if (!storage)
     {
-    SH_DEBUG_PRINT("failed to find host storage...");
+    SH_GCC_DEBUG_PRINT("failed to find host storage...");
     }
   float* data = (float*)storage->data();
   
@@ -162,23 +172,23 @@ void __cpu_lookup2D(SH::ShTextureNode* tex, float* src, float* dst)
       }
     case 1:
       // linear interpolation
-      SH_DEBUG_PRINT("2D/LINEAR textures unsupported...");
+      SH_GCC_DEBUG_PRINT("2D/LINEAR textures unsupported...");
       break;
     }
   }
 
-void __cpu_lookupRECT(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_gcc_backend_lookupRECT(SH::ShTextureNode* tex, float* src, float* dst)
   {
   if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
     {
-    SH_DEBUG_PRINT("RECT/SH_FILTER_MIPMAP textures unsupported...");
+    SH_GCC_DEBUG_PRINT("RECT/SH_FILTER_MIPMAP textures unsupported...");
     return;
     }
 
   SH::ShHostStoragePtr storage = SH::shref_dynamic_cast<SH::ShHostStorage>(tex->memory()->findStorage("host"));
   if (!storage)
     {
-    SH_DEBUG_PRINT("failed to find host storage...");
+    SH_GCC_DEBUG_PRINT("failed to find host storage...");
     }
   float* data = (float*)storage->data();
   
@@ -238,22 +248,22 @@ void __cpu_lookupRECT(SH::ShTextureNode* tex, float* src, float* dst)
       }
     case 1:
       // linear interpolation
-      SH_DEBUG_PRINT("RECT/LINEAR textures unsupported...");
+      SH_GCC_DEBUG_PRINT("RECT/LINEAR textures unsupported...");
       break;
     }
   }
 
-void __cpu_lookup3D(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_gcc_backend_lookup3D(SH::ShTextureNode* tex, float* src, float* dst)
   {
-  SH_DEBUG_PRINT("3D textures unsupported...");
+  SH_GCC_DEBUG_PRINT("3D textures unsupported...");
   }
 
-void __cpu_lookupCUBE(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_gcc_backend_lookupCUBE(SH::ShTextureNode* tex, float* src, float* dst)
   {
-  SH_DEBUG_PRINT("CUBE textures unsupported...");
+  SH_GCC_DEBUG_PRINT("CUBE textures unsupported...");
   }
 
-extern "C" void __cpu_lookup(void *t, float* src, float* dst)
+extern "C" void sh_gcc_backend_lookup(void *t, float* src, float* dst)
   {
   // [0, 1) float based texture lookup
   SH::ShTextureNode* tex = (SH::ShTextureNode*)t;
@@ -261,38 +271,38 @@ extern "C" void __cpu_lookup(void *t, float* src, float* dst)
   switch(tex->dims())
     {
     case SH::SH_TEXTURE_1D:
-      __cpu_lookup1D(tex, src, dst);
+      sh_gcc_backend_lookup1D(tex, src, dst);
       break;
     case SH::SH_TEXTURE_2D:
-      __cpu_lookup2D(tex, src, dst);
+      sh_gcc_backend_lookup2D(tex, src, dst);
       break;
     case SH::SH_TEXTURE_RECT:
-      __cpu_lookupRECT(tex, src, dst);
+      sh_gcc_backend_lookupRECT(tex, src, dst);
       break;
     case SH::SH_TEXTURE_3D:
-      __cpu_lookup3D(tex, src, dst);
+      sh_gcc_backend_lookup3D(tex, src, dst);
       break;
     case SH::SH_TEXTURE_CUBE:
-      __cpu_lookupCUBE(tex, src, dst);
+      sh_gcc_backend_lookupCUBE(tex, src, dst);
       break;
     default:
-      SH_DEBUG_PRINT("unknown texture dimension (" << tex->dims() << ")");
+      SH_GCC_DEBUG_PRINT("unknown texture dimension (" << tex->dims() << ")");
       break;
     }
   }
 
-void __cpu_lookupi1D(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_gcc_backend_lookupi1D(SH::ShTextureNode* tex, float* src, float* dst)
   {
   if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
     {
-    SH_DEBUG_PRINT("1D/SH_FILTER_MIPMAP textures unsupported...");
+    SH_GCC_DEBUG_PRINT("1D/SH_FILTER_MIPMAP textures unsupported...");
     return;
     }
 
   SH::ShHostStoragePtr storage = SH::shref_dynamic_cast<SH::ShHostStorage>(tex->memory()->findStorage("host"));
   if (!storage)
     {
-    SH_DEBUG_PRINT("failed to find host storage...");
+    SH_GCC_DEBUG_PRINT("failed to find host storage...");
     }
   float* data = (float*)storage->data();
   
@@ -335,23 +345,23 @@ void __cpu_lookupi1D(SH::ShTextureNode* tex, float* src, float* dst)
       }
     case 1:
       // linear interpolation
-      SH_DEBUG_PRINT("1D/LINEAR textures unsupported...");
+      SH_GCC_DEBUG_PRINT("1D/LINEAR textures unsupported...");
       break;
     }
   }
 
-void __cpu_lookupi2D(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_gcc_backend_lookupi2D(SH::ShTextureNode* tex, float* src, float* dst)
   {
   if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
     {
-    SH_DEBUG_PRINT("2D/SH_FILTER_MIPMAP textures unsupported...");
+    SH_GCC_DEBUG_PRINT("2D/SH_FILTER_MIPMAP textures unsupported...");
     return;
     }
 
   SH::ShHostStoragePtr storage = SH::shref_dynamic_cast<SH::ShHostStorage>(tex->memory()->findStorage("host"));
   if (!storage)
     {
-    SH_DEBUG_PRINT("failed to find host storage...");
+    SH_GCC_DEBUG_PRINT("failed to find host storage...");
     }
   float* data = (float*)storage->data();
   
@@ -411,23 +421,23 @@ void __cpu_lookupi2D(SH::ShTextureNode* tex, float* src, float* dst)
       }
     case 1:
       // linear interpolation
-      SH_DEBUG_PRINT("2D/LINEAR textures unsupported...");
+      SH_GCC_DEBUG_PRINT("2D/LINEAR textures unsupported...");
       break;
     }
   }
 
-void __cpu_lookupiRECT(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_gcc_backend_lookupiRECT(SH::ShTextureNode* tex, float* src, float* dst)
   {
   if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
     {
-    SH_DEBUG_PRINT("RECT/SH_FILTER_MIPMAP textures unsupported...");
+    SH_GCC_DEBUG_PRINT("RECT/SH_FILTER_MIPMAP textures unsupported...");
     return;
     }
 
   SH::ShHostStoragePtr storage = SH::shref_dynamic_cast<SH::ShHostStorage>(tex->memory()->findStorage("host"));
   if (!storage)
     {
-    SH_DEBUG_PRINT("failed to find host storage...");
+    SH_GCC_DEBUG_PRINT("failed to find host storage...");
     }
   float* data = (float*)storage->data();
   
@@ -487,22 +497,22 @@ void __cpu_lookupiRECT(SH::ShTextureNode* tex, float* src, float* dst)
       }
     case 1:
       // linear interpolation
-      SH_DEBUG_PRINT("RECT/LINEAR textures unsupported...");
+      SH_GCC_DEBUG_PRINT("RECT/LINEAR textures unsupported...");
       break;
     }
   }
 
-void __cpu_lookupi3D(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_gcc_backend_lookupi3D(SH::ShTextureNode* tex, float* src, float* dst)
   {
-  SH_DEBUG_PRINT("3D textures unsupported...");
+  SH_GCC_DEBUG_PRINT("3D textures unsupported...");
   }
 
-void __cpu_lookupiCUBE(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_gcc_backend_lookupiCUBE(SH::ShTextureNode* tex, float* src, float* dst)
   {
-  SH_DEBUG_PRINT("CUBE textures unsupported...");
+  SH_GCC_DEBUG_PRINT("CUBE textures unsupported...");
   }
 
-extern "C" void __cpu_lookupi(void* t, float* src, float* dst)
+extern "C" void sh_gcc_backend_lookupi(void* t, float* src, float* dst)
   {
   // [0, size] integer based texture lookup
   SH::ShTextureNode* tex = (SH::ShTextureNode*)t;
@@ -510,22 +520,22 @@ extern "C" void __cpu_lookupi(void* t, float* src, float* dst)
   switch(tex->dims())
     {
     case SH::SH_TEXTURE_1D:
-      __cpu_lookupi1D(tex, src, dst);
+      sh_gcc_backend_lookupi1D(tex, src, dst);
       break;
     case SH::SH_TEXTURE_2D:
-      __cpu_lookupi2D(tex, src, dst);
+      sh_gcc_backend_lookupi2D(tex, src, dst);
       break;
     case SH::SH_TEXTURE_RECT:
-      __cpu_lookupiRECT(tex, src, dst);
+      sh_gcc_backend_lookupiRECT(tex, src, dst);
       break;
     case SH::SH_TEXTURE_3D:
-      __cpu_lookupi3D(tex, src, dst);
+      sh_gcc_backend_lookupi3D(tex, src, dst);
       break;
     case SH::SH_TEXTURE_CUBE:
-      __cpu_lookupiCUBE(tex, src, dst);
+      sh_gcc_backend_lookupiCUBE(tex, src, dst);
       break;
     default:
-      SH_DEBUG_PRINT("unknown texture dimension (" << tex->dims() << ")");
+      SH_GCC_DEBUG_PRINT("unknown texture dimension (" << tex->dims() << ")");
       break;
     }
   }
@@ -539,103 +549,103 @@ std::string encode(const SH::ShVariable& v)
   return ret.str();
   }
 
-namespace ShCPU {
+namespace ShGcc {
 
-  CPUVariable::CPUVariable(void) :
+  GccVariable::GccVariable(void) :
     m_num(-1),
     m_size(-1)
     {
     }
   
-  CPUVariable::CPUVariable(int num, const std::string& name) :
+  GccVariable::GccVariable(int num, const std::string& name) :
     m_num(num),
     m_name(name),
     m_size(-1)
     {
     }
 
-  CPUVariable::CPUVariable(int num, const std::string& name, int size) :
+  GccVariable::GccVariable(int num, const std::string& name, int size) :
     m_num(num),
     m_name(name),
     m_size(size)
     {
     }
 
-  CPUBackendCode::LabelFunctor::LabelFunctor(std::map<SH::ShCtrlGraphNodePtr, int>& label_map) :
+  GccBackendCode::LabelFunctor::LabelFunctor(std::map<SH::ShCtrlGraphNodePtr, int>& label_map) :
     m_cur_label(0),
     m_label_map(label_map)
     {
     }
 
-  void CPUBackendCode::LabelFunctor::operator()(SH::ShCtrlGraphNode* node)
+  void GccBackendCode::LabelFunctor::operator()(SH::ShCtrlGraphNode* node)
     {
     m_label_map[node] = m_cur_label++;
     }
   
-  CPUBackendCode::EmitFunctor::EmitFunctor(CPUBackendCode* bec) :
+  GccBackendCode::EmitFunctor::EmitFunctor(GccBackendCode* bec) :
     m_bec(bec)
     {
     }
   
-  void CPUBackendCode::EmitFunctor::operator()(SH::ShCtrlGraphNode* node)
+  void GccBackendCode::EmitFunctor::operator()(SH::ShCtrlGraphNode* node)
     {
     m_bec->emit(node);
     }
   
-  CPUBackendCode::CPUBackendCode(const SH::ShProgram& program) :
+  GccBackendCode::GccBackendCode(const SH::ShProgramNodeCPtr& program) :
     m_program(program),
     m_handle(NULL),
     m_func(NULL),
     m_cur_temp(0),
     m_params(NULL)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_GCC_DEBUG_PRINT(__FUNCTION__);
     }
 
-  CPUBackendCode::~CPUBackendCode(void)
+  GccBackendCode::~GccBackendCode(void)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_GCC_DEBUG_PRINT(__FUNCTION__);
     }
 
-  bool CPUBackendCode::allocateRegister(const SH::ShVariableNodePtr& var)
+  bool GccBackendCode::allocateRegister(const SH::ShVariableNodePtr& var)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_GCC_DEBUG_PRINT(__FUNCTION__);
     return false;
     }
 
-  void CPUBackendCode::freeRegister(const SH::ShVariableNodePtr& var)
+  void GccBackendCode::freeRegister(const SH::ShVariableNodePtr& var)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_GCC_DEBUG_PRINT(__FUNCTION__);
     }
 
-  void CPUBackendCode::upload(void)
+  void GccBackendCode::upload(void)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_GCC_DEBUG_PRINT(__FUNCTION__);
     }
 
-  void CPUBackendCode::bind(void)
+  void GccBackendCode::bind(void)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_GCC_DEBUG_PRINT(__FUNCTION__);
     }
 
-  void CPUBackendCode::updateUniform(const SH::ShVariableNodePtr& uniform)
+  void GccBackendCode::updateUniform(const SH::ShVariableNodePtr& uniform)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_GCC_DEBUG_PRINT(__FUNCTION__);
     }
 
-  std::ostream& CPUBackendCode::print(std::ostream& out)
+  std::ostream& GccBackendCode::print(std::ostream& out)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_GCC_DEBUG_PRINT(__FUNCTION__);
     return out;
     }
 
-  std::ostream& CPUBackendCode::printInputOutputFormat(std::ostream& out)
+  std::ostream& GccBackendCode::printInputOutputFormat(std::ostream& out)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_GCC_DEBUG_PRINT(__FUNCTION__);
     return out;
     }
   
-  void CPUBackendCode::allocate_consts(void)
+  void GccBackendCode::allocate_consts(void)
     {
     int cur_const = 0;
     for (SH::ShProgramNode::VarList::const_iterator itr = m_program->constants.begin();
@@ -647,7 +657,7 @@ namespace ShCPU {
       // allocate internal variable as constant
       char name[128];
       sprintf(name, "var_c_%d", cur_const);
-      m_varmap[node] = CPUVariable(cur_const++, name);
+      m_varmap[node] = GccVariable(cur_const++, name);
 
       // output constant definition
       m_code << "float " << name << "[" << node->size() << "] = {";
@@ -661,10 +671,10 @@ namespace ShCPU {
       m_code << "};" << std::endl;
       }
 
-    SH_DEBUG_PRINT("Found " << cur_const << " consts...");
+    SH_GCC_DEBUG_PRINT("Found " << cur_const << " consts...");
     }
 
-  void CPUBackendCode::allocate_inputs(void)
+  void GccBackendCode::allocate_inputs(void)
     {
     int cur_input = 0;
     for (SH::ShProgramNode::VarList::const_iterator itr = m_program->inputs.begin();
@@ -676,13 +686,13 @@ namespace ShCPU {
       // allocate internal variable as attribute
       char name[128];
       sprintf(name, "inputs[%d]", cur_input);
-      m_varmap[node] = CPUVariable(cur_input++, name);
+      m_varmap[node] = GccVariable(cur_input++, name);
       }
 
-    SH_DEBUG_PRINT("Found " << cur_input << " inputs...");
+    SH_GCC_DEBUG_PRINT("Found " << cur_input << " inputs...");
     }
 
-  void CPUBackendCode::allocate_outputs(void)
+  void GccBackendCode::allocate_outputs(void)
     {
     int cur_output = 0;
     for (SH::ShProgramNode::VarList::const_iterator itr = m_program->outputs.begin();
@@ -694,13 +704,13 @@ namespace ShCPU {
       // allocate internal variable as attribute
       char name[128];
       sprintf(name, "outputs[%d]", cur_output);
-      m_varmap[node] = CPUVariable(cur_output++, name);
+      m_varmap[node] = GccVariable(cur_output++, name);
       }
 
-    SH_DEBUG_PRINT("Found " << cur_output << " outputs...");
+    SH_GCC_DEBUG_PRINT("Found " << cur_output << " outputs...");
     }
 
-  void CPUBackendCode::allocate_streams(void)
+  void GccBackendCode::allocate_streams(void)
     {
     int cur_stream = 0;
     for (SH::ShProgramNode::ChannelList::const_iterator itr = m_program->channels.begin();
@@ -712,14 +722,14 @@ namespace ShCPU {
       // allocate internal variable as stream
       char name[128];
       sprintf(name, "streams[%d]", cur_stream);
-      m_varmap[node] = CPUVariable(cur_stream++, name);
+      m_varmap[node] = GccVariable(cur_stream++, name);
       m_streams.push_back(node);
       }
 
-    SH_DEBUG_PRINT("Found " << cur_stream << " streams...");
+    SH_GCC_DEBUG_PRINT("Found " << cur_stream << " streams...");
     }
 
-  void CPUBackendCode::allocate_textures(void)
+  void GccBackendCode::allocate_textures(void)
     {
     int cur_texture = 0;
     for (SH::ShProgramNode::TexList::const_iterator itr = m_program->textures.begin();
@@ -731,14 +741,14 @@ namespace ShCPU {
       // allocate internal variable as texture
       char name[128];
       sprintf(name, "textures[%d]", cur_texture);
-      m_varmap[node] = CPUVariable(cur_texture++, name);
+      m_varmap[node] = GccVariable(cur_texture++, name);
       m_textures.push_back(node);
       }
 
-    SH_DEBUG_PRINT("Found " << cur_texture << " textures...");
+    SH_GCC_DEBUG_PRINT("Found " << cur_texture << " textures...");
     }
 
-  void CPUBackendCode::allocate_uniforms(void)
+  void GccBackendCode::allocate_uniforms(void)
     {
     int cur_uniform = 0;
     std::vector<SH::ShVariableNodePtr> uniforms;
@@ -752,7 +762,7 @@ namespace ShCPU {
       // allocate internal variable as parameter
       char name[128];
       sprintf(name, "params[%d]", cur_uniform);
-      m_varmap[node] = CPUVariable(cur_uniform++, name);
+      m_varmap[node] = GccVariable(cur_uniform++, name);
       uniforms.push_back(node);
       }
 
@@ -778,13 +788,13 @@ namespace ShCPU {
 	}
       }
 
-    SH_DEBUG_PRINT("Found " << cur_uniform << " uniforms...");
+    SH_GCC_DEBUG_PRINT("Found " << cur_uniform << " uniforms...");
     }
 
-  std::string CPUBackendCode::resolve(const SH::ShVariable& v)
+  std::string GccBackendCode::resolve(const SH::ShVariable& v)
     {
-    CPUVariable v2;
-    std::map<SH::ShVariableNodePtr, CPUVariable>::iterator itr = m_varmap.find(v.node());
+    GccVariable v2;
+    std::map<SH::ShVariableNodePtr, GccVariable>::iterator itr = m_varmap.find(v.node());
     
     if (itr == m_varmap.end())
       {
@@ -794,7 +804,7 @@ namespace ShCPU {
       // allocate internal variable as temp
       char name[128];
       sprintf(name, "var_t_%d", m_cur_temp);
-      v2 = CPUVariable(m_cur_temp++, name, v.node()->size());
+      v2 = GccVariable(m_cur_temp++, name, v.node()->size());
       m_varmap[v.node()] = v2;
       m_temps.push_back(v2);
       }
@@ -809,10 +819,10 @@ namespace ShCPU {
     return buf.str();
     }
 
-  std::string CPUBackendCode::resolve(const SH::ShVariable& v, int idx)
+  std::string GccBackendCode::resolve(const SH::ShVariable& v, int idx)
     {
-    CPUVariable v2;
-    std::map<SH::ShVariableNodePtr, CPUVariable>::iterator itr = m_varmap.find(v.node());
+    GccVariable v2;
+    std::map<SH::ShVariableNodePtr, GccVariable>::iterator itr = m_varmap.find(v.node());
     
     if (itr == m_varmap.end())
       {
@@ -822,7 +832,7 @@ namespace ShCPU {
       // allocate internal variable as temp
       char name[128];
       sprintf(name, "var_t_%d", m_cur_temp);
-      v2 = CPUVariable(m_cur_temp++, name, v.node()->size());
+      v2 = GccVariable(m_cur_temp++, name, v.node()->size());
       m_varmap[v.node()] = v2;
       m_temps.push_back(v2);
       }
@@ -838,7 +848,7 @@ namespace ShCPU {
     return buf.str();
     }
 
-  void CPUBackendCode::emit(const SH::ShStatement& stmt)
+  void GccBackendCode::emit(const SH::ShStatement& stmt)
     {
     // output SH intermediate m_code for reference
     switch(SH::opInfo[stmt.op].arity)
@@ -917,91 +927,39 @@ namespace ShCPU {
 	  m_code << "  "
 		 << resolve(stmt.dest, i)
 		 << " = " 
-		 << resolve(stmt.src[0], i)
+		 << resolve(stmt.src[0], (stmt.src[0].size() > 1 ? i : 0))
 		 << " + " 
-		 << resolve(stmt.src[1], i)
+		 << resolve(stmt.src[1], (stmt.src[1].size() > 1 ? i : 0))
 		 << ";" << std::endl;
 	  }
 	break;
 	}
       case SH::SH_OP_MUL:
 	{
-	if (stmt.src[0].swizzle().size() == 1)
+	for(int i = 0; i < stmt.dest.size(); i++)
 	  {
-	  for(int i = 0; i < stmt.dest.size(); i++)
-	    {
-	    m_code << "  ";
-	    m_code << resolve(stmt.dest, i);
-	    m_code << " = " ;
-	    m_code << resolve(stmt.src[0], 0);
-	    m_code << " * " ;
-	    m_code << resolve(stmt.src[1], i);
-	    m_code << ";";
-	    m_code << std::endl;
-	    }
+	  m_code << "  "
+		 << resolve(stmt.dest, i)
+		 << " = " 
+		 << resolve(stmt.src[0], (stmt.src[0].size() > 1 ? i : 0))
+		 << " * " 
+		 << resolve(stmt.src[1], (stmt.src[1].size() > 1 ? i : 0))
+		 << ";" << std::endl;
 	  }
-	else if (stmt.src[1].swizzle().size() == 1)
-	  {
-	  for(int i = 0; i < stmt.dest.size(); i++)
-	    {
-	    m_code << "  ";
-	    m_code << resolve(stmt.dest, i);
-	    m_code << " = " ;
-	    m_code << resolve(stmt.src[0], i);
-	    m_code << " * " ;
-	    m_code << resolve(stmt.src[1], 0);
-	    m_code << ";";
-	    m_code << std::endl;
-	    }
-	  }
-	else
-	  {
-	  for(int i = 0; i < stmt.dest.size(); i++)
-	    {
-	    m_code << "  ";
-	    m_code << resolve(stmt.dest, i);
-	    m_code << " = " ;
-	    m_code << resolve(stmt.src[0], i);
-	    m_code << " * " ;
-	    m_code << resolve(stmt.src[1], i);
-	    m_code << ";";
-	    m_code << std::endl;
-	    }
-	  }
-
 	break;
 	}
       case SH::SH_OP_DIV:
 	{
-	if (stmt.src[1].swizzle().size() == 1)
+	for(int i = 0; i < stmt.dest.size(); i++)
 	  {
-	  for(int i = 0; i < stmt.dest.size(); i++)
-	    {
-	    m_code << "  "
-		   << resolve(stmt.dest, i)
-		   << " = " 
-		   << resolve(stmt.src[0], i)
-		   << " / " 
-		   << resolve(stmt.src[1], 0)
-		   << ";"
-		   << std::endl;
-	    }
+	  m_code << "  "
+		 << resolve(stmt.dest, i)
+		 << " = " 
+		 << resolve(stmt.src[0], (stmt.src[0].size() > 1 ? i : 0))
+		 << " / " 
+		 << resolve(stmt.src[1], (stmt.src[1].size() > 1 ? i : 0))
+		 << ";" << std::endl;
 	  }
-	else
-	  {
-	  for(int i = 0; i < stmt.dest.size(); i++)
-	    {
-	    m_code << "  "
-		   << resolve(stmt.dest, i)
-		   << " = " 
-		   << resolve(stmt.src[0], i)
-		   << " / " 
-		   << resolve(stmt.src[1], i)
-		   << ";"
-		   << std::endl;
-	    }
-	  }
-
 	break;
 	}
       case SH::SH_OP_SLT:
@@ -1529,6 +1487,32 @@ namespace ShCPU {
 
 	break;
 	}
+      case SH::SH_OP_RCP:
+	{
+	for(int i = 0; i < stmt.dest.size(); i++)
+	  {
+	  m_code << "  "
+		 << resolve(stmt.dest, i)
+		 << " = 1.0/("
+		 << resolve(stmt.src[0], i)
+		 << ");" << std::endl;
+	  }
+
+	break;
+	}
+      case SH::SH_OP_RSQ:
+	{
+	for(int i = 0; i < stmt.dest.size(); i++)
+	  {
+	  m_code << "  "
+		 << resolve(stmt.dest, i)
+		 << " = 1.0/sqrt("
+		 << resolve(stmt.src[0], i)
+		 << ");" << std::endl;
+	  }
+
+	break;
+	}
       case SH::SH_OP_SIN:
 	{
 	for(int i = 0; i < stmt.dest.size(); i++)
@@ -1537,6 +1521,22 @@ namespace ShCPU {
 		 << resolve(stmt.dest, i)
 		 << " = sin("
 		 << resolve(stmt.src[0], i)
+		 << ");" << std::endl;
+	  }
+
+	break;
+	}
+      case SH::SH_OP_SGN:
+	{
+	for(int i = 0; i < stmt.dest.size(); i++)
+	  {
+	  m_code << "  "
+		 << resolve(stmt.dest, i)
+		 << " = ("
+		 << resolve(stmt.src[0], i)
+                 << " < 0.0f ? -1.0f : ("
+		 << resolve(stmt.src[0], i)
+                 << " > 0.0f ? 1.0f : 0.0)"
 		 << ");" << std::endl;
 	  }
 
@@ -1607,7 +1607,7 @@ namespace ShCPU {
 	  {
 	  if (stmt.src[1].swizzle().identity())
 	    {
-	    m_code << "  __cpu_lookup("
+	    m_code << "  sh_gcc_backend_lookup("
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << resolve(stmt.src[1])
@@ -1628,7 +1628,7 @@ namespace ShCPU {
 		     << resolve(stmt.src[1], i)
 		     << ";" << std::endl;
 	      }
-	    m_code << "    __cpu_lookup("
+	    m_code << "    sh_gcc_backend_lookup("
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << "input"
@@ -1644,7 +1644,7 @@ namespace ShCPU {
 	    {
 	    m_code << "    {" << std::endl;
 	    m_code << "    float result[" << stmt.dest.size() << "];" << std::endl;
-	    m_code << "    __cpu_lookup("
+	    m_code << "    sh_gcc_backend_lookup("
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << resolve(stmt.src[1])
@@ -1675,7 +1675,7 @@ namespace ShCPU {
 		     << resolve(stmt.src[1], i)
 		     << ";" << std::endl;
 	      }
-	    m_code << "    __cpu_lookup("
+	    m_code << "    sh_gcc_backend_lookup("
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << "input"
@@ -1702,7 +1702,7 @@ namespace ShCPU {
 	  {
 	  if (stmt.src[1].swizzle().identity())
 	    {
-	    m_code << "  __cpu_lookupi("
+	    m_code << "  sh_gcc_backend_lookupi("
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << resolve(stmt.src[1])
@@ -1723,7 +1723,7 @@ namespace ShCPU {
 		     << resolve(stmt.src[1], i)
 		     << ";" << std::endl;
 	      }
-	    m_code << "    __cpu_lookupi("
+	    m_code << "    sh_gcc_backend_lookupi("
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << "input"
@@ -1739,7 +1739,7 @@ namespace ShCPU {
 	    {
 	    m_code << "    {" << std::endl;
 	    m_code << "    float result[" << stmt.dest.size() << "];" << std::endl;
-	    m_code << "    __cpu_lookupi("
+	    m_code << "    sh_gcc_backend_lookupi("
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << resolve(stmt.src[1])
@@ -1770,7 +1770,7 @@ namespace ShCPU {
 		     << resolve(stmt.src[1], i)
 		     << ";" << std::endl;
 	      }
-	    m_code << "    __cpu_lookupi("
+	    m_code << "    sh_gcc_backend_lookupi("
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << "input"
@@ -1867,7 +1867,7 @@ namespace ShCPU {
       }
     }
 
-  void CPUBackendCode::emit(SH::ShBasicBlockPtr block)
+  void GccBackendCode::emit(SH::ShBasicBlockPtr block)
     {
     if (!block)
       {
@@ -1886,7 +1886,7 @@ namespace ShCPU {
       }
     }
 
-  void CPUBackendCode::emit(SH::ShCtrlGraphNodePtr node)
+  void GccBackendCode::emit(SH::ShCtrlGraphNodePtr node)
     {
     m_code << "label_" << m_label_map[node] << ":" << std::endl
 	   << "  ;" << std::endl;
@@ -1929,9 +1929,9 @@ namespace ShCPU {
       }
     }
 
-  bool CPUBackendCode::generate(void)
+  bool GccBackendCode::generate(void)
     {
-    SH_DEBUG_PRINT("Creating label map...");
+    SH_GCC_DEBUG_PRINT("Creating label map...");
     LabelFunctor fl(m_label_map);
     m_program->ctrlGraph->dfs(fl);
 
@@ -1943,7 +1943,7 @@ namespace ShCPU {
     allocate_uniforms();
 
     // emit code
-    SH_DEBUG_PRINT("Emitting code...");
+    SH_GCC_DEBUG_PRINT("Emitting code...");
     EmitFunctor fe(this);
     m_program->ctrlGraph->dfs(fe);
 
@@ -1951,8 +1951,8 @@ namespace ShCPU {
     std::stringstream prologue;
     prologue << "#include <math.h>" << std::endl;
     prologue << std::endl;
-    prologue << "extern \"C\" void __cpu_lookup(void*, float*, float*);" << std::endl;
-    prologue << "extern \"C\" void __cpu_lookupi(void*, float*, float*);" << std::endl;
+    prologue << "extern \"C\" void sh_gcc_backend_lookup(void*, float*, float*);" << std::endl;
+    prologue << "extern \"C\" void sh_gcc_backend_lookupi(void*, float*, float*);" << std::endl;
     prologue << std::endl;
     prologue << "extern \"C\" "
 	   << " void func("
@@ -1964,7 +1964,7 @@ namespace ShCPU {
     prologue << "  {" << std::endl;
 
     // output temp declarations
-    for(std::vector<CPUVariable>::iterator itr = m_temps.begin();
+    for(std::vector<GccVariable>::iterator itr = m_temps.begin();
 	itr != m_temps.end();
 	itr++)
       {
@@ -1979,9 +1979,9 @@ namespace ShCPU {
     epilogue << "  }" << std::endl;
 
     // output code for debugging...
-    SH_DEBUG_PRINT(prologue.str());
-    SH_DEBUG_PRINT(m_code.str());
-    SH_DEBUG_PRINT(epilogue.str());
+    SH_GCC_DEBUG_PRINT(prologue.str());
+    SH_GCC_DEBUG_PRINT(m_code.str());
+    SH_GCC_DEBUG_PRINT(epilogue.str());
 
     char name[32];
     tmpnam(name);
@@ -1999,8 +1999,9 @@ namespace ShCPU {
     if (pid == 0)
       {
       // child
-      execlp("gcc", "gcc", "-g", "-shared", "-o", sofile, ccfile, NULL);
-      SH_DEBUG_PRINT("exec failed (" << errno << ")");
+      execlp("gcc", "gcc", "-O2", "-shared", "-o", sofile, ccfile,
+             "-L", SH_INSTALL_PREFIX "/lib/sh", "-lshgcc", NULL);
+      SH_GCC_DEBUG_PRINT("exec failed (" << errno << ")");
       exit(-1);
       }
     else if (pid > 0)
@@ -2009,27 +2010,27 @@ namespace ShCPU {
       pid_t ret = waitpid(pid, &status, 0);
       if (ret == -1)
 	{
-	SH_DEBUG_PRINT("wait failed...");
+	SH_GCC_DEBUG_PRINT("wait failed...");
 	return false;
 	}
       else
 	{
-	SH_DEBUG_PRINT("status = " << status);
+	SH_GCC_DEBUG_PRINT("status = " << status);
 	}
 
       m_handle = dlopen(sofile, RTLD_NOW);
       if (m_handle == NULL)
 	{
-	SH_DEBUG_PRINT("dlopen failed...");
+          SH_GCC_DEBUG_PRINT("dlopen failed: " << dlerror());
 	return false;
 	}
       else
 	{
-	m_func = (CPUFunc)dlsym(m_handle, "func");
+	m_func = (GccFunc)dlsym(m_handle, "func");
 
 	if (m_func == NULL)
 	  {
-	  SH_DEBUG_PRINT("dlsym failed...");
+            SH_GCC_DEBUG_PRINT("dlsym failed: " << dlerror());
 	  return false;
 	  }
 	}
@@ -2039,18 +2040,18 @@ namespace ShCPU {
     else 
       {
       // fork failed
-      SH_DEBUG_PRINT("fork failed...");
+      SH_GCC_DEBUG_PRINT("fork failed...");
       return false;
       }
     }
 
-  bool CPUBackendCode::execute(SH::ShStream& dest)
+  bool GccBackendCode::execute(SH::ShStream& dest)
     {
     if (!m_func)
       {
       if (!generate())
 	{
-	SH_DEBUG_PRINT("failed to generate program..."); 
+	SH_GCC_DEBUG_PRINT("failed to generate program..."); 
 	return false;
 	}
       }
@@ -2113,7 +2114,7 @@ namespace ShCPU {
 	{
 	if (count != channel->count())
 	  {
-	  SH_DEBUG_PRINT("channel count discrepancy...");
+	  SH_GCC_DEBUG_PRINT("channel count discrepancy...");
 	  return false;
 	  }
 	}
@@ -2122,12 +2123,12 @@ namespace ShCPU {
       
     for(int i = 0; i < count; i++)
       {
-      SH_DEBUG_PRINT("execution " << i << " of " << count);
+      SH_GCC_DEBUG_PRINT("execution " << i << " of " << count);
       m_func(inputs, params, streams, textures, outputs);
 
       for(int j = 0; j < num_streams; j++)
 	{
-	SH_DEBUG_PRINT("advancing input stream "
+	SH_GCC_DEBUG_PRINT("advancing input stream "
 		       << j
 		       << " by "
 		       << stream_sizes[j]);
@@ -2135,7 +2136,7 @@ namespace ShCPU {
 	}
       for(int j = 0; j < num_outputs; j++)
 	{
-	SH_DEBUG_PRINT("advancing output stream "
+	SH_GCC_DEBUG_PRINT("advancing output stream "
 		       << j
 		       << " by "
 		       << output_sizes[j]);
@@ -2147,40 +2148,40 @@ namespace ShCPU {
     }
 
 
-  CPUBackend::CPUBackend(void)
+  GccBackend::GccBackend(void)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_GCC_DEBUG_PRINT(__FUNCTION__);
     }
 
-  CPUBackend::~CPUBackend(void)
+  GccBackend::~GccBackend(void)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_GCC_DEBUG_PRINT(__FUNCTION__);
     }
 
-  std::string CPUBackend::name(void) const
+  std::string GccBackend::name(void) const
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
-    return "cpu";
+    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+    return "gcc";
     }
 
-  SH::ShBackendCodePtr CPUBackend::generateCode(const std::string& target,
-						const SH::ShProgram& program)
+  SH::ShBackendCodePtr GccBackend::generateCode(const std::string& target,
+						const SH::ShProgramNodeCPtr& program)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
-    CPUBackendCodePtr backendcode = new CPUBackendCode(program);
+    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+    GccBackendCodePtr backendcode = new GccBackendCode(program);
     backendcode->generate();
     return backendcode;
     }
 
-  void CPUBackend::execute(const SH::ShProgram& program, SH::ShStream& dest)
+  void GccBackend::execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest)
     {
-    SH_DEBUG_PRINT(__FUNCTION__);
+    SH_GCC_DEBUG_PRINT(__FUNCTION__);
 
-    CPUBackendCodePtr backendcode = new CPUBackendCode(program);
+    GccBackendCodePtr backendcode = new GccBackendCode(program);
     backendcode->execute(dest);
     }
 
-  static CPUBackend* backend = new CPUBackend();
+  static GccBackend* backend = new GccBackend();
 
 }
 

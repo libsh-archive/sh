@@ -28,6 +28,7 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
+#include <bitset>
 
 #include "ShVariable.hpp"
 #include "ShDebug.hpp"
@@ -40,6 +41,7 @@
 #include "ShSyntax.hpp"
 #include "ArbReg.hpp"
 #include "Arb.hpp"
+#include "ShAttrib.hpp"
 
 namespace shgl {
 
@@ -93,23 +95,49 @@ ArbBindingSpecs arbFragmentOutputBindingSpecs[] = {
   {SH_ARB_REG_NONE, 0, SH_ATTRIB}
 };
 
-ArbBindingSpecs* arbBindingSpecs(bool output, const std::string& target)
+ArbBindingSpecs* arbBindingSpecs(bool output, const std::string& unit)
 {
-  if (target == "gpu:vertex")
+  if (unit == "vertex")
     return output ? arbVertexOutputBindingSpecs : arbVertexAttribBindingSpecs;
-  if (target == "gpu:fragment")
+  if (unit == "fragment")
     return output ? arbFragmentOutputBindingSpecs : arbFragmentAttribBindingSpecs;
   return 0;
 }
 
 using namespace SH;
 
-ArbCode::ArbCode(const ShProgram& shader, const std::string& target,
+ArbCode::ArbCode(const ShProgramNodeCPtr& shader, const std::string& unit,
                  TextureStrategy* textures)
-  : m_textures(textures), m_shader(shader), m_originalShader(m_shader), m_target(target),
+  : m_textures(textures), m_shader(0), m_originalShader(shader), m_unit(unit),
     m_numTemps(0), m_numInputs(0), m_numOutputs(0), m_numParams(0), m_numConsts(0),
-    m_numTextures(0), m_programId(0)
+    m_numTextures(0), m_programId(0), m_environment(0), m_max_label(0)
 {
+  if (unit == "fragment") m_environment |= SH_ARB_FP;
+  if (unit == "vertex") m_environment |= SH_ARB_VP;
+
+  const GLubyte* extensions = glGetString(GL_EXTENSIONS);
+
+  std::string extstr(reinterpret_cast<const char*>(extensions));
+
+  if (unit == "fragment") {
+    if (extstr.find("NV_fragment_program_option") != std::string::npos) {
+      m_environment |= SH_ARB_NVFP;
+    }
+    if (extstr.find("NV_fragment_program2") != std::string::npos) {
+      m_environment |= SH_ARB_NVFP2;
+    }
+    if (extstr.find("ATI_draw_buffers") != std::string::npos) {
+      m_environment |= SH_ARB_ATIDB;
+    }
+  }
+  if (unit == "vertex") {
+    if (extstr.find("NV_vertex_program2_option") != std::string::npos) {
+      m_environment |= SH_ARB_NVVP2;
+    }
+    if (extstr.find("NV_vertex_program3") != std::string::npos) {
+      m_environment |= SH_ARB_NVVP3;
+    }
+  }
 }
 
 ArbCode::~ArbCode()
@@ -119,9 +147,8 @@ ArbCode::~ArbCode()
 void ArbCode::generate()
 {
   // Transform code to be ARB_fragment_program compatible
-  m_shader = cloneProgram(m_originalShader);
-  ShEnvironment::insideShader = true;
-  ShEnvironment::shader = m_shader;
+  m_shader = m_originalShader->clone();
+  ShContext::current()->enter(m_shader);
   ShTransformer transform(m_shader);
 
   transform.convertInputOutput(); 
@@ -133,17 +160,29 @@ void ArbCode::generate()
     optimizer.optimize(ShContext::current()->optimization());
     m_shader->collectVariables();
   } else {
-    m_shader = m_originalShader;
-    ShEnvironment::shader = m_shader;
+    m_shader = shref_const_cast<ShProgramNode>(m_originalShader);
+    ShContext::current()->exit();
+    ShContext::current()->enter(m_shader);
   }
 
-  m_shader->ctrlGraph->entry()->clearMarked();
-  genNode(m_shader->ctrlGraph->entry());
+  if (m_environment & SH_ARB_NVFP2) {
+    // In NV_fragment_program2, we actually generate structured code.
+    ShStructural str(m_shader->ctrlGraph);
+
+    genStructNode(str.head());
+    
+  } else {
+    m_shader->ctrlGraph->entry()->clearMarked();
+    genNode(m_shader->ctrlGraph->entry());
+    
+    if (m_environment & SH_ARB_NVVP2) {
+      m_instructions.push_back(ArbInst(SH_ARB_LABEL, getLabel(m_shader->ctrlGraph->exit())));
+    }
+  }
   m_shader->ctrlGraph->entry()->clearMarked();
   allocRegs();
-
-  ShEnvironment::insideShader = false;
-  ShEnvironment::shader = 0;
+  
+  ShContext::current()->exit();
 }
 
 bool ArbCode::allocateRegister(const ShVariableNodePtr& var)
@@ -160,7 +199,8 @@ bool ArbCode::allocateRegister(const ShVariableNodePtr& var)
   int idx = m_tempRegs.front();
   m_tempRegs.pop_front();
   if (idx + 1 > m_numTemps) m_numTemps = idx + 1;
-  m_registers[var] = ArbReg(SH_ARB_REG_TEMP, idx);
+  m_registers[var] = new ArbReg(SH_ARB_REG_TEMP, idx);
+  m_reglist.push_back(m_registers[var]);
   
   return true;
 }
@@ -172,7 +212,7 @@ void ArbCode::freeRegister(const ShVariableNodePtr& var)
   if (var->uniform()) return;
 
   SH_DEBUG_ASSERT(m_registers.find(var) != m_registers.end());
-  m_tempRegs.push_front(m_registers[var].index);
+  m_tempRegs.push_front(m_registers[var]->index);
 }
 
 void ArbCode::upload()
@@ -181,12 +221,12 @@ void ArbCode::upload()
     SH_GL_CHECK_ERROR(shGlGenProgramsARB(1, &m_programId));
   }
 
-  SH_GL_CHECK_ERROR(shGlBindProgramARB(arbTarget(m_target), m_programId));
+  SH_GL_CHECK_ERROR(shGlBindProgramARB(arbTarget(m_unit), m_programId));
   
   std::ostringstream out;
   print(out);
   std::string text = out.str();
-  shGlProgramStringARB(arbTarget(m_target), GL_PROGRAM_FORMAT_ASCII_ARB,
+  shGlProgramStringARB(arbTarget(m_unit), GL_PROGRAM_FORMAT_ASCII_ARB,
                        (GLsizei)text.size(), text.c_str());
   int error = glGetError();
   if (error == GL_INVALID_OPERATION) {
@@ -202,8 +242,8 @@ void ArbCode::upload()
     }
   }
   if (error != GL_NO_ERROR) {
-    SH_DEBUG_ERROR("Error uploading ARB program (" << m_target << "): " << error);
-    SH_DEBUG_ERROR("shGlProgramStringARB(" << arbTarget(m_target)
+    SH_DEBUG_ERROR("Error uploading ARB program (" << m_unit << "): " << error);
+    SH_DEBUG_ERROR("shGlProgramStringARB(" << arbTarget(m_unit)
                    << ", GL_PROGRAM_FORMAT_ASCII_ARB, " << (GLsizei)text.size() << 
                    ", <program text>);");
   }
@@ -215,14 +255,16 @@ void ArbCode::bind()
     upload();
   }
   
-  SH_GL_CHECK_ERROR(shGlBindProgramARB(arbTarget(m_target), m_programId));
+  SH_GL_CHECK_ERROR(shGlBindProgramARB(arbTarget(m_unit), m_programId));
   
-  SH::ShEnvironment::boundShaders()[m_target] = m_originalShader; 
+
+  ShContext::current()->set_binding(std::string("arb:") + m_unit,
+                                    shref_const_cast<ShProgramNode>(m_originalShader));
 
   // Initialize constants
   for (RegMap::const_iterator I = m_registers.begin(); I != m_registers.end(); ++I) {
     ShVariableNodePtr node = I->first;
-    ArbReg reg = I->second;
+    ArbReg reg = *I->second;
     if (node->hasValues() && reg.type == SH_ARB_REG_PARAM) {
       updateUniform(node);
     }
@@ -259,7 +301,7 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
     return;
   }
     
-  const ArbReg& reg = I->second;
+  const ArbReg& reg = *I->second;
   
   float values[4];
   for (i = 0; i < uniform->size(); i++) {
@@ -272,10 +314,10 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
   if (reg.type != SH_ARB_REG_PARAM) return;
   switch(reg.binding) {
   case SH_ARB_REG_PARAMLOC:
-    SH_GL_CHECK_ERROR(shGlProgramLocalParameter4fvARB(arbTarget(m_target), reg.bindingIndex, values));
+    SH_GL_CHECK_ERROR(shGlProgramLocalParameter4fvARB(arbTarget(m_unit), reg.bindingIndex, values));
     break;
   case SH_ARB_REG_PARAMENV:
-    SH_GL_CHECK_ERROR(shGlProgramEnvParameter4fvARB(arbTarget(m_target), reg.bindingIndex, values));
+    SH_GL_CHECK_ERROR(shGlProgramEnvParameter4fvARB(arbTarget(m_unit), reg.bindingIndex, values));
     break;
   default:
     return;
@@ -290,7 +332,7 @@ std::ostream& ArbCode::printVar(std::ostream& out, bool dest, const ShVariable& 
     out << "<no reg for " << var.name() << ">";
     return out;
   }
-  const ArbReg& reg = I->second;
+  const ArbReg& reg = *I->second;
 
   // Negation
   if (var.neg()) out << '-';
@@ -301,10 +343,16 @@ std::ostream& ArbCode::printVar(std::ostream& out, bool dest, const ShVariable& 
   // Swizzling
   const char* swizChars = "xyzw";
   out << ".";
-  if (dest || var.swizzle().size() == 1) {
-    for (int i = 0; i < std::min(var.swizzle().size(), 4); i++) {
-       out << swizChars[var.swizzle()[i]];
+  if (dest) {
+    bool masked[4] = {false, false, false, false};
+    for (int i = 0; i < var.swizzle().size(); i++) {
+      masked[var.swizzle()[i]] = true;
     }
+    for (int i = 0; i < 4; i++) {
+      if (masked[i]) out << swizChars[i];
+    }
+  } else if (var.swizzle().size() == 1) {
+    out << swizChars[var.swizzle()[0]];
   } else if (collectingOp) {
     for (int i = 0; i < 4; i++) {
        out << swizChars[i < var.swizzle().size() ? var.swizzle()[i] : i];
@@ -341,9 +389,23 @@ bool ArbCode::printSamplingInstruction(std::ostream& out, const ArbInst& instr) 
 
   ShTextureNodePtr texture = shref_dynamic_cast<ShTextureNode>(instr.src[1].node());
   RegMap::const_iterator texRegIt = m_registers.find(instr.src[1].node());
-  SH_DEBUG_ASSERT(texRegIt != m_registers.end());
+  if (texRegIt == m_registers.end()) {
+    SH_DEBUG_PRINT("Unallocated texture found.");
+    SH_DEBUG_PRINT("Operation = " << arbOpInfo[instr.op].name);
+    SH_DEBUG_PRINT("Destination* = " << instr.dest.node().object());
+    if (instr.dest.node()) {
+      SH_DEBUG_PRINT("Destination = " << instr.dest.name());
+    }
+    SH_DEBUG_PRINT("Texture pointer = " << texture.object());
+    if (texture) {
+      SH_DEBUG_PRINT("Texture = " << texture->name());
+    }
+    out << "  INVALID TEX INSTRUCTION;";
+    return true;
+  }
+  //SH_DEBUG_ASSERT(texRegIt != m_registers.end());
 
-  const ArbReg& texReg = texRegIt->second;
+  const ArbReg& texReg = *texRegIt->second;
   
   out << "  ";
   out << arbOpInfo[instr.op].name << " ";
@@ -367,47 +429,40 @@ bool ArbCode::printSamplingInstruction(std::ostream& out, const ArbInst& instr) 
     out << "RECT";
     break;
   }
+  out << ";";
   return true;
 }
 
 std::ostream& ArbCode::print(std::ostream& out)
 {
   LineNumberer endl;
+  const char* swizChars = "xyzw";
 
   // Print version header
-  if (m_target == "gpu:vertex") out << "!!ARBvp1.0" << endl;
-  if (m_target == "gpu:fragment") out << "!!ARBfp1.0" << endl;
+  if (m_unit == "vertex") {
+    out << "!!ARBvp1.0" << endl;
+    if (m_environment & SH_ARB_NVVP3) out << "OPTION NV_vertex_program3;" << endl;
+    else if (m_environment & SH_ARB_NVVP2) out << "OPTION NV_vertex_program2;" << endl;
+  }
+  if (m_unit == "fragment") {
+    out << "!!ARBfp1.0" << endl;
 
+    if (m_environment & SH_ARB_NVFP2) out << "OPTION NV_fragment_program2;" << endl;
+    else if (m_environment & SH_ARB_NVFP) out << "OPTION NV_fragment_program;" << endl;
+
+    if (m_environment & SH_ARB_ATIDB) out << "OPTION ATI_draw_buffers;" << endl;
+  }
+  
   // Print register declarations
   
-  for (ShProgramNode::VarList::const_iterator I = m_shader->inputs.begin();
-       I != m_shader->inputs.end(); ++I) {
+  for (RegList::const_iterator I = m_reglist.begin();
+       I != m_reglist.end(); ++I) {
+    if ((*I)->type == SH_ARB_REG_TEMP) continue;
+    if ((*I)->type == SH_ARB_REG_TEXTURE) continue;
     out << "  ";
-    m_registers[*I].printDecl(out);
+    (*I)->printDecl(out);
     out << endl;
   }
-
-  for (ShProgramNode::VarList::const_iterator I = m_shader->outputs.begin();
-       I != m_shader->outputs.end(); ++I) {
-    out << "  ";
-    m_registers[*I].printDecl(out);
-    out << endl;
-  }
-
-  for (ShProgramNode::VarList::const_iterator I = m_shader->uniforms.begin();
-       I != m_shader->uniforms.end(); ++I) {
-    out << "  ";
-    m_registers[*I].printDecl(out);
-    out << endl;
-  }
-
-  for (ShProgramNode::VarList::const_iterator I = m_shader->constants.begin();
-       I != m_shader->constants.end(); ++I) {
-    out << "  ";
-    m_registers[*I].printDecl(out);
-    out << endl;
-  }
-
   if (m_numTemps) {
     out << "  TEMP ";
     for (int i = 0; i < m_numTemps; i++) {
@@ -422,16 +477,108 @@ std::ostream& ArbCode::print(std::ostream& out)
   // Print instructions
   for (ArbInstList::const_iterator I = m_instructions.begin();
        I != m_instructions.end(); ++I) {
-    if (!printSamplingInstruction(out, *I)) {
+    if (I->op == SH_ARB_LABEL) {
+      out << "label" << I->label << ": ";
+    } else if (I->op == SH_ARB_ELSE) {
+      out << "  ELSE;";
+    } else if (I->op == SH_ARB_ENDIF) {
+      out << "  ENDIF;";
+    } else if (I->op == SH_ARB_BRA) {
+      if (I->src[0].node()) {
+        out << "  MOVC ";
+        printVar(out, true, I->src[0], false);
+        out << ", ";
+        printVar(out, false, I->src[0], false, I->src[0].swizzle());
+        out << ";" << endl;
+      }
+      out << "  BRA label" << I->label;
+      if (I->src[0].node()) {
+        out << "  (GT)";
+        out << ".";
+        for (int i = 0; i < I->src[0].swizzle().size(); i++) {
+          out << swizChars[I->src[0].swizzle()[i]];
+        }
+      }
+      out << ";";
+    } else if (I->op == SH_ARB_REP) {
+      out << "  REP ";
+      printVar(out, false, I->src[0], false, I->src[0].swizzle());
+      out << ";";
+    } else if (I->op == SH_ARB_BRK) {
+      if (I->src[0].node()) {
+        out << "  MOVC ";
+        printVar(out, true, I->src[0], false);
+        out << ", ";
+        printVar(out, false, I->src[0], false, I->src[0].swizzle());
+        out << ";" << endl;
+      }
+      out << "  BRK ";
+      if (I->src[0].node()) {
+        out << " (";
+        if (I->invert) {
+          out << "LE";
+        } else {
+          out << "GT";
+        }
+        out << ".";
+        for (int i = 0; i < I->src[0].swizzle().size(); i++) {
+          out << swizChars[I->src[0].swizzle()[i]];
+        }
+        out << ")";
+      }
+      out << ";";
+    } else if (I->op == SH_ARB_ENDREP) {
+      out << "  ENDREP;";
+    } else if (I->op == SH_ARB_IF) {
+      if (I->src[0].node()) {
+        out << "  MOVC ";
+        printVar(out, true, I->src[0], false);
+        out << ", ";
+        printVar(out, false, I->src[0], false, I->src[0].swizzle());
+        out << ";" << endl;
+      }
+      out << "  IF ";
+      if (I->src[0].node()) {
+        out << "GT";
+        out << ".";
+        for (int i = 0; i < I->src[0].swizzle().size(); i++) {
+          out << swizChars[I->src[0].swizzle()[i]];
+        }
+      } else {
+        out << "TR";
+      }
+      out << ";";
+    } else if (!printSamplingInstruction(out, *I)) {
       out << "  ";
-      out << arbOpInfo[I->op].name << " ";
+      out << arbOpInfo[I->op].name;
+      if (I->update_cc) out << "C";
+      out << " ";
       printVar(out, true, I->dest, arbOpInfo[I->op].collectingOp);
+      if (I->ccode != ArbInst::NOCC) {
+        out << " (";
+        out << arbCCnames[I->ccode];
+        out << ".";
+        for (int i = 0; i < 4; i++) {
+          out << swizChars[(i < I->ccswiz.size() ? I->ccswiz[i]
+                            : (I->ccswiz.size() == 1 ? I->ccswiz[0] : i))];
+        }
+        out << ") ";
+      }
       for (int i = 0; i < arbOpInfo[I->op].arity; i++) {
         out << ", ";
         printVar(out, false, I->src[i], arbOpInfo[I->op].collectingOp, I->dest.swizzle());
       }
+      out << ';';
     }
-    out << ';';
+    out << " # ";
+    if (I->dest.node() && I->dest.has_name()) {
+      out << "d=" << I->dest.name() << " ";
+    }
+    for (int i = 0; i < 3; i++) {
+      if (I->src[i].node()  && I->src[i].has_name()) {
+        out << "s[" << i << "]=" << I->src[i].name() << " ";
+      }
+    }
     out << endl;
   }
 
@@ -444,17 +591,25 @@ std::ostream& ArbCode::printInputOutputFormat(std::ostream& out) {
   out << "Inputs:" << std::endl;
   for (I = m_shader->inputs.begin(); I != m_shader->inputs.end(); ++I) {
     out << "  ";
-    m_registers[*I].printDecl(out);
+    m_registers[*I]->printDecl(out);
     out << std::endl;
   }
 
   out << "Outputs:" << std::endl;
   for (I = m_shader->outputs.begin(); I != m_shader->outputs.end(); ++I) {
     out << "  ";
-    m_registers[*I].printDecl(out);
+    m_registers[*I]->printDecl(out);
     out << std::endl;
   }
   return out;
+}
+
+int ArbCode::getLabel(ShCtrlGraphNodePtr node)
+{
+  if (m_label_map.find(node) == m_label_map.end()) {
+    m_label_map[node] = m_max_label++;
+  }
+  return m_label_map[node];
 }
 
 void ArbCode::genNode(ShCtrlGraphNodePtr node)
@@ -462,517 +617,120 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
   if (!node || node->marked()) return;
   node->mark();
 
+  if (node == m_shader->ctrlGraph->exit()) return;
+  
+  if (m_environment & SH_ARB_NVVP2) {
+    m_instructions.push_back(ArbInst(SH_ARB_LABEL, getLabel(node)));
+  }
+  
   if (node->block) for (ShBasicBlock::ShStmtList::const_iterator I = node->block->begin();
        I != node->block->end(); ++I) {
     const ShStatement& stmt = *I;
-    switch (stmt.op) {
-    case SH_OP_ASN:
-      m_instructions.push_back(ArbInst(SH_ARB_MOV, stmt.dest, stmt.src[0]));
-      break;
-    case SH_OP_NEG:
-      m_instructions.push_back(ArbInst(SH_ARB_MOV, stmt.dest, -stmt.src[0]));
-      break;
-    case SH_OP_ADD:
-      m_instructions.push_back(ArbInst(SH_ARB_ADD, stmt.dest, stmt.src[0], stmt.src[1]));
-      break;
-    case SH_OP_MUL:
-      genScalarVectorInst(stmt.dest, stmt.src[0], stmt.src[1], SH_ARB_MUL);
-      break;
-    case SH_OP_DIV:
-      genDiv(stmt.dest, stmt.src[0], stmt.src[1]);
-      break;
-    case SH_OP_ABS:
-      m_instructions.push_back(ArbInst(SH_ARB_ABS, stmt.dest, stmt.src[0]));
-      break;
-    case SH_OP_ACOS:
-      {
-        genTrigInst(stmt.dest, stmt.src[0], SH_OP_ACOS);
-      }
-      break;
-    case SH_OP_ASIN:
-      {
-        genTrigInst(stmt.dest, stmt.src[0], SH_OP_ASIN);
-      }
-      break;
-    case SH_OP_CEIL:
-      {
-        m_instructions.push_back(ArbInst(SH_ARB_FLR, stmt.dest, -stmt.src[0])); 
-        m_instructions.push_back(ArbInst(SH_ARB_MOV, stmt.dest, -stmt.dest));
-      }
-      break;
-    case SH_OP_COS:
-      if( m_target == "gpu:vertex" ) 
-      {
-        genTrigInst(stmt.dest, stmt.src[0], SH_OP_COS);
-      }
-      else 
-      {
-        for (int i = 0; i < stmt.src[0].size(); i++)
-        {
-          m_instructions.push_back(
-              ArbInst(SH_ARB_COS, stmt.dest(i), stmt.src[0](i)));
-        }
-      }
-      break;
-    case SH_OP_DOT: 
-      genDot(stmt.dest, stmt.src[0], stmt.src[1]);
-      break;
-    case SH_OP_EXP:
-      {
-        ShVariable e(new ShVariableNode(SH_CONST, 1));
-        float ef = M_E;
-        e.setValues(&ef);
-        for (int i = 0; i < stmt.src[0].size(); i++) {
-          m_instructions.push_back(ArbInst(SH_ARB_POW, stmt.dest(i), e, stmt.src[0](i)));
-        }
-        break;
-      }
-    case SH_OP_EXP2:
-      for (int i = 0; i < stmt.src[0].size(); i++) {
-        m_instructions.push_back(ArbInst(SH_ARB_EX2, stmt.dest(i), stmt.src[0](i)));
-      }
-      break;
-    case SH_OP_EXP10:
-      {
-        ShVariable ten(new ShVariableNode(SH_CONST, 1));
-        float tenf = 10.0;
-        ten.setValues(&tenf);
-        for (int i = 0; i < stmt.src[0].size(); i++) {
-          m_instructions.push_back(ArbInst(SH_ARB_POW, stmt.dest(i), ten, stmt.src[0](i)));
-        }
-        break;
-      }
-    case SH_OP_FLR:
-      m_instructions.push_back(ArbInst(SH_ARB_FLR, stmt.dest, stmt.src[0]));
-      break;
-    case SH_OP_FRAC:
-      m_instructions.push_back(ArbInst(SH_ARB_FRC, stmt.dest, stmt.src[0]));
-      break;
-    case SH_OP_LOG:
-      {
-        float scalef = 1.0/log2(M_E);
-        ShVariable scale(new ShVariableNode(SH_CONST, stmt.src[0].size()));
-        for (int i = 0; i < stmt.src[0].size(); i++) {
-          scale.node()->setValue(i, scalef);
-          m_instructions.push_back(ArbInst(SH_ARB_LG2, stmt.dest(i), stmt.src[0](i)));
-        }
-        m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0], scale));
-      }
-      break;
-    case SH_OP_LOG2:
-      for (int i = 0; i < stmt.src[0].size(); i++) {
-        m_instructions.push_back(ArbInst(SH_ARB_LG2, stmt.dest(i), stmt.src[0](i)));
-      }
-      break;
-    case SH_OP_LOG10:
-      {
-        float scalef = 1.0/log2(10);
-        ShVariable scale(new ShVariableNode(SH_CONST, stmt.src[0].size()));
-        for (int i = 0; i < stmt.src[0].size(); i++) {
-          scale.node()->setValue(i, scalef);
-          m_instructions.push_back(ArbInst(SH_ARB_LG2, stmt.dest(i), stmt.src[0](i)));
-        }
-        m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0], scale));
-      }
-      break;
-    case SH_OP_LRP:
-      if(m_target == "gpu:vertex") {
-        ShVariable t(new ShVariableNode(SH_TEMP, stmt.src[1].size()));
-        // lerp(f,a,b)=f*a + (1-f)*b = f*(a-b) + b 
-        m_instructions.push_back(ArbInst(SH_ARB_ADD, t, stmt.src[1], -stmt.src[2]));
+    emit(stmt);
+  }
 
-        if (stmt.src[0].size() == 1 && stmt.src[1].size() != 1) { 
-          int* swizzle = new int[stmt.src[1].size()];
-          for (int i = 0; i < stmt.src[1].size(); i++) swizzle[i] = 0;
-
-          m_instructions.push_back(ArbInst(SH_ARB_MAD, stmt.dest, 
-                stmt.src[0](stmt.src[1].size(), swizzle), t, stmt.src[2]));
-          delete [] swizzle;
-        } else {
-          m_instructions.push_back(ArbInst(SH_ARB_MAD, stmt.dest, 
-                stmt.src[0], t, stmt.src[2]));
-        }
-      } else {
-        if(stmt.src[0].size() == 1 && stmt.src[1].size() != 1) {
-          int* swizzle = new int[stmt.src[1].size()];
-          for (int i = 0; i < stmt.src[1].size(); i++) swizzle[i] = 0;
-
-          m_instructions.push_back(ArbInst(SH_ARB_LRP, stmt.dest,
-                stmt.src[0](stmt.src[1].size(), swizzle), stmt.src[1], stmt.src[2]));
-          delete [] swizzle;
-        } else {
-          m_instructions.push_back(ArbInst(SH_ARB_LRP, stmt.dest,
-                stmt.src[0], stmt.src[1], stmt.src[2]));
-        }
-      }
-      break;
-    case SH_OP_MAD:
-      if (stmt.src[0].size() != 1 || stmt.src[1].size() != 1) {
-        if (stmt.src[0].size() == 1) {
-          int* swizzle = new int[stmt.src[1].size()];
-          for (int i = 0; i < stmt.src[1].size(); i++) swizzle[i] = 0; 
-          m_instructions.push_back(ArbInst(SH_ARB_MAD, stmt.dest, 
-                stmt.src[0](stmt.src[1].size(), swizzle), stmt.src[1], stmt.src[2]));
-          delete [] swizzle;
-          break;
-        } else if (stmt.src[1].size() == 1) {
-          int* swizzle = new int[stmt.src[0].size()];
-          for (int i = 0; i < stmt.src[0].size(); i++) swizzle[i] = 0;
-          m_instructions.push_back(ArbInst(SH_ARB_MAD, stmt.dest, stmt.src[0],
-                stmt.src[1](stmt.src[0].size(), swizzle), stmt.src[2]));
-          delete [] swizzle;
-          break;
-        }
-      } 
-      m_instructions.push_back(ArbInst(SH_ARB_MAD, stmt.dest, stmt.src[0], 
-            stmt.src[1], stmt.src[2])); 
-      break;
-
-    case SH_OP_MAX:
-      m_instructions.push_back(ArbInst(SH_ARB_MAX, stmt.dest, stmt.src[0], stmt.src[1]));
-      break;
-    case SH_OP_MIN:
-      m_instructions.push_back(ArbInst(SH_ARB_MIN, stmt.dest, stmt.src[0], stmt.src[1]));
-      break;
-    case SH_OP_MOD:
-      {
-        // TODO - is this really optimal?
-        ShVariable t1(new ShVariableNode(SH_TEMP, stmt.src[0].size()));
-        ShVariable t2(new ShVariableNode(SH_TEMP, stmt.src[0].size()));
-        
-        // result = x - sign(x/y)*floor(abs(x/y))*y
-        genDiv(t1, stmt.src[0], stmt.src[1]);
-        m_instructions.push_back(ArbInst(SH_ARB_ABS, t2, t1));
-
-        genDiv(t1, t1, t2);
-        m_instructions.push_back(ArbInst(SH_ARB_FLR, t2, t2)); 
-        m_instructions.push_back(ArbInst(SH_ARB_MUL, t1, t1, t2)); 
-        m_instructions.push_back(ArbInst(SH_ARB_MUL, t1, t1, stmt.src[1])); 
-        m_instructions.push_back(ArbInst(SH_ARB_SUB, stmt.dest, stmt.src[0], t1)); 
-      }
-      break;
-    case SH_OP_NORM:
-      { 
-        ShVariable mul(new ShVariableNode(SH_TEMP, 1));
-        genDot(mul, stmt.src[0], stmt.src[0]);
-        m_instructions.push_back(ArbInst(SH_ARB_RSQ, mul, mul));
-        m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, mul, stmt.src[0]));
-      }
-      break;
-    case SH_OP_SIN:
-      if( m_target == "gpu:vertex" ) 
-      {
-        genTrigInst(stmt.dest, stmt.src[0], SH_OP_SIN);
-      }
-      else 
-      {
-        for (int i = 0; i < stmt.src[0].size(); i++)
-        {
-          m_instructions.push_back(
-              ArbInst(SH_ARB_SIN, stmt.dest(i), stmt.src[0](i)));
-        }
-      }
-      break;
-    case SH_OP_SEQ:
-      {
-        int tempsize = stmt.src[0].size();
-        if( tempsize < stmt.src[1].size() ) tempsize = stmt.src[1].size();
-        ShVariable seq(new ShVariableNode(SH_TEMP, tempsize)); 
-        ShVariable seq2(new ShVariableNode(SH_TEMP, tempsize)); 
-        genScalarVectorInst(seq, stmt.src[0], stmt.src[1], SH_ARB_SGE);
-        genScalarVectorInst(seq2, stmt.src[1], stmt.src[0], SH_ARB_SGE);
-        m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, seq, seq2 ));
-      }
-      break;
-    case SH_OP_SLT:
-      genScalarVectorInst(stmt.dest, stmt.src[0], stmt.src[1], SH_ARB_SLT);
-      break;
-    case SH_OP_SGT:
-      genScalarVectorInst(stmt.dest, stmt.src[1], stmt.src[0], SH_ARB_SLT);
-      break;
-    case SH_OP_SLE:
-      genScalarVectorInst(stmt.dest, stmt.src[1], stmt.src[0], SH_ARB_SGE);
-      break;
-    case SH_OP_SGE:
-      genScalarVectorInst(stmt.dest, stmt.src[0], stmt.src[1], SH_ARB_SGE);
-      break;
-    case SH_OP_SQRT:
-      {
-        ShVariable rcp(new ShVariableNode(SH_TEMP, stmt.src[0].size()));
-        m_instructions.push_back(ArbInst(SH_ARB_RSQ, rcp, stmt.src[0]));
-        m_instructions.push_back(ArbInst(SH_ARB_RCP, stmt.dest, rcp));
-      break;
-      }
-    case SH_OP_POW:
-      for (int i = 0; i < stmt.src[0].size(); i++) {
-        bool scalar = stmt.src[1].size() <= 1;
-        m_instructions.push_back(ArbInst(SH_ARB_POW, stmt.dest(i), stmt.src[0](i),
-                                         stmt.src[1](scalar ? 0 : i)));
-      }
-      break;
-
-    case SH_OP_TAN:
-      if (m_target == "gpu:vertex") {
-        // TODO: fix for vertex program (use genTrigInst)
-      } else {
-        ShVariable tmp(new ShVariableNode(SH_TEMP, stmt.src[0].size()));
-        ShVariable tmp2(new ShVariableNode(SH_TEMP, stmt.src[0].size()));
-        for (int i = 0; i < stmt.src[0].size(); i++) {
-          m_instructions.push_back(ArbInst(SH_ARB_COS, tmp(i), stmt.src[0](i)));
-          m_instructions.push_back(ArbInst(SH_ARB_RCP, tmp(i), tmp(i)));
-          m_instructions.push_back(ArbInst(SH_ARB_SIN, tmp2(i), stmt.src[0](i)));
-        }
-        m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, tmp, tmp2));
-      }
-      break;
-    case SH_OP_TEX:
-    case SH_OP_TEXI:
-      m_instructions.push_back(ArbInst(SH_ARB_TEX, stmt.dest, stmt.src[1], stmt.src[0]));
-      break;
-    case SH_OP_XPD:
-      m_instructions.push_back(ArbInst(SH_ARB_XPD, stmt.dest, stmt.src[0], stmt.src[1]));
-      break;
-    case SH_OP_COND:
-      if (stmt.src[0].size() == 1 && stmt.src[1].size() != 1) {
-        int* swizzle = new int[stmt.src[1].size()];
-        for (int i = 0; i < stmt.src[1].size(); i++) swizzle[i] = 0;
-        m_instructions.push_back(ArbInst(SH_ARB_CMP, stmt.dest, -stmt.src[0](stmt.src[1].size(), swizzle),
-                                         stmt.src[1], stmt.src[2]));
-        delete [] swizzle;
-      } else {
-        m_instructions.push_back(ArbInst(SH_ARB_CMP, stmt.dest, -stmt.src[0], stmt.src[1], stmt.src[2]));
-      }
-      break;
-    case SH_OP_KIL:
-      m_instructions.push_back(ArbInst(SH_ARB_KIL, -stmt.src[0]));
-      break;
-    default:
-      SH_DEBUG_WARN(opInfo[stmt.op].name << " not handled by ARB backend");
+  if (m_environment & SH_ARB_NVVP2) {
+    for(std::vector<SH::ShCtrlGraphBranch>::iterator I = node->successors.begin();
+	I != node->successors.end(); I++) {
+      m_instructions.push_back(ArbInst(SH_ARB_BRA, getLabel(I->node), I->cond));
+    }
+    m_instructions.push_back(ArbInst(SH_ARB_BRA, getLabel(node->follower)));
+    for(std::vector<SH::ShCtrlGraphBranch>::iterator I = node->successors.begin();
+	I != node->successors.end(); I++) {
+      genNode(I->node);
     }
   }
 
   genNode(node->follower);
 }
 
-void ArbCode::genDiv(const ShVariable &dest, const ShVariable &op1, const ShVariable &op2) {
-  if (op2.size() == 1 && op1.size() != 1) {
-    ShVariable rcp(new ShVariableNode(SH_TEMP, op2.size())); 
-    m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp, op2)); 
-
-    int* swizzle = new int[op1.size()];
-    for (int i = 0; i < op1.size(); i++) swizzle[i] = 0;
-    m_instructions.push_back(ArbInst(SH_ARB_MUL, dest, op1,
-          rcp(op1.size(), swizzle)));
-    delete [] swizzle;
-  } else {
-    ShVariable rcp(new ShVariableNode(SH_TEMP, 1));
-
-    // TODO arg...component-wise div is ugly, ARB RCP only works on scalars
-    for(int i = 0; i < op2.size(); ++i) {
-      m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp, op2(i)));
-      m_instructions.push_back(ArbInst(SH_ARB_MUL, dest(i), op1(i), rcp));
-    }
-  }
-}
-
-void ArbCode::genScalarVectorInst( const SH::ShVariable &dest, const SH::ShVariable &op1, 
-    const SH::ShVariable &op2, int opcode ) {
-  if (op1.size() != 1 || op2.size() != 1) {
-    if (op1.size() == 1) {
-      int* swizzle = new int[op2.size()];
-      for (int i = 0; i < op2.size(); i++) swizzle[i] = 0; 
-      m_instructions.push_back(ArbInst((ArbOp)opcode, dest, 
-            op1(op2.size(), swizzle), op2));
-      delete [] swizzle;
-      return;
-    } else if (op2.size() == 1) {
-      int* swizzle = new int[op1.size()];
-      for (int i = 0; i < op1.size(); i++) swizzle[i] = 0;
-      m_instructions.push_back(ArbInst((ArbOp)opcode, dest, op1,
-                                             op2(op1.size(), swizzle)));
-      delete [] swizzle;
-      return;
-    }
-  } 
-  m_instructions.push_back(ArbInst((ArbOp)opcode, dest, op1, op2)); 
-}
-
-void ArbCode::genTrigInst( const SH::ShVariable& dest, 
-    const SH::ShVariable& src, int opcode  )
+void ArbCode::genStructNode(const ShStructuralNodePtr& node)
 {
-  if (opcode == SH_OP_ASIN || opcode == SH_OP_ACOS) 
-  {
-    ShVariableNode::ValueType c0_values[] = 
-    { 0.0, 1.570796327, -0.5860008052, 0.5860008052 };
-    ShVariable c0(new ShVariableNode(SH_CONST, 4));
-    c0.setValues(c0_values);
-    ShVariableNode::ValueType c1_values[] = 
-    { 1.571945105, -1.571945105, -1.669668977, 1.669668977 };
-    ShVariable c1(new ShVariableNode(SH_CONST, 4));
-    c1.setValues(c1_values);
-    ShVariableNode::ValueType c2_values[] = 
-    { 0.8999841642, -0.8999841642, -0.6575341673, 0.6575341673 };
-    ShVariable c2(new ShVariableNode(SH_CONST, 4));
-    c2.setValues(c2_values);
-    ShVariableNode::ValueType c3_values[] = 
-    { 1.012386649, -1.012386649, 0.9998421793, -0.9998421793 };
-    ShVariable c3(new ShVariableNode(SH_CONST, 4));
-    c3.setValues(c3_values);
-    ShVariableNode::ValueType c4_values[] = 
-    { 1.0, -1.0, 1.0, -1.0 };
-    ShVariable c4(new ShVariableNode(SH_CONST, 4));
-    c4.setValues(c4_values);
-    m_shader->constants.push_back(c0.node());
-    m_shader->constants.push_back(c1.node());
-    m_shader->constants.push_back(c2.node());
-    m_shader->constants.push_back(c3.node());
-    m_shader->constants.push_back(c4.node());
-    ShVariable r0(new ShVariableNode(SH_TEMP, 4));
-    ShVariable r1(new ShVariableNode(SH_TEMP, 4));
-    ShVariable r2(new ShVariableNode(SH_TEMP, 4));
-    ShVariable rs(new ShVariableNode(SH_TEMP, 4));
-    ShVariable offset(new ShVariableNode(SH_TEMP, 4));
-    m_instructions.push_back(ArbInst(SH_ARB_MOV, rs, src));
-    m_instructions.push_back(ArbInst(SH_ARB_ABS, r0, rs));
-    m_instructions.push_back(
-        ArbInst(SH_ARB_MAD, offset, -r0, r0, c4(0,0,0,0)));
-    for (int i = 0; i < src.size(); i++)
-    {
-      m_instructions.push_back(ArbInst(SH_ARB_MOV, r2, c0(0,1,0,1)));
-      m_instructions.push_back(ArbInst(SH_ARB_SLT, r2(1), rs(i), c0(0)));
-      m_instructions.push_back(ArbInst(SH_ARB_SGE, r2(0), rs(i), c0(0)));
-      m_instructions.push_back(
-          ArbInst(SH_ARB_MAD, r1(0,1), c0(2,3), r0(i,i), c1(0,1)));
-      m_instructions.push_back(
-          ArbInst(SH_ARB_MAD, r1(0,1), r1(0,1), r0(i,i), c1(2,3)));
-      m_instructions.push_back(
-          ArbInst(SH_ARB_MAD, r1(0,1), r1(0,1), r0(i,i), c2(0,1)));
-      m_instructions.push_back(
-          ArbInst(SH_ARB_MAD, r1(0,1), r1(0,1), r0(i,i), c2(2,3)));
-      m_instructions.push_back(
-          ArbInst(SH_ARB_MAD, r1(0,1), r1(0,1), r0(i,i), c3(0,1)));
-      m_instructions.push_back(
-          ArbInst(SH_ARB_MAD, r1(0,1), r1(0,1), r0(i,i), c3(2,3)));
-      m_instructions.push_back(ArbInst(SH_ARB_RSQ,offset(i), offset(i)));
-      m_instructions.push_back(ArbInst(SH_ARB_RCP,offset(i), offset(i)));
-      m_instructions.push_back(
-          ArbInst(SH_ARB_MAD, r1(0,1), c4(1,0), offset(i,i), r1(0,1)));
-      m_instructions.push_back(
-          ArbInst(SH_ARB_DP3, dest(i), r1(0,1,2), r2(0,1,2)));
+  if (!node) return;
+
+  if (node->type == ShStructuralNode::UNREDUCED) {
+    ShBasicBlockPtr block = node->cfg_node->block;
+    if (block) for (ShBasicBlock::ShStmtList::const_iterator I = block->begin();
+                    I != block->end(); ++I) {
+      const ShStatement& stmt = *I;
+      emit(stmt);
     }
-    if (opcode == SH_OP_ACOS)
-    {
-      m_instructions.push_back(
-          ArbInst(SH_ARB_ADD, dest, -dest, c0(1,1,1,1)));
+  } else if (node->type == ShStructuralNode::BLOCK) {
+    for (ShStructuralNode::StructNodeList::const_iterator I = node->structnodes.begin();
+         I != node->structnodes.end(); ++I) {
+      genStructNode(*I);
     }
-  }
-  else if (opcode == SH_OP_SIN || opcode == SH_OP_COS)
-  {
-    ShVariableNode::ValueType c0_values[] = 
-    { 0.0, 0.5, 1.0, 0.0 };
-    ShVariable c0(new ShVariableNode(SH_CONST, 4));
-    c0.setValues(c0_values);
-    ShVariableNode::ValueType c1_values[] = 
-    { 0.25, -9.0, 0.75, 1.0/(2.0*M_PI) };
-    ShVariable c1(new ShVariableNode(SH_CONST, 4));
-    c1.setValues(c1_values);
-    ShVariableNode::ValueType c2_values[] = 
-    { 24.9808039603, -24.9808039603, -60.1458091736, 60.1458091736 };
-    ShVariable c2(new ShVariableNode(SH_CONST, 4));
-    c2.setValues(c2_values);
-    ShVariableNode::ValueType c3_values[] = 
-    { 85.4537887573, -85.4537887573, -64.9393539429, 64.9393539429 };
-    ShVariable c3(new ShVariableNode(SH_CONST, 4));
-    c3.setValues(c3_values);
-    ShVariableNode::ValueType c4_values[] = 
-    { 19.7392082214, -19.7392082214, -1.0, 1.0 };
-    ShVariable c4(new ShVariableNode(SH_CONST, 4));
-    c4.setValues(c4_values);
-    m_shader->constants.push_back(c0.node());
-    m_shader->constants.push_back(c1.node());
-    m_shader->constants.push_back(c2.node());
-    m_shader->constants.push_back(c3.node());
-    m_shader->constants.push_back(c4.node());
-    ShVariable r0(new ShVariableNode(SH_TEMP, 4));
-    ShVariable r1(new ShVariableNode(SH_TEMP, 4));
-    ShVariable r2(new ShVariableNode(SH_TEMP, 4));
-    ShVariable rs(new ShVariableNode(SH_TEMP, 4));
-    m_instructions.push_back(ArbInst(SH_ARB_MOV, rs, src));
-    if (opcode == SH_OP_SIN)
-    {
-      m_instructions.push_back(
-          ArbInst(SH_ARB_MAD, rs, c1(3,3,3,3), rs, -c1(0,0,0,0)));
+  } else if (node->type == ShStructuralNode::IFELSE) {
+    ShStructuralNodePtr header = node->structnodes.front();
+    // TODO Check that header->successors is only two.
+    ShVariable cond;
+    ShStructuralNodePtr ifnode, elsenode;
+    for (ShStructuralNode::SuccessorList::iterator I = header->succs.begin();
+         I != header->succs.end(); ++I) {
+      if (I->first.node()) {
+        ifnode = I->second;
+        cond = I->first;
+      } else {
+        elsenode = I->second;
+      }
     }
-    else 
-    {
-      m_instructions.push_back(ArbInst(SH_ARB_MUL, rs, c1(3,3,3,3), rs));
+    genStructNode(header);
+    m_instructions.push_back(ArbInst(SH_ARB_IF, ShVariable(), cond)); {
+      genStructNode(ifnode);
+    } m_instructions.push_back(ArbInst(SH_ARB_ELSE, ShVariable())); {
+      genStructNode(elsenode);
+    } m_instructions.push_back(ArbInst(SH_ARB_ENDIF, ShVariable()));
+  } else if (node->type == ShStructuralNode::WHILELOOP) {
+    ShStructuralNodePtr header = node->structnodes.front();
+
+    ShVariable cond = header->succs.front().first;
+    
+    ShStructuralNodePtr body = node->structnodes.back();
+
+    ShVariable maxloop(new ShVariableNode(SH_CONST, 1));
+    float maxloopval = 255.0;
+    maxloop.setValues(&maxloopval);
+    m_shader->constants.push_back(maxloop.node());
+    m_instructions.push_back(ArbInst(SH_ARB_REP, ShVariable(), maxloop));
+    genStructNode(header);
+    ArbInst brk(SH_ARB_BRK, ShVariable(), cond);
+    brk.invert = true;
+    m_instructions.push_back(brk);
+    genStructNode(body);
+    
+    m_instructions.push_back(ArbInst(SH_ARB_ENDREP, ShVariable()));
+  } else if (node->type == ShStructuralNode::SELFLOOP) {
+    ShStructuralNodePtr loopnode = node->structnodes.front();
+
+    bool condexit = true; // true if the condition causes us to exit the
+                          // loop, rather than continue it
+    ShVariable cond;
+    for (ShStructuralNode::SuccessorList::iterator I = loopnode->succs.begin();
+         I != loopnode->succs.end(); ++I) {
+      if (I->first.node()) {
+        if (I->second == loopnode) condexit = false; else condexit = true;
+        cond = I->first;
+      }
     }
-    m_instructions.push_back(ArbInst(SH_ARB_FRC, rs, rs));
-    for (int i = 0; i < src.size(); i++)
-    {
-      m_instructions.push_back(ArbInst(SH_ARB_SLT, r2(0), rs(i), c1(0)));
-      m_instructions.push_back(
-          ArbInst(SH_ARB_SGE, r2(1,2), rs(i,i), c1(1,2)));
-      m_instructions.push_back(
-          ArbInst(SH_ARB_DP3, r2(1), r2(0,1,2), c4(2,3,2)));
-      m_instructions.push_back(
-          ArbInst(SH_ARB_ADD, r0(0,1,2), -rs(i,i,i), c0(0,1,2)));
-      m_instructions.push_back(ArbInst(SH_ARB_MUL, r0, r0, r0));
-      m_instructions.push_back(
-          ArbInst(SH_ARB_MAD, r1, c2(0,1,0,1), r0, c2(2,3,2,3)));
-      m_instructions.push_back(
-          ArbInst(SH_ARB_MAD, r1, r1, r0, c3(0,1,0,1)));
-      m_instructions.push_back(
-          ArbInst(SH_ARB_MAD, r1, r1, r0, c3(2,3,2,3)));
-      m_instructions.push_back(
-          ArbInst(SH_ARB_MAD, r1, r1, r0, c4(0,1,0,1)));
-      m_instructions.push_back(
-          ArbInst(SH_ARB_MAD, r1, r1, r0, c4(2,3,2,3)));
-      m_instructions.push_back(
-          ArbInst(SH_ARB_DP3, r0(0), r1(0,1,2), -r2(0,1,2)));
-      m_instructions.push_back(ArbInst(SH_ARB_MOV, dest(i), r0(0)));
-    }
+    
+    ShVariable maxloop(new ShVariableNode(SH_CONST, 1));
+    float maxloopval = 255.0;
+    maxloop.setValues(&maxloopval);
+    m_shader->constants.push_back(maxloop.node());
+    m_instructions.push_back(ArbInst(SH_ARB_REP, ShVariable(), maxloop));
+    genStructNode(loopnode);
+    ArbInst brk(SH_ARB_BRK, ShVariable(), cond);
+    if (!condexit) {
+      brk.invert = true;
+    } 
+    m_instructions.push_back(brk);
+    m_instructions.push_back(ArbInst(SH_ARB_ENDREP, ShVariable()));
   }
 }
-
-void ArbCode::genDot( const ShVariable& dest, 
-    const ShVariable& src0, const ShVariable &src1) { 
-  ShVariable left = src0;
-  ShVariable right = src1;
-
-  // expand src0/src1 if they are scalar
-  if( src0.size() < src1.size() ) {
-    int *swizzle = new int[ src1.size() ];
-    for( int i = 0; i < src1.size(); ++i ) swizzle[i] = 0; 
-    left = src0( src1.size(), swizzle ); 
-    delete swizzle;
-  } else if( src1.size() < src0.size() ) {
-    int *swizzle = new int[ src0.size() ];
-    for( int i = 0; i < src0.size(); ++i ) swizzle[i] = 0; 
-    right = src1( src0.size(), swizzle ); 
-    delete swizzle;
-  }
-
-  if (left.size() == 3) {
-    m_instructions.push_back(ArbInst(SH_ARB_DP3, dest, left, right));
-  } else if (left.size() == 4) {
-    m_instructions.push_back(ArbInst(SH_ARB_DP4, dest, left, right));
-  } else if (left.size() == 1) {
-    m_instructions.push_back(ArbInst(SH_ARB_MUL, dest, left, right));
-  } else {
-    ShVariable mul(new ShVariableNode(SH_TEMP, left.size()));
-    m_instructions.push_back(ArbInst(SH_ARB_MUL, mul, left, right));
-    m_instructions.push_back(ArbInst(SH_ARB_ADD, dest, mul(0), mul(1)));
-    for (int i = 2; i < left.size(); i++) {
-      m_instructions.push_back(ArbInst(SH_ARB_ADD, dest, dest, mul(i)));
-    }
-  }
-}
-
 
 void ArbCode::allocRegs()
 {
-  ArbLimits limits(m_target);
+  ArbLimits limits(m_unit);
   
   allocInputs(limits);
   
@@ -1006,9 +764,10 @@ void ArbCode::bindSpecial(const ShProgramNode::VarList::const_iterator& begin,
     if (m_registers.find(node) != m_registers.end()) continue;
     if (node->specialType() != specs.semanticType) continue;
     
-    m_registers[node] = ArbReg(type, num++, node->name());
-    m_registers[node].binding = specs.binding;
-    m_registers[node].bindingIndex = bindings.back();
+    m_registers[node] = new ArbReg(type, num++, node->name());
+    m_registers[node]->binding = specs.binding;
+    m_registers[node]->bindingIndex = bindings.back();
+    m_reglist.push_back(m_registers[node]);
     
     bindings.back()++;
     if (bindings.back() == specs.maxBindings) break;
@@ -1018,9 +777,9 @@ void ArbCode::bindSpecial(const ShProgramNode::VarList::const_iterator& begin,
 void ArbCode::allocInputs(const ArbLimits& limits)
 {
   // First, try to assign some "special" output register bindings
-  for (int i = 0; arbBindingSpecs(false, m_target)[i].binding != SH_ARB_REG_NONE; i++) {
+  for (int i = 0; arbBindingSpecs(false, m_unit)[i].binding != SH_ARB_REG_NONE; i++) {
     bindSpecial(m_shader->inputs.begin(), m_shader->inputs.end(),
-                arbBindingSpecs(false, m_target)[i], m_inputBindings,
+                arbBindingSpecs(false, m_unit)[i], m_inputBindings,
                 SH_ARB_REG_ATTRIB, m_numInputs);
   }
   
@@ -1028,15 +787,16 @@ void ArbCode::allocInputs(const ArbLimits& limits)
        I != m_shader->inputs.end(); ++I) {
     ShVariableNodePtr node = *I;
     if (m_registers.find(node) != m_registers.end()) continue;
-    m_registers[node] = ArbReg(SH_ARB_REG_ATTRIB, m_numInputs++, node->name());
+    m_registers[node] = new ArbReg(SH_ARB_REG_ATTRIB, m_numInputs++, node->name());
+    m_reglist.push_back(m_registers[node]);
 
     // Binding
-    for (int i = 0; arbBindingSpecs(false, m_target)[i].binding != SH_ARB_REG_NONE; i++) {
-      const ArbBindingSpecs& specs = arbBindingSpecs(false, m_target)[i];
+    for (int i = 0; arbBindingSpecs(false, m_unit)[i].binding != SH_ARB_REG_NONE; i++) {
+      const ArbBindingSpecs& specs = arbBindingSpecs(false, m_unit)[i];
 
       if (specs.allowGeneric && m_inputBindings[i] < specs.maxBindings) {
-        m_registers[node].binding = specs.binding;
-        m_registers[node].bindingIndex = m_inputBindings[i];
+        m_registers[node]->binding = specs.binding;
+        m_registers[node]->bindingIndex = m_inputBindings[i];
         m_inputBindings[i]++;
         break;
       }
@@ -1047,9 +807,9 @@ void ArbCode::allocInputs(const ArbLimits& limits)
 void ArbCode::allocOutputs(const ArbLimits& limits)
 {
   // First, try to assign some "special" output register bindings
-  for (int i = 0; arbBindingSpecs(true, m_target)[i].binding != SH_ARB_REG_NONE; i++) {
+  for (int i = 0; arbBindingSpecs(true, m_unit)[i].binding != SH_ARB_REG_NONE; i++) {
     bindSpecial(m_shader->outputs.begin(), m_shader->outputs.end(),
-                arbBindingSpecs(true, m_target)[i], m_outputBindings,
+                arbBindingSpecs(true, m_unit)[i], m_outputBindings,
                 SH_ARB_REG_OUTPUT, m_numOutputs);
   }
   
@@ -1057,15 +817,16 @@ void ArbCode::allocOutputs(const ArbLimits& limits)
        I != m_shader->outputs.end(); ++I) {
     ShVariableNodePtr node = *I;
     if (m_registers.find(node) != m_registers.end()) continue;
-    m_registers[node] = ArbReg(SH_ARB_REG_OUTPUT, m_numOutputs++, node->name());
-
+    m_registers[node] = new ArbReg(SH_ARB_REG_OUTPUT, m_numOutputs++, node->name());
+    m_reglist.push_back(m_registers[node]);
+    
     // Binding
-    for (int i = 0; arbBindingSpecs(true, m_target)[i].binding != SH_ARB_REG_NONE; i++) {
-      const ArbBindingSpecs& specs = arbBindingSpecs(true, m_target)[i];
+    for (int i = 0; arbBindingSpecs(true, m_unit)[i].binding != SH_ARB_REG_NONE; i++) {
+      const ArbBindingSpecs& specs = arbBindingSpecs(true, m_unit)[i];
 
       if (specs.allowGeneric && m_outputBindings[i] < specs.maxBindings) {
-        m_registers[node].binding = specs.binding;
-        m_registers[node].bindingIndex = m_outputBindings[i];
+        m_registers[node]->binding = specs.binding;
+        m_registers[node]->bindingIndex = m_outputBindings[i];
         m_outputBindings[i]++;
         break;
       }
@@ -1077,9 +838,10 @@ void ArbCode::allocParam(const ArbLimits& limits, const ShVariableNodePtr& node)
 {
   // TODO: Check if we reached maximum
   if (m_registers.find(node) != m_registers.end()) return;
-  m_registers[node] = ArbReg(SH_ARB_REG_PARAM, m_numParams, node->name());
-  m_registers[node].binding = SH_ARB_REG_PARAMLOC;
-  m_registers[node].bindingIndex = m_numParams;
+  m_registers[node] = new ArbReg(SH_ARB_REG_PARAM, m_numParams, node->name());
+  m_registers[node]->binding = SH_ARB_REG_PARAMLOC;
+  m_registers[node]->bindingIndex = m_numParams;
+  m_reglist.push_back(m_registers[node]);
   m_numParams++;
 }
 
@@ -1088,31 +850,215 @@ void ArbCode::allocConsts(const ArbLimits& limits)
   for (ShProgramNode::VarList::const_iterator I = m_shader->constants.begin();
        I != m_shader->constants.end(); ++I) {
     ShVariableNodePtr node = *I;
-    m_registers[node] = ArbReg(SH_ARB_REG_CONST, m_numConsts, node->name());
-    for (int i = 0; i < 4; i++) {
-      m_registers[node].values[i] = (float)(i < node->size() ? node->getValue(i) : 0.0);
+
+    // TODO: improve efficiency
+    RegMap::const_iterator J;
+    for (J = m_registers.begin(); J != m_registers.end(); ++J) {
+      if (J->second->type != SH_ARB_REG_CONST) continue;
+      int f = 0;
+      for (int i = 0; i < node->size(); i++) {
+        if (J->second->values[i] == node->getValue(i)) f++;
+      }
+      if (f == node->size()) break;
     }
-    m_numConsts++;
+    if (J == m_registers.end()) {
+      m_registers[node] = new ArbReg(SH_ARB_REG_CONST, m_numConsts, node->name());
+      m_reglist.push_back(m_registers[node]);
+      for (int i = 0; i < 4; i++) {
+        m_registers[node]->values[i] = (float)(i < node->size() ? node->getValue(i) : 0.0);
+      }
+      m_numConsts++;
+    } else {
+      m_registers[node] = J->second;
+    }
   }
 }
 
-void mark(ShLinearAllocator& allocator, ShVariableNodePtr node, int i)
+bool mark(ShLinearAllocator& allocator, ShVariableNodePtr node, int i)
 {
-  if (!node) return;
-  if (node->kind() != SH_TEMP) return;
-  if (node->hasValues()) return;
+  if (!node) return false;
+  if (node->kind() != SH_TEMP) return false;
+  if (node->hasValues()) return false;
   allocator.mark(node, i);
+  return true;
 }
+
+bool markable(ShVariableNodePtr node)
+{
+  if (!node) return false;
+  if (node->kind() != SH_TEMP) return false;
+  if (node->hasValues()) return false;
+  return true;
+}
+
+struct ArbScope {
+  ArbScope(int start)
+    : start(start)
+  {
+  }
+  
+  typedef std::map< ShVariableNode*, std::bitset<4> > UsageMap;
+
+  typedef std::set<ShVariableNode*> MarkList;
+  
+  MarkList need_mark; // Need to mark at end of loop
+  int start; // location where loop started
+  UsageMap usage_map;
+  UsageMap write_map; // locations last written to
+};
 
 void ArbCode::allocTemps(const ArbLimits& limits)
 {
+
+  typedef std::list<ArbScope> ScopeStack;
+  ScopeStack scopestack;
+  
   ShLinearAllocator allocator(this);
 
+//   {
+//     ScopeStack scopestack;
+//     // First do a backwards traversal to find loop nodes that need to be
+//     // marked due to later uses of assignments
+//     std::map<ShVariableNode*, int> last_use;
+    
+//     for (int i = (int)m_instructions.size() - 1; i >= 0; --i) {
+//       ArbInst instr = m_instructions[i];
+//       if (instr.op == SH_ARB_ENDREP) {
+//         scopestack.push_back((int)i);
+//       }
+//       if (instr.op == SH_ARB_REP) {
+//         const ArbScope& scope = scopestack.back();
+//         for (ArbScope::MarkList::const_iterator I = scope.need_mark.begin();
+//              I != scope.need_mark.end(); ++I) {
+//           mark(allocator, *I, (int)i);
+//         }
+//         scopestack.pop_back();
+//       }
+
+//       if (markable(instr.dest.node())) {
+//         if (last_use.find(instr.dest.node().object()) == last_use.end()) continue;
+//         for (ScopeStack::iterator S = scopestack.begin(); S != scopestack.end(); ++S) {
+//           ArbScope& scope = *S;
+//           // Note scope.start == location of ENDREP
+//           // TODO: Consider sub-components in last_use update and here.
+//           if (last_use[instr.dest.node().object()] > scope.start) {
+//             mark(allocator, instr.dest.node().object(), scope.start);
+//             scope.need_mark.insert(instr.dest.node().object());
+//           }
+//         }
+//       }
+      
+//       for (int j = 0; j < 3; j++) {
+//         if (!markable(instr.src[j].node())) continue;
+        
+//         if (last_use.find(instr.src[j].node().object()) == last_use.end()) {
+//           last_use[instr.src[j].node().object()] = i;
+//         }
+//       }
+//     }
+//   }
+
+  {
+    ScopeStack scopestack;
+    // First do a backwards traversal to find loop nodes that need to be
+    // marked due to later uses of assignments
+
+    // push root stack
+
+    scopestack.push_back(m_instructions.size() - 1);
+    
+    for (int i = (int)m_instructions.size() - 1; i >= 0; --i) {
+      ArbInst instr = m_instructions[i];
+      if (instr.op == SH_ARB_ENDREP) {
+        scopestack.push_back((int)i);
+      }
+      if (instr.op == SH_ARB_REP) {
+        const ArbScope& scope = scopestack.back();
+        for (ArbScope::MarkList::const_iterator I = scope.need_mark.begin();
+             I != scope.need_mark.end(); ++I) {
+          mark(allocator, *I, (int)i);
+        }
+        scopestack.pop_back();
+      }
+
+      if (markable(instr.dest.node())) {
+        std::bitset<4> writemask;
+        for (int k = 0; k < instr.dest.size(); k++) {
+          writemask[instr.dest.swizzle()[k]] = true;
+        }
+        std::bitset<4> used;
+        for (ScopeStack::iterator S = scopestack.begin(); S != scopestack.end(); ++S) {
+          ArbScope& scope = *S;
+
+          if ((used & writemask).any()) {
+            mark(allocator, instr.dest.node().object(), scope.start);
+            scope.need_mark.insert(instr.dest.node().object());
+          }
+          
+          used |= scope.usage_map[instr.dest.node().object()];
+        }
+
+        ArbScope& scope = scopestack.back();
+        scope.usage_map[instr.dest.node().object()] &= ~writemask;
+      }
+      
+      for (int j = 0; j < 3; j++) {
+        if (!markable(instr.src[j].node())) continue;
+        std::bitset<4> usemask;
+        for (int k = 0; k < instr.src[j].size(); k++) {
+          usemask[instr.src[j].swizzle()[k]] = true;
+        }
+        ArbScope& scope = scopestack.back();
+        scope.usage_map[instr.src[j].node().object()] |= usemask;
+      }
+    }
+  }
+  
   for (std::size_t i = 0; i < m_instructions.size(); i++) {
     ArbInst instr = m_instructions[i];
-    mark(allocator, instr.dest.node(), (int)i);
+    if (instr.op == SH_ARB_REP) {
+      scopestack.push_back((int)i);
+    }
+    if (instr.op == SH_ARB_ENDREP) {
+      const ArbScope& scope = scopestack.back();
+      for (ArbScope::MarkList::const_iterator I = scope.need_mark.begin();
+           I != scope.need_mark.end(); ++I) {
+        mark(allocator, *I, (int)i);
+      }
+      scopestack.pop_back();
+    }
+
+    if (mark(allocator, instr.dest.node(), (int)i)) {
+      for (ScopeStack::iterator S = scopestack.begin(); S != scopestack.end(); ++S) {
+        ArbScope& scope = *S;
+        std::bitset<4> writemask;
+        for (int k = 0; k < instr.dest.size(); k++) {
+          writemask[instr.dest.swizzle()[k]] = true;
+        }
+        // TODO: Only change the writemask for scopes that see this
+        // write unconditionally
+        // I.e. don't change it if the scope is outside an if
+        // statement, or a post-BRK REP scope.
+        scope.write_map[instr.dest.node().object()] |= writemask;
+
+      }        
+    }
+    
     for (int j = 0; j < 3; j++) {
-      mark(allocator, instr.src[j].node(), (int)i);
+      if (mark(allocator, instr.src[j].node(), (int)i)) {
+        for (ScopeStack::iterator S = scopestack.begin(); S != scopestack.end(); ++S) {
+          ArbScope& scope = *S;
+          // Mark uses that weren't recently written to.
+          std::bitset<4> usemask;
+          for (int k = 0; k < instr.src[j].size(); k++) {
+            usemask[instr.src[j].swizzle()[k]] = true;
+          }
+          if ((usemask & ~scope.write_map[instr.src[j].node().object()]).any()) {
+            mark(allocator, instr.src[j].node(), scope.start);
+            scope.need_mark.insert(instr.src[j].node().object());
+          }
+        }
+      }
     }
   }
   
@@ -1134,7 +1080,8 @@ void ArbCode::allocTextures(const ArbLimits& limits)
     ShTextureNodePtr node = *I;
     int index;
     index = m_numTextures;
-    m_registers[node] = ArbReg(SH_ARB_REG_TEXTURE, index, node->name());
+    m_registers[node] = new ArbReg(SH_ARB_REG_TEXTURE, index, node->name());
+    m_reglist.push_back(m_registers[node]);
     m_numTextures++;
   }
 }
@@ -1143,37 +1090,8 @@ void ArbCode::bindTextures()
 {
   for (ShProgramNode::TexList::const_iterator I = m_shader->textures.begin();
        I != m_shader->textures.end(); ++I) {
-    m_textures->bindTexture(*I, GL_TEXTURE0 + m_registers[*I].index);
+    m_textures->bindTexture(*I, GL_TEXTURE0 + m_registers[*I]->index);
   }
 }
-
-
-// #ifdef WIN32
-//   DWORD err;
-//   if (!(glProgramStringARB =
-//         (PFNGLPROGRAMSTRINGARBPROC)wglGetProcAddress("glProgramStringARB")))
-//     err = GetLastError();
-//   if (!(glBindProgramARB = 
-//         (PFNGLBINDPROGRAMARBPROC)wglGetProcAddress("glBindProgramARB")))
-//     err = GetLastError();
-//   if (!(glGenProgramsARB = 
-//         (PFNGLGENPROGRAMSARBPROC)wglGetProcAddress("glGenProgramsARB")))
-//     err = GetLastError();
-//   if (!(glActiveTextureARB = 
-//         (PFNGLACTIVETEXTUREARBPROC)wglGetProcAddress("glActiveTextureARB")))
-//     err = GetLastError();
-//   if (!(glTexImage3D = 
-//         (PFNGLTEXIMAGE3DPROC)wglGetProcAddress("glTexImage3D")))
-//     err = GetLastError();
-//   if (!(glProgramEnvParameter4fvARB = 
-//         (PFNGLPROGRAMENVPARAMETER4FVARBPROC)wglGetProcAddress("glProgramEnvParameter4fvARB")))
-//     err = GetLastError();
-//   if (!(glProgramLocalParameter4fvARB = 
-//         (PFNGLPROGRAMLOCALPARAMETER4FVARBPROC)wglGetProcAddress("glProgramLocalParameter4fvARB")))
-//     err = GetLastError();
-//   if (!(glGetProgramivARB = 
-//         (PFNGLGETPROGRAMIVARBPROC)wglGetProcAddress("glGetProgramivARB")))
-//     err = GetLastError();
-// #endif /* WIN32 */
 
 }

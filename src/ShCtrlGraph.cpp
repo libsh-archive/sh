@@ -54,7 +54,7 @@ std::ostream& ShCtrlGraphNode::print(std::ostream& out, int indent) const
     out << "->" << std::endl;
     follower->print(out, indent + 2);
   }
-  for (std::vector<ShCtrlGraphBranch>::const_iterator I = successors.begin();
+  for (SuccessorList::const_iterator I = successors.begin();
        I != successors.end(); ++I) {
     shPrintIndent(out, indent);
     if (!I->cond.null()) {
@@ -80,7 +80,7 @@ std::ostream& ShCtrlGraphNode::graphvizDump(std::ostream& out) const
   }
   out << ";" << std::endl;
 
-  for (std::vector<ShCtrlGraphBranch>::const_iterator I = successors.begin();
+  for (SuccessorList::const_iterator I = successors.begin();
        I != successors.end(); ++I) {
     I->node->graphvizDump(out);
     out << "\"" << this << "\" ";
@@ -118,7 +118,7 @@ void ShCtrlGraphNode::clearMarked() const
 
   if (follower) follower->clearMarked();
   
-  for (std::vector<ShCtrlGraphBranch>::const_iterator I = successors.begin();
+  for (SuccessorList::const_iterator I = successors.begin();
        I != successors.end(); ++I) {
     I->node->clearMarked();
   }
@@ -243,7 +243,7 @@ struct ComputePreds {
   void operator()(ShCtrlGraphNode* node) {
     if (!node) return;
     
-    for (std::vector<ShCtrlGraphBranch>::iterator I = node->successors.begin();
+    for (ShCtrlGraphNode::SuccessorList::iterator I = node->successors.begin();
          I != node->successors.end(); ++I) {
       if (I->node) I->node->predecessors.push_back(node);
     }
@@ -260,6 +260,57 @@ void ShCtrlGraph::computePredecessors()
   ComputePreds comp;
   dfs(comp);
 }
+
+typedef std::map<ShCtrlGraphNodePtr, ShCtrlGraphNodePtr> CtrlGraphCopyMap;
+
+struct CtrlGraphCopier {
+  CtrlGraphCopier(CtrlGraphCopyMap& copyMap)
+    : copyMap(copyMap)
+  {
+  }
+  
+  void operator()(ShCtrlGraphNodePtr node) {
+    if (!node) return;
+    ShCtrlGraphNodePtr newNode = new ShCtrlGraphNode(*node);
+    copyMap[node] = newNode;
+  }
+
+  CtrlGraphCopyMap& copyMap;
+};
+
+void ShCtrlGraph::copy(ShCtrlGraphNodePtr& newHead, ShCtrlGraphNodePtr& newTail) const
+{
+  CtrlGraphCopyMap copyMap;
+  copyMap[0] = 0;
+  
+  CtrlGraphCopier copier(copyMap);
+  SH_DEBUG_ASSERT(m_entry);
+  SH_DEBUG_ASSERT(m_exit); // catch empty tails
+  m_entry->clearMarked();
+  m_entry->dfs(copier);
+
+  // Replace the successors and followers in the new graph with their new equivalents
+  for (CtrlGraphCopyMap::iterator I = copyMap.begin(); I != copyMap.end(); ++I) {
+    ShCtrlGraphNodePtr node = I->second; // Get the new node
+    if (!node) continue;
+    for (ShCtrlGraphNode::SuccessorList::iterator J = node->successors.begin();
+         J != node->successors.end(); ++J) {
+      J->node = copyMap[J->node];
+    }
+    node->follower = copyMap[node->follower];
+    if (node->block) {
+      ShBasicBlockPtr new_block = new ShBasicBlock(*node->block);
+      node->block = new_block;
+    }
+  }
+  newHead = copyMap[m_entry];
+  newTail = copyMap[m_exit];
+  SH_DEBUG_ASSERT(newHead);
+  SH_DEBUG_ASSERT(newTail);
+
+  m_entry->clearMarked();
+}
+
 
 
 }

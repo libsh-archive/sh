@@ -5,63 +5,106 @@ namespace shgl {
 ArbOpInfo arbOpInfo[] = {
   // VERTEX AND FRAGMENT
   // Vector
-  {"ABS", true, true, 1, true, false},
-  {"FLR", true, true, 1, true, false},
-  {"FRC", true, true, 1, true, false},
-  {"LIT", true, true, 1, true, false},
-  {"MOV", true, true, 1, true, false},
+  {"ABS", 1, false},
+  {"FLR", 1, false},
+  {"FRC", 1, false},
+  {"LIT", 1, false},
+  {"MOV", 1, false},
 
   // Scalar
-  {"EX2", true, true, 1, false, false},
-  {"LG2", true, true, 1, false, false},
-  {"RCP", true, true, 1, false, false},
-  {"RSQ", true, true, 1, false, false},
+  {"EX2", 1, false},
+  {"LG2", 1, false},
+  {"RCP", 1, false},
+  {"RSQ", 1, false},
 
   // Binary scalar
-  {"POW", true, true, 2, false, false},
+  {"POW", 2, false},
 
   // Binary vector
-  {"ADD", true, true, 2, true, false},
-  {"DP3", true, true, 2, true, true},
-  {"DP4", true, true, 2, true, true},
-  {"DPH", true, true, 2, true, true},
-  {"DST", true, true, 2, true, true},
-  {"MAX", true, true, 2, true, false},
-  {"MIN", true, true, 2, true, false},
-  {"MUL", true, true, 2, true, false},
-  {"SGE", true, true, 2, true, false},
-  {"SLT", true, true, 2, true, false},
-  {"SUB", true, true, 2, true, false},
-  {"XPD", true, true, 2, true, true},
+  {"ADD", 2, false},
+  {"DP3", 2, true},
+  {"DP4", 2, true},
+  {"DPH", 2, true},
+  {"DST", 2, true},
+  {"MAX", 2, false},
+  {"MIN", 2, false},
+  {"MUL", 2, false},
+  {"SGE", 2, false},
+  {"SLT", 2, false},
+  {"SUB", 2, false},
+  {"XPD", 2, true}, // should this really be a collectingOp?
 
   // Trinary
-  {"MAD", true, true, 3, true, false},
+  {"MAD", 3, false},
 
   // Swizzling
-  {"SWZ", true, true, 2, true, true}, // should this really be a collectingOp?
+  {"SWZ", 2, true}, // should this really be a collectingOp?
 
   // VERTEX ONLY
   // Scalar
-  {"EXP", true, false, 1, false, false},
-  {"LOG", true, false, 1, false, false},
+  {"EXP", 1, false},
+  {"LOG", 1, false},
   
   // FRAGMENT ONLY
   // Scalar
-  {"COS", false, true, 1, false, false},
-  {"SIN", false, true, 1, false, false},
-  {"SCS", false, true, 1, false, false},
+  {"COS", 1, false},
+  {"SIN", 1, false},
+  {"SCS", 1, false},
 
   // Trinary
-  {"CMP", false, true, 3, true, false},
-  {"LRP", false, true, 3, true, false},
+  {"CMP", 3, false},
+  {"LRP", 3, false},
 
   // Sampling
-  {"TEX", false, true, 3, true, false},
-  {"TXP", false, true, 3, true, false},
-  {"TXB", false, true, 3, true, false},
+  {"TEX", 3, false},
+  {"TXP", 3, false},
+  {"TXB", 3, false},
 
   // KIL
-  {"KIL", false, true, 0, false, false}
+  {"KIL", 0, false},
+
+  // NV_vertex_program/NV_fragment_program
+  {"SEQ", 2, false},
+  {"SGT", 2, false},
+  {"SLE", 2, false},
+  {"SNE", 2, false},
+  {"SFL", 2, false},
+  {"STR", 2, false},
+
+  // NV_fragment_program
+  {"DDX", 1, false},
+  {"DDY", 1, false},
+  {"RFL", 2, false},
+
+  // NV_vertex_program2
+  {"SSG", 1, false},
+  {"BRA", 2, false},
+  {"<label>", 1, false},
+  
+  // NV_fragment_program2
+  {"DIV", 2, false},
+  {"DP2", 2, true},
+  {"NRM", 1, false},
+  {"IF", 1, false},
+  {"ELSE", 0, false},
+  {"ENDIF", 0, false},
+  {"REP", 1, false},
+  {"ENDREP", 0, false},
+  {"BRK", 1, false},
+  
+  {"<fun>", 0, false}
+};
+
+char* arbCCnames[] = {
+  "",
+  "EQ",
+  "GE",
+  "GT",
+  "LE",
+  "LT",
+  "NE",
+  "TR",
+  "FL"
 };
 
 }

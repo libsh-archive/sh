@@ -62,6 +62,25 @@ ShGeneric<1, T> mod(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right)
 
 template<int N, typename T>
 inline
+ShGeneric<N, T> operator%(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
+{
+  return mod(left, right);
+}
+template<int N, typename T>
+inline
+ShGeneric<N, T> operator%(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right)
+{
+  return mod(left, right);
+}
+template<typename T>
+inline
+ShGeneric<1, T> operator%(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right)
+{
+  return mod(left, right);
+}
+
+template<int N, typename T>
+inline
 ShGeneric<N, T> frac(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
@@ -91,6 +110,45 @@ ShGeneric<N,  T> min(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
 {
   ShAttrib<N, SH_TEMP, T> t;
   shMIN(t, left, right);
+  return t;
+}
+
+template<int N, typename T>
+inline
+ShGeneric<N, T> clamp(const ShGeneric<N, T>& a,
+                      const ShGeneric<N, T>& b, const ShGeneric<N, T>& c)
+{
+  return min(max(a, b), c);
+}
+template<int N, typename T>
+inline
+ShGeneric<N, T> clamp(const ShGeneric<N, T>& a,
+                      const ShGeneric<1, T>& b, const ShGeneric<1, T>& c)
+{
+  return min(max(a, fillcast<N>(b)), fillcast<N>(c));
+}
+
+template<typename T>
+inline
+ShGeneric<1, T> clamp(const ShGeneric<1, T>& a,
+                      const ShGeneric<1, T>& b, const ShGeneric<1, T>& c)
+{
+  return min(max(a, b), c);
+}
+
+template<int N, typename T>
+inline
+ShGeneric<N, T> sat(const ShGeneric<N, T>& a)
+{
+  return min(a, fillcast<N>(ShConstAttrib1f(1.0)));
+}
+
+template<int N, typename T>
+inline
+ShGeneric<N, T> sign(const ShGeneric<N, T>& var)
+{
+  ShAttrib<N, SH_TEMP, T> t;
+  shSGN(t, var);
   return t;
 }
 

@@ -3,9 +3,9 @@ AM_CXXFLAGS = -Wall -g -O0
 AM_LDFLAGS = -g -L../../src
 LDADD = -lsh -lGL
 TESTS = ADD MUL DIV SLT SLE SGT SGE SEQ SNE ABS ACOS ASIN ATAN ATAN2 CEIL COS DOT \
-	EXP EXP2 EXP10 FLR FRAC LRP MAD MAX MIN MOD LOG LOG2 LOG10 POW SIN SQRT TAN NORM XPD COND
+	EXP EXP2 EXP10 FLR FRAC LRP MAD MAX MIN MOD LOG LOG2 LOG10 POW RCP RSQ SIN SQRT TAN NORM XPD COND
 check_PROGRAMS = $(TESTS)
-BACKENDS = arb cpu
+BACKENDS = arb gcc
 EXTRA_DIST = regress.py
 
 clean:
@@ -86,6 +86,10 @@ LOG10_SOURCES = LOG10.cpp test.cpp
 LOG10.cpp: testlist
 POW_SOURCES = POW.cpp test.cpp
 POW.cpp: testlist
+RCP_SOURCES = RCP.cpp test.cpp
+RCP.cpp: testlist
+RSQ_SOURCES = RSQ.cpp test.cpp
+RSQ.cpp: testlist
 SIN_SOURCES = SIN.cpp test.cpp
 SIN.cpp: testlist
 SQRT_SOURCES = SQRT.cpp test.cpp

@@ -53,6 +53,13 @@ public:
   ShParseException(const std::string& message);
 };
 
+/** An exception representing a scoping violation
+ */
+class ShScopeException : public ShException {
+public:
+  ShScopeException(const std::string& message);
+};
+
 /** An exception relating to an ShImage operation.
  */
 class ShImageException : public ShException {

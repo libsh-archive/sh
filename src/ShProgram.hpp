@@ -27,103 +27,83 @@
 #ifndef SHPROGRAM_HPP
 #define SHPROGRAM_HPP
 
-#include <list>
-#include <map>
-#include <utility>
-#include <string>
-#include "ShRefCount.hpp"
-#include "ShTokenizer.hpp"
-#include "ShVariableNode.hpp"
-#include "ShCtrlGraph.hpp"
-#include "ShTextureNode.hpp"
-#include "ShChannelNode.hpp"
-#include "ShMeta.hpp"
+#include "ShProgramNode.hpp"
+#include "ShBackend.hpp"
 
 namespace SH {
 
-class ShBackendCode;
-class ShBackend;
-
-/** A particular Sh program.
+/** Thin wrapper around ShProgramNode.
  */
-class ShProgramNode : public virtual ShRefCountable, public virtual ShMeta {
+class ShProgram : public ShMetaForwarder {
 public:
-  ShProgramNode(const std::string& target);
+  ShProgram();
+  ShProgram(const ShProgram& other);
+  ShProgram(const std::string& target);
+  ShProgram(const ShProgramNodePtr& node);
 
-  ~ShProgramNode();
+  ShProgram& operator=(const ShProgram& other);
   
-  /// Forcefully compile this shader for a particular backend, even if
+  /// Obtain the node which this ShProgram wraps
+  ShProgramNodeCPtr node() const { return m_node; }
+
+  /// Obtain the node which this ShProgram wraps
+  ShProgramNodePtr node() { return m_node; }
+  
+  /// Forcefully compile this program for a particular backend, even if
   /// it has been compiled previously. Use code() to obtain the actual
   /// code.
   /// This operation will fail if this program does not have a
   /// particular target.
-  void compile(const ShPointer<ShBackend>& backend);
+  void compile(const ShPointer<ShBackend>& backend) { m_node->compile(backend); }
 
-  /// Forcefully compile this shader for a particular backend, even if
+  /// Forcefully compile this program for a particular backend, even if
   /// it has been compiled previously. Use code() to obtain the actual code.
-  void compile(const std::string& target, const ShPointer<ShBackend>& backend);
+  void compile(const std::string& target, const ShPointer<ShBackend>& backend)
+  {
+    m_node->compile(target, backend);
+  }
+
+  /// Obtain a listing of the inputs, outputs and uniforms used by
+  /// this program.
+  std::string describe_interface() const
+  {
+    return m_node->describe_interface();
+  }
   
   /// Obtain the code for currently active backend. 
   /// This operation will fail if this program does not have a
   /// particular target.
-  ShPointer<ShBackendCode> code(); 
+  ShPointer<ShBackendCode> code() { return m_node->code(); }
   
   /// Obtain the code for a particular backend. Generates it if necessary.
   /// This operation will fail if this program does not have a
   /// particular target.
-  ShPointer<ShBackendCode> code(const ShPointer<ShBackend>& backend);
+  ShPointer<ShBackendCode> code(const ShPointer<ShBackend>& backend) {
+    return m_node->code(backend);
+  }
 
   /// Obtain the code for a particular backend. Generates it if necessary.
-  ShPointer<ShBackendCode> code(const std::string& target, const ShPointer<ShBackend>& backend);
+  ShPointer<ShBackendCode> code(const std::string& target, const ShPointer<ShBackend>& backend)
+  {
+    return m_node->code(target, backend);
+  }
 
-  /// Notify this shader that a uniform variable has changed.
-  void updateUniform(const ShVariableNodePtr& uniform);
+  /// Notify this program that a uniform variable has changed.
+  void updateUniform(const ShVariableNodePtr& uniform)
+  {
+    m_node->updateUniform(uniform);
+  }
 
-  /// The tokenizer for this shader's body. Used only during
-  /// construction of the program (before parsing)
-  ShTokenizer tokenizer;
-
-  /// The control graph (the parsed form of the token
-  /// list). Constructed during the parsing step, when shEndShader()
-  /// is called.
-  ShPointer<ShCtrlGraph> ctrlGraph;
-
-  /// Call after contructing the control graph [after optimization!]
-  /// to make lists of all the variables used in the shader.
-  void collectVariables();
-
-  typedef std::list<ShVariableNodePtr> VarList;
-  typedef std::list<ShTextureNodePtr> TexList;
-  typedef std::list<ShChannelNodePtr> ChannelList;
-  
-  VarList inputs; ///< Input variables used in this shader
-  VarList outputs; ///< Output variables used in this shader
-  VarList temps; ///< Temporary variables used in this shader
-  VarList constants; ///< Constants used in this shader
-  VarList uniforms; ///< Uniform variables used in this shader
-  TexList textures; ///< Textures used in this shader
-  ChannelList channels; ///< Channels used in FETCH instructions in this shader
-
-  /// Can be empty, if there is no target associated with this program.
-  std::string target() const { return m_target; }
+  std::string target() const { return m_node->target(); }
 
   /// It may be useful to change a program's target sometimes.
-  std::string& target() { return m_target; }
+  std::string& target() { return m_node->target(); }
   
 private:
 
-  std::string m_target; ///< Can be empty, if there is no target associated with this program.
-
-  void collectNodeVars(const ShPointer<ShCtrlGraphNode>& node);
-  void collectVar(const ShVariableNodePtr& node);
-
-  std::map< std::pair< std::string, ShPointer<ShBackend> >, ShPointer<ShBackendCode> > m_code; ///< Compiled code is cached here.
+  ShProgramNodePtr m_node;
 };
 
-typedef ShPointer<ShProgramNode> ShProgram;
-
-extern std::ostream& operator<<( std::ostream& out, const ShProgramNode::VarList &varList );
- 
 }
 
 #endif

@@ -144,7 +144,6 @@ template<int D, typename T>
 struct NullGenFactory: public GridGenFactory<D, T> { 
   private:
     void makePos(Generator<D, T> &g) const;
-    static ShConstAttrib1f half; // TODO get rid of this later
 };
 
 // An animating point generator - uses same uniform integer grid
@@ -177,8 +176,6 @@ struct PropertyFactory {
 
 // when ShProgram objects can be called like functions, this will 
 // no longer be necessary as it is analogous to the Algebra combine operator.
-//
-// TODO fix this
 template<int N, int D, typename T, typename P1, typename P2>
 struct CombinedPropFactory: 
 public PropertyFactory<N, D, T> {
@@ -210,8 +207,23 @@ struct Dist_1PropFactory: public PropertyFactory<1, D, T> {
 };
 
 template<int D, typename T>
-struct DistSqGradientPropFactory: public PropertyFactory<3, D, T> {
-  ShGeneric<3, T> operator()(const ShGeneric<D, T> &p, const Generator<D, T> &g) const; 
+struct Dist_InfPropFactory: public PropertyFactory<1, D, T> {
+  ShGeneric<1, T> operator()(const ShGeneric<D, T> &p, const Generator<D, T> &g) const; 
+};
+
+template<int D, typename T>
+struct DistSqGradientPropFactory: public PropertyFactory<D + 1, D, T> {
+  ShGeneric<D + 1, T> operator()(const ShGeneric<D, T> &p, const Generator<D, T> &g) const; 
+};
+
+template<int D, typename T>
+struct Dist_1GradientPropFactory: public PropertyFactory<D + 1, D, T> {
+  ShGeneric<D + 1, T> operator()(const ShGeneric<D, T> &p, const Generator<D, T> &g) const; 
+};
+
+template<int D, typename T>
+struct Dist_InfGradientPropFactory: public PropertyFactory<D + 1, D, T> {
+  ShGeneric<D + 1, T> operator()(const ShGeneric<D, T> &p, const Generator<D, T> &g) const; 
 };
 
 template<int N, int D, typename T>
@@ -238,32 +250,26 @@ struct Tex2DPropFactory: public PropertyFactory<TexType::typesize, 2, T> {
 
 /** \brief Worley texture generator.
  * This uses the DefaultGeneratorFactory and DistSqPropFactory 
+ * TODO allow arbitrary distance function
  * @{
  */
 template<int K, int D, typename T>
-ShGeneric<1, T> worley(const ShGeneric<D, T> &p, bool useTexture = true); 
-
-template<int K, int D, typename T>
-ShGeneric<1, T> worley(const ShGeneric<D, T> &p, const ShGeneric<K, T> &coeff, 
-    bool useTexture = true); 
+ShGeneric<K, T> worley(const ShGeneric<D, T> &p, bool useTexture = true); 
 //@}
 
 /** \brief Worley texture generator.
  * This uses a GeneratorFactory and PropertyFactory of your choice.
  */
 template<int K, int N, int P, int D, typename T>
-ShGeneric<N, T> worley(const ShGeneric<D, T> &p, const ShGeneric<K, T> coeff[N],
+void worley(ShGeneric<K, T> result[N], const ShGeneric<D, T> &p, 
     const GeneratorFactory<P, D, T> *genFactory,
     const PropertyFactory<N, D, T> *propFactory);
 
 /** Makes a shader that takes 
- * TODO fix this - coefficients[N] thing - make it somewhere else in the interface
- * the coefficients currently are NOT named attributes
- *
- *  IN(0) ShAttrib<K,T> coefficients[N]; // worley coefficients
  *  IN(1) ShTexCoord<D,T> texcoord; // texture lookup coordinates
  *
- *  OUT(0) ShAttrib<N, T> result; weighted sum of basis functions 
+ * TODO make Output a struct of some kind when Sh supports structs
+ *  OUT(0) ShAttrib<K, T> result[N]; // properties of k-nearest neighbours 
  * @{
  */
 template<int K, int D, typename T>

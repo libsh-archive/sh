@@ -96,6 +96,25 @@ SH_SHLIB_CONST_N_OP_RIGHT(operation);
 SH_SHLIB_CONST_N_OP_RETSIZE_LEFT(operation, retsize); \
 SH_SHLIB_CONST_N_OP_RETSIZE_RIGHT(operation, retsize);
 
+#define SH_SHLIB_CONST_TRINARY_OP_011_RETSIZE(operation, retsize) \
+template<int N, typename T> \
+ShGeneric<retsize, T> operation(const ShGeneric<N, T>& a, \
+                                T b, \
+                                T c) \
+{ \
+  return operation(a, ShAttrib<1, SH_CONST, T>(b), ShAttrib<1, SH_CONST, T>(c)); \
+} \
+template<int N, typename T> \
+ShGeneric<retsize, T> operation(const ShGeneric<N, T>& a, \
+                                double b, \
+                                double c) \
+{ \
+  return operation(a, ShAttrib<1, SH_CONST, T>(b), ShAttrib<1, SH_CONST, T>(c)); \
+}
+
+#define SH_SHLIB_CONST_TRINARY_OP_011(operation) \
+SH_SHLIB_CONST_TRINARY_OP_011_RETSIZE(operation, N);
+
 #include "ShLibArith.hpp"
 #include "ShLibBoolean.hpp"
 #include "ShLibClamp.hpp"
@@ -103,6 +122,7 @@ SH_SHLIB_CONST_N_OP_RETSIZE_RIGHT(operation, retsize);
 #include "ShLibMatrix.hpp"
 #include "ShLibMisc.hpp"
 #include "ShLibTrig.hpp"
+#include "ShLibDeriv.hpp"
 
 // Semantic stuff
 

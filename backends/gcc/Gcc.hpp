@@ -24,8 +24,8 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHCPU_HPP
-#define SHCPU_HPP
+#ifndef SHGCC_HPP
+#define SHGCC_HPP
 
 #include <map>
 #include <string>
@@ -33,20 +33,20 @@
 
 #include "ShBackend.hpp"
 
-typedef void (*CPUFunc)(float** inputs,
+typedef void (*GccFunc)(float** inputs,
 			float** params,
 			float** streams,
 			void** textures,
 			float** outputs);
 
-namespace ShCPU {
+namespace ShGcc {
   
-  class CPUVariable
+  class GccVariable
     {
     public:
-      CPUVariable(void);
-      CPUVariable(int num, const std::string& name);
-      CPUVariable(int num, const std::string& name, int size);
+      GccVariable(void);
+      GccVariable(int num, const std::string& name);
+      GccVariable(int num, const std::string& name, int size);
 
     public:
       int m_num;
@@ -54,11 +54,11 @@ namespace ShCPU {
       int m_size;
     };
 
-  class CPUBackendCode: public SH::ShBackendCode
+  class GccBackendCode: public SH::ShBackendCode
     {
     public:
-      CPUBackendCode(const SH::ShProgram& program);
-      ~CPUBackendCode(void);
+      GccBackendCode(const SH::ShProgramNodeCPtr& program);
+      ~GccBackendCode(void);
 
       bool allocateRegister(const SH::ShVariableNodePtr& var);
       void freeRegister(const SH::ShVariableNodePtr& var);
@@ -73,7 +73,7 @@ namespace ShCPU {
       std::ostream& printInputOutputFormat(std::ostream& out);
 
     protected:
-      friend class CPUBackend;
+      friend class GccBackend;
       bool generate(void);
       bool execute(SH::ShStream& dest);
 
@@ -103,12 +103,12 @@ namespace ShCPU {
       class EmitFunctor
 	{
 	public:
-	  EmitFunctor(CPUBackendCode* bec);
+	  EmitFunctor(GccBackendCode* bec);
 
 	  void operator()(SH::ShCtrlGraphNode* node);
 	  
 	public:
-	  CPUBackendCode* m_bec;
+	  GccBackendCode* m_bec;
 	};
       
       void emit(const SH::ShStatement& stmt);
@@ -116,41 +116,41 @@ namespace ShCPU {
       void emit(SH::ShCtrlGraphNodePtr node);
       
     private:
-      const SH::ShProgram& m_program;
+      const SH::ShProgramNodeCPtr& m_program;
 
       std::map<SH::ShCtrlGraphNodePtr, int> m_label_map;
-      std::map<SH::ShVariableNodePtr, CPUVariable> m_varmap;
+      std::map<SH::ShVariableNodePtr, GccVariable> m_varmap;
 
       std::stringstream m_code;
 
       void* m_handle;
-      CPUFunc m_func;
+      GccFunc m_func;
 
       int m_cur_temp;
 
       float** m_params;
       std::vector<SH::ShChannelNodePtr> m_streams;
-      std::vector<CPUVariable> m_temps;
+      std::vector<GccVariable> m_temps;
       std::vector<SH::ShTextureNodePtr> m_textures;
     };
   
-  class CPUBackend: public SH::ShBackend
+  class GccBackend: public SH::ShBackend
     {
     public:
-      CPUBackend(void);
-      ~CPUBackend(void);
+      GccBackend(void);
+      ~GccBackend(void);
 
       std::string name(void) const;
 
       SH::ShBackendCodePtr generateCode(const std::string& target,
-					const SH::ShProgram& program);
+					const SH::ShProgramNodeCPtr& program);
       
-      void execute(const SH::ShProgram& program, SH::ShStream& dest);
+      void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
     };
 
 
-  typedef SH::ShPointer<CPUBackendCode> CPUBackendCodePtr;
-  typedef SH::ShPointer<CPUBackend> CPUBackendPtr;
+  typedef SH::ShPointer<GccBackendCode> GccBackendCodePtr;
+  typedef SH::ShPointer<GccBackend> GccBackendPtr;
 }
 
 #endif
