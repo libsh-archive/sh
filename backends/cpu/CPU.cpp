@@ -518,14 +518,16 @@ namespace ShCPU {
 	}
       case SH::SH_OP_SLT:
 	{
+	bool scalar0 = (stmt.src[0].size() == 1);
+	bool scalar1 = (stmt.src[1].size() == 1);
 	for(int i = 0; i < stmt.dest.size(); i++)
 	  {
 	  m_code << "  "
 		 << resolve(stmt.dest, i)
 		 << " = (" 
-		 << resolve(stmt.src[0], i)
+		 << resolve(stmt.src[0], (scalar0 ? 0 : i))
 		 << " < "
-		 << resolve(stmt.src[1], i)
+		 << resolve(stmt.src[1], (scalar1 ? 0 : i))
 		 << " ? 1.0f : 0.0f)"
 		 << ";"
 		 << std::endl;
@@ -534,14 +536,16 @@ namespace ShCPU {
 	}
       case SH::SH_OP_SLE:
 	{
+	bool scalar0 = (stmt.src[0].size() == 1);
+	bool scalar1 = (stmt.src[1].size() == 1);
 	for(int i = 0; i < stmt.dest.size(); i++)
 	  {
 	  m_code << "  "
 		 << resolve(stmt.dest, i)
 		 << " = (" 
-		 << resolve(stmt.src[0], i)
+		 << resolve(stmt.src[0], (scalar0 ? 0 : i))
 		 << " <= "
-		 << resolve(stmt.src[1], i)
+		 << resolve(stmt.src[1], (scalar1 ? 0 : i))
 		 << " ? 1.0f : 0.0f)"
 		 << ";"
 		 << std::endl;
@@ -550,14 +554,16 @@ namespace ShCPU {
 	}
       case SH::SH_OP_SGT:
 	{
+	bool scalar0 = (stmt.src[0].size() == 1);
+	bool scalar1 = (stmt.src[1].size() == 1);
 	for(int i = 0; i < stmt.dest.size(); i++)
 	  {
 	  m_code << "  "
 		 << resolve(stmt.dest, i)
 		 << " = (" 
-		 << resolve(stmt.src[0], i)
+		 << resolve(stmt.src[0], (scalar0 ? 0 : i))
 		 << " > "
-		 << resolve(stmt.src[1], i)
+		 << resolve(stmt.src[1], (scalar1 ? 0 : i))
 		 << " ? 1.0f : 0.0f)"
 		 << ";"
 		 << std::endl;
@@ -566,14 +572,16 @@ namespace ShCPU {
 	}
       case SH::SH_OP_SGE:
 	{
+	bool scalar0 = (stmt.src[0].size() == 1);
+	bool scalar1 = (stmt.src[1].size() == 1);
 	for(int i = 0; i < stmt.dest.size(); i++)
 	  {
 	  m_code << "  "
 		 << resolve(stmt.dest, i)
 		 << " = (" 
-		 << resolve(stmt.src[0], i)
+		 << resolve(stmt.src[0], (scalar0 ? 0 : i))
 		 << " >= "
-		 << resolve(stmt.src[1], i)
+		 << resolve(stmt.src[1], (scalar1 ? 0 : i))
 		 << " ? 1.0f : 0.0f)"
 		 << ";"
 		 << std::endl;
@@ -582,14 +590,16 @@ namespace ShCPU {
 	}
       case SH::SH_OP_SEQ:
 	{
+	bool scalar0 = (stmt.src[0].size() == 1);
+	bool scalar1 = (stmt.src[1].size() == 1);
 	for(int i = 0; i < stmt.dest.size(); i++)
 	  {
 	  m_code << "  "
 		 << resolve(stmt.dest, i)
 		 << " = (" 
-		 << resolve(stmt.src[0], i)
+		 << resolve(stmt.src[0], (scalar0 ? 0 : i))
 		 << " == "
-		 << resolve(stmt.src[1], i)
+		 << resolve(stmt.src[1], (scalar1 ? 0 : i))
 		 << " ? 1.0f : 0.0f)"
 		 << ";"
 		 << std::endl;
@@ -598,14 +608,16 @@ namespace ShCPU {
 	}
       case SH::SH_OP_SNE:
 	{
+	bool scalar0 = (stmt.src[0].size() == 1);
+	bool scalar1 = (stmt.src[1].size() == 1);
 	for(int i = 0; i < stmt.dest.size(); i++)
 	  {
 	  m_code << "  "
 		 << resolve(stmt.dest, i)
 		 << " = (" 
-		 << resolve(stmt.src[0], i)
+		 << resolve(stmt.src[0], (scalar0 ? 0 : i))
 		 << " != "
-		 << resolve(stmt.src[1], i)
+		 << resolve(stmt.src[1], (scalar1 ? 0 : i))
 		 << " ? 1.0f : 0.0f)"
 		 << ";"
 		 << std::endl;
@@ -1249,7 +1261,16 @@ namespace ShCPU {
       case SH::SH_OP_KIL:
 	{
 	// TODO: maintain prior output values 
-	m_code << "  return;" << std::endl;
+	m_code << "  if (";
+	for(int i = 0; i < stmt.src[0].size(); i++)
+	  {
+	  if (i != 0) m_code << " || ";
+	  m_code << "("
+		 << resolve(stmt.src[0], i) 
+		 << " > 0)";
+	  }
+	m_code << ")" << std::endl;
+	m_code << "    return;" << std::endl;
 	break;
 	}
       case SH::SH_OP_OPTBRA:
@@ -1386,9 +1407,9 @@ namespace ShCPU {
     epilogue << "  }" << std::endl;
 
     // output code for debugging...
-    std::cout << prologue.str();
-    std::cout << m_code.str();
-    std::cout << epilogue.str();
+    SH_DEBUG_PRINT(prologue.str());
+    SH_DEBUG_PRINT(m_code.str());
+    SH_DEBUG_PRINT(epilogue.str());
 
     char name[32];
     tmpnam(name);
