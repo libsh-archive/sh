@@ -259,11 +259,13 @@ void ShImage::loadPng(const std::string& filename)
       for (int i = 0; i < m_elements; i++) {
 	png_byte *row = row_pointers[y];
 	int index = m_elements * (y * m_width + x) + i;
-	long element = 0;
-	for (int j = 0; j < bit_depth/8; j++) {
-	  element <<= 8;
-	  element += row[(x * m_elements + i) * bit_depth/8 + j];
-	}
+	
+  long element = 0;
+  for (int j = bit_depth/8 - 1; j >= 0; j--) {
+    element <<= 8;
+    element += row[(x * m_elements + i) * bit_depth/8 + j];
+  }
+
 	data()[index] = element / static_cast<float>((1 << bit_depth) - 1);
       }
     }

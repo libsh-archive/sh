@@ -1,3 +1,7 @@
+2004-04-07  Jack Wang  <jmwang@uwaterloo.ca>
+
+	* src/ShImage.cpp: Fixed byte ordering bug in loadPng().
+
 2004-04-06  Jack Wang  <jmwang@uwaterloo.ca>
 
 	* src/ShImage.hpp, src/ShImage.cpp: Added writePng16(), which writes
