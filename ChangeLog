@@ -1,3 +1,8 @@
+2003-11-28  Gabriel Renaud (g2renaud@cgl.uwaterloo.ca)
+  
+  * src/ShMatrix.hpp src/ShMatrixImpl.hpp:
+  Fixed Matrix determinant template friend issues 
+
 2003-11-24  Bryan Chan (b8chan@cgl.uwaterloo.ca)
   
   * src/ShMemoryObject.hpp src/ShMemoryObject.cpp
