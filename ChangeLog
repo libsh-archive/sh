@@ -1,5 +1,9 @@
 2004-02-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShVariableNode.cpp (hasName): Implemented hasName().
+
+	* src/ShVariableNode.hpp: Added hasName() to ShVariableNode.
+
 	* src/ShUtility.hpp: Added the SelectType utility template.
 
 	* src/ShLib.hpp (cond): Fix conditional assignment check.

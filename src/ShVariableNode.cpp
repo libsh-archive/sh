@@ -173,6 +173,11 @@ void ShVariableNode::name(const std::string& name)
   m_name = name;
 }
 
+bool ShVariableNode::hasName()
+{
+  return !m_name.empty();
+}
+
 void ShVariableNode::range(ShVariableNode::ValueType low, ShVariableNode::ValueType high)
 {
   m_lowBound = low;

@@ -73,6 +73,9 @@ public:
   /// to the type and id of the variable.
   void name(const std::string& name);
 
+  /// Returns true iff. this variable has been assigned an actual name.
+  bool hasName();
+  
   typedef float ValueType; ///< This is not necessarily correct. Oh well.
 
   // Metadata
