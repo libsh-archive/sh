@@ -67,11 +67,11 @@ GlslVariable::GlslVariable(const GlslVariable& v)
 }
 
 GlslVariable::GlslVariable(const ShVariableNodePtr& v)
-  : m_builtin(false), m_texture(SH_TEXTURE == v->kind()),
-    m_palette(SH_PALETTE == v->kind()),
+  : m_builtin(!v->meta("opengl:state").empty()), 
+    m_texture(SH_TEXTURE == v->kind()), m_palette(SH_PALETTE == v->kind()),
     m_uniform(m_texture || m_palette || v->uniform()),
-    m_size(v->size()), m_kind(v->kind()), m_type(v->valueType()), 
-    m_semantic_type(v->specialType())
+    m_name(v->meta("opengl:state")), m_size(v->size()), m_kind(v->kind()), 
+    m_type(v->valueType()), m_semantic_type(v->specialType())
 {
   if (v->hasValues()) {
     m_values = v->getVariant()->encodeArray();

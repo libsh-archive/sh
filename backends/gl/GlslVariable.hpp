@@ -86,6 +86,7 @@ public:
   const std::string& name() const { return m_name; }
   const SH::ShSemanticType& semantic_type() const { return m_semantic_type; }
   const int size() const { return m_size; }
+  const bool builtin() const { return m_builtin; }
   const bool uniform() const { return m_uniform; }
   const bool texture() const { return m_texture; }
 

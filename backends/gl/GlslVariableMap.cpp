@@ -84,7 +84,7 @@ GlslVariableMap::GlslVariableMap(ShProgramNode* shader, GlslProgramType unit)
 
   for (ShProgramNode::PaletteList::const_iterator i = m_shader->palettes_begin();
        i != m_shader->palettes_end(); i++) {
-    allocate_palette(*i);
+    allocate_temp(*i);
   }
   for (ShProgramNode::VarList::const_iterator i = m_shader->temps_begin();
        i != m_shader->temps_end(); i++) {
@@ -101,6 +101,7 @@ void GlslVariableMap::allocate_builtin(const ShVariableNodePtr& node,
                                        bool generic)
 {
   if (m_varmap.find(node) != m_varmap.end()) return;
+
   for (const GlslBindingSpecs* s = specs; s->binding != SH_GLSL_VAR_NONE; s++) {
     if (s->semantic_type == node->specialType() || (generic && s->allow_generic)) {
       if (bindings[s->binding] >= s->max_bindings) continue;
@@ -141,37 +142,26 @@ void GlslVariableMap::allocate_builtin_outputs()
 
 void GlslVariableMap::allocate_temp(const ShVariableNodePtr& node)
 {
+  if (m_varmap.find(node) != m_varmap.end()) return;
+
   GlslVariable var(node);
-  if (var.uniform()) {
-    var.name(m_nb_uniform_variables++, m_unit);
-  } else {
-    var.name(m_nb_regular_variables++, m_unit);
+  
+  if (!var.builtin()) {
+    if (var.uniform()) {
+      var.name(m_nb_uniform_variables++, m_unit);
+    } else {
+      var.name(m_nb_regular_variables++, m_unit);
+    }
   }
+
   map_insert(node, var);
 
-  // Since this variable is not built-in, it must be declared
-  if (var.uniform()) {
-    m_uniform_declarations.push_back(var.declaration());
-  } else {
-    m_regular_declarations.push_back(var.declaration());
-  }
-}
-
-void GlslVariableMap::allocate_palette(const ShPaletteNodePtr& palette)
-{
-  GlslVariable var(palette);
-  if (var.uniform()) {
-    var.name(m_nb_uniform_variables++, m_unit);
-  } else {
-    var.name(m_nb_regular_variables++, m_unit);
-  }
-  map_insert(palette, var);
-
-  // Since this variable is not built-in, it must be declared
-  if (var.uniform()) {
-    m_uniform_declarations.push_back(var.declaration());
-  } else {
-    m_regular_declarations.push_back(var.declaration());
+  if (!var.builtin()) {
+    if (var.uniform()) {
+      m_uniform_declarations.push_back(var.declaration());
+    } else {
+      m_regular_declarations.push_back(var.declaration());
+    }
   }
 }
 

@@ -344,8 +344,6 @@ void GlslCode::updateUniform(const ShVariableNodePtr& uniform)
             ShSwizzle(uniform->size(), (*it)->size(), copySwiz))); 
         updateUniform(*it);
       }
-    } else {
-      cerr << "Cannot find a uniform named '" << uniform->name() << "'." << endl;
     }
     return;
   }

@@ -1,3 +1,28 @@
+2005-03-18  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslVariable.cpp (GlslVariable): Use the contents of
+	meta("opengl:state") to initialize m_name and m_builtin.
+
+	* backends/gl/GlslVariable.hpp: Add a builtin() method.
+
+	* backends/gl/GlslVariableMap.cpp (allocate_temp): Add a check to
+	avoid double insertions in the map.
+	Don't set the name for built-in variables.
+	Use the new builtin() method to determine whether or not a
+	variable is built-in.
+
+	* backends/gl/GlslVariableMap.hpp, GlslVariableMap.cpp: Remove
+	allocate_palette() since it's the same as allocate_temp().
+
+	* backends/gl/GlslVariableMap.cpp (GlslVariableMap): Use
+	allocate_temp() instead of allocate_palette().
+	
+	* backends/gl/GlslCode.cpp (updateUniform): Remove warning about
+	unknown uniform.  This caused unnecessary output in the examples.
+
+	* examples/binding/main.cpp: Remove debugging output.
+	Remove unnecessary glDisable() calls in gprintf().
+
 2005-03-17  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslVariableMap.cpp, GlslVariableMap.hpp,

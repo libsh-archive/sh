@@ -84,7 +84,6 @@ private:
   void allocate_builtin_inputs();
   void allocate_builtin_outputs();
   void allocate_temp(const SH::ShVariableNodePtr& node);
-  void allocate_palette(const SH::ShPaletteNodePtr& palette);
   
   void map_insert(const SH::ShVariableNodePtr& node, GlslVariable var);
 
