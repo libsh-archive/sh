@@ -76,6 +76,7 @@ ArbMapping ArbCode::table[] = {
   {SH_OP_POW,  SH_ARB_ANY,   scalarize,    SH_ARB_POW, 0},
   {SH_OP_RCP,  SH_ARB_ANY,   scalarize,    SH_ARB_RCP, 0},
   {SH_OP_RSQ,  SH_ARB_ANY,   scalarize,    SH_ARB_RSQ, 0},
+  {SH_OP_CBRT, SH_ARB_ANY,   scalarize,    SH_ARB_FUN, &ArbCode::emit_cbrt},
   {SH_OP_SQRT, SH_ARB_ANY,   scalarize,    SH_ARB_FUN, &ArbCode::emit_sqrt},
 
   {SH_OP_LRP, SH_ARB_FP,  0, SH_ARB_LRP, 0},
@@ -121,6 +122,7 @@ ArbMapping ArbCode::table[] = {
   {SH_OP_MOD,  SH_ARB_ANY, 0, SH_ARB_FUN, &ArbCode::emit_mod},
   {SH_OP_MAX,  SH_ARB_ANY, 0, SH_ARB_MAX, 0},
   {SH_OP_MIN,  SH_ARB_ANY, 0, SH_ARB_MIN, 0},
+  {SH_OP_RND,  SH_ARB_ANY, 0, SH_ARB_FUN, &ArbCode::emit_rnd},
   {SH_OP_SGN,  SH_ARB_NVVP2, 0, SH_ARB_SSG, 0},
   {SH_OP_SGN,  SH_ARB_ANY, 0, SH_ARB_FUN, &ArbCode::emit_sgn},
   
@@ -324,8 +326,10 @@ void ArbCode::emit_eq(const ShStatement& stmt)
 
 void ArbCode::emit_ceil(const ShStatement& stmt)
 {
-  m_instructions.push_back(ArbInst(SH_ARB_FLR, stmt.dest, -stmt.src[0])); 
-  m_instructions.push_back(ArbInst(SH_ARB_MOV, stmt.dest, -stmt.dest));
+  ShVariable t(new ShVariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
+
+  m_instructions.push_back(ArbInst(SH_ARB_FLR, t, -stmt.src[0])); 
+  m_instructions.push_back(ArbInst(SH_ARB_MOV, stmt.dest, -t));
 }
 
 void ArbCode::emit_mod(const ShStatement& stmt)
@@ -578,7 +582,7 @@ void ArbCode::emit_cmul(const ShStatement& stmt)
   
   m_instructions.push_back(ArbInst(SH_ARB_MOV, prod, stmt.src[0](0)));
   for (int i = 1; i < stmt.src[0].size(); i++) {
-    m_instructions.push_back(ArbInst(SH_ARB_MUL, prod, stmt.src[0](i)));
+    m_instructions.push_back(ArbInst(SH_ARB_MUL, prod, prod, stmt.src[0](i)));
   }
   m_instructions.push_back(ArbInst(SH_ARB_MOV, stmt.dest, prod));
 }
@@ -601,6 +605,29 @@ void ArbCode::emit_lit(const ShStatement& stmt)
   m_instructions.push_back(inst);
 
   emit(ShStatement(stmt.dest, SH_OP_ASN, tmp));
+}
+
+void ArbCode::emit_rnd(const ShStatement& stmt)
+{
+  ShVariable t(new ShVariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
+  
+  ShVariantPtr c1_values = new ShDataVariant<float, SH_HOST>(stmt.src[0].size(), 0.5f); 
+  ShVariable c1(new ShVariableNode(SH_CONST, stmt.src[0].size(), SH_FLOAT));
+  c1.setVariant(c1_values);
+  m_shader->constants.push_back(c1.node());
+
+  m_instructions.push_back(ArbInst(SH_ARB_ADD, t, stmt.src[0], c1)); 
+  m_instructions.push_back(ArbInst(SH_ARB_FLR, stmt.dest, t));
+}
+
+void ArbCode::emit_cbrt(const ShStatement& stmt)
+{
+  ShVariable t(new ShVariableNode(SH_TEMP, 1, SH_FLOAT));
+  ShConstAttrib1f c(3.0f);
+  m_shader->constants.push_back(c.node());
+
+  m_instructions.push_back(ArbInst(SH_ARB_RCP, t, c)); 
+  m_instructions.push_back(ArbInst(SH_ARB_POW, stmt.dest, stmt.src[0], t));
 }
 
 }

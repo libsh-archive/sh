@@ -1,6 +1,18 @@
+2005-03-09  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbEmit.cpp (emit_ceil): Allocate a temporary
+	variable to prevent reading from stmt.dest.
+
+	* backends/gl/ArbEmit.cpp (emit_cmul): Added a missing parameter
+	to the MUL operation.
+
+	* backends/gl/ArbEmit.cpp, backends/gl/ArbCode.hpp: Added the CBRT
+	and RND operations.
+	
 2005-03-09  Bryan Chan <b8chan@cgl.uwaterloo.ca>
-  * src/ShTypeInfo.hpp, ShTypeInfo.cpp (m_valueTypes):
-  Changed to pointer to avoid static initialization snafus. 
+	
+	* src/ShTypeInfo.hpp, ShTypeInfo.cpp (m_valueTypes):
+	Changed to pointer to avoid static initialization snafus. 
 
 2005-03-04  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
