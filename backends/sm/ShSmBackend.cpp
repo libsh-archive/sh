@@ -34,10 +34,10 @@ std::string SmRegister::print() const
     stream << "cR";
     break;
   case SHSM_REG_TEXTURE:
-    stream << index << std::ends;
+    stream << index;
     return stream.str();
   }
-  stream << "[" << index << "]" << std::ends;
+  stream << "[" << index << "]";
   
   return stream.str();
 }
@@ -105,7 +105,9 @@ void BackendCode::upload()
   for (SmInstList::const_iterator I = m_instructions.begin(); I != m_instructions.end();
        ++I) {
     if (I->op == OP_TEX) {
-      smTEX(getSmReg(I->dest), getSmReg(I->src1), getReg(I->src2.node()).index);
+      SH_DEBUG_PRINT("Adding an OP_TEX");
+      SH_DEBUG_ASSERT(getReg(I->src2.node()).type == SHSM_REG_TEXTURE);
+      smInstr(OP_TEX, getSmReg(I->dest), getSmReg(I->src1), getReg(I->src2.node()).index);
     } else if (I->src1.null()) {
       smInstr(I->op, getSmReg(I->dest));
     } else if (I->src2.null()) {
@@ -118,7 +120,6 @@ void BackendCode::upload()
     i++;
   }
   SH_DEBUG_PRINT(i << " instructions uploaded.");
-  
   smShaderEnd();
 }
 
@@ -169,7 +170,7 @@ void BackendCode::bind()
       SH_DEBUG_PRINT("Texture already allocated");
     }
     SH_DEBUG_PRINT("Binding texture " << m_textureMap[texture] << " to texture unit " << getReg(texture).index);
-    smBindTexture(getReg(texture).index, m_textureMap[texture]);
+    smBindTexture(m_shader->kind(), getReg(texture).index, m_textureMap[texture]);
   }
 }
 
@@ -446,7 +447,7 @@ void BackendCode::allocRegs()
   
   ShLinearAllocator allocator(ShBackendCodePtr(this));
   
-  for (int i = 0; i < m_instructions.size(); i++) {
+  for (std::size_t i = 0; i < m_instructions.size(); i++) {
     SmInstruction instr = m_instructions[i];
     getReg(instr.dest.node());
     allocator.mark(instr.dest.node(), i);
@@ -461,8 +462,8 @@ void BackendCode::allocRegs()
 
   m_tempRegs.clear();
   
-  m_cR = new SMreg[m_maxCR];
   m_tR = new SMreg[m_maxTR];
+  m_cR = new SMreg[m_maxCR];
   m_iR = new SMreg[m_maxIR];
   m_oR = new SMreg[m_maxOR];
 }

@@ -74,6 +74,7 @@ void ShLinearAllocator::allocate()
     if (!I->end) {
       if (!m_backendCode->allocateRegister(I->var)) {
         // TODO: Error
+        SH_DEBUG_WARN("Error allocating a register for " << I->var->name());
       }
     } else {
       m_backendCode->freeRegister(I->var);
