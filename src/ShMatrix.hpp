@@ -164,10 +164,14 @@ namespace SH {
      * Returns a ShAttrib1f containing the value of the determinant of the matrix. NOTE: This method uses an naive recursive algorithm in O(n!) which could take a long time with large matrices
      * \param other The matrix from which we want the determinant (need to be a square matrix to compile)
      */
+    template<int Kind2, typename T2>
+    friend ShAttrib1f det(const ShMatrix<1, 1, Kind2, T2>& matrix);
+
+    template<int Kind2, typename T2>
+    friend ShAttrib1f det(const ShMatrix<2, 2, Kind2, T2>& matrix);
     
     template <int RowsCols, int Kind2, typename T2>
-	friend
-    ShAttrib1f det(const ShMatrix<RowsCols, RowsCols, Kind2, T2>& matrix);
+    friend ShAttrib1f det(const ShMatrix<RowsCols, RowsCols, Kind2, T2>& matrix);
     
     
     /** \brief Returns the matrix of cofactors for the matrix in parameter
@@ -219,6 +223,14 @@ namespace SH {
      * \param other The matrix from which we want to get the submatrix
      */
     ShMatrix<Rows - 1, Cols -1, SH_VAR_TEMP, T> subMatrix(int,int) const;
+
+
+
+   
+    void setTranslation(const ShVariableN<Rows-1, T>& trans);
+  
+    void setScaling(const ShVariableN<Rows-1, T>& scale);
+
 
     /** \brief Definition of the scalar multiplication operation
      *
