@@ -1,5 +1,10 @@
 2004-06-30  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShLibGeometryImpl.hpp (reflect): Implemented reflect
+	function. Makes issue73 in progress.
+
+	* src/ShLibGeometry.hpp: Added reflect function.
+
 	* backends/cpu/CPU.cpp (encode): Handle RCP and RSQ.
 
 	* test/regress/regress.py (tests): Add tests for RCP, RSQ and SQRT.

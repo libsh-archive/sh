@@ -48,6 +48,14 @@ ShGeneric<1,  T> operator|(const ShGeneric<N, T>& left, const ShGeneric<N, T>& r
   return dot(left, right);
 }
 
+template<int N, typename T>
+inline
+ShGeneric<N, T> reflect(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
+{
+  ShGeneric<N, T> bn = normalize(b);
+  return 2.0 * dot(a, b) * b - a;
+}
+
 }
 
 #endif

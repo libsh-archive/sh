@@ -30,6 +30,12 @@ ShGeneric<3, T> operator^(const ShGeneric<3, T>& left, const ShGeneric<3, T>& ri
 template<int N, typename T>
 ShGeneric<N, T> normalize(const ShGeneric<N, T>& var);
 
+/** Compute reflection vector.
+ * Reflect vector a about normal n.
+ */
+template<int N, typename T>
+ShGeneric<N, T> reflect(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b);
+
 /** Inner (dot) product.
  */
 template<int N, typename T>
