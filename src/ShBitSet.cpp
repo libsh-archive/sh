@@ -51,7 +51,7 @@ namespace SH {
 
 ShBitRef::operator bool() const
 {
-  return (*m_byte) & m_mask;
+  return (((*m_byte) & m_mask) == m_mask);
 }
 
 ShBitRef& ShBitRef::operator=(bool b)
@@ -156,7 +156,7 @@ ShBitSet ShBitSet::operator~() const
 bool ShBitSet::operator==(const ShBitSet& other) const
 {
   if (m_size != other.m_size) return false;
-  for (int i = 0; i < fullwordsize(m_size); i++) {
+  for (unsigned int i = 0; i < fullwordsize(m_size); i++) {
     if (m_data[i] != other.m_data[i]) return false;
   }
   if (m_size % WORD_SIZE) {
@@ -178,7 +178,7 @@ std::size_t ShBitSet::size() const
 
 bool ShBitSet::operator[](std::size_t i) const
 {
-  return m_data[i / WORD_SIZE] & (1 << (i % WORD_SIZE));
+  return ((m_data[i / WORD_SIZE] & (1 << (i % WORD_SIZE))) != 0);
 }
 
 ShBitRef ShBitSet::operator[](std::size_t i)
