@@ -92,7 +92,6 @@ struct VariableSplitter {
             
     }
     changed = true;
-    SH_DEBUG_PRINT("Splitting node " << node->name());
     ShTransformer::VarNodeVec &nodeVarNodeVec = splits[node];
     ShVariableNodePtr newNode;
     for(offset = 0; n > 0; offset += maxTuple, n -= maxTuple) {
@@ -302,10 +301,12 @@ void ShTransformer::splitTuples(int maxTuple, ShTransformer::VarSplitMap &splits
   m_graph->dfs(ss);
 }
 
+static int id = 0;
+
 // Output Convertion to temporaries 
 struct InputOutputConvertor {
-  InputOutputConvertor(ShProgram program, bool& changed)
-    : m_program(program), m_graph(program->ctrlGraph), changed(changed)
+  InputOutputConvertor(ShProgram program, ShVariableReplacer::VarMap &varMap, bool& changed)
+    : m_program(program), m_graph(program->ctrlGraph), m_varMap( varMap ), m_changed(changed), m_id(++id)
   {}
 
   void operator()(ShCtrlGraphNodePtr node) {
@@ -320,8 +321,8 @@ struct InputOutputConvertor {
   /* Convert all INOUT nodes that appear in a VarList (use std::for_each with this object)
    * (currently InOuts are always converted) */ 
   void operator()(ShVariableNodePtr node) {
-    if (node->kind() != SH_INOUT || varMap.count(node) > 0) return;
-    varMap[node] = dupNode(node);
+    if (node->kind() != SH_INOUT || m_varMap.count(node) > 0) return;
+    m_varMap[node] = dupNode(node);
   }
 
   // dup that works only on nodes without values (inputs, outputs fall into this category)
@@ -339,8 +340,8 @@ struct InputOutputConvertor {
     if(!stmt.dest.null()) {
       ShVariableNodePtr &oldNode = stmt.dest.node();
       if(oldNode->kind() == SH_INPUT) { 
-        if(varMap.find(oldNode) == varMap.end()) {
-          varMap[oldNode] = dupNode(oldNode); 
+        if(m_varMap.count(oldNode) == 0) {
+          m_varMap[oldNode] = dupNode(oldNode); 
         }
       }
     }
@@ -348,8 +349,8 @@ struct InputOutputConvertor {
       if(!stmt.src[i].null()) {
         ShVariableNodePtr &oldNode = stmt.src[i].node();
         if(oldNode->kind() == SH_OUTPUT) { 
-          if(varMap.find(oldNode) == varMap.end()) {
-            varMap[oldNode] = dupNode(oldNode); 
+          if(m_varMap.count(oldNode) == 0) {
+            m_varMap[oldNode] = dupNode(oldNode); 
           }
         }
       }
@@ -357,14 +358,14 @@ struct InputOutputConvertor {
   }
 
   void updateGraph() {
-    if(varMap.empty()) return;
-    changed = true;
+    if(m_varMap.empty()) return;
+    m_changed = true;
 
     // create block after exit
     ShCtrlGraphNodePtr oldExit = m_graph->appendExit(); 
     ShCtrlGraphNodePtr oldEntry = m_graph->prependEntry();
 
-    for(ShVariableReplacer::VarMap::iterator it = varMap.begin(); it != varMap.end(); ++it) {
+    for(ShVariableReplacer::VarMap::const_iterator it = m_varMap.begin(); it != m_varMap.end(); ++it) {
       // assign temporary to output
       ShVariableNodePtr oldNode = it->first; 
       if(oldNode->kind() == SH_OUTPUT) {
@@ -397,18 +398,21 @@ struct InputOutputConvertor {
 
   ShProgram m_program;
   ShCtrlGraphPtr m_graph;
-  bool& changed;
-  ShVariableReplacer::VarMap varMap; // maps from outputs used as srcs in computation to their temporary variables
+  bool& m_changed;
+  ShVariableReplacer::VarMap &m_varMap; // maps from outputs used as srcs in computation to their temporary variables
+  int m_id;
 };
 
 void ShTransformer::convertInputOutput()
 {
-  InputOutputConvertor ioc(m_program, m_changed);
+  ShVariableReplacer::VarMap varMap; // maps from outputs used as srcs in computation to their temporary variables
+
+  InputOutputConvertor ioc(m_program, varMap, m_changed);
   std::for_each(m_program->inputs.begin(), m_program->inputs.end(), ioc);
   std::for_each(m_program->outputs.begin(), m_program->outputs.end(), ioc);
   m_graph->dfs(ioc);
 
-  ShVariableReplacer vr(ioc.varMap);
+  ShVariableReplacer vr(varMap);
   m_graph->dfs(vr);
 
   ioc.updateGraph(); 

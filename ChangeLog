@@ -1,7 +1,10 @@
+2004 02-17  Bryan Chan <b8chan@uwaterloo.ca>
+	* src/ShTransformer.cpp (InputOutputConvertor):
+	I am not fit to program. period.
+	
 2004-02-17  Jack Wang  <jmwang@uwaterloo.ca>
 	* src/ShQuaternionImpl.hpp, src/ShQuaternion.hpp:
 	Added slerp (spherical linear interpolation) for ShQuaternion.
-
 
 2004-02-16  Bryan Chan <b8chan@uwaterloo.ca>
 	* src/ShAlgebra.hpp (operator>>):

@@ -22,4 +22,4 @@ ShProgram foo3 = SH_BEGIN_VERTEX_PROGRAM {
   ShOutputVector3f SH_DECL(veco2) = vec2;
 } SH_END_PROGRAM;
 
-ShProgram shader =  foo3 << (foo1 & foo2); 
+ShProgram shader =  (foo3 << ( foo1 & foo2 ) )& keep<ShColor3f>("keep1") & keep<ShColor3f>("keep2"); 
