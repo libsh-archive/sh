@@ -1362,7 +1362,7 @@ namespace ShCPU {
 		   << resolve(stmt.src[1], i)
 		   << " + " 
 		   << resolve(stmt.src[2], i)
-		   << ");" << std::endl;
+		   << ";" << std::endl;
 	    }
 	  }
 	else if (stmt.src[1].swizzle().size() == 1)
@@ -1377,7 +1377,7 @@ namespace ShCPU {
 		   << resolve(stmt.src[1], 0)
 		   << " + "
 		   << resolve(stmt.src[2], i)
-		   << ");" << std::endl;
+		   << ";" << std::endl;
 	    }
 	  }
 	else
@@ -1392,7 +1392,7 @@ namespace ShCPU {
 		   << resolve(stmt.src[1], i)
 		   << " + "
 		   << resolve(stmt.src[2], i)
-		   << ");" << std::endl;
+		   << ";" << std::endl;
 	    }
 	  }
 	
