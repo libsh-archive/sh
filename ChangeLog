@@ -1,3 +1,10 @@
+2004-01-30  Jack Wang  <jmwang@uwaterloo.ca>
+	* src/ShNormal.hpp: Added m_isunit flag to ShNormal to identify 
+	unit normals, similar to ShVector.hpp.
+
+	* src/ShLibNormal.hpp: Modified normalize and abs to update the
+	m_isunit flag.
+	
 2004-01-29  Jack Wang  <jmwang@uwaterloo.ca>
 	* src/ShVector.hpp: Added a m_isunit flag to ShVector, this 
 	required changing a number of functions so they can no longer

@@ -33,7 +33,30 @@
 
 namespace SH {
 
-SH_SHLIB_USUAL_OPERATIONS(ShNormal);
+SH_SHLIB_USUAL_NON_UNIT_OPS_RETTYPE(ShNormal, ShNormal);
+
+template<int N, int K1, typename T, bool S1>
+  ShNormal<N, SH_VAR_TEMP, T, false>
+  abs(const ShNormal<N, K1, T, S1>& var)
+  {
+    ShVariableN<N, T> t = abs(static_cast< ShVariableN<N, T> >(var));
+    ShNormal<N, SH_VAR_TEMP, T, false> vec(t.node(), t.swizzle(), t.neg());
+    vec.setUnit(var.isUnit());
+    return vec;
+  }
+
+template<int N, int K1, typename T, bool S1>
+  ShNormal<N, SH_VAR_TEMP, T, false>
+  normalize(const ShNormal<N, K1, T, S1>& var)
+  {
+    if (var.isUnit()) return var;
+
+    ShVariableN<N, T> t = normalize(static_cast< ShVariableN<N, T> >(var));
+    ShNormal<N, SH_VAR_TEMP, T, false> vec(t.node(), t.swizzle(), t.neg());
+    vec.setUnit(true);
+    return vec;
+  }
+
 SH_SHLIB_USUAL_SUBTRACT(ShNormal);
 
 SH_SHLIB_LEFT_MATRIX_OPERATION(ShNormal, operator|, M);
