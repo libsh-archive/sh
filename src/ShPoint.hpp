@@ -45,31 +45,61 @@ template<int N, ShBindingType Binding, typename T=float, bool Swizzled=false>
 class ShPoint : public ShAttrib<N, Binding, T, Swizzled> {
 public:
   ShPoint();
-  ShPoint(const ShGeneric<N, T>& other);
+  
+  template<typename T2>
+  ShPoint(const ShGeneric<N, T2>& other);
   ShPoint(const ShPoint<N, Binding, T, Swizzled>& other);
+  
+  template<typename T2>
+  ShPoint(const ShPoint<N, Binding, T2, Swizzled>& other);
   ShPoint(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
   explicit ShPoint(T data[N]);
   
   ~ShPoint();
 
-  ShPoint& operator=(const ShGeneric<N, T>& other);
+  
+  template<typename T2>
+  ShPoint& operator=(const ShGeneric<N, T2>& other);
+  
+  template<typename T2>
+  ShPoint& operator=(const ShPoint<N, Binding, T2, Swizzled>& other);
   ShPoint& operator=(const ShPoint<N, Binding, T, Swizzled>& other);
 
-  ShPoint& operator+=(const ShGeneric<N, T>& right);
-  ShPoint& operator-=(const ShGeneric<N, T>& right);
-  ShPoint& operator*=(const ShGeneric<N, T>& right);
-  ShPoint& operator/=(const ShGeneric<N, T>& right);
-  ShPoint& operator%=(const ShGeneric<N, T>& right);
+  
+  template<typename T2>
+  ShPoint& operator+=(const ShGeneric<N, T2>& right);
+  
+  template<typename T2>
+  ShPoint& operator-=(const ShGeneric<N, T2>& right);
+  
+  template<typename T2>
+  ShPoint& operator*=(const ShGeneric<N, T2>& right);
+  
+  template<typename T2>
+  ShPoint& operator/=(const ShGeneric<N, T2>& right);
+  
+  template<typename T2>
+  ShPoint& operator%=(const ShGeneric<N, T2>& right);
   ShPoint& operator*=(T);
   ShPoint& operator/=(T);
   ShPoint& operator%=(T);
   ShPoint& operator+=(T);
   ShPoint& operator-=(T);
-  ShPoint& operator+=(const ShGeneric<1, T>&);
-  ShPoint& operator-=(const ShGeneric<1, T>&);
-  ShPoint& operator*=(const ShGeneric<1, T>&);
-  ShPoint& operator/=(const ShGeneric<1, T>&);
-  ShPoint& operator%=(const ShGeneric<1, T>&);
+  
+  template<typename T2>
+  ShPoint& operator+=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShPoint& operator-=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShPoint& operator*=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShPoint& operator/=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShPoint& operator%=(const ShGeneric<1, T2>&);
   ShPoint<1, Binding, T, true> operator()(int) const;
   ShPoint<2, Binding, T, true> operator()(int, int) const;
   ShPoint<3, Binding, T, true> operator()(int, int, int) const;
@@ -98,8 +128,13 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 class ShPoint<1, Binding, T, Swizzled> : public ShAttrib<1, Binding, T, Swizzled> {
 public:
   ShPoint();
-  ShPoint(const ShGeneric<1, T>& other);
+  
+  template<typename T2>
+  ShPoint(const ShGeneric<1, T2>& other);
   ShPoint(const ShPoint<1, Binding, T, Swizzled>& other);
+  
+  template<typename T2>
+  ShPoint(const ShPoint<1, Binding, T2, Swizzled>& other);
   ShPoint(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
   explicit ShPoint(T data[1]);
   
@@ -107,16 +142,31 @@ public:
   
   ~ShPoint();
 
-  ShPoint& operator=(const ShGeneric<1, T>& other);
+  
+  template<typename T2>
+  ShPoint& operator=(const ShGeneric<1, T2>& other);
+  
+  template<typename T2>
+  ShPoint& operator=(const ShPoint<1, Binding, T2, Swizzled>& other);
   ShPoint& operator=(const ShPoint<1, Binding, T, Swizzled>& other);
 
   ShPoint& operator=(T other);
 
-  ShPoint& operator+=(const ShGeneric<1, T>& right);
-  ShPoint& operator-=(const ShGeneric<1, T>& right);
-  ShPoint& operator*=(const ShGeneric<1, T>& right);
-  ShPoint& operator/=(const ShGeneric<1, T>& right);
-  ShPoint& operator%=(const ShGeneric<1, T>& right);
+  
+  template<typename T2>
+  ShPoint& operator+=(const ShGeneric<1, T2>& right);
+  
+  template<typename T2>
+  ShPoint& operator-=(const ShGeneric<1, T2>& right);
+  
+  template<typename T2>
+  ShPoint& operator*=(const ShGeneric<1, T2>& right);
+  
+  template<typename T2>
+  ShPoint& operator/=(const ShGeneric<1, T2>& right);
+  
+  template<typename T2>
+  ShPoint& operator%=(const ShGeneric<1, T2>& right);
   ShPoint& operator*=(T);
   ShPoint& operator/=(T);
   ShPoint& operator%=(T);
@@ -150,8 +200,13 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 class ShPoint<2, Binding, T, Swizzled> : public ShAttrib<2, Binding, T, Swizzled> {
 public:
   ShPoint();
-  ShPoint(const ShGeneric<2, T>& other);
+  
+  template<typename T2>
+  ShPoint(const ShGeneric<2, T2>& other);
   ShPoint(const ShPoint<2, Binding, T, Swizzled>& other);
+  
+  template<typename T2>
+  ShPoint(const ShPoint<2, Binding, T2, Swizzled>& other);
   ShPoint(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
   explicit ShPoint(T data[2]);
   
@@ -160,24 +215,49 @@ public:
   
   ~ShPoint();
 
-  ShPoint& operator=(const ShGeneric<2, T>& other);
+  
+  template<typename T2>
+  ShPoint& operator=(const ShGeneric<2, T2>& other);
+  
+  template<typename T2>
+  ShPoint& operator=(const ShPoint<2, Binding, T2, Swizzled>& other);
   ShPoint& operator=(const ShPoint<2, Binding, T, Swizzled>& other);
 
-  ShPoint& operator+=(const ShGeneric<2, T>& right);
-  ShPoint& operator-=(const ShGeneric<2, T>& right);
-  ShPoint& operator*=(const ShGeneric<2, T>& right);
-  ShPoint& operator/=(const ShGeneric<2, T>& right);
-  ShPoint& operator%=(const ShGeneric<2, T>& right);
+  
+  template<typename T2>
+  ShPoint& operator+=(const ShGeneric<2, T2>& right);
+  
+  template<typename T2>
+  ShPoint& operator-=(const ShGeneric<2, T2>& right);
+  
+  template<typename T2>
+  ShPoint& operator*=(const ShGeneric<2, T2>& right);
+  
+  template<typename T2>
+  ShPoint& operator/=(const ShGeneric<2, T2>& right);
+  
+  template<typename T2>
+  ShPoint& operator%=(const ShGeneric<2, T2>& right);
   ShPoint& operator*=(T);
   ShPoint& operator/=(T);
   ShPoint& operator%=(T);
   ShPoint& operator+=(T);
   ShPoint& operator-=(T);
-  ShPoint& operator+=(const ShGeneric<1, T>&);
-  ShPoint& operator-=(const ShGeneric<1, T>&);
-  ShPoint& operator*=(const ShGeneric<1, T>&);
-  ShPoint& operator/=(const ShGeneric<1, T>&);
-  ShPoint& operator%=(const ShGeneric<1, T>&);
+  
+  template<typename T2>
+  ShPoint& operator+=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShPoint& operator-=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShPoint& operator*=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShPoint& operator/=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShPoint& operator%=(const ShGeneric<1, T2>&);
   ShPoint<1, Binding, T, true> operator()(int) const;
   ShPoint<2, Binding, T, true> operator()(int, int) const;
   ShPoint<3, Binding, T, true> operator()(int, int, int) const;
@@ -206,8 +286,13 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 class ShPoint<3, Binding, T, Swizzled> : public ShAttrib<3, Binding, T, Swizzled> {
 public:
   ShPoint();
-  ShPoint(const ShGeneric<3, T>& other);
+  
+  template<typename T2>
+  ShPoint(const ShGeneric<3, T2>& other);
   ShPoint(const ShPoint<3, Binding, T, Swizzled>& other);
+  
+  template<typename T2>
+  ShPoint(const ShPoint<3, Binding, T2, Swizzled>& other);
   ShPoint(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
   explicit ShPoint(T data[3]);
   
@@ -216,24 +301,49 @@ public:
   
   ~ShPoint();
 
-  ShPoint& operator=(const ShGeneric<3, T>& other);
+  
+  template<typename T2>
+  ShPoint& operator=(const ShGeneric<3, T2>& other);
+  
+  template<typename T2>
+  ShPoint& operator=(const ShPoint<3, Binding, T2, Swizzled>& other);
   ShPoint& operator=(const ShPoint<3, Binding, T, Swizzled>& other);
 
-  ShPoint& operator+=(const ShGeneric<3, T>& right);
-  ShPoint& operator-=(const ShGeneric<3, T>& right);
-  ShPoint& operator*=(const ShGeneric<3, T>& right);
-  ShPoint& operator/=(const ShGeneric<3, T>& right);
-  ShPoint& operator%=(const ShGeneric<3, T>& right);
+  
+  template<typename T2>
+  ShPoint& operator+=(const ShGeneric<3, T2>& right);
+  
+  template<typename T2>
+  ShPoint& operator-=(const ShGeneric<3, T2>& right);
+  
+  template<typename T2>
+  ShPoint& operator*=(const ShGeneric<3, T2>& right);
+  
+  template<typename T2>
+  ShPoint& operator/=(const ShGeneric<3, T2>& right);
+  
+  template<typename T2>
+  ShPoint& operator%=(const ShGeneric<3, T2>& right);
   ShPoint& operator*=(T);
   ShPoint& operator/=(T);
   ShPoint& operator%=(T);
   ShPoint& operator+=(T);
   ShPoint& operator-=(T);
-  ShPoint& operator+=(const ShGeneric<1, T>&);
-  ShPoint& operator-=(const ShGeneric<1, T>&);
-  ShPoint& operator*=(const ShGeneric<1, T>&);
-  ShPoint& operator/=(const ShGeneric<1, T>&);
-  ShPoint& operator%=(const ShGeneric<1, T>&);
+  
+  template<typename T2>
+  ShPoint& operator+=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShPoint& operator-=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShPoint& operator*=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShPoint& operator/=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShPoint& operator%=(const ShGeneric<1, T2>&);
   ShPoint<1, Binding, T, true> operator()(int) const;
   ShPoint<2, Binding, T, true> operator()(int, int) const;
   ShPoint<3, Binding, T, true> operator()(int, int, int) const;
@@ -262,8 +372,13 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 class ShPoint<4, Binding, T, Swizzled> : public ShAttrib<4, Binding, T, Swizzled> {
 public:
   ShPoint();
-  ShPoint(const ShGeneric<4, T>& other);
+  
+  template<typename T2>
+  ShPoint(const ShGeneric<4, T2>& other);
   ShPoint(const ShPoint<4, Binding, T, Swizzled>& other);
+  
+  template<typename T2>
+  ShPoint(const ShPoint<4, Binding, T2, Swizzled>& other);
   ShPoint(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
   explicit ShPoint(T data[4]);
   
@@ -272,24 +387,49 @@ public:
   
   ~ShPoint();
 
-  ShPoint& operator=(const ShGeneric<4, T>& other);
+  
+  template<typename T2>
+  ShPoint& operator=(const ShGeneric<4, T2>& other);
+  
+  template<typename T2>
+  ShPoint& operator=(const ShPoint<4, Binding, T2, Swizzled>& other);
   ShPoint& operator=(const ShPoint<4, Binding, T, Swizzled>& other);
 
-  ShPoint& operator+=(const ShGeneric<4, T>& right);
-  ShPoint& operator-=(const ShGeneric<4, T>& right);
-  ShPoint& operator*=(const ShGeneric<4, T>& right);
-  ShPoint& operator/=(const ShGeneric<4, T>& right);
-  ShPoint& operator%=(const ShGeneric<4, T>& right);
+  
+  template<typename T2>
+  ShPoint& operator+=(const ShGeneric<4, T2>& right);
+  
+  template<typename T2>
+  ShPoint& operator-=(const ShGeneric<4, T2>& right);
+  
+  template<typename T2>
+  ShPoint& operator*=(const ShGeneric<4, T2>& right);
+  
+  template<typename T2>
+  ShPoint& operator/=(const ShGeneric<4, T2>& right);
+  
+  template<typename T2>
+  ShPoint& operator%=(const ShGeneric<4, T2>& right);
   ShPoint& operator*=(T);
   ShPoint& operator/=(T);
   ShPoint& operator%=(T);
   ShPoint& operator+=(T);
   ShPoint& operator-=(T);
-  ShPoint& operator+=(const ShGeneric<1, T>&);
-  ShPoint& operator-=(const ShGeneric<1, T>&);
-  ShPoint& operator*=(const ShGeneric<1, T>&);
-  ShPoint& operator/=(const ShGeneric<1, T>&);
-  ShPoint& operator%=(const ShGeneric<1, T>&);
+  
+  template<typename T2>
+  ShPoint& operator+=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShPoint& operator-=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShPoint& operator*=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShPoint& operator/=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShPoint& operator%=(const ShGeneric<1, T2>&);
   ShPoint<1, Binding, T, true> operator()(int) const;
   ShPoint<2, Binding, T, true> operator()(int, int) const;
   ShPoint<3, Binding, T, true> operator()(int, int, int) const;
@@ -314,6 +454,94 @@ private:
   typedef ShAttrib<4, Binding, T, Swizzled> ParentType;
 };
 
+typedef ShPoint<1, SH_INPUT, ShInterval<double> > ShInputPoint1i_d;
+typedef ShPoint<1, SH_OUTPUT, ShInterval<double> > ShOutputPoint1i_d;
+typedef ShPoint<1, SH_INOUT, ShInterval<double> > ShInOutPoint1i_d;
+typedef ShPoint<1, SH_TEMP, ShInterval<double> > ShPoint1i_d;
+typedef ShPoint<1, SH_CONST, ShInterval<double> > ShConstPoint1i_d;
+typedef ShPoint<2, SH_INPUT, ShInterval<double> > ShInputPoint2i_d;
+typedef ShPoint<2, SH_OUTPUT, ShInterval<double> > ShOutputPoint2i_d;
+typedef ShPoint<2, SH_INOUT, ShInterval<double> > ShInOutPoint2i_d;
+typedef ShPoint<2, SH_TEMP, ShInterval<double> > ShPoint2i_d;
+typedef ShPoint<2, SH_CONST, ShInterval<double> > ShConstPoint2i_d;
+typedef ShPoint<3, SH_INPUT, ShInterval<double> > ShInputPoint3i_d;
+typedef ShPoint<3, SH_OUTPUT, ShInterval<double> > ShOutputPoint3i_d;
+typedef ShPoint<3, SH_INOUT, ShInterval<double> > ShInOutPoint3i_d;
+typedef ShPoint<3, SH_TEMP, ShInterval<double> > ShPoint3i_d;
+typedef ShPoint<3, SH_CONST, ShInterval<double> > ShConstPoint3i_d;
+typedef ShPoint<4, SH_INPUT, ShInterval<double> > ShInputPoint4i_d;
+typedef ShPoint<4, SH_OUTPUT, ShInterval<double> > ShOutputPoint4i_d;
+typedef ShPoint<4, SH_INOUT, ShInterval<double> > ShInOutPoint4i_d;
+typedef ShPoint<4, SH_TEMP, ShInterval<double> > ShPoint4i_d;
+typedef ShPoint<4, SH_CONST, ShInterval<double> > ShConstPoint4i_d;
+
+
+typedef ShPoint<1, SH_INPUT, short> ShInputPoint1s;
+typedef ShPoint<1, SH_OUTPUT, short> ShOutputPoint1s;
+typedef ShPoint<1, SH_INOUT, short> ShInOutPoint1s;
+typedef ShPoint<1, SH_TEMP, short> ShPoint1s;
+typedef ShPoint<1, SH_CONST, short> ShConstPoint1s;
+typedef ShPoint<2, SH_INPUT, short> ShInputPoint2s;
+typedef ShPoint<2, SH_OUTPUT, short> ShOutputPoint2s;
+typedef ShPoint<2, SH_INOUT, short> ShInOutPoint2s;
+typedef ShPoint<2, SH_TEMP, short> ShPoint2s;
+typedef ShPoint<2, SH_CONST, short> ShConstPoint2s;
+typedef ShPoint<3, SH_INPUT, short> ShInputPoint3s;
+typedef ShPoint<3, SH_OUTPUT, short> ShOutputPoint3s;
+typedef ShPoint<3, SH_INOUT, short> ShInOutPoint3s;
+typedef ShPoint<3, SH_TEMP, short> ShPoint3s;
+typedef ShPoint<3, SH_CONST, short> ShConstPoint3s;
+typedef ShPoint<4, SH_INPUT, short> ShInputPoint4s;
+typedef ShPoint<4, SH_OUTPUT, short> ShOutputPoint4s;
+typedef ShPoint<4, SH_INOUT, short> ShInOutPoint4s;
+typedef ShPoint<4, SH_TEMP, short> ShPoint4s;
+typedef ShPoint<4, SH_CONST, short> ShConstPoint4s;
+
+
+typedef ShPoint<1, SH_INPUT, int> ShInputPoint1i;
+typedef ShPoint<1, SH_OUTPUT, int> ShOutputPoint1i;
+typedef ShPoint<1, SH_INOUT, int> ShInOutPoint1i;
+typedef ShPoint<1, SH_TEMP, int> ShPoint1i;
+typedef ShPoint<1, SH_CONST, int> ShConstPoint1i;
+typedef ShPoint<2, SH_INPUT, int> ShInputPoint2i;
+typedef ShPoint<2, SH_OUTPUT, int> ShOutputPoint2i;
+typedef ShPoint<2, SH_INOUT, int> ShInOutPoint2i;
+typedef ShPoint<2, SH_TEMP, int> ShPoint2i;
+typedef ShPoint<2, SH_CONST, int> ShConstPoint2i;
+typedef ShPoint<3, SH_INPUT, int> ShInputPoint3i;
+typedef ShPoint<3, SH_OUTPUT, int> ShOutputPoint3i;
+typedef ShPoint<3, SH_INOUT, int> ShInOutPoint3i;
+typedef ShPoint<3, SH_TEMP, int> ShPoint3i;
+typedef ShPoint<3, SH_CONST, int> ShConstPoint3i;
+typedef ShPoint<4, SH_INPUT, int> ShInputPoint4i;
+typedef ShPoint<4, SH_OUTPUT, int> ShOutputPoint4i;
+typedef ShPoint<4, SH_INOUT, int> ShInOutPoint4i;
+typedef ShPoint<4, SH_TEMP, int> ShPoint4i;
+typedef ShPoint<4, SH_CONST, int> ShConstPoint4i;
+
+
+typedef ShPoint<1, SH_INPUT, double> ShInputPoint1d;
+typedef ShPoint<1, SH_OUTPUT, double> ShOutputPoint1d;
+typedef ShPoint<1, SH_INOUT, double> ShInOutPoint1d;
+typedef ShPoint<1, SH_TEMP, double> ShPoint1d;
+typedef ShPoint<1, SH_CONST, double> ShConstPoint1d;
+typedef ShPoint<2, SH_INPUT, double> ShInputPoint2d;
+typedef ShPoint<2, SH_OUTPUT, double> ShOutputPoint2d;
+typedef ShPoint<2, SH_INOUT, double> ShInOutPoint2d;
+typedef ShPoint<2, SH_TEMP, double> ShPoint2d;
+typedef ShPoint<2, SH_CONST, double> ShConstPoint2d;
+typedef ShPoint<3, SH_INPUT, double> ShInputPoint3d;
+typedef ShPoint<3, SH_OUTPUT, double> ShOutputPoint3d;
+typedef ShPoint<3, SH_INOUT, double> ShInOutPoint3d;
+typedef ShPoint<3, SH_TEMP, double> ShPoint3d;
+typedef ShPoint<3, SH_CONST, double> ShConstPoint3d;
+typedef ShPoint<4, SH_INPUT, double> ShInputPoint4d;
+typedef ShPoint<4, SH_OUTPUT, double> ShOutputPoint4d;
+typedef ShPoint<4, SH_INOUT, double> ShInOutPoint4d;
+typedef ShPoint<4, SH_TEMP, double> ShPoint4d;
+typedef ShPoint<4, SH_CONST, double> ShConstPoint4d;
+
+
 typedef ShPoint<1, SH_INPUT, float> ShInputPoint1f;
 typedef ShPoint<1, SH_OUTPUT, float> ShOutputPoint1f;
 typedef ShPoint<1, SH_INOUT, float> ShInOutPoint1f;
@@ -334,6 +562,52 @@ typedef ShPoint<4, SH_OUTPUT, float> ShOutputPoint4f;
 typedef ShPoint<4, SH_INOUT, float> ShInOutPoint4f;
 typedef ShPoint<4, SH_TEMP, float> ShPoint4f;
 typedef ShPoint<4, SH_CONST, float> ShConstPoint4f;
+
+
+typedef ShPoint<1, SH_INPUT, char> ShInputPoint1b;
+typedef ShPoint<1, SH_OUTPUT, char> ShOutputPoint1b;
+typedef ShPoint<1, SH_INOUT, char> ShInOutPoint1b;
+typedef ShPoint<1, SH_TEMP, char> ShPoint1b;
+typedef ShPoint<1, SH_CONST, char> ShConstPoint1b;
+typedef ShPoint<2, SH_INPUT, char> ShInputPoint2b;
+typedef ShPoint<2, SH_OUTPUT, char> ShOutputPoint2b;
+typedef ShPoint<2, SH_INOUT, char> ShInOutPoint2b;
+typedef ShPoint<2, SH_TEMP, char> ShPoint2b;
+typedef ShPoint<2, SH_CONST, char> ShConstPoint2b;
+typedef ShPoint<3, SH_INPUT, char> ShInputPoint3b;
+typedef ShPoint<3, SH_OUTPUT, char> ShOutputPoint3b;
+typedef ShPoint<3, SH_INOUT, char> ShInOutPoint3b;
+typedef ShPoint<3, SH_TEMP, char> ShPoint3b;
+typedef ShPoint<3, SH_CONST, char> ShConstPoint3b;
+typedef ShPoint<4, SH_INPUT, char> ShInputPoint4b;
+typedef ShPoint<4, SH_OUTPUT, char> ShOutputPoint4b;
+typedef ShPoint<4, SH_INOUT, char> ShInOutPoint4b;
+typedef ShPoint<4, SH_TEMP, char> ShPoint4b;
+typedef ShPoint<4, SH_CONST, char> ShConstPoint4b;
+
+
+typedef ShPoint<1, SH_INPUT, ShInterval<float> > ShInputPoint1i_f;
+typedef ShPoint<1, SH_OUTPUT, ShInterval<float> > ShOutputPoint1i_f;
+typedef ShPoint<1, SH_INOUT, ShInterval<float> > ShInOutPoint1i_f;
+typedef ShPoint<1, SH_TEMP, ShInterval<float> > ShPoint1i_f;
+typedef ShPoint<1, SH_CONST, ShInterval<float> > ShConstPoint1i_f;
+typedef ShPoint<2, SH_INPUT, ShInterval<float> > ShInputPoint2i_f;
+typedef ShPoint<2, SH_OUTPUT, ShInterval<float> > ShOutputPoint2i_f;
+typedef ShPoint<2, SH_INOUT, ShInterval<float> > ShInOutPoint2i_f;
+typedef ShPoint<2, SH_TEMP, ShInterval<float> > ShPoint2i_f;
+typedef ShPoint<2, SH_CONST, ShInterval<float> > ShConstPoint2i_f;
+typedef ShPoint<3, SH_INPUT, ShInterval<float> > ShInputPoint3i_f;
+typedef ShPoint<3, SH_OUTPUT, ShInterval<float> > ShOutputPoint3i_f;
+typedef ShPoint<3, SH_INOUT, ShInterval<float> > ShInOutPoint3i_f;
+typedef ShPoint<3, SH_TEMP, ShInterval<float> > ShPoint3i_f;
+typedef ShPoint<3, SH_CONST, ShInterval<float> > ShConstPoint3i_f;
+typedef ShPoint<4, SH_INPUT, ShInterval<float> > ShInputPoint4i_f;
+typedef ShPoint<4, SH_OUTPUT, ShInterval<float> > ShOutputPoint4i_f;
+typedef ShPoint<4, SH_INOUT, ShInterval<float> > ShInOutPoint4i_f;
+typedef ShPoint<4, SH_TEMP, ShInterval<float> > ShPoint4i_f;
+typedef ShPoint<4, SH_CONST, ShInterval<float> > ShConstPoint4i_f;
+
+
 
 } // namespace SH
 #include "ShPointImpl.hpp"

@@ -45,31 +45,61 @@ template<int N, ShBindingType Binding, typename T=float, bool Swizzled=false>
 class ShColor : public ShAttrib<N, Binding, T, Swizzled> {
 public:
   ShColor();
-  ShColor(const ShGeneric<N, T>& other);
+  
+  template<typename T2>
+  ShColor(const ShGeneric<N, T2>& other);
   ShColor(const ShColor<N, Binding, T, Swizzled>& other);
+  
+  template<typename T2>
+  ShColor(const ShColor<N, Binding, T2, Swizzled>& other);
   ShColor(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
   explicit ShColor(T data[N]);
   
   ~ShColor();
 
-  ShColor& operator=(const ShGeneric<N, T>& other);
+  
+  template<typename T2>
+  ShColor& operator=(const ShGeneric<N, T2>& other);
+  
+  template<typename T2>
+  ShColor& operator=(const ShColor<N, Binding, T2, Swizzled>& other);
   ShColor& operator=(const ShColor<N, Binding, T, Swizzled>& other);
 
-  ShColor& operator+=(const ShGeneric<N, T>& right);
-  ShColor& operator-=(const ShGeneric<N, T>& right);
-  ShColor& operator*=(const ShGeneric<N, T>& right);
-  ShColor& operator/=(const ShGeneric<N, T>& right);
-  ShColor& operator%=(const ShGeneric<N, T>& right);
+  
+  template<typename T2>
+  ShColor& operator+=(const ShGeneric<N, T2>& right);
+  
+  template<typename T2>
+  ShColor& operator-=(const ShGeneric<N, T2>& right);
+  
+  template<typename T2>
+  ShColor& operator*=(const ShGeneric<N, T2>& right);
+  
+  template<typename T2>
+  ShColor& operator/=(const ShGeneric<N, T2>& right);
+  
+  template<typename T2>
+  ShColor& operator%=(const ShGeneric<N, T2>& right);
   ShColor& operator*=(T);
   ShColor& operator/=(T);
   ShColor& operator%=(T);
   ShColor& operator+=(T);
   ShColor& operator-=(T);
-  ShColor& operator+=(const ShGeneric<1, T>&);
-  ShColor& operator-=(const ShGeneric<1, T>&);
-  ShColor& operator*=(const ShGeneric<1, T>&);
-  ShColor& operator/=(const ShGeneric<1, T>&);
-  ShColor& operator%=(const ShGeneric<1, T>&);
+  
+  template<typename T2>
+  ShColor& operator+=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShColor& operator-=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShColor& operator*=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShColor& operator/=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShColor& operator%=(const ShGeneric<1, T2>&);
   ShColor<1, Binding, T, true> operator()(int) const;
   ShColor<2, Binding, T, true> operator()(int, int) const;
   ShColor<3, Binding, T, true> operator()(int, int, int) const;
@@ -98,8 +128,13 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 class ShColor<1, Binding, T, Swizzled> : public ShAttrib<1, Binding, T, Swizzled> {
 public:
   ShColor();
-  ShColor(const ShGeneric<1, T>& other);
+  
+  template<typename T2>
+  ShColor(const ShGeneric<1, T2>& other);
   ShColor(const ShColor<1, Binding, T, Swizzled>& other);
+  
+  template<typename T2>
+  ShColor(const ShColor<1, Binding, T2, Swizzled>& other);
   ShColor(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
   explicit ShColor(T data[1]);
   
@@ -107,16 +142,31 @@ public:
   
   ~ShColor();
 
-  ShColor& operator=(const ShGeneric<1, T>& other);
+  
+  template<typename T2>
+  ShColor& operator=(const ShGeneric<1, T2>& other);
+  
+  template<typename T2>
+  ShColor& operator=(const ShColor<1, Binding, T2, Swizzled>& other);
   ShColor& operator=(const ShColor<1, Binding, T, Swizzled>& other);
 
   ShColor& operator=(T other);
 
-  ShColor& operator+=(const ShGeneric<1, T>& right);
-  ShColor& operator-=(const ShGeneric<1, T>& right);
-  ShColor& operator*=(const ShGeneric<1, T>& right);
-  ShColor& operator/=(const ShGeneric<1, T>& right);
-  ShColor& operator%=(const ShGeneric<1, T>& right);
+  
+  template<typename T2>
+  ShColor& operator+=(const ShGeneric<1, T2>& right);
+  
+  template<typename T2>
+  ShColor& operator-=(const ShGeneric<1, T2>& right);
+  
+  template<typename T2>
+  ShColor& operator*=(const ShGeneric<1, T2>& right);
+  
+  template<typename T2>
+  ShColor& operator/=(const ShGeneric<1, T2>& right);
+  
+  template<typename T2>
+  ShColor& operator%=(const ShGeneric<1, T2>& right);
   ShColor& operator*=(T);
   ShColor& operator/=(T);
   ShColor& operator%=(T);
@@ -150,8 +200,13 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 class ShColor<2, Binding, T, Swizzled> : public ShAttrib<2, Binding, T, Swizzled> {
 public:
   ShColor();
-  ShColor(const ShGeneric<2, T>& other);
+  
+  template<typename T2>
+  ShColor(const ShGeneric<2, T2>& other);
   ShColor(const ShColor<2, Binding, T, Swizzled>& other);
+  
+  template<typename T2>
+  ShColor(const ShColor<2, Binding, T2, Swizzled>& other);
   ShColor(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
   explicit ShColor(T data[2]);
   
@@ -160,24 +215,49 @@ public:
   
   ~ShColor();
 
-  ShColor& operator=(const ShGeneric<2, T>& other);
+  
+  template<typename T2>
+  ShColor& operator=(const ShGeneric<2, T2>& other);
+  
+  template<typename T2>
+  ShColor& operator=(const ShColor<2, Binding, T2, Swizzled>& other);
   ShColor& operator=(const ShColor<2, Binding, T, Swizzled>& other);
 
-  ShColor& operator+=(const ShGeneric<2, T>& right);
-  ShColor& operator-=(const ShGeneric<2, T>& right);
-  ShColor& operator*=(const ShGeneric<2, T>& right);
-  ShColor& operator/=(const ShGeneric<2, T>& right);
-  ShColor& operator%=(const ShGeneric<2, T>& right);
+  
+  template<typename T2>
+  ShColor& operator+=(const ShGeneric<2, T2>& right);
+  
+  template<typename T2>
+  ShColor& operator-=(const ShGeneric<2, T2>& right);
+  
+  template<typename T2>
+  ShColor& operator*=(const ShGeneric<2, T2>& right);
+  
+  template<typename T2>
+  ShColor& operator/=(const ShGeneric<2, T2>& right);
+  
+  template<typename T2>
+  ShColor& operator%=(const ShGeneric<2, T2>& right);
   ShColor& operator*=(T);
   ShColor& operator/=(T);
   ShColor& operator%=(T);
   ShColor& operator+=(T);
   ShColor& operator-=(T);
-  ShColor& operator+=(const ShGeneric<1, T>&);
-  ShColor& operator-=(const ShGeneric<1, T>&);
-  ShColor& operator*=(const ShGeneric<1, T>&);
-  ShColor& operator/=(const ShGeneric<1, T>&);
-  ShColor& operator%=(const ShGeneric<1, T>&);
+  
+  template<typename T2>
+  ShColor& operator+=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShColor& operator-=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShColor& operator*=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShColor& operator/=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShColor& operator%=(const ShGeneric<1, T2>&);
   ShColor<1, Binding, T, true> operator()(int) const;
   ShColor<2, Binding, T, true> operator()(int, int) const;
   ShColor<3, Binding, T, true> operator()(int, int, int) const;
@@ -206,8 +286,13 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 class ShColor<3, Binding, T, Swizzled> : public ShAttrib<3, Binding, T, Swizzled> {
 public:
   ShColor();
-  ShColor(const ShGeneric<3, T>& other);
+  
+  template<typename T2>
+  ShColor(const ShGeneric<3, T2>& other);
   ShColor(const ShColor<3, Binding, T, Swizzled>& other);
+  
+  template<typename T2>
+  ShColor(const ShColor<3, Binding, T2, Swizzled>& other);
   ShColor(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
   explicit ShColor(T data[3]);
   
@@ -216,24 +301,49 @@ public:
   
   ~ShColor();
 
-  ShColor& operator=(const ShGeneric<3, T>& other);
+  
+  template<typename T2>
+  ShColor& operator=(const ShGeneric<3, T2>& other);
+  
+  template<typename T2>
+  ShColor& operator=(const ShColor<3, Binding, T2, Swizzled>& other);
   ShColor& operator=(const ShColor<3, Binding, T, Swizzled>& other);
 
-  ShColor& operator+=(const ShGeneric<3, T>& right);
-  ShColor& operator-=(const ShGeneric<3, T>& right);
-  ShColor& operator*=(const ShGeneric<3, T>& right);
-  ShColor& operator/=(const ShGeneric<3, T>& right);
-  ShColor& operator%=(const ShGeneric<3, T>& right);
+  
+  template<typename T2>
+  ShColor& operator+=(const ShGeneric<3, T2>& right);
+  
+  template<typename T2>
+  ShColor& operator-=(const ShGeneric<3, T2>& right);
+  
+  template<typename T2>
+  ShColor& operator*=(const ShGeneric<3, T2>& right);
+  
+  template<typename T2>
+  ShColor& operator/=(const ShGeneric<3, T2>& right);
+  
+  template<typename T2>
+  ShColor& operator%=(const ShGeneric<3, T2>& right);
   ShColor& operator*=(T);
   ShColor& operator/=(T);
   ShColor& operator%=(T);
   ShColor& operator+=(T);
   ShColor& operator-=(T);
-  ShColor& operator+=(const ShGeneric<1, T>&);
-  ShColor& operator-=(const ShGeneric<1, T>&);
-  ShColor& operator*=(const ShGeneric<1, T>&);
-  ShColor& operator/=(const ShGeneric<1, T>&);
-  ShColor& operator%=(const ShGeneric<1, T>&);
+  
+  template<typename T2>
+  ShColor& operator+=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShColor& operator-=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShColor& operator*=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShColor& operator/=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShColor& operator%=(const ShGeneric<1, T2>&);
   ShColor<1, Binding, T, true> operator()(int) const;
   ShColor<2, Binding, T, true> operator()(int, int) const;
   ShColor<3, Binding, T, true> operator()(int, int, int) const;
@@ -262,8 +372,13 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 class ShColor<4, Binding, T, Swizzled> : public ShAttrib<4, Binding, T, Swizzled> {
 public:
   ShColor();
-  ShColor(const ShGeneric<4, T>& other);
+  
+  template<typename T2>
+  ShColor(const ShGeneric<4, T2>& other);
   ShColor(const ShColor<4, Binding, T, Swizzled>& other);
+  
+  template<typename T2>
+  ShColor(const ShColor<4, Binding, T2, Swizzled>& other);
   ShColor(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
   explicit ShColor(T data[4]);
   
@@ -272,24 +387,49 @@ public:
   
   ~ShColor();
 
-  ShColor& operator=(const ShGeneric<4, T>& other);
+  
+  template<typename T2>
+  ShColor& operator=(const ShGeneric<4, T2>& other);
+  
+  template<typename T2>
+  ShColor& operator=(const ShColor<4, Binding, T2, Swizzled>& other);
   ShColor& operator=(const ShColor<4, Binding, T, Swizzled>& other);
 
-  ShColor& operator+=(const ShGeneric<4, T>& right);
-  ShColor& operator-=(const ShGeneric<4, T>& right);
-  ShColor& operator*=(const ShGeneric<4, T>& right);
-  ShColor& operator/=(const ShGeneric<4, T>& right);
-  ShColor& operator%=(const ShGeneric<4, T>& right);
+  
+  template<typename T2>
+  ShColor& operator+=(const ShGeneric<4, T2>& right);
+  
+  template<typename T2>
+  ShColor& operator-=(const ShGeneric<4, T2>& right);
+  
+  template<typename T2>
+  ShColor& operator*=(const ShGeneric<4, T2>& right);
+  
+  template<typename T2>
+  ShColor& operator/=(const ShGeneric<4, T2>& right);
+  
+  template<typename T2>
+  ShColor& operator%=(const ShGeneric<4, T2>& right);
   ShColor& operator*=(T);
   ShColor& operator/=(T);
   ShColor& operator%=(T);
   ShColor& operator+=(T);
   ShColor& operator-=(T);
-  ShColor& operator+=(const ShGeneric<1, T>&);
-  ShColor& operator-=(const ShGeneric<1, T>&);
-  ShColor& operator*=(const ShGeneric<1, T>&);
-  ShColor& operator/=(const ShGeneric<1, T>&);
-  ShColor& operator%=(const ShGeneric<1, T>&);
+  
+  template<typename T2>
+  ShColor& operator+=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShColor& operator-=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShColor& operator*=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShColor& operator/=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShColor& operator%=(const ShGeneric<1, T2>&);
   ShColor<1, Binding, T, true> operator()(int) const;
   ShColor<2, Binding, T, true> operator()(int, int) const;
   ShColor<3, Binding, T, true> operator()(int, int, int) const;
@@ -314,6 +454,94 @@ private:
   typedef ShAttrib<4, Binding, T, Swizzled> ParentType;
 };
 
+typedef ShColor<1, SH_INPUT, ShInterval<double> > ShInputColor1i_d;
+typedef ShColor<1, SH_OUTPUT, ShInterval<double> > ShOutputColor1i_d;
+typedef ShColor<1, SH_INOUT, ShInterval<double> > ShInOutColor1i_d;
+typedef ShColor<1, SH_TEMP, ShInterval<double> > ShColor1i_d;
+typedef ShColor<1, SH_CONST, ShInterval<double> > ShConstColor1i_d;
+typedef ShColor<2, SH_INPUT, ShInterval<double> > ShInputColor2i_d;
+typedef ShColor<2, SH_OUTPUT, ShInterval<double> > ShOutputColor2i_d;
+typedef ShColor<2, SH_INOUT, ShInterval<double> > ShInOutColor2i_d;
+typedef ShColor<2, SH_TEMP, ShInterval<double> > ShColor2i_d;
+typedef ShColor<2, SH_CONST, ShInterval<double> > ShConstColor2i_d;
+typedef ShColor<3, SH_INPUT, ShInterval<double> > ShInputColor3i_d;
+typedef ShColor<3, SH_OUTPUT, ShInterval<double> > ShOutputColor3i_d;
+typedef ShColor<3, SH_INOUT, ShInterval<double> > ShInOutColor3i_d;
+typedef ShColor<3, SH_TEMP, ShInterval<double> > ShColor3i_d;
+typedef ShColor<3, SH_CONST, ShInterval<double> > ShConstColor3i_d;
+typedef ShColor<4, SH_INPUT, ShInterval<double> > ShInputColor4i_d;
+typedef ShColor<4, SH_OUTPUT, ShInterval<double> > ShOutputColor4i_d;
+typedef ShColor<4, SH_INOUT, ShInterval<double> > ShInOutColor4i_d;
+typedef ShColor<4, SH_TEMP, ShInterval<double> > ShColor4i_d;
+typedef ShColor<4, SH_CONST, ShInterval<double> > ShConstColor4i_d;
+
+
+typedef ShColor<1, SH_INPUT, short> ShInputColor1s;
+typedef ShColor<1, SH_OUTPUT, short> ShOutputColor1s;
+typedef ShColor<1, SH_INOUT, short> ShInOutColor1s;
+typedef ShColor<1, SH_TEMP, short> ShColor1s;
+typedef ShColor<1, SH_CONST, short> ShConstColor1s;
+typedef ShColor<2, SH_INPUT, short> ShInputColor2s;
+typedef ShColor<2, SH_OUTPUT, short> ShOutputColor2s;
+typedef ShColor<2, SH_INOUT, short> ShInOutColor2s;
+typedef ShColor<2, SH_TEMP, short> ShColor2s;
+typedef ShColor<2, SH_CONST, short> ShConstColor2s;
+typedef ShColor<3, SH_INPUT, short> ShInputColor3s;
+typedef ShColor<3, SH_OUTPUT, short> ShOutputColor3s;
+typedef ShColor<3, SH_INOUT, short> ShInOutColor3s;
+typedef ShColor<3, SH_TEMP, short> ShColor3s;
+typedef ShColor<3, SH_CONST, short> ShConstColor3s;
+typedef ShColor<4, SH_INPUT, short> ShInputColor4s;
+typedef ShColor<4, SH_OUTPUT, short> ShOutputColor4s;
+typedef ShColor<4, SH_INOUT, short> ShInOutColor4s;
+typedef ShColor<4, SH_TEMP, short> ShColor4s;
+typedef ShColor<4, SH_CONST, short> ShConstColor4s;
+
+
+typedef ShColor<1, SH_INPUT, int> ShInputColor1i;
+typedef ShColor<1, SH_OUTPUT, int> ShOutputColor1i;
+typedef ShColor<1, SH_INOUT, int> ShInOutColor1i;
+typedef ShColor<1, SH_TEMP, int> ShColor1i;
+typedef ShColor<1, SH_CONST, int> ShConstColor1i;
+typedef ShColor<2, SH_INPUT, int> ShInputColor2i;
+typedef ShColor<2, SH_OUTPUT, int> ShOutputColor2i;
+typedef ShColor<2, SH_INOUT, int> ShInOutColor2i;
+typedef ShColor<2, SH_TEMP, int> ShColor2i;
+typedef ShColor<2, SH_CONST, int> ShConstColor2i;
+typedef ShColor<3, SH_INPUT, int> ShInputColor3i;
+typedef ShColor<3, SH_OUTPUT, int> ShOutputColor3i;
+typedef ShColor<3, SH_INOUT, int> ShInOutColor3i;
+typedef ShColor<3, SH_TEMP, int> ShColor3i;
+typedef ShColor<3, SH_CONST, int> ShConstColor3i;
+typedef ShColor<4, SH_INPUT, int> ShInputColor4i;
+typedef ShColor<4, SH_OUTPUT, int> ShOutputColor4i;
+typedef ShColor<4, SH_INOUT, int> ShInOutColor4i;
+typedef ShColor<4, SH_TEMP, int> ShColor4i;
+typedef ShColor<4, SH_CONST, int> ShConstColor4i;
+
+
+typedef ShColor<1, SH_INPUT, double> ShInputColor1d;
+typedef ShColor<1, SH_OUTPUT, double> ShOutputColor1d;
+typedef ShColor<1, SH_INOUT, double> ShInOutColor1d;
+typedef ShColor<1, SH_TEMP, double> ShColor1d;
+typedef ShColor<1, SH_CONST, double> ShConstColor1d;
+typedef ShColor<2, SH_INPUT, double> ShInputColor2d;
+typedef ShColor<2, SH_OUTPUT, double> ShOutputColor2d;
+typedef ShColor<2, SH_INOUT, double> ShInOutColor2d;
+typedef ShColor<2, SH_TEMP, double> ShColor2d;
+typedef ShColor<2, SH_CONST, double> ShConstColor2d;
+typedef ShColor<3, SH_INPUT, double> ShInputColor3d;
+typedef ShColor<3, SH_OUTPUT, double> ShOutputColor3d;
+typedef ShColor<3, SH_INOUT, double> ShInOutColor3d;
+typedef ShColor<3, SH_TEMP, double> ShColor3d;
+typedef ShColor<3, SH_CONST, double> ShConstColor3d;
+typedef ShColor<4, SH_INPUT, double> ShInputColor4d;
+typedef ShColor<4, SH_OUTPUT, double> ShOutputColor4d;
+typedef ShColor<4, SH_INOUT, double> ShInOutColor4d;
+typedef ShColor<4, SH_TEMP, double> ShColor4d;
+typedef ShColor<4, SH_CONST, double> ShConstColor4d;
+
+
 typedef ShColor<1, SH_INPUT, float> ShInputColor1f;
 typedef ShColor<1, SH_OUTPUT, float> ShOutputColor1f;
 typedef ShColor<1, SH_INOUT, float> ShInOutColor1f;
@@ -334,6 +562,52 @@ typedef ShColor<4, SH_OUTPUT, float> ShOutputColor4f;
 typedef ShColor<4, SH_INOUT, float> ShInOutColor4f;
 typedef ShColor<4, SH_TEMP, float> ShColor4f;
 typedef ShColor<4, SH_CONST, float> ShConstColor4f;
+
+
+typedef ShColor<1, SH_INPUT, char> ShInputColor1b;
+typedef ShColor<1, SH_OUTPUT, char> ShOutputColor1b;
+typedef ShColor<1, SH_INOUT, char> ShInOutColor1b;
+typedef ShColor<1, SH_TEMP, char> ShColor1b;
+typedef ShColor<1, SH_CONST, char> ShConstColor1b;
+typedef ShColor<2, SH_INPUT, char> ShInputColor2b;
+typedef ShColor<2, SH_OUTPUT, char> ShOutputColor2b;
+typedef ShColor<2, SH_INOUT, char> ShInOutColor2b;
+typedef ShColor<2, SH_TEMP, char> ShColor2b;
+typedef ShColor<2, SH_CONST, char> ShConstColor2b;
+typedef ShColor<3, SH_INPUT, char> ShInputColor3b;
+typedef ShColor<3, SH_OUTPUT, char> ShOutputColor3b;
+typedef ShColor<3, SH_INOUT, char> ShInOutColor3b;
+typedef ShColor<3, SH_TEMP, char> ShColor3b;
+typedef ShColor<3, SH_CONST, char> ShConstColor3b;
+typedef ShColor<4, SH_INPUT, char> ShInputColor4b;
+typedef ShColor<4, SH_OUTPUT, char> ShOutputColor4b;
+typedef ShColor<4, SH_INOUT, char> ShInOutColor4b;
+typedef ShColor<4, SH_TEMP, char> ShColor4b;
+typedef ShColor<4, SH_CONST, char> ShConstColor4b;
+
+
+typedef ShColor<1, SH_INPUT, ShInterval<float> > ShInputColor1i_f;
+typedef ShColor<1, SH_OUTPUT, ShInterval<float> > ShOutputColor1i_f;
+typedef ShColor<1, SH_INOUT, ShInterval<float> > ShInOutColor1i_f;
+typedef ShColor<1, SH_TEMP, ShInterval<float> > ShColor1i_f;
+typedef ShColor<1, SH_CONST, ShInterval<float> > ShConstColor1i_f;
+typedef ShColor<2, SH_INPUT, ShInterval<float> > ShInputColor2i_f;
+typedef ShColor<2, SH_OUTPUT, ShInterval<float> > ShOutputColor2i_f;
+typedef ShColor<2, SH_INOUT, ShInterval<float> > ShInOutColor2i_f;
+typedef ShColor<2, SH_TEMP, ShInterval<float> > ShColor2i_f;
+typedef ShColor<2, SH_CONST, ShInterval<float> > ShConstColor2i_f;
+typedef ShColor<3, SH_INPUT, ShInterval<float> > ShInputColor3i_f;
+typedef ShColor<3, SH_OUTPUT, ShInterval<float> > ShOutputColor3i_f;
+typedef ShColor<3, SH_INOUT, ShInterval<float> > ShInOutColor3i_f;
+typedef ShColor<3, SH_TEMP, ShInterval<float> > ShColor3i_f;
+typedef ShColor<3, SH_CONST, ShInterval<float> > ShConstColor3i_f;
+typedef ShColor<4, SH_INPUT, ShInterval<float> > ShInputColor4i_f;
+typedef ShColor<4, SH_OUTPUT, ShInterval<float> > ShOutputColor4i_f;
+typedef ShColor<4, SH_INOUT, ShInterval<float> > ShInOutColor4i_f;
+typedef ShColor<4, SH_TEMP, ShInterval<float> > ShColor4i_f;
+typedef ShColor<4, SH_CONST, ShInterval<float> > ShConstColor4i_f;
+
+
 
 } // namespace SH
 #include "ShColorImpl.hpp"

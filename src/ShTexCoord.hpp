@@ -45,31 +45,61 @@ template<int N, ShBindingType Binding, typename T=float, bool Swizzled=false>
 class ShTexCoord : public ShAttrib<N, Binding, T, Swizzled> {
 public:
   ShTexCoord();
-  ShTexCoord(const ShGeneric<N, T>& other);
+  
+  template<typename T2>
+  ShTexCoord(const ShGeneric<N, T2>& other);
   ShTexCoord(const ShTexCoord<N, Binding, T, Swizzled>& other);
+  
+  template<typename T2>
+  ShTexCoord(const ShTexCoord<N, Binding, T2, Swizzled>& other);
   ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
   explicit ShTexCoord(T data[N]);
   
   ~ShTexCoord();
 
-  ShTexCoord& operator=(const ShGeneric<N, T>& other);
+  
+  template<typename T2>
+  ShTexCoord& operator=(const ShGeneric<N, T2>& other);
+  
+  template<typename T2>
+  ShTexCoord& operator=(const ShTexCoord<N, Binding, T2, Swizzled>& other);
   ShTexCoord& operator=(const ShTexCoord<N, Binding, T, Swizzled>& other);
 
-  ShTexCoord& operator+=(const ShGeneric<N, T>& right);
-  ShTexCoord& operator-=(const ShGeneric<N, T>& right);
-  ShTexCoord& operator*=(const ShGeneric<N, T>& right);
-  ShTexCoord& operator/=(const ShGeneric<N, T>& right);
-  ShTexCoord& operator%=(const ShGeneric<N, T>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator+=(const ShGeneric<N, T2>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator-=(const ShGeneric<N, T2>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator*=(const ShGeneric<N, T2>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator/=(const ShGeneric<N, T2>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator%=(const ShGeneric<N, T2>& right);
   ShTexCoord& operator*=(T);
   ShTexCoord& operator/=(T);
   ShTexCoord& operator%=(T);
   ShTexCoord& operator+=(T);
   ShTexCoord& operator-=(T);
-  ShTexCoord& operator+=(const ShGeneric<1, T>&);
-  ShTexCoord& operator-=(const ShGeneric<1, T>&);
-  ShTexCoord& operator*=(const ShGeneric<1, T>&);
-  ShTexCoord& operator/=(const ShGeneric<1, T>&);
-  ShTexCoord& operator%=(const ShGeneric<1, T>&);
+  
+  template<typename T2>
+  ShTexCoord& operator+=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShTexCoord& operator-=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShTexCoord& operator*=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShTexCoord& operator/=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShTexCoord& operator%=(const ShGeneric<1, T2>&);
   ShTexCoord<1, Binding, T, true> operator()(int) const;
   ShTexCoord<2, Binding, T, true> operator()(int, int) const;
   ShTexCoord<3, Binding, T, true> operator()(int, int, int) const;
@@ -98,8 +128,13 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 class ShTexCoord<1, Binding, T, Swizzled> : public ShAttrib<1, Binding, T, Swizzled> {
 public:
   ShTexCoord();
-  ShTexCoord(const ShGeneric<1, T>& other);
+  
+  template<typename T2>
+  ShTexCoord(const ShGeneric<1, T2>& other);
   ShTexCoord(const ShTexCoord<1, Binding, T, Swizzled>& other);
+  
+  template<typename T2>
+  ShTexCoord(const ShTexCoord<1, Binding, T2, Swizzled>& other);
   ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
   explicit ShTexCoord(T data[1]);
   
@@ -107,16 +142,31 @@ public:
   
   ~ShTexCoord();
 
-  ShTexCoord& operator=(const ShGeneric<1, T>& other);
+  
+  template<typename T2>
+  ShTexCoord& operator=(const ShGeneric<1, T2>& other);
+  
+  template<typename T2>
+  ShTexCoord& operator=(const ShTexCoord<1, Binding, T2, Swizzled>& other);
   ShTexCoord& operator=(const ShTexCoord<1, Binding, T, Swizzled>& other);
 
   ShTexCoord& operator=(T other);
 
-  ShTexCoord& operator+=(const ShGeneric<1, T>& right);
-  ShTexCoord& operator-=(const ShGeneric<1, T>& right);
-  ShTexCoord& operator*=(const ShGeneric<1, T>& right);
-  ShTexCoord& operator/=(const ShGeneric<1, T>& right);
-  ShTexCoord& operator%=(const ShGeneric<1, T>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator+=(const ShGeneric<1, T2>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator-=(const ShGeneric<1, T2>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator*=(const ShGeneric<1, T2>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator/=(const ShGeneric<1, T2>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator%=(const ShGeneric<1, T2>& right);
   ShTexCoord& operator*=(T);
   ShTexCoord& operator/=(T);
   ShTexCoord& operator%=(T);
@@ -150,8 +200,13 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 class ShTexCoord<2, Binding, T, Swizzled> : public ShAttrib<2, Binding, T, Swizzled> {
 public:
   ShTexCoord();
-  ShTexCoord(const ShGeneric<2, T>& other);
+  
+  template<typename T2>
+  ShTexCoord(const ShGeneric<2, T2>& other);
   ShTexCoord(const ShTexCoord<2, Binding, T, Swizzled>& other);
+  
+  template<typename T2>
+  ShTexCoord(const ShTexCoord<2, Binding, T2, Swizzled>& other);
   ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
   explicit ShTexCoord(T data[2]);
   
@@ -160,24 +215,49 @@ public:
   
   ~ShTexCoord();
 
-  ShTexCoord& operator=(const ShGeneric<2, T>& other);
+  
+  template<typename T2>
+  ShTexCoord& operator=(const ShGeneric<2, T2>& other);
+  
+  template<typename T2>
+  ShTexCoord& operator=(const ShTexCoord<2, Binding, T2, Swizzled>& other);
   ShTexCoord& operator=(const ShTexCoord<2, Binding, T, Swizzled>& other);
 
-  ShTexCoord& operator+=(const ShGeneric<2, T>& right);
-  ShTexCoord& operator-=(const ShGeneric<2, T>& right);
-  ShTexCoord& operator*=(const ShGeneric<2, T>& right);
-  ShTexCoord& operator/=(const ShGeneric<2, T>& right);
-  ShTexCoord& operator%=(const ShGeneric<2, T>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator+=(const ShGeneric<2, T2>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator-=(const ShGeneric<2, T2>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator*=(const ShGeneric<2, T2>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator/=(const ShGeneric<2, T2>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator%=(const ShGeneric<2, T2>& right);
   ShTexCoord& operator*=(T);
   ShTexCoord& operator/=(T);
   ShTexCoord& operator%=(T);
   ShTexCoord& operator+=(T);
   ShTexCoord& operator-=(T);
-  ShTexCoord& operator+=(const ShGeneric<1, T>&);
-  ShTexCoord& operator-=(const ShGeneric<1, T>&);
-  ShTexCoord& operator*=(const ShGeneric<1, T>&);
-  ShTexCoord& operator/=(const ShGeneric<1, T>&);
-  ShTexCoord& operator%=(const ShGeneric<1, T>&);
+  
+  template<typename T2>
+  ShTexCoord& operator+=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShTexCoord& operator-=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShTexCoord& operator*=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShTexCoord& operator/=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShTexCoord& operator%=(const ShGeneric<1, T2>&);
   ShTexCoord<1, Binding, T, true> operator()(int) const;
   ShTexCoord<2, Binding, T, true> operator()(int, int) const;
   ShTexCoord<3, Binding, T, true> operator()(int, int, int) const;
@@ -206,8 +286,13 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 class ShTexCoord<3, Binding, T, Swizzled> : public ShAttrib<3, Binding, T, Swizzled> {
 public:
   ShTexCoord();
-  ShTexCoord(const ShGeneric<3, T>& other);
+  
+  template<typename T2>
+  ShTexCoord(const ShGeneric<3, T2>& other);
   ShTexCoord(const ShTexCoord<3, Binding, T, Swizzled>& other);
+  
+  template<typename T2>
+  ShTexCoord(const ShTexCoord<3, Binding, T2, Swizzled>& other);
   ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
   explicit ShTexCoord(T data[3]);
   
@@ -216,24 +301,49 @@ public:
   
   ~ShTexCoord();
 
-  ShTexCoord& operator=(const ShGeneric<3, T>& other);
+  
+  template<typename T2>
+  ShTexCoord& operator=(const ShGeneric<3, T2>& other);
+  
+  template<typename T2>
+  ShTexCoord& operator=(const ShTexCoord<3, Binding, T2, Swizzled>& other);
   ShTexCoord& operator=(const ShTexCoord<3, Binding, T, Swizzled>& other);
 
-  ShTexCoord& operator+=(const ShGeneric<3, T>& right);
-  ShTexCoord& operator-=(const ShGeneric<3, T>& right);
-  ShTexCoord& operator*=(const ShGeneric<3, T>& right);
-  ShTexCoord& operator/=(const ShGeneric<3, T>& right);
-  ShTexCoord& operator%=(const ShGeneric<3, T>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator+=(const ShGeneric<3, T2>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator-=(const ShGeneric<3, T2>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator*=(const ShGeneric<3, T2>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator/=(const ShGeneric<3, T2>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator%=(const ShGeneric<3, T2>& right);
   ShTexCoord& operator*=(T);
   ShTexCoord& operator/=(T);
   ShTexCoord& operator%=(T);
   ShTexCoord& operator+=(T);
   ShTexCoord& operator-=(T);
-  ShTexCoord& operator+=(const ShGeneric<1, T>&);
-  ShTexCoord& operator-=(const ShGeneric<1, T>&);
-  ShTexCoord& operator*=(const ShGeneric<1, T>&);
-  ShTexCoord& operator/=(const ShGeneric<1, T>&);
-  ShTexCoord& operator%=(const ShGeneric<1, T>&);
+  
+  template<typename T2>
+  ShTexCoord& operator+=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShTexCoord& operator-=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShTexCoord& operator*=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShTexCoord& operator/=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShTexCoord& operator%=(const ShGeneric<1, T2>&);
   ShTexCoord<1, Binding, T, true> operator()(int) const;
   ShTexCoord<2, Binding, T, true> operator()(int, int) const;
   ShTexCoord<3, Binding, T, true> operator()(int, int, int) const;
@@ -262,8 +372,13 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 class ShTexCoord<4, Binding, T, Swizzled> : public ShAttrib<4, Binding, T, Swizzled> {
 public:
   ShTexCoord();
-  ShTexCoord(const ShGeneric<4, T>& other);
+  
+  template<typename T2>
+  ShTexCoord(const ShGeneric<4, T2>& other);
   ShTexCoord(const ShTexCoord<4, Binding, T, Swizzled>& other);
+  
+  template<typename T2>
+  ShTexCoord(const ShTexCoord<4, Binding, T2, Swizzled>& other);
   ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
   explicit ShTexCoord(T data[4]);
   
@@ -272,24 +387,49 @@ public:
   
   ~ShTexCoord();
 
-  ShTexCoord& operator=(const ShGeneric<4, T>& other);
+  
+  template<typename T2>
+  ShTexCoord& operator=(const ShGeneric<4, T2>& other);
+  
+  template<typename T2>
+  ShTexCoord& operator=(const ShTexCoord<4, Binding, T2, Swizzled>& other);
   ShTexCoord& operator=(const ShTexCoord<4, Binding, T, Swizzled>& other);
 
-  ShTexCoord& operator+=(const ShGeneric<4, T>& right);
-  ShTexCoord& operator-=(const ShGeneric<4, T>& right);
-  ShTexCoord& operator*=(const ShGeneric<4, T>& right);
-  ShTexCoord& operator/=(const ShGeneric<4, T>& right);
-  ShTexCoord& operator%=(const ShGeneric<4, T>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator+=(const ShGeneric<4, T2>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator-=(const ShGeneric<4, T2>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator*=(const ShGeneric<4, T2>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator/=(const ShGeneric<4, T2>& right);
+  
+  template<typename T2>
+  ShTexCoord& operator%=(const ShGeneric<4, T2>& right);
   ShTexCoord& operator*=(T);
   ShTexCoord& operator/=(T);
   ShTexCoord& operator%=(T);
   ShTexCoord& operator+=(T);
   ShTexCoord& operator-=(T);
-  ShTexCoord& operator+=(const ShGeneric<1, T>&);
-  ShTexCoord& operator-=(const ShGeneric<1, T>&);
-  ShTexCoord& operator*=(const ShGeneric<1, T>&);
-  ShTexCoord& operator/=(const ShGeneric<1, T>&);
-  ShTexCoord& operator%=(const ShGeneric<1, T>&);
+  
+  template<typename T2>
+  ShTexCoord& operator+=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShTexCoord& operator-=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShTexCoord& operator*=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShTexCoord& operator/=(const ShGeneric<1, T2>&);
+  
+  template<typename T2>
+  ShTexCoord& operator%=(const ShGeneric<1, T2>&);
   ShTexCoord<1, Binding, T, true> operator()(int) const;
   ShTexCoord<2, Binding, T, true> operator()(int, int) const;
   ShTexCoord<3, Binding, T, true> operator()(int, int, int) const;
@@ -314,6 +454,94 @@ private:
   typedef ShAttrib<4, Binding, T, Swizzled> ParentType;
 };
 
+typedef ShTexCoord<1, SH_INPUT, ShInterval<double> > ShInputTexCoord1i_d;
+typedef ShTexCoord<1, SH_OUTPUT, ShInterval<double> > ShOutputTexCoord1i_d;
+typedef ShTexCoord<1, SH_INOUT, ShInterval<double> > ShInOutTexCoord1i_d;
+typedef ShTexCoord<1, SH_TEMP, ShInterval<double> > ShTexCoord1i_d;
+typedef ShTexCoord<1, SH_CONST, ShInterval<double> > ShConstTexCoord1i_d;
+typedef ShTexCoord<2, SH_INPUT, ShInterval<double> > ShInputTexCoord2i_d;
+typedef ShTexCoord<2, SH_OUTPUT, ShInterval<double> > ShOutputTexCoord2i_d;
+typedef ShTexCoord<2, SH_INOUT, ShInterval<double> > ShInOutTexCoord2i_d;
+typedef ShTexCoord<2, SH_TEMP, ShInterval<double> > ShTexCoord2i_d;
+typedef ShTexCoord<2, SH_CONST, ShInterval<double> > ShConstTexCoord2i_d;
+typedef ShTexCoord<3, SH_INPUT, ShInterval<double> > ShInputTexCoord3i_d;
+typedef ShTexCoord<3, SH_OUTPUT, ShInterval<double> > ShOutputTexCoord3i_d;
+typedef ShTexCoord<3, SH_INOUT, ShInterval<double> > ShInOutTexCoord3i_d;
+typedef ShTexCoord<3, SH_TEMP, ShInterval<double> > ShTexCoord3i_d;
+typedef ShTexCoord<3, SH_CONST, ShInterval<double> > ShConstTexCoord3i_d;
+typedef ShTexCoord<4, SH_INPUT, ShInterval<double> > ShInputTexCoord4i_d;
+typedef ShTexCoord<4, SH_OUTPUT, ShInterval<double> > ShOutputTexCoord4i_d;
+typedef ShTexCoord<4, SH_INOUT, ShInterval<double> > ShInOutTexCoord4i_d;
+typedef ShTexCoord<4, SH_TEMP, ShInterval<double> > ShTexCoord4i_d;
+typedef ShTexCoord<4, SH_CONST, ShInterval<double> > ShConstTexCoord4i_d;
+
+
+typedef ShTexCoord<1, SH_INPUT, short> ShInputTexCoord1s;
+typedef ShTexCoord<1, SH_OUTPUT, short> ShOutputTexCoord1s;
+typedef ShTexCoord<1, SH_INOUT, short> ShInOutTexCoord1s;
+typedef ShTexCoord<1, SH_TEMP, short> ShTexCoord1s;
+typedef ShTexCoord<1, SH_CONST, short> ShConstTexCoord1s;
+typedef ShTexCoord<2, SH_INPUT, short> ShInputTexCoord2s;
+typedef ShTexCoord<2, SH_OUTPUT, short> ShOutputTexCoord2s;
+typedef ShTexCoord<2, SH_INOUT, short> ShInOutTexCoord2s;
+typedef ShTexCoord<2, SH_TEMP, short> ShTexCoord2s;
+typedef ShTexCoord<2, SH_CONST, short> ShConstTexCoord2s;
+typedef ShTexCoord<3, SH_INPUT, short> ShInputTexCoord3s;
+typedef ShTexCoord<3, SH_OUTPUT, short> ShOutputTexCoord3s;
+typedef ShTexCoord<3, SH_INOUT, short> ShInOutTexCoord3s;
+typedef ShTexCoord<3, SH_TEMP, short> ShTexCoord3s;
+typedef ShTexCoord<3, SH_CONST, short> ShConstTexCoord3s;
+typedef ShTexCoord<4, SH_INPUT, short> ShInputTexCoord4s;
+typedef ShTexCoord<4, SH_OUTPUT, short> ShOutputTexCoord4s;
+typedef ShTexCoord<4, SH_INOUT, short> ShInOutTexCoord4s;
+typedef ShTexCoord<4, SH_TEMP, short> ShTexCoord4s;
+typedef ShTexCoord<4, SH_CONST, short> ShConstTexCoord4s;
+
+
+typedef ShTexCoord<1, SH_INPUT, int> ShInputTexCoord1i;
+typedef ShTexCoord<1, SH_OUTPUT, int> ShOutputTexCoord1i;
+typedef ShTexCoord<1, SH_INOUT, int> ShInOutTexCoord1i;
+typedef ShTexCoord<1, SH_TEMP, int> ShTexCoord1i;
+typedef ShTexCoord<1, SH_CONST, int> ShConstTexCoord1i;
+typedef ShTexCoord<2, SH_INPUT, int> ShInputTexCoord2i;
+typedef ShTexCoord<2, SH_OUTPUT, int> ShOutputTexCoord2i;
+typedef ShTexCoord<2, SH_INOUT, int> ShInOutTexCoord2i;
+typedef ShTexCoord<2, SH_TEMP, int> ShTexCoord2i;
+typedef ShTexCoord<2, SH_CONST, int> ShConstTexCoord2i;
+typedef ShTexCoord<3, SH_INPUT, int> ShInputTexCoord3i;
+typedef ShTexCoord<3, SH_OUTPUT, int> ShOutputTexCoord3i;
+typedef ShTexCoord<3, SH_INOUT, int> ShInOutTexCoord3i;
+typedef ShTexCoord<3, SH_TEMP, int> ShTexCoord3i;
+typedef ShTexCoord<3, SH_CONST, int> ShConstTexCoord3i;
+typedef ShTexCoord<4, SH_INPUT, int> ShInputTexCoord4i;
+typedef ShTexCoord<4, SH_OUTPUT, int> ShOutputTexCoord4i;
+typedef ShTexCoord<4, SH_INOUT, int> ShInOutTexCoord4i;
+typedef ShTexCoord<4, SH_TEMP, int> ShTexCoord4i;
+typedef ShTexCoord<4, SH_CONST, int> ShConstTexCoord4i;
+
+
+typedef ShTexCoord<1, SH_INPUT, double> ShInputTexCoord1d;
+typedef ShTexCoord<1, SH_OUTPUT, double> ShOutputTexCoord1d;
+typedef ShTexCoord<1, SH_INOUT, double> ShInOutTexCoord1d;
+typedef ShTexCoord<1, SH_TEMP, double> ShTexCoord1d;
+typedef ShTexCoord<1, SH_CONST, double> ShConstTexCoord1d;
+typedef ShTexCoord<2, SH_INPUT, double> ShInputTexCoord2d;
+typedef ShTexCoord<2, SH_OUTPUT, double> ShOutputTexCoord2d;
+typedef ShTexCoord<2, SH_INOUT, double> ShInOutTexCoord2d;
+typedef ShTexCoord<2, SH_TEMP, double> ShTexCoord2d;
+typedef ShTexCoord<2, SH_CONST, double> ShConstTexCoord2d;
+typedef ShTexCoord<3, SH_INPUT, double> ShInputTexCoord3d;
+typedef ShTexCoord<3, SH_OUTPUT, double> ShOutputTexCoord3d;
+typedef ShTexCoord<3, SH_INOUT, double> ShInOutTexCoord3d;
+typedef ShTexCoord<3, SH_TEMP, double> ShTexCoord3d;
+typedef ShTexCoord<3, SH_CONST, double> ShConstTexCoord3d;
+typedef ShTexCoord<4, SH_INPUT, double> ShInputTexCoord4d;
+typedef ShTexCoord<4, SH_OUTPUT, double> ShOutputTexCoord4d;
+typedef ShTexCoord<4, SH_INOUT, double> ShInOutTexCoord4d;
+typedef ShTexCoord<4, SH_TEMP, double> ShTexCoord4d;
+typedef ShTexCoord<4, SH_CONST, double> ShConstTexCoord4d;
+
+
 typedef ShTexCoord<1, SH_INPUT, float> ShInputTexCoord1f;
 typedef ShTexCoord<1, SH_OUTPUT, float> ShOutputTexCoord1f;
 typedef ShTexCoord<1, SH_INOUT, float> ShInOutTexCoord1f;
@@ -334,6 +562,52 @@ typedef ShTexCoord<4, SH_OUTPUT, float> ShOutputTexCoord4f;
 typedef ShTexCoord<4, SH_INOUT, float> ShInOutTexCoord4f;
 typedef ShTexCoord<4, SH_TEMP, float> ShTexCoord4f;
 typedef ShTexCoord<4, SH_CONST, float> ShConstTexCoord4f;
+
+
+typedef ShTexCoord<1, SH_INPUT, char> ShInputTexCoord1b;
+typedef ShTexCoord<1, SH_OUTPUT, char> ShOutputTexCoord1b;
+typedef ShTexCoord<1, SH_INOUT, char> ShInOutTexCoord1b;
+typedef ShTexCoord<1, SH_TEMP, char> ShTexCoord1b;
+typedef ShTexCoord<1, SH_CONST, char> ShConstTexCoord1b;
+typedef ShTexCoord<2, SH_INPUT, char> ShInputTexCoord2b;
+typedef ShTexCoord<2, SH_OUTPUT, char> ShOutputTexCoord2b;
+typedef ShTexCoord<2, SH_INOUT, char> ShInOutTexCoord2b;
+typedef ShTexCoord<2, SH_TEMP, char> ShTexCoord2b;
+typedef ShTexCoord<2, SH_CONST, char> ShConstTexCoord2b;
+typedef ShTexCoord<3, SH_INPUT, char> ShInputTexCoord3b;
+typedef ShTexCoord<3, SH_OUTPUT, char> ShOutputTexCoord3b;
+typedef ShTexCoord<3, SH_INOUT, char> ShInOutTexCoord3b;
+typedef ShTexCoord<3, SH_TEMP, char> ShTexCoord3b;
+typedef ShTexCoord<3, SH_CONST, char> ShConstTexCoord3b;
+typedef ShTexCoord<4, SH_INPUT, char> ShInputTexCoord4b;
+typedef ShTexCoord<4, SH_OUTPUT, char> ShOutputTexCoord4b;
+typedef ShTexCoord<4, SH_INOUT, char> ShInOutTexCoord4b;
+typedef ShTexCoord<4, SH_TEMP, char> ShTexCoord4b;
+typedef ShTexCoord<4, SH_CONST, char> ShConstTexCoord4b;
+
+
+typedef ShTexCoord<1, SH_INPUT, ShInterval<float> > ShInputTexCoord1i_f;
+typedef ShTexCoord<1, SH_OUTPUT, ShInterval<float> > ShOutputTexCoord1i_f;
+typedef ShTexCoord<1, SH_INOUT, ShInterval<float> > ShInOutTexCoord1i_f;
+typedef ShTexCoord<1, SH_TEMP, ShInterval<float> > ShTexCoord1i_f;
+typedef ShTexCoord<1, SH_CONST, ShInterval<float> > ShConstTexCoord1i_f;
+typedef ShTexCoord<2, SH_INPUT, ShInterval<float> > ShInputTexCoord2i_f;
+typedef ShTexCoord<2, SH_OUTPUT, ShInterval<float> > ShOutputTexCoord2i_f;
+typedef ShTexCoord<2, SH_INOUT, ShInterval<float> > ShInOutTexCoord2i_f;
+typedef ShTexCoord<2, SH_TEMP, ShInterval<float> > ShTexCoord2i_f;
+typedef ShTexCoord<2, SH_CONST, ShInterval<float> > ShConstTexCoord2i_f;
+typedef ShTexCoord<3, SH_INPUT, ShInterval<float> > ShInputTexCoord3i_f;
+typedef ShTexCoord<3, SH_OUTPUT, ShInterval<float> > ShOutputTexCoord3i_f;
+typedef ShTexCoord<3, SH_INOUT, ShInterval<float> > ShInOutTexCoord3i_f;
+typedef ShTexCoord<3, SH_TEMP, ShInterval<float> > ShTexCoord3i_f;
+typedef ShTexCoord<3, SH_CONST, ShInterval<float> > ShConstTexCoord3i_f;
+typedef ShTexCoord<4, SH_INPUT, ShInterval<float> > ShInputTexCoord4i_f;
+typedef ShTexCoord<4, SH_OUTPUT, ShInterval<float> > ShOutputTexCoord4i_f;
+typedef ShTexCoord<4, SH_INOUT, ShInterval<float> > ShInOutTexCoord4i_f;
+typedef ShTexCoord<4, SH_TEMP, ShInterval<float> > ShTexCoord4i_f;
+typedef ShTexCoord<4, SH_CONST, ShInterval<float> > ShConstTexCoord4i_f;
+
+
 
 } // namespace SH
 #include "ShTexCoordImpl.hpp"
