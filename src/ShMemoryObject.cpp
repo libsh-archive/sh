@@ -27,6 +27,7 @@
 #include <cstring>
 #include <cassert>
 #include "ShMemoryObject.hpp"
+#include "ShDebug.hpp"
 
 namespace SH {
 
@@ -34,7 +35,8 @@ ShMemoryObject::ShMemoryObject(int width, int height, int depth, int elements)
   : m_width(width), m_height(height), m_depth(depth), m_elements(elements) {
 }
 
-ShMemoryObject::~ShMemoryObject() {
+ShMemoryObject::~ShMemoryObject()
+{
 }
 
 int ShMemoryObject::width() const {
@@ -58,7 +60,7 @@ bool ShMemoryObject::copy( ShMemoryObjectPtr b ) {
   if( !compatibleWith(b) || bdata == 0 ) return false;
 
   setData(bdata);
-  delete bdata;
+  delete [] bdata;
 
   return true;
 }
@@ -73,6 +75,11 @@ bool ShMemoryObject::compatibleWith( ShMemoryObjectPtr b ) {
 ShDataMemoryObject::ShDataMemoryObject(int width, int height, int depth, int elements)
   : ShMemoryObject(width, height, depth, elements),
     m_data(new float[m_width * m_height * m_depth * m_elements]) {
+}
+
+ShDataMemoryObject::~ShDataMemoryObject()
+{
+  delete [] m_data;
 }
 
 void ShDataMemoryObject::setData(const float *data, int slice) {

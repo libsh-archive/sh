@@ -62,6 +62,7 @@ void shEndShader()
       ShEnvironment::shader->target() == "gpu:fragment") {
     shCompileShader(ShEnvironment::shader);
   }
+  ShEnvironment::shader = 0;
 }
 
 void shCompileShader(ShProgram& shader)

@@ -46,6 +46,8 @@ class ShOptimizer {
 public:
   ShOptimizer(ShCtrlGraphPtr graph);
 
+  ShOptimizer::~ShOptimizer();
+  
   /// Optimize with the given agressiveness
   void optimize(int level);
 

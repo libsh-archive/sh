@@ -37,6 +37,10 @@ ShOptimizer::ShOptimizer(ShCtrlGraphPtr graph)
 {
 }
 
+ShOptimizer::~ShOptimizer()
+{
+}
+
 void ShOptimizer::optimize(int level)
 {
   if (level == 0) return; // Level 0 means no optimizations at all.
@@ -466,7 +470,6 @@ struct DumpRch {
   void operator()(ShCtrlGraphNodePtr node)
   {
     if (!node) return;
-    SH_DEBUG_PRINT(node.object() << " = " <<r[node]);
   }
 
   ShOptimizer::ReachingMap& r;
@@ -584,8 +587,26 @@ struct UdDuDumper {
   }
 };
 
+struct UdDuClearer {
+  void operator()(ShCtrlGraphNodePtr node) {
+    if (!node) return;
+    ShBasicBlockPtr block = node->block;
+    if (!block) return;
+    
+    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+      for (int i = 0; i < 3; i++) {
+        I->ud[i].clear();
+      }
+      I->du.clear();
+    }
+  }
+};
+
 void ShOptimizer::buildUdDuChains()
 {
+  UdDuClearer clearer;
+  m_graph->dfs(clearer);
+  
   UdDuBuilder builder(*this);
   m_graph->dfs(builder);
 

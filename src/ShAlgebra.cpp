@@ -48,7 +48,10 @@ void copyCtrlGraph(ShCtrlGraphNodePtr head, ShCtrlGraphNodePtr tail,
       J->node = copyMap[J->node];
     }
     node->follower = copyMap[node->follower];
-    if (node->block) node->block = new ShBasicBlock(*node->block);
+    if (node->block) {
+      ShBasicBlockPtr new_block = new ShBasicBlock(*node->block);
+      node->block = new_block;
+    }
   }
   newHead = copyMap[head];
   newTail = copyMap[tail];
@@ -65,7 +68,6 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   int aosize, bisize;
   aosize = a->outputs.size();
   bisize = b->inputs.size();
-  //SH_DEBUG_PRINT( "Connecting " << aosize << " outputs to " << bisize << " inputs" );
   std::string rtarget;
 
   if (a->target().empty()) {
@@ -86,8 +88,9 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   copyCtrlGraph(b->ctrlGraph->entry(), b->ctrlGraph->exit(), headb, tailb);
 
   taila->append(headb);
-  
-  program->ctrlGraph = new ShCtrlGraph(heada, tailb);
+
+  ShCtrlGraphPtr new_graph = new ShCtrlGraph(heada, tailb);
+  program->ctrlGraph = new_graph;
 
   for (ShProgramNode::VarList::const_iterator II = a->inputs.begin(); II != a->inputs.end(); ++II) {
     program->inputs.push_back(*II);
@@ -117,15 +120,12 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   
   ShVariableReplacer::VarMap varMap;
 
-  // SH_DEBUG_PRINT("Smashing variables together");
   
   ShEnvironment::shader = program;
   ShEnvironment::insideShader = true;
   
   ShProgramNode::VarList::const_iterator I, J;  
   for (I = a->outputs.begin(), J = b->inputs.begin(); I != a->outputs.end() && J != b->inputs.end(); ++I, ++J) {
-    // SH_DEBUG_PRINT("Smashing variables " << (*I)->nameOfType() << " " <<(*I)->name() 
-    //     << " -> " << (*J)->nameOfType() << " " << (*J)->name() );
     if( (*I)->size() != (*J)->size() ) {
       ShError( ShAlgebraException( "Cannot smash variables " + 
             (*I)->nameOfType() + " " + (*I)->name() + " and " + 
@@ -146,8 +146,6 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   optimizer.optimize(ShEnvironment::optimizationLevel);
   
   program->collectVariables();
-  // SH_DEBUG_PRINT( "Done");
-
   return program;
 }
 
@@ -168,13 +166,14 @@ ShProgram combine(const ShProgram& a, const ShProgram& b)
   ShProgram program = new ShProgramNode(rtarget);
 
   ShCtrlGraphNodePtr heada, taila, headb, tailb;
-  
+
   copyCtrlGraph(a->ctrlGraph->entry(), a->ctrlGraph->exit(), heada, taila);
   copyCtrlGraph(b->ctrlGraph->entry(), b->ctrlGraph->exit(), headb, tailb);
 
   taila->append(headb);
-  
-  program->ctrlGraph = new ShCtrlGraph(heada, tailb);
+
+  ShCtrlGraphPtr new_graph = new ShCtrlGraph(heada, tailb);
+  program->ctrlGraph = new_graph;
 
   for (ShProgramNode::VarList::const_iterator I = a->inputs.begin(); I != a->inputs.end(); ++I) {
     program->inputs.push_back(*I);
@@ -190,8 +189,8 @@ ShProgram combine(const ShProgram& a, const ShProgram& b)
   }
 
   ShOptimizer optimizer(program->ctrlGraph);
-  optimizer.optimize(ShEnvironment::optimizationLevel);
-  
+  optimizer.optimize(ShEnvironment::optimizationLevel); 
+ 
   program->collectVariables();
   
   return program;
@@ -228,7 +227,8 @@ ShProgram replaceUniform(const ShProgram& a, const ShVariable& v)
   
   copyCtrlGraph(a->ctrlGraph->entry(), a->ctrlGraph->exit(), heada, taila);
 
-  program->ctrlGraph = new ShCtrlGraph(heada, taila);
+  ShCtrlGraphPtr new_graph = new ShCtrlGraph(heada, taila);
+  program->ctrlGraph = new_graph;
 
   for (ShProgramNode::VarList::const_iterator II = a->inputs.begin(); II != a->inputs.end(); ++II) {
     program->inputs.push_back(*II);
@@ -239,8 +239,6 @@ ShProgram replaceUniform(const ShProgram& a, const ShVariable& v)
   
   ShVariableReplacer::VarMap varMap;
 
-  // SH_DEBUG_PRINT("Adding a new input to replace the uniform");
-  
   ShEnvironment::shader = program;
   ShEnvironment::insideShader = true;
   // make a new input

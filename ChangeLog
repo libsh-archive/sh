@@ -1,3 +1,33 @@
+2004-01-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* test/ref.sht: Added this simple test to fix bugs in reference
+	counting.
+
+	* src/ShSyntax.cpp (shEndShader): Set ShEnvironment::shader to a
+	null pointer when we're done with it, possibly freeing up memory
+	earlier.
+
+	* backends/arb/ShArbStream.cpp (execute): More verbose error
+	message when input arity does not match output arity.
+
+	* backends/arb/ShArbTexture.cpp (loadDataTexture): Delete the
+	new'd array that ShMemoryObject gave to us from the data()
+	call. ShMemoryObject will be replaced soon, don't worry...
+
+	* src/ShMemoryObject.cpp (ShDataMemoryObject): How about we
+	actually delete the data that we allocate with new? Eh, Bryan?
+
+	* src/ShRefCount.hpp (class ShRefCountable): Have fun recompiling!
+	Add an operator=() and copy constructor to ShRefCountable, which
+	set the refcount to zero, as it should be. Also added a warning at
+	the top to those wishing to implement their own operator=() to
+	derived classes.
+	Added lots of optional debugging output. This helped me find the
+	previous bug.
+
+	* src/ShOptimizer.cpp (buildUdDuChains): Clear ud/du chains before
+	we build them, in case there is some cruft in there.
+
 2004-01-21  Bryan Chan  <b8chan@uwaterloo.ca>
 	* src/ShNibbles.hpp, src/ShNibblesImpl.hpp: 
 	Added some useful nibbles.

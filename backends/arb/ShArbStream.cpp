@@ -164,7 +164,11 @@ void ArbBackend::execute(const ShProgram& program,
   }
 
   if (program->outputs.size() != dest.size()) {
-    SH_DEBUG_ERROR("Number of stream program outputs does not match number of destinations.");
+    SH_DEBUG_ERROR("Number of stream program outputs ("
+                   << program->outputs.size()
+                   << ") does not match number of destinations ("
+                   << dest.size()
+                   << ").");
     return;
   }
   
@@ -226,6 +230,7 @@ void ArbBackend::execute(const ShProgram& program,
     tex->setMem(mem);
     I->second = tex;
   }
+  
 
   if (output->count() != input_count) {
     SH_DEBUG_ERROR("Input data count does not match output data count ("
@@ -414,13 +419,12 @@ void ArbBackend::execute(const ShProgram& program,
     XCloseDisplay(dpy);
     return;
   }
-
   // Clean up
   // TODO: Anything else?
   glXDestroyContext(dpy, pbuffer_ctxt);
   XFree(fb_config);
   XCloseDisplay(dpy);
-  
+
   ShEnvironment::boundShaders().clear();
 }
 

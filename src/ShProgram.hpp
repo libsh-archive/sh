@@ -47,6 +47,8 @@ class ShProgramNode : public ShRefCountable {
 public:
   ShProgramNode(const std::string& target);
 
+  ~ShProgramNode();
+  
   /// Forcefully compile this shader for a particular backend, even if
   /// it has been compiled previously. Use code() to obtain the actual
   /// code.

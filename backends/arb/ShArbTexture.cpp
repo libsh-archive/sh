@@ -90,7 +90,7 @@ void ArbCode::loadTexture(ShTextureNodePtr texture)
   glBindTexture(shGlTextureType[texture->dims()], texReg.bindingIndex);
   
   if (shGlTextureType[texture->dims()] != GL_TEXTURE_RECTANGLE_NV) {
-    if (0) {
+    if (1) {
       glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     } else {
@@ -180,9 +180,10 @@ void ArbCode::loadDataTexture(ShDataTextureNodePtr texture, unsigned int type)
       }
     };
 
+    float* data = dataMem->data();
     switch(type) {
     case GL_TEXTURE_1D:
-      glTexImage1D(type, 0, internal_format, texture->width(), 0, format, GL_FLOAT, dataMem->data());
+      glTexImage1D(type, 0, internal_format, texture->width(), 0, format, GL_FLOAT, data);
       break;
     case GL_TEXTURE_2D:
     case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
@@ -192,17 +193,19 @@ void ArbCode::loadDataTexture(ShDataTextureNodePtr texture, unsigned int type)
     case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
     case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
     case GL_TEXTURE_RECTANGLE_NV:
-      glTexImage2D(type, 0, internal_format, texture->width(), texture->height(), 0, format, GL_FLOAT,
-                   dataMem->data());
+      glTexImage2D(type, 0, internal_format, texture->width(), texture->height(), 0, format,
+                   GL_FLOAT, data);
       break;
     case GL_TEXTURE_3D:
       glTexImage3D(type, 0, internal_format, texture->width(), texture->height(), texture->depth(),
-                   0, format, GL_FLOAT, dataMem->data());
+                   0, format, GL_FLOAT, data);
       break;
     default:
       SH_DEBUG_WARN("Texture type not handled by ARB backend");
       break;
     }
+    delete [] data; // <-- ShMemoryObjects are just _ever_ so useful!
+    
   } else {
     ShExternalMemoryObjectPtr extMem = texture->mem();
     if( extMem ) {

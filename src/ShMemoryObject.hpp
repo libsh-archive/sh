@@ -109,6 +109,8 @@ class ShDataMemoryObject: public ShMemoryObject {
      * Use 1 for dimensions that are not needed
      */
     ShDataMemoryObject(int width, int height, int depth, int elements);
+
+  virtual ~ShDataMemoryObject();
     
     /** Writes a slice of data into this memory object
      *

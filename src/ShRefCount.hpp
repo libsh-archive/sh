@@ -29,11 +29,39 @@
 
 #include <utility>
 
+//#define SH_REFCOUNT_DEBUGGING
+
+#ifdef SH_REFCOUNT_DEBUGGING
+#include <iostream>
+#include <iomanip>
+#include "ShDebug.hpp"
+
+#define SH_RCDEBUG_GREEN std::cerr << "[32m"
+#define SH_RCDEBUG_RED std::cerr << "[31m"
+#define SH_RCDEBUG_BLUE std::cerr << "[34m"
+#define SH_RCDEBUG_NORMAL std::cerr << "[0m"
+
+#endif
+
 namespace SH {
 
 /** A class which can be reference-counted.
     These are classes you can wrap in an ShRefCount. Inherit from this
-    if you want to reference-count your class */
+    if you want to reference-count your class.
+
+    Note: It is VERY IMPORTANT that you call the operator= from this
+    class if you define your own operator=() in your derived class.
+
+    E.g:
+
+    MyClass& MyClass::operator=(const MyClass& other) {
+      // Do this first:
+      static_cast<ShRefCountable&>(*this) = static_cast<const ShRefCountable&>(other);
+
+      // Now do your other stuff
+      ...
+    }
+*/
 class ShRefCountable 
 {
 public:
@@ -41,14 +69,42 @@ public:
     : m_refCount(0)
   {
   }
+
+  ShRefCountable(const ShRefCountable&)
+    : m_refCount(0)
+  {
+  }
+
+  ShRefCountable& operator=(const ShRefCountable&)
+  {
+    m_refCount = 0;
+    return *this;
+  }
+
+#ifdef SH_REFCOUNT_DEBUGGING
+  // Just to make this polymorphic, so typeid() works as expected
+  virtual ~ShRefCountable() {}   
+#endif
   
   int acquireRef() 
   {
+#ifdef SH_REFCOUNT_DEBUGGING
+    SH_RCDEBUG_GREEN;
+    std::cerr << "   [+] " << std::setw(10) << this << " <" << typeid(*this).name() << ">"
+              << ": " << m_refCount << "->" << (m_refCount + 1) << std::endl;
+    SH_RCDEBUG_NORMAL;
+#endif
     return ++m_refCount;
   }
   
   int releaseRef()
   {
+#ifdef SH_REFCOUNT_DEBUGGING
+    SH_RCDEBUG_RED;
+    std::cerr << "   [-] " << std::setw(10) << this << " <" << typeid(*this).name() << ">"
+              << ": " << m_refCount << "->" << (m_refCount - 1) << std::endl;
+    SH_RCDEBUG_NORMAL;
+#endif
     return --m_refCount;
   }
 
@@ -116,12 +172,22 @@ template<typename T>
 ShRefCount<T>::ShRefCount()
   : m_object(0)
 {
+#ifdef SH_REFCOUNT_DEBUGGING
+  SH_RCDEBUG_BLUE;
+  std::cerr << "[cons] " << std::setw(10) << "0" << " (default)" << std::endl;
+  SH_RCDEBUG_NORMAL;
+#endif
 }
 
 template<typename T>
 ShRefCount<T>::ShRefCount(T* object)
   : m_object(object)
 {
+#ifdef SH_REFCOUNT_DEBUGGING
+  SH_RCDEBUG_BLUE;
+  std::cerr << "[cons] " << std::setw(10) << object << " <" << (object ? typeid(*(object)).name() : "n/a") << ">" << std::endl;
+  SH_RCDEBUG_NORMAL;
+#endif
   if (m_object) m_object->acquireRef();
 }
 
@@ -129,6 +195,12 @@ template<typename T>
 ShRefCount<T>::ShRefCount(const ShRefCount<T>& other)
   : m_object(other.m_object)
 {
+#ifdef SH_REFCOUNT_DEBUGGING
+  SH_RCDEBUG_BLUE;
+  std::cerr << "[copy] " << std::setw(10) << other.m_object << " <" << (other.m_object ? typeid(*(other.m_object)).name() : "n/a") << ">" << std::endl;
+  SH_RCDEBUG_NORMAL;
+#endif
+
   if (m_object) m_object->acquireRef();
 }
 
@@ -138,6 +210,13 @@ template<typename T1>
 ShRefCount<T>::ShRefCount(const ShRefCount<T1>& other)
   : m_object(0)
 {
+#ifdef SH_REFCOUNT_DEBUGGING
+  SH_RCDEBUG_BLUE;
+  std::cerr << "[cast] " << std::setw(10) << other.object() << " <" << (other.object() ? typeid(*(other.object())).name() : "n/a") << ">"
+            << "(to <" << typeid(*this).name() << ">)" << std::endl;
+  SH_RCDEBUG_NORMAL;
+#endif
+
   if (other.object()) {
     m_object = dynamic_cast<T*>(other.object());
     if (m_object) m_object->acquireRef();
@@ -147,12 +226,23 @@ ShRefCount<T>::ShRefCount(const ShRefCount<T1>& other)
 template<typename T>
 ShRefCount<T>::~ShRefCount()
 {
+#ifdef SH_REFCOUNT_DEBUGGING
+  SH_RCDEBUG_BLUE;
+  std::cerr << "[dest] " << std::setw(10) << m_object << " <" << (m_object ? typeid(*(m_object)).name() : "n/a") << ">" << std::endl;
+  SH_RCDEBUG_NORMAL;
+#endif
+
   releaseRef();
 }
 
 template<typename T>
 ShRefCount<T>& ShRefCount<T>::operator=(const ShRefCount<T>& other)
 {
+#ifdef SH_REFCOUNT_DEBUGGING
+  SH_RCDEBUG_BLUE;
+  std::cerr << "[assn] " << std::setw(10) << other.m_object << " <" << (other.m_object ? typeid(*(other.m_object)).name() : "n/a") << ">" << " (was " << m_object << " <" << (m_object ? typeid(*(m_object)).name() : "n/a") << ">" << ")" << std::endl;
+  SH_RCDEBUG_NORMAL;
+#endif
   if (m_object == other.m_object) return *this;
 
   // Bug fix - must aquireRef to other.m_object first in case
@@ -161,7 +251,7 @@ ShRefCount<T>& ShRefCount<T>::operator=(const ShRefCount<T>& other)
   releaseRef();
 
   m_object = other.m_object;
-  
+
   return *this;
 }
 
@@ -169,6 +259,14 @@ template<typename T>
 template<typename T1>
 ShRefCount<T>& ShRefCount<T>::operator=(const ShRefCount<T1>& other)
 {
+#ifdef SH_REFCOUNT_DEBUGGING
+  SH_RCDEBUG_BLUE;
+  std::cerr << "[cst=] " << std::setw(10) << other.object() << " <" << (other.object() ? typeid(*(other.object())).name() : "n/a") << ">" << " (was " << " <" << (m_object ? typeid(*(m_object)).name() : "n/a") << ">" << ")"
+            << "(to <" << typeid(*this).name() << ">)" << std::endl;
+
+  SH_RCDEBUG_NORMAL;
+#endif
+  
   if (m_object == other.object()) return *this;
 
   // Bug fix - moved releaseRef down to prevent same problem as above
@@ -188,6 +286,12 @@ ShRefCount<T>& ShRefCount<T>::operator=(const ShRefCount<T1>& other)
 template<typename T>
 ShRefCount<T>& ShRefCount<T>::operator=(T* object)
 {
+#ifdef SH_REFCOUNT_DEBUGGING
+  SH_RCDEBUG_BLUE;
+  std::cerr << "[asn*] " << std::setw(10) << object << " <" << (object ? typeid(*(object)).name() : "n/a") << ">" << " (was " << m_object << " <" << (m_object ? typeid(*(m_object)).name() : "n/a") << ">" << ")" << std::endl;
+  SH_RCDEBUG_NORMAL;
+#endif
+  
   if (m_object == object) return *this;
   if( object ) object->acquireRef();
   releaseRef();
@@ -265,7 +369,12 @@ T* ShRefCount<T>::object() const
 template<typename T>
 void ShRefCount<T>::releaseRef()
 {
-  if (m_object && m_object->releaseRef() == 0) delete m_object;
+  if (m_object && m_object->releaseRef() <= 0) {
+    delete m_object;
+#ifdef SH_REFCOUNT_DEBUGGING
+    m_object = 0;
+#endif
+  }
 }
 
 } // namespace SH

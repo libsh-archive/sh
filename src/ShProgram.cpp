@@ -41,6 +41,12 @@ ShProgramNode::ShProgramNode(const std::string& target)
 {
 }
 
+ShProgramNode::~ShProgramNode()
+{
+  // TODO: maybe need some cleanup here, although refcounting ought to
+  // take care of it.
+}
+
 void ShProgramNode::compile(ShRefCount<ShBackend>& backend)
 {
   if (m_target.empty()) ShError( ShException( "Invalid ShProgram target" ) );
