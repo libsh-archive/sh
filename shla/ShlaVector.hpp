@@ -50,7 +50,7 @@ using namespace SH;
  * 2D location (i % M, i / M)
  */
 template<typename T, int M, int N>
-class ShlaVector: public ShlaRenderable<T, M, N>
+class ShlaVector
 {
   public:
     /** \brief Constructor for ShlaVector

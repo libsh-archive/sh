@@ -32,6 +32,7 @@
 #include "ShError.hpp"
 #include "ShException.hpp"
 #include "ShlaMatrix.hpp"
+#include "ShlaRenderGlobal.hpp"
 #include "ShlaLib.hpp"
 
 namespace Shla {
@@ -60,61 +61,80 @@ ShlaDenseMatrix<T, M, N>::~ShlaDenseMatrix() {
 template< typename T, int M, int N >
 template< typename VecT >
 ShlaVector<VecT, M, N> ShlaDenseMatrix<T, M, N>::operator|( ShlaVector<VecT, M, N> &v ) {
+  /* TODO these should be static */
+  typedef ShlaRenderGlobal<VecT, M, N> vecGlobal;
+  static ShTexture2D<T> &columnTex = ShlaRenderGlobal<T, M, N>::op1; 
+  static ShTexture2D<VecT> &vecTex = vecGlobal::op2; 
+  static ShTexture2D<VecT> &vecAccum = vecGlobal::accum; 
+  static ShTexCoord2f colTexCoord;
+  static ShProgram fsh; 
+  if( !fsh ) {
+    ShEnvironment::boundShader[0] = 0;
+    ShEnvironment::boundShader[1] = 0;
+
+    fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+      ShInputPosition4f p;
+      ShInputTexCoord2f tc;
+      typename vecGlobal::OutputColorType out;
+      out = mad( columnTex(tc), vecTex(colTexCoord), vecAccum(tc) );
+    } SH_END_PROGRAM;
+  }
+  /* end of static */
+
   if( M * N == 1 ) { // handle 1 dimensional matrix
     ShError( ShException( "Cannot handle dimension 1 matrices" ) ); 
   }
 
-  /* TODO these should be static */
-  ShProgram fsh; 
-  ShTexture2D<T> &columnTex = ShlaVector<T, M, N>::op1;
-  ShTexture2D<VecT> &vecTex = v.op2;
-  ShTexture2D<VecT> &vecAccum = v.accum;
-  ShTexCoord2f colTexCoord;
-  /* end of static */
-
   ShlaVector<VecT, M, N> result;
-
-  if( !fsh ) {
-    fsh = SH_BEGIN_FRAGMENT_PROGRAM {
-      ShInputPosition4f p;
-      ShInputTexCoord2f tc;
-      typename ShlaVector<VecT, M, N>::OutputColorType out;
-      out = mad( columnTex(tc), vecTex(colTexCoord), vecAccum(tc) );
-    } SH_END_PROGRAM;
-  }
-  v.bindDefault( fsh );
   ShFramebufferPtr oldfb = ShEnvironment::framebuffer;
 
+  vecGlobal::bindDefault( fsh );
   vecTex.attach( v.getMem() );
-  v.accumInit( result.getMem() );
-  for( int i = 0; i < M * N; ++i ) {
-    if( i == M * N - 1 ) {
-      v.accumLastLoop( result.getMem() );
+  vecGlobal::accumInit( result.getMem() );
+  for( int i = 0; i < N; ++i ) for( int j = 0; j < M; ++j ) {
+    int colIndex = i * M + j;
+    if( colIndex == M * N - 1 ) {
+      printf( "last loop\n" );
+      vecGlobal::accumLastLoop( result.getMem() );
     } else if( i > 0 ) {
-      v.accumLoop();
+      printf( "loop\n" );
+      vecGlobal::accumLoop();
     }
     // calculate the i'th column
-    printf( "Calculating Column %d\n", i );
-    columnTex.attach( m_column[i].getMem() );
-    colTexCoord = ShConstant2f( ( i % M + 0.5 ) / M, ( i / M + 0.5 ) / N );
+    columnTex.attach( m_column[colIndex].getMem() );
+    colTexCoord = ShConstant2f( ( j + 0.5 ) / M, ( i + 0.5 ) / N );
+    printf( "Calculating Column %d texcoord( %lf, %lf )\n", colIndex,
+        colTexCoord.node()->getValue(0), colTexCoord.node()->getValue(1) );
 
-    v.useRenderbuf();
-    v.drawQuad();
+    vecGlobal::useRenderbuf();
+    vecGlobal::drawQuad();
   }
+  printf( "after loop\n" );
+  vecGlobal::detachAll();
   columnTex.attach( 0 ); 
-  v.detachAll();
+  //vecGlobal::detachAll();
+  printf( "detach all\n" );
 
   shDrawBuffer( oldfb );
+  printf( "draw oldfb\n" );
   return result;
 }
 
 template< typename T, int M, int N >
 template< typename VecT >
 ShlaVector<VecT, M, N> ShlaBandedMatrix<T, M, N>::operator|( ShlaVector<VecT, M, N> &v ) {
-  static ShProgram fsh; 
+  /* only use static variables in the shader */
+  typedef ShlaRenderGlobal<VecT, M, N> vecGlobal;
+  static ShTexture2D<T> &diagTex = ShlaRenderGlobal<T, M, N>::op1; 
+  static ShTexture2D<VecT> &vecTex = vecGlobal::op2; 
+  static ShTexture2D<VecT> &vecAccum = vecGlobal::accum; 
   static ShAttrib1f diag; 
+  static ShProgram fsh; 
 
   if( !fsh ) {
+    ShEnvironment::boundShader[0] = 0;
+    ShEnvironment::boundShader[1] = 0;
+
     fsh = SH_BEGIN_FRAGMENT_PROGRAM {
       ShInputPosition4f p;
       ShInputTexCoord2f tc;
@@ -124,40 +144,45 @@ ShlaVector<VecT, M, N> ShlaBandedMatrix<T, M, N>::operator|( ShlaVector<VecT, M,
       offsetTc(1) = mad( floor( offsetTc(0) ), ( 1.0 / N ), tc(1) ); 
       offsetTc = frac( offsetTc );
 
-      typename ShlaVector<VecT, M, N>::OutputColorType out;
-      out = v.accum(tc) + v.op1(tc) * v.op2(offsetTc);
-    }
+      typename vecGlobal::OutputColorType out;
+      out = vecAccum(tc) + diagTex(tc) * vecTex(offsetTc);
+    } SH_END_PROGRAM;
   }
+  /* end of static only */
 
-  if( N == 1 ) { // handle 1 dimensional matrix
-    return m_column[0] * v;
+  if( M * N == 1 ) { // handle 1 dimensional matrix
+    ShError( ShException( "Cannot handle dimension 1 matrices" ) ); 
   }
 
   ShlaVector<VecT, M, N> result;
 
-  v.bindVsh();
-  shBindShader( fsh );
+  ShFramebufferPtr oldfb = ShEnvironment::framebuffer;
 
-  v.op2.attach( v.getMem() );
-
-  v.accumInit( result.getMem() );
+  vecGlobal::bindDefault( fsh );
+  vecTex.attach( v.getMem() );
+  vecGlobal::accumInit( result.getMem() );
   for( typename DiagonalMap::iterator diagIt = m_diagonal.begin();
        diagIt != m_diagonal.end(); ++diagIt ) {
+
+    typename DiagonalMap::iterator tempIt = diagIt;
+    if( ++tempIt == m_diagonal.end() ) { 
+      vecGlobal::accumLastLoop( result.getMem() );
+    } else if( diagIt != m_diagonal.begin() ){
+      vecGlobal::accumLoop();
+    }
+
     // calculate the i'th column
-    v.op1.attach( diagIt->second.getMem() );
+    diagTex.attach( diagIt->second.getMem() );
     diag = diagIt->first / (double) M;
 
-    v.clear();
-    v.drawQuad();
+    vecGlobal::useRenderbuf();
+    vecGlobal::drawQuad();
 
-    if( i == M * N - 1 ) {
-      v.accumLastLoop( result.getMem() );
-    } else {
-      v.accumLoop();
-    }
   }
-  v.accumDetach();
-  v.vecOp.attach( 0 ); 
+  vecGlobal::detachAll();
+  diagTex.attach( 0 ); 
+
+  shDrawBuffer( oldfb );
   
   return result;
 }

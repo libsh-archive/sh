@@ -10,3 +10,6 @@
   the required temporaries.
 - sparse matrices
 - scalar multiplication
+- delayed swizzling, negation, constant multiplication 
+  on vector components.
+  (similar to what Sh does with Attribs)

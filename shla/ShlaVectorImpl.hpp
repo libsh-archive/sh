@@ -58,7 +58,6 @@ ShlaVector<T, M, N>& ShlaVector<T, M, N>::operator=( const ShlaVector<T, M, N> &
 
 template< typename T, int M, int N >
 ShUberbufferPtr ShlaVector<T, M, N>::getMem() { 
-  printf( "getMem() this: %x\n", this );
   ShUberbufferPtr ubuf = upload();
   return ubuf;
 }

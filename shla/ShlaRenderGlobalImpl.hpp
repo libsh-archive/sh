@@ -24,13 +24,13 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHLA_RENDERABLEIMPL_HPP
-#define SHLA_RENDERABLEIMPL_HPP
+#ifndef SHLA_RENDERGLOBALIMPL_HPP
+#define SHLA_RENDERGLOBALIMPL_HPP
 
 // TODO get rid of this when backend support for drawing geometry stabilizes
 #include <GL/gl.h>
 
-#include "ShlaRenderable.hpp"
+#include "ShlaRenderGlobal.hpp"
 #include "ShSyntax.hpp"
 #include "ShArrayData.hpp"
 #include "ShEnvironment.hpp"
@@ -40,34 +40,34 @@ namespace Shla {
 
 using namespace SH;
 
-/** \file ShlaRenderableImpl.hpp
+/** \file ShlaRenderGlobalImpl.hpp
  */
 template<typename T, int M, int N>
-ShFramebufferPtr ShlaRenderable<T, M, N>::renderbuf = new ShFramebuffer( M, N, 1, T::typesize );
+ShFramebufferPtr ShlaRenderGlobal<T, M, N>::renderbuf = new ShFramebuffer( M, N, 1, T::typesize );
 
 template<typename T, int M, int N>
-ShTexture2D<T> ShlaRenderable<T, M, N>::op1( M, N );
+ShTexture2D<T> ShlaRenderGlobal<T, M, N>::op1( M, N );
 
 template<typename T, int M, int N>
-ShTexture2D<T> ShlaRenderable<T, M, N>::op2( M, N );
+ShTexture2D<T> ShlaRenderGlobal<T, M, N>::op2( M, N );
 
 template<typename T, int M, int N>
-ShTexture2D<T> ShlaRenderable<T, M, N>::accum( M, N );
+ShTexture2D<T> ShlaRenderGlobal<T, M, N>::accum( M, N );
 
 template<typename T, int M, int N>
-ShUberbufferPtr ShlaRenderable<T, M, N>::accumRead = new ShUberbuffer( M, N, 1, T::typesize );
+ShUberbufferPtr ShlaRenderGlobal<T, M, N>::accumRead = new ShUberbuffer( M, N, 1, T::typesize );
 
 template<typename T, int M, int N>
-ShUberbufferPtr ShlaRenderable<T, M, N>::accumWrite = new ShUberbuffer( M, N, 1, T::typesize );
+ShUberbufferPtr ShlaRenderGlobal<T, M, N>::accumWrite = new ShUberbuffer( M, N, 1, T::typesize );
 
 template<typename T, int M, int N>
-void ShlaRenderable<T, M, N>::useRenderbuf() {
+void ShlaRenderGlobal<T, M, N>::useRenderbuf() {
   shDrawBuffer( renderbuf );
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 }
 
 template<typename T, int M, int N>
-void ShlaRenderable<T, M, N>::drawQuad( int w, int h, double z ) {
+void ShlaRenderGlobal<T, M, N>::drawQuad( int w, int h, double z ) {
   // TODO hacked in for now
   // This should be in the backend when backends support drawing geometry
   double tcx = w / (double) M; 
@@ -119,12 +119,12 @@ void ShlaRenderable<T, M, N>::drawQuad( int w, int h, double z ) {
 }
 
 template<typename T, int M, int N>
-void ShlaRenderable<T, M, N>::drawQuad() {
+void ShlaRenderGlobal<T, M, N>::drawQuad() {
   drawQuad( M, N, 0.0 ); 
 }
 
 template<typename T, int M, int N>
-void ShlaRenderable<T, M, N>::detachAll() {
+void ShlaRenderGlobal<T, M, N>::detachAll() {
   renderbuf->bind( 0 );
   op1.attach( 0 );
   op2.attach( 0 );
@@ -132,7 +132,7 @@ void ShlaRenderable<T, M, N>::detachAll() {
 }
 
 template<typename T, int M, int N>
-void ShlaRenderable<T, M, N>::bindDefault( ShProgram fsh ) {
+void ShlaRenderGlobal<T, M, N>::bindDefault( ShProgram fsh ) {
   static ShProgram defaultVsh;
 
   ShEnvironment::boundShader[0] = 0;
@@ -153,7 +153,7 @@ void ShlaRenderable<T, M, N>::bindDefault( ShProgram fsh ) {
 }
 
 template<typename T, int M, int N>
-void ShlaRenderable<T, M, N>::bindReduce( ShProgram fsh ) {
+void ShlaRenderGlobal<T, M, N>::bindReduce( ShProgram fsh ) {
   static ShProgram reduceVsh;
 
   ShEnvironment::boundShader[0] = 0;
@@ -181,24 +181,37 @@ void ShlaRenderable<T, M, N>::bindReduce( ShProgram fsh ) {
 }
 
 template<typename T, int M, int N>
-void ShlaRenderable<T, M, N>::accumInit( ShUberbufferPtr init ) {
+void ShlaRenderGlobal<T, M, N>::bindOutput( ShTexture2D<T> &tex ) { 
+  ShProgram texFsh;
+
+  ShEnvironment::boundShader[0] = 0;
+  ShEnvironment::boundShader[1] = 0;
+  texFsh = SH_BEGIN_FRAGMENT_PROGRAM {
+    ShInputTexCoord2f tc;
+    ShInputPosition4f p;
+    OutputColorType out = tex( tc ); 
+  } SH_END_PROGRAM;
+
+  bindDefault( texFsh );
+}
+
+template<typename T, int M, int N>
+void ShlaRenderGlobal<T, M, N>::accumInit( ShUberbufferPtr init ) {
   accum.attach( init );
   renderbuf->bind( accumWrite );
 }
 
 template<typename T, int M, int N>
-void ShlaRenderable<T, M, N>::accumLoop() {
+void ShlaRenderGlobal<T, M, N>::accumLoop() {
   accumDetach();
 
   ShUberbufferPtr temp = accumRead;
   accumRead = accumWrite;
-  accumWrite = temp;
-
-  // swapping seems to cause bugs
   /*
-  accumRead = accumWrite;
-  accumWrite = new ShUberbuffer( M, N, 1, T::typesize ); 
+  accumWrite = temp;
   */
+  // try without swapping
+  accumWrite = new ShUberbuffer( M, N, 1, T::typesize ); 
 
   printf( "Attaching accumRead: %d to tex\n", accumRead->mem() );
   accum.attach( accumRead );
@@ -207,7 +220,7 @@ void ShlaRenderable<T, M, N>::accumLoop() {
 }
 
 template<typename T, int M, int N>
-void ShlaRenderable<T, M, N>::accumLastLoop( ShUberbufferPtr out ) {
+void ShlaRenderGlobal<T, M, N>::accumLastLoop( ShUberbufferPtr out ) {
   accumDetach();
   accum.attach( accumWrite );
   // TODO  add invalidate?
@@ -215,7 +228,7 @@ void ShlaRenderable<T, M, N>::accumLastLoop( ShUberbufferPtr out ) {
 }
 
 template<typename T, int M, int N>
-void ShlaRenderable<T, M, N>::accumDetach() {
+void ShlaRenderGlobal<T, M, N>::accumDetach() {
   renderbuf->bind( 0 );
   accum.attach( 0 );
 }

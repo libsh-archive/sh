@@ -24,8 +24,8 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHLA_RENDERABLE_HPP
-#define SHLA_RENDERABLE_HPP
+#ifndef SHLA_RENDERGLOBAL_HPP
+#define SHLA_RENDERGLOBAL_HPP
 
 #include "ShProgram.hpp"
 #include "ShFramebuffer.hpp"
@@ -36,7 +36,7 @@ namespace Shla {
 
 using namespace SH;
 
-/** \file ShlaRenderable.hpp
+/** \file ShlaRenderGlobal.hpp
  * This static class sets up framebuffer, texture, and uberbuffers 
  * with the given dimensions and element type 
  */
@@ -50,7 +50,7 @@ using namespace SH;
  * can re-use the same framebuffer and temporary texture/uber buffer objects.
  */
 template<typename T, int M, int N> 
-class ShlaRenderable {
+class ShlaRenderGlobal {
   public:
     typedef ShColor<T::typesize, SH_VAR_OUTPUT, typename T::ValueType> OutputColorType;
     typedef ShAttrib<T::typesize, SH_VAR_TEMP, typename T::ValueType> TempType;
@@ -85,6 +85,9 @@ class ShlaRenderable {
     /** binds the reduction vertex shader and given fragment shader */
     static void bindReduce( ShProgram fsh );
 
+    /** binds a vertex shader & fragment shader that outputs a given 2D texture */
+    static void bindOutput( ShTexture2D<T>& tex );
+
     // helper functions for doing a render to texture loop with at least 2 iterations
     //
     // Before first iteration, use accumInit( initial state );
@@ -117,6 +120,6 @@ class ShlaRenderable {
 
 }
 
-#include "ShlaRenderableImpl.hpp"
+#include "ShlaRenderGlobalImpl.hpp"
 
 #endif

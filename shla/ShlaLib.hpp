@@ -28,6 +28,7 @@
 #define SHLA_LIB_HPP 
 
 #include "ShlaVector.hpp"
+#include "ShlaRenderGlobal.hpp"
 
 namespace Shla {
 
@@ -41,93 +42,100 @@ using namespace SH;
 #define SHLA_LIB_VEC_OP( op, op_src ) \
   template<typename T, int M, int N>  \
   ShlaVector<T, M, N> op( ShlaVector<T, M, N> &a, ShlaVector<T, M, N> &b ) { \
-    ShlaVector<T, M, N> result; \
+    /* only use static variables in the shader */ \
+    typedef ShlaRenderGlobal<T, M, N> global; \
     static ShProgram fsh; \
-    \
+    static ShTexture2D<T>& op1 = global::op1; \
+    static ShTexture2D<T>& op2 = global::op2; \
     if( !fsh ) {\
       ShEnvironment::boundShader[0] = 0; \
       ShEnvironment::boundShader[1] = 0; \
       fsh = SH_BEGIN_FRAGMENT_PROGRAM { \
         ShInputTexCoord2f tc;\
         ShInputPosition4f p;\
-        typename ShlaVector<T, M, N>::OutputColorType out;\
+        typename global::OutputColorType out;\
         out = op_src; \
       } SH_END_PROGRAM;\
     }\
+    \
+    ShlaVector<T, M, N> result; \
 \
-    a.renderbuf->bind( result.getMem() );\
-    a.op1.attach( a.getMem() );\
-    a.op2.attach( b.getMem() );\
+    global::renderbuf->bind( result.getMem() );\
+    op1.attach( a.getMem() );\
+    op2.attach( b.getMem() );\
 \
-    a.bindDefault( fsh ); \
+    global::bindDefault( fsh ); \
 \
     ShFramebufferPtr oldfb = ShEnvironment::framebuffer;\
-    a.useRenderbuf();\
-    a.drawQuad();\
-    a.detachAll();\
+    global::useRenderbuf();\
+    global::drawQuad();\
+    global::detachAll();\
     shDrawBuffer( oldfb );\
 \
     return result; \
   }
 
-SHLA_LIB_VEC_OP( operator+, a.op1(tc) + a.op2(tc) ); 
-SHLA_LIB_VEC_OP( max, max( a.op1(tc), a.op2(tc) ) );
-SHLA_LIB_VEC_OP( min, min( a.op1(tc), a.op2(tc) ) );
-SHLA_LIB_VEC_OP( operator*, a.op1(tc) * a.op2(tc) );
-SHLA_LIB_VEC_OP( operator-, a.op1(tc) - a.op2(tc) );
+SHLA_LIB_VEC_OP( operator+, op1(tc) + op2(tc) ); 
+SHLA_LIB_VEC_OP( max, max( op1(tc), op2(tc) ) );
+SHLA_LIB_VEC_OP( min, min( op1(tc), op2(tc) ) );
+SHLA_LIB_VEC_OP( operator*, op1(tc) * op2(tc) );
+SHLA_LIB_VEC_OP( operator-, op1(tc) - op2(tc) );
 
 
 //TODO this should return something of type T
 // implement for non-square, non-power of 2 vectors
 template<typename T, int N> 
-T reduceAdd( ShlaVector<T, N, N> &a ) { 
-  ShlaVector<T, N, N> resultVec; 
-  T result;
-
+ShlaVector<T, N, N> reduceMax( ShlaVector<T, N, N> &a ) { 
+  /* only use static variables in the shader */ \
+  typedef ShlaRenderGlobal<T, N, N> global;
   static ShProgram fsh; 
+  static ShTexture2D<T>& accum = global::accum; 
   if( !fsh ) {
     ShEnvironment::boundShader[0] = 0;
     ShEnvironment::boundShader[1] = 0;
     fsh = SH_BEGIN_FRAGMENT_PROGRAM { 
       ShInputTexCoord2f tc[4]; 
       ShInputPosition4f p;  
-      typename ShlaVector<T, N, N>::TempType c[4]; /* components */ 
-      typename ShlaVector<T, N, N>::OutputColorType out; 
+      typename global::TempType c[4]; /* components */ 
+      typename global::OutputColorType out; 
 
       //TODO get rid of toobig
       ShAttrib1f toobig = ( tc[0](0) > 1.0 ) + ( tc[0](1) > 1.0 );
       toobig = min( toobig, 1.0 );
 
-      for( int i = 0; i < 4; ++i ) c[i] = a.accum(tc[i]); 
-      out = ( 1.0 - toobig ) * ( c[0] + c[1] + c[2] + c[3] );
+      for( int i = 0; i < 4; ++i ) c[i] = accum(tc[i]); 
+      out = ( 1.0 - toobig ) * ( max( max( c[0],  c[1] ), max( c[2], c[3] ) ) );
     } SH_END_PROGRAM;
   }
-  a.bindReduce( fsh );
+
+  ShlaVector<T, N, N> resultVec; 
+  T result;
+  global::bindReduce( fsh );
   ShFramebufferPtr oldfb = ShEnvironment::framebuffer;
 
-  a.accumInit( a.getMem());
-  int curN = N;
-  for( int curN = N / 2; curN >= 1; curN /= 2 ) {
+  global::accumInit( a.getMem());
+  for( int curN = N / 2; curN >= 8; curN /= 2 ) {
     //TODO handle very small vectors
-    if( curN < 4 ) {
-      a.accumLastLoop( resultVec.getMem() );
+    if( curN == 8 ) {
+      global::accumLastLoop( resultVec.getMem() );
     } else if( curN < N / 2 ) {
-      a.accumLoop();
+      global::accumLoop();
     }
     //TODO get rid of clear, and just draw over original values
-    a.useRenderbuf();
-    a.drawQuad();
+    global::useRenderbuf();
+    global::drawQuad();
     printf( "curN: %d\n", curN );
   }
-
-  a.detachAll();
+  global::detachAll();
   shDrawBuffer( oldfb );
 
+  /*
   for( int i = 0; i < T::typesize; ++i ) {
     result.node()->setValue( i, resultVec(0, i) );
   }
+  */
 
-  return result; 
+  return resultVec; 
 }
 
 /*
