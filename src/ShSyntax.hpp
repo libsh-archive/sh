@@ -28,6 +28,7 @@
 #define SHSYNTAX_HPP
 
 #include "ShProgram.hpp"
+#include "ShUtility.hpp"
 
 /** \file ShSyntax.hpp
  * Sh syntactical definitions.
@@ -166,7 +167,7 @@
  *
  * @see SH_NAMEDDECL
  */
-#define SH_DECL(var) var; var.name( # var ); var
+#define SH_DECL(var) var; var.name( # var ); ShIgnore & var
 
 /** \def SH_NAMEDECL
  * Declare variable with the given name 
@@ -176,7 +177,7 @@
  *
  * @see SH_DECL
  */
-#define SH_NAMEDECL(var, varName) var; var.name( varName ); var
+#define SH_NAMEDECL(var, varName) var; var.name( varName ); ShIgnore & var
 //@}
 
 namespace SH {

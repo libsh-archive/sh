@@ -52,6 +52,11 @@ template<> struct ShCompileTimeChecker<false> {
   (void)sizeof(ShCompileTimeChecker<(expr)>(y));\
 }
 
+struct ShIgnore {
+  template<typename T>
+  T& operator&(T& other) { return other; }
+};
+
 }
 
 #endif
