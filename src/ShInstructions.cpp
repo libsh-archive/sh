@@ -28,6 +28,8 @@
 #include "ShInstructions.hpp"
 #include "ShStatement.hpp"
 #include "ShContext.hpp"
+#include "ShVariant.hpp"
+#include "ShEval.hpp"
 #include "ShDebug.hpp"
 #include "ShError.hpp"
 

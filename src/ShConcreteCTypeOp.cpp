@@ -38,27 +38,27 @@ namespace SH {
  *** Use Specialization to define particular ops 
  **************************************************************/
 #define SHCCTO_UNARY_OP_SPEC(T, op, opsrc)\
-void ShConcreteCTypeOp<op, T>::doop(std::vector<T> *dest, \
-    const std::vector<T> *a, const std::vector<T> *b, const std::vector<T> *c) \
+void ShConcreteCTypeOp<op, T>::doop(ShPointer<ShDataVariant<T> > dest, \
+    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b, ShPointer<const ShDataVariant<T> > c) \
 {\
   int ao = a->size() > 1;\
 \
-  std::vector<T>::iterator D = dest->begin();\
-  std::vector<T>::const_iterator A = a->begin();\
+  ShDataVariant<T>::iterator D = dest->begin();\
+  ShDataVariant<T>::const_iterator A = a->begin();\
   for(; D != dest->end(); A += ao, ++D) {\
     (*D) = opsrc;\
   }\
 }\
 
 #define SHCCTO_BINARY_OP_SPEC(T, op, opsrc)\
-void ShConcreteCTypeOp<op, T>::doop(std::vector<T> *dest, \
-    const std::vector<T> *a, const std::vector<T> *b, const std::vector<T> *c) \
+void ShConcreteCTypeOp<op, T>::doop(ShPointer<ShDataVariant<T> > dest, \
+    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b, ShPointer<const ShDataVariant<T> > c) \
 {\
   int ao = a->size() > 1;\
   int bo = b->size() > 1;\
 \
-  std::vector<T>::iterator D = dest->begin();\
-  std::vector<T>::const_iterator A, B;\
+  ShDataVariant<T>::iterator D = dest->begin();\
+  ShDataVariant<T>::const_iterator A, B;\
   A = a->begin();\
   B = b->begin();\
   for(; D != dest->end(); A += ao, B += bo, ++D) {\
@@ -67,15 +67,15 @@ void ShConcreteCTypeOp<op, T>::doop(std::vector<T> *dest, \
 }
 
 #define SHCCTO_TERNARY_OP_SPEC(T, op, opsrc)\
-void ShConcreteCTypeOp<op, T>::doop(std::vector<T> *dest, \
-    const std::vector<T> *a, const std::vector<T> *b, const std::vector<T> *c) \
+void ShConcreteCTypeOp<op, T>::doop(ShPointer<ShDataVariant<T> > dest, \
+    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b, ShPointer<const ShDataVariant<T> > c) \
 {\
   int ao = a->size() > 1;\
   int bo = b->size() > 1;\
   int co = c->size() > 1;\
 \
-  std::vector<T>::iterator D = dest->begin();\
-  std::vector<T>::const_iterator A, B, C;\
+  ShDataVariant<T>::iterator D = dest->begin();\
+  ShDataVariant<T>::const_iterator A, B, C;\
   A = a->begin();\
   B = b->begin();\
   C = c->begin();\
@@ -117,26 +117,30 @@ SHCCTO_UNARY_OP_SPEC(double, SH_OP_LOG10, std::log(*A) / std::log(10.0));
 SHCCTO_UNARY_OP_SPEC(float,  SH_OP_LOG10, logf(*A) / logf(10.0f)); 
 
 
-void ShConcreteCTypeOp<SH_OP_NORM, double>::doop(std::vector<double> *dest, 
-    const std::vector<double> *a, const std::vector<double> *b, const std::vector<double> *c) 
+void ShConcreteCTypeOp<SH_OP_NORM, double>::doop(ShPointer< ShDataVariant<double> > dest, 
+    ShPointer<const ShDataVariant<double> > a, 
+    ShPointer<const ShDataVariant<double> > b, 
+    ShPointer<const ShDataVariant<double> > c) 
 {
   // assume dest.size == a->size 
   double m = std::sqrt(std::inner_product(a->begin(), a->end(), a->begin(), 0.0));
 
-  std::vector<double>::const_iterator A = a->begin();
-  std::vector<double>::iterator D = dest->begin();
+  ShDataVariant<double>::const_iterator A = a->begin();
+  ShDataVariant<double>::iterator D = dest->begin();
   for(; A != a->end(); ++D, ++A) (*D) = (*A) / m; 
 }
 
 
-void ShConcreteCTypeOp<SH_OP_NORM, float>::doop(std::vector<float> *dest, 
-    const std::vector<float> *a, const std::vector<float> *b, const std::vector<float> *c) 
+void ShConcreteCTypeOp<SH_OP_NORM, float>::doop(ShPointer< ShDataVariant<float> > dest, 
+    ShPointer<const ShDataVariant<float> > a, 
+    ShPointer<const ShDataVariant<float> > b, 
+    ShPointer<const ShDataVariant<float> > c) 
 {
   // assume dest.size == a->size 
   float m = std::sqrt(std::inner_product(a->begin(), a->end(), a->begin(), 0.0f));
 
-  std::vector<float>::const_iterator A = a->begin();
-  std::vector<float>::iterator D = dest->begin();
+  ShDataVariant<float>::const_iterator A = a->begin();
+  ShDataVariant<float>::iterator D = dest->begin();
   for(; A != a->end(); ++D, ++A) (*D) = (*A) / m; 
 }
 

@@ -106,7 +106,7 @@ void ShCastMgrGraph::addEdge(int srcIndex, int destIndex,
 
 std::ostream& ShCastMgrVertex::graphvizDump(std::ostream& out) const
 {
-  ShTypeInfoPtr typeInfo = shTypeInfo(m_typeIndex); 
+  const ShTypeInfo* typeInfo = shTypeInfo(m_typeIndex); 
 
   out << "[label=\"" << typeInfo->name() << "\"]";
   return out;
@@ -136,7 +136,7 @@ void ShCastManager::init()
   // TODO current code is ridiculous...just look at this  
   // ugly stuff below
 
-  int numTypes = ShContext::current()->num_types(); 
+  int numTypes = shNumTypes(); 
   m_castStep.clear();
   m_autoStep.clear();
   m_precDist.clear();
@@ -217,8 +217,6 @@ ShCastManager* ShCastManager::instance()
 
 std::ostream& ShCastManager::graphvizDump(std::ostream& out) const
 {
-  SH_DEBUG_PRINT("verts: " << m_casts.verts.size());
-  SH_DEBUG_PRINT("edges: " << m_casts.edges.size());
   SH::graphvizDump(out, m_casts);
   return out;
 }

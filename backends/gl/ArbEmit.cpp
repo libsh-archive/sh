@@ -30,7 +30,7 @@
 #include "ShDebug.hpp"
 #include "ShError.hpp"
 #include "ShAttrib.hpp"
-#include "ShContext.hpp"
+#include "ShTypeInfo.hpp"
 
 #ifdef WIN32
 namespace {

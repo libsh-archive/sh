@@ -2,6 +2,7 @@
 #include "ShInstructions.hpp"
 #include "ShDebug.hpp"
 #include "ShContext.hpp"
+#include "ShVariant.hpp"
 
 namespace SH {
 

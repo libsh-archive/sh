@@ -6,6 +6,7 @@
 #include "ShBitSet.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShDebug.hpp"
+#include "ShVariant.hpp"
 #include "ShEvaluate.hpp"
 #include "ShContext.hpp"
 #include "ShSyntax.hpp"

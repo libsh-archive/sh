@@ -2,8 +2,8 @@
 
 import streamtest, sys, common, math
 
-def sin(l):
-    return ([math.sin(x) for x in l], [l])
+def sin(l, types=[]):
+    return streamtest.make_test([math.sin(x) for x in l], [l], types)
 
 test = streamtest.StreamTest('sin', 1)
 test.add_call(streamtest.Call(streamtest.Call.call, 'sin', 1))

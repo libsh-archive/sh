@@ -38,7 +38,8 @@ public:
   GlTextureStorage(int context,
                    SH::ShMemory* memory, GLenum target,
                    GLenum format, GLint internalFormat,
-                   int width, int height, int depth,
+                   int typeIndex, 
+                   int width, int height, int depth, int tuplesize,
                    GlTextureNamePtr name);
   
   ~GlTextureStorage();
@@ -50,18 +51,25 @@ public:
   GLenum target() const { return m_target; }
   GLenum format() const { return m_format; }
   GLint internalFormat() const { return m_internalFormat; }
+  int typeIndex() const { return m_typeIndex; }
   int width() const { return m_width; }
   int height() const { return m_height; }
   int depth() const { return m_depth; }
+  int tuplesize() const { return m_tuplesize; }
+  int count() const { return m_width * m_height * m_depth * m_tuplesize; }
   int context() const { return m_context; }
   
 private:
   int m_context;
   GlTextureNamePtr m_name;
+
+  // OpenGL texture params.  type will be determined by the Transfer function
   GLenum m_target;
   GLenum m_format;
   GLint m_internalFormat;
-  int m_width, m_height, m_depth;
+
+  int m_typeIndex; // type index expected of data on host
+  int m_width, m_height, m_depth, m_tuplesize;
   
   unsigned int m_params;
 

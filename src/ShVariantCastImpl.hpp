@@ -27,6 +27,7 @@
 #ifndef SHVARIANTCASTIMPL_HPP
 #define SHVARIANTCASTIMPL_HPP
 
+#include "ShInternals.hpp"
 #include "ShVariant.hpp"
 #include "ShVariantCast.hpp"
 

@@ -30,7 +30,6 @@
 #include "ShTypeInfo.hpp"
 #include "ShVariantFactory.hpp"
 #include "ShInterval.hpp"
-#include "ShEval.hpp"
 
 namespace {
 
@@ -51,6 +50,8 @@ bool ShConcreteTypeEquals(const SH::ShInterval<T> &a, const SH::ShInterval<T> &b
 
 namespace SH {
 
+template<typename T> const char* ShConcreteTypeInfo<T>::m_name = "unknown type"; 
+
 // values that should usually work
 template<typename T> const T ShConcreteTypeInfo<T>::TrueVal = (T) 1;
 template<typename T> const T ShConcreteTypeInfo<T>::FalseVal = (T) 0;
@@ -58,12 +59,8 @@ template<typename T> const T ShConcreteTypeInfo<T>::FalseVal = (T) 0;
 template<typename T> const T ShConcreteTypeInfo<T>::ZERO = (T) 0;
 template<typename T> const T ShConcreteTypeInfo<T>::ONE = (T) 1;
 
-template<typename T>
-ShPointer<ShVariantFactory> ShConcreteTypeInfo<T>::m_variantFactory;   
+template<typename T> const int ShConcreteTypeInfo<T>::DataSize = sizeof(T);
 
-template<typename T>
-ShConcreteTypeInfo<T>::ShConcreteTypeInfo()
-{}
 
 template<typename T>
 T ShConcreteTypeInfo<T>::defaultLo(ShSemanticType type)
@@ -92,25 +89,66 @@ const char* ShConcreteTypeInfo<T>::name() const
 }
 
 template<typename T>
+int ShConcreteTypeInfo<T>::datasize() const 
+{
+  return DataSize; 
+}
+
+template<typename T>
 bool ShConcreteTypeInfo<T>::valuesEqual(const T &a, const T &b)
 {
   return ShConcreteTypeEquals(a, b);
 }
 
 template<typename T>
-ShVariantFactoryCPtr ShConcreteTypeInfo<T>::variantFactory() 
+const ShVariantFactory* ShConcreteTypeInfo<T>::variantFactory() const
 {
-  if(!m_variantFactory) {
-    m_variantFactory = new ShDataVariantFactory<T>();
-  }
-  return m_variantFactory;
+  return ShDataVariantFactory<T>::instance();
 }
+
+template<typename T>
+const ShConcreteTypeInfo<T>* ShConcreteTypeInfo<T>::instance() 
+{
+  if(!m_instance) m_instance = new ShConcreteTypeInfo<T>();
+  return m_instance;
+}
+
+template<typename T>
+ShConcreteTypeInfo<T>* ShConcreteTypeInfo<T>::m_instance = 0;
+
+template<typename T>
+ShConcreteTypeInfo<T>::ShConcreteTypeInfo()
+{}
 
 template<typename T>
 T shTypeInfoCond(bool cond) 
 {
   return cond ? ShConcreteTypeInfo<T>::TrueVal : ShConcreteTypeInfo<T>::FalseVal;
 }
+
+// Type to index mapping and inverse
+// We use the naive implementation for compatibility,
+// even though it may be slightly more elegant to build template type lists.
+template<typename T> struct ShTypeIndexMap { static const int index = -1; };
+#define SH_TYPEINFO_TYPEINDEX(N, T) template<> struct ShTypeIndexMap<T> { static const int index = N; };
+
+// make sure this matches the entries added in ShTypeInfo.cpp shTypeInfoInit(); 
+SH_TYPEINFO_TYPEINDEX(1, ShInterval<double>);
+SH_TYPEINFO_TYPEINDEX(2, ShInterval<float>);
+SH_TYPEINFO_TYPEINDEX(3, double);
+SH_TYPEINFO_TYPEINDEX(4, float);
+SH_TYPEINFO_TYPEINDEX(5, int);
+SH_TYPEINFO_TYPEINDEX(6, short);
+SH_TYPEINFO_TYPEINDEX(7, char);
+SH_TYPEINFO_TYPEINDEX(8, unsigned int);
+SH_TYPEINFO_TYPEINDEX(9, unsigned short);
+SH_TYPEINFO_TYPEINDEX(10, unsigned char);
+
+template<typename T>
+int shTypeIndex() {
+  return ShTypeIndexMap<T>::index;
+}
+
 
 // Type precedence information 
 // 

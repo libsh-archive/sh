@@ -53,12 +53,35 @@
 #include "ShOptimizations.hpp"
 #include "ShException.hpp"
 #include "ShError.hpp"
-#include "ShContext.hpp"
+#include "ShTypeInfo.hpp"
+#include "ShVariant.hpp"
 
 #ifdef DO_PBUFFER_TIMING
 #include <sys/time.h>
 #include <time.h>
 #endif
+
+namespace {
+
+// @todo type get rid of this when there's a proper framework
+// for manipulating data in memory 
+
+// converts an array of type from to type to using the default cast
+// (should be good enough for now. may want to hook in Sh casting
+// functions if necessary...)
+//
+// @return newly allocated array of type To with size elements 
+template<typename D, typename S>
+void convertData(D* castData, const S* originalData, int size)
+{
+  
+  for(int i = 0; i < size; ++i) {
+    castData[i] = static_cast<D>(originalData[i]);
+  }
+}
+
+
+}
 
 namespace shgl {
 
@@ -247,6 +270,8 @@ void fillin()
 
 FloatExtension PBufferStreams::setupContext(int width, int height)
 {
+  //@todo type change context setup depending out output type 
+  
   if (m_info.valid()
       && m_info.width == width
       && m_info.height == height) {
@@ -361,6 +386,7 @@ FloatExtension PBufferStreams::setupContext(int width, int height)
 void PBufferStreams::execute(const ShProgramNodeCPtr& program,
                              ShStream& dest)
 {
+  // @todo type - map weird input memory types to textures properly 
   DECLARE_TIMER(overhead);
   int prev = shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->context();
 
@@ -413,6 +439,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   
   ShChannelNodePtr output = *dest.begin();
   int count = output->count();
+  int typeIndex = output->typeIndex();
 
   // Pick a size for the texture that just fits the output data.
   int tex_size = 1;
@@ -615,8 +642,9 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   ShHostStoragePtr outhost
     = shref_dynamic_cast<ShHostStorage>(output->memory()->findStorage("host"));
   if (!outhost) {
+    int datasize = shTypeInfo(typeIndex)->datasize(); 
     outhost = new ShHostStorage(output->memory().object(),
-                                sizeof(float) * output->size() * output->count());
+                                datasize * output->size() * output->count());
   }
   TIMING_RESULT(findouthost);
 
@@ -646,9 +674,18 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   }
 
   DECLARE_TIMER(readback);
-  
+
+  // @todo type half-float, frac types
+  ShPointer<ShDataVariant<float> > resultBuffer; 
+  int resultDatasize = output->size() * count;
+  if(typeIndex != shTypeIndex<float>()) {
+    resultBuffer = new ShDataVariant<float>(resultDatasize);
+  } else {
+    resultBuffer = new ShDataVariant<float>(outhost->data(), resultDatasize, false);
+  }
+
   glReadPixels(0, 0, tex_size, count / tex_size, format,
-               GL_FLOAT, outhost->data());
+               GL_FLOAT, resultBuffer->begin());
   gl_error = glGetError();
   if (gl_error != GL_NO_ERROR) {
     shError(PBufferStreamException("Could not do glReadPixels()"));
@@ -658,8 +695,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   }
   if (count % tex_size) {
     glReadPixels(0, count / tex_size, count % tex_size, 1, format, GL_FLOAT,
-                 reinterpret_cast<float*>(outhost->data())
-                 + (count - (count % tex_size)) * output->size());
+                 resultBuffer->begin() + (count - (count % tex_size)) * output->size());
     gl_error = glGetError();
     if (gl_error != GL_NO_ERROR) {
       shError(PBufferStreamException("Could not do rest of glReadPixels()"));
@@ -667,6 +703,13 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
       //XFree(fb_config);
       return;
     }
+  }
+
+  if(resultBuffer->managed()) { // need to copy to outhoust->data()
+    const ShVariantFactory* variantFactory = shTypeInfo(typeIndex)->variantFactory();
+    ShVariantPtr outhostVariant = 
+      variantFactory->generate(outhost->data(), resultDatasize, false);
+    outhostVariant->set(resultBuffer);
   }
 
   TIMING_RESULT(readback);

@@ -2,9 +2,9 @@
 
 import streamtest, sys, common
 
-def div(p, q):
+def div(p, q, types=[]):
     result = [a / b for (a,b) in common.upzip(p, q)]
-    return (result, [p, q])
+    return streamtest.make_test(result, [p, q], types)
 
 test = streamtest.StreamTest('div', 2)
 test.add_call(streamtest.Call(streamtest.Call.infix, '/', 2))
@@ -13,4 +13,9 @@ test.add_test(div((1.0,), (3.0, 4.0, 5.0)))
 test.add_test(div((1.0, 2.0, 3.0), (7.0,)))
 test.add_test(div((1.0,), (7.0,)))
 test.add_test(div((4.0, 5.0, 6.0), (-4.0, -5.0, -6.0)))
+
+test.add_test(div((1, 2, 3), (3, 3, 3), ['i', 's', 's']))
+test.add_test(div((1.0, 2.0, 3.0), (3, 3, 3), ['f', 'f', 's']))
+#test.add_test(div((1, 2, 3), (3.0, 3.0, 3.0), ['f', 's', 'f']))
+
 test.output(sys.stdout)

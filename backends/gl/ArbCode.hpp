@@ -77,7 +77,7 @@ public:
   virtual void updateUniform(const SH::ShVariableNodePtr& uniform);
   
   std::ostream& print(std::ostream& out);
-  std::ostream& printInputOutputFormat(std::ostream& out);
+  std::ostream& describe_interface(std::ostream& out);
 
   /// Actually generate the code, and do register allocation.
   void generate();
@@ -209,7 +209,6 @@ private:
   // floating point types
   //
   // @todo may want more intelligent conversion if hardware 
-  SH::ShVarMap m_converts;
   SH::ShTransformer::TypeIndexMap m_convertMap;
 
   /// ARB Program ID we are bound to. 0 if code hasn't been uploaded yet.

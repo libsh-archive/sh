@@ -2,8 +2,8 @@
 
 import streamtest, sys, common, math
 
-def cos(l):
-    return ([math.cos(x) for x in l], [l])
+def cos(l, types=[]):
+    return streamtest.make_test([math.cos(x) for x in l], [l], types)
 
 test = streamtest.StreamTest('cos', 1)
 test.add_call(streamtest.Call(streamtest.Call.call, 'cos', 1))

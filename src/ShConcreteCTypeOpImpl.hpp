@@ -31,14 +31,14 @@ namespace SH {
 #define SHCCTO_UNARY_OP(op, opsrc)\
 template<typename T>\
 struct ShConcreteCTypeOp<op, T> {\
-  static void doop(std::vector<T> *dest, \
-    const std::vector<T> *a, const std::vector<T> *b = 0, const std::vector<T> *c = 0) \
+  static void doop(ShPointer<ShDataVariant<T> > dest, \
+    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) \
   {\
     SH_DEBUG_ASSERT(dest && a);\
     int ao = a->size() > 1;\
   \
-    typename std::vector<T>::iterator D = dest->begin();\
-    typename std::vector<T>::const_iterator A = a->begin();\
+    typename ShDataVariant<T>::iterator D = dest->begin();\
+    typename ShDataVariant<T>::const_iterator A = a->begin();\
     for(; D != dest->end(); A += ao, ++D) {\
       (*D) = opsrc;\
     }\
@@ -49,15 +49,15 @@ struct ShConcreteCTypeOp<op, T> {\
 #define SHCCTO_BINARY_OP(op, opsrc)\
 template<typename T>\
 struct ShConcreteCTypeOp<op, T> {\
-  static void doop(std::vector<T> *dest, \
-    const std::vector<T> *a, const std::vector<T> *b = 0, const std::vector<T> *c = 0) \
+  static void doop(ShPointer<ShDataVariant<T> > dest, \
+    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) \
   {\
     SH_DEBUG_ASSERT(dest && a && b);\
     int ao = a->size() > 1;\
     int bo = b->size() > 1;\
   \
-    typename std::vector<T>::iterator D = dest->begin();\
-    typename std::vector<T>::const_iterator A, B;\
+    typename ShDataVariant<T>::iterator D = dest->begin();\
+    typename ShDataVariant<T>::const_iterator A, B;\
     A = a->begin();\
     B = b->begin();\
     for(; D != dest->end(); A += ao, B += bo, ++D) {\
@@ -70,16 +70,16 @@ struct ShConcreteCTypeOp<op, T> {\
 #define SHCCTO_TERNARY_OP(op, opsrc)\
 template<typename T>\
 struct ShConcreteCTypeOp<op, T> {\
-  static void doop(std::vector<T> *dest, \
-    const std::vector<T> *a, const std::vector<T> *b = 0, const std::vector<T> *c = 0) \
+  static void doop(ShPointer<ShDataVariant<T> > dest, \
+    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) \
   {\
     SH_DEBUG_ASSERT(dest && a && b && c);\
     int ao = a->size() > 1;\
     int bo = b->size() > 1;\
     int co = c->size() > 1;\
   \
-    typename std::vector<T>::iterator D = dest->begin();\
-    typename std::vector<T>::const_iterator A, B, C;\
+    typename ShDataVariant<T>::iterator D = dest->begin();\
+    typename ShDataVariant<T>::const_iterator A, B, C;\
     A = a->begin();\
     B = b->begin();\
     C = c->begin();\
@@ -92,8 +92,8 @@ struct ShConcreteCTypeOp<op, T> {\
 #define SHCCTO_OP_SPEC(T, op)\
 template<>\
 struct ShConcreteCTypeOp<op, T> {\
-  static void doop(std::vector<T> *dest, \
-    const std::vector<T> *a, const std::vector<T> *b = 0, const std::vector<T> *c = 0);\
+  static void doop(ShPointer<ShDataVariant<T> > dest, \
+    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0);\
   \
 };
 
@@ -119,12 +119,12 @@ SHCCTO_OP_CMATH_SPEC(SH_OP_CEIL);
 
 template<typename T>
 struct ShConcreteCTypeOp<SH_OP_CMUL, T> {
-  static void doop(std::vector<T> *dest, 
-    const std::vector<T> *a, const std::vector<T> *b = 0, const std::vector<T> *c = 0) 
+  static void doop(ShPointer<ShDataVariant<T> > dest, 
+    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) 
   {
     // dest->size should be 1 and a->size == b->size
     T result = ShConcreteTypeInfo<T>::ZERO;
-    typename std::vector<T>::const_iterator A = a->begin();
+    typename ShDataVariant<T>::const_iterator A = a->begin();
     for(; A != a->end(); ++A) result *= (*A); 
      (*dest)[0] = result;
   }
@@ -134,12 +134,12 @@ SHCCTO_OP_CMATH_SPEC(SH_OP_COS);
 
 template<typename T>
 struct ShConcreteCTypeOp<SH_OP_CSUM, T> {
-  static void doop(std::vector<T> *dest, 
-    const std::vector<T> *a, const std::vector<T> *b = 0, const std::vector<T> *c = 0) 
+  static void doop(ShPointer<ShDataVariant<T> > dest, 
+    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) 
   {
     // dest->size should be 1 and a->size == b->size
     T result = ShConcreteTypeInfo<T>::ZERO;
-    typename std::vector<T>::const_iterator A = a->begin();
+    typename ShDataVariant<T>::const_iterator A = a->begin();
     for(; A != a->end(); ++A) result += (*A); 
      (*dest)[0] = result;
   }
@@ -176,8 +176,8 @@ SHCCTO_BINARY_OP(SH_OP_DIV, (*A) / (*B));
 
 template<typename T>
 struct ShConcreteCTypeOp<SH_OP_DOT, T> {
-  static void doop(std::vector<T> *dest, 
-    const std::vector<T> *a, const std::vector<T> *b = 0, const std::vector<T> *c = 0) 
+  static void doop(ShPointer<ShDataVariant<T> > dest, 
+    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) 
   {
     // dest->size should be 1 and a->size == b->size
     (*dest)[0] = std::inner_product(a->begin(), a->end(), b->begin(), (T) 0);
@@ -206,8 +206,8 @@ SHCCTO_BINARY_OP(SH_OP_SNE, shTypeInfoCond<T>((*A) != (*B)));
 
 template<typename T>
 struct ShConcreteCTypeOp<SH_OP_XPD, T> {
-  static void doop(std::vector<T> *dest, 
-    const std::vector<T> *a, const std::vector<T> *b = 0, const std::vector<T> *c = 0) 
+  static void doop(ShPointer<ShDataVariant<T> > dest, 
+    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) 
   {
     (*dest)[0] = (*a)[1] * (*b)[2] - (*a)[2] * (*b)[1];
     (*dest)[1] = -((*a)[0] * (*b)[2] - (*a)[2] * (*b)[0]);

@@ -250,8 +250,8 @@ void ShVariableNode::rangeVariant(ShVariantCPtr low, ShVariantCPtr high)
 
 void ShVariableNode::rangeVariant(ShVariantCPtr low, ShVariantCPtr high, bool neg, const ShSwizzle &writemask)
 {
-  ShTypeInfoPtr typeInfo = shTypeInfo(m_typeIndex);
-  ShVariantFactoryCPtr factory = typeInfo->variantFactory();
+  const ShTypeInfo* typeInfo = shTypeInfo(m_typeIndex);
+  const ShVariantFactory* factory = typeInfo->variantFactory();
 
   std::string oldLo, oldHi;
   oldLo = meta("lowBound");
@@ -275,7 +275,7 @@ void ShVariableNode::rangeVariant(ShVariantCPtr low, ShVariantCPtr high, bool ne
 
 ShVariantPtr ShVariableNode::lowBoundVariant() const
 {
-  ShVariantFactoryCPtr factory = shTypeInfo(m_typeIndex)->variantFactory();
+  const ShVariantFactory* factory = shTypeInfo(m_typeIndex)->variantFactory();
   std::string metaLow = meta("lowBound");
 
   return (metaLow.empty() ? 
@@ -285,7 +285,7 @@ ShVariantPtr ShVariableNode::lowBoundVariant() const
 
 ShVariantPtr ShVariableNode::highBoundVariant() const
 {
-  ShVariantFactoryCPtr factory = shTypeInfo(m_typeIndex)->variantFactory();
+  const ShVariantFactory* factory = shTypeInfo(m_typeIndex)->variantFactory();
   std::string metaHigh = meta("highBound");
 
   return (metaHigh.empty() ? 

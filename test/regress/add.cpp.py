@@ -2,9 +2,9 @@
 
 import streamtest, sys, common
 
-def add(p, q):
+def add(p, q, types=[]):
     result = [a + b for (a,b) in common.upzip(p, q)]
-    return (result, [p, q])
+    return streamtest.make_test(result, [p, q], types)
 
 test = streamtest.StreamTest('add', 2)
 test.add_call(streamtest.Call(streamtest.Call.infix, '+', 2))
@@ -13,4 +13,13 @@ test.add_test(add((1.0,), (3.0, 4.0, 5.0)))
 test.add_test(add((1.0, 2.0, 3.0), (7.0,)))
 test.add_test(add((1.0,), (7.0,)))
 test.add_test(add((4.0, 5.0, 6.0), (-4.0, -5.0, -6.0)))
+
+test.add_test(add((0, 1, 2), (3, 4, 5), ['i', 'i', 'i']))
+test.add_test(add((1,), (3, 4, 5), ['s', 's', 's']))
+test.add_test(add((1, 2, 3), (7,), ['i', 's', 'b']))
+test.add_test(add((1,), (7,), ['i', 'i', 'i']))
+test.add_test(add((4, 5, 6), (-4, -5, -6), ['i', 'i', 'i']))
+
+test.add_test(streamtest.make_test((0, 1, 2), [(1.3, 2.97, -5.4), (-.31, -1.5, 8)], ['i', 'f', 'f']))
+
 test.output(sys.stdout)

@@ -39,6 +39,9 @@
 #define COLOR_YELLOW "[33m"
 #define COLOR_NORMAL "[0m"
 
+// turns on output of all results, even if they pass 
+//#define SH_REGRESS_SHOWALL 
+
 class Test {
 public:
   // reads backend from command line (default gcc) 
@@ -61,22 +64,25 @@ public:
            const INPUT1& in1,
            const OUTPUT& res)
   {
+    typedef typename INPUT1::ValueType IT;
+    typedef typename OUTPUT::ValueType OT;
+
     std::string name = program.name();
-    float* _in1 = new float[in1.size()];
+    IT* _in1 = new IT[in1.size()];
     in1.getValues(_in1);
 
-    float* _out = new float[res.size()];
+    OT* _out = new OT[res.size()];
     res.getValues(_out);
     // Arbitrarily change output values
     for (int i = 0; i < res.size(); i++) _out[i] += 10.0;
 
-    float* _res = new float[res.size()];
+    OT* _res = new OT[res.size()];
     res.getValues(_res);
 
-    SH::ShHostMemoryPtr mem_in1 = new SH::ShHostMemory(in1.size()*sizeof(float), _in1);
+    SH::ShHostMemoryPtr mem_in1 = new SH::ShHostMemory(in1.size()*sizeof(IT), _in1);
     SH::ShChannel<typename INPUT1::TempType> chan_in1(mem_in1, 1);
 
-    SH::ShHostMemoryPtr mem_out = new SH::ShHostMemory(res.size()*sizeof(float), _out);
+    SH::ShHostMemoryPtr mem_out = new SH::ShHostMemory(res.size()*sizeof(OT), _out);
     SH::ShChannel<typename OUTPUT::TempType> chan_out(mem_out, 1);
 
     chan_out = program << chan_in1;
@@ -89,9 +95,11 @@ public:
         pretty_print("res", res.size(), _res);
         return;
       }
-//      /* DEBUG */ pretty_print("out", res.size(), _out);
-//      /* DEBUG */ pretty_print("res", res.size(), _res);
     }
+#ifdef SH_REGRESS_SHOWALL
+      /* DEBUG */ pretty_print("out", res.size(), _out);
+      /* DEBUG */ pretty_print("res", res.size(), _res);
+#endif
     print_pass(name);
   }
 
@@ -101,28 +109,32 @@ public:
            const INPUT2& in2,
            const OUTPUT& res)
   {
+    typedef typename INPUT1::ValueType IT1;
+    typedef typename INPUT2::ValueType IT2;
+    typedef typename OUTPUT::ValueType OT;
+
     std::string name = program.name();
-    float* _in1 = new float[in1.size()];
+    IT1* _in1 = new IT1[in1.size()];
     in1.getValues(_in1);
 
-    float* _in2 = new float[in2.size()];
+    IT2* _in2 = new IT2[in2.size()];
     in2.getValues(_in2);
 
-    float* _out = new float[res.size()];
+    OT* _out = new OT[res.size()];
     res.getValues(_out);
     // Arbitrarily change output values
     for (int i = 0; i < res.size(); i++) _out[i] += 10.0;
 
-    float* _res = new float[res.size()];
+    OT* _res = new OT[res.size()];
     res.getValues(_res);
 
-    SH::ShHostMemoryPtr mem_in1 = new SH::ShHostMemory(in1.size()*sizeof(float), _in1);
+    SH::ShHostMemoryPtr mem_in1 = new SH::ShHostMemory(in1.size()*sizeof(IT1), _in1);
     SH::ShChannel<typename INPUT1::TempType> chan_in1(mem_in1, 1);
 
-    SH::ShHostMemoryPtr mem_in2 = new SH::ShHostMemory(in2.size()*sizeof(float), _in2);
+    SH::ShHostMemoryPtr mem_in2 = new SH::ShHostMemory(in2.size()*sizeof(IT2), _in2);
     SH::ShChannel<typename INPUT2::TempType> chan_in2(mem_in2, 1);
 
-    SH::ShHostMemoryPtr mem_out = new SH::ShHostMemory(res.size()*sizeof(float), _out);
+    SH::ShHostMemoryPtr mem_out = new SH::ShHostMemory(res.size()*sizeof(OT), _out);
     SH::ShChannel<typename OUTPUT::TempType> chan_out(mem_out, 1);
 
     chan_out = program << chan_in1 << chan_in2;
@@ -136,9 +148,11 @@ public:
         pretty_print("res", res.size(), _res);
         return;
       }
-//      /* DEBUG */ pretty_print("out", res.size(), _out);
-//      /* DEBUG */ pretty_print("res", res.size(), _res);
     }
+#ifdef SH_REGRESS_SHOWALL
+      /* DEBUG */ pretty_print("out", res.size(), _out);
+      /* DEBUG */ pretty_print("res", res.size(), _res);
+#endif    
     print_pass(name);
   }
 
@@ -149,35 +163,40 @@ public:
            const INPUT3& in3,
            const OUTPUT res)
   {
+    typedef typename INPUT1::ValueType IT1;
+    typedef typename INPUT2::ValueType IT2;
+    typedef typename INPUT3::ValueType IT3;
+    typedef typename OUTPUT::ValueType OT;
+
     std::string name = program.name();
   
-    float* _in1 = new float[in1.size()];
+    IT1* _in1 = new IT1[in1.size()];
     in1.getValues(_in1);
 
-    float* _in2 = new float[in2.size()];
+    IT2* _in2 = new IT2[in2.size()];
     in2.getValues(_in2);
 
-    float* _in3 = new float[in3.size()];
+    IT3* _in3 = new IT3[in3.size()];
     in3.getValues(_in3);
 
-    float* _out = new float[res.size()];
+    OT* _out = new OT[res.size()];
     res.getValues(_out);
     // Arbitrarily change output values
     for (int i = 0; i < res.size(); i++) _out[i] += 10.0;
 
-    float* _res = new float[res.size()];
+    OT* _res = new OT[res.size()];
     res.getValues(_res);
 
-    SH::ShHostMemoryPtr mem_in1 = new SH::ShHostMemory(in1.size()*sizeof(float), _in1);
+    SH::ShHostMemoryPtr mem_in1 = new SH::ShHostMemory(in1.size()*sizeof(IT1), _in1);
     SH::ShChannel<typename INPUT1::TempType> chan_in1(mem_in1, 1);
 
-    SH::ShHostMemoryPtr mem_in2 = new SH::ShHostMemory(in2.size()*sizeof(float), _in2);
+    SH::ShHostMemoryPtr mem_in2 = new SH::ShHostMemory(in2.size()*sizeof(IT2), _in2);
     SH::ShChannel<typename INPUT2::TempType> chan_in2(mem_in2, 1);
 
-    SH::ShHostMemoryPtr mem_in3 = new SH::ShHostMemory(in3.size()*sizeof(float), _in3);
+    SH::ShHostMemoryPtr mem_in3 = new SH::ShHostMemory(in3.size()*sizeof(IT3), _in3);
     SH::ShChannel<typename INPUT3::TempType> chan_in3(mem_in3, 1);
 
-    SH::ShHostMemoryPtr mem_out = new SH::ShHostMemory(res.size()*sizeof(float), _out);
+    SH::ShHostMemoryPtr mem_out = new SH::ShHostMemory(res.size()*sizeof(OT), _out);
     SH::ShChannel<typename OUTPUT::TempType> chan_out(mem_out, 1);
 
     chan_out = program << chan_in1 << chan_in2 << chan_in3;
@@ -192,9 +211,11 @@ public:
         pretty_print("res", res.size(), _res);
         return;
       }
-//      /* DEBUG */ pretty_print("out", res.size(), _out);
-//      /* DEBUG */ pretty_print("res", res.size(), _res);
     }
+#ifdef SH_REGRESS_SHOWALL
+      /* DEBUG */ pretty_print("out", res.size(), _out);
+      /* DEBUG */ pretty_print("res", res.size(), _res);
+#endif
   }
 
   /// Checks results from running ops on the host
@@ -221,9 +242,11 @@ public:
           pretty_print("res", res.size(), _res); 
           return;
         }
-//        /* DEBUG */ pretty_print("out", res.size(), _out);
-//        /* DEBUG */ pretty_print("res", res.size(), _res);
       }
+#ifdef SH_REGRESS_SHOWALL
+        /* DEBUG */ pretty_print("out", res.size(), _out);
+        /* DEBUG */ pretty_print("res", res.size(), _res);
+#endif
       print_pass(name);
   }
 

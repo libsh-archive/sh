@@ -2,9 +2,9 @@
 
 import streamtest, sys, common
 
-def mul(p, q):
+def mul(p, q, types=[]):
     result = [a * b for (a,b) in common.upzip(p, q)]
-    return (result, [p, q])
+    return streamtest.make_test(result, [p, q], types)
 
 test = streamtest.StreamTest('mul', 2)
 test.add_call(streamtest.Call(streamtest.Call.infix, '*', 2))

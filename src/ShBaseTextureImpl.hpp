@@ -29,6 +29,7 @@
 
 #include "ShBaseTexture.hpp"
 #include "ShContext.hpp"
+#include "ShTypeInfo.hpp"
 #include "ShError.hpp"
 #include "ShLibMisc.hpp"
 

@@ -27,11 +27,13 @@
 #include <algorithm>
 #include <map>
 #include <list>
-#include "ShContext.hpp"
+#include "ShSyntax.hpp"
 #include "ShError.hpp"
 #include "ShDebug.hpp"
+#include "ShTypeInfo.hpp"
 #include "ShVariableNode.hpp"
 #include "ShInternals.hpp"
+#include "ShInstructions.hpp"
 #include "ShEval.hpp"
 #include "ShTransformer.hpp"
 
@@ -125,9 +127,9 @@ struct FloatConverter {
     m_intIndices.push_back(shTypeIndex<short>());
     m_intIndices.push_back(shTypeIndex<char>());
     
-    //m_uintIndices.push_back(shTypeIndex<unsigned int>());
-    //m_uintIndices.push_back(shTypeIndex<unsigned short>());
-    //m_uintIndices.push_back(shTypeIndex<unsigned char>());
+    m_uintIndices.push_back(shTypeIndex<unsigned int>());
+    m_uintIndices.push_back(shTypeIndex<unsigned short>());
+    m_uintIndices.push_back(shTypeIndex<unsigned char>());
     
     //@todo frac types
   }
@@ -155,7 +157,7 @@ struct FloatConverter {
 
   // @todo not implemented yet 
   bool isUint(int typeIndex) {
-    //return std::find(m_uintIndices.begin(), m_uintIndices.end(), typeIndex) != m_uintIndices.end();
+    return std::find(m_uintIndices.begin(), m_uintIndices.end(), typeIndex) != m_uintIndices.end();
     return false;
   }
 
@@ -182,6 +184,9 @@ struct FloatConverter {
   //
   // Instead of using var's variable node in these operations,
   // it uses newvarNode (this may in fact be the same as var->node()) 
+  //
+  // var and result should have the converted types already,
+  // but fromType and toType are the original types requested for the statement.
   //
   void insertConversion(ShBasicBlock::ShStmtList &stmtList, const ShBasicBlock::ShStmtList::iterator &I,
       const ShVariable &var, int fromType, const ShVariable &result, int toType,
@@ -210,9 +215,25 @@ struct FloatConverter {
     ShVariable temp(var.node()->clone(SH_TEMP, SH_ATTRIB, var.size(), false, false));
 
     stmtList.insert(I, ShStatement(temp, SH_OP_ASN, var));
-    //if(operations & APPLY_MAX_1) stmtList.insert(I, ShStatement(temp, SH_OP_FLR, temp)); 
-    //if(operations & APPLY_MAX0)  stmtList.insert(I, ShStatement(temp, SH_OP_FLR, temp)); 
-    //if(operations & APPLY_MIN1)  stmtList.insert(I, ShStatement(temp, SH_OP_FLR, temp)); 
+
+    if(operations & APPLY_MAX_1) {
+      ShVariable one(var.node()->clone(SH_CONST, SH_ATTRIB, 1, false, false));
+      one.setVariant(shTypeInfo(var.typeIndex())->variantFactory()->generateOne());
+      stmtList.insert(I, ShStatement(temp, temp, SH_OP_MAX, one)); 
+    }
+
+    if(operations & APPLY_MAX0)  {
+      ShVariable zero(var.node()->clone(SH_CONST, SH_ATTRIB, 1, false, false));
+      zero.setVariant(shTypeInfo(var.typeIndex())->variantFactory()->generateZero());
+      stmtList.insert(I, ShStatement(temp, temp, SH_OP_MAX, zero)); 
+    }
+
+    if(operations & APPLY_MIN1)  {
+      ShVariable one(var.node()->clone(SH_CONST, SH_ATTRIB, 1, false, false));
+      one.setVariant(shTypeInfo(var.typeIndex())->variantFactory()->generateOne());
+      stmtList.insert(I, ShStatement(temp, temp, SH_OP_MIN, one)); 
+    }
+
     if(operations & APPLY_FLR) stmtList.insert(I, ShStatement(temp, SH_OP_FLR, temp)); 
 
     stmtList.insert(I, ShStatement(result, SH_OP_ASN, temp));
@@ -299,7 +320,10 @@ struct FloatConverter {
 
       // @todo type check for other special cases
       unsigned int forcedOps = 0;
-      if(stmt.op == SH_OP_DIV || stmt.op == SH_OP_POW) forcedOps |= APPLY_FLR; 
+      if((stmt.op == SH_OP_DIV || stmt.op == SH_OP_POW) && 
+         (isInt(destIndex) || isUint(destIndex))) {
+        forcedOps |= APPLY_FLR; 
+      }
 
       insertConversion(stmtList, afterI, temp, opDest, newdest, destIndex, forcedOps); 
 
@@ -312,13 +336,24 @@ struct FloatConverter {
     // check if done or conversion not necessary
     if(m_converts.count(p) > 0) return; 
     if(m_typeMap.count(p->typeIndex()) == 0) return; 
-    m_converts[p] = p->clone(m_typeMap[p->typeIndex()], false);
+    ShVariableNodePtr &converted_p = m_converts[p] 
+      = p->clone(m_typeMap[p->typeIndex()], false);
+
     if(p->hasValues()) {
-      m_converts[p]->setVariant(p->getVariant());
+      converted_p->setVariant(p->getVariant());
 
 #ifdef SH_DEBUG_TYPECONVERT
-      SH_DEBUG_PRINT("Setting values on replacement = " << m_converts[p]->getVariant()->encode() << " original = " << p->getVariant()->encode());
+      SH_DEBUG_PRINT("Setting values on replacement = " << converted_p->getVariant()->encode() << " original = " << p->getVariant()->encode());
 #endif
+    }
+    
+    if(p->uniform()) { // @todo set up dependent uniform
+      ShProgram prg = SH_BEGIN_PROGRAM("uniform") {
+        ShVariable original(p);
+        ShVariable converted(converted_p);
+        shASN(converted, original);
+      } SH_END;
+      converted_p->attach(prg.node());
     }
 
 #ifdef SH_DEBUG_TYPECONVERT
@@ -337,13 +372,14 @@ struct FloatConverter {
 
     TypeIndexSet m_floatIndices;
     TypeIndexSet m_intIndices;
-    //TypeIndexset m_uintIndices;
-    //TypeIndexset m_fracIndices;
-    //TypeIndexset m_ufracIndices;
+    TypeIndexSet m_uintIndices;
+    //TypeIndexSet m_fracIndices;
+    //TypeIndexSet m_ufracIndices;
 };
 
-void ShTransformer::convertToFloat(TypeIndexMap &typeMap, ShVarMap &converts)
+void ShTransformer::convertToFloat(TypeIndexMap &typeMap)
 {
+  ShVarMap converts;
   FloatConverter floatconv(typeMap, converts);
 
   // Step 1

@@ -24,6 +24,7 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
+#include "ShContext.hpp"
 #include "GlTextures.hpp"
 #include <sstream>
 #include "GlTextureName.hpp"
@@ -77,11 +78,30 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node)
   } else if (node->traits().clamping() == SH::ShTextureTraits::SH_UNCLAMPED) {
 
     std::string exts(reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS)));
-    GLenum fpformats_nv[4] = {GL_FLOAT_R_NV, GL_FLOAT_RGBA_NV, GL_FLOAT_RGB_NV, GL_FLOAT_RGBA_NV};
+
+    GLenum byteformats[4] = {GL_LUMINANCE8, GL_LUMINANCE8_ALPHA8, GL_RGB8, GL_RGBA8}; 
+    GLenum shortformats[4] = {GL_LUMINANCE16, GL_LUMINANCE16_ALPHA16, GL_RGB16, GL_RGBA16}; 
+
+    GLenum halfformats_nv[4] = {GL_FLOAT_R16_NV, GL_FLOAT_RGBA16_NV, GL_FLOAT_RGB16_NV, GL_FLOAT_RGBA16_NV};
+    GLenum fpformats_nv[4] = {GL_FLOAT_R32_NV, GL_FLOAT_RGBA32_NV, GL_FLOAT_RGB32_NV, GL_FLOAT_RGBA32_NV};
+
+    GLenum halfformats_ati[4] = {GL_LUMINANCE_FLOAT16_ATI,
+                               GL_LUMINANCE_ALPHA_FLOAT16_ATI,
+                               GL_RGB_FLOAT16_ATI,
+                               GL_RGBA_FLOAT16_ATI};
+
     GLenum fpformats_ati[4] = {GL_LUMINANCE_FLOAT32_ATI,
                                GL_LUMINANCE_ALPHA_FLOAT32_ATI,
                                GL_RGB_FLOAT32_ATI,
                                GL_RGBA_FLOAT32_ATI};
+
+    // @todo type
+    // handle fractional types
+    // right now all available formats - double, float, signed ints, unsigned ints should
+    // be stored internally as float if possible
+    //
+    // @todo type
+    // handle half-floats
     GLenum* fpformats = 0;
     if (exts.find("NV_float_buffer") != std::string::npos) {
       fpformats = fpformats_nv;
@@ -210,8 +230,9 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node,
                                                            shGlCubeMapTargets[i],
                                                            shGlFormat(node),
                                                            shGlInternalFormat(node),
+                                                           node->typeIndex(),
                                                            node->width(), node->height(),
-                                                           node->depth(),
+                                                           node->depth(), node->size(),
                                                            texname);
         storage->sync();
       }
@@ -246,7 +267,9 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node,
                                      shGlTargets[node->dims()],
                                      shGlFormat(node),
                                      shGlInternalFormat(node),
-                                     node->width(), node->height(), node->depth(),
+                                     node->typeIndex(),
+                                     node->width(), node->height(), 
+                                     node->depth(), node->size(),
                                      name);
       name->params(node->traits());
     }

@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <map>
+#include "ShStatement.hpp"
+#include "ShVariant.hpp"
 #include "ShOperation.hpp"
 #include "ShRefCount.hpp"
 #include "ShInterval.hpp"
@@ -31,15 +33,16 @@ namespace SH {
  * shref, but none implemented as IR operations yet...)
  */
 
-#include "ShStatement.hpp"
 
 // forward declarations
-class ShVariant;
+//class ShVariant;
 class ShEvalOp;
-typedef ShPointer<ShVariant> ShVariantPtr;
-typedef ShPointer<const ShVariant> ShVariantCPtr;
+//typedef ShPointer<ShVariant> ShVariantPtr;
+//typedef ShPointer<const ShVariant> ShVariantCPtr;
 
-struct ShEvalOpInfo: public ShStatementInfo {
+struct 
+SH_DLLEXPORT
+ShEvalOpInfo: public ShStatementInfo {
   ShOperation m_op;
 
   // type indices of the destination and sources
@@ -56,7 +59,9 @@ struct ShEvalOpInfo: public ShStatementInfo {
   std::string encode() const;
 };
 
-class ShEval {
+class 
+SH_DLLEXPORT
+ShEval {
   public:
     /** Decides which evaluation evalOp to use and calls it up.
      * If an op is unary, leave b, c = 0.
@@ -94,7 +99,9 @@ class ShEval {
     static ShEval* m_instance;
 };
 
-class ShEvalOp: public ShRefCountable {
+class 
+SH_DLLEXPORT
+ShEvalOp: public ShRefCountable {
   public:
     virtual ~ShEvalOp();
 
@@ -114,7 +121,7 @@ typedef ShPointer<const ShEvalOp> ShEvalOpCPtr;
 //
 // 2) Functions 
 //    template<ShOperation S>
-//    static void unaryOp(std::vector<T1> &dest, const std::vector<T2> &src);
+//    static void unaryOp(ShDataVariant<T1> &dest, const ShDataVariant<T2> &src);
 //
 //    and similarly for binary, ternary ops 
 //    (for most ops, only T1 = T2 is supported directly,
@@ -146,10 +153,10 @@ struct ShRegularOp: public ShEvalOp {
 // OR, use helper functions 
 template<ShOperation S, typename T>
 struct ShConcreteRegularOp {
-  static void doop(std::vector<T> *dest, 
-      const std::vector<T> *a, 
-      const std::vector<T> *b = 0, 
-      const std::vector<T> *c = 0);
+  static void doop(ShPointer<ShDataVariant<T> > dest, 
+      ShPointer<const ShDataVariant<T> > a, 
+      ShPointer<const ShDataVariant<T> > b = 0, 
+      ShPointer<const ShDataVariant<T> > c = 0);
 };
 
 /// evalOp that uses cmath functions and
@@ -160,10 +167,10 @@ struct ShConcreteRegularOp {
 //want to not declare the ones that don't make sense...
 template<ShOperation S, typename T>
 struct ShConcreteCTypeOp {
-  static void doop(std::vector<T> *dest, 
-      const std::vector<T> *a, 
-      const std::vector<T> *b = 0, 
-      const std::vector<T> *c = 0);
+  static void doop(ShPointer<ShDataVariant<T> > dest, 
+      ShPointer<const ShDataVariant<T> > a, 
+      ShPointer<const ShDataVariant<T> > b = 0, 
+      ShPointer<const ShDataVariant<T> > c = 0);
 };
 
 template<ShOperation S, typename T>
@@ -194,8 +201,8 @@ struct ShIntervalOp: public ShEvalOp {
 
 template<ShOperation S, typename T1, typename T2>
 struct ShConcreteIntervalOp{
-  static void doop(std::vector<T1> &dest, 
-      const std::vector<T2> &a);
+  static void doop(ShDataVariant<T1> &dest, 
+      const ShDataVariant<T2> &a);
       
 };
 

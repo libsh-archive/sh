@@ -35,34 +35,64 @@ namespace SH {
 
 
 struct 
-SH_DLLEXPORT ShVariantFactory: public ShRefCountable {
-  /// Creates a ShVariant object with N components 
+SH_DLLEXPORT 
+ShVariantFactory {
+  virtual ~ShVariantFactory() {}
+
+  /// Creates a ShDataVariant object with N components 
   virtual ShVariantPtr generate(int N) const = 0; 
 
-  /// Creates a ShVariant object by using the 
+  /// Creates a ShDataVariant object by using the 
   // decode method from the Variant type corresponding
   // to this factory
   virtual ShVariantPtr generate(std::string s) const = 0;
 
-  /// Creates two ShVariants object with N default low
+  /// Creates an ShDataVariant object with the existing
+  /// array as data
+  /// @param managed Set to true iff this should make a copy
+  //                 rather than using the given array internally.
+  virtual ShVariantPtr generate(void *data, int N, bool managed = true) const = 0;  
+
+  /// Creates ShDataVariant objects with N default low
   // range values for the given ShSemanticType
   virtual ShVariantPtr generateLowBound(int N, ShSemanticType type) const = 0; 
   virtual ShVariantPtr generateHighBound(int N, ShSemanticType type) const = 0; 
+
+  /// Creates an ShDataVariant object with N elements set to zero.
+  virtual ShVariantPtr generateZero(int N = 1) const = 0;
+
+  /// Creates an ShDataVariant object with N elements set to one. 
+  virtual ShVariantPtr generateOne(int N = 1) const = 0;
+
+  /// Creates an ShDataVariant object with N elements set to true 
+  virtual ShVariantPtr generateTrue(int N = 1) const = 0;
+
+  /// Creates an ShDataVariant object with N elements set to false 
+  virtual ShVariantPtr generateFalse(int N = 1) const = 0;
 };
 
-typedef ShPointer<ShVariantFactory> ShVariantFactoryPtr;
-typedef ShPointer<const ShVariantFactory> ShVariantFactoryCPtr;
-
 template<typename T>
-struct 
-SH_DLLEXPORT ShDataVariantFactory: public ShVariantFactory {
+struct ShDataVariantFactory: public ShVariantFactory {
   ShVariantPtr generate(int N) const;
 
-  /// generates a ShVariant by using  
   ShVariantPtr generate(std::string s) const; 
+
+  ShVariantPtr generate(void *data, int N, bool managed = true) const;  
 
   ShVariantPtr generateLowBound(int N, ShSemanticType type) const; 
   ShVariantPtr generateHighBound(int N, ShSemanticType type) const; 
+
+  ShVariantPtr generateZero(int N = 1) const;
+  ShVariantPtr generateOne(int N = 1) const;
+  ShVariantPtr generateTrue(int N = 1) const;
+  ShVariantPtr generateFalse(int N = 1) const;
+
+  static const ShDataVariantFactory<T>* instance();
+
+  protected:
+    static ShDataVariantFactory<T> *m_instance;
+
+    ShDataVariantFactory();
 };
 
 

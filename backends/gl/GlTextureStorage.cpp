@@ -25,6 +25,31 @@
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
 #include "GlTextureStorage.hpp"
+#include "ShTypeInfo.hpp"
+#include "ShVariantFactory.hpp"
+
+namespace {
+
+// @todo type get rid of this when there's a proper framework
+// for manipulating data in memory 
+
+// converts an array of type from to type to using the default cast
+// (should be good enough for now. may want to hook in Sh casting
+// functions if necessary...)
+//
+// @return newly allocated array of type To with size elements 
+template<typename D, typename S>
+D* convertData(const S* originalData, int size)
+{
+  D* result = new D[size];
+
+  for(int i = 0; i < size; ++i) {
+    result[i] = static_cast<D>(originalData[i]);
+  }
+  return result;
+}
+
+}
 
 namespace shgl {
 
@@ -33,12 +58,14 @@ using namespace SH;
 GlTextureStorage::GlTextureStorage(int context,
                                    ShMemory* memory, GLenum target,
                                    GLenum format, GLint internalFormat,
-                                   int width, int height, int depth,
+                                   int typeIndex, 
+                                   int width, int height, int depth, int tuplesize,
                                    GlTextureNamePtr name)
   : ShStorage(memory), m_context(context),
-    m_name(name), m_target(target), m_format(format),
+    m_name(name), m_target(target), m_format(format), 
     m_internalFormat(internalFormat),
-    m_width(width), m_height(height), m_depth(depth)
+    m_typeIndex(typeIndex), 
+    m_width(width), m_height(height), m_depth(depth), m_tuplesize(tuplesize)
 {
   m_name->addStorage(this);
 }
@@ -47,6 +74,7 @@ GlTextureStorage::~GlTextureStorage()
 {
   m_name->removeStorage(this);
 }
+
 
 class HostGlTextureTransfer : public ShTransfer {
   HostGlTextureTransfer()
@@ -61,13 +89,38 @@ class HostGlTextureTransfer : public ShTransfer {
 
     // Bind texture name for this scope.
     GlTextureName::Binding binding(texture->texName());
-    
+
+    GLenum type = GL_FLOAT;
+
+    int typeIndex = texture->typeIndex(); 
+    int count = texture->count();
+    // @todo type half-float/frac types 
+    ShPointer<ShDataVariant<float> > dataVariant; 
+
+    if(typeIndex != shTypeIndex<float>()) {
+      const ShVariantFactory* variantFactory = shTypeInfo(typeIndex)->variantFactory();
+
+      // @todo type shouldn't really use this trickery...
+      // But knowing ShDataVariant internals, it will not change host->data() 
+      ShVariantCPtr hostVariant = 
+        variantFactory->generate(const_cast<void *>(host->data()), count, false);
+
+      dataVariant = new ShDataVariant<float>(count); 
+      dataVariant->set(hostVariant);
+    } else {
+      dataVariant = new ShDataVariant<float>(const_cast<void *>(host->data()),
+          count, false);
+    }
+
+    // @todo type 
+    // change type if we have a fractional/half 
+
     switch(texture->target()) {
     case GL_TEXTURE_1D:
       SH_GL_CHECK_ERROR(glTexImage1D(texture->target(), 0,
                                      texture->internalFormat(),
-                                     texture->width(), 0, texture->format(), GL_FLOAT,
-                                     host->data()));
+                                     texture->width(), 0, texture->format(), type,
+                                     dataVariant->begin()));
       break;
     case GL_TEXTURE_2D:
     case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
@@ -80,19 +133,21 @@ class HostGlTextureTransfer : public ShTransfer {
       SH_GL_CHECK_ERROR(glTexImage2D(texture->target(), 0,
                                      texture->internalFormat(),
                                      texture->width(), texture->height(), 0, texture->format(),
-                                     GL_FLOAT, host->data()));
+                                     type, dataVariant->begin()));
       break;
     case GL_TEXTURE_3D:
       SH_GL_CHECK_ERROR(glTexImage3D(texture->target(), 0,
                                      texture->internalFormat(),
                                      texture->width(), texture->height(),
                                      texture->depth(), 0, texture->format(),
-                                     GL_FLOAT, host->data()));
+                                     type, dataVariant->begin()));
       break;
     default:
       SH_DEBUG_WARN("Texture target " << texture->target() << " not handled by GL backend");
       break;
     }
+
+
     return true;
   }
   

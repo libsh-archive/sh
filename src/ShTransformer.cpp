@@ -30,6 +30,7 @@
 #include "ShContext.hpp"
 #include "ShError.hpp"
 #include "ShDebug.hpp"
+#include "ShVariant.hpp"
 #include "ShVariableNode.hpp"
 #include "ShInternals.hpp"
 #include "ShTransformer.hpp"

@@ -28,6 +28,7 @@
 #define SHGENERICIMPL_HPP
 
 #include "ShGeneric.hpp"
+#include "ShTypeInfo.hpp"
 #include "ShAttrib.hpp"
 #include "ShLib.hpp"
 #include "ShInstructions.hpp"

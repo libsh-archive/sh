@@ -14,17 +14,17 @@ template<ShOperation OP, typename T>
 void ShRegularOp<OP, T>::operator()( 
     ShVariantPtr dest, ShVariantCPtr a, ShVariantCPtr b, ShVariantCPtr c) const
 {
-  typename std::vector<T> *destVec;
-  const typename std::vector<T> *aVec, *bVec, *cVec;
+  ShPointer<ShDataVariant<T> > destVec;
+  ShPointer<const ShDataVariant<T> > aVec, bVec, cVec;
 
   SH_DEBUG_ASSERT(dest && a);
-  destVec = &shref_dynamic_cast<ShDataVariant<T> >(dest)->data();
-  aVec = &shref_dynamic_cast<const ShDataVariant<T> >(a)->data();
+  destVec = variant_cast<T>(dest);
+  aVec = variant_cast<T>(a);
 
-  if(b) bVec = &shref_dynamic_cast<const ShDataVariant<T> >(b)->data(); 
+  if(b) bVec = variant_cast<T>(b);
   else bVec = 0;
 
-  if(c) cVec = &shref_dynamic_cast<const ShDataVariant<T> >(c)->data();  
+  if(c) cVec = variant_cast<T>(c);
   else cVec = 0;
 
   ShRegularOpChooser<OP, T>::Op::doop(destVec, aVec, bVec, cVec);
@@ -37,13 +37,11 @@ void ShIntervalOp<OP, T1, T2>::operator()(
 
   SH_DEBUG_ASSERT(dest && a);
 
-  typename std::vector<T1> &destVec = 
-    shref_dynamic_cast<ShDataVariant<T1> >(dest)->data();
+  ShPointer<ShDataVariant<T1> > destVec = variant_cast<T1>(dest);
 
-  const typename std::vector<T2> &aVec = 
-    shref_dynamic_cast<const ShDataVariant<T2> >(a)->data();
+  ShPointer<const ShDataVariant<T2> > aVec = variant_cast<T2>(a);
 
-  ShConcreteIntervalOp<OP, T1, T2>::doop(destVec, aVec);
+  ShConcreteIntervalOp<OP, T1, T2>::doop(*destVec, *aVec);
 }
 
 template<typename T>

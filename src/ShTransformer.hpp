@@ -117,7 +117,7 @@ public:
    * but j is also floatMapping[k])
    *
    */
-  void convertToFloat(TypeIndexMap &typeMap, ShVarMap &converts);
+  void convertToFloat(TypeIndexMap &typeMap);
 
   //@todo  use dependent uniforms in conversion and spliting functions
   //instead of separate VarSplitMaps and ShVarMaps

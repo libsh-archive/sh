@@ -28,7 +28,7 @@
 #define SHTYPEINFO_HPP
 
 #include <string>
-
+#include <vector>
 #include "ShVariableType.hpp"
 #include "ShRefCount.hpp"
 
@@ -37,18 +37,25 @@ namespace SH {
 /// forward declarations 
 class ShVariantFactory;
 
-struct ShTypeInfo: ShRefCountable {
+
+
+struct 
+SH_DLLEXPORT
+ShTypeInfo {
+  virtual ~ShTypeInfo() {}
+
   /** Returns a unique string representation for this type */
   virtual const char* name() const = 0;
 
+  /** Returns size of type when stored in host memory */ 
+  virtual int datasize() const = 0;
+
   /** Returns the factory that generates ShVariant objects of this type */
-  virtual ShPointer<const ShVariantFactory> variantFactory() = 0; 
+  virtual const ShVariantFactory* variantFactory() const = 0; 
 };
 
-typedef ShPointer<ShTypeInfo> ShTypeInfoPtr;
-typedef ShPointer<const ShTypeInfo> ShTypeInfoCPtr;
-
-// generic level
+// generic level, singleton ShTypeInfo class holding information for
+// a particular type
 template<typename T>
 struct ShConcreteTypeInfo: public ShTypeInfo {
   public:
@@ -62,7 +69,11 @@ struct ShConcreteTypeInfo: public ShTypeInfo {
     static const T ZERO;
     static const T ONE;
 
-    ShConcreteTypeInfo();
+    /// size in bytes when stored in host memory. 
+    // note - not equivalent to sizeof(T) for types like ShHalf
+    // where the type used in host computation is usually a 32-bit float,
+    // but stored in memory are always 16-bit.
+    static const int DataSize;
 
     /// default range information
     // (0,1) by default
@@ -74,15 +85,34 @@ struct ShConcreteTypeInfo: public ShTypeInfo {
     static bool valuesEqual(const T &a, const T &b); 
 
     const char* name() const; 
-    ShPointer<const ShVariantFactory> variantFactory();
+    int datasize() const;
+    const ShVariantFactory* variantFactory() const;
+
+    static const ShConcreteTypeInfo<T>* instance();
 
   protected:
-    static ShPointer<ShVariantFactory> m_variantFactory;
+    static ShConcreteTypeInfo<T> *m_instance;
+
+    ShConcreteTypeInfo();
 };
 
 //default initialization (adds concrete type infos and creates 
 // eval providers for core Sh types
+SH_DLLEXPORT
 void shTypeInfoInit(); 
+
+/// Returns the number of storage types
+// This means that type indices 0 through result - 1 are all
+// occupied.
+SH_DLLEXPORT
+int shNumTypes();
+
+SH_DLLEXPORT
+const ShTypeInfo* shTypeInfo(int typeIndex);  
+
+/// Returns the type index of type T in the current context
+template<typename T>
+int shTypeIndex();
 
 // Given a type T, returns ShConcreteTypeInfo<T>::TrueVal if the arg is true
 // ::FalseVal otherwise

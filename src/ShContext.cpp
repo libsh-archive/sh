@@ -122,36 +122,6 @@ void ShContext::exit()
   m_parsing.pop();
 }
 
-int ShContext::type_index(const std::string &typeName) const
-{
-  TypeNameIndexMap::const_iterator I = m_type_index.find(typeName);
-  if(I != m_type_index.end()) {
-    return I->second; 
-  }
-  SH_DEBUG_ASSERT(0);
-  // TODO throw some kind of error
-  return -1;
-}
-
-int ShContext::num_types() const
-{
-  return m_type_index.size();
-}
-
-ShTypeInfoPtr ShContext::type_info(int typeIndex) const
-{
-  SH_DEBUG_ASSERT(typeIndex > 0 && typeIndex <= (int)m_type_info.size());
-  return m_type_info[typeIndex - 1];
-}
-
-void ShContext::addTypeInfo(ShTypeInfoPtr typeInfo)
-{
-  // TODO check that type_name does not already exist
-  m_type_info.push_back(typeInfo);
-  SH_DEBUG_ASSERT(m_type_index.count(typeInfo->name()) == 0);
-  m_type_index[typeInfo->name()] = m_type_info.size();
-}
-
 ShBoundIterator shBeginBound()
 {
   return ShContext::current()->begin_bound();
@@ -160,11 +130,6 @@ ShBoundIterator shBeginBound()
 ShBoundIterator shEndBound()
 {
   return ShContext::current()->end_bound();
-}
-
-ShTypeInfoPtr shTypeInfo(int type_index)
-{
-  return ShContext::current()->type_info(type_index);
 }
 
 }

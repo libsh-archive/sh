@@ -5,6 +5,7 @@
 #include "ShDebug.hpp"
 #include "ShError.hpp"
 #include "ShTypeInfo.hpp"
+#include "ShVariant.hpp"
 
 namespace SH {
 
@@ -25,14 +26,14 @@ namespace SH {
 #define SHCRO_UNARY_OP(op, opsrc)\
 template<typename T>\
 struct ShConcreteRegularOp<op, T> {\
-  static void doop(std::vector<T> *dest, \
-    const std::vector<T> *a, const std::vector<T> *b = 0, const std::vector<T> *c = 0) \
+  static void doop(ShPointer<ShDataVariant<T> > dest, \
+    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) \
   {\
     SH_DEBUG_ASSERT(dest && a);\
     int ao = a->size() > 1;\
   \
-    typename std::vector<T>::iterator D = dest->begin();\
-    typename std::vector<T>::const_iterator A = a->begin();\
+    typename ShDataVariant<T>::iterator D = dest->begin();\
+    typename ShDataVariant<T>::const_iterator A = a->begin();\
     for(; D != dest->end(); A += ao, ++D) {\
       (*D) = opsrc;\
     }\
@@ -42,15 +43,15 @@ struct ShConcreteRegularOp<op, T> {\
 #define SHCRO_BINARY_OP(op, opsrc)\
 template<typename T>\
 struct ShConcreteRegularOp<op, T> {\
-  static void doop(std::vector<T> *dest, \
-    const std::vector<T> *a, const std::vector<T> *b = 0, const std::vector<T> *c = 0) \
+  static void doop(ShPointer<ShDataVariant<T> > dest, \
+    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) \
   {\
     SH_DEBUG_ASSERT(dest && a && b);\
     int ao = a->size() > 1;\
     int bo = b->size() > 1;\
   \
-    typename std::vector<T>::iterator D = dest->begin();\
-    typename std::vector<T>::const_iterator A, B;\
+    typename ShDataVariant<T>::iterator D = dest->begin();\
+    typename ShDataVariant<T>::const_iterator A, B;\
     A = a->begin();\
     B = b->begin();\
     for(; D != dest->end(); A += ao, B += bo, ++D) {\
@@ -62,16 +63,16 @@ struct ShConcreteRegularOp<op, T> {\
 #define SHCRO_TERNARY_OP(op, opsrc)\
 template<typename T>\
 struct ShConcreteRegularOp<op, T> {\
-  static void doop(std::vector<T> *dest, \
-    const std::vector<T> *a, const std::vector<T> *b = 0, const std::vector<T> *c = 0) \
+  static void doop(ShPointer<ShDataVariant<T> > dest, \
+    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) \
   {\
     SH_DEBUG_ASSERT(dest && a && b && c);\
     int ao = a->size() > 1;\
     int bo = b->size() > 1;\
     int co = c->size() > 1;\
   \
-    typename std::vector<T>::iterator D = dest->begin();\
-    typename std::vector<T>::const_iterator A, B, C;\
+    typename ShDataVariant<T>::iterator D = dest->begin();\
+    typename ShDataVariant<T>::const_iterator A, B, C;\
     A = a->begin();\
     B = b->begin();\
     C = c->begin();\
@@ -92,12 +93,12 @@ SHCRO_UNARY_OP(SH_OP_CEIL, ceil(*A));
 
 template<typename T>
 struct ShConcreteRegularOp<SH_OP_CMUL, T> {
-  static void doop(std::vector<T> *dest, 
-    const std::vector<T> *a, const std::vector<T> *b = 0, const std::vector<T> *c = 0) 
+  static void doop(ShPointer<ShDataVariant<T> > dest, 
+    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) 
   {
     // dest->size should be 1 and a->size == b->size
     T result = ShConcreteTypeInfo<T>::ZERO;
-    typename std::vector<T>::const_iterator A = a->begin();
+    typename ShDataVariant<T>::const_iterator A = a->begin();
     for(; A != a->end(); ++A) result *= (*A); 
      (*dest)[0] = result;
   }
@@ -107,12 +108,12 @@ SHCRO_UNARY_OP(SH_OP_COS, cos(*A));
 
 template<typename T>
 struct ShConcreteRegularOp<SH_OP_CSUM, T> {
-  static void doop(std::vector<T> *dest, 
-    const std::vector<T> *a, const std::vector<T> *b = 0, const std::vector<T> *c = 0) 
+  static void doop(ShPointer<ShDataVariant<T> > dest, 
+    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) 
   {
     // dest->size should be 1 and a->size == b->size
     T result = ShConcreteTypeInfo<T>::ZERO;
-    typename std::vector<T>::const_iterator A = a->begin();
+    typename ShDataVariant<T>::const_iterator A = a->begin();
     for(; A != a->end(); ++A) result += (*A); 
      (*dest)[0] = result;
   }
@@ -129,14 +130,14 @@ SHCRO_UNARY_OP(SH_OP_LOG10, log10(*A));
 
 template<typename T>
 struct ShConcreteRegularOp<SH_OP_NORM, T> {
-  static void doop(std::vector<T> *dest, 
-    const std::vector<T> *a, const std::vector<T> *b = 0, const std::vector<T> *c = 0) 
+  static void doop(ShPointer<ShDataVariant<T> > dest, 
+    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) 
   {
     SH_DEBUG_ASSERT(dest && a);
     T m = sqrt(std::inner_product(a->begin(), a->end(), a->begin(), (T) 0));
   
-    typename std::vector<T>::iterator D = dest->begin();
-    typename std::vector<T>::const_iterator A = a->begin();
+    typename ShDataVariant<T>::iterator D = dest->begin();
+    typename ShDataVariant<T>::const_iterator A = a->begin();
     for(; D != dest->end(); ++A, ++D) (*D) = (*A) / m;
   }
 };
@@ -161,8 +162,8 @@ SHCRO_BINARY_OP(SH_OP_POW, pow((*A), (*B)));
 
 template<typename T>
 struct ShConcreteRegularOp<SH_OP_DOT, T> {
-  static void doop(std::vector<T> *dest, 
-    const std::vector<T> *a, const std::vector<T> *b = 0, const std::vector<T> *c = 0) 
+  static void doop(ShPointer<ShDataVariant<T> > dest, 
+    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) 
   {
     // dest->size should be 1 and a->size == b->size
     (*dest)[0] = std::inner_product(a->begin(), a->end(), b->begin(), ShConcreteTypeInfo<T>::ZERO);
@@ -178,8 +179,8 @@ SHCRO_BINARY_OP(SH_OP_SNE, (*A) != (*B));
 
 template<typename T>
 struct ShConcreteRegularOp<SH_OP_XPD, T> {
-  static void doop(std::vector<T> *dest, 
-    const std::vector<T> *a, const std::vector<T> *b = 0, const std::vector<T> *c = 0) 
+  static void doop(ShPointer<ShDataVariant<T> > dest, 
+    ShPointer<const ShDataVariant<T> > a, ShPointer<const ShDataVariant<T> > b = 0, ShPointer<const ShDataVariant<T> > c = 0) 
   {
     (*dest)[0] = (*a)[1] * (*b)[2] - (*a)[2] * (*b)[1];
     (*dest)[1] = -((*a)[0] * (*b)[2] - (*a)[2] * (*b)[0]);

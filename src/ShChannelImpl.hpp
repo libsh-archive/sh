@@ -31,6 +31,7 @@
 #include "ShDebug.hpp"
 #include "ShVariable.hpp"
 #include "ShContext.hpp"
+#include "ShTypeInfo.hpp"
 #include "ShProgram.hpp"
 #include "ShSyntax.hpp"
 #include "ShStatement.hpp"

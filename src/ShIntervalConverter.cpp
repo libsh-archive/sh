@@ -27,9 +27,9 @@
 #include <algorithm>
 #include <map>
 #include <list>
-#include "ShContext.hpp"
 #include "ShError.hpp"
 #include "ShDebug.hpp"
+#include "ShTypeInfo.hpp"
 #include "ShVariable.hpp"
 #include "ShVariableNode.hpp"
 #include "ShInternals.hpp"
@@ -256,6 +256,8 @@ struct IntervalStatementFixer {
         int newType = iaMap[iaType];
 
         ShProgram newProgram = getProgram(stmt.op, opSize, newType);
+        
+        // @todo type should use algebra ops to do below in fewer lines 
         
         // run a variable replacement to turn newProgram's inputs/outputs into
         // temps, and add them to lists for argument/result passing from the

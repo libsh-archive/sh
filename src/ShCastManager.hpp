@@ -70,7 +70,9 @@ struct ShCastMgrEdge;
 struct ShCastMgrVertex;
 typedef ShGraphType<ShCastMgrVertex, ShCastMgrEdge> ShCastMgrGraphType;
 
-struct ShCastMgrEdge: public ShGraphEdge<ShCastMgrGraphType> 
+struct 
+SH_DLLEXPORT
+ShCastMgrEdge: public ShGraphEdge<ShCastMgrGraphType> 
 {
   // Creates an edges describing a relationship between two types.
   // automatic = true iff the cast is automatic
@@ -85,7 +87,9 @@ struct ShCastMgrEdge: public ShGraphEdge<ShCastMgrGraphType>
   bool m_precedence;
 };
 
-struct ShCastMgrVertex: public ShGraphVertex<ShCastMgrGraphType>
+struct 
+SH_DLLEXPORT
+ShCastMgrVertex: public ShGraphVertex<ShCastMgrGraphType>
 {
   ShCastMgrVertex(int typeIndex);
   ShCastMgrVertex(const ShCastMgrVertex &other);
@@ -95,7 +99,9 @@ struct ShCastMgrVertex: public ShGraphVertex<ShCastMgrGraphType>
   int m_typeIndex;
 };
 
-class ShCastMgrGraph: public ShGraph<ShCastMgrGraphType>
+class 
+SH_DLLEXPORT
+ShCastMgrGraph: public ShGraph<ShCastMgrGraphType>
 {
   public:
     // functions to use instead of default addVertex, addEdge
@@ -111,7 +117,9 @@ class ShCastMgrGraph: public ShGraph<ShCastMgrGraphType>
     
 };
 
-class ShCastManager {
+class 
+SH_DLLEXPORT
+ShCastManager {
   public:
     void addCast(int destIndex, int srcIndex, ShVariantCastPtr caster, 
         bool automatic, bool precedence); 

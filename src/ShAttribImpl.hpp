@@ -36,6 +36,7 @@
 
 #include "ShAttrib.hpp"
 #include "ShContext.hpp"
+#include "ShTypeInfo.hpp"
 #include "ShStatement.hpp"
 #include "ShEnvironment.hpp"
 #include "ShDebug.hpp"

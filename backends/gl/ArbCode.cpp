@@ -37,6 +37,7 @@
 #include "ShOptimizations.hpp"
 #include "ShEnvironment.hpp"
 #include "ShContext.hpp"
+#include "ShTypeInfo.hpp"
 #include "ShTextureNode.hpp"
 #include "ShSyntax.hpp"
 #include "ArbReg.hpp"
@@ -176,7 +177,7 @@ void ArbCode::generate()
   transform.convertInputOutput(); 
   transform.splitTuples(4, m_splits);
   transform.convertTextureLookups();
-  transform.convertToFloat(m_convertMap, m_converts);
+  transform.convertToFloat(m_convertMap);
   
   if(transform.changed()) {
     optimize(m_shader);
@@ -625,7 +626,7 @@ std::ostream& ArbCode::print(std::ostream& out)
   return out;
 }
 
-std::ostream& ArbCode::printInputOutputFormat(std::ostream& out) {
+std::ostream& ArbCode::describe_interface(std::ostream& out) {
   ShProgramNode::VarList::const_iterator I;
   out << "Inputs:" << std::endl;
   for (I = m_shader->inputs.begin(); I != m_shader->inputs.end(); ++I) {

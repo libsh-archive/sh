@@ -150,6 +150,11 @@ int ShTextureNode::depth() const
   return m_depth;
 }
 
+int ShTextureNode::count() const
+{
+  return m_width * m_height * m_depth;
+}
+
 const ShVariable& ShTextureNode::texSizeVar() const
 {
   return m_texSizeVar;

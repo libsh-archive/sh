@@ -1,3 +1,40 @@
+2004-10-18 Bryan Chan  <b8chan@cgl.uwaterloo.ca>
+  * test/regress/streamtest.py, test.hpp:
+  Added storage type test capabilities. 
+
+  * src/ShTransformer.hpp, src/ShTypeConvertTransformer.cpp (convertToFloat):
+  Use dependent uniforms instead of a non-float to float variable
+  map passed to backend.
+
+	* backends/gl/GlTextures.?pp, 
+		backends/gl/GlTextureStorage.?pp,
+		backends/gl/PBufferStreams.cpp:
+	Add non-float storage-type textures/streams.
+	(Costly conversion occurs for types not supported natively
+	through OpenGL.  We can speed this up/rethink later on)
+
+  * backends/gcc/Gcc.hpp, Gcc.cpp, GccEmit.cpp, GccTextures.hpp:
+  Tabulated the mess in emit(ShStatement) for LINEAR ops, 
+  Changed all traces of float* to void*, and added administrative code required for 
+	proper casting to the right storage types.
+	Cleaned up texture lookup to handle new storage types. (untested)
+	(Changed to nearest-neighbour, clamp to edge only.  Assume
+	interpolation/wrapping and other abstractions implemented as transformers)
+
+	* src/ShVariant.hpp src/ShVariantImpl.hpp, 
+		src/ShVariantFactory.hpp, src/ShVariantFactoryImpl.hpp, 
+		src/ShEval*, 
+		src/ShConcrete*:
+	Cleaned up ShVariant and ShDataVariant classes, switched to a self-managed
+	data array instead of vector, and added constructors to manage external data
+	(useful for working/casting ShHostStorage objects that hold a single data type)
+
+	* src/ShTypeInfo.hpp, src/ShTypeInfoImpl.hpp, src/ShContext.hpp:
+	Moved type->index, index->type mappings to templates in TypeInfo instead
+	of run-time generated in ShContext.
+	(The templates are a little clumsy, but makes sense unless we want to be able 
+	to change the set of available storage types at runtime)
+
 2004-10-14  Bryan Chan  <b8chan@cgl.uwaterloo.ca>
   Merged main branch up to r1559 into this branch.
 

@@ -32,7 +32,6 @@
 #include "ShDebug.hpp"
 #include "ShCastManager.hpp"
 #include "ShVariant.hpp"
-#include "ShContext.hpp"
 #include "ShTypeInfo.hpp"
 #include "ShInterval.hpp"
 
@@ -40,30 +39,73 @@ namespace SH {
 
 template<typename T>
 ShDataVariant<T>::ShDataVariant(int N)
-  : m_data(N, 0)
+  : m_managed(true)
 {
+  alloc(N);
+  std::fill(m_begin, m_end, ShConcreteTypeInfo<T>::ZERO);
 }
 
 template<typename T>
 ShDataVariant<T>::ShDataVariant(int N, const T &value)
-  : m_data(N, value)
+  : m_managed(true)
 {
+  alloc(N);
+  std::fill(m_begin, m_end, value); 
+}
+
+template<typename T>
+ShDataVariant<T>::ShDataVariant(std::string encodedValue) 
+  : m_managed(true)
+{
+  std::istringstream in(encodedValue);
+
+  int size;
+  in >> size;
+  alloc(size);
+
+  for(iterator I = m_begin; I != m_end; ++I) {
+    in.ignore(1, '$');
+    in >> (*I); 
+  }
+}
+
+template<typename T>
+ShDataVariant<T>::ShDataVariant(void *data, int N, bool managed)
+  : m_managed(managed)
+{
+  if(m_managed) {
+    alloc(N);
+    memcpy(m_begin, data, N * sizeof(T));
+  } else {
+    m_begin = reinterpret_cast<T*>(data);
+    m_end = m_begin + N;
+  }
 }
 
 template<typename T>
 ShDataVariant<T>::ShDataVariant(const ShDataVariant<T> &other)
-  : m_data(other.m_data)
+  : m_managed(true)
 {
+  int size = other.size();
+  alloc(size);
+  memcpy(m_begin, other.m_begin, size * sizeof(T));
 }
 
 template<typename T>
 ShDataVariant<T>::ShDataVariant(const ShDataVariant<T> &other, 
     bool neg, const ShSwizzle &swizzle)
-  : m_data(swizzle.size())
+  : m_managed(true)
 {
+  alloc(swizzle.size());
   for(int i = 0; i < swizzle.size(); ++i) {
-    m_data[i] = (neg ? -other[swizzle[i]] : other[swizzle[i]]);
+    m_begin[i] = (neg ? -other[swizzle[i]] : other[swizzle[i]]);
   }
+}
+
+template<typename T>
+ShDataVariant<T>::~ShDataVariant() 
+{
+  if(m_managed) delete m_begin;
 }
 
 template<typename T>
@@ -78,65 +120,68 @@ std::string ShDataVariant<T>::typeName() const {
 }
 
 template<typename T>
-ShDataVariant<T>::ShDataVariant(std::string s)
+int ShDataVariant<T>::size() const
 {
-   decode(s);
+  return m_end - m_begin; 
 }
 
 template<typename T>
-int ShDataVariant<T>::size() const
+bool ShDataVariant<T>::managed() const
 {
-  return m_data.size();
+  return m_managed; 
 }
 
 template<typename T>
 void ShDataVariant<T>::negate()
 {
-  transform(m_data.begin(), m_data.end(), m_data.begin(), std::negate<T>());
+  transform(m_begin, m_end, m_begin, std::negate<T>());
 }
 
 template<typename T>
 void ShDataVariant<T>::set(ShVariantCPtr other)
 {
-  CPtrType castOther = shref_dynamic_cast<const ShDataVariant<T> >(
-      ShCastManager::instance()->doCast(shTypeIndex<T>(), other));
+  SH_DEBUG_ASSERT(other->size() == size());
+  ShCastManager* castmgr = ShCastManager::instance();
+  CPtrType castOther = variant_cast<T>(castmgr->doCast(shTypeIndex<T>(), other));
 //  CPtrType castOther = shref_dynamic_cast<const ShDataVariant<T> >(other);
   if(!castOther) { 
     // TODO throw some kind of exception
     SH_DEBUG_WARN("Cannot cast " << other->typeName() << " to " << typeName());
   } else {
     SH_DEBUG_ASSERT(other->size() == size());
-    std::copy(castOther->data().begin(), castOther->data().end(), m_data.begin());
+    std::copy(castOther->begin(), castOther->end(), m_begin);
   }
 }
 
 template<typename T>
 void ShDataVariant<T>::set(ShVariantCPtr other, int index)
 {
-  CPtrType castOther = shref_dynamic_cast<const ShDataVariant<T> >(
-      ShCastManager::instance()->doCast(shTypeIndex<T>(), other));
+  SH_DEBUG_ASSERT(other->size() == 1); 
+  ShCastManager* castmgr = ShCastManager::instance();
+  CPtrType castOther = variant_cast<T>(castmgr->doCast(shTypeIndex<T>(), other));
   //CPtrType castOther = shref_dynamic_cast<const ShDataVariant<T> >(other);
   if(!castOther) { 
     // TODO throw some kind of exception
     SH_DEBUG_WARN("Cannot cast " << other->typeName() << " to " << typeName());
   } else {
     SH_DEBUG_ASSERT(index >= 0 && index < size() && castOther->size() > 0); 
-    m_data[index] = (*castOther)[0];
+    m_begin[index] = (*castOther)[0];
   }
 }
 
 template<typename T>
 void ShDataVariant<T>::set(ShVariantCPtr other, bool neg, const ShSwizzle &writemask) 
 {
-  CPtrType castOther = shref_dynamic_cast<const ShDataVariant<T> >(
-      ShCastManager::instance()->doCast(shTypeIndex<T>(), other));
+  SH_DEBUG_ASSERT(writemask.size() == other->size());
+  ShCastManager* castmgr = ShCastManager::instance();
+  CPtrType castOther = variant_cast<T>(castmgr->doCast(shTypeIndex<T>(), other));
   //CPtrType castOther = shref_dynamic_cast<const ShDataVariant<T> >(other);
   if(!castOther) { 
     // TODO throw some kind of exception
     SH_DEBUG_WARN("Cannot cast " << other->typeName() << " to " << typeName());
   } else {
     for(int i = 0; i < writemask.size(); ++i) {
-      m_data[writemask[i]] = neg ? -(*castOther)[i] : (*castOther)[i];
+      m_begin[writemask[i]] = neg ? -(*castOther)[i] : (*castOther)[i];
     }
   }
 }
@@ -150,7 +195,7 @@ ShVariantPtr ShDataVariant<T>::get() const
 template<typename T>
 ShVariantPtr ShDataVariant<T>::get(int index) const
 {
-  return new ShDataVariant<T>(1, m_data[index]);
+  return new ShDataVariant<T>(1, m_begin[index]);
 }
 
 template<typename T>
@@ -160,16 +205,15 @@ ShVariantPtr ShDataVariant<T>::get(bool neg, const ShSwizzle &swizzle) const
 }
 
 
-
 template<typename T>
 bool ShDataVariant<T>::equals(ShVariantCPtr other) const 
 {
   if(!other || size() != other->size() || typeIndex() != other->typeIndex()) return false;
   CPtrType castOther = shref_dynamic_cast<const ShDataVariant<T> >(other);
   const_iterator I, J;
-  I = begin();
+  I = m_begin; 
   J = castOther->begin(); 
-  for(;I != end(); ++I, ++J) {
+  for(;I != m_end; ++I, ++J) {
     if(!ShConcreteTypeInfo<T>::valuesEqual((*I), (*J))) return false;
   }
   return true;
@@ -185,45 +229,47 @@ bool ShDataVariant<T>::isTrue() const
 }
 
 template<typename T>
+void* ShDataVariant<T>::array()
+{
+  return m_begin;
+}
+
+template<typename T>
+const void* ShDataVariant<T>::array() const
+{
+  return m_begin;
+}
+
+template<typename T>
 T& ShDataVariant<T>::operator[](int index) 
 {
-  return m_data[index];
+  return m_begin[index];
 }
 
 template<typename T>
 const T& ShDataVariant<T>::operator[](int index) const
 {
-  return m_data[index];
+  return m_begin[index];
 }
 
 template<typename T>
-std::vector<T>& ShDataVariant<T>::data() {
-  return m_data;
+typename ShDataVariant<T>::iterator ShDataVariant<T>::begin() {
+  return m_begin;
 }
 
 template<typename T>
-const std::vector<T>& ShDataVariant<T>::data() const {
-  return m_data;
+typename ShDataVariant<T>::iterator ShDataVariant<T>::end() {
+  return m_end;
 }
 
 template<typename T>
-typename std::vector<T>::iterator ShDataVariant<T>::begin() {
-  return m_data.begin();
+typename ShDataVariant<T>::const_iterator ShDataVariant<T>::begin() const {
+  return m_begin;
 }
 
 template<typename T>
-typename std::vector<T>::iterator ShDataVariant<T>::end() {
-  return m_data.end();
-}
-
-template<typename T>
-typename std::vector<T>::const_iterator ShDataVariant<T>::begin() const {
-  return m_data.begin();
-}
-
-template<typename T>
-typename std::vector<T>::const_iterator ShDataVariant<T>::end() const {
-  return m_data.end();
+typename ShDataVariant<T>::const_iterator ShDataVariant<T>::end() const {
+  return m_end;
 }
 
 template<typename T>
@@ -231,30 +277,31 @@ std::string ShDataVariant<T>::encode() const {
   if(size() < 1) return "";
 
   std::ostringstream out;
-  out << m_data.size();
-  for(int i = 0; i < (int)m_data.size(); ++i) {
-    out << "," << m_data[i];
+  out << size(); 
+  for(const_iterator I = m_begin; I != m_end; ++I) {
+    out << "," << *I;
   }
   return out.str();
 }
 
+// @todo type do Interval types
 template<typename T>
-int ShDataVariant<T>::decode(std::string value) {
-  m_data.clear();
+std::string ShDataVariant<T>::encodeArray() const {
+  if(size() < 1) return "";
 
-  std::istringstream in(value);
-
-  int size;
-  in >> size;
-  m_data.reserve(size);
-
-  T component; 
-  for(int i = 0; i < size; ++i) {
-    in.ignore(1, '$');
-    in >> component;
-    m_data.push_back(component);
+  std::ostringstream out;
+  for(const_iterator I = m_begin; I != m_end; ++I) {
+    if(I != m_begin) out << ", ";
+    out << *I;
   }
-  return size;
+  return out.str();
+}
+
+
+template<typename T>
+void ShDataVariant<T>::alloc(int N) {
+  m_begin = new T[N]; 
+  m_end = m_begin + N;
 }
 
 template<typename T>

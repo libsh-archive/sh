@@ -32,11 +32,14 @@
 
 namespace SH {
 
-class 
-SH_DLLEXPORT ShVariant;
-struct ShVariantCast: public ShRefCountable {
+// forward declaration
+class ShVariant;
+
+struct 
+SH_DLLEXPORT
+ShVariantCast: public ShRefCountable {
   public:
-    virtual ~ShVariantCast();
+    virtual ~ShVariantCast() {}
 
     virtual ShPointer<ShVariant> operator()(ShPointer<ShVariant> value) const = 0;
     virtual ShPointer<const ShVariant> operator()(
@@ -47,8 +50,7 @@ typedef ShPointer<ShVariantCast> ShVariantCastPtr;
 typedef ShPointer<const ShVariantCast> ShVariantCastCPtr;
 
 template<typename DEST, typename SRC>
-struct 
-SH_DLLEXPORT ShDataVariantCast: public ShVariantCast {
+struct ShDataVariantCast: public ShVariantCast {
   public:
     ShPointer<ShVariant> operator()(ShPointer<ShVariant> value) const;
     ShPointer<const ShVariant> operator()(ShPointer<const ShVariant> value) const;
