@@ -1,7 +1,7 @@
 // -*- C++ -*-
-#include <sh/sh.hpp>
 #include <iostream>
 #include <fstream>
+#include "sh.hpp"
 
 using namespace SH;
 

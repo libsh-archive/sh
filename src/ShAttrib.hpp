@@ -28,6 +28,7 @@
 #define SHATTRIB_HPP
 
 #include "ShVariable.hpp"
+#include "ShConstant.hpp"
 
 namespace SH {
 
@@ -57,11 +58,12 @@ public:
   ShAttrib(const ShVariableN<N, T>& other);
   ShAttrib(const ShAttrib<N, Kind, T, Swizzled>& other);
   ShAttrib(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-
+  
   ~ShAttrib();
 
   ShAttrib& operator=(const ShVariableN<N, T>& other);
   ShAttrib& operator=(const ShAttrib<N, Kind, T, Swizzled>& other);
+  ShAttrib& operator=(T other);
 
   ShAttrib& operator+=(const ShVariableN<N, T>& right);
   ShAttrib& operator-=(const ShVariableN<N, T>& right);
@@ -101,7 +103,20 @@ typedef ShAttrib<3, SH_VAR_TEMP, double> ShAttrib3f;
 typedef ShAttrib<4, SH_VAR_INPUT, double> ShInputAttrib4f;
 typedef ShAttrib<4, SH_VAR_OUTPUT, double> ShOutputAttrib4f;
 typedef ShAttrib<4, SH_VAR_TEMP, double> ShAttrib4f;
- 
+
+template<int Kind, typename T, bool Swizzled>
+ShAttrib<1, Kind, T, Swizzled>& operator+=(ShAttrib<1, Kind, T, Swizzled>& a, T t)
+{
+  return a += ShConstant1f(t);
+}
+
+template<int Kind, typename T, bool Swizzled>
+ShAttrib<1, Kind, T, Swizzled>& operator-=(ShAttrib<1, Kind, T, Swizzled>& a, T t)
+{
+  return a -= ShConstant1f(t);
+}
+
+
 } // namespace SH
 
 #include "ShAttribImpl.hpp"

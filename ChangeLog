@@ -1,3 +1,14 @@
+2003-08-11  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShAttrib.hpp (operator+=, operator-=): Added these operators
+	for Attrib1's to once again avoid having to wrap constants in
+	ShConstant1f()s.
+
+	* src/ShLib.hpp: Added SH_SHLIB_CONST* macros and calls to these
+	to allow scalar constants in operations not have to be wrapped in
+	ShConstant1f(). This should make using the library _far_ more
+	convenient :).
+
 2003-08-08  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShLib.hpp (cond): Allow scalar cond().

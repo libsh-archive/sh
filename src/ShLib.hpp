@@ -40,6 +40,36 @@
  * the bottom of the file for a list.
  */
 
+#define SH_SHLIB_CONST_SCALAR_OP(operation) \
+template<typename T> \
+ShVariableN<1, T> operation(const ShVariableN<1, T>& left, T right) \
+{ \
+  return operation(left, ShConstant1f(right)); \
+} \
+template<typename T> \
+ShVariableN<1, T> operation(T left, const ShVariableN<1, T>& right) \
+{ \
+  return operation(ShConstant1f(left), right); \
+}
+
+#define SH_SHLIB_CONST_N_OP_LEFT(operation) \
+template<int N, typename T> \
+ShVariableN<N, T> operation(const ShVariableN<N, T>& left, T right) \
+{ \
+  return operation(left, ShConstant1f(right)); \
+}
+
+#define SH_SHLIB_CONST_N_OP_RIGHT(operation) \
+template<int N, typename T> \
+ShVariableN<N, T> operation(T left, const ShVariableN<N, T>& right) \
+{ \
+  return operation(ShConstant1f(left), right); \
+}
+
+#define SH_SHLIB_CONST_N_OP_BOTH(operation) \
+SH_SHLIB_CONST_N_OP_LEFT(operation); \
+SH_SHLIB_CONST_N_OP_RIGHT(operation);
+
 namespace SH {
 
 /** Utility template to check whether dimensions are equal or scalar.
@@ -98,12 +128,16 @@ ShVariableN<N, T> operator+(const ShVariableN<N, T>& left, const ShVariableN<N, 
   }
 }
 
+SH_SHLIB_CONST_SCALAR_OP(operator+);
+
 /// Subtraction
 template<int N, typename T>
 ShVariableN<N, T> operator-(const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
 {
   return left + (-right);
 }
+
+SH_SHLIB_CONST_SCALAR_OP(operator-);
 
 /// Componentwise/scalar multiplication
 template<int N, int M, typename T>
@@ -151,6 +185,9 @@ ShVariableN<M, T> operator*(const ShVariableN<1, T>& left, const ShVariableN<M, 
   }
 }
 
+SH_SHLIB_CONST_SCALAR_OP(operator*);
+SH_SHLIB_CONST_N_OP_BOTH(operator*);
+
 /// Componentwise/scalar division
 template<int N, int M, typename T>
 ShVariableN<N, T> operator/(const ShVariableN<N, T>& left, const ShVariableN<M, T>& right)
@@ -175,6 +212,9 @@ ShVariableN<N, T> operator/(const ShVariableN<N, T>& left, const ShVariableN<M, 
   }
 }
 
+SH_SHLIB_CONST_SCALAR_OP(operator/);
+SH_SHLIB_CONST_N_OP_RIGHT(operator/);
+
 /// Conventional power operation.
 template<int N, typename T>
 ShVariableN<N, T> operator^(const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
@@ -196,6 +236,9 @@ ShVariableN<N, T> operator^(const ShVariableN<N, T>& left, const ShVariableN<N, 
     return t;
   }
 }
+
+SH_SHLIB_CONST_SCALAR_OP(operator^);
+SH_SHLIB_CONST_N_OP_RIGHT(operator^);
 
 // "Boolean" operators
 
@@ -220,6 +263,8 @@ ShVariableN<N, T> operator<(const ShVariableN<N, T>& left, const ShVariableN<1, 
   }
 }
 
+SH_SHLIB_CONST_SCALAR_OP(operator<);
+
 template<int N, typename T>
 ShVariableN<N, T> operator<=(const ShVariableN<N, T>& left, const ShVariableN<1, T>& right)
 {
@@ -240,6 +285,8 @@ ShVariableN<N, T> operator<=(const ShVariableN<N, T>& left, const ShVariableN<1,
     return t;
   }
 }
+
+SH_SHLIB_CONST_SCALAR_OP(operator<=);
 
 template<int N, typename T>
 ShVariableN<N, T> operator>(const ShVariableN<N, T>& left, const ShVariableN<1, T>& right)
@@ -262,6 +309,8 @@ ShVariableN<N, T> operator>(const ShVariableN<N, T>& left, const ShVariableN<1, 
   }
 }
 
+SH_SHLIB_CONST_SCALAR_OP(operator>);
+
 template<int N, typename T>
 ShVariableN<N, T> operator>=(const ShVariableN<N, T>& left, const ShVariableN<1, T>& right)
 {
@@ -282,6 +331,8 @@ ShVariableN<N, T> operator>=(const ShVariableN<N, T>& left, const ShVariableN<1,
     return t;
   }
 }
+
+SH_SHLIB_CONST_SCALAR_OP(operator>=);
 
 template<int N, typename T>
 ShVariableN<N, T> operator==(const ShVariableN<N, T>& left, const ShVariableN<1, T>& right)
@@ -304,6 +355,8 @@ ShVariableN<N, T> operator==(const ShVariableN<N, T>& left, const ShVariableN<1,
   }
 }
 
+SH_SHLIB_CONST_SCALAR_OP(operator==);
+
 template<int N, typename T>
 ShVariableN<N, T> operator!=(const ShVariableN<N, T>& left, const ShVariableN<1, T>& right)
 {
@@ -324,6 +377,8 @@ ShVariableN<N, T> operator!=(const ShVariableN<N, T>& left, const ShVariableN<1,
     return t;
   }
 }
+
+SH_SHLIB_CONST_SCALAR_OP(operator!=);
 
 /** Conditional assignment (COND/CMP)
  *  dest[i] = (src1[i] > 0.0 ? src2[i] : src3[i])
@@ -508,6 +563,8 @@ ShVariableN<N,  T> max(const ShVariableN<N, T>& left, const ShVariableN<N, T>& r
   }
 }
 
+SH_SHLIB_CONST_SCALAR_OP(max);
+
 /// Componentwise minimum
 template<int N, typename T>
 ShVariableN<N,  T> min(const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
@@ -528,6 +585,8 @@ ShVariableN<N,  T> min(const ShVariableN<N, T>& left, const ShVariableN<N, T>& r
     return t;
   }
 }
+
+SH_SHLIB_CONST_SCALAR_OP(min);
 
 
 /// Sine of x.

@@ -178,6 +178,13 @@ ShAttrib<N, Kind, T, Swizzled>::operator=(const ShAttrib<N, Kind, T, Swizzled>& 
   return *this;
 }
 
+template<int N, int Kind, typename T, bool Swizzled>
+ShAttrib<N, Kind, T, Swizzled>&
+ShAttrib<N, Kind, T, Swizzled>::operator=(T other)
+{
+  return operator=(ShConstant1f(other));
+}
+
 /// In-place addition
 template<int N, int Kind, typename T, bool Swizzled>
 ShAttrib<N, Kind, T, Swizzled>&

@@ -1,8 +1,8 @@
 check_PROGRAMS = constants do if for julia matrix ops point simple texture uniforms shvector while
 
-INCLUDES = -I$(prefix)/include
+INCLUDES = -I../src
 
-LDADD = -L$(prefix)/lib -lsh
+LDADD = ../src/libsh.la
 
 constants_SOURCES = constants.cpp
 do_SOURCES = do.cpp

@@ -9,10 +9,11 @@ RELEASE:
  - have functions to switch the current backend, clearing bound shaders etc. appropriately.
  - port to windows
  X swap around order for cubemaps
- - get an environment map
- - fix demos
+ X get an environment map
+ X clean up demos
  - figure out drawing environment map on the back, preferably without using a shader
  - upload/bind split in Arb backend 
+ - scalar constant operators
 
 MATRICES:
  X operator()() extracts submatrix
