@@ -56,11 +56,16 @@ const char* ShSemanticTypeName[] = {
   "Position"
 };
 
+struct ShVariableNodeEval {
+  ShPointer<ShProgramNode> value;
+};
+
 ShVariableNode::ShVariableNode(ShBindingType kind, int size, ShSemanticType type)
   : m_uniform(!ShContext::current()->parsing() && kind == SH_TEMP),
     m_kind(kind), m_specialType(type),
     m_size(size), m_id(m_maxID++), m_locked(0),
-    m_values(0)
+    m_values(0),
+    m_eval(new ShVariableNodeEval)
 {
   if (m_uniform || m_kind == SH_CONST) addValues();
   switch (m_kind) {
@@ -282,11 +287,11 @@ void ShVariableNode::attach(const ShProgramNodePtr& evaluator)
 
   detach_dependencies();
 
-  m_evaluator = evaluator;
+  m_eval->value = evaluator;
 
-  if (m_evaluator) {
-    for (ShProgramNode::VarList::const_iterator I = m_evaluator->uniforms_begin();
-         I != m_evaluator->uniforms_end(); ++I) {
+  if (m_eval->value) {
+    for (ShProgramNode::VarList::const_iterator I = m_eval->value->uniforms_begin();
+         I != m_eval->value->uniforms_end(); ++I) {
       if ((*I).object() == this) continue;
       (*I)->add_dependent(this);
     }
@@ -297,14 +302,14 @@ void ShVariableNode::attach(const ShProgramNodePtr& evaluator)
 
 void ShVariableNode::update()
 {
-  if (!m_evaluator) return;
+  if (!m_eval->value) return;
 
-  evaluate(m_evaluator);
+  evaluate(m_eval->value);
 }
 
 const ShPointer<ShProgramNode>& ShVariableNode::evaluator() const
 {
-  return m_evaluator;
+  return m_eval->value;
 }
 
 void ShVariableNode::add_dependent(ShVariableNode* dep)
@@ -328,13 +333,13 @@ void ShVariableNode::update_dependents()
 
 void ShVariableNode::detach_dependencies()
 {
-  if (m_evaluator) {
-    for (ShProgramNode::VarList::const_iterator I = m_evaluator->uniforms_begin();
-         I != m_evaluator->uniforms_end(); ++I) {
+  if (m_eval->value) {
+    for (ShProgramNode::VarList::const_iterator I = m_eval->value->uniforms_begin();
+         I != m_eval->value->uniforms_end(); ++I) {
       if ((*I).object() == this) continue;
       (*I)->remove_dependent(this);
     }
-    m_evaluator = 0;
+    m_eval->value = 0;
   }
 }
 

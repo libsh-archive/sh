@@ -35,11 +35,14 @@ libsh_dll_SOURCES += ShBackend.cpp ShBackend.hpp
 libsh_dll_SOURCES += ShLinearAllocator.hpp ShLinearAllocator.cpp
 
 # Optimizer and compiler internals
-libsh_dll_SOURCES += ShDomTree.hpp ShOptimizer.hpp ShTransformer.hpp ShBitSet.hpp
-libsh_dll_SOURCES += ShDomTree.cpp ShOptimizer.cpp ShTransformer.cpp ShBitSet.cpp
-incinc_HEADERS   += ShDomTree.hpp ShOptimizer.hpp ShTransformer.hpp ShBitSet.hpp
+libsh_dll_SOURCES += ShDomTree.hpp ShOptimizations.hpp ShTransformer.hpp ShBitSet.hpp
+libsh_dll_SOURCES += ShDomTree.cpp ShOptimizations.cpp ShTransformer.cpp ShBitSet.cpp
+incinc_HEADERS   += ShDomTree.hpp ShOptimizations.hpp ShTransformer.hpp ShBitSet.hpp
 libsh_dll_SOURCES += ShStructural.hpp ShStructural.cpp
 incinc_HEADERS   += ShStructural.hpp
+libsh_dll_SOURCES += ShValueTracking.cpp ShConstProp.cpp
+libsh_dll_SOURCES += ShEvaluate.cpp ShEvaluate.hpp
+incinc_HEADERS   += ShEvaluate.hpp
 
 # Library functions
 libsh_dll_SOURCES += ShLib.hpp
@@ -109,6 +112,6 @@ install: libsh.dll libshd.dll $(wildcard *.hpp)
 libsh_dll_DEPENDS = $(libsh_dll_CXXFILES:.cpp=.r.d) $(libsh_dll_CXXFILES:.cpp=.d.d)
 
 include ../win32.mk
-CPPFLAGS += -DSH_DLLEXPORT=__declspec(dllexport)
+CPPFLAGS += -DSH_DLLEXPORT="__declspec(dllexport)"
 include $(libsh_dll_DEPENDS)
 

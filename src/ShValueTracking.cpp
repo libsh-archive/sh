@@ -249,7 +249,7 @@ struct UdDuBuilder {
             const DefSet& ds = defs[TupleElement(I->src[j].node(), I->src[j].swizzle()[i])];
 
             vt->defs[j][i] = ds;
-            for (DefSet::iterator J = ds.begin(); J != ds.end(); J++) {
+            for (DefSet::const_iterator J = ds.begin(); J != ds.end(); J++) {
               ValueTracking* ut = J->stmt->template get_info<ValueTracking>();
               if (!ut) {
                 ut = new ValueTracking(J->stmt);

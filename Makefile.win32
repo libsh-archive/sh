@@ -3,16 +3,16 @@ clean: recurse-clean
 install: recurse-install
 
 recurse-all:
-	cd src & $(MAKE) -f Makefile.win32 all & cd ..
-	cd backends & cd gl & $(MAKE) -f Makefile.win32 all & cd .. & cd ..
-	cd util & $(MAKE) -f Makefile.win32 all & cd ..
+	$(MAKE) -C src -f Makefile.win32 all
+	$(MAKE) -C backends -f Makefile.win32 all
+	$(MAKE) -C util -f Makefile.win32 all
 
 recurse-clean:
-	cd src & $(MAKE) -f Makefile.win32 clean & cd ..
-	cd backends & cd gl & $(MAKE) -f Makefile.win32 clean & cd .. & cd ..
-	cd util & $(MAKE) -f Makefile.win32 clean & cd ..
+	$(MAKE) -C src -f Makefile.win32 clean
+	$(MAKE) -C backends -f Makefile.win32 clean
+	$(MAKE) -C util -f Makefile.win32 clean
 
 recurse-install:
-	cd src & $(MAKE) -f Makefile.win32 install & cd ..
-	cd backends & cd gl & $(MAKE) -f Makefile.win32 install & cd .. & cd ..
-	cd util & $(MAKE) -f Makefile.win32 install & cd ..
+	$(MAKE) -C src -f Makefile.win32 install
+	$(MAKE) -C backends -f Makefile.win32 install
+	$(MAKE) -C util -f Makefile.win32 install

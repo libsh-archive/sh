@@ -35,8 +35,6 @@
 
 namespace SH {
 
-class ShProgramNode;
-
 /** The various ways variables can be bound.
  */
 enum ShBindingType {
@@ -64,6 +62,11 @@ enum ShSemanticType {
 // ensure these match the BindingType and SemanticType enums
 SH_DLLEXPORT extern const char* ShBindingTypeName[];
 SH_DLLEXPORT extern const char* ShSemanticTypeName[];
+
+class ShProgramNode;
+
+// Used to hide our use of ShProgramNodePtr, since MSVC7 doesn't allow it.
+struct ShVariableNodeEval;
 
 /** A generic n-tuple variable.
  */
@@ -157,7 +160,7 @@ protected:
   ValueType m_lowBound, m_highBound;
 
   // Dependent uniform evaluation
-  ShPointer<ShProgramNode> m_evaluator;
+  ShVariableNodeEval* m_eval;
   std::list<ShVariableNode*> m_dependents;
   
   static int m_maxID;
