@@ -27,8 +27,6 @@
 #include "GlslCode.hpp"
 #include "ShTransformer.hpp"
 #include "ShStorageType.hpp"
-#include <vector>
-#include <string>
 #include <iostream>
 
 #define SH_DEBUG_GLSL_BACKEND // DEBUG
@@ -42,7 +40,10 @@ using namespace std;
 
 GlslCode::GlslCode(const ShProgramNodeCPtr& shader, const std::string& unit,
 		   TextureStrategy* texture) 
-  : m_texture(texture), m_uploaded(false), m_nb_variables(0), m_arb_shader(0)
+  : m_texture(texture), m_target("glsl:" + unit), m_arb_shader(0),
+    m_nb_variables(0), m_nb_varying(0), m_gl_Normal_allocated(false),
+    m_gl_Position_allocated(false), m_gl_FragColor_allocated(false),
+    m_uploaded(false)
 {
   m_originalShader = const_cast<ShProgramNode*>(shader.object());
   
@@ -50,7 +51,7 @@ GlslCode::GlslCode(const ShProgramNodeCPtr& shader, const std::string& unit,
     m_arb_shader = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
     m_unit = SH_GLSL_FP;
   }
-
+  
   if (unit == "vertex") {
     m_arb_shader = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
     m_unit = SH_GLSL_VP;
@@ -95,7 +96,7 @@ void GlslCode::generate()
   
   try {
     m_shader->ctrlGraph->entry()->clearMarked();
-    genNode(m_shader->ctrlGraph->entry());
+    gen_node(m_shader->ctrlGraph->entry());
     m_shader->ctrlGraph->entry()->clearMarked();
   } 
   catch (...) {
@@ -148,6 +149,7 @@ void GlslCode::upload()
   stringstream code;
   print(code);
   string s = code.str(); // w/o this extra copy, the shader code gets corrupted
+
   const char* code_string = s.c_str();
   GLint code_len = strlen(code_string);
   glShaderSourceARB(m_arb_shader, 1, &code_string, &code_len);
@@ -157,55 +159,22 @@ void GlslCode::upload()
   int compiled;
   glGetObjectParameterivARB(m_arb_shader, GL_OBJECT_COMPILE_STATUS_ARB, &compiled);
   if (compiled != GL_TRUE) {
-    cout << "Shader compile status: FAILED" << endl << endl;
+    cout << "Shader compile status (target = " << m_target << "): FAILED" << endl << endl;
     cout << "Shader infolog:" << endl;
     print_infolog(m_arb_shader);
     cout << "Shader code:" << endl;
     print_shader_source();
     cout << endl;
     return;
-#ifdef SH_DEBUG_GLSL_BACKEND
-  } else {
-    cout << "Shader compile status: OK" << endl;
-#endif
   }
 
   glAttachObjectARB(m_arb_program, m_arb_shader);
-  //glDeleteObjectARB(m_arb_shader); // Mark for deletion once it's detached
-  glLinkProgramARB(m_arb_program);
-
-  // Check linking
-  int linked;
-  glGetObjectParameterivARB(m_arb_program, GL_OBJECT_LINK_STATUS_ARB, &linked);
-  if (linked != GL_TRUE) {
-    cout << "Program link status: FAILED" << endl << endl;
-    cout << "Program infolog:" << endl;
-    print_infolog(m_arb_program);
-    cout << "Shader code:" << endl;
-    print_shader_source();
-    cout << endl;
-    return;
-#ifdef SH_DEBUG_GLSL_BACKEND
-  } else {
-    cout << "Program link status: OK" << endl;
-#endif
-  }
-
-  glUseProgramObjectARB(m_arb_program);
+  //glDeleteObjectARB(m_arb_shader); // Mark for deletion on detachment
 
 #ifdef SH_DEBUG_GLSL_BACKEND
   int nb_objects;
   glGetObjectParameterivARB(m_arb_program, GL_OBJECT_ATTACHED_OBJECTS_ARB, &nb_objects);
-  cout << "Number of objects attached to the program: " << nb_objects << endl;
-
-  glValidateProgramARB(m_arb_program);
-  int validated;
-  glGetObjectParameterivARB(m_arb_program, GL_OBJECT_VALIDATE_STATUS_ARB, &validated);
-  cout << "Program validate status: " << (validated == GL_TRUE ? "OK" : "FAILED") << endl;
-  if (linked != GL_TRUE) {
-    cout << "Program infolog:" << endl;
-    print_infolog(m_arb_program);
-  }  
+  cout << "Number of objects attached to the program (target = " << m_target << "): " << nb_objects << endl;
 #endif
 
   m_uploaded = true;
@@ -216,6 +185,36 @@ void GlslCode::bind()
   if (!m_uploaded) {
     upload();
   }
+
+  glLinkProgramARB(m_arb_program);
+
+  // Check linking
+  int linked;
+  glGetObjectParameterivARB(m_arb_program, GL_OBJECT_LINK_STATUS_ARB, &linked);
+  if (linked != GL_TRUE) {
+    cout << "Program link status (target = " << m_target << "): FAILED" << endl << endl;
+    cout << "Program infolog:" << endl;
+    print_infolog(m_arb_program);
+    cout << "Shader code:" << endl;
+    print_shader_source();
+    cout << endl;
+    return;
+  }
+
+  glUseProgramObjectARB(m_arb_program);
+  ShContext::current()->set_binding(m_target, ShProgram(m_originalShader));
+
+#ifdef SH_DEBUG_GLSL_BACKEND
+  cout << "Program validate status (target = " << m_target << "): ";
+  glValidateProgramARB(m_arb_program);
+  int validated;
+  glGetObjectParameterivARB(m_arb_program, GL_OBJECT_VALIDATE_STATUS_ARB, &validated);
+  cout << (validated == GL_TRUE ? "OK" : "FAILED") << endl;
+  if (validated != GL_TRUE) {
+    cout << "Program infolog:" << endl;
+    print_infolog(m_arb_program);
+  }
+#endif
 }
 
 void GlslCode::update()
@@ -224,27 +223,46 @@ void GlslCode::update()
 
 void GlslCode::updateUniform(const ShVariableNodePtr& uniform)
 {
+  // After updating the uniform variables, we must relink the shaders (hence, call bind())
 }
 
-string GlslCode::type_string(const GlslVariable &var)
+string GlslCode::type_string(const GlslVariable &v)
 {
   stringstream s;
-  if (shIsInteger(var.type)) {
-    if (var.size > 1) {
+  if (shIsInteger(v.type)) {
+    if (v.size > 1) {
       s << "ivec";
     } else {
       return "int";
     }
   } else {
-    if (var.size > 1) {
+    if (v.size > 1) {
       s << "vec";
     } else {
       return "float";
     }
   }
 
-  s << var.size;
+  s << v.size;
   return s.str();
+}
+
+string GlslCode::declare_var(const GlslVariable& v)
+{
+  if (v.builtin) return "";
+
+  string ret;
+  string type = type_string(v);
+
+  if (v.kind == SH_CONST) {
+    ret += "const ";
+  }
+  ret += type + " " + v.name;
+  if (!v.values.empty()) {
+    ret += " = " + type + "(" + v.values + ")";
+  }
+
+  return ret;
 }
 
 ostream& GlslCode::print(ostream& out)
@@ -252,19 +270,28 @@ ostream& GlslCode::print(ostream& out)
   out << "// OpenGL SL " << ((m_unit == SH_GLSL_VP) ? "Vertex" : "Fragment") << " Program" << endl;
   out << endl;
 
+  vector<string> vars; // holds variables to be declared in main
+  for (map<ShVariableNodePtr, GlslVariable>::const_iterator i = m_varmap.begin(); 
+       i != m_varmap.end(); i++) {
+    string var = declare_var((*i).second);
+
+    if (var.empty()) continue; // builtin variables are implicitly declared
+
+    if ((*i).second.varying()) {
+      out << "varying " << var << ";" << endl;
+    } else {
+      vars.push_back(var);
+    }
+  }
+  out << endl;
+
   out << "void main()" << endl;
   out << "{" << endl;
   string indent = "  ";
 
-  // Declare variables
-  for (map<ShVariableNodePtr, GlslVariable>::const_iterator i = m_varmap.begin(); 
-       i != m_varmap.end(); i++) {
-    string type = type_string((*i).second);
-    out << indent << type << " " << (*i).second.name;
-    if (!(*i).second.values.empty()) {
-      out << " = " << type <<"(" << (*i).second.values << ")";
-    }
-    out << ";" << endl;
+  // Temporaries and constants
+  for (vector<string>::const_iterator i = vars.begin(); i != vars.end(); i++) {
+    out << indent << *i << ";" << endl;
   }
   out << endl;
 
@@ -286,7 +313,7 @@ void GlslCode::optimize(const ShProgramNodeCPtr& shader)
 {
 }
 
-void GlslCode::genNode(ShCtrlGraphNodePtr node)
+void GlslCode::gen_node(ShCtrlGraphNodePtr node)
 {
   if (!node || node->marked()) return;
   node->mark();
@@ -301,7 +328,7 @@ void GlslCode::genNode(ShCtrlGraphNodePtr node)
     }
   }
   
-  genNode(node->follower);
+  gen_node(node->follower);
 }
 
 void GlslCode::emit(const ShStatement &stmt)
@@ -342,21 +369,80 @@ void GlslCode::emit(const ShStatement &stmt)
 
 string GlslCode::var_name(const ShVariable& v)
 {
-  // @todo Add the type to the variable name
   stringstream varname;
-  varname << "v" << m_nb_variables++;
+  switch (v.node()->kind()) {
+  case SH_INPUT:
+    varname << "var_i_";
+    break;
+  case SH_OUTPUT:
+    varname << "var_o_";
+    break;
+  case SH_INOUT:
+    varname << "var_io_";
+    break;
+  case SH_TEMP:
+    varname << "var_t_";
+    break;
+  case SH_CONST:
+    varname << "var_c_";
+    break;
+  case SH_TEXTURE:
+    varname << "var_tex_";
+    break;
+  case SH_STREAM:
+    varname << "var_s_";
+    break;
+  case SH_PALETTE:
+    varname << "var_p_";
+    break;
+  default:
+    varname << "var_";
+  }
+  varname << m_nb_variables++;
   return varname.str();
 }
 
 void GlslCode::allocate_var(const ShVariable& v)
 {
   GlslVariable var;
-  
-  var.name = var_name(v);
+  var.builtin = false;
   var.size = v.node()->size();
+  var.kind = v.node()->kind();
   var.type = v.valueType();
+  var.semantic_type = v.node()->specialType();
   if (v.hasValues()) {
     var.values = v.getVariant()->encodeArray();
+  }
+  
+  // Special cases
+  if (!m_gl_Position_allocated && (var.semantic_type == SH_POSITION) &&
+      ((var.kind == SH_INPUT) || (var.kind == SH_INOUT) || (var.kind == SH_OUTPUT)) ) {
+    var.name = "gl_Position";
+    var.builtin = true;
+    m_gl_Position_allocated = true;
+  }
+  else if (!m_gl_FragColor_allocated && (var.semantic_type == SH_COLOR) &&
+	   ((var.kind == SH_OUTPUT) || (var.kind == SH_INOUT))) {
+    var.name = "gl_FragColor";
+    var.builtin = true;
+    m_gl_FragColor_allocated = true;
+  }
+  else if (!m_gl_Normal_allocated && (m_unit == SH_GLSL_VP) && (var.semantic_type == SH_NORMAL) &&
+	   ((var.kind == SH_INPUT) || (var.kind == SH_INOUT) || (var.kind == SH_OUTPUT)) ) {
+    stringstream ss;
+    ss << "varying" << m_nb_varying++;
+    var.name = ss.str();
+
+    var.values = "gl_Normal";
+    m_gl_Normal_allocated = true;
+  }
+  else if (var.varying()) {
+    stringstream ss;
+    ss << "varying" << m_nb_varying++;
+    var.name = ss.str();
+  }
+  else {
+    var.name = var_name(v);  
   }
 
   m_varmap[v.node()] = var;

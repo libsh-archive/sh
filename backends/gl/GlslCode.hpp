@@ -37,10 +37,15 @@ namespace shgl {
 enum GlslProgramType { SH_GLSL_FP, SH_GLSL_VP }; 
 
 struct GlslVariable {
+  bool builtin; // if true, then it won't be declared or initialized
   std::string name;
   int size;
+  SH::ShBindingType kind;
   SH::ShValueType type;
+  SH::ShSemanticType semantic_type;
   std::string values;
+
+  bool varying() const { return (kind == SH::SH_INPUT) || (kind == SH::SH_OUTPUT) || (kind == SH::SH_INOUT); }
 };
 
 class GlslCode : public SH::ShBackendCode {
@@ -70,27 +75,33 @@ private:
   // its compiled code is broken
   SH::ShProgramNode* m_shader; // internally visible shader ShTransformered to fit this target (GLSL)
   SH::ShProgramNode* m_originalShader; // original shader (should alway use this for external (e.g. globals))
-
-  bool m_uploaded; /// true if the program has already been uploaded to the GPU
-
-  std::vector<std::string> m_lines; /// raw lines of code (unindented)
-  unsigned m_nb_variables; /// number of variables that have been allocated in the program so far
-  std::map<SH::ShVariableNodePtr, GlslVariable> m_varmap; /// maps a variable node to a variable
-
   enum GlslProgramType m_unit;
+  std::string m_target;
 
   static GLhandleARB m_arb_program; /// program to which all shaders are attached
   GLhandleARB m_arb_shader; /// shader program uploaded to the GPU
 
+  std::vector<std::string> m_lines; /// raw lines of code (unindented)
+  unsigned m_nb_variables;
+  unsigned m_nb_varying;
+  std::map<SH::ShVariableNodePtr, GlslVariable> m_varmap; /// maps a variable node to a variable
+  bool m_gl_Normal_allocated;
+  bool m_gl_Position_allocated;
+  bool m_gl_FragColor_allocated;
+
+  bool m_uploaded; /// true if the program has already been uploaded to the GPU
+
   void optimize(const SH::ShProgramNodeCPtr& shader);
 
   /// Generate code for this node and those following it.
-  void genNode(SH::ShCtrlGraphNodePtr node);
+  void gen_node(SH::ShCtrlGraphNodePtr node);
   
   /// Generate code for a single Sh statement.
   void emit(const SH::ShStatement &stmt);
   
-  std::string type_string(const GlslVariable &var); /// returns corresponding OpenGL SL type
+  std::string declare_var(const GlslVariable& v);
+  std::string type_string(const GlslVariable& v); /// returns corresponding OpenGL SL type
+
   std::string var_name(const SH::ShVariable& v); /// generates an identifier for the given variable
   void allocate_var(const SH::ShVariable& v);
   std::string resolve(const SH::ShVariable& v);
