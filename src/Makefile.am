@@ -14,6 +14,7 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
                    ShLinearAllocator.cpp \
                    ShDomTree.cpp \
                    ShOptimizer.cpp \
+                   ShInternals.hpp ShInternals.cpp \
 		   ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp \
                    ShBlock.hpp ShConstant.hpp ShConstantImpl.hpp ShCtrlGraph.hpp \
                    ShDebug.hpp ShEnvironment.hpp ShError.hpp \
@@ -60,7 +61,7 @@ incinc_HEADERS = ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp \
 		   ShPosition.hpp ShLibPosition.hpp \
                    ShNormal.hpp ShLibNormal.hpp \
                    ShTexCoord.hpp ShLibTexCoord.hpp \
-                   ShDomTree.hpp ShOptimizer.hpp ShAlgebra.hpp \
+                   ShDomTree.hpp ShOptimizer.hpp ShAlgebra.hpp ShInternals.hpp\
 		   ShFixedManipulator.hpp \
 		   ShManipulator.hpp ShManipulatorImpl.hpp \
 		   ShChannelNode.hpp ShChannel.hpp ShChannelImpl.hpp \

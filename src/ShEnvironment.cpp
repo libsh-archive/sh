@@ -33,7 +33,7 @@ ShProgram ShEnvironment::shader = 0;
 bool ShEnvironment::insideShader = false;
 ShEnvironment::BoundShaderMap* ShEnvironment::m_boundShader = 0;
 ShBackendPtr ShEnvironment::backend = 0;
-int ShEnvironment::optimizationLevel = 1;
+int ShEnvironment::optimizationLevel = 2;
 bool ShEnvironment::useExceptions = false;
 
 ShEnvironment::BoundShaderMap& ShEnvironment::boundShaders()

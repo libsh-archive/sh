@@ -56,7 +56,7 @@
   SH_SPECIAL_TYPE_PARENT(SH_TYPE_NAME, SH_COMMENT_NAME, ShAttrib, SH_TYPE_ENUM)
 
 #define SH_SPECIAL_TYPE_PARENT(SH_TYPE_NAME, SH_COMMENT_NAME, SH_TYPE_PARENT, SH_TYPE_ENUM) \
-template<int N, int Kind, typename T, bool Swizzled=false> \
+template<int N, int Kind, typename T=double, bool Swizzled=false> \
 class SH_TYPE_NAME : public SH_TYPE_PARENT<N, Kind, T, Swizzled> { \
 public: \
   SH_TYPE_NAME(); \

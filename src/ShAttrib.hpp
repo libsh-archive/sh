@@ -44,8 +44,10 @@ namespace SH {
  * calling a conversion constructor instead, which cannot be elided.
  * If this paragraph confuses you, and you're not modifying Sh
  * internals, you may safely ignore it.
+ *
+ * The default 
  */
-template<int N, int Kind, typename T, bool Swizzled=false>
+template<int N, int Kind, typename T=double, bool Swizzled=false>
 class ShAttrib : public ShVariableN<N, T> {
 public:
   ShAttrib();

@@ -101,7 +101,7 @@ ShTexture1D<T>::ShTexture1D(int length)
 }
 
 template<typename T>
-T ShTexture1D<T>::operator()(const ShVariableN<1, double>& coords)
+T ShTexture1D<T>::operator()(const ShVariableN<1, double>& coords) const
 {
   T t;
   ShVariable texVar(m_node);
@@ -124,7 +124,7 @@ ShTexture2D<T>::ShTexture2D(int width, int height)
 }
 
 template<typename T>
-T ShTexture2D<T>::operator()(const ShVariableN<2, double>& coords)
+T ShTexture2D<T>::operator()(const ShVariableN<2, double>& coords) const
 {
   T t;
   ShVariable texVar(m_node);
@@ -147,7 +147,7 @@ ShTexture3D<T>::ShTexture3D(int width, int height, int depth)
 }
 
 template<typename T>
-T ShTexture3D<T>::operator()(const ShVariableN<3, double>& coords)
+T ShTexture3D<T>::operator()(const ShVariableN<3, double>& coords) const
 {
   T t;
   ShVariable texVar(m_node);
@@ -177,7 +177,7 @@ void ShTextureCube<T>::set(ShCubeDirection dir, const ShTexture2D<T>& texture)
 }
 
 template<typename T>
-T ShTextureCube<T>::operator()(const ShVariableN<3, double>& dir)
+T ShTextureCube<T>::operator()(const ShVariableN<3, double>& dir) const
 {
   T t;
   ShVariable texVar(m_node);

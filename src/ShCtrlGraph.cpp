@@ -170,6 +170,15 @@ ShCtrlGraphNodePtr ShCtrlGraph::exit() const
   return m_exit;
 }
 
+void ShCtrlGraph::setEntry(ShCtrlGraphNodePtr newEntry) {
+  m_entry = newEntry;
+}
+
+void ShCtrlGraph::setExit(ShCtrlGraphNodePtr newExit) {
+  m_exit = newExit;
+}
+
+
 std::ostream& ShCtrlGraph::print(std::ostream& out, int indent) const
 {
   if (m_entry) {

@@ -1,5 +1,5 @@
 check_PROGRAMS = algebra combine connect constants copy do if for julia matrix ops point \
-		 rch simple texture uniforms shvector while neg stream
+		 rch simple texture uniforms shvector while neg stream io2temp
 
 INCLUDES = -I../src
 
@@ -25,6 +25,7 @@ uniforms_SOURCES = uniforms.cpp
 shvector_SOURCES = shvector.cpp
 stream_SOURCES = stream.cpp
 while_SOURCES = while.cpp
+io2temp_SOURCES = io2temp.cpp
 
 %.cpp: %.sht test.header test.footer
 	cat test.header > $@

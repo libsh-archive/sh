@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <queue>
 #include "ShDebug.hpp"
+#include "ShInternals.hpp"
 
 namespace SH {
 
@@ -44,20 +45,27 @@ void ShOptimizer::optimize(int level)
     bool changed;
     do {
       changed = false;
-      copyPropagation(changed);
-      moveElimination(changed);
-      
-      m_graph->computePredecessors();
-      
-      straighten(changed);
 
-      insertBraInsts();
-      
-      solveReachDefs();
-      buildUdDuChains();
-      removeDeadCode(changed);
-      
-      removeBraInsts();
+      outputConversion(changed);
+      straighten(changed);
+      inputConversion(changed);
+
+      if( level >= 2 ) {
+        copyPropagation(changed);
+        moveElimination(changed);
+        
+        m_graph->computePredecessors();
+        
+        straighten(changed);
+
+        insertBraInsts();
+        
+        solveReachDefs();
+        buildUdDuChains();
+        removeDeadCode(changed);
+        
+        removeBraInsts();
+      }
     } while (changed);
   }
 }
@@ -202,6 +210,125 @@ void ShOptimizer::moveElimination(bool& changed)
 {
   MoveEliminator m(*this, changed);
   m_graph->dfs(m);
+}
+
+// Output Convertion to temporaries 
+struct OutputConvertor {
+  OutputConvertor(ShOptimizer& o, bool& changed)
+    : optimizer(o), changed(changed)
+  {
+  }
+
+  void operator()(ShCtrlGraphNodePtr node) {
+    if (!node) return;
+    ShBasicBlockPtr block = node->block;
+    if (!block) return;
+    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+      convertOutput(*I);
+    }
+  }
+  
+  void convertOutput(ShStatement& stmt)
+  {
+    for(int i = 0; i < 3; ++i) {
+      if(!stmt.src[i].null() && stmt.src[i].node()->kind() == SH_VAR_OUTPUT) {
+        ShVariableNodePtr &oldNode = stmt.src[i].node();
+        varMap[oldNode] = new ShVariableNode(SH_VAR_TEMP, 
+            oldNode->size(), oldNode->specialType());
+      }
+    }
+  }
+
+  void updateExit() {
+    if( varMap.size() == 0 ) return; // no outputs to change;
+
+    // create block after exit
+    ShCtrlGraphNodePtr newExit = new ShCtrlGraphNode(); 
+    ShCtrlGraphNodePtr oldExit = optimizer.m_graph->exit();
+    oldExit->append( newExit );
+    optimizer.m_graph->setExit( newExit );
+
+    // generate code in the old exit block
+    oldExit->block = new ShBasicBlock(); 
+    for(ShVariableReplacer::VarMap::iterator it = varMap.begin(); it != varMap.end(); ++it) {
+      // assign temporary to output
+      oldExit->block->addStatement(ShStatement(
+            ShVariable(it->first), SH_OP_ASN, ShVariable(it->second)));
+    }
+  }
+
+  ShOptimizer& optimizer;
+  bool& changed;
+  ShVariableReplacer::VarMap varMap; // maps from outputs used as srcs in computation to their temporary variables
+};
+
+void ShOptimizer::outputConversion(bool& changed)
+{
+  OutputConvertor oc(*this, changed);
+  m_graph->dfs(oc);
+
+  ShVariableReplacer vr( oc.varMap );
+  m_graph->dfs(vr);
+
+  oc.updateExit();
+}
+
+// Input Convertion to temporaries 
+struct InputConvertor {
+  InputConvertor(ShOptimizer& o, bool& changed)
+    : optimizer(o), changed(changed)
+  {
+  }
+
+  void operator()(ShCtrlGraphNodePtr node) {
+    if (!node) return;
+    ShBasicBlockPtr block = node->block;
+    if (!block) return;
+    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+      convertInput(*I);
+    }
+  }
+  
+  void convertInput(ShStatement& stmt) {
+    if( !stmt.dest.null() && stmt.dest.node()->kind() == SH_VAR_INPUT) {
+      ShVariableNodePtr &oldNode = stmt.dest.node();
+      varMap[oldNode] = new ShVariableNode(SH_VAR_TEMP, 
+          oldNode->size(), oldNode->specialType());
+    }
+  }
+
+  void updateEntry() {
+    if( varMap.size() == 0 ) return; // no inputs to change;
+
+    // create block after exit
+    ShCtrlGraphNodePtr newEntry = new ShCtrlGraphNode(); 
+    ShCtrlGraphNodePtr oldEntry = optimizer.m_graph->entry();
+    newEntry->append( oldEntry );
+    optimizer.m_graph->setEntry( newEntry ); 
+
+    // generate code in the old exit block
+    oldEntry->block = new ShBasicBlock(); 
+    for(ShVariableReplacer::VarMap::iterator it = varMap.begin(); it != varMap.end(); ++it) {
+      // assign from the input to the temporary
+      oldEntry->block->addStatement(ShStatement(
+            ShVariable(it->second), SH_OP_ASN, ShVariable(it->first)));
+    }
+  }
+
+  ShOptimizer& optimizer;
+  bool& changed;
+  ShVariableReplacer::VarMap varMap; // maps from inputs used as dests in computation to their temporary variables
+};
+
+void ShOptimizer::inputConversion(bool& changed)
+{
+  InputConvertor ic(*this, changed);
+  m_graph->dfs(ic);
+
+  ShVariableReplacer vr( ic.varMap );
+  m_graph->dfs(vr);
+
+  ic.updateEntry();
 }
 
 // Straightening

@@ -1,4 +1,10 @@
 2004-01-20  Bryan Chan  <b8chan@uwaterloo.ca>
+	* src/ShInternals.?pp: Moved ShVariableReplacer here from ShAlgebra
+
+	* src/ShOptimizer.hpp, src/ShOptimizer.cpp, src/ShCtrlGraph.?pp: 
+	Added conversion of input and output vars to temps when used 
+	in computation.
+	
 	* util/ShPerlin.hpp, util/ShPerlinImpl.hpp: Templatized and cleaned up 
 	the old Perlin code
 
@@ -6,6 +12,10 @@
 	them easier to use.
 	
 	* src/ShLib.hpp: Added pos, | for dot product on ShVariableN.
+
+	* src/ShTexture.?pp: changed access operator() methods to const
+
+	* src/ShAttrib.hpp, src/ShSpecialType.hpp: added default ValueType
 		
 2004-01-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 

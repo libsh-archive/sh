@@ -5,6 +5,7 @@
 #include "ShDebug.hpp"
 #include "ShError.hpp"
 #include "ShOptimizer.hpp"
+#include "ShInternals.hpp"
 #include "ShEnvironment.hpp"
 
 namespace {
@@ -54,38 +55,6 @@ void copyCtrlGraph(ShCtrlGraphNodePtr head, ShCtrlGraphNodePtr tail,
 
   head->clearMarked();
 }
-
-typedef std::map<ShVariableNodePtr, ShVariableNodePtr> VarMap;
-
-struct VariableReplacer {
-  VariableReplacer(VarMap& v)
-    : varMap(v)
-  {
-  }
-
-  void operator()(ShCtrlGraphNodePtr node)
-  {
-    if (!node) return;
-    ShBasicBlockPtr block = node->block;
-    if (!block) return;
-    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-      repVar(I->dest);
-      for (int i = 0; i < 3; i++) {
-        if( !I->src[i].null() ) repVar(I->src[i]);
-      }
-    }
-  }
-
-  void repVar(ShVariable& var)
-  {
-    VarMap::iterator I = varMap.find(var.node());
-    if (I == varMap.end()) return;
-    SH_DEBUG_PRINT("Replacing " << var.node()->name() << " with " << I->second->name());
-    var.node() = I->second;
-  }
-
-  VarMap& varMap;
-};
 
 }
 
@@ -146,7 +115,7 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
     }
   }
   
-  VarMap varMap;
+  ShVariableReplacer::VarMap varMap;
 
   SH_DEBUG_PRINT("Smashing variables together");
   
@@ -170,7 +139,7 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   ShEnvironment::shader = 0;
   ShEnvironment::insideShader = false;
 
-  VariableReplacer replacer(varMap);
+  ShVariableReplacer replacer(varMap);
   program->ctrlGraph->dfs(replacer);
 
   ShOptimizer optimizer(program->ctrlGraph);
@@ -268,7 +237,7 @@ ShProgram replaceUniform(const ShProgram& a, const ShVariable& v)
     program->outputs.push_back(*II);
   }
   
-  VarMap varMap;
+  ShVariableReplacer::VarMap varMap;
 
   SH_DEBUG_PRINT("Adding a new input to replace the uniform");
   
@@ -281,7 +250,7 @@ ShProgram replaceUniform(const ShProgram& a, const ShVariable& v)
   ShEnvironment::shader = 0;
   ShEnvironment::insideShader = false;
 
-  VariableReplacer replacer(varMap);
+  ShVariableReplacer replacer(varMap);
   program->ctrlGraph->dfs(replacer);
 
   ShOptimizer optimizer(program->ctrlGraph);

@@ -127,6 +127,8 @@ public:
 
   ShCtrlGraphNodePtr entry() const;
   ShCtrlGraphNodePtr exit() const;
+  void setEntry(ShCtrlGraphNodePtr newEntry);
+  void setExit(ShCtrlGraphNodePtr newExit);
 
   template<typename F>
   void dfs(F& functor);
