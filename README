@@ -4,6 +4,12 @@ See the "INSTALL" file for directions.
 
 STATUS
 
+20040317: The SM backend is currently disabled, it needs an
+overhaul. Also, there is an "ATI" backend mentioned in configure, but
+this is not included in the distribution right now for IP reasons.
+
+----
+
 Sh is currently roughly in the "alpha" stage.
 
 This means it works, but there are several things which are by no
