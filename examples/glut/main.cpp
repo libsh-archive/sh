@@ -3,8 +3,10 @@
 #include <GL/glext.h>
 #include <GL/glu.h>
 #include "Camera.hpp"
+#include <iostream>
 
 using namespace SH;
+using namespace std;
 
 ShMatrix4x4f mv, mvd;
 ShPoint3f lightPos;
@@ -115,7 +117,7 @@ int main(int argc, char** argv)
   glutMouseFunc(mouse);
   glutMotionFunc(motion);
   
-  shSetBackend("arb");
+  shSetBackend("glsl");
 
   initShaders();
   
@@ -135,6 +137,13 @@ int main(int argc, char** argv)
 
   shBind(vsh);
   shBind(fsh);
-  
-  glutMainLoop();
+
+  cout << "Vertex Unit:" << endl;
+  vsh.node()->code()->print(cout);
+  cout << "--" << endl;
+  cout << "Fragment Unit:" << endl;
+  fsh.node()->code()->print(cout);
+  cout << "--" << endl;
+
+  //glutMainLoop();
 }
