@@ -13,76 +13,76 @@
 #include <algorithm>
 //#include "sh.hpp"			 // necessary?
 #include "ShDllExport.hpp"
-#include "ShCtrlGraph.hpp"
 #include "ShRefCount.hpp"
+#include "DAG.hpp"
 
-  /* A parital dominator tree in a flowgraph
-   * -- dominator tree including multi-referenced nodes and their immediate dominators
-   */
-  class
-  SH_DLLEXPORT PDomTree {
+/***
+ * A parital dominator tree in a flowgraph
+ * (dominator tree including multi-referenced nodes and their immediate dominators)
+ */
+// See "A Fast Algorithm for Finding Dominators in a Flowgraph", 
+// ACM TOPLAS, Langauer & Tarjan, Vol 1 No 1, 1979 for more information
+
+class SH_DLLEXPORT PDomTree {
   public:
-    PDomTree(SH::ShCtrlGraphPtr ctrlGraph);
+    
+	PDomTree(DAG::DAG* dag);
 	
 	/* pchildren(w): set of child vertices of w in partial dom tree */
-    typedef std::vector<SH::ShCtrlGraphNodePtr> PChildVector;
-    typedef std::map<SH::ShCtrlGraphNodePtr, PChildVector> PChildMap;
+    typedef std::vector<DAGNode::DAGNode*> PChildVector;
+    typedef std::map<DAGNode::DAGNode*, PChildVector> PChildMap;
     PChildMap pchildren;
-
-    /// Postorder (bottom-up) traversal
-    template<typename T> void postorder(T& f);
-
-    /// Preorder traversal
-    template<typename T> void preorder(T& f);
   
-    void debugDump();
+	void printDoms();
 
-    int numbering(SH::ShCtrlGraphNodePtr node) const {
+    int numbering(DAGNode::DAGNode* node) const {
       	return (int)(std::find( m_vertex.begin(), m_vertex.end(), node) - m_vertex.begin());
     }
+
+	DAGNode::DAGNode* dominator(DAGNode::DAGNode* node) {
+		return dom[node];
+	}
   
   	// returns true if node is multi-referenced; false otherwise
-  	bool mr(SH::ShCtrlGraphNodePtr node) {
+  	bool mr(DAGNode::DAGNode* node) {
 		return m_mr[node];
 	}
 	
-	SH::ShCtrlGraphNodePtr get_root() {
-		return m_graph->entry();
+	DAGNode::DAGNode* get_root() {
+		return m_graph->m_root;
 	}
   
   private:
-    void dfs(SH::ShCtrlGraphNodePtr v);
-    SH::ShCtrlGraphNodePtr eval(SH::ShCtrlGraphNodePtr v);
-    void compress(SH::ShCtrlGraphNodePtr v);
-    void link(SH::ShCtrlGraphNodePtr v, SH::ShCtrlGraphNodePtr w);
-	  void build_pdt(SH::ShCtrlGraphNodePtr v);
+    void dfs(DAGNode::DAGNode* v);
+    DAGNode::DAGNode* eval(DAGNode::DAGNode* v);
+    void compress(DAGNode::DAGNode* v);
+    void link(DAGNode::DAGNode* v, DAGNode::DAGNode* w);
+	void build_pdt(DAGNode::DAGNode* v);
   
   	/* input */
-    SH::ShCtrlGraphPtr m_graph;
-
-    // See "A Fast Algorithm for Finding Dominators in a Flowgraph", ACM TOPLAS, Langauer & Tarjan, Vol 1 No 1, 1979 for more information
+    DAG::DAG *m_graph;
 
     /* parent(w): vertex that is parent of w in spanning tree */ 
-	  typedef std::map<SH::ShCtrlGraphNodePtr, SH::ShCtrlGraphNodePtr> ParentMap;
+	  typedef std::map<DAGNode::DAGNode*, DAGNode::DAGNode*> ParentMap;
     ParentMap m_parent;
 	
 	/* pred(w): set of vertices, st (v, w) is edge of graph */
-    typedef std::set<SH::ShCtrlGraphNodePtr> PredSet;
-    typedef std::map<SH::ShCtrlGraphNodePtr, PredSet> PredMap;
+    typedef std::set<DAGNode::DAGNode*> PredSet;
+    typedef std::map<DAGNode::DAGNode*, PredSet> PredMap;
     PredMap m_pred;
 	
 	/* semi(w): before numbered, = 0
      			after numbered = number of w
 				after semidominator = number of semidominator of w */
-    typedef std::map<SH::ShCtrlGraphNodePtr, int> SemiMap;
+    typedef std::map<DAGNode::DAGNode*, int> SemiMap;
     SemiMap m_semi;
 	
 	/* vertex(i): vertex corresponding to number i */
-	std::vector<SH::ShCtrlGraphNodePtr> m_vertex;
+	std::vector<DAGNode::DAGNode*> m_vertex;
 	
 	/* bucket(w): set of vertices whose semidominator is w */
-    typedef std::set<SH::ShCtrlGraphNodePtr> BucketSet;
-    typedef std::map<SH::ShCtrlGraphNodePtr, BucketSet> BucketMap;
+    typedef std::set<DAGNode::DAGNode*> BucketSet;
+    typedef std::map<DAGNode::DAGNode*, BucketSet> BucketMap;
     BucketMap m_bucket;
 	
 	/* pchild(w): set of vertices v st (w, v) is edge of graph */
@@ -90,67 +90,28 @@
 		
 	/* dom(w):	after step 3, some dominator of w
 				after step 4, immediate dominator of w */
-    typedef std::map<SH::ShCtrlGraphNodePtr, SH::ShCtrlGraphNodePtr> DomMap;
+    typedef std::map<DAGNode::DAGNode*, DAGNode::DAGNode*> DomMap;
     DomMap dom;
 
-    typedef std::map<SH::ShCtrlGraphNodePtr, SH::ShCtrlGraphNodePtr> AncestorMap;
+    typedef std::map<DAGNode::DAGNode*, DAGNode::DAGNode*> AncestorMap;
     AncestorMap m_ancestor;
-    typedef std::map<SH::ShCtrlGraphNodePtr, SH::ShCtrlGraphNodePtr> LabelMap;
+    typedef std::map<DAGNode::DAGNode*, DAGNode::DAGNode*> LabelMap;
     LabelMap m_label;
 
-    typedef std::set<SH::ShCtrlGraphNodePtr> ChildrenSet;
-    typedef std::map<SH::ShCtrlGraphNodePtr, ChildrenSet> ChildrenMap;
+    typedef std::set<DAGNode::DAGNode*> ChildrenSet;
+    typedef std::map<DAGNode::DAGNode*, ChildrenSet> ChildrenMap;
     ChildrenMap m_children;
   
  	/* flag for multi-referenced nodes */
-	typedef std::map<SH::ShCtrlGraphNodePtr, bool> MRMap;
-	MRMap m_mr; 
+	typedef std::map<DAGNode::DAGNode*, bool> BoolMap;
+	BoolMap m_mr; 
 	
 	/* flag for nodes in the partial dom tree */
-	typedef std::map<SH::ShCtrlGraphNodePtr, bool> MRMap;
-	MRMap m_pdt;
+	BoolMap m_pdt;
+	BoolMap m_visited;
   
   	/* for numbering vertices in spanning tree */
     int m_n;
-
-    template<typename T> void postorderNode(T& f, SH::ShCtrlGraphNodePtr root, int level = 0);
-    template<typename T> void preorderNode(T& f, SH::ShCtrlGraphNodePtr root, int level = 0);
   };
-
-
-//typedef SH::ShPointer<PDomTree> PDomTreePtr;
-  typedef PDomTree* PDomTreePtr;
-  
-  template<typename T>
-  void PDomTree::postorder(T& f)
-  {
-    postorderNode(f, m_graph->entry());
-  }
-
-  template<typename T>
-  void PDomTree::postorderNode(T& f, SH::ShCtrlGraphNodePtr root, int level)
-  {
-    ChildrenSet& children = m_children[root];
-    for (ChildrenSet::iterator I = children.begin(); I != children.end(); ++I) {
-      postorderNode(f, *I, level + 1);
-    }
-    f(root, level);
-  }
-
-  template<typename T>
-  void PDomTree::preorder(T& f)
-  {
-    preorderNode(f, m_graph->entry());
-  }
-
-  template<typename T>
-  void PDomTree::preorderNode(T& f, SH::ShCtrlGraphNodePtr root, int level)
-  {
-    f(root, level);
-    ChildrenSet& children = m_children[root];
-    for (ChildrenSet::iterator I = children.begin(); I != children.end(); ++I) {
-      preorderNode(f, *I, level + 1);
-    }
-  }
 
 #endif
