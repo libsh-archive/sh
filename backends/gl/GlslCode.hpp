@@ -78,6 +78,7 @@ private:
   std::string m_target;
 
   static GLhandleARB m_arb_program; /// program to which all shaders are attached
+  static GlslCode* m_current_shaders[2];
   GLhandleARB m_arb_shader; /// shader program uploaded to the GPU
 
   std::vector<std::string> m_lines; /// raw lines of code (unindented)

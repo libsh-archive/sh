@@ -34,6 +34,7 @@
 namespace shgl {
 
 GLhandleARB GlslCode::m_arb_program = glCreateProgramObjectARB();
+GlslCode* GlslCode::m_current_shaders[] = { NULL, NULL };
 
 using namespace SH;
 using namespace std;
@@ -46,16 +47,10 @@ GlslCode::GlslCode(const ShProgramNodeCPtr& shader, const std::string& unit,
   m_originalShader = const_cast<ShProgramNode*>(shader.object());
   
   if (unit == "fragment"){
-    m_arb_shader = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
     m_unit = SH_GLSL_FP;
-  }
-  
-  if (unit == "vertex") {
-    m_arb_shader = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
+  } else if (unit == "vertex") {
     m_unit = SH_GLSL_VP;
   }
-
-  SH_DEBUG_ASSERT(m_arb_shader);
 }
 
 GlslCode::~GlslCode()
@@ -64,10 +59,7 @@ GlslCode::~GlslCode()
     delete m_shader;
   }
 
-  if (m_uploaded) {
-    SH_GL_CHECK_ERROR(glDetachObjectARB(m_arb_program, m_arb_shader));
-  }
-
+  unbind();
   delete m_varmap;
 }
 
@@ -135,6 +127,18 @@ void GlslCode::generate()
 
 void GlslCode::upload()
 {
+  // Unbind the previously attached shader if necessary
+  if (m_current_shaders[m_unit]) {
+    m_current_shaders[m_unit]->unbind();
+  }
+
+  if (SH_GLSL_VP == m_unit) {
+    m_arb_shader = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
+  } else if (SH_GLSL_FP == m_unit) {
+    m_arb_shader = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
+  }
+  SH_DEBUG_ASSERT(m_arb_shader);
+
   stringstream code;
   print(code);
   string s = code.str(); // w/o this extra copy, the last bytes of the shader code become garbage
@@ -160,6 +164,7 @@ void GlslCode::upload()
   SH_GL_CHECK_ERROR(glAttachObjectARB(m_arb_program, m_arb_shader));
   SH_GL_CHECK_ERROR(glDeleteObjectARB(m_arb_shader)); // mark for deletion on detachment
 
+  m_current_shaders[m_unit] = this;
   m_uploaded = true;
 }
 
@@ -220,6 +225,8 @@ void GlslCode::unbind()
   if (!m_uploaded) return;
 
   SH_GL_CHECK_ERROR(glDetachObjectARB(m_arb_program, m_arb_shader));
+
+  m_current_shaders[m_unit] = NULL;
   m_uploaded = false;
 }
 
