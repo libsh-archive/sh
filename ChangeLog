@@ -3,7 +3,8 @@
 	* src/ShOptimizations.cpp (ReachingDefs::Definition): Keep a
 	disable_mask bitset to keep track of definitions overwriting each
 	other in a single block. This is used when constructing gen.
-	(DefFinder::operator()): Set up disable_mask appropriately.
+	(DefFinder::operator()): Set up disable_mask appropriately. Constant
+	propagation now works, but isn't used yet.
 
 	* src/ShBitSet.cpp (full): Implement full.
 	(empty): Implement empty.
