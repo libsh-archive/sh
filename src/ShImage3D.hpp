@@ -33,7 +33,11 @@
 
 namespace SH {
 
-/** An image, consisting of a rectangle of floating-point elements.
+/** A 3D image.
+ * Consists of a grid of floating-point elements.   Stores data
+ * in a memory object that can be shared with a 3D array, table, or
+ * texture.
+ * @see ShImage
  */
 class ShImage3D : public ShRefCountable {
 public:

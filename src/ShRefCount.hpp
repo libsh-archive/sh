@@ -46,9 +46,9 @@
 namespace SH {
 
 /** A class which can be reference-counted.
-    These are classes you can wrap in an ShRefCount. Inherit from this
-    if you want to reference-count your class.
-*/
+ * These are classes you can wrap in an ShRefCount. Inherit from this
+ * if you want to reference-count your class.
+ */
 class ShRefCountable 
 {
 public:
@@ -107,7 +107,8 @@ private:
   mutable int m_refCount;
 };
 
-/** A reference-counting smart pointer. */
+/** A reference-counting smart pointer. 
+ */
 template<typename T>
 class ShRefCount 
 {

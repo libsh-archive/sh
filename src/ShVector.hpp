@@ -32,8 +32,10 @@
 namespace SH {
 
 /** An N-Vector.
+ * By "vector" we mean a geometric vector, not just a tuple or an
+ * array (unlike the unfortunate terminology in the standard
+ * library).
  */
-
 SH_SPECIAL_TYPE_PARENT_OPEN(ShVector, vector, ShAttrib, SH_VECTOR);
 ShVector(); 
 ShVector(T); 

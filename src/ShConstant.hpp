@@ -33,6 +33,8 @@ namespace SH {
 
 /** A shader-compile-time constant.
  * Represent an N-tuple constant which will never actually vary.
+ * TODO: probably, "Constant/SH_CONSTANT" should be a binding type.  
+ * It's not really a semantic type.
  */
 template<int N, typename T>
 class ShConstant : public ShVariableN<N, T> 

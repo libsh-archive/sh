@@ -30,12 +30,13 @@
 
 /** @file ShError.hh
  *  Error handling functions 
- *   */
+ */
 
 namespace SH {
 
-/// Throws the exception when ShEnvironment::useExceptions is on. 
-/// Otherwise prints error message and aborts.
+/** Throws the given exception when ShEnvironment::useExceptions is on. 
+ * Otherwise prints error message and aborts.
+ */
 void ShError( ShException exception ); 
 
 }

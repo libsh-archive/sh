@@ -31,6 +31,10 @@
 #include "ShLib.hpp"
 
 namespace SH {
+
+/** A Quaternion.
+ * TODO: K should have the ShBindingType enumerated type.
+ */
 template<int K, typename T=float>
 class ShQuaternion
 {

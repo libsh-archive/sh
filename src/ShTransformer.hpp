@@ -33,7 +33,7 @@
 
 namespace SH {
 
-/** Program transformer 
+/** Program transformer. 
  * Platform-specific transformations on ShProgram objects.
  *
  * These may change the variable lists (inputs, outputs, etc.)

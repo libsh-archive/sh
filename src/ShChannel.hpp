@@ -32,9 +32,10 @@
 
 namespace SH {
 
-// The client interface to a single-channel stream.
-// Really this hides an ShChannelNode which is the true representation
-// of the stream.
+/** The client interface to a single-channel typed data stream.
+ * Really this hides an ShChannelNode which is the true representation
+ * of the channel.   The template argument is the element type stored.
+ */
 template<typename T>
 class ShChannel {
 public:
@@ -64,10 +65,17 @@ private:
   ShChannelNodePtr m_node;
 };
 
-// Bind a channel as an input to a program
+/** Apply a programs to a single channel.
+ * Bind a channel as an input to a program.   The implementation
+ * supports currying, and returns a program with one less input.
+ */
 template<typename T>
 ShProgram connect(const ShChannel<T>& channel, const ShProgram& program);
 
+/** Equivalent to connect(p,c). 
+ * Bind a channel as an input to a program.   The implementation
+ * supports currying, and returns a program with one less input.
+ */
 template<typename T>
 ShProgram operator<<(const ShProgram& program, const ShChannel<T>& channel);
 

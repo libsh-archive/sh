@@ -34,6 +34,9 @@
 
 namespace SH {
 
+/** Texture formats.
+ * An enumeration of the various ways textures can be laid out.
+ */
 enum ShTextureDims {
   SH_TEXTURE_1D,   // Power of two
   SH_TEXTURE_2D,   // Power of two
@@ -42,6 +45,9 @@ enum ShTextureDims {
   SH_TEXTURE_CUBE, // 6 "2D" memory objects, power of two
 };
 
+/** Cube map faces.
+ * An enumeration of names for the various faces of a cube map.
+ */
 enum ShCubeDirection {
   SH_CUBE_POS_X = 0,
   SH_CUBE_NEG_X = 1,
@@ -51,6 +57,10 @@ enum ShCubeDirection {
   SH_CUBE_NEG_Z = 5,
 };
 
+/** Texture traits.
+ * An enumeration of the various wrapping an clamping modes supported
+ * by textures.
+ */
 class ShTextureTraits {
 public:
   enum Filtering {

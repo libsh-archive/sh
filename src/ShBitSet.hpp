@@ -24,7 +24,6 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-
 #ifndef SHBITSET_HPP
 #define SHBITSET_HPP
 
@@ -33,6 +32,9 @@
 
 namespace SH {
 
+/* A reference to a single bit in a set.
+ * @see ShBitSet
+ */
 class ShBitRef {
 public:
   operator bool() const;

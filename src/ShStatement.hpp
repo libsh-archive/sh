@@ -34,8 +34,8 @@
 namespace SH {
 
 /** Kinds of operations.
- *  If you change this, be sure to change the opInfo array in
- *  ShStatement.cpp
+ * If you change this, be sure to change the opInfo array in
+ * ShStatement.cpp
  * @see opInfo
  */
 enum ShOperation {

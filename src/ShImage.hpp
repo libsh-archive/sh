@@ -34,6 +34,9 @@
 namespace SH {
 
 /** An image, consisting of a rectangle of floating-point elements.
+ * This class makes it easy to read PNG files and the like from
+ * files.   It stores the image data in a memory object which can
+ * then be shared with array, table, and texture objects.
  */
 class ShImage : public ShRefCountable {
 public:

@@ -33,7 +33,11 @@
 
 namespace SH {
 
-// Dynamic list of channels
+/** Dynamic list of channels.
+ * The stream keep track (by reference) of an ordered lists of 
+ * data channels, to be used as inputs and outputs of stream operations.
+ * @see ShChannel
+ */
 class ShStream {
 public:
   ShStream(const ShChannelNodePtr& node);
@@ -63,32 +67,55 @@ private:
   std::list<ShChannelNodePtr> m_nodes;
 };
 
-// Ways to form a combined stream
+/** Combine two streams.
+ * This concatenates the list of channels in the component streams.
+ */
 template<typename T1, typename T2>
 ShStream combine(const ShChannel<T1>& left, const ShChannel<T2>& right);
 
+/** Combine a stream and a channel.
+ * This concatenates the given channel to the end of the list of
+ * channels in the stream.
+ */
 template<typename T2>
 ShStream combine(const ShStream& left, const ShChannel<T2>& right);
 
+/** Combine a channel and a stream.
+ * This concatenates the given channel to the start of the list of
+ * channels in the stream.
+ */
 template<typename T1>
 ShStream combine(const ShChannel<T1>& left, const ShStream& right);
 
 ShStream combine(const ShStream& left, const ShStream& right);
 
-// Aliases for combine
+/** An operator alias for combine between channels.
+ */
 template<typename T1, typename T2>
 ShStream operator&(const ShChannel<T1>& left, const ShChannel<T2>& right);
 
+/** An operator alias for combine between a stream and a channel.
+ */
 template<typename T2>
 ShStream operator&(const ShStream& left, const ShChannel<T2>& right);
 
+/** An operator alias for combine between a channel and a stream.
+ */
 template<typename T1>
 ShStream operator&(const ShChannel<T1>& left, const ShStream& right);
 
+/** An operator alias for combine between two streams.
+ */
 ShStream operator&(const ShStream& left, const ShStream& right);
 
-// Connecting (currying) streams onto programs
+/** Apply a program to a stream. 
+ * This function connects streams onto the output of programs
+ * TODO: is this right?  why is the stream argument first?
+ */
 ShProgram connect(const ShStream& stream, const ShProgram& program);
+
+/** An operator alias for connect(p,s).
+ */
 ShProgram operator<<(const ShProgram& program, const ShStream& stream);
 
 

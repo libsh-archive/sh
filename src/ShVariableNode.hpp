@@ -32,6 +32,11 @@
 
 namespace SH {
 
+/** The various ways variables can be bound.
+ * TODO: this name should be changed to "ShBindingType", and this
+ * type name should be used whenever required to declare template
+ * arguments (for documentation purposes, at least).
+ */
 enum ShVariableKind {
   SH_INPUT = 0,
   SH_OUTPUT = 1,
@@ -42,6 +47,11 @@ enum ShVariableKind {
   SH_STREAM = 6
 };
 
+/** The various ways semantic types for variables.
+ * TODO: this name should be changed to "ShSemanticType", and this
+ * type name should be used whenever required to declare template
+ * arguments (for documentation purposes, at least).
+ */
 enum ShVariableSpecialType {
   SH_ATTRIB,
   SH_POINT,
@@ -53,6 +63,7 @@ enum ShVariableSpecialType {
 };
 
 // ensure these match the Kind and SpecialType enums
+// TODO: names should change to match the above.
 extern const char* ShVariableKindName[];
 extern const char* ShVariableSpecialTypeName[];
 

@@ -30,6 +30,9 @@
 namespace SH {
 
 /** A vertex position.
+ * This is semantically a point, but is bound preferentially to the position
+ * input and output of the rasterizer or to the vertex position when
+ * used in vertex and fragment shaders.
  */
 SH_SPECIAL_TYPE_PARENT(ShPosition, position, ShPoint, SH_POSITION);
 

@@ -4,7 +4,7 @@
 	* src/ShWrap.hpp: Hack to add trait wrappers for 1D, 2D, 3D.
 	* src/ShClamping.hpp: Ditto.
 
-	Lack of default constructor was making it hard to allocate
+	Lack of default constructors was making it hard to allocate
 	arrays of textures.   Adding default sizes worked, but then
 	also had to add default sizes to trait wrappers.   But then,
 	needed different trait wrappers for each number of dimensions...
@@ -14,11 +14,15 @@
 	should do this.   I have commited this code for now but I think
 	we should do something else, like make the size a template
 	argument (with 0 indicating a "resizable" texture, with no
-	memory initially allocated).   To discuss...
+	memory initially allocated).   Then we can rip out the 1D,
+	2D, 3D trait wrappers.  To discuss; maybe there is another way.
 
-	Also added some structured comments in various places.   Many
-	classes don't even show up under doxygen since not even the
-	most minimal commenting has been done. 
+	Also added some structured comments in MANY places.   Many
+	classes did't even show up under doxygen since not even the
+	most minimal commenting had been done.   Also added license
+	header to many files (although I think I missed some).  Noted
+	a few issues here and there with "TODO".   Anyways, doxygen
+	now generates much more complete documentation.
 
 2004-04-01  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 

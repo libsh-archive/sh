@@ -47,6 +47,8 @@ public:
 
 typedef ShRefCount<ShBlock> ShBlockPtr;
 
+/** A list of generic blocks.
+ */
 class ShBlockList : public ShRefCountable {
 public:
   ShBlockList(bool isArgument = false);

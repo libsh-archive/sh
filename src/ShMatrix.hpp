@@ -39,8 +39,11 @@ class ShMatrix;
 template<int Rows, int Cols, typename T>
 class ShMatrixRows;
 
-/*
- * A matrix of Rows by Cols elements.
+/** A matrix of Rows by Cols elements.
+ * A matrix is a representation of a linear operator.  In Sh, this
+ * class represents SMALL matrices that will fit in registers.   For
+ * large amounts of data, use an ShArray.
+ * @see ShArray
  */
 template<int Rows, int Cols, int Kind, typename T>
 class ShMatrix {

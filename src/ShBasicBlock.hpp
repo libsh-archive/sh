@@ -34,7 +34,10 @@
 namespace SH {
 
 /** A basic block.
- * A basic block is a block composed of * simpler statements.
+ * A basic block is a block composed of simpler statements, but with
+ * no loops or conditionals.   It may only contain arithmetic 
+ * operations, texture lookups, and assignments (although some of 
+ * these assignments might be conditional).
  */
 class ShBasicBlock : public ShBlock {
 public:

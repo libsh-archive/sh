@@ -38,7 +38,9 @@ namespace SH {
 /// Print "indent" spaces to out.
 std::ostream& shPrintIndent(std::ostream& out, int indent);
 
-// This follows Alexandrescu's excellent book "Modern C++ Design"
+/** Check a boolean condition at compile time.
+ * This follows Alexandrescu's excellent book "Modern C++ Design"
+ */
 template<bool B> struct ShCompileTimeChecker
 {
   ShCompileTimeChecker(...);

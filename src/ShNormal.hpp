@@ -33,7 +33,6 @@ namespace SH {
 
 /** A surface normal with N dimensions.
  */
-
 SH_SPECIAL_TYPE_PARENT_OPEN(ShNormal, surface normal, ShAttrib, SH_NORMAL);
 ShNormal(); 
 ShNormal(T); 
