@@ -104,9 +104,15 @@ ShVariableN<1, T> lInfDistance(const ShVariableN<N, T>& a, const ShVariableN<N, 
   return result;
 }
 
-static ShAttrib4f hasha(M_PI * M_PI * M_PI * M_PI, std::exp(4.0), 
-                        std::pow(13.0, M_PI / 2.0), std::sqrt(1997.0));
-static ShAttrib4f hashm(std::sqrt(2.0), 1.0 / M_PI, std::sqrt(3.0), 
+// TODO analyze quality of random numbers and pick some better values
+// These were just picked out of a hat, and may give very bad behaviour...
+static ShAttrib4f hasha(97.409091034002437236440332688705, 
+						std::exp(4.0), 
+                        std::pow(13.0, 1.5707963267948966192313216916398), 
+						std::sqrt(1997.0));
+static ShAttrib4f hashm(std::sqrt(2.0), 
+						0.31830988618379067153776752674503, 
+						std::sqrt(3.0), 
                         std::exp(-1.0));
 
 static const int LCG_REPS = 5; // total instructions for hashlcg will be LCG_REPS * 2 + 2

@@ -40,19 +40,21 @@ static const int DY[] = { 0, 1, 1, 1, 0, -1, -1, -1 };
 ShWorley::ShWorley( int frequency, bool useTexture ): useTexture(useTexture), freq( frequency ),
   dfreq( freq ), cellPosTex(frequency, frequency)
 {
-  int i, j, k, l;
-  srand48(13);
+  int i, j, k;
+  srand(13);
 
   // generate cell positions 
-  double* posx[freq];
-  double* posy[freq];
+  float** posx; 
+  float** posy;
+  posx = new float*[freq];
+  posy = new float*[freq];
   for(i = 0; i < freq; ++i) {
-    posx[i] = new double[freq];
-    posy[i] = new double[freq];
+    posx[i] = new float[freq];
+    posy[i] = new float[freq];
   }
   for(i = 0; i < freq; ++i) for(j = 0; j < freq; ++j) for(k = 0; k < 2; ++k) {
-    posx[i][j] = drand48();
-    posy[i][j] = drand48();
+    posx[i][j] = rand() / (float) RAND_MAX;
+    posy[i][j] = rand() / (float) RAND_MAX;
   }
 
   ShImage adjImage[4];
@@ -68,15 +70,15 @@ ShWorley::ShWorley( int frequency, bool useTexture ): useTexture(useTexture), fr
     for(k = 0; k < 4; ++k) {
       //TODO until we have floating point textures, we need to map the adjacent points
       // which are in [-1,2]^2 to [0,1]^2
-      double px = posx[ ( i + DX[k] + freq ) % freq ][ ( j + DY[k] + freq ) % freq ]; 
-      double py = posy[ ( i + DX[k] + freq ) % freq ][ ( j + DY[k] + freq ) % freq ]; 
-      adjImage[k](i, j, 0) = (px + DX[k] + 1.0) / 3.0; 
-      adjImage[k](i, j, 1) = (py + DY[k] + 1.0) / 3.0; 
+      float px = posx[ ( i + DX[k] + freq ) % freq ][ ( j + DY[k] + freq ) % freq ]; 
+      float py = posy[ ( i + DX[k] + freq ) % freq ][ ( j + DY[k] + freq ) % freq ]; 
+      adjImage[k](i, j, 0) = (px + DX[k] + 1) / 3; 
+      adjImage[k](i, j, 1) = (py + DY[k] + 1) / 3; 
 
       px = posx[ ( i + DX[k + 4] + freq ) % freq ][ ( j + DY[k + 4] + freq ) % freq ]; 
       py = posy[ ( i + DX[k + 4] + freq ) % freq ][ ( j + DY[k + 4] + freq ) % freq ]; 
-      adjImage[k](i, j, 2) = (px + DX[k + 4] + 1.0) / 3.0; 
-      adjImage[k](i, j, 3) = (py + DY[k + 4] + 1.0) / 3.0; 
+      adjImage[k](i, j, 2) = (px + DX[k + 4] + 1) / 3; 
+      adjImage[k](i, j, 3) = (py + DY[k + 4] + 1) / 3; 
     }
   }
   for(i = 0; i < 4; ++i) adjTex[i]->load(adjImage[i]);
@@ -86,6 +88,8 @@ ShWorley::ShWorley( int frequency, bool useTexture ): useTexture(useTexture), fr
     delete[] posx[i];
     delete[] posy[i];
   }
+  delete[] posx;
+  delete[] posy;
 }
 
 ShWorley::~ShWorley()
@@ -114,8 +118,8 @@ class Metric {
 
 };
 
-ShAttrib1f ShWorley::worley(ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m ) {
-  ShAttrib1f result;
+ShAttrib3f ShWorley::worley(ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m ) {
+  ShAttrib3f result;
   Metric dist(m);
 
   int i, j;
@@ -154,9 +158,12 @@ ShAttrib1f ShWorley::worley(ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m ) {
   ShAttrib4f gradAdj[4];
   ShAttrib2f gradCell;
   dcell = dist( cellPoint, fp );
+  gradCell = normalize(cellPoint - fp);
   for(i = 0; i < 4; ++i) {
     dadj[0](i) = dist( adjPoints[i](0,1), fp );
     dadj[1](i) = dist( adjPoints[i](2,3), fp );
+    gradAdj[i](0,1) = normalize(adjPoints[i](0,1) - fp);
+    gradAdj[i](2,3) = normalize(adjPoints[i](2,3) - fp);
   }
 
   // TODO find faster method to do k-selection for k = { 1, 2, 3, 4 }
@@ -181,7 +188,27 @@ ShAttrib1f ShWorley::worley(ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m ) {
   resultVec(0,2) = even(0,1);
   resultVec(1,3) = odd(0,1);
 
-  result = dot(resultVec, c);
+  //TODO integrate this gradient selection into the above sort.
+  //This is a really really UGLY hack
+  ShAttrib2f grads[4];
+  for (i=0; i<4; i++)
+  {
+    grads[i] = (resultVec(i)==dcell)*gradCell;
+    //grads[i] = cond((resultVec(i)==dcell), gradCell, ShAttrib2f(0,0));
+    for (j=0; j<4; j++)
+    {
+      grads[i]+= (resultVec(i)==dadj[0](j))*gradAdj[j](0,1);
+      grads[i]+= (resultVec(i)==dadj[1](j))*gradAdj[j](2,3);
+      //grads[i] = cond((resultVec(i)==dadj[0](j)), gradAdj[j](0,1), grads[i]);
+      //grads[i] = cond((resultVec(i)==dadj[1](j)), gradAdj[j](2,3), grads[i]);
+    }
+  }
+
+  result(0,1) = c(0)*grads[0] + 
+	  	c(1)*grads[1] +
+		c(2)*grads[2] +
+		c(3)*grads[3];
+  result(2) = dot(resultVec, c);
   return result;
 }
 
