@@ -415,13 +415,9 @@ void ShSchedule::execute(ShStream& out)
   int width = 4, height = 4;
 
   while (width * height < (*out.begin())->count()) {
-    if (width < 2048) {
-      width <<= 1;
-    } else if (height < 2048) {
-      height <<= 1;
-    } else {
-      SH_DEBUG_ASSERT(false);
-    }
+    width <<= 1;
+    if (width * height >= (*out.begin())->count()) break;
+    height <<= 1;
   }
   
   m_backend_data->pre_execution(width, height, out);
