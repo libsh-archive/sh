@@ -46,32 +46,30 @@ namespace ShUtil {
 using namespace SH;
 
 template<typename T>
-ShProgram ShKernelPost::halftone(const ShBaseTexture2D<T> &tex) {
+ShProgram shHalftone(const ShBaseTexture2D<T> &tex) {
   ShProgram kernel = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShInputAttrib1f SH_NAMEDECL(scale, "scaling");
     typename T::InputType SH_NAMEDECL(in, "result");
-    ShInputPosition4f SH_DECL(posh);
+    ShInputTexCoord2f SH_NAMEDECL(tc, "texcoord");
 
     typename T::OutputType SH_NAMEDECL(out, "result");
 
-    ShAttrib2f texcoord = frac(posh(0,1) * scale); 
     // TODO rotate color components...
-    out = in > tex(texcoord);
+    // TODO decide whether this frac should stay
+    out = in > tex(frac(tc));
   } SH_END;
   return kernel;
 }
 
-template<typename T>
-ShProgram ShKernelPost::noisify() {
+template<int N, typename T>
+ShProgram shNoisify(bool useTexture) {
   ShProgram kernel = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShInputAttrib1f SH_DECL(scaling);
-    ShInputAttrib1f SH_DECL(noiseScale);
+    ShInputAttrib1f SH_DECL(noise_scale);
     typename T::InputType SH_NAMEDECL(in, "result");
-    ShInputPosition4f SH_DECL(posh);
+    ShAttrib<N, SH_INPUT, typename T::ValueType> SH_NAMEDECL(tc, "texcoord");
 
     typename T::OutputType SH_NAMEDECL(out, "result");
 
-    out = in + cellnoise<3>(posh(0,1)*scaling)*noiseScale; 
+    out = in + cellnoise<T::typesize>(tc, useTexture)*noise_scale; 
   } SH_END;
   return kernel;
 }

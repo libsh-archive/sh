@@ -43,29 +43,24 @@ namespace ShUtil {
 
 using namespace SH;
 
-class ShKernelPost {
-  public:
-    /** screen space Halftoning/Hatching in each color channel using tex as a threshold image
-     * IN(0) ShAttrib1f scaling   - scaling on posh(0,1) before doing texture lookup
-     * IN(1) T result 
-     * IN(2) ShPosition4f posh    - homogeneous position (HDCS)
-     *
-     * OUT(0) T result            - output result 
-     */
-    template<typename T>
-    static ShProgram halftone(const ShBaseTexture2D<T> &tex);
+/** screen space Halftoning/Hatching in each color channel using tex as a threshold image
+ * IN(0) T result 
+ * IN(1) ShTexcoord2f texcoord
+ *
+ * OUT(0) T result            - output result 
+ */
+template<typename T>
+static ShProgram shHalftone(const ShBaseTexture2D<T> &tex);
 
-    /** screen space noise 
-     * IN(0) ShAttrib1f scaling   - scaling on posh(0,1) before doing noise lookup 
-     * IN(1) ShAttrib1f noiseScale - scaling on cellnoise
-     * IN(1) T result 
-     * IN(0) ShPosition4f posh    - homogeneous position (HDCS)
-     *
-     * OUT(0) T result            - output result 
-     */
-    template<typename T>
-    static ShProgram noisify();
-};
+/** screen space noise 
+ * IN(0) ShAttrib1f noise_scale - scaling on cellnoise
+ * IN(1) T result 
+ * IN(2) ShAttrib<N> texcoord  
+ *
+ * OUT(0) T result            - output result 
+ */
+template<int N, typename T>
+static ShProgram shNoisify(bool useTexture = false);
 
 }
 
