@@ -1,11 +1,120 @@
+2005-01-21  Francois Marier  <francois@serioushack.com>
+
+	* src/ShSyntax.hpp, src/ShSyntax.cpp: Added a new function,
+	shUpdate(), which uploads any textures and uniform parameters
+	which are out-of-date but required on all compilation targets that
+	have any programs bound.
+
+	* src/ShBackend.hpp, backends/gl/ArbCode.cpp,
+	backends/gl/ArbCode.hpp, backends/cc/Cc.cpp, backends/cc/Cc.hpp:
+	The backend code now has an update() method which is called by
+	shUpdate().
+
+2005-01-19  Francois Marier  <francois@serioushack.com>
+
+	* src/ShTextureNode.cpp, src/ShTextureNode.hpp,
+	backends/gl/GlTextures.cpp, backends/gl/PBufferStreams.cpp: Added
+	an option count parameter to the constructor that is used to
+	restrict the copy of non-existing data to texture memory.
+
+	* backends/gl/GlTextureStorage.hpp, GlTextureStorage.cpp: Changed
+	the glTexImage calls to only allocate the necessary space and
+	added glTexSubImage calls to do the actual copying.  Fixes issue151.
+
+2005-01-17  Francois Marier  <francois@serioushack.com>
+
+	* test/regres: Added tests for exp, clamp, frac, sign, max, min,
+	pos, sat and sqrt.
+
+	* test/regress/test.hpp: Prevent the host backend from running
+	stream programs and segfaulting.
+
+	* test/regress/shtest.py, test/regress/test.hpp: Instead of always
+	returning 0, the generated test programs now return 1 if any of
+	the tests failed, 2 on ShErrors and 3 on C++ errors.
+
+2005-01-12  Francois Marier  <francois@serioushack.com>
+
+	* test/regress: Added tests for abs, ceil, dot, floor, mod, pow, 
+	==, !=, >=, >, <=, and <.
+	
+	* test/regress/test.hpp: Renamed "res" to "exp" in the test output
+	to make it clear that the last line refers to expected output.
+
+	* test/regress/shtest.py (Test.output_footer): Prevent compile
+	warning by adding an extra \n at the end of each cpp file that's
+	generated.
+
+	* test/regress/test.cpp: The default backend is set to the
+	SH_REGRESS_BACKEND environment variable if it exists. It's still
+	possible to override this default on the command line.
+
+	* test/regress/Makefile.am: Added a checkall target
+	to run "make check" on all backends.
+	
+2005-01-11  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbCode.cpp (allocParam): Renamed opengl:binding to
+	opengl:state.
+
+2004-12-20  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* examples/binding/*: Small example of using the new
+	"opengl:binding" meta information to bind Sh uniforms to
+	OpenGL state.
+
+2004-12-20  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShMatrixImpl.hpp (internal):  Fix two  variables  with same
+	name to be different.
+
+2004-12-20  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* src/ShMatrix.hpp, src/ShMatrixImpl.hpp: ShMatrix now
+	inherits from ShMeta. Removed the existing name() and internal()
+	methods. Meta information is stored in the ShMatrix class and all
+	meta information is passed along to each internal ShAttrib with
+	a ".row[i]" attached.
+
+	* backends/gl/ArbCode.cpp, backends/gl/ArbReg.cpp,
+	backends/gl/ArbReg.hpp: Added support for explicit OpenGL
+	state binding via "opengl:binding" meta information. Additionally,
+	"opengl:readonly" is also supported.
+
+2004-12-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShSyntax.cpp (shBind): Correct order of arguments in shBind
+	definition.
+
+2004-12-10  Bryan Chan  <b8chan@cgl.uwaterloo.ca
+	
+	* backends/gl/ArbCode.cpp: Fixed unnecessary BRA instruction.
+
+2004-12-01  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShSyntax.hpp (SH_WHILE): Remove spurious backslash.
+
+	* backends/cc/Cc.cpp (CcBackend::execute): Cache programs.
+
+2004-11-30  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+	
+	* backends/cc/CcTextures.hpp (sh_cc_backend_nearest): Fixed the
+	floor bug Nils mentioned.  Fixed some other bugs I just noticed.
+
+	* test/regress/tex.cpp.py: Added tests for above two bugs
+
+	* test/regress/div.cpp.py: Added some integer div tests that may
+	be related to the FOR loop weirdness on GPU.
+
 2004-11-28  Bryan Chan <b8chan@cgl.uwaterloo.ca>
-  * src/ShHashMap.hpp (ShPairHashMap::operator()):
-	Added missing typedef.
+
+	* src/ShHashMap.hpp (ShPairHashMap::operator()): Added missing
+	typedef.
 
 	* src/ShFractionImpl.hpp (cbrt, exp, exp2, exp10):
 	Fixed bug. 
 
-2004-11-28  Bryan Chan <b8chan@cgl.uwaterloo.ca
+2004-11-28  Bryan Chan <b8chan@cgl.uwaterloo.ca>
 	* src/ShUtility.hpp (MatchTemplateType, TemplateParamterType):
 	Added some mildly useful template voodoo. 
 

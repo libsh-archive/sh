@@ -165,6 +165,11 @@ namespace ShCc {
     SH_CC_DEBUG_PRINT(__FUNCTION__);
   }
 
+  void CcBackendCode::update(void) 
+  {
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
+  }
+
   void CcBackendCode::updateUniform(const ShVariableNodePtr& uniform) 
   {
     SH_CC_DEBUG_PRINT(__FUNCTION__);
@@ -703,7 +708,10 @@ namespace ShCc {
   void CcBackend::execute(const ShProgramNodeCPtr& program, ShStream& dest) {
     SH_CC_DEBUG_PRINT(__FUNCTION__);
 
-    CcBackendCodePtr backendcode = new CcBackendCode(program);
+    ShProgramNodePtr prg = shref_const_cast<ShProgramNode>(program);
+    ShPointer<ShBackend> b(this);
+    
+    CcBackendCodePtr backendcode = shref_dynamic_cast<CcBackendCode>(prg->code(b)); // = new CcBackendCode(program);
     backendcode->execute(dest);
   }
 

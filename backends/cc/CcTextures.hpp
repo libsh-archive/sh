@@ -47,7 +47,7 @@
 template<typename T>
 inline int sh_cc_backend_nearest(T value)
 {
-  return (int)(floor(value)); 
+  return (int)(floor(static_cast<double>(value))); 
 }
 
 struct sh_gcc_backend_wrap_clamp
@@ -86,12 +86,12 @@ struct sh_gcc_backend_unclamped
   }
 };
 
-template<int TexDims, int TexSize, int TexWidth, int TexHeight, int TexDepth, 
+template<int TexDims, int TexSize, int TexWidth, int TexHeight, int TexDepth, typename TexType,
   typename SrcWrap, typename DestClamp,
   typename IndexType, typename MemoryType> 
 void sh_cc_backend_lookupi(const void *texture, IndexType *src, MemoryType *dest)
 {
-  const MemoryType* data = reinterpret_cast<const MemoryType *>(texture);
+  const TexType* data = reinterpret_cast<const TexType*>(texture);
   int index = 0;
   if(TexDims == 3) index = SrcWrap::wrap(sh_cc_backend_nearest(src[2]), TexDepth);
   if(TexDims >= 2) index = SrcWrap::wrap(sh_cc_backend_nearest(src[1]), TexHeight) 
@@ -101,11 +101,11 @@ void sh_cc_backend_lookupi(const void *texture, IndexType *src, MemoryType *dest
 
   int start = index * TexSize; 
   for(int i = 0; i < TexSize; ++i) {
-    dest[i] = DestClamp::clamp(data[start + i]); 
+    dest[i] = static_cast<MemoryType>(DestClamp::clamp(data[start + i])); 
   }
 }
 
-template<int TexDims, int TexSize, int TexWidth, int TexHeight, int TexDepth, 
+template<int TexDims, int TexSize, int TexWidth, int TexHeight, int TexDepth, typename TexType,
   typename SrcWrap, typename DestClamp,
   typename IndexType, typename MemoryType> 
 void sh_cc_backend_lookup(const void *texture, IndexType *src, MemoryType *dest)
@@ -115,7 +115,7 @@ void sh_cc_backend_lookup(const void *texture, IndexType *src, MemoryType *dest)
   if(TexDims > 1) scaled_src[1] = TexHeight * src[1];
   if(TexDims > 2) scaled_src[2] = TexDepth * src[2];
 
-  sh_cc_backend_lookupi<TexDims, TexSize, TexWidth, TexHeight, TexDepth, 
+  sh_cc_backend_lookupi<TexDims, TexSize, TexWidth, TexHeight, TexDepth, TexType, 
     SrcWrap, DestClamp>(texture, scaled_src, dest);
 }
 

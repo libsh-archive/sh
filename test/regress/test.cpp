@@ -29,6 +29,8 @@
 Test::Test(int argc, char** argv)
 {
   m_backend = "cc";
+  char *env_var = getenv("SH_REGRESS_BACKEND");
+  if (env_var != NULL) m_backend = env_var;
   if (argc >= 2) m_backend = argv[1];
   if (m_backend != "host") SH::shSetBackend(m_backend);
 }

@@ -109,7 +109,7 @@
   ::SH::shWhile(SH_PUSH_ARG_QUEUE && SH_PUSH_ARG && SH_PROCESS_ARG(cond, &sh__internal_cond)); \
   bool sh__internal_firsttime = true; \
   while ((sh__internal_firsttime && (ShContext::current()->parsing() || sh__internal_cond)) \
-         || (!ShContext::current()->parsing() && ::SH::shEvaluateCondition(cond))) {{{ \
+         || (!ShContext::current()->parsing() && ::SH::shEvaluateCondition(cond))) {{{
 /** \def SH_ENDWHILE
  * Indicate the end of a while-statement.
  * @see SH_WHILE
@@ -277,6 +277,12 @@ void shBindShader(ShProgram& shader);
 /// \deprecated Use shBind() instead.
 SH_DLLEXPORT
 void shBindShader(const std::string& target, ShProgram& shader);
+
+/// Upload any textures and uniform parameters which are out-of-date
+/// but required on all compilation targets that have any programs
+/// bound
+SH_DLLEXPORT
+void shUpdate();
 
 /// Switch to a particular backend
 SH_DLLEXPORT

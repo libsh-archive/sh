@@ -324,11 +324,21 @@ void ArbCode::bind()
   bindTextures();
 }
 
+void ArbCode::update()
+{
+  bindTextures();
+}
+
 void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
 {
   int i;
 
   if (!uniform) return;
+
+  if (!uniform->meta("opengl:readonly").empty())
+    {
+    return;
+    }
 
   ShVariantCPtr uniformVariant = uniform->getVariant();
   RegMap::const_iterator I = m_registers.find(uniform);
@@ -374,13 +384,15 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
   }
   
   if (reg.type != SH_ARB_REG_PARAM) return;
-  switch(reg.binding) {
-  case SH_ARB_REG_PARAMLOC:
-    SH_GL_CHECK_ERROR(shGlProgramLocalParameter4fvARB(arbTarget(m_unit), reg.bindingIndex, values));
+  switch(reg.binding.type) {
+  case SH_ARB_REG_PROGRAMLOC:
+    SH_GL_CHECK_ERROR(shGlProgramLocalParameter4fvARB(arbTarget(m_unit), reg.binding.index, values));
     break;
-  case SH_ARB_REG_PARAMENV:
-    SH_GL_CHECK_ERROR(shGlProgramEnvParameter4fvARB(arbTarget(m_unit), reg.bindingIndex, values));
+  case SH_ARB_REG_PROGRAMENV:
+    SH_GL_CHECK_ERROR(shGlProgramEnvParameter4fvARB(arbTarget(m_unit), reg.binding.index, values));
     break;
+  case SH_ARB_REG_STATE:
+    SH_DEBUG_WARN("Updating uniforms bound to OpenGL state is not currently supported.");
   default:
     return;
   }
@@ -720,7 +732,9 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
 	I != node->successors.end(); I++) {
       m_instructions.push_back(ArbInst(SH_ARB_BRA, getLabel(I->node), I->cond));
     }
-    m_instructions.push_back(ArbInst(SH_ARB_BRA, getLabel(node->follower)));
+    if(!node->successors.empty() || node->follower->marked()) { // else it's next anyway, no need for bra
+      m_instructions.push_back(ArbInst(SH_ARB_BRA, getLabel(node->follower)));
+    }
     for(std::vector<SH::ShCtrlGraphBranch>::iterator I = node->successors.begin();
 	I != node->successors.end(); I++) {
       genNode(I->node);
@@ -875,8 +889,8 @@ void ArbCode::bindSpecial(const ShProgramNode::VarList::const_iterator& begin,
     if (node->specialType() != specs.semanticType) continue;
     
     m_registers[node] = new ArbReg(type, num++, node->name());
-    m_registers[node]->binding = specs.binding;
-    m_registers[node]->bindingIndex = bindings.back();
+    m_registers[node]->binding.type = specs.binding;
+    m_registers[node]->binding.index = bindings.back();
     m_reglist.push_back(m_registers[node]);
     
     bindings.back()++;
@@ -905,8 +919,8 @@ void ArbCode::allocInputs(const ArbLimits& limits)
       const ArbBindingSpecs& specs = arbBindingSpecs(false, m_unit)[i];
 
       if (specs.allowGeneric && m_inputBindings[i] < specs.maxBindings) {
-        m_registers[node]->binding = specs.binding;
-        m_registers[node]->bindingIndex = m_inputBindings[i];
+        m_registers[node]->binding.type = specs.binding;
+        m_registers[node]->binding.index = m_inputBindings[i];
         m_inputBindings[i]++;
         break;
       }
@@ -935,8 +949,8 @@ void ArbCode::allocOutputs(const ArbLimits& limits)
       const ArbBindingSpecs& specs = arbBindingSpecs(true, m_unit)[i];
 
       if (specs.allowGeneric && m_outputBindings[i] < specs.maxBindings) {
-        m_registers[node]->binding = specs.binding;
-        m_registers[node]->bindingIndex = m_outputBindings[i];
+        m_registers[node]->binding.type = specs.binding;
+        m_registers[node]->binding.index = m_outputBindings[i];
         m_outputBindings[i]++;
         break;
       }
@@ -948,12 +962,22 @@ void ArbCode::allocParam(const ArbLimits& limits, const ShVariableNodePtr& node)
 {
   // TODO: Check if we reached maximum
   if (m_registers.find(node) != m_registers.end()) return;
+
   m_registers[node] = new ArbReg(SH_ARB_REG_PARAM, m_numParams, node->name());
-  m_registers[node]->binding = SH_ARB_REG_PARAMLOC;
-  m_registers[node]->bindingIndex = m_numParamBindings;
+
+  if (!node->meta("opengl:state").empty())
+    {
+    m_registers[node]->binding.type = SH_ARB_REG_STATE;
+    m_registers[node]->binding.name = node->meta("opengl:state");
+    } 
+  else
+    {
+    m_registers[node]->binding.type = SH_ARB_REG_PROGRAMLOC;
+    m_registers[node]->binding.index = m_numParamBindings++;
+    }
+
   m_reglist.push_back(m_registers[node]);
   m_numParams++;
-  m_numParamBindings++;
 }
 
 void ArbCode::allocPalette(const ArbLimits& limits, const ShPaletteNodePtr& palette)
@@ -961,9 +985,9 @@ void ArbCode::allocPalette(const ArbLimits& limits, const ShPaletteNodePtr& pale
   if (m_registers.find(palette) != m_registers.end()) return;
 
   m_registers[palette] = new ArbReg(SH_ARB_REG_PARAM, m_numParams, palette->name());
-  m_registers[palette]->binding = SH_ARB_REG_PARAMLOC;
-  m_registers[palette]->bindingIndex = m_numParamBindings;
-  m_registers[palette]->bindingCount = palette->palette_length();
+  m_registers[palette]->binding.type = SH_ARB_REG_PROGRAMLOC;
+  m_registers[palette]->binding.index = m_numParamBindings;
+  m_registers[palette]->binding.count = palette->palette_length();
   m_reglist.push_back(m_registers[palette]);
   m_numParams++;
   
@@ -971,8 +995,8 @@ void ArbCode::allocPalette(const ArbLimits& limits, const ShPaletteNodePtr& pale
     ShVariableNodePtr node = palette->get_node(i);
     SH_DEBUG_ASSERT(m_registers.find(node) == m_registers.end());
     m_registers[node] = new ArbReg(SH_ARB_REG_PARAM, m_numParams + i, node->name());
-    m_registers[node]->binding = SH_ARB_REG_PARAMLOC;
-    m_registers[node]->bindingIndex = m_numParamBindings + i;
+    m_registers[node]->binding.type = SH_ARB_REG_PROGRAMLOC;
+    m_registers[node]->binding.index = m_numParamBindings + i;
     m_reglist.push_back(m_registers[node]);
   }
 
@@ -999,7 +1023,7 @@ void ArbCode::allocConsts(const ArbLimits& limits)
       int f = 0;
       // TODO handle other stuff
       for (int i = 0; i < node->size(); i++) {
-        if (J->second->values[i] == (*variant)[i]) f++;
+        if (J->second->binding.values[i] == (*variant)[i]) f++;
       }
       if (f == node->size()) break;
     }
@@ -1007,7 +1031,7 @@ void ArbCode::allocConsts(const ArbLimits& limits)
       m_registers[node] = new ArbReg(SH_ARB_REG_CONST, m_numConsts, node->name());
       m_reglist.push_back(m_registers[node]);
       for (int i = 0; i < 4; i++) {
-        m_registers[node]->values[i] = (float)(i < node->size() ? (*variant)[i] : 0.0);
+        m_registers[node]->binding.values[i] = (float)(i < node->size() ? (*variant)[i] : 0.0);
       }
       m_numConsts++;
     } else {
