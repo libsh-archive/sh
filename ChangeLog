@@ -1,5 +1,16 @@
 2004-07-05  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/scripts/semantic.py (Class.modifying): Add operator%=.
+	(Impl.modifying): Implemented operator%=. Resolves other half of issue45.
+
+	* src/ShGenericImpl.hpp (operator%): Implemented operator%=.
+
+	* src/ShGeneric.hpp (class ShGeneric): Add operator%=.
+
+	* src/ShLibClampImpl.hpp: Implemented operator%. Resolves half of issue45.
+
+	* src/ShLibClamp.hpp: Added operator%.
+
 	* src/ShInterp.hpp: Added ShInterp<L> texture trait wrapper
 	template. Resolves issue38.
 

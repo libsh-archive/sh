@@ -62,6 +62,25 @@ ShGeneric<1, T> mod(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right)
 
 template<int N, typename T>
 inline
+ShGeneric<N, T> operator%(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
+{
+  return mod(left, right);
+}
+template<int N, typename T>
+inline
+ShGeneric<N, T> operator%(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right)
+{
+  return mod(left, right);
+}
+template<typename T>
+inline
+ShGeneric<1, T> operator%(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right)
+{
+  return mod(left, right);
+}
+
+template<int N, typename T>
+inline
 ShGeneric<N, T> frac(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;

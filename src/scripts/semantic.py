@@ -95,17 +95,19 @@ public:""")
                        self.name + "& operator=(const " + self.name + "<" + self.sizevar(size) + ", Binding, T, Swizzled>& other);\n")
 
     def modifying(self, size):
-        # TODO: Scalar op* and op/
         common.inprint(self.name + "& operator+=(const ShGeneric<" + self.sizevar(size) + ", T>& right);")
         common.inprint(self.name + "& operator-=(const ShGeneric<" + self.sizevar(size) + ", T>& right);")
         common.inprint(self.name + "& operator*=(const ShGeneric<" + self.sizevar(size) + ", T>& right);")
         common.inprint(self.name + "& operator/=(const ShGeneric<" + self.sizevar(size) + ", T>& right);")
+        common.inprint(self.name + "& operator%=(const ShGeneric<" + self.sizevar(size) + ", T>& right);")
         
         common.inprint(self.name + "& operator*=(T);")
         common.inprint(self.name + "& operator/=(T);")
+        common.inprint(self.name + "& operator%=(T);")
         if size != 1:
             common.inprint(self.name + "& operator*=(const ShGeneric<1, T>&);")
             common.inprint(self.name + "& operator/=(const ShGeneric<1, T>&);")
+            common.inprint(self.name + "& operator%=(const ShGeneric<1, T>&);")
         else:
             common.inprint(self.name + "& operator+=(T);")
             common.inprint(self.name + "& operator-=(T);")
@@ -261,12 +263,15 @@ class Impl:
         self.assign("operator-=", [["const ShGeneric<" + s + ", T>&", "right"]], size)
         self.assign("operator*=", [["const ShGeneric<" + s + ", T>&", "right"]], size)
         self.assign("operator/=", [["const ShGeneric<" + s + ", T>&", "right"]], size)
+        self.assign("operator%=", [["const ShGeneric<" + s + ", T>&", "right"]], size)
 
         self.assign("operator*=", [["T", "right"]], size)
         self.assign("operator/=", [["T", "right"]], size)
+        self.assign("operator%=", [["T", "right"]], size)
         if size != 1:
             self.assign("operator*=", [["const ShGeneric<1, T>&", "right"]], size)
             self.assign("operator/=", [["const ShGeneric<1, T>&", "right"]], size)
+            self.assign("operator%=", [["const ShGeneric<1, T>&", "right"]], size)
         else:
             self.assign("operator+=", [["T", "right"]], size)
             self.assign("operator-=", [["T", "right"]], size)

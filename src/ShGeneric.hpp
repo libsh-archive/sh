@@ -68,10 +68,13 @@ public:
   ShGeneric& operator-=(const ShGeneric& right);
   ShGeneric& operator*=(const ShGeneric& right);
   ShGeneric& operator/=(const ShGeneric& right);
+  ShGeneric& operator%=(const ShGeneric& right);
   ShGeneric& operator*=(const ShGeneric<1, T>& right);
   ShGeneric& operator/=(const ShGeneric<1, T>& right);
+  ShGeneric& operator%=(const ShGeneric<1, T>& right);
   ShGeneric& operator*=(T);
   ShGeneric& operator/=(T);
+  ShGeneric& operator%=(T);
 
   ShGeneric operator-() const;
 
@@ -106,10 +109,12 @@ public:
   ShGeneric& operator-=(const ShGeneric& right);
   ShGeneric& operator*=(const ShGeneric& right);
   ShGeneric& operator/=(const ShGeneric& right);
+  ShGeneric& operator%=(const ShGeneric& right);
   ShGeneric& operator+=(T);
   ShGeneric& operator-=(T);
   ShGeneric& operator*=(T);
   ShGeneric& operator/=(T);
+  ShGeneric& operator%=(T);
 
   ShGeneric operator-() const;
 
