@@ -1,31 +1,42 @@
+2004-11-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShSyntax.cpp: Small changes for immediate-mode control flow.
+
+	* src/ShSyntax.hpp: Allow immediate-mode use of control flow
+	statements.
+
 2004-11-16  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShBackend.cpp: Remove spurious debug statements.
 
 2004-11-12  Bryan Chan <b8chan@cgl.uwaterloo.ca>
-        * src/ShInternals.cpp (operator()(ShCtrlGraphNodePtr)): 
-	  Fixed VarReplacer so it replaces the ShVariable in branch conditions as well
-	    as the block.
-  
-2004-11-11  Bryan Chan <b8chan@cgl.uwaterloo.ca>
-  * backends/gl/ArbCode.cpp (print):
-  Fixed some bugs printing out half temp registers.
-  
-2004-11-09  Bryan Chan <b8chan@cgl.uwaterloo.ca>
-  * backends/cc/Cc.cpp, CcTextures.hpp:
-  Checked in the wrong version of these files
-	
-  * util/ShFunc.hpp, ShWorley.hpp ShNoise.hpp:
-  hid some function declarations from the compiler
 
-  * win32.mk:
-  Fixed error. 
+	* src/ShInternals.cpp (operator()(ShCtrlGraphNodePtr)): Fixed
+	  VarReplacer so it replaces the ShVariable in branch conditions
+	  as well as the block.
+	      
+2004-11-11  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+
+	* backends/gl/ArbCode.cpp (print):
+	  Fixed	some bugs printing out half temp registers.
+	  
+2004-11-09  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+
+	* backends/cc/Cc.cpp, CcTextures.hpp: Checked in the wrong version
+	of these files
+
+	* util/ShFunc.hpp, ShWorley.hpp ShNoise.hpp: hid some function
+	declarations from the compiler
+
+	* win32.mk: Fixed error.
 
 2004-11-08  Bryan Chan <b8chan@cgl.uwaterloo.ca>
-  Merged arithmetic r1672 into main branch
+
+	Merged arithmetic r1672 into main branch
   
 2004-11-07  Bryan Chan <b8chan@cgl.uwaterloo.ca>
-  Merged in trunk up to r1671. 
+
+	Merged in trunk up to r1671. 
 
 	* src/ShTypeInfo.hpp (ShCommonType):
 	Fixed bad template params caught by gcc 3.4
