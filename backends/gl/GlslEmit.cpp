@@ -340,9 +340,6 @@ void GlslCode::emit_logic(const ShStatement& stmt)
 
   // TODO: cache these mappings
   
-  string s = glsl_typename(stmt.dest.valueType(), stmt.dest.size()) + "(" + string(mapping.code) + ")";
-  mapping.code = s.c_str();
-
   table_substitution(stmt, mapping);
 }
 

@@ -1,3 +1,12 @@
+2005-03-31  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslCode.cpp (gen_structural_node): Removed
+	unnecessary if statement in while loops by duplicating the
+	condition evaluation code.
+
+	* backends/gl/GlslEmit.cpp (emit_logic): Removed duplicate cast to
+	the destination variable's type and size.
+
 2005-03-30  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslEmit.cpp (table_substitution): Properly cast all
