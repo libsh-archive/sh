@@ -57,6 +57,8 @@ PFNGLGETPROGRAMIVARBPROC glGetProgramivARB = NULL;
 #include "ShVariable.hpp"
 #include "ShDebug.hpp"
 #include "ShLinearAllocator.hpp"
+#include "ShInternals.hpp"
+#include "ShOptimizer.hpp"
 #include "ShEnvironment.hpp"
 #include "ShTextureNode.hpp"
 #include "ShSyntax.hpp"
@@ -238,7 +240,7 @@ using namespace SH;
 static SH::ShRefCount<ArbBackend> instance = new ArbBackend();
 
 ArbCode::ArbCode(ArbBackendPtr backend, const ShProgram& shader, const std::string& target)
-  : m_backend(backend), m_shader(shader), m_target(target),
+  : m_backend(backend), m_shader(shader), m_originalShader(m_shader), m_target(target),
     m_numTemps(0), m_numInputs(0), m_numOutputs(0), m_numParams(0), m_numConsts(0),
     m_numTextures(0), m_programId(0)
 {
@@ -250,6 +252,23 @@ ArbCode::~ArbCode()
 
 void ArbCode::generate()
 {
+  // Transform code to be ARB_fragment_program compatible
+  m_shader = cloneProgram(m_originalShader);
+  ShEnvironment::shader = m_shader;
+  ShTransformer transform(m_shader);
+
+  transform.convertInputOutput(); 
+  transform.splitTuples(4, m_splits);
+  
+  if(transform.changed()) {
+    ShOptimizer optimizer(m_shader->ctrlGraph);
+    optimizer.optimize(ShEnvironment::optimizationLevel);
+    m_shader->collectVariables();
+  } else {
+    m_shader = m_originalShader;
+    ShEnvironment::shader = m_shader;
+  }
+
   m_shader->ctrlGraph->entry()->clearMarked();
   genNode(m_shader->ctrlGraph->entry());
   m_shader->ctrlGraph->entry()->clearMarked();
@@ -322,7 +341,7 @@ void ArbCode::bind()
   
   shGlBindProgramARB(shArbTarget(m_target), m_programId);
   
-  SH::ShEnvironment::boundShaders()[m_target] = m_shader;
+  SH::ShEnvironment::boundShaders()[m_target] = m_originalShader; 
 
   // Initialize constants
   for (RegMap::const_iterator I = m_registers.begin(); I != m_registers.end(); ++I) {
@@ -339,10 +358,25 @@ void ArbCode::bind()
 
 void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
 {
+  int i;
+
   if (!uniform) return;
 
   RegMap::const_iterator I = m_registers.find(uniform);
-  if (I == m_registers.end()) return;
+  if (I == m_registers.end()) { // perhaps uniform was split
+    if( m_splits.count(uniform) > 0 ) {
+      ShTransformer::VarNodeVec &splitVec = m_splits[uniform];
+      int offset = 0;
+      for(ShTransformer::VarNodeVec::iterator it = splitVec.begin();
+          it != splitVec.end(); offset += (*it)->size(), ++it) {
+        for(i = 0; i < (*it)->size(); ++i) {
+          (*it)->setValue(i, uniform->getValue(i + offset));
+        }
+        updateUniform(*it);
+      }
+    } 
+    return;
+  }
 
   ShTextureNodePtr tex = shref_dynamic_cast<ShTextureNode>(uniform);
   if (tex) {
@@ -352,7 +386,6 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
   const ArbReg& reg = I->second;
   
   float values[4];
-  int i;
   for (i = 0; i < uniform->size(); i++) {
     values[i] = (float)uniform->getValue(i);
   }
@@ -527,6 +560,24 @@ std::ostream& ArbCode::print(std::ostream& out)
   }
 
   out << "END" << endl;
+  return out;
+}
+
+std::ostream& ArbCode::printInputOutputFormat(std::ostream& out) {
+  ShProgramNode::VarList::const_iterator I;
+  out << "Inputs:" << std::endl;
+  for (I = m_shader->inputs.begin(); I != m_shader->inputs.end(); ++I) {
+    out << "  ";
+    m_registers[*I].printDecl(out);
+    out << std::endl;
+  }
+
+  out << "Outputs:" << std::endl;
+  for (I = m_shader->outputs.begin(); I != m_shader->outputs.end(); ++I) {
+    out << "  ";
+    m_registers[*I].printDecl(out);
+    out << std::endl;
+  }
   return out;
 }
 
@@ -1010,7 +1061,7 @@ void ArbCode::bindSpecial(const ShProgramNode::VarList::const_iterator& begin,
     if (m_registers.find(node) != m_registers.end()) continue;
     if (node->specialType() != specs.specialType) continue;
     
-    m_registers[node] = ArbReg(type, num++);
+    m_registers[node] = ArbReg(type, num++, node->name());
     m_registers[node].binding = specs.binding;
     m_registers[node].bindingIndex = bindings.back();
     
@@ -1032,7 +1083,7 @@ void ArbCode::allocInputs()
        I != m_shader->inputs.end(); ++I) {
     ShVariableNodePtr node = *I;
     if (m_registers.find(node) != m_registers.end()) continue;
-    m_registers[node] = ArbReg(SH_ARB_REG_ATTRIB, m_numInputs++);
+    m_registers[node] = ArbReg(SH_ARB_REG_ATTRIB, m_numInputs++, node->name());
 
     // Binding
     for (int i = 0; shArbBindingSpecs(false, m_target)[i].binding != SH_ARB_REG_NONE; i++) {
@@ -1061,7 +1112,7 @@ void ArbCode::allocOutputs()
        I != m_shader->outputs.end(); ++I) {
     ShVariableNodePtr node = *I;
     if (m_registers.find(node) != m_registers.end()) continue;
-    m_registers[node] = ArbReg(SH_ARB_REG_OUTPUT, m_numOutputs++);
+    m_registers[node] = ArbReg(SH_ARB_REG_OUTPUT, m_numOutputs++, node->name());
 
     // Binding
     for (int i = 0; shArbBindingSpecs(true, m_target)[i].binding != SH_ARB_REG_NONE; i++) {
@@ -1081,7 +1132,7 @@ void ArbCode::allocParam(ShVariableNodePtr node)
 {
   // TODO: Check if we reached maximum
   if (m_registers.find(node) != m_registers.end()) return;
-  m_registers[node] = ArbReg(SH_ARB_REG_PARAM, m_numParams);
+  m_registers[node] = ArbReg(SH_ARB_REG_PARAM, m_numParams, node->name());
   m_registers[node].binding = SH_ARB_REG_PARAMLOC;
   m_registers[node].bindingIndex = m_numParams;
   m_numParams++;
@@ -1092,7 +1143,7 @@ void ArbCode::allocConsts()
   for (ShProgramNode::VarList::const_iterator I = m_shader->constants.begin();
        I != m_shader->constants.end(); ++I) {
     ShVariableNodePtr node = *I;
-    m_registers[node] = ArbReg(SH_ARB_REG_CONST, m_numConsts);
+    m_registers[node] = ArbReg(SH_ARB_REG_CONST, m_numConsts, node->name());
     for (int i = 0; i < 4; i++) {
       m_registers[node].values[i] = (float)(i < node->size() ? node->getValue(i) : 0.0);
     }
@@ -1190,20 +1241,12 @@ std::string ArbBackend::name() const
   return "arb";
 }
 
-ShBackendCodePtr ArbBackend::compile(const std::string& target, const ShProgram& shader)
+ShBackendCodePtr ArbBackend::generateCode(const std::string& target, const ShProgram& shader)
 {
   SH_DEBUG_ASSERT(shader.object());
   ArbCodePtr code = new ArbCode(this, shader, target);
   code->generate();
   return code;
 }
-
-int ArbBackend::getCapability(ShBackendCapability sbc) {
-  switch( sbc ) {
-    case SH_BACKEND_USE_INPUT_DEST: return 0;
-    case SH_BACKEND_USE_OUTPUT_SRC: return 0;
-    case SH_BACKEND_MAX_TUPLE: return 4;
-  }
-}                                                                              
 
 }

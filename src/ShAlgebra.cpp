@@ -46,9 +46,7 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   ShCtrlGraphPtr new_graph = new ShCtrlGraph(heada, tailb);
   program->ctrlGraph = new_graph;
 
-  for (ShProgramNode::VarList::const_iterator II = a->inputs.begin(); II != a->inputs.end(); ++II) {
-    program->inputs.push_back(*II);
-  }
+  program->inputs = a->inputs;
 
 // push back extra inputs from b if aosize < bisize
   if(aosize < bisize) {
@@ -58,10 +56,7 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
       program->inputs.push_back(*II);
     }
   }
-
-  for (ShProgramNode::VarList::const_iterator II = b->outputs.begin(); II != b->outputs.end(); ++II) {
-    program->outputs.push_back(*II);
-  }
+  program->outputs = b->outputs;
 
   // push back extra outputs from a if aosize > bisize
   if(aosize > bisize) { 
@@ -171,18 +166,10 @@ ShProgram combine(const ShProgram& a, const ShProgram& b)
   ShCtrlGraphPtr new_graph = new ShCtrlGraph(heada, tailb);
   program->ctrlGraph = new_graph;
 
-  for (ShProgramNode::VarList::const_iterator I = a->inputs.begin(); I != a->inputs.end(); ++I) {
-    program->inputs.push_back(*I);
-  }
-  for (ShProgramNode::VarList::const_iterator I = a->outputs.begin(); I != a->outputs.end(); ++I) {
-    program->outputs.push_back(*I);
-  }
-  for (ShProgramNode::VarList::const_iterator I = b->inputs.begin(); I != b->inputs.end(); ++I) {
-    program->inputs.push_back(*I);
-  }
-  for (ShProgramNode::VarList::const_iterator I = b->outputs.begin(); I != b->outputs.end(); ++I) {
-    program->outputs.push_back(*I);
-  }
+  program->inputs = a->inputs;
+  program->inputs.insert(program->inputs.end(), b->inputs.begin(), b->inputs.end());
+  program->outputs = a->outputs;
+  program->outputs.insert(program->outputs.end(), b->outputs.begin(), b->outputs.end());
 
   ShOptimizer optimizer(program->ctrlGraph);
   optimizer.optimize(ShEnvironment::optimizationLevel); 
@@ -289,21 +276,7 @@ ShProgram replaceUniform(const ShProgram& a, const ShVariable& v)
     ShError(ShAlgebraException("Cannot replace non-uniform variable"));
   }
 
-  ShProgram program = new ShProgramNode(a->target());
-
-  ShCtrlGraphNodePtr heada, taila;
-  
-  copyCtrlGraph(a->ctrlGraph->entry(), a->ctrlGraph->exit(), heada, taila);
-
-  ShCtrlGraphPtr new_graph = new ShCtrlGraph(heada, taila);
-  program->ctrlGraph = new_graph;
-
-  for (ShProgramNode::VarList::const_iterator II = a->inputs.begin(); II != a->inputs.end(); ++II) {
-    program->inputs.push_back(*II);
-  }
-  for (ShProgramNode::VarList::const_iterator II = a->outputs.begin(); II != a->outputs.end(); ++II) {
-    program->outputs.push_back(*II);
-  }
+  ShProgram program = cloneProgram(a); 
   
   ShVariableReplacer::VarMap varMap;
 

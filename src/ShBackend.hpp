@@ -38,12 +38,6 @@ namespace SH  {
 
 class ShStream;
 
-enum ShBackendCapability {
-  SH_BACKEND_USE_INPUT_DEST, //< 0 iff not supported (default 1)
-  SH_BACKEND_USE_OUTPUT_SRC, //< 0 iff not supported (default 1)
-  SH_BACKEND_MAX_TUPLE //< 0 if no max tuple length (default 0)
-};
-
 class ShBackendCode : public ShRefCountable {
 public:
   virtual ~ShBackendCode();
@@ -67,24 +61,28 @@ public:
   virtual void updateUniform(const ShVariableNodePtr& uniform) = 0;
 
   virtual std::ostream& print(std::ostream& out) = 0;
+
+  /// Prints input and output specification in target-specific format
+  // (Useful for how to format long tuple input on targets 
+  // that only support limited tuple lengths) 
+  virtual std::ostream& printInputOutputFormat(std::ostream& out) = 0;
 };
 
 typedef ShRefCount<ShBackendCode> ShBackendCodePtr;
 
+class ShTransformer;
 class ShBackend : public ShRefCountable {
 public:
   virtual ~ShBackend();
   virtual std::string name() const = 0;
 
-  /// Generate the backend code for a particular shader.
-  // This performs applies backend-specific ShTransformer transformations
-  // on a copy of the shader's control graph, re-optimizes if necessary,
-  // and then pases the updated shader to the virtual compile function.
-  ShBackendCodePtr generateCode(const std::string& target, const ShProgram& shader);
+  /// Generate the backend code for a particular shader. Ensure that
+  /// ShEnvironment::shader is the same as shader before calling this,
+  /// since extra variables may be declared inside this function!
+  virtual ShBackendCodePtr generateCode(const std::string& target, const ShProgram& shader) = 0;
 
   // execute a stream program, if supported
   virtual void execute(const ShProgram& program, ShStream& dest) = 0;
-  virtual int getCapability(ShBackendCapability sbc); // returns default values
   
   typedef std::vector< ShRefCount<ShBackend> > ShBackendList;
 
@@ -99,11 +97,6 @@ protected:
 private:
   static void init();
 
-  /// Generate the backend code for a particular shader. Ensure that
-  /// ShEnvironment::shader is the same as shader before calling this,
-  /// since extra variables may be declared inside this function!
-  virtual ShBackendCodePtr compile(const std::string& target, const ShProgram& shader) = 0;
-  
   static ShBackendList* m_backends;
   static bool m_doneInit;
 };

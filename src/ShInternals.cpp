@@ -101,6 +101,17 @@ void copyCtrlGraph(ShCtrlGraphNodePtr head, ShCtrlGraphNodePtr tail,
   head->clearMarked();
 }
 
+ShProgram cloneProgram(ShProgram p) {
+  ShCtrlGraphNodePtr head, tail;
+  copyCtrlGraph(p->ctrlGraph->entry(), p->ctrlGraph->exit(), head, tail);
+
+  ShProgram result = new ShProgramNode(p->target());
+  result->ctrlGraph = new ShCtrlGraph(head, tail);
+  result->inputs = p->inputs;
+  result->outputs = p->outputs;
+  return result;
+}
+
 }
 
 

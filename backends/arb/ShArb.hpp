@@ -36,6 +36,7 @@
 #include "ShRefCount.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShTextureNode.hpp"
+#include "ShTransformer.hpp"
 
 namespace ShArb {
 
@@ -70,6 +71,7 @@ public:
   virtual void updateUniform(const SH::ShVariableNodePtr& uniform);
   
   std::ostream& print(std::ostream& out);
+  std::ostream& printInputOutputFormat(std::ostream& out);
 
   /// Actually generate the code, and do register allocation.
   void generate();
@@ -135,7 +137,8 @@ private:
   bool printSamplingInstruction(std::ostream& out, const ArbInst& inst) const;
   
   SH::ShRefCount<ArbBackend> m_backend;
-  SH::ShProgram m_shader;
+  SH::ShProgram m_shader; // internally visible shader ShTransformered to fit this target (ARB)
+  SH::ShProgram m_originalShader; // original shader (should alway use this for external (e.g. globals))
   std::string m_target;
 
   typedef std::vector<ArbInst> ArbInstList;
@@ -168,6 +171,9 @@ private:
   std::vector<int> m_outputBindings;
   std::vector<int> m_inputBindings;
 
+  /// The long tuple splits applied to this shader before compilation.
+  SH::ShTransformer::VarSplitMap m_splits;
+
   /// ARB Program ID we are bound to. 0 if code hasn't been uploaded yet.
   unsigned int m_programId;
 };
@@ -181,7 +187,7 @@ public:
   
   std::string name() const;
 
-  SH::ShBackendCodePtr compile(const std::string& kind, const SH::ShProgram& shader);
+  SH::ShBackendCodePtr generateCode(const std::string& kind, const SH::ShProgram& shader);
 
   int instrs(const std::string& target) { return m_instrs[target]; }
   int temps(const std::string& target) { return m_temps[target]; }
@@ -190,7 +196,6 @@ public:
   int texs(const std::string& target) { return m_texs[target]; }
 
   void execute(const SH::ShProgram& program, SH::ShStream& dest);
-  int getCapability(SH::ShBackendCapability sbc); 
   
 private:
   class GlExtensions {
@@ -256,10 +261,11 @@ enum ShArbRegBinding {
  */
 struct ArbReg {
   ArbReg();
-  ArbReg(ShArbRegType type, int index);
+  ArbReg(ShArbRegType type, int index, std::string name = "");
 
   ShArbRegType type;
   int index;
+  std::string name; //< variable name (if any) associated with the register
 
   union {
     struct {

@@ -52,12 +52,12 @@ struct {
 };
 
 ArbReg::ArbReg()
-  : type(SH_ARB_REG_TEMP), index(-1), binding(SH_ARB_REG_NONE), bindingIndex(-1)
+  : type(SH_ARB_REG_TEMP), index(-1), name(""), binding(SH_ARB_REG_NONE), bindingIndex(-1)
 {
 }
   
-ArbReg::ArbReg(ShArbRegType type, int index)
-  : type(type), index(index), binding(SH_ARB_REG_NONE), bindingIndex(-1)
+ArbReg::ArbReg(ShArbRegType type, int index, std::string name)
+  : type(type), index(index), name(name), binding(SH_ARB_REG_NONE), bindingIndex(-1) 
 {
 }
 
@@ -78,7 +78,8 @@ std::ostream& ArbReg::printDecl(std::ostream& out) const
       out << "[" << bindingIndex << "]";
     }
   }
-  out << ";";
+  out << ";"; 
+  if(!name.empty() && type != SH_ARB_REG_CONST) out << " # " << name;
   return out;
 }
 

@@ -61,6 +61,11 @@ public:
   /// it has been compiled previously. Use code() to obtain the actual code.
   void compile(const std::string& target, const ShRefCount<ShBackend>& backend);
   
+  /// Obtain the code for currently active backend. 
+  /// This operation will fail if this program does not have a
+  /// particular target.
+  ShRefCount<ShBackendCode> code(); 
+  
   /// Obtain the code for a particular backend. Generates it if necessary.
   /// This operation will fail if this program does not have a
   /// particular target.

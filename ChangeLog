@@ -1,3 +1,18 @@
+2004-02-15  Bryan Chan <b8chan@uwaterloo.ca>
+	* src/ShAlgebra.cpp (connect,combine):
+	Small cleanups to use STL list ops for copying inputs/outputs
+	Factored out cloneProgram(ShProgram) to ShInternals.hpp
+
+	* src/ShTransformer.?pp, src/ShBackend.?pp, src/ShProgram.cpp,
+	  backends/arb/ShArb.?pp, backends/sm/ShSmBackend.?pp
+	Cleaned up ShTransformer work.
+	Added split input/output/inout and uniform transformations.
+
+	* backends/ShArb.cpp (updateUniform): added split uniform support
+	
+	* src/ShOptimizer.cpp (solveReachDefs):
+	Fixed bug (not clearing m_defNodes)
+	
 2004-02-13  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* Added the new memory management/texture management code. Too

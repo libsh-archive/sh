@@ -3,8 +3,8 @@
 //ShEnvironment::optimizationLevel = 0;
 float c1val[] = { 0, -1, -2, -3, -4, -5, -6 };
 ShConstant<7, float> c1( c1val );
-ShProgram shader = SH_BEGIN_FRAGMENT_PROGRAM {
-  ShInputAttrib1f SH_DECL(in); 
+ShProgram shader = SH_BEGIN_VERTEX_PROGRAM {
+  ShNormal<7, SH_INPUT, float> SH_DECL(in); 
   ShOutputAttrib1f SH_DECL(out); 
 
   ShAttrib<6, SH_TEMP, float> SH_DECL(foo1);

@@ -1,5 +1,8 @@
+#define GL_GLEXT_LEGACY
 #include <GL/gl.h>
 #include <GL/glext.h>
+#undef GL_GLEXT_LEGACY
+
 #include "ShArb.hpp"
 #include "ShArbMemory.hpp"
 #include "ShDebug.hpp"
@@ -182,7 +185,7 @@ void ArbCode::allocTextures()
     ShTextureNodePtr node = *I;
     int index;
     index = m_numTextures;
-    m_registers[node] = ArbReg(SH_ARB_REG_TEXTURE, index);
+    m_registers[node] = ArbReg(SH_ARB_REG_TEXTURE, index, node->name());
     m_numTextures++;
   }
 }

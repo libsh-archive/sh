@@ -61,15 +61,20 @@ OPTIMIZER:
  X control flow graph optimizations
  X Run the optimizations more than once as necessary.
  X Don't run the optimizer twice in connect(), once the previous item is done.
- / Replace outputs used as src and inputs used as dest by temps 
-   (find out why we need to straighten in between)
+ - Do dead code on inputs/outputs/inouts (currently only does temps)
  - constant folding
  - algebraic simplification
  - refactor some of the optimizer code, in particular uddu chains
  - improve uddu chain algorithm by using bitsets to keep track of tuple element writes
 
+TRANSFORMER:
+ X Replace inputs/outputs in computation & inouts when not supported by target
+ / Split long tuples
+   X temps, constants (and uniforms), inputs/outputs/inouts 
+   - textures, streams
+
 SHADER ALGEBRA:
- - fix combine() to operate correctly on empty graphs.
+ X fix combine() to operate correctly on empty graphs.
  X fix combine() to operate correctly on null programs
  X operator&() for combine()
  X replaceUniform()
@@ -127,7 +132,18 @@ TEXTURES:
 ARB BACKEND:
  X split into multiple files
  / add extension querying/plugin mechanism for ATI extensions etc.
+ / long tuples
+   X updateUniform
+   - textures
+   - streams
+   - proper input/output handling
 
+SM BACKEND:
+ / long tuples 
+   - updateUniform
+   - textures
+   - streams
+   - proper input/output handling
 
 === OPERATIONS ===
 

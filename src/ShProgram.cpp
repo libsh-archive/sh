@@ -57,11 +57,21 @@ void ShProgramNode::compile(const std::string& target, const ShRefCount<ShBacken
 {
   if (!backend) return;
 
+  ShEnvironment::shader = this;
+  ShEnvironment::insideShader = true;
+
+  collectVariables();
+
   ShBackendCodePtr code = backend->generateCode(target, this);
 #ifdef SH_DEBUG
-  //code->print(std::cerr);
+  // code->print(std::cerr);
 #endif
+  ShEnvironment::insideShader = false;
   m_code[std::make_pair(target, backend)] = code;
+}
+
+ShRefCount<ShBackendCode> ShProgramNode::code() {
+  return code(ShEnvironment::backend);
 }
 
 ShRefCount<ShBackendCode> ShProgramNode::code(const ShRefCount<ShBackend>& backend) {

@@ -367,17 +367,27 @@ struct IterateRch {
 };
 
 struct DumpRch {
-  DumpRch(ShOptimizer::ReachingMap& r)
-    : r(r)
+  DumpRch(ShOptimizer::ReachingMap& r, ShOptimizer::ReachingMap& gen,
+      ShOptimizer::ReachingMap& psrv)
+    : r(r), gen(gen), psrv(psrv)
   {
   }
 
   void operator()(ShCtrlGraphNodePtr node)
   {
     if (!node) return;
+    ShBasicBlockPtr block = node->block;
+    if (!block) return;
+    SH_DEBUG_PRINT("NODE:");
+    node->block->print(std::cerr, 4);
+    SH_DEBUG_PRINT("  reachIn: " << r[node]);
+    SH_DEBUG_PRINT("  gen: " << gen[node]);
+    SH_DEBUG_PRINT("  psrv: " << psrv[node]);
   }
 
   ShOptimizer::ReachingMap& r;
+  ShOptimizer::ReachingMap& gen;
+  ShOptimizer::ReachingMap& psrv;
 };
 
 void ShOptimizer::solveReachDefs()
@@ -386,6 +396,7 @@ void ShOptimizer::solveReachDefs()
   ReachingMap prsv;
 
   m_defs.clear();
+  m_defNodes.clear();
     
   DefFinder finder(*this);
   m_graph->dfs(finder);
@@ -403,8 +414,12 @@ void ShOptimizer::solveReachDefs()
   } while (changed);
 
 #if 0
-  SH_DEBUG_PRINT("Dumping RCHin");
-  DumpRch dump(m_reachIn);
+  SH_DEBUG_PRINT("Dumping Defs");
+  for(int i = 0; i < m_defs.size(); ++i) {
+    SH_DEBUG_PRINT( "  " << i << ": " << *m_defs[i]);
+  }
+  SH_DEBUG_PRINT("Dumping Reaching Maps");
+  DumpRch dump(m_reachIn, gen, prsv);
   m_graph->dfs(dump);
 #endif
 }
@@ -446,12 +461,12 @@ struct UdDuBuilder {
       // Compute the ud chains for the statement's source variables,
       // and contribute to the du chains of the source variables' definitions.
       for (int j = 0; j < opInfo[I->op].arity; j++) {
-        if (I->src[j].node()->kind() == SH_TEMP) {
+        if (I->src[j].node()->kind() == SH_TEMP) { 
           I->ud[j] = defs[I->src[j].node()];
           for (StmtSet::iterator J = defs[I->src[j].node()].begin(); J != defs[I->src[j].node()].end(); J++) {
             (*J)->du.insert(&(*I));
           }
-        }
+        } 
       }
       // Now update the defs structure.
       
@@ -540,6 +555,7 @@ struct InitLiveCode {
     if (!block) return;
 
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+      ShVariableKind nodeKind = I->dest.node()->kind();
       if (I->dest.node()->kind() != SH_TEMP
           || I->op == SH_OP_KIL
           || I->op == SH_OP_OPTBRA) {

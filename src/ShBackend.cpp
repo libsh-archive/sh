@@ -62,45 +62,6 @@ ShBackend::~ShBackend()
   m_backends->erase(std::remove(begin(), end(), ShBackendPtr(this)), end());
 }
 
-ShBackendCodePtr ShBackend::generateCode(const std::string& target, const ShProgram& shader) {
-  // make a copy of the shader
-  ShProgram copy = new ShProgramNode(target);
-
-  ShCtrlGraphNodePtr head, tail;
-  copyCtrlGraph(shader->ctrlGraph->entry(), shader->ctrlGraph->exit(), head, tail);
-  copy->ctrlGraph = new ShCtrlGraph(head, tail);
-
-  for (ShProgramNode::VarList::const_iterator I = shader->inputs.begin(); 
-      I != shader->inputs.end(); ++I) {
-    copy->inputs.push_back(*I);
-  }
-
-  for (ShProgramNode::VarList::const_iterator I = shader->outputs.begin(); 
-      I != shader->outputs.end(); ++I) {
-    copy->outputs.push_back(*I);
-  }
-
-  // setup environment since transform/optimizer/code generation may make new vars
-  ShEnvironment::shader = copy;
-  ShEnvironment::insideShader = true;
-
-  // apply transformation
-  ShTransformer transformer(copy, this);
-  transformer.transform();
-
-  ShOptimizer optimizer(copy->ctrlGraph);
-  optimizer.optimize(ShEnvironment::optimizationLevel);
-
-  copy->collectVariables();
-
-  ShBackendCodePtr result = compile(target, copy);
-
-  ShEnvironment::insideShader = false;
-
-  return result;
-
-}
-
 ShBackend::ShBackendList::iterator ShBackend::begin()
 {
   init();
@@ -142,14 +103,6 @@ ShRefCount<ShBackend> ShBackend::lookup(const std::string& name)
 #else
   return 0;
 #endif
-}
-
-int ShBackend::getCapability(ShBackendCapability sbc) {
-  switch( sbc ) {
-    case SH_BACKEND_USE_INPUT_DEST: return 1;
-    case SH_BACKEND_USE_OUTPUT_SRC: return 1;
-    case SH_BACKEND_MAX_TUPLE: return 0;
-  }
 }
 
 void ShBackend::init()

@@ -73,7 +73,8 @@ std::string SmRegister::print() const
 
 BackendCode::BackendCode(ShRefCount<Backend> backend, const ShProgram& shader,
                          const std::string& target)
-  : m_backend(backend), m_shader(shader), m_smShader(0), m_target(target),
+  : m_backend(backend), m_shader(shader), m_originalShader(shader), 
+    m_smShader(0), m_target(target),
     m_maxCR(0), m_maxTR(0), m_maxIR(0), m_maxOR(0), m_maxTex(0),
     m_cR(0), m_tR(0), m_iR(0), m_oR(0)
 {
@@ -171,7 +172,7 @@ void BackendCode::bind()
   SH_DEBUG_PRINT("Binding shader");
   
   smBindShader(m_smShader);
-  SH::ShEnvironment::boundShaders()[m_target] = m_shader;
+  SH::ShEnvironment::boundShaders()[m_target] = m_originalShader;
 
   // Initialize constants
   for (RegMap::const_iterator I = m_registers.begin(); I != m_registers.end(); ++I) {
@@ -267,6 +268,31 @@ void BackendCode::updateUniform(const ShVariableNodePtr& uniform)
   smModLocalConstant(shSmTarget(m_target), reg.index, smTuple(values[0], values[1], values[2], values[3]));
 }
 
+void BackendCode::generate() {
+  // Transform code to be ARB_fragment_program compatible
+  m_shader = cloneProgram(m_originalShader);
+  ShEnvironment::shader = m_shader;
+  ShTransformer transform(m_shader);
+
+  transform.convertInputOutput();
+  transform.splitTuples(4, m_splits);
+
+  if(transform.changed()) {
+    ShOptimizer optimizer(m_shader->ctrlGraph);
+    optimizer.optimize(ShEnvironment::optimizationLevel);
+    m_shader->collectVariables();
+  } else {
+    m_shader = m_originalShader;
+    ShEnvironment::shader = m_shader;
+  }
+
+  shader->ctrlGraph->entry->clearMarked();
+  generateNode(code, entry);
+  shader->ctrlGraph->entry->clearMarked();
+
+  code->allocRegs();
+}
+
 std::ostream& BackendCode::print(std::ostream& out)
 {
   out << "SMshader shader = smDeclareShader(" << shSmTarget(m_target) << ");" << std::endl;
@@ -330,6 +356,11 @@ std::ostream& BackendCode::print(std::ostream& out)
       out << "));" << std::endl;
     }
   }
+  return out;
+}
+
+std::ostream& BackendCode::printInputOutputFormat(std::ostream& out) {
+  // TODO implement this
   return out;
 }
 
@@ -726,19 +757,11 @@ void Backend::generateNode(BackendCodePtr& code, const ShCtrlGraphNodePtr& node)
   }
 }
 
-ShBackendCodePtr Backend::compile(const std::string& target, const ShProgram& shader)
+ShBackendCodePtr Backend::generateCode(const std::string& target, const ShProgram& shader)
 {
+
   BackendCodePtr code = new BackendCode(this, shader, target);
-
-  ShCtrlGraphPtr graph = shader->ctrlGraph;
-
-  ShCtrlGraphNodePtr entry = graph->entry();
-
-  entry->clearMarked();
-
-  generateNode(code, entry);
-
-  code->allocRegs();
+  code->generate();
   
   return code;
 }
@@ -812,13 +835,5 @@ void Backend::execute(const ShProgram& program, ShStream& dest)
 {
   // TODO: NOT YET IMPLEMENTED
 }
-
-int Backend::getCapability(ShBackendCapability sbc) {
-  switch( sbc ) {
-    case SH_BACKEND_USE_INPUT_DEST: return 0;
-    case SH_BACKEND_USE_OUTPUT_SRC: return 0;
-    case SH_BACKEND_MAX_TUPLE: return 4;
-  }
-}                                                                              
 
 }

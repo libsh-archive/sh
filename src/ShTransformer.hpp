@@ -28,70 +28,69 @@
 #define SHTRANSFORMER_HPP
 
 #include "ShBackend.hpp"
+#include "ShProgram.hpp"
 #include "ShCtrlGraph.hpp"
 
 namespace SH {
 
 /** Program transformer 
- * Final pre-backend stage that applies some simple transforms to the
- * code so it is compatible with a specific backend.
+ * Platform-specific transformations on ShProgram objects.
+ *
+ * These may change the variable lists (inputs, outputs, etc.)
+ * and control graph of the ShProgram, so they should be done
+ * on a copy of the ShProgram just before code generation instead
+ * of the original. (Otherwise, future algebra operations on 
+ * the original may not give the expected results since the variables
+ * will no longer be the same)
+ *
+ * Global requirements for running ShTransformer:
+ * ShEnvironment::shader = program 
+ * ShEnvironment::insideShader = true
  */
 class ShTransformer {
-public:
-  typedef std::vector<ShVariableNodePtr> VarNodeVec;
-  typedef std::map<ShVariableNodePtr, VarNodeVec> VarSplitMap;
+  public:
+    ShTransformer(ShProgram program);
+    ShTransformer::~ShTransformer();
+    bool changed(); //< returns true iff one of the transformations changed the shader
 
-  ShTransformer(ShProgram program, ShBackendPtr backend);
-
-  ShTransformer::~ShTransformer();
+    /**@name Tuple splitting when backend canot support arbitrary 
+     * length tuples.
+     *
+     * If any tuples are split, this adds entries to the splits map
+     * to map from original long tuple ShVariableNode
+     * to a vector of ShVariableNodes all <= max tuple size of the backend.
+     * All long tuples in the intermediate representation are split up into
+     * shorter tuples.
+     */
+    //@{
+    typedef std::vector<ShVariableNodePtr> VarNodeVec;
+    typedef std::map<ShVariableNodePtr, VarNodeVec> VarSplitMap;
+    friend struct VariableSplitter;
+    friend struct StatementSplitter;
+    void splitTuples(int maxTuple, VarSplitMap &splits);
+    //@}
   
-  /// Apply transformations to the IR specific to this backend
-  // Returns true if anything was changed
-  bool transform();
+    /**@name Input and Output variable to temp convertor
+     * In most GPU shading languages/assembly, outputs cannot be used as src
+     * variable in computation and inputs cannot be used as a dest, and
+     * inout variables are not supported directly.
+     *
+     *
+     */
+    friend struct InputOutputConvertor;
+    void convertInputOutput();
+    // TODO currently all or none approach to conversion.
+    // could parameterize this with flags to choose INPUT, OUTPUT, INOUT
 
-  /// After running transform, this returns any split variables 
-  const VarSplitMap& splits() const;
+  private:
+    /// NOT IMPLEMENTED
+    ShTransformer(const ShTransformer& other);
+    /// NOT IMPLEMENTED
+    ShTransformer& operator=(const ShTransformer& other);
 
-private:
-  ShProgram m_program;
-  ShCtrlGraphPtr m_graph;
-  ShBackendPtr m_backend;
-  VarSplitMap m_splits;
-
-  /**@name Tuple splitting when backend canot support arbitrary 
-   * length tuples.
-   *
-   * If any tuples are split, this adds entries to the splits map
-   * to map from original long tuple ShVariableNode
-   * to a vector of ShVariableNodes all <= max tuple size of the backend.
-   * All long tuples in the intermediate representation are split up into
-   * shorter tuples.
-   *
-   * This is done only if SH_BACKEND_MAX_TUPLE != 0 (default unlimited length tuples)
-   * and it sets the VarSplitMap for use by the backend.
-   */
-  //@{
-  friend struct VariableSplitter; // makes a map of large tuples to split tuples
-  friend struct StatementSplitter; // updates statements involving large tuples
-  void tupleSplitting(bool& changed);
-  //@}
-  
-  /**@name Input and Output variable to temp convertor
-   * In most GPU shading languages/assembly, outputs cannot be used as src
-   * variable in computation and inputs cannot be used as a dest.  
-   * This converts outputs and inputs used in computation 
-   * into a temporaries.
-   *
-   * This is done only if SH_BACKEND_USE_INPUT_DEST or 
-   * SH_BACKEND_USE_OUTPUT_SRC are 0.
-   */
-  friend struct InputOutputConvertor;
-  void inputOutputConversion(bool& changed);
-
-  /// NOT IMPLEMENTED
-  ShTransformer(const ShTransformer& other);
-  /// NOT IMPLEMENTED
-  ShTransformer& operator=(const ShTransformer& other);
+    ShProgram m_program;
+    ShCtrlGraphPtr m_graph;
+    bool m_changed;
 };
 
 }

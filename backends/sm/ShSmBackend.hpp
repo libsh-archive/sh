@@ -38,6 +38,7 @@
 #include "ShRefCount.hpp"
 #include "ShTextureNode.hpp"
 #include "ShCtrlGraph.hpp"
+#include "ShTransformer.hpp"
 
 namespace ShSm {
 
@@ -71,7 +72,7 @@ enum SmRegType {
 
 struct SmRegister {
   SmRegister() {}
-  SmRegister(SmRegType type, int index)
+  SmRegister(SmRegType type, int index, std::string name = "")
     : type(type), index(index)
   {
   }
@@ -95,6 +96,9 @@ public:
   virtual void upload();
   virtual void bind();
   virtual void updateUniform(const SH::ShVariableNodePtr& uniform);
+
+  /// Actually generate the code, and do register allocation.
+  void generate();
   
   std::ostream& print(std::ostream& out);
 
@@ -108,6 +112,7 @@ public:
 private:
   SH::ShRefCount<Backend> m_backend;
   SH::ShProgram m_shader;
+  SH::ShProgram m_originalShader;
   SMshader m_smShader;
   std::string m_target;
 
@@ -150,6 +155,8 @@ private:
 
   TextureNodeMap m_textureMap;
 
+  SH::ShTransformer::VarSplitMap m_splits;
+
   std::string printVar(const SH::ShVariable& var);
 };
 
@@ -160,10 +167,9 @@ public:
   Backend();
   ~Backend();
   std::string name() const;
-  SH::ShBackendCodePtr compile(const std::string& target, const SH::ShProgram& shader);
+  SH::ShBackendCodePtr generateCode(const std::string& target, const SH::ShProgram& shader);
 
   void execute(const SH::ShProgram& program, SH::ShStream& dest);
-  int getCapability(SH::ShBackendCapability sbc); 
 
 private:
   void generateNode(BackendCodePtr& code, const SH::ShCtrlGraphNodePtr& node);
