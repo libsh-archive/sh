@@ -128,7 +128,7 @@ void init_gl(void)
 void init_sh()
   {
   // set OpenGL backend
-  shSetBackend("arb");
+  shSetBackend("rds");
 
   // Sh data
   ShMatrix4x4f mv;

@@ -185,7 +185,7 @@ int main(int argc, char** argv)
   glutMotionFunc(motion);
   glutKeyboardFunc(keyboard);
     
-  shSetBackend("arb");
+  shSetBackend("rds");
 
   initShaders();
 

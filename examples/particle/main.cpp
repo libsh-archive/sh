@@ -309,7 +309,7 @@ int main(int argc, char** argv)
 
   try
     {
-    shSetBackend("arb");
+    shSetBackend("rds");
 
     init_shaders();
     init_streams();
