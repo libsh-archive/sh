@@ -36,7 +36,9 @@ namespace SH {
 
 void ShInit(void)
   {
+#ifdef WIN32
   static SH::ShRefCount<ShArb::ArbBackend> instance = new ShArb::ArbBackend();
+#endif /* WIN32 */
   }
 
 }
