@@ -164,6 +164,7 @@ private:
 };
 
 typedef ShPointer<ShTextureNode> ShTextureNodePtr;
+typedef ShPointer<const ShTextureNode> ShTextureNodeCPtr;
 
 }
 #endif

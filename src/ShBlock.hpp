@@ -46,6 +46,7 @@ public:
 };
 
 typedef ShPointer<ShBlock> ShBlockPtr;
+typedef ShPointer<const ShBlock> ShBlockCPtr;
 
 /** A list of generic blocks.
  */
@@ -82,6 +83,7 @@ private:
 };
 
 typedef ShPointer<ShBlockList> ShBlockListPtr;
+typedef ShPointer<const ShBlockList> ShBlockListCPtr;
 
 }
 

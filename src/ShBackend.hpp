@@ -69,6 +69,7 @@ public:
 };
 
 typedef ShPointer<ShBackendCode> ShBackendCodePtr;
+typedef ShPointer<const ShBackendCode> ShBackendCodeCPtr;
 
 class ShTransformer;
 class ShBackend : public ShRefCountable {
@@ -102,6 +103,7 @@ private:
 };
 
 typedef ShPointer<ShBackend> ShBackendPtr;
+typedef ShPointer<const ShBackend> ShBackendCPtr;
 
 }
 

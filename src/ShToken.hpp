@@ -76,6 +76,7 @@ private:
 };
 
 typedef ShPointer<ShToken> ShTokenPtr;
+typedef ShPointer<const ShToken> ShTokenCPtr;
 
 
 }

@@ -68,6 +68,7 @@ private:
 };
 
 typedef ShPointer<ShBasicBlock> ShBasicBlockPtr;
+typedef ShPointer<const ShBasicBlock> ShBasicBlockCPtr;
 
 }
 

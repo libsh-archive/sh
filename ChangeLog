@@ -1,3 +1,8 @@
+2004-05-28  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* Added CPtr typedefs for ShPointer<const ...> types. Resolves
+	issue106.
+
 2004-05-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShChannel.hpp: Actually make ShChannel inherit from

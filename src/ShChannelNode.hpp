@@ -55,6 +55,7 @@ private:
 };
 
 typedef ShPointer<ShChannelNode> ShChannelNodePtr;
+typedef ShPointer<const ShChannelNode> ShChannelNodeCPtr;
 
 }
 #endif

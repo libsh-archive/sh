@@ -112,6 +112,7 @@ private:
 };
 
 typedef ShPointer<ShCtrlGraphNode> ShCtrlGraphNodePtr;
+typedef ShPointer<const ShCtrlGraphNode> ShCtrlGraphNodeCPtr;
 
 /** A control-flow graph.
  * This is the parsed form of a shader body.
@@ -153,6 +154,7 @@ private:
 };
 
 typedef ShPointer<ShCtrlGraph> ShCtrlGraphPtr;
+typedef ShPointer<const ShCtrlGraph> ShCtrlGraphCPtr;
 
 template<typename F>
 void ShCtrlGraphNode::real_dfs(F& functor)
