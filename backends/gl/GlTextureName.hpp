@@ -55,8 +55,8 @@ public:
   StorageList::const_iterator endStorages() const { return m_storages.end(); }
 
   typedef std::list<GlTextureName*> NameList;
-  static NameList::const_iterator beginNames() { return m_names.begin(); }
-  static NameList::const_iterator endNames() { return m_names.end(); }
+  static NameList::const_iterator beginNames() { return m_names->begin(); }
+  static NameList::const_iterator endNames() { return m_names->end(); }
 
   // Utility class to bind texture temporarily
   struct Binding {
@@ -71,7 +71,7 @@ private:
   GLenum m_target;
   GLuint m_name;
   StorageList m_storages;
-  static NameList m_names;
+  static NameList* m_names;
   SH::ShTextureTraits m_params;
 
   bool m_managed; // True if we generated our own name

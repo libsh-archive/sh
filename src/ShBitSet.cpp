@@ -96,6 +96,8 @@ ShBitSet::~ShBitSet()
 
 ShBitSet& ShBitSet::operator=(const ShBitSet& other)
 {
+  if (&other == this) return *this;
+  
   delete [] m_data;
   m_size = other.m_size;
   m_data = new unsigned int[wordsize(m_size)];
@@ -182,7 +184,7 @@ std::size_t ShBitSet::size() const
 
 bool ShBitSet::full() const
 {
-  for (int i = 0; i < fullwordsize(m_size); i++) {
+  for (std::size_t i = 0; i < fullwordsize(m_size); i++) {
     if (~m_data[i]) return false;
   }
   if (m_size % WORD_SIZE) {
@@ -195,7 +197,7 @@ bool ShBitSet::full() const
 
 bool ShBitSet::empty() const
 {
-  for (int i = 0; i < wordsize(m_size); i++) if (m_data[i]) return false;
+  for (std::size_t i = 0; i < wordsize(m_size); i++) if (m_data[i]) return false;
   return true;
 }
 

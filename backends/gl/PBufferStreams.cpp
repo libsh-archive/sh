@@ -42,6 +42,7 @@
 #include "ShError.hpp"
 #include "ShTypeInfo.hpp"
 #include "ShVariant.hpp"
+#include "PBufferContext.hpp"
 
 #ifdef DO_PBUFFER_TIMING
 #include <sys/time.h>
@@ -272,7 +273,6 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   }
 
   DECLARE_TIMER(onerun);
-  // --- Set up the GLX context
   
   ShChannelNodePtr output = *dest.begin();
   int count = output->count();
@@ -285,10 +285,24 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
     tex_size <<= 1;
   }
 
-  FloatExtension extension = setupContext(tex_size, tex_size);
+  PBufferFactory* factory = PBufferFactory::instance();
 
+  if (!factory) {
+    // TODO: Throw error.
+    SH_DEBUG_PRINT("Cannot access PBuffer factory!");
+    return;
+  }
+  
+  FloatExtension extension = factory->get_extension();
+
+  // Todo: throw error
   if (extension == SH_ARB_NO_FLOAT_EXT) return;
 
+  // --- Set up the GLX context
+  PBufferContextPtr context = factory->get_context(tex_size, tex_size);
+
+  PBufferHandlePtr old_handle = context->activate();
+  
   DECLARE_TIMER(gather);
   
   StreamInputMap input_map;
@@ -545,14 +559,17 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   }
 
   TIMING_RESULT(readback);
-  
-  // TODO: I think this is necessary, but it doesn't seem to be. I assume
-  // that GLUT (or whatever UI toolkit) is setting up its one context when
-  // its about to redraw. -Kevin
-  restoreContext();
-  
+
+  if (old_handle) {
+    old_handle->restore();
+  }
+    
   TIMING_RESULT(onerun);
 }
 
+StreamStrategy* PBufferStreams::create()
+{
+  return new PBufferStreams();
+}
 
 }

@@ -336,7 +336,7 @@ std::string ShDataVariant<T, DT>::encode() const {
   if(size() < 1) return "";
 
   std::ostringstream out;
-  out << size(); 
+  out << size();
   for(const_iterator I = m_begin; I != m_end; ++I) {
     out << "," << *I;
   }
