@@ -29,7 +29,7 @@
 
 #include "ShStorageType.hpp"
 
-#define SH_DEBUG_GLSL_BACKEND // DEBUG
+#define SH_DEBUG_GLSL_BACKEND
 
 namespace shgl {
 
@@ -146,6 +146,7 @@ void GlslCode::upload()
   SH_GL_CHECK_ERROR(glShaderSourceARB(m_arb_shader, 1, &code_string, &code_len));
   SH_GL_CHECK_ERROR(glCompileShaderARB(m_arb_shader));
 
+#ifdef SH_DEBUG_GLSL_BACKEND
   // Check compilation
   int compiled;
   glGetObjectParameterivARB(m_arb_shader, GL_OBJECT_COMPILE_STATUS_ARB, &compiled);
@@ -158,6 +159,7 @@ void GlslCode::upload()
     cout << endl;
     return;
   }
+#endif
 }
 
 void GlslCode::link()
@@ -166,6 +168,8 @@ void GlslCode::link()
 
   SH_GL_CHECK_ERROR(glLinkProgramARB(m_arb_program));
   
+#ifdef SH_DEBUG_GLSL_BACKEND
+  // Check linking
   int linked;
   glGetObjectParameterivARB(m_arb_program, GL_OBJECT_LINK_STATUS_ARB, &linked);
   if (linked != GL_TRUE) {
@@ -177,11 +181,12 @@ void GlslCode::link()
     cout << endl;
     return;
   }
+#endif
 
   SH_GL_CHECK_ERROR(glUseProgramObjectARB(m_arb_program));
 
 #ifdef SH_DEBUG_GLSL_BACKEND
-  // This is slow, it should not be enable in release code
+  // This could be slow, it should not be enabled in release code
   glValidateProgramARB(m_arb_program);
   int validated;
   glGetObjectParameterivARB(m_arb_program, GL_OBJECT_VALIDATE_STATUS_ARB, &validated);
@@ -196,8 +201,10 @@ void GlslCode::link()
     SH_DEBUG_ASSERT(m_varmap);
 
     // Whenever the program is linked, we must reinitialize the uniforms
-    // because their values are reset.  Also, we must call
-    // glUseProgramObjectARB before we can get the location of uniforms.
+    // because their values are reset to 0.
+    //
+    // NOTE: we must callglUseProgramObjectARB before we can get the
+    // location of uniforms.
     for (GlslVariableMap::NodeList::iterator i = m_varmap->node_begin();
 	 i != m_varmap->node_end(); i++) {
       ShVariableNodePtr node = *i;

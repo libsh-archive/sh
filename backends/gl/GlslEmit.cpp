@@ -64,7 +64,7 @@ static GlslMapping opCodeTable[] = {
   {SH_OP_SIN,   "sin($0)"},
   {SH_OP_SLE,   "lessThanEqual($0, $1)"},
   {SH_OP_SLT,   "lessThan($0, $1)"},
-  {SH_OP_SNE,   "not(equal($0, $1))"},
+  {SH_OP_SNE,   "not(equal($0, $1))"}, // notEqual() doesn't work on NVIDIA
   {SH_OP_SQRT,  "sqrt($0)"},
 
   {SH_OPERATION_END,  0} 
