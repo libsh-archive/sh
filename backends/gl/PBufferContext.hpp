@@ -3,6 +3,7 @@
 
 #include "ShProgram.hpp"
 #include "GlBackend.hpp"
+#include "ShMemory.hpp"
 
 namespace shgl {
 
@@ -27,6 +28,26 @@ protected:
 typedef SH::ShPointer<PBufferHandle> PBufferHandlePtr;
 typedef SH::ShPointer<const PBufferHandle> PBufferHandleCPtr;
 
+class PBufferContext;
+
+class PBufferStorage : public SH::ShStorage {
+public:
+  PBufferStorage(const SH::ShPointer<PBufferContext>& context,
+                 SH::ShMemory* memory);
+
+  ~PBufferStorage();
+
+  SH::ShPointer<PBufferContext> context() const;
+
+  std::string id() const { return "opengl:pbuffer"; }
+  
+private:
+  SH::ShPointer<PBufferContext> m_context;
+};
+
+typedef SH::ShPointer<PBufferStorage> PBufferStoragePtr;
+typedef SH::ShPointer<const PBufferStorage> PBufferStorageCPtr;
+
 class PBufferContext : public SH::ShRefCountable {
 public:
   virtual ~PBufferContext();
@@ -37,6 +58,8 @@ public:
   
   virtual PBufferHandlePtr activate() = 0;
 
+  PBufferStoragePtr make_storage(SH::ShMemory* memory) { return new PBufferStorage(this, memory); }
+  
 protected:
   PBufferContext(int width, int height, void* id);
   

@@ -286,9 +286,14 @@ TextureStrategy* GlTextures::create(void)
   return new GlTextures;
 }
 
-
 void GlTextures::bindTexture(const ShTextureNodePtr& node,
-                             GLenum target)
+                     GLenum target)
+{
+  shGlBindTexture(node, target);
+}
+
+void shGlBindTexture(const ShTextureNodePtr& node,
+                     GLenum target)
 {
   if (!node) return;
 

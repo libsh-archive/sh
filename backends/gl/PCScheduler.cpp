@@ -11,6 +11,8 @@
 #include "GlTextureStorage.hpp"
 #include "ShInstructions.hpp"
 #include "ShNibbles.hpp"
+#include "ShManipulator.hpp"
+#include "GlTextures.hpp"
 
 namespace {
 using namespace SH;
@@ -58,7 +60,30 @@ ShProgramNodePtr replace_temps_and_fetches(const ShPass& pass,
   
   return result.node();
 }
-                                           
+
+void split_outputs(const ShProgramNodePtr& program,
+                   std::list<ShProgramNodePtr>& programs)
+{
+  int i = 0;
+  for (ShProgramNode::VarList::const_iterator I = program->outputs_begin(); I != program->outputs_end(); ++I, ++i) {
+    ShProgram p = shSwizzle(i) << shref_const_cast<ShProgramNode>(program);
+    programs.push_back(p.node());
+  }
+}
+
+
+
+void copy_framebuffer_to_texture(PBufferContextPtr context,
+                                 const ShTextureNodePtr& texnode)
+{
+  PBufferStoragePtr fbs = context->make_storage(texnode->memory().object());
+  fbs->dirtyall();
+  
+  shGlBindTexture(texnode, GL_TEXTURE0_ARB);
+
+  texnode->memory()->removeStorage(fbs);
+}
+
 }
 
 namespace shgl {
@@ -84,7 +109,7 @@ struct PCSchedule : public ShVoid {
   PCSchedule();
   
   virtual ~PCSchedule();
-  virtual void pre_execution(int width, int height);
+  virtual void pre_execution(int width, int height, const ShStream& stream);
   virtual void execute_pass(ShPass* pass);
   
   PCChannelMap channel_map;
@@ -107,6 +132,8 @@ private:
 
   int m_width, m_height;
 
+  PBufferContextPtr m_context;
+
   ShAttrib2f m_size;
 
   // Fragment program, kills based on predicate
@@ -115,6 +142,11 @@ private:
 
   // TODO: Should be an Array2D sometimes...
   ShArrayRect<ShAttrib1f> m_pred_texture;
+  ShArrayRect<ShAttrib4f> m_copy_texture;
+
+  ShProgram m_copy_fp;
+  
+  std::vector<ShChannelNodePtr> m_output_channels;
 };
 
 typedef ShPointer<PCSchedule> PCSchedulePtr;
@@ -167,7 +199,8 @@ ShVoidPtr PCScheduler::prepare(ShSchedule* schedule)
     ShProgramNodePtr prg = I->program;
     prg = replace_temps_and_fetches(*I, pc_schedule->temp_buffers, pc_schedule->channel_map);
 
-    //split_outputs(prg, p->programs);
+    // TODO
+    split_outputs(prg, p->programs);
     
     current_pc += pc_increment;
 
@@ -189,6 +222,7 @@ PCSchedule::PCSchedule()
     ShInOutPosition4f pos;
     ShOutputTexCoord2f tc;
 
+    // TODO: change depending on rect vs 2d
     tc = pos(0,1);
     pos(0,1) = pos(0,1) * (rcp(m_size) * 0.5) - 0.5;
   } SH_END;
@@ -204,6 +238,13 @@ PCSchedule::PCSchedule()
     
     discard(cond(m_pred_kill, predicate, 1.0 - (predicate > 0)));
   } SH_END;
+
+  m_copy_fp = SH_BEGIN_FRAGMENT_PROGRAM {
+    ShInputTexCoord2f tc;
+    ShOutputAttrib4f out;
+
+    out = m_copy_texture[tc];
+  } SH_END;
   
   ShContext::current()->exit();
 }
@@ -213,8 +254,13 @@ PCSchedule::~PCSchedule()
   glDeleteOcclusionQueriesNV(1, &m_query);
 }
 
-void PCSchedule::pre_execution(int width, int height)
+void PCSchedule::pre_execution(int width, int height, const ShStream& outputs)
 {
+  m_output_channels.clear();
+  for (ShStream::NodeList::const_iterator I = outputs.begin(); I != outputs.end(); ++I) {
+    m_output_channels.push_back(*I);
+  }
+  
   if (width == m_width && height == m_height) return;
   
   SH_DEBUG_ASSERT(width > 0);
@@ -234,6 +280,8 @@ void PCSchedule::pre_execution(int width, int height)
   }
   m_pred_texture.size(m_width, m_height);
   m_pred_texture.memory(new GlTextureMemory(m_pred_texture.node()));
+
+  m_context = GLXPBufferFactory::instance()->get_context(m_width, m_height, this);
 }
 
 void PCSchedule::draw_quad(double x1, double y1, double x2, double y2,
@@ -251,6 +299,9 @@ void PCSchedule::execute_pass(ShPass* pass)
 {
   if (!pass->count) return;
 
+  // Assume CTT for now, so just one context
+  PBufferHandlePtr old_context = m_context->activate();
+  
   glPushAttrib(GL_ENABLE_BIT);
   
   glEnable(GL_STENCIL_TEST);
@@ -265,16 +316,37 @@ void PCSchedule::execute_pass(ShPass* pass)
   GLint stencil_mask;
   glGetIntegerv(GL_STENCIL_VALUE_MASK, &stencil_mask);
   
-  glDepthFunc(GL_EQUAL);
   glDepthMask(GL_FALSE);
 
   // TODO: set this to true on ATI.
   bool bad_occlusion_query = false;
   
+  glClear(GL_STENCIL_BUFFER_BIT);
+  glStencilFunc(GL_ALWAYS, 1, stencil_mask);
+  glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
+  // TODO: Should really store the mappings in pc_pass, since we might
+  // have multiple outputs with ATI_draw_buffers
+  std::list<Mapping>::const_iterator O = pass->outputs.begin();
   for (std::list<ShProgramNodePtr>::iterator I = pc_pass->programs.begin();
-       I != pc_pass->programs.end(); ++I) {
+       I != pc_pass->programs.end(); ++I, ++O) {
     std::list<ShProgramNodePtr>::iterator J = I; ++J;
 
+    m_copy_texture.size(m_width, m_height);
+    if (O->type == MAPPING_TEMP) {
+      m_copy_texture.memory(temp_buffers[O->id]->memory());
+    } else if (O->type == MAPPING_OUTPUT) {
+      // TODO: perhaps handle non-stream outputs?
+      m_copy_texture.memory(m_output_channels[O->id]->memory());
+      m_copy_texture.node()->set_count(m_output_channels[O->id]->count());
+    } else {
+      SH_DEBUG_ASSERT(false);
+    }
+
+    shBind(m_copy_fp);
+    glDepthFunc(GL_ALWAYS);
+    draw_quad(0.0, 0.0, m_width, m_height, pc_pass->pc);
+    
     if (J == pc_pass->programs.end() && pass->predicate_pass) {
       glClear(GL_STENCIL_BUFFER_BIT);
       glStencilFunc(GL_ALWAYS, 1, stencil_mask);
@@ -283,9 +355,12 @@ void PCSchedule::execute_pass(ShPass* pass)
     ShProgram prg(*I);
     shBind(prg);
 
+    glDepthFunc(GL_EQUAL);
     // draw a quad at depth = pc
     draw_quad(0.0, 0.0, m_width, m_height, pc_pass->pc);
-    // either use RTT or CTT to store result in buffer
+    // TODO either use RTT or CTT to store result in buffer
+
+    copy_framebuffer_to_texture(m_context, m_copy_texture.node());
   }
 
   if (pass->predicate_pass) {
@@ -330,6 +405,7 @@ void PCSchedule::execute_pass(ShPass* pass)
       
       glBeginOcclusionQueryNV(m_query);
       // draw a quad at depth = pc_pred
+      draw_quad(0.0, 0.0, m_width, m_height, pred_pc_pass->pc);
       glEndOcclusionQueryNV();
     }
 
@@ -344,6 +420,8 @@ void PCSchedule::execute_pass(ShPass* pass)
   pass->count = 0;
 
   glPopAttrib();
+
+  if (old_context) old_context->restore();
 }
 
 ScheduleStrategy* PCScheduler::create()

@@ -38,6 +38,9 @@ GLenum shGlInternalFormat(const SH::ShTextureNodePtr& node);
 GLenum shGlFormat(const SH::ShTextureNodePtr& node);
 GLenum shGlType(SH::ShValueType valueType, SH::ShValueType &convertedType);
 
+void shGlBindTexture(const SH::ShTextureNodePtr& texture,
+                     GLenum target);
+
 class GlTextures : public TextureStrategy {
 public:
   GlTextures(void);
