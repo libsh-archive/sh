@@ -30,7 +30,7 @@
 #include "ShGeneric.hpp"
 #include "ShLib.hpp"
 
-
+#ifndef WIN32 
 namespace SH {
 
 /** \defgroup lib_boolean Boolean and conditional functions
@@ -51,8 +51,8 @@ operator<(const ShGeneric<1, V1>& left, const ShGeneric<N, V2>& right);
 template<ShValueType V1, ShValueType V2>
 ShGeneric<1, CV1V2>
 operator<(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right);
-SH_SHLIB_CONST_SCALAR_OP(operator<);
-SH_SHLIB_CONST_N_OP_BOTH(operator<);
+SH_SHLIB_CONST_SCALAR_OP_DECL(operator<);
+SH_SHLIB_CONST_N_OP_BOTH_DECL(operator<);
 
 /// Componentwise less-than-or-equal
 template<int N, ShValueType V1, ShValueType V2>
@@ -67,8 +67,8 @@ operator<=(const ShGeneric<1, V1>& left, const ShGeneric<N, V2>& right);
 template<ShValueType V1, ShValueType V2>
 ShGeneric<1, CV1V2>
 operator<=(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right);
-SH_SHLIB_CONST_SCALAR_OP(operator<=);
-SH_SHLIB_CONST_N_OP_BOTH(operator<=);
+SH_SHLIB_CONST_SCALAR_OP_DECL(operator<=);
+SH_SHLIB_CONST_N_OP_BOTH_DECL(operator<=);
 
 /// Componentwise greater-than
 template<int N, ShValueType V1, ShValueType V2>
@@ -83,8 +83,8 @@ operator>(const ShGeneric<1, V1>& left, const ShGeneric<N, V2>& right);
 template<ShValueType V1, ShValueType V2>
 ShGeneric<1, CV1V2>
 operator>(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right);
-SH_SHLIB_CONST_SCALAR_OP(operator>);
-SH_SHLIB_CONST_N_OP_BOTH(operator>);
+SH_SHLIB_CONST_SCALAR_OP_DECL(operator>);
+SH_SHLIB_CONST_N_OP_BOTH_DECL(operator>);
 
 /// Componentwise greater-than-or-equal
 template<int N, ShValueType V1, ShValueType V2>
@@ -99,8 +99,8 @@ operator>=(const ShGeneric<1, V1>& left, const ShGeneric<N, V2>& right);
 template<ShValueType V1, ShValueType V2>
 ShGeneric<1, CV1V2>
 operator>=(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right);
-SH_SHLIB_CONST_SCALAR_OP(operator>=);
-SH_SHLIB_CONST_N_OP_BOTH(operator>=);
+SH_SHLIB_CONST_SCALAR_OP_DECL(operator>=);
+SH_SHLIB_CONST_N_OP_BOTH_DECL(operator>=);
 
 /// Componentwise equal
 template<int N, ShValueType V1, ShValueType V2>
@@ -115,8 +115,8 @@ operator==(const ShGeneric<1, V1>& left, const ShGeneric<N, V2>& right);
 template<ShValueType V1, ShValueType V2>
 ShGeneric<1, CV1V2>
 operator==(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right);
-SH_SHLIB_CONST_SCALAR_OP(operator==);
-SH_SHLIB_CONST_N_OP_BOTH(operator==);
+SH_SHLIB_CONST_SCALAR_OP_DECL(operator==);
+SH_SHLIB_CONST_N_OP_BOTH_DECL(operator==);
 
 /// Componentwise not equal
 template<int N, ShValueType V1, ShValueType V2>
@@ -131,8 +131,8 @@ operator!=(const ShGeneric<1, V1>& left, const ShGeneric<N, V2>& right);
 template<ShValueType V1, ShValueType V2>
 ShGeneric<1, CV1V2>
 operator!=(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right);
-SH_SHLIB_CONST_SCALAR_OP(operator!=);
-SH_SHLIB_CONST_N_OP_BOTH(operator!=);
+SH_SHLIB_CONST_SCALAR_OP_DECL(operator!=);
+SH_SHLIB_CONST_N_OP_BOTH_DECL(operator!=);
 
 /** Conditional assignment.
  *  dest[i] = ((src[0][i] > 0.0) ? src[1][i] : src[2][i])
@@ -181,6 +181,7 @@ ShGeneric<1, V> all(const ShGeneric<N, V>& a);
 /*@}*/
 
 }
+#endif
 
 #include "ShLibBooleanImpl.hpp"
 

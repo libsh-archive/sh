@@ -9,7 +9,9 @@
 
 namespace SH {
 
-class ShPool {
+class 
+SH_DLLEXPORT
+ShPool {
 public:
   ShPool(std::size_t element_size, std::size_t block_size);
 

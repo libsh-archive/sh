@@ -1,6 +1,25 @@
+2004-11-04  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+  Win32 port.  Not well tested yet, but examples run fine.
+
+  * win32/* :
+    Added new files to the win32 projects & solution 
+
+  * src/* :
+    Lots of little fixes to get Win32 compiling.
+    Workaround for VC.NET 2K3 compiler weirdness in 
+    ShVariableType.hpp (changed ShValueType from enum to int)
+    And #ifdeffed out every case where ShLib* contains a function
+    declaration with a separate definition in ShLibImpl* (because 
+    VC thinks they're different functions).
+
+  * backends/cc/CcTexturesString.cpp:
+    Changed the texture lookup code string to an array of strings
+    because the VC scanner barfed at one long string on a single line. 
+
 2004-11-02  Bryan Chan <b8chan@cgl.uwaterloo.ca>
    Merged trunk up to r1654
    Fixed the spacing in the table below.
+
 
 2004-11-02  Bryan Chan <b8chan@cgl.uwaterloo.ca>
 	* src/ShMeta.hpp, ShMetaImpl.hpp:

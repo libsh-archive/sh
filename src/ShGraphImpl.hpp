@@ -108,7 +108,7 @@ template<typename G>
 void ShGraph<G>::removeVertex(typename G::Vertex *v)
 {
   for(typename EdgeList::iterator E = v->edges.begin(); E != v->edges.end(); ++E) {
-    E = edges.erase(*E);
+    edges.erase(*E);
   }
   verts.erase(v);
 }
@@ -117,7 +117,7 @@ template<typename G>
 void ShGraph<G>::removeEdge(typename G::Edge *e)
 {
   edges.erase(e);
-  e->start->edges.erase(e);
+  e->start->edges.remove(e);
   delete e;
 }
 
@@ -134,7 +134,7 @@ void ShGraph<G>::clear()
 template<typename G>
 void ShGraph<G>::clearMarked()
 {
-  for(typename VertexSet::iterator V = verts.begin(); V != verts.end(); ++V) V->marked = false;
+  for(typename VertexSet::iterator V = verts.begin(); V != verts.end(); ++V) (*V)->marked = false;
 }
 
 template<typename G>
@@ -385,7 +385,7 @@ template<typename G, typename D>
 std::ostream& graphvizDump(std::ostream &out, const ShGraph<G> &g, D &dumpFunctor)
 {
   out << "digraph {" << std::endl;
-    typename ShGraph<G>::VertexSet::iterator V = g.verts.begin();
+    typename ShGraph<G>::VertexSet::const_iterator V = g.verts.begin();
     for(; V != g.verts.end(); ++V) {
       out << "\"" << *V << "\" ";
       dumpFunctor(out, *V);
@@ -393,7 +393,7 @@ std::ostream& graphvizDump(std::ostream &out, const ShGraph<G> &g, D &dumpFuncto
       out << std::endl;
     }
 
-    typename ShGraph<G>::EdgeSet::iterator E = g.edges.begin();
+    typename ShGraph<G>::EdgeSet::const_iterator E = g.edges.begin();
     for(; E != g.edges.end(); ++E) {
       const typename G::Edge &e = **E;
       out << "\"" << e.start << "\" ";

@@ -61,6 +61,8 @@ ShGeneric<1, CV1V2> operator<(const ShGeneric<1, V1>& left, const ShGeneric<1, V
   shSLT(t, left, right);
   return t;
 }
+SH_SHLIB_CONST_SCALAR_OP(operator<);
+SH_SHLIB_CONST_N_OP_BOTH(operator<);
 
 template<int N, ShValueType V1, ShValueType V2>
 ShGeneric<N, CV1V2> operator<=(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right)
@@ -90,6 +92,8 @@ ShGeneric<1, CV1V2> operator<=(const ShGeneric<1, V1>& left, const ShGeneric<1, 
   shSLE(t, left, right);
   return t;
 }
+SH_SHLIB_CONST_SCALAR_OP(operator<=);
+SH_SHLIB_CONST_N_OP_BOTH(operator<=);
 
 template<int N, ShValueType V1, ShValueType V2>
 ShGeneric<N, CV1V2> operator>(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right)
@@ -119,6 +123,8 @@ ShGeneric<1, CV1V2> operator>(const ShGeneric<1, V1>& left, const ShGeneric<1, V
   shSGT(t, left, right);
   return t;
 }
+SH_SHLIB_CONST_SCALAR_OP(operator>);
+SH_SHLIB_CONST_N_OP_BOTH(operator>);
 
 template<int N, ShValueType V1, ShValueType V2>
 ShGeneric<N, CV1V2> operator>=(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right)
@@ -148,6 +154,8 @@ ShGeneric<1, CV1V2> operator>=(const ShGeneric<1, V1>& left, const ShGeneric<1, 
   shSGE(t, left, right);
   return t;
 }
+SH_SHLIB_CONST_SCALAR_OP(operator>=);
+SH_SHLIB_CONST_N_OP_BOTH(operator>=);
 
 template<int N, ShValueType V1, ShValueType V2>
 ShGeneric<N, CV1V2> operator==(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right)
@@ -177,6 +185,8 @@ ShGeneric<1, CV1V2> operator==(const ShGeneric<1, V1>& left, const ShGeneric<1, 
   shSEQ(t, left, right);
   return t;
 }
+SH_SHLIB_CONST_SCALAR_OP(operator==);
+SH_SHLIB_CONST_N_OP_BOTH(operator==);
 
 template<int N, ShValueType V1, ShValueType V2>
 ShGeneric<N, CV1V2> operator!=(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right)
@@ -206,6 +216,8 @@ ShGeneric<1, CV1V2> operator!=(const ShGeneric<1, V1>& left, const ShGeneric<1, 
   shSNE(t, left, right);
   return t;
 }
+SH_SHLIB_CONST_SCALAR_OP(operator!=);
+SH_SHLIB_CONST_N_OP_BOTH(operator!=);
 
 template<int N, ShValueType V1, ShValueType V2, ShValueType V3>
 ShGeneric<N, CV1V2V3> cond(const ShGeneric<N, V1>& condition, const ShGeneric<N, V2>& left,

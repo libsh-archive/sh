@@ -30,6 +30,7 @@
 #include "ShGeneric.hpp"
 #include "ShLib.hpp"
 
+#ifndef WIN32
 namespace SH {
 
 /** \defgroup lib_arith Arithmetic operations
@@ -49,8 +50,8 @@ template<int N, ShValueType V1, ShValueType V2>
 ShGeneric<N, CV1V2> operator+(const ShGeneric<N, V1>& left, const ShGeneric<1, V2>& right);
 template<ShValueType V1, ShValueType V2>
 ShGeneric<1, CV1V2> operator+(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right);
-SH_SHLIB_CONST_SCALAR_OP(operator+);
-SH_SHLIB_CONST_N_OP_BOTH(operator+);
+SH_SHLIB_CONST_SCALAR_OP_DECL(operator+);
+SH_SHLIB_CONST_N_OP_BOTH_DECL(operator+);
 
 /** Subtraction.
  * On tuples, this operator acts componentwise.
@@ -64,8 +65,8 @@ template<int N, ShValueType V1, ShValueType V2>
 ShGeneric<N, CV1V2> operator-(const ShGeneric<N, V1>& left, const ShGeneric<1, V2>& right);
 template<ShValueType V1, ShValueType V2>
 ShGeneric<1, CV1V2> operator-(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right);
-SH_SHLIB_CONST_SCALAR_OP(operator-);
-SH_SHLIB_CONST_N_OP_BOTH(operator-);
+SH_SHLIB_CONST_SCALAR_OP_DECL(operator-);
+SH_SHLIB_CONST_N_OP_BOTH_DECL(operator-);
 
 /** Multiplication.
  * On tuples, this operator acts componentwise.
@@ -80,8 +81,8 @@ template<int N, ShValueType V1, ShValueType V2>
 ShGeneric<N, CV1V2> operator*(const ShGeneric<N, V1>& left, const ShGeneric<1, V2>& right);
 template<ShValueType V1, ShValueType V2>
 ShGeneric<1, CV1V2> operator*(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right);
-SH_SHLIB_CONST_SCALAR_OP(operator*);
-SH_SHLIB_CONST_N_OP_BOTH(operator*);
+SH_SHLIB_CONST_SCALAR_OP_DECL(operator*);
+SH_SHLIB_CONST_N_OP_BOTH_DECL(operator*);
 
 /** Division.
  * On tuples, this operator acts componentwise.
@@ -96,8 +97,8 @@ template<int N, ShValueType V1, ShValueType V2>
 ShGeneric<N, CV1V2> operator/(const ShGeneric<1, V1>& left, const ShGeneric<N, V2>& right);
 template<ShValueType V1, ShValueType V2>
 ShGeneric<1, CV1V2> operator/(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right);
-SH_SHLIB_CONST_SCALAR_OP(operator/);
-SH_SHLIB_CONST_N_OP_LEFT(operator/);
+SH_SHLIB_CONST_SCALAR_OP_DECL(operator/);
+SH_SHLIB_CONST_N_OP_LEFT_DECL(operator/);
 
 
 /** Natural Exponent.
@@ -169,8 +170,8 @@ pow(const ShGeneric<N, V1>& left, const ShGeneric<1, V2>& right);
 template<ShValueType V1, ShValueType V2, ShValueType V3>
 ShGeneric<1, CV1V2> pow(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right);
 
-SH_SHLIB_CONST_SCALAR_OP(pow);
-SH_SHLIB_CONST_N_OP_RIGHT(pow);
+SH_SHLIB_CONST_SCALAR_OP_DECL(pow);
+SH_SHLIB_CONST_N_OP_RIGHT_DECL(pow);
 
 /** Multiply and add.
  * This is an intrinsic to access the assembly instruction of the same name.
@@ -271,6 +272,7 @@ template<int N, ShValueType V>
 ShGeneric<1, V> prod(const ShGeneric<N, V>& var);
 
 }
+#endif
 
 #include "ShLibArithImpl.hpp"
 

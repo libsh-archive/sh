@@ -79,6 +79,10 @@ ShCastMgrVertex::ShCastMgrVertex(ShValueType valueType, ShDataType dataType)
   : m_valueType(valueType), m_dataType(dataType)
 {}
 
+ShCastMgrVertex::ShCastMgrVertex(const ShCastMgrVertex &other)
+  : m_valueType(other.m_valueType), m_dataType(other.m_dataType)
+{}
+
 ShCastMgrGraph::ShCastMgrGraph() 
 {
   for(int i = 0; i < (int)SH_VALUETYPE_END; ++i) {

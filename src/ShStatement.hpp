@@ -101,9 +101,10 @@ public:
   void remove_info(ShStatementInfo* old_info);
   
   bool marked;
+
+  friend SH_DLLEXPORT std::ostream& operator<<(std::ostream& out, const SH::ShStatement& stmt);
 };
 
-std::ostream& operator<<(std::ostream& out, const SH::ShStatement& stmt);
 
 template<typename T>
 T* ShStatement::get_info()

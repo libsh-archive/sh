@@ -30,6 +30,7 @@
 #include "ShGeneric.hpp"
 #include "ShLib.hpp"
 
+#ifndef WIN32
 namespace SH {
 
 /** \defgroup lib_geometry Geometric operations.
@@ -103,7 +104,7 @@ template<int N, ShValueType V1, ShValueType V2>
 ShGeneric<1, CV1V2> 
 operator|(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right);
 
-SH_SHLIB_CONST_N_OP_RETSIZE_BOTH(dot, 1);
+SH_SHLIB_CONST_N_OP_RETSIZE_BOTH_DECL(dot, 1);
 
 /*@}*/
 
@@ -132,6 +133,7 @@ template<int N, ShValueType V>
 ShGeneric<1, V> length(const ShGeneric<N, V>& a);
 
 }
+#endif
 
 #include "ShLibGeometryImpl.hpp"
 

@@ -30,6 +30,7 @@
 #include "ShGeneric.hpp"
 #include "ShLib.hpp"
 
+#ifndef WIN32
 namespace SH {
 
 
@@ -91,10 +92,10 @@ template<ShValueType V1, ShValueType V2>
 ShGeneric<1, CV1V2>
 operator%(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right);
 
-SH_SHLIB_CONST_SCALAR_OP(mod);
-SH_SHLIB_CONST_N_OP_LEFT(mod);
-SH_SHLIB_CONST_SCALAR_OP(operator%);
-SH_SHLIB_CONST_N_OP_LEFT(operator%);
+SH_SHLIB_CONST_SCALAR_OP_DECL(mod);
+SH_SHLIB_CONST_N_OP_LEFT_DECL(mod);
+SH_SHLIB_CONST_SCALAR_OP_DECL(operator%);
+SH_SHLIB_CONST_N_OP_LEFT_DECL(operator%);
 
 /** Fractional part.
  * Discards the integer part of each componenent in var.
@@ -116,7 +117,7 @@ template<int N, ShValueType V1, ShValueType V2>
 ShGeneric<N, CV1V2>
 max(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right);
 
-SH_SHLIB_CONST_SCALAR_OP(max);
+SH_SHLIB_CONST_SCALAR_OP_DECL(max);
 
 /** Minimum.
  * Creates a tuple of componentwise minimums of a pair of input tuples.
@@ -125,7 +126,7 @@ template<int N, ShValueType V1, ShValueType V2>
 ShGeneric<N, CV1V2>
 min(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right);
 
-SH_SHLIB_CONST_SCALAR_OP(min);
+SH_SHLIB_CONST_SCALAR_OP_DECL(min);
 
 /** Maximum of all components
  */
@@ -150,7 +151,7 @@ template<ShValueType V1, ShValueType V2, ShValueType V3>
 ShGeneric<1, CV1V2V3> 
 clamp(const ShGeneric<1, V1>& a, const ShGeneric<1, V2>& b, const ShGeneric<1, V3>& c);
 
-SH_SHLIB_CONST_TRINARY_OP_011(clamp);
+SH_SHLIB_CONST_TRINARY_OP_011_DECL(clamp);
 
 /** Componentwise saturation.
  * Equivalent to componentwise minimum with 1.
@@ -169,6 +170,7 @@ ShGeneric<N, V> sign(const ShGeneric<N, V>& var);
 /*@}*/
 
 }
+#endif
 
 #include "ShLibClampImpl.hpp"
 

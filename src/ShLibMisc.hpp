@@ -30,6 +30,7 @@
 #include "ShGeneric.hpp"
 #include "ShLib.hpp"
 
+#ifndef WIN32
 namespace SH {
 
 /** \defgroup lib_misc Miscellaneous operations
@@ -91,6 +92,7 @@ ShProgram freeze(const ShProgram& p,
 /*@}*/
 
 }
+#endif
 
 #include "ShLibMiscImpl.hpp"
 

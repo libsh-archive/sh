@@ -108,13 +108,20 @@ const typename ShDataTypeCppType<V, DT>::type ShDataTypeConstant<V, DT>::One = 1
 
 /** Special cases
  * @{  */
-template<> SH_DLLEXPORT extern const unsigned short ShDataTypeConstant<SH_HALF, SH_MEM>::One; 
-template<> SH_DLLEXPORT extern const int ShDataTypeConstant<SH_FRAC_INT, SH_MEM>::One;
-template<> SH_DLLEXPORT extern const short ShDataTypeConstant<SH_FRAC_SHORT, SH_MEM>::One;
-template<> SH_DLLEXPORT extern const char ShDataTypeConstant<SH_FRAC_BYTE, SH_MEM>::One;
-template<> SH_DLLEXPORT extern const unsigned int ShDataTypeConstant<SH_FRAC_UINT, SH_MEM>::One;
-template<> SH_DLLEXPORT extern const unsigned short ShDataTypeConstant<SH_FRAC_USHORT, SH_MEM>::One;
-template<> SH_DLLEXPORT extern const unsigned char ShDataTypeConstant<SH_FRAC_UBYTE, SH_MEM>::One;
+#define SH_DTC_SPEC(V, DT) \
+template<> struct ShDataTypeConstant<V, DT> { \
+    typedef ShDataTypeCppType<V, DT>::type type; \
+    static const type Zero; /* additive identity and also a true value */ \
+    static const type One; /* multiplicative identity also a false value */ \
+};
+
+SH_DTC_SPEC(SH_HALF, SH_MEM);
+SH_DTC_SPEC(SH_FRAC_INT, SH_MEM);
+SH_DTC_SPEC(SH_FRAC_SHORT, SH_MEM);
+SH_DTC_SPEC(SH_FRAC_BYTE, SH_MEM);
+SH_DTC_SPEC(SH_FRAC_UINT, SH_MEM);
+SH_DTC_SPEC(SH_FRAC_USHORT, SH_MEM);
+SH_DTC_SPEC(SH_FRAC_UBYTE, SH_MEM);
 // @}
 
 /** Returns the boolean cond in the requested data type */

@@ -28,6 +28,7 @@
 #define SHINTERVALIMPL_HPP
 
 #include <cmath>
+#include "ShMath.hpp"
 #include "ShInterval.hpp"
 
 namespace SH {

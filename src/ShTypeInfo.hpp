@@ -109,7 +109,8 @@ extern const ShVariantFactory* shVariantFactory(ShValueType valueType, ShDataTyp
 // Provides a least common ancestor in the type tree for 
 // a given pair of types in a typedef named type 
 template<ShValueType V1, ShValueType V2>
-struct ShCommonType; 
+struct ShCommonType;
+
 
 template<ShValueType V1, ShValueType V2, ShValueType V3>
 struct ShCommonType3 {

@@ -26,7 +26,6 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #ifdef WIN32
-#include <windows.h>
 #include <math.h>
 #else
 #include <dlfcn.h>
@@ -417,7 +416,9 @@ namespace ShCc {
     std::stringstream prologue;
     prologue << "#include <math.h>" << std::endl;
     prologue << "#include <iostream>" << std::endl;
-    prologue << cc_texture_string << std::endl;
+    for(int i = 0; cc_texture_string[i][0] != 0;) {
+      prologue << cc_texture_string[i]; 
+    }
     // @todo output the CcTextures.hpp file here
     prologue << std::endl;
     prologue << std::endl;

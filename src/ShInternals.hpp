@@ -31,6 +31,7 @@
 #include "ShDllExport.hpp"
 #include "ShVariableNode.hpp"
 #include "ShCtrlGraph.hpp"
+#include "ShBackend.hpp"
 #include "ShProgramNode.hpp"
 #include <map>
 

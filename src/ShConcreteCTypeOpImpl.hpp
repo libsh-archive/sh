@@ -2,13 +2,28 @@
 #define SHCONCRETECTYPEOPIMPL_HPP
 
 #include <numeric>
-#include <ext/numeric> // TODO implement clone of std::power(T, int) for non-GNU libstdc++ compatibility (using the "Russian peasant algorithm")
 #include "ShEval.hpp"
 #include "ShVariant.hpp"
 #include "ShDebug.hpp"
 #include "ShError.hpp"
 #include "ShTypeInfo.hpp"
 
+namespace {
+/** Integer power (T2 must be an integer) - Russian peasant algorithm */
+template<typename T1, typename T2>
+T1 _sh_intpow(T1 x, T2 pow)
+{
+	T1 result = 1;
+	if(pow < 0) { 
+		x = 1 / x;
+		pow = -pow;
+	}
+	for(;pow; pow >>= 1, x *= x) {
+		if(pow & 1) result *= x;
+	}
+	return result;
+}
+}
 namespace SH {
 
 /* Partial specialization for different operations */ 
@@ -220,7 +235,7 @@ SHCCTO_OP_CMATH_SPEC(SH_OP_MOD);
 SHCCTO_BINARY_OP(SH_OP_MUL, (*A) * (*B));
 
 // TODO implemeng power for win32
-SHCCTO_BINARY_OP(SH_OP_POW, __gnu_cxx::power((*A), (*B)));  // only works for integer B
+SHCCTO_BINARY_OP(SH_OP_POW, _sh_intpow((*A), (*B)));  // only works for integers
 SHCCTO_OP_CMATH_SPEC(SH_OP_POW);
 
 

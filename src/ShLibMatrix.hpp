@@ -31,6 +31,7 @@
 #include "ShLib.hpp"
 #include "ShMatrix.hpp"
 
+#ifndef WIN32
 namespace SH {
 
 /** \defgroup lib_matrix Matrix operations
@@ -254,6 +255,7 @@ scale(const ShGeneric<1, V>& a);
 /*@}*/
 
 }
+#endif
 
 #include "ShLibMatrixImpl.hpp"
 

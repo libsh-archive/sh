@@ -103,7 +103,7 @@ struct VariableSplitter {
     changed = true;
     ShTransformer::VarNodeVec &nodeVarNodeVec = splits[node];
     ShVariableNodePtr newNode;
-    int copySwiz[maxTuple];
+    int* copySwiz = new int[maxTuple];
     for(offset = 0; n > 0; offset += maxTuple, n -= maxTuple) {
       ShProgramNodePtr prev = ShContext::current()->parsing();
       // @todo type should not be necessary any more
@@ -124,6 +124,7 @@ struct VariableSplitter {
       }
       nodeVarNodeVec.push_back( newNode );
     }
+	delete [] copySwiz;
     return true;
   }
 

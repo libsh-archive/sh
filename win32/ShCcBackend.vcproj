@@ -132,6 +132,9 @@
 			<File
 				RelativePath="..\backends\cc\Cc.cpp">
 			</File>
+			<File
+				RelativePath="..\backends\cc\CcEmit.cpp">
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -139,6 +142,9 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
 				RelativePath="..\backends\cc\Cc.hpp">
+			</File>
+			<File
+				RelativePath="..\backends\cc\CcTexturesString.hpp">
 			</File>
 		</Filter>
 		<Filter

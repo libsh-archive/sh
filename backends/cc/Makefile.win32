@@ -24,7 +24,7 @@ install: $(INSTALL_TARGETS)
 all-release: $(RELEASE_TARGETS)
 all-debug: $(DEBUG_TARGETS)
 
-libshcc_dll_SOURCES = Cc.hpp Cc.cpp CcEmit.cpp
+libshcc_dll_SOURCES = Cc.hpp Cc.cpp CcEmit.cpp CcTexturesString.hpp
 
 libshcc_dll_CXXFILES = $(filter %.cpp,$(libshcc_dll_SOURCES))
 libshcc_dll_RELEASE_OBJECTS = $(libshcc_dll_CXXFILES:.cpp=.r.obj)
@@ -32,6 +32,12 @@ libshcc_dll_DEBUG_OBJECTS = $(libshcc_dll_CXXFILES:.cpp=.d.obj)
 
 libshcc_dll_RELEASE_LDADD = ../../src/libsh.lib 
 libshcc_dll_DEBUG_LDADD = ../../src/libshd.lib 
+
+BUILT_SOURCES=CcTexturesString.hpp
+GENERATED=CcTexturesString.hpp
+
+CcTexturesString.hpp: CcTextures.hpp
+	sed 's/"/\\"/g' CcTextures.hpp | awk 'BEGIN { printf "const char* cc_texture_string[] = {\n" } {printf "\"%s\\n\",\n", $$0} END { printf "\"\"};\n"}' > CcTexturesString.hpp
 
 libshcc.dll: $(libshcc_dll_RELEASE_OBJECTS)
 	$(LD) /DLL /OUT:$@ $^ $(RELEASE_LDFLAGS) $(libshcc_dll_RELEASE_LDADD)

@@ -25,6 +25,7 @@
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
 #include <cmath>
+#include "ShMath.hpp"
 #include <numeric>
 #include "ShOperation.hpp"
 #include "ShEval.hpp"

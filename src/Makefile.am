@@ -32,6 +32,8 @@ libsh_la_SOURCES += ShInstructions.hpp ShInstructions.cpp
 libsh_la_SOURCES += ShMeta.hpp ShMetaImpl.hpp
 libsh_la_SOURCES += ShMetaForwarder.hpp ShMetaForwarder.cpp
 libsh_la_SOURCES += ShContext.hpp ShContext.cpp
+libsh_la_SOURCES += ShMath.hpp 
+incinc_HEADERS   += ShMath.hpp 
 libsh_la_SOURCES += ShDllExport.hpp
 incinc_HEADERS   += ShDllExport.hpp
 libsh_la_SOURCES += ShPool.hpp ShPool.cpp
@@ -52,6 +54,7 @@ incinc_HEADERS   += ShOptimizations.hpp
 libsh_la_SOURCES += ShValueTracking.cpp ShConstProp.cpp
 libsh_la_SOURCES += ShEvaluate.cpp ShEvaluate.hpp
 incinc_HEADERS   += ShEvaluate.hpp
+libsh_la_SOURCES += ShStructural.hpp ShStructural.cpp
 incinc_HEADERS   += ShStructural.hpp
 
 # Library functions

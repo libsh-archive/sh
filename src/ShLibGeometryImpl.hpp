@@ -73,6 +73,7 @@ ShGeneric<1,  CV1V2> operator|(const ShGeneric<N, V1>& left, const ShGeneric<N, 
 {
   return dot(left, right);
 }
+SH_SHLIB_CONST_N_OP_RETSIZE_BOTH(dot, 1);
 
 template<int N, ShValueType V1, ShValueType V2>
 inline

@@ -68,6 +68,8 @@ operator+(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right)
   shADD(t, left, right);
   return t;
 }
+SH_SHLIB_CONST_SCALAR_OP(operator+);
+SH_SHLIB_CONST_N_OP_BOTH(operator+);
 
 template<int N, ShValueType V1, ShValueType V2>
 inline
@@ -105,6 +107,8 @@ operator-(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right)
   shADD(t, left, -right);
   return t;
 }
+SH_SHLIB_CONST_SCALAR_OP(operator-);
+SH_SHLIB_CONST_N_OP_BOTH(operator-);
 
 template<int N, ShValueType V1, ShValueType V2>
 inline
@@ -142,6 +146,8 @@ operator*(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right)
   shMUL(t, left, right);
   return t;
 }
+SH_SHLIB_CONST_SCALAR_OP(operator*);
+SH_SHLIB_CONST_N_OP_BOTH(operator*);
 
 template<int N, ShValueType V1, ShValueType V2>
 inline
@@ -179,6 +185,8 @@ operator/(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right)
   shDIV(t, left, right);
   return t;
 }
+SH_SHLIB_CONST_SCALAR_OP(operator/);
+SH_SHLIB_CONST_N_OP_LEFT(operator/);
 
 template<int N, ShValueType V>
 inline
@@ -272,6 +280,8 @@ ShGeneric<1, CV1V2> pow(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& ri
   shPOW(t, left, right);
   return t;
 }
+SH_SHLIB_CONST_SCALAR_OP(pow);
+SH_SHLIB_CONST_N_OP_RIGHT(pow);
 
 template<int N, ShValueType V1, ShValueType V2, ShValueType V3>
 inline

@@ -12,5 +12,5 @@ libshcc_la_SOURCES = Cc.cpp Cc.hpp CcEmit.cpp CcTexturesString.hpp
 GENERATED=CcTexturesString.hpp
 
 CcTexturesString.hpp: CcTextures.hpp
-	sed 's/"/\\"/g' CcTextures.hpp | awk 'BEGIN { printf "const char* cc_texture_string=\"" } {printf "%s\\n", $$0} END { printf "\";\n"}' > CcTexturesString.hpp
+	sed 's/"/\\"/g' CcTextures.hpp | awk 'BEGIN { printf "const char* cc_texture_string[] = {\n" } {printf "\"%s\\n\",\n", $$0} END { printf "\"\"};\n"}' > CcTexturesString.hpp
 	

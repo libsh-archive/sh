@@ -113,6 +113,10 @@ ShGeneric<1, CV1V2> operator%(const ShGeneric<1, V1>& left, const ShGeneric<1, V
 {
   return mod(left, right);
 }
+SH_SHLIB_CONST_SCALAR_OP(mod);
+SH_SHLIB_CONST_N_OP_LEFT(mod);
+SH_SHLIB_CONST_SCALAR_OP(operator%);
+SH_SHLIB_CONST_N_OP_LEFT(operator%);
 
 template<int N, ShValueType V>
 inline
@@ -138,6 +142,7 @@ ShGeneric<N,  CV1V2> max(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& r
   shMAX(t, left, right);
   return t;
 }
+SH_SHLIB_CONST_SCALAR_OP(max);
 
 template<int N, ShValueType V1, ShValueType V2>
 inline
@@ -147,6 +152,7 @@ ShGeneric<N,  CV1V2> min(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& r
   shMIN(t, left, right);
   return t;
 }
+SH_SHLIB_CONST_SCALAR_OP(min);
 
 template<int N, ShValueType V>
 ShGeneric<1, V> max(const ShGeneric<N, V>& a)
@@ -212,6 +218,7 @@ ShGeneric<1, CV1V2V3> clamp(const ShGeneric<1, V1>& a,
 {
   return min(max(a, b), c);
 }
+SH_SHLIB_CONST_TRINARY_OP_011(clamp);
 
 template<int N, ShValueType V>
 inline

@@ -86,19 +86,6 @@ inline void addStatement(const ShStatement& stmt)
   ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
 }
 
-
-// TODO: Replace ifdef with an autoconf check
-// @todo type 
-// Might need to move these to somewhere else (ShEval*.hpp)
-// for win/mac
-//#ifdef WIN32
-//T exp2f(T a) { return powf(2.0, a); }
-//T exp10f(T a) { return powf(10.0, a); }
-//T log2f(T a) { return logf(a)/logf(2.0); }
-//#endif
-//#ifdef __APPLE__
-//T exp10f(T a) { return powf(10.0, a); }
-//#endif
 }
 
 namespace SH {

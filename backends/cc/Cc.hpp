@@ -27,6 +27,10 @@
 #ifndef SHCC_HPP
 #define SHCC_HPP
 
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 #include <map>
 #include <string>
 #include <sstream>

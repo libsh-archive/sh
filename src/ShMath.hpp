@@ -24,52 +24,24 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHLIBDERIV_HPP
-#define SHLIBDERIV_HPP
+#ifndef SHMATH_HPP
+#define SHMATH_HPP
 
-#include "ShGeneric.hpp"
-#include "ShLib.hpp"
-#include "ShMatrix.hpp"
-
-#ifndef WIN32
-namespace SH {
-
-/** \defgroup lib_deriv Derivatives
- * @ingroup library
- * Operations related to derivatives of values.
- * @{
+/** @file ShMath.hpp
+ * Some C99 math functions that windows/apple don't have
  */
 
-/** Screen-space x derivatives
- */
-template<int N, ShValueType V>
-ShGeneric<N, V> dx(const ShGeneric<N, V>& var);
+#include <cmath>
 
-/** Screen-space y derivatives
- */
-template<int N, ShValueType V>
-ShGeneric<N, V> dy(const ShGeneric<N, V>& var);
-
-/** Maximum value of absolute derivatives
- */
-template<int N, ShValueType V>
-ShGeneric<N, V> fwidth(const ShGeneric<N, V>& var);
-
-/** Pair of screen-space derivatives
- */
-template<ShValueType V>
-ShGeneric<2, V> gradient(const ShGeneric<1, V>& var);
-
-/** Jacobian matrix
- */
-template<int N, ShValueType V>
-ShMatrix<2, N, SH_TEMP, V> jacobian(const ShGeneric<N, V>& var);
-
-/*@}*/
-
-}
+namespace {
+#ifdef WIN32
+inline float log2f(float a) { return logf(a) / logf(2.0f); }
+inline float exp2f(float a) { return powf(2.0f, a); }
+inline float exp10f(float a) { return powf(10.0f, a); }
 #endif
-
-#include "ShLibDerivImpl.hpp"
+#ifdef __APPLE__
+inline float exp10f(float a) { return powf(10.0f, a); }
+#endif
+}
 
 #endif

@@ -78,7 +78,12 @@ SH_DLLEXPORT extern const char* semanticTypeName[];
 
 /**  The various variable value types.
  */
+#ifdef WIN32
+typedef int ShValueType;
+enum __ShValueTypeEnum {
+#else 
 enum ShValueType {
+#endif
   SH_INTERVAL_DOUBLE,
   SH_INTERVAL_FLOAT,
   SH_DOUBLE,
