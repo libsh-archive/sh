@@ -156,14 +156,14 @@ ShProgramManipNode::ShProgramManipNode(const ShProgram &p)
 }
 
 ShProgram ShProgramManipNode::applyToInputs(ShManipVarIterator &finger, ShManipVarIterator end) const {
-  int i;
+  std::size_t i;
   for(i = 0; i < p->outputs.size() && finger != end; ++i, ++finger);
   // allow extra outputs from p 
   return p; 
 }
 
 ShProgram ShProgramManipNode::applyToOutputs(ShManipVarIterator &finger, ShManipVarIterator end) const {
-  int i;
+  std::size_t i;
   for(i = 0; i < p->inputs.size() && finger != end; ++i, ++finger);
   // allow extra inputs from p 
   return p; 

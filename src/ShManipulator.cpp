@@ -51,10 +51,10 @@ int OffsetRange<int>::absIndex( int index, int offset, const ShProgramNode::VarL
   if( offset == _FIRST ) return 0;
   else if( offset == _LAST ) return v.size() - 1;
   if( index < 0 ) index += v.size();
-  if( index < 0 || index >= v.size() ) return OFFSET_RANGE_BAD_INDEX; 
+  if( index < 0 || index >= static_cast<int>(v.size()) ) return OFFSET_RANGE_BAD_INDEX; 
 
   index += offset;
-  if( index < 0 || index >= v.size() ) return OFFSET_RANGE_BAD_OFFSET; 
+  if( index < 0 || index >= static_cast<int>(v.size()) ) return OFFSET_RANGE_BAD_OFFSET; 
   return index;
 }
 
@@ -85,7 +85,7 @@ int OffsetRange<std::string>::absIndex( std::string index, int offset,
   }
 
   result += offset;
-  if( result < 0 || result >= v.size()) result = OFFSET_RANGE_BAD_OFFSET;
+  if( result < 0 || result >= static_cast<int>(v.size())) result = OFFSET_RANGE_BAD_OFFSET;
   return result; 
 }
 

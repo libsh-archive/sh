@@ -205,7 +205,7 @@ ShProgram namedCombine(const ShProgram &a, const ShProgram &b) {
   ShFixedManipulator duplicator;
   for(i = 0; i < dups.size(); ++i) {
     if( dups[i].empty() ) continue;
-    for(int j = 0; j < dups[i].size(); ++j) swizzle.push_back(dups[i][j]);
+    for(std::size_t j = 0; j < dups[i].size(); ++j) swizzle.push_back(dups[i][j]);
     if( duplicator ) duplicator = duplicator & shDup(dups[i].size());
     else duplicator = shDup(dups[i].size());
   }

@@ -9,6 +9,16 @@ AC_DEFUN([SH_CHECK_BACKEND],
                  *) AC_MSG_ERROR(bad value ${enableval} for --enable-$1-backend) ;;
               esac],[ac_backend_$1=m4_default([$3], true)])
 ])
+AC_DEFUN([SH_CHECK_NONDEFAULT_BACKEND],
+[AC_ARG_ENABLE([$1-backend],
+               AC_HELP_STRING([--enable-$1-backend],
+                              [compile $2 backend (default=no)]),
+               [case "${enableval}" in
+	         yes) ac_backend_$1=true ;;
+		 no)  ac_backend_$1=false ;;
+                 *) AC_MSG_ERROR(bad value ${enableval} for --enable-$1-backend) ;;
+              esac],[ac_backend_$1=m4_default([$3], false)])
+])
 
 # SH_WITH_SH_DIR
 # Adds a --with-sh option to specify the Sh installation directory

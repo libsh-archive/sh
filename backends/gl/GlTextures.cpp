@@ -51,6 +51,7 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node)
     GLenum fpformats[4] = {GL_FLOAT_R_NV, GL_FLOAT_RG_NV, GL_FLOAT_RGB_NV, GL_FLOAT_RGBA_NV};
     return fpformats[node->size() - 1];
   }
+  return 0;
 }
 
 GLenum shGlFormat(const ShTextureNodePtr& node)

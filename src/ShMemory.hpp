@@ -122,8 +122,8 @@ protected:
   ShStorage(ShMemory* memory);
 
 private:
-  int m_timestamp;
   ShMemory* m_memory;
+  int m_timestamp;
 
   typedef std::map<std::pair<std::string, std::string>, ShTransfer*> TransferMap;
   static TransferMap* m_transfers;

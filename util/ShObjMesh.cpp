@@ -172,11 +172,11 @@ std::istream& ShObjMesh::readObj(std::istream &in) {
   }
 
   // convert faceVec to mesh
-  for(int i = 0; i < faceVec.size(); ++i) {
+  for(std::size_t i = 0; i < faceVec.size(); ++i) {
     VertexList vl;
     for(ShObjIndexedFace::iterator I = faceVec[i].begin(); I != faceVec[i].end(); ++I) {
       int vi = (*I)[0] - 1;
-      if( vi == -1 || vi >= vertexVec.size() ) {
+      if( vi == -1 || vi >= (int)vertexVec.size() ) {
         std::ostringstream os;
         os << "Invalid vertex index " << vi << " in OBJ file.";
         ShError( ShException(os.str()));
@@ -192,7 +192,7 @@ std::istream& ShObjMesh::readObj(std::istream &in) {
       int ni = (*I)[2] - 1; 
 
       if( tci != -1 ) {
-        if( tci >= tcVec.size() ) {
+        if( tci >= (int)tcVec.size() ) {
           std::ostringstream os;
           os << "Invalid texcoord index " << tci << " in OBJ file.";
           ShError( ShException(os.str()));
@@ -201,14 +201,14 @@ std::istream& ShObjMesh::readObj(std::istream &in) {
       }
 
       if( ni != -1 ) {
-        if( ni >= normVec.size() ) {
+        if( ni >= (int)normVec.size() ) {
           std::ostringstream os;
           os << "Invalid normal index " << ni << " in OBJ file.";
           ShError( ShException(os.str()));
         }
         edge->normal = normVec[ni];
 
-        if( ni >= tangentVec.size() ) {
+        if( ni >= (int)tangentVec.size() ) {
           // TODO make a tangent
         } else {
           edge->tangent = tangentVec[ni];

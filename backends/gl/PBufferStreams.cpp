@@ -172,7 +172,7 @@ void PBufferStreams::execute(const ShProgram& program,
     return;
   }
 
-  if (program->outputs.size() != dest.size()) {
+  if ((int)program->outputs.size() != dest.size()) {
     SH_DEBUG_ERROR("Number of stream program outputs ("
                    << program->outputs.size()
                    << ") does not match number of destinations ("
@@ -269,7 +269,7 @@ void PBufferStreams::execute(const ShProgram& program,
   // First, allocate textures for each input stream.
   // Need to ensure that input stream sizes are the same.
   int input_count = -1;
-  int tex_size;
+  int tex_size = 0;
   for (StreamInputMap::iterator I = input_map.begin(); I != input_map.end(); ++I) {
     if (input_count < 0) {
       input_count = I->first->count();
@@ -297,6 +297,9 @@ void PBufferStreams::execute(const ShProgram& program,
     case SH_ARB_ATI_PIXEL_FORMAT_FLOAT:
       tex = new ShTextureNode(SH_TEXTURE_2D, I->first->size(),
                               traits, tex_size, tex_size, 1);
+      break;
+    default:
+      tex = 0;
       break;
     }
 

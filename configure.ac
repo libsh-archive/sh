@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT(sh, 0.0.20040202, libsh-devel@lists.sourceforge.net, libsh)
+AC_INIT(sh, 0.0.20040316, libsh-devel@lists.sourceforge.net, libsh)
 AC_CONFIG_SRCDIR([src/ShAttrib.hpp])
 AM_INIT_AUTOMAKE
 
@@ -67,7 +67,20 @@ if test "x$ac_backend_arb" = xtrue ; then
 fi
 AM_CONDITIONAL(ENABLE_ARB_BACKEND, test x$ac_backend_arb = xtrue)
 
+SH_CHECK_NONDEFAULT_BACKEND([ati], [ATI])
+if test "x$ac_backend_ati" = xtrue ; then
+  GL_CHECK_GL_HEADERS([],
+    [AC_MSG_WARN([OpenGL headers (GL/gl.h and GL/glext.h) not found. Disabling ATI backend.])
+     ac_backend_ati=false])
+  GL_CHECK_GLEXT_VERSION([18], [], [
+    AC_MSG_WARN([glext.h version 18 or greater (available at http://oss.sgi.com/projects/ogl-sample/regi\
+stry/) not found. Disabling ATI backend.])
+    ac_backend_ati=false
+  ])
+fi
+AM_CONDITIONAL(ENABLE_ATI_BACKEND, test x$ac_backend_ati = xtrue)
 
+AM_CONDITIONAL(ENABLE_GL_BACKENDS, test x$ac_backend_ati = xtrue -o x$ac_backend_arb = xtrue)
 
 # Store the prefix as a variable
 AC_DEFINE_UNQUOTED(SH_INSTALL_PREFIX, "$prefix", [Installation prefix directory])
@@ -83,3 +96,9 @@ AC_CONFIG_FILES([Makefile
 		 util/Makefile
 		 doc/Makefile])
 AC_OUTPUT
+
+
+echo "Summary:"
+echo "SM Backend: $ac_backend_sm"
+echo "ARB Backend: $ac_backend_arb"
+echo "ATI Backend: $ac_backend_ati"

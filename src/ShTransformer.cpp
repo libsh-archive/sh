@@ -110,8 +110,8 @@ struct VariableSplitter {
     return true;
   }
 
-  ShTransformer::VarSplitMap &splits;
   int maxTuple;
+  ShTransformer::VarSplitMap &splits;
   bool& changed;
 };
 
@@ -135,7 +135,7 @@ struct StatementSplitter {
       vv.push_back(v);
       return;
     }
-    int i, j, k, n;
+    std::size_t i, j, k, n;
     const ShSwizzle &swiz = v.swizzle();
     
     // get VarNodeVec for src
@@ -146,7 +146,7 @@ struct StatementSplitter {
 
     // make and assign to a VarVec for temps
     for(i = 0, n = v.size(); n > 0; i += maxTuple, n -= maxTuple) {
-      int tsize = n < maxTuple ? n : maxTuple;
+      std::size_t tsize = (int)n < maxTuple ? n : maxTuple;
       //TODO  make this smarter so that it reuses variable nodes if it's just reswizlling a src node
       // (check that move elimination doesn't do this for us already)
       ShVariable tempVar(new ShVariableNode(SH_TEMP, tsize, SH_ATTRIB));
@@ -158,7 +158,7 @@ struct StatementSplitter {
       for(j = 0; j < srcVec.size(); ++j) {
         tempSize = 0;
         for(k = 0; k < tsize; ++k ) { 
-          if(swiz[i + k] / maxTuple == j) {
+          if(swiz[i + k] / maxTuple == (int)j) {
             tempSwiz[tempSize] = k;
             srcSwiz[tempSize] = swiz[i + k] % maxTuple;
             tempSize++;
@@ -175,7 +175,8 @@ struct StatementSplitter {
   // moves the result to the destination based on the destination swizzle
   void movToDest(ShTransformer::VarNodeVec &destVec, const ShSwizzle &destSwiz, 
       const VarVec &resultVec, ShBasicBlock::ShStmtList &stmts) {
-    int j, k;
+    std::size_t j;
+    int k;
     int offset = 0;
     int swizd[maxTuple];
     int swizr[maxTuple];
@@ -185,7 +186,7 @@ struct StatementSplitter {
       for(j = 0; j < destVec.size(); ++j) {
         size = 0;
         for(k = 0; k < I->size(); ++k) {
-          if( destSwiz[k + offset] / maxTuple == j) {
+          if( destSwiz[k + offset] / maxTuple == (int)j) {
             swizd[size] = destSwiz[k + offset] % maxTuple;
             swizr[size] = k;
             size++;
@@ -203,7 +204,7 @@ struct StatementSplitter {
   // 1) special cases for DOT, XPD (and any other future non-componentwise ops) implemented separately
   // 2) Everything else is in the form N = [1|N]+ in terms of tuple sizes involved in dest and src
   void updateStatement(ShStatement &oldStmt, VarVec srcVec[3], ShBasicBlock::ShStmtList &stmts) {
-    int i, j;
+    std::size_t i, j;
     ShVariable &dest = oldStmt.dest;
     const ShSwizzle &destSwiz = dest.swizzle();
     ShTransformer::VarNodeVec destVec;
@@ -263,7 +264,7 @@ struct StatementSplitter {
    * and ensures stit points at next statement in block*/
   void splitStatement(ShBasicBlockPtr block, ShBasicBlock::ShStmtList::iterator &stit) {
     ShStatement &stmt = *stit;
-    int i, j;
+    int i;
     if(!stmt.marked && stmt.dest.size() <= maxTuple) {
       for(i = 0; i < 3; ++i) if(stmt.src[i].size() > maxTuple) break;
       if(i == 3) { // nothing needs splitting
@@ -398,8 +399,8 @@ struct InputOutputConvertor {
 
   ShProgram m_program;
   ShCtrlGraphPtr m_graph;
-  bool& m_changed;
   ShVariableReplacer::VarMap &m_varMap; // maps from outputs used as srcs in computation to their temporary variables
+  bool& m_changed;
   int m_id;
 };
 

@@ -97,6 +97,7 @@ ArbBindingSpecs* arbBindingSpecs(bool output, const std::string& target)
     return output ? arbVertexOutputBindingSpecs : arbVertexAttribBindingSpecs;
   if (target == "gpu:fragment")
     return output ? arbFragmentOutputBindingSpecs : arbFragmentAttribBindingSpecs;
+  return 0;
 }
 
 using namespace SH;
@@ -193,7 +194,6 @@ void ArbCode::upload()
       const unsigned char* message = glGetString(GL_PROGRAM_ERROR_STRING_ARB);
       SH_DEBUG_WARN("Error at character " << pos);
       SH_DEBUG_WARN("Message: " << message);
-      int i = pos;
       while (pos >= 0 && text[pos] != '\n') pos--;
       if (pos > 0) pos++;
       SH_DEBUG_WARN("Code: " << text.substr(pos, text.find('\n', pos)));

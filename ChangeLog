@@ -1,5 +1,10 @@
 2004-03-16  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* configure.ac: Report backends. Add ATI backend.
+
+	* src/*, util/*, backends/gl/*: Make libsh compile without
+	warnings with -Wall. Nothing serious here.
+
 	* src/ShBaseTextureImpl.hpp (size): Fix my embarrassing bugs.
 
 2004-03-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>

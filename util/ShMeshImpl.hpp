@@ -57,11 +57,11 @@ ShMeshFace<M>::ShMeshFace(const ShMeshFace<M> &other)
 /** ShMeshEdge method definitions */
 template<typename M>
 ShMeshEdge<M>::ShMeshEdge()
-  : start(0), end(0), face(0), next(0), prev(0), sym(0) {}
+  : start(0), end(0), face(0), sym(0), next(0), prev(0) {}
 
 template<typename M>
 ShMeshEdge<M>::ShMeshEdge(const ShMeshEdge<M> &other)
-  : start(0), end(0), face(0), next(0), prev(0), sym(0) {} 
+  : start(0), end(0), face(0), sym(0), next(0), prev(0) {} 
 
 template<typename M>
 void ShMeshEdge<M>::setLinks(Vertex *s, Vertex *e, Face *f,
@@ -198,9 +198,8 @@ ShMesh<M>::addFace(const ShMesh<M>::VertexList &vl) {
   Face *newf = new Face();
   faces.insert(newf);
 
-  Edge *newe, *olde;
+  Edge *newe = 0, *olde = 0;
   Vertex *first = vl.front();
-  olde = 0;
   for(typename VertexList::const_iterator I = vl.begin(); I != vl.end();) {
     Vertex *start = *(I++);
     Vertex *end = (I == vl.end() ? first : *I); 
