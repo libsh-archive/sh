@@ -1,3 +1,31 @@
+2003-09-02  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* test/*.sht: Update to use new program specification syntax.
+	
+	* src/ShBackend.hpp: Make generateCode() take a program kind.
+
+	* backends/arb/ShArb.hpp: Update backend to take program kind in
+	generateCode().
+
+	* backends/sm/ShSmBackend.hpp: Update backend to take program kind
+	in generateCode().
+
+	* src/ShAlgebra.cpp (connect, combine): Allow generic programs and
+	determine the resulting program kind appropriately.
+
+	* src/ShAlgebra.hpp: Use generic programs in lose and keep.
+
+	* src/ShSyntax.cpp (shCompileShader): Add bodies for
+	shCompileShader.
+
+	* src/ShSyntax.hpp (SH_VERTEX_PROGRAM, SH_FRAGMENT_PROGRAM):
+	Rename to these instead of SH_{VERTEX,FRAGMENT}_SHADER.
+	(SH_BEGIN_VERTEX_PROGRAM, SH_BEGIN_FRAGMENT_PROGRAM): Add these.
+	(SH_BEGIN_PROGRAM): Allow generic programs (without kinds).
+	(shCompileShader): Add these functions.
+
+	* src/ShProgram.hpp, src/ShProgram.cpp: Make shader kinds optional.
+
 2003-08-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShAlgebra.hpp: Added operator<<, operator+, lose and keep.

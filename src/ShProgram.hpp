@@ -29,6 +29,7 @@
 
 #include <list>
 #include <map>
+#include <utility>
 #include "ShRefCount.hpp"
 #include "ShTokenizer.hpp"
 #include "ShVariableNode.hpp"
@@ -46,14 +47,26 @@ class ShBackend;
  */
 class ShProgramNode : public ShRefCountable {
 public:
-  ShProgramNode(int kind);
+  ShProgramNode(int kind = -1);
+
+  /// Forcefully compile this shader for a particular backend, even if
+  /// it has been compiled previously. Use code() to obtain the actual
+  /// code.
+  /// This operation will fail if this program does not have a
+  /// particular kind.
+  void compile(ShRefCount<ShBackend>& backend);
 
   /// Forcefully compile this shader for a particular backend, even if
   /// it has been compiled previously. Use code() to obtain the actual code.
-  void compile(ShRefCount<ShBackend>& backend);
+  void compile(int kind, ShRefCount<ShBackend>& backend);
   
   /// Obtain the code for a particular backend. Generates it if necessary.
+  /// This operation will fail if this program does not have a
+  /// particular kind.
   ShRefCount<ShBackendCode> code(ShRefCount<ShBackend>& backend);
+
+  /// Obtain the code for a particular backend. Generates it if necessary.
+  ShRefCount<ShBackendCode> code(int kind, ShRefCount<ShBackend>& backend);
 
   /// Notify this shader that a uniform variable has changed.
   void updateUniform(const ShVariableNodePtr& uniform);
@@ -80,16 +93,17 @@ public:
   VarList uniforms; ///< Uniform variables used in this shader
   VarList textures; ///< Textures used in this shader
 
+  /// Can be -1, if there is no kind associated with this program.
   int kind() const { return m_kind; }
   
 private:
 
+  int m_kind; ///< Can be -1, if there is no kind associated with this program.
+  
   void collectNodeVars(const ShRefCount<ShCtrlGraphNode>& node);
   void collectVar(const ShVariableNodePtr& node);
 
-  int m_kind; ///< Whether this is a vertex/fragment shader, etc.
-
-  std::map< ShRefCount<ShBackend>, ShRefCount<ShBackendCode> > m_code; ///< Compiled code is cached here.
+  std::map< std::pair< int, ShRefCount<ShBackend> >, ShRefCount<ShBackendCode> > m_code; ///< Compiled code is cached here.
 };
 
 typedef ShRefCount<ShProgramNode> ShProgram;

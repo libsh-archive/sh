@@ -11,7 +11,7 @@ struct F {
   }
 };
 
-ShProgram shader = SH_BEGIN_SHADER(0) {
+ShProgram shader = SH_BEGIN_VERTEX_PROGRAM {
   ShInputAttrib1f in; NAME(in);
   ShAttrib1f temp; NAME(temp);
   ShOutputAttrib1f out; NAME(out);
@@ -20,4 +20,4 @@ ShProgram shader = SH_BEGIN_SHADER(0) {
     out = temp + temp;
   } SH_ENDWHILE;
   temp = in + in;
-} SH_END_SHADER;
+} SH_END_PROGRAM;

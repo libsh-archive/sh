@@ -19,11 +19,11 @@ ShProgram operator<<(const ShProgram& a, const ShProgram& b);
 /// Equiv. to combine(a,b)
 ShProgram operator+(const ShProgram& a, const ShProgram& b);
 
-template<typename T, int progtype>
+template<typename T>
 struct keep {
   typedef typename T::ValueType ValType;
   operator ShProgram() {
-    ShProgram prog = SH_BEGIN_SHADER(progtype) {
+    ShProgram prog = SH_BEGIN_PROGRAM {
       T temp;
       ShAttrib<T::typesize, SH_VAR_INPUT, ValType> attr;
       attr.node()->specialType(temp.node()->specialType());
@@ -31,22 +31,22 @@ struct keep {
       ShAttrib<T::typesize, SH_VAR_OUTPUT, ValType> out;
       out.node()->specialType(temp.node()->specialType());
       out = attr;
-    } SH_END_SHADER;
+    } SH_END_PROGRAM;
     return prog;
   }
 };
 
-template<typename T, int progtype>
+template<typename T>
 struct lose {
   typedef typename T::ValueType ValType;
   operator ShProgram() {
-    ShProgram prog = SH_BEGIN_SHADER(progtype) {
+    ShProgram prog = SH_BEGIN_PROGRAM {
       T temp;
       ShAttrib<T::typesize, SH_VAR_INPUT, ValType> attr;
       attr.node()->specialType(temp.node()->specialType());
 
       ShAttrib4f dummy = dummy;
-    } SH_END_SHADER;
+    } SH_END_PROGRAM;
     return prog;
   }
 };

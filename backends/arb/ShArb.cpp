@@ -443,8 +443,8 @@ using namespace SH;
 
 static SH::ShRefCount<ArbBackend> instance = new ArbBackend();
 
-ArbCode::ArbCode(ArbBackendPtr backend, const ShProgram& shader)
-  : m_backend(backend), m_shader(shader),
+ArbCode::ArbCode(ArbBackendPtr backend, const ShProgram& shader, int kind)
+  : m_backend(backend), m_shader(shader), m_kind(kind),
     m_numTemps(0), m_numInputs(0), m_numOutputs(0), m_numParams(0), m_numConsts(0),
     m_numTextures(0), m_programId(0)
 {
@@ -496,12 +496,12 @@ void ArbCode::upload()
   if (!m_programId)
     shGlGenProgramsARB(1, &m_programId);
 
-  shGlBindProgramARB(shArbTargets[m_shader->kind()], m_programId);
+  shGlBindProgramARB(shArbTargets[m_kind], m_programId);
   
   std::ostringstream out;
   print(out);
   std::string text = out.str();
-  shGlProgramStringARB(shArbTargets[m_shader->kind()], GL_PROGRAM_FORMAT_ASCII_ARB, text.size(), text.c_str());
+  shGlProgramStringARB(shArbTargets[m_kind], GL_PROGRAM_FORMAT_ASCII_ARB, text.size(), text.c_str());
   int error = glGetError();
   if (error == GL_INVALID_OPERATION) {
     int pos = -1;
@@ -522,9 +522,9 @@ void ArbCode::bind()
     upload();
   }
   
-  shGlBindProgramARB(shArbTargets[m_shader->kind()], m_programId);
+  shGlBindProgramARB(shArbTargets[m_kind], m_programId);
   
-  SH::ShEnvironment::boundShader[m_shader->kind()] = m_shader;
+  SH::ShEnvironment::boundShader[m_kind] = m_shader;
 
   // Initialize constants
   for (RegMap::const_iterator I = m_registers.begin(); I != m_registers.end(); ++I) {
@@ -700,10 +700,10 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
   if (reg.type != SH_ARB_REG_PARAM) return;
   switch(reg.binding) {
   case SH_ARB_REG_PARAMLOC:
-    shGlProgramLocalParameter4fvARB(shArbTargets[m_shader->kind()], reg.bindingIndex, values);
+    shGlProgramLocalParameter4fvARB(shArbTargets[m_kind], reg.bindingIndex, values);
     break;
   case SH_ARB_REG_PARAMENV:
-    shGlProgramEnvParameter4fvARB(shArbTargets[m_shader->kind()], reg.bindingIndex, values);
+    shGlProgramEnvParameter4fvARB(shArbTargets[m_kind], reg.bindingIndex, values);
     break;
   default:
     return;
@@ -789,7 +789,7 @@ std::ostream& ArbCode::print(std::ostream& out)
   LineNumberer endl;
 
   // Print version header
-  switch(m_shader->kind()) {
+  switch(m_kind) {
   case 0:
     out << "!!ARBvp1.0" << endl;
     break;
@@ -1053,9 +1053,9 @@ void ArbCode::bindSpecial(const ShProgramNode::VarList::const_iterator& begin,
 void ArbCode::allocInputs()
 {
   // First, try to assign some "special" output register bindings
-  for (int i = 0; shArbAttribBindingSpecs[m_shader->kind()][i].binding != SH_ARB_REG_NONE; i++) {
+  for (int i = 0; shArbAttribBindingSpecs[m_kind][i].binding != SH_ARB_REG_NONE; i++) {
     bindSpecial(m_shader->inputs.begin(), m_shader->inputs.end(),
-                shArbAttribBindingSpecs[m_shader->kind()][i], m_inputBindings,
+                shArbAttribBindingSpecs[m_kind][i], m_inputBindings,
                 SH_ARB_REG_ATTRIB, m_numInputs);
   }
   
@@ -1066,8 +1066,8 @@ void ArbCode::allocInputs()
     m_registers[node] = ArbReg(SH_ARB_REG_ATTRIB, m_numInputs++);
 
     // Binding
-    for (int i = 0; shArbAttribBindingSpecs[m_shader->kind()][i].binding != SH_ARB_REG_NONE; i++) {
-      const ArbBindingSpecs& specs = shArbAttribBindingSpecs[m_shader->kind()][i];
+    for (int i = 0; shArbAttribBindingSpecs[m_kind][i].binding != SH_ARB_REG_NONE; i++) {
+      const ArbBindingSpecs& specs = shArbAttribBindingSpecs[m_kind][i];
 
       if (specs.allowGeneric && m_inputBindings[i] < specs.maxBindings) {
         m_registers[node].binding = specs.binding;
@@ -1082,9 +1082,9 @@ void ArbCode::allocInputs()
 void ArbCode::allocOutputs()
 {
   // First, try to assign some "special" output register bindings
-  for (int i = 0; shArbOutputBindingSpecs[m_shader->kind()][i].binding != SH_ARB_REG_NONE; i++) {
+  for (int i = 0; shArbOutputBindingSpecs[m_kind][i].binding != SH_ARB_REG_NONE; i++) {
     bindSpecial(m_shader->outputs.begin(), m_shader->outputs.end(),
-                shArbOutputBindingSpecs[m_shader->kind()][i], m_outputBindings,
+                shArbOutputBindingSpecs[m_kind][i], m_outputBindings,
                 SH_ARB_REG_OUTPUT, m_numOutputs);
   }
   
@@ -1095,8 +1095,8 @@ void ArbCode::allocOutputs()
     m_registers[node] = ArbReg(SH_ARB_REG_OUTPUT, m_numOutputs++);
 
     // Binding
-    for (int i = 0; shArbOutputBindingSpecs[m_shader->kind()][i].binding != SH_ARB_REG_NONE; i++) {
-      const ArbBindingSpecs& specs = shArbOutputBindingSpecs[m_shader->kind()][i];
+    for (int i = 0; shArbOutputBindingSpecs[m_kind][i].binding != SH_ARB_REG_NONE; i++) {
+      const ArbBindingSpecs& specs = shArbOutputBindingSpecs[m_kind][i];
 
       if (specs.allowGeneric && m_outputBindings[i] < specs.maxBindings) {
         m_registers[node].binding = specs.binding;
@@ -1168,7 +1168,7 @@ void ArbCode::allocTemps()
   
   m_tempRegs.clear();
   m_numTemps = 0;
-  for (int i = 0; i < m_backend->temps(m_shader->kind()); i++) {
+  for (int i = 0; i < m_backend->temps(m_kind); i++) {
     m_tempRegs.push_back(i);
   }
   
@@ -1218,10 +1218,10 @@ std::string ArbBackend::name() const
   return "arb";
 }
 
-ShBackendCodePtr ArbBackend::generateCode(const ShProgram& shader)
+ShBackendCodePtr ArbBackend::generateCode(int kind, const ShProgram& shader)
 {
   SH_DEBUG_ASSERT(shader.object());
-  ArbCodePtr code = new ArbCode(this, shader);
+  ArbCodePtr code = new ArbCode(this, shader, kind);
   code->generate();
   return code;
 }

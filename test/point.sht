@@ -4,7 +4,7 @@ ShPoint4f p1; NAME(p1);
 ShPosition3f pos1; NAME(pos1);
 ShMatrix4x4f mvw;
 
-ShProgram shader = SH_BEGIN_SHADER(0) {
+ShProgram shader = SH_BEGIN_VERTEX_PROGRAM {
   ShInputPoint1f in1; NAME(in1);
   ShInputPoint1f in2(3.0); NAME(in2);
   ShInputPoint4f a; NAME(a);
@@ -16,4 +16,4 @@ ShProgram shader = SH_BEGIN_SHADER(0) {
   //      out(0) = (a - b) | (b - a);
   out(0,1,2) = mvw | pos1;
   
-} SH_END_SHADER;
+} SH_END_PROGRAM;

@@ -57,7 +57,7 @@ enum ShArbRegType {
 
 class ArbCode : public SH::ShBackendCode {
 public:
-  ArbCode(SH::ShRefCount<ArbBackend> backend, const SH::ShProgram& shader);
+  ArbCode(SH::ShRefCount<ArbBackend> backend, const SH::ShProgram& shader, int kind);
   virtual ~ArbCode();
 
   virtual bool allocateRegister(const SH::ShVariableNodePtr& var);
@@ -122,6 +122,7 @@ private:
   
   SH::ShRefCount<ArbBackend> m_backend;
   SH::ShProgram m_shader;
+  int m_kind;
 
   typedef std::vector<ArbInst> ArbInstList;
   ArbInstList m_instructions;
@@ -166,7 +167,7 @@ public:
   
   std::string name() const;
 
-  SH::ShBackendCodePtr generateCode(const SH::ShProgram& shader);
+  SH::ShBackendCodePtr generateCode(int kind, const SH::ShProgram& shader);
 
   int instrs(int kind) { return m_instrs[kind]; }
   int temps(int kind) { return m_temps[kind]; }

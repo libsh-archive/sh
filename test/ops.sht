@@ -1,6 +1,6 @@
 // -*- C++ -*-
 
-ShProgram shader = SH_BEGIN_SHADER(0) {
+ShProgram shader = SH_BEGIN_VERTEX_PROGRAM {
   ShInputAttrib4f in1; NAME(in1);
   ShInputAttrib4f in2; NAME(in2);
   ShOutputAttrib4f out; NAME(out);
@@ -28,4 +28,4 @@ ShProgram shader = SH_BEGIN_SHADER(0) {
   out = max(in1, in2);
   kill(in1);
   
-} SH_END_SHADER;
+} SH_END_PROGRAM;

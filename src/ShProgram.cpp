@@ -42,31 +42,47 @@ ShProgramNode::ShProgramNode(int kind)
 
 void ShProgramNode::compile(ShRefCount<ShBackend>& backend)
 {
+  // TODO: Throw an exception here instead.
+  SH_DEBUG_ASSERT(m_kind >= 0);
+  compile(m_kind, backend);
+}
+
+void ShProgramNode::compile(int kind, ShRefCount<ShBackend>& backend)
+{
   if (!backend) return;
 
   ShEnvironment::shader = this;
   ShEnvironment::insideShader = true;
-  ShBackendCodePtr code = backend->generateCode(this);
+  ShBackendCodePtr code = backend->generateCode(kind, this);
 #ifdef SH_DEBUG
   code->print(std::cerr);
 #endif
   ShEnvironment::insideShader = false;
-  m_code[backend] = code;
+  m_code[std::make_pair(kind, backend)] = code;
 }
 
 ShRefCount<ShBackendCode> ShProgramNode::code(ShRefCount<ShBackend>& backend) {
+  // TODO: Throw an exception instead
+  SH_DEBUG_ASSERT(m_kind >= 0);
+
+  return code(m_kind, backend);
+}
+
+ShRefCount<ShBackendCode> ShProgramNode::code(int kind, ShRefCount<ShBackend>& backend) {
   if (!backend) return 0;
   assert(!ShEnvironment::insideShader);
 
-  if (m_code.find(backend) == m_code.end()) compile(backend);
+  if (m_code.find(std::make_pair(kind, backend)) == m_code.end()) compile(kind, backend);
 
-  return m_code[backend];
+  return m_code[std::make_pair(kind, backend)];
 }
 
 void ShProgramNode::updateUniform(const ShVariableNodePtr& uniform)
 {
-  if (ShEnvironment::boundShader[m_kind] == this) {
-    code(ShEnvironment::backend)->updateUniform(uniform);
+  for (int i = 0; i < shShaderKinds; i++) {
+    if (ShEnvironment::boundShader[i] == this) {
+      code(i, ShEnvironment::backend)->updateUniform(uniform);
+    }
   }
 }
 

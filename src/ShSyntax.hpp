@@ -42,25 +42,29 @@
 
 /// @name Shader definitions
 //@{
-/** \def SH_BEGIN_SHADER(kind)
- * Begin a new shader of the given \a kind.
- * Nesting shaders is not allowed.
- * @retval ShProgram A reference to the new shader.
- * @see SH_END_SHADER
+/** \def SH_BEGIN_PROGRAM
+ * Begin a new generic program block.
+ * Nesting programs is not allowed.
+ * @retval ShProgram A reference to the new program.
+ * @see SH_END_PROGRAM
  */
-#define SH_BEGIN_SHADER(kind) ::SH::shBeginShader(kind);
-/** \def SH_END_SHADER
- * End the current shader definition.
- * @see SH_BEGIN_SHADER
+#define SH_BEGIN_PROGRAM ::SH::shBeginShader(-1);
+/** \def SH_END_PROGRAM
+ * End the current program definition.
+ *
+ * If there is a backend and the program has a specified target
+ * (e.g. vertex or fragment), this will also compile the program.
+ *
+ * @see SH_BEGIN_PROGRAM
  */
-#define SH_END_SHADER         ::SH::shEndShader();
+#define SH_END_PROGRAM         ::SH::shEndShader();
 //@}
 
-#define SH_BEGIN_VERTEX_SHADER ::SH::shBeginShader(0);
-#define SH_BEGIN_FRAGMENT_SHADER ::SH::shBeginShader(1);
+#define SH_VERTEX_PROGRAM 0
+#define SH_FRAGMENT_PROGRAM 1
 
-#define SH_VERTEX_SHADER 0
-#define SH_FRAGMENT_SHADER 1
+#define SH_BEGIN_VERTEX_PROGRAM ::SH::shBeginShader(SH_VERTEX_PROGRAM);
+#define SH_BEGIN_FRAGMENT_PROGRAM ::SH::shBeginShader(SH_FRAGMENT_PROGRAM);
 
 ///@name If statements
 //@{
@@ -154,10 +158,18 @@
 
 namespace SH {
 
-ShProgram shBeginShader(int kind);
+ShProgram shBeginShader(int kind = -1);
 void shEndShader();
 
+/// Force compilation of a shader. The shader must have a target.
+void shCompileShader(ShProgram& shader);
+/// Force compilation of a shader for a given target
+void shCompileShader(int target, ShProgram& shader);
+
+/// Bind a shader. The shader must have a target.
 void shBindShader(ShProgram& shader);
+/// Bind a shader with the given target.
+void shBindShader(int target, ShProgram& shader);
 
 void shIf(bool);
 void shElse();

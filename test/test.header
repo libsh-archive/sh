@@ -3,6 +3,7 @@
 #include <fstream>
 #include "sh.hpp"
 #include "ShCtrlGraph.hpp"
+#include "ShDebug.hpp"
 
 using namespace SH;
 

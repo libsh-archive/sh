@@ -85,10 +85,21 @@ namespace SH {
 
 ShProgram connect(const ShProgram& a, const ShProgram& b)
 {
-  SH_DEBUG_ASSERT(a->kind() == b->kind());
   SH_DEBUG_ASSERT(a->outputs.size() == b->inputs.size());
-  
-  ShProgram program = new ShProgramNode(b->kind());
+
+  int rkind;
+
+  if (a->kind() < 0) {
+    rkind = b->kind(); // A doesn't have a target. Use b's.
+  } else {
+    if (b->kind() < 0) {
+      rkind = a->kind(); // A has a target, b doesn't
+    } else {
+      rkind = -1; // Connecting different targets.
+    }
+  }
+
+  ShProgram program = new ShProgramNode(rkind);
 
   ShCtrlGraphNodePtr heada, taila, headb, tailb;
   
@@ -138,9 +149,19 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
 
 ShProgram combine(const ShProgram& a, const ShProgram& b)
 {
-  SH_DEBUG_ASSERT(a->kind() == b->kind());
-  
-  ShProgram program = new ShProgramNode(b->kind());
+  int rkind;
+
+  if (a->kind() < 0) {
+    rkind = b->kind(); // A doesn't have a target. Use b's.
+  } else {
+    if (b->kind() < 0) {
+      rkind = a->kind(); // A has a target, b doesn't
+    } else {
+      rkind = -1; // Connecting different targets.
+    }
+  }
+
+  ShProgram program = new ShProgramNode(rkind);
 
   ShCtrlGraphNodePtr heada, taila, headb, tailb;
   

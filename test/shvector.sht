@@ -1,7 +1,7 @@
 ShVector4f v1; NAME(v1);
 ShMatrix4x4f mvw;
 
-ShProgram shader = SH_BEGIN_SHADER(0) {
+ShProgram shader = SH_BEGIN_VERTEX_PROGRAM {
   ShInputVector1f in1; NAME(in1);
   ShInputVector1f in2(3.0); NAME(in2);
   ShInputVector4f a; NAME(a);
@@ -13,4 +13,4 @@ ShProgram shader = SH_BEGIN_SHADER(0) {
   
   out(0,1,2) = mvw | t;
   
-} SH_END_SHADER;
+} SH_END_PROGRAM;

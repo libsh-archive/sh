@@ -85,7 +85,7 @@ class Backend;
 
 class BackendCode : public SH::ShBackendCode {
 public:
-  BackendCode(SH::ShRefCount<Backend> backend, const SH::ShProgram& shader);
+  BackendCode(SH::ShRefCount<Backend> backend, const SH::ShProgram& shader, int kind);
   virtual ~BackendCode();
 
   virtual bool allocateRegister(const SH::ShVariableNodePtr& var);
@@ -102,10 +102,13 @@ public:
 
   void allocRegs();
 
+  int kind() const { return m_kind; }
+
 private:
   SH::ShRefCount<Backend> m_backend;
   SH::ShProgram m_shader;
   SMshader m_smShader;
+  int m_kind;
 
   typedef std::vector<SmInstruction> SmInstList;
   SmInstList m_instructions; ///< The actual code.
@@ -127,7 +130,7 @@ private:
   int m_maxIR;
   int m_maxOR;
   int m_maxTex;
-  
+
   typedef std::map<SH::ShVariableNodePtr, SmRegister> RegMap;
   RegMap m_registers;
 
@@ -150,7 +153,7 @@ public:
   Backend();
   ~Backend();
   std::string name() const;
-  SH::ShBackendCodePtr generateCode(const SH::ShProgram& shader);
+  SH::ShBackendCodePtr generateCode(int kind, const SH::ShProgram& shader);
 
 private:
   void generateNode(BackendCodePtr& code, const SH::ShCtrlGraphNodePtr& node);

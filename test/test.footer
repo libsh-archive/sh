@@ -9,7 +9,9 @@
       return -1;
     }
 
-    ShBackendCodePtr code = backend->generateCode(shader);
+    SH_DEBUG_ASSERT(shader->kind() >= 0);
+
+    ShBackendCodePtr code = backend->generateCode(shader->kind(), shader);
     std::cerr << "Printing code:" << std::endl;
     code->print(std::cout);
 

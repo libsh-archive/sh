@@ -48,42 +48,43 @@ ShProgram shBeginShader(int kind)
 void shEndShader()
 {
   assert(ShEnvironment::insideShader);
-
-  // DEBUG
-  //std::cerr << "--- Tokenized: " << std::endl;
-  //std::cerr << *ShEnvironment::shader->tokenizer.blockList();
   
   ShEnvironment::shader->ctrlGraph = new ShCtrlGraph(ShEnvironment::shader->tokenizer.blockList());
 
   ShOptimizer optimizer(ShEnvironment::shader->ctrlGraph);
   optimizer.optimize(ShEnvironment::optimizationLevel);
   
-  //ShDomTree domTree(ShEnvironment::shader->ctrlGraph);
-  //domTree.debugDump();
-
-  /*
-  std::cerr << "--- Control graph: " << std::endl;
-  ShEnvironment::shader->ctrlGraph->print(std::cerr, 0);
-  */
-  //std::ofstream dotfile("control.dot");
-  //ShEnvironment::shader->ctrlGraph->graphvizDump(dotfile);
-
   ShEnvironment::shader->collectVariables();
-
-  /*
-  ShBackendPtr backend = ShBackend::lookup("sm");
-  ShBackendCodePtr code = backend->generateCode(ShEnvironment::shader);
-  code->print(std::cerr);
-  */
   
   ShEnvironment::insideShader = false;
+
+  if (ShEnvironment::shader->kind() >= 0) {
+    shCompileShader(ShEnvironment::shader);
+  }
+}
+
+void shCompileShader(ShProgram& shader)
+{
+  if (!ShEnvironment::backend) return;
+  shader->compile(ShEnvironment::backend);
+}
+
+void shCompileShader(int kind, ShProgram& shader)
+{
+  if (!ShEnvironment::backend) return;
+  shader->compile(kind, ShEnvironment::backend);
 }
 
 void shBindShader(ShProgram& shader)
 {
   if (!ShEnvironment::backend) return;
-  //  shader->code(ShEnvironment::backend)->upload();
   shader->code(ShEnvironment::backend)->bind();
+}
+
+void shBindShader(int kind, ShProgram& shader)
+{
+  if (!ShEnvironment::backend) return;
+  shader->code(kind, ShEnvironment::backend)->bind();
 }
 
 void shIf(bool)

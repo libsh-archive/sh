@@ -75,6 +75,7 @@ SMALL TASKS:
  - add operator*(T) and similar for division to Sh{Lib*,Matrix}.hpp
  X add operator[] to ShAttrib also to do one-element swizzle.
  - use a ShVariableKind instead of an int template parameter in ShAttrib and ShMatrix
+ - rename "shader kind" to "shader target" throughout the code.
 
 MEDIUM TASKS:
  X port more of the ShLib calls to the new model.

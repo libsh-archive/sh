@@ -1,6 +1,6 @@
 // -*- C++ -*-
 ShMatrix4x4f mv;
-ShProgram shader = SH_BEGIN_SHADER(0) {
+ShProgram shader = SH_BEGIN_VERTEX_PROGRAM {
   ShInputAttrib4f in; NAME(in);
   ShOutputMatrix4x4f matrix;
   
@@ -15,4 +15,4 @@ ShProgram shader = SH_BEGIN_SHADER(0) {
           matrix *= ShAttrib1f(3.0);
           matrix /= ShAttrib1f(3.0); */
   
-} SH_END_SHADER;
+} SH_END_PROGRAM;
