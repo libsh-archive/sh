@@ -10,12 +10,21 @@ tests = [
       [[1, 2, 3], [1], [1, 2, 3]],
       [[1], [1, 2, 3], [1, 2, 3]],
       [[1, 2, 3], [4, 5, 6], [4, 10, 18]],
+      [[-1, 2, -3], [4, -5, -6], [-4, -10, 18]],
       [[1, 2, 3], [0, 0, 0], [0, 0, 0]]]
       ],
     
     ['DIV', ['v', 'sv'], 'v', ['A / B'], []],
     
-    ['DOT', ['v', 'v'], '1', ['dot(A, B)', '(A | B)'], []],
+    ['DOT', ['v', 'v'], '1', ['dot(A, B)', '(A | B)'],
+     [[[1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [0.0]],
+      [[1.0, 1.0, 1.0], [1.0, 0.0, -1.0], [0.0]],
+      [[1.0, 1.0, 1.0], [1.0, 0.0, -1.0], [0.0]],
+      [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [3.0]],
+      [[-1.0, -1.0, -1.0], [1.0, 1.0, 1.0], [-3.0]],
+      [[0.0, 0.4, 0.8], [0.8, 1.0, 1.2], [0.4 + 0.8*1.2]]
+      ]
+     ],
     
     ['NORM', ['v'], 'v', ['normalize(A)'],
      [[l, [x / math.sqrt(reduce(lambda a, b: a+b, [x*x for x in l])) for x in l]]
@@ -30,8 +39,12 @@ tests = [
     
     ['XPD', ['3', '3'], '3', ['cross(A, B)', 'A ^ B'], []],
     
-    ['POW', ['v', 'sv'], 'v', ['pow(A, B)'], []]
-    ]
+    ['POW', ['v', 'sv'], 'v', ['pow(A, B)'],
+     [[[1.0, 1.0, 1.0], [1.0], [1.0, 1.0, 1.0]],
+      [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]]
+     ]
+     
+    ] # tests
 
 # Thanks to
 # 2002 by Erwin S. Andreasen -- http://www.andreasen.org/misc.shtml
@@ -70,32 +83,36 @@ int main(int argc, char** argv) {
 ''')
     terms = test[1]
     ops = test[3]
+    ops = map(lambda x: 'out = ' + x, ops)
+    ops.append('sh' + test[0] + '(out, ' +
+               ', '.join([string.ascii_uppercase[i] for i in range(len(terms))]) + ')')
     cases = test[4]
     for combination in cartesianProduct(terms):
-        prgname = test[0] + ''.join(combination);
-        f.write('  ShProgram ' + prgname + ' = SH_BEGIN_PROGRAM("gpu:stream") {\n')
-        max = 1
-        for i, size in enumerate(combination):
-            f.write('    ShAttrib<' + varsize(size) + ', SH_INPUT> ' + string.ascii_uppercase[i]
+        for oi, op in enumerate(ops):
+            prgname = test[0] + ''.join(combination) + str(oi);
+            f.write('  ShProgram ' + prgname + ' = SH_BEGIN_PROGRAM("gpu:stream") {\n')
+            max = 1
+            for i, size in enumerate(combination):
+                f.write('    ShAttrib<' + varsize(size) + ', SH_INPUT> ' + string.ascii_uppercase[i]
                     + ';\n')
-            nsize = int(varsize(size))
-            if nsize > max: max = nsize
-        outsize = test[2]
-        if outsize == 'v': outsize = str(max)
-        f.write('    ShAttrib<' + outsize + ', SH_OUTPUT> out;\n')
-        f.write('    out = ' + test[3][0] + ';\n')
-        f.write('  } SH_END;\n')
-        f.write('  ' + prgname + '->name("' + prgname + '");\n')
-        f.write('\n')
-        for case in cases:
-            if len(case) - 1 != len(combination): continue
-            if not reduce(lambda a, b: a and b,
-                          [len(x[0]) == int(varsize(x[1])) for x in zip(case[:-1], combination)],
-                          1):
-                continue
-            f.write('  run(' + prgname + ', ')
-            f.write(', '.join(['ShAttrib' + str(len(x)) + 'f(' + ', '.join([str(y) for y in x]) + ')' for x in case]) + ');\n')
-        f.write('\n')
+                nsize = int(varsize(size))
+                if nsize > max: max = nsize
+            outsize = test[2]
+            if outsize == 'v': outsize = str(max)
+            f.write('    ShAttrib<' + outsize + ', SH_OUTPUT> out;\n')
+            f.write('    ' + op + ';\n')
+            f.write('  } SH_END;\n')
+            f.write('  ' + prgname + '->name("' + op + ' [' + ' x '.join(combination) + ']");\n')
+            f.write('\n')
+            for case in cases:
+                if len(case) - 1 != len(combination): continue
+                if not reduce(lambda a, b: a and b,
+                              [len(x[0]) == int(varsize(x[1]))
+                               for x in zip(case[:-1], combination)], 1):
+                    continue
+                f.write('  run(' + prgname + ', ')
+                f.write(', '.join(['ShAttrib' + str(len(x)) + 'f(' + ', '.join([str(y) for y in x]) + ')' for x in case]) + ');\n')
+            f.write('\n')
     f.write('''}
 ''')
 

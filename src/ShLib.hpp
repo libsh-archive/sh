@@ -268,10 +268,6 @@ SH_SHLIB_BINARY_RETTYPE_OPERATION(type, pow, rettype, N);            \
 SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, pow, rettype, 1);        \
 SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_RIGHT(type, pow, rettype, N);       \
                                                         \
-SH_SHLIB_BINARY_RETTYPE_OPERATION(type, operator^, rettype, N);      \
-SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, operator^, rettype, 1);  \
-SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_RIGHT(type, operator^, rettype, N); \
-                                                        \
 SH_SHLIB_BINARY_RETTYPE_OPERATION(type, operator<, rettype, N);      \
 SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, operator<, rettype, 1);  \
 SH_SHLIB_BINARY_RETTYPE_OPERATION(type, operator<=, rettype, N);     \

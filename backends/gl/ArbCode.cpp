@@ -516,11 +516,15 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
     case SH_OP_DOT: 
       genDot(stmt.dest, stmt.src[0], stmt.src[1]);
       break;
-    case SH_OP_EXP:
-      genScalarVectorInst(stmt.dest, stmt.src[1], stmt.src[0], SH_ARB_EXP);
-      break;
+      //case SH_OP_EXP:
+      //genScalarVectorInst(stmt.dest, stmt.src[1], stmt.src[0], SH_ARB_EXP);
+      // TODO
+      //break;
     case SH_OP_EXP2:
-      genScalarVectorInst(stmt.dest, stmt.src[1], stmt.src[0], SH_ARB_EX2);
+      for (int i = 0; i < stmt.src[0].size(); i++) {
+        m_instructions.push_back(ArbInst(SH_ARB_EX2, stmt.dest(i), stmt.src[0](i)));
+      }
+      //genScalarVectorInst(stmt.dest, stmt.src[1], stmt.src[0], SH_ARB_EX2);
       break;
     case SH_OP_FLR:
       m_instructions.push_back(ArbInst(SH_ARB_FLR, stmt.dest, stmt.src[0]));
@@ -663,8 +667,11 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       break;
       }
     case SH_OP_POW:
-      // TODO: scalarize?
-      m_instructions.push_back(ArbInst(SH_ARB_POW, stmt.dest, stmt.src[0], stmt.src[1]));
+      for (int i = 0; i < stmt.src[0].size(); i++) {
+        bool scalar = stmt.src[1].size() <= 1;
+        m_instructions.push_back(ArbInst(SH_ARB_POW, stmt.dest(i), stmt.src[0](i),
+                                         stmt.src[1](scalar ? 0 : i)));
+      }
       break;
     case SH_OP_TEX:
     case SH_OP_TEXI:

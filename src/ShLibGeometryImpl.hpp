@@ -16,6 +16,13 @@ ShGeneric<3, T> cross(const ShGeneric<3, T>& left, const ShGeneric<3, T>& right)
   return t;
 }
 
+template<typename T>
+inline
+ShGeneric<3, T> operator^(const ShGeneric<3, T>& left, const ShGeneric<3, T>& right)
+{
+  return cross(left, right);
+}
+
 template<int N, typename T>
 inline
 ShGeneric<N, T> normalize(const ShGeneric<N, T>& var)

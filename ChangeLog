@@ -1,3 +1,23 @@
+2004-06-02  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/cpu/CPU.cpp (encode): Fix POW to work with scalar RHS
+	operands.
+
+	* backends/gl/ArbCode.cpp (genNode): Fix POW to scalarize vector
+	arguments.
+
+	* src/ShLibGeometryImpl.hpp (operator^): Define operator^ (it's
+	just cross). Fixes issue68. Gotta love low-hanging fruit.
+
+	* src/ShLibGeometry.hpp: Declare operator^ to mean cross product.
+
+	* src/ShLib.hpp (SH_SHLIB_USUAL_NON_UNIT_OPS_RETTYPE): Remove old
+	crufty operator^ declarations. Should probably go over this whole
+	thing and replace it (e.g. with Python code).
+
+	* test/regress/regress.py: Perform tests for all operations, added
+	more test data, cleaned up a few things.
+
 2004-06-01  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* test/regress: Added start of regression test suite.

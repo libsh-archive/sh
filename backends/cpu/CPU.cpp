@@ -1445,7 +1445,7 @@ namespace ShCPU {
 		 << " = pow("
 		 << resolve(stmt.src[0], i)
 		 << ", "
-		 << resolve(stmt.src[1], i)
+		 << resolve(stmt.src[1], (stmt.src[1].size() > 1 ? i : 0))
 		 << ");" << std::endl;
 	  }
 
