@@ -346,7 +346,7 @@ namespace SH {
   }
   
 
-  //Adjacent
+  // Adjoint
   template<int RowsCols, int Kind, typename T>
   ShMatrix<RowsCols, RowsCols, Kind, T>
   adj(const ShMatrix<RowsCols, RowsCols, Kind, T>& matrix){
