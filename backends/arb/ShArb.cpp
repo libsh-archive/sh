@@ -27,11 +27,33 @@
 #include "ShArb.hpp"
 #include <iostream>
 #include <sstream>
+
+#ifdef WIN32
+
+#include <windows.h>
+
+#include <GL/gl.h>
+#include <GL/glext.h>
+
+PFNGLPROGRAMSTRINGARBPROC glProgramStringARB = NULL;
+PFNGLBINDPROGRAMARBPROC glBindProgramARB = NULL;
+PFNGLGENPROGRAMSARBPROC glGenProgramsARB = NULL;
+PFNGLACTIVETEXTUREARBPROC glActiveTextureARB = NULL;
+PFNGLTEXIMAGE3DPROC glTexImage3D = NULL;
+PFNGLPROGRAMENVPARAMETER4FVARBPROC glProgramEnvParameter4fvARB = NULL;
+PFNGLPROGRAMLOCALPARAMETER4FVARBPROC glProgramLocalParameter4fvARB = NULL;
+PFNGLGETPROGRAMIVARBPROC glGetProgramivARB = NULL;
+
+#else
+
 #define GL_GLEXT_PROTOTYPES 1
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include <GL/glx.h>
 #undef GL_GLEXT_PROTOTYPES
+
+#endif /* WIN32 */
+
 #include "ShVariable.hpp"
 #include "ShDebug.hpp"
 #include "ShLinearAllocator.hpp"
@@ -58,13 +80,6 @@ const unsigned int shGlTextureType[] = {
 };
 
 using namespace SH;
-/*
-PFNGLPROGRAMSTRINGARBPROC shGlProgramStringARB;
-PFNGLACTIVETEXTUREPROC shGlActiveTexture;
-PFNGLPROGRAMLOCALPARAMETER4FVARBPROC shGlProgramLocalParameter4fvARB;
-PFNGLPROGRAMENVPARAMETER4FVARBPROC shGlProgramEnvParameter4fvARB;
-PFNGLGETPROGRAMIVARBPROC shGlGetProgramivARB;
-*/
 
 #define shGlProgramStringARB glProgramStringARB
 #define shGlActiveTextureARB glActiveTextureARB
@@ -442,7 +457,7 @@ std::ostream& operator<<(std::ostream& out, const ArbReg& reg)
 
 using namespace SH;
 
-static SH::ShRefCount<ArbBackend> instance = new ArbBackend();
+//static SH::ShRefCount<ArbBackend> instance = new ArbBackend();
 
 ArbCode::ArbCode(ArbBackendPtr backend, const ShProgram& shader, int kind)
   : m_backend(backend), m_shader(shader), m_kind(kind),
@@ -502,7 +517,7 @@ void ArbCode::upload()
   std::ostringstream out;
   print(out);
   std::string text = out.str();
-  shGlProgramStringARB(shArbTargets[m_kind], GL_PROGRAM_FORMAT_ASCII_ARB, text.size(), text.c_str());
+  shGlProgramStringARB(shArbTargets[m_kind], GL_PROGRAM_FORMAT_ASCII_ARB, (GLsizei)text.size(), text.c_str());
   int error = glGetError();
   if (error == GL_INVALID_OPERATION) {
     int pos = -1;
@@ -692,7 +707,7 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
   float values[4];
   int i;
   for (i = 0; i < uniform->size(); i++) {
-    values[i] = uniform->getValue(i);
+    values[i] = (float)uniform->getValue(i);
   }
   for (; i < 4; i++) {
     values[i] = 0.0;
@@ -1227,7 +1242,7 @@ void ArbCode::allocConsts()
     ShVariableNodePtr node = *I;
     m_registers[node] = ArbReg(SH_ARB_REG_CONST, m_numConsts);
     for (int i = 0; i < 4; i++) {
-      m_registers[node].values[i] = (i < node->size() ? node->getValue(i) : 0.0);
+      m_registers[node].values[i] = (float)(i < node->size() ? node->getValue(i) : 0.0);
     }
     m_numConsts++;
   }
@@ -1262,9 +1277,9 @@ void ArbCode::allocTemps()
 
   for (std::size_t i = 0; i < m_instructions.size(); i++) {
     ArbInst instr = m_instructions[i];
-    mark(allocator, instr.dest.node(), i);
+    mark(allocator, instr.dest.node(), (int)i);
     for (int j = 0; j < 3; j++) {
-      mark(allocator, instr.src[j].node(), i);
+      mark(allocator, instr.src[j].node(), (int)i);
     }
   }
   
@@ -1281,15 +1296,23 @@ void ArbCode::allocTemps()
 
 ArbBackend::ArbBackend()
 {
-  /*
-#define SH_ARB_GL_EXT_LOOKUP(type, name) shGl ## name = (PFNGL ## type ## PROC)glXGetProcAddressARB((const GLubyte*) "gl" # name ); SH_DEBUG_PRINT("Looked up " << # name << " as " << &shGl ## name)
-  SH_ARB_GL_EXT_LOOKUP(PROGRAMSTRINGARB, ProgramStringARB);
-  SH_ARB_GL_EXT_LOOKUP(ACTIVETEXTURE, ActiveTextureARB);
-  SH_ARB_GL_EXT_LOOKUP(PROGRAMLOCALPARAMETER4FVARB, ProgramLocalParameter4fvARB);
-  SH_ARB_GL_EXT_LOOKUP(PROGRAMENVPARAMETER4FVARB, ProgramEnvParameter4fvARB);
-  SH_ARB_GL_EXT_LOOKUP(GETPROGRAMIVARB, GetProgramivARB);
-#undef SH_ARB_GL_EXT_LOOKUP  
-*/
+	DWORD err;
+	if ((glProgramStringARB = (PFNGLPROGRAMSTRINGARBPROC)wglGetProcAddress("glProgramStringARB")) == NULL)
+		err = GetLastError();
+	if ((glBindProgramARB = (PFNGLBINDPROGRAMARBPROC)wglGetProcAddress("glBindProgramARB")) == NULL)
+		err = GetLastError();
+	if ((glGenProgramsARB = (PFNGLGENPROGRAMSARBPROC)wglGetProcAddress("glGenProgramsARB")) == NULL)
+		err = GetLastError();
+	if ((glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC)wglGetProcAddress("glActiveTextureARB")) == NULL)
+		err = GetLastError();
+	if ((glTexImage3D = (PFNGLTEXIMAGE3DPROC)wglGetProcAddress("glTexImage3D")) == NULL)
+		err = GetLastError();
+	if ((glProgramEnvParameter4fvARB = (PFNGLPROGRAMENVPARAMETER4FVARBPROC)wglGetProcAddress("glProgramEnvParameter4fvARB")) == NULL)
+		err = GetLastError();
+	if ((glProgramLocalParameter4fvARB = (PFNGLPROGRAMLOCALPARAMETER4FVARBPROC)wglGetProcAddress("glProgramLocalParameter4fvARB")) == NULL)
+		err = GetLastError();
+	if ((glGetProgramivARB = (PFNGLGETPROGRAMIVARBPROC)wglGetProcAddress("glGetProgramivARB")) == NULL)
+		err = GetLastError();
 
   // TODO Max TEX instructions, texture indirections
   for (int i = 0; i < 2; i++) {
@@ -1323,6 +1346,7 @@ std::string ArbBackend::name() const
 
 ShBackendCodePtr ArbBackend::generateCode(int kind, const ShProgram& shader)
 {
+
   SH_DEBUG_ASSERT(shader.object());
   ArbCodePtr code = new ArbCode(this, shader, kind);
   code->generate();
