@@ -36,6 +36,7 @@ namespace SH {
 
 /** Throws the given exception when ShEnvironment::useExceptions is on. 
  * Otherwise prints error message and aborts.
+ * @todo rename this to shError
  */
 void ShError( ShException exception ); 
 

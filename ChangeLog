@@ -1,3 +1,13 @@
+2004-04-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/GlTextures.cpp (shGlInternalFormat): With new ATI
+	drivers, floating-point textures now work on ATI. Hurrah!
+
+	* backends/gl/PBufferStreams.cpp: Do PBuffer timings.
+	Restore GLX state properly.
+	(setupContext): Only setup a new context if required. This can
+	still be improved.
+
 2004-04-13  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShChannelImpl.hpp (ShChannel): Use semantic_type instead of

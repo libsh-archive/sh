@@ -27,17 +27,54 @@
 #ifndef PBUFFERSTREAMS_HPP
 #define PBUFFERSTREAMS_HPP
 
+#include "ShProgram.hpp"
 #include "GlBackend.hpp"
 
 namespace shgl {
 
+#ifndef WIN32
+enum FloatExtension {
+  SH_ARB_NV_FLOAT_BUFFER,
+  SH_ARB_ATI_PIXEL_FORMAT_FLOAT,
+  SH_ARB_NO_FLOAT_EXT
+};
+
+struct ShGLXPBufferInfo {
+  ShGLXPBufferInfo()
+    : extension(SH_ARB_NO_FLOAT_EXT),
+      pbuffer(0), context(0), width(0), height(0),
+      shcontext(-1)
+  {
+  }
+  FloatExtension extension;
+  GLXPbuffer pbuffer;
+  GLXContext context;
+  int width, height;
+  int shcontext;
+  bool valid() { return extension != SH_ARB_NO_FLOAT_EXT
+                   && pbuffer
+                   && context; }
+};
+#endif
+
 struct PBufferStreams : public StreamStrategy {
   PBufferStreams(int context = 0);
+  virtual ~PBufferStreams();
   virtual StreamStrategy* create(int context);
   virtual void execute(const SH::ShProgram& program, SH::ShStream& dest);
 
 private:
   int m_context;
+
+  FloatExtension setupContext(int width, int height);
+
+  int m_setup_vp;
+  SH::ShProgram m_vp;
+  
+#ifndef WIN32
+  Display* m_display;
+  ShGLXPBufferInfo m_info;
+#endif
 };
 
 }

@@ -48,7 +48,26 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node)
   if (node->traits().clamping() == SH::ShTextureTraits::SH_CLAMPED) {
     return node->size();
   } else if (node->traits().clamping() == SH::ShTextureTraits::SH_UNCLAMPED) {
-    GLenum fpformats[4] = {GL_FLOAT_R_NV, GL_FLOAT_RG_NV, GL_FLOAT_RGB_NV, GL_FLOAT_RGBA_NV};
+
+    std::string exts(reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS)));
+    GLenum fpformats_nv[4] = {GL_FLOAT_R_NV, GL_FLOAT_RG_NV, GL_FLOAT_RGB_NV, GL_FLOAT_RGBA_NV};
+    GLenum fpformats_ati[4] = {GL_LUMINANCE_FLOAT32_ATI,
+                               GL_LUMINANCE_ALPHA_FLOAT32_ATI,
+                               GL_RGB_FLOAT32_ATI,
+                               GL_RGBA_FLOAT32_ATI};
+    GLenum* fpformats = 0;
+    if (exts.find("NV_float_buffer") != std::string::npos) {
+      fpformats = fpformats_nv;
+    } else if (exts.find("ATI_texture_float") != std::string::npos) {
+      fpformats = fpformats_ati;
+    }
+
+    if (!fpformats) {
+      SH_DEBUG_ERROR("Could not find appropriate floating-point format extension\n"
+                     "Using non-floating point texture instead!");
+      return node->size();
+    }
+    
     return fpformats[node->size() - 1];
   }
   return 0;
@@ -82,8 +101,12 @@ struct StorageFinder {
   bool operator()(const ShStoragePtr& storage) const
   {
     GlTextureStoragePtr t = shref_dynamic_cast<GlTextureStorage>(storage);
-    if (!t) return false;
-    if (t->context() != context) return false;
+    if (!t) {
+      return false;
+    }
+    if (t->context() != context) {
+      return false;
+    }
     if (!ignoreTarget) {
       if (t->texName()->params() != node->traits()) return false;
       if (t->target() != shGlTargets[node->dims()]) return false;
