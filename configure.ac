@@ -72,20 +72,7 @@ if test "x$sh_backend_arb" = xtrue ; then
 fi
 AM_CONDITIONAL(ENABLE_ARB_BACKEND, test x$sh_backend_arb = xtrue)
 
-SH_CHECK_NONDEFAULT_BACKEND([ati], [ATI])
-if test "x$sh_backend_ati" = xtrue ; then
-  GL_CHECK_GL_HEADERS([],
-    [SH_BACKEND_MESSAGE([ati], [OpenGL headers (GL/gl.h and GL/glext.h) not found. Disabling ATI backend.])
-     sh_backend_ati=false])
-  GL_CHECK_GLEXT_VERSION([18], [], [
-    SH_BACKEND_MESSAGE([ati], [glext.h version 18 or greater (available at http://oss.sgi.com/projects/ogl-sample/regi\
-stry/) not found. Disabling ATI backend.])
-    sh_backend_ati=false
-  ])
-fi
-AM_CONDITIONAL(ENABLE_ATI_BACKEND, test x$sh_backend_ati = xtrue)
-
-AM_CONDITIONAL(ENABLE_GL_BACKENDS, test x$sh_backend_ati = xtrue -o x$sh_backend_arb = xtrue)
+AM_CONDITIONAL(ENABLE_GL_BACKENDS, test x$sh_backend_arb = xtrue)
 
 AC_ARG_ENABLE([docs],
 	      AC_HELP_STRING([--enable-docs],
