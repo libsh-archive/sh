@@ -46,6 +46,11 @@ public:
   template<int K2, int K3>
   ShQuaternion(const ShAttrib<1, K2, T>& angle, 
                const ShVector<3, K3, T>& axis);
+  
+  // create a quaternion using a matrix, the input matrix must be orthogonal
+  // (ie. det(mat) = 1)
+  template<int K2>
+  ShQuaternion(const ShMatrix<4, 4, K2, T>& mat);
   template<int K2> 
   ShQuaternion& operator=(const ShQuaternion<K2, T>& other);
   template<int K2>
@@ -65,12 +70,20 @@ public:
   template<int K2>
   ShQuaternion<SH_TEMP, T> operator*(const ShAttrib<1, K2, T>& c);
   void normalize();
+  void getValues(T values []) const;
+  void setUnit(bool flag);
+  /// Set this variable's name. If set to the empty string, defaults
+  /// to the type and id of the variable.
+  void name(const std::string& name);
+  std::string name() const; ///< Get this variable's name
+
 
   template<int K2>
   ShAttrib<1, SH_TEMP, T> dot(const ShQuaternion<K2, T>& q) const;
   ShQuaternion<SH_TEMP, T> conjugate() const;
   ShQuaternion<SH_TEMP, T> inverse() const;
   ShMatrix<4, 4, SH_TEMP, T> getMatrix() const;
+  ShVector<4, SH_TEMP, T> getVector() const;
 private:
   ShVector<4, K, T> m_data;
 };

@@ -3,15 +3,18 @@
 namespace SH {
 template<int K, typename T>
 ShQuaternion<K, T>::ShQuaternion() 
-  : m_data(1.0,0.0,0.0,0.0)
 {
-  m_data.setUnit(true);
+  if (K == SH_TEMP) 
+  {
+    m_data = ShVector4f(1.0, 0.0, 0.0, 0.0);
+    m_data.setUnit(true);
+  }
 }
 
 template<int K, typename T>
 template<int K2>
 ShQuaternion<K, T>::ShQuaternion(const ShQuaternion<K2, T>& other)
-  : m_data(other.m_data)
+  : m_data(other.getVector())
 {
 }
 
@@ -34,6 +37,71 @@ ShQuaternion<K, T>::ShQuaternion(const ShAttrib<1, K2, T>& angle,
 }
 
 template<int K, typename T>
+template<int K2>
+ShQuaternion<K, T>::ShQuaternion(const ShMatrix<4, 4, K2, T>& mat)
+{
+  ShAttrib1f trace = 1.0 + mat[0](0) + mat[1](1) + mat[2](2);
+  trace = (trace >= 0.0)*trace + (trace < 0.0)*0.0;
+  ShAttrib1f c0 = (trace > 0.001);
+  ShAttrib1f c1 = ((mat[0](0) > mat[1](1))*(mat[0](0) > mat[2](2)));
+  ShAttrib1f c2 = ( mat[1](1) > mat[2](2) );
+  ShVector4f res0, res1, res2, res3;
+  ShAttrib1f S0 = sqrt(trace) * 2.0;
+  S0 += (S0 == 0.0)*1.0;
+  //float val;
+  //S0.getValues(&val);
+  //std::cout << "S0" << std::endl;
+  //std::cout << val << std::endl;
+  res0(0) = 0.25 * S0;
+  res0(1) = (mat[1](2) - mat[2](1)) / S0;
+  res0(2) = (mat[2](0) - mat[0](2)) / S0;
+  res0(3) = (mat[0](1) - mat[1](0)) / S0;
+  //std::cout << res0 << std::endl;
+  
+  trace = 1.0 + mat[0](0) - mat[1](1) - mat[2](2);
+  trace = (trace >= 0.0)*trace + (trace < 0.0)*0.0;
+  ShAttrib1f S1 = sqrt(trace) * 2.0;
+  S1 += (S1 == 0.0)*1.0;
+  //S1.getValues(&val);
+  //std::cout << "S1" << std::endl;
+  //std::cout << val << std::endl;
+  res1(0) = (mat[2](1) - mat[1](2)) / S1;
+  res1(1) = 0.25 * S1;
+  res1(2) = (mat[0](1) + mat[1](0)) / S1;
+  res1(3) = (mat[2](0) + mat[0](2)) / S1;
+  //std::cout << res1 << std::endl;
+  
+  trace = 1.0 - mat[0](0) + mat[1](1) - mat[2](2);
+  trace = (trace >= 0.0)*trace + (trace < 0.0)*0.0;
+  ShAttrib1f S2 = sqrt(trace) * 2.0;
+  S2 += (S2 == 0.0)*1.0;
+  //S2.getValues(&val);
+  //std::cout << "S2" << std::endl;
+  //std::cout << val << std::endl;
+  res2(0) = (mat[2](0) - mat[0](2)) / S2;
+  res2(1) = (mat[0](1) + mat[1](0)) / S2;
+  res2(2) = 0.25 * S2;
+  res2(3) = (mat[1](2) + mat[2](1)) / S2;
+  //std::cout << res2 << std::endl;
+  
+  trace = 1.0 - mat[0](0) - mat[1](1) + mat[2](2);
+  trace = (trace >= 0.0)*trace + (trace < 0.0)*0.0;
+  ShAttrib1f S3 = sqrt(trace) * 2.0;
+  S3 += (S3 == 0.0)*1.0;
+  //S3.getValues(&val);
+  //std::cout << "S3" << std::endl;
+  //std::cout << val << std::endl;
+  res3(0) = (mat[1](0) - mat[0](1)) / S3;
+  res3(1) = (mat[2](0) + mat[0](2)) / S3;
+  res3(2) = (mat[1](2) + mat[2](1)) / S3;
+  res3(3) = 0.25 * S3;
+  //std::cout << res3 << std::endl;
+  m_data = c0*res0 + 
+    (c0 == 0.0)*(c1*res1 + (c1 == 0.0)*(c2*res2 + (c2 == 0.0)*res3));
+  m_data.setUnit(true);
+}
+
+template<int K, typename T>
 std::ostream& operator<<(std::ostream& out, const ShQuaternion<K, T>& q)
 {
   float vals[4];
@@ -48,7 +116,7 @@ template<int K2>
 ShQuaternion<K, T>& 
 ShQuaternion<K, T>::operator=(const ShQuaternion<K2, T>& other) 
 {
-  m_data = other.m_data;
+  m_data = other.getVector();
   return *this;
 }
 
@@ -57,7 +125,7 @@ template<int K2>
 ShQuaternion<K, T>& 
 ShQuaternion<K, T>::operator+=(const ShQuaternion<K2, T>& right) 
 {
-  m_data += right.m_data;
+  m_data += right.getVector();
   return *this;
 }
 
@@ -66,7 +134,7 @@ template<int K2>
 ShQuaternion<K, T>& 
 ShQuaternion<K, T>::operator-=(const ShQuaternion<K2, T>& right) 
 {
-  m_data -= right.m_data;
+  m_data -= right.getVector();
   return *this;
 }
 
@@ -76,13 +144,14 @@ ShQuaternion<K, T>&
 ShQuaternion<K, T>::operator*=(const ShQuaternion<K2, T>& right) 
 {
   ShVector4f result;
+  ShVector4f rightData = right.getVector();
   result(0) = 
-    m_data(0)*right.m_data(0) - SH::dot(m_data(1,2,3), right.m_data(1,2,3));
+    m_data(0)*rightData(0) - SH::dot(m_data(1,2,3), rightData(1,2,3));
   result(1,2,3) = 
-    m_data(0)*right.m_data(1,2,3) + right.m_data(0)*m_data(1,2,3) + 
-    cross(m_data(1,2,3), right.m_data(1,2,3));
+    m_data(0)*rightData(1,2,3) + rightData(0)*m_data(1,2,3) + 
+    cross(m_data(1,2,3), rightData(1,2,3));
 
-  result.setUnit(m_data.isUnit() && right.m_data.isUnit());
+  result.setUnit(m_data.isUnit() && rightData.isUnit());
   m_data = result;
   return *this;
 }
@@ -101,22 +170,18 @@ template<int K2>
 ShAttrib<1, SH_TEMP, T> 
 ShQuaternion<K, T>::dot(const ShQuaternion<K2, T>& q) const 
 {
-  return SH::dot(m_data, q.m_data);
+  return SH::dot(m_data, q.getVector());
 }
 
 template<int K, typename T>
 ShQuaternion<SH_TEMP, T> ShQuaternion<K, T>::conjugate() const 
 {
-  /*  TODO after bug fix, revert to old code 
-  ShVector4f conjData = -m_data;
-  conjData(0) = -conjData(0);
- */
   ShVector4f conjData;
   conjData(0) = m_data(0);
-  conjData(1,2,3) = -m_data(1,2,3);
+  conjData(1, 2, 3) = -m_data(1, 2, 3);
   conjData.setUnit(m_data.isUnit());
 
-  return ShQuaternion(conjData);
+  return ShQuaternion<SH_TEMP>(conjData);
 }
 
 template<int K, typename T>
@@ -167,6 +232,12 @@ ShMatrix<4, 4, SH_TEMP, T> ShQuaternion<K, T>::getMatrix() const
 }
 
 template<int K, typename T>
+ShVector<4, SH_TEMP, T> ShQuaternion<K, T>::getVector() const
+{
+  return m_data;
+}
+
+template<int K, typename T>
 template<int K2>
 ShQuaternion<SH_TEMP, T> 
 ShQuaternion<K, T>::operator+(const ShQuaternion<K2, T>& q)
@@ -208,6 +279,18 @@ void ShQuaternion<K, T>::normalize()
 	m_data = normalize(m_data);
 }
 
+template<int K, typename T>
+void ShQuaternion<K, T>::setUnit(bool flag)
+{
+	m_data.setUnit(flag);
+}
+
+template<int K, typename T>
+void ShQuaternion<K, T>::getValues(T values[]) const
+{
+	m_data.getValues(values);
+}
+
 template<int K, typename T, int K2>
 ShQuaternion<SH_TEMP, T> 
 operator*(const ShAttrib<1, K2, T>& c, const ShQuaternion<K, T>& q)
@@ -233,5 +316,18 @@ slerp(const ShQuaternion<K1, T>& q1, const ShQuaternion<K2, T>& q2,
 
   return (sin((1.0 - t)*theta)/sinTheta)*q1 + (sin(t*theta)/sinTheta)*q2prime;
 }
+
+template<int K, typename T>
+std::string ShQuaternion<K, T>::name() const
+{
+    return m_data.name();
+}
+
+template<int K, typename T>
+void ShQuaternion<K, T>::name(const std::string& name)
+{
+    m_data.name(name);
+}
+
 
 }
