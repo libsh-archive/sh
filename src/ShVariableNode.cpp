@@ -1,4 +1,5 @@
 #include <sstream>
+#include <cassert>
 #include "ShEnvironment.hpp"
 #include "ShVariableNode.hpp"
 
@@ -8,8 +9,21 @@ ShVariableNode::ShVariableNode(ShVariableKind kind, int size)
   : m_uniform(!ShEnvironment::insideShader), m_kind(kind), m_size(size),
     m_id(m_maxID++), m_values(0)
 {
-  if (m_uniform || kind == SH_VAR_CONST) {
+  if (m_uniform || m_kind == SH_VAR_CONST) {
     m_values = new ValueType[size];
+  }
+  switch (m_kind) {
+  case SH_VAR_INPUT:
+    assert(ShEnvironment::shader);
+    ShEnvironment::shader->inputs.push_back(this);
+    break;
+  case SH_VAR_OUTPUT:
+    assert(ShEnvironment::shader);
+    ShEnvironment::shader->outputs.push_back(this);
+    break;
+  default:
+    // Do nothing
+    break;
   }
 }
 

@@ -24,7 +24,7 @@ AC_ARG_ENABLE([debug], AC_HELP_STRING([--enable-debug], [enable debugging inform
    AC_DEFINE(SH_DEBUG, 1, [Enable debugging information])
    AC_MSG_RESULT(default (yes))
    ])
-CXXFLAGS="-g -Wall -O2"
+CXXFLAGS="-g -Wall -O0"
 
 # Checks for libraries.
 

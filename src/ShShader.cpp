@@ -1,4 +1,8 @@
 #include "ShShader.hpp"
+#include <cassert>
+#include <algorithm>
+#include "ShBackend.hpp"
+#include "ShEnvironment.hpp"
 
 namespace SH {
 
@@ -6,6 +10,25 @@ ShShaderNode::ShShaderNode(int kind)
   : m_kind(kind)
 {
 }
+
+ShRefCount<ShBackendCode> ShShaderNode::code(ShRefCount<ShBackend>& backend) {
+  if (!backend) return 0;
+  assert(!ShEnvironment::insideShader);
+
+  if (m_code.find(backend) == m_code.end()) {
+    ShEnvironment::shader = this;
+    ShEnvironment::insideShader = true;
+    ShBackendCodePtr code = backend->generateCode(this);
+#ifdef SH_DEBUG
+    code->print(std::cerr);
+#endif
+    ShEnvironment::insideShader = false;
+    m_code[backend] = code;
+  }
+
+  return m_code[backend];
+}
+  
 
 void ShShaderNode::collectVariables()
 {
@@ -39,16 +62,18 @@ void ShShaderNode::collectNodeVars(const ShCtrlGraphNodePtr& node)
 void ShShaderNode::collectVar(const ShVariableNodePtr& var) {
   if (!var) return;
   if (var->uniform()) {
-    uniforms.insert(var);
+    if (std::find(uniforms.begin(), uniforms.end(), var) != uniforms.end()) uniforms.push_back(var);
   } else switch (var->kind()) {
   case SH_VAR_INPUT:
-    inputs.insert(var);
   case SH_VAR_OUTPUT:
-    outputs.insert(var);
+    // Taken care of by ShVariableNode constructor
+    break;
   case SH_VAR_TEMP:
-    temps.insert(var);
+    if (std::find(temps.begin(), temps.end(), var) != temps.end()) temps.push_back(var);
+    break;
   case SH_VAR_CONST:
-    constants.insert(var);
+    if (std::find(constants.begin(), constants.end(), var) != constants.end()) constants.push_back(var);
+    break;
   }
 }
 

@@ -1,9 +1,12 @@
 #ifndef SHLIB_HPP
 #define SHLIB_HPP
 
-namespace SH {
-
+#include <cmath>
+#include <cassert>
+#include "ShVariable.hpp"
 #include "ShAttrib.hpp"
+
+namespace SH {
 
 /** Utility template to check whether dimensions are equal or scalar.
  * If ScalarLHS or ScalarRHS are true, then the left or right
@@ -137,6 +140,69 @@ ShVariableN<N, T> operator/(const ShVariableN<N, T>& left, const ShVariableN<M, 
     return t;
   }
 }
+
+//--- Library calls "ported" from Cg
+
+/// Absolute value
+template<int N, typename T>
+ShVariableN<N, T> abs(const ShVariableN<N, T>& var)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(var.hasValues());
+    T vals[N];
+    var.getValues(vals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = (vals[i] >= 0.0 ? vals[i] : -vals[i]);
+    return ShConstant<N, T>(result);
+  } else {
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, SH_OP_ABS, var);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    
+    return t;
+  }
+}
+
+/// Arccosine of x. x in [-1, 1], result in [-pi/2, pi/2]
+template<int N, typename T>
+ShVariableN<N, T> acos(const ShVariableN<N, T>& var)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(var.hasValues());
+    T vals[N];
+    var.getValues(vals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = std::acos(vals[i]) - M_PI/2;
+    return ShConstant<N, T>(result);
+  } else {
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, SH_OP_ACOS, var);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    
+    return t;
+  }
+}
+
+/// Arcsine of x. x in [-1, 1]. Result in [0, pi]
+template<int N, typename T>
+ShVariableN<N, T> asin(const ShVariableN<N, T>& var)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(var.hasValues());
+    T vals[N];
+    var.getValues(vals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = std::asin(vals[i]) + M_PI/2;
+    return ShConstant<N, T>(result);
+  } else {
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, SH_OP_ASIN, var);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    
+    return t;
+  }
+}
+
 
 }
 

@@ -12,6 +12,8 @@ namespace SH {
 ShShader shBeginShader(int kind);
 void shEndShader();
 
+void shBindShader(ShShader& shader);
+
 void shIf(bool);
 void shElse();
 void shEndIf();

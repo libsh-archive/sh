@@ -1,9 +1,10 @@
 #include "ShCtrlGraph.hpp"
+#include <iostream>
+#include <cassert>
 #include "ShBasicBlock.hpp"
 #include "ShToken.hpp"
 #include "ShUtility.hpp"
 #include "ShParser.hpp"
-#include <iostream>
 
 namespace SH {
 

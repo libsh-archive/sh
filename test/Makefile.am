@@ -2,7 +2,7 @@ check_PROGRAMS = do if for ops simple uniforms while
 
 AM_CPPFLAGS = -I../src
 
-LDADD = ../../smash/software/libsm.a ../src/libsh.la ../backends/sm/Backend.o
+LDADD = ../../sm/src/libsm.la ../src/libsh.la ../backends/sm/Backend.o
 LDFLAGS = -all-static
 
 do_SOURCES = do.cpp

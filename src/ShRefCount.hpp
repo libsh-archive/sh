@@ -109,8 +109,10 @@ template<typename T1>
 ShRefCount<T>::ShRefCount(const ShRefCount<T1>& other)
   : m_object(0)
 {
-  m_object = dynamic_cast<T*>(other.object());
-  if (m_object) m_object->acquireRef();
+  if (other.object()) {
+    m_object = dynamic_cast<T*>(other.object());
+    if (m_object) m_object->acquireRef();
+  }
 }
 
 template<typename T>
@@ -138,8 +140,12 @@ ShRefCount<T>& ShRefCount<T>::operator=(const ShRefCount<T1>& other)
   if (m_object == other.object()) return *this;
   releaseRef();
 
-  m_object = dynamic_cast<T*>(other.object());
-  if (m_object) m_object->acquireRef();
+  if (!other.object()) {
+    m_object = 0;
+  } else {
+    m_object = dynamic_cast<T*>(other.object());
+    if (m_object) m_object->acquireRef();
+  }
   
   return *this;
 }

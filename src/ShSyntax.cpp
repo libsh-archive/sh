@@ -1,9 +1,11 @@
 #include <iostream>
 #include <fstream>
+#include <cassert>
 #include "ShSyntax.hpp"
 #include "ShEnvironment.hpp"
 #include "ShTokenizer.hpp"
 #include "ShToken.hpp"
+#include "ShShader.hpp"
 #include "ShBackend.hpp"
 
 namespace SH {
@@ -34,16 +36,18 @@ void shEndShader()
   ShEnvironment::shader->ctrlGraph->graphvizDump(dotfile);
 
   ShEnvironment::shader->collectVariables();
-  
-  std::cerr << "--- SM code:" << std::endl;
+
   ShBackendPtr backend = ShBackend::lookup("sm");
-  if (backend) {
-    ShBackendCodePtr code = backend->generateCode(ShEnvironment::shader);
-    code->print(std::cerr);
-  } else {
-    std::cerr << "SM backend not loaded!" << std::endl;
-  }
+  ShBackendCodePtr code = backend->generateCode(ShEnvironment::shader);
+  code->print(std::cerr);
+  
   ShEnvironment::insideShader = false;
+}
+
+void shBindShader(ShShader& shader)
+{
+  if (!ShEnvironment::backend) return;
+  shader->code(ShEnvironment::backend)->bind();
 }
 
 void shIf(bool)

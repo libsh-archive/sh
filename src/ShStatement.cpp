@@ -12,6 +12,12 @@ const ShOperationInfo opInfo[] = {
   {"ADD", 2},
   {"MUL", 2},
   {"DIV", 2},
+  {"ABS", 1},
+  {"ACOS", 1},
+  {"ASIN", 1},
+  {"ATAN", 1},
+  {"ATAN2", 2},
+  {"CEIL", 1},
   {0, 0}
 };
 

@@ -19,6 +19,9 @@ int main()
       out = in1 * in2(3);
       out = in1 / in2;
       out = in1 / in2(3);
+      out = abs(in1);
+      out = acos(in1);
+      out = asin(in1);
     } SH_END_SHADER;
   } catch (const ShException& e) {
     std::cerr << "SH Exception: " << e.message() << std::endl;

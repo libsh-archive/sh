@@ -1,13 +1,17 @@
 #ifndef SHSHADER_HPP
 #define SHSHADER_HPP
 
-#include <set>
+#include <list>
+#include <map>
 #include "ShRefCount.hpp"
 #include "ShTokenizer.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShVariableNode.hpp"
 
 namespace SH {
+
+class ShBackendCode;
+class ShBackend;
 
 /** A particular shader.
  * A shader consists mostly of a parser for its body and some metadata
@@ -27,7 +31,7 @@ public:
   /// to make lists of all the variables used in the shader.
   void collectVariables();
   
-  typedef std::set<ShVariableNodePtr> VarList;
+  typedef std::list<ShVariableNodePtr> VarList;
   
   VarList inputs; ///< Input variables used in this shader
   VarList outputs; ///< Output variables used in this shader
@@ -36,13 +40,18 @@ public:
   VarList uniforms; ///< Uniform variables used in this shader
 
   int kind() const { return m_kind; }
+
+  /// Obtain the code for a particular backend. Generates it if necessary.
+  ShRefCount<ShBackendCode> code(ShRefCount<ShBackend>& backend);
   
 private:
 
   void collectNodeVars(const ShCtrlGraphNodePtr& node);
   void collectVar(const ShVariableNodePtr& node);
-  
+
   int m_kind;
+
+  std::map< ShRefCount<ShBackend>, ShRefCount<ShBackendCode> > m_code;
 };
 
 typedef ShRefCount<ShShaderNode> ShShader;
@@ -50,3 +59,4 @@ typedef ShRefCount<ShShaderNode> ShShader;
 }
 
 #endif
+

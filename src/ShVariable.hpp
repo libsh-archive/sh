@@ -56,6 +56,7 @@ protected:
  * This is only provided so that subclasses can derive from it and
  * indicate that certain operations only work on variables of certain
  * lengths.
+ *
  */
 template<int N, typename T>
 class ShVariableN : public ShVariable 

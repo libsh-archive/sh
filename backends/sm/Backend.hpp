@@ -34,10 +34,10 @@ struct SmInstruction {
 };
 
 enum SmRegType {
-  SHSM_REG_INPUT,
-  SHSM_REG_OUTPUT,
-  SHSM_REG_TEMP,
-  SHSM_REG_CONST,
+  SHSM_REG_INPUT = 0,
+  SHSM_REG_OUTPUT = 1,
+  SHSM_REG_TEMP = 2,
+  SHSM_REG_CONST = 3,
 };
 
 struct SmRegister {
@@ -78,7 +78,7 @@ private:
   SmInstList m_instructions; ///< The actual code.
 
   SmRegister getReg(const SH::ShVariableNodePtr& var);
-  SMreg getSmReg(const SH::ShVariableNodePtr& var);
+  SMreg getSmReg(const SH::ShVariable& var);
 
   int m_maxCR;
   int m_maxTR;

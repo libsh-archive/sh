@@ -17,6 +17,12 @@ enum ShOperation {
   SH_OP_ADD, ///< Binary addition
   SH_OP_MUL, ///< Binary multiplication
   SH_OP_DIV, ///< Binary division
+  SH_OP_ABS, ///< Unary absolute value
+  SH_OP_ACOS, ///< Unary arccosine (result between -pi/2 and pi/2)
+  SH_OP_ASIN, ///< Unary arcsine (result between 0 and pi)
+  SH_OP_ATAN, ///< Unary arctan (result between -pi/2 and pi/2)
+  SH_OP_ATAN2, ///< Binary arctan of src2/src1 (result between -pi and pi)
+  SH_OP_CEIL, ///< Unary smallest integer not less than src1
   // TODO: finish these
 };
 

@@ -1,5 +1,6 @@
 #include <algorithm>
 #include "ShBackend.hpp"
+#include "ShShader.hpp"
 
 namespace SH {
 

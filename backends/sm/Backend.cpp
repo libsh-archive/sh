@@ -1,6 +1,7 @@
 #include "Backend.hpp"
 #include <iostream>
 #include <sstream>
+#include "ShEnvironment.hpp"
 #include "ShDebug.hpp"
 #include "sm.hpp"
 
@@ -52,6 +53,7 @@ BackendCode::~BackendCode()
 
 void BackendCode::upload()
 {
+  SH_DEBUG_PRINT("Uploading shader");
   m_smShader = smDeclareShader(m_shader->kind());
   smShaderBegin(m_smShader);
 
@@ -59,6 +61,7 @@ void BackendCode::upload()
   for (int i = 0; i < m_maxIR; i++) m_iR[i] = smInputReg(i);
   for (int i = 0; i < m_maxOR; i++) m_oR[i] = smOutputReg(i);
   for (int i = 0; i < m_maxCR; i++) m_cR[i] = smConstantReg(i);
+
 
   // Initialize constants
   for (RegMap::const_iterator I = m_registers.begin(); I != m_registers.end(); ++I) {
@@ -79,17 +82,14 @@ void BackendCode::upload()
 
   for (SmInstList::const_iterator I = m_instructions.begin(); I != m_instructions.end();
        ++I) {
-    // TODO: Negation!
     if (I->src1.null()) {
-      smInstr(I->op, getSmReg(I->dest.node()));
+      smInstr(I->op, getSmReg(I->dest));
     } else if (I->src2.null()) {
-      smInstr(I->op, getSmReg(I->dest.node()), getSmReg(I->src1.node()));
+      smInstr(I->op, getSmReg(I->dest), getSmReg(I->src1));
     } else if (I->src3.null()) {
-      smInstr(I->op, getSmReg(I->dest.node()), getSmReg(I->src1.node()),
-              getSmReg(I->src2.node()));
+      smInstr(I->op, getSmReg(I->dest), getSmReg(I->src1), getSmReg(I->src2));
     } else {
-      smInstr(I->op, getSmReg(I->dest.node()), getSmReg(I->src1.node()),
-              getSmReg(I->src2.node()), getSmReg(I->src3.node()));
+      smInstr(I->op, getSmReg(I->dest), getSmReg(I->src1), getSmReg(I->src2), getSmReg(I->src3));
     }
   }
   
@@ -98,8 +98,10 @@ void BackendCode::upload()
 
 void BackendCode::bind()
 {
-  // TODO: Set constants
+  SH_DEBUG_PRINT("Binding shader");
   smBindShader(m_smShader);
+  SH::ShEnvironment::boundShader = m_shader;
+  //  smLoadConstReg(m_shader->kind());
 }
 
 std::string BackendCode::printVar(const ShVariable& var)
@@ -170,6 +172,7 @@ std::ostream& BackendCode::print(std::ostream& out)
   // This should really only happen at bind time.
   // The question is: how useful is printing the code out in the
   // first place if the constant values aren't really accessible.
+  // I guess printing out the code is more of a debugging tool than anything.
   for (RegMap::const_iterator I = m_registers.begin(); I != m_registers.end(); ++I) {
     ShVariableNodePtr node = I->first;
     SmRegister reg = I->second;
@@ -212,8 +215,12 @@ void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
       m_instructions.push_back(SmInstruction(OP_MUL, stmt.dest, stmt.src1, rcp));
       break;
       }
+    case SH_OP_ABS:
+      m_instructions.push_back(SmInstruction(OP_ABS, stmt.dest, stmt.src1));
+      break;
     default:
       // TODO: other ops
+      SH_DEBUG_WARN(opInfo[stmt.op].name << " not implement in SM backend");
       break;
     }
   }
@@ -221,6 +228,14 @@ void BackendCode::addBasicBlock(const ShBasicBlockPtr& block)
 
 void BackendCode::allocRegs()
 {
+  for (ShShaderNode::VarList::const_iterator I = m_shader->inputs.begin();
+       I != m_shader->inputs.end(); ++I) {
+    getReg(*I);
+  }
+  for (ShShaderNode::VarList::const_iterator I = m_shader->outputs.begin();
+       I != m_shader->outputs.end(); ++I) {
+    getReg(*I);
+  }
   for (SmInstList::const_iterator I = m_instructions.begin();
        I != m_instructions.end(); ++I) {
     getReg(I->dest.node());
@@ -265,21 +280,52 @@ SmRegister BackendCode::getReg(const SH::ShVariableNodePtr& var)
   return m_registers[var];
 }
 
-SMreg BackendCode::getSmReg(const SH::ShVariableNodePtr& var)
+SMreg BackendCode::getSmReg(const SH::ShVariable& var)
 {
-  SmRegister reg = getReg(var);
-  if (reg.index < 0) return SMreg(); // TODO: Something better?
+  SmRegister reg = getReg(var.node());
+  if (reg.index < 0) {
+    SH_DEBUG_WARN("Could not obtain register!");
+    return SMreg(); // TODO: Something better?
+  }
+  
+  SMreg smReg;
+  // Get the storage register
   switch (reg.type) {
   case SHSM_REG_INPUT:
-    return m_iR[reg.index];
+    smReg = m_iR[reg.index];
+    break;
   case SHSM_REG_OUTPUT:
-    return m_oR[reg.index];
+    smReg = m_oR[reg.index];
+    break;
   case SHSM_REG_TEMP:
-    return m_tR[reg.index];
+    smReg = m_tR[reg.index];
+    break;
   case SHSM_REG_CONST:
-    return m_cR[reg.index];
+    smReg = m_cR[reg.index];
+    break;
+  default:
+    SH_DEBUG_WARN("Unknown register type " << (int)reg.type);
+    break;
   }
-  return SMreg(); // Control should never even get here.
+  
+  // Swizzling
+  const char* swizChars = "xyzw";
+  std::string swizzle;
+  if (var.swizzle().size()) {
+    for (int i = 0; i < std::min(var.swizzle().size(), 4); i++) {
+      swizzle += swizChars[var.swizzle()[i]];
+    }
+  } else {
+    if (var.size() < 4) {
+      for (int i = 0; i < var.size(); i++) swizzle += swizChars[i];
+    }
+  }
+  if (!swizzle.empty()) smReg = smReg[swizzle.c_str()];
+
+  // Negation
+  if (var.neg()) smReg = -smReg;
+  
+  return smReg;
 }
 
 Backend::Backend()

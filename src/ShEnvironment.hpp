@@ -2,6 +2,7 @@
 #define SHENVIRONMENT_HPP
 
 #include "ShShader.hpp"
+#include "ShBackend.hpp"
 
 namespace SH {
 
@@ -12,9 +13,17 @@ namespace SH {
  */
 struct ShEnvironment 
 {
+  /// The shader currently being defined
   static ShShader shader;
-  
+
+  /// Whether we are in the process of defining a shader
   static bool insideShader;
+
+  /// The shader bound under the current backend
+  static ShShader boundShader;
+
+  /// The currently active backend
+  static ShBackendPtr backend;
 };
 
 }
