@@ -29,25 +29,42 @@
 #include "ShStorageType.hpp"
 #include <vector>
 #include <string>
+#include <iostream>
+
+#define SH_DEBUG_GLSL_BACKEND // DEBUG
 
 namespace shgl {
+
+GLhandleARB GlslCode::m_arb_program = glCreateProgramObjectARB();
 
 using namespace SH;
 using namespace std;
 
 GlslCode::GlslCode(const ShProgramNodeCPtr& shader, const std::string& unit,
-		   TextureStrategy* texture) : m_texture(texture), m_nb_variables(0)
+		   TextureStrategy* texture) 
+  : m_texture(texture), m_uploaded(false), m_nb_variables(0), m_arb_shader(0)
 {
   m_originalShader = const_cast<ShProgramNode*>(shader.object());
   
-  if (unit == "fragment") m_unit = SH_GLSL_FP;
-  if (unit == "vertex") m_unit = SH_GLSL_VP;
+  if (unit == "fragment"){
+    m_arb_shader = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
+    m_unit = SH_GLSL_FP;
+  }
+
+  if (unit == "vertex") {
+    m_arb_shader = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
+    m_unit = SH_GLSL_VP;
+  }
 }
 
 GlslCode::~GlslCode()
 {
   if (m_shader != m_originalShader) {
     delete m_shader;
+  }
+
+  if (m_arb_shader != 0) {
+    glDetachObjectARB(m_arb_program, m_arb_shader);
   }
 }
 
@@ -90,12 +107,115 @@ void GlslCode::generate()
   ShContext::current()->exit();
 }
 
+void GlslCode::print_infolog(GLhandleARB obj)
+{
+  int infolog_len;
+  glGetObjectParameterivARB(obj, GL_OBJECT_INFO_LOG_LENGTH_ARB, &infolog_len);
+  
+  if (infolog_len > 0) {
+    char* infolog = (char*)malloc(infolog_len);
+    int nb_chars;
+    glGetInfoLogARB(obj, infolog_len, &nb_chars, infolog);
+    cout << infolog << endl;
+    free(infolog);
+  }
+}
+
+void GlslCode::print_shader_source()
+{
+  int source_len;
+  glGetObjectParameterivARB(m_arb_shader, GL_OBJECT_SHADER_SOURCE_LENGTH_ARB, &source_len);
+  
+  if (source_len > 0) {
+    char* source = (char*)malloc(source_len);
+    int nb_chars;
+    glGetShaderSourceARB(m_arb_shader, source_len, &nb_chars, source);
+
+    stringstream ss(source);
+    for (int i=1; !ss.eof(); i++) {
+      char line[1024];
+      ss.getline(line, sizeof(line));
+      cout.width(4); cout << i;
+      cout.width(0); cout << ":  " << line << endl;
+    }
+
+    free(source);
+  }
+}
+
 void GlslCode::upload()
 {
+  stringstream code;
+  print(code);
+  string s = code.str(); // w/o this extra copy, the shader code gets corrupted
+  const char* code_string = s.c_str();
+  GLint code_len = strlen(code_string);
+  glShaderSourceARB(m_arb_shader, 1, &code_string, &code_len);
+  glCompileShaderARB(m_arb_shader);
+
+  // Check compilation
+  int compiled;
+  glGetObjectParameterivARB(m_arb_shader, GL_OBJECT_COMPILE_STATUS_ARB, &compiled);
+  if (compiled != GL_TRUE) {
+    cout << "Shader compile status: FAILED" << endl << endl;
+    cout << "Shader infolog:" << endl;
+    print_infolog(m_arb_shader);
+    cout << "Shader code:" << endl;
+    print_shader_source();
+    cout << endl;
+    return;
+#ifdef SH_DEBUG_GLSL_BACKEND
+  } else {
+    cout << "Shader compile status: OK" << endl;
+#endif
+  }
+
+  glAttachObjectARB(m_arb_program, m_arb_shader);
+  //glDeleteObjectARB(m_arb_shader); // Mark for deletion once it's detached
+  glLinkProgramARB(m_arb_program);
+
+  // Check linking
+  int linked;
+  glGetObjectParameterivARB(m_arb_program, GL_OBJECT_LINK_STATUS_ARB, &linked);
+  if (linked != GL_TRUE) {
+    cout << "Program link status: FAILED" << endl << endl;
+    cout << "Program infolog:" << endl;
+    print_infolog(m_arb_program);
+    cout << "Shader code:" << endl;
+    print_shader_source();
+    cout << endl;
+    return;
+#ifdef SH_DEBUG_GLSL_BACKEND
+  } else {
+    cout << "Program link status: OK" << endl;
+#endif
+  }
+
+  glUseProgramObjectARB(m_arb_program);
+
+#ifdef SH_DEBUG_GLSL_BACKEND
+  int nb_objects;
+  glGetObjectParameterivARB(m_arb_program, GL_OBJECT_ATTACHED_OBJECTS_ARB, &nb_objects);
+  cout << "Number of objects attached to the program: " << nb_objects << endl;
+
+  glValidateProgramARB(m_arb_program);
+  int validated;
+  glGetObjectParameterivARB(m_arb_program, GL_OBJECT_VALIDATE_STATUS_ARB, &validated);
+  cout << "Program validate status: " << (validated == GL_TRUE ? "OK" : "FAILED") << endl;
+  if (linked != GL_TRUE) {
+    cout << "Program infolog:" << endl;
+    print_infolog(m_arb_program);
+  }  
+#endif
+
+  m_uploaded = true;
 }
 
 void GlslCode::bind()
 {
+  if (!m_uploaded) {
+    upload();
+  }
 }
 
 void GlslCode::update()
@@ -139,7 +259,12 @@ ostream& GlslCode::print(ostream& out)
   // Declare variables
   for (map<ShVariableNodePtr, GlslVariable>::const_iterator i = m_varmap.begin(); 
        i != m_varmap.end(); i++) {
-    out << indent << type_string((*i).second) << " " << (*i).second.name << ";" << endl;
+    string type = type_string((*i).second);
+    out << indent << type << " " << (*i).second.name;
+    if (!(*i).second.values.empty()) {
+      out << " = " << type <<"(" << (*i).second.values << ")";
+    }
+    out << ";" << endl;
   }
   out << endl;
 
@@ -215,15 +340,24 @@ void GlslCode::emit(const ShStatement &stmt)
   }
 }
 
+string GlslCode::var_name(const ShVariable& v)
+{
+  // @todo Add the type to the variable name
+  stringstream varname;
+  varname << "v" << m_nb_variables++;
+  return varname.str();
+}
+
 void GlslCode::allocate_var(const ShVariable& v)
 {
   GlslVariable var;
-
-  stringstream varname;
-  varname << "v" << m_nb_variables++;
-  var.name = varname.str();
+  
+  var.name = var_name(v);
   var.size = v.node()->size();
   var.type = v.valueType();
+  if (v.hasValues()) {
+    var.values = v.getVariant()->encodeArray();
+  }
 
   m_varmap[v.node()] = var;
 }
@@ -233,14 +367,42 @@ string GlslCode::resolve(const ShVariable& v)
   if (m_varmap.find(v.node()) == m_varmap.end()) {
     allocate_var(v);
   }
-  return m_varmap[v.node()].name;
+  return m_varmap[v.node()].name + swizzle(v);
 }
 
 string GlslCode::resolve(const ShVariable& v, int idx)
 {
   stringstream ss;
   ss << resolve(v) << "[" << idx << "]";
-  return ss.str();
+  return ss.str() + swizzle(v);
+}
+
+string GlslCode::swizzle(const ShVariable& v)
+{
+  const ShSwizzle& s(v.swizzle());
+  if (s.identity()) return "";
+
+  stringstream ss;
+  for (int i=0; i < v.size(); i++) {
+    switch (s[i]) {
+    case 0:
+      ss << "x";
+      break;
+    case 1:
+      ss << "y";
+      break;
+    case 2:
+      ss << "z";
+      break;
+    case 3:
+      ss << "w";
+      break;
+    default:
+      ss << " *** ERROR: Invalid swizzle '" << s[i] << "' *** ";
+      return ss.str();
+    }
+  }
+  return "." + ss.str();
 }
 
 }

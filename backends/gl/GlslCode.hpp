@@ -40,6 +40,7 @@ struct GlslVariable {
   std::string name;
   int size;
   SH::ShValueType type;
+  std::string values;
 };
 
 class GlslCode : public SH::ShBackendCode {
@@ -70,13 +71,16 @@ private:
   SH::ShProgramNode* m_shader; // internally visible shader ShTransformered to fit this target (GLSL)
   SH::ShProgramNode* m_originalShader; // original shader (should alway use this for external (e.g. globals))
 
+  bool m_uploaded; /// true if the program has already been uploaded to the GPU
+
   std::vector<std::string> m_lines; /// raw lines of code (unindented)
-  
   unsigned m_nb_variables; /// number of variables that have been allocated in the program so far
   std::map<SH::ShVariableNodePtr, GlslVariable> m_varmap; /// maps a variable node to a variable
 
-  // Extensions and language alternatives available. See list above
   enum GlslProgramType m_unit;
+
+  static GLhandleARB m_arb_program; /// program to which all shaders are attached
+  GLhandleARB m_arb_shader; /// shader program uploaded to the GPU
 
   void optimize(const SH::ShProgramNodeCPtr& shader);
 
@@ -87,9 +91,14 @@ private:
   void emit(const SH::ShStatement &stmt);
   
   std::string type_string(const GlslVariable &var); /// returns corresponding OpenGL SL type
+  std::string var_name(const SH::ShVariable& v); /// generates an identifier for the given variable
   void allocate_var(const SH::ShVariable& v);
   std::string resolve(const SH::ShVariable& v);
   std::string resolve(const SH::ShVariable& v, int idx);
+  std::string swizzle(const SH::ShVariable& v); /// returns the proper swizzle to add to the varname
+
+  void print_infolog(GLhandleARB obj);
+  void print_shader_source();
 };
 
 typedef SH::ShPointer<GlslCode> GlslCodePtr;
