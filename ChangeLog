@@ -1,18 +1,23 @@
+2004-12-01  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShSyntax.hpp (SH_WHILE): Remove spurious backslash.
+
+	* backends/cc/Cc.cpp (CcBackend::execute): Cache programs.
+
 2004-11-30  Bryan Chan <b8chan@cgl.uwaterloo.ca>
-	* backends/cc/CcTextures.hpp (sh_cc_backend_nearest):
-	Fixed the floor bug Nils mentioned.
-	Fixed some other bugs I just noticed.
+	
+	* backends/cc/CcTextures.hpp (sh_cc_backend_nearest): Fixed the
+	floor bug Nils mentioned.  Fixed some other bugs I just noticed.
 
-	* test/regress/tex.cpp.py:
-	Added tests for above two bugs
+	* test/regress/tex.cpp.py: Added tests for above two bugs
 
-	* test/regress/div.cpp.py:
-	Added some integer div tests that may be related to the FOR loop weirdness on
-	GPU.
+	* test/regress/div.cpp.py: Added some integer div tests that may
+	be related to the FOR loop weirdness on GPU.
 
 2004-11-28  Bryan Chan <b8chan@cgl.uwaterloo.ca>
-  * src/ShHashMap.hpp (ShPairHashMap::operator()):
-	Added missing typedef.
+
+	* src/ShHashMap.hpp (ShPairHashMap::operator()): Added missing
+	typedef.
 
 	* src/ShFractionImpl.hpp (cbrt, exp, exp2, exp10):
 	Fixed bug. 
