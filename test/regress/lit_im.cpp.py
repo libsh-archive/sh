@@ -2,7 +2,7 @@
 
 import shtest, sys, common, lit_test
 
-test = shtest.StreamTest('lit', 3)
+test = shtest.ImmediateTest('lit', 3)
 test.add_call(shtest.Call(shtest.Call.call, 'lit', 3))
 lit_test.addtests(test)
 
