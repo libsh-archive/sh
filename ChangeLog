@@ -1,5 +1,10 @@
 2005-03-31  Francois Marier  <francois@serioushack.com>
 
+	* src/ShMatrix.hpp: Removed unnecessary typedef (HostType, not
+	used anywhere).  
+	Added a few typedefs and static to match ShAttrib.  Necessary to
+	support ShMatrix as an Input/Output parameter to a stream program.
+
 	* backends/gl/GlslCode.cpp (gen_structural_node): Removed
 	unnecessary if statement in while loops by duplicating the
 	condition evaluation code.
