@@ -24,11 +24,6 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifdef WIN32
-#include <windows.h>
-#endif
-#include <GL/gl.h>
-#include <GL/glext.h>
 #include "GlBackend.hpp"
 #include "Arb.hpp"
 #include "ArbCode.hpp"

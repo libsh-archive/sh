@@ -104,8 +104,11 @@ T sgn(T a) { return (a < 0.0f ? -1.0f : (a == 0.0f ? 0.0f : 1.0f)); }
 // TODO: Replace ifdef with an autoconf check
 #ifdef WIN32
 T exp2f(T a) { return powf(2.0, a); }
-T exp10f(T a) { return powf(2.0, a); }
+T exp10f(T a) { return powf(10.0, a); }
 T log2f(T a) { return logf(a)/logf(2.0); }
+#endif
+#ifdef __APPLE__
+T exp10f(T a) { return powf(10.0, a); }
 #endif
 }
 
