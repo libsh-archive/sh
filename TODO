@@ -4,6 +4,8 @@ OPTIMIZER:
  X control flow graph optimizations
  X Run the optimizations more than once as necessary.
  X Don't run the optimizer twice in connect(), once the previous item is done.
+ / Replace outputs used as src and inputs used as dest by temps 
+   (find out why we need to straighten in between)
  - constant folding
  - algebraic simplification
  - refactor some of the optimizer code, in particular uddu chains
@@ -98,6 +100,7 @@ GENERIC SMALL TASKS:
  X rename "shader kind" to "shader target" throughout the code.
  X replace integers for shader targets with strings
  - add a switchBackend() function that clears boundShaders(), etc.
+ - add ShIOVariable types as a single variable used for both Input and Output
  - add more tests to test/constant.sht
 
 GENERIC MEDIUM TASKS:
