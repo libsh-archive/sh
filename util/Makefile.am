@@ -5,15 +5,16 @@ lib_LTLIBRARIES = libshutil.la
 libshutil_la_LIBADD = $(LIBLTDL)
 libshutil_la_LDFLAGS = -export-dynamic -no-undefined
 
-libshutil_la_SOURCES = ShWorley.cpp \
-											 ShKernelLib.cpp
+libshutil_la_SOURCES = ShKernelLib.cpp
 
 incincdir = $(includedir)/sh
 
-incinc_HEADERS = ShPerlin.hpp \
-								 ShPerlinImpl.hpp \
+incinc_HEADERS = ShNoise.hpp \
+								 ShNoiseImpl.hpp \
                  ShWorley.hpp \
-                 ShUtilLib.hpp \
+                 ShWorleyImpl.hpp \
+                 ShUtil.hpp \
+                 ShUtilImpl.hpp \
 								 ShKernelLib.hpp \
 								 ShKernelLibImpl.hpp \
                  shutil.hpp

@@ -117,7 +117,7 @@ class ShKernelLib {
      * IN(3) ShNormal3f normal    - normal (xCS)
      * IN(4) ShVector3f halfVec   - half vector (xCS)
      * IN(5) ShVector3f lightVec  - light vector (xCS)
-     * IN(6) ShPosition4f posh    - positino (HDCS)
+     * IN(6) ShPosition4f posh    - position (HDCS)
      *
      * OUT(0) T result            - output colour 
      *
@@ -155,7 +155,9 @@ class ShKernelLib {
      *  IN(0) ShTexCoord2f texcoord   - texture coordinate
      *  IN(1) ShNormal3f normal       - normal vector (MCS)
      *  IN(2) ShVector3f tangent      - primary tangent (MCS)
-     *  IN(3) ShVector3f tangent2     - secondary tangent (MCS)
+     *  IN(3) ShVector3f tangent2     - secondary tangent (MCS) 
+     *  (only included if hasSecondTangent=true, otherwise generated using tangent2 = normal x tangent)
+     *
      *  IN(4) ShPoint3f lightPos      - light position (VCS)
      *  IN(5) ShPosition4f posm       - position (MCS)
      *
@@ -168,7 +170,8 @@ class ShKernelLib {
      *  OUT(6) ShPosition4f posh       - position (HDCS)
      */
     template<int N, int Kind, typename T>
-    static ShProgram shVshTangentSpace( const ShMatrix<N, N, Kind, T> &mv, const ShMatrix<N, N, Kind, T> &mvp ); 
+    static ShProgram shVshTangentSpace( const ShMatrix<N, N, Kind, T> &mv, const ShMatrix<N, N, Kind, T> &mvp,
+        bool hasSecondTangent = true ); 
 };
 
 }

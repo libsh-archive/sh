@@ -57,17 +57,17 @@ struct ShIgnore {
   T& operator&(T& other) { return other; }
 };
 
-/// SelectType::type == <T1 if B is false, T2 if B is true>
+/// SelectType::type == B ? T1 : T2 
 template<bool B, typename T1, typename T2>
 struct SelectType;
 
 template<typename T1, typename T2>
-struct SelectType<false, T1, T2> {
+struct SelectType<true, T1, T2> {
   typedef T1 type;
 };
 
 template<typename T1, typename T2>
-struct SelectType<true, T1, T2> {
+struct SelectType<false, T1, T2> {
   typedef T2 type;
 };
 

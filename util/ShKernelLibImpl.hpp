@@ -142,8 +142,20 @@ ShProgram ShKernelLib::shVsh(const ShMatrix<N, N, Kind, T> &mv, const ShMatrix<N
 
 template<int N, int Kind, typename T>
 ShProgram ShKernelLib::shVshTangentSpace(const ShMatrix<N, N, Kind, T> &mv, 
-    const ShMatrix<N, N, Kind, T> &mvp) {
-  ShProgram vsh = shVsh(mv, mvp) & keep<ShVector3f>("tangent") & keep<ShVector3f>("tangent2");
+    const ShMatrix<N, N, Kind, T> &mvp, bool hasSecondTangent) {
+  ShProgram vsh = shVsh(mv, mvp) & transform<ShVector3f>(mv, "tangent");
+  if( hasSecondTangent ) {
+    vsh = vsh & transform<ShVector3f>(mv, "tangent2");
+    vsh = vsh << shSwizzle("texcoord", "normal", "tangent", "tangent2", "lightPos", "posm");
+  } else {
+    ShProgram makeSecondTangent = SH_BEGIN_PROGRAM() {
+      ShInOutNormal3f SH_DECL(normal); // VCS normal
+      ShInOutVector3f SH_DECL(tangent); // VCS tangent
+      ShOutputVector3f SH_DECL(tangent2) = cross(normal, tangent);
+    } SH_END
+    vsh = namedConnect(vsh, makeSecondTangent);
+    vsh = vsh << shSwizzle("texcoord", "normal", "tangent", "lightPos", "posm");
+  }
 
   // convert view, half, and light to orthonormal bases {normal, tangent, tangent2}
   ShProgram ConvertToTCS = ShKernelLib::shConvertBasis("viewVec", "normal", "tangent", "tangent2");
@@ -157,9 +169,8 @@ ShProgram ShKernelLib::shVshTangentSpace(const ShMatrix<N, N, Kind, T> &mv,
     (keep<ShNormal3f>("normal") << ShConstant3f(1.0, 0.0, 0.0));
 
   // swizzle inputs/outputs to match specs
-  return  shSwizzle("texcoord", "posv", "normal", "viewVec", "halfVec", "lightVec", "posh")
-    << vsh 
-    << shSwizzle("texcoord", "normal", "tangent", "tangent2", "lightPos", "posm");
+  vsh = shSwizzle("texcoord", "posv", "normal", "viewVec", "halfVec", "lightVec", "posh") << vsh;
+  return vsh;
 }
 
 

@@ -27,9 +27,9 @@
 #ifndef SHUTIL_HPP
 #define SHUTIL_HPP
 
-#include "ShUtilLib.hpp"
+#include "ShUtil.hpp"
 #include "ShWorley.hpp"
-#include "ShPerlin.hpp"
+#include "ShNoise.hpp"
 #include "ShKernelLib.hpp"
 
 /** \namespace ShUtil

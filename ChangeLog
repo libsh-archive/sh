@@ -1,3 +1,23 @@
+2004-02-19  Bryan Chan <b8chan@uwaterloo.ca>
+	* util/ShUtil.hpp, util/ShUtilImpl.hpp 
+	(evenOddSort, groupEvenOddSort):
+	Even odd sort on tuple components.
+
+	* util/ShNoise.hpp, util/ShNoiseImpl.hpp:
+	Added cellnoise function here that reuses noise texture
+	originally intended for Perlin noise.
+
+	* util/ShWorley.hpp, util/ShWorleyImpl.hpp:
+	Templatized & cleaned up worley to use cellnoise 
+	& sorting functions.
+
+	* src/ShNibbles.hpp:
+	Allow binary operators to take operands of different sizes
+
+	* util/ShKernelLib.hpp (shVshTangentSpace):
+	Allow either passing in secondary tangent or generating
+	it from normal x tangent.
+	
 2004-02-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShVariableNode.cpp (hasName): Implemented hasName().
@@ -58,7 +78,7 @@
 
 2004 02-17  Bryan Chan <b8chan@uwaterloo.ca>
 	* src/ShTransformer.cpp (InputOutputConvertor):
-	I am not fit to program. period.
+	I am not fit to program. period. (fixed not knowing how to use references bug)
 	
 2004-02-17  Jack Wang  <jmwang@uwaterloo.ca>
 	* src/ShQuaternionImpl.hpp, src/ShQuaternion.hpp:

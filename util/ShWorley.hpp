@@ -24,8 +24,8 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SMASHTEST_WORLEY_HPP 
-#define SMASHTEST_WORLEY_HPP
+#ifndef SHUTIL_WORLEY_HPP 
+#define SHUTIL_WORLEY_HPP
 
 #include "ShAttrib.hpp"
 #include "ShColor.hpp"
@@ -48,76 +48,48 @@ enum ShWorleyMetric {
   LINF, ///< Maximum absolute difference
 };
 
-/** A 2D Worley texture class.
+/** \brief Worley texture generator.
+ * This finds the 1 < N <= 9 nearest neighbours to the point p using metric m 
+ * and returns the sum of the distances, weighted by c.
+ *
+ * The weighted sum of the gradients associated with nearest neighbour points
+ * is returned in components (1,2) of the result.
+ *
+ * Note that for GPU implementation, the number of points found & sorted for
+ * each lookup must be equal and relatively small.  So cellnoise is used
+ * to generate one point in each grid cell, and only a cell and it's 8
+ * adjacent 2D neighbours are checked.  
+ *
+ * Unfortunately, this means that the result may not even be C0 continuous
+ * since the closest point may in fact not be in any of the cells searched;
+ * however, the probability of this happening with uniformly distributed
+ * points is small.  With higher values of N, the probability of 
+ * discontinuity increases.
  */
-class ShWorley {
-  public:
-    /** \brief Constructor for ShWorley.
-     * Creates a Worley texture with the given frequency.
-     * (frequency x frequency cells are generated in the [0,1]x[0,1] square) 
-     *
-     * The texture should tile properly (perhaps...). 
-     */  
-    ShWorley( int frequency, bool useTexture ); 
+template<int N, typename T>
+ShVariableN<3, T> worley(const ShVariableN<2, T> &p, 
+    const ShVariableN<N, T> &c, ShWorleyMetric m = L2_SQ,
+    bool useTexture = true); 
 
-    /** \brief Destructor for ShWorley.
-     * Destroys a ShWorley.
-     */
-    ~ShWorley();
-
-    /** \brief Toggles texture lookup for cell positions. 
-     * The Worley texture function can use either a procedural hash
-     * to generate positions in adjacent cells, or use several
-     * texture lookups.
-     *
-     * This toggles whether to use the texture lookup method, which is 
-     * currently much faster than the procedural method.
-     */
-    void useNoiseTexture( bool useNoiseTex );
-
-    /** \brief Worley texture generator.
-     * This finds the 4 nearest neighbours to the point p using metric m 
-     * and returns the sum of the distances, weighted by c.
-     */
-    // TODO implement gradients
-    // should be real easy, but need to makes odd-even transposition sort 
-    // much messier (maybe try bubble sort?)
-    // UPDATE: has an ugly gradient selection
-    ShAttrib3f worley( ShAttrib2f p, 
-        ShAttrib4f c = ShAttrib4f( 1.0, 0.0, 0.0, 0.0 ), ShWorleyMetric m = L2_SQ ); 
-    // same as above, without gradients
-    ShAttrib1f worleyNoGradient( ShAttrib2f p, 
-        ShAttrib4f c = ShAttrib4f( 1.0, 0.0, 0.0, 0.0 ), ShWorleyMetric m = L2_SQ ); 
+template<int N, typename T>
+ShVariableN<1, T> worleyNoGradient(const ShVariableN<2, T> &p, 
+    const ShVariableN<N, T> &c, ShWorleyMetric m = L2_SQ,
+    bool useTexture = true); 
     
-    /** Makes a shader that takes 
-     *  IN(0) ShAttrib4f coefficients; // worley coefficients
-     *  IN(1) ShTexCoord2f texcoord; // texture lookup coordinates
-     *
-     *  OUT(0) ShAttrib1f scalar 
-     *  OUT(1) ShAttrib2f gradient;
-     */
-    ShProgram worleyProgram( ShWorleyMetric m = L2_SQ );
+/** Makes a shader that takes 
+ *  IN(0) ShAttrib<N,T> coefficients; // worley coefficients
+ *  IN(1) ShTexCoord<2,T> texcoord; // texture lookup coordinates
+ *
+ *  OUT(0) ShAttrib<1,T> scalar 
+ *  OUT(1) ShAttrib<2,T> gradient;
+ */
 
-  private:
-    bool useTexture; ///< toggles whether to use texture lookup for points 
-    int freq;  ///< frequency of the texture (number of cells in [0,1])
-    double dfreq; ///< frequency of the texture
-
-    /** Lookup for the point in the given cell
-     */
-    ShTexture2D<ShColor4f> cellPosTex; 
-
-    /** Lookup for 8 points in cells adjacent to the given cell
-     */
-    ShTexture2D<ShColor4f>* adjTex[4]; 
-
-    void doWorley( ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m, ShAttrib1f &result, ShAttrib2f &gradientResult );
-
-  void generateTexture();
-};
-
+template<int N, typename T>
+ShProgram worleyProgram(ShWorleyMetric m = L2_SQ, bool useTexture = true);
 
 
 } // namespace ShUtil
+
+#include "ShWorleyImpl.hpp"
 
 #endif
