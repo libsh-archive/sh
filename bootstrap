@@ -21,11 +21,9 @@ export LIBTOOLIZE
 
 # Old versions of libtoolize ask for configure.in instead of configure.ac
 # XXX -- There must be a better way to do this
-LIBTOOLIZE_VERSION=`$LIBTOOLIZE --version | awk 'NR == 1 { print $NF }'`
-SND=${LIBTOOLIZE_VERSION%.*}
-WRKVER=$(( ${LIBTOOLIZE_VERSION%%.*} * 10 + ${SND#*.} ))
-if [ $WRKVER -lt 15 ]; then
-    echo "Your version of libtoolize ($LIBTOOLIZE_VERSION) is too old."
+LIBTOOLIZE_VERSION=`$LIBTOOLIZE --version | awk ' NR == 1 { VERSION=$NF }  END { split(VERSION, arr_ver, "."); print arr_ver[1] * 10 + arr_ver[2] }'`
+if [ $LIBTOOLIZE_VERSION -lt 15 ]; then
+    echo "Your version of libtoolize is too old, please upgrade."
     exit 1
 fi
 

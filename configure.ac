@@ -15,7 +15,7 @@ fi
 # Additional libraries if in OSX
 case ${host_os}
      in darwin*)
-	 if [[ -f /sw/include/png.h ]]; then
+	 if test -f /sw/include/png.h ; then
 	    CXXFLAGS="-I/sw/include $CXXFLAGS"
 	    LDFLAGS="-L/sw/lib $LDFLAGS"
 	 fi

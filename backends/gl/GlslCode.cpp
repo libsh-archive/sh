@@ -249,13 +249,28 @@ void GlslCode::upload_uniforms()
   for (GlslVariableMap::NodeList::iterator i = m_varmap->node_begin();
        i != m_varmap->node_end(); i++) {
     ShVariableNodePtr node = *i;
+    
     if (node->hasValues() && node->uniform()) {
-      updateUniform(node);
+      // Normal uniforms
+      updateUniform(node); 
+    } else {
+      // Palettes are implemented as uniform arrays
+      ShPaletteNodePtr palette = shref_dynamic_cast<ShPaletteNode>(*i);
+      if (palette) {
+	const GlslVariable& var(m_varmap->variable(palette));
+
+	for (unsigned i=0; i < palette->palette_length(); i++) {
+	  ShVariableNodePtr uniform = palette->get_node(i);
+	  stringstream name;
+	  name << var.name() << "[" << i << "]";
+	  real_update_uniform(uniform, name.str().c_str());
+	}
+      }
     }
   }
 }
 
-void GlslCode::updateFloatUniform(const ShVariableNodePtr& node, const GLint location)
+void GlslCode::update_float_uniform(const ShVariableNodePtr& node, const GLint location)
 {
   float values[4];
   for (int i=0; i < node->size(); i++) {
@@ -280,7 +295,7 @@ void GlslCode::updateFloatUniform(const ShVariableNodePtr& node, const GLint loc
   }
 }
 
-void GlslCode::updateIntUniform(const ShVariableNodePtr& node, const GLint location)
+void GlslCode::update_int_uniform(const ShVariableNodePtr& node, const GLint location)
 {
   int values[4];
   for (int i=0; i < node->size(); i++) {
@@ -329,24 +344,29 @@ void GlslCode::updateUniform(const ShVariableNodePtr& uniform)
             ShSwizzle(uniform->size(), (*it)->size(), copySwiz))); 
         updateUniform(*it);
       }
-    } 
+    }
     return;
   }
 
   const GlslVariable& var(m_varmap->variable(uniform));
   
-  if (var.texture()) return;
+  if (!var.texture()) {
+    real_update_uniform(uniform, var.name());
+  }
+}
 
+void GlslCode::real_update_uniform(const ShVariableNodePtr& uniform, const string& name)
+{
   // TODO: cache these
-  GLint location = glGetUniformLocationARB(m_bound, var.name().c_str());
+  GLint location = glGetUniformLocationARB(m_bound, name.c_str());
   if (location != -1) {
     if (shIsInteger(uniform->valueType())) {
-      updateIntUniform(uniform, location);
+      update_int_uniform(uniform, location);
     } else {
-      updateFloatUniform(uniform, location);
+      update_float_uniform(uniform, location);
     }
   } else {
-    cerr << "Cannot find uniform named '" << var.name() << "'." << endl;
+    cerr << "Cannot find the location of uniform named '" << name << "'." << endl;
   }
 }
 
@@ -510,6 +530,12 @@ void GlslCode::gen_structural_node(const ShStructuralNodePtr& node)
 }
 
 string GlslCode::resolve(const ShVariable& v, int index) const
+{
+  SH_DEBUG_ASSERT(m_varmap);
+  return m_varmap->resolve(v, index);
+}
+
+string GlslCode::resolve(const ShVariable& v, const ShVariable& index) const
 {
   SH_DEBUG_ASSERT(m_varmap);
   return m_varmap->resolve(v, index);
