@@ -120,6 +120,8 @@ SH_DLLEXPORT ShOperationInfo {
               // (e.g. TEX)
     IGNORE   // Does not yield a result
   } result_source;
+
+  bool commutative; ///< True if order of sources does not matter.
 };
 
 SH_DLLEXPORT
