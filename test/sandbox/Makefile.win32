@@ -1,0 +1,20 @@
+SOURCES = $(wildcard *.cpp)
+EXECUTABLES = $(SOURCES:.cpp=)
+OBJECTS = $(SOURCES:.cpp=.obj)
+DEPENDS = $(SOURCES:.cpp=.d)
+LDFLAGS = ..\..\src\libsh.lib
+
+all:
+
+clean:
+	rm -f *.o $(EXECUTABLES) *.d
+
+%: %.o
+	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
+
+include ../../win32.mk
+CPPFLAGS += -I..\..\src 
+
+include $(DEPENDS)
+
+
