@@ -46,9 +46,7 @@ void ShOptimizer::optimize(int level)
     do {
       changed = false;
 
-      /*
       inputOutputConversion(changed);
-      */
       if( level >= 2 ) {
         copyPropagation(changed);
         moveElimination(changed);
