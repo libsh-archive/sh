@@ -38,9 +38,9 @@
  */
 
 /** \file shutil.hpp
- * \brief The main Sh utility include file. 
- * You can use this file to include all the utilities, or include
- * individual ShUtil headers separately.
+ * \brief The include file for extra Sh utilities 
+ *
+ * You can use this to include all available extra utilities.
  */
 namespace ShUtil {
 }
