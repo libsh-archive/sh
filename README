@@ -9,12 +9,7 @@ Sh is currently roughly in the "alpha" stage.
 This means it works, but there are several things which are by no
 means completed.
 
-The biggest outstanding issue is optimization. There is very little
-code related to this in CVS but the developers are working hard on it.
-This means however that the quality of the generated code is rather
-poor at the moment. On the other hand it _is_ functional.
-
-The backends aren't quite complete yet either. Some operations are
+The backends aren't quite complete yet. Some operations are
 missing from the ARB backend, and in partiuclar texturing is rather
 poorly done in the SM backend (only 2D 4-component textures will work
 at the moment). This is due to SM not supporting anything else at the
