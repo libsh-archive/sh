@@ -33,10 +33,11 @@
 
 namespace SH { 
 
-struct ShVariableReplacer {
-  typedef std::map<ShVariableNodePtr, ShVariableNodePtr> VarMap;
+typedef std::map<ShVariableNodePtr, ShVariableNodePtr> ShVarMap;
 
-  ShVariableReplacer(VarMap& v);
+struct ShVariableReplacer {
+
+  ShVariableReplacer(ShVarMap& v);
 
   // replaces variables in node based on varMap
   void operator()(ShCtrlGraphNodePtr node);
@@ -44,7 +45,7 @@ struct ShVariableReplacer {
   // replaces node in a single variable using varMap
   void repVar(ShVariable& var);
 
-  VarMap& varMap;
+  ShVarMap& varMap;
 };
 
 }

@@ -121,7 +121,8 @@ private:
 class ShTextureNode : public ShVariableNode {
 public:
   ShTextureNode(ShTextureDims dims,
-                int size, // scalars per tuple
+                int size, // scalars per tuple 
+                int typeIndex, // type index 
                 const ShTextureTraits&,
                 int width, int height = 0, int depth = 0);
   virtual ~ShTextureNode();

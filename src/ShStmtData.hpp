@@ -24,33 +24,32 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#include "ShInternals.hpp"
-#include "ShDebug.hpp"
+#ifndef SHSTMTDATA_HPP
+#define SHSTMTDATA_HPP
 
-namespace SH { 
+#include "ShRefCount.hpp"
 
-ShVariableReplacer::ShVariableReplacer(ShVarMap& v)
-  : varMap(v) {
+namespace SH {
+
+struct ShStmtData: public ShRefCountable {
+  virtual ~ShStmtData();
+}; 
+typedef ShPointer<ShStmtData > ShStmtDataPtr;
+typedef ShPointer<const ShStmtData > ShStmtDataCPtr;
+
+// denotes the type used to compute the statement
+struct ShStmtTypeData: public ShStmtData {
+  ShStmtTypeData(int typeIndex);
+  int typeIndex() const;
+  int& typeIndex();
+
+  private:
+    int m_typeIndex;
+};
+typedef ShPointer<ShStmtTypeData> ShStmtTypeDataPtr;
+typedef ShPointer<const ShStmtTypeData> ShStmtTypeDataCPtr;
+
+
 }
 
-void ShVariableReplacer::operator()(ShCtrlGraphNodePtr node) {
-  if (!node) return;
-  ShBasicBlockPtr block = node->block;
-  if (!block) return;
-  for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-    if(!I->dest.null()) repVar(I->dest);
-    for (int i = 0; i < 3; i++) {
-      if( !I->src[i].null() ) repVar(I->src[i]);
-    }
-  }
-}
-
-void ShVariableReplacer::repVar(ShVariable& var) {
-  ShVarMap::iterator I = varMap.find(var.node());
-  if (I == varMap.end()) return;
-  var = ShVariable(I->second, var.swizzle(), var.neg());
-}
-
-}
-
-
+#endif

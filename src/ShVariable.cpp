@@ -70,19 +70,24 @@ int ShVariable::size() const
   return m_swizzle.size();
 }
 
-void ShVariable::range(ShVariableNode::ValueType low, ShVariableNode::ValueType high)
+int ShVariable::typeIndex() const 
 {
-  m_node->range(low, high);
+  return m_node->typeIndex();
 }
 
-ShVariableNode::ValueType ShVariable::lowBound() const
+void ShVariable::rangeCloak(ShCloakCPtr low, ShCloakCPtr high)
 {
-  return m_node->lowBound();
+  m_node->rangeCloak(low, high, m_neg, m_swizzle);
 }
 
-ShVariableNode::ValueType ShVariable::highBound() const
+ShCloakPtr ShVariable::lowBoundCloak() const
 {
-  return m_node->highBound();
+  return m_node->lowBoundCloak()->get(m_neg, m_swizzle);
+}
+
+ShCloakPtr ShVariable::highBoundCloak() const
+{
+  return m_node->highBoundCloak()->get(m_neg, m_swizzle);
 }
 
 const ShSwizzle& ShVariable::swizzle() const
@@ -105,29 +110,29 @@ bool& ShVariable::neg()
   return m_neg;
 }
 
-void ShVariable::getValues(ShVariableNode::ValueType dest[]) const
+ShCloakPtr ShVariable::cloak() const
 {
-  for (int i = 0; i < size(); i++) {
-    dest[i] = m_node->getValue(m_swizzle[i]);
-    if (m_neg) dest[i] = -dest[i];
-  }
+  return m_node->cloak()->get(m_neg, m_swizzle);
 }
 
-ShVariableNode::ValueType ShVariable::getValue(int i) const
+ShCloakPtr ShVariable::cloak(int index) const
 {
-  ShVariableNode::ValueType value = m_node->getValue(m_swizzle[i]);
-  if (m_neg) value = -value;
-  return value;
+  return m_node->cloak()->get(m_neg, ShSwizzle(size(), index) * m_swizzle); 
 }
 
-void ShVariable::setValues(ShVariableNode::ValueType values[])
+void ShVariable::setCloak(ShCloakCPtr other, bool neg, const ShSwizzle &writemask)
 {
-  m_node->lock();
-  for (int i = 0; i < size(); i++) {
-    m_node->setValue(m_swizzle[i], values[i]); 
-  }
-  m_node->unlock();
-  m_neg = false;
+  m_node->setCloak(other, neg ^ m_neg, writemask * m_swizzle);
+}
+
+void ShVariable::setCloak(ShCloakCPtr other, int index) 
+{
+  m_node->setCloak(other, m_neg, ShSwizzle(size(), index) * m_swizzle);
+}
+
+void ShVariable::setCloak(ShCloakCPtr other)
+{
+  setCloak(other);
 }
 
 ShVariable ShVariable::operator()() const
@@ -160,8 +165,7 @@ ShVariable ShVariable::operator()(int n, int indices[]) const
   return ShVariable(m_node, m_swizzle * ShSwizzle(size(), n, indices), m_neg);
 }
 
-
-std::ostream& operator<<(std::ostream& _out, const ShVariable& shVariableToPrint){
+std::ostream& operator<<(std::ostream& _out, const ShVariable& shVariableToPrint) {
  
   if (!shVariableToPrint.m_node){
     _out<<"[null]";
@@ -169,17 +173,7 @@ std::ostream& operator<<(std::ostream& _out, const ShVariable& shVariableToPrint
   }
 
   _out<<'[';
-
-  if(shVariableToPrint.size() > 0)
-    _out << (( shVariableToPrint.neg() ? -1.0 : 1.0 ) *  
-      shVariableToPrint.m_node->getValue(shVariableToPrint.swizzle()[0]) );
-
-  for (int k = 1; k < shVariableToPrint.size(); k++) {
-    _out<<", ";
-    _out << (( shVariableToPrint.neg() ? -1.0 : 1.0 ) *  
-      shVariableToPrint.m_node->getValue(shVariableToPrint.swizzle()[k]) );
-   }
-
+  _out << shVariableToPrint.cloak()->encode();
   _out<<']';
   return _out;
 }

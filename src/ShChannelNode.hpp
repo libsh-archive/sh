@@ -34,8 +34,8 @@ namespace SH {
 
 class ShChannelNode : public ShVariableNode {
 public:
-  ShChannelNode(ShSemanticType specType, int elements);
-  ShChannelNode(ShSemanticType specType, int elements,
+  ShChannelNode(ShSemanticType specType, int elements, int typeIndex);
+  ShChannelNode(ShSemanticType specType, int elements, int typeIndex,
                 const ShMemoryPtr& memory, int count);
   virtual ~ShChannelNode();
 

@@ -35,28 +35,30 @@
 #define SH_SHATTRIBIMPL_HPP
 
 #include "ShAttrib.hpp"
+#include "ShContext.hpp"
 #include "ShStatement.hpp"
 #include "ShEnvironment.hpp"
 #include "ShDebug.hpp"
+#include "ShTypeInfo.hpp"
 
 namespace SH {
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<N, Binding, T, Swizzled>::ShAttrib()
-  : ShGeneric<N, T>(new ShVariableNode(Binding, N))
+  : ShGeneric<N, T>(new ShVariableNode(Binding, N, shTypeIndex<T>()))
 {
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShGeneric<N, T>& other)
-  : ShGeneric<N, T>(new ShVariableNode(Binding, N))
+  : ShGeneric<N, T>(new ShVariableNode(Binding, N, shTypeIndex<T>()))
 {
   shASN(*this, other);
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShAttrib<N, Binding, T, Swizzled>& other)
-  : ShGeneric<N, T>(new ShVariableNode(Binding, N))
+  : ShGeneric<N, T>(new ShVariableNode(Binding, N, shTypeIndex<T>()))
 {
   shASN(*this, other);
 }
@@ -70,10 +72,10 @@ ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<N, Binding, T, Swizzled>::ShAttrib(T data[N])
-  : ShGeneric<N, T>(new ShVariableNode(Binding, N))
+  : ShGeneric<N, T>(new ShVariableNode(Binding, N, shTypeIndex<T>()))
 {
   if (Binding == SH_CONST) {
-    for (int i = 0; i < N; i++) m_node->setValue(i, data[i]);
+    for (int i = 0; i < N; i++) setValue(i, data[i]);
   } else {
     (*this) = ShAttrib<N, SH_CONST, T>(data);
   }
@@ -272,20 +274,20 @@ ShAttrib<N, Binding, T, Swizzled>::operator-() const
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<1, Binding, T, Swizzled>::ShAttrib()
-  : ShGeneric<1, T>(new ShVariableNode(Binding, 1))
+  : ShGeneric<1, T>(new ShVariableNode(Binding, 1, shTypeIndex<T>()))
 {
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T>& other)
-  : ShGeneric<1, T>(new ShVariableNode(Binding, 1))
+  : ShGeneric<1, T>(new ShVariableNode(Binding, 1, shTypeIndex<T>()))
 {
   shASN(*this, other);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShAttrib<1, Binding, T, Swizzled>& other)
-  : ShGeneric<1, T>(new ShVariableNode(Binding, 1))
+  : ShGeneric<1, T>(new ShVariableNode(Binding, 1, shTypeIndex<T>()))
 {
   shASN(*this, other);
 }
@@ -299,10 +301,10 @@ ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<1, Binding, T, Swizzled>::ShAttrib(T data[1])
-  : ShGeneric<1, T>(new ShVariableNode(Binding, 1))
+  : ShGeneric<1, T>(new ShVariableNode(Binding, 1, shTypeIndex<T>()))
 {
   if (Binding == SH_CONST) {
-    for (int i = 0; i < 1; i++) m_node->setValue(i, data[i]);
+    for (int i = 0; i < 1; i++) setValue(i, data[i]);
   } else {
     (*this) = ShAttrib<1, SH_CONST, T>(data);
   }
@@ -310,10 +312,10 @@ ShAttrib<1, Binding, T, Swizzled>::ShAttrib(T data[1])
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<1, Binding, T, Swizzled>::ShAttrib(T s0)
-  : ShGeneric<1, T>(new ShVariableNode(Binding, 1))
+  : ShGeneric<1, T>(new ShVariableNode(Binding, 1, shTypeIndex<T>()))
 {
   if (Binding == SH_CONST) {
-    m_node->setValue(0, s0);
+    setValue(0, s0);
   } else {
     (*this)[0] = ShAttrib<1, SH_CONST, T>(s0);
   }
@@ -480,20 +482,20 @@ ShAttrib<1, Binding, T, Swizzled>::operator-() const
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<2, Binding, T, Swizzled>::ShAttrib()
-  : ShGeneric<2, T>(new ShVariableNode(Binding, 2))
+  : ShGeneric<2, T>(new ShVariableNode(Binding, 2, shTypeIndex<T>()))
 {
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShGeneric<2, T>& other)
-  : ShGeneric<2, T>(new ShVariableNode(Binding, 2))
+  : ShGeneric<2, T>(new ShVariableNode(Binding, 2, shTypeIndex<T>()))
 {
   shASN(*this, other);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShAttrib<2, Binding, T, Swizzled>& other)
-  : ShGeneric<2, T>(new ShVariableNode(Binding, 2))
+  : ShGeneric<2, T>(new ShVariableNode(Binding, 2, shTypeIndex<T>()))
 {
   shASN(*this, other);
 }
@@ -507,10 +509,10 @@ ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<2, Binding, T, Swizzled>::ShAttrib(T data[2])
-  : ShGeneric<2, T>(new ShVariableNode(Binding, 2))
+  : ShGeneric<2, T>(new ShVariableNode(Binding, 2, shTypeIndex<T>()))
 {
   if (Binding == SH_CONST) {
-    for (int i = 0; i < 2; i++) m_node->setValue(i, data[i]);
+    for (int i = 0; i < 2; i++) setValue(i, data[i]);
   } else {
     (*this) = ShAttrib<2, SH_CONST, T>(data);
   }
@@ -518,11 +520,11 @@ ShAttrib<2, Binding, T, Swizzled>::ShAttrib(T data[2])
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<2, Binding, T, Swizzled>::ShAttrib(T s0, T s1)
-  : ShGeneric<2, T>(new ShVariableNode(Binding, 2))
+  : ShGeneric<2, T>(new ShVariableNode(Binding, 2, shTypeIndex<T>()))
 {
   if (Binding == SH_CONST) {
-    m_node->setValue(0, s0);
-    m_node->setValue(1, s1);
+    setValue(0, s0);
+    setValue(1, s1);
   } else {
     (*this)[0] = ShAttrib<1, SH_CONST, T>(s0);
     (*this)[1] = ShAttrib<1, SH_CONST, T>(s1);
@@ -531,13 +533,13 @@ ShAttrib<2, Binding, T, Swizzled>::ShAttrib(T s0, T s1)
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T>& s0, const ShGeneric<1, T>& s1)
-  : ShGeneric<2, T>(new ShVariableNode(Binding, 2))
+  : ShGeneric<2, T>(new ShVariableNode(Binding, 2, shTypeIndex<T>()))
 {
   if (Binding == SH_CONST) {
     SH_DEBUG_ASSERT(s0.hasValues());
-    m_node->setValue(0, s0.getValue(0));
+    setValue(0, s0.getValue(0));
     SH_DEBUG_ASSERT(s1.hasValues());
-    m_node->setValue(1, s1.getValue(0));
+    setValue(1, s1.getValue(0));
   } else {
     (*this)[0] = s0;
     (*this)[1] = s1;
@@ -737,20 +739,20 @@ ShAttrib<2, Binding, T, Swizzled>::operator-() const
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<3, Binding, T, Swizzled>::ShAttrib()
-  : ShGeneric<3, T>(new ShVariableNode(Binding, 3))
+  : ShGeneric<3, T>(new ShVariableNode(Binding, 3, shTypeIndex<T>()))
 {
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShGeneric<3, T>& other)
-  : ShGeneric<3, T>(new ShVariableNode(Binding, 3))
+  : ShGeneric<3, T>(new ShVariableNode(Binding, 3, shTypeIndex<T>()))
 {
   shASN(*this, other);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShAttrib<3, Binding, T, Swizzled>& other)
-  : ShGeneric<3, T>(new ShVariableNode(Binding, 3))
+  : ShGeneric<3, T>(new ShVariableNode(Binding, 3, shTypeIndex<T>()))
 {
   shASN(*this, other);
 }
@@ -764,10 +766,10 @@ ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<3, Binding, T, Swizzled>::ShAttrib(T data[3])
-  : ShGeneric<3, T>(new ShVariableNode(Binding, 3))
+  : ShGeneric<3, T>(new ShVariableNode(Binding, 3, shTypeIndex<T>()))
 {
   if (Binding == SH_CONST) {
-    for (int i = 0; i < 3; i++) m_node->setValue(i, data[i]);
+    for (int i = 0; i < 3; i++) setValue(i, data[i]);
   } else {
     (*this) = ShAttrib<3, SH_CONST, T>(data);
   }
@@ -775,12 +777,12 @@ ShAttrib<3, Binding, T, Swizzled>::ShAttrib(T data[3])
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<3, Binding, T, Swizzled>::ShAttrib(T s0, T s1, T s2)
-  : ShGeneric<3, T>(new ShVariableNode(Binding, 3))
+  : ShGeneric<3, T>(new ShVariableNode(Binding, 3, shTypeIndex<T>()))
 {
   if (Binding == SH_CONST) {
-    m_node->setValue(0, s0);
-    m_node->setValue(1, s1);
-    m_node->setValue(2, s2);
+    setValue(0, s0);
+    setValue(1, s1);
+    setValue(2, s2);
   } else {
     (*this)[0] = ShAttrib<1, SH_CONST, T>(s0);
     (*this)[1] = ShAttrib<1, SH_CONST, T>(s1);
@@ -790,15 +792,15 @@ ShAttrib<3, Binding, T, Swizzled>::ShAttrib(T s0, T s1, T s2)
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T>& s0, const ShGeneric<1, T>& s1, const ShGeneric<1, T>& s2)
-  : ShGeneric<3, T>(new ShVariableNode(Binding, 3))
+  : ShGeneric<3, T>(new ShVariableNode(Binding, 3, shTypeIndex<T>()))
 {
   if (Binding == SH_CONST) {
     SH_DEBUG_ASSERT(s0.hasValues());
-    m_node->setValue(0, s0.getValue(0));
+    setValue(0, s0.getValue(0));
     SH_DEBUG_ASSERT(s1.hasValues());
-    m_node->setValue(1, s1.getValue(0));
+    setValue(1, s1.getValue(0));
     SH_DEBUG_ASSERT(s2.hasValues());
-    m_node->setValue(2, s2.getValue(0));
+    setValue(2, s2.getValue(0));
   } else {
     (*this)[0] = s0;
     (*this)[1] = s1;
@@ -999,20 +1001,20 @@ ShAttrib<3, Binding, T, Swizzled>::operator-() const
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<4, Binding, T, Swizzled>::ShAttrib()
-  : ShGeneric<4, T>(new ShVariableNode(Binding, 4))
+  : ShGeneric<4, T>(new ShVariableNode(Binding, 4, shTypeIndex<T>()))
 {
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShGeneric<4, T>& other)
-  : ShGeneric<4, T>(new ShVariableNode(Binding, 4))
+  : ShGeneric<4, T>(new ShVariableNode(Binding, 4, shTypeIndex<T>()))
 {
   shASN(*this, other);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShAttrib<4, Binding, T, Swizzled>& other)
-  : ShGeneric<4, T>(new ShVariableNode(Binding, 4))
+  : ShGeneric<4, T>(new ShVariableNode(Binding, 4, shTypeIndex<T>()))
 {
   shASN(*this, other);
 }
@@ -1026,10 +1028,10 @@ ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<4, Binding, T, Swizzled>::ShAttrib(T data[4])
-  : ShGeneric<4, T>(new ShVariableNode(Binding, 4))
+  : ShGeneric<4, T>(new ShVariableNode(Binding, 4, shTypeIndex<T>()))
 {
   if (Binding == SH_CONST) {
-    for (int i = 0; i < 4; i++) m_node->setValue(i, data[i]);
+    for (int i = 0; i < 4; i++) setValue(i, data[i]);
   } else {
     (*this) = ShAttrib<4, SH_CONST, T>(data);
   }
@@ -1037,13 +1039,13 @@ ShAttrib<4, Binding, T, Swizzled>::ShAttrib(T data[4])
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<4, Binding, T, Swizzled>::ShAttrib(T s0, T s1, T s2, T s3)
-  : ShGeneric<4, T>(new ShVariableNode(Binding, 4))
+  : ShGeneric<4, T>(new ShVariableNode(Binding, 4, shTypeIndex<T>()))
 {
   if (Binding == SH_CONST) {
-    m_node->setValue(0, s0);
-    m_node->setValue(1, s1);
-    m_node->setValue(2, s2);
-    m_node->setValue(3, s3);
+    setValue(0, s0);
+    setValue(1, s1);
+    setValue(2, s2);
+    setValue(3, s3);
   } else {
     (*this)[0] = ShAttrib<1, SH_CONST, T>(s0);
     (*this)[1] = ShAttrib<1, SH_CONST, T>(s1);
@@ -1054,17 +1056,17 @@ ShAttrib<4, Binding, T, Swizzled>::ShAttrib(T s0, T s1, T s2, T s3)
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T>& s0, const ShGeneric<1, T>& s1, const ShGeneric<1, T>& s2, const ShGeneric<1, T>& s3)
-  : ShGeneric<4, T>(new ShVariableNode(Binding, 4))
+  : ShGeneric<4, T>(new ShVariableNode(Binding, 4, shTypeIndex<T>()))
 {
   if (Binding == SH_CONST) {
     SH_DEBUG_ASSERT(s0.hasValues());
-    m_node->setValue(0, s0.getValue(0));
+    setValue(0, s0.getValue(0));
     SH_DEBUG_ASSERT(s1.hasValues());
-    m_node->setValue(1, s1.getValue(0));
+    setValue(1, s1.getValue(0));
     SH_DEBUG_ASSERT(s2.hasValues());
-    m_node->setValue(2, s2.getValue(0));
+    setValue(2, s2.getValue(0));
     SH_DEBUG_ASSERT(s3.hasValues());
-    m_node->setValue(3, s3.getValue(0));
+    setValue(3, s3.getValue(0));
   } else {
     (*this)[0] = s0;
     (*this)[1] = s1;

@@ -207,12 +207,75 @@ ShGeneric<4, T> ShGeneric<N, T>::operator()(int i1, int i2, int i3, int i4) cons
 {
   return ShGeneric<4, T>(m_node, m_swizzle * ShSwizzle(size(), i1, i2, i3, i4), m_neg);
 }
+
+template<int N, typename T>
+void ShGeneric<N, T>::range(T low, T high) 
+{
+  ShDataCloak<T> lowCloak(1, low);
+  ShDataCloak<T> highCloak(1, high);
+  rangeCloak(&lowCloak, &highCloak);
+}
+
+template<int N, typename T>
+ShDataCloak<T> ShGeneric<N, T>::lowBound() const
+{
+  return (*shref_dynamic_cast<CloakType>(lowBoundCloak()));
+}
+
+template<int N, typename T>
+T ShGeneric<N, T>::lowBound(int index) const
+{
+  return (*shref_dynamic_cast<CloakType>(lowBoundCloak()))[index];
+}
+
+template<int N, typename T>
+ShDataCloak<T> ShGeneric<N, T>::highBound() const
+{
+  return (*shref_dynamic_cast<CloakType>(highBoundCloak()));
+}
+
+template<int N, typename T>
+T ShGeneric<N, T>::highBound(int index) const
+{
+  return (*shref_dynamic_cast<CloakType>(highBoundCloak()))[index];
+}
   
 template<int N, typename T> 
 template<int N2>
 ShGeneric<N2, T> ShGeneric<N, T>::swiz(int indices[]) const
 {
   return ShGeneric<N2, T>(m_node, m_swizzle * ShSwizzle(N, N2, indices), m_neg);
+}
+
+template<int N, typename T>
+void ShGeneric<N, T>::getValues(T dest[]) const
+{
+  CloakTypePtr c = shref_dynamic_cast<CloakType>(cloak()); 
+  for(int i = 0; i < N; ++i) dest[i] = (*c)[i]; 
+}
+
+template<int N, typename T>
+T ShGeneric<N, T>::getValue(int index) const
+{
+  CloakTypePtr c = shref_dynamic_cast<CloakType>(cloak(index)); 
+  return (*c)[0];
+}
+
+template<int N, typename T>
+void ShGeneric<N, T>::setValue(int index, const T &cloakValue) 
+{
+  CloakTypePtr cloak(new CloakType(1, cloakValue));
+  setCloak(cloak, false, ShSwizzle(N, index));
+}
+
+template<int N, typename T>
+void ShGeneric<N, T>::setValues(const T cloakValues[]) 
+{
+  CloakTypePtr cloak(new CloakType(N));
+  for(int i = 0; i < N; ++i) {
+    (*cloak)[i] = cloakValues[i]; 
+  }
+  setCloak(cloakPtr);
 }
 
 template<typename T>
@@ -359,6 +422,38 @@ template<typename T>
 ShGeneric<4, T> ShGeneric<1, T>::operator()(int i1, int i2, int i3, int i4) const
 {
   return ShGeneric<4, T>(m_node, m_swizzle * ShSwizzle(size(), i1, i2, i3, i4), m_neg);
+}
+
+template<typename T>
+void ShGeneric<1, T>::range(T low, T high) 
+{
+  ShDataCloak<T> lowCloak(1, low);
+  ShDataCloak<T> highCloak(1, high);
+  rangeCloak(&lowCloak, &highCloak);
+}
+
+template<typename T>
+ShDataCloak<T> ShGeneric<1, T>::lowBound() const
+{
+  return (*shref_dynamic_cast<CloakType>(lowBoundCloak()));
+}
+
+template<typename T>
+T ShGeneric<1, T>::lowBound(int index) const
+{
+  return (*shref_dynamic_cast<CloakType>(lowBoundCloak()))[index];
+}
+
+template<typename T>
+ShDataCloak<T> ShGeneric<1, T>::highBound() const
+{
+  return (*shref_dynamic_cast<CloakType>(highBoundCloak()));
+}
+
+template<typename T>
+T ShGeneric<1, T>::highBound(int index) const
+{
+  return (*shref_dynamic_cast<CloakType>(highBoundCloak()))[index];
 }
   
 template<typename T> 

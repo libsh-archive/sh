@@ -8,61 +8,61 @@ namespace SH {
 
 template<typename T>
 ShBaseTexture1D<T>::ShBaseTexture1D(int width, const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_1D, T::typesize, traits, width))
+  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_1D, T::typesize, shTypeIndex<T>(), traits, width))
 {
 }
 
 template<typename T>
 ShBaseTexture2D<T>::ShBaseTexture2D(int width, int height, const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_2D, T::typesize, traits, width, height))
+  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_2D, T::typesize, shTypeIndex<T>(), traits, width, height))
 {
 }
 
 template<typename T>
 ShBaseTextureRect<T>::ShBaseTextureRect(int width, int height, const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_RECT, T::typesize, traits, width, height))
+  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_RECT, T::typesize, shTypeIndex<T>(), traits, width, height))
 {
 }
 
 template<typename T>
 ShBaseTexture3D<T>::ShBaseTexture3D(int width, int height, int depth, const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_3D, T::typesize, traits, width, height, depth))
+  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_3D, T::typesize, shTypeIndex<T>(), traits, width, height, depth))
 {
 }
 
 template<typename T>
 ShBaseTextureCube<T>::ShBaseTextureCube(int width, int height, const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_CUBE, T::typesize, traits, width, height))
+  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_CUBE, T::typesize, shTypeIndex<T>(), traits, width, height))
 {
 }
 
 template<typename T>
 ShBaseTexture1D<T>::ShBaseTexture1D(const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_1D, T::typesize, traits, 0))
+  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_1D, T::typesize, shTypeIndex<T>(), traits, 0))
 {
 }
 
 template<typename T>
 ShBaseTexture2D<T>::ShBaseTexture2D(const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_2D, T::typesize, traits, 0, 0))
+  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_2D, T::typesize, shTypeIndex<T>(), traits, 0, 0))
 {
 }
 
 template<typename T>
 ShBaseTextureRect<T>::ShBaseTextureRect(const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_RECT, T::typesize, traits, 0, 0))
+  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_RECT, T::typesize, shTypeIndex<T>(), traits, 0, 0))
 {
 }
 
 template<typename T>
 ShBaseTexture3D<T>::ShBaseTexture3D(const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_3D, T::typesize, traits, 0, 0, 0))
+  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_3D, T::typesize, shTypeIndex<T>(), traits, 0, 0, 0))
 {
 }
 
 template<typename T>
 ShBaseTextureCube<T>::ShBaseTextureCube(const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_CUBE, T::typesize, traits, 0, 0))
+  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_CUBE, T::typesize, shTypeIndex<T>(), traits, 0, 0))
 {
 }
 

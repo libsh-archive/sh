@@ -22,6 +22,7 @@ libsh_la_SOURCES += ShBlock.hpp ShCtrlGraph.hpp
 libsh_la_SOURCES += ShDebug.hpp ShEnvironment.hpp ShError.hpp
 libsh_la_SOURCES += ShException.hpp
 libsh_la_SOURCES += ShParser.hpp ShRefCount.hpp ShStatement.hpp
+libsh_la_SOURCES += ShStmtData.hpp ShStmtData.cpp 
 libsh_la_SOURCES += ShSwizzle.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp
 libsh_la_SOURCES += ShUtility.hpp ShVariable.hpp ShVariableNode.hpp sh.hpp
 libsh_la_SOURCES += ShInstructions.hpp ShInstructions.cpp
@@ -71,6 +72,10 @@ libsh_la_SOURCES += ShNormal.hpp ShNormalImpl.hpp ShLibNormal.hpp
 libsh_la_SOURCES += ShTexCoord.hpp ShTexCoordImpl.hpp ShLibTexCoord.hpp
 libsh_la_SOURCES += ShMatrix.hpp ShMatrixImpl.hpp
 libsh_la_SOURCES += ShQuaternion.hpp ShQuaternionImpl.hpp
+libsh_la_SOURCES += ShTypeInfo.hpp ShTypeInfoImpl.hpp ShTypeInfo.cpp
+libsh_la_SOURCES += ShCloak.hpp ShCloakImpl.hpp ShCloak.cpp
+libsh_la_SOURCES += ShEval.hpp ShEvalImpl.hpp ShEval.cpp
+
 
 # Shader Algebra
 libsh_la_SOURCES += ShAlgebra.hpp ShAlgebra.cpp
@@ -96,7 +101,7 @@ incinc_HEADERS += ShLibMisc.hpp ShLibMiscImpl.hpp
 incinc_HEADERS += ShLibTrig.hpp ShLibTrigImpl.hpp
 incinc_HEADERS += ShLibDeriv.hpp ShLibDerivImpl.hpp
 incinc_HEADERS += ShParser.hpp ShRefCount.hpp ShRefCountImpl.hpp 
-incinc_HEADERS += ShProgram.hpp ShProgramNode.hpp ShStatement.hpp
+incinc_HEADERS += ShProgram.hpp ShProgramNode.hpp ShStatement.hpp ShStmtData.hpp
 incinc_HEADERS += ShSwizzle.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp
 incinc_HEADERS += ShUtility.hpp
 incinc_HEADERS += ShVariable.hpp ShVariableNode.hpp
@@ -122,6 +127,8 @@ incinc_HEADERS += ShNibbles.hpp ShNibblesImpl.hpp
 incinc_HEADERS += ShChannelNode.hpp ShChannel.hpp ShChannelImpl.hpp
 incinc_HEADERS += ShStream.hpp ShStreamImpl.hpp
 incinc_HEADERS += ShQuaternion.hpp ShQuaternionImpl.hpp
+incinc_HEADERS += ShTypeInfo.hpp ShTypeInfoImpl.hpp 
+incinc_HEADERS += ShCloak.hpp ShCloakImpl.hpp ShEval.hpp ShEvalImpl.hpp
 incinc_HEADERS += ShMemory.hpp ShClamping.hpp ShInterp.hpp
 incinc_HEADERS += ShInstructions.hpp
 incinc_HEADERS += ShMeta.hpp ShMetaForwarder.hpp

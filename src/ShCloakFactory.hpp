@@ -24,33 +24,48 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#include "ShInternals.hpp"
-#include "ShDebug.hpp"
+#ifndef SHCLOAKFACTORY_HPP
+#define SHCLOAKFACTORY_HPP
 
-namespace SH { 
+#include <string>
+#include "ShCloak.hpp"
+#include "ShVariableNode.hpp"
 
-ShVariableReplacer::ShVariableReplacer(ShVarMap& v)
-  : varMap(v) {
+namespace SH {
+
+
+struct ShCloakFactory: public ShRefCountable {
+  /// Creates a ShCloak object with N components 
+  virtual ShCloakPtr generate(int N) const = 0; 
+
+  /// Creates a ShCloak object by using the 
+  // decode method from the Cloak type corresponding
+  // to this factory
+  virtual ShCloakPtr generate(std::string s) const = 0;
+
+  /// Creates two ShCloaks object with N default low
+  // range values for the given ShSemanticType
+  virtual ShCloakPtr generateLowBound(int N, ShSemanticType type) const = 0; 
+  virtual ShCloakPtr generateHighBound(int N, ShSemanticType type) const = 0; 
+};
+
+typedef ShPointer<ShCloakFactory> ShCloakFactoryPtr;
+typedef ShPointer<const ShCloakFactory> ShCloakFactoryCPtr;
+
+template<typename T>
+struct ShDataCloakFactory: public ShCloakFactory {
+  ShCloakPtr generate(int N) const;
+
+  /// generates a ShCloak by using  
+  ShCloakPtr generate(string s) const; 
+
+  ShCloakPtr generateLowBound(int N, ShSemanticType type) const; 
+  ShCloakPtr generateHighBound(int N, ShSemanticType type) const; 
+};
+
+
 }
 
-void ShVariableReplacer::operator()(ShCtrlGraphNodePtr node) {
-  if (!node) return;
-  ShBasicBlockPtr block = node->block;
-  if (!block) return;
-  for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-    if(!I->dest.null()) repVar(I->dest);
-    for (int i = 0; i < 3; i++) {
-      if( !I->src[i].null() ) repVar(I->src[i]);
-    }
-  }
-}
+#include "ShCloakFactoryImpl.hpp"
 
-void ShVariableReplacer::repVar(ShVariable& var) {
-  ShVarMap::iterator I = varMap.find(var.node());
-  if (I == varMap.end()) return;
-  var = ShVariable(I->second, var.swizzle(), var.neg());
-}
-
-}
-
-
+#endif

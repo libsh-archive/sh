@@ -28,10 +28,10 @@
 #define SHVARIABLE_HPP
 
 #include "ShRefCount.hpp"
-#include "ShVariableNode.hpp"
 #include "ShSwizzle.hpp"
 #include "ShUtility.hpp"
 #include "ShMetaForwarder.hpp"
+#include "ShVariableNode.hpp"
 
 namespace SH {
 
@@ -57,6 +57,8 @@ public:
   
   int size() const; ///< Get the number of elements in this variable,
                     /// after swizzling.
+                    
+  int typeIndex() const; ///< Returns index of the data type held in this node 
 
   /**@name Metadata
    * This data is useful for various things, including asset
@@ -66,11 +68,14 @@ public:
 
   
   /// Set a range of values for this variable
-  void range(ShVariableNode::ValueType low, ShVariableNode::ValueType high);
-  /// Obtain a lower bound on this variable
-  ShVariableNode::ValueType lowBound() const;
-  /// Obtain an upper bound on this variable
-  ShVariableNode::ValueType highBound() const;
+  // TODO check if this works when swizzle contains one index more than once
+  void rangeCloak(ShCloakCPtr low, ShCloakCPtr high);
+
+  /// Obtain a lower bounds on this variable (tuple of same size as this)
+  ShCloakPtr lowBoundCloak() const;
+
+  /// Obtain an upper bounds on this variable (tuple of same size as this)
+  ShCloakPtr highBoundCloak() const;
 
   //@}
   
@@ -84,14 +89,18 @@ public:
   bool neg() const;
 
   bool& neg();
+
+  ///
   
-  /// Get the values of this variable, with swizzling taken into account
-  void getValues(ShVariableNode::ValueType dest[]) const;
-  ShVariableNode::ValueType getValue(int index) const;
-  
-  /// Set the values of this variable, using the swizzle as a
-  /// writemask.
-  void setValues(ShVariableNode::ValueType values[]);
+  /// Gets a copy of the cloak (with swizzling & proper negation)
+  ShCloakPtr cloak() const;
+  ShCloakPtr cloak(int index) const;
+
+  /// sets up to num elements starting at index in this cloak 
+  /// from the other cloak, accounting for swizzles and negation
+  void setCloak(ShCloakCPtr other, bool neg, const ShSwizzle &writemask);
+  void setCloak(ShCloakCPtr other, int index);
+  void setCloak(ShCloakCPtr other);
 
   ShVariable operator()() const; ///< Identity swizzle
   ShVariable operator()(int) const;

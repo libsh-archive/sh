@@ -280,16 +280,20 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
 
   if (!uniform) return;
 
+  ShCloakCPtr uniformCloak = uniform->cloak();
   RegMap::const_iterator I = m_registers.find(uniform);
   if (I == m_registers.end()) { // perhaps uniform was split
     if( m_splits.count(uniform) > 0 ) {
       ShTransformer::VarNodeVec &splitVec = m_splits[uniform];
+
       int offset = 0;
+      int copySwiz[4];
       for(ShTransformer::VarNodeVec::iterator it = splitVec.begin();
           it != splitVec.end(); offset += (*it)->size(), ++it) {
-        for(i = 0; i < (*it)->size(); ++i) {
-          (*it)->setValue(i, uniform->getValue(i + offset));
-        }
+        // TODO switch to properly swizzled version
+        for(i = 0; i < (*it)->size(); ++i) copySwiz[i] = i + offset;
+        (*it)->setCloak(uniformCloak->get(false,
+            ShSwizzle(uniform->size(), (*it)->size(), copySwiz))); 
         updateUniform(*it);
       }
     } 
@@ -305,7 +309,8 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
   
   float values[4];
   for (i = 0; i < uniform->size(); i++) {
-    values[i] = (float)uniform->getValue(i);
+    // TODO clean this up and handle different types
+    values[i] = (*shref_dynamic_cast<ShDataCloak<float> >(uniformCloak->get(i)))[0];
   }
   for (; i < 4; i++) {
     values[i] = 0.0;
@@ -687,9 +692,9 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
     
     ShStructuralNodePtr body = node->structnodes.back();
 
-    ShVariable maxloop(new ShVariableNode(SH_CONST, 1));
-    float maxloopval = 255.0;
-    maxloop.setValues(&maxloopval);
+    float maxloopval = 255.0f;
+    ShConstAttrib1f maxloop(maxloopval);
+
     m_shader->constants.push_back(maxloop.node());
     m_instructions.push_back(ArbInst(SH_ARB_REP, ShVariable(), maxloop));
     genStructNode(header);
@@ -713,9 +718,9 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
       }
     }
     
-    ShVariable maxloop(new ShVariableNode(SH_CONST, 1));
-    float maxloopval = 255.0;
-    maxloop.setValues(&maxloopval);
+    float maxloopval = 255.0f;
+    ShConstAttrib1f maxloop(maxloopval);
+
     m_shader->constants.push_back(maxloop.node());
     m_instructions.push_back(ArbInst(SH_ARB_REP, ShVariable(), maxloop));
     genStructNode(loopnode);
@@ -850,14 +855,16 @@ void ArbCode::allocConsts(const ArbLimits& limits)
   for (ShProgramNode::VarList::const_iterator I = m_shader->constants.begin();
        I != m_shader->constants.end(); ++I) {
     ShVariableNodePtr node = *I;
+    const ShDataCloak<float>& cloak = (*shref_dynamic_cast<const ShDataCloak<float> >(node->cloak()));
 
     // TODO: improve efficiency
     RegMap::const_iterator J;
     for (J = m_registers.begin(); J != m_registers.end(); ++J) {
       if (J->second->type != SH_ARB_REG_CONST) continue;
       int f = 0;
+      // TODO handle other stuff
       for (int i = 0; i < node->size(); i++) {
-        if (J->second->values[i] == node->getValue(i)) f++;
+        if (J->second->values[i] == cloak[i]) f++;
       }
       if (f == node->size()) break;
     }
@@ -865,7 +872,7 @@ void ArbCode::allocConsts(const ArbLimits& limits)
       m_registers[node] = new ArbReg(SH_ARB_REG_CONST, m_numConsts, node->name());
       m_reglist.push_back(m_registers[node]);
       for (int i = 0; i < 4; i++) {
-        m_registers[node]->values[i] = (float)(i < node->size() ? node->getValue(i) : 0.0);
+        m_registers[node]->values[i] = (float)(i < node->size() ? cloak[i] : 0.0);
       }
       m_numConsts++;
     } else {

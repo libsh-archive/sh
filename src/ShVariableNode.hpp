@@ -30,6 +30,7 @@
 #include <string>
 #include "ShRefCount.hpp"
 #include "ShMeta.hpp"
+#include "ShCloak.hpp"
 
 namespace SH {
 
@@ -61,13 +62,49 @@ enum ShSemanticType {
 extern const char* ShBindingTypeName[];
 extern const char* ShSemanticTypeName[];
 
+class ShVariableNode;
+typedef ShPointer<ShVariableNode> ShVariableNodePtr;
+typedef ShPointer<const ShVariableNode> ShVariableNodeCPtr;
+
 /** A generic n-tuple variable.
  */
 class ShVariableNode : public virtual ShRefCountable,
                        public virtual ShMeta {
 public:
-  ShVariableNode(ShBindingType kind, int size, ShSemanticType type = SH_ATTRIB);
+  /// Constructs a VariableNode that holds a tuple of data of type 
+  //given by the typeIndex.
+  ShVariableNode(ShBindingType kind, int size, int typeIndex, ShSemanticType type = SH_ATTRIB);
+
   virtual ~ShVariableNode();
+
+  /// Clones this ShVariableNode, copying all fields and meta data
+  // except it uses the specified fields in the place of the originals. 
+  //
+  // If updateVarList is set to false, then the clone is not added to the
+  // current ShProgramNode's variable lists.  You *must* add it in manually 
+  // for INPUT/OUTPUT/INOUT types.
+  //
+  // If keepUniform is set to false, then the new variable  
+  // has m_uniform set to false even if the original m_uniform was true. 
+  //
+  // TODO Currently this does not work if the newKind is SH_CONST
+  // and old kind was not CONST/uniform since the old one won't have 
+  // a ShCloak node to clone...
+  // To fix this, VariableNode should hold the type_index of its data
+  // as well, so that it can generate new cloaks on demand.
+  // @{
+  ShVariableNodePtr clone(ShBindingType newKind, 
+      bool updateVarList = true, bool keepUniform = true) const;
+
+  ShVariableNodePtr clone(ShBindingType newKind, ShSemanticType newType, 
+      bool updateVarList = true, bool keepUniform = true) const;
+
+  ShVariableNodePtr clone(ShBindingType newKind, ShSemanticType newType, 
+      int newSize, bool updateVarList = true, bool keepUniform = true) const;
+
+  ShVariableNodePtr clone(int newTypeIndex, 
+      bool updateVarList = true, bool keepUniform = true) const;
+  // @}
 
   bool uniform() const; ///< Is this a uniform (non-shader specific) variable?
   bool hasValues() const; ///< Does this variable have values in the
@@ -80,17 +117,19 @@ public:
   void lock(); ///< Do not update bound shaders in subsequent setValue calls
   void unlock(); ///< Update bound shader values, and turn off locking
   
-
-  typedef float ValueType; ///< This is not necessarily correct. Oh well.
+  int typeIndex() const; ///< Returns index of the data type held in this node 
 
   // Metadata
   std::string name() const; ///< Get this variable's name
   void name(const std::string& n); ///< Set this variable's name
 
   /// Set a range of possible values for this variable's elements
-  void range(ShVariableNode::ValueType low, ShVariableNode::ValueType high);
-  ShVariableNode::ValueType lowBound() const;
-  ShVariableNode::ValueType highBound() const;
+  // low and high must be scalar elements (otherwise this just uses the first component)
+  void rangeCloak(ShCloakCPtr low, ShCloakCPtr high);
+  void rangeCloak(ShCloakCPtr low, ShCloakCPtr high, bool neg, const ShSwizzle &writemask);
+
+  ShCloakPtr lowBoundCloak() const;
+  ShCloakPtr highBoundCloak() const;
 
   ShBindingType kind() const;
   ShSemanticType specialType() const;
@@ -98,35 +137,42 @@ public:
 
   std::string nameOfType() const; ///< Get a string of this var's specialType, kind, & size
 
-  /// For variables with values only. Sets the value of the i'th entry.
-  /// If i is outside [0, size - 1] this is a no-op.
-  ///
-  ///@see hasValues()
-  void setValue(int i, ValueType value);
+  /// Update elements of a cloak applying the given writemask and negation
+  void setCloak(ShCloakCPtr other);
+  void setCloak(ShCloakCPtr other, bool neg, const ShSwizzle &writemask);
 
-  /// Retrieve a particular value
-  ValueType getValue(int i) const;
+  /// Retrieve the cloak 
+  ShCloakCPtr cloak() const;
+  //ShDataCloakPtr cloak(); // TODO can't have this function until ShUpdate is implemented, and even then it might not be a good idea
   
 protected:
+  /// Creates a new variable node that holds the same data type as old
+  // with the option to alter binding/semantic types and size.
+  //
+  // When updateVarList is false, the new ShVariableNode does not get entered
+  // into the current ShProgram's variable lists.
+  //
+  // When maintainUniform is true, the old.m_uniform is used instead
+  // of setting up the value based on current ShContext state
+  ShVariableNode(const ShVariableNode& old, ShBindingType newKind, 
+      ShSemanticType newType, int newSize, int newTypeIndex, 
+      bool updateVarList, bool keepUniform);
+  void uniformUpdate(); /// Updates a uniform in currently bound shaders
+  void programVarListInit(); /// After kind, size and type are set, this 
 
   bool m_uniform;
   
   ShBindingType m_kind;
   ShSemanticType m_specialType;
   int m_size;
+  int m_typeIndex;
   int m_id;
   int m_locked;
 
-  ValueType* m_values;
-
-  // Metadata (range)
-  ValueType m_lowBound, m_highBound;
-  
+  ShCloakPtr m_cloak;
   static int m_maxID;
 };
 
-typedef ShPointer<ShVariableNode> ShVariableNodePtr;
-typedef ShPointer<const ShVariableNode> ShVariableNodeCPtr;
 
 }
 

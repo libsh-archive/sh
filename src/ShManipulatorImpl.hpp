@@ -128,9 +128,7 @@ ShProgram operator<<(const ShProgram &p, const ShManipulator<T> &m) {
     std::vector<ShVariable> outputs;
     for(ShProgramNode::VarList::const_iterator inIt = p.node()->inputs.begin();
         inIt != p.node()->inputs.end(); ++inIt) {
-      ShVariable out(ShVariable(new ShVariableNode(SH_OUTPUT, 
-              (*inIt)->size(), (*inIt)->specialType())));
-      out.name((*inIt)->name());
+      ShVariable out((*inIt)->clone(SH_OUTPUT));
       outputs.push_back(out);
     }
 
@@ -160,10 +158,7 @@ ShProgram operator<<(const ShProgram &p, const ShManipulator<T> &m) {
         }
         used[i] = true;
 
-        ShVariable input(new ShVariableNode(SH_INPUT, 
-              outputs[i].node()->size(), outputs[i].node()->specialType()));
-        input.name(outputs[i].name());
-
+        ShVariable input(outputs[i].node()->clone(SH_INPUT));
         shASN(outputs[i], input);
       }
     }
@@ -182,9 +177,7 @@ ShProgram operator<<(const ShManipulator<T> &m, const ShProgram &p) {
     std::vector<ShVariable> inputs;
     for(ShProgramNode::VarList::const_iterator outIt = p.node()->outputs.begin();
         outIt != p.node()->outputs.end(); ++outIt) {
-      ShVariable in(new ShVariableNode(SH_INPUT, (*outIt)->size(), 
-            (*outIt)->specialType()));
-      in.name((*outIt)->name());
+      ShVariable in((*outIt)->clone(SH_INPUT));
       inputs.push_back(in);
     }
 
@@ -205,10 +198,7 @@ ShProgram operator<<(const ShManipulator<T> &m, const ShProgram &p) {
       }
 
       for(int i = start; i <= end; ++i) { // handles end < start case
-        ShVariable output(new ShVariableNode(SH_OUTPUT, 
-              inputs[i].node()->size(), inputs[i].node()->specialType()));
-        output.name( inputs[i].name() );
-
+        ShVariable output(inputs[i].node()->clone(SH_OUTPUT));
         shASN(output, inputs[i]);
       }
     }

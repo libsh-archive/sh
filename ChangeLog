@@ -1,3 +1,24 @@
+2004-07-19  Bryan Chan <b8chan@uwaterloo.ca>
+  Changes in progress for adding extra arithmetic types to Sh.
+  Current copy is still non-working.
+
+  * ShCloak*: Polymorphic tuple data containers that 
+  ShVariableNode now uses in place of float[]
+
+  * ShEval*: Evaluators for Cloaks.
+
+  * ShTypeInfo*:  
+  Type specific information (true/false values, default ranges, etc.)
+  Also holds the evaluator and  Cloak factory.
+
+  * ShContext*:
+  Handles mappings between type strings, ShTypeInfo objects, and runtime
+  generated type indices.
+
+  * ShTransformer* :
+  Moronic implementation right now only converts ops on other floating point
+  types to single precision float.  Other types still TODO.
+
 2004-07-17  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShVariable.hpp (ShVariable): Add operator!=.

@@ -24,33 +24,64 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#include "ShInternals.hpp"
-#include "ShDebug.hpp"
+#ifndef SHTYPEINFOIMPL_HPP
+#define SHTYPEINFOIMPL_HPP
 
-namespace SH { 
+#include "ShTypeInfo.hpp"
+#include "ShEval.hpp"
 
-ShVariableReplacer::ShVariableReplacer(ShVarMap& v)
-  : varMap(v) {
-}
+namespace SH {
 
-void ShVariableReplacer::operator()(ShCtrlGraphNodePtr node) {
-  if (!node) return;
-  ShBasicBlockPtr block = node->block;
-  if (!block) return;
-  for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-    if(!I->dest.null()) repVar(I->dest);
-    for (int i = 0; i < 3; i++) {
-      if( !I->src[i].null() ) repVar(I->src[i]);
-    }
+template<typename T>
+ShPointer<ShDataCloakFactory<T> > ShConcreteTypeInfo<T>::m_cloakFactory;   
+
+template<typename T>
+ShPointer<ShEval > ShConcreteTypeInfo<T>::m_eval;   
+
+template<typename T>
+T ShConcreteTypeInfo<T>::defaultLo(ShSemanticType type)
+{
+  switch(type) {
+    case SH_POINT:
+    case SH_VECTOR:
+    case SH_NORMAL:
+    case SH_POSITION:
+      return -1;
+    default:
+      return 0;
   }
 }
 
-void ShVariableReplacer::repVar(ShVariable& var) {
-  ShVarMap::iterator I = varMap.find(var.node());
-  if (I == varMap.end()) return;
-  var = ShVariable(I->second, var.swizzle(), var.neg());
+template<typename T>
+T ShConcreteTypeInfo<T>::defaultHi(ShSemanticType type)
+{
+  return 1;
+}
+
+template<typename T>
+const char* ShConcreteTypeInfo<T>::name() const 
+{
+  return m_name;
+}
+
+template<typename T>
+ShCloakFactoryCPtr ShConcreteTypeInfo<T>::cloakFactory() 
+{
+  if(!m_cloakFactory) {
+    m_cloakFactory = new ShDataCloakFactory<T>();
+  }
+  return m_cloakFactory;
+}
+
+template<typename T>
+ShEvalCPtr ShConcreteTypeInfo<T>::eval() 
+{
+  if(!m_eval) {
+    m_eval = new ShDataEval<T>();
+  }
+  return m_eval;
 }
 
 }
 
-
+#endif

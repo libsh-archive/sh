@@ -24,33 +24,38 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#include "ShInternals.hpp"
-#include "ShDebug.hpp"
+#ifndef SHCLOAKFACTORYIMPL_HPP
+#define SHCLOAKFACTORYIMPL_HPP
 
-namespace SH { 
+#include "ShCloakFactory.hpp"
+#include "ShTypeInfo.hpp"
+//#include "ShContext.hpp"
 
-ShVariableReplacer::ShVariableReplacer(ShVarMap& v)
-  : varMap(v) {
+namespace SH {
+
+template<typename T>
+ShCloakPtr ShDataCloakFactory<T>::generate(int N) const
+{
+  return new ShDataCloak<T>(N);
 }
 
-void ShVariableReplacer::operator()(ShCtrlGraphNodePtr node) {
-  if (!node) return;
-  ShBasicBlockPtr block = node->block;
-  if (!block) return;
-  for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-    if(!I->dest.null()) repVar(I->dest);
-    for (int i = 0; i < 3; i++) {
-      if( !I->src[i].null() ) repVar(I->src[i]);
-    }
-  }
+template<typename T>
+ShCloakPtr ShDataCloakFactory<T>::generate(std::string s) const
+{
+  return new ShDataCloak<T>(s);
 }
 
-void ShVariableReplacer::repVar(ShVariable& var) {
-  ShVarMap::iterator I = varMap.find(var.node());
-  if (I == varMap.end()) return;
-  var = ShVariable(I->second, var.swizzle(), var.neg());
+template<typename T>
+ShCloakPtr ShDataCloakFactory<T>::generateLowBound(int N, ShSemanticType type) const
+{
+  return new ShDataCloak<T>(N, ShConcreteTypeInfo<T>::defaultLo(type));
+}
+
+template<typename T>
+ShCloakPtr ShDataCloakFactory<T>::generateHighBound(int N, ShSemanticType type) const
+{
+  return new ShDataCloak<T>(N, ShConcreteTypeInfo<T>::defaultHi(type));
 }
 
 }
-
-
+#endif

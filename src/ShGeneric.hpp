@@ -28,6 +28,7 @@
 #define SHGENERIC_HPP
 
 #include "ShVariable.hpp"
+#include "ShCloak.hpp"
 
 namespace SH {
 
@@ -88,13 +89,34 @@ public:
   ShGeneric<2, T> operator()(int, int) const;
   ShGeneric<3, T> operator()(int, int, int) const;
   ShGeneric<4, T> operator()(int, int, int, int) const;
+
+  /// Range Metadata
+  void range(T low, T high);
+
+  CloakType lowBound() const; 
+  T lowBound(int index) const;
+
+  CloakType highBound() const;
+  T highBound(int index) const;
   
   // Arbitrary Swizzle
   template<int N2>
   ShGeneric<N2, T> swiz(int indices[]) const;
 
+  /// Get the values of this variable, with swizzling taken into account
+  void getValues(T dest[]) const;
+  T getValue(int index) const;
+  
+  /// Set the values of this variable, using the swizzle as a
+  /// writemask.
+  void setValue(int index, const T &value); 
+  void setValues(const T values[]);
+
   typedef T ValueType;
   static const int typesize = N;
+  typedef ShDataCloak<T> CloakType; 
+  typedef ShPointer<CloakType> CloakTypePtr;
+  typedef ShPointer<const CloakType> CloakTypeCPtr;
 
 protected:
   ShGeneric(const ShVariableNodePtr& node);
@@ -129,13 +151,34 @@ public:
   ShGeneric<2, T> operator()(int, int) const;
   ShGeneric<3, T> operator()(int, int, int) const;
   ShGeneric<4, T> operator()(int, int, int, int) const;
+
+  /// Range Metadata
+  void range(T low, T high);
+
+  CloakType lowBound() const; 
+  T lowBound(int index) const;
+
+  CloakType highBound() const;
+  T highBound(int index) const;
   
   // Arbitrary Swizzle
   template<int N2>
   ShGeneric<N2, T> swiz(int indices[]) const;
 
+  /// Get the values of this variable, with swizzling taken into account
+  void getValues(T dest[]) const;
+  T getValue(int index) const;
+  
+  /// Set the values of this variable, using the swizzle as a
+  /// writemask.
+  void setValue(int index, const T &value); 
+  void setValues(const T values[]);
+
   typedef T ValueType;
   static const int typesize = 1;
+  typedef ShDataCloak<T> CloakType; 
+  typedef ShPointer<CloakType> CloakTypePtr;
+  typedef ShPointer<const CloakType> CloakTypeCPtr;
 
 protected:
   ShGeneric(const ShVariableNodePtr& node);

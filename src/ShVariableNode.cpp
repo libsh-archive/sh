@@ -30,6 +30,7 @@
 #include "ShVariableNode.hpp"
 #include "ShDebug.hpp"
 #include "ShContext.hpp"
+#include "ShCloakFactory.hpp"
 
 namespace SH {
 
@@ -53,59 +54,72 @@ const char* ShSemanticTypeName[] = {
   "Position"
 };
 
-ShVariableNode::ShVariableNode(ShBindingType kind, int size, ShSemanticType type)
+ShVariableNode::ShVariableNode(ShBindingType kind, int size, int typeIndex, ShSemanticType type)
   : m_uniform(!ShContext::current()->parsing() && kind != SH_TEXTURE && kind != SH_STREAM),
     m_kind(kind), m_specialType(type),
-    m_size(size), m_id(m_maxID++), m_locked(0),
-    m_values(0)
+    m_size(size), m_typeIndex(typeIndex), 
+    m_id(m_maxID++), m_locked(0),
+    m_cloak(0)
 {
   if (m_uniform || m_kind == SH_CONST) {
-    m_values = new ValueType[size];
-    for (int i = 0; i < size; i++) m_values[i] = 0.0;
+    m_cloak = shTypeInfo(m_typeIndex)->cloakFactory()->generate(m_size);
   }
-  switch (m_kind) {
-  case SH_INPUT:
-    assert(ShContext::current()->parsing());
-    ShContext::current()->parsing()->inputs.push_back(this);
-    break;
-  case SH_OUTPUT:
-    assert(ShContext::current()->parsing());
-    ShContext::current()->parsing()->outputs.push_back(this);
-    break;
-  case SH_INOUT:
-    assert(ShContext::current()->parsing());
-    ShContext::current()->parsing()->outputs.push_back(this);
-    ShContext::current()->parsing()->inputs.push_back(this);
-    break;
-  default:
-    // Do nothing
-    break;
-  }
+  programVarListInit();
+}
 
-  switch (type) {
-  case SH_ATTRIB:
-    range(0, 1.0);
-    break;
-  case SH_POINT:
-  case SH_VECTOR:
-  case SH_NORMAL:
-  case SH_POSITION:
-    range(-1.0, 1.0);
-    break;
-  case SH_TEXCOORD:
-  case SH_COLOR:
-    range(0, 1.0);
-    break;
-  default:
-    range(0, 1.0);
-    break;
+ShVariableNode::ShVariableNode(const ShVariableNode& old, ShBindingType newKind,
+          ShSemanticType newType, int newSize, int newTypeIndex, 
+          bool updateVarList, bool keepUniform)
+  : ShMeta(old), 
+    m_uniform(old.m_uniform), m_kind(newKind), m_specialType(newType),
+    m_size(newSize), m_typeIndex(newTypeIndex),
+    m_id(m_maxID++), m_locked(0),
+    m_cloak(0)
+{
+  if(!keepUniform) m_uniform = false;
+
+  if(m_uniform || m_kind == SH_CONST) {
+    m_cloak = shTypeInfo(m_typeIndex)->cloakFactory()->generate(m_size);
   }
+  if(updateVarList) programVarListInit();
 }
 
 ShVariableNode::~ShVariableNode()
 {
-  delete [] m_values;
-  m_values = 0;
+  /* TODO using a smart pointer now - probably shouldn't be though, so leave
+   * these here just in case
+  delete m_cloak; 
+  m_cloak = 0;
+  */
+}
+
+ShVariableNodePtr ShVariableNode::clone(ShBindingType newKind, 
+    bool updateVarList, bool keepUniform) const
+{
+  return new ShVariableNode(*this, newKind, m_specialType, m_size, m_typeIndex, 
+      updateVarList, keepUniform);
+}
+
+ShVariableNodePtr ShVariableNode::clone(ShBindingType newKind, 
+    ShSemanticType newType, bool updateVarList, bool keepUniform) const
+{
+  return new ShVariableNode(*this, newKind, newType, m_size, m_typeIndex, 
+      updateVarList, keepUniform);
+}
+
+ShVariableNodePtr ShVariableNode::clone(ShBindingType newKind, 
+    ShSemanticType newType, int newSize, 
+    bool updateVarList, bool keepUniform) const
+{
+  return new ShVariableNode(*this, newKind, newType, newSize, m_typeIndex, 
+      updateVarList, keepUniform);
+}
+
+ShVariableNodePtr ShVariableNode::clone(int newTypeIndex,
+    bool updateVarList, bool keepUniform) const
+{
+  return new ShVariableNode(*this, m_kind, m_specialType, m_size, newTypeIndex, 
+      updateVarList, keepUniform);
 }
 
 bool ShVariableNode::uniform() const
@@ -115,7 +129,7 @@ bool ShVariableNode::uniform() const
 
 bool ShVariableNode::hasValues() const
 {
-  return (m_values != NULL);
+  return (m_cloak);
 }
 
 void ShVariableNode::lock()
@@ -142,7 +156,7 @@ int ShVariableNode::size() const
 
 void ShVariableNode::size(int s)
 {
-  SH_DEBUG_ASSERT(!m_values);
+  SH_DEBUG_ASSERT(!m_cloak);
   m_size = s;
 }
 
@@ -160,17 +174,7 @@ std::string ShVariableNode::name() const
   
   // Special case for constants
   if (m_kind == SH_CONST) {
-    if (m_size == 1) {
-      stream << m_values[0];
-    } else {
-      stream << "(";
-      for (int i = 0; i < m_size; i++) {
-        if (i > 0) stream << ", ";
-        stream << m_values[i];
-      }
-      stream << ")";
-    }
-    return stream.str();
+    return m_cloak->encode();
   }
 
   switch (m_kind) {
@@ -202,20 +206,59 @@ std::string ShVariableNode::name() const
   return stream.str();
 }
 
-void ShVariableNode::range(ShVariableNode::ValueType low, ShVariableNode::ValueType high)
+void ShVariableNode::rangeCloak(ShCloakCPtr low, ShCloakCPtr high) 
 {
-  m_lowBound = low;
-  m_highBound = high;
+  // TODO slow, possibly?
+  int indices[m_size];
+  std::fill_n(indices, m_size, 0);
+  ShSwizzle swiz(1, m_size, indices); 
+  meta("lowBound", low.get(false, swiz));
+  meta("highBound", high.get(false, swiz));
 }
 
-ShVariableNode::ValueType ShVariableNode::lowBound() const
+void ShVariableNode::rangeCloak(ShCloakCPtr low, ShCloakCPtr high, bool neg, const ShSwizzle &writemask)
 {
-  return m_lowBound;
+  ShTypeInfoPtr typeInfo = shTypeInfo(m_typeIndex);
+  ShCloakFactoryPtr factory = typeInfo->cloakFactory();
+
+  std::string oldLo, oldHi;
+  oldLo = meta("lowBound");
+  oldHi = meta("highBound");
+
+  ShCloakCPtr newLo, newHi; 
+  if(oldLo.empty() || oldHi.empty()) { // TODO they should be either both empty or both not
+    newLo = factory->generateLowBound(m_size, m_specialType);
+    newHi = factory->generateHighBound(m_size, m_specialType);
+  } else {
+    newLo = factory->generate(oldLo);
+    newHi = factory->generate(oldHi);
+  }
+
+  newLo->set(low, neg, writemask);
+  newHi->set(high, neg, writemask);
+
+  meta("lowBound", newLo->encode());
+  meta("highBound", newHi->encode());
 }
 
-ShVariableNode::ValueType ShVariableNode::highBound() const
+ShCloakPtr ShVariableNode::lowBoundCloak() const
 {
-  return m_highBound;
+  ShCloakFactoryPtr factory = shTypeInfo(m_typeIndex)->cloakFactory();
+  std::string metaLow = meta("lowBound");
+
+  return (metaLow.empty() ? 
+    factory->generateLowBound(m_size, m_specialType) 
+    : factory->generate(metaLow));
+}
+
+ShCloakPtr ShVariableNode::highBoundCloak() const
+{
+  ShCloakFactoryPtr factory = shTypeInfo(m_typeIndex)->cloakFactory();
+  std::string metaHigh = meta("highBound");
+
+  return (metaHigh.empty() ? 
+    factory->generateHighBound(m_size, m_specialType) 
+    : factory->generate(metaHigh));
 }
 
 ShBindingType ShVariableNode::kind() const
@@ -242,12 +285,27 @@ void ShVariableNode::specialType(ShSemanticType type)
 
 // TODO: also have an n-length set value, since updating the uniforms
 // will otherwise be horribly inefficient.
-void ShVariableNode::setValue(int i, ValueType value)
+void ShVariableNode::setCloak(ShCloakCPtr other)
 {
-  assert(m_values);
-  if (i < 0 || i >= m_size) return;
-  m_values[i] = value;
+  assert(m_cloak);
+  m_cloak->set(other);
+  uniformUpdate();
+}
 
+void ShVariableNode::setCloak(ShCloakCPtr other, bool neg, const ShSwizzle &writemask)
+{
+  assert(m_cloak);
+  m_cloak->set(other, neg, writemask);
+  uniformUpdate();
+}
+
+ShCloakCPtr ShVariableNode::cloak() const
+{
+  return m_cloak;
+}
+
+void ShVariableNode::uniformUpdate() 
+{
   if (m_uniform && !m_locked) {
     for (ShBoundIterator I = shBeginBound(); I != shEndBound(); ++I) {
       // TODO: Maybe pass in the backend unit to updateUniform
@@ -256,11 +314,26 @@ void ShVariableNode::setValue(int i, ValueType value)
   }
 }
 
-ShVariableNode::ValueType ShVariableNode::getValue(int i) const
+void ShVariableNode::programVarListInit() 
 {
-  assert(m_values);
-  assert(i >= 0 && i < m_size);
-  return m_values[i];
+  switch (m_kind) {
+  case SH_INPUT:
+    assert(ShContext::current()->parsing());
+    ShContext::current()->parsing()->inputs.push_back(this);
+    break;
+  case SH_OUTPUT:
+    assert(ShContext::current()->parsing());
+    ShContext::current()->parsing()->outputs.push_back(this);
+    break;
+  case SH_INOUT:
+    assert(ShContext::current()->parsing());
+    ShContext::current()->parsing()->outputs.push_back(this);
+    ShContext::current()->parsing()->inputs.push_back(this);
+    break;
+  default:
+    // Do nothing
+    break;
+  }
 }
 
 int ShVariableNode::m_maxID = 0;

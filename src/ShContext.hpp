@@ -30,6 +30,9 @@
 #include <string>
 #include <map>
 #include "ShProgram.hpp"
+#include "ShEval.hpp"
+#include "ShCloakFactory.hpp"
+#include "ShTypeInfo.hpp"
 
 namespace SH {
 
@@ -62,6 +65,17 @@ public:
 
   /// Finish constructing the current program
   void exit();
+
+  /// Returns a unique positive integer corresponding to a string type name 
+  /// Generates a unique number the first time a type is passed to this function.
+  int type_index(const std::string &typeName) const;
+
+  ShTypeInfoPtr type_info(int typeIndex) const;
+
+  /// utility function to add a ShTypeInfo object to the two maps
+  /// You must register any custom types here with this function
+  // TODO (should be done automatically somehow...)
+  void addTypeInfo(ShTypeInfoPtr typeInfo); 
   
 private:
   ShContext();
@@ -73,6 +87,14 @@ private:
   std::stack<ShProgramNodePtr> m_parsing;
   
   static ShContext* m_instance;
+
+  /*  TODO might want to move all these properties out into a separate holding
+   *  class */
+  typedef std::map<std::string, int> TypeNameIndexMap;
+  typedef std::vector<ShTypeInfoPtr> TypeInfoVec;
+
+  TypeNameIndexMap m_type_index;
+  TypeInfoVec m_type_info;
 
   // NOT IMPLEMENTED
   ShContext(const ShContext& other);
@@ -86,6 +108,17 @@ ShBoundIterator shBeginBound();
 
 /// Get end of bound program map for current context
 ShBoundIterator shEndBound();
+
+/// Returns the ShTypeInfo object for the given type index in
+// the current context.
+ShTypeInfoPtr shTypeInfo(int type_index);  
+
+/// Returns the type index of type T in the current context
+template<typename T>
+int shTypeIndex()
+{
+  return ShContext::current()->type_index(ShConcreteTypeInfo<T>::m_name);
+}
 
 
 }

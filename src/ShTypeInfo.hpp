@@ -24,33 +24,56 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#include "ShInternals.hpp"
-#include "ShDebug.hpp"
+#ifndef SHTYPEINFO_HPP
+#define SHTYPEINFO_HPP
 
-namespace SH { 
+#include <string>
 
-ShVariableReplacer::ShVariableReplacer(ShVarMap& v)
-  : varMap(v) {
+#include "ShRefCount.hpp"
+#include "ShCloakFactory.hpp"
+#include "ShVariableNode.hpp"
+
+namespace SH {
+
+/// forward declaration of ShEval
+class ShEval;
+
+struct ShTypeInfo: ShRefCountable {
+  virtual const char* name() const = 0;
+  virtual ShCloakFactoryCPtr cloakFactory() = 0; 
+  virtual ShPointer<const ShEval> eval()= 0;
+};
+
+typedef ShPointer<ShTypeInfo> ShTypeInfoPtr;
+typedef ShPointer<const ShTypeInfo> ShTypeInfoCPtr;
+
+// generic level
+template<typename T>
+struct ShConcreteTypeInfo: public ShTypeInfo  {
+  public:
+    static const char* m_name; 
+
+    /// default boolean values to use for ops with boolean resoluts
+    static const T trueValue;
+    static const T falseValue;
+
+    /// default range information
+    // (0,1) by default
+    static T defaultLo(ShSemanticType type);
+    static T defaultHi(ShSemanticType type);
+
+    const char* name() const; 
+    ShCloakFactoryCPtr cloakFactory();
+    ShPointer<const ShEval> eval();
+
+  protected:
+    static ShPointer<ShDataCloakFactory<T> > m_cloakFactory;
+    static ShPointer<ShEval > m_eval;
+};
+
+
 }
 
-void ShVariableReplacer::operator()(ShCtrlGraphNodePtr node) {
-  if (!node) return;
-  ShBasicBlockPtr block = node->block;
-  if (!block) return;
-  for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-    if(!I->dest.null()) repVar(I->dest);
-    for (int i = 0; i < 3; i++) {
-      if( !I->src[i].null() ) repVar(I->src[i]);
-    }
-  }
-}
+#include "ShTypeInfoImpl.hpp"
 
-void ShVariableReplacer::repVar(ShVariable& var) {
-  ShVarMap::iterator I = varMap.find(var.node());
-  if (I == varMap.end()) return;
-  var = ShVariable(I->second, var.swizzle(), var.neg());
-}
-
-}
-
-
+#endif

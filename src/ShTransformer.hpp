@@ -30,6 +30,7 @@
 #include "ShBackend.hpp"
 #include "ShProgram.hpp"
 #include "ShCtrlGraph.hpp"
+#include "ShInternals.hpp"
 
 namespace SH {
 
@@ -89,6 +90,13 @@ public:
   //@{
   void convertTextureLookups();
   //@}
+
+  /**@name Arithmetic type conversions
+   * TODO this is very dumb - currently only converts double to float... 
+   *
+   */
+  void convertToFloat(ShVarMap &converts);
+  
   
 private:
   /// NOT IMPLEMENTED

@@ -24,33 +24,23 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#include "ShInternals.hpp"
-#include "ShDebug.hpp"
+#include <iostream>
+#include <sstream>
+#include "ShCloak.hpp"
 
-namespace SH { 
+namespace SH {
 
-ShVariableReplacer::ShVariableReplacer(ShVarMap& v)
-  : varMap(v) {
-}
+ShCloak::ShCloak()
+  : m_typeIndex(-1)
+{}
 
-void ShVariableReplacer::operator()(ShCtrlGraphNodePtr node) {
-  if (!node) return;
-  ShBasicBlockPtr block = node->block;
-  if (!block) return;
-  for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-    if(!I->dest.null()) repVar(I->dest);
-    for (int i = 0; i < 3; i++) {
-      if( !I->src[i].null() ) repVar(I->src[i]);
-    }
-  }
-}
+ShCloak::~ShCloak() 
+{}
 
-void ShVariableReplacer::repVar(ShVariable& var) {
-  ShVarMap::iterator I = varMap.find(var.node());
-  if (I == varMap.end()) return;
-  var = ShVariable(I->second, var.swizzle(), var.neg());
+int ShCloak::typeIndex() 
+{
+  if(m_typeIndex < 0) updateTypeIndex(); 
+  return m_typeIndex;
 }
 
 }
-
-

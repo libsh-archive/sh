@@ -31,6 +31,7 @@
 #include "Gcc.hpp" 
 #include "ShDebug.hpp" 
 #include "ShStream.hpp" 
+#include "ShCloak.hpp"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -661,12 +662,14 @@ namespace ShGcc {
 
       // output constant definition
       m_code << "float " << name << "[" << node->size() << "] = {";
+      const SH::ShDataCloak<float> &cloak = (*SH::shref_dynamic_cast<const SH::ShDataCloak<float> >(node->cloak()));
       for (int i = 0; i < node->size(); i++)
 	{
+    // TODO handle different types
 	if (i == 0)
-	  m_code << node->getValue(i);
+	  m_code << cloak[i]; 
 	else
-	  m_code << ", " << node->getValue(i);
+	  m_code << ", " << cloak[i]; 
 	}
       m_code << "};" << std::endl;
       }
@@ -774,9 +777,10 @@ namespace ShGcc {
 
       if (node->hasValues())
 	{
+      const SH::ShDataCloak<float> &cloak = (*SH::shref_dynamic_cast<const SH::ShDataCloak<float> >(node->cloak()));
 	for(int j = 0; j < node->size(); j++)
 	  {
-	  m_params[i][j] = node->getValue(j);
+	  m_params[i][j] = cloak[j]; 
 	  }
 	}
       else

@@ -33,9 +33,10 @@
 namespace SH {
 
 ShTextureNode::ShTextureNode(ShTextureDims dims, int size,
+                             int typeIndex,
                              const ShTextureTraits& traits,
                              int width, int height, int depth)
-  : ShVariableNode(SH_TEXTURE, size),
+  : ShVariableNode(SH_TEXTURE, size, typeIndex),
     m_dims(dims),
     m_memory(new ShMemoryPtr[dims == SH_TEXTURE_CUBE ? 6 : 1]),
     m_traits(traits),

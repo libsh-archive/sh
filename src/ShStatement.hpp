@@ -29,7 +29,9 @@
 
 #include <iosfwd>
 #include <set>
+#include <list>
 #include "ShVariable.hpp"
+#include "ShStmtData.hpp"
 
 namespace SH {
 
@@ -125,21 +127,42 @@ public:
   ShStatement(ShVariable dest, ShOperation op, ShVariable src);
   ShStatement(ShVariable dest, ShVariable src0, ShOperation op, ShVariable src1);
   ShStatement(ShVariable dest, ShOperation op, ShVariable src0, ShVariable src1, ShVariable src2);
+
+  // retrieves statement data of the given class (T must be a ShStmtDataPtr)
+  // Assumes that there is a unique matching element in the list
+  // or returns 0 if there is no matching element
+  template<typename T>
+  T data(); 
   
   ShVariable dest;
   ShVariable src[3];
   
   ShOperation op;
 
+
   // The following are used for the optimizer.
   
   std::set<ShStatement*> ud[3];
   std::set<ShStatement*> du;
 
+
   bool marked;
+
+protected:
+  std::list<ShStmtDataPtr> m_data;
 };
 
 std::ostream& operator<<(std::ostream& out, const SH::ShStatement& stmt);
+
+template<typename T>
+T ShStatement::data()
+{
+  T result;
+  for(std::list<ShStmtDataPtr>::iterator I = m_data.begin(); I != m_data.end(); ++I) {
+    if((result = dynamic_cast<T>(*I))) return result; 
+  }
+  return 0;
+}
 
 } // namespace SH
 

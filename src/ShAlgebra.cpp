@@ -72,7 +72,7 @@ ShProgram connect(ShProgram pa, ShProgram pb)
     }
   }
   
-  ShVariableReplacer::VarMap varMap;
+  ShVarMap varMap;
 
   ShContext::current()->enter(program);
   
@@ -97,7 +97,7 @@ ShProgram connect(ShProgram pa, ShProgram pb)
       shError(ShAlgebraException(err.str()));
       return ShProgram(ShProgramNodePtr(0));
     }
-    ShVariableNodePtr n = new ShVariableNode(SH_TEMP, (*I)->size());
+    ShVariableNodePtr n = (*I)->clone(SH_TEMP);
     varMap[*I] = n;
     varMap[*J] = n;
 
@@ -110,11 +110,8 @@ ShProgram connect(ShProgram pa, ShProgram pb)
   ShCtrlGraphNodePtr graphEntry;
   for (I = InOutInputs.begin(); I != InOutInputs.end(); ++I) {
     if(!graphEntry) graphEntry = program->ctrlGraph->prependEntry();
-    ShVariableNodePtr newInput(new ShVariableNode(SH_INPUT, (*I)->size(), 
-          (*I)->specialType()));
-    if ((*I)->has_name()) {
-      newInput->name((*I)->name());
-    }
+    ShVariableNodePtr newInput((*I)->clone(SH_INPUT)); 
+
     std::replace(program->inputs.begin(), program->inputs.end(),
         (*I), newInput);
     program->inputs.pop_back();
@@ -126,11 +123,8 @@ ShProgram connect(ShProgram pa, ShProgram pb)
   ShCtrlGraphNodePtr graphExit;
   for (I = InOutOutputs.begin(); I != InOutOutputs.end(); ++I) {
     if(!graphExit) graphExit = program->ctrlGraph->appendExit();
-    ShVariableNodePtr newOutput(new ShVariableNode(SH_OUTPUT, (*I)->size(), 
-          (*I)->specialType()));
-    if ((*I)->has_name()) {
-      newOutput->name((*I)->name());
-    }
+    ShVariableNodePtr newOutput((*I)->clone(SH_OUTPUT));
+    
     std::replace(program->outputs.begin(), program->outputs.end(),
         (*I), newOutput);
     program->outputs.pop_back();
@@ -276,9 +270,7 @@ ShProgram namedConnect(ShProgram pa, ShProgram pb, bool keepExtra)
   for(j = 0, J= b->inputs.begin(); J != b->inputs.end(); ++J, ++j) {
     if( !bMatch[j] ) {
       ShProgram passOne = SH_BEGIN_PROGRAM() {
-        ShVariable var(new ShVariableNode(SH_INOUT, (*J)->size(), 
-              (*J)->specialType()));
-        var.name((*J)->name());
+        ShVariable var((*J)->clone(SH_INOUT));
       } SH_END;
       passer = passer & passOne; 
       swiz[j] = newInputIdx++;
@@ -300,8 +292,7 @@ ShProgram renameInput(ShProgram a,
   ShProgram renamer = SH_BEGIN_PROGRAM() {
     for(ShProgramNode::VarList::const_iterator I = a.node()->inputs.begin();
         I != a.node()->inputs.end(); ++I) {
-      ShVariable var(new ShVariableNode(SH_INOUT, (*I)->size(), 
-            (*I)->specialType()));
+      ShVariable var((*I)->clone(SH_INOUT));
 
       if (!(*I)->has_name()) continue;
       std::string name = (*I)->name();
@@ -321,8 +312,7 @@ ShProgram renameOutput(ShProgram a,
   ShProgram renamer = SH_BEGIN_PROGRAM() {
     for(ShProgramNode::VarList::const_iterator I = a.node()->outputs.begin();
         I != a.node()->outputs.end(); ++I) {
-      ShVariable var(new ShVariableNode(SH_INOUT, (*I)->size(), 
-                                        (*I)->specialType()));
+      ShVariable var((*I)->clone(SH_INOUT));
 
       if (!(*I)->has_name()) continue;
       std::string name = (*I)->name();
@@ -374,12 +364,12 @@ ShProgram replaceUniform(ShProgram a, const ShVariable& v)
 
   ShProgram program(a.node()->clone()); 
   
-  ShVariableReplacer::VarMap varMap;
+  ShVarMap varMap;
 
   ShContext::current()->enter(program.node());
 
   // make a new input
-  ShVariableNodePtr newInput = new ShVariableNode(SH_INPUT, v.size(), v.node()->specialType()); 
+  ShVariableNodePtr newInput(v.node()->clone(SH_INPUT)); 
   varMap[v.node()] = newInput;
 
   ShContext::current()->exit();

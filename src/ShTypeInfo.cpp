@@ -24,33 +24,18 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#include "ShInternals.hpp"
-#include "ShDebug.hpp"
+#include "ShTypeInfo.hpp"
 
-namespace SH { 
+namespace SH {
 
-ShVariableReplacer::ShVariableReplacer(ShVarMap& v)
-  : varMap(v) {
-}
+template<> const char* ShConcreteTypeInfo<double>::m_name = "d";
+template<> const double ShConcreteTypeInfo<double>::trueValue = 1.0;
+template<> const double ShConcreteTypeInfo<double>::falseValue = 0.0;
 
-void ShVariableReplacer::operator()(ShCtrlGraphNodePtr node) {
-  if (!node) return;
-  ShBasicBlockPtr block = node->block;
-  if (!block) return;
-  for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-    if(!I->dest.null()) repVar(I->dest);
-    for (int i = 0; i < 3; i++) {
-      if( !I->src[i].null() ) repVar(I->src[i]);
-    }
-  }
-}
+template<> const char* ShConcreteTypeInfo<float>::m_name = "f";
+template<> const float ShConcreteTypeInfo<float>::trueValue= 1.0f;
+template<> const float ShConcreteTypeInfo<float>::falseValue = 0.0f;
 
-void ShVariableReplacer::repVar(ShVariable& var) {
-  ShVarMap::iterator I = varMap.find(var.node());
-  if (I == varMap.end()) return;
-  var = ShVariable(I->second, var.swizzle(), var.neg());
-}
+//template<> const char* ShConcreteTypeInfo<int>::name = "int";
 
 }
-
-
