@@ -28,7 +28,7 @@ ShQuaternion<K, T>::ShQuaternion(const ShAttrib<1, K2, T>& angle,
                                  const ShVector<3, K3, T>& axis)
 {
   m_data(0) = cos(angle/2.0);
-  m_data(1,2,3) = normalize(axis);
+  m_data(1,2,3) = SH::normalize(axis);
   m_data(1,2,3) *= sin(angle/2.0);
   m_data.setUnit(true);
 }
