@@ -105,8 +105,6 @@ ShPointer<ShBackend> ShBackend::lookup(const std::string& name)
   return 0;
 #else
   
-  SH_DEBUG_PRINT("Looking up " << name);
-
   HMODULE mod = NULL;
   std::string libname("LIBSH");
   libname += name;
@@ -123,7 +121,6 @@ ShPointer<ShBackend> ShBackend::lookup(const std::string& name)
 
   for (ShBackendList::iterator I = begin(); I != end(); ++I) {
     if ((*I)->name() == name) {
-      SH_DEBUG_PRINT("Found " << name << " at " << I->object());
       return *I;
     }
   }
@@ -137,7 +134,7 @@ ShPointer<ShBackend> ShBackend::lookup(const std::string& name)
 void ShBackend::init()
 {
   if (m_doneInit) return;
-  SH_DEBUG_PRINT("Initializing backend system");
+  // SH_DEBUG_PRINT("Initializing backend system");
   
   m_backends = new ShBackendList();
 

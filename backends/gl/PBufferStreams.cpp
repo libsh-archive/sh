@@ -550,9 +550,6 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   // that GLUT (or whatever UI toolkit) is setting up its one context when
   // its about to redraw. -Kevin
   restoreContext();
-
-  // TODO: This just seems wrong.
-  // ShEnvironment::boundShaders().clear();
   
   TIMING_RESULT(onerun);
 }

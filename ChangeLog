@@ -1,7 +1,11 @@
+2004-11-16  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShBackend.cpp: Remove spurious debug statements.
+
 2004-11-12  Bryan Chan <b8chan@cgl.uwaterloo.ca>
-  * src/ShInternals.cpp (operator()(ShCtrlGraphNodePtr)): 
-  Fixed VarReplacer so it replaces the ShVariable in branch conditions as well
-  as the block.
+        * src/ShInternals.cpp (operator()(ShCtrlGraphNodePtr)): 
+	  Fixed VarReplacer so it replaces the ShVariable in branch conditions as well
+	    as the block.
   
 2004-11-11  Bryan Chan <b8chan@cgl.uwaterloo.ca>
   * backends/gl/ArbCode.cpp (print):
