@@ -5,8 +5,7 @@
 #include <vector>
 #include <string>
 #include <set>
-//#include <algorithm>
-//#include "sh.hpp"      // necessary?
+
 #include "ShUtility.hpp"
 #include "ShDllExport.hpp"
 #include "ShRefCount.hpp"
@@ -23,16 +22,11 @@
  * Creates a directed acyclic graph for a basic block
  */
 
-
 class SH_DLLEXPORT DAGNode {
   public:
-	DAGNode() {}
-	
+	DAGNode() {}	
 	DAGNode(SH::ShVariable var);
 	DAGNode(SH::ShOperation op);
-	DAGNode(SH::ShOperation op, DAGNode *kid);
-	DAGNode(SH::ShOperation op, DAGNode* kid0, DAGNode* kid1);
-	DAGNode(SH::ShOperation op, DAGNode* kid0, DAGNode* kid1, DAGNode* kid2);
 
 	SH::ShVariable m_var;
 	SH::ShOperation m_op;
@@ -51,6 +45,7 @@ class SH_DLLEXPORT DAGNode {
 	DAGNodeVector predecessors;
 	DAGNodeVector successors;
 
+	void add_kid(DAGNode *kid);
 	void print(int indent);
   private:
 	

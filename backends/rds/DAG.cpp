@@ -1,68 +1,34 @@
 #include <iostream>
-//#include <iostream.h>
 #include "DAG.hpp"
 
 using namespace SH;
 using namespace std;
 
+// creates a leaf node
 DAGNode::DAGNode(ShVariable var) 
 	:	m_var(var),
 		m_label(var.node()->name())
 {
-	//cout << "Creating new node with name " << m_label << "\n";
 	m_type = DAG_LEAF;
 }
 
+// creates an operation node
 DAGNode::DAGNode(ShOperation op) 
 	:	m_op(op),
 		m_label(static_cast<std::string>(opInfo[op].name))	
 {
-	//cout << "Creating new node with name " << m_label << "\n";
 	m_type = DAG_OP;
 }
 
-DAGNode::DAGNode(ShOperation op, DAGNode* kid) 
-	:	m_op(op),
-		m_label(static_cast<std::string>(opInfo[op].name))
+// adds a node to successors of this one
+void DAGNode::add_kid(DAGNode *kid)
 {
-	//cout << "Creating new node with name " << m_label << " Kids: " << kid->m_label << "\n";
-	m_type = DAG_OP;
 	successors.push_back(kid);
 	m_cut[kid] = false;
 	kid->predecessors.push_back(this);
 }
 
-DAGNode::DAGNode(ShOperation op, DAGNode *kid0, DAGNode* kid1)
-	:	m_op(op),
-		m_label(static_cast<std::string>(opInfo[op].name))
-{
-	//cout << "Creating new node with name " << m_label << " Kids: " << kid0->m_label << " " << kid1->m_label <<"\n";
-	m_type = DAG_OP;
-	successors.push_back(kid0);
-	successors.push_back(kid1);
-	m_cut[kid0] = false;
-	m_cut[kid1] = false;
-	kid0->predecessors.push_back(this);
-	kid1->predecessors.push_back(this);
-}
-
-DAGNode::DAGNode(ShOperation op, DAGNode* kid0, DAGNode* kid1, DAGNode* kid2) 
-	:	m_op(op),
-		m_label(static_cast<std::string>(opInfo[op].name))
-{
-	//cout << "Creating new node with name " << m_label << " Kids: " << kid0->m_label << " " << kid1->m_label << kid2->m_label << "\n";
-	m_type = DAG_OP;
-	successors.push_back(kid0);
-	successors.push_back(kid1);
-	successors.push_back(kid2);
-	m_cut[kid0] = false;
-	m_cut[kid1] = false;
-	m_cut[kid2] = false;
-	kid0->predecessors.push_back(this);
-	kid1->predecessors.push_back(this);
-	kid2->predecessors.push_back(this);
-}
-
+// text output of this node and its successors
 void DAGNode::print(int indent) {
 	shPrintIndent(cout, indent);	
 	cout << "-->";
@@ -76,6 +42,7 @@ void DAGNode::print(int indent) {
 	}
 }
 
+// adds an Sh statement to the graph
 void DAG::add_statement(Stmt stmt) {
 	NodeMap::iterator node_it;
 	OpMap::iterator op_it;
@@ -114,63 +81,29 @@ void DAG::add_statement(Stmt stmt) {
 			// see if matching set of kids in vector for this operation
 			op_v = (*op_it).second;
 
-			switch (src_size) {
-				case 1:
-					for(OpVector::iterator V = op_v.begin(); !created && V != op_v.end(); ++V) {
-						DAGNode *v = *V;
-						if (v->successors.at(0) == src[0]) {
-							created = true;
-							n = v;
-						}
+			for(OpVector::iterator V = op_v.begin(); !created && V != op_v.end(); ++V) {
+				DAGNode *v = *V;
+				for (int i = 0; i < src_size; i++) {
+					if (v->successors.at(i) != src[i]) {
+						break;
 					}
-					break;
-				case 2:
-					for(OpVector::iterator V = op_v.begin(); !created && V != op_v.end(); ++V) {
-						DAGNode *v = *V;
-						//cout << "kids: " << v->kids[0] << " " << v->kids[1] << " src; " << src[0] << " " << src[1] << "\n";
-						if (v->successors.at(0) == src[0] && 
-							v->successors.at(1) == src[1]) {
-							created = true;
-							n = v;
-						}
+					else if (i == src_size - 1) {
+						created = true;
+						n = v;
 					}
-					break;
-				case 3:
-					for(OpVector::iterator V = op_v.begin(); !created && V != op_v.end(); ++V) {
-						DAGNode *v = *V;
-						if (v->successors.at(0) == src[0] &&
-							v->successors.at(1) == src[1] &&
-							v->successors.at(2) == src[2]) {
-							created = true;
-							n = v;
-						}
-					}
-					break;
+				}
 			}
 		}
 	}
 
 	// create a new node for the operation if not found
 	if (!created) {
-		switch (src_size) {
-			case 0:
-				n = new DAGNode(stmt.op);
-				//cout << "making node for " << opInfo[stmt.op].name << "\n";
-				break;
-			case 1:
-				n = new DAGNode(stmt.op, src[0]);					
-				//cout << "making node for " << opInfo[stmt.op].name << " " << src[0]->m_label << "\n";
-				break;
-			case 2:
-				n = new DAGNode(stmt.op, src[0], src[1]);
-				//cout << "making node for " << opInfo[stmt.op].name << " " << src[0]->m_label << " " << src[1]->m_label << "\n";
-				break;
-			case 3:
-				n = new DAGNode(stmt.op, src[0], src[1], src[2]);
-				//cout << "making node for " << opInfo[stmt.op].name << " " << src[0]->m_label << " " << src[1]->m_label << " " << src[2]->m_label << "\n";
-				break;
+		n = new DAGNode(stmt.op);
+
+		// attach all kids
+		for (int i = 0; i < src_size; i++) {
+			n->add_kid(src[i]);
 		}
-		
 		ops[src_size][stmt.op].push_back(n);
 	}
 
@@ -182,7 +115,6 @@ void DAG::add_statement(Stmt stmt) {
 	if (dest_it != node.end()) {
 		dest = (*dest_it).second;
 		dest->id_list.erase((*dest_it).first);
-		//cout << "Delete" <<  (*dest_it).first << " from " << dest->m_label << "\n";
 	}
 
 	// append dest to list of ids for n
@@ -209,7 +141,8 @@ DAG::DAG(ShBasicBlockPtr block)
 	for (NodeMap::iterator I = node.begin(); I != node.end(); ++I) {
 		// if the node isn't a leaf, add an assignment node
 		if ((*I).second->successors.size() > 0) {
-			DAGNode *parent = new DAGNode(op, (*I).second); 
+			DAGNode *parent = new DAGNode(op);
+			parent->add_kid((*I).second);
 			parent->id_list.insert((*I).first);
 			//(*I).second->id_list.erase((*I).first);
 			node[(*I).first] = parent;
