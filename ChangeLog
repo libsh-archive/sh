@@ -1,10 +1,15 @@
-2004-10-13  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
-  * src/ShConstProp.cpp (updateDest):
-  Temporarily fixed issue with detecting whether all srcs are uniform.  
+2004-10-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
-  * configure.ac:
-  Changed AC_CONFIG_SRCDIR to ShVariable.hpp, since ShAttrib.hpp is now 
-  generated automatically.
+	* src/ShGenericImpl.hpp (operator%=): Actually do a modulo, not a
+	divide. Woops.
+
+2004-10-13  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShConstProp.cpp (updateDest): Temporarily fixed issue with
+	detecting whether all srcs are uniform.
+
+	* configure.ac: Changed AC_CONFIG_SRCDIR to ShVariable.hpp, since
+	ShAttrib.hpp is now generated automatically.
 
 2004-10-12  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 

@@ -149,7 +149,7 @@ template<int N, typename T>
 inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator%=(const ShGeneric<1, T>& right)
 {
-  *this = *this / right;
+  *this = *this % right;
   return *this;
 }
 
