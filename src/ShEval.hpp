@@ -159,8 +159,8 @@ struct ShRegularOp: public ShEvalOp {
 template<ShOperation S, ShValueType V>
 struct ShConcreteRegularOp {
   typedef ShDataVariant<V, SH_HOST> Variant;
-  typedef ShPointer<Variant> DataPtr; 
-  typedef ShPointer<const Variant> DataCPtr; 
+  typedef Variant* DataPtr; 
+  typedef const Variant* DataCPtr; 
 
   static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0);
 };
@@ -174,8 +174,8 @@ struct ShConcreteRegularOp {
 template<ShOperation S, ShValueType V>
 struct ShConcreteCTypeOp {
   typedef ShDataVariant<V, SH_HOST> Variant;
-  typedef ShPointer<Variant> DataPtr; 
-  typedef ShPointer<const Variant> DataCPtr; 
+  typedef Variant* DataPtr; 
+  typedef const Variant* DataCPtr; 
 
   static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0);
 };

@@ -24,71 +24,78 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
+#ifndef SH_METAIMPL_HPP
+#define SH_METAIMPL_HPP
+
 #include "ShMeta.hpp"
 
 namespace SH {
 
-ShMeta::~ShMeta()
+inline ShMeta::~ShMeta()
 {
 }
 
-std::string ShMeta::name() const
+inline std::string ShMeta::name() const
 {
-  return m_name;
+  return meta("n"); 
 }
 
-void ShMeta::name(const std::string& n)
+inline void ShMeta::name(const std::string& n)
 {
-  m_name = n;
-  m_has_name = true;
+  meta("n", n);
 }
 
-bool ShMeta::has_name() const
+inline bool ShMeta::has_name() const
 {
-  return m_has_name;
+  return !meta("n").empty(); 
 }
 
-bool ShMeta::internal() const
+inline bool ShMeta::internal() const
 {
-  return m_internal;
+  return !meta("i").empty(); 
 }
 
-void ShMeta::internal(bool i)
+inline void ShMeta::internal(bool i)
 {
-  m_internal = i;
+  meta("i", i ? "1" : "");
 }
 
-const std::string& ShMeta::title() const
+inline std::string ShMeta::title() const
 {
-  return m_title;
+  return meta("t");
 }
 
-void ShMeta::title(const std::string& t)
+inline void ShMeta::title(const std::string& t)
 {
-  m_title = t;
+  meta("t", t);
 }
 
-const std::string& ShMeta::description() const
+inline std::string ShMeta::description() const
 {
-  return m_description;
+  return meta("d");
 }
 
-void ShMeta::description(const std::string& d)
+inline void ShMeta::description(const std::string& d)
 {
-  m_description = d;
+  meta("d", d);
 }
 
-std::string ShMeta::meta(const std::string& key) const
+inline std::string ShMeta::meta(const std::string& key) const
 {
-  MetaMap::const_iterator I = m_meta.find(key);
-  if (I == m_meta.end()) return std::string();
+  if(!m_meta) return std::string(); 
+
+  MetaMap::const_iterator I = m_meta->find(key);
+  if (I == m_meta->end()) return std::string();
   return I->second;
 }
 
-void ShMeta::meta(const std::string& key, const std::string& value)
+inline void ShMeta::meta(const std::string& key, const std::string& value)
 {
-  m_meta[key] = value;
+  if(!m_meta) m_meta = new MetaMap();
+  (*m_meta)[key] = value;
 }
 
 }
+
+#endif
 

@@ -31,69 +31,6 @@
 
 namespace SH {
 
-ShSwizzle::ShSwizzle(T srcSize, T i0, T i1)
-  : m_srcSize(srcSize),
-    m_size(2)
-{
-  alloc();
-  checkSrcSize(i0);
-  checkSrcSize(i1);
-  get(0) = i0;
-  get(1) = i1;
-}
-
-ShSwizzle::ShSwizzle(T srcSize, T i0, T i1, T i2)
-  : m_srcSize(srcSize),
-    m_size(3)
-{
-  alloc();
-  checkSrcSize(i0);
-  checkSrcSize(i1);
-  checkSrcSize(i2);
-  get(0) = i0;
-  get(1) = i1;
-  get(2) = i2;
-}
-
-ShSwizzle::ShSwizzle(T srcSize, T i0, T i1, T i2, T i3)
-  : m_srcSize(srcSize),
-    m_size(4)
-{
-  alloc();
-  checkSrcSize(i0);
-  checkSrcSize(i1);
-  checkSrcSize(i2);
-  checkSrcSize(i3);
-  get(0) = i0;
-  get(1) = i1;
-  get(2) = i2;
-  get(3) = i3;
-}
-
-ShSwizzle::ShSwizzle(T srcSize, T size, T* indices)
-  : m_srcSize(srcSize),
-    m_size(size)
-{
-  alloc();
-  for (T i = 0; i < size; i++) {
-    checkSrcSize(indices[i]);
-    get(i) = indices[i];
-  }
-}
-
-#ifdef SH_SWIZZLE_CHAR
-ShSwizzle::ShSwizzle(T srcSize, T size, int* indices)
-  : m_srcSize(srcSize),
-    m_size(size)
-{
-  alloc();
-  for (T i = 0; i < size; i++) {
-    checkSrcSize(indices[i]);
-    get(i) = indices[i];
-  }
-}
-#endif
-
 ShSwizzleException::ShSwizzleException(const ShSwizzle& s, int index, int size)
   : ShException("")
 {
@@ -107,7 +44,7 @@ std::ostream& operator<<(std::ostream& out, const ShSwizzle& swizzle)
 {
   if (swizzle.identity()) return out;
   out << "(";
-  for (ShSwizzle::T i = 0; i < swizzle.size(); i++) {
+  for (int i = 0; i < swizzle.size(); i++) {
     if (i > 0) out << ", ";
     out << swizzle[i];
   }

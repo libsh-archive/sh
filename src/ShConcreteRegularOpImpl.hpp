@@ -28,8 +28,8 @@ template<ShValueType V>\
 struct ShConcreteRegularOp<op, V>\
 { \
   typedef ShDataVariant<V, SH_HOST> Variant; \
-  typedef ShPointer<Variant> DataPtr; \
-  typedef ShPointer<const Variant> DataCPtr; \
+  typedef Variant* DataPtr; \
+  typedef const Variant* DataCPtr; \
 \
   static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) \
   {\
@@ -49,8 +49,8 @@ template<ShValueType V>\
 struct ShConcreteRegularOp<op, V>\
 { \
   typedef ShDataVariant<V, SH_HOST> Variant; \
-  typedef ShPointer<Variant> DataPtr; \
-  typedef ShPointer<const Variant> DataCPtr; \
+  typedef Variant* DataPtr; \
+  typedef const Variant* DataCPtr; \
 \
   static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) \
   {\
@@ -73,8 +73,8 @@ template<ShValueType V>\
 struct ShConcreteRegularOp<op, V>\
 { \
   typedef ShDataVariant<V, SH_HOST> Variant; \
-  typedef ShPointer<Variant> DataPtr; \
-  typedef ShPointer<const Variant> DataCPtr; \
+  typedef Variant* DataPtr; \
+  typedef const Variant* DataCPtr; \
 \
   static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) \
   {\
@@ -107,8 +107,8 @@ template<ShValueType V>
 struct ShConcreteRegularOp<SH_OP_CMUL, V>
 {
   typedef ShDataVariant<V, SH_HOST> Variant; 
-  typedef ShPointer<Variant> DataPtr; 
-  typedef ShPointer<const Variant> DataCPtr; 
+  typedef Variant* DataPtr; 
+  typedef const Variant* DataCPtr; 
 
   static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
   {
@@ -125,8 +125,8 @@ template<ShValueType V>
 struct ShConcreteRegularOp<SH_OP_CSUM, V>
 {
   typedef ShDataVariant<V, SH_HOST> Variant; 
-  typedef ShPointer<Variant> DataPtr; 
-  typedef ShPointer<const Variant> DataCPtr; 
+  typedef Variant* DataPtr; 
+  typedef const Variant* DataCPtr; 
 
   static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
   {
@@ -150,8 +150,8 @@ template<ShValueType V>
 struct ShConcreteRegularOp<SH_OP_NORM, V>
 {
   typedef ShDataVariant<V, SH_HOST> Variant; 
-  typedef ShPointer<Variant> DataPtr; 
-  typedef ShPointer<const Variant> DataCPtr; 
+  typedef Variant* DataPtr; 
+  typedef const Variant* DataCPtr; 
 
   static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
   {
@@ -187,8 +187,8 @@ template<ShValueType V>
 struct ShConcreteRegularOp<SH_OP_DOT, V>
 {
   typedef ShDataVariant<V, SH_HOST> Variant; 
-  typedef ShPointer<Variant> DataPtr; 
-  typedef ShPointer<const Variant> DataCPtr; 
+  typedef Variant* DataPtr; 
+  typedef const Variant* DataCPtr; 
 
   static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
   {
@@ -209,8 +209,8 @@ template<ShValueType V>
 struct ShConcreteRegularOp<SH_OP_XPD, V>
 {
   typedef ShDataVariant<V, SH_HOST> Variant; 
-  typedef ShPointer<Variant> DataPtr; 
-  typedef ShPointer<const Variant> DataCPtr; 
+  typedef Variant* DataPtr; 
+  typedef const Variant* DataCPtr; 
 
   static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
   {

@@ -122,6 +122,7 @@ bool shSetBackend(const std::string& name)
 
 void shInit()
 {
+  ShContext::current();
   // TODO: Initialize backends
 }
 

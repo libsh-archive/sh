@@ -104,8 +104,9 @@ ShDataVariant<V, DT>::ShDataVariant(const ShDataVariant<V, DT> &other,
 {
   alloc(swizzle.size());
   for(int i = 0; i < swizzle.size(); ++i) {
-    m_begin[i] = (neg ? -other[swizzle[i]] : other[swizzle[i]]);
+    m_begin[i] = other[swizzle[i]];
   }
+  if(neg) negate();
 }
 
 template<ShValueType V, ShDataType DT>
@@ -194,8 +195,9 @@ void ShDataVariant<V, DT>::set(const ShVariant* other, bool neg, const ShSwizzle
 {
   int wmsize = writemask.size();
   SH_DEBUG_ASSERT(wmsize == other->size());
-  if(!neg && writemask.identity()) {
+  if(writemask.identity() && (wmsize == size())) {
     set(other);
+    if(neg) negate();
     return;
   }
 
@@ -409,10 +411,10 @@ const ShDataVariant<V, DT>* variant_cast(const ShVariant* c)
 }
 
 template<ShValueType V, ShDataType DT>
-ShPointer<ShDataVariant<V, DT> > variant_convert(ShVariantPtr c)
+ShPointer<ShDataVariant<V, DT> > variant_convert(ShVariantCPtr c)
 {
   ShDataVariant<V, DT>* result = new ShDataVariant<V, DT>(c->size());
-  ShCastManager::instance()->doCast(result, c);
+  ShCastManager::instance()->doCast(result, c.object());
   return result;
 }
 
