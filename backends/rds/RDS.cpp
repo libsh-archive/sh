@@ -11,8 +11,6 @@
 #include "ShDebug.hpp"
 #include "ShUtility.hpp"
 
-#define RDS_DEBUG
-
 using namespace SH;
 
 RDS::RDS(ShProgramNodePtr progPtr)
@@ -446,7 +444,7 @@ void RDS::partition(DAGNode::DAGNode *v)
 			v->m_cut[w] = true; 
 			m_shared_vars.push_back(var);
 #ifdef RDS_DEBUG
-      SH_DEBUG_PRINT("Cut: " << w->m_label );
+    SH_DEBUG_PRINT("Cut: " << w->m_label );
 	  SH_DEBUG_PRINT("Shared variable: " << var->name() << " " << var->swizzle() );
 #endif
 		}
@@ -461,7 +459,10 @@ void RDS::partition(DAGNode::DAGNode *v)
 // true if pass starting at v can execute in one pass
 bool RDS::valid(DAGNode::DAGNode* v) {
   v->set_resources();
+
+#ifdef RDS_DEBUG
   v->print_resources();
+#endif
 
   if (m_rdsh) {
     return  v->halftemps() <= m_limits->halftemps() &&
@@ -472,13 +473,19 @@ bool RDS::valid(DAGNode::DAGNode* v) {
 			v->instrs() <= m_limits->instrs();
   }
 
+
  if(	v->halftemps() <= (m_limits->halftemps() - m_halftemps_used) &&
 			v->temps() <= (m_limits->temps() - m_temps_used) &&
 			v->attribs() <= (m_limits->attribs() - m_attribs_used) &&
 			v->params() <= (m_limits->params()  - m_params_used) &&
 			v->texs() <= (m_limits->texs() - m_texs_used) && 
 			v->instrs() <= (m_limits->instrs() - m_ops_used) )
-	{ SH_DEBUG_PRINT ("Valid!!!\n"); return true; }
+ {
+#ifdef RDS_DEBUG
+    SH_DEBUG_PRINT ("Valid!!!\n");
+#endif
+    return true;
+  }
 
  return false;
 }

@@ -5,6 +5,8 @@
 #include "../gl/GLXPBufferStreams.hpp"
 #include <fstream>
 
+#define RDS_DEBUG
+
 void RDSBackend::dump(RDS rds, char* complete, char* partitioned) {
   rds.get_pdt()->graphvizDump(complete);
   rds.get_pdt()->printDoms();
@@ -50,7 +52,10 @@ SH::ShBackendCodePtr RDSBackend::generateCode(const std::string& target,
 {
 #ifdef RDS_DEBUG
   SH_DEBUG_PRINT( __FUNCTION__ );
-  SH_DEBUG_PRINT("RDS generateCode() call, dumping partitions");
+  SH_DEBUG_PRINT("RDS generateCode() call");
+#endif
+
+#ifdef RDS_COMPARE
   compare(shader->clone());
 #endif
   /*
@@ -72,7 +77,9 @@ void RDSBackend::execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& des
 {
 #ifdef RDS_DEBUG
   SH_DEBUG_PRINT( __FUNCTION__ );
-  SH_DEBUG_PRINT("RDS execute() call, dumping partitions");
+  SH_DEBUG_PRINT("RDS execute() call");
+#endif
+#ifdef RDS_COMPARE
   compare(program->clone());
 #endif
   //m_stream->execute(program,dest);
@@ -85,9 +92,15 @@ void RDSBackend::execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& des
 
   RDS rds(program->clone());
   rds.force_fake_limits();
+#ifdef RDS_DEBUG
+  SH_DEBUG_PRINT("Running rds");
+#endif
   rds.rds();
+#ifdef RDS_DEBUG
+  SH_DEBUG_PRINT("Scheduling passes");
+#endif
   Schedule s(rds.m_passes, rds.m_shared_vars);
-  
+ 
   for (std::vector<Pass*>::iterator I = s.get_passes()->begin(); I != s.get_passes()->end(); ++I) {
     std::cout << "Executing pass " << (*I)->id << std::endl;
     std::cout << (*I)->get_prog()->describe_interface() << std::endl;

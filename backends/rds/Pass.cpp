@@ -6,6 +6,8 @@
 #include <set>
 #include <map>
 
+#define RDS_DEBUG
+
 #ifdef RDS_DEBUG
 #include <iostream>
 #endif
@@ -17,7 +19,9 @@ Pass::Pass(DAGNode* node, std::string target)
   m_prog = new ShProgramNode(target);
   ShCtrlGraphNodePtr start = new ShCtrlGraphNode();
   m_bb = start->block = new ShBasicBlock();
+  SH_DEBUG_PRINT("Adding statements from node" << node);
   m_bb->m_statements = node->get_statements();
+  SH_DEBUG_PRINT("Got statements" << node);
 #ifdef RDS_DEBUG
   m_bb->print(std::cout,2);
   node->cuts();
@@ -38,12 +42,23 @@ void Schedule::make_channel(ShVariableNodePtr v)
 
 Schedule::Schedule(RDS::PassVector p, RDS::VarVector v)
 {
+#ifdef RDS_DEBUG
+  SH_DEBUG_PRINT("Making passes");
+#endif
   for (RDS::PassVector::iterator I = p.begin(); I != p.end(); ++I) {
     m_passes.push_back(new Pass(*I,"gpu:stream"));
   }
+
+#ifdef RDS_DEBUG
+  SH_DEBUG_PRINT("Making channels/allocing memory");
+#endif
   for (RDS::VarVector::iterator I = v.begin(); I != v.end(); ++I) {
     make_channel( (*I)->node().object() );
   }
+
+#ifdef RDS_DEBUG
+  SH_DEBUG_PRINT("Adding instructions");
+#endif
   int i = 0;
   for (std::vector<Pass*>::iterator I = m_passes.begin(); I != m_passes.end(); ++I) {
     (*I)->id = ++i;
