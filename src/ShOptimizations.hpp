@@ -7,7 +7,8 @@
 #include <set>
 
 // Uncomment this to turn on optimizer debugging using dot.
-// #define SH_DEBUG_OPTIMIZER
+// Warning: This is very verbose!
+//#define SH_DEBUG_OPTIMIZER
 
 namespace SH {
 

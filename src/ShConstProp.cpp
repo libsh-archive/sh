@@ -11,6 +11,14 @@
 #include <sstream>
 #include <fstream>
 
+// Uncomment to enable constant/uniform propagation debugging (verbose!)
+//#define SH_DEBUG_CONSTPROP
+
+#ifdef SH_DEBUG_OPTIMIZER
+#ifndef SH_DEBUG_CONSTPROP
+#define SH_DEBUG_CONSTPROP
+#endif
+#endif
 
 namespace {
 
@@ -65,7 +73,11 @@ struct ConstProp : public ShStatementInfo {
 
     if (stmt->op == SH_OP_ASN) {
       for (int i = 0; i < stmt->dest.size(); i++) {
-        dest.push_back(Cell(src[0][i]));
+        dest.push_back(src[0][i]);
+        if (src[0][i].state == Cell::UNIFORM ||
+            src[0][i].state == Cell::CONSTANT) {
+          worklist.push(ValueTracking::Def(stmt, i));
+        }
       }
     } else if (opInfo[stmt->op].result_source == ShOperationInfo::EXTERNAL) {
       // This statement never results in a constant
@@ -179,7 +191,7 @@ struct ConstProp : public ShStatementInfo {
       if (constant != other.constant) return false;
 
       if (constant) {
-        return constval != other.constval;
+        return constval == other.constval;
       } else {
         if (valuenum != other.valuenum) return false;
         if (index != other.index) return false;
@@ -232,30 +244,43 @@ struct ConstProp : public ShStatementInfo {
       return m_values.size() - 1;
     }
 
+    bool operator==(const Value& other) const
+    {
+      if (type != other.type) return false;
+      if (type == NODE) {
+        return node == other.node;
+      } else if (type == STMT) {
+        if (op != other.op || destsize != other.destsize) return false;
+        for (int i = 0; i < opInfo[op].arity; i++) {
+          if (src[i].size() != other.src[i].size()) return false;
+          for (int j = 0; j < src[i].size(); j++) {
+            if (src[i][j] != other.src[i][j]) return false;
+          }
+        }
+        return true;
+      }
+      return false;
+    }
+
+    bool operator!=(const Value& other) const
+    {
+      return !(*this == other);
+    }
+    
     static ValueNum lookup(ConstProp* cp)
     {
+      Value* val = new Value(cp);
+      
       for (int i = 0; i < m_values.size(); i++) {
         if (m_values[i]->type != STMT) continue;
         if (m_values[i]->op != cp->stmt->op) continue;
 
-        bool mismatch = false;
-        for (int j = 0; j < opInfo[cp->stmt->op].arity; j++) {
-          if (cp->src[j].size() != m_values[i]->src[j].size()) {
-            mismatch = true;
-            break;
-          }
-          
-          for (int k = 0; k < cp->src[j].size(); k++) {
-            if (cp->src[j][k].uniform != m_values[i]->src[j][k]) {
-              mismatch = true;
-              break;
-            }
-          }
-          if (mismatch) break;
+        if (*val == *m_values[i]) {
+          delete val;
+          return i;
         }
-        if (!mismatch) return i;
       }
-      m_values.push_back(new Value(cp));
+      m_values.push_back(val);
       return m_values.size() - 1;
     }
 
@@ -509,7 +534,9 @@ struct FinishConstProp
             newconst.setValue(i, cp->dest[i].value);
           }
           if (allconst) {
-            //SH_DEBUG_PRINT("Replaced {" << *I << "} with " << newconst);
+#ifdef SH_DEBUG_CONSTPROP
+            SH_DEBUG_PRINT("Replaced {" << *I << "} with " << newconst);
+#endif
             *I = ShStatement(I->dest, SH_OP_ASN, newconst);
           } else {
             // otherwise, do the same for each source field.
@@ -526,7 +553,9 @@ struct FinishConstProp
                 newconst.setValue(i, cp->src[s][i].value);
               }
               if (allconst) {
-                //SH_DEBUG_PRINT("Replaced {" << *I << "}.src[" << s << "] with " << newconst);
+#ifdef SH_DEBUG_CONSTPROP
+                SH_DEBUG_PRINT("Replaced {" << *I << "}.src[" << s << "] with " << newconst);
+#endif
                 I->src[s] = newconst;
               }
             }
@@ -537,8 +566,6 @@ struct FinishConstProp
             continue;
           }
 
-          //SH_DEBUG_PRINT("Considering " << *I << " for uniform lifting");
-          
           bool alluniform = true;
           for (int s = 0; s < opInfo[I->op].arity; s++) {
             for (int i = 0; i < I->src[s].size(); i++) {
@@ -552,10 +579,14 @@ struct FinishConstProp
           }
           if (!alluniform || I->dest.node()->kind() == SH_OUTPUT
               || I->dest.node()->kind() == SH_INOUT) {
-            //SH_DEBUG_PRINT("Really considering " << *I << " for uniform lifting");
+#ifdef SH_DEBUG_CONSTPROP
+            SH_DEBUG_PRINT("Considering " << *I << " for uniform lifting");
+#endif          
             for (int s = 0; s < opInfo[I->op].arity; s++) {
               if (I->src[s].uniform()) {
-                //SH_DEBUG_PRINT(*I << ".src[" << s << "] is already a uniform");
+#ifdef SH_DEBUG_CONSTPROP
+                SH_DEBUG_PRINT(*I << ".src[" << s << "] is already a uniform");
+#endif
                 continue;
               }
 
@@ -583,26 +614,38 @@ struct FinishConstProp
               
               
               if (mixed) {
-                //SH_DEBUG_PRINT(*I << ".src[" << s << "] is mixed");
+#ifdef SH_DEBUG_CONSTPROP
+                SH_DEBUG_PRINT(*I << ".src[" << s << "] is mixed");
+#endif
                 continue;
               }
               if (uniform < 0) {
-                //SH_DEBUG_PRINT(*I << ".src[" << s << "] is not uniform");
+#ifdef SH_DEBUG_CONSTPROP
+                SH_DEBUG_PRINT(*I << ".src[" << s << "] is not uniform");
+#endif
                 continue;
               }
               ConstProp::Value* value = ConstProp::Value::get(uniform);
 
 
-              //SH_DEBUG_PRINT("Lifting {" << *I << "}.src[" << s << "]: " << uniform);
-              
-              ShSwizzle swizzle(value->destsize, indices.size(), &(*indices.begin()));
-              //SH_DEBUG_PRINT("Swizzle = " << swizzle);
+#ifdef SH_DEBUG_CONSTPROP
+              SH_DEBUG_PRINT("Lifting {" << *I << "}.src[" << s << "]: " << uniform);
+#endif
+              int srcsize;
+              if (value->type == ConstProp::Value::NODE) {
+                srcsize = value->node->size();
+              } else {
+                srcsize = value->destsize;
+              }
+              ShSwizzle swizzle(srcsize, indices.size(), &(*indices.begin()));
               // Build a uniform to represent this computation.
               ShVariableNodePtr node = build_uniform(value, uniform);
               if (node) {
                 I->src[s] = ShVariable(node, swizzle, neg);
               } else {
-                //SH_DEBUG_PRINT("Could not lift " << *I << ".src[" << s << "] for some reason");
+#ifdef SH_DEBUG_CONSTPROP
+                SH_DEBUG_PRINT("Could not lift " << *I << ".src[" << s << "] for some reason");
+#endif
               }
             }
           }
@@ -630,7 +673,9 @@ struct FinishConstProp
     }
     ShContext::current()->exit();
 
-    //SH_DEBUG_PRINT("Lifting value #" << valuenum);
+#ifdef SH_DEBUG_CONSTPROP
+    SH_DEBUG_PRINT("Lifting value #" << valuenum);
+#endif
 
     bool broken = false;
     
@@ -645,7 +690,7 @@ struct FinishConstProp
       ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
     } SH_END;
 
-#ifdef SH_DEBUG_OPTIMIZER
+#ifdef SH_DEBUG_CONSTPROP
     {
       std::ostringstream s;
       s << "lifted_" << valuenum;
@@ -695,7 +740,6 @@ struct FinishConstProp
       }
     }
     if (!allsame) {
-      //SH_DEBUG_PRINT("Source is not heterogenous");
       // Make intermediate variables, combine them together.
       ShVariable r = ShVariable(new ShVariableNode(SH_TEMP, src.size()));
       
@@ -718,9 +762,7 @@ struct FinishConstProp
     ConstProp::Value* value = ConstProp::Value::get(v);
     
     if (value->type == ConstProp::Value::NODE) {
-      //SH_DEBUG_PRINT("compute: Returning simple uniform with " << indices.size() << " indices");
       ShSwizzle swizzle(value->node->size(), indices.size(), &*indices.begin());
-      //SH_DEBUG_PRINT("compute: Swizzle = " << swizzle);
       return ShVariable(value->node, swizzle, neg);
     }
     if (value->type == ConstProp::Value::STMT) {
@@ -733,13 +775,13 @@ struct FinishConstProp
       }
 
       ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
-      //SH_DEBUG_PRINT("compute: Returning computed uniform with " << indices.size() << " indices");
       ShSwizzle swizzle(node->size(), indices.size(), &*indices.begin());
-      //SH_DEBUG_PRINT("compute: Swizzle = " << swizzle);
       return ShVariable(node, swizzle, neg);
     }
 
-    //SH_DEBUG_PRINT("Reached invalid point");
+#ifdef SH_DEBUG_CONSTPROP
+    SH_DEBUG_PRINT("Reached invalid point");
+#endif
 
     // Should never reach here.
     return ShVariable();
@@ -764,12 +806,20 @@ void propagate_constants(ShProgram& p)
   InitConstProp init(worklist);
   graph->dfs(init);
 
+#ifdef SH_DEBUG_CONSTPROP
+  SH_DEBUG_PRINT("Const Prop Initial Values:");
+  DumpConstProp dump_pre;
+  graph->dfs(dump_pre);
+#endif
+
+  
   while (!worklist.empty()) {
     ValueTracking::Def def = worklist.front(); worklist.pop();
     ValueTracking* vt = def.stmt->template get_info<ValueTracking>();
     if (!vt) {
-      //SH_DEBUG_PRINT("Statement on worklist does not have VT information?");
-      //SH_DEBUG_PRINT(*def.stmt);
+#ifdef SH_DEBUG_CONSTPROP
+      SH_DEBUG_PRINT(*def.stmt << " on worklist does not have VT information?");
+#endif
       continue;
     }
 
@@ -778,7 +828,9 @@ void propagate_constants(ShProgram& p)
          use != vt->uses[def.index].end(); ++use) {
       ConstProp* cp = use->stmt->template get_info<ConstProp>();
       if (!cp) {
-        //SH_DEBUG_PRINT("Use does not have const prop information!");
+#ifdef SH_DEBUG_CONSTPROP
+        SH_DEBUG_PRINT("Use " << *use->stmt << " does not have const prop information!");
+#endif
         continue;
       }
 
@@ -787,35 +839,51 @@ void propagate_constants(ShProgram& p)
       ValueTracking* ut = use->stmt->template get_info<ValueTracking>();
       if (!ut) {
         // Should never happen...
-        //SH_DEBUG_PRINT("Statement on worklist does not have VT information?");
-        //SH_DEBUG_PRINT(*def.stmt);
+#ifdef SH_DEBUG_CONSTPROP
+        SH_DEBUG_PRINT("Use " << *use->stmt << " on worklist does not have VT information?");
+#endif
         continue;
       }
 
-      ConstProp::Cell new_cell = cell;
+#ifdef SH_DEBUG_CONSTPROP
+      SH_DEBUG_PRINT("Meeting cell for {" << *use->stmt
+                     << "}.src" << use->source << "[" << use->index << "]");
+#endif
+      
+      ConstProp::Cell new_cell(ConstProp::Cell::TOP);
       
       for (ValueTracking::UseDefChain::iterator possdef
              = ut->defs[use->source][use->index].begin();
            possdef != ut->defs[use->source][use->index].end(); ++possdef) {
         ConstProp* dcp = possdef->stmt->template get_info<ConstProp>();
         if (!dcp) {
-          //SH_DEBUG_PRINT("Statement on worklist does not have CP information?");
+#ifdef SH_DEBUG_CONSTPROP
+          SH_DEBUG_PRINT("Possible def " << *dcp->stmt << " on worklist does not have CP information?");
+#endif
           continue;
         }
         
         ConstProp::Cell destcell = dcp->dest[possdef->index];
-        if (destcell.state == ConstProp::Cell::CONSTANT
-            && use->stmt->src[use->source].neg()) {
-          destcell.value = -destcell.value;
+
+        // If the use is negated, we need to change the cell
+        if (use->stmt->src[use->source].neg()) {
+          if (destcell.state == ConstProp::Cell::CONSTANT) {
+            destcell.value = -destcell.value;
+          } else if (destcell.state == ConstProp::Cell::UNIFORM) {
+            destcell.uniform.neg = !destcell.uniform.neg;
+          }
         }
-        if (destcell.state == ConstProp::Cell::UNIFORM
-            && use->stmt->src[use->source].neg()) {
-          destcell.uniform.neg = !destcell.uniform.neg;
-        }
-        new_cell = meet(destcell, new_cell);
+#ifdef SH_DEBUG_CONSTPROP
+        SH_DEBUG_PRINT("  meet(" << new_cell << ", " << destcell << ") = " <<
+                       meet(new_cell, destcell));
+#endif
+        new_cell = meet(new_cell, destcell);
       }
       
       if (cell != new_cell) {
+#ifdef SH_DEBUG_CONSTPROP
+        SH_DEBUG_PRINT("  ...replacing cell");
+#endif
         cp->src[use->source][use->index] = new_cell;
         cp->updateDest(worklist);
       }
@@ -824,7 +892,7 @@ void propagate_constants(ShProgram& p)
   // Now do something with our glorious newfound information.
 
   
-#ifdef SH_DEBUG_OPTIMIZER
+#ifdef SH_DEBUG_CONSTPROP
   ConstProp::Value::dump(std::cerr);
 
   DumpConstProp dump;

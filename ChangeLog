@@ -1,3 +1,18 @@
+2004-09-01  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShConstProp.cpp (ConstProp::updateDest): Push definitions
+	onto the worklist when op = SH_OP_ASN if appropriate.
+	(Uniform::operator==): Two constant uniforms are equal if their
+	values are equal.
+	(Value): Add an operator==, and simplify lookup() using this.
+	Add lots of debugging support.
+	(propagate_constants): Use TOP as the base case for building the
+	meet over all possible values, instead of the current value of the
+	use's cell.
+
+	* src/ShContext.hpp: Add mechanism to disable particular
+	optimizations (not used by the optimizer yet).
+
 2004-08-30  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShConstProp.cpp (struct FinishConstProp): Ignore nodes whose
