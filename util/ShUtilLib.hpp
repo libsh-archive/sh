@@ -72,8 +72,9 @@ template<typename T>
 ShVariableN<1, T> smoothstep(const ShVariableN<1, T>& a, const ShVariableN<1, T>& b,
     const ShVariableN<1, T> x) {
   ShVariableN<1, T> t = (x - a) / (b - a);
-  t = clamp(0.0, 1.0, t); 
-  return t * t * mad(-2.0, t, ShConstant1f(3.0));
+  // TODO fix this for other types
+  t = clamp(0.0f, 1.0f, t); 
+  return t * t * mad(-2.0f, t, ShConstant1f(3.0f));
 }
 
 /** \brief Euclidean distance between two points.

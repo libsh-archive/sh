@@ -42,7 +42,7 @@ using namespace SH;
  * M = dimensions of the result (1 <= M <= 4 currently)
  * P = period of the noise texture
  */
-template<int M, int P = 32>
+template<int M, int P = 16>
 class ShPerlin
 {
   public:

@@ -127,13 +127,13 @@ ShVariableN<M, T> ShPerlin<M, P>::noise(const ShVariableN<K, T> &p, bool useText
   T flip[K];
   for(i = 0; i < NUM_SAMPLES; ++i) {
     for(j = 0; j < K; ++j) {
-      if(j == 0) flip[j] = i;
+      if(j == 0) flip[j] = i & 1;
       else flip[j] = (i >> j) & 1;
     }
     ConstTempType offsets(flip);
     TempType intLatticePoint = cond(offsets, ip1, ip0);
     if(useTexture) {
-      grad[i] = noiseTex(cast<3>(intLatticePoint)); // lookup 3D texture
+      grad[i] = noiseTex(copycast<3>(intLatticePoint)); // lookup 3D texture
     } else {
       grad[i] = cast<M>(hashmrg(intLatticePoint)); 
     }
@@ -147,17 +147,16 @@ ShVariableN<M, T> ShPerlin<M, P>::noise(const ShVariableN<K, T> &p, bool useText
     }
   }
 
-  //result is in grad[0], cast into the result size 
-  return cast<M>(grad[0]);
+  return grad[0];
 }
 
 template<int M, int K, typename T>
-ShVariableN<M, T> noise(const ShVariableN<K, T> &p, bool useTexture = true) {
+ShVariableN<M, T> noise(const ShVariableN<K, T> &p, bool useTexture) {
   return ShPerlin<M>::noise(p, useTexture);
 }
 
 template<int M, int K, typename T>
-ShVariableN<M, T> snoise(const ShVariableN<K, T> &p, bool useTexture = true) {
+ShVariableN<M, T> snoise(const ShVariableN<K, T> &p, bool useTexture) {
   return _pmad( noise<M>(p, useTexture), 2.0f, -1.0f );
 }
 
@@ -165,10 +164,11 @@ ShVariableN<M, T> snoise(const ShVariableN<K, T> &p, bool useTexture = true) {
 template<int M, int N, int K, typename T>
 ShVariableN<M, T> turbulence(const ShVariableN<N, T> &amp,
       const ShVariableN<K, T> &p, bool useTexture) {
-  ShAttrib<M, SH_VAR_TEMP, T> result;
+  ShAttrib<M, SH_VAR_TEMP, T> result = copycast<M>(ShConstant1f(0.0));
   T freq = 1.0;
+  result *= 0.0; 
   for(int i = 0; i < N; ++i, freq *= 2.0) {
-    result = mad(ShPerlin<M>::noise(p * freq, useTexture), amp(i), result);
+    result = mad(noise<M>(p * freq, useTexture), amp(i), result);
   }
   return result;
 }
@@ -176,9 +176,13 @@ ShVariableN<M, T> turbulence(const ShVariableN<N, T> &amp,
 template<int M, int N, int K, typename T>
 ShVariableN<M, T> sturbulence(const ShVariableN<N, T> &amp,
       const ShVariableN<K, T> &p, bool useTexture) {
-  ShAttrib<M, SH_VAR_TEMP, T> result;
-  result = turbulence<M>(amp, p, useTexture);
-  return _pmad(result, 2.0f, - 1.0f); 
+  ShAttrib<M, SH_VAR_TEMP, T> result = copycast<M>(ShConstant1f(0.0));
+  T freq = 1.0;
+  result *= 0.0; 
+  for(int i = 0; i < N; ++i, freq *= 2.0) {
+    result = mad(snoise<M>(p * freq, useTexture), amp(i), result);
+  }
+  return result;
 }
 
 } // namespace ShUtil
