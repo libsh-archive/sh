@@ -70,8 +70,8 @@ public:
                                              ///this file
   
   void savePng16(const std::string& filename, int inverse_alpha=0);///< Save a PNG image into
-  
-  
+ 
+  ShImage getNormalImage();
 
   const float* data() const;
   float* data();

@@ -344,6 +344,34 @@ void ShImage::savePng16(const std::string& filename, int inverse_alpha)
   fclose(fout);
 }
 
+ShImage ShImage::getNormalImage()
+{
+  int w = width();
+  int h = height();
+  ShImage output_image(w,h,3);
+  for (int j = 0; j < h; j++) {
+    int jp1 = j + 1;
+    if (jp1 >= h) jp1 = 0;
+    int jm1 = (j - 1);
+    if (jm1 < 0) jm1 = h - 1;
+    for (int i = 0; i < w; i++) {
+      int ip1 = i + 1;
+      if (ip1 >= w) ip1 = 0;
+      int im1 = (i - 1);
+      if (im1 < 0) im1 = w - 1;
+      float x, y, z;
+      x = ((*this)(ip1,j,0) - (*this)(im1,j,0))/2.0f;
+      output_image(i,j,0) = x/2.0f + 0.5f;
+      y = ((*this)(i,jp1,0) - (*this)(i,jm1,0))/2.0f;
+      output_image(i,j,1) = y/2.0f + 0.5f;
+      z = x*x + y*y;
+      z = (z > 1.0f) ? z = 0.0f : sqrt(1 - z);
+      output_image(i,j,2) = z;
+    }
+  }
+  return output_image;
+}
+
 const float* ShImage::data() const
 {
   if (!m_memory) return 0;

@@ -1,3 +1,9 @@
+2004-04-12  Jack Wang  <jmwang@uwaterloo.ca>
+
+	* src/ShImage.?pp: Added getNormalMap() to generate a normal map by 
+	treating the image as a height field.
+
+
 2004-04-08  Jack Wang  <jmwang@uwaterloo.ca>
 
 	* src/ShQuaternionImpl.hpp: Improved code in getMatrix().
