@@ -239,34 +239,21 @@ template<ShBindingType B, typename T>
 ShMatrix<4, 4, SH_TEMP, T> ShQuaternion<B, T>::getMatrix() const
 {
   SH::ShMatrix4x4f m;
-  ShAttrib1f xx, xy, xz, xw, yy, yz, yw, zz, zw;
+  ShAttrib4f x = m_data(1,1,1,1) * m_data(1,2,3,0);
+  ShAttrib4f y = m_data(2,2,2,2) * m_data(0,2,3,0);
+  ShAttrib4f z = m_data(3,3,3,3) * m_data(0,0,3,0);
 
-  xx = m_data(1)*m_data(1);
-  xy = m_data(1)*m_data(2);
-  xz = m_data(1)*m_data(3);
-  xw = m_data(1)*m_data(0);
+  m[0](0) = 1 - 2 * (y(1) + z(2));
+  m[1](0) = 2 * (x(1) - z(3));
+  m[2](0) = 2 * (x(2) + y(3));
 
-  yy = m_data(2)*m_data(2);
-  yz = m_data(2)*m_data(3);
-  yw = m_data(2)*m_data(0);
+  m[0](1) = 2 * (x(2) + z(3));
+  m[1](1) = 1 - 2 * (x(0) + z(2));
+  m[2](1) = 2 * (y(2) - x(3));
 
-  zz = m_data(3)*m_data(3);
-  zw = m_data(3)*m_data(0);
-
-  m[0](0) = 1 - 2 * (yy + zz);
-  m[1](0) = 2 * (xy - zw);
-  m[2](0) = 2 * (xz + yw);
-
-  m[0](1) = 2 * (xy + zw);
-  m[1](1) = 1 - 2 * (xx + zz);
-  m[2](1) = 2 * (yz - xw);
-
-  m[0](2) = 2 * (xz - yw);
-  m[1](2) = 2 * (yz + xw);
-  m[2](2) = 1 - 2 * (xx + yy);
-
-  m[3](0) = m[3](1) = m[3](2) = m[0](3) = m[1](3) = m[2](3) = 0;
-  m[3](3) = 1;
+  m[0](2) = 2 * (x(2) - y(3));
+  m[1](2) = 2 * (y(2) + x(3));
+  m[2](2) = 1 - 2 * (x(0) + y(1));
 
   return m;
 }

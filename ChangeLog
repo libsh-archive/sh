@@ -1,3 +1,7 @@
+2004-04-08  Jack Wang  <jmwang@uwaterloo.ca>
+
+	* src/ShQuaternionImpl.hpp: Improved code in getMatrix().
+
 2004-04-07  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* Too many to enumerate: Wow. Big change. Several source files are
