@@ -64,7 +64,7 @@ struct VariableReplacer {
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
       repVar(I->dest);
       for (int i = 0; i < 3; i++) {
-        repVar(I->src[i]);
+        if( !I->src[i].null() ) repVar(I->src[i]);
       }
     }
   }
@@ -130,7 +130,7 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   ShProgramNode::VarList::const_iterator I, J;  
   for (I = a->outputs.begin(), J = b->inputs.begin(); I != a->outputs.end(); ++I, ++J) {
     SH_DEBUG_PRINT("Smashing a variable..");
-    if( (*I)->size() == (*J)->size() ) {
+    if( (*I)->size() != (*J)->size() ) {
       ShError( ShAlgebraException( "Cannot smash variables " + (*I)->name() +
             " and " + (*J)->name() + " with different sizes." ) );
     }
