@@ -31,6 +31,13 @@
 #include "ShDebug.hpp"
 #include "ShError.hpp"
 
+#ifdef WIN32
+// TODO: quick fix, maybe this should be handled elsewhere or
+// implemented better?
+inline roundf(float f) { return floorf(f + 0.5); }
+inline cbrtf(float f) { return pow(f, 1.0f/3.0f); }
+#endif /* WIN32 */
+
 namespace {
 
 using namespace SH;

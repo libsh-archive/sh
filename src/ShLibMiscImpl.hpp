@@ -29,6 +29,7 @@
 
 #include "ShLibMisc.hpp"
 #include "ShInstructions.hpp"
+#include "ShProgram.hpp"
 
 namespace SH {
 

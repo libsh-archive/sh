@@ -1,3 +1,13 @@
+2004-10-07  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* src/ShInstructions.cpp: No roundf or cbrtf on Win32, created
+	inline replacements using floor and pow.
+
+	* src/ShLibMiscImpl.hpp: VC++ complained about unknown type ShProgram,
+	added appropriate include.
+
+	* src/ShMatrix.hpp: Fixed misplaced SH_DLLEXPORT.
+	
 2004-10-06  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShVariableNode.cpp: Added optional memory pool
