@@ -1,0 +1,49 @@
+RELEASE_TARGETS = libsharb.dll
+DEBUG_TARGETS = libsharbd.dll
+
+all: all-release all-debug
+
+all-release: $(RELEASE_TARGETS)
+all-debug: $(DEBUG_TARGETS)
+
+CLEANFILES = $(RELEASE_TARGETS) $(DEBUG_TARGETS)
+
+install:
+
+GLBACKEND_SOURCES = GlBackend.cpp GlBackend.hpp \
+		  GlTextureName.hpp GlTextureName.cpp
+GLTEXTURE_SOURCES = GlTextureStorage.hpp GlTextureStorage.cpp \
+		     GlTextures.hpp GlTextures.cpp 
+# PBUFFERSTREAM_SOURCES = PBufferStreams.hpp PBufferStreams.cpp
+
+# For now..
+PBUFFERSTREAM_SOURCES = 
+
+# libsharb_dll_LDFLAGS = -L$(prefix)/lib -module
+libsharb_dll_SOURCES =  Arb.cpp ArbCode.cpp ArbEmit.cpp ArbInst.cpp
+libsharb_dll_SOURCES += ArbLimits.cpp ArbReg.cpp
+libsharb_dll_SOURCES += Arb.hpp ArbCode.hpp ArbInst.hpp ArbLimits.hpp
+libsharb_dll_SOURCES += ArbReg.hpp ArbBackend.cpp
+libsharb_dll_SOURCES += $(GLBACKEND_SOURCES) $(GLTEXTURE_SOURCES) $(PBUFFERSTREAM_SOURCES)
+
+libsharb_dll_CXXFILES = $(filter %.cpp,$(libsharb_dll_SOURCES))
+libsharb_dll_RELEASE_OBJECTS = $(libsharb_dll_CXXFILES:.cpp=.r.obj)
+libsharb_dll_DEBUG_OBJECTS = $(libsharb_dll_CXXFILES:.cpp=.d.obj)
+
+libsharb_dll_DEBUG_LDADD = ../../src/libshd.lib 
+libsharb_dll_DEBUG_LDADD += $(OPENGL_DIR)\lib\OPENGL32.LIB
+libsharb_dll_RELEASE_LDADD = ../../src/libsh.lib 
+libsharb_dll_RELEASE_LDADD += $(OPENGL_DIR)\lib\OPENGL32.LIB
+
+libsharb.dll: $(libsharb_dll_RELEASE_OBJECTS)
+	$(CXX) /Felibsharb /LD $^ $(libsharb_dll_RELEASE_LDADD) $(RELEASE_LDFLAGS)
+
+libsharbd.dll: $(libsharb_dll_DEBUG_OBJECTS)
+	$(CXX) /Felibsharbd /LD $^ $(libsharb_dll_DEBUG_LDADD) $(DEBUG_LDFLAGS)
+
+libsharb_dll_DEPENDS = $(libsharb_dll_CXXFILES:.cpp=.r.d) $(libsharb_dll_CXXFILES:.cpp=.d.d)
+
+include ../../win32.mk
+INCLUDES += -I../../src
+CPPFLAGS += -DSH_DLLEXPORT=__declspec(dllimport)
+include $(libsharb_dll_DEPENDS)

@@ -1,0 +1,1993 @@
+2004-09-08  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShConstProp.cpp (struct FinishConstProp): Don't lift values
+	which are partially not uniform.
+
+2004-09-07  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/GlTextures.cpp (bindTexture): Added support for
+	opengl:preset metadata, and set opengl:texid metadata.
+
+2004-09-01  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShConstProp.cpp (ConstProp::updateDest): Push definitions
+	onto the worklist when op = SH_OP_ASN if appropriate.
+	(Uniform::operator==): Two constant uniforms are equal if their
+	values are equal.
+	(Value): Add an operator==, and simplify lookup() using this.
+	Add lots of debugging support.
+	(propagate_constants): Use TOP as the base case for building the
+	meet over all possible values, instead of the current value of the
+	use's cell.
+
+	* src/ShContext.hpp: Add mechanism to disable particular
+	optimizations (not used by the optimizer yet).
+
+2004-08-30  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShConstProp.cpp (struct FinishConstProp): Ignore nodes whose
+	RHS is all (uniform OR constant), unless they're writing to output
+	(or inout) nodes.
+	(struct FinishConstProp): Fix boolean expressions.
+
+	* src/Makefile.am (libsh_la_SOURCES): Split some of
+	ShOptimizations.cpp into ShConstProp.cpp and ShValueTracking.cpp
+
+2004-08-28  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp (Cell::Cell): Don't use the swizzle to
+	make the index, the swizzling is represented implicitly when
+	setting up a statement-based cell.
+	(propagate_constants): Set negatives appropriately when
+	propagating uniforms.
+	(...): Added support for mixed (constant/uniform) operations to be
+	lifted. Seems to be slightly broken still.
+	(ConstProp::updateDest): Handle SH_OP_ASN specially.
+
+2004-08-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp: Added most of the uniform lifting code.
+
+2004-08-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp (ConstProp): Set destinations to either
+	BOTTOM or CONSTANT but never top.
+	(propagate_constants): Consider all use-def information for uses
+	that need to be updated when computing the new lattice cell
+	values.
+	* test/regress/Makefile.am: Added test.hpp everywhere.
+
+2004-08-24  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp: Add copy propagation, clean up a few
+	things.
+
+2004-08-23  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/PBufferStreams.cpp (execute): Optimize is spelled
+	"optimize", not "optmize".
+
+	* src/ShOptimizations.cpp: Mark writes to inputs as live. This is
+	actually over pessimistic, but works for now.
+
+	* src/ShVariableNode.cpp (ShVariableNode): Constants are not
+	uniforms.
+
+	* src/ShOptimizations.cpp (ConstProp::updateDest): Use SH_CONST
+	for our temporary evaluator variables so that they have values
+	even if we are inside a shader program definition.
+
+	* src/ShEvaluate.cpp (evaluate): Push a null program onto the
+	definition stack in ShContext to force our operations to execute
+	in immediate mode, even if we are in a program definition.
+
+	* src/ShOptimizations.cpp (forward_substitute): Copy this from
+	ShOptimzer.cpp (it used to be called "move elimination" but
+	forward substitution is the proper term).
+
+	* src/ShSyntax.cpp (shEndShader): Use optimize() from
+	ShOptimizations.hpp instead of ShOptimizer. Also did this in
+	backends/*/* and src/ShAlgebra.cpp.
+
+	* src/Makefile.am (libsh_la_SOURCES): Remove ShOptimizer.hpp and
+	ShOptimzer.cpp.
+
+	* src/ShStatement.hpp: Remove ud and du members from ShStatement.
+
+	* src/ShStatement.cpp (operator=): Implement operator=.
+
+	* src/ShStatement.hpp: Add operator=() for ShStatements.
+
+2004-08-21  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp (struct FinishConstProp): Use the
+	constant propagation information, and remove it when we're done.
+
+2004-08-20  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp (ReachingDefs::Definition): Keep a
+	disable_mask bitset to keep track of definitions overwriting each
+	other in a single block. This is used when constructing gen.
+	(DefFinder::operator()): Set up disable_mask appropriately. Constant
+	propagation now works, but isn't used yet.
+
+	* src/ShBitSet.cpp (full): Implement full.
+	(empty): Implement empty.
+
+	* src/ShBitSet.hpp: Add full and empty member functions.
+
+	* src/ShStatement.cpp (ShStatement): Implement ShStatement copy
+	constructor, cloning info items using new clone() member function.
+
+	* src/ShStatement.hpp (destroy_info): Fix destroy_info to iterate
+	correctly.
+	(class ShStatementInfo): Add clone() virtual member function.
+	(class ShStatement): Add explicit copy constructor.
+
+	* src/ShOptimizations.cpp: Added lots of code for constant
+	propagation.
+
+2004-08-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizations.cpp: Implementation file for the new
+	tuple-aware optimizer.
+
+	* src/ShOptimizations.hpp: Header file for the new tuple-aware optimizer.
+
+2004-08-18  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/GlBackend.hpp: Check for __APPLE__ when including
+	opengl headers.
+
+	* backends/gl/Arb.cpp: Let GlBackend.hpp include our GL headers
+	for us.
+
+	* src/ShInstructions.cpp: Define exp10f on OSX.
+
+	* config/gl.m4: Look for either <GL/gl.h> or <OpenGL/gl.h> for
+	MacOS X.
+
+	* src/ShInstructions.cpp: Fix exp10f on WIN32. Thanks to Evan Wies
+	for pointing this out.
+
+2004-08-04  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* util/ShNoiseImpl.hpp: fixed random number generation under Win32.
+
+2004-07-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbCode.cpp (allocateRegister): Instead of
+	asserting, use shError() when we're out of temporaries. Resolves
+	issue139.
+
+	* src/ShLibMatrix.hpp: Moved (and renamed) inverse, adjoint,
+	transpose, cofactors and det here. Resolves issue94.
+	Added diag and rowmat. Resolves issue98 and half of issue97.
+
+	* Added copyright statements to the heads of all the files that
+	were missing.
+
+	* src/ShLibMatrix.hpp: Added operator* for existing matrix
+	multiplication functions. Resolves issue92.
+	Added row vector / matrix multiplication. Resolves issue93.
+
+	* src/ShProgram.hpp: Added introspection iterators. Resolves issue37.
+
+	* src/ShProgramNode.hpp: Added introspection iterators.
+
+	* src/ShLibMisc.hpp: Rename kill to discard. Resolves issue83.
+
+	* src/ShLibArith.hpp: Added expm1 and logp1. Resolves issue81.
+
+	* backends/gl/ArbEmit.cpp: Added emit_csum and emit_cmul functions
+	and table entries.
+
+	* src/ShLibClamp.hpp: Added unary min and max. Resolves issue61.
+
+	* src/ShLibArith.hpp: Added sum and prod. Resolves issue46 and
+	issue47.
+
+	* src/ShLibGeometry.hpp: Added distance* and length*. Resolves
+	issue69, issue70, issue71, issue72.
+
+	* src/ShStatement.hpp: Added SH_OP_CSUM and SH_OP_CMUL.
+
+2004-07-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShLibClamp.hpp: Undef max and min if they are defined.
+
+	* backends/gl/GlBackend.cpp (setContext): Fix assertion.
+
+	* backends/gl/ArbEmit.cpp: Add some stuff missing on win32.
+
+	* backends/gl/ArbBackend.cpp: Add a DllMain for win32.
+
+	* backends/gl/Arb.cpp: Include windows.h on win32.
+
+	* backends/gl/Makefile.win32: Added Makefile for win32.
+
+2004-07-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShTransformer.cpp: Get rid of some more stack-based variable
+	array initializers.
+
+	* src/ShSyntax.cpp (shInit): Empty for now.
+
+	* src/ShOptimizer.cpp: Only output node block in DumpRch if
+	SH_DEBUG is enabled.
+
+	* src/ShInstructions.cpp: Use new instead of stack-based
+	variable-sized arrays.
+
+	* src/ShImage.cpp: Include <cmath> for sqrt.
+
+	* util/Makefile.win32: Added Win32 Makefile.
+
+	* src/Makefile.win32: Added Win32 Makefile.
+
+	* win32.mk: Added global win32 make settings.
+
+	* test/sandbox/Makefile.win32: Added Win32 makefile.
+
+2004-07-17  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShVariable.hpp (ShVariable): Add operator!=.
+
+	* src/ShSwizzle.cpp (ShSwizzle): Implement default constructor.
+
+	* src/ShSwizzle.hpp (ShSwizzle): Add default constructor.
+
+	* src/ShStructural.cpp (ShStructural): Rewrote cycle discovery code.
+	(ShStructural): Fix duplicate removal code.
+
+	* backends/gl/GlTextures.cpp (shGlInternalFormat): Use
+	GL_FLOAT_RGBA_NV for 2-component floating-point textures with
+	NV_float_buffer so that the appropriate components are extracted.
+
+	* backends/gl/PBufferStreams.cpp (execute): Added fragment program
+	dumping code.
+
+	* backends/gl/ArbCode.cpp (print): Handle condition codes.
+	(allocTemps): Allocate temporaries (mostly) correctly in the
+	presence of REPs.
+
+	* backends/gl/ArbInst.hpp (ArbInst): Add condition code data.
+
+	* backends/gl/ArbEmit.cpp: Use emit_div even on NV40, because we
+	found a bug with DIV in the drivers.
+	(emit_nvcond): Use condition-codes for COND instructions on NV backends.
+	(emit_tex): Fixed texture lookups, in particular for 2-tuple textures.
+
+2004-07-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbInst.hpp: Add an "invert" field for BRKs.
+
+	* backends/gl/ArbCode.cpp (genStructNode): Handle SELFLOOPs.
+
+	* src/ShStructural.cpp: Implement "reach under" set computation
+	and therefore handle while and do loops. Yay!
+
+	* backends/gl/ArbInst.cpp (arbOpInfo): Add info for REP, BRK and ENDREP.
+
+	* backends/gl/ArbInst.hpp: Add REP, BRK and ENDREP.
+
+	* backends/gl/ArbCode.cpp: Support generation of REP statements
+	for while loops. Emit proper code for REP, BRK and ENDREP.
+	(allocTemps): Handle loops in the
+	allocator. It's not graph colouring, but it works and it's not
+	completely stupid either :).
+
+2004-07-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbCode.cpp: Implement conditionals using IF on the
+	NV40 using the new Structural Analysis discovery code.
+
+	* backends/gl/ArbCode.hpp: Add genStructNode() prototype.
+
+	* backends/gl/ArbInst.cpp (arbOpInfo): Operation info for IF,
+	ELSE, ENDIF.
+
+	* backends/gl/ArbInst.hpp: Add IF, ELSE, ENDIF.
+
+	* src/ShStructural.cpp: Implementation of Structural Analysis algorithm.
+
+	* src/ShStructural.hpp: Added Structural Analysis
+	algorithm. Doesn't do loops yet.
+
+	* test/sandbox/Makefile: Improve Makefile overall, add dependencies.
+
+	* src/ShSwizzle.hpp: Added comparison (==) operator.
+
+	* src/ShVariable.hpp: Added comparison (==) operator.
+
+2004-07-13  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShSyntax.hpp (SH_NAME): Added this macro.
+
+2004-07-12  Gabriel Moreno-Fortuny  <gmoreno@fezzik.cgl.uwaterloo.ca>
+
+	* backends/cpu/CPU.cpp: Added -O2 flag to CPU execution.
+
+2004-07-12  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/cpu/CPU.cpp: Rename the functions starting with __ to
+	functions starting with sh_gcc_backend_.
+	(encode): Link with libshcpu for the lookup functions. Resolves issue145.
+
+	* src/ShParser.cpp (parseDo): Until means until, not
+	while. Resolves issue144.
+
+2004-07-10  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* test/sandbox: Added sandbox directory for simple tests.
+
+	* src/scripts/semantic.py (Class.assignments): Add operatxor=(T)
+	for single element types.
+	(Impl.assignments): Implement operator=(T) for single element
+	types. Resolves issue141.
+
+	* src/ShGenericImpl.hpp: Implemented operator=(T).
+
+	* src/ShGeneric.hpp: Added operator=(T) to 1-element generic.
+
+2004-07-09  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbCode.cpp (print): Add LABEL and BRA printing cases.
+	(getLabel): Implement this function.
+	(genNode): Handle branches for NVVP2.
+
+	* backends/gl/ArbCode.hpp: Add label map.
+
+	* backends/gl/ArbInst.cpp (arbOpInfo): Clean up table, add BRA and
+	LABEL info.
+
+	* backends/gl/ArbInst.hpp: Add instructions for BRA and a fake
+	LABEL instruction.
+	(ArbOpInfo): Remove useless members (fp, vp, vector).
+
+	* backends/cpu/CPU.cpp (encode): Implement SH_OP_SGN.
+
+	* src/ShLibDerivImpl.hpp (fwidth): Fix this function (use "var"
+	instead of "t").
+
+	* src/ShLibClampImpl.hpp (sign): Implemented this
+	function. Resolves issue60.
+
+	* src/ShLibClamp.hpp: Added sign() function.
+
+	* src/ShInstructions.cpp (shSGN): Implemented this function.
+
+	* src/ShInstructions.hpp: Added shSGN() function.
+
+2004-07-08  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbEmit.cpp: Added rules for SH_OP_SGN.
+	(emit_sgn): Implemented this function.
+	(emit_mod): Use SH_OP_SGN.
+
+	* backends/gl/ArbCode.hpp (ArbCode): Added emit_sgn() member function.
+
+	* src/ShStatement.cpp: Added opInfo for SGN.
+
+	* src/ShStatement.hpp: Added SH_OP_SGN statement.
+
+	* backends/gl/ArbInst.hpp: Added SGT, SLE, SFL, STR, RFL, SSG
+	instructions.
+
+	* backends/gl/ArbInst.cpp (arbOpInfo): DP2 is a collectingOp.
+	(arbOpInfo): Added SGT, SLE, SFL, STR, RFL, SSG instructions.
+
+	* backends/gl/ArbEmit.cpp: Only turn three-vector normalizations
+	into NRM instructions (on nvfp2).
+
+	* backends/gl/ArbCode.cpp (ArbCode): Initialize m_environment
+	using GL_EXTENSIONS information.
+
+	* backends/gl/ArbCode.hpp: Move filters here from ArbEmit.cpp.
+	(class ArbCode): Add m_environment member.
+
+	* util/ShNoiseImpl.hpp (perlin): Avoid using a cond here, use lerp
+	instead. Approximately 35% speedup for marble :).
+
+2004-07-07  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbEmit.cpp: Add a delay_mask transformation to do
+	the writemasking of a statement in a separate assignment. Use this
+	for texture lookups. Resolves issue58.
+
+	* backends/gl/ArbCode.cpp (genNode): Use emit function to generate code.
+	(printVar): Fix the way destination writemasks are emitted.
+
+	* backends/gl/ArbCode.hpp: Add emit* functions.
+
+	* backends/gl/ArbEmit.cpp: Add new table-driven emit code.
+
+2004-07-06  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbCode.cpp (genNode): Handle SH_OP_SNE.
+
+2004-07-05  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* Resolved issue43.
+
+	* backends/cpu/CPU.cpp (encode): Allow scalar ADD and DIV on both
+	sides, clean up implementation of MUL.
+
+	* backends/gl/ArbCode.cpp (genNode): Allow scalar versions of OP_ADD.
+	(genDiv): Allow scalar left-hand side in division.
+
+	* src/scripts/semantic.py (Class.modifying): Add declarations for
+	scalar versions of operator+= and operator-=.
+	(Impl.modifying): Add implementations for scalar versions of
+	operator+= and operator-=.
+
+	* src/ShGenericImpl.hpp: Implemented scalar versions of modifying
+	arithmetic operators.
+
+	* src/ShGeneric.hpp (class ShGeneric): Added scalar versions of
+	modifying arithmetic operators.
+
+	* src/ShInstructions.cpp (shADD): Allow scalars on both sides.
+	(shDIV): Allow scalars on both sides.
+
+	* src/ShLibArithImpl.hpp: Implemented scalar versions of
+	arithmetic operators.
+
+	* src/ShLibArith.hpp: Added scalar versions for both sides of
+	operator+, operator- and operator/.
+
+	* src/ShLibGeometryImpl.hpp (refract): Implement refract. Resolves issue73.
+
+	* src/ShLibGeometry.hpp: Add refract function prototype.
+
+	* src/scripts/semantic.py (Class.modifying): Add operator%=.
+	(Impl.modifying): Implemented operator%=. Resolves other half of issue45.
+
+	* src/ShGenericImpl.hpp (operator%): Implemented operator%=.
+
+	* src/ShGeneric.hpp (class ShGeneric): Add operator%=.
+
+	* src/ShLibClampImpl.hpp: Implemented operator%. Resolves half of issue45.
+
+	* src/ShLibClamp.hpp: Added operator%.
+
+	* src/ShInterp.hpp: Added ShInterp<L> texture trait wrapper
+	template. Resolves issue38.
+
+	* src/ShLibClampImpl.hpp (sat): Implement sat. Resolves issue62.
+
+	* src/ShLibClamp.hpp: Add sat function.
+
+	* util/ShFunc.hpp: Remove clamp functions.
+
+	* src/ShLibClampImpl.hpp (clamp): Implement. Resolves issue55.
+
+	* src/ShLibClamp.hpp: Add clamp library function.
+
+	* src/ShLibGeometryImpl.hpp (lit): Implement this function.
+	(faceforward): Implement this function.
+	Resolves one more part of issue73.
+
+	* src/ShLibGeometry.hpp: Add faceforward() and lit() library functions.
+
+	* src/ShProgram.hpp: Add describe_interface() member function wrapper.
+
+	* src/ShProgramNode.hpp: Rename operator<< for VarLists to static
+	member function "print" of ShProgramNode, add describe_interface
+	member function.
+
+	* src/ShProgramNode.cpp (describe_interface): Implement this
+	function. Resolves issue18.
+
+	* src/ShVariableNode.cpp (shBindingTypeName): Change name of temp
+	types to the empty string.
+
+2004-06-30  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShLibGeometryImpl.hpp (reflect): Implemented reflect
+	function. Makes issue73 in progress.
+
+	* src/ShLibGeometry.hpp: Added reflect function.
+
+	* backends/cpu/CPU.cpp (encode): Handle RCP and RSQ.
+
+	* test/regress/regress.py (tests): Add tests for RCP, RSQ and SQRT.
+
+	* backends/gl/ArbCode.cpp (genNode): Handle RCP and RSQ.
+
+	* src/ShInstructions.cpp: Implement shRCP() and shRSQ().
+
+	* src/ShInstructions.hpp: Add shRCP() and shRSQ().
+
+	* src/ShLibArithImpl.hpp: Implement rcp() and rsqrt().
+
+	* src/ShLibArith.hpp: Add rcp and rsqrt functions.
+
+	* src/ShStatement.cpp: Add RCP and RSQ opInfo.
+
+	* src/ShStatement.hpp: Add RCP and RSQ operations. Fixes issue48
+	and issue49, together with related changes.
+
+	* backends/gl/ArbCode.cpp (genNode): Scalarize sqrt.
+
+	* src/ShInstructions.cpp: Implemented shDX() and shDY().
+
+	* src/ShInstructions.hpp: Added shDX and shDY functions.
+
+	* src/ShStatement.cpp: Added opInfo for DX and DY.
+
+	* src/ShStatement.hpp: Added DX and DY ops.
+
+	* src/ShLibDerivImpl.hpp: Implemented derivative functions.
+
+	* src/ShLibDeriv.hpp: Added derivative functions, which of course
+	don't work in the backend yet. Resolves issue65, issue66, issue67
+	and makes issue64 an in-progress item.
+
+	* backends/gl/ArbCode.cpp (print): Don't print out declarations
+	for textures.
+
+	* backends/gl/ArbReg.hpp: A few changes for the constant-joining code.
+
+	* backends/gl/ArbCode.cpp: More constant-joining goodness.
+
+	* backends/gl/ArbCode.hpp: Add constant-joining code. Find
+	constants with the same values and allocate them to the same
+	register. This helps particularily on ATI and Mesa.
+
+2004-06-25  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShClamping.hpp: Added return_type typedefs.
+
+	* src/ShWrap.hpp: Added return_type typedefs.
+
+	* src/ShTexture.hpp: Added return_type typedefs.
+
+	* src/ShTable.hpp: Added return_type typedefs.
+
+	* src/ShArray.hpp: Added return_type typedefs.
+
+	* src/ShBaseTexture.hpp: Added return_type typedefs.
+
+2004-06-19  Bryan Chan <b8chan@uwaterloo.ca
+	* util/ShWorley*.?pp: Updated worley slightly to return all
+	k-nearest results instead of returning a weighted average.
+  
+2004-06-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* Everywhere: Replaced ShProgram typedef with real class. Moved
+	bound program list to ShContext. Moved ShEnvironment::shader to
+	ShContext::parsing(), and use a stack. Move copyCtrlGraph from
+	ShInternals to ShCtrlGraph and cloneProgram to
+	ShProgramNode. Fixes issue3, issue4, issue13 and a bunch of things
+	that should have been issues but aren't.
+
+2004-06-04  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShLibTrig.hpp: Added a couple of trig functions.
+
+	* test/regress/regress.py (tests): Added tests for TAN. May need
+	some work, probably don't want to test crazy cases.
+
+	* src/ShStatement.hpp: Added SH_OP_TAN.
+
+	* src/ShInstructions.hpp: Implemented shTAN.
+
+	* backends/gl/ArbCode.cpp (genNode): Implemented TAN, preliminarily.
+
+	* test/regress/regress.py (tests): Test LOG, LOG2, LOG10. Together
+	with backend implementations this resolves issue82.
+
+	* backends/cpu/CPU.cpp (encode): Implement LOG, LOG2, LOG10.
+
+	* backends/gl/ArbCode.cpp (genNode): Implement LOG, LOG2, LOG10.
+
+	* test/regress/regress.py (tests): Test EXP, EXP2, EXP10. Together
+	with backend implementations this resolves issue80.
+
+	* backends/cpu/CPU.cpp (encode): Implement SH_OP_EXP, SH_OP_EXP2, SH_OP_EXP10.
+
+	* backends/gl/ArbCode.cpp (genNode): Implement SH_OP_EXP, SH_OP_EXP10.
+
+	* backends/cpu/CPU.cpp (encode): Use SH_OP_MOD instead of SH_OP_FMOD.
+
+	* backends/gl/ArbCode.cpp (genNode): Use SH_OP_MOD instead of SH_OP_FMOD.
+
+	* backends/sm/ShSmBackend.cpp (addBasicBlock): Use SH_OP_MOD
+	instead of SH_OP_FMOD.
+
+	* src/ShNibblesImpl.hpp: Rename fmod to mod.
+
+	* src/ShNibbles.hpp: Rename fmod to mod.
+
+	* src/ShInstructions.cpp (shMOD): Rename from shFMOD().
+
+	* src/ShInstructions.hpp: Rename shFMOD() to shMOD().
+
+	* src/ShLibClampImpl.hpp (mod): Rename from fmod.
+
+	* src/ShLibClamp.hpp: Rename fmod to mod. Fixes issue57.
+
+	* src/ShLib.hpp (SH_SHLIB_USUAL_NON_UNIT_OPS_RETTYPE): Use mod
+	instead of fmod.
+
+	* src/ShStatement.hpp: Rename FMOD to MOD.
+
+	* test/regress/Makefile (%.check): Generate log files.
+
+	* test/regress/test.cpp (Test::Test): Implement.
+
+	* test/regress/test.hpp: Made the Test class.
+
+	* test/regress/regress.py: Added some more test data. Adopted to
+	new Test class.
+
+2004-06-02  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/cpu/CPU.cpp (encode): Fix POW to work with scalar RHS
+	operands.
+
+	* backends/gl/ArbCode.cpp (genNode): Fix POW to scalarize vector
+	arguments.
+
+	* src/ShLibGeometryImpl.hpp (operator^): Define operator^ (it's
+	just cross). Fixes issue68. Gotta love low-hanging fruit.
+
+	* src/ShLibGeometry.hpp: Declare operator^ to mean cross product.
+
+	* src/ShLib.hpp (SH_SHLIB_USUAL_NON_UNIT_OPS_RETTYPE): Remove old
+	crufty operator^ declarations. Should probably go over this whole
+	thing and replace it (e.g. with Python code).
+
+	* test/regress/regress.py: Perform tests for all operations, added
+	more test data, cleaned up a few things.
+
+2004-06-01  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* test/regress: Added start of regression test suite.
+
+	* src/ShSyntax.cpp (shEndShader): Don't compile automatically for
+	now. Need to fix this test. See issue129.
+
+2004-06-01  Bryan Chan <b8chan@uwaterloo.ca>
+
+	* src/ShTransformer.cpp (splitVaralist): Fixed input and output
+	variable list splitting (Issue111)
+
+	* test/longtuple.sht, test/test.header: Made test case more
+	comprehensive.  Removed optimizationLevel
+
+	* util/ShNoise*, util/ShWorley*: Changed interfaces to match book
+	+ added weighted octave versions (Issue90)
+
+	* util/ShKernelPost*: Fixed shHalftone and shNoisify kernels
+	(Issue26, Issue27)
+
+2004-05-31  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShVariable.hpp: Remove non-const node() accessor.
+
+	* src/ShInternals.cpp: Don't change ShVariable::node() directly in repVar().
+
+	* src/ShOptimizer.cpp: Don't change ShVariable::node() directly in copyValue().
+
+	* src/scripts/ShAttribImpl.hpp.py (Impl.constructors): Use
+	node/swizzle/neg ShGeneric constructor instead of setting fields
+	manually.
+
+2004-05-28  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShLibBooleanImpl.hpp: Implemented operator||, operator&&,
+	operator!, as well as any and all. Resolves issue52, issue51,
+	issue125, issue54 and issue53.
+
+	* backends/gl/ArbCode.cpp (genNode): Implemented EXP, EXP2, LOG, LOG2.
+
+	* src/ShInstructions.hpp: Added sh{EXP,LOG}{,2,10}() functions.
+
+	* src/ShLibArith.hpp: Added {log,exp}{,2,10}
+	instructions. Resolves issue80 and issue82, but not tested yet.
+
+	* src/ShStatement.cpp: Added opInfo for SH_{EXP,LOG}{,2,10} operations.
+
+	* src/ShStatement.hpp: Added SH_{EXP,LOG}{,2,10} operations.
+
+	* src/ShContext.hpp: Added ShContext type. Moved optimization
+	level and error throwing settings here from ShEnvironment. Changed
+	uses of ShEnvironment to refer to ShContext::current() where
+	appropriate. Resolves issue4, more or less.
+
+	* Added CPtr typedefs for ShPointer<const ...> types. Resolves
+	issue106.
+
+2004-05-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShChannel.hpp: Actually make ShChannel inherit from
+	ShMetaForwarder. Sigh.
+
+	* src/ShProgram.hpp (class ShProgramNode): Use ShMeta.
+
+	* src/ShChannel.hpp (class ShChannel): Use ShMetaForwarder.
+
+	* src/ShVariable.hpp (class ShVariable): Use ShMetaForwarder.
+
+	* src/ShVariableNode.hpp (class ShVariableNode): Use ShMeta.
+
+	* src/ShBaseTexture.cpp (ShBaseTexture): Implement.
+
+	* src/ShBaseTexture.hpp: Add ShBaseTexture class.
+
+	* src/ShMeta.hpp, src/ShMeta.cpp, src/ShMetaForwarder.hpp,
+	src/ShMetaForwarder.cpp: Added ShMeta and ShMetaForwarder
+	classes. Resolves issue17.
+
+2004-05-27  Bryan Chan <b8chan@uwaterloo.ca>
+
+	* src/ShManipulator.hpp, test/manip.sht (shInsert): Added shInsert
+	manipulator and added a corresponding test shader.
+	  
+2004-05-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShInstructions.cpp (CWISE_BINARY_OP): Allocate correct size
+	for the destinations. This fixes a bug where left-hand-side scalar
+	operations would produce incorrect values in uniform
+	computations. Thanks to Gabriel Moreno for reporting this bug.
+
+2004-05-21  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShError.hpp: Rename ShError to shError. Fix this in all
+	invocations. Resolves issue9.
+
+	* src/ShInit.cpp: Remove.
+
+	* src/ShSyntax.cpp (shInit): Moved definition here from ShInit.cpp.
+
+	* src/ShSyntax.hpp: Renamed ShInit as shInit and moved declaration
+	here. Fixes issue105.
+
+	* src/ShRefCount.hpp (class ShPointer): Rename ShRefCount to
+	ShPointer. Also change all references to this. Resolves issue15.
+
+	* src/ShSyntax.hpp, src/ShSyntax.cpp: Add shBind, shCompile and
+	deprecate old functions with "Shader" in the names. Fixes issue1.
+
+	* Get rid of explicit instantiation. Fixes issue103.
+
+2004-05-20  Bryan Chan <b8chan@uwaterloo.ca>
+  * sh/ShLibMisc.hpp:
+  Added join library function from ref manual.
+
+  * sh/ShNibbles.hpp:
+  Added named input params from ref manual (only for binary ops).
+
+  * util/ShWorley*: 
+  Rewrote all the worley functions.  Modularized properly into
+  generator and property factories (although it's still not
+  flexible enough to handle non-linear combinations). 
+
+  * util/ShNoise.hpp:
+  Added a constant to the class to prevent recalculation
+  of the noise texture width inverse.
+
+2004-04-20  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* util/ShKernelLib.cpp (inputPass): Implemented inputPass().
+
+	* util/ShKernelLib.hpp: Added inputPass().
+
+2004-04-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShAlgebra.cpp (connect): Recover properly on error.
+
+2004-04-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShInstructions.hpp: shFMOD() should take two parameters.
+
+	* backends/gl/GlTextures.cpp (shGlInternalFormat): With new ATI
+	drivers, floating-point textures now work on ATI. Hurrah!
+
+	* backends/gl/PBufferStreams.cpp: Do PBuffer timings.
+	Restore GLX state properly.
+	(setupContext): Only setup a new context if required. This can
+	still be improved.
+
+2004-04-13  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShChannelImpl.hpp (ShChannel): Use semantic_type instead of
+	special_type.
+
+	* src/scripts/semantic.py (Class.declare_sized): Don't include
+	doxygen comments for specializations.
+
+	* src/ShBaseTexture.hpp: There's no need for ShBaseTexture*<T> to
+	be refcountable.
+
+2004-04-12  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* Once more, a gigantic patch. ShLib has been split up into
+	multiple files, and ShInstructions.{c,h}pp have been added,
+	providing "intrinsics" for every intermediate language
+	operation. All ShLib functions use these intrinsics. Doxygen
+	comments have been fixed up in many places. Compile time has been
+	improved. Everything is wonderful. Hurrah!
+
+	* src/scripts/ShAttribImpl.hpp.py (Impl.assign): Use ShGeneric's
+	implementations of these functions instead of providing our own.
+	No longer include ShLib.hpp.
+
+	* src/ShGeneric.hpp (class ShGeneric): Specialize for N = 1.
+	(class ShGeneric): Add scalar op*= and op/=.
+
+	* src/scripts/ShAttribImpl.hpp.py (Impl.copycons): Use
+	SH_DEBUG_ASSERT() instead of assert().
+
+2004-04-12  Jack Wang  <jmwang@uwaterloo.ca>
+
+	* src/ShImage.?pp: Added getNormalMap() to generate a normal map by 
+	treating the image as a height field.
+
+2004-04-08  Jack Wang  <jmwang@uwaterloo.ca>
+
+	* src/ShQuaternionImpl.hpp: Improved code in getMatrix().
+
+2004-04-07  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* Too many to enumerate: Wow. Big change. Several source files are
+	now generated by python. In particular, ShAttrib and all the other
+	semantic types are generated. See src/scripts/.
+	Also, explicitly instantiate ShAttrib, ShVector, etc.
+	Also, rename ShVariableN to ShGeneric and explicitly instantiate
+	it.
+	Also, remove ShConstant and add ShConstAttrib, etc. instead.
+	This is one of a few large changes we had planned before the beta
+	happens. Note that right now ShAttrib.cpp takes far too long to
+	compile, but I'm working on that. Also going to be explicitly
+	instantiating the bulk of ShLib soon, and probably generate
+	ShLibPoint.hpp etc.
+
+	* util/ShWorley.hpp: Fix comment.
+
+2004-04-07  Jack Wang  <jmwang@uwaterloo.ca>
+
+	* src/ShImage.cpp: Fixed byte ordering bug in loadPng().
+
+2004-04-06  Jack Wang  <jmwang@uwaterloo.ca>
+
+	* src/ShImage.hpp, src/ShImage.cpp: Added writePng16(), which writes
+	16 bit png images.
+
+2004-04-05  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShVariable.hpp (operator): Fix a small bug.
+
+	* src/ShVariable.cpp (setValues): Lock the node before we call all
+	the setValue functions.
+
+	* src/ShVariableNode.hpp: Added m_locked member function.
+
+	* src/ShVariableNode.cpp (lock): Added this function.
+	(unlock): Added this function.
+	(setValue): Respect locking, and call code()->updateUniform()
+	directly. Hopefully this will improve immediate computation efficiency.
+
+	* src/ShClamping.hpp: Remove now unnecessary dimension-specific trait
+	wrappers.
+
+	* src/ShWrap.hpp: Remove now unnecessary dimension-specific trait
+	wrappers.
+
+	* src/ShTexture.hpp: Add default constructors. Remove Mike's
+	default sizes.
+
+	* src/ShTable.hpp: Add default constructors.
+
+	* src/ShArray.hpp: Add default constructors.
+
+	* src/ShBaseTexture.hpp: Add constructors that don't take a size.
+
+2004-04-05  Jack Wang  <jmwang@uwaterloo.ca>
+
+	* src/ShQuaternion.hpp: Added structured comments.
+
+2004-04-04  Michael McCool  <mmccool@uwaterloo.ca>
+
+        * src/ShTexture.hpp: added default sizes in constructors
+	* src/ShWrap.hpp: Hack to add trait wrappers for 1D, 2D, 3D.
+	* src/ShClamping.hpp: Ditto.
+
+	Lack of default constructors was making it hard to allocate
+	arrays of textures.   Adding default sizes worked, but then
+	also had to add default sizes to trait wrappers.   But then,
+	needed different trait wrappers for each number of dimensions...
+	ARRRGGH!
+
+	I have concluded that although this works, this is NOT how we
+	should do this.   I have commited this code for now but I think
+	we should do something else, like make the size a template
+	argument (with 0 indicating a "resizable" texture, with no
+	memory initially allocated).   Then we can rip out the 1D,
+	2D, 3D trait wrappers.  To discuss; maybe there is another way.
+
+	Also added some structured comments in MANY places.   Many
+	classes did't even show up under doxygen since not even the
+	most minimal commenting had been done.   Also added license
+	header to many files (although I think I missed some).  Noted
+	a few issues here and there with "TODO".   Anyways, doxygen
+	now generates much more complete documentation.
+
+2004-04-01  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShVariableNode.hpp: Added size() member function to change
+	size of variables. Don't use this if you're not sure what you're doing.
+
+	* src/ShNibbles.hpp: Added dup nibble.
+
+2004-03-30  Kevin Moule <krmoule@cgl.uwaterloo.ca>
+
+	* backends/cpu/CPU.cpp: removed extra ")" present in OP_MAD
+
+2004-03-30  Kevin Moule <krmoule@cgl.uwaterloo.ca>
+
+	* backends/cpu/CPU.cpp: changed '<' to '>' in OP_COND
+
+2004-03-30  Kevin Moule <krmoule@cgl.uwaterloo.ca>
+
+	* backends/cpu/CPU.cpp: added sqrt to OP_NORM, implemented
+	OP_TEX and OP_TEXI for a subset of texture types (more to follow)
+
+2004-03-29  Gabriel Moreno-Fortuny  <gmoreno@fezzik.cgl.uwaterloo.ca>
+
+	* backends/cpu/CPU.cpp (encode): Return from last block, thus not
+	looping infinitely.
+
+2004-03-25  Bryan Chan <b8chan@uwaterloo.ca>
+	* util/ShKernel*:
+	Rewrote the generalized vsh.
+	Added other kernels into sepearte categories:
+	Surface, Light, Postprocessing.
+
+	* src/ShAlgebra.cpp:
+	Added some operations on named ShPrograms
+	Changed named connect/combine to automatically duplicate
+	values to inputs that have matching name/type.
+	Added namedAlign function (namedAlign(a, b) automatically swizzles
+	position of a's outputs to match inputs of b by matching names)
+	
+2004-03-24  Jack Wang <jmwang@uwaterloo.ca>
+	
+	* src/ShQuaternionImpl.hpp: Bug fix in normalize().
+
+2004-03-22  Kevin Moule <krmoule@cgl.uwaterloo.ca>
+
+	* backends/cpu/CPU.cpp: Fixed scalar case for boolean operations,
+	implemented OP_KIL
+
+2004-03-22  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/arb: Remove these old files.
+
+	* backends/gl/ArbCode.cpp (genNode): Use src[0] instead of dest
+	from SH_OP_KIL to determine whether to kill the fragment.
+
+	* src/ShStatement.hpp: Change comment for SH_OP_KIL to use src[0]
+	instead of dst.
+
+2004-03-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/PBufferStreams.cpp (execute): Use different
+	ReadPixels() format depending on the output channel pitch.
+
+	* Makefile.am: Don't make documentation if doxygen wasn't found or
+	they have been disabled.
+
+	* config/doxygen.m4: Add check for doxygen.
+
+	* configure.ac: Add --enable-docs/--disable-docs
+
+	* src/ShBaseTexture.hpp: Cube map textures shouldn't have
+	operator[].
+
+2004-03-18  Jack Wang <jmwang@uwaterloo.ca>
+	
+	* src/ShTransformer.cpp: Bug fix by Stefanus.
+
+2004-03-17  Bryan Chan <b8chan@uwaterloo.ca>
+	
+	* src/ShWrap.hpp, src/ShTextureNode.hpp, backends/gl/GlTextureName.cpp:
+	  Added GL_CLAMP_TO_EDGE wrap mode for textures.
+
+	* backends/gl/ArbCode.cpp (genDiv, genNode):
+	  Added codegen for normalize n-tuples for n != 3.
+
+	* util/ShObjMesh*:
+	  Removed some of the mesh processing at load time
+	  (vertex consolidation, edge matching, 
+	   normalization of normals) since they're not
+	  needed in most cases.
+	
+2004-03-16  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* configure.ac: Report backends. Add ATI backend.
+
+	* src/*, util/*, backends/gl/*: Make libsh compile without
+	warnings with -Wall. Nothing serious here.
+
+	* src/ShBaseTextureImpl.hpp (size): Fix my embarrassing bugs.
+
+2004-03-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShTextureNode.hpp: Add setTexSize().
+
+	* src/ShBaseTextureImpl.hpp: Call ShTextureNode::setTexSize().
+
+	* backends/gl/UberTextures.cpp (glToShCubeDir): Fix -Wall warning.
+
+	* backends/gl/GlTextures.cpp (glToShCubeDir): Fix -Wall warning.
+
+	* src/ShTransformer.cpp (convertTextureLookups): Add this function
+	to convert texture lookups to appropriate metrics. operator() and
+	operator[] do The Right Thing on textures now.
+
+	* src/ShTextureNode.hpp: Include a uniform to keep track of the
+	texture's size.
+
+	* src/ShBaseTexture.hpp, src/ShBaseTextureImpl.hpp: Include a size
+	variable and size-setting functions.
+
+	* backends/gl/ArbCode.cpp (generate): Set ShEnvironment::shader to
+	0 after generating the code.
+
+	* backends/cpu/CPU.cpp (encode): Include math.h in generated code. 
+
+	* src/ShVariableNode.cpp (name): Output names for InOut variables.
+
+2004-03-15  Kevin Moule <krmoule@cgl.uwaterloo.ca>
+
+	* configure.ac: Added cpu backend to AC_CONFIG_FILES
+
+	* backends/Makefile.am: Added cpu backend to SUBDIRS
+		
+	* backends/cpu/.cvsignore, backends/cpu/CPU.cpp, backends/cpu/CPU.hpp,
+	backends/cpu/Makefile.am: Initial implementation of cpu backend
+	
+2004-03-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShProgram.cpp: Collect channels in collectVar().
+
+	* src/ShProgram.hpp: Add a list of channels to ShProgramNode.
+
+	* src/ShVariableNode.cpp (ShVariableNode): Channels are not uniform.
+
+2004-03-11  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShNibblesImpl.hpp: Call ShProgramNode::name() for all the
+	generated nibbles.
+
+	* src/ShProgram.hpp: Added name() functions for programs.
+
+2004-03-10  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShClamping.hpp: Added clamping modifiers.
+
+2004-03-10  Tiberiu Stefan Popa  <stpopa@pentane.math.uwaterloo.ca>
+
+	* src/ShStream.cpp (combine): Actually return the stream that we
+	create.
+
+2004-03-04  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShMemory.hpp (ShStorage): Add a default constructor that
+	sets the timestamp to -1.
+
+	* src/ShStream.hpp: Added an operator=() to run Backend::execute().
+
+	* src/ShChannel.hpp: Added an operator=() to run Backend::execute().
+
+	* backends/gl/*: Use the new context mechanism in various places.
+
+	* backends/gl/GlBackend.hpp: Added a context mechanism to inform
+	the GL backend about context changes.
+
+	* src/ShMemory.cpp (sync): Check "local_cost < 0" instead of
+	"cost < 0". This fixes a bug that caused storages not to be synced
+	in certain circumstances.
+
+	* backends/gl/PBufferStreams.cpp (execute): Update for new TextureTraits class.
+
+	* backends/gl/GlTextures.cpp (shGlInternalFormat): Support
+	unclamped floating-point textures.
+
+	* backends/gl/GlTextureName.cpp (params): Update for new TextureTraits class.
+
+	* src/ShOptimizer.cpp: Don't mark FETCH statements as dead.
+
+	* src/ShNibblesImpl.hpp (access): Update for new TextureTraits class.
+
+	* src/ShNibbles.hpp (access): Update for new TextureTraits class.
+
+	* src/ShTexture.hpp: Update for new TextureTraits class.
+
+	* src/ShArray.hpp: Update for new TextureTraits class.
+
+	* src/ShTable.hpp: Update for new TextureTraits class.
+
+	* src/ShBaseTextureImpl.hpp: Update for new TextureTraits class.
+
+	* src/ShBaseTexture.hpp: Update for new TextureTraits class.
+
+	* src/ShWrap.hpp: Update for new TextureTraits class.
+
+	* src/ShTextureNode.hpp: Added TextureTraits class and made use of it.
+
+	* test/stream_inverse.cpp: Add this test case.
+
+	* src/ShImage.cpp (savePng): Make this work for non-4-element
+	images, and remove debug statements.
+
+2004-03-04  Jack Wang  <jmwang@uwaterloo.ca>
+
+	* src/ShQuaternion.hpp, src/ShQuaternionImpl.hpp:
+	Added multiplication with ShVector and ShNormal for convenience.
+
+2004-03-02  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbBackend.cpp: Use PBufferStreams.
+
+	* backends/gl/PBufferStreams.cpp: Added pbuffer streams.
+
+	* backends/gl/UberTextures.cpp: StorageFinder checks that pitch ==
+	size instead of pitch == dims.
+
+2004-03-02  Tiberiu Stefan Popa  <stpopa@pentane.math.uwaterloo.ca>
+
+	* backends/gl/UberTextures.cpp (bindTexture): Use node->size()
+	instead of node->dims().
+
+	* backends/gl/GlBackend.hpp (SH_GL_CHECK_ERROR): Add file and line
+	info 
+
+	* backends/gl/UberStorage.cpp (transfer): Return true on HostUber
+	transfers
+
+2004-03-01  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/*: Fixed up ATI uberbuffer backend.
+
+2004-02-28  Bryan Chan <b8chan@uwaterloo.ca>
+	* util/*Mesh*:
+	First cleanup pass.  Still not satisfied with 
+	some of the kludginess, but won't waste more time 
+	messing with this now.
+	
+2004-02-27  Bryan Chan <b8chan@uwaterloo.ca>
+	* backends/gl/Makefile.am:
+	Stefanus' fix for linking problems.
+
+	* util/*Mesh*:
+	Added triangulation.
+	
+2004-02-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/*: Started GL backend abstraction, for future
+	ARB-like backends on OpenGL.
+
+	* src/ShChannelNode.cpp: ditto.
+
+	* src/ShChannelNode.hpp: ditto.
+
+	* src/ShChannelImpl.hpp: ditto.
+
+	* src/ShChannel.hpp: Adopt stream code to new memory abstractions.
+
+2004-02-27  Jack Wang  <jmwang@uwaterloo.ca>
+
+	* src/ShQuaternion.hpp, src/ShQuaternionImpl.hpp:
+	Added constructor taking a rotation matrix.
+
+2004-02-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShVariable.cpp (setValues): Set m_neg to false, since we're
+	setting signed values.
+
+2004-02-26  Bryan Chan <b8chan@uwaterloo.ca>
+	* util/ShMesh*, util/ShObjMesh*:
+	Added half-edge mesh structure and cleaned up OBJ file reader a bit
+	(still work in progress, interface will probably change)
+
+	* src/ShAlgebra.cpp (namedConnect):
+	Properly handle case where there are extra inputs & extra outputs.
+
+	* util/ShKernelLibImpl.hpp (shVsh):
+	Updated since outputs can be used as temps
+
+	* src/ShVariable.cpp (operator<<):
+	Fixed output of variables with m_neg set.
+	
+2004-02-23  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* util/ShKernelLibImpl.hpp: Clamp specular components in
+	Specular() and Phong().
+
+2004-02-20  Bryan Chan <b8chan@uwaterloo.ca>
+	* util/ShWorley:
+	Added point generator class functionality (now it animates!)
+	
+2004-02-19  Bryan Chan <b8chan@uwaterloo.ca>
+	* util/ShUtil.hpp, util/ShUtilImpl.hpp 
+	(evenOddSort, groupEvenOddSort):
+	Even odd sort on tuple components.
+
+	* util/ShNoise.hpp, util/ShNoiseImpl.hpp:
+	Added cellnoise function here that reuses noise texture
+	originally intended for Perlin noise.
+
+	* util/ShWorley.hpp, util/ShWorleyImpl.hpp:
+	Templatized & cleaned up worley to use cellnoise 
+	& sorting functions.
+
+	* src/ShNibbles.hpp:
+	Allow binary operators to take operands of different sizes
+
+	* util/ShKernelLib.hpp (shVshTangentSpace):
+	Allow either passing in secondary tangent or generating
+	it from normal x tangent.
+	
+2004-02-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShVariableNode.cpp (hasName): Implemented hasName().
+
+	* src/ShVariableNode.hpp: Added hasName() to ShVariableNode.
+
+	* src/ShUtility.hpp: Added the SelectType utility template.
+
+	* src/ShLib.hpp (cond): Fix conditional assignment check.
+
+	* src/ShSyntax.hpp (SH_DECL): Make use of ShIgnore to avoid
+	warnings with -Wall.
+
+	* src/ShUtility.hpp (ShCompileTimeChecker): Remove unnecessary
+	private declarations.
+
+	* src/ShMatrixImpl.hpp: Implemented ShMatrix metadata functions.
+
+	* src/ShMatrix.hpp: Added metadata functions to ShMatrix.
+
+	* src/ShVariableNode.cpp (internal): Implemented these.
+
+	* src/ShVariableNode.hpp: Added "internal" metadata to variable
+	nodes.
+
+	* src/ShVariable.cpp (internal): Implemented internal functions.
+
+	* src/ShVariable.hpp: Added "internal" metadata value to
+	variables.
+
+2004-02-18  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShConstantImpl.hpp: Ditto.
+
+	* src/ShMatrixImpl.hpp: Ditto.
+
+	* src/ShSpecialType.hpp: Make use of SH_STATIC_CHECK instead of
+	ShIntEqual.
+
+	* src/ShAttrib.hpp: Make use of SH_STATIC_CHECK instead of
+	ShIntEqual.
+
+	* src/ShLib.hpp: Make use of SH_STATIC_CHECK where we previously
+	used ShCheckDims or similar.
+
+	* src/ShUtility.hpp (ShCompileTimeChecker): Added this utility struct.
+	(SH_STATIC_CHECK): Add this macro to check a static assertion, and
+	if not output a (hopefully somewhat) useful diagnostic (at compile
+	time).
+
+2004-02-17  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShVariable.hpp: Added range metadata wrappers to ShVariable.
+
+	* src/ShVariableNode.cpp (setValue): Only notify bound shaders if
+	this is actually a uniform (and not, e.g. a constant).
+	(range): Added range metadata to ShVariableNodes.
+
+2004 02-17  Bryan Chan <b8chan@uwaterloo.ca>
+	* src/ShTransformer.cpp (InputOutputConvertor):
+	I am not fit to program. period. (fixed not knowing how to use references bug)
+	
+2004-02-17  Jack Wang  <jmwang@uwaterloo.ca>
+	* src/ShQuaternionImpl.hpp, src/ShQuaternion.hpp:
+	Added slerp (spherical linear interpolation) for ShQuaternion.
+
+2004-02-16  Bryan Chan <b8chan@uwaterloo.ca>
+	* src/ShAlgebra.hpp (operator>>):
+	Removed the default templated >> operator that automatically defines
+	>> whenever << is defined with one arg as ShProgram.
+
+	* src/ShTransformer.cpp (convertInputOutput):
+	Fixed mishandling of SH_INOUTs.
+	
+2004-02-15  Bryan Chan <b8chan@uwaterloo.ca>
+	* src/ShAlgebra.cpp (connect,combine):
+	Small cleanups to use STL list ops for copying inputs/outputs
+	Factored out cloneProgram(ShProgram) to ShInternals.hpp
+
+	* src/ShTransformer.?pp, src/ShBackend.?pp, src/ShProgram.cpp,
+	  backends/arb/ShArb.?pp, backends/sm/ShSmBackend.?pp
+	Cleaned up ShTransformer work.
+	Added split input/output/inout and uniform transformations.
+
+	* backends/ShArb.cpp (updateUniform): added split uniform support
+	
+	* src/ShOptimizer.cpp (solveReachDefs):
+	Fixed bug (not clearing m_defNodes)
+	
+2004-02-13  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* Added the new memory management/texture management code. Too
+	many changes to list. Should have kept changelogs while going
+	along, but alas.
+
+2004-02-13  Bryan Chan <b8chan@uwaterloo.ca>
+	The last stand of the _VAR_
+
+	* src/, util/, backend/: Changed all SH_VAR_* to SH_*
+
+	* src/ShVariableNode.?pp, ShAlgebra.cpp, ShAttrib*,
+	ShSpecialType*, ShMatrix.hpp, ShTransformer.cpp:
+	Changed following SH_INOUT variables 
+	  - typedefs
+	  - addition to ShProgram varlists
+	  - algebra connect/combine
+	  - transformation for incompatible backends
+	  - nibbles to use InOut types)
+
+	* src/ShCtrlGraph.cpp: Fixed empty ShProgram problems
+	(if parser gives null head/tail, CtrlGraph connects m_entry to m_exit)
+
+	* src/ShTransformer.cpp: Added long constant tuple splitting
+
+	* src/ShLib.hpp: Changed copycast to fillcast
+	
+2004-02-12  Bryan Chan <b8chan@uwaterloo.ca>
+	* src/ShTransformer.?pp:
+	Moved backend-specific transformations to the IR here.
+	Added basic long tuple support for temporaries.
+	
+2004-02-12  Jack Wang  <jmwang@uwaterloo.ca>
+	* backends/arb/ShArb.cpp, backends/arb/ShArb.hpp, src/ShLib.hpp:
+	Implemented ASIN, ACOS and put all the trig code generation stuff into
+	one function.
+
+2004-02-10  Jack Wang  <jmwang@uwaterloo.ca>
+	* backends/arb/ShArb.cpp:
+	Implemented cosine and sine on the vertex shaders.
+
+2004-02-04  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShAttribImpl.hpp, src/ShConstantImpl.hpp, src/ShSpecialType:
+	Make type constructors check their size at compile time.
+
+2004-02-02  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/arb/ShArbStream.cpp: Figure out which floating point
+	pbuffers extension (ATI or NV) to use automatically.
+	Add proper error reporting.
+
+	* src/ShQuaternion.hpp, src/ShQuaternionImpl.hpp: Indented these
+	to match the rest of Sh.
+
+2004-02-01  Jack Wang  <jmwang@uwaterloo.ca>
+	* src/ShQuaternion.?pp, src/ShQuaternionImpl.hpp:
+	Made ShQuaternion a templated class, and hence renamed the cpp file to
+	ShQuaternionImpl.hpp.
+	
+2004-02-01  Jack Wang  <jmwang@uwaterloo.ca>
+	* src/ShQuaternion.?pp:
+	Added ShQuaternion class with basically the same interface as the one
+	in libdemo, but all methods here can be run on shaders.
+
+2004-01-31  Bryan Chan  <b8chan@uwaterloo.ca>
+	* util/ShPerlinImpl.hpp: Fixed discontinuity problems.
+	  (TODO Sh should print a warning if a temporary is used before 
+	   initialization...should be easy to determine after making ud-chains)
+	
+2004-01-30  Bryan Chan  <b8chan@uwaterloo.ca>
+	* util/ShWorley.cpp (EvenOddSort): Made some changes to allow
+	  more efficient dead code removal when either distances or gradients
+	  are discarded
+
+	* util/ShPerlin.hpp, util/ShPerlinImpl.hpp: Fixed the templatized
+	  versions with proper casting code (but still non-working)
+
+	* src/ShAlgebra.?pp (namedConnect, namedCombine):
+	  Added connect & combine by name operations. (may be flaky)
+
+	* util/ShKernelLib.hpp (shPhong,shTangentVsh): Cleaned up
+	  with the new named combine/connect operators.
+
+  * src/ShNibbles.hpp, ShNibblesImpl.hpp: Added name arguments 
+    to give nibble inputs/outputs names (easier named connect/combine)
+
+2004-01-30  Jack Wang  <jmwang@uwaterloo.ca>
+	* src/ShNormal.hpp: Added m_isunit flag to ShNormal to identify 
+	unit normals, similar to ShVector.hpp.
+
+	* src/ShLibNormal.hpp: Modified normalize and abs to update the
+	m_isunit flag.
+	
+2004-01-29  Jack Wang  <jmwang@uwaterloo.ca>
+	* src/ShVector.hpp: Added a m_isunit flag to ShVector, this 
+	required changing a number of functions so they can no longer
+	be specified by the macros.
+
+	* src/ShLib.hpp: SH_SHLIB_USUAL_OPERATIONS_RETTYPE was broken
+	down to normalize, abs, and everything else.  
+
+	* src/ShLibVector.hpp: Modified normalize and abs to update
+	the new ShVector m_isunit flag as necessary.
+
+	* src/ShSpecialType.hpp: SH_SPECIAL_TYPE_PARENT was broken down
+	to OPEN, CONSTRUCTORS, NON_CONST_METHODS, CONST_METHODS, MEMBERS,
+	and CLOSE to allow more flexibility.	
+	
+2004-01-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShRefCount.hpp (ShRefCountable): Actually, the
+	ShRefCountable operator=() should not do anything. Realised this
+	on the way home. Hence also removed the warning comment at the
+	top, since luckily this will actually be the behaviour if a
+	derived class provides a operator=() but does not call ours!
+
+	* test/ref.sht: Added this simple test to fix bugs in reference
+	counting.
+
+	* src/ShSyntax.cpp (shEndShader): Set ShEnvironment::shader to a
+	null pointer when we're done with it, possibly freeing up memory
+	earlier.
+
+	* backends/arb/ShArbStream.cpp (execute): More verbose error
+	message when input arity does not match output arity.
+
+	* backends/arb/ShArbTexture.cpp (loadDataTexture): Delete the
+	new'd array that ShMemoryObject gave to us from the data()
+	call. ShMemoryObject will be replaced soon, don't worry...
+
+	* src/ShMemoryObject.cpp (ShDataMemoryObject): How about we
+	actually delete the data that we allocate with new? Eh, Bryan?
+
+	* src/ShRefCount.hpp (class ShRefCountable): Have fun recompiling!
+	Add an operator=() and copy constructor to ShRefCountable, which
+	set the refcount to zero, as it should be. Also added a warning at
+	the top to those wishing to implement their own operator=() to
+	derived classes.
+	Added lots of optional debugging output. This helped me find the
+	previous bug.
+
+	* src/ShOptimizer.cpp (buildUdDuChains): Clear ud/du chains before
+	we build them, in case there is some cruft in there.
+
+2004-01-26  Bryan Chan  <b8chan@uwaterloo.ca>
+	* src/ShNibbles.hpp, src/ShNibblesImpl.hpp: 
+	Added some useful nibbles.
+
+	* src/ShAttrib.hpp, src/ShSpecialType.hpp:
+	Added typedefs for InputType, OutputType, and TempType for Attribs
+	and special types
+	
+2004-01-21  Bryan Chan  <b8chan@uwaterloo.
+	* src/ShRefCount.hpp: fixed count in operator=
+	(was releasing ref before acquiring ref, so if the old object
+	had the only pointer to the new object, the new object would be
+	deleted before assignment)
+
+	* src/ShOptimizer.cpp: small fixes to the Input/Output convertor
+2004-01-21  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	The 2601-line patch of doom!
+	
+	* src/ShTextureNode.hpp (ShTextureDims): Add SH_TEXTURE_RECT enum
+	value.
+
+	* src/ShTexture.hpp (ShTextureRect): Add ShTextureRect.
+
+	* src/ShSyntax.cpp (shEndShader): Only attempt to immediately
+	compile vertex and fragment programs.
+
+	* src/ShStream.hpp (ShStream): Add non-const begin() and end().
+
+	* src/ShInternals.cpp (repVar): Remove... you guessed it, annoying
+	debug output.
+
+	* src/ShAlgebra.cpp (connect): Remove annoying debug output.
+	(connect): Remove annoying debug output.
+	(replaceUniform): Remove annoying debug output.
+
+	* src/ShLib*.hpp: Add double conversion operators for constant
+	types. Tremendously improve the special type macros to actually
+	set up constant-overloaded library functions, etc.
+
+	* src/ShAttrib.hpp, src/ShVariable.hpp, ...: Change ShFoo1f to
+	actually be a float type, instead of a double.
+
+	* backends/arb/ShArbStream.cpp (execute): Arb stream execution
+	works now! At least on nvidia... Hooray! Aka the "Stefanus is
+	allowed to sleep again" change. This was a lot more work than this
+	puny little ChangeLog entry might suggest.
+
+	* backends/arb/ShArbTexture.cpp, backends/arbShArbReg.cpp: Split
+	these out of ShArb.cpp to make it a little more manageable.
+
+	* backends/arb/ShArb.hpp: Added some classes from ShArb.cpp to
+	facilitate splitting ShArb.cpp into more manageable chunks.
+
+2004-01-20  Bryan Chan  <b8chan@uwaterloo.ca>
+	* src/ShInternals.?pp: Moved ShVariableReplacer here from ShAlgebra
+
+	* src/ShOptimizer.hpp, src/ShOptimizer.cpp, src/ShCtrlGraph.?pp: 
+	Added conversion of input and output vars to temps when used 
+	in computation.
+	
+	* util/ShPerlin.hpp, util/ShPerlinImpl.hpp: Templatized and cleaned up 
+	the old Perlin code
+
+	* util/ShKernelLib.?pp: moved nibbles outside of ShKernelLib to make
+	them easier to use.
+	
+	* src/ShLib.hpp: Added pos, | for dot product on ShVariableN.
+
+	* src/ShTexture.?pp: changed access operator() methods to const
+
+	* src/ShAttrib.hpp, src/ShSpecialType.hpp: added default ValueType
+		
+2004-01-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/arb/ShArbStream.cpp (execute): Generates fragment
+	programs now. All that's left to do is wrestling with pbuffers to
+	actually get the "geometry" rendered and read back. Hooray.
+
+	* backends/arb/ShArb.cpp (printSamplingInstruction): Don't output
+	a newline.
+	(print): When using printSamplingInstruction, use our own line
+	numberer to end the line. This will actually add line numbers to
+	TEX instructions being output.
+
+	* src/sh.hpp: Added ShChannelNode.hpp, ShChannel.hpp to the list
+	of included files.
+
+	* src/ShMemoryObject.cpp (ShDataMemoryObject::setPartialData):
+	Implemented this function.
+
+	* src/ShMemoryObject.hpp (ShDataMemoryObject): Added the
+	setPartialData() function, used by ArbBackend::execute().
+
+	* backends/sm/ShSmBackend.cpp (execute): Added an empty
+	ShSmBackend::execute() imeplementation.
+
+	* backends/arb/ShArbStream.cpp: Beginnings of an
+	ArbBackend::execute() implementation.
+
+	* backends/arb/ShArb.hpp (ArbBackend): Added ArbBackend::execute()
+	prototype.
+
+	* src/ShBackend.hpp (ShBackend): Added the execute() virtual
+	function for stream programs.
+
+	* src/ShCtrlGraph.hpp: Added constant versions of the dfs()
+	algorithms.
+
+	* src/Sh{Stream,Channel,ChannelNode}{,Impl}.{c,h}pp: Renamed
+	streams to channels, stream lists to streams, removed
+	ShCombinedStream, added operators to connect the new dynamic
+	streams to ShPrograms, following Mike's new naming suggestions.
+
+2004-01-18  Bryan Chan  <b8chan@cgl.uwaterloo.ca>
+	* util/ShWorley.cpp: Added good worley bump-mapping
+	
+	* backends/ati/ShArb.?pp, backends/sm/ShSmBackend.?pp:
+	Changed boolean <,<=,>,>=,==,!= operators to accept vec/vec
+	and scalar/vec arguments in addition to original vec/scalar.
+
+	* src/ShFixedManipulator.??: Rewrote these from scratch.
+	  Added shDup.
+	
+2004-01-17  Bryan Chan  <b8chan@cgl.uwaterloo.ca>
+	* src/ShFixedManipulator.??: Added shKeep, shLose
+	manipulators that support combine with ShProgram and 
+	other ShFixedManipulators.
+
+	* src/ShManipulator.?pp, src/ShManipulatorImpl.hpp:
+	Reworked all manipulators to take string parameters as well.           
+
+	* src/ShSyntax.hpp, src/ShAlgebra.hpp, util/ShKernelLib.?pp: 
+	Added macros to declare vars with names, and updated util 
+	nibbles/kernels with names.
+
+	* src/ShManipulatorImpl.hpp: Removed default 0 value for
+	extra inputs when connecting an input manipulator
+	(Reverts to old behaviour of passing through the channel)
+
+	* src/ShAlgebra.hpp: added >> operator for replaceUniform
+	* src/ShAlgebra.cpp: changed connect to handle outputs > inputs
+	* src/ShLib.hpp: added pow(x, exp) function
+	* src/ShProgram.?pp, src/ShVariableNode.?pp: added methods
+	to print variables/variable lists for displaying algebra errors
+	
+2004-01-15.5  Bryan Chan  <b8chan@enora.cgl.uwaterloo.ca>
+	* src/Makefile.am: Added missing headers
+
+	* src/ShManipulator.?pp: Added input manipulation
+	  (unsed input channels are given default value of 0)
+
+	* util/ShKernelLib.hpp, util/ShKernelLibImpl.hpp,
+	  util/ShKernelLib.cpp: Added a few useful kernels and nibbles
+
+	* src/ShAlgebra.cpp: Changed connect/combine(p,q) to use
+	  p's target (instead of "") if p.target == q.target
+	
+2004-01-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* test/stream.cpp: Added initial stream test.
+
+	* src/ShAttrib.hpp (ShAttrib), src/ShSpecialType.hpp
+	(ShSpecialType), ...: Added special_type.
+
+	* src/ShStatement.hpp (ShOperation), src/ShStatement.cpp (opInfo):
+	Added SH_OP_FETCH for streams.
+
+	* src/ShStream.hpp, src/ShStreamImpl.hpp, src/ShStreamNode.hpp,
+	src/ShStreamNode.cpp: Added (the start of) a stream abstraction.
+
+	* test/algebra.sht: Use operator&() instead of operator+() for
+	combine().
+
+	* test/test.footer: Massage the control graph dump filename a bit
+	to avoid libtool ugliness.
+
+	* src/ShCtrlGraph.hpp (ShCtrlGraphNode): Add private real_dfs()
+	template member function.
+	(ShCtrlGraphNode::real_dfs): Renamed dfs() to real_dfs().
+	(ShCtrlGraphNode::dfs): Added new dfs() function that wraps
+	real_dfs() call with clearMarked().
+	(ShCtrlGraph::dfs): Remove now unnecessary clearMarked() calls.
+
+2004-01-14  Bryan Chan  <b8chan@enora.cgl.uwaterloo.ca>
+
+	* src/ShManipulator.cpp (operator<<): Changed SEQ to ASN.
+
+	* backends/arb/ShArb.cpp: Added SEQ operation support
+
+	* src/ShManipulator.?pp: Bug fixes (lots of unmentionable idiocy)
+
+	* src/ShAlgebra.cpp, ShVariableNode.?pp : Better error message 
+	for invalid ShProgram connect (prints output/input types)
+
+2004-01-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShAlgebra.cpp (copyCtrlGraph): Clear head before we do a dfs
+	on it. Also, change the /new/ nodes instead of the old ones in the
+	successor-changing loop. Furthermore, it would be a good idea to
+	copy blocks instead of referring to old ones. Aka the "evidence
+	that Stefanus can't code" patch.
+
+2004-01-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShProgram.hpp, ...: Rename "shader kind" to "shader target",
+	make targets strings instead of ints.
+
+2004-01-12  Bryan Chan  <b8chan@enora.cgl.uwaterloo.ca>
+
+	* src/ShAlgebra.cpp (replaceUniform): Implemented replaceUniform().
+
+	* src/ShAlgebra.hpp: Added replaceUniform prototype.
+
+2003-11-24  Bryan Chan (b8chan@cgl.uwaterloo.ca)
+  
+	* src/ShMemoryObject.hpp, src/ShMemoryObject.cpp, backends/arb/ShArb.cpp:
+	Experimental implementation of memory objects for über buffer support.
+
+	* src/ShTexture.hpp, src/ShTextureImpl.hpp, src/ShTextureNode.hpp,
+	src/ShTextureNode.cpp, util/ShPerlin.hpp, util/ShPerlin.cpp: Added
+	3D Texture support.
+
+2003-11-21  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizer.cpp (MoveEliminator): Don't eliminate moves
+	where the RHS is negated (that's a legitimate move).
+	(CopyPropagator): Assign negations properly in copy propagation.
+
+	* src/ShAlgebra.cpp (copyCtrlGraph): Added a clearMarked() call
+	before we do a DFS on the graph node that's to be copied. This
+	makes Tibi's life much better.
+
+2003-11-17 Kevin Moule (krmoule@cgl.uwaterloo.ca)
+
+	* backends/arb/ShArb.cpp: re-added Backend instance, accidentally
+	removed during WIN32 port
+
+2003-11-16 Bryan Chan (b8chan@cgl.uwaterloo.ca)
+
+	* util/Makefile.am, util/Perlin.cpp, util/Perlin.hpp,
+	util/ShPerlin.cpp, util/ShPerlin.hpp, util/ShUtilLib.hpp,
+	util/ShWorley.cpp, util/ShWorley.hpp, util/Worley.cpp,
+	util/Worley.hpp, util/shutil.hpp: fixed some include bugs in utils
+	renamed utils to match other sh files
+
+2003-11-16  Kevin Moule (krmoule@cgl.uwaterloo.ca)
+
+	* src/ShInit.cpp: ifdef's for WIN32 only code...
+
+	* src/Makefile.am: Added ShInit.cpp
+
+	* backends/arb/ShArb.cpp: ifdef's for wglGetProcAddress
+
+2003-11-14  Bryan Chan (b8chan@cgl.uwaterloo.ca)
+
+	* util/shutil.hpp: more doc fixing
+
+	* util/Makefile.am, util/Perlin.hpp, util/ShUtilLib.hpp,
+	util/shutil.hpp: fixed some doc output bugs
+
+	* doc/Doxyfile, doc/Makefile.am: updated for libshutil
+
+	* config/ltdl.m4: Changed ltdl.m4 back to the version that comes
+	with automake 1.4-p6
+
+	* Makefile.am, configure.ac: Added util directory
+
+	* backends/arb/ShArb.cpp, backends/arb/ShArb.hpp: Stefanus' fix
+	for write masking. Changed dot product to accept scalars.
+
+	* backends/sm/ShSmBackend.cpp: Changed dot to accept scalars
+
+	* src/ShLib.hpp: Made dot product also accept scalars
+
+	* util/Makefile.am, util/Perlin.cpp, util/Perlin.hpp,
+	util/ShUtilLib.hpp, util/Worley.cpp, util/Worley.hpp: Initial
+	checkin of utilities including hash functions, Perlin noise and
+	Worley textures
+
+2003-11-11  Kevin Moule (krmoule@cgl.uwaterloo.ca)
+
+	* win32/.cvsignore, win32/sh.sln, win32/sh.suo, win32/sh.vcproj:
+	WIN32 build files...
+
+	* src/ShMatrix.hpp, src/ShMatrixImpl.hpp: cosmetic changes...
+
+	* src/sh.hpp, src/ShInit.cpp: added ShInit function...
+
+	* backends/arb/ShArb.cpp: sweeping changes for WIN32 build...
+
+2003-11-06  Bryan Chan (b8chan@cgl.uwaterloo.ca)
+
+	* src/ShMatrix.hpp: fixed shadowed template parameter compile
+	warnings in gcc3.3.2
+
+2003-10-31  Bryan Chan (b8chan@cgl.uwaterloo.ca)
+
+	* src/ShLib.hpp: fixed bug introduced by me to fix another bug (for
+	mad dimension checking)
+
+2003-10-31  Kevin Moule (krmoule@cgl.uwaterloo.ca)
+
+	* src/ShOptimizer.hpp: friend classes renamed to struct as per cpp
+	file
+
+	* src/ShOptimizer.cpp: unsigned changes for vector::size()
+
+	* src/ShMatrixImpl.hpp: typo
+
+	* src/ShMatrix.hpp: proper syntax for template friend functions
+
+	* src/ShDomTree.hpp: missing header file for std::find()
+
+	* src/ShBitSet.cpp: operator= missing return values...
+
+	* src/ShAlgebra.cpp: for scoping rules for WIN32...
+
+2003-10-30  Kevin Moule (krmoule@cgl.uwaterloo.ca)
+
+	* backends/arb/ShArb.hpp: ArbInst/ArbReg are structs not classes...
+
+	* src/ShVariableNode.cpp: cleanup for warnings generated under WIN32...
+
+	* src/ShToken.hpp: ShTokenArgument is actually a struct...
+
+	* src/ShSwizzle.cpp: warnings and improper C++ syntax under WIN32...
+
+	* src/ShImage.cpp: binary mode fopen needed for WIN32
+
+	* src/ShBitSet.cpp: cleanup for WIN32 warnings...
+
+	* src/ShBackend.cpp: WIN32 changes for ltdl...
+
+2003-10-24  Bryan Chan (b8chan@cgl.uwaterloo.ca)
+
+	* src/ShAlgebra.cpp: small fix because I can't tell the difference
+	  between != and ==
+
+	* src/ShLib.hpp: Added dimension checks for mad, lerp, fmod
+
+	* src/ShLinearAllocator.cpp: Changed linear allocator to use
+	multiset
+
+2003-10-22  Bryan Chan (b8chan@cgl.uwaterloo.ca)
+
+	* backends/arb/ShArb.cpp, backends/sm/ShSmBackend.cpp, src/ShLib.hpp,
+	src/ShStatement.cpp, src/ShStatement.hpp: Added mad (Multiply & Add)
+	operation
+
+2003-10-17  Gabriel Renaud (g2renaud@cgl.uwaterloo.ca)
+
+	* src/ShAttrib.hpp, src/ShDomTree.cpp, src/ShDomTree.hpp,
+	src/ShMatrix.hpp, src/ShMatrixImpl.hpp, src/ShVariable.cpp,
+	src/ShVariable.hpp: Change ShMatrix.hpp, ShAttrib, and ShVariable,
+	so that we have matrix operations and output on the console
+
+2003-10-16  Bryan Chan (b8chan@cgl.uwaterloo.ca)
+
+	* src/ShLib.hpp, src/ShStatement.cpp, src/ShStatement.hpp: Added
+	floor, ceil, lerp, fmod.
+
+	* backends/sm/ShSmBackend.cpp: Added ceil, floor, fmod, lerp ops
+
+	* backends/arb/ShArb.cpp, backends/arb/ShArb.hpp: Added abs, ceil,
+	floor, fmod, lerp, sle, and sge ops.  Added sin/cos not implemented
+	warnings in vertex programs
+
+2003-10-15  Bryan Chan (b8chan@cgl.uwaterloo.ca)
+
+	* src/ShLinearAllocator.cpp: Fixed allocation for common
+	starters/enders
+
+2003-10-13  Bryan Chan (b8chan@cgl.uwaterloo.ca)
+
+	* src/ShOptimizer.cpp: Backed out changes for error messages
+
+2003-10-08  Bryan Chan (b8chan@cgl.uwaterloo.ca)
+
+	* src/ShError.cpp, src/ShError.hpp: Added improved error handling
+
+2003-10-06  Bryan Chan (b8chan@cgl.uwaterloo.ca)
+
+	* backends/sm/ShSmBackend.cpp, src/Makefile.am, src/ShAlgebra.cpp,
+	src/ShBitSet.cpp, src/ShEnvironment.cpp, src/ShEnvironment.hpp,
+	src/ShException.cpp, src/ShException.hpp, src/ShImage.cpp,
+	src/ShOptimizer.cpp, src/ShParser.cpp, src/ShProgram.cpp,
+	src/ShSwizzle.cpp, src/ShTokenizer.cpp: Added ShError for error
+	handling
+	
+2003-09-02  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* test/*.sht: Update to use new program specification syntax.
+	
+	* src/ShBackend.hpp: Make generateCode() take a program kind.
+
+	* backends/arb/ShArb.hpp: Update backend to take program kind in
+	generateCode().
+
+	* backends/sm/ShSmBackend.hpp: Update backend to take program kind
+	in generateCode().
+
+	* src/ShAlgebra.cpp (connect, combine): Allow generic programs and
+	determine the resulting program kind appropriately.
+
+	* src/ShAlgebra.hpp: Use generic programs in lose and keep.
+
+	* src/ShSyntax.cpp (shCompileShader): Add bodies for
+	shCompileShader.
+
+	* src/ShSyntax.hpp (SH_VERTEX_PROGRAM, SH_FRAGMENT_PROGRAM):
+	Rename to these instead of SH_{VERTEX,FRAGMENT}_SHADER.
+	(SH_BEGIN_VERTEX_PROGRAM, SH_BEGIN_FRAGMENT_PROGRAM): Add these.
+	(SH_BEGIN_PROGRAM): Allow generic programs (without kinds).
+	(shCompileShader): Add these functions.
+
+	* src/ShProgram.hpp, src/ShProgram.cpp: Make shader kinds optional.
+
+2003-08-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShAlgebra.hpp: Added operator<<, operator+, lose and keep.
+
+	* src/ShAlgebra.cpp: Added operator<< and operator+ for programs.
+
+	* src/ShOptimizer.hpp, src/ShOptimizer.cpp: Added straightening.
+	Loop over optimizations until a fixed point is reached.
+
+	* src/ShCtrlGraph.hpp: Added constructor taking a tail and a head,
+	for the ShAlgebra operations.
+
+	* src/sh.hpp: Added ShAlgebra.hpp to included files.
+
+	* src/ShAlgebra.cpp, src/ShAlgebra.hpp: Added combine and connect
+	functions.
+
+2003-08-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShBitSet.hpp, src/ShBitSet.cpp: Added operator== and operator!=.
+
+	* src/ShLib.hpp (kill): Pass in the extra argument to SH_OP_KIL.
+
+	* src/ShStatement.cpp: Make KIL take one (ignored) argument. This
+	is useful for the optimzer. Added OPTBRA instruction info.
+
+	* src/ShStatement.hpp: Data structures for ud/du chains, added
+	OPTBRA instruction for the optimizer. Use src[3] instead of src1,
+	src2, src3 in ShStatement.
+
+	* src/ShOptimizer.cpp, src/ShOptimizer.hpp: Added du/ud-chain
+	construction and dead code elimination. Lots and lots of code.
+
+2003-08-25  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/Makefile.am (CXXFLAGS): Enable optimizations.
+
+	* src/ShStatement.hpp: Add an XPD statement.
+
+	* src/ShVariableNode.cpp (ShVariableNode): Initialize variables
+	with 0 in each element.
+
+	* src/ShMatrixImpl.hpp (ShMatrix): Initialize matrices with
+	identity matrices.
+
+	* src/ShLib.hpp (cross): Add a cross product routine for 3-tuples.
+
+2003-08-22  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizer.cpp (copyValue): Improve efficiency slightly.
+
+	* test/bitset.cpp: Added simple bitset test.
+
+	* src/ShBitSet.cpp, src/ShBitSet.hpp: Added ShBitSet class for the
+	optimizer.
+
+2003-08-20  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShStatement.cpp (operator<<): Print negations.
+
+	* src/ShBasicBlock.hpp (ShBasicBlock::erase): Return the result of
+	the erase operation (i.e. the iterator one past the erased element).
+
+	* src/ShOptimizer.cpp: Improved the iterate-erase loops used in
+	the optimizations.
+
+2003-08-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizer.cpp (struct TempFinder): Mark temporaries used
+	in branches as necessary.
+
+	* src/ShEnvironment.hpp (struct ShEnvironment): Added the
+	optimizationLevel variable indication the level of
+	optimizations. Set this to 1 to turn on optimizations.
+
+	* src/ShSyntax.cpp (shEndShader): Run the optimizer after parsing.
+
+	* src/ShOptimizer.hpp, src/ShOptimizer.cpp: Added (simple) copy
+	propagation, "move elimination" and unused temporary removal.
+
+2003-08-11  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShAttrib.hpp (operator+=, operator-=): Added these operators
+	for Attrib1's to once again avoid having to wrap constants in
+	ShConstant1f()s.
+
+	* src/ShLib.hpp: Added SH_SHLIB_CONST* macros and calls to these
+	to allow scalar constants in operations not have to be wrapped in
+	ShConstant1f(). This should make using the library _far_ more
+	convenient :).
+
+2003-08-08  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShLib.hpp (cond): Allow scalar cond().
+
+	* backends/sm/ShSmBackend.cpp (addBasicBlock): Support scalar COND instructions.
+
+	* backends/arb/ShArb.cpp (genNode): Support scalar COND instructions.
+
+2003-08-07  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* configure.ac, bootstrap, config/*.m4: Split off some useful
+	utility functions into their own M4 files, making the configure.ac
+	slightly less verbose.
+
+	* doc/Makefile.am: Added proper rules to build the documentation
+	and install/upload it as well.

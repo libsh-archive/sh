@@ -1,0 +1,22 @@
+ - make sure all "release-critical" bugs are fixed
+ - edit configure.ac and change the version at the top
+ - make distclean
+ - ./bootstrap
+ - ./configure (with usual arguments)
+ - make dist
+ - untar the newly created .tar.gz somewhere
+ - cd there
+ - ./configure (with previously unused prefix to install in)
+    (e.g. $HOME/sh-dist-$DATE)
+ - make
+ - make install
+ - for smashtest and shdemo:
+   - make distclean ; bootstrap ; ./configure ... --with-sh=$HOME/sh-dist-$DATE
+   - make
+   - run, check that everything works
+   - if appropriate, apply same release procedure
+ - copy to sourceforge
+ - add to file tracker (remember the ChangeLog entries, etc.)
+ - make upload-docs
+ - add news to homepage
+ - e-mail mailing list

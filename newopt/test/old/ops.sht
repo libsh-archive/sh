@@ -1,0 +1,31 @@
+// -*- C++ -*-
+
+ShProgram shader = SH_BEGIN_VERTEX_PROGRAM {
+  ShInputAttrib4f in1; NAME(in1);
+  ShInputAttrib4f in2; NAME(in2);
+  ShOutputAttrib4f out; NAME(out);
+  
+  out = in1 + in2;
+  out = in1 - in2;
+  out = in1 * in2;
+  out = in1 * in2(3);
+  out = in1(0) * in2;
+  out(0) = in1(0) * in2(1);
+  out = in1 / in2;
+  out = in1 / in2(3);
+  out = in1 ^ in2;
+  out = abs(in1);
+  out = acos(in1);
+  out = asin(in1);
+  out = cos(in1);
+  out(0) = dot(in1, in2);
+  out = frac(in1);
+  out = sin(in1);
+  out = sqrt(in1);
+  out = cond(in1(0), in1, in2);
+  out = cond(in1, in1, in2);
+  out = min(in1, in2);
+  out = max(in1, in2);
+  kill(in1);
+  
+} SH_END_PROGRAM;
