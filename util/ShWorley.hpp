@@ -82,7 +82,7 @@ class ShWorley {
     // TODO implement gradients
     // should be real easy, but need to makes odd-even transposition sort 
     // much messier (maybe try bubble sort?)
-    ShAttrib1f worley( ShAttrib2f p, 
+    ShAttrib3f worley( ShAttrib2f p, 
         ShAttrib4f c = ShAttrib4f( 1.0, 0.0, 0.0, 0.0 ), ShWorleyMetric m = L2_SQ ); 
 
   private:
