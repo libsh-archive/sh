@@ -4,11 +4,14 @@
 using namespace SH;
 using namespace std;
 
+#define RDS_DEBUG
+
 // creates a leaf node
 DAGNode::DAGNode(ShVariable *var) 
 	:	m_var(var),
 		m_label(var->node()->name())
 {
+  m_stmt = NULL;
 	m_visited = false;
 }
 
@@ -17,6 +20,7 @@ DAGNode::DAGNode(ShStatement *stmt)
 	:	m_stmt(stmt),
 		m_label(static_cast<std::string>(opInfo[stmt->op].name))	
 {
+  m_var = NULL;
 	m_visited = false;
 }
 
@@ -45,8 +49,20 @@ ShBasicBlock::ShStmtList DAGNode::dag_to_stmt(ShBasicBlock::ShStmtList stmts)
 	}
 
 	for (DAGNodeVector::iterator I = successors.begin(); I != successors.end(); ++I) {
-		if (!((*I)->m_visited) && !m_cut[*I])
-			stmts = (*I)->dag_to_stmt(stmts);
+		if (!((*I)->m_visited)) {
+      if (!m_cut[*I]) {
+        stmts = (*I)->dag_to_stmt(stmts);
+      } 
+      else {
+#ifdef RDS_DEBUG
+        cout << "Cut at " << (*I)->m_label << endl;
+        //(*I)->print_stmts();
+        
+        if ( (*I)->m_stmt != NULL)
+          cout << "  STMT " << *(*I)->m_stmt << endl;
+#endif
+      }
+    }
 	}
 
 	if (!m_visited && predecessors.size() > 0) {
@@ -54,6 +70,15 @@ ShBasicBlock::ShStmtList DAGNode::dag_to_stmt(ShBasicBlock::ShStmtList stmts)
 		m_visited = true;
 	}
 	return stmts;
+}
+
+void DAGNode::cuts()
+{
+  for (CutMap::iterator I = m_cut.begin(); I != m_cut.end(); ++I) {
+#ifdef RDS_DEBUG
+    cout << "Cut at " << (I)->first->m_label << " "<< (I)->second << endl;
+#endif
+  }
 }
 
 // return statement list for dag starting at this node

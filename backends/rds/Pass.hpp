@@ -13,7 +13,7 @@ public:
 private:
   SH::ShProgramNodePtr m_prog;
 
-  void alloc_shared_mem(SH::ShBasicBlockPtr bb);
+  void Pass::alloc_shared_mem(DAGNode* dag,SH::ShBasicBlockPtr bb);
 };
 
 #endif

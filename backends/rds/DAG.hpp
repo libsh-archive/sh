@@ -21,7 +21,7 @@
 
 class SH_DLLEXPORT DAGNode {
   public:
-	DAGNode() {}	
+	DAGNode() { m_var = NULL; m_stmt = NULL; }
 	DAGNode(SH::ShVariable *var);
 	DAGNode(SH::ShStatement *stmt);
 
@@ -47,6 +47,7 @@ class SH_DLLEXPORT DAGNode {
 	void print(int indent);
 	void dump_stmts();
 	void unvisitall();
+  void cuts();
 	SH::ShBasicBlock::ShStmtList get_statements(); 
   private:
 	void print_stmts();

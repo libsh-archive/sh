@@ -22,14 +22,13 @@ Pass::Pass(DAGNode* node, std::string target)
   start->block->m_statements = node->get_statements();
 #ifdef RDS_DEBUG
   start->block->print(std::cout,2);
+  node->cuts();
 #endif
   m_prog->ctrlGraph = new ShCtrlGraph(start, start);
-  alloc_shared_mem(start->block);
+  alloc_shared_mem(node, start->block);
 }
 
-void Pass::alloc_shared_mem(ShBasicBlockPtr bb) {
-
-  // We need to turn shared temporaries into inputs/outputs
+void Pass::alloc_shared_mem(DAGNode* dag,ShBasicBlockPtr bb) {
 
   std::set<ShVariableNode*> handled_output;
   std::set<ShVariableNode*> handled_input;
@@ -45,7 +44,6 @@ void Pass::alloc_shared_mem(ShBasicBlockPtr bb) {
       ShVariableNode* vnode = I->dest.node().object();
       if (vnode->kind() == SH_TEMP
           && handled_output.find(vnode) == handled_output.end()) {
-        // Need to add an output for this node
         ShVariableNodePtr outnode = new ShVariableNode(SH_STREAM,
                                                        vnode->size(),
                                                        vnode->valueType());
@@ -72,7 +70,6 @@ void Pass::alloc_shared_mem(ShBasicBlockPtr bb) {
       if (vnode->kind() == SH_TEMP
           && handled_input.find(vnode) == handled_input.end() ) {
 
-        // Need to add an input for this node
         ShVariableNodePtr innode = new ShVariableNode(SH_STREAM,
                                                       vnode->size(),
                                                       vnode->valueType());
