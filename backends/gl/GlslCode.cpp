@@ -475,30 +475,18 @@ void GlslCode::gen_structural_node(const ShStructuralNodePtr& node)
     ShVariable cond = header->succs.front().first;
     ShStructuralNodePtr body = node->structnodes.back();
 
-    ShVariable tmp(new ShVariableNode(SH_TEMP, 1, SH_BYTE));
-    append_line(resolve(tmp) + " = 1");
-    append_line("while (" + resolve(tmp) + " > 0) {", false);
-
-    m_indent++;
     append_line("// evaluate loop condition:", false);
     gen_structural_node(header);
-    append_line("if (bool(" + resolve(cond.node()) + ")) {", false);
-    
+    append_line("while (bool(" + resolve(cond.node()) + ")) {", false);
+
     m_indent++;
     append_line("// execute loop body:", false);
     gen_structural_node(body);
+    append_line("// evaluate loop condition:", false);
+    gen_structural_node(header);
     m_indent--;
     
-    // Can't use the 'break' keyword because it's broken on NVIDIA
-    append_line("} else {", false);
-    m_indent++;
-    append_line("// break out of the loop", false);
-    append_line(resolve(tmp) + " = 0");
-    m_indent--;
-
-    append_line("} // if", false);
-    m_indent--;
-    append_line("} // for", false);
+    append_line("} // while", false);
   } 
   else if (node->type == ShStructuralNode::SELFLOOP) {
     ShStructuralNodePtr loopnode = node->structnodes.front();

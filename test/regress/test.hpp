@@ -60,12 +60,21 @@ public:
     print_values(varname.c_str(), s.str());
   }
 
-  template<typename T>
-  void mem_from_host(typename T::mem_type mem[], T &host) {
-    SH::ShVariantPtr memVariant = new SH::ShDataVariant<typename T::storage_type, SH::SH_MEM>(mem, host.size(), false);
+  template<int N, SH::ShBindingType Binding, typename T, bool swizzled>
+  void mem_from_host(typename SH::ShAttrib<N, Binding, T, swizzled>::mem_type mem[], const SH::ShAttrib<N, Binding, T, swizzled>& host)
+  {
+    using namespace SH;
+    ShVariantPtr memVariant = new ShDataVariant<typename ShAttrib<N, Binding, T, swizzled>::storage_type, SH_MEM>(mem, host.size(), false);
     memVariant->set(host.getVariant());
   }
 
+  template<int Rows, int Cols, SH::ShBindingType Binding, typename T>
+  void mem_from_host(typename SH::ShMatrix<Rows, Cols, Binding, T>::mem_type mem[], const SH::ShMatrix<Rows, Cols, Binding, T>& host)
+  {
+    // TODO: add support for matrices
+  }
+
+  /// Apply the input parameter to the program
   template<class T>
   SH::ShProgram bind_input(SH::ShProgram& program, const T& in, std::string& str)
   {
@@ -90,6 +99,7 @@ public:
     return program << chan_in;
   }
 
+  /// Check results and output differences
   template<typename T>
   int output_result(const std::string& name, const std::vector<std::string>& inputs,
 		    const T& out, const T& exp, int out_size)
@@ -115,6 +125,7 @@ public:
     return 0;
   }
 
+  /// Run stream test on current backend (1 input parameter)
   template <class INPUT1, class OUTPUT>
   int run(SH::ShProgram& program, const INPUT1& in1, const OUTPUT& res)
   {
@@ -140,6 +151,7 @@ public:
     return output_result(program.name(), inputs, _out, _res, res.size());
   }
 
+  /// Run stream test on current backend (2 input parameters)
   template <class INPUT1, class INPUT2, class OUTPUT>
   int run(SH::ShProgram& program, const INPUT1& in1, const INPUT2& in2,
 	  const OUTPUT& res)
@@ -167,6 +179,7 @@ public:
     return output_result(program.name(), inputs, _out, _res, res.size());
   }
 
+  /// Run stream test on current backend (3 input parameters)
   template <class INPUT1, class INPUT2, class INPUT3, class OUTPUT>
   int run(SH::ShProgram& program, const INPUT1& in1, const INPUT2& in2,
            const INPUT3& in3, const OUTPUT res)
@@ -195,25 +208,27 @@ public:
     return output_result(program.name(), inputs, _out, _res, res.size());
   }
 
-  /// Checks results from running ops on the host
+  /// Check results from running ops on the host
   template <class OUTPUT, class EXPECTED>
   int check(std::string name, const OUTPUT &out, const EXPECTED &res)
   {
-      typedef typename OUTPUT::host_type OT;
-      OT* _out = new OT[out.size()];
-      out.getValues(_out);
-
-      OT* _res = new OT[res.size()];
-      res.getValues(_res);
-
-      if(out.size() != res.size()) {
-        print_fail(name);
+    if (!on_host()) return 0; // skip this test
+ 
+    typedef typename OUTPUT::host_type OT;
+    OT* _out = new OT[out.size()];
+    out.getValues(_out);
+    
+    OT* _res = new OT[res.size()];
+    res.getValues(_res);
+    
+    if(out.size() != res.size()) {
+      print_fail(name);
         std::cout << "Test data size mismatch" << std::endl;
         return 2;
-      }
-
-      std::vector<std::string> inputs(0);
-      return output_result(name, inputs, _out, _res, res.size());
+    }
+    
+    std::vector<std::string> inputs(0);
+    return output_result(name, inputs, _out, _res, res.size());
   }
   
 private:

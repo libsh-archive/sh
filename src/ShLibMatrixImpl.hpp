@@ -31,6 +31,36 @@
 
 namespace SH {
 
+template<int M, int N, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
+ShMatrix<N, M, SH_TEMP, CT1T2>
+operator+(const ShMatrix<N, M, Binding, T1>& a, 
+	  const ShMatrix<N, M, Binding2, T2>& b)
+{
+  ShMatrix<N, M, SH_TEMP, CT1T2> r(a);
+  r += b;
+  return r;
+}
+
+template<int M, int N, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
+ShMatrix<N, M, SH_TEMP, CT1T2>
+operator-(const ShMatrix<N, M, Binding, T1>& a, 
+	  const ShMatrix<N, M, Binding2, T2>& b)
+{
+  ShMatrix<N, M, SH_TEMP, CT1T2> r(a);
+  r -= b;
+  return r;
+}
+
+template<int M, int N, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
+ShMatrix<N, M, SH_TEMP, CT1T2>
+operator/(const ShMatrix<N, M, Binding, T1>& a, 
+	  const ShMatrix<N, M, Binding2, T2>& b)
+{
+  ShMatrix<N, M, SH_TEMP, CT1T2> r(a);
+  r /= b;
+  return r;
+}
+
 template<int M, int N, int P, ShBindingType Binding, ShBindingType Binding2, 
   typename T1, typename T2>
 inline
@@ -60,8 +90,7 @@ operator*(const ShMatrix<M, N, Binding, T1>& a,
 
 template<int M, int N, ShBindingType Binding, typename T1, typename T2>
 inline
-ShGeneric<M, CT1T2> operator|(const ShMatrix<M, N, Binding, T1>& a, 
-    const ShGeneric<N, T2>& b)
+ShGeneric<M, CT1T2> operator|(const ShMatrix<M, N, Binding, T1>& a, const ShGeneric<N, T2>& b)
 {
   ShAttrib<M, SH_TEMP, CT1T2> ret;
   for (int i = 0; i < M; i++) {
@@ -76,7 +105,10 @@ ShGeneric<N, CT1T2> operator|(const ShGeneric<M, T1>& a, const ShMatrix<M, N, Bi
 {
   ShAttrib<N, SH_TEMP, CT1T2> ret;
   for (int i = 0; i < N; i++) {
-    ret[i] = dot(a, b()(i));
+    ret[i] = 0;
+    for (int j=0; j < M; j++) {
+      ret[i] += a[j] * b[j][i];
+    }
   }
   return ret;
 }

@@ -49,9 +49,19 @@ class ShMatrixRows;
 template<int Rows, int Cols, ShBindingType Binding, typename T>
 class ShMatrix: public virtual ShMeta {
 public:
-  typedef typename ShHostType<T>::type H; 
-  typedef H HostType; 
-  typedef H host_type;
+  typedef T storage_type;
+  typedef typename ShHostType<T>::type host_type; 
+  typedef typename ShMemType<T>::type mem_type;
+  static const ShValueType value_type = ShStorageTypeInfo<T>::value_type;
+  static const ShBindingType binding_type = Binding;
+  static const int typesize = Rows * Cols;
+
+  typedef ShMatrix<Rows, Cols, SH_INPUT, T> InputType;
+  typedef ShMatrix<Rows, Cols, SH_OUTPUT, T> OutputType;
+  typedef ShMatrix<Rows, Cols, SH_INOUT, T> InOutType;
+  typedef ShMatrix<Rows, Cols, SH_TEMP, T> TempType;
+  typedef ShMatrix<Rows, Cols, SH_CONST, T> ConstType;
+  typedef ShMatrix<Rows, Cols, SH_TEMP, T> TempType;
     
   /** \brief Identity constructor.
    *
@@ -187,7 +197,7 @@ public:
   //@{
 
   /// Set a range of values for this matrix
-  void range(H low, H high);
+  void range(host_type low, host_type high);
 
   //@}
   

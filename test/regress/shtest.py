@@ -25,14 +25,16 @@ value_type_enum = {'d': 'double',
 
 enum_value_type = dict(zip(value_type_enum.values(), value_type_enum.keys()))
 
-def make_variable(arg, binding_type, value_type):
+def make_variable(arg, binding_type, value_type, immediate=False):
     if is_array(arg) and is_array(arg[0]):
-        nrows = len(arg[0])
-        ncols = len(arg)
+        ncols = len(arg[0])
+        nrows = len(arg)
         return 'ShMatrix<' + str(nrows) + ', ' + str(ncols) + ', ' + binding_type + ', ' + value_type + '>'    
     elif is_array(arg):
         size = len(arg)
         return 'ShAttrib<' + str(size) + ', ' + binding_type + ', ' + value_type + '>'
+    elif immediate:
+        return value_type
     else:
         return 'ShAttrib<1, ' + binding_type + ', ' + value_type  + '>'
 
@@ -57,33 +59,33 @@ def init_attrib(indent, arg, argtype, varname):
     out += ';\n'
     return out
 
-def init_scalar(indent, arg, argtype, varname):
+def init_scalar(indent, arg, argtype, varname, immediate):
     out = indent
-    out += make_variable(arg, 'SH_CONST', argtype) + ' ' + varname
+    out += make_variable(arg, 'SH_CONST', argtype, immediate) + ' ' + varname
     out += '(' + argtype + '(' + str(arg) + '));\n'
     return out
 
-def init_variable(indent, arg, argtype, varname):
+def init_variable(indent, arg, argtype, varname, immediate):
     if is_array(arg) and is_array(arg[0]):
         return init_matrix(indent, arg, argtype, varname)
     elif is_array(arg):
         return init_attrib(indent, arg, argtype, varname)
     else:
-        return init_scalar(indent, arg, argtype, varname)
+        return init_scalar(indent, arg, argtype, varname, immediate)
 
-def init_inputs(indent, src_arg_types):
+def init_inputs(indent, src_arg_types, immediate=False):
     out = ''
     i = 0
     for arg, argtype in src_arg_types:
         varname =  string.ascii_lowercase[i]
-        out += init_variable(indent, arg, argtype, varname)
+        out += init_variable(indent, arg, argtype, varname, immediate)
         i += 1;
     return out
 
-def init_expected(indent, arg, argtype):
+def init_expected(indent, arg, argtype, immediate=False):
     out = ''
     varname = 'exp'
-    out += init_variable(indent, arg, argtype, varname)
+    out += init_variable(indent, arg, argtype, varname, immediate)
     return out
 
 # types are a list of dest then src types ('f' used as default) 
@@ -311,7 +313,7 @@ class ImmediateTest(Test):
     def __init__(self, name, arity):
         Test.__init__(self, name, arity)
 
-    def output(self, out):
+    def output(self, out, immediate=False):
         self.output_header(out)
         test_nb = 0
         for test, testcalls in self.tests:
@@ -320,10 +322,10 @@ class ImmediateTest(Test):
             for i, call in enumerate(testcalls):
                 testname = make_testname(src_arg_types, types, call.key())
                 out.write('  { // ' + testname + '\n')
-                out.write(init_inputs('    ', src_arg_types))
-                out.write(init_expected('    ', test[0], types[0]))
+                out.write(init_inputs('    ', src_arg_types, immediate))
+                out.write(init_expected('    ', test[0], types[0], immediate))
                 out.write('\n')
-                out.write('    ' + make_variable(test[0], 'SH_TEMP', types[0]) +  ' out;\n')
+                out.write('    ' + make_variable(test[0], 'SH_TEMP', types[0], immediate) +  ' out;\n')
                 out.write('    ' + str(call) + ';\n')
                 out.write('\n')
                 out.write('    if (test.check("' + testname + '", out, exp' + ') != 0) errors++;\n')

@@ -370,7 +370,7 @@ ShMatrixRows<Rows, Cols, T>::operator()(int i0, int i1, int i2, int i3) const
 }
 
 template<int Rows, int Cols, ShBindingType Binding, typename T>
-void ShMatrix<Rows, Cols, Binding, T>::range(H low, H high)
+void ShMatrix<Rows, Cols, Binding, T>::range(host_type low, host_type high)
 {
   for (int i = 0; i < Rows; i++) m_data[i].range(low, high);
 }
