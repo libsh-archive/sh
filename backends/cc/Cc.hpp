@@ -33,11 +33,18 @@
 
 #include "ShBackend.hpp"
 
-typedef void (*CcFunc)(float** inputs,
-			float** params,
-			float** streams,
-			void** textures,
-			float** outputs);
+extern "C" typedef void (*CcLookupFunc)(void* t,
+                                        float* src,
+                                        float* dst);
+
+extern "C" typedef void (*CcInitFunc)(CcLookupFunc,
+                                      CcLookupFunc);
+
+extern "C" typedef void (*CcShaderFunc)(float** inputs,
+                                        float** params,
+                                        float** streams,
+                                        void** textures,
+                                        float** outputs);
 
 namespace ShCc {
   
@@ -89,27 +96,27 @@ namespace ShCc {
       std::string resolve(const SH::ShVariable& v, int idx);
 
       class LabelFunctor
-	{
-	public:
-	  LabelFunctor(std::map<SH::ShCtrlGraphNodePtr, int>& label_map);
-	  
-	  void operator()(SH::ShCtrlGraphNode* node);
-	  
-	public:
-	  int m_cur_label;
-	  std::map<SH::ShCtrlGraphNodePtr, int>& m_label_map;
-	};
+  {
+  public:
+    LabelFunctor(std::map<SH::ShCtrlGraphNodePtr, int>& label_map);
+    
+    void operator()(SH::ShCtrlGraphNode* node);
+    
+  public:
+    int m_cur_label;
+    std::map<SH::ShCtrlGraphNodePtr, int>& m_label_map;
+  };
       
       class EmitFunctor
-	{
-	public:
-	  EmitFunctor(CcBackendCode* bec);
+  {
+  public:
+    EmitFunctor(CcBackendCode* bec);
 
-	  void operator()(SH::ShCtrlGraphNode* node);
-	  
-	public:
-	  CcBackendCode* m_bec;
-	};
+    void operator()(SH::ShCtrlGraphNode* node);
+    
+  public:
+    CcBackendCode* m_bec;
+  };
       
       void emit(const SH::ShStatement& stmt);
       void emit(SH::ShBasicBlockPtr block);
@@ -129,7 +136,8 @@ namespace ShCc {
       void* m_handle;
 #endif /* WIN32 */
 
-      CcFunc m_func;
+      CcInitFunc m_init_func;
+      CcShaderFunc m_shader_func;
 
       int m_cur_temp;
 
@@ -148,7 +156,7 @@ namespace ShCc {
       std::string name(void) const;
 
       SH::ShBackendCodePtr generateCode(const std::string& target,
-					const SH::ShProgramNodeCPtr& program);
+                                        const SH::ShProgramNodeCPtr& program);
       
       void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
     };

@@ -604,7 +604,8 @@ namespace ShCc {
 #else
     m_handle(NULL),
 #endif
-    m_func(NULL),
+    m_init_func(NULL),
+    m_shader_func(NULL),
     m_cur_temp(0),
     m_params(NULL)
     {
@@ -1962,14 +1963,23 @@ namespace ShCc {
     std::stringstream prologue;
     prologue << "#include <math.h>" << std::endl;
     prologue << std::endl;
-    prologue << "extern \"C\" void sh_cc_backend_lookup(void*, float*, float*);" << std::endl;
-    prologue << "extern \"C\" void sh_cc_backend_lookupi(void*, float*, float*);" << std::endl;
+    prologue << "extern \"C\" typedef void (*CcLookupFunc)(void* t, float* src, float* dst);" << std::endl;
+    prologue << std::endl;
+    prologue << "CcLookupFunc sh_cc_backend_lookup;" << std::endl;
+    prologue << "CcLookupFunc sh_cc_backend_lookupi;" << std::endl;
+    prologue << std::endl;
+    prologue << "extern \"C\"";
+    prologue << "void __declspec(dllexport) cc_init(CcLookupFunc lookup, CcLookupFunc lookupi)" << std::endl;
+    prologue << "  {" << std::endl;
+    prologue << "  sh_cc_backend_lookup = lookup;" << std::endl;
+    prologue << "  sh_cc_backend_lookupi = lookupi;" << std::endl;
+    prologue << "  }" << std::endl;
     prologue << std::endl;
     prologue << "extern \"C\" "
 #ifdef WIN32
-	     << " void __declspec(dllexport) func("
+	     << " void __declspec(dllexport) cc_shader("
 #else
-	     << " void func("
+	     << " void cc_shader("
 #endif /* WIN32 */
 	     << "float** inputs, "
 	     << "float** params, "
@@ -2051,13 +2061,23 @@ namespace ShCc {
       }
     else
       {
-      m_func = (CcFunc)GetProcAddress(m_hmodule, "func");
+      m_init_func = (CcInitFunc)GetProcAddress(m_hmodule, "cc_init");
 
-      if (m_func == NULL)
+      if (m_init_func == NULL)
         {
         SH_CC_DEBUG_PRINT("GetProcAddress failed: " << GetLastError());
         return false;
         }
+
+      m_shader_func = (CcShaderFunc)GetProcAddress(m_hmodule, "cc_shader");
+
+      if (m_shader_func == NULL)
+        {
+        SH_CC_DEBUG_PRINT("GetProcAddress failed: " << GetLastError());
+        return false;
+        }
+
+      m_init_func(sh_cc_backend_lookup, sh_cc_backend_lookupi);
       }
 
     return true;
@@ -2106,9 +2126,9 @@ namespace ShCc {
 	}
       else
 	{
-	m_func = (CcFunc)dlsym(m_handle, "func");
+	m_shader_func = (CcShaderFunc)dlsym(m_handle, "cc_shader");
 
-	if (m_func == NULL)
+	if (m_shader_func == NULL)
 	  {
 	  SH_CC_DEBUG_PRINT("dlsym failed: " << dlerror());
 	  return false;
@@ -2128,7 +2148,7 @@ namespace ShCc {
 
   bool CcBackendCode::execute(SH::ShStream& dest)
     {
-    if (!m_func)
+    if (!m_shader_func)
       {
       if (!generate())
 	{
@@ -2205,7 +2225,7 @@ namespace ShCc {
     for(int i = 0; i < count; i++)
       {
       SH_CC_DEBUG_PRINT("execution " << i << " of " << count);
-      m_func(inputs, params, streams, textures, outputs);
+      m_shader_func(inputs, params, streams, textures, outputs);
 
       for(int j = 0; j < num_streams; j++)
 	{

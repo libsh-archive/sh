@@ -1,4 +1,15 @@
-2004-10-20 Sylvain Vasseur <sfvsasse@cgl.uwaterloo.ca>
+2004-10-21  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* backends/cc/Cc.cpp, backends/cc/Cc.hpp: Completed Win32 support
+	for cc backend. Added 'init' function to generated code to bootstrap
+	texture lookup functions
+
+	* src/ShImage.cpp: savePng on Win32 generates bad images, fopen
+	need a "wb" instead of "w".
+
+	* src/ShPaletteNode.hpp: Added SH_DLLEXPORT
+
+2004-10-20  Sylvain Vasseur  <sfvsasse@cgl.uwaterloo.ca>
 
 	* src/ShMemoryDep.hpp: Implement dependencies with a memory object
   
