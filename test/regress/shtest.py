@@ -257,7 +257,6 @@ class Test:
         out.write('  try {\n')
         out.write('  int errors = 0;\n')
         out.write('  Test test(argc, argv);\n\n')
-        self.output_textures(out)
 
     def output_footer(self, out):
         out.write('  if (errors !=0) return 1;\n')
@@ -275,8 +274,10 @@ class StreamTest(Test):
     def __init__(self, name, arity):
         Test.__init__(self, name, arity)
 
-    def output(self, out):
-        self.output_header(out)
+    def output(self, out, standalone=True):
+        if standalone:
+            self.output_header(out)
+        self.output_textures(out)
         programs = {}
         test_nb = 0
         for test, testcalls in self.tests:
@@ -307,14 +308,17 @@ class StreamTest(Test):
                 out.write('  }\n')
                 test_nb += 1
             out.write('\n')
-        self.output_footer(out)
+        if standalone:
+            self.output_footer(out)
 
 class ImmediateTest(Test):
     def __init__(self, name, arity):
         Test.__init__(self, name, arity)
 
-    def output(self, out, immediate=False):
-        self.output_header(out)
+    def output(self, out, standalone=True):
+        if standalone:
+            self.output_header(out)
+        self.output_textures(out)
         test_nb = 0
         for test, testcalls in self.tests:
             types = test[2]
@@ -322,15 +326,16 @@ class ImmediateTest(Test):
             for i, call in enumerate(testcalls):
                 testname = make_testname(src_arg_types, types, call.key())
                 out.write('  { // ' + testname + '\n')
-                out.write(init_inputs('    ', src_arg_types, immediate))
-                out.write(init_expected('    ', test[0], types[0], immediate))
+                out.write(init_inputs('    ', src_arg_types, False))
+                out.write(init_expected('    ', test[0], types[0], False))
                 out.write('\n')
-                out.write('    ' + make_variable(test[0], 'SH_TEMP', types[0], immediate) +  ' out;\n')
+                out.write('    ' + make_variable(test[0], 'SH_TEMP', types[0], False) +  ' out;\n')
                 out.write('    ' + str(call) + ';\n')
                 out.write('\n')
                 out.write('    if (test.check("' + testname + '", out, exp' + ') != 0) errors++;\n')
                 out.write('  }\n\n')
-        self.output_footer(out)
+        if standalone:
+            self.output_footer(out)
 
 if __name__ == "__main__":
     foo = StreamTest("add", 2)

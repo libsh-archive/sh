@@ -115,8 +115,8 @@ public:
       }
     }
 #ifdef SH_REGRESS_SHOWALL
-    pretty_print("out", size, out);
-    pretty_print("exp", size, exp);
+    pretty_print("out", out_size, out);
+    pretty_print("exp", out_size, exp);
     print_pass(name);
 #endif
     return 0;

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import shtest, sys, add_test
+import shtest, sys
 
 # all the tests use nearest-neighbour lookup right now
 
