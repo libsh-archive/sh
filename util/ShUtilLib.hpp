@@ -80,7 +80,8 @@ ShVariableN<1, T> smoothstep(const ShVariableN<1, T>& a, const ShVariableN<1, T>
  */
 template<int N, typename T>
 ShVariableN<1, T> distance(const ShVariableN<N, T>& a, const ShVariableN<N, T>& b) {
-  return sqrt(dot(a, b));
+  ShVariableN<N, T> diff = abs(a - b);
+  return sqrt(dot(diff, diff));
 }
 
 /** \brief L1 distance between two points
