@@ -1,3 +1,9 @@
+2005-01-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbEmit.cpp (ArbCode::table): Do not scalarize
+	OP_DIVs.
+	(emit_div): Emit a single RCP instruction for scalar-RHS divs.
+
 2005-01-25  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShMatrixImpl.hpp (ShMatrix): Fix default constructor to not

@@ -72,7 +72,7 @@ ArbMapping ArbCode::table[] = {
   // Removed this temporarily because of a bug in the NV drivers
   //{SH_OP_DIV,  SH_ARB_NVFP2, scalarize,    SH_ARB_DIV, 0},
   
-  {SH_OP_DIV,  SH_ARB_ANY,   scalarize,    SH_ARB_FUN, &ArbCode::emit_div},
+  {SH_OP_DIV,  SH_ARB_ANY,   0,    SH_ARB_FUN, &ArbCode::emit_div},
   {SH_OP_POW,  SH_ARB_ANY,   scalarize,    SH_ARB_POW, 0},
   {SH_OP_RCP,  SH_ARB_ANY,   scalarize,    SH_ARB_RCP, 0},
   {SH_OP_RSQ,  SH_ARB_ANY,   scalarize,    SH_ARB_RSQ, 0},
@@ -270,8 +270,12 @@ void ArbCode::emit(const ShStatement& stmt)
 void ArbCode::emit_div(const ShStatement& stmt)
 {
   // @todo type should handle other types (half-floats, fixed point)
-  ShVariable rcp(new ShVariableNode(SH_TEMP, 1, SH_FLOAT));
-  m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp, stmt.src[1]));
+
+  ShVariable rcp(new ShVariableNode(SH_TEMP, stmt.src[1].size(), SH_FLOAT));
+
+  for (int i = 0; i < stmt.src[1].size(); i++) {
+    m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp(i), stmt.src[1](i)));
+  }
   m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0], rcp));
 }
 
