@@ -117,7 +117,9 @@ private:
                    ShArbRegType type, int& num);
 
   /// Output a use of a variable.
-  std::ostream& printVar(std::ostream& out, bool dest, const SH::ShVariable& var) const;
+  std::ostream& printVar(std::ostream& out, bool dest, const SH::ShVariable& var,
+                         bool collectingOp,
+                         const SH::ShSwizzle& destSwiz) const;
 
   /// Check whether inst is a sampling instruction. If so, output it
   /// and return true. Otherwise, output nothing and return false.

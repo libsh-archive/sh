@@ -167,66 +167,67 @@ static struct {
   bool vp, fp;
   int arity;
   bool vector;
+  bool collectingOp;
 } arbOpInfo[] = {
   // VERTEX AND FRAGMENT
   // Vector
-  {"ABS", true, true, 1, true},
-  {"FLR", true, true, 1, true},
-  {"FRC", true, true, 1, true},
-  {"LIT", true, true, 1, true},
-  {"MOV", true, true, 1, true},
+  {"ABS", true, true, 1, true, false},
+  {"FLR", true, true, 1, true, false},
+  {"FRC", true, true, 1, true, false},
+  {"LIT", true, true, 1, true, false},
+  {"MOV", true, true, 1, true, false},
 
   // Scalar
-  {"EX2", true, true, 1, false},
-  {"LG2", true, true, 1, false},
-  {"RCP", true, true, 1, false},
-  {"RSQ", true, true, 1, false},
+  {"EX2", true, true, 1, false, false},
+  {"LG2", true, true, 1, false, false},
+  {"RCP", true, true, 1, false, false},
+  {"RSQ", true, true, 1, false, false},
 
   // Binary scalar
-  {"POW", true, true, 2, false},
+  {"POW", true, true, 2, false, false},
 
   // Binary vector
-  {"ADD", true, true, 2, true},
-  {"DP3", true, true, 2, true},
-  {"DP4", true, true, 2, true},
-  {"DPH", true, true, 2, true},
-  {"DST", true, true, 2, true},
-  {"MAX", true, true, 2, true},
-  {"MIN", true, true, 2, true},
-  {"MUL", true, true, 2, true},
-  {"SGE", true, true, 2, true},
-  {"SLT", true, true, 2, true},
-  {"SUB", true, true, 2, true},
-  {"XPD", true, true, 2, true},
+  {"ADD", true, true, 2, true, false},
+  {"DP3", true, true, 2, true, true},
+  {"DP4", true, true, 2, true, true},
+  {"DPH", true, true, 2, true, true},
+  {"DST", true, true, 2, true, true},
+  {"MAX", true, true, 2, true, false},
+  {"MIN", true, true, 2, true, false},
+  {"MUL", true, true, 2, true, false},
+  {"SGE", true, true, 2, true, false},
+  {"SLT", true, true, 2, true, false},
+  {"SUB", true, true, 2, true, false},
+  {"XPD", true, true, 2, true, true},
 
   // Trinary
-  {"MAD", true, true, 3, true},
+  {"MAD", true, true, 3, true, false},
 
   // Swizzling
-  {"SWZ", true, true, 2, true},
+  {"SWZ", true, true, 2, true, true}, // should this really be a collectingOp?
 
   // VERTEX ONLY
   // Scalar
-  {"EXP", true, false, 2, false},
-  {"LOG", true, false, 2, false},
+  {"EXP", true, false, 2, false, false},
+  {"LOG", true, false, 2, false, false},
   
   // FRAGMENT ONLY
   // Scalar
-  {"COS", false, true, 1, false},
-  {"SIN", false, true, 1, false},
-  {"SCS", false, true, 1, false},
+  {"COS", false, true, 1, false, false},
+  {"SIN", false, true, 1, false, false},
+  {"SCS", false, true, 1, false, false},
 
   // Trinary
-  {"CMP", false, true, 3, true},
-  {"LRP", false, true, 3, true},
+  {"CMP", false, true, 3, true, false},
+  {"LRP", false, true, 3, true, false},
 
   // Sampling
-  {"TEX", false, true, 3, true},
-  {"TXP", false, true, 3, true},
-  {"TXB", false, true, 3, true},
+  {"TEX", false, true, 3, true, false},
+  {"TXP", false, true, 3, true, false},
+  {"TXB", false, true, 3, true, false},
 
   // KIL
-  {"KIL", false, true, 0, false}
+  {"KIL", false, true, 0, false, false}
 };
 
 /** An ARB instruction.
@@ -726,7 +727,8 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
   }
 }
 
-std::ostream& ArbCode::printVar(std::ostream& out, bool dest, const ShVariable& var) const
+std::ostream& ArbCode::printVar(std::ostream& out, bool dest, const ShVariable& var,
+                                bool collectingOp, const ShSwizzle& destSwiz = ShSwizzle(4)) const
 {
   RegMap::const_iterator I = m_registers.find(var.node());
   if (I == m_registers.end()) {
@@ -744,14 +746,25 @@ std::ostream& ArbCode::printVar(std::ostream& out, bool dest, const ShVariable& 
   // Swizzling
   const char* swizChars = "xyzw";
   out << ".";
-  int i;
-  for (i = 0; i < std::min(var.swizzle().size(), 4); i++) {
-    out << swizChars[var.swizzle()[i]];
+  if (dest || var.swizzle().size() == 1) {
+    for (int i = 0; i < std::min(var.swizzle().size(), 4); i++) {
+       out << swizChars[var.swizzle()[i]];
+    }
+  } else if (collectingOp) {
+    for (int i = 0; i < 4; i++) {
+       out << swizChars[i < var.swizzle().size() ? var.swizzle()[i] : i];
+    }
+  } else {
+    for (int i = 0; i < 4; i++) {
+      int j;
+      for (j = 0; j < destSwiz.size(); j++) {
+        if (destSwiz[j] == i) break;
+      }
+      if (j == destSwiz.size()) j = i;
+      out << swizChars[j < var.size() ? var.swizzle()[j] : j];
+    }
   }
-  for (; !dest && i != 1 && i < 4; i++) {
-    out << swizChars[i];
-  }
-  
+
   return out;
 }
 
@@ -779,8 +792,8 @@ bool ArbCode::printSamplingInstruction(std::ostream& out, const ArbInst& instr) 
   
   out << "  ";
   out << arbOpInfo[instr.op].name << " ";
-  printVar(out, true, instr.dest) << ", ";
-  printVar(out, false, instr.src[0]) << ", ";
+  printVar(out, true, instr.dest, false) << ", ";
+  printVar(out, false, instr.src[0], true, instr.dest.swizzle()) << ", ";
   out << "texture[" << texReg.index << "], ";
   switch (texture->dims()) {
   case SH_TEXTURE_1D:
@@ -861,10 +874,10 @@ std::ostream& ArbCode::print(std::ostream& out)
     if (!printSamplingInstruction(out, *I)) {
       out << "  ";
       out << arbOpInfo[I->op].name << " ";
-      printVar(out, true, I->dest);
+      printVar(out, true, I->dest, arbOpInfo[I->op].collectingOp);
       for (int i = 0; i < arbOpInfo[I->op].arity; i++) {
         out << ", ";
-        printVar(out, false, I->src[i]);
+        printVar(out, false, I->src[i], arbOpInfo[I->op].collectingOp, I->dest.swizzle());
       }
       out << ';';
       out << endl;
@@ -940,17 +953,33 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       break;
     case SH_OP_DOT:
       {
-        if (stmt.src[0].size() == 3) {
-          m_instructions.push_back(ArbInst(SH_ARB_DP3, stmt.dest, stmt.src[0], stmt.src[1]));
-        } else if (stmt.src[0].size() == 4) {
-          m_instructions.push_back(ArbInst(SH_ARB_DP4, stmt.dest, stmt.src[0], stmt.src[1]));
-        } else if (stmt.src[0].size() == 1) {
-          m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0], stmt.src[1]));
+        ShVariable left = stmt.src[0];
+        ShVariable right = stmt.src[1];
+
+        // expand left/right if they are scalar
+        if( left.size() < right.size() ) {
+          int *swizzle = new int[ right.size() ];
+          for( int i = 0; i < right.size(); ++i ) swizzle[i] = 0; 
+          left = left( right.size(), swizzle ); 
+          delete swizzle;
+        } else if( right.size() < left.size() ) {
+          int *swizzle = new int[ left.size() ];
+          for( int i = 0; i < left.size(); ++i ) swizzle[i] = 0; 
+          right = right( left.size(), swizzle ); 
+          delete swizzle;
+        }
+
+        if (left.size() == 3) {
+          m_instructions.push_back(ArbInst(SH_ARB_DP3, stmt.dest, left, right));
+        } else if (left.size() == 4) {
+          m_instructions.push_back(ArbInst(SH_ARB_DP4, stmt.dest, left, right));
+        } else if (left.size() == 1) {
+          m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, left, right));
         } else {
-          ShVariable mul(new ShVariableNode(SH_VAR_TEMP, stmt.src[0].size()));
-          m_instructions.push_back(ArbInst(SH_ARB_MUL, mul, stmt.src[0], stmt.src[1]));
+          ShVariable mul(new ShVariableNode(SH_VAR_TEMP, left.size()));
+          m_instructions.push_back(ArbInst(SH_ARB_MUL, mul, left, right));
           m_instructions.push_back(ArbInst(SH_ARB_ADD, stmt.dest, mul(0), mul(1)));
-          for (int i = 2; i < stmt.src[0].size(); i++) {
+          for (int i = 2; i < left.size(); i++) {
             m_instructions.push_back(ArbInst(SH_ARB_ADD, stmt.dest, stmt.dest, mul(i)));
           }
         }
