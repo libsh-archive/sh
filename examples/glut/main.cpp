@@ -5,9 +5,9 @@
 # include <OpenGL/glu.h>
 # include <GLUT/glut.h>
 #else
+# include <GL/glut.h>
 # include <GL/glext.h>
 # include <GL/glu.h>
-# include <GL/glut.h>
 #endif
 #include "Camera.hpp"
 #include <iostream>
