@@ -153,6 +153,25 @@ ShMatrix<Rows, Cols, Binding, T>::operator/=(const ShMatrix<Rows, Cols, Binding2
 }
 
 template<int Rows, int Cols, ShBindingType Binding, typename T>
+template<ShBindingType Binding2>
+ShMatrix<Rows, Cols, Binding, T>&
+ShMatrix<Rows, Cols, Binding, T>::operator*=(const ShMatrix<Rows, Cols, Binding2, T>& other)
+{
+  ShMatrix<Rows, Cols, SH_TEMP, T> r = *this * other;
+  *this = r;
+  return *this;
+}
+
+template<int Rows, int Cols, ShBindingType Binding, typename T>
+ShMatrix<Rows, Cols, Binding, T>&
+ShMatrix<Rows, Cols, Binding, T>::operator-()
+{
+  for (int i = 0; i < Rows; i++)
+    m_data[i] = -(m_data[i]);
+  return *this;
+}
+
+template<int Rows, int Cols, ShBindingType Binding, typename T>
 ShMatrix<Rows, Cols, Binding, T>&
 ShMatrix<Rows, Cols, Binding, T>::operator*=(const ShGeneric<1, T>& other)
 {

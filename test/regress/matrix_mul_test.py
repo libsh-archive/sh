@@ -68,7 +68,7 @@ def mul(p, q, types=[]):
         result = scalar_matrix(q, p)
     return shtest.make_test(result, [p, q], types)
 
-def insert_into(test):
+def insert_into(test, modifying=False):
     # Trivial cases
     test.add_test(mul(((0.0, 0.0, 0.0),(0.0, 0.0, 0.0),(0.0, 0.0, 0.0)), ((1.0, 2.0, 3.0),(3.0, 4.0, 5.0),(5.0, 6.0, 7.0))))
     test.add_test(mul(((1.0, 0.0, 0.0),(0.0, 1.0, 0.0),(0.0, 0.0, 1.0)), ((1.0, 2.0, 3.0),(3.0, 4.0, 5.0),(5.0, 6.0, 7.0))))
@@ -79,18 +79,22 @@ def insert_into(test):
     test.add_test(mul(((0.0, 1.0),(0.0, 1.0)), ((1.0, 2.0),(3.0, 4.0))))
     
     # Different sizes
-    test.add_test(mul(((34.0, 1.0),(0.5, -1.9),(1000.0, 0.012345)), ((1.0, 2.0, 3.0, 4.0),(5.0, 6.0, 7.0, 8.0))))
+    if not modifying:
+        test.add_test(mul(((34.0, 1.0),(0.5, -1.9),(1000.0, 0.012345)), ((1.0, 2.0, 3.0, 4.0),(5.0, 6.0, 7.0, 8.0))))
 
     # Scalar-matrix product
-    test.add_test(mul(0.5, ((1.0, 2.0, 3.0),(3.0, 4.0, 5.0),(5.0, 6.0, 7.0))))
+    if not modifying:
+        test.add_test(mul(0.5, ((1.0, 2.0, 3.0),(3.0, 4.0, 5.0),(5.0, 6.0, 7.0))))
 
     # Matrix-scalar product
     test.add_test(mul(((1.0, 2.0, 3.0),(3.0, 4.0, 5.0),(5.0, 6.0, 7.0)), -2.3))
 
     # Row vector-matrix product
-    test.add_test(mul((0.0, 1.0, 2.0), ((1.0, 2.0, 3.0),(3.0, 4.0, 5.0),(5.0, 6.0, 7.0))))
-    test.add_test(mul((0.0, 1.0, 2.0), ((1.0, 2.0),(3.0, 4.0),(5.0, 6.0))))
+    if not modifying:
+        test.add_test(mul((0.0, 1.0, 2.0), ((1.0, 2.0, 3.0),(3.0, 4.0, 5.0),(5.0, 6.0, 7.0))))
+        test.add_test(mul((0.0, 1.0, 2.0), ((1.0, 2.0),(3.0, 4.0),(5.0, 6.0))))
 
     # Matrix-column vector product
-    test.add_test(mul(((1.0, 2.0, 3.0),(3.0, 4.0, 5.0),(5.0, 6.0, 7.0)), (1.0, -0.3, 10.1)))
-    test.add_test(mul(((1.0, 2.0, 3.0),(3.0, 4.0, 5.0)), (1.0, -0.3, 10.1)))
+    if not modifying:
+        test.add_test(mul(((1.0, 2.0, 3.0),(3.0, 4.0, 5.0),(5.0, 6.0, 7.0)), (1.0, -0.3, 10.1)))
+        test.add_test(mul(((1.0, 2.0, 3.0),(3.0, 4.0, 5.0)), (1.0, -0.3, 10.1)))
