@@ -143,7 +143,8 @@ template<int N, typename T>
 ShGeneric<1, T> max(const ShGeneric<N, T>& a)
 {
   if (N == 1) return a(0);
-  int lhswz[N/2 + N%2];
+  return a(0);
+/*  int lhswz[N/2 + N%2];
   for (int i = 0; i < N/2 + N%2; i++) {
     lhswz[i] = i;
   }
@@ -153,13 +154,15 @@ ShGeneric<1, T> max(const ShGeneric<N, T>& a)
   }
 
   return max(max(a.template swiz<N/2 + N%2>(lhswz)), max(a.template swiz<N/2>(rhswz)));
+*/
 }
 
 template<int N, typename T>
 ShGeneric<1, T> min(const ShGeneric<N, T>& a)
 {
   if (N == 1) return a(0);
-  int lhswz[N/2 + N%2];
+  return a(0);
+/*  int lhswz[N/2 + N%2];
   for (int i = 0; i < N/2 + N%2; i++) {
     lhswz[i] = i;
   }
@@ -169,6 +172,7 @@ ShGeneric<1, T> min(const ShGeneric<N, T>& a)
   }
 
   return min(min(a.template swiz<N/2 + N%2>(lhswz)), min(a.template swiz<N/2>(rhswz)));
+*/
 }
 
 

@@ -4,25 +4,55 @@ rm -rf libltdl
 
 echo "You may ignore messages about updating aclocal.m4."
 
-if test "x${LIBTOOLIZE}" = "x" ; then
-  LIBTOOLIZE="libtoolize --ltdl"
-else
-  LIBTOOLIZE="$LIBTOOLIZE --ltdl"
-fi
-export LIBTOOLIZE
+# Machine specific
+case ${MACHTYPE}
+in *apple*darwin*)  # Mac OSX
 
-if test "x${AUTOMAKE}" = "x" ; then
-  AUTOMAKE=automake-1.7
-fi
-export AUTOMAKE
-if test "x${ACLOCAL}" = "x" ; then
-  ACLOCAL=aclocal-1.7
-fi
-export ACLOCAL
+  if test "x${LIBTOOLIZE}" = "x" ; then
+    LIBTOOLIZE="/sw/bin/glibtoolize --ltdl"
+  else
+    LIBTOOLIZE="$LIBTOOLIZE --ltdl"
+  fi
+  export LIBTOOLIZE
 
-# ltdl seems to require these now...
-cp /usr/share/libtool/libtool.m4 .
-cp /usr/share/libtool/ltdl.m4 .
+  # need to use fink's autoconf utils because Apple's is too old
+  if test "x${AUTOMAKE}" = "x" ; then
+    AUTOMAKE=/sw/bin/automake
+  fi
+  export AUTOMAKE
+  if test "x${ACLOCAL}" = "x" ; then
+    ACLOCAL=/sw/bin/aclocal
+  fi
+  export ACLOCAL
+
+  # ltdl seems to require these now...
+  cp /usr/share/aclocal/libtool.m4 ./config
+  cp /usr/share/aclocal/ltdl.m4 ./config
+
+;;
+*) # all others
+
+  if test "x${LIBTOOLIZE}" = "x" ; then
+    LIBTOOLIZE="libtoolize --ltdl"
+  else
+    LIBTOOLIZE="$LIBTOOLIZE --ltdl"
+  fi
+  export LIBTOOLIZE
+
+  if test "x${AUTOMAKE}" = "x" ; then
+    AUTOMAKE=automake
+  fi
+  export AUTOMAKE
+  if test "x${ACLOCAL}" = "x" ; then
+    ACLOCAL=aclocal
+  fi
+  export ACLOCAL
+
+  # ltdl seems to require these now...
+  cp /usr/share/libtool/libtool.m4 .
+  cp /usr/share/libtool/ltdl.m4 .
+
+esac
 
 cat config/*.m4 > acinclude.m4
 

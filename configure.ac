@@ -42,6 +42,18 @@ AC_CHECK_HEADER([sstream], [], [AC_MSG_ERROR([sh requires <sstream>. Please use 
 # Checks for library functions.
 AC_CHECK_FUNCS([pow sqrt])
 
+required_glext_version=18
+
+# Mac OSX Tests
+case $host_os in darwin*)
+  AC_MSG_NOTICE([configuring OSX build, you have $host_os])
+  AC_CHECK_LIB([mx], [log2f])
+  LDFLAGS="$LDFLAGS -flat_namespace"
+  required_glext_version=7
+  ;;
+esac
+
+
 # Backends
 
 SM_WITH_SM_DIR
@@ -65,7 +77,7 @@ if test "x$sh_backend_arb" = xtrue ; then
   GL_CHECK_GL_HEADERS([],
     [SH_BACKEND_MESSAGE([arb], [OpenGL headers (GL/gl.h and GL/glext.h) not found. Disabling ARB backend.])
      sh_backend_arb=false])
-  GL_CHECK_GLEXT_VERSION([18], [], [
+  GL_CHECK_GLEXT_VERSION([$required_glext_version], [], [
     SH_BACKEND_MESSAGE([arb], [glext.h version 18 or greater (available at http://oss.sgi.com/projects/ogl-sample/registry/) not found. Disabling ARB backend.])
     sh_backend_arb=false
   ])
@@ -77,7 +89,7 @@ if test "x$sh_backend_ati" = xtrue ; then
   GL_CHECK_GL_HEADERS([],
     [SH_BACKEND_MESSAGE([ati], [OpenGL headers (GL/gl.h and GL/glext.h) not found. Disabling ATI backend.])
      sh_backend_ati=false])
-  GL_CHECK_GLEXT_VERSION([18], [], [
+  GL_CHECK_GLEXT_VERSION([$required_glext_version], [], [
     SH_BACKEND_MESSAGE([ati], [glext.h version 18 or greater (available at http://oss.sgi.com/projects/ogl-sample/regi\
 stry/) not found. Disabling ATI backend.])
     sh_backend_ati=false
