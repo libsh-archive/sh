@@ -165,6 +165,10 @@ public:
   template<typename T>
   T* get_info();
 
+  // Delete and remove all info entries matching the given type.
+  template<typename T>
+  void destroy_info();
+
   // Add the given statement information to the end of the info list.
   void add_info(ShStatementInfo* new_info);
 
@@ -191,6 +195,18 @@ T* ShStatement::get_info()
     if (info) return info;
   }
   return 0;
+}
+
+template<typename T>
+void ShStatement::destroy_info()
+{
+  for (std::list<ShStatementInfo*>::iterator I = info.begin(); I != info.end();
+       ++I) {
+    T* item = dynamic_cast<T*>(*I);
+    if (item) delete item;
+    I = info.erase(I);
+    --I;
+  }
 }
 
 } // namespace SH
