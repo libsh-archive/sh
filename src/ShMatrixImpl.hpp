@@ -401,7 +401,7 @@ template<int Rows, int Cols, ShBindingType Binding, typename T>
 void ShMatrix<Rows, Cols, Binding, T>::name(const std::string& name)
 {
   // TODO: add a row number
-  for (int i = 0; i < Rows; i++) r[i] = m_data[i].name(name);
+  for (int i = 0; i < Rows; i++) m_data[i].name(name);
 }
 
 template<int Rows, int Cols, ShBindingType Binding, typename T>

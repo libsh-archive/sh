@@ -8,14 +8,11 @@
 #include "ShEvaluate.hpp"
 #include "ShContext.hpp"
 #include "ShSyntax.hpp"
-
-// Uncomment this to turn on optimizer debugging using dot.
-#define SH_DEBUG_OPTIMIZER
-
-#ifdef SH_DEBUG_OPTIMIZER
 #include <sstream>
 #include <fstream>
-#endif
+
+// Uncomment this to turn on optimizer debugging using dot.
+// #define SH_DEBUG_OPTIMIZER
 
 namespace {
 
@@ -903,6 +900,11 @@ struct DumpConstProp {
 
 struct FinishConstProp
 {
+  FinishConstProp(bool lift_uniforms)
+    : lift_uniforms(lift_uniforms)
+  {
+  }
+  
   void operator()(const ShCtrlGraphNodePtr& node) {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
@@ -949,6 +951,8 @@ struct FinishConstProp
               }
             }
           }
+
+          if (!lift_uniforms) continue;
           
           bool alluniform = true;
           for (int s = 0; s < opInfo[I->op].arity; s++) {
@@ -1013,6 +1017,8 @@ struct FinishConstProp
     ShVariableNodePtr node = new ShVariableNode(SH_TEMP, value->destsize);
     ShContext::current()->exit();
 
+    SH_DEBUG_PRINT("Lifting value #" << valuenum);
+    
     ShProgram prg = SH_BEGIN_PROGRAM("uniform") {
       ShStatement stmt(node, value->op);
 
@@ -1081,9 +1087,13 @@ struct FinishConstProp
       return ShVariable(node, swizzle, neg);
     }
 
+    SH_DEBUG_PRINT("Reached invalid point");
+
     // Should never reach here.
     return ShVariable();
   }
+
+  bool lift_uniforms;
 };
 
 // Copy propagation
@@ -1401,14 +1411,14 @@ void propagate_constants(ShProgram& p)
   // Now do something with our glorious newfound information.
 
   
-#ifdef SH_DEBUG_OPTIMIZER
+  //#ifdef SH_DEBUG_OPTIMIZER
   ConstProp::Value::dump(std::cerr);
 
   DumpConstProp dump;
   graph->dfs(dump);
-#endif
+  //#endif
   
-  FinishConstProp finish;
+  FinishConstProp finish(p.node()->target() != "uniform");
   graph->dfs(finish);
   
 }
