@@ -1,6 +1,10 @@
 #ifndef SHDEBUG_HPP
 #define SHDEBUG_HPP
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #ifdef SH_DEBUG
 #include <iostream>
 

@@ -58,21 +58,37 @@ void BackendCode::upload()
   for (int i = 0; i < m_maxTR; i++) m_tR[i] = smReg();
   for (int i = 0; i < m_maxIR; i++) m_iR[i] = smInputReg(i);
   for (int i = 0; i < m_maxOR; i++) m_oR[i] = smOutputReg(i);
-  // TODO: Initialize constants
   for (int i = 0; i < m_maxCR; i++) m_cR[i] = smConstantReg(i);
+
+  // Initialize constants
+  for (RegMap::const_iterator I = m_registers.begin(); I != m_registers.end(); ++I) {
+    ShVariableNodePtr node = I->first;
+    SmRegister reg = I->second;
+    if (node->hasValues()) {
+      float values[4];
+      int i;
+      for (i = 0; i < node->size(); i++) {
+        values[i] = node->getValue(i);
+      }
+      for (; i < 4; i++) {
+        values[i] = 0.0;
+      }
+      smModConstReg(reg.index, smTuple(values[0], values[1], values[2], values[3]));
+    }
+  }
 
   for (SmInstList::const_iterator I = m_instructions.begin(); I != m_instructions.end();
        ++I) {
     // TODO: Negation!
     if (I->src1.null()) {
-      smINSTR(I->op, getSmReg(I->dest.node()));
+      smInstr(I->op, getSmReg(I->dest.node()));
     } else if (I->src2.null()) {
-      smINSTR(I->op, getSmReg(I->dest.node()), getSmReg(I->src1.node()));
+      smInstr(I->op, getSmReg(I->dest.node()), getSmReg(I->src1.node()));
     } else if (I->src3.null()) {
-      smINSTR(I->op, getSmReg(I->dest.node()), getSmReg(I->src1.node()),
+      smInstr(I->op, getSmReg(I->dest.node()), getSmReg(I->src1.node()),
               getSmReg(I->src2.node()));
     } else {
-      smINSTR(I->op, getSmReg(I->dest.node()), getSmReg(I->src1.node()),
+      smInstr(I->op, getSmReg(I->dest.node()), getSmReg(I->src1.node()),
               getSmReg(I->src2.node()), getSmReg(I->src3.node()));
     }
   }
@@ -126,7 +142,7 @@ std::ostream& BackendCode::print(std::ostream& out)
   for (int i = 0; i < m_maxOR; i++) out << "oR[" << i << "] = smOutputReg(" << i << ");" << std::endl;
   out << "SMreg cR[" << m_maxCR << "];" << std::endl;
   for (int i = 0; i < m_maxCR; i++) out << "cR[" << i << "] = smConstantReg(" << i << ");" << std::endl;
-
+  
   out << std::endl;
   out << "// Shader body" << std::endl;
   for (SmInstList::const_iterator I = m_instructions.begin(); I != m_instructions.end();
@@ -146,6 +162,26 @@ std::ostream& BackendCode::print(std::ostream& out)
   out << std::endl;
   out << "smShaderEnd();" << std::endl;
   out << "}" << std::endl;
+
+  out << std::endl;
+  out << "// Initialize constant registers" << std::endl;
+  
+  // Set constants.
+  // This should really only happen at bind time.
+  // The question is: how useful is printing the code out in the
+  // first place if the constant values aren't really accessible.
+  for (RegMap::const_iterator I = m_registers.begin(); I != m_registers.end(); ++I) {
+    ShVariableNodePtr node = I->first;
+    SmRegister reg = I->second;
+    if (node->hasValues()) {
+      out << "smModConstReg(" << reg.index << ", smTuple(";
+      for (int i = 0; i < node->size(); i++) {
+        if (i) out << ", ";
+        out << node->getValue(i);
+      }
+      out << "));" << std::endl;
+    }
+  }
   return out;
 }
 
@@ -302,56 +338,58 @@ std::string Backend::name() const
 void initOps()
 {
   opNames = new std::string[256];
+  opNames[OP_ABS] = "ABS";
   opNames[OP_ADD] = "ADD";
-  opNames[OP_RCP] = "RCP";
-  opNames[OP_MUL] = "MUL";
-  opNames[OP_LIT] = "LIT";
-  opNames[OP_DST] = "DST";
-  opNames[OP_DP3] = "DP3";
-  opNames[OP_DP4] = "DP4";
-  opNames[OP_MOV] = "MOV";
-  opNames[OP_RSQ] = "RSQ";
-  opNames[OP_MIN] = "MIN";
-  opNames[OP_MAX] = "MAX";
-  opNames[OP_SLT] = "SLT";
-  opNames[OP_SGE] = "SGE";
-  opNames[OP_EXP] = "EXP";
-  opNames[OP_LOG] = "LOG";
-  opNames[OP_JR] = "JR";
-  opNames[OP_BNE] = "BNE";
-  opNames[OP_BE] = "BE";
-  opNames[OP_TEX] = "TEX";
-  opNames[OP_NSE1] = "NSE1";
-  opNames[OP_NSE2] = "NSE2";
-  opNames[OP_NSE3] = "NSE3";
-  opNames[OP_DNS1] = "DNS1";
-  opNames[OP_DNS2] = "DNS2";
-  opNames[OP_DNS3] = "DNS3";
-  opNames[OP_GNS1] = "GNS1";
-  opNames[OP_GNS2] = "GNS2";
-  opNames[OP_GNS3] = "GNS3";
-  opNames[OP_TNS1] = "TNS1";
-  opNames[OP_TNS2] = "TNS2";
-  opNames[OP_TNS3] = "TNS3";
-  opNames[OP_TEXJ] = "TEXJ";
-  opNames[OP_SIN] = "SIN";
+  opNames[OP_BRA] = "BRA";
+  opNames[OP_CAL] = "CAL";
+  opNames[OP_CMP] = "CMP";
   opNames[OP_COS] = "COS";
-  opNames[OP_FLR] = "FLR";
-  opNames[OP_FRC] = "FRC";
-  opNames[OP_SSG] = "SSG";
-  opNames[OP_MAD] = "MAD";
-  opNames[OP_NORM] = "NORM";
-  opNames[OP_OUT] = "OUT";
-  opNames[OP_TEXM] = "TEXM";
-  opNames[OP_SHL] = "SHL";
-  opNames[OP_SHR] = "SHR";
-  opNames[OP_HSH] = "HSH";
-  opNames[OP_MOVD] = "MOVD";
-  opNames[OP_DBG] = "DBG";
   opNames[OP_DDX] = "DDX";
   opNames[OP_DDY] = "DDY";
+  opNames[OP_DP3] = "DP3";
+  opNames[OP_DP4] = "DP4";
+  opNames[OP_DPH] = "DPH";
+  opNames[OP_DST] = "DST";
+  opNames[OP_EX2] = "EX2";
+  opNames[OP_EXP] = "EXP";
+  opNames[OP_FLR] = "FLR";
+  opNames[OP_FRC] = "FRC";
+  opNames[OP_KIL] = "KIL";
+  opNames[OP_LG2] = "LG2";
+  opNames[OP_LIT] = "LIT";
+  opNames[OP_LOG] = "LOG";
+  opNames[OP_LRP] = "LRP";
+  opNames[OP_MAD] = "MAD";
+  opNames[OP_MAX] = "MAX";
+  opNames[OP_MIN] = "MIN";
+  opNames[OP_MOV] = "MOV";
+  opNames[OP_MUL] = "MUL";
+  opNames[OP_NORM] = "NORM"; 
+  opNames[OP_OUT] = "OUT"; 
+  opNames[OP_POW] = "POW";
+  opNames[OP_RCC] = "RCC";
+  opNames[OP_RCP] = "RCP";
+  opNames[OP_RET] = "RET";
+  opNames[OP_RFL] = "RFL";
+  opNames[OP_RSQ] = "RSQ";
+  opNames[OP_SEQ] = "SEQ";
+  opNames[OP_SCS] = "SCS";
+  opNames[OP_SFL] = "SFL";
+  opNames[OP_SGE] = "SGE";
+  opNames[OP_SGT] = "SGT";
+  opNames[OP_SIN] = "SIN";
+  opNames[OP_SLE] = "SLE";
+  opNames[OP_SLT] = "SLT";
+  opNames[OP_SNE] = "SNE";
+  opNames[OP_SSG] = "SSG";
+  opNames[OP_STR] = "STR";
+  opNames[OP_SUB] = "SUB";
+  opNames[OP_TEX] = "TEX";
+  opNames[OP_TXB] = "TXB";
   opNames[OP_TXD] = "TXD";
-  opNames[OP_KLL] = "KLL";
+  opNames[OP_TXP] = "TXP";
+  opNames[OP_X2D] = "X2D";
+  opNames[OP_XPD] = "XPD";
   opNames[OP_HLT] = "HLT";
 }
 

@@ -3,7 +3,7 @@
 namespace SH {
 
 ShVariable::ShVariable(const ShVariableNodePtr& node)
-  : m_node(node), m_neg(false)
+  : m_node(node), m_swizzle(node ? node->size() : 0), m_neg(false)
 {
 }
 
@@ -15,6 +15,11 @@ bool ShVariable::null() const
 bool ShVariable::uniform() const
 {
   return m_node->uniform();
+}
+
+bool ShVariable::hasValues() const
+{
+  return m_node->hasValues();
 }
 
 int ShVariable::size() const
@@ -45,6 +50,20 @@ const ShVariableNodePtr& ShVariable::node() const
 bool ShVariable::neg() const
 {
   return m_neg;
+}
+
+void ShVariable::getValues(ShVariableNode::ValueType dest[]) const
+{
+  for (int i = 0; i < size(); i++) {
+    dest[i] = m_node->getValue(m_swizzle[i]);
+  }
+}
+
+void ShVariable::setValues(ShVariableNode::ValueType values[])
+{
+  for (int i = 0; i < size(); i++) {
+    m_node->setValue(m_swizzle[i], values[i]);
+  }
 }
 
 }

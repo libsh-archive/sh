@@ -41,13 +41,24 @@ template<> class ShCheckDims<1, true, 1, true>
 
 /// Addition
 template<int N, typename T>
-ShAttrib<N, SH_VAR_TEMP, T, false> operator+(const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
+ShVariableN<N, T> operator+(const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
 {
-  ShAttrib<N, SH_VAR_TEMP, T, false> t;
-  ShStatement stmt(t, left, SH_OP_ADD, right);
-  ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
-  
-  return t;
+  if (!ShEnvironment::insideShader) {
+    assert(left.hasValues());
+    assert(right.hasValues());
+    T lvals[N];
+    left.getValues(lvals);
+    T rvals[N];
+    right.getValues(rvals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = lvals[i] + rvals[i];
+    return ShConstant<N, T>(result);
+  } else {
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, left, SH_OP_ADD, right);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
 }
 
 /// Subtraction
@@ -61,24 +72,70 @@ ShAttrib<N, SH_VAR_TEMP, T, false> operator-(const ShVariableN<N, T>& left, cons
 template<int N, int M, typename T>
 ShAttrib<N, SH_VAR_TEMP, T, false> operator*(const ShVariableN<N, T>& left, const ShVariableN<M, T>& right)
 {
-  ShCheckDims<N, true, M, true>();
-  ShAttrib<N, SH_VAR_TEMP, T, false> t;
-  ShStatement stmt(t, left, SH_OP_MUL, right);
-  ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+  if (!ShEnvironment::insideShader) {
+    assert(left.hasValues());
+    assert(right.hasValues());
+    T lvals[N];
+    left.getValues(lvals);
+    T rvals[M];
+    right.getValues(rvals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = lvals[i] * rvals[M == 1 ? 0 : i];
+    return ShConstant<N, T>(result);
+  } else {
+    ShCheckDims<N, true, M, true>();
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, left, SH_OP_MUL, right);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
 
-  return t;
+    return t;
+  }
+}
+
+template<int M, typename T>
+ShAttrib<M, SH_VAR_TEMP, T, false> operator*(const ShVariableN<1, T>& left, const ShVariableN<M, T>& right)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(left.hasValues());
+    assert(right.hasValues());
+    T lvals[1];
+    left.getValues(lvals);
+    T rvals[M];
+    right.getValues(rvals);
+    T result[M];
+    for (int i = 0; i < M; i++) result[i] = lvals[0] * rvals[i];
+    return ShConstant<M, T>(result);
+  } else {
+    ShAttrib<M, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, left, SH_OP_MUL, right);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+
+    return t;
+  }
 }
 
 /// Componentwise/scalar division
 template<int N, int M, typename T>
 ShAttrib<N, SH_VAR_TEMP, T, false> operator/(const ShVariableN<N, T>& left, const ShVariableN<M, T>& right)
 {
-  ShCheckDims<N, false, M, true>();
-  ShAttrib<N, SH_VAR_TEMP, T, false> t;
-  ShStatement stmt(t, left, SH_OP_DIV, right);
-  ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
-
-  return t;
+  if (!ShEnvironment::insideShader) {
+    assert(left.hasValues());
+    assert(right.hasValues());
+    T lvals[N];
+    left.getValues(lvals);
+    T rvals[M];
+    right.getValues(rvals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = lvals[i] / rvals[M == 1 ? 0 : i];
+    return ShConstant<N, T>(result);
+  } else {
+    ShCheckDims<N, false, M, true>();
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, left, SH_OP_DIV, right);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    
+    return t;
+  }
 }
 
 }

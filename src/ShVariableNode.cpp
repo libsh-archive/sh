@@ -94,6 +94,13 @@ void ShVariableNode::setValue(int i, ValueType value)
   m_values[i] = value;
 }
 
+ShVariableNode::ValueType ShVariableNode::getValue(int i) const
+{
+  assert(m_values);
+  assert(i >= 0 && i < m_size);
+  return m_values[i];
+}
+
 int ShVariableNode::m_maxID = 0;
 
 }

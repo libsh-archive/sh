@@ -41,6 +41,9 @@ public:
   ///@see hasValues()
   void setValue(int i, ValueType value);
 
+  /// Retrieve a particular value
+  ValueType getValue(int i) const;
+  
 protected:
 
   bool m_uniform;

@@ -19,7 +19,6 @@ ShShader shBeginShader(int kind)
 void shEndShader()
 {
   assert(ShEnvironment::insideShader);
-  ShEnvironment::insideShader = false;
 
   // DEBUG
   std::cerr << "--- Tokenized: " << std::endl;
@@ -44,6 +43,7 @@ void shEndShader()
   } else {
     std::cerr << "SM backend not loaded!" << std::endl;
   }
+  ShEnvironment::insideShader = false;
 }
 
 void shIf(bool)

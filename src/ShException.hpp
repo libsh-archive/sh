@@ -16,7 +16,7 @@ public:
   /// Return an informative message describing the exception.
   const std::string& message() const;
   
-private:
+protected:
   std::string m_message;
 };
 

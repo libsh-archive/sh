@@ -1,4 +1,4 @@
-check_PROGRAMS = do if for ops simple while
+check_PROGRAMS = do if for ops simple uniforms while
 
 AM_CPPFLAGS = -I../src
 
@@ -10,4 +10,5 @@ if_SOURCES = if.cpp
 for_SOURCES = for.cpp
 ops_SOURCES = ops.cpp
 simple_SOURCES = simple.cpp
+uniforms_SOURCES = uniforms.cpp
 while_SOURCES = while.cpp

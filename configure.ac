@@ -1,6 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 AC_INIT(sh, 0.1, mmccool@cgl.uwaterloo.ca)
 AC_CONFIG_SRCDIR([src/ShAttrib.hpp])
+AM_CONFIG_HEADER(config.h)
 
 AM_INIT_AUTOMAKE(sh, 0.1)
 
@@ -14,13 +15,13 @@ AC_ARG_ENABLE([debug], AC_HELP_STRING([--enable-debug], [enable debugging inform
   [AC_MSG_CHECKING([for debugging information])
    msg=disabled
    if test ".$enableval" = ".yes" ; then
-       AC_DEFINE(SH_DEBUG)
+       AC_DEFINE(SH_DEBUG, 1, [Enable debugging information])
        msg=enabled
    fi
    AC_MSG_RESULT($msg)
   ],
   [AC_MSG_CHECKING([for debugging information])
-   AC_DEFINE(SH_DEBUG)
+   AC_DEFINE(SH_DEBUG, 1, [Enable debugging information])
    AC_MSG_RESULT(default (yes))
    ])
 CXXFLAGS="-g -Wall -O2"

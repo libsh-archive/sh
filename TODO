@@ -8,9 +8,11 @@ SMALL TASKS:
  X gather variables in ShShader
  X simple SM register allocation
  X add negation to variables
+ X compute uniform constant operations in the host
+ - send uniform values to SM in the SM backend
+ - have updating semantics for uniforms
 
 MEDIUM TASKS:
- - set constants and uniforms in the sm backend
  - port more of the ShLib calls to the new model.
  X code generator
  - add smarter configuration mechanism

@@ -20,7 +20,9 @@ public:
   bool null() const; ///< true iff node is a null pointer.
   
   bool uniform() const; ///< Is this a uniform (non-shader specific) variable?
-
+  bool hasValues() const; ///< Does this variable have constant
+                          ///(host-local) values?
+  
   int size() const; ///< Get the number of elements in this variable
   std::string name() const; ///< Get this variable's name
 
@@ -37,6 +39,12 @@ public:
   /// Return true if this variable is negated
   bool neg() const;
 
+  /// Get the values of this variable, with swizzling taken into account
+  void getValues(ShVariableNode::ValueType dest[]) const;
+  /// Set the values of this variable, using the swizzle as a
+  /// writemask.
+  void setValues(ShVariableNode::ValueType values[]);
+  
 protected:
   
   ShVariableNodePtr m_node; ///< The actual variable node we refer to.

@@ -29,17 +29,17 @@ namespace SH {
 class ShSwizzle {
 public:
   /// Identity swizzle: does nothing at all.
-  ShSwizzle();
+  ShSwizzle(int srcSize);
   /// Use one element from the original tuple.
-  ShSwizzle(int i0);
+  ShSwizzle(int srcSize, int i0);
   /// Use two elements from the original tuple.
-  ShSwizzle(int i0, int i1);
+  ShSwizzle(int srcSize, int i0, int i1);
   /// Use three elements from the original tuple.
-  ShSwizzle(int i0, int i1, int i2);
+  ShSwizzle(int srcSize, int i0, int i1, int i2);
   /// Use four elements from the original tuple.
-  ShSwizzle(int i0, int i1, int i2, int i3);
+  ShSwizzle(int srcSize, int i0, int i1, int i2, int i3);
   /// Use an arbitrary number of elements from the original tuple.
-  ShSwizzle(int size, int* indices);
+  ShSwizzle(int srcSize, int size, int* indices);
 
   ShSwizzle(const ShSwizzle& other);
   ~ShSwizzle();
@@ -69,7 +69,7 @@ private:
 class ShSwizzleException : public ShException 
 {
 public:
-  ShSwizzleException();
+  ShSwizzleException(int idx, int size);
 };
   
 }
