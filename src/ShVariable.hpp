@@ -100,7 +100,6 @@ public:
   }
 };
 
-
 }
 
 namespace SH {

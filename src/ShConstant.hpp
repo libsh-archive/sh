@@ -22,6 +22,11 @@ private:
   ShConstant<N, T>& operator=(const ShConstant<N, T>& other);
 };
 
+typedef ShConstant<1, double> ShConstant1f;
+typedef ShConstant<2, double> ShConstant2f;
+typedef ShConstant<3, double> ShConstant3f;
+typedef ShConstant<4, double> ShConstant4f;
+
 }
 
 #include "ShConstantImpl.hpp"

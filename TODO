@@ -7,6 +7,8 @@ MATRICES:
  - determinant
  - inverse
  - name()
+ - add some matrix expand() call to expand to an ident matrix with top-left submatrix replaced with M
+ - identity fetcher
 
 TEXTURES:
  X bind texture units in shader
@@ -78,7 +80,7 @@ OPERATIONS:
 |X|X|X| sub
 |X|X|X| sqrt
 |X|X|X| dot
-|X|X|X| pow
+|X|X|X| pow   TODO: vector x scalar
 |X|X|X| frac
 |X|X|X| sin
 |X|X|X| cos
