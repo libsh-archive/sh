@@ -118,6 +118,8 @@ public:
   ShProgramNode::TexList::const_iterator textures_end() const { return m_node->textures_end(); }
   ShProgramNode::ChannelList::const_iterator channels_begin() const { return m_node->channels_begin(); }
   ShProgramNode::ChannelList::const_iterator channels_end() const { return m_node->channels_end(); }
+  ShProgramNode::PaletteList::const_iterator palettes_begin() const { return m_node->palettes_begin(); }
+  ShProgramNode::PaletteList::const_iterator palettes_end() const { return m_node->palettes_end(); }
 
   // Call operators for channels and streams.
   // Equivalent to operator<< invocations.

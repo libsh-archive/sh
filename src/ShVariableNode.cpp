@@ -223,6 +223,9 @@ std::string ShVariableNode::name() const
   case SH_STREAM:
     stream << "str";
     break;
+  case SH_PALETTE:
+    stream << "pal";
+    break;
   }
 
   stream << m_id;

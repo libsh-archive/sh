@@ -116,6 +116,10 @@ libsh_dll_SOURCES += ShChannelNode.hpp ShChannelNode.cpp
 libsh_dll_SOURCES += ShChannel.hpp ShChannelImpl.hpp
 libsh_dll_SOURCES += ShStream.hpp ShStreamImpl.hpp ShStream.cpp
 
+# Palettes
+libsh_dll_SOURCES += ShPalette.hpp ShPaletteImpl.hpp
+libsh_dll_SOURCES += ShPaletteNode.hpp ShPaletteNode.cpp
+
 libsh_dll_CXXFILES = $(filter %.cpp,$(libsh_dll_SOURCES))
 libsh_dll_RELEASE_OBJECTS = $(libsh_dll_CXXFILES:.cpp=.r.obj)
 libsh_dll_DEBUG_OBJECTS = $(libsh_dll_CXXFILES:.cpp=.d.obj)

@@ -45,7 +45,8 @@ enum ShBindingType {
   SH_TEMP = 3,
   SH_CONST = 4,
   SH_TEXTURE = 5,
-  SH_STREAM = 6
+  SH_STREAM = 6,
+  SH_PALETTE = 7
 };
 
 /** The various ways semantic types for variables.

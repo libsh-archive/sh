@@ -1,3 +1,38 @@
+2004-10-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShConstProp.cpp (ConstProp::ConstProp): Handle palette nodes.
+
+	* src/ShVariableNode.cpp (name): Handle palette nodes.
+
+	* src/Makefile.win32: Add palette source files.
+
+	* src/Makefile.am: Add palette source files.
+
+	* src/sh.hpp: Include ShPalette.hpp.
+
+	* src/ShStatement.cpp (opInfo): Add info for SH_OP_PAL.
+
+	* src/ShStatement.hpp (ShOperation): Add SH_OP_PAL.
+
+	* src/ShVariableNode.hpp (ShBindingType): Add new SH_PALETTE
+	binding type.
+
+	* src/ShProgram.hpp (ShProgram): Add palette accessor function
+	wrappers.
+
+	* src/ShProgramNode.cpp (collectVar): Look for palettes.
+
+	* src/ShProgramNode.hpp (ShProgramNode): Add palette accesor functions.
+
+	* src/ShPaletteNode.cpp: Implement ShPaletteNode.
+
+	* src/ShPaletteNode.hpp: Add ShPaletteNode class for internal
+	palette representation.
+
+	* src/ShPaletteImpl.hpp: Add implementation for ShPalette.
+
+	* src/ShPalette.hpp: Add initial palette support.
+
 2004-10-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShGenericImpl.hpp (operator%=): Actually do a modulo, not a

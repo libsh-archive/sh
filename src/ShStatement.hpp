@@ -108,6 +108,8 @@ enum ShOperation {
                 ///  code passed to the backend.
 
   SH_OP_FETCH, ///< Unary (takes a stream). Fetch an element from a stream. Similar to TEX
+
+  SH_OP_PAL, ///< Palette fetch
 };
 
 #ifdef IGNORE
