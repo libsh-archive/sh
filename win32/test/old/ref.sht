@@ -1,0 +1,20 @@
+// -*- C++ -*-
+ShTexture2D<ShColor3f> tex(20, 30);
+
+ShProgram prg = SH_BEGIN_PROGRAM() {
+  ShInputTexCoord2f tc;
+  ShOutputColor3f col = tex(tc);
+} SH_END;
+
+std::cout << "tex.node rc = " << tex.node().refCount() << std::endl;
+prg & keep<ShAttrib1f>();
+std::cout << "tex.node rc = " << tex.node().refCount() << std::endl;
+prg & keep<ShAttrib1f>();
+std::cout << "tex.node rc = " << tex.node().refCount() << std::endl;
+prg & keep<ShAttrib1f>();
+std::cout << "tex.node rc = " << tex.node().refCount() << std::endl;
+prg & keep<ShAttrib1f>();
+std::cout << "tex.node rc = " << tex.node().refCount() << std::endl;
+
+ShProgram shader = SH_BEGIN_PROGRAM("gpu:vertex") {
+} SH_END;
