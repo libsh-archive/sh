@@ -51,7 +51,7 @@ class ShKernelPost {
     /** screen space Halftoning/Hatching in each color channel using tex as a threshold image
      * IN(0) ShAttrib1f scaling   - scaling on posh(0,1) before doing texture lookup
      * IN(1) T result 
-     * IN(0) ShPosition4f posh    - homogeneous position (HDCS)
+     * IN(2) ShPosition4f posh    - homogeneous position (HDCS)
      *
      * OUT(0) T result            - output result 
      */
