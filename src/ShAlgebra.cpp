@@ -9,6 +9,7 @@
 #include "ShOptimizer.hpp"
 #include "ShInternals.hpp"
 #include "ShEnvironment.hpp"
+#include "ShContext.hpp"
 #include "ShManipulator.hpp"
 #include "ShFixedManipulator.hpp"
 
@@ -138,7 +139,7 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   program->ctrlGraph->dfs(replacer);
 
   ShOptimizer optimizer(program->ctrlGraph);
-  optimizer.optimize(ShEnvironment::optimizationLevel);
+  optimizer.optimize(ShContext::current()->optimization());
   
   program->collectVariables();
   return program;
@@ -179,7 +180,7 @@ ShProgram combine(const ShProgram& a, const ShProgram& b)
   program->outputs.insert(program->outputs.end(), b->outputs.begin(), b->outputs.end());
 
   ShOptimizer optimizer(program->ctrlGraph);
-  optimizer.optimize(ShEnvironment::optimizationLevel); 
+  optimizer.optimize(ShContext::current()->optimization()); 
  
   program->collectVariables();
   
@@ -371,7 +372,7 @@ ShProgram replaceUniform(const ShProgram& a, const ShVariable& v)
   program->ctrlGraph->dfs(replacer);
 
   ShOptimizer optimizer(program->ctrlGraph);
-  optimizer.optimize(ShEnvironment::optimizationLevel);
+  optimizer.optimize(ShContext::current()->optimization());
   
   program->collectVariables();
 

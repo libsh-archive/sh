@@ -95,7 +95,6 @@ int main(int argc, char** argv)
     backendName = argv[1];
   }
 
-  ShEnvironment::optimizationLevel = 1;
   try {
     ShColor3f SH_DECL(color) = ShColor3f(1.0, 1.0, 1.0);
   

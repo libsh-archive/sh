@@ -34,10 +34,10 @@
 
 namespace SH {
 
-/** Throws the given exception when ShEnvironment::useExceptions is on. 
- * Otherwise prints error message and aborts.
+/** Throws the given exception when ShContext::current()->throw_errors() is on. 
+ * Otherwise prints error message.
  */
-void shError( ShException exception ); 
+void shError(const ShException& exception); 
 
 }
 #endif

@@ -1,5 +1,10 @@
 2004-05-28  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShContext.hpp: Added ShContext type. Moved optimization
+	level and error throwing settings here from ShEnvironment. Changed
+	uses of ShEnvironment to refer to ShContext::current() where
+	appropriate. Resolves issue4, more or less.
+
 	* Added CPtr typedefs for ShPointer<const ...> types. Resolves
 	issue106.
 

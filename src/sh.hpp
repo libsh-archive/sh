@@ -28,6 +28,7 @@
 #define SH_HPP
 
 #include "ShException.hpp"
+#include "ShContext.hpp"
 #include "ShProgram.hpp"
 #include "ShSyntax.hpp"
 #include "ShAttrib.hpp"

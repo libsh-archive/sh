@@ -29,6 +29,7 @@
 #include <cassert>
 #include "ShSyntax.hpp"
 #include "ShEnvironment.hpp"
+#include "ShContext.hpp"
 #include "ShTokenizer.hpp"
 #include "ShToken.hpp"
 #include "ShProgram.hpp"
@@ -52,7 +53,7 @@ void shEndShader()
   ShEnvironment::shader->ctrlGraph = new ShCtrlGraph(ShEnvironment::shader->tokenizer.blockList());
 
   ShOptimizer optimizer(ShEnvironment::shader->ctrlGraph);
-  optimizer.optimize(ShEnvironment::optimizationLevel);
+  optimizer.optimize(ShContext::current()->optimization());
   
   ShEnvironment::shader->collectVariables();
   

@@ -25,18 +25,17 @@
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
 #include "ShError.hpp"
-#include "ShEnvironment.hpp"
+#include "ShContext.hpp"
 #include <iostream>
 
 namespace SH {
 
-void shError( ShException exception ) {
-    if( ShEnvironment::useExceptions ) {
-        throw exception;
-    } else {
-      std::cerr << exception.message() << std::endl;
-      abort();
-    }
+void shError(const ShException& exception ) {
+  if (ShContext::current()->throw_errors()) {
+    throw exception;
+  } else {
+    std::cerr << exception.message() << std::endl;
+  }
 }
 
 }

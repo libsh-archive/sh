@@ -34,6 +34,7 @@
 #include "ShInternals.hpp"
 #include "ShOptimizer.hpp"
 #include "ShEnvironment.hpp"
+#include "ShContext.hpp"
 #include "ShTextureNode.hpp"
 #include "ShSyntax.hpp"
 #include "ArbReg.hpp"
@@ -128,7 +129,7 @@ void ArbCode::generate()
   
   if(transform.changed()) {
     ShOptimizer optimizer(m_shader->ctrlGraph);
-    optimizer.optimize(ShEnvironment::optimizationLevel);
+    optimizer.optimize(ShContext::current()->optimization());
     m_shader->collectVariables();
   } else {
     m_shader = m_originalShader;

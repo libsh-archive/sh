@@ -48,6 +48,7 @@
 #include "ShOptimizer.hpp"
 #include "ShException.hpp"
 #include "ShError.hpp"
+#include "ShContext.hpp"
 
 #ifdef DO_PBUFFER_TIMING
 #include <sys/time.h>
@@ -485,7 +486,7 @@ void PBufferStreams::execute(const ShProgram& program,
   
   // optimize
   ShOptimizer optimizer(fp->ctrlGraph);
-  optimizer.optimize(ShEnvironment::optimizationLevel);
+  optimizer.optimize(ShContext::current()->optimization());
 
   int gl_error;
   glEnable(GL_VERTEX_PROGRAM_ARB);
