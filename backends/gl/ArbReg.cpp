@@ -56,6 +56,7 @@ struct {
 } arbRegBindingInfo[] = {
   {SH_ARB_REG_PARAM, "program.local", true},
   {SH_ARB_REG_PARAM, "program.env", true},
+  {SH_ARB_REG_PARAM, "<nil>", true},
   {SH_ARB_REG_OUTPUT, "result.color", false}, // TODO: Special case?
   
   {SH_ARB_REG_ATTRIB, "vertex.position", false},
@@ -81,13 +82,19 @@ struct {
 };
 
 ArbReg::ArbReg()
-  : type(SH_ARB_REG_TEMP), index(-1), name(""), binding(SH_ARB_REG_NONE), bindingIndex(-1), bindingCount(1)
+  : type(SH_ARB_REG_TEMP), index(-1), name("")
 {
+    binding.type = SH_ARB_REG_NONE;
+    binding.index = -1;
+    binding.count = 1;
 }
   
 ArbReg::ArbReg(ArbRegType type, int index, std::string name)
-  : type(type), index(index), name(name), binding(SH_ARB_REG_NONE), bindingIndex(-1), bindingCount(1)
+  : type(type), index(index), name(name)
 {
+    binding.type = SH_ARB_REG_NONE;
+    binding.index = -1;
+    binding.count = 1;
 }
 
 
@@ -98,24 +105,31 @@ std::ostream& ArbReg::printDecl(std::ostream& out) const
     out << " = " << "{";
     for (int i = 0; i < 4; i++) {
       if (i) out << ", ";
-      out << values[i];
+      out << binding.values[i];
     }
     out << "}";
-  } else if (binding != SH_ARB_REG_NONE) {
-    if (bindingCount > 1) {
-      out << "[" << bindingCount << "]";
+  } else if (binding.type != SH_ARB_REG_NONE) {
+  if (binding.type == SH_ARB_REG_STATE)
+    {
+    out << " = " << binding.name;
+    }
+  else
+    {
+    if (binding.count > 1) {
+      out << "[" << binding.count << "]";
     }
     out << " = ";
-    if (bindingCount > 1) out << "{ ";
-    out << arbRegBindingInfo[binding].name;
-    if (arbRegBindingInfo[binding].indexed) {
-      out << "[" << bindingIndex;
-      if (bindingCount > 1) {
-        out << " .. " << (bindingIndex + bindingCount - 1);
+    if (binding.count > 1) out << "{ ";
+    out << arbRegBindingInfo[binding.type].name;
+    if (arbRegBindingInfo[binding.type].indexed) {
+      out << "[" << binding.index;
+      if (binding.count > 1) {
+        out << " .. " << (binding.index + binding.count - 1);
       }
       out << "]";
     }
-    if (bindingCount > 1) out << " }";
+    if (binding.count > 1) out << " }";
+    }
   }
   out << ";"; 
   if(!name.empty() && type != SH_ARB_REG_CONST) out << " # " << name;

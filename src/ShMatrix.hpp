@@ -27,6 +27,7 @@
 #ifndef SH_SHMATRIX_HPP
 #define SH_SHMATRIX_HPP
 
+#include "ShMeta.hpp"
 #include "ShVariable.hpp"
 #include "ShAttrib.hpp"
 #include "ShRefCount.hpp"
@@ -46,7 +47,7 @@ class ShMatrixRows;
  * @see ShArray
  */
 template<int Rows, int Cols, ShBindingType Binding, typename T>
-class ShMatrix {
+class ShMatrix: public virtual ShMeta {
 public:
   typedef typename ShHostType<T>::type H; 
   typedef H HostType; 
@@ -172,23 +173,27 @@ public:
    */
   //@{
 
-  /// Set this matrix's name. If set to the empty string, defaults
-  /// to the type and id of the variable.
-  void name(const std::string& name);
-  std::string name() const; ///< Get this matrix's name
-  
   /// Set a range of values for this matrix
   void range(H low, H high);
 
-  /// If this is true, this matrix should not be able to be set by
-  /// e.g. a user in a UI. For example the model-view matrix should
-  /// probably have this set to true.
-  /// This is false by default.
-  void internal(bool setting);
-
   //@}
   
+  virtual std::string name() const;
+  virtual void name(const std::string& n);
+  virtual bool has_name() const;
   
+  virtual bool internal() const;
+  virtual void internal(bool);
+
+  virtual std::string title() const;
+  virtual void title(const std::string& t);
+
+  virtual std::string description() const;
+  virtual void description(const std::string& d);
+
+  virtual std::string meta(const std::string& key) const;
+  virtual void meta(const std::string& key, const std::string& value);
+
 private:
   /** \brief The Matrix itself
    *

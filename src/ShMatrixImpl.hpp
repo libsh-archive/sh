@@ -344,33 +344,109 @@ ShMatrixRows<Rows, Cols, T>::operator()(int i0, int i1, int i2, int i3) const
 }
 
 template<int Rows, int Cols, ShBindingType Binding, typename T>
-void ShMatrix<Rows, Cols, Binding, T>::name(const std::string& name)
-{
-  for (int i = 0; i < Rows; i++) {
-    std::ostringstream os;
-    os << name << "_row" << i;
-    m_data[i].name(os.str());
-    m_data[i].meta("matrixname", name);
-  }
-}
-
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-std::string ShMatrix<Rows, Cols, Binding, T>::name() const
-{
-  return m_data[0].meta("matrixname");
-}
-
-template<int Rows, int Cols, ShBindingType Binding, typename T>
 void ShMatrix<Rows, Cols, Binding, T>::range(H low, H high)
 {
   for (int i = 0; i < Rows; i++) m_data[i].range(low, high);
 }
 
 template<int Rows, int Cols, ShBindingType Binding, typename T>
-void ShMatrix<Rows, Cols, Binding, T>::internal(bool setting)
-{
-  for (int i = 0; i < Rows; i++) m_data[i].internal(setting);
-}
+std::string ShMatrix<Rows, Cols, Binding, T>::name() const
+  {
+  return ShMeta::name();
+  }
+
+template<int Rows, int Cols, ShBindingType Binding, typename T>
+void ShMatrix<Rows, Cols, Binding, T>::name(const std::string& n)
+  {
+  ShMeta::name(n);
+  
+  for (int i = 0; i < Rows; i++)
+    {
+    std::stringstream s;
+    s << n << ".row[" << i << "]";
+    m_data[i].name(s.str());
+    }
+  }
+
+template<int Rows, int Cols, ShBindingType Binding, typename T>
+bool ShMatrix<Rows, Cols, Binding, T>:: has_name() const
+  {
+  return ShMeta::has_name();
+  }
+  
+template<int Rows, int Cols, ShBindingType Binding, typename T>
+bool ShMatrix<Rows, Cols, Binding, T>::internal() const
+  {
+  return ShMeta::internal();
+  }
+
+template<int Rows, int Cols, ShBindingType Binding, typename T>
+void ShMatrix<Rows, Cols, Binding, T>::internal(bool i)
+  {
+  ShMeta::internal(i);
+  
+  for (int i = 0; i < Rows; i++)
+    {
+    m_data[i].internal(i);
+    }
+  }
+
+template<int Rows, int Cols, ShBindingType Binding, typename T>
+std::string ShMatrix<Rows, Cols, Binding, T>::title() const
+  {
+  return ShMeta::title();
+  }
+
+template<int Rows, int Cols, ShBindingType Binding, typename T>
+void ShMatrix<Rows, Cols, Binding, T>::title(const std::string& t)
+  {
+  ShMeta::title(t);
+
+  for (int i = 0; i < Rows; i++)
+    {
+    std::stringstream s;
+    s << t << ".row[" << i << "]";
+    m_data[i].title(s.str());
+    }
+  }
+
+template<int Rows, int Cols, ShBindingType Binding, typename T>
+std::string ShMatrix<Rows, Cols, Binding, T>::description() const
+  {
+  return ShMeta::description();
+  }
+
+template<int Rows, int Cols, ShBindingType Binding, typename T>
+void ShMatrix<Rows, Cols, Binding, T>::description(const std::string& d)
+  {
+  ShMeta::description(d);
+
+  for (int i = 0; i < Rows; i++)
+    {
+    std::stringstream s;
+    s << d << ".row[" << i << "]";
+    m_data[i].description(s.str());
+    }
+  }
+
+template<int Rows, int Cols, ShBindingType Binding, typename T>
+std::string ShMatrix<Rows, Cols, Binding, T>::meta(const std::string& key) const
+  {
+  return ShMeta::meta(key);
+  }
+
+template<int Rows, int Cols, ShBindingType Binding, typename T>
+void ShMatrix<Rows, Cols, Binding, T>::meta(const std::string& key, const std::string& value)
+  {
+  ShMeta::meta(key, value);
+
+  for (int i = 0; i < Rows; i++)
+    {
+    std::stringstream s;
+    s << value << ".row[" << i << "]";
+    m_data[i].meta(key, s.str());
+    }
+  }
 
 
 }
