@@ -324,6 +324,11 @@ void ArbCode::bind()
   bindTextures();
 }
 
+void ArbCode::update()
+{
+  bindTextures();
+}
+
 void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
 {
   int i;

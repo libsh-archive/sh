@@ -74,6 +74,7 @@ public:
   
   virtual void upload();
   virtual void bind();
+  virtual void update();
   virtual void updateUniform(const SH::ShVariableNodePtr& uniform);
   
   std::ostream& print(std::ostream& out);
