@@ -6,7 +6,10 @@ AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
 
 # Checks for programs.
-CXXFLAGS="-Wall -g -O2"
+if test "x$CXXFLAGS" = x ; then
+    CXXFLAGS="-Wall -g -O2"
+fi
+
 AC_PROG_CXX
 AC_LIBLTDL_CONVENIENCE
 AC_LIBTOOL_DLOPEN
