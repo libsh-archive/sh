@@ -710,6 +710,21 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
                                          stmt.src[1](scalar ? 0 : i)));
       }
       break;
+
+    case SH_OP_TAN:
+      if (m_target == "gpu:vertex") {
+        // TODO: fix for vertex program (use genTrigInst)
+      } else {
+        ShVariable tmp(new ShVariableNode(SH_TEMP, stmt.src[0].size()));
+        ShVariable tmp2(new ShVariableNode(SH_TEMP, stmt.src[0].size()));
+        for (int i = 0; i < stmt.src[0].size(); i++) {
+          m_instructions.push_back(ArbInst(SH_ARB_COS, tmp(i), stmt.src[0](i)));
+          m_instructions.push_back(ArbInst(SH_ARB_RCP, tmp(i), tmp(i)));
+          m_instructions.push_back(ArbInst(SH_ARB_SIN, tmp2(i), stmt.src[0](i)));
+        }
+        m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, tmp, tmp2));
+      }
+      break;
     case SH_OP_TEX:
     case SH_OP_TEXI:
       m_instructions.push_back(ArbInst(SH_ARB_TEX, stmt.dest, stmt.src[1], stmt.src[0]));

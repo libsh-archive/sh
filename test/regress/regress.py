@@ -115,6 +115,17 @@ tests = [
     ['SIN', ['v'], 'v', ['sin(A)'], []],
     ['SQRT', ['v'], 'v', ['sqrt(A)'], []],
 
+    ['TAN', ['v'], 'v', [],
+     [[l, [math.tan(x) for x in l]]
+       for l in [[0.0, 1.0, 2.0],
+                 [0.5, 0.8, 0.9],
+                 [math.pi, math.pi/2.0, math.pi*2.0],
+                 [-math.pi, -math.pi/2.0, -math.pi*2.0],
+                 [3.0, 4.0, 5.0],
+                 [-1.0, -3.0, -4.0],
+                 [0.5, 1.5, 2.5]]]
+     ],
+
     ['NORM', ['v'], 'v', ['normalize(A)'],
      [[l, [x / math.sqrt(reduce(lambda a, b: a+b, [x*x for x in l])) for x in l]]
       for l in [[1.0, 1.0, 1.0],

@@ -79,6 +79,7 @@ enum ShOperation {
   SH_OP_POW, ///< Binary power
   SH_OP_SIN, ///< Unary sine function
   SH_OP_SQRT, ///< Unary square root
+  SH_OP_TAN, ///< Unary tangent
 
   SH_OP_NORM, ///< Normalize vector
   SH_OP_XPD, ///< Cross product

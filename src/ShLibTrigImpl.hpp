@@ -27,6 +27,24 @@ ShGeneric<N, T> asin(const ShGeneric<N, T>& var)
 
 template<int N, typename T>
 inline
+ShGeneric<N, T> atan(const ShGeneric<N, T>& var)
+{
+  ShAttrib<N, SH_TEMP, T> t;
+  shATAN(t, var);
+  return t;
+}
+
+template<int N, typename T>
+inline
+ShGeneric<N, T> atan2(const ShGeneric<N, T>& y, const ShGeneric<N, T>& x)
+{
+  ShAttrib<N, SH_TEMP, T> t;
+  shATAN2(t, y, x);
+  return t;
+}
+
+template<int N, typename T>
+inline
 ShGeneric<N, T> cos(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
@@ -40,6 +58,15 @@ ShGeneric<N, T> sin(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
   shSIN(t, var);
+  return t;
+}
+
+template<int N, typename T>
+inline
+ShGeneric<N, T> tan(const ShGeneric<N, T>& var)
+{
+  ShAttrib<N, SH_TEMP, T> t;
+  shTAN(t, var);
   return t;
 }
 

@@ -51,6 +51,7 @@ void shMOD(ShVariable& dest, const ShVariable& a, const ShVariable& b);
 void shPOW(ShVariable& dest, const ShVariable& a, const ShVariable& b);
 void shSIN(ShVariable& dest, const ShVariable& a);
 void shSQRT(ShVariable& dest, const ShVariable& a);
+void shTAN(ShVariable& dest, const ShVariable& a);
 
 void shNORM(ShVariable& dest, const ShVariable& a);
 void shXPD(ShVariable& dest, const ShVariable& a, const ShVariable& b);

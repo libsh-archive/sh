@@ -1,5 +1,16 @@
 2004-06-04  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShLibTrig.hpp: Added a couple of trig functions.
+
+	* test/regress/regress.py (tests): Added tests for TAN. May need
+	some work, probably don't want to test crazy cases.
+
+	* src/ShStatement.hpp: Added SH_OP_TAN.
+
+	* src/ShInstructions.hpp: Implemented shTAN.
+
+	* backends/gl/ArbCode.cpp (genNode): Implemented TAN, preliminarily.
+
 	* test/regress/regress.py (tests): Test LOG, LOG2, LOG10. Together
 	with backend implementations this resolves issue82.
 

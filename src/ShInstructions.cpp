@@ -518,6 +518,17 @@ void shSQRT(ShVariable& dest, const ShVariable& a)
   }
 }
 
+void shTAN(ShVariable& dest, const ShVariable& a)
+{
+  sizes_match(dest, a);
+  if (immediate()) {
+    CWISE_UNARY_OP(dest, a, std::tan);
+  } else {
+    ShStatement stmt(dest, SH_OP_TAN, a);
+    addStatement(stmt);
+  }
+}
+
 void shNORM(ShVariable& dest, const ShVariable& a)
 {
   sizes_match(dest, a);
