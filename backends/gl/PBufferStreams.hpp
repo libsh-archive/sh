@@ -29,14 +29,9 @@
 
 #include "ShProgram.hpp"
 #include "GlBackend.hpp"
+#include "PBufferContext.hpp"
 
 namespace shgl {
-
-enum FloatExtension {
-  SH_ARB_NV_FLOAT_BUFFER,
-  SH_ARB_ATI_PIXEL_FORMAT_FLOAT,
-  SH_ARB_NO_FLOAT_EXT
-};
 
 struct PBufferStreams : public StreamStrategy {
   PBufferStreams();

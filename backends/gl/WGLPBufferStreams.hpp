@@ -33,60 +33,58 @@
 
 namespace shgl {
 
-  struct ShWGLPBufferInfo
-    {
-    ShWGLPBufferInfo() :
-      extension(SH_ARB_NO_FLOAT_EXT),
-      pbuffer(0),
-      pbuffer_hdc(0),
-      pbuffer_hglrc(0),
-      width(0),
-      height(0)
+struct ShWGLPBufferInfo {
+  ShWGLPBufferInfo() :
+    extension(SH_ARB_NO_FLOAT_EXT),
+    pbuffer(0),
+    pbuffer_hdc(0),
+    pbuffer_hglrc(0),
+    width(0),
+    height(0)
+  {
+  }
+
+  FloatExtension extension;
+  HPBUFFERARB pbuffer;
+  HDC pbuffer_hdc;
+  HGLRC pbuffer_hglrc;
+  int width, height;
+
+  bool valid() 
+  { 
+    if (extension == SH_ARB_NO_FLOAT_EXT ||
+        pbuffer == NULL ||
+        pbuffer_hdc == NULL ||
+        pbuffer_hglrc == NULL)
       {
-      }
-
-    FloatExtension extension;
-    HPBUFFERARB pbuffer;
-    HDC pbuffer_hdc;
-    HGLRC pbuffer_hglrc;
-    int width, height;
-
-    bool valid() 
-      { 
-      if (extension == SH_ARB_NO_FLOAT_EXT ||
-          pbuffer == NULL ||
-          pbuffer_hdc == NULL ||
-          pbuffer_hglrc == NULL)
-        {
         return false;
-        }
-      else
-        {
-        return true;
-        }
       }
-    };
+    else
+      {
+        return true;
+      }
+  }
+};
 
-  struct WGLPBufferStreams: public PBufferStreams
-    {
-    public:
-      WGLPBufferStreams(void);
-      virtual ~WGLPBufferStreams();
+class WGLPBufferStreams: public PBufferStreams {
+public:
+  WGLPBufferStreams(void);
+  virtual ~WGLPBufferStreams();
 
-      virtual StreamStrategy* create(void);
+  virtual StreamStrategy* create(void);
 
-    private:
-      virtual FloatExtension setupContext(int width, int height);
-      virtual void restoreContext(void);
+private:
+  virtual FloatExtension setupContext(int width, int height);
+  virtual void restoreContext(void);
 
-    private:
-      ShWGLPBufferInfo createContext(int width, int height);
+private:
+  ShWGLPBufferInfo createContext(int width, int height);
 
-    private:
-      HDC m_orig_hdc;
-      HGLRC m_orig_hglrc;
-      std::list<ShWGLPBufferInfo> m_infos;
-    };
+private:
+  HDC m_orig_hdc;
+  HGLRC m_orig_hglrc;
+  std::list<ShWGLPBufferInfo> m_infos;
+};
 
 }
 

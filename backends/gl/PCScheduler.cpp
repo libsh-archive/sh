@@ -7,6 +7,7 @@
 #include "ShPosition.hpp"
 #include "ShLib.hpp"
 #include "ShArray.hpp"
+#include "GLXPBufferContext.hpp"
 
 namespace shgl {
 
@@ -76,7 +77,19 @@ ShVoidPtr PCScheduler::prepare(ShSchedule* schedule)
 
   PCSchedulePtr pc_schedule = new PCSchedule();
 
-  // TODO determine dims.
+  ShTextureDims dims;
+  // TODO: This should use a regular PBufferFactory instead.
+  FloatExtension ext = GLXPBufferFactory::instance()->get_extension();
+  switch (ext) {
+  case SH_ARB_NV_FLOAT_BUFFER:
+    dims = SH_TEXTURE_RECT;
+    break;
+  case SH_ARB_ATI_PIXEL_FORMAT_FLOAT:
+    dims = SH_TEXTURE_2D;
+    break;
+  default:
+    break;
+  }
   
   for (ShSchedule::PassList::iterator I = schedule->begin(); I != schedule->end();
        ++I) {

@@ -63,7 +63,7 @@ struct ShGLXPBufferInfo {
   }
 };
 
-struct GLXPBufferStreams: public PBufferStreams {
+class GLXPBufferStreams: public PBufferStreams {
 public:
   GLXPBufferStreams(void);
   virtual ~GLXPBufferStreams();
