@@ -641,6 +641,7 @@ void AtiCode::loadDataTexture(ShDataTextureNodePtr texture, unsigned int type)
   // TODO: Element Format
   // TODO: sampling/filtering
   // TODO: wrap/clamp
+  unsigned int internalFormat;
   unsigned int format;
 
 
@@ -649,18 +650,23 @@ void AtiCode::loadDataTexture(ShDataTextureNodePtr texture, unsigned int type)
   if( dataMem ) { // 
     glAttachMemATI( GL_TEXTURE_2D, 0 );
 
+    //TODO fix this hard-coded float stuff
     switch (texture->elements()) {
     case 1:
       format = GL_LUMINANCE;
+      internalFormat = GL_LUMINANCE_FLOAT32_ATI;
       break;
     case 2:
       format = GL_LUMINANCE_ALPHA;
+      internalFormat = GL_LUMINANCE_ALPHA_FLOAT32_ATI;
       break;
     case 3:
       format = GL_RGB;
+      internalFormat = GL_RGB_FLOAT32_ATI;
       break;
     case 4:
       format = GL_RGBA;
+      internalFormat = GL_RGBA_FLOAT32_ATI;
       break;
     default:
       format = 0;
@@ -669,7 +675,7 @@ void AtiCode::loadDataTexture(ShDataTextureNodePtr texture, unsigned int type)
 
     switch(type) {
     case GL_TEXTURE_1D:
-      glTexImage1D(type, 0, texture->elements(), texture->width(), 0, format, GL_FLOAT, dataMem->data());
+      glTexImage1D(type, 0, internalFormat, texture->width(), 0, format, GL_FLOAT, dataMem->data());
       break;
     case GL_TEXTURE_2D:
     case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
@@ -678,11 +684,11 @@ void AtiCode::loadDataTexture(ShDataTextureNodePtr texture, unsigned int type)
     case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
     case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
     case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
-      glTexImage2D(type, 0, texture->elements(), texture->width(), texture->height(), 0, format, GL_FLOAT,
+      glTexImage2D(type, 0, internalFormat, texture->width(), texture->height(), 0, format, GL_FLOAT,
                    dataMem->data());
       break;
     case GL_TEXTURE_3D:
-      glTexImage3D(type, 0, texture->elements(), texture->width(), texture->height(), texture->depth(),
+      glTexImage3D(type, 0, internalFormat, texture->width(), texture->height(), texture->depth(),
                    0, format, GL_FLOAT, dataMem->data());
       break;
     default:
