@@ -1,6 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright 2005 Serious Hack Inc.
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
