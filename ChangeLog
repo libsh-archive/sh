@@ -1,3 +1,8 @@
+2004-09-24  Sylvain Vasseur  <sfvvasse@cgl.uwaterloo.ca>
+
+	* src/ShLibClampImpl.hpp (max): Specialize unary max for N==1.
+	(min): Specialize unary min for N==1.
+
 2004-09-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/ArbEmit.cpp: Implement emit_kil and use it to emit
