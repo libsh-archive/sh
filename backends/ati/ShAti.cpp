@@ -1617,11 +1617,11 @@ void AtiBackend::setUberbufferData(ShUberbufferPtr ub, const float *data) {
   //bind the texture 
   GLuint texBinding;
   glGenTextures(1, &texBinding);
-  shGlActiveTextureARB(GL_TEXTURE1);
+  shGlActiveTextureARB(GL_TEXTURE10);
 
   //TODO handle other dimensions
   glBindTexture(GL_TEXTURE_2D, texBinding); 
-  SH_DEBUG_PRINT( "Active Texture Unit: " << 1 << " binding: " << texBinding ); 
+  SH_DEBUG_PRINT( "Active Texture Unit: " << 10 << " binding: " << texBinding ); 
 
   //attach the uber buffer
   glAttachMemATI( GL_TEXTURE_2D, mem ); 
