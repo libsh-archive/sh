@@ -1,6 +1,12 @@
+2005-01-27  Francois Marier  <francois@serioushack.com>
+
+	* src/ShMatrix.hpp, src/ShMatrixImpl.hpp: Assigning a scalar to a
+	matrix now creates an identity matrix multiplied by that scalar.
+
 2005-01-26  Bryan Chan <b8chan@cgl.uwaterloo.ca>
-  * util/ShObjMesh.cpp:
-  Improved vertex normal generation.
+	
+	* util/ShObjMesh.cpp:
+        Improved vertex normal generation.
 
 2005-01-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
@@ -10,6 +16,8 @@
 
 2005-01-25  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	After release 0.7.6:
+	
 	* src/ShMatrixImpl.hpp (ShMatrix): Fix default constructor to not
 	set matrix to identity for inputs.
 

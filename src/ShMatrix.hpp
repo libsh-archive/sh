@@ -92,6 +92,18 @@ public:
   template<ShBindingType Binding2>
   ShMatrix& operator=(const ShMatrix<Rows, Cols, Binding2, T>& other);
 
+  /** \brief Assignment (scalar promotion).
+   * 
+   * Construct an identity matrix multiplied by the scalar.
+   */
+  ShMatrix& operator=(double scalar);
+
+  /** \brief Assignment (scalar promotion).
+   * 
+   * Construct an identity matrix multiplied by the scalar.
+   */
+  ShMatrix& operator=(int scalar);
+
   /** \brief Attribute row access.
    *
    * Return a reference to the given row as an ShAttrib.

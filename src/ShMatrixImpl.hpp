@@ -87,6 +87,32 @@ ShMatrix<Rows, Cols, Binding, T>::operator=(const ShMatrix<Rows, Cols, Binding2,
 }
 
 template<int Rows, int Cols, ShBindingType Binding, typename T>
+ShMatrix<Rows, Cols, Binding, T>& ShMatrix<Rows, Cols, Binding, T>::operator=(double scalar)
+{
+  for (int i = 0; i < Rows; i++)
+    for (int j = 0; j < Cols; j++) {
+      if (i == j)
+	m_data[i][j] = scalar;
+      else
+	m_data[i][j] = 0;
+    }
+  return *this;
+}
+
+template<int Rows, int Cols, ShBindingType Binding, typename T>
+ShMatrix<Rows, Cols, Binding, T>& ShMatrix<Rows, Cols, Binding, T>::operator=(int scalar)
+{
+  for (int i = 0; i < Rows; i++)
+    for (int j = 0; j < Cols; j++) {
+      if (i == j)
+	m_data[i][j] = scalar;
+      else
+	m_data[i][j] = 0;
+    }
+  return *this;
+}
+
+template<int Rows, int Cols, ShBindingType Binding, typename T>
 ShAttrib<Cols, Binding, T>& ShMatrix<Rows, Cols, Binding, T>::operator[](int i)
 {
   return m_data[i];
