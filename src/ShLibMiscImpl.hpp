@@ -33,12 +33,12 @@
 
 namespace SH {
 
-template<int M, int N, typename T> 
+template<int M, int N, ShValueType V> 
 inline
-ShGeneric<M, T> cast(const ShGeneric<N, T>& a)
+ShGeneric<M, V> cast(const ShGeneric<N, V>& a)
 {
   int copySize = std::min(M, N);
-  ShAttrib<M, SH_TEMP, T> result;
+  ShAttrib<M, SH_TEMP, V> result;
 
   int* indices = new int[copySize];
   for(int i = 0; i < copySize; ++i) indices[i] = i;
@@ -55,14 +55,14 @@ ShGeneric<M, T> cast(const ShGeneric<N, T>& a)
 
 template<int M> 
 inline
-ShGeneric<M, float> cast(float a)
+ShGeneric<M, SH_DOUBLE> cast(double a)
 {
-  return cast<M>(ShAttrib<1, SH_CONST, float>(a));
+  return cast<M>(ShAttrib<1, SH_CONST, SH_DOUBLE>(a));
 }
 
-template<int M, int N, typename T> 
+template<int M, int N, ShValueType V> 
 inline
-ShGeneric<M, T> fillcast(const ShGeneric<N, T>& a)
+ShGeneric<M, V> fillcast(const ShGeneric<N, V>& a)
 {
   if( M <= N ) return cast<M>(a);
   int indices[M];
@@ -72,33 +72,33 @@ ShGeneric<M, T> fillcast(const ShGeneric<N, T>& a)
 
 template<int M> 
 inline
-ShGeneric<M, float> fillcast(float a)
+ShGeneric<M, SH_DOUBLE> fillcast(double a)
 {
-  return fillcast<M>(ShAttrib<1, SH_CONST, float>(a));
+  return fillcast<M>(ShAttrib<1, SH_CONST, SH_DOUBLE>(a));
 }
 
-template<int M, int N, typename T> 
+template<int M, int N, ShValueType V1, ShValueType V2> 
 inline
-ShGeneric<M+N, T> join(const ShGeneric<M, T>& a, const ShGeneric<N, T>& b)
+ShGeneric<M+N, CV1V2> join(const ShGeneric<M, V1>& a, const ShGeneric<N, V2>& b)
 {
   int indices[M+N];
   for(int i = 0; i < M+N; ++i) indices[i] = i; 
-  ShAttrib<M+N, SH_TEMP, T> result;
+  ShAttrib<M+N, SH_TEMP, CV1V2> result;
   result.template swiz<M>(indices) = a;
   result.template swiz<N>(indices + M) = b;
   return result;
 }
 
-template<int N, typename T>
+template<int N, ShValueType V>
 inline
-void discard(const ShGeneric<N, T>& c)
+void discard(const ShGeneric<N, V>& c)
 {
   shKIL(c);
 }
 
-template<int N, typename T>
+template<int N, ShValueType V>
 inline
-void kill(const ShGeneric<N, T>& c)
+void kill(const ShGeneric<N, V>& c)
 {
   discard(c);
 }
@@ -107,7 +107,7 @@ template<typename T>
 ShProgram freeze(const ShProgram& p,
                  const T& uniform)
 {
-  return (p >> uniform) << (typename T::ConstType)(uniform);
+  return (p >> uniform) << (T::ConstType)(uniform);
 }
 
 }

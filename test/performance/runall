@@ -1,0 +1,14 @@
+#!/bin/bash
+TESTS="compile 
+      init
+      mat_asn_scal
+      mat_asn_vec 
+      mat_mul 
+      vec3_add 
+      vec3_add_swiz"
+RUNS=5
+
+for i in $TESTS; do
+  echo "Running <$i> $RUNS times"
+  ./runtest ./$i $RUNS
+done

@@ -30,6 +30,7 @@
 #include "ShGeneric.hpp"
 #include "ShLib.hpp"
 
+#ifndef WIN32
 namespace SH {
 
 
@@ -45,122 +46,131 @@ namespace SH {
  * Returns the magnitude.
  * Operates componentwise on tuples.
  */
-template<int N, typename T>
-ShGeneric<N, T> abs(const ShGeneric<N, T>& var);
+template<int N, ShValueType V>
+ShGeneric<N, V> abs(const ShGeneric<N, V>& var);
 
 /** Ceiling.
  * Returns the least integer >= argument. 
  * Operates componentwise on tuples.
  */
-template<int N, typename T>
-ShGeneric<N, T> ceil(const ShGeneric<N, T>& var);
+template<int N, ShValueType V>
+ShGeneric<N, V> ceil(const ShGeneric<N, V>& var);
 
 /** Floor.
  * Returns the greatest integer <= argument.
  * Operates componentwise on tuples.
  */
-template<int N, typename T>
-ShGeneric<N, T> floor(const ShGeneric<N, T>& var);
+template<int N, ShValueType V>
+ShGeneric<N, V> floor(const ShGeneric<N, V>& var);
 
 /** Round.
  * Returns the nearest integer to the argument.
  * Operates componentwise on tuples.
  */
-template<int N, typename T>
-ShGeneric<N, T> round(const ShGeneric<N, T>& var);
+template<int N, ShValueType V>
+ShGeneric<N, V> round(const ShGeneric<N, V>& var);
 
 /** Float modulus. 
  * The result is always positive.
  */
-template<int N, typename T>
-ShGeneric<N, T> mod(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> mod(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
-template<typename T>
-ShGeneric<1, T> mod(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> operator%(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> operator%(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
-template<typename T>
-ShGeneric<1, T> operator%(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
+template<int N, ShValueType V1, ShValueType V2>
+ShGeneric<N, CV1V2>
+mod(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right);
+template<int N, ShValueType V1, ShValueType V2>
+ShGeneric<N, CV1V2>
+mod(const ShGeneric<N, V1>& left, const ShGeneric<1, V2>& right);
+template<ShValueType V1, ShValueType V2>
+ShGeneric<1, CV1V2>
+mod(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right);
+template<int N, ShValueType V1, ShValueType V2>
+ShGeneric<N, CV1V2>
+operator%(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right);
+template<int N, ShValueType V1, ShValueType V2>
+ShGeneric<N, CV1V2>
+operator%(const ShGeneric<N, V1>& left, const ShGeneric<1, V2>& right);
+template<ShValueType V1, ShValueType V2>
+ShGeneric<1, CV1V2>
+operator%(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right);
 
-SH_SHLIB_CONST_SCALAR_OP(mod);
-SH_SHLIB_CONST_N_OP_LEFT(mod);
-SH_SHLIB_CONST_SCALAR_OP(operator%);
-SH_SHLIB_CONST_N_OP_LEFT(operator%);
+SH_SHLIB_CONST_SCALAR_OP_DECL(mod);
+SH_SHLIB_CONST_N_OP_LEFT_DECL(mod);
+SH_SHLIB_CONST_SCALAR_OP_DECL(operator%);
+SH_SHLIB_CONST_N_OP_LEFT_DECL(operator%);
 
 /** Fractional part.
  * Discards the integer part of each componenent in var.
  */
-template<int N, typename T>
-ShGeneric<N, T> frac(const ShGeneric<N, T>& var);
+template<int N, ShValueType V>
+ShGeneric<N, V> frac(const ShGeneric<N, V>& var);
 
 /** Take positive part. 
  * Clamps a value to zero if it is negative.   
  * This is useful to wrap dot products in lighting models.
  */
-template<int N, typename T>
-ShGeneric<N,  T> pos(const ShGeneric<N, T>& x);
+template<int N, ShValueType V>
+ShGeneric<N, V> pos(const ShGeneric<N, V>& x);
 
 /** Maximum.
  * Creates a tuple of componentwise maximums of a pair of input tuples.
  */
-template<int N, typename T>
-ShGeneric<N,  T> max(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
+template<int N, ShValueType V1, ShValueType V2>
+ShGeneric<N, CV1V2>
+max(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right);
 
-SH_SHLIB_CONST_SCALAR_OP(max);
+SH_SHLIB_CONST_SCALAR_OP_DECL(max);
 
 /** Minimum.
  * Creates a tuple of componentwise minimums of a pair of input tuples.
  */
-template<int N, typename T>
-ShGeneric<N,  T> min(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
+template<int N, ShValueType V1, ShValueType V2>
+ShGeneric<N, CV1V2>
+min(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right);
 
-SH_SHLIB_CONST_SCALAR_OP(min);
+SH_SHLIB_CONST_SCALAR_OP_DECL(min);
 
 /** Maximum of all components
  */
-template<int N, typename T>
-ShGeneric<1, T> max(const ShGeneric<N, T>& a);
+template<int N, ShValueType V>
+ShGeneric<1, V> max(const ShGeneric<N, V>& a);
 
 /** Minimum of all components
  */
-template<int N, typename T>
-ShGeneric<1, T> min(const ShGeneric<N, T>& a);
+template<int N, ShValueType V>
+ShGeneric<1, V> min(const ShGeneric<N, V>& a);
 
 /** Componentwise clamping.
  * Clamps a between b and c.
  */
-template<int N, typename T>
-ShGeneric<N, T> clamp(const ShGeneric<N, T>& a,
-                      const ShGeneric<N, T>& b, const ShGeneric<N, T>& c);
-template<int N, typename T>
-ShGeneric<N, T> clamp(const ShGeneric<N, T>& a,
-                      const ShGeneric<1, T>& b, const ShGeneric<1, T>& c);
-template<typename T>
-ShGeneric<1, T> clamp(const ShGeneric<1, T>& a,
-                      const ShGeneric<1, T>& b, const ShGeneric<1, T>& c);
+template<int N, ShValueType V1, ShValueType V2, ShValueType V3>
+ShGeneric<N, CV1V2V3> 
+clamp(const ShGeneric<N, V1>& a, const ShGeneric<N, V2>& b, const ShGeneric<N, V3>& c);
+template<int N, ShValueType V1, ShValueType V2, ShValueType V3>
+ShGeneric<N, CV1V2V3> 
+clamp(const ShGeneric<N, V1>& a, const ShGeneric<1, V2>& b, const ShGeneric<1, V3>& c);
+template<ShValueType V1, ShValueType V2, ShValueType V3>
+ShGeneric<1, CV1V2V3> 
+clamp(const ShGeneric<1, V1>& a, const ShGeneric<1, V2>& b, const ShGeneric<1, V3>& c);
 
-SH_SHLIB_CONST_TRINARY_OP_011(clamp);
+SH_SHLIB_CONST_TRINARY_OP_011_DECL(clamp);
 
 /** Componentwise saturation.
  * Equivalent to componentwise minimum with 1.
  */
-template<int N, typename T>
-ShGeneric<N, T> sat(const ShGeneric<N, T>& a);
+template<int N, ShValueType V>
+ShGeneric<N, V> sat(const ShGeneric<N, V>& a);
 
 /** Componentwise sign.
  * Returns -1.0 if argument is less than 0.0, 1.0 if argument is greater
  * than 0.0, 0.0 otherwise.
  * Operates componentwise on tuples.
  */
-template<int N, typename T>
-ShGeneric<N, T> sign(const ShGeneric<N, T>& var);
+template<int N, ShValueType V>
+ShGeneric<N, V> sign(const ShGeneric<N, V>& var);
 
 /*@}*/
 
 }
+#endif
 
 #include "ShLibClampImpl.hpp"
 

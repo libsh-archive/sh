@@ -28,14 +28,16 @@
 #include "ShTextureNode.hpp"
 #include "ShEnvironment.hpp"
 #include "ShDebug.hpp"
+#include "ShGeneric.hpp"
 #include "ShAttrib.hpp"
 
 namespace SH {
 
 ShTextureNode::ShTextureNode(ShTextureDims dims, int size,
+                             ShValueType valueType,
                              const ShTextureTraits& traits,
                              int width, int height, int depth)
-  : ShVariableNode(SH_TEXTURE, size),
+  : ShVariableNode(SH_TEXTURE, size, valueType),
     m_dims(dims),
     m_memory(new ShMemoryPtr[dims == SH_TEXTURE_CUBE ? 6 : 1]),
     m_traits(traits),
@@ -146,6 +148,11 @@ int ShTextureNode::height() const
 int ShTextureNode::depth() const
 {
   return m_depth;
+}
+
+int ShTextureNode::count() const
+{
+  return m_width * m_height * m_depth;
 }
 
 const ShVariable& ShTextureNode::texSizeVar() const

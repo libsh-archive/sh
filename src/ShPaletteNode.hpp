@@ -43,7 +43,7 @@ namespace SH {
  */
 class SH_DLLEXPORT ShPaletteNode : public ShVariableNode {
 public:
-  ShPaletteNode(int elements, ShSemanticType semantic, std::size_t length);
+  ShPaletteNode(int elements, ShSemanticType semantic, ShValueType valueType, std::size_t length);
 
   /// Set the VariableNode corresponding to the given index. Only ShPalette should call this.
   void set_node(std::size_t index, const ShVariableNodePtr& node);

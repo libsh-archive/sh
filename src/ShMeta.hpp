@@ -37,7 +37,7 @@ class
 SH_DLLEXPORT ShMeta {
 public:
   ShMeta()
-    : m_has_name(false), m_internal(false)
+    : m_meta(0) 
   {
   }
   virtual ~ShMeta();
@@ -49,27 +49,22 @@ public:
   virtual bool internal() const;
   virtual void internal(bool);
 
-  virtual const std::string& title() const;
+  virtual std::string title() const;
   virtual void title(const std::string& t);
 
-  virtual const std::string& description() const;
+  virtual std::string description() const;
   virtual void description(const std::string& d);
 
   virtual std::string meta(const std::string& key) const;
   virtual void meta(const std::string& key, const std::string& value);
 
 private:
-  std::string m_name;
-  bool m_has_name;
-
-  bool m_internal;
-  std::string m_title;
-  std::string m_description;
-
   typedef std::map<std::string, std::string> MetaMap;
-  MetaMap m_meta;
+  MetaMap *m_meta;
 };
 
 }
+
+#include "ShMetaImpl.hpp"
 
 #endif

@@ -24,71 +24,16 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#include "ShMeta.hpp"
+#include <iostream>
+#include <sstream>
+#include "ShVariant.hpp"
 
 namespace SH {
 
-ShMeta::~ShMeta()
-{
-}
+ShVariant::ShVariant()
+{}
 
-std::string ShMeta::name() const
-{
-  return m_name;
-}
-
-void ShMeta::name(const std::string& n)
-{
-  m_name = n;
-  m_has_name = true;
-}
-
-bool ShMeta::has_name() const
-{
-  return m_has_name;
-}
-
-bool ShMeta::internal() const
-{
-  return m_internal;
-}
-
-void ShMeta::internal(bool i)
-{
-  m_internal = i;
-}
-
-const std::string& ShMeta::title() const
-{
-  return m_title;
-}
-
-void ShMeta::title(const std::string& t)
-{
-  m_title = t;
-}
-
-const std::string& ShMeta::description() const
-{
-  return m_description;
-}
-
-void ShMeta::description(const std::string& d)
-{
-  m_description = d;
-}
-
-std::string ShMeta::meta(const std::string& key) const
-{
-  MetaMap::const_iterator I = m_meta.find(key);
-  if (I == m_meta.end()) return std::string();
-  return I->second;
-}
-
-void ShMeta::meta(const std::string& key, const std::string& value)
-{
-  m_meta[key] = value;
-}
+ShVariant::~ShVariant() 
+{}
 
 }
-

@@ -25,6 +25,8 @@
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
 #include "GlTextureStorage.hpp"
+#include "ShTypeInfo.hpp"
+#include "ShVariantFactory.hpp"
 
 namespace shgl {
 
@@ -32,12 +34,14 @@ using namespace SH;
 
 GlTextureStorage::GlTextureStorage(ShMemory* memory, GLenum target,
                                    GLenum format, GLint internalFormat,
-                                   int width, int height, int depth,
+                                   ShValueType valueType, 
+                                   int width, int height, int depth, int tuplesize,
                                    GlTextureNamePtr name)
   : ShStorage(memory),
-    m_name(name), m_target(target), m_format(format),
+    m_name(name), m_target(target), m_format(format), 
     m_internalFormat(internalFormat),
-    m_width(width), m_height(height), m_depth(depth)
+    m_valueType(valueType), 
+    m_width(width), m_height(height), m_depth(depth), m_tuplesize(tuplesize)
 {
   m_name->addStorage(this);
 }
@@ -46,6 +50,7 @@ GlTextureStorage::~GlTextureStorage()
 {
   m_name->removeStorage(this);
 }
+
 
 class HostGlTextureTransfer : public ShTransfer {
   HostGlTextureTransfer()
@@ -60,13 +65,34 @@ class HostGlTextureTransfer : public ShTransfer {
 
     // Bind texture name for this scope.
     GlTextureName::Binding binding(texture->texName());
-    
+
+
+    ShValueType valueType = texture->valueType(); 
+    int count = texture->count();
+
+    GLenum type; 
+    ShValueType convertedType;
+    type = shGlType(valueType, convertedType);
+
+    ShVariantPtr dataVariant; 
+    // @todo a little hackish...but we promise host->data() will not change... 
+    ShVariantPtr hostVariant = shVariantFactory(valueType, SH_MEM)->generate(
+        const_cast<void *>(host->data()), count, false);
+
+    if(convertedType != SH_VALUETYPE_END) {
+      SH_DEBUG_WARN("ARB backend does not handle " << valueTypeName[valueType] << " natively.  Converting to " << valueTypeName[convertedType]);
+      dataVariant = shVariantFactory(convertedType, SH_MEM)->generate(count);
+      dataVariant->set(hostVariant);
+    } else {
+      dataVariant = hostVariant; 
+    }
+
     switch(texture->target()) {
     case GL_TEXTURE_1D:
       SH_GL_CHECK_ERROR(glTexImage1D(texture->target(), 0,
                                      texture->internalFormat(),
-                                     texture->width(), 0, texture->format(), GL_FLOAT,
-                                     host->data()));
+                                     texture->width(), 0, texture->format(), type,
+                                     dataVariant->array()));
       break;
     case GL_TEXTURE_2D:
     case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
@@ -79,19 +105,21 @@ class HostGlTextureTransfer : public ShTransfer {
       SH_GL_CHECK_ERROR(glTexImage2D(texture->target(), 0,
                                      texture->internalFormat(),
                                      texture->width(), texture->height(), 0, texture->format(),
-                                     GL_FLOAT, host->data()));
+                                     type, dataVariant->array()));
       break;
     case GL_TEXTURE_3D:
       SH_GL_CHECK_ERROR(glTexImage3D(texture->target(), 0,
                                      texture->internalFormat(),
                                      texture->width(), texture->height(),
                                      texture->depth(), 0, texture->format(),
-                                     GL_FLOAT, host->data()));
+                                     type, dataVariant->array()));
       break;
     default:
       SH_DEBUG_WARN("Texture target " << texture->target() << " not handled by GL backend");
       break;
     }
+
+
     return true;
   }
   

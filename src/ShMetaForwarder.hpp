@@ -46,10 +46,10 @@ public:
   bool internal() const;
   void internal(bool);
 
-  const std::string& title() const;
+  std::string title() const;
   void title(const std::string& t);
 
-  const std::string& description() const;
+  std::string description() const;
   void description(const std::string& d);
 
   std::string meta(std::string key) const;

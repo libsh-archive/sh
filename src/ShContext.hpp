@@ -102,7 +102,6 @@ ShBoundIterator shBeginBound();
 SH_DLLEXPORT
 ShBoundIterator shEndBound();
 
-
 }
 
 #endif

@@ -1,15 +1,18 @@
 #ifndef SHPOOL_HPP
 #define SHPOOL_HPP
 
-// #define SH_USE_MEMORY_POOL
+#define SH_USE_MEMORY_POOL
 
 #ifdef SH_USE_MEMORY_POOL
 
 #include <cstddef>
+#include "ShDllExport.hpp"
 
 namespace SH {
 
-class ShPool {
+class 
+SH_DLLEXPORT
+ShPool {
 public:
   ShPool(std::size_t element_size, std::size_t block_size);
 

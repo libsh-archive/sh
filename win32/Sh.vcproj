@@ -151,7 +151,13 @@
 				RelativePath="..\src\ShBlock.cpp">
 			</File>
 			<File
+				RelativePath="..\src\ShCastManager.cpp">
+			</File>
+			<File
 				RelativePath="..\src\ShChannelNode.cpp">
+			</File>
+			<File
+				RelativePath="..\src\ShConcreteCTypeOp.cpp">
 			</File>
 			<File
 				RelativePath="..\src\ShConstProp.cpp">
@@ -163,6 +169,9 @@
 				RelativePath="..\src\ShCtrlGraph.cpp">
 			</File>
 			<File
+				RelativePath="..\src\ShDataType.cpp">
+			</File>
+			<File
 				RelativePath="..\src\ShDomTree.cpp">
 			</File>
 			<File
@@ -170,6 +179,9 @@
 			</File>
 			<File
 				RelativePath="..\src\ShError.cpp">
+			</File>
+			<File
+				RelativePath="..\src\ShEval.cpp">
 			</File>
 			<File
 				RelativePath="..\src\ShEvaluate.cpp">
@@ -193,6 +205,9 @@
 				RelativePath="..\src\ShInternals.cpp">
 			</File>
 			<File
+				RelativePath="..\src\ShIntervalConverter.cpp">
+			</File>
+			<File
 				RelativePath="..\src\ShLinearAllocator.cpp">
 			</File>
 			<File
@@ -202,10 +217,10 @@
 				RelativePath="..\src\ShMemory.cpp">
 			</File>
 			<File
-				RelativePath="..\src\ShMeta.cpp">
+				RelativePath="..\src\ShMetaForwarder.cpp">
 			</File>
 			<File
-				RelativePath="..\src\ShMetaForwarder.cpp">
+				RelativePath="..\src\ShOperation.cpp">
 			</File>
 			<File
 				RelativePath="..\src\ShOptimizations.cpp">
@@ -253,6 +268,18 @@
 				RelativePath="..\src\ShTransformer.cpp">
 			</File>
 			<File
+				RelativePath="..\src\ShTypeConvertTransformer.cpp">
+			</File>
+			<File
+				RelativePath="..\src\ShTypeInfo.cpp">
+			</File>
+			<File
+				RelativePath="..\src\ShTypeInfoCasts.cpp">
+			</File>
+			<File
+				RelativePath="..\src\ShTypeInfoOps.cpp">
+			</File>
+			<File
 				RelativePath="..\src\ShUtility.cpp">
 			</File>
 			<File
@@ -263,6 +290,12 @@
 			</File>
 			<File
 				RelativePath="..\src\ShVariableNode.cpp">
+			</File>
+			<File
+				RelativePath="..\src\ShVariableType.cpp">
+			</File>
+			<File
+				RelativePath="..\src\ShVariant.cpp">
 			</File>
 		</Filter>
 		<Filter
@@ -303,6 +336,9 @@
 				RelativePath="..\src\ShBlock.hpp">
 			</File>
 			<File
+				RelativePath="..\src\ShCastManager.hpp">
+			</File>
+			<File
 				RelativePath="..\src\ShChannel.hpp">
 			</File>
 			<File
@@ -321,10 +357,25 @@
 				RelativePath="..\src\ShColorImpl.hpp">
 			</File>
 			<File
+				RelativePath="..\src\ShConcreteCTypeOpImpl.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShConcreteIntervalOpImpl.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShConcreteRegularOpImpl.hpp">
+			</File>
+			<File
 				RelativePath="..\src\ShContext.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShCtrlGraph.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShDataType.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShDataTypeImpl.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShDebug.hpp">
@@ -342,6 +393,12 @@
 				RelativePath="..\src\ShError.hpp">
 			</File>
 			<File
+				RelativePath="..\src\ShEval.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShEvalImpl.hpp">
+			</File>
+			<File
 				RelativePath="..\src\ShEvaluate.hpp">
 			</File>
 			<File
@@ -357,6 +414,12 @@
 				RelativePath="..\src\ShGenericImpl.hpp">
 			</File>
 			<File
+				RelativePath="..\src\ShGraph.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShGraphImpl.hpp">
+			</File>
+			<File
 				RelativePath="..\src\ShImage.hpp">
 			</File>
 			<File
@@ -370,6 +433,12 @@
 			</File>
 			<File
 				RelativePath="..\src\ShInterp.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShInterval.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShIntervalImpl.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShLib.hpp">
@@ -409,6 +478,12 @@
 			</File>
 			<File
 				RelativePath="..\src\ShLibGeometryImpl.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShLibInterval.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShLibIntervalImpl.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShLibMatrix.hpp">
@@ -453,6 +528,9 @@
 				RelativePath="..\src\ShManipulatorImpl.hpp">
 			</File>
 			<File
+				RelativePath="..\src\ShMath.hpp">
+			</File>
+			<File
 				RelativePath="..\src\ShMatrix.hpp">
 			</File>
 			<File
@@ -471,6 +549,9 @@
 				RelativePath="..\src\ShMetaForwarder.hpp">
 			</File>
 			<File
+				RelativePath="..\src\ShMetaImpl.hpp">
+			</File>
+			<File
 				RelativePath="..\src\ShNibbles.hpp">
 			</File>
 			<File
@@ -481,6 +562,9 @@
 			</File>
 			<File
 				RelativePath="..\src\ShNormalImpl.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShOperation.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShOptimizations.hpp">
@@ -546,6 +630,9 @@
 				RelativePath="..\src\ShSwizzle.hpp">
 			</File>
 			<File
+				RelativePath="..\src\ShSwizzleImpl.hpp">
+			</File>
+			<File
 				RelativePath="..\src\ShSyntax.hpp">
 			</File>
 			<File
@@ -573,6 +660,12 @@
 				RelativePath="..\src\ShTransformer.hpp">
 			</File>
 			<File
+				RelativePath="..\src\ShTypeInfo.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShTypeInfoImpl.hpp">
+			</File>
+			<File
 				RelativePath="..\src\ShUtility.hpp">
 			</File>
 			<File
@@ -580,6 +673,27 @@
 			</File>
 			<File
 				RelativePath="..\src\ShVariableNode.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShVariableType.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShVariant.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShVariantCast.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShVariantCastImpl.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShVariantFactory.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShVariantFactoryImpl.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShVariantImpl.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShVector.hpp">

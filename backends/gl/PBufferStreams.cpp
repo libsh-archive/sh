@@ -40,7 +40,8 @@
 #include "ShOptimizations.hpp"
 #include "ShException.hpp"
 #include "ShError.hpp"
-#include "ShContext.hpp"
+#include "ShTypeInfo.hpp"
+#include "ShVariant.hpp"
 
 #ifdef DO_PBUFFER_TIMING
 #include <sys/time.h>
@@ -50,6 +51,7 @@
 namespace shgl {
 
 using namespace SH;
+
 
 #ifdef DO_PBUFFER_TIMING
 
@@ -166,7 +168,7 @@ public:
       } else {
         // Make sure our actualy index is a temporary in the program.
         ShContext::current()->enter(program);
-        ShVariable coordsVar(new ShVariableNode(SH_TEMP, 2));
+        ShVariable coordsVar(new ShVariableNode(SH_TEMP, 2, SH_FLOAT));
         ShContext::current()->exit();
         
         ShBasicBlock::ShStmtList new_stmts;
@@ -274,6 +276,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   
   ShChannelNodePtr output = *dest.begin();
   int count = output->count();
+  ShValueType valueType = output->valueType();
 
   // Pick a size for the texture that just fits the output data.
   int tex_size = 1;
@@ -320,11 +323,11 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
     switch (extension) {
     case SH_ARB_NV_FLOAT_BUFFER:
       tex = new ShTextureNode(SH_TEXTURE_RECT, I->first->size(),
-                              traits, tex_size, tex_size, 1);
+                              I->first->valueType(), traits, tex_size, tex_size, 1);
       break;
     case SH_ARB_ATI_PIXEL_FORMAT_FLOAT:
       tex = new ShTextureNode(SH_TEXTURE_2D, I->first->size(),
-                              traits, tex_size, tex_size, 1);
+                              I->first->valueType(), traits, tex_size, tex_size, 1);
       break;
     default:
       tex = 0;
@@ -470,8 +473,9 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   ShHostStoragePtr outhost
     = shref_dynamic_cast<ShHostStorage>(output->memory()->findStorage("host"));
   if (!outhost) {
+    int datasize = shTypeInfo(valueType)->datasize(); 
     outhost = new ShHostStorage(output->memory().object(),
-                                sizeof(float) * output->size() * output->count());
+                                datasize * output->size() * output->count());
   }
   TIMING_RESULT(findouthost);
 
@@ -501,23 +505,43 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   }
 
   DECLARE_TIMER(readback);
-  
+
+  // @todo half-float
+  ShVariantPtr  resultBuffer; 
+  int resultDatasize = output->size() * count;
+  GLenum readpixelType;
+  ShValueType convertedType; 
+  readpixelType = shGlType(valueType, convertedType);
+  if(convertedType != SH_VALUETYPE_END) {
+      SH_DEBUG_WARN("ARB backend does not handle stream output type " << valueTypeName[valueType] << " natively."
+          << "  Using " << valueTypeName[convertedType] << " temporary buffer.");
+      resultBuffer = shVariantFactory(convertedType, SH_MEM)->generate(resultDatasize);
+  } else {
+      resultBuffer = shVariantFactory(valueType, SH_MEM)->generate(
+          outhost->data(), resultDatasize, false);
+  }
+
   glReadPixels(0, 0, tex_size, count / tex_size, format,
-               GL_FLOAT, outhost->data());
+               readpixelType, resultBuffer->array());
   gl_error = glGetError();
   if (gl_error != GL_NO_ERROR) {
     shError(PBufferStreamException("Could not do glReadPixels()"));
     return;
   }
   if (count % tex_size) {
-    glReadPixels(0, count / tex_size, count % tex_size, 1, format, GL_FLOAT,
-                 reinterpret_cast<float*>(outhost->data())
-                 + (count - (count % tex_size)) * output->size());
+    glReadPixels(0, count / tex_size, count % tex_size, 1, format, readpixelType,
+                 (char*)(resultBuffer->array()) + (count - (count % tex_size)) * output->size() * resultBuffer->datasize());
     gl_error = glGetError();
     if (gl_error != GL_NO_ERROR) {
       shError(PBufferStreamException("Could not do rest of glReadPixels()"));
       return;
     }
+  }
+
+  if(convertedType != SH_VALUETYPE_END) { // need to copy to outhoust->data()
+    ShVariantPtr outhostVariant = shVariantFactory(valueType, SH_MEM)->generate(
+          outhost->data(), resultDatasize, false);
+    outhostVariant->set(resultBuffer);
   }
 
   TIMING_RESULT(readback);

@@ -2,15 +2,16 @@
 #include "ShInstructions.hpp"
 #include "ShDebug.hpp"
 #include "ShContext.hpp"
+#include "ShVariant.hpp"
 
 namespace SH {
 
 void evaluate(ShStatement& stmt)
 {
   // TODO: Maybe not do this _every_ time we call evaluate...
-  stmt.dest.node()->addValues();
+  stmt.dest.node()->addVariant();
   for (int i = 0; i < opInfo[stmt.op].arity; i++) {
-    stmt.src[i].node()->addValues();
+    stmt.src[i].node()->addVariant();
   }
   // Make sure we are outside of a program definition
   ShContext::current()->enter(0);
@@ -179,9 +180,9 @@ void evaluate(const ShProgramNodePtr& p)
     
     for (std::vector<ShCtrlGraphBranch>::const_iterator I = node->successors.begin();
          I != node->successors.end(); ++I) {
-      I->cond.node()->addValues(); // Make sure the condition has values.
+      I->cond.node()->addVariant(); // Make sure the condition has values.
       bool jmp = false;
-      for (int i = 0; i < I->cond.size(); i++) if (I->cond.getValue(i) > 0.0) jmp = true;
+      for (int i = 0; i < I->cond.size(); i++) if (I->cond.getVariant()->isTrue()) jmp = true;
       if (jmp) {
         done = true;
         node = I->node;

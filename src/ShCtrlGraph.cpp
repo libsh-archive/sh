@@ -139,6 +139,27 @@ void ShCtrlGraphNode::append(const ShPointer<ShCtrlGraphNode>& node,
   if (node) successors.push_back(ShCtrlGraphBranch(node, cond));
 }
 
+ShCtrlGraphNodePtr ShCtrlGraphNode::split(ShBasicBlock::ShStmtList::iterator stmt) 
+{
+  // make a new node to hold the statements after stmt
+  // and move over the successors/follower info
+  ShCtrlGraphNode *after = new ShCtrlGraphNode();
+  after->successors = successors;
+  after->follower = follower;
+  successors.clear();
+  follower = 0;
+
+  // link up the two nodes
+  after->predecessors.push_back(this);
+  this->follower = after;
+
+  // make a block for after and split up the statements
+  after->block = new ShBasicBlock();
+  after->block->splice(after->block->begin(), block->m_statements, stmt);
+
+  return after;
+}
+
 ShCtrlGraphBranch::ShCtrlGraphBranch(const ShPointer<ShCtrlGraphNode>& node,
                                      ShVariable cond)
   : node(node), cond(cond)

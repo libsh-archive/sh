@@ -43,7 +43,7 @@ namespace SH {
 template<typename T>
 ShChannel<T>::ShChannel()
   : ShMetaForwarder(0),
-    m_node(new ShChannelNode(T::semantic_type, T::typesize))
+    m_node(new ShChannelNode(T::semantic_type, T::typesize, T::value_type))
 {
   real_meta(m_node.object());
 }
@@ -51,7 +51,7 @@ ShChannel<T>::ShChannel()
 template<typename T>
 ShChannel<T>::ShChannel(const ShMemoryPtr& memory, int count)
   : ShMetaForwarder(0),
-    m_node(new ShChannelNode(T::semantic_type, T::typesize, memory, count))
+    m_node(new ShChannelNode(T::semantic_type, T::typesize, T::value_type, memory, count))
 {
   real_meta(m_node.object());
 }
@@ -108,8 +108,8 @@ T ShChannel<T>::operator()() const
 }
 
 template<typename T>
-template<typename Ts>
-T ShChannel<T>::operator[](const ShGeneric<1, Ts>& index) const
+template<ShValueType V>
+T ShChannel<T>::operator[](const ShGeneric<1, V>& index) const
 {
   // TODO: shError() maybe instead.
   if (!ShContext::current()->parsing()) shError(ShScopeException("Indexed stream fetch outside program"));

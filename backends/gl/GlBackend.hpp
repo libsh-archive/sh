@@ -27,6 +27,7 @@
 #ifndef GLBACKEND_HPP
 #define GLBACKEND_HPP
 
+#include "ShVariableType.hpp"
 #include "ShProgram.hpp"
 #include "ShStream.hpp"
 #include "ShTextureNode.hpp"
@@ -120,6 +121,12 @@ private:
 };
 
 void shGlCheckError(const char* desc, const char* file, int line);
+
+/* Returns glReadPixels/glTexImage type for a given value type 
+ * and returns a value type for the temporary buffer
+ * (or SH_VALUETYPE_END if we can use the original buffer directly) 
+ */
+GLenum shGlType(SH::ShValueType valueType, SH::ShValueType &convertedType); 
 
 }
 
