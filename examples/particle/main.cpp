@@ -308,7 +308,11 @@ int main(int argc, char** argv)
 
   try
     {
-    shSetBackend("glsl");
+    std::string backend_name("arb");
+    if (argc > 1) {
+      backend_name = argv[1];
+    }
+    shSetBackend(backend_name);
 
     init_shaders();
     init_streams();
@@ -333,7 +337,7 @@ int main(int argc, char** argv)
     return 1;
     }
 
-#if 1
+#if 0
   cout << "Vertex Unit:" << endl;
   vsh.node()->code()->print(cout);
   cout << "--" << endl;
