@@ -178,8 +178,14 @@ public:
   std::string name() const;
 
   SH::ShBackendCodePtr generateCode(int kind, const SH::ShProgram& shader);
+
+  //TODO - implement more super/framebuffer methods.
+  // It may be a good idea to split this off into a Buffer manager class
+  // that works with the Backend.
   virtual void bindFramebuffer();
-  virtual void deleteUberbuffer(SH::ShUberbufferPtr ub);
+  virtual void setUberbufferData(SH::ShUberbufferPtr ub, const float *data );
+  virtual float* getUberbufferData(const SH::ShUberbuffer *ub);
+  virtual void deleteUberbuffer(const SH::ShUberbuffer *ub);
 
   /// Allocate uber buffers (called by allocRegs)
   void allocFramebuffer(SH::ShFramebufferPtr fb);

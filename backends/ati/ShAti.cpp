@@ -521,7 +521,8 @@ void AtiCode::freeRegister(const ShVariableNodePtr& var)
 void AtiCode::upload()
 {
   /// clean-up previous errors
-  glGetError();
+  int error;
+  if( error = glGetError() ) SH_DEBUG_WARN( "Unexpected GL error" << error  );
 
   if (!m_programId)
     shGlGenProgramsARB(1, &m_programId);
@@ -532,22 +533,17 @@ void AtiCode::upload()
   print(out);
   std::string text = out.str();
   shGlProgramStringARB(shAtiTargets[m_kind], GL_PROGRAM_FORMAT_ASCII_ARB, (GLsizei)text.size(), text.c_str());
-  int error = glGetError();
-  printf( "{" );
+  error = glGetError();
   if (error == GL_INVALID_OPERATION) {
     int pos = -1;
-    printf( "|" );
     glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &pos);
     const unsigned char* message = glGetString(GL_PROGRAM_ERROR_STRING_ARB);
     SH_DEBUG_WARN("Error at character " << pos);
-    printf( "@" );
     SH_DEBUG_WARN("Message: " << message);
-    printf( "#" );
     if( pos >= 0 ) {
       SH_DEBUG_WARN("Code (30 chars): " << text.substr(pos, 30));
     }
   }
-  printf( "}" );
   if (error != GL_NO_ERROR) {
     SH_DEBUG_ERROR("Error uploading ARB program: " << error);
   }
@@ -625,7 +621,8 @@ void AtiCode::loadDataTexture(ShDataTextureNodePtr texture, unsigned int type)
 {
 
   /// reset the error OpenGL counter
-  glGetError();
+  int error;
+  if( error = glGetError() ) SH_DEBUG_WARN( "Unexpected GL error" << error );
 
   if (!type) {
     switch (texture->dims()) {
@@ -708,8 +705,6 @@ void AtiCode::loadDataTexture(ShDataTextureNodePtr texture, unsigned int type)
       m_backend->allocUberbuffer( ub );
       glAttachMemATI( GL_TEXTURE_2D, ub->mem() );
 
-      SH_DEBUG_ERROR("Memory object: "<<ub->mem());
-
       m_backend->printUbErrors();
     } else {
       glAttachMemATI( GL_TEXTURE_2D, 0 );
@@ -717,7 +712,7 @@ void AtiCode::loadDataTexture(ShDataTextureNodePtr texture, unsigned int type)
     }
   } 
 
-  int error = glGetError();
+  error = glGetError();
   if (error != GL_NO_ERROR) {
     SH_DEBUG_ERROR("Error loading texture: " << error);
     switch(error) {
@@ -1445,7 +1440,7 @@ ShBackendCodePtr AtiBackend::generateCode(int kind, const ShProgram& shader)
 void AtiBackend::allocFramebuffer(ShFramebufferPtr fb) 
 {
   if( !fb ) {
-    SH_DEBUG_WARN( "No framebuffer object" );
+    SH_DEBUG_WARN( "No framebuffer object (This is probably okay)" );
     return;
   }
   ShUberbufferPtr ub = fb->getUberbuffer();
@@ -1468,20 +1463,36 @@ void AtiBackend::allocUberbuffer( ShUberbufferPtr ub) {
   int i = 0;
   for( ShUberbuffer::PropertyMap::iterator pmit = props.begin();
       pmit != props.end(); ++pmit, i += 2 ) {
-    propsArray[i + 4] = pmit->first;
-    propsArray[i + 1 + 4] = pmit->second;
+    propsArray[i ] = pmit->first;
+    propsArray[i + 1] = pmit->second;
   }
 
-  // TODO fix this hack
-  propsArray[0] = GL_TEXTURE_2D;
-  propsArray[1] = GL_TRUE;
-  propsArray[2] = GL_COLOR_BUFFER_ATI;
-  propsArray[3] = GL_TRUE;
+  // TODO fix this hack (give user way of specifying properties)
+  // Currently hardcoded to allow ubuf to be used as a 2D texture,
+  // and attach to a color buffer if it has 3-4 components.
+  propsArray[i++] = GL_TEXTURE_2D;
+  propsArray[i++] = GL_TRUE;
+  if( ub->elements() > 2 ) { 
+    propsArray[i++] = GL_COLOR_BUFFER_ATI;
+    propsArray[i++] = GL_TRUE;
+  }
+
+  GLenum format = ub->format();
+  if( format == 0 ) {
+    switch( ub->elements() ) {
+      case 1: format = GL_LUMINANCE_FLOAT32_ATI; break;
+      case 2: format = GL_LUMINANCE_ALPHA_FLOAT32_ATI; break;
+      case 3: format = GL_RGB_FLOAT32_ATI; break;
+      case 4: format = GL_RGBA_FLOAT32_ATI; break;
+      default: format = 0;
+    }
+  }
+  ub->setFormat( format );
 
   SH_DEBUG_PRINT(ub->format()<<"; "<<GL_RGBA);
 
-  ub->setMem( glAllocMem2DATI(ub->format(), ub->width(), ub->height(), 
-			  numProps + 2, propsArray ) );
+  ub->setMem( glAllocMem2DATI(format, ub->width(), ub->height(), 
+			  i/2, propsArray ) );
   
   SH_DEBUG_PRINT("Alocated: "<<ub->mem());
 
@@ -1515,6 +1526,89 @@ void AtiBackend::bindFramebuffer() {
       glAttachMemATI( GL_AUX0, 0 );
       glDrawBuffer( GL_BACK );
   }
+}
+
+void AtiBackend::setUberbufferData(ShUberbufferPtr ub, const float *data) {
+  allocUberbuffer( ub );
+  unsigned int mem = ub->mem();
+  if( !mem ) return; 
+  //TODO replace all this junk with a glMemImage(...) call when it's implemented
+
+  //bind the texture 
+  GLuint texBinding;
+  glGenTextures(1, &texBinding);
+  shGlActiveTextureARB(GL_TEXTURE0);
+
+  //TODO handle other dimensions
+  glBindTexture(GL_TEXTURE_2D, texBinding); 
+  
+  //attach the uber buffer
+  glAttachMemATI( GL_TEXTURE_2D, mem ); 
+
+  //use glTexImage to upload data
+  // TODO support other dimensions
+  GLenum format;
+  switch (ub->elements()) {
+    case 1: format = GL_LUMINANCE; break;
+    case 2: format = GL_LUMINANCE_ALPHA; break;
+    case 3: format = GL_RGB; break;
+    case 4: format = GL_RGBA; break;
+    default: format = 0; break;
+  }
+  glTexImage2D(GL_TEXTURE_2D, 0, ub->format(), ub->width(), ub->height(), 0, format, GL_FLOAT,
+               data);
+
+  //detach uber buffer
+  glAttachMemATI( GL_TEXTURE_2D, 0 );
+
+  //delete texture
+  glDeleteTextures(1, (GLuint*)&texBinding);
+}
+
+//TODO use glGetImage on the super buffer when it's implemented
+//instead of rendering to a buffer and reading pixels
+float* AtiBackend::getUberbufferData(const ShUberbuffer *ub) {
+  unsigned int mem = ub->mem();
+  if( !mem ) {
+    SH_DEBUG_WARN( "Cannot get uber buffer data from unininitialized uber buffer\n" );
+    return 0; 
+  }
+  SH_DEBUG_WARN( "Getting ubuf data (Warning - experimental - bindShader again before accessing textures)" ); 
+  GLint oldReadBuf;
+  glGetIntegerv( GL_READ_BUFFER, &oldReadBuf );
+
+  float* data = new float[ ub->width() * ub->height() * ub->elements() ];
+
+  //bind the texture 
+  GLuint texBinding;
+  glGenTextures(1, &texBinding);
+  shGlActiveTextureARB(GL_TEXTURE0);
+
+  //TODO handle other dimensions
+  glBindTexture(GL_TEXTURE_2D, texBinding); 
+  
+  //attach the uber buffer
+  glAttachMemATI( GL_TEXTURE_2D, mem ); 
+
+  //use glTexImage to upload data
+  // TODO support other dimensions
+  GLenum format;
+  switch (ub->elements()) {
+    case 1: format = GL_LUMINANCE; break;
+    case 2: format = GL_LUMINANCE_ALPHA; break;
+    case 3: format = GL_RGB; break;
+    case 4: format = GL_RGBA; break;
+    default: format = 0; break;
+  }
+  glGetTexImage(GL_TEXTURE_2D, 0, format, GL_FLOAT, data );
+
+  //detach uber buffer
+  glAttachMemATI( GL_TEXTURE_2D, 0 );
+
+  //delete texture
+  glDeleteTextures(1, (GLuint*)&texBinding);
+
+  return data;
 }
 
 void AtiBackend::render(SH::ShVertexArray& data){
@@ -1562,7 +1656,7 @@ void AtiBackend::render_planar(SH::ShVertexArray& data){
 }
 
 
-void AtiBackend::deleteUberbuffer(ShUberbufferPtr ub) {
+void AtiBackend::deleteUberbuffer(const ShUberbuffer* ub) {
   if( !ub->mem() ) return; 
   glDeleteMemATI(ub->mem());
 }
