@@ -1,3 +1,8 @@
+2004-09-07  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/GlTextures.cpp (bindTexture): Added support for
+	opengl:preset metadata, and set opengl:texid metadata.
+
 2004-08-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* test/regress/Makefile.am: Added test.hpp everywhere.

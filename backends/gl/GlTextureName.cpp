@@ -33,16 +33,29 @@ using namespace SH;
 GlTextureName::GlTextureName(GLenum target)
   : m_target(target),
     m_params(0, SH::ShTextureTraits::SH_FILTER_NONE,
-             SH::ShTextureTraits::SH_WRAP_CLAMP, SH::ShTextureTraits::SH_CLAMPED)
+             SH::ShTextureTraits::SH_WRAP_CLAMP, SH::ShTextureTraits::SH_CLAMPED),
+    m_managed(true)
 {
   glGenTextures(1, &m_name);
+  m_names.push_back(this);
+}
+
+GlTextureName::GlTextureName(GLenum target, GLuint name)
+  : m_target(target),
+    m_name(name),
+    m_params(0, SH::ShTextureTraits::SH_FILTER_NONE,
+             SH::ShTextureTraits::SH_WRAP_CLAMP, SH::ShTextureTraits::SH_CLAMPED),
+    m_managed(false)
+{
   m_names.push_back(this);
 }
 
 GlTextureName::~GlTextureName()
 {
   m_names.erase(std::remove(m_names.begin(), m_names.end(), this));
-  glDeleteTextures(1, &m_name);
+  if (m_managed) {
+    glDeleteTextures(1, &m_name);
+  }
 }
 
 void GlTextureName::addStorage(SH::ShStorage* storage)
