@@ -1,3 +1,11 @@
+2003-08-08  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShLib.hpp (cond): Allow scalar cond().
+
+	* backends/sm/ShSmBackend.cpp (addBasicBlock): Support scalar COND instructions.
+
+	* backends/arb/ShArb.cpp (genNode): Support scalar COND instructions.
+
 2003-08-07  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* configure.ac, bootstrap, config/*.m4: Split off some useful

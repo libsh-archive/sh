@@ -986,7 +986,15 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       m_instructions.push_back(ArbInst(SH_ARB_TEX, stmt.dest, stmt.src2, stmt.src1));
       break;
     case SH_OP_COND:
-      m_instructions.push_back(ArbInst(SH_ARB_CMP, stmt.dest, -stmt.src1, stmt.src2, stmt.src3));
+      if (stmt.src1.size() == 1 && stmt.src2.size() != 1) {
+        int* swizzle = new int[stmt.src2.size()];
+        for (int i = 0; i < stmt.src2.size(); i++) swizzle[i] = 0;
+        m_instructions.push_back(ArbInst(SH_ARB_CMP, stmt.dest, -stmt.src1(stmt.src2.size(), swizzle),
+                                         stmt.src2, stmt.src3));
+        delete [] swizzle;
+      } else {
+        m_instructions.push_back(ArbInst(SH_ARB_CMP, stmt.dest, -stmt.src1, stmt.src2, stmt.src3));
+      }
       break;
     case SH_OP_KIL:
       m_instructions.push_back(ArbInst(SH_ARB_KIL, -stmt.dest));

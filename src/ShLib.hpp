@@ -330,21 +330,22 @@ ShVariableN<N, T> operator!=(const ShVariableN<N, T>& left, const ShVariableN<1,
  *  Note: CMP in the ARB_{vertex,fragment}_program spec has
  *  src1[i] < 0.0, not greater than.
  */
-template<int N, typename T>
-ShVariableN<N, T> cond(const ShVariableN<N, T>& condition, const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
+template<int M, int N, typename T>
+ShVariableN<N, T> cond(const ShVariableN<M, T>& condition, const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
 {
+  ShCheckDims<N, true, M, true>();
   if (!ShEnvironment::insideShader) {
     assert(condition.hasValues());
     assert(left.hasValues());
     assert(right.hasValues());
-    T cvals[N];
+    T cvals[M];
     condition.getValues(cvals);
     T lvals[N];
     left.getValues(lvals);
     T rvals[N];
     right.getValues(rvals);
     T result[N];
-    for (int i = 0; i < N; i++) result[i] = (cvals[i] > 0.0 ? lvals[i] : rvals[i]);
+    for (int i = 0; i < N; i++) result[i] = (cvals[M == 1 ? 0 : i] > 0.0 ? lvals[i] : rvals[i]);
     return ShConstant<N, T>(result);
   } else {
     ShAttrib<N, SH_VAR_TEMP, T, false> t;
