@@ -1,8 +1,302 @@
+2004-01-11 Bryan Chan <b8chan@cgl.uwaterloo.ca>
+Probably should have checked a good chunk of this in a month ago...ah well.
+
+Merged trunk up r1714->r1798 into arithmetic
+
+Changes to merge back to trunk, once they're proven correct and stable:
+	A) Changes to constant propagation:
+
+		* src/ShConstProp.cpp (updateDest):
+		Changed updateDest to 
+			1) init dest to TOP 
+			2) only move down the lattice
+			3) keep a vector of previous lattice values on each dest
+			4) update worklist iff change to dest lattice value
+	
+	B) Allow ShProgram to be used as a function call while defining other
+		 ShPrograms.  This required recording temp declares within each 
+		 ShProgram's scope to handle weird cases robustly.
+
+		* src/ShRecord.hpp ShRecord.cpp:
+		Morphed ShStream into something similar for ShVariable.	
+		Implements operators like (a & b) = p(c & d & e) for
+		execution in immed mode, insertion into parse in retained mode.
+		(immed mode eval todo - should be just one or two lines)
+
+		* src/ShVariable.hpp ShVariable.cpp (operator=(ShProgram)):
+		Changed original operator= for dep uniforms to attach.
+		New operator= works like as program execution/insertion like above
+		for ShRecord.
+
+		* src/ShCfgBlock.hpp:
+		A ShBlock subclass that represents inserting a previously defined 
+		single-entry/single-exit control graph into the current parse. 
+
+		* src/ShProgramNode.hpp, ShProgramNode.cpp (collectDecl, collectVariables,
+																							hasDecl, addDecl)
+			ShOperation.hpp, ShOperation.cpp (SH_OP_DECL),
+			ShCtrlGraph.hpp, ShCtrlGraph.cpp (addDecl, hasDecl, decl_begin, decl_end),
+			ShParser.hpp, ShParser.cpp (parseBlock),
+			ShConstProp.cpp (ShConstProp::ShConstProp),
+			ShOptimizations.cpp (optimize, InitLiveCode::operator()):
+		Added a dummy op SH_OP_DECL to indicate declaration points of temps,
+		Changed ShParser to collect SH_OP_DECL into cfg nodes during parse,
+		Changed optimize() to call collectDecls and collectVariables by itself
+		Changed optimizations to deal with this
+			-live code init, constprop - handles temps declared outside current
+			program scope in a manner similar to uniforms
+			-straightener also merges decl sets when coallescing a block 
+
+		* src/ShAlgebra.hpp, ShAlgebra.cpp (replaceUniform -> replaceVariable):
+		Made replace work on any variable instead of just uniforms.
+
+	C) Change ShStatementInfo to ShInfo
+		For attaching complex meta information to certain Sh objects during
+		optimizations, transformations, etc.
+		This was useful for example to attach different properties to ShPrograms
+		and ShCtrlGraphNodes for affine arithmetic. 
+		
+		* src/ShInfo.hpp, ShInfoImpl.hpp (ShInfo, ShInfoHolder)
+			src/ShStatement.hpp, ShStatement.cpp:
+		Extracted methods from ShStatementInfo and ShStatement.
+
+	D) Other cleanup
+		* src/ShValueTracking.cpp:
+		Changed to track use-defs on non-temps (inputs/outputs/inouts), since
+		these may be involved in computation.
+
+		* src/ShEvaluate.hpp, ShEvaluate.cpp (evaluate(ShStatement)),
+			ShEval.cpp (operator()) :
+		Pointed evaluate to ShEval::operator(), and moved over error
+		handling for missing ops to operator().
+		(Can clean this up more by merging some of the code with 
+		code in ShInstructions.cpp)
+
+		* src/ShTransformer.hpp (ShDefaultTransformer):
+		Added a mixin foundation for transforms to save typing. 
+		(i.e. sick of copy/pasting operator()(ShCtrlGraphNodePtr node)... code 
+		over and over again)
+
+		* src/ShOptimizations.cpp (CopyPropagator::operator()):
+		Added extra check to prevent copy propagation if ASN is a cast between
+		different storage types.
+
+		* src/ShLibMatrix.hpp (specialized 3x3 det):
+		This was slowing down inverse performance.
+		(Note: the existing recursive det that breaks out scalar elements _sucks_.
+		nxn det should always doable (proof in the margin...) using only swizzled 
+		ops on n-vector rows) 
+
+		* src/ShMeta.hpp (ShMeta):
+		Added copy constructor since the default no longer works
+
+		* src/ShSwizzle.hpp (ShSwizzle):
+		Added a constructor that repeats a given swizzle n times.
+
+IA/AA changes:
+	A.1) Affine Arithmetic - General
+		* src/ShAffine.hpp ShAffineImpl.hpp:
+		Intermediate mode affine arithmetic classes (dynamically allocated error
+		syms)
+
+		* src/ShStorageType.?pp, ShTypeInfoCasts.?pp, ShDataType.?pp, sh.hpp:
+		Added in affine storage type.
+
+
+	A.2) Affine Arithmetic - Static error symbol placement and statement
+												 transformations 
+
+		* src/ShAaSyms.hpp, .cpp (ShAaIndexSet, ShAaSyms):
+		Classes used to represent static sets of symbols assigned to a tuple.
+
+		* src/ShAaSymPlacer.hpp, .cpp (placeAaSyms, clearAaSyms):
+		Determines a static assignment of error symbols by propagating initial
+		assignments along data flow edges.
+		Does not handle loops yet.
+
+		* src/ShAaVariable.hpp, .cpp (ShAaVariableNode, ShAaVariable):
+		Wrappers around several ShVariable objects used to represent a 
+		single affine term (center and error symbol tuples).
+
+		* src/ShAaOps.hpp, .cpp:
+		Operators on ShAaVariables.
+		(Framework for ops with affine approximations of the form
+			i. ax + b, error = d
+			ii. ax + by + c, error = d
+		 is in place, so many other ops should be trivial to implement)
+
+		* src/ShAaOpHandler.hpp, .cpp (handleAaOps):
+		Uses a static assignment of error symbols from placeAaSyms to change
+		all affine variables in a program into several non-affine tuples
+		(using ShAaVariable).  Splits up ops appropriately.
+
+
+	B) Inclusion functions 
+		 Transforms ShProgram into IA/AA form.
+		* src/ShInclusion.hpp ShInclusion.cpp (inclusion, affine_inclusion,
+		fullAffineInclusion):
+		ShProgram transformation function that turns all nonuniform/const variables
+		into intervals.
+		Affine inclusion turns inputs into intervals (single error symbol), and 
+		outputs into either intervals or affine interval (for internal use only at
+		this point).
+
+		* src/ShIntervalTexture.hpp:
+		2D/Rect -> Interval Rect texture converter for internal usage.
+		@todo 3D/1D.  Ignore cube maps for now unless needed for something
+		(not tested)
+
+	C) Examples 
+
+		* examples/graph:
+		Cheesy 2D function plotter that also displays range arithmetic bounds for debugging.
+		Works fine, except @todo affine version shouldn't convert ranges to IA before
+		rendering bounds. 
+
+		Both examples demonstrate the use of the inclusion and affine_inclusion
+		transformers to convert a standard function into equivalent range arithmetic
+		form. 
+
+		* examples/implicit:
+		Branch-and-bound implicit surface intersector using a rather clumsy attempt
+		at a stack, and a slightly cleaner approach
+		(Both are O(n) for n bits of precision if inclusion function is "perfect"
+		i.e. gives exact range of function, and exponential O(2^n) in worst case,
+		average case behaviour still todo (but they're probably equivalent)).
+		(does not work yet)
+
+
+	C) Misc Range Arithmetic Changes 
+
+		* src/ShRangeBranchFixer.hpp, ShRangeBranchFixer.cpp (fixRangeBranches):
+		Bottom-up traversal of structural graph transforms if-else, self and while
+		loops on range type conditions into non-range type conditions. 
+		(This should work for affine too, except need to implement hierarchical 
+		affine arithmetic for loops)
+
+		* src/ShCtrlGraphWranglers.hpp:
+		Defines two simple cfg ops for splicing in one cfg into another
+		at a given statement iterator.
+
+		* src/ShStructural.hpp:
+		Added several functions to get CtrlGraph edges matching certain
+		structural graph edges to do graph transformations that affect
+		both graphs.
+
+		* ShDomTree.hpp:
+		Miscellaneous untested changes in preparation for doing some form of SSA
+		later.
+
+		* ShTransformer.hpp (extractCasts, vectorizeScalars):
+		Some transformations that make statements easier to analyze
+		(but now unused. probably want to remove these since they interfere
+		with the optimizer).
+
+		* src/ShIntervalConverter.cpp:
+		Added replacement ShPrograms fragments for a few more ops on interval types. 
+
+		* src/ShOperation.hpp, ShOperation.cpp,
+			ShEval.hpp, ShInstructions.hpp, ShInstructions.cpp,
+			ShConcreteRangeOpImpl.hpp,
+		 	ShLibRange, ShLibRangeImpl.hpp,	
+			ShInterval.hpp, ShIntervalImpl.hpp
+			ShEvaluate.cpp:
+		Renamed ShConreteIntervalOp and ShLibInterval to Range.
+		Removed setlo/sethi ops for now since assigning partially to a tuple element
+		wreaks havoc on the optimizer.
+		Added range union/intersect/contains ops to the intermediate language.
+		Added some other range-useful ops (width, center)
+
+		* backends/Cc.cpp (generate):
+		Added a request for the interval and affine transformers.
+
+		* backends/ArbCode.cpp (generate):
+		Added some more DOT debugging outputs for each transformer stage.
+
+		* src/scripts/semantic.py, all the other usual suspects ShAttrib,
+		ShVector, ShNormal, ShColor, ShPoint, ShPosition:
+		Added typedefs for affine types ("a_f", "a_d")  
+
+		* src/ShStatement.hpp, ShStatement.cpp (src field, constructors, operator<<):
+		Changed statements to be able to hold more than three src 
+		(for internal usage only.  Default still allocates exactly three null srcs)
+		(may remove this...)
+
+		* src/ShLibBoolean.hpp ShLibBooleanImpl.hpp (cond):
+		Put 011 scalar version of cond in (perhaps I deleted this by mistake at some
+		point).
+
+
+
+2005-01-11  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbCode.cpp (allocParam): Renamed opengl:binding to
+	opengl:state.
+
+2004-12-20  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* examples/binding/*: Small example of using the new
+	"opengl:binding" meta information to bind Sh uniforms to
+	OpenGL state.
+
+2004-12-20  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShMatrixImpl.hpp (internal):  Fix two  variables  with same
+	name to be different.
+
+2004-12-20  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* src/ShMatrix.hpp, src/ShMatrixImpl.hpp: ShMatrix now
+	inherits from ShMeta. Removed the existing name() and internal()
+	methods. Meta information is stored in the ShMatrix class and all
+	meta information is passed along to each internal ShAttrib with
+	a ".row[i]" attached.
+
+	* backends/gl/ArbCode.cpp, backends/gl/ArbReg.cpp,
+	backends/gl/ArbReg.hpp: Added support for explicit OpenGL
+	state binding via "opengl:binding" meta information. Additionally,
+	"opengl:readonly" is also supported.
+
+2004-12-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShSyntax.cpp (shBind): Correct order of arguments in shBind
+	definition.
+
+2004-12-10  Bryan Chan  <b8chan@cgl.uwaterloo.ca
+	
+	* backends/gl/ArbCode.cpp: Fixed unnecessary BRA instruction.
+
+2004-12-01  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShSyntax.hpp (SH_WHILE): Remove spurious backslash.
+
+	* backends/cc/Cc.cpp (CcBackend::execute): Cache programs.
+
+2004-11-30  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+	
+	* backends/cc/CcTextures.hpp (sh_cc_backend_nearest): Fixed the
+	floor bug Nils mentioned.  Fixed some other bugs I just noticed.
+
+	* test/regress/tex.cpp.py: Added tests for above two bugs
+
+	* test/regress/div.cpp.py: Added some integer div tests that may
+	be related to the FOR loop weirdness on GPU.
+
 2004-11-28  Bryan Chan <b8chan@cgl.uwaterloo.ca>
 	Merged trunk r1714 into arithmetic branch
 	(arithmetic = trunk at this point)
 
 2004-11-28  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+  * src/ShHashMap.hpp (ShPairHashMap::operator()):
+	Added missing typedef.
+
+	* src/ShHashMap.hpp (ShPairHashMap::operator()): Added missing
+	typedef.
+
+	* src/ShFractionImpl.hpp (cbrt, exp, exp2, exp10):
+	Fixed bug. 
+
+2004-11-28  Bryan Chan <b8chan@cgl.uwaterloo.ca
 	* src/ShUtility.hpp (MatchTemplateType, TemplateParamterType):
 	Added some mildly useful template voodoo. 
 
@@ -36,7 +330,7 @@
 
 	* the rest:
 	Search & replace lots of ShValueType back to typename 
-  Win32 build.
+  Added new files to the Win32 build scripts.
 
 2004-11-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
