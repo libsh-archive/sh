@@ -31,14 +31,23 @@
 
 namespace SH {
 
+const char* ShVariableKindName[] = {
+  "Input",
+  "Output",
+  "Temp",
+  "Constant",
+  "Texture",
+  "Stream"
+};
+
 const char* ShVariableSpecialTypeName[] = {
-  "ShAttrib",
-  "ShPoint",
-  "ShVector",
-  "ShNormal",
-  "ShColor",
-  "ShTexCoord",
-  "ShPosition"
+  "Attrib",
+  "Point",
+  "Vector",
+  "Normal",
+  "Color",
+  "TexCoord",
+  "Position"
 };
 
 ShVariableNode::ShVariableNode(ShVariableKind kind, int size, ShVariableSpecialType type)
@@ -149,7 +158,8 @@ ShVariableSpecialType ShVariableNode::specialType() const
 
 std::string ShVariableNode::nameOfType() const {
   std::ostringstream os;
-  os << ShVariableSpecialTypeName[ m_specialType ] << m_size;
+  // TODO indicate ValueType properly
+  os << "Sh" << ShVariableKindName[ m_kind ] << ShVariableSpecialTypeName[ m_specialType ] << m_size << "f";
   return os.str();
 }
 

@@ -71,7 +71,7 @@ ShProgram ShKernelLib::shAccess(const ShTexture2D<T> &tex) {
 template<typename T>
 ShProgram ShKernelLib::shLerp() {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
-    ShInputAttrib1f alpha;
+    ShInputAttrib1f SH_DECL(alpha);
     ATTRIB_DECL(T, SH_VAR_INPUT, a);
     ATTRIB_DECL(T, SH_VAR_INPUT, b);
     ATTRIB_DECL(T, SH_VAR_OUTPUT, result);
@@ -209,8 +209,11 @@ ShProgram ShKernelLib::shVsh(const ShMatrix<N, N, Kind, T> &mv, const ShMatrix<N
 template<int N, int Kind, typename T>
 ShProgram ShKernelLib::shVshTangentSpace(const ShMatrix<N, N, Kind, T> &mv, 
     const ShMatrix<N, N, Kind, T> &mvp) {
+  // permute inputs to match specified inputs
   ShProgram vsh = shVsh(mv, mvp) & keep<ShVector3f>("tangent") & keep<ShVector3f>("tangent2");
   vsh = vsh << shPermute( "texcoord", "normal", "tangent", "tangent2", "lightPos", "posm");
+
+  // permute outputs to match tangentVsh below
   vsh = vsh >> shRange("normal", "lightVec")("tangent")("tangent2")("texcoord")("posv")("posh");
 
   ShProgram tangentVsh = SH_BEGIN_VERTEX_PROGRAM {
@@ -244,6 +247,8 @@ ShProgram ShKernelLib::shVshTangentSpace(const ShMatrix<N, N, Kind, T> &mv,
     lt(1) = dot(lv, t1v);
     lt(2) = dot(lv, t2v);
   } SH_END;
+
+  // permute outputs to match specified outputs
   return vsh >> tangentVsh >> shRange("texcoord")("posv")("normal", "lightVec")("posh"); 
 }
 

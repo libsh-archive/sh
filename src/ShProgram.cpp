@@ -154,4 +154,15 @@ void ShProgramNode::collectVar(const ShVariableNodePtr& var) {
   }
 }
 
+std::ostream& operator<<( std::ostream& out, const ShProgramNode::VarList &varList ) {
+  out << "(";
+  for( ShProgramNode::VarList::const_iterator it = varList.begin(); 
+      it != varList.end(); ++it ) {
+    if( it != varList.begin() ) out << ", ";
+    out << (*it)->nameOfType() << " " << (*it)->name(); 
+  }
+  out << ")";
+  return out;
+}
+
 }

@@ -86,13 +86,11 @@ class ShWorley {
         ShAttrib4f c = ShAttrib4f( 1.0, 0.0, 0.0, 0.0 ), ShWorleyMetric m = L2_SQ ); 
     
     /** Makes a shader that takes 
-     * Inputs:
-     *  ShAttrib4f coefficients; // worley coefficients
-     *  ShTexCoord2f tc; // texture lookup coordinates
+     *  IN(0) ShAttrib4f coefficients; // worley coefficients
+     *  IN(1) ShTexCoord2f texcoord; // texture lookup coordinates
      *
-     * Outputs:
-     *  ShAttrib1f  worleyValue 
-     *  ShAttrib2f  gradients;
+     *  OUT(0) ShAttrib1f scalar 
+     *  OUT(1) ShAttrib2f gradient;
      */
     ShProgram worleyProgram( ShWorleyMetric m = L2_SQ );
 

@@ -1,7 +1,7 @@
 2004-01-17  Bryan Chan  <b8chan@cgl.uwaterloo.ca>
 	* src/ShFixedManipulator.??: Added shKeep, shLose
 	manipulators that support combine with ShProgram and 
-	other ShFixedManipulators.
+	other ShFixedManipulators. (shDup and some cleanup coming soon)
 
 	* src/ShManipulator.?pp, src/ShManipulatorImpl.hpp:
 	Reworked all manipulators to take string parameters as well.           
@@ -15,8 +15,10 @@
 	(Reverts to old behaviour of passing through the channel)
 
 	* src/ShAlgebra.hpp: added >> operator for replaceUniform
-
+	* src/ShAlgebra.cpp: changed connect to handle outputs > inputs
 	* src/ShLib.hpp: added pow(x, exp) function
+	* src/ShProgram.?pp, src/ShVariableNode.?pp: added methods
+	to print variables/variable lists for displaying algebra errors
 	
 2004-01-15.5  Bryan Chan  <b8chan@enora.cgl.uwaterloo.ca>
 	* src/Makefile.am: Added missing headers

@@ -173,11 +173,6 @@ ShProgram operator<<(const ShProgram &p, const ShManipulator<T> &m) {
 }
 
 template<typename T>
-ShProgram operator>>(const ShManipulator<T> &m, const ShProgram &p) {
-  return p << m;
-}
-
-template<typename T>
 ShProgram operator<<(const ShManipulator<T> &m, const ShProgram &p) {
   typedef typename ShManipulator<T>::IndexRangeVector RangeVec;
   RangeVec mranges = m.getRanges();
@@ -222,11 +217,6 @@ ShProgram operator<<(const ShManipulator<T> &m, const ShProgram &p) {
   } SH_END;
 
   return connect(p, permuter); 
-}
-
-template<typename T>
-ShProgram operator>>(const ShProgram &p, const ShManipulator<T> &m) {
-  return m << p;
 }
 
 template<typename T>

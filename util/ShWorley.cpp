@@ -220,15 +220,15 @@ ShAttrib3f ShWorley::worley(ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m ) {
 
 ShProgram ShWorley::worleyProgram( ShWorleyMetric m ) {
   ShProgram program = SH_BEGIN_PROGRAM() {
-    ShInputAttrib4f coefficient;
-    ShInputAttrib2f p;
+    ShInputAttrib4f SH_DECL(coefficients);
+    ShInputAttrib2f SH_DECL(texcoord);
 
     ShAttrib1f tempScalar;
     ShAttrib2f tempGradient;
-    doWorley( p, coefficient, m, tempScalar, tempGradient );
+    doWorley( texcoord, coefficients, m, tempScalar, tempGradient );
 
-    ShOutputAttrib1f scalar = tempScalar;
-    ShOutputAttrib2f gradient = tempGradient;
+    ShOutputAttrib1f SH_DECL(scalar) = tempScalar;
+    ShOutputAttrib2f SH_DECL(gradient) = tempGradient;
   } SH_END_PROGRAM;
   return program;
 }

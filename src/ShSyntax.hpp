@@ -161,37 +161,22 @@
  * Declare variable with the same name as var.
  * Usage:
  *  Sh_Some_Type SH_DECL(var);
+ * or 
+ *  Sh_Some_TYPE SH_DECL(var) = initial_value;
  *
  * @see SH_NAMEDDECL
  */
-#define SH_DECL(var) var; var.name( # var );
+#define SH_DECL(var) var; var.name( # var ); var
 
 /** \def SH_NAMEDECL
  * Declare variable with the given name 
  * Usage:
  *  Sh_Some_Type SH_NAMEDECL(var, "name");
+ * or Sh_Some_Type SH_NAMEDECL(var, "name") = initial_value;
  *
  * @see SH_DECL
  */
-#define SH_NAMEDECL(var, varName) var; var.name( varName );
-
-/** \def SH_DECL_INIT
- * Declare variable with the given name, and initialize 
- * Usage:
- *  Sh_Some_Type SH_DECL_INIT(var) = initizliation;
- *
- * @see SH_DECL
- */
-#define SH_DECL_INIT(var) var; var.name( # var ); var
-
-/** \def SH_NAMEDECL_INIT
- * Declare variable with the given name, and initialize 
- * Usage:
- *  Sh_Some_Type SH_NAMEDECL_INIT(var, "name") = initizliation;
- *
- * @see SH_DECL
- */
-#define SH_NAMEDECL_INIT(var, varName) var; var.name( varName ); var
+#define SH_NAMEDECL(var, varName) var; var.name( varName ); var
 //@}
 
 namespace SH {

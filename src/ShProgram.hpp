@@ -105,6 +105,8 @@ private:
 };
 
 typedef ShRefCount<ShProgramNode> ShProgram;
+
+extern std::ostream& operator<<( std::ostream& out, const ShProgramNode::VarList &varList );
  
 }
 

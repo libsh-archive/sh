@@ -112,9 +112,6 @@ class ShManipulator {
 template<typename T>
 ShProgram operator<<(const ShProgram &p, const ShManipulator<T> &m); 
 
-template<typename T>
-ShProgram operator>>(const ShManipulator<T> &m, const ShProgram &p); /// Equiv. to p << m 
-
 /** \brief Applies a manipulator to the outputs of a ShProgram
  *
  * This makes sense since >> is left associative, so 
@@ -123,10 +120,6 @@ ShProgram operator>>(const ShManipulator<T> &m, const ShProgram &p); /// Equiv. 
  */
 template<typename T>
 ShProgram operator<<(const ShManipulator<T> &m, const ShProgram &p);
-
-template<typename T>
-ShProgram operator>>(const ShProgram &p, const ShManipulator<T> &m); /// Equiv. to m << p 
-
 
 
 /// permute(a1, ...) is a manipulator that permutes 

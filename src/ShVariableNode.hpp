@@ -51,7 +51,8 @@ enum ShVariableSpecialType {
   SH_VAR_POSITION
 };
 
-// ensure this matches the SpecialType enum
+// ensure these match the Kind and SpecialType enums
+extern const char* ShVariableKindName[];
 extern const char* ShVariableSpecialTypeName[];
 
 /** A generic n-tuple variable.
@@ -75,7 +76,7 @@ public:
   ShVariableSpecialType specialType() const;
   void specialType(ShVariableSpecialType);
 
-  std::string nameOfType() const; ///< Get a string of this var's specialType & size
+  std::string nameOfType() const; ///< Get a string of this var's specialType, kind, & size
 
   typedef double ValueType;
   

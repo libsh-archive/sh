@@ -97,24 +97,6 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   aosize = a->outputs.size();
   bisize = b->inputs.size();
   SH_DEBUG_PRINT( "Connecting " << aosize << " outputs to " << bisize << " inputs" );
-  if (aosize > bisize) {
-    std::ostringstream os;
-    os << "Cannot connect programs. Number of outputs (" << a->outputs.size() << ") > number of inputs ("
-       << b->inputs.size() << ")" << std::endl;
-    os << "Outputs: ";
-    for( ShProgramNode::VarList::const_iterator it = a->outputs.begin();
-        it != a->outputs.end(); ++it ) {
-      os << (*it)->nameOfType() << " "; 
-    }
-    os << std::endl << "Inputs: "; 
-    for( ShProgramNode::VarList::const_iterator it = b->inputs.begin();
-        it != b->inputs.end(); ++it ) {
-      os << (*it)->nameOfType() << " "; 
-    }
-
-    ShError( ShAlgebraException( os.str() ) ); 
-  }
-
   std::string rtarget;
 
   if (a->target().empty()) {
@@ -154,6 +136,15 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   for (ShProgramNode::VarList::const_iterator II = b->outputs.begin(); II != b->outputs.end(); ++II) {
     program->outputs.push_back(*II);
   }
+
+  // push back extra outputs from a if aosize > bisize
+  if( aosize > bisize ) { 
+    ShProgramNode::VarList::const_iterator II = a->outputs.begin();
+    for(int i = 0; i < bisize; ++i, ++II); 
+    for(; II != a->outputs.end(); ++II) {
+      program->outputs.push_back(*II);
+    }
+  }
   
   VarMap varMap;
 
@@ -163,7 +154,7 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   ShEnvironment::insideShader = true;
   
   ShProgramNode::VarList::const_iterator I, J;  
-  for (I = a->outputs.begin(), J = b->inputs.begin(); I != a->outputs.end(); ++I, ++J) {
+  for (I = a->outputs.begin(), J = b->inputs.begin(); I != a->outputs.end() && J != b->inputs.end(); ++I, ++J) {
     SH_DEBUG_PRINT("Smashing a variable..");
     if( (*I)->size() != (*J)->size() ) {
       ShError( ShAlgebraException( "Cannot smash variables " + 
@@ -251,7 +242,7 @@ ShProgram operator&(const ShProgram& a, const ShProgram& b)
   return combine(a, b);
 }
 
-ShProgram operator>>(const ShProgram &p, const ShVariable &var) {
+ShProgram operator<<(const ShVariable &var, const ShProgram &p) { 
   return replaceUniform(p, var);
 }
 
@@ -298,10 +289,6 @@ ShProgram replaceUniform(const ShProgram& a, const ShVariable& v)
   program->collectVariables();
 
   return program;
-}
-
-ShProgram permute(const ShProgram& a, int size, ... ) {
-
 }
 
 }
