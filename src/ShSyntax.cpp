@@ -120,6 +120,16 @@ bool shSetBackend(const std::string& name)
   return true;
 }
 
+// Pass data to the backend (used for DirectX)
+bool shSetBackendData(void* ptr)
+{
+  if (!SH::ShEnvironment::backend)
+    return false;
+
+  SH::ShEnvironment::backend->setBackendData(ptr);
+  return true;
+}
+
 void shInit()
 {
   // TODO: Initialize backends

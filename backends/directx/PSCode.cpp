@@ -30,6 +30,9 @@
 #include <cmath>
 #include <bitset>
 
+#include <d3d9.h>
+#include <d3dx9.h>
+
 #include "ShVariable.hpp"
 #include "ShDebug.hpp"
 #include "ShLinearAllocator.hpp"
@@ -48,15 +51,6 @@ namespace shdx {
 
 using namespace SH;
 
-#define shGlProgramStringARB glProgramStringARB
-#define shGlActiveTextureARB glActiveTextureARB
-#define shGlProgramLocalParameter4fvARB glProgramLocalParameter4fvARB
-#define shGlProgramEnvParameter4fvARB glProgramEnvParameter4fvARB
-#define shGlGetProgramivARB glGetProgramivARB
-#define shGlGenProgramsARB glGenProgramsARB
-#define shGlDeleteProgramsARB glDeleteProgramsARB
-#define shGlBindProgramARB glBindProgramARB
-
 struct PSBindingSpecs {
   PSRegBinding binding;
   int maxBindings;
@@ -65,35 +59,34 @@ struct PSBindingSpecs {
 };
 
 PSBindingSpecs psVertexAttribBindingSpecs[] = {
-  {SH_ARB_REG_VERTEXPOS, 1, SH_POSITION, false},
-  {SH_ARB_REG_VERTEXNRM, 1, SH_NORMAL, false},
-  {SH_ARB_REG_VERTEXCOL, 1, SH_COLOR, false},
-  {SH_ARB_REG_VERTEXTEX, 8, SH_TEXCOORD, true},
-  {SH_ARB_REG_VERTEXFOG, 1, SH_ATTRIB, true},
-  {SH_ARB_REG_NONE, 0, SH_ATTRIB, true}
-};
-
-PSBindingSpecs psFragmentAttribBindingSpecs[] = {
-  {SH_ARB_REG_FRAGMENTPOS, 1, SH_POSITION, false},
-  {SH_ARB_REG_FRAGMENTCOL, 1, SH_COLOR, false},
-  {SH_ARB_REG_FRAGMENTTEX, 8, SH_TEXCOORD, true},
-  {SH_ARB_REG_FRAGMENTFOG, 1, SH_ATTRIB, true},
-  {SH_ARB_REG_NONE, 0, SH_ATTRIB, true}
+  {SH_PS_REG_VERTEXPOS, 1, SH_POSITION, false},
+  {SH_PS_REG_VERTEXNRM, 1, SH_NORMAL, false},
+  {SH_PS_REG_VERTEXDIFFUSE, 1, SH_COLOR, false},
+  {SH_PS_REG_VERTEXTEX, 8, SH_TEXCOORD, true},
+  {SH_PS_REG_NONE, 0, SH_ATTRIB, true}
 };
 
 PSBindingSpecs psVertexOutputBindingSpecs[] = {
-  {SH_ARB_REG_RESULTPOS, 1, SH_POSITION, false},
-  {SH_ARB_REG_RESULTCOL, 1, SH_COLOR, false},
-  {SH_ARB_REG_RESULTTEX, 8, SH_TEXCOORD, true},
-  {SH_ARB_REG_RESULTFOG, 1, SH_ATTRIB, true},
-  {SH_ARB_REG_RESULTPTS, 1, SH_ATTRIB, true},
-  {SH_ARB_REG_NONE, 0, SH_ATTRIB}
+  {SH_PS_REG_RESULTPOS, 1, SH_POSITION, false},
+  {SH_PS_REG_RESULTDIFFUSE, 1, SH_COLOR, false},
+  {SH_PS_REG_RESULTSPECULAR, 1, SH_COLOR, false},
+  {SH_PS_REG_RESULTTEX, 8, SH_TEXCOORD, true},
+  {SH_PS_REG_RESULTFOG, 1, SH_ATTRIB, true},
+  {SH_PS_REG_RESULTPTS, 1, SH_ATTRIB, true},
+  {SH_PS_REG_NONE, 0, SH_ATTRIB}
+};
+
+PSBindingSpecs psFragmentAttribBindingSpecs[] = {
+  {SH_PS_REG_FRAGMENTPOS, 1, SH_POSITION, false},
+  {SH_PS_REG_FRAGMENTNRM, 1, SH_NORMAL, false},
+  {SH_PS_REG_FRAGMENTDIFFUSE, 1, SH_COLOR, false},
+  {SH_PS_REG_FRAGMENTTEX, 8, SH_TEXCOORD, true},
+  {SH_PS_REG_NONE, 0, SH_ATTRIB, true}
 };
 
 PSBindingSpecs psFragmentOutputBindingSpecs[] = {
-  {SH_ARB_REG_RESULTCOL, 1, SH_COLOR, true},
-  {SH_ARB_REG_RESULTDPT, 1, SH_ATTRIB, false},
-  {SH_ARB_REG_NONE, 0, SH_ATTRIB}
+  {SH_PS_REG_RESULTCOL, 1, SH_COLOR, true},
+  {SH_PS_REG_NONE, 0, SH_ATTRIB}
 };
 
 PSBindingSpecs* psBindingSpecs(bool output, const std::string& unit)
@@ -110,44 +103,26 @@ using namespace SH;
 PSCode::PSCode(const ShProgramNodeCPtr& shader, const std::string& unit,
                  TextureStrategy* textures)
   : m_textures(textures), m_shader(0), m_originalShader(shader), m_unit(unit),
-    m_numTemps(0), m_numInputs(0), m_numOutputs(0), m_numParams(0), m_numConsts(0),
-    m_numTextures(0), m_programId(0), m_environment(0), m_max_label(0)
+    m_numTemps(0), m_numInputs(0), m_numOutputs(0), m_numParams(0),
+    m_numTextures(0), m_environment(0), m_max_label(0), m_pVS(NULL), m_pPS(NULL)
 {
-  if (unit == "fragment") m_environment |= SH_ARB_FP;
-  if (unit == "vertex") m_environment |= SH_ARB_VP;
-
-  const GLubyte* extensions = glGetString(GL_EXTENSIONS);
-
-  std::string extstr(reinterpret_cast<const char*>(extensions));
-
-  if (unit == "fragment") {
-    if (extstr.find("NV_fragment_program_option") != std::string::npos) {
-      m_environment |= SH_ARB_NVFP;
-    }
-    if (extstr.find("NV_fragment_program2") != std::string::npos) {
-      m_environment |= SH_ARB_NVFP2;
-    }
-    if (extstr.find("ATI_draw_buffers") != std::string::npos) {
-      m_environment |= SH_ARB_ATIDB;
-    }
-  }
-  if (unit == "vertex") {
-    if (extstr.find("NV_vertex_program2_option") != std::string::npos) {
-      m_environment |= SH_ARB_NVVP2;
-    }
-    if (extstr.find("NV_vertex_program3") != std::string::npos) {
-      m_environment |= SH_ARB_NVVP3;
-    }
-  }
+  if (unit == "fragment") m_environment |= SH_PS_PS_3_0;
+  if (unit == "vertex") m_environment |= SH_PS_VS_3_0;
 }
 
 PSCode::~PSCode()
 {
 }
 
+// Set the Direct3D device
+void PSCode::setD3DDevice(LPDIRECT3DDEVICE9 pD3DDevice)
+{
+  m_pD3DDevice = pD3DDevice;
+}
+
 void PSCode::generate()
 {
-  // Transform code to be ARB_fragment_program compatible
+  // Transform code to be VS/PS compatible
   m_shader = m_originalShader->clone();
   ShContext::current()->enter(m_shader);
   ShTransformer transform(m_shader);
@@ -165,20 +140,20 @@ void PSCode::generate()
     ShContext::current()->enter(m_shader);
   }
 
-  if (m_environment & SH_ARB_NVFP2) {
+  /*if (m_environment & SH_ARB_NVFP2) {
     // In NV_fragment_program2, we actually generate structured code.
     ShStructural str(m_shader->ctrlGraph);
 
     genStructNode(str.head());
     
-  } else {
+  } else {*/
     m_shader->ctrlGraph->entry()->clearMarked();
     genNode(m_shader->ctrlGraph->entry());
     
-    if (m_environment & SH_ARB_NVVP2) {
-      m_instructions.push_back(ArbInst(SH_ARB_LABEL, getLabel(m_shader->ctrlGraph->exit())));
-    }
-  }
+    /*if (m_environment & SH_ARB_NVVP2) {
+      m_instructions.push_back(PSInst(SH_ARB_LABEL, getLabel(m_shader->ctrlGraph->exit())));
+    }*/
+  //}
   m_shader->ctrlGraph->entry()->clearMarked();
   allocRegs();
   
@@ -192,14 +167,14 @@ bool PSCode::allocateRegister(const ShVariableNodePtr& var)
   if (var->uniform()) return true;
 
   if (m_tempRegs.empty()) {
-    shError(ShException("ARB Backend: Out of registers"));
+    shError(ShException("DX Backend: Out of registers"));
     return false;
   }
 
   int idx = m_tempRegs.front();
   m_tempRegs.pop_front();
   if (idx + 1 > m_numTemps) m_numTemps = idx + 1;
-  m_registers[var] = new ArbReg(SH_ARB_REG_TEMP, idx);
+  m_registers[var] = new PSReg(SH_PS_REG_TEMP, idx);
   m_reglist.push_back(m_registers[var]);
   
   return true;
@@ -217,60 +192,112 @@ void PSCode::freeRegister(const ShVariableNodePtr& var)
 
 void PSCode::upload()
 {
-  if (!m_programId) {
-    SH_GL_CHECK_ERROR(shGlGenProgramsARB(1, &m_programId));
-  }
+  LPD3DXBUFFER pErrorBuffer, pShaderBuffer;
 
-  SH_GL_CHECK_ERROR(shGlBindProgramARB(arbTarget(m_unit), m_programId));
-  
+  // Get the text for the shader
   std::ostringstream out;
   print(out);
   std::string text = out.str();
-  shGlProgramStringARB(arbTarget(m_unit), GL_PROGRAM_FORMAT_ASCII_ARB,
-                       (GLsizei)text.size(), text.c_str());
-  int error = glGetError();
-  if (error == GL_INVALID_OPERATION) {
-    int pos = -1;
-    SH_GL_CHECK_ERROR(glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &pos));
-    if (pos >= 0){
-      const unsigned char* message = glGetString(GL_PROGRAM_ERROR_STRING_ARB);
-      SH_DEBUG_WARN("Error at character " << pos);
-      SH_DEBUG_WARN("Message: " << message);
-      while (pos >= 0 && text[pos] != '\n') pos--;
-      if (pos > 0) pos++;
-      SH_DEBUG_WARN("Code: " << text.substr(pos, text.find('\n', pos)));
-    }
+
+  if (m_environment & SH_PS_VS_3_0)
+  {
+	  FILE *fp = fopen("c:\\vertex_ps.txt", "wt");
+	  fprintf(fp, "%s\n", text.c_str());
+	  fclose(fp);
   }
-  if (error != GL_NO_ERROR) {
-    SH_DEBUG_ERROR("Error uploading ARB program (" << m_unit << "): " << error);
-    SH_DEBUG_ERROR("shGlProgramStringARB(" << arbTarget(m_unit)
-                   << ", GL_PROGRAM_FORMAT_ASCII_ARB, " << (GLsizei)text.size() << 
-                   ", <program text>);");
+  else
+	{
+	  FILE *fp = fopen("c:\\fragment_ps.txt", "wt");
+	  fprintf(fp, "%s\n", text.c_str());
+	  fclose(fp);
+	}
+
+  // Assemble the shader code
+  if (FAILED(D3DXAssembleShader(text.c_str(), text.length(), NULL, NULL, 0, &pShaderBuffer, &pErrorBuffer)))
+  {
+	SH_DEBUG_WARN("Error compiling shader (" << m_unit << "): " << pErrorBuffer->GetBufferPointer());
+	  if (m_environment & SH_PS_VS_3_0)
+	  {
+		  FILE *fp = fopen("c:\\vertex_ps_errors.txt", "wt");
+		  fprintf(fp, "%s\n", pErrorBuffer->GetBufferPointer());
+		  fclose(fp);
+	  }
+	  else
+		{
+		  FILE *fp = fopen("c:\\fragment_ps_errors.txt", "wt");
+		  fprintf(fp, "%s\n", pErrorBuffer->GetBufferPointer());
+		  fclose(fp);
+		}
+
+	return;
+  }
+  else // Didn't fail: overwrite the error files
+  {
+	  if (m_environment & SH_PS_VS_3_0)
+	  {
+		  FILE *fp = fopen("c:\\vertex_ps_errors.txt", "wt");
+		  fprintf(fp, "No errors\n");
+		  fclose(fp);
+	  }
+	  else
+		{
+		  FILE *fp = fopen("c:\\fragment_ps_errors.txt", "wt");
+		  fprintf(fp, "No errors\n");
+		  fclose(fp);
+		}
+  }
+  // Vertex shader
+  if (m_environment & SH_PS_VS_3_0)
+  {
+	// Create a vertex shader from the compiled code
+	if (FAILED(m_pD3DDevice->CreateVertexShader((DWORD*)pShaderBuffer->GetBufferPointer(), &m_pVS)))
+	{
+	  FILE *fp = fopen("c:\\vertex_ps_errors.txt", "at");
+	  fprintf(fp, "Couldn't bind pixel shader\n");
+	  fclose(fp);
+	  SH_DEBUG_ERROR("Error uploading VS program (" << m_unit << ")");
+	  return;
+	}
+
+	// Set the shader as active
+    m_pD3DDevice->SetVertexShader(m_pVS);
+  }
+  else if (m_environment & SH_PS_PS_3_0) // Fragment shader
+  {
+	// Create a fragment shader from the compiled code
+	if (FAILED(m_pD3DDevice->CreatePixelShader((DWORD*)pShaderBuffer->GetBufferPointer(), &m_pPS)))
+	{
+	  FILE *fp = fopen("c:\\fragment_ps_errors.txt", "at");
+	  fprintf(fp, "Couldn't bind pixel shader\n");
+	  fclose(fp);
+	  SH_DEBUG_ERROR("Error uploading PS program (" << m_unit << ")");
+	  return;
+	}
+
+	// Set the shader as active
+    m_pD3DDevice->SetPixelShader(m_pPS);
   }
 }
 
 void PSCode::bind()
 {
-  if (!m_programId) {
+  if (m_pPS == NULL && m_pVS == NULL) {
     upload();
   }
   
-  SH_GL_CHECK_ERROR(shGlBindProgramARB(arbTarget(m_unit), m_programId));
-  
-
-  ShContext::current()->set_binding(std::string("arb:") + m_unit,
+  ShContext::current()->set_binding(std::string("ps:") + m_unit,
                                     shref_const_cast<ShProgramNode>(m_originalShader));
 
   // Initialize constants
   for (RegMap::const_iterator I = m_registers.begin(); I != m_registers.end(); ++I) {
     ShVariableNodePtr node = I->first;
-    ArbReg reg = *I->second;
-    if (node->hasValues() && reg.type == SH_ARB_REG_PARAM) {
+    PSReg reg = *I->second;
+    if (node->hasValues() && reg.type == SH_PS_REG_PARAM) {
       updateUniform(node);
     }
   }
-  // Make sure all textures are loaded.
 
+  // Make sure all textures are loaded.
   bindTextures();
 }
 
@@ -301,7 +328,7 @@ void PSCode::updateUniform(const ShVariableNodePtr& uniform)
     return;
   }
     
-  const ArbReg& reg = *I->second;
+  const PSReg& reg = *I->second;
   
   float values[4];
   for (i = 0; i < uniform->size(); i++) {
@@ -311,14 +338,14 @@ void PSCode::updateUniform(const ShVariableNodePtr& uniform)
     values[i] = 0.0;
   }
   
-  if (reg.type != SH_ARB_REG_PARAM) return;
+  if (reg.type != SH_PS_REG_PARAM) return;
   switch(reg.binding) {
-  case SH_ARB_REG_PARAMLOC:
+/*  case SH_ARB_REG_PARAMLOC:
     SH_GL_CHECK_ERROR(shGlProgramLocalParameter4fvARB(arbTarget(m_unit), reg.bindingIndex, values));
     break;
   case SH_ARB_REG_PARAMENV:
     SH_GL_CHECK_ERROR(shGlProgramEnvParameter4fvARB(arbTarget(m_unit), reg.bindingIndex, values));
-    break;
+    break;*/
   default:
     return;
   }
@@ -332,7 +359,7 @@ std::ostream& PSCode::printVar(std::ostream& out, bool dest, const ShVariable& v
     out << "<no reg for " << var.name() << ">";
     return out;
   }
-  const ArbReg& reg = *I->second;
+  const PSReg& reg = *I->second;
 
   // Negation
   if (var.neg()) out << '-';
@@ -378,13 +405,13 @@ struct LineNumberer {
 
 std::ostream& operator<<(std::ostream& out, LineNumberer& l)
 {
-  out << " # " << ++l.line << std::endl;
+  out << " // " << ++l.line << std::endl;
   return out;
 }
 
-bool PSCode::printSamplingInstruction(std::ostream& out, const ArbInst& instr) const
+bool PSCode::printSamplingInstruction(std::ostream& out, const PSInst& instr) const
 {
-  if (instr.op != SH_ARB_TEX && instr.op != SH_ARB_TXP && instr.op != SH_ARB_TXB)
+/*  if (instr.op != SH_ARB_TEX && instr.op != SH_ARB_TXP && instr.op != SH_ARB_TXB)
     return false;
 
   ShTextureNodePtr texture = shref_dynamic_cast<ShTextureNode>(instr.src[1].node());
@@ -405,7 +432,7 @@ bool PSCode::printSamplingInstruction(std::ostream& out, const ArbInst& instr) c
   }
   //SH_DEBUG_ASSERT(texRegIt != m_registers.end());
 
-  const ArbReg& texReg = *texRegIt->second;
+  const PSReg& texReg = *texRegIt->second;
   
   out << "  ";
   out << psOpInfo[instr.op].name << " ";
@@ -430,46 +457,37 @@ bool PSCode::printSamplingInstruction(std::ostream& out, const ArbInst& instr) c
     break;
   }
   out << ";";
-  return true;
+  return true;*/
+
+  // For now, assume our shaders are non-textured
+  return false;
 }
 
 std::ostream& PSCode::print(std::ostream& out)
 {
   LineNumberer endl;
   const char* swizChars = "xyzw";
+  int major, minor;
 
   // Print version header
-  if (m_unit == "vertex") {
-    out << "!!ARBvp1.0" << endl;
-    if (m_environment & SH_ARB_NVVP3) out << "OPTION NV_vertex_program3;" << endl;
-    else if (m_environment & SH_ARB_NVVP2) out << "OPTION NV_vertex_program2;" << endl;
+  if (psTarget(m_unit, m_pD3DDevice, major, minor) == SH_PSTARGET_VS)
+  {
+	out << "vs.3.0" << endl;
   }
-  if (m_unit == "fragment") {
-    out << "!!ARBfp1.0" << endl;
-
-    if (m_environment & SH_ARB_NVFP2) out << "OPTION NV_fragment_program2;" << endl;
-    else if (m_environment & SH_ARB_NVFP) out << "OPTION NV_fragment_program;" << endl;
-
-    if (m_environment & SH_ARB_ATIDB) out << "OPTION ATI_draw_buffers;" << endl;
+  else
+  {
+	  out << "ps.3.0" << endl;
   }
   
   // Print register declarations
   
   for (RegList::const_iterator I = m_reglist.begin();
        I != m_reglist.end(); ++I) {
-    if ((*I)->type == SH_ARB_REG_TEMP) continue;
-    if ((*I)->type == SH_ARB_REG_TEXTURE) continue;
+    if ((*I)->type == SH_PS_REG_TEMP) continue;
+    if ((*I)->type == SH_PS_REG_TEXTURE) continue;
     out << "  ";
     (*I)->printDecl(out);
     out << endl;
-  }
-  if (m_numTemps) {
-    out << "  TEMP ";
-    for (int i = 0; i < m_numTemps; i++) {
-      if (i > 0) out << ", ";
-      out << ArbReg(SH_ARB_REG_TEMP, i);
-    }
-    out << ";" << endl;
   }
 
   out << endl;
@@ -477,7 +495,7 @@ std::ostream& PSCode::print(std::ostream& out)
   // Print instructions
   for (PSInstList::const_iterator I = m_instructions.begin();
        I != m_instructions.end(); ++I) {
-    if (I->op == SH_ARB_LABEL) {
+    /*if (I->op == SH_ARB_LABEL) {
       out << "label" << I->label << ": ";
     } else if (I->op == SH_ARB_ELSE) {
       out << "  ELSE;";
@@ -548,14 +566,15 @@ std::ostream& PSCode::print(std::ostream& out)
       } else {
         out << "TR";
       }
-      out << ";";
-    } else if (!printSamplingInstruction(out, *I)) {
+      out << ";";*/
+    //} else
+	if (!printSamplingInstruction(out, *I)) {
       out << "  ";
       out << psOpInfo[I->op].name;
-      if (I->update_cc) out << "C";
+      //if (I->update_cc) out << "C";
       out << " ";
       printVar(out, true, I->dest, psOpInfo[I->op].collectingOp);
-      if (I->ccode != ArbInst::NOCC) {
+      /*if (I->ccode != PSInst::NOCC) {
         out << " (";
         out << arbCCnames[I->ccode];
         out << ".";
@@ -564,14 +583,14 @@ std::ostream& PSCode::print(std::ostream& out)
                             : (I->ccswiz.size() == 1 ? I->ccswiz[0] : i))];
         }
         out << ") ";
-      }
+      }*/
       for (int i = 0; i < psOpInfo[I->op].arity; i++) {
         out << ", ";
         printVar(out, false, I->src[i], psOpInfo[I->op].collectingOp, I->dest.swizzle());
       }
       out << ';';
     }
-    out << " # ";
+    out << " // ";
     if (I->dest.node() && I->dest.has_name()) {
       out << "d=" << I->dest.name() << " ";
     }
@@ -583,7 +602,6 @@ std::ostream& PSCode::print(std::ostream& out)
     out << endl;
   }
 
-  out << "END" << endl;
   return out;
 }
 
@@ -620,9 +638,9 @@ void PSCode::genNode(ShCtrlGraphNodePtr node)
 
   if (node == m_shader->ctrlGraph->exit()) return;
   
-  if (m_environment & SH_ARB_NVVP2) {
-    m_instructions.push_back(ArbInst(SH_ARB_LABEL, getLabel(node)));
-  }
+  //if (m_environment & SH_ARB_NVVP2) {
+  //  m_instructions.push_back(PSInst(SH_ARB_LABEL, getLabel(node)));
+  //}
   
   if (node->block) for (ShBasicBlock::ShStmtList::const_iterator I = node->block->begin();
        I != node->block->end(); ++I) {
@@ -630,24 +648,24 @@ void PSCode::genNode(ShCtrlGraphNodePtr node)
     emit(stmt);
   }
 
-  if (m_environment & SH_ARB_NVVP2) {
+  /*if (m_environment & SH_ARB_NVVP2) {
     for(std::vector<SH::ShCtrlGraphBranch>::iterator I = node->successors.begin();
 	I != node->successors.end(); I++) {
-      m_instructions.push_back(ArbInst(SH_ARB_BRA, getLabel(I->node), I->cond));
+      m_instructions.push_back(PSInst(SH_ARB_BRA, getLabel(I->node), I->cond));
     }
-    m_instructions.push_back(ArbInst(SH_ARB_BRA, getLabel(node->follower)));
+    m_instructions.push_back(PSInst(SH_ARB_BRA, getLabel(node->follower)));
     for(std::vector<SH::ShCtrlGraphBranch>::iterator I = node->successors.begin();
 	I != node->successors.end(); I++) {
       genNode(I->node);
     }
-  }
+  }*/
 
   genNode(node->follower);
 }
 
 void PSCode::genStructNode(const ShStructuralNodePtr& node)
 {
-  if (!node) return;
+/*  if (!node) return;
 
   if (node->type == ShStructuralNode::UNREDUCED) {
     ShBasicBlockPtr block = node->cfg_node->block;
@@ -676,11 +694,11 @@ void PSCode::genStructNode(const ShStructuralNodePtr& node)
       }
     }
     genStructNode(header);
-    m_instructions.push_back(ArbInst(SH_ARB_IF, ShVariable(), cond)); {
+    m_instructions.push_back(PSInst(SH_ARB_IF, ShVariable(), cond)); {
       genStructNode(ifnode);
-    } m_instructions.push_back(ArbInst(SH_ARB_ELSE, ShVariable())); {
+    } m_instructions.push_back(PSInst(SH_ARB_ELSE, ShVariable())); {
       genStructNode(elsenode);
-    } m_instructions.push_back(ArbInst(SH_ARB_ENDIF, ShVariable()));
+    } m_instructions.push_back(PSInst(SH_ARB_ENDIF, ShVariable()));
   } else if (node->type == ShStructuralNode::WHILELOOP) {
     ShStructuralNodePtr header = node->structnodes.front();
 
@@ -692,14 +710,14 @@ void PSCode::genStructNode(const ShStructuralNodePtr& node)
     float maxloopval = 255.0;
     maxloop.setValues(&maxloopval);
     m_shader->constants.push_back(maxloop.node());
-    m_instructions.push_back(ArbInst(SH_ARB_REP, ShVariable(), maxloop));
+    m_instructions.push_back(PSInst(SH_ARB_REP, ShVariable(), maxloop));
     genStructNode(header);
-    ArbInst brk(SH_ARB_BRK, ShVariable(), cond);
+    PSInst brk(SH_ARB_BRK, ShVariable(), cond);
     brk.invert = true;
     m_instructions.push_back(brk);
     genStructNode(body);
     
-    m_instructions.push_back(ArbInst(SH_ARB_ENDREP, ShVariable()));
+    m_instructions.push_back(PSInst(SH_ARB_ENDREP, ShVariable()));
   } else if (node->type == ShStructuralNode::SELFLOOP) {
     ShStructuralNodePtr loopnode = node->structnodes.front();
 
@@ -718,42 +736,39 @@ void PSCode::genStructNode(const ShStructuralNodePtr& node)
     float maxloopval = 255.0;
     maxloop.setValues(&maxloopval);
     m_shader->constants.push_back(maxloop.node());
-    m_instructions.push_back(ArbInst(SH_ARB_REP, ShVariable(), maxloop));
+    m_instructions.push_back(PSInst(SH_ARB_REP, ShVariable(), maxloop));
     genStructNode(loopnode);
-    ArbInst brk(SH_ARB_BRK, ShVariable(), cond);
+    PSInst brk(SH_ARB_BRK, ShVariable(), cond);
     if (!condexit) {
       brk.invert = true;
     } 
     m_instructions.push_back(brk);
-    m_instructions.push_back(ArbInst(SH_ARB_ENDREP, ShVariable()));
-  }
+    m_instructions.push_back(PSInst(SH_ARB_ENDREP, ShVariable()));
+  }*/
 }
 
 void PSCode::allocRegs()
 {
-  ArbLimits limits(m_unit);
-  
+  PSLimits limits(m_unit, m_pD3DDevice);
+
   allocInputs(limits);
-  
   allocOutputs(limits);
-  
+
   for (ShProgramNode::VarList::const_iterator I = m_shader->uniforms.begin();
        I != m_shader->uniforms.end(); ++I) {
     allocParam(limits, *I);
   }
 
   allocConsts(limits);
-  
   allocTemps(limits);
-
   allocTextures(limits);
 }
 
 void PSCode::bindSpecial(const ShProgramNode::VarList::const_iterator& begin,
                           const ShProgramNode::VarList::const_iterator& end,
-                          const ArbBindingSpecs& specs, 
+                          const PSBindingSpecs& specs, 
                           std::vector<int>& bindings,
-                          ArbRegType type, int& num)
+                          PSRegType type, int& num)
 {
   bindings.push_back(0);
   
@@ -765,7 +780,7 @@ void PSCode::bindSpecial(const ShProgramNode::VarList::const_iterator& begin,
     if (m_registers.find(node) != m_registers.end()) continue;
     if (node->specialType() != specs.semanticType) continue;
     
-    m_registers[node] = new ArbReg(type, num++, node->name());
+    m_registers[node] = new PSReg(type, num++, node->name());
     m_registers[node]->binding = specs.binding;
     m_registers[node]->bindingIndex = bindings.back();
     m_reglist.push_back(m_registers[node]);
@@ -775,25 +790,25 @@ void PSCode::bindSpecial(const ShProgramNode::VarList::const_iterator& begin,
   }    
 }
 
-void PSCode::allocInputs(const ArbLimits& limits)
+void PSCode::allocInputs(const PSLimits& limits)
 {
   // First, try to assign some "special" output register bindings
-  for (int i = 0; arbBindingSpecs(false, m_unit)[i].binding != SH_ARB_REG_NONE; i++) {
+  for (int i = 0; psBindingSpecs(false, m_unit)[i].binding != SH_PS_REG_NONE; i++) {
     bindSpecial(m_shader->inputs.begin(), m_shader->inputs.end(),
-                arbBindingSpecs(false, m_unit)[i], m_inputBindings,
-                SH_ARB_REG_ATTRIB, m_numInputs);
+                psBindingSpecs(false, m_unit)[i], m_inputBindings,
+                SH_PS_REG_INPUT, m_numInputs);
   }
   
   for (ShProgramNode::VarList::const_iterator I = m_shader->inputs.begin();
        I != m_shader->inputs.end(); ++I) {
     ShVariableNodePtr node = *I;
     if (m_registers.find(node) != m_registers.end()) continue;
-    m_registers[node] = new ArbReg(SH_ARB_REG_ATTRIB, m_numInputs++, node->name());
+    m_registers[node] = new PSReg(SH_PS_REG_INPUT, m_numInputs++, node->name());
     m_reglist.push_back(m_registers[node]);
 
     // Binding
-    for (int i = 0; arbBindingSpecs(false, m_unit)[i].binding != SH_ARB_REG_NONE; i++) {
-      const ArbBindingSpecs& specs = arbBindingSpecs(false, m_unit)[i];
+    for (int i = 0; psBindingSpecs(false, m_unit)[i].binding != SH_PS_REG_NONE; i++) {
+      const PSBindingSpecs& specs = psBindingSpecs(false, m_unit)[i];
 
       if (specs.allowGeneric && m_inputBindings[i] < specs.maxBindings) {
         m_registers[node]->binding = specs.binding;
@@ -805,25 +820,34 @@ void PSCode::allocInputs(const ArbLimits& limits)
   }
 }
 
-void PSCode::allocOutputs(const ArbLimits& limits)
+void PSCode::allocOutputs(const PSLimits& limits)
 {
   // First, try to assign some "special" output register bindings
-  for (int i = 0; arbBindingSpecs(true, m_unit)[i].binding != SH_ARB_REG_NONE; i++) {
-    bindSpecial(m_shader->outputs.begin(), m_shader->outputs.end(),
-                arbBindingSpecs(true, m_unit)[i], m_outputBindings,
-                SH_ARB_REG_OUTPUT, m_numOutputs);
+  for (int i = 0; psBindingSpecs(true, m_unit)[i].binding != SH_PS_REG_NONE; i++) {
+	if (m_environment & SH_PS_VS_3_0) // Vertex shader
+	    bindSpecial(m_shader->outputs.begin(), m_shader->outputs.end(),
+                psBindingSpecs(true, m_unit)[i], m_outputBindings,
+                SH_PS_REG_VSOUTPUT, m_numOutputs);
+	else if (m_environment & SH_PS_PS_3_0) // Pixel shader
+	    bindSpecial(m_shader->outputs.begin(), m_shader->outputs.end(),
+                psBindingSpecs(true, m_unit)[i], m_outputBindings,
+                SH_PS_REG_PSOUTPUT, m_numOutputs);
   }
-  
+
   for (ShProgramNode::VarList::const_iterator I = m_shader->outputs.begin();
        I != m_shader->outputs.end(); ++I) {
+
     ShVariableNodePtr node = *I;
     if (m_registers.find(node) != m_registers.end()) continue;
-    m_registers[node] = new ArbReg(SH_ARB_REG_OUTPUT, m_numOutputs++, node->name());
+	if (m_environment & SH_PS_VS_3_0) // Vertex shader
+	    m_registers[node] = new PSReg(SH_PS_REG_VSOUTPUT, m_numOutputs++, node->name());
+	else if (m_environment & SH_PS_PS_3_0) // Fragment shader
+	    m_registers[node] = new PSReg(SH_PS_REG_PSOUTPUT, m_numOutputs++, node->name());
     m_reglist.push_back(m_registers[node]);
     
     // Binding
-    for (int i = 0; arbBindingSpecs(true, m_unit)[i].binding != SH_ARB_REG_NONE; i++) {
-      const ArbBindingSpecs& specs = arbBindingSpecs(true, m_unit)[i];
+    for (int i = 0; psBindingSpecs(true, m_unit)[i].binding != SH_PS_REG_NONE; i++) {
+      const PSBindingSpecs& specs = psBindingSpecs(true, m_unit)[i];
 
       if (specs.allowGeneric && m_outputBindings[i] < specs.maxBindings) {
         m_registers[node]->binding = specs.binding;
@@ -835,18 +859,18 @@ void PSCode::allocOutputs(const ArbLimits& limits)
   }
 }
 
-void PSCode::allocParam(const ArbLimits& limits, const ShVariableNodePtr& node)
+void PSCode::allocParam(const PSLimits& limits, const ShVariableNodePtr& node)
 {
   // TODO: Check if we reached maximum
   if (m_registers.find(node) != m_registers.end()) return;
-  m_registers[node] = new ArbReg(SH_ARB_REG_PARAM, m_numParams, node->name());
-  m_registers[node]->binding = SH_ARB_REG_PARAMLOC;
+  m_registers[node] = new PSReg(SH_PS_REG_PARAM, m_numParams, node->name());
+  //m_registers[node]->binding = SH_PS_REG_PARAM;
   m_registers[node]->bindingIndex = m_numParams;
   m_reglist.push_back(m_registers[node]);
   m_numParams++;
 }
 
-void PSCode::allocConsts(const ArbLimits& limits)
+void PSCode::allocConsts(const PSLimits& limits)
 {
   for (ShProgramNode::VarList::const_iterator I = m_shader->constants.begin();
        I != m_shader->constants.end(); ++I) {
@@ -855,7 +879,7 @@ void PSCode::allocConsts(const ArbLimits& limits)
     // TODO: improve efficiency
     RegMap::const_iterator J;
     for (J = m_registers.begin(); J != m_registers.end(); ++J) {
-      if (J->second->type != SH_ARB_REG_CONST) continue;
+      if (J->second->type != SH_PS_REG_CONST) continue;
       int f = 0;
       for (int i = 0; i < node->size(); i++) {
         if (J->second->values[i] == node->getValue(i)) f++;
@@ -863,12 +887,12 @@ void PSCode::allocConsts(const ArbLimits& limits)
       if (f == node->size()) break;
     }
     if (J == m_registers.end()) {
-      m_registers[node] = new ArbReg(SH_ARB_REG_CONST, m_numConsts, node->name());
+      m_registers[node] = new PSReg(SH_PS_REG_CONST, m_numParams, node->name());
       m_reglist.push_back(m_registers[node]);
       for (int i = 0; i < 4; i++) {
         m_registers[node]->values[i] = (float)(i < node->size() ? node->getValue(i) : 0.0);
       }
-      m_numConsts++;
+      m_numParams++;
     } else {
       m_registers[node] = J->second;
     }
@@ -892,8 +916,8 @@ bool markable(ShVariableNodePtr node)
   return true;
 }
 
-struct ArbScope {
-  ArbScope(int start)
+struct PSScope {
+  PSScope(int start)
     : start(start)
   {
   }
@@ -908,56 +932,12 @@ struct ArbScope {
   UsageMap write_map; // locations last written to
 };
 
-void PSCode::allocTemps(const ArbLimits& limits)
+void PSCode::allocTemps(const PSLimits& limits)
 {
-
-  typedef std::list<ArbScope> ScopeStack;
+  typedef std::list<PSScope> ScopeStack;
   ScopeStack scopestack;
   
   ShLinearAllocator allocator(this);
-
-//   {
-//     ScopeStack scopestack;
-//     // First do a backwards traversal to find loop nodes that need to be
-//     // marked due to later uses of assignments
-//     std::map<ShVariableNode*, int> last_use;
-    
-//     for (int i = (int)m_instructions.size() - 1; i >= 0; --i) {
-//       ArbInst instr = m_instructions[i];
-//       if (instr.op == SH_ARB_ENDREP) {
-//         scopestack.push_back((int)i);
-//       }
-//       if (instr.op == SH_ARB_REP) {
-//         const ArbScope& scope = scopestack.back();
-//         for (ArbScope::MarkList::const_iterator I = scope.need_mark.begin();
-//              I != scope.need_mark.end(); ++I) {
-//           mark(allocator, *I, (int)i);
-//         }
-//         scopestack.pop_back();
-//       }
-
-//       if (markable(instr.dest.node())) {
-//         if (last_use.find(instr.dest.node().object()) == last_use.end()) continue;
-//         for (ScopeStack::iterator S = scopestack.begin(); S != scopestack.end(); ++S) {
-//           ArbScope& scope = *S;
-//           // Note scope.start == location of ENDREP
-//           // TODO: Consider sub-components in last_use update and here.
-//           if (last_use[instr.dest.node().object()] > scope.start) {
-//             mark(allocator, instr.dest.node().object(), scope.start);
-//             scope.need_mark.insert(instr.dest.node().object());
-//           }
-//         }
-//       }
-      
-//       for (int j = 0; j < 3; j++) {
-//         if (!markable(instr.src[j].node())) continue;
-        
-//         if (last_use.find(instr.src[j].node().object()) == last_use.end()) {
-//           last_use[instr.src[j].node().object()] = i;
-//         }
-//       }
-//     }
-//   }
 
   {
     ScopeStack scopestack;
@@ -965,12 +945,11 @@ void PSCode::allocTemps(const ArbLimits& limits)
     // marked due to later uses of assignments
 
     // push root stack
-
     scopestack.push_back(m_instructions.size() - 1);
     
     for (int i = (int)m_instructions.size() - 1; i >= 0; --i) {
-      ArbInst instr = m_instructions[i];
-      if (instr.op == SH_ARB_ENDREP) {
+      PSInst instr = m_instructions[i];
+      /*if (instr.op == SH_ARB_ENDREP) {
         scopestack.push_back((int)i);
       }
       if (instr.op == SH_ARB_REP) {
@@ -980,7 +959,7 @@ void PSCode::allocTemps(const ArbLimits& limits)
           mark(allocator, *I, (int)i);
         }
         scopestack.pop_back();
-      }
+      }*/
 
       if (markable(instr.dest.node())) {
         std::bitset<4> writemask;
@@ -989,7 +968,7 @@ void PSCode::allocTemps(const ArbLimits& limits)
         }
         std::bitset<4> used;
         for (ScopeStack::iterator S = scopestack.begin(); S != scopestack.end(); ++S) {
-          ArbScope& scope = *S;
+          PSScope& scope = *S;
 
           if ((used & writemask).any()) {
             mark(allocator, instr.dest.node().object(), scope.start);
@@ -999,7 +978,7 @@ void PSCode::allocTemps(const ArbLimits& limits)
           used |= scope.usage_map[instr.dest.node().object()];
         }
 
-        ArbScope& scope = scopestack.back();
+        PSScope& scope = scopestack.back();
         scope.usage_map[instr.dest.node().object()] &= ~writemask;
       }
       
@@ -1009,15 +988,15 @@ void PSCode::allocTemps(const ArbLimits& limits)
         for (int k = 0; k < instr.src[j].size(); k++) {
           usemask[instr.src[j].swizzle()[k]] = true;
         }
-        ArbScope& scope = scopestack.back();
+        PSScope& scope = scopestack.back();
         scope.usage_map[instr.src[j].node().object()] |= usemask;
       }
     }
   }
-  
+
   for (std::size_t i = 0; i < m_instructions.size(); i++) {
-    ArbInst instr = m_instructions[i];
-    if (instr.op == SH_ARB_REP) {
+    PSInst instr = m_instructions[i];
+    /*if (instr.op == SH_ARB_REP) {
       scopestack.push_back((int)i);
     }
     if (instr.op == SH_ARB_ENDREP) {
@@ -1027,11 +1006,11 @@ void PSCode::allocTemps(const ArbLimits& limits)
         mark(allocator, *I, (int)i);
       }
       scopestack.pop_back();
-    }
+    }*/
 
     if (mark(allocator, instr.dest.node(), (int)i)) {
       for (ScopeStack::iterator S = scopestack.begin(); S != scopestack.end(); ++S) {
-        ArbScope& scope = *S;
+        PSScope& scope = *S;
         std::bitset<4> writemask;
         for (int k = 0; k < instr.dest.size(); k++) {
           writemask[instr.dest.swizzle()[k]] = true;
@@ -1048,7 +1027,7 @@ void PSCode::allocTemps(const ArbLimits& limits)
     for (int j = 0; j < 3; j++) {
       if (mark(allocator, instr.src[j].node(), (int)i)) {
         for (ScopeStack::iterator S = scopestack.begin(); S != scopestack.end(); ++S) {
-          ArbScope& scope = *S;
+          PSScope& scope = *S;
           // Mark uses that weren't recently written to.
           std::bitset<4> usemask;
           for (int k = 0; k < instr.src[j].size(); k++) {
@@ -1065,7 +1044,7 @@ void PSCode::allocTemps(const ArbLimits& limits)
   
   m_tempRegs.clear();
   m_numTemps = 0;
-  for (int i = 0; i < limits.temps(); i++) {
+  for (int i = 0; i < limits.regs(); i++) {
     m_tempRegs.push_back(i);
   }
   
@@ -1074,14 +1053,14 @@ void PSCode::allocTemps(const ArbLimits& limits)
   m_tempRegs.clear();
 }
 
-void PSCode::allocTextures(const ArbLimits& limits)
+void PSCode::allocTextures(const PSLimits& limits)
 {
   for (ShProgramNode::TexList::const_iterator I = m_shader->textures.begin();
        I != m_shader->textures.end(); ++I) {
     ShTextureNodePtr node = *I;
     int index;
     index = m_numTextures;
-    m_registers[node] = new ArbReg(SH_ARB_REG_TEXTURE, index, node->name());
+    m_registers[node] = new PSReg(SH_PS_REG_TEXTURE, index, node->name());
     m_reglist.push_back(m_registers[node]);
     m_numTextures++;
   }
@@ -1089,10 +1068,10 @@ void PSCode::allocTextures(const ArbLimits& limits)
 
 void PSCode::bindTextures()
 {
-  for (ShProgramNode::TexList::const_iterator I = m_shader->textures.begin();
+  /*for (ShProgramNode::TexList::const_iterator I = m_shader->textures.begin();
        I != m_shader->textures.end(); ++I) {
     m_textures->bindTexture(*I, GL_TEXTURE0 + m_registers[*I]->index);
-  }
+  }*/
 }
 
 }

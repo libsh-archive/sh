@@ -10,21 +10,28 @@ install-debug: recurse-install-debug
 
 recurse-all:
 	$(MAKE) -C gl -f Makefile.win32 all
+	$(MAKE) -C directx -f Makefile.win32 all
 
 recurse-all-release:
 	$(MAKE) -C gl -f Makefile.win32 all-release
+	$(MAKE) -C directx -f Makefile.win32 all-release
 
 recurse-all-debug:
 	$(MAKE) -C gl -f Makefile.win32 all-debug
+	$(MAKE) -C directx -f Makefile.win32 all-debug
 
 recurse-clean:
 	$(MAKE) -C gl -f Makefile.win32 clean
+	$(MAKE) -C directx -f Makefile.win32 clean
 
 recurse-install:
 	$(MAKE) -C gl -f Makefile.win32 install
+	$(MAKE) -C directx -f Makefile.win32 install
 
 recurse-install-release:
 	$(MAKE) -C gl -f Makefile.win32 install-release
+	$(MAKE) -C directx -f Makefile.win32 install-release
 
 recurse-install-debug:
 	$(MAKE) -C gl -f Makefile.win32 install-debug
+	$(MAKE) -C directx -f Makefile.win32 install-debug

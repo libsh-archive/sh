@@ -58,6 +58,14 @@ struct CodeStrategy {
   virtual SH::ShBackendCodePtr generate(const std::string& target,
                                         const SH::ShProgramNodeCPtr& shader,
                                         TextureStrategy* textures) = 0;
+
+  void setD3DDevice(LPDIRECT3DDEVICE9 pD3DDevice) { m_pD3DDevice = pD3DDevice; }
+
+protected:
+
+  // Direct3D device
+  LPDIRECT3DDEVICE9 m_pD3DDevice;
+
 };
 
 class DxBackend : public SH::ShBackend {
@@ -73,13 +81,15 @@ public:
   virtual void setContext(int context);
   virtual void destroyContext();
 
-  // Unfortunately, you can't do anything in the Direct3D world without a 
-  // device COM object, so we must have one in our class
-  virtual void setD3DDevice(LPDIRECT3DDEVICE9 pD3DDevice);
-  
+  // Pass data to the backend (only used for DirectX)
+  virtual void setBackendData(void *ptr);
+
 protected:
   DxBackend(CodeStrategy* code, TextureStrategy* texture,
             StreamStrategy* stream);
+  
+  // Direct3D device
+  LPDIRECT3DDEVICE9 m_pD3DDevice;
   
 private:
   int m_curContext;
@@ -98,8 +108,6 @@ private:
   };
   
   std::vector<Context> m_contexts;
-
-  LPDIRECT3DDEVICE9 m_pD3DDevice;
 
   // NOT IMPLEMENTED
   DxBackend(const DxBackend& other);

@@ -44,6 +44,8 @@ SH::ShBackendCodePtr
 DxBackend::generateCode(const std::string& target,
                         const SH::ShProgramNodeCPtr& shader)
 {
+  // Pass the Direct3D device to the context
+  m_contexts[m_curContext].code->setD3DDevice(m_pD3DDevice);
   return m_contexts[m_curContext].code->generate(target, shader,
                                                  m_contexts[m_curContext].textures);
 }
@@ -92,9 +94,9 @@ void DxBackend::destroyContext()
   setContext(0);
 }
 
-void DxBackend::setD3DDevice(LPDIRECT3DDEVICE9 pD3DDevice)
+void DxBackend::setBackendData(void *ptr)
 {
-	m_pD3DDevice = pD3DDevice;
+	m_pD3DDevice = (LPDIRECT3DDEVICE9)ptr;
 }
 
 }

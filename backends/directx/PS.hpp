@@ -44,9 +44,10 @@ public:
                                 TextureStrategy* textures);
 
   PSCodeStrategy* create(int context);
-
+  
 private:
   int m_context;
+
 };
 
 #define SH_PSTARGET_UNKNOWN 0

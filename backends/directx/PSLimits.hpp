@@ -28,6 +28,7 @@
 #define PSLIMITS_HPP
 
 #include <string>
+#include <d3d9.h>
 
 namespace shdx {
 

@@ -37,14 +37,14 @@ struct {
   char* name;
   char* estName;
 } psRegTypeInfo[] = {
-  {"INPUT", "v"),
+  {"INPUT", "v"},
   {"VSOUTPUT", "o"},
-  {"PSOUTPUT", "r"},
-  {"PSOUTPUT2", "o"},
+  {"PSOUTPUT", "oC"},
   {"ADDRESS", "a"},
   {"TEMP", "r"},
+  {"PARAM", "c"},
   {"CONST", "c"},
-  {"TEXTURE", "t"}
+  {"TEXTURE", "t"},
   {"COLOR", "v"},
 };
 
@@ -55,70 +55,86 @@ struct {
   char* name;
   bool indexed;
 } psRegBindingInfo[] = {
-  {SH_ARB_REG_PARAM, "program.local", true},
-  {SH_ARB_REG_PARAM, "program.env", true},
-  {SH_ARB_REG_OUTPUT, "result.color", false}, // TODO: Special case?
+
+  // VS Input
+  {SH_PS_REG_INPUT, "dcl_position", false},
+  {SH_PS_REG_INPUT, "dcl_normal", false},
+  {SH_PS_REG_INPUT, "dcl_color0", false},
+  {SH_PS_REG_INPUT, "dcl_color1", false},
+  {SH_PS_REG_INPUT, "dcl_texcoord", true},
   
-  {SH_ARB_REG_ATTRIB, "vertex.position", false},
-  {SH_ARB_REG_ATTRIB, "vertex.weight", true},
-  {SH_ARB_REG_ATTRIB, "vertex.normal", false},
-  {SH_ARB_REG_ATTRIB, "vertex.color", false}, // TODO: Special case?
-  {SH_ARB_REG_ATTRIB, "vertex.fogcoord", false},
-  {SH_ARB_REG_ATTRIB, "vertex.texcoord", true},
-  {SH_ARB_REG_ATTRIB, "vertex.matrixindex", true},
-  {SH_ARB_REG_ATTRIB, "vertex.attrib", true},
-  {SH_ARB_REG_OUTPUT, "result.position", false},
-  {SH_ARB_REG_OUTPUT, "result.fogcoord", false},
-  {SH_ARB_REG_OUTPUT, "result.pointsize", false},
-  {SH_ARB_REG_OUTPUT, "result.texcoord", true},
+  // VS Output
+  {SH_PS_REG_VSOUTPUT, "dcl_color0", false},
+  {SH_PS_REG_VSOUTPUT, "dcl_color1", false},
+  {SH_PS_REG_VSOUTPUT, "dcl_fog", false},
+  {SH_PS_REG_VSOUTPUT, "dcl_position", false},
+  {SH_PS_REG_VSOUTPUT, "dcl_psize", false},
+  {SH_PS_REG_VSOUTPUT, "dcl_texcoord", true},
 
-  {SH_ARB_REG_ATTRIB, "fragment.color", false}, // TODO: Special case?
-  {SH_ARB_REG_ATTRIB, "fragment.texcoord", true},
-  {SH_ARB_REG_ATTRIB, "fragment.fogcoord", false},
-  {SH_ARB_REG_ATTRIB, "fragment.position", false},
-  {SH_ARB_REG_OUTPUT, "result.depth", false},
+  // PS Input
+  {SH_PS_REG_INPUT, "dcl vPos.xy", false},
+  {SH_PS_REG_INPUT, "dcl_normal", false},
+  {SH_PS_REG_INPUT, "dcl_color0", false},
+  {SH_PS_REG_INPUT, "dcl_color1", false},
+  {SH_PS_REG_INPUT, "dcl_texcoord", true},
 
-  {SH_ARB_REG_ATTRIB, "<nil>", false},
+  // PS Output
+  {SH_PS_REG_PSOUTPUT, "oC", true},
+
+  {SH_PS_REG_INPUT, "<nil>", false},
 };
 
+
 PSReg::PSReg()
-  : type(SH_ARB_REG_TEMP), index(-1), name(""), binding(SH_ARB_REG_NONE), bindingIndex(-1)
+  : type(SH_PS_REG_TEMP), index(-1), name(""), binding(SH_PS_REG_NONE), bindingIndex(-1)
 {
 }
   
 PSReg::PSReg(PSRegType type, int index, std::string name)
-  : type(type), index(index), name(name), binding(SH_ARB_REG_NONE), bindingIndex(-1) 
+  : type(type), index(index), name(name), binding(SH_PS_REG_NONE), bindingIndex(-1) 
 {
 }
 
 
 std::ostream& PSReg::printDecl(std::ostream& out) const
 {
-  out << psRegTypeInfo[type].name << " " << *this;
-  if (type == SH_ARB_REG_CONST) {
-    out << " = " << "{";
-    for (int i = 0; i < 4; i++) {
-      if (i) out << ", ";
-      out << values[i];
-    }
-    out << "}";
-  } else if (binding != SH_ARB_REG_NONE) {
-    out << " = " << psRegBindingInfo[binding].name;
-    if (psRegBindingInfo[binding].indexed) {
-      out << "[" << bindingIndex << "]";
-    }
-  }
-  out << ";"; 
-  if(!name.empty() && type != SH_ARB_REG_CONST) out << " # " << name;
-  return out;
+	// In general, we don't have to declare things under ps & vs
+
+	if (type == SH_PS_REG_INPUT || type == SH_PS_REG_VSOUTPUT)
+	{
+		out << psRegBindingInfo[binding].name;
+		if (psRegBindingInfo[binding].indexed)
+			out << bindingIndex;
+		if (binding != SH_PS_REG_FRAGMENTPOS)
+			out << " " << *this;
+	}
+	else if (type == SH_PS_REG_CONST)
+	{
+		out << "def " << *this;
+		for (int i = 0; i < 4; i++)
+		{
+			out << ", " << values[i];
+		}
+	}
+	else if (type == SH_PS_REG_PARAM || type == SH_PS_REG_PSOUTPUT) // Just put a comment
+	{
+		out << "// " << *this;
+		if (!name.empty())
+			out << " = " << name;
+		return out;
+	}
+
+	if(!name.empty() && type != SH_PS_REG_CONST) out << " // " << name;
+
+	return out;
 }
 
 /** Output a use of a ps register.
  */
 std::ostream& operator<<(std::ostream& out, const PSReg& reg)
 {
-  out << psRegTypeInfo[reg.type].estName << reg.index;
-  return out;
+	out << psRegTypeInfo[reg.type].estName << reg.index;
+	return out;
 }
 
 }

@@ -49,13 +49,6 @@ enum PSOp {
   SH_PS_RCP, // vs 1.1, ps 2.0
   SH_PS_RSQ, // vs 1.1, ps 2.0
   
-  // Register ops
-  /*SH_PS_DCL_USAGE, // vs 1.1, ps 3.0
-  SH_PS_DEF, // 1.1
-  SH_PS_DEFB, // vs 2.0, ps 3.0
-  SH_PS_DEFI, // vs 2.0, ps 3.0
-  SH_PS_DCLTEXTURETYPE, // ps 2.0, vs 3.0*/
-
   // Binary vector
   SH_PS_ADD, // 1.1
   SH_PS_DP3, // 1.1
@@ -104,8 +97,6 @@ enum PSOp {
 
 
   // VERTEX ONLY
-  //SH_PS_VS, // vs 1.1
-
   // Vector
   SH_PS_LOGP, // vs 1.1
   SH_PS_EXPP, // vs 1.1
@@ -124,8 +115,6 @@ enum PSOp {
 
 
   // FRAGMENT ONLY
-  //SH_PS_PS, // ps 1.1
-  //SH_PS_PHASE, // ps 1.4 ONLY
 
   // Vector
   SH_PS_DSX, // ps 2_x
@@ -139,35 +128,12 @@ enum PSOp {
   SH_PS_CND, // ps 1.1
   SH_PS_DP2ADD, // ps 2.0
 
-  // Declarations
-  //SH_PS_DCL, // ps 2.0
-
   // Texturing
-  SH_PS_TEX, // ps 1.1-1.3
-  SH_PS_TEXBEM, // ps 1.1-1.3
-  SH_PS_TEXBEML, // ps 1.1-1.3
-  SH_PS_TEXCOORD, // ps 1.1-1.3
-  SH_PS_TEXCRD, // ps 1.4
-  SH_PS_TEXDEPTH, // ps 1.4
-  SH_PS_TEXDP3, // ps 1.2-1.3
-  SH_PS_TEXDP3TEX, // ps 1.2-1.3
-  SH_PS_TEXKILL, // ps 1.1
-  SH_PS_TEXLD, // ps 1.4
-  SH_PS_TEXM3X2DEPTH, // ps 1.3 ONLY
-  SH_PS_TEXM3X2PAD, // ps 1.1-1.3
-  SH_PS_TEXM3X2TEX, // ps 1.1-1.3
-  SH_PS_TEXM3X3, // ps 1.2-1.3
-  SH_PS_TEXM3X3PAD, // ps 1.1-1.3
-  SH_PS_TEXM3X3SPEC, // ps 1.1-1.3
-  SH_PS_TEXM3X3TEX, // ps 1.1-1.3
-  SH_PS_TEXM3X3VSPEC, // ps 1.1-1.3
-  SH_PS_TEXREG2AR, // ps 1.1-1.3
-  SH_PS_TEXREG2GB, // ps 1.1-1.3
-  SH_PS_TEXREG2RGB, // ps 1.2-1.3
-  SH_PS_TEXLD_2, // ps 2.0
+  /*SH_PS_TEXKILL, // ps 1.1
+  SH_PS_TEXLD, // ps 2.0
   SH_PS_TEXLDB, // ps 2.0
   SH_PS_TEXLDP, // ps 2.0
-  SH_PS_TEXLDD, // ps 2_x
+  SH_PS_TEXLDD, // ps 2_x*/
   
   // Special "operations" for emit
   SH_PS_FUN

@@ -40,6 +40,10 @@ PSLimits::PSLimits(const std::string& target, LPDIRECT3DDEVICE9 pD3DDevice) : m_
   D3DCAPS9 caps;
   pD3DDevice->GetDeviceCaps(&caps);
 
+  // Since we're only targetting the 3.0 shaders...
+  m_nMajor = 3;
+  m_nMinor = 3;
+
   if (m_nTarget == SH_PSTARGET_VS)
   {
 	  m_instrs = caps.MaxVShaderInstructionsExecuted;
@@ -58,7 +62,7 @@ PSLimits::PSLimits(const std::string& target, LPDIRECT3DDEVICE9 pD3DDevice) : m_
 
 	  m_texs = 0; // Vertex shaders have no tex instruction
   }
-  else if (m_nTaret == SH_PSTARGET_PS)
+  else if (m_nTarget == SH_PSTARGET_PS)
   {
 	  m_instrs = caps.MaxPShaderInstructionsExecuted;
 	  if (m_nMajor == 3)

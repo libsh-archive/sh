@@ -51,6 +51,7 @@ ShBackendCodePtr PSCodeStrategy::generate(const std::string& target,
   std::string::size_type loc = target.rfind(':');
   std::string unit = (loc == std::string::npos ? target : target.substr(loc + 1));
   PSCodePtr code = new PSCode(shader, unit, textures);
+  code->setD3DDevice(m_pD3DDevice);
   code->generate();
   return code;
 }
@@ -63,73 +64,27 @@ int psTarget(const std::string& unit, LPDIRECT3DDEVICE9 pD3DDevice, int& major, 
 
 	if (unit == "vertex")
 	{
-		if (caps.VertexShaderVersion < D3DVS_VERSION(1, 1))
-		{
-			major = 0;
-			minor = 0;
-		}
-		else if (caps.VertexShaderVersion == D3DVS_VERSION(1, 1))
-		{
-			major = 1;
-			minor = 1;
-		}
-		else if (caps.VertexShaderVersion == D3DVS_VERSION(2, 0))
-		{
-			major = 2;
-			minor = 0;
-		}
-		else if (caps.VertexShaderVersion == D3DVS_VERSION(3, 0))
+		if (caps.VertexShaderVersion == D3DVS_VERSION(3, 0))
 		{
 			major = 3;
 			minor = 0;
+			return SH_PSTARGET_VS;
 		}
-		return SH_PSTARGET_VS;
 	}
     else if (unit == "fragment")
 	{
-		if (caps.PixelShaderVersion < D3DPS_VERSION(1, 1))
-		{
-			major = 0;
-			minor = 0;
-		}
-		else if (caps.PixelShaderVersion == D3DPS_VERSION(1, 1))
-		{
-			major = 1;
-			minor = 1;
-		}
-		else if (caps.PixelShaderVersion == D3DPS_VERSION(1, 2))
-		{
-			major = 1;
-			minor = 2;
-		}
-		else if (caps.PixelShaderVersion == D3DPS_VERSION(1, 3))
-		{
-			major = 1;
-			minor = 3;
-		}
-		else if (caps.PixelShaderVersion == D3DPS_VERSION(1, 4))
-		{
-			major = 1;
-			minor = 4;
-		}
-		else if (caps.PixelShaderVersion == D3DPS_VERSION(2, 0))
-		{
-			major = 2;
-			minor = 0;
-		}
-		else if (caps.PixelShaderVersion == D3DPS_VERSION(3, 0))
+		if (caps.PixelShaderVersion == D3DPS_VERSION(3, 0))
 		{
 			major = 3;
 			minor = 0;
+			return SH_PSTARGET_PS;
 		}
-		return SH_PSTARGET_PS;
 	}
-	else
-	{
-		major = 0;
-		minor = 0;
-		return SH_PSTARGET_UNKNOWN;
-	}
+
+	// Not a 3.0 version shader
+	major = 0;
+	minor = 0;
+	return SH_PSTARGET_UNKNOWN;
 }
 
 }

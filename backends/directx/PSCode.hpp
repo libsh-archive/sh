@@ -41,6 +41,8 @@
 #include "PSReg.hpp"
 #include "PSInst.hpp"
 
+#include <d3d9.h>
+
 namespace shdx {
 
 class PSCode;
@@ -48,21 +50,14 @@ class PSBindingSpecs;
 class PSMapping;
 
 // Filters for code emission and environment setup
-const unsigned int SH_PS_ANY    = 0x0000; // All targets
-const unsigned int SH_PS_VS_1_1 = 0x0001; // Version 1.1 Vertex shaders
-const unsigned int SH_PS_VS_2_0 = 0x0002; // Version 2.0 Vertex shaders
-const unsigned int SH_PS_VS_3_0 = 0x0004; // Version 3.0 Vertex shaders
-const unsigned int SH_PS_PS_1_1 = 0x0008; // Version 1.1 Pixel shaders
-const unsigned int SH_PS_PS_1_2 = 0x0010; // Version 1.2 Pixel shaders
-const unsigned int SH_PS_PS_1_3 = 0x0020; // Version 1.3 Pixel shaders
-const unsigned int SH_PS_PS_1_4 = 0x0040; // Version 1.4 Pixel shaders
-const unsigned int SH_PS_PS_2_0 = 0x0080; // Version 2.0 Pixel shaders
-const unsigned int SH_PS_PS_3_0 = 0x0100; // Version 3.0 Pixel shaders
-const unsigned int SH_PS_VEC1   = 0x0200; // Maximum source has length 1
-const unsigned int SH_PS_VEC2   = 0x0400; // Maximum source has length 2
-const unsigned int SH_PS_VEC3   = 0x0800; // Maximum source has length 3
-const unsigned int SH_PS_VEC4   = 0x1000; // Maximum source has length 4
-const unsigned int SH_PS_END    = 0x2000; // Not a filter. End of table.
+const unsigned int SH_PS_ANY    = 0x0000; // Any shader
+const unsigned int SH_PS_VS_3_0 = 0x0001; // Version 3.0 Vertex shaders
+const unsigned int SH_PS_PS_3_0 = 0x0002; // Version 3.0 Pixel shaders
+const unsigned int SH_PS_VEC1   = 0x0004; // Maximum source has length 1
+const unsigned int SH_PS_VEC2   = 0x0008; // Maximum source has length 2
+const unsigned int SH_PS_VEC3   = 0x0010; // Maximum source has length 3
+const unsigned int SH_PS_VEC4   = 0x0020; // Maximum source has length 4
+const unsigned int SH_PS_END    = 0x0040; // Not a filter. End of table.
 
 class PSCode : public SH::ShBackendCode {
 public:
@@ -82,7 +77,11 @@ public:
 
   /// Actually generate the code, and do register allocation.
   void generate();
-  
+
+  // Unfortunately, you can't do anything in the Direct3D world without a 
+  // device COM object, so we must have one in our class
+  void setD3DDevice(LPDIRECT3DDEVICE9 pD3DDevice);
+
 private:
 
   /// Generate code for this node and those following it.
@@ -103,12 +102,14 @@ private:
   void emit_dot2(const SH::ShStatement& stmt);
   void emit_eq(const SH::ShStatement& stmt);
   void emit_ceil(const SH::ShStatement& stmt);
+  void emit_floor(const SH::ShStatement& stmt);
   void emit_mod(const SH::ShStatement& stmt);
   void emit_trig(const SH::ShStatement& stmt);
   void emit_invtrig(const SH::ShStatement& stmt);
   void emit_tan(const SH::ShStatement& stmt);
   void emit_exp(const SH::ShStatement& stmt);
   void emit_log(const SH::ShStatement& stmt);
+  void emit_no_output_norm(const SH::ShStatement& stmt);
   void emit_norm(const SH::ShStatement& stmt);
   void emit_sgn(const SH::ShStatement& stmt);
   void emit_tex(const SH::ShStatement& stmt);
@@ -183,9 +184,7 @@ private:
 
   /// The number of parameter registers used in this shader.
   int m_numParams;
-
-  /// The number of constant 4-tuples used in this shader.
-  int m_numConsts;
+  // DirectX doesn't differentiate between external params and shader-defined constants
 
   /// The number of distinct textures used in this shader.
   int m_numTextures;
@@ -203,8 +202,10 @@ private:
   /// The long tuple splits applied to this shader before compilation.
   SH::ShTransformer::VarSplitMap m_splits;
 
-  /// PS Program ID we are bound to. 0 if code hasn't been uploaded yet.
-  unsigned int m_programId;
+  // Pre-compiled vertex or pixel shader
+  LPDIRECT3DVERTEXSHADER9 m_pVS; // Compiled vertex shader
+  LPDIRECT3DPIXELSHADER9 m_pPS; // Compiled pixel shader
+
 
   static PSMapping table[];
 
@@ -214,6 +215,9 @@ private:
   typedef std::map<SH::ShCtrlGraphNodePtr, int> LabelMap;
   LabelMap m_label_map; 
   int m_max_label;
+
+  // Direct3D device
+  LPDIRECT3DDEVICE9 m_pD3DDevice;
 };
 
 typedef SH::ShPointer<PSCode> PSCodePtr;

@@ -26,16 +26,19 @@
 //////////////////////////////////////////////////////////////////////////////
 #include <iostream>
 #include "PS.hpp"
-#include "DxTextures.hpp"
 #include "DxBackend.hpp"
+#include "DxTextures.hpp"
 #ifndef WIN32
 #include "PBufferStreams.hpp"
 #endif
 #ifdef WIN32
 #include <windows.h>
+#include <d3d9.h>
 #endif
 
 namespace shdx {
+
+
 
 struct PSBackend : public DxBackend {
   PSBackend()

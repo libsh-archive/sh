@@ -88,6 +88,9 @@ public:
 
   // execute a stream program, if supported
   virtual void execute(const ShProgramNodeCPtr& program, ShStream& dest) = 0;
+
+  // Pass data to the backend (only used for DirectX)
+  virtual void setBackendData(void *ptr) {};
   
   typedef std::vector< ShPointer<ShBackend> > ShBackendList;
 

@@ -229,6 +229,9 @@ void shBindShader(const std::string& target, ShProgram& shader);
 /// Switch to a particular backend
 SH_DLLEXPORT
 bool shSetBackend(const std::string& name);
+// Pass a pointer to the backend
+SH_DLLEXPORT
+bool shSetBackendData(void* ptr);
 
 
 /** \brief SH Initialization Function.

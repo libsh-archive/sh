@@ -35,11 +35,11 @@ libshps_dll_SOURCES += PSReg.hpp PSReg.cpp
 
 # DirectX backend
 libshps_dll_SOURCES += DxBackend.hpp DxBackend.cpp
-libshps_dll_SOURCES += DxTextureName.hpp DxTextureName.cpp
+#libshps_dll_SOURCES += DxTextureName.hpp DxTextureName.cpp
 
 # DirectX textures
 libshps_dll_SOURCES += DxTextures.hpp DxTextures.cpp
-libshps_dll_SOURCES += DxTextureStorage.hpp DxTextureStorage.cpp
+#libshps_dll_SOURCES += DxTextureStorage.hpp DxTextureStorage.cpp
 
 # pbuffer stream
 #libshps_dll_SOURCES += PBufferStreams.hpp PBufferStreams.cpp
@@ -49,9 +49,17 @@ libshps_dll_RELEASE_OBJECTS = $(libshps_dll_CXXFILES:.cpp=.r.obj)
 libshps_dll_DEBUG_OBJECTS = $(libshps_dll_CXXFILES:.cpp=.d.obj)
 
 libshps_dll_RELEASE_LDADD = ../../src/libsh.lib 
-libshps_dll_RELEASE_LDADD += /dxdsk/lib/d3d9.LIB
+libshps_dll_RELEASE_LDADD += \dxsdk\lib\d3d9.lib \dxsdk\lib\d3dx9.lib
+libshps_dll_RELEASE_LDADD += wsock32.lib
+libshps_dll_RELEASE_LDADD += kernel32.lib user32.lib gdi32.lib
+libshps_dll_RELEASE_LDADD += shell32.lib ole32.lib comctl32.lib
+libshps_dll_RELEASE_LDADD += comdlg32.lib rpcrt4.lib advapi32.lib
 libshps_dll_DEBUG_LDADD = ../../src/libshd.lib 
-libshps_dll_DEBUG_LDADD += /dxdsk/lib/d3d9.LIB
+libshps_dll_DEBUG_LDADD += \dxsdk\lib\d3d9.lib \dxsdk\lib\d3dx9.lib
+libshps_dll_DEBUG_LDADD += wsock32.lib
+libshps_dll_DEBUG_LDADD += kernel32.lib user32.lib gdi32.lib
+libshps_dll_DEBUG_LDADD += shell32.lib ole32.lib comctl32.lib
+libshps_dll_DEBUG_LDADD += comdlg32.lib rpcrt4.lib advapi32.lib
 
 libshps.dll: $(libshps_dll_RELEASE_OBJECTS)
 	$(LD) /DLL /OUT:$@ $^ $(RELEASE_LDFLAGS) $(libshps_dll_RELEASE_LDADD)
