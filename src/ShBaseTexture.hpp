@@ -10,7 +10,8 @@
 
 namespace SH {
 
-class ShBaseTexture : public ShMetaForwarder {
+class
+SH_DLLEXPORT ShBaseTexture : public ShMetaForwarder {
 public:
   ShBaseTexture(const ShTextureNodePtr& node);
 

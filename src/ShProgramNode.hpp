@@ -46,7 +46,8 @@ class ShBackend;
 
 /** A particular Sh program.
  */
-class ShProgramNode : public virtual ShRefCountable, public virtual ShMeta {
+class
+SH_DLLEXPORT ShProgramNode : public virtual ShRefCountable, public virtual ShMeta {
 public:
   ShProgramNode(const std::string& target);
 

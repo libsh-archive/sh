@@ -27,8 +27,10 @@
 #include "ShCtrlGraph.hpp"
 #include <iostream>
 #include <cassert>
+#include <vector>
 #include "ShBasicBlock.hpp"
 #include "ShToken.hpp"
+#include "ShTokenizer.hpp"
 #include "ShUtility.hpp"
 #include "ShParser.hpp"
 #include "ShDebug.hpp"

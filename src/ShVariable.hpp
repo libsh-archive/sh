@@ -41,7 +41,8 @@ namespace SH {
  * instances of subclasses of ShVariable being sliced when they get
  * placed in ShStatements.
 */
-class ShVariable : public ShMetaForwarder {
+class 
+SH_DLLEXPORT ShVariable : public ShMetaForwarder {
 public:
   ShVariable();
   ShVariable(const ShVariableNodePtr& node);
@@ -111,7 +112,7 @@ protected:
   ShSwizzle m_swizzle; ///< Swizzling applied to this variable.
   bool m_neg; ///< True iff this variable is negated
 
-  friend std::ostream& operator<<(std::ostream& out, const ShVariable& shVariableToPrint);
+  friend SH_DLLEXPORT std::ostream& operator<<(std::ostream& out, const ShVariable& shVariableToPrint);
 };
 
 }

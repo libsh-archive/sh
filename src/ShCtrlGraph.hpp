@@ -39,7 +39,8 @@ namespace SH {
 
 class ShCtrlGraphNode;
 
-struct ShCtrlGraphBranch {
+struct
+SH_DLLEXPORT ShCtrlGraphBranch {
   ShCtrlGraphBranch(const ShPointer<ShCtrlGraphNode>& node,
                     ShVariable cond);
   
@@ -57,7 +58,8 @@ struct ShCtrlGraphBranch {
  * Only the exit node of a control graph will have an unconditional
  * successor of 0.
  */
-class ShCtrlGraphNode : public ShRefCountable {
+class
+SH_DLLEXPORT ShCtrlGraphNode : public ShRefCountable {
 public:
   ShCtrlGraphNode();
   ~ShCtrlGraphNode();
@@ -118,7 +120,8 @@ typedef ShPointer<const ShCtrlGraphNode> ShCtrlGraphNodeCPtr;
 /** A control-flow graph.
  * This is the parsed form of a shader body.
  */
-class ShCtrlGraph : public ShRefCountable {
+class
+SH_DLLEXPORT ShCtrlGraph : public ShRefCountable {
 public:
   ShCtrlGraph(ShCtrlGraphNodePtr head, ShCtrlGraphNodePtr tail);
   ShCtrlGraph(ShBlockListPtr blocks);

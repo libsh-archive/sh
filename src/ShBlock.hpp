@@ -37,7 +37,8 @@ namespace SH {
 /** A generic block or token.
  * These are either basic blocks or tokens.
  */
-class ShBlock : public ShRefCountable {
+class
+SH_DLLEXPORT ShBlock : public ShRefCountable {
 public:
   virtual ~ShBlock();
 
@@ -50,7 +51,8 @@ typedef ShPointer<const ShBlock> ShBlockCPtr;
 
 /** A list of generic blocks.
  */
-class ShBlockList : public ShRefCountable {
+class
+SH_DLLEXPORT ShBlockList : public ShRefCountable {
 public:
   ShBlockList(bool isArgument = false);
 
@@ -72,7 +74,7 @@ public:
   bool empty() const;
 
   /// Output a token list
-  friend std::ostream& operator<<(std::ostream& out, const ShBlockList& blockList);
+  friend SH_DLLEXPORT std::ostream& operator<<(std::ostream& out, const ShBlockList& blockList);
 
   /// Output a token list at a given indentation
   std::ostream& print(std::ostream& out, int indentation) const;

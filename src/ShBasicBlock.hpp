@@ -39,7 +39,9 @@ namespace SH {
  * operations, texture lookups, and assignments (although some of 
  * these assignments might be conditional).
  */
-class ShBasicBlock : public ShBlock {
+class 
+SH_DLLEXPORT
+ShBasicBlock : public ShBlock {
 public:
   ~ShBasicBlock();
 

@@ -42,7 +42,8 @@ namespace SH {
  * Used internally after programs are created to (hopefully) make them
  * more efficient.
  */
-class ShOptimizer {
+class
+SH_DLLEXPORT ShOptimizer {
 public:
   ShOptimizer(ShCtrlGraphPtr graph);
 

@@ -38,7 +38,8 @@ namespace SH {
  * files.   It stores the image data in a memory object which can
  * then be shared with array, table, and texture objects.
  */
-class ShImage : public ShRefCountable {
+class
+SH_DLLEXPORT ShImage : public ShRefCountable {
 public:
   ShImage(); ///< Construct an empty image
   ShImage(int width, int height, int depth); ///< Construct a black

@@ -38,7 +38,8 @@ namespace SH  {
 
 class ShStream;
 
-class ShBackendCode : public ShRefCountable {
+class
+SH_DLLEXPORT ShBackendCode : public ShRefCountable {
 public:
   virtual ~ShBackendCode();
 
@@ -72,7 +73,8 @@ typedef ShPointer<ShBackendCode> ShBackendCodePtr;
 typedef ShPointer<const ShBackendCode> ShBackendCodeCPtr;
 
 class ShTransformer;
-class ShBackend : public ShRefCountable {
+class
+SH_DLLEXPORT ShBackend : public ShRefCountable {
 public:
   virtual ~ShBackend();
   virtual std::string name() const = 0;

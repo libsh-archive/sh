@@ -26,13 +26,16 @@ struct ArbBackend : public GlBackend {
 };
 
 #ifdef WIN32
-static ArbBackend* backend;
+static ArbBackend* backend = 0;
 
 extern "C"
 BOOL APIENTRY DllMain(HANDLE hModule, 
                       DWORD  ul_reason_for_call, 
                       LPVOID lpReserved)
 {
+  std::cerr << "Arb Backend DllMain called!" << std::endl;
+
+  if (backend) return true;
   switch (ul_reason_for_call) {
   case DLL_PROCESS_ATTACH:
     backend = new ArbBackend();
@@ -41,7 +44,6 @@ BOOL APIENTRY DllMain(HANDLE hModule,
   case DLL_THREAD_DETACH:
     break;
   case DLL_PROCESS_DETACH:
-    delete backend;
     break;
   }
   return TRUE;

@@ -32,7 +32,8 @@
 
 namespace SH {
 
-class ShMeta {
+class
+SH_DLLEXPORT ShMeta {
 public:
   ShMeta();
   virtual ~ShMeta();

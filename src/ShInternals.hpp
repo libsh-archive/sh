@@ -33,7 +33,8 @@
 
 namespace SH { 
 
-struct ShVariableReplacer {
+struct
+SH_DLLEXPORT ShVariableReplacer {
   typedef std::map<ShVariableNodePtr, ShVariableNodePtr> VarMap;
 
   ShVariableReplacer(VarMap& v);

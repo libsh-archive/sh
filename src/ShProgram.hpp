@@ -34,7 +34,8 @@ namespace SH {
 
 /** Thin wrapper around ShProgramNode.
  */
-class ShProgram : public ShMetaForwarder {
+class
+SH_DLLEXPORT ShProgram : public ShMetaForwarder {
 public:
   ShProgram();
   ShProgram(const ShProgram& other);

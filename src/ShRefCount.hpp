@@ -49,7 +49,9 @@ namespace SH {
  * These are classes you can wrap in an ShRefCount. Inherit from this
  * if you want to reference-count your class.
  */
-class ShRefCountable 
+class 
+SH_DLLEXPORT
+ShRefCountable 
 {
 public:
   ShRefCountable()

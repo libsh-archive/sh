@@ -32,7 +32,8 @@
 
 namespace SH {
 
-class ShChannelNode : public ShVariableNode {
+class
+SH_DLLEXPORT ShChannelNode : public ShVariableNode {
 public:
   ShChannelNode(ShSemanticType specType, int elements);
   ShChannelNode(ShSemanticType specType, int elements,

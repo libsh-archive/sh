@@ -49,7 +49,8 @@ class ShStorage;
  * @todo Maybe keep a length field (in bytes)?
  * @see ShStorage
  */
-class ShMemory : public ShRefCountable {
+class
+SH_DLLEXPORT ShMemory : public ShRefCountable {
 public:
   virtual ~ShMemory();
 
@@ -101,7 +102,8 @@ typedef ShPointer<const ShMemory> ShMemoryCPtr;
  * @see ShMemory
  * @see ShStorage
  */
-class ShTransfer {
+class
+SH_DLLEXPORT ShTransfer {
 public:
   /// Returns true if the transfer succeeded.
   virtual bool transfer(const ShStorage* from, ShStorage* to) = 0;
@@ -130,7 +132,8 @@ private:
  * @see ShMemory
  * @see ShTransfer
  */
-class ShStorage : public ShRefCountable {
+class
+SH_DLLEXPORT ShStorage : public ShRefCountable {
 public:
   ShStorage();
   virtual ~ShStorage();
@@ -200,7 +203,8 @@ typedef ShPointer<const ShStorage> ShStorageCPtr;
  * @see ShStorage
  * @see ShHostMemory
  */
-class ShHostStorage : public ShStorage {
+class
+SH_DLLEXPORT ShHostStorage : public ShStorage {
 public:
   ShHostStorage(ShMemory* memory, int length); ///< Internally managed storage
   ShHostStorage(ShMemory* memory, int length, void* data); ///< Externally managed storage
@@ -237,7 +241,8 @@ typedef ShPointer<const ShHostStorage> ShHostStorageCPtr;
  * @see ShMemory
  * @see ShHostStorage
  */
-class ShHostMemory : public ShMemory {
+class
+SH_DLLEXPORT ShHostMemory : public ShMemory {
 public:
   ShHostMemory(int length);
   ShHostMemory(int length, void* data);

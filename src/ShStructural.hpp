@@ -10,7 +10,8 @@
 
 namespace SH {
 
-class ShStructuralNode : public ShRefCountable {
+class
+SH_DLLEXPORT ShStructuralNode : public ShRefCountable {
 public:
   friend class ShStructural;
   
@@ -54,7 +55,8 @@ public:
 typedef ShPointer<ShStructuralNode> ShStructuralNodePtr;
 typedef ShPointer<const ShStructuralNode> ShStructuralNodeCPtr;
 
-class ShStructural {
+class
+SH_DLLEXPORT ShStructural {
 public:
   ShStructural(const ShCtrlGraphPtr& graph);
 

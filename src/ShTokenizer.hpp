@@ -44,7 +44,8 @@ namespace SH {
  * Each argument consists of a result variable, containing the value
  * of the argument, and a block list describing how that value is to
  * be computed */
-struct ShTokenArgument {
+struct 
+SH_DLLEXPORT ShTokenArgument {
   ShTokenArgument(const ShVariable& result, const ShBlockListPtr& blockList)
     : result(result), blockList(blockList)
   {
@@ -58,7 +59,8 @@ struct ShTokenArgument {
  * Call message() on this exception to determine a detailed report of
  * the error.
  */
-class ShTokenizerException : public ShException {
+class 
+SH_DLLEXPORT ShTokenizerException : public ShException {
 public:
   ShTokenizerException(const std::string& error);
 };
@@ -72,7 +74,8 @@ public:
  * tokenizer.
  *
  */
-class ShTokenizer {
+class 
+SH_DLLEXPORT ShTokenizer {
 public:
   ShTokenizer();
 

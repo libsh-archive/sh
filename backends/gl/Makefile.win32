@@ -20,7 +20,6 @@ libsharb_dll_OBJECTS = $(libsharb_dll_CXXFILES:.cpp=.obj)
 libshard_dll_LDADD = ../../src/libsh.lib 
 libshard_dll_LDADD += $(OPENGL_DIR)\lib\OPENGL32.LIB
 
-
 libsharb.dll: $(libsharb_dll_OBJECTS)
 	$(CXX) /Felibsharb /LD $^ $(libshard_dll_LDADD) $(LDFLAGS)
 
@@ -28,4 +27,5 @@ libsharb_dll_DEPENDS = $(libsharb_dll_CXXFILES:.cpp=.d)
 
 include ../../win32.mk
 INCLUDES += -I../../src
+CPPFLAGS += -DSH_DLLEXPORT=__declspec(dllimport)
 include $(libsharb_dll_DEPENDS)

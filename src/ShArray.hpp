@@ -34,7 +34,8 @@ namespace SH {
 /** Default traits for ShArray.
  * An array is a texture that does not support filtering or interpolation.
  */
-struct ShArrayTraits : public ShTextureTraits {
+struct
+SH_DLLEXPORT ShArrayTraits : public ShTextureTraits {
   ShArrayTraits()
     : ShTextureTraits(0, SH_FILTER_NONE, SH_WRAP_CLAMP_TO_EDGE, SH_CLAMPED)
   {

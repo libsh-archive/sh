@@ -2,18 +2,20 @@ SOURCES = $(wildcard *.cpp)
 EXECUTABLES = $(SOURCES:.cpp=)
 OBJECTS = $(SOURCES:.cpp=.obj)
 DEPENDS = $(SOURCES:.cpp=.d)
-LDFLAGS = ..\..\src\libsh.lib
+LDADD = ..\..\src\libsh.lib
+CLEANFILES = $(SOURCES:.cpp=)
 
 all:
 
-clean:
-	rm -f *.o $(EXECUTABLES) *.d
+%.exe: %.obj
+	$(CXX) $(CXXFLAGS) /Fe$* $< $(LDADD) $(LDFLAGS)
 
-%: %.o
-	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
+w32testarb.exe: w32testarb.obj
+	$(CXX) $(CXXFLAGS) /Few32testarb w32testarb.obj $(LDFLAGS) $(OPENGL_DIR)\lib\OPENGL32.LIB ..\..\src\libsh.lib
 
 include ../../win32.mk
 CPPFLAGS += -I..\..\src 
+CPPFLAGS += -DSH_DLLEXPORT=__declspec(dllimport)
 
 include $(DEPENDS)
 

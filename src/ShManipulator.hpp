@@ -105,7 +105,6 @@ class ShManipulator {
     /** \brief Creates empty manipulator of given size
      */
     ShManipulator();
-    ShManipulator(const ShManipulator<T> &m);
     ~ShManipulator();
 
     ShManipulator<T>& operator()(T i);

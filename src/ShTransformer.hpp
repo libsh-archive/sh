@@ -46,7 +46,8 @@ namespace SH {
  * Global requirements for running ShTransformer:
  * ShContext::current()->parsing() == program
  */
-class ShTransformer {
+class 
+SH_DLLEXPORT ShTransformer {
 public:
   ShTransformer(const ShProgramNodePtr& program);
   ShTransformer::~ShTransformer();

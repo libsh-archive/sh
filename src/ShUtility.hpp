@@ -36,6 +36,7 @@
 namespace SH {
 
 /// Print "indent" spaces to out.
+SH_DLLEXPORT
 std::ostream& shPrintIndent(std::ostream& out, int indent);
 
 /** Check a boolean condition at compile time.
@@ -54,7 +55,8 @@ template<> struct ShCompileTimeChecker<false> {
   (void)sizeof(ShCompileTimeChecker<(expr)>(y));\
 }
 
-struct ShIgnore {
+struct 
+SH_DLLEXPORT ShIgnore {
   template<typename T>
   T& operator&(T& other) { return other; }
 };

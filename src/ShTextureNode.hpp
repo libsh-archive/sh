@@ -61,7 +61,8 @@ enum ShCubeDirection {
  * An enumeration of the various wrapping an clamping modes supported
  * by textures.
  */
-class ShTextureTraits {
+class 
+SH_DLLEXPORT ShTextureTraits {
 public:
   enum Filtering {
     SH_FILTER_NONE,
@@ -118,7 +119,8 @@ private:
   Clamping m_clamping;
 };
 
-class ShTextureNode : public ShVariableNode {
+class 
+SH_DLLEXPORT ShTextureNode : public ShVariableNode {
 public:
   ShTextureNode(ShTextureDims dims,
                 int size, // scalars per tuple

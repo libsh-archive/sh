@@ -38,7 +38,8 @@ namespace SH {
  * data channels, to be used as inputs and outputs of stream operations.
  * @see ShChannel
  */
-class ShStream {
+class
+SH_DLLEXPORT ShStream {
 public:
   ShStream(const ShChannelNodePtr& node);
   
@@ -87,6 +88,7 @@ ShStream combine(const ShStream& left, const ShChannel<T2>& right);
 template<typename T1>
 ShStream combine(const ShChannel<T1>& left, const ShStream& right);
 
+SH_DLLEXPORT
 ShStream combine(const ShStream& left, const ShStream& right);
 
 /** An operator alias for combine between channels.
@@ -106,16 +108,19 @@ ShStream operator&(const ShChannel<T1>& left, const ShStream& right);
 
 /** An operator alias for combine between two streams.
  */
+SH_DLLEXPORT
 ShStream operator&(const ShStream& left, const ShStream& right);
 
 /** Apply a program to a stream. 
  * This function connects streams onto the output of programs
  * TODO: is this right?  why is the stream argument first?
  */
+SH_DLLEXPORT
 ShProgram connect(const ShStream& stream, const ShProgram& program);
 
 /** An operator alias for connect(p,s).
  */
+SH_DLLEXPORT
 ShProgram operator<<(const ShProgram& program, const ShStream& stream);
 
 

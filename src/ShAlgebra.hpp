@@ -40,6 +40,7 @@ namespace SH {
  * If A > B, extra outputs are kept at end
  * If A < B, extra inputs are kept at end
  */
+SH_DLLEXPORT
 ShProgram connect(ShProgram a, ShProgram b);
 
 /** Combine a and b.
@@ -47,6 +48,7 @@ ShProgram connect(ShProgram a, ShProgram b);
  * concatenated in order,
  * and perform all operations from both programs.
  */
+SH_DLLEXPORT
 ShProgram combine(ShProgram a, ShProgram b);
 
 /** Combine a and b.
@@ -62,6 +64,7 @@ ShProgram combine(ShProgram a, ShProgram b);
  * For instance, if a has inputs x, y, k, x, z and b has inputs w, y, x, v
  * then the result has inputs x, y, k, z, w, v
  */
+SH_DLLEXPORT
 ShProgram namedCombine(ShProgram a, ShProgram b);
 
 /** Replace inputs of b with outputs of a.
@@ -73,38 +76,46 @@ ShProgram namedCombine(ShProgram a, ShProgram b);
  * another output of a.
  * Extra inputs remain at the end.  Extra outputs remain iff keepExtra = true 
  */
+SH_DLLEXPORT
 ShProgram namedConnect(ShProgram a, ShProgram b, bool keepExtra = false );
 
 /** Renames all inputs named oldName to newName.
  */
+SH_DLLEXPORT
 ShProgram renameInput(ShProgram a, const std::string& oldName, const std::string& newName);
 
 /** Renames all outputs named oldName to newName.
  */
+SH_DLLEXPORT
 ShProgram renameOutput(ShProgram a, const std::string& oldName, const std::string& newName);
 
 /** Swizzles named outputs of a to match named inputs of b.
  * This only works on programs with inputs/outputs that all have unique names. 
  * Also, the inputs of b must be a subset of the outputs of a.
  */
+SH_DLLEXPORT
 ShProgram namedAlign(ShProgram a, ShProgram b);
 
 /** Replaces parameter with attribute.
  * Replaces a uniform parameter by appending a
  * varying input attribute to the end of the list of inputs.
  */
+SH_DLLEXPORT
 ShProgram replaceUniform(ShProgram a, const ShVariable &var); 
 
 /** Equivalent to combine(a,b).
  */
+SH_DLLEXPORT
 ShProgram operator&(ShProgram a, ShProgram b);
 
 /** Equivalent to connect(b,a).
  */
+SH_DLLEXPORT
 ShProgram operator<<(ShProgram a, ShProgram b);
 
 /** Equivalent to replaceUniform(p,var).
  */
+SH_DLLEXPORT
 ShProgram operator>>(ShProgram p, const ShVariable &var); 
 
 /** Application operator.

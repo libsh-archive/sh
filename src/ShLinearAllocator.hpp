@@ -33,7 +33,8 @@
 
 namespace SH {
 
-struct ShLifeTime {
+struct
+SH_DLLEXPORT ShLifeTime {
   ShLifeTime()
   {
   }
@@ -60,7 +61,8 @@ struct ShLifeTime {
 
 /** A simple, basic-block based linear register allocator.
  */
-class ShLinearAllocator {
+class
+SH_DLLEXPORT ShLinearAllocator {
 public:
   ShLinearAllocator(ShBackendCodePtr backendCode);
   

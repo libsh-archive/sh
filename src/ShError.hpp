@@ -37,6 +37,7 @@ namespace SH {
 /** Throws the given exception when ShContext::current()->throw_errors() is on. 
  * Otherwise prints error message.
  */
+SH_DLLEXPORT
 void shError(const ShException& exception); 
 
 }

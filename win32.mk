@@ -10,14 +10,15 @@ INCLUDES += -I$(MSSDK_DIR)\include
 # OpenGL
 INCLUDES += -I$(OPENGL_DIR)\include
 
-CPPFLAGS = -DWIN32 -DSH_DEBUG $(INCLUDES)
+CPPFLAGS = -DWIN32 -DSH_DEBUG \
+	   $(INCLUDES)
 CXXFLAGS = $(CPPFLAGS) /GR /GX /wd4003
 CXX = cl
 LIBRARIAN = lib
 LDFLAGS = /link /LIBPATH:\DEV\MSSDK\LIB
 
 clean:
-	del *.lib *.obj *.d
+	del *.lib *.obj *.d $(CLEANFILES)
 
 %.obj: %.cpp
 	$(CXX) /Fo$@ /c $< $(CXXFLAGS)
