@@ -30,18 +30,28 @@ class ShUberbuffer: public ShMemoryObject {
 
     /** \brief Writes data into this memory object
      * Writes a chunk of memory with size width * height * depth * elements
-     * into this memory object.
+     * into this memory object.  
      *
      * WARNING - this function may not work properly.  Use at your own risk
      * until ATI drivers support uploading data into an uber buffer.
      *
-     * (Currently this commandeers a texture and uses glTexImage to upload
-     * the data, so always do this BEFORE binding the shader to prevent
-     * clobbering an active texture)
      */
-    void setData(const float *data);
+    void setData(const float *data); 
 
+    /** \brief Writes a single data element into this memory object
+     * Writes a single data element given by a array data with elements 
+     * entries at offset w, h, d.
+     */
+    void setData(int w, int h, constfloat *data);
+
+    /** \brief Reads data from a memory object
+     */
     float* data() const;
+
+    /** \brief Reads data from a memory object
+     * Returns a new float array with elements items.
+     */
+    float* data( int w, int h ) const;
 
  
     /// Invalidates buffer 

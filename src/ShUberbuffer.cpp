@@ -58,10 +58,25 @@ void ShUberbuffer::setData(const float* data) {
   }
 }
 
+void ShUberbuffer::setData(int w, int h, const float* data ) {
+  if( ShEnvironment::backend ) {
+    ShEnvironment::backend->setUberbufferData( this, w, h, 1, 1, data );
+  }
+}
+
 float* ShUberbuffer::data() const {
   if( ShEnvironment::backend ) {
     float *data = new float[ m_width * m_height * m_elements ];
     ShEnvironment::backend->getUberbufferData( this, 0, 0, m_width, m_height, data );
+    return data;
+  }
+  return 0;
+}
+
+float* ShUberbuffer::data(int w, int h) const {
+  if( ShEnvironment::backend ) {
+    float *data = new float[ m_elements ];
+    ShEnvironment::backend->getUberbufferData( this, w, h, 1, 1, data );
     return data;
   }
   return 0;

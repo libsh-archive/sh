@@ -1687,7 +1687,6 @@ void AtiBackend::getUberbufferData(const ShUberbuffer *ub, int xoffset, int yoff
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
 
   // use this dummy memory object to force GL_AUXn to be
   // a float framebuffer, so ReadPixels can return unclamped values with full precision
