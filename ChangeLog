@@ -1,3 +1,10 @@
+2004-05-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShInstructions.cpp (CWISE_BINARY_OP): Allocate correct size
+	for the destinations. This fixes a bug where left-hand-side scalar
+	operations would produce incorrect values in uniform
+	computations. Thanks to Gabriel Moreno for reporting this bug.
+
 2004-05-21  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShError.hpp: Rename ShError to shError. Fix this in all

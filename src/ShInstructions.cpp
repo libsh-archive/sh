@@ -76,25 +76,27 @@ T frac(T a) { return fmodf(a, 1.0f); }
 #define CWISE_BINARY_OP(d, a, b, op) \
 do {\
   has_values(d, a, b);\
+  T v_d[d.size()];\
   T v_a[a.size()];\
   a.getValues(v_a);\
   T v_b[b.size()];\
   b.getValues(v_b);\
-  for (int i = 0; i < d.size(); i++) v_a[i] = op(v_a[(a.size() == 1 ? 0 : i)],\
+  for (int i = 0; i < d.size(); i++) v_d[i] = op(v_a[(a.size() == 1 ? 0 : i)],\
                                                  v_b[(b.size() == 1 ? 0 : i)]);\
-  d.setValues(v_a);\
+  d.setValues(v_d);\
 } while (0)
 
 #define CWISE_BINARY_INLOP(d, a, b, op) \
 do {\
   has_values(d, a, b);\
+  T v_d[d.size()];\
   T v_a[a.size()];\
   a.getValues(v_a);\
   T v_b[b.size()];\
   b.getValues(v_b);\
-  for (int i = 0; i < d.size(); i++) v_a[i] = v_a[(a.size() == 1 ? 0 : i)] op\
+  for (int i = 0; i < d.size(); i++) v_d[i] = v_a[(a.size() == 1 ? 0 : i)] op\
                                               v_b[(b.size() == 1 ? 0 : i)];\
-  d.setValues(v_a);\
+  d.setValues(v_d);\
 } while (0)
 
 #define CWISE_TRINARY_OP(d, a, b, c, op) \
@@ -118,9 +120,10 @@ do {\
 do {\
   has_values(d, a);\
   T v_a[a.size()];\
+  T v_d[d.size()];\
   a.getValues(v_a);\
-  for (int i = 0; i < d.size(); i++) v_a[i] = op(v_a[(a.size() == 1 ? 0 : i)]);\
-  d.setValues(v_a);\
+  for (int i = 0; i < d.size(); i++) v_d[i] = op(v_a[(a.size() == 1 ? 0 : i)]);\
+  d.setValues(v_d);\
 } while (0)
 
 namespace SH {
