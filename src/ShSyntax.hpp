@@ -33,31 +33,6 @@
  * Sh syntactical definitions.
  */
 
-namespace SH {
-
-ShProgram shBeginShader(int kind);
-void shEndShader();
-
-void shBindShader(ShProgram& shader);
-
-void shIf(bool);
-void shElse();
-void shEndIf();
-
-void shWhile(bool);
-void shEndWhile();
-
-void shDo();
-void shUntil(bool);
-
-void shFor(bool);
-void shEndFor();
-
-void shBreak();
-void shContinue();
-
-}
-
 /// @internal
 //@{
 #define SH_PUSH_ARG_QUEUE ::SH::ShEnvironment::shader->tokenizer.pushArgQueue()
@@ -173,5 +148,30 @@ void shContinue();
  */
 #define SH_CONTINUE ::SH::shBreak();
 //@}
+
+namespace SH {
+
+ShProgram shBeginShader(int kind);
+void shEndShader();
+
+void shBindShader(ShProgram& shader);
+
+void shIf(bool);
+void shElse();
+void shEndIf();
+
+void shWhile(bool);
+void shEndWhile();
+
+void shDo();
+void shUntil(bool);
+
+void shFor(bool);
+void shEndFor();
+
+void shBreak();
+void shContinue();
+
+}
 
 #endif

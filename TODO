@@ -13,7 +13,12 @@ RELEASE:
  X clean up demos
  - figure out drawing environment map on the back, preferably without using a shader
  - upload/bind split in Arb backend 
- - scalar constant operators
+ X scalar constant operators
+
+OPTIMIZER/SHADER ALGEBRA:
+ / control flow graph optimizations
+ X Run the optimizations more than once as necessary.
+ X Don't run the optimizer twice in connect(), once the previous item is done.
 
 MATRICES:
  X operator()() extracts submatrix

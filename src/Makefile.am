@@ -28,7 +28,8 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
                    ShColor.hpp ShLibColor.hpp \
                    ShNormal.hpp ShLibNormal.hpp \
                    ShTexCoord.hpp ShLibTexCoord.hpp \
-                   ShDomTree.hpp ShOptimizer.hpp ShBitSet.hpp ShBitSet.cpp
+                   ShDomTree.hpp ShOptimizer.hpp ShBitSet.hpp ShBitSet.cpp \
+		   ShAlgebra.hpp ShAlgebra.cpp
 
 incincdir = $(includedir)/sh
 
@@ -47,4 +48,4 @@ incinc_HEADERS = ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp \
 		   ShPosition.hpp ShLibPosition.hpp \
                    ShNormal.hpp ShLibNormal.hpp \
                    ShTexCoord.hpp ShLibTexCoord.hpp \
-                   ShDomTree.hpp ShOptimizer.hpp 
+                   ShDomTree.hpp ShOptimizer.hpp ShAlgebra.hpp

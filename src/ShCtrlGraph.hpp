@@ -108,6 +108,7 @@ typedef ShRefCount<ShCtrlGraphNode> ShCtrlGraphNodePtr;
  */
 class ShCtrlGraph : public ShRefCountable {
 public:
+  ShCtrlGraph(ShCtrlGraphNodePtr head, ShCtrlGraphNodePtr tail);
   ShCtrlGraph(ShBlockListPtr blocks);
   ~ShCtrlGraph();
 
@@ -116,6 +117,7 @@ public:
   std::ostream& graphvizDump(std::ostream& out) const;
 
   ShCtrlGraphNodePtr entry() const;
+  ShCtrlGraphNodePtr exit() const;
 
   template<typename F>
   void dfs(F& functor);

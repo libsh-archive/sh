@@ -73,6 +73,10 @@ void ShProgramNode::updateUniform(const ShVariableNodePtr& uniform)
 
 void ShProgramNode::collectVariables()
 {
+  temps.clear();
+  uniforms.clear();
+  constants.clear();
+  textures.clear();
   if (ctrlGraph->entry()) {
     ctrlGraph->entry()->clearMarked();
     collectNodeVars(ctrlGraph->entry());

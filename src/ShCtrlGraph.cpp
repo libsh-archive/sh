@@ -139,6 +139,12 @@ ShCtrlGraphBranch::ShCtrlGraphBranch(const ShRefCount<ShCtrlGraphNode>& node,
 {
 }
 
+ShCtrlGraph::ShCtrlGraph(ShCtrlGraphNodePtr head, ShCtrlGraphNodePtr tail)
+  : m_entry(head),
+    m_exit(tail)
+{
+}
+
 ShCtrlGraph::ShCtrlGraph(ShBlockListPtr blocks)
   : m_entry(new ShCtrlGraphNode()),
     m_exit(new ShCtrlGraphNode())
@@ -157,6 +163,11 @@ ShCtrlGraph::~ShCtrlGraph()
 ShCtrlGraphNodePtr ShCtrlGraph::entry() const
 {
   return m_entry;
+}
+
+ShCtrlGraphNodePtr ShCtrlGraph::exit() const
+{
+  return m_exit;
 }
 
 std::ostream& ShCtrlGraph::print(std::ostream& out, int indent) const

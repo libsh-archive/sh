@@ -56,12 +56,7 @@ private:
    */
   //@{
   friend class CopyPropagator;
-  typedef std::list< std::pair<ShVariableNodePtr, ShVariableNodePtr> > ACP;
-  ACP m_acp;
-  void copyPropagation();
-  void localCopyProp(ShBasicBlockPtr block);
-  void copyValue(ShVariable& var);
-  void removeACP(const ShVariable& var);
+  void copyPropagation(bool& changed);
   //@}
   
   /**@name Move elimination
@@ -75,12 +70,15 @@ private:
    */
   //@{
   friend class MoveEliminator;
-  typedef std::list<ShStatement> AME;
-  AME m_ame;
-  void moveElimination();
-  void localMoveElim(ShBasicBlockPtr block);
-  void eliminateMove(ShStatement& stmt);
-  void removeAME(ShVariableNodePtr node);
+  void moveElimination(bool& changed);
+  //@}
+
+  /**@name Basic block straightening
+   * Combines basic blocks which can be connected with another.
+   */
+  //@{
+  friend class Straightener;
+  void straighten(bool& changed);
   //@}
   
   /**@name Reaching definitions
@@ -112,7 +110,7 @@ private:
   //@{
   friend class InitLiveCode;
   friend class DeadCodeRemover;
-  void removeDeadCode();
+  void removeDeadCode(bool& changed);
   //@}
   
   /**@name SH_OP_OPTBRA insertion/removal

@@ -41,79 +41,89 @@ void ShOptimizer::optimize(int level)
   if (level == 0) return; // Level 0 means no optimizations at all.
 
   if (level >= 1) {
-    copyPropagation();
-    moveElimination();
+    bool changed;
+    do {
+      changed = false;
+      copyPropagation(changed);
+      moveElimination(changed);
+      
+      m_graph->computePredecessors();
+      
+      straighten(changed);
 
-    insertBraInsts();
-    
-    m_graph->computePredecessors();
-    solveReachDefs();
-    buildUdDuChains();
-    removeDeadCode();
-
-    removeBraInsts();
+      insertBraInsts();
+      
+      solveReachDefs();
+      buildUdDuChains();
+      removeDeadCode(changed);
+      
+      removeBraInsts();
+    } while (changed);
   }
 }
 
 // Copy propagation
 
 struct CopyPropagator {
-  CopyPropagator(ShOptimizer& o)
-    : optimizer(o)
+  CopyPropagator(ShOptimizer& o, bool& changed)
+    : o(o), changed(changed)
   {
   }
 
   void operator()(ShCtrlGraphNodePtr node) {
     if (!node) return;
-    optimizer.localCopyProp(node->block);
+    ShBasicBlockPtr block = node->block;
+    
+    if (!block) return;
+    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+      for (int i = 0; i < opInfo[I->op].arity; i++) copyValue(I->src[i]);
+      removeACP(I->dest);
+      
+      if (I->op == SH_OP_ASN
+          && I->dest.node() != I->src[0].node()
+          && I->dest.node()->kind() == SH_VAR_TEMP
+          && I->dest.swizzle().identity()
+          && I->src[0].swizzle().identity()) {
+        m_acp.push_back(std::make_pair(I->dest.node(), I->src[0].node()));
+      }
+    }
+    m_acp.clear();
+  }
+
+  void removeACP(const ShVariable& var)
+  {
+    for (ACP::iterator I = m_acp.begin(); I != m_acp.end();) {
+      if (I->first == var.node() || I->second == var.node()) {
+        I = m_acp.erase(I);
+        continue;
+      }
+      ++I;
+    }
   }
   
-  ShOptimizer& optimizer;
+
+  void copyValue(ShVariable& var)
+  {
+    for (ACP::const_iterator I = m_acp.begin(); I != m_acp.end(); ++I) {
+      if (I->first == var.node()) {
+        changed = true;
+        var.node() = I->second;
+        break;
+      }
+    }
+  }
+
+  typedef std::list< std::pair<ShVariableNodePtr, ShVariableNodePtr> > ACP;
+  ACP m_acp;
+  
+  ShOptimizer& o;
+  bool& changed;
 };
 
-void ShOptimizer::copyPropagation()
+void ShOptimizer::copyPropagation(bool& changed)
 {
-  CopyPropagator c(*this);
+  CopyPropagator c(*this, changed);
   m_graph->dfs(c);
-}
-
-void ShOptimizer::localCopyProp(ShBasicBlockPtr block)
-{
-  if (!block) return;
-  for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-    for (int i = 0; i < opInfo[I->op].arity; i++) copyValue(I->src[i]);
-    removeACP(I->dest);
-
-    if (I->op == SH_OP_ASN
-        && I->dest.node() != I->src[0].node()
-        && I->dest.node()->kind() == SH_VAR_TEMP
-        && I->dest.swizzle().identity()
-        && I->src[0].swizzle().identity()) {
-      m_acp.push_back(std::make_pair(I->dest.node(), I->src[0].node()));
-    }
-  }
-  m_acp.clear();
-}
-
-void ShOptimizer::copyValue(ShVariable& var)
-{
-  for (ACP::const_iterator I = m_acp.begin(); I != m_acp.end(); ++I) {
-    if (I->first == var.node()) {
-      var.node() = I->second;
-      break;
-    }
-  }
-}
-
-void ShOptimizer::removeACP(const ShVariable& var)
-{
-  for (ACP::iterator I = m_acp.begin(); I != m_acp.end();) {
-    if (I->first == var.node() || I->second == var.node()) {
-      I = m_acp.erase(I);
-      continue;
-    }
-    ++I;
-  }
 }
 
 /// A utility routine
@@ -129,67 +139,126 @@ bool inRHS(ShVariableNodePtr node, ShStatement& stmt)
 // Move elimination
 
 struct MoveEliminator {
-  MoveEliminator(ShOptimizer& o)
-    : optimizer(o)
+  MoveEliminator(ShOptimizer& o, bool& changed)
+    : optimizer(o), changed(changed)
   {
   }
 
   void operator()(ShCtrlGraphNodePtr node) {
     if (!node) return;
-    optimizer.localMoveElim(node->block);
+    ShBasicBlockPtr block = node->block;
+    if (!block) return;
+    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+      eliminateMove(*I);
+      
+      removeAME(I->dest.node());
+      
+      if (!inRHS(I->dest.node(), *I)
+          && I->dest.node()->kind() == SH_VAR_TEMP
+          && I->dest.swizzle().identity()) {
+        m_ame.push_back(*I);
+      }
+    }
+    m_ame.clear();
   }
   
+  void eliminateMove(ShStatement& stmt)
+  {
+    if (stmt.op != SH_OP_ASN) return;
+    if (stmt.src[0].node()->kind() != SH_VAR_TEMP) return;
+    if (!stmt.src[0].swizzle().identity()) return;
+
+    for (AME::const_iterator I = m_ame.begin(); I != m_ame.end(); ++I) {
+      if (I->dest.node() == stmt.src[0].node()) {
+        ShVariable v = stmt.dest;
+        stmt = *I;
+        stmt.dest = v;
+        changed = true;
+        break;
+      }
+    }
+  }
+
+  void removeAME(ShVariableNodePtr node)
+  {
+    for (AME::iterator I = m_ame.begin(); I != m_ame.end();) {
+      if (I->dest.node() == node || inRHS(node, *I)) {
+        I = m_ame.erase(I);
+        continue;
+      }
+      ++I;
+    }
+  }
+
   ShOptimizer& optimizer;
+  bool& changed;
+  typedef std::list<ShStatement> AME;
+  AME m_ame;
 };
 
-void ShOptimizer::moveElimination()
+void ShOptimizer::moveElimination(bool& changed)
 {
-  MoveEliminator m(*this);
+  MoveEliminator m(*this, changed);
   m_graph->dfs(m);
 }
 
-void ShOptimizer::localMoveElim(ShBasicBlockPtr block)
-{
-  if (!block) return;
-  for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-    eliminateMove(*I);
+// Straightening
+struct Straightener {
+  Straightener(ShOptimizer& o, bool& changed)
+    : o(o), changed(changed)
+  {
+  }
 
-    removeAME(I->dest.node());
+  void operator()(ShCtrlGraphNodePtr node)
+  {
+    if (!node) return;
+    if (!node->follower) return;
+    if (node == o.m_graph->entry()) return;
+    if (node->follower == o.m_graph->exit()) return;
+    if (!node->successors.empty()) return;
+    if (node->follower->predecessors.size() > 1) return;
+    
+    if (!node->block) node->block = new ShBasicBlock();
+    if (!node->follower->block) node->follower->block = new ShBasicBlock();
 
-    if (!inRHS(I->dest.node(), *I)
-        && I->dest.node()->kind() == SH_VAR_TEMP
-        && I->dest.swizzle().identity()) {
-      m_ame.push_back(*I);
+    for (ShBasicBlock::ShStmtList::iterator I = node->follower->block->begin(); I != node->follower->block->end(); ++I) {
+      node->block->addStatement(*I);
+    }
+    node->successors = node->follower->successors;
+
+    // Update predecessors
+    
+    for (std::vector<ShCtrlGraphBranch>::iterator I = node->follower->successors.begin();
+         I != node->follower->successors.end(); ++I) {
+      replacePredecessors(I->node, node->follower.object(), node.object());
+    }
+    if (node->follower->follower) replacePredecessors(node->follower->follower, node->follower.object(), node.object());
+    
+    node->follower = node->follower->follower;
+
+    changed = true;
+  }
+
+  void replacePredecessors(ShCtrlGraphNodePtr node,
+                           ShCtrlGraphNode* old,
+                           ShCtrlGraphNode* replacement)
+  {
+    for (ShCtrlGraphNode::ShPredList::iterator I = node->predecessors.begin(); I != node->predecessors.end(); ++I) {
+      if (*I == old) {
+        *I = replacement;
+        break;
+      }
     }
   }
-  m_ame.clear();
-}
+  
+  ShOptimizer& o;
+  bool& changed;
+};
 
-void ShOptimizer::eliminateMove(ShStatement& stmt)
+void ShOptimizer::straighten(bool& changed)
 {
-  if (stmt.op != SH_OP_ASN) return;
-  if (stmt.src[0].node()->kind() != SH_VAR_TEMP) return;
-  if (!stmt.src[0].swizzle().identity()) return;
-
-  for (AME::const_iterator I = m_ame.begin(); I != m_ame.end(); ++I) {
-    if (I->dest.node() == stmt.src[0].node()) {
-      ShVariable v = stmt.dest;
-      stmt = *I;
-      stmt.dest = v;
-      break;
-    }
-  }
-}
-
-void ShOptimizer::removeAME(ShVariableNodePtr node)
-{
-  for (AME::iterator I = m_ame.begin(); I != m_ame.end();) {
-    if (I->dest.node() == node || inRHS(node, *I)) {
-      I = m_ame.erase(I);
-      continue;
-    }
-    ++I;
-  }
+  Straightener s(*this, changed);
+  m_graph->dfs(s);
 }
 
 // Solve the reaching definitions problem
@@ -326,7 +395,7 @@ void ShOptimizer::solveReachDefs()
     m_graph->dfs(iter);
   } while (changed);
 
-#ifdef SH_DEBUG
+#if 0
   SH_DEBUG_PRINT("Dumping RCHin");
   DumpRch dump(m_reachIn);
   m_graph->dfs(dump);
@@ -424,8 +493,10 @@ void ShOptimizer::buildUdDuChains()
   m_reachIn.clear(); // We don't need the reaching definitions
                      // structures anymore.
 
+#if 0
   UdDuDumper dumper;
   m_graph->dfs(dumper);
+#endif
 }
 
 // Dead code removal
@@ -459,6 +530,11 @@ struct InitLiveCode {
 };
 
 struct DeadCodeRemover {
+  DeadCodeRemover(bool& changed)
+    : changed(changed)
+  {
+  }
+  
   void operator()(ShCtrlGraphNodePtr node) {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
@@ -466,37 +542,36 @@ struct DeadCodeRemover {
     
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end();) {
       if (!I->marked) {
+        changed = true;
         I = block->erase(I);
         continue;
       }
       ++I;
     }
   }
+
+  bool& changed;
 };
 
-void ShOptimizer::removeDeadCode()
+void ShOptimizer::removeDeadCode(bool& changed)
 {
   DeadCodeWorkList w;
 
   InitLiveCode init(w);
   m_graph->dfs(init);
 
-  SH_DEBUG_PRINT("Initialized the worklist. It now has " << w.size() << " elements")
-  
   while (!w.empty()) {
     ShStatement* stmt = w.front(); w.pop();
-    SH_DEBUG_PRINT("Processing " << *stmt);
     for (int i = 0; i < 3; i++) {
       for (std::set<ShStatement*>::iterator J = stmt->ud[i].begin(); J != stmt->ud[i].end(); ++J) {
         if ((*J)->marked) continue;
-        SH_DEBUG_PRINT("Marking " << **J);
         (*J)->marked = true;
         w.push(*J);
       }
     }
   }
 
-  DeadCodeRemover r;
+  DeadCodeRemover r(changed);
   m_graph->dfs(r);
 }
 

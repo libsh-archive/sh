@@ -42,6 +42,7 @@
 #include "ShTexture.hpp"
 #include "ShBackend.hpp"
 #include "ShImage.hpp"
+#include "ShAlgebra.hpp"
 
 /** \namespace SH
  * \brief The main Sh namespace.

@@ -1,3 +1,16 @@
+2003-08-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizer.hpp, src/ShOptimizer.cpp: Added straightening.
+	Loop over optimizations until a fixed point is reached.
+
+	* src/ShCtrlGraph.hpp: Added constructor taking a tail and a head,
+	for the ShAlgebra operations.
+
+	* src/sh.hpp: Added ShAlgebra.hpp to included files.
+
+	* src/ShAlgebra.cpp, src/ShAlgebra.hpp: Added combine and connect
+	functions.
+
 2003-08-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShBitSet.hpp, src/ShBitSet.cpp: Added operator== and operator!=.
