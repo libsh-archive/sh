@@ -167,7 +167,7 @@
  *
  * @see SH_NAMEDDECL
  */
-#define SH_DECL(var) var; var.name( # var ); ShIgnore & var
+#define SH_DECL(var) var; var.name( # var ); ::SH::ShIgnore() & var
 
 /** \def SH_NAMEDECL
  * Declare variable with the given name 
@@ -177,7 +177,7 @@
  *
  * @see SH_DECL
  */
-#define SH_NAMEDECL(var, varName) var; var.name( varName ); ShIgnore & var
+#define SH_NAMEDECL(var, varName) var; var.name( varName ); ::SH::ShIgnore() & var
 //@}
 
 namespace SH {

@@ -1,5 +1,8 @@
 2004-02-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShSyntax.hpp (SH_DECL): Make use of ShIgnore to avoid
+	warnings with -Wall.
+
 	* src/ShUtility.hpp (ShCompileTimeChecker): Remove unnecessary
 	private declarations.
 
