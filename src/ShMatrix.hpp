@@ -51,6 +51,7 @@ class ShMatrix: public virtual ShMeta {
 public:
   typedef typename ShHostType<T>::type H; 
   typedef H HostType; 
+  typedef H host_type;
     
   /** \brief Identity constructor.
    *
@@ -205,6 +206,10 @@ public:
 
   virtual std::string meta(const std::string& key) const;
   virtual void meta(const std::string& key, const std::string& value);
+
+  int size() const { return Rows * Cols; }
+  
+  virtual void getValues(host_type dest[]) const;
 
 private:
   /** \brief The Matrix itself

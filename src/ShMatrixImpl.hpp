@@ -476,6 +476,20 @@ void ShMatrix<Rows, Cols, Binding, T>::meta(const std::string& key, const std::s
     }
   }
 
+template<int Rows, int Cols, ShBindingType Binding, typename T>
+void ShMatrix<Rows, Cols, Binding, T>::getValues(host_type dest[]) const
+{
+  int x = 0;
+  for (int i=0; i < Rows; i++) {
+    for (int j=0; j < Cols; j++) {
+      typedef ShDataVariant<T, SH_HOST> VariantType;
+      typedef ShPointer<VariantType> VariantTypePtr;
+      VariantTypePtr c = variant_cast<T, SH_HOST>(m_data[i].getVariant());
+      dest[x] = (*c)[j];
+      x++;
+    }
+  }
+}
 
 }
 

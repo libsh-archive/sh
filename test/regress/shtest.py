@@ -25,8 +25,56 @@ value_type_enum = {'d': 'double',
 
 enum_value_type = dict(zip(value_type_enum.values(), value_type_enum.keys()))
 
-def make_attrib(size, binding_type, value_type):
-    return 'ShAttrib<' + str(size) + ', ' + binding_type + ', ' + value_type + '>'
+def make_variable(arg, binding_type, value_type):
+    if (type(arg[0]) == tuple) or (type(arg[0]) == list):
+        nrows = len(arg[0])
+        ncols = len(arg)
+        return 'ShMatrix<' + str(nrows) + ', ' + str(ncols) + ', ' + binding_type + ', ' + value_type + '>'    
+    else:
+        size = len(arg)
+        return 'ShAttrib<' + str(size) + ', ' + binding_type + ', ' + value_type + '>'
+
+def init_matrix(indent, arg, argtype, varname):
+    out = ''
+    out += indent + make_variable(arg, 'SH_TEMP', argtype) + ' ' + varname + ';\n'
+    i = 0
+    for row in arg:
+        j = 0
+        out += indent;
+        for cell in row:
+            out += varname + '[' + str(i) + '](' + str(j) + ') = ' + str(cell) + '; ';
+            j +=1
+        out += '\n'
+        i += 1
+    return out
+
+def init_attrib(indent, arg, argtype, varname):
+    out = indent
+    out += make_variable(arg, 'SH_CONST', argtype) + ' ' + varname
+    out += '(' + ', '.join([str(a) for a in arg]) + ')'
+    out += ';\n'
+    return out
+
+def init_variable(indent, arg, argtype, varname):
+    if (type(arg[0]) == tuple) or (type(arg[0]) == list):
+        return init_matrix(indent, arg, argtype, varname)
+    else:
+        return init_attrib(indent, arg, argtype, varname)
+
+def init_inputs(indent, src_arg_types):
+    out = ''
+    i = 0
+    for arg, argtype in src_arg_types:
+        varname =  string.ascii_lowercase[i]
+        out += init_variable(indent, arg, argtype, varname)
+        i += 1;
+    return out
+
+def init_expected(indent, arg, argtype):
+    out = ''
+    varname = 'exp'
+    out += init_variable(indent, arg, argtype, varname)
+    return out
 
 # types are a list of dest then src types ('f' used as default) 
 def make_test(expected, values, types=[]):
@@ -198,30 +246,34 @@ class StreamTest(Test):
     def output(self, out):
         self.output_header(out)
         programs = {}
+        test_nb = 0
         for test, testcalls in self.tests:
             types = test[2]
             src_arg_types = zip(test[1], types[1:])
             for i, call in enumerate(testcalls):
-                argkey = enum_value_type[types[0]] + '_' + '_'.join([str(len(arg)) + enum_value_type[type] for arg, type in src_arg_types]) + '_' + call.key() 
+                argkey = enum_value_type[types[0]] + '_' + '_'.join([str(len(arg)) + enum_value_type[argtype] for arg, argtype in src_arg_types]) + '_' + call.key()
                 if not programs.has_key(argkey):
                     programs[argkey] = []
                     progname = self.name + '_' + string.ascii_lowercase[i] + '_' + argkey
                     programs[argkey].append(progname)
                     out.write('  ShProgram ' + progname + ' = SH_BEGIN_PROGRAM("gpu:stream") {\n')
-                    for j, (arg, type) in enumerate(src_arg_types):
-                        out.write('    ' + make_attrib(len(arg), 'SH_INPUT', type) 
+                    for j, (arg, argtype) in enumerate(src_arg_types):
+                        out.write('    ' + make_variable(arg, 'SH_INPUT', argtype)
                                   + ' ' + string.ascii_lowercase[j] + ';\n')
-                    out.write('    ' + make_attrib(len(test[0]), 'SH_OUTPUT', types[0]) +  ' out;\n')
+                    out.write('    ' + make_variable(test[0], 'SH_OUTPUT', types[0]) +  ' out;\n')
                     out.write('    ' + str(call) + ';\n')
                     out.write('  } SH_END;\n\n')
                     out.write('  ' + progname + '.name("' + progname + '");\n')
             for p in programs[argkey]:
-                out.write('  if (test.run(' + p + ', '
-                          + ', '.join([make_attrib(len(arg), 'SH_CONST', types[j + 1]) + '('
-                                       + ', '.join([str(a) for a in arg]) + ')' for arg, type in src_arg_types])
-                          + ', ' + make_attrib(len(test[0]), 'SH_CONST', types[0]) + '('
-                                       + ', '.join([str(a) for a in test[0]]) + ')'
-                          + ') != 0) errors++;\n')
+                out.write('  {\n');
+                out.write(init_inputs('    ', src_arg_types))
+                out.write(init_expected('    ', test[0], types[0]))
+                out.write('\n')
+                out.write('    if (test.run(' + p + ', '
+                          + ', '.join([ string.ascii_lowercase[a] for a in range(len(src_arg_types))])
+                          + ', ' + 'exp' + ') != 0) errors++;\n')
+                out.write('  }\n')
+                test_nb += 1
             out.write('\n')
         self.output_footer(out)
 
@@ -231,21 +283,20 @@ class ImmediateTest(Test):
 
     def output(self, out):
         self.output_header(out)
+        test_nb = 0
         for test, testcalls in self.tests:
             types = test[2]
             src_arg_types = zip(test[1], types[1:])
             for i, call in enumerate(testcalls):
-                testname = enum_value_type[types[0]] + '_' + '_'.join([str(len(arg)) + enum_value_type[type] for arg, type in src_arg_types]) + '_' + call.key()
+                testname = enum_value_type[types[0]] + '_' + '_'.join([str(len(arg)) + enum_value_type[argtype] for arg, argtype in src_arg_types]) + '_' + call.key()
                 out.write('  { // ' + testname + '\n')
-                for j, (arg, type) in enumerate(src_arg_types):
-                    out.write('    ' + make_attrib(len(arg), 'SH_CONST', type) 
-                              + ' ' + string.ascii_lowercase[j] + '(' + ','.join([str(a) for a in arg]) + ');\n')
-                out.write('    ' + make_attrib(len(test[0]), 'SH_TEMP', types[0]) +  ' out;\n')
+                out.write(init_inputs('    ', src_arg_types))
+                out.write(init_expected('    ', test[0], types[0]))
+                out.write('\n')
+                out.write('    ' + make_variable(test[0], 'SH_TEMP', types[0]) +  ' out;\n')
                 out.write('    ' + str(call) + ';\n')
-                out.write('    if (test.check("' + testname + '", out, ' +
-																			make_attrib(len(test[0]), 'SH_CONST', types[0]) + '('
-                                       + ', '.join([str(a) for a in test[0]]) + ')'
-                          + ') != 0) errors++;\n')
+                out.write('\n')
+                out.write('    if (test.check("' + testname + '", out, exp' + ') != 0) errors++;\n')
                 out.write('  }\n\n')
         self.output_footer(out)
 
