@@ -3,11 +3,8 @@
   -remove glClear
 - handle vec ops with different element types
   (e.g. multiply vectors with ShAttrib1f and ShColor3f elements) 
-- clean up sharing render temporaries 
++ clean up sharing render temporaries 
   (framebuf, 2D textures, ubufs)
-  Currently, all ShlaVectors using the same sized render temporaries
-  are subclasses of ShRenderable with static instances of all
-  the required temporaries.
 - sparse matrices
 - scalar multiplication
 - delayed swizzling, negation, constant multiplication 

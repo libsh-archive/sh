@@ -29,7 +29,6 @@
 
 #include "ShMemoryObject.hpp"
 #include "ShUberbuffer.hpp"
-#include "ShlaRenderable.hpp"
 
 namespace Shla {
 
