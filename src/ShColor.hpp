@@ -304,5 +304,6 @@ typedef ShColor<4, SH_TEMP, float> ShColor4f;
 typedef ShColor<4, SH_CONST, float> ShConstColor4f;
 
 } // namespace SH
+#include "ShColorImpl.hpp"
 
 #endif // SH_SHCOLOR_HPP

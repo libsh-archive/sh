@@ -3,7 +3,13 @@ import common, semantic
 common.header()
 
 common.guard("SHATTRIB_HPP")
-common.inprint('#include "ShVariable.hpp"')
+common.inprint('#ifndef SH_DO_NOT_INCLUDE_GENERIC_IMPL')
+common.inprint('#  define SH_DO_NOT_INCLUDE_GENERIC_IMPL')
+common.inprint('#  include "ShGeneric.hpp"')
+common.inprint('#  undef SH_DO_NOT_INCLUDE_GENERIC_IMPL')
+common.inprint('#else');
+common.inprint('#  include "ShGeneric.hpp"')
+common.inprint('#endif');
 common.namespace()
 
 decl = semantic.Class("Attrib", "attribute", "SH_ATTRIB",
@@ -24,4 +30,7 @@ internals, you may safely ignore it.""",
 decl.declare_all()
 
 common.endnamespace()
+
+common.inprint('#include "ShGenericImpl.hpp"')
+common.inprint('#include "ShAttribImpl.hpp"')
 common.endguard("SHATTRIB_HPP")

@@ -17,4 +17,5 @@ used in vertex and fragment shaders.
 decl.declare_all()
 
 common.endnamespace()
+common.inprint('#include "ShPositionImpl.hpp"')
 common.endguard("SHPOSITION_HPP")

@@ -132,7 +132,4 @@ protected:
 
 }
 
-// TODO (eventually): remove this
-#include "ShGeneric.hpp"
-
 #endif

@@ -308,5 +308,6 @@ typedef ShPosition<4, SH_TEMP, float> ShPosition4f;
 typedef ShPosition<4, SH_CONST, float> ShConstPosition4f;
 
 } // namespace SH
+#include "ShPositionImpl.hpp"
 
 #endif // SH_SHPOSITION_HPP

@@ -13,4 +13,5 @@ decl = semantic.Class("Color", "color", "SH_COLOR",
 decl.declare_all()
 
 common.endnamespace()
+common.inprint('#include "ShColorImpl.hpp"')
 common.endguard("SHCOLOR_HPP")

@@ -307,5 +307,6 @@ typedef ShVector<4, SH_TEMP, float> ShVector4f;
 typedef ShVector<4, SH_CONST, float> ShConstVector4f;
 
 } // namespace SH
+#include "ShVectorImpl.hpp"
 
 #endif // SH_SHVECTOR_HPP

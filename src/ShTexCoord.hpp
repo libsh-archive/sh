@@ -304,5 +304,6 @@ typedef ShTexCoord<4, SH_TEMP, float> ShTexCoord4f;
 typedef ShTexCoord<4, SH_CONST, float> ShConstTexCoord4f;
 
 } // namespace SH
+#include "ShTexCoordImpl.hpp"
 
 #endif // SH_SHTEXCOORD_HPP

@@ -5,13 +5,13 @@ lib_LTLIBRARIES = libsh.la
 libsh_la_LIBADD = $(LIBLTDL)
 libsh_la_LDFLAGS = -export-dynamic -no-undefined
 
-GENERATED  = ShAttrib.hpp ShAttribImpl.hpp ShAttrib.cpp
-GENERATED += ShVector.hpp ShVectorImpl.hpp ShVector.cpp
-GENERATED += ShPoint.hpp ShPointImpl.hpp ShPoint.cpp
-GENERATED += ShColor.hpp ShColorImpl.hpp ShColor.cpp
-GENERATED += ShPosition.hpp ShPositionImpl.hpp ShPosition.cpp
-GENERATED += ShNormal.hpp ShNormalImpl.hpp ShNormal.cpp
-GENERATED += ShTexCoord.hpp ShTexCoordImpl.hpp ShTexCoord.cpp
+GENERATED  = ShAttrib.hpp ShAttribImpl.hpp # ShAttrib.cpp
+GENERATED += ShVector.hpp ShVectorImpl.hpp # ShVector.cpp
+GENERATED += ShPoint.hpp ShPointImpl.hpp # ShPoint.cpp
+GENERATED += ShColor.hpp ShColorImpl.hpp # ShColor.cpp
+GENERATED += ShPosition.hpp ShPositionImpl.hpp # ShPosition.cpp
+GENERATED += ShNormal.hpp ShNormalImpl.hpp # ShNormal.cpp
+GENERATED += ShTexCoord.hpp ShTexCoordImpl.hpp # ShTexCoord.cpp
 
 libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
                    ShEnvironment.cpp ShException.cpp ShError.cpp \
@@ -24,7 +24,7 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
                    ShOptimizer.cpp \
                    ShTransformer.cpp \
                    ShInternals.hpp ShInternals.cpp \
-		   ShAttrib.hpp ShAttribImpl.hpp ShAttrib.cpp \
+		   ShAttrib.hpp ShAttribImpl.hpp \
 		   ShBackend.hpp ShBasicBlock.hpp \
                    ShBlock.hpp ShCtrlGraph.hpp \
                    ShDebug.hpp ShEnvironment.hpp ShError.hpp \
@@ -39,7 +39,7 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
                    ShParser.hpp ShRefCount.hpp ShProgram.hpp ShStatement.hpp \
                    ShSwizzle.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp \
                    ShUtility.hpp ShVariable.hpp ShVariableNode.hpp sh.hpp \
-		   ShGeneric.hpp ShGenericImpl.hpp ShGeneric.cpp \
+		   ShGeneric.hpp ShGenericImpl.hpp \
                    ShMatrix.hpp ShMatrixImpl.hpp \
                    ShBaseTexture.hpp ShBaseTextureImpl.hpp \
                    ShArray.hpp ShTable.hpp ShTexture.hpp \
@@ -47,12 +47,12 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
                    ShTextureNode.hpp ShImage.hpp ShImage3D.hpp \
 		   ShLinearAllocator.hpp \
                    ShLibAttrib.hpp \
-                   ShVector.hpp ShVectorImpl.hpp ShVector.cpp ShLibVector.hpp \
-                   ShPoint.hpp ShPointImpl.hpp ShPoint.cpp ShLibPoint.hpp \
-		   ShPosition.hpp ShPositionImpl.hpp ShPosition.cpp ShLibPosition.hpp \
-                   ShColor.hpp ShColorImpl.hpp ShColor.cpp ShLibColor.hpp \
-                   ShNormal.hpp ShNormalImpl.hpp ShNormal.cpp ShLibNormal.hpp \
-                   ShTexCoord.hpp ShTexCoordImpl.hpp ShTexCoord.cpp ShLibTexCoord.hpp \
+                   ShVector.hpp ShVectorImpl.hpp ShLibVector.hpp \
+                   ShPoint.hpp ShPointImpl.hpp ShLibPoint.hpp \
+		   ShPosition.hpp ShPositionImpl.hpp ShLibPosition.hpp \
+                   ShColor.hpp ShColorImpl.hpp ShLibColor.hpp \
+                   ShNormal.hpp ShNormalImpl.hpp ShLibNormal.hpp \
+                   ShTexCoord.hpp ShTexCoordImpl.hpp ShLibTexCoord.hpp \
                    ShDomTree.hpp ShOptimizer.hpp ShTransformer.hpp ShBitSet.hpp ShBitSet.cpp \
 		   ShAlgebra.hpp ShAlgebra.cpp \
 		   ShManipulator.hpp ShManipulatorImpl.hpp ShManipulator.cpp \
@@ -84,7 +84,7 @@ incinc_HEADERS = ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp \
                    ShUtility.hpp \
 		   ShVariable.hpp ShVariableNode.hpp \
 		   ShGeneric.hpp ShGenericImpl.hpp \
-		   sh.hpp shimpl.hpp \
+		   sh.hpp \
                    ShMatrix.hpp ShMatrixImpl.hpp \
 		   ShArray.hpp ShTable.hpp ShTexture.hpp \
 		   ShWrap.hpp \

@@ -16,4 +16,5 @@ library).""")
 decl.declare_all()
 
 common.endnamespace()
+common.inprint('#include "ShVectorImpl.hpp"')
 common.endguard("SHVECTOR_HPP")

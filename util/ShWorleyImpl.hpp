@@ -35,7 +35,6 @@
 #include "ShFunc.hpp"
 #include "ShImage.hpp"
 #include "ShTexCoord.hpp"
-#include "shimpl.hpp"
 
 namespace ShUtil {
 

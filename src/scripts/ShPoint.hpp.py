@@ -13,4 +13,5 @@ decl = semantic.Class("Point", "point", "SH_POINT",
 decl.declare_all()
 
 common.endnamespace()
+common.inprint('#include "ShPointImpl.hpp"')
 common.endguard("SHPOINT_HPP")

@@ -304,5 +304,6 @@ typedef ShNormal<4, SH_TEMP, float> ShNormal4f;
 typedef ShNormal<4, SH_CONST, float> ShConstNormal4f;
 
 } // namespace SH
+#include "ShNormalImpl.hpp"
 
 #endif // SH_SHNORMAL_HPP

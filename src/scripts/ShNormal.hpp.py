@@ -13,4 +13,5 @@ decl = semantic.Class("Normal", "normal", "SH_NORMAL",
 decl.declare_all()
 
 common.endnamespace()
+common.inprint('#include "ShNormalImpl.hpp"')
 common.endguard("SHNORMAL_HPP")

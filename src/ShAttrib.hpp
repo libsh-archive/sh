@@ -34,7 +34,13 @@
 #ifndef SH_SHATTRIB_HPP
 #define SH_SHATTRIB_HPP
 
-#include "ShVariable.hpp"
+#ifndef SH_DO_NOT_INCLUDE_GENERIC_IMPL
+#  define SH_DO_NOT_INCLUDE_GENERIC_IMPL
+#  include "ShGeneric.hpp"
+#  undef SH_DO_NOT_INCLUDE_GENERIC_IMPL
+#else
+#  include "ShGeneric.hpp"
+#endif
 namespace SH {
 
 /** A generic attribute (or parameter) holding N values.
@@ -314,5 +320,7 @@ typedef ShAttrib<4, SH_TEMP, float> ShAttrib4f;
 typedef ShAttrib<4, SH_CONST, float> ShConstAttrib4f;
 
 } // namespace SH
+#include "ShGenericImpl.hpp"
+#include "ShAttribImpl.hpp"
 
 #endif // SH_SHATTRIB_HPP

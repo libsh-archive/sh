@@ -133,4 +133,10 @@ protected:
 
 }
 
+// This is a hack for ShAttrib.hpp in particular.
+// A little dirty, but it works well.
+#ifndef SH_DO_NOT_INCLUDE_GENERIC_IMPL
+#include "ShGenericImpl.hpp"
+#endif
+
 #endif

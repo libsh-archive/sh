@@ -13,4 +13,5 @@ decl = semantic.Class("TexCoord", "texture coordinate", "SH_TEXCOORD",
 decl.declare_all()
 
 common.endnamespace()
+common.inprint('#include "ShTexCoordImpl.hpp"')
 common.endguard("SHTEXCOORD_HPP")

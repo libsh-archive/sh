@@ -304,5 +304,6 @@ typedef ShPoint<4, SH_TEMP, float> ShPoint4f;
 typedef ShPoint<4, SH_CONST, float> ShConstPoint4f;
 
 } // namespace SH
+#include "ShPointImpl.hpp"
 
 #endif // SH_SHPOINT_HPP
