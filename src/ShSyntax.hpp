@@ -191,7 +191,7 @@ void shEndFor();
 void shBreak();
 void shContinue();
 
-  ShProgram  shHideInputs(ShProgram prgm);
+  ShProgram  shHideInputs(ShProgram prgm, int);
 
 }
 

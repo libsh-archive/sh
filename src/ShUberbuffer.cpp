@@ -14,10 +14,19 @@ ShUberbuffer::ShUberbuffer(int width, int height, int depth,
     m_format(format), m_mem(0) {
 }
 
+
+/// TO DO FIX the destructor problem
 ShUberbuffer::~ShUberbuffer() {
+  
+  static int called = 0;
+  called+=1;
+  std::cout<<"Destructor called {}{}{} "<<called<<std::endl;
+
+#if 0
   if( m_mem != 0 && ShEnvironment::backend ) {
     ShEnvironment::backend->deleteUberbuffer( this );
   }
+#endif
 }
 
 unsigned int ShUberbuffer::format() {
