@@ -206,11 +206,12 @@ struct ConstProp : public ShStatementInfo {
       return !(*this == other);
     }
 
+    bool constant;
+
     ValueNum valuenum;
     int index;
     bool neg;
 
-    bool constant;
     float constval;
   };
 
@@ -238,7 +239,7 @@ struct ConstProp : public ShStatementInfo {
     
     static ValueNum lookup(const ShVariableNodePtr& node)
     {
-      for (int i = 0; i < m_values.size(); i++) {
+      for (std::size_t i = 0; i < m_values.size(); i++) {
         if (m_values[i]->type == NODE && m_values[i]->node == node) return i;
       }
       m_values.push_back(new Value(node));
@@ -254,7 +255,7 @@ struct ConstProp : public ShStatementInfo {
         if (op != other.op || destsize != other.destsize) return false;
         for (int i = 0; i < opInfo[op].arity; i++) {
           if (src[i].size() != other.src[i].size()) return false;
-          for (int j = 0; j < src[i].size(); j++) {
+          for (std::size_t j = 0; j < src[i].size(); j++) {
             if (src[i][j] != other.src[i][j]) return false;
           }
         }
@@ -272,7 +273,7 @@ struct ConstProp : public ShStatementInfo {
     {
       Value* val = new Value(cp);
       
-      for (int i = 0; i < m_values.size(); i++) {
+      for (std::size_t i = 0; i < m_values.size(); i++) {
         if (m_values[i]->type != STMT) continue;
         if (m_values[i]->op != cp->stmt->op) continue;
 
@@ -302,7 +303,7 @@ struct ConstProp : public ShStatementInfo {
       : type(STMT), node(0), op(cp->stmt->op), destsize(cp->stmt->dest.size())
     {
       for (int i = 0; i < opInfo[cp->stmt->op].arity; i++) {
-        for (int j = 0; j < cp->src[i].size(); j++) {
+        for (std::size_t j = 0; j < cp->src[i].size(); j++) {
           if (cp->src[i][j].state == Cell::UNIFORM) {
             src[i].push_back(cp->src[i][j].uniform);
           } else {
@@ -412,7 +413,7 @@ std::ostream& operator<<(std::ostream& out, const ConstProp::Uniform& uniform)
 void ConstProp::Value::dump(std::ostream& out)
 {
   out << "--- uniform values ---" << std::endl;
-  for (int i = 0; i < m_values.size(); i++) {
+  for (std::size_t i = 0; i < m_values.size(); i++) {
     out << i << ": ";
     if (m_values[i]->type == NODE) {
       out << "node " << m_values[i]->node->name() << std::endl;
@@ -486,14 +487,14 @@ struct DumpConstProp {
       }
 
       std::cerr << "dest = {";
-      for (int i = 0; i < cp->dest.size(); i++) {
+      for (std::size_t i = 0; i < cp->dest.size(); i++) {
         std::cerr << cp->dest[i];
       }
       std::cerr << "}; ";
       for (int s = 0; s < opInfo[I->op].arity; s++) {
         if (s) std::cerr << ", ";
         std::cerr << "src" << s << " = {";
-        for (int i = 0; i < cp->src[s].size(); i++) {
+        for (std::size_t i = 0; i < cp->src[s].size(); i++) {
           std::cerr << cp->src[s][i];
         }
         std::cerr << "}";
@@ -724,7 +725,7 @@ struct FinishConstProp
     bool neg = false;
     std::vector<int> indices;
     std::vector<float> constvals;
-    for (int i = 0; i < src.size(); i++) {
+    for (std::size_t i = 0; i < src.size(); i++) {
       if (src[i].constant) {
         if (v >= 0) {
           allsame = false;
@@ -747,7 +748,7 @@ struct FinishConstProp
       // Make intermediate variables, combine them together.
       ShVariable r = ShVariable(new ShVariableNode(SH_TEMP, src.size()));
       
-      for (int i = 0; i < src.size(); i++) {
+      for (std::size_t i = 0; i < src.size(); i++) {
         std::vector<ConstProp::Uniform> v;
         v.push_back(src[i]);
         ShVariable scalar = compute(v);

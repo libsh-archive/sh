@@ -390,10 +390,11 @@ void optimize(ShProgram& p, int level)
     if (!ShContext::current()->optimization_disabled("straightening")) {
       straighten(p, changed);
     }
-    
+
     insert_branch_instructions(p);
 
-    if (!ShContext::current()->optimization_disabled("propagation")) {
+    if (level >= 2 &&
+        !ShContext::current()->optimization_disabled("propagation")) {
       add_value_tracking(p);
       propagate_constants(p);
     }

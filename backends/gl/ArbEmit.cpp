@@ -170,7 +170,7 @@ ArbMapping ArbCode::table[] = {
   {SH_OP_COND, SH_ARB_NVFP, 0, SH_ARB_FUN, &ArbCode::emit_nvcond},
   {SH_OP_COND, SH_ARB_NVVP2, 0, SH_ARB_FUN, &ArbCode::emit_nvcond},
   {SH_OP_COND, SH_ARB_ANY, negate_first, SH_ARB_CMP, 0},
-  {SH_OP_KIL,  SH_ARB_FP,  negate_first, SH_ARB_KIL, 0},
+  {SH_OP_KIL,  SH_ARB_FP,  0, SH_ARB_FUN, &ArbCode::emit_kil},
 
   {SH_OP_ASN, SH_ARB_END, 0, SH_ARB_FUN, 0}
 };
@@ -596,5 +596,9 @@ void ArbCode::emit_cmul(const ShStatement& stmt)
   m_instructions.push_back(ArbInst(SH_ARB_MOV, stmt.dest, prod));
 }
 
+void ArbCode::emit_kil(const ShStatement& stmt)
+{
+  m_instructions.push_back(ArbInst(SH_ARB_KIL, -stmt.src[0]));
+}
 
 }

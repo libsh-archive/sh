@@ -1,8 +1,22 @@
+2004-09-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbEmit.cpp: Implement emit_kil and use it to emit
+	KIL instructions. Fixes issue146. Thanks to Bryan Chan for
+	pointing this out.
+
+	* backends/gl/ArbCode.hpp: Add emit_kil member function.
+
 2004-09-09  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* Fixed some brokenness on Windows.
 
 2004-09-08  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShConstProp.cpp: Fix a bunch of harmless warnings.
+
+	* src/ShOptimizations.cpp (optimize): Don't do constant
+	propagation/uniform lifting unless the optimization level is at
+	least two.
 
 	* src/ShConstProp.cpp (struct FinishConstProp): Don't lift values
 	which are partially not uniform.
