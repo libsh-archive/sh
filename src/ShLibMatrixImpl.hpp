@@ -398,9 +398,9 @@ rotate(const ShGeneric<3, T>& axis,
   result[2][0] -= xyz(1) * s;
   result[2][1] += xyz(0) * s;
   
-  result[0][0] *= 2.0; result[0][0] += c;
-  result[1][1] *= 2.0; result[1][1] += c;
-  result[2][2] *= 2.0; result[2][2] += c;
+  result[0][0] *= xyz(0); result[0][0] += c;
+  result[1][1] *= xyz(1); result[1][1] += c;
+  result[2][2] *= xyz(2); result[2][2] += c;
 
   return result;
 }

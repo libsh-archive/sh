@@ -1,3 +1,19 @@
+2005-02-18  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+	
+	* backends/gl/ArbCode.cpp: Added support for "opengl:texunit" and
+	"opengl:preset" on ShTextures and "opengl:reservetex" on ShPrograms.
+	
+	* backends/gl/ArbReg.cpp, backends/gl/ArbReg.hpp: Added preset
+	flag to ArbReg for textures with reserved units.
+	
+	* backends/gl/GlTextures.cpp: Removed "opengl:preset" processing,
+	this is now done in ArbCode.cpp. Renamed "opengl:texid" to
+	"opengl:alloc_texid".
+	
+2005-02-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShLibMatrixImpl.hpp (rotate): Fix rotations.
+
 2005-02-11  Bryan Chan  <b8chan@cgl.uwaterloo.ca>
 
 	* src/ShInstructions.hpp, ShInstructions.cpp
