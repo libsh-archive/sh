@@ -52,7 +52,7 @@ struct ShEnvironment
   /// The currently active backend
   static ShBackendPtr backend;
 
-  /// 0 means no optimizations (default)
+  /// 0 means no optimizations. The default level is 1.
   static int optimizationLevel;
 };
 

@@ -1,9 +1,10 @@
-check_PROGRAMS = constants copy do if for julia matrix ops point simple texture uniforms shvector while
+check_PROGRAMS = bitset constants copy do if for julia matrix ops point simple texture uniforms shvector while
 
 INCLUDES = -I../src
 
 LDADD = ../src/libsh.la
 
+bitset_SOURCES = bitset.cpp
 constants_SOURCES = constants.cpp
 copy_SOURCES = copy.cpp
 do_SOURCES = do.cpp

@@ -1,3 +1,12 @@
+2003-08-22  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizer.cpp (copyValue): Improve efficiency slightly.
+
+	* test/bitset.cpp: Added simple bitset test.
+
+	* src/ShBitSet.cpp, src/ShBitSet.hpp: Added ShBitSet class for the
+	optimizer.
+
 2003-08-20  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShStatement.cpp (operator<<): Print negations.

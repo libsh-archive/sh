@@ -97,6 +97,7 @@ void ShOptimizer::copyValue(ShVariable& var)
   for (ACP::const_iterator I = m_acp.begin(); I != m_acp.end(); ++I) {
     if (I->first == var.node()) {
       var.node() = I->second;
+      break;
     }
   }
 }
@@ -191,6 +192,15 @@ void ShOptimizer::removeAME(ShVariableNodePtr node)
 }
 
 // Unused Temporary Removal
+//
+// This isn't particularily smart right now. It only checks if a
+// temporary is _ever_ used and if so marks it live. So, this will
+// not handle chains of dead temporaries or self-assignment in
+// temporaries.
+// 
+// Really a more complicated method, perhaps using du/ud-chains or
+// some form of SSA should be used to do dead code elimination.
+//
 
 struct TempFinder {
   TempFinder(ShOptimizer& o)
