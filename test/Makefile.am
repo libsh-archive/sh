@@ -4,8 +4,8 @@ check_PROGRAMS = algebra combine connect constants copy do if for julia matrix o
 
 INCLUDES = -I../src
 
-LDFLAGS = -L/usr/X11R6/lib
-LDADD =  -lGL ../src/libsh.la
+AM_LDFLAGS = -L/usr/X11R6/lib
+AM_LDADD =  -lGL ../src/libsh.la
 
 AM_CXXFLAGS = -g -O0
 

@@ -35,9 +35,9 @@ endif
 if ENABLE_ATI_BACKEND
 libshati_la_LDFLAGS = -L$(prefix)/lib -module
 libshati_la_LIBADD = $(top_srcdir)/src/libsh.la
-nodist_libshati_la_SOURCES = UberTextures.hpp UberTextures.cpp \
-			     UberStorage.hpp UberStorage.cpp \
-		             AtiBackend.cpp uberbuffers.hpp
+nodist_libshati_la_SOURCES = uberbuffers/UberTextures.hpp uberbuffers/UberTextures.cpp \
+			     uberbuffers/UberStorage.hpp uberbuffers/UberStorage.cpp \
+		             uberbuffers/AtiBackend.cpp uberbuffers/uberbuffers.hpp
 
 dist_libshati_la_SOURCES = Arb.cpp ArbCode.cpp ArbInst.cpp ArbLimits.cpp \
 			   ArbReg.cpp \
