@@ -48,54 +48,42 @@ ShQuaternion<K, T>::ShQuaternion(const ShMatrix<4, 4, K2, T>& mat)
   ShVector4f res0, res1, res2, res3;
   ShAttrib1f S0 = sqrt(trace) * 2.0;
   S0 += (S0 == 0.0)*1.0;
-  //float val;
-  //S0.getValues(&val);
-  //std::cout << "S0" << std::endl;
-  //std::cout << val << std::endl;
+  
   res0(0) = 0.25 * S0;
   res0(1) = (mat[1](2) - mat[2](1)) / S0;
   res0(2) = (mat[2](0) - mat[0](2)) / S0;
   res0(3) = (mat[0](1) - mat[1](0)) / S0;
-  //std::cout << res0 << std::endl;
   
   trace = 1.0 + mat[0](0) - mat[1](1) - mat[2](2);
   trace = (trace >= 0.0)*trace + (trace < 0.0)*0.0;
   ShAttrib1f S1 = sqrt(trace) * 2.0;
   S1 += (S1 == 0.0)*1.0;
-  //S1.getValues(&val);
-  //std::cout << "S1" << std::endl;
-  //std::cout << val << std::endl;
+  
   res1(0) = (mat[2](1) - mat[1](2)) / S1;
   res1(1) = 0.25 * S1;
   res1(2) = (mat[0](1) + mat[1](0)) / S1;
   res1(3) = (mat[2](0) + mat[0](2)) / S1;
-  //std::cout << res1 << std::endl;
   
   trace = 1.0 - mat[0](0) + mat[1](1) - mat[2](2);
   trace = (trace >= 0.0)*trace + (trace < 0.0)*0.0;
   ShAttrib1f S2 = sqrt(trace) * 2.0;
   S2 += (S2 == 0.0)*1.0;
-  //S2.getValues(&val);
-  //std::cout << "S2" << std::endl;
-  //std::cout << val << std::endl;
+  
   res2(0) = (mat[2](0) - mat[0](2)) / S2;
   res2(1) = (mat[0](1) + mat[1](0)) / S2;
   res2(2) = 0.25 * S2;
   res2(3) = (mat[1](2) + mat[2](1)) / S2;
-  //std::cout << res2 << std::endl;
   
   trace = 1.0 - mat[0](0) - mat[1](1) + mat[2](2);
   trace = (trace >= 0.0)*trace + (trace < 0.0)*0.0;
   ShAttrib1f S3 = sqrt(trace) * 2.0;
   S3 += (S3 == 0.0)*1.0;
-  //S3.getValues(&val);
-  //std::cout << "S3" << std::endl;
-  //std::cout << val << std::endl;
+  
   res3(0) = (mat[1](0) - mat[0](1)) / S3;
   res3(1) = (mat[2](0) + mat[0](2)) / S3;
   res3(2) = (mat[1](2) + mat[2](1)) / S3;
   res3(3) = 0.25 * S3;
-  //std::cout << res3 << std::endl;
+  
   m_data = c0*res0 + 
     (c0 == 0.0)*(c1*res1 + (c1 == 0.0)*(c2*res2 + (c2 == 0.0)*res3));
   m_data.setUnit(true);
@@ -162,6 +150,32 @@ ShQuaternion<K, T>&
 ShQuaternion<K, T>::operator*=(const ShAttrib<1, K2, T>& right) 
 {
   m_data = m_data*right;
+  return *this;
+}
+
+template<int K, typename T>
+template<int K2>
+ShQuaternion<K, T>& 
+ShQuaternion<K, T>::operator*=(const ShVector<3, K2, T>& right) 
+{
+  ShVector4f v;
+  v(0) = 0.0;
+  v(1,2,3) = right;
+  v.setUnit(right.isUnit());
+  *this *= ShQuaternionf(v);
+  return *this;
+}
+
+template<int K, typename T>
+template<int K2>
+ShQuaternion<K, T>& 
+ShQuaternion<K, T>::operator*=(const ShNormal<3, K2, T>& right) 
+{
+  ShVector4f v;
+  v(0) = 0.0;
+  v(1,2,3) = right;
+  v.setUnit(right.isUnit());
+  *this *= ShQuaternionf(v);
   return *this;
 }
 
@@ -271,6 +285,24 @@ ShQuaternion<K, T>::operator*(const ShAttrib<1, K2, T>& c)
 {
   ShQuaternion<K, T> r = *this;
   return (r *= c);
+}
+
+template<int K, typename T>
+template<int K2>
+ShQuaternion<SH_TEMP, T> 
+ShQuaternion<K, T>::operator*(const ShVector<3, K2, T>& v)
+{
+  ShQuaternion<K, T> r = *this;
+  return (r *= v);
+}
+
+template<int K, typename T>
+template<int K2>
+ShQuaternion<SH_TEMP, T> 
+ShQuaternion<K, T>::operator*(const ShNormal<3, K2, T>& v)
+{
+  ShQuaternion<K, T> r = *this;
+  return (r *= v);
 }
 
 template<int K, typename T>

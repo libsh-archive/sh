@@ -62,6 +62,10 @@ public:
   template<int K2>
   ShQuaternion& operator*=(const ShAttrib<1, K2, T>& right);
   template<int K2>
+  ShQuaternion& operator*=(const ShVector<3, K2, T>& right);
+  template<int K2>
+  ShQuaternion& operator*=(const ShNormal<3, K2, T>& right);
+  template<int K2>
   ShQuaternion<SH_TEMP, T> operator+(const ShQuaternion<K2, T>& q2);
   template<int K2>
   ShQuaternion<SH_TEMP, T> operator-(const ShQuaternion<K2, T>& q2);
@@ -69,6 +73,10 @@ public:
   ShQuaternion<SH_TEMP, T> operator*(const ShQuaternion<K2, T>& q2);
   template<int K2>
   ShQuaternion<SH_TEMP, T> operator*(const ShAttrib<1, K2, T>& c);
+  template<int K2>
+  ShQuaternion<SH_TEMP, T> operator*(const ShVector<3, K2, T>& q2);
+  template<int K2>
+  ShQuaternion<SH_TEMP, T> operator*(const ShNormal<3, K2, T>& q2);
   void normalize();
   void getValues(T values []) const;
   void setUnit(bool flag);

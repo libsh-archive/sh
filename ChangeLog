@@ -1,3 +1,8 @@
+2004-03-04  Jack Wang  <jmwang@uwaterloo.ca>
+
+	* src/ShQuaternion.hpp, src/ShQuaternionImpl.hpp:
+	Added multiplication with ShVector and ShNormal for convenience.
+
 2004-03-02  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/ArbBackend.cpp: Use PBufferStreams.
