@@ -45,10 +45,7 @@ ShProgram operator<<(const ShProgram &p, const ShManipulator &m) {
         ShVariable output(new ShVariableNode(SH_VAR_OUTPUT, 
               inputs[i].node()->size(), inputs[i].node()->specialType()));
 
-        ShVariable temp(new ShVariableNode(SH_VAR_TEMP, 
-              inputs[i].node()->size(), inputs[i].node()->specialType()));
-
-        ShStatement stmt(temp, output, SH_OP_SEQ, inputs[i]);
+        ShStatement stmt(output, SH_OP_ASN, inputs[i]);
         ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
       }
     }

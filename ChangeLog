@@ -1,3 +1,15 @@
+2004-01-14  Bryan Chan  <b8chan@enora.cgl.uwaterloo.ca>
+
+	* src/ShManipulator.cpp (operator<<): Changed SEQ to ASN.
+
+2004-01-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShAlgebra.cpp (copyCtrlGraph): Clear head before we do a dfs
+	on it. Also, change the /new/ nodes instead of the old ones in the
+	successor-changing loop. Furthermore, it would be a good idea to
+	copy blocks instead of referring to old ones. Aka the "evidence
+	that Stefanus can't code" patch.
+
 2004-01-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShProgram.hpp, ...: Rename "shader kind" to "shader target",

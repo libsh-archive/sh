@@ -34,18 +34,23 @@ void copyCtrlGraph(ShCtrlGraphNodePtr head, ShCtrlGraphNodePtr tail,
   copyMap[0] = 0;
   
   CtrlGraphCopier copier(copyMap);
+  head->clearMarked();
   head->dfs(copier);
 
+  // Replace the successors and followers in the new graph with their new equivalents
   for (CtrlGraphCopyMap::iterator I = copyMap.begin(); I != copyMap.end(); ++I) {
-    ShCtrlGraphNodePtr node = I->first;
+    ShCtrlGraphNodePtr node = I->second; // Get the new node
     if (!node) continue;
     for (std::vector<ShCtrlGraphBranch>::iterator J = node->successors.begin(); J != node->successors.end(); ++J) {
       J->node = copyMap[J->node];
     }
     node->follower = copyMap[node->follower];
+    if (node->block) node->block = new ShBasicBlock(*node->block);
   }
   newHead = copyMap[head];
   newTail = copyMap[tail];
+
+  head->clearMarked();
 }
 
 typedef std::map<ShVariableNodePtr, ShVariableNodePtr> VarMap;
