@@ -44,8 +44,7 @@ namespace shgl {
         }
     };
 
-  WGLPBufferStreams::WGLPBufferStreams(int context) :
-    PBufferStreams(context),
+  WGLPBufferStreams::WGLPBufferStreams(void) :
     m_orig_hdc(NULL),
     m_orig_hglrc(NULL)
     {
@@ -55,48 +54,13 @@ namespace shgl {
     {
     }
 
-  StreamStrategy* WGLPBufferStreams::create(int context)
+  StreamStrategy* WGLPBufferStreams::create(void)
     {
-    return new WGLPBufferStreams(context);
+    return new WGLPBufferStreams;
     }
 
   FloatExtension WGLPBufferStreams::setupContext(int width, int height)
     {
-    if (m_info.valid() && m_info.width == width && m_info.height == height)
-      {
-      shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->setContext(m_info.shcontext);
-
-      if (!wglMakeCurrent(m_info.pbuffer_hdc, m_info.pbuffer_hglrc))
-        {
-        wglReleasePbufferDCARB(m_info.pbuffer, m_info.pbuffer_hdc);
-        wglDestroyPbufferARB(m_info.pbuffer);
-        wglDeleteContext(m_info.pbuffer_hglrc);
-
-        m_info.pbuffer = NULL;
-        m_info.pbuffer_hdc = NULL;
-        m_info.pbuffer_hglrc = NULL;
-
-        std::stringstream msg;
-        msg << "wglMakeCurrent failed (" << GetLastError() << ")";
-        shError(WGLPBufferStreamException(msg.str()));
-        }
-
-      return m_info.extension;
-      }
-
-    if (m_info.shcontext >= 0)
-      {
-      shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->setContext(m_info.shcontext);
-      shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->destroyContext();
-      }
-
-    // Figure out what extension we're using
-    m_info.extension = SH_ARB_NO_FLOAT_EXT;
-    m_info.width = width;
-    m_info.height = height;
-
-    m_info.shcontext = shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->newContext();
-  
     // Grab the current DC and context, this will need to be
     // restored after the pbuffer work has been completed. If
     // there is no DC then we need to create one, the subsequent
@@ -126,6 +90,78 @@ namespace shgl {
       {
       m_orig_hglrc = wglGetCurrentContext();
       }
+
+    // search the crrent list of pbuffers for an applicable one
+    ShWGLPBufferInfo match;
+    for(std::list<ShWGLPBufferInfo>::iterator itr = m_infos.begin();
+	      itr != m_infos.end();
+	      itr++)
+      {
+      if ((*itr).valid() && (*itr).width == width && (*itr).height == height)
+	      {
+	      match = (*itr);
+	      break;
+	      }
+      }
+
+    // if a valid match wasn't found then create a new
+    // context and add it to the list of infos
+    if (!match.valid())
+      {
+      match = createContext(width, height);
+      m_infos.push_back(match);
+      }
+
+    // Activate the pbuffer/context 
+    if (!wglMakeCurrent(match.pbuffer_hdc, match.pbuffer_hglrc))
+      {
+      wglReleasePbufferDCARB(match.pbuffer, match.pbuffer_hdc);
+      wglDestroyPbufferARB(match.pbuffer);
+      wglDeleteContext(match.pbuffer_hglrc);
+
+      match.pbuffer = NULL;
+      match.pbuffer_hdc = NULL;
+      match.pbuffer_hglrc = NULL;
+
+      std::stringstream msg;
+      msg << "wglMakeCurrent failed (" << GetLastError() << ")";
+      shError(WGLPBufferStreamException(msg.str()));
+      }
+
+    // If we had to create the DC (see above) then delete it.
+    // TODO: cleanup this hackery (see above)
+    if (delete_dc)
+      {
+      DeleteDC(m_orig_hdc);
+      m_orig_hdc = NULL;
+      }
+
+    return match.extension;
+    }
+
+  void WGLPBufferStreams::restoreContext(void)
+    {
+    if (m_orig_hdc != NULL && m_orig_hglrc != NULL)
+      {
+      if (!wglMakeCurrent(m_orig_hdc, m_orig_hglrc))
+        {
+        std::stringstream msg;
+        msg << "wglMakeCurrent failed (" << GetLastError() << ")";
+        shError(WGLPBufferStreamException(msg.str()));
+        }
+      else
+        {
+        m_orig_hdc = NULL;
+        m_orig_hglrc = NULL;
+        }
+      }
+    }
+
+  ShWGLPBufferInfo WGLPBufferStreams::createContext(int width, int height)
+    {
+    ShWGLPBufferInfo ret;
+    ret.width = width;
+    ret.height = height;
 
     int nfattribs = 0;
     int niattribs = 0;
@@ -159,7 +195,7 @@ namespace shgl {
       if (nformats > 0)
         {
         found_pixelformat = true;
-        m_info.extension = SH_ARB_NV_FLOAT_BUFFER;
+        ret.extension = SH_ARB_NV_FLOAT_BUFFER;
         }
       }
 
@@ -180,20 +216,18 @@ namespace shgl {
       if (nformats > 0)
         {
         found_pixelformat = true;
-        m_info.extension = SH_ARB_ATI_PIXEL_FORMAT_FLOAT;
+        ret.extension = SH_ARB_ATI_PIXEL_FORMAT_FLOAT;
         }
       }
 
     if (!found_pixelformat)
       {
       shError(WGLPBufferStreamException("Could not find appropriate pixel format!"));
-      return SH_ARB_NO_FLOAT_EXT;
       }
 
-    if (m_info.extension == SH_ARB_NO_FLOAT_EXT)
+    if (ret.extension == SH_ARB_NO_FLOAT_EXT)
       {
       shError(WGLPBufferStreamException("Could not choose a floating-point extension!"));
-      return m_info.extension;
       }
 
     // Set up the pbuffer
@@ -206,23 +240,23 @@ namespace shgl {
     // bad results in the first few pixels of the image. I've found that making
     // atleast an 8x8 pbuffer alleviates this. Some further testing is needed
     // and possible a better work around. -Kevin
-    int temp_width = std::max(m_info.width, 8);
-    int temp_height = std::max(m_info.height, 8);
+    int temp_width = std::max(ret.width, 8);
+    int temp_height = std::max(ret.height, 8);
 
-    m_info.pbuffer = wglCreatePbufferARB(m_orig_hdc, format, temp_width, temp_height, pbuffer_attribs);
-    if (m_info.pbuffer == NULL)
+    ret.pbuffer = wglCreatePbufferARB(m_orig_hdc, format, temp_width, temp_height, pbuffer_attribs);
+    if (ret.pbuffer == NULL)
       {
       std::stringstream msg;
       msg << "wglCreatePbufferARB failed (" << GetLastError() << ")";
       shError(WGLPBufferStreamException(msg.str()));
       }
 
-    m_info.pbuffer_hdc = wglGetPbufferDCARB(m_info.pbuffer);
-    if (m_info.pbuffer_hdc == NULL)
+    ret.pbuffer_hdc = wglGetPbufferDCARB(ret.pbuffer);
+    if (ret.pbuffer_hdc == NULL)
       {
-      wglDestroyPbufferARB(m_info.pbuffer);
+      wglDestroyPbufferARB(ret.pbuffer);
 
-      m_info.pbuffer = NULL;
+      ret.pbuffer = NULL;
 
       std::stringstream msg;
       msg << "wglGetPbufferDCARB failed (" << GetLastError() << ")";
@@ -230,56 +264,21 @@ namespace shgl {
       }
 
     // Create a new gl context for the p-buffer.
-    m_info.pbuffer_hglrc = wglCreateContext(m_info.pbuffer_hdc);
-    if (m_info.pbuffer_hglrc == NULL)
+    ret.pbuffer_hglrc = wglCreateContext(ret.pbuffer_hdc);
+    if (ret.pbuffer_hglrc == NULL)
       {
-      wglReleasePbufferDCARB(m_info.pbuffer, m_info.pbuffer_hdc);
-      wglDestroyPbufferARB(m_info.pbuffer);
+      wglReleasePbufferDCARB(ret.pbuffer, ret.pbuffer_hdc);
+      wglDestroyPbufferARB(ret.pbuffer);
 
-      m_info.pbuffer = NULL;
-      m_info.pbuffer_hdc = NULL;
+      ret.pbuffer = NULL;
+      ret.pbuffer_hdc = NULL;
 
       std::stringstream msg;
       msg << "wglCreateContext failed (" << GetLastError() << ")";
       shError(WGLPBufferStreamException(msg.str()));
       }
 
-    if (!wglMakeCurrent(m_info.pbuffer_hdc, m_info.pbuffer_hglrc))
-      {
-      wglReleasePbufferDCARB(m_info.pbuffer, m_info.pbuffer_hdc);
-      wglDestroyPbufferARB(m_info.pbuffer);
-      wglDeleteContext(m_info.pbuffer_hglrc);
-
-      m_info.pbuffer = NULL;
-      m_info.pbuffer_hdc = NULL;
-      m_info.pbuffer_hglrc = NULL;
-
-      std::stringstream msg;
-      msg << "wglMakeCurrent failed (" << GetLastError() << ")";
-      shError(WGLPBufferStreamException(msg.str()));
-      }
-
-    // If we had to create the DC (see above) then delete it.
-    // TODO: cleanup this hackery (see above)
-    if (delete_dc)
-      {
-      DeleteDC(m_orig_hdc);
-      }
-
-    return m_info.extension;
-    }
-
-  void WGLPBufferStreams::restoreContext(void)
-    {
-    if (m_orig_hdc != NULL && m_orig_hglrc != NULL)
-      {
-      if (!wglMakeCurrent(m_orig_hdc, m_orig_hglrc))
-        {
-        std::stringstream msg;
-        msg << "wglMakeCurrent failed (" << GetLastError() << ")";
-        shError(WGLPBufferStreamException(msg.str()));
-        }
-      }
+    return ret;
     }
 
 }

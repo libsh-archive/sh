@@ -80,9 +80,12 @@ namespace shgl {
       virtual void restoreContext(void);
 
     private:
+      ShWGLPBufferInfo createContext(int width, int height);
+
+    private:
       HDC m_orig_hdc;
       HGLRC m_orig_hglrc;
-      ShWGLPBufferInfo m_info;
+      std::list<ShWGLPBufferInfo> m_infos;
     };
 
 }

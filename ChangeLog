@@ -1,9 +1,19 @@
 2004-10-28  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
 
+	* backends/gl/WGLPBufferStreams.*: Changed pbuffer management
+	code, removed context tracking and replaced with list of
+	cached pbuffer/contexts. 
+
+2004-10-28  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
 	* backends/gl/ArbCode.*: The ArbCode was holding a reference
 	to its associated program causing a cyclic dependency. The smart
 	pointer was changed to a raw pointer, alleviating most of the memory
 	leaks.
+
+	* backends/gl/WGLPBufferStreams.*: Changed pbuffer management
+	code, removed context tracking and replaced with list of
+	cached pbuffer/contexts. 
 
 	* backends/gl/GLXPBufferStreams.*: Changed pbuffer management
 	code, removed context tracking and replaced with list of
