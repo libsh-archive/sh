@@ -79,8 +79,11 @@ int main() {
 	// create an rds object
 	rds = RDS(program.node());
 	rds.get_pdt()->printDoms();
-	rds.get_partitions();
-	rds.print_partitions();
+	//cout << "RDSh...\n";
+	//rds.rdsh();
+	cout << "\nRDS...\n";
+	rds.rds();
+	rds.print_partition();
 
 	return 0;
 }

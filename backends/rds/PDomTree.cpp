@@ -130,6 +130,8 @@ void PDomTree::link(DAGNode::DAGNode* v, DAGNode::DAGNode* w)
 /* children listed in same order as postorder traversal of original graph */
 void PDomTree::build_pdt(DAGNode::DAGNode* v)
 {
+	if (m_visited[v]) return;
+
 	// visit v's children first
 	for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end(); ++I) {
 		build_pdt(*I);
@@ -140,9 +142,9 @@ void PDomTree::build_pdt(DAGNode::DAGNode* v)
 		m_pdt[dom[v]] = true;
 		if (!m_visited[v]) {
 			pchildren[dom[v]].push_back(v);
-			m_visited[v] = true;
 		}
 	}
+	m_visited[v] = true;
 }
 
 void PDomTree::printDoms() {

@@ -25,23 +25,35 @@ class SH_DLLEXPORT RDS {
 	// empty constructor, for testing purposes
 	RDS() {};
 
-	// perform rds and return resulting set of programs
-	void get_partitions();
+	void rds() {
+		m_rdsh = false;
+		rds_search();
+		set_partition();
+	};
+
+	void rdsh() {
+		m_rdsh = true;
+		rds_subdivide(m_pdt->get_root());
+		set_partition();
+	};
   
 	// return partial dom tree for this program
 	PDomTree::PDomTree *get_pdt() {
 		return m_pdt;
 	}
 
-	void print_partitions();
+	void print_partition();
 
   private:
+	typedef std::set<DAGNode::DAGNode*> ChildrenSet;
+    typedef std::vector<DAGNode::DAGNode*> PassVector;	
+
 	// limits
 	int max_ops;
 
-	typedef std::set<DAGNode::DAGNode*> ChildrenSet;
-    typedef std::vector<DAGNode::DAGNode*> PassVector;
-    
+	// true if rdsh; false if rds
+	bool m_rdsh;
+
 	DAG::DAG *m_graph;
 	PDomTree::PDomTree *m_pdt;
 
@@ -67,12 +79,16 @@ class SH_DLLEXPORT RDS {
 	// for setting hardware limits
 	void set_limits();
 
+	// get list of passes after rds or rdsh
+	void set_partition();
+
 	// for creating list of passes
 	void partition(DAGNode::DAGNode *v);
 
   	// from rds paper
 	void rds_subdivide(DAGNode::DAGNode* v);
 	void rds_merge(DAGNode::DAGNode* v);
+	void rds_search();
 
 	// callbacks
 	bool valid(DAGNode::DAGNode* v);
@@ -82,7 +98,11 @@ class SH_DLLEXPORT RDS {
 
 	void add_mr(DAGNode::DAGNode* v);
 	int *next_ksubset(int n, int k, int *a);
+	void unfixall(DAGNode::DAGNode *v);
+	void unmarkall(DAGNode::DAGNode *v);
 
+	
+	int countmarked(DAGNode::DAGNode *v);
 	int countnodes(DAGNode::DAGNode *v);
 	void unvisitall(DAGNode::DAGNode *v);
   };
