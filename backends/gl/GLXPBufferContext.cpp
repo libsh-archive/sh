@@ -65,8 +65,12 @@ PBufferHandlePtr GLXPBufferContext::activate()
   if (!glXMakeCurrent(m_display, m_pbuffer, m_context)) {
     shError(ShException("Activating GLXPBufferContext failed!"));
   }
-  
-  return new GLXPBufferHandle(m_display, old_drawable, old_context);
+
+  if (old_drawable && old_context) {
+    return new GLXPBufferHandle(m_display, old_drawable, old_context);
+  } else {
+    return 0;
+  }
 }
 
 ///////////////////////
@@ -194,8 +198,10 @@ GLXPBufferContextPtr GLXPBufferFactory::create_context(int width, int height,
     shError(ShException("Could not make pbuffer!"));
     return 0;
   }
+
+  GLXContext share = glXGetCurrentContext();
   
-  GLXContext context = glXCreateNewContext(m_display, m_fb_config[0], GLX_RGBA_TYPE, 0, True);
+  GLXContext context = glXCreateNewContext(m_display, m_fb_config[0], GLX_RGBA_TYPE, share, True);
   if (!context) {
     // TODO: delete pbuffer
     shError(ShException("Could not create PBuffer context"));

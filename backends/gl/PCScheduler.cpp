@@ -86,6 +86,7 @@ void split_outputs(const ShProgramNodePtr& program,
 void copy_framebuffer_to_texture(PBufferContextPtr context,
                                  const ShTextureNodePtr& texnode)
 {
+  glFinish();
   std::cerr << "Before copy: "; texnode->memory()->dump(std::cerr) << std::endl;
   PBufferStoragePtr fbs = context->make_storage(texnode->memory().object());
   fbs->dirtyall();
@@ -252,7 +253,7 @@ PCSchedule::PCSchedule(ShSchedule* schedule)
 
     // TODO: change depending on rect vs 2d
     tc = pos(0,1);
-    pos(0,1) = pos(0,1) * (rcp(m_size) * 0.5) - 0.5;
+    pos(0,1) = 2.0 * pos(0,1) * (rcp(m_size)) - 1.0;
   } SH_END;
 
   m_dummy_fp = SH_BEGIN_FRAGMENT_PROGRAM {
@@ -260,7 +261,7 @@ PCSchedule::PCSchedule(ShSchedule* schedule)
   } SH_END;
 
   m_black_fp = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShOutputAttrib4f out = ShConstAttrib4f(0.0, 0.0, 0.0, 0.0);
+    ShOutputAttrib4f out = ShConstAttrib4f(0.9, 0.8, 0.7, 0.6);
   } SH_END;
 
   m_pred_fp = SH_BEGIN_FRAGMENT_PROGRAM {
@@ -317,7 +318,8 @@ void PCSchedule::pre_execution(int width, int height, const ShStream& outputs)
 
   SH_GL_CHECK_ERROR(glEnable(GL_VERTEX_PROGRAM_ARB));
   SH_GL_CHECK_ERROR(glEnable(GL_FRAGMENT_PROGRAM_ARB));
-
+  SH_GL_CHECK_ERROR(glClearColor(0.3, 0.4, 0.5, 0.6));
+  SH_GL_CHECK_ERROR(glDisable(GL_CULL_FACE));
   SH_GL_CHECK_ERROR(glGenOcclusionQueriesNV(1, &m_query));
 
   for (std::size_t i = 0; i < temp_buffers.size(); i++) {
@@ -337,10 +339,13 @@ void PCSchedule::pre_execution(int width, int height, const ShStream& outputs)
 
   shBind(m_vp);
   shBind(m_black_fp);
+  SH_GL_CHECK_ERROR(glEnable(GL_STENCIL_TEST));
+  SH_GL_CHECK_ERROR(glEnable(GL_DEPTH_TEST));
 
   SH_GL_CHECK_ERROR(glDepthFunc(GL_ALWAYS));
-  SH_GL_CHECK_ERROR(glDepthMask(GL_FALSE));
+  SH_GL_CHECK_ERROR(glDepthMask(GL_TRUE));
   
+
   // Initialize depth buffer
   draw_quad(0.0, 0.0, m_width, m_height, 1.0/m_schedule->num_passes());
 
@@ -355,9 +360,9 @@ void PCSchedule::draw_quad(double x1, double y1, double x2, double y2,
 {
   glBegin(GL_QUADS); {
     glVertex3f(x1, y1, d);
-    glVertex3f(x1, y2, d);
-    glVertex3f(x2, y2, d);
     glVertex3f(x2, y1, d);
+    glVertex3f(x2, y2, d);
+    glVertex3f(x1, y2, d);
   } SH_GL_CHECK_ERROR(glEnd());
 }
 
@@ -373,8 +378,8 @@ void PCSchedule::execute_pass(ShPass* pass)
   std::cerr << "glEnable calls." << std::endl;
   SH_GL_CHECK_ERROR(glPushAttrib(GL_ENABLE_BIT));
   
-  SH_GL_CHECK_ERROR(glEnable(GL_STENCIL_TEST));
-  SH_GL_CHECK_ERROR(glEnable(GL_DEPTH_TEST));
+  //SH_GL_CHECK_ERROR(glDisable(GL_STENCIL_TEST));
+  // SH_GL_CHECK_ERROR(glDisable(GL_DEPTH_TEST));
   
   std::cerr << "Retrieve backend data." << std::endl;
   PCPassPtr pc_pass = shref_dynamic_cast<PCPass>(pass->backend_data);
@@ -420,7 +425,9 @@ void PCSchedule::execute_pass(ShPass* pass)
     }
 
     std::cerr << "Running init" << std::endl;
+    SH_GL_CHECK_ERROR(glClear(GL_COLOR_BUFFER_BIT));
     shBind(m_copy_fp);
+
     SH_GL_CHECK_ERROR(glDepthFunc(GL_ALWAYS));
     draw_quad(0.0, 0.0, m_width, m_height, pc_pass->pc);
     
@@ -435,6 +442,7 @@ void PCSchedule::execute_pass(ShPass* pass)
     shBind(prg);
 
     SH_GL_CHECK_ERROR(glDepthFunc(GL_EQUAL));
+    //SH_GL_CHECK_ERROR(glDepthFunc(GL_ALWAYS));
     // draw a quad at depth = pc
     draw_quad(0.0, 0.0, m_width, m_height, pc_pass->pc);
     // TODO either use RTT or CTT to store result in buffer

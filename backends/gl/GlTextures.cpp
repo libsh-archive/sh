@@ -237,7 +237,11 @@ GLenum shGlType(ShValueType valueType, ShValueType &convertedType)
       break;
   }
 
-  std::string exts(reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS)));
+  const char* ext_ptr = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
+  if (!ext_ptr) {
+    SH_DEBUG_ERROR("Cannot get GL_EXTENSIONS string");
+  }
+  std::string exts(ext_ptr);
   if(valueType == SH_HALF) { 
         if((exts.find("NV_half_float") != std::string::npos)) {
           convertedType = SH_VALUETYPE_END; 

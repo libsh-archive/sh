@@ -240,5 +240,73 @@ class HostGlTextureTransfer : public ShTransfer {
 
 HostGlTextureTransfer* HostGlTextureTransfer::instance = new HostGlTextureTransfer();
 
+class GlTextureHostTransfer : public ShTransfer {
+  GlTextureHostTransfer()
+    : ShTransfer("opengl:texture", "host")
+  {
+  }
+  
+  bool transfer(const ShStorage* from, ShStorage* to)
+  {
+    std::cerr << "Transferring opengl:texture to host" << std::endl;
+    std::cerr << "Casting..." << std::endl;
+    const GlTextureStorage* texture = dynamic_cast<const GlTextureStorage*>(from);
+    ShHostStorage* host = dynamic_cast<ShHostStorage*>(to);
+
+    std::cerr << "Binding texture..." << std::endl;
+    // Bind texture name for this scope.
+    GlTextureName::Binding binding(texture->texName());
+
+    std::cerr << "Setting up types..." << std::endl;
+    ShValueType valueType = texture->valueType(); 
+    int count = texture->count();
+    int tuplesize = texture->tuplesize();
+
+    GLenum type; 
+    ShValueType convertedType;
+    type = shGlType(valueType, convertedType);
+
+    int width = texture->width();
+    int height = texture->height();
+    int depth = texture->depth();
+
+    // If the texture is not full, must not copy more than count
+    bool full_copy = (count == (width * height * depth));
+
+    std::cerr << "Setting up variants..." << std::endl;
+    // TODO: Type conversion stuff.
+    ShVariantPtr hostVariant = shVariantFactory(valueType,
+                                                SH_MEM)->generate(host->data(), count * tuplesize, false);
+    ShVariantPtr dataVariant; 
+    if (!full_copy || convertedType != SH_VALUETYPE_END) {
+      dataVariant = shVariantFactory((convertedType == SH_VALUETYPE_END ? valueType : convertedType),
+                                     SH_MEM)->generate(count * tuplesize);
+    } else {
+      dataVariant = hostVariant; 
+    }
+
+    std::cerr << "glGetTexImage..." << std::endl;
+    SH_GL_CHECK_ERROR(glGetTexImage(texture->target(), 0, texture->format(), type, dataVariant->array()));
+
+    if (dataVariant != hostVariant) {
+      std::cerr << "Copying data..." << std::endl;
+      hostVariant->set(dataVariant);
+    }
+
+    std::cerr << "Done transferring" << std::endl;
+    return true;
+  }
+  
+  int cost()
+  {
+    // Texture uploads are REALLY expensive!
+    return 1000;
+  }
+
+  static GlTextureHostTransfer* instance;
+};
+
+GlTextureHostTransfer* GlTextureHostTransfer::instance = new GlTextureHostTransfer();
+
 
 }
