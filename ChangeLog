@@ -1,10 +1,20 @@
-2005-01-11  Francois Marier  <francois@serioushack.com>
+2005-01-12  Francois Marier  <francois@serioushack.com>
+
+	* test/regress: Added tests for abs, ceil, dot, floor, mod, pow, 
+	==, !=, >=, >, <=, and <.
+	
+	* test/regress/test.hpp: Renamed "res" to "exp" in the test output
+	to make it clear that the last line refers to expected output.
+
+	* test/regress/shtest.py (Test.output_footer): Prevent compile
+	warning by adding an extra \n at the end of each cpp file that's
+	generated.
 
 	* test/regress/test.cpp: The default backend is set to the
 	SH_REGRESS_BACKEND environment variable if it exists. It's still
 	possible to override this default on the command line.
 
-	* test/regress/Makefile.am (AM_CXXFLAGS): Added a checkall target
+	* test/regress/Makefile.am: Added a checkall target
 	to run "make check" on all backends.
 	
 2005-01-11  Francois Marier  <francois@serioushack.com>
