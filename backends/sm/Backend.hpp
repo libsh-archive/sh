@@ -14,6 +14,8 @@
 
 namespace ShSm {
 
+const int SmMaxTR = 256;
+
 struct SmInstruction {
   SmInstruction(const Operation& op, const SH::ShVariable& dest)
     : op(op), dest(dest), src1(0), src2(0), src3(0)
@@ -59,11 +61,14 @@ class Backend;
 class BackendCode : public SH::ShBackendCode {
 public:
   BackendCode(SH::ShRefCount<Backend> backend, const SH::ShShader& shader);
-  ~BackendCode();
+  virtual ~BackendCode();
 
-  void upload();
-  void bind();
-  void updateUniform(const SH::ShVariableNodePtr& uniform);
+  virtual bool allocateRegister(const SH::ShVariableNodePtr& var);
+  virtual void freeRegister(const SH::ShVariableNodePtr& var);
+  
+  virtual void upload();
+  virtual void bind();
+  virtual void updateUniform(const SH::ShVariableNodePtr& uniform);
   
   std::ostream& print(std::ostream& out);
 
@@ -77,18 +82,21 @@ private:
   SH::ShShader m_shader;
   SMshader m_smShader;
 
-  typedef std::list<SmInstruction> SmInstList;
+  typedef std::vector<SmInstruction> SmInstList;
   SmInstList m_instructions; ///< The actual code.
 
   /// Returns true if a register has been allocated to var.
   bool haveReg(const SH::ShVariableNodePtr& var);
 
-  /// Allocates a register if there is none yet.
+  /// Allocates a register if there is none yet, except for temporaries
   SmRegister getReg(const SH::ShVariableNodePtr& var);
   
-  /// Allocates a register if there is none yet.
+  /// Allocates a register if there is none yet, except for temporaries
   SMreg getSmReg(const SH::ShVariable& var);
 
+  /// A list of temporary register indices which are available.
+  std::list<int> m_tempRegs;
+  
   int m_maxCR;
   int m_maxTR;
   int m_maxIR;
@@ -96,7 +104,7 @@ private:
   int m_maxTex;
   
   typedef std::map<SH::ShVariableNodePtr, SmRegister> RegMap;
-  RegMap m_registers; ///< Really Simple(TM) register allocation
+  RegMap m_registers;
 
   SMreg* m_cR;
   SMreg* m_tR;

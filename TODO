@@ -60,6 +60,7 @@ MEDIUM TASKS:
  - colours
 
 LARGE TASKS:
+ X linear register allocator
  X finish the parser
  - begin the optimizer
  / matrices

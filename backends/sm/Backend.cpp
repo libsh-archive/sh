@@ -3,6 +3,7 @@
 #include <sstream>
 #include "ShEnvironment.hpp"
 #include "ShDebug.hpp"
+#include "ShLinearAllocator.hpp"
 #include "sm.hpp"
 
 namespace ShSm {
@@ -56,6 +57,35 @@ BackendCode::~BackendCode()
   for (TextureNodeMap::iterator I = m_textureMap.begin(); I != m_textureMap.end(); ++I) {
     smDeleteTexture(I->second);
   }
+}
+
+bool BackendCode::allocateRegister(const SH::ShVariableNodePtr& var)
+{
+  if (!var) return true;
+  if (var->kind() != SH_VAR_TEMP) return true; // ignore anything but temporaries
+  if (var->uniform()) return true;
+  
+  if (m_tempRegs.empty()) {
+    SH_DEBUG_WARN("Oh no, out of registers!");
+    return false;
+  }
+
+  int idx = m_tempRegs.front();
+  m_tempRegs.pop_front();
+
+  if (idx + 1 > m_maxTR) m_maxTR = idx + 1;
+  m_registers[var] = SmRegister(SHSM_REG_TEMP, idx);
+  return true;
+}
+
+void BackendCode::freeRegister(const SH::ShVariableNodePtr& var)
+{
+  if (!var) return;
+  if (var->kind() != SH_VAR_TEMP) return; // ignore anything but temporaries
+  if (var->uniform()) return;
+
+  SH_DEBUG_ASSERT(m_registers.find(var) != m_registers.end());
+  m_tempRegs.push_front(m_registers[var].index);
 }
 
 void BackendCode::upload()
@@ -396,13 +426,30 @@ void BackendCode::allocRegs()
        I != m_shader->outputs.end(); ++I) {
     getReg(*I);
   }
-  for (SmInstList::const_iterator I = m_instructions.begin();
-       I != m_instructions.end(); ++I) {
-    getReg(I->dest.node());
-    getReg(I->src1.node());
-    getReg(I->src2.node());
-    getReg(I->src3.node());
+
+  m_tempRegs.clear();
+  m_maxTR = 0;
+  for (int i = 0; i < SmMaxTR; i++) {
+    m_tempRegs.push_back(i);
   }
+  
+  ShLinearAllocator allocator(ShBackendCodePtr(this));
+  
+  for (int i = 0; i < m_instructions.size(); i++) {
+    SmInstruction instr = m_instructions[i];
+    getReg(instr.dest.node());
+    allocator.mark(instr.dest.node(), i);
+    getReg(instr.src1.node());
+    allocator.mark(instr.src1.node(), i);
+    getReg(instr.src2.node());
+    allocator.mark(instr.src2.node(), i);
+    getReg(instr.src3.node());
+    allocator.mark(instr.src3.node(), i);
+  }
+  allocator.allocate();
+
+  m_tempRegs.clear();
+  
   m_cR = new SMreg[m_maxCR];
   m_tR = new SMreg[m_maxTR];
   m_iR = new SMreg[m_maxIR];
@@ -425,6 +472,8 @@ SmRegister BackendCode::getReg(const SH::ShVariableNodePtr& var)
     return m_registers[var];
   }
 
+  if (var->kind() == SH_VAR_TEMP) return SmRegister(SHSM_REG_TEMP, -1);
+  
   switch (var->kind()) {
   case SH_VAR_INPUT:
     m_registers[var] = SmRegister(SHSM_REG_INPUT, m_maxIR++);
@@ -433,7 +482,6 @@ SmRegister BackendCode::getReg(const SH::ShVariableNodePtr& var)
     m_registers[var] = SmRegister(SHSM_REG_OUTPUT, m_maxOR++);
     break;
   case SH_VAR_TEMP:
-    m_registers[var] = SmRegister(SHSM_REG_TEMP, m_maxTR++);
     break;
   case SH_VAR_CONST:
     m_registers[var] = SmRegister(SHSM_REG_CONST, m_maxCR++);

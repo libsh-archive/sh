@@ -14,6 +14,15 @@ class ShBackendCode : public ShRefCountable {
 public:
   virtual ~ShBackendCode();
 
+  /// Used by a register allocater to signal that a register should be
+  /// allocated to var. Return true iff the allocation succeeded.
+  virtual bool allocateRegister(const ShVariableNodePtr& var) = 0;
+
+  /// Used by the register allocator to signal that the register used
+  /// by var can be used by other registers in future
+  /// allocateRegister() calls.
+  virtual void freeRegister(const ShVariableNodePtr& var) = 0;
+  
   /// Upload this shader code to the GPU.
   virtual void upload() = 0;
 
