@@ -564,6 +564,7 @@ ShVariableN<N, T> floor(const ShVariableN<N, T>& var)
 template<int N, int M, typename T>
 ShVariableN<N,  T> fmod(const ShVariableN<N, T>& left, const ShVariableN<M, T>& right)
 {
+  ShCheckDims<N, false, M, true>();
   if (!ShEnvironment::insideShader) {
     assert(left.hasValues()); 
     assert(right.hasValues());
@@ -610,6 +611,7 @@ template<int N, int M, typename T>
 ShVariableN<N, T> lerp(const ShVariableN<M, T>& f, const ShVariableN<N, T>& a, 
     const ShVariableN<N,T>& b)
 {
+  ShCheckDims<M, true, N, false>();
   if (!ShEnvironment::insideShader) {
     assert(a.hasValues()); 
     assert(b.hasValues());
@@ -638,18 +640,29 @@ ShVariableN<N, T> lerp(T f, const ShVariableN<N, T>& a, const ShVariableN<N, T>&
   return lerp(ShConstant1f(f), a, b); 
 }
 
+template<int N, int M, int P> 
+class ShCheckMad {
+  private:
+    ShCheckMad();
+};
+template<int N> class ShCheckMad<N, N, N>
+{public: ShCheckMad() {}};
+template<int N> class ShCheckMad<1, N, N> 
+{public: ShCheckMad() {}};
+template<int N> class ShCheckMad<N, 1, N>
+{public: ShCheckMad() {}};
 
 /// Multiply and add
 template<int N, int M, int P, typename T>
 ShVariableN<P, T> mad(const ShVariableN<M, T>& m1, const ShVariableN<N, T>& m2, 
     const ShVariableN<P,T>& a)
 {
+  ShCheckMad<N, M, P>();
   if (!ShEnvironment::insideShader) {
     assert(m1.hasValues()); 
     assert(m2.hasValues());
     assert(a.hasValues());
     //TODO better error message.  can this method be cleaner?
-    assert( ( M == P && N == P ) || ( M == 1 && N == P ) || ( N == 1 && M == P ) );
     T m1vals[M], m2vals[N], avals[P];
     m1.getValues(m1vals);
     m2.getValues(m2vals);
