@@ -1,6 +1,7 @@
 #ifndef SHBASETEXTURE_HPP
 #define SHBASETEXTURE_HPP
 
+#include <string>
 #include "ShTextureNode.hpp"
 #include "ShMemory.hpp"
 #include "ShVariable.hpp"
@@ -23,6 +24,9 @@ public:
   void memory(ShMemoryPtr memory);
   void size(int width);
 
+  void name(const std::string&);
+  std::string name() const;
+
   ShAttrib1f size() const;
 
 protected:
@@ -43,6 +47,9 @@ public:
   ShMemoryPtr memory();
   void memory(ShMemoryPtr memory);
   void size(int width, int height);
+
+  void name(const std::string&);
+  std::string name() const;
 
   ShAttrib2f size() const;
   
@@ -65,6 +72,9 @@ public:
   void memory(ShMemoryPtr memory);
   void size(int width, int height);
   
+  void name(const std::string&);
+  std::string name() const;
+
   ShAttrib2f size() const;
 
 protected:
@@ -86,6 +96,9 @@ public:
   void memory(ShMemoryPtr memory);
   void size(int width, int height, int depth);
 
+  void name(const std::string&);
+  std::string name() const;
+
   ShAttrib3f size() const;
 
 protected:
@@ -106,6 +119,9 @@ public:
   void memory(ShMemoryPtr memory, ShCubeDirection face);
   void size(int width, int height);
   
+  void name(const std::string&);
+  std::string name() const;
+
   ShAttrib2f size() const;
   
 protected:

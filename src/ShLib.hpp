@@ -103,7 +103,13 @@ SH_SHLIB_CONST_N_OP_RETSIZE_RIGHT(operation, retsize);
 
 namespace SH {
 
-/// Addition
+/** Arithmetic Operations.
+ */ ///@{
+
+/** Addition.
+ * On tuples, this operator acts componentwise.
+ * TODO: scalar promotion.
+ */
 template<int N, typename T>
 ShGeneric<N, T> operator+(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
 {
@@ -127,7 +133,10 @@ ShGeneric<N, T> operator+(const ShGeneric<N, T>& left, const ShGeneric<N, T>& ri
 
 SH_SHLIB_CONST_SCALAR_OP(operator+);
 
-/// Subtraction
+/** Subtraction.
+ * On tuples, this operator acts componentwise.
+ * TODO: scalar promotion.
+ */
 template<int N, typename T>
 ShGeneric<N, T> operator-(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
 {
@@ -136,7 +145,11 @@ ShGeneric<N, T> operator-(const ShGeneric<N, T>& left, const ShGeneric<N, T>& ri
 
 SH_SHLIB_CONST_SCALAR_OP(operator-);
 
-/// Componentwise/scalar multiplication
+/** Multiplication.
+ * On tuples, this operator acts componentwise.
+ * If a scalar is multiplied by a tuple, the scalar is promoted by
+ * duplication to a tuple.
+ */
 template<int N, int M, typename T>
 ShGeneric<N, T> operator*(const ShGeneric<N, T>& left, const ShGeneric<M, T>& right)
 {
@@ -185,7 +198,11 @@ ShGeneric<M, T> operator*(const ShGeneric<1, T>& left, const ShGeneric<M, T>& ri
 SH_SHLIB_CONST_SCALAR_OP(operator*);
 SH_SHLIB_CONST_N_OP_BOTH(operator*);
 
-/// Componentwise/scalar division
+/** Division.
+ * On tuples, this operator acts componentwise.
+ * If a tuple is divided by a scalar (or vice versa), the scalar is promoted by
+ * duplication to a tuple.
+ */
 template<int N, int M, typename T>
 ShGeneric<N, T> operator/(const ShGeneric<N, T>& left, const ShGeneric<M, T>& right)
 {
@@ -212,7 +229,10 @@ ShGeneric<N, T> operator/(const ShGeneric<N, T>& left, const ShGeneric<M, T>& ri
 SH_SHLIB_CONST_SCALAR_OP(operator/);
 SH_SHLIB_CONST_N_OP_LEFT(operator/);
 
-/// Conventional power operation.
+/** Power.
+ * Raise a tuple to a power.
+ * TODO: scalar promotion.
+ */
 template<int N, typename T>
 ShGeneric<N, T> pow(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
 {
@@ -237,6 +257,11 @@ ShGeneric<N, T> pow(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
 SH_SHLIB_CONST_SCALAR_OP(pow);
 SH_SHLIB_CONST_N_OP_RIGHT(pow);
 
+/** Power operator.
+ * TODO: Not so sure this a good idea.   Might be better to use this opeator for
+ * cross product, would be more consistent with usual C usage (or rather,
+ * would not conflict so much with it!)
+ */
 template<int N, typename T>
 ShGeneric<N, T> operator^(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right) {
   return pow(left, right);
@@ -245,7 +270,95 @@ ShGeneric<N, T> operator^(const ShGeneric<N, T>& left, const ShGeneric<N, T>& ri
 SH_SHLIB_CONST_SCALAR_OP(operator^);
 SH_SHLIB_CONST_N_OP_RIGHT(operator^);
 
-// "Boolean" operators
+/** Multiply and add.
+ * This is an intrinsic to access the assembly instruction of the same name.
+ * Multiply-add is potentially cheaper than a separate multiply and
+ * add.  Note: potentially.
+ */
+template<int N, int M, int P, typename T>
+ShGeneric<P, T> mad(const ShGeneric<M, T>& m1, const ShGeneric<N, T>& m2, 
+    const ShGeneric<P,T>& a)
+{
+  SH_STATIC_CHECK((M == N && N == P) || (M == 1 && N == P) || (N == 1 && M == P),
+                  Multiply_And_Add_Components_Do_Not_Match);
+  if (!ShEnvironment::insideShader) {
+    assert(m1.hasValues()); 
+    assert(m2.hasValues());
+    assert(a.hasValues());
+    //TODO better error message.  can this method be cleaner?
+    T m1vals[M], m2vals[N], avals[P];
+    m1.getValues(m1vals);
+    m2.getValues(m2vals);
+    a.getValues(avals);
+    T result[P];
+    for (int i = 0; i < P; i++) {
+        result[i] = ( M == 1 ? m1vals[0] : m1vals[i] ) * ( N == 1 ? m2vals[0] : m2vals[i] ) + avals[i]; 
+    }
+    return ShAttrib<P, SH_CONST, T>(result);
+  } else {
+    ShAttrib<P, SH_TEMP, T, false> t;
+    ShStatement stmt(t, SH_OP_MAD, m1, m2, a); 
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
+
+// Use template specialization for the N, 1, N case
+
+template<int N, typename T> 
+ShGeneric<N, T> mad(T m1, const ShGeneric<N, T>& m2, const ShGeneric<N, T>& a)
+{ 
+  return mad(ShAttrib<1, SH_CONST, T>(m1), m2, a); 
+}
+
+template<int N, typename T> 
+ShGeneric<N, T> mad(double m1, const ShGeneric<N, T>& m2, const ShGeneric<N, T>& a)
+{ 
+  return mad(ShAttrib<1, SH_CONST, T>(m1), m2, a); 
+}
+
+template<int N, typename T> 
+ShGeneric<N, T> mad(const ShGeneric<N, T>& m1, T m2, const ShGeneric<N, T>& a)
+{ 
+  return mad(m1, ShAttrib<1, SH_CONST, T>(m2), a); 
+}
+
+template<int N, typename T> 
+ShGeneric<N, T> mad(const ShGeneric<N, T>& m1, double m2, const ShGeneric<N, T>& a)
+{ 
+  return mad(m1, ShAttrib<1, SH_CONST, T>(m2), a); 
+}
+
+/* Square root.
+ * The square root of each component of the input is evaluated.
+ * TODO: should add reciprocal square root (rsqrt) as an intrinsic.
+ */
+template<int N, typename T>
+ShGeneric<N, T> sqrt(const ShGeneric<N, T>& var)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(var.hasValues());
+    T vals[N];
+    var.getValues(vals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = std::sqrt(vals[i]);
+    return ShAttrib<N, SH_CONST, T>(result);
+  } else {
+    ShAttrib<N, SH_TEMP, T, false> t;
+    ShStatement stmt(t, SH_OP_SQRT, var);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
+
+///@}
+
+/** Conditionals.
+ * TODO: where are && and || defined?   And how can we add documentation
+ * for all the operators defined using macros?
+ */
+///@{
+
 #define SH_SHLIB_BOOLEAN_OP(opfunc, op, shop) \
 template<int N, int M, typename T>\
 ShGeneric<N, T> opfunc(const ShGeneric<N, T>& left, const ShGeneric<M, T>& right)\
@@ -299,11 +412,16 @@ SH_SHLIB_BOOLEAN_OP(operator>=, >=, SH_OP_SGE);
 SH_SHLIB_BOOLEAN_OP(operator==, ==, SH_OP_SEQ); 
 SH_SHLIB_BOOLEAN_OP(operator!=, !=, SH_OP_SNE); 
 
-
-/** Conditional assignment (COND/CMP)
- *  dest[i] = (src[0][i] > 0.0 ? src[1][i] : src[2][i])
+/** Conditional assignment.
+ *  dest[i] = ((src[0][i] > 0.0) ? src[1][i] : src[2][i])
  *  Note: CMP in the ARB_{vertex,fragment}_program spec has
- *  src[0][i] < 0.0, not greater than.
+ *  src[0][i] < 0.0, not greater than.   The semantics used here
+ *  follows that in Scheme and the ?: operator (which, unfortunately,
+ *  cannot be overloaded in C++ right now).   The boolean argument
+ *  is a tuple, and so this is really a kind of conditional writemask
+ *  if used with a tuple of booleans, although a scalar boolean may
+ *  also be used in the first argument, in which case it applies to 
+ *  all elements.
  */
 template<int M, int N, typename T>
 ShGeneric<N, T> cond(const ShGeneric<M, T>& condition, const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
@@ -330,8 +448,16 @@ ShGeneric<N, T> cond(const ShGeneric<M, T>& condition, const ShGeneric<N, T>& le
   }
 }
 
-/** Casting
- * Casts ShGeneric<N, T> to ShGeneric<M, T>
+///@}
+
+/** Casts.
+ * Some special versions of type-cast operators are defined to be able to
+ * deal with tuple size changes in various useful ways.
+ */
+///@{
+
+/** Casting.
+ * Casts ShGeneric<N, T> to ShGeneric<M, T>.
  * If M > N, pads remaining components with 0s (on right).
  * Otherwise, discards extra components.
  */
@@ -353,9 +479,9 @@ ShGeneric<M, T> cast( const ShGeneric<N, T> &a ) {
   return result;
 }
 
-/** Fill Casting
- * Casts ShGeneric<N, T> to ShGeneric<M, T>
- * If M > N, copies last component to fill extras 
+/** Fill Casting.
+ * Casts ShGeneric<N, T> to ShGeneric<M, T>.
+ * If M > N, copies last component to fill extra slots.
  * Otherwise, discards extra components.
  */
 template<int M, int N, typename T> 
@@ -366,7 +492,10 @@ ShGeneric<M, T> fillcast( const ShGeneric<N, T> &a ) {
   return a.template swiz<M>(indices);
 }
 
-// Fragment killing
+/** Fragment killing.
+ * TODO: This should probably be a "control construct", and should
+ * be called "SH_DISCARD(cond)".   
+ */
 template<int N, typename T>
 void kill(const ShGeneric<N, T>& c)
 {
@@ -375,9 +504,17 @@ void kill(const ShGeneric<N, T>& c)
   ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
 }
 
-//--- Mathematics Library
+///@}
 
-/// Absolute value
+/** Clamping.
+ * Various operations that clamp values to specific ranges or
+ * values or that manipulate the sign.
+ */ ///@{
+
+/** Absolute value.
+ * Returns the magnitude.
+ * Operates componentwise on tuples.
+ */
 template<int N, typename T>
 ShGeneric<N, T> abs(const ShGeneric<N, T>& var)
 {
@@ -397,47 +534,10 @@ ShGeneric<N, T> abs(const ShGeneric<N, T>& var)
   }
 }
 
-/// Arccosine of x. x in [-1, 1], result in [0, pi]
-template<int N, typename T>
-ShGeneric<N, T> acos(const ShGeneric<N, T>& var)
-{
-  if (!ShEnvironment::insideShader) {
-    assert(var.hasValues());
-    T vals[N];
-    var.getValues(vals);
-    T result[N];
-    for (int i = 0; i < N; i++) result[i] = std::acos(vals[i]);
-    return ShAttrib<N, SH_CONST, T>(result);
-  } else {
-    ShAttrib<N, SH_TEMP, T, false> t;
-    ShStatement stmt(t, SH_OP_ACOS, var);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
-    
-    return t;
-  }
-}
-
-/// Arcsine of x. x in [-1, 1]. Result in [-pi/2, pi/2]
-template<int N, typename T>
-ShGeneric<N, T> asin(const ShGeneric<N, T>& var)
-{
-  if (!ShEnvironment::insideShader) {
-    assert(var.hasValues());
-    T vals[N];
-    var.getValues(vals);
-    T result[N];
-    for (int i = 0; i < N; i++) result[i] = std::asin(vals[i]);
-    return ShAttrib<N, SH_CONST, T>(result);
-  } else {
-    ShAttrib<N, SH_TEMP, T, false> t;
-    ShStatement stmt(t, SH_OP_ASIN, var);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
-    
-    return t;
-  }
-}
-
-/// least integer <= argument 
+/** Ceiling.
+ * Returns the least integer <= argument. 
+ * Operates componentwise on tuples.
+ */
 template<int N, typename T>
 ShGeneric<N, T> ceil(const ShGeneric<N, T>& var)
 {
@@ -456,56 +556,10 @@ ShGeneric<N, T> ceil(const ShGeneric<N, T>& var)
   }
 }
 
-/// Cosine of x.
-template<int N, typename T>
-ShGeneric<N, T> cos(const ShGeneric<N, T>& var)
-{
-  if (!ShEnvironment::insideShader) {
-    assert(var.hasValues());
-    T vals[N];
-    var.getValues(vals);
-    T result[N];
-    for (int i = 0; i < N; i++) result[i] = std::cos(vals[i]);
-    return ShAttrib<N, SH_CONST, T>(result);
-  } else {
-    ShAttrib<N, SH_TEMP, T, false> t;
-    ShStatement stmt(t, SH_OP_COS, var);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
-    
-    return t;
-  }
-}
-
-/// Componentwise/scalar dot product
-#define SH_LIB_DOTPRODUCT(opfunc) \
-template<int M, int N, typename T>\
-ShGeneric<1,  T> opfunc(const ShGeneric<M, T>& left, const ShGeneric<N, T>& right)\
-{\
-  SH_STATIC_CHECK(M == N || M == 1 || N == 1, Dot_Product_Components_Do_Not_Match);\
-  if (!ShEnvironment::insideShader) {\
-    assert(left.hasValues());\
-    T lvals[M];\
-    left.getValues(lvals);\
-    T rvals[N];\
-    right.getValues(rvals);\
-    T result = 0.0;\
-    for (int i = 0; i < M || i < N; i++) result += \
-        ( M == 1 ? lvals[0] : lvals[i] ) * ( N == 1 ? rvals[0] : rvals[i] );\
-    return ShAttrib<1, SH_CONST, T>(result);\
-  } else {\
-    ShAttrib<1, SH_TEMP, T, false> t;\
-    ShStatement stmt(t, left, SH_OP_DOT, right);\
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);\
-    return t;\
-  }\
-}
-
-SH_LIB_DOTPRODUCT(dot);
-SH_LIB_DOTPRODUCT(operator|);
-
-SH_SHLIB_CONST_N_OP_RETSIZE_BOTH(dot, 1);
-
-/// smallest integer >= argument 
+/** Floor.
+ * Returns the smallest integer >= argument.
+ * Operates componentwise on tuples.
+ */
 template<int N, typename T>
 ShGeneric<N, T> floor(const ShGeneric<N, T>& var)
 {
@@ -524,7 +578,12 @@ ShGeneric<N, T> floor(const ShGeneric<N, T>& var)
   }
 }
 
-/// Float modulus 
+/** Float modulus. 
+ * Given a value f, returns f - floor(f).   Note that this is the
+ * same as frac (the fractional part) for positive values, but is
+ * equal to 1-frac for negative values.   The result is always 
+ * postive.
+ */
 template<int N, int M, typename T>
 ShGeneric<N,  T> fmod(const ShGeneric<N, T>& left, const ShGeneric<M, T>& right)
 {
@@ -551,7 +610,11 @@ ShGeneric<N,  T> fmod(const ShGeneric<N, T>& left, const ShGeneric<M, T>& right)
 SH_SHLIB_CONST_SCALAR_OP(fmod);
 SH_SHLIB_CONST_N_OP_LEFT(fmod);
 
-/// Fractional part.
+/** Fractional part.
+ * Discards the integer part.
+ * TODO: is this equivalent to fmod or not?   How does this behave on negative 
+ * numbers?
+ */
 template<int N, typename T>
 ShGeneric<N, T> frac(const ShGeneric<N, T>& var)
 {
@@ -570,7 +633,192 @@ ShGeneric<N, T> frac(const ShGeneric<N, T>& var)
   }
 }
 
-/// linear interpolation.
+/** Take positive part. 
+ * Clamps a value to zero if it is negative.   
+ * This is useful to wrap dot products in lighting models.
+ */
+template<int N, typename T>
+ShGeneric<N,  T> pos(const ShGeneric<N, T>& x) 
+{
+  if (!ShEnvironment::insideShader) {
+    assert(x.hasValues());
+    T vals[N];
+    x.getValues(vals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = vals[i] > 0 ? vals[i] : 0; 
+    return ShAttrib<N, SH_CONST, T>(result);
+  } else {
+    T vals[N];
+    for( int i = 0; i < N; ++i ) vals[i] = 0;
+    ShAttrib<N, SH_CONST, T> zero(vals);
+    ShAttrib<N, SH_TEMP, T, false> t;
+    ShStatement stmt(t, x, SH_OP_MAX, zero);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
+
+/** Maximum.
+ * Creates a tuple of componentwise maximums of a pair of input tuples.
+ * TODO: would be nice to be able to apply this to a single tuple.
+ */
+template<int N, typename T>
+ShGeneric<N,  T> max(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(left.hasValues());
+    T lvals[N];
+    left.getValues(lvals);
+    T rvals[N];
+    right.getValues(rvals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = (lvals[i] > rvals[i] ? lvals[i] : rvals[i]);
+    return ShAttrib<N, SH_CONST, T>(result);
+  } else {
+    ShAttrib<N, SH_TEMP, T, false> t;
+    ShStatement stmt(t, left, SH_OP_MAX, right);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
+SH_SHLIB_CONST_SCALAR_OP(max);
+
+/** Minimum.
+ * Creates a tuple of componentwise minimums of a pair of input tuples.
+ */
+template<int N, typename T>
+ShGeneric<N,  T> min(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(left.hasValues());
+    T lvals[N];
+    left.getValues(lvals);
+    T rvals[N];
+    right.getValues(rvals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = (lvals[i] < rvals[i] ? lvals[i] : rvals[i]);
+    return ShAttrib<N, SH_CONST, T>(result);
+  } else {
+    ShAttrib<N, SH_TEMP, T, false> t;
+    ShStatement stmt(t, left, SH_OP_MIN, right);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
+
+SH_SHLIB_CONST_SCALAR_OP(min);
+
+///@}
+
+/** Trigonometry.
+ * TODO: tan, atan, atan2, hyperbolic functions, secant, cosecant, etc.
+ */ ///@{
+
+/** Arccosine. 
+ * Operates componentwise on tuples.
+ * A value of x in [-1, 1] gives a result in [0, pi].
+ * Input values outside the range [-1,1] will give undefined results.
+ */
+template<int N, typename T>
+ShGeneric<N, T> acos(const ShGeneric<N, T>& var)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(var.hasValues());
+    T vals[N];
+    var.getValues(vals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = std::acos(vals[i]);
+    return ShAttrib<N, SH_CONST, T>(result);
+  } else {
+    ShAttrib<N, SH_TEMP, T, false> t;
+    ShStatement stmt(t, SH_OP_ACOS, var);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    
+    return t;
+  }
+}
+
+/** Arcsine. 
+ * Operates componentwise on tuples.
+ * A value of x in [-1, 1] gives a result in [-pi/2, pi/2].
+ * Input values outside the range [-1,1] will give undefined results.
+ */
+template<int N, typename T>
+ShGeneric<N, T> asin(const ShGeneric<N, T>& var)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(var.hasValues());
+    T vals[N];
+    var.getValues(vals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = std::asin(vals[i]);
+    return ShAttrib<N, SH_CONST, T>(result);
+  } else {
+    ShAttrib<N, SH_TEMP, T, false> t;
+    ShStatement stmt(t, SH_OP_ASIN, var);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    
+    return t;
+  }
+}
+
+/** Cosine.
+ * Operates componentwise on tuples.
+ * Returns the cosine of x.   Any value of x gives a result
+ * in the range [-1,1].
+ */
+template<int N, typename T>
+ShGeneric<N, T> cos(const ShGeneric<N, T>& var)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(var.hasValues());
+    T vals[N];
+    var.getValues(vals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = std::cos(vals[i]);
+    return ShAttrib<N, SH_CONST, T>(result);
+  } else {
+    ShAttrib<N, SH_TEMP, T, false> t;
+    ShStatement stmt(t, SH_OP_COS, var);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    
+    return t;
+  }
+}
+
+/** Sine.
+ * Operates componentwise on tuples.
+ * Returns the sine of x.   Any value of x gives a result
+ * in the range [-1,1].
+ */
+template<int N, typename T>
+ShGeneric<N, T> sin(const ShGeneric<N, T>& var)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(var.hasValues());
+    T vals[N];
+    var.getValues(vals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = std::sin(vals[i]);
+    return ShAttrib<N, SH_CONST, T>(result);
+  } else {
+    ShAttrib<N, SH_TEMP, T, false> t;
+    ShStatement stmt(t, SH_OP_SIN, var);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    
+    return t;
+  }
+}
+
+///@}
+
+/** Interpolation and Approximation.
+ */ ///@{
+
+/** Linear interpolation.
+ * Blend between two tuples.   The blend value can be a scalar
+ * or a tuple.
+ */
 template<int N, int M, typename T>
 ShGeneric<N, T> lerp(const ShGeneric<M, T>& f, const ShGeneric<N, T>& a, 
     const ShGeneric<N,T>& b)
@@ -604,171 +852,20 @@ ShGeneric<N, T> lerp(T f, const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
   return lerp(ShAttrib<1, SH_CONST, T>(f), a, b); 
 }
 
-/// Multiply and add
-template<int N, int M, int P, typename T>
-ShGeneric<P, T> mad(const ShGeneric<M, T>& m1, const ShGeneric<N, T>& m2, 
-    const ShGeneric<P,T>& a)
-{
-  SH_STATIC_CHECK((M == N && N == P) || (M == 1 && N == P) || (N == 1 && M == P),
-                  Multiply_And_Add_Components_Do_Not_Match);
-  if (!ShEnvironment::insideShader) {
-    assert(m1.hasValues()); 
-    assert(m2.hasValues());
-    assert(a.hasValues());
-    //TODO better error message.  can this method be cleaner?
-    T m1vals[M], m2vals[N], avals[P];
-    m1.getValues(m1vals);
-    m2.getValues(m2vals);
-    a.getValues(avals);
-    T result[P];
-    for (int i = 0; i < P; i++) {
-        result[i] = ( M == 1 ? m1vals[0] : m1vals[i] ) * ( N == 1 ? m2vals[0] : m2vals[i] ) + avals[i]; 
-    }
-    return ShAttrib<P, SH_CONST, T>(result);
-  } else {
-    ShAttrib<P, SH_TEMP, T, false> t;
-    ShStatement stmt(t, SH_OP_MAD, m1, m2, a); 
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  }
-}
+///@}
 
-/// Use template specialization for the N, 1, N case
+/** Geometric operations.
+ * TODO: distance, sqdistance, length, rlength, rsqlength, sqlength, perp,
+ * perpdot, projnorm should be implemented too.   Different distance functions
+ * also possible: L1, L2, Linf.
+ */
+///@{
 
-template<int N, typename T> 
-ShGeneric<N, T> mad(T m1, const ShGeneric<N, T>& m2, const ShGeneric<N, T>& a)
-{ 
-  return mad(ShAttrib<1, SH_CONST, T>(m1), m2, a); 
-}
-
-template<int N, typename T> 
-ShGeneric<N, T> mad(double m1, const ShGeneric<N, T>& m2, const ShGeneric<N, T>& a)
-{ 
-  return mad(ShAttrib<1, SH_CONST, T>(m1), m2, a); 
-}
-
-template<int N, typename T> 
-ShGeneric<N, T> mad(const ShGeneric<N, T>& m1, T m2, const ShGeneric<N, T>& a)
-{ 
-  return mad(m1, ShAttrib<1, SH_CONST, T>(m2), a); 
-}
-
-template<int N, typename T> 
-ShGeneric<N, T> mad(const ShGeneric<N, T>& m1, double m2, const ShGeneric<N, T>& a)
-{ 
-  return mad(m1, ShAttrib<1, SH_CONST, T>(m2), a); 
-}
-
-/// Componentwise maximum
-template<int N, typename T>
-ShGeneric<N,  T> max(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
-{
-  if (!ShEnvironment::insideShader) {
-    assert(left.hasValues());
-    T lvals[N];
-    left.getValues(lvals);
-    T rvals[N];
-    right.getValues(rvals);
-    T result[N];
-    for (int i = 0; i < N; i++) result[i] = (lvals[i] > rvals[i] ? lvals[i] : rvals[i]);
-    return ShAttrib<N, SH_CONST, T>(result);
-  } else {
-    ShAttrib<N, SH_TEMP, T, false> t;
-    ShStatement stmt(t, left, SH_OP_MAX, right);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  }
-}
-SH_SHLIB_CONST_SCALAR_OP(max);
-
-/// Positive - make positive  
-template<int N, typename T>
-ShGeneric<N,  T> pos(const ShGeneric<N, T>& x) 
-{
-  if (!ShEnvironment::insideShader) {
-    assert(x.hasValues());
-    T vals[N];
-    x.getValues(vals);
-    T result[N];
-    for (int i = 0; i < N; i++) result[i] = vals[i] > 0 ? vals[i] : 0; 
-    return ShAttrib<N, SH_CONST, T>(result);
-  } else {
-    T vals[N];
-    for( int i = 0; i < N; ++i ) vals[i] = 0;
-    ShAttrib<N, SH_CONST, T> zero(vals);
-    ShAttrib<N, SH_TEMP, T, false> t;
-    ShStatement stmt(t, x, SH_OP_MAX, zero);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  }
-}
-
-
-/// Componentwise minimum
-template<int N, typename T>
-ShGeneric<N,  T> min(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
-{
-  if (!ShEnvironment::insideShader) {
-    assert(left.hasValues());
-    T lvals[N];
-    left.getValues(lvals);
-    T rvals[N];
-    right.getValues(rvals);
-    T result[N];
-    for (int i = 0; i < N; i++) result[i] = (lvals[i] < rvals[i] ? lvals[i] : rvals[i]);
-    return ShAttrib<N, SH_CONST, T>(result);
-  } else {
-    ShAttrib<N, SH_TEMP, T, false> t;
-    ShStatement stmt(t, left, SH_OP_MIN, right);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  }
-}
-
-SH_SHLIB_CONST_SCALAR_OP(min);
-
-
-/// Sine of x.
-template<int N, typename T>
-ShGeneric<N, T> sin(const ShGeneric<N, T>& var)
-{
-  if (!ShEnvironment::insideShader) {
-    assert(var.hasValues());
-    T vals[N];
-    var.getValues(vals);
-    T result[N];
-    for (int i = 0; i < N; i++) result[i] = std::sin(vals[i]);
-    return ShAttrib<N, SH_CONST, T>(result);
-  } else {
-    ShAttrib<N, SH_TEMP, T, false> t;
-    ShStatement stmt(t, SH_OP_SIN, var);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
-    
-    return t;
-  }
-}
-
-// Square root.
-template<int N, typename T>
-ShGeneric<N, T> sqrt(const ShGeneric<N, T>& var)
-{
-  if (!ShEnvironment::insideShader) {
-    assert(var.hasValues());
-    T vals[N];
-    var.getValues(vals);
-    T result[N];
-    for (int i = 0; i < N; i++) result[i] = std::sqrt(vals[i]);
-    return ShAttrib<N, SH_CONST, T>(result);
-  } else {
-    ShAttrib<N, SH_TEMP, T, false> t;
-    ShStatement stmt(t, SH_OP_SQRT, var);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  }
-}
-
-// Geometrical operations
-
+/** Take the cross product of two 3-tuples.
+ * Note that this operation is not limited to vectors (although it
+ * probably should be).
+ * TODO: should really be restricted to vectors and normals.
+ */
 template<typename T>
 ShGeneric<3, T> cross(const ShGeneric<3, T>& left, const ShGeneric<3, T>& right)
 {
@@ -792,6 +889,11 @@ ShGeneric<3, T> cross(const ShGeneric<3, T>& left, const ShGeneric<3, T>& right)
   }
 }
 
+/** Normalize an n-tuple to unit length.
+ * Divides an n-tuple by its Euclidean length.   
+ * TODO: should really be restricted to vectors and normals.
+ * Will operate incorrectly on homogeneous points, for instance.
+ */
 template<int N, typename T>
 ShGeneric<N, T> normalize(const ShGeneric<N, T>& var)
 {
@@ -813,9 +915,57 @@ ShGeneric<N, T> normalize(const ShGeneric<N, T>& var)
   }
 }
 
-// Operations on matrices
+///@}
 
-/// Transpose of a matrix
+/** Linear Algebra.
+ * Matrix operations and the dot product.   To do (or incorporate):
+ * matrix inverse, matrix adjoint, determinant, trace.
+ * Also, functions to construct matrices from tuples by column or
+ * row would be useful (for small numbers of tuples, and arrays of
+ * tuples).   Although... perhaps these should be constructors?
+ */ ///@{
+
+/** Inner (dot) product.
+ * TODO: why the macro?   Should just use an inline function to define
+ * one of these in terms of the other.   Documentation not going to 
+ * work this way.   Also, should only work on tuples of the same size...
+ * scalar promotion doesn't make any sense here.
+ */
+#define SH_LIB_DOTPRODUCT(opfunc) \
+template<int M, int N, typename T>\
+ShGeneric<1,  T> opfunc(const ShGeneric<M, T>& left, const ShGeneric<N, T>& right)\
+{\
+  SH_STATIC_CHECK(M == N || M == 1 || N == 1, Dot_Product_Components_Do_Not_Match);\
+  if (!ShEnvironment::insideShader) {\
+    assert(left.hasValues());\
+    T lvals[M];\
+    left.getValues(lvals);\
+    T rvals[N];\
+    right.getValues(rvals);\
+    T result = 0.0;\
+    for (int i = 0; i < M || i < N; i++) result += \
+        ( M == 1 ? lvals[0] : lvals[i] ) * ( N == 1 ? rvals[0] : rvals[i] );\
+    return ShAttrib<1, SH_CONST, T>(result);\
+  } else {\
+    ShAttrib<1, SH_TEMP, T, false> t;\
+    ShStatement stmt(t, left, SH_OP_DOT, right);\
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);\
+    return t;\
+  }\
+}
+
+SH_LIB_DOTPRODUCT(dot);
+SH_LIB_DOTPRODUCT(operator|);
+
+SH_SHLIB_CONST_N_OP_RETSIZE_BOTH(dot, 1);
+
+/** Transpose of a matrix.
+ * TODO: this implementation is not very smart.   Really, the compiler should
+ * keep track of transpose state and swizzle references as needed, so that
+ * a copy of the matrix does not need to be formed.   But this needs to be
+ * overridden if the transpose of a matrix is taken and then modified
+ * (which, however, does not happen very often).
+ */
 template<int Rows, int Cols, ShBindingType Binding, typename T>
 ShMatrix<Cols, Rows, SH_TEMP, T>
 transpose(const ShMatrix<Rows, Cols, Binding, T>& m)
@@ -829,7 +979,10 @@ transpose(const ShMatrix<Rows, Cols, Binding, T>& m)
   return result;
 }
 
-/// Matrix multiplication
+/** Matrix multiplication.
+ * Only works on matrices of compatible sizes.
+ * TODO: should also define * and mmult to mean the same thing.
+ */
 template<int M, int N, int P, ShBindingType Binding, ShBindingType Binding2, typename T>
 ShMatrix<M, P, SH_TEMP, T>
 operator|(const ShMatrix<M, N, Binding, T>& a,
@@ -846,7 +999,10 @@ operator|(const ShMatrix<M, N, Binding, T>& a,
   return result;
 }
 
-/// Treat a variable as a column vector and multiply it with a matrix
+/** Matrix-tuple multiplication.
+ * Treats the tuple as a column vector.
+ * TODO: should also define * and mmult to mean the same thing.
+ */
 template<int M, int N, ShBindingType Binding, typename T>
 ShGeneric<M, T> operator|(const ShMatrix<M, N, Binding, T>& a, const ShGeneric<N, T>& b)
 {
@@ -856,6 +1012,8 @@ ShGeneric<M, T> operator|(const ShMatrix<M, N, Binding, T>& a, const ShGeneric<N
   }
   return ret;
 }
+
+///@}
 
 }
 

@@ -344,6 +344,70 @@ void ShBaseTextureCube<T>::size(int width, int height)
   m_node->setTexSize(width, height);
 }
 
+// name - maybe we should add an additional base class
+template<typename T>
+void ShBaseTexture1D<T>::name(const std::string& n)
+{
+  m_node->name(n);
+}
+
+template<typename T>
+std::string ShBaseTexture1D<T>::name() const
+{
+  return m_node->name();
+}
+
+template<typename T>
+void ShBaseTexture2D<T>::name(const std::string& n)
+{
+  m_node->name(n);
+}
+
+template<typename T>
+std::string ShBaseTexture2D<T>::name() const
+{
+  return m_node->name();
+}
+
+template<typename T>
+void ShBaseTextureRect<T>::name(const std::string& n)
+{
+  m_node->name(n);
+}
+
+template<typename T>
+std::string ShBaseTextureRect<T>::name() const
+{
+  return m_node->name();
+}
+
+template<typename T>
+void ShBaseTexture3D<T>::name(const std::string& n)
+{
+  m_node->name(n);
+}
+
+template<typename T>
+std::string ShBaseTexture3D<T>::name() const
+{
+  return m_node->name();
+}
+
+
+template<typename T>
+void ShBaseTextureCube<T>::name(const std::string& n)
+{
+  m_node->name(n);
+}
+
+template<typename T>
+std::string ShBaseTextureCube<T>::name() const
+{
+  return m_node->name();
+}
+
+
+
 }
 
 #endif
