@@ -57,7 +57,7 @@ using namespace SH;
     }
             
     void operator()(ShCtrlGraphNodePtr node, int level) {
-      //    node->print(std::cerr, 0);
+      // node->print(std::cerr, 0);
       shPrintIndent(std::cerr, level);
       SH_DEBUG_PRINT("Node with numbering " << tree.numbering(node));
     }
@@ -131,16 +131,22 @@ using namespace SH;
 
     void RDS::rds_merge(ShCtrlGraphNodePtr v)
     {
-    // get the number of kids of v
-    int k = v->successors.size();
+		// get the number of kids of v
+		int k = v->successors.size();
     
         if (v->follower) {
           k++;
         }
-    
-    for (int d = k; d >= 0; d--) {
-      // Note: Cynthia can write this subsets-of-size-d code later  
-    }
+   
+		for (int d = k; d >= 0; d--) {
+			// get each subset of v's kids with d kids
+
+			// try to merge all subsets with v
+
+			// if only one can be merged, select and stop
+
+			// otherwise, use MERGE to pick one
+		}
     }
   
   // creates a post-order list of MR nodes, storing in m_mrlist
@@ -163,11 +169,9 @@ using namespace SH;
         
     ShCtrlGraphNodePtr w = v->follower;
 
-    // I'm not sure what you meant to do here
-//  if (w) {
-//    ShCtrlGraphNodePtr w = I->node;
-//    add_mr(w);
-//  }
+	if (w) {
+		add_mr(w);
+	}
     
     // add v to list if it's multi-referenced
     if (m_pdt->mr(v)) {
