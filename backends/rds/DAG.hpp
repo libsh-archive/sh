@@ -12,6 +12,12 @@
 #include "ShRefCount.hpp"
 #include "ShBasicBlock.hpp"
 #include "ShStatement.hpp"
+#include "ShVariable.hpp"
+#include "ShOperation.hpp"
+#include "ShVariableNode.hpp"
+
+#define DAG_OP 0
+#define DAG_LEAF 1
 
 /***
  * Creates a directed acyclic graph for a basic block
@@ -20,14 +26,21 @@
 class SH_DLLEXPORT DAGNode {
   public:
 	DAGNode() {}
-	DAGNode(const std::string& label);
-	DAGNode(const std::string& label, DAGNode *kid);
-	DAGNode(const std::string& label, DAGNode* kid0, DAGNode* kid1);
-	DAGNode(const std::string& label, DAGNode* kid0, DAGNode* kid1, DAGNode* kid2);
+	
+	DAGNode(SH::ShVariable var);
+	DAGNode(SH::ShOperation op);
+	DAGNode(SH::ShOperation op, DAGNode *kid);
+	DAGNode(SH::ShOperation op, DAGNode* kid0, DAGNode* kid1);
+	DAGNode(SH::ShOperation op, DAGNode* kid0, DAGNode* kid1, DAGNode* kid2);
 
-	std::string m_label; 
+	SH::ShVariable m_var;
+	SH::ShOperation m_op;
 
-	typedef std::set<std::string> IdSet;
+	std::string m_label;
+	
+	int m_type;
+
+	typedef std::set<SH::ShVariableNodePtr> IdSet;
 	IdSet id_list;
 
 	typedef std::vector<DAGNode *> DAGNodeVector;
@@ -53,14 +66,14 @@ class SH_DLLEXPORT DAG {
 
 	void print(int indent);
   private:
-	typedef std::map<const std::string, DAGNode*> NodeMap;
+	typedef std::map<SH::ShVariableNodePtr, DAGNode*> NodeMap;
 	NodeMap node;
 
 	typedef std::vector<DAGNode*> OpVector;
-	typedef std::map<const std::string, OpVector> OpMap;
+	typedef std::map<SH::ShOperation, OpVector> OpMap;
 	OpMap ops[4];
 
-	void DAG::add_statement(Stmt stmt, int src_size);
+	void DAG::add_statement(SH::ShStatement stmt);
 };
 
 #endif

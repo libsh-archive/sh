@@ -4,30 +4,52 @@
 
 using namespace SH;
 
-DAGNode::DAGNode(const std::string& label) 
-	:	m_label(label)
+
+
+DAGNode::DAGNode(ShVariable var) 
+	:	m_var(var),
+		m_label(var.node()->name())
 {
+	cout << "Creating new node with name " << m_label << "\n";
+	m_type = DAG_LEAF;
 }
 
-DAGNode::DAGNode(const std::string& label, DAGNode* kid) 
-	:	m_label(label)
+DAGNode::DAGNode(ShOperation op) 
+	:	m_op(op),
+		m_label(static_cast<std::string>(opInfo[op].name))	
 {
+	cout << "Creating new node with name " << m_label << "\n";
+	m_type = DAG_OP;
+}
+
+DAGNode::DAGNode(ShOperation op, DAGNode* kid) 
+	:	m_op(op),
+		m_label(static_cast<std::string>(opInfo[op].name))
+{
+	cout << "Creating new node with name " << m_label << " Kids: " << kid->m_label << "\n";
+	m_type = DAG_OP;
 	successors.push_back(kid);
 	kid->predecessors.push_back(this);
 }
 
-DAGNode::DAGNode(const std::string& label, DAGNode *kid0, DAGNode* kid1)
-	:	m_label(label)
+DAGNode::DAGNode(ShOperation op, DAGNode *kid0, DAGNode* kid1)
+	:	m_op(op),
+		m_label(static_cast<std::string>(opInfo[op].name))
 {
+	cout << "Creating new node with name " << m_label << " Kids: " << kid0->m_label << " " << kid1->m_label <<"\n";
+	m_type = DAG_OP;
 	successors.push_back(kid0);
 	successors.push_back(kid1);
 	kid0->predecessors.push_back(this);
 	kid1->predecessors.push_back(this);
 }
 
-DAGNode::DAGNode(const std::string& label, DAGNode* kid0, DAGNode* kid1, DAGNode* kid2) 
-	:	m_label(label)
+DAGNode::DAGNode(ShOperation op, DAGNode* kid0, DAGNode* kid1, DAGNode* kid2) 
+	:	m_op(op),
+		m_label(static_cast<std::string>(opInfo[op].name))
 {
+	cout << "Creating new node with name " << m_label << " Kids: " << kid0->m_label << " " << kid1->m_label << kid2->m_label << "\n";
+	m_type = DAG_OP;
 	successors.push_back(kid0);
 	successors.push_back(kid1);
 	successors.push_back(kid2);
@@ -37,35 +59,36 @@ DAGNode::DAGNode(const std::string& label, DAGNode* kid0, DAGNode* kid1, DAGNode
 }
 
 void DAGNode::print(int indent) {
-	shPrintIndent(cout, indent);
+	shPrintIndent(cout, indent);	
 	cout << "-->";
 	cout << m_label << " {";
 	for (IdSet::iterator I = id_list.begin(); I != id_list.end(); ++I) {
-		cout << " " << (*I);
+		cout << " " << (*I)->name();
 	}
 	cout << " }\n";
 	for (DAGNodeVector::iterator I = successors.begin(); I != successors.end(); ++I) {
-		(*I)->print(indent + 4);
+			(*I)->print(indent + 2);
 	}
 }
 
-void DAG::add_statement(Stmt stmt, int src_size) {
+void DAG::add_statement(Stmt stmt) {
 	NodeMap::iterator node_it;
-	DAGNode *src[src_size], *n;
 	OpMap::iterator op_it;
 	OpVector op_v;
 	bool created = false;
+	int src_size = opInfo[stmt.op].arity;
+	DAGNode *src[src_size], *n;
 	
 	// Source: The Dragon Book, section 9.8 (page 549)
 
 	// Step 1
 	// go through each of the src fields, creating new nodes if they don't exist
 	for (int i = 0; i < src_size; i++) {
-		node_it = node.find(stmt.src[i].name());
+		node_it = node.find(stmt.src[i].node());
 				
 		if (node_it == node.end()) {
-			src[i] = new DAGNode(stmt.src[i].name());
-			node[stmt.src[i].name()] = src[i];
+			src[i] = new DAGNode(stmt.src[i]);
+			node[stmt.src[i].node()] = src[i];
 		}
 		else {
 			src[i] = (*node_it).second;
@@ -80,7 +103,7 @@ void DAG::add_statement(Stmt stmt, int src_size) {
 	}
 	else {
 		// see if a node for this operator exists
-		op_it = ops[src_size].find(static_cast<std::string>(opInfo[stmt.op].name));
+		op_it = ops[src_size].find(stmt.op);
 
 		if (op_it != ops[src_size].end()) {
 			// see if matching set of kids in vector for this operation
@@ -126,29 +149,29 @@ void DAG::add_statement(Stmt stmt, int src_size) {
 	if (!created) {
 		switch (src_size) {
 			case 0:
-				n = new DAGNode(static_cast<std::string>(opInfo[stmt.op].name));
+				n = new DAGNode(stmt.op);
 				//cout << "making node for " << opInfo[stmt.op].name << "\n";
 				break;
 			case 1:
-				n = new DAGNode(static_cast<std::string>(opInfo[stmt.op].name), src[0]);					
+				n = new DAGNode(stmt.op, src[0]);					
 				//cout << "making node for " << opInfo[stmt.op].name << " " << src[0]->m_label << "\n";
 				break;
 			case 2:
-				n = new DAGNode(static_cast<std::string>(opInfo[stmt.op].name), src[0], src[1]);
+				n = new DAGNode(stmt.op, src[0], src[1]);
 				//cout << "making node for " << opInfo[stmt.op].name << " " << src[0]->m_label << " " << src[1]->m_label << "\n";
 				break;
 			case 3:
-				n = new DAGNode(static_cast<std::string>(opInfo[stmt.op].name), src[0], src[1], src[2]);
+				n = new DAGNode(stmt.op, src[0], src[1], src[2]);
 				//cout << "making node for " << opInfo[stmt.op].name << " " << src[0]->m_label << " " << src[1]->m_label << " " << src[2]->m_label << "\n";
 				break;
 		}
 		
-		ops[src_size][static_cast<std::string>(opInfo[stmt.op].name)].push_back(n);
+		ops[src_size][stmt.op].push_back(n);
 	}
 
 	// Step 3
 	// delete dest from list of ids for node(dest)
-	NodeMap::iterator dest_it = node.find(stmt.dest.name());
+	NodeMap::iterator dest_it = node.find(stmt.dest.node());
 	DAGNode *dest;
 
 	if (dest_it != node.end()) {
@@ -158,9 +181,9 @@ void DAG::add_statement(Stmt stmt, int src_size) {
 	}
 
 	// append dest to list of ids for n
-	n->id_list.insert(stmt.dest.name());
+	n->id_list.insert(stmt.dest.node());
 
-	node[stmt.dest.name()] = n;
+	node[stmt.dest.node()] = n;
 }
 
 DAG::DAG(ShBasicBlockPtr block)
@@ -168,32 +191,29 @@ DAG::DAG(ShBasicBlockPtr block)
 { 	
 	// iterate through all statements
 	for (StmtList::iterator I = m_statements.begin(); I != m_statements.end(); ++I) {
-		add_statement(*I, opInfo[(*I).op].arity);
+		add_statement(*I);
 	}
 
-	m_root = new DAGNode("root");
+	m_root = new DAGNode();
+	m_root->m_label = "root";
 
-	// list all tree tops as successors of pseudo-root
-	/*for (NodeMap::iterator I = node.begin(); I != node.end(); ++I) {
-		if ((*I).second->predecessors.size() == 0) {
-			m_root->successors.push_back((*I).second);
-			(*I).second->predecessors.push_back(m_root);
-		}
-	}*/
+	ShOperation op = SH_OP_ASN;
 
 	// this might be a rough implementation for now -- an assignment node is created for each active node
 	// and the root just points to these assignment nodes
 	for (NodeMap::iterator I = node.begin(); I != node.end(); ++I) {
 		// if the node isn't a leaf, add an assignment node
 		if ((*I).second->successors.size() > 0) {
-			DAGNode *parent = new DAGNode(static_cast<std::string>(opInfo[SH_OP_ASN].name), (*I).second); 
+			DAGNode *parent = new DAGNode(op, (*I).second); 
 			parent->id_list.insert((*I).first);
-			(*I).second->id_list.erase((*I).first);
+			//(*I).second->id_list.erase((*I).first);
 			node[(*I).first] = parent;
 			m_root->successors.push_back(parent);
 			parent->predecessors.push_back(m_root);
 		}
 	}
+
+	return;
 }
 
 void DAG::print(int indent) {

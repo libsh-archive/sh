@@ -69,19 +69,17 @@ int main() {
 
 	// extract the cfg and print it
 	ShCtrlGraphPtr graph = program.node()->ctrlGraph;
-	//graph->print(cout, 1);
+	graph->print(cout, 1);
 
-
-	DAG *dag = new DAG(graph->entry()->follower->block);
-
+	//DAG *dag = new DAG(graph->entry()->follower->block);
 	//dag->print(0);
 
 	// create an rds object
-	rds = RDS(program.node());
-	rds.get_pdt()->printDoms();
-	//cout << "RDSh...\n";
-	//rds.rdsh();
-	cout << "\nRDS...\n";
+	 rds = RDS(program.node());
+	 rds.get_pdt()->printDoms();
+	 //cout << "RDSh...\n";
+	 //rds.rdsh();
+	//cout << "\nRDS...\n";
 	rds.rds();
 	rds.print_partition();
 

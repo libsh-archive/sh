@@ -178,11 +178,14 @@ void RDS::rds_merge(DAGNode::DAGNode* v)
 		ksub_mtc = false;
 		a = next_ksubset(k, d, a);
 
-		int unmarked = 0;
-		bool marked = false;
-
 		// join v with subset of successors
-		DAGNode::DAGNode *w = new DAGNode(v->m_label);
+		DAGNode::DAGNode *w;
+		
+		if (v->m_type == DAG_OP)
+			w = new DAGNode(v->m_op);
+		else
+			w = new DAGNode(v->m_var);
+
 		if (m_rdsh) {
 			for (int j = 0; j < d; j++) {
 				w->successors.push_back(kids.at(a[j]));
@@ -207,7 +210,11 @@ void RDS::rds_merge(DAGNode::DAGNode* v)
 		}
 
 		while(ksub_mtc && d!=0) {
-			w = new DAGNode(v->m_label);
+			if (v->m_type == DAG_OP)
+				w = new DAGNode(v->m_op);
+			else
+				w = new DAGNode(v->m_var);
+			
 			if (d != 0)
 				//cout << "Next k-subset for " << d << "\n";
 			
