@@ -1,4 +1,4 @@
-AUTOMAKE_OPTIONS = foreign
+AUTOMAKE_OPTIONS = 1.7 foreign
 SUBDIRS = libltdl src backends test util doc
 
 docs:

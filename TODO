@@ -13,6 +13,7 @@ OPTIMIZER:
 
 SHADER ALGEBRA:
  - fix combine() to operate correctly on empty graphs.
+ X fix combine() to operate correctly on null programs
  X operator&() for combine()
  X replaceUniform()
  X add operator>> for uniform extraction
@@ -23,8 +24,7 @@ SHADER ALGEBRA:
  X make connect work with inputs != outputs 
  X add operator<< for uniforms
  - add constant() for uniforms with operator<<
- - allow semantic connection
- - implement named temporary extraction
+ - implement named temporary extraction (maybe)
 
 STREAMS:
  X implement execute() for Arb
@@ -68,8 +68,8 @@ TEXTURES:
     - maybe a generic bookkeeping mechanism for this
 
 ARB BACKEND:
- - split into multiple files
- - add extension querying/plugin mechanism for ATI extensions etc.
+ X split into multiple files
+ / add extension querying/plugin mechanism for ATI extensions etc.
 
 GENERIC SMALL TASKS:
  X have updating semantics for uniforms
@@ -107,7 +107,7 @@ GENERIC MEDIUM TASKS:
  X port more of the ShLib calls to the new model.
  X code generator
  - add smarter configuration mechanism
- - add "context" concept
+ - add "context" concept, or campaigns
  X vectors, points, colours, positions, texcoords
  - rethink some of the binding mechanism
 

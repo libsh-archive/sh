@@ -1,8 +1,8 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT(sh, 0.0.20031119, libsh-devel@lists.sourceforge.net, libsh)
+AC_INIT(sh, 0.0.20040202, libsh-devel@lists.sourceforge.net, libsh)
+AC_CONFIG_SRCDIR([src/ShAttrib.hpp])
 AM_INIT_AUTOMAKE
 
-AC_CONFIG_SRCDIR([src/ShAttrib.hpp])
 AM_CONFIG_HEADER(config.h)
 
 # Checks for programs.
