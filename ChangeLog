@@ -1,5 +1,12 @@
 2004-06-04  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* test/regress/regress.py (tests): Test EXP, EXP2, EXP10. Together
+	with backend implementations this resolves issue80.
+
+	* backends/cpu/CPU.cpp (encode): Implement SH_OP_EXP, SH_OP_EXP2, SH_OP_EXP10.
+
+	* backends/gl/ArbCode.cpp (genNode): Implement SH_OP_EXP, SH_OP_EXP10.
+
 	* backends/cpu/CPU.cpp (encode): Use SH_OP_MOD instead of SH_OP_FMOD.
 
 	* backends/gl/ArbCode.cpp (genNode): Use SH_OP_MOD instead of SH_OP_FMOD.

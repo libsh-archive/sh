@@ -27,6 +27,7 @@
 #include "ArbCode.hpp"
 #include <iostream>
 #include <sstream>
+#include <cmath>
 
 #include "ShVariable.hpp"
 #include "ShDebug.hpp"
@@ -516,16 +517,31 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
     case SH_OP_DOT: 
       genDot(stmt.dest, stmt.src[0], stmt.src[1]);
       break;
-      //case SH_OP_EXP:
-      //genScalarVectorInst(stmt.dest, stmt.src[1], stmt.src[0], SH_ARB_EXP);
-      // TODO
-      //break;
+    case SH_OP_EXP:
+      {
+        ShVariable e(new ShVariableNode(SH_CONST, 1));
+        float ef = M_E;
+        e.setValues(&ef);
+        for (int i = 0; i < stmt.src[0].size(); i++) {
+          m_instructions.push_back(ArbInst(SH_ARB_POW, stmt.dest(i), e, stmt.src[0](i)));
+        }
+        break;
+      }
     case SH_OP_EXP2:
       for (int i = 0; i < stmt.src[0].size(); i++) {
         m_instructions.push_back(ArbInst(SH_ARB_EX2, stmt.dest(i), stmt.src[0](i)));
       }
-      //genScalarVectorInst(stmt.dest, stmt.src[1], stmt.src[0], SH_ARB_EX2);
       break;
+    case SH_OP_EXP10:
+      {
+        ShVariable ten(new ShVariableNode(SH_CONST, 1));
+        float tenf = 10.0;
+        ten.setValues(&tenf);
+        for (int i = 0; i < stmt.src[0].size(); i++) {
+          m_instructions.push_back(ArbInst(SH_ARB_POW, stmt.dest(i), ten, stmt.src[0](i)));
+        }
+        break;
+      }
     case SH_OP_FLR:
       m_instructions.push_back(ArbInst(SH_ARB_FLR, stmt.dest, stmt.src[0]));
       break;
