@@ -154,7 +154,7 @@ std::istream& ShObjMesh::readObj(std::istream &in) {
   }
 
   // convert faceVec to mesh
-  for(std::size_t i = 0; i < faceVec.size(); ++i) {
+  for(size_t i = 0; i < faceVec.size(); ++i) {
     VertexList vl;
     for(ShObjIndexedFace::iterator I = faceVec[i].begin(); I != faceVec[i].end(); ++I) {
       int vi = (*I)[0] - 1;

@@ -35,12 +35,12 @@
 
 namespace {
 
-std::size_t wordsize(std::size_t size)
+size_t wordsize(size_t size)
 {
   return size / WORD_SIZE + (size % WORD_SIZE ? 1 : 0);
 }
 
-std::size_t fullwordsize(std::size_t size)
+size_t fullwordsize(size_t size)
 {
   return size / WORD_SIZE;
 }
@@ -75,10 +75,10 @@ ShBitSet::ShBitSet()
 {
 }
 
-ShBitSet::ShBitSet(std::size_t size)
+ShBitSet::ShBitSet(size_t size)
   : m_size(size), m_data(new unsigned int[wordsize(m_size)])
 {
-  for (std::size_t i = 0; i < wordsize(m_size); i++) {
+  for (size_t i = 0; i < wordsize(m_size); i++) {
     m_data[i] = 0;
   }
 }
@@ -107,7 +107,7 @@ ShBitSet& ShBitSet::operator=(const ShBitSet& other)
 ShBitSet& ShBitSet::operator&=(const ShBitSet& other)
 {
   if (m_size != other.m_size) shError( ShException( "ShBitSet operands of &= must be the same size." ) );
-  for (std::size_t i = 0; i < wordsize(m_size); i++)
+  for (size_t i = 0; i < wordsize(m_size); i++)
     m_data[i] &= other.m_data[i];
   return *this;
 }
@@ -115,7 +115,7 @@ ShBitSet& ShBitSet::operator&=(const ShBitSet& other)
 ShBitSet& ShBitSet::operator|=(const ShBitSet& other)
 {
   if (m_size != other.m_size) shError( ShException( "ShBitSet operands of |= must be the same size." ) );
-  for (std::size_t i = 0; i < wordsize(m_size); i++)
+  for (size_t i = 0; i < wordsize(m_size); i++)
     m_data[i] |= other.m_data[i];
   return *this;
 }
@@ -123,7 +123,7 @@ ShBitSet& ShBitSet::operator|=(const ShBitSet& other)
 ShBitSet& ShBitSet::operator^=(const ShBitSet& other)
 {
   if (m_size != other.m_size) shError( ShException( "ShBitSet operands of ^= must be the same size." ) );
-  for (std::size_t i = 0; i < wordsize(m_size); i++)
+  for (size_t i = 0; i < wordsize(m_size); i++)
     m_data[i] ^= other.m_data[i];
   return *this;
 }
@@ -152,7 +152,7 @@ ShBitSet ShBitSet::operator^(const ShBitSet& other) const
 ShBitSet ShBitSet::operator~() const
 {
   ShBitSet ret(m_size);
-  for (std::size_t i = 0; i < wordsize(m_size); i++)
+  for (size_t i = 0; i < wordsize(m_size); i++)
     ret.m_data[i] = ~m_data[i];
   return ret;
 }
@@ -175,7 +175,7 @@ bool ShBitSet::operator!=(const ShBitSet& other) const
   return !(*this == other);
 }
 
-std::size_t ShBitSet::size() const
+size_t ShBitSet::size() const
 {
   return m_size;
 }
@@ -199,19 +199,19 @@ bool ShBitSet::empty() const
   return true;
 }
 
-bool ShBitSet::operator[](std::size_t i) const
+bool ShBitSet::operator[](size_t i) const
 {
   return ((m_data[i / WORD_SIZE] & (1 << (i % WORD_SIZE))) != 0);
 }
 
-ShBitRef ShBitSet::operator[](std::size_t i)
+ShBitRef ShBitSet::operator[](size_t i)
 {
   return ShBitRef(m_data + (i / WORD_SIZE), 1 << (i % WORD_SIZE));
 }
 
 std::ostream& operator<<(std::ostream& out, const ShBitSet& bitset)
 {
-  for (std::size_t i = 0; i < bitset.size(); i++) {
+  for (size_t i = 0; i < bitset.size(); i++) {
     out << bitset[i] ? '1' : '0';
   }
   return out;

@@ -231,7 +231,7 @@ ShProgram mergeNames(ShProgram p)
   // The whole set is stored in the smallest i position.
   Duplicates dups( p.node()->inputs.size(), std::vector<int>()); 
 
-  std::size_t i = 0;
+  size_t i = 0;
   for(ShProgramNode::VarList::const_iterator I = p.node()->inputs.begin();
       I != p.node()->inputs.end(); ++I, ++i) {
     InputType it( (*I)->name(), (*I)->size() );
@@ -246,7 +246,7 @@ ShProgram mergeNames(ShProgram p)
   ShFixedManipulator duplicator;
   for(i = 0; i < dups.size(); ++i) {
     if( dups[i].empty() ) continue;
-    for(std::size_t j = 0; j < dups[i].size(); ++j) swizzle.push_back(dups[i][j]);
+    for(size_t j = 0; j < dups[i].size(); ++j) swizzle.push_back(dups[i][j]);
     if( duplicator ) duplicator = duplicator & shDup(dups[i].size());
     else duplicator = shDup(dups[i].size());
   }
@@ -269,7 +269,7 @@ ShProgram namedConnect(ShProgram pa, ShProgram pb, bool keepExtra)
   std::vector<bool> aMatch(a->outputs.size(), false);
   std::vector<bool> bMatch(b->inputs.size(), false);
   MatchedChannelMap mcm;
-  std::size_t i, j;
+  size_t i, j;
   ShProgramNode::VarList::const_iterator I, J;
 
   i = 0;

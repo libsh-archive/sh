@@ -1,3 +1,4 @@
+# -*- Makefile -*-
 RELEASE_TARGETS = libsharb.dll
 DEBUG_TARGETS = libsharbd.dll
 
@@ -45,5 +46,5 @@ libsharb_dll_DEPENDS = $(libsharb_dll_CXXFILES:.cpp=.r.d) $(libsharb_dll_CXXFILE
 
 include ../../win32.mk
 INCLUDES += -I../../src
-CPPFLAGS += -DSH_DLLEXPORT=__declspec(dllimport)
+CPPFLAGS += -DSH_DLLEXPORT="__declspec(dllimport)"
 include $(libsharb_dll_DEPENDS)

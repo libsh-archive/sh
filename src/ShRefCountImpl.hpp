@@ -69,8 +69,7 @@ ShPointer<T>::ShPointer(const ShPointer<T>& other)
   if (m_object) m_object->acquireRef();
 }
 
-template<typename T>
-template<typename S>
+template<typename S, T>
 ShPointer<T>::ShPointer(const ShPointer<S>& other)
   : m_object(other.object())
 {
@@ -128,8 +127,7 @@ ShPointer<T>& ShPointer<T>::operator=(const ShPointer<T>& other)
   return *this;
 }
 
-template<typename T>
-template<typename S>
+template<typename S, T>
 ShPointer<T>& ShPointer<T>::operator=(const ShPointer<S>& other)
 {
 #ifdef SH_REFCOUNT_DEBUGGING

@@ -617,7 +617,7 @@ void BackendCode::allocRegs()
   
   ShLinearAllocator allocator(ShBackendCodePtr(this));
   
-  for (std::size_t i = 0; i < m_instructions.size(); i++) {
+  for (size_t i = 0; i < m_instructions.size(); i++) {
     SmInstruction instr = m_instructions[i];
     getReg(instr.dest.node());
     allocator.mark(instr.dest.node(), i);

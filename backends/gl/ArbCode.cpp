@@ -1016,7 +1016,7 @@ void ArbCode::allocTemps(const ArbLimits& limits)
     }
   }
   
-  for (std::size_t i = 0; i < m_instructions.size(); i++) {
+  for (size_t i = 0; i < m_instructions.size(); i++) {
     ArbInst instr = m_instructions[i];
     if (instr.op == SH_ARB_REP) {
       scopestack.push_back((int)i);

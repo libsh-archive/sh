@@ -157,7 +157,7 @@ ShSwizzleException::ShSwizzleException(const ShSwizzle& s, int index, int size)
 bool ShSwizzle::identity() const
 {
   if (m_indices.size() != m_srcSize) return false;
-  for (std::size_t i = 0; i < m_indices.size(); i++) {
+  for (size_t i = 0; i < m_indices.size(); i++) {
     if (m_indices[i] != i) return false;
   }
   return true;

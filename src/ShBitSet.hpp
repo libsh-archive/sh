@@ -67,7 +67,7 @@ public:
    * @arg size number of bits in the bitset.
    */
   ShBitSet();
-  explicit ShBitSet(std::size_t size);
+  explicit ShBitSet(size_t size);
   ShBitSet(const ShBitSet& other);
   
   ~ShBitSet();
@@ -91,13 +91,13 @@ public:
   // Return true iff all entries are 0
   bool empty() const;
   
-  std::size_t size() const;
+  size_t size() const;
 
-  bool operator[](std::size_t i) const;
-  ShBitRef operator[](std::size_t i);
+  bool operator[](size_t i) const;
+  ShBitRef operator[](size_t i);
 
 private:
-  std::size_t m_size;
+  size_t m_size;
   unsigned int* m_data;
 };
 

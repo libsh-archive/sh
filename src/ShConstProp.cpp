@@ -2,6 +2,7 @@
 #include <map>
 #include <set>
 #include <utility>
+#include <iostream>
 #include "ShBitSet.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShDebug.hpp"

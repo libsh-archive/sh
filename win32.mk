@@ -1,4 +1,4 @@
-SH_INSTALLDIR = \Dev\install-sh
+SH_INSTALLDIR = \home\mmccool\install
 
 OPENGL_DIR = \dev\opengl
 MSSDK_DIR = \dev\mssdk

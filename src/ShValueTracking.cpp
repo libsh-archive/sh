@@ -224,7 +224,7 @@ struct UdDuBuilder {
 
     // initialize defs at the start of the block, using the reaching
     // definitions solution.
-    for (std::size_t i = 0; i < r.defs.size(); i++) {
+    for (size_t i = 0; i < r.defs.size(); i++) {
       for (int j = 0; j < r.defs[i].stmt->dest().size(); j++) {
         if (r.rchin[node][r.defs[i].offset + j]) {
           ValueTracking::Def def(r.defs[i].stmt, j);
@@ -249,7 +249,7 @@ struct UdDuBuilder {
             const DefSet& ds = defs[TupleElement(I->src[j].node(), I->src[j].swizzle()[i])];
 
             vt->defs[j][i] = ds;
-            for (DefSet::iterator J = ds.begin(); J != ds.end(); J++) {
+            for (DefSet::const_iterator J = ds.begin(); J != ds.end(); J++) {
               ValueTracking* ut = J->stmt->template get_info<ValueTracking>();
               if (!ut) {
                 ut = new ValueTracking(J->stmt);

@@ -107,6 +107,10 @@ enum ShOperation {
   SH_OP_FETCH, ///< Unary (takes a stream). Fetch an element from a stream. Similar to TEX
 };
 
+#ifdef IGNORE
+#undef IGNORE
+#endif
+
 /** Information related to a specific operation */
 struct
 SH_DLLEXPORT ShOperationInfo {
@@ -130,7 +134,9 @@ extern const ShOperationInfo opInfo[];
 /** Dummy class representing additional information that can be stored
  *  in statements.
  */
-class ShStatementInfo {
+class 
+SH_DLLEXPORT
+ShStatementInfo {
 public:
   virtual ~ShStatementInfo();
 

@@ -95,7 +95,7 @@ public:
   bool operator==(const ShSwizzle& other) const;
   
 private:
-  std::size_t m_srcSize;
+  size_t m_srcSize;
   std::vector<int> m_indices;
 
   friend SH_DLLEXPORT std::ostream& operator<<(std::ostream& out, const ShSwizzle& swizzle);

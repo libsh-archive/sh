@@ -33,5 +33,5 @@ libshutil_lib_DEPENDS = $(libshutil_lib_CXXFILES:.cpp=.r.d) $(libshutil_lib_CXXF
 
 include ../win32.mk
 INCLUDES += -I../src
-CPPFLAGS += -DSH_DLLEXPORT=__declspec(dllimport)
+CPPFLAGS += -DSH_DLLEXPORT="__declspec(dllimport)"
 include $(libshutil_lib_DEPENDS)
