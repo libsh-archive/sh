@@ -147,7 +147,12 @@ class CcBackendCode: public SH::ShBackendCode
 
     std::stringstream m_code;
 
-    void* m_handle;
+#ifdef WIN32
+      HMODULE m_hmodule;
+#else
+      void* m_handle;
+#endif /* WIN32 */
+
     CcFunc m_func;
 
     int m_cur_temp;

@@ -1,0 +1,61 @@
+# -*- makefile -*-
+include ../../win32.mk
+
+INCLUDES += -I../../src
+CPPFLAGS += -DSH_DLLEXPORT="__declspec(dllimport)"
+
+ALL_TARGETS =
+INSTALL_TARGETS =
+RELEASE_TARGETS = libshcc.dll
+DEBUG_TARGETS = libshccd.dll
+
+ifeq ($(BUILD_RELEASE), 1)
+	ALL_TARGETS += all-release
+	INSTALL_TARGETS += install-release
+endif
+
+ifeq ($(BUILD_DEBUG), 1)
+	ALL_TARGETS += all-debug
+	INSTALL_TARGETS += install-debug
+endif
+
+all: $(ALL_TARGETS)
+install: $(INSTALL_TARGETS)
+all-release: $(RELEASE_TARGETS)
+all-debug: $(DEBUG_TARGETS)
+
+libshcc_dll_SOURCES = Cc.hpp Cc.cpp CcEmit.cpp
+
+libshcc_dll_CXXFILES = $(filter %.cpp,$(libshcc_dll_SOURCES))
+libshcc_dll_RELEASE_OBJECTS = $(libshcc_dll_CXXFILES:.cpp=.r.obj)
+libshcc_dll_DEBUG_OBJECTS = $(libshcc_dll_CXXFILES:.cpp=.d.obj)
+
+libshcc_dll_RELEASE_LDADD = ../../src/libsh.lib 
+libshcc_dll_DEBUG_LDADD = ../../src/libshd.lib 
+
+libshcc.dll: $(libshcc_dll_RELEASE_OBJECTS)
+	$(LD) /DLL /OUT:$@ $^ $(RELEASE_LDFLAGS) $(libshcc_dll_RELEASE_LDADD)
+
+libshccd.dll: $(libshcc_dll_DEBUG_OBJECTS)
+	$(LD) /DLL /OUT:$@ $^ $(DEBUG_LDFLAGS) $(libshcc_dll_DEBUG_LDADD)
+
+install-common:
+	-mkdir $(SH_INSTALLDIR)
+
+install-release: $(RELEASE_TARGETS) install-common
+	copy libshcc.dll $(SH_INSTALLDIR)
+
+install-debug: $(DEBUG_TARGETS) install-common
+	copy libshccd.dll $(SH_INSTALLDIR)
+	copy libshccd.pdb $(SH_INSTALLDIR)
+
+clean:
+	-del $(RELEASE_TARGETS) $(DEBUG_TARGETS)
+	-del *.obj *.d
+	-del *.exp *.pdb *.idb *.ilk
+
+libshcc_dll_DEPENDS = $(libshcc_dll_CXXFILES:.cpp=.r.d) $(libshcc_dll_CXXFILES:.cpp=.d.d)
+
+ifeq ($(GEN_DEPENDENCIES), 1)
+-include $(libshcc_dll_DEPENDS)
+endif

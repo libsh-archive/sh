@@ -24,12 +24,18 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
+
+#ifdef WIN32
+#include <windows.h>
+#include <math.h>
+#else
 #include <dlfcn.h>
-#include <iostream>
-#include <fstream>
-#include <streambuf>
 #include <unistd.h>
 #include <sys/wait.h>
+#endif /* WIN32 */
+
+#include <iostream>
+#include <fstream>
 
 #include "Cc.hpp" 
 #include "ShDebug.hpp" 
@@ -47,9 +53,6 @@
 #else
 #  define SH_CC_DEBUG_PRINT(x) do { } while(0)
 #endif
-
-
-
 
 
 namespace ShCc {
@@ -112,7 +115,11 @@ namespace ShCc {
   
   CcBackendCode::CcBackendCode(const ShProgramNodeCPtr& program) 
     : m_program(program),
-      m_handle(NULL),
+#ifdef WIN32
+    m_hmodule(NULL),
+#else
+    m_handle(NULL),
+#endif
       m_func(NULL),
       m_cur_temp(0),
       m_params(NULL) 
@@ -370,7 +377,11 @@ namespace ShCc {
     prologue << std::endl;
     prologue << std::endl;
     prologue << "extern \"C\" "
-	   << " void func("
+#ifdef WIN32
+	     << " void __declspec(dllexport) func("
+#else
+	     << " void func("
+#endif /* WIN32 */
 	   << "void** inputs, "
 	   << "const void** params, "
 	   << "void** channels, "
@@ -388,6 +399,79 @@ namespace ShCc {
     SH_CC_DEBUG_PRINT(m_code.str());
     SH_CC_DEBUG_PRINT(epilogue.str());
 
+#ifdef SH_CC_DEBUG
+    std::ofstream dbgout("ccstream.cpp");
+    dbgout << prologue.str();
+    dbgout << m_code.str();
+    dbgout << epilogue.str();
+    dbgout.flush();
+    dbgout.close();
+#endif
+
+#ifdef WIN32
+    // generate temporary names for the
+    // code and the dll
+    char path[1024];
+    GetTempPath(1024, path);
+
+    char prefix[1024];
+    GetTempFileName(path, "shcc", 0, prefix);
+
+    char cppfile[1024];
+    char dllfile[1024];
+    sprintf(cppfile, "%s.cpp", prefix);
+    sprintf(dllfile, "%s.dll", prefix);
+
+    // write the code out to cppfile
+    std::ofstream fout(cppfile);
+    fout << prologue.str();
+    fout << m_code.str();
+    fout << epilogue.str();
+    fout.flush();
+    fout.close();
+
+    // run cl on cppfile and generate dllfile
+    char cmdline[1024];
+    sprintf(cmdline, "cl /LD /Fe\"%s\" \"%s\"", dllfile, cppfile);
+
+    SH_CC_DEBUG_PRINT("cmdline: \"" << cmdline << "\"");
+
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+    ZeroMemory(&si, sizeof(STARTUPINFO));   
+    ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));   
+    si.cb = sizeof(STARTUPINFO);
+
+    if (!CreateProcess(NULL, cmdline, NULL, NULL,
+                      TRUE, 0, NULL, NULL, &si, &pi))
+      {
+      SH_CC_DEBUG_PRINT("CreateProcess failed!" << GetLastError());
+      return false;
+      }
+
+    // TODO: do not use INFINITE
+    WaitForSingleObject(pi.hProcess, INFINITE);
+
+    // Attempt to load the dll and fetch our function
+    m_hmodule = LoadLibrary(dllfile);
+    if (m_hmodule == NULL)
+      {
+      SH_CC_DEBUG_PRINT("LoadLibrary failed: " << GetLastError());
+      return false;
+      }
+    else
+      {
+      m_func = (CcFunc)GetProcAddress(m_hmodule, "func");
+
+      if (m_func == NULL)
+        {
+        SH_CC_DEBUG_PRINT("GetProcAddress failed: " << GetLastError());
+        return false;
+        }
+      }
+
+    return true;
+#else
     char name[32];
     tmpnam(name);
     char ccfile[32];
@@ -401,15 +485,6 @@ namespace ShCc {
     fout << epilogue.str();
     fout.flush();
     fout.close();
-
-#ifdef SH_CC_DEBUG
-    std::ofstream dbgout("ccstream.cpp");
-    dbgout << prologue.str();
-    dbgout << m_code.str();
-    dbgout << epilogue.str();
-    dbgout.flush();
-    dbgout.close();
-#endif
 
     pid_t pid = fork();
     if (pid == 0) {
@@ -445,6 +520,7 @@ namespace ShCc {
       SH_CC_DEBUG_PRINT("fork failed...");
       return false;
     }
+#endif /* WIN32 */
   }
 
   bool CcBackendCode::execute(ShStream& dest) 
