@@ -1830,7 +1830,7 @@ void AtiBackend::getUberbufferData(const ShUberbuffer *ub, int xoffset, int yoff
   // a float framebuffer, so ReadPixels can return unclamped values with full precision
   GLint propsArray[] = { GL_TEXTURE_2D, GL_TRUE, GL_COLOR_BUFFER_ATI, GL_TRUE };
   GLmem dummyMem = glAllocMem2DATI(ub->format(), ub->width(), ub->height(), 2, propsArray);
-  if( !tempfb ) {
+  if( tempfb < 0) {
     tempfb = glCreateFramebufferATI();
     SH_DEBUG_PRINT("Create temporary framebuffer fb " << tempfb);
     CHECK_GL_ERROR();
@@ -2009,7 +2009,7 @@ void AtiBackend::copyUberbufferData(SH::ShUberbufferPtr dest, SH::ShUberbufferPt
   
   // use this dummy memory object to force GL_AUXn to be
   // a float framebuffer, so ReadPixels can return unclamped values with full precision
-  if( !tempfb ) {
+  if( tempfb < 0 ) {
    tempfb = glCreateFramebufferATI();
     SH_DEBUG_PRINT("Create temporary framebuffer fb " << tempfb);
     CHECK_GL_ERROR();
