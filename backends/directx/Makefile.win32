@@ -1,0 +1,81 @@
+# -*- makefile -*-
+include ../../win32.mk
+
+INCLUDES += -I../../src -I/dxsdk/include
+CPPFLAGS += -DSH_DLLEXPORT="__declspec(dllimport)"
+
+ALL_TARGETS =
+INSTALL_TARGETS =
+RELEASE_TARGETS = libshps.dll
+DEBUG_TARGETS = libshpsd.dll
+
+ifeq ($(BUILD_RELEASE), 1)
+	ALL_TARGETS += all-release
+	INSTALL_TARGETS += install-release
+endif
+
+ifeq ($(BUILD_DEBUG), 1)
+	ALL_TARGETS += all-debug
+	INSTALL_TARGETS += install-debug
+endif
+
+all: $(ALL_TARGETS)
+install: $(INSTALL_TARGETS)
+all-release: $(RELEASE_TARGETS)
+all-debug: $(DEBUG_TARGETS)
+
+# Pixel Shader/Vertex Shader Assembly Language backend
+libshps_dll_SOURCES = PS.hpp PS.cpp
+libshps_dll_SOURCES += PSBackend.cpp
+libshps_dll_SOURCES += PSCode.hpp PSCode.cpp
+libshps_dll_SOURCES += PSEmit.cpp
+libshps_dll_SOURCES += PSInst.hpp PSInst.cpp
+libshps_dll_SOURCES += PSLimits.hpp PSLimits.cpp
+libshps_dll_SOURCES += PSReg.hpp PSReg.cpp
+
+# DirectX backend
+libshps_dll_SOURCES += DxBackend.hpp DxBackend.cpp
+libshps_dll_SOURCES += DxTextureName.hpp DxTextureName.cpp
+
+# DirectX textures
+libshps_dll_SOURCES += DxTextures.hpp DxTextures.cpp
+libshps_dll_SOURCES += DxTextureStorage.hpp DxTextureStorage.cpp
+
+# pbuffer stream
+#libshps_dll_SOURCES += PBufferStreams.hpp PBufferStreams.cpp
+
+libshps_dll_CXXFILES = $(filter %.cpp,$(libshps_dll_SOURCES))
+libshps_dll_RELEASE_OBJECTS = $(libshps_dll_CXXFILES:.cpp=.r.obj)
+libshps_dll_DEBUG_OBJECTS = $(libshps_dll_CXXFILES:.cpp=.d.obj)
+
+libshps_dll_RELEASE_LDADD = ../../src/libsh.lib 
+libshps_dll_RELEASE_LDADD += /dxdsk/lib/d3d9.LIB
+libshps_dll_DEBUG_LDADD = ../../src/libshd.lib 
+libshps_dll_DEBUG_LDADD += /dxdsk/lib/d3d9.LIB
+
+libshps.dll: $(libshps_dll_RELEASE_OBJECTS)
+	$(LD) /DLL /OUT:$@ $^ $(RELEASE_LDFLAGS) $(libshps_dll_RELEASE_LDADD)
+
+libshpsd.dll: $(libshps_dll_DEBUG_OBJECTS)
+	$(LD) /DLL /OUT:$@ $^ $(DEBUG_LDFLAGS) $(libshps_dll_DEBUG_LDADD)
+
+install-common:
+	-mkdir $(SH_INSTALLDIR)
+
+install-release: $(RELEASE_TARGETS) install-common
+	copy libshps.dll $(SH_INSTALLDIR)
+
+install-debug: $(DEBUG_TARGETS) install-common
+	copy libshpsd.dll $(SH_INSTALLDIR)
+	copy libshpsd.pdb $(SH_INSTALLDIR)
+
+clean:
+	-del $(RELEASE_TARGETS) $(DEBUG_TARGETS)
+	-del *.obj *.d
+	-del *.exp *.pdb *.idb *.ilk
+
+libshps_dll_DEPENDS = $(libshps_dll_CXXFILES:.cpp=.r.d) $(libshps_dll_CXXFILES:.cpp=.d.d)
+
+ifeq ($(GEN_DEPENDENCIES), 1)
+-include $(libshps_dll_DEPENDS)
+endif
