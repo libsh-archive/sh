@@ -37,6 +37,7 @@
 #include "ShCtrlGraph.hpp"
 #include "ShTextureNode.hpp"
 #include "ShChannelNode.hpp"
+#include "ShMeta.hpp"
 
 namespace SH {
 
@@ -45,7 +46,7 @@ class ShBackend;
 
 /** A particular Sh program.
  */
-class ShProgramNode : public ShRefCountable {
+class ShProgramNode : public virtual ShRefCountable, public virtual ShMeta {
 public:
   ShProgramNode(const std::string& target);
 
@@ -91,12 +92,6 @@ public:
   /// to make lists of all the variables used in the shader.
   void collectVariables();
 
-  /// Set a name for this program
-  void name(const std::string& name);
-
-  /// Get this program's name - may be empty.
-  std::string name() const;
-  
   typedef std::list<ShVariableNodePtr> VarList;
   typedef std::list<ShTextureNodePtr> TexList;
   typedef std::list<ShChannelNodePtr> ChannelList;
@@ -119,8 +114,6 @@ private:
 
   std::string m_target; ///< Can be empty, if there is no target associated with this program.
 
-  std::string m_name; ///< Can be empty, until one is set with name().
-  
   void collectNodeVars(const ShPointer<ShCtrlGraphNode>& node);
   void collectVar(const ShVariableNodePtr& node);
 

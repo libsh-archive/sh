@@ -6,13 +6,22 @@
 #include "ShMemory.hpp"
 #include "ShVariable.hpp"
 #include "ShAttrib.hpp"
+#include "ShMetaForwarder.hpp"
 
 namespace SH {
+
+class ShBaseTexture : public ShMetaForwarder {
+public:
+  ShBaseTexture(const ShTextureNodePtr& node);
+
+protected:
+  ShTextureNodePtr m_node;
+};
 
 /** Base type for 1D Textures.
  */
 template<typename T>
-class ShBaseTexture1D {
+class ShBaseTexture1D : public ShBaseTexture {
 public:
   ShBaseTexture1D(const ShTextureTraits& traits);
   ShBaseTexture1D(int width, const ShTextureTraits& traits);
@@ -24,19 +33,13 @@ public:
   void memory(ShMemoryPtr memory);
   void size(int width);
 
-  void name(const std::string&);
-  std::string name() const;
-
   ShAttrib1f size() const;
-
-protected:
-  ShTextureNodePtr m_node;
 };
 
 /** Base type for 2D Textures.
  */
 template<typename T>
-class ShBaseTexture2D {
+class ShBaseTexture2D : public ShBaseTexture  {
 public:
   ShBaseTexture2D(const ShTextureTraits& traits);
   ShBaseTexture2D(int width, int height, const ShTextureTraits& traits);
@@ -48,19 +51,13 @@ public:
   void memory(ShMemoryPtr memory);
   void size(int width, int height);
 
-  void name(const std::string&);
-  std::string name() const;
-
   ShAttrib2f size() const;
-  
-protected:
-  ShTextureNodePtr m_node;
-};
+  };
 
 /** Base type for Rectangular Textures.
  */
 template<typename T>
-class ShBaseTextureRect {
+class ShBaseTextureRect : public ShBaseTexture  {
 public:
   ShBaseTextureRect(const ShTextureTraits& traits);
   ShBaseTextureRect(int width, int height, const ShTextureTraits& traits);
@@ -71,20 +68,14 @@ public:
   ShMemoryPtr memory();
   void memory(ShMemoryPtr memory);
   void size(int width, int height);
-  
-  void name(const std::string&);
-  std::string name() const;
 
   ShAttrib2f size() const;
-
-protected:
-  ShTextureNodePtr m_node;
 };
 
 /** Base type for 3D Textures.
  */
 template<typename T>
-class ShBaseTexture3D {
+class ShBaseTexture3D : public ShBaseTexture  {
 public:
   ShBaseTexture3D(const ShTextureTraits& traits);
   ShBaseTexture3D(int width, int height, int depth, const ShTextureTraits& traits);
@@ -96,19 +87,13 @@ public:
   void memory(ShMemoryPtr memory);
   void size(int width, int height, int depth);
 
-  void name(const std::string&);
-  std::string name() const;
-
   ShAttrib3f size() const;
-
-protected:
-  ShTextureNodePtr m_node;
 };
 
 /** Base type for Cube Textures.
  */
 template<typename T>
-class ShBaseTextureCube {
+class ShBaseTextureCube : public ShBaseTexture {
 public:
   ShBaseTextureCube(const ShTextureTraits& traits);
   ShBaseTextureCube(int width, int height, const ShTextureTraits& traits);
@@ -118,14 +103,8 @@ public:
   ShMemoryPtr memory(ShCubeDirection face);
   void memory(ShMemoryPtr memory, ShCubeDirection face);
   void size(int width, int height);
-  
-  void name(const std::string&);
-  std::string name() const;
 
   ShAttrib2f size() const;
-  
-protected:
-  ShTextureNodePtr m_node;
 };
 
 }

@@ -29,6 +29,7 @@
 
 #include <string>
 #include "ShRefCount.hpp"
+#include "ShMeta.hpp"
 
 namespace SH {
 
@@ -62,7 +63,8 @@ extern const char* ShSemanticTypeName[];
 
 /** A generic n-tuple variable.
  */
-class ShVariableNode : public ShRefCountable {
+class ShVariableNode : public virtual ShRefCountable,
+                       public virtual ShMeta {
 public:
   ShVariableNode(ShBindingType kind, int size, ShSemanticType type = SH_ATTRIB);
   virtual ~ShVariableNode();
@@ -78,23 +80,17 @@ public:
   void lock(); ///< Do not update bound shaders in subsequent setValue calls
   void unlock(); ///< Update bound shader values, and turn off locking
   
-  std::string name() const; ///< Get this variable's name
 
-  /// Set this variable's name. If set to the empty string, defaults
-  /// to the type and id of the variable.
-  void name(const std::string& name);
-
-  /// Returns true iff. this variable has been assigned an actual name.
-  bool hasName();
-  
   typedef float ValueType; ///< This is not necessarily correct. Oh well.
 
   // Metadata
+  std::string name() const; ///< Get this variable's name
+  void name(const std::string& n); ///< Set this variable's name
+
+  /// Set a range of possible values for this variable's elements
   void range(ShVariableNode::ValueType low, ShVariableNode::ValueType high);
   ShVariableNode::ValueType lowBound() const;
   ShVariableNode::ValueType highBound() const;
-  void internal(bool setting);
-  bool internal() const;
 
   ShBindingType kind() const;
   ShSemanticType specialType() const;
@@ -119,18 +115,18 @@ protected:
   ShSemanticType m_specialType;
   int m_size;
   int m_id;
-  std::string m_name;
   int m_locked;
 
-  // Metadata
   ValueType* m_values;
+
+  // Metadata (range)
   ValueType m_lowBound, m_highBound;
-  bool m_internal;
   
   static int m_maxID;
 };
 
 typedef ShPointer<ShVariableNode> ShVariableNodePtr;
+typedef ShPointer<const ShVariableNode> ShVariableNodeCPtr;
 
 }
 

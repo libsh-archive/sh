@@ -31,7 +31,7 @@
 #include "ShVariableNode.hpp"
 #include "ShSwizzle.hpp"
 #include "ShUtility.hpp"
-
+#include "ShMetaForwarder.hpp"
 
 namespace SH {
 
@@ -41,7 +41,7 @@ namespace SH {
  * instances of subclasses of ShVariable being sliced when they get
  * placed in ShStatements.
 */
-class ShVariable {
+class ShVariable : public ShMetaForwarder {
 public:
   ShVariable();
   ShVariable(const ShVariableNodePtr& node);
@@ -64,10 +64,6 @@ public:
    */
   //@{
 
-  /// Set this variable's name. If set to the empty string, defaults
-  /// to the type and id of the variable.
-  void name(const std::string& name);
-  std::string name() const; ///< Get this variable's name
   
   /// Set a range of values for this variable
   void range(ShVariableNode::ValueType low, ShVariableNode::ValueType high);
@@ -75,17 +71,6 @@ public:
   ShVariableNode::ValueType lowBound() const;
   /// Obtain an upper bound on this variable
   ShVariableNode::ValueType highBound() const;
-
-  /// If this is true, this variable should not be able to be set by
-  /// e.g. a user in a UI. For example the model-view matrix should
-  /// probably have this set to true.
-  /// This is false by default.
-  void internal(bool setting);
-  /// If this is true, this variable should not be able to be set by
-  /// e.g. a user in a UI. For example the model-view matrix should
-  /// probably have this set to true.
-  /// This is false by default.
-  bool internal() const;
 
   //@}
   

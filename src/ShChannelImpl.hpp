@@ -39,14 +39,18 @@ namespace SH {
 
 template<typename T>
 ShChannel<T>::ShChannel()
-  : m_node(new ShChannelNode(T::semantic_type, T::typesize))
+  : ShMetaForwarder(0),
+    m_node(new ShChannelNode(T::semantic_type, T::typesize))
 {
+  real_meta(m_node.object());
 }
 
 template<typename T>
 ShChannel<T>::ShChannel(const ShMemoryPtr& memory, int count)
-  : m_node(new ShChannelNode(T::semantic_type, T::typesize, memory, count))
+  : ShMetaForwarder(0),
+    m_node(new ShChannelNode(T::semantic_type, T::typesize, memory, count))
 {
+  real_meta(m_node.object());
 }
 
 template<typename T>

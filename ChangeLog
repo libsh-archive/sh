@@ -1,7 +1,26 @@
-2004-05-27  Bryan Chan <b8chan@uwaterloo.ca>
-  * src/ShManipulator.hpp, test/manip.sht (shInsert):
-  Added shInsert manipulator and added a corresponding test shader.
+2004-05-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShProgram.hpp (class ShProgramNode): Use ShMeta.
+
+	* src/ShChannel.hpp (class ShChannel): Use ShMetaForwarder.
+
+	* src/ShVariable.hpp (class ShVariable): Use ShMetaForwarder.
+
+	* src/ShVariableNode.hpp (class ShVariableNode): Use ShMeta.
+
+	* src/ShBaseTexture.cpp (ShBaseTexture): Implement.
+
+	* src/ShBaseTexture.hpp: Add ShBaseTexture class.
+
+	* src/ShMeta.hpp, src/ShMeta.cpp, src/ShMetaForwarder.hpp,
+	src/ShMetaForwarder.cpp: Added ShMeta and ShMetaForwarder
+	classes. Resolves issue17.
+
+2004-05-27  Bryan Chan <b8chan@uwaterloo.ca>
+
+	* src/ShManipulator.hpp, test/manip.sht (shInsert): Added shInsert
+	manipulator and added a corresponding test shader.
+	  
 2004-05-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShInstructions.cpp (CWISE_BINARY_OP): Allocate correct size

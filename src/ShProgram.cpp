@@ -47,16 +47,6 @@ ShProgramNode::~ShProgramNode()
   // take care of it.
 }
 
-void ShProgramNode::name(const std::string& n)
-{
-  m_name = n;
-}
-
-std::string ShProgramNode::name() const
-{
-  return m_name;
-}
-
 void ShProgramNode::compile(const ShPointer<ShBackend>& backend)
 {
   if (m_target.empty()) shError( ShException( "Invalid ShProgram target" ) );

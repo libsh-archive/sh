@@ -31,19 +31,22 @@
 namespace SH {
 
 ShVariable::ShVariable()
-  : m_node(0), m_swizzle(0), m_neg(false)
+  : ShMetaForwarder(0),
+    m_node(0), m_swizzle(0), m_neg(false)
 {
 }
 
 ShVariable::ShVariable(const ShVariableNodePtr& node)
-  : m_node(node), m_swizzle(node ? node->size() : 0), m_neg(false)
+  : ShMetaForwarder(node.object()),
+    m_node(node), m_swizzle(node ? node->size() : 0), m_neg(false)
 {
 }
 
 ShVariable::ShVariable(const ShVariableNodePtr& node,
                        const ShSwizzle& swizzle,
                        bool neg)
-  : m_node(node), m_swizzle(swizzle), m_neg(neg)
+  : ShMetaForwarder(node.object()),
+    m_node(node), m_swizzle(swizzle), m_neg(neg)
 {
 }
 
@@ -67,16 +70,6 @@ int ShVariable::size() const
   return m_swizzle.size();
 }
 
-std::string ShVariable::name() const
-{
-  return m_node->name();
-}
-
-void ShVariable::name(const std::string& name)
-{
-  m_node->name(name);
-}
-
 void ShVariable::range(ShVariableNode::ValueType low, ShVariableNode::ValueType high)
 {
   m_node->range(low, high);
@@ -90,16 +83,6 @@ ShVariableNode::ValueType ShVariable::lowBound() const
 ShVariableNode::ValueType ShVariable::highBound() const
 {
   return m_node->highBound();
-}
-
-void ShVariable::internal(bool setting)
-{
-  m_node->internal(setting);
-}
-
-bool ShVariable::internal() const
-{
-  return m_node->internal();
 }
 
 const ShSwizzle& ShVariable::swizzle() const
