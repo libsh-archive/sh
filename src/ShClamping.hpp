@@ -9,17 +9,17 @@ public:
   ShClamped(int width)
     : T(width)
   {
-    m_node->traits().wrapping(ShTextureTraits::SH_CLAMPED);
+    m_node->traits().clamping(ShTextureTraits::SH_CLAMPED);
   }
   ShClamped(int width, int height)
     : T(width, height)
   {
-    m_node->traits().wrapping(ShTextureTraits::SH_CLAMPED);
+    m_node->traits().clamping(ShTextureTraits::SH_CLAMPED);
   }
   ShClamped(int width, int height, int depth)
     : T(width, height, depth)
   {
-    m_node->traits().wrapping(ShTextureTraits::SH_CLAMPED);
+    m_node->traits().clamping(ShTextureTraits::SH_CLAMPED);
   }
 };
 
@@ -29,17 +29,17 @@ public:
   ShUnclamped(int width)
     : T(width)
   {
-    m_node->traits().wrapping(ShTextureTraits::SH_UNCLAMPED);
+    m_node->traits().clamping(ShTextureTraits::SH_UNCLAMPED);
   }
   ShUnclamped(int width, int height)
     : T(width, height)
   {
-    m_node->traits().wrapping(ShTextureTraits::SH_UNCLAMPED);
+    m_node->traits().clamping(ShTextureTraits::SH_UNCLAMPED);
   }
   ShUnclamped(int width, int height, int depth)
     : T(width, height, depth)
   {
-    m_node->traits().wrapping(ShTextureTraits::SH_UNCLAMPED);
+    m_node->traits().clamping(ShTextureTraits::SH_UNCLAMPED);
   }
 };
 
