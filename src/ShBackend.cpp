@@ -130,8 +130,12 @@ void ShBackend::getUberbufferData(const SH::ShUberbuffer *ub, int xoffset, int y
   printf("no uberbuffer support for this backend...\n");
 }
 
-void ShBackend::copyUberbufferData(SH::ShUberbufferPtr dest, const SH::ShUberbuffer *src ) {
+void ShBackend::copyUberbufferData(SH::ShUberbufferPtr dest, SH::ShUberbufferPtr src ) {
   printf("no uberbuffer support for this backend...\n");
+}
+
+void ShBackend::deleteFramebuffer(const ShFramebuffer *fb) {
+  printf("no framebuffer support for this backend...\n");
 }
 
 void ShBackend::deleteUberbuffer(const ShUberbuffer *ub) {

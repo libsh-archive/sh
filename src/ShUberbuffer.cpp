@@ -38,12 +38,14 @@ void ShUberbuffer::setFormat( unsigned int format ) {
 }
 
 bool ShUberbuffer::copy( ShUberbufferPtr b ) {
-  printf( "copy() %d to %d\n", b->mem(), m_mem );
   if( !compatibleWith( b ) ) return false;
   m_properties = b->properties();
   m_format = b->format();
-//  glDeleteMemATI( m_mem );
- // m_mem = glCloneMemATI( b->mem() );
+  if( m_mem ) {
+    ShEnvironment::backend->deleteUberbuffer( this );
+    m_mem = 0;
+  }
+  ShEnvironment::backend->copyUberbufferData( this, b );
 
   if( m_mem == 0 ) {
     SH_DEBUG_ERROR( "Unable to clone uber buffer" );

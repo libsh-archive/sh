@@ -36,10 +36,13 @@ namespace SH {
 
 ShFramebuffer::ShFramebuffer(int width, int height, int depth, int elements)
   : m_width(width), m_height(height), m_depth(depth), m_elements(elements),
-    m_ub(0) {
+    m_fb(0), m_ub(0) {
 }
 
 ShFramebuffer::~ShFramebuffer() {
+  if( m_fb != 0 && ShEnvironment::backend ) {
+    ShEnvironment::backend->deleteFramebuffer( this );
+  }
 }
 
 int ShFramebuffer::width() const {
@@ -57,6 +60,15 @@ int ShFramebuffer::depth() const {
 int ShFramebuffer::elements() const {
   return m_elements;
 }
+
+unsigned int ShFramebuffer::fb() const {
+  return m_fb;
+}
+
+void ShFramebuffer::setFb( unsigned int fb ) {
+  m_fb = fb;
+}
+
 
 void ShFramebuffer::bind( ShUberbufferPtr ub ) {
   m_ub = ub;

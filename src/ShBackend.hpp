@@ -33,6 +33,7 @@
 #include "ShRefCount.hpp"
 #include "ShProgram.hpp"
 #include "ShVariableNode.hpp"
+#include "ShFramebuffer.hpp"
 #include "ShUberbuffer.hpp"
 
 #include "ShArrayData.hpp"
@@ -81,8 +82,9 @@ public:
          int width, int height, const float *data );
   virtual void getUberbufferData(const SH::ShUberbuffer *ub, int xoffset, int yoffset,
           int width, int height, float *data );
-  virtual void copyUberbufferData(SH::ShUberbufferPtr dest, const SH::ShUberbuffer *src );
+  virtual void copyUberbufferData(SH::ShUberbufferPtr dest, SH::ShUberbufferPtr src );
 
+  virtual void deleteFramebuffer(const ShFramebuffer *fb);
   virtual void deleteUberbuffer(const ShUberbuffer *ub);
 
   virtual void init2(void);
