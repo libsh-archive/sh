@@ -2,8 +2,8 @@
 //
 // Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
 // Project administrator: Michael D. McCool
-// Authors: Bryan Chan 
-//          
+// Authors:  Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
+//           Bryan Chan, Michael McCool
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -42,7 +42,7 @@ using namespace SH;
 // TODO handle operands with different T
 #define SHLA_LIB_VEC_OP( op, op_src ) \
   template<typename T, int M, int N>  \
-  ShlaVector<T, M, N> op( ShlaVector<T, M, N> &a, ShlaVector<T, M, N> &b ) { \
+  ShlaVector<T, M, N> op( const ShlaVector<T, M, N> &a, const ShlaVector<T, M, N> &b ) { \
     /* only use static variables in the shader */ \
     typedef ShlaRenderGlobal<T, M, N> global; \
     static ShProgram fsh; \
@@ -83,13 +83,57 @@ SHLA_LIB_VEC_OP( operator*, op1(tc) * op2(tc) );
 SHLA_LIB_VEC_OP( operator/, op1(tc) / op2(tc) );
 SHLA_LIB_VEC_OP( operator-, op1(tc) - op2(tc) );
 
+#define SHLA_LIB_RIGHT_SCALAR_OP( op, op_src ) \
+  template<typename T, int M, int N>  \
+  ShlaVector<T, M, N> op( const ShlaVector<T, M, N> &a, double s ) { \
+    /* only use static variables in the shader */ \
+    typedef ShlaRenderGlobal<T, M, N> global; \
+    static ShProgram fsh; \
+    static ShTexture2D<T>& op1 = global::op1; \
+    if( !fsh ) {\
+      ShEnvironment::boundShader[0] = 0; \
+      ShEnvironment::boundShader[1] = 0; \
+      fsh = SH_BEGIN_FRAGMENT_PROGRAM { \
+        ShInputTexCoord2f tc;\
+        ShInputPosition4f p;\
+        typename global::OutputColorType out;\
+        out = op_src; \
+      } SH_END_PROGRAM;\
+    }\
+    \
+    ShlaVector<T, M, N> result; \
+\
+    global::renderbuf->bind( result.getMem() );\
+    op1.attach( a.getMem() );\
+\
+    global::bindDefault( fsh ); \
+\
+    ShFramebufferPtr oldfb = ShEnvironment::framebuffer;\
+    global::useRenderbuf();\
+    global::drawQuad();\
+    global::detachAll();\
+    shDrawBuffer( oldfb );\
+\
+    return result; \
+  }
+
+// uses RIGHT_SCALAR_OP to make a commutative vector-scalar operator
+#define SHLA_LIB_COMMUTATIVE_SCALAR_OP( op, op_src ) \
+  SHLA_LIB_RIGHT_SCALAR_OP( op, op_src ); \
+  template< typename T, int M, int N> \
+    ShlaVector<T, M, N> op( double s, const ShlaVector<T, M, N> &a ) { \
+      return op( a, s ); \
+    } 
+SHLA_LIB_RIGHT_SCALAR_OP( operator/, op1(tc) * ( 1.0 / s ) ); 
+SHLA_LIB_COMMUTATIVE_SCALAR_OP( operator*, op1(tc) * s ); 
+
 
 //TODO this should return something of type T
 // implement for non-square, non-power of 2 vectors
 // reduces in half until reaching size. (must have size < N / 2, power of 2)
 #define SHLA_LIB_REDUCE_OP( op, op_src ) \
 template<typename T, int N> \
-ShlaVector<T, N, N> op( ShlaVector<T, N, N> &a, int size = 1 ) { \
+T op( const ShlaVector<T, N, N> &a, int size = 1 ) { \
   /* only use static variables in the shader */ \
   typedef ShlaRenderGlobal<T, N, N> global;\
   static ShProgram fsh; \
@@ -110,7 +154,6 @@ ShlaVector<T, N, N> op( ShlaVector<T, N, N> &a, int size = 1 ) { \
   }\
 \
   ShlaVector<T, N, N> resultVec; \
-  T result;\
   global::bindReduce( fsh );\
   ShFramebufferPtr oldfb = ShEnvironment::framebuffer;\
 \
@@ -132,12 +175,7 @@ ShlaVector<T, N, N> op( ShlaVector<T, N, N> &a, int size = 1 ) { \
   global::detachAll();\
   shDrawBuffer( oldfb );\
 \
-  /* TODO switch back to returning doubles when reading data off card works \
-  for( int i = 0; i < T::typesize; ++i ) {\
-    result.node()->setValue( i, resultVec(0, i) );\
-  }\
-  */\
-  return resultVec; \
+  return resultVec(0); \
 }
 
 SHLA_LIB_REDUCE_OP( reduceAbs, abs( c[0] ) + abs( c[1] ) + abs( c[2] ) + abs( c[3] ) );
@@ -146,57 +184,21 @@ SHLA_LIB_REDUCE_OP( reduceMax, max( max( c[0], c[1] ), max( c[2], c[3] ) ) );
 SHLA_LIB_REDUCE_OP( reduceMin, min( min( c[0], c[1] ), min( c[2], c[3] ) ) ); 
 SHLA_LIB_REDUCE_OP( reduceMul, c[0] * c[1] * c[2] * c[3] );
 
-// TODO - remove this when reading data off card works properly
-// For now, I can't read floating point data 
-template<typename T, int N> 
-ShlaVector<T, N, N> expand( ShlaVector<T, N, N> &a ) { 
-  /* only use static variables in the shader */ 
-  typedef ShlaRenderGlobal<T, N, N> global;
-  static ShProgram fsh; 
-  static ShTexture2D<T>& atex = global::op1; 
-  if( !fsh ) {
-    ShEnvironment::boundShader[0] = 0;
-    ShEnvironment::boundShader[1] = 0;
-    fsh = SH_BEGIN_FRAGMENT_PROGRAM { 
-      ShInputTexCoord2f tc; 
-      ShInputPosition4f p;  
-      typename global::OutputColorType out; 
-      out = atex( ShConstant2f( 0.5 / N, 0.5 / N ) );
-    } SH_END_PROGRAM;
-  }
-  /* end of static section */
-
-  ShlaVector<T, N, N> result; 
-  atex.attach( a.getMem() );
-  ShFramebufferPtr oldfb = ShEnvironment::framebuffer;
-
-  global::renderbuf->bind( result.getMem() );\
-  global::bindDefault( fsh );
-  global::useRenderbuf();
-  global::drawQuad();
-
-  /* restore old state */
-  global::detachAll();
-  shDrawBuffer( oldfb );
-
-  return result; 
-}
-
 // Does iter iterations of unpreconditioned conjugate gradient
 /// TODO change BandedMatrix to Matrix
 template<typename T, int N>
 ShlaVector<T, N, N> conjugateGradient( ShlaBandedMatrix<T, N, N> &A, ShlaVector<T, N, N> &b, int iter = 4 ) {
-  // TODO modify when we can read scalars off GPU 
-  ShlaVector<T, N, N> alpha, beta, rho, p, q, r, x;
+  T alpha, beta, rho;
+  ShlaVector<T, N, N> p, q, r, x;
  
   p = r = b - ( A | x );
   for( int i = 0; i < 4; ++i ) {
-    rho = expand( reduceAdd( r * r ) );
+    rho = reduceAdd( r * r );
     q = A | p;
-    alpha = rho / ( expand( reduceAdd( p * q ) ) ); // scalar op
-    x = x + alpha * p;
+    alpha = rho / ( reduceAdd( p * q ) ); 
+    x = x + p * alpha;
     r = r - alpha * q;
-    beta = expand( reduceAdd( r * r ) ) / rho;
+    beta = reduceAdd( r * r ) / rho;
     p = r + beta * p;
   }
   return x;

@@ -3,10 +3,13 @@
   -remove glClear
 - handle vec ops with different element types
   (e.g. multiply vectors with ShAttrib1f and ShColor3f elements) 
-+ clean up sharing render temporaries 
+X clean up sharing render temporaries 
   (framebuf, 2D textures, ubufs)
-- sparse matrices
-- scalar multiplication
+- sparse matrices (use vert arrays for scatter)
+X scalar multiplication
 - delayed swizzling, negation, constant multiplication 
   on vector components.
   (similar to what Sh does with Attribs)
+- fix assignment bug
+  (either always make a copy of ubuf, or allow reuse of ubufs and
+  do a clone before setData when there is more than one pointer to the ubuf)

@@ -53,7 +53,7 @@ class ShlaVector
 {
   public:
     /** \brief Constructor for ShlaVector
-     * Creates a vector containing all zeroes of length N*N
+     * Creates a vector containing undefined data of length M * N. 
      */
     ShlaVector();
     
@@ -72,37 +72,26 @@ class ShlaVector
      */
     ShlaVector<T, M, N>& operator=( const ShlaVector<T, M, N> &b );
 
-// functions that work with memory objects on the GPU 
     /** \brief Returns a memory object for the vector
      */
-    ShUberbufferPtr getMem();
+    ShUberbufferPtr getMem() const;
 
-// functions that work on memory on the host 
     // TODO explain i, element (element is used when vector holds vector data)
     // TODO change float to T::ValueType (requires some thought, as all the Sh
     // texture stuff is hardcoded to use float currently)
-    const float& operator()( int i, int element ) const; 
-    float& operator()( int i, int element );
+    T operator()( int i ) const; 
 
     // function to set data from a floating point array
-    void setData( float* data ); 
+    void setData( const float* data ); 
+    void setData( int w, int h, const T& elm );
 
     // function sets data to a zeroed floating point array
     void zeroData();
 
-    ShDataMemoryObjectPtr getDataMem();
-
   private:
-    ShMemoryObjectPtr m_mem;
+    ShUberbufferPtr m_mem;
 
-    // changes between super buffer memory object (on GPU) 
-    // and data memory object (on host)
-    // Returns the corresponding memory object, or throws ShlaTransferException if it fails 
-    // If the m_mem is already where it should be, nothing happens.
-    // If the m_mem is uninitialized, then creates a new memory object in desired location
-    // with zeroed contents.
-    ShUberbufferPtr upload();
-    ShDataMemoryObjectPtr download();
+    static float* zeros;
 };
 
 }

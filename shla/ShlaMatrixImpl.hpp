@@ -61,6 +61,9 @@ ShlaDenseMatrix<T, M, N>::~ShlaDenseMatrix() {
 template< typename T, int M, int N >
 template< typename VecT >
 ShlaVector<VecT, M, N> ShlaDenseMatrix<T, M, N>::operator|( ShlaVector<VecT, M, N> &v ) {
+
+  // TODO this doesn't work at all
+#if 0
   /* TODO these should be static */
   typedef ShlaRenderGlobal<VecT, M, N> vecGlobal;
   static ShTexture2D<T> &columnTex = ShlaRenderGlobal<T, M, N>::op1; 
@@ -84,8 +87,10 @@ ShlaVector<VecT, M, N> ShlaDenseMatrix<T, M, N>::operator|( ShlaVector<VecT, M, 
   if( M * N == 1 ) { // handle 1 dimensional matrix
     ShError( ShException( "Cannot handle dimension 1 matrices" ) ); 
   }
+#endif
 
   ShlaVector<VecT, M, N> result;
+#if 0
   ShFramebufferPtr oldfb = ShEnvironment::framebuffer;
 
   vecGlobal::bindDefault( fsh );
@@ -117,6 +122,7 @@ ShlaVector<VecT, M, N> ShlaDenseMatrix<T, M, N>::operator|( ShlaVector<VecT, M, 
 
   shDrawBuffer( oldfb );
   printf( "draw oldfb\n" );
+#endif
   return result;
 }
 
@@ -154,6 +160,8 @@ ShlaVector<VecT, M, N> ShlaBandedMatrix<T, M, N>::operator|( ShlaVector<VecT, M,
   ShFramebufferPtr oldfb = ShEnvironment::framebuffer;
 
   vecTex.attach( v.getMem() );
+
+  blank.zeroData();
   vecGlobal::accumInit( blank.getMem() );
   vecGlobal::bindDefault( fsh );
   printf( "Attaching v\n" );
