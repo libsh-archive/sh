@@ -33,16 +33,211 @@
 
 namespace shgl {
 
-GLhandleARB GlslCode::m_arb_program = 0;
-GlslCode* GlslCode::m_current_shaders[] = { NULL, NULL };
-
 using namespace SH;
 using namespace std;
+
+GlslSet::GlslSet()
+  : m_arb_program(glCreateProgramObjectARB()),
+    m_linked(false), m_bound(false)
+{
+  m_shaders[0] = 0;
+  m_shaders[1] = 0;
+}
+
+GlslSet::GlslSet(const SH::ShPointer<GlslCode>& code)
+  : m_arb_program(glCreateProgramObjectARB()),
+    m_linked(false), m_bound(false)
+{
+  m_shaders[0] = 0;
+  m_shaders[1] = 0;
+  attach(code);
+}
+
+GlslSet::GlslSet(const SH::ShProgramSet& s)
+  : m_arb_program(glCreateProgramObjectARB()),
+    m_linked(false), m_bound(false)
+{
+  m_shaders[0] = 0;
+  m_shaders[1] = 0;
+  for (ShProgramSet::const_iterator I = s.begin(); I != s.end(); ++I) {
+    // TODO: use the glsl backend
+    GlslCodePtr code = shref_dynamic_cast<GlslCode>((*I)->code());
+
+    // TODO: use shError()
+    SH_DEBUG_ASSERT(code);
+    SH_DEBUG_ASSERT(!m_shaders[code->glsl_unit()]);
+
+    attach(code);
+  }
+}
+
+GlslSet::GlslSet(const GlslSet& other)
+  : m_arb_program(glCreateProgramObjectARB()),
+    m_linked(false), m_bound(false)
+{
+  m_shaders[0] = other.m_shaders[0];
+  m_shaders[1] = other.m_shaders[1];
+}
+
+GlslSet& GlslSet::operator=(const GlslSet& other)
+{
+  if (&other == this) return *this;
+
+  unbind();
+  
+  m_shaders[0] = other.m_shaders[0];
+  m_shaders[1] = other.m_shaders[1];
+
+  m_linked = false;
+
+  return *this;
+}
+
+GlslSet::~GlslSet()
+{
+  // Necessary?
+  unbind();
+  SH_GL_CHECK_ERROR(glDeleteObjectARB(m_arb_program));
+  m_arb_program = 0;
+}
+
+void GlslSet::attach(const SH::ShPointer<GlslCode>& code)
+{
+  SH_DEBUG_ASSERT(code);
+  if (m_shaders[code->glsl_unit()] == code) return;
+
+  unbind();
+  
+  SH_DEBUG_ASSERT(m_arb_program);
+  if (m_shaders[code->glsl_unit()]) {
+    SH_GL_CHECK_ERROR(glDetachObjectARB(m_arb_program, m_shaders[code->glsl_unit()]->glsl_shader()));
+  }
+  SH_GL_CHECK_ERROR(glAttachObjectARB(m_arb_program, code->glsl_shader()));
+  m_shaders[code->glsl_unit()] = code;
+
+  // Need to relink
+  m_linked = false;
+}
+
+void GlslSet::detach(const SH::ShPointer<GlslCode>& code)
+{
+  SH_DEBUG_ASSERT(code);
+  if (m_shaders[code->glsl_unit()] != code) return;
+
+  unbind();
+
+  SH_DEBUG_ASSERT(m_arb_program);
+  SH_GL_CHECK_ERROR(glDetachObjectARB(m_arb_program, code->glsl_shader()));
+  m_shaders[code->glsl_unit()] = 0;
+
+  // Need to relink
+  m_linked = false;
+}
+
+void GlslSet::replace(const SH::ShPointer<GlslCode>& code)
+{
+  SH_DEBUG_ASSERT(code);
+  if (m_shaders[code->glsl_unit()] == code && !m_shaders[1 - code->glsl_unit()]) return;
+
+  if (m_shaders[0]) detach(m_shaders[0]);
+  if (m_shaders[1]) detach(m_shaders[1]);
+  attach(code);
+}
+
+
+void GlslSet::link()
+{
+  SH_DEBUG_ASSERT(m_arb_program);
+
+  SH_GL_CHECK_ERROR(glLinkProgramARB(m_arb_program));
+
+  // TODO: probably always want to check this.
+#ifdef SH_DEBUG_GLSL_BACKEND
+  // Check linking
+  int linked;
+  glGetObjectParameterivARB(m_arb_program, GL_OBJECT_LINK_STATUS_ARB, &linked);
+  if (linked != GL_TRUE) {
+    cout << "Program link status: FAILED" << endl << endl;
+    cout << "Program infolog:" << endl;
+    print_infolog(m_arb_program);
+    cout << "Program code:" << endl;
+    print_shader_source(m_arb_program);
+    cout << endl;
+    return;
+  }
+#endif
+
+  m_linked = true;
+}
+
+bool GlslSet::empty() const
+{
+  if (m_shaders[0]) return false;
+  if (m_shaders[1]) return false;
+  return true;
+}
+
+void GlslSet::bind()
+{
+  if (m_bound) {
+    for (int i = 0; i < 2; i++) {
+      if (!m_shaders[i]) continue;
+      m_shaders[i]->update();
+    }
+    return;
+  }
+
+  if (!m_linked) link();
+
+  if (current() && current() != this) current()->unbind();
+  
+  SH_GL_CHECK_ERROR(glUseProgramObjectARB(m_arb_program));
+
+#ifdef SH_DEBUG_GLSL_BACKEND
+  // This could be slow, it should not be enabled in release code
+  glValidateProgramARB(m_arb_program);
+  int validated;
+  glGetObjectParameterivARB(m_arb_program, GL_OBJECT_VALIDATE_STATUS_ARB, &validated);
+  if (validated != GL_TRUE) {
+    cout << "Program validate status: FAILED" << endl;
+    cout << "Program infolog:" << endl;
+    print_infolog(m_arb_program);
+  }
+#endif
+
+  for (int i = 0; i < 2; i++) {
+    if (!m_shaders[i]) continue;
+    GlslCodePtr shader = m_shaders[i];
+    shader->set_bound(m_arb_program);
+
+    shader->upload_uniforms();
+    shader->bind_textures();
+  }
+
+  m_current = this;
+  m_bound = true;
+}
+
+void GlslSet::unbind()
+{
+  if (!m_bound) return;
+
+  SH_GL_CHECK_ERROR(glUseProgramObjectARB(0));
+
+  for (int i = 0; i < 2; i++) {
+    if (!m_shaders[i]) continue;
+    m_shaders[i]->set_bound(0);
+  }
+  m_current = 0;
+  m_bound = false;
+}
+
+GlslSet* GlslSet::m_current = 0;
 
 GlslCode::GlslCode(const ShProgramNodeCPtr& shader, const std::string& unit,
 		   TextureStrategy* texture) 
   : m_texture(texture), m_target("glsl:" + unit), m_arb_shader(0),
-    m_varmap(NULL), m_nb_textures(0), m_bound(false)
+    m_varmap(NULL), m_nb_textures(0), m_bound(0)
 {
   m_originalShader = const_cast<ShProgramNode*>(shader.object());
   
@@ -60,7 +255,8 @@ GlslCode::~GlslCode()
   }
 
   if (m_arb_shader != 0) {
-    unbind();
+    // Shouldn't be bound, ever
+    SH_DEBUG_ASSERT(!m_bound);
     SH_GL_CHECK_ERROR(glDeleteObjectARB(m_arb_shader));
   }
   delete m_varmap;
@@ -162,128 +358,79 @@ void GlslCode::upload()
 #endif
 }
 
-void GlslCode::link()
+GLhandleARB GlslCode::glsl_shader()
 {
-  SH_DEBUG_ASSERT(m_arb_program);
-
-  SH_GL_CHECK_ERROR(glLinkProgramARB(m_arb_program));
-  
-#ifdef SH_DEBUG_GLSL_BACKEND
-  // Check linking
-  int linked;
-  glGetObjectParameterivARB(m_arb_program, GL_OBJECT_LINK_STATUS_ARB, &linked);
-  if (linked != GL_TRUE) {
-    cout << "Program link status (target = " << m_target << "): FAILED" << endl << endl;
-    cout << "Program infolog:" << endl;
-    print_infolog(m_arb_program);
-    cout << "Program code:" << endl;
-    print_shader_source(m_arb_program);
-    cout << endl;
-    return;
-  }
-#endif
-
-  SH_GL_CHECK_ERROR(glUseProgramObjectARB(m_arb_program));
-
-#ifdef SH_DEBUG_GLSL_BACKEND
-  // This could be slow, it should not be enabled in release code
-  glValidateProgramARB(m_arb_program);
-  int validated;
-  glGetObjectParameterivARB(m_arb_program, GL_OBJECT_VALIDATE_STATUS_ARB, &validated);
-  if (validated != GL_TRUE) {
-    cout << "Program validate status (target = " << m_target << "): FAILED" << endl;
-    cout << "Program infolog:" << endl;
-    print_infolog(m_arb_program);
-  }
-#endif
-
-  for (int i = 0; i < 2; i++) {
-    if (!m_current_shaders[i]) continue;
-    GlslCode* shader = m_current_shaders[i];
-    
-    if (shader->m_bound) {
-      SH_DEBUG_ASSERT(shader->m_varmap);
-      
-      // Whenever the program is linked, we must reinitialize the uniforms
-      // because their values are reset.  Also, we must call
-      // glUseProgramObjectARB before we can get the location of uniforms.
-      for (GlslVariableMap::NodeList::iterator i = shader->m_varmap->node_begin();
-           i != shader->m_varmap->node_end(); i++) {
-        ShVariableNodePtr node = *i;
-        if (node->hasValues() && node->uniform()) {
-          shader->updateUniform(node);
-        }
-      }
-    }
-  }
-}
-
-void GlslCode::bind()
-{
-  if (m_bound) {
-    update();
-    return;
-  }
-
-  // Unbind the previously attached shader if necessary
-  if (m_current_shaders[m_unit]) {
-    m_current_shaders[m_unit]->unbind(false);
-  }
-  
-  // Compile code if necessary
   if (!m_arb_shader) {
     upload();
   }
 
-  if (!m_arb_program) {
-    m_arb_program = glCreateProgramObjectARB();
-  }
-  
-  ShContext::current()->set_binding(m_target, ShProgram(m_originalShader));
-  m_current_shaders[m_unit] = this;
-  m_bound = true; // must be set before the call to link()
-  
-  SH_GL_CHECK_ERROR(glAttachObjectARB(m_arb_program, m_arb_shader));
-  link();
+  return m_arb_shader;
+}
 
-  // Make sure all textures are loaded.
-  bind_textures();
+void GlslCode::bind()
+{
+  if (m_bound) return;
+
+  if (!m_fallback_set) m_fallback_set = new GlslSet;
+
+  if (GlslSet::current()) {
+    *m_fallback_set = *GlslSet::current();
+    m_fallback_set->attach(this);
+  } else {
+    m_fallback_set->replace(this);
+  }
+  m_fallback_set->bind();
 }
 
 void GlslCode::unbind()
 {
-  unbind(true);
-}
-
-void GlslCode::unbind(bool refresh)
-{
   if (!m_bound) return;
-
-  SH_DEBUG_ASSERT(m_current_shaders[m_unit] == this);
-  SH_DEBUG_ASSERT(m_arb_shader);
-  SH_DEBUG_ASSERT(m_arb_program);
-
-  SH_GL_CHECK_ERROR(glDetachObjectARB(m_arb_program, m_arb_shader));
-
-  m_bound = false; // must be set before the calls to link() and unset_binding()
-  m_current_shaders[m_unit] = NULL;
-
-  // Refresh the current rendering state
-  if (refresh) {
-    if (!m_current_shaders[SH_GLSL_FP] && !m_current_shaders[SH_GLSL_VP]) {
-      SH_GL_CHECK_ERROR(glUseProgramObjectARB(0));
-    } else {
-      link();
-    }
-  }
+  SH_DEBUG_ASSERT(GlslSet::current());
   
-  ShContext::current()->unset_binding(m_target); // calls the destructor
+  if (!m_fallback_set) m_fallback_set = new GlslSet;
+
+  *m_fallback_set = *GlslSet::current();
+  m_fallback_set->detach(this);
+
+  if (m_fallback_set->empty()) {
+    GlslSet::current()->unbind();
+  } else {
+    m_fallback_set->bind();
+  }
 }
 
 void GlslCode::update()
 {
   if (!m_bound) return;
   bind_textures();
+}
+
+void GlslCode::set_bound(GLhandleARB program)
+{
+  m_bound = program;
+  if (program) {
+    ShContext::current()->set_binding(m_target, ShProgram(m_originalShader));
+  } else {
+    ShContext::current()->unset_binding(m_target);
+  }
+}
+
+void GlslCode::upload_uniforms()
+{
+  if (!m_bound) return;
+  
+  SH_DEBUG_ASSERT(m_varmap);
+      
+  // Whenever the program is linked, we must reinitialize the uniforms
+  // because their values are reset.  Also, we must call
+  // glUseProgramObjectARB before we can get the location of uniforms.
+  for (GlslVariableMap::NodeList::iterator i = m_varmap->node_begin();
+       i != m_varmap->node_end(); i++) {
+    ShVariableNodePtr node = *i;
+    if (node->hasValues() && node->uniform()) {
+      updateUniform(node);
+    }
+  }
 }
 
 void GlslCode::updateFloatUniform(const ShVariableNodePtr& node, const GLint location)
@@ -340,7 +487,6 @@ void GlslCode::updateUniform(const ShVariableNodePtr& uniform)
 {
   if (!m_bound) return;
 
-  SH_DEBUG_ASSERT(m_arb_program);
   SH_DEBUG_ASSERT(uniform);
 
   if (!m_varmap->contains(uniform)) {
@@ -369,7 +515,8 @@ void GlslCode::updateUniform(const ShVariableNodePtr& uniform)
   
   if (var.texture()) return;
 
-  GLint location = glGetUniformLocationARB(m_arb_program, var.name().c_str());
+  // TODO: cache these
+  GLint location = glGetUniformLocationARB(m_bound, var.name().c_str());
   if (location != -1) {
     if (shIsInteger(uniform->valueType())) {
       updateIntUniform(uniform, location);
@@ -528,8 +675,8 @@ void GlslCode::allocate_textures()
 
 void GlslCode::bind_textures()
 {
-  SH_DEBUG_ASSERT(m_arb_program);
-
+  if (!m_bound) return;
+  
   for (ShProgramNode::TexList::const_iterator i = m_shader->textures.begin();
        i != m_shader->textures.end(); i++) {
     ShTextureNodePtr texture = *i;
@@ -540,7 +687,7 @@ void GlslCode::bind_textures()
     }
     
     const GlslVariable& var(m_varmap->variable(shref_dynamic_cast<ShVariableNode>(texture)));
-    GLint location = glGetUniformLocationARB(m_arb_program, var.name().c_str());
+    GLint location = glGetUniformLocationARB(m_bound, var.name().c_str());
 
     if (location != -1) {
       int index = m_texture_units[texture].index;
@@ -555,5 +702,7 @@ void GlslCode::bind_textures()
     }
   }
 }
+
+GlslSet* GlslCode::m_fallback_set = 0;
 
 }

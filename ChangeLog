@@ -1,7 +1,55 @@
-2005-03-02  Bryan Chan <b8chan@cgl.uwaterloo.ca>
-	* backends/gl/ArbCode.cpp (ArbCode::print):
-	Fixed NVFP register decls to use "SHORT TEMP" and "LONG TEMP"
+2005-03-02  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> (glsl branch)
 
+	* examples/glut/main.cpp: Use a ShProgramSet to contain the shaders.
+
+	* backends/cc/Cc.cpp (ShCc): Rename generateCode() to
+	generate_code().
+
+	* backends/cc/Cc.hpp (ShBackend): Rename generateCode() to
+	generate_code().
+
+	* backends/gl/GlslCode.cpp: Implemented GlslSet functionality, and
+	use GlslSet functionality appropriately from GlslCode.
+
+	* backends/gl/GlslCode.hpp (GlslSet): Added this class.
+	(GlslCode): Simplified a fair bit, moving a lot to GlslSet.
+
+	* backends/gl/Glsl.hpp: More ProgramSet changes.
+
+	* backends/gl/GlBackend.hpp (CodeStrategy): Added ShProgramSet
+	support.
+	(GlBackend): Rename generateCode() to generate_code().
+
+	* win32/Sh.vcproj: Added ShProgramSet files.
+
+	* src/Makefile.win32 (libsh_dll_SOURCES): Added ShProgramSet
+	files.
+
+	* src/Makefile.am (libsh_la_SOURCES): Add ShProgramSet files
+	(incinc_HEADERS): Add ShProgramSet.hpp header.
+
+	* src/sh.hpp: Include ShProgramSet.hpp.
+
+	* src/ShBackend.hpp, src/ShBackend.cpp: Added backend program set
+	mechanism.
+
+	* src/ShSyntax.hpp, src/ShSyntax.cpp: Added functions to
+	bind/link/unbind program sets.
+
+	* src/ShProgramSet.hpp, src/ShProgramSet.cpp: Added program sets.
+
+2005-03-02  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+	* backends/gl/ArbCode.cpp (ArbCode::print): Fixed NVFP register
+	decls to use "SHORT TEMP" and "LONG TEMP"
+
+2005-03-02  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> (glsl branch)
+
+	* src/ShBackend.hpp: Rename generateCode() to generate_code().
+
+	* examples/glut/main.cpp (main): Use arb backend by default, allow
+	passing in a backend name.
+	(display): Add back in the gprintfs.
+	
 2005-03-01  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* util/ShObjMesh.cpp (ShTriple::ShTriple): Be a little less

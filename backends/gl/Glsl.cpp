@@ -53,6 +53,18 @@ ShBackendCodePtr GlslCodeStrategy::generate(const std::string& target,
   return code;
 }
 
+ShBackendSetPtr GlslCodeStrategy::generate_set(const SH::ShProgramSet& s)
+{
+  GlslSetPtr glsl_set = new GlslSet(s);
+  return glsl_set;
+}
+
+bool GlslCodeStrategy::use_default_set() const
+{
+  return false;
+}
+
+
 unsigned int glslTarget(const std::string& unit)
 {
   if (unit == "vertex") return GL_VERTEX_PROGRAM_ARB;

@@ -99,12 +99,18 @@ struct CodeStrategy {
   virtual SH::ShBackendCodePtr generate(const std::string& target,
                                         const SH::ShProgramNodeCPtr& shader,
                                         TextureStrategy* texture) = 0;
+
+  // If you want to use a special set generation function, override
+  // generate_set, and override use_default_set() to return false.
+  virtual SH::ShBackendSetPtr generate_set(const SH::ShProgramSet& s);
+  virtual bool use_default_set() const;
 };
 
 class GlBackend : public SH::ShBackend {
 public:
-  virtual SH::ShBackendCodePtr generateCode(const std::string& target,
-                                            const SH::ShProgramNodeCPtr& shader);
+  virtual SH::ShBackendCodePtr generate_code(const std::string& target,
+                                             const SH::ShProgramNodeCPtr& shader);
+  virtual SH::ShBackendSetPtr generate_set(const SH::ShProgramSet& s);
 
   // execute a stream program, if supported
   virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);

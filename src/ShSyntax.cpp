@@ -97,6 +97,12 @@ void shBind(ShProgram& prg)
   prg.code(ShEnvironment::backend)->bind();
 }
 
+void shBind(const ShProgramSet& s)
+{
+  if (!ShEnvironment::backend) return;
+  s.backend_set(ShEnvironment::backend)->bind();
+}
+
 void shBind(const std::string& target, ShProgram& prg)
 {
   if (!ShEnvironment::backend) return;
@@ -109,10 +115,22 @@ void shUnbind(ShProgram& prg)
   prg.code(ShEnvironment::backend)->unbind();
 }
 
+void shUnbind(const ShProgramSet& s)
+{
+  if (!ShEnvironment::backend) return;
+  s.backend_set(ShEnvironment::backend)->unbind();
+}
+
 void shUnbind(const std::string& target, ShProgram& prg)
 {
   if (!ShEnvironment::backend) return;
   prg.code(target, ShEnvironment::backend)->unbind();
+}
+
+void shLink(const ShProgramSet& s)
+{
+  if (!ShEnvironment::backend) return;
+  s.backend_set(ShEnvironment::backend)->link();
 }
 
 typedef std::map<std::string, ShProgram> BoundProgramMap;

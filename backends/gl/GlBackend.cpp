@@ -119,6 +119,18 @@ if ((x = reinterpret_cast<PFN ## T ## PROC>(wglGetProcAddress(#x))) == NULL) \
   }
 #endif /* WIN32 */
 
+SH::ShBackendSetPtr CodeStrategy::generate_set(const SH::ShProgramSet& s)
+{
+  SH_DEBUG_ERROR("shgl::CodeStrategy::generate_set() called!");
+  SH_DEBUG_ASSERT(false);
+  return 0;
+}
+
+bool CodeStrategy::use_default_set() const
+{
+  return true;
+}
+
 GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrategy* stream) :
   m_code(code),
   m_texture(texture),
@@ -284,10 +296,20 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
   }
 
 SH::ShBackendCodePtr
-GlBackend::generateCode(const std::string& target,
-                        const SH::ShProgramNodeCPtr& shader)
+GlBackend::generate_code(const std::string& target,
+                         const SH::ShProgramNodeCPtr& shader)
 {
   return m_code->generate(target, shader, m_texture);
+}
+
+SH::ShBackendSetPtr
+GlBackend::generate_set(const ShProgramSet& s)
+{
+  if (m_code->use_default_set()) {
+    return SH::ShBackend::generate_set(s);
+  } else {
+    return m_code->generate_set(s);
+  }
 }
 
 void

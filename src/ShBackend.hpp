@@ -33,6 +33,7 @@
 #include "ShDllExport.hpp"
 #include "ShRefCount.hpp"
 #include "ShProgram.hpp"
+#include "ShProgramSet.hpp"
 #include "ShVariableNode.hpp"
 
 namespace SH  {
@@ -79,6 +80,21 @@ public:
 typedef ShPointer<ShBackendCode> ShBackendCodePtr;
 typedef ShPointer<const ShBackendCode> ShBackendCodeCPtr;
 
+// A backend-specific set of programs, to be linked together/bound at once
+class
+SH_DLLEXPORT ShBackendSet : public ShRefCountable {
+public:
+  virtual ~ShBackendSet();
+
+  virtual void link() = 0;
+
+  virtual void bind() = 0;
+  virtual void unbind() = 0;
+};
+
+typedef ShPointer<ShBackendSet> ShBackendSetPtr;
+typedef ShPointer<const ShBackendSet> ShBackendSetCPtr;
+
 class ShTransformer;
 class
 SH_DLLEXPORT ShBackend : public ShRefCountable {
@@ -89,9 +105,11 @@ public:
   /// Generate the backend code for a particular shader. Ensure that
   /// ShEnvironment::shader is the same as shader before calling this,
   /// since extra variables may be declared inside this function!
-  virtual ShBackendCodePtr generateCode(const std::string& target,
-                                        const ShProgramNodeCPtr& shader) = 0;
+  virtual ShBackendCodePtr generate_code(const std::string& target,
+                                         const ShProgramNodeCPtr& shader) = 0;
 
+  virtual ShBackendSetPtr generate_set(const ShProgramSet& s);
+  
   // execute a stream program, if supported
   virtual void execute(const ShProgramNodeCPtr& program, ShStream& dest) = 0;
   

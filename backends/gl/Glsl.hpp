@@ -42,7 +42,9 @@ public:
   SH::ShBackendCodePtr generate(const std::string& target,
                                 const SH::ShProgramNodeCPtr& shader,
                                 TextureStrategy* textures);
-
+  SH::ShBackendSetPtr generate_set(const SH::ShProgramSet& s);
+  bool use_default_set() const;
+  
   GlslCodeStrategy* create(void);
 };
 

@@ -11,7 +11,8 @@ using namespace std;
 ShMatrix4x4f mv, mvd;
 ShPoint3f lightPos;
 Camera camera;
-ShProgram vsh, fsh;
+ShProgramSet* shaders;
+
 ShColor3f diffusecolor;
 
 // Glut data
@@ -24,7 +25,7 @@ bool show_help = false;
 
 void initShaders()
 {
-  vsh = SH_BEGIN_VERTEX_PROGRAM {
+  ShProgram vsh = SH_BEGIN_VERTEX_PROGRAM {
     ShInOutPosition4f pos;
     ShInOutNormal3f normal;
     ShOutputVector3f lightv;
@@ -36,7 +37,7 @@ void initShaders()
     normal = mv | normal; // Project normal
   } SH_END;
 
-  fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+  ShProgram fsh = SH_BEGIN_FRAGMENT_PROGRAM {
     ShInputPosition4f pos;
     ShInputNormal3f normal;
     ShInputVector3f lightv;
@@ -48,21 +49,22 @@ void initShaders()
     
     color = (normal | lightv) * diffusecolor;
   } SH_END;
+
+  shaders = new ShProgramSet(vsh, fsh);
 }
 
 void display()
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  shBind(vsh);
-  shBind(fsh);
-  
+  shBind(*shaders);
+
+  std::cerr << "drawing" << std::endl;
   glFrontFace(GL_CW);
   glutSolidTeapot(2.5);
   glFrontFace(GL_CCW);
 
-  shUnbind(fsh);
-  shUnbind(vsh);
+  shUnbind(*shaders);
   
 //   // Help information
    if (show_help) {
@@ -145,16 +147,6 @@ void keyboard(unsigned char k, int x, int y)
   case 'h':
   case 'H':
     show_help = !show_help;
-    break;
-  case 'b':
-  case 'B':
-    shBind(vsh);
-    shBind(fsh);
-    break;
-  case 'u':
-  case 'U':
-    shUnbind(vsh);
-    shUnbind(fsh);
     break;
   case 'q':
   case 'Q':
@@ -239,8 +231,7 @@ int main(int argc, char** argv)
 
   initShaders();
 
-  shBind(vsh);
-  shBind(fsh);
+  shBind(*shaders);
 
 #if 0
   cout << "Vertex Unit:" << endl;
@@ -252,4 +243,6 @@ int main(int argc, char** argv)
 #endif
 
   glutMainLoop();
+
+  delete shaders;
 }

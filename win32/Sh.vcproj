@@ -240,6 +240,9 @@
 				RelativePath="..\src\ShProgram.cpp">
 			</File>
 			<File
+				RelativePath="..\src\ShProgramSet.cpp">
+			</File>
+			<File
 				RelativePath="..\src\ShProgramNode.cpp">
 			</File>
 			<File
@@ -614,6 +617,9 @@
 			</File>
 			<File
 				RelativePath="..\src\ShProgram.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShProgramSet.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShProgramNode.hpp">

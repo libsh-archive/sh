@@ -67,7 +67,7 @@ void ShProgramNode::compile(const std::string& target, const ShPointer<ShBackend
   try {
     collectDecls();
     collectVariables();
-    code = backend->generateCode(target, this);
+    code = backend->generate_code(target, this);
 #ifdef SH_DEBUG
     // code->print(std::cerr);
 #endif

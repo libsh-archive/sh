@@ -46,6 +46,43 @@ struct TextureInfo {
   bool preset;
 };
 
+class GlslCode;
+
+class GlslSet : public SH::ShBackendSet {
+public:
+  GlslSet();
+  GlslSet(const SH::ShPointer<GlslCode>& code);
+  GlslSet(const SH::ShProgramSet& s);
+  GlslSet(const GlslSet& s);
+  ~GlslSet();
+
+  GlslSet& operator=(const GlslSet& s);
+  
+  void link();
+  void bind();
+  void unbind();
+
+  bool empty() const;
+  
+  void attach(const SH::ShPointer<GlslCode>& code);
+  void detach(const SH::ShPointer<GlslCode>& code);
+  void replace(const SH::ShPointer<GlslCode>& code);
+
+  // Currently bound set
+  static GlslSet* current() { return m_current; }
+  
+private:
+  SH::ShPointer<GlslCode> m_shaders[2];
+  GLhandleARB m_arb_program;
+
+  bool m_linked, m_bound;
+
+  static GlslSet* m_current;
+};
+
+typedef SH::ShPointer<GlslSet> GlslSetPtr;
+typedef SH::ShPointer<const GlslSet> GlslSetCPtr;
+
 class GlslCode : public SH::ShBackendCode {
 public:
   GlslCode(const SH::ShProgramNodeCPtr& program, const std::string& target,
@@ -58,28 +95,37 @@ public:
   virtual void upload();
   virtual void bind();
   virtual void unbind();
-  void unbind(bool refresh);
   virtual void update();
   virtual void updateUniform(const SH::ShVariableNodePtr& uniform);
 
+  void set_bound(GLhandleARB program);
+  void upload_uniforms();
+  
   std::ostream& print(std::ostream& out);
   std::ostream& describe_interface(std::ostream& out);
   
   /// Actually generate the code
   void generate();
 
+  GlslProgramType glsl_unit() const { return m_unit; }
+  GLhandleARB glsl_shader();
+  std::string target() const { return m_target; }
+
+  void bind_textures();
+  
 private:
+
+  static GlslSet* m_fallback_set;
+  
   TextureStrategy* m_texture;
   // NOTE: These two pointer are deliberately not smart pointers
   // so that the circular referenece between a program and
   // its compiled code is broken
   SH::ShProgramNode* m_shader; // internally visible shader ShTransformered to fit this target (GLSL)
   SH::ShProgramNode* m_originalShader; // original shader (should alway use this for external (e.g. globals))
-  enum GlslProgramType m_unit;
+  GlslProgramType m_unit;
   std::string m_target;
 
-  static GLhandleARB m_arb_program; /// program to which all shaders are attached
-  static GlslCode* m_current_shaders[2];
   GLhandleARB m_arb_shader; /// shader program uploaded to the GPU
 
   std::vector<std::string> m_lines; /// raw lines of code (unindented)
@@ -90,9 +136,10 @@ private:
   /// The long tuple splits applied to this shader before compilation.
   SH::ShTransformer::VarSplitMap m_splits;
 
-  bool m_bound; /// true if the program has already been uploaded to the GPU
+  // Linked GLSL Program that contains this shader and is currently
+  // bound, if any
+  GLhandleARB m_bound;
 
-  void link();
   void optimize(const SH::ShProgramNodeCPtr& shader);
 
   /// Generate code for this node and those following it.
@@ -113,7 +160,6 @@ private:
   void updateIntUniform(const SH::ShVariableNodePtr& node, const GLint location);
 
   void allocate_textures();
-  void bind_textures();
 };
 
 typedef SH::ShPointer<GlslCode> GlslCodePtr;
