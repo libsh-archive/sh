@@ -77,6 +77,9 @@ private:
   /// Generate code for this node and those following it.
   void genNode(SH::ShCtrlGraphNodePtr node);
 
+  /// Generate code for DIV (either op2 is scalar or op1.size() == op2.size())
+  void genDiv( SH::ShVariable dest, SH::ShVariable op1, SH::ShVariable op2 );
+
   /// Allocate registers, after the code has been generated
   void allocRegs();
 

@@ -37,6 +37,7 @@
 #include "ShLinearAllocator.hpp"
 #include "ShEnvironment.hpp"
 #include "ShTextureNode.hpp"
+#include "ShSyntax.hpp"
 
 namespace ShArb {
 
@@ -859,6 +860,7 @@ std::ostream& ArbCode::print(std::ostream& out)
   return out;
 }
 
+
 void ArbCode::genNode(ShCtrlGraphNodePtr node)
 {
   if (!node || node->marked()) return;
@@ -878,13 +880,12 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       m_instructions.push_back(ArbInst(SH_ARB_ADD, stmt.dest, stmt.src[0], stmt.src[1]));
       break;
     case SH_OP_MUL:
-      {
       if (stmt.src[0].size() != 1 || stmt.src[1].size() != 1) {
         if (stmt.src[0].size() == 1) {
           int* swizzle = new int[stmt.src[1].size()];
-          for (int i = 0; i < stmt.src[1].size(); i++) swizzle[i] = 0;
-          m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest,
-                                                 stmt.src[0](stmt.src[1].size(), swizzle), stmt.src[1]));
+          for (int i = 0; i < stmt.src[1].size(); i++) swizzle[i] = 0; 
+          m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, 
+                stmt.src[0](stmt.src[1].size(), swizzle), stmt.src[1]));
           delete [] swizzle;
           break;
         } else if (stmt.src[1].size() == 1) {
@@ -895,27 +896,11 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
           delete [] swizzle;
           break;
         }
-      }
-
-      m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0], stmt.src[1]));
+      } 
+      m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0], stmt.src[1])); 
       break;
-      }
     case SH_OP_DIV:
-      {
-        ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, stmt.src[1].size()));
-        m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp, stmt.src[1]));
-
-        if (rcp.size() == 1 && stmt.src[0].size() != 1) {
-          int* swizzle = new int[stmt.src[0].size()];
-          for (int i = 0; i < stmt.src[0].size(); i++) swizzle[i] = 0;
-          m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0],
-                                                 rcp(stmt.src[0].size(), swizzle)));
-          delete [] swizzle;
-        } else {
-          m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0], rcp));
-        }
-        break;
-      }
+      genDiv(stmt.dest, stmt.src[0], stmt.src[1]);
       /*
       {
       ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, stmt.src[1].size()));
@@ -923,6 +908,20 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0], rcp));
       }
       */
+      break;
+    case SH_OP_ABS:
+      m_instructions.push_back(ArbInst(SH_ARB_ABS, stmt.dest, stmt.src[0]));
+      break;
+    case SH_OP_CEIL:
+      {
+        m_instructions.push_back(ArbInst(SH_ARB_FLR, stmt.dest, stmt.src[0])); 
+        m_instructions.push_back(ArbInst(SH_ARB_MOV, stmt.dest, -stmt.dest));
+      }
+      break;
+    case SH_OP_COS:
+      if( m_kind == SH_VERTEX_PROGRAM ) 
+        SH_DEBUG_ERROR("cosine is not implemented for ARB vertex program ");
+      m_instructions.push_back(ArbInst(SH_ARB_COS, stmt.dest, stmt.src[0]));
       break;
     case SH_OP_DOT:
       {
@@ -942,11 +941,59 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
         }
       }
       break;
-    case SH_OP_COS:
-      m_instructions.push_back(ArbInst(SH_ARB_COS, stmt.dest, stmt.src[0]));
+    case SH_OP_FLR:
+      m_instructions.push_back(ArbInst(SH_ARB_FLR, stmt.dest, stmt.src[0], stmt.src[1]));
+      break;
+    case SH_OP_FMOD:
+      {
+        // TODO - is this really optimal?
+        ShVariable t1(new ShVariableNode(SH_VAR_TEMP, stmt.src[0].size()));
+        ShVariable t2(new ShVariableNode(SH_VAR_TEMP, stmt.src[0].size()));
+        
+        // result = x - sign(x/y)*floor(abs(x/y))*y
+        genDiv(t1, stmt.src[0], stmt.src[1]);
+        m_instructions.push_back(ArbInst(SH_ARB_ABS, t2, t1));
+
+        genDiv(t1, t1, t2);
+        m_instructions.push_back(ArbInst(SH_ARB_FLR, t2, t2)); 
+        m_instructions.push_back(ArbInst(SH_ARB_MUL, t1, t1, t2)); 
+        m_instructions.push_back(ArbInst(SH_ARB_MUL, t1, t1, stmt.src[1])); 
+        m_instructions.push_back(ArbInst(SH_ARB_SUB, stmt.dest, stmt.src[0], t1)); 
+      }
       break;
     case SH_OP_FRAC:
-      m_instructions.push_back(ArbInst(SH_ARB_FRC, stmt.dest, stmt.src[0], stmt.src[1]));
+      m_instructions.push_back(ArbInst(SH_ARB_FRC, stmt.dest, stmt.src[0]));
+      break;
+    case SH_OP_LRP:
+      if(m_kind == SH_VERTEX_PROGRAM) {
+        ShVariable t(new ShVariableNode(SH_VAR_TEMP, stmt.src[1].size()));
+        // lerp(f,a,b)=f*a + (1-f)*b = f*(a-b) + b 
+        m_instructions.push_back(ArbInst(SH_ARB_ADD, t, stmt.src[1], -stmt.src[2]));
+
+        if (stmt.src[0].size() == 1 && stmt.src[1].size() != 1) { 
+          int* swizzle = new int[stmt.src[1].size()];
+          for (int i = 0; i < stmt.src[1].size(); i++) swizzle[i] = 0;
+
+          m_instructions.push_back(ArbInst(SH_ARB_MAD, stmt.dest, 
+                stmt.src[0](stmt.src[1].size(), swizzle), t, stmt.src[2]));
+          delete [] swizzle;
+        } else {
+          m_instructions.push_back(ArbInst(SH_ARB_MAD, stmt.dest, 
+                stmt.src[0], t, stmt.src[2]));
+        }
+      } else {
+        if(stmt.src[0].size() == 1 && stmt.src[1].size() != 1) {
+          int* swizzle = new int[stmt.src[1].size()];
+          for (int i = 0; i < stmt.src[1].size(); i++) swizzle[i] = 0;
+
+          m_instructions.push_back(ArbInst(SH_ARB_LRP, stmt.dest,
+                stmt.src[0](stmt.src[1].size(), swizzle), stmt.src[1], stmt.src[2]));
+          delete [] swizzle;
+        } else {
+          m_instructions.push_back(ArbInst(SH_ARB_LRP, stmt.dest,
+                stmt.src[0], stmt.src[1], stmt.src[2]));
+        }
+      }
       break;
     case SH_OP_MAX:
       m_instructions.push_back(ArbInst(SH_ARB_MAX, stmt.dest, stmt.src[0], stmt.src[1]));
@@ -963,12 +1010,21 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       }
       break;
     case SH_OP_SIN:
+      // TODO fix this
+      if( m_kind == SH_VERTEX_PROGRAM ) 
+        SH_DEBUG_ERROR("sin is not implemented for ARB vertex program ");
       m_instructions.push_back(ArbInst(SH_ARB_SIN, stmt.dest, stmt.src[0]));
       break;
     case SH_OP_SLT:
       m_instructions.push_back(ArbInst(SH_ARB_SLT, stmt.dest, stmt.src[0], stmt.src[1]));
       break;
     case SH_OP_SGT:
+      m_instructions.push_back(ArbInst(SH_ARB_SLT, stmt.dest, stmt.src[1], stmt.src[0]));
+      break;
+    case SH_OP_SLE:
+      m_instructions.push_back(ArbInst(SH_ARB_SGE, stmt.dest, stmt.src[1], stmt.src[0]));
+      break;
+    case SH_OP_SGE:
       m_instructions.push_back(ArbInst(SH_ARB_SGE, stmt.dest, stmt.src[0], stmt.src[1]));
       break;
     case SH_OP_SQRT:
@@ -1008,6 +1064,27 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
   }
 
   genNode(node->follower);
+}
+
+void ArbCode::genDiv(ShVariable dest, ShVariable op1, ShVariable op2) {
+  if (op2.size() == 1 && op1.size() != 1) {
+    ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, op2.size())); 
+    m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp, op2)); 
+
+    int* swizzle = new int[op1.size()];
+    for (int i = 0; i < op1.size(); i++) swizzle[i] = 0;
+    m_instructions.push_back(ArbInst(SH_ARB_MUL, dest, op1,
+          rcp(op1.size(), swizzle)));
+    delete [] swizzle;
+  } else {
+    ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, 1));
+
+    // TODO arg...component-wise div is ugly, ARB RCP only works on scalars
+    for(int i = 0; i < op2.size(); ++i) {
+      m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp, op2(i)));
+      m_instructions.push_back(ArbInst(SH_ARB_MUL, dest(i), op1(i), rcp));
+    }
+  }
 }
 
 void ArbCode::allocRegs()
@@ -1190,7 +1267,8 @@ ArbBackend::ArbBackend()
   SH_ARB_GL_EXT_LOOKUP(PROGRAMENVPARAMETER4FVARB, ProgramEnvParameter4fvARB);
   SH_ARB_GL_EXT_LOOKUP(GETPROGRAMIVARB, GetProgramivARB);
 #undef SH_ARB_GL_EXT_LOOKUP  
-  */
+*/
+
   // TODO Max TEX instructions, texture indirections
   for (int i = 0; i < 2; i++) {
     unsigned int target = shArbTargets[i];
