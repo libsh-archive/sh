@@ -8,7 +8,7 @@ endif
 
 SUBDIRS = libltdl src backends test util $(DOC_SUBDIR)
 
-EXTRA_DIST = BUGS Makefile.win32 win32.mk
+EXTRA_DIST = BUGS Makefile.win32 win32.mk README.w32.txt
 
 docs:
 	cd doc ; $(MAKE) docs ; cd ..
