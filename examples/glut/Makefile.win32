@@ -42,9 +42,9 @@ shglutex_SOURCES = Camera.hpp Camera.cpp
 shglutex_SOURCES += ShTrackball.hpp ShTrackball.cpp
 shglutex_SOURCES += main.cpp
 
-shglutex_CXXFILES = $(filter %.cpp,$(dispmap_SOURCES))
-shglutex_RELEASE_OBJECTS = $(dispmap_CXXFILES:.cpp=.r.obj)
-shglutex_DEBUG_OBJECTS = $(dispmap_CXXFILES:.cpp=.d.obj)
+shglutex_CXXFILES = $(filter %.cpp,$(shglutex_SOURCES))
+shglutex_RELEASE_OBJECTS = $(shglutex_CXXFILES:.cpp=.r.obj)
+shglutex_DEBUG_OBJECTS = $(shglutex_CXXFILES:.cpp=.d.obj)
 
 shglutex_RELEASE_LDADD = $(SH_RELEASE_LDADD)
 shglutex_RELEASE_LDADD += $(GLUT_LDADD) $(OPENGL_LDADD)
@@ -74,10 +74,10 @@ all: $(ALL_TARGETS)
 all-release: $(RELEASE_TARGETS)
 all-debug: $(DEBUG_TARGETS)
 
-shglutex.exe: $(dispmap_RELEASE_OBJECTS)
+shglutex.exe: $(shglutex_RELEASE_OBJECTS)
 	$(LD) /out:$@ $^ $(RELEASE_LDFLAGS) $(shglutex_RELEASE_LDADD)
 
-shglutexd.exe: $(dispmap_DEBUG_OBJECTS)
+shglutexd.exe: $(shglutex_DEBUG_OBJECTS)
 	$(LD) /out:$@ $^ $(DEBUG_LDFLAGS) $(shglutex_DEBUG_LDADD)
 
 clean:
@@ -85,7 +85,7 @@ clean:
 	-del *.obj *.d
 	-del *.pdb *.ilk
 
-shglutex_DEPENDS = $(dispmap_CXXFILES:.cpp=.r.d) $(dispmap_CXXFILES:.cpp=.d.d)
+shglutex_DEPENDS = $(shglutex_CXXFILES:.cpp=.r.d) $(shglutex_CXXFILES:.cpp=.d.d)
 
 ifeq ($(GEN_DEPENDENCIES), 1)
 -include $(shglutex_DEPENDS)
