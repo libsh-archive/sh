@@ -1766,6 +1766,12 @@ void AtiBackend::getUberbufferData(const ShUberbuffer *ub, int xoffset, int yoff
   glDrawBuffer( oldDrawBuf );
   glDeleteTextures( 1, &texBinding );
 
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
+
   glDeleteMemATI( dummyMem );
   SH_DEBUG_PRINT( "Delete dummy mem " << dummyMem ); 
 
