@@ -51,13 +51,11 @@ class ShNoise
      * If useTexture is on, then the pattern repeats at every P cells.
      */
     template<int K>
-    static ShGeneric<M, T> noise(const ShGeneric<K, T> &p, bool useTexture);
+    static ShGeneric<M, T> perlin(const ShGeneric<K, T> &p, bool useTexture);
 
-    /** \brief Generates a cell noise value using unit cube cells 
-     * intPoint can be set to true if p is already an integer lattice point */ 
+    /** \brief Generates a cell noise value using unit cube cells  */
     template<int K>
-    static ShGeneric<M, T> cellnoise(const ShGeneric<K, T> &p, bool useTexture,
-        bool intPoint);
+    static ShGeneric<M, T> cellnoise(const ShGeneric<K, T> &p, bool useTexture);
 
   private:
     static ShAttrib<1, SH_CONST, T> constP, invP;
@@ -67,21 +65,43 @@ class ShNoise
     static void init();
 };
 
-// Returns one octave of perlin noise
-template<int M, int K, typename T>
-ShGeneric<M, T> noise(const ShGeneric<K, T> &p, bool useTexture = true);
+// Returns summed octaves of Perlin improved noise
+// @{
+template<int N, int M, typename T>
+ShGeneric<N, T> perlin(const ShGeneric<M, T> &p, bool useTexture = true);
 
-// Returns one octave of signed perlin noise
-template<int M, int K, typename T>
-ShGeneric<M, T> snoise(const ShGeneric<K, T> &p, bool useTexture = true);
+template<int N, int M, int K, typename T>
+ShGeneric<N, T> perlin(const ShGeneric<M, T> &p, const ShGeneric<K, T> &amp, bool useTexture = true);
+// @}
 
-// Returns one octave of cell noise 
-template<int M, int K, typename T>
-ShGeneric<M, T> cellnoise(const ShGeneric<K, T> &p, bool useTexture = true, bool intPoint = false);
+// Returns summed octaves of signed Perlin improved noise
+// @{
+template<int N, int M, typename T>
+ShGeneric<N, T> sperlin(const ShGeneric<M, T> &p, bool useTexture = true);
 
-// Returns one octave of signed cell noise 
-template<int M, int K, typename T>
-ShGeneric<M, T> scellnoise(const ShGeneric<K, T> &p, bool useTexture = true, bool intPoint = false);
+template<int N, int M, int K, typename T>
+ShGeneric<N, T> sperlin(const ShGeneric<M, T> &p, const ShGeneric<K, T> &amp, bool useTexture = true);
+// @}
+
+// Returns summed octaves of cell noise 
+// @{
+template<int N, int M, typename T>
+ShGeneric<N, T> cellnoise(const ShGeneric<M, T> &p, bool useTexture = true);
+
+template<int N, int M, int K, typename T>
+ShGeneric<N, T> cellnoise(const ShGeneric<M, T> &p, const ShGeneric<K, T> &amp, 
+    bool useTexture = true);
+// @}
+
+// Returns summed octaves of signed cell noise 
+// @{
+template<int N, int M, typename T>
+ShGeneric<N, T> scellnoise(const ShGeneric<M, T> &p, bool useTexture = true);
+
+template<int N, int M, int K, typename T>
+ShGeneric<N, T> scellnoise(const ShGeneric<M, T> &p, const ShGeneric<K, T> &amp,
+    bool useTexture = true); 
+// @}
 
 // Returns M octaves of turbulence in N-dimensional space (currently 1 <= N <= 4,
 // 1 <= M <= 2, 1 <= K <= 4 is supported)
@@ -92,15 +112,25 @@ ShGeneric<M, T> scellnoise(const ShGeneric<K, T> &p, bool useTexture = true, boo
 // The reason it is set at 2 right now is  
 //
 // useTexture determines whether procedureal hash is used or texture lookup
-template<int M, int N, int K, typename T>
-ShGeneric<M, T> turbulence(const ShGeneric<N, T> &amp, 
-    const ShGeneric<K, T> &p, bool useTexture = true);
+// @{
+template<int N, int M, typename T>
+ShGeneric<N, T> turbulence(const ShGeneric<M, T> &p, bool useTexture = true);
+
+template<int N, int M, int K, typename T>
+ShGeneric<N, T> turbulence(const ShGeneric<M, T> &p, const ShGeneric<K, T> &amp, 
+    bool useTexture = true);
+// @}
 
 /** \brief Turbulence functions sum several octaves of Perlin noise. 
+ * @{
  */
-template<int M, int N, int K, typename T>
-ShGeneric<M, T> sturbulence(const ShGeneric<N, T> &amp, 
-    const ShGeneric<K, T> &p, bool useTexture = true);
+template<int N, int M, typename T>
+ShGeneric<N, T> sturbulence(const ShGeneric<M, T> &p, bool useTexture = true);
+
+template<int N, int M, int K, typename T>
+ShGeneric<N, T> sturbulence(const ShGeneric<M, T> &p, const ShGeneric<K, T> &amp, 
+    bool useTexture = true);
+// @}
 }
 #include "ShNoiseImpl.hpp" 
 

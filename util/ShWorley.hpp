@@ -237,17 +237,19 @@ struct Tex2DPropFactory: public PropertyFactory<TexType::typesize, 2, T> {
 
 
 /** \brief Worley texture generator.
- * This uses the DefaultGeneratorFactory and DistSqPropFactory and has
- * been explicitly instantiated for D = 2, K=1..4
+ * This uses the DefaultGeneratorFactory and DistSqPropFactory 
+ * @{
  */
+template<int K, int D, typename T>
+ShGeneric<1, T> worley(const ShGeneric<D, T> &p, bool useTexture = true); 
+
 template<int K, int D, typename T>
 ShGeneric<1, T> worley(const ShGeneric<D, T> &p, const ShGeneric<K, T> &coeff, 
     bool useTexture = true); 
+//@}
 
 /** \brief Worley texture generator.
  * This uses a GeneratorFactory and PropertyFactory of your choice.
- * However, this function has not been explicitly instantiated, so you must include
- * Impl.hpp to use this.
  */
 template<int K, int N, int P, int D, typename T>
 ShGeneric<N, T> worley(const ShGeneric<D, T> &p, const ShGeneric<K, T> coeff[N],

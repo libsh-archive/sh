@@ -104,7 +104,7 @@ ShGeneric<M, T> _padd(const ShGeneric<M, T> &x, T d) {
 
 template<int M, typename T, int P>
 template<int K>
-ShGeneric<M, T> ShNoise<M, T, P>::noise(const ShGeneric<K, T> &p, bool useTexture) 
+ShGeneric<M, T> ShNoise<M, T, P>::perlin(const ShGeneric<K, T> &p, bool useTexture) 
 {
   init();
   int i, j;
@@ -157,14 +157,12 @@ ShGeneric<M, T> ShNoise<M, T, P>::noise(const ShGeneric<K, T> &p, bool useTextur
 
 template<int M, typename T, int P>
 template<int K>
-ShGeneric<M, T> ShNoise<M, T, P>::cellnoise(const ShGeneric<K, T> &p, bool useTexture,
-    bool intPoint) 
+ShGeneric<M, T> ShNoise<M, T, P>::cellnoise(const ShGeneric<K, T> &p, bool useTexture)
 {
   init();
   ShAttrib<K, SH_TEMP, T> ip;
 
-  if(intPoint) ip = p;
-  else ip = floor(p);
+  ip = floor(p);
 
   if( useTexture ) {
     ip = frac(ip * invP);
@@ -173,44 +171,54 @@ ShGeneric<M, T> ShNoise<M, T, P>::cellnoise(const ShGeneric<K, T> &p, bool useTe
   return fillcast<M>(hashmrg(ip));
 }
 
-template<int M, int K, typename T>
-ShGeneric<M, T> noise(const ShGeneric<K, T> &p, bool useTexture) {
-  return ShNoise<M, T>::noise(p, useTexture);
-}
-
-template<int M, int K, typename T>
-ShGeneric<M, T> snoise(const ShGeneric<K, T> &p, bool useTexture) {
-  return _pmad( noise<M>(p, useTexture), 2.0f, -1.0f );
-}
-
-template<int M, int K, typename T>
-ShGeneric<M, T> cellnoise(const ShGeneric<K, T> &p, bool useTexture, bool intPoint) {
-  return ShNoise<M, T>::cellnoise(p, useTexture, intPoint);
-}
-
-template<int M, int K, typename T>
-ShGeneric<M, T> scellnoise(const ShGeneric<K, T> &p, bool useTexture, bool intPoint) {
-  return _pmad( cellnoise<M>(p, useTexture, intPoint), 2.0f, -1.0f );
-}
-
-
-template<int M, int N, int K, typename T>
-ShGeneric<M, T> turbulence(const ShGeneric<N, T> &amp,
-      const ShGeneric<K, T> &p, bool useTexture) {
-  ShAttrib<M, SH_TEMP, T> result = fillcast<M>(ShConstAttrib1f(0.0));
-  T freq = 1.0;
-  result *= 0.0; 
-  for(int i = 0; i < N; ++i, freq *= 2.0) {
-    result = mad(abs(snoise<M>(p * freq, useTexture)), amp(i), result);
+#define SHNOISE_WITH_AMP(name) \
+template<int N, int M, int K, typename T>\
+  ShGeneric<N, T> name(const ShGeneric<M, T> &p, const ShGeneric<K, T> &amp, bool useTexture) {\
+    ShAttrib<N, SH_TEMP, T> result; \
+    T freq = 1;\
+    result *= 0; \
+    for(int i = 0; i < K; ++i, freq *= 2.0) {\
+      result = mad(name<N>(p * freq, useTexture), amp(i), result);\
+    }\
+    return result;\
   }
-  return result;
-}
 
-template<int M, int N, int K, typename T>
-ShGeneric<M, T> sturbulence(const ShGeneric<N, T> &amp,
-      const ShGeneric<K, T> &p, bool useTexture) {
-  return _pmad(turbulence<M>(amp, p, useTexture), 2.0f, -1.0f);
+template<int N, int M, typename T>
+ShGeneric<N, T> perlin(const ShGeneric<M, T> &p, bool useTexture) {
+  return ShNoise<N, T>::perlin(p, useTexture);
 }
+SHNOISE_WITH_AMP(perlin);
+
+template<int N, int M, typename T>
+ShGeneric<N, T> sperlin(const ShGeneric<M, T> &p, bool useTexture) {
+  return _pmad( perlin<N>(p, useTexture), 2.0f, -1.0f );
+}
+SHNOISE_WITH_AMP(sperlin);
+
+template<int N, int M, typename T>
+ShGeneric<N, T> cellnoise(const ShGeneric<M, T> &p, bool useTexture) {
+  return ShNoise<N, T>::cellnoise(p, useTexture);
+}
+SHNOISE_WITH_AMP(cellnoise);
+
+template<int N, int M, typename T>
+ShGeneric<N, T> scellnoise(const ShGeneric<M, T> &p, bool useTexture) {
+  return _pmad( cellnoise<N>(p, useTexture), 2.0f, -1.0f );
+}
+SHNOISE_WITH_AMP(scellnoise);
+
+
+template<int N, int M, typename T>
+ShGeneric<N, T> turbulence(const ShGeneric<M, T> &p, bool useTexture) {
+  abs(sperlin<N>(p, useTexture));
+}
+SHNOISE_WITH_AMP(turbulence);
+
+template<int N, int M, typename T>
+ShGeneric<N, T> sturbulence(const ShGeneric<M, T> &p, bool useTexture) {
+  return _pmad(abs(sperlin<N>(p, useTexture)), 2.0f, -1.0f);
+}
+SHNOISE_WITH_AMP(sturbulence);
 
 } // namespace ShUtil
 

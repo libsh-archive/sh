@@ -69,7 +69,7 @@ void GridGenFactory<D, T>::operator()(const ShGeneric<D, T> &p, Generator<D, T> 
 
 template<int D, typename T>
 void DefaultGenFactory<D, T>::makePos(Generator<D, T> &g) const {
-  g.pos = g.cell + cellnoise<D>(g.cell, m_useTexture, true);
+  g.pos = g.cell + cellnoise<D>(g.cell, m_useTexture);
 }
 
 template<int D, typename T>
@@ -92,10 +92,10 @@ void LerpGenFactory<D, T>::makePos(Generator<D, T> &g) const {
 
   offsetCell = fillcast<D+1>(g.cell);
   offsetCell(D) = lastTime;
-  ShAttrib<D, SH_TEMP, T> p1 = cellnoise<D>(offsetCell, m_useTexture, true); 
+  ShAttrib<D, SH_TEMP, T> p1 = cellnoise<D>(offsetCell, m_useTexture); 
 
   offsetCell(D) += 1;
-  ShAttrib<D, SH_TEMP, T> p2 = cellnoise<D>(offsetCell, m_useTexture, true); 
+  ShAttrib<D, SH_TEMP, T> p2 = cellnoise<D>(offsetCell, m_useTexture); 
 
   g.pos = g.cell + lerp(timeOffset, p2, p1);
 }
@@ -145,7 +145,7 @@ ShGeneric<3, T> DistSqGradientPropFactory<D, T>::operator() (
 template<int N, int D, typename T>
 ShGeneric<N, T> CellnoisePropFactory<N, D, T>::operator() (
     const ShGeneric<D, T> &p, const Generator<D, T> &g) const {
-  return cellnoise<N>(g.cell, m_useTexture, true);
+  return cellnoise<N>(g.cell, m_useTexture);
 };
 
 template<typename TexType, typename T>
@@ -220,6 +220,11 @@ ShGeneric<1, T> worley(const ShGeneric<D, T> &p, const ShGeneric<K, T> &coeff,
   DefaultGenFactory<D, T> genFactory(useTexture);
   DistSqPropFactory<D, T> propFactory;
   return worley(p, &coeff, &genFactory, &propFactory);
+}
+
+template<int D, typename T>
+ShGeneric<1, T> worley(const ShGeneric<D, T> &p, bool useTexture = true) {
+  return worley(p, ShAttrib<1, SH_CONST, T>(1), useTexture);
 }
 
 template<int K, int D, typename T>
