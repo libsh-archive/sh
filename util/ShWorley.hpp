@@ -53,21 +53,21 @@ template<typename T>
 class ShWorleyDefaultPointGen {
   public:
     ShWorleyDefaultPointGen() {}
-    ShVariableN<2, T> operator()(const ShVariableN<2, T> &p, bool useTexture) const; 
+    ShGeneric<2, T> operator()(const ShGeneric<2, T> &p, bool useTexture) const; 
 };
 
 template<typename T>
 class ShWorleyLerpingPointGen {
   public:
-    ShWorleyLerpingPointGen(const ShVariableN<1, T> &time);
-    ShVariableN<2, T> operator()(const ShVariableN<2, T> &p, bool useTexture) const; 
+    ShWorleyLerpingPointGen(const ShGeneric<1, T> &time);
+    ShGeneric<2, T> operator()(const ShGeneric<2, T> &p, bool useTexture) const; 
 
   private:
-    const ShVariableN<1, T> &m_time;
+    const ShGeneric<1, T> &m_time;
 };
 
 /** \brief Worley texture generator.
- * This finds the 1 < N <= 9 nearest neighbours to the point p using metric m 
+ * This finds the 1 <= N <= 9 nearest neighbours to the point p using metric m 
  * and returns the sum of the distances, weighted by c.
  *
  * The weighted sum of the gradients associated with nearest neighbour points
@@ -86,22 +86,22 @@ class ShWorleyLerpingPointGen {
  * @{
  */
 template<int N, typename T, typename PointGen> 
-ShVariableN<3, T> worley(const ShVariableN<2, T> &p, 
-    const ShVariableN<N, T> &c, ShWorleyMetric m, bool useTexture, 
+ShGeneric<3, T> worley(const ShGeneric<2, T> &p, 
+    const ShGeneric<N, T> &c, ShWorleyMetric m, bool useTexture, 
     const PointGen &generator); 
 
 template<int N, typename T>
-ShVariableN<3, T> worley(const ShVariableN<2, T> &p, 
-    const ShVariableN<N, T> &c, ShWorleyMetric m = L2_SQ, bool useTexture = true); 
+ShGeneric<3, T> worley(const ShGeneric<2, T> &p, 
+    const ShGeneric<N, T> &c, ShWorleyMetric m = L2_SQ, bool useTexture = true); 
 
 template<int N, typename T, typename PointGen> 
-ShVariableN<1, T> worleyNoGradient(const ShVariableN<2, T> &p, 
-    const ShVariableN<N, T> &c, ShWorleyMetric m, bool useTexture,
+ShGeneric<1, T> worleyNoGradient(const ShGeneric<2, T> &p, 
+    const ShGeneric<N, T> &c, ShWorleyMetric m, bool useTexture,
     const PointGen &generator); 
 
 template<int N, typename T>
-ShVariableN<1, T> worleyNoGradient(const ShVariableN<2, T> &p, 
-    const ShVariableN<N, T> &c, ShWorleyMetric m = L2_SQ, bool useTexture = true);
+ShGeneric<1, T> worleyNoGradient(const ShGeneric<2, T> &p, 
+    const ShGeneric<N, T> &c, ShWorleyMetric m = L2_SQ, bool useTexture = true);
 //@}
     
 /** Makes a shader that takes 
@@ -122,7 +122,5 @@ ShProgram worleyProgram(ShWorleyMetric m = L2_SQ, bool useTexture = true);
 
 
 } // namespace ShUtil
-
-#include "ShWorleyImpl.hpp"
 
 #endif

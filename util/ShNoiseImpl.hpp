@@ -32,6 +32,7 @@
 #include "ShNoise.hpp"
 #include "ShUtil.hpp"
 #include "ShImage3D.hpp"
+#include "ShLib.hpp"
 
 namespace ShUtil {
 
@@ -65,45 +66,45 @@ void ShNoise<M, T, P>::init() {
 
 // runs x * d + e, d may be an Attrib or a float 
 template<int M, typename T>
-ShVariableN<M, T> _pmad(const ShVariableN<M, T> &x, T d, T e) {
+ShGeneric<M, T> _pmad(const ShGeneric<M, T> &x, T d, T e) {
   T vals[M];
   for(int i = 0; i < M; ++i) vals[i] = e;
-  ShConstant<M, T> ec(vals);
+  ShAttrib<M, SH_CONST, T> ec(vals);
   return mad(x, d, ec);
 }
 
 template<int M, typename T>
-ShVariableN<M, T> _pmad(const ShVariableN<M, T> &x, const ShVariableN<M, T> &d, T e) {
+ShGeneric<M, T> _pmad(const ShGeneric<M, T> &x, const ShGeneric<M, T> &d, T e) {
   T vals[M];
   for(int i = 0; i < M; ++i) vals[i] = e;
-  ShConstant<M, T> ec(vals);
+  ShAttrib<M, SH_CONST, T> ec(vals);
   return mad(x, d, ec);
 }
 
 template<int M, typename T>
-ShVariableN<M, T> _psmootht(const ShVariableN<M, T> &t) 
+ShGeneric<M, T> _psmootht(const ShGeneric<M, T> &t) 
 {
   return t * t * t * _pmad(t, _pmad(t, 6.0f, -15.0f), 10.0f); 
 }
 
 // adds x to a float d componentwise
 template<int M, typename T>
-ShVariableN<M, T> _padd(const ShVariableN<M, T> &x, T d) {
+ShGeneric<M, T> _padd(const ShGeneric<M, T> &x, T d) {
   T vals[M];
   for(int i = 0; i < M; ++i) vals[i] = d;
-  ShConstant<M, T> c(vals);
+  ShAttrib<M, SH_CONST, T> c(vals);
   return x + c;
 }
 
 template<int M, typename T, int P>
 template<int K>
-ShVariableN<M, T> ShNoise<M, T, P>::noise(const ShVariableN<K, T> &p, bool useTexture) 
+ShGeneric<M, T> ShNoise<M, T, P>::noise(const ShGeneric<K, T> &p, bool useTexture) 
 {
   init();
   int i, j;
   typedef ShAttrib<K, SH_TEMP, T> TempType;
   typedef ShAttrib<M, SH_TEMP, T> ResultType;
-  typedef ShConstant<K, T> ConstTempType;
+  typedef ShAttrib<K, SH_CONST, T> ConstTempType;
   static const int NUM_SAMPLES = 1 << K;
   static const float INVP = 1.0 / P; // TODO if optimizer propagates constants, remove this
   static const float DP = (float)P; 
@@ -152,7 +153,7 @@ ShVariableN<M, T> ShNoise<M, T, P>::noise(const ShVariableN<K, T> &p, bool useTe
 
 template<int M, typename T, int P>
 template<int K>
-ShVariableN<M, T> ShNoise<M, T, P>::cellnoise(const ShVariableN<K, T> &p, bool useTexture,
+ShGeneric<M, T> ShNoise<M, T, P>::cellnoise(const ShGeneric<K, T> &p, bool useTexture,
     bool intPoint) 
 {
   init();
@@ -170,30 +171,30 @@ ShVariableN<M, T> ShNoise<M, T, P>::cellnoise(const ShVariableN<K, T> &p, bool u
 }
 
 template<int M, int K, typename T>
-ShVariableN<M, T> noise(const ShVariableN<K, T> &p, bool useTexture) {
+ShGeneric<M, T> noise(const ShGeneric<K, T> &p, bool useTexture) {
   return ShNoise<M, T>::noise(p, useTexture);
 }
 
 template<int M, int K, typename T>
-ShVariableN<M, T> snoise(const ShVariableN<K, T> &p, bool useTexture) {
+ShGeneric<M, T> snoise(const ShGeneric<K, T> &p, bool useTexture) {
   return _pmad( noise<M>(p, useTexture), 2.0f, -1.0f );
 }
 
 template<int M, int K, typename T>
-ShVariableN<M, T> cellnoise(const ShVariableN<K, T> &p, bool useTexture, bool intPoint) {
+ShGeneric<M, T> cellnoise(const ShGeneric<K, T> &p, bool useTexture, bool intPoint) {
   return ShNoise<M, T>::cellnoise(p, useTexture, intPoint);
 }
 
 template<int M, int K, typename T>
-ShVariableN<M, T> scellnoise(const ShVariableN<K, T> &p, bool useTexture, bool intPoint) {
+ShGeneric<M, T> scellnoise(const ShGeneric<K, T> &p, bool useTexture, bool intPoint) {
   return _pmad( cellnoise<M>(p, useTexture, intPoint), 2.0f, -1.0f );
 }
 
 
 template<int M, int N, int K, typename T>
-ShVariableN<M, T> turbulence(const ShVariableN<N, T> &amp,
-      const ShVariableN<K, T> &p, bool useTexture) {
-  ShAttrib<M, SH_TEMP, T> result = fillcast<M>(ShConstant1f(0.0));
+ShGeneric<M, T> turbulence(const ShGeneric<N, T> &amp,
+      const ShGeneric<K, T> &p, bool useTexture) {
+  ShAttrib<M, SH_TEMP, T> result = fillcast<M>(ShConstAttrib1f(0.0));
   T freq = 1.0;
   result *= 0.0; 
   for(int i = 0; i < N; ++i, freq *= 2.0) {
@@ -203,9 +204,9 @@ ShVariableN<M, T> turbulence(const ShVariableN<N, T> &amp,
 }
 
 template<int M, int N, int K, typename T>
-ShVariableN<M, T> sturbulence(const ShVariableN<N, T> &amp,
-      const ShVariableN<K, T> &p, bool useTexture) {
-  ShAttrib<M, SH_TEMP, T> result = fillcast<M>(ShConstant1f(0.0));
+ShGeneric<M, T> sturbulence(const ShGeneric<N, T> &amp,
+      const ShGeneric<K, T> &p, bool useTexture) {
+  ShAttrib<M, SH_TEMP, T> result = fillcast<M>(ShConstAttrib1f(0.0));
   T freq = 1.0;
   result *= 0.0; 
   for(int i = 0; i < N; ++i, freq *= 2.0) {

@@ -91,12 +91,12 @@ ShProgram access(const ShBaseTextureCube<T> &tex, const std::string & tcname = "
 
 /** \brief transformation nibble 
  * Creates a nibble that transforms a variable of type T2 by 
- * a matrix of type ShMatrix<Rows, Cols, Kind, T>
+ * a matrix of type ShMatrix<Rows, Cols, Binding, T>
  * Inputs: IN(0) attrib
  * Outputs: OUT(0) T2 name = m | attrib
  */
-template<typename T2, int Rows, int Cols, int Kind, typename T>
-ShProgram transform(const ShMatrix<Rows, Cols, Kind, T> &m, const std::string & name = "result");
+template<typename T2, int Rows, int Cols, ShBindingType Binding, typename T>
+ShProgram transform(const ShMatrix<Rows, Cols, Binding, T> &m, const std::string & name = "result");
 
 /** \brief Casting nibble 
  * Casts from tuple type T to type T2

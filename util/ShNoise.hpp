@@ -51,12 +51,12 @@ class ShNoise
      * If useTexture is on, then the pattern repeats at every P cells.
      */
     template<int K>
-    static ShVariableN<M, T> noise(const ShVariableN<K, T> &p, bool useTexture);
+    static ShGeneric<M, T> noise(const ShGeneric<K, T> &p, bool useTexture);
 
     /** \brief Generates a cell noise value using unit cube cells 
      * intPoint can be set to true if p is already an integer lattice point */ 
     template<int K>
-    static ShVariableN<M, T> cellnoise(const ShVariableN<K, T> &p, bool useTexture,
+    static ShGeneric<M, T> cellnoise(const ShGeneric<K, T> &p, bool useTexture,
         bool intPoint);
 
   private:
@@ -68,19 +68,19 @@ class ShNoise
 
 // Returns one octave of perlin noise
 template<int M, int K, typename T>
-ShVariableN<M, T> noise(const ShVariableN<K, T> &p, bool useTexture = true);
+ShGeneric<M, T> noise(const ShGeneric<K, T> &p, bool useTexture = true);
 
 // Returns one octave of signed perlin noise
 template<int M, int K, typename T>
-ShVariableN<M, T> snoise(const ShVariableN<K, T> &p, bool useTexture = true);
+ShGeneric<M, T> snoise(const ShGeneric<K, T> &p, bool useTexture = true);
 
 // Returns one octave of cell noise 
 template<int M, int K, typename T>
-ShVariableN<M, T> cellnoise(const ShVariableN<K, T> &p, bool useTexture = true, bool intPoint = false);
+ShGeneric<M, T> cellnoise(const ShGeneric<K, T> &p, bool useTexture = true, bool intPoint = false);
 
 // Returns one octave of signed cell noise 
 template<int M, int K, typename T>
-ShVariableN<M, T> scellnoise(const ShVariableN<K, T> &p, bool useTexture = true, bool intPoint = false);
+ShGeneric<M, T> scellnoise(const ShGeneric<K, T> &p, bool useTexture = true, bool intPoint = false);
 
 // Returns M octaves of turbulence in N-dimensional space (currently 1 <= N <= 4,
 // 1 <= M <= 2, 1 <= K <= 4 is supported)
@@ -92,14 +92,14 @@ ShVariableN<M, T> scellnoise(const ShVariableN<K, T> &p, bool useTexture = true,
 //
 // useTexture determines whether procedureal hash is used or texture lookup
 template<int M, int N, int K, typename T>
-ShVariableN<M, T> turbulence(const ShVariableN<N, T> &amp, 
-    const ShVariableN<K, T> &p, bool useTexture = true);
+ShGeneric<M, T> turbulence(const ShGeneric<N, T> &amp, 
+    const ShGeneric<K, T> &p, bool useTexture = true);
 
 /** \brief Turbulence functions sum several octaves of Perlin noise. 
  */
 template<int M, int N, int K, typename T>
-ShVariableN<M, T> sturbulence(const ShVariableN<N, T> &amp, 
-    const ShVariableN<K, T> &p, bool useTexture = true);
+ShGeneric<M, T> sturbulence(const ShGeneric<N, T> &amp, 
+    const ShGeneric<K, T> &p, bool useTexture = true);
 }
 #include "ShNoiseImpl.hpp" 
 

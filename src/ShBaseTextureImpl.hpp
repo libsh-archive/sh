@@ -2,6 +2,7 @@
 #define SHBASETEXTUREIMPL_HPP
 
 #include "ShBaseTexture.hpp"
+#include "ShEnvironment.hpp"
 
 namespace SH {
 
@@ -66,7 +67,7 @@ ShBaseTextureCube<T>::ShBaseTextureCube(const ShTextureTraits& traits)
 }
 
 template<typename T>
-T ShBaseTexture1D<T>::operator()(const ShVariableN<1, float>& coords) const
+T ShBaseTexture1D<T>::operator()(const ShGeneric<1, float>& coords) const
 {
   if (ShEnvironment::insideShader) {
     T t;
@@ -82,7 +83,7 @@ T ShBaseTexture1D<T>::operator()(const ShVariableN<1, float>& coords) const
 }
 
 template<typename T>
-T ShBaseTexture2D<T>::operator()(const ShVariableN<2, float>& coords) const
+T ShBaseTexture2D<T>::operator()(const ShGeneric<2, float>& coords) const
 {
   if (ShEnvironment::insideShader) {
     T t;
@@ -98,7 +99,7 @@ T ShBaseTexture2D<T>::operator()(const ShVariableN<2, float>& coords) const
 }
 
 template<typename T>
-T ShBaseTextureRect<T>::operator()(const ShVariableN<2, float>& coords) const
+T ShBaseTextureRect<T>::operator()(const ShGeneric<2, float>& coords) const
 {
   if (ShEnvironment::insideShader) {
     T t;
@@ -114,23 +115,7 @@ T ShBaseTextureRect<T>::operator()(const ShVariableN<2, float>& coords) const
 }
 
 template<typename T>
-T ShBaseTexture3D<T>::operator()(const ShVariableN<3, float>& coords) const
-{
-  if (ShEnvironment::insideShader) {
-    T t;
-    ShVariable texVar(m_node);
-    ShStatement stmt(t, texVar, SH_OP_TEX, coords);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  } else {
-    // TODO!
-    T t;
-    return t;
-  }
-} 
-
-template<typename T>
-T ShBaseTextureCube<T>::operator()(const ShVariableN<3, float>& coords) const
+T ShBaseTexture3D<T>::operator()(const ShGeneric<3, float>& coords) const
 {
   if (ShEnvironment::insideShader) {
     T t;
@@ -146,7 +131,23 @@ T ShBaseTextureCube<T>::operator()(const ShVariableN<3, float>& coords) const
 } 
 
 template<typename T>
-T ShBaseTexture1D<T>::operator[](const ShVariableN<1, float>& coords) const
+T ShBaseTextureCube<T>::operator()(const ShGeneric<3, float>& coords) const
+{
+  if (ShEnvironment::insideShader) {
+    T t;
+    ShVariable texVar(m_node);
+    ShStatement stmt(t, texVar, SH_OP_TEX, coords);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  } else {
+    // TODO!
+    T t;
+    return t;
+  }
+} 
+
+template<typename T>
+T ShBaseTexture1D<T>::operator[](const ShGeneric<1, float>& coords) const
 {
   if (ShEnvironment::insideShader) {
     T t;
@@ -162,7 +163,7 @@ T ShBaseTexture1D<T>::operator[](const ShVariableN<1, float>& coords) const
 }
 
 template<typename T>
-T ShBaseTexture2D<T>::operator[](const ShVariableN<2, float>& coords) const
+T ShBaseTexture2D<T>::operator[](const ShGeneric<2, float>& coords) const
 {
   if (ShEnvironment::insideShader) {
     T t;
@@ -178,7 +179,7 @@ T ShBaseTexture2D<T>::operator[](const ShVariableN<2, float>& coords) const
 }
 
 template<typename T>
-T ShBaseTextureRect<T>::operator[](const ShVariableN<2, float>& coords) const
+T ShBaseTextureRect<T>::operator[](const ShGeneric<2, float>& coords) const
 {
   if (ShEnvironment::insideShader) {
     T t;
@@ -194,7 +195,7 @@ T ShBaseTextureRect<T>::operator[](const ShVariableN<2, float>& coords) const
 }
 
 template<typename T>
-T ShBaseTexture3D<T>::operator[](const ShVariableN<3, float>& coords) const
+T ShBaseTexture3D<T>::operator[](const ShGeneric<3, float>& coords) const
 {
   if (ShEnvironment::insideShader) {
     T t;

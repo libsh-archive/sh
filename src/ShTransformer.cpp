@@ -328,8 +328,8 @@ struct InputOutputConvertor {
   }
 
   // dup that works only on nodes without values (inputs, outputs fall into this category)
-  ShVariableNodePtr dupNode(ShVariableNodePtr node, ShVariableKind newKind = SH_TEMP) {
-    ShVariableNodePtr result( new ShVariableNode(newKind,
+  ShVariableNodePtr dupNode(ShVariableNodePtr node, ShBindingType newBinding = SH_TEMP) {
+    ShVariableNodePtr result( new ShVariableNode(newBinding,
           node->size(), node->specialType()));
     result->name(node->name());
     return result;

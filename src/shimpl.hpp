@@ -24,43 +24,27 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHCONSTANT_HPP
-#define SHCONSTANT_HPP
+#ifndef SHIMPL_HPP
+#define SHIMPL_HPP
 
-#include "ShVariable.hpp"
-
-namespace SH {
-
-/** A shader-compile-time constant.
- * Represent an N-tuple constant which will never actually vary.
- * TODO: probably, "Constant/SH_CONSTANT" should be a binding type.  
- * It's not really a semantic type.
+/** \file shimpl.hpp
+ * \brief Sh implicit instantiation header
+ *
+ * If you use types which are not explicitly instantiated, you must
+ * include this file. This is generally only the case if you use
+ * tuples in Sh with more than 4 elements.
  */
-template<int N, typename T>
-class ShConstant : public ShVariableN<N, T> 
-{
-public:
-  ShConstant(T value);
-  ShConstant(T value0, T value1);
-  ShConstant(T value0, T value1, T value2);
-  ShConstant(T value0, T value1, T value2, T value3);
-  
-  explicit ShConstant(T values[N]);
 
-private:
-  /// Will never be implemented
-  ShConstant(const ShConstant<N, T>& other);
-  /// Will never be implemented
-  ShConstant<N, T>& operator=(const ShConstant<N, T>& other);
-};
+#include "sh.hpp"
+#include "ShAttribImpl.hpp"
+#include "ShGenericImpl.hpp"
+#include "ShVectorImpl.hpp"
+#include "ShNormalImpl.hpp"
+#include "ShColorImpl.hpp"
+#include "ShTexCoordImpl.hpp"
+#include "ShPointImpl.hpp"
+#include "ShPositionImpl.hpp"
 
-typedef ShConstant<1, float> ShConstant1f;
-typedef ShConstant<2, float> ShConstant2f;
-typedef ShConstant<3, float> ShConstant3f;
-typedef ShConstant<4, float> ShConstant4f;
 
-}
-
-#include "ShConstantImpl.hpp"
 
 #endif

@@ -34,6 +34,9 @@
 #include "ShNoise.hpp"
 #include "ShUtil.hpp"
 #include "ShImage.hpp"
+#include "ShAttribImpl.hpp"
+#include "ShGenericImpl.hpp"
+#include "ShTexCoord.hpp"
 
 namespace ShUtil {
 
@@ -64,15 +67,15 @@ class Metric {
 };
 
 template<typename T>
-ShVariableN<2, T> ShWorleyDefaultPointGen<T>::operator()(const ShVariableN<2, T> &p, bool useTexture) const {
+ShGeneric<2, T> ShWorleyDefaultPointGen<T>::operator()(const ShGeneric<2, T> &p, bool useTexture) const {
     return cellnoise<2>(p, useTexture, true); 
 }
 template<typename T>
-ShWorleyLerpingPointGen<T>::ShWorleyLerpingPointGen(const ShVariableN<1, T> &time)
+ShWorleyLerpingPointGen<T>::ShWorleyLerpingPointGen(const ShGeneric<1, T> &time)
   : m_time(time) {}
 
 template<typename T>
-ShVariableN<2, T> ShWorleyLerpingPointGen<T>::operator()(const ShVariableN<2, T> &p, bool useTexture) const {
+ShGeneric<2, T> ShWorleyLerpingPointGen<T>::operator()(const ShGeneric<2, T> &p, bool useTexture) const {
     ShAttrib<1, SH_TEMP, T> lastTime = floor(m_time);
     ShAttrib<1, SH_TEMP, T> timeoffset = frac(m_time);
     ShAttrib<3, SH_TEMP, T> offsetp;
@@ -99,11 +102,12 @@ ShVariableN<2, T> ShWorleyLerpingPointGen<T>::operator()(const ShVariableN<2, T>
 // geneated for each cell, etc.)
 //
 
-template<int N, int Kind1, int Kind2, bool Swizzled1, bool Swizzled2, typename T, typename PointGen>
-void doWorley(const ShVariableN<2, T> &p, const ShVariableN<N, T> &c, 
-    ShWorleyMetric m, ShAttrib<1, Kind1, T, Swizzled1> &scalarResult, 
-    ShAttrib<2, Kind2, T, Swizzled2> &gradientResult, bool useTexture, 
-    const PointGen &generator) {
+template<int N, typename T, typename PointGen>
+void doWorley(const ShGeneric<2, T> &p, const ShGeneric<N, T> &c, 
+              ShWorleyMetric m,
+              ShGeneric<1, T> &scalarResult, 
+              ShGeneric<2, T> &gradientResult, bool useTexture, 
+              const PointGen &generator) {
   int i;
   Metric dist(m);
 
@@ -118,7 +122,7 @@ void doWorley(const ShVariableN<2, T> &p, const ShVariableN<N, T> &c,
   ShAttrib<2, SH_TEMP, T> gradTemp;
   
   for(i = 0; i < DSIZE; ++i) {
-    ShConstant<2, T> offset(DX[i], DY[i]);
+    ShAttrib<2, SH_CONST, T> offset(DX[i], DY[i]);
     point = generator(ip + offset, useTexture) + offset;
 
     adj[0](i) = dist(point, op);
@@ -137,8 +141,8 @@ void doWorley(const ShVariableN<2, T> &p, const ShVariableN<N, T> &c,
 }
 
 template<int N, typename T, typename PointGen>
-ShVariableN<3, T> worley(const ShVariableN<2, T> &p,
-    const ShVariableN<N, T> &c, ShWorleyMetric m, bool useTexture, 
+ShGeneric<3, T> worley(const ShGeneric<2, T> &p,
+    const ShGeneric<N, T> &c, ShWorleyMetric m, bool useTexture, 
     const PointGen &generator) {
   ShAttrib<3, SH_TEMP, T> result;
   ShAttrib<1, SH_TEMP, T> scalar;
@@ -152,15 +156,15 @@ ShVariableN<3, T> worley(const ShVariableN<2, T> &p,
 }
 
 template<int N, typename T>
-ShVariableN<3, T> worley(const ShVariableN<2, T> &p,
-    const ShVariableN<N, T> &c, ShWorleyMetric m, bool useTexture) {
+ShGeneric<3, T> worley(const ShGeneric<2, T> &p,
+    const ShGeneric<N, T> &c, ShWorleyMetric m, bool useTexture) {
   ShWorleyDefaultPointGen<T> generator;
   return worley<N, T>(p, c, m, useTexture, generator);
 }
 
 template<int N, typename T, typename PointGen>
-ShVariableN<1, T> worleyNoGradient(const ShVariableN<2, T> &p,
-    const ShVariableN<N, T> &c, ShWorleyMetric m, bool useTexture,
+ShGeneric<1, T> worleyNoGradient(const ShGeneric<2, T> &p,
+    const ShGeneric<N, T> &c, ShWorleyMetric m, bool useTexture,
     const PointGen &generator) {
   ShAttrib<1, SH_TEMP, T> result;
   ShAttrib<2, SH_TEMP, T> dummy;
@@ -169,8 +173,8 @@ ShVariableN<1, T> worleyNoGradient(const ShVariableN<2, T> &p,
 }
 
 template<int N, typename T>
-ShVariableN<1, T> worleyNoGradient(const ShVariableN<2, T> &p,
-    const ShVariableN<N, T> &c, ShWorleyMetric m, bool useTexture) {
+ShGeneric<1, T> worleyNoGradient(const ShGeneric<2, T> &p,
+    const ShGeneric<N, T> &c, ShWorleyMetric m, bool useTexture) {
   ShWorleyDefaultPointGen<T> generator;
   return worleyNoGradient<N, T>(p, c, m, useTexture, generator);
 }

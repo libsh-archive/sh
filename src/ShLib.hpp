@@ -32,6 +32,7 @@
 #include "ShVariable.hpp"
 #include "ShAttrib.hpp"
 #include "ShMatrix.hpp"
+#include "ShEnvironment.hpp"
 
 /** \file ShLib.hpp
  * \brief The Sh library functions.
@@ -42,48 +43,48 @@
 
 #define SH_SHLIB_CONST_SCALAR_OP(operation) \
 template<typename T> \
-ShVariableN<1, T> operation(const ShVariableN<1, T>& left, T right) \
+ShAttrib<1, SH_TEMP, T> operation(const ShGeneric<1, T>& left, T right) \
 { \
-  return operation(left, ShConstant1f(right)); \
+  return operation(left, ShAttrib<1, SH_CONST, T>(right)); \
 } \
 template<typename T> \
-ShVariableN<1, T> operation(T left, const ShVariableN<1, T>& right) \
+ShGeneric<1, T> operation(T left, const ShGeneric<1, T>& right) \
 { \
-  return operation(ShConstant1f(left), right); \
+  return operation(ShAttrib<1, SH_CONST, T>(left), right); \
 } \
 template<typename T> \
-ShVariableN<1, T> operation(const ShVariableN<1, T>& left, double right) \
+ShGeneric<1, T> operation(const ShGeneric<1, T>& left, double right) \
 { \
-  return operation(left, ShConstant1f(right)); \
+  return operation(left, ShAttrib<1, SH_CONST, T>(right)); \
 } \
 template<typename T> \
-ShVariableN<1, T> operation(double left, const ShVariableN<1, T>& right) \
+ShGeneric<1, T> operation(double left, const ShGeneric<1, T>& right) \
 { \
-  return operation(ShConstant1f(left), right); \
+  return operation(ShAttrib<1, SH_CONST, T>(left), right); \
 }
 
 #define SH_SHLIB_CONST_N_OP_RETSIZE_LEFT(operation, retsize) \
 template<int N, typename T> \
-ShVariableN<retsize, T> operation(const ShVariableN<N, T>& left, T right) \
+ShGeneric<retsize, T> operation(const ShGeneric<N, T>& left, T right) \
 { \
-  return operation(left, ShConstant1f(right)); \
+  return operation(left, ShAttrib<1, SH_CONST, T>(right)); \
 } \
 template<int N, typename T> \
-ShVariableN<retsize, T> operation(const ShVariableN<N, T>& left, double right) \
+ShGeneric<retsize, T> operation(const ShGeneric<N, T>& left, double right) \
 { \
-  return operation(left, ShConstant1f(right)); \
+  return operation(left, ShAttrib<1, SH_CONST, T>(right)); \
 }
 
 #define SH_SHLIB_CONST_N_OP_RETSIZE_RIGHT(operation, retsize) \
 template<int N, typename T> \
-ShVariableN<retsize, T> operation(T left, const ShVariableN<N, T>& right) \
+ShGeneric<retsize, T> operation(T left, const ShGeneric<N, T>& right) \
 { \
-  return operation(ShConstant1f(left), right); \
+  return operation(ShAttrib<1, SH_CONST, T>(left), right); \
 } \
 template<int N, typename T> \
-ShVariableN<retsize, T> operation(double left, const ShVariableN<N, T>& right) \
+ShGeneric<retsize, T> operation(double left, const ShGeneric<N, T>& right) \
 { \
-  return operation(ShConstant1f(left), right); \
+  return operation(ShAttrib<1, SH_CONST, T>(left), right); \
 }
 
 #define SH_SHLIB_CONST_N_OP_LEFT(operation) \
@@ -104,7 +105,7 @@ namespace SH {
 
 /// Addition
 template<int N, typename T>
-ShVariableN<N, T> operator+(const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
+ShGeneric<N, T> operator+(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
 {
   if (!ShEnvironment::insideShader) {
     assert(left.hasValues());
@@ -115,7 +116,7 @@ ShVariableN<N, T> operator+(const ShVariableN<N, T>& left, const ShVariableN<N, 
     right.getValues(rvals);
     T result[N];
     for (int i = 0; i < N; i++) result[i] = lvals[i] + rvals[i];
-    return ShConstant<N, T>(result);
+    return ShAttrib<N, SH_CONST, T>(result);
   } else {
     ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, left, SH_OP_ADD, right);
@@ -128,7 +129,7 @@ SH_SHLIB_CONST_SCALAR_OP(operator+);
 
 /// Subtraction
 template<int N, typename T>
-ShVariableN<N, T> operator-(const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
+ShGeneric<N, T> operator-(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
 {
   return left + (-right);
 }
@@ -137,7 +138,7 @@ SH_SHLIB_CONST_SCALAR_OP(operator-);
 
 /// Componentwise/scalar multiplication
 template<int N, int M, typename T>
-ShVariableN<N, T> operator*(const ShVariableN<N, T>& left, const ShVariableN<M, T>& right)
+ShGeneric<N, T> operator*(const ShGeneric<N, T>& left, const ShGeneric<M, T>& right)
 {
   SH_STATIC_CHECK(N == M || N == 1 || M == 1, Multiplication_Components_Do_Not_Match);
   if (!ShEnvironment::insideShader) {
@@ -149,7 +150,7 @@ ShVariableN<N, T> operator*(const ShVariableN<N, T>& left, const ShVariableN<M, 
     right.getValues(rvals);
     T result[N];
     for (int i = 0; i < N; i++) result[i] = lvals[i] * rvals[M == 1 ? 0 : i];
-    return ShConstant<N, T>(result);
+    return ShAttrib<N, SH_CONST, T>(result);
   } else {
     ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, left, SH_OP_MUL, right);
@@ -160,7 +161,7 @@ ShVariableN<N, T> operator*(const ShVariableN<N, T>& left, const ShVariableN<M, 
 }
 
 template<int M, typename T>
-ShVariableN<M, T> operator*(const ShVariableN<1, T>& left, const ShVariableN<M, T>& right)
+ShGeneric<M, T> operator*(const ShGeneric<1, T>& left, const ShGeneric<M, T>& right)
 {
   if (!ShEnvironment::insideShader) {
     assert(left.hasValues());
@@ -171,7 +172,7 @@ ShVariableN<M, T> operator*(const ShVariableN<1, T>& left, const ShVariableN<M, 
     right.getValues(rvals);
     T result[M];
     for (int i = 0; i < M; i++) result[i] = lvals[0] * rvals[i];
-    return ShConstant<M, T>(result);
+    return ShAttrib<M, SH_CONST, T>(result);
   } else {
     ShAttrib<M, SH_TEMP, T, false> t;
     ShStatement stmt(t, left, SH_OP_MUL, right);
@@ -186,7 +187,7 @@ SH_SHLIB_CONST_N_OP_BOTH(operator*);
 
 /// Componentwise/scalar division
 template<int N, int M, typename T>
-ShVariableN<N, T> operator/(const ShVariableN<N, T>& left, const ShVariableN<M, T>& right)
+ShGeneric<N, T> operator/(const ShGeneric<N, T>& left, const ShGeneric<M, T>& right)
 {
   SH_STATIC_CHECK(M == N || M == 1, Division_Components_Do_Not_Match);
   if (!ShEnvironment::insideShader) {
@@ -198,7 +199,7 @@ ShVariableN<N, T> operator/(const ShVariableN<N, T>& left, const ShVariableN<M, 
     right.getValues(rvals);
     T result[N];
     for (int i = 0; i < N; i++) result[i] = lvals[i] / rvals[M == 1 ? 0 : i];
-    return ShConstant<N, T>(result);
+    return ShAttrib<N, SH_CONST, T>(result);
   } else {
     ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, left, SH_OP_DIV, right);
@@ -213,7 +214,7 @@ SH_SHLIB_CONST_N_OP_LEFT(operator/);
 
 /// Conventional power operation.
 template<int N, typename T>
-ShVariableN<N, T> pow(const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
+ShGeneric<N, T> pow(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
 {
   if (!ShEnvironment::insideShader) {
     assert(left.hasValues());
@@ -224,7 +225,7 @@ ShVariableN<N, T> pow(const ShVariableN<N, T>& left, const ShVariableN<N, T>& ri
     right.getValues(rvals);
     T result[N];
     for (int i = 0; i < N; i++) result[i] = std::pow(lvals[i], rvals[i]);
-    return ShConstant<N, T>(result);
+    return ShAttrib<N, SH_CONST, T>(result);
   } else {
     ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, left, SH_OP_POW, right);
@@ -237,7 +238,7 @@ SH_SHLIB_CONST_SCALAR_OP(pow);
 SH_SHLIB_CONST_N_OP_RIGHT(pow);
 
 template<int N, typename T>
-ShVariableN<N, T> operator^(const ShVariableN<N, T>& left, const ShVariableN<N, T>& right) {
+ShGeneric<N, T> operator^(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right) {
   return pow(left, right);
 }
 
@@ -247,7 +248,7 @@ SH_SHLIB_CONST_N_OP_RIGHT(operator^);
 // "Boolean" operators
 #define SH_SHLIB_BOOLEAN_OP(opfunc, op, shop) \
 template<int N, int M, typename T>\
-ShVariableN<N, T> opfunc(const ShVariableN<N, T>& left, const ShVariableN<M, T>& right)\
+ShGeneric<N, T> opfunc(const ShGeneric<N, T>& left, const ShGeneric<M, T>& right)\
 {\
   SH_STATIC_CHECK(N == M || N == 1 || M == 1, Boolean_Operation_Components_Do_Not_match); \
   if (!ShEnvironment::insideShader) {\
@@ -259,7 +260,7 @@ ShVariableN<N, T> opfunc(const ShVariableN<N, T>& left, const ShVariableN<M, T>&
     right.getValues(rvals);\
     T result[N];\
     for (int i = 0; i < N; i++) result[i] = (lvals[i] op rvals[(M == 1) ? 0 : i] ? 1.0 : 0.0);\
-    return ShConstant<N, T>(result);\
+    return ShAttrib<N, SH_CONST, T>(result);\
   } else {\
     ShAttrib<N, SH_TEMP, T, false> t;\
     ShStatement stmt(t, left, shop, right);\
@@ -269,7 +270,7 @@ ShVariableN<N, T> opfunc(const ShVariableN<N, T>& left, const ShVariableN<M, T>&
 }\
 \
 template<int M, typename T>\
-ShVariableN<M, T> opfunc(const ShVariableN<1, T>& left, const ShVariableN<M, T>& right)\
+ShGeneric<M, T> opfunc(const ShGeneric<1, T>& left, const ShGeneric<M, T>& right)\
 {\
   if (!ShEnvironment::insideShader) {\
     assert(left.hasValues());\
@@ -280,7 +281,7 @@ ShVariableN<M, T> opfunc(const ShVariableN<1, T>& left, const ShVariableN<M, T>&
     right.getValues(rvals);\
     T result[M];\
     for (int i = 0; i < M; i++) result[i] = (lvals[0] op rvals[i] ? 1.0 : 0.0);\
-    return ShConstant<M, T>(result);\
+    return ShAttrib<M, SH_CONST, T>(result);\
   } else {\
     ShAttrib<M, SH_TEMP, T, false> t;\
     ShStatement stmt(t, left, shop, right);\
@@ -305,7 +306,7 @@ SH_SHLIB_BOOLEAN_OP(operator!=, !=, SH_OP_SNE);
  *  src[0][i] < 0.0, not greater than.
  */
 template<int M, int N, typename T>
-ShVariableN<N, T> cond(const ShVariableN<M, T>& condition, const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
+ShGeneric<N, T> cond(const ShGeneric<M, T>& condition, const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
 {
   SH_STATIC_CHECK(N == M || M == 1, Conditional_Assignment_Components_Do_Not_Match);
   if (!ShEnvironment::insideShader) {
@@ -320,7 +321,7 @@ ShVariableN<N, T> cond(const ShVariableN<M, T>& condition, const ShVariableN<N, 
     right.getValues(rvals);
     T result[N];
     for (int i = 0; i < N; i++) result[i] = (cvals[M == 1 ? 0 : i] > 0.0 ? lvals[i] : rvals[i]);
-    return ShConstant<N, T>(result);
+    return ShAttrib<N, SH_CONST, T>(result);
   } else {
     ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_COND, condition, left, right);
@@ -330,12 +331,12 @@ ShVariableN<N, T> cond(const ShVariableN<M, T>& condition, const ShVariableN<N, 
 }
 
 /** Casting
- * Casts ShVariableN<N, T> to ShVariableN<M, T>
+ * Casts ShGeneric<N, T> to ShGeneric<M, T>
  * If M > N, pads remaining components with 0s (on right).
  * Otherwise, discards extra components.
  */
 template<int M, int N, typename T> 
-ShVariableN<M, T> cast( const ShVariableN<N, T> &a ) {
+ShGeneric<M, T> cast( const ShGeneric<N, T> &a ) {
   int copySize = std::min(M, N);
   ShAttrib<M, SH_TEMP, T, false> result;
 
@@ -353,12 +354,12 @@ ShVariableN<M, T> cast( const ShVariableN<N, T> &a ) {
 }
 
 /** Fill Casting
- * Casts ShVariableN<N, T> to ShVariableN<M, T>
+ * Casts ShGeneric<N, T> to ShGeneric<M, T>
  * If M > N, copies last component to fill extras 
  * Otherwise, discards extra components.
  */
 template<int M, int N, typename T> 
-ShVariableN<M, T> fillcast( const ShVariableN<N, T> &a ) {
+ShGeneric<M, T> fillcast( const ShGeneric<N, T> &a ) {
   if( M <= N ) return cast<M>(a);
   int indices[M];
   for(int i = 0; i < M; ++i) indices[i] = i >= N ? N - 1 : i;
@@ -367,7 +368,7 @@ ShVariableN<M, T> fillcast( const ShVariableN<N, T> &a ) {
 
 // Fragment killing
 template<int N, typename T>
-void kill(const ShVariableN<N, T>& c)
+void kill(const ShGeneric<N, T>& c)
 {
   assert(ShEnvironment::insideShader);
   ShStatement stmt(c, SH_OP_KIL, c);
@@ -378,7 +379,7 @@ void kill(const ShVariableN<N, T>& c)
 
 /// Absolute value
 template<int N, typename T>
-ShVariableN<N, T> abs(const ShVariableN<N, T>& var)
+ShGeneric<N, T> abs(const ShGeneric<N, T>& var)
 {
   if (!ShEnvironment::insideShader) {
     assert(var.hasValues());
@@ -386,7 +387,7 @@ ShVariableN<N, T> abs(const ShVariableN<N, T>& var)
     var.getValues(vals);
     T result[N];
     for (int i = 0; i < N; i++) result[i] = (vals[i] >= 0.0 ? vals[i] : -vals[i]);
-    return ShConstant<N, T>(result);
+    return ShAttrib<N, SH_CONST, T>(result);
   } else {
     ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_ABS, var);
@@ -398,7 +399,7 @@ ShVariableN<N, T> abs(const ShVariableN<N, T>& var)
 
 /// Arccosine of x. x in [-1, 1], result in [0, pi]
 template<int N, typename T>
-ShVariableN<N, T> acos(const ShVariableN<N, T>& var)
+ShGeneric<N, T> acos(const ShGeneric<N, T>& var)
 {
   if (!ShEnvironment::insideShader) {
     assert(var.hasValues());
@@ -406,7 +407,7 @@ ShVariableN<N, T> acos(const ShVariableN<N, T>& var)
     var.getValues(vals);
     T result[N];
     for (int i = 0; i < N; i++) result[i] = std::acos(vals[i]);
-    return ShConstant<N, T>(result);
+    return ShAttrib<N, SH_CONST, T>(result);
   } else {
     ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_ACOS, var);
@@ -418,7 +419,7 @@ ShVariableN<N, T> acos(const ShVariableN<N, T>& var)
 
 /// Arcsine of x. x in [-1, 1]. Result in [-pi/2, pi/2]
 template<int N, typename T>
-ShVariableN<N, T> asin(const ShVariableN<N, T>& var)
+ShGeneric<N, T> asin(const ShGeneric<N, T>& var)
 {
   if (!ShEnvironment::insideShader) {
     assert(var.hasValues());
@@ -426,7 +427,7 @@ ShVariableN<N, T> asin(const ShVariableN<N, T>& var)
     var.getValues(vals);
     T result[N];
     for (int i = 0; i < N; i++) result[i] = std::asin(vals[i]);
-    return ShConstant<N, T>(result);
+    return ShAttrib<N, SH_CONST, T>(result);
   } else {
     ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_ASIN, var);
@@ -438,7 +439,7 @@ ShVariableN<N, T> asin(const ShVariableN<N, T>& var)
 
 /// least integer <= argument 
 template<int N, typename T>
-ShVariableN<N, T> ceil(const ShVariableN<N, T>& var)
+ShGeneric<N, T> ceil(const ShGeneric<N, T>& var)
 {
   if (!ShEnvironment::insideShader) {
     assert(var.hasValues());
@@ -446,7 +447,7 @@ ShVariableN<N, T> ceil(const ShVariableN<N, T>& var)
     var.getValues(vals);
     T result[N];
     for (int i = 0; i < N; i++) result[i] = std::ceil(vals[i]);
-    return ShConstant<N, T>(result);
+    return ShAttrib<N, SH_CONST, T>(result);
   } else {
     ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_CEIL, var);
@@ -457,7 +458,7 @@ ShVariableN<N, T> ceil(const ShVariableN<N, T>& var)
 
 /// Cosine of x.
 template<int N, typename T>
-ShVariableN<N, T> cos(const ShVariableN<N, T>& var)
+ShGeneric<N, T> cos(const ShGeneric<N, T>& var)
 {
   if (!ShEnvironment::insideShader) {
     assert(var.hasValues());
@@ -465,7 +466,7 @@ ShVariableN<N, T> cos(const ShVariableN<N, T>& var)
     var.getValues(vals);
     T result[N];
     for (int i = 0; i < N; i++) result[i] = std::cos(vals[i]);
-    return ShConstant<N, T>(result);
+    return ShAttrib<N, SH_CONST, T>(result);
   } else {
     ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_COS, var);
@@ -478,7 +479,7 @@ ShVariableN<N, T> cos(const ShVariableN<N, T>& var)
 /// Componentwise/scalar dot product
 #define SH_LIB_DOTPRODUCT(opfunc) \
 template<int M, int N, typename T>\
-ShVariableN<1,  T> opfunc(const ShVariableN<M, T>& left, const ShVariableN<N, T>& right)\
+ShGeneric<1,  T> opfunc(const ShGeneric<M, T>& left, const ShGeneric<N, T>& right)\
 {\
   SH_STATIC_CHECK(M == N || M == 1 || N == 1, Dot_Product_Components_Do_Not_Match);\
   if (!ShEnvironment::insideShader) {\
@@ -490,7 +491,7 @@ ShVariableN<1,  T> opfunc(const ShVariableN<M, T>& left, const ShVariableN<N, T>
     T result = 0.0;\
     for (int i = 0; i < M || i < N; i++) result += \
         ( M == 1 ? lvals[0] : lvals[i] ) * ( N == 1 ? rvals[0] : rvals[i] );\
-    return ShConstant<1, T>(result);\
+    return ShAttrib<1, SH_CONST, T>(result);\
   } else {\
     ShAttrib<1, SH_TEMP, T, false> t;\
     ShStatement stmt(t, left, SH_OP_DOT, right);\
@@ -506,7 +507,7 @@ SH_SHLIB_CONST_N_OP_RETSIZE_BOTH(dot, 1);
 
 /// smallest integer >= argument 
 template<int N, typename T>
-ShVariableN<N, T> floor(const ShVariableN<N, T>& var)
+ShGeneric<N, T> floor(const ShGeneric<N, T>& var)
 {
   if (!ShEnvironment::insideShader) {
     assert(var.hasValues());
@@ -514,7 +515,7 @@ ShVariableN<N, T> floor(const ShVariableN<N, T>& var)
     var.getValues(vals);
     T result[N];
     for (int i = 0; i < N; i++) result[i] = std::floor(vals[i]);
-    return ShConstant<N, T>(result);
+    return ShAttrib<N, SH_CONST, T>(result);
   } else {
     ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_FLR, var);
@@ -525,7 +526,7 @@ ShVariableN<N, T> floor(const ShVariableN<N, T>& var)
 
 /// Float modulus 
 template<int N, int M, typename T>
-ShVariableN<N,  T> fmod(const ShVariableN<N, T>& left, const ShVariableN<M, T>& right)
+ShGeneric<N,  T> fmod(const ShGeneric<N, T>& left, const ShGeneric<M, T>& right)
 {
   SH_STATIC_CHECK(N == M || M == 1, Fmod_Components_Do_Not_Match);
   if (!ShEnvironment::insideShader) {
@@ -538,7 +539,7 @@ ShVariableN<N,  T> fmod(const ShVariableN<N, T>& left, const ShVariableN<M, T>& 
     T result[N]; 
     for (int i = 0; i < N; i++) result[i] = 
       std::fmod( lvals[i], rvals[(M == 1 ? 0 : i)] ); 
-    return ShConstant<N, T>(result);
+    return ShAttrib<N, SH_CONST, T>(result);
   } else {
     ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, left, SH_OP_FMOD, right);
@@ -552,7 +553,7 @@ SH_SHLIB_CONST_N_OP_LEFT(fmod);
 
 /// Fractional part.
 template<int N, typename T>
-ShVariableN<N, T> frac(const ShVariableN<N, T>& var)
+ShGeneric<N, T> frac(const ShGeneric<N, T>& var)
 {
   if (!ShEnvironment::insideShader) {
     assert(var.hasValues());
@@ -560,7 +561,7 @@ ShVariableN<N, T> frac(const ShVariableN<N, T>& var)
     var.getValues(vals);
     T result[N];
     for (int i = 0; i < N; i++) result[i] = fmodf(vals[i], 1.0f); // TODO: Check that this is correct
-    return ShConstant<N, T>(result);
+    return ShAttrib<N, SH_CONST, T>(result);
   } else {
     ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_FRAC, var);
@@ -571,8 +572,8 @@ ShVariableN<N, T> frac(const ShVariableN<N, T>& var)
 
 /// linear interpolation.
 template<int N, int M, typename T>
-ShVariableN<N, T> lerp(const ShVariableN<M, T>& f, const ShVariableN<N, T>& a, 
-    const ShVariableN<N,T>& b)
+ShGeneric<N, T> lerp(const ShGeneric<M, T>& f, const ShGeneric<N, T>& a, 
+    const ShGeneric<N,T>& b)
 {
   SH_STATIC_CHECK(M == N || M == 1, Linear_Interpolation_Components_Do_Not_Match);
   if (!ShEnvironment::insideShader) {
@@ -588,7 +589,7 @@ ShVariableN<N, T> lerp(const ShVariableN<M, T>& f, const ShVariableN<N, T>& a,
         T fi = ( M == 1 ? fvals[0] : fvals[i] ); 
         result[i] = fi * avals[i] + (1 - fi) * bvals[i]; 
     }
-    return ShConstant<N, T>(result);
+    return ShAttrib<N, SH_CONST, T>(result);
   } else {
     ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_LRP, f, a, b); 
@@ -598,15 +599,15 @@ ShVariableN<N, T> lerp(const ShVariableN<M, T>& f, const ShVariableN<N, T>& a,
 }
 
 template<int N, typename T> 
-ShVariableN<N, T> lerp(T f, const ShVariableN<N, T>& a, const ShVariableN<N, T>& b)
+ShGeneric<N, T> lerp(T f, const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
 { 
-  return lerp(ShConstant1f(f), a, b); 
+  return lerp(ShAttrib<1, SH_CONST, T>(f), a, b); 
 }
 
 /// Multiply and add
 template<int N, int M, int P, typename T>
-ShVariableN<P, T> mad(const ShVariableN<M, T>& m1, const ShVariableN<N, T>& m2, 
-    const ShVariableN<P,T>& a)
+ShGeneric<P, T> mad(const ShGeneric<M, T>& m1, const ShGeneric<N, T>& m2, 
+    const ShGeneric<P,T>& a)
 {
   SH_STATIC_CHECK((M == N && N == P) || (M == 1 && N == P) || (N == 1 && M == P),
                   Multiply_And_Add_Components_Do_Not_Match);
@@ -623,7 +624,7 @@ ShVariableN<P, T> mad(const ShVariableN<M, T>& m1, const ShVariableN<N, T>& m2,
     for (int i = 0; i < P; i++) {
         result[i] = ( M == 1 ? m1vals[0] : m1vals[i] ) * ( N == 1 ? m2vals[0] : m2vals[i] ) + avals[i]; 
     }
-    return ShConstant<P, T>(result);
+    return ShAttrib<P, SH_CONST, T>(result);
   } else {
     ShAttrib<P, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_MAD, m1, m2, a); 
@@ -635,32 +636,32 @@ ShVariableN<P, T> mad(const ShVariableN<M, T>& m1, const ShVariableN<N, T>& m2,
 /// Use template specialization for the N, 1, N case
 
 template<int N, typename T> 
-ShVariableN<N, T> mad(T m1, const ShVariableN<N, T>& m2, const ShVariableN<N, T>& a)
+ShGeneric<N, T> mad(T m1, const ShGeneric<N, T>& m2, const ShGeneric<N, T>& a)
 { 
-  return mad(ShConstant1f(m1), m2, a); 
+  return mad(ShAttrib<1, SH_CONST, T>(m1), m2, a); 
 }
 
 template<int N, typename T> 
-ShVariableN<N, T> mad(double m1, const ShVariableN<N, T>& m2, const ShVariableN<N, T>& a)
+ShGeneric<N, T> mad(double m1, const ShGeneric<N, T>& m2, const ShGeneric<N, T>& a)
 { 
-  return mad(ShConstant1f(m1), m2, a); 
+  return mad(ShAttrib<1, SH_CONST, T>(m1), m2, a); 
 }
 
 template<int N, typename T> 
-ShVariableN<N, T> mad(const ShVariableN<N, T>& m1, T m2, const ShVariableN<N, T>& a)
+ShGeneric<N, T> mad(const ShGeneric<N, T>& m1, T m2, const ShGeneric<N, T>& a)
 { 
-  return mad(m1, ShConstant1f(m2), a); 
+  return mad(m1, ShAttrib<1, SH_CONST, T>(m2), a); 
 }
 
 template<int N, typename T> 
-ShVariableN<N, T> mad(const ShVariableN<N, T>& m1, double m2, const ShVariableN<N, T>& a)
+ShGeneric<N, T> mad(const ShGeneric<N, T>& m1, double m2, const ShGeneric<N, T>& a)
 { 
-  return mad(m1, ShConstant1f(m2), a); 
+  return mad(m1, ShAttrib<1, SH_CONST, T>(m2), a); 
 }
 
 /// Componentwise maximum
 template<int N, typename T>
-ShVariableN<N,  T> max(const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
+ShGeneric<N,  T> max(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
 {
   if (!ShEnvironment::insideShader) {
     assert(left.hasValues());
@@ -670,7 +671,7 @@ ShVariableN<N,  T> max(const ShVariableN<N, T>& left, const ShVariableN<N, T>& r
     right.getValues(rvals);
     T result[N];
     for (int i = 0; i < N; i++) result[i] = (lvals[i] > rvals[i] ? lvals[i] : rvals[i]);
-    return ShConstant<N, T>(result);
+    return ShAttrib<N, SH_CONST, T>(result);
   } else {
     ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, left, SH_OP_MAX, right);
@@ -682,7 +683,7 @@ SH_SHLIB_CONST_SCALAR_OP(max);
 
 /// Positive - make positive  
 template<int N, typename T>
-ShVariableN<N,  T> pos(const ShVariableN<N, T>& x) 
+ShGeneric<N,  T> pos(const ShGeneric<N, T>& x) 
 {
   if (!ShEnvironment::insideShader) {
     assert(x.hasValues());
@@ -690,11 +691,11 @@ ShVariableN<N,  T> pos(const ShVariableN<N, T>& x)
     x.getValues(vals);
     T result[N];
     for (int i = 0; i < N; i++) result[i] = vals[i] > 0 ? vals[i] : 0; 
-    return ShConstant<N, T>(result);
+    return ShAttrib<N, SH_CONST, T>(result);
   } else {
     T vals[N];
     for( int i = 0; i < N; ++i ) vals[i] = 0;
-    ShConstant<N, T> zero(vals);
+    ShAttrib<N, SH_CONST, T> zero(vals);
     ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, x, SH_OP_MAX, zero);
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
@@ -705,7 +706,7 @@ ShVariableN<N,  T> pos(const ShVariableN<N, T>& x)
 
 /// Componentwise minimum
 template<int N, typename T>
-ShVariableN<N,  T> min(const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
+ShGeneric<N,  T> min(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
 {
   if (!ShEnvironment::insideShader) {
     assert(left.hasValues());
@@ -715,7 +716,7 @@ ShVariableN<N,  T> min(const ShVariableN<N, T>& left, const ShVariableN<N, T>& r
     right.getValues(rvals);
     T result[N];
     for (int i = 0; i < N; i++) result[i] = (lvals[i] < rvals[i] ? lvals[i] : rvals[i]);
-    return ShConstant<N, T>(result);
+    return ShAttrib<N, SH_CONST, T>(result);
   } else {
     ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, left, SH_OP_MIN, right);
@@ -729,7 +730,7 @@ SH_SHLIB_CONST_SCALAR_OP(min);
 
 /// Sine of x.
 template<int N, typename T>
-ShVariableN<N, T> sin(const ShVariableN<N, T>& var)
+ShGeneric<N, T> sin(const ShGeneric<N, T>& var)
 {
   if (!ShEnvironment::insideShader) {
     assert(var.hasValues());
@@ -737,7 +738,7 @@ ShVariableN<N, T> sin(const ShVariableN<N, T>& var)
     var.getValues(vals);
     T result[N];
     for (int i = 0; i < N; i++) result[i] = std::sin(vals[i]);
-    return ShConstant<N, T>(result);
+    return ShAttrib<N, SH_CONST, T>(result);
   } else {
     ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_SIN, var);
@@ -749,7 +750,7 @@ ShVariableN<N, T> sin(const ShVariableN<N, T>& var)
 
 // Square root.
 template<int N, typename T>
-ShVariableN<N, T> sqrt(const ShVariableN<N, T>& var)
+ShGeneric<N, T> sqrt(const ShGeneric<N, T>& var)
 {
   if (!ShEnvironment::insideShader) {
     assert(var.hasValues());
@@ -757,7 +758,7 @@ ShVariableN<N, T> sqrt(const ShVariableN<N, T>& var)
     var.getValues(vals);
     T result[N];
     for (int i = 0; i < N; i++) result[i] = std::sqrt(vals[i]);
-    return ShConstant<N, T>(result);
+    return ShAttrib<N, SH_CONST, T>(result);
   } else {
     ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_SQRT, var);
@@ -769,7 +770,7 @@ ShVariableN<N, T> sqrt(const ShVariableN<N, T>& var)
 // Geometrical operations
 
 template<typename T>
-ShVariableN<3, T> cross(const ShVariableN<3, T>& left, const ShVariableN<3, T>& right)
+ShGeneric<3, T> cross(const ShGeneric<3, T>& left, const ShGeneric<3, T>& right)
 {
   if (!ShEnvironment::insideShader) {
     assert(left.hasValues());
@@ -782,7 +783,7 @@ ShVariableN<3, T> cross(const ShVariableN<3, T>& left, const ShVariableN<3, T>& 
     result[0] = lvals[1] * rvals[2] - lvals[2] * rvals[1];
     result[1] = -(lvals[0] * rvals[2] - lvals[2] * rvals[0]);
     result[2] = lvals[0] * rvals[1] - lvals[1] * rvals[0];
-    return ShConstant<3, T>(result);
+    return ShAttrib<3, SH_CONST, T>(result);
   } else {
     ShAttrib<3, SH_TEMP, T, false> t;
     ShStatement stmt(t, left, SH_OP_XPD, right);
@@ -792,7 +793,7 @@ ShVariableN<3, T> cross(const ShVariableN<3, T>& left, const ShVariableN<3, T>& 
 }
 
 template<int N, typename T>
-ShVariableN<N, T> normalize(const ShVariableN<N, T>& var)
+ShGeneric<N, T> normalize(const ShGeneric<N, T>& var)
 {
   if (!ShEnvironment::insideShader) {
     ShAttrib1f sizeVar = sqrt(dot(var, var));
@@ -803,7 +804,7 @@ ShVariableN<N, T> normalize(const ShVariableN<N, T>& var)
     var.getValues(vals);
     T result[N];
     for (int i = 0; i < N; i++) result[i] = vals[i]/size;
-    return ShConstant<N, T>(result);
+    return ShAttrib<N, SH_CONST, T>(result);
   } else {
     ShAttrib<N, SH_TEMP, T, false> t;
     ShStatement stmt(t, SH_OP_NORM, var);
@@ -815,9 +816,9 @@ ShVariableN<N, T> normalize(const ShVariableN<N, T>& var)
 // Operations on matrices
 
 /// Transpose of a matrix
-template<int Rows, int Cols, int Kind, typename T>
+template<int Rows, int Cols, ShBindingType Binding, typename T>
 ShMatrix<Cols, Rows, SH_TEMP, T>
-transpose(const ShMatrix<Rows, Cols, Kind, T>& m)
+transpose(const ShMatrix<Rows, Cols, Binding, T>& m)
 {
   ShMatrix<Cols, Rows, SH_TEMP, T> result;
   for (int i = 0; i < Cols; i++) {
@@ -829,10 +830,10 @@ transpose(const ShMatrix<Rows, Cols, Kind, T>& m)
 }
 
 /// Matrix multiplication
-template<int M, int N, int P, int Kind, int Kind2, typename T>
+template<int M, int N, int P, ShBindingType Binding, ShBindingType Binding2, typename T>
 ShMatrix<M, P, SH_TEMP, T>
-operator|(const ShMatrix<M, N, Kind, T>& a,
-          const ShMatrix<N, P, Kind2, T>& b)
+operator|(const ShMatrix<M, N, Binding, T>& a,
+          const ShMatrix<N, P, Binding2, T>& b)
 {
   ShMatrix<P, N, SH_TEMP, T> tb = transpose(b);
 
@@ -846,8 +847,8 @@ operator|(const ShMatrix<M, N, Kind, T>& a,
 }
 
 /// Treat a variable as a column vector and multiply it with a matrix
-template<int M, int N, int Kind, typename T>
-ShVariableN<M, T> operator|(const ShMatrix<M, N, Kind, T>& a, const ShVariableN<N, T>& b)
+template<int M, int N, ShBindingType Binding, typename T>
+ShGeneric<M, T> operator|(const ShMatrix<M, N, Binding, T>& a, const ShGeneric<N, T>& b)
 {
   ShAttrib<M, SH_TEMP, T> ret;
   for (int i = 0; i < M; i++) {
@@ -859,11 +860,11 @@ ShVariableN<M, T> operator|(const ShMatrix<M, N, Kind, T>& a, const ShVariableN<
 }
 
 #define SH_SHLIB_UNARY_RETTYPE_OPERATION(libtype, libop, librettype, libretsize) \
-template<int N, int K1, typename T, bool S1> \
+template<int N, ShBindingType K1, typename T, bool S1> \
 librettype<libretsize, SH_TEMP, T, false> \
 libop(const libtype<N, K1, T, S1>& var) \
 { \
-  ShVariableN<libretsize, T> t = libop(static_cast< ShVariableN<N, T> >(var)); \
+  ShGeneric<libretsize, T> t = libop(static_cast< ShGeneric<N, T> >(var)); \
   return librettype<libretsize, SH_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
 }
 
@@ -871,12 +872,12 @@ libop(const libtype<N, K1, T, S1>& var) \
   SH_SHLIB_UNARY_RETTYPE_OPERATION(libtype, libop, libtype, libretsize)
 
 #define SH_SHLIB_BINARY_RETTYPE_OPERATION(libtype, libop, librettype, libretsize) \
-template<int N, int K1, int K2, typename T, bool S1, bool S2> \
+template<int N, ShBindingType K1, ShBindingType K2, typename T, bool S1, bool S2> \
 librettype<libretsize, SH_TEMP, T, false> \
 libop(const libtype<N, K1, T, S1>& left, const libtype<N, K2, T, S2>& right) \
 { \
-  ShVariableN<libretsize, T> t = libop(static_cast< ShVariableN<N, T> >(left), \
-                                       static_cast< ShVariableN<N, T> >(right)); \
+  ShGeneric<libretsize, T> t = libop(static_cast< ShGeneric<N, T> >(left), \
+                                       static_cast< ShGeneric<N, T> >(right)); \
   return librettype<libretsize, SH_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
 }
 
@@ -884,12 +885,12 @@ libop(const libtype<N, K1, T, S1>& left, const libtype<N, K2, T, S2>& right) \
   SH_SHLIB_BINARY_RETTYPE_OPERATION(libtype, libop, libtype, libretsize)
 
 #define SH_SHLIB_UNEQ_BINARY_RETTYPE_OPERATION(libtype, libop, librettype, libretsize) \
-template<int N, int M, int K1, int K2, typename T, bool S1, bool S2> \
+template<int N, int M, ShBindingType K1, ShBindingType K2, typename T, bool S1, bool S2> \
 librettype<libretsize, SH_TEMP, T, false> \
 libop(const libtype<N, K1, T, S1>& left, const libtype<M, K2, T, S2>& right) \
 { \
-  ShVariableN<libretsize, T> t = libop(static_cast< ShVariableN<N, T> >(left), \
-                                       static_cast< ShVariableN<M, T> >(right)); \
+  ShGeneric<libretsize, T> t = libop(static_cast< ShGeneric<N, T> >(left), \
+                                       static_cast< ShGeneric<M, T> >(right)); \
   return librettype<libretsize, SH_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
 }
 
@@ -897,12 +898,12 @@ libop(const libtype<N, K1, T, S1>& left, const libtype<M, K2, T, S2>& right) \
   SH_SHLIB_UNEQ_BINARY_RETTYPE_OPERATION(libtype, libop, libtype, libretsize)
 
 #define SH_SHLIB_LEFT_SCALAR_RETTYPE_OPERATION(libtype, libop, librettype) \
-template<int M, int K1, int K2, typename T, bool S1, bool S2> \
+template<int M, ShBindingType K1, ShBindingType K2, typename T, bool S1, bool S2> \
 librettype<M, SH_TEMP, T, false> \
 libop(const libtype<1, K2, T, S2>& left, const libtype<M, K1, T, S1>& right) \
 { \
-  ShVariableN<M, T> t = libop(static_cast< ShVariableN<1, T> >(left), \
-                              static_cast< ShVariableN<M, T> >(right)); \
+  ShGeneric<M, T> t = libop(static_cast< ShGeneric<1, T> >(left), \
+                              static_cast< ShGeneric<M, T> >(right)); \
   return librettype<M, SH_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
 }
 
@@ -910,12 +911,12 @@ libop(const libtype<1, K2, T, S2>& left, const libtype<M, K1, T, S1>& right) \
   SH_SHLIB_LEFT_SCALAR_RETTYPE_OPERATION(libtype, libop, libtype)
 
 #define SH_SHLIB_LEFT_MATRIX_RETTYPE_OPERATION(libtype, libop, librettype, libretsize) \
-template<int M, int N, int K1, int K2, typename T, bool S1> \
+template<int M, int N, ShBindingType K1, ShBindingType K2, typename T, bool S1> \
 librettype<libretsize, SH_TEMP, T, false> libop(const ShMatrix<M, N, K1, T>& a, \
                                                     const libtype<N, K2, T, S1>& b) \
 { \
-  ShVariableN<libretsize, T> t = libop(a, \
-                                       static_cast< ShVariableN<N, T> >(b)); \
+  ShGeneric<libretsize, T> t = libop(a, \
+                                       static_cast< ShGeneric<N, T> >(b)); \
   return librettype<libretsize, K1, T, S1>(t.node(), t.swizzle(), t.neg()); \
 }
 
@@ -925,62 +926,62 @@ librettype<libretsize, SH_TEMP, T, false> libop(const ShMatrix<M, N, K1, T>& a, 
 // All the scalar constant stuff
 
 #define SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(libtype, libop, librettype, libretsize) \
-template<int K1, typename T, bool S1> \
+template<ShBindingType K1, typename T, bool S1> \
 librettype<libretsize, SH_TEMP, T, false> \
 libop(const libtype<1, K1, T, S1>& left, T right) \
 { \
-  return libop(left, ShConstant1f(right)); \
+  return libop(left, ShAttrib<1, SH_CONST, T>(right)); \
 } \
-template<int K1, typename T, bool S1> \
+template<ShBindingType K1, typename T, bool S1> \
 librettype<libretsize, SH_TEMP, T, false> \
 libop(T left, const libtype<1, K1, T, S1>& right) \
 { \
-  return libop(ShConstant1f(left), right); \
+  return libop(ShAttrib<1, SH_CONST, T>(left), right); \
 } \
-template<int K1, typename T, bool S1> \
+template<ShBindingType K1, typename T, bool S1> \
 librettype<libretsize, SH_TEMP, T, false> \
 libop(const libtype<1, K1, T, S1>& left, double right) \
 { \
-  return libop(left, ShConstant1f(right)); \
+  return libop(left, ShAttrib<1, SH_CONST, T>(right)); \
 } \
-template<int K1, typename T, bool S1> \
+template<ShBindingType K1, typename T, bool S1> \
 librettype<libretsize, SH_TEMP, T, false> \
 libop(double left, const libtype<1, K1, T, S1>& right) \
 { \
-  return libop(ShConstant1f(left), right); \
+  return libop(ShAttrib<1, SH_CONST, T>(left), right); \
 }
 
 #define SH_SHLIB_SPECIAL_CONST_SCALAR_OP(libtype, libop) \
   SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(libtype, libop, libtype, 1)
 
 #define SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_LEFT(libtype, libop, librettype, libretsize) \
-template<int N, int K1, typename T, bool S1> \
+template<int N, ShBindingType K1, typename T, bool S1> \
 librettype<libretsize, SH_TEMP, T, false> \
 libop(const libtype<N, K1, T, S1>& left, T right) \
 { \
-  return libop(left, ShConstant1f(right)); \
+  return libop(left, ShAttrib<1, SH_CONST, T>(right)); \
 } \
-template<int N, int K1, typename T, bool S1> \
+template<int N, ShBindingType K1, typename T, bool S1> \
 librettype<libretsize, SH_TEMP, T, false> \
 libop(const libtype<N, K1, T, S1>& left, double right) \
 { \
-  return libop(left, ShConstant1f(right)); \
+  return libop(left, ShAttrib<1, SH_CONST, T>(right)); \
 }
 #define SH_SHLIB_SPECIAL_CONST_N_OP_LEFT(libtype, libop) \
   SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_LEFT(libtype, libop, libtype, N)
 
 #define SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_RIGHT(libtype, libop, librettype, libretsize) \
-template<int N, int K1, typename T, bool S1> \
+template<int N, ShBindingType K1, typename T, bool S1> \
 librettype<libretsize, SH_TEMP, T, false> \
 libop(T left, const libtype<N, K1, T, S1>& right) \
 { \
-  return libop(ShConstant1f(left), right); \
+  return libop(ShAttrib<1, SH_CONST, T>(left), right); \
 } \
-template<int N, int K1, typename T, bool S1> \
+template<int N, ShBindingType K1, typename T, bool S1> \
 librettype<libretsize, SH_TEMP, T, false> \
 libop(double left, const libtype<N, K1, T, S1>& right) \
 { \
-  return libop(ShConstant1f(left), right); \
+  return libop(ShAttrib<1, SH_CONST, T>(left), right); \
 }
 #define SH_SHLIB_SPECIAL_CONST_N_OP_RIGHT(libtype, libop) \
   SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_RIGHT(libtype, libop, libtype, N)
@@ -1060,13 +1061,5 @@ SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, max, rettype, 1);
 #define SH_SHLIB_USUAL_SUBTRACT(type) \
 SH_SHLIB_BINARY_OPERATION(type, operator-, N);      \
 SH_SHLIB_SPECIAL_CONST_SCALAR_OP(type, operator-);  \
-
-#include "ShLibAttrib.hpp"
-#include "ShLibVector.hpp"
-#include "ShLibPoint.hpp"
-#include "ShLibColor.hpp"
-#include "ShLibTexCoord.hpp"
-#include "ShLibNormal.hpp"
-#include "ShLibPosition.hpp"
 
 #endif

@@ -32,7 +32,7 @@
 
 namespace SH {
 
-const char* ShVariableKindName[] = {
+const char* ShBindingTypeName[] = {
   "Input",
   "Output",
   "InOut",
@@ -42,7 +42,7 @@ const char* ShVariableKindName[] = {
   "Stream"
 };
 
-const char* ShVariableSpecialTypeName[] = {
+const char* ShSemanticTypeName[] = {
   "Attrib",
   "Point",
   "Vector",
@@ -52,7 +52,7 @@ const char* ShVariableSpecialTypeName[] = {
   "Position"
 };
 
-ShVariableNode::ShVariableNode(ShVariableKind kind, int size, ShVariableSpecialType type)
+ShVariableNode::ShVariableNode(ShBindingType kind, int size, ShSemanticType type)
   : m_uniform(!ShEnvironment::insideShader && kind != SH_TEXTURE && kind != SH_STREAM),
     m_kind(kind), m_specialType(type),
     m_size(size), m_id(m_maxID++), m_values(0),
@@ -231,12 +231,12 @@ bool ShVariableNode::internal() const
   return m_internal;
 }
 
-ShVariableKind ShVariableNode::kind() const
+ShBindingType ShVariableNode::kind() const
 {
   return m_kind;
 }
 
-ShVariableSpecialType ShVariableNode::specialType() const
+ShSemanticType ShVariableNode::specialType() const
 {
   return m_specialType;
 }
@@ -244,11 +244,11 @@ ShVariableSpecialType ShVariableNode::specialType() const
 std::string ShVariableNode::nameOfType() const {
   std::ostringstream os;
   // TODO indicate ValueType properly
-  os << "Sh" << ShVariableKindName[ m_kind ] << ShVariableSpecialTypeName[ m_specialType ] << m_size << "f";
+  os << "Sh" << ShBindingTypeName[ m_kind ] << ShSemanticTypeName[ m_specialType ] << m_size << "f";
   return os.str();
 }
 
-void ShVariableNode::specialType(ShVariableSpecialType type)
+void ShVariableNode::specialType(ShSemanticType type)
 {
   m_specialType = type;
 }

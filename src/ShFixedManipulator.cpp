@@ -31,6 +31,7 @@
 #include "ShError.hpp"
 #include "ShAlgebra.hpp"
 #include "ShFixedManipulator.hpp"
+#include "ShEnvironment.hpp"
 
 namespace SH {
 
@@ -40,8 +41,8 @@ ShFixedManipulatorNode::ShFixedManipulatorNode() {
 ShFixedManipulatorNode::~ShFixedManipulatorNode() {
 }
 
-ShVariable makeVariable(const ShVariableNodePtr &v, ShVariableKind kind) {
-  ShVariable result(new ShVariableNode(kind, v->size(), v->specialType()));
+ShVariable makeVariable(const ShVariableNodePtr &v, ShBindingType binding) {
+  ShVariable result(new ShVariableNode(binding, v->size(), v->specialType()));
   result.name(v->name());
   return result;
 }

@@ -33,11 +33,8 @@
 namespace SH {
 
 /** The various ways variables can be bound.
- * TODO: this name should be changed to "ShBindingType", and this
- * type name should be used whenever required to declare template
- * arguments (for documentation purposes, at least).
  */
-enum ShVariableKind {
+enum ShBindingType {
   SH_INPUT = 0,
   SH_OUTPUT = 1,
   SH_INOUT = 2,
@@ -48,11 +45,8 @@ enum ShVariableKind {
 };
 
 /** The various ways semantic types for variables.
- * TODO: this name should be changed to "ShSemanticType", and this
- * type name should be used whenever required to declare template
- * arguments (for documentation purposes, at least).
  */
-enum ShVariableSpecialType {
+enum ShSemanticType {
   SH_ATTRIB,
   SH_POINT,
   SH_VECTOR,
@@ -62,16 +56,15 @@ enum ShVariableSpecialType {
   SH_POSITION
 };
 
-// ensure these match the Kind and SpecialType enums
-// TODO: names should change to match the above.
-extern const char* ShVariableKindName[];
-extern const char* ShVariableSpecialTypeName[];
+// ensure these match the BindingType and SemanticType enums
+extern const char* ShBindingTypeName[];
+extern const char* ShSemanticTypeName[];
 
 /** A generic n-tuple variable.
  */
 class ShVariableNode : public ShRefCountable {
 public:
-  ShVariableNode(ShVariableKind kind, int size, ShVariableSpecialType type = SH_ATTRIB);
+  ShVariableNode(ShBindingType kind, int size, ShSemanticType type = SH_ATTRIB);
   virtual ~ShVariableNode();
 
   bool uniform() const; ///< Is this a uniform (non-shader specific) variable?
@@ -103,9 +96,9 @@ public:
   void internal(bool setting);
   bool internal() const;
 
-  ShVariableKind kind() const;
-  ShVariableSpecialType specialType() const;
-  void specialType(ShVariableSpecialType);
+  ShBindingType kind() const;
+  ShSemanticType specialType() const;
+  void specialType(ShSemanticType);
 
   std::string nameOfType() const; ///< Get a string of this var's specialType, kind, & size
 
@@ -122,8 +115,8 @@ protected:
 
   bool m_uniform;
   
-  ShVariableKind m_kind;
-  ShVariableSpecialType m_specialType;
+  ShBindingType m_kind;
+  ShSemanticType m_specialType;
   int m_size;
   int m_id;
   std::string m_name;

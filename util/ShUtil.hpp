@@ -27,7 +27,6 @@
 #ifndef SHUTIL_SHUTIL_HPP 
 #define SHUTIL_SHUTIL_HPP 
 
-#include "ShConstant.hpp"
 #include "ShVariable.hpp"
 #include "ShAttrib.hpp"
 
@@ -49,11 +48,11 @@ using namespace SH;
  */
 //@{
 template<typename T>
-ShVariableN<1, T> clamp(const ShVariableN<1, T>& a, const ShVariableN<1, T>& b,
-    const ShVariableN<1, T>& x); 
+ShGeneric<1, T> clamp(const ShGeneric<1, T>& a, const ShGeneric<1, T>& b,
+    const ShGeneric<1, T>& x); 
 
 template<typename T>
-ShVariableN<1, T> clamp(T a, T b, const ShVariableN<1, T>& x); 
+ShGeneric<1, T> clamp(T a, T b, const ShGeneric<1, T>& x); 
 //@}
 
 
@@ -63,36 +62,36 @@ ShVariableN<1, T> clamp(T a, T b, const ShVariableN<1, T>& x);
  * cubic interpolation between 0 and 1 otherwise
  */
 template<int N, typename T>
-ShVariableN<N, T> smoothstep(const ShVariableN<N, T>& a, const ShVariableN<N, T>& b,
-    const ShVariableN<N, T> x); 
+ShGeneric<N, T> smoothstep(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b,
+    const ShGeneric<N, T> x); 
 
 /** \brief Euclidean distance between two points.
  */
 template<int N, typename T>
-ShVariableN<1, T> distance(const ShVariableN<N, T>& a, const ShVariableN<N, T>& b); 
+ShGeneric<1, T> distance(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b); 
 
 /** \brief L1 distance between two points
  * The L1 distance is a sum of the absolute component-wise differences.
  */
 template<int N, typename T>
-ShVariableN<1, T> lOneDistance(const ShVariableN<N, T>& a, const ShVariableN<N, T>& b); 
+ShGeneric<1, T> lOneDistance(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b); 
 
 /** \brief Linfinity distance between two points 
  * Linfinity distance is the maximum absolute component-wise difference.
  */
 template<int N, typename T>
-ShVariableN<1, T> lInfDistance(const ShVariableN<N, T>& a, const ShVariableN<N, T>& b); 
+ShGeneric<1, T> lInfDistance(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b); 
 
 /** \brief Parallel linear congruential generator
  * 
  * This does not work very well right now.  Use hashmrg instead.
  *
- * \sa  template<int N, typename T> ShVariableN<N, T> hashmrg(const ShVariableN<N, T>& p)
+ * \sa  template<int N, typename T> ShGeneric<N, T> hashmrg(const ShGeneric<N, T>& p)
  */
 // TODO: may not work as intended on 24-bit floats
 // since there may not be enough precision 
 template<int N, typename T>
-ShVariableN<N, T> hashlcg(const ShVariableN<N, T>& p); 
+ShGeneric<N, T> hashlcg(const ShGeneric<N, T>& p); 
 
 /** \brief MRG style pseudorandom vector generator
  *
@@ -104,32 +103,32 @@ ShVariableN<N, T> hashlcg(const ShVariableN<N, T>& p);
  * This appears to reduce correlation in the output components when input components are 
  * similar, but the behaviour needs to be studied further.
  *
- * \sa template<int N, typename T> ShVariableN<N, T> hashlcg(const ShVariableN<N, T>& p)
+ * \sa template<int N, typename T> ShGeneric<N, T> hashlcg(const ShGeneric<N, T>& p)
  */
 template<int N, typename T>
-ShVariableN<N, T> hashmrg(const ShVariableN<N, T>& p); 
+ShGeneric<N, T> hashmrg(const ShGeneric<N, T>& p); 
 
 
 /** \brief Sorts components of an n-tuple
  * Uses an even-odd transposition sort to sort the components of an n-tuple.
  * (Ordered from smallest to largset)
  */
-template<int N, int Kind, typename T>
-ShAttrib<N, Kind, T> evenOddSort(const ShAttrib<N, Kind, T>& v);
+template<int N, ShBindingType Binding, typename T>
+ShAttrib<N, Binding, T> evenOddSort(const ShAttrib<N, Binding, T>& v);
 
 /** \brief Sorts groups of components v[i](j), 0 <= i < S
  * by the components in v[0](j) 0 <= j < N.
  * This also uses an even-odd transposition sort.
  */
-template<int S, int N, int Kind, typename T>
-void groupEvenOddSort(ShAttrib<N, Kind, T> v[]);
+template<int S, int N, ShBindingType Binding, typename T>
+void groupEvenOddSort(ShAttrib<N, Binding, T> v[]);
 
 /** \brief Given orthonormal basis b0, b1, b2 and vector v relative to coordinate space C,
  * does change of basis on v to the orthonormal basis b0, b1, b2
  */
 template<typename T>
-ShVariableN<3, T> changeBasis(const ShVariableN<3, T> &b0, 
-    const ShVariableN<3, T> &b1, const ShVariableN<3, T> &b2, const ShVariableN<3, T> &v); 
+ShGeneric<3, T> changeBasis(const ShGeneric<3, T> &b0, 
+    const ShGeneric<3, T> &b1, const ShGeneric<3, T> &b2, const ShGeneric<3, T> &v); 
 
 }
 

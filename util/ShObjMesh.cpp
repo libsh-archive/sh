@@ -234,7 +234,7 @@ int ShObjMesh::generateVertexNormals(bool force) {
   for(EdgeSet::iterator I = edges.begin(); I != edges.end(); ++I) {
     Edge &e = **I;
     if( force || dot(e.normal, e.normal).getValue(0) == 0 ) { 
-      nsm[e.start] = ShConstant3f(0.0f, 0.0f, 0.0f);
+      nsm[e.start] = ShConstAttrib3f(0.0f, 0.0f, 0.0f);
       nscount[e.start] = 0;
     }
   }

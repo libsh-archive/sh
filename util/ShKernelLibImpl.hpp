@@ -36,6 +36,11 @@
 #include "ShNibbles.hpp"
 #include "ShKernelLib.hpp"
 #include "ShUtil.hpp"
+#include "ShTexCoord.hpp"
+#include "ShVector.hpp"
+#include "ShPoint.hpp"
+#include "ShPosition.hpp"
+#include "ShNormal.hpp"
 
 /** \file ShKernelLibImpl.hpp
  * This is an implementation of useful kernels and nibbles (simple kernels).
@@ -45,8 +50,11 @@ namespace ShUtil {
 
 using namespace SH;
 
-template<int N, int Kind, typename T>
-ShProgram ShKernelLib::shVsh(const ShMatrix<N, N, Kind, T> &mv, const ShMatrix<N, N, Kind, T> &mvp, int numTangents, int numLights) {
+template<int N, ShBindingType Binding, typename T>
+ShProgram ShKernelLib::shVsh(const ShMatrix<N, N, Binding, T> &mv,
+                             const ShMatrix<N, N, Binding, T> &mvp,
+                             int numTangents, int numLights)
+{
   int i;
   ShProgram generalVsh = SH_BEGIN_VERTEX_PROGRAM {
     // INPUTS

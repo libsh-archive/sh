@@ -16,8 +16,8 @@ public:
   ShBaseTexture1D(const ShTextureTraits& traits);
   ShBaseTexture1D(int width, const ShTextureTraits& traits);
 
-  T operator()(const ShVariableN<1, float>& coords) const;
-  T operator[](const ShVariableN<1, float>& coords) const;
+  T operator()(const ShGeneric<1, float>& coords) const;
+  T operator[](const ShGeneric<1, float>& coords) const;
 
   ShMemoryPtr memory();
   void memory(ShMemoryPtr memory);
@@ -37,8 +37,8 @@ public:
   ShBaseTexture2D(const ShTextureTraits& traits);
   ShBaseTexture2D(int width, int height, const ShTextureTraits& traits);
 
-  T operator()(const ShVariableN<2, float>& coords) const;
-  T operator[](const ShVariableN<2, float>& coords) const;
+  T operator()(const ShGeneric<2, float>& coords) const;
+  T operator[](const ShGeneric<2, float>& coords) const;
 
   ShMemoryPtr memory();
   void memory(ShMemoryPtr memory);
@@ -58,8 +58,8 @@ public:
   ShBaseTextureRect(const ShTextureTraits& traits);
   ShBaseTextureRect(int width, int height, const ShTextureTraits& traits);
 
-  T operator()(const ShVariableN<2, float>& coords) const;
-  T operator[](const ShVariableN<2, float>& coords) const;
+  T operator()(const ShGeneric<2, float>& coords) const;
+  T operator[](const ShGeneric<2, float>& coords) const;
 
   ShMemoryPtr memory();
   void memory(ShMemoryPtr memory);
@@ -79,8 +79,8 @@ public:
   ShBaseTexture3D(const ShTextureTraits& traits);
   ShBaseTexture3D(int width, int height, int depth, const ShTextureTraits& traits);
 
-  T operator()(const ShVariableN<3, float>& coords) const;
-  T operator[](const ShVariableN<3, float>& coords) const;
+  T operator()(const ShGeneric<3, float>& coords) const;
+  T operator[](const ShGeneric<3, float>& coords) const;
 
   ShMemoryPtr memory();
   void memory(ShMemoryPtr memory);
@@ -100,7 +100,7 @@ public:
   ShBaseTextureCube(const ShTextureTraits& traits);
   ShBaseTextureCube(int width, int height, const ShTextureTraits& traits);
 
-  T operator()(const ShVariableN<3, float>& coords) const;
+  T operator()(const ShGeneric<3, float>& coords) const;
 
   ShMemoryPtr memory(ShCubeDirection face);
   void memory(ShMemoryPtr memory, ShCubeDirection face);

@@ -30,40 +30,40 @@
 #include <cmath>
 #include <numeric>
 #include "ShAttrib.hpp"
-#include "ShConstant.hpp"
 #include "ShSwizzle.hpp" 
 #include "ShVariable.hpp"
 #include "ShUtil.hpp"
+#include "ShLib.hpp"
 
 namespace ShUtil {
 
 using namespace SH;
 
 template<typename T>
-ShVariableN<1, T> clamp(const ShVariableN<1, T>& a, const ShVariableN<1, T>& b,
-    const ShVariableN<1, T>& x) {
+ShGeneric<1, T> clamp(const ShGeneric<1, T>& a, const ShGeneric<1, T>& b,
+    const ShGeneric<1, T>& x) {
   return min(max(x, a), b); 
 }
 
 template<typename T>
-ShVariableN<1, T> clamp(T a, T b, const ShVariableN<1, T>& x) {
-  return min(max(x, ShConstant<1,T>(a)), ShConstant<1,T>(b)); 
+ShGeneric<1, T> clamp(T a, T b, const ShGeneric<1, T>& x) {
+  return min(max(x, ShAttrib<1, SH_CONST, T>(a)), ShAttrib<1, SH_CONST, T>(b)); 
 }
 
 template<int N, typename T>
-ShVariableN<N, T> smoothstep(const ShVariableN<N, T>& a, const ShVariableN<N, T>& b,
-    const ShVariableN<N, T> x) {
-  ShVariableN<N, T> t = (x - a) / (b - a);
+ShGeneric<N, T> smoothstep(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b,
+    const ShGeneric<N, T> x) {
+  ShGeneric<N, T> t = (x - a) / (b - a);
   // TODO fix this for other types
   t = clamp(0.0f, 1.0f, t); 
-  return t * t * mad(-2.0f, t, ShConstant1f(3.0f));
+  return t * t * mad(-2.0f, t, ShConstAttrib1f(3.0f));
 }
 
 /** \brief Euclidean distance between two points.
  */
 template<int N, typename T>
-ShVariableN<1, T> distance(const ShVariableN<N, T>& a, const ShVariableN<N, T>& b) {
-  ShVariableN<N, T> diff = abs(a - b);
+ShGeneric<1, T> distance(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b) {
+  ShGeneric<N, T> diff = abs(a - b);
   return sqrt(dot(diff, diff));
 }
 
@@ -71,9 +71,9 @@ ShVariableN<1, T> distance(const ShVariableN<N, T>& a, const ShVariableN<N, T>& 
  * The L1 distance is a sum of the absolute component-wise differences.
  */
 template<int N, typename T>
-ShVariableN<1, T> lOneDistance(const ShVariableN<N, T>& a, const ShVariableN<N, T>& b) {
+ShGeneric<1, T> lOneDistance(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b) {
   //TODO should use dot product with vector 1
-  ShVariableN<N, T> diff = abs(a - b);
+  ShGeneric<N, T> diff = abs(a - b);
   return dot(1.0, diff); 
 }
 
@@ -81,9 +81,9 @@ ShVariableN<1, T> lOneDistance(const ShVariableN<N, T>& a, const ShVariableN<N, 
  * Linfinity distance is the maximum absolute component-wise difference.
  */
 template<int N, typename T>
-ShVariableN<1, T> lInfDistance(const ShVariableN<N, T>& a, const ShVariableN<N, T>& b) {
-  ShVariableN<N, T> diff = abs(a - b);
-  ShVariableN<1, T> result = max(diff(0), diff(1));
+ShGeneric<1, T> lInfDistance(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b) {
+  ShGeneric<N, T> diff = abs(a - b);
+  ShGeneric<1, T> result = max(diff(0), diff(1));
   for(int i = 2; i < N; ++i) result = max(result, diff(i));
   return result;
 }
@@ -94,20 +94,20 @@ static const int LCG_REPS = 5; // total instructions for hashlcg will be LCG_REP
  * 
  * This does not work very well right now.  Use hashmrg instead.
  *
- * \sa  template<int N, typename T> ShVariableN<N, T> hashmrg(const ShVariableN<N, T>& p)
+ * \sa  template<int N, typename T> ShGeneric<N, T> hashmrg(const ShGeneric<N, T>& p)
  */
 // TODO: may not work as intended on 24-bit floats
 // since there may not be enough precision 
 template<int N, typename T>
-ShVariableN<N, T> hashlcg(const ShVariableN<N, T>& p) {
+ShGeneric<N, T> hashlcg(const ShGeneric<N, T>& p) {
   ShAttrib<N, SH_TEMP, T> result = frac(p * 0.01);
 
   // TODO fix this for long tuples
-  ShVariableN<N, T> a = fillcast<N>(
-      ShConstant4f(M_PI * M_PI * M_PI * M_PI, std::exp(4.0), 
+  ShGeneric<N, T> a = fillcast<N>(
+      ShConstAttrib4f(M_PI * M_PI * M_PI * M_PI, std::exp(4.0), 
           std::pow(13.0, M_PI / 2.0), std::sqrt(1997.0)));
-  ShVariableN<N, T> m = fillcast<N>(
-      ShConstant4f(std::sqrt(2.0), 1.0 / M_PI, std::sqrt(3.0), 
+  ShGeneric<N, T> m = fillcast<N>(
+      ShConstAttrib4f(std::sqrt(2.0), 1.0 / M_PI, std::sqrt(3.0), 
           std::exp(-1.0)));
 
   for(int i = 0; i < LCG_REPS; ++i) result = frac(mad(result, a, m)); 
@@ -126,13 +126,13 @@ static const int MRG_REPS = 2; // total instructions for hashmrg will be MRG_REP
  * This appears to reduce correlation in the output components when input components are 
  * similar, but the behaviour needs to be studied further.
  *
- * \sa template<int N, typename T> ShVariableN<N, T> hashlcg(const ShVariableN<N, T>& p)
+ * \sa template<int N, typename T> ShGeneric<N, T> hashlcg(const ShGeneric<N, T>& p)
  */
 template<int N, typename T>
-ShVariableN<N, T> hashmrg(const ShVariableN<N, T>& p) {
+ShGeneric<N, T> hashmrg(const ShGeneric<N, T>& p) {
   ShAttrib<N, SH_TEMP, T> result = frac(p * 0.01);
-  ShVariableN<N, T> a = fillcast<N>(
-      ShConstant4f(M_PI * M_PI * M_PI * M_PI, std::exp(4.0), 
+  ShGeneric<N, T> a = fillcast<N>(
+      ShConstAttrib4f(M_PI * M_PI * M_PI * M_PI, std::exp(4.0), 
           std::pow(13.0, M_PI / 2.0), std::sqrt(1997.0)));
 
   for(int i = 0; i < MRG_REPS; ++i) {
@@ -143,9 +143,9 @@ ShVariableN<N, T> hashmrg(const ShVariableN<N, T>& p) {
   return result;
 }
 
-template<int N, int Kind, typename T>
-ShAttrib<N, Kind, T> evenOddSort(const ShAttrib<N, Kind, T>& v) {
-  ShAttrib<N, Kind, T> result = v;
+template<int N, ShBindingType Binding, typename T>
+ShAttrib<N, Binding, T> evenOddSort(const ShAttrib<N, Binding, T>& v) {
+  ShAttrib<N, Binding, T> result = v;
   groupEvenOddSort<1>(&result);
   return result;
 }
@@ -154,8 +154,8 @@ ShAttrib<N, Kind, T> evenOddSort(const ShAttrib<N, Kind, T>& v) {
  *  * by the components in v[0](j) 0 <= j < N.
  *   * This also uses an even-odd transposition sort.
  *    */
-template<int S, int N, int Kind, typename T>
-void groupEvenOddSort(ShAttrib<N, Kind, T> v[]) {
+template<int S, int N, ShBindingType Binding, typename T>
+void groupEvenOddSort(ShAttrib<N, Binding, T> v[]) {
   const int NE = (N + 1) / 2; // number of even elements
   const int NO = N / 2; // number of odd elements
   const int NU = NO; // number of components to compare for (2i, 2i+1) comparisons
@@ -223,8 +223,8 @@ void groupEvenOddSort(ShAttrib<N, Kind, T> v[]) {
  * this does a change of basis on a vector v in space C to the orthonormal basis
  */
 template<typename T>
-ShVariableN<3, T> changeBasis(const ShVariableN<3, T> &b0, 
-    const ShVariableN<3, T> &b1, const ShVariableN<3, T> &b2, const ShVariableN<3, T> &v) {
+ShGeneric<3, T> changeBasis(const ShGeneric<3, T> &b0, 
+    const ShGeneric<3, T> &b1, const ShGeneric<3, T> &b2, const ShGeneric<3, T> &v) {
   ShAttrib<3, SH_TEMP, T> result;
   result(0) = b0 | v;
   result(1) = b1 | v;

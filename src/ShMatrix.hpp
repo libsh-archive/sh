@@ -33,7 +33,7 @@
 
 namespace SH {
 
-template<int Rows, int Cols, int Kind, typename T>
+template<int Rows, int Cols, ShBindingType Binding, typename T>
 class ShMatrix;
 
 template<int Rows, int Cols, typename T>
@@ -45,7 +45,7 @@ class ShMatrixRows;
  * large amounts of data, use an ShArray.
  * @see ShArray
  */
-template<int Rows, int Cols, int Kind, typename T>
+template<int Rows, int Cols, ShBindingType Binding, typename T>
 class ShMatrix {
 public:
     
@@ -60,7 +60,7 @@ public:
    * Creates a ShMatrix where each element is equal to the one in the parameters
    * \param other the matrix from which we will get the values from 
    */
-  ShMatrix(const ShMatrix<Rows, Cols, Kind, T>& other);
+  ShMatrix(const ShMatrix<Rows, Cols, Binding, T>& other);
 
 
   /** \brief Constructor for ShMatrix with a matrix as parameter. (template kind2)
@@ -68,8 +68,8 @@ public:
    * Creates a ShMatrix where each element is equal to the one in the parameters
    * \param other the matrix from which we will get the values from 
    */
-  template<int Kind2>
-  ShMatrix(const ShMatrix<Rows, Cols, Kind2, T>& other);
+  template<ShBindingType Binding2>
+  ShMatrix(const ShMatrix<Rows, Cols, Binding2, T>& other);
   
 
   /** \brief Destructor for ShMatrix
@@ -83,75 +83,75 @@ public:
    * Returns the address of a matrix from which the values were taken from the ones of the matrix in the parameters
    * \param other the matrix from which we will get the values from 
    */
-  ShMatrix& operator=(const ShMatrix<Rows, Cols, Kind, T>& other);
+  ShMatrix& operator=(const ShMatrix<Rows, Cols, Binding, T>& other);
 
   /** \brief Definition of the equal operation with another matrix (template kind2)
    *
    * Returns the address of a matrix from which the values were taken from the ones of the matrix in the parameters (template kind2)
    * \param other the matrix from which we will get the values from 
    */
-  template<int Kind2>
-  ShMatrix& operator=(const ShMatrix<Rows, Cols, Kind2, T>& other);
+  template<ShBindingType Binding2>
+  ShMatrix& operator=(const ShMatrix<Rows, Cols, Binding2, T>& other);
 
   /** \brief Definition of the bracket [] operation
    *
    * Returns the row of our current matrix where the row number is given by the parameter i
    * \param i The number of the row (ranges from 0 to Rows-1)
    */
-  ShAttrib<Cols, Kind, T>& operator[](int i);
+  ShAttrib<Cols, Binding, T>& operator[](int i);
 
   /** \brief Definition of the bracket [] operation (const)
    *
    * Returns the row of our current matrix where the row number is given by the parameter i (const)
    * \param i The number of the row (ranges from 0 to Rows-1)
    */
-  const ShAttrib<Cols, Kind, T>& operator[](int i) const;
+  const ShAttrib<Cols, Binding, T>& operator[](int i) const;
 
   /** \brief Definition of the += operation with another matrix
    *
    * Returns the address of a matrix where the result is the current matrix += (for each element) with the matrix in the parameters
    * \param other The other matrix that is used in the +=operation
    */
-  template<int Kind2>
-  ShMatrix& operator+=(const ShMatrix<Rows, Cols, Kind2, T>& other);
+  template<ShBindingType Binding2>
+  ShMatrix& operator+=(const ShMatrix<Rows, Cols, Binding2, T>& other);
 
   /** \brief Definition of the -= operation
    *
    * Returns the address of a matrix where the result is the current matrix += (for each element) with the matrix in the parameters
    * \param other The other matrix that is used in the -=operation
    */
-  template<int Kind2>
-  ShMatrix& operator-=(const ShMatrix<Rows, Cols, Kind2, T>& other);
+  template<ShBindingType Binding2>
+  ShMatrix& operator-=(const ShMatrix<Rows, Cols, Binding2, T>& other);
 
   /** \brief Definition of the *= operation
    *
    * Returns the address of a matrix where the result is the current matrix += (for each element) with the matrix in the parameters
    * \param other The other matrix that is used in the *=operation
    */
-  template<int Kind2>
-  ShMatrix& operator*=(const ShMatrix<Rows, Cols, Kind2, T>& other);
+  template<ShBindingType Binding2>
+  ShMatrix& operator*=(const ShMatrix<Rows, Cols, Binding2, T>& other);
 
   /** \brief Definition of the /= operation
    *
    * Returns the address of a matrix where the result is the current matrix += (for each element) with the matrix in the parameters
    * \param other The other matrix that is used in the /=operation
    */
-  template<int Kind2>
-  ShMatrix& operator/=(const ShMatrix<Rows, Cols, Kind2, T>& other);    
+  template<ShBindingType Binding2>
+  ShMatrix& operator/=(const ShMatrix<Rows, Cols, Binding2, T>& other);    
     
   /** \brief Returns the determinant for the matrix in parameter
    *
    * Returns a ShAttrib1f containing the value of the determinant of the matrix. NOTE: This method uses an naive recursive algorithm in O(n!) which could take a long time with large matrices
    * \param other The matrix from which we want the determinant (need to be a square matrix to compile)
    */
-  template<int Kind2, typename T2>
-  friend ShAttrib1f det(const ShMatrix<1, 1, Kind2, T2>& matrix);
+  template<ShBindingType Binding2, typename T2>
+  friend ShAttrib1f det(const ShMatrix<1, 1, Binding2, T2>& matrix);
 
-  template<int Kind2, typename T2>
-  friend ShAttrib1f det(const ShMatrix<2, 2, Kind2, T2>& matrix);
+  template<ShBindingType Binding2, typename T2>
+  friend ShAttrib1f det(const ShMatrix<2, 2, Binding2, T2>& matrix);
     
-  template <int RowsCols, int Kind2, typename T2>
-  friend ShAttrib1f det(const ShMatrix<RowsCols, RowsCols, Kind2, T2>& matrix);
+  template <int RowsCols, ShBindingType Binding2, typename T2>
+  friend ShAttrib1f det(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
     
     
   /** \brief Returns the matrix of cofactors for the matrix in parameter
@@ -159,43 +159,43 @@ public:
    * Returns a ShMatrix containing the same amount of Rows/Colsvalue as the matrix in parameter 
    * \param other The matrix from which we want the matrix of cofactors (need to be a square matrix to compile)
    */
-  template <int RowsCols, int Kind2, typename T2>
+  template <int RowsCols, ShBindingType Binding2, typename T2>
   friend
-  ShMatrix<RowsCols, RowsCols, Kind2, T2> cofactors(const ShMatrix<RowsCols, RowsCols, Kind2, T2>& matrix);
+  ShMatrix<RowsCols, RowsCols, Binding2, T2> cofactors(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
     
   /** \brief Returns the transposed matrix for the matrix in parameter
    *
    * Returns a ShMatrix that is the transposed of the one in parameters
    * \param other The matrix from which we want the matrix of cofactors (need to be a square matrix to compile, we might want to change that...)
    */
-  template <int RowsCols, int Kind2, typename T2>
+  template <int RowsCols, ShBindingType Binding2, typename T2>
   friend
-  ShMatrix<RowsCols, RowsCols, Kind2, T2> trans(const ShMatrix<RowsCols, RowsCols, Kind2, T2>& matrix);
+  ShMatrix<RowsCols, RowsCols, Binding2, T2> trans(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
   
   /** \brief Returns the adjacent matrix for the matrix in parameter
    *
    * Returns a ShMatrix that is the adjacent of the one in parameters
    * \param other The matrix from which we want the adjacent matrix (need to be a square matrix to compile)
    */
-  template <int RowsCols, int Kind2, typename T2>
+  template <int RowsCols, ShBindingType Binding2, typename T2>
   friend
-  ShMatrix<RowsCols, RowsCols, Kind2, T2> adj(const ShMatrix<RowsCols, RowsCols, Kind2, T2>& matrix);
+  ShMatrix<RowsCols, RowsCols, Binding2, T2> adj(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
 
   /** \brief Returns the inverse matrix for the matrix in parameter
    *
    * Returns a ShMatrix that is the inverse of the one in parameters (NOTE: There is no error handling if the determinant is 0, NOTE #2: We might want to rewrite this method if we have the * operator with a ShVariableN)
    * \param other The matrix from which we want the inverse matrix (need to be a square matrix to compile)
    */
-  template <int RowsCols, int Kind2, typename T2>
+  template <int RowsCols, ShBindingType Binding2, typename T2>
   friend
-  ShMatrix<RowsCols,RowsCols, Kind2, T2> inv(const ShMatrix<RowsCols, RowsCols, Kind2, T2>& matrix);
+  ShMatrix<RowsCols,RowsCols, Binding2, T2> inv(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
    
   /** \brief Operator << (used for iostream)
    *
    * This operator uses the << operator defined in ShAttrib on each of its rows to give the output
    */
-  template<int R, int C, int K, typename Ty>
-  friend std::ostream& operator<<(std::ostream& out, const ShMatrix<R, C, K, Ty>& shMatrixToPrint);
+  template<int R, int C, ShBindingType B, typename Ty>
+  friend std::ostream& operator<<(std::ostream& out, const ShMatrix<R, C, B, Ty>& shMatrixToPrint);
 
   /** \brief Returns a submatrix of the original matrix where the row (first parameter), and the column (second parameter) has been removed
    *
@@ -204,9 +204,9 @@ public:
    */
   ShMatrix<Rows - 1, Cols -1, SH_TEMP, T> subMatrix(int,int) const;
 
-  void setTranslation(const ShVariableN<Rows-1, T>& trans);
+  void setTranslation(const ShGeneric<Rows-1, T>& trans);
   
-  void setScaling(const ShVariableN<Rows-1, T>& scale);
+  void setScaling(const ShGeneric<Rows-1, T>& scale);
 
 
   /** \brief Definition of the scalar multiplication operation
@@ -214,14 +214,14 @@ public:
    * Returns the address of a matrix where the result is the current matrix * (for each element) with the scalar in the parameters
    * \param other The other matrix that is used in the multiplication operation with the scalar
    */
-  ShMatrix& operator*=(const ShVariableN<1, T>& other);
+  ShMatrix& operator*=(const ShGeneric<1, T>& other);
     
   /** \brief Definition of the scalar division operation
    *
    * Returns the address of a matrix where the result is the current matrix * (for each element) with the scalar in the parameters
    * \param other The other matrix that is used in the division operation with the scalar
    */
-  ShMatrix& operator/=(const ShVariableN<1, T>& other);
+  ShMatrix& operator/=(const ShGeneric<1, T>& other);
 
   /**@name Swizzling
    * Retrieve some set of rows from this matrix. These must be
@@ -263,7 +263,7 @@ private:
    *
    * The data structure that hold the data
    */
-  ShAttrib<Cols, Kind, T> m_data[Rows];
+  ShAttrib<Cols, Binding, T> m_data[Rows];
   
 };//end ShMatrix
   
@@ -277,20 +277,20 @@ private:
 template<int Rows, int Cols, typename T>
 class ShMatrixRows {
 public:
-  template<int Kind>
-  ShMatrixRows(const ShMatrix<Rows, Cols, Kind, T>& source);
+  template<ShBindingType Binding>
+  ShMatrixRows(const ShMatrix<Rows, Cols, Binding, T>& source);
   
-  template<int OR, int Kind>
-  ShMatrixRows(const ShMatrix<OR, Cols, Kind, T>& source,
+  template<int OR, ShBindingType Binding>
+  ShMatrixRows(const ShMatrix<OR, Cols, Binding, T>& source,
                int idx0);
-  template<int OR, int Kind>
-  ShMatrixRows(const ShMatrix<OR, Cols, Kind, T>& source,
+  template<int OR, ShBindingType Binding>
+  ShMatrixRows(const ShMatrix<OR, Cols, Binding, T>& source,
                int idx0, int idx1);
-  template<int OR, int Kind>
-  ShMatrixRows(const ShMatrix<OR, Cols, Kind, T>& source,
+  template<int OR, ShBindingType Binding>
+  ShMatrixRows(const ShMatrix<OR, Cols, Binding, T>& source,
                int idx0, int idx1, int idx2);
-  template<int OR, int Kind>
-  ShMatrixRows(const ShMatrix<OR, Cols, Kind, T>& source,
+  template<int OR, ShBindingType Binding>
+  ShMatrixRows(const ShMatrix<OR, Cols, Binding, T>& source,
                int idx0, int idx1, int idx2, int idx3);
 
   ShMatrixRows(const ShMatrixRows<Rows, Cols, T>& other);

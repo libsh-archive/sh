@@ -94,8 +94,8 @@ ShProgram ShKernelLight::texLight2D(const ShBaseTexture2D<T> &tex) {
     ShVector3f lightHoriz = cross(lightDir, lightUp);
 
     ShAttrib2f texcoord;
-    texcoord(0) = frac(((-lightVec | lightHoriz) + ShConstant1f(0.5f)) * scaling);
-    texcoord(1) = frac(((-lightVec | lightUp) + ShConstant1f(0.5f)) * scaling);
+    texcoord(0) = frac(((-lightVec | lightHoriz) + ShConstAttrib1f(0.5f)) * scaling);
+    texcoord(1) = frac(((-lightVec | lightUp) + ShConstAttrib1f(0.5f)) * scaling);
 
     irrad = tex(texcoord); 
   } SH_END;

@@ -35,6 +35,7 @@
 #include "ShDebug.hpp"
 #include "ShAlgebra.hpp"
 #include "ShManipulator.hpp"
+#include "ShEnvironment.hpp"
 
 namespace SH {
 

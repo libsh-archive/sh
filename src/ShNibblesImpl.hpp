@@ -28,6 +28,7 @@
 #define SHNIBBLESIMPL_HPP
 
 #include "ShNibbles.hpp"
+#include "ShTexCoord.hpp"
 
 namespace SH {
 
@@ -110,8 +111,8 @@ ShProgram access(const ShBaseTextureCube<T> &tex, const std::string & tcname, co
   return nibble;
 }
 
-template<typename T2, int Rows, int Cols, int Kind, typename T>
-ShProgram transform(const ShMatrix<Rows, Cols, Kind, T> &m, const std::string & name) {
+template<typename T2, int Rows, int Cols, ShBindingType Binding, typename T>
+ShProgram transform(const ShMatrix<Rows, Cols, Binding, T> &m, const std::string & name) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T2::InOutType SH_NAMEDECL(attrib, name) = m | attrib;
   } SH_END;

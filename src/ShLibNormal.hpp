@@ -35,25 +35,21 @@ namespace SH {
 
 SH_SHLIB_USUAL_NON_UNIT_OPS_RETTYPE(ShNormal, ShNormal);
 
-template<int N, int K1, typename T, bool S1>
+template<int N, ShBindingType B1, typename T, bool S1>
   ShNormal<N, SH_TEMP, T, false>
-  abs(const ShNormal<N, K1, T, S1>& var)
+  abs(const ShNormal<N, B1, T, S1>& var)
   {
-    ShVariableN<N, T> t = abs(static_cast< ShVariableN<N, T> >(var));
+    ShGeneric<N, T> t = abs(static_cast< ShGeneric<N, T> >(var));
     ShNormal<N, SH_TEMP, T, false> vec(t.node(), t.swizzle(), t.neg());
-    vec.setUnit(var.isUnit());
     return vec;
   }
 
-template<int N, int K1, typename T, bool S1>
+template<int N, ShBindingType B1, typename T, bool S1>
   ShNormal<N, SH_TEMP, T, false>
-  normalize(const ShNormal<N, K1, T, S1>& var)
+  normalize(const ShNormal<N, B1, T, S1>& var)
   {
-    if (var.isUnit()) return var;
-
-    ShVariableN<N, T> t = normalize(static_cast< ShVariableN<N, T> >(var));
+    ShGeneric<N, T> t = normalize(static_cast< ShGeneric<N, T> >(var));
     ShNormal<N, SH_TEMP, T, false> vec(t.node(), t.swizzle(), t.neg());
-    vec.setUnit(true);
     return vec;
   }
 
@@ -61,30 +57,30 @@ SH_SHLIB_USUAL_SUBTRACT(ShNormal);
 
 SH_SHLIB_LEFT_MATRIX_OPERATION(ShNormal, operator|, M);
 
-template<int N, int K1, int K2, typename T, bool S1, bool S2>
-ShVariableN<1, T> operator|(const ShNormal<N, K1, T, S1>& a,
-                            const ShNormal<N, K2, T, S2>& b)
+template<int N, ShBindingType B1, ShBindingType B2, typename T, bool S1, bool S2>
+ShGeneric<1, T> operator|(const ShNormal<N, B1, T, S1>& a,
+                            const ShNormal<N, B2, T, S2>& b)
 {
   return dot(a, b);
 }
 
-template<int N, int K1, int K2, typename T, bool S1, bool S2>
-ShVariableN<1, T> operator|(const ShVector<N, K1, T, S1>& a,
-                            const ShNormal<N, K2, T, S2>& b)
+template<int N, ShBindingType B1, ShBindingType B2, typename T, bool S1, bool S2>
+ShGeneric<1, T> operator|(const ShVector<N, B1, T, S1>& a,
+                            const ShNormal<N, B2, T, S2>& b)
 {
   return dot(a, b);
 }
 
-template<int N, int K1, int K2, typename T, bool S1, bool S2>
-ShVariableN<1, T> operator|(const ShNormal<N, K1, T, S1>& a,
-                            const ShVector<N, K2, T, S2>& b)
+template<int N, ShBindingType B1, ShBindingType B2, typename T, bool S1, bool S2>
+ShGeneric<1, T> operator|(const ShNormal<N, B1, T, S1>& a,
+                            const ShVector<N, B2, T, S2>& b)
 {
   return dot(a, b);
 }
 
-template<int K1, int K2, typename T, bool S1>
-ShNormal<3, SH_TEMP, T, false> operator|(const ShMatrix<4, 4, K1, T>& m,
-                                             const ShNormal<3, K2, T, S1>& v)
+template<ShBindingType B1, ShBindingType B2, typename T, bool S1>
+ShNormal<3, SH_TEMP, T, false> operator|(const ShMatrix<4, 4, B1, T>& m,
+                                             const ShNormal<3, B2, T, S1>& v)
 {
   ShNormal<3, SH_TEMP, T, false> t;
   for (int i = 0; i < 3; i++) {
@@ -93,9 +89,9 @@ ShNormal<3, SH_TEMP, T, false> operator|(const ShMatrix<4, 4, K1, T>& m,
   return t;
 }
 
-template<int K1, int K2, typename T, bool S1>
-ShNormal<2, SH_TEMP, T, false> operator|(const ShMatrix<3, 3, K1, T>& m,
-                                             const ShNormal<2, K2, T, S1>& v)
+template<ShBindingType B1, ShBindingType B2, typename T, bool S1>
+ShNormal<2, SH_TEMP, T, false> operator|(const ShMatrix<3, 3, B1, T>& m,
+                                             const ShNormal<2, B2, T, S1>& v)
 {
   ShNormal<2, SH_TEMP, T, false> t;
   for (int i = 0; i < 2; i++) {
@@ -104,9 +100,9 @@ ShNormal<2, SH_TEMP, T, false> operator|(const ShMatrix<3, 3, K1, T>& m,
   return t;
 }
 
-template<int K1, int K2, typename T, bool S1>
-ShNormal<1, SH_TEMP, T, false> operator|(const ShMatrix<2, 2, K1, T>& m,
-                                             const ShNormal<1, K2, T, S1>& v)
+template<ShBindingType B1, ShBindingType B2, typename T, bool S1>
+ShNormal<1, SH_TEMP, T, false> operator|(const ShMatrix<2, 2, B1, T>& m,
+                                         const ShNormal<1, B2, T, S1>& v)
 {
   ShNormal<1, SH_TEMP, T, false> t;
   for (int i = 0; i < 1; i++) {

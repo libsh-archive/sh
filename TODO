@@ -1,11 +1,28 @@
 TODO file for libsh
 
-GENERIC SMALL TASKS:
+BEFORE BETA:
+ X lock/unlock variable nodes
+ - cache pbuffer context in pbufferstreams
  - add ShFooCPtr typedefs everywhere (for RefCountable types)
  - rename ShRefCount to ShPointer or something else more useful
  - everywhere where we pass a ShFooPtr into a function, replace it with
    const ShFooPtr&
  - use ShFooCPtrs where appropriate
+ - shUnbind() or something similar
+ - shUpdate(), perhaps, maybe with an shAutoUpdate(bool) function
+ - lock matrices
+ - make immediate-mode matrix operations more efficient
+ - missing library functions from the reference manual
+ - use python to generate ShVector etc.
+ - use python to generate ShAttrib, and be rid of implicit instantiation where aprpriate
+ - replace ShConstant with ShConstAttrib, etc.
+ - rename SpecialType -> SemanticType
+ - mipmapping
+ - ShInterp
+ - finalize Quaternion interface
+ - clean up texture/image/memory interface
+
+GENERIC SMALL TASKS:
  X have updating semantics for uniforms
  X need a map of shader kind -> currently bound shader
  X hack constant loading for now by recompiling shader everytime it is bound
@@ -58,6 +75,7 @@ OVERALL LARGE TASKS:
  - integrate Kevin's shgl stuff
  - SSE backend
  - python interface
+ - get the SM backend back up to speed
 
 OPTIMIZER:
  X control flow graph optimizations
@@ -141,6 +159,7 @@ ARB BACKEND:
  - check more limits when allocating
 
 SM BACKEND:
+ - fix it up. this is a lot of work.
  / long tuples 
    - updateUniform
    - textures

@@ -55,7 +55,7 @@ using namespace SH;
 struct ArbBindingSpecs {
   ArbRegBinding binding;
   int maxBindings;
-  ShVariableSpecialType specialType;
+  ShSemanticType semanticType;
   bool allowGeneric;
 };
 
@@ -926,13 +926,13 @@ void ArbCode::bindSpecial(const ShProgramNode::VarList::const_iterator& begin,
 {
   bindings.push_back(0);
   
-  if (specs.specialType == SH_ATTRIB) return;
+  if (specs.semanticType == SH_ATTRIB) return;
   
   for (ShProgramNode::VarList::const_iterator I = begin; I != end; ++I) {
     ShVariableNodePtr node = *I;
     
     if (m_registers.find(node) != m_registers.end()) continue;
-    if (node->specialType() != specs.specialType) continue;
+    if (node->specialType() != specs.semanticType) continue;
     
     m_registers[node] = ArbReg(type, num++, node->name());
     m_registers[node].binding = specs.binding;
