@@ -1,3 +1,15 @@
+2005-01-17  Francois Marier  <francois@serioushack.com>
+
+	* test/regres: Added tests for exp, clamp, frac, sign, max, min,
+	pos, sat and sqrt.
+
+	* test/regress/test.hpp: Prevent the host backend from running
+	stream programs and segfaulting.
+
+	* test/regress/shtest.py, test/regress/test.hpp: Instead of always
+	returning 0, the generated test programs now return 1 if any of
+	the tests failed, 2 on ShErrors and 3 on C++ errors.
+
 2005-01-12  Francois Marier  <francois@serioushack.com>
 
 	* test/regress: Added tests for abs, ceil, dot, floor, mod, pow, 

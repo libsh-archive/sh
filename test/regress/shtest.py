@@ -175,14 +175,18 @@ class Test:
         out.write('int main(int argc, char** argv) {\n')
         out.write('  using namespace SH;\n\n')
         out.write('  try {\n')
+        out.write('  int errors = 0;\n')
         out.write('  Test test(argc, argv);\n\n')
         self.output_textures(out)
 
     def output_footer(self, out):
+        out.write('  if (errors !=0) return 1;\n')
         out.write("""  } catch (const ShException &e) {
     std::cout << "Caught Sh Exception." << std::endl << e.message() << std::endl;
+    return 2;
   } catch (const std::exception& e) {
-      std::cerr << "Caught C++ exception: " << e.what() << std::endl;
+    std::cerr << "Caught C++ exception: " << e.what() << std::endl;
+    return 3;
   }
 }""")
         out.write("\n")
@@ -212,12 +216,12 @@ class StreamTest(Test):
                     out.write('  } SH_END;\n\n')
                     out.write('  ' + progname + '.name("' + progname + '");\n')
             for p in programs[argkey]:
-                out.write('  test.run(' + p + ', '
+                out.write('  if (test.run(' + p + ', '
                           + ', '.join([make_attrib(len(arg), 'SH_CONST', types[j + 1]) + '('
                                        + ', '.join([str(a) for a in arg]) + ')' for arg, type in src_arg_types])
                           + ', ' + make_attrib(len(test[0]), 'SH_CONST', types[0]) + '('
                                        + ', '.join([str(a) for a in test[0]]) + ')'
-                          + ');\n')
+                          + ') != 0) errors++;\n')
             out.write('\n')
         self.output_footer(out)
 
@@ -238,10 +242,10 @@ class ImmediateTest(Test):
                               + ' ' + string.ascii_lowercase[j] + '(' + ','.join([str(a) for a in arg]) + ');\n')
                 out.write('    ' + make_attrib(len(test[0]), 'SH_TEMP', types[0]) +  ' out;\n')
                 out.write('    ' + str(call) + ';\n')
-                out.write('    test.check("' + testname + '", out, ' +
+                out.write('    if (test.check("' + testname + '", out, ' +
 																			make_attrib(len(test[0]), 'SH_CONST', types[0]) + '('
                                        + ', '.join([str(a) for a in test[0]]) + ')'
-                          + ');\n')
+                          + ') != 0) errors++;\n')
                 out.write('  }\n\n')
         self.output_footer(out)
 
