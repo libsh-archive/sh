@@ -48,6 +48,8 @@ struct ShPass {
   ShPass* predicate_pass; // Taken if predicate is true
   ShPass* default_pass; // Taken if no predicate, or predicate is false
 
+  ShVoidPtr backend_data;
+  
   // Number of elements waiting on this pass.
   int count;
 };
@@ -65,7 +67,21 @@ public:
              const ShProgramNode::VarList& inputs,
              const ShProgramNode::VarList& outputs);
 
-  void dump_graphviz(std::ostream& out);
+  void prepare();
+  void execute();
+  
+  void dump_graphviz(std::ostream& out) const;
+  
+  // Access to the pass list
+  PassList::iterator begin() { return m_passes.begin(); }
+  PassList::iterator end() { return m_passes.end(); }
+  PassList::const_iterator begin() const { return m_passes.begin(); }
+  PassList::const_iterator end() const { return m_passes.end(); }
+
+  PassList::iterator root() { return m_root; }
+  PassList::const_iterator root() const { return m_root; }
+
+  std::size_t num_passes() { return m_passes.size(); }
   
 private:
   // The program for which this schedule is generated.
@@ -85,6 +101,8 @@ private:
   // NOT IMPLEMENTED
   ShSchedule(const ShSchedule&);
   ShSchedule& operator=(const ShSchedule&);
+
+  ShVoidPtr m_backend_data;
 };
 
 }

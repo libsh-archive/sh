@@ -168,6 +168,15 @@ ShPointer<T> shref_dynamic_cast(const ShPointer<S>& other);
 template<typename T, typename S>
 ShPointer<T> shref_const_cast(const ShPointer<S>& other);
 
+
+// Empty but reference-countable and polymorphic
+struct ShVoid : public ShRefCountable {
+  virtual ~ShVoid();
+};
+
+typedef ShPointer<ShVoid> ShVoidPtr;
+typedef ShPointer<const ShVoid> ShVoidCPtr;
+
 } // namespace SH
 
 #include "ShRefCountImpl.hpp"

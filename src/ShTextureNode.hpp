@@ -146,11 +146,13 @@ public:
   int width() const; // valid for all texture nodes
   int height() const; // 1 for SH_TEXTURE_1D
   int depth() const; // 1 unless SH_TEXTURE_3D
-  int count() const; // number of elements  
+  int count() const; // number of values actually sent to GPU
 
   void setTexSize(int w);
   void setTexSize(int w, int h);
   void setTexSize(int w, int h, int d);
+  void set_count(int count); // -1 means download all entries.
+  
   const ShVariable& texSizeVar() const;
   
 private:

@@ -317,9 +317,6 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
     ShTextureTraits traits = ShArrayTraits();
     traits.clamping(ShTextureTraits::SH_UNCLAMPED);
 
-    // TODO!
-    // We're copying a far larger amount of memory in here than we
-    // should. Don't do this.
     switch (extension) {
     case SH_ARB_NV_FLOAT_BUFFER:
       tex = new ShTextureNode(SH_TEXTURE_RECT, I->first->size(),

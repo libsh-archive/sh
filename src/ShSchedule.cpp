@@ -10,6 +10,7 @@
 #include "ShContext.hpp"
 #include "ShTransformer.hpp"
 #include "ShOptimizations.hpp"
+#include "ShEnvironment.hpp"
 
 namespace {
 using namespace SH;
@@ -338,7 +339,7 @@ ShSchedule::ShSchedule(const ShSchedule::PassList& passes,
   m_eligible_passes.insert(&(*m_root));
 }
 
-void ShSchedule::dump_graphviz(std::ostream& out)
+void ShSchedule::dump_graphviz(std::ostream& out) const
 {
   out << "digraph schedule { " << std::endl;
   for (PassList::const_iterator I = m_passes.begin(); I != m_passes.end(); ++I) {
@@ -369,9 +370,9 @@ void ShSchedule::dump_graphviz(std::ostream& out)
     
     if (pass.predicate_pass) {
       out << "  \"" << &pass << "\" -> \"" << pass.predicate_pass << "\""
-          << " [label=\"buf[" << pass.predicate.id << "]\"];" << std::endl;
+          << " [label=\"" << pass.predicate << "\"];" << std::endl;
       out << "  \"" << &pass << "\" -> \"" << pass.default_pass << "\""
-          << " [label=\"not buf[" << pass.predicate.id << "]\"];" << std::endl;
+          << " [label=\"not " << pass.predicate << "]\"];" << std::endl;
     } else {
       if (pass.default_pass) {
         out << "  \"" << &pass << "\" -> \"" << pass.default_pass << "\";" << std::endl;
@@ -380,6 +381,15 @@ void ShSchedule::dump_graphviz(std::ostream& out)
   }
 
   out << "}" << std::endl;
+}
+
+void ShSchedule::prepare()
+{
+  if (m_backend_data) return;
+
+  SH_DEBUG_ASSERT(ShEnvironment::backend);
+  
+  m_backend_data = ShEnvironment::backend->prepare(this);
 }
 
 }

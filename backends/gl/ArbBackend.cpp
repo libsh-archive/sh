@@ -40,6 +40,8 @@
 #include "GLXPBufferStreams.hpp"
 #endif /* WIN32 */
 
+#include "PCScheduler.hpp"
+
 namespace shgl {
 
 struct ArbBackend : public GlBackend {
@@ -47,10 +49,11 @@ struct ArbBackend : public GlBackend {
     : GlBackend(new ArbCodeStrategy(),
                 new GlTextures(),
 #ifdef WIN32
-                new WGLPBufferStreams())
+                new WGLPBufferStreams(),
 #else
-                new GLXPBufferStreams())
+                new GLXPBufferStreams(),
 #endif /* WIN32 */
+                new PCScheduler())
   {
   }
 

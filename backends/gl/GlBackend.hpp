@@ -99,6 +99,11 @@ struct CodeStrategy {
                                         TextureStrategy* texture) = 0;
 };
 
+struct ScheduleStrategy {
+  virtual ScheduleStrategy* create(void) = 0;
+  virtual SH::ShVoidPtr prepare(SH::ShSchedule* schedule) = 0;
+};
+
 class GlBackend : public SH::ShBackend {
 public:
   virtual SH::ShBackendCodePtr generateCode(const std::string& target,
@@ -107,13 +112,19 @@ public:
   // execute a stream program, if supported
   virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
 
+  virtual SH::ShVoidPtr prepare(SH::ShSchedule* schedule);
+  
 protected:
-  GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrategy* stream);
+  GlBackend(CodeStrategy* code,
+            TextureStrategy* texture,
+            StreamStrategy* stream,
+            ScheduleStrategy* schedule);
   
 private:
   CodeStrategy* m_code;
   TextureStrategy* m_texture;
   StreamStrategy* m_stream;
+  ScheduleStrategy* m_schedule;
 
   // NOT IMPLEMENTED
   GlBackend(const GlBackend& other);

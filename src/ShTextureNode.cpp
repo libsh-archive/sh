@@ -135,6 +135,11 @@ void ShTextureNode::setTexSize(int w, int h, int d)
   s = ShAttrib3f(w, h, d);
 }
 
+void ShTextureNode::set_count(int count)
+{
+  m_count = count;
+}
+
 int ShTextureNode::width() const
 {
   return m_width;

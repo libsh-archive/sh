@@ -61,14 +61,14 @@ using namespace SH;
 
 #ifdef WIN32
 LRESULT CALLBACK shGlWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-  {
+{
   // An empty WindowProc, we need one to create a window. For now
   // just pass everything through DefWindowProc.
   // TODO: Should we actually process any messages? There will
   // definitely be atleast a WM_CREATE coming through here and
   // maybe some others.
   return DefWindowProc(hWnd, uMsg, wParam, lParam);
-  }
+}
 #endif /* WIN32 */
 
 void shGlCheckError(const char* desc, const char* file, int line)
@@ -117,11 +117,13 @@ if ((x = reinterpret_cast<PFN ## T ## PROC>(wglGetProcAddress(#x))) == NULL) \
   }
 #endif /* WIN32 */
 
-GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrategy* stream) :
-  m_code(code),
-  m_texture(texture),
-  m_stream(stream)
-  {
+GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture,
+                     StreamStrategy* stream, ScheduleStrategy* schedule)
+  : m_code(code),
+    m_texture(texture),
+    m_stream(stream),
+    m_schedule(schedule)
+{
 
 #ifdef WIN32
   // wglGetProcessAddress will fail outright if there isn't a current
@@ -151,8 +153,7 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
   HWND hWnd = NULL;
   HDC hdc = wglGetCurrentDC();
   HGLRC hglrc = wglGetCurrentContext();
-  if (hdc == NULL && hglrc == NULL)
-    {
+  if (hdc == NULL && hglrc == NULL) {
     WNDCLASSEX wc;
     ZeroMemory(&wc, sizeof (WNDCLASSEX));
     wc.cbSize = sizeof(WNDCLASSEX);
@@ -168,70 +169,63 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
     wc.lpszClassName = "shGlWindow";
     wc.hIconSm = NULL;
 
-    if (!RegisterClassEx(&wc))
-      {
+    if (!RegisterClassEx(&wc)) {
       std::stringstream msg;
       msg << "RegisterClassEx failed (" << GetLastError() << ")";
       shError(ShException(msg.str()));
-      }
+    }
 
     hWnd = CreateWindowEx(0, "shGlWindow", "shGlWindow", WS_POPUP,
                           CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
                           NULL, NULL, NULL, NULL);
 
-    if (hWnd == NULL)
-      {
+    if (hWnd == NULL) {
       std::stringstream msg;
       msg << "CreateWindowEx failed (" << GetLastError() << ")";
       shError(ShException(msg.str()));
-      }
+    }
 
     hdc = GetDC(hWnd);
-    if (hdc == NULL)
-      {
+    if (hdc == NULL) {
       DestroyWindow(hWnd);
 
       std::stringstream msg;
       msg << "GetDC failed (" << GetLastError() << ")";
       shError(ShException(msg.str()));
-      }
+    }
 
-	  PIXELFORMATDESCRIPTOR pfd;
-	  ZeroMemory(&pfd, sizeof(PIXELFORMATDESCRIPTOR));
-	  pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
-	  pfd.nVersion = 1;
-	  pfd.dwFlags = PFD_SUPPORT_OPENGL;
-	  pfd.iPixelType = PFD_TYPE_RGBA;
+    PIXELFORMATDESCRIPTOR pfd;
+    ZeroMemory(&pfd, sizeof(PIXELFORMATDESCRIPTOR));
+    pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+    pfd.nVersion = 1;
+    pfd.dwFlags = PFD_SUPPORT_OPENGL;
+    pfd.iPixelType = PFD_TYPE_RGBA;
     pfd.iLayerType = PFD_MAIN_PLANE;
 
-	  int pf = ChoosePixelFormat(hdc, &pfd);
-    if (pf == 0)
-      {
+    int pf = ChoosePixelFormat(hdc, &pfd);
+    if (pf == 0) {
       std::stringstream msg;
       msg << "ChoosePixelFormat failed (" << GetLastError() << ")";
       shError(ShException(msg.str()));
-      }
+    }
 
-	  if (!SetPixelFormat(hdc, pf, &pfd))
-      {
+    if (!SetPixelFormat(hdc, pf, &pfd)) {
       std::stringstream msg;
       msg << "SetPixelFormat failed (" << GetLastError() << ")";
       shError(ShException(msg.str()));
-      }
+    }
 
     hglrc = wglCreateContext(hdc);
-    if (hglrc == NULL)
-      {
+    if (hglrc == NULL) {
       ReleaseDC(hWnd, hdc);
       DestroyWindow(hWnd);
 
       std::stringstream msg;
       msg << "wglCreateContext failed (" << GetLastError() << ")";
       shError(ShException(msg.str()));
-      }
+    }
 
-    if (!wglMakeCurrent(hdc, hglrc))
-      {
+    if (!wglMakeCurrent(hdc, hglrc)) {
       wglDeleteContext(hglrc);
       ReleaseDC(hWnd, hdc);
       DestroyWindow(hWnd);
@@ -239,13 +233,11 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
       std::stringstream msg;
       msg << "wglMakeCurrent failed (" << GetLastError() << ")";
       shError(ShException(msg.str()));
-      }
     }
-  else
-    {
+  } else {
     hdc = NULL;
     hglrc = NULL;
-    }
+  }
 
   GET_WGL_PROCEDURE(glProgramStringARB, GLPROGRAMSTRINGARB);
   GET_WGL_PROCEDURE(glBindProgramARB, GLBINDPROGRAMARB);
@@ -268,16 +260,15 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
   GET_WGL_PROCEDURE(wglDestroyPbufferARB, WGLDESTROYPBUFFERARB);
   GET_WGL_PROCEDURE(wglQueryPbufferARB, WGLQUERYPBUFFERARB);
 
-  if (hWnd)
-    {
+  if (hWnd) {
     wglMakeCurrent(NULL, NULL);
     ReleaseDC(hWnd, hdc);
     wglDeleteContext(hglrc);
     DestroyWindow(hWnd);
-    }
+  }
   
 #endif /* WIN32 */
-  }
+}
 
 SH::ShBackendCodePtr
 GlBackend::generateCode(const std::string& target,
@@ -290,7 +281,13 @@ void
 GlBackend::execute(const SH::ShProgramNodeCPtr& program,
                    SH::ShStream& dest)
 {
- m_stream->execute(program, dest);
+  m_stream->execute(program, dest);
+}
+
+SH::ShVoidPtr
+GlBackend::prepare(SH::ShSchedule* schedule)
+{
+  return m_schedule->prepare(schedule);
 }
 
 }

@@ -33,58 +33,56 @@
 
 namespace shgl {
 
-  struct ShGLXPBufferInfo
-    {
-    ShGLXPBufferInfo() :
-      extension(SH_ARB_NO_FLOAT_EXT),
-      pbuffer(0),
-      context(0),
-      width(0),
-      height(0)
+struct ShGLXPBufferInfo {
+  ShGLXPBufferInfo() :
+    extension(SH_ARB_NO_FLOAT_EXT),
+    pbuffer(0),
+    context(0),
+    width(0),
+    height(0)
+  {
+  }
+
+  FloatExtension extension;
+  GLXPbuffer pbuffer;
+  GLXContext context;
+  int width, height;
+
+  bool valid() 
+  { 
+    if (extension == SH_ARB_NO_FLOAT_EXT ||
+        pbuffer == 0 ||
+        context == 0)
       {
-      }
-
-    FloatExtension extension;
-    GLXPbuffer pbuffer;
-    GLXContext context;
-    int width, height;
-
-    bool valid() 
-      { 
-      if (extension == SH_ARB_NO_FLOAT_EXT ||
-          pbuffer == 0 ||
-          context == 0)
-        {
         return false;
-        }
-      else
-        {
-        return true;
-        }
       }
-    };
+    else
+      {
+        return true;
+      }
+  }
+};
 
-  struct GLXPBufferStreams: public PBufferStreams
-    {
-    public:
-      GLXPBufferStreams(void);
-      virtual ~GLXPBufferStreams();
+struct GLXPBufferStreams: public PBufferStreams {
+public:
+  GLXPBufferStreams(void);
+  virtual ~GLXPBufferStreams();
 
-      virtual StreamStrategy* create(void);
+  virtual StreamStrategy* create(void);
 
-    private:
-      virtual FloatExtension setupContext(int width, int height);
-      virtual void restoreContext(void);
+private:
+  virtual FloatExtension setupContext(int width, int height);
+  virtual void restoreContext(void);
 
-    private:
-      ShGLXPBufferInfo createContext(int width, int height);
+private:
+  ShGLXPBufferInfo createContext(int width, int height);
 
-    private:
-      Display* m_display;
-      GLXDrawable m_orig_drawable;
-      GLXContext m_orig_context;
-      std::list<ShGLXPBufferInfo> m_infos;
-    };
+private:
+  Display* m_display;
+  GLXDrawable m_orig_drawable;
+  GLXContext m_orig_context;
+  std::list<ShGLXPBufferInfo> m_infos;
+};
 
 }
 

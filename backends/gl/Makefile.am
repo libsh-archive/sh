@@ -19,7 +19,10 @@ endif
 shbackend_LTLIBRARIES = $(ARB_LIBS) $(ATI_LIBS)
 
 GLBACKEND_SOURCES = GlBackend.cpp GlBackend.hpp \
-		  GlTextureName.hpp GlTextureName.cpp
+		  GlTextureName.hpp GlTextureName.cpp \
+		  PCScheduler.hpp PCScheduler.cpp \
+		  Utils.hpp Utils.cpp
+
 GLTEXTURE_SOURCES = GlTextureStorage.hpp GlTextureStorage.cpp \
 		     GlTextures.hpp GlTextures.cpp 
 PBUFFERSTREAM_SOURCES = PBufferStreams.hpp PBufferStreams.cpp \

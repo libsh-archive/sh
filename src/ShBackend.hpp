@@ -38,6 +38,7 @@
 namespace SH  {
 
 class ShStream;
+class ShSchedule;
 
 class
 SH_DLLEXPORT ShBackendCode : public ShRefCountable {
@@ -96,6 +97,8 @@ public:
 
   static ShPointer<ShBackend> lookup(const std::string& name);
 
+  virtual ShVoidPtr prepare(ShSchedule* schedule) = 0;
+  
 protected:
   ShBackend();
   
