@@ -26,17 +26,9 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "ArbCode.hpp"
 #include <algorithm>
-#define _USE_MATH_DEFINES
 #include <cmath>
 #include "ShDebug.hpp"
 #include "ShError.hpp"
-
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
 
 #ifdef WIN32
 namespace {

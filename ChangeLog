@@ -1,3 +1,15 @@
+2004-10-04  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* backends/gl/ArbCode.cpp, backends/gl/ArbEmit.cpp,
+	src/ShImage.cpp, src/ShInstructions.cpp, src/ShLib.hpp,
+	src/ShLibClamp.hpp, util/ShFuncImpl.hpp: Removed use of
+	_USE_MATH_DEFINES and undefines of min and max, now
+	controlled via win32.mk.
+
+	* backends/gl/Makefile.win32, src/Makefile.win32,
+	util/Makefile.win32, win32.mk: General WIN32 makefile
+	cleanup/overhaul.
+
 2004-09-24  Sylvain Vasseur  <sfvvasse@cgl.uwaterloo.ca>
 
 	* src/ShLibClampImpl.hpp (max): Specialize unary max for N==1.

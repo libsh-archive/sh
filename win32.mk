@@ -1,31 +1,40 @@
-SH_INSTALLDIR = \home\mmccool\install
+# install location
+SH_INSTALLDIR = \dev\install
 
-OPENGL_DIR = \dev\opengl
-MSSDK_DIR = \dev\mssdk
-LIBPNG_DIR = \dev\libpng
-ZLIB_DIR = \dev\zlib
-
-# libpng/zlib
-INCLUDES = -I$(LIBPNG_DIR)\include -I$(ZLIB_DIR)\include
-# MS platform SDK
-INCLUDES += -I$(MSSDK_DIR)\include
 # OpenGL
-INCLUDES += -I$(OPENGL_DIR)\include
+OPENGL_DIR = \dev\opengl
+INCLUDES += /I$(OPENGL_DIR)\include
 
-CPPFLAGS = -DWIN32 $(INCLUDES)
+# libpng
+LIBPNG_DIR = \dev\libpng
+INCLUDES = /I$(LIBPNG_DIR)
+LIBPNG_LDADD= $(LIBPNG_DIR)\libpng.lib
+LIBPNG_RELEASE_LDADD = $(LIBPNG_LDADD)
+LIBPNG_DEBUG_LDADD = $(LIBPNG_LDADD)
+
+# zlib
+ZLIB_DIR = \dev\zlib
+INCLUDES += /I$(ZLIB_DIR)
+ZLIB_LDADD= $(ZLIB_DIR)\zlib.lib
+ZLIB_RELEASE_LDADD = $(ZLIB_LDADD)
+ZLIB_DEBUG_LDADD = $(ZLIB_LDADD)
+
+CXX = cl /nologo
+AR = link /lib /nologo
+LD = link /nologo
+
+CPPFLAGS = /DWIN32 /DNOMINMAX /D_USE_MATH_DEFINES $(INCLUDES)
+CXXFLAGS = /GR /GX /wd4003
 
 RELEASE_CPPFLAGS = $(CPPFLAGS)
-DEBUG_CPPFLAGS   = $(CPPFLAGS) /D SH_DEBUG /D _DEBUG
+RELEASE_CXXFLAGS = $(CXXFLAGS) $(RELEASE_CPPFLAGS) /MD
 
-CXXFLAGS = /GR /GX /wd4003
-RELEASE_CXXFLAGS = $(CXXFLAGS) $(RELEASE_CPPFLAGS)  /MD
+DEBUG_CPPFLAGS = $(CPPFLAGS) /D SH_DEBUG /D _DEBUG
 DEBUG_CXXFLAGS = $(CXXFLAGS) $(DEBUG_CPPFLAGS) /MDd /ZI /Od /RTC1
 
 LDFLAGS = 
-DEBUG_LDFLAGS = $(LDFLAGS) /Zi
 RELEASE_LDFLAGS = $(LDFLAGS)
-
-CXX = cl
+DEBUG_LDFLAGS = $(LDFLAGS)
 
 clean:
 	del *.lib *.obj *.d $(CLEANFILES)
@@ -37,9 +46,9 @@ clean:
 	$(CXX) /Fo$@ /c $< $(DEBUG_CXXFLAGS)
 
 %.r.d: %.cpp
-	makedepend -f- -o.r.obj $< -- $(RELEASE_CPPFLAGS) > $@ 2>devnull
+	@makedepend -f- -o.r.obj $< -- $(RELEASE_CPPFLAGS) > $@ 2>devnull
 	-@del devnull
 
 %.d.d: %.cpp
-	makedepend -f- -o.d.obj $< -- $(RELEASE_CPPFLAGS) > $@ 2>devnull
+	@makedepend -f- -o.d.obj $< -- $(RELEASE_CPPFLAGS) > $@ 2>devnull
 	-@del devnull

@@ -27,7 +27,6 @@
 #ifndef SHLIB_HPP
 #define SHLIB_HPP
 
-#define _USE_MATH_DEFINES
 #include <cmath>
 #include <cassert>
 #include "ShVariable.hpp"
