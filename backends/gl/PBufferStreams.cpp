@@ -128,7 +128,7 @@ PBufferStreamCache::PBufferStreamCache(ShProgramNode* stream_program,
     m_vertex_program(vertex_program)
 {
   FloatExtension extension = PBufferFactory::instance()->get_extension();
-  ShTextureDims dims;
+  ShTextureDims dims(SH_TEXTURE_2D);
   
   switch (extension) {
   case SH_ARB_NV_FLOAT_BUFFER:
