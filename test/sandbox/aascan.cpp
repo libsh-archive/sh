@@ -10,12 +10,12 @@ using namespace std;
 int main() 
 {
   shInit();
-#if 1
+#if 0
   shSetBackend("arb");
 
   ShProgram prog = SH_BEGIN_PROGRAM("gpu:stream") {
 #else
-  shSetBackend("arb");
+  shSetBackend("cc");
 
   ShProgram prog = SH_BEGIN_PROGRAM("cc:stream") {
 #endif

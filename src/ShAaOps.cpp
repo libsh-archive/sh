@@ -102,15 +102,21 @@ void affineApprox(ShAaVariable &dest,
  * @see ShAffine.hpp
  */
 template<typename F>
-void convexApprox(ShAaVariable &dest, const ShAaVariable &src, const ShAaSyms &newsyms, bool poslo=false)
+void convexApprox(ShAaVariable &dest, const ShAaVariable &src, const ShAaSyms &newsyms, bool pos=false)
 {
   // Translated directly from ShAffineImpl.hpp
   ShVariable lo = src.lo();
-  if(poslo) {
-    ShVariable ZERO = ShConstAttrib1f(0.0f);
-    shMAX(lo, lo, ZERO(ShSwizzle(ZERO.swizzle(), lo.size()))); 
-  }
   ShVariable hi = src.hi();
+  if(pos) {
+    // EPS should really depend on the type of the variable and the platform.
+    // Here we just pick something that should be representable even for
+    // half-floats.
+    ShVariable EPS = ShConstAttrib1f(1e-7f); 
+    shMAX(lo, lo, EPS.repeat(lo.size()));
+
+    // @todo range make sure hi > lo...may not always be what we want though?
+    shMAX(hi, lo, hi); 
+  }
   ShVariable flo = src.temp("fhi"); 
   ShVariable fhi = src.temp("flo"); 
   F::f(flo, lo);
@@ -254,6 +260,16 @@ ShAaVariable aaMAD(const ShAaVariable &a, const ShAaVariable &b,
   return aaADD(ab, c);
 }
 
+ShAaVariable aaNORM(const ShAaVariable& a, const ShAaSyms& newsyms)
+{
+  // need to do some weird stuff to get the right syms
+  ShAaSyms mulSyms = newsyms.last();
+  ShAaSyms scalarSyms = (newsyms - mulSyms).swizSyms(ShSwizzle(1));
+  ShAaVariable normSq = aaDOT(a, a, scalarSyms);
+  ShAaVariable invnorm = aaRSQ(normSq, scalarSyms);
+  return aaMUL(a, normSq.repeat(a.size()), mulSyms);
+}
+
 struct __aaop_rcp {
   typedef ShVariable V; 
   static const bool use_fdf = false;
@@ -277,6 +293,25 @@ ShAaVariable aaRCP(const ShAaVariable& a, const ShAaSyms& newsyms)
 {
   ShAaVariable result(new ShAaVariableNode(*a.node(), a.use() | newsyms));
   convexApprox<__aaop_rcp>(result, a, newsyms); // @todo range - fix this
+  return result;
+}
+
+struct __aaop_rsq {
+  typedef ShVariable V; 
+  static const bool use_fdf = false;
+  static void f(V r, V x) { shRSQ(r, x); }
+  static void dfinv(V r, V x, V lo, V hi) { 
+    shMUL(r, x, ShConstAttrib1f(-2.0f)); 
+    shPOW(r, r, ShConstAttrib1f(-2.0f/3.0f));
+  }
+  static void fdfinv(V r, V x) {}
+};
+
+
+ShAaVariable aaRSQ(const ShAaVariable& a, const ShAaSyms& newsyms)
+{
+  ShAaVariable result(new ShAaVariableNode(*a.node(), a.use() | newsyms));
+  convexApprox<__aaop_rsq>(result, a, newsyms, true); 
   return result;
 }
 
@@ -361,6 +396,64 @@ ShAaVariable aaEXP10(const ShAaVariable& a, const ShAaSyms& newsyms)
 {
   ShAaVariable result(new ShAaVariableNode(*a.node(), a.use() | newsyms));
   convexApprox<__aaop_exp10>(result, a, newsyms); // @todo range - fix this
+  return result;
+}
+
+ShAaVariable aaFLR(const ShAaVariable& a, const ShAaSyms& newsyms)
+{
+  // A) if between n, n + 1 then set to n 
+  // B) if not between 
+  //    otherwise, best approx is (a - 0.5) 
+  ShVariable lo, hi; 
+  a.lohi(lo, hi);
+
+  ShVariable flr_lo = a.temp("aaFLR_loflr");
+  ShVariable keep = a.temp("aaFLR_keep");
+  shFLR(flr_lo, lo); 
+  shADD(keep, hi, -flr_lo);
+  ShVariable one = ShConstAttrib1f(1.0f).repeat(a.size());
+  shSGE(keep, keep, one); 
+
+  // come up with the two options
+  ShAaVariable result(new ShAaVariableNode(*a.node(), a.use() | newsyms));
+  result.ZERO();
+  shASN(result.center(), flr_lo);
+
+  ShVariable half = ShConstAttrib1f(0.5f).repeat(a.size());
+  ShAaVariable resultB(new ShAaVariableNode(*a.node(), a.use() | newsyms));
+  resultB.ASN(a).ADD(-half).setErr(half, newsyms);
+
+  result.COND(keep, resultB);
+  return result;
+}
+
+ShAaVariable aaFRAC(const ShAaVariable& a, const ShAaSyms& newsyms)
+{
+  // A) if between n, n + 1 then 
+  //  set center to be frac(center), no err
+  // B) if not, best approx is 0.5, err = 0.5
+  ShVariable lo, hi; 
+  a.lohi(lo, hi);
+
+  ShVariable flr_lo = a.temp("aaFRAC_loflr");
+  ShVariable keep = a.temp("aaFRAC_keep");
+  shFLR(flr_lo, lo); 
+  shADD(keep, hi, -flr_lo);
+  ShVariable one = ShConstAttrib1f(1.0f).repeat(a.size());
+  shSGE(keep, keep, one); 
+
+  // come up with the two options
+  ShAaVariable result(new ShAaVariableNode(*a.node(), a.use() | newsyms));
+  result.ZERO().ASN(a);
+  shFRAC(result.center(), result.center());
+
+
+  ShVariable half = ShConstAttrib1f(0.5f).repeat(a.size());
+  ShAaVariable resultB(new ShAaVariableNode(*a.node(), a.use() | newsyms));
+  resultB.ZERO().setErr(half, newsyms);
+  shASN(resultB.center(), half);
+
+  result.COND(keep, resultB);
   return result;
 }
 

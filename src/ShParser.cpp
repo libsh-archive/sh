@@ -283,6 +283,7 @@ void ShParser::parseSection(ShCtrlGraphNodePtr& head,
   ShBasicBlockPtr basic = shref_dynamic_cast<ShBasicBlock>(blocks->getFront());
   SH_DEBUG_ASSERT(basic && !basic->empty() && basic->begin()->op == SH_OP_COMMENT);
   std::string name = basic->begin()->get_info<ShInfoComment>()->comment;
+  basic->erase(basic->begin());
 
   ShCtrlGraphNodePtr secHead, secTail;
   parseStmts(secHead, secTail, blocks);

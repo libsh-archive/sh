@@ -227,6 +227,11 @@ ShVariable ShVariable::operator()(const ShSwizzle &swizzle) const
   return ShVariable(m_node, m_swizzle * swizzle, m_neg);
 }
 
+ShVariable ShVariable::repeat(int n) const
+{
+  return ShVariable(m_node, ShSwizzle(m_swizzle, n), m_neg);
+}
+
 std::ostream& operator<<(std::ostream& out, const ShVariable& v)
 {
   if (!v.m_node){

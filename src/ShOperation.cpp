@@ -103,6 +103,7 @@ const ShOperationInfo opInfo[] = {
   {"DECL", 0, ShOperationInfo::IGNORE, false, false, false},
   {"PHI", 1, ShOperationInfo::LINEAR, false, false, false},
   {"ESCJOIN", 1, ShOperationInfo::IGNORE, false, true, false},
+  {"ESCSAV", 1, ShOperationInfo::IGNORE, false, false, false},
 
   {"STARTSEC", 0, ShOperationInfo::IGNORE, false, false, false},
   {"ENDSEC", 0, ShOperationInfo::IGNORE, false, false, false},

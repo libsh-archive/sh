@@ -86,6 +86,10 @@ struct ShAaProgramSyms: public ShInfo {
   ShAaVarSymsMap inputs, vars, outputs;
   ShAaStmtSymsMap stmts;
 
+  // need association between extra outputs added for hierarchy,
+  // and the symbols they save
+
+
   ShInfo* clone() const;
 
   friend std::ostream& operator<<(std::ostream& out, const ShAaProgramSyms& stmtSyms);

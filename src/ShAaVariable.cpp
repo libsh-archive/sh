@@ -200,6 +200,12 @@ ShAaVariable ShAaVariable::operator()(const ShSwizzle& swizzle) const
   return ShAaVariable(m_node, m_swizzle * swizzle, m_neg, m_used.swizSyms(swizzle));
 }
 
+ShAaVariable ShAaVariable::repeat(int n) const
+{
+  ShSwizzle swiz(size());
+  return operator()(ShSwizzle(swiz, n));
+}
+
 ShVariable ShAaVariable::center() const {
   ShVariable result = m_node->center()(m_swizzle);
   if(m_neg) return -result;
@@ -341,6 +347,29 @@ ShAaVariable& ShAaVariable::MAD(const ShAaVariable& other, const ShVariable& sca
   return *this;
 }
 
+ShAaVariable& ShAaVariable::COND(const ShVariable& condvar, const ShAaVariable& other)
+{
+  return COND(condvar, other, other.use());
+}
+
+ShAaVariable& ShAaVariable::COND(const ShVariable& condvar, const ShAaVariable& other, 
+    const ShAaSyms& used, bool changeCenter)
+{
+  SH_DEBUG_ASSERT(other.node() != node());
+  SH_DEBUG_ASSERT(size() == other.size() && size() == condvar.size());
+
+  if(changeCenter) {
+    shCOND(center(), condvar, other.center(), center()); 
+  }
+
+  for(int i = 0; i < size(); ++i) {
+    if(used[i].empty()) continue;
+    ShVariable myerr = err(i, used[i]);
+    shCOND(myerr, condvar(i), other.err(i, used[i]), myerr);
+  }
+  return *this;
+}
+
 ShAaVariable& ShAaVariable::setErr(const ShVariable& other, const ShAaSyms &used) {
   SH_DEBUG_ASSERT(size() == used.size());
   for(int i = 0; i < size(); ++i) {
@@ -387,6 +416,14 @@ ShVariable ShAaVariable::lo() const {
   ShVariable result = makeTemp("_lo");
   shADD(result, center(), -radius());
   return result;
+}
+
+void ShAaVariable::lohi(ShVariable& lo, ShVariable& hi) const {
+  ShVariable rad = radius(); 
+  lo = makeTemp("_lo");
+  hi = makeTemp("_hi");
+  shADD(lo, center(), -rad);
+  shADD(hi, center(), rad);
 }
 
 ShVariable ShAaVariable::hi() const {

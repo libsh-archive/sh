@@ -27,6 +27,7 @@
 #ifndef SHINCLUSION_HPP
 #define SHINCLUSION_HPP
 
+#include <map>
 #include "ShInfo.hpp"
 #include "ShProgram.hpp"
 #include "ShAlgebra.hpp"
@@ -70,6 +71,9 @@ struct ShStmtIndex: public ShInfo
 /** Adds statement indices to a program for statements that do not already have
  * an index */
 void add_stmt_indices(ShProgram a);
+
+typedef std::map<ShStmtIndex, ShStatement*> ShIndexStmtMap;
+ShIndexStmtMap gather_indices(ShProgram a);
 
 /** Makes a clone of the control graph in a and turns all regular float computation to interval computation */
 SH_DLLEXPORT

@@ -21,6 +21,10 @@ enum Graph {
   GR_LOG, // logarithm (LOG, LOG2, LOG10)
   GR_RCP, // reciprocal (RCP) 
   GR_SQRT, // square root (SQRT)
+  GR_RSQ, // inverse square root
+  GR_FLR, // floor (FLR)
+  GR_FRAC, // frac
+  GR_NORM, // norm
   GR_LRP  // lerp between EXP and LOG (LRP, EXP, LOG)
 };
 const int NUMGRAPHS = (int)(GR_LRP) + 1;
@@ -33,6 +37,10 @@ const char* GraphName[] = {
   "log",
   "rcp",
   "sqrt",
+  "rsq",
+  "floor",
+  "frac",
+  "norm",
   "lrp"
 };
 
@@ -41,7 +49,7 @@ ShAttrib1f eps;
 ShAttrib2f offset;
 ShAttrib1f myscale;
 ShProgram vsh, fsh[NUMGRAPHS];
-Graph mode = GR_POLY;
+Graph mode = GR_FRAC; 
 
 ShAttrib<5, SH_TEMP, float> coeff;
 ShAttrib<3, SH_TEMP, float> denom;
@@ -86,6 +94,14 @@ struct PlotFunction {
           value = rcp(t); break;
         case GR_SQRT:
           value = sqrt(t); break;
+        case GR_RSQ:
+          value = rsqrt(t); break;
+        case GR_FLR:
+          value = floor(t); break;
+        case GR_FRAC:
+          value = frac(t); break;
+        case GR_NORM:
+          value = normalize(t); break;
         case GR_LRP:
           value = lerp(coeff(0), exp(t), log(t)); break;
         default:

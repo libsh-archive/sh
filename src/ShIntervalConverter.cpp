@@ -202,6 +202,27 @@ ShProgram intervalDOT(int N, ShValueType valueType)
   return csum << mul; 
 }
 
+ShProgram intervalFRAC(int N, ShValueType valueType) 
+{
+  ShProgram result = SH_BEGIN_PROGRAM() {
+    ShVariablePair a(SH_INPUT, N, valueType);
+    ShVariablePair r(SH_OUTPUT, N, valueType);
+    ShVariable temp(new ShVariableNode(SH_TEMP, N, valueType));
+    ShVariablePair frac_a(SH_TEMP, N, valueType);
+
+    // if floor(a.lo) is not floor(a.hi),  
+    shFLR(temp, a.lo); 
+    shADD(temp, a.hi, -temp);
+    shSGE(temp, temp, ShConstAttrib1f(1.0f).repeat(N));
+
+    shFRAC(frac_a.lo, a.lo);
+    shFRAC(frac_a.hi, a.hi);
+    shCOND(r.lo, temp, ShConstAttrib1f(0.0f).repeat(N), frac_a.lo);
+    shCOND(r.hi, temp, ShConstAttrib1f(1.0f).repeat(N), frac_a.hi);
+  } SH_END;
+  return result;
+}
+
 ShProgram intervalNEG(int N, ShValueType valueType)
 {
   ShProgram result = SH_BEGIN_PROGRAM() {
@@ -313,6 +334,7 @@ ShProgram getProgram(ShOperation op, int N, ShValueType valueType) {
     case SH_OP_EXP2:   return intervalBinaryMonotonic<SH_OP_EXP2>(N, valueType);
     case SH_OP_EXP10:   return intervalBinaryMonotonic<SH_OP_EXP10>(N, valueType);
     case SH_OP_FLR:   return intervalBinaryMonotonic<SH_OP_FLR>(N, valueType);
+    case SH_OP_FRAC:  return intervalFRAC(N, valueType); 
     case SH_OP_LOG:   return intervalBinaryMonotonic<SH_OP_LOG>(N, valueType);
     case SH_OP_LOG2:   return intervalBinaryMonotonic<SH_OP_LOG2>(N, valueType);
     case SH_OP_LOG10:   return intervalBinaryMonotonic<SH_OP_LOG10>(N, valueType);

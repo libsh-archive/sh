@@ -2,11 +2,11 @@ SOURCES = $(wildcard *.cpp)
 EXECUTABLES = $(SOURCES:.cpp=)
 OBJECTS = $(SOURCES:.cpp=.o)
 DEPENDS = $(SOURCES:.cpp=.d)
-CPPFLAGS = -I../../src 
+CPPFLAGS = -I../../src -I../../util 
 #CXXFLAGS = -g -O0 -Wall
 CXX=g++ 
 CXXFLAGS = -g -Wall -DSH_DEBUG
-LDFLAGS = ../../src/libsh.la -lGL -lGLU
+LDFLAGS = ../../src/libsh.la ../../util/libshutil.la -lGL -lGLU
 
 # LDFLAGS = ../../src/libsh.la
 

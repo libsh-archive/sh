@@ -73,7 +73,7 @@ ShVariable makeTemp(ShVariableNodePtr node, const std::string& name) {
 namespace SH {
 
 ShAaScanCore::ShAaScanCore(ShProgram program)
-  : m_program(program.node()->clone())
+  : m_program(program)
 {
 #ifdef SH_DBG_ASCCANCORE
   m_program.node()->dump("aascan_start");

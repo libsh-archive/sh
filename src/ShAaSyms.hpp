@@ -34,7 +34,7 @@
 #include "ShDllExport.hpp"
 
 // enable this to turn on all AA debugging
-#define SH_DBG_AA
+// #define SH_DBG_AA
 
 namespace SH {
 
@@ -152,6 +152,9 @@ struct ShAaSyms {
 
   // Unions idx[i] with other
   void merge(int i, const ShAaIndexSet& other);
+
+  // Picks out the last element of each index set 
+  ShAaSyms last() const;
 
   // Returns whether all index sets are empty 
   bool empty() const;

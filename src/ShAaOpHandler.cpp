@@ -296,9 +296,9 @@ ShProgram getProgram(ShStatement& stmt, SymAllocator& alloc) {
       }
 
       /* @todo range handle vectorization of scalars */
-      if(opInfo[stmt.op].result_source == ShOperationInfo::LINEAR && stmt.src[i].size() < stmt.dest.size() && stmt.src[i].size() == 1) {
-        SH_DEBUG_ASSERT(0 && "Cannot vectorize scalar sources yet");
-      //  src[i] = src[i].swiz(ShSwizzle(stmt.src[i].swizzle(), stmt.dest.size())); 
+      if(opInfo[stmt.op].result_source == ShOperationInfo::LINEAR && 
+          stmt.src[i].size() < stmt.dest.size() && stmt.src[i].size() == 1) {
+        src[i] = src[i].repeat(stmt.dest.size());
       }
       
     }
@@ -326,9 +326,8 @@ ShProgram getProgram(ShStatement& stmt, SymAllocator& alloc) {
       case SH_OP_EXP:   dest.ASN(aaEXP(src[0], stmtSyms->newdest)); break; 
       case SH_OP_EXP2:  dest.ASN(aaEXP2(src[0], stmtSyms->newdest)); break;  
       case SH_OP_EXP10: dest.ASN(aaEXP10(src[0], stmtSyms->newdest)); break;   
-#if 0
-      case SH_OP_FLR:   return affineBinaryMonotonic<SH_OP_FLR>(N, valueType);
-#endif
+      case SH_OP_FLR:   dest.ASN(aaFLR(src[0], stmtSyms->newdest)); break;   
+      case SH_OP_FRAC:  dest.ASN(aaFRAC(src[0], stmtSyms->newdest)); break;   
       case SH_OP_LOG:   dest.ASN(aaLOG(src[0], stmtSyms->newdest)); break; 
       case SH_OP_LOG2:  dest.ASN(aaLOG2(src[0], stmtSyms->newdest)); break; 
       case SH_OP_LOG10: dest.ASN(aaLOG10(src[0], stmtSyms->newdest)); break; 
@@ -338,8 +337,10 @@ ShProgram getProgram(ShStatement& stmt, SymAllocator& alloc) {
       case SH_OP_MAX:   return affineBinaryMonotonic<SH_OP_MAX>(N, valueType);
       case SH_OP_MIN:   return affineBinaryMonotonic<SH_OP_MIN>(N, valueType);
 #endif
+      case SH_OP_NORM:  dest.ASN(aaNORM(src[0], stmtSyms->newdest)); break; 
       case SH_OP_POW:   dest.ASN(aaPOW(src[0], src[1], stmtSyms->newdest)); break;
       case SH_OP_RCP:   dest.ASN(aaRCP(src[0], stmtSyms->newdest)); break; 
+      case SH_OP_RSQ:   dest.ASN(aaRSQ(src[0], stmtSyms->newdest)); break; 
 #if 0
       case SH_OP_RND:   return affineBinaryMonotonic<SH_OP_RND>(N, valueType);
       case SH_OP_SGN:   return affineBinaryMonotonic<SH_OP_SGN>(N, valueType);

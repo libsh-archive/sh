@@ -90,10 +90,8 @@ ShAaVariable aaDY(const ShAaVariable& a);
 ShAaVariable aaEXP(const ShAaVariable& a, const ShAaSyms& newsyms);
 ShAaVariable aaEXP2(const ShAaVariable& a, const ShAaSyms& newsyms);
 ShAaVariable aaEXP10(const ShAaVariable& a, const ShAaSyms& newsyms);
-#if 0
-ShAaVariable aaFLR(const ShAaVariable& a);
-ShAaVariable aaFRAC(const ShAaVariable& a);
-#endif
+ShAaVariable aaFLR(const ShAaVariable& a, const ShAaSyms& newsyms);
+ShAaVariable aaFRAC(const ShAaVariable& a, const ShAaSyms& newsyms);
 ShAaVariable aaLOG(const ShAaVariable& a, const ShAaSyms& newsyms);
 ShAaVariable aaLOG2(const ShAaVariable& a, const ShAaSyms& newsyms);
 ShAaVariable aaLOG10(const ShAaVariable& a, const ShAaSyms& newsyms);
@@ -113,15 +111,20 @@ ShAaVariable aaPOW(const ShAaVariable& a, const ShAaVariable& b, const ShAaSyms&
 ShAaVariable aaRCP(const ShAaVariable& a, const ShAaSyms& newsyms);
 #if 0
 ShAaVariable aaRND(const ShAaVariable& a);
-ShAaVariable aaRSQ(const ShAaVariable& a);
+#endif
+ShAaVariable aaRSQ(const ShAaVariable& a, const ShAaSyms& newsyms);
+#if 0
 ShAaVariable aaSGN(const ShAaVariable& a);
 ShAaVariable aaSIN(const ShAaVariable& a);
 #endif
 ShAaVariable aaSQRT(const ShAaVariable& a, const ShAaSyms& newsyms);
 #if 0
 ShAaVariable aaTAN(const ShAaVariable& a);
+#endif
 
-ShAaVariable aaNORM(const ShAaVariable& a);
+ShAaVariable aaNORM(const ShAaVariable& a, const ShAaSyms& newsyms);
+
+#if 0
 ShAaVariable aaXPD(const ShAaVariable& a, const ShAaVariable& b);
 
 ShAaVariable aaCOND(const ShAaVariable& cond,

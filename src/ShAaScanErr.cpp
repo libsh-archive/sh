@@ -24,9 +24,14 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
+#include <fstream>
+#include <sstream>
 #include "ShSyntax.hpp"
 #include "ShStream.hpp"
 #include "ShRecStream.hpp"
+#include "ShStructural.hpp"
+#include "ShSection.hpp"
+#include "ShInclusion.hpp"
 #include "ShAaScanCore.hpp"
 #include "ShAaScanErr.hpp"
 
@@ -66,6 +71,94 @@ ShProgram rgbToLightness(ShVariable output)
   } SH_END;
   return result;
 }
+
+struct ScanErrDumper {
+  ShAaScanErrMap& errMap;
+  ShIndexStmtMap& indexStmt;
+  double maxErr; // max error (absolute value) 
+
+  ScanErrDumper(ShAaScanErrMap& errMap, ShIndexStmtMap& indexStmt)
+    : errMap(errMap), indexStmt(indexStmt) {
+    maxErr = 0;
+    // @todo only include statement indices from original program  
+    for(ShAaScanErrMap::iterator I = errMap.begin(); I != errMap.end(); ++I) {
+      if(indexStmt.find(I->first) == indexStmt.end()) {
+        //SH_DEBUG_PRINT_ASE("Ignoring " << *I->second.stmt << " for max err calculation.");
+        continue;
+      }
+      maxErr = std::max(maxErr, I->second.err);
+    }
+    SH_DEBUG_PRINT_ASE("Max error = " << maxErr);
+  }
+
+  void operator()(std::ostream& out, ShSectionNodePtr section)
+  {
+    // @todo range - grab error from ESCJOINs before end of section
+    out << "label=\"" << section->name() << "\";" << std::endl;
+  }
+
+  /* prints an integer value between 0-255 in 2 digit hex */
+  std::ostream& hex(std::ostream& out, int val)
+  {
+    if(val < 16) out << "0";
+    out << std::hex << val;
+    return out;
+  }
+
+  std::ostream& colorOf(std::ostream& out, double error)
+  {
+    out << "#";
+    int val = static_cast<int>(255 * error / maxErr);
+
+    // simple green -> yellow -> red map (linear)
+    if(val < 127) {
+      hex(out, val * 2);
+      hex(out, 255);
+    } else {
+      hex(out, 255);
+      hex(out, (255 - val) * 2);
+    }
+    hex(out, 0);
+    return out;
+  }
+
+  void operator()(std::ostream& out, ShCtrlGraphNodePtr node)
+  {
+    out << "[label=<";
+
+    if(node->block) {
+      out << "<TABLE BORDER=\"0\">\n";
+      for(ShBasicBlock::iterator I = node->block->begin(); I != node->block->end(); ++I) {
+        ShStatement& stmt = *I; 
+        ShStmtIndex* stmtIndex = stmt.get_info<ShStmtIndex>();
+
+        SH_DEBUG_PRINT_ASE("Handling stmt " << stmt); 
+
+        double error = 0;
+        if(!stmtIndex) {
+          SH_DEBUG_PRINT_ASE("  no stmt index" << stmt);
+        } else if (errMap.find(*stmtIndex) == errMap.end()) {
+          SH_DEBUG_PRINT_ASE("  no error info!");
+        } else {
+          error = errMap.find(*stmtIndex)->second.err; 
+          SH_DEBUG_PRINT_ASE("  error " << error);
+        }
+
+        out << "  <TR><TD BGCOLOR=\"";
+        colorOf(out, error) << "\">";
+        if(!stmt.dest.null()) {
+          out << stmt.dest.name() << " := ";
+        }
+        out << opInfo[stmt.op].name;
+        out << "</TD></TR>";
+      }
+      out << "</TABLE>>, margin=\"0.0,0.0\", shape=box]";
+    } else {
+      out << ">, shape=circle, height=0.25]";
+    }
+  }
+
+};
   
 }
 
@@ -92,18 +185,18 @@ ShAaScanErrMap shAaScanLightnessErr(ShProgram program)
 {
   // Check that program 
   if(program.node()->outputs.size() != 1) {
-    SH_DEBUG_PRINT("Cannot analyze programs with more than one output");
+    SH_DEBUG_PRINT_ASE("Cannot analyze programs with more than one output");
   }
 
   ShVariable output = *program.outputs_begin();
   if(output.size() != 3 || output.node()->specialType() != SH_COLOR) {
-    SH_DEBUG_PRINT("Cannot handle non-RGB ShColor3x outputs");
+    SH_DEBUG_PRINT_ASE("Cannot handle non-RGB ShColor3x outputs");
   }
 
-  ShProgram progClone(program.node()->clone());
-
   // Add indices
-  add_stmt_indices(progClone);
+  add_stmt_indices(program);
+
+  ShProgram progClone(program.node()->clone());
 
   // Tack on RGB->luminance conversion
   progClone = rgbToLightness(output) << progClone;
@@ -122,9 +215,9 @@ ShAaScanErrMap shAaScanLightnessErr(ShProgram program)
   //fetch one into resultRecord/resultPattern 
   lookup(resultRecord, result, 0);
 
-  SH_DEBUG_PRINT("Results:");
+  SH_DEBUG_PRINT_ASE("Results:");
   for(unsigned int i = 0; i < resultPattern.size(); ++i) {
-    SH_DEBUG_PRINT(i << ": " << resultPattern[i].name() << "=" << resultPattern[i]); 
+    SH_DEBUG_PRINT_ASE(i << ": " << resultPattern[i].name() << "=" << resultPattern[i]); 
   }
 
   // Pull out results into  
@@ -134,7 +227,7 @@ ShAaScanErrMap shAaScanLightnessErr(ShProgram program)
   int i = 0; 
   ShVariable aaErr = aaOutput.err(0);
   ShAaScanErrMap errMap;
-  for(ShAaIndexSet::iterator I = syms.begin(); I != syms.end(); ++I) {
+  for(ShAaIndexSet::iterator I = syms.begin(); I != syms.end(); ++I, ++i) {
     int index = *I; // noise symbol index
     double err;
     // this is kind of messy with the variants
@@ -142,6 +235,7 @@ ShAaScanErrMap shAaScanLightnessErr(ShProgram program)
       generate(&err, 1, false);
     errVariant->set(aaErr.getVariant(i));
     err = std::abs(err);
+    SH_DEBUG_PRINT_ASE("noise sym " << index << " err " << err);
 
     // now figure out which stmt this comes from and stick it in the map 
     // (add onto previous error if there is any)
@@ -156,11 +250,30 @@ ShAaScanErrMap shAaScanLightnessErr(ShProgram program)
       } else {
         errMap[*matchingIdx] = ShAaStmtErr(*matchingIdx, stmt, err); 
       }
-      SH_DEBUG_PRINT("Updating " << errMap[*matchingIdx]);
+      SH_DEBUG_PRINT_ASE("Updating " << errMap[*matchingIdx]);
     }
   }
 
   return errMap;
+}
+
+void shAaScanErrDump(const std::string& filename, ShAaScanErrMap& errMap, ShProgram program)
+{
+  ShStructural structural(program.node()->ctrlGraph);
+  ShSectionTree sectionTree(structural);
+
+  ShIndexStmtMap indexStmt = gather_indices(program);
+
+  ScanErrDumper sed(errMap, indexStmt);
+  std::string dotfile = filename + ".dot";
+  std::string psfile = filename + ".ps";
+
+  std::ofstream fout(dotfile.c_str());
+  sectionTree.dump(fout, sed); 
+  fout.close();
+
+  std::string cmd = std::string("dot -Tps < ") + dotfile + " > " + psfile;
+  system(cmd.c_str());
 }
 
 }

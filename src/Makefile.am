@@ -91,8 +91,8 @@ libsh_la_SOURCES += ShEvaluate.cpp ShEvaluate.hpp
 incinc_HEADERS   += ShEvaluate.hpp
 libsh_la_SOURCES += ShStructural.hpp ShStructural.cpp
 incinc_HEADERS   += ShStructural.hpp
-libsh_la_SOURCES += ShSectionUtil.hpp ShSectionUtil.cpp 
-incinc_HEADERS   += ShSectionUtil.hpp
+libsh_la_SOURCES += ShSection.hpp ShSectionImpl.hpp ShSection.cpp 
+incinc_HEADERS   += ShSection.hpp ShSectionImpl.hpp
 
 # Library functions
 libsh_la_SOURCES += ShLib.hpp

@@ -26,8 +26,11 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include <queue>
+#include <fstream>
 #include "ShDebug.hpp"
 #include "ShTransformer.hpp"
+#include "ShStructural.hpp"
+#include "ShSection.hpp"
 #include "ShOptimizations.hpp"
 #include "ShAaHier.hpp"
 #include "ShAaSymPlacer.hpp"
@@ -109,6 +112,20 @@ void updateDest(ShAaStmtSyms *stmtSyms, const SymLevelVec& levelSyms, WorkList &
         destChanged[i] = (oldsize != dest[i].size());
       }
     }
+  } else if(stmt->op == SH_OP_ESCSAV) {
+    // only keep symbols generated at the current nesting level
+    // We'll pick up the association between ESCSAV'd symbols and the new
+    // symbols generated for ESCJOIN later in the processing.
+    SH_DEBUG_PRINT_ASP("    ESCSAV"); 
+    SH_DEBUG_ASSERT(dest.size() == src[0].size());
+    unsigned int myLevel = stmtSyms->level;
+    if(myLevel < levelSyms.size()) {
+      for(int i = 0; i < dest.size(); ++i) {
+        int oldsize = dest[i].size();
+        dest.merge(i, src[0][i] & levelSyms[myLevel]);
+        destChanged[i] = (oldsize != dest[i].size());
+      }
+    }
   } else if(opInfo[stmt->op].affine_keep) {
     switch(opInfo[stmt->op].result_source) {
       case ShOperationInfo::IGNORE: 
@@ -180,8 +197,10 @@ struct SymInitBase: public ShTransformerParent {
    * Assigns the worklist to fill with w
    *
    * This must be called exactly once before each transform call */
-  void init(const ShAaVarSymsMap* inputs, WorkList *w) 
+  void init(ShSectionTree* s, const ShAaVarSymsMap* inputs, WorkList *w) 
   {
+    sectionTree = s; 
+
     worklist = w;
 
     psyms->inputs = *inputs;
@@ -235,9 +254,8 @@ struct SymInitBase: public ShTransformerParent {
     if(stmt.dest.null()) return false;
 
     // get node nesting level
-    ShSectionInfo* sectionInfo = node->get_info<ShSectionInfo>();
-    SH_DEBUG_ASSERT(sectionInfo);
-    int level = sectionInfo->level; 
+    ShSectionNodePtr section = (*sectionTree)[node]; 
+    int level = section->depth();
 
     ShAaStmtSyms *stmtSyms = new ShAaStmtSyms(level, &stmt); 
     stmt.destroy_info<ShAaStmtSyms>();
@@ -283,13 +301,23 @@ struct SymInitBase: public ShTransformerParent {
 
     // check if op adds a symbol to the output, if so, add it 
     if(opInfo[stmt.op].affine_add && shIsRange(stmt.dest.valueType())) { 
-      stmtSyms->dest = stmtSyms->newdest = ShAaSyms(stmt.dest.size(), false);
+      // special cases where more than one sym need to be inserted
+      switch(stmt.op) {
+        case SH_OP_NORM:
+          stmtSyms->newdest = ShAaSyms(ShSwizzle(ShSwizzle(1), stmt.dest.size()));
+          stmtSyms->newdest |= ShAaSyms(stmt.dest.size(), false);
+          break;
+        default:
+          stmtSyms->newdest = ShAaSyms(stmt.dest.size(), false);
+          break;
+      }
+      stmtSyms->dest = stmtSyms->newdest;
 
       // insert ESCJOIN new syms up one level
       if(stmt.op == SH_OP_ESCJOIN) {
-        insertSyms(level - 1, stmtSyms->newdest);
+        insertSyms(level - 1, stmtSyms->newdest); 
       } else {
-        insertSyms(level, stmtSyms->newdest);
+        insertSyms(level, stmtSyms->newdest); 
       }
       const ShStmtIndex* sidx = stmt.get_info<ShStmtIndex>();
       if(sidx) {
@@ -309,6 +337,7 @@ struct SymInitBase: public ShTransformerParent {
     m_program->add_info(psyms);
   }
 
+  ShSectionTree* sectionTree;
   ShAaProgramSyms* psyms;
   WorkList* worklist;
   int cur_index;
@@ -495,13 +524,19 @@ void placeAaSyms(ShProgramNodePtr programNode, const ShAaVarSymsMap& inputs)
 
   SH_DEBUG_PRINT_ASP("Hierarchical Initialization"); 
   ShStructural programStruct(programNode->ctrlGraph);
-  inEscAnalysis(programStruct, programNode);
+  ShSectionTree sectionTree(programStruct);
+
+  std::ofstream fout("sap_stree.dot");
+  sectionTree.dump(fout);
+  fout.close();
+  std::string cmd = std::string("dot -Tps < sap_stree.dot > sap_stree.ps");
+  system(cmd.c_str());
+
+
+  inEscAnalysis(sectionTree, programNode);
 #ifdef SH_DBG_AASYMPLACER 
   programNode->dump("sap_inesc");
 #endif
-
-  SH_DEBUG_PRINT_ASP("Adding Section Info"); 
-  addSectionInfo(programStruct, programNode);
 
   SH_DEBUG_PRINT_ASP("Adding Value Tracking");
   programNode->ctrlGraph->computePredecessors();
@@ -513,7 +548,7 @@ void placeAaSyms(ShProgramNodePtr programNode, const ShAaVarSymsMap& inputs)
   // and add defs to the worklist if they insert an extra error symbol
   SH_DEBUG_PRINT_ASP("Running error symbol initialization");
   SymInit si; 
-  si.init(&inputs, &worklist);
+  si.init(&sectionTree, &inputs, &worklist);
   si.transform(programNode);
   ShAaProgramSyms* psyms = si.psyms;
 
@@ -545,11 +580,11 @@ void placeAaSyms(ShProgramNodePtr programNode, const ShAaVarSymsMap& inputs)
         SH_DEBUG_PRINT_ASP("Use " << *use->stmt << " does not have ESU information!");
         continue;
       }
+      useStmtSyms->src[use->source][use->index] |= defStmtSyms->dest[def.index];
+      updateDest(useStmtSyms, si.levelSyms, worklist); 
       SH_DEBUG_PRINT_ASP("  use src=" << use->source << " index=" << use->index 
           << " stmt=" << *use->stmt); 
       SH_DEBUG_PRINT_ASP("    syms=" << *useStmtSyms);
-      useStmtSyms->src[use->source][use->index] |= defStmtSyms->dest[def.index];
-      updateDest(useStmtSyms, si.levelSyms, worklist); 
     }
   }
 

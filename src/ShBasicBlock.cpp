@@ -55,10 +55,11 @@ void ShBasicBlock::graphvizDump(std::ostream& out) const
   for (const_iterator I = m_statements.begin();
        I != m_statements.end(); ++I) {
     const ShInfoComment* comment = I->get_info<ShInfoComment>();    
+    out << *I; 
     if(comment) {
-      out << "// " << comment->comment << "\\n";
+      out << " // " << comment->comment;
     }
-    out << *I << "\\n";
+    out << "\\n";
   }
 }
 

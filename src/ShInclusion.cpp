@@ -140,6 +140,30 @@ void add_stmt_indices(ShProgram a) {
   sia.transform(a.node());
 }
 
+struct StmtIndexGathererBase: public ShTransformerParent {
+  ShIndexStmtMap* ismap;
+  void init(ShIndexStmtMap& ism) {
+    ismap = &ism;
+  }
+  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr cfg_node)
+  {
+    ShStmtIndex* index = I->get_info<ShStmtIndex>();
+    if(index) {
+      (*ismap)[*index] = &*I;
+    }
+    return false;
+  }
+};
+typedef ShDefaultTransformer<StmtIndexGathererBase> StmtIndexGatherer;
+
+ShIndexStmtMap gather_indices(ShProgram a) {
+  ShIndexStmtMap result;
+  StmtIndexGatherer sig;
+  sig.init(result);
+  sig.transform(a.node());
+  return result;
+}
+
 /* isInterval detector
  * regular -> interval mapping
  * name prefix
@@ -199,11 +223,13 @@ struct FloatToRangeBase: public ShTransformerParent {
     return true;
   }
 
+#if 0
   bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr cfg_node)
   {
     ShStatement &stmt = *I;
 
     // handle texture lookup/stream fetches
+    // we're doing this in the ShAaOpHandler.cpp now...
     switch(stmt.op) {
       case SH_OP_TEX:
       case SH_OP_TEXI:
@@ -239,6 +265,7 @@ struct FloatToRangeBase: public ShTransformerParent {
     }
     return false;
   }
+#endif
 
   void finish() {
     ShVariableReplacer vr(varmap);

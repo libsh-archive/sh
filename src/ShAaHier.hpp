@@ -31,7 +31,7 @@
 #include <iosfwd>
 #include "ShDllExport.hpp"
 #include "ShInfo.hpp"
-#include "ShStructural.hpp"
+#include "ShSection.hpp"
 
 namespace SH {
 
@@ -46,31 +46,11 @@ struct ShInEscInfo: public ShInfo
 };
 
 /* Adds ShInEscInfo to the STARTSEC, ENDSEC statements.
- * Inserts SH_OP_ESCJOIN operations right before ENDSEC statements (using the 
- * same ShStmtIndex as the ENDSEC stmt) for escaping variables.
- */
-SH_DLLEXPORT void inEscAnalysis(ShStructural &structural, ShProgramNodePtr p);
-
-
-struct ShSectionInfo: public ShInfo
-{
-  // Constructs a section info for the program scope (no section, level=0)
-  ShSectionInfo();
-
-  // Constructions a section info for a particular section
-  ShSectionInfo(ShStatement* start, ShStatement* end, int level); 
-
-  int level; ///< nesting level 
-  ShStatement *start, *end;
-
-  friend std::ostream& operator<<(std::ostream& out, const ShSectionInfo& si);
-  ShInfo* clone() const;
-};
-/* Adds ShSectionInfo objects to control graph nodes in sections 
- * Inserts SH_OP_ESCJOIN operations right before ENDSEC statements
+ * Inserts SH_OP_ESCJOIN operations paired with SH_OP_ESCSAV right 
+ * before ENDSEC statements (using the same ShStmtIndex as the ENDSEC stmt) 
  * for escaping variables.
  */
-SH_DLLEXPORT void addSectionInfo(ShStructural &s, ShProgramNodePtr p);
+SH_DLLEXPORT void inEscAnalysis(ShSectionTree &sectionTree, ShProgramNodePtr p);
 
 }
 

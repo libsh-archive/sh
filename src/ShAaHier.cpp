@@ -28,14 +28,14 @@
 #include <map>
 #include "ShTransformer.hpp"
 #include "ShOptimizations.hpp"
-#include "ShSectionUtil.hpp"
+#include "ShSection.hpp"
 #include "ShInclusion.hpp"
 #include "ShAaHier.hpp"
 
 #ifdef SH_DBG_AA
 #define SH_DBG_AAHIER
 #endif
-#define SH_DBG_AAHIER
+// #define SH_DBG_AAHIER
 
 #ifdef SH_DBG_AAHIER
 #define SH_DEBUG_PRINT_AH(x) { SH_DEBUG_PRINT(x); }
@@ -46,23 +46,24 @@
 namespace {
 using namespace SH;
 
-typedef std::map<ShCtrlGraphNodePtr, IntRange> CfgRangeMap;
-typedef std::map<ValueTracking::Def, int> DefIndexMap; 
-typedef std::map<ShCtrlGraphNodePtr, ShStructuralNodePtr> CfgSectionMap; 
+/** Maps a definition to the cfg node where it was defined,
+ * or 0 if it's an input */
+typedef std::map<ValueTracking::Def, ShCtrlGraphNodePtr> DefNodeMap; 
 
+/** Stores the tuple elements that are inputs/escapees from a section */
 typedef std::set<int> IndexSet;
 typedef std::map<ShVariableNodePtr, IndexSet> VarIndexSet; 
-typedef std::map<ShStructuralNodePtr, VarIndexSet> SectionVarIndexSet; 
+typedef std::map<ShSectionNodePtr, VarIndexSet> SectionVarIndexSet; 
 
 // really just a non-modifying traversal, not really a transformer...
 
 /** Gathers the postorder index of the containing cfg node for each definition point */
-struct DefIndexGathererBase: public ShTransformerParent 
+struct DefNodeGathererBase: public ShTransformerParent 
 {
-  void init(CfgRangeMap& cfgRange, DefIndexMap& defIndex)
+  DefNodeMap* m_defNode;
+  void init(DefNodeMap& defNode)
   {
-    m_cfgRange = &cfgRange;
-    m_defIndex = &defIndex;
+    m_defNode = &defNode;
   }
 
   bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node) 
@@ -76,171 +77,119 @@ struct DefIndexGathererBase: public ShTransformerParent
       return false;
     }
 
-    int index = (*m_cfgRange)[node].second;
     for(int i = 0; i < stmt.dest.size(); ++i) {
-      (*m_defIndex)[ValueTracking::Def(&stmt, i)] = index; 
+      (*m_defNode)[ValueTracking::Def(&stmt, i)] = node;
     }
     return false;
   } 
-
-  CfgRangeMap* m_cfgRange;
-  DefIndexMap* m_defIndex;
 };
-typedef ShDefaultTransformer<DefIndexGathererBase> DefIndexGatherer;
+typedef ShDefaultTransformer<DefNodeGathererBase> DefNodeGatherer;
 
 /** Searches defuse info for defs that occur outside current section */
 struct InEscFinderBase: public ShTransformerParent 
 {
+  ShSectionTree* m_sectionTree;
+  DefNodeMap* m_defNode;
+  SectionVarIndexSet m_in;
+  SectionVarIndexSet m_esc;
+
   // @todo range - the number of things being passed in here is ridiculous...
-  void init(StructRangeMap& sectionRange, CfgSectionMap& cfgSection, 
-      CfgRangeMap& cfgRange, DefIndexMap& defIndex,
-      SectionParentMap& sectionParent, 
-      SectionVarIndexSet &ins, SectionVarIndexSet &escs)
+  void init(ShSectionTree& sectionTree, DefNodeMap& defNode)
   {
-    m_sectionRange = &sectionRange;
-    m_cfgSection = &cfgSection;
-    m_cfgRange = &cfgRange;
-    m_defIndex = &defIndex;
-    m_sectionParent = &sectionParent;
-    m_in = &ins;
-    m_esc = &escs;
-
-    // set up m_section map
-    for(StructRangeMap::const_iterator I = sectionRange.begin(); 
-        I != sectionRange.end(); ++I) {
-      ShStructuralNodePtr node = I->first;
-      int index = I->second.second;
-      while(node && node->type != ShStructuralNode::SECTION) {
-        node = node->container;
-      }
-      m_section[index] = node; 
-    }
-  }
-
-  bool outside(int idx, IntRange& range) {
-    return idx < range.first || range.second < idx;
-  }
-
-  std::string nameOf(ShStructuralNodePtr section)
-  {
-    if(!section) return "Main Program"; 
-
-    SH_DEBUG_ASSERT(section->type == ShStructuralNode::SECTION 
-        && !section->structnodes.empty());
-    ShStatement* start = section->structnodes.front()->secStart;
-    SH_DEBUG_ASSERT(start);
-    ShInfoComment* comment = start->get_info<ShInfoComment>();
-    SH_DEBUG_ASSERT(comment);
-    return comment->comment;
+    m_sectionTree = &sectionTree;
+    m_defNode = &defNode;
   }
 
   // Adds the elm'th tuple element of var to the var index set 
   // for the given section and the section's ancestors until
   // either we reach program scope or the section contains the
-  // given index
+  // given cfg node 
   //
-  // @param idx postorder index of the  (-1 to ignore check) 
-  void addVar(SectionVarIndexSet* svis, ShStructuralNodePtr section, 
-      int idx, const ShVariable& var, int elm) {
-    if(!section) {
-      SH_DEBUG_PRINT_AH("    ignoring - in main program scope");
-      return;
-    }
-    IntRange sectionRange = (*m_sectionRange)[section];
+  // @param def CfgNode where definition occurs. Set to 0 if we
+  //            should add var/elm regardless of containment in section.
+  void addVar(SectionVarIndexSet& svis, ShSectionNodePtr section, 
+      ShCtrlGraphNodePtr defCfg, const ShVariable& var, int elm) {
+    if(!section || section->isRoot()) return;
 
-    if(idx == -1 || outside(idx, sectionRange)) {
-      SH_DEBUG_PRINT_AH("    adding to section = " << nameOf(section));
-      (*svis)[section][var.node()].insert(var.swizzle()[elm]);
-      SH_DEBUG_PRINT_AH("    checking parent = " << (*m_sectionParent)[section].object());
-      addVar(svis, (*m_sectionParent)[section], idx, var, elm);
-    } else {
-      SH_DEBUG_PRINT_AH("    ignoring - index is in section");
-    }
+    if(!defCfg || !m_sectionTree->contains(section, defCfg)) { 
+      SH_DEBUG_PRINT_AH("    adding to section = " << section->name()); 
+      svis[section][var.node()].insert(var.swizzle()[elm]);
+      addVar(svis, section->parent, defCfg, var, elm);
+    } 
   }
 
   bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node) 
   { 
     ShStatement& stmt = *I;
     ValueTracking *vt = stmt.get_info<ValueTracking>();
+    if(!vt) {
+      SH_DEBUG_PRINT("No valuetracking on " << stmt);
+      return false;
+    }
+      
 
-    IntRange nodeRange = (*m_cfgRange)[node];
-    int nodeidx = nodeRange.second; 
-    ShStructuralNodePtr nodeSection = m_section[nodeidx];
+    ShSectionNodePtr section = (*m_sectionTree)[node];
+    SH_DEBUG_ASSERT(section); 
 
+    // Handle escaping outputs
     if(!stmt.dest.null()) {
-      ShBindingType kind = stmt.dest.node()->kind();
-      // @todo range for here and below, need better def-use chains
-      // that take into account input/output values
-      // (or do an in/out conversion before coming through here) 
-      if((kind == SH_OUTPUT || kind == SH_INOUT) && nodeSection) {
-        SH_DEBUG_PRINT_AH("  adding output dest " << stmt.dest.name() 
-            << " to escapes section=" << nameOf(nodeSection)); 
-        for(int i = 0; i < stmt.dest.size(); ++i) {
-          addVar(m_esc, nodeSection, -1, stmt.dest, i);
+      for(int i = 0; i < stmt.dest.size(); ++i) {
+        for(ValueTracking::DefUseChain::iterator I = vt->uses[i].begin();
+            I != vt->uses[i].end(); ++I) {
+          if(I->kind == ValueTracking::Use::OUTPUT) {
+            SH_DEBUG_PRINT_AH("  adding output dest " << stmt.dest.name() 
+                << " to escapes section=" << section->name()); 
+            addVar(m_esc, section, 0, stmt.dest, i);
+            break;
+          }
         }
       }
     }
 
     for(int i = 0; i < opInfo[stmt.op].arity; ++i) { 
-      ShBindingType srcKind = stmt.src[i].node()->kind();
-      if((srcKind == SH_INPUT || srcKind == SH_INOUT) && nodeSection) {
-        SH_DEBUG_PRINT_AH("  adding input src " << stmt.src[i].name()
-            << " to inputs section=" << nameOf(nodeSection));
-        for(int j = 0; j < stmt.src[i].size(); ++j) {
-          addVar(m_in, nodeSection, -1, stmt.src[i], j);
-        }
-      }
-
-      if(!vt) continue;
       const ValueTracking::TupleUseDefChain& tud = vt->defs[i];
+
       for(unsigned int j = 0; j < tud.size(); ++j) { 
         const ValueTracking::UseDefChain& ud = tud[j];
+
         for(ValueTracking::UseDefChain::iterator U = ud.begin(); 
             U != ud.end(); ++U) {
           const ValueTracking::Def& def = *U;
-          int defidx = (*m_defIndex)[def];
+          ShCtrlGraphNodePtr defCfg = (*m_defNode)[def];
 
           // if def is outside of this section, add to inputs to this section 
-          if((outside(defidx, nodeRange)) && nodeSection) { 
-            SH_DEBUG_PRINT_AH("  checking src " << stmt.src[i].name()
-              << "[" << j << "] deffed elsewhere for inputs section=" << nameOf(nodeSection));
-            addVar(m_in, nodeSection, defidx, stmt.src[i], j);
-          }
+          SH_DEBUG_PRINT_AH("  checking src " << stmt.src[i].name()
+            << "[" << j << "] deffed elsewhere for inputs section=" << section->name()); 
+          addVar(m_in, section, defCfg, stmt.src[i], j);
 
           // if use is outside of the def's section, add to the def section's 
           // escaped variables
-          ShStructuralNodePtr defSection = m_section[defidx];
-          if(defSection) {
+          if(defCfg) {
+            ShSectionNodePtr defSection = (*m_sectionTree)[defCfg];
+            SH_DEBUG_ASSERT(defSection);
             SH_DEBUG_PRINT_AH("  checking src " << stmt.src[i].name()
-              << "[" << j << "] used elsewhere for escapes section=" << nameOf(defSection));
-            addVar(m_esc, defSection, nodeidx, stmt.src[i], j);
+              << "[" << j << "] used elsewhere for escapes section=" << defSection->name()); 
+              addVar(m_esc, defSection, node, stmt.src[i], j);
           }
         }
       }
     }
     return false;
   } 
-
-  StructRangeMap* m_sectionRange;
-  CfgSectionMap* m_cfgSection;
-  CfgRangeMap* m_cfgRange;
-  DefIndexMap* m_defIndex;
-  SectionParentMap* m_sectionParent;
-  SectionVarIndexSet* m_in;
-  SectionVarIndexSet* m_esc;
-
-  typedef std::map<int, ShStructuralNodePtr> IndexSectionMap;
-  IndexSectionMap m_section; ///< maps a postorder index to the enclosing section node (or 0 if in program scope)
 };
 typedef ShDefaultTransformer<InEscFinderBase> InEscFinder;
 
 struct EscStmtInserterBase: public ShTransformerParent 
 {
-  void init(CfgSectionMap& cfgSection, SectionVarIndexSet& in, SectionVarIndexSet& esc)
+  ShSectionTree* m_sectionTree;
+  SectionVarIndexSet* m_in;
+  SectionVarIndexSet* m_esc;
+
+  void init(ShSectionTree& sectionTree, InEscFinder& ief)  
   {
-    m_cfgSection = &cfgSection;
-    m_in = &in;
-    m_esc = &esc;
+    m_sectionTree = &sectionTree;
+    m_in = &ief.m_in;
+    m_esc = &ief.m_esc;
   }
 
   ShVariable makeVar(ShVariableNodePtr node, const IndexSet& indices) {
@@ -271,7 +220,7 @@ struct EscStmtInserterBase: public ShTransformerParent
   bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node) 
   { 
     ShStatement& stmt = *I;
-    ShStructuralNodePtr section = (*m_cfgSection)[node];
+    ShSectionNodePtr section = (*m_sectionTree)[node];
     switch(stmt.op) {
       case SH_OP_STARTSEC:
         {
@@ -280,7 +229,7 @@ struct EscStmtInserterBase: public ShTransformerParent
           stmt.add_info(inesc);
           SH_DEBUG_ASSERT(section);
           makeInfo(*inesc, (*m_in)[section], (*m_esc)[section]);
-          SH_DEBUG_PRINT_AH("Adding InEsc info to STARTSEC section=" << section.object());
+          SH_DEBUG_PRINT_AH("Adding InEsc info to section=" << section->name());
           SH_DEBUG_PRINT_AH("    " << *inesc);
           break;
         }
@@ -295,13 +244,18 @@ struct EscStmtInserterBase: public ShTransformerParent
           ShBasicBlock::ShStmtList escStmts; 
           for(ShInEscInfo::VarVec::iterator J = inesc->esc.begin();
               J != inesc->esc.end(); ++J) {
+#if 0 // @todo range - add these in later
+            ShVariable jOutput(J->node.clone(SH_OUTPUT, J->size()));
+            ShStatement escSave = ShStatement(jOutput, SH_OP_ESCSAV, *J); 
+            escStmts.push_back(escSave);
+#endif
 
-            ShStatement escj = ShStatement(*J, SH_OP_ESCJOIN, *J);
+            ShStatement escJoin = ShStatement(*J, SH_OP_ESCJOIN, *J);
             ShStmtIndex* stmtIndex = stmt.get_info<ShStmtIndex>();
             if(stmtIndex) { 
-              escj.add_info(stmtIndex->clone());
+              escJoin.add_info(stmtIndex->clone());
             }
-            escStmts.push_back(escj);
+            escStmts.push_back(escJoin);
           }
           node->block->splice(I, escStmts);
           break;
@@ -314,41 +268,8 @@ struct EscStmtInserterBase: public ShTransformerParent
     return false;
   }
 
-  CfgSectionMap* m_cfgSection;
-  SectionVarIndexSet* m_in;
-  SectionVarIndexSet* m_esc;
 };
 typedef ShDefaultTransformer<EscStmtInserterBase> EscStmtInserter;
-
-struct SectionInfoAdder {
-  SectionInfoAdder(ShStructural &s)
-    : m_cfgLevel(sectionNestingLevel(s)),
-      m_cfgSection(gatherCfgSection(s)) 
-  {}
-
-  void operator()(ShCtrlGraphNodePtr node) 
-  {
-    SH_DEBUG_ASSERT(m_cfgLevel.find(node) != m_cfgLevel.end());
-
-    ShSectionInfo* secInfo;
-    unsigned int level = m_cfgLevel[node];
-    if(level == 0) {
-      secInfo = new ShSectionInfo();
-    } else {
-      SH_DEBUG_ASSERT(m_cfgSection[node]);
-      ShStructuralNodePtr section = m_cfgSection[node];
-      ShStatement *start = section->structnodes.front()->secStart;
-      ShStatement *end = section->structnodes.back()->secEnd;
-      SH_DEBUG_ASSERT(start && end);
-      secInfo = new ShSectionInfo(start, end, level); 
-    }
-    node->destroy_info<ShSectionInfo>();
-    node->add_info(secInfo);
-  }
-
-  NestingLevelMap m_cfgLevel; 
-  CfgSectionMap m_cfgSection; 
-};
 
 }
 
@@ -375,25 +296,8 @@ std::ostream& operator<<(std::ostream& out, const ShInEscInfo& iei)
   return out;
 }
 
-void inEscAnalysis(ShStructural &structural, ShProgramNodePtr p)
+void inEscAnalysis(ShSectionTree& sectionTree, ShProgramNodePtr p)
 {
-  StructRangeMap range;
-  range = postorderRange(structural);
-
-  CfgSectionMap cfgSection = gatherCfgSection(structural);
-
-  // also map cfg nodes to indices
-  CfgRangeMap cfgRange;
-  for(StructRangeMap::const_iterator R = range.begin(); R != range.end(); ++R) {
-    const ShStructuralNodePtr& snode = R->first;
-    const IntRange& range = R->second;
-    if(snode->cfg_node) {
-      cfgRange[snode->cfg_node] = range;
-    }
-  }
-
-  SectionParentMap sectionParent = findParents(structural);
-
   // insert value tracking
   p->ctrlGraph->computePredecessors();
   ShProgram program(p);
@@ -402,45 +306,22 @@ void inEscAnalysis(ShStructural &structural, ShProgramNodePtr p)
   remove_branch_instructions(program);
 
   // Make a def->index map
-  DefIndexGatherer dig; 
-  DefIndexMap defIndex;
-  dig.init(cfgRange, defIndex);
-  dig.transform(p);
+  DefNodeGatherer dng; 
+  DefNodeMap defNode;
+  dng.init(defNode);
+  dng.transform(p);
 
   // Identify inputs, escapes 
   InEscFinder ief;
-  SectionVarIndexSet ins, escs;
-  ief.init(range, cfgSection, cfgRange, defIndex, sectionParent, ins, escs);
+  ief.init(sectionTree, defNode);
   ief.transform(p);
 
-  // Add special statements
+  // Add special statements, and extra outputs.
+  ShContext::current()->enter(p);
   EscStmtInserter esi;
-  esi.init(cfgSection, ins, escs);
+  esi.init(sectionTree, ief);
   esi.transform(p);
+  ShContext::current()->exit();
 }
-
-ShSectionInfo::ShSectionInfo()
-  : level(0),
-    start(0),
-    end(0)
-{}
-
-ShSectionInfo::ShSectionInfo(ShStatement* start, ShStatement* end, int level)
-  : level(level),
-    start(start),
-    end(end)
-{}
-
-ShInfo* ShSectionInfo::clone() const
-{
-  return new ShSectionInfo(*this);
-}
-
-void addSectionInfo(ShStructural &s, ShProgramNodePtr p)
-{
-  SectionInfoAdder sia(s);
-  p->ctrlGraph->dfs(sia);
-}
-
 
 }

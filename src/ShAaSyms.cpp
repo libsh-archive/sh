@@ -167,6 +167,15 @@ void ShAaSyms::merge(int i, const ShAaIndexSet& other)
   m_tidx[i] |= other;
 }
 
+ShAaSyms ShAaSyms::last() const
+{
+  ShAaSyms result(size(), true);
+  for(int i = 0; i < size(); ++i) {
+    result[i] |= m_tidx[i].last();
+  }
+  return result;
+}
+
 bool ShAaSyms::empty() const
 {
   bool result = true;

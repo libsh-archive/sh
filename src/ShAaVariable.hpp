@@ -196,6 +196,7 @@ struct ShAaVariable {
   ShAaVariable operator()(int, int, int, int) const;
   ShAaVariable operator()(int swizSize, int indices[]) const;
   ShAaVariable operator()(const ShSwizzle& swizzle) const;
+  ShAaVariable repeat(int n) const;
   // @}
 
   /** Returns the ShAaVariableNode */
@@ -269,6 +270,13 @@ struct ShAaVariable {
   ShAaVariable& MAD(const ShAaVariable& other, const ShVariable& scalar); 
   ShAaVariable& MAD(const ShAaVariable& other, const ShVariable& scalar, const ShAaSyms& used, bool changeCenter=true); 
 
+  /** Sets tuple element by element equal to other based on the condition 
+   * where condvar > 0, use the other tuple element 
+   * where condvar <=0, the original value remains 
+   **/ 
+  ShAaVariable& COND(const ShVariable& condvar, const ShAaVariable& other);
+  ShAaVariable& COND(const ShVariable& condvar, const ShAaVariable& other, const ShAaSyms& used, bool changeCenter=true); 
+
   /** Sets error symbols indicated by used with the values in other.
    * Like ASN, this takes only the first sym from each tuple element in used */
   ShAaVariable& setErr(const ShVariable& other, const ShAaSyms& used); 
@@ -286,6 +294,7 @@ struct ShAaVariable {
   ShVariable width() const;
   ShVariable lo() const; 
   ShVariable hi() const;
+  void lohi(ShVariable& lo, ShVariable& hi) const;
   /* @} */
 
   /** Returns a temporary of the same size() as this, using a regular base storage

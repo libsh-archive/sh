@@ -162,6 +162,7 @@ public:
   ShVariable operator()(int, int, int, int) const;
   ShVariable operator()(int size, int indices[]) const;
   ShVariable operator()(const ShSwizzle &swizzle) const;
+  ShVariable repeat(int n) const;
   
   ShVariable operator-() const;
 

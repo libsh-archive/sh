@@ -529,6 +529,7 @@ std::ostream& operator<<(std::ostream& out, const ValueTracking::Def& def) {
   } else {
     out << "(INPUT " << def.node->name() << ")[" << def.index << "]"; 
   }
+  return out;
 }
 
 std::ostream& operator<<(std::ostream& out, const ValueTracking::TupleDefUseChain& tdu)

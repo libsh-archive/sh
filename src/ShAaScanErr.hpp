@@ -68,6 +68,9 @@ ShAaScanErrMap shAaScanLightnessErr(ShProgram program);
  * - Handles lightness of one RGB output, splits domain, bandpass frequency analysis, CSF
  */
 
+/* Dumps out the program using the given  */   
+void shAaScanErrDump(const std::string& filename, ShAaScanErrMap& errMap, ShProgram program);
+
 }
 
 #endif

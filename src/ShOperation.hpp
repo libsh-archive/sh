@@ -124,6 +124,9 @@ enum ShOperation {
                 ///  Right now it is also not safe to use this in the optimizer.
   SH_OP_ESCJOIN, ///< Acts as an assignment in hierarchical AA where error symbols
                  /// for variables that escape a hierarchical region are merged together
+  SH_OP_ESCSAV,  ///< Stores the max contribution of pruned hierarchical symbols  
+                 ///< so they still affect the results, but don't appear in
+                 /// computation.
 
   SH_OP_STARTSEC, ///< Indicates the starting point of a hierarchical section
   SH_OP_ENDSEC,  ///< Indicates the ending point of a hierarchical section
