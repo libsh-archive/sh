@@ -26,6 +26,7 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "ShUtility.hpp"
 #include <iostream>
+#include <fstream>
 
 namespace SH {
 
@@ -33,6 +34,20 @@ std::ostream& shPrintIndent(std::ostream& out, int indent)
 {
   for (int i = 0; i < indent; i++) out << ' ';
   return out;
+}
+
+void shDotToPs(const std::string& dot_string, const std::string& ps_filename)
+{
+  // @todo range does not work on most platforms
+  // use tmpnam to generate a real temp file
+  std::string dot_filename = ps_filename + ".dot"; 
+  std::ofstream fout(dot_filename.c_str());
+  fout << dot_string;
+  fout.close();
+  std::string cmd = std::string("dot -Tps < ") + dot_filename + " > " + ps_filename; 
+  system(cmd.c_str());
+//  cmd = std::string("rm -f ") + dot_filename; 
+//  system(cmd.c_str());
 }
 
 }

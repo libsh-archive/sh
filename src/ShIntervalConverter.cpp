@@ -44,8 +44,12 @@
 #include "ShCtrlGraphWranglers.hpp"
 #include "ShOptimizations.hpp"
 #include "ShRangeBranchFixer.hpp"
+#include "ShIntervalTexture.hpp"
 
-//#define SH_DEBUG_ICONV
+// @todo range Change this to use a wrapper like ShAaVariable for cleaner code. 
+
+// @todo debug
+#define SH_DEBUG_ICONV
 namespace {
 
 using namespace SH;
@@ -60,6 +64,12 @@ struct ShVariablePair {
   ShRecord record() 
   {
     return (lo & hi);
+  }
+
+  void name(const std::string& name)
+  {
+    lo.name(name + "_lo");
+    hi.name(name + "_hi");
   }
 };
 
@@ -311,6 +321,40 @@ ShProgram intervalCONTAINS(int N, ShValueType valueType)
     shSGE(r.hi, a.hi, b.hi);
     shMUL(r.lo, r.lo, r.hi);
     shASN(r.hi, r.lo);
+  } SH_END;
+  return result;
+}
+
+ShProgram intervalTEX(const ShVariable& texVar, int N, ShValueType destvt, ShValueType srcvt) 
+{
+  ShProgram result = SH_BEGIN_PROGRAM() {
+    ShVariablePair tc(SH_INPUT, N, srcvt);
+    ShVariablePair r(SH_OUTPUT, texVar.size(), destvt);
+
+    ShTextureNodePtr texNode = shref_dynamic_cast<ShTextureNode>(texVar.node());
+    SH_DEBUG_ASSERT(texNode);
+    ShIntervalTexturePtr iatex = ShIntervalTexture::convert(texNode);
+    SH_DEBUG_ASSERT(iatex);
+
+    ShRecord rRec = r.record();
+    rRec = iatex->lookup(tc.lo, tc.hi);
+
+  } SH_END;
+  return result;
+}
+
+ShProgram intervalTEXI(const ShVariable& texVar, int N, ShValueType destvt, ShValueType srcvt) 
+{
+  ShProgram result = SH_BEGIN_PROGRAM() {
+    ShVariablePair tc(SH_INPUT, N, srcvt);
+    ShVariablePair r(SH_OUTPUT, texVar.size(), destvt);
+
+    ShTextureNodePtr texNode = shref_dynamic_cast<ShTextureNode>(texVar.node());
+    SH_DEBUG_ASSERT(texNode);
+    ShIntervalTexturePtr iatex = ShIntervalTexture::convert(texNode);
+    SH_DEBUG_ASSERT(iatex);
+
+    r.record() = iatex->rect_lookup(tc.lo, tc.hi);
   } SH_END;
   return result;
 }
@@ -659,8 +703,21 @@ struct IntervalStatementFixer {
     SH_DEBUG_PRINT("  src[1] = " << stmt.src[1]);
 #endif
 
+    ShProgram newProgram;
+    // @todo range merge this together instead of special casing:
+    switch(stmt.op) {
+      case SH_OP_TEX:
+        newProgram = intervalTEX(stmt.src[0], stmt.src[1].size(), newType, newType); 
+        break;
+      case SH_OP_TEXI:
+        newProgram = intervalTEXI(stmt.src[0], stmt.src[1].size(), newType, newType); 
+        break;
+      default:
+        newProgram = getProgram(stmt.op, opSize, newType);
+        break;
+    }
+
     // generate the program fragment
-    ShProgram newProgram = getProgram(stmt.op, opSize, newType);
     SH_DEBUG_ASSERT(newProgram.node());
     
     // map the interval versions of the original stmt src/dest to the newProgram's inputs/outputs
@@ -673,6 +730,9 @@ struct IntervalStatementFixer {
     ShProgram inputMapper = SH_BEGIN_PROGRAM() {
       for(i = 0; i < opInfo[stmt.op].arity; ++i) {
         ShVariableNodePtr lo, hi;
+
+        if(stmt.src[i].node()->kind() == SH_TEXTURE) continue;
+
         if(!shIsInterval(stmt.src[i].valueType())) {
           lo = stmt.src[i].node();
           hi = stmt.src[i].node();
@@ -708,7 +768,7 @@ struct IntervalStatementFixer {
     } SH_END;
 
     newProgram = outputMapper << newProgram << inputMapper; 
-    
+
     spliceProgram(node, stmtI, newProgram);
 
     // re-enable optimization

@@ -4,7 +4,9 @@
 #include "ShStatement.hpp"
 #include "ShProgramNode.hpp"
 
+// @todo merge this with ShEval.hpp, ShEval.cpp
 namespace SH {
+// Evaluate the given statement.
 SH_DLLEXPORT
 void evaluate(ShStatement& stmt);
 

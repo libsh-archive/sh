@@ -62,7 +62,9 @@ public:
   ShVariable dest;
 
   typedef std::vector<ShVariable> ShVariableVec;
-  ShVariableVec src; //< by default always allocates 3 ShVariables, but may hold more temporarily during internal transformations.
+  
+  //< by default always allocates 3 ShVariables, but may hold more for future internal use.
+  ShVariableVec src; 
                      
   
   ShOperation op;

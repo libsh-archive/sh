@@ -44,10 +44,7 @@ inline bool immediate()
 
 inline void sizes_match(const ShVariable& a, const ShVariable& b)
 {
-  if(a.size() != b.size()) {
-    SH_DEBUG_ERROR("Variable size mismatch.  size of " << a.name() << "=" << a.size() << ", " << b.name() << "=" << b.size());
-    abort();
-  }
+  SH_DEBUG_ASSERT(a.size() == b.size());
 }
 
 inline void sizes_match(const ShVariable& a, const ShVariable& b,
@@ -325,6 +322,16 @@ void shKIL(const ShVariable& a)
   }
   SH_DEBUG_ASSERT(!immediate());
   ShStatement stmt(a, SH_OP_KIL, a);
+  addStatement(stmt);
+}
+
+void shDBG(const ShVariable& a)
+{
+  if(immediate()) {
+      shError(ShScopeException("Cannot dbg in immediate mode"));
+  }
+  SH_DEBUG_ASSERT(!immediate());
+  ShStatement stmt(a, SH_OP_DBG, a);
   addStatement(stmt);
 }
 

@@ -80,5 +80,6 @@ enum ShSemanticType {
 
 SH_DLLEXPORT extern const char* semanticTypeName[];
 
+
 }
 #endif

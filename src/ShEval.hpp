@@ -101,7 +101,6 @@ ShEval {
     const ShEvalOpInfo* getEvalOpInfo(const ShStatement &stmt) const;
     //@}
 
-
     /** debugging function */ 
     std::string availableOps() const;
 

@@ -31,6 +31,7 @@
 #include <cmath>
 #include <bitset>
 
+#include "ShUtility.hpp"
 #include "ShVariable.hpp"
 #include "ShDebug.hpp"
 #include "ShLinearAllocator.hpp"
@@ -47,6 +48,9 @@
 #include "ShAttrib.hpp"
 #include "ShCastManager.hpp"
 #include "ShError.hpp"
+#include "ShStructural.hpp"
+#include "ShSection.hpp"
+
 
 namespace shgl {
 
@@ -61,7 +65,7 @@ using namespace SH;
 #define shGlDeleteProgramsARB glDeleteProgramsARB
 #define shGlBindProgramARB glBindProgramARB
 
-// #define ARBCODE_DEBUG
+#define ARBCODE_DEBUG
 
 struct ArbBindingSpecs {
   ArbRegBinding binding;
@@ -182,8 +186,19 @@ ArbCode::~ArbCode()
 
 void dump(ShProgramNodePtr foo, std::string desc) {
 #ifdef ARBCODE_DEBUG
+  desc += "_" + foo->name() + foo->target();
   optimize(foo);
   foo->dump(desc);
+
+  ShStructural st(foo->ctrlGraph);
+  std::ostringstream structOut; 
+  st.dump(structOut);
+  shDotToPs(structOut.str(), desc + "_struct.ps");
+
+  ShSectionTree sec(st); 
+  std::ostringstream secOut;
+  sec.dump(secOut);
+  shDotToPs(secOut.str(), desc + "_sec.ps");
 #endif
 }
 
@@ -199,6 +214,8 @@ void ArbCode::generate()
   ShTransformer transform(m_shader);
 
   dump(m_shader, "arbcode_start");
+  transform.handleDbgOps();
+  dump(m_shader, "arbcode_dbg");
   transform.convertInputOutput(); 
   //dump(m_shader, "arbcode_io");
   transform.convertTextureLookups();
@@ -206,7 +223,9 @@ void ArbCode::generate()
   transform.convertAffineTypes();
   //dump(m_shader, "arbcode_a_conv");
   transform.convertIntervalTypes();
-  //dump(m_shader, "arbcode_i_conv");
+  dump(m_shader, "arbcode_i_conv");
+  transform.convertTextureLookups(); // @todo range - do again in case IA/AA tex lookups need some extra care
+  dump(m_shader, "arbcode_i_conv_tex");
   transform.convertToFloat(m_convertMap);
   //dump(m_shader, "arbcode_conv2float");
   transform.splitTuples(4, m_splits);
@@ -286,7 +305,6 @@ void ArbCode::freeRegister(const ShVariableNodePtr& var)
 
 void ArbCode::upload()
 {
-  SH_DEBUG_PRINT("Uploading " << m_originalShader->name());
   if (!m_programId) {
     SH_GL_CHECK_ERROR(shGlGenProgramsARB(1, &m_programId));
   }

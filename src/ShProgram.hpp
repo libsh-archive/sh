@@ -162,7 +162,7 @@ public:
                         const ShStream& s2,
                         const ShStream& s3,
                         const ShStream& s4) const;
-
+  
   // Call operators for records
   // May want to merge these with above in the long term. 
   ShProgram operator()(const ShRecord &rec) const;

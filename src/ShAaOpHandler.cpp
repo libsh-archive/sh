@@ -273,6 +273,7 @@ ShProgram getProgram(ShStatement& stmt, SymAllocator& alloc) {
       dest = ShAaVariable(new ShAaVariableNode(stmt.dest.node(), stmtSyms->dest));  
     } else {
       // @todo range - handle IA dests 
+      SH_DEBUG_PRINT("non-IA/AA dest on stmt " << stmt); 
       SH_DEBUG_ASSERT(0 && "Cannot handle non-IA/AA dests yet");
     }
 

@@ -62,7 +62,6 @@ public:
    * Adds the given statement before the statements in this block */
   void prependStatement(const ShStatement& stmt);
 
-
   /* List ops 
    * @{ */
   bool empty() { return m_statements.empty(); }

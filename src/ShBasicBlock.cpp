@@ -74,4 +74,3 @@ void ShBasicBlock::prependStatement(const ShStatement& stmt)
 }
 
 }
-

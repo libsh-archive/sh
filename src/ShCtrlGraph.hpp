@@ -89,7 +89,6 @@ public:
   void append(const ShPointer<ShCtrlGraphNode>& node,
               ShVariable cond);
 
-
   /** Splits this control graph node into two nodes A, B, at the given statement.
    * A is this, and keeps all predecessor information, 
    * B is a new node that takes over all successor/follower

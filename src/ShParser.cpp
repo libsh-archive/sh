@@ -128,7 +128,6 @@ void ShParser::parseBlock(ShCtrlGraphNodePtr& head,
       I = block->erase(I);
     } else ++I;
   }
-
 }
 
 void ShParser::parseIf(ShCtrlGraphNodePtr& head,

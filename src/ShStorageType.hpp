@@ -223,12 +223,12 @@ struct ShIsRange
 };
 //@}
 
-/** Returns whether a type is an interval type
+/** Returns whether a type is a fraction type
  * @{ */
 template<typename T>
 struct ShIsFraction: public MatchTemplateType<T, ShFraction> {};
 //@}
-//
+
 /** Returns the regular value type corresponding to a special templated value type
  * (interval or affine) so far 
  * @{ */

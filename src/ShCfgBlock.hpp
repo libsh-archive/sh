@@ -35,7 +35,7 @@ namespace SH {
 
 /** A control-flow graph block 
  * A cfg block is a block composed a previously defined control graph, 
- * Normally the block stores a copy, but for internal use you can set copy =
+ * Normally the block stores a copy, but for internal use you may set copy =
  * false to use the original graph.  
  */
 class 

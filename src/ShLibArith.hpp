@@ -258,6 +258,7 @@ template<int N, typename T1, typename T2>
 ShGeneric<N, CT1T2>
 lerp(double f, const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b);
 
+
 /* Sum of components.
  * Addition of all components into a single result.
  */

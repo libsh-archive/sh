@@ -76,7 +76,6 @@ public:
 
 
   ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, bool neg);
-  //ShGeneric(const ShProgram& prg);
   ~ShGeneric();
 
   // Copy constructor 

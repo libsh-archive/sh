@@ -72,8 +72,6 @@ public:
   typedef std::pair<ShVariable, ShPointer<ShStructuralNode> > SuccessorEdge;
   typedef std::list<SuccessorEdge> SuccessorList;
   SuccessorList succs;
-
-
   typedef std::pair<ShVariable, ShStructuralNode*> PredecessorEdge;
   typedef std::list<PredecessorEdge> PredecessorList;
   PredecessorList preds;

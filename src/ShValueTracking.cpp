@@ -415,6 +415,10 @@ struct UdDuBuilder {
           for(DefSet::iterator S = ds.begin(); S != ds.end(); ++S) {
             if(S->kind != ValueTracking::Def::STMT) continue; 
             ValueTracking* vt = S->stmt->get_info<ValueTracking>();
+            if (!vt) {
+              vt = new ValueTracking(S->stmt);
+              S->stmt->add_info(vt);
+            }
             SH_DEBUG_ASSERT(vt); // must have added it above somewhere
             ValueTracking::Use use(node, S->stmt->dest.swizzle()[S->index]);
             vt->uses[S->index].insert(use);
@@ -442,8 +446,6 @@ struct UdDuClearer {
     }
   }
 };
-
-
 
 struct UdDuDumper {
   void operator()(ShCtrlGraphNodePtr node) {

@@ -145,7 +145,7 @@ void updateDest(ShAaStmtSyms *stmtSyms, const SymLevelVec& levelSyms, WorkList &
 
       case ShOperationInfo::EXTERNAL: // assume component-wise error sym propagation 
         SH_DEBUG_PRINT_ASP("    EXTERNAL");
-        SH_DEBUG_PRINT("Did not deal with external op " << *stmt);
+        SH_DEBUG_PRINT_ASP("Did not deal with external op " << *stmt);
         break;
 
 

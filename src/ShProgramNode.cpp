@@ -116,6 +116,7 @@ std::string ShProgramNode::describe_interface() const
   os << describe(channels) << std::endl;
   os << "Uniforms:" << std::endl;
   os << describe(uniforms) << std::endl;
+
   return os.str();
 }
 
@@ -235,6 +236,7 @@ void ShProgramNode::collectNodeVars(const ShCtrlGraphNodePtr& node)
   if (node->block) {
     for (ShBasicBlock::ShStmtList::const_iterator I = node->block->begin();
          I != node->block->end(); ++I) {
+      
       collectVar(I->dest.node());
       collectVar(I->src[0].node());
       collectVar(I->src[1].node());

@@ -163,6 +163,7 @@ private:
   ShTextureTraits m_traits;
   int m_width, m_height, m_depth;
 
+  // need to ensure this is a uniform
   ShVariable m_texSizeVar;
   
   // NOT IMPLEMENTED

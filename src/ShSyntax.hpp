@@ -28,7 +28,6 @@
 #define SHSYNTAX_HPP
 
 #include "ShDllExport.hpp"
-#include "ShRecord.hpp"
 #include "ShProgram.hpp"
 #include "ShUtility.hpp"
 
@@ -365,9 +364,6 @@ void shEndSection();
 
 /// \internal
 /// Adds a comment to the immediate representation 
-/// @todo range - this is just me (BC) adding ridiculous stuff to the IR.
-///               Can remove this clutter after it's no longer useful for
-///               debugging. 
 SH_DLLEXPORT
 void shComment(const std::string& comment);
 

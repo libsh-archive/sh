@@ -54,18 +54,6 @@ ShGeneric<N, T>::ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, boo
   SH_DEBUG_ASSERT(node); // DEBUG
 }
 
-// @todo range - should throw something if prg doesn't have an output 
-/*
-template<int N, typename T>
-inline
-ShGeneric<N, T>::ShGeneric(const ShProgram &prg)
-  : ShVariable(prg.node()->outputs.front()->clone(SH_TEMP, 0, SH_VALUETYPE_END, 
-        SH_SEMANTICTYPE_END, true, false))
-{
-  *this = prg;
-}
-*/
-
 template<int N, typename T>
 inline
 ShGeneric<N, T>::~ShGeneric()

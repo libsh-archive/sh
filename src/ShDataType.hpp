@@ -29,8 +29,6 @@
 
 #include "ShUtility.hpp"
 #include "ShVariableType.hpp"
-#include "ShAffine.hpp"
-#include "ShInterval.hpp"
 #include "ShHalf.hpp"
 #include "ShFraction.hpp"
 #include "ShStorageType.hpp"

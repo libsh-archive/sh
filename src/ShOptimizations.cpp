@@ -199,6 +199,8 @@ struct CopyPropagator {
           && I->dest.node()->kind() == SH_TEMP
           && I->dest.swizzle().identity()
           && I->src[0].swizzle().identity()
+
+		  // added to preserve casts
           && (I->dest.valueType() == I->src[0].valueType())) {
         m_acp.push_back(std::make_pair(I->dest, I->src[0]));
       }

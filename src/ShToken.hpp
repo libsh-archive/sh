@@ -53,7 +53,10 @@ enum ShTokenType {
   SH_TOKEN_BREAK,
   SH_TOKEN_CONTINUE,
   SH_TOKEN_STARTSEC,
-  SH_TOKEN_ENDSEC
+  SH_TOKEN_ENDSEC,
+  SH_TOKEN_STARTSWITCH,
+  SH_TOKEN_ENDSWITCH,
+  SH_TOKEN_CASE
 };
 
 /** A token in the (unparsed) parse tree.

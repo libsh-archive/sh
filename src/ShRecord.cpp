@@ -33,7 +33,6 @@
 #include "ShInstructions.hpp"
 #include "ShSyntax.hpp"
 #include "ShAlgebra.hpp"
-#include "ShCtrlGraphWranglers.hpp"
 #include "ShMemory.hpp"
 #include "ShChannelNode.hpp"
 #include "ShStream.hpp"
@@ -146,6 +145,9 @@ ShRecord operator&(const ShRecord& left, const ShRecord& right)
 
 ShRecord& ShRecord::operator=(const ShRecord &other)
 {
+  if(size() != other.size()) {
+    SH_DEBUG_WARN("ShRecord assignment of different sizes");
+  }
   VarList::iterator I = begin();
   VarList::const_iterator O = other.begin();
 

@@ -31,8 +31,6 @@
 #include "ShVariantCast.hpp"
 #include "ShCastManager.hpp"
 
-//#define SH_DEBUG_CASTMGR
-
 namespace {
 struct ShCastMgrEdgeWeigher
 {
@@ -156,10 +154,6 @@ void ShCastManager::init()
 void ShCastManager::doCast(ShVariant* dest, const ShVariant* src)
 {
   SH_DEBUG_ASSERT(dest != src);
-#ifdef SH_DEBUG_CASTMGR
-  SH_DEBUG_PRINT("Casting to " << shValueTypeName(dest->valueType()) << "," << dataTypeName[dest->dataType()] <<  
-      " from " << shValueTypeName(src->valueType()) << "," << dataTypeName[src->dataType()]);
-#endif
 
   // should be the same size
   int size = dest->size();

@@ -34,8 +34,6 @@
 #include "ShCastManager.hpp"
 #include "ShVariant.hpp"
 #include "ShTypeInfo.hpp"
-#include "ShInterval.hpp"
-#include "ShAffine.hpp"
 
 namespace SH {
 
@@ -366,7 +364,6 @@ std::string ShDataVariant<T, DT>::encode(bool neg, const ShSwizzle &swizzle) con
   return out.str();
 }
 
-// @todo type do Interval types
 template<typename T, ShDataType DT>
 std::string ShDataVariant<T, DT>::encodeArray() const {
   if(size() < 1) return "";

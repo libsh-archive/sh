@@ -41,6 +41,10 @@ namespace SH {
 SH_DLLEXPORT
 std::ostream& shPrintIndent(std::ostream& out, int indent);
 
+/// Takes a DOT string specification and generates the given .ps file
+SH_DLLEXPORT
+void shDotToPs(const std::string& dot_string, const std::string& ps_filename);
+
 /** Check a boolean condition at compile time.
  * This follows Alexandrescu's excellent book "Modern C++ Design"
  */

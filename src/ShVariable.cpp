@@ -55,7 +55,6 @@ ShVariable::ShVariable(const ShVariableNodePtr& node,
 
 ShVariable& ShVariable::operator=(const ShProgram &prg) {
   // @todo range
-  SH_DEBUG_PRINT("This function no longer does what you think it does!");
   ShRecord rec(*this); 
   rec = prg;
   return *this;

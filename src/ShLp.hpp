@@ -53,8 +53,6 @@ struct SH_DLLEXPORT ShUnboundedLpException {};
 // Right now it's just general enough to do the affine texture stuff
 // (i.e. T is a tuple, T are scalars)
 
-template<typename T>
-std::ostream& operator<<(std::ostream& out, const std::valarray<T>& v);
 
 /*
  * Solves linear programs of the form

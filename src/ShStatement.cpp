@@ -54,7 +54,6 @@ ShStatement::ShStatement(ShVariable dest, ShOperation op, ShVariable src1)
 ShStatement::ShStatement(ShVariable dest, ShVariable src0, ShOperation op, ShVariable src1)
   : dest(dest), src(3), op(op), marked(false)
 {
-  SH_DEBUG_ASSERT(!src0.null() && !src1.null());
   src[0] = src0;
   src[1] = src1;
 }

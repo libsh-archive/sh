@@ -249,6 +249,7 @@ struct EscStmtInserterBase: public ShTransformerParent
             ShStatement escSave = ShStatement(jOutput, SH_OP_ESCSAV, *J); 
             escStmts.push_back(escSave);
 #endif
+            if(!shIsAffine(J->valueType())) continue;
 
             ShStatement escJoin = ShStatement(*J, SH_OP_ESCJOIN, *J);
             ShStmtIndex* stmtIndex = stmt.get_info<ShStmtIndex>();

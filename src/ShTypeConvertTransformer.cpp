@@ -241,7 +241,9 @@ struct FloatConverter {
     stmtList.insert(I, ShStatement(result, SH_OP_ASN, temp));
 
     if((operations & APPLY_FLR) && (operations - APPLY_FLR)) {
+#ifdef SH_DEBUG_TYPECONVERT
       SH_DEBUG_PRINT("Unhandled conversion operations");
+#endif
     }
   }
 

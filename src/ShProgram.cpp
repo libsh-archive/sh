@@ -108,7 +108,6 @@ ShProgram ShProgram::operator()(const ShRecord &rec) const
 
 ShProgram ShProgram::operator()(const ShVariable &v0) const 
 {
-  SH_DEBUG_PRINT("Connecting program to variale " << v0.name() << " of size " << v0.size());
   return (*this) << v0; 
 }
 

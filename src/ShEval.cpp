@@ -166,6 +166,7 @@ const ShEvalOpInfo* ShEval::getEvalOpInfo(ShOperation op, ShValueType dest,
       result = &*I;
     }
   }
+
   // @todo range identify cases when we haven't found an evaluator properly
   // instead of making up numbers that we think are big enough
   if(mindist > 1000) {

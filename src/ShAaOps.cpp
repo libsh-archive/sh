@@ -61,6 +61,10 @@ void affineApprox(ShAaVariable &dest,
                   const AaVarVec &src,
                   const ShRecord& coeff, const ShAaSyms &newsyms)
 {
+  // @todo debug
+  if(src.size() != coeff.size() - 2) {
+    SH_DEBUG_PRINT("src.size = " << src.size() << " coeff.size() - 2 = " << (coeff.size() - 2));
+  }
   SH_DEBUG_ASSERT(src.size() == coeff.size() - 2);
   SH_DEBUG_ASSERT(src.size() > 0);
 
@@ -548,8 +552,15 @@ ShAaVariable aaTEX(const ShVariable& texVar, const ShAaVariable& coord, const Sh
   ShRecord coeff(aatex->lookup(coord.lo(), coord.hi()));
 
   AaVarVec srcVec;
-  srcVec.push_back(&coord);
+  for(int i = 0; i < coord.size(); ++i) {
+    srcVec.push_back(new ShAaVariable(coord(i).repeat(result.size())));
+  }
+
   affineApprox(result, srcVec, coeff, newsyms); 
+
+  for(int i = 0; i < coord.size(); ++i) {
+    delete srcVec[i];
+  }
   return result;
 }
 
@@ -566,8 +577,15 @@ ShAaVariable aaTEXI(const ShVariable& texVar, const ShAaVariable& coord,
   ShRecord coeff(aatex->rect_lookup(coord.lo(), coord.hi()));
 
   AaVarVec srcVec;
-  srcVec.push_back(&coord);
+  for(int i = 0; i < coord.size(); ++i) {
+    srcVec.push_back(new ShAaVariable(coord(i).repeat(result.size())));
+  }
+
   affineApprox(result, srcVec, coeff, newsyms); 
+
+  for(int i = 0; i < coord.size(); ++i) {
+    delete srcVec[i];
+  }
   return result;
 }
 

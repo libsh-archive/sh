@@ -31,7 +31,6 @@
 #include "ShException.hpp"
 #include "ShContext.hpp"
 #include "ShProgram.hpp"
-#include "ShOptimizations.hpp"
 #include "ShSyntax.hpp"
 #include "ShInterval.hpp"
 #include "ShAffine.hpp"

@@ -358,7 +358,7 @@ struct ConstProp : public ShInfo {
       if(type == NODE) return node->name();
       else return ""; 
     }
-    
+
   private:
     Value(const ShVariableNodePtr& node)
       : type(NODE), node(node)

@@ -30,6 +30,7 @@
 #include "ShDebug.hpp"
 #include "ShAttrib.hpp"
 #include "ShUtility.hpp"
+#include "ShMultiArray.hpp"
 #include "ShLp.hpp"
 
 //#define SH_DBG_LP
@@ -57,19 +58,6 @@ namespace SH {
 // valarray<T>.
 //
 // (or if Sh types and swizzles were more efficient) 
-
-template<typename T>
-std::ostream& operator<<(std::ostream& out, const std::valarray<T>& v)
-{
-  out << "(";
-  for(size_t i = 0; i < v.size(); ++i) {
-    if(i != 0) out << ",";
-    out.width(4);
-    out << v[i];
-  }
-  out << ")";
-  return out;
-}
 
 template<typename T>
 std::ostream& operator<<(std::ostream& out, const std::valarray<std::valarray<T> >& a)
@@ -151,7 +139,7 @@ void shLpSimplexCore(size_t M, size_t N, std::valarray<size_t>& nonBasic, std::v
 
     // select the basic var to pivot (once again selecting max index to break
     // ties)
-    T min;
+    T min = 0; // doesn't matter, since l == -1 checked below, but this removes warning
     int l = -1;
     for(i = 0; i < M; ++i) {
       if(A[i][e] < _SH_LP_EPS) continue; // @todo range should be <= EPS

@@ -559,8 +559,6 @@ void ArbCode::emit_nvcond(const ShStatement& stmt)
 
 void ArbCode::emit_csum(const ShStatement& stmt)
 {
-  SH_DEBUG_ASSERT(!stmt.src[0].null());
-  SH_DEBUG_ASSERT(!stmt.dest.null());
 
   // @todo type make this function handle more than floats
   ShVariantPtr c1_values = new ShDataVariant<float, SH_HOST>(stmt.src[0].size(), 1.0f); 

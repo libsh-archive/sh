@@ -54,7 +54,7 @@ void shEndShader()
 
   ShProgramNodePtr parsing = context->parsing();
   assert(parsing);
-  
+
   parsing->ctrlGraph = new ShCtrlGraph(parsing->tokenizer.blockList());
   
   optimize(parsing);

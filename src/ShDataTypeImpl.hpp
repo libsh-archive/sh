@@ -30,6 +30,8 @@
 #include <climits>
 #include <cmath>
 #include <algorithm>
+#include "ShAffine.hpp"
+#include "ShInterval.hpp"
 #include "ShDataType.hpp"
 
 namespace SH {

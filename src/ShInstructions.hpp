@@ -182,6 +182,9 @@ void shLASTERR(const ShVariable& dest, const ShVariable& a, const ShVariable& b)
 SH_DLLEXPORT
 void shKIL(const ShVariable& cond);
 
+SH_DLLEXPORT
+void shDBG(const ShVariable& a);
+
 /*@}*/
 
 }

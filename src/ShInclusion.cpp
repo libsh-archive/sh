@@ -41,7 +41,6 @@
 #include "ShRangeBranchFixer.hpp"
 #include "ShTextureNode.hpp"
 #include "ShTransformer.hpp"
-#include "ShIntervalTexture.hpp"
 #include "ShCtrlGraphWranglers.hpp"
 
 namespace {
@@ -58,46 +57,27 @@ void dump(ShProgram a, const char* name) {
 
 
 
-#if 0
-typedef std::map<ShTextureNodePtr, ShAffineTexture*> AffineTexMapping;
-AffineTexMapping affineTexMap;
-#endif
-
 struct IntervalInfo {
   static const char* Prefix; 
-  typedef ShIntervalTexture TexClass;
 
   static bool isType(ShValueType value_type) 
   { return shIsInterval(value_type); }
 
   static ShValueType toRangeType(ShValueType value_type) 
   { return shIntervalValueType(value_type); }
-
-  typedef std::map<ShTextureNodePtr, TexClass*> RangeTexMapping;
-  // @todo range - make sure that this is not a major memory hole
-  // but this can wait until later. 
-  static RangeTexMapping rangeTexMap;
 };
 const char* IntervalInfo::Prefix = "ia_";
-IntervalInfo::RangeTexMapping IntervalInfo::rangeTexMap;
 
 struct AffineInfo {
   static const char* Prefix; 
-  typedef ShIntervalTexture TexClass;
 
   static bool isType(ShValueType value_type) 
   { return shIsAffine(value_type); }
 
   static ShValueType toRangeType(ShValueType value_type) 
   { return shAffineValueType(value_type); }
-
-  typedef std::map<ShTextureNodePtr, TexClass*> RangeTexMapping;
-  // @todo range - make sure that this is not a major memory hole
-  // but this can wait until later. 
-  static RangeTexMapping rangeTexMap;
 };
 const char* AffineInfo::Prefix = "aa_";
-AffineInfo::RangeTexMapping AffineInfo::rangeTexMap;
 
 }
 
