@@ -1,3 +1,11 @@
+2004-07-12  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/cpu/CPU.cpp: Rename the functions starting with __ to
+	functions starting with sh_gcc_backend_.
+
+	* src/ShParser.cpp (parseDo): Until means until, not
+	while. Resolves issue144.
+
 2004-07-10  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* test/sandbox: Added sandbox directory for simple tests.

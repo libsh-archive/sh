@@ -32,7 +32,7 @@
 #include "ShDebug.hpp" 
 #include "ShStream.hpp" 
 
-void __cpu_lookup1D(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_gcc_backend_lookup1D(SH::ShTextureNode* tex, float* src, float* dst)
   {
   if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
     {
@@ -91,7 +91,7 @@ void __cpu_lookup1D(SH::ShTextureNode* tex, float* src, float* dst)
     }
   }
 
-void __cpu_lookup2D(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_gcc_backend_lookup2D(SH::ShTextureNode* tex, float* src, float* dst)
   {
   if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
     {
@@ -167,7 +167,7 @@ void __cpu_lookup2D(SH::ShTextureNode* tex, float* src, float* dst)
     }
   }
 
-void __cpu_lookupRECT(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_gcc_backend_lookupRECT(SH::ShTextureNode* tex, float* src, float* dst)
   {
   if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
     {
@@ -243,17 +243,17 @@ void __cpu_lookupRECT(SH::ShTextureNode* tex, float* src, float* dst)
     }
   }
 
-void __cpu_lookup3D(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_gcc_backend_lookup3D(SH::ShTextureNode* tex, float* src, float* dst)
   {
   SH_DEBUG_PRINT("3D textures unsupported...");
   }
 
-void __cpu_lookupCUBE(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_gcc_backend_lookupCUBE(SH::ShTextureNode* tex, float* src, float* dst)
   {
   SH_DEBUG_PRINT("CUBE textures unsupported...");
   }
 
-extern "C" void __cpu_lookup(void *t, float* src, float* dst)
+extern "C" void sh_gcc_backend_lookup(void *t, float* src, float* dst)
   {
   // [0, 1) float based texture lookup
   SH::ShTextureNode* tex = (SH::ShTextureNode*)t;
@@ -261,19 +261,19 @@ extern "C" void __cpu_lookup(void *t, float* src, float* dst)
   switch(tex->dims())
     {
     case SH::SH_TEXTURE_1D:
-      __cpu_lookup1D(tex, src, dst);
+      sh_gcc_backend_lookup1D(tex, src, dst);
       break;
     case SH::SH_TEXTURE_2D:
-      __cpu_lookup2D(tex, src, dst);
+      sh_gcc_backend_lookup2D(tex, src, dst);
       break;
     case SH::SH_TEXTURE_RECT:
-      __cpu_lookupRECT(tex, src, dst);
+      sh_gcc_backend_lookupRECT(tex, src, dst);
       break;
     case SH::SH_TEXTURE_3D:
-      __cpu_lookup3D(tex, src, dst);
+      sh_gcc_backend_lookup3D(tex, src, dst);
       break;
     case SH::SH_TEXTURE_CUBE:
-      __cpu_lookupCUBE(tex, src, dst);
+      sh_gcc_backend_lookupCUBE(tex, src, dst);
       break;
     default:
       SH_DEBUG_PRINT("unknown texture dimension (" << tex->dims() << ")");
@@ -281,7 +281,7 @@ extern "C" void __cpu_lookup(void *t, float* src, float* dst)
     }
   }
 
-void __cpu_lookupi1D(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_gcc_backend_lookupi1D(SH::ShTextureNode* tex, float* src, float* dst)
   {
   if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
     {
@@ -340,7 +340,7 @@ void __cpu_lookupi1D(SH::ShTextureNode* tex, float* src, float* dst)
     }
   }
 
-void __cpu_lookupi2D(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_gcc_backend_lookupi2D(SH::ShTextureNode* tex, float* src, float* dst)
   {
   if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
     {
@@ -416,7 +416,7 @@ void __cpu_lookupi2D(SH::ShTextureNode* tex, float* src, float* dst)
     }
   }
 
-void __cpu_lookupiRECT(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_gcc_backend_lookupiRECT(SH::ShTextureNode* tex, float* src, float* dst)
   {
   if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
     {
@@ -492,17 +492,17 @@ void __cpu_lookupiRECT(SH::ShTextureNode* tex, float* src, float* dst)
     }
   }
 
-void __cpu_lookupi3D(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_gcc_backend_lookupi3D(SH::ShTextureNode* tex, float* src, float* dst)
   {
   SH_DEBUG_PRINT("3D textures unsupported...");
   }
 
-void __cpu_lookupiCUBE(SH::ShTextureNode* tex, float* src, float* dst)
+void sh_gcc_backend_lookupiCUBE(SH::ShTextureNode* tex, float* src, float* dst)
   {
   SH_DEBUG_PRINT("CUBE textures unsupported...");
   }
 
-extern "C" void __cpu_lookupi(void* t, float* src, float* dst)
+extern "C" void sh_gcc_backend_lookupi(void* t, float* src, float* dst)
   {
   // [0, size] integer based texture lookup
   SH::ShTextureNode* tex = (SH::ShTextureNode*)t;
@@ -510,19 +510,19 @@ extern "C" void __cpu_lookupi(void* t, float* src, float* dst)
   switch(tex->dims())
     {
     case SH::SH_TEXTURE_1D:
-      __cpu_lookupi1D(tex, src, dst);
+      sh_gcc_backend_lookupi1D(tex, src, dst);
       break;
     case SH::SH_TEXTURE_2D:
-      __cpu_lookupi2D(tex, src, dst);
+      sh_gcc_backend_lookupi2D(tex, src, dst);
       break;
     case SH::SH_TEXTURE_RECT:
-      __cpu_lookupiRECT(tex, src, dst);
+      sh_gcc_backend_lookupiRECT(tex, src, dst);
       break;
     case SH::SH_TEXTURE_3D:
-      __cpu_lookupi3D(tex, src, dst);
+      sh_gcc_backend_lookupi3D(tex, src, dst);
       break;
     case SH::SH_TEXTURE_CUBE:
-      __cpu_lookupiCUBE(tex, src, dst);
+      sh_gcc_backend_lookupiCUBE(tex, src, dst);
       break;
     default:
       SH_DEBUG_PRINT("unknown texture dimension (" << tex->dims() << ")");
@@ -1597,7 +1597,7 @@ namespace ShCPU {
 	  {
 	  if (stmt.src[1].swizzle().identity())
 	    {
-	    m_code << "  __cpu_lookup("
+	    m_code << "  sh_gcc_backend_lookup("
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << resolve(stmt.src[1])
@@ -1618,7 +1618,7 @@ namespace ShCPU {
 		     << resolve(stmt.src[1], i)
 		     << ";" << std::endl;
 	      }
-	    m_code << "    __cpu_lookup("
+	    m_code << "    sh_gcc_backend_lookup("
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << "input"
@@ -1634,7 +1634,7 @@ namespace ShCPU {
 	    {
 	    m_code << "    {" << std::endl;
 	    m_code << "    float result[" << stmt.dest.size() << "];" << std::endl;
-	    m_code << "    __cpu_lookup("
+	    m_code << "    sh_gcc_backend_lookup("
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << resolve(stmt.src[1])
@@ -1665,7 +1665,7 @@ namespace ShCPU {
 		     << resolve(stmt.src[1], i)
 		     << ";" << std::endl;
 	      }
-	    m_code << "    __cpu_lookup("
+	    m_code << "    sh_gcc_backend_lookup("
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << "input"
@@ -1692,7 +1692,7 @@ namespace ShCPU {
 	  {
 	  if (stmt.src[1].swizzle().identity())
 	    {
-	    m_code << "  __cpu_lookupi("
+	    m_code << "  sh_gcc_backend_lookupi("
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << resolve(stmt.src[1])
@@ -1713,7 +1713,7 @@ namespace ShCPU {
 		     << resolve(stmt.src[1], i)
 		     << ";" << std::endl;
 	      }
-	    m_code << "    __cpu_lookupi("
+	    m_code << "    sh_gcc_backend_lookupi("
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << "input"
@@ -1729,7 +1729,7 @@ namespace ShCPU {
 	    {
 	    m_code << "    {" << std::endl;
 	    m_code << "    float result[" << stmt.dest.size() << "];" << std::endl;
-	    m_code << "    __cpu_lookupi("
+	    m_code << "    sh_gcc_backend_lookupi("
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << resolve(stmt.src[1])
@@ -1760,7 +1760,7 @@ namespace ShCPU {
 		     << resolve(stmt.src[1], i)
 		     << ";" << std::endl;
 	      }
-	    m_code << "    __cpu_lookupi("
+	    m_code << "    sh_gcc_backend_lookupi("
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << "input"
@@ -1941,8 +1941,8 @@ namespace ShCPU {
     std::stringstream prologue;
     prologue << "#include <math.h>" << std::endl;
     prologue << std::endl;
-    prologue << "extern \"C\" void __cpu_lookup(void*, float*, float*);" << std::endl;
-    prologue << "extern \"C\" void __cpu_lookupi(void*, float*, float*);" << std::endl;
+    prologue << "extern \"C\" void sh_gcc_backend_lookup(void*, float*, float*);" << std::endl;
+    prologue << "extern \"C\" void sh_gcc_backend_lookupi(void*, float*, float*);" << std::endl;
     prologue << std::endl;
     prologue << "extern \"C\" "
 	   << " void func("
@@ -2010,7 +2010,7 @@ namespace ShCPU {
       m_handle = dlopen(sofile, RTLD_NOW);
       if (m_handle == NULL)
 	{
-	SH_DEBUG_PRINT("dlopen failed...");
+          SH_DEBUG_PRINT("dlopen failed: " << dlerror());
 	return false;
 	}
       else
@@ -2019,7 +2019,7 @@ namespace ShCPU {
 
 	if (m_func == NULL)
 	  {
-	  SH_DEBUG_PRINT("dlsym failed...");
+            SH_DEBUG_PRINT("dlsym failed: " << dlerror());
 	  return false;
 	  }
 	}
