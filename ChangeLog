@@ -34,7 +34,7 @@
 	* src/ShOptimizer.cpp (buildUdDuChains): Clear ud/du chains before
 	we build them, in case there is some cruft in there.
 
-2004-01-21  Bryan Chan  <b8chan@uwaterloo.ca>
+2004-01-26  Bryan Chan  <b8chan@uwaterloo.ca>
 	* src/ShNibbles.hpp, src/ShNibblesImpl.hpp: 
 	Added some useful nibbles.
 
