@@ -74,7 +74,7 @@ ShProgram ShKernelLib::shSpecular() {
     ShAttrib1f irrad = pos(normal | lightVec);
 
     typename T::OutputType SH_DECL(result);
-    result = irrad * ks * ((normal | halfVec)^specExp); 
+    result = irrad * ks * pow(pos(normal | halfVec),specExp); 
   } SH_END;
   return kernel;
 }
@@ -97,7 +97,7 @@ ShProgram ShKernelLib::shPhong() {
     halfVec = normalize(halfVec);
     lightVec = normalize(lightVec);
     ShAttrib1f irrad = pos(normal | lightVec);
-    result = kd * irrad + ks * pow(normal | halfVec, specExp); 
+    result = kd * irrad + ks * pow(pos(normal | halfVec), specExp); 
   } SH_END;
   return kernel;
 }

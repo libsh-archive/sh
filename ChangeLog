@@ -1,3 +1,8 @@
+2004-02-23  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* util/ShKernelLibImpl.hpp: Clamp specular components in
+	Specular() and Phong().
+
 2004-02-20  Bryan Chan <b8chan@uwaterloo.ca>
 	* util/ShWorley:
 	Added point generator class functionality (now it animates!)
