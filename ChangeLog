@@ -1,3 +1,7 @@
+2004-10-22 Sylvain Vasseur <sfvsasse@cgl.uwaterloo.ca>
+
+	* src/Makefile.win32: Add ShMemoryDep file.
+
 2004-10-21  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
 
 	* backends/cc/Cc.cpp, backends/cc/Cc.hpp: Completed Win32 support
