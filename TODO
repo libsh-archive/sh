@@ -5,7 +5,14 @@ RELEASE:
  X check for libpng in configure
  X check for SM/GL for the backends in configure
  X make sure "make install" works
+ X dynamic backend loading
  - have functions to switch the current backend, clearing bound shaders etc. appropriately.
+ - port to windows
+ X swap around order for cubemaps
+ - get an environment map
+ - fix demos
+ - figure out drawing environment map on the back, preferably without using a shader
+ - upload/bind split in Arb backend 
 
 MATRICES:
  X operator()() extracts submatrix

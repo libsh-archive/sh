@@ -87,7 +87,6 @@ void ShProgramNode::collectNodeVars(const ShCtrlGraphNodePtr& node)
   if (node->block) {
     for (ShBasicBlock::ShStmtList::const_iterator I = node->block->begin();
          I != node->block->end(); ++I) {
-      SH_DEBUG_PRINT("Collecting variables in " << *I);
       
       collectVar(I->dest.node());
       collectVar(I->src1.node());

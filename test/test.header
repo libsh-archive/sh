@@ -1,5 +1,5 @@
 // -*- C++ -*-
-#include "sh.hpp"
+#include <sh/sh.hpp>
 #include <iostream>
 #include <fstream>
 
@@ -9,4 +9,9 @@ using namespace SH;
 
 int main(int argc, char** argv)
 {
+  std::string backendName("sm");
+  if (argc > 1) {
+    backendName = argv[1];
+  }
+  
   try {

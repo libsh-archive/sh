@@ -30,7 +30,6 @@
 #include "ShEnvironment.hpp"
 #include "ShDebug.hpp"
 #include "ShLinearAllocator.hpp"
-#include "sm.hpp"
 
 namespace ShSm {
 

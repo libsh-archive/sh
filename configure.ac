@@ -7,7 +7,13 @@ AM_INIT_AUTOMAKE(sh, 0.1)
 
 # Checks for programs.
 AC_PROG_CXX
+AC_LIBLTDL_CONVENIENCE
+AC_LIBTOOL_DLOPEN
 AC_PROG_LIBTOOL
+AC_LIB_LTDL
+AC_SUBST(LIBLTDL)
+AC_SUBST(LTDLINCL)
+AC_CONFIG_SUBDIRS(libltdl)
 AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LN_S
@@ -97,6 +103,10 @@ if test "x$ac_backend_arb" = xtrue ; then
     ac_backend_arb=false])
 fi
 AM_CONDITIONAL(ENABLE_ARB_BACKEND, test x$ac_backend_arb = xtrue)
+
+# Store the prefix as a variable
+AC_DEFINE_UNQUOTED(SH_INSTALL_PREFIX, "$prefix", [Installation prefix directory])
+
 
 AC_CONFIG_FILES([Makefile
 		 src/Makefile

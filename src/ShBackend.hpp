@@ -84,7 +84,11 @@ protected:
   ShBackend();
   
 private:
+
+  static void init();
+  
   static ShBackendList* m_backends;
+  static bool m_doneInit;
 };
 
 typedef ShRefCount<ShBackend> ShBackendPtr;

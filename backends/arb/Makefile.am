@@ -1,4 +1,8 @@
-AM_CXXFLAGS = -I../../src
+INCLUDES = -I$(top_srcdir)/src
 
-lib_LTLIBRARIES = libsharb.la
+shbackenddir = $(prefix)/lib/sh
+
+shbackend_LTLIBRARIES = libsharb.la
+libsharb_la_LDFLAGS = -L$(prefix)/lib -module
+libsharb_la_LIBADD = $(top_srcdir)/src/libsh.la -lGL
 libsharb_la_SOURCES = ShArb.cpp ShArb.hpp

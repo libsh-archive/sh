@@ -1,5 +1,8 @@
-# TODO: Make the smash include dir more sensible (ie. a variable)
-AM_CXXFLAGS = -I../../src -I../../../sm/src
+INCLUDES = -I$(top_srcdir)/src
 
-lib_LTLIBRARIES = libshsm.la
+shbackenddir = $(prefix)/lib/sh
+
+shbackend_LTLIBRARIES = libshsm.la
+libshsm_la_LDFLAGS = -L$(prefix)/lib -module
+libshsm_la_LIBADD = $(top_srcdir)/src/libsh.la -lsm
 libshsm_la_SOURCES = ShSmBackend.cpp ShSmBackend.hpp

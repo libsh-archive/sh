@@ -1,2 +1,2 @@
 AUTOMAKE_OPTIONS = foreign
-SUBDIRS = src backends test doc
+SUBDIRS = libltdl src backends test doc

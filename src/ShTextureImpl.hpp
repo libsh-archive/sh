@@ -52,8 +52,6 @@ ShTextureNodePtr ShTexture<T>::node() const
 template<typename T>
 void ShTexture<T>::loadImage(const ShImage& image)
 {
-  SH_DEBUG_PRINT("Loading image");
-
   ShDataTextureNodePtr node = m_node;
   assert(node);
   
@@ -75,8 +73,6 @@ void ShTexture<T>::loadImage(const ShImage& image)
     node->setData(data);
     delete [] data;
   } else {
-    SH_DEBUG_PRINT("Setting image data directly");
-    
     assert(node->elements() == image.depth());
     node->setData(image.data());
   }

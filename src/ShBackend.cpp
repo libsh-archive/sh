@@ -25,12 +25,18 @@
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
 #include <algorithm>
+#include <ltdl.h>
 #include "ShBackend.hpp"
 #include "ShProgram.hpp"
+#include "ShDebug.hpp"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 namespace SH {
 
 ShBackend::ShBackendList* ShBackend::m_backends = 0;
+bool ShBackend::m_doneInit = false;
 
 ShBackendCode::~ShBackendCode()
 {
@@ -38,7 +44,7 @@ ShBackendCode::~ShBackendCode()
 
 ShBackend::ShBackend()
 {
-  if (!m_backends) m_backends = new ShBackendList();
+  init();
   m_backends->push_back(this);
 }
 
@@ -49,24 +55,63 @@ ShBackend::~ShBackend()
 
 ShBackend::ShBackendList::iterator ShBackend::begin()
 {
-  if (!m_backends) m_backends = new ShBackendList();
+  init();
   return m_backends->begin();
 }
 
 ShBackend::ShBackendList::iterator ShBackend::end()
 {
+  init();
   if (!m_backends) m_backends = new ShBackendList();
   return m_backends->end();
 }
 
 ShRefCount<ShBackend> ShBackend::lookup(const std::string& name)
 {
-  if (!m_backends) m_backends = new ShBackendList();
+  init();
+  
   for (ShBackendList::iterator I = begin(); I != end(); ++I) {
     if ((*I)->name() == name) return *I;
   }
+
+  std::string libname(SH_INSTALL_PREFIX);
+  libname += "/lib/sh/libsh" + name + ".so";
+  
+  lt_dlhandle handle = lt_dlopenext(libname.c_str());
+
+  if (!handle) {
+    SH_DEBUG_ERROR("Could not open " << libname << ": " << lt_dlerror());
+    return 0;
+  }
+
+  for (ShBackendList::iterator I = begin(); I != end(); ++I) {
+    if ((*I)->name() == name) return *I;
+  }
+
+  SH_DEBUG_ERROR("Could not find " << name << "backend");
+
   return 0;
 }
 
+void ShBackend::init()
+{
+  if (m_doneInit) return;
+  SH_DEBUG_PRINT("Initializing backend system");
+  
+  m_backends = new ShBackendList();
+
+  if (lt_dlinit()) {
+    SH_DEBUG_ERROR("Error initializing ltdl: " << lt_dlerror());
+  }
+
+  std::string searchpath(SH_INSTALL_PREFIX);
+  searchpath += "/lib/sh";
+
+  if (lt_dladdsearchdir(searchpath.c_str())) {
+    SH_DEBUG_ERROR("Could not add " + searchpath + " to search dir: " << lt_dlerror());
+  }
+
+  m_doneInit = true;
+}
 
 }

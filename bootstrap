@@ -1,8 +1,12 @@
 #!/bin/sh
-#aclocal \
-#&& libtoolize \
-#&& autoheader \
-#&& automake --foreign --add-missing \
-#&& autoconf
 
-autoreconf -s -i
+rm -r libltdl
+
+if test "x${LIBTOOLIZE}" = "x" ; then
+  LIBTOOLIZE="libtoolize --ltdl"
+else
+  LIBTOOLIZE="$LIBTOOLIZE --ltdl"
+fi
+export LIBTOOLIZE
+
+autoreconf -s -i $*

@@ -40,12 +40,12 @@ enum ShTextureDims {
 };
 
 enum ShCubeDirection {
-  SH_CUBE_NEG_X = 0,
-  SH_CUBE_POS_X = 1,
-  SH_CUBE_NEG_Y = 2,
-  SH_CUBE_POS_Y = 3,
-  SH_CUBE_NEG_Z = 4,
-  SH_CUBE_POS_Z = 5
+  SH_CUBE_POS_X = 0,
+  SH_CUBE_NEG_X = 1,
+  SH_CUBE_POS_Y = 2,
+  SH_CUBE_NEG_Y = 3,
+  SH_CUBE_POS_Z = 4,
+  SH_CUBE_NEG_Z = 5,
 };
 
 class ShTextureNode : public ShVariableNode {

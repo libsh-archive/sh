@@ -1,5 +1,11 @@
 AM_CXXFLAGS = -O0 -g
+INCLUDES = $(LTDLINCL)
+
 lib_LTLIBRARIES = libsh.la
+
+libsh_la_LIBADD = $(LIBLTDL)
+libsh_la_LDFLAGS = -export-dynamic -no-undefined
+
 libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
                    ShEnvironment.cpp ShException.cpp ShParser.cpp ShProgram.cpp \
                    ShStatement.cpp ShSwizzle.cpp ShSyntax.cpp ShToken.cpp \
@@ -19,6 +25,7 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
                    ShLibAttrib.hpp ShSpecialType.hpp \
                    ShVector.hpp ShLibVector.hpp \
                    ShPoint.hpp ShLibPoint.hpp \
+		   ShPosition.hpp ShLibPosition.hpp \
                    ShColor.hpp ShLibColor.hpp \
                    ShNormal.hpp ShLibNormal.hpp \
                    ShTexCoord.hpp ShLibTexCoord.hpp \
@@ -38,6 +45,7 @@ incinc_HEADERS = ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp \
                    ShVector.hpp ShLibVector.hpp \
                    ShPoint.hpp ShLibPoint.hpp \
                    ShColor.hpp ShLibColor.hpp \
+		   ShPosition.hpp ShLibPosition.hpp \
                    ShNormal.hpp ShLibNormal.hpp \
                    ShTexCoord.hpp ShLibTexCoord.hpp \
                    ShDomTree.hpp ShOptimizer.hpp 

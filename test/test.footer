@@ -2,10 +2,16 @@
 
     ShEnvironment::shader = shader;
     ShEnvironment::insideShader = true;
-    ShBackendPtr backend = ShBackend::lookup("sm");
+    ShBackendPtr backend = ShBackend::lookup(backendName);
+
+    if (!backend) {
+      std::cerr << "Error opening " << backendName << " backend." << std::endl;
+      return -1;
+    }
+
     ShBackendCodePtr code = backend->generateCode(shader);
     std::cerr << "Printing code:" << std::endl;
-    code->print(std::cerr);
+    code->print(std::cout);
     std::string dumpfilename = argv[0];
     dumpfilename += "-control.dot";
 
@@ -14,11 +20,13 @@
 
     ShEnvironment::insideShader = false;
     ShEnvironment::shader = 0;
-
+ 
+    return 0;
   } catch (const ShException& e) {
     std::cerr << "SH Exception: " << e.message() << std::endl;
+    return -1;
   } catch (...) {
     std::cerr << "Unknown exception caught." << std::endl;
+    return -1;
   }
-    
 }
