@@ -2,6 +2,12 @@
 
 import string
 
+def cross_product(a, b):
+    return (a[1]*b[2] - a[2]*b[1], a[2]*b[0] - a[0]*b[2], a[0]*b[1] - a[1]*b[0]);
+
+def dot_product(a, b):
+    return sum([x*y for (x,y) in zip(a,b)])
+
 def upzip(a, b):
     if len(a) > len(b):
         return zip(a, b + (b[-1],) * (len(a) - len(b)))
@@ -42,4 +48,3 @@ if __name__ == "__main__":
     print upzip3((0,1,), (3,), (6,7))
     print upzip3((0,1,), (3,), (6,7,8))
     print upzip3((0,1,), (3,), (6,7,8,9,10,11))
-
