@@ -124,7 +124,7 @@ namespace ShCc {
 #else
     m_handle(NULL),
 #endif
-      m_func(NULL),
+      m_shader_func(NULL),
       m_cur_temp(0),
       m_params(NULL) 
   {
@@ -423,9 +423,9 @@ namespace ShCc {
     prologue << std::endl;
     prologue << "extern \"C\" "
 #ifdef WIN32
-	     << " void __declspec(dllexport) func("
+	     << " void __declspec(dllexport) cc_shader("
 #else
-	     << " void func("
+	     << " void cc_shader("
 #endif /* WIN32 */
 	   << "void** inputs, "
 	   << "void** params, "
@@ -489,32 +489,27 @@ namespace ShCc {
     si.cb = sizeof(STARTUPINFO);
 
     if (!CreateProcess(NULL, cmdline, NULL, NULL,
-                      TRUE, 0, NULL, NULL, &si, &pi))
-      {
+                      TRUE, 0, NULL, NULL, &si, &pi)) {
       SH_CC_DEBUG_PRINT("CreateProcess failed!" << GetLastError());
       return false;
-      }
+    }
 
     // TODO: do not use INFINITE
     WaitForSingleObject(pi.hProcess, INFINITE);
 
     // Attempt to load the dll and fetch our function
     m_hmodule = LoadLibrary(dllfile);
-    if (m_hmodule == NULL)
-      {
+    if (m_hmodule == NULL) {
       SH_CC_DEBUG_PRINT("LoadLibrary failed: " << GetLastError());
       return false;
-      }
-    else
-      {
-      m_func = (CcFunc)GetProcAddress(m_hmodule, "func");
+    } else {
+      m_shader_func = (CcShaderFunc)GetProcAddress(m_hmodule, "cc_shader");
 
-      if (m_func == NULL)
-        {
+      if (m_shader_func == NULL) {
         SH_CC_DEBUG_PRINT("GetProcAddress failed: " << GetLastError());
         return false;
-        }
       }
+    }
 
     return true;
 #else
@@ -535,8 +530,7 @@ namespace ShCc {
     pid_t pid = fork();
     if (pid == 0) {
       // child
-      execlp("cc", "cc", "-O2", "-shared", "-o", sofile, ccfile,
-             "-L", SH_INSTALL_PREFIX "/lib/sh", "-lshcc", NULL);
+      execlp("cc", "cc", "-O2", "-shared", "-o", sofile, ccfile, NULL);
       SH_CC_DEBUG_PRINT("exec failed (" << errno << ")");
       exit(-1);
     } else if (pid > 0) {
@@ -554,8 +548,8 @@ namespace ShCc {
         SH_CC_DEBUG_PRINT("dlopen failed: " << dlerror());
         return false;
       } else {
-        m_func = (CcFunc)dlsym(m_handle, "func");
-        if (m_func == NULL) {
+        m_shader_func = (CcShaderFunc)dlsym(m_handle, "cc_shader");
+        if (m_shader_func == NULL) {
           SH_CC_DEBUG_PRINT("dlsym failed: " << dlerror());
           return false;
         }
@@ -571,7 +565,7 @@ namespace ShCc {
 
   bool CcBackendCode::execute(ShStream& dest) 
   {
-    if (!m_func) {
+    if (!m_shader_func) {
       if (!generate()) {
         SH_CC_DEBUG_PRINT("failed to generate program..."); 
         return false;
@@ -660,7 +654,7 @@ namespace ShCc {
       
     for(int i = 0; i < count; i++) {
       SH_CC_DEBUG_PRINT("execution " << i << " of " << count);
-      m_func(inputs, m_params, streams, textures, outputs);
+      m_shader_func(inputs, m_params, streams, textures, outputs);
 
       for(int j = 0; j < num_streams; j++) {
         SH_CC_DEBUG_PRINT("advancing input stream "

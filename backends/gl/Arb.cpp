@@ -60,5 +60,10 @@ unsigned int arbTarget(const std::string& unit)
   return 0;
 }
 
+ArbException::ArbException(const std::string& message)
+  : ShBackendException(std::string("ARB error: ") + message)
+{
+}
+
 }
 

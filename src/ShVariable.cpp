@@ -148,6 +148,11 @@ bool ShVariable::loadVariant(ShVariant *&result) const
   return true;
 }
 
+void ShVariable::updateVariant()
+{
+  m_node->update_all();
+}
+
 void ShVariable::setVariant(const ShVariant* other, bool neg, const ShSwizzle &writemask)
 {
   m_node->setVariant(other, neg ^ m_neg, m_swizzle * writemask);

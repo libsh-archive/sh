@@ -41,7 +41,7 @@ namespace SH {
  *
  * @see ShPalette
  */
-class ShPaletteNode : public ShVariableNode {
+class SH_DLLEXPORT ShPaletteNode : public ShVariableNode {
 public:
   ShPaletteNode(int elements, ShSemanticType semantic, ShValueType valueType, std::size_t length);
 

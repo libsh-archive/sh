@@ -38,44 +38,23 @@ enum FloatExtension {
   SH_ARB_NO_FLOAT_EXT
 };
 
-#ifndef WIN32
-struct ShGLXPBufferInfo {
-  ShGLXPBufferInfo()
-    : extension(SH_ARB_NO_FLOAT_EXT),
-      pbuffer(0), context(0), width(0), height(0),
-      shcontext(-1)
-  {
-  }
-  FloatExtension extension;
-  GLXPbuffer pbuffer;
-  GLXContext context;
-  int width, height;
-  int shcontext;
-  bool valid() { return extension != SH_ARB_NO_FLOAT_EXT
-                   && pbuffer
-                   && context; }
-};
-#endif
-
 struct PBufferStreams : public StreamStrategy {
   PBufferStreams(int context = 0);
   virtual ~PBufferStreams();
-  virtual StreamStrategy* create(int context);
+
   virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
+
+private:
+  virtual FloatExtension setupContext(int width, int height) = 0;
+  virtual void restoreContext(void) = 0;
 
 private:
   int m_context;
 
-  FloatExtension setupContext(int width, int height);
-
   int m_setup_vp;
   SH::ShProgram m_vp;
-  
-#ifndef WIN32
-  Display* m_display;
-  ShGLXPBufferInfo m_info;
-#endif
 };
 
 }
+
 #endif

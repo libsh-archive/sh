@@ -41,11 +41,11 @@
 // Each of the parameters is an array of single storage-typed arrays
 // (The size and type are known during code emission)
 // @todo type - inputs should be allowed to change?
-typedef void (*CcFunc)(void** inputs, 
-			void** params,
-			void** channels,
-			void** textures,
-			void** outputs);
+extern "C" typedef void (*CcShaderFunc)(void** inputs, 
+			                                  void** params,
+			                                  void** channels,
+			                                  void** textures,
+			                                  void** outputs);
 
 namespace ShCc {
 
@@ -94,7 +94,7 @@ class CcBackendCode: public SH::ShBackendCode
 
     // Allocates a variable names for different kinds of data 
     // and initializes the variable to index into the appropriate
-    // element of an array passed into the CcFunc.
+    // element of an array passed into the CcShaderFunc.
     //
     // Spits out these variable declarations & assignments to m_code
     //
@@ -113,33 +113,33 @@ class CcBackendCode: public SH::ShBackendCode
     std::string resolve(const SH::ShVariable& v, int idx);
     const char* ctype(SH::ShValueType valueType);
 
-  class LabelFunctor
-	{
-    public:
-      LabelFunctor(std::map<SH::ShCtrlGraphNodePtr, int>& label_map);
-      
-      void operator()(SH::ShCtrlGraphNode* node);
-      
-    public:
-      int m_cur_label;
-      std::map<SH::ShCtrlGraphNodePtr, int>& m_label_map;
-	};
-      
-  class EmitFunctor
-	{
-    public:
-      EmitFunctor(CcBackendCode* bec);
+    class LabelFunctor
+    {
+      public:
+        LabelFunctor(std::map<SH::ShCtrlGraphNodePtr, int>& label_map);
+        
+        void operator()(SH::ShCtrlGraphNode* node);
+        
+      public:
+        int m_cur_label;
+        std::map<SH::ShCtrlGraphNodePtr, int>& m_label_map;
+    };
+        
+    class EmitFunctor
+    {
+      public:
+        EmitFunctor(CcBackendCode* bec);
 
-      void operator()(SH::ShCtrlGraphNode* node);
-      
-    public:
-      CcBackendCode* m_bec;
-	};
-      
-  void emit(const SH::ShStatement& stmt);
-  void emitTexLookup(const SH::ShStatement &stmt, const char* texfunc);
-  void emit(SH::ShBasicBlockPtr block);
-  void emit(SH::ShCtrlGraphNodePtr node);
+        void operator()(SH::ShCtrlGraphNode* node);
+        
+      public:
+        CcBackendCode* m_bec;
+    };
+        
+    void emit(const SH::ShStatement& stmt);
+    void emitTexLookup(const SH::ShStatement &stmt, const char* texfunc);
+    void emit(SH::ShBasicBlockPtr block);
+    void emit(SH::ShCtrlGraphNodePtr node);
       
   private:
     const SH::ShProgramNodeCPtr& m_original_program;
@@ -162,7 +162,7 @@ class CcBackendCode: public SH::ShBackendCode
       void* m_handle;
 #endif /* WIN32 */
 
-    CcFunc m_func;
+    CcShaderFunc m_shader_func;
 
     int m_cur_temp;
 

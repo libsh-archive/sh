@@ -151,6 +151,7 @@ public:
   const ShVariant* getVariant() const;
 
   /// Retrieve the variant.  This should probably only be used internally.
+  // You need to call update_all if you change the values here
   ShVariant* getVariant();
 
   /// Ensure this node has space to store host-side values.
@@ -170,6 +171,11 @@ public:
 
   /// Reevaluate a dependent uniform
   void update();
+
+  // @todo type find a better function name for this
+  // (Later this should just update the backends as part of shUpdate 
+  // and all calls to this should be replaced with update_dependents) 
+  void update_all(); /// Updates a uniform in currently bound shaders and all dependencies
 
   /// Obtain the program defining this uniform, if any.
   const ShPointer<ShProgramNode>& evaluator() const;
@@ -201,10 +207,6 @@ protected:
   // Generates a default high bound baesd on current special type
   ShVariant* makeHigh() const;
 
-  // @todo type find a better function name for this
-  // (Later this should just update the backends as part of shUpdate 
-  // and all calls to this should be replaced with update_dependents) 
-  void update_all(); /// Updates a uniform in currently bound shaders and all dependencies
 
   void programVarListInit(); /// After kind, size and type are set, this 
 

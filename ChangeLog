@@ -1,4 +1,22 @@
 2004-10-28 Bryan Chan <b8chan@cgl.uwaterloo.ca>
+	Merged trunk up to r1646
+
+	* in a few places:
+	Fixed bad search/replaces "Viberiu" -> "Tiberiu"
+
+	* src/ShMatrix.hpp, ShMatrixImpl.hpp:
+	Checked in the wrong version a few hours ago.
+
+  * src/ShVariable.hpp, ShVariable.cpp (loadVariant, updateVariant):
+  loadVariant opened up a hole into the internals that made it possible 
+  to change a values without triggering dependent/backend updates
+  updateVariant plugs the hole.
+  (both of these are intended only for internal use)
+  -this slows down the vec test below to about 2.40s, but doesn't
+  change matrix mul significantly (there's too matrix overhead elsewhere)
+  
+
+2004-10-28 Bryan Chan <b8chan@cgl.uwaterloo.ca>
 Performance Tuning
 ------------------
 	Test cases (all on fezzik):
@@ -43,7 +61,7 @@ Performance Tuning
 
 Cleanup
 -------
-	* ShVariableType.hpp, and a few lines in many other files:
+	* ShVariableType.hpp, and a few lines in many other files: 
 	Changed the storage type template parameter from a c++ typename 
 	to an enum. (This breaks backward compatibility unfortunately,
 	but makes more sense)
@@ -105,6 +123,95 @@ Testing
 	* test/regress/cbrt.cpp.py, cmul.cpp.py, csum.cpp.py, rnd.cpp.py:
 	Tests for new ops. (some need to be implemented in the backends) 
 
+2004-10-28  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* backends/cc/Cc.cpp: Generated code changed to use
+	static variable, some linux ld versions caused symbol
+	collisions leading to segfaults
+
+2004-10-27  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* backends/gl/GlBackend.*, backends/gl/WGLPBuffersStreams.cpp:
+	Create an OpenGL context if there already isn't one already
+	to bootstrap the calls to wglGetProcAddress and for pbuffer creation.
+
+2004-10-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShConstProp.cpp (ConstPropInfo): Respect "opt:lifting"
+	metadata. This should be particularily useful for bypassing Sh's
+	uniform updating facilities (to trade convenience for speed).
+
+	* backends/gl/ArbCode.cpp (generate): Remove debugging output.
+	(allocateRegister): Throw exception from here to be caught further up.
+	(allocRegs): Catch exception from allocateRegister and provide
+	more useful error message.
+
+	* src/ShLinearAllocator.hpp: Remove spurious semicolon
+
+	* src/ShStatement.cpp: Set arity of PAL to 2 instead of 1.
+	This took a while to track down!
+
+2004-10-25  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* examples/particle/main.cpp: Use nicer colours.
+
+2004-10-24  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* win32/*: Added Visual Studio .NET solution/project files.
+
+	* examples/particle/*: Added a stream example, loosely based
+	on the particle code from the book.
+
+	* backends/gl/Makefile.win32: Added WGL pbuffer source files.
+
+	* backends/gl/ArbBackend.cpp: Changes to instantiate GLX streams
+	on linux and WGL streams on windows.
+
+	* backends/gl/GlBackend.hpp, backends/gl/GlBackend.cpp: Added WGL
+	stuffs to load WGL_ARB_pbuffer and WGL_ARB_pixel_format extensions.
+
+	* backends/gl/PBufferStream.cpp, backends/gl/PBufferStreams.hpp:
+	Factored out the GLX specifics, leaving only the code common to both
+	WGL and GLX. Added a few pure virtual functions that are implemented
+	by the platform dependent classes.
+
+	* backends/gl/WGLPBufferStreams.cpp, backends/gl/WGLPBufferStreams.hpp:
+	Added WGL specific pbuffer code.
+
+	* backends/gl/GLXPBufferStreams.cpp, backends/gl/GLXPBufferStreams.hpp:
+	Added GLX specific pbuffer code (transplanted from old PBufferStreams.cpp).
+
+2004-10-22  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShTransformer.cpp: Instead of popping the current program,
+	push 0, when constructing uniforms.
+
+	* src/ShProgramNode.cpp (compile): More exception safety fixes.
+
+	* backends/gl/ArbCode.cpp (upload): Call shError() when the driver
+	doesn't allow code to be uploaded (e.g. due to failing instruction
+	limits).
+	(generate): Exception safety fix (leave context and rethrow
+	exception if we get one).
+
+	* src/ShException.cpp (ShBackendException): Implement
+	ShBackendException constructor.
+
+2004-10-22  Sylvain Vasseur  <sfvsasse@cgl.uwaterloo.ca>
+
+	* src/Makefile.win32: Add ShMemoryDep file.
+
+2004-10-21  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* backends/cc/Cc.cpp, backends/cc/Cc.hpp: Completed Win32 support
+	for cc backend. Added 'init' function to generated code to bootstrap
+	texture lookup functions
+
+	* src/ShImage.cpp: savePng on Win32 generates bad images, fopen
+	need a "wb" instead of "w".
+
+	* src/ShPaletteNode.hpp: Added SH_DLLEXPORT
+
 2004-10-21 Bryan Chan <b8chan@cgl.uwaterloo.ca>
   Merged trunk up to r1606
 
@@ -123,7 +230,7 @@ Testing
   * test/regress/test.hpp:
   Changed streams to use MemoryType instead of ValueType.
 
-2004-10-20 Sylvain Vasseur <sfvsasse@cgl.uwaterloo.ca>
+2004-10-20  Sylvain Vasseur  <sfvsasse@cgl.uwaterloo.ca>
 
 	* src/ShMemoryDep.hpp: Implement dependencies with a memory object
   
@@ -162,7 +269,8 @@ Testing
 
 	* backends/gl/ArbReg.hpp (ArbReg): Add bindingCount member for
 	parameter arrays.
-  
+
+
 2004-10-20 Bryan Chan  <b8chan@cgl.uwaterloo.ca>
   Merged trunk up to r1595 into arithmetic (but did not test out the windows
   changes).

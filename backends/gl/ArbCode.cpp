@@ -193,24 +193,28 @@ void ArbCode::generate()
     ShContext::current()->enter(m_shader);
   }
 
+  try {
+    if (m_environment & SH_ARB_NVFP2) {
+      // In NV_fragment_program2, we actually generate structured code.
+      ShStructural str(m_shader->ctrlGraph);
 
-  if (m_environment & SH_ARB_NVFP2) {
-    // In NV_fragment_program2, we actually generate structured code.
-    ShStructural str(m_shader->ctrlGraph);
-
-    genStructNode(str.head());
+      genStructNode(str.head());
     
-  } else {
-    m_shader->ctrlGraph->entry()->clearMarked();
-    genNode(m_shader->ctrlGraph->entry());
+    } else {
+      m_shader->ctrlGraph->entry()->clearMarked();
+      genNode(m_shader->ctrlGraph->entry());
     
-    if (m_environment & SH_ARB_NVVP2) {
-      m_instructions.push_back(ArbInst(SH_ARB_LABEL, getLabel(m_shader->ctrlGraph->exit())));
+      if (m_environment & SH_ARB_NVVP2) {
+        m_instructions.push_back(ArbInst(SH_ARB_LABEL, getLabel(m_shader->ctrlGraph->exit())));
+      }
     }
+    m_shader->ctrlGraph->entry()->clearMarked();
+    allocRegs();
+  } catch (...) {
+    m_shader->ctrlGraph->entry()->clearMarked();
+    ShContext::current()->exit();
+    throw;
   }
-  m_shader->ctrlGraph->entry()->clearMarked();
-  allocRegs();
-  
   ShContext::current()->exit();
 }
 
@@ -221,8 +225,9 @@ bool ArbCode::allocateRegister(const ShVariableNodePtr& var)
   if (var->uniform()) return true;
 
   if (m_tempRegs.empty()) {
-    shError(ShException("ARB Backend: Out of registers"));
-    return false;
+    // This gets caught around allocTemps.
+    throw 1; // yes, it's hacky. Instead we should throw a different
+             // type, or store the limit information.
   }
 
   int idx = m_tempRegs.front();
@@ -263,24 +268,26 @@ void ArbCode::upload()
   shGlProgramStringARB(arbTarget(m_unit), GL_PROGRAM_FORMAT_ASCII_ARB,
                        (GLsizei)text.size(), text.c_str());
   int error = glGetError();
+  std::ostringstream error_os;
+  if (error == GL_NO_ERROR) return;
+  
+  error_os << "Failed to upload ARB program." << std::endl;
   if (error == GL_INVALID_OPERATION) {
+    error_os << "Program error:" << std::endl;
     int pos = -1;
     SH_GL_CHECK_ERROR(glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &pos));
     if (pos >= 0){
       const unsigned char* message = glGetString(GL_PROGRAM_ERROR_STRING_ARB);
-      SH_DEBUG_WARN("Error at character " << pos);
-      SH_DEBUG_WARN("Message: " << message);
+      error_os << "Error at character " << pos << std::endl;
+      error_os << "Driver Message: " << message << std::endl;
       while (pos >= 0 && text[pos] != '\n') pos--;
       if (pos > 0) pos++;
-      SH_DEBUG_WARN("Code: " << text.substr(pos, text.find('\n', pos)));
+      error_os << "Code: " << text.substr(pos, text.find('\n', pos)) << std::endl;
     }
+  } else {
+    error_os << "Unknown error." << std::endl;
   }
-  if (error != GL_NO_ERROR) {
-    SH_DEBUG_ERROR("Error uploading ARB program (" << m_unit << "): " << error);
-    SH_DEBUG_ERROR("shGlProgramStringARB(" << arbTarget(m_unit)
-                   << ", GL_PROGRAM_FORMAT_ASCII_ARB, " << (GLsizei)text.size() << 
-                   ", <program text>);");
-  }
+  shError(ArbException(error_os.str()));
 }
 
 void ArbCode::bind()
@@ -815,12 +822,20 @@ void ArbCode::allocRegs()
   }
 
   allocConsts(limits);
-  
-  allocTemps(limits, false); // allocate non-half
 
-  bool halfSupport = m_environment & (SH_ARB_NVFP | SH_ARB_NVFP2);
-  if(halfSupport) {
-    allocTemps(limits, true);
+  try {
+    allocTemps(limits, false);
+    bool halfSupport = m_environment & (SH_ARB_NVFP | SH_ARB_NVFP2);
+    if(halfSupport) {
+      allocTemps(limits, true);
+    }
+  } catch (int) {
+    std::ostringstream os;
+    os << "Out of temporary registers (" << limits.temps()
+       << " were available)";
+    throw ArbException(os.str());
+  } catch (...) {
+    throw;
   }
 
   // Allocate array register

@@ -82,7 +82,7 @@ libsh_dll_SOURCES += ShBaseTexture.hpp ShBaseTextureImpl.hpp ShBaseTexture.cpp
 libsh_dll_SOURCES += ShTextureNode.hpp ShTextureNode.cpp
 libsh_dll_SOURCES += ShImage.hpp ShImage.cpp
 libsh_dll_SOURCES += ShImage3D.hpp ShImage3D.cpp
-libsh_dll_SOURCES += ShMemory.hpp ShMemory.cpp
+libsh_dll_SOURCES += ShMemory.hpp ShMemory.cpp ShMemoryDep.hpp
 libsh_dll_SOURCES += ShArray.hpp ShTable.hpp ShTexture.hpp
 libsh_dll_SOURCES += ShWrap.hpp ShClamping.hpp ShInterp.hpp
 

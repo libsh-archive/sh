@@ -113,6 +113,8 @@ namespace SH {
     if(newd) {\
       dest.setVariant(dv); \
       delete dv;\
+    } else {\
+      dest.updateVariant();\
     }\
     if(news) delete sv;\
   } else {\
@@ -139,6 +141,8 @@ void sh ## op(ShVariable& dest, const ShVariable& src)\
     if(newd) {\
       dest.setVariant(dv); \
       delete dv;\
+    } else {\
+      dest.updateVariant();\
     }\
     if(newa) delete av;\
     if(newb) delete bv;\
@@ -171,6 +175,8 @@ void sh ## op(ShVariable& dest, const ShVariable& a, const ShVariable &b, const 
     if(newd) {\
       dest.setVariant(dv); \
       delete dv;\
+    } else {\
+      dest.updateVariant();\
     }\
     if(newa) delete av;\
     if(newb) delete bv;\

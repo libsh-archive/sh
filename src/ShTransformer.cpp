@@ -106,14 +106,14 @@ struct VariableSplitter {
     int copySwiz[maxTuple];
     for(offset = 0; n > 0; offset += maxTuple, n -= maxTuple) {
       ShProgramNodePtr prev = ShContext::current()->parsing();
-      // TODO should not be necessary any more
+      // @todo type should not be necessary any more
       //if(node->uniform()) ShContext::current()->exit(); 
 
       int newSize = n < maxTuple ? n : maxTuple;
       newNode = node->clone(node->kind(), node->specialType(), newSize, false); 
 
-      // TODO should not be necessary any more
-      // if(node->uniform()) ShContext::current()->enter(prev);
+      // @todo type should not be necessary any more
+      // if(node->uniform()) ShContext::current()->enter(0);
 
       if( node->hasValues() ) { 
         // @todo type set up dependent uniforms here 

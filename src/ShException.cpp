@@ -33,6 +33,10 @@ ShException::ShException(const std::string& message)
 {
 }
 
+ShException::~ShException()
+{
+}
+
 const std::string& ShException::message() const
 {
   return m_message;
@@ -65,6 +69,11 @@ ShOptimizerException::ShOptimizerException(const std::string& message)
 
 ShTransformerException::ShTransformerException(const std::string& message)
   : ShException("Transformer Error: " + message)
+{
+}
+
+ShBackendException::ShBackendException(const std::string& message)
+  : ShException("Backend Error: " + message)
 {
 }
 

@@ -113,8 +113,16 @@ public:
    * on result will be 1 if it's allocated as a copy.  You may
    * assign this to a refcounted pointer, and then manually release a ref.
    * @todo type figure out a cleaner way) 
+   *
+   * Since this allows you to possibly change the variant values without
+   * triggering a uniform update, if loadVariant returns false, you must
+   * call updateVariant() afterwards if you change any values in result. 
+   * @{
    */
   bool loadVariant(ShVariant *&result) const;
+  void updateVariant();
+  // @}
+
   
   /** Sets the elements of this variant from other accounting for 
    * this' writemask and negations

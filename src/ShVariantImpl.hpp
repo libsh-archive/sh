@@ -163,8 +163,7 @@ void ShDataVariant<V, DT>::negate()
 template<ShValueType V, ShDataType DT>
 void ShDataVariant<V, DT>::set(const ShVariant* other)
 {
-  int N = size();
-  SH_DEBUG_ASSERT(other->size() == N);
+  SH_DEBUG_ASSERT(other->size() == size());
   ShCastManager::instance()->doCast(this, other);
 }
 
