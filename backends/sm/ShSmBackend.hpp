@@ -14,8 +14,6 @@
 
 namespace ShSm {
 
-const int SmMaxTR = 256;
-
 struct SmInstruction {
   SmInstruction(const Operation& op, const SH::ShVariable& dest)
     : op(op), dest(dest), src1(0), src2(0), src3(0)

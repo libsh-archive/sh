@@ -2,4 +2,4 @@
 AM_CXXFLAGS = -I../../src -I../../../sm/src
 
 lib_LTLIBRARIES = libshsm.la
-libshsm_la_SOURCES = Backend.cpp Backend.hpp
+libshsm_la_SOURCES = ShSmBackend.cpp ShSmBackend.hpp

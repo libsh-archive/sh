@@ -41,9 +41,11 @@ void shEndShader()
 
   ShEnvironment::shader->collectVariables();
 
+  /*
   ShBackendPtr backend = ShBackend::lookup("sm");
   ShBackendCodePtr code = backend->generateCode(ShEnvironment::shader);
   code->print(std::cerr);
+  */
   
   ShEnvironment::insideShader = false;
 }

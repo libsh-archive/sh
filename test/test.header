@@ -1,0 +1,10 @@
+#include "sh.hpp"
+#include <iostream>
+
+using namespace SH;
+
+#define NAME(x) {x.name(#x);}
+
+int main()
+{
+  try {

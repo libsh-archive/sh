@@ -108,7 +108,7 @@ ShSwizzleException::ShSwizzleException(const ShSwizzle& s, int index, int size)
   : ShException("")
 {
   std::ostringstream out;
-  out << "Swizzle error: " << index << " out of range [0, " << size << ") in " << s << std::ends;
+  out << "Swizzle error: " << index << " out of range [0, " << size << ") in " << s;
 
   m_message = out.str();
 }

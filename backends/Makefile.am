@@ -1,1 +1,14 @@
-SUBDIRS = sm
+if ENABLE_SM_BACKEND
+SM_SUBDIR = sm
+else
+SM_SUBDIR =
+endif
+
+if ENABLE_ARB_BACKEND
+ARB_SUBDIR = arb
+else
+ARB_SUBDIR =
+endif
+
+SUBDIRS = $(SM_SUBDIR) $(ARB_SUBDIR)
+

@@ -1,4 +1,4 @@
-#include "Backend.hpp"
+#include "ShSmBackend.hpp"
 #include <iostream>
 #include <sstream>
 #include "ShEnvironment.hpp"
@@ -7,6 +7,8 @@
 #include "sm.hpp"
 
 namespace ShSm {
+
+const int SmMaxTR = 256;
 
 using namespace SH;
 

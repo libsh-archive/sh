@@ -64,7 +64,6 @@ std::string ShVariableNode::name() const
       }
       stream << ")";
     }
-    stream << std::ends;
     return stream.str();
   }
 
@@ -89,7 +88,6 @@ std::string ShVariableNode::name() const
   }
 
   stream << m_id;
-  stream << std::ends;
 
   return stream.str();
 }

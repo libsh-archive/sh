@@ -1,0 +1,17 @@
+// -*- C++ -*-
+
+    ShEnvironment::shader = shader;
+    ShEnvironment::insideShader = true;
+    ShBackendPtr backend = ShBackend::lookup("arb");
+    ShBackendCodePtr code = backend->generateCode(shader);
+    code->print(std::cerr);
+    ShEnvironment::insideShader = false;
+    ShEnvironment::shader = 0;
+
+  } catch (const ShException& e) {
+    std::cerr << "SH Exception: " << e.message() << std::endl;
+  } catch (...) {
+    std::cerr << "Unknown exception caught." << std::endl;
+  }
+    
+}

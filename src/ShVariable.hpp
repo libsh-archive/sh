@@ -15,6 +15,7 @@ namespace SH {
 */
 class ShVariable {
 public:
+  ShVariable();
   ShVariable(const ShVariableNodePtr& node);
 
   bool null() const; ///< true iff node is a null pointer.
@@ -51,6 +52,8 @@ public:
   ShVariable operator()(int, int, int) const;
   ShVariable operator()(int, int, int, int) const;
   ShVariable operator()(int size, int indices[]) const;
+
+  ShVariable operator-() const;
   
 protected:
   ShVariable(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg)

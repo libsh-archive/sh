@@ -2,6 +2,11 @@
 
 namespace SH {
 
+ShVariable::ShVariable()
+  : m_node(0), m_swizzle(0), m_neg(false)
+{
+}
+
 ShVariable::ShVariable(const ShVariableNodePtr& node)
   : m_node(node), m_swizzle(node ? node->size() : 0), m_neg(false)
 {
@@ -95,6 +100,11 @@ ShVariable ShVariable::operator()(int i1, int i2, int i3, int i4) const
 ShVariable ShVariable::operator()(int n, int indices[]) const
 {
   return ShVariable(m_node, m_swizzle * ShSwizzle(size(), n, indices), m_neg);
+}
+
+ShVariable ShVariable::operator-() const
+{
+  return ShVariable(m_node, m_swizzle, !m_neg);
 }
 
 }
