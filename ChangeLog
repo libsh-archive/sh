@@ -7,7 +7,7 @@
 		Fixed bug setting lower/upper bounds.  
 		Moved some of fields around to give better alignment. 
 
-	==> simple vec test = , matrix mul test = 
+	==> simple vec test = 1.92s, matrix mul test = 6.15s 
 
 
 2004-10-28 Bryan Chan <b8chan@cgl.uwaterloo.ca>
