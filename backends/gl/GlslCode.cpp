@@ -224,7 +224,7 @@ void GlslCode::bind()
 
   // Unbind the previously attached shader if necessary
   if (m_current_shaders[m_unit]) {
-    m_current_shaders[m_unit]->unbind();
+    m_current_shaders[m_unit]->unbind(false);
   }
   
   // Compile code if necessary
@@ -247,7 +247,7 @@ void GlslCode::bind()
   bind_textures();
 }
 
-void GlslCode::unbind()
+void GlslCode::unbind(bool refresh)
 {
   if (!m_bound) return;
 
@@ -261,10 +261,12 @@ void GlslCode::unbind()
   m_current_shaders[m_unit] = NULL;
 
   // Refresh the current rendering state
-  if (!m_current_shaders[SH_GLSL_FP] && !m_current_shaders[SH_GLSL_VP]) {
-    SH_GL_CHECK_ERROR(glUseProgramObjectARB(0));
-  } else {
-    link();
+  if (refresh) {
+    if (!m_current_shaders[SH_GLSL_FP] && !m_current_shaders[SH_GLSL_VP]) {
+      SH_GL_CHECK_ERROR(glUseProgramObjectARB(0));
+    } else {
+      link();
+    }
   }
   
   ShContext::current()->unset_binding(m_target); // calls the destructor

@@ -75,7 +75,7 @@ class CcBackendCode: public SH::ShBackendCode
     
     void upload(void);
     void bind(void);
-    void unbind(void);
+    void unbind(bool refresh = true);
     void update(void);
     
     void updateUniform(const SH::ShVariableNodePtr& uniform);

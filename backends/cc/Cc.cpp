@@ -165,7 +165,7 @@ namespace ShCc {
     SH_CC_DEBUG_PRINT(__FUNCTION__);
   }
 
-  void CcBackendCode::unbind(void) 
+  void CcBackendCode::unbind(bool refresh) 
   {
     SH_CC_DEBUG_PRINT(__FUNCTION__);
   }
