@@ -30,6 +30,7 @@
 #include "ShBackend.hpp"
 #include "ShEnvironment.hpp"
 #include "ShDebug.hpp"
+#include "ShTextureNode.hpp"
 
 namespace SH {
 
@@ -119,8 +120,17 @@ void ShProgramNode::collectVar(const ShVariableNodePtr& var) {
     if (std::find(constants.begin(), constants.end(), var) == constants.end()) constants.push_back(var);
     break;
   case SH_VAR_TEXTURE:
-    SH_DEBUG_PRINT("Found a texture");
-    if (std::find(textures.begin(), textures.end(), var) == textures.end()) textures.push_back(var);
+    if (std::find(textures.begin(), textures.end(), var) == textures.end()) {
+      textures.push_back(var);
+      ShCubeTextureNodePtr cubetex = var;
+      if (cubetex) {
+        for (int i = 0; i < 6; i++) {
+          ShVariableNodePtr face = cubetex->face(static_cast<ShCubeDirection>(i));
+          if (!face) continue;
+          if (std::find(textures.begin(), textures.end(), face) == textures.end()) textures.push_back(face);
+        }
+      }
+    }    
     break;
   }
 }

@@ -98,8 +98,11 @@ private:
   /// Allocate textures (called by allocRegs)
   void allocTextures();
 
+  /// Allocate a texture, either data or cubemap
+  void loadTexture(SH::ShTextureNodePtr texture);
+  
   /// Allocate a data texture
-  void loadTexture(SH::ShDataTextureNodePtr texture, unsigned int type = 0);
+  void loadDataTexture(SH::ShDataTextureNodePtr texture, unsigned int type = 0);
 
   /// Allocate a cube map
   void loadCubeTexture(SH::ShCubeTextureNodePtr cube);

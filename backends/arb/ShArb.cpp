@@ -525,58 +525,59 @@ void ArbCode::bind()
   }
   for (ShProgramNode::VarList::const_iterator I = m_shader->textures.begin(); I != m_shader->textures.end();
        ++I) {
-    ShTextureNodePtr texture = *I;
-    if (!texture) {
-      SH_DEBUG_WARN((*I)->name() << " is not a valid texture!");
-      continue;
-    }
-    
-    RegMap::const_iterator texRegIterator = m_registers.find(texture);
-    
-    SH_DEBUG_ASSERT(texRegIterator != m_registers.end());
-    
-    const ArbReg& texReg = texRegIterator->second;
-    
-    SH_DEBUG_PRINT("Setting active texture to " << texReg.index << ", my shader is " << m_shader.object());
-    
-    shGlActiveTextureARB(GL_TEXTURE0 + texReg.index);
-
-    SH_DEBUG_PRINT("Binding texture " << texReg.index << " with texture unit " << texReg.bindingIndex);
-
-    glBindTexture(shGlTextureType[texture->dims()], texReg.bindingIndex);
-
-    if (1) {
-      glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    } else {
-      glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-      glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    }
-    if (1) {
-      glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    } else {
-      glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_WRAP_S, GL_REPEAT);
-      glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_WRAP_T, GL_REPEAT);
-    }
-    
-    ShDataTextureNodePtr datatex = texture;
-    if (datatex) {
-      loadTexture(datatex);
-      continue;
-    }
-
-    ShCubeTextureNodePtr cubetex = texture;
-    if (cubetex) {
-      loadCubeTexture(cubetex);
-      continue;
-    }
-    
-    SH_DEBUG_WARN((*I)->name() << " is not a valid texture!");
+    loadTexture(*I);
   }
 }
 
-void ArbCode::loadTexture(ShDataTextureNodePtr texture, unsigned int type)
+void ArbCode::loadTexture(ShTextureNodePtr texture) 
+{
+  if (!texture) return;
+  
+  RegMap::const_iterator texRegIterator = m_registers.find(texture);
+  
+  SH_DEBUG_ASSERT(texRegIterator != m_registers.end());
+  
+  const ArbReg& texReg = texRegIterator->second;
+  
+  SH_DEBUG_PRINT("Setting active texture to " << texReg.index << ", my shader is " << m_shader.object());
+  
+  shGlActiveTextureARB(GL_TEXTURE0 + texReg.index);
+  
+  SH_DEBUG_PRINT("Binding texture " << texReg.index << " with texture unit " << texReg.bindingIndex);
+  
+  glBindTexture(shGlTextureType[texture->dims()], texReg.bindingIndex);
+  
+  if (1) {
+    glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  } else {
+    glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  }
+  if (1) {
+    glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  } else {
+    glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_WRAP_T, GL_REPEAT);
+  }
+    
+  ShDataTextureNodePtr datatex = texture;
+  if (datatex) {
+    loadDataTexture(datatex);
+    return;
+  }
+
+  ShCubeTextureNodePtr cubetex = texture;
+  if (cubetex) {
+    loadCubeTexture(cubetex);
+    return;
+  }
+    
+  SH_DEBUG_WARN(texture->name() << " is not a valid texture!");
+}
+
+void ArbCode::loadDataTexture(ShDataTextureNodePtr texture, unsigned int type)
 {
   if (!type) {
     switch (texture->dims()) {
@@ -662,17 +663,23 @@ void ArbCode::loadTexture(ShDataTextureNodePtr texture, unsigned int type)
 void ArbCode::loadCubeTexture(ShCubeTextureNodePtr cube)
 {
   for (int i = 0; i < 6; i++) {
-    loadTexture(cube->face(static_cast<ShCubeDirection>(i)), shGlCubeMapTargets[i]);
+    loadDataTexture(cube->face(static_cast<ShCubeDirection>(i)), shGlCubeMapTargets[i]);
   }
 }
 
 void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
 {
-  // TODO: textures?
   if (!uniform) return;
+
   RegMap::const_iterator I = m_registers.find(uniform);
   if (I == m_registers.end()) return;
-  
+
+  ShTextureNodePtr tex = uniform;
+  if (tex) {
+    loadTexture(tex);
+    return;
+  }
+    
   const ArbReg& reg = I->second;
   
   float values[4];

@@ -25,6 +25,7 @@
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
 #include "ShTextureNode.hpp"
+#include "ShEnvironment.hpp"
 
 namespace SH {
 
@@ -79,6 +80,9 @@ int ShDataTextureNode::elements() const
 void ShDataTextureNode::setData(const float* data)
 {
   memcpy(m_data, data, m_width * m_height * m_elements * sizeof(float));
+  for (int s = 0; s < shShaderKinds; s++) {
+    if (ShEnvironment::boundShader[s]) ShEnvironment::boundShader[s]->updateUniform(this);
+  }
 }
 
 const float* ShDataTextureNode::data() const
