@@ -7,7 +7,9 @@ echo "You may ignore messages about updating aclocal.m4."
 if test "x${LIBTOOLIZE}" = "x" ; then
     case ${MACHTYPE}
 	in *apple*darwin*)
+	    # fink tools instead of Apple's
 	    LIBTOOLIZE="/sw/bin/glibtoolize --ltdl"
+
 	    ;;
 	*)
 	    LIBTOOLIZE="libtoolize --ltdl"
@@ -17,13 +19,23 @@ else
 fi
 export LIBTOOLIZE
 
+# Old versions of libtoolize ask for configure.in instead of configure.ac
+# XXX -- There must be a better way to do this
+LIBTOOLIZE_VERSION=`$LIBTOOLIZE --version | awk 'NR == 1 { print $NF }'`
+SND=${LIBTOOLIZE_VERSION%.*}
+WRKVER=$(( ${LIBTOOLIZE_VERSION%%.*} * 10 + ${SND#*.} ))
+if [ $WRKVER -lt 15 ]; then
+    echo "Your version of libtoolize ($LIBTOOLIZE_VERSION) is too old."
+    exit 1
+fi
+
 if test "x${AUTOMAKE}" = "x" ; then
     case ${MACHTYPE}
 	in *apple*darwin*)
 	    AUTOMAKE=/sw/bin/automake
 	    ;;
 	*)
-	    AUTOMAKE=automake
+	    AUTOMAKE=automake-1.7
     esac
 fi
 export AUTOMAKE
@@ -31,10 +43,10 @@ export AUTOMAKE
 if test "x${ACLOCAL}" = "x" ; then
     case ${MACHTYPE}
 	in *apple*darwin*)
-	    AUTOMAKE=/sw/bin/automake
+	    ACLOCAL="/sw/bin/aclocal -I /sw/share/aclocal"
 	    ;;
 	*)
-	    ACLOCAL=aclocal
+	    ACLOCAL=aclocal-1.7
     esac
 fi
 export ACLOCAL
