@@ -444,37 +444,41 @@ ShVariableN<N, T> cos(const ShVariableN<N, T>& var)
 }
 
 /// Componentwise/scalar dot product
-template<int M, int N, typename T>
-ShVariableN<1,  T> dot(const ShVariableN<M, T>& left, const ShVariableN<N, T>& right)
-{
-  ShCheckDims<M, true, N, true>();
-  if (!ShEnvironment::insideShader) {
-    assert(left.hasValues());
-    T lvals[M];
-    left.getValues(lvals);
-    T rvals[N];
-    right.getValues(rvals);
-    T result = 0.0;
-    for (int i = 0; i < M || i < N; i++) result += 
-        ( M == 1 ? lvals[0] : lvals[i] ) * ( N == 1 ? rvals[0] : rvals[i] );
-    return ShConstant<1, T>(result);
-  } else {
-    ShAttrib<1, SH_VAR_TEMP, T, false> t;
-    ShStatement stmt(t, left, SH_OP_DOT, right);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  }
+#define SH_LIB_DOTPRODUCT(opfunc) \
+template<int M, int N, typename T>\
+ShVariableN<1,  T> opfunc(const ShVariableN<M, T>& left, const ShVariableN<N, T>& right)\
+{\
+  ShCheckDims<M, true, N, true>();\
+  if (!ShEnvironment::insideShader) {\
+    assert(left.hasValues());\
+    T lvals[M];\
+    left.getValues(lvals);\
+    T rvals[N];\
+    right.getValues(rvals);\
+    T result = 0.0;\
+    for (int i = 0; i < M || i < N; i++) result += \
+        ( M == 1 ? lvals[0] : lvals[i] ) * ( N == 1 ? rvals[0] : rvals[i] );\
+    return ShConstant<1, T>(result);\
+  } else {\
+    ShAttrib<1, SH_VAR_TEMP, T, false> t;\
+    ShStatement stmt(t, left, SH_OP_DOT, right);\
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);\
+    return t;\
+  }\
+}\
+\
+template<int N, typename T>\
+ShVariableN<1,  T> opfunc(T left, const ShVariableN<N, T>& right) {\
+  return opfunc(ShConstant1f(left), right);\
+}\
+\
+template<int M, typename T>\
+ShVariableN<1,  T> opfunc(const ShVariableN<M, T>& left, T right) {\
+  return opfunc(left, ShConstant1f(right));\
 }
 
-template<int N, typename T>
-ShVariableN<1,  T> dot(T left, const ShVariableN<N, T>& right) {
-  return dot(ShConstant1f(left), right);
-}
-
-template<int M, typename T>
-ShVariableN<1,  T> dot(const ShVariableN<M, T>& left, T right) {
-  return dot(left, ShConstant1f(right));
-}
+SH_LIB_DOTPRODUCT(dot);
+SH_LIB_DOTPRODUCT(operator|);
 
 
 
@@ -653,8 +657,30 @@ ShVariableN<N,  T> max(const ShVariableN<N, T>& left, const ShVariableN<N, T>& r
     return t;
   }
 }
-
 SH_SHLIB_CONST_SCALAR_OP(max);
+
+/// Positive - make positive  
+template<int N, typename T>
+ShVariableN<N,  T> pos(const ShVariableN<N, T>& x) 
+{
+  if (!ShEnvironment::insideShader) {
+    assert(x.hasValues());
+    T vals[N];
+    x.getValues(vals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = vals[i] > 0 ? vals[i] : 0; 
+    return ShConstant<N, T>(result);
+  } else {
+    T vals[N];
+    for( int i = 0; i < N; ++i ) vals[i] = 0;
+    ShConstant<N, T> zero(vals);
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, x, SH_OP_MAX, zero);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  }
+}
+
 
 /// Componentwise minimum
 template<int N, typename T>
