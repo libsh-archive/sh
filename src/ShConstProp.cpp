@@ -41,6 +41,7 @@ struct ConstProp : public ShStatementInfo {
         case SH_INOUT:
         case SH_TEXTURE:
         case SH_STREAM:
+        case SH_PALETTE:
           src[i].push_back(Cell(Cell::BOTTOM));
           break;
         case SH_TEMP:

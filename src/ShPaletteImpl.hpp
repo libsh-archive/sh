@@ -24,35 +24,54 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHVARIABLETYPE_HPP
-#define SHVARIABLETYPE_HPP
+#ifndef SHPALETTEIMPL_HPP
+#define SHPALETTEIMPL_HPP
 
 namespace SH {
 
-/** The various ways variables can be bound.
- */
-enum ShBindingType {
-  SH_INPUT = 0,
-  SH_OUTPUT = 1,
-  SH_INOUT = 2,
-  SH_TEMP = 3,
-  SH_CONST = 4,
-  SH_TEXTURE = 5,
-  SH_STREAM = 6,
-  SH_PALETTE = 7
-};
+template<typename T>
+ShPalette<T>::ShPalette(std::size_t size)
+  : m_node(new ShPaletteNode(T::typesize, T::semantic_type, shTypeIndex<T::ValueType>(), size)),
+    m_data(new T[size])
+{
+  for (std::size_t i = 0; i < size; i++) {
+    m_node->set_node(i, m_data[i].node());
+  }
+}
 
-/** The various ways semantic types for variables.
- */
-enum ShSemanticType {
-  SH_ATTRIB,
-  SH_POINT,
-  SH_VECTOR,
-  SH_NORMAL,
-  SH_COLOR,
-  SH_TEXCOORD,
-  SH_POSITION
-};
+template<typename T>
+ShPalette<T>::~ShPalette()
+{
+  delete [] m_data;
+}
+
+template<typename T>
+const T& ShPalette<T>::operator[](std::size_t index) const
+{
+  return m_data[index];
+}
+
+template<typename T>
+T& ShPalette<T>::operator[](std::size_t index)
+{
+  return m_data[index];
+}
+
+template<typename T>
+template<typename L>
+T ShPalette<T>::operator[](const ShGeneric<1, L>& index) const
+{
+  if (ShContext::current()->parsing()) {
+    T t;
+    ShVariable palVar(m_node);
+    ShStatement stmt(t, palVar, SH_OP_PAL, index);
+    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  } else {
+    return m_data[(std::size_t)index.getValue(0)];
+  }
+}
 
 }
+
 #endif

@@ -33,6 +33,7 @@
 #include "ShContext.hpp"
 #include "ShDebug.hpp"
 #include "ShTextureNode.hpp"
+#include "ShPaletteNode.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShError.hpp"
 
@@ -133,6 +134,7 @@ void ShProgramNode::collectVariables()
   constants.clear();
   textures.clear();
   channels.clear();
+  palettes.clear();
   if (ctrlGraph->entry()) {
     ctrlGraph->entry()->clearMarked();
     collectNodeVars(ctrlGraph->entry());
@@ -197,6 +199,11 @@ void ShProgramNode::collectVar(const ShVariableNodePtr& var)
     if (std::find(channels.begin(), channels.end(),
                   shref_dynamic_cast<ShChannelNode>(var)) == channels.end()) {
       channels.push_back(shref_dynamic_cast<ShChannelNode>(var));
+    }
+  case SH_PALETTE:
+    if (std::find(palettes.begin(), palettes.end(),
+                  shref_dynamic_cast<ShPaletteNode>(var)) == palettes.end()) {
+      palettes.push_back(shref_dynamic_cast<ShPaletteNode>(var));
     }
     break;
   }
@@ -295,6 +302,16 @@ ShProgramNode::ChannelList::const_iterator ShProgramNode::channels_begin() const
 ShProgramNode::ChannelList::const_iterator ShProgramNode::channels_end() const
 {
   return channels.end();
+}
+
+ShProgramNode::PaletteList::const_iterator ShProgramNode::palettes_begin() const
+{
+  return palettes.begin();
+}
+
+ShProgramNode::PaletteList::const_iterator ShProgramNode::palettes_end() const
+{
+  return palettes.end();
 }
 
 bool ShProgramNode::finished() const

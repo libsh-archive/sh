@@ -1,4 +1,14 @@
-2004-10-18 Bryan Chan  <b8chan@cgl.uwaterloo.ca>
+2004-10-20 Bryan Chan  <b8chan@cgl.uwaterloo.ca>
+	Merged trunk up to r1592 into arithmetic.
+	Transferred updated gcc backend to cc, like trunk. 
+
+	* src/ShPalette.hpp, src/ShPaletteImpl.hpp (ShPalette)
+		src/ShPaletteNode.hpp, src/ShPaletteNode.cpp (ShPaletteNode):
+		Added type index of T::ValueType for an ShPalette<T> to 
+		ShVariableNode constructor call so that
+		ShVariable::typeIndex() will work for palettes.
+	
+2004-10-19 Bryan Chan  <b8chan@cgl.uwaterloo.ca>
   * test/regress/streamtest.py, test.hpp:
   Added storage type test capabilities. 
 
@@ -34,6 +44,47 @@
 	of run-time generated in ShContext.
 	(The templates are a little clumsy, but makes sense unless we want to be able 
 	to change the set of available storage types at runtime)
+
+2004-10-19  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* configure.ac, backends/Makefile.am, backends/cc/Makefile.am,
+	backends/cc/Cc.cpp, backends/cc/Cc.hpp, test/regress/test.cpp:
+	Renamed Gcc to Cc, Windows port of compiler backend to follow...
+
+2004-10-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShConstProp.cpp (ConstProp::ConstProp): Handle palette nodes.
+
+	* src/ShVariableNode.cpp (name): Handle palette nodes.
+
+	* src/Makefile.win32: Add palette source files.
+
+	* src/Makefile.am: Add palette source files.
+
+	* src/sh.hpp: Include ShPalette.hpp.
+
+	* src/ShStatement.cpp (opInfo): Add info for SH_OP_PAL.
+
+	* src/ShStatement.hpp (ShOperation): Add SH_OP_PAL.
+
+	* src/ShVariableNode.hpp (ShBindingType): Add new SH_PALETTE
+	binding type.
+
+	* src/ShProgram.hpp (ShProgram): Add palette accessor function
+	wrappers.
+
+	* src/ShProgramNode.cpp (collectVar): Look for palettes.
+
+	* src/ShProgramNode.hpp (ShProgramNode): Add palette accesor functions.
+
+	* src/ShPaletteNode.cpp: Implement ShPaletteNode.
+
+	* src/ShPaletteNode.hpp: Add ShPaletteNode class for internal
+	palette representation.
+
+	* src/ShPaletteImpl.hpp: Add implementation for ShPalette.
+
+	* src/ShPalette.hpp: Add initial palette support.
 
 2004-10-14  Bryan Chan  <b8chan@cgl.uwaterloo.ca>
   Merged main branch up to r1559 into this branch.

@@ -105,6 +105,8 @@ enum ShOperation {
 
   SH_OP_FETCH, ///< Unary (takes a stream). Fetch an element from a stream. Similar to TEX
 
+  SH_OP_PAL, ///< Palette fetch
+
   SH_OP_LO,  ///< Extracts a lower bound from a range arithmetic type
   SH_OP_HI,  ///< Extracts an upper bound from a range arithmetic type
   SH_OP_SETLO, ///< Sets a lower bound on an interval arithmetic type from a regular tuple

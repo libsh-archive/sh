@@ -68,6 +68,7 @@
 #include "ShQuaternion.hpp"
 #include "ShVariant.hpp"
 #include "ShTypeInfo.hpp"
+#include "ShPalette.hpp"
 
 /** \namespace SH
  * \brief The main Sh namespace.

@@ -45,7 +45,8 @@ const char* ShBindingTypeName[] = {
   "",
   "Constant",
   "Texture",
-  "Stream"
+  "Stream",
+  "Palette"
 };
 
 const char* ShSemanticTypeName[] = {
@@ -230,6 +231,9 @@ std::string ShVariableNode::name() const
     break;
   case SH_STREAM:
     stream << "str";
+    break;
+  case SH_PALETTE:
+    stream << "pal";
     break;
   }
 

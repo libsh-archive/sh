@@ -24,35 +24,37 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHVARIABLETYPE_HPP
-#define SHVARIABLETYPE_HPP
+#ifndef SHPALETTE_HPP
+#define SHPALETTE_HPP
+
+#include <cstddef>
+
+#include "ShPaletteNode.hpp"
+#include "ShGeneric.hpp"
 
 namespace SH {
 
-/** The various ways variables can be bound.
- */
-enum ShBindingType {
-  SH_INPUT = 0,
-  SH_OUTPUT = 1,
-  SH_INOUT = 2,
-  SH_TEMP = 3,
-  SH_CONST = 4,
-  SH_TEXTURE = 5,
-  SH_STREAM = 6,
-  SH_PALETTE = 7
-};
+template<typename T>
+class ShPalette {
+public:
+  ShPalette(std::size_t size);
+  ~ShPalette();
+  
+  // C++-time lookup
+  const T& operator[](std::size_t index) const;
+  T& operator[](std::size_t index);
 
-/** The various ways semantic types for variables.
- */
-enum ShSemanticType {
-  SH_ATTRIB,
-  SH_POINT,
-  SH_VECTOR,
-  SH_NORMAL,
-  SH_COLOR,
-  SH_TEXCOORD,
-  SH_POSITION
+  // Sh program runtime lookup
+  template<typename L>
+  T operator[](const ShGeneric<1, L>& index) const;
+  
+private:
+  ShPaletteNodePtr m_node;
+  T* m_data;
 };
 
 }
+
+#include "ShPaletteImpl.hpp"
+
 #endif

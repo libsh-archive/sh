@@ -27,7 +27,7 @@
 #include <map>
 #include <vector>
 #include <sstream>
-#include "Gcc.hpp" 
+#include "Cc.hpp" 
 #include "ShDebug.hpp" 
 #include "ShStream.hpp" 
 #include "ShVariant.hpp"
@@ -37,17 +37,17 @@
 #include "config.h"
 #endif
 
-#ifdef SH_GCC_DEBUG
-#  define SH_GCC_DEBUG_PRINT(x) SH_DEBUG_PRINT(x)
+#ifdef SH_CC_DEBUG
+#  define SH_CC_DEBUG_PRINT(x) SH_DEBUG_PRINT(x)
 #else
-#  define SH_GCC_DEBUG_PRINT(x) do { } while(0)
+#  define SH_CC_DEBUG_PRINT(x) do { } while(0)
 #endif
 
-namespace ShGcc {
+namespace ShCc {
 
 using namespace SH;
 
-/** @file GccEmit.cpp
+/** @file CcEmit.cpp
  * Implements code emission for a single ShStatement.  This is a table-driven approach
  * patterned on ArbEmit.cpp in the GL backend.
  */
@@ -56,24 +56,24 @@ using namespace SH;
 // e.g. std::abs for int types, funcf versions of func for float
 
 // handles linear ops that require up to 4 src arguments (may not be independent) 
-struct GccOpCode 
+struct CcOpCode 
 {
   ShOperation op;
   char *code;
 };
 
-struct GccOpCodeVecs
+struct CcOpCodeVecs
 {
-  GccOpCodeVecs() {}
+  CcOpCodeVecs() {}
 
   // Dices up the code string into references #i or $i to 
   // src variables and the code fragments between references. 
   //
   // after construction, frag.size() == (index.size() + 1) 
   // and index.size() = scalar.size()
-  GccOpCodeVecs(const GccOpCode &op);
+  CcOpCodeVecs(const CcOpCode &op);
 
-  bool operator<(const GccOpCodeVecs &other) {
+  bool operator<(const CcOpCodeVecs &other) {
     return op < other.op;
   }
 
@@ -87,9 +87,9 @@ struct GccOpCodeVecs
 };
 
 
-typedef std::map<SH::ShOperation, GccOpCodeVecs> GccOpCodeMap;
+typedef std::map<SH::ShOperation, CcOpCodeVecs> CcOpCodeMap;
 
-GccOpCodeVecs::GccOpCodeVecs(const GccOpCode &op) {
+CcOpCodeVecs::CcOpCodeVecs(const CcOpCode &op) {
   std::string code = op.code; 
 
   unsigned i, j;
@@ -110,7 +110,7 @@ GccOpCodeVecs::GccOpCodeVecs(const GccOpCode &op) {
 
 }
 
-std::string GccOpCodeVecs::encode() const 
+std::string CcOpCodeVecs::encode() const 
 {
   std::ostringstream out;
   for(unsigned int i = 0; i < index.size(); ++i) {
@@ -124,7 +124,7 @@ std::string GccOpCodeVecs::encode() const
 
 // Table of replacement macros holding C++ code corresponding to SH op 
 //
-// This table is parsed into a static map in GccBackendCode.  Although
+// This table is parsed into a static map in CcBackendCode.  Although
 // it may be possible to classify the ops depending on the kinds of C++
 // code output, this is a bit trickier than with the gl backend. Since
 // the end result is not assmebly, the variety of syntax makes categorizing
@@ -136,7 +136,7 @@ std::string GccOpCodeVecs::encode() const
 //        #i in rhs replaced by resolve(src[i], j)
 //        $i in rhs replaced by resolve(src[i], src[i].size() == 1 ? 0 : j)
 //        where i is an non-negative integer
-const GccOpCode opCodeTable[] = {
+const CcOpCode opCodeTable[] = {
   {SH_OP_ASN,   "#0" },
   {SH_OP_NEG,   "-#0" },  
   {SH_OP_ADD,   "$0 + $1"},
@@ -202,18 +202,18 @@ const GccOpCode opCodeTable[] = {
 #endif
 
 // @todo type implement emit
-void GccBackendCode::emit(const ShStatement& stmt) {
-  static GccOpCodeMap opcodeMap;
+void CcBackendCode::emit(const ShStatement& stmt) {
+  static CcOpCodeMap opcodeMap;
 
-  // @todo type should really move this to the GccBackendCode constructor 
+  // @todo type should really move this to the CcBackendCode constructor 
   // @todo type should handle other types properly
   
   // fill in opcodeMap from the above table
   if(opcodeMap.empty()) {
-    SH_GCC_DEBUG_PRINT("ShOperation -> C++ code mappings");
+    SH_CC_DEBUG_PRINT("ShOperation -> C++ code mappings");
     for(int i = 0; opCodeTable[i].op != SH_OP_NONE; ++i) {
-      opcodeMap[opCodeTable[i].op] = GccOpCodeVecs(opCodeTable[i]); 
-      SH_GCC_DEBUG_PRINT(opInfo[opCodeTable[i].op].name << " -> " 
+      opcodeMap[opCodeTable[i].op] = CcOpCodeVecs(opCodeTable[i]); 
+      SH_CC_DEBUG_PRINT(opInfo[opCodeTable[i].op].name << " -> " 
           << opcodeMap[opCodeTable[i].op]);
     }
   }
@@ -228,7 +228,7 @@ void GccBackendCode::emit(const ShStatement& stmt) {
 
   // handle ops in the table first 
   if(opcodeMap.find(stmt.op) != opcodeMap.end()) {
-    GccOpCodeVecs codeVecs = opcodeMap[stmt.op]; 
+    CcOpCodeVecs codeVecs = opcodeMap[stmt.op]; 
     for(int i = 0; i < stmt.dest.size(); ++i) {
       m_code << "  " << resolve(stmt.dest, i) << " = (" 
         << ctype(stmt.dest.typeIndex()) << ")(";
@@ -319,11 +319,11 @@ void GccBackendCode::emit(const ShStatement& stmt) {
         break;
       }
     case SH_OP_TEX:
-      emitTexLookup(stmt, "sh_gcc_backend_lookup");
+      emitTexLookup(stmt, "sh_cc_backend_lookup");
       break;
 
     case SH_OP_TEXI:
-      emitTexLookup(stmt, "sh_gcc_backend_lookupi");
+      emitTexLookup(stmt, "sh_cc_backend_lookupi");
       break;
 
     case SH_OP_KIL:
@@ -356,7 +356,7 @@ void GccBackendCode::emit(const ShStatement& stmt) {
   }
 }
 
-void GccBackendCode::emitTexLookup(const ShStatement& stmt, const char* texfunc) {
+void CcBackendCode::emitTexLookup(const ShStatement& stmt, const char* texfunc) {
   ShTextureNodePtr node = shref_dynamic_cast<ShTextureNode>(stmt.src[0].node());
   int dims = 0; 
   switch(node->dims()) {

@@ -110,7 +110,12 @@ libsh_la_SOURCES += ShChannelNode.hpp ShChannelNode.cpp
 libsh_la_SOURCES += ShChannel.hpp ShChannelImpl.hpp
 libsh_la_SOURCES += ShStream.hpp ShStreamImpl.hpp ShStream.cpp
 
+# Palettes
+libsh_la_SOURCES += ShPalette.hpp ShPaletteImpl.hpp
+libsh_la_SOURCES += ShPaletteNode.hpp ShPaletteNode.cpp
+incinc_HEADERS   += ShPalette.hpp ShPaletteImpl.hpp ShPaletteNode.hpp
 
+# These should really be moved up top
 incinc_HEADERS += ShBlock.hpp ShCtrlGraph.hpp
 incinc_HEADERS += ShDebug.hpp ShEnvironment.hpp ShError.hpp
 incinc_HEADERS += ShException.hpp ShLib.hpp

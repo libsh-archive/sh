@@ -24,35 +24,35 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHVARIABLETYPE_HPP
-#define SHVARIABLETYPE_HPP
+#include "ShPaletteNode.hpp"
 
 namespace SH {
 
-/** The various ways variables can be bound.
- */
-enum ShBindingType {
-  SH_INPUT = 0,
-  SH_OUTPUT = 1,
-  SH_INOUT = 2,
-  SH_TEMP = 3,
-  SH_CONST = 4,
-  SH_TEXTURE = 5,
-  SH_STREAM = 6,
-  SH_PALETTE = 7
-};
+ShPaletteNode::ShPaletteNode(int elements, ShSemanticType semantic, int typeIndex, std::size_t length)
+  : ShVariableNode(SH_PALETTE, elements, typeIndex, semantic),
+    m_length(length),
+    m_nodes(new ShVariableNodePtr[length])
+{
+}
 
-/** The various ways semantic types for variables.
- */
-enum ShSemanticType {
-  SH_ATTRIB,
-  SH_POINT,
-  SH_VECTOR,
-  SH_NORMAL,
-  SH_COLOR,
-  SH_TEXCOORD,
-  SH_POSITION
-};
+void ShPaletteNode::set_node(std::size_t i, const ShVariableNodePtr& node)
+{
+  m_nodes[i] = node;
+}
+
+std::size_t ShPaletteNode::palette_length() const
+{
+  return m_length;
+}
+
+ShVariableNodeCPtr ShPaletteNode::get_node(std::size_t index) const
+{
+  return m_nodes[index];
+}
+
+ShVariableNodePtr ShPaletteNode::get_node(std::size_t index)
+{
+  return m_nodes[index];
+}
 
 }
-#endif

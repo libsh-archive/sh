@@ -24,8 +24,8 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHGCC_HPP
-#define SHGCC_HPP
+#ifndef SHCC_HPP
+#define SHCC_HPP
 
 #include <map>
 #include <string>
@@ -34,23 +34,23 @@
 #include "ShVariant.hpp"
 #include "ShBackend.hpp"
 
-// #define SH_GCC_DEBUG 1
+// #define SH_CC_DEBUG 1
 
 // function representing a single kernel
 // Each of the parameters is an array of single storage-typed arrays
 // (The size and type are known during code emission)
-typedef void (*GccFunc)(void** inputs, 
+typedef void (*CcFunc)(void** inputs, 
 			const void** params,
 			void** channels,
 			void** textures,
 			void** outputs);
 
-namespace ShGcc {
+namespace ShCc {
 
-struct GccVariable
+struct CcVariable
 {
-  GccVariable(void);
-  GccVariable(int num, const std::string& name, int size, int typeIndex);
+  CcVariable(void);
+  CcVariable(int num, const std::string& name, int size, int typeIndex);
 
   int m_num;
   std::string m_name;
@@ -58,11 +58,11 @@ struct GccVariable
   int m_typeIndex;
 };
 
-class GccBackendCode: public SH::ShBackendCode
+class CcBackendCode: public SH::ShBackendCode
 {
   public:
-    GccBackendCode(const SH::ShProgramNodeCPtr& program);
-    ~GccBackendCode(void);
+    CcBackendCode(const SH::ShProgramNodeCPtr& program);
+    ~CcBackendCode(void);
 
     bool allocateRegister(const SH::ShVariableNodePtr& var);
     void freeRegister(const SH::ShVariableNodePtr& var);
@@ -77,13 +77,13 @@ class GccBackendCode: public SH::ShBackendCode
     std::ostream& describe_interface(std::ostream& out);
 
   protected:
-    friend class GccBackend;
+    friend class CcBackend;
     bool generate(void);
     bool execute(SH::ShStream& dest);
 
   private:
 
-    /// Starting from num = 0, adds GccVariables to the m_varmap with variables
+    /// Starting from num = 0, adds CcVariables to the m_varmap with variables
     /// named varPrefix + num = arrayName[num]. 
     /// 
     /// T must be of type ShVariableNodePtr 
@@ -92,7 +92,7 @@ class GccBackendCode: public SH::ShBackendCode
 
     // Allocates a variable names for different kinds of data 
     // and initializes the variable to index into the appropriate
-    // element of an array passed into the GccFunc.
+    // element of an array passed into the CcFunc.
     //
     // Spits out these variable declarations & assignments to m_code
     //
@@ -126,12 +126,12 @@ class GccBackendCode: public SH::ShBackendCode
   class EmitFunctor
 	{
     public:
-      EmitFunctor(GccBackendCode* bec);
+      EmitFunctor(CcBackendCode* bec);
 
       void operator()(SH::ShCtrlGraphNode* node);
       
     public:
-      GccBackendCode* m_bec;
+      CcBackendCode* m_bec;
 	};
       
   void emit(const SH::ShStatement& stmt);
@@ -143,12 +143,12 @@ class GccBackendCode: public SH::ShBackendCode
     const SH::ShProgramNodeCPtr& m_program;
 
     std::map<SH::ShCtrlGraphNodePtr, int> m_label_map;
-    std::map<SH::ShVariableNodePtr, GccVariable> m_varmap;
+    std::map<SH::ShVariableNodePtr, CcVariable> m_varmap;
 
     std::stringstream m_code;
 
     void* m_handle;
-    GccFunc m_func;
+    CcFunc m_func;
 
     int m_cur_temp;
 
@@ -156,15 +156,15 @@ class GccBackendCode: public SH::ShBackendCode
     std::vector<SH::ShVariantPtr> m_paramVariants;
 
     //std::vector<SH::ShChannelNodePtr> m_channels;
-    //std::vector<GccVariable> m_temps;
+    //std::vector<CcVariable> m_temps;
     //std::vector<SH::ShTextureNodePtr> m_textures;
 };
   
-class GccBackend: public SH::ShBackend
+class CcBackend: public SH::ShBackend
 {
   public:
-    GccBackend(void);
-    ~GccBackend(void);
+    CcBackend(void);
+    ~CcBackend(void);
 
     std::string name(void) const;
 
@@ -175,8 +175,8 @@ class GccBackend: public SH::ShBackend
 };
 
 
-typedef SH::ShPointer<GccBackendCode> GccBackendCodePtr;
-typedef SH::ShPointer<GccBackend> GccBackendPtr;
+typedef SH::ShPointer<CcBackendCode> CcBackendCodePtr;
+typedef SH::ShPointer<CcBackend> CcBackendPtr;
 
 }
 

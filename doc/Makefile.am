@@ -4,7 +4,7 @@ html/index.html: Doxyfile $(wildcard ../src/*.[hc]pp) $(wildcard ../util/*.[hc]p
 	doxygen Doxyfile
 
 upload-docs: docs
-	scp -r html shell.sourceforge.net:/home/groups/l/li/libsh/htdocs/api
+	scp -r html shell.sourceforge.net:/home/groups/l/li/libsh/htdocs/api/@VERSION@
 
 mostlyclean-local:
 	rm -rf html

@@ -28,7 +28,7 @@
 
 Test::Test(int argc, char** argv)
 {
-  m_backend = "gcc";
+  m_backend = "cc";
   if (argc >= 2) m_backend = argv[1];
   if (m_backend != "host") SH::shSetBackend(m_backend);
 }

@@ -31,7 +31,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-#include "Gcc.hpp" 
+#include "Cc.hpp" 
 #include "ShDebug.hpp" 
 #include "ShStream.hpp" 
 #include "ShVariant.hpp"
@@ -42,17 +42,17 @@
 #include "config.h"
 #endif
 
-#ifdef SH_GCC_DEBUG
-#  define SH_GCC_DEBUG_PRINT(x) SH_DEBUG_PRINT(x)
+#ifdef SH_CC_DEBUG
+#  define SH_CC_DEBUG_PRINT(x) SH_DEBUG_PRINT(x)
 #else
-#  define SH_GCC_DEBUG_PRINT(x) do { } while(0)
+#  define SH_CC_DEBUG_PRINT(x) do { } while(0)
 #endif
 
 
 
 
 
-namespace ShGcc {
+namespace ShCc {
   using namespace SH;
 
   std::string encode(const ShVariable& v) {
@@ -78,93 +78,93 @@ namespace ShGcc {
   const char* StreamPrefix = "var_s_";
   const char* UniformPrefix= "var_u_";
 
-  GccVariable::GccVariable(void) 
+  CcVariable::CcVariable(void) 
     : m_num(-1), 
       m_size(-1), 
       m_typeIndex(-1)
   {}
   
-  GccVariable::GccVariable(int num, const std::string& name, int size, int typeIndex) 
+  CcVariable::CcVariable(int num, const std::string& name, int size, int typeIndex) 
     : m_num(num),
       m_name(name),
       m_size(size),
       m_typeIndex(typeIndex) 
   {}
 
-  GccBackendCode::LabelFunctor::LabelFunctor(std::map<ShCtrlGraphNodePtr, int>& label_map) 
+  CcBackendCode::LabelFunctor::LabelFunctor(std::map<ShCtrlGraphNodePtr, int>& label_map) 
     : m_cur_label(0),
       m_label_map(label_map) 
   {}
 
-  void GccBackendCode::LabelFunctor::operator()(ShCtrlGraphNode* node) 
+  void CcBackendCode::LabelFunctor::operator()(ShCtrlGraphNode* node) 
   {
     m_label_map[node] = m_cur_label++;
   }
   
-  GccBackendCode::EmitFunctor::EmitFunctor(GccBackendCode* bec) 
+  CcBackendCode::EmitFunctor::EmitFunctor(CcBackendCode* bec) 
     : m_bec(bec) 
   {}
   
-  void GccBackendCode::EmitFunctor::operator()(ShCtrlGraphNode* node) 
+  void CcBackendCode::EmitFunctor::operator()(ShCtrlGraphNode* node) 
   {
     m_bec->emit(node);
   }
   
-  GccBackendCode::GccBackendCode(const ShProgramNodeCPtr& program) 
+  CcBackendCode::CcBackendCode(const ShProgramNodeCPtr& program) 
     : m_program(program),
       m_handle(NULL),
       m_func(NULL),
       m_cur_temp(0),
       m_params(NULL) 
   {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
   }
 
-  GccBackendCode::~GccBackendCode(void) 
+  CcBackendCode::~CcBackendCode(void) 
   {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
   }
 
-  bool GccBackendCode::allocateRegister(const ShVariableNodePtr& var) 
+  bool CcBackendCode::allocateRegister(const ShVariableNodePtr& var) 
   {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
     return false;
   }
 
-  void GccBackendCode::freeRegister(const ShVariableNodePtr& var) 
+  void CcBackendCode::freeRegister(const ShVariableNodePtr& var) 
   {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
   }
 
-  void GccBackendCode::upload(void) 
+  void CcBackendCode::upload(void) 
   {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
   }
 
-  void GccBackendCode::bind(void) 
+  void CcBackendCode::bind(void) 
   {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
   }
 
-  void GccBackendCode::updateUniform(const ShVariableNodePtr& uniform) 
+  void CcBackendCode::updateUniform(const ShVariableNodePtr& uniform) 
   {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
   }
 
-  std::ostream& GccBackendCode::print(std::ostream& out) 
+  std::ostream& CcBackendCode::print(std::ostream& out) 
   {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
     return out;
   }
 
-  std::ostream& GccBackendCode::describe_interface(std::ostream& out) 
+  std::ostream& CcBackendCode::describe_interface(std::ostream& out) 
   {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
     return out;
   }
   
   template<typename T>
-  void GccBackendCode::allocate_varlist(const std::list<T> &varList, const char* varPrefix, const char* arrayName, const char* typePrefix)
+  void CcBackendCode::allocate_varlist(const std::list<T> &varList, const char* varPrefix, const char* arrayName, const char* typePrefix)
   {
     int num = 0;
 
@@ -179,14 +179,14 @@ namespace ShGcc {
         << " = ((" << type << "*) " << arrayName << "[" << num << "]); // " 
         << node->name() << std::endl; 
 
-      m_varmap[node] = GccVariable(num, name, node->size(), node->typeIndex()); 
+      m_varmap[node] = CcVariable(num, name, node->size(), node->typeIndex()); 
     }
     m_code << std::endl;
 
-    SH_GCC_DEBUG_PRINT("Found " << num << " " << arrayName << "...");
+    SH_CC_DEBUG_PRINT("Found " << num << " " << arrayName << "...");
   }
 
-  void GccBackendCode::allocate_consts(void) 
+  void CcBackendCode::allocate_consts(void) 
   {
     int num = 0;
     
@@ -199,30 +199,30 @@ namespace ShGcc {
       m_code << ctype(node->typeIndex()) << name << "[" << node->size() << "] = {" 
         << node->getVariant()->encodeArray() << "}; // " << node->name() << std::endl;
 
-      m_varmap[node] = GccVariable(num, name, node->size(), node->typeIndex()); 
+      m_varmap[node] = CcVariable(num, name, node->size(), node->typeIndex()); 
     }
     m_code << std::endl;
 
-    SH_GCC_DEBUG_PRINT("Found " << num << " consts...");
+    SH_CC_DEBUG_PRINT("Found " << num << " consts...");
   }
 
-  void GccBackendCode::allocate_inputs(void) {
+  void CcBackendCode::allocate_inputs(void) {
     allocate_varlist(m_program->inputs, InputPrefix, "inputs"); 
   }
 
-  void GccBackendCode::allocate_outputs(void) {
+  void CcBackendCode::allocate_outputs(void) {
     allocate_varlist(m_program->outputs, OutputPrefix, "outputs"); 
   }
 
-  void GccBackendCode::allocate_channels(void) {
+  void CcBackendCode::allocate_channels(void) {
     allocate_varlist(m_program->channels, StreamPrefix, "channels"); 
   }
 
-  void GccBackendCode::allocate_textures(void) {
+  void CcBackendCode::allocate_textures(void) {
     allocate_varlist(m_program->textures, TexturePrefix, "textures"); 
   }
 
-  void GccBackendCode::allocate_uniforms(void) {
+  void CcBackendCode::allocate_uniforms(void) {
     allocate_varlist(m_program->uniforms, UniformPrefix, "params", "const"); 
     
     const ShProgramNode::VarList &uniforms = m_program->uniforms;
@@ -237,7 +237,7 @@ namespace ShGcc {
     }
   }
 
-  void GccBackendCode::allocate_temps() 
+  void CcBackendCode::allocate_temps() 
   {
     ShProgramNode::VarList::const_iterator I = m_program->temps.begin();
     for (; I != m_program->temps.end(); ++I, ++m_cur_temp) {
@@ -246,14 +246,14 @@ namespace ShGcc {
       
       m_code << ctype(node->typeIndex()) << " " << name << "[" << node->size() << "]"
         << "; // " << node->name() << std::endl;
-      m_varmap[node] = GccVariable(m_cur_temp, name, node->size(), node->typeIndex()); 
+      m_varmap[node] = CcVariable(m_cur_temp, name, node->size(), node->typeIndex()); 
     }
 
-    SH_GCC_DEBUG_PRINT("Found " << m_cur_temp << " temps...");
+    SH_CC_DEBUG_PRINT("Found " << m_cur_temp << " temps...");
   }
 
-  std::string GccBackendCode::resolve(const ShVariable& v) {
-    GccVariable &var = m_varmap[v.node()];
+  std::string CcBackendCode::resolve(const ShVariable& v) {
+    CcVariable &var = m_varmap[v.node()];
     SH_DEBUG_ASSERT(var.m_num != -1);
 
     std::stringstream buf;
@@ -262,8 +262,8 @@ namespace ShGcc {
     return buf.str();
   }
 
-  std::string GccBackendCode::resolve(const ShVariable& v, int idx) {
-    GccVariable &var = m_varmap[v.node()];
+  std::string CcBackendCode::resolve(const ShVariable& v, int idx) {
+    CcVariable &var = m_varmap[v.node()];
     SH_DEBUG_ASSERT(var.m_num != -1);
 
     std::stringstream buf;
@@ -272,7 +272,7 @@ namespace ShGcc {
     return buf.str();
   }
 
-  const char* GccBackendCode::ctype(int typeIndex)
+  const char* CcBackendCode::ctype(int typeIndex)
   {
     // outputs a c++ type corresponding to the given type index
     // @todo type enter these strings into the ShTypeInfo objects 
@@ -294,7 +294,7 @@ namespace ShGcc {
     return ctype_table[typeIndex];
   }
 
-  void GccBackendCode::emit(ShBasicBlockPtr block) {
+  void CcBackendCode::emit(ShBasicBlockPtr block) {
     if (!block) {
       m_code << "  // empty basic block" << std::endl;
     }
@@ -308,7 +308,7 @@ namespace ShGcc {
     }
   }
 
-  void GccBackendCode::emit(ShCtrlGraphNodePtr node) {
+  void CcBackendCode::emit(ShCtrlGraphNodePtr node) {
     m_code << "label_" << m_label_map[node] << ":" << std::endl
 	   << "  ;" << std::endl;
 	
@@ -344,8 +344,8 @@ namespace ShGcc {
     }
   }
 
-  bool GccBackendCode::generate(void) {
-    SH_GCC_DEBUG_PRINT("Creating label map...");
+  bool CcBackendCode::generate(void) {
+    SH_CC_DEBUG_PRINT("Creating label map...");
     LabelFunctor fl(m_label_map);
     m_program->ctrlGraph->dfs(fl);
 
@@ -358,7 +358,7 @@ namespace ShGcc {
     allocate_temps();
 
     // emit code
-    SH_GCC_DEBUG_PRINT("Emitting code...");
+    SH_CC_DEBUG_PRINT("Emitting code...");
     EmitFunctor fe(this);
     m_program->ctrlGraph->dfs(fe);
 
@@ -366,7 +366,7 @@ namespace ShGcc {
     std::stringstream prologue;
     prologue << "#include <math.h>" << std::endl;
     prologue << "#include <iostream>" << std::endl;
-    // @todo output the GccTextures.hpp file here
+    // @todo output the CcTextures.hpp file here
     prologue << std::endl;
     prologue << std::endl;
     prologue << "extern \"C\" "
@@ -384,9 +384,9 @@ namespace ShGcc {
     epilogue << "}" << std::endl;
 
     // output code for debugging...
-    SH_GCC_DEBUG_PRINT(prologue.str());
-    SH_GCC_DEBUG_PRINT(m_code.str());
-    SH_GCC_DEBUG_PRINT(epilogue.str());
+    SH_CC_DEBUG_PRINT(prologue.str());
+    SH_CC_DEBUG_PRINT(m_code.str());
+    SH_CC_DEBUG_PRINT(epilogue.str());
 
     char name[32];
     tmpnam(name);
@@ -402,8 +402,8 @@ namespace ShGcc {
     fout.flush();
     fout.close();
 
-#ifdef SH_GCC_DEBUG
-    std::ofstream dbgout("gccstream.cpp");
+#ifdef SH_CC_DEBUG
+    std::ofstream dbgout("ccstream.cpp");
     dbgout << prologue.str();
     dbgout << m_code.str();
     dbgout << epilogue.str();
@@ -414,44 +414,44 @@ namespace ShGcc {
     pid_t pid = fork();
     if (pid == 0) {
       // child
-      execlp("gcc", "gcc", "-O2", "-shared", "-o", sofile, ccfile,
-             "-L", SH_INSTALL_PREFIX "/lib/sh", "-lshgcc", NULL);
-      SH_GCC_DEBUG_PRINT("exec failed (" << errno << ")");
+      execlp("cc", "cc", "-O2", "-shared", "-o", sofile, ccfile,
+             "-L", SH_INSTALL_PREFIX "/lib/sh", "-lshcc", NULL);
+      SH_CC_DEBUG_PRINT("exec failed (" << errno << ")");
       exit(-1);
     } else if (pid > 0) {
       int status;
       pid_t ret = waitpid(pid, &status, 0);
       if (ret == -1) {
-        SH_GCC_DEBUG_PRINT("wait failed...");
+        SH_CC_DEBUG_PRINT("wait failed...");
         return false;
       } else {
-        SH_GCC_DEBUG_PRINT("status = " << status);
+        SH_CC_DEBUG_PRINT("status = " << status);
       }
 
       m_handle = dlopen(sofile, RTLD_NOW);
       if (m_handle == NULL) {
-        SH_GCC_DEBUG_PRINT("dlopen failed: " << dlerror());
+        SH_CC_DEBUG_PRINT("dlopen failed: " << dlerror());
         return false;
       } else {
-        m_func = (GccFunc)dlsym(m_handle, "func");
+        m_func = (CcFunc)dlsym(m_handle, "func");
         if (m_func == NULL) {
-          SH_GCC_DEBUG_PRINT("dlsym failed: " << dlerror());
+          SH_CC_DEBUG_PRINT("dlsym failed: " << dlerror());
           return false;
         }
       }
       return true;
     } else  {
       // fork failed
-      SH_GCC_DEBUG_PRINT("fork failed...");
+      SH_CC_DEBUG_PRINT("fork failed...");
       return false;
     }
   }
 
-  bool GccBackendCode::execute(ShStream& dest) 
+  bool CcBackendCode::execute(ShStream& dest) 
   {
     if (!m_func) {
       if (!generate()) {
-        SH_GCC_DEBUG_PRINT("failed to generate program..."); 
+        SH_CC_DEBUG_PRINT("failed to generate program..."); 
         return false;
       }
     }
@@ -470,7 +470,7 @@ namespace ShGcc {
     
     int sidx = 0;
     
-    SH_GCC_DEBUG_PRINT("Assigning input channels to arrays");
+    SH_CC_DEBUG_PRINT("Assigning input channels to arrays");
     for(ShProgramNode::ChannelList::const_iterator I = m_program->channels_begin()
         ;I != m_program->channels_end(); ++I, ++sidx) {
       ShChannelNodePtr channel = (*I);
@@ -507,7 +507,7 @@ namespace ShGcc {
     int count = 0;
 
     
-    SH_GCC_DEBUG_PRINT("Assigning output channels to arrays");
+    SH_CC_DEBUG_PRINT("Assigning output channels to arrays");
     for(ShStream::NodeList::iterator I = dest.begin()
         ;I != dest.end(); ++I, ++oidx) {
       ShChannelNodePtr channel = (*I);
@@ -519,29 +519,29 @@ namespace ShGcc {
       output_types[oidx] = channel->typeIndex();
 
       if (!storage) {
-        SH_GCC_DEBUG_PRINT("  Allocating new storage?");
+        SH_CC_DEBUG_PRINT("  Allocating new storage?");
         storage = new ShHostStorage(channel->memory().object(),
            datasize * channel->size() * channel->count());
       }
       storage->dirty();
       outputs[oidx] = storage->data();
-      SH_GCC_DEBUG_PRINT("  outputs[" << oidx << "] = " << outputs[oidx]);
+      SH_CC_DEBUG_PRINT("  outputs[" << oidx << "] = " << outputs[oidx]);
 
       if (count == 0) {
         count = channel->count();
       } else if (count != channel->count()) {
-        SH_GCC_DEBUG_PRINT("channel count discrepancy...");
+        SH_CC_DEBUG_PRINT("channel count discrepancy...");
         return false;
       }
     }
 
       
     for(int i = 0; i < count; i++) {
-      SH_GCC_DEBUG_PRINT("execution " << i << " of " << count);
+      SH_CC_DEBUG_PRINT("execution " << i << " of " << count);
       m_func(inputs, m_params, streams, textures, outputs);
 
       for(int j = 0; j < num_streams; j++) {
-        SH_GCC_DEBUG_PRINT("advancing input stream "
+        SH_CC_DEBUG_PRINT("advancing input stream "
 		       << j
 		       << " by "
 		       << stream_sizes[j] 
@@ -551,7 +551,7 @@ namespace ShGcc {
         streams[j] = reinterpret_cast<char*>(streams[j]) + stream_sizes[j]; 
       }
       for(int j = 0; j < num_outputs; j++) {
-        SH_GCC_DEBUG_PRINT("advancing output stream "
+        SH_CC_DEBUG_PRINT("advancing output stream "
 		       << j
 		       << " by "
 		       << output_sizes[j]
@@ -564,35 +564,35 @@ namespace ShGcc {
   }
 
 
-  GccBackend::GccBackend(void) {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+  CcBackend::CcBackend(void) {
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
   }
 
-  GccBackend::~GccBackend(void) {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+  CcBackend::~CcBackend(void) {
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
   }
 
-  std::string GccBackend::name(void) const {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
-    return "gcc";
+  std::string CcBackend::name(void) const {
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
+    return "cc";
   }
 
-  ShBackendCodePtr GccBackend::generateCode(const std::string& target,
+  ShBackendCodePtr CcBackend::generateCode(const std::string& target,
 						const ShProgramNodeCPtr& program) {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
-    GccBackendCodePtr backendcode = new GccBackendCode(program);
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
+    CcBackendCodePtr backendcode = new CcBackendCode(program);
     backendcode->generate();
     return backendcode;
   }
 
-  void GccBackend::execute(const ShProgramNodeCPtr& program, ShStream& dest) {
-    SH_GCC_DEBUG_PRINT(__FUNCTION__);
+  void CcBackend::execute(const ShProgramNodeCPtr& program, ShStream& dest) {
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
 
-    GccBackendCodePtr backendcode = new GccBackendCode(program);
+    CcBackendCodePtr backendcode = new CcBackendCode(program);
     backendcode->execute(dest);
   }
 
-  static GccBackend* backend = new GccBackend();
+  static CcBackend* backend = new CcBackend();
 
 }
 

@@ -1,0 +1,13 @@
+This directory contains a very minimal example of using Sh in a glut-based
+application. This may be useful for you to use as a basis for building your own
+Sh-enabled programs.
+
+You will need to change the installation location in the Makefile if you are
+compiling under Linux, or change some of the variables in Makefile.win32 if
+compiling under Windows.
+
+Note that this example also appears in the Sh book.
+
+Enjoy,
+
+Stefanus

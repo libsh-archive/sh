@@ -24,35 +24,47 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHVARIABLETYPE_HPP
-#define SHVARIABLETYPE_HPP
+#ifndef SHPALETTENODE_HPP
+#define SHPALETTENODE_HPP
+
+#include <cstddef>
+#include "ShVariableNode.hpp"
 
 namespace SH {
 
-/** The various ways variables can be bound.
+/** @internal Palette Node Representation
+ *
+ * Represents a palette (i.e. a uniform array of variables)
+ * internally.
+ *
+ * To use palettes, refer to the ShPalette class instead.
+ *
+ * @see ShPalette
  */
-enum ShBindingType {
-  SH_INPUT = 0,
-  SH_OUTPUT = 1,
-  SH_INOUT = 2,
-  SH_TEMP = 3,
-  SH_CONST = 4,
-  SH_TEXTURE = 5,
-  SH_STREAM = 6,
-  SH_PALETTE = 7
+class ShPaletteNode : public ShVariableNode {
+public:
+  ShPaletteNode(int elements, ShSemanticType semantic, int typeIndex, std::size_t length);
+
+  /// Set the VariableNode corresponding to the given index. Only ShPalette should call this.
+  void set_node(std::size_t index, const ShVariableNodePtr& node);
+
+  /// Return the number of variables represented by this palette.
+  std::size_t palette_length() const;
+
+  /// Return one of the variables represented by this palette.
+  ShVariableNodeCPtr get_node(std::size_t index) const;
+
+  /// Return one of the variables represented by this palette.
+  ShVariableNodePtr get_node(std::size_t index);
+  
+private:
+  std::size_t m_length;
+  ShVariableNodePtr* m_nodes;
 };
 
-/** The various ways semantic types for variables.
- */
-enum ShSemanticType {
-  SH_ATTRIB,
-  SH_POINT,
-  SH_VECTOR,
-  SH_NORMAL,
-  SH_COLOR,
-  SH_TEXCOORD,
-  SH_POSITION
-};
+typedef ShPointer<ShPaletteNode> ShPaletteNodePtr;
+typedef ShPointer<const ShPaletteNode> ShPaletteNodeCPtr;
 
 }
+
 #endif

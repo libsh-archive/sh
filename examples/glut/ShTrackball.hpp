@@ -24,35 +24,26 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHVARIABLETYPE_HPP
-#define SHVARIABLETYPE_HPP
+#ifndef SHTRACKBALL_HPP
+#define SHTRACKBALL_HPP
+
+#include <sh/sh.hpp>
 
 namespace SH {
 
-/** The various ways variables can be bound.
- */
-enum ShBindingType {
-  SH_INPUT = 0,
-  SH_OUTPUT = 1,
-  SH_INOUT = 2,
-  SH_TEMP = 3,
-  SH_CONST = 4,
-  SH_TEXTURE = 5,
-  SH_STREAM = 6,
-  SH_PALETTE = 7
-};
+class ShTrackball {
+public:
+  ShTrackball() : m_width(0.0), m_height(0.0) {}
+  
+  ~ShTrackball() {}
 
-/** The various ways semantic types for variables.
- */
-enum ShSemanticType {
-  SH_ATTRIB,
-  SH_POINT,
-  SH_VECTOR,
-  SH_NORMAL,
-  SH_COLOR,
-  SH_TEXCOORD,
-  SH_POSITION
+  void resize(float width, float height);
+  ShMatrix4x4f rotate(float sx, float sy, float ex, float ey) const;
+
+private:
+  float m_width, m_height;
 };
 
 }
+
 #endif
