@@ -165,6 +165,7 @@ struct ScheduleBuilder {
             
             pass.outputs.push_back(register_map[vnode]);
             handled_output.insert(vnode);
+            pass.program->outputs.push_back(vnode);
           }
         }
         

@@ -199,6 +199,7 @@ ShBackendSchedulePtr PCScheduler::prepare(ShSchedule* schedule)
     return 0;
   }
 
+  
   std::cerr << "Schedule has " << schedule->num_temps() << std::endl;
   for (std::size_t i = 0; i < schedule->num_temps(); i++) {
     std::cerr << "Setting up temporary..." << std::endl;
@@ -209,6 +210,7 @@ ShBackendSchedulePtr PCScheduler::prepare(ShSchedule* schedule)
   
   for (ShSchedule::PassList::iterator I = schedule->begin(); I != schedule->end();
        ++I) {
+    SH_DEBUG_ASSERT(!I->program->outputs.empty());
     std::cerr << "Gathering..." << std::endl;
     ChannelGatherer gatherer(pc_schedule->channel_map, dims);
 
@@ -219,6 +221,7 @@ ShBackendSchedulePtr PCScheduler::prepare(ShSchedule* schedule)
   
   for (ShSchedule::PassList::iterator I = schedule->begin(); I != schedule->end();
        ++I) {
+    SH_DEBUG_ASSERT(!I->program->outputs.empty());
     PCPassPtr p = new PCPass(current_pc);
 
     ShProgramNodePtr prg = I->program;
@@ -311,6 +314,9 @@ void PCSchedule::pre_execution(int width, int height, const ShStream& outputs)
 
   std::cerr << "Activating." << std::endl;
   PBufferHandlePtr old_context = m_context->activate();
+
+  SH_GL_CHECK_ERROR(glEnable(GL_VERTEX_PROGRAM_ARB));
+  SH_GL_CHECK_ERROR(glEnable(GL_FRAGMENT_PROGRAM_ARB));
 
   SH_GL_CHECK_ERROR(glGenOcclusionQueriesNV(1, &m_query));
 
