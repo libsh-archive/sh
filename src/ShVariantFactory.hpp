@@ -62,7 +62,7 @@ ShVariantFactory {
   virtual ShVariant* generateOne(int N = 1) const = 0;
 };
 
-template<ShValueType V, ShDataType DT>
+template<typename T, ShDataType DT>
 struct ShDataVariantFactory: public ShVariantFactory {
   ShVariant* generate(int N) const;
 

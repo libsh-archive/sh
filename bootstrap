@@ -21,8 +21,16 @@ fi
 export ACLOCAL
 
 # ltdl seems to require these now...
-cp /usr/share/libtool/libtool.m4 .
-cp /usr/share/libtool/ltdl.m4 .
+if test -f "/usr/share/libtool/libtool.m4"
+  then cp /usr/share/libtool/libtool.m4 .
+  cp /usr/share/libtool/ltdl.m4 .
+elif test -f "/usr/share/aclocal/libtool.m4"
+  then cp /usr/share/aclocal/libtool.m4 .
+  cp /usr/share/aclocal/ltdl.m4 .
+else
+  echo "libtool.m4 and ltdl.m4 not copied"
+  echo "if you find them copy them to `pwd`"
+fi
 
 cat config/*.m4 > acinclude.m4
 

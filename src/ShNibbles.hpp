@@ -95,8 +95,8 @@ ShProgram access(const ShBaseTextureCube<T> &tex, const std::string & tcname = "
  * Inputs: IN(0) attrib
  * Outputs: OUT(0) T name = m | attrib
  */
-template<typename T, int Rows, int Cols, ShBindingType Binding, ShValueType V>
-ShProgram transform(const ShMatrix<Rows, Cols, Binding, V> &m, const std::string & name = "result");
+template<typename T, int Rows, int Cols, ShBindingType Binding, typename T2>
+ShProgram transform(const ShMatrix<Rows, Cols, Binding, T2> &m, const std::string & name = "result");
 
 /** \brief Casting nibble 
  * Casts from tuple type T to type T2

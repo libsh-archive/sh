@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT(Sh, 0.7.4, libsh-devel@lists.sourceforge.net, libsh)
+AC_INIT(Sh, 0.7.5, libsh-devel@lists.sourceforge.net, libsh)
 AC_CONFIG_SRCDIR([src/ShVariable.hpp])
 AM_INIT_AUTOMAKE
 
@@ -105,6 +105,7 @@ fi
 
 AM_CONDITIONAL(ENABLE_DOXYGEN_DOCS, test x$sh_enable_docs = xtrue)
 
+if test "x$prefix" == "xNONE"; then prefix="/usr/local"; fi
 # Store the prefix as a variable
 AC_DEFINE_UNQUOTED(SH_INSTALL_PREFIX, "$prefix", [Installation prefix directory])
 
@@ -115,6 +116,7 @@ AC_CONFIG_FILES([Makefile
 		 test/regress/Makefile
 		 backends/Makefile
 		 backends/cc/Makefile
+		 backends/rds/Makefile
 		 backends/sm/Makefile
 		 backends/gl/Makefile
 		 util/Makefile

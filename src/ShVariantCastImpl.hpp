@@ -33,13 +33,13 @@
 
 namespace SH {
 
-template<ShValueType Dest, ShDataType DestDT, 
-  ShValueType Src, ShDataType SrcDT> 
+template<typename Dest, ShDataType DestDT, 
+  typename Src, ShDataType SrcDT> 
 ShDataVariantCast<Dest, DestDT, Src, SrcDT>* 
 ShDataVariantCast<Dest, DestDT, Src, SrcDT>::m_instance = 0;
 
-template<ShValueType Dest, ShDataType DestDT, 
-  ShValueType Src, ShDataType SrcDT> 
+template<typename Dest, ShDataType DestDT, 
+  typename Src, ShDataType SrcDT> 
 void ShDataVariantCast<Dest, DestDT, Src, SrcDT>::doCast(
     ShVariant* dest, const ShVariant *src) const
 {
@@ -52,36 +52,36 @@ void ShDataVariantCast<Dest, DestDT, Src, SrcDT>::doCast(
   for(;S != sv->end(); ++S, ++D) doCast(*D, *S);
 }
 
-template<ShValueType Dest, ShDataType DestDT, 
-  ShValueType Src, ShDataType SrcDT>
+template<typename Dest, ShDataType DestDT, 
+  typename Src, ShDataType SrcDT>
 void ShDataVariantCast<Dest, DestDT, Src, SrcDT>::getCastTypes(
     ShValueType &dest, ShDataType &destDT, 
     ShValueType &src, ShDataType &srcDT) const
 {
-  dest = Dest;
+  dest = DestValueType;
   destDT = DestDT;
-  src = Src;
+  src = SrcValueType;
   srcDT = SrcDT;
 }
 
-template<ShValueType Dest, ShDataType DestDT, 
-  ShValueType Src, ShDataType SrcDT>
+template<typename Dest, ShDataType DestDT, 
+  typename Src, ShDataType SrcDT>
 void ShDataVariantCast<Dest, DestDT, Src, SrcDT>::getDestTypes(
     ShValueType &valueType, ShDataType &dataType) const
 {
-  valueType = Dest; 
+  valueType = DestValueType; 
   dataType = DestDT;
 }
 
-template<ShValueType Dest, ShDataType DestDT, 
-  ShValueType Src, ShDataType SrcDT>
+template<typename Dest, ShDataType DestDT, 
+  typename Src, ShDataType SrcDT>
 void ShDataVariantCast<Dest, DestDT, Src, SrcDT>::doCast(D &dest, const S &src) const
 {
   shDataTypeCast<Dest, DestDT, Src, SrcDT>(dest, src);
 }
 
-template<ShValueType Dest, ShDataType DestDT, 
-  ShValueType Src, ShDataType SrcDT>
+template<typename Dest, ShDataType DestDT, 
+  typename Src, ShDataType SrcDT>
 const ShDataVariantCast<Dest, DestDT, Src, SrcDT>*
 ShDataVariantCast<Dest, DestDT, Src, SrcDT>::instance()
 {

@@ -131,12 +131,12 @@ namespace ShCc {
 
     // convert half floats, fractionals to types we can use
     m_convertMap[SH_HALF] = SH_FLOAT;
-    m_convertMap[SH_FRAC_INT] = SH_FLOAT;
-    m_convertMap[SH_FRAC_SHORT] = SH_FLOAT;
-    m_convertMap[SH_FRAC_BYTE] = SH_FLOAT;
-    m_convertMap[SH_FRAC_UINT] = SH_FLOAT;
-    m_convertMap[SH_FRAC_USHORT] = SH_FLOAT;
-    m_convertMap[SH_FRAC_UBYTE] = SH_FLOAT;
+    m_convertMap[SH_FINT] = SH_FLOAT;
+    m_convertMap[SH_FSHORT] = SH_FLOAT;
+    m_convertMap[SH_FBYTE] = SH_FLOAT;
+    m_convertMap[SH_FUINT] = SH_FLOAT;
+    m_convertMap[SH_FUSHORT] = SH_FLOAT;
+    m_convertMap[SH_FUBYTE] = SH_FLOAT;
   }
 
   CcBackendCode::~CcBackendCode(void) 
@@ -295,29 +295,28 @@ namespace ShCc {
 
   const char* CcBackendCode::ctype(ShValueType valueType)
   {
-    // outputs a c++ type corresponding to the given type index
-    // @todo type enter these strings into the ShTypeInfo objects 
-    static const char* ctype_table[SH_VALUETYPE_END] = {
-      "ShInterval<double>",
-      "ShInterval<float>",
-      "double",
-      "float",
-      "float",
-      "int",
-      "short",
-      "char",
-      "unsigned int",
-      "unsigned short",
-      "unsigned char",
-      "float",
-      "float",
-      "float",
-      "float",
-      "float",
-      "float",
-    };
+    switch(valueType) {
+      case SH_HALF:
+      case SH_FLOAT:
+      case SH_FBYTE:
+      case SH_FSHORT:
+      case SH_FINT:
+      case SH_FUBYTE:
+      case SH_FUSHORT:
+      case SH_FUINT:
+        return "float";
 
-    return ctype_table[valueType];
+      case SH_DOUBLE: return "double";
+      case SH_BYTE:   return "char";
+      case SH_SHORT:  return "short";
+      case SH_INT:    return "int";
+      case SH_UBYTE:  return "unsigned char";
+      case SH_USHORT: return "unsigned short";
+      case SH_UINT:   return "unsigned int";
+      default:
+        SH_DEBUG_ASSERT(0 && "Invalid value type");
+    }
+    return "unknown"; 
   }
 
   void CcBackendCode::emit(ShBasicBlockPtr block) {

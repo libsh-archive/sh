@@ -58,6 +58,8 @@ enum ShBindingType {
   SH_TEXTURE, 
   SH_STREAM, 
   SH_PALETTE, 
+
+  SH_BINDINGTYPE_END
 };
 
 SH_DLLEXPORT extern const char* bindingTypeName[];
@@ -72,84 +74,11 @@ enum ShSemanticType {
   SH_COLOR,
   SH_TEXCOORD,
   SH_POSITION,
+  
+  SH_SEMANTICTYPE_END
 };
 
 SH_DLLEXPORT extern const char* semanticTypeName[];
-
-/**  The various variable value types.
- */
-#ifdef WIN32
-typedef int ShValueType;
-enum __ShValueTypeEnum {
-#else 
-enum ShValueType {
-#endif
-  SH_INTERVAL_DOUBLE,
-  SH_INTERVAL_FLOAT,
-  SH_DOUBLE,
-  SH_FLOAT,
-  SH_HALF,
-
-  SH_INT,
-  SH_SHORT,
-  SH_BYTE,
-  SH_UINT,
-  SH_USHORT,
-  SH_UBYTE,
-
-  SH_FRAC_INT,
-  SH_FRAC_SHORT,
-  SH_FRAC_BYTE,
-  SH_FRAC_UINT,
-  SH_FRAC_USHORT,
-  SH_FRAC_UBYTE,
-
-  SH_VALUETYPE_END ///< only denotes end of list/number of Value type 
-};
-
-SH_DLLEXPORT extern const char* valueTypeName[]; 
-
-/** type holds the interval value type that uses the given value type V 
- * for its bounds. or SH_VALUETYPE_END if no such interval type exists.
- */
-template<ShValueType V>
-struct ShIntervalValueType 
-{
-  static const ShValueType type = (SH_DOUBLE <= V) && (V <= SH_FLOAT) ? (ShValueType)(V - 2) : SH_VALUETYPE_END;
-};
-
-/** type holds the the regular type used as a bounds for the interval type V 
- * or SH_VALUETYPE_END if V is not an interval type */
-template<ShValueType V>
-struct ShRegularValueType
-{
-  static const ShValueType type = (SH_INTERVAL_DOUBLE <= V) && (V <= SH_INTERVAL_FLOAT) ? (ShValueType)((int)V + 2) : SH_VALUETYPE_END;
-};
-
-inline
-bool shIsIntervalValueType(ShValueType valueType)
-{
-  return (SH_INTERVAL_DOUBLE <= valueType) && (valueType <= SH_INTERVAL_FLOAT); 
-}
-
-inline
-ShValueType shIntervalValueType(ShValueType valueType) 
-{
-  if(shIsIntervalValueType(valueType)) {
-    return (ShValueType)((int)valueType - 2); 
-  }
-  return SH_VALUETYPE_END;
-}
-
-inline
-ShValueType shRegularValueType(ShValueType valueType) 
-{
-  if(SH_INTERVAL_DOUBLE <= valueType && valueType <= SH_INTERVAL_FLOAT) {
-    return (ShValueType)((int)valueType + 2); 
-  }
-  return SH_VALUETYPE_END;
-}
-
 
 
 }

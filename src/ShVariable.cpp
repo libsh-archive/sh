@@ -225,7 +225,7 @@ std::ostream& operator<<(std::ostream& out, const ShVariable& v)
   }
 
   out << '[';
-  out << v.getVariant()->encode();
+  out << v.getVariant()->encodeArray();
   out<<']';
   return out;
 }

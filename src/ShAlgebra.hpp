@@ -124,10 +124,10 @@ ShProgram operator>>(ShProgram p, const ShVariable &var);
  * to a variable.   The implementation supports currying with delayed
  * read, which is equivalent to replacing an input with a parameter.
  */
-template<int N, ShValueType V>
-ShProgram operator<<(ShProgram a, const ShGeneric<N, V>& v) {
+template<int N, typename T>
+ShProgram operator<<(ShProgram a, const ShGeneric<N, T>& v) {
   ShProgram vNibble = SH_BEGIN_PROGRAM() {
-    ShAttrib<N, SH_OUTPUT, V> out;
+    ShAttrib<N, SH_OUTPUT, T> out;
     out.node()->specialType(v.node()->specialType());
     out = v;
   } SH_END_PROGRAM;

@@ -131,9 +131,9 @@ class ShKernelLib {
      *
      *  OUT(-1) ShPosition4f posh       - position (HDCS)
      */
-    template<int N, ShBindingType Binding, ShValueType V>
-    static ShProgram shVsh(const ShMatrix<N, N, Binding, V> &mv,
-                           const ShMatrix<N, N, Binding, V> &mvp,
+    template<int N, ShBindingType Binding, typename T>
+    static ShProgram shVsh(const ShMatrix<N, N, Binding, T> &mv,
+                           const ShMatrix<N, N, Binding, T> &mvp,
                            int numTangents = 0, int numLights = 1); 
 };
 

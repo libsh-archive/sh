@@ -49,16 +49,16 @@ void ShTypeInfo::addOps()
   /// 4) else if either operand is f or we have i x ui, use f 
   /// 5) else if operands are integers/unsigned integers use i
   /// 6) else use float (this includes all fractionals)
-  _shInitFloatOps<SH_INTERVAL_DOUBLE>();
-  _shInitIntervalOps<SH_DOUBLE, SH_INTERVAL_DOUBLE>();
+  _shInitFloatOps<ShInterval<double> >();
+  _shInitIntervalOps<double, ShInterval<double> >();
 
-  _shInitFloatOps<SH_INTERVAL_FLOAT>();
-  _shInitIntervalOps<SH_FLOAT, SH_INTERVAL_FLOAT>();
+  _shInitFloatOps<ShInterval<float> >();
+  _shInitIntervalOps<float, ShInterval<float> >();
 
-  _shInitFloatOps<SH_DOUBLE>();
-  _shInitFloatOps<SH_FLOAT>();
+  _shInitFloatOps<double>();
+  _shInitFloatOps<float>();
 
-  _shInitIntOps<SH_INT>();
+  _shInitIntOps<int>();
 }
 
 }

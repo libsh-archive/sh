@@ -33,17 +33,18 @@ namespace SH {
 
 ShEval* ShEval::m_instance = 0;
 
-//#define SH_DEBUG_SHEVAL 
+// #define SH_DEBUG_SHEVAL 
+#define SH_EVALOP_CACHE
 
 void ShEval::operator()(ShOperation op, ShVariant* dest, 
     const ShVariant* a, const ShVariant* b, const ShVariant* c) const
 {
 #ifdef SH_DEBUG_SHEVAL
   SH_DEBUG_PRINT("PRE OP=" << opInfo[op].name << " "
-      << (dest ? dest->encode() : "NULL") << " = "
-      << (a ? a->encode() : "NULL") << ", "
-      << (b ? b->encode() : "NULL") << ", "
-      << (c ? c->encode() : "NULL")); 
+      << (dest ? dest->encodeArray() : "NULL") << " = "
+      << (a ? a->encodeArray() : "NULL") << ", "
+      << (b ? b->encodeArray() : "NULL") << ", "
+      << (c ? c->encodeArray() : "NULL")); 
 #endif
 
   const ShEvalOpInfo *evalOpInfo = 
@@ -51,6 +52,13 @@ void ShEval::operator()(ShOperation op, ShVariant* dest,
                       a ? a->valueType() : SH_VALUETYPE_END, 
                       b ? b->valueType() : SH_VALUETYPE_END, 
                       c ? c->valueType() : SH_VALUETYPE_END);
+  if(!evalOpInfo) {
+#ifdef SH_DEBUG_SHEVAL
+    SH_DEBUG_PRINT("Unable to find eval op!");
+    SH_DEBUG_ASSERT(0);
+    return;
+#endif
+  }
 
   const ShEvalOp* evalOp = evalOpInfo->m_evalOp; 
  
@@ -81,10 +89,10 @@ void ShEval::operator()(ShOperation op, ShVariant* dest,
 
 #ifdef SH_DEBUG_SHEVAL
   SH_DEBUG_PRINT("   RES=" << opInfo[op].name << " "
-      << (dest ? dest->encode() : "NULL") << " = "
-      << (a ? a->encode() : "NULL") << ", "
-      << (b ? b->encode() : "NULL") << ", "
-      << (c ? c->encode() : "NULL")); 
+      << (dest ? dest->encodeArray() : "NULL") << " = "
+      << (a ? a->encodeArray() : "NULL") << ", "
+      << (b ? b->encodeArray() : "NULL") << ", "
+      << (c ? c->encodeArray() : "NULL")); 
 #endif
 }
 
@@ -92,7 +100,7 @@ void ShEval::addOp(ShOperation op, const ShEvalOp* evalOp, ShValueType dest,
     ShValueType src0, ShValueType src1, ShValueType src2)
 {
   m_evalOpMap[op].push_back(ShEvalOpInfo(op, evalOp, dest, src0, src1, src2));
-  m_evalOpCache[op][src0][src1][src2] = &(m_evalOpMap[op].back()); // @todo type no refcount inc is okay since above inc'ed 
+  m_evalOpCache(op, src0, src1, src2) = &(m_evalOpMap[op].back()); // @todo type no refcount inc is okay since above inc'ed 
 }
 
 const ShEvalOpInfo* ShEval::getEvalOpInfo(ShOperation op, ShValueType dest,
@@ -100,19 +108,23 @@ const ShEvalOpInfo* ShEval::getEvalOpInfo(ShOperation op, ShValueType dest,
 {
 #ifdef SH_DEBUG_SHEVAL
   SH_DEBUG_PRINT("ShEval mapping op=" << opInfo[op].name << " dest,src[0-2]= " 
-      << valueTypeName[dest]
-      << ", " << valueTypeName[src0]
-      << ", " << valueTypeName[src1] 
-      << ", " << valueTypeName[src2]); 
+      << shValueTypeName(dest)
+      << ", " << shValueTypeName(src0)
+      << ", " << shValueTypeName(src1) 
+      << ", " << shValueTypeName(src2)); 
 #endif
 
-  const ShEvalOpInfo* result = m_evalOpCache[op][src0][src1][src2];
+#ifdef SH_EVALOP_CACHE
+  const ShEvalOpInfo*& result = m_evalOpCache(op, src0, src1, src2);
   if(result) {
 #ifdef SH_DEBUG_SHEVAL
       SH_DEBUG_PRINT("    cached result=" << result->encode()); 
 #endif
     return result;
   }
+#else
+  const ShEvalOpinfo* result = 0;
+#endif
 
   // @todo this really needs to be improved...
   // linear search through a table with hundreds of entries is stupid
@@ -141,9 +153,10 @@ const ShEvalOpInfo* ShEval::getEvalOpInfo(ShOperation op, ShValueType dest,
     }
   }
 
-  m_evalOpCache[op][src0][src1][src2] = result;
 #ifdef SH_DEBUG_SHEVAL
+  if(result) {
       SH_DEBUG_PRINT("    result=" << result->encode()); 
+  }
 #endif
 
   return result;
@@ -184,13 +197,6 @@ ShEval* ShEval::instance()
 
 ShEval::ShEval()
 {
-  // clear evalOpCache
-  for(int i = 0; i < (int)SH_OPERATION_END; ++i) 
-  for(int j = 0; j < (int)SH_VALUETYPE_END; ++j)
-  for(int k = 0; k < (int)SH_VALUETYPE_END; ++k)
-  for(int l = 0; l < (int)SH_DATATYPE_END; ++l) {
-    m_evalOpCache[i][j][k][l] = 0;
-  }
 }
 
 ShEvalOpInfo::ShEvalOpInfo(ShOperation op, const ShEvalOp* evalOp, 

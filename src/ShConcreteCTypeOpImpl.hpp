@@ -43,10 +43,10 @@ namespace SH {
 // do a partial specialization on the class
 // and define the doop function
 #define SHCCTO_UNARY_OP(op, opsrc)\
-template<ShValueType V>\
-struct ShConcreteCTypeOp<op, V>\
+template<typename T>\
+struct ShConcreteCTypeOp<op, T>\
 { \
-  typedef ShDataVariant<V, SH_HOST> Variant; \
+  typedef ShDataVariant<T, SH_HOST> Variant; \
   typedef Variant* DataPtr; \
   typedef const Variant* DataCPtr; \
 \
@@ -65,10 +65,10 @@ struct ShConcreteCTypeOp<op, V>\
 
 
 #define SHCCTO_BINARY_OP(op, opsrc)\
-template<ShValueType V>\
-struct ShConcreteCTypeOp<op, V>\
+template<typename T>\
+struct ShConcreteCTypeOp<op, T>\
 { \
-  typedef ShDataVariant<V, SH_HOST> Variant; \
+  typedef ShDataVariant<T, SH_HOST> Variant; \
   typedef Variant* DataPtr; \
   typedef const Variant* DataCPtr; \
 \
@@ -90,10 +90,10 @@ struct ShConcreteCTypeOp<op, V>\
 
 
 #define SHCCTO_TERNARY_OP(op, opsrc)\
-template<ShValueType V>\
-struct ShConcreteCTypeOp<op, V>\
+template<typename T>\
+struct ShConcreteCTypeOp<op, T>\
 { \
-  typedef ShDataVariant<V, SH_HOST> Variant; \
+  typedef ShDataVariant<T, SH_HOST> Variant; \
   typedef Variant* DataPtr; \
   typedef const Variant* DataCPtr; \
 \
@@ -115,13 +115,13 @@ struct ShConcreteCTypeOp<op, V>\
   }\
 };
 
-#define SHCCTO_OP_SPEC(V, op)\
+#define SHCCTO_OP_SPEC(T, op)\
 template<>\
 struct  \
 SH_DLLEXPORT \
-ShConcreteCTypeOp<op, V>\
+ShConcreteCTypeOp<op, T>\
 { \
-  typedef ShDataVariant<V, SH_HOST> Variant; \
+  typedef ShDataVariant<T, SH_HOST> Variant; \
   typedef Variant* DataPtr; \
   typedef const Variant* DataCPtr; \
 \
@@ -129,8 +129,8 @@ ShConcreteCTypeOp<op, V>\
 };
 
 #define SHCCTO_OP_CMATH_SPEC(op)\
-  SHCCTO_OP_SPEC(SH_DOUBLE, op);\
-  SHCCTO_OP_SPEC(SH_FLOAT, op);
+  SHCCTO_OP_SPEC(double, op);\
+  SHCCTO_OP_SPEC(float, op);
 
 // Note that some ops are currently NOT declared for integer types
 // (anything that is only specialized for double/float cmath functions 
@@ -148,10 +148,10 @@ SHCCTO_OP_CMATH_SPEC(SH_OP_ATAN);
 SHCCTO_OP_CMATH_SPEC(SH_OP_CBRT);
 SHCCTO_OP_CMATH_SPEC(SH_OP_CEIL);
 
-template<ShValueType V>
-struct ShConcreteCTypeOp<SH_OP_CMUL, V>
+template<typename T>
+struct ShConcreteCTypeOp<SH_OP_CMUL, T>
 { 
-  typedef ShDataVariant<V, SH_HOST> Variant; 
+  typedef ShDataVariant<T, SH_HOST> Variant; 
   typedef Variant* DataPtr; 
   typedef const Variant* DataCPtr; 
 
@@ -159,17 +159,17 @@ struct ShConcreteCTypeOp<SH_OP_CMUL, V>
   {
     // dest->size should be 1 and a->size == b->size
     (*dest)[0] = std::accumulate(a->begin(), a->end(), 
-                     ShDataTypeInfo<V, SH_HOST>::Zero, 
+                     ShDataTypeInfo<T, SH_HOST>::Zero, 
                      std::multiplies<typename Variant::DataType>());
   }
 };
 
 SHCCTO_OP_CMATH_SPEC(SH_OP_COS);
 
-template<ShValueType V>
-struct ShConcreteCTypeOp<SH_OP_CSUM, V>
+template<typename T>
+struct ShConcreteCTypeOp<SH_OP_CSUM, T>
 { 
-  typedef ShDataVariant<V, SH_HOST> Variant; 
+  typedef ShDataVariant<T, SH_HOST> Variant; 
   typedef Variant* DataPtr; 
   typedef const Variant* DataCPtr; 
 
@@ -177,7 +177,7 @@ struct ShConcreteCTypeOp<SH_OP_CSUM, V>
   {
     // dest->size should be 1 and a->size == b->size
     (*dest)[0] = std::accumulate(a->begin(), a->end(), 
-                     ShDataTypeInfo<V, SH_HOST>::Zero, 
+                     ShDataTypeInfo<T, SH_HOST>::Zero, 
                      std::plus<typename Variant::DataType>()); 
   }
 };
@@ -211,10 +211,10 @@ SHCCTO_OP_CMATH_SPEC(SH_OP_ATAN2);
 
 SHCCTO_BINARY_OP(SH_OP_DIV, (*A) / (*B));
 
-template<ShValueType V>
-struct ShConcreteCTypeOp<SH_OP_DOT, V>
+template<typename T>
+struct ShConcreteCTypeOp<SH_OP_DOT, T>
 { 
-  typedef ShDataVariant<V, SH_HOST> Variant; 
+  typedef ShDataVariant<T, SH_HOST> Variant; 
   typedef Variant* DataPtr; 
   typedef const Variant* DataCPtr; 
 
@@ -222,7 +222,7 @@ struct ShConcreteCTypeOp<SH_OP_DOT, V>
   {
     // dest->size should be 1 and a->size == b->size
     (*dest)[0] = std::inner_product(a->begin(), a->end(), b->begin(), 
-                      ShDataTypeInfo<V, SH_HOST>::Zero);
+                      ShDataTypeInfo<T, SH_HOST>::Zero);
   }
 };
 
@@ -239,17 +239,17 @@ SHCCTO_BINARY_OP(SH_OP_POW, _sh_intpow((*A), (*B)));  // only works for integers
 SHCCTO_OP_CMATH_SPEC(SH_OP_POW);
 
 
-SHCCTO_BINARY_OP(SH_OP_SEQ, (shDataTypeCond<V, SH_HOST>((*A) == (*B))));
-SHCCTO_BINARY_OP(SH_OP_SGE, (shDataTypeCond<V, SH_HOST>((*A) >= (*B))));
-SHCCTO_BINARY_OP(SH_OP_SGT, (shDataTypeCond<V, SH_HOST>((*A) > (*B))));
-SHCCTO_BINARY_OP(SH_OP_SLE, (shDataTypeCond<V, SH_HOST>((*A) <= (*B))));
-SHCCTO_BINARY_OP(SH_OP_SLT, (shDataTypeCond<V, SH_HOST>((*A) < (*B))));
-SHCCTO_BINARY_OP(SH_OP_SNE, (shDataTypeCond<V, SH_HOST>((*A) != (*B))));
+SHCCTO_BINARY_OP(SH_OP_SEQ, (shDataTypeCond<T, SH_HOST>((*A) == (*B))));
+SHCCTO_BINARY_OP(SH_OP_SGE, (shDataTypeCond<T, SH_HOST>((*A) >= (*B))));
+SHCCTO_BINARY_OP(SH_OP_SGT, (shDataTypeCond<T, SH_HOST>((*A) > (*B))));
+SHCCTO_BINARY_OP(SH_OP_SLE, (shDataTypeCond<T, SH_HOST>((*A) <= (*B))));
+SHCCTO_BINARY_OP(SH_OP_SLT, (shDataTypeCond<T, SH_HOST>((*A) < (*B))));
+SHCCTO_BINARY_OP(SH_OP_SNE, (shDataTypeCond<T, SH_HOST>((*A) != (*B))));
 
-template<ShValueType V>
-struct ShConcreteCTypeOp<SH_OP_XPD, V>
+template<typename T>
+struct ShConcreteCTypeOp<SH_OP_XPD, T>
 { 
-  typedef ShDataVariant<V, SH_HOST> Variant; 
+  typedef ShDataVariant<T, SH_HOST> Variant; 
   typedef Variant* DataPtr; 
   typedef const Variant* DataCPtr; 
 

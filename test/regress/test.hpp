@@ -61,8 +61,8 @@ public:
   }
 
   template<typename T>
-  void mem_from_host(typename T::MemType mem[], T &host) {
-    SH::ShVariantPtr memVariant = new SH::ShDataVariant<T::value_type, SH::SH_MEM>(mem, host.size(), false);
+  void mem_from_host(typename T::mem_type mem[], T &host) {
+    SH::ShVariantPtr memVariant = new SH::ShDataVariant<typename T::storage_type, SH::SH_MEM>(mem, host.size(), false);
     memVariant->set(host.getVariant());
   }
 
@@ -71,8 +71,8 @@ public:
            const INPUT1& in1,
            const OUTPUT& res)
   {
-    typedef typename INPUT1::MemType IT;
-    typedef typename OUTPUT::MemType OT;
+    typedef typename INPUT1::mem_type IT;
+    typedef typename OUTPUT::mem_type OT;
 
     std::string name = program.name();
     IT* _in1 = new IT[in1.size()];
@@ -116,9 +116,9 @@ public:
            const INPUT2& in2,
            const OUTPUT& res)
   {
-    typedef typename INPUT1::MemType IT1;
-    typedef typename INPUT2::MemType IT2;
-    typedef typename OUTPUT::MemType OT;
+    typedef typename INPUT1::mem_type IT1;
+    typedef typename INPUT2::mem_type IT2;
+    typedef typename OUTPUT::mem_type OT;
 
     std::string name = program.name();
     IT1* _in1 = new IT1[in1.size()];
@@ -170,10 +170,10 @@ public:
            const INPUT3& in3,
            const OUTPUT res)
   {
-    typedef typename INPUT1::MemType IT1;
-    typedef typename INPUT2::MemType IT2;
-    typedef typename INPUT3::MemType IT3;
-    typedef typename OUTPUT::MemType OT;
+    typedef typename INPUT1::mem_type IT1;
+    typedef typename INPUT2::mem_type IT2;
+    typedef typename INPUT3::mem_type IT3;
+    typedef typename OUTPUT::mem_type OT;
 
     std::string name = program.name();
   
@@ -229,7 +229,7 @@ public:
   template <class OUTPUT, class EXPECTED>
   void check(std::string name, const OUTPUT &out, const EXPECTED &res)
   {
-      typedef typename OUTPUT::HostType OT;
+      typedef typename OUTPUT::host_type OT;
       OT* _out = new OT[out.size()];
       out.getValues(_out);
 

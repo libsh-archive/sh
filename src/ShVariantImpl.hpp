@@ -39,28 +39,28 @@
 namespace SH {
 
 #ifdef SH_USE_MEMORY_POOL
-template<ShValueType V, ShDataType DT>
-ShPool* ShDataVariant<V, DT>::m_pool = 0;
+template<typename T, ShDataType DT>
+ShPool* ShDataVariant<T, DT>::m_pool = 0;
 #endif
 
-template<ShValueType V, ShDataType DT>
-ShDataVariant<V, DT>::ShDataVariant(int N)
+template<typename T, ShDataType DT>
+ShDataVariant<T, DT>::ShDataVariant(int N)
   : m_managed(true)
 {
   alloc(N);
-  std::fill(m_begin, m_end, ShDataTypeConstant<V, DT>::Zero);
+  std::fill(m_begin, m_end, ShDataTypeConstant<T, DT>::Zero);
 }
 
-template<ShValueType V, ShDataType DT>
-ShDataVariant<V, DT>::ShDataVariant(int N, const DataType &value)
+template<typename T, ShDataType DT>
+ShDataVariant<T, DT>::ShDataVariant(int N, const DataType &value)
   : m_managed(true)
 {
   alloc(N);
   std::fill(m_begin, m_end, value); 
 }
 
-template<ShValueType V, ShDataType DT>
-ShDataVariant<V, DT>::ShDataVariant(std::string encodedValue) 
+template<typename T, ShDataType DT>
+ShDataVariant<T, DT>::ShDataVariant(std::string encodedValue) 
   : m_managed(true)
 {
   std::istringstream in(encodedValue);
@@ -75,8 +75,8 @@ ShDataVariant<V, DT>::ShDataVariant(std::string encodedValue)
   }
 }
 
-template<ShValueType V, ShDataType DT>
-ShDataVariant<V, DT>::ShDataVariant(void *data, int N, bool managed)
+template<typename T, ShDataType DT>
+ShDataVariant<T, DT>::ShDataVariant(void *data, int N, bool managed)
   : m_managed(managed)
 {
   if(m_managed) {
@@ -88,8 +88,8 @@ ShDataVariant<V, DT>::ShDataVariant(void *data, int N, bool managed)
   }
 }
 
-template<ShValueType V, ShDataType DT>
-ShDataVariant<V, DT>::ShDataVariant(const ShDataVariant<V, DT> &other)
+template<typename T, ShDataType DT>
+ShDataVariant<T, DT>::ShDataVariant(const ShDataVariant<T, DT> &other)
   : m_managed(true)
 {
   int size = other.size();
@@ -97,8 +97,8 @@ ShDataVariant<V, DT>::ShDataVariant(const ShDataVariant<V, DT> &other)
   memcpy(m_begin, other.m_begin, size * datasize());
 }
 
-template<ShValueType V, ShDataType DT>
-ShDataVariant<V, DT>::ShDataVariant(const ShDataVariant<V, DT> &other, 
+template<typename T, ShDataType DT>
+ShDataVariant<T, DT>::ShDataVariant(const ShDataVariant<T, DT> &other, 
     bool neg, const ShSwizzle &swizzle)
   : m_managed(true)
 {
@@ -109,73 +109,73 @@ ShDataVariant<V, DT>::ShDataVariant(const ShDataVariant<V, DT> &other,
   if(neg) negate();
 }
 
-template<ShValueType V, ShDataType DT>
-ShDataVariant<V, DT>::~ShDataVariant() 
+template<typename T, ShDataType DT>
+ShDataVariant<T, DT>::~ShDataVariant() 
 {
   if(m_managed) delete m_begin;
 }
 
-template<ShValueType V, ShDataType DT>
-ShValueType ShDataVariant<V, DT>::valueType() const {
-  return V; 
+template<typename T, ShDataType DT>
+ShValueType ShDataVariant<T, DT>::valueType() const {
+  return value_type; 
 }
 
-template<ShValueType V, ShDataType DT>
-ShDataType ShDataVariant<V, DT>::dataType() const {
+template<typename T, ShDataType DT>
+ShDataType ShDataVariant<T, DT>::dataType() const {
   return DT; 
 }
 
-template<ShValueType V, ShDataType DT>
-bool ShDataVariant<V, DT>::typeMatches(
+template<typename T, ShDataType DT>
+bool ShDataVariant<T, DT>::typeMatches(
     ShValueType valueType, ShDataType dataType) const {
-  return (valueType == V) && (dataType == DT);
+  return (valueType == value_type) && (dataType == DT);
 }
 
 
-template<ShValueType V, ShDataType DT>
-std::string ShDataVariant<V, DT>::typeName() const {
-  return valueTypeName[V]; 
+template<typename T, ShDataType DT>
+const char* ShDataVariant<T, DT>::typeName() const {
+  return ShStorageTypeInfo<T>::name;
 }
 
-template<ShValueType V, ShDataType DT>
-int ShDataVariant<V, DT>::size() const
+template<typename T, ShDataType DT>
+int ShDataVariant<T, DT>::size() const
 {
   return m_end - m_begin; 
 }
 
-template<ShValueType V, ShDataType DT>
-int ShDataVariant<V, DT>::datasize() const
+template<typename T, ShDataType DT>
+int ShDataVariant<T, DT>::datasize() const
 {
   return sizeof(DataType); 
 }
 
-template<ShValueType V, ShDataType DT>
-bool ShDataVariant<V, DT>::managed() const
+template<typename T, ShDataType DT>
+bool ShDataVariant<T, DT>::managed() const
 {
   return m_managed; 
 }
 
-template<ShValueType V, ShDataType DT>
-void ShDataVariant<V, DT>::negate()
+template<typename T, ShDataType DT>
+void ShDataVariant<T, DT>::negate()
 {
   transform(m_begin, m_end, m_begin, std::negate<DataType>());
 }
 
-template<ShValueType V, ShDataType DT>
-void ShDataVariant<V, DT>::set(const ShVariant* other)
+template<typename T, ShDataType DT>
+void ShDataVariant<T, DT>::set(const ShVariant* other)
 {
   SH_DEBUG_ASSERT(other->size() == size());
   ShCastManager::instance()->doCast(this, other);
 }
 
-template<ShValueType V, ShDataType DT>
-void ShDataVariant<V, DT>::set(ShVariantCPtr other)
+template<typename T, ShDataType DT>
+void ShDataVariant<T, DT>::set(ShVariantCPtr other)
 {
   set(other.object());
 }
 
-template<ShValueType V, ShDataType DT>
-void ShDataVariant<V, DT>::set(const ShVariant* other, int index)
+template<typename T, ShDataType DT>
+void ShDataVariant<T, DT>::set(const ShVariant* other, int index)
 {
   SH_DEBUG_ASSERT(other->size() == 1); 
   // make a new DataVariant that uses the index element as it's array 
@@ -184,14 +184,14 @@ void ShDataVariant<V, DT>::set(const ShVariant* other, int index)
   delete temp; // okay - it doesn't delete its array
 }
 
-template<ShValueType V, ShDataType DT>
-void ShDataVariant<V, DT>::set(ShVariantCPtr other, int index)
+template<typename T, ShDataType DT>
+void ShDataVariant<T, DT>::set(ShVariantCPtr other, int index)
 {
   set(other.object(), index);
 }
 
-template<ShValueType V, ShDataType DT>
-void ShDataVariant<V, DT>::set(const ShVariant* other, bool neg, const ShSwizzle &writemask) 
+template<typename T, ShDataType DT>
+void ShDataVariant<T, DT>::set(const ShVariant* other, bool neg, const ShSwizzle &writemask) 
 {
   int wmsize = writemask.size();
   SH_DEBUG_ASSERT(wmsize == other->size());
@@ -210,38 +210,38 @@ void ShDataVariant<V, DT>::set(const ShVariant* other, bool neg, const ShSwizzle
   delete temp;
 }
 
-template<ShValueType V, ShDataType DT>
-void ShDataVariant<V, DT>::set(ShVariantCPtr other, bool neg, const ShSwizzle &writemask) 
+template<typename T, ShDataType DT>
+void ShDataVariant<T, DT>::set(ShVariantCPtr other, bool neg, const ShSwizzle &writemask) 
 {
   set(other.object(), neg, writemask);
 }
 
-template<ShValueType V, ShDataType DT>
-ShVariantPtr ShDataVariant<V, DT>::get() const
+template<typename T, ShDataType DT>
+ShVariantPtr ShDataVariant<T, DT>::get() const
 {
-  return new ShDataVariant<V, DT>(*this);
+  return new ShDataVariant<T, DT>(*this);
 }
 
-template<ShValueType V, ShDataType DT>
-ShVariantPtr ShDataVariant<V, DT>::get(int index) const
+template<typename T, ShDataType DT>
+ShVariantPtr ShDataVariant<T, DT>::get(int index) const
 {
-  return new ShDataVariant<V, DT>(1, m_begin[index]);
+  return new ShDataVariant<T, DT>(1, m_begin[index]);
 }
 
-template<ShValueType V, ShDataType DT>
-ShVariantPtr ShDataVariant<V, DT>::get(bool neg, const ShSwizzle &swizzle) const 
+template<typename T, ShDataType DT>
+ShVariantPtr ShDataVariant<T, DT>::get(bool neg, const ShSwizzle &swizzle) const 
 {
-  return new ShDataVariant<V, DT>(*this, neg, swizzle);
+  return new ShDataVariant<T, DT>(*this, neg, swizzle);
 }
 
 
-template<ShValueType V, ShDataType DT>
-bool ShDataVariant<V, DT>::equals(const ShVariant* other) const 
+template<typename T, ShDataType DT>
+bool ShDataVariant<T, DT>::equals(const ShVariant* other) const 
 {
   if(!other || (size() != other->size()) 
       || !other->typeMatches(valueType(), dataType())) return false;
 
-  const ShDataVariant* castOther = variant_cast<V, DT>(other);
+  const ShDataVariant* castOther = variant_cast<T, DT>(other);
   const_iterator I, J;
   I = m_begin; 
   J = castOther->begin(); 
@@ -251,14 +251,14 @@ bool ShDataVariant<V, DT>::equals(const ShVariant* other) const
   return true;
 }
 
-template<ShValueType V, ShDataType DT>
-bool ShDataVariant<V, DT>::equals(ShVariantCPtr other) const 
+template<typename T, ShDataType DT>
+bool ShDataVariant<T, DT>::equals(ShVariantCPtr other) const 
 {
   return equals(other.object());
 }
 
-template<ShValueType V, ShDataType DT>
-bool ShDataVariant<V, DT>::isTrue() const 
+template<typename T, ShDataType DT>
+bool ShDataVariant<T, DT>::isTrue() const 
 {
   for(const_iterator I = begin(); I != end(); ++I) {
     if(!shDataTypeIsPositive((*I))) return false;
@@ -266,52 +266,52 @@ bool ShDataVariant<V, DT>::isTrue() const
   return true;
 }
 
-template<ShValueType V, ShDataType DT>
-void* ShDataVariant<V, DT>::array()
+template<typename T, ShDataType DT>
+void* ShDataVariant<T, DT>::array()
 {
   return m_begin;
 }
 
-template<ShValueType V, ShDataType DT>
-const void* ShDataVariant<V, DT>::array() const
+template<typename T, ShDataType DT>
+const void* ShDataVariant<T, DT>::array() const
 {
   return m_begin;
 }
 
-template<ShValueType V, ShDataType DT>
-typename ShDataVariant<V, DT>::DataType& ShDataVariant<V, DT>::operator[](int index) 
-{
-  return m_begin[index];
-}
-
-template<ShValueType V, ShDataType DT>
-const typename ShDataVariant<V, DT>::DataType& ShDataVariant<V, DT>::operator[](int index) const
+template<typename T, ShDataType DT>
+typename ShDataVariant<T, DT>::DataType& ShDataVariant<T, DT>::operator[](int index) 
 {
   return m_begin[index];
 }
 
-template<ShValueType V, ShDataType DT>
-typename ShDataVariant<V, DT>::iterator ShDataVariant<V, DT>::begin() {
+template<typename T, ShDataType DT>
+const typename ShDataVariant<T, DT>::DataType& ShDataVariant<T, DT>::operator[](int index) const
+{
+  return m_begin[index];
+}
+
+template<typename T, ShDataType DT>
+typename ShDataVariant<T, DT>::iterator ShDataVariant<T, DT>::begin() {
   return m_begin;
 }
 
-template<ShValueType V, ShDataType DT>
-typename ShDataVariant<V, DT>::iterator ShDataVariant<V, DT>::end() {
+template<typename T, ShDataType DT>
+typename ShDataVariant<T, DT>::iterator ShDataVariant<T, DT>::end() {
   return m_end;
 }
 
-template<ShValueType V, ShDataType DT>
-typename ShDataVariant<V, DT>::const_iterator ShDataVariant<V, DT>::begin() const {
+template<typename T, ShDataType DT>
+typename ShDataVariant<T, DT>::const_iterator ShDataVariant<T, DT>::begin() const {
   return m_begin;
 }
 
-template<ShValueType V, ShDataType DT>
-typename ShDataVariant<V, DT>::const_iterator ShDataVariant<V, DT>::end() const {
+template<typename T, ShDataType DT>
+typename ShDataVariant<T, DT>::const_iterator ShDataVariant<T, DT>::end() const {
   return m_end;
 }
 
-template<ShValueType V, ShDataType DT>
-std::string ShDataVariant<V, DT>::encode() const {
+template<typename T, ShDataType DT>
+std::string ShDataVariant<T, DT>::encode() const {
   if(size() < 1) return "";
 
   std::ostringstream out;
@@ -321,8 +321,8 @@ std::string ShDataVariant<V, DT>::encode() const {
   }
   return out.str();
 }
-template<ShValueType V, ShDataType DT>
-std::string ShDataVariant<V, DT>::encode(int index, int repeats) const 
+template<typename T, ShDataType DT>
+std::string ShDataVariant<T, DT>::encode(int index, int repeats) const 
 {
   std::ostringstream out;
   out << repeats;
@@ -332,8 +332,8 @@ std::string ShDataVariant<V, DT>::encode(int index, int repeats) const
   return out.str();
 }
 
-template<ShValueType V, ShDataType DT>
-std::string ShDataVariant<V, DT>::encode(bool neg, const ShSwizzle &swizzle) const 
+template<typename T, ShDataType DT>
+std::string ShDataVariant<T, DT>::encode(bool neg, const ShSwizzle &swizzle) const 
 {
   std::ostringstream out;
   out << swizzle.size(); 
@@ -344,8 +344,8 @@ std::string ShDataVariant<V, DT>::encode(bool neg, const ShSwizzle &swizzle) con
 }
 
 // @todo type do Interval types
-template<ShValueType V, ShDataType DT>
-std::string ShDataVariant<V, DT>::encodeArray() const {
+template<typename T, ShDataType DT>
+std::string ShDataVariant<T, DT>::encodeArray() const {
   if(size() < 1) return "";
 
   std::ostringstream out;
@@ -356,16 +356,16 @@ std::string ShDataVariant<V, DT>::encodeArray() const {
   return out.str();
 }
 
-template<ShValueType V, ShDataType DT>
-void ShDataVariant<V, DT>::alloc(int N) {
+template<typename T, ShDataType DT>
+void ShDataVariant<T, DT>::alloc(int N) {
   // SH_DEBUG_PRINT("alloc " << valueTypeName[V] << " " << dataTypeName[DT]);
   m_begin = new DataType[N];
   m_end = m_begin + N;
 }
 
 #ifdef SH_USE_MEMORY_POOL
-template<ShValueType V, ShDataType DT>
-void* ShDataVariant<V, DT>::operator new(std::size_t size)
+template<typename T, ShDataType DT>
+void* ShDataVariant<T, DT>::operator new(std::size_t size)
 {
   if (size != sizeof(ShDataVariant)) return ::operator new(size);
   if (!m_pool) {
@@ -374,8 +374,8 @@ void* ShDataVariant<V, DT>::operator new(std::size_t size)
   return m_pool->alloc();
 }
 
-template<ShValueType V, ShDataType DT>
-void ShDataVariant<V, DT>::operator delete(void* ptr, std::size_t size)
+template<typename T, ShDataType DT>
+void ShDataVariant<T, DT>::operator delete(void* ptr, std::size_t size)
 {
   if(size != sizeof(ShDataVariant)) {
     SH_DEBUG_PRINT("delete size does not match " << size << " " << sizeof(ShDataVariant));
@@ -385,34 +385,34 @@ void ShDataVariant<V, DT>::operator delete(void* ptr, std::size_t size)
 }
 #endif
 
-template<ShValueType V, ShDataType DT>
-ShPointer<ShDataVariant<V, DT> > variant_cast(ShVariantPtr c)
+template<typename T, ShDataType DT>
+ShPointer<ShDataVariant<T, DT> > variant_cast(ShVariantPtr c)
 {
-  return shref_dynamic_cast<ShDataVariant<V, DT> >(c);
+  return shref_dynamic_cast<ShDataVariant<T, DT> >(c);
 }
 
-template<ShValueType V, ShDataType DT>
-ShPointer<const ShDataVariant<V, DT> > variant_cast(ShVariantCPtr c)
+template<typename T, ShDataType DT>
+ShPointer<const ShDataVariant<T, DT> > variant_cast(ShVariantCPtr c)
 {
-  return shref_dynamic_cast<const ShDataVariant<V, DT> >(c);
+  return shref_dynamic_cast<const ShDataVariant<T, DT> >(c);
 }
 
-template<ShValueType V, ShDataType DT>
-ShDataVariant<V, DT>* variant_cast(ShVariant* c)
+template<typename T, ShDataType DT>
+ShDataVariant<T, DT>* variant_cast(ShVariant* c)
 {
-  return dynamic_cast<ShDataVariant<V, DT>*>(c);
+  return dynamic_cast<ShDataVariant<T, DT>*>(c);
 }
 
-template<ShValueType V, ShDataType DT>
-const ShDataVariant<V, DT>* variant_cast(const ShVariant* c)
+template<typename T, ShDataType DT>
+const ShDataVariant<T, DT>* variant_cast(const ShVariant* c)
 {
-  return dynamic_cast<const ShDataVariant<V, DT>*>(c);
+  return dynamic_cast<const ShDataVariant<T, DT>*>(c);
 }
 
-template<ShValueType V, ShDataType DT>
-ShPointer<ShDataVariant<V, DT> > variant_convert(ShVariantCPtr c)
+template<typename T, ShDataType DT>
+ShPointer<ShDataVariant<T, DT> > variant_convert(ShVariantCPtr c)
 {
-  ShDataVariant<V, DT>* result = new ShDataVariant<V, DT>(c->size());
+  ShDataVariant<T, DT>* result = new ShDataVariant<T, DT>(c->size());
   ShCastManager::instance()->doCast(result, c.object());
   return result;
 }

@@ -513,8 +513,8 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   ShValueType convertedType; 
   readpixelType = shGlType(valueType, convertedType);
   if(convertedType != SH_VALUETYPE_END) {
-      SH_DEBUG_WARN("ARB backend does not handle stream output type " << valueTypeName[valueType] << " natively."
-          << "  Using " << valueTypeName[convertedType] << " temporary buffer.");
+      SH_DEBUG_WARN("ARB backend does not handle stream output type " << shValueTypeName(valueType) << " natively."
+          << "  Using " << shValueTypeName(convertedType) << " temporary buffer.");
       resultBuffer = shVariantFactory(convertedType, SH_MEM)->generate(resultDatasize);
   } else {
       resultBuffer = shVariantFactory(valueType, SH_MEM)->generate(

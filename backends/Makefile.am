@@ -10,5 +10,5 @@ else
 GL_SUBDIR =
 endif
 
-SUBDIRS = cc $(SM_SUBDIR) $(GL_SUBDIR)
+SUBDIRS = rds cc $(SM_SUBDIR) $(GL_SUBDIR)
 

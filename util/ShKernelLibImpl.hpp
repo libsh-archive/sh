@@ -50,9 +50,9 @@ namespace ShUtil {
 
 using namespace SH;
 
-template<int N, ShBindingType Binding, ShValueType V>
-ShProgram ShKernelLib::shVsh(const ShMatrix<N, N, Binding, V> &mv,
-                             const ShMatrix<N, N, Binding, V> &mvp,
+template<int N, ShBindingType Binding, typename T>
+ShProgram ShKernelLib::shVsh(const ShMatrix<N, N, Binding, T> &mv,
+                             const ShMatrix<N, N, Binding, T> &mvp,
                              int numTangents, int numLights)
 {
   int i;
