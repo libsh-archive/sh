@@ -1,3 +1,7 @@
+2004-11-11  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+  * backends/gl/ArbCode.cpp (print):
+  Fixed some bugs printing out half temp registers.
+  
 2004-11-09  Bryan Chan <b8chan@cgl.uwaterloo.ca>
   * backends/cc/Cc.cpp, CcTextures.hpp:
   Checked in the wrong version of these files

@@ -528,6 +528,7 @@ std::ostream& ArbCode::print(std::ostream& out)
   for (RegList::const_iterator I = m_reglist.begin();
        I != m_reglist.end(); ++I) {
     if ((*I)->type == SH_ARB_REG_TEMP) continue;
+    if ((*I)->type == SH_ARB_REG_HALF_TEMP) continue;
     if ((*I)->type == SH_ARB_REG_TEXTURE) continue;
     out << "  ";
     (*I)->printDecl(out);
@@ -539,6 +540,7 @@ std::ostream& ArbCode::print(std::ostream& out)
       if (i > 0) out << ", ";
       out << ArbReg(SH_ARB_REG_TEMP, i);
     }
+    if(m_numTemps > 0 && m_numHalfTemps > 0) out << ", ";
     for (int i = 0; i < m_numHalfTemps; i++) {
       if (i > 0) out << ", ";
       out << ArbReg(SH_ARB_REG_HALF_TEMP, i);
