@@ -112,6 +112,14 @@ struct
 SH_DLLEXPORT ShOperationInfo {
   const char* name; ///< The operation's name, e.g. "ASN"
   int arity; ///< The arity of the operation. 1, 2 or 3.
+
+  enum ResultSource {
+    LINEAR,   // dest[i] depends only on src_j[i] for all 0 <= j < arity
+    ALL,      // dest[i] depends on all elements of src_j for all 0 <= j < arity
+    EXTERNAL, // Statement yields its results from an external source
+              // (e.g. TEX)
+    IGNORE   // Does not yield a result
+  } result_source;
 };
 
 SH_DLLEXPORT
@@ -124,13 +132,11 @@ class ShStatementInfo {
 public:
   virtual ~ShStatementInfo();
 
+  virtual ShStatementInfo* clone() const = 0;
+  
 protected:
   ShStatementInfo();
 
-private:
-  // Not implemented
-  ShStatementInfo(const ShStatementInfo& other);
-  ShStatementInfo& operator=(const ShStatementInfo& other);
 };
 
 /** A single statement.
@@ -148,6 +154,8 @@ public:
   ShStatement(ShVariable dest, ShOperation op, ShVariable src);
   ShStatement(ShVariable dest, ShVariable src0, ShOperation op, ShVariable src1);
   ShStatement(ShVariable dest, ShOperation op, ShVariable src0, ShVariable src1, ShVariable src2);
+  ShStatement(const ShStatement& other);
+  
   ~ShStatement();
   
   ShVariable dest;
@@ -189,10 +197,11 @@ std::ostream& operator<<(std::ostream& out, const SH::ShStatement& stmt);
 template<typename T>
 T* ShStatement::get_info()
 {
-  for (std::list<ShStatementInfo*>::iterator I = info.begin(); I != info.end();
-       ++I) {
-    T* info = dynamic_cast<T*>(*I);
-    if (info) return info;
+  for (std::list<ShStatementInfo*>::iterator I = info.begin(); I != info.end(); ++I) {
+    T* item = dynamic_cast<T*>(*I);
+    if (item) {
+      return item;
+    }
   }
   return 0;
 }
@@ -200,12 +209,14 @@ T* ShStatement::get_info()
 template<typename T>
 void ShStatement::destroy_info()
 {
-  for (std::list<ShStatementInfo*>::iterator I = info.begin(); I != info.end();
-       ++I) {
+  for (std::list<ShStatementInfo*>::iterator I = info.begin(); I != info.end();) {
     T* item = dynamic_cast<T*>(*I);
-    if (item) delete item;
-    I = info.erase(I);
-    --I;
+    if (item) {
+      I = info.erase(I);
+      delete item;
+    } else {
+      ++I;
+    }
   }
 }
 

@@ -5,6 +5,7 @@
 #include "ShBitSet.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShDebug.hpp"
+#include "ShEvaluate.hpp"
 
 namespace {
 
@@ -84,7 +85,7 @@ struct InitRch {
     // Initialize gen
     for (unsigned int i = 0; i < r.defs.size(); i++) {
       if (r.defs[i].node == node) {
-        for (unsigned int j = 0; j < r.defs[i].stmt->dest.size(); j++) {
+        for (int j = 0; j < r.defs[i].stmt->dest.size(); j++) {
           r.gen[node][r.defs[i].offset + j] = true;
         }
       }
@@ -418,6 +419,256 @@ struct DeadCodeRemover {
   bool& changed;
 };
 
+typedef std::queue<ValueTracking::Def> ConstWorkList;
+
+struct ConstProp : public ShStatementInfo {
+  ConstProp(ShStatement* stmt,
+            ConstWorkList& worklist)
+    : stmt(stmt)
+  {
+    for (int i = 0; i < opInfo[stmt->op].arity ; i++) {
+      for (int j = 0; j < stmt->src[i].size(); j++) {
+        switch(stmt->src[i].node()->kind()) {
+        case SH_INPUT:
+        case SH_OUTPUT:
+        case SH_INOUT:
+        case SH_TEXTURE:
+        case SH_STREAM:
+          src[i].push_back(Cell(Cell::BOTTOM));
+          break;
+        case SH_TEMP:
+          src[i].push_back(Cell(Cell::TOP));
+          break;
+        case SH_CONST:
+          src[i].push_back(Cell(Cell::CONSTANT, stmt->src[i].getValue(j)));
+          break;
+        }
+      }
+    }
+    updateDest(worklist);
+  }
+
+  ShStatementInfo* clone() const;
+
+  int idx(int destindex, int source)
+  {
+    return (stmt->src[source].size() == 1 ? 0 : destindex);
+  }
+
+  void updateDest(ConstWorkList& worklist)
+  {
+    dest.clear();
+
+    // Ignore KIL, optbra, etc.
+    if (opInfo[stmt->op].result_source == ShOperationInfo::IGNORE) return;
+    
+    if (opInfo[stmt->op].result_source == ShOperationInfo::EXTERNAL) {
+      // This statement never results in a constant
+      // E.g. texture fetches, stream fetches.
+      for (int i = 0; i < stmt->dest.size(); i++) {
+        dest.push_back(Cell(Cell::BOTTOM));
+      }
+    } else if (opInfo[stmt->op].result_source == ShOperationInfo::LINEAR) {
+      // Consider each tuple element in turn.
+      // Dest and sources are guaranteed to be of the same length.
+      // Except that sources might be scalar.
+      for (int i = 0; i < stmt->dest.size(); i++) {
+        bool allconst = true;
+        bool bottom = false;
+        for (int s = 0; s < opInfo[stmt->op].arity; s++) {
+          if (src[s][idx(i,s)].state != Cell::CONSTANT) {
+            allconst = false;
+          }
+          if (src[s][idx(i,s)].state == Cell::BOTTOM) {
+            bottom = true;
+          }
+        }
+        if (allconst) {
+          ShVariable tmpdest(new ShVariableNode(SH_TEMP, 1));
+          ShStatement eval(*stmt);
+          eval.dest = tmpdest;
+          for (int k = 0; k < opInfo[stmt->op].arity; k++) {
+            ShVariable tmpsrc(new ShVariableNode(SH_TEMP, 1));
+            tmpsrc.setValue(0, src[k][idx(i,k)].value);
+            eval.src[k] = tmpsrc;
+          }
+          evaluate(eval);
+          dest.push_back(Cell(Cell::CONSTANT, tmpdest.getValue(0)));
+          worklist.push(ValueTracking::Def(stmt, i));
+        } else if (bottom) {
+          dest.push_back(Cell(Cell::BOTTOM));
+        } else {
+          dest.push_back(Cell(Cell::TOP));
+        }
+      }      
+    } else if (opInfo[stmt->op].result_source == ShOperationInfo::ALL) {
+      // build statement ONLY if ALL elements of ALL sources are constant
+      bool allconst = true;
+      bool bottom = false;
+      for (int s = 0; s < opInfo[stmt->op].arity; s++) {
+        for (unsigned int k = 0; k < src[s].size(); k++) {
+          if (src[s][k].state != Cell::CONSTANT) {
+            allconst = false;
+          }
+          if (src[s][k].state == Cell::BOTTOM) {
+            bottom = true;
+          }
+        }
+      }
+      if (allconst) {
+        ShVariable tmpdest(new ShVariableNode(SH_TEMP, stmt->dest.size()));
+        ShStatement eval(*stmt);
+        eval.dest = tmpdest;
+        for (int i = 0; i < opInfo[stmt->op].arity; i++) {
+          ShVariable tmpsrc(new ShVariableNode(SH_TEMP, stmt->src[i].size()));
+          for (int j = 0; j < stmt->src[i].size(); j++) {
+            tmpsrc.setValue(j, src[i][j].value);
+          }
+          eval.src[i] = tmpsrc;
+        }
+        evaluate(eval);
+        for (int i = 0; i < stmt->dest.size(); i++) {
+          dest.push_back(Cell(Cell::CONSTANT, tmpdest.getValue(i)));
+          worklist.push(ValueTracking::Def(stmt, i));
+        }
+      } else if (bottom) {
+        for (int i = 0; i < stmt->dest.size(); i++) {
+          dest.push_back(Cell(Cell::BOTTOM));
+        }
+      } else {
+        for (int i = 0; i < stmt->dest.size(); i++) {
+          dest.push_back(Cell(Cell::TOP));
+        }
+      }
+    } else {
+      SH_DEBUG_ASSERT(0 && "Invalid result source type");
+    }
+  }
+  
+  struct Cell {
+    enum State {
+      BOTTOM,
+      CONSTANT,
+      TOP
+    };
+
+    Cell(State state, float value = 0.0)
+      : state(state), value(value)
+    {
+    }
+
+    bool operator==(const Cell& other) const
+    {
+      return state == other.state && value == other.value;
+    }
+    bool operator!=(const Cell& other) const
+    {
+      return !(*this == other);
+    }
+    
+    State state;
+    float value;
+  };
+
+  ShStatement* stmt;
+  std::vector<Cell> dest;
+  std::vector<Cell> src[3];
+};
+
+ShStatementInfo* ConstProp::clone() const
+{
+  return new ConstProp(*this);
+}
+
+ConstProp::Cell meet(const ConstProp::Cell& a, const ConstProp::Cell& b)
+{
+  if (a.state == ConstProp::Cell::BOTTOM || b.state == ConstProp::Cell::BOTTOM) {
+    return ConstProp::Cell(ConstProp::Cell::BOTTOM);
+  }
+  if (a.state == ConstProp::Cell::CONSTANT && b.state == ConstProp::Cell::CONSTANT) {
+    if (a.value == b.value) {
+      return a;
+    } else {
+      return ConstProp::Cell(ConstProp::Cell::BOTTOM);
+    }
+  }
+  if (a.state == ConstProp::Cell::CONSTANT) return a;
+  if (b.state == ConstProp::Cell::CONSTANT) return b;
+  
+  return ConstProp::Cell(ConstProp::Cell::TOP);
+}
+
+std::ostream& operator<<(std::ostream& out, const ConstProp::Cell& cell)
+{
+  switch(cell.state) {
+  case ConstProp::Cell::BOTTOM:
+    out << "[bot]";
+    break;
+  case ConstProp::Cell::CONSTANT:
+    out << "[" << cell.value << "]";
+    break;
+  case ConstProp::Cell::TOP:
+    out << "[top]";
+    break;
+  }
+  return out;
+}
+
+struct InitConstProp {
+  InitConstProp(ConstWorkList& worklist)
+    : worklist(worklist)
+  {
+  }
+
+  void operator()(const ShCtrlGraphNodePtr& node)
+  {
+    if (!node) return;
+    ShBasicBlockPtr block = node->block;
+    if (!block) return;
+    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+      I->template destroy_info<ConstProp>();
+      ConstProp* cp = new ConstProp(&(*I), worklist);
+      I->add_info(cp);
+    }
+  }
+
+  ConstWorkList& worklist;
+};
+
+struct DumpConstProp {
+  void operator()(const ShCtrlGraphNodePtr& node)
+  {
+    if (!node) return;
+    ShBasicBlockPtr block = node->block;
+    if (!block) return;
+    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+      std::cerr << "{" << *I << "} --- ";
+      ConstProp* cp = I->template get_info<ConstProp>();
+
+      if (!cp) {
+        std::cerr << "NO CP INFORMATION" << std::endl;
+        continue;
+      }
+
+      std::cerr << "dest = {";
+      for (int i = 0; i < cp->dest.size(); i++) {
+        std::cerr << cp->dest[i];
+      }
+      std::cerr << "}; ";
+      for (int s = 0; s < opInfo[I->op].arity; s++) {
+        if (s) std::cerr << ", ";
+        std::cerr << "src" << s << " = {";
+        for (int i = 0; i < cp->src[s].size(); i++) {
+          std::cerr << cp->src[s][i];
+        }
+        std::cerr << "}";
+      }
+      std::cerr << std::endl;
+    }
+    
+  }
+};
+
 }
 
 namespace SH {
@@ -430,6 +681,11 @@ ValueTracking::ValueTracking(ShStatement* stmt)
       defs[i].push_back(std::set<Def>());
     }
   }
+}
+
+ShStatementInfo* ValueTracking::clone() const
+{
+  return new ValueTracking(*this);
 }
 
 void add_value_tracking(ShProgram& p)
@@ -477,9 +733,10 @@ void add_value_tracking(ShProgram& p)
   UdDuBuilder builder(r);
   graph->dfs(builder);
 
+#if 1
   UdDuDumper dumper;
   graph->dfs(dumper);
-
+#endif
 }
 
 void insert_branch_instructions(ShProgram& p)
@@ -505,7 +762,6 @@ void remove_dead_code(ShProgram& p, bool& changed)
   DeadCodeWorkList w;
 
   ShCtrlGraphPtr graph = p.node()->ctrlGraph;
-
   
   InitLiveCode init(w);
   graph->dfs(init);
@@ -532,12 +788,59 @@ void remove_dead_code(ShProgram& p, bool& changed)
   graph->dfs(r);
 }
 
+void propagate_constants(ShProgram& p)
+{
+  ShCtrlGraphPtr graph = p.node()->ctrlGraph;
+
+  ConstWorkList worklist;
+  
+  InitConstProp init(worklist);
+  graph->dfs(init);
+
+  while (!worklist.empty()) {
+    ValueTracking::Def def = worklist.front(); worklist.pop();
+    ValueTracking* vt = def.stmt->template get_info<ValueTracking>();
+    if (!vt) {
+      SH_DEBUG_PRINT("Statement on worklist does not have VT information?");
+      SH_DEBUG_PRINT(*def.stmt);
+      continue;
+    }
+
+    ConstProp* dcp = def.stmt->template get_info<ConstProp>();
+    if (!dcp) {
+      SH_DEBUG_PRINT("Statement on worklist does not have CP information?");
+      continue;
+    }
+    
+    for (ValueTracking::DefUseChain::iterator I = vt->uses[def.index].begin(); I != vt->uses[def.index].end(); ++I) {
+      ConstProp* cp = I->stmt->template get_info<ConstProp>();
+      if (!cp) {
+        SH_DEBUG_PRINT("Use does not have const prop information!");
+        continue;
+      }
+
+      ConstProp::Cell cell = cp->src[I->source][I->index];
+      ConstProp::Cell new_cell = meet(cell, dcp->dest[def.index]);
+      if (cell != new_cell) {
+        cp->src[I->source][I->index] = new_cell;
+        cp->updateDest(worklist);
+      }
+    }
+  }
+  // Now do something with our glorious newfound information.
+
+  DumpConstProp dump;
+  graph->dfs(dump);
+  
+}
+
 void optimize(ShProgram& p, int level)
 {
   if (level <= 0) return;
 
   bool changed;
   do {
+    SH_DEBUG_PRINT("===================Optimizer Pass Begins========================");
     changed = false;
 
     p.node()->ctrlGraph->computePredecessors();
@@ -545,12 +848,16 @@ void optimize(ShProgram& p, int level)
     straighten(p, changed);
     
     insert_branch_instructions(p);
-    add_value_tracking(p);
 
+    add_value_tracking(p);
+    propagate_constants(p);
+
+    add_value_tracking(p); // TODO: Really necessary?
     remove_dead_code(p, changed);
 
     remove_branch_instructions(p);
 
+    SH_DEBUG_PRINT("==================Optimizer Pass Finished=======================");
   } while (changed);
 }
 

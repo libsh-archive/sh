@@ -33,6 +33,8 @@ void remove_dead_code(ShProgram& p, bool& changed);
 struct ValueTracking : public ShStatementInfo {
   ValueTracking(ShStatement* stmt);
 
+  ShStatementInfo* clone() const;
+  
   struct Def {
     Def(ShStatement* stmt, int index)
       : stmt(stmt), index(index)

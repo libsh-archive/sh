@@ -43,6 +43,8 @@ libsh_la_SOURCES += ShDomTree.cpp ShOptimizer.cpp ShTransformer.cpp ShBitSet.cpp
 incinc_HEADERS   += ShDomTree.hpp ShOptimizer.hpp ShTransformer.hpp ShBitSet.hpp
 libsh_la_SOURCES += ShOptimizations.cpp ShOptimizations.hpp
 incinc_HEADERS   += ShOptimizations.hpp
+libsh_la_SOURCES += ShEvaluate.cpp ShEvaluate.hpp
+incinc_HEADERS   += ShEvaluate.hpp
 libsh_la_SOURCES += ShStructural.hpp ShStructural.cpp
 incinc_HEADERS   += ShStructural.hpp
 

@@ -1,3 +1,16 @@
+2004-08-20  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShStatement.cpp (ShStatement): Implement ShStatement copy
+	constructor, cloning info items using new clone() member function.
+
+	* src/ShStatement.hpp (destroy_info): Fix destroy_info to iterate
+	correctly.
+	(class ShStatementInfo): Add clone() virtual member function.
+	(class ShStatement): Add explicit copy constructor.
+
+	* src/ShOptimizations.cpp: Added lots of code for constant
+	propagation.
+
 2004-08-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShOptimizations.cpp: Implementation file for the new

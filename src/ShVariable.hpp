@@ -94,7 +94,8 @@ public:
   /// Set the values of this variable, using the swizzle as a
   /// writemask.
   void setValues(ShVariableNode::ValueType values[]);
-
+  void setValue(int index, ShVariableNode::ValueType value);
+  
   ShVariable operator()() const; ///< Identity swizzle
   ShVariable operator()(int) const;
   ShVariable operator()(int, int) const;

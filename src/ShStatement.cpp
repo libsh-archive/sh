@@ -33,68 +33,68 @@ namespace SH {
  * @see ShOperation
  */
 const ShOperationInfo opInfo[] = {
-  {"ASN", 1},
+  {"ASN", 1, ShOperationInfo::LINEAR},
   
-  {"NEG", 1},
-  {"ADD", 2},
-  {"MUL", 2},
-  {"DIV", 2},
+  {"NEG", 1, ShOperationInfo::LINEAR},
+  {"ADD", 2, ShOperationInfo::LINEAR},
+  {"MUL", 2, ShOperationInfo::LINEAR},
+  {"DIV", 2, ShOperationInfo::LINEAR},
 
-  {"SLT", 2},
-  {"SLE", 2},
-  {"SGT", 2},
-  {"SGE", 2},
-  {"SEQ", 2},
-  {"SNE", 2},
+  {"SLT", 2, ShOperationInfo::LINEAR},
+  {"SLE", 2, ShOperationInfo::LINEAR},
+  {"SGT", 2, ShOperationInfo::LINEAR},
+  {"SGE", 2, ShOperationInfo::LINEAR},
+  {"SEQ", 2, ShOperationInfo::LINEAR},
+  {"SNE", 2, ShOperationInfo::LINEAR},
   
-  {"ABS", 1},
-  {"ACOS", 1},
-  {"ASIN", 1},
-  {"ATAN", 1},
-  {"ATAN2", 2},
-  {"CEIL", 1},
-  {"COS", 1},
-  {"CMUL", 1},
-  {"CSUM", 1},
-  {"DOT", 2},
-  {"DX", 1},
-  {"DY", 1},
-  {"EXP", 1},
-  {"EXP2", 1},
-  {"EXP10", 1},
-  {"FLR", 1},
-  {"FRAC", 1},
-  {"LRP", 3},
-  {"MAD", 3},
-  {"MAX", 2},
-  {"MIN", 2},
-  {"MOD", 2},
-  {"LOG", 1},
-  {"LOG2", 1},
-  {"LOG10", 1},
-  {"POW", 2},
-  {"RCP", 1},
-  {"RSQ", 1},
-  {"SIN", 1},
-  {"SGN", 1},
-  {"SQRT", 1},
-  {"TAN", 1},
+  {"ABS", 1, ShOperationInfo::LINEAR},
+  {"ACOS", 1, ShOperationInfo::LINEAR},
+  {"ASIN", 1, ShOperationInfo::LINEAR},
+  {"ATAN", 1, ShOperationInfo::LINEAR},
+  {"ATAN2", 2, ShOperationInfo::LINEAR},
+  {"CEIL", 1, ShOperationInfo::LINEAR},
+  {"COS", 1, ShOperationInfo::LINEAR},
+  {"CMUL", 1, ShOperationInfo::ALL},
+  {"CSUM", 1, ShOperationInfo::ALL},
+  {"DOT", 2, ShOperationInfo::ALL},
+  {"DX", 1, ShOperationInfo::EXTERNAL},
+  {"DY", 1, ShOperationInfo::EXTERNAL},
+  {"EXP", 1, ShOperationInfo::LINEAR},
+  {"EXP2", 1, ShOperationInfo::LINEAR},
+  {"EXP10", 1, ShOperationInfo::LINEAR},
+  {"FLR", 1, ShOperationInfo::LINEAR},
+  {"FRAC", 1, ShOperationInfo::LINEAR},
+  {"LRP", 3, ShOperationInfo::LINEAR},
+  {"MAD", 3, ShOperationInfo::LINEAR},
+  {"MAX", 2, ShOperationInfo::LINEAR},
+  {"MIN", 2, ShOperationInfo::LINEAR},
+  {"MOD", 2, ShOperationInfo::LINEAR},
+  {"LOG", 1, ShOperationInfo::LINEAR},
+  {"LOG2", 1, ShOperationInfo::LINEAR},
+  {"LOG10", 1, ShOperationInfo::LINEAR},
+  {"POW", 2, ShOperationInfo::LINEAR},
+  {"RCP", 1, ShOperationInfo::LINEAR},
+  {"RSQ", 1, ShOperationInfo::LINEAR},
+  {"SIN", 1, ShOperationInfo::LINEAR},
+  {"SGN", 1, ShOperationInfo::LINEAR},
+  {"SQRT", 1, ShOperationInfo::LINEAR},
+  {"TAN", 1, ShOperationInfo::LINEAR},
 
-  {"NORM", 1},
-  {"XPD", 2},
+  {"NORM", 1, ShOperationInfo::ALL},
+  {"XPD", 2, ShOperationInfo::ALL}, // Not quite true, but probably good enough
 
-  {"TEX", 2},
-  {"TEXI", 2},
+  {"TEX", 2, ShOperationInfo::EXTERNAL},
+  {"TEXI", 2, ShOperationInfo::EXTERNAL},
 
-  {"COND", 3},
+  {"COND", 3, ShOperationInfo::LINEAR},
 
-  {"KIL", 1},
+  {"KIL", 1, ShOperationInfo::IGNORE},
 
-  {"OPTBRA", 1},
+  {"OPTBRA", 1, ShOperationInfo::IGNORE},
 
-  {"FETCH", 1},
+  {"FETCH", 1, ShOperationInfo::EXTERNAL},
   
-  {0, 0}
+  {0, 0, ShOperationInfo::IGNORE}
 };
 
 ShStatementInfo::ShStatementInfo()
@@ -129,6 +129,19 @@ ShStatement::ShStatement(ShVariable dest, ShOperation op, ShVariable src0, ShVar
   src[0] = src0;
   src[1] = src1;
   src[2] = src2;
+}
+
+ShStatement::ShStatement(const ShStatement& other)
+  : dest(other.dest),
+    op(other.op),
+    marked(other.marked),
+    du(other.du)
+{
+  for (int i = 0; i < 3; i++) src[i] = other.src[i];
+  for (int i = 0; i < 3; i++) ud[i] = other.ud[i];  
+  for (std::list<ShStatementInfo*>::const_iterator I = other.info.begin(); I != other.info.end(); ++I) {
+    info.push_back((*I)->clone());
+  }
 }
 
 ShStatement::~ShStatement()
