@@ -16,14 +16,24 @@ enum MappingType {
   MAPPING_OUTPUT
 };
 
+// All mappings are assumed to point to 4-colour floating point
+// buffers [may want to allow differently sized buffers in the future].
+// Offset and length are used to address subparts of these buffers.
 struct Mapping {
-  Mapping(MappingType type, int id)
-    : type(type), id(id)
+  Mapping()
+    : type(MAPPING_NULL), id(0), offset(0), length(0)
+  {
+  }
+  
+  Mapping(MappingType type, int id, int offset, int length)
+    : type(type), id(id), offset(offset), length(length)
   {
   }
   
   MappingType type;
   int id;
+  unsigned int offset;
+  unsigned int length;
 };
 
 struct ShPass {
@@ -32,7 +42,7 @@ struct ShPass {
 
   // Either a predicated branch or an unconditional branch.
 
-  ShVariable predicate;
+  Mapping predicate;
   ShPass* predicate_pass; // Taken if predicate is true
   ShPass* default_pass; // Taken if no predicate, or predicate is false
 
@@ -56,6 +66,9 @@ public:
   void dump_graphviz(std::ostream& out);
   
 private:
+  // The program for which this schedule is generated.
+  ShProgramNodePtr m_program;
+  
   PassList m_passes;
   
   // The root of the graph
