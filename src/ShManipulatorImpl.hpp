@@ -218,61 +218,61 @@ ShProgram operator<<(const ShManipulator<T> &m, const ShProgram &p) {
 }
 
 template<typename T>
-ShManipulator<T> shPermute(T i0) {
+ShManipulator<T> shSwizzle(T i0) {
   ShManipulator<T> m;
   m(i0);
   return m;
 }
 template<typename T>
-ShManipulator<T> shPermute(T i0, T i1) {
+ShManipulator<T> shSwizzle(T i0, T i1) {
   ShManipulator<T> m;
   m(i0); m(i1);
   return m;
 }
 template<typename T>
-ShManipulator<T> shPermute(T i0, T i1, T i2) {
+ShManipulator<T> shSwizzle(T i0, T i1, T i2) {
   ShManipulator<T> m;
   m(i0); m(i1); m(i2); 
   return m;
 }
 
 template<typename T>
-ShManipulator<T> shPermute(T i0, T i1, T i2, T i3) {
+ShManipulator<T> shSwizzle(T i0, T i1, T i2, T i3) {
   ShManipulator<T> m;
   m(i0); m(i1); m(i2); m(i3);
   return m;
 }
 
 template<typename T>
-ShManipulator<T> shPermute(T i0, T i1, T i2, T i3, T i4) {
+ShManipulator<T> shSwizzle(T i0, T i1, T i2, T i3, T i4) {
   ShManipulator<T> m;
   m(i0); m(i1); m(i2); m(i3); m(i4); 
   return m;
 }
 
 template<typename T>
-ShManipulator<T> shPermute(T i0, T i1, T i2, T i3, T i4, T i5) {
+ShManipulator<T> shSwizzle(T i0, T i1, T i2, T i3, T i4, T i5) {
   ShManipulator<T> m;
   m(i0); m(i1); m(i2); m(i3); m(i4); m(i5); 
   return m;
 }
 
 template<typename T>
-ShManipulator<T> shPermute(T i0, T i1, T i2, T i3, T i4, T i5, T i6) {
+ShManipulator<T> shSwizzle(T i0, T i1, T i2, T i3, T i4, T i5, T i6) {
   ShManipulator<T> m;
   m(i0); m(i1); m(i2); m(i3); m(i4); m(i5); m(i6); 
   return m;
 }
 
 template<typename T>
-ShManipulator<T> shPermute(T i0, T i1, T i2, T i3, T i4, T i5, T i6, T i7) {
+ShManipulator<T> shSwizzle(T i0, T i1, T i2, T i3, T i4, T i5, T i6, T i7) {
   ShManipulator<T> m;
   m(i0); m(i1); m(i2); m(i3); m(i4); m(i5); m(i6); m(i7); 
   return m;
 }
 
 template<typename T>
-ShManipulator<T> shPermute(T i0, T i1, T i2, T i3, T i4, T i5, T i6, T i7, T i8) {
+ShManipulator<T> shSwizzle(T i0, T i1, T i2, T i3, T i4, T i5, T i6, T i7, T i8) {
   ShManipulator<T> m;
   m(i0); m(i1); m(i2); m(i3); m(i4); m(i5); m(i6); 
   m(i7); m(i8);
@@ -280,7 +280,7 @@ ShManipulator<T> shPermute(T i0, T i1, T i2, T i3, T i4, T i5, T i6, T i7, T i8)
 }
 
 template<typename T>
-ShManipulator<T> shPermute(T i0, T i1, T i2, T i3, T i4, T i5, T i6, T i7, T i8, T i9) {
+ShManipulator<T> shSwizzle(T i0, T i1, T i2, T i3, T i4, T i5, T i6, T i7, T i8, T i9) {
   ShManipulator<T> m;
   m(i0); m(i1); m(i2); m(i3); m(i4); m(i5); m(i6); 
   m(i7); m(i8); m(i9);
@@ -288,7 +288,7 @@ ShManipulator<T> shPermute(T i0, T i1, T i2, T i3, T i4, T i5, T i6, T i7, T i8,
 }
 
 template<typename T>
-ShManipulator<T> shPermute(std::vector<T> indices) {
+ShManipulator<T> shSwizzle(std::vector<T> indices) {
   ShManipulator<T> m;
   for(typename std::vector<T>::iterator it = indices.begin();
       it != indices.end(); ++it) {

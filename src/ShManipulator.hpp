@@ -135,37 +135,37 @@ ShProgram operator<<(const ShManipulator<T> &m, const ShProgram &p);
  * if index < 0, then uses program size + index'th output
  */
 template<typename T>
-ShManipulator<T> shPermute(T i0);
+ShManipulator<T> shSwizzle(T i0);
 
 template<typename T>
-ShManipulator<T> shPermute(T i0, T i1);
+ShManipulator<T> shSwizzle(T i0, T i1);
 
 template<typename T>
-ShManipulator<T> shPermute(T i0, T i1, T i2);
+ShManipulator<T> shSwizzle(T i0, T i1, T i2);
 
 template<typename T>
-ShManipulator<T> shPermute(T i0, T i1, T i2, T i3);
+ShManipulator<T> shSwizzle(T i0, T i1, T i2, T i3);
 
 template<typename T>
-ShManipulator<T> shPermute(T i0, T i1, T i2, T i3, T i4);
+ShManipulator<T> shSwizzle(T i0, T i1, T i2, T i3, T i4);
 
 template<typename T>
-ShManipulator<T> shPermute(T i0, T i1, T i2, T i3, T i4, T i5);
+ShManipulator<T> shSwizzle(T i0, T i1, T i2, T i3, T i4, T i5);
 
 template<typename T>
-ShManipulator<T> shPermute(T i0, T i1, T i2, T i3, T i4, T i5, T i6);
+ShManipulator<T> shSwizzle(T i0, T i1, T i2, T i3, T i4, T i5, T i6);
 
 template<typename T>
-ShManipulator<T> shPermute(T i0, T i1, T i2, T i3, T i4, T i5, T i6, T i7);
+ShManipulator<T> shSwizzle(T i0, T i1, T i2, T i3, T i4, T i5, T i6, T i7);
 
 template<typename T>
-ShManipulator<T> shPermute(T i0, T i1, T i2, T i3, T i4, T i5, T i6, T i7, T i8);
+ShManipulator<T> shSwizzle(T i0, T i1, T i2, T i3, T i4, T i5, T i6, T i7, T i8);
 
 template<typename T>
-ShManipulator<T> shPermute(T i0, T i1, T i2, T i3, T i4, T i5, T i6, T i7, T i8, T i9);
+ShManipulator<T> shSwizzle(T i0, T i1, T i2, T i3, T i4, T i5, T i6, T i7, T i8, T i9);
 
 template<typename T>
-ShManipulator<T> shPermute(std::vector<T> indices);
+ShManipulator<T> shSwizzle(std::vector<T> indices);
 
 /// range manipulator that permutes ranges of shader
 // outputs based on given indices
