@@ -82,7 +82,7 @@ private:
   /// Generate code for a single Sh statement.
   void emit(const SH::ShStatement &stmt);
   
-  std::string resolve(const SH::ShVariable& v, int src_size = 0) const;
+  std::string resolve(const SH::ShVariable& v) const;
 
   void updateFloatUniform(const SH::ShVariableNodePtr& node, const GLint location);
   void updateIntUniform(const SH::ShVariableNodePtr& node, const GLint location);

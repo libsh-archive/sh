@@ -342,25 +342,25 @@ void GlslCode::emit(const ShStatement &stmt)
 {
   switch(stmt.op) {
   case SH_OP_ADD:
-    m_lines.push_back(resolve(stmt.dest, max(stmt.src[0].size(), stmt.src[1].size())) + " = " + resolve(stmt.src[0]) + " + " + resolve(stmt.src[1]));
+    m_lines.push_back(resolve(stmt.dest) + " = " + resolve(stmt.src[0]) + " + " + resolve(stmt.src[1]));
     break;
   case SH_OP_MUL:
-    m_lines.push_back(resolve(stmt.dest, max(stmt.src[0].size(), stmt.src[1].size())) + " = " + resolve(stmt.src[0]) + " * " + resolve(stmt.src[1]));
+    m_lines.push_back(resolve(stmt.dest) + " = " + resolve(stmt.src[0]) + " * " + resolve(stmt.src[1]));
     break;
   case SH_OP_DOT:
-    m_lines.push_back(resolve(stmt.dest, 1) + " = dot(" + resolve(stmt.src[0]) + ", " + resolve(stmt.src[1]) + ")");
+    m_lines.push_back(resolve(stmt.dest) + " = dot(" + resolve(stmt.src[0]) + ", " + resolve(stmt.src[1]) + ")");
     break;
   case SH_OP_ASN:
-    m_lines.push_back(resolve(stmt.dest, stmt.src[0].size()) + " = " + resolve(stmt.src[0]));
+    m_lines.push_back(resolve(stmt.dest) + " = " + resolve(stmt.src[0]));
     break;
   case SH_OP_NORM:
-    m_lines.push_back(resolve(stmt.dest, stmt.src[0].size()) + " = normalize(" + resolve(stmt.src[0]) + ")");
+    m_lines.push_back(resolve(stmt.dest) + " = normalize(" + resolve(stmt.src[0]) + ")");
     break;
   case SH_OP_POW:
-    m_lines.push_back(resolve(stmt.dest, max(stmt.src[0].size(), stmt.src[1].size())) + " = pow(" + resolve(stmt.src[0]) + ", " + resolve(stmt.src[1]) + ")");
+    m_lines.push_back(resolve(stmt.dest) + " = pow(" + resolve(stmt.src[0]) + ", " + resolve(stmt.src[1]) + ")");
     break;
   case SH_OP_MAX:
-    m_lines.push_back(resolve(stmt.dest, max(stmt.src[0].size(), stmt.src[1].size())) + " = max(" + resolve(stmt.src[0]) + ", " + resolve(stmt.src[1]) + ")");
+    m_lines.push_back(resolve(stmt.dest) + " = max(" + resolve(stmt.src[0]) + ", " + resolve(stmt.src[1]) + ")");
     break;
   default:
     m_lines.push_back("// *** unhandled operation " + 
@@ -369,13 +369,10 @@ void GlslCode::emit(const ShStatement &stmt)
   }
 }
 
-string GlslCode::resolve(const ShVariable& v, int src_size) const
+string GlslCode::resolve(const ShVariable& v) const
 {
   SH_DEBUG_ASSERT(m_varmap);
-  if (0 == src_size) {
-    src_size = v.size();
-  }
-  return m_varmap->resolve(v, src_size);
+  return m_varmap->resolve(v);
 }
 
 }

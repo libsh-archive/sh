@@ -48,7 +48,7 @@ class GlslVariableMap {
 public:
   GlslVariableMap(SH::ShProgramNode* shader, GlslProgramType unit);
   
-  std::string resolve(const SH::ShVariable& v, int src_size);
+  std::string resolve(const SH::ShVariable& v);
   const GlslVariable& variable(const SH::ShVariableNodePtr& node);
   bool contains(const SH::ShVariableNodePtr& node) const;
 
@@ -88,7 +88,7 @@ private:
   
   void map_insert(const SH::ShVariableNodePtr& node, GlslVariable var);
 
-  std::string swizzle(const SH::ShVariable& v, int dest_size, int src_size) const;
+  std::string swizzle(const SH::ShVariable& v, int dest_size) const;
 };
 
 }

@@ -175,32 +175,23 @@ GlslVariableMap::DeclarationList::const_iterator GlslVariableMap::regular_end() 
   return m_regular_declarations.end();
 }
 
-string GlslVariableMap::resolve(const ShVariable& v, int src_size)
+string GlslVariableMap::resolve(const ShVariable& v)
 {
   if (m_varmap.find(v.node()) == m_varmap.end()) {
     allocate_temp(v.node());
   }
 
   GlslVariable var(m_varmap[v.node()]);
-  string s = var.name() + swizzle(v, var.size(), src_size);
+  string s = var.name() + swizzle(v, var.size());
   if (v.neg()) {
     s =  string("-(") + s + ")";
   }
   return s;
 }
 
-string GlslVariableMap::swizzle(const ShVariable& v, int dest_size, int src_size) const
+string GlslVariableMap::swizzle(const ShVariable& v, int dest_size) const
 {
   ShSwizzle swizzle = v.swizzle();
-
-  if (dest_size != src_size) {
-    // Fit this variable to the variable it's assigned to using the proper write mask
-    int* s = new int[dest_size];
-    for (int i = 0; i < dest_size; i++) s[i] = i;
-    swizzle = ShSwizzle(dest_size, src_size, s);
-    delete s;
-    swizzle = v.swizzle() * swizzle;
-  }
 
   if (swizzle.identity() && (swizzle.size() == dest_size)) return ""; // no need for a swizzle
 
