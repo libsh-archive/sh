@@ -109,6 +109,11 @@ AC_CONFIG_FILES([Makefile
 		 backends/sm/Makefile
 		 backends/gl/Makefile
 		 util/Makefile
+		 examples/Makefile
+		 examples/binding/Makefile
+		 examples/glut/Makefile
+		 examples/particle/Makefile
+		 examples/textures/Makefile
 		 doc/Makefile])
 AC_OUTPUT
 
