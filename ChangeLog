@@ -1,3 +1,17 @@
+2004-07-05  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShProgram.hpp: Add describe_interface() member function wrapper.
+
+	* src/ShProgramNode.hpp: Rename operator<< for VarLists to static
+	member function "print" of ShProgramNode, add describe_interface
+	member function.
+
+	* src/ShProgramNode.cpp (describe_interface): Implement this
+	function. Resolves issue18.
+
+	* src/ShVariableNode.cpp (shBindingTypeName): Change name of temp
+	types to the empty string.
+
 2004-06-30  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShLibGeometryImpl.hpp (reflect): Implemented reflect

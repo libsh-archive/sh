@@ -62,6 +62,13 @@ public:
   {
     m_node->compile(target, backend);
   }
+
+  /// Obtain a listing of the inputs, outputs and uniforms used by
+  /// this program.
+  std::string describe_interface() const
+  {
+    return m_node->describe_interface();
+  }
   
   /// Obtain the code for currently active backend. 
   /// This operation will fail if this program does not have a

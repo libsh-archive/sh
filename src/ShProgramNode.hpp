@@ -62,6 +62,9 @@ public:
   /// Forcefully compile this program for a particular backend, even if
   /// it has been compiled previously. Use code() to obtain the actual code.
   void compile(const std::string& target, const ShPointer<ShBackend>& backend);
+
+  /// Describe the inputs and outputs of this program.
+  std::string describe_interface() const;
   
   /// Obtain the code for currently active backend. 
   /// This operation will fail if this program does not have a
@@ -112,6 +115,9 @@ public:
 
   /// Make a copy of this program.
   ShPointer<ShProgramNode> clone() const;
+
+  /// Print a description of a list of variables
+  static std::ostream& print(std::ostream& out, const VarList& list);
   
 private:
 
@@ -127,8 +133,6 @@ private:
 
 typedef ShPointer<ShProgramNode> ShProgramNodePtr;
 typedef ShPointer<const ShProgramNode> ShProgramNodeCPtr;
-
-extern std::ostream& operator<<( std::ostream& out, const ShProgramNode::VarList &varList );
 
 }
 

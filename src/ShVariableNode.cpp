@@ -37,7 +37,7 @@ const char* ShBindingTypeName[] = {
   "Input",
   "Output",
   "InOut",
-  "Temp",
+  "",
   "Constant",
   "Texture",
   "Stream"

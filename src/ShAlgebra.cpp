@@ -89,8 +89,10 @@ ShProgram connect(ShProgram pa, ShProgram pb)
       err << "Cannot smash variables "  
           << (*I)->nameOfType() << " " << (*I)->name() << " and " 
           << (*J)->nameOfType() << " " << (*J)->name() << " with different sizes" << std::endl;
-      err << "while connecting outputs: " << a->outputs << std::endl;
-      err << "to inputs: " << b->inputs << std::endl;
+      err << "while connecting outputs: ";
+      ShProgramNode::print(err, a->outputs) << std::endl;
+      err << "to inputs: ";
+      ShProgramNode::print(err, b->inputs) << std::endl;
       ShContext::current()->exit();
       shError(ShAlgebraException(err.str()));
       return ShProgram(ShProgramNodePtr(0));

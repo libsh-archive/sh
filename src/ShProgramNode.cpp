@@ -27,6 +27,7 @@
 #include "ShProgramNode.hpp"
 #include <cassert>
 #include <algorithm>
+#include <sstream>
 #include "ShBackend.hpp"
 #include "ShEnvironment.hpp"
 #include "ShContext.hpp"
@@ -86,6 +87,35 @@ ShPointer<ShBackendCode> ShProgramNode::code(const std::string& target, const Sh
   if (m_code.find(std::make_pair(target, backend)) == m_code.end()) compile(target, backend);
 
   return m_code[std::make_pair(target, backend)];
+}
+
+std::string ShProgramNode::describe_interface() const
+{
+  std::ostringstream os;
+  os << "Interface for ";
+  if (has_name()) {
+    os << name();
+  } else {
+    os << "<anonymous program>";
+  }
+  os << std::endl;
+  os << std::endl;
+  os << "Inputs:" << std::endl;
+  for (VarList::const_iterator I = inputs.begin(); I != inputs.end(); ++I) {
+    os << "  " << (*I)->nameOfType() << " " << (*I)->name() << ";" << std::endl;
+  }
+  os << std::endl;
+  os << "Outputs:" << std::endl;
+  for (VarList::const_iterator I = outputs.begin(); I != outputs.end(); ++I) {
+    os << "  " << (*I)->nameOfType() << " " << (*I)->name() << ";" << std::endl;
+  }
+  os << std::endl;
+  os << "Uniforms:" << std::endl;
+  for (VarList::const_iterator I = uniforms.begin(); I != uniforms.end(); ++I) {
+    os << "  " << (*I)->nameOfType() << " " << (*I)->name() << ";" << std::endl;
+  }
+
+  return os.str();
 }
 
 void ShProgramNode::updateUniform(const ShVariableNodePtr& uniform)
@@ -171,11 +201,11 @@ void ShProgramNode::collectVar(const ShVariableNodePtr& var)
   }
 }
 
-std::ostream& operator<<( std::ostream& out, const ShProgramNode::VarList &varList )
+std::ostream& ShProgramNode::print(std::ostream& out,
+                                   const ShProgramNode::VarList& varList)
 {
   out << "(";
-  for( ShProgramNode::VarList::const_iterator it = varList.begin(); 
-      it != varList.end(); ++it ) {
+  for(VarList::const_iterator it = varList.begin(); it != varList.end(); ++it) {
     if( it != varList.begin() ) out << ", ";
     out << (*it)->nameOfType() << " " << (*it)->name(); 
   }
