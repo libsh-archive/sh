@@ -1,3 +1,7 @@
+2004-04-05  Jack Wang  <jmwang@uwaterloo.ca>
+
+	* src/ShQuaternion.hpp: Added structured comments.
+
 2004-04-04  Michael McCool  <mmccool@uwaterloo.ca>
 
         * src/ShTexture.hpp: added default sizes in constructors

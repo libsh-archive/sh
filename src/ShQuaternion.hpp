@@ -42,59 +42,232 @@ class ShQuaternion
   friend std::ostream& operator<<(std::ostream& out, 
                                   const ShQuaternion<K2, T2>& q);
 public:
+  
+  /** \brief Constructor for ShQuaternion.
+   *    
+   *  Creates a identity ShQuaternion
+   */
   ShQuaternion();
+
+  /** \brief Constructor for ShQuaternion with a quaternion as parameter.
+   *
+   * Creates a ShQuaternion where each element is equal to the one in the 
+   * parameters
+   * \param other the quaternion from which we will get the values from 
+   */  
   template<int K2> 
   ShQuaternion(const ShQuaternion<K2, T>& other);
+
+  
+  /** \brief Constructor for ShQuaternion with a 4-vector as parameter.
+   *
+   * Creates a ShQuaternion where each element is equal to the one in 
+   * the parameters
+   * \param values 4-vector from which we will get the values from 
+   */  
   template<int K2>
   ShQuaternion(const ShVector<4, K2, T>& values);
+  
+  
+  /** \brief Constructor for ShQuaternion with an angle and axis of rotation.
+   *
+   * Creates a unit ShQuaternion defined by a rotation
+   * \param angle angle in radians of the rotation
+   * \param axis axis of rotation
+   */  
   template<int K2, int K3>
   ShQuaternion(const ShAttrib<1, K2, T>& angle, 
                const ShVector<3, K3, T>& axis);
   
-  // create a quaternion using a matrix, the input matrix must be orthogonal
-  // (ie. det(mat) = 1)
+  
+  /** \brief Constructor for ShQuaternion with a rotation matrix.
+   *
+   * Creates a unit ShQuaternion defined by a rotation
+   * \param mat matrix defining the rotation
+   * \pre det(mat) = 1
+   */  
   template<int K2>
   ShQuaternion(const ShMatrix<4, 4, K2, T>& mat);
+  
+  /** \brief Definition of assignment to another quaternion
+   *
+   * Returns the address of a quaternion from which the values were copied from
+   * other
+   * \param other ShQuaternion from which we will get the values from
+   */  
   template<int K2> 
   ShQuaternion& operator=(const ShQuaternion<K2, T>& other);
+
+  /** \brief Definition of the add-assign operation with another quaternion
+   *
+   * Returns the address of a quaternion where the result is the current 
+   * quaternion + right
+   * \param right the other quaternion added to this one
+   */  
   template<int K2>
   ShQuaternion& operator+=(const ShQuaternion<K2, T>& right);
+  
+  /** \brief Definition of the minus-assign operation with another quaternion
+   *
+   * Returns the address of a quaternion where the result is the current 
+   * quaternion - right
+   * \param right the other quaternion subtracted from this one
+   */  
   template<int K2>
   ShQuaternion& operator-=(const ShQuaternion<K2, T>& right);
+  
+  /** \brief Definition of the times-assign operation with another quaternion
+   *
+   * Returns the address of a quaternion where the result is the current 
+   * quaternion * right 
+   * \param right the other quaternion multiplied to this one
+   */  
   template<int K2>
   ShQuaternion& operator*=(const ShQuaternion<K2, T>& right);
+
+  
+  /** \brief Definition of the times-assign operation with a scalar
+   *
+   * Returns the address of a quaternion where the result is the current 
+   * quaternion (each component) multiplied by right
+   * \param right the scalar multiplied to this quaternion
+   */  
   template<int K2>
   ShQuaternion& operator*=(const ShAttrib<1, K2, T>& right);
+  
+  /** \brief Definition of the times-assign operation with a 3-vector
+   *
+   * Returns the address of a quaternion where the result is the current 
+   * quaternion * ShQuaternion(0.0, right)
+   * \param right 3-vector converted to a quaternion multiplied to this one
+   */  
   template<int K2>
   ShQuaternion& operator*=(const ShVector<3, K2, T>& right);
+  
+  /** \brief Definition of the times-assign operation with a 3-normal
+   *
+   * Returns the address of a quaternion where the result is the current 
+   * quaternion * ShQuaternion(0.0, right)
+   * \param right 3-normal converted to a quaternion multiplied to this one
+   */  
   template<int K2>
   ShQuaternion& operator*=(const ShNormal<3, K2, T>& right);
+
+  /** \brief Definition of the add operation with another quaternion
+   *
+   * Returns a new ShQuaternion equals to the current quaternion + q2
+   * \param q2 the other quaternion added to this one
+   */  
   template<int K2>
   ShQuaternion<SH_TEMP, T> operator+(const ShQuaternion<K2, T>& q2);
+  
+  /** \brief Definition of the subtract operation with another quaternion
+   *
+   * Returns a new ShQuaternion equals to the current quaternion - q2
+   * \param q2 the other quaternion subtracted from this one
+   */  
   template<int K2>
   ShQuaternion<SH_TEMP, T> operator-(const ShQuaternion<K2, T>& q2);
+
+  /** \brief Definition of the multiply operation with another quaternion
+   *
+   * Returns a new ShQuaternion equals to the current quaternion * q2
+   * \param q2 the other quaternion multiplied to this one
+   */  
   template<int K2>
   ShQuaternion<SH_TEMP, T> operator*(const ShQuaternion<K2, T>& q2);
+  
+  /** \brief Definition of the multiply operation with a scalar
+   *
+   * Returns a new ShQuaternion equals to the current quaternion * c
+   * \param c the scalar multiplied to this one
+   */  
   template<int K2>
   ShQuaternion<SH_TEMP, T> operator*(const ShAttrib<1, K2, T>& c);
+  
+  /** \brief Definition of the times operation with a 3-vector
+   *
+   * Returns a new ShQuaternion equals to the current 
+   * quaternion * ShQuaternion(0.0, right)
+   * \param q2 3-vector converted to a quaternion multiplied to this one
+   */  
   template<int K2>
   ShQuaternion<SH_TEMP, T> operator*(const ShVector<3, K2, T>& q2);
+  
+  /** \brief Definition of the times operation with a 3-normal
+   *
+   * Returns a new ShQuaternion equals to the current 
+   * quaternion * ShQuaternion(0.0, right)
+   * \param q2 3-normal converted to a quaternion multiplied to this one
+   */  
   template<int K2>
   ShQuaternion<SH_TEMP, T> operator*(const ShNormal<3, K2, T>& q2);
+
+  /** \brief Definition of the normalize function
+   *
+   * Normalizes the current quaternion which makes it unit
+   */  
   void normalize();
+  
+  /** \brief Definition of the getValues function
+   *
+   * Outputs the current content of the quaternion as a T array
+   * \param values output T array
+   */  
   void getValues(T values []) const;
+
+  /** \brief Definition of the setUnit function
+   *
+   * Manually indicate whether the quaternion is unit or non-unit
+   * \param flag true or false
+   */  
   void setUnit(bool flag);
-  /// Set this variable's name. If set to the empty string, defaults
-  /// to the type and id of the variable.
+
+  /** \brief Definition of the name function
+   * 
+   * Set this variable's name. If set to the empty string, defaults
+   * to the type and id of the variable.
+   * \param name the name string
+   */
   void name(const std::string& name);
-  std::string name() const; ///< Get this variable's name
+  
+  /** \brief Definition of the name function
+   * 
+   * Returns this variable's name.
+   */
+  std::string name() const; 
 
-
+  /** \brief Definition of the dot function
+   * 
+   * Returns the dot product between this quaternion and q
+   * \param q quaternion we're taking the dot product with
+   */
   template<int K2>
   ShAttrib<1, SH_TEMP, T> dot(const ShQuaternion<K2, T>& q) const;
+  
+  /** \brief Definition of the conjugate function
+   * 
+   * Returns the conjugate of this quaternion
+   */
   ShQuaternion<SH_TEMP, T> conjugate() const;
+  
+  /** \brief Definition of the inverse function
+   * 
+   * Returns the inverse of this quaternion (same as conjugate if unit)
+   */
   ShQuaternion<SH_TEMP, T> inverse() const;
+  
+  /** \brief Definition of the getMatrix function
+   * 
+   * Returns the rotation matrix defined by this quaternion
+   * \pre this quaternion is unit
+   */
   ShMatrix<4, 4, SH_TEMP, T> getMatrix() const;
+
+  /** \brief Definition of the getVector function
+   * 
+   * Returns the values of this quaternion as a vector
+   */
   ShVector<4, SH_TEMP, T> getVector() const;
 private:
   ShVector<4, K, T> m_data;
