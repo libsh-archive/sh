@@ -347,6 +347,12 @@ void GlslCode::emit_texture(const ShStatement& stmt)
   }
 
   line << "(" << resolve(stmt.src[0]) << ", " << resolve(stmt.src[1]) << ")";
+  if (texture->size() != 4) {
+    line << ".";
+    for (int i = 0; i < texture->size(); i++) {
+      line << "xyzw"[i];
+    }
+  }
 
   append_line(line.str());
 }

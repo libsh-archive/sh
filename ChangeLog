@@ -1,5 +1,9 @@
 2005-03-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* backends/gl/GlslEmit.cpp (emit_texture): Swizzle texture lookups
+	to the expected size. Fixes many GLSL backend problems on ATI (but
+	not all of them, in particular implicit bool->float casts).
+
 	* win32/ShArbBackend.vcproj, win32/ShGlslBackend.vcproj: Include
 	Utils.cpp and Utils.hpp
 
