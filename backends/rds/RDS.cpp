@@ -43,6 +43,14 @@ void RDS::print_partitions(char *filename) {
   dump.close();
 }
 
+void RDS::force_fake_limits() {
+  m_limits = new rds::FakeLimits();
+}
+
+void RDS::force_graph_limits() {
+  m_limits = new rds::FakeLimits();
+}
+
 void RDS::print_partition() {
 	int count = 0;
 	for(PassVector::iterator I = m_passes.begin(); I != m_passes.end(); ++I) {
