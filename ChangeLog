@@ -4,6 +4,9 @@
   * src/ShTypeConvertTransformer.cpp:
   Bug fix for uniform flag on temp variables.
 
+  * src/ShConstProp.cpp:
+  Fix to figure out storage type of a valuenum properly.
+
 2004-10-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShGenericImpl.hpp (operator%=): Actually do a modulo, not a

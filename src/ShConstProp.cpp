@@ -224,10 +224,17 @@ struct ConstProp : public ShStatementInfo {
       }
     }
 
+    int typeIndex() const 
+    {
+      if(constant) return constval->typeIndex();
+      return Value::get(valuenum)->getTypeIndex();
+    }
+
     bool operator!=(const Uniform& other) const
     {
       return !(*this == other);
     }
+
 
     bool constant;
 
@@ -308,6 +315,13 @@ struct ConstProp : public ShStatementInfo {
       }
       m_values.push_back(val);
       return m_values.size() - 1;
+    }
+
+    int getTypeIndex() {
+      if(type == NODE) {
+        return node->typeIndex();
+      } 
+      return destTypeIndex;
     }
 
     static Value* get(ValueNum n)
@@ -796,8 +810,7 @@ struct FinishConstProp
     }
     if (!allsame) {
       // Make intermediate variables, combine them together.
-      SH_DEBUG_ASSERT(src[0].constval); // @todo type DEBUGGING
-      ShVariable r = ShVariable(new ShVariableNode(SH_TEMP, src.size(), src[0].constval->typeIndex()));
+      ShVariable r = ShVariable(new ShVariableNode(SH_TEMP, src.size(), src[0].typeIndex()));
       
       for (std::size_t i = 0; i < src.size(); i++) {
         std::vector<ConstProp::Uniform> v;
