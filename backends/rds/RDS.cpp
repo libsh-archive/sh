@@ -63,7 +63,7 @@ void RDS::print_partition_stmt() {
 void RDS::set_partition() {
 	DAGNode::DAGNode *root = m_pdt->get_root();
 	unvisitall(root);
-	m_marked[root] = true;
+	root->m_marked = true;
 	partition(root);
 }
 
@@ -132,29 +132,29 @@ void RDS::rds_subdivide(DAGNode::DAGNode* v) {
 			if(m_rdsh) {
 				if (recompute(k)) {
 					// recompute k
-					m_marked[k] = false;
+					k->m_marked = false;
 				}
 				else {
 					// save k
-					m_marked[k] = true;
+					k->m_marked = true;
 				}
 			}
 			else {
 				switch(m_fixed[k]) {
 					case RDS_MARKED:
-						m_marked[k] = true;;  
+						k->m_marked = true;;  
 						break;
 					case RDS_UNMARKED:
-						m_marked[k] = false;;
+						k->m_marked = false;;
 						break;
 					default:
 						if (recompute(k)) {
 							// recompute 
-							m_marked[k] = false;
+							k->m_marked = false;
 						}
 						else {
 							// save w
-							m_marked[k] = true;
+							k->m_marked = true;
 						}
 						break;
 				}
@@ -280,12 +280,12 @@ void RDS::rds_merge(DAGNode::DAGNode* v) {
 
 			// mark all the kids of w
 			for (DAGNode::DAGNodeVector::iterator I = kids.begin(); I != kids.end(); ++I) {
-				m_marked[*I] = true;
+				(*I)->m_marked = true;
 			}
 
 			// unmark all the kids in the subset
 			for (DAGNode::DAGNodeVector::iterator I = w->successors.begin(); I != w->successors.end(); ++I) {
-				m_marked[*I] = false;
+				(*I)->m_marked = false;
 			}
 
 			// we're done
@@ -295,7 +295,7 @@ void RDS::rds_merge(DAGNode::DAGNode* v) {
 
 	// nothing could be merged; mark all the kids
 	for (DAGNode::DAGNodeVector::iterator I = kids.begin(); I != kids.end(); ++I) {
-		m_marked[*I] = true;
+		(*I)->m_marked = true;
 	}
 }
   
@@ -351,12 +351,12 @@ int *RDS::next_ksubset(int n, int k, int *a) {
   
 
 int RDS::countnodes(DAGNode::DAGNode *v) {
-	if (t_visited[v]) return 0;
-	t_visited[v] = true;
+	if (v->m_visited) return 0;
+	v->m_visited = true;
 	int count = 1;
 	
 	for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end(); ++I) {
-		if (!(m_marked[*I] || m_fixed[*I] == RDS_MARKED)) {
+		if (!((*I)->m_marked || m_fixed[*I] == RDS_MARKED)) {
 			count += countnodes(*I);
 		}
 	} 
@@ -364,7 +364,6 @@ int RDS::countnodes(DAGNode::DAGNode *v) {
 }
 
 void RDS::unvisitall(DAGNode::DAGNode *v) {
-	t_visited[v] = false;
 	v->m_visited = false;
 	for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end(); ++I) {
 		unvisitall(*I);
@@ -379,7 +378,7 @@ void RDS::unfixall(DAGNode::DAGNode *v) {
 }
 
 void RDS::unmarkall(DAGNode::DAGNode *v) {
-	m_marked[v] = false;
+	v->m_marked = false;
 	for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end(); ++I) {
 		unmarkall(*I);
 	}
@@ -406,7 +405,7 @@ void RDS::partition(DAGNode::DAGNode *v)
 		}
       
 		// cut w off from v if it's marked
-		if (m_marked[w]) {
+		if (w->m_marked) {
 			v->m_cut[w] = true; 
 #ifdef RDS_DEBUG
       SH_DEBUG_PRINT("Cut at " << w->m_label );
@@ -415,7 +414,7 @@ void RDS::partition(DAGNode::DAGNode *v)
     }
    
     // check if v is a partition root
-  if (m_marked[v]) {
+  if (v->m_marked) {
     m_passes.push_back(v);
   }
 }
@@ -451,12 +450,12 @@ DAGNode::DAGNode* RDS::merge(PassVector passes) {
 }
 
 int RDS::countmarked(DAGNode::DAGNode* v) {
-	if (t_visited[v]) return 0;
-	t_visited[v] = true;
+	if (v->m_visited) return 0;
+	v->m_visited = true;
 	
 	int count = 0;
 
-	if (m_marked[v]) count++;
+	if (v->m_marked) count++;
 	
 	for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end(); ++I) {
 			count += countnodes(*I);
@@ -519,10 +518,10 @@ void RDS::full_search() {
 		unmarkall(root);
 
 		for (int j = 0; j < k; j++) {
-			m_marked[m_nodelist.at(a[j])] = true;
+			m_nodelist.at(a[j])->m_marked = true;
 		}
 
-		m_marked[root] = true;
+		root->m_marked = true;
 
 		bool isvalid = true;
 
@@ -560,10 +559,10 @@ void RDS::full_search() {
 			unmarkall(root);
 
 			for (int j = 0; j < k; j++) {
-				m_marked[m_nodelist.at(a[j])] = true;
+				m_nodelist.at(a[j])->m_marked = true;
 			}
 
-			m_marked[root] = true;
+			root->m_marked = true;
 
 			bool isvalid = true;
 
@@ -601,7 +600,7 @@ void RDS::full_search() {
 
 	for(int i = 0; i < n; i++) {
 		if (marked[i])
-			m_marked[m_nodelist.at(i)] = true;
+			m_nodelist.at(i)->m_marked = true;
 	}
 
 	set_partition();

@@ -31,6 +31,7 @@ class SH_DLLEXPORT DAGNode {
 	std::string m_label;
 
 	bool m_visited;
+	bool m_marked;
 
 	typedef std::map<DAGNode *, bool> CutMap;
 	CutMap m_cut;
