@@ -15,12 +15,13 @@ if re.compile("p[\d]+.ecf").match(socket.gethostname()):
 # shdr = env.Program('shader',['main.cpp'])
 # test = env.Command('test',prog,runcom)
 
+shrike = Split('Globals.cpp NullShader.cpp')
 cppre = re.compile('.cpp')
 for i in glob.glob('shader*.cpp'):
   progname = cppre.sub('',i)
-  shdr = env.Program( progname , Split(i) )
-  runs = env.Command( 'c'+progname, shdr, "./"+progname )
+  shdr = env.Program( progname , Split(i) + shrike)
+  # runs = env.Command( 'c'+progname, shdr, "./"+progname )
   # os.system("./" + progname)
-  for j in glob.glob('rds*graph'):
+  # for j in glob.glob('rds*graph'):
     # os.system('mv '+j+' '+progname+j)
-    env.Command(progname+j, runs, 'mv '+j+' '+progname+j)
+    # env.Command(progname+j, runs, 'mv '+j+' '+progname+j)
