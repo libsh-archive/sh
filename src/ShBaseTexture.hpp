@@ -42,6 +42,10 @@ SH_DLLEXPORT ShBaseTexture : public ShMetaForwarder {
 public:
   ShBaseTexture(const ShTextureNodePtr& node);
 
+  /* @todo range - added in for debugging without having to
+   * add the texture to a program */
+  ShTextureNodePtr node() { return m_node; }
+
 protected:
   ShTextureNodePtr m_node;
 };

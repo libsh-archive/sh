@@ -1,10 +1,35 @@
+2010-02-04 Bryan Chan <b8chan@cgl.uwaterloo.ca>
+	* src/ShLp.hpp ShLpImpl.hpp:
+	Basic simplex-method linear programming straight from CLRS.
+	Was using Sh types, but too slow, so switched to valarrays. 
+
+	* src/ShAffineTexture.hpp ShAffineTexture.cpp:
+	Added a first attempt at an affine texture (handles 1D, 2D, 3D and RECT,
+	but not wrap modes)
+
+	Based on Kevin's interval mip-maps from GI'02 paper, except this samples
+	2^n x 2^n ranges at 2^(n-1) offsets so only one lookup is required, but
+	should still have no problems with power of 2 boundaries. 
+
+	* src/ShAaOpHandler.hpp, ShAaOpHandler.cpp, ShAaSymPlacer.cpp,
+		ShAaOps.hpp, ShAaOps.cpp:
+	Added handling for TEX ops in noise symbol assignment, op replacement.
+
+	* src/ShBaseTexture.hpp (node()):
+	Added a function to access the ShBaseTexture::m_node. 
+	(For debugging)
+
+	* src/scripts/semantic.py, src/ShGeneric.hpp, ShGenericImpl.hpp, 
+		ShAttrib.hpp ShAttribImpl.hpp (swiz(const ShSwizzle&)):
+	Added this arbitrary swiz function.  
+
 2004-01-26 Bryan Chan <b8chan@cgl.uwaterloo.ca>
 	* src/ShAaOps.hpp, ShAaOps.cpp ShAaOpHandler.cpp:
 	Added FRAC, FLR, RSQ ops.  That should cover the needs for perlin, except
   TEX (which will be coming shortly once I cook up some LP goodness).
 	Fixed NaN problems by clamping some inputs to valid function domains. 
 
-	* src/ShSection.hpp, ShSection.cpp:
+	* src/ShSection.hpp, ShSectionImpl.hpp, ShSection.cpp:
 	Wrapper around ShStructural that only keeps the tree-structure of sections.
   Replaces the garbage code in ShSectionUtil.?pp
 

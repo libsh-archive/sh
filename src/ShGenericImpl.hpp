@@ -335,6 +335,14 @@ ShGeneric<N2, T> ShGeneric<N, T>::swiz(int indices[]) const
   return ShGeneric<N2, T>(m_node, m_swizzle * ShSwizzle(N, N2, indices), m_neg);
 }
 
+template<int N, typename T> 
+template<int N2>
+ShGeneric<N2, T> ShGeneric<N, T>::swiz(const ShSwizzle& s) const
+{
+  SH_DEBUG_ASSERT(s.size() == N2);
+  return ShGeneric<N2, T>(m_node, m_swizzle * s, m_neg);
+}
+
 template<int N, typename T>
 void ShGeneric<N, T>::getValues(host_type dest[]) const
 {
@@ -624,6 +632,14 @@ template<int N2>
 ShGeneric<N2, T> ShGeneric<1, T>::swiz(int indices[]) const
 {
   return ShGeneric<N2, T>(m_node, m_swizzle * ShSwizzle(1, N2, indices), m_neg);
+}
+
+template<typename T> 
+template<int N2>
+ShGeneric<N2, T> ShGeneric<1, T>::swiz(const ShSwizzle& s) const
+{
+  SH_DEBUG_ASSERT(s.size() == N2);
+  return ShGeneric<N2, T>(m_node, m_swizzle * s, m_neg);
 }
 
 template<typename T>

@@ -160,6 +160,9 @@ public:
   template<int N2>
   ShGeneric<N2, T> swiz(int indices[]) const;
 
+  template<int N2>
+  ShGeneric<N2, T> swiz(const ShSwizzle& s) const;
+
   /// Get the values of this variable, with swizzling taken into account
   void getValues(host_type dest[]) const;
   host_type getValue(int index) const;
@@ -256,6 +259,8 @@ public:
   // Arbitrary Swizzle
   template<int N2>
   ShGeneric<N2, T> swiz(int indices[]) const;
+  template<int N2>
+  ShGeneric<N2, T> swiz(const ShSwizzle& s) const;
 
   /// Get the values of this variable, with swizzling taken into account
   void getValues(host_type dest[]) const;

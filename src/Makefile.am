@@ -49,6 +49,8 @@ libsh_la_SOURCES += ShDllExport.hpp
 incinc_HEADERS   += ShDllExport.hpp
 libsh_la_SOURCES += ShPool.hpp ShPool.cpp
 incinc_HEADERS   += ShPool.hpp
+libsh_la_SOURCES += ShLp.hpp ShLpImpl.hpp
+incinc_HEADERS   += ShLp.hpp
 
 # Backend
 libsh_la_SOURCES += ShBackend.cpp ShBackend.hpp 
@@ -84,6 +86,8 @@ libsh_la_SOURCES += ShRangeBranchFixer.cpp ShRangeBranchFixer.hpp
 incinc_HEADERS	 += ShRangeBranchFixer.hpp
 libsh_la_SOURCES += ShIntervalTexture.hpp ShIntervalTexture.cpp
 incinc_HEADERS	 += ShIntervalTexture.hpp
+libsh_la_SOURCES += ShAffineTexture.hpp ShAffineTexture.cpp
+incinc_HEADERS	 += ShAffineTexture.hpp
 libsh_la_SOURCES += ShOptimizations.cpp ShOptimizations.hpp
 incinc_HEADERS   += ShOptimizations.hpp
 libsh_la_SOURCES += ShValueTracking.cpp ShConstProp.cpp

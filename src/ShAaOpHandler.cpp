@@ -279,6 +279,11 @@ ShProgram getProgram(ShStatement& stmt, SymAllocator& alloc) {
     ShAaVariable *src;
     if(arity > 0) src = new ShAaVariable[arity];
     for(int i = 0; i < arity; ++i) {
+      /* ignore tex sources */
+      if(stmt.src[i].node()->kind() == SH_TEXTURE) {
+        continue;
+      }
+
       /* @todo range handle IA inputs */
       ShValueType srcValueType = stmt.src[i].valueType();
       if(shIsAffine(srcValueType)) {
@@ -346,6 +351,8 @@ ShProgram getProgram(ShStatement& stmt, SymAllocator& alloc) {
       case SH_OP_SGN:   return affineBinaryMonotonic<SH_OP_SGN>(N, valueType);
 #endif
       case SH_OP_SQRT:  dest.ASN(aaSQRT(src[0], stmtSyms->newdest)); break; 
+      case SH_OP_TEX:   dest.ASN(aaTEX(stmt.src[0], src[1], stmtSyms->dest, stmtSyms->newdest)); break; 
+      case SH_OP_TEXI:  dest.ASN(aaTEXI(stmt.src[0], src[1], stmtSyms->dest, stmtSyms->newdest)); break; 
 #if 0
 
       case SH_OP_UNION:   return affineUNION(N, valueType);

@@ -33,6 +33,7 @@
 #include "ShTransformer.hpp"
 #include "ShCtrlGraphWranglers.hpp"
 #include "ShOptimizations.hpp"
+#include "ShAffineTexture.hpp"
 #include "ShAaSyms.hpp"
 #include "ShAaSymPlacer.hpp"
 #include "ShAaVariable.hpp"
@@ -52,6 +53,41 @@
 namespace {
 using namespace SH;
 
+/* Affine approximation of arbitrary dimension.
+ * Each src[i] must be the same size as dest
+ */
+typedef std::vector<const ShAaVariable*> AaVarVec;
+void affineApprox(ShAaVariable &dest,
+                  const AaVarVec &src,
+                  const ShRecord& coeff, const ShAaSyms &newsyms)
+{
+  SH_DEBUG_ASSERT(src.size() == coeff.size() - 2);
+  SH_DEBUG_ASSERT(src.size() > 0);
+
+  ShRecord::const_iterator C = coeff.begin();
+  dest.ASN(aaMUL(*src[0], *C++));
+  ShAaSyms assigned = src[0]->use(); // keeps track of symbols assigned to so far
+
+  for(int i = 1; i < src.size(); ++i, ++C) {
+    ShAaSyms add = src[i]->use() - assigned;
+    ShAaSyms isct = src[i]->use() & assigned;
+
+    SH_DEBUG_ASSERT(src[i]->size() == dest.size());
+
+    dest.ASN(aaMUL(*src[i], *C), add, false);
+    dest.MAD(*src[i], *C, isct, true);
+
+    assigned |= add;
+  }
+
+  dest.ADD(*C++); // const factor
+  if((assigned & newsyms).empty()) {
+    dest.setErr(*C, newsyms);
+  } else {
+    dest.addErr(*C, newsyms);
+  }
+}
+
 // Affine approximation
 // Detects if src already has newsyms, in which case it adds the error on
 // as an absolute value
@@ -59,13 +95,9 @@ void affineApprox(ShAaVariable &dest, const ShAaVariable &src,
                   ShVariable alpha, ShVariable beta, 
                   ShVariable delta, const ShAaSyms &newsyms)
 {
-  dest.ASN(aaMUL(src, alpha)).ADD(beta);
-
-  if((src.use() & newsyms).empty()) { 
-    dest.setErr(delta, newsyms);
-  } else {
-    dest.addErr(delta, newsyms);
-  }
+  AaVarVec srcVec;
+  srcVec.push_back(&src);
+  affineApprox(dest, srcVec, alpha & beta & delta, newsyms);
 }
 
 
@@ -77,22 +109,12 @@ void affineApprox(ShAaVariable &dest,
                   ShVariable alpha, ShVariable beta, ShVariable gamma, 
                   ShVariable delta, const ShAaSyms &newsyms)
 {
-  ShAaSyms isct = a.use() & b.use();
-  ShAaSyms bonly = b.use() - a.use();
-  SH_DEBUG_PRINT_AOP("Set Ops: a=" << a.use() << " b=" << b.use() 
-      << " isct=" << isct << " bonly=" << bonly);
-
-  dest.ASN(aaMUL(a, alpha));
-  dest.ASN(aaMUL(b, beta), bonly, false); 
-  dest.MAD(b, beta, isct, true);
-  dest.ADD(gamma);
-
-  if((a.use() & newsyms).empty() && (b.use() & newsyms).empty()) { 
-    dest.setErr(delta, newsyms);
-  } else {
-    dest.addErr(delta, newsyms);
-  }
+  AaVarVec srcVec;
+  srcVec.push_back(&a);
+  srcVec.push_back(&b);
+  affineApprox(dest, srcVec, alpha & beta & gamma & delta, newsyms);
 }
+
 
 
 /* Given a functor F that defines three functions similar to ShAffine.hpp's
@@ -511,6 +533,41 @@ ShAaVariable aaLOG10(const ShAaVariable& a, const ShAaSyms& newsyms)
 {
   ShAaVariable result(new ShAaVariableNode(*a.node(), a.use() | newsyms));
   convexApprox<__aaop_log10>(result, a, newsyms); // @todo range - fix this
+  return result;
+}
+
+ShAaVariable aaTEX(const ShVariable& texVar, const ShAaVariable& coord, const ShAaSyms& destsyms, const ShAaSyms& newsyms)
+{
+  ShAaVariable result(new ShAaVariableNode(texVar.node(), destsyms)); 
+
+  ShTextureNodePtr texnode = shref_dynamic_cast<ShTextureNode>(texVar.node());
+  SH_DEBUG_ASSERT(texnode);
+  ShAffineTexturePtr aatex = ShAffineTexture::convert(texnode);
+  SH_DEBUG_ASSERT(aatex);
+
+  ShRecord coeff(aatex->lookup(coord.lo(), coord.hi()));
+
+  AaVarVec srcVec;
+  srcVec.push_back(&coord);
+  affineApprox(result, srcVec, coeff, newsyms); 
+  return result;
+}
+
+ShAaVariable aaTEXI(const ShVariable& texVar, const ShAaVariable& coord, 
+                    const ShAaSyms& destsyms, const ShAaSyms& newsyms)
+{
+  ShAaVariable result(new ShAaVariableNode(texVar.node(), destsyms)); 
+
+  ShTextureNodePtr texnode = shref_dynamic_cast<ShTextureNode>(texVar.node());
+  SH_DEBUG_ASSERT(texnode);
+  ShAffineTexturePtr aatex = ShAffineTexture::convert(texnode);
+  SH_DEBUG_ASSERT(aatex);
+
+  ShRecord coeff(aatex->rect_lookup(coord.lo(), coord.hi()));
+
+  AaVarVec srcVec;
+  srcVec.push_back(&coord);
+  affineApprox(result, srcVec, coeff, newsyms); 
   return result;
 }
 

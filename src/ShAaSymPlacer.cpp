@@ -127,7 +127,19 @@ void updateDest(ShAaStmtSyms *stmtSyms, const SymLevelVec& levelSyms, WorkList &
       }
     }
   } else if(opInfo[stmt->op].affine_keep) {
-    switch(opInfo[stmt->op].result_source) {
+    ShOperationInfo::ResultSource result_source = opInfo[stmt->op].result_source;
+    // special case certain EXTERNAL statements
+    if(result_source == ShOperationInfo::EXTERNAL) {
+      switch(stmt->op) {
+        case SH_OP_TEX:
+        case SH_OP_TEXI:
+          result_source = ShOperationInfo::ALL;
+          break;
+        default:
+          break;
+      }
+    }
+    switch(result_source) {
       case ShOperationInfo::IGNORE: 
         break;
 

@@ -71,7 +71,7 @@ ShRecord::VarList::iterator ShRecord::end()
   return m_vars.end();
 }
 
-int ShRecord::size() const 
+size_t ShRecord::size() const 
 {
   return m_vars.size();
 }

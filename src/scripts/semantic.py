@@ -178,6 +178,8 @@ public:""")
         common.inprint('')
         common.inprint("template<int N2>\n" +
                        self.name + "<N2, Binding, T, true> swiz(int indices[]) const;")
+        common.inprint("template<int N2>\n" +
+                       self.name + "<N2, Binding, T, true> swiz(const ShSwizzle& s) const;")
         common.inprint('')
         common.inprint(self.name + " operator-() const;")
 
@@ -389,6 +391,24 @@ class Impl:
             args = [str(size)] + args
         common.inprint("return " + self.tplcls("N2", "true") + "(this->m_node, " +
                        "this->m_swizzle * ShSwizzle(" + ', '.join(args) + "), " +
+                       "this->m_neg);")
+        common.deindent()
+        common.inprint("}")
+        common.inprint("")
+        common.inprint(self.tpl(size) + "\n" +
+                       "template<int N2>\n" +
+                       self.tplcls("N2", "true") + "\n" +
+                       self.tplcls(size) + "::swiz(const ShSwizzle& s) const")
+        common.inprint("{")
+        common.indent()
+        args = ["N2", "indices"]
+        if size <= 0:
+            args = ["N"] + args
+        else:
+            args = [str(size)] + args
+        common.inprint("SH_DEBUG_ASSERT(s.size() == N2);");
+        common.inprint("return " + self.tplcls("N2", "true") + "(this->m_node, " +
+                       "this->m_swizzle * s," +
                        "this->m_neg);")
         common.deindent()
         common.inprint("}")

@@ -126,7 +126,14 @@ ShAaVariable aaNORM(const ShAaVariable& a, const ShAaSyms& newsyms);
 
 #if 0
 ShAaVariable aaXPD(const ShAaVariable& a, const ShAaVariable& b);
+#endif
 
+ShAaVariable aaTEX(const ShVariable& texVar, const ShAaVariable& coord, 
+                   const ShAaSyms& destsyms, const ShAaSyms& newsyms);
+ShAaVariable aaTEXI(const ShVariable& texVar, const ShAaVariable& coord, 
+                   const ShAaSyms& destsyms, const ShAaSyms& newsyms);
+
+#if 0
 ShAaVariable aaCOND(const ShAaVariable& cond,
             const ShAaVariable& a, const ShAaVariable& b);
 

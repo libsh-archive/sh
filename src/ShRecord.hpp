@@ -55,7 +55,7 @@ public:
   const_iterator end() const;
   iterator begin();
   iterator end();
-  int size() const;
+  size_t size() const;
 
   void append(const ShVariable& variable);
   void prepend(const ShVariable& variable);
