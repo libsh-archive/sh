@@ -170,7 +170,8 @@ ShPointer<T> shref_const_cast(const ShPointer<S>& other);
 
 
 // Empty but reference-countable and polymorphic
-struct ShVoid : public ShRefCountable {
+struct 
+SH_DLLEXPORT ShVoid : public ShRefCountable {
   virtual ~ShVoid();
 };
 

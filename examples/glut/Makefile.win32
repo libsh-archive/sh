@@ -1,12 +1,12 @@
 # -*- makefile -*-
 
 # build options
-GEN_DEPENDENCIES=1
+GEN_DEPENDENCIES=0
 BUILD_RELEASE=1
 BUILD_DEBUG=1
 
 # Sh
-SH_DIR = \dev\install
+SH_DIR = \home\sdt\install
 INCLUDES += -I$(SH_DIR)\include
 SH_RELEASE_LDADD = $(SH_DIR)\lib\libsh.lib
 SH_DEBUG_LDADD = $(SH_DIR)\lib\libshd.lib

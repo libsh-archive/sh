@@ -262,7 +262,7 @@ struct ScheduleBuilder {
 
 namespace SH {
 
-std::ostream& operator<<(std::ostream& out, const Mapping& mapping)
+SH_DLLEXPORT std::ostream& operator<<(std::ostream& out, const Mapping& mapping)
 {
   switch (mapping.type) {
   case MAPPING_NULL:

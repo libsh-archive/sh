@@ -42,7 +42,7 @@ SH_DLLEXPORT ShBaseTexture : public ShMetaForwarder {
 public:
   ShBaseTexture(const ShTextureNodePtr& node);
 
-  const ShTextureNodePtr& node() { return m_node; }
+  const ShTextureNodePtr& node();
   
 protected:
   ShTextureNodePtr m_node;

@@ -13,8 +13,11 @@ CLEANFILES = $(EXECUTABLES) *.pdb *.ilk *.exp
 
 all:
 
-%.exe: %.obj
-	$(CXX) $(DEBUG_CXXFLAGS) /Fe$* $< $(LDADD) $(DEBUG_LDFLAGS)
+%.exe: %.r.obj
+	$(CXX) $(RELEASE_CXXFLAGS) /Fe$@ $< $(RELEASE_LDFLAGS) $(OPENGL_DIR)\lib\OPENGL32.LIB  $(RELEASE_LDADD) /link
+
+%_d.exe: %.d.obj
+	$(CXX)  $(RELEASE_CXXFLAGS) /Fe$@ $< $(RELEASE_LDFLAGS) $(OPENGL_DIR)\lib\OPENGL32.LIB  $(DEBUG_LDADD) /link
 
 w32testarb.exe: w32testarb.d.obj
 	$(CXX) $(DEBUG_CXXFLAGS) /Fe$@ $< $(DEBUG_LDFLAGS) $(OPENGL_DIR)\lib\OPENGL32.LIB  $(DEBUG_LDADD)

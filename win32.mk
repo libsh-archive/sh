@@ -1,10 +1,10 @@
 # build options
-GEN_DEPENDENCIES=1
+GEN_DEPENDENCIES=0
 BUILD_RELEASE=1
 BUILD_DEBUG=1
 
 # install location
-SH_INSTALLDIR = \dev\install
+SH_INSTALLDIR = \home\sdt\install
 
 # OpenGL
 OPENGL_DIR = \dev\opengl

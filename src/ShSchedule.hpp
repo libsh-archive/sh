@@ -20,7 +20,8 @@ enum MappingType {
 // All mappings are assumed to point to 4-colour floating point
 // buffers [may want to allow differently sized buffers in the future].
 // Offset and length are used to address subparts of these buffers.
-struct Mapping {
+struct
+SH_DLLEXPORT Mapping {
   Mapping()
     : type(MAPPING_NULL), id(0), offset(0), length(0)
   {
@@ -37,9 +38,10 @@ struct Mapping {
   unsigned int length;
 };
 
-std::ostream& operator<<(std::ostream& out, const Mapping& mapping);
+SH_DLLEXPORT std::ostream& operator<<(std::ostream& out, const Mapping& mapping);
 
-struct ShPass {
+struct
+SH_DLLEXPORT ShPass {
   ShProgramNodePtr program;
   std::list<Mapping> inputs, outputs;
 
@@ -55,7 +57,8 @@ struct ShPass {
   int count;
 };
 
-struct ShBackendSchedule : public ShRefCountable {
+struct
+SH_DLLEXPORT ShBackendSchedule : public ShRefCountable {
   virtual void pre_execution(int width, int height, const ShStream& stream) = 0;
   virtual void execute_pass(ShPass* pass) = 0 ;
 };
@@ -63,7 +66,8 @@ struct ShBackendSchedule : public ShRefCountable {
 typedef ShPointer<ShBackendSchedule> ShBackendSchedulePtr;
 typedef ShPointer<const ShBackendSchedule> ShBackendScheduleCPtr;
 
-class ShSchedule {
+class 
+SH_DLLEXPORT ShSchedule {
 public:
   typedef std::list<ShPass> PassList;
 

@@ -35,6 +35,8 @@ libsharb_dll_SOURCES += ArbReg.hpp ArbReg.cpp
 # OpenGL backend
 libsharb_dll_SOURCES += GlBackend.hpp GlBackend.cpp
 libsharb_dll_SOURCES += GlTextureName.hpp GlTextureName.cpp
+libsharb_dll_SOURCES += PCScheduler.hpp PCScheduler.cpp
+libsharb_dll_SOURCES += Utils.hpp Utils.cpp
 
 # OpenGL textures
 libsharb_dll_SOURCES += GlTextures.hpp GlTextures.cpp
@@ -42,6 +44,8 @@ libsharb_dll_SOURCES += GlTextureStorage.hpp GlTextureStorage.cpp
 
 # Stream support
 libsharb_dll_SOURCES += PBufferStreams.hpp PBufferStreams.cpp
+libsharb_dll_SOURCES += PBufferContext.hpp PBufferContext.cpp
+libsharb_dll_SOURCES += WGLPBufferContext.hpp WGLPBufferContext.cpp
 libsharb_dll_SOURCES += WGLPBufferStreams.hpp WGLPBufferStreams.cpp
 
 libsharb_dll_CXXFILES = $(filter %.cpp,$(libsharb_dll_SOURCES))

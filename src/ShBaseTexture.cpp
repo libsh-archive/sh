@@ -34,4 +34,9 @@ ShBaseTexture::ShBaseTexture(const ShTextureNodePtr& node)
 {
 }
 
+const ShTextureNodePtr& ShBaseTexture::node()
+{ 
+  return m_node; 
+}
+
 }

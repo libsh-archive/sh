@@ -10,7 +10,11 @@
 #include "ShPosition.hpp"
 #include "ShLib.hpp"
 #include "ShArray.hpp"
-#include "GLXPBufferContext.hpp"
+#ifdef WIN32
+# include "WGLPBufferContext.hpp"
+#else
+# include "GLXPBufferContext.hpp"
+#endif
 #include "GlTextureStorage.hpp"
 #include "ShInstructions.hpp"
 #include "ShNibbles.hpp"
@@ -19,13 +23,17 @@
 #include "ShClamping.hpp"
 #include "ShImage.hpp"
 
-// #define PCS_DEBUG_LOG
+#define PCS_DEBUG_LOG
 
 namespace {
 using namespace SH;
 using namespace shgl;
 
+#ifdef WIN32
+const std::string dump_directory = "dumps\\";
+#else
 const std::string dump_directory = "dumps/";
+#endif
 
 std::string dump_depth_buffer(const std::string& filename,
                        int width, int height)
@@ -261,7 +269,11 @@ ShBackendSchedulePtr PCScheduler::prepare(ShSchedule* schedule)
 
   ShTextureDims dims;
   // TODO: This should use a regular PBufferFactory instead.
+#ifdef WIN32
+  FloatExtension ext = WGLPBufferFactory::instance()->get_extension();
+#else
   FloatExtension ext = GLXPBufferFactory::instance()->get_extension();
+#endif
   switch (ext) {
   case SH_ARB_NV_FLOAT_BUFFER:
     dims = SH_TEXTURE_RECT;
@@ -400,7 +412,11 @@ void PCSchedule::pre_execution(int width, int height, const ShStream& outputs)
 
   m_size = ShAttrib2f(m_width, m_height);
 
+#ifdef WIN32
+  m_context = WGLPBufferFactory::instance()->get_context(m_width, m_height, this);
+#else
   m_context = GLXPBufferFactory::instance()->get_context(m_width, m_height, this);
+#endif
 
   PBufferHandlePtr old_context = m_context->activate();
 
@@ -587,7 +603,7 @@ void PCSchedule::execute_pass(ShPass* pass)
     SH_GL_CHECK_ERROR(glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP));
 
     // Set up predication texture.
-    m_pred_kill = 0.0;
+    m_pred_kill = -1.0;
     m_pred_texture.memory(temp_buffers[pass->predicate.id]->memory());
     m_pred_texture.size(m_width, m_height);
 
@@ -599,7 +615,7 @@ void PCSchedule::execute_pass(ShPass* pass)
 
     
     // draw a quad at depth = pc_pred, killing if false
-    m_pred_kill = 0.0;
+    m_pred_kill = -1.0;
     draw_quad(0.0, 0.0, m_width, m_height, pred_pc_pass->pc);
 
 #ifdef PCS_DEBUG_LOG
@@ -615,6 +631,8 @@ void PCSchedule::execute_pass(ShPass* pass)
     }
 
     m_pred_kill = 1.0;
+    // Shouldn't be necessary
+    shBind(m_pred_fp);
     // draw a quad at depth = pc_default, killing if true
     draw_quad(0.0, 0.0, m_width, m_height, default_pc_pass->pc);
 

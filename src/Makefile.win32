@@ -37,7 +37,7 @@ libsh_dll_SOURCES += ShBasicBlock.hpp
 libsh_dll_SOURCES += ShBlock.hpp ShCtrlGraph.hpp
 libsh_dll_SOURCES += ShDebug.hpp ShEnvironment.hpp ShError.hpp
 libsh_dll_SOURCES += ShException.hpp
-libsh_dll_SOURCES += ShParser.hpp ShRefCount.hpp ShStatement.hpp
+libsh_dll_SOURCES += ShParser.hpp ShRefCount.hpp ShRefCount.cpp ShStatement.hpp
 libsh_dll_SOURCES += ShSwizzle.hpp ShSwizzleImpl.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp
 libsh_dll_SOURCES += ShUtility.hpp ShVariable.hpp ShVariableNode.hpp sh.hpp
 libsh_dll_SOURCES += ShGraph.hpp ShGraphImpl.hpp 
@@ -51,6 +51,7 @@ libsh_dll_SOURCES += ShPool.hpp ShPool.cpp
 # Backend
 libsh_dll_SOURCES += ShBackend.cpp ShBackend.hpp 
 libsh_dll_SOURCES += ShLinearAllocator.hpp ShLinearAllocator.cpp
+libsh_dll_SOURCES += ShSchedule.hpp ShSchedule.cpp
 
 # Optimizer and compiler internals
 libsh_dll_SOURCES += ShTransformer.hpp ShBitSet.hpp
