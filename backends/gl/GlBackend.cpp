@@ -293,3 +293,4 @@ GlBackend::execute(const SH::ShProgramNodeCPtr& program,
  m_stream->execute(program, dest);
 }
 
+}
