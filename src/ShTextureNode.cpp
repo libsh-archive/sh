@@ -109,19 +109,28 @@ ShTextureTraits& ShTextureNode::traits()
   return m_traits;
 }
 
-void ShTextureNode::width(int s)
+void ShTextureNode::setTexSize(int w)
 {
-  m_width = s;
+  m_width = w;
+  ShAttrib1f s(m_texSizeVar.node(), ShSwizzle(m_texSizeVar().size()), false);
+  s = static_cast<float>(w);
 }
 
-void ShTextureNode::height(int s)
+void ShTextureNode::setTexSize(int w, int h)
 {
-  m_height = s;
+  m_width = w;
+  m_height = h;
+  ShAttrib2f s(m_texSizeVar.node(), ShSwizzle(m_texSizeVar().size()), false);
+  s = ShAttrib2f(w, h);
 }
 
-void ShTextureNode::depth(int s)
+void ShTextureNode::setTexSize(int w, int h, int d)
 {
-  m_depth = s;
+  m_width = w;
+  m_height = h;
+  m_depth = d;
+  ShAttrib3f s(m_texSizeVar.node(), ShSwizzle(m_texSizeVar().size()), false);
+  s = ShAttrib3f(w, h, d);
 }
 
 int ShTextureNode::width() const

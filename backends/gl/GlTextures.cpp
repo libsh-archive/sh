@@ -39,6 +39,7 @@ ShCubeDirection glToShCubeDir(GLuint target)
   case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
     return SH_CUBE_NEG_Z;
   }
+  return SH_CUBE_POS_X;
 }
 
 GLenum shGlInternalFormat(const ShTextureNodePtr& node)
@@ -64,9 +65,10 @@ GLenum shGlFormat(const ShTextureNodePtr& node)
   case 4:
     return GL_RGBA;
   default:
-    // TODO: Warn or something
-    return 0;
+    break;
   }
+  // TODO: Warn or something
+  return 0;
 }
 
 struct StorageFinder {

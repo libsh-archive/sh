@@ -1,5 +1,13 @@
 2004-03-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShTextureNode.hpp: Add setTexSize().
+
+	* src/ShBaseTextureImpl.hpp: Call ShTextureNode::setTexSize().
+
+	* backends/gl/UberTextures.cpp (glToShCubeDir): Fix -Wall warning.
+
+	* backends/gl/GlTextures.cpp (glToShCubeDir): Fix -Wall warning.
+
 	* src/ShTransformer.cpp (convertTextureLookups): Add this function
 	to convert texture lookups to appropriate metrics. operator() and
 	operator[] do The Right Thing on textures now.

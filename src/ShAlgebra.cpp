@@ -190,7 +190,7 @@ ShProgram namedCombine(const ShProgram &a, const ShProgram &b) {
   // The whole set is stored in the smallest i position.
   Duplicates dups( ab->inputs.size(), std::vector<int>()); 
 
-  int i = 0;
+  std::size_t i = 0;
   for(ShProgramNode::VarList::const_iterator I = ab->inputs.begin();
       I != ab->inputs.end(); ++I, ++i) {
     InputType it( (*I)->name(), (*I)->size() );
@@ -219,7 +219,7 @@ ShProgram namedConnect(const ShProgram &a, const ShProgram &b, bool keepExtra) {
   std::vector<bool> aMatch(a->outputs.size(), false);
   std::vector<bool> bMatch(b->inputs.size(), false);
   MatchedChannelMap mcm;
-  int i, j;
+  std::size_t i, j;
   ShProgramNode::VarList::const_iterator I, J;
 
   i = 0;

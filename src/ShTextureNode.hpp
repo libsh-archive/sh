@@ -132,10 +132,9 @@ public:
   int height() const; // not for SH_TEXTURE_1D
   int depth() const; // only for SH_TEXTURE_3D
 
-  void width(int w);
-  void height(int h);
-  void depth(int d);
-
+  void setTexSize(int w);
+  void setTexSize(int w, int h);
+  void setTexSize(int w, int h, int d);
   const ShVariable& texSizeVar() const;
   
 private:

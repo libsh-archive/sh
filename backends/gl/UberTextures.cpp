@@ -39,6 +39,7 @@ ShCubeDirection glToShCubeDir(GLuint target)
   case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
     return SH_CUBE_NEG_Z;
   }
+  return SH_CUBE_POS_X;
 }
 
 GLenum shGlInternalFormat(const ShTextureNodePtr& node)
