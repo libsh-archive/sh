@@ -18,15 +18,15 @@ ShChannel<T>::ShChannel()
 }
 
 template<typename T>
-ShChannel<T>::ShChannel(typename ShChannel<T>::ValueType* data, int count)
-  : m_node(new ShChannelNode(T::special_type, T::typesize, data, count))
+ShChannel<T>::ShChannel(const ShMemoryPtr& memory, int count)
+  : m_node(new ShChannelNode(T::special_type, T::typesize, memory, count))
 {
 }
 
 template<typename T>
-void ShChannel<T>::attach(typename ShChannel<T>::ValueType* data, int count)
+void ShChannel<T>::memory(const ShMemoryPtr& memory, int count)
 {
-  m_node->attach(data, count);
+  m_node->memory(memory, count);
 }
 
 template<typename T>
@@ -36,15 +36,15 @@ int ShChannel<T>::count() const
 }
 
 template<typename T>
-typename ShChannel<T>::ValueType* ShChannel<T>::data()
+ShMemoryPtr ShChannel<T>::memory()
 {
-  return reinterpret_cast<typename ShChannel<T>::ValueType*>(m_node->data());
+  return m_node->memory();
 }
 
 template<typename T>
-const typename ShChannel<T>::ValueType* ShChannel<T>::data() const
+ShRefCount<const ShMemory> ShChannel<T>::memory() const
 {
-  return reinterpret_cast<const typename ShChannel<T>::ValueType*>(m_node->data());
+  return m_node->memory();
 }
 
 template<typename T>
@@ -93,15 +93,7 @@ ShProgram connect(const ShChannel<T>& stream,
                   const ShProgram& program)
 {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
-    // TODO: This could be improved dramatically if ShAttribs had a
-    // OutputType typedef...
-    // I.e.:
-    // T::OutputType out = stream();
-    // would be all that's needed.
-    ShVariable out(new ShVariableNode(SH_OUTPUT,
-                                      T::typesize, T::special_type));
-    ShStatement stmt(out, SH_OP_ASN, stream());
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    typename T::OutputType out = stream();
   } SH_END_PROGRAM;
   return connect(nibble, program);
 }

@@ -30,14 +30,15 @@ namespace SH {
 
 ShChannelNode::ShChannelNode(ShVariableSpecialType specType, int elements)
   : ShVariableNode(SH_STREAM, elements),
-    m_data(0), m_count(0)
+    m_memory(0), m_count(0)
 {
   specialType(specType);
 }
 
-ShChannelNode::ShChannelNode(ShVariableSpecialType specType, int elements, void* data, int count)
+ShChannelNode::ShChannelNode(ShVariableSpecialType specType, int elements,
+                             const ShMemoryPtr& memory, int count)
   : ShVariableNode(SH_STREAM, elements),
-    m_data(data), m_count(count)
+    m_memory(memory), m_count(count)
 {
   specialType(specType);
 }
@@ -46,20 +47,20 @@ ShChannelNode::~ShChannelNode()
 {
 }
 
-void ShChannelNode::attach(void* data, int count)
+void ShChannelNode::memory(const ShMemoryPtr& memory, int count)
 {
-  m_data = data;
+  m_memory = memory;
   m_count = count;
 }
 
-const void* ShChannelNode::data() const
+ShRefCount<const ShMemory> ShChannelNode::memory() const
 {
-  return m_data;
+  return m_memory;
 }
 
-void* ShChannelNode::data() 
+ShMemoryPtr ShChannelNode::memory() 
 {
-  return m_data;
+  return m_memory;
 }
 
 int ShChannelNode::count() const

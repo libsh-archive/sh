@@ -24,35 +24,9 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#include "ShArb.hpp"
+#include "ArbCode.hpp"
 #include <iostream>
 #include <sstream>
-
-#ifdef WIN32
-
-#include <windows.h>
-
-#include <GL/gl.h>
-#include <GL/glext.h>
-
-PFNGLPROGRAMSTRINGARBPROC glProgramStringARB = NULL;
-PFNGLBINDPROGRAMARBPROC glBindProgramARB = NULL;
-PFNGLGENPROGRAMSARBPROC glGenProgramsARB = NULL;
-PFNGLACTIVETEXTUREARBPROC glActiveTextureARB = NULL;
-PFNGLTEXIMAGE3DPROC glTexImage3D = NULL;
-PFNGLPROGRAMENVPARAMETER4FVARBPROC glProgramEnvParameter4fvARB = NULL;
-PFNGLPROGRAMLOCALPARAMETER4FVARBPROC glProgramLocalParameter4fvARB = NULL;
-PFNGLGETPROGRAMIVARBPROC glGetProgramivARB = NULL;
-
-#else
-
-#define GL_GLEXT_PROTOTYPES 1
-#include <GL/gl.h>
-#include <GL/glext.h>
-#include <GL/glx.h>
-#undef GL_GLEXT_PROTOTYPES
-
-#endif /* WIN32 */
 
 #include "ShVariable.hpp"
 #include "ShDebug.hpp"
@@ -62,45 +36,12 @@ PFNGLGETPROGRAMIVARBPROC glGetProgramivARB = NULL;
 #include "ShEnvironment.hpp"
 #include "ShTextureNode.hpp"
 #include "ShSyntax.hpp"
+#include "ArbReg.hpp"
+#include "Arb.hpp"
 
-namespace ShArb {
+namespace shgl {
 
 using namespace SH;
-
-void shGlCheckError(const char* desc)
-{
-  GLenum errnum = glGetError();
-  char* error = 0;
-  switch (errnum) {
-  case GL_NO_ERROR:
-    return;
-  case GL_INVALID_ENUM:
-    error = "GL_INVALID_ENUM";
-    break;
-  case GL_INVALID_VALUE:
-    error = "GL_INVALID_VALUE";
-    break;
-  case GL_INVALID_OPERATION:
-    error = "GL_INVALID_OPERATION";
-    break;
-  case GL_STACK_OVERFLOW:
-    error = "GL_STACK_OVERFLOW";
-    break;
-  case GL_STACK_UNDERFLOW:
-    error = "GL_STACK_UNDERFLOW";
-    break;
-  case GL_OUT_OF_MEMORY:
-    error = "GL_OUT_OF_MEMORY";
-    break;
-  case GL_TABLE_TOO_LARGE:
-    error = "GL_TABLE_TOO_LARGE";
-    break;
-  default:
-    error = "Unknown error!";
-    break;
-  }
-  SH_DEBUG_ERROR("GL ERROR " << desc << ": " << error);
-}
 
 #define shGlProgramStringARB glProgramStringARB
 #define shGlActiveTextureARB glActiveTextureARB
@@ -111,91 +52,14 @@ void shGlCheckError(const char* desc)
 #define shGlDeleteProgramsARB glDeleteProgramsARB
 #define shGlBindProgramARB glBindProgramARB
 
-unsigned int shArbTarget(const std::string& shTarget)
-{
-  if (shTarget == "gpu:vertex") return GL_VERTEX_PROGRAM_ARB;
-  if (shTarget == "gpu:fragment") return GL_FRAGMENT_PROGRAM_ARB;  
-  return 0;
-}
-
-/** Information about the operations from ArbOp.
- */
-static struct {
-  char* name;
-  bool vp, fp;
-  int arity;
-  bool vector;
-  bool collectingOp;
-} arbOpInfo[] = {
-  // VERTEX AND FRAGMENT
-  // Vector
-  {"ABS", true, true, 1, true, false},
-  {"FLR", true, true, 1, true, false},
-  {"FRC", true, true, 1, true, false},
-  {"LIT", true, true, 1, true, false},
-  {"MOV", true, true, 1, true, false},
-
-  // Scalar
-  {"EX2", true, true, 1, false, false},
-  {"LG2", true, true, 1, false, false},
-  {"RCP", true, true, 1, false, false},
-  {"RSQ", true, true, 1, false, false},
-
-  // Binary scalar
-  {"POW", true, true, 2, false, false},
-
-  // Binary vector
-  {"ADD", true, true, 2, true, false},
-  {"DP3", true, true, 2, true, true},
-  {"DP4", true, true, 2, true, true},
-  {"DPH", true, true, 2, true, true},
-  {"DST", true, true, 2, true, true},
-  {"MAX", true, true, 2, true, false},
-  {"MIN", true, true, 2, true, false},
-  {"MUL", true, true, 2, true, false},
-  {"SGE", true, true, 2, true, false},
-  {"SLT", true, true, 2, true, false},
-  {"SUB", true, true, 2, true, false},
-  {"XPD", true, true, 2, true, true},
-
-  // Trinary
-  {"MAD", true, true, 3, true, false},
-
-  // Swizzling
-  {"SWZ", true, true, 2, true, true}, // should this really be a collectingOp?
-
-  // VERTEX ONLY
-  // Scalar
-  {"EXP", true, false, 1, false, false},
-  {"LOG", true, false, 1, false, false},
-  
-  // FRAGMENT ONLY
-  // Scalar
-  {"COS", false, true, 1, false, false},
-  {"SIN", false, true, 1, false, false},
-  {"SCS", false, true, 1, false, false},
-
-  // Trinary
-  {"CMP", false, true, 3, true, false},
-  {"LRP", false, true, 3, true, false},
-
-  // Sampling
-  {"TEX", false, true, 3, true, false},
-  {"TXP", false, true, 3, true, false},
-  {"TXB", false, true, 3, true, false},
-
-  // KIL
-  {"KIL", false, true, 0, false, false}
-};
-
 struct ArbBindingSpecs {
-  ShArbRegBinding binding;
+  ArbRegBinding binding;
   int maxBindings;
   ShVariableSpecialType specialType;
   bool allowGeneric;
 };
 
-ArbBindingSpecs shArbVertexAttribBindingSpecs[] = {
+ArbBindingSpecs arbVertexAttribBindingSpecs[] = {
   {SH_ARB_REG_VERTEXPOS, 1, SH_POSITION, false},
   {SH_ARB_REG_VERTEXNRM, 1, SH_NORMAL, false},
   {SH_ARB_REG_VERTEXCOL, 1, SH_COLOR, false},
@@ -204,7 +68,7 @@ ArbBindingSpecs shArbVertexAttribBindingSpecs[] = {
   {SH_ARB_REG_NONE, 0, SH_ATTRIB, true}
 };
 
-ArbBindingSpecs shArbFragmentAttribBindingSpecs[] = {
+ArbBindingSpecs arbFragmentAttribBindingSpecs[] = {
   {SH_ARB_REG_FRAGMENTPOS, 1, SH_POSITION, false},
   {SH_ARB_REG_FRAGMENTCOL, 1, SH_COLOR, false},
   {SH_ARB_REG_FRAGMENTTEX, 8, SH_TEXCOORD, true},
@@ -212,7 +76,7 @@ ArbBindingSpecs shArbFragmentAttribBindingSpecs[] = {
   {SH_ARB_REG_NONE, 0, SH_ATTRIB, true}
 };
 
-ArbBindingSpecs shArbVertexOutputBindingSpecs[] = {
+ArbBindingSpecs arbVertexOutputBindingSpecs[] = {
   {SH_ARB_REG_RESULTPOS, 1, SH_POSITION, false},
   {SH_ARB_REG_RESULTCOL, 1, SH_COLOR, false},
   {SH_ARB_REG_RESULTTEX, 8, SH_TEXCOORD, true},
@@ -221,26 +85,25 @@ ArbBindingSpecs shArbVertexOutputBindingSpecs[] = {
   {SH_ARB_REG_NONE, 0, SH_ATTRIB}
 };
 
-ArbBindingSpecs shArbFragmentOutputBindingSpecs[] = {
+ArbBindingSpecs arbFragmentOutputBindingSpecs[] = {
   {SH_ARB_REG_RESULTCOL, 1, SH_COLOR, true},
   {SH_ARB_REG_RESULTDPT, 1, SH_ATTRIB, false},
   {SH_ARB_REG_NONE, 0, SH_ATTRIB}
 };
 
-ArbBindingSpecs* shArbBindingSpecs(bool output, const std::string& target)
+ArbBindingSpecs* arbBindingSpecs(bool output, const std::string& target)
 {
   if (target == "gpu:vertex")
-    return output ? shArbVertexOutputBindingSpecs : shArbVertexAttribBindingSpecs;
+    return output ? arbVertexOutputBindingSpecs : arbVertexAttribBindingSpecs;
   if (target == "gpu:fragment")
-    return output ? shArbFragmentOutputBindingSpecs : shArbFragmentAttribBindingSpecs;
+    return output ? arbFragmentOutputBindingSpecs : arbFragmentAttribBindingSpecs;
 }
 
 using namespace SH;
 
-static SH::ShRefCount<ArbBackend> instance = new ArbBackend();
-
-ArbCode::ArbCode(ArbBackendPtr backend, const ShProgram& shader, const std::string& target)
-  : m_backend(backend), m_shader(shader), m_originalShader(m_shader), m_target(target),
+ArbCode::ArbCode(const ShProgram& shader, const std::string& target,
+                 TextureStrategy* textures)
+  : m_textures(textures), m_shader(shader), m_originalShader(m_shader), m_target(target),
     m_numTemps(0), m_numInputs(0), m_numOutputs(0), m_numParams(0), m_numConsts(0),
     m_numTextures(0), m_programId(0)
 {
@@ -310,12 +173,12 @@ void ArbCode::upload()
     SH_GL_CHECK_ERROR(shGlGenProgramsARB(1, &m_programId));
   }
 
-  SH_GL_CHECK_ERROR(shGlBindProgramARB(shArbTarget(m_target), m_programId));
+  SH_GL_CHECK_ERROR(shGlBindProgramARB(arbTarget(m_target), m_programId));
   
   std::ostringstream out;
   print(out);
   std::string text = out.str();
-  shGlProgramStringARB(shArbTarget(m_target), GL_PROGRAM_FORMAT_ASCII_ARB,
+  shGlProgramStringARB(arbTarget(m_target), GL_PROGRAM_FORMAT_ASCII_ARB,
                        (GLsizei)text.size(), text.c_str());
   int error = glGetError();
   if (error == GL_INVALID_OPERATION) {
@@ -333,7 +196,7 @@ void ArbCode::upload()
   }
   if (error != GL_NO_ERROR) {
     SH_DEBUG_ERROR("Error uploading ARB program (" << m_target << "): " << error);
-    SH_DEBUG_ERROR("shGlProgramStringARB(" << shArbTarget(m_target)
+    SH_DEBUG_ERROR("shGlProgramStringARB(" << arbTarget(m_target)
                    << ", GL_PROGRAM_FORMAT_ASCII_ARB, " << (GLsizei)text.size() << 
                    ", <program text>);");
   }
@@ -345,7 +208,7 @@ void ArbCode::bind()
     upload();
   }
   
-  SH_GL_CHECK_ERROR(shGlBindProgramARB(shArbTarget(m_target), m_programId));
+  SH_GL_CHECK_ERROR(shGlBindProgramARB(arbTarget(m_target), m_programId));
   
   SH::ShEnvironment::boundShaders()[m_target] = m_originalShader; 
 
@@ -402,10 +265,10 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
   if (reg.type != SH_ARB_REG_PARAM) return;
   switch(reg.binding) {
   case SH_ARB_REG_PARAMLOC:
-    SH_GL_CHECK_ERROR(shGlProgramLocalParameter4fvARB(shArbTarget(m_target), reg.bindingIndex, values));
+    SH_GL_CHECK_ERROR(shGlProgramLocalParameter4fvARB(arbTarget(m_target), reg.bindingIndex, values));
     break;
   case SH_ARB_REG_PARAMENV:
-    SH_GL_CHECK_ERROR(shGlProgramEnvParameter4fvARB(shArbTarget(m_target), reg.bindingIndex, values));
+    SH_GL_CHECK_ERROR(shGlProgramEnvParameter4fvARB(arbTarget(m_target), reg.bindingIndex, values));
     break;
   default:
     return;
@@ -1028,27 +891,29 @@ void ArbCode::genTrigInst( const SH::ShVariable& dest,
 
 void ArbCode::allocRegs()
 {
-  allocInputs();
+  ArbLimits limits(m_target);
   
-  allocOutputs();
+  allocInputs(limits);
+  
+  allocOutputs(limits);
   
   for (ShProgramNode::VarList::const_iterator I = m_shader->uniforms.begin();
        I != m_shader->uniforms.end(); ++I) {
-    allocParam(*I);
+    allocParam(limits, *I);
   }
 
-  allocConsts();
+  allocConsts(limits);
   
-  allocTemps();
+  allocTemps(limits);
 
-  allocTextures();
+  allocTextures(limits);
 }
 
 void ArbCode::bindSpecial(const ShProgramNode::VarList::const_iterator& begin,
                           const ShProgramNode::VarList::const_iterator& end,
                           const ArbBindingSpecs& specs, 
                           std::vector<int>& bindings,
-                          ShArbRegType type, int& num)
+                          ArbRegType type, int& num)
 {
   bindings.push_back(0);
   
@@ -1069,12 +934,12 @@ void ArbCode::bindSpecial(const ShProgramNode::VarList::const_iterator& begin,
   }    
 }
 
-void ArbCode::allocInputs()
+void ArbCode::allocInputs(const ArbLimits& limits)
 {
   // First, try to assign some "special" output register bindings
-  for (int i = 0; shArbBindingSpecs(false, m_target)[i].binding != SH_ARB_REG_NONE; i++) {
+  for (int i = 0; arbBindingSpecs(false, m_target)[i].binding != SH_ARB_REG_NONE; i++) {
     bindSpecial(m_shader->inputs.begin(), m_shader->inputs.end(),
-                shArbBindingSpecs(false, m_target)[i], m_inputBindings,
+                arbBindingSpecs(false, m_target)[i], m_inputBindings,
                 SH_ARB_REG_ATTRIB, m_numInputs);
   }
   
@@ -1085,8 +950,8 @@ void ArbCode::allocInputs()
     m_registers[node] = ArbReg(SH_ARB_REG_ATTRIB, m_numInputs++, node->name());
 
     // Binding
-    for (int i = 0; shArbBindingSpecs(false, m_target)[i].binding != SH_ARB_REG_NONE; i++) {
-      const ArbBindingSpecs& specs = shArbBindingSpecs(false, m_target)[i];
+    for (int i = 0; arbBindingSpecs(false, m_target)[i].binding != SH_ARB_REG_NONE; i++) {
+      const ArbBindingSpecs& specs = arbBindingSpecs(false, m_target)[i];
 
       if (specs.allowGeneric && m_inputBindings[i] < specs.maxBindings) {
         m_registers[node].binding = specs.binding;
@@ -1098,12 +963,12 @@ void ArbCode::allocInputs()
   }
 }
 
-void ArbCode::allocOutputs()
+void ArbCode::allocOutputs(const ArbLimits& limits)
 {
   // First, try to assign some "special" output register bindings
-  for (int i = 0; shArbBindingSpecs(true, m_target)[i].binding != SH_ARB_REG_NONE; i++) {
+  for (int i = 0; arbBindingSpecs(true, m_target)[i].binding != SH_ARB_REG_NONE; i++) {
     bindSpecial(m_shader->outputs.begin(), m_shader->outputs.end(),
-                shArbBindingSpecs(true, m_target)[i], m_outputBindings,
+                arbBindingSpecs(true, m_target)[i], m_outputBindings,
                 SH_ARB_REG_OUTPUT, m_numOutputs);
   }
   
@@ -1114,8 +979,8 @@ void ArbCode::allocOutputs()
     m_registers[node] = ArbReg(SH_ARB_REG_OUTPUT, m_numOutputs++, node->name());
 
     // Binding
-    for (int i = 0; shArbBindingSpecs(true, m_target)[i].binding != SH_ARB_REG_NONE; i++) {
-      const ArbBindingSpecs& specs = shArbBindingSpecs(true, m_target)[i];
+    for (int i = 0; arbBindingSpecs(true, m_target)[i].binding != SH_ARB_REG_NONE; i++) {
+      const ArbBindingSpecs& specs = arbBindingSpecs(true, m_target)[i];
 
       if (specs.allowGeneric && m_outputBindings[i] < specs.maxBindings) {
         m_registers[node].binding = specs.binding;
@@ -1127,7 +992,7 @@ void ArbCode::allocOutputs()
   }
 }
 
-void ArbCode::allocParam(ShVariableNodePtr node)
+void ArbCode::allocParam(const ArbLimits& limits, const ShVariableNodePtr& node)
 {
   // TODO: Check if we reached maximum
   if (m_registers.find(node) != m_registers.end()) return;
@@ -1137,7 +1002,7 @@ void ArbCode::allocParam(ShVariableNodePtr node)
   m_numParams++;
 }
 
-void ArbCode::allocConsts()
+void ArbCode::allocConsts(const ArbLimits& limits)
 {
   for (ShProgramNode::VarList::const_iterator I = m_shader->constants.begin();
        I != m_shader->constants.end(); ++I) {
@@ -1158,7 +1023,7 @@ void mark(ShLinearAllocator& allocator, ShVariableNodePtr node, int i)
   allocator.mark(node, i);
 }
 
-void ArbCode::allocTemps()
+void ArbCode::allocTemps(const ArbLimits& limits)
 {
   ShLinearAllocator allocator(this);
 
@@ -1172,7 +1037,7 @@ void ArbCode::allocTemps()
   
   m_tempRegs.clear();
   m_numTemps = 0;
-  for (int i = 0; i < m_backend->temps(m_target); i++) {
+  for (int i = 0; i < limits.temps(); i++) {
     m_tempRegs.push_back(i);
   }
   
@@ -1181,71 +1046,53 @@ void ArbCode::allocTemps()
   m_tempRegs.clear();
 }
 
-ArbBackend::ArbBackend()
+void ArbCode::allocTextures(const ArbLimits& limits)
 {
-#ifdef WIN32
-  DWORD err;
-  if ((glProgramStringARB = (PFNGLPROGRAMSTRINGARBPROC)wglGetProcAddress("glProgramStringARB")) == NULL)
-    err = GetLastError();
-  if ((glBindProgramARB = (PFNGLBINDPROGRAMARBPROC)wglGetProcAddress("glBindProgramARB")) == NULL)
-    err = GetLastError();
-  if ((glGenProgramsARB = (PFNGLGENPROGRAMSARBPROC)wglGetProcAddress("glGenProgramsARB")) == NULL)
-    err = GetLastError();
-  if ((glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC)wglGetProcAddress("glActiveTextureARB")) == NULL)
-    err = GetLastError();
-  if ((glTexImage3D = (PFNGLTEXIMAGE3DPROC)wglGetProcAddress("glTexImage3D")) == NULL)
-    err = GetLastError();
-  if ((glProgramEnvParameter4fvARB = (PFNGLPROGRAMENVPARAMETER4FVARBPROC)wglGetProcAddress("glProgramEnvParameter4fvARB")) == NULL)
-    err = GetLastError();
-  if ((glProgramLocalParameter4fvARB = (PFNGLPROGRAMLOCALPARAMETER4FVARBPROC)wglGetProcAddress("glProgramLocalParameter4fvARB")) == NULL)
-    err = GetLastError();
-  if ((glGetProgramivARB = (PFNGLGETPROGRAMIVARBPROC)wglGetProcAddress("glGetProgramivARB")) == NULL)
-    err = GetLastError();
-#endif /* WIN32 */
-
-  // TODO Max TEX instructions, texture indirections
-  for (int i = 0; i < 2; i++) {
-    std::string sh_target = (i == 0 ? "gpu:vertex" : "gpu:fragment");
-    unsigned int arb_target = shArbTarget(sh_target);
-    m_instrs[sh_target] = (!i ? 128 : 48);
-    SH_GL_CHECK_ERROR(shGlGetProgramivARB(arb_target, GL_MAX_PROGRAM_INSTRUCTIONS_ARB, &m_instrs[sh_target]));
-    SH_DEBUG_PRINT("instrs[" << sh_target << "] = " << m_instrs[sh_target]);
-
-    /** TODO big ugly hack follows:
-    /* TODO implement proper detection of NVIDIA.
-     * NVIDIA's GlGetProgramivARB does not update m_temps, so set it to 32 here.
-     * ATI will still have the right number because its drivers should set m_temps properly.
-     */
-    m_temps[sh_target] = (!i ? 12 : 32);
-    SH_GL_CHECK_ERROR(shGlGetProgramivARB(arb_target, GL_MAX_PROGRAM_TEMPORARIES_ARB, &m_temps[sh_target]));
-    SH_DEBUG_PRINT("temps[" << sh_target << "] = " << m_temps[sh_target]);
-    m_attribs[sh_target] = (!i ? 16 : 10);
-    SH_GL_CHECK_ERROR(shGlGetProgramivARB(arb_target, GL_MAX_PROGRAM_ATTRIBS_ARB, &m_attribs[sh_target]));
-    SH_DEBUG_PRINT("attribs[" << sh_target << "] = " << m_attribs[sh_target]);
-    m_params[sh_target] = (!i ? 96 : 24);
-    SH_GL_CHECK_ERROR(shGlGetProgramivARB(arb_target, GL_MAX_PROGRAM_LOCAL_PARAMETERS_ARB, &m_params[sh_target]));
-    SH_DEBUG_PRINT("params[" << sh_target << "] = " << m_params[sh_target]);
-    m_texs[sh_target] = (!i ? 0 : 24);
-    if (i) SH_GL_CHECK_ERROR(shGlGetProgramivARB(arb_target, GL_MAX_PROGRAM_TEX_INSTRUCTIONS_ARB, &m_texs[sh_target]));
-    SH_DEBUG_PRINT("texs[" << sh_target << "] = " << m_texs[sh_target]);
+  for (ShProgramNode::TexList::const_iterator I = m_shader->textures.begin();
+       I != m_shader->textures.end(); ++I) {
+    ShTextureNodePtr node = *I;
+    int index;
+    index = m_numTextures;
+    m_registers[node] = ArbReg(SH_ARB_REG_TEXTURE, index, node->name());
+    m_numTextures++;
   }
 }
 
-ArbBackend::~ArbBackend()
+void ArbCode::bindTextures()
 {
+  for (ShProgramNode::TexList::const_iterator I = m_shader->textures.begin();
+       I != m_shader->textures.end(); ++I) {
+    m_textures->bindTexture(*I, GL_TEXTURE0 + m_registers[*I].index);
+  }
 }
 
-std::string ArbBackend::name() const
-{
-  return "arb";
-}
 
-ShBackendCodePtr ArbBackend::generateCode(const std::string& target, const ShProgram& shader)
-{
-  SH_DEBUG_ASSERT(shader.object());
-  ArbCodePtr code = new ArbCode(this, shader, target);
-  code->generate();
-  return code;
-}
+// #ifdef WIN32
+//   DWORD err;
+//   if (!(glProgramStringARB =
+//         (PFNGLPROGRAMSTRINGARBPROC)wglGetProcAddress("glProgramStringARB")))
+//     err = GetLastError();
+//   if (!(glBindProgramARB = 
+//         (PFNGLBINDPROGRAMARBPROC)wglGetProcAddress("glBindProgramARB")))
+//     err = GetLastError();
+//   if (!(glGenProgramsARB = 
+//         (PFNGLGENPROGRAMSARBPROC)wglGetProcAddress("glGenProgramsARB")))
+//     err = GetLastError();
+//   if (!(glActiveTextureARB = 
+//         (PFNGLACTIVETEXTUREARBPROC)wglGetProcAddress("glActiveTextureARB")))
+//     err = GetLastError();
+//   if (!(glTexImage3D = 
+//         (PFNGLTEXIMAGE3DPROC)wglGetProcAddress("glTexImage3D")))
+//     err = GetLastError();
+//   if (!(glProgramEnvParameter4fvARB = 
+//         (PFNGLPROGRAMENVPARAMETER4FVARBPROC)wglGetProcAddress("glProgramEnvParameter4fvARB")))
+//     err = GetLastError();
+//   if (!(glProgramLocalParameter4fvARB = 
+//         (PFNGLPROGRAMLOCALPARAMETER4FVARBPROC)wglGetProcAddress("glProgramLocalParameter4fvARB")))
+//     err = GetLastError();
+//   if (!(glGetProgramivARB = 
+//         (PFNGLGETPROGRAMIVARBPROC)wglGetProcAddress("glGetProgramivARB")))
+//     err = GetLastError();
+// #endif /* WIN32 */
 
 }

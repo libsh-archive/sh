@@ -5,7 +5,7 @@ SM_SUBDIR =
 endif
 
 if ENABLE_ARB_BACKEND
-ARB_SUBDIR = arb
+ARB_SUBDIR = gl
 else
 ARB_SUBDIR =
 endif

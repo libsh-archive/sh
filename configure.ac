@@ -42,12 +42,16 @@ AC_CHECK_FUNCS([pow sqrt])
 
 SM_WITH_SM_DIR
 
-SH_CHECK_BACKEND([sm], [SM])
-if test "x$ac_backend_sm" = xtrue ; then
-  SM_CHECK_SM_HEADERS([],
-    [AC_MSG_WARN([sm.hpp not found. Disabling SM backend.])
-     ac_backend_sm=false ])
-fi
+
+# SH_CHECK_BACKEND([sm], [SM])
+# if test "x$ac_backend_sm" = xtrue ; then
+#   SM_CHECK_SM_HEADERS([],
+#     [AC_MSG_WARN([sm.hpp not found. Disabling SM backend.])
+#      ac_backend_sm=false ])
+# fi
+ac_backend_sm=false
+AC_MSG_WARN([The SM backend is disabled for the moment.])
+
 AM_CONDITIONAL(ENABLE_SM_BACKEND, test x$ac_backend_sm = xtrue)
 
 SH_CHECK_BACKEND([arb], [OpenGL ARB])
@@ -62,6 +66,8 @@ if test "x$ac_backend_arb" = xtrue ; then
 fi
 AM_CONDITIONAL(ENABLE_ARB_BACKEND, test x$ac_backend_arb = xtrue)
 
+
+
 # Store the prefix as a variable
 AC_DEFINE_UNQUOTED(SH_INSTALL_PREFIX, "$prefix", [Installation prefix directory])
 
@@ -71,7 +77,7 @@ AC_CONFIG_FILES([Makefile
 		 test/Makefile
 		 backends/Makefile
 		 backends/sm/Makefile
-		 backends/arb/Makefile
+		 backends/gl/Makefile
 		 util/Makefile
 		 doc/Makefile])
 AC_OUTPUT

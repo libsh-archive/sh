@@ -137,6 +137,7 @@ ARB BACKEND:
    - textures
    - streams
    - proper input/output handling
+ - check more limits when allocating
 
 SM BACKEND:
  / long tuples 

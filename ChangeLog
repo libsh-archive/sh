@@ -1,3 +1,16 @@
+2004-02-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/*: Started GL backend abstraction, for future
+	ARB-like backends on OpenGL.
+
+	* src/ShChannelNode.cpp: ditto.
+
+	* src/ShChannelNode.hpp: ditto.
+
+	* src/ShChannelImpl.hpp: ditto.
+
+	* src/ShChannel.hpp: Adopt stream code to new memory abstractions.
+
 2004-02-27  Jack Wang  <jmwang@uwaterloo.ca>
 
 	* src/ShQuaternion.hpp, src/ShQuaternionImpl.hpp:

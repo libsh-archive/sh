@@ -30,12 +30,7 @@
 #include <list>
 #include <set>
 #include <map>
-
-#ifdef WIN32
-#include <sh.hpp>
-#else
-#include <sh/sh.hpp>
-#endif /* WIN32 */
+#include "sh.hpp"
 
 namespace ShUtil {
 

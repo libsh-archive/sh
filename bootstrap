@@ -2,6 +2,8 @@
 
 rm -rf libltdl
 
+echo "You may ignore messages about updating aclocal.m4."
+
 if test "x${LIBTOOLIZE}" = "x" ; then
   LIBTOOLIZE="libtoolize --ltdl"
 else

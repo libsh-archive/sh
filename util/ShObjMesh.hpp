@@ -29,12 +29,7 @@
 
 #include <iosfwd>
 
-#ifdef WIN32
-#include <sh.hpp>
-#else
-#include <sh/sh.hpp>
-#endif /* WIN32 */
-
+#include "sh.hpp"
 #include "ShMesh.hpp"
 
 namespace ShUtil {

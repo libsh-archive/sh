@@ -28,23 +28,25 @@
 #define SHCHANNELNODE_HPP
 
 #include "ShVariableNode.hpp"
+#include "ShMemory.hpp"
 
 namespace SH {
 
 class ShChannelNode : public ShVariableNode {
 public:
   ShChannelNode(ShVariableSpecialType specType, int elements);
-  ShChannelNode(ShVariableSpecialType specType, int elements, void* data, int count);
+  ShChannelNode(ShVariableSpecialType specType, int elements,
+                const ShMemoryPtr& memory, int count);
   virtual ~ShChannelNode();
 
-  void attach(void* data, int count);
-
-  const void* data() const;
-  void* data();
+  void memory(const ShMemoryPtr& memory, int count);
+  ShRefCount<const ShMemory> memory() const;
+  ShMemoryPtr memory();
+  
   int count() const;
   
 private:
-  void* m_data;
+  ShMemoryPtr m_memory;
   int m_count;
 
   // NOT IMPLEMENTED

@@ -40,16 +40,17 @@ class ShChannel {
 public:
   typedef typename T::ValueType ValueType;
   ShChannel();
-  ShChannel(ValueType* data, int count);
+  ShChannel(const ShMemoryPtr& memory, int count);
 
   // TODO: copy constructor, operator=(), etc.
   
-  void attach(ValueType* data, int count);
+  void memory(const ShMemoryPtr& memory, int count);
 
   int count() const;
-  ValueType* data();
-  const ValueType* data() const;
-  
+  ShRefCount<const ShMemory> memory() const;
+  ShMemoryPtr memory();
+
+  // Stream element fetch operator
   T operator()();
   const T operator()() const;
 
