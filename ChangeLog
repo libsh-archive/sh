@@ -1,5 +1,8 @@
 2004-06-30  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* backends/gl/ArbCode.cpp (print): Don't print out declarations
+	for textures.
+
 	* backends/gl/ArbReg.hpp: A few changes for the constant-joining code.
 
 	* backends/gl/ArbCode.cpp: More constant-joining goodness.

@@ -413,6 +413,7 @@ std::ostream& ArbCode::print(std::ostream& out)
   for (RegList::const_iterator I = m_reglist.begin();
        I != m_reglist.end(); ++I) {
     if ((*I)->type == SH_ARB_REG_TEMP) continue;
+    if ((*I)->type == SH_ARB_REG_TEXTURE) continue;
     out << "  ";
     (*I)->printDecl(out);
     out << endl;
