@@ -308,7 +308,7 @@ ShQuaternion<K, T>::operator*(const ShNormal<3, K2, T>& v)
 template<int K, typename T>
 void ShQuaternion<K, T>::normalize()
 {
-	m_data = normalize(m_data);
+	m_data = SH::normalize(m_data);
 }
 
 template<int K, typename T>
