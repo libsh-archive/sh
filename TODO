@@ -24,7 +24,7 @@ TEXTURES:
  X scale lookups in SM backend
  X load data into textures
  - turn 3-textures into 4-textures automatically... in sm backend!
- - update notification
+ X update notification
  - mip mapping
  - other lookup mechanisms (bilinear etc.)
  - generic traits mechanism

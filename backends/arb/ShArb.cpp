@@ -467,7 +467,7 @@ bool ArbCode::allocateRegister(const ShVariableNodePtr& var)
   if (var->uniform()) return true;
 
   if (m_tempRegs.empty()) {
-    SH_DEBUG_WARN("Out of temporaries!");
+    SH_DEBUG_ERROR("Out of temporaries!");
     return false;
   }
 
@@ -539,11 +539,7 @@ void ArbCode::loadTexture(ShTextureNodePtr texture)
   
   const ArbReg& texReg = texRegIterator->second;
   
-  SH_DEBUG_PRINT("Setting active texture to " << texReg.index << ", my shader is " << m_shader.object());
-  
   shGlActiveTextureARB(GL_TEXTURE0 + texReg.index);
-  
-  SH_DEBUG_PRINT("Binding texture " << texReg.index << " with texture unit " << texReg.bindingIndex);
   
   glBindTexture(shGlTextureType[texture->dims()], texReg.bindingIndex);
   
@@ -596,7 +592,6 @@ void ArbCode::loadDataTexture(ShDataTextureNodePtr texture, unsigned int type)
     }
   }
 
-  SH_DEBUG_PRINT("Sending texture image");
   // TODO: Other types of textures.
   // TODO: Element Format
   // TODO: sampling/filtering
