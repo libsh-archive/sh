@@ -39,8 +39,6 @@ class PBufferGlTextureTransfer : public ShTransfer {
 
   bool transfer(const ShStorage* from, ShStorage* to)
   {
-    std::cerr << "Transferring pbuffer to texture" << std::endl;
-    
     const PBufferStorage* pbuffer = dynamic_cast<const PBufferStorage*>(from);
     PBufferContextPtr context = pbuffer->context();
     

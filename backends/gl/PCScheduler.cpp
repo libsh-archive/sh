@@ -19,7 +19,7 @@
 #include "ShClamping.hpp"
 #include "ShImage.hpp"
 
-#define PCS_DEBUG_LOG
+// #define PCS_DEBUG_LOG
 
 namespace {
 using namespace SH;
@@ -82,7 +82,6 @@ ShProgramNodePtr replace_temps_and_fetches(const ShPass& pass,
                                            std::vector<ShTextureNodePtr>& temp_buffers,
                                            std::map<ShChannelNodePtr, ShTextureNodePtr>& channel_map)
 {
-  std::cerr << "Replacing: " << std::endl << pass.program->describe_interface() << std::endl;
   ShProgram result = pass.program->clone();
 
   // Make a dummy uniform that we'll replace later using the extract operator.
@@ -120,14 +119,12 @@ ShProgramNodePtr replace_temps_and_fetches(const ShPass& pass,
 
   result.node()->collectVariables();
   
-  std::cerr << "Replace result: " << std::endl << result.describe_interface() << std::endl;
   return result.node();
 }
 
 void split_outputs(const ShProgramNodePtr& program,
                    std::list<ShProgramNodePtr>& programs)
 {
-  std::cerr << "Splitting: " << std::endl << program->describe_interface() << std::endl;
   if (program->outputs.size() < 2) {
     programs.push_back(program);
   } else {
@@ -138,7 +135,6 @@ void split_outputs(const ShProgramNodePtr& program,
       programs.push_back(p.node());
     }
   }
-  std::cerr << "Split program into " << programs.size() << " programs." << std::endl;
 }
 
 
@@ -146,16 +142,13 @@ void split_outputs(const ShProgramNodePtr& program,
 void copy_framebuffer_to_texture(PBufferContextPtr context,
                                  const ShTextureNodePtr& texnode)
 {
-  glFinish();
-  std::cerr << "Before copy: "; texnode->memory()->dump(std::cerr) << std::endl;
+  //glFinish();
   PBufferStoragePtr fbs = context->make_storage(texnode->memory().object());
   fbs->dirtyall();
   
   shGlBindTexture(texnode, GL_TEXTURE0_ARB);
 
-  std::cerr << "After copy: "; texnode->memory()->dump(std::cerr) << std::endl;
   texnode->memory()->removeStorage(fbs);
-  std::cerr << "After removal: "; texnode->memory()->dump(std::cerr) << std::endl;
 }
 
 }
@@ -261,7 +254,6 @@ PCScheduler::PCScheduler()
 
 ShBackendSchedulePtr PCScheduler::prepare(ShSchedule* schedule)
 {
-  std::cerr << "Preparing schedule " << schedule << std::endl;
   double pc_increment = 1.0/(schedule->num_passes() + 1);
   double current_pc = pc_increment; // 0 is special, avoid 1
 
@@ -269,7 +261,6 @@ ShBackendSchedulePtr PCScheduler::prepare(ShSchedule* schedule)
 
   ShTextureDims dims;
   // TODO: This should use a regular PBufferFactory instead.
-  std::cerr << "Getting FPE..." << std::endl;
   FloatExtension ext = GLXPBufferFactory::instance()->get_extension();
   switch (ext) {
   case SH_ARB_NV_FLOAT_BUFFER:
@@ -284,9 +275,7 @@ ShBackendSchedulePtr PCScheduler::prepare(ShSchedule* schedule)
   }
 
   
-  std::cerr << "Schedule has " << schedule->num_temps() << std::endl;
   for (std::size_t i = 0; i < schedule->num_temps(); i++) {
-    std::cerr << "Setting up temporary..." << std::endl;
     ShTextureTraits traits = ShArrayTraits();
     traits.clamping(ShTextureTraits::SH_UNCLAMPED);
     pc_schedule->temp_buffers.push_back(new ShTextureNode(dims, 4, SH_FLOAT, traits, 1, 1, 1, 0));
@@ -295,14 +284,11 @@ ShBackendSchedulePtr PCScheduler::prepare(ShSchedule* schedule)
   for (ShSchedule::PassList::iterator I = schedule->begin(); I != schedule->end();
        ++I) {
     SH_DEBUG_ASSERT(!I->program->outputs.empty());
-    std::cerr << "Gathering..." << std::endl;
     ChannelGatherer gatherer(pc_schedule->channel_map, dims);
 
     I->program->ctrlGraph->dfs(gatherer);
   }
 
-  std::cerr << "After gathering, channel_map has size " << pc_schedule->channel_map.size() << std::endl;
-  
   for (ShSchedule::PassList::iterator I = schedule->begin(); I != schedule->end();
        ++I) {
     SH_DEBUG_ASSERT(!I->program->outputs.empty());
@@ -320,7 +306,6 @@ ShBackendSchedulePtr PCScheduler::prepare(ShSchedule* schedule)
     I->backend_data = p;
   }
   
-  std::cerr << "All passes setup." << std::endl;
   return pc_schedule;
 }
 
@@ -402,10 +387,8 @@ void PCSchedule::pre_execution(int width, int height, const ShStream& outputs)
     m_output_channels.push_back(*I);
   }
   
-  std::cerr << "Setup channels." << std::endl;
   if (width == m_width && height == m_height) return;
   
-  std::cerr << "Setting up viewport size." << std::endl;
   SH_DEBUG_ASSERT(width > 0);
   SH_DEBUG_ASSERT(height > 0);
   
@@ -417,10 +400,8 @@ void PCSchedule::pre_execution(int width, int height, const ShStream& outputs)
 
   m_size = ShAttrib2f(m_width, m_height);
 
-  std::cerr << "Setting up context" << std::endl;
   m_context = GLXPBufferFactory::instance()->get_context(m_width, m_height, this);
 
-  std::cerr << "Activating." << std::endl;
   PBufferHandlePtr old_context = m_context->activate();
 
   SH_GL_CHECK_ERROR(glViewport(0, 0, m_width, m_height));
@@ -432,7 +413,6 @@ void PCSchedule::pre_execution(int width, int height, const ShStream& outputs)
   SH_GL_CHECK_ERROR(glGenOcclusionQueriesNV(1, &m_query));
 
   for (std::size_t i = 0; i < temp_buffers.size(); i++) {
-    std::cerr << "Allocate temporary buffer " << i << std::endl;
     temp_buffers[i]->setTexSize(m_width, m_height);
     temp_buffers[i]->memory(new GlTextureMemory(temp_buffers[i]));
   }
@@ -446,13 +426,11 @@ void PCSchedule::pre_execution(int width, int height, const ShStream& outputs)
     texture->set_count(channel->count());
     texture->memory(channel->memory());
   }
-  std::cerr << "Allocate predicate texture" << std::endl;
   m_pred_texture.size(m_width, m_height);
   m_pred_texture.memory(new GlTextureMemory(m_pred_texture.node()));
   m_copy_texture.size(m_width, m_height);
   m_copy_texture.memory(new GlTextureMemory(m_pred_texture.node()));
 
-  std::cerr << "Initializing depth buffer." << std::endl;
 
   SH_GL_CHECK_ERROR(glClear(GL_DEPTH_BUFFER_BIT));
 
@@ -464,14 +442,9 @@ void PCSchedule::pre_execution(int width, int height, const ShStream& outputs)
   SH_GL_CHECK_ERROR(glDepthFunc(GL_ALWAYS));
   SH_GL_CHECK_ERROR(glDepthMask(GL_TRUE));
   
-  dump_depth_buffer(make_unique_filename("init", ".png"), m_width, m_height);
-
   // Initialize depth buffer
   draw_quad(0.0, 0.0, m_width, m_height, 1.0/(m_schedule->num_passes() + 1));
 
-  dump_depth_buffer(make_unique_filename("init", ".png"), m_width, m_height);
-  
-  std::cerr << "Restoring context." << std::endl;
   if (old_context) old_context->restore();
 
 }
@@ -545,12 +518,10 @@ void PCSchedule::execute_pass(ShPass* pass)
     m_copy_texture.size(m_width, m_height);
     if (O->type == MAPPING_TEMP) {
       m_copy_texture.memory(temp_buffers[O->id]->memory());
-      m_copy_texture.memory()->dump(std::cerr) << std::endl;
     } else if (O->type == MAPPING_OUTPUT) {
       // TODO: perhaps handle non-stream outputs?
       m_copy_texture.memory(m_output_channels[O->id]->memory());
       m_copy_texture.node()->set_count(m_output_channels[O->id]->count());
-      m_copy_texture.memory()->dump(std::cerr) << std::endl;
     } else {
       SH_DEBUG_ASSERT(false);
     }
@@ -561,7 +532,6 @@ void PCSchedule::execute_pass(ShPass* pass)
     SH_GL_CHECK_ERROR(glDepthFunc(GL_ALWAYS));
     draw_quad(0.0, 0.0, m_width, m_height, pc_pass->pc);
 #else    
-    std::cerr << "Running init" << std::endl;
     SH_GL_CHECK_ERROR(glClear(GL_COLOR_BUFFER_BIT));
     shBind(m_copy_fp);
 
@@ -578,7 +548,6 @@ void PCSchedule::execute_pass(ShPass* pass)
     if (J == pc_pass->programs.end()) {
       SH_GL_CHECK_ERROR(glStencilOp(GL_REPLACE, GL_KEEP, GL_REPLACE));
     }
-    std::cerr << "Running pass" << std::endl;
     ShProgram prg(*I);
     shBind(prg);
 
@@ -607,7 +576,6 @@ void PCSchedule::execute_pass(ShPass* pass)
     m_debug_log
       << "<li>Looks like I need to do some predication..." << std::endl;
 #endif
-    std::cerr << "Predication" << std::endl;
     PCPassPtr pred_pc_pass = shref_dynamic_cast<PCPass>(pass->predicate_pass->backend_data);
     SH_DEBUG_ASSERT(pred_pc_pass);
     PCPassPtr default_pc_pass = shref_dynamic_cast<PCPass>(pass->default_pass->backend_data);
@@ -708,11 +676,9 @@ void PCSchedule::execute_pass(ShPass* pass)
   pass->count = 0;
   m_schedule->remove_eligible(pass);
   if (pass->predicate_pass && pass->predicate_pass->count > 0) {
-    SH_DEBUG_PRINT("Add predicate pass");
     m_schedule->add_eligible(pass->predicate_pass);
   }
   if (pass->default_pass && pass->default_pass->count > 0) {
-    SH_DEBUG_PRINT("Add default pass");
     m_schedule->add_eligible(pass->default_pass);
   }
 

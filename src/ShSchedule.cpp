@@ -412,10 +412,6 @@ void ShSchedule::execute(ShStream& out)
 {
   SH_DEBUG_ASSERT(out.begin() != out.end());
 
-  // TODO: Check counts
-
-  std::cerr << "Executing schedule: count = " << (*out.begin())->count() << std::endl;
-  
   int width = 4, height = 4;
 
   while (width * height < (*out.begin())->count()) {
@@ -435,7 +431,6 @@ void ShSchedule::execute(ShStream& out)
   
   while (!m_eligible_passes.empty()) {
     ShPass* pass = *m_eligible_passes.begin();
-    std::cerr << "Executing pass " << pass << std::endl;
     m_backend_data->execute_pass(pass);
   }
 }

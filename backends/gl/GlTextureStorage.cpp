@@ -126,7 +126,6 @@ class HostGlTextureTransfer : public ShTransfer {
   
   bool transfer(const ShStorage* from, ShStorage* to)
   {
-    std::cerr << "host->opengl:texture" << std::endl; 
     const ShHostStorage* host = dynamic_cast<const ShHostStorage*>(from);
     GlTextureStorage* texture = dynamic_cast<GlTextureStorage*>(to);
 
@@ -158,8 +157,6 @@ class HostGlTextureTransfer : public ShTransfer {
     int height = texture->height();
     int depth = texture->depth();
 
-    std::cerr << "   Target has " << count << "/" << width << "x" << height << "x" << depth << std::endl;
-    
     // If the texture is not full, must not copy more than count
     bool full_copy = (count == (width * height * depth));
 
@@ -251,7 +248,6 @@ class GlTextureHostTransfer : public ShTransfer {
   
   bool transfer(const ShStorage* from, ShStorage* to)
   {
-    std::cerr << "Transferring opengl:texture to host" << std::endl;
     const GlTextureStorage* texture = dynamic_cast<const GlTextureStorage*>(from);
     ShHostStorage* host = dynamic_cast<ShHostStorage*>(to);
 
