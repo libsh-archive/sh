@@ -14,3 +14,5 @@ mkinstalldirs
 stamp-h.in
 autom4te.cache
 control.dot
+stamp-h
+config.h
