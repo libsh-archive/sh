@@ -1,3 +1,7 @@
+2004-12-10  Bryan Chan  <b8chan@cgl.uwaterloo.ca
+	* backends/gl/ArbCode.cpp:
+	Fixed unnecessary BRA instruction.
+
 2004-12-01  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShSyntax.hpp (SH_WHILE): Remove spurious backslash.

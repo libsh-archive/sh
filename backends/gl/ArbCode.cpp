@@ -720,7 +720,9 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
 	I != node->successors.end(); I++) {
       m_instructions.push_back(ArbInst(SH_ARB_BRA, getLabel(I->node), I->cond));
     }
-    m_instructions.push_back(ArbInst(SH_ARB_BRA, getLabel(node->follower)));
+    if(!node->successors.empty() || node->follower->marked()) { // else it's next anyway, no need for bra
+      m_instructions.push_back(ArbInst(SH_ARB_BRA, getLabel(node->follower)));
+    }
     for(std::vector<SH::ShCtrlGraphBranch>::iterator I = node->successors.begin();
 	I != node->successors.end(); I++) {
       genNode(I->node);
