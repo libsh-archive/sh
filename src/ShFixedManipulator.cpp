@@ -51,11 +51,12 @@ ShKeepNode::ShKeepNode(int numChannels)
 }
 
 ShProgram ShKeepNode::applyToInputs(ShManipVarIterator &finger, ShManipVarIterator end) const {
+  SH_DEBUG_PRINT( "Applying keep " << m_numChannels  );
   ShProgram result = SH_BEGIN_PROGRAM() {
     for(int i = 0; i < m_numChannels; ++i, ++finger) {
       std::cout << "Keep apply to channel: " << (*finger)->nameOfType() << (*finger)->name() << std::endl;
       if(finger == end) {
-        ShError(ShAlgebraException("Not enough ShProgram channels for manipulator"));
+        ShError(ShAlgebraException("Not enough ShProgram channels for shKeep manipulator"));
       }
       ShVariable output = makeVariable((*finger), SH_VAR_OUTPUT);
       ShVariable input = makeVariable((*finger), SH_VAR_INPUT);
@@ -80,10 +81,11 @@ ShLoseNode::ShLoseNode(int numChannels)
 }
 
 ShProgram ShLoseNode::applyToInputs(ShManipVarIterator &finger, ShManipVarIterator end) const {
+  SH_DEBUG_PRINT( "Applying lose " << m_numChannels  );
   ShProgram result = SH_BEGIN_PROGRAM() {
     for(int i = 0; i < m_numChannels; ++i, ++finger) {
       if(finger == end) {
-        ShError(ShAlgebraException("Not enough ShProgram channels for manipulator"));
+        ShError(ShAlgebraException("Not enough ShProgram input channels for shLose manipulator"));
       }
       ShVariable output = makeVariable((*finger), SH_VAR_OUTPUT);
     }
@@ -97,7 +99,7 @@ ShProgram ShLoseNode::applyToOutputs(ShManipVarIterator &finger, ShManipVarItera
   ShProgram result = SH_BEGIN_PROGRAM() {
     for(int i = 0; i < m_numChannels; ++i, ++finger) {
       if(finger == end) {
-        ShError(ShAlgebraException("Not enough ShProgram channels for manipulator"));
+        ShError(ShAlgebraException("Not enough ShProgram output channels for shLose manipulator"));
       }
       ShVariable input = makeVariable((*finger), SH_VAR_INPUT);
     }
@@ -120,7 +122,7 @@ ShProgram ShDupNode::applyToInputs(ShManipVarIterator &finger, ShManipVarIterato
     ShVariable input;
     for(int i = 0; i < m_numDups; ++i, ++finger) {
       if(finger == end) {
-        ShError(ShAlgebraException("Not enough ShProgram channels for manipulator"));
+        ShError(ShAlgebraException("Not enough ShProgram input channels for shDup manipulator"));
       }
       if(i == 0) {
         input = makeVariable((*finger), SH_VAR_INPUT);
@@ -140,7 +142,22 @@ ShProgram ShDupNode::applyToInputs(ShManipVarIterator &finger, ShManipVarIterato
 }
 
 ShProgram ShDupNode::applyToOutputs(ShManipVarIterator &finger, ShManipVarIterator end) const {
-  return applyToInputs(finger, end); 
+  ShProgram result = SH_BEGIN_PROGRAM() {
+    if(finger == end) {
+      ShError(ShAlgebraException("Not enough ShProgram output channels for shDup manipulator"));
+    }
+    ShVariable input = makeVariable((*finger), SH_VAR_INPUT);
+
+    for(int i = 0; i < m_numDups; ++i) {
+      ShVariable output = makeVariable((*finger), SH_VAR_OUTPUT);
+      ShStatement stmt(output, SH_OP_ASN, input);
+      ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    }
+    ++finger;
+    // TODO  remove this when empty connect/combine bugs fixed
+    ShAttrib4f dummy = dummy;
+  } SH_END;
+  return result;
 }
 
 ShFixedManipulator shDup(int numDups) {
@@ -192,7 +209,7 @@ ShProgram operator<<(const ShProgram &p, const ShFixedManipulator &m) {
 ShProgram operator<<(const ShFixedManipulator &m, const ShProgram &p) {
   ShManipVarIterator finger = p->outputs.begin();
   ShProgram manipulator = m->applyToOutputs(finger, p->outputs.end()); 
-  return p << manipulator;
+  return manipulator << p;
 }
 
 ShFixedManipulator operator&(const ShFixedManipulator &m, const ShFixedManipulator &n) {
