@@ -1,6 +1,25 @@
 2004-02-11 Bryan Chan <b8chan@cgl.uwaterloo.ca>
+	Merged trunk in up to r1997. 
+
 	Reverted parts of several files to trunk versions while
 	doing the partial merge at r1978 (mostly debugging crud). 
+
+2005-02-10  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/scripts/ShAttribImpl.hpp.py (Impl.scalarcons): Only do
+	constant-assignment when the types being passed are host_type.
+
+	* src/ShBaseTexture.hpp: Made width(), height() and depth()
+	constant for all the ShBaseTexture classes.
+
+2005-02-09  Francois Marier  <francois@serioushack.com>
+
+	* src/scripts/ShAttribImpl.hpp.py (Impl.scalarcons):
+	Constant assignment now done as a single statement (issue44).
+
+2005-02-09  Bryan Chan	<b8chan@cgl.uwaterloo.ca>
+	Removed range arithmetics from trunk.  They were only partially working,
+	and the implementation in arithmetic branch is quite different now. 
 
 	Also some additions 
 	* src/ShAffineTexture.hpp, .cpp

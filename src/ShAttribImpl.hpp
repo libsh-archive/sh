@@ -409,7 +409,7 @@ ShAttrib<1, Binding, T, Swizzled>::ShAttrib(host_type s0)
   if (Binding == SH_CONST) {
     setValue(0, s0);
   } else {
-    (*this)[0] = s0;
+    (*this) = ShAttrib<1, SH_CONST, T>(s0);
   }
 }
 
@@ -687,8 +687,7 @@ ShAttrib<2, Binding, T, Swizzled>::ShAttrib(host_type s0, host_type s1)
     setValue(0, s0);
     setValue(1, s1);
   } else {
-    (*this)[0] = s0;
-    (*this)[1] = s1;
+    (*this) = ShAttrib<2, SH_CONST, T>(s0, s1);
   }
 }
 
@@ -1025,9 +1024,7 @@ ShAttrib<3, Binding, T, Swizzled>::ShAttrib(host_type s0, host_type s1, host_typ
     setValue(1, s1);
     setValue(2, s2);
   } else {
-    (*this)[0] = s0;
-    (*this)[1] = s1;
-    (*this)[2] = s2;
+    (*this) = ShAttrib<3, SH_CONST, T>(s0, s1, s2);
   }
 }
 
@@ -1368,10 +1365,7 @@ ShAttrib<4, Binding, T, Swizzled>::ShAttrib(host_type s0, host_type s1, host_typ
     setValue(2, s2);
     setValue(3, s3);
   } else {
-    (*this)[0] = s0;
-    (*this)[1] = s1;
-    (*this)[2] = s2;
-    (*this)[3] = s3;
+    (*this) = ShAttrib<4, SH_CONST, T>(s0, s1, s2, s3);
   }
 }
 

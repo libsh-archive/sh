@@ -69,7 +69,7 @@ public:
   void size(int width);
 
   ShAttrib1f size() const;
-  int width() { return m_node->width(); }
+  int width() const { return m_node->width(); }
 
   typedef T return_type;
 };
@@ -100,8 +100,8 @@ public:
 
   ShAttrib2f size() const;
 
-  int width() { return m_node->width(); }
-  int height() { return m_node->height(); }
+  int width() const { return m_node->width(); }
+  int height() const { return m_node->height(); }
 
   typedef T return_type;
 };
@@ -126,8 +126,8 @@ public:
 
   ShAttrib2f size() const;
 
-  int width() { return m_node->width(); }
-  int height() { return m_node->height(); }
+  int width() const { return m_node->width(); }
+  int height() const { return m_node->height(); }
 
   typedef T return_type;
 };
@@ -151,9 +151,9 @@ public:
   void size(int width, int height, int depth);
 
   ShAttrib3f size() const;
-  int width() { return m_node->width(); }
-  int height() { return m_node->height(); }
-  int depth() { return m_node->depth(); }
+  int width() const { return m_node->width(); }
+  int height() const { return m_node->height(); }
+  int depth() const { return m_node->depth(); }
 
   typedef T return_type;
 };
@@ -175,8 +175,8 @@ public:
 
   ShAttrib2f size() const;
 
-  int width() { return m_node->width(); }
-  int height() { return m_node->height(); }
+  int width() const { return m_node->width(); }
+  int height() const { return m_node->height(); }
 
   typedef T return_type;
 };
