@@ -88,7 +88,10 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
           << (*J)->nameOfType() << " " << (*J)->name() << " with different sizes" << std::endl;
       err << "while connecting outputs: " << a->outputs << std::endl;
       err << "to inputs: " << b->inputs << std::endl;
+      ShEnvironment::insideShader = false;
+      ShEnvironment::shader = 0;
       ShError(ShAlgebraException(err.str()));
+      return 0;
     }
     ShVariableNodePtr n = new ShVariableNode(SH_TEMP, (*I)->size());
     varMap[*I] = n;

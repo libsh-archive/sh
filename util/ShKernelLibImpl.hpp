@@ -86,24 +86,19 @@ ShProgram ShKernelLib::shVsh(const ShMatrix<N, N, Binding, T> &mv,
     ShOutputVector3f SH_NAMEDECL(tv, "tangent");
     ShOutputVector3f SH_NAMEDECL(tv2, "tangent2");
     ShOutputVector3f SH_NAMEDECL(vv, "viewVec");     
-    ShOutputVector3f SH_NAMEDECL(hv0, "halfVec");
     ShOutputVector3f hv[numLights];    
     for(i = 0; i < numLights; ++i) hv[i].name(makeName("halfVec", i).c_str());
-    ShOutputVector3f SH_NAMEDECL(lv0, "lightVec");
     ShOutputVector3f lv[numLights];    
     for(i = 0; i < numLights; ++i) lv[i].name(makeName("lightVec", i).c_str()); 
 
-    ShOutputPoint3f SH_NAMEDECL(lpo0, "lightPos");
     ShOutputPoint3f lpo[numLights];    
     for(i = 0; i < numLights; ++i) lpo[i].name(makeName("lightPos", i).c_str()); 
 
     // TCS outputs
     ShOutputNormal3f SH_NAMEDECL(nvt, "normalt");      
     ShOutputVector3f SH_NAMEDECL(vvt, "viewVect");     
-    ShOutputVector3f SH_NAMEDECL(hvt0, "halfVect");
     ShOutputVector3f hvt[numLights];    
     for(i = 0; i < numLights; ++i) hvt[i].name(makeName("halfVect", i).c_str());
-    ShOutputVector3f SH_NAMEDECL(lvt0, "lightVect");
     ShOutputVector3f lvt[numLights];    
     for(i = 0; i < numLights; ++i) lvt[i].name(makeName("lightVect", i).c_str()); 
 
@@ -121,9 +116,6 @@ ShProgram ShKernelLib::shVsh(const ShMatrix<N, N, Binding, T> &mv,
       hv[i] = normalize(vv + lv[i]); 
       lpo[i] = lpv[i];
     }
-    hv0 = hv[0];
-    lv0 = lv[0];
-    lpo0 = lpo[0];
 
     // TCS outputs
     tv = mv | tgt;
@@ -134,8 +126,6 @@ ShProgram ShKernelLib::shVsh(const ShMatrix<N, N, Binding, T> &mv,
       hvt[i] = normalize(changeBasis(nv, tv, tv2, hv[i]));
       lvt[i] = normalize(changeBasis(nv, tv, tv2, lv[i])); 
     }
-    hvt0 = hvt[0];
-    lvt0 = lvt[0];
 
 
     pd = mvp | pm;
