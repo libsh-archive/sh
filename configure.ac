@@ -62,6 +62,18 @@ if test "x$ac_backend_arb" = xtrue ; then
 fi
 AM_CONDITIONAL(ENABLE_ARB_BACKEND, test x$ac_backend_arb = xtrue)
 
+SH_CHECK_BACKEND([ati], [OpenGL ATI])
+if test "x$ac_backend_ati" = xtrue ; then
+  GL_CHECK_GL_HEADERS([],
+    [AC_MSG_WARN([OpenGL headers (GL/gl.h and GL/glext.h) not found. Disabling ATI backend.])
+     ac_backend_ati=false])
+  GL_CHECK_GLEXT_VERSION([18], [], [
+    AC_MSG_WARN([glext.h version 18 or greater (available at http://oss.sgi.com/projects/ogl-sample/registry/) not found. Disabling ATI backend.])
+    ac_backend_ati=false
+  ])
+fi
+AM_CONDITIONAL(ENABLE_ATI_BACKEND, test x$ac_backend_ati = xtrue)
+
 # Store the prefix as a variable
 AC_DEFINE_UNQUOTED(SH_INSTALL_PREFIX, "$prefix", [Installation prefix directory])
 
@@ -72,6 +84,7 @@ AC_CONFIG_FILES([Makefile
 		 backends/Makefile
 		 backends/sm/Makefile
 		 backends/arb/Makefile
+		 backends/ati/Makefile
 		 util/Makefile
 		 doc/Makefile])
 AC_OUTPUT
