@@ -78,6 +78,7 @@ private:
 
 class ShStorage : public ShRefCountable {
 public:
+  ShStorage();
   virtual ~ShStorage();
   
   int timestamp() const;

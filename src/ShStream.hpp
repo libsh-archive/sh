@@ -56,6 +56,8 @@ public:
 
   void append(const ShChannelNodePtr& node);
   void prepend(const ShChannelNodePtr& node);
+  // Execute fully bound stream program and place results in stream.
+  ShStream& operator=(const ShProgram& program);
   
 private:
   std::list<ShChannelNodePtr> m_nodes;
@@ -88,6 +90,7 @@ ShStream operator&(const ShStream& left, const ShStream& right);
 // Connecting (currying) streams onto programs
 ShProgram connect(const ShStream& stream, const ShProgram& program);
 ShProgram operator<<(const ShProgram& program, const ShStream& stream);
+
 
 }
 

@@ -135,6 +135,16 @@ private:
   ShVariableNodePtr tc_node;
 };
 
+PBufferStreams::PBufferStreams(int context)
+  : m_context(context)
+{
+}
+
+StreamStrategy* PBufferStreams::create(int context)
+{
+  return new PBufferStreams(context);
+}
+
 void PBufferStreams::execute(const ShProgram& program,
                              ShStream& dest)
 {
@@ -330,6 +340,8 @@ void PBufferStreams::execute(const ShProgram& program,
 
   glXMakeCurrent(dpy, pbuffer, pbuffer_ctxt);
 
+  shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->newContext();
+  
   if (output->count() != input_count) {
     SH_DEBUG_ERROR("Input data count does not match output data count ("
                    << input_count << " != " << output->count() << ")");
@@ -368,8 +380,6 @@ void PBufferStreams::execute(const ShProgram& program,
   shBindShader(vp);
   shBindShader(fp);
 
-  fp->code(ShEnvironment::backend)->print(std::cerr);
-  
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glViewport(0, 0, tex_size, tex_size);
@@ -408,6 +418,7 @@ void PBufferStreams::execute(const ShProgram& program,
   gl_error = glGetError();
   if (gl_error != GL_NO_ERROR) {
     ShError(PBufferStreamException("Could not render"));
+    shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->destroyContext();
     glXDestroyContext(dpy, pbuffer_ctxt);
     XFree(fb_config);
     XCloseDisplay(dpy);
@@ -430,6 +441,7 @@ void PBufferStreams::execute(const ShProgram& program,
   gl_error = glGetError();
   if (gl_error != GL_NO_ERROR) {
     ShError(PBufferStreamException("Could not do glReadPixels()"));
+    shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->destroyContext();
     glXDestroyContext(dpy, pbuffer_ctxt);
     XFree(fb_config);
     XCloseDisplay(dpy);
@@ -442,6 +454,7 @@ void PBufferStreams::execute(const ShProgram& program,
     gl_error = glGetError();
     if (gl_error != GL_NO_ERROR) {
       ShError(PBufferStreamException("Could not do rest of glReadPixels()"));
+      shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->destroyContext();
       glXDestroyContext(dpy, pbuffer_ctxt);
       XFree(fb_config);
       XCloseDisplay(dpy);
@@ -450,6 +463,7 @@ void PBufferStreams::execute(const ShProgram& program,
   }
 
   // Clean up
+  shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->destroyContext();
   glXDestroyContext(dpy, pbuffer_ctxt);
   XFree(fb_config);
   XCloseDisplay(dpy);

@@ -56,6 +56,9 @@ public:
 
   ShChannelNodePtr node();
   const ShChannelNodePtr node() const;
+
+  // Execute fully bound single-output stream program and place result in channel.
+  ShChannel& operator=(const ShProgram& program);
   
 private:
   ShChannelNodePtr m_node;

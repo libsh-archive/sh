@@ -4,11 +4,13 @@ namespace shgl {
 
 using namespace SH;
 
-GlTextureStorage::GlTextureStorage(ShMemory* memory, GLenum target,
+GlTextureStorage::GlTextureStorage(int context,
+                                   ShMemory* memory, GLenum target,
                                    GLenum format, GLint internalFormat,
                                    int width, int height, int depth,
                                    GlTextureNamePtr name)
-  : ShStorage(memory), m_name(name), m_target(target), m_format(format),
+  : ShStorage(memory), m_context(context),
+    m_name(name), m_target(target), m_format(format),
     m_internalFormat(internalFormat),
     m_width(width), m_height(height), m_depth(depth)
 {
@@ -30,9 +32,6 @@ class HostGlTextureTransfer : public ShTransfer {
   {
     const ShHostStorage* host = dynamic_cast<const ShHostStorage*>(from);
     GlTextureStorage* texture = dynamic_cast<GlTextureStorage*>(to);
-
-    SH_DEBUG_PRINT("host->opengl:texture: Transferring from host "
-                   << host->data() << " to texture " << texture->name());
 
     // Bind texture name for this scope.
     GlTextureName::Binding binding(texture->texName());

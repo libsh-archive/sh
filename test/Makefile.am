@@ -29,6 +29,7 @@ texture_SOURCES = texture.cpp
 uniforms_SOURCES = uniforms.cpp
 stream_inverse_SOURCES = stream_inverse.cpp
 stream_inverse_LDADD = ../src/libsh.la -lX11 -lGL
+stream_LDADD = ../src/libsh.la -lX11 -lGL
 shvector_SOURCES = shvector.cpp
 stream_SOURCES = stream.cpp
 while_SOURCES = while.cpp

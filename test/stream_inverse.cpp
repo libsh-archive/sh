@@ -31,11 +31,19 @@ int main(int argc, char** argv)
     ShImage result(image.width(), image.height(), 3);
     ShChannel<ShColor3f> output(result.memory(), image.width() * image.height());
 
+    ShMatrix3x3f sobel_x = ShMatrix3x3f(-1.0, 0.0, +1.0,
+                                        -2.0, 0.0, +2.0,
+                                        -1.0, 0.0, -1.0);
+    ShMatrix3x3f sobel_y = transpose(sobel_x);
+    
     ShProgram invert = SH_BEGIN_PROGRAM("gpu:stream") {
       ShTexCoord<INDEX_ELEMENTS, SH_INPUT> idx;
       ShOutputColor3f outcol;
+
+      ShTexCoord2f t = idx(0,1)
+      
       //      outcol = ShColor3f(1.0, 1.0, 1.0) - picture(idx(0,1));
-      outcol = picture(idx(0,1) - ShConstant2f(1.0, 0.0)) - picture(idx(0,1));
+      outcol = picture(t - ShConstant2f(1.0, 0.0)) - picture(t);
       outcol = dot(outcol,outcol)(0,0,0);
     } SH_END;
 

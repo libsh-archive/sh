@@ -116,4 +116,10 @@ ShProgram operator<<(const ShProgram& program, const ShStream& stream)
   return connect(stream, program);
 }
 
+ShStream& ShStream::operator=(const ShProgram& program)
+{
+  ShEnvironment::backend->execute(program, *this);
+  return *this;
+}
+
 }

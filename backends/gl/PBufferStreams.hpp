@@ -32,7 +32,12 @@
 namespace shgl {
 
 struct PBufferStreams : public StreamStrategy {
+  PBufferStreams(int context = 0);
+  virtual StreamStrategy* create(int context);
   virtual void execute(const SH::ShProgram& program, SH::ShStream& dest);
+
+private:
+  int m_context;
 };
 
 }

@@ -1,5 +1,21 @@
 2004-03-04  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShMemory.hpp (ShStorage): Add a default constructor that
+	sets the timestamp to -1.
+
+	* src/ShStream.hpp: Added an operator=() to run Backend::execute().
+
+	* src/ShChannel.hpp: Added an operator=() to run Backend::execute().
+
+	* backends/gl/*: Use the new context mechanism in various places.
+
+	* backends/gl/GlBackend.hpp: Added a context mechanism to inform
+	the GL backend about context changes.
+
+	* src/ShMemory.cpp (sync): Check "local_cost < 0" instead of
+	"cost < 0". This fixes a bug that caused storages not to be synced
+	in certain circumstances.
+
 	* backends/gl/PBufferStreams.cpp (execute): Update for new TextureTraits class.
 
 	* backends/gl/GlTextures.cpp (shGlInternalFormat): Support

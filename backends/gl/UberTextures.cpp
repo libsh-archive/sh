@@ -65,8 +65,8 @@ GLenum shGlFormat(const ShTextureNodePtr& node)
 }
 
 struct StorageFinder {
-  StorageFinder(const ShTextureNodePtr& node, bool ignoreTarget = false)
-    : node(node), ignoreTarget(ignoreTarget)
+  StorageFinder(const ShTextureNodePtr& node, int context, bool ignoreTarget = false)
+    : node(node), context(context), ignoreTarget(ignoreTarget)
   {
   }
   
@@ -74,6 +74,7 @@ struct StorageFinder {
   {
     UberStoragePtr t = shref_dynamic_cast<UberStorage>(storage);
     if (!t) return false;
+    if (t->context() != context) return false;
     if (!ignoreTarget) {
       /*
       if (t->texName()->params() != node->traits()) return false;
@@ -88,11 +89,13 @@ struct StorageFinder {
   }
   
   const ShTextureNodePtr& node;
+  int context;
   bool ignoreTarget;
 };
 
 
-UberTextures::UberTextures()
+UberTextures::UberTextures(int context)
+  : m_context(context)
 {
 }
 
@@ -117,7 +120,7 @@ void UberTextures::bindTexture(const ShTextureNodePtr& node,
       GlTextureName::StorageList::const_iterator S;
       for (S = name->beginStorages(); S != name->endStorages(); ++S) {
         ShCubeDirection dir = glToShCubeDir((*S)->target());
-        if ((*S)->memory() != node->memory(dir).object() || !StorageFinder(node, true)(*S))
+        if ((*S)->memory() != node->memory(dir).object() || !StorageFinder(node, m_context, true)(*S))
           break;
       }
       // If we got through the whole list, we've found a matching list.
@@ -153,12 +156,13 @@ void UberTextures::bindTexture(const ShTextureNodePtr& node,
     */
   } else {
     // Everything but cubemaps
-    StorageFinder finder(node);
+    StorageFinder finder(node, m_context);
     UberStoragePtr storage =
       shref_dynamic_cast<UberStorage>(node->memory()->findStorage("uberbuffer", finder));
     if (!storage) {
       GlTextureNamePtr name = new GlTextureName(shGlTargets[node->dims()]);
-      storage = new UberStorage(node->memory().object(), name,
+      storage = new UberStorage(m_context,
+                                node->memory().object(), name,
                                 node->width(), node->height(), node->size());
       name->params(node->traits());
     }

@@ -7,10 +7,15 @@ namespace shgl {
 
 class GlTextures : public TextureStrategy {
 public:
-  GlTextures();
+  GlTextures(int context = 0);
+
+  TextureStrategy* create(int context);
   
   void bindTexture(const SH::ShTextureNodePtr& texture,
                    GLenum target);
+
+private:
+  int m_context;
 };
 
 }

@@ -11,7 +11,8 @@ namespace shgl {
 class HostUberTransfer;
 class UberStorage : public SH::ShStorage {
 public:
-  UberStorage(SH::ShMemory* memory, const GlTextureNamePtr& name,
+  UberStorage(int context,
+              SH::ShMemory* memory, const GlTextureNamePtr& name,
               int width, int height, int pitch);
   ~UberStorage();
   
@@ -32,6 +33,7 @@ public:
   int width() const { return m_width; }
   int height() const { return m_height; }
   int pitch() const { return m_pitch; }
+  int context() const { return m_context; }
   unsigned int mem() const { return m_mem; }
 
   std::string id() const { return "uberbuffer"; }
@@ -50,6 +52,8 @@ private:
   unsigned int alloc(int bForce=0);
   unsigned int remove();
 
+  int m_context;
+  
   int m_width, m_height, m_pitch;
           
   // the uber buffer

@@ -105,6 +105,14 @@ ShProgram operator<<(const ShProgram& program,
   return connect(stream, program);
 }
 
+template<typename T>
+ShChannel<T>& ShChannel<T>::operator=(const ShProgram& program)
+{
+  ShStream stream(*this);
+  stream = program;
+  return *this;
+}
+
 }
 
 

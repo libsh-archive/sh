@@ -64,9 +64,15 @@ ShTransfer::ShTransfer(const std::string& from, const std::string& to)
   ShStorage::addTransfer(from, to, this);
 }
 
+
 ///////////////////////
 // --- ShStorage --- //
 ///////////////////////
+ShStorage::ShStorage()
+  : m_timestamp(-1)
+{
+}
+
 ShStorage::~ShStorage()
 {
   if (m_memory) {
@@ -117,7 +123,7 @@ void ShStorage::sync()
     if (other == this) continue;
     if (other->timestamp() < m_memory->timestamp()) continue;
     int local_cost = cost(other, this);
-    if (cost < 0) continue; // Can't transfer from that storage.
+    if (local_cost < 0) continue; // Can't transfer from that storage.
     if (!source || local_cost < transfer_cost) {
       source = other;
       transfer_cost = local_cost;
@@ -130,7 +136,9 @@ void ShStorage::sync()
   // cheap, working one.
 
   // Do the actual transfer
-  transfer(source, this);
+  if (!transfer(source, this)) {
+    SH_DEBUG_WARN("Transfer from " << source << " to " << this << " failed!");
+  }
 }
 
 void ShStorage::dirty()

@@ -16,9 +16,11 @@ int UberStorage::temp_fb[4] = {-1, -1, -1, -1};
 
 bool UberStorage::m_firstTime = true;
 
-UberStorage::UberStorage(SH::ShMemory* memory, const GlTextureNamePtr& name,
+UberStorage::UberStorage(int context,
+                         SH::ShMemory* memory, const GlTextureNamePtr& name,
                          int width, int height, int pitch)
   : SH::ShStorage(memory),
+    m_context(context),
     m_width(width), m_height(height), m_pitch(pitch), 
     m_mem(0), m_binding(SH_UBER_UNBOUND),
     m_textureName(name), m_auxTarget(0)

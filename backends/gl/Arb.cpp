@@ -8,6 +8,16 @@ namespace shgl {
 
 using namespace SH;
 
+ArbCodeStrategy::ArbCodeStrategy(int context)
+  : m_context(context)
+{
+}
+
+ArbCodeStrategy* ArbCodeStrategy::create(int context)
+{
+  return new ArbCodeStrategy(context);
+}
+
 ShBackendCodePtr ArbCodeStrategy::generate(const std::string& target,
                                            const ShProgram& shader,
                                            TextureStrategy* textures)

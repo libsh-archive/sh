@@ -73,9 +73,35 @@ int main(int argc, char** argv)
 
     ShStream s = output1 & output2;
 
-    output1 & output2 = shader << stream1 << stream2;
-    
-    ShEnvironment::backend->execute(final, s);
+    (output1 & output2) = (shader << stream1 << stream2);
+    std::cerr << "out_data1 = [";
+    for (int i = 0; i < elements * 3; i++) {
+      if (i % 3 == 0) {
+        if (i > 0) std::cerr << "; ";
+        std::cerr << "(";
+      } else if (i > 0) {
+        std::cerr << ", ";
+      }
+      std::cerr << out_data1[i];
+      if (i % 3 == 2) std::cerr << ")";
+    }
+    std::cerr << "]" << std::endl;
+
+    std::cerr << "out_data2 = [";
+    for (int i = 0; i < elements * 3; i++) {
+      if (i % 3 == 0) {
+        if (i > 0) std::cerr << "; ";
+        std::cerr << "(";
+      } else if (i > 0) {
+        std::cerr << ", ";
+      }
+      std::cerr << out_data2[i];
+      if (i % 3 == 2) std::cerr << ")";
+    }
+    std::cerr << "]" << std::endl;
+
+    (output1 & output2) = (shader << stream1 << stream2);
+
 
     std::cerr << "out_data1 = [";
     for (int i = 0; i < elements * 3; i++) {

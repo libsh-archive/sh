@@ -35,24 +35,23 @@ extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
 namespace shgl {
 
 struct TextureStrategy {
+  virtual TextureStrategy* create(int context) = 0;
+  
   virtual void bindTexture(const SH::ShTextureNodePtr& texture,
                            GLenum target) = 0;
 };
 
 struct StreamStrategy {
+  virtual StreamStrategy* create(int context) = 0;
   virtual void execute(const SH::ShProgram& program, SH::ShStream& dest) = 0;
 };
 
 struct CodeStrategy {
+  virtual CodeStrategy* create(int context) = 0;
   virtual SH::ShBackendCodePtr generate(const std::string& target,
                                         const SH::ShProgram& shader,
                                         TextureStrategy* textures) = 0;
 };
-
-// TODO: Think about GL contexts.
-// Maybe we should swap out the actual backend each time the context
-// is changed.
-// I think that might work well.
 
 class GlBackend : public SH::ShBackend {
 public:
@@ -62,14 +61,32 @@ public:
   // execute a stream program, if supported
   virtual void execute(const SH::ShProgram& program, SH::ShStream& dest);
 
+  virtual int newContext();
+  virtual int context() const;
+  virtual void setContext(int context);
+  virtual void destroyContext();
+  
 protected:
   GlBackend(CodeStrategy* code, TextureStrategy* texture,
             StreamStrategy* stream);
   
 private:
-  CodeStrategy* m_code;
-  TextureStrategy* m_textures;
-  StreamStrategy* m_stream;
+  int m_curContext;
+
+  struct Context {
+    Context(CodeStrategy* code,
+            TextureStrategy* textures,
+            StreamStrategy* streams)
+      : code(code), textures(textures), streams(streams)
+    {
+    }
+    
+    CodeStrategy* code;
+    TextureStrategy* textures;
+    StreamStrategy* streams;
+  };
+  
+  std::vector<Context> m_contexts;
 
   // NOT IMPLEMENTED
   GlBackend(const GlBackend& other);
