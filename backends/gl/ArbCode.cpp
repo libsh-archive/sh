@@ -1297,10 +1297,21 @@ void ArbCode::allocTextures(const ArbLimits& limits)
     {
     ShTextureNodePtr node = *I;
     
-    if (!node->meta("opengl:texunit").empty())
+    if (!node->meta("opengl:texunit").empty() ||
+	!node->meta("opengl:preset").empty())
       {
       GLuint index;
-      std::istringstream is(node->meta("opengl:texunit"));
+      std::istringstream is;
+
+      if (!node->meta("opengl:texunit").empty())
+	{
+	is.str(node->meta("opengl:texunit"));
+	}
+      else
+	{
+	is.str(node->meta("opengl:preset"));
+	}
+
       is >> index; // TODO: Check for errors
 
       if (std::find(reserved.begin(), reserved.end(), index) == reserved.end())
@@ -1324,7 +1335,8 @@ void ArbCode::allocTextures(const ArbLimits& limits)
     {
     ShTextureNodePtr node = *I;
     
-    if (node->meta("opengl:texunit").empty())
+    if (node->meta("opengl:texunit").empty() &&
+	node->meta("opengl:preset").empty())
       {
       GLuint index;
       index = m_numTextures;
@@ -1339,7 +1351,7 @@ void ArbCode::allocTextures(const ArbLimits& limits)
       
       m_registers[node] = new ArbReg(SH_ARB_REG_TEXTURE, index, node->name());
       m_reglist.push_back(m_registers[node]);
-      m_numTextures = index;
+      m_numTextures = index + 1;
       }
     }
   }

@@ -291,6 +291,16 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node,
   if (!node) return;
 
   // TODO: Check for memories that are 0
+
+  if (!node->meta("opengl:texid").empty())
+    {
+    SH_GL_CHECK_ERROR(glActiveTextureARB(target));
+    GLuint name;
+    std::istringstream is(node->meta("opengl:texid"));
+    is >> name; // TODO: Check for errors
+    SH_GL_CHECK_ERROR(glBindTexture(shGlTargets[node->dims()], name));
+    return;
+    } 
   
   if (node->dims() == SH_TEXTURE_CUBE) {
     
