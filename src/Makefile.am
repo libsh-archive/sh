@@ -41,7 +41,8 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
 		   ShChannelNode.hpp ShChannelNode.cpp \
 		   ShChannel.hpp ShChannelImpl.hpp \
 		   ShStream.hpp ShStreamImpl.hpp ShStream.cpp \
-		   ShInit.cpp
+		   ShInit.cpp \
+			 ShQuaternion.hpp ShQuaternion.cpp
 
 incincdir = $(includedir)/sh
 
@@ -67,5 +68,6 @@ incinc_HEADERS = ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp \
 		   ShManipulator.hpp ShManipulatorImpl.hpp \
 			 ShNibbles.hpp ShNibblesImpl.hpp \
 		   ShChannelNode.hpp ShChannel.hpp ShChannelImpl.hpp \
-		   ShStream.hpp ShStreamImpl.hpp
+		   ShStream.hpp ShStreamImpl.hpp \
+			 ShQuaternion.hpp
 

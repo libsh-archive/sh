@@ -1,3 +1,10 @@
+
+2004-02-01  Jack Wang  <jmwang@uwaterloo.ca>
+	* src/ShQuaternion.?pp:
+	Added ShQuaternion class with basically the same interface as the one
+	in libdemo, but all methods here can be run on shaders.
+	
+
 2004-01-31  Bryan Chan  <b8chan@uwaterloo.ca>
 	* util/ShPerlinImpl.hpp: Fixed discontinuity problems.
 	  (TODO Sh should print a warning if a temporary is used before 

@@ -24,52 +24,43 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SH_HPP
-#define SH_HPP
+#ifndef SHQUATERNION_HPP
+#define SHQUATERNION_HPP
 
-#include "ShException.hpp"
-#include "ShProgram.hpp"
-#include "ShSyntax.hpp"
-#include "ShAttrib.hpp"
-#include "ShMatrix.hpp"
-#include "ShVector.hpp"
-#include "ShPoint.hpp"
-#include "ShColor.hpp"
-#include "ShTexCoord.hpp"
-#include "ShNormal.hpp"
-#include "ShPosition.hpp"
+#include <iostream>
 #include "ShLib.hpp"
-#include "ShTexture.hpp"
-#include "ShMemoryObject.hpp"
-#include "ShBackend.hpp"
-#include "ShImage.hpp"
-#include "ShAlgebra.hpp"
-#include "ShNibbles.hpp"
-#include "ShManipulator.hpp"
-#include "ShFixedManipulator.hpp"
-#include "ShChannelNode.hpp"
-#include "ShChannel.hpp"
-#include "ShStream.hpp"
-#include "ShQuaternion.hpp"
-
-/** \namespace SH
- * \brief The main Sh namespace.
- *
- * All Sh classes, functions and objects reside within this namespace.
- */
-
-/** \file sh.hpp
- * \brief The main Sh include file.
- * You should only have to include this file to use Sh.
- */
 
 namespace SH {
-    /** \brief SH Initialization Function.
-     *
-     * The function needs to be called prior to the use of any other SH functions. Additionally,
-	 * in Windows, this function needs to be called after a OpenGL context/window has been created.
-     */
-    void ShInit();
+  class ShQuaternion
+  {
+    friend std::ostream& operator<<(std::ostream& out, const ShQuaternion& q);
+    public:
+      ShQuaternion();
+      ShQuaternion(const ShQuaternion& other);
+      ShQuaternion(const ShVector4f& values);
+      ShQuaternion(const ShAttrib1f& angle, const ShVector3f& axis);
+
+      ShQuaternion& operator=(const ShQuaternion& other);
+      ShQuaternion& operator+=(const ShQuaternion& right);
+      ShQuaternion& operator-=(const ShQuaternion& right);
+      ShQuaternion& operator*=(const ShQuaternion& right);
+      ShQuaternion& operator*=(const ShAttrib1f& right);
+
+      ShQuaternion operator+(const ShQuaternion& q2);
+      ShQuaternion operator-(const ShQuaternion& q2);
+      ShQuaternion operator*(const ShQuaternion& q2);
+      ShQuaternion operator*(const ShAttrib1f& c);
+
+      ShQuaternion conjugate() const;
+      ShQuaternion inverse() const;
+      ShMatrix4x4f getMatrix() const;
+    private:
+      ShVector4f m_data;
+  };
+
+  extern ShQuaternion operator*(const ShAttrib1f& c, const ShQuaternion& q);
 }
+
+
 
 #endif
