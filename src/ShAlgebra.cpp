@@ -155,7 +155,8 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   
   ShProgramNode::VarList::const_iterator I, J;  
   for (I = a->outputs.begin(), J = b->inputs.begin(); I != a->outputs.end() && J != b->inputs.end(); ++I, ++J) {
-    SH_DEBUG_PRINT("Smashing a variable..");
+    SH_DEBUG_PRINT("Smashing variables " << (*I)->nameOfType() << " " <<(*I)->name() 
+        << " -> " << (*J)->nameOfType() << " " << (*J)->name() );
     if( (*I)->size() != (*J)->size() ) {
       ShError( ShAlgebraException( "Cannot smash variables " + 
             (*I)->nameOfType() + " " + (*I)->name() + " and " + 

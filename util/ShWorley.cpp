@@ -194,8 +194,8 @@ void ShWorley::doWorley(ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m, ShAttrib1f
     //grads[i] = cond((resultVec(i)==dcell), gradCell, ShAttrib2f(0,0));
     for (j=0; j<4; j++)
     {
-      grads[i]+= (resultVec(i)==dadj[0](j))*gradAdj[j](0,1); // normalize?
-      grads[i]+= (resultVec(i)==dadj[1](j))*gradAdj[j](2,3);
+      grads[i]= mad((resultVec(i)==dadj[0](j)),gradAdj[j](0,1), grads[i]); // normalize?
+      grads[i]= mad((resultVec(i)==dadj[1](j)),gradAdj[j](2,3), grads[i]);
       //grads[i] = cond((resultVec(i)==dadj[0](j)), gradAdj[j](0,1), grads[i]);
       //grads[i] = cond((resultVec(i)==dadj[1](j)), gradAdj[j](2,3), grads[i]);
     }

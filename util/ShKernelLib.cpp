@@ -2,7 +2,7 @@
 
 namespace ShUtil {
 
-ShProgram outputPass( const ShProgram &p ) {
+ShProgram ShKernelLib::outputPass( const ShProgram &p ) {
   ShProgram passer = SH_BEGIN_PROGRAM() {
     for( ShProgramNode::VarList::const_iterator it = p->outputs.begin();
         it != p->outputs.end(); ++it ) {
