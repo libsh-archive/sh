@@ -152,6 +152,8 @@ public:
   void setTexSize(int w, int h);
   void setTexSize(int w, int h, int d);
   const ShVariable& texSizeVar() const;
+
+  void count(int n);
   
 private:
   int m_count; // max nb of elements sent to the GPU or -1 if unknown (used by the stream backend)

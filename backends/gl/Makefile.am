@@ -24,7 +24,8 @@ GLTEXTURE_SOURCES = GlTextureStorage.hpp GlTextureStorage.cpp \
 		     GlTextures.hpp GlTextures.cpp 
 PBUFFERSTREAM_SOURCES = PBufferStreams.hpp PBufferStreams.cpp \
 			PBufferContext.hpp PBufferContext.cpp \
-			GLXPBufferContext.hpp GLXPBufferContext.cpp
+			GLXPBufferContext.hpp GLXPBufferContext.cpp \
+			Utils.hpp Utils.cpp
 
 if ENABLE_ARB_BACKEND
 libsharb_la_LDFLAGS = -L$(prefix)/lib -module

@@ -165,6 +165,11 @@ int ShTextureNode::count() const
   return (m_count != -1) ? m_count : m_width * m_height * m_depth;
 }
 
+void ShTextureNode::count(int n)
+{
+  m_count = n;
+}
+
 const ShVariable& ShTextureNode::texSizeVar() const
 {
   return m_texSizeVar;

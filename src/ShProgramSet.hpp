@@ -35,7 +35,7 @@ class ShBackendSet;
 class ShProgram;
 
 class
-SH_DLLEXPORT ShProgramSet {
+SH_DLLEXPORT ShProgramSet : public ShRefCountable {
 public:
   ShProgramSet(); // empty set
   explicit ShProgramSet(const ShProgram& a);
@@ -61,6 +61,9 @@ private:
   ShProgramSet(const ShProgramSet& other);
   ShProgramSet& operator=(const ShProgramSet& other);
 };
+
+typedef ShPointer<ShProgramSet> ShProgramSetPtr;
+typedef ShPointer<const ShProgramSet> ShProgramSetCPtr;
 
 }
 

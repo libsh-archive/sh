@@ -104,8 +104,6 @@ void ShTrivialBackendSet::bind()
 void ShTrivialBackendSet::unbind()
 {
   // TODO: This may not quite have the correct semantics
-  // I'm wondering whether we want to allow unbinding backendsets at
-  // all...
   for (std::list<ShBackendCodePtr>::iterator I = m_code.begin(); I != m_code.end(); ++I) {
     (*I)->unbind();
   }

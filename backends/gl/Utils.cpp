@@ -1,6 +1,7 @@
 #include "Utils.hpp"
 #include "ShTextureNode.hpp"
 #include "ShArray.hpp"
+#include "sh.hpp"
 
 namespace shgl {
 
@@ -99,6 +100,19 @@ void TexFetcher::operator()(ShCtrlGraphNode* node)
       node->block->splice(I, new_stmts);
       I--;
     }
+  }
+}
+
+void split_program(ShProgramNode* program,
+                   std::list<ShProgramNodePtr>& programs,
+                   const std::string& target)
+{
+  int i = 0;
+  for (ShProgramNode::VarList::const_iterator I = program->outputs_begin();
+       I != program->outputs_end(); ++I, ++i) {
+    ShProgram p = shSwizzle(i) << ShProgram(program);
+    p.node()->target() = target;
+    programs.push_back(p.node());
   }
 }
 

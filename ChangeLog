@@ -1,3 +1,25 @@
+2005-03-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* win32/ShArbBackend.vcproj, win32/ShGlslBackend.vcproj: Include
+	Utils.cpp and Utils.hpp
+
+	* backends/gl/Makefile.win32 (PBUFFERSTREAM_SOURCES): Include
+	Utils.*.
+
+	* backends/gl/Makefile.am (PBUFFERSTREAM_SOURCES): Include
+	Utils.[ch]pp.
+
+	* backends/gl/Utils.cpp (split_program): Add this function.
+
+	The "Make Arno and Nils Happy" patch.
+	
+	* backends/gl/PBufferStreams.cpp: PBufferStreams caches its
+	fragment programs now. Hooray, particle system demo is about 100
+	times faster....
+
+	* src/ShProgramSet.hpp (ShProgramSet): Make ShProgramSets
+	reference-countable. Happy Pi day.
+
 2005-03-14  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslCode.cpp, GlslCode.hpp: Support for control flow
