@@ -55,7 +55,7 @@ GlslBindingSpecs glslVertexInputBindingSpecs[] = {
   {SH_GLSL_VAR_NORMAL, 1, SH_NORMAL, false},
   {SH_GLSL_VAR_COLOR, 1, SH_COLOR, false},
   {SH_GLSL_VAR_SECONDARYCOLOR, 1, SH_COLOR, false},
-  //{SH_GLSL_VAR_TEXCOORD, 8, SH_TEXCOORD, true},
+  {SH_GLSL_VAR_TEXCOORD, 8, SH_TEXCOORD, true},
   {SH_GLSL_VAR_NONE, 0, SH_ATTRIB, true}
 };
 
@@ -63,7 +63,7 @@ GlslBindingSpecs glslFragmentInputBindingSpecs[] = {
   {SH_GLSL_VAR_FRAGCOORD, 1, SH_POSITION, false},
   {SH_GLSL_VAR_COLOR, 1, SH_COLOR, false},
   {SH_GLSL_VAR_SECONDARYCOLOR, 1, SH_COLOR, false},
-  //{SH_GLSL_VAR_TEXCOORD, 8, SH_TEXCOORD, true},
+  {SH_GLSL_VAR_TEXCOORD, 8, SH_TEXCOORD, true},
   {SH_GLSL_VAR_NONE, 0, SH_ATTRIB, true}
 };
 
@@ -71,7 +71,7 @@ GlslBindingSpecs glslVertexOutputBindingSpecs[] = {
   {SH_GLSL_VAR_POSITION, 1, SH_POSITION, false},
   {SH_GLSL_VAR_FRONTCOLOR, 1, SH_COLOR, false},
   {SH_GLSL_VAR_FRONTSECONDARYCOLOR, 1, SH_COLOR, false},
-  //{SH_GLSL_VAR_TEXCOORD, 8, SH_TEXCOORD, true},
+  {SH_GLSL_VAR_TEXCOORD, 8, SH_TEXCOORD, true},
   {SH_GLSL_VAR_NONE, 0, SH_ATTRIB}
 };
 
@@ -114,36 +114,48 @@ GlslVariableMap::GlslVariableMap(ShProgramNode* shader, GlslProgramType unit)
   }
 }
 
-void GlslVariableMap::allocate_builtin(const ShProgramNode::VarList::const_iterator& begin,
-				       const ShProgramNode::VarList::const_iterator& end,
-				       const GlslBindingSpecs& specs, map<GlslVarBinding, int>& bindings)
+void GlslVariableMap::allocate_builtin(const ShVariableNodePtr& node,
+                                       const GlslBindingSpecs* specs, map<GlslVarBinding, int>& bindings,
+                                       bool generic)
 {
-  for (ShProgramNode::VarList::const_iterator i = begin; i != end; i++) {
-    const ShVariableNodePtr& node(*i);
-    if (specs.semantic_type == node->specialType()) {
-      if (bindings[specs.binding] >= specs.max_bindings) continue;
-      bindings[specs.binding]++;
+  if (m_varmap.find(node) != m_varmap.end()) return;
+  for (const GlslBindingSpecs* s = specs; s->binding != SH_GLSL_VAR_NONE; s++) {
+    if (s->semantic_type == node->specialType() || (generic && s->allow_generic)) {
+      if (bindings[s->binding] >= s->max_bindings) continue;
 
       GlslVariable var(node);
-      var.name(glslVarBindingInfo[specs.binding].name);
+      std::ostringstream name;
+      name << glslVarBindingInfo[s->binding].name;
+      
+      if (glslVarBindingInfo[s->binding].indexed) {
+        name << '[' << bindings[s->binding] << ']';
+      }
+      var.name(name.str());
       m_varmap[node] = var;
+
+      bindings[s->binding]++;
+      return;
     }
   }
 }
 
 void GlslVariableMap::allocate_builtin_inputs()
 {
-  for (int i = 0; glslBindingSpecs(false, m_unit)[i].binding != SH_GLSL_VAR_NONE; i++) {
-    allocate_builtin(m_shader->inputs_begin(), m_shader->inputs_end(),
-		     glslBindingSpecs(false, m_unit)[i], m_input_bindings);
+  for (ShProgramNode::VarList::const_iterator i = m_shader->inputs_begin(); i != m_shader->inputs_end(); i++) {
+    allocate_builtin(*i, glslBindingSpecs(false, m_unit), m_input_bindings, false);
+  }
+  for (ShProgramNode::VarList::const_iterator i = m_shader->inputs_begin(); i != m_shader->inputs_end(); i++) {
+    allocate_builtin(*i, glslBindingSpecs(false, m_unit), m_input_bindings, true);
   }
 }
 
 void GlslVariableMap::allocate_builtin_outputs()
 {
-  for (int i = 0; glslBindingSpecs(false, m_unit)[i].binding != SH_GLSL_VAR_NONE; i++) {
-    allocate_builtin(m_shader->outputs_begin(), m_shader->outputs_end(),
-		     glslBindingSpecs(false, m_unit)[i], m_output_bindings);
+  for (ShProgramNode::VarList::const_iterator i = m_shader->outputs_begin(); i != m_shader->outputs_end(); i++) {
+    allocate_builtin(*i, glslBindingSpecs(true, m_unit), m_output_bindings, false);
+  }
+  for (ShProgramNode::VarList::const_iterator i = m_shader->outputs_begin(); i != m_shader->outputs_end(); i++) {
+    allocate_builtin(*i, glslBindingSpecs(true, m_unit), m_output_bindings, true);
   }
 }
 

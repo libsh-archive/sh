@@ -12,8 +12,9 @@ void initShaders()
 {
   vsh = SH_BEGIN_VERTEX_PROGRAM {
     ShInOutPosition4f pos;
-    ShInOutNormal3f normal;
-    ShOutputVector3f lightv;
+    ShInputNormal3f normal;
+    ShOutputNormal4f onormal;
+    ShOutputVector4f lightv;
 
     ShConstPoint3f lightPos(5.0, 5.0, 5.0);
     ShMatrix4x4f mv;
@@ -30,19 +31,19 @@ void initShaders()
     mvd[3] = ShAttrib4f(0, 0, -1, 15);
 
     ShPoint3f posv = (mv | pos)(0,1,2); // Compute viewspace position
-    lightv = lightPos - posv; // Compute light direction
+    lightv(0,1,2) = lightPos - posv; // Compute light direction
     
     pos = mvd | pos; // Project position
-    normal = mv | normal; // Project normal
+    onormal(0,1,2) = mv | normal; // Project normal
   } SH_END;
 
   fsh = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShInputNormal3f normal;
-    ShInputVector3f lightv;
+    ShInputNormal4f normal_in;
+    ShInputVector4f lightv_in;
     ShOutputColor4f color;
 
-    normal = normalize(normal);
-    lightv = normalize(lightv);
+    ShVector3f normal = normalize(normal_in(0,1,2));
+    ShVector3f lightv = normalize(lightv_in(0,1,2));
     
     color = (normal | lightv) * ShColor4f(0.5, 0.7, 0.9, 1.0);
   } SH_END;

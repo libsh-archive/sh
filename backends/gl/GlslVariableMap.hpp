@@ -99,7 +99,9 @@ private:
   std::map<GlslVarBinding, int> m_input_bindings;
   std::map<GlslVarBinding, int> m_output_bindings;
 
-  void allocate_builtin(const SH::ShProgramNode::VarList::const_iterator& begin, const SH::ShProgramNode::VarList::const_iterator& end, const GlslBindingSpecs& specs, std::map<GlslVarBinding, int>& bindings);
+  void allocate_builtin(const SH::ShVariableNodePtr& node,
+                        const GlslBindingSpecs* specs, std::map<GlslVarBinding, int>& bindings,
+                        bool generic);
   void allocate_builtin_inputs();
   void allocate_builtin_outputs();
   

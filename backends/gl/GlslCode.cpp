@@ -331,7 +331,11 @@ void GlslCode::emit(const ShStatement &stmt)
 string GlslCode::resolve(const ShVariable& v)
 {
   SH_DEBUG_ASSERT(m_varmap);
-  return m_varmap->resolve(v.node()).name() + swizzle(v);
+  std::string s = m_varmap->resolve(v.node()).name() + swizzle(v);
+  if (v.neg()) {
+    s = std::string("-(") + s + ")";
+  }
+  return s;
 }
 
 string GlslCode::resolve(const ShVariable& v, int idx)
