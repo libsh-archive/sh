@@ -31,6 +31,8 @@
 #include <set>
 #include <map>
 #include <vector>
+#include <algorithm>
+
 #include "ShCtrlGraph.hpp"
 #include "ShRefCount.hpp"
 
@@ -51,7 +53,7 @@ namespace SH {
     void debugDump();
 
     int numbering(ShCtrlGraphNodePtr node) const {
-      return std::find( m_vertex.begin(), m_vertex.end(), node) - m_vertex.begin();
+      return (int)(std::find( m_vertex.begin(), m_vertex.end(), node) - m_vertex.begin());
     }
   
   private:
