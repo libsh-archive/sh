@@ -179,22 +179,6 @@ T ShBaseTexture3D<T>::operator[](const ShVariableN<3, float>& coords) const
   }
 }
 
-template<typename T>
-T ShBaseTextureCube<T>::operator[](const ShVariableN<3, float>& coords) const
-{
-  if (ShEnvironment::insideShader) {
-    T t;
-    ShVariable texVar(m_node);
-    ShStatement stmt(t, texVar, SH_OP_TEXI, coords);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  } else {
-    // TODO!
-    T t;
-    return t;
-  }
-}
-
 // setMemory
 
 template<typename T>

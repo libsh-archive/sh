@@ -504,7 +504,7 @@ SH_LIB_DOTPRODUCT(operator|);
 
 SH_SHLIB_CONST_N_OP_RETSIZE_BOTH(dot, 1);
 
-/// greatest integer >= argument 
+/// smallest integer >= argument 
 template<int N, typename T>
 ShVariableN<N, T> floor(const ShVariableN<N, T>& var)
 {

@@ -1,5 +1,12 @@
 AUTOMAKE_OPTIONS = 1.7 foreign
-SUBDIRS = libltdl src backends test util doc
+
+if ENABLE_DOXYGEN_DOCS
+DOC_SUBDIR = doc
+else
+DOC_SUBDIR =
+endif
+
+SUBDIRS = libltdl src backends test util $(DOC_SUBDIR)
 
 docs:
 	cd doc ; $(MAKE) docs ; cd ..

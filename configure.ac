@@ -82,6 +82,24 @@ AM_CONDITIONAL(ENABLE_ATI_BACKEND, test x$ac_backend_ati = xtrue)
 
 AM_CONDITIONAL(ENABLE_GL_BACKENDS, test x$ac_backend_ati = xtrue -o x$ac_backend_arb = xtrue)
 
+AC_ARG_ENABLE([docs],
+	      AC_HELP_STRING([--enable-docs],
+                             [generate doxygen documentation (default=yes)]),
+	      [case ${enableval} in
+	         yes) sh_enable_docs=true ;;
+		 no)  sh_enable_docs=false ;;
+                 *) AC_MSG_ERROR(bad value ${enableval} for --enable-docs) ;;
+              esac],[sh_enable_docs=true])
+
+if test "x$sh_enable_docs" = xtrue ; then
+  DOXYGEN_FIND_DOXYGEN
+  if test "x$DOXYGEN" = xno ; then
+    sh_enable_docs=false
+  fi
+fi
+
+AM_CONDITIONAL(ENABLE_DOXYGEN_DOCS, test x$sh_enable_docs = xtrue)
+
 # Store the prefix as a variable
 AC_DEFINE_UNQUOTED(SH_INSTALL_PREFIX, "$prefix", [Installation prefix directory])
 

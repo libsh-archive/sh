@@ -86,7 +86,6 @@ public:
   ShBaseTextureCube(int width, int height, const ShTextureTraits& traits);
 
   T operator()(const ShVariableN<3, float>& coords) const;
-  T operator[](const ShVariableN<3, float>& coords) const;
 
   ShMemoryPtr memory(ShCubeDirection face);
   void memory(ShMemoryPtr memory, ShCubeDirection face);

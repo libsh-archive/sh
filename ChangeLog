@@ -1,8 +1,21 @@
+2004-03-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* Makefile.am: Don't make documentation if doxygen wasn't found or
+	they have been disabled.
+
+	* config/doxygen.m4: Add check for doxygen.
+
+	* configure.ac: Add --enable-docs/--disable-docs
+
+	* src/ShBaseTexture.hpp: Cube map textures shouldn't have
+	operator[].
+
 2004-03-18  Jack Wang <jmwang@uwaterloo.ca>
-	* src/ShTransformer.cpp
-	Bug fix by Stefanus.
+	
+	* src/ShTransformer.cpp: Bug fix by Stefanus.
 
 2004-03-17  Bryan Chan <b8chan@uwaterloo.ca>
+	
 	* src/ShWrap.hpp, src/ShTextureNode.hpp, backends/gl/GlTextureName.cpp:
 	  Added GL_CLAMP_TO_EDGE wrap mode for textures.
 
