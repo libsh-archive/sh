@@ -12,4 +12,5 @@ incincdir = $(includedir)/shutil
 
 incinc_HEADERS = Perlin.hpp \
                  Worley.hpp \
-                 ShUtilLib.hpp
+                 ShUtilLib.hpp \
+                 shutil.hpp

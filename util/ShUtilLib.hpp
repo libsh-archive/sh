@@ -130,6 +130,7 @@ SH::ShVariableN<N, T> hashlcg(const SH::ShVariableN<N, T>& p) {
 
 static const int MRG_REPS = 2; // total instructions for hashmrg will be MRG_REPS * N * 2 + 2 
 /** \brief MRG style pseudorandom vector generator
+ *
  * Generates a random vector using a multiple-recursive generator style. (LCG on steroids)
  * Treat x,y,z,w as seeds a0, a1, a2, a3
  * and repeatedly apply an = b * (an-1, an-2, an-3, an-4), where b is a vector

@@ -53,19 +53,15 @@ class Perlin
 
     /** \brief Generates a single octave Perlin noise.
      */
-    //@{
     SH::ShAttrib1f noise(SH::ShAttrib3f p);
-    //@}
 
     /** \brief Turbulence functions sum several octaves of Perlin noise. 
      * The number of octaves and persistence can be controlled using 
      * setTurbulenceParams.
      * \sa void setTurbulenceParams(double persist, int numOctaves);
      */
-    //@{
     SH::ShAttrib1f turbulence(SH::ShAttrib3f p);
     SH::ShAttrib1f sturbulence(SH::ShAttrib3f p);
-    //@}
 
     /** \brief Toggles texture lookup Perlin method
      * The Perlin noise function can use either a procedural hash
