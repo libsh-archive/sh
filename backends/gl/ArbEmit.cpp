@@ -30,6 +30,7 @@ namespace {
 const unsigned int scalarize    = 0x01; // Split into scalar instructions
 const unsigned int swap_sources = 0x02; // Swap first and second sources
 const unsigned int negate_first = 0x04; // Negate first source
+const unsigned int delay_mask   = 0x08; // Do writemasking in separate step
 };
 
 struct ArbMapping {
@@ -122,10 +123,10 @@ ArbMapping ArbCode::table[] = {
   {SH_OP_XPD,  SH_ARB_ANY,   0, SH_ARB_XPD, 0},
 
   // Texture
-  {SH_OP_TEX,  SH_ARB_NVVP2, swap_sources, SH_ARB_TEX, 0},
-  {SH_OP_TEX,  SH_ARB_FP,    swap_sources, SH_ARB_TEX, 0},
-  {SH_OP_TEXI, SH_ARB_NVVP2, swap_sources, SH_ARB_TEX, 0},
-  {SH_OP_TEXI, SH_ARB_FP,    swap_sources, SH_ARB_TEX, 0},
+  {SH_OP_TEX,  SH_ARB_NVVP2, swap_sources | delay_mask, SH_ARB_TEX, 0},
+  {SH_OP_TEX,  SH_ARB_FP,    swap_sources | delay_mask, SH_ARB_TEX, 0},
+  {SH_OP_TEXI, SH_ARB_NVVP2, swap_sources | delay_mask, SH_ARB_TEX, 0},
+  {SH_OP_TEXI, SH_ARB_FP,    swap_sources | delay_mask, SH_ARB_TEX, 0},
 
   // Misc.
   {SH_OP_COND, SH_ARB_ANY, negate_first, SH_ARB_CMP, 0},
@@ -189,6 +190,21 @@ void ArbCode::emit(const ShStatement& stmt)
     }
   } else {
     stmts.push_back(actual);
+  }
+
+  if (mapping->transforms & delay_mask) {
+    for (std::list<ShStatement>::iterator I = stmts.begin(); I != stmts.end(); ++I) {
+      if (I->dest.swizzle().identity()) continue;
+
+      ShVariable realdest(I->dest);
+      ShVariable tmp(new ShVariableNode(SH_TEMP, 4));
+      I->dest = tmp;
+
+      ShStatement mask(realdest, SH_OP_ASN, tmp);
+
+      std::list<ShStatement>::iterator next = I; ++next;
+      I = stmts.insert(next, mask);
+    }
   }
 
   for (std::list<ShStatement>::const_iterator I = stmts.begin(); I != stmts.end(); ++I) {

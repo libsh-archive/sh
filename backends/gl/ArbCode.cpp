@@ -303,10 +303,16 @@ std::ostream& ArbCode::printVar(std::ostream& out, bool dest, const ShVariable& 
   // Swizzling
   const char* swizChars = "xyzw";
   out << ".";
-  if (dest || var.swizzle().size() == 1) {
-    for (int i = 0; i < std::min(var.swizzle().size(), 4); i++) {
-       out << swizChars[var.swizzle()[i]];
+  if (dest) {
+    bool masked[4] = {false, false, false, false};
+    for (int i = 0; i < var.swizzle().size(); i++) {
+      masked[var.swizzle()[i]] = true;
     }
+    for (int i = 0; i < 4; i++) {
+      if (masked[i]) out << swizChars[i];
+    }
+  } else if (var.swizzle().size() == 1) {
+    out << swizChars[var.swizzle()[0]];
   } else if (collectingOp) {
     for (int i = 0; i < 4; i++) {
        out << swizChars[i < var.swizzle().size() ? var.swizzle()[i] : i];

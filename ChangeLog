@@ -1,6 +1,11 @@
 2004-07-07  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* backends/gl/ArbEmit.cpp: Add a delay_mask transformation to do
+	the writemasking of a statement in a separate assignment. Use this
+	for texture lookups. Resolves issue58.
+
 	* backends/gl/ArbCode.cpp (genNode): Use emit function to generate code.
+	(printVar): Fix the way destination writemasks are emitted.
 
 	* backends/gl/ArbCode.hpp: Add emit* functions.
 
