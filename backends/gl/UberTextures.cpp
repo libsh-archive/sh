@@ -158,15 +158,15 @@ void UberTextures::bindTexture(const ShTextureNodePtr& node,
       shref_dynamic_cast<UberStorage>(node->memory()->findStorage("uberbuffer", finder));
     if (!storage) {
       GlTextureNamePtr name = new GlTextureName(shGlTargets[node->dims()]);
-      storage = new UberStorage(node->memory().object(),
+      storage = new UberStorage(node->memory().object(), name,
                                 node->width(), node->height(), node->dims());
-      // TODO: name management
       name->params(node->traits());
     }
-
+    storage->bindAsTexture();
+    
     SH_GL_CHECK_ERROR(glActiveTextureARB(target));
     storage->sync();
-    SH_GL_CHECK_ERROR(glBindTexture(shGlTargets[node->dims()], storage->name()));
+    SH_GL_CHECK_ERROR(glBindTexture(shGlTargets[node->dims()], storage->textureName()->value()));
   }
 }
 

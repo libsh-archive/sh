@@ -1,15 +1,9 @@
 #include <iostream>
 
-#include <GL/gl.h>
-#include <GL/glext.h>
-#include <GL/glx.h>
-//#undef GL_GLEXT_PROTOTYPES
-//
-#include "glati.h"
-#include "extensions.h"
+#include "GlBackend.hpp"
+#include "uberbuffers.hpp"
 #include "UberStorage.hpp"
 
-#include "GlBackend.hpp"
 #include "ShDebug.hpp"
 
 namespace shgl {
@@ -18,23 +12,28 @@ UberUberTransfer* UberUberTransfer::instance = new UberUberTransfer();
 UberHostTransfer* UberHostTransfer::instance = new UberHostTransfer();
 HostUberTransfer* HostUberTransfer::instance = new HostUberTransfer();
 
-
-// this should be rep[lace by a correct onbe
-#define CHECK_GL_ERROR()  
-
 int UberStorage::temp_fb[4] = {-1, -1, -1, -1};
 
-UberStorage::UberStorage(SH::ShMemory* memory, 
-			     int width, int height, int pitch)
+bool UberStorage::m_firstTime = true;
+
+UberStorage::UberStorage(SH::ShMemory* memory, const GlTextureNamePtr& name,
+                         int width, int height, int pitch)
   : SH::ShStorage(memory),
     m_width(width), m_height(height), m_pitch(pitch), 
-    m_mem(0), m_bound(0), m_boundto(0) 
+    m_mem(0), m_binding(SH_UBER_UNBOUND),
+    m_textureName(name), m_auxTarget(0)
 {
-  static int bFirstTime = 1;
-
-  if (bFirstTime) {
-    bFirstTime = 0;
+  // TODO: Maybe move this somewhere more sane
+  if (m_firstTime) {
+    m_firstTime = false;
   }
+  
+  alloc();
+}
+
+UberStorage::~UberStorage()
+{
+  remove();
 }
 
 GLenum getFormat(int pitch)
@@ -50,61 +49,64 @@ GLenum getFormat(int pitch)
   return format;
 }
 
+void UberStorage::bindAsTexture()
+{
+  unbind(); // Just to be safe
 
+  // Bind to our name
+  GlTextureName::Binding texbinding(m_textureName);
 
-void UberStorage::bindAsTexture(unsigned int target){
-  unsigned int mem = alloc();// it use m_mem if already allocated
-  SH_GL_CHECK_ERROR(glAttachMemATI(GL_TEXTURE_2D, GL_IMAGES_ATI, mem)); 
+  // and attach
+  SH_GL_CHECK_ERROR(glAttachMemATI(m_textureName->target(), GL_IMAGES_ATI, m_mem));
+  
+  m_binding = SH_UBER_TEXTURE;
 }
 
-void UberStorage::bindAsAux(unsigned int n){
-  unsigned int mem = alloc();// it uses m_mem if already allocated
+void UberStorage::bindAsAux(unsigned int n)
+{
+  unbind();
   SH_GL_CHECK_ERROR(glBindFramebufferATI(GL_DRAW_FRAMEBUFFER_ATI, allocfb(0)));
-  SH_GL_CHECK_ERROR(glAttachMemATI( GL_DRAW_FRAMEBUFFER_ATI, n + GL_AUX0, mem));
+  SH_GL_CHECK_ERROR(glAttachMemATI( GL_DRAW_FRAMEBUFFER_ATI, n + GL_AUX0, m_mem));
+  m_binding = SH_UBER_AUX;
+  m_auxTarget = n;
 }
 
-void UberStorage::unbind(){
-
-  switch(m_bound){
-  case 0:
+void UberStorage::unbind()
+{
+  switch (m_binding) {
+  case SH_UBER_UNBOUND:
     // not bound
     break;
-  case 1:
-    SH_GL_CHECK_ERROR(glAttachMemATI(GL_DRAW_FRAMEBUFFER_ATI,m_boundto, 0));
+  case SH_UBER_TEXTURE:
+    {
+      // Bind to our name
+      GlTextureName::Binding texbinding(m_textureName);
+      // And unattach
+      SH_GL_CHECK_ERROR(glAttachMemATI(m_textureName->target(), GL_IMAGES_ATI, 0));
+    }
     break;
-  case 2:
+  case SH_UBER_AUX:
     SH_GL_CHECK_ERROR(glBindFramebufferATI(GL_DRAW_FRAMEBUFFER_ATI, temp_fb[0]));
-    SH_GL_CHECK_ERROR(glAttachMemATI(GL_DRAW_FRAMEBUFFER_ATI,m_boundto+GL_AUX0, 0));
+    SH_GL_CHECK_ERROR(glAttachMemATI(GL_DRAW_FRAMEBUFFER_ATI, m_auxTarget + GL_AUX0, 0));
     break;
-  default:
-    // invalid bound parameter
-    SH_DEBUG_WARN("Invalid  bind parameter!");
   }
+  m_binding = SH_UBER_UNBOUND;
 }
 
-//TO DO:
-void UberStorage::unbindall(){
-
+UberStorage::Binding UberStorage::binding() const
+{
+  return m_binding;
 }
 
-bool UberStorage::isBoundAsTexture(unsigned int target){
-  if(m_bound!=1)
-    return false;
-  if(m_boundto!= target)
-    return false;
-  return true;
+GlTextureNamePtr UberStorage::textureName() const
+{
+  return m_textureName;
 }
 
-bool UberStorage::isBoundAsAux(unsigned int n){
-  if(m_bound!=2)
-    return false;
-  if(m_boundto!=n)
-    return false;
-  return true;
-}
-
-bool UberStorage::isBound(){
-  return m_bound==0;
+int UberStorage::auxTarget() const
+{
+  if (m_binding != SH_UBER_AUX) return -1;
+  return m_auxTarget;
 }
 
 int UberStorage::allocfb(int n, bool bForce){
@@ -142,7 +144,6 @@ unsigned int UberStorage::remove()
 void UberStorage::clearBuffer(float* col){
   
   if(m_mem<=0) return;
-  CHECK_GL_ERROR();
   SH_GL_CHECK_ERROR(glBindFramebufferATI(GL_DRAW_FRAMEBUFFER_ATI, allocfb(3)));
 
   // whi aux2? don't know
@@ -165,14 +166,11 @@ void UberStorage::clearBuffer(float* col){
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
   glLoadIdentity();
-  gluOrtho2D(0.0, width(), 0.0, height());
+  glOrtho(0.0, width(), 0.0, height(), -1.0, 1.0);
  
-  CHECK_GL_ERROR();
-
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
   glLoadIdentity();
-  CHECK_GL_ERROR();
 
   // save the state 
   SH_GL_CHECK_ERROR(glPushAttrib(GL_COLOR_BUFFER_BIT | /* GL_DRAW_BUFFER */
@@ -194,7 +192,6 @@ void UberStorage::clearBuffer(float* col){
   glVertex3f(width(), height(), 0.0);
   glVertex3f(0.0, height(), 0.0);
   glEnd(); 
-  CHECK_GL_ERROR();
 
   SH_GL_CHECK_ERROR(glPopAttrib());
   glMatrixMode(GL_PROJECTION);
@@ -203,7 +200,7 @@ void UberStorage::clearBuffer(float* col){
   glPopMatrix();
 
   glDrawBuffer(GL_BACK); 
-  glBindFramebufferATI(GL_DRAW_FRAMEBUFFER_ATI, 0);
+  SH_GL_CHECK_ERROR(glBindFramebufferATI(GL_DRAW_FRAMEBUFFER_ATI, 0));
   glDrawBuffer(GL_BACK); 
 
 }
@@ -241,69 +238,68 @@ bool UberUberTransfer::transfer(const SH::ShStorage* from, SH::ShStorage* to)
   glDisable(GL_LIGHTING);
   glFrontFace(GL_CCW);
 
-  // attach ubuf to texture
-  GLuint texBinding;
-  glGenTextures(1, &texBinding);
-  glActiveTextureARB(GL_TEXTURE7);
-  glEnable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, texBinding);
-  //TODO save all this state before messing with it (for now just assume nobody uses
-  //texture unit 7
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+  {
+    // attach ubuf to texture
+    GlTextureName::Binding texbinding(src_storage->textureName());
 
-  glBindFramebufferATI(GL_DRAW_FRAMEBUFFER_ATI, 0);
-  // use this dummy memory object to force GL_AUXn to be
-  // a float framebuffer, so ReadPixels can return unclamped values with full precision
-  UberStorage::allocfb(2);
+    // XXX
+    glEnable(GL_TEXTURE_2D);
 
-  SH_GL_CHECK_ERROR(glAttachMemATI(GL_TEXTURE_2D, GL_IMAGES_ATI, srcmem));
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-  SH_GL_CHECK_ERROR(glBindFramebufferATI(GL_DRAW_FRAMEBUFFER_ATI, UberStorage::temp_fb[2]));
+    glBindFramebufferATI(GL_DRAW_FRAMEBUFFER_ATI, 0);
+    // use this dummy memory object to force GL_AUXn to be
+    // a float framebuffer, so ReadPixels can return unclamped values with full precision
+    UberStorage::allocfb(2);
+
+    
+    SH_GL_CHECK_ERROR(glAttachMemATI(GL_TEXTURE_2D, GL_IMAGES_ATI, srcmem));
+
+    SH_GL_CHECK_ERROR(glBindFramebufferATI(GL_DRAW_FRAMEBUFFER_ATI, UberStorage::temp_fb[2]));
 
 
-  SH_GL_CHECK_ERROR(glAttachMemATI(GL_DRAW_FRAMEBUFFER_ATI, GL_AUX3, destmem));
-  SH_DEBUG_PRINT("Attach GL_AUX3 temporarily to dest mem " << destmem);
+    SH_GL_CHECK_ERROR(glAttachMemATI(GL_DRAW_FRAMEBUFFER_ATI, GL_AUX3, destmem));
+    SH_DEBUG_PRINT("Attach GL_AUX3 temporarily to dest mem " << destmem);
 
-  SH_GL_CHECK_ERROR(glDrawBuffer(GL_AUX3)); 
+    SH_GL_CHECK_ERROR(glDrawBuffer(GL_AUX3)); 
 
-  SH_GL_CHECK_ERROR(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+    SH_GL_CHECK_ERROR(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-  // setup matrices 
-  glMatrixMode(GL_PROJECTION);
-  glPushMatrix();
-  glLoadIdentity();
-  gluOrtho2D(0.0, width, 0.0, height);
+    // setup matrices 
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0.0, width, 0.0, height, -1.0, 1.0);
 
-  glMatrixMode(GL_MODELVIEW);
-  glPushMatrix();
-  glLoadIdentity();
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
 
-  // find tex coords && draw quad
-  glBegin(GL_QUADS);
-  glMultiTexCoord2fARB(GL_TEXTURE7, 0, 1); 
-  glVertex3f(0, 0, 0.0);
-  glMultiTexCoord2fARB(GL_TEXTURE7, 1, 1);
-  glVertex3f(width, 0, 0.0);
-  glMultiTexCoord2fARB(GL_TEXTURE7, 1, 0); 
-  glVertex3f(width, height, 0.0);
-  glMultiTexCoord2fARB(GL_TEXTURE7, 0, 0); 
-  glVertex3f(0, height, 0.0);
-  glEnd(); 
+    // find tex coords && draw quad
+    glBegin(GL_QUADS);
+    glMultiTexCoord2fARB(GL_TEXTURE7, 0, 1); 
+    glVertex3f(0, 0, 0.0);
+    glMultiTexCoord2fARB(GL_TEXTURE7, 1, 1);
+    glVertex3f(width, 0, 0.0);
+    glMultiTexCoord2fARB(GL_TEXTURE7, 1, 0); 
+    glVertex3f(width, height, 0.0);
+    glMultiTexCoord2fARB(GL_TEXTURE7, 0, 0); 
+    glVertex3f(0, height, 0.0);
+    glEnd(); 
 
-  // detach/free mem objects
-  SH_GL_CHECK_ERROR(glAttachMemATI(GL_TEXTURE_2D, GL_IMAGES_ATI, 0));
-  SH_GL_CHECK_ERROR(glAttachMemATI(GL_DRAW_FRAMEBUFFER_ATI, GL_AUX3, 0));
-  SH_GL_CHECK_ERROR(glBindFramebufferATI(GL_DRAW_FRAMEBUFFER_ATI, 0));
-
+    // detach/free mem objects
+    SH_GL_CHECK_ERROR(glAttachMemATI(GL_TEXTURE_2D, GL_IMAGES_ATI, 0));
+    SH_GL_CHECK_ERROR(glAttachMemATI(GL_DRAW_FRAMEBUFFER_ATI, GL_AUX3, 0));
+    SH_GL_CHECK_ERROR(glBindFramebufferATI(GL_DRAW_FRAMEBUFFER_ATI, 0));
+  }
+  
   /// restore all the info
   glPopAttrib();
-
-  glDeleteTextures(1, &texBinding);
 
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
@@ -392,7 +388,7 @@ bool UberHostTransfer::transfer(const SH::ShStorage* from, SH::ShStorage* to)
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
   glLoadIdentity();
-  gluOrtho2D(0.0, width, 0.0, height);
+  glOrtho(0.0, width, 0.0, height, -1.0, 1.0);
 
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
@@ -470,7 +466,7 @@ bool HostUberTransfer::transfer(const SH::ShStorage* from, SH::ShStorage* to)
   }
 
   // allocate if needed
-  unsigned int mem = ustorage->alloc();
+  unsigned int mem = ustorage->mem();
 
   if (!mem) {
     SH_DEBUG_WARN("Unable to allocate Memory");

@@ -1,31 +1,38 @@
 #ifndef SHUBERSTORAGE_HPP
 #define SHUBERSTORAGE_HPP
 
+#include "GlBackend.hpp"
 #include "ShRefCount.hpp"
 #include "ShMemory.hpp"
+#include "GlTextureName.hpp"
 
 namespace shgl {
 
 class HostUberTransfer;
 class UberStorage : public SH::ShStorage {
 public:
-  UberStorage(SH::ShMemory* memory, 
-                int width, int height, int pitch);
-
-  // TODO
-  void bindAsTexture(unsigned int target);
+  UberStorage(SH::ShMemory* memory, const GlTextureNamePtr& name,
+              int width, int height, int pitch);
+  ~UberStorage();
+  
+  void bindAsTexture();
   void bindAsAux(unsigned int n);
   void unbind();
-  static void unbindall();
+  
+  enum Binding {
+    SH_UBER_UNBOUND,
+    SH_UBER_TEXTURE,
+    SH_UBER_AUX
+  };
 
-  bool isBoundAsTexture(unsigned int target);
-  bool isBoundAsAux(unsigned int target);
-  bool isBound();
-
+  Binding binding() const;
+  GlTextureNamePtr textureName() const;
+  int auxTarget() const; // returns -1 if binding != aux
+  
   int width() const { return m_width; }
   int height() const { return m_height; }
   int pitch() const { return m_pitch; }
-  unsigned int mem()const{ return m_mem; }
+  unsigned int mem() const { return m_mem; }
 
   std::string id() const { return "uberbuffer"; }
  
@@ -36,6 +43,8 @@ public:
   void clearBuffer(float* col);
 
 private:
+
+  static bool m_firstTime;
   
   /// manipulate memory objects
   unsigned int alloc(int bForce=0);
@@ -46,10 +55,11 @@ private:
   // the uber buffer
   unsigned int m_mem;
 
-  // binding information
-  unsigned int m_bound; // 0 - unbound, 1 - texture of some sort, 2 - rendering target
-  unsigned int m_boundto; // 0-3 -> for the aux buffers, GL_TEXTURE2D, etc. for the texture boundings
-
+  Binding m_binding;
+  
+  GlTextureNamePtr m_textureName;
+  int m_auxTarget; // m_binding == SH_UBER_AUX
+  
   friend class HostUberTransfer;
   friend class UberUberTransfer;
 };

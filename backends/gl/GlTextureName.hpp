@@ -27,6 +27,15 @@ public:
   typedef std::list<GlTextureName*> NameList;
   static NameList::const_iterator beginNames() { return m_names.begin(); }
   static NameList::const_iterator endNames() { return m_names.end(); }
+
+  // Utility class to bind texture temporarily
+  struct Binding {
+    Binding(const SH::ShRefCount<const GlTextureName>& name);
+    ~Binding();
+  
+    GLenum target;
+    GLint last;
+  };
   
 private:
   GLenum m_target;

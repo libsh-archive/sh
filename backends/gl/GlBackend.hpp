@@ -15,19 +15,19 @@
 extern PFNGLPROGRAMSTRINGARBPROC glProgramStringARB;
 extern PFNGLBINDPROGRAMARBPROC glBindProgramARB;
 extern PFNGLGENPROGRAMSARBPROC glGenProgramsARB;
-extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
-extern PFNGLTEXIMAGE3DPROC glTexImage3D;
 extern PFNGLPROGRAMENVPARAMETER4FVARBPROC glProgramEnvParameter4fvARB;
 extern PFNGLPROGRAMLOCALPARAMETER4FVARBPROC glProgramLocalParameter4fvARB;
 extern PFNGLGETPROGRAMIVARBPROC glGetProgramivARB;
+extern PFNGLTEXIMAGE3DPROC glTexImage3D;
+extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
 
 #else
 
+#define GL_GLEXT_VERBOSE 1
 #define GL_GLEXT_PROTOTYPES 1
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include <GL/glx.h>
-#undef GL_GLEXT_PROTOTYPES
 
 #endif /* WIN32 */
 
