@@ -1,14 +1,28 @@
 # -*- makefile -*-
+include ../win32.mk
 
+INCLUDES += -I../src
+CPPFLAGS += -DSH_DLLEXPORT="__declspec(dllimport)"
+
+ALL_TARGETS =
+INSTALL_TARGETS =
 RELEASE_TARGETS = libshutil.lib
 DEBUG_TARGETS = libshutild.lib
 
-all: all-release all-debug
+ifeq ($(BUILD_RELEASE), 1)
+	ALL_TARGETS += all-release
+	INSTALL_TARGETS += install-release
+endif
 
+ifeq ($(BUILD_DEBUG), 1)
+	ALL_TARGETS += all-debug
+	INSTALL_TARGETS += install-debug
+endif
+
+all: $(ALL_TARGETS)
+install: $(INSTALL_TARGETS)
 all-release: $(RELEASE_TARGETS)
 all-debug: $(DEBUG_TARGETS)
-
-CLEANFILES = $(RELEASE_TARGETS) $(DEBUG_TARGETS) *.exp *.pdb *.idb *.ilk
 
 libshutil_lib_SOURCES = ShFunc.hpp ShFuncImpl.hpp
 libshutil_lib_SOURCES += ShKernelLib.cpp ShKernelLib.hpp ShKernelLibImpl.hpp
@@ -32,18 +46,26 @@ libshutil.lib: $(libshutil_lib_RELEASE_OBJECTS)
 libshutild.lib: $(libshutil_lib_DEBUG_OBJECTS)
 	$(AR) /OUT:$@ $^
 
-install: $(RELEASE_TARGETS) $(DEBUG_TARGETS) $(wildcard *.hpp)
+install-common:
 	-mkdir $(SH_INSTALLDIR)
 	-mkdir $(SH_INSTALLDIR)\include
 	-mkdir $(SH_INSTALLDIR)\include\sh
 	-mkdir $(SH_INSTALLDIR)\lib
-	copy libshutil.lib $(SH_INSTALLDIR)\lib
-	copy libshutild.lib $(SH_INSTALLDIR)\lib
 	copy *.hpp $(SH_INSTALLDIR)\include\sh
+
+install-release: $(RELEASE_TARGETS) install-common
+	copy libshutil.lib $(SH_INSTALLDIR)\lib
+
+install-debug: $(DEBUG_TARGETS) install-common
+	copy libshutild.lib $(SH_INSTALLDIR)\lib
+
+clean:
+	-del $(RELEASE_TARGETS) $(DEBUG_TARGETS)
+	-del *.obj *.d
+	-del *.exp *.pdb *.idb *.ilk
 
 libshutil_lib_DEPENDS = $(libshutil_lib_CXXFILES:.cpp=.r.d) $(libshutil_lib_CXXFILES:.cpp=.d.d)
 
-include ../win32.mk
-INCLUDES += -I../src
-CPPFLAGS += -DSH_DLLEXPORT="__declspec(dllimport)"
+ifeq ($(GEN_DEPENDENCIES), 1)
 -include $(libshutil_lib_DEPENDS)
+endif
