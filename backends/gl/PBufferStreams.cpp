@@ -506,7 +506,7 @@ void PBufferStreams::execute(const ShProgram& program,
   }
 
   // generate code
-  shCompileShader(fp);
+  shCompile(fp);
 
   TIMING_RESULT(fpsetup);
 
@@ -519,7 +519,7 @@ void PBufferStreams::execute(const ShProgram& program,
       m_vp = keep<ShPosition4f>() & keep<ShTexCoord2f>();
       m_vp->target() = "gpu:vertex";
     }
-    shCompileShader(m_vp);
+    shCompile(m_vp);
     m_setup_vp = curcontext;
   }
 
@@ -527,8 +527,8 @@ void PBufferStreams::execute(const ShProgram& program,
 
   DECLARE_TIMER(binding);
   // Then, bind vertex (pass-through) and fragment program
-  shBindShader(m_vp);
-  shBindShader(fp);
+  shBind(m_vp);
+  shBind(fp);
   TIMING_RESULT(binding);
 
   DECLARE_TIMER(clear);

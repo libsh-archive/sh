@@ -182,36 +182,59 @@
 
 namespace SH {
 
+/// \internal
 ShProgram shBeginShader(const std::string& kind = "");
+/// \internal
 void shEndShader();
 
-/// Force compilation of a shader. The shader must have a target.
-void shCompileShader(ShProgram& shader);
-/// Force compilation of a shader for a given target
-void shCompileShader(const std::string& target, ShProgram& shader);
+/// Force (re)compilation of a program under its default target.
+void shCompile(ShProgram& prg);
+/// Force (re)compilation of a program for a given target.
+void shCompile(ShProgram& prg, const std::string& target);
 
-/// Bind a shader. The shader must have a target.
+/// \deprecated Use shCompile() instead
+void shCompileShader(ShProgram& prg);
+/// \deprecated Use shCompile() instead
+void shCompileShader(ShProgram& prg, const std::string& target);
+
+/// Bind a program using the program's default target
+void shBind(ShProgram& prg);
+/// Bind a program with the given target.
+void shBind(const std::string& target, ShProgram& shader);
+
+/// \deprecated Use shBind() instead.
 void shBindShader(ShProgram& shader);
-/// Bind a shader with the given target.
+/// \deprecated Use shBind() instead.
 void shBindShader(const std::string& target, ShProgram& shader);
 
 /// Switch to a particular backend
 bool shSetBackend(const std::string& name);
 
+/// \internal
 void shIf(bool);
+/// \internal
 void shElse();
+/// \internal
 void shEndIf();
 
+/// \internal
 void shWhile(bool);
+/// \internal
 void shEndWhile();
 
+/// \internal
 void shDo();
+/// \internal
 void shUntil(bool);
 
+/// \internal
 void shFor(bool);
+/// \internal
 void shEndFor();
 
+/// \internal
 void shBreak();
+/// \internal
 void shContinue();
 
 }

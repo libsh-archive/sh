@@ -58,35 +58,54 @@ void shEndShader()
   
   ShEnvironment::insideShader = false;
 
-  if (ShEnvironment::shader->target() == "gpu:vertex" ||
-      ShEnvironment::shader->target() == "gpu:fragment") {
-    shCompileShader(ShEnvironment::shader);
+  if (!ShEnvironment::shader->target().empty()) {
+    shCompile(ShEnvironment::shader);
   }
   ShEnvironment::shader = 0;
 }
 
-void shCompileShader(ShProgram& shader)
+void shCompile(ShProgram& prg)
 {
   if (!ShEnvironment::backend) return;
-  shader->compile(ShEnvironment::backend);
+  prg->compile(ShEnvironment::backend);
+}
+
+void shCompile(ShProgram& prg, const std::string& target)
+{
+  if (!ShEnvironment::backend) return;
+  prg->compile(target, ShEnvironment::backend);
+}
+
+void shCompileShader(ShProgram& shader)
+{
+  shCompile(shader);
 }
 
 void shCompileShader(const std::string& target, ShProgram& shader)
 {
+  shCompile(shader, target);
+}
+
+void shBind(ShProgram& prg)
+{
   if (!ShEnvironment::backend) return;
-  shader->compile(target, ShEnvironment::backend);
+  prg->code(ShEnvironment::backend)->bind();
+}
+
+void shBind(ShProgram& prg, const std::string& target)
+{
+  if (!ShEnvironment::backend) return;
+  prg->code(target, ShEnvironment::backend)->bind();
 }
 
 void shBindShader(ShProgram& shader)
 {
-  if (!ShEnvironment::backend) return;
-  shader->code(ShEnvironment::backend)->bind();
+  shBind(shader);
 }
 
 void shBindShader(const std::string& target, ShProgram& shader)
 {
-  if (!ShEnvironment::backend) return;
-  shader->code(target, ShEnvironment::backend)->bind();
+  shBind(shader, target);
 }
 
 bool shSetBackend(const std::string& name)
