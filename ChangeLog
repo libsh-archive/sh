@@ -1,3 +1,7 @@
+2005-02-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShLibMatrixImpl.hpp (rotate): Fix rotations.
+
 2005-02-11  Bryan Chan  <b8chan@cgl.uwaterloo.ca>
 
 	* src/ShInstructions.hpp, ShInstructions.cpp
