@@ -36,7 +36,11 @@ using namespace SH;
 const unsigned int shGlTargets[] = {
   GL_TEXTURE_1D,
   GL_TEXTURE_2D,
+#if defined ( __APPLE__ )
+  GL_TEXTURE_RECTANGLE_EXT,
+#else
   GL_TEXTURE_RECTANGLE_NV,
+#endif
   GL_TEXTURE_3D,
   GL_TEXTURE_CUBE_MAP,
 };
@@ -75,7 +79,15 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node)
   if (node->traits().clamping() == SH::ShTextureTraits::SH_CLAMPED) {
     return node->size();
   } else if (node->traits().clamping() == SH::ShTextureTraits::SH_UNCLAMPED) {
-
+#if defined( __APPLE__ )
+    //    std::string exts(reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS)));
+    //GLenum fpformats_apple[4] = { 
+    //  GL_RGBA_FLOAT32_APPLE,  GL_RGBA_FLOAT32_APPLE,  GL_RGBA_FLOAT32_APPLE,  GL_RGBA_FLOAT32_APPLE };
+    
+    GLenum* fpformats = 0;
+    //    if (exts.find("GL_APPLE_float_pixels") != std::string::npos) 
+    //fpformats = fpformats_apple;
+#else
     std::string exts(reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS)));
     GLenum fpformats_nv[4] = {GL_FLOAT_R_NV, GL_FLOAT_RGBA_NV, GL_FLOAT_RGB_NV, GL_FLOAT_RGBA_NV};
     GLenum fpformats_ati[4] = {GL_LUMINANCE_FLOAT32_ATI,
@@ -88,7 +100,7 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node)
     } else if (exts.find("ATI_texture_float") != std::string::npos) {
       fpformats = fpformats_ati;
     }
-
+#endif
     if (!fpformats) {
       SH_DEBUG_ERROR("Could not find appropriate floating-point format extension\n"
                      "Using non-floating point texture instead!");

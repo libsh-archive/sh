@@ -182,9 +182,30 @@ private:
   bool indexed;
 };
 
-class GlxState {
+#if defined( WIN32 )
+#elif defined( __APPLE__ )
+class GlSaveState {
 public:
-  GlxState()
+  GlSaveState()
+    : context(0)
+  {
+      context = aglGetCurrentContext();
+  }
+
+  ~GlSaveState()
+  {
+    if (context) {
+      aglSetCurrentContext(context);
+    }
+  }
+
+private:
+  AGLContext context;
+};
+#else // Linux
+class GlSaveState {
+public:
+  GlSaveState()
     : display(0), drawable(0), context(0)
   {
     display = glXGetCurrentDisplay();
@@ -194,7 +215,7 @@ public:
     }
   }
 
-  ~GlxState()
+  ~GlSaveState()
   {
     if (display) {
       glXMakeCurrent(display, drawable, context);
@@ -206,13 +227,22 @@ private:
   GLXDrawable drawable;
   GLXContext context;
 };
+#endif
 
+#if defined( __APPLE__ )
+PBufferStreams::PBufferStreams(int context)
+  : m_context(context),
+    m_setup_vp(-1)
+{
+}
+#else
 PBufferStreams::PBufferStreams(int context)
   : m_context(context),
     m_setup_vp(-1),
     m_display(0)
 {
 }
+#endif
 
 PBufferStreams::~PBufferStreams()
 {
@@ -252,7 +282,7 @@ FloatExtension PBufferStreams::setupContext(int width, int height)
       && m_info.height == height) {
     DECLARE_TIMER(activatecontext);
     shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->setContext(m_info.shcontext);
-    glXMakeCurrent(m_display, m_info.pbuffer, m_info.context);
+    makeCurrenContext();
     TIMING_RESULT(activatecontext);
     return m_info.extension;
   }
@@ -272,7 +302,9 @@ FloatExtension PBufferStreams::setupContext(int width, int height)
     = shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->newContext();
   
   // This is glx specific for now
-
+#if defined( WIN32 )
+#elif defined( __APPLE__ )
+#else
   if (!m_display) {
     m_display = glXGetCurrentDisplay();
     if (!m_display) m_display = XOpenDisplay(0);
@@ -281,7 +313,9 @@ FloatExtension PBufferStreams::setupContext(int width, int height)
       return m_info.extension;
     }
   }
-  
+#endif
+
+#if !defined( __APPLE__ )  
   int scrnum;
   scrnum = DefaultScreen(m_display);
 
@@ -339,7 +373,45 @@ FloatExtension PBufferStreams::setupContext(int width, int height)
     GLX_LARGEST_PBUFFER, False,
     None
   };
+#else // __APPLE
+  //  const int kSamples = 4;
+  //  GLint attrib[] = { AGL_RGBA, AGL_DOUBLEBUFFER, AGL_DEPTH_SIZE, 16, AGL_SAMPLE_BUFFERS_ARB, 1, AGL_SAMPLES_ARB, kSamples, AGL_NO_RECOVERY, AGL_NONE };  
+  std::vector<GLint> agl_attribs;
+  agl_attribs.push_back(AGL_RGBA);
+  agl_attribs.push_back(AGL_DOUBLEBUFFER);
+  agl_attribs.push_back(AGL_RED_SIZE);   agl_attribs.push_back(32);
+  agl_attribs.push_back(AGL_GREEN_SIZE); agl_attribs.push_back(32);
+  agl_attribs.push_back(AGL_BLUE_SIZE);  agl_attribs.push_back(32);
+  agl_attribs.push_back(AGL_NO_RECOVERY);
+  agl_attribs.push_back(AGL_NONE);
+  m_info.extension = SH_ARB_NV_FLOAT_BUFFER;
 
+#endif // !defined( __APPLE__ )
+
+#if defined( WIN32 )
+#elif defined( __APPLE__ )
+  // build context
+  m_info.pixformat = aglChoosePixelFormat(NULL, 0, &agl_attribs[0]);
+  if (aglGetError() != AGL_NO_ERROR) {
+    shError(PBufferStreamException("Could not create supported pixel format"));
+    return SH_ARB_NO_FLOAT_EXT;
+  }
+
+  m_info.context = aglCreateContext(m_info.pixformat, NULL);
+  if (!m_info.context) {
+    shError(PBufferStreamException("Could not create PBuffer context"));
+    return SH_ARB_NO_FLOAT_EXT;
+  }
+
+  const int kPbufferMaxLevels = 0;
+  m_info.pbuffer = 0;
+  aglCreatePBuffer(m_info.width, m_info.height, GL_TEXTURE_2D, GL_RGBA, kPbufferMaxLevels, &(m_info.pbuffer));
+  if (!m_info.pbuffer) {
+    shError(PBufferStreamException("Could not make pbuffer!"));
+    return SH_ARB_NO_FLOAT_EXT;
+  }
+  makeCurrenContext();
+#else
   m_info.pbuffer = glXCreatePbuffer(m_display, fb_config[0], pbuffer_attribs);
   if (!m_info.pbuffer) {
     shError(PBufferStreamException("Could not make pbuffer!"));
@@ -352,7 +424,8 @@ FloatExtension PBufferStreams::setupContext(int width, int height)
     XFree(fb_config);
     return SH_ARB_NO_FLOAT_EXT;
   }
-  glXMakeCurrent(m_display, m_info.pbuffer, m_info.context);
+  makeCurrenContext()
+#endif
   
   TIMING_RESULT(makecontext);
   return m_info.extension;
@@ -421,7 +494,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
     tex_size <<= 1;
   }
 
-  GlxState prevstate;
+  GlSaveState prevstate;
   
   FloatExtension extension = setupContext(tex_size, tex_size);
 

@@ -113,8 +113,13 @@ GlTextureName::Binding::Binding(const ShPointer<const GlTextureName>& name)
   case GL_TEXTURE_CUBE_MAP:
     SH_GL_CHECK_ERROR(glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &last));
     break;
+#if defined( __APPLE__ )
+  case GL_TEXTURE_RECTANGLE_EXT:
+    SH_GL_CHECK_ERROR(glGetIntegerv(GL_TEXTURE_BINDING_RECTANGLE_EXT, &last));
+#else
   case GL_TEXTURE_RECTANGLE_NV:
     SH_GL_CHECK_ERROR(glGetIntegerv(GL_TEXTURE_BINDING_RECTANGLE_NV, &last));
+#endif // __APPLE__
     break;
   case GL_TEXTURE_3D:
     SH_GL_CHECK_ERROR(glGetIntegerv(GL_TEXTURE_BINDING_3D, &last));

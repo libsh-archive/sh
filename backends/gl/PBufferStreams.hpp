@@ -38,7 +38,29 @@ enum FloatExtension {
   SH_ARB_NO_FLOAT_EXT
 };
 
-#ifndef WIN32
+#if defined( WIN32 )
+#elif defined( __APPLE__ )
+#include <AGL/agl.h>
+struct ShAGLPBufferInfo {
+  ShAGLPBufferInfo()
+    : extension(SH_ARB_NO_FLOAT_EXT),
+      pixformat(0), pbuffer(0), context(0), width(0), height(0),
+      shcontext(-1)
+  {
+  }
+
+  FloatExtension extension;
+  AGLPixelFormat pixformat; // will be the pixel format for the Pbuffer
+  AGLContext     context;   // the Pbuffer context
+  AGLPbuffer     pbuffer;   // the equivalent to the drawable
+
+  int width, height;
+  int shcontext;
+  bool valid() { return extension != SH_ARB_NO_FLOAT_EXT
+                   && pbuffer
+                   && context; }
+};
+#else // Linux
 struct ShGLXPBufferInfo {
   ShGLXPBufferInfo()
     : extension(SH_ARB_NO_FLOAT_EXT),
@@ -47,6 +69,7 @@ struct ShGLXPBufferInfo {
   {
   }
   FloatExtension extension;
+
   GLXPbuffer pbuffer;
   GLXContext context;
   int width, height;
@@ -57,11 +80,25 @@ struct ShGLXPBufferInfo {
 };
 #endif
 
+
 struct PBufferStreams : public StreamStrategy {
   PBufferStreams(int context = 0);
   virtual ~PBufferStreams();
   virtual StreamStrategy* create(int context);
   virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
+
+#if defined( WIN32 )
+#elif defined( __APPLE__ )
+  void makeCurrenContext()
+  {
+  	aglSetCurrentContext( m_info.context );
+  }
+#else
+  void makeCurrenContext()
+  {
+    glXMakeCurrent(m_display, m_info.pbuffer, m_info.context);
+  }
+#endif
 
 private:
   int m_context;
@@ -70,8 +107,12 @@ private:
 
   int m_setup_vp;
   SH::ShProgram m_vp;
+
   
-#ifndef WIN32
+#if defined( WIN32 )
+#elif defined( __APPLE__ )
+  ShAGLPBufferInfo m_info;
+#else
   Display* m_display;
   ShGLXPBufferInfo m_info;
 #endif
