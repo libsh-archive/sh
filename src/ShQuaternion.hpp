@@ -31,36 +31,56 @@
 #include "ShLib.hpp"
 
 namespace SH {
+  template<int K, typename T=float>
   class ShQuaternion
   {
-    friend std::ostream& operator<<(std::ostream& out, const ShQuaternion& q);
+    template <int K2, typename T2>
+    friend std::ostream& operator<<(std::ostream& out, 
+        const ShQuaternion<K2, T2>& q);
     public:
       ShQuaternion();
-      ShQuaternion(const ShQuaternion& other);
-      ShQuaternion(const ShVector4f& values);
-      ShQuaternion(const ShAttrib1f& angle, const ShVector3f& axis);
+      template<int K2> 
+        ShQuaternion(const ShQuaternion<K2, T>& other);
+      template<int K2>
+        ShQuaternion(const ShVector<4, K2, T>& values);
+      template<int K2, int K3>
+        ShQuaternion(const ShAttrib<1, K2, T>& angle, 
+            const ShVector<3, K3, T>& axis);
+      template<int K2> 
+        ShQuaternion& operator=(const ShQuaternion<K2, T>& other);
+      template<int K2>
+        ShQuaternion& operator+=(const ShQuaternion<K2, T>& right);
+      template<int K2>
+        ShQuaternion& operator-=(const ShQuaternion<K2, T>& right);
+      template<int K2>
+        ShQuaternion& operator*=(const ShQuaternion<K2, T>& right);
+      template<int K2>
+        ShQuaternion& operator*=(const ShAttrib<1, K2, T>& right);
+      template<int K2>
+        ShQuaternion<SH_VAR_TEMP, T> operator+(const ShQuaternion<K2, T>& q2);
+      template<int K2>
+        ShQuaternion<SH_VAR_TEMP, T> operator-(const ShQuaternion<K2, T>& q2);
+      template<int K2>
+        ShQuaternion<SH_VAR_TEMP, T> operator*(const ShQuaternion<K2, T>& q2);
+      template<int K2>
+        ShQuaternion<SH_VAR_TEMP, T> operator*(const ShAttrib<1, K2, T>& c);
 
-      ShQuaternion& operator=(const ShQuaternion& other);
-      ShQuaternion& operator+=(const ShQuaternion& right);
-      ShQuaternion& operator-=(const ShQuaternion& right);
-      ShQuaternion& operator*=(const ShQuaternion& right);
-      ShQuaternion& operator*=(const ShAttrib1f& right);
-
-      ShQuaternion operator+(const ShQuaternion& q2);
-      ShQuaternion operator-(const ShQuaternion& q2);
-      ShQuaternion operator*(const ShQuaternion& q2);
-      ShQuaternion operator*(const ShAttrib1f& c);
-
-      ShQuaternion conjugate() const;
-      ShQuaternion inverse() const;
-      ShMatrix4x4f getMatrix() const;
+      ShQuaternion<SH_VAR_TEMP, T> conjugate() const;
+      ShQuaternion<SH_VAR_TEMP, T> inverse() const;
+      ShMatrix<4, 4, SH_VAR_TEMP, T> getMatrix() const;
     private:
-      ShVector4f m_data;
+      ShVector<4, K, T> m_data;
   };
 
-  extern ShQuaternion operator*(const ShAttrib1f& c, const ShQuaternion& q);
+  template<int K, typename T, int K2>
+  extern ShQuaternion<SH_VAR_TEMP, T> 
+  operator*(const ShAttrib<1, K2, T>& c, const ShQuaternion<K, T> q); 
+
+  typedef ShQuaternion<SH_VAR_INPUT, float> ShInputQuaternionf;
+  typedef ShQuaternion<SH_VAR_OUTPUT, float> ShOutputQuaternionf;
+  typedef ShQuaternion<SH_VAR_TEMP, float> ShQuaternionf;
 }
 
-
+#include "ShQuaternionImpl.hpp"
 
 #endif
