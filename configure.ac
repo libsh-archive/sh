@@ -73,6 +73,27 @@ AM_CONDITIONAL(INCLUDE_PBUFFERSTREAMS, test x$enable_pbuffer_streams = xtrue)
 SM_WITH_SM_DIR
 GL_WITH_GL_DIR
 
+#version spec is done in the style [current[:release=0[:age=0]]]
+BACKEND_LIB_VERSION=1:0:0
+AC_SUBST(BACKEND_LIB_VERSION)
+
+dnl Shared library extensions (LTDL_SHLIB_EXT gets it wrong on OS X)
+AC_LIBTOOL_SYS_DYNAMIC_LINKER
+
+# This is an abysmal hack against different versions of aclocal
+if test "x$shrext" = x; then
+   my_shrext=$shrext_cmds
+else
+   my_shrext=$shrext
+fi
+tst_shrext=`echo $my_shrext | sed -n 's/^\(\$.*\)/\1/p'`
+if test "x$tst_shrext" = x; then
+   sh_shlib_ext=$my_shrext
+else
+   sh_shlib_ext=`module="" eval echo $my_shrext`
+fi
+
+AC_DEFINE_UNQUOTED(SH_SHLIB_EXT, "$sh_shlib_ext", [Platform-specific shared library extension])
 
 # SH_CHECK_BACKEND([sm], [SM])
 # if test "x$sh_backend_sm" = xtrue ; then
@@ -152,6 +173,8 @@ AC_CONFIG_FILES([Makefile
 		 examples/particle/Makefile
 		 examples/textures/Makefile
 		 doc/Makefile])
+
 AC_OUTPUT
 
 SH_SUMMARISE_BACKENDS
+
