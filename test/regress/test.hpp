@@ -99,13 +99,13 @@ public:
         print_fail(name);
         pretty_print("  A", in1.size(), _in1);
         pretty_print("out", res.size(), _out);
-        pretty_print("res", res.size(), _res);
+        pretty_print("exp", res.size(), _res);
         return;
       }
     }
 #ifdef SH_REGRESS_SHOWALL
       /* DEBUG */ pretty_print("out", res.size(), _out);
-      /* DEBUG */ pretty_print("res", res.size(), _res);
+      /* DEBUG */ pretty_print("exp", res.size(), _res);
 #endif
     print_pass(name);
   }
@@ -152,13 +152,13 @@ public:
         pretty_print("  A", in1.size(), _in1);
         pretty_print("  B", in2.size(), _in2);
         pretty_print("out", res.size(), _out);
-        pretty_print("res", res.size(), _res);
+        pretty_print("exp", res.size(), _res);
         return;
       }
     }
 #ifdef SH_REGRESS_SHOWALL
       /* DEBUG */ pretty_print("out", res.size(), _out);
-      /* DEBUG */ pretty_print("res", res.size(), _res);
+      /* DEBUG */ pretty_print("exp", res.size(), _res);
 #endif    
     print_pass(name);
   }
@@ -215,13 +215,13 @@ public:
         pretty_print("  B", in2.size(), _in2);
         pretty_print("  C", in2.size(), _in2);
         pretty_print("out", res.size(), _out);
-        pretty_print("res", res.size(), _res);
+        pretty_print("exp", res.size(), _res);
         return;
       }
     }
 #ifdef SH_REGRESS_SHOWALL
       /* DEBUG */ pretty_print("out", res.size(), _out);
-      /* DEBUG */ pretty_print("res", res.size(), _res);
+      /* DEBUG */ pretty_print("exp", res.size(), _res);
 #endif
   }
 
@@ -246,13 +246,13 @@ public:
         if (fabs(_out[i] - _res[i]) > EPSILON) {
           print_fail(name);
           pretty_print("out", out.size(), _out); 
-          pretty_print("res", res.size(), _res); 
+          pretty_print("exp", res.size(), _res); 
           return;
         }
       }
 #ifdef SH_REGRESS_SHOWALL
         /* DEBUG */ pretty_print("out", res.size(), _out);
-        /* DEBUG */ pretty_print("res", res.size(), _res);
+        /* DEBUG */ pretty_print("exp", res.size(), _res);
 #endif
       print_pass(name);
   }

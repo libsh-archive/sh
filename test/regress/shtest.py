@@ -185,6 +185,7 @@ class Test:
       std::cerr << "Caught C++ exception: " << e.what() << std::endl;
   }
 }""")
+        out.write("\n")
 
 class StreamTest(Test):
     def __init__(self, name, arity):
