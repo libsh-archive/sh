@@ -165,7 +165,8 @@ private:
   typedef std::map<SH::ShVariableNodePtr, AtiReg> RegMap;
   RegMap m_registers;
 
-  typedef std::map<int, std::map<int, int> > TexBindingMap;
+  typedef std::pair<int, int> UbufBinding; // stores (texBinding, ubuf mem) pairs 
+  typedef std::map<int, UbufBinding > TexBindingMap;
   static TexBindingMap texBindings;
 
   std::vector<int> m_outputBindings;
@@ -234,6 +235,7 @@ private:
   int m_texs[2]; ///< Maximum number of TEX instructions for each shader kind
 
   int m_framebufBinding; ///< Uberbuffer that GL_AUX0 is bound to (TODO accomodate other aux buffres later)
+
 };
 
 typedef SH::ShRefCount<AtiBackend> AtiBackendPtr;
