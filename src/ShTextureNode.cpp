@@ -87,6 +87,10 @@ bool ShDataTextureNode::compatibleWith(ShMemoryObjectPtr memObj) {
 
 void ShDataTextureNode::setMem(ShMemoryObjectPtr mem)
 {
+  if( !mem ) {
+    m_mem = 0;
+    return;
+  }
   assert( compatibleWith(mem) );
   m_mem = mem;  
   for (int s = 0; s < shShaderKinds; s++) {
