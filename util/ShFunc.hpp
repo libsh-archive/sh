@@ -40,21 +40,6 @@ using namespace SH;
  * \brief Miscellaneous small Sh utility functions.  
  */
 
-/** \brief Clamps value between a and b. 
- * a must be <= b.
- * Returns a if x < a,
- * b if b < x,
- * x otherwise
- */
-//@{
-template<typename T>
-ShGeneric<1, T> clamp(const ShGeneric<1, T>& a, const ShGeneric<1, T>& b,
-    const ShGeneric<1, T>& x); 
-
-template<typename T>
-ShGeneric<1, T> clamp(T a, T b, const ShGeneric<1, T>& x); 
-//@}
-
 
 /** \brief Cubic interpolated step between 0 and 1. 
  * Returns 0 if x < a,

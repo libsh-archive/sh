@@ -91,6 +91,14 @@ template<typename T>
 ShGeneric<1, T> clamp(const ShGeneric<1, T>& a,
                       const ShGeneric<1, T>& b, const ShGeneric<1, T>& c);
 
+SH_SHLIB_CONST_TRINARY_OP_011(clamp);
+
+/** Componentwise saturation.
+ * Equivalent to componentwise minimum with 1.
+ */
+template<int N, typename T>
+ShGeneric<N, T> sat(const ShGeneric<N, T>& a);
+
 /*@}*/
 
 }

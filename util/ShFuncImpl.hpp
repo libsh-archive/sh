@@ -39,23 +39,12 @@ namespace ShUtil {
 
 using namespace SH;
 
-template<typename T>
-ShGeneric<1, T> clamp(const ShGeneric<1, T>& a, const ShGeneric<1, T>& b,
-    const ShGeneric<1, T>& x) {
-  return min(max(x, a), b); 
-}
-
-template<typename T>
-ShGeneric<1, T> clamp(T a, T b, const ShGeneric<1, T>& x) {
-  return min(max(x, ShAttrib<1, SH_CONST, T>(a)), ShAttrib<1, SH_CONST, T>(b)); 
-}
-
 template<int N, typename T>
 ShGeneric<N, T> smoothstep(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b,
     const ShGeneric<N, T> x) {
   ShGeneric<N, T> t = (x - a) / (b - a);
   // TODO fix this for other types
-  t = clamp(0.0f, 1.0f, t); 
+  t = clamp(t, 0.0f, 1.0f); 
   return t * t * mad(-2.0f, t, ShConstAttrib1f(3.0f));
 }
 

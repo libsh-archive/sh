@@ -95,12 +95,14 @@ ShGeneric<N,  T> min(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
 }
 
 template<int N, typename T>
+inline
 ShGeneric<N, T> clamp(const ShGeneric<N, T>& a,
                       const ShGeneric<N, T>& b, const ShGeneric<N, T>& c)
 {
   return min(max(a, b), c);
 }
 template<int N, typename T>
+inline
 ShGeneric<N, T> clamp(const ShGeneric<N, T>& a,
                       const ShGeneric<1, T>& b, const ShGeneric<1, T>& c)
 {
@@ -108,10 +110,18 @@ ShGeneric<N, T> clamp(const ShGeneric<N, T>& a,
 }
 
 template<typename T>
+inline
 ShGeneric<1, T> clamp(const ShGeneric<1, T>& a,
                       const ShGeneric<1, T>& b, const ShGeneric<1, T>& c)
 {
   return min(max(a, b), c);
+}
+
+template<int N, typename T>
+inline
+ShGeneric<N, T> sat(const ShGeneric<N, T>& a)
+{
+  return min(a, fillcast<N>(ShConstAttrib1f(1.0)));
 }
 
 }

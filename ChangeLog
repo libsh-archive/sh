@@ -1,5 +1,11 @@
 2004-07-05  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShLibClampImpl.hpp (sat): Implement sat. Resolves issue62.
+
+	* src/ShLibClamp.hpp: Add sat function.
+
+	* util/ShFunc.hpp: Remove clamp functions.
+
 	* src/ShLibClampImpl.hpp (clamp): Implement. Resolves issue55.
 
 	* src/ShLibClamp.hpp: Add clamp library function.
