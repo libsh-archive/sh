@@ -36,6 +36,7 @@ void copyCtrlGraph(ShCtrlGraphNodePtr head, ShCtrlGraphNodePtr tail,
   
   CtrlGraphCopier copier(copyMap);
   SH_DEBUG_ASSERT( tail ); // catch empty tails
+  head->clearMarked();
   head->dfs(copier);
 
   // Replace the successors and followers in the new graph with their new equivalents
@@ -237,7 +238,12 @@ ShProgram combine(const ShProgram& a, const ShProgram& b)
 
 ShProgram operator<<(const ShProgram& a, const ShProgram& b)
 {
-  return connect(a, b);
+  return connect(b,a);
+}
+
+ShProgram operator>>(const ShProgram& a, const ShProgram& b)
+{
+  return connect(a,b);
 }
 
 ShProgram operator&(const ShProgram& a, const ShProgram& b)

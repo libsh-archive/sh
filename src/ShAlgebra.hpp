@@ -21,8 +21,12 @@ ShProgram combine(const ShProgram& a, const ShProgram& b);
 /// Replaces uniform by appending an input to the end of the list
 ShProgram replaceUniform(const ShProgram &a, const ShVariable &var); 
 
-/// Equiv. to connect(a,b)
+/// Equiv. to connect(b,a)
 ShProgram operator<<(const ShProgram& a, const ShProgram& b);
+
+/// Equiv. to connect(a, b)
+ShProgram operator>>(const ShProgram& a, const ShProgram& b);
+
 /// Equiv. to combine(a,b)
 ShProgram operator&(const ShProgram& a, const ShProgram& b);
 
