@@ -98,12 +98,23 @@ void GlslCode::table_substitution(const ShStatement& stmt, GlslOpCodeVecs codeVe
 {
   stringstream line;
   line << resolve(stmt.dest) << " = ";
-  line << glsl_typename(stmt.dest.valueType(), stmt.dest.size()) << "(";
+  line << glsl_typename(stmt.dest.valueType(), stmt.dest.size()) << "("; // cast for the destination size
   
+  // find the size of the biggest parameter
+  int param_size=0;
+  for (unsigned i=0; i < codeVecs.index.size(); i++) {
+    const ShVariable& src = stmt.src[codeVecs.index[i]];
+    if (src.size() > param_size) {
+      param_size = src.size();
+    }
+  }
+
+  // print each parameter
   unsigned i;
   for (i=0; i < codeVecs.index.size(); i++) { 
     const ShVariable& src = stmt.src[codeVecs.index[i]];
-    line << codeVecs.frag[i] << resolve(src);
+    line << codeVecs.frag[i] << glsl_typename(src.valueType(), param_size)
+	 << "(" << resolve(src) << ")";
   }
 
   line << codeVecs.frag[i]; // code fragment after the last variable

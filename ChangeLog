@@ -1,3 +1,8 @@
+2005-03-30  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslEmit.cpp (table_substitution): Properly cast all
+	substituted parameters to allow parameters with different sizes.
+
 2005-03-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShAttrib.cpp, src/ShVector.cpp, ...: Remove explicit
