@@ -1,0 +1,55 @@
+# -*- makefile -*-
+
+RELEASE_TARGETS = cuberot_native.exe cuberot_nativeshader.exe cuberot_sh.exe
+DEBUG_TARGETS = 
+
+all: all-release all-debug
+
+all-release: $(RELEASE_TARGETS)
+all-debug: $(DEBUG_TARGETS)
+
+INSTALLTARGETS = $(RELEASE_TARGETS)
+CLEANFILES = $(RELEASE_TARGETS) $(DEBUG_TARGETS)
+
+directx_demo_SOURCES = cuberot_native.cpp cuberot_nativeshader.cpp
+directx_demo_SOURCES += cuberot_sh.cpp
+
+directx_demo_CXXFILES = $(filter %.cpp,$(directx_demo_SOURCES))
+directx_demo_RELEASE_OBJECTS = $(directx_demo_CXXFILES:.cpp=.r.obj)
+directx_demo_DEBUG_OBJECTS = $(directx_demo_CXXFILES:.cpp=.d.obj)
+
+directx_demo_RELEASE_LDADD  = $(SH_INSTALLDIR)\lib\libsh.lib
+directx_demo_RELEASE_LDADD += $(SH_INSTALLDIR)\lib\libshutil.lib
+directx_demo_RELEASE_LDADD += kernel32.lib user32.lib gdi32.lib 
+directx_demo_RELEASE_LDADD += comdlg32.lib winspool.lib winmm.lib shell32.lib oldnames.lib comctl32.lib
+directx_demo_RELEASE_LDADD += ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib
+directx_demo_RELEASE_LDADD += $(DXSDK_DIR)\lib\d3dx9.lib
+directx_demo_RELEASE_LDADD += $(DXSDK_DIR)\lib\d3d9.lib
+
+directx_demo_DEBUG_LDADD  = $(SH_INSTALLDIR)\lib\libshd.lib
+directx_demo_DEBUG_LDADD += $(SH_INSTALLDIR)\lib\libshutild.lib
+directx_demo_DEBUG_LDADD += kernel32.lib user32.lib gdi32.lib 
+directx_demo_DEBUG_LDADD += comdlg32.lib winspool.lib winmm.lib shell32.lib oldnames.lib comctl32.lib
+directx_demo_DEBUG_LDADD += ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib
+directx_demo_DEBUG_LDADD += $(DXSDK_DIR)\lib\d3dx9d.lib
+
+cuberot_native.exe: cuberot_native.r.obj
+	$(CXX) /Fecuberot_native $^ $(directx_demo_RELEASE_LDADD) $(RELEASE_LDFLAGS)
+
+cuberot_nativeshader.exe: cuberot_nativeshader.r.obj
+	$(CXX) /Fecuberot_nativeshader $^ $(directx_demo_RELEASE_LDADD) $(RELEASE_LDFLAGS)
+
+cuberot_sh.exe: cuberot_sh.r.obj
+	$(CXX) /Fecuberot_sh $^ $(directx_demo_RELEASE_LDADD) $(RELEASE_LDFLAGS)
+
+install: $(INSTALL_TARGETS)
+	copy cuberot_native.exe $(INSTALLDIR)
+	copy cuberot_nativeshader.exe $(INSTALLDIR)
+	copy cuberot_sh.exe $(INSTALLDIR)
+
+directx_demo_DEPENDS = $(directx_demo_CXXFILES:.cpp=.r.d) $(directx_demo_CXXFILES:.cpp=.d.d)
+
+include ../win32.mk
+#CPPFLAGS += -DSH_DLLEXPORT="__declspec(dllexport)"
+include $(directx_demo_DEPENDS)
+
