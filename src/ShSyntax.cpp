@@ -96,7 +96,7 @@ void shBind(ShProgram& prg)
   prg.code(ShEnvironment::backend)->bind();
 }
 
-void shBind(ShProgram& prg, const std::string& target)
+void shBind(const std::string& target, ShProgram& prg)
 {
   if (!ShEnvironment::backend) return;
   prg.code(target, ShEnvironment::backend)->bind();
@@ -109,7 +109,7 @@ void shBindShader(ShProgram& shader)
 
 void shBindShader(const std::string& target, ShProgram& shader)
 {
-  shBind(shader, target);
+  shBind(target, shader);
 }
 
 bool shSetBackend(const std::string& name)
