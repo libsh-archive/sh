@@ -1,3 +1,11 @@
+2005-03-04  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/PBufferStreams.cpp (execute): Unbind our shaders.
+
+	* backends/gl/GlslSet.cpp (GlslSet copy constructor): Use attach()
+	to attach shaders.
+	(GlslSet::operator=): Call detach and attach.
+
 2005-03-02  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> (glsl branch)
 
 	* examples/glut/main.cpp: Use a ShProgramSet to contain the shaders.

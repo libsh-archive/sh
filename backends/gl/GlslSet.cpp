@@ -70,8 +70,10 @@ GlslSet::GlslSet(const GlslSet& other)
   : m_arb_program(glCreateProgramObjectARB()),
     m_linked(false), m_bound(false)
 {
-  m_shaders[0] = other.m_shaders[0];
-  m_shaders[1] = other.m_shaders[1];
+  m_shaders[0] = 0;
+  m_shaders[1] = 0;
+  attach(other.m_shaders[0]);
+  attach(other.m_shaders[1]);
 }
 
 GlslSet& GlslSet::operator=(const GlslSet& other)
@@ -79,9 +81,11 @@ GlslSet& GlslSet::operator=(const GlslSet& other)
   if (&other == this) return *this;
 
   unbind();
-  
-  m_shaders[0] = other.m_shaders[0];
-  m_shaders[1] = other.m_shaders[1];
+
+  detach(m_shaders[0]);
+  detach(m_shaders[1]);
+  attach(other.m_shaders[0]);
+  attach(other.m_shaders[1]);
 
   m_linked = false;
 
@@ -97,7 +101,7 @@ GlslSet::~GlslSet()
 
 void GlslSet::attach(const SH::ShPointer<GlslCode>& code)
 {
-  SH_DEBUG_ASSERT(code);
+  if (!code) return;
   if (m_shaders[code->glsl_unit()] == code) return;
 
   unbind();
@@ -115,7 +119,7 @@ void GlslSet::attach(const SH::ShPointer<GlslCode>& code)
 
 void GlslSet::detach(const SH::ShPointer<GlslCode>& code)
 {
-  SH_DEBUG_ASSERT(code);
+  if (!code) return;
   if (m_shaders[code->glsl_unit()] != code) return;
 
   unbind();
@@ -133,8 +137,8 @@ void GlslSet::replace(const SH::ShPointer<GlslCode>& code)
   SH_DEBUG_ASSERT(code);
   if (m_shaders[code->glsl_unit()] == code && !m_shaders[1 - code->glsl_unit()]) return;
 
-  if (m_shaders[0]) detach(m_shaders[0]);
-  if (m_shaders[1]) detach(m_shaders[1]);
+  detach(m_shaders[0]);
+  detach(m_shaders[1]);
   attach(code);
 }
 

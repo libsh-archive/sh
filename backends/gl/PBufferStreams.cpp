@@ -463,6 +463,8 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
 
   TIMING_RESULT(finish);
 
+  // Unbind, just to be safe
+  shUnbind(*m_shaders);
   
   int gl_error = glGetError();
   if (gl_error != GL_NO_ERROR) {
