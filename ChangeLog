@@ -1,4 +1,15 @@
-2004-10-08  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+2004-10-13  Bryan Chan  <b8chan@cgl.uwaterloo.ca>
+  Merged main branch up to r1543 into this branch.
+
+2004-10-13  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+  * src/ShConstProp.cpp (updateDest):
+  Temporarily fixed issue with detecting whether all srcs are uniform.  
+
+  * configure.ac:
+  Changed AC_CONFIG_SRCDIR to ShVariable.hpp, since ShAttrib.hpp is now 
+  generated automatically.
+
+2004-10-13  Bryan Chan <b8chan@cgl.uwaterloo.ca>
   Merged main branch up to r1510 into this branch, minor
 	fixes for shrike (which now unfortunately takes > 30
 	seconds to initialize on kurr :-O )
@@ -8,6 +19,143 @@
 
   * src/ShCloak*:
   Changed to ShVariant* to prevent potential Star Trek licensing issues. 
+
+2004-10-12  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbCode.cpp (printSamplingInstruction): Output
+	SH_ARB_TXD instructions properly.
+
+	* backends/gl/ArbEmit.cpp (emit_tex): Handle SH_OP_TEXD (only 2D
+	for now).
+
+	* backends/gl/ArbInst.hpp (struct ArbInst): Add max_num_sources,
+	set to four, add constructor for four sources.
+
+	* backends/gl/ArbInst.cpp (arbOpInfo): Add operation info for SH_ARB_TXD.
+
+	* backends/gl/ArbInst.hpp (enum ArbOp): Add SH_ARB_TXD.
+
+	* src/ShBaseTextureImpl.hpp (ShBaseTexture2D::operator()):
+	Implemented lookup-with-derivatives operator.
+
+	* src/ShBaseTexture.hpp (ShBaseTexture2D): Added
+	lookup-with-derivatives operator, only for 2D for now.
+
+	* src/ShStatement.cpp (opInfo): Added opInfo for SH_OP_TEXD.
+
+	* src/ShStatement.hpp: Added SH_OP_TEXD.
+
+	* backends/gl/ArbEmit.cpp: Only emit texture lookups on NVVP3 (was NVVP2).
+
+	* src/ShConstProp.cpp (struct FinishConstProp): Skip the statement
+	for uniform lifting if we've replaced it with a constant.
+
+2004-10-08  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShInstructions.cpp: Inline helper functions.
+
+	* src/ShRefCountImpl.hpp: More inlining.
+
+	* src/ShVariableNode.cpp (ShVariableNode): Only construct m_eval
+	if we have to (i.e. in functions that use it).
+
+	* src/ShSwizzle.hpp: Use a simple array instead of std::vector.
+
+	* src/ShGenericImpl.hpp: Inline lots of stuff.
+
+	* src/ShMeta.hpp: Inline default constructor.
+
+	* src/scripts/ShAttribImpl.hpp.py: More inlining.
+
+	* src/scripts/semantic.py: Inline those member functions.
+
+	* src/ShLib.hpp (SH_SHLIB_USUAL_NON_UNIT_OPS_RETTYPE): Add all
+	versions of operator/.
+
+	* test/regress/regress.py: Remove this file.
+
+	* test/regress/add.cpp.py, test/regress/mul.cpp.py,
+	test/regress/div.cpp.py, test/regress/cos.cpp.py,
+	test/regress/sin.cpp.py: Added the first of the new regression
+	tests.
+
+	* test/regress/common.py: Add file containing some useful
+	functions for regression testing (well, just one right now).
+
+	* test/regress/streamtest.py: Add beginnings of new regression test engine.
+
+	* test/regress/Makefile.am: Remove old regression testing cruft.
+
+2004-10-08  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* Makefile.win32, backends/Makefile.win32, backends/gl/Makefile.win32,
+	src/Makefile.win32, util/Makefile.win32, win32.mk: Updated makefiles
+	to support release/debug only builds, turning off dependency
+	generetion and explicit targets for release and debug builds.
+
+2004-10-07  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* win32.mk, src/Makefile.win32: makedepend doesn't recognize
+	/I and /D, changed all references to -I and -D.
+
+	* src/ShMatrix.hpp: Previous SH_DLLEXPORT though to be
+	misplaced was actually unnecessary.
+	
+2004-10-07  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* src/ShInstructions.cpp: No roundf or cbrtf on Win32, created
+	inline replacements using floor and pow.
+
+	* src/ShLibMiscImpl.hpp: VC++ complained about unknown type ShProgram,
+	added appropriate include.
+
+	* src/ShMatrix.hpp: Fixed misplaced SH_DLLEXPORT.
+	
+2004-10-06  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShVariableNode.cpp: Added optional memory pool
+	support implementation. Disabled right now.
+
+	* src/ShVariableNode.hpp: Added optional memory pool
+	support. Disabled right now.
+
+	* src/ShPool.cpp: Added memory pool implementation.
+
+	* src/ShPool.hpp: Added optional memory pool interface. Disabled
+	for now.
+
+	* src/ShVariableNode.cpp (~ShVariableNode): Fix memory leak by
+	deleting m_eval. doh.
+
+	* src/ShLibMatrixImpl.hpp (rotate): Added 2D version of rotation.
+
+	* src/ShVariable.cpp (operator<<): Simplify this a little.
+
+	* src/ShInstructions.cpp: Implement shCBRT and shRND.
+
+	* src/ShProgram.cpp: Add operator() on streams here.
+
+	* src/ShChannelImpl.hpp (operator()): Add operators for programs
+	to channels.
+
+	* src/ShLibClamp.hpp (round): Add this function.
+
+	* src/ShLibArith.hpp (cbrt): Add this function.
+
+	* src/ShStatement.cpp: Add opInfo for CBRT and RND.
+
+	* src/ShStatement.hpp: Add CBRT and RND.
+
+	* src/ShLibMisc.hpp (freeze): Add this function to turn uniforms
+	into constants.
+
+	* src/ShLibMatrixImpl.hpp: Added colmat, rotate, translate, scale
+	(although 2D rotate is still missing).
+
+	* src/ShMatrix.hpp: Many much needed comment fixes. Also, moved
+	operator<< out of ShMatrix.
+
+	* src/ShVariable.hpp (ShVariable): Add clone member function.
 
 2004-10-05  Bryan Chan <b8chan@cgl.uwaterloo.ca>
   Small fixes to make shrike work.  Merging in main branch next.  
@@ -21,6 +169,11 @@
   * src/ShTypeConvertTransformer.cpp, src/ShInstructions.cpp,
     backends/gl/Arb.cpp backends/gl/ArbCode.cpp:
   Removed obsolete debug messages. 
+
+2004-10-05  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShGenericImpl.hpp (operator=(T)): Make the temporary
+	constant attribute an SH_CONST instead of an SH_TEMP.
 
 2004-10-05  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
 

@@ -126,6 +126,9 @@ template<typename T>
 ShInterval<T> operator%(const ShInterval<T> &a, const ShInterval<T> &b);
 
 template<typename T>
+ShInterval<T> cbrt(const ShInterval<T> &a);
+
+template<typename T>
 ShInterval<T> exp(const ShInterval<T> &a);
 
 template<typename T>
@@ -227,6 +230,9 @@ ShInterval<T> floor(const ShInterval<T> &a);
 
 template<typename T>
 ShInterval<T> ceil(const ShInterval<T> &a);
+
+template<typename T>
+ShInterval<T> rnd(const ShInterval<T> &a);
 
 template<typename T>
 ShInterval<T> abs(const ShInterval<T> &a);

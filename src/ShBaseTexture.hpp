@@ -81,6 +81,12 @@ public:
   template<typename T2>
   T operator()(const ShGeneric<2, T2>& coords) const;
 
+  /// Texture lookup with derivatives
+  template<typename T2, typename T3, typename T4>
+  T operator()(const ShGeneric<2, T2>& coords,
+               const ShGeneric<2, T3>& dx,
+               const ShGeneric<2, T4>& dy) const;
+  
   template<typename T2>
   T operator[](const ShGeneric<2, T2>& coords) const;
 

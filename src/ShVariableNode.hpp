@@ -34,6 +34,7 @@
 #include "ShRefCount.hpp"
 #include "ShMeta.hpp"
 #include "ShSwizzle.hpp"
+#include "ShPool.hpp"
 
 namespace SH {
 
@@ -164,6 +165,12 @@ public:
   const ShPointer<ShProgramNode>& evaluator() const;
   
   /** @} */
+
+#ifdef SH_USE_MEMORY_POOL
+  // Memory pool stuff.
+  void* operator new(std::size_t size);
+  void operator delete(void* d);
+#endif
   
 protected:
   /// Creates a new variable node that holds the same data type as old
@@ -202,10 +209,14 @@ protected:
   ShPointer<ShVariant> m_variant;
 
   // Dependent uniform evaluation
-  ShVariableNodeEval* m_eval;
+  mutable ShVariableNodeEval* m_eval;
   std::list<ShVariableNode*> m_dependents;
   
   static int m_maxID;
+
+#ifdef SH_USE_MEMORY_POOL
+  static ShPool* m_pool;
+#endif
 };
 
 }

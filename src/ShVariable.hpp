@@ -120,6 +120,11 @@ public:
   bool operator==(const ShVariable& other) const;
   bool operator!=(const ShVariable& other) const { return !((*this) == other); }
 
+  /// @internal used by ShMatrix to set up its rows when swizzled.
+  /// Sets this variable's node, swizzle, and negation bit to be
+  /// identical to the given variable.
+  void clone(const ShVariable& other);
+  
 protected:
   
   ShVariableNodePtr m_node; ///< The actual variable node we refer to.

@@ -1,14 +1,28 @@
 # -*- makefile -*-
+include ../../win32.mk
 
+INCLUDES += -I../../src
+CPPFLAGS += -DSH_DLLEXPORT="__declspec(dllimport)"
+
+ALL_TARGETS =
+INSTALL_TARGETS =
 RELEASE_TARGETS = libsharb.dll
 DEBUG_TARGETS = libsharbd.dll
 
-all: all-release all-debug
+ifeq ($(BUILD_RELEASE), 1)
+	ALL_TARGETS += all-release
+	INSTALL_TARGETS += install-release
+endif
 
+ifeq ($(BUILD_DEBUG), 1)
+	ALL_TARGETS += all-debug
+	INSTALL_TARGETS += install-debug
+endif
+
+all: $(ALL_TARGETS)
+install: $(INSTALL_TARGETS)
 all-release: $(RELEASE_TARGETS)
 all-debug: $(DEBUG_TARGETS)
-
-CLEANFILES = $(RELEASE_TARGETS) $(DEBUG_TARGETS) *.exp *.pdb *.idb *.ilk
 
 libsharb_dll_SOURCES = Arb.hpp Arb.cpp
 libsharb_dll_SOURCES += ArbBackend.cpp
@@ -33,10 +47,10 @@ libsharb_dll_CXXFILES = $(filter %.cpp,$(libsharb_dll_SOURCES))
 libsharb_dll_RELEASE_OBJECTS = $(libsharb_dll_CXXFILES:.cpp=.r.obj)
 libsharb_dll_DEBUG_OBJECTS = $(libsharb_dll_CXXFILES:.cpp=.d.obj)
 
-libsharb_dll_DEBUG_LDADD = ../../src/libshd.lib 
-libsharb_dll_DEBUG_LDADD += OPENGL32.LIB
 libsharb_dll_RELEASE_LDADD = ../../src/libsh.lib 
 libsharb_dll_RELEASE_LDADD += OPENGL32.LIB
+libsharb_dll_DEBUG_LDADD = ../../src/libshd.lib 
+libsharb_dll_DEBUG_LDADD += OPENGL32.LIB
 
 libsharb.dll: $(libsharb_dll_RELEASE_OBJECTS)
 	$(LD) /DLL /OUT:$@ $^ $(RELEASE_LDFLAGS) $(libsharb_dll_RELEASE_LDADD)
@@ -44,15 +58,23 @@ libsharb.dll: $(libsharb_dll_RELEASE_OBJECTS)
 libsharbd.dll: $(libsharb_dll_DEBUG_OBJECTS)
 	$(LD) /DLL /OUT:$@ $^ $(DEBUG_LDFLAGS) $(libsharb_dll_DEBUG_LDADD)
 
-install: $(RELEASE_TARGETS) $(DEBUG_TARGETS) $(wildcard *.hpp)
+install-common:
 	-mkdir $(SH_INSTALLDIR)
+
+install-release: $(RELEASE_TARGETS) install-common
 	copy libsharb.dll $(SH_INSTALLDIR)
+
+install-debug: $(DEBUG_TARGETS) install-common
 	copy libsharbd.dll $(SH_INSTALLDIR)
 	copy libsharbd.pdb $(SH_INSTALLDIR)
 
+clean:
+	-del $(RELEASE_TARGETS) $(DEBUG_TARGETS)
+	-del *.obj *.d
+	-del *.exp *.pdb *.idb *.ilk
+
 libsharb_dll_DEPENDS = $(libsharb_dll_CXXFILES:.cpp=.r.d) $(libsharb_dll_CXXFILES:.cpp=.d.d)
 
-include ../../win32.mk
-INCLUDES += -I../../src
-CPPFLAGS += -DSH_DLLEXPORT="__declspec(dllimport)"
+ifeq ($(GEN_DEPENDENCIES), 1)
 -include $(libsharb_dll_DEPENDS)
+endif

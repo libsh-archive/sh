@@ -179,17 +179,21 @@ ShVariable ShVariable::operator()(int n, int indices[]) const
   return ShVariable(m_node, m_swizzle * ShSwizzle(size(), n, indices), m_neg);
 }
 
-std::ostream& operator<<(std::ostream& _out, const ShVariable& shVariableToPrint) {
- 
-  if (!shVariableToPrint.m_node){
-    _out<<"[null]";
-    return _out;
+std::ostream& operator<<(std::ostream& out, const ShVariable& v)
+{
+  if (!v.m_node){
+    out << "[null]";
+    return out;
+  }
+  if (!v.hasValues()){
+    out << "[not uniform]";
+    return out;
   }
 
-  _out<<'[';
-  _out << shVariableToPrint.getVariant()->encode();
-  _out<<']';
-  return _out;
+  out << '[';
+  out << v.getVariant()->encode();
+  out<<']';
+  return out;
 }
 
 
@@ -201,6 +205,13 @@ ShVariable ShVariable::operator-() const
 bool ShVariable::operator==(const ShVariable& other) const
 {
   return m_node == other.m_node && m_swizzle == other.m_swizzle && m_neg == other.m_neg;
+}
+
+void ShVariable::clone(const ShVariable& other)
+{
+  m_node = other.m_node;
+  m_swizzle = other.m_swizzle;
+  m_neg = other.m_neg;
 }
 
 

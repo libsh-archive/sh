@@ -93,6 +93,8 @@ SHCCTO_UNARY_OP_SPEC(double, SH_OP_ASIN, std::asin(*A));
 SHCCTO_UNARY_OP_SPEC(float,  SH_OP_ASIN, asinf(*A));
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_ATAN, std::atan(*A));
 SHCCTO_UNARY_OP_SPEC(float,  SH_OP_ATAN, atanf(*A));
+SHCCTO_UNARY_OP_SPEC(double, SH_OP_CBRT, std::pow(*A, 1.0 / 3.0));
+SHCCTO_UNARY_OP_SPEC(float,  SH_OP_CBRT, powf(*A, 1.0f / 3.0f));
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_CEIL, std::ceil(*A));
 SHCCTO_UNARY_OP_SPEC(float,  SH_OP_CEIL, ceilf(*A));
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_COS, std::cos(*A));
@@ -140,6 +142,8 @@ void ShConcreteCTypeOp<SH_OP_NORM, float>::doop(std::vector<float> *dest,
 
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_RCP, 1.0 / (*A)); 
 SHCCTO_UNARY_OP_SPEC(float,  SH_OP_RCP, 1.0f / (*A)); 
+SHCCTO_UNARY_OP_SPEC(double, SH_OP_RND, std::floor(*A + 0.5)); 
+SHCCTO_UNARY_OP_SPEC(float,  SH_OP_RND, floorf(*A + 0.5f)); 
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_RSQ, 1.0 / std::sqrt(*A)); 
 SHCCTO_UNARY_OP_SPEC(float,  SH_OP_RSQ, 1.0f / sqrtf(*A)); 
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_SGN, ((*A) < 0 ? -1 : (*A) > 0 ? 1 : 0)); 

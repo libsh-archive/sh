@@ -78,6 +78,16 @@ void discard(const ShGeneric<N, T>& c);
 template<int N, typename T>
 void kill(const ShGeneric<N, T>& c);
 
+/** Uniform freezing.
+ *
+ * Replace uses of the given uniform in the given program with a
+ * constant containing its current value, and return the resulting
+ * program.
+ */
+template<typename T>
+ShProgram freeze(const ShProgram& p,
+                 const T& uniform);
+
 /*@}*/
 
 }

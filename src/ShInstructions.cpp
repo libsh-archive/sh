@@ -35,42 +35,42 @@ namespace {
 
 using namespace SH;
 
-bool immediate()
+inline bool immediate()
 {
   return !ShContext::current()->parsing();
 }
 
-void sizes_match(const ShVariable& a, const ShVariable& b)
+inline void sizes_match(const ShVariable& a, const ShVariable& b)
 {
   SH_DEBUG_ASSERT(a.size() == b.size());
 }
 
-void sizes_match(const ShVariable& a, const ShVariable& b,
+inline void sizes_match(const ShVariable& a, const ShVariable& b,
                  const ShVariable& c, bool scalar_b = false, bool scalar_c = false)
 {
   SH_DEBUG_ASSERT(((scalar_b && b.size() == 1) || a.size() == b.size()) && 
                   ((scalar_c && c.size() == 1) || a.size() == c.size()));
 }
 
-void has_values(const ShVariable& a)
+inline void has_values(const ShVariable& a)
 {
   SH_DEBUG_ASSERT(a.hasValues());
 }
 
-void has_values(const ShVariable& a, const ShVariable& b)
+inline void has_values(const ShVariable& a, const ShVariable& b)
 {
   SH_DEBUG_ASSERT(a.hasValues());
   SH_DEBUG_ASSERT(b.hasValues());
 }
 
-void has_values(const ShVariable& a, const ShVariable& b, const ShVariable& c)
+inline void has_values(const ShVariable& a, const ShVariable& b, const ShVariable& c)
 {
   SH_DEBUG_ASSERT(a.hasValues());
   SH_DEBUG_ASSERT(b.hasValues());
   SH_DEBUG_ASSERT(c.hasValues());
 }
 
-void has_values(const ShVariable& a, const ShVariable& b,
+inline void has_values(const ShVariable& a, const ShVariable& b,
                 const ShVariable& c, const ShVariable& d)
 {
   SH_DEBUG_ASSERT(a.hasValues());
@@ -79,7 +79,7 @@ void has_values(const ShVariable& a, const ShVariable& b,
   SH_DEBUG_ASSERT(d.hasValues());
 }
 
-void addStatement(const ShStatement& stmt)
+inline void addStatement(const ShStatement& stmt)
 {
   ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
 }
@@ -174,6 +174,7 @@ SHINST_UNARY_OP(ACOS);
 SHINST_UNARY_OP(ASIN);
 SHINST_UNARY_OP(ATAN);
 SHINST_BINARY_OP(ATAN2, false, false);
+SHINST_UNARY_OP(CBRT);
 SHINST_UNARY_OP(CEIL);
 SHINST_UNARY_OP(COS);
 
@@ -239,6 +240,7 @@ SHINST_BINARY_OP(MAX, false, false);
 SHINST_BINARY_OP(MIN, false, false);
 SHINST_BINARY_OP(POW, false, true);
 SHINST_UNARY_OP(RCP);
+SHINST_UNARY_OP(RND);
 SHINST_UNARY_OP(RSQ);
 SHINST_UNARY_OP(SGN);
 SHINST_UNARY_OP(SIN);

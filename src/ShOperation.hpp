@@ -58,6 +58,7 @@ enum ShOperation {
   SH_OP_ASIN, ///< Unary arcsine (result between 0 and pi)
   SH_OP_ATAN, ///< Unary arctan (result between -pi/2 and pi/2)
   SH_OP_ATAN2, ///< Binary arctan of src[1]/src[0] (result between -pi and pi)
+  SH_OP_CBRT, ///< Unary componentwise cube root
   SH_OP_CEIL, ///< Unary smallest integer not less than src[0]
   SH_OP_COS, ///< Unary cosine function
   SH_OP_CMUL, ///< Unary product of components
@@ -80,6 +81,7 @@ enum ShOperation {
   SH_OP_LOG10, ///< Unary base-10 log
   SH_OP_POW, ///< Binary power
   SH_OP_RCP, ///< Unary reciprocal
+  SH_OP_RND, ///< Unary round to neareset integer
   SH_OP_RSQ, ///< Unary reciprocal square root
   SH_OP_SIN, ///< Unary sine function
   SH_OP_SGN, ///< Unary componentwise sign
@@ -91,6 +93,7 @@ enum ShOperation {
 
   SH_OP_TEX, ///< Texture lookup (0..1)
   SH_OP_TEXI, ///< Texture lookup, indexed mode (0..width - 1)
+  SH_OP_TEXD, ///< Texture lookup with derivatives
 
   SH_OP_COND, ///< Conditional assignment: dst[i] = (src[0][i] > 0.0 ? src[1][i] : src[2][i])
 

@@ -34,6 +34,8 @@ libsh_la_SOURCES += ShMetaForwarder.hpp ShMetaForwarder.cpp
 libsh_la_SOURCES += ShContext.hpp ShContextImpl.hpp ShContext.cpp
 libsh_la_SOURCES += ShDllExport.hpp
 incinc_HEADERS   += ShDllExport.hpp
+libsh_la_SOURCES += ShPool.hpp ShPool.cpp
+incinc_HEADERS   += ShPool.hpp
 
 # Backend
 libsh_la_SOURCES += ShBackend.cpp ShBackend.hpp 

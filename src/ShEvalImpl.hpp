@@ -56,6 +56,7 @@ void _shInitFloatOps() {
   eval->addOp(SH_OP_ASIN, new ShRegularOp<SH_OP_ASIN, T>(), typeIndex, typeIndex);
   eval->addOp(SH_OP_ASN, new ShRegularOp<SH_OP_ASN, T>(), typeIndex, typeIndex);
   eval->addOp(SH_OP_ATAN, new ShRegularOp<SH_OP_ATAN, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_CBRT, new ShRegularOp<SH_OP_CBRT, T>(), typeIndex, typeIndex);
   eval->addOp(SH_OP_CEIL, new ShRegularOp<SH_OP_CEIL, T>(), typeIndex, typeIndex);
   eval->addOp(SH_OP_COS, new ShRegularOp<SH_OP_COS, T>(), typeIndex, typeIndex);
   eval->addOp(SH_OP_CSUM, new ShRegularOp<SH_OP_CSUM, T>(), typeIndex, typeIndex);
@@ -71,6 +72,7 @@ void _shInitFloatOps() {
   //eval->addOp(SH_OP_NEG, new ShRegularOp<SH_OP_NEG, T>());
   eval->addOp(SH_OP_NORM, new ShRegularOp<SH_OP_NORM, T>(), typeIndex, typeIndex);
   eval->addOp(SH_OP_RCP, new ShRegularOp<SH_OP_RCP, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_RND, new ShRegularOp<SH_OP_RND, T>(), typeIndex, typeIndex);
   eval->addOp(SH_OP_RSQ, new ShRegularOp<SH_OP_RSQ, T>(), typeIndex, typeIndex);
   eval->addOp(SH_OP_SIN, new ShRegularOp<SH_OP_SIN, T>(), typeIndex, typeIndex);
   eval->addOp(SH_OP_SGN, new ShRegularOp<SH_OP_SGN, T>(), typeIndex, typeIndex);
@@ -104,6 +106,9 @@ void _shInitIntOps() {
   int typeIndex = shTypeIndex<T>();
   ShEval* eval = ShEval::instance();
 
+  // @todo type add some int ops even if they don't normally make sense
+  // (e.g. no-ops like FLR, CEIL, etc.)
+  // because otherwise
   eval->addOp(SH_OP_ABS, new ShRegularOp<SH_OP_ABS, T>(), typeIndex, typeIndex);
   eval->addOp(SH_OP_ASN, new ShRegularOp<SH_OP_ASN, T>(), typeIndex, typeIndex);
   //eval->addOp(SH_OP_NEG, new ShRegularOp<SH_OP_NEG, T>());

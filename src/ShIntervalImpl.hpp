@@ -33,7 +33,7 @@
 
 namespace SH {
 
-// TODO replace uses of std::fabs 
+// @todo replace uses of std::fabs 
 
 /** Constructs an interval with undefined value */
 template<typename T>
@@ -181,7 +181,7 @@ ShInterval<T>& ShInterval<T>::operator/=(const ShInterval<T> &other)
 template<typename T>
 ShInterval<T>& ShInterval<T>::operator%=(const T &value)
 {
-  // TODO
+  // @todo
   m_hi = std::fabs(value);
   m_lo = -m_hi;
 }
@@ -189,7 +189,7 @@ ShInterval<T>& ShInterval<T>::operator%=(const T &value)
 template<typename T>
 ShInterval<T>& ShInterval<T>::operator%=(const ShInterval<T> &other)
 {
-  // TODO
+  // @todo
   m_hi = std::max(std::fabs(other.lo), std::fabs(other.hi));
   m_lo = -m_hi;
 }
@@ -211,7 +211,7 @@ std::ostream& operator<<(std::ostream &out, const ShInterval<TT> &value)
 template<typename TT>
 std::istream& operator>>(std::istream &in, ShInterval<TT> &value)
 {
-  // TODO this isn't exactly bullet-proof right now...
+  // @todo this isn't exactly bullet-proof right now...
   in.ignore(1, '[');
   in >> value.m_lo;
   in.ignore(1, ',');
@@ -269,6 +269,14 @@ ShInterval<T> operator%(const ShInterval<T> &a, const ShInterval<T> &b)
   return ShInterval<T>(-large, large); 
 }
 
+template<typename T>
+ShInterval<T> cbrt(const ShInterval<T> &a) 
+{
+  // monotonic
+  // @todo type check this one 
+  return pow(a, ShInterval<T>(1.0f / 3.0f)); 
+}
+
 
 template<typename T>
 ShInterval<T> exp(const ShInterval<T> &a) 
@@ -298,7 +306,7 @@ template<typename T>
 ShInterval<T> log(const ShInterval<T> &a) 
 {
   // monotonic, except <= 0 gives NaN 
-  // TODO handle <= 0 with exception?
+  // @todo handle <= 0 with exception?
   return ShInterval<T>(std::log(a.m_lo), std::log(a.m_hi));
 }
 
@@ -307,7 +315,7 @@ template<typename T>
 ShInterval<T> log2(const ShInterval<T> &a) 
 {
   // monotonic, except <= 0 gives NaN 
-  // TODO handle <= 0 with exception or clamp?
+  // @todo handle <= 0 with exception or clamp?
   return ShInterval<T>(log2f(a.m_lo), log2f(a.m_hi));
 }
 
@@ -316,14 +324,14 @@ template<typename T>
 ShInterval<T> log10(const ShInterval<T> &a) 
 {
   // monotonic, except <= 0 gives NaN 
-  // TODO handle <= 0 with exception or clamp?
+  // @todo handle <= 0 with exception or clamp?
   return ShInterval<T>(log10f(a.m_lo), log10f(a.m_hi));
 }
 
 template<typename T>
 ShInterval<T> frac(const ShInterval<T> &a)
 {
-  // TODO - if width > 1, then return below,
+  // @todo - if width > 1, then return below,
   // otherwise do some more figuring
   return ShInterval<T>(ShConcreteTypeInfo<T>::ZERO, ShConcreteTypeInfo<T>::ONE);
 }
@@ -338,8 +346,8 @@ ShInterval<T> fmod(const ShInterval<T> &a, const ShInterval<T> &b)
 template<typename T>
 ShInterval<T> pow(const ShInterval<T> &a, const ShInterval<T> &b) 
 {
-  // TODO check if this is optimal
-  // TODO do integer special cases? - see NuS.cc
+  // @todo check if this is optimal
+  // @todo do integer special cases? - see NuS.cc
   return exp(log(a)*b);
 }
 
@@ -348,7 +356,7 @@ template<typename T>
 ShInterval<T> rcp(const ShInterval<T> &a) 
 {
   if(a.m_lo <= 0 && a.m_hi >= 0) {
-    // TODO handle infinities
+    // @todo handle infinities
     // This results in a -inf, inf interval
   }
   return ShInterval<T>(1.0 / a.m_hi, 1.0 / a.m_lo);
@@ -357,14 +365,14 @@ ShInterval<T> rcp(const ShInterval<T> &a)
 template<typename T>
 ShInterval<T> rsq(const ShInterval<T> &a) 
 {
-  // TODO something better?
+  // @todo something better?
   return rcp(sqrt(a)); 
 }
 
 template<typename T>
 ShInterval<T> sgn(const ShInterval<T> &a) 
 {
-  // TODO have constants for positve, negative, zero values
+  // @todo have constants for positve, negative, zero values
 
   // the usual sgn function is monotonic:
   return ShInterval<T>(a.m_lo < ShConcreteTypeInfo<T>::ZERO ? -1 : a.m_lo > 0 ? 1 : 0,
@@ -375,7 +383,7 @@ template<typename T>
 ShInterval<T> sqrt(const ShInterval<T> &a) 
 {
   // monotonic, except <= 0 gives NaN
-  // TODO handle <= 0 with exception or clamp
+  // @todo handle <= 0 with exception or clamp
   return ShInterval<T>(std::sqrt(a.m_lo), std::sqrt(a.m_hi));
 }
 
@@ -384,7 +392,7 @@ ShInterval<T> sqrt(const ShInterval<T> &a)
 template<typename T>
 ShInterval<T> acos(const ShInterval<T> &a) 
 {
-  // TODO
+  // @todo
   return ShInterval<T>(0, M_PI);
 }
 
@@ -392,7 +400,7 @@ ShInterval<T> acos(const ShInterval<T> &a)
 template<typename T>
 ShInterval<T> asin(const ShInterval<T> &a) 
 {
-  // TODO
+  // @todo
   return ShInterval<T>(-M_PI/2, M_PI/2);
 }
 
@@ -400,7 +408,7 @@ ShInterval<T> asin(const ShInterval<T> &a)
 template<typename T>
 ShInterval<T> atan(const ShInterval<T> &a) 
 {
-  // TODO
+  // @todo
   return ShInterval<T>(-M_PI/2, M_PI/2);
 }
 
@@ -408,7 +416,7 @@ ShInterval<T> atan(const ShInterval<T> &a)
 template<typename T>
 ShInterval<T> atan2(const ShInterval<T> &a, const ShInterval<T> &b) 
 {
-  // TODO
+  // @todo
   return ShInterval<T>(-M_PI, M_PI);
 }
 
@@ -416,14 +424,14 @@ ShInterval<T> atan2(const ShInterval<T> &a, const ShInterval<T> &b)
 template<typename T>
 ShInterval<T> cos(const ShInterval<T> &a) 
 {
-  //TODO
+  //@todo
   return ShInterval<T>(-1, 1);
 }
 
 template<typename T>
 ShInterval<T> sin(const ShInterval<T> &a) 
 {
-  // TODO
+  // @todo
   return ShInterval<T>(-1, 1);
 }
 
@@ -431,17 +439,17 @@ ShInterval<T> sin(const ShInterval<T> &a)
 template<typename T>
 ShInterval<T> tan(const ShInterval<T> &a) 
 {
-  // TODO
-  return ShInterval<T>(-1, 1); // TODO this is totally wrong...
+  // @todo
+  return ShInterval<T>(-1, 1); // @todo this is totally wrong...
 }
 
 
 /** Comparison Operators **/
 template<typename T>
 ShInterval<T> __boolean_op(bool trueCond, bool falseCond) {
-  // TODO fix this assumption that false < true
-  // TODO special value for maybe? 
-  // TODO make this return something special (other than Interval<T>)?
+  // @todo fix this assumption that false < true
+  // @todo special value for maybe? 
+  // @todo make this return something special (other than Interval<T>)?
   
   if(trueCond) return ShInterval<T>(ShConcreteTypeInfo<T>::TrueVal);
   if(falseCond) return ShInterval<T>(ShConcreteTypeInfo<T>::FalseVal);
@@ -490,7 +498,7 @@ ShInterval<T> operator==(const ShInterval<T> &a, const ShInterval<T> &b)
 template<typename T>
 ShInterval<T> operator!=(const ShInterval<T> &a, const ShInterval<T> &b) 
 {
-  // TODO should use not(a==b) once we have not
+  // @todo should use not(a==b) once we have not
   return __boolean_op<T>(
       a.m_hi < b.m_lo || a.m_lo > b.m_hi,
       a.m_hi == b.m_hi && a.m_lo == b.m_lo && a.m_lo == a.m_hi);
@@ -529,6 +537,14 @@ ShInterval<T> ceil(const ShInterval<T> &a)
 {
   // monotonic
   return ShInterval<T>(std::ceil(a.m_lo), std::ceil(a.m_hi));
+}
+
+template<typename T>
+ShInterval<T> rnd(const ShInterval<T> &a) 
+{
+  // monotonic
+  // @todo type handle this in general
+  return ShInterval<T>(std::floor(a.m_lo + 0.5f), std::floor(a.m_hi + 0.5f));
 }
 
 template<typename T>

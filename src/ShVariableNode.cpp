@@ -60,7 +60,26 @@ const char* ShSemanticTypeName[] = {
 
 struct ShVariableNodeEval {
   ShPointer<ShProgramNode> value;
+
+#ifdef SH_USE_MEMORY_POOL
+  // Memory pool stuff.
+  void* operator new(std::size_t size)
+  {
+    if (!m_pool) m_pool = new ShPool(sizeof(ShVariableNodeEval), 32768);
+    return m_pool->alloc();
+  }
+  void operator delete(void* ptr)
+  {
+    m_pool->free(ptr);
+  }
+
+  static ShPool* m_pool;
+#endif
 };
+
+#ifdef SH_USE_MEMORY_POOL
+ShPool* ShVariableNodeEval::m_pool = 0;
+#endif
 
 ShVariableNode::ShVariableNode(ShBindingType kind, int size, int typeIndex, ShSemanticType type)
   : m_uniform(!ShContext::current()->parsing() && kind == SH_TEMP),
@@ -68,7 +87,7 @@ ShVariableNode::ShVariableNode(ShBindingType kind, int size, int typeIndex, ShSe
     m_size(size), m_typeIndex(typeIndex), 
     m_id(m_maxID++), m_locked(0),
     m_variant(0),
-    m_eval(new ShVariableNodeEval)
+    m_eval(0)
 {
   if (m_uniform || m_kind == SH_CONST) addVariant();
   programVarListInit();
@@ -98,6 +117,7 @@ ShVariableNode::~ShVariableNode()
   delete m_variant; 
   m_variant = 0;
   */
+  delete m_eval;
 }
 
 ShVariableNodePtr ShVariableNode::clone(ShBindingType newKind, 
@@ -367,6 +387,7 @@ void ShVariableNode::addVariant()
 void ShVariableNode::attach(const ShProgramNodePtr& evaluator)
 {
   SH_DEBUG_ASSERT(uniform());
+  if (!m_eval) m_eval = new ShVariableNodeEval;
   // TODO: Check that the program really evaluates this variable.
 
   detach_dependencies();
@@ -386,6 +407,7 @@ void ShVariableNode::attach(const ShProgramNodePtr& evaluator)
 
 void ShVariableNode::update()
 {
+  if (!m_eval) m_eval = new ShVariableNodeEval;
   if (!m_eval->value) return;
 
   evaluate(m_eval->value);
@@ -393,8 +415,24 @@ void ShVariableNode::update()
 
 const ShPointer<ShProgramNode>& ShVariableNode::evaluator() const
 {
+  if (!m_eval) m_eval = new ShVariableNodeEval;
   return m_eval->value;
 }
+
+#ifdef SH_USE_MEMORY_POOL
+void* ShVariableNode::operator new(std::size_t size)
+{
+  if (size != sizeof(ShVariableNode)) return ::operator new(size);
+  if (!m_pool) m_pool = new ShPool(sizeof(ShVariableNode), 32768);
+  return m_pool->alloc();
+}
+
+void ShVariableNode::operator delete(void* ptr)
+{
+  // Really, if we don't have a pool, we should throw an exception or something.
+  return m_pool->free(ptr);
+}
+#endif
 
 void ShVariableNode::add_dependent(ShVariableNode* dep)
 {
@@ -417,6 +455,7 @@ void ShVariableNode::update_dependents()
 
 void ShVariableNode::detach_dependencies()
 {
+  if (!m_eval) return;
   if (m_eval->value) {
     for (ShProgramNode::VarList::const_iterator I = m_eval->value->uniforms_begin();
          I != m_eval->value->uniforms_end(); ++I) {
@@ -428,5 +467,7 @@ void ShVariableNode::detach_dependencies()
 }
 
 int ShVariableNode::m_maxID = 0;
-
+#ifdef SH_USE_MEMORY_POOL
+ShPool* ShVariableNode::m_pool = 0;
+#endif
 }

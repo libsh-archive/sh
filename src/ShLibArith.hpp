@@ -228,6 +228,12 @@ ShGeneric<N, T> sqrt(const ShGeneric<N, T>& var);
 template<int N, typename T>
 ShGeneric<N, T> rsqrt(const ShGeneric<N, T>& var);
 
+/* Cube root.
+ * The cube root of each component of the input is evaluated.
+ */
+template<int N, typename T>
+ShGeneric<N, T> cbrt(const ShGeneric<N, T>& var);
+
 /*@}*/
 
 /** Linear interpolation.

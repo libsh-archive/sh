@@ -49,100 +49,88 @@ template<int Rows, int Cols, ShBindingType Binding, typename T>
 class ShMatrix {
 public:
     
-  /** \brief Constructor for ShMatrix.
+  /** \brief Identity constructor.
    *
-   * Creates a identity ShMatrix
+   * Constructs an identity matrix.
+   * For non-square matrices, the largest square upper-left submatrix
+   * possible is made an identity matrix, with the rest left zero.
+   *
    */
   ShMatrix();
 
-  /** \brief Constructor for ShMatrix with a matrix as parameter.
+  /** \brief Copy constructor.
    *
-   * Creates a ShMatrix where each element is equal to the one in the parameters
-   * \param other the matrix from which we will get the values from 
+   * Construct a matrix with the same contents as the given matrix.
    */
   ShMatrix(const ShMatrix<Rows, Cols, Binding, T>& other);
 
 
-  /** \brief Constructor for ShMatrix with a matrix as parameter. (template kind2)
+  /** \brief Copy constructor.
    *
-   * Creates a ShMatrix where each element is equal to the one in the parameters
-   * \param other the matrix from which we will get the values from 
+   * Construct a matrix with the same contents as the given matrix.
    */
   template<ShBindingType Binding2>
   ShMatrix(const ShMatrix<Rows, Cols, Binding2, T>& other);
   
-
-  /** \brief Destructor for ShMatrix
-   *
-   * Destroys a ShMatrix 
-   */
   ~ShMatrix();
 
-  /** \brief Definition of the equal operation with another matrix
+  /** \brief Assignment.
    *
-   * Returns the address of a matrix from which the values were taken from the ones of the matrix in the parameters
-   * \param other the matrix from which we will get the values from 
+   * Replace each entry in this matrix with the corresponding entry of
+   * the given matrix.
    */
   ShMatrix& operator=(const ShMatrix<Rows, Cols, Binding, T>& other);
 
-  /** \brief Definition of the equal operation with another matrix (template kind2)
+  /** \brief Assignment.
    *
-   * Returns the address of a matrix from which the values were taken from the ones of the matrix in the parameters (template kind2)
-   * \param other the matrix from which we will get the values from 
+   * Replace each entry in this matrix with the corresponding entry of
+   * the given matrix.
    */
   template<ShBindingType Binding2>
   ShMatrix& operator=(const ShMatrix<Rows, Cols, Binding2, T>& other);
 
-  /** \brief Definition of the bracket [] operation
+  /** \brief Attribute row access.
    *
-   * Returns the row of our current matrix where the row number is given by the parameter i
-   * \param i The number of the row (ranges from 0 to Rows-1)
+   * Return a reference to the given row as an ShAttrib.
    */
   ShAttrib<Cols, Binding, T>& operator[](int i);
 
-  /** \brief Definition of the bracket [] operation (const)
+  /** \brief Attribute row access.
    *
-   * Returns the row of our current matrix where the row number is given by the parameter i (const)
-   * \param i The number of the row (ranges from 0 to Rows-1)
+   * Return a reference to the given row as an ShAttrib.
    */
   const ShAttrib<Cols, Binding, T>& operator[](int i) const;
 
-  /** \brief Definition of the += operation with another matrix
+  /** \brief Modifying componentwise addition
    *
-   * Returns the address of a matrix where the result is the current matrix += (for each element) with the matrix in the parameters
-   * \param other The other matrix that is used in the +=operation
+   * Add each entry in the given matrix to each entry in this
+   * matrix matching its row and column index.
    */
   template<ShBindingType Binding2>
   ShMatrix& operator+=(const ShMatrix<Rows, Cols, Binding2, T>& other);
 
-  /** \brief Definition of the -= operation
+  /** \brief Modifying componentwise subtraction
    *
-   * Returns the address of a matrix where the result is the current matrix += (for each element) with the matrix in the parameters
-   * \param other The other matrix that is used in the -=operation
+   * Subtract each entry in the given matrix from each entry in this
+   * matrix matching its row and column index.
    */
   template<ShBindingType Binding2>
   ShMatrix& operator-=(const ShMatrix<Rows, Cols, Binding2, T>& other);
 
 
-  /** \brief Definition of the /= operation
+  /** \brief Modifying componentwise division
    *
-   * Returns the address of a matrix where the result is the current matrix += (for each element) with the matrix in the parameters
-   * \param other The other matrix that is used in the /=operation
+   * Divide each entry in this matrix by the entry in the given matrix
+   * matching its row and column index.
+   *
    */
   template<ShBindingType Binding2>
   ShMatrix& operator/=(const ShMatrix<Rows, Cols, Binding2, T>& other);    
    
-  /** \brief Operator << (used for iostream)
-   *
-   * This operator uses the << operator defined in ShAttrib on each of its rows to give the output
-   */
-  template<int R, int C, ShBindingType B, typename Ty>
-  friend std::ostream& operator<<(std::ostream& out, const ShMatrix<R, C, B, Ty>& shMatrixToPrint);
 
-  /** \brief Returns a submatrix of the original matrix where the row (first parameter), and the column (second parameter) has been removed
+  /** \brief Obtain a submatrix of this matrix.
    *
-   * Returns a ShMatrix that is the matrix where the row (first parameter), and the column (second parameter) has been removed, the matrix has a size of Rows-1, Cols -1
-   * \param other The matrix from which we want to get the submatrix
+   * Return a copy of this matrix not containing the given row and column.
    */
   ShMatrix<Rows - 1, Cols -1, SH_TEMP, T> subMatrix(int,int) const;
 
@@ -151,19 +139,18 @@ public:
   void setScaling(const ShGeneric<Rows-1, T>& scale);
 
 
-  /** \brief Definition of the scalar multiplication operation
+  /** \brief Modifying scalar multiplicatoin
    *
-   * Returns the address of a matrix where the result is the current matrix * (for each element) with the scalar in the parameters
-   * \param other The other matrix that is used in the multiplication operation with the scalar
+   * Multiply the given scalar attribute with each component of this
+   * matrix.
    */
-  ShMatrix& operator*=(const ShGeneric<1, T>& other);
+  ShMatrix& operator*=(const ShGeneric<1, T>& a);
     
-  /** \brief Definition of the scalar division operation
+  /** \brief Modifying scalar division
    *
-   * Returns the address of a matrix where the result is the current matrix * (for each element) with the scalar in the parameters
-   * \param other The other matrix that is used in the division operation with the scalar
+   * Divide each component of this matrix by the given attribute.
    */
-  ShMatrix& operator/=(const ShGeneric<1, T>& other);
+  ShMatrix& operator/=(const ShGeneric<1, T>& a);
 
   /**@name Swizzling
    * Retrieve some set of rows from this matrix. These must be
@@ -207,15 +194,23 @@ private:
    */
   ShAttrib<Cols, Binding, T> m_data[Rows];
   
-};//end ShMatrix
-  
+};
+/** \brief Matrix output operator
+ *
+ * Print a representation of the given (uniform or constant) matrix's
+ * values to the given stream.
+ */
 
-  /** A few rows from a matrix.
-   * This is an intermediate structure representing some rows that have
-   * just been swizzled from a matrix. The only useful operation is to
-   * swizzle these rows again to obtain a submatrix with the given rows
-   * and columns.
-   */
+template<int R, int C, ShBindingType B, typename Ty>
+std::ostream& operator<<(std::ostream& out,
+                         const ShMatrix<R, C, B, Ty>& m);
+
+/** A few rows from a matrix.
+ * This is an intermediate structure representing some rows that have
+ * just been swizzled from a matrix. The only useful operation is to
+ * swizzle these rows again to obtain a submatrix with the given rows
+ * and columns.
+ */
 template<int Rows, int Cols, typename T>
 class ShMatrixRows {
 public:
@@ -327,10 +322,4 @@ typedef ShMatrix<4, 4, SH_TEMP, float> ShMatrix4x4f;
 #include "ShMatrixImpl.hpp"
 
 #endif
-
-
-
-
-
-
 

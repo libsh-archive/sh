@@ -239,6 +239,7 @@ class Impl:
         if len(extraTplArg) > 0: extraTplStr = "template<" + ", ".join(["typename " + x for x in extraTplArg]) + ">\n"
         common.inprint(self.tpl(size) + "\n" +
                        extraTplStr +
+                       "inline\n" +
                        self.tplcls(size) + "::" + self.name + "(" + ', '.join([' '.join(x) for x in args]) + ")")
         if len(args) > 0:
             common.inprint("  : ParentType(" + ', '.join([re.sub(r'\[.*\]', r'', x[-1]) for x in args]) + ")")
@@ -271,6 +272,7 @@ class Impl:
         
     def destructor(self, size):
         common.inprint(self.tpl(size) + "\n" +
+                       "inline\n" +
                        self.tplcls(size) + "::~" + self.name + "()")
         common.inprint("{")
         common.inprint("}")
@@ -281,6 +283,7 @@ class Impl:
         if len(extraTplArg) > 0: extraTplStr = "template<" + ", ".join(["typename " + x for x in extraTplArg]) + ">\n"
         common.inprint(self.tpl(size) + "\n" +
                        extraTplStr +
+                       "inline\n" +
                        self.tplcls(size) + "&\n" +
                        self.tplcls(size) + "::" + fun +
                        "(" + ', '.join([' '.join(x) for x in args]) + ")")
@@ -330,6 +333,7 @@ class Impl:
     def swizzle(self, num, size, op = "()"):
         args = ["s" + str(i) for i in range(0, num)]
         common.inprint(self.tpl(size) + "\n" +
+                       "inline\n" +
                        self.tplcls(num, "true") + "\n" +
                        self.tplcls(size) + "::operator" + op + "(" + ', '.join(["int " + x for x in args]) + ")" +
                        " const")

@@ -181,6 +181,7 @@ operator/(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right)
 }
 
 template<int N, typename T>
+inline
 ShGeneric<N, T> exp(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
@@ -189,6 +190,7 @@ ShGeneric<N, T> exp(const ShGeneric<N, T>& var)
 }
 
 template<int N, typename T>
+inline
 ShGeneric<N, T> exp2(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
@@ -197,6 +199,7 @@ ShGeneric<N, T> exp2(const ShGeneric<N, T>& var)
 }
 
 template<int N, typename T>
+inline
 ShGeneric<N, T> exp10(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
@@ -205,12 +208,14 @@ ShGeneric<N, T> exp10(const ShGeneric<N, T>& var)
 }
 
 template<int N, typename T>
+inline
 ShGeneric<N, T> expm1(const ShGeneric<N, T>& var)
 {
   return exp(var - 1.0);
 }
 
 template<int N, typename T>
+inline
 ShGeneric<N, T> log(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
@@ -219,6 +224,7 @@ ShGeneric<N, T> log(const ShGeneric<N, T>& var)
 }
 
 template<int N, typename T>
+inline
 ShGeneric<N, T> log2(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
@@ -227,6 +233,7 @@ ShGeneric<N, T> log2(const ShGeneric<N, T>& var)
 }
 
 template<int N, typename T>
+inline
 ShGeneric<N, T> log10(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
@@ -235,6 +242,7 @@ ShGeneric<N, T> log10(const ShGeneric<N, T>& var)
 }
 
 template<int N, typename T>
+inline
 ShGeneric<N, T> logp1(const ShGeneric<N, T>& var)
 {
   return log(var + 1.0);
@@ -363,7 +371,17 @@ ShGeneric<N, T> rsqrt(const ShGeneric<N, T>& var)
   return t;
 }
 
+template<int N, typename T>
+inline
+ShGeneric<N, T> cbrt(const ShGeneric<N, T>& var)
+{
+  ShAttrib<N, SH_TEMP, T> t;
+  shCBRT(t, var);
+  return t;
+}
+
 template<int N, typename T1, typename T2, typename T3>
+inline
 ShGeneric<N, CT1T2T3> lerp(const ShGeneric<N, T1>& f, const ShGeneric<N, T2>& a, 
                      const ShGeneric<N, T3>& b)
 {
@@ -371,7 +389,9 @@ ShGeneric<N, CT1T2T3> lerp(const ShGeneric<N, T1>& f, const ShGeneric<N, T2>& a,
   shLRP(t, f, a, b);
   return t;
 }
+
 template<int N, typename T1, typename T2, typename T3>
+inline
 ShGeneric<N, CT1T2T3> lerp(const ShGeneric<1, T1>& f, const ShGeneric<N, T2>& a, 
                      const ShGeneric<N, T3>& b)
 {
@@ -379,7 +399,9 @@ ShGeneric<N, CT1T2T3> lerp(const ShGeneric<1, T1>& f, const ShGeneric<N, T2>& a,
   shLRP(t, f, a, b);
   return t;
 }
+
 template<typename T1, typename T2, typename T3>
+inline
 ShGeneric<1, CT1T2T3> lerp(const ShGeneric<1, T1>& f, const ShGeneric<1, T2>& a, 
                      const ShGeneric<1, T3>& b)
 {
@@ -389,6 +411,7 @@ ShGeneric<1, CT1T2T3> lerp(const ShGeneric<1, T1>& f, const ShGeneric<1, T2>& a,
 }
 //@todo type see explanation in LibArith.hpp file
 template<int N, typename T>
+inline
 ShGeneric<N, T> lerp(T f, const ShGeneric<N, T>& a, 
                      const ShGeneric<N, T>& b)
 {
@@ -398,6 +421,7 @@ ShGeneric<N, T> lerp(T f, const ShGeneric<N, T>& a,
 }
 
 template<int N, typename T>
+inline
 ShGeneric<1, T> sum(const ShGeneric<N, T>& var)
 {
   ShAttrib<1, SH_TEMP, T> t;
@@ -406,6 +430,7 @@ ShGeneric<1, T> sum(const ShGeneric<N, T>& var)
 }
 
 template<int N, typename T>
+inline
 ShGeneric<1, T> prod(const ShGeneric<N, T>& var)
 {
   ShAttrib<1, SH_TEMP, T> t;

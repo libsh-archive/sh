@@ -25,6 +25,7 @@ class Impl(semantic.Impl):
 
         common.inprint(self.tpl(size))
         if len(extraTplArg) > 0: common.inprint("template<" + ", ".join(["typename " + x for x in extraTplArg]) + ">")
+        common.inprint("inline")
         common.inprint(self.tplcls(size) + "::" + self.name + "(" + ', '.join([' '.join(x) for x in args]) + ")")
         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
                        "(new ShVariableNode(Binding, " + self.sizevar(size) + ",shTypeIndex<T>()))")
@@ -49,6 +50,7 @@ class Impl(semantic.Impl):
     def scalarcons(self, args, size, extraTplArg=[]):
         common.inprint(self.tpl(size))
         if len(extraTplArg) > 0: common.inprint("template<" + ", ".join(["typename " + x for x in extraTplArg]) + ">")
+        common.inprint("inline")
         common.inprint(self.tplcls(size) + "::" + self.name + "(" + ', '.join([' '.join(x) for x in args]) + ")")
         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
                        "(new ShVariableNode(Binding, " + self.sizevar(size) + ",shTypeIndex<T>()))")
@@ -80,6 +82,7 @@ class Impl(semantic.Impl):
 
     def constructors(self, size = 0):
         common.inprint(self.tpl(size))
+        common.inprint("inline")
         common.inprint(self.tplcls(size) + "::" + self.name + "()")
         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
                        "(new ShVariableNode(Binding, " + self.sizevar(size) + ",shTypeIndex<T>()))")
@@ -100,6 +103,7 @@ class Impl(semantic.Impl):
 #         common.inprint("")
 
         common.inprint(self.tpl(size))
+        common.inprint("inline")
         common.inprint(self.tplcls(size) + "::" + self.name + "(const ShVariableNodePtr& node,")
         common.inprint("  const ShSwizzle& swizzle, bool neg)")
         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" + "(node, swizzle, neg)")
@@ -110,6 +114,7 @@ class Impl(semantic.Impl):
         common.inprint("")
 
         common.inprint(self.tpl(size))
+        common.inprint("inline")
         common.inprint(self.tplcls(size) + "::" + self.name + "(T data[" + self.sizevar(size) + "])")
         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
                        "(new ShVariableNode(Binding, " + self.sizevar(size) + ",shTypeIndex<T>()))")

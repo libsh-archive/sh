@@ -87,6 +87,7 @@ SHCRO_UNARY_OP(SH_OP_ACOS, acos(*A));
 SHCRO_UNARY_OP(SH_OP_ASIN, asin(*A));
 SHCRO_UNARY_OP(SH_OP_ASN, (*A));
 SHCRO_UNARY_OP(SH_OP_ATAN, atan(*A));
+SHCRO_UNARY_OP(SH_OP_CBRT, cbrt(*A));
 SHCRO_UNARY_OP(SH_OP_CEIL, ceil(*A));
 
 template<typename T>
@@ -141,6 +142,7 @@ struct ShConcreteRegularOp<SH_OP_NORM, T> {
 };
 
 SHCRO_UNARY_OP(SH_OP_RCP, rcp(*A));
+SHCRO_UNARY_OP(SH_OP_RND, rnd(*A));
 SHCRO_UNARY_OP(SH_OP_RSQ, rsq(*A));
 SHCRO_UNARY_OP(SH_OP_SIN, sin(*A));
 SHCRO_UNARY_OP(SH_OP_SGN, sgn(*A)); 

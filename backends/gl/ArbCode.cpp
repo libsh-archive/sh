@@ -417,7 +417,8 @@ std::ostream& operator<<(std::ostream& out, LineNumberer& l)
 
 bool ArbCode::printSamplingInstruction(std::ostream& out, const ArbInst& instr) const
 {
-  if (instr.op != SH_ARB_TEX && instr.op != SH_ARB_TXP && instr.op != SH_ARB_TXB)
+  if (instr.op != SH_ARB_TEX && instr.op != SH_ARB_TXP && instr.op != SH_ARB_TXB
+      && instr.op != SH_ARB_TXD)
     return false;
 
   ShTextureNodePtr texture = shref_dynamic_cast<ShTextureNode>(instr.src[1].node());
@@ -444,6 +445,10 @@ bool ArbCode::printSamplingInstruction(std::ostream& out, const ArbInst& instr) 
   out << arbOpInfo[instr.op].name << " ";
   printVar(out, true, instr.dest, false) << ", ";
   printVar(out, false, instr.src[0], true, instr.dest.swizzle()) << ", ";
+  if (instr.op == SH_ARB_TXD) {
+    printVar(out, false, instr.src[2], true, instr.dest.swizzle()) << ", ";
+    printVar(out, false, instr.src[3], true, instr.dest.swizzle()) << ", ";
+  }
   out << "texture[" << texReg.index << "], ";
   switch (texture->dims()) {
   case SH_TEXTURE_1D:
@@ -608,7 +613,7 @@ std::ostream& ArbCode::print(std::ostream& out)
     if (I->dest.node() && I->dest.has_name()) {
       out << "d=" << I->dest.name() << " ";
     }
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < ArbInst::max_num_sources; i++) {
       if (I->src[i].node()  && I->src[i].has_name()) {
         out << "s[" << i << "]=" << I->src[i].name() << " ";
       }
@@ -984,7 +989,7 @@ void ArbCode::allocTemps(const ArbLimits& limits)
 //         }
 //       }
       
-//       for (int j = 0; j < 3; j++) {
+//       for (int j = 0; j < ArbInst::max_num_sources; j++) {
 //         if (!markable(instr.src[j].node())) continue;
         
 //         if (last_use.find(instr.src[j].node().object()) == last_use.end()) {
@@ -1038,7 +1043,7 @@ void ArbCode::allocTemps(const ArbLimits& limits)
         scope.usage_map[instr.dest.node().object()] &= ~writemask;
       }
       
-      for (int j = 0; j < 3; j++) {
+      for (int j = 0; j < ArbInst::max_num_sources; j++) {
         if (!markable(instr.src[j].node())) continue;
         std::bitset<4> usemask;
         for (int k = 0; k < instr.src[j].size(); k++) {
@@ -1080,7 +1085,7 @@ void ArbCode::allocTemps(const ArbLimits& limits)
       }        
     }
     
-    for (int j = 0; j < 3; j++) {
+    for (int j = 0; j < ArbInst::max_num_sources; j++) {
       if (mark(allocator, instr.src[j].node(), (int)i)) {
         for (ScopeStack::iterator S = scopestack.begin(); S != scopestack.end(); ++S) {
           ArbScope& scope = *S;
