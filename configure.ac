@@ -106,7 +106,11 @@ fi
 AM_CONDITIONAL(ENABLE_DOXYGEN_DOCS, test x$sh_enable_docs = xtrue)
 
 # Store the prefix as a variable
-AC_DEFINE_UNQUOTED(SH_INSTALL_PREFIX, "$prefix", [Installation prefix directory])
+if test "x$prefix" = xNONE ; then
+   AC_DEFINE_UNQUOTED(SH_INSTALL_PREFIX, "/usr/local", [Installation prefix directory])
+else
+   AC_DEFINE_UNQUOTED(SH_INSTALL_PREFIX, "$prefix", [Installation prefix directory])
+fi
 
 
 AC_CONFIG_FILES([Makefile
