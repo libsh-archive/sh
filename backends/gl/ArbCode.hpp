@@ -132,8 +132,12 @@ private:
   /// The number of distinct textures used in this shader.
   int m_numTextures;
 
-  typedef std::map<SH::ShVariableNodePtr, ArbReg> RegMap;
+  typedef std::map<SH::ShVariableNodePtr,
+                   SH::ShPointer<ArbReg> > RegMap;
   RegMap m_registers;
+
+  typedef std::list< SH::ShPointer<ArbReg> > RegList;
+  RegList m_reglist;
 
   std::vector<int> m_outputBindings;
   std::vector<int> m_inputBindings;

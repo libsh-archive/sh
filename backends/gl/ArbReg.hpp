@@ -4,6 +4,8 @@
 #include <string>
 #include <iosfwd>
 
+#include "ShRefCount.hpp"
+
 namespace shgl {
 
 /** Possible register types in the ARB spec.
@@ -58,7 +60,7 @@ enum ArbRegBinding {
 
 /** An ARB register.
  */
-struct ArbReg {
+struct ArbReg : public SH::ShRefCountable {
   ArbReg();
   ArbReg(ArbRegType type, int index, std::string name = "");
 

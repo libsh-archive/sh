@@ -159,7 +159,8 @@ bool ArbCode::allocateRegister(const ShVariableNodePtr& var)
   int idx = m_tempRegs.front();
   m_tempRegs.pop_front();
   if (idx + 1 > m_numTemps) m_numTemps = idx + 1;
-  m_registers[var] = ArbReg(SH_ARB_REG_TEMP, idx);
+  m_registers[var] = new ArbReg(SH_ARB_REG_TEMP, idx);
+  m_reglist.push_back(m_registers[var]);
   
   return true;
 }
@@ -171,7 +172,7 @@ void ArbCode::freeRegister(const ShVariableNodePtr& var)
   if (var->uniform()) return;
 
   SH_DEBUG_ASSERT(m_registers.find(var) != m_registers.end());
-  m_tempRegs.push_front(m_registers[var].index);
+  m_tempRegs.push_front(m_registers[var]->index);
 }
 
 void ArbCode::upload()
@@ -223,7 +224,7 @@ void ArbCode::bind()
   // Initialize constants
   for (RegMap::const_iterator I = m_registers.begin(); I != m_registers.end(); ++I) {
     ShVariableNodePtr node = I->first;
-    ArbReg reg = I->second;
+    ArbReg reg = *I->second;
     if (node->hasValues() && reg.type == SH_ARB_REG_PARAM) {
       updateUniform(node);
     }
@@ -260,7 +261,7 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
     return;
   }
     
-  const ArbReg& reg = I->second;
+  const ArbReg& reg = *I->second;
   
   float values[4];
   for (i = 0; i < uniform->size(); i++) {
@@ -291,7 +292,7 @@ std::ostream& ArbCode::printVar(std::ostream& out, bool dest, const ShVariable& 
     out << "<no reg for " << var.name() << ">";
     return out;
   }
-  const ArbReg& reg = I->second;
+  const ArbReg& reg = *I->second;
 
   // Negation
   if (var.neg()) out << '-';
@@ -344,7 +345,7 @@ bool ArbCode::printSamplingInstruction(std::ostream& out, const ArbInst& instr) 
   RegMap::const_iterator texRegIt = m_registers.find(instr.src[1].node());
   SH_DEBUG_ASSERT(texRegIt != m_registers.end());
 
-  const ArbReg& texReg = texRegIt->second;
+  const ArbReg& texReg = *texRegIt->second;
   
   out << "  ";
   out << arbOpInfo[instr.op].name << " ";
@@ -381,34 +382,41 @@ std::ostream& ArbCode::print(std::ostream& out)
 
   // Print register declarations
   
-  for (ShProgramNode::VarList::const_iterator I = m_shader->inputs.begin();
-       I != m_shader->inputs.end(); ++I) {
+//   for (ShProgramNode::VarList::const_iterator I = m_shader->inputs.begin();
+//        I != m_shader->inputs.end(); ++I) {
+//     out << "  ";
+//     m_registers[*I]->printDecl(out);
+//     out << endl;
+//   }
+
+//   for (ShProgramNode::VarList::const_iterator I = m_shader->outputs.begin();
+//        I != m_shader->outputs.end(); ++I) {
+//     out << "  ";
+//     m_registers[*I]->printDecl(out);
+//     out << endl;
+//   }
+
+//   for (ShProgramNode::VarList::const_iterator I = m_shader->uniforms.begin();
+//        I != m_shader->uniforms.end(); ++I) {
+//     out << "  ";
+//     m_registers[*I]->printDecl(out);
+//     out << endl;
+//   }
+
+//   for (ShProgramNode::VarList::const_iterator I = m_shader->constants.begin();
+//        I != m_shader->constants.end(); ++I) {
+//     out << "  ";
+//     m_registers[*I]->printDecl(out);
+//     out << endl;
+//   }
+
+  for (RegList::const_iterator I = m_reglist.begin();
+       I != m_reglist.end(); ++I) {
+    if ((*I)->type == SH_ARB_REG_TEMP) continue;
     out << "  ";
-    m_registers[*I].printDecl(out);
+    (*I)->printDecl(out);
     out << endl;
   }
-
-  for (ShProgramNode::VarList::const_iterator I = m_shader->outputs.begin();
-       I != m_shader->outputs.end(); ++I) {
-    out << "  ";
-    m_registers[*I].printDecl(out);
-    out << endl;
-  }
-
-  for (ShProgramNode::VarList::const_iterator I = m_shader->uniforms.begin();
-       I != m_shader->uniforms.end(); ++I) {
-    out << "  ";
-    m_registers[*I].printDecl(out);
-    out << endl;
-  }
-
-  for (ShProgramNode::VarList::const_iterator I = m_shader->constants.begin();
-       I != m_shader->constants.end(); ++I) {
-    out << "  ";
-    m_registers[*I].printDecl(out);
-    out << endl;
-  }
-
   if (m_numTemps) {
     out << "  TEMP ";
     for (int i = 0; i < m_numTemps; i++) {
@@ -445,14 +453,14 @@ std::ostream& ArbCode::printInputOutputFormat(std::ostream& out) {
   out << "Inputs:" << std::endl;
   for (I = m_shader->inputs.begin(); I != m_shader->inputs.end(); ++I) {
     out << "  ";
-    m_registers[*I].printDecl(out);
+    m_registers[*I]->printDecl(out);
     out << std::endl;
   }
 
   out << "Outputs:" << std::endl;
   for (I = m_shader->outputs.begin(); I != m_shader->outputs.end(); ++I) {
     out << "  ";
-    m_registers[*I].printDecl(out);
+    m_registers[*I]->printDecl(out);
     out << std::endl;
   }
   return out;
@@ -1007,9 +1015,10 @@ void ArbCode::bindSpecial(const ShProgramNode::VarList::const_iterator& begin,
     if (m_registers.find(node) != m_registers.end()) continue;
     if (node->specialType() != specs.semanticType) continue;
     
-    m_registers[node] = ArbReg(type, num++, node->name());
-    m_registers[node].binding = specs.binding;
-    m_registers[node].bindingIndex = bindings.back();
+    m_registers[node] = new ArbReg(type, num++, node->name());
+    m_registers[node]->binding = specs.binding;
+    m_registers[node]->bindingIndex = bindings.back();
+    m_reglist.push_back(m_registers[node]);
     
     bindings.back()++;
     if (bindings.back() == specs.maxBindings) break;
@@ -1029,15 +1038,16 @@ void ArbCode::allocInputs(const ArbLimits& limits)
        I != m_shader->inputs.end(); ++I) {
     ShVariableNodePtr node = *I;
     if (m_registers.find(node) != m_registers.end()) continue;
-    m_registers[node] = ArbReg(SH_ARB_REG_ATTRIB, m_numInputs++, node->name());
+    m_registers[node] = new ArbReg(SH_ARB_REG_ATTRIB, m_numInputs++, node->name());
+    m_reglist.push_back(m_registers[node]);
 
     // Binding
     for (int i = 0; arbBindingSpecs(false, m_unit)[i].binding != SH_ARB_REG_NONE; i++) {
       const ArbBindingSpecs& specs = arbBindingSpecs(false, m_unit)[i];
 
       if (specs.allowGeneric && m_inputBindings[i] < specs.maxBindings) {
-        m_registers[node].binding = specs.binding;
-        m_registers[node].bindingIndex = m_inputBindings[i];
+        m_registers[node]->binding = specs.binding;
+        m_registers[node]->bindingIndex = m_inputBindings[i];
         m_inputBindings[i]++;
         break;
       }
@@ -1058,15 +1068,16 @@ void ArbCode::allocOutputs(const ArbLimits& limits)
        I != m_shader->outputs.end(); ++I) {
     ShVariableNodePtr node = *I;
     if (m_registers.find(node) != m_registers.end()) continue;
-    m_registers[node] = ArbReg(SH_ARB_REG_OUTPUT, m_numOutputs++, node->name());
-
+    m_registers[node] = new ArbReg(SH_ARB_REG_OUTPUT, m_numOutputs++, node->name());
+    m_reglist.push_back(m_registers[node]);
+    
     // Binding
     for (int i = 0; arbBindingSpecs(true, m_unit)[i].binding != SH_ARB_REG_NONE; i++) {
       const ArbBindingSpecs& specs = arbBindingSpecs(true, m_unit)[i];
 
       if (specs.allowGeneric && m_outputBindings[i] < specs.maxBindings) {
-        m_registers[node].binding = specs.binding;
-        m_registers[node].bindingIndex = m_outputBindings[i];
+        m_registers[node]->binding = specs.binding;
+        m_registers[node]->bindingIndex = m_outputBindings[i];
         m_outputBindings[i]++;
         break;
       }
@@ -1078,9 +1089,10 @@ void ArbCode::allocParam(const ArbLimits& limits, const ShVariableNodePtr& node)
 {
   // TODO: Check if we reached maximum
   if (m_registers.find(node) != m_registers.end()) return;
-  m_registers[node] = ArbReg(SH_ARB_REG_PARAM, m_numParams, node->name());
-  m_registers[node].binding = SH_ARB_REG_PARAMLOC;
-  m_registers[node].bindingIndex = m_numParams;
+  m_registers[node] = new ArbReg(SH_ARB_REG_PARAM, m_numParams, node->name());
+  m_registers[node]->binding = SH_ARB_REG_PARAMLOC;
+  m_registers[node]->bindingIndex = m_numParams;
+  m_reglist.push_back(m_registers[node]);
   m_numParams++;
 }
 
@@ -1089,11 +1101,27 @@ void ArbCode::allocConsts(const ArbLimits& limits)
   for (ShProgramNode::VarList::const_iterator I = m_shader->constants.begin();
        I != m_shader->constants.end(); ++I) {
     ShVariableNodePtr node = *I;
-    m_registers[node] = ArbReg(SH_ARB_REG_CONST, m_numConsts, node->name());
-    for (int i = 0; i < 4; i++) {
-      m_registers[node].values[i] = (float)(i < node->size() ? node->getValue(i) : 0.0);
+
+    // TODO: improve efficiency
+    RegMap::const_iterator J;
+    for (J = m_registers.begin(); J != m_registers.end(); ++J) {
+      if (J->second->type != SH_ARB_REG_CONST) continue;
+      int f = 0;
+      for (int i = 0; i < node->size(); i++) {
+        if (J->second->values[i] == node->getValue(i)) f++;
+      }
+      if (f == node->size()) break;
     }
-    m_numConsts++;
+    if (J == m_registers.end()) {
+      m_registers[node] = new ArbReg(SH_ARB_REG_CONST, m_numConsts, node->name());
+      m_reglist.push_back(m_registers[node]);
+      for (int i = 0; i < 4; i++) {
+        m_registers[node]->values[i] = (float)(i < node->size() ? node->getValue(i) : 0.0);
+      }
+      m_numConsts++;
+    } else {
+      m_registers[node] = J->second;
+    }
   }
 }
 
@@ -1135,7 +1163,8 @@ void ArbCode::allocTextures(const ArbLimits& limits)
     ShTextureNodePtr node = *I;
     int index;
     index = m_numTextures;
-    m_registers[node] = ArbReg(SH_ARB_REG_TEXTURE, index, node->name());
+    m_registers[node] = new ArbReg(SH_ARB_REG_TEXTURE, index, node->name());
+    m_reglist.push_back(m_registers[node]);
     m_numTextures++;
   }
 }
@@ -1144,7 +1173,7 @@ void ArbCode::bindTextures()
 {
   for (ShProgramNode::TexList::const_iterator I = m_shader->textures.begin();
        I != m_shader->textures.end(); ++I) {
-    m_textures->bindTexture(*I, GL_TEXTURE0 + m_registers[*I].index);
+    m_textures->bindTexture(*I, GL_TEXTURE0 + m_registers[*I]->index);
   }
 }
 

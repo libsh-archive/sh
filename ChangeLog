@@ -1,3 +1,13 @@
+2004-06-30  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbReg.hpp: A few changes for the constant-joining code.
+
+	* backends/gl/ArbCode.cpp: More constant-joining goodness.
+
+	* backends/gl/ArbCode.hpp: Add constant-joining code. Find
+	constants with the same values and allocate them to the same
+	register. This helps particularily on ATI and Mesa.
+
 2004-06-25  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShClamping.hpp: Added return_type typedefs.
