@@ -30,10 +30,10 @@
 
 #include <string>
 #include "ShError.hpp"
+#include "ShDebug.hpp"
 #include "ShException.hpp"
 #include "ShlaMatrix.hpp"
 #include "ShlaRenderGlobal.hpp"
-#include "ShlaLib.hpp"
 
 namespace Shla {
 
@@ -145,39 +145,42 @@ ShlaVector<VecT, M, N> ShlaBandedMatrix<T, M, N>::operator|( ShlaVector<VecT, M,
       offsetTc = frac( offsetTc );
 
       typename vecGlobal::OutputColorType out;
-      out = vecAccum(tc) + diagTex(tc) * vecTex(offsetTc);
+      out = mad( diagTex(tc), vecTex(offsetTc), vecAccum(tc) ); 
     } SH_END_PROGRAM;
   }
   /* end of static only */
 
-  if( M * N == 1 ) { // handle 1 dimensional matrix
-    ShError( ShException( "Cannot handle dimension 1 matrices" ) ); 
-  }
-
   ShlaVector<VecT, M, N> result;
-
+  ShlaVector<VecT, M, N> blank;
   ShFramebufferPtr oldfb = ShEnvironment::framebuffer;
 
-  vecGlobal::bindDefault( fsh );
   vecTex.attach( v.getMem() );
-  vecGlobal::accumInit( result.getMem() );
+  vecGlobal::accumInit( blank.getMem() );
+  vecGlobal::bindDefault( fsh );
+  printf( "Attaching v\n" );
+  int i = 0;
+  int diagSize = m_diagonal.size();
   for( typename DiagonalMap::iterator diagIt = m_diagonal.begin();
-       diagIt != m_diagonal.end(); ++diagIt ) {
+       diagIt != m_diagonal.end() ; ++diagIt, ++i ) {
 
-    typename DiagonalMap::iterator tempIt = diagIt;
-    if( ++tempIt == m_diagonal.end() ) { 
-      vecGlobal::accumLastLoop( result.getMem() );
-    } else if( diagIt != m_diagonal.begin() ){
+    if( i == diagSize - 1 ) { 
+      if( i == 0 ) {
+        vecGlobal::renderbuf->bind( result.getMem() );
+      } else {
+        vecGlobal::accumLastLoop( result.getMem() );
+      }
+    } else if( i > 0 ) { 
       vecGlobal::accumLoop();
     }
 
     // calculate the i'th column
+    SH_DEBUG_PRINT( "Attaching diagTex for diagonal " << diagIt->first );
     diagTex.attach( diagIt->second.getMem() );
     diag = diagIt->first / (double) M;
 
     vecGlobal::useRenderbuf();
     vecGlobal::drawQuad();
-
+    shDrawBuffer( 0 );
   }
   vecGlobal::detachAll();
   diagTex.attach( 0 ); 

@@ -30,6 +30,7 @@
 
 #include "ShlaVector.hpp"
 #include "ShDebug.hpp"
+#include "ShlaRenderGlobal.hpp"
 
 namespace Shla {
 
@@ -51,8 +52,54 @@ ShlaVector<T, M, N>::~ShlaVector() {
 
 template< typename T, int M, int N >
 ShlaVector<T, M, N>& ShlaVector<T, M, N>::operator=( const ShlaVector<T, M, N> &b ) { 
-  SH_DEBUG_WARN( "Assignment may not work\n" );
-  m_mem = b.m_mem; // TODO should use cloning
+  ShDataMemoryObjectPtr bDataMem= b.m_mem;
+  if( bDataMem ) {
+    ShDataMemoryObjectPtr myDataMem = new ShDataMemoryObject( M, N, 1, T::typesize );
+    float *bData = bDataMem->data();
+    myDataMem->setData( bData );
+    m_mem = myDataMem;
+    delete[] bData;
+  } else {
+#if 0
+    ShUberbufferPtr bUbuf = b.m_mem;
+    if( bUbuf ) {
+      /* only use static variables in the copy shader */ 
+      // TODO switch this to use glCloneMem in backend when that 
+      // entry point is supported
+      typedef ShlaRenderGlobal<T, M, N> global;
+      static ShProgram fsh; 
+      static ShTexture2D<T>& btex = global::op1; 
+      if( !fsh ) {
+        ShEnvironment::boundShader[0] = 0;
+        ShEnvironment::boundShader[1] = 0;
+        fsh = SH_BEGIN_FRAGMENT_PROGRAM { 
+          ShInputTexCoord2f tc; 
+          ShInputPosition4f p;  
+          typename global::OutputColorType out; 
+          out = btex(tc); 
+        } SH_END_PROGRAM;
+      }
+      /* end of static section */
+      btex.attach( bUbuf );  
+      ShFramebufferPtr oldfb = ShEnvironment::framebuffer;
+      
+      ShUberbufferPtr myUbuf = new ShUberbuffer( M, N, 1, T::typesize );
+      global::renderbuf->bind( myUbuf );
+      global::bindDefault( fsh );
+      global::useRenderbuf();
+      global::drawQuad();
+
+      /* restore old state */
+      global::detachAll();
+      shDrawBuffer( oldfb );
+      m_mem = myUbuf;
+    } else {
+      m_mem = 0;
+    } 
+#endif
+    // TODO fix above
+    m_mem = b.m_mem;
+  }
   return *this;
 }
 
@@ -99,9 +146,16 @@ ShUberbufferPtr ShlaVector<T, M, N>::upload() {
     ShDataMemoryObjectPtr dataMem = m_mem;
 
     m_mem = ubuf = new ShUberbuffer( M, N, 1, T::typesize );
+    float *data;
     if( dataMem ) { // if data exists, copy
-      ubuf->setData( dataMem->data() );
-    } // else leave mem contentes undefined
+      data = dataMem->data();
+    } else {
+      data = new float[ M * N * T::typesize ];
+      memset( data, 0, M * N * T::typesize * sizeof( float ) );
+    }
+
+    ubuf->setData( data ); 
+    delete[] data;
   }
   return ubuf;
 }

@@ -207,11 +207,7 @@ void ShlaRenderGlobal<T, M, N>::accumLoop() {
 
   ShUberbufferPtr temp = accumRead;
   accumRead = accumWrite;
-  /*
   accumWrite = temp;
-  */
-  // try without swapping
-  accumWrite = new ShUberbuffer( M, N, 1, T::typesize ); 
 
   printf( "Attaching accumRead: %d to tex\n", accumRead->mem() );
   accum.attach( accumRead );
