@@ -1,5 +1,22 @@
 2004-10-08  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShInstructions.cpp: Inline helper functions.
+
+	* src/ShRefCountImpl.hpp: More inlining.
+
+	* src/ShVariableNode.cpp (ShVariableNode): Only construct m_eval
+	if we have to (i.e. in functions that use it).
+
+	* src/ShSwizzle.hpp: Use a simple array instead of std::vector.
+
+	* src/ShGenericImpl.hpp: Inline lots of stuff.
+
+	* src/ShMeta.hpp: Inline default constructor.
+
+	* src/scripts/ShAttribImpl.hpp.py: More inlining.
+
+	* src/scripts/semantic.py: Inline those member functions.
+
 	* src/ShLib.hpp (SH_SHLIB_USUAL_NON_UNIT_OPS_RETTYPE): Add all
 	versions of operator/.
 

@@ -84,7 +84,7 @@ ShVariableNode::ShVariableNode(ShBindingType kind, int size, ShSemanticType type
     m_kind(kind), m_specialType(type),
     m_size(size), m_id(m_maxID++), m_locked(0),
     m_values(0),
-    m_eval(new ShVariableNodeEval)
+    m_eval(0)
 {
   if (m_uniform || m_kind == SH_CONST) addValues();
   switch (m_kind) {
@@ -303,6 +303,7 @@ void ShVariableNode::addValues()
 void ShVariableNode::attach(const ShProgramNodePtr& evaluator)
 {
   SH_DEBUG_ASSERT(uniform());
+  if (!m_eval) m_eval = new ShVariableNodeEval;
   // TODO: Check that the program really evaluates this variable.
 
   detach_dependencies();
@@ -322,6 +323,7 @@ void ShVariableNode::attach(const ShProgramNodePtr& evaluator)
 
 void ShVariableNode::update()
 {
+  if (!m_eval) m_eval = new ShVariableNodeEval;
   if (!m_eval->value) return;
 
   evaluate(m_eval->value);
@@ -329,6 +331,7 @@ void ShVariableNode::update()
 
 const ShPointer<ShProgramNode>& ShVariableNode::evaluator() const
 {
+  if (!m_eval) m_eval = new ShVariableNodeEval;
   return m_eval->value;
 }
 
@@ -368,6 +371,7 @@ void ShVariableNode::update_dependents()
 
 void ShVariableNode::detach_dependencies()
 {
+  if (!m_eval) return;
   if (m_eval->value) {
     for (ShProgramNode::VarList::const_iterator I = m_eval->value->uniforms_begin();
          I != m_eval->value->uniforms_end(); ++I) {

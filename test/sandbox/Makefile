@@ -4,8 +4,10 @@ OBJECTS = $(SOURCES:.cpp=.o)
 DEPENDS = $(SOURCES:.cpp=.d)
 CPPFLAGS = -I../../src 
 #CXXFLAGS = -g -O0 -Wall
-CXXFLAGS = -pg -g -O2 -Wall
-LDFLAGS = ../../src/libsh.la -lGL -pg
+CXXFLAGS = -g -O2 -Wall
+# LDFLAGS = ../../src/libsh.la -lGL
+
+LDFLAGS = ../../src/libsh.la
 
 all:
 

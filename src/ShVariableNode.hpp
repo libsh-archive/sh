@@ -167,7 +167,7 @@ protected:
   ValueType m_lowBound, m_highBound;
 
   // Dependent uniform evaluation
-  ShVariableNodeEval* m_eval;
+  mutable ShVariableNodeEval* m_eval;
   std::list<ShVariableNode*> m_dependents;
   
   static int m_maxID;

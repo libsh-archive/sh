@@ -23,6 +23,7 @@ class Impl(semantic.Impl):
         other = args[0][1]
 
         common.inprint(self.tpl(size))
+        common.inprint("inline")
         common.inprint(self.tplcls(size) + "::" + self.name + "(" + ', '.join([' '.join(x) for x in args]) + ")")
         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
                        "(new ShVariableNode(Binding, " + self.sizevar(size) + "))")
@@ -46,6 +47,7 @@ class Impl(semantic.Impl):
 
     def scalarcons(self, size, type):
         common.inprint(self.tpl(size))
+        common.inprint("inline")
         args = [[type, "s" + str(i)] for i in range(0, size)]
         common.inprint(self.tplcls(size) + "::" + self.name + "(" + ', '.join([' '.join(x) for x in args]) + ")")
         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
@@ -78,6 +80,7 @@ class Impl(semantic.Impl):
 
     def constructors(self, size = 0):
         common.inprint(self.tpl(size))
+        common.inprint("inline")
         common.inprint(self.tplcls(size) + "::" + self.name + "()")
         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
                        "(new ShVariableNode(Binding, " + self.sizevar(size) + "))")
@@ -98,6 +101,7 @@ class Impl(semantic.Impl):
         self.copycons([["const " + self.tplcls(size) + "&", "other"]], size)
 
         common.inprint(self.tpl(size))
+        common.inprint("inline")
         common.inprint(self.tplcls(size) + "::" + self.name + "(const ShVariableNodePtr& node,")
         common.inprint("  const ShSwizzle& swizzle, bool neg)")
         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" + "(node, swizzle, neg)")
@@ -108,6 +112,7 @@ class Impl(semantic.Impl):
         common.inprint("")
 
         common.inprint(self.tpl(size))
+        common.inprint("inline")
         common.inprint(self.tplcls(size) + "::" + self.name + "(T data[" + self.sizevar(size) + "])")
         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
                        "(new ShVariableNode(Binding, " + self.sizevar(size) + "))")

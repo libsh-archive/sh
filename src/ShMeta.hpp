@@ -36,7 +36,10 @@ namespace SH {
 class
 SH_DLLEXPORT ShMeta {
 public:
-  ShMeta();
+  ShMeta()
+    : m_has_name(false), m_internal(false)
+  {
+  }
   virtual ~ShMeta();
   
   virtual std::string name() const;

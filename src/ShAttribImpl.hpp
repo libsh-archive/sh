@@ -42,12 +42,14 @@
 namespace SH {
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<N, Binding, T, Swizzled>::ShAttrib()
   : ShGeneric<N, T>(new ShVariableNode(Binding, N))
 {
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShGeneric<N, T>& other)
   : ShGeneric<N, T>(new ShVariableNode(Binding, N))
 {
@@ -55,6 +57,7 @@ ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShGeneric<N, T>& other)
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShAttrib<N, Binding, T, Swizzled>& other)
   : ShGeneric<N, T>(new ShVariableNode(Binding, N))
 {
@@ -62,6 +65,7 @@ ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShAttrib<N, Binding, T, Swizzl
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
   const ShSwizzle& swizzle, bool neg)
   : ShGeneric<N, T>(node, swizzle, neg)
@@ -69,6 +73,7 @@ ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<N, Binding, T, Swizzled>::ShAttrib(T data[N])
   : ShGeneric<N, T>(new ShVariableNode(Binding, N))
 {
@@ -80,11 +85,13 @@ ShAttrib<N, Binding, T, Swizzled>::ShAttrib(T data[N])
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<N, Binding, T, Swizzled>::~ShAttrib()
 {
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator=(const ShGeneric<N, T>& other)
 {
@@ -93,6 +100,7 @@ ShAttrib<N, Binding, T, Swizzled>::operator=(const ShGeneric<N, T>& other)
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator=(const ShAttrib<N, Binding, T, Swizzled>& other)
 {
@@ -101,6 +109,7 @@ ShAttrib<N, Binding, T, Swizzled>::operator=(const ShAttrib<N, Binding, T, Swizz
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 {
@@ -109,6 +118,7 @@ ShAttrib<N, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator+=(const ShGeneric<N, T>& right)
 {
@@ -117,6 +127,7 @@ ShAttrib<N, Binding, T, Swizzled>::operator+=(const ShGeneric<N, T>& right)
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator-=(const ShGeneric<N, T>& right)
 {
@@ -125,6 +136,7 @@ ShAttrib<N, Binding, T, Swizzled>::operator-=(const ShGeneric<N, T>& right)
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator*=(const ShGeneric<N, T>& right)
 {
@@ -133,6 +145,7 @@ ShAttrib<N, Binding, T, Swizzled>::operator*=(const ShGeneric<N, T>& right)
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator/=(const ShGeneric<N, T>& right)
 {
@@ -141,6 +154,7 @@ ShAttrib<N, Binding, T, Swizzled>::operator/=(const ShGeneric<N, T>& right)
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator%=(const ShGeneric<N, T>& right)
 {
@@ -149,6 +163,7 @@ ShAttrib<N, Binding, T, Swizzled>::operator%=(const ShGeneric<N, T>& right)
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator+=(T right)
 {
@@ -157,6 +172,7 @@ ShAttrib<N, Binding, T, Swizzled>::operator+=(T right)
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator-=(T right)
 {
@@ -165,6 +181,7 @@ ShAttrib<N, Binding, T, Swizzled>::operator-=(T right)
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator*=(T right)
 {
@@ -173,6 +190,7 @@ ShAttrib<N, Binding, T, Swizzled>::operator*=(T right)
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator/=(T right)
 {
@@ -181,6 +199,7 @@ ShAttrib<N, Binding, T, Swizzled>::operator/=(T right)
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator%=(T right)
 {
@@ -189,6 +208,7 @@ ShAttrib<N, Binding, T, Swizzled>::operator%=(T right)
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T>& right)
 {
@@ -197,6 +217,7 @@ ShAttrib<N, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T>& right)
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator-=(const ShGeneric<1, T>& right)
 {
@@ -205,6 +226,7 @@ ShAttrib<N, Binding, T, Swizzled>::operator-=(const ShGeneric<1, T>& right)
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T>& right)
 {
@@ -213,6 +235,7 @@ ShAttrib<N, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T>& right)
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T>& right)
 {
@@ -221,6 +244,7 @@ ShAttrib<N, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T>& right)
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<N, Binding, T, Swizzled>&
 ShAttrib<N, Binding, T, Swizzled>::operator%=(const ShGeneric<1, T>& right)
 {
@@ -229,6 +253,7 @@ ShAttrib<N, Binding, T, Swizzled>::operator%=(const ShGeneric<1, T>& right)
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, true>
 ShAttrib<N, Binding, T, Swizzled>::operator()(int s0) const
 {
@@ -236,6 +261,7 @@ ShAttrib<N, Binding, T, Swizzled>::operator()(int s0) const
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, true>
 ShAttrib<N, Binding, T, Swizzled>::operator()(int s0, int s1) const
 {
@@ -243,6 +269,7 @@ ShAttrib<N, Binding, T, Swizzled>::operator()(int s0, int s1) const
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, true>
 ShAttrib<N, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
 {
@@ -250,6 +277,7 @@ ShAttrib<N, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, true>
 ShAttrib<N, Binding, T, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
 {
@@ -265,6 +293,7 @@ ShAttrib<N, Binding, T, Swizzled>::swiz(int indices[]) const
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, true>
 ShAttrib<N, Binding, T, Swizzled>::operator[](int s0) const
 {
@@ -279,12 +308,14 @@ ShAttrib<N, Binding, T, Swizzled>::operator-() const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, Swizzled>::ShAttrib()
   : ShGeneric<1, T>(new ShVariableNode(Binding, 1))
 {
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T>& other)
   : ShGeneric<1, T>(new ShVariableNode(Binding, 1))
 {
@@ -292,6 +323,7 @@ ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T>& other)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShAttrib<1, Binding, T, Swizzled>& other)
   : ShGeneric<1, T>(new ShVariableNode(Binding, 1))
 {
@@ -299,6 +331,7 @@ ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShAttrib<1, Binding, T, Swizzl
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
   const ShSwizzle& swizzle, bool neg)
   : ShGeneric<1, T>(node, swizzle, neg)
@@ -306,6 +339,7 @@ ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, Swizzled>::ShAttrib(T data[1])
   : ShGeneric<1, T>(new ShVariableNode(Binding, 1))
 {
@@ -317,6 +351,7 @@ ShAttrib<1, Binding, T, Swizzled>::ShAttrib(T data[1])
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, Swizzled>::ShAttrib(T s0)
   : ShGeneric<1, T>(new ShVariableNode(Binding, 1))
 {
@@ -328,11 +363,13 @@ ShAttrib<1, Binding, T, Swizzled>::ShAttrib(T s0)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, Swizzled>::~ShAttrib()
 {
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, Swizzled>&
 ShAttrib<1, Binding, T, Swizzled>::operator=(const ShGeneric<1, T>& other)
 {
@@ -341,6 +378,7 @@ ShAttrib<1, Binding, T, Swizzled>::operator=(const ShGeneric<1, T>& other)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, Swizzled>&
 ShAttrib<1, Binding, T, Swizzled>::operator=(const ShAttrib<1, Binding, T, Swizzled>& other)
 {
@@ -349,6 +387,7 @@ ShAttrib<1, Binding, T, Swizzled>::operator=(const ShAttrib<1, Binding, T, Swizz
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, Swizzled>&
 ShAttrib<1, Binding, T, Swizzled>::operator=(T other)
 {
@@ -357,6 +396,7 @@ ShAttrib<1, Binding, T, Swizzled>::operator=(T other)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, Swizzled>&
 ShAttrib<1, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 {
@@ -365,6 +405,7 @@ ShAttrib<1, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, Swizzled>&
 ShAttrib<1, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T>& right)
 {
@@ -373,6 +414,7 @@ ShAttrib<1, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, Swizzled>&
 ShAttrib<1, Binding, T, Swizzled>::operator-=(const ShGeneric<1, T>& right)
 {
@@ -381,6 +423,7 @@ ShAttrib<1, Binding, T, Swizzled>::operator-=(const ShGeneric<1, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, Swizzled>&
 ShAttrib<1, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T>& right)
 {
@@ -389,6 +432,7 @@ ShAttrib<1, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, Swizzled>&
 ShAttrib<1, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T>& right)
 {
@@ -397,6 +441,7 @@ ShAttrib<1, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, Swizzled>&
 ShAttrib<1, Binding, T, Swizzled>::operator%=(const ShGeneric<1, T>& right)
 {
@@ -405,6 +450,7 @@ ShAttrib<1, Binding, T, Swizzled>::operator%=(const ShGeneric<1, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, Swizzled>&
 ShAttrib<1, Binding, T, Swizzled>::operator+=(T right)
 {
@@ -413,6 +459,7 @@ ShAttrib<1, Binding, T, Swizzled>::operator+=(T right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, Swizzled>&
 ShAttrib<1, Binding, T, Swizzled>::operator-=(T right)
 {
@@ -421,6 +468,7 @@ ShAttrib<1, Binding, T, Swizzled>::operator-=(T right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, Swizzled>&
 ShAttrib<1, Binding, T, Swizzled>::operator*=(T right)
 {
@@ -429,6 +477,7 @@ ShAttrib<1, Binding, T, Swizzled>::operator*=(T right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, Swizzled>&
 ShAttrib<1, Binding, T, Swizzled>::operator/=(T right)
 {
@@ -437,6 +486,7 @@ ShAttrib<1, Binding, T, Swizzled>::operator/=(T right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, Swizzled>&
 ShAttrib<1, Binding, T, Swizzled>::operator%=(T right)
 {
@@ -445,6 +495,7 @@ ShAttrib<1, Binding, T, Swizzled>::operator%=(T right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, true>
 ShAttrib<1, Binding, T, Swizzled>::operator()(int s0) const
 {
@@ -452,6 +503,7 @@ ShAttrib<1, Binding, T, Swizzled>::operator()(int s0) const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, true>
 ShAttrib<1, Binding, T, Swizzled>::operator()(int s0, int s1) const
 {
@@ -459,6 +511,7 @@ ShAttrib<1, Binding, T, Swizzled>::operator()(int s0, int s1) const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, true>
 ShAttrib<1, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
 {
@@ -466,6 +519,7 @@ ShAttrib<1, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, true>
 ShAttrib<1, Binding, T, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
 {
@@ -481,6 +535,7 @@ ShAttrib<1, Binding, T, Swizzled>::swiz(int indices[]) const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, true>
 ShAttrib<1, Binding, T, Swizzled>::operator[](int s0) const
 {
@@ -495,12 +550,14 @@ ShAttrib<1, Binding, T, Swizzled>::operator-() const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>::ShAttrib()
   : ShGeneric<2, T>(new ShVariableNode(Binding, 2))
 {
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShGeneric<2, T>& other)
   : ShGeneric<2, T>(new ShVariableNode(Binding, 2))
 {
@@ -508,6 +565,7 @@ ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShGeneric<2, T>& other)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShAttrib<2, Binding, T, Swizzled>& other)
   : ShGeneric<2, T>(new ShVariableNode(Binding, 2))
 {
@@ -515,6 +573,7 @@ ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShAttrib<2, Binding, T, Swizzl
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
   const ShSwizzle& swizzle, bool neg)
   : ShGeneric<2, T>(node, swizzle, neg)
@@ -522,6 +581,7 @@ ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>::ShAttrib(T data[2])
   : ShGeneric<2, T>(new ShVariableNode(Binding, 2))
 {
@@ -533,6 +593,7 @@ ShAttrib<2, Binding, T, Swizzled>::ShAttrib(T data[2])
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>::ShAttrib(T s0, T s1)
   : ShGeneric<2, T>(new ShVariableNode(Binding, 2))
 {
@@ -546,6 +607,7 @@ ShAttrib<2, Binding, T, Swizzled>::ShAttrib(T s0, T s1)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T>& s0, const ShGeneric<1, T>& s1)
   : ShGeneric<2, T>(new ShVariableNode(Binding, 2))
 {
@@ -561,11 +623,13 @@ ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T>& s0, const ShG
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>::~ShAttrib()
 {
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator=(const ShGeneric<2, T>& other)
 {
@@ -574,6 +638,7 @@ ShAttrib<2, Binding, T, Swizzled>::operator=(const ShGeneric<2, T>& other)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator=(const ShAttrib<2, Binding, T, Swizzled>& other)
 {
@@ -582,6 +647,7 @@ ShAttrib<2, Binding, T, Swizzled>::operator=(const ShAttrib<2, Binding, T, Swizz
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 {
@@ -590,6 +656,7 @@ ShAttrib<2, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator+=(const ShGeneric<2, T>& right)
 {
@@ -598,6 +665,7 @@ ShAttrib<2, Binding, T, Swizzled>::operator+=(const ShGeneric<2, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator-=(const ShGeneric<2, T>& right)
 {
@@ -606,6 +674,7 @@ ShAttrib<2, Binding, T, Swizzled>::operator-=(const ShGeneric<2, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator*=(const ShGeneric<2, T>& right)
 {
@@ -614,6 +683,7 @@ ShAttrib<2, Binding, T, Swizzled>::operator*=(const ShGeneric<2, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator/=(const ShGeneric<2, T>& right)
 {
@@ -622,6 +692,7 @@ ShAttrib<2, Binding, T, Swizzled>::operator/=(const ShGeneric<2, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator%=(const ShGeneric<2, T>& right)
 {
@@ -630,6 +701,7 @@ ShAttrib<2, Binding, T, Swizzled>::operator%=(const ShGeneric<2, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator+=(T right)
 {
@@ -638,6 +710,7 @@ ShAttrib<2, Binding, T, Swizzled>::operator+=(T right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator-=(T right)
 {
@@ -646,6 +719,7 @@ ShAttrib<2, Binding, T, Swizzled>::operator-=(T right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator*=(T right)
 {
@@ -654,6 +728,7 @@ ShAttrib<2, Binding, T, Swizzled>::operator*=(T right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator/=(T right)
 {
@@ -662,6 +737,7 @@ ShAttrib<2, Binding, T, Swizzled>::operator/=(T right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator%=(T right)
 {
@@ -670,6 +746,7 @@ ShAttrib<2, Binding, T, Swizzled>::operator%=(T right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T>& right)
 {
@@ -678,6 +755,7 @@ ShAttrib<2, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator-=(const ShGeneric<1, T>& right)
 {
@@ -686,6 +764,7 @@ ShAttrib<2, Binding, T, Swizzled>::operator-=(const ShGeneric<1, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T>& right)
 {
@@ -694,6 +773,7 @@ ShAttrib<2, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T>& right)
 {
@@ -702,6 +782,7 @@ ShAttrib<2, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator%=(const ShGeneric<1, T>& right)
 {
@@ -710,6 +791,7 @@ ShAttrib<2, Binding, T, Swizzled>::operator%=(const ShGeneric<1, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, true>
 ShAttrib<2, Binding, T, Swizzled>::operator()(int s0) const
 {
@@ -717,6 +799,7 @@ ShAttrib<2, Binding, T, Swizzled>::operator()(int s0) const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, true>
 ShAttrib<2, Binding, T, Swizzled>::operator()(int s0, int s1) const
 {
@@ -724,6 +807,7 @@ ShAttrib<2, Binding, T, Swizzled>::operator()(int s0, int s1) const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, true>
 ShAttrib<2, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
 {
@@ -731,6 +815,7 @@ ShAttrib<2, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, true>
 ShAttrib<2, Binding, T, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
 {
@@ -746,6 +831,7 @@ ShAttrib<2, Binding, T, Swizzled>::swiz(int indices[]) const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, true>
 ShAttrib<2, Binding, T, Swizzled>::operator[](int s0) const
 {
@@ -760,12 +846,14 @@ ShAttrib<2, Binding, T, Swizzled>::operator-() const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>::ShAttrib()
   : ShGeneric<3, T>(new ShVariableNode(Binding, 3))
 {
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShGeneric<3, T>& other)
   : ShGeneric<3, T>(new ShVariableNode(Binding, 3))
 {
@@ -773,6 +861,7 @@ ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShGeneric<3, T>& other)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShAttrib<3, Binding, T, Swizzled>& other)
   : ShGeneric<3, T>(new ShVariableNode(Binding, 3))
 {
@@ -780,6 +869,7 @@ ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShAttrib<3, Binding, T, Swizzl
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
   const ShSwizzle& swizzle, bool neg)
   : ShGeneric<3, T>(node, swizzle, neg)
@@ -787,6 +877,7 @@ ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>::ShAttrib(T data[3])
   : ShGeneric<3, T>(new ShVariableNode(Binding, 3))
 {
@@ -798,6 +889,7 @@ ShAttrib<3, Binding, T, Swizzled>::ShAttrib(T data[3])
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>::ShAttrib(T s0, T s1, T s2)
   : ShGeneric<3, T>(new ShVariableNode(Binding, 3))
 {
@@ -813,6 +905,7 @@ ShAttrib<3, Binding, T, Swizzled>::ShAttrib(T s0, T s1, T s2)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T>& s0, const ShGeneric<1, T>& s1, const ShGeneric<1, T>& s2)
   : ShGeneric<3, T>(new ShVariableNode(Binding, 3))
 {
@@ -831,11 +924,13 @@ ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T>& s0, const ShG
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>::~ShAttrib()
 {
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator=(const ShGeneric<3, T>& other)
 {
@@ -844,6 +939,7 @@ ShAttrib<3, Binding, T, Swizzled>::operator=(const ShGeneric<3, T>& other)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator=(const ShAttrib<3, Binding, T, Swizzled>& other)
 {
@@ -852,6 +948,7 @@ ShAttrib<3, Binding, T, Swizzled>::operator=(const ShAttrib<3, Binding, T, Swizz
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 {
@@ -860,6 +957,7 @@ ShAttrib<3, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator+=(const ShGeneric<3, T>& right)
 {
@@ -868,6 +966,7 @@ ShAttrib<3, Binding, T, Swizzled>::operator+=(const ShGeneric<3, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator-=(const ShGeneric<3, T>& right)
 {
@@ -876,6 +975,7 @@ ShAttrib<3, Binding, T, Swizzled>::operator-=(const ShGeneric<3, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator*=(const ShGeneric<3, T>& right)
 {
@@ -884,6 +984,7 @@ ShAttrib<3, Binding, T, Swizzled>::operator*=(const ShGeneric<3, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator/=(const ShGeneric<3, T>& right)
 {
@@ -892,6 +993,7 @@ ShAttrib<3, Binding, T, Swizzled>::operator/=(const ShGeneric<3, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator%=(const ShGeneric<3, T>& right)
 {
@@ -900,6 +1002,7 @@ ShAttrib<3, Binding, T, Swizzled>::operator%=(const ShGeneric<3, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator+=(T right)
 {
@@ -908,6 +1011,7 @@ ShAttrib<3, Binding, T, Swizzled>::operator+=(T right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator-=(T right)
 {
@@ -916,6 +1020,7 @@ ShAttrib<3, Binding, T, Swizzled>::operator-=(T right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator*=(T right)
 {
@@ -924,6 +1029,7 @@ ShAttrib<3, Binding, T, Swizzled>::operator*=(T right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator/=(T right)
 {
@@ -932,6 +1038,7 @@ ShAttrib<3, Binding, T, Swizzled>::operator/=(T right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator%=(T right)
 {
@@ -940,6 +1047,7 @@ ShAttrib<3, Binding, T, Swizzled>::operator%=(T right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T>& right)
 {
@@ -948,6 +1056,7 @@ ShAttrib<3, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator-=(const ShGeneric<1, T>& right)
 {
@@ -956,6 +1065,7 @@ ShAttrib<3, Binding, T, Swizzled>::operator-=(const ShGeneric<1, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T>& right)
 {
@@ -964,6 +1074,7 @@ ShAttrib<3, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T>& right)
 {
@@ -972,6 +1083,7 @@ ShAttrib<3, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, Swizzled>&
 ShAttrib<3, Binding, T, Swizzled>::operator%=(const ShGeneric<1, T>& right)
 {
@@ -980,6 +1092,7 @@ ShAttrib<3, Binding, T, Swizzled>::operator%=(const ShGeneric<1, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, true>
 ShAttrib<3, Binding, T, Swizzled>::operator()(int s0) const
 {
@@ -987,6 +1100,7 @@ ShAttrib<3, Binding, T, Swizzled>::operator()(int s0) const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, true>
 ShAttrib<3, Binding, T, Swizzled>::operator()(int s0, int s1) const
 {
@@ -994,6 +1108,7 @@ ShAttrib<3, Binding, T, Swizzled>::operator()(int s0, int s1) const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, true>
 ShAttrib<3, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
 {
@@ -1001,6 +1116,7 @@ ShAttrib<3, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, true>
 ShAttrib<3, Binding, T, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
 {
@@ -1016,6 +1132,7 @@ ShAttrib<3, Binding, T, Swizzled>::swiz(int indices[]) const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, true>
 ShAttrib<3, Binding, T, Swizzled>::operator[](int s0) const
 {
@@ -1030,12 +1147,14 @@ ShAttrib<3, Binding, T, Swizzled>::operator-() const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>::ShAttrib()
   : ShGeneric<4, T>(new ShVariableNode(Binding, 4))
 {
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShGeneric<4, T>& other)
   : ShGeneric<4, T>(new ShVariableNode(Binding, 4))
 {
@@ -1043,6 +1162,7 @@ ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShGeneric<4, T>& other)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShAttrib<4, Binding, T, Swizzled>& other)
   : ShGeneric<4, T>(new ShVariableNode(Binding, 4))
 {
@@ -1050,6 +1170,7 @@ ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShAttrib<4, Binding, T, Swizzl
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
   const ShSwizzle& swizzle, bool neg)
   : ShGeneric<4, T>(node, swizzle, neg)
@@ -1057,6 +1178,7 @@ ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShVariableNodePtr& node,
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>::ShAttrib(T data[4])
   : ShGeneric<4, T>(new ShVariableNode(Binding, 4))
 {
@@ -1068,6 +1190,7 @@ ShAttrib<4, Binding, T, Swizzled>::ShAttrib(T data[4])
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>::ShAttrib(T s0, T s1, T s2, T s3)
   : ShGeneric<4, T>(new ShVariableNode(Binding, 4))
 {
@@ -1085,6 +1208,7 @@ ShAttrib<4, Binding, T, Swizzled>::ShAttrib(T s0, T s1, T s2, T s3)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T>& s0, const ShGeneric<1, T>& s1, const ShGeneric<1, T>& s2, const ShGeneric<1, T>& s3)
   : ShGeneric<4, T>(new ShVariableNode(Binding, 4))
 {
@@ -1106,11 +1230,13 @@ ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T>& s0, const ShG
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>::~ShAttrib()
 {
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator=(const ShGeneric<4, T>& other)
 {
@@ -1119,6 +1245,7 @@ ShAttrib<4, Binding, T, Swizzled>::operator=(const ShGeneric<4, T>& other)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator=(const ShAttrib<4, Binding, T, Swizzled>& other)
 {
@@ -1127,6 +1254,7 @@ ShAttrib<4, Binding, T, Swizzled>::operator=(const ShAttrib<4, Binding, T, Swizz
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 {
@@ -1135,6 +1263,7 @@ ShAttrib<4, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator+=(const ShGeneric<4, T>& right)
 {
@@ -1143,6 +1272,7 @@ ShAttrib<4, Binding, T, Swizzled>::operator+=(const ShGeneric<4, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator-=(const ShGeneric<4, T>& right)
 {
@@ -1151,6 +1281,7 @@ ShAttrib<4, Binding, T, Swizzled>::operator-=(const ShGeneric<4, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator*=(const ShGeneric<4, T>& right)
 {
@@ -1159,6 +1290,7 @@ ShAttrib<4, Binding, T, Swizzled>::operator*=(const ShGeneric<4, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator/=(const ShGeneric<4, T>& right)
 {
@@ -1167,6 +1299,7 @@ ShAttrib<4, Binding, T, Swizzled>::operator/=(const ShGeneric<4, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator%=(const ShGeneric<4, T>& right)
 {
@@ -1175,6 +1308,7 @@ ShAttrib<4, Binding, T, Swizzled>::operator%=(const ShGeneric<4, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator+=(T right)
 {
@@ -1183,6 +1317,7 @@ ShAttrib<4, Binding, T, Swizzled>::operator+=(T right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator-=(T right)
 {
@@ -1191,6 +1326,7 @@ ShAttrib<4, Binding, T, Swizzled>::operator-=(T right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator*=(T right)
 {
@@ -1199,6 +1335,7 @@ ShAttrib<4, Binding, T, Swizzled>::operator*=(T right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator/=(T right)
 {
@@ -1207,6 +1344,7 @@ ShAttrib<4, Binding, T, Swizzled>::operator/=(T right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator%=(T right)
 {
@@ -1215,6 +1353,7 @@ ShAttrib<4, Binding, T, Swizzled>::operator%=(T right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T>& right)
 {
@@ -1223,6 +1362,7 @@ ShAttrib<4, Binding, T, Swizzled>::operator+=(const ShGeneric<1, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator-=(const ShGeneric<1, T>& right)
 {
@@ -1231,6 +1371,7 @@ ShAttrib<4, Binding, T, Swizzled>::operator-=(const ShGeneric<1, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T>& right)
 {
@@ -1239,6 +1380,7 @@ ShAttrib<4, Binding, T, Swizzled>::operator*=(const ShGeneric<1, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T>& right)
 {
@@ -1247,6 +1389,7 @@ ShAttrib<4, Binding, T, Swizzled>::operator/=(const ShGeneric<1, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator%=(const ShGeneric<1, T>& right)
 {
@@ -1255,6 +1398,7 @@ ShAttrib<4, Binding, T, Swizzled>::operator%=(const ShGeneric<1, T>& right)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, true>
 ShAttrib<4, Binding, T, Swizzled>::operator()(int s0) const
 {
@@ -1262,6 +1406,7 @@ ShAttrib<4, Binding, T, Swizzled>::operator()(int s0) const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<2, Binding, T, true>
 ShAttrib<4, Binding, T, Swizzled>::operator()(int s0, int s1) const
 {
@@ -1269,6 +1414,7 @@ ShAttrib<4, Binding, T, Swizzled>::operator()(int s0, int s1) const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<3, Binding, T, true>
 ShAttrib<4, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
 {
@@ -1276,6 +1422,7 @@ ShAttrib<4, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<4, Binding, T, true>
 ShAttrib<4, Binding, T, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
 {
@@ -1291,6 +1438,7 @@ ShAttrib<4, Binding, T, Swizzled>::swiz(int indices[]) const
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
 ShAttrib<1, Binding, T, true>
 ShAttrib<4, Binding, T, Swizzled>::operator[](int s0) const
 {
