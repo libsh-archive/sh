@@ -39,13 +39,13 @@ namespace SH {
 
 template<typename T>
 ShChannel<T>::ShChannel()
-  : m_node(new ShChannelNode(T::special_type, T::typesize))
+  : m_node(new ShChannelNode(T::semantic_type, T::typesize))
 {
 }
 
 template<typename T>
 ShChannel<T>::ShChannel(const ShMemoryPtr& memory, int count)
-  : m_node(new ShChannelNode(T::special_type, T::typesize, memory, count))
+  : m_node(new ShChannelNode(T::semantic_type, T::typesize, memory, count))
 {
 }
 

@@ -1,5 +1,8 @@
 2004-04-13  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShChannelImpl.hpp (ShChannel): Use semantic_type instead of
+	special_type.
+
 	* src/scripts/semantic.py (Class.declare_sized): Don't include
 	doxygen comments for specializations.
 
