@@ -21,42 +21,49 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef GLSL_HPP
-#define GLSL_HPP
+#ifndef GLSLSET_HPP
+#define GLSLSET_HPP
 
-#include <string>
-#include "GlBackend.hpp"
 #include "ShBackend.hpp"
-#include "ShProgram.hpp"
-#include "ShException.hpp"
 
 namespace shgl {
 
-class GlslCodeStrategy : public CodeStrategy {
+class GlslCode;
+
+class GlslSet : public SH::ShBackendSet {
 public:
-  GlslCodeStrategy(void);
+  GlslSet();
+  GlslSet(const SH::ShPointer<GlslCode>& code);
+  GlslSet(const SH::ShProgramSet& s);
+  GlslSet(const GlslSet& s);
+  ~GlslSet();
+
+  GlslSet& operator=(const GlslSet& s);
   
-  SH::ShBackendCodePtr generate(const std::string& target,
-                                const SH::ShProgramNodeCPtr& shader,
-                                TextureStrategy* textures);
-  SH::ShBackendSetPtr generate_set(const SH::ShProgramSet& s);
-  bool use_default_set() const;
+  void link();
+  void bind();
+  void unbind();
+
+  bool empty() const;
   
-  GlslCodeStrategy* create(void);
+  void attach(const SH::ShPointer<GlslCode>& code);
+  void detach(const SH::ShPointer<GlslCode>& code);
+  void replace(const SH::ShPointer<GlslCode>& code);
+
+  // Currently bound set
+  static GlslSet* current() { return m_current; }
+  
+private:
+  SH::ShPointer<GlslCode> m_shaders[2];
+  GLhandleARB m_arb_program;
+
+  bool m_linked, m_bound;
+
+  static GlslSet* m_current;
 };
 
-unsigned int glslTarget(const std::string& unit);
-
-class GlslException : public SH::ShBackendException {
-public:
-  GlslException(const std::string& message);
-};
-
-enum GlslProgramType { SH_GLSL_FP, SH_GLSL_VP }; 
-
-void print_infolog(GLhandleARB obj);
-void print_shader_source(GLhandleARB shader);
+typedef SH::ShPointer<GlslSet> GlslSetPtr;
+typedef SH::ShPointer<const GlslSet> GlslSetCPtr;
 
 }
-
 #endif
