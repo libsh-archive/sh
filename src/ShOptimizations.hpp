@@ -2,6 +2,7 @@
 #define SHOPTIMIZATIONS_HPP
 
 #include "ShProgram.hpp"
+#include "ShInfo.hpp"
 #include "ShStatement.hpp"
 #include <vector>
 #include <set>
@@ -55,10 +56,10 @@ void propagate_constants(ShProgram& p);
 
 struct 
 SH_DLLEXPORT
-ValueTracking : public ShStatementInfo {
+ValueTracking : public ShInfo {
   ValueTracking(ShStatement* stmt);
 
-  ShStatementInfo* clone() const;
+  ShInfo* clone() const;
   
   struct Def {
     Def(ShStatement* stmt, int index)

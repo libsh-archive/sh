@@ -28,6 +28,7 @@
 #include <string>
 #include "ShToken.hpp"
 #include "ShBasicBlock.hpp"
+#include "ShCfgBlock.hpp"
 #include "ShTokenizer.hpp"
 #include "ShException.hpp"
 #include "ShError.hpp"
@@ -61,12 +62,11 @@ void ShParser::parseStmts(ShCtrlGraphNodePtr& head,
   }
   
   ShBasicBlockPtr basic = shref_dynamic_cast<ShBasicBlock>(next);
+  ShCfgBlockPtr cfg = shref_dynamic_cast<ShCfgBlock>(next);
   ShTokenPtr token = shref_dynamic_cast<ShToken>(next);
 
   if (basic) {
-    // This is a basic block. Just make a node for it.
-    head = tail = new ShCtrlGraphNode();
-    tail->block = basic;
+    parseBlock(head, tail, basic);
     blocks->removeFront();
   } else if (token) {
     // This is a token. Check what type it has.
@@ -93,7 +93,11 @@ void ShParser::parseStmts(ShCtrlGraphNodePtr& head,
     case SH_TOKEN_ENDFOR:
       return;
     }
-  } else { // not a basic block, not a token
+  } else if (cfg) {
+    head = cfg->entry();
+    tail = cfg->exit();
+    blocks->removeFront();
+  } else { // not a basic/cfg block, not a token
     return;
   }
   if (tail) {
@@ -104,6 +108,22 @@ void ShParser::parseStmts(ShCtrlGraphNodePtr& head,
       tail = nt;
     }
   }
+}
+
+void ShParser::parseBlock(ShCtrlGraphNodePtr& head,
+                          ShCtrlGraphNodePtr& tail, ShBasicBlockPtr block)
+{
+  head = tail = new ShCtrlGraphNode();
+  tail->block = block;
+  
+  /* Move SH_OP_DECL statement sinto the node's declaration set */
+  for(ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end();) {
+    if(I->op == SH_OP_DECL) {
+      head->addDecl(I->dest.node());
+      I = block->erase(I);
+    } else ++I;
+  }
+
 }
 
 void ShParser::parseIf(ShCtrlGraphNodePtr& head,

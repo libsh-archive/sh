@@ -71,6 +71,9 @@ struct Straightener {
     }
     node->successors = node->follower->successors;
 
+    // merge in declarations
+    node->insert_decls(node->follower->decl_begin(), node->follower->decl_end());
+
     // Update predecessors
     
     for (std::vector<ShCtrlGraphBranch>::iterator I = node->follower->successors.begin();
@@ -103,8 +106,8 @@ struct Straightener {
 typedef std::queue<ShStatement*> DeadCodeWorkList;
 
 struct InitLiveCode {
-  InitLiveCode(DeadCodeWorkList& w)
-    : w(w)
+  InitLiveCode(ShProgramNodeCPtr p, DeadCodeWorkList& w)
+    : p(p), w(w)
   {
   }
   
@@ -114,9 +117,15 @@ struct InitLiveCode {
     if (!block) return;
 
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-      if (I->dest.node()->kind() != SH_TEMP
+#ifdef SH_DEBUG_OPTIMIZER
+      if(I->dest.node()->kind() == SH_TEMP && !p->hasDecl(I->dest.node())) {
+        SH_DEBUG_PRINT("No decl for " << I->dest.name());
+      }
+#endif
+      if (I->op == SH_OP_KIL
+          || I->dest.node()->kind() != SH_TEMP
           || I->dest.node()->uniform()
-          || I->op == SH_OP_KIL
+          || !p->hasDecl(I->dest.node())
           /*
           || I->op == SH_OP_FETCH // Keep stream fetches, since these
                                   // are like inputs.
@@ -130,6 +139,7 @@ struct InitLiveCode {
     }
   }
 
+  ShProgramNodeCPtr p;
   DeadCodeWorkList& w;
 };
 
@@ -179,7 +189,8 @@ struct CopyPropagator {
           && I->dest.node() != I->src[0].node()
           && I->dest.node()->kind() == SH_TEMP
           && I->dest.swizzle().identity()
-          && I->src[0].swizzle().identity()) {
+          && I->src[0].swizzle().identity()
+          && (I->dest.valueType() == I->src[0].valueType())) {
         m_acp.push_back(std::make_pair(I->dest, I->src[0]));
       }
     }
@@ -315,7 +326,7 @@ void remove_dead_code(ShProgram& p, bool& changed)
 
   ShCtrlGraphPtr graph = p.node()->ctrlGraph;
   
-  InitLiveCode init(w);
+  InitLiveCode init(p.node(), w);
   graph->dfs(init);
 
   while (!w.empty()) {
@@ -355,6 +366,12 @@ void forward_substitute(ShProgram& p, bool& changed)
 void optimize(ShProgram& p, int level)
 {
   if (level <= 0) return;
+
+  p.node()->collectDecls();
+#ifdef SH_DEBUG_OPTIMIZER
+  SH_DEBUG_PRINT("After collecting declarations");
+  SH_DEBUG_PRINT(p.node()->describe_decls());
+#endif
 
 #ifdef SH_DEBUG_OPTIMIZER
   int pass = 0;
@@ -411,6 +428,8 @@ void optimize(ShProgram& p, int level)
     pass++;
 #endif
   } while (changed);
+
+  p.node()->collectVariables();
 }
 
 void optimize(const ShProgramNodePtr& n, int level)

@@ -116,6 +116,12 @@ enum ShOperation {
   SH_OP_OPTBRA, ///< Used in the optimizer to indicate a conditional
                 ///  branch dependency. This should never show up in
                 ///  code passed to the backend.
+  SH_OP_DECL,   ///< Used during ShProgram definition to indicate temp declaration points.
+                ///  These are transferred during parsing into a map in each cfg
+                ///  node, and do not appear in actual cfg block statement lists.
+  SH_OP_PHI,    ///< Used in certain range arithmetic transforms as an SSA phi function 
+                ///  This should never show up in code passed to the backend.
+                ///  Right now it is also not safe to use this in the optimizer.
 
   // Streams
   SH_OP_FETCH, ///< Unary (takes a stream). Fetch an element from a stream. Similar to TEX
@@ -127,8 +133,13 @@ enum ShOperation {
 
   SH_OP_LO,  ///< Extracts a lower bound from a range arithmetic type
   SH_OP_HI,  ///< Extracts an upper bound from a range arithmetic type
-  SH_OP_SETLO, ///< Sets a lower bound on an interval arithmetic type from a regular tuple
-  SH_OP_SETHI, ///< Sets an upper bound on an interval arithmetic type from a regular tuple
+  SH_OP_WIDTH, ///< Returns the width of a range type 
+  SH_OP_CENTER, ///< Returns the center of a range type 
+
+  SH_OP_IVAL, ///< Make an interval out of the given lower bound (src[0]) and upper bound (src[1])
+  SH_OP_UNION, ///< Union two ranges 
+  SH_OP_ISCT, ///< Intersect two ranges 
+  SH_OP_CONTAINS, ///< Intersect two ranges 
 
   SH_OPERATION_END, ///< End of List marker.  Not an actual op
 };
@@ -151,6 +162,9 @@ ShOperationInfo {
               // (e.g. TEX)
     IGNORE   // Does not yield a result
   } result_source;
+
+  bool affine_keep; //< whether the operation may preserve src error syms
+  bool affine_add;  //< whether the operation adds extra error syms
 
   bool commutative; ///< True if order of sources does not matter.
 };

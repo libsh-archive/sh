@@ -46,6 +46,9 @@ public:
                     ShBlockListPtr blocks);
   
 private:
+  static void parseBlock(ShCtrlGraphNodePtr& head, 
+                         ShCtrlGraphNodePtr& tail,
+                         ShBasicBlockPtr block);
   static void parseStmts(ShCtrlGraphNodePtr& head,
                          ShCtrlGraphNodePtr& tail,
                          ShBlockListPtr blocks);

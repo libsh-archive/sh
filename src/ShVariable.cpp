@@ -27,6 +27,8 @@
 #include <iostream>
 
 #include "ShVariable.hpp"
+#include "ShDebug.hpp"
+#include "ShRecord.hpp"
 #include "ShProgram.hpp"
 
 namespace SH {
@@ -51,7 +53,15 @@ ShVariable::ShVariable(const ShVariableNodePtr& node,
 {
 }
 
-ShVariable& ShVariable::operator=(const ShProgram& prgc)
+ShVariable& ShVariable::operator=(const ShProgram &prg) {
+  // @todo range
+  SH_DEBUG_PRINT("This function no longer does what you think it does!");
+  ShRecord rec(*this); 
+  rec = prg;
+  return *this;
+}
+
+void ShVariable::attach(const ShProgram& prgc)
 {
   ShProgram prg(prgc);
   if (prg.node()->finished()) {
@@ -59,7 +69,6 @@ ShVariable& ShVariable::operator=(const ShProgram& prgc)
   } else {
     prg.node()->assign(m_node);
   }
-  return *this;
 }
 
 bool ShVariable::null() const
@@ -148,37 +157,37 @@ bool ShVariable::loadVariant(ShVariant *&result) const
   return true;
 }
 
-void ShVariable::updateVariant()
+void ShVariable::updateVariant() const
 {
   m_node->update_all();
 }
 
-void ShVariable::setVariant(const ShVariant* other, bool neg, const ShSwizzle &writemask)
+void ShVariable::setVariant(const ShVariant* other, bool neg, const ShSwizzle &writemask) const
 {
   m_node->setVariant(other, neg ^ m_neg, m_swizzle * writemask);
 }
 
-void ShVariable::setVariant(ShVariantCPtr other, bool neg, const ShSwizzle &writemask)
+void ShVariable::setVariant(ShVariantCPtr other, bool neg, const ShSwizzle &writemask) const
 {
   setVariant(other.object(), neg, writemask); 
 }
 
-void ShVariable::setVariant(const ShVariant* other, int index) 
+void ShVariable::setVariant(const ShVariant* other, int index) const
 {
   m_node->setVariant(other, m_neg, m_swizzle * ShSwizzle(size(), index));
 }
 
-void ShVariable::setVariant(ShVariantCPtr other, int index) 
+void ShVariable::setVariant(ShVariantCPtr other, int index) const 
 {
   setVariant(other.object(), index); 
 }
 
-void ShVariable::setVariant(const ShVariant* other)
+void ShVariable::setVariant(const ShVariant* other) const
 {
   m_node->setVariant(other, m_neg, m_swizzle);
 }
 
-void ShVariable::setVariant(ShVariantCPtr other)
+void ShVariable::setVariant(ShVariantCPtr other) const
 {
   setVariant(other.object());
 }
@@ -211,6 +220,11 @@ ShVariable ShVariable::operator()(int i1, int i2, int i3, int i4) const
 ShVariable ShVariable::operator()(int n, int indices[]) const
 {
   return ShVariable(m_node, m_swizzle * ShSwizzle(size(), n, indices), m_neg);
+}
+
+ShVariable ShVariable::operator()(const ShSwizzle &swizzle) const
+{
+  return ShVariable(m_node, m_swizzle * swizzle, m_neg);
 }
 
 std::ostream& operator<<(std::ostream& out, const ShVariable& v)

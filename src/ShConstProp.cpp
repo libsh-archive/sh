@@ -10,6 +10,7 @@
 #include "ShEvaluate.hpp"
 #include "ShContext.hpp"
 #include "ShSyntax.hpp"
+#include "ShInfo.hpp"
 #include <sstream>
 #include <fstream>
 
@@ -28,8 +29,9 @@ using namespace SH;
 
 typedef std::queue<ValueTracking::Def> ConstWorkList;
 
-struct ConstProp : public ShStatementInfo {
+struct ConstProp : public ShInfo {
   ConstProp(ShStatement* stmt,
+            ShProgramNodeCPtr prog,
             ConstWorkList& worklist)
     : stmt(stmt)
   {
@@ -69,7 +71,7 @@ struct ConstProp : public ShStatementInfo {
     updateDest(worklist);
   }
 
-  ShStatementInfo* clone() const;
+  ShInfo* clone() const;
 
   int idx(int destindex, int source)
   {
@@ -78,35 +80,44 @@ struct ConstProp : public ShStatementInfo {
 
   void updateDest(ConstWorkList& worklist)
   {
-    dest.clear();
+    if(dest.empty()) {
+      dest.resize(stmt->dest.size(), Cell(Cell::TOP)); 
+    }
 
     // Ignore KIL, optbra, etc.
     if (opInfo[stmt->op].result_source == ShOperationInfo::IGNORE) return;
 
     if (stmt->op == SH_OP_ASN) {
       for (int i = 0; i < stmt->dest.size(); i++) {
-
-        dest.push_back(src[0][i]);
-        if (src[0][i].state == Cell::UNIFORM ||
-            src[0][i].state == Cell::CONSTANT) {
-          worklist.push(ValueTracking::Def(stmt, i));
-        }
+        setDest(i, src[0][i], worklist); // assume src[0][i] cannot move up lattice
       }
     } else if (opInfo[stmt->op].result_source == ShOperationInfo::EXTERNAL) {
       // This statement never results in a constant
       // E.g. texture fetches, stream fetches.
       for (int i = 0; i < stmt->dest.size(); i++) {
-        dest.push_back(Cell(Cell::BOTTOM));
+        setDest(i, Cell(Cell::BOTTOM), worklist);
       }
     } else if (opInfo[stmt->op].result_source == ShOperationInfo::LINEAR) {
+      // The strategy here is to ensure that 
+      // a) whenever one src becomes bottom, dest becomes bottom
+      // b) uniform only gets set when ALL src are uniform (because value
+      // tracking requires it)
+      // c) otherwise, propagate CONST state per element
+      // @todo range (CONST may move across to UNIFORM, check that this is okay)
+
       // Consider each tuple element in turn.
       // Dest and sources are guaranteed to be of the same length.
       // Except that sources might be scalar.
       bool all_fields_uniform = true;
+      bool some_field_bottom = false;
       for (int i = 0; i < stmt->dest.size(); i++) {
         bool alluniform = true;
         bool allconst = true;
+        bool somebottom = false;
         for (int s = 0; s < opInfo[stmt->op].arity; s++) {
+          if (src[s][idx(i,s)].state == Cell::BOTTOM) {
+            somebottom = true;
+          }
           if (src[s][idx(i,s)].state != Cell::CONSTANT) {
             allconst = false;
             if (src[s][idx(i,s)].state != Cell::UNIFORM) {
@@ -114,6 +125,7 @@ struct ConstProp : public ShStatementInfo {
             }
           }
         }
+        some_field_bottom |= somebottom;
         if (!alluniform) all_fields_uniform = false;
         if (allconst) {
           ShVariable tmpdest(new ShVariableNode(SH_CONST, 1, stmt->dest.valueType()));
@@ -126,30 +138,32 @@ struct ConstProp : public ShStatementInfo {
             eval.src[k] = tmpsrc;
           }
           evaluate(eval);
-          dest.push_back(Cell(Cell::CONSTANT, tmpdest.getVariant(0)));
-          worklist.push(ValueTracking::Def(stmt, i));
-        } else {
-          dest.push_back(Cell(Cell::BOTTOM));
+          setDest(i, Cell(Cell::CONSTANT, tmpdest.getVariant(0)), worklist);
+        } else if (somebottom) {
+          setDest(i, Cell(Cell::BOTTOM), worklist);
         }
       } 
+
 
       // Because making a uniform cell based on a ConstProp requires
       // generating a value for the entire statement (not just one
       // field of the destination), we only push said cells if ALL of
       // the indices are uniform for ALL of their corresponding sources.
       if (all_fields_uniform) {
-        dest.clear();
         for (int i = 0; i < stmt->dest.size(); i++) {
-          dest.push_back(Cell(Cell::UNIFORM, this, i));
-          worklist.push(ValueTracking::Def(stmt, i));
+          setDest(i, Cell(Cell::UNIFORM, this, i), worklist);
         }
       }
     } else if (opInfo[stmt->op].result_source == ShOperationInfo::ALL) {
       // build statement ONLY if ALL elements of ALL sources are constant
       bool allconst = true;
       bool alluniform = true; // all statements are either uniform or constant
-      for (int s = 0; s < opInfo[stmt->op].arity; s++) {
+      bool somebottom = false;
+      for (int s = 0; s < opInfo[stmt->op].arity && !somebottom; s++) {
         for (unsigned int k = 0; k < src[s].size(); k++) {
+          if(src[s][k].state == Cell::BOTTOM) {
+            somebottom = true;
+          }
           if (src[s][k].state != Cell::CONSTANT) {
             allconst = false;
             if (src[s][k].state != Cell::UNIFORM) {
@@ -158,7 +172,7 @@ struct ConstProp : public ShStatementInfo {
           }
         }
       }
-      if (allconst) {
+      if (allconst) { 
         ShVariable tmpdest(new ShVariableNode(SH_CONST, stmt->dest.size(), stmt->dest.valueType()));
         ShStatement eval(*stmt);
         eval.dest = tmpdest;
@@ -173,18 +187,15 @@ struct ConstProp : public ShStatementInfo {
         }
         evaluate(eval);
         for (int i = 0; i < stmt->dest.size(); i++) {
-          dest.push_back(Cell(Cell::CONSTANT, tmpdest.getVariant(i)));
-          worklist.push(ValueTracking::Def(stmt, i));
+          setDest(i, Cell(Cell::CONSTANT, tmpdest.getVariant(i)), worklist);
         }
       } else if (alluniform) {
         for (int i = 0; i < stmt->dest.size(); i++) {
-          dest.push_back(Cell(Cell::UNIFORM, this, i));
-          worklist.push(ValueTracking::Def(stmt, i));
+          setDest(i, Cell(Cell::UNIFORM, this, i), worklist);
         }
-      } else {
+      } else if (somebottom) {
         for (int i = 0; i < stmt->dest.size(); i++) {
-          dest.push_back(Cell(Cell::BOTTOM));
-          worklist.push(ValueTracking::Def(stmt, i));
+          setDest(i, Cell(Cell::BOTTOM), worklist);
         }
       }
     } else {
@@ -341,6 +352,12 @@ struct ConstProp : public ShStatementInfo {
     }
 
     static void dump(std::ostream& out);
+
+    std::string name() const
+    {
+      if(type == NODE) return node->name();
+      else return ""; 
+    }
     
   private:
     Value(const ShVariableNodePtr& node)
@@ -420,12 +437,21 @@ struct ConstProp : public ShStatementInfo {
     Uniform uniform; // Only for state == UNIFORM
   };
 
+  // If dest[index] != cell, sets dest[index] to cell and updates the worklist 
+  // Caller must ensure that cell does not move up the lattice. 
+  void setDest(int index, const Cell &cell, ConstWorkList &worklist)
+  {
+    if(dest[index] == cell) return; 
+    dest[index] = cell;
+    worklist.push(ValueTracking::Def(stmt, index));
+  }
+
   ShStatement* stmt;
   std::vector<Cell> dest;
   std::vector<Cell> src[3];
 };
 
-ShStatementInfo* ConstProp::clone() const
+ShInfo* ConstProp::clone() const
 {
   return new ConstProp(*this);
 }
@@ -517,8 +543,8 @@ std::ostream& operator<<(std::ostream& out, const ConstProp::Cell& cell)
 }
 
 struct InitConstProp {
-  InitConstProp(ConstWorkList& worklist)
-    : worklist(worklist)
+  InitConstProp(ShProgramNodeCPtr prog, ConstWorkList& worklist)
+    : prog(prog), worklist(worklist)
   {
   }
 
@@ -529,11 +555,12 @@ struct InitConstProp {
     if (!block) return;
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
       I->destroy_info<ConstProp>();
-      ConstProp* cp = new ConstProp(&(*I), worklist);
+      ConstProp* cp = new ConstProp(&(*I), prog, worklist);
       I->add_info(cp);
     }
   }
 
+  ShProgramNodeCPtr prog;
   ConstWorkList& worklist;
 };
 
@@ -747,7 +774,7 @@ struct FinishConstProp
     ShVariableNodePtr node = new ShVariableNode(SH_TEMP, value->destsize, value->destValueType);
     {
     std::ostringstream s;
-    s << "dep_" << valuenum;
+    s << "dep_" << valuenum << "_" << value->name();
     node->name(s.str());
     }
     ShContext::current()->exit();
@@ -882,7 +909,7 @@ void propagate_constants(ShProgram& p)
 
   //ConstProp::Value::clear();
   
-  InitConstProp init(worklist);
+  InitConstProp init(p.node(), worklist);
   graph->dfs(init);
 
 #ifdef SH_DEBUG_CONSTPROP

@@ -35,6 +35,7 @@ namespace SH {
 
 class ShStream;
 template<typename T> class ShChannel;
+class ShRecord;
 
 /** Thin wrapper around ShProgramNode.
  */
@@ -161,6 +162,20 @@ public:
                         const ShStream& s2,
                         const ShStream& s3,
                         const ShStream& s4) const;
+
+  // Call operators for records
+  // May want to merge these with above in the long term. 
+  ShProgram operator()(const ShRecord &rec) const;
+  ShProgram operator()(const ShVariable &v0) const;
+  ShProgram operator()(const ShVariable &v0, 
+                       const ShVariable &v1) const;
+  ShProgram operator()(const ShVariable &v0, 
+                       const ShVariable &v1, 
+                       const ShVariable &v2) const;
+  ShProgram operator()(const ShVariable &v0, 
+                       const ShVariable &v1, 
+                       const ShVariable &v2, 
+                       const ShVariable &v3) const;
   
 private:
 
