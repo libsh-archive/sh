@@ -52,26 +52,29 @@ void initShaders()
 
 void display()
 {
-  shBind(vsh);
-  shBind(fsh);
-
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  shBind(vsh);
+  shBind(fsh);
+  
   glFrontFace(GL_CW);
   glutSolidTeapot(2.5);
   glFrontFace(GL_CCW);
 
+  shUnbind(fsh);
+  shUnbind(vsh);
+  
 //   // Help information
-//   if (show_help) {
-//     gprintf(30, 120, "Sh Glut Example Help");
-//     gprintf(30, 95,  "  '1' - Colour 1");
-//     gprintf(30, 80,  "  '2' - Colour 2");
-//     gprintf(30, 65,  "  '3' - Light angle 1");
-//     gprintf(30, 50,  "  '4' - Light angle 2");
-//     gprintf(30, 30,  "  'Q' - Quit");
-//   } else {
-//     gprintf(10, 10, "'H' for help...");
-//   }
+   if (show_help) {
+     gprintf(30, 120, "Sh Glut Example Help");
+     gprintf(30, 95,  "  '1' - Colour 1");
+     gprintf(30, 80,  "  '2' - Colour 2");
+     gprintf(30, 65,  "  '3' - Light angle 1");
+     gprintf(30, 50,  "  '4' - Light angle 2");
+     gprintf(30, 30,  "  'Q' - Quit");
+   } else {
+     gprintf(10, 10, "'H' for help...");
+   }
   
   glutSwapBuffers();
 }
@@ -186,8 +189,6 @@ int gprintf(int x, int y, char* fmt, ...)
   // texturing off and disable depth testing
   glPushAttrib(GL_ENABLE_BIT);
   glDisable(GL_DEPTH_TEST);
-  shUnbind(vsh);
-  shUnbind(fsh);
 
   // render the character through glut
   char* p = temp;
@@ -220,7 +221,12 @@ int main(int argc, char** argv)
   glutMotionFunc(motion);
   glutKeyboardFunc(keyboard);
 
-  shSetBackend("glsl");
+  std::string backend_name("arb");
+  if (argc > 1) {
+    backend_name = argv[1];
+  }
+  
+  shSetBackend(backend_name);
 
   glEnable(GL_DEPTH_TEST);
   glClearColor(0.0, 0.0, 0.0, 1.0);

@@ -197,19 +197,22 @@ void GlslCode::link()
   }
 #endif
 
-  if (m_bound) {
-    SH_DEBUG_ASSERT(m_varmap);
-
-    // Whenever the program is linked, we must reinitialize the uniforms
-    // because their values are reset to 0.
-    //
-    // NOTE: we must callglUseProgramObjectARB before we can get the
-    // location of uniforms.
-    for (GlslVariableMap::NodeList::iterator i = m_varmap->node_begin();
-	 i != m_varmap->node_end(); i++) {
-      ShVariableNodePtr node = *i;
-      if (node->hasValues() && node->uniform()) {
-	updateUniform(node);
+  for (int i = 0; i < 2; i++) {
+    if (!m_current_shaders[i]) continue;
+    GlslCode* shader = m_current_shaders[i];
+    
+    if (shader->m_bound) {
+      SH_DEBUG_ASSERT(shader->m_varmap);
+      
+      // Whenever the program is linked, we must reinitialize the uniforms
+      // because their values are reset.  Also, we must call
+      // glUseProgramObjectARB before we can get the location of uniforms.
+      for (GlslVariableMap::NodeList::iterator i = shader->m_varmap->node_begin();
+           i != shader->m_varmap->node_end(); i++) {
+        ShVariableNodePtr node = *i;
+        if (node->hasValues() && node->uniform()) {
+          shader->updateUniform(node);
+        }
       }
     }
   }

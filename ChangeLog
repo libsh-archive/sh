@@ -1,3 +1,12 @@
+2005-03-02  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* examples/glut/main.cpp (main): Use arb backend by default, allow
+	passing in a backend name.
+	(display): Add back in the gprintfs.
+
+	* backends/gl/GlslCode.cpp (link): Update uniforms for *all* bound
+	shaders upon relinking.
+
 2005-02-25  Francois Marier  <francois@serioushack.com>
 
 	* sh/trunk/backends/cc/Cc.cpp, Cc.hpp, 
