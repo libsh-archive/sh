@@ -549,10 +549,31 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       m_instructions.push_back(ArbInst(SH_ARB_FRC, stmt.dest, stmt.src[0]));
       break;
     case SH_OP_LOG:
-      genScalarVectorInst(stmt.dest, stmt.src[1], stmt.src[0], SH_ARB_LOG);
+      {
+        float scalef = 1.0/log2(M_E);
+        ShVariable scale(new ShVariableNode(SH_CONST, stmt.src[0].size()));
+        for (int i = 0; i < stmt.src[0].size(); i++) {
+          scale.node()->setValue(i, scalef);
+          m_instructions.push_back(ArbInst(SH_ARB_LG2, stmt.dest(i), stmt.src[0](i)));
+        }
+        m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0], scale));
+      }
       break;
     case SH_OP_LOG2:
-      genScalarVectorInst(stmt.dest, stmt.src[1], stmt.src[0], SH_ARB_LG2);
+      for (int i = 0; i < stmt.src[0].size(); i++) {
+        m_instructions.push_back(ArbInst(SH_ARB_LG2, stmt.dest(i), stmt.src[0](i)));
+      }
+      break;
+    case SH_OP_LOG10:
+      {
+        float scalef = 1.0/log2(10);
+        ShVariable scale(new ShVariableNode(SH_CONST, stmt.src[0].size()));
+        for (int i = 0; i < stmt.src[0].size(); i++) {
+          scale.node()->setValue(i, scalef);
+          m_instructions.push_back(ArbInst(SH_ARB_LG2, stmt.dest(i), stmt.src[0](i)));
+        }
+        m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0], scale));
+      }
       break;
     case SH_OP_LRP:
       if(m_target == "gpu:vertex") {

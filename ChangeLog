@@ -1,5 +1,12 @@
 2004-06-04  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* test/regress/regress.py (tests): Test LOG, LOG2, LOG10. Together
+	with backend implementations this resolves issue82.
+
+	* backends/cpu/CPU.cpp (encode): Implement LOG, LOG2, LOG10.
+
+	* backends/gl/ArbCode.cpp (genNode): Implement LOG, LOG2, LOG10.
+
 	* test/regress/regress.py (tests): Test EXP, EXP2, EXP10. Together
 	with backend implementations this resolves issue80.
 

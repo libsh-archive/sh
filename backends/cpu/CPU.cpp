@@ -1333,6 +1333,45 @@ namespace ShCPU {
 
 	break;
 	}
+      case SH::SH_OP_LOG:
+	{
+	for(int i = 0; i < stmt.dest.size(); i++)
+	  {
+	  m_code << "  "
+		 << resolve(stmt.dest, i)
+		 << " = log("
+		 << resolve(stmt.src[0], i)
+		 << ");" << std::endl;
+	  }
+
+	break;
+	}
+      case SH::SH_OP_LOG2:
+	{
+	for(int i = 0; i < stmt.dest.size(); i++)
+	  {
+	  m_code << "  "
+		 << resolve(stmt.dest, i)
+		 << " = log2("
+		 << resolve(stmt.src[0], i)
+		 << ");" << std::endl;
+	  }
+
+	break;
+	}
+      case SH::SH_OP_LOG10:
+	{
+	for(int i = 0; i < stmt.dest.size(); i++)
+	  {
+	  m_code << "  "
+		 << resolve(stmt.dest, i)
+		 << " = log10("
+		 << resolve(stmt.src[0], i)
+		 << ");" << std::endl;
+	  }
+
+	break;
+	}
       case SH::SH_OP_LRP:
 	{
 	if (stmt.src[0].swizzle().size() == 1)
