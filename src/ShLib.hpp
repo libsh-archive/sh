@@ -10,7 +10,8 @@
 /** \file ShLib.hpp
  * \brief The Sh library functions.
  * If you add or remove functions in this file be sure to modify the
- * other ShLib*.hpp (e.g. ShLibVector.hpp) files appropriately.
+ * other ShLib*.hpp (e.g. ShLibVector.hpp) files appropriately. See
+ * the bottom of the file for a list.
  */
 
 namespace SH {
@@ -588,5 +589,6 @@ libtype<libretsize, SH_VAR_TEMP, T, false> libop(const ShMatrix<M, N, K1, T>& a,
 #include "ShLibVector.hpp"
 #include "ShLibPoint.hpp"
 #include "ShLibColor.hpp"
+#include "ShLibTexCoord.hpp"
 
 #endif

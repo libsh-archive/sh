@@ -9,6 +9,7 @@
 #include "ShVector.hpp"
 #include "ShPoint.hpp"
 #include "ShColor.hpp"
+#include "ShTexCoord.hpp"
 #include "ShLib.hpp"
 #include "ShTexture.hpp"
 #include "ShBackend.hpp"
