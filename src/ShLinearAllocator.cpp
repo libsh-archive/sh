@@ -32,18 +32,25 @@
 namespace {
 
 struct LifeToken {
-  LifeToken(const SH::ShVariableNodePtr& var, int index, bool end)
-    : var(var), index(index), end(end)
+  LifeToken(const SH::ShVariableNodePtr& var, int index, bool end, int index2)
+    : var(var), index(index), end(end), index2(index2)
   {
   }
   
   SH::ShVariableNodePtr var;
   int index;
   bool end;
+  int index2;
 
+  // order by index, then end, then index2
   bool operator<(const LifeToken& other) const
   {
-    if (index == other.index) return !end;
+    if (index == other.index) {
+      if(end == other.end) {
+        return index2 < other.index2;
+      }
+      return !end;
+    }
     return index < other.index;
   }
 };
@@ -83,9 +90,10 @@ void ShLinearAllocator::allocate()
   std::set<LifeToken> starters;
   std::set<LifeToken> enders;
 
-  for (LifetimeMap::const_iterator I = m_lifetimes.begin(); I != m_lifetimes.end(); ++I) {
-    starters.insert(LifeToken(I->first, I->second.first, false));
-    enders.insert(LifeToken(I->first, I->second.last, true));
+  int i = 0;
+  for (LifetimeMap::const_iterator I = m_lifetimes.begin(); I != m_lifetimes.end(); ++I, ++i) {
+    starters.insert(LifeToken(I->first, I->second.first, false, i));
+    enders.insert(LifeToken(I->first, I->second.last, true, i));
   }
 
   std::list<LifeToken> tokens;
