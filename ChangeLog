@@ -1,4 +1,7 @@
 2004-11-09  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+  * backends/cc/Cc.cpp, CcTextures.hpp:
+  Checked in the wrong version of these files
+	
   * util/ShFunc.hpp, ShWorley.hpp ShNoise.hpp:
   hid some function declarations from the compiler
 

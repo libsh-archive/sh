@@ -415,7 +415,6 @@ namespace ShCc {
     // prologue
     std::stringstream prologue;
     prologue << "#include <math.h>" << std::endl;
-    prologue << "#include <iostream>" << std::endl;
     for(int i = 0; cc_texture_string[i][0] != 0; ++i) {
       prologue << cc_texture_string[i]; 
     }
@@ -479,7 +478,7 @@ namespace ShCc {
 
     // run cl on cppfile and generate dllfile
     char cmdline[1024];
-    sprintf(cmdline, "cl /LD /Fe\"%s\" \"%s\"", dllfile, cppfile);
+    sprintf(cmdline, "cl /EHsc /LD /Fe\"%s\" \"%s\"", dllfile, cppfile);
 
     SH_CC_DEBUG_PRINT("cmdline: \"" << cmdline << "\"");
 
