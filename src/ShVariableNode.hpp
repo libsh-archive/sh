@@ -32,6 +32,7 @@
 #include "ShDllExport.hpp"
 #include "ShRefCount.hpp"
 #include "ShMeta.hpp"
+#include "ShPool.hpp"
 
 namespace SH {
 
@@ -137,6 +138,12 @@ public:
   const ShPointer<ShProgramNode>& evaluator() const;
   
   /** @} */
+
+#ifdef SH_USE_MEMORY_POOL
+  // Memory pool stuff.
+  void* operator new(std::size_t size);
+  void operator delete(void* d);
+#endif
   
 protected:
 
@@ -164,6 +171,10 @@ protected:
   std::list<ShVariableNode*> m_dependents;
   
   static int m_maxID;
+
+#ifdef SH_USE_MEMORY_POOL
+  static ShPool* m_pool;
+#endif
 };
 
 typedef ShPointer<ShVariableNode> ShVariableNodePtr;

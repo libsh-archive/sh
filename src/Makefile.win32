@@ -36,6 +36,7 @@ libsh_dll_SOURCES += ShMeta.hpp ShMeta.cpp
 libsh_dll_SOURCES += ShMetaForwarder.hpp ShMetaForwarder.cpp
 libsh_dll_SOURCES += ShContext.hpp ShContext.cpp
 libsh_dll_SOURCES += ShDllExport.hpp
+libsh_dll_SOURCES += ShPool.hpp ShPool.cpp
 
 # Backend
 libsh_dll_SOURCES += ShBackend.hpp ShBackend.cpp

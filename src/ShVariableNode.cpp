@@ -58,7 +58,26 @@ const char* ShSemanticTypeName[] = {
 
 struct ShVariableNodeEval {
   ShPointer<ShProgramNode> value;
+
+#ifdef SH_USE_MEMORY_POOL
+  // Memory pool stuff.
+  void* operator new(std::size_t size)
+  {
+    if (!m_pool) m_pool = new ShPool(sizeof(ShVariableNodeEval), 32768);
+    return m_pool->alloc();
+  }
+  void operator delete(void* ptr)
+  {
+    m_pool->free(ptr);
+  }
+
+  static ShPool* m_pool;
+#endif
 };
+
+#ifdef SH_USE_MEMORY_POOL
+ShPool* ShVariableNodeEval::m_pool = 0;
+#endif
 
 ShVariableNode::ShVariableNode(ShBindingType kind, int size, ShSemanticType type)
   : m_uniform(!ShContext::current()->parsing() && kind == SH_TEMP),
@@ -111,6 +130,7 @@ ShVariableNode::~ShVariableNode()
 {
   detach_dependencies();
   delete [] m_values;
+  delete m_eval;
   m_values = 0;
 }
 
@@ -312,6 +332,21 @@ const ShPointer<ShProgramNode>& ShVariableNode::evaluator() const
   return m_eval->value;
 }
 
+#ifdef SH_USE_MEMORY_POOL
+void* ShVariableNode::operator new(std::size_t size)
+{
+  if (size != sizeof(ShVariableNode)) return ::operator new(size);
+  if (!m_pool) m_pool = new ShPool(sizeof(ShVariableNode), 32768);
+  return m_pool->alloc();
+}
+
+void ShVariableNode::operator delete(void* ptr)
+{
+  // Really, if we don't have a pool, we should throw an exception or something.
+  return m_pool->free(ptr);
+}
+#endif
+
 void ShVariableNode::add_dependent(ShVariableNode* dep)
 {
   if (std::find(m_dependents.begin(), m_dependents.end(), dep) != m_dependents.end()) return;
@@ -344,5 +379,7 @@ void ShVariableNode::detach_dependencies()
 }
 
 int ShVariableNode::m_maxID = 0;
-
+#ifdef SH_USE_MEMORY_POOL
+ShPool* ShVariableNode::m_pool = 0;
+#endif
 }

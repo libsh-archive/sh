@@ -1,5 +1,19 @@
 2004-10-06  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShVariableNode.cpp: Added optional memory pool
+	support implementation. Disabled right now.
+
+	* src/ShVariableNode.hpp: Added optional memory pool
+	support. Disabled right now.
+
+	* src/ShPool.cpp: Added memory pool implementation.
+
+	* src/ShPool.hpp: Added optional memory pool interface. Disabled
+	for now.
+
+	* src/ShVariableNode.cpp (~ShVariableNode): Fix memory leak by
+	deleting m_eval. doh.
+
 	* src/ShLibMatrixImpl.hpp (rotate): Added 2D version of rotation.
 
 	* src/ShVariable.cpp (operator<<): Simplify this a little.
