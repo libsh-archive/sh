@@ -1325,6 +1325,7 @@ void ArbCode::allocTemps()
 
 ArbBackend::ArbBackend()
 {
+#ifdef WIN32
 	DWORD err;
 	if ((glProgramStringARB = (PFNGLPROGRAMSTRINGARBPROC)wglGetProcAddress("glProgramStringARB")) == NULL)
 		err = GetLastError();
@@ -1342,6 +1343,7 @@ ArbBackend::ArbBackend()
 		err = GetLastError();
 	if ((glGetProgramivARB = (PFNGLGETPROGRAMIVARBPROC)wglGetProcAddress("glGetProgramivARB")) == NULL)
 		err = GetLastError();
+#endif /* WIN32 */
 
   // TODO Max TEX instructions, texture indirections
   for (int i = 0; i < 2; i++) {
