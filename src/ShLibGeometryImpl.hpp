@@ -87,9 +87,9 @@ template<int N, typename T1, typename T2, typename T3>
 ShGeneric<N, CT1T2T3> refract(const ShGeneric<N, T1>& v, const ShGeneric<N, T2>& n,
                         const ShGeneric<1, T3>& theta)
 {
-  ShGeneric<N, T1> vn = -normalize(v);
+  ShGeneric<N, T1> vn = normalize(v);
   ShGeneric<N, T2> nn = normalize(n);
-  ShGeneric<1, CT1T2T3> c = (vn|nn);
+  ShGeneric<1, CT1T2T3> c = (-vn|nn);
   ShGeneric<1, CT1T2T3> k = c*c - ShDataTypeConstant<CT1T2T3, SH_HOST>::One;
   k = ShDataTypeConstant<CT1T2T3, SH_HOST>::One + theta*theta*k;
   k = clamp(k, ShDataTypeConstant<CT1T2T3, SH_HOST>::Zero, ShDataTypeConstant<CT1T2T3, SH_HOST>::One); 
