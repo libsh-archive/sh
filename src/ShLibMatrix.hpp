@@ -195,15 +195,14 @@ template<typename T>
 ShMatrix<4, 4, SH_TEMP, T>
 rotate(const ShGeneric<3, T>& axis, const ShGeneric<1, T>& angle);
 
-////// TODO
-// /** \brief 2D Rotation about the given angle
-//  *
-//  * The angle is specified in radians. The result is an affine
-//  * transformation matrix.
-//  */
-// template<typename T>
-// ShMatrix<3, 3, SH_TEMP, T>
-// rotate(const ShGeneric<1, T>& angle);
+/** \brief 2D Rotation about the given angle
+ *
+ * The angle is specified in radians. The result is an affine
+ * transformation matrix.
+ */
+template<typename T>
+ShMatrix<3, 3, SH_TEMP, T>
+rotate(const ShGeneric<1, T>& angle);
 
 /** \brief 3D Translation
  *

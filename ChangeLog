@@ -1,5 +1,7 @@
 2004-10-06  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShLibMatrixImpl.hpp (rotate): Added 2D version of rotation.
+
 	* src/ShVariable.cpp (operator<<): Simplify this a little.
 
 	* src/ShInstructions.cpp: Implement shCBRT and shRND.

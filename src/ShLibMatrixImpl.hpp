@@ -395,11 +395,21 @@ rotate(const ShGeneric<3, T>& axis,
   return result;
 }
 
-/* TODO
 template<typename T>
 ShMatrix<3, 3, SH_TEMP, T>
-rotate(const ShGeneric<1, T>& angle);
-*/
+rotate(const ShGeneric<1, T>& angle)
+{
+  ShMatrix<3, 3, SH_TEMP, T> result;
+  
+  ShGeneric<1, T> c = cos(angle);
+  ShGeneric<1, T> s = sin(angle);
+  result[0] = ShAttrib<3, SH_TEMP, T>(c, -s, 0.0f);
+  result[1] = ShAttrib<3, SH_TEMP, T>(c, s, 0.0f);
+  result[2] = ShAttrib<3, SH_TEMP, T>(0.0f, 0.0f, 1.0f);
+
+  return result;
+}
+
 template<typename T>
 ShMatrix<4, 4, SH_TEMP, T>
 translate(const ShGeneric<3, T>& a)
