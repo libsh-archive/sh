@@ -1214,7 +1214,7 @@ namespace ShCPU {
 	}
       case SH::SH_OP_COND:
 	{
-	if (stmt.src[1].swizzle().size() == 1)
+	if (stmt.src[0].swizzle().size() == 1)
 	  {
 	  for(int i = 0; i < stmt.dest.size(); i++)
 	    {
@@ -1356,6 +1356,7 @@ namespace ShCPU {
 
     // prologue
     std::stringstream prologue;
+    prologue << "#include <math.h>" << std::endl;
     prologue << std::endl;
     prologue << "extern \"C\" void __cpu_lookup(float*, void*, float*);" << std::endl;
     prologue << "extern \"C\" void __cpu_lookupi(float*, void*, float*);" << std::endl;
