@@ -11,7 +11,7 @@ using namespace std;
 ShMatrix4x4f mv, mvd;
 ShPoint3f lightPos;
 Camera camera;
-ShProgram vsh, fsh;
+ShProgramSet* shaders;
 
 ShTexture2D<ShColor3f> kd(512, 512);
 ShTexture2D<ShColor3f> ks(512, 512);
@@ -41,7 +41,7 @@ void xTexture()
 
 void initShaders()
 {
-  vsh = SH_BEGIN_VERTEX_PROGRAM {
+  ShProgram vsh = SH_BEGIN_VERTEX_PROGRAM {
     ShInOutTexCoord2f u;
     ShInOutPosition4f pos;
     ShInOutNormal3f normal;
@@ -57,7 +57,7 @@ void initShaders()
   ShColor3f SH_DECL(diffusecolor) = ShColor3f(0.2, 0.2, 0.2);
   ShAttrib1f exponent(30.0);
 
-  fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+  ShProgram fsh = SH_BEGIN_FRAGMENT_PROGRAM {
     ShInputTexCoord2f u;
     ShInputPosition4f position;
     ShInputNormal3f normal;
@@ -76,29 +76,32 @@ void initShaders()
     ShNormal3f nv = normal;
     color += color*kd(u) + ks(u)*pow(pos(hv | nv), exponent);
   } SH_END;
+
+  shaders = new ShProgramSet(vsh, fsh);
 }
 
 void display()
 {
-  shBind(vsh);
-  shBind(fsh);
-
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  shBind(*shaders);
+  
   glFrontFace(GL_CW);
   glutSolidTeapot(2.5);
   glFrontFace(GL_CCW);
 
-//   // Help information
-//   if (show_help) {
-//     gprintf(30, 100, "Sh Texture Example Help");
-//     gprintf(30, 80,  "  '1' - Default texture");
-//     gprintf(30, 65,  "  '2' - Rusty texture");
-//     gprintf(30, 50,  "  'U' - Invoke shUpdate()");
-//     gprintf(30, 30,  "  'Q' - Quit");
-//   } else {
-//     gprintf(10, 10, "'H' for help...");
-//   }
+  shUnbind(*shaders);
+  
+  // Help information
+  if (show_help) {
+    gprintf(30, 100, "Sh Texture Example Help");
+    gprintf(30, 80,  "  '1' - Default texture");
+    gprintf(30, 65,  "  '2' - Rusty texture");
+    gprintf(30, 50,  "  'U' - Invoke shUpdate()");
+    gprintf(30, 30,  "  'Q' - Quit");
+  } else {
+    gprintf(10, 10, "'H' for help...");
+  }
   
   glutSwapBuffers();
 }
@@ -201,8 +204,6 @@ int gprintf(int x, int y, char* fmt, ...)
   // texturing off and disable depth testing
   glPushAttrib(GL_ENABLE_BIT);
   glDisable(GL_DEPTH_TEST);
-  shUnbind(vsh);
-  shUnbind(fsh);
 
   // render the character through glut
   char* p = temp;
@@ -235,7 +236,12 @@ int main(int argc, char** argv)
   glutMotionFunc(motion);
   glutKeyboardFunc(keyboard);
     
-  shSetBackend("arb");
+  std::string backend_name("arb");
+  if (argc > 1) {
+    backend_name = argv[1];
+  }
+  
+  shSetBackend(backend_name);
 
   initShaders();
 
@@ -259,6 +265,8 @@ int main(int argc, char** argv)
   // Set the initial texture
   xTexture();
   
+  shBind(*shaders);
+  
 #if 0
   cout << "Vertex Unit:" << endl;
   vsh.node()->code()->print(cout);
@@ -269,4 +277,6 @@ int main(int argc, char** argv)
 #endif
   
   glutMainLoop();
+
+  delete shaders;
 }

@@ -59,24 +59,23 @@ void display()
 
   shBind(*shaders);
 
-  std::cerr << "drawing" << std::endl;
   glFrontFace(GL_CW);
   glutSolidTeapot(2.5);
   glFrontFace(GL_CCW);
 
   shUnbind(*shaders);
   
-//   // Help information
-   if (show_help) {
-     gprintf(30, 120, "Sh Glut Example Help");
-     gprintf(30, 95,  "  '1' - Colour 1");
-     gprintf(30, 80,  "  '2' - Colour 2");
-     gprintf(30, 65,  "  '3' - Light angle 1");
-     gprintf(30, 50,  "  '4' - Light angle 2");
-     gprintf(30, 30,  "  'Q' - Quit");
-   } else {
-     gprintf(10, 10, "'H' for help...");
-   }
+  // Help information
+  if (show_help) {
+    gprintf(30, 120, "Sh Glut Example Help");
+    gprintf(30, 95,  "  '1' - Colour 1");
+    gprintf(30, 80,  "  '2' - Colour 2");
+    gprintf(30, 65,  "  '3' - Light angle 1");
+    gprintf(30, 50,  "  '4' - Light angle 2");
+    gprintf(30, 30,  "  'Q' - Quit");
+  } else {
+    gprintf(10, 10, "'H' for help...");
+  }
   
   glutSwapBuffers();
 }
