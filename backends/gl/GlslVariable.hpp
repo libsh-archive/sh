@@ -36,7 +36,7 @@ namespace shgl {
 
 /// Possible bindings for an input/output variable
 enum GlslVarBinding {
-  // Input and output for vertex, input for fragment
+  // Output for vertex, input for fragment
   SH_GLSL_VAR_TEXCOORD,
 
   // Inputs to both units
@@ -46,7 +46,15 @@ enum GlslVarBinding {
   // Vertex inputs
   SH_GLSL_VAR_VERTEX,
   SH_GLSL_VAR_NORMAL,
-
+  SH_GLSL_VAR_MULTITEXCOORD0,
+  SH_GLSL_VAR_MULTITEXCOORD1,
+  SH_GLSL_VAR_MULTITEXCOORD2,
+  SH_GLSL_VAR_MULTITEXCOORD3,
+  SH_GLSL_VAR_MULTITEXCOORD4,
+  SH_GLSL_VAR_MULTITEXCOORD5,
+  SH_GLSL_VAR_MULTITEXCOORD6,
+  SH_GLSL_VAR_MULTITEXCOORD7,
+  
   // Fragment inputs
   SH_GLSL_VAR_FRAGCOORD,
 
@@ -81,15 +89,21 @@ public:
   const std::string& name() const { return m_name; }
   const SH::ShSemanticType& semantic_type() const { return m_semantic_type; }
   const int size() const { return m_size; }
+  const bool uniform() const { return m_uniform; }
+  const bool texture() const { return m_texture; }
 
   void name(int i, enum GlslProgramType unit); /// for regular variables
   void builtin(GlslVarBinding binding, int index); /// for built-in variables
   
 private:
   bool m_builtin; /// if true, it won't be declared or initialized
+  bool m_texture;
   bool m_uniform;
   std::string m_name;
-  int m_size;
+  union {
+    int m_size;
+    SH::ShTextureDims m_dims; // if m_texture == true
+  };
   SH::ShBindingType m_kind;
   SH::ShValueType m_type;
   SH::ShSemanticType m_semantic_type;

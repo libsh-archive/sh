@@ -25,9 +25,9 @@
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
 #include "GlslCode.hpp"
-#include "ShTransformer.hpp"
-#include "ShStorageType.hpp"
 #include <iostream>
+
+#include "ShStorageType.hpp"
 
 #define SH_DEBUG_GLSL_BACKEND // DEBUG
 
@@ -41,7 +41,7 @@ using namespace std;
 GlslCode::GlslCode(const ShProgramNodeCPtr& shader, const std::string& unit,
 		   TextureStrategy* texture) 
   : m_texture(texture), m_target("glsl:" + unit), m_arb_shader(0),
-    m_varmap(NULL), m_uploaded(false)
+    m_varmap(NULL), m_nb_textures(0), m_uploaded(false)
 {
   m_originalShader = const_cast<ShProgramNode*>(shader.object());
   
@@ -54,6 +54,8 @@ GlslCode::GlslCode(const ShProgramNodeCPtr& shader, const std::string& unit,
     m_arb_shader = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
     m_unit = SH_GLSL_VP;
   }
+
+  SH_DEBUG_ASSERT(m_arb_shader);
 }
 
 GlslCode::~GlslCode()
@@ -63,7 +65,7 @@ GlslCode::~GlslCode()
   }
 
   if (m_arb_shader != 0) {
-    glDetachObjectARB(m_arb_program, m_arb_shader);
+    SH_GL_CHECK_ERROR(glDetachObjectARB(m_arb_program, m_arb_shader));
   }
 
   delete m_varmap;
@@ -77,12 +79,29 @@ void GlslCode::generate()
   temp_shader = NULL;
 
   ShContext::current()->enter(m_shader);
-  
+
   ShTransformer transform(m_shader);
   transform.convertInputOutput(); 
   transform.convertTextureLookups();
-  //transform.convertToFloat(m_convertMap); // TODO
-  //transform.splitTuples(4, m_splits); // TODO
+
+  SH::ShTransformer::ValueTypeMap convert_map;
+  convert_map[SH_DOUBLE] = SH_FLOAT; 
+  convert_map[SH_HALF] = SH_FLOAT;
+  convert_map[SH_INT] = SH_FLOAT;
+  convert_map[SH_SHORT] = SH_FLOAT;
+  convert_map[SH_BYTE] = SH_FLOAT;
+  convert_map[SH_UINT] = SH_FLOAT;
+  convert_map[SH_USHORT] = SH_FLOAT;
+  convert_map[SH_UBYTE] = SH_FLOAT;
+  convert_map[SH_FINT] = SH_FLOAT;
+  convert_map[SH_FSHORT] = SH_FLOAT;
+  convert_map[SH_FBYTE] = SH_FLOAT;
+  convert_map[SH_FUINT] = SH_FLOAT;
+  convert_map[SH_FUSHORT] = SH_FLOAT;
+  convert_map[SH_FUBYTE] = SH_FLOAT;
+  
+  transform.convertToFloat(convert_map);
+  transform.splitTuples(4, m_splits);
   transform.stripDummyOps();
 
   if (transform.changed()) {
@@ -103,6 +122,7 @@ void GlslCode::generate()
     m_shader->ctrlGraph->entry()->clearMarked();
     gen_node(m_shader->ctrlGraph->entry());
     m_shader->ctrlGraph->entry()->clearMarked();
+    allocate_textures();
   } 
   catch (...) {
     m_shader->ctrlGraph->entry()->clearMarked();
@@ -121,12 +141,12 @@ void GlslCode::upload()
 
   const char* code_string = s.c_str();
   GLint code_len = strlen(code_string);
-  glShaderSourceARB(m_arb_shader, 1, &code_string, &code_len);
-  glCompileShaderARB(m_arb_shader);
+  SH_GL_CHECK_ERROR(glShaderSourceARB(m_arb_shader, 1, &code_string, &code_len));
+  SH_GL_CHECK_ERROR(glCompileShaderARB(m_arb_shader));
 
   // Check compilation
   int compiled;
-  glGetObjectParameterivARB(m_arb_shader, GL_OBJECT_COMPILE_STATUS_ARB, &compiled);
+  SH_GL_CHECK_ERROR(glGetObjectParameterivARB(m_arb_shader, GL_OBJECT_COMPILE_STATUS_ARB, &compiled));
   if (compiled != GL_TRUE) {
     cout << "Shader compile status (target = " << m_target << "): FAILED" << endl << endl;
     cout << "Shader infolog:" << endl;
@@ -137,14 +157,8 @@ void GlslCode::upload()
     return;
   }
 
-  glAttachObjectARB(m_arb_program, m_arb_shader);
-  glDeleteObjectARB(m_arb_shader); // mark for deletion on detachment
-
-#ifdef SH_DEBUG_GLSL_BACKEND
-  int nb_objects;
-  glGetObjectParameterivARB(m_arb_program, GL_OBJECT_ATTACHED_OBJECTS_ARB, &nb_objects);
-  cout << "Number of objects attached to the program (target = " << m_target << "): " << nb_objects << endl;
-#endif
+  SH_GL_CHECK_ERROR(glAttachObjectARB(m_arb_program, m_arb_shader));
+  SH_GL_CHECK_ERROR(glDeleteObjectARB(m_arb_shader)); // mark for deletion on detachment
 
   m_uploaded = true;
 }
@@ -155,11 +169,11 @@ void GlslCode::bind()
     upload();
   }
 
-  glLinkProgramARB(m_arb_program);
+  SH_GL_CHECK_ERROR(glLinkProgramARB(m_arb_program));
 
   // Check linking
   int linked;
-  glGetObjectParameterivARB(m_arb_program, GL_OBJECT_LINK_STATUS_ARB, &linked);
+  SH_GL_CHECK_ERROR(glGetObjectParameterivARB(m_arb_program, GL_OBJECT_LINK_STATUS_ARB, &linked));
   if (linked != GL_TRUE) {
     cout << "Program link status (target = " << m_target << "): FAILED" << endl << endl;
     cout << "Program infolog:" << endl;
@@ -170,7 +184,7 @@ void GlslCode::bind()
     return;
   }
 
-  glUseProgramObjectARB(m_arb_program);
+  SH_GL_CHECK_ERROR(glUseProgramObjectARB(m_arb_program));
   ShContext::current()->set_binding(m_target, ShProgram(m_originalShader));
 
 #ifdef SH_DEBUG_GLSL_BACKEND
@@ -196,10 +210,14 @@ void GlslCode::bind()
       updateUniform(node);
     }
   }
+
+  // Make sure all textures are loaded.
+  bind_textures();
 }
 
 void GlslCode::update()
 {
+  bind_textures();
 }
 
 void GlslCode::updateFloatUniform(const ShVariableNodePtr& node, const GLint location)
@@ -211,16 +229,16 @@ void GlslCode::updateFloatUniform(const ShVariableNodePtr& node, const GLint loc
 
   switch (node->size()) {
   case 1:
-    glUniform1fARB(location, values[0]);
+    SH_GL_CHECK_ERROR(glUniform1fARB(location, values[0]));
     break;
   case 2:
-    glUniform2fARB(location, values[0], values[1]);
+    SH_GL_CHECK_ERROR(glUniform2fARB(location, values[0], values[1]));
     break;
   case 3:
-    glUniform3fARB(location, values[0], values[1], values[2]);
+    SH_GL_CHECK_ERROR(glUniform3fARB(location, values[0], values[1], values[2]));
     break;
   case 4:
-    glUniform4fARB(location, values[0], values[1], values[2], values[3]);
+    SH_GL_CHECK_ERROR(glUniform4fARB(location, values[0], values[1], values[2], values[3]));
     break;
   default:
     SH_DEBUG_ASSERT(0); // Unsupported size
@@ -236,16 +254,16 @@ void GlslCode::updateIntUniform(const ShVariableNodePtr& node, const GLint locat
 
   switch (node->size()) {
   case 1:
-    glUniform1iARB(location, values[0]);
+    SH_GL_CHECK_ERROR(glUniform1iARB(location, values[0]));
     break;
   case 2:
-    glUniform2iARB(location, values[0], values[1]);
+    SH_GL_CHECK_ERROR(glUniform2iARB(location, values[0], values[1]));
     break;
   case 3:
-    glUniform3iARB(location, values[0], values[1], values[2]);
+    SH_GL_CHECK_ERROR(glUniform3iARB(location, values[0], values[1], values[2]));
     break;
   case 4:
-    glUniform4iARB(location, values[0], values[1], values[2], values[3]);
+    SH_GL_CHECK_ERROR(glUniform4iARB(location, values[0], values[1], values[2], values[3]));
     break;
   default:
     SH_DEBUG_ASSERT(0); // Unsupported size
@@ -256,9 +274,31 @@ void GlslCode::updateUniform(const ShVariableNodePtr& uniform)
 {
   SH_DEBUG_ASSERT(uniform);
 
-  if (!m_varmap->contains(uniform)) return;
+  if (!m_varmap->contains(uniform)) {
+    // Check to see if the uniform was split
+    if (m_splits.count(uniform) > 0) {
+      ShTransformer::VarNodeVec &splitVec = m_splits[uniform];
+      ShVariantCPtr uniformVariant = uniform->getVariant();
+
+      int offset = 0;
+      int copySwiz[4];
+      for (ShTransformer::VarNodeVec::iterator it = splitVec.begin();
+	   it != splitVec.end(); offset += (*it)->size(), ++it) {
+	// TODO switch to properly swizzled version
+        for (int i=0; i < (*it)->size(); ++i) {
+	  copySwiz[i] = i + offset;
+	}
+        (*it)->setVariant(uniformVariant->get(false,
+            ShSwizzle(uniform->size(), (*it)->size(), copySwiz))); 
+        updateUniform(*it);
+      }
+    } 
+    return;
+  }
 
   const GlslVariable& var(m_varmap->variable(uniform));
+  
+  if (var.texture()) return;
 
   GLint location = glGetUniformLocationARB(m_arb_program, var.name().c_str());
   if (location != -1) {
@@ -268,7 +308,7 @@ void GlslCode::updateUniform(const ShVariableNodePtr& uniform)
       updateFloatUniform(uniform, location);
     }
   } else {
-    cerr << "ERROR: Could not find uniform '" << var.name() << "'." << endl;
+    cerr << "Cannot find uniform named '" << var.name() << "'." << endl;
   }
 }
 
@@ -362,6 +402,9 @@ void GlslCode::emit(const ShStatement &stmt)
   case SH_OP_MAX:
     m_lines.push_back(resolve(stmt.dest) + " = max(" + resolve(stmt.src[0]) + ", " + resolve(stmt.src[1]) + ")");
     break;
+  case SH_OP_TEX:
+    emit_texture(stmt);
+    break;
   default:
     m_lines.push_back("// *** unhandled operation " + 
 		      string(opInfo[stmt.op].name) + " ***");
@@ -369,10 +412,132 @@ void GlslCode::emit(const ShStatement &stmt)
   }
 }
 
+void GlslCode::emit_texture(const ShStatement &stmt)
+{
+  SH_DEBUG_ASSERT(stmt.op == SH_OP_TEX);
+  stringstream line;
+  line << resolve(stmt.dest) << " = texture";
+
+  ShTextureNodePtr texture = shref_dynamic_cast<ShTextureNode>(stmt.src[0].node());
+  switch (texture->dims()) {
+  case SH_TEXTURE_1D:
+    line << "1D";
+    break;
+  case SH_TEXTURE_2D:
+    line << "2D";
+    break;
+  case SH_TEXTURE_3D:
+    line << "3D";
+    break;
+  case SH_TEXTURE_CUBE:
+    line << "Cube";
+    break;
+  case SH_TEXTURE_RECT:
+    line << "2DRect";
+    break;
+  }
+
+  line << "(" << resolve(stmt.src[0]) << ", " << resolve(stmt.src[1]) << ")";
+
+  m_lines.push_back(line.str());
+}
+
 string GlslCode::resolve(const ShVariable& v) const
 {
   SH_DEBUG_ASSERT(m_varmap);
   return m_varmap->resolve(v);
+}
+
+void GlslCode::allocate_textures()
+{
+  list<GLuint> reserved;
+
+  // reserve any texunits specified at the program level
+  if (!m_shader->meta("opengl:reservetex").empty()) {
+    GLuint index;
+    istringstream is(m_shader->meta("opengl:reservetex"));
+
+    while(1) {
+      is >> index;
+      if (!is) break;
+      reserved.push_back(index);
+    }
+  }
+
+  // reserve and allocate any preset texunits
+  for (ShProgramNode::TexList::const_iterator i = m_shader->textures.begin();
+       i != m_shader->textures.end(); i++) {
+    ShTextureNodePtr node = *i;
+    
+    if (!node->meta("opengl:texunit").empty()) {
+      GLuint index;
+      istringstream is(node->meta("opengl:texunit"));
+      is >> index; // TODO: Check for errors
+
+      if (find(reserved.begin(), reserved.end(), index) == reserved.end()) {
+	m_texture_units[node].index = index;
+	m_texture_units[node].preset = true;
+	reserved.push_back(index);
+      } else {
+	cerr << "Texture unit " << index << " is used more than once." << endl;
+      }
+    }
+  }
+
+  // allocate remaining textures units with respect to the reserved list
+  for (ShProgramNode::TexList::const_iterator i = m_shader->textures.begin();
+       i != m_shader->textures.end(); i++) {
+    ShTextureNodePtr node = *i;
+    
+    if (node->meta("opengl:texunit").empty()) {
+      GLuint index;
+      const unsigned MAX_TEXTURE_UNITS = (SH_GLSL_VP == m_unit ?
+					  GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS_ARB :
+					  GL_MAX_TEXTURE_IMAGE_UNITS_ARB);
+
+      for (index = m_nb_textures; index < MAX_TEXTURE_UNITS; index++) {
+	if (find(reserved.begin(), reserved.end(), index) == reserved.end()) {
+	  break;
+	}
+      }
+      
+      if (index < MAX_TEXTURE_UNITS) {
+	m_texture_units[node].index = index;
+      } else {
+	cerr << "No available texture unit for '" << node->name() << "'." << endl;
+      }
+
+      m_nb_textures = index + 1;
+    }
+  }
+}
+
+void GlslCode::bind_textures()
+{
+  for (ShProgramNode::TexList::const_iterator i = m_shader->textures.begin();
+       i != m_shader->textures.end(); i++) {
+    ShTextureNodePtr texture = *i;
+
+    if (m_texture_units.find(texture) == m_texture_units.end()) {
+      cerr << "Texture '" << texture->name() << "' has no assigned unit." << endl;
+      continue;
+    }
+    
+    const GlslVariable& var(m_varmap->variable(shref_dynamic_cast<ShVariableNode>(texture)));
+    GLint location = glGetUniformLocationARB(m_arb_program, var.name().c_str());
+
+    if (location != -1) {
+      int index = m_texture_units[texture].index;
+
+      SH_GL_CHECK_ERROR(glUniform1iARB(location, index));
+      
+      if (!m_texture_units[texture].preset) {
+	m_texture->bindTexture(texture, GL_TEXTURE0 + index);
+      }
+    } else {
+      cerr << "Cannot find uniform named '" << var.name() << "'." << endl;
+    }
+  }
 }
 
 }

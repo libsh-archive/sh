@@ -27,14 +27,24 @@
 #ifndef GLSLCODE_HPP
 #define GLSLCODE_HPP
 
+#include <map>
+#include <string>
+#include <vector>
+
 #include "Glsl.hpp"
 #include "GlBackend.hpp"
 #include "ShVariableNode.hpp"
 #include "ShProgram.hpp"
 #include "ShCtrlGraph.hpp"
+#include "ShTransformer.hpp"
 #include "GlslVariableMap.hpp"
 
 namespace shgl {
+
+struct TextureInfo {
+  int index;
+  bool preset;
+};
 
 class GlslCode : public SH::ShBackendCode {
 public:
@@ -71,6 +81,11 @@ private:
 
   std::vector<std::string> m_lines; /// raw lines of code (unindented)
   GlslVariableMap* m_varmap;
+  std::map<SH::ShTextureNodePtr, TextureInfo> m_texture_units;
+  int m_nb_textures;
+
+  /// The long tuple splits applied to this shader before compilation.
+  SH::ShTransformer::VarSplitMap m_splits;
 
   bool m_uploaded; /// true if the program has already been uploaded to the GPU
 
@@ -81,11 +96,15 @@ private:
   
   /// Generate code for a single Sh statement.
   void emit(const SH::ShStatement &stmt);
+  void emit_texture(const SH::ShStatement &stmt);
   
   std::string resolve(const SH::ShVariable& v) const;
 
   void updateFloatUniform(const SH::ShVariableNodePtr& node, const GLint location);
   void updateIntUniform(const SH::ShVariableNodePtr& node, const GLint location);
+
+  void allocate_textures();
+  void bind_textures();
 };
 
 typedef SH::ShPointer<GlslCode> GlslCodePtr;

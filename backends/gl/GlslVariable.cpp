@@ -38,35 +38,56 @@ const GlslVarBindingInfo GlslVariable::glslVarBindingInfo[] = {
   {"gl_SecondaryColor", 4, false},
   {"gl_Vertex", 4, false},
   {"gl_Normal", 3, false},
+  {"gl_MultiTexCoord0", 4, false},
+  {"gl_MultiTexCoord1", 4, false},
+  {"gl_MultiTexCoord2", 4, false},
+  {"gl_MultiTexCoord3", 4, false},
+  {"gl_MultiTexCoord4", 4, false},
+  {"gl_MultiTexCoord5", 4, false},
+  {"gl_MultiTexCoord6", 4, false},
+  {"gl_MultiTexCoord7", 4, false},
   {"gl_FragCoord", 4, false},
   {"gl_Position", 4, false},
   {"gl_FrontColor", 4, false},
   {"gl_FrontSecondaryColor", 4, false},
   {"gl_FragDepth", 1, false},
-  {"gl_FragColor", 4, false},
+  {"gl_FragColor", 4, false}
 };
 
 GlslVariable::GlslVariable()
-  : m_builtin(false), m_uniform(false), m_name(""), m_size(0),
-    m_kind(SH_TEMP), m_type(SH_FLOAT), m_semantic_type(SH_ATTRIB),
-    m_values("")
+  : m_builtin(false), m_texture(false), m_uniform(false), 
+    m_name(""), m_size(0), m_kind(SH_TEMP), m_type(SH_FLOAT), 
+    m_semantic_type(SH_ATTRIB), m_values("")
 {
 }
 
 GlslVariable::GlslVariable(const GlslVariable& v)
-  : m_builtin(v.m_builtin), m_uniform(v.m_uniform), m_name(v.m_name), 
-    m_size(v.m_size), m_kind(v.m_kind), m_type(v.m_type), 
+  : m_builtin(v.m_builtin), m_texture(v.m_texture),
+    m_uniform(v.m_uniform), m_name(v.m_name), 
+    m_kind(v.m_kind), m_type(v.m_type), 
     m_semantic_type(v.m_semantic_type), m_values(v.m_values)
 {
+  if (m_texture) {
+    m_dims = v.m_dims;
+  } else {
+    m_size = v.m_size;
+  }
 }
 
 GlslVariable::GlslVariable(const ShVariableNodePtr& v)
-  : m_builtin(false), m_uniform(v->uniform()), m_size(v->size()),
+  : m_builtin(false), m_texture(SH_TEXTURE == v->kind()),
+    m_uniform(m_texture || v->uniform()),
     m_kind(v->kind()), m_type(v->valueType()), 
     m_semantic_type(v->specialType())
 {
   if (v->hasValues()) {
     m_values = v->getVariant()->encodeArray();
+  }
+  if (m_texture) {
+    ShTextureNodePtr texture = shref_dynamic_cast<ShTextureNode>(v);
+    m_dims = texture->dims();
+  } else {
+    m_size = v->size();
   }
 }
 
@@ -92,7 +113,7 @@ void GlslVariable::name(int i, enum GlslProgramType unit)
 {
   stringstream varname;
   if (m_uniform) {
-    varname << "uni";
+    varname << (m_texture ? "tex" : "uni");
     varname << (unit == SH_GLSL_FP ? "fp" : "vp");
   } else {
     switch (m_kind) {
@@ -146,21 +167,42 @@ void GlslVariable::builtin(GlslVarBinding binding, int index)
 string GlslVariable::type_string() const
 {
   stringstream s;
-  if (shIsInteger(m_type)) {
-    if (m_size > 1) {
-      s << "ivec";
-    } else {
-      return "int";
+  if (m_texture) {
+    s << "sampler";
+    switch (m_dims) {
+    case SH_TEXTURE_1D:
+      s << "1D";
+      break;
+    case SH_TEXTURE_2D:
+      s << "2D";
+      break;
+    case SH_TEXTURE_3D:
+      s << "3D";
+      break;
+    case SH_TEXTURE_CUBE:
+      s << "Cube";
+      break;
+    case SH_TEXTURE_RECT:
+      s << "2DRect";
+      break;
     }
   } else {
-    if (m_size > 1) {
-      s << "vec";
+    if (shIsInteger(m_type)) {
+      if (m_size > 1) {
+	s << "ivec";
+      } else {
+	return "int";
+      }
     } else {
-      return "float";
+      if (m_size > 1) {
+	s << "vec";
+      } else {
+	return "float";
+      }
     }
+    s << m_size;
   }
 
-  s << m_size;
   return s.str();
 }
 

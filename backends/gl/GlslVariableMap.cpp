@@ -36,8 +36,15 @@ GlslBindingSpecs glslVertexInputBindingSpecs[] = {
   {SH_GLSL_VAR_NORMAL, 1, SH_NORMAL, false},
   {SH_GLSL_VAR_COLOR, 1, SH_COLOR, false},
   {SH_GLSL_VAR_SECONDARYCOLOR, 1, SH_COLOR, false},
-  {SH_GLSL_VAR_TEXCOORD, 8, SH_TEXCOORD, true},
-  {SH_GLSL_VAR_NONE, 0, SH_ATTRIB, true}
+  {SH_GLSL_VAR_MULTITEXCOORD0, 1, SH_TEXCOORD, true},
+  {SH_GLSL_VAR_MULTITEXCOORD1, 1, SH_TEXCOORD, true},
+  {SH_GLSL_VAR_MULTITEXCOORD2, 1, SH_TEXCOORD, true},
+  {SH_GLSL_VAR_MULTITEXCOORD3, 1, SH_TEXCOORD, true},
+  {SH_GLSL_VAR_MULTITEXCOORD4, 1, SH_TEXCOORD, true},
+  {SH_GLSL_VAR_MULTITEXCOORD5, 1, SH_TEXCOORD, true},
+  {SH_GLSL_VAR_MULTITEXCOORD6, 1, SH_TEXCOORD, true},
+  {SH_GLSL_VAR_MULTITEXCOORD7, 1, SH_TEXCOORD, true},
+  {SH_GLSL_VAR_NONE, 0, SH_ATTRIB, false}
 };
 
 GlslBindingSpecs glslFragmentInputBindingSpecs[] = {
@@ -45,7 +52,7 @@ GlslBindingSpecs glslFragmentInputBindingSpecs[] = {
   {SH_GLSL_VAR_COLOR, 1, SH_COLOR, false},
   {SH_GLSL_VAR_SECONDARYCOLOR, 1, SH_COLOR, false},
   {SH_GLSL_VAR_TEXCOORD, 8, SH_TEXCOORD, true},
-  {SH_GLSL_VAR_NONE, 0, SH_ATTRIB, true}
+  {SH_GLSL_VAR_NONE, 0, SH_ATTRIB, false}
 };
 
 GlslBindingSpecs glslVertexOutputBindingSpecs[] = {
@@ -53,13 +60,13 @@ GlslBindingSpecs glslVertexOutputBindingSpecs[] = {
   {SH_GLSL_VAR_FRONTCOLOR, 1, SH_COLOR, false},
   {SH_GLSL_VAR_FRONTSECONDARYCOLOR, 1, SH_COLOR, false},
   {SH_GLSL_VAR_TEXCOORD, 8, SH_TEXCOORD, true},
-  {SH_GLSL_VAR_NONE, 0, SH_ATTRIB}
+  {SH_GLSL_VAR_NONE, 0, SH_ATTRIB, false}
 };
 
 GlslBindingSpecs glslFragmentOutputBindingSpecs[] = {
   {SH_GLSL_VAR_FRAGDEPTH, 1, SH_POSITION, false},
   {SH_GLSL_VAR_FRAGCOLOR, 1, SH_COLOR, false},
-  {SH_GLSL_VAR_NONE, 0, SH_ATTRIB}
+  {SH_GLSL_VAR_NONE, 0, SH_ATTRIB, false}
 };
 
 GlslBindingSpecs* glslBindingSpecs(bool output, GlslProgramType unit)
@@ -134,7 +141,7 @@ void GlslVariableMap::allocate_builtin_outputs()
 void GlslVariableMap::allocate_temp(const ShVariableNodePtr& node)
 {
   GlslVariable var(node);
-  if (node->uniform()) {
+  if (var.uniform()) {
     var.name(m_nb_uniform_variables++, m_unit);
   } else {
     var.name(m_nb_regular_variables++, m_unit);
@@ -142,7 +149,7 @@ void GlslVariableMap::allocate_temp(const ShVariableNodePtr& node)
   map_insert(node, var);
 
   // Since this variable is not built-in, it must be declared
-  if (node->uniform()) {
+  if (var.uniform()) {
     m_uniform_declarations.push_back(var.declaration());
   } else {
     m_regular_declarations.push_back(var.declaration());
@@ -182,10 +189,15 @@ string GlslVariableMap::resolve(const ShVariable& v)
   }
 
   GlslVariable var(m_varmap[v.node()]);
-  string s = var.name() + swizzle(v, var.size());
-  if (v.neg()) {
-    s =  string("-(") + s + ")";
+  string s = var.name();
+  
+  if (!var.texture()) {
+    s += swizzle(v, var.size());
+    if (v.neg()) {
+      s =  string("-(") + s + ")";
+    }
   }
+
   return s;
 }
 
