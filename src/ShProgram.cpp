@@ -27,6 +27,7 @@
 #include "ShProgram.hpp"
 #include <cassert>
 #include <algorithm>
+#include <iostream>
 #include "ShBackend.hpp"
 #include "ShEnvironment.hpp"
 #include "ShDebug.hpp"

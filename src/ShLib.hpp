@@ -756,6 +756,26 @@ ShVariableN<N,  T> min(const ShVariableN<N, T>& left, const ShVariableN<N, T>& r
 
 SH_SHLIB_CONST_SCALAR_OP(min);
 
+/// Componentwise reciprocal of x.
+template<int N, typename T>
+ShVariableN<N, T> rcp(const ShVariableN<N, T>& var)
+{
+  if (!ShEnvironment::insideShader) {
+    assert(var.hasValues());
+    T vals[N];
+    var.getValues(vals);
+    T result[N];
+    for (int i = 0; i < N; i++) result[i] = 1.0 / vals[i];
+    return ShConstant<N, T>(result);
+  } else {
+    ShAttrib<N, SH_VAR_TEMP, T, false> t;
+    ShStatement stmt(t, SH_OP_RCP, var);
+    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    
+    return t;
+  }
+}
+
 
 /// Sine of x.
 template<int N, typename T>

@@ -29,6 +29,7 @@
 
 #include "ShTexture.hpp"
 #include "ShEnvironment.hpp"
+#include <cassert>
 
 namespace SH {
 

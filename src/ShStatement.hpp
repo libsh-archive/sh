@@ -71,6 +71,7 @@ enum ShOperation {
   SH_OP_MAX, ///< Binary componentwise maximum
   SH_OP_MIN, ///< Binary componentwise minimum
   SH_OP_POW, ///< Binary power
+  SH_OP_RCP, ///< Unary reciprocal 
   SH_OP_SIN, ///< Unary sine function
   SH_OP_SQRT, ///< Unary square root
 
