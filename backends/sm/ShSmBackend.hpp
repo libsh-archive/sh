@@ -163,6 +163,7 @@ public:
   SH::ShBackendCodePtr generateCode(const std::string& target, const SH::ShProgram& shader);
 
   void execute(const SH::ShProgram& program, SH::ShStream& dest);
+  int getCapability(SH::ShBackendCapability sbc); 
 
 private:
   void generateNode(BackendCodePtr& code, const SH::ShCtrlGraphNodePtr& node);

@@ -193,6 +193,7 @@ public:
   int texs(const std::string& target) { return m_texs[target]; }
 
   void execute(const SH::ShProgram& program, SH::ShStream& dest);
+  int getCapability(SH::ShBackendCapability sbc); 
   
 private:
   class GlExtensions {

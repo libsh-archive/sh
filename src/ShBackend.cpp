@@ -102,6 +102,14 @@ ShRefCount<ShBackend> ShBackend::lookup(const std::string& name)
 #endif
 }
 
+int ShBackend::getCapability(ShBackendCapability sbc) {
+  switch( sbc ) {
+    case SH_BACKEND_USE_INPUT_DEST: return 1;
+    case SH_BACKEND_USE_OUTPUT_SRC: return 1;
+    case SH_BACKEND_MAX_TUPLE: return 0;
+  }
+}
+
 void ShBackend::init()
 {
   if (m_doneInit) return;

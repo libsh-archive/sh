@@ -1165,4 +1165,12 @@ ShBackendCodePtr ArbBackend::generateCode(const std::string& target, const ShPro
   return code;
 }
 
+int ArbBackend::getCapability(ShBackendCapability sbc) {
+  switch( sbc ) {
+    case SH_BACKEND_USE_INPUT_DEST: return 0;
+    case SH_BACKEND_USE_OUTPUT_SRC: return 0;
+    case SH_BACKEND_MAX_TUPLE: return 4;
+  }
+}                                                                              
+
 }

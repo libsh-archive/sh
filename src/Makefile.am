@@ -14,6 +14,7 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
                    ShLinearAllocator.cpp \
                    ShDomTree.cpp \
                    ShOptimizer.cpp \
+                   ShTransformer.cpp \
                    ShInternals.hpp ShInternals.cpp \
 		   ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp \
                    ShBlock.hpp ShConstant.hpp ShConstantImpl.hpp ShCtrlGraph.hpp \
@@ -33,7 +34,7 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
                    ShColor.hpp ShLibColor.hpp \
                    ShNormal.hpp ShLibNormal.hpp \
                    ShTexCoord.hpp ShLibTexCoord.hpp \
-                   ShDomTree.hpp ShOptimizer.hpp ShBitSet.hpp ShBitSet.cpp \
+                   ShDomTree.hpp ShOptimizer.hpp ShTransformer.hpp ShBitSet.hpp ShBitSet.cpp \
 		   ShAlgebra.hpp ShAlgebra.cpp \
 		   ShManipulator.hpp ShManipulatorImpl.hpp ShManipulator.cpp \
 		   ShNibbles.hpp ShNibblesImpl.hpp \
@@ -63,7 +64,7 @@ incinc_HEADERS = ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp \
 		   ShPosition.hpp ShLibPosition.hpp \
                    ShNormal.hpp ShLibNormal.hpp \
                    ShTexCoord.hpp ShLibTexCoord.hpp \
-                   ShDomTree.hpp ShOptimizer.hpp ShAlgebra.hpp ShInternals.hpp\
+                   ShDomTree.hpp ShOptimizer.hpp ShTransformer.hpp ShAlgebra.hpp ShInternals.hpp\
 		   ShFixedManipulator.hpp \
 		   ShManipulator.hpp ShManipulatorImpl.hpp \
 			 ShNibbles.hpp ShNibblesImpl.hpp \

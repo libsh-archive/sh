@@ -51,10 +51,8 @@ ShKeepNode::ShKeepNode(int numChannels)
 }
 
 ShProgram ShKeepNode::applyToInputs(ShManipVarIterator &finger, ShManipVarIterator end) const {
-  SH_DEBUG_PRINT( "Applying keep " << m_numChannels  );
   ShProgram result = SH_BEGIN_PROGRAM() {
     for(int i = 0; i < m_numChannels; ++i, ++finger) {
-      std::cout << "Keep apply to channel: " << (*finger)->nameOfType() << (*finger)->name() << std::endl;
       if(finger == end) {
         ShError(ShAlgebraException("Not enough ShProgram channels for shKeep manipulator"));
       }

@@ -1,7 +1,5 @@
 // -*- C++ -*-
 
-    ShEnvironment::shader = shader;
-    ShEnvironment::insideShader = true;
     ShBackendPtr backend = ShBackend::lookup(backendName);
 
     if (!backend) {
@@ -11,7 +9,7 @@
 
     SH_DEBUG_ASSERT(!shader->target().empty());
 
-    ShBackendCodePtr code = backend->generateCode(shader->target(), shader);
+    ShBackendCodePtr code = shader->code(backend);
     std::cerr << "Printing code:" << std::endl;
     code->print(std::cout);
 

@@ -27,6 +27,7 @@
 #ifndef SHBASICBLOCK_HPP
 #define SHBASICBLOCK_HPP
 
+#include <list>
 #include "ShBlock.hpp"
 #include "ShStatement.hpp"
 
@@ -44,7 +45,7 @@ public:
   
   void addStatement(const ShStatement& stmt);
 
-  typedef std::vector<ShStatement> ShStmtList;
+  typedef std::list<ShStatement> ShStmtList;
 
   ShStmtList::const_iterator begin() const;
   ShStmtList::const_iterator end() const;
@@ -53,6 +54,10 @@ public:
 
   ShStmtList::iterator erase(ShStmtList::iterator I) {
     return m_statements.erase(I);
+  }
+
+  void splice(ShStmtList::iterator I, ShStmtList &l) {
+    m_statements.splice(I, l);
   }
   
 private:

@@ -33,6 +33,8 @@
 #include "ShTextureNode.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShError.hpp"
+#include "ShOptimizer.hpp"
+#include "ShTransformer.hpp"
 
 namespace SH {
 
@@ -59,9 +61,19 @@ void ShProgramNode::compile(const std::string& target, ShRefCount<ShBackend>& ba
 
   ShEnvironment::shader = this;
   ShEnvironment::insideShader = true;
+
+  // apply transformation
+  ShTransformer transformer(ctrlGraph, backend);
+  transformer.transform();
+
+  ShOptimizer optimizer(ctrlGraph);
+  optimizer.optimize(ShEnvironment::optimizationLevel);
+
+  collectVariables();
+
   ShBackendCodePtr code = backend->generateCode(target, this);
 #ifdef SH_DEBUG
-  // code->print(std::cerr);
+  //code->print(std::cerr);
 #endif
   ShEnvironment::insideShader = false;
   m_code[std::make_pair(target, backend)] = code;

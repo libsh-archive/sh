@@ -1,6 +1,6 @@
 // -*- C++ -*-
 
-ShEnvironment::optimizationLevel = 2;
+ShEnvironment::optimizationLevel = 1;
 
 ShProgram shader = SH_BEGIN_VERTEX_PROGRAM {
   ShInputPosition3f input;

@@ -74,6 +74,13 @@ public:
   ShOptimizerException(const std::string& message);
 };
 
+/** An exception relating to an ShTransformer operation.
+ */
+class ShTransformerException : public ShException {
+public:
+  ShTransformerException(const std::string& message);
+};
+
 /** An exception relating to an ShBackend operation.
  */
 class ShBackendException : public ShException {

@@ -813,4 +813,12 @@ void Backend::execute(const ShProgram& program, ShStream& dest)
   // TODO: NOT YET IMPLEMENTED
 }
 
+int Backend::getCapability(ShBackendCapability sbc) {
+  switch( sbc ) {
+    case SH_BACKEND_USE_INPUT_DEST: return 0;
+    case SH_BACKEND_USE_OUTPUT_SRC: return 0;
+    case SH_BACKEND_MAX_TUPLE: return 4;
+  }
+}                                                                              
+
 }

@@ -38,6 +38,12 @@ namespace SH  {
 
 class ShStream;
 
+enum ShBackendCapability {
+  SH_BACKEND_USE_INPUT_DEST, //< 0 iff not supported (default 1)
+  SH_BACKEND_USE_OUTPUT_SRC, //< 0 iff not supported (default 1)
+  SH_BACKEND_MAX_TUPLE //< 0 if no max tuple length (default 0)
+};
+
 class ShBackendCode : public ShRefCountable {
 public:
   virtual ~ShBackendCode();
@@ -77,6 +83,7 @@ public:
 
   // execute a stream program, if supported
   virtual void execute(const ShProgram& program, ShStream& dest) = 0;
+  virtual int getCapability(ShBackendCapability sbc); // returns default values
   
   typedef std::vector< ShRefCount<ShBackend> > ShBackendList;
 
@@ -89,7 +96,6 @@ protected:
   ShBackend();
   
 private:
-
   static void init();
   
   static ShBackendList* m_backends;

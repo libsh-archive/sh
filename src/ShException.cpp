@@ -58,5 +58,10 @@ ShOptimizerException::ShOptimizerException(const std::string& message)
 {
 }
 
+ShTransformerException::ShTransformerException(const std::string& message)
+  : ShException("Transformer Error: " + message)
+{
+}
+
 
 }

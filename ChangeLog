@@ -1,3 +1,8 @@
+2004-02-12  Bryan Chan <b8chan@uwaterloo.ca>
+	* src/ShTransformer.?pp:
+	Moved backend-specific transformations to the IR here.
+	Added basic long tuple support for temporaries.
+	
 2004-02-12  Jack Wang  <jmwang@uwaterloo.ca>
 	* backends/arb/ShArb.cpp, backends/arb/ShArb.hpp, src/ShLib.hpp:
 	Implemented ASIN, ACOS and put all the trig code generation stuff into
