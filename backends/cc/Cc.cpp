@@ -599,7 +599,11 @@ namespace ShCc {
   
   CcBackendCode::CcBackendCode(const SH::ShProgramNodeCPtr& program) :
     m_program(program),
+#ifdef WIN32
+    m_hmodule(NULL),
+#else
     m_handle(NULL),
+#endif
     m_func(NULL),
     m_cur_temp(0),
     m_params(NULL)
@@ -2039,15 +2043,15 @@ namespace ShCc {
     WaitForSingleObject(pi.hProcess, INFINITE);
 
     // Attempt to load the dll and fetch our function
-    m_handle = LoadLibrary(dllfile);
-    if (m_handle == NULL)
+    m_hmodule = LoadLibrary(dllfile);
+    if (m_hmodule == NULL)
       {
       SH_CC_DEBUG_PRINT("LoadLibrary failed: " << GetLastError());
       return false;
       }
     else
       {
-      m_func = (CcFunc)GetProcAddress(m_handle, "func");
+      m_func = (CcFunc)GetProcAddress(m_hmodule, "func");
 
       if (m_func == NULL)
         {
