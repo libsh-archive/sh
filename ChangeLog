@@ -1,5 +1,22 @@
 2004-10-28  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
 
+	* backends/gl/ArbCode.*: The ArbCode was holding a reference
+	to its associated program causing a cyclic dependency. The smart
+	pointer was changed to a raw pointer, alleviating most of the memory
+	leaks.
+
+	* backends/gl/GLXPBufferStreams.*: Changed pbuffer management
+	code, removed context tracking and replaced with list of
+	cached pbuffer/contexts. 
+
+	* backends/gl/GlTextures.*, backends/gl/GlTextureStorage.*,
+	backends/gl/Arb.*, backends/gl/GlBackend.*,
+	backends/gl/PBufferStreams.*: Removed all the context bookkeeping
+	code. We now assume that contexts share the same texture/program/
+	display list space.
+
+2004-10-28  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
 	* backends/cc/Cc.cpp: Generated code changed to use
 	static variable, some linux ld versions caused symbol
 	collisions leading to segfaults

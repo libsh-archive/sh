@@ -39,7 +39,7 @@ enum FloatExtension {
 };
 
 struct PBufferStreams : public StreamStrategy {
-  PBufferStreams(int context = 0);
+  PBufferStreams(void);
   virtual ~PBufferStreams();
 
   virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
@@ -49,9 +49,7 @@ private:
   virtual void restoreContext(void) = 0;
 
 private:
-  int m_context;
-
-  int m_setup_vp;
+  bool m_setup_vp;
   SH::ShProgram m_vp;
 };
 

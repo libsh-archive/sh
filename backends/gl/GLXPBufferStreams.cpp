@@ -54,8 +54,7 @@ namespace shgl {
 	}
     };
 
-  GLXPBufferStreams::GLXPBufferStreams(int context) :
-    PBufferStreams(context),
+  GLXPBufferStreams::GLXPBufferStreams(void) :
     m_display(NULL),
     m_orig_drawable(0),
     m_orig_context(0)
@@ -66,42 +65,14 @@ namespace shgl {
     {
     }
 
-  StreamStrategy* GLXPBufferStreams::create(int context)
+  StreamStrategy* GLXPBufferStreams::create(void)
     {
-    return new GLXPBufferStreams(context);
+    return new GLXPBufferStreams;
     }
 
   FloatExtension GLXPBufferStreams::setupContext(int width, int height)
     {
-    if (m_info.valid() && m_info.width == width && m_info.height == height)
-      {
-      shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->setContext(m_info.shcontext);
-      if (!glXMakeCurrent(m_display, m_info.pbuffer, m_info.context))
-	{
-	// TODO: cleanup
-        std::stringstream msg;
-        msg << "glXMakeCurrent failed";
-        shError(GLXPBufferStreamException(msg.str()));
-        }
-
-      return m_info.extension;
-      }
-
-    if (m_info.shcontext >= 0)
-      {
-      shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->setContext(m_info.shcontext);
-      shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->destroyContext();
-      }
-
-    // Figure out what extension we're using
-    m_info.extension = SH_ARB_NO_FLOAT_EXT;
-    m_info.width = width;
-    m_info.height = height;
-    m_info.pbuffer = 0;
-    m_info.context = 0;
-    
-    m_info.shcontext = shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->newContext();
-    
+    // initialize m_display if it hasn't already been done 
     if (!m_display)
       {
       m_display = glXGetCurrentDisplay();
@@ -111,104 +82,45 @@ namespace shgl {
 	if (!m_display)
 	  {
 	  shError(GLXPBufferStreamException("Could not open X display"));
-	  return m_info.extension;
 	  }
 	}
-      else
-	{
-	m_orig_context = glXGetCurrentContext();
-	m_orig_drawable = glXGetCurrentDrawable();
-	}
       }
-    
-    int scrnum;
-    scrnum = DefaultScreen(m_display);
-    
-    std::vector<int> fb_base_attribs;
-    fb_base_attribs.push_back(GLX_DOUBLEBUFFER); fb_base_attribs.push_back(False);
-    fb_base_attribs.push_back(GLX_RED_SIZE); fb_base_attribs.push_back(32);
-    fb_base_attribs.push_back(GLX_GREEN_SIZE); fb_base_attribs.push_back(32);
-    fb_base_attribs.push_back(GLX_BLUE_SIZE); fb_base_attribs.push_back(32);
-    fb_base_attribs.push_back(GLX_DRAWABLE_TYPE); fb_base_attribs.push_back(GLX_PBUFFER_BIT);
-  
-    int items;
 
-    GLXFBConfig* fb_config = 0;
-
-    // Try NVIDIA
-    if (!fb_config)
+    // grab the current GLX context/drawable, they will
+    // be restore after the stream execution is finished
+    m_orig_context = glXGetCurrentContext();
+    m_orig_drawable = glXGetCurrentDrawable();
+    
+    // search the crrent list of pbuffers for an applicable one
+    ShGLXPBufferInfo match;
+    for(std::list<ShGLXPBufferInfo>::iterator itr = m_infos.begin();
+	itr != m_infos.end();
+	itr++)
       {
-      std::vector<int> fb_attribs(fb_base_attribs);
-      fb_attribs.push_back(GLX_RENDER_TYPE); fb_attribs.push_back(GLX_RGBA_BIT);
-      fb_attribs.push_back(GLX_FLOAT_COMPONENTS_NV); fb_attribs.push_back(True);
-      fb_attribs.push_back(None);
-    
-      fb_config = glXChooseFBConfig(m_display, scrnum, &fb_attribs.front(), &items);
-      if (fb_config)
+      if ((*itr).valid() && (*itr).width == width && (*itr).height == height)
 	{
-	m_info.extension = SH_ARB_NV_FLOAT_BUFFER;
+	match = (*itr);
+	break;
 	}
       }
 
-    // Try ATI
-    if (!fb_config)
+    // if a valid match wasn't found then create a new
+    // context and add it to the list of infos
+    if (!match.valid())
       {
-      std::vector<int> fb_attribs(fb_base_attribs);
-      fb_attribs.push_back(GLX_RENDER_TYPE); fb_attribs.push_back(GLX_RGBA_FLOAT_ATI_BIT);
-      fb_attribs.push_back(None);
-    
-      fb_config = glXChooseFBConfig(m_display, scrnum, &fb_attribs.front(), &items);
-      if (fb_config)
-	{
-	m_info.extension = SH_ARB_ATI_PIXEL_FORMAT_FLOAT;
-	}
+      match = createContext(width, height);
+      m_infos.push_back(match);
       }
 
-    if (!fb_config)
+    // Activate the pbuffer/context 
+    if (!glXMakeCurrent(m_display, match.pbuffer, match.context))
       {
-      shError(GLXPBufferStreamException("Could not get GLX FB Config!\n"
-					"Your card may not support the appropriate extensions."));
-      return SH_ARB_NO_FLOAT_EXT;
+      std::stringstream msg;
+      msg << "glXMakeCurrent failed";
+      shError(GLXPBufferStreamException(msg.str()));
       }
 
-    if (m_info.extension == SH_ARB_NO_FLOAT_EXT)
-      {
-      shError(GLXPBufferStreamException("Could not choose a floating-point extension!\n"
-					"Your card may not support the appropriate extensions."));
-      return m_info.extension;
-      }
-
-    // Set up the pbuffer
-    int pbuffer_attribs[] = {
-      GLX_PBUFFER_WIDTH, width,
-      GLX_PBUFFER_HEIGHT, height,
-      GLX_LARGEST_PBUFFER, False,
-      None
-    };
-
-    m_info.pbuffer = glXCreatePbuffer(m_display, fb_config[0], pbuffer_attribs);
-    if (!m_info.pbuffer)
-      {
-      shError(GLXPBufferStreamException("Could not make pbuffer!"));
-      return SH_ARB_NO_FLOAT_EXT;
-      }
-  
-    m_info.context = glXCreateNewContext(m_display, fb_config[0], GLX_RGBA_TYPE, 0, True);
-    if (!m_info.context)
-      {
-      // TODO: delete pbuffer
-      shError(GLXPBufferStreamException("Could not create PBuffer context"));
-      return SH_ARB_NO_FLOAT_EXT;
-      }
-
-    if (!glXMakeCurrent(m_display, m_info.pbuffer, m_info.context))
-      {
-      // TODO: delete pbuffer, context
-      shError(GLXPBufferStreamException("glXMakeCurrent failed"));
-      return SH_ARB_NO_FLOAT_EXT;
-      }
-  
-    return m_info.extension;
+    return match.extension;
     }
 
   void GLXPBufferStreams::restoreContext(void)
@@ -221,7 +133,97 @@ namespace shgl {
 	msg << "glXMakeCurrent failed";
 	shError(GLXPBufferStreamException(msg.str()));
 	}
+      else
+	{
+	m_orig_context = 0;
+	m_orig_drawable = 0;
+	}
       }
+    }
+
+  ShGLXPBufferInfo GLXPBufferStreams::createContext(int width, int height)
+    {
+    ShGLXPBufferInfo ret;
+    ret.width = width;
+    ret.height = height;
+
+    // Figure out what extension we're using
+    int scrnum = DefaultScreen(m_display);
+    
+    std::vector<int> fb_base_attribs;
+    fb_base_attribs.push_back(GLX_DOUBLEBUFFER); fb_base_attribs.push_back(False);
+    fb_base_attribs.push_back(GLX_RED_SIZE); fb_base_attribs.push_back(32);
+    fb_base_attribs.push_back(GLX_GREEN_SIZE); fb_base_attribs.push_back(32);
+    fb_base_attribs.push_back(GLX_BLUE_SIZE); fb_base_attribs.push_back(32);
+    fb_base_attribs.push_back(GLX_DRAWABLE_TYPE); fb_base_attribs.push_back(GLX_PBUFFER_BIT);
+  
+    GLXFBConfig* fb_config = 0;
+
+    // Try NVIDIA
+    if (!fb_config)
+      {
+      std::vector<int> fb_attribs(fb_base_attribs);
+      fb_attribs.push_back(GLX_RENDER_TYPE); fb_attribs.push_back(GLX_RGBA_BIT);
+      fb_attribs.push_back(GLX_FLOAT_COMPONENTS_NV); fb_attribs.push_back(True);
+      fb_attribs.push_back(None);
+    
+      int items = 0;
+      fb_config = glXChooseFBConfig(m_display, scrnum, &fb_attribs.front(), &items);
+      if (fb_config)
+	{
+	ret.extension = SH_ARB_NV_FLOAT_BUFFER;
+	}
+      }
+
+    // Try ATI
+    if (!fb_config)
+      {
+      std::vector<int> fb_attribs(fb_base_attribs);
+      fb_attribs.push_back(GLX_RENDER_TYPE); fb_attribs.push_back(GLX_RGBA_FLOAT_ATI_BIT);
+      fb_attribs.push_back(None);
+    
+      int items = 0;
+      fb_config = glXChooseFBConfig(m_display, scrnum, &fb_attribs.front(), &items);
+      if (fb_config)
+	{
+	ret.extension = SH_ARB_ATI_PIXEL_FORMAT_FLOAT;
+	}
+      }
+
+    if (!fb_config)
+      {
+      shError(GLXPBufferStreamException("Could not get GLX FB Config!\n"
+					"Your card may not support the appropriate extensions."));
+      }
+
+    if (ret.extension == SH_ARB_NO_FLOAT_EXT)
+      {
+      shError(GLXPBufferStreamException("Could not choose a floating-point extension!\n"
+					"Your card may not support the appropriate extensions."));
+      }
+
+    // Set up the pbuffer
+    int pbuffer_attribs[] = {
+      GLX_PBUFFER_WIDTH, width,
+      GLX_PBUFFER_HEIGHT, height,
+      GLX_LARGEST_PBUFFER, False,
+      None
+    };
+
+    ret.pbuffer = glXCreatePbuffer(m_display, fb_config[0], pbuffer_attribs);
+    if (!ret.pbuffer)
+      {
+      shError(GLXPBufferStreamException("Could not make pbuffer!"));
+      }
+  
+    ret.context = glXCreateNewContext(m_display, fb_config[0], GLX_RGBA_TYPE, 0, True);
+    if (!ret.context)
+      {
+      // TODO: delete pbuffer
+      shError(GLXPBufferStreamException("Could not create PBuffer context"));
+      }
+
+    return ret;
     }
 
 }

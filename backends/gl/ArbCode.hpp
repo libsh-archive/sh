@@ -66,7 +66,7 @@ const unsigned int SH_ARB_END   = 0x800; // Not a filter. End of
 class ArbCode : public SH::ShBackendCode {
 public:
   ArbCode(const SH::ShProgramNodeCPtr& program, const std::string& target,
-          TextureStrategy* textures);
+          TextureStrategy* texture);
   virtual ~ArbCode();
 
   virtual bool allocateRegister(const SH::ShVariableNodePtr& var);
@@ -165,9 +165,12 @@ private:
 
   int getLabel(SH::ShCtrlGraphNodePtr node);
   
-  TextureStrategy* m_textures;
-  SH::ShProgramNodePtr m_shader; // internally visible shader ShTransformered to fit this target (ARB)
-  SH::ShProgramNodeCPtr m_originalShader; // original shader (should alway use this for external (e.g. globals))
+  TextureStrategy* m_texture;
+  // NOTE: These two pointer are deliberately not smart pointers
+  // so that the circular referenece between a program and
+  // its compiled code is broken
+  SH::ShProgramNode* m_shader; // internally visible shader ShTransformered to fit this target (ARB)
+  SH::ShProgramNode* m_originalShader; // original shader (should alway use this for external (e.g. globals))
   std::string m_unit;
 
   typedef std::vector<ArbInst> ArbInstList;

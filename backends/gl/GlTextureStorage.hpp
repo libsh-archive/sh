@@ -35,8 +35,7 @@ namespace shgl {
 
 class GlTextureStorage : public SH::ShStorage {
 public:
-  GlTextureStorage(int context,
-                   SH::ShMemory* memory, GLenum target,
+  GlTextureStorage(SH::ShMemory* memory, GLenum target,
                    GLenum format, GLint internalFormat,
                    int width, int height, int depth,
                    GlTextureNamePtr name);
@@ -53,10 +52,8 @@ public:
   int width() const { return m_width; }
   int height() const { return m_height; }
   int depth() const { return m_depth; }
-  int context() const { return m_context; }
   
 private:
-  int m_context;
   GlTextureNamePtr m_name;
   GLenum m_target;
   GLenum m_format;
