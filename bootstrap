@@ -20,6 +20,10 @@ if test "x${ACLOCAL}" = "x" ; then
 fi
 export ACLOCAL
 
+# ltdl seems to require these now...
+cp /usr/share/libtool/libtool.m4 .
+cp /usr/share/libtool/ltdl.m4 .
+
 cat config/*.m4 > acinclude.m4
 
 autoreconf -s -i $*
