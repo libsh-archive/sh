@@ -123,7 +123,6 @@ AC_CONFIG_FILES([Makefile
 		 util/Makefile
 		 examples/Makefile
 		 examples/binding/Makefile
-		 examples/glsl/Makefile
 		 examples/glut/Makefile
 		 examples/particle/Makefile
 		 examples/textures/Makefile
