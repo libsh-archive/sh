@@ -68,7 +68,7 @@ std::string SmRegister::print() const
 }
 
 BackendCode::BackendCode(ShRefCount<Backend> backend, const ShProgram& shader)
-  : m_backend(backend), m_shader(shader),
+  : m_backend(backend), m_shader(shader), m_smShader(0),
     m_maxCR(0), m_maxTR(0), m_maxIR(0), m_maxOR(0), m_maxTex(0),
     m_cR(0), m_tR(0), m_iR(0), m_oR(0)
 {
@@ -150,6 +150,8 @@ void BackendCode::upload()
 
 void BackendCode::bind()
 {
+  if (!m_smShader) upload();
+  
   SH_DEBUG_PRINT("Binding shader");
   
   smBindShader(m_smShader);

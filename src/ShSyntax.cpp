@@ -79,7 +79,7 @@ void shEndShader()
 void shBindShader(ShProgram& shader)
 {
   if (!ShEnvironment::backend) return;
-  shader->code(ShEnvironment::backend)->upload();
+  //  shader->code(ShEnvironment::backend)->upload();
   shader->code(ShEnvironment::backend)->bind();
 }
 

@@ -70,7 +70,9 @@ PFNGLGETPROGRAMIVARBPROC shGlGetProgramivARB;
 #define shGlProgramLocalParameter4fvARB glProgramLocalParameter4fvARB
 #define shGlProgramEnvParameter4fvARB glProgramEnvParameter4fvARB
 #define shGlGetProgramivARB glGetProgramivARB
-
+#define shGlGenProgramsARB glGenProgramsARB
+#define shGlDeleteProgramsARB glDeleteProgramsARB
+#define shGlBindProgramARB glBindProgramARB
 
 unsigned int shArbTargets[] = {
   GL_VERTEX_PROGRAM_ARB,
@@ -444,7 +446,7 @@ static SH::ShRefCount<ArbBackend> instance = new ArbBackend();
 ArbCode::ArbCode(ArbBackendPtr backend, const ShProgram& shader)
   : m_backend(backend), m_shader(shader),
     m_numTemps(0), m_numInputs(0), m_numOutputs(0), m_numParams(0), m_numConsts(0),
-    m_numTextures(0)
+    m_numTextures(0), m_programId(0)
 {
 }
 
@@ -491,11 +493,11 @@ void ArbCode::freeRegister(const ShVariableNodePtr& var)
 
 void ArbCode::upload()
 {
-  // TODO: anything?
-}
+  if (!m_programId)
+    shGlGenProgramsARB(1, &m_programId);
 
-void ArbCode::bind()
-{
+  shGlBindProgramARB(shArbTargets[m_shader->kind()], m_programId);
+  
   std::ostringstream out;
   print(out);
   std::string text = out.str();
@@ -510,9 +512,18 @@ void ArbCode::bind()
     SH_DEBUG_WARN("Code (30 chars): " << text.substr(pos, 30));
   }
   if (error != GL_NO_ERROR) {
-    // TODO: Better error handling.
-    SH_DEBUG_ERROR("Error binding ARB program: " << error);
+    SH_DEBUG_ERROR("Error uploading ARB program: " << error);
   }
+}
+
+void ArbCode::bind()
+{
+  if (!m_programId) {
+    upload();
+  }
+  
+  shGlBindProgramARB(shArbTargets[m_shader->kind()], m_programId);
+  
   SH::ShEnvironment::boundShader[m_shader->kind()] = m_shader;
 
   // Initialize constants

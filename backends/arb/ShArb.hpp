@@ -152,6 +152,9 @@ private:
 
   std::vector<int> m_outputBindings;
   std::vector<int> m_inputBindings;
+
+  /// ARB Program ID we are bound to. 0 if code hasn't been uploaded yet.
+  unsigned int m_programId;
 };
 
 typedef SH::ShRefCount<ArbCode> ArbCodePtr;
