@@ -1,3 +1,4 @@
+#include <iostream>
 #include "Arb.hpp"
 #include "GlTextures.hpp"
 #include "GlBackend.hpp"
@@ -34,17 +35,26 @@ BOOL APIENTRY DllMain(HANDLE hModule,
                       LPVOID lpReserved)
 {
   std::cerr << "Arb Backend DllMain called!" << std::endl;
-
-  if (backend) return true;
+  std::cerr << "Have backend: " << backend << std::endl;
+  std::cerr << "lpReserved = " << lpReserved << std::endl;
+  std::cerr << "hModule = " << lpReserved << std::endl;
   switch (ul_reason_for_call) {
   case DLL_PROCESS_ATTACH:
+    std::cerr << "Process attach!" << std::endl;
+    if (backend) return TRUE;
     backend = new ArbBackend();
     break;
   case DLL_THREAD_ATTACH:
   case DLL_THREAD_DETACH:
+    std::cerr << "Thread!" << std::endl;
     break;
   case DLL_PROCESS_DETACH:
+    std::cerr << "Process detach!" << std::endl;
+    delete backend;
+    std::cerr << "Deleted backend!" << std::endl;
     break;
+  default:
+    std::cerr << "Some Other Thing!" << std::endl;
   }
   return TRUE;
 }

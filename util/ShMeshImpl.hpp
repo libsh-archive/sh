@@ -133,27 +133,27 @@ ShMesh<M>& ShMesh<M>::operator=(const ShMesh<M> &other) {
   fmap[0] = 0;
 
   // make copies
-  for(typename EdgeSet::iterator J = other.edges.begin(); J != other.edges.end(); ++J) {
+  for(typename EdgeSet::const_iterator J = other.edges.begin(); J != other.edges.end(); ++J) {
     Edge* newedge = new Edge(**J); 
     edges.insert(newedge);
     emap[*J] = newedge; 
   }
 
-  for(typename VertexSet::iterator I = other.verts.begin(); I != other.verts.end(); ++I) {
+  for(typename VertexSet::const_iterator I = other.verts.begin(); I != other.verts.end(); ++I) {
     Vertex* newvert = new Vertex(**I); 
     verts.insert(newvert);
     vmap[*I] = newvert;
     newvert->edge = emap[(*I)->edge];
   }
 
-  for(typename FaceSet::iterator K = other.faces.begin(); K != other.faces.end(); ++K) {
+  for(typename FaceSet::const_iterator K = other.faces.begin(); K != other.faces.end(); ++K) {
     Face* newface = new Face(**K); 
     faces.insert(newface);
     fmap[*K] = newface; 
     newface->edge = emap[(*K)->edge]; 
   }
 
-  for(typename EdgeSet::iterator J = other.edges.begin(); J != other.edges.end(); ++J) {
+  for(typename EdgeSet::const_iterator J = other.edges.begin(); J != other.edges.end(); ++J) {
     Edge *e = emap[*J];
     e->start = vmap[(*J)->start]; 
     e->end = vmap[(*J)->end]; 

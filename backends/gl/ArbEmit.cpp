@@ -1,5 +1,6 @@
 #include "ArbCode.hpp"
 #include <algorithm>
+#define _USE_MATH_DEFINES
 #include <cmath>
 #include "ShDebug.hpp"
 #include "ShError.hpp"
@@ -9,14 +10,6 @@
 #endif
 #ifdef max
 #undef max
-#endif
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
-#ifndef M_E
-#define M_E 2.7182818284590452354
 #endif
 
 #ifdef WIN32

@@ -96,7 +96,9 @@ ShPointer<ShBackend> ShBackend::lookup(const std::string& name)
   }
 
   for (ShBackendList::iterator I = begin(); I != end(); ++I) {
-    if ((*I)->name() == name) return *I;
+    if ((*I)->name() == name) {
+      return *I;
+    }
   }
 
   SH_DEBUG_ERROR("Could not find " << name << "backend");
@@ -104,12 +106,17 @@ ShPointer<ShBackend> ShBackend::lookup(const std::string& name)
   return 0;
 #else
   
+  SH_DEBUG_PRINT("Looking up " << name);
+
   HMODULE mod = NULL;
 #define SH_WIN32_BACKENDS_DIR "\\DEV\\SH\\BACKENDS\\GL"
 
   std::string libname(SH_WIN32_BACKENDS_DIR);
   libname += "\\LIBSH";
   libname += name;
+#ifdef SH_DEBUG
+  libname += "D";
+#endif
   libname += ".DLL";
   mod = LoadLibrary(libname.c_str());
 
@@ -119,7 +126,10 @@ ShPointer<ShBackend> ShBackend::lookup(const std::string& name)
   }
 
   for (ShBackendList::iterator I = begin(); I != end(); ++I) {
-    if ((*I)->name() == name) return *I;
+    if ((*I)->name() == name) {
+      SH_DEBUG_PRINT("Found " << name << " at " << I->object());
+      return *I;
+    }
   }
   
   SH_DEBUG_ERROR("Could not find " << name << "backend");

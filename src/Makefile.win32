@@ -1,5 +1,12 @@
+RELEASE_TARGETS = libsh.dll libsh.lib
+DEBUG_TARGETS = libshd.dll libshd.lib
 
-all: libsh.dll
+all: all-release all-debug
+
+all-release: $(RELEASE_TARGETS)
+all-debug: $(DEBUG_TARGETS)
+
+CLEANFILES = $(RELEASE_TARGETS) $(DEBUG_TARGETS)
 
 libsh_dll_SOURCES  = ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp
 libsh_dll_SOURCES += ShEnvironment.cpp ShException.cpp ShError.cpp
@@ -76,15 +83,30 @@ libsh_dll_SOURCES += ShChannel.hpp ShChannelImpl.hpp
 libsh_dll_SOURCES += ShStream.hpp ShStreamImpl.hpp ShStream.cpp
 
 libsh_dll_CXXFILES = $(filter %.cpp,$(libsh_dll_SOURCES))
-libsh_dll_OBJECTS = $(libsh_dll_CXXFILES:.cpp=.obj)
-libsh_dll_LDADD = $(LIBPNG_DIR)\lib\libpng.dll.a
+libsh_dll_RELEASE_OBJECTS = $(libsh_dll_CXXFILES:.cpp=.r.obj)
+libsh_dll_DEBUG_OBJECTS = $(libsh_dll_CXXFILES:.cpp=.d.obj)
+libsh_dll_RELEASE_LDADD = $(LIBPNG_DIR)\lib\libpng.dll.a
+libsh_dll_DEBUG_LDADD = $(LIBPNG_DIR)\lib\libpng.dll.a
 
-libsh.dll: $(libsh_dll_OBJECTS)
-	$(CXX) /Felibsh /LD $^ $(libsh_dll_LDADD) $(LDFLAGS)
+libsh.dll libsh.lib: $(libsh_dll_RELEASE_OBJECTS)
+	$(CXX) /Felibsh /LD $^ $(libsh_dll_RELEASE_LDADD) $(RELEASE_LDFLAGS)
 
-libsh_dll_DEPENDS = $(libsh_dll_CXXFILES:.cpp=.d)
+libshd.dll libshd.lib: $(libsh_dll_DEBUG_OBJECTS)
+	$(CXX) /Felibshd /LD $^ $(libsh_dll_DEBUG_LDADD) $(DEBUG_LDFLAGS)
+
+install: libsh.dll libshd.dll $(wildcard *.hpp)
+	-mkdir $(SH_INSTALLDIR)
+	-mkdir $(SH_INSTALLDIR)\include\sh
+	-mkdir $(SH_INSTALLDIR)\lib
+	copy libsh.dll $(SH_INSTALLDIR)\lib
+	copy libsh.lib $(SH_INSTALLDIR)\lib
+	copy libshd.dll $(SH_INSTALLDIR)\lib
+	copy libshd.lib $(SH_INSTALLDIR)\lib
+	copy *.hpp $(SH_INSTALLDIR)\include\sh
+
+libsh_dll_DEPENDS = $(libsh_dll_CXXFILES:.cpp=.r.d) $(libsh_dll_CXXFILES:.cpp=.d.d)
 
 include ../win32.mk
-CPPFLAGS +=  -DSH_DLLEXPORT=__declspec(dllexport)
+CPPFLAGS += -DSH_DLLEXPORT=__declspec(dllexport)
 include $(libsh_dll_DEPENDS)
 

@@ -27,6 +27,7 @@
 #include "ArbCode.hpp"
 #include <iostream>
 #include <sstream>
+#define _USE_MATH_DEFINES
 #include <cmath>
 #include <bitset>
 

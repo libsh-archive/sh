@@ -34,7 +34,7 @@ namespace SH {
 /** Trait class to represent texture filtering modes.
  */
 struct 
-SH_DLLEXPORT ShFilteredTextureTraits : public ShTextureTraits {
+ShFilteredTextureTraits : public ShTextureTraits {
   ShFilteredTextureTraits()
     : ShTextureTraits(1, SH_FILTER_MIPMAP, SH_WRAP_CLAMP_TO_EDGE, SH_CLAMPED)
   {

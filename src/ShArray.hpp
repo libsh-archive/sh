@@ -35,7 +35,7 @@ namespace SH {
  * An array is a texture that does not support filtering or interpolation.
  */
 struct
-SH_DLLEXPORT ShArrayTraits : public ShTextureTraits {
+ShArrayTraits : public ShTextureTraits {
   ShArrayTraits()
     : ShTextureTraits(0, SH_FILTER_NONE, SH_WRAP_CLAMP_TO_EDGE, SH_CLAMPED)
   {

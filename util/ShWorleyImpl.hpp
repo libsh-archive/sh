@@ -197,11 +197,12 @@ Tex2DPropFactory<TexType, T>::Tex2DPropFactory(
     const ShBaseTexture2D<TexType> &tex, const ShGeneric<1, T> &scale)
   : m_tex(tex), m_scale(scale), invScale(ShConstAttrib2f(1.0f, 1.0f) / tex.size()) {}
 
+/* Moved to ShWorley.hpp
 template<typename TexType, typename T>
 ShGeneric<TexType::typesize, T> Tex2DPropFactory<TexType, T>::operator()(
     const ShGeneric<2, T> &p, const Generator<2, T> &g) const {
-  return m_tex(frac(g.cell * invScale * m_scale)) * ShConstAttrib1f(1.0f);
 }
+*/
 
 template<int N, int K, int P, typename T>
 void kSelect(const ShGeneric<P, T> vals[N], ShGeneric<K, T> result[N], float LARGE = 1e10) {
@@ -233,31 +234,31 @@ void kSelect(const ShGeneric<P, T> vals[N], ShGeneric<K, T> result[N], float LAR
   }
 }
 
-template<int K, int N, int P, int D, typename T>
-void worley(ShGeneric<K, T> result[N], const ShGeneric<D, T> &p,
+template<int K, int L, int P, int D, typename T>
+void worley(ShGeneric<K, T> result[], const ShGeneric<D, T> &p,
     const GeneratorFactory<P, D, T> *genFactory,
-    const PropertyFactory<N, D, T> *propFactory) {
+    const PropertyFactory<L, D, T> *propFactory) {
 
   int i, j;
   Generator<D, T> generators[P];
-  ShAttrib<P, SH_TEMP, T> props[N]; 
-  ShAttrib<N, SH_TEMP, T> propTemp; 
+  ShAttrib<P, SH_TEMP, T> props[L]; 
+  ShAttrib<L, SH_TEMP, T> propTemp; 
 
   (*genFactory)(p, generators); // make generators
   for(i = 0; i < P; ++i) {
     propTemp = (*propFactory)(p, generators[i]);
-    for(j = 0; j < N; ++j) props[j](i) = propTemp(j);
+    for(j = 0; j < L; ++j) props[j](i) = propTemp(j);
   }
 
   // sort points & gradients by distance
-  groupEvenOddSort<N>(props); 
+  groupEvenOddSort<L>(props); 
 
   // weighted sum of basis function values to get final result
-  for(j = 0; j < N; ++j) result[j] = cast<K>(props[j]);
+  for(j = 0; j < L; ++j) result[j] = cast<K>(props[j]);
 }
 
 template<int K, int D, typename T>
-ShGeneric<K, T> worley(const ShGeneric<D, T> &p, bool useTexture = true) {
+ShGeneric<K, T> worley(const ShGeneric<D, T> &p, bool useTexture) {
   DefaultGenFactory<D, T> genFactory(useTexture);
   DistSqPropFactory<D, T> propFactory;
   ShAttrib<K, SH_TEMP, T> result;
@@ -272,14 +273,14 @@ ShProgram shWorley(bool useTexture) {
   return shWorley<K>(&genFactory, &propFactory); 
 }
 
-template<int K, int N, int P, int D, typename T>
+template<int K, int L, int P, int D, typename T>
 ShProgram shWorley(const GeneratorFactory<P, D, T> *genFactory,
-        const PropertyFactory<N, D, T> *propFactory) {
+        const PropertyFactory<L, D, T> *propFactory) {
   ShProgram program = SH_BEGIN_PROGRAM() {
     ShTexCoord<D, SH_INPUT, T> SH_DECL(texcoord);
 
-    ShAttrib<K, SH_OUTPUT, T> result[N]; 
-    worley(result, texcoord, genFactory, propFactory); 
+    ShAttrib<K, SH_OUTPUT, T> result[L]; 
+    worley(&result[0], texcoord, genFactory, propFactory); 
   } SH_END_PROGRAM;
   return program;
 }

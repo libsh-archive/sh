@@ -1,17 +1,31 @@
 SOURCES = $(wildcard *.cpp)
-EXECUTABLES = $(SOURCES:.cpp=)
-OBJECTS = $(SOURCES:.cpp=.obj)
-DEPENDS = $(SOURCES:.cpp=.d)
-LDADD = ..\..\src\libsh.lib
-CLEANFILES = $(SOURCES:.cpp=)
+EXECUTABLES = $(SOURCES:.cpp=.exe)
+DEBUG_OBJECTS = $(SOURCES:.cpp=.d.obj)
+RELEASE_OBJECTS = $(SOURCES:.cpp=.r.obj)
+DEPENDS = $(SOURCES:.cpp=.d.d) $(SOURCES:.cpp=.r.d)
+DEBUG_LDADD = ..\..\src\libshd.lib
+RELEASE_LDADD = ..\..\src\libsh.lib
+CLEANFILES = $(EXECUTABLES) *.pdb *.ilk *.exp
 
 all:
 
 %.exe: %.obj
-	$(CXX) $(CXXFLAGS) /Fe$* $< $(LDADD) $(LDFLAGS)
+	$(CXX) $(DEBUG_CXXFLAGS) /Fe$* $< $(LDADD) $(DEBUG_LDFLAGS)
 
-w32testarb.exe: w32testarb.obj
-	$(CXX) $(CXXFLAGS) /Few32testarb w32testarb.obj $(LDFLAGS) $(OPENGL_DIR)\lib\OPENGL32.LIB ..\..\src\libsh.lib
+w32testarb.exe: w32testarb.d.obj
+	$(CXX) $(DEBUG_CXXFLAGS) /Few32testarb $< $(DEBUG_LDFLAGS) $(OPENGL_DIR)\lib\OPENGL32.LIB  $(DEBUG_LDADD)
+
+glutex.exe: glutex.d.obj
+	$(CXX) $(DEBUG_CXXFLAGS) /Feglutex $< $(DEBUG_LDFLAGS) $(OPENGL_DIR)\lib\OPENGL32.LIB $(OPENGL_DIR)\lib\GLUT32.LIB $(DEBUG_LDADD)
+
+glutex_r.exe: glutex.r.obj
+	$(CXX) $(RELEASE_CXXFLAGS) /Feglutex_r.exe $< $(RELEASE_LDFLAGS) $(OPENGL_DIR)\lib\OPENGL32.LIB $(OPENGL_DIR)\lib\GLUT32.LIB $(RELEASE_LDADD)
+
+libshd.dll: ..\..\src\libshd.dll
+	copy $< $@
+
+libsh.dll: ..\..\src\libsh.dll
+	copy $< $@
 
 include ../../win32.mk
 CPPFLAGS += -I..\..\src 

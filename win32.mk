@@ -1,3 +1,5 @@
+SH_INSTALLDIR = \Dev\install-sh
+
 OPENGL_DIR = \dev\opengl
 MSSDK_DIR = \dev\mssdk
 LIBPNG_DIR = \dev\libpng
@@ -10,19 +12,34 @@ INCLUDES += -I$(MSSDK_DIR)\include
 # OpenGL
 INCLUDES += -I$(OPENGL_DIR)\include
 
-CPPFLAGS = -DWIN32 -DSH_DEBUG \
-	   $(INCLUDES)
-CXXFLAGS = $(CPPFLAGS) /GR /GX /wd4003
+CPPFLAGS = -DWIN32 $(INCLUDES)
+
+RELEASE_CPPFLAGS = $(CPPFLAGS)
+DEBUG_CPPFLAGS   = $(CPPFLAGS) /D SH_DEBUG /D _DEBUG
+
+CXXFLAGS = /GR /GX /wd4003
+RELEASE_CXXFLAGS = $(CXXFLAGS) $(RELEASE_CPPFLAGS)  /MD
+DEBUG_CXXFLAGS = $(CXXFLAGS) $(DEBUG_CPPFLAGS) /MDd /ZI /Od /RTC1
+
+LDFLAGS = 
+DEBUG_LDFLAGS = $(LDFLAGS) /Zi
+RELEASE_LDFLAGS = $(LDFLAGS)
+
 CXX = cl
-LIBRARIAN = lib
-LDFLAGS = /link /LIBPATH:\DEV\MSSDK\LIB
 
 clean:
 	del *.lib *.obj *.d $(CLEANFILES)
 
-%.obj: %.cpp
-	$(CXX) /Fo$@ /c $< $(CXXFLAGS)
+%.r.obj: %.cpp
+	$(CXX) /Fo$@ /c $< $(RELEASE_CXXFLAGS)
 
-%.d: %.cpp
-	makedepend -f- -o.obj $< -- $(CPPFLAGS) > $@ 2>devnull
+%.d.obj: %.cpp
+	$(CXX) /Fo$@ /c $< $(DEBUG_CXXFLAGS)
+
+%.r.d: %.cpp
+	makedepend -f- -o.r.obj $< -- $(RELEASE_CPPFLAGS) > $@ 2>devnull
+	-@del devnull
+
+%.d.d: %.cpp
+	makedepend -f- -o.d.obj $< -- $(RELEASE_CPPFLAGS) > $@ 2>devnull
 	-@del devnull
