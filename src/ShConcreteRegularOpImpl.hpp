@@ -7,7 +7,6 @@
 #include "ShError.hpp"
 #include "ShTypeInfo.hpp"
 #include "ShVariant.hpp"
-#include "ShInterval.hpp"
 
 namespace SH {
 
