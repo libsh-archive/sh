@@ -125,7 +125,7 @@ OPERATIONS:
 | | | | | log
 |X|X|X|X| fmod
 |X|X|X|X| lerp
-| | | | | mad
+|X|X|X|X| mad
 | | | | | rcp 
 | | | | | rsqrt
 |X|X|X|X| norm
