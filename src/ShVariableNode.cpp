@@ -54,7 +54,7 @@ const char* ShSemanticTypeName[] = {
 };
 
 ShVariableNode::ShVariableNode(ShBindingType kind, int size, ShSemanticType type)
-  : m_uniform(!ShContext::current()->parsing() && kind != SH_TEXTURE && kind != SH_STREAM),
+  : m_uniform(!ShContext::current()->parsing() && kind != SH_TEXTURE && kind != SH_STREAM && kind != SH_CONST),
     m_kind(kind), m_specialType(type),
     m_size(size), m_id(m_maxID++), m_locked(0),
     m_values(0)

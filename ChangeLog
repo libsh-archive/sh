@@ -1,5 +1,14 @@
 2004-08-23  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* backends/gl/PBufferStreams.cpp (execute): Optimize is spelled
+	"optimize", not "optmize".
+
+	* src/ShOptimizations.cpp: Mark writes to inputs as live. This is
+	actually over pessimistic, but works for now.
+
+	* src/ShVariableNode.cpp (ShVariableNode): Constants are not
+	uniforms.
+
 	* src/ShOptimizations.cpp (ConstProp::updateDest): Use SH_CONST
 	for our temporary evaluator variables so that they have values
 	even if we are inside a shader program definition.

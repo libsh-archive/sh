@@ -495,7 +495,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
 
   
   // optimize
-  optimze(fp);
+  optimize(fp);
 
   int gl_error;
   glEnable(GL_VERTEX_PROGRAM_ARB);
