@@ -105,6 +105,14 @@ SH_SHLIB_CONST_TRINARY_OP_011(clamp);
 template<int N, typename T>
 ShGeneric<N, T> sat(const ShGeneric<N, T>& a);
 
+/** Componentwise sign.
+ * Returns -1.0 if argument is less than 0.0, 1.0 if argument is greater
+ * than 0.0, 0.0 otherwise.
+ * Operates componentwise on tuples.
+ */
+template<int N, typename T>
+ShGeneric<N, T> sign(const ShGeneric<N, T>& var);
+
 /*@}*/
 
 }

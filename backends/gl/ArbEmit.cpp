@@ -55,9 +55,15 @@ ArbMapping ArbCode::table[] = {
 
   // Boolean
   {SH_OP_SLT, SH_ARB_ANY,   0,            SH_ARB_SLT, 0},
-  {SH_OP_SLE, SH_ARB_ANY,   swap_sources, SH_ARB_SGE, 0},
-  {SH_OP_SGT, SH_ARB_ANY,   swap_sources, SH_ARB_SLT, 0},
   {SH_OP_SGE, SH_ARB_ANY,   0,            SH_ARB_SGE, 0},
+
+  {SH_OP_SLE, SH_ARB_NVVP2, 0,            SH_ARB_SLE, 0},
+  {SH_OP_SLE, SH_ARB_NVFP,  0,            SH_ARB_SLE, 0},
+  {SH_OP_SLE, SH_ARB_ANY,   swap_sources, SH_ARB_SGE, 0},
+
+  {SH_OP_SGT, SH_ARB_NVVP2, 0,            SH_ARB_SGT, 0},
+  {SH_OP_SGT, SH_ARB_NVFP,  0,            SH_ARB_SGT, 0},
+  {SH_OP_SGT, SH_ARB_ANY,   swap_sources, SH_ARB_SLT, 0},
 
   {SH_OP_SEQ, SH_ARB_NVVP2, 0,            SH_ARB_SEQ, 0},
   {SH_OP_SEQ, SH_ARB_NVFP,  0,            SH_ARB_SEQ, 0},
@@ -75,6 +81,8 @@ ArbMapping ArbCode::table[] = {
   {SH_OP_MOD,  SH_ARB_ANY, 0, SH_ARB_FUN, &ArbCode::emit_mod},
   {SH_OP_MAX,  SH_ARB_ANY, 0, SH_ARB_MAX, 0},
   {SH_OP_MIN,  SH_ARB_ANY, 0, SH_ARB_MIN, 0},
+  {SH_OP_SGN,  SH_ARB_NVVP2, 0, SH_ARB_SSG, 0},
+  {SH_OP_SGN,  SH_ARB_ANY, 0, SH_ARB_FUN, &ArbCode::emit_sgn},
   
   // Trig
   {SH_OP_ACOS,  SH_ARB_ANY, 0,         SH_ARB_FUN, &ArbCode::emit_invtrig},
@@ -275,8 +283,7 @@ void ArbCode::emit_mod(const ShStatement& stmt)
   // result = x - sign(x/y)*floor(abs(x/y))*y
   emit(ShStatement(t1, stmt.src[0], SH_OP_DIV, stmt.src[1]));
   m_instructions.push_back(ArbInst(SH_ARB_ABS, t2, t1));
-  
-  emit(ShStatement(t1, t1, SH_OP_DIV, t2));
+  emit(ShStatement(t1, SH_OP_SGN, t1));
   m_instructions.push_back(ArbInst(SH_ARB_FLR, t2, t2)); 
   m_instructions.push_back(ArbInst(SH_ARB_MUL, t1, t1, t2)); 
   m_instructions.push_back(ArbInst(SH_ARB_MUL, t1, t1, stmt.src[1])); 
@@ -443,6 +450,13 @@ void ArbCode::emit_norm(const ShStatement& stmt)
   emit(ShStatement(tmp, stmt.src[0], SH_OP_DOT, stmt.src[0]));
   m_instructions.push_back(ArbInst(SH_ARB_RSQ, tmp, tmp));
   m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, tmp, stmt.src[0]));
+}
+
+void ArbCode::emit_sgn(const ShStatement& stmt)
+{
+  ShVariable tmp(new ShVariableNode(SH_TEMP, stmt.src[0].size()));
+  m_instructions.push_back(ArbInst(SH_ARB_ABS, tmp, stmt.src[0]));
+  emit(ShStatement(stmt.dest, stmt.src[0], SH_OP_DIV, tmp));
 }
 
 }

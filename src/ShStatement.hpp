@@ -82,6 +82,7 @@ enum ShOperation {
   SH_OP_RCP, ///< Unary reciprocal
   SH_OP_RSQ, ///< Unary reciprocal square root
   SH_OP_SIN, ///< Unary sine function
+  SH_OP_SGN, ///< Unary componentwise sign
   SH_OP_SQRT, ///< Unary square root
   SH_OP_TAN, ///< Unary tangent
 

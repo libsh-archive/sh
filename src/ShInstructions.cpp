@@ -72,6 +72,7 @@ T lrp(T alpha, T a, T b) { return alpha*a + (1.0f-alpha)*b; }
 T cond(T alpha, T a, T b) { return alpha > 0.0f ? a : b; }
 T mad(T a, T b, T c) { return a * b + c; }
 T frac(T a) { return fmodf(a, 1.0f); }
+T sgn(T a) { return (a < 0.0f ? -1.0f : (a == 0.0f ? 0.0f : 1.0f)); }
 }
 
 #define CWISE_BINARY_OP(d, a, b, op) \
@@ -537,6 +538,17 @@ void shRSQ(ShVariable& dest, const ShVariable& a)
     CWISE_UNARY_OP(dest, a, 1.0f / sqrt);
   } else {
     ShStatement stmt(dest, SH_OP_RSQ, a);
+    addStatement(stmt);
+  }
+}
+
+void shSGN(ShVariable& dest, const ShVariable& a)
+{
+  sizes_match(dest, a);
+  if (immediate()) {
+    CWISE_UNARY_OP(dest, a, sgn);
+  } else {
+    ShStatement stmt(dest, SH_OP_SGN, a);
     addStatement(stmt);
   }
 }

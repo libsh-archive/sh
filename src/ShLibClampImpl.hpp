@@ -143,6 +143,15 @@ ShGeneric<N, T> sat(const ShGeneric<N, T>& a)
   return min(a, fillcast<N>(ShConstAttrib1f(1.0)));
 }
 
+template<int N, typename T>
+inline
+ShGeneric<N, T> sign(const ShGeneric<N, T>& var)
+{
+  ShAttrib<N, SH_TEMP, T> t;
+  shSGN(t, var);
+  return t;
+}
+
 }
 
 #endif

@@ -69,11 +69,21 @@ enum ArbOp {
   // KIL
   SH_ARB_KIL,
 
-  // NV_vertex_program/NV_fragment_program
+  // NV_vertex_program2/NV_fragment_program
+  SH_ARB_SEQ,
+  SH_ARB_SGT,
+  SH_ARB_SLE,
+  SH_ARB_SNE,
+  SH_ARB_SFL,
+  SH_ARB_STR,
+
+  // NV_fragment_program
   SH_ARB_DDX,
   SH_ARB_DDY,
-  SH_ARB_SEQ,
-  SH_ARB_SNE,
+  SH_ARB_RFL,
+
+  // NV_vertex_program2
+  SH_ARB_SSG,
   
   // NV_fragment_program2
   SH_ARB_DIV,

@@ -1,6 +1,36 @@
+2004-07-09  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/cpu/CPU.cpp (encode): Implement SH_OP_SGN.
+
+	* src/ShLibDerivImpl.hpp (fwidth): Fix this function (use "var"
+	instead of "t").
+
+	* src/ShLibClampImpl.hpp (sign): Implemented this
+	function. Resolves issue60.
+
+	* src/ShLibClamp.hpp: Added sign() function.
+
+	* src/ShInstructions.cpp (shSGN): Implemented this function.
+
+	* src/ShInstructions.hpp: Added shSGN() function.
+
 2004-07-08  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* backends/gl/ArbEmit.cpp: Added rules for SH_OP_SGN.
+	(emit_sgn): Implemented this function.
+	(emit_mod): Use SH_OP_SGN.
+
+	* backends/gl/ArbCode.hpp (ArbCode): Added emit_sgn() member function.
+
+	* src/ShStatement.cpp: Added opInfo for SGN.
+
+	* src/ShStatement.hpp: Added SH_OP_SGN statement.
+
+	* backends/gl/ArbInst.hpp: Added SGT, SLE, SFL, STR, RFL, SSG
+	instructions.
+
 	* backends/gl/ArbInst.cpp (arbOpInfo): DP2 is a collectingOp.
+	(arbOpInfo): Added SGT, SLE, SFL, STR, RFL, SSG instructions.
 
 	* backends/gl/ArbEmit.cpp: Only turn three-vector normalizations
 	into NRM instructions (on nvfp2).

@@ -64,15 +64,25 @@ ArbOpInfo arbOpInfo[] = {
   {"KIL", false, true, 0, false, false},
 
   // NV_vertex_program/NV_fragment_program
+  {"SEQ", true, true, 2, true, false},
+  {"SGT", true, true, 2, true, false},
+  {"SLE", true, true, 2, true, false},
+  {"SNE", true, true, 2, true, false},
+  {"SFL", true, true, 2, true, false},
+  {"STR", true, true, 2, true, false},
+
+  // NV_fragment_program
   {"DDX", false, true, 1, true, false},
   {"DDY", false, true, 1, true, false},
-  {"SEQ", true, true, 1, false, false},
-  {"SNE", true, true, 1, false, false},
+  {"RFL", false, true, 2, true, false},
+
+  // NV_vertex_program2
+  {"SSG", true, false, 1, true, false},
   
   // NV_fragment_program2
   {"DIV", false, true, 2, false, false},
   {"DP2", false, true, 2, true, true},
-  {"NRM", false, true, 1, false, false},
+  {"NRM", false, true, 1, true, false},
 
   {"<fun>", false, false, 0, false, false}
 };

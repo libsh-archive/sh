@@ -27,7 +27,7 @@ template<int N, typename T>
 inline
 ShGeneric<N, T> fwidth(const ShGeneric<N, T>& var)
 {
-  return max(abs(dx(t)), abs(dy(t)));
+  return max(abs(dx(var)), abs(dy(var)));
 }
 
 template<typename T>

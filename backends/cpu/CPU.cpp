@@ -1516,6 +1516,22 @@ namespace ShCPU {
 
 	break;
 	}
+      case SH::SH_OP_SGN:
+	{
+	for(int i = 0; i < stmt.dest.size(); i++)
+	  {
+	  m_code << "  "
+		 << resolve(stmt.dest, i)
+		 << " = ("
+		 << resolve(stmt.src[0], i)
+                 << " < 0.0f ? -1.0f : ("
+		 << resolve(stmt.src[0], i)
+                 << " > 0.0f ? 1.0f : 0.0)"
+		 << ");" << std::endl;
+	  }
+
+	break;
+	}
       case SH::SH_OP_SQRT:
 	{
 	for(int i = 0; i < stmt.dest.size(); i++)
