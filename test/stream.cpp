@@ -12,11 +12,24 @@ using namespace SH;
 int main(int argc, char** argv)
 {
   try {
-    double data[] = {1.0, 0.0, 1.0,
-                     0.5, 0.5, 0.5};
+    std::string backendName("arb");
+    ShBackendPtr backend = ShBackend::lookup(backendName);
 
-    ShChannel<ShColor3f> stream1(data, 2);
-    ShChannel<ShColor3f> stream2(data, 2);
+    if (!backend) {
+      std::cerr << "Error opening " << backendName << " backend." << std::endl;
+      return -1;
+    }
+    
+    double data[] = {1.0, 0.0, 1.0,
+                     0.5, 0.5, 0.5,
+                     0.6, 0.2, 0.1,
+                     0.7, 0.2, 0.4,
+    };
+
+    double out_data[4 * 3];
+
+    ShChannel<ShColor3f> stream1(data, 4);
+    ShChannel<ShColor3f> stream2(data, 4);
     
     ShProgram shader = SH_BEGIN_PROGRAM("gpu:stream") {
       ShInputColor3f colors[2];
@@ -37,6 +50,10 @@ int main(int argc, char** argv)
     std::cout << "final:" << std::endl;
     final->ctrlGraph->print(std::cout, 0);
 
+    ShChannel<ShColor3f> output(out_data, 4);
+    ShStream outputStream = output;
+    backend->execute(final, outputStream);
+    
     return 0;
   } catch (const ShException& e) {
     std::cerr << "SH Exception: " << e.message() << std::endl;

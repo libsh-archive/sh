@@ -821,7 +821,6 @@ bool ArbCode::printSamplingInstruction(std::ostream& out, const ArbInst& instr) 
     out << "CUBE";
     break;
   }
-  out << ";" << std::endl;
   return true;
 }
 
@@ -885,9 +884,9 @@ std::ostream& ArbCode::print(std::ostream& out)
         out << ", ";
         printVar(out, false, I->src[i], arbOpInfo[I->op].collectingOp, I->dest.swizzle());
       }
-      out << ';';
-      out << endl;
     }
+    out << ';';
+    out << endl;
   }
 
   out << "END" << endl;

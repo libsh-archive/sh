@@ -27,15 +27,17 @@
 #include "ShArb.hpp"
 #include <map>
 #include "sh.hpp"
+#include "ShOptimizer.hpp"
 
 namespace ShArb {
 
 using namespace SH;
 
-class StreamInputGatherer
-{
+typedef std::map<ShChannelNodePtr, ShTextureNodePtr> StreamInputMap;
+
+class StreamInputGatherer {
 public:
-  StreamInputGatherer(std::map<ShChannelNodePtr, ShTextureNodePtr>& input_map)
+  StreamInputGatherer(StreamInputMap& input_map)
     : input_map(input_map)
   {
   }
@@ -48,27 +50,88 @@ public:
          I != node->block->end(); ++I) {
       const ShStatement& stmt = *I;
       if (stmt.op != SH_OP_FETCH) continue;
+
+      // TODO: ought to complain here
       if (stmt.src[0].node()->kind() != SH_VAR_STREAM) continue;
+
       ShChannelNodePtr stream_node = stmt.src[0].node();
       input_map.insert(std::make_pair(stream_node, ShTextureNodePtr(0)));
     }
   }
 
 private:
-  std::map<ShChannelNodePtr, ShTextureNodePtr>& input_map;
+  StreamInputMap& input_map;
+};
+
+class TexFetcher {
+public:
+  TexFetcher(StreamInputMap& input_map,
+             ShVariableNodePtr tc_node)
+    : input_map(input_map),
+      tc_node(tc_node)
+  {
+  }
+
+  void operator()(ShCtrlGraphNode* node)
+  {
+    ShVariable coordsVar(tc_node);
+    if (!node->block) return;
+    for (ShBasicBlock::ShStmtList::iterator I = node->block->begin();
+         I != node->block->end(); ++I) {
+      ShStatement& stmt = *I;
+      if (stmt.op != SH_OP_FETCH) continue;
+      
+      if (stmt.src[0].node()->kind() != SH_VAR_STREAM) {
+        // TODO: complain
+        continue;
+      }
+      
+      ShChannelNodePtr stream_node = stmt.src[0].node();
+      StreamInputMap::const_iterator I = input_map.find(stream_node);
+      if (I == input_map.end()) {
+        // TODO: complain
+        continue;
+      }
+
+      if (!I->second) {
+        // TODO: complain
+        continue;
+      }
+
+      ShVariable texVar(I->second);
+      stmt = ShStatement(stmt.dest, texVar, SH_OP_TEX, coordsVar);
+    }
+  }
+  
+private:
+  StreamInputMap& input_map;
+  ShVariableNodePtr tc_node;
 };
 
 void ArbBackend::execute(const ShProgram& program,
                          ShStream& dest)
 {
-  // TODO: Check program type
-  
-  if (dest.size() != 1) {
-    SH_DEBUG_ERROR("ShArb cannot support multiple outputs for stream execution yet.");
+  // Check program target
+  if (program->target() != "gpu:stream") {
+    SH_DEBUG_ERROR("ShArb can only execute ``gpu:stream'' programs.");
     return;
   }
 
-  std::map<ShChannelNodePtr, ShTextureNodePtr> input_map;
+  // Make sure program has no inputs
+  if (!program->inputs.empty()) {
+    SH_DEBUG_ERROR("Stream program has unbound inputs, and can hence not be executed.");
+    return;
+  }
+
+  // Only support one output channel right now.
+  if (dest.size() != 1) {
+    SH_DEBUG_ERROR("ShArb cannot support multiple output channels for stream execution yet.");
+    return;
+  }
+
+  ShChannelNodePtr output = *dest.begin();
+
+  StreamInputMap input_map;
 
   // Do a DFS through the program's control graph.
   StreamInputGatherer gatherer(input_map);
@@ -81,47 +144,96 @@ void ArbBackend::execute(const ShProgram& program,
 
   // First, allocate textures for each input stream.
   // Need to ensure that input stream sizes are the same.
-  int input_size = -1;
+  int input_count = -1;
   int tex_size;
-  for (std::map<ShChannelNodePtr, ShTextureNodePtr>::iterator I = input_map.begin();
-       I != input_map.end(); ++I) {
-    if (input_size < 0) {
-      input_size = I->first->count();
+  for (StreamInputMap::iterator I = input_map.begin(); I != input_map.end(); ++I) {
+    if (input_count < 0) {
+      input_count = I->first->count();
 
       // Pick a size for the texture that just fits the data.
-      // TODO: Verify this code!
-      int k = 0;
-      int n = input_size;
-      while (n >= 2) {
-        n >>= 2;
-        k++;
+      int t = 1;
+      while (t * t < input_count) {
+        t <<= 1;
       }
-      tex_size = 2 << k;
+      tex_size = t;
     }
-    if (input_size != I->first->count()) {
+    if (input_count != I->first->count()) {
       SH_DEBUG_ERROR("Input lengths of stream program do not match ("
-                     << input_size << " != " << I->first->count() << ")");
+                     << input_count << " != " << I->first->count() << ")");
       return;
     }
     ShDataTextureNodePtr tex = new ShDataTextureNode(SH_TEXTURE_2D, tex_size, tex_size, 1,
                                                      I->first->size());
     ShDataMemoryObjectPtr mem = new ShDataMemoryObject(tex_size, tex_size, 1,
                                                        I->first->size());
-    mem->setPartialData(reinterpret_cast<const float*>(I->first->data()), input_size);
+    mem->setPartialData(reinterpret_cast<const float*>(I->first->data()), input_count);
     tex->setMem(mem);
     I->second = tex;
   }
+
+  if (output->count() != input_count) {
+    SH_DEBUG_ERROR("Input data count does not match output data count ("
+                   << input_count << " != " << output->count() << ")");
+    return;
+  }
+
+  /*
+  SH_DEBUG_PRINT("Debugging info:" << std::endl <<
+                 "input_count = " << input_count << std::endl <<
+                 "tex_size   = " << tex_size);
+  */
+
+  // Add in the texcoord variable
+  ShProgram fp = program & keep<ShTexCoord2f>();
+
+  // Make it a fragment program
+  fp->target() = "gpu:fragment";
   
-  // Then, generate fragment program code from program
-  //  - replace FETCH with TEX
-  //  - need to pass in tex coord
-  //     (can use combine for that)
+  ShVariableNodePtr tc_node = fp->inputs.back(); // there should be only one input anyways
+
+  ShBackendPtr arbBackend(this);
+
+  // replace FETCH with TEX
+  TexFetcher texFetcher(input_map, tc_node);
+  fp->ctrlGraph->dfs(texFetcher);
+  fp->collectVariables();
+  
+  // optimize
+  ShOptimizer optimizer(fp->ctrlGraph);
+  optimizer.optimize(ShEnvironment::optimizationLevel);
+
+  
+  // generate code
+  fp->compile(arbBackend);
+
+  {
+    SH_DEBUG_PRINT("Optimized FP:");
+    fp->code(arbBackend)->print(std::cerr);
+  }
+  
+  // The (trivial) vertex program
+  ShProgram vp = keep<ShPosition4f>() & keep<ShTexCoord2f>();
+  vp->target() = "gpu:vertex";
+  vp->compile(arbBackend);
 
   // Then, bind vertex (pass-through) and fragment program
+  fp->code(arbBackend)->bind();
+  vp->code(arbBackend)->bind();
+  
+  // TODO: pbuffers stuff
+
   // Generate quad geometry
+  /*
+  glBegin(GL_QUADS); {
+    glVertex3f(-1.0, -1.0, 0.0);
+    glVertex3f(-1.0,  1.0, 0.0);
+    glVertex3f( 1.0,  1.0, 0.0);
+    glVertex3f( 1.0, -1.0, 0.0);
+  } glEnd();
+  */
+  
   // Render
   // Read back output
-  // 
 }
 
 }

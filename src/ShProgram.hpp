@@ -93,6 +93,9 @@ public:
 
   /// Can be empty, if there is no target associated with this program.
   std::string target() const { return m_target; }
+
+  /// It may be useful to change a program's target sometimes.
+  std::string& target() { return m_target; }
   
 private:
 

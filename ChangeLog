@@ -1,5 +1,15 @@
 2004-01-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* backends/arb/ShArbStream.cpp (execute): Generates fragment
+	programs now. All that's left to do is wrestling with pbuffers to
+	actually get the "geometry" rendered and read back. Hooray.
+
+	* backends/arb/ShArb.cpp (printSamplingInstruction): Don't output
+	a newline.
+	(print): When using printSamplingInstruction, use our own line
+	numberer to end the line. This will actually add line numbers to
+	TEX instructions being output.
+
 	* src/sh.hpp: Added ShChannelNode.hpp, ShChannel.hpp to the list
 	of included files.
 
