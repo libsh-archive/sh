@@ -122,7 +122,7 @@ void DAGNode::dump_stmts() {
 }
 
 
-// returns node associated with this variable
+// returns variable associated with this variable
 // creates a new one if it doesn't exist
 ShVariable *DAG::find_var(ShVariable *var) {
 	VarVectorMap::iterator node_it;

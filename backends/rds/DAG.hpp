@@ -67,6 +67,7 @@ class SH_DLLEXPORT DAG {
 	DAGNode* m_root;
 
 	void print(int indent);
+	SH::ShVariable *find_var(SH::ShVariable *var);
   private:
 	typedef std::vector<SH::ShVariable*> VarVector;
 	typedef std::map<SH::ShVariableNodePtr, VarVector> VarVectorMap;
@@ -75,7 +76,6 @@ class SH_DLLEXPORT DAG {
 	NodeMap node;
 
 	void DAG::add_statement(SH::ShStatement *stmt);
-	SH::ShVariable *find_var(SH::ShVariable *var);
 };
 
 #endif

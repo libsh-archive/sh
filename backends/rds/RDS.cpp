@@ -415,9 +415,12 @@ void RDS::partition(DAGNode::DAGNode *v)
       
 		// cut w off from v if it's marked
 		if (w->m_marked) {
+			SH::ShVariable *var = m_graph->find_var( &(w->m_stmt->dest) );
 			v->m_cut[w] = true; 
+			m_shared_vars.push_back(var);
 #ifdef RDS_DEBUG
-      SH_DEBUG_PRINT("Cut at " << w->m_label );
+      SH_DEBUG_PRINT("Cut: " << w->m_label );
+	  SH_DEBUG_PRINT("Shared variable: " << var->name() << " " << var->swizzle() );
 #endif
 		}
     }

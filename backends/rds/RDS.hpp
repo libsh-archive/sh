@@ -52,10 +52,14 @@ public:
 	void print_partition();
 	void print_partition_stmt();
 
-	SH::ShBasicBlockPtr get_block(DAGNode::DAGNode* node);
+	//SH::ShBasicBlockPtr get_block(DAGNode::DAGNode* node);
+	typedef std::vector<DAGNode::DAGNode*> PassVector;	
+	PassVector m_passes;
+
+	typedef std::vector<SH::ShVariable*> VarVector;
+	VarVector m_shared_vars;
 private:
   typedef std::set<DAGNode::DAGNode*> ChildrenSet;
-  typedef std::vector<DAGNode::DAGNode*> PassVector;	
   typedef std::vector<DAGNode::DAGNode*> NodeVector;
 
 	// limits
@@ -68,7 +72,7 @@ private:
 	DAG::DAG *m_graph;
 	PDomTree::PDomTree *m_pdt;
 
-	PassVector m_passes;
+
     
 	// for next_ksubset
 	int  ksub_h, ksub_m2;
