@@ -1,9 +1,13 @@
+2004-01-12  Bryan Chan  <b8chan@enora.cgl.uwaterloo.ca>
+
+	* src/ShAlgebra.cpp (replaceUniform): Implemented replaceUniform().
+
+	* src/ShAlgebra.hpp: Added replaceUniform prototype.
+
 2003-11-24  Bryan Chan (b8chan@cgl.uwaterloo.ca)
   
-  * src/ShMemoryObject.hpp src/ShMemoryObject.cpp
-    backends/arb/ShArb.cpp:
-    Experimental implementation of memory objects
-    for über buffer support.
+	* src/ShMemoryObject.hpp, src/ShMemoryObject.cpp, backends/arb/ShArb.cpp:
+	  Experimental implementation of memory objects for über buffer support.
 
   * src/ShTexture.hpp src/ShTextureImpl.hpp
     src/ShTextureNode.hpp src/ShTextureNode.cpp

@@ -209,4 +209,49 @@ ShProgram operator+(const ShProgram& a, const ShProgram& b)
   return combine(a, b);
 }
 
+ShProgram replaceUniform(const ShProgram& a, const ShVariable& v)
+{
+  if(!v.uniform()) {
+    ShError( ShAlgebraException( "Cannot replace non-uniform variable" ) );
+  }
+
+  ShProgram program = new ShProgramNode(a->kind());
+
+  ShCtrlGraphNodePtr heada, taila;
+  
+  copyCtrlGraph(a->ctrlGraph->entry(), a->ctrlGraph->exit(), heada, taila);
+
+  program->ctrlGraph = new ShCtrlGraph(heada, taila);
+
+  for (ShProgramNode::VarList::const_iterator II = a->inputs.begin(); II != a->inputs.end(); ++II) {
+    program->inputs.push_back(*II);
+  }
+  for (ShProgramNode::VarList::const_iterator II = a->outputs.begin(); II != a->outputs.end(); ++II) {
+    program->outputs.push_back(*II);
+  }
+  
+  VarMap varMap;
+
+  SH_DEBUG_PRINT("Adding a new input to replace the uniform");
+  
+  ShEnvironment::shader = program;
+  ShEnvironment::insideShader = true;
+  // make a new input
+  ShVariableNodePtr newInput = new ShVariableNode(SH_VAR_INPUT, v.size(), v.node()->specialType()); 
+  varMap[v.node()] = newInput;
+
+  ShEnvironment::shader = 0;
+  ShEnvironment::insideShader = false;
+
+  VariableReplacer replacer(varMap);
+  program->ctrlGraph->dfs(replacer);
+
+  ShOptimizer optimizer(program->ctrlGraph);
+  optimizer.optimize(ShEnvironment::optimizationLevel);
+  
+  program->collectVariables();
+
+  return program;
+}
+
 }
