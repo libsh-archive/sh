@@ -74,7 +74,7 @@ GlslException::GlslException(const std::string& message)
 {
 }
 
-void print_infolog(GLhandleARB obj)
+void print_infolog(GLhandleARB obj, std::ostream& out)
 {
   int infolog_len;
   glGetObjectParameterivARB(obj, GL_OBJECT_INFO_LOG_LENGTH_ARB, &infolog_len);
@@ -83,12 +83,12 @@ void print_infolog(GLhandleARB obj)
     char* infolog = (char*)malloc(infolog_len);
     int nb_chars;
     glGetInfoLogARB(obj, infolog_len, &nb_chars, infolog);
-    std::cout << infolog << std::endl;
+    out << infolog << std::endl;
     free(infolog);
   }
 }
 
-void print_shader_source(GLhandleARB shader)
+void print_shader_source(GLhandleARB shader, std::ostream& out)
 {
   int source_len;
   glGetObjectParameterivARB(shader, GL_OBJECT_SHADER_SOURCE_LENGTH_ARB, &source_len);
@@ -100,10 +100,10 @@ void print_shader_source(GLhandleARB shader)
 
     std::stringstream ss(source);
     for (int i=1; !ss.eof(); i++) {
-      char line[1024];
-      ss.getline(line, sizeof(line));
-      std::cout.width(4); std::cout << i;
-      std::cout.width(0); std::cout << ":  " << line << std::endl;
+      std::string line;
+      std::getline(ss, line);
+      out.width(4); out << i;
+      out.width(0); out << ":  " << line << std::endl;
     }
 
     free(source);

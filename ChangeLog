@@ -1,4 +1,12 @@
-2005-03-04  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+2005-03-04  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> (glsl branch)
+
+	* backends/gl/GlslCode.cpp (unbind): Keep around the old
+	GlslSet::current() (it can become null if it already was
+	m_fallback_set). This fixes a segfault related to binding.
+
+	* src/ShSyntax.cpp (shUnbind): Implement shUnbind().
+
+	* src/ShSyntax.hpp: Add parameterless shUnbind() prototype.
 
 	* backends/gl/PBufferStreams.cpp (execute): Unbind our shaders.
 

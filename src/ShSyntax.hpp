@@ -302,6 +302,10 @@ void shBindShader(const std::string& target, ShProgram& shader);
 SH_DLLEXPORT
 void shBind(const ShProgramSet& s);
 
+/// Unbind all currently bound programs
+SH_DLLEXPORT
+void shUnbind();
+
 /// Unbind a program.
 SH_DLLEXPORT
 void shUnbind(ShProgram& prg);

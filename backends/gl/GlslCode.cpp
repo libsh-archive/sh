@@ -31,6 +31,14 @@ namespace shgl {
 using namespace SH;
 using namespace std;
 
+struct GlslError : public ShException {
+public:
+  GlslError(const std::string& message)
+    : ShException(std::string("GLSL Backend: ") + message)
+  {
+  }
+};
+
 GlslSet* GlslSet::m_current = 0;
 
 GlslCode::GlslCode(const ShProgramNodeCPtr& shader, const std::string& unit,
@@ -145,12 +153,14 @@ void GlslCode::upload()
   int compiled;
   glGetObjectParameterivARB(m_arb_shader, GL_OBJECT_COMPILE_STATUS_ARB, &compiled);
   if (compiled != GL_TRUE) {
-    cout << "Shader compile status (target = " << m_target << "): FAILED" << endl << endl;
-    cout << "Shader infolog:" << endl;
-    print_infolog(m_arb_shader);
-    cout << "Shader code:" << endl;
-    print_shader_source(m_arb_shader);
-    cout << endl;
+    std::ostringstream os;
+    os << "Shader compile status (target = " << m_target << "): FAILED" << endl << endl;
+    os << "Shader infolog:" << endl;
+    print_infolog(m_arb_shader, os);
+    os << "Shader code:" << endl;
+    print_shader_source(m_arb_shader, os);
+    os << endl;
+    shError(GlslError(os.str()));
     return;
   }
 }
@@ -186,11 +196,14 @@ void GlslCode::unbind()
   
   if (!m_fallback_set) m_fallback_set = new GlslSet;
 
-  *m_fallback_set = *GlslSet::current();
+  GlslSet* current = GlslSet::current();
+  
+  *m_fallback_set = *current;
+  
   m_fallback_set->detach(this);
 
   if (m_fallback_set->empty()) {
-    GlslSet::current()->unbind();
+    current->unbind();
   } else {
     m_fallback_set->bind();
   }
@@ -217,10 +230,7 @@ void GlslCode::upload_uniforms()
   if (!m_bound) return;
   
   SH_DEBUG_ASSERT(m_varmap);
-      
-  // Whenever the program is linked, we must reinitialize the uniforms
-  // because their values are reset.  Also, we must call
-  // glUseProgramObjectARB before we can get the location of uniforms.
+
   for (GlslVariableMap::NodeList::iterator i = m_varmap->node_begin();
        i != m_varmap->node_end(); i++) {
     ShVariableNodePtr node = *i;
