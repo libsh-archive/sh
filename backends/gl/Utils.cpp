@@ -34,4 +34,72 @@ void ChannelGatherer::operator()(const ShCtrlGraphNode* node)
   }
 }
 
+TexFetcher::TexFetcher(ChannelMap& channel_map,
+                       const ShVariableNodePtr& tc_node,
+                       bool indexed,
+                       const ShProgramNodePtr& program)
+    : channel_map(channel_map),
+      tc_node(tc_node),
+      indexed(indexed),
+      program(program)
+{
+}
+
+void TexFetcher::operator()(ShCtrlGraphNode* node)
+{
+  if (!node->block) return;
+  for (ShBasicBlock::ShStmtList::iterator I = node->block->begin();
+       I != node->block->end(); ++I) {
+    ShStatement& stmt = *I;
+    if (stmt.op != SH_OP_FETCH && stmt.op != SH_OP_LOOKUP) continue;
+      
+    if (!stmt.src[0].node()) {
+      SH_DEBUG_WARN("FETCH/LOOKUP from null stream");
+      continue;
+    }
+    if (stmt.src[0].node()->kind() != SH_STREAM) {
+      SH_DEBUG_WARN("FETCH/LOOKUP from non-stream");
+      continue;
+    }
+      
+    ShChannelNodePtr stream_node = shref_dynamic_cast<ShChannelNode>(stmt.src[0].node());
+    ChannelMap::const_iterator J = channel_map.find(stream_node);
+    if (J == channel_map.end()) {
+      SH_DEBUG_WARN("Stream node not found in input map");
+      continue;
+    }
+
+    if (!J->second) {
+      SH_DEBUG_WARN("No texture allocated for stream node");
+      continue;
+    }
+
+    ShVariable texVar(J->second);
+
+    if (stmt.op == SH_OP_FETCH) {
+      ShVariable coordsVar(tc_node);
+      if (indexed) {
+        stmt = ShStatement(stmt.dest, texVar, SH_OP_TEXI, coordsVar);
+      } else {
+        stmt = ShStatement(stmt.dest, texVar, SH_OP_TEX, coordsVar);
+      }
+    } else {
+      // Make sure our actualy index is a temporary in the program.
+      ShContext::current()->enter(program);
+      ShVariable coordsVar(new ShVariableNode(SH_TEMP, 2, SH_FLOAT));
+      ShContext::current()->exit();
+        
+      ShBasicBlock::ShStmtList new_stmts;
+      new_stmts.push_back(ShStatement(coordsVar(0), stmt.src[1], SH_OP_MOD, J->second->texSizeVar()(0)));
+      new_stmts.push_back(ShStatement(coordsVar(1), stmt.src[1], SH_OP_DIV, J->second->texSizeVar()(0)));
+      new_stmts.push_back(ShStatement(stmt.dest, texVar, SH_OP_TEXI, coordsVar));
+      I = node->block->erase(I);
+      node->block->splice(I, new_stmts);
+      I--;
+    }
+    // The following is useful for debugging
+    // stmt = ShStatement(stmt.dest, SH_OP_ASN, coordsVar);
+  }
+}
+
 }

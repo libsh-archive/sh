@@ -202,7 +202,8 @@ GLenum shGlFormat(const ShTextureNodePtr& node)
  * and returns a value type for the temporary buffer
  * (or SH_VALUETYPE_END if we can read pixels directly into
  * the original buffer)*/
-GLenum shGlType(ShValueType valueType, ShValueType &convertedType) {
+GLenum shGlType(ShValueType valueType, ShValueType &convertedType)
+{
   convertedType = SH_VALUETYPE_END;
   GLenum result = GL_NONE;
   switch(valueType) {

@@ -8,6 +8,58 @@
 #include "ShLib.hpp"
 #include "ShArray.hpp"
 #include "GLXPBufferContext.hpp"
+#include "GlTextureStorage.hpp"
+#include "ShInstructions.hpp"
+#include "ShNibbles.hpp"
+
+namespace {
+using namespace SH;
+using namespace shgl;
+
+ShProgramNodePtr replace_temps_and_fetches(const ShPass& pass,
+                                           std::vector<ShTextureNodePtr>& temp_buffers,
+                                           std::map<ShChannelNodePtr, ShTextureNodePtr>& channel_map)
+{
+  ShProgram result = pass.program->clone();
+
+  // Make a dummy uniform that we'll replace later using the extract operator.
+  ShContext::current()->enter(0);
+  ShTexCoord2f tc;
+  ShContext::current()->exit();
+
+  for (std::list<Mapping>::const_iterator I = pass.inputs.begin(); I != pass.inputs.end(); ++I) {
+    const Mapping& mapping = *I;
+    SH_DEBUG_ASSERT(mapping.type == MAPPING_TEMP);
+
+    ShTextureNodePtr texnode(temp_buffers[mapping.id]);
+
+    ShProgram fetcher = SH_BEGIN_PROGRAM() {
+      // TODO: Handle mapping.offset
+      // TOOD: types??
+      ShVariable out(new ShVariableNode(SH_OUTPUT, mapping.length, SH_FLOAT));
+      ShVariable texVar(texnode);
+      ShStatement stmt(out, texVar, SH_OP_TEX, tc);
+      ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+    } SH_END;
+
+    result = result << fetcher;
+    
+    SH_DEBUG_ASSERT(false);
+  }
+
+  // Replace OP_FETCHes
+  // TODO: set indexed appropriately
+  TexFetcher fetcher(channel_map, tc.node(), true, result.node());
+
+  result.node()->ctrlGraph->dfs(fetcher);
+
+  // Replace the dummy uniform with an input
+  result = (result >> tc) << keep<ShTexCoord2f>();
+  
+  return result.node();
+}
+                                           
+}
 
 namespace shgl {
 
@@ -72,6 +124,7 @@ PCScheduler::PCScheduler()
 {
 }
 
+
 ShVoidPtr PCScheduler::prepare(ShSchedule* schedule)
 {
   double pc_increment = 1.0/schedule->num_passes();
@@ -112,9 +165,7 @@ ShVoidPtr PCScheduler::prepare(ShSchedule* schedule)
     PCPassPtr p = new PCPass(current_pc);
 
     ShProgramNodePtr prg = I->program;
-    // TODO
-    //prg = replace_temp_inputs(prg, pc_schedule->temp_buffers);
-    //prg = replace_fetches(prg, pc_schedule->channel_map);
+    prg = replace_temps_and_fetches(*I, pc_schedule->temp_buffers, pc_schedule->channel_map);
 
     //split_outputs(prg, p->programs);
     
@@ -179,8 +230,10 @@ void PCSchedule::pre_execution(int width, int height)
 
   for (std::size_t i = 0; i < temp_buffers.size(); i++) {
     temp_buffers[i]->setTexSize(m_width, m_height);
-    // TODO: Need to give these guys some memory.
+    temp_buffers[i]->memory(new GlTextureMemory(temp_buffers[i]));
   }
+  m_pred_texture.size(m_width, m_height);
+  m_pred_texture.memory(new GlTextureMemory(m_pred_texture.node()));
 }
 
 void PCSchedule::draw_quad(double x1, double y1, double x2, double y2,

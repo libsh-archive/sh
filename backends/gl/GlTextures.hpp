@@ -31,6 +31,13 @@
 
 namespace shgl {
 
+extern const unsigned int shGlTargets[];
+
+SH::ShCubeDirection glToShCubeDir(GLuint target);
+GLenum shGlInternalFormat(const SH::ShTextureNodePtr& node);
+GLenum shGlFormat(const SH::ShTextureNodePtr& node);
+GLenum shGlType(SH::ShValueType valueType, SH::ShValueType &convertedType);
+
 class GlTextures : public TextureStrategy {
 public:
   GlTextures(void);

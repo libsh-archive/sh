@@ -27,6 +27,7 @@
 #include "GlTextureStorage.hpp"
 #include "ShTypeInfo.hpp"
 #include "ShVariantFactory.hpp"
+#include "GlTextures.hpp"
 
 namespace shgl {
 
@@ -97,6 +98,24 @@ void GlTextureStorage::init()
     SH_DEBUG_WARN("Texture target " << this->target() << " not handled by GL backend");
     break;
   }
+}
+
+GlTextureMemory::GlTextureMemory(const SH::ShTextureNodePtr& node)
+  : m_storage(0)
+{
+  SH_DEBUG_ASSERT(node->dims() != SH_TEXTURE_CUBE);
+  
+  GlTextureNamePtr name = new GlTextureName(shGlTargets[node->dims()]);
+  m_storage = new GlTextureStorage(this,
+                                   shGlTargets[node->dims()],
+                                   shGlFormat(node),
+                                   shGlInternalFormat(node),
+                                   node->valueType(),
+                                   node->width(), node->height(), 
+                                   node->depth(), node->size(),
+                                   node->count(), name);
+  m_storage->setTimestamp(0);
+  name->params(node->traits());
 }
 
 class HostGlTextureTransfer : public ShTransfer {
@@ -220,5 +239,6 @@ class HostGlTextureTransfer : public ShTransfer {
 };
 
 HostGlTextureTransfer* HostGlTextureTransfer::instance = new HostGlTextureTransfer();
+
 
 }

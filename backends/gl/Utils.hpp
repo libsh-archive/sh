@@ -5,6 +5,7 @@
 #include "ShChannelNode.hpp"
 #include "ShTextureNode.hpp"
 #include "ShCtrlGraph.hpp"
+#include "ShProgramNode.hpp"
 
 namespace shgl {
 
@@ -21,6 +22,24 @@ struct ChannelGatherer {
   
   ChannelMap channel_map;
   SH::ShTextureDims dims;
+};
+
+
+// Replace FETCH and LOOKUP operations with texture fetches
+class TexFetcher {
+public:
+  TexFetcher(ChannelMap& channel_map,
+             const SH::ShVariableNodePtr& tc_node,
+             bool indexed,
+             const SH::ShProgramNodePtr& program);
+
+  void operator()(SH::ShCtrlGraphNode* node);
+
+private:
+  ChannelMap& channel_map;
+  SH::ShVariableNodePtr tc_node;
+  bool indexed;
+  SH::ShProgramNodePtr program;
 };
 
 }

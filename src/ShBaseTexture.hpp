@@ -42,6 +42,8 @@ SH_DLLEXPORT ShBaseTexture : public ShMetaForwarder {
 public:
   ShBaseTexture(const ShTextureNodePtr& node);
 
+  const ShTextureNodePtr& node() { return m_node; }
+  
 protected:
   ShTextureNodePtr m_node;
 };
@@ -53,6 +55,7 @@ class ShBaseTexture1D : public ShBaseTexture {
 public:
   ShBaseTexture1D(const ShTextureTraits& traits);
   ShBaseTexture1D(int width, const ShTextureTraits& traits);
+  ShBaseTexture1D(const ShTextureNodePtr& node);
 
   template<typename T2>
   T operator()(const ShGeneric<1, T2>& coords) const;
@@ -77,6 +80,7 @@ class ShBaseTexture2D : public ShBaseTexture  {
 public:
   ShBaseTexture2D(const ShTextureTraits& traits);
   ShBaseTexture2D(int width, int height, const ShTextureTraits& traits);
+  ShBaseTexture2D(const ShTextureNodePtr& node);
 
   template<typename T2>
   T operator()(const ShGeneric<2, T2>& coords) const;
@@ -109,6 +113,7 @@ class ShBaseTextureRect : public ShBaseTexture  {
 public:
   ShBaseTextureRect(const ShTextureTraits& traits);
   ShBaseTextureRect(int width, int height, const ShTextureTraits& traits);
+  ShBaseTextureRect(const ShTextureNodePtr& node);
 
   template<typename T2>
   T operator()(const ShGeneric<2, T2>& coords) const;
@@ -135,6 +140,7 @@ class ShBaseTexture3D : public ShBaseTexture  {
 public:
   ShBaseTexture3D(const ShTextureTraits& traits);
   ShBaseTexture3D(int width, int height, int depth, const ShTextureTraits& traits);
+  ShBaseTexture3D(const ShTextureNodePtr& node);
 
   template<typename T2>
   T operator()(const ShGeneric<3, T2>& coords) const;
@@ -161,6 +167,7 @@ class ShBaseTextureCube : public ShBaseTexture {
 public:
   ShBaseTextureCube(const ShTextureTraits& traits);
   ShBaseTextureCube(int width, int height, const ShTextureTraits& traits);
+  ShBaseTextureCube(const ShTextureNodePtr& node);
 
   template<typename T2>
   T operator()(const ShGeneric<3, T2>& coords) const;

@@ -82,6 +82,17 @@ private:
 
 typedef SH::ShPointer<GlTextureStorage> GlTextureStoragePtr;
 
+class GlTextureMemory : public SH::ShMemory {
+public:
+  GlTextureMemory(const SH::ShTextureNodePtr& texnode);
+
+  GlTextureStoragePtr texture_storage() { return m_storage; }
+  
+private:
+  GlTextureStoragePtr m_storage;
+};
+
+
 }
 
 #endif

@@ -34,6 +34,43 @@
 
 namespace SH {
 
+// Node constructors
+template<typename T>
+ShBaseTexture1D<T>::ShBaseTexture1D(const ShTextureNodePtr& node)
+  : ShBaseTexture(node)
+{
+  SH_DEBUG_ASSERT(node->dims() == SH_TEXTURE_1D);
+}
+
+template<typename T>
+ShBaseTexture2D<T>::ShBaseTexture2D(const ShTextureNodePtr& node)
+  : ShBaseTexture(node)
+{
+  SH_DEBUG_ASSERT(node->dims() == SH_TEXTURE_2D);
+}
+
+template<typename T>
+ShBaseTextureRect<T>::ShBaseTextureRect(const ShTextureNodePtr& node)
+  : ShBaseTexture(node)
+{
+  SH_DEBUG_ASSERT(node->dims() == SH_TEXTURE_RECT);
+}
+
+template<typename T>
+ShBaseTexture3D<T>::ShBaseTexture3D(const ShTextureNodePtr& node)
+  : ShBaseTexture(node)
+{
+  SH_DEBUG_ASSERT(node->dims() == SH_TEXTURE_3D);
+}
+
+template<typename T>
+ShBaseTextureCube<T>::ShBaseTextureCube(const ShTextureNodePtr& node)
+  : ShBaseTexture(node)
+{
+  SH_DEBUG_ASSERT(node->dims() == SH_TEXTURE_CUBE);
+}
+
+// Traits constructors
 template<typename T>
 ShBaseTexture1D<T>::ShBaseTexture1D(int width, const ShTextureTraits& traits)
   : ShBaseTexture(new ShTextureNode(SH_TEXTURE_1D, T::typesize, T::value_type, traits, width))
@@ -64,6 +101,7 @@ ShBaseTextureCube<T>::ShBaseTextureCube(int width, int height, const ShTextureTr
 {
 }
 
+// Sizeless traits constructors
 template<typename T>
 ShBaseTexture1D<T>::ShBaseTexture1D(const ShTextureTraits& traits)
   : ShBaseTexture(new ShTextureNode(SH_TEXTURE_1D, T::typesize, T::value_type, traits, 0))
@@ -93,6 +131,8 @@ ShBaseTextureCube<T>::ShBaseTextureCube(const ShTextureTraits& traits)
   : ShBaseTexture(new ShTextureNode(SH_TEXTURE_CUBE, T::typesize, T::value_type, traits, 0, 0))
 {
 }
+
+// operator()
 
 template<typename T>
 template<typename T2>
@@ -196,6 +236,8 @@ T ShBaseTextureCube<T>::operator()(const ShGeneric<3, T2>& coords) const
     return t;
   }
 } 
+
+// operator[]
 
 template<typename T>
 template<typename T2>
