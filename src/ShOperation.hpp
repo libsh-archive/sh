@@ -33,7 +33,7 @@ namespace SH {
 
 /** Kinds of operations.
  * If you change this, be sure to change the opInfo array in
- * ShStatement.cpp
+ * ShOperation.cpp
  * @see opInfo
  */
 enum ShOperation {
@@ -77,6 +77,7 @@ enum ShOperation {
   SH_OP_FLR, ///< Unary smallest integer not greater than src[0]
   SH_OP_FRAC, ///< Unary fractional part
 
+  SH_OP_LIT, ///< Compute lighting coefficients
   SH_OP_LOG, ///< Unary natural log
   SH_OP_LOG2, ///< Unary base-2 log
   SH_OP_LOG10, ///< Unary base-10 log

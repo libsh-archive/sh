@@ -2,6 +2,7 @@
 #define SHCONCRETECTYPEOPIMPL_HPP
 
 #include <numeric>
+#include <cmath>
 #include "ShEval.hpp"
 #include "ShVariant.hpp"
 #include "ShDebug.hpp"
@@ -203,6 +204,29 @@ SHCCTO_UNARY_OP(SH_OP_SGN, (*A) > 0 ? 1 : (*A) < 0 ? -1 : 0);
 SHCCTO_OP_CMATH_SPEC(SH_OP_SQRT);
 SHCCTO_OP_CMATH_SPEC(SH_OP_TAN);
 
+template<typename T>
+struct ShConcreteCTypeOp<SH_OP_LIT, T>
+{ 
+  typedef ShDataVariant<T, SH_HOST> Variant; 
+  typedef Variant* DataPtr; 
+  typedef const Variant* DataCPtr; 
+
+  static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
+  {
+    typename Variant::DataType x, y, w;
+    x = (*a)[0];
+    if (x < 0) x = 0;
+    y = (*a)[1];
+    if (y < 0) y = 0;
+    w = (*a)[2];
+    if (w < -128) w = -128;
+    if (w > 128) w = 128;
+    (*dest)[0] = 1;
+    (*dest)[1] = x;
+    (*dest)[2] = (x > 0) ? std::pow(y,w) : 0;
+    (*dest)[3] = 1;
+  }
+};
 
 // Binary ops
 SHCCTO_BINARY_OP(SH_OP_ADD, (*A) + (*B));
@@ -270,7 +294,6 @@ struct ShConcreteCTypeOp<SH_OP_XPD, T>
 SHCCTO_TERNARY_OP(SH_OP_COND, ((*A) > 0 ? (*B) : (*C))); 
 SHCCTO_TERNARY_OP(SH_OP_LRP, (*A) * (*B) + (1 - (*A)) * (*C)); 
 SHCCTO_TERNARY_OP(SH_OP_MAD, (*A) * (*B) + (*C)); 
-
 
 }
 

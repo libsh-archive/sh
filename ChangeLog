@@ -1,3 +1,18 @@
+2005-02-04  Francois Marier  <francois@serioushack.com>
+
+	* src/*: Made lit an operation (issue74) and compute it according
+	to the Arb fragment program spec when in immediate mode. 
+
+	* backends/gl/*: The lit function now uses the actual LIT Arb
+	function.
+
+	* backends/cc/*: The lit function is computed according to the Arb
+	Fragment program spec.
+
+	* test/regress/lit.cpp.py: Added more test cases and changed
+	the definition of the lit function to match the Arb fragment
+	program spec.
+
 2005-02-02  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/ArbEmit.cpp (emit_tex): Handle non-four-tuple

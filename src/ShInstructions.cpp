@@ -249,6 +249,7 @@ SHINST_TERNARY_OP(LRP,
     dest.size() == c.size() &&
     (dest.size() == a.size() || a.size() == 1)));
 
+SHINST_UNARY_OP(LIT);
 SHINST_UNARY_OP(LOG);
 SHINST_UNARY_OP(LOG2);
 SHINST_UNARY_OP(LOG10);

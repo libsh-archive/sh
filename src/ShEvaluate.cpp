@@ -97,6 +97,9 @@ void evaluate(ShStatement& stmt)
   case SH_OP_FRAC:
     shFRAC(stmt.dest, stmt.src[0]);
     break;
+  case SH_OP_LIT:
+    shLIT(stmt.dest, stmt.src[0]);
+    break;
   case SH_OP_LOG:
     shLOG(stmt.dest, stmt.src[0]);
     break;

@@ -99,6 +99,8 @@ void shFLR(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
 void shFRAC(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
+void shLIT(ShVariable& dest, const ShVariable& a);
+SH_DLLEXPORT
 void shLOG(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
 void shLOG2(ShVariable& dest, const ShVariable& a);

@@ -1,6 +1,7 @@
 #ifndef SHCONCRETEREGULAROPIMPL_HPP 
 #define SHCONCRETEREGULAROPIMPL_HPP
 #include <numeric>
+#include <cmath>
 #include "ShEval.hpp"
 #include "ShDebug.hpp"
 #include "ShError.hpp"
@@ -145,6 +146,30 @@ SHCRO_UNARY_OP(SH_OP_FRAC, frac(*A));
 SHCRO_UNARY_OP(SH_OP_LOG, log(*A));
 SHCRO_UNARY_OP(SH_OP_LOG2, log(*A));
 SHCRO_UNARY_OP(SH_OP_LOG10, log10(*A));
+
+template<typename T>
+struct ShConcreteRegularOp<SH_OP_LIT, T>
+{
+  typedef ShDataVariant<T, SH_HOST> Variant; 
+  typedef Variant* DataPtr; 
+  typedef const Variant* DataCPtr; 
+
+  static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
+  {
+    typename Variant::DataType::DataType x, y, w;
+    x = (*a)[0].lo();
+    if (x < 0) x = 0;
+    y = (*a)[1].lo();
+    if (y < 0) y = 0;
+    w = (*a)[2].lo();
+    if (w < -128) w = -128;
+    if (w > 128) w = 128;
+    (*dest)[0] = 1;
+    (*dest)[1] = x;
+    (*dest)[2] = (x > 0) ? std::pow(y,w) : 0;
+    (*dest)[3] = 1;
+  }
+};
 
 template<typename T>
 struct ShConcreteRegularOp<SH_OP_NORM, T>

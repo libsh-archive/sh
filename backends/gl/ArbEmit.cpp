@@ -163,10 +163,11 @@ ArbMapping ArbCode::table[] = {
   {SH_OP_TEXD,  SH_ARB_NVFP,  0, SH_ARB_FUN, &ArbCode::emit_tex},
   
   // Misc.
-  {SH_OP_COND, SH_ARB_NVFP, 0, SH_ARB_FUN, &ArbCode::emit_nvcond},
-  {SH_OP_COND, SH_ARB_NVVP2, 0, SH_ARB_FUN, &ArbCode::emit_nvcond},
-  {SH_OP_COND, SH_ARB_ANY, negate_first, SH_ARB_CMP, 0},
-  {SH_OP_KIL,  SH_ARB_FP,  0, SH_ARB_FUN, &ArbCode::emit_kil},
+  {SH_OP_LIT,  SH_ARB_ANY,   0,            SH_ARB_FUN, &ArbCode::emit_lit},
+  {SH_OP_COND, SH_ARB_NVFP,  0,            SH_ARB_FUN, &ArbCode::emit_nvcond},
+  {SH_OP_COND, SH_ARB_NVVP2, 0,            SH_ARB_FUN, &ArbCode::emit_nvcond},
+  {SH_OP_COND, SH_ARB_ANY,   negate_first, SH_ARB_CMP, 0},
+  {SH_OP_KIL,  SH_ARB_FP,    0,            SH_ARB_FUN, &ArbCode::emit_kil},
 
   {SH_OP_PAL,  SH_ARB_VP, 0, SH_ARB_FUN, &ArbCode::emit_pal},
 
@@ -590,6 +591,15 @@ void ArbCode::emit_pal(const ShStatement& stmt)
 {
   m_instructions.push_back(ArbInst(SH_ARB_ARL, m_address_register, stmt.src[1]));
   m_instructions.push_back(ArbInst(SH_ARB_ARRAYMOV, stmt.dest, stmt.src[0], m_address_register));
+}
+
+void ArbCode::emit_lit(const ShStatement& stmt)
+{
+  ShVariable tmp(new ShVariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
+  ArbInst inst(SH_ARB_LIT, tmp, stmt.src[0]);
+  m_instructions.push_back(inst);
+
+  emit(ShStatement(stmt.dest, SH_OP_ASN, tmp));
 }
 
 }
