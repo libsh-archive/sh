@@ -1,7 +1,7 @@
 # -*- makefile -*-
 
-RELEASE_TARGETS = libsh.dll libsh.lib
-DEBUG_TARGETS = libshd.dll libshd.lib
+RELEASE_TARGETS = libsh.dll
+DEBUG_TARGETS = libshd.dll
 
 all: all-release all-debug
 
@@ -109,10 +109,10 @@ libsh_dll_DEBUG_OBJECTS = $(libsh_dll_CXXFILES:.cpp=.d.obj)
 libsh_dll_RELEASE_LDADD = $(LIBPNG_RELEASE_LDADD) $(ZLIB_RELEASE_LDADD)
 libsh_dll_DEBUG_LDADD = $(LIBPNG_DEBUG_LDADD) $(ZLIB_DEBUG_LDADD)
 
-libsh.dll libsh.lib: $(libsh_dll_RELEASE_OBJECTS)
+libsh.dll: $(libsh_dll_RELEASE_OBJECTS)
 	$(LD) /DLL /OUT:$@ $^ $(RELEASE_LDFLAGS) $(libsh_dll_RELEASE_LDADD)
 
-libshd.dll libshd.lib: $(libsh_dll_DEBUG_OBJECTS)
+libshd.dll: $(libsh_dll_DEBUG_OBJECTS)
 	$(LD) /DLL /OUT:$@ $^ $(DEBUG_LDFLAGS) $(libsh_dll_DEBUG_LDADD)
 
 install: $(RELEASE_TARGETS) $(DEBUG_TARGETS) $(wildcard *.hpp)
@@ -130,5 +130,5 @@ install: $(RELEASE_TARGETS) $(DEBUG_TARGETS) $(wildcard *.hpp)
 libsh_dll_DEPENDS = $(libsh_dll_CXXFILES:.cpp=.r.d) $(libsh_dll_CXXFILES:.cpp=.d.d)
 
 include ../win32.mk
-CPPFLAGS += /DSH_DLLEXPORT="__declspec(dllexport)"
+CPPFLAGS += -DSH_DLLEXPORT="__declspec(dllexport)"
 -include $(libsh_dll_DEPENDS)

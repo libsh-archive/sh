@@ -1,5 +1,13 @@
 2004-10-07  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
 
+	* win32.mk, src/Makefile.win32: makedepend doesn't recognize
+	/I and /D, changed all references to -I and -D.
+
+	* src/ShMatrix.hpp: Previous SH_DLLEXPORT though to be
+	misplaced was actually unnecessary.
+	
+2004-10-07  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
 	* src/ShInstructions.cpp: No roundf or cbrtf on Win32, created
 	inline replacements using floor and pow.
 

@@ -202,7 +202,6 @@ private:
  */
 
 template<int R, int C, ShBindingType B, typename Ty>
-SH_DLLEXPORT
 std::ostream& operator<<(std::ostream& out,
                          const ShMatrix<R, C, B, Ty>& m);
 
