@@ -37,6 +37,8 @@ struct PCSchedule : public ShVoid {
   
   PCChannelMap channel_map;
 
+  std::vector<ShTextureNodePtr> temp_buffers;
+  
 protected:
   
   void draw_quad(double x1, double y1, double x2, double y2,
@@ -88,7 +90,14 @@ ShVoidPtr PCScheduler::prepare(ShSchedule* schedule)
     dims = SH_TEXTURE_2D;
     break;
   default:
-    break;
+    SH_DEBUG_ERROR("OpenGL PCScheduler: No floating point extension found!");
+    return 0;
+  }
+
+  for (std::size_t i = 0; i < schedule->num_temps(); i++) {
+    ShTextureTraits traits = ShArrayTraits();
+    traits.clamping(ShTextureTraits::SH_UNCLAMPED);
+    pc_schedule->temp_buffers.push_back(new ShTextureNode(dims, 4, SH_FLOAT, traits, 1, 1, 1, 0));
   }
   
   for (ShSchedule::PassList::iterator I = schedule->begin(); I != schedule->end();
@@ -102,10 +111,12 @@ ShVoidPtr PCScheduler::prepare(ShSchedule* schedule)
        ++I) {
     PCPassPtr p = new PCPass(current_pc);
 
-    ShProgramNodePtr prg = replace_fetches(I->program, pc_schedule->channel_map);
-    // Need to do temp buffers here too.
+    ShProgramNodePtr prg = I->program;
+    // TODO
+    //prg = replace_temp_inputs(prg, pc_schedule->temp_buffers);
+    //prg = replace_fetches(prg, pc_schedule->channel_map);
 
-    split_outputs(prg, p->programs);
+    //split_outputs(prg, p->programs);
     
     current_pc += pc_increment;
 
@@ -153,6 +164,8 @@ PCSchedule::~PCSchedule()
 
 void PCSchedule::pre_execution(int width, int height)
 {
+  if (width == m_width && height == m_height) return;
+  
   SH_DEBUG_ASSERT(width > 0);
   SH_DEBUG_ASSERT(height > 0);
   
@@ -163,6 +176,11 @@ void PCSchedule::pre_execution(int width, int height)
   m_height = height;
 
   m_size = ShAttrib2f(m_width, m_height);
+
+  for (std::size_t i = 0; i < temp_buffers.size(); i++) {
+    temp_buffers[i]->setTexSize(m_width, m_height);
+    // TODO: Need to give these guys some memory.
+  }
 }
 
 void PCSchedule::draw_quad(double x1, double y1, double x2, double y2,
@@ -229,7 +247,7 @@ void PCSchedule::execute_pass(ShPass* pass)
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
     // Set up predication texture.
-    m_pred_texture.memory(predicate_memory);
+    m_pred_texture.memory(temp_buffers[pass->predicate.id]->memory());
     m_pred_texture.size(m_width, m_height);
 
     shBind(m_pred_fp);

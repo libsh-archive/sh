@@ -44,13 +44,60 @@ GlTextureStorage::GlTextureStorage(ShMemory* memory, GLenum target,
     m_width(width), m_height(height), m_depth(depth), m_tuplesize(tuplesize), m_count(count)
 {
   m_name->addStorage(this);
+
+  init();
 }
+
 
 GlTextureStorage::~GlTextureStorage()
 {
   m_name->removeStorage(this);
 }
 
+void GlTextureStorage::init()
+{
+  
+  // Bind texture name for this scope.
+  GlTextureName::Binding binding(this->texName());
+  
+  ShValueType valueType = this->valueType(); 
+  
+  GLenum type; 
+  ShValueType convertedType;
+  type = shGlType(valueType, convertedType);
+
+  switch(this->target()) {
+  case GL_TEXTURE_1D:
+    SH_GL_CHECK_ERROR(glTexImage1D(this->target(), 0,
+                                   this->internalFormat(),
+                                   this->width(), 0, this->format(), type,
+                                   NULL));
+    break;
+  case GL_TEXTURE_2D:
+  case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
+  case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
+  case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
+  case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
+  case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
+  case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
+  case GL_TEXTURE_RECTANGLE_NV:
+    SH_GL_CHECK_ERROR(glTexImage2D(this->target(), 0,
+                                   this->internalFormat(),
+                                   this->width(), this->height(), 0, this->format(),
+                                   type, NULL));
+    break;
+  case GL_TEXTURE_3D:
+    SH_GL_CHECK_ERROR(glTexImage3D(this->target(), 0,
+                                   this->internalFormat(),
+                                   this->width(), this->height(), this->depth(),
+                                   0, this->format(),
+                                   type, NULL));
+    break;
+  default:
+    SH_DEBUG_WARN("Texture target " << this->target() << " not handled by GL backend");
+    break;
+  }
+}
 
 class HostGlTextureTransfer : public ShTransfer {
   HostGlTextureTransfer()
@@ -66,7 +113,6 @@ class HostGlTextureTransfer : public ShTransfer {
     // Bind texture name for this scope.
     GlTextureName::Binding binding(texture->texName());
 
-
     ShValueType valueType = texture->valueType(); 
     int count = texture->count();
     int tuplesize = texture->tuplesize();
@@ -78,7 +124,7 @@ class HostGlTextureTransfer : public ShTransfer {
     ShVariantPtr dataVariant; 
     // @todo a little hackish...but we promise host->data() will not change... 
     ShVariantPtr hostVariant = shVariantFactory(valueType, SH_MEM)->generate(
-        const_cast<void *>(host->data()), count * tuplesize, false);
+                                                                             const_cast<void *>(host->data()), count * tuplesize, false);
 
     if(convertedType != SH_VALUETYPE_END) {
       SH_DEBUG_WARN("ARB backend does not handle " << shValueTypeName(valueType) << " natively.  Converting to " << shValueTypeName(convertedType));
@@ -97,20 +143,9 @@ class HostGlTextureTransfer : public ShTransfer {
 
     switch(texture->target()) {
     case GL_TEXTURE_1D:
-      if (full_copy) {
-	SH_GL_CHECK_ERROR(glTexImage1D(texture->target(), 0,
-				       texture->internalFormat(),
-				       width, 0, texture->format(), type,
-				       dataVariant->array()));
-      } else {
-	SH_GL_CHECK_ERROR(glTexImage1D(texture->target(), 0,
-				       texture->internalFormat(),
-				       width, 0, texture->format(), type,
-				       NULL));
-	SH_GL_CHECK_ERROR(glTexSubImage1D(texture->target(), 0, 0,
-					  count, texture->format(), type,
-					  dataVariant->array()));
-      }
+      SH_GL_CHECK_ERROR(glTexSubImage1D(texture->target(), 0, 0,
+                                        (full_copy ? width : count), texture->format(), type,
+                                        dataVariant->array()));
       break;
     case GL_TEXTURE_2D:
     case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
@@ -121,15 +156,10 @@ class HostGlTextureTransfer : public ShTransfer {
     case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
     case GL_TEXTURE_RECTANGLE_NV:
       if (full_copy) {
-	SH_GL_CHECK_ERROR(glTexImage2D(texture->target(), 0,
-				       texture->internalFormat(),
-				       width, height, 0, texture->format(),
-				       type, dataVariant->array()));
+	SH_GL_CHECK_ERROR(glTexSubImage2D(texture->target(), 0, 0, 0,
+					  width, height, texture->format(),
+					  type, dataVariant->array()));
       } else {
-	SH_GL_CHECK_ERROR(glTexImage2D(texture->target(), 0,
-				       texture->internalFormat(),
-				       width, height, 0, texture->format(),
-				       type, NULL));
 	int last_row_count = count % width;
 	int full_rows_count = count - last_row_count;
 	int full_rows_height = full_rows_count / width;
@@ -144,17 +174,11 @@ class HostGlTextureTransfer : public ShTransfer {
       break;
     case GL_TEXTURE_3D:
       if (full_copy) {
-	SH_GL_CHECK_ERROR(glTexImage3D(texture->target(), 0,
-				       texture->internalFormat(),
-				       width, height,
-				       depth, 0, texture->format(),
-				       type, dataVariant->array()));
+	SH_GL_CHECK_ERROR(glTexSubImage3D(texture->target(), 0, 0, 0,
+					  0, width, height,
+					  depth, texture->format(),
+					  type, dataVariant->array()));
       } else {
-	SH_GL_CHECK_ERROR(glTexImage3D(texture->target(), 0,
-				       texture->internalFormat(),
-				       width, height,
-				       depth, 0, texture->format(),
-				       type, NULL));
 	int last_surface_count = count % (width * height);
 	int last_row_count = last_surface_count % width;
 	int full_rows_count = last_surface_count - last_row_count;

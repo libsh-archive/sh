@@ -43,6 +43,9 @@ public:
                    int count, GlTextureNamePtr name);
   
   ~GlTextureStorage();
+
+  // Initialize TexImages without sending any data
+  void init();
   
   std::string id() const { return "opengl:texture"; }
   
