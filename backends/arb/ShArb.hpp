@@ -87,6 +87,10 @@ private:
   // should be promoted to a vector by duplicating components
   void genScalarVectorInst( const SH::ShVariable &dest, const SH::ShVariable &op1, 
       const SH::ShVariable &op2, int opcode );
+ 
+  /// Generate code for polynomial approximations of trig functions.
+  void genTrigInst( const SH::ShVariable &dest, const SH::ShVariable& src,
+      int opcode );
 
   /// Allocate registers, after the code has been generated
   void allocRegs();

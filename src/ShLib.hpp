@@ -430,7 +430,7 @@ ShVariableN<N, T> abs(const ShVariableN<N, T>& var)
   }
 }
 
-/// Arccosine of x. x in [-1, 1], result in [-pi/2, pi/2]
+/// Arccosine of x. x in [-1, 1], result in [0, pi]
 template<int N, typename T>
 ShVariableN<N, T> acos(const ShVariableN<N, T>& var)
 {
@@ -439,7 +439,7 @@ ShVariableN<N, T> acos(const ShVariableN<N, T>& var)
     T vals[N];
     var.getValues(vals);
     T result[N];
-    for (int i = 0; i < N; i++) result[i] = std::acos(vals[i]) - M_PI/2;
+    for (int i = 0; i < N; i++) result[i] = std::acos(vals[i]);
     return ShConstant<N, T>(result);
   } else {
     ShAttrib<N, SH_VAR_TEMP, T, false> t;
@@ -450,7 +450,7 @@ ShVariableN<N, T> acos(const ShVariableN<N, T>& var)
   }
 }
 
-/// Arcsine of x. x in [-1, 1]. Result in [0, pi]
+/// Arcsine of x. x in [-1, 1]. Result in [-pi/2, pi/2]
 template<int N, typename T>
 ShVariableN<N, T> asin(const ShVariableN<N, T>& var)
 {
@@ -459,7 +459,7 @@ ShVariableN<N, T> asin(const ShVariableN<N, T>& var)
     T vals[N];
     var.getValues(vals);
     T result[N];
-    for (int i = 0; i < N; i++) result[i] = std::asin(vals[i]) + M_PI/2;
+    for (int i = 0; i < N; i++) result[i] = std::asin(vals[i]);
     return ShConstant<N, T>(result);
   } else {
     ShAttrib<N, SH_VAR_TEMP, T, false> t;

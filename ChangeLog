@@ -1,3 +1,8 @@
+2004-02-12  Jack Wang  <jmwang@uwaterloo.ca>
+	* backends/arb/ShArb.cpp, backends/arb/ShArb.hpp, src/ShLib.hpp:
+	Implemented ASIN, ACOS and put all the trig code generation stuff into
+	one function.
+
 2004-02-10  Jack Wang  <jmwang@uwaterloo.ca>
 	* backends/arb/ShArb.cpp:
 	Implemented cosine and sine on the vertex shaders.
