@@ -59,7 +59,7 @@ public:
   /// Bind this shader code after it has been uploaded.
   virtual void bind() = 0;
 
-  /// Unbind this shader
+  /// Unbind this shader.
   virtual void unbind() = 0;
 
   /// Upload any textures and uniform parameters which are out-of-date but required

@@ -247,6 +247,11 @@ void GlslCode::bind()
   bind_textures();
 }
 
+void GlslCode::unbind()
+{
+  unbind(true);
+}
+
 void GlslCode::unbind(bool refresh)
 {
   if (!m_bound) return;

@@ -74,7 +74,7 @@ public:
   
   virtual void upload();
   virtual void bind();
-  virtual void unbind(bool refresh = true);
+  virtual void unbind();
   virtual void update();
   virtual void updateUniform(const SH::ShVariableNodePtr& uniform);
   
