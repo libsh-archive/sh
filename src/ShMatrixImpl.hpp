@@ -469,7 +469,7 @@ template<int Kind, typename T>
   ShMatrixRows<Rows, Cols, T>::ShMatrixRows(const ShMatrix<OR, Cols, Kind, T>& source,
 					    int i0)
   {
-    ShIntEqual<Rows, 1>();
+    SH_STATIC_CHECK(Rows == 1, Constructing_Non_1_Row_Matrix_From_1_Row);
   
     m_data[0] = source[i0];
   }
@@ -479,7 +479,7 @@ template<int Kind, typename T>
   ShMatrixRows<Rows, Cols, T>::ShMatrixRows(const ShMatrix<OR, Cols, Kind, T>& source,
 					    int i0, int i1)
   {
-    ShIntEqual<Rows, 2>();
+    SH_STATIC_CHECK(Rows == 2, Constructing_Non_2_Row_Matrix_From_2_Rows);
   
     m_data[0] = source[i0];
     m_data[1] = source[i1];
@@ -490,7 +490,7 @@ template<int Kind, typename T>
   ShMatrixRows<Rows, Cols, T>::ShMatrixRows(const ShMatrix<OR, Cols, Kind, T>& source,
 					    int i0, int i1, int i2)
   {
-    ShIntEqual<Rows, 3>();
+    SH_STATIC_CHECK(Rows == 3, Constructing_Non_3_Row_Matrix_From_3_Rows);
   
     m_data[0] = source[i0];
     m_data[1] = source[i1];
@@ -502,7 +502,7 @@ template<int Kind, typename T>
   ShMatrixRows<Rows, Cols, T>::ShMatrixRows(const ShMatrix<OR, Cols, Kind, T>& source,
 					    int i0, int i1, int i2, int i3)
   {
-    ShIntEqual<Rows, 4>();
+    SH_STATIC_CHECK(Rows == 4, Constructing_Non_4_Row_Matrix_From_4_Rows);
   
     m_data[0] = source[i0];
     m_data[1] = source[i1];

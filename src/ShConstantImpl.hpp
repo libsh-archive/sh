@@ -36,7 +36,7 @@ template<int N, typename T>
 ShConstant<N, T>::ShConstant(T value)
   : ShVariableN<N, T>(new ShVariableNode(SH_CONST, N))
 {
-  ShIntEqual<N, 1>();
+  SH_STATIC_CHECK(N == 1, Constructing_Non_1_Constant_From_1_Value);
 
   m_node->setValue(0, value);
 }
@@ -45,7 +45,7 @@ template<int N, typename T>
 ShConstant<N, T>::ShConstant(T value0, T value1)
   : ShVariableN<N, T>(new ShVariableNode(SH_CONST, N))
 {
-  ShIntEqual<N, 2>();
+  SH_STATIC_CHECK(N == 2, Constructing_Non_2_Constant_From_2_Values);
 
   m_node->setValue(0, value0);
   m_node->setValue(1, value1);
@@ -55,7 +55,7 @@ template<int N, typename T>
 ShConstant<N, T>::ShConstant(T value0, T value1, T value2)
   : ShVariableN<N, T>(new ShVariableNode(SH_CONST, N))
 {
-  ShIntEqual<N, 3>();
+  SH_STATIC_CHECK(N == 3, Constructing_Non_3_Constant_From_3_Values);
 
   m_node->setValue(0, value0);
   m_node->setValue(1, value1);
@@ -66,7 +66,7 @@ template<int N, typename T>
 ShConstant<N, T>::ShConstant(T value0, T value1, T value2, T value3)
   : ShVariableN<N, T>(new ShVariableNode(SH_CONST, N))
 {
-  ShIntEqual<N, 4>();
+  SH_STATIC_CHECK(N == 4, Constructing_Non_4_Constant_From_4_Values);
 
   m_node->setValue(0, value0);
   m_node->setValue(1, value1);

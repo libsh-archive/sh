@@ -38,9 +38,21 @@ namespace SH {
 /// Print "indent" spaces to out.
 std::ostream& shPrintIndent(std::ostream& out, int indent);
 
-/// Enforce that A == B (will not instantiate otherwise).
-template<int A, int B> class ShIntEqual { private: ShIntEqual(); };
-template<int A> class ShIntEqual<A, A> { public: ShIntEqual() {} };
+// This follows Alexandrescu's excellent book "Modern C++ Design"
+template<bool B> struct ShCompileTimeChecker
+{
+  ShCompileTimeChecker(...);
+private:
+};
+template<> struct ShCompileTimeChecker<false> {
+private:
+};
+
+#define SH_STATIC_CHECK(expr, msg) \
+{ \
+  class SH_ERROR_##msg {} y; \
+  (void)sizeof(ShCompileTimeChecker<(expr)>(y));\
+}
 
 }
 

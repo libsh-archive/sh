@@ -1,3 +1,23 @@
+2004-02-18  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShConstantImpl.hpp: Ditto.
+
+	* src/ShMatrixImpl.hpp: Ditto.
+
+	* src/ShSpecialType.hpp: Make use of SH_STATIC_CHECK instead of
+	ShIntEqual.
+
+	* src/ShAttrib.hpp: Make use of SH_STATIC_CHECK instead of
+	ShIntEqual.
+
+	* src/ShLib.hpp: Make use of SH_STATIC_CHECK where we previously
+	used ShCheckDims or similar.
+
+	* src/ShUtility.hpp (ShCompileTimeChecker): Added this utility struct.
+	(SH_STATIC_CHECK): Add this macro to check a static assertion, and
+	if not output a (hopefully somewhat) useful diagnostic (at compile
+	time).
+
 2004-02-17  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShVariable.hpp: Added range metadata wrappers to ShVariable.

@@ -102,40 +102,6 @@ SH_SHLIB_CONST_N_OP_RETSIZE_RIGHT(operation, retsize);
 
 namespace SH {
 
-/** Utility template to check whether dimensions are equal or scalar.
- * If ScalarLHS or ScalarRHS are true, then the left or right
- * arguments respectively are allowed to be 1.
- *
- * This is kind of ugly, but it saves us having to define several
- *operator*, operator/, etc. later on.
- */
-template<int N, bool ScalarLHS, int M, bool ScalarRHS>
-class ShCheckDims 
-{
-private:
-  ShCheckDims();
-};
-template<int N> class ShCheckDims<N, false, N, false>
-{public: ShCheckDims() {}};
-template<int N> class ShCheckDims<N, false, N, true>
-{public: ShCheckDims() {}};
-template<int N> class ShCheckDims<N, true, N, false>
-{public: ShCheckDims() {}};
-template<int N> class ShCheckDims<N, true, N, true>
-{public: ShCheckDims() {}};
-template<int N, bool ScalarRHS> class ShCheckDims<1, true, N, ScalarRHS>
-{public: ShCheckDims() {}};
-template<int N, bool ScalarLHS> class ShCheckDims<N, ScalarLHS, 1, true>
-{public: ShCheckDims() {}};
-template<> class ShCheckDims<1, false, 1, false>
-{public: ShCheckDims() {}};
-template<> class ShCheckDims<1, false, 1, true>
-{public: ShCheckDims() {}};
-template<> class ShCheckDims<1, true, 1, false>
-{public: ShCheckDims() {}};
-template<> class ShCheckDims<1, true, 1, true>
-{public: ShCheckDims() {}};
-
 /// Addition
 template<int N, typename T>
 ShVariableN<N, T> operator+(const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
@@ -173,7 +139,7 @@ SH_SHLIB_CONST_SCALAR_OP(operator-);
 template<int N, int M, typename T>
 ShVariableN<N, T> operator*(const ShVariableN<N, T>& left, const ShVariableN<M, T>& right)
 {
-  ShCheckDims<N, true, M, true>();
+  SH_STATIC_CHECK(N == M || N == 1 || M == 1, Multiplication_Components_Do_Not_Match);
   if (!ShEnvironment::insideShader) {
     assert(left.hasValues());
     assert(right.hasValues());
@@ -222,7 +188,7 @@ SH_SHLIB_CONST_N_OP_BOTH(operator*);
 template<int N, int M, typename T>
 ShVariableN<N, T> operator/(const ShVariableN<N, T>& left, const ShVariableN<M, T>& right)
 {
-  ShCheckDims<N, false, M, true>();
+  SH_STATIC_CHECK(M == N || M == 1, Division_Components_Do_Not_Match);
   if (!ShEnvironment::insideShader) {
     assert(left.hasValues());
     assert(right.hasValues());
@@ -283,7 +249,7 @@ SH_SHLIB_CONST_N_OP_RIGHT(operator^);
 template<int N, int M, typename T>\
 ShVariableN<N, T> opfunc(const ShVariableN<N, T>& left, const ShVariableN<M, T>& right)\
 {\
-  ShCheckDims<N, true, M, true>();\
+  SH_STATIC_CHECK(N == M || N == 1 || M == 1, Boolean_Operation_Components_Do_Not_match); \
   if (!ShEnvironment::insideShader) {\
     assert(left.hasValues());\
     assert(right.hasValues());\
@@ -341,7 +307,7 @@ SH_SHLIB_BOOLEAN_OP(operator!=, !=, SH_OP_SNE);
 template<int M, int N, typename T>
 ShVariableN<N, T> cond(const ShVariableN<M, T>& condition, const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
 {
-  ShCheckDims<N, true, M, true>();
+  SH_STATIC_CHECK(N == M, Conditional_Assignment_Components_Do_Not_Match);
   if (!ShEnvironment::insideShader) {
     assert(condition.hasValues());
     assert(left.hasValues());
@@ -514,7 +480,7 @@ ShVariableN<N, T> cos(const ShVariableN<N, T>& var)
 template<int M, int N, typename T>\
 ShVariableN<1,  T> opfunc(const ShVariableN<M, T>& left, const ShVariableN<N, T>& right)\
 {\
-  ShCheckDims<M, true, N, true>();\
+  SH_STATIC_CHECK(M == N || M == 1 || N == 1, Dot_Product_Components_Do_Not_Match);\
   if (!ShEnvironment::insideShader) {\
     assert(left.hasValues());\
     T lvals[M];\
@@ -561,7 +527,7 @@ ShVariableN<N, T> floor(const ShVariableN<N, T>& var)
 template<int N, int M, typename T>
 ShVariableN<N,  T> fmod(const ShVariableN<N, T>& left, const ShVariableN<M, T>& right)
 {
-  ShCheckDims<N, false, M, true>();
+  SH_STATIC_CHECK(N == M || M == 1, Fmod_Components_Do_Not_Match);
   if (!ShEnvironment::insideShader) {
     assert(left.hasValues()); 
     assert(right.hasValues());
@@ -608,7 +574,7 @@ template<int N, int M, typename T>
 ShVariableN<N, T> lerp(const ShVariableN<M, T>& f, const ShVariableN<N, T>& a, 
     const ShVariableN<N,T>& b)
 {
-  ShCheckDims<M, true, N, false>();
+  SH_STATIC_CHECK(M == N || M == 1, Linear_Interpolation_Components_Do_Not_Match);
   if (!ShEnvironment::insideShader) {
     assert(a.hasValues()); 
     assert(b.hasValues());
@@ -637,26 +603,13 @@ ShVariableN<N, T> lerp(T f, const ShVariableN<N, T>& a, const ShVariableN<N, T>&
   return lerp(ShConstant1f(f), a, b); 
 }
 
-template<int N, int M, int P> 
-class ShCheckMad {
-  private:
-    ShCheckMad();
-};
-template<int N> class ShCheckMad<N, N, N>
-{public: ShCheckMad() {}};
-template<int N> class ShCheckMad<1, N, N> 
-{public: ShCheckMad() {}};
-template<int N> class ShCheckMad<N, 1, N>
-{public: ShCheckMad() {}};
-template<> class ShCheckMad<1, 1, 1>
-{public: ShCheckMad() {}};
-
 /// Multiply and add
 template<int N, int M, int P, typename T>
 ShVariableN<P, T> mad(const ShVariableN<M, T>& m1, const ShVariableN<N, T>& m2, 
     const ShVariableN<P,T>& a)
 {
-  ShCheckMad<N, M, P>();
+  SH_STATIC_CHECK((M == N && N == P) || (M == 1 && N == P) || (N == 1 && M == P),
+                  Multiply_And_Add_Components_Do_Not_Match);
   if (!ShEnvironment::insideShader) {
     assert(m1.hasValues()); 
     assert(m2.hasValues());

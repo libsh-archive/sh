@@ -88,7 +88,7 @@ template<int N, int Kind, typename T, bool Swizzled>
 ShAttrib<N, Kind, T, Swizzled>::ShAttrib(T v1)
   : ShVariableN<N, T>(new ShVariableNode(static_cast<ShVariableKind>(Kind), N))
 {
-  ShIntEqual<N, 1>();
+  SH_STATIC_CHECK(N == 1, Constructing_Non_1_Attrib_From_1_Value);
   if (uniform()) {
     m_node->setValue(0, v1);
   } else {
@@ -102,7 +102,7 @@ template<int N, int Kind, typename T, bool Swizzled>
 ShAttrib<N, Kind, T, Swizzled>::ShAttrib(T v1, T v2)
   : ShVariableN<N, T>(new ShVariableNode(static_cast<ShVariableKind>(Kind), N))
 {
-  ShIntEqual<N, 2>();
+  SH_STATIC_CHECK(N == 2, Constructing_Non_2_Attrib_From_2_Values);
   if (uniform()) {
     m_node->setValue(0, v1);
     m_node->setValue(1, v2);
@@ -118,7 +118,7 @@ template<int N, int Kind, typename T, bool Swizzled>
 ShAttrib<N, Kind, T, Swizzled>::ShAttrib(T v1, T v2, T v3)
   : ShVariableN<N, T>(new ShVariableNode(static_cast<ShVariableKind>(Kind), N))
 {
-  ShIntEqual<N, 3>();
+  SH_STATIC_CHECK(N == 3, Constructing_Non_3_Attrib_From_3_Values);
   if (uniform()) {
     m_node->setValue(0, v1);
     m_node->setValue(1, v2);
@@ -135,7 +135,7 @@ template<int N, int Kind, typename T, bool Swizzled>
 ShAttrib<N, Kind, T, Swizzled>::ShAttrib(T v1, T v2, T v3, T v4)
   : ShVariableN<N, T>(new ShVariableNode(static_cast<ShVariableKind>(Kind), N))
 {
-  ShIntEqual<N, 4>();
+  SH_STATIC_CHECK(N == 4, Constructing_Non_4_Attrib_From_4_Values);
   if (uniform()) {
     m_node->setValue(0, v1);
     m_node->setValue(1, v2);
@@ -187,7 +187,7 @@ template<int N, int Kind, typename T, bool Swizzled>
 ShAttrib<N, Kind, T, Swizzled>&
 ShAttrib<N, Kind, T, Swizzled>::operator=(T other)
 {
-  ShIntEqual<N, 1>();
+  SH_STATIC_CHECK(N == 1, Assigning_Scalar_To_Non_Scalar_Attrib);
   return operator=(ShConstant1f(other));
 }
 
