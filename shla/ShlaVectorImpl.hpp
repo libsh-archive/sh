@@ -60,6 +60,12 @@ ShlaVector<T, M, N>& ShlaVector<T, M, N>::operator=( const ShlaVector<T, M, N> &
 
 template< typename T, int M, int N >
 ShUberbufferPtr ShlaVector<T, M, N>::getMem() const { 
+  // TODO fix this (clone ubufs on assignment) 
+  // or shield access to the memory object in some way
+  if( m_mem.refCount() > 1 ) {
+    SH_DEBUG_WARN( "getMem() on ShlaVector whose memory object is shared." );
+    SH_DEBUG_WARN( "Do not write to the uber buffer unless you know what you're doing." );
+  }
   return m_mem;
 }
 
@@ -77,21 +83,16 @@ T ShlaVector<T, M, N>::operator()( int i ) const {
 
 template< typename T, int M, int N >
 void ShlaVector<T, M, N>::setData( const float* data ) {
+  if( m_mem.refCount() > 1 ) {
+    SH_DEBUG_PRINT( "Found shared mem object on setData.  Making new buf" );
+    m_mem = new ShUberbuffer( M, N, 1, T::typesize );
+  }
   m_mem->setData( data );
 }
 
-
 template< typename T, int M, int N >
-float* ShlaVector<T, M, N>::zeros = 0;
-
-template< typename T, int M, int N >
-void ShlaVector<T, M, N>::zeroData() {
-  // TODO faster way to do this?
-  if( zeros == 0 ) {
-    zeros = new float[ M * N * T::typesize ];
-    memset( zeros, 0, M * N * T::typesize * sizeof( float ) );
-  }
-  m_mem->setData( zeros );
+void ShlaVector<T, M, N>::printData(int c) { 
+  ShlaRenderGlobal<T, M, N>::printData( m_mem, c );
 }
 
 

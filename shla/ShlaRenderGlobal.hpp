@@ -61,6 +61,7 @@ class ShlaRenderGlobal {
     static ShTexture2D<T> accum;
     static ShUberbufferPtr accumRead, accumWrite; // N*N 2D uber buffers for storing intermediate results
 
+
     /** Clears the render buffer and switches active render buffer to renderbuf */
     static void useRenderbuf();  
 
@@ -114,6 +115,26 @@ class ShlaRenderGlobal {
     static void accumLastLoop( ShUberbufferPtr out );
 
     static void accumDetach();
+
+    /** \brief initializes the zero uber buffer
+     * Currently this is only used for matrix multiplication (in case 
+     * the matrix has no diagonals, the multiplicatoin must return 0.
+     * Instead of reinitializing a 0 vector each time (which is really slow
+     * with current ubuf implementation), keep this zero here
+     *
+     */
+    static ShUberbufferPtr getZeroMem();
+
+    /** \brief Prints the floating point contents of the uber buffer
+     * (must have dimensions M x N and hold elements of type T)
+     *
+     * TODO remove this (it's for temporary debugging purposes)
+     */
+    static void printData( ShUberbufferPtr ub, int c = T::typesize ); 
+    
+  private:
+    // TODO this may not be necessary...
+    static ShUberbufferPtr zero;
 };
 
 

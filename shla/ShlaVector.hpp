@@ -85,13 +85,11 @@ class ShlaVector
     void setData( const float* data ); 
     void setData( int w, int h, const T& elm );
 
-    // function sets data to a zeroed floating point array
-    void zeroData();
+    // prints data (first c elements of each vector component) to standard out 
+    void printData( int c = T::typesize ); 
 
   private:
     ShUberbufferPtr m_mem;
-
-    static float* zeros;
 };
 
 }

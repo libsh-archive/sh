@@ -61,6 +61,9 @@ template<typename T, int M, int N>
 ShUberbufferPtr ShlaRenderGlobal<T, M, N>::accumWrite = new ShUberbuffer( M, N, 1, T::typesize );
 
 template<typename T, int M, int N>
+ShUberbufferPtr ShlaRenderGlobal<T, M, N>::zero = 0; 
+
+template<typename T, int M, int N>
 void ShlaRenderGlobal<T, M, N>::useRenderbuf() {
   shDrawBuffer( renderbuf );
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -139,7 +142,6 @@ void ShlaRenderGlobal<T, M, N>::bindDefault( ShProgram fsh ) {
   ShEnvironment::boundShader[1] = 0;
 
   if( !defaultVsh ) {
-    printf( "defaultVsh\n" );
     defaultVsh = SH_BEGIN_VERTEX_PROGRAM {
       ShInputTexCoord2f tci;
       ShInputPosition4f pi;
@@ -160,7 +162,6 @@ void ShlaRenderGlobal<T, M, N>::bindReduce( ShProgram fsh ) {
   ShEnvironment::boundShader[1] = 0;
 
   if( !reduceVsh ) {
-    printf( "reduceVsh\n" );
     reduceVsh = SH_BEGIN_VERTEX_PROGRAM {
       ShInputTexCoord2f tci;
       ShInputPosition4f pi;
@@ -209,7 +210,6 @@ void ShlaRenderGlobal<T, M, N>::accumLoop() {
   accumRead = accumWrite;
   accumWrite = temp;
 
-  printf( "Attaching accumRead: %d to tex\n", accumRead->mem() );
   accum.attach( accumRead );
   // TODO add invalidate?
   renderbuf->bind( accumWrite );
@@ -228,6 +228,40 @@ void ShlaRenderGlobal<T, M, N>::accumDetach() {
   renderbuf->bind( 0 );
   accum.attach( 0 );
 }
+
+template<typename T, int M, int N>
+ShUberbufferPtr ShlaRenderGlobal<T, M, N>::getZeroMem() {
+  if( !zero ) {
+    zero = new ShUberbuffer( M, N, 1, T::typesize );
+    float *zeroData = new float[ M * N * T::typesize ];
+    memset( zeroData, 0, M * N * T::typesize * sizeof( float ) );
+    zero->setData( zeroData );
+    delete[] zeroData;
+  }
+  return zero;
+}
+  
+
+template<typename T, int M, int N>
+void ShlaRenderGlobal<T, M, N>::printData( ShUberbufferPtr ub, int c ) {
+  float *vData = ub->data();
+  for( int i = 0; i < N; ++i ) {
+    for( int j = 0; j < M; ++j ) {
+      std::cout << "(";
+      for( int k = 0; k < c; ++k ) {
+        int index = (i * M + j ) * T::typesize + k;
+        std::cout.setf(std::ios::fixed);
+        std::cout.precision(2);
+        std::cout << vData[index] << ( k < (c - 1) ? " " : "" );
+      }
+      std::cout << ") ";
+    }
+    std::cout << std::endl;
+  }
+
+  delete[] vData;
+}
+
 
 }
 

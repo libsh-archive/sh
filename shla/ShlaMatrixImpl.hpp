@@ -60,7 +60,7 @@ ShlaDenseMatrix<T, M, N>::~ShlaDenseMatrix() {
 
 template< typename T, int M, int N >
 template< typename VecT >
-ShlaVector<VecT, M, N> ShlaDenseMatrix<T, M, N>::operator|( ShlaVector<VecT, M, N> &v ) {
+ShlaVector<VecT, M, N> ShlaDenseMatrix<T, M, N>::operator|( const ShlaVector<VecT, M, N> &v ) const {
 
   // TODO this doesn't work at all
 #if 0
@@ -128,16 +128,28 @@ ShlaVector<VecT, M, N> ShlaDenseMatrix<T, M, N>::operator|( ShlaVector<VecT, M, 
 
 template< typename T, int M, int N >
 template< typename VecT >
-ShlaVector<VecT, M, N> ShlaBandedMatrix<T, M, N>::operator|( ShlaVector<VecT, M, N> &v ) {
+ShlaVector<VecT, M, N> ShlaBandedMatrix<T, M, N>::operator|( const ShlaVector<VecT, M, N> &v ) const {
+  SH_DEBUG_PRINT( "Banded Matrix-Vector Multiplication" );
   /* only use static variables in the shader */
   typedef ShlaRenderGlobal<VecT, M, N> vecGlobal;
   static ShTexture2D<T> &diagTex = ShlaRenderGlobal<T, M, N>::op1; 
   static ShTexture2D<VecT> &vecTex = vecGlobal::op2; 
   static ShTexture2D<VecT> &vecAccum = vecGlobal::accum; 
+  static ShUberbufferPtr zero = vecGlobal::getZeroMem();
   static ShAttrib2f diag;  // for current diagonal d, stores ( d % M, d / M );
-  static ShProgram fsh; 
+  //static ShProgram fsh; 
+  /*
+  ShTexture2D<T> diagTex( M, N ); 
+  ShTexture2D<VecT> &vecTex = vecGlobal::op2;
+  ShTexture2D<VecT> &vecAccum = vecGlobal::accum; 
+  ShAttrib2f diag;  // for current diagonal d, stores ( d % M, d / M );
+  */
+  // TODO figure out why this doesn't work when fsh is static
+  // (i.e. on the second call to this operator, v gets corrupted)
+  ShProgram fsh; 
 
-  if( !fsh ) {
+  //if( !fsh ) {
+    SH_DEBUG_PRINT( "Generating fragment shader for multiplying diagonals." );
     ShEnvironment::boundShader[0] = 0;
     ShEnvironment::boundShader[1] = 0;
 
@@ -152,22 +164,24 @@ ShlaVector<VecT, M, N> ShlaBandedMatrix<T, M, N>::operator|( ShlaVector<VecT, M,
       typename vecGlobal::OutputColorType out;
       out = mad( diagTex(tc), vecTex(offsetTc), vecAccum(tc) ); 
     } SH_END_PROGRAM;
-  }
+  //}
   /* end of static only */
 
   ShlaVector<VecT, M, N> result;
-  ShlaVector<VecT, M, N> blank;
+
+  // TODO get rid of this hack - 
   ShFramebufferPtr oldfb = ShEnvironment::framebuffer;
 
+  SH_DEBUG_PRINT( "Binding Shader" );
+  vecGlobal::bindDefault( fsh );
+  SH_DEBUG_PRINT( "Attaching v" );
   vecTex.attach( v.getMem() );
 
-  blank.zeroData();
-  vecGlobal::accumInit( blank.getMem() );
-  vecGlobal::bindDefault( fsh );
-  printf( "Attaching v\n" );
+  SH_DEBUG_PRINT( "Attaching blank to accum" );
+  vecGlobal::accumInit( zero ); 
   int i = 0;
   int diagSize = m_diagonal.size();
-  for( typename DiagonalMap::iterator diagIt = m_diagonal.begin();
+  for( typename DiagonalMap::const_iterator diagIt = m_diagonal.begin();
        diagIt != m_diagonal.end() ; ++diagIt, ++i ) {
 
     if( i == diagSize - 1 ) { 
@@ -182,15 +196,17 @@ ShlaVector<VecT, M, N> ShlaBandedMatrix<T, M, N>::operator|( ShlaVector<VecT, M,
 
     // calculate the i'th column
     SH_DEBUG_PRINT( "Attaching diagTex for diagonal " << diagIt->first );
+
     diagTex.attach( diagIt->second.getMem() );
     diag = ShConstant2f( (double)( diagIt->first % M ) / M, (double)( diagIt->first / M ) / N );
+    SH_DEBUG_PRINT( "diag: (" << diag.node()->getValue(0) << ", " << diag.node()->getValue(1) << ")" );
 
     vecGlobal::useRenderbuf();
     vecGlobal::drawQuad();
     shDrawBuffer( 0 );
+    diagTex.attach( 0 ); 
   }
   vecGlobal::detachAll();
-  diagTex.attach( 0 ); 
 
   shDrawBuffer( oldfb );
   

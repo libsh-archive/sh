@@ -55,7 +55,7 @@ class ShlaMatrix
 
 // functions that work on the GPU
     template<typename VecT>
-    virtual ShlaVector<VecT, M, N> operator|( ShlaVector<VecT, M, N> &v ) = 0; 
+    virtual ShlaVector<VecT, M, N> operator|( const ShlaVector<VecT, M, N> &v ) const = 0; 
 
 // functions that work on memory on the host 
 // (eventually might work directly on elements in the GPU)
@@ -84,7 +84,7 @@ class ShlaDenseMatrix  {
     ~ShlaDenseMatrix();
 
     template<typename VecT>
-    ShlaVector<VecT, M, N> operator|( ShlaVector<VecT, M, N> &v ); 
+    ShlaVector<VecT, M, N> operator|( const ShlaVector<VecT, M, N> &v ) const; 
 
     const float& operator()( int r, int c, int element ) const;
     float& operator()( int r, int c, int element );
@@ -112,7 +112,7 @@ class ShlaBandedMatrix {
     ~ShlaBandedMatrix();
 
     template<typename VecT>
-    ShlaVector<VecT, M, N> operator|( ShlaVector<VecT, M, N> &v ); 
+    ShlaVector<VecT, M, N> operator|( const ShlaVector<VecT, M, N> &v ) const; 
 
     const float& operator()( int r, int c, int element ) const;
     float& operator()( int r, int c, int element );
@@ -121,8 +121,8 @@ class ShlaBandedMatrix {
       * The dth diagonal contains the matrix entries (i, (d+i)%(N*N))
       * in sequence from i = 0 to N * N.
       */
-    const ShlaVector<T, M, N> &operator[]( int d ) const; 
-    ShlaVector<T, M, N> &operator[]( int d ); 
+    const ShlaVector<T, M, N>& operator[]( int d ) const; 
+    ShlaVector<T, M, N>& operator[]( int d ); 
 
   private:
     typedef std::map< int, ShlaVector<T, M, N> > DiagonalMap;
