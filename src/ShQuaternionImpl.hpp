@@ -197,4 +197,11 @@ operator*(const ShAttrib<1, K2, T>& c, const ShQuaternion<K, T>& q)
   return (r *= c);
 }
 
+template<int K, typename T>
+void ShQuaternion<K, T>::normalize()
+{
+	m_data = normalize(m_data);
+}
+
+
 }

@@ -64,6 +64,7 @@ public:
   ShQuaternion<SH_VAR_TEMP, T> operator*(const ShQuaternion<K2, T>& q2);
   template<int K2>
   ShQuaternion<SH_VAR_TEMP, T> operator*(const ShAttrib<1, K2, T>& c);
+  void normalize();
 
   ShQuaternion<SH_VAR_TEMP, T> conjugate() const;
   ShQuaternion<SH_VAR_TEMP, T> inverse() const;
