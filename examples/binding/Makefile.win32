@@ -38,9 +38,7 @@ LDFLAGS =
 RELEASE_LDFLAGS = $(LDFLAGS)
 DEBUG_LDFLAGS = $(LDFLAGS) /DEBUG
 
-shbindingex_SOURCES = Camera.hpp Camera.cpp
-shbindingex_SOURCES += ShTrackball.hpp ShTrackball.cpp
-shbindingex_SOURCES += main.cpp
+shbindingex_SOURCES = main.cpp
 
 shbindingex_CXXFILES = $(filter %.cpp,$(shbindingex_SOURCES))
 shbindingex_RELEASE_OBJECTS = $(shbindingex_CXXFILES:.cpp=.r.obj)
