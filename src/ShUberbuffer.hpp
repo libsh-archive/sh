@@ -42,7 +42,7 @@ class ShUberbuffer: public ShMemoryObject {
      * Writes a single data element given by a array data with elements 
      * entries at offset w, h, d.
      */
-    void setData(int w, int h, constfloat *data);
+    void setData(int w, int h, const float *data);
 
     /** \brief Reads data from a memory object
      */
