@@ -54,7 +54,8 @@ ShlaVector<T, M, N>::~ShlaVector() {
 template< typename T, int M, int N >
 ShlaVector<T, M, N>& ShlaVector<T, M, N>::operator=( const ShlaVector<T, M, N> &b ) { 
   //TODO do this properly (copy uber buffers)
-  m_mem = b.m_mem;
+  m_mem = new ShUberbuffer( M, N, 1, T::typesize );
+  m_mem->copy( b.m_mem );
   return *this;
 }
 
