@@ -170,8 +170,18 @@ private:
   std::vector<int> m_outputBindings;
   std::vector<int> m_inputBindings;
 
+
+  //@todo remove m_splits and m_converts with dependent uniforms 
+  
   /// The long tuple splits applied to this shader before compilation.
   SH::ShTransformer::VarSplitMap m_splits;
+
+  /// The conversions done to change types not handled in hardware into
+  // floating point types
+  //
+  // @todo may want more intelligent conversion if hardware 
+  SH::ShVarMap m_converts;
+  SH::ShTransformer::TypeIndexMap m_convertMap;
 
   /// ARB Program ID we are bound to. 0 if code hasn't been uploaded yet.
   unsigned int m_programId;

@@ -26,7 +26,6 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "ShContext.hpp"
 #include "ShDebug.hpp"
-#include "ShEval.hpp"
 #include "ShTypeInfo.hpp"
 
 namespace SH {
@@ -37,6 +36,10 @@ ShContext* ShContext::current()
 {
   if (!m_instance) {
     m_instance = new ShContext();
+
+    // must be done this way since
+    // init_types requires a ShContext object, 
+    shTypeInfoInit();
   }
   return m_instance;
 }
@@ -45,18 +48,6 @@ ShContext::ShContext()
   : m_optimization(2),
     m_throw_errors(true)
 {
-  addTypeInfo(new ShConcreteTypeInfo<double>());
-  addTypeInfo(new ShConcreteTypeInfo<float>());
-
-  /*
-  addTypeInfo(new ShConcreteTypeInfo<int>());
-  addTypeInfo(new ShConcreteTypeInfo<short>());
-  addTypeInfo(new ShConcreteTypeInfo<char>());
-  addTypeInfo(new ShConcreteTypeInfo<unsigned int>());
-  addTypeInfo(new ShConcreteTypeInfo<unsigned short>());
-  addTypeInfo(new ShConcreteTypeInfo<unsigned char>());
-  // frac types
-  */
 }
 
 
@@ -125,6 +116,11 @@ int ShContext::type_index(const std::string &typeName) const
   SH_DEBUG_ASSERT(0);
   // TODO throw some kind of error
   return -1;
+}
+
+int ShContext::num_types() const
+{
+  return m_type_index.size();
 }
 
 ShTypeInfoPtr ShContext::type_info(int typeIndex) const

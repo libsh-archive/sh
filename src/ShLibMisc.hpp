@@ -36,8 +36,9 @@ ShGeneric<M, float> fillcast(float a);
 /** Join two tuples 
  * Creates an M+N tuple with components of a first then b.
  */
-template<int M, int N, typename T> 
-ShGeneric<M+N, T> join(const ShGeneric<M, T>& a, const ShGeneric<N, T> &b);
+template<int M, int N, typename T1, typename T2> 
+ShGeneric<M+N, CT1T2> 
+join(const ShGeneric<M, T1>& a, const ShGeneric<N, T2> &b);
 
 /** Fragment killing. Only for fragment programs.
  * Kills the current fragment if any(c) > 0.

@@ -123,6 +123,13 @@ ShVariableNodePtr ShVariableNode::clone(int newTypeIndex,
       updateVarList, keepUniform);
 }
 
+ShVariableNodePtr ShVariableNode::clone(ShBindingType newKind, int newSize, 
+    int newTypeIndex, bool updateVarList, bool keepUniform) const
+{
+  return new ShVariableNode(*this, newKind, m_specialType, newSize, newTypeIndex, 
+      updateVarList, keepUniform);
+}
+
 bool ShVariableNode::uniform() const
 {
   return m_uniform;
@@ -148,6 +155,10 @@ void ShVariableNode::unlock()
       if (I->second.node()) I->second.updateUniform(this);
     }
   }
+}
+
+int ShVariableNode::typeIndex() const {
+  return m_typeIndex;
 }
 
 int ShVariableNode::size() const
@@ -275,7 +286,8 @@ ShSemanticType ShVariableNode::specialType() const
 std::string ShVariableNode::nameOfType() const {
   std::ostringstream os;
   // TODO indicate ValueType properly
-  os << "Sh" << ShBindingTypeName[ m_kind ] << ShSemanticTypeName[ m_specialType ] << m_size << "f";
+  os << "Sh" << ShBindingTypeName[ m_kind ] << ShSemanticTypeName[ m_specialType ] 
+    << m_size << shTypeInfo(m_typeIndex)->name();
   return os.str();
 }
 
@@ -290,6 +302,13 @@ void ShVariableNode::setCloak(ShCloakCPtr other)
 {
   assert(m_cloak);
   m_cloak->set(other);
+  uniformUpdate();
+}
+
+void ShVariableNode::setCloak(ShCloakCPtr other, int index) 
+{
+  assert(m_cloak);
+  m_cloak->set(other, index); 
   uniformUpdate();
 }
 

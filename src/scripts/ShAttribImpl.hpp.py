@@ -4,6 +4,7 @@ common.header()
 
 common.guard("SHATTRIBIMPL_HPP")
 common.inprint('#include "ShAttrib.hpp"')
+common.inprint('#include "ShContext.hpp"')
 common.inprint('#include "ShStatement.hpp"')
 common.inprint('#include "ShEnvironment.hpp"')
 common.inprint('#include "ShDebug.hpp"')
@@ -19,13 +20,15 @@ class Impl(semantic.Impl):
     def __init__(self):
         semantic.Impl.__init__(self, "Attrib", "attribute", "SH_ATTRIB", "ShGeneric")
 
-    def copycons(self, args, size):
+    def copycons(self, args, size, extraTplArg=""):
         other = args[0][1]
 
+        if extraTplArg != "": extraTplArg = "template<typename " + extraTplArg + ">\n"
         common.inprint(self.tpl(size))
+        common.inprint(extraTplArg);
         common.inprint(self.tplcls(size) + "::" + self.name + "(" + ', '.join([' '.join(x) for x in args]) + ")")
         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
-                       "(new ShVariableNode(Binding, " + self.sizevar(size) + "))")
+                       "(new ShVariableNode(Binding, " + self.sizevar(size) + ",shTypeIndex<T>()))")
         common.inprint("{")
         common.indent()
         common.inprint("shASN(*this, " + other + ");")
@@ -49,7 +52,7 @@ class Impl(semantic.Impl):
         args = [[type, "s" + str(i)] for i in range(0, size)]
         common.inprint(self.tplcls(size) + "::" + self.name + "(" + ', '.join([' '.join(x) for x in args]) + ")")
         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
-                       "(new ShVariableNode(Binding, " + self.sizevar(size) + "))")
+                       "(new ShVariableNode(Binding, " + self.sizevar(size) + ",shTypeIndex<T>()))")
         common.inprint("{")
         common.indent()
         
@@ -57,10 +60,10 @@ class Impl(semantic.Impl):
         common.indent()
         for i in range(0, size):
             if type == "T":
-                common.inprint("m_node->setValue(" + str(i) + ", s" + str(i) + ");")
+                common.inprint("setValue(" + str(i) + ", s" + str(i) + ");")
             else:
                 common.inprint("SH_DEBUG_ASSERT(s" + str(i) + ".hasValues());")
-                common.inprint("m_node->setValue(" + str(i) + ", s" + str(i) + ".getValue(0));")
+                common.inprint("setValue(" + str(i) + ", s" + str(i) + ".getValue(0));")
         common.deindent()
         common.inprint("} else {")
         common.indent()
@@ -80,13 +83,14 @@ class Impl(semantic.Impl):
         common.inprint(self.tpl(size))
         common.inprint(self.tplcls(size) + "::" + self.name + "()")
         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
-                       "(new ShVariableNode(Binding, " + self.sizevar(size) + "))")
+                       "(new ShVariableNode(Binding, " + self.sizevar(size) + ",shTypeIndex<T>()))")
         common.inprint("{")
         common.inprint("}")
         common.inprint("")
 
-        self.copycons([["const ShGeneric<" + self.sizevar(size) + ", T>&", "other"]], size)
-        self.copycons([["const " + self.tplcls(size) + "&", "other"]], size)
+        self.copycons([["const ShGeneric<" + self.sizevar(size) + ", T2>&", "other"]], size, "T2")
+        self.copycons([["const " + self.tplcls(size) + "&","other"]], size)
+        self.copycons([["const " + self.tplcls(size, "Swizzled", "T2") + "&","other"]], size, "T2")
 
         common.inprint(self.tpl(size))
         common.inprint(self.tplcls(size) + "::" + self.name + "(const ShVariableNodePtr& node,")
@@ -101,12 +105,12 @@ class Impl(semantic.Impl):
         common.inprint(self.tpl(size))
         common.inprint(self.tplcls(size) + "::" + self.name + "(T data[" + self.sizevar(size) + "])")
         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
-                       "(new ShVariableNode(Binding, " + self.sizevar(size) + "))")
+                       "(new ShVariableNode(Binding, " + self.sizevar(size) + ",shTypeIndex<T>()))")
         common.inprint("{")
         common.indent()
         common.inprint("if (Binding == SH_CONST) {")
         common.indent()
-        common.inprint("for (int i = 0; i < " + self.sizevar(size) + "; i++) m_node->setValue(i, data[i]);")
+        common.inprint("for (int i = 0; i < " + self.sizevar(size) + "; i++) setValue(i, data[i]);")
         common.deindent()
         common.inprint("} else {")
         common.indent()

@@ -1,5 +1,49 @@
+2004-10-01  Bryan Chan <b8chan@uwaterloo.ca>
+  Another checkin for storage types. Transformers are now in place
+	so floating point (not including half) and signed int types 
+
+	* test/regress/regress.py test/regress/test.?pp:
+	Added testing of immediate mode. 
+
+	* ShInterval*: Interval Type
+	Mucked around with exising NuS class to make an interval type.
+  (some functions incomplete, like trig)	
+
+	* ShTransformer*, ShIntervalConverter.cpp, ShCtrlGraph.*, ShBasicBlock.*:
+	Added a transformer that turns interval temps into floats
+	by splicing in ShProgram fragments in the place of statements.
+
+	* ShTypeConvertTransformer*:
+	Added a transformer that turns non-float variables/statements
+	into float.
+	(Currently only does int, double -> float, but commented out
+	framework should handle all standard Sh types)
+
+	* ShEval*, ShConcrete.*Op*, ShInstructions.?pp,
+		ShLibInterval*:
+	Added in interval ops (LO,HI,SETLO,SETHI)
+	Cleaned up evaluation and made it more flexible.
+
+	* ShOperation.cpp:
+	Merged in changes from main branch
+
+	* ShCloakCast*, ShCastManager*:
+	Used internally to manage casting between different variable storage types 
+
+	
+	* ShGraph*: 
+	Added some a adjacency-list based graph class with some basic 
+	functions (needs cleaning).  Used for operator resolution. 
+
+	* ShStatement.*:
+	Merged in ShStatementInformation from main branch.
+
+	* ShBaseTexture*, ShLib*, ShAttrib*, and ShAttrib subclasses:
+	Changed binary/ternary/assignment operators and texture lookup to 
+	allow operands of different variable storage types.
+
 2004-07-19  Bryan Chan <b8chan@uwaterloo.ca>
-  Changes in progress for adding extra arithmetic types to Sh.
+  Changes in progress for adding extra storage types to Sh.
   Current copy is still non-working.
 
   * ShCloak*: Polymorphic tuple data containers that 

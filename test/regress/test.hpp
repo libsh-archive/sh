@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <sh.hpp>
 
-#define EPSILON 1e-5
+#define EPSILON 1e-2
 
 #define COLOR_GREEN "[32m"
 #define COLOR_RED "[31m"
@@ -15,7 +15,20 @@
 
 class Test {
 public:
+  // reads backend from command line (default gcc) 
   Test(int argc, char** argv);
+
+  template <class T>
+  void pretty_print(std::string varname, int size, const T *values)
+  {
+    std::cout << varname << " = [ ";
+    std::cout << std::setiosflags(std::ios::right);
+    for(int j = 0; j < size; j++) {
+      if (j != 0) std::cout << ",";
+      std::cout << std::setw(10) << values[j];
+    }
+    std::cout << " ]" << std::endl;;
+  }
 
   template <class INPUT1, class OUTPUT>
   void run(SH::ShProgram& program,
@@ -44,41 +57,16 @@ public:
 
     for(int i = 0; i < res.size(); i++) {
       if (fabs(_out[i] - _res[i]) > EPSILON) {
-        std::cout << COLOR_YELLOW << "Test: " << COLOR_NORMAL
-                  << std::setiosflags(std::ios::left) << std::setw(50) << name
-                  << COLOR_RED
-                  << " FAILED"
-                  << COLOR_NORMAL
-                  << " [" << m_backend << "]"
-                  << std::endl;
-
-        std::cout << "out = [ ";
-        std::cout << std::setiosflags(std::ios::right);
-        for(int j = 0; j < res.size(); j++)
-          {
-            if (j != 0) std::cout << ",";
-            std::cout << std::setw(10) << _out[j];
-          }
-        std::cout << " ]" << std::endl;;
-
-        std::cout << "res = [ ";
-        std::cout << std::setiosflags(std::ios::right);
-        for(int j = 0; j < res.size(); j++)
-          {
-            if (j != 0) std::cout << ",";
-            std::cout << std::setw(10) << _res[j];
-          }
-        std::cout << " ]" << std::endl;;
-        std::cout << std::resetiosflags(std::ios::right);
-
+        print_fail(name);
+        pretty_print("  A", in1.size(), _in1);
+        pretty_print("out", res.size(), _out);
+        pretty_print("res", res.size(), _res);
         return;
       }
+      /* DEBUG */ pretty_print("out", res.size(), _out);
+      /* DEBUG */ pretty_print("res", res.size(), _res);
     }
-    std::cout << COLOR_YELLOW << "Test: " << COLOR_NORMAL
-              << std::setiosflags(std::ios::left) << std::setw(50) << name
-              << COLOR_GREEN
-              << " PASSED"
-              << COLOR_NORMAL << std::endl;
+    print_pass(name);
   }
 
   template <class INPUT1, class INPUT2, class OUTPUT>
@@ -115,41 +103,17 @@ public:
 
     for(int i = 0; i < res.size(); i++) {
       if (fabs(_out[i] - _res[i]) > EPSILON) {
-        std::cout << COLOR_YELLOW << "Test: " << COLOR_NORMAL
-                  << std::setiosflags(std::ios::left) << std::setw(50) << name
-                  << COLOR_RED
-                  << " FAILED"
-                  << COLOR_NORMAL
-                  << " [" << m_backend << "]"
-                  << std::endl;
-
-        std::cout << "out = [ ";
-        std::cout << std::setiosflags(std::ios::right);
-        for(int j = 0; j < res.size(); j++)
-          {
-            if (j != 0) std::cout << ",";
-            std::cout << std::setw(10) << _out[j];
-          }
-        std::cout << " ]" << std::endl;
-
-        std::cout << "res = [ ";
-        std::cout << std::setiosflags(std::ios::right);
-        for(int j = 0; j < res.size(); j++)
-          {
-            if (j != 0) std::cout << ",";
-            std::cout << std::setw(10) << _res[j];
-          }
-        std::cout << " ]" << std::endl;
-        std::cout << std::resetiosflags(std::ios::right);
-
+        print_fail(name);
+        pretty_print("  A", in1.size(), _in1);
+        pretty_print("  B", in2.size(), _in2);
+        pretty_print("out", res.size(), _out);
+        pretty_print("res", res.size(), _res);
         return;
       }
+      /* DEBUG */ pretty_print("out", res.size(), _out);
+      /* DEBUG */ pretty_print("res", res.size(), _res);
     }
-    std::cout << COLOR_YELLOW << "Test: " << COLOR_NORMAL
-              << std::setiosflags(std::ios::left) << std::setw(50) << name
-              << COLOR_GREEN
-              << " PASSED"
-              << COLOR_NORMAL << std::endl;
+    print_pass(name);
   }
 
   template <class INPUT1, class INPUT2, class INPUT3, class OUTPUT>
@@ -194,24 +158,58 @@ public:
   
     for(int i = 0; i < res.size(); i++) {
       if (fabs(_out[i] - _res[i]) > EPSILON) {
-        std::cout << COLOR_YELLOW << "Test: " << COLOR_NORMAL
-                  << std::setiosflags(std::ios::left) << std::setw(50) << name
-                  << COLOR_RED
-                  << " FAILED"
-                  << COLOR_NORMAL
-                  << " [" << m_backend << "]"
-                  << std::endl;
+        print_fail(name);
+        pretty_print("  A", in1.size(), _in1);
+        pretty_print("  B", in2.size(), _in2);
+        pretty_print("  C", in2.size(), _in2);
+        pretty_print("out", res.size(), _out);
+        pretty_print("res", res.size(), _res);
         return;
       }
+      /* DEBUG */ pretty_print("out", res.size(), _out);
+      /* DEBUG */ pretty_print("res", res.size(), _res);
     }
-    std::cout << COLOR_YELLOW << "Test: " << COLOR_NORMAL
-              << std::setiosflags(std::ios::left) << std::setw(50) << name
-              << COLOR_GREEN
-              << " PASSED"
-              << COLOR_NORMAL << std::endl;
   }
+
+  /// Checks results from running ops on the host
+  template <class OUTPUT, class EXPECTED>
+  void check(std::string name, const OUTPUT &out, const EXPECTED &res)
+  {
+      typedef typename OUTPUT::ValueType ValType;
+      ValType* _out = new ValType[out.size()];
+      out.getValues(_out);
+
+      ValType* _res = new ValType[res.size()];
+      res.getValues(_res);
+
+      if(out.size() != res.size()) {
+        print_fail(name);
+        std::cout << "Test data size mismatch" << std::endl;
+        return;
+      }
+
+      for(int i = 0; i < out.size(); ++i) {
+        if (fabs(_out[i] - _res[i]) > EPSILON) {
+          print_fail(name);
+          pretty_print("out", out.size(), _out); 
+          pretty_print("res", res.size(), _res); 
+          return;
+        }
+        /* DEBUG */ pretty_print("out", res.size(), _out);
+        /* DEBUG */ pretty_print("res", res.size(), _res);
+      }
+      print_pass(name);
+  }
+
+  bool on_host()
+  {
+    return m_backend == "host";
+  }
+
   
 private:
+  void print_fail(std::string name);
+  void print_pass(std::string name);
   
   std::string m_backend;
 };

@@ -64,6 +64,12 @@ void shXPD(ShVariable& dest, const ShVariable& a, const ShVariable& b);
 void shCOND(ShVariable& dest, const ShVariable& cond,
             const ShVariable& a, const ShVariable& b);
 
+// interval arithmetic ops 
+void shLO(ShVariable &dest, const ShVariable &a);
+void shHI(ShVariable &dest, const ShVariable &a);
+void shSETLO(ShVariable &dest, const ShVariable &a);
+void shSETHI(ShVariable &dest, const ShVariable &a);
+
 void shKIL(const ShVariable& cond);
 
 /*@}*/

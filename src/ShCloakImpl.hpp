@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <sstream>
 #include "ShDebug.hpp"
+#include "ShCastManager.hpp"
 #include "ShCloak.hpp"
 #include "ShContext.hpp"
 #include "ShTypeInfo.hpp"
@@ -69,6 +70,7 @@ int ShDataCloak<T>::typeIndex() const {
   return shTypeIndex<T>(); 
 }
 
+
 template<typename T>
 std::string ShDataCloak<T>::typeName() const {
   return ShConcreteTypeInfo<T>::m_name; 
@@ -95,7 +97,9 @@ void ShDataCloak<T>::negate()
 template<typename T>
 void ShDataCloak<T>::set(ShCloakCPtr other)
 {
-  CPtrType castOther = shref_dynamic_cast<const ShDataCloak<T> >(other);
+  CPtrType castOther = shref_dynamic_cast<const ShDataCloak<T> >(
+      ShCastManager::instance()->doCast(shTypeIndex<T>(), other));
+//  CPtrType castOther = shref_dynamic_cast<const ShDataCloak<T> >(other);
   if(!castOther) { 
     // TODO throw some kind of exception
     SH_DEBUG_WARN("Cannot cast " << other->typeName() << " to " << typeName());
@@ -108,7 +112,9 @@ void ShDataCloak<T>::set(ShCloakCPtr other)
 template<typename T>
 void ShDataCloak<T>::set(ShCloakCPtr other, int index)
 {
-  CPtrType castOther = shref_dynamic_cast<const ShDataCloak<T> >(other);
+  CPtrType castOther = shref_dynamic_cast<const ShDataCloak<T> >(
+      ShCastManager::instance()->doCast(shTypeIndex<T>(), other));
+  //CPtrType castOther = shref_dynamic_cast<const ShDataCloak<T> >(other);
   if(!castOther) { 
     // TODO throw some kind of exception
     SH_DEBUG_WARN("Cannot cast " << other->typeName() << " to " << typeName());
@@ -121,7 +127,9 @@ void ShDataCloak<T>::set(ShCloakCPtr other, int index)
 template<typename T>
 void ShDataCloak<T>::set(ShCloakCPtr other, bool neg, const ShSwizzle &writemask) 
 {
-  CPtrType castOther = shref_dynamic_cast<const ShDataCloak<T> >(other);
+  CPtrType castOther = shref_dynamic_cast<const ShDataCloak<T> >(
+      ShCastManager::instance()->doCast(shTypeIndex<T>(), other));
+  //CPtrType castOther = shref_dynamic_cast<const ShDataCloak<T> >(other);
   if(!castOther) { 
     // TODO throw some kind of exception
     SH_DEBUG_WARN("Cannot cast " << other->typeName() << " to " << typeName());
@@ -173,6 +181,26 @@ const std::vector<T>& ShDataCloak<T>::data() const {
 }
 
 template<typename T>
+typename std::vector<T>::iterator ShDataCloak<T>::begin() {
+  return m_data.begin();
+}
+
+template<typename T>
+typename std::vector<T>::iterator ShDataCloak<T>::end() {
+  return m_data.end();
+}
+
+template<typename T>
+typename std::vector<T>::const_iterator ShDataCloak<T>::begin() const {
+  return m_data.begin();
+}
+
+template<typename T>
+typename std::vector<T>::const_iterator ShDataCloak<T>::end() const {
+  return m_data.end();
+}
+
+template<typename T>
 std::string ShDataCloak<T>::encode() const {
   if(size() < 1) return "";
 
@@ -196,11 +224,23 @@ int ShDataCloak<T>::decode(std::string value) {
 
   T component; 
   for(int i = 0; i < size; ++i) {
-    in.ignore(1, ',');
+    in.ignore(1, '$');
     in >> component;
     m_data.push_back(component);
   }
   return size;
+}
+
+template<typename T>
+ShPointer<ShDataCloak<T> > cloak_cast(ShCloakPtr c)
+{
+  return shref_dynamic_cast<ShDataCloak<T> >(c);
+}
+
+template<typename T>
+ShPointer<const ShDataCloak<T> > cloak_cast(ShCloakCPtr c)
+{
+  return shref_dynamic_cast<const ShDataCloak<T> >(c);
 }
 
 }

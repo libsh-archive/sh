@@ -25,17 +25,136 @@
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
 #include "ShTypeInfo.hpp"
+#include "ShContext.hpp"
+#include "ShInterval.hpp"
+#include "ShEval.hpp"
+#include "ShCastManager.hpp"
+#include "ShCloakCast.hpp"
+
+namespace {
+using namespace SH;
+
+template<typename DEST, typename SRC>
+void addCast(bool automatic, bool precedence)
+{
+  ShCastManager::instance()->addCast(shTypeIndex<DEST>(), shTypeIndex<SRC>(),  
+      new ShDataCloakCast<DEST, SRC>(), automatic, precedence);
+}
+
+
+// This adds the available automatic and explicit casts 
+// and should only be run after type indices are available from the context.
+void addCasts()
+{
+  // precedence DAG edges 
+  
+  // @todo addCast<ShInterval<double>, ShInterval<float> >(true, true);
+  addCast<ShInterval<float>, float>(true, true);
+  addCast<ShInterval<double>, double>(true, true);
+
+  // float types
+  addCast<double, float>(true, true);
+
+  // int types
+  addCast<int, short>(true, true);
+  addCast<short, char>(true, true);
+
+  // between int and float types
+  addCast<double, int>(true, true);
+  addCast<float, short>(true, true); // @todo change this to half
+  addCast<float, char>(true, true); // @todo change this to half
+
+
+  // automatic casts (but not precedence DAG edges)
+  // @todo not sure what to do here.
+  //
+  // choice 1 - always use standard C++ cast, in which case
+  // any cast going up the precedence DAG should be in one step
+  addCast<float, int>(true, false);
+
+  // may want to make these explicit...
+  addCast<float, double>(true, false);
+  addCast<int, double>(true, false);
+  addCast<int, float>(true, false);
+
+  // explicit casts 
+  // decide what should be here...
+  // not sure...may want to separate classes some more so
+  // some automatic casts print out warnings
+  // @todo addCast<ShInterval<float>, ShInterval<double> >(false, false);
+
+  ShCastManager::instance()->init();
+
+  /* DEBUG */ //ShCastManager::instance()->graphvizDump(std::cout);
+}
+
+}
 
 namespace SH {
 
 template<> const char* ShConcreteTypeInfo<double>::m_name = "d";
-template<> const double ShConcreteTypeInfo<double>::trueValue = 1.0;
-template<> const double ShConcreteTypeInfo<double>::falseValue = 0.0;
-
 template<> const char* ShConcreteTypeInfo<float>::m_name = "f";
-template<> const float ShConcreteTypeInfo<float>::trueValue= 1.0f;
-template<> const float ShConcreteTypeInfo<float>::falseValue = 0.0f;
 
-//template<> const char* ShConcreteTypeInfo<int>::name = "int";
+template<> const char* ShConcreteTypeInfo<int>::m_name = "i";
+template<> const char* ShConcreteTypeInfo<short>::m_name = "s";
+template<> const char* ShConcreteTypeInfo<char>::m_name = "b";
+
+// @todo type
+#if 0
+template<> const char* ShConcreteTypeInfo<unsigned int>::m_name = "ui";
+template<> const char* ShConcreteTypeInfo<unsigned short>::m_name = "us";
+template<> const char* ShConcreteTypeInfo<unsigned char>::m_name = "ub";
+#endif
+
+template<> const char* ShConcreteTypeInfo<ShInterval<double> >::m_name = "i_d";
+template<> const char* ShConcreteTypeInfo<ShInterval<float> >::m_name = "i_f";
+
+void shTypeInfoInit()
+{
+  ShContext* context = ShContext::current();
+
+  context->addTypeInfo(new ShConcreteTypeInfo<double>());
+  context->addTypeInfo(new ShConcreteTypeInfo<float>());
+
+  context->addTypeInfo(new ShConcreteTypeInfo<int>());
+  context->addTypeInfo(new ShConcreteTypeInfo<short>());
+  context->addTypeInfo(new ShConcreteTypeInfo<char>());
+
+  // @todo type
+#if 0
+  context->addTypeInfo(new ShConcreteTypeInfo<unsigned int>());
+  context->addTypeInfo(new ShConcreteTypeInfo<unsigned short>());
+  context->addTypeInfo(new ShConcreteTypeInfo<unsigned char>());
+#endif
+
+  context->addTypeInfo(new ShConcreteTypeInfo<ShInterval<double> >());
+  context->addTypeInfo(new ShConcreteTypeInfo<ShInterval<float> >());
+
+  // instantiate the regular eval ops 
+  _shInitFloatOps<double>();
+  _shInitFloatOps<float>();
+
+  _shInitIntOps<int>();
+  _shInitIntOps<short>();
+  _shInitIntOps<char>();
+
+  // @todo type
+#if 0
+  _shInitIntOps<unsigned int>();
+  _shInitIntOps<unsigned short>();
+  _shInitIntOps<unsigned char>();
+#endif
+
+  _shInitFloatOps<ShInterval<double> >();
+  _shInitFloatOps<ShInterval<float> >();
+
+  // instantiate range eval ops 
+  _shInitIntervalOps<double>();
+  _shInitIntervalOps<float>();
+
+  SH_DEBUG_PRINT("ShEval ops: \n" << ShEval::instance()->availableOps());
+
+  addCasts();
+}
 
 }

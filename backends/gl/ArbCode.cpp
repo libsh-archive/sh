@@ -42,6 +42,7 @@
 #include "ArbReg.hpp"
 #include "Arb.hpp"
 #include "ShAttrib.hpp"
+#include "ShCastManager.hpp"
 
 namespace shgl {
 
@@ -116,28 +117,47 @@ ArbCode::ArbCode(const ShProgramNodeCPtr& shader, const std::string& unit,
   if (unit == "vertex") m_environment |= SH_ARB_VP;
 
   const GLubyte* extensions = glGetString(GL_EXTENSIONS);
+  if(extensions) { // DEBUGGING
+    std::string extstr(reinterpret_cast<const char*>(extensions));
 
-  std::string extstr(reinterpret_cast<const char*>(extensions));
-
-  if (unit == "fragment") {
-    if (extstr.find("NV_fragment_program_option") != std::string::npos) {
-      m_environment |= SH_ARB_NVFP;
+    if (unit == "fragment") {
+      if (extstr.find("NV_fragment_program_option") != std::string::npos) {
+        m_environment |= SH_ARB_NVFP;
+      }
+      if (extstr.find("NV_fragment_program2") != std::string::npos) {
+        m_environment |= SH_ARB_NVFP2;
+      }
+      if (extstr.find("ATI_draw_buffers") != std::string::npos) {
+        m_environment |= SH_ARB_ATIDB;
+      }
     }
-    if (extstr.find("NV_fragment_program2") != std::string::npos) {
-      m_environment |= SH_ARB_NVFP2;
-    }
-    if (extstr.find("ATI_draw_buffers") != std::string::npos) {
-      m_environment |= SH_ARB_ATIDB;
+    if (unit == "vertex") {
+      if (extstr.find("NV_vertex_program2_option") != std::string::npos) {
+        m_environment |= SH_ARB_NVVP2;
+      }
+      if (extstr.find("NV_vertex_program3") != std::string::npos) {
+        m_environment |= SH_ARB_NVVP3;
+      }
     }
   }
-  if (unit == "vertex") {
-    if (extstr.find("NV_vertex_program2_option") != std::string::npos) {
-      m_environment |= SH_ARB_NVVP2;
-    }
-    if (extstr.find("NV_vertex_program3") != std::string::npos) {
-      m_environment |= SH_ARB_NVVP3;
-    }
-  }
+
+  // initialize m_convertMap
+  m_convertMap[shTypeIndex<double>()] = shTypeIndex<float>();
+  m_convertMap[shTypeIndex<int>()] = shTypeIndex<float>();
+  m_convertMap[shTypeIndex<short>()] = shTypeIndex<float>();
+  m_convertMap[shTypeIndex<char>()] = shTypeIndex<float>();
+
+  // @todo put in the rest when they're in
+  // @todo handle hardware with half-floats, fixed-point
+  // (use capability flags above)
+  //
+  //
+  // @todo type
+  // m_convertMap[shTypeIndex<unsigned int>()] = shTypeIndex<float>();
+  // m_convertMap[shTypeIndex<unsigned short>()] = shTypeIndex<float>();
+  // m_convertMap[shTypeIndex<unsigned char>()] = shTypeIndex<float>();
+  //
+  // @todo frac types
 }
 
 ArbCode::~ArbCode()
@@ -146,14 +166,20 @@ ArbCode::~ArbCode()
 
 void ArbCode::generate()
 {
+  SH_DEBUG_PRINT("Entering ArbCode::generate");
   // Transform code to be ARB_fragment_program compatible
   m_shader = m_originalShader->clone();
   ShContext::current()->enter(m_shader);
   ShTransformer transform(m_shader);
 
+  SH_DEBUG_PRINT("Old Interface" << std::endl << m_shader->describe_interface());
+
   transform.convertInputOutput(); 
   transform.splitTuples(4, m_splits);
   transform.convertTextureLookups();
+  SH_DEBUG_PRINT("ArbCode::generate starting convertToFloat");
+  transform.convertToFloat(m_convertMap, m_converts);
+  SH_DEBUG_PRINT("ArbCode::generate finished convertToFloat");
   
   if(transform.changed()) {
     ShOptimizer optimizer(m_shader->ctrlGraph);
@@ -164,6 +190,7 @@ void ArbCode::generate()
     ShContext::current()->exit();
     ShContext::current()->enter(m_shader);
   }
+
 
   if (m_environment & SH_ARB_NVFP2) {
     // In NV_fragment_program2, we actually generate structured code.
@@ -180,6 +207,9 @@ void ArbCode::generate()
     }
   }
   m_shader->ctrlGraph->entry()->clearMarked();
+  SH_DEBUG_PRINT("New Control Graph");
+  m_shader->ctrlGraph->graphvizDump(std::cout);
+  SH_DEBUG_PRINT("New Interface" << std::endl << m_shader->describe_interface());
   allocRegs();
   
   ShContext::current()->exit();
@@ -307,10 +337,15 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
     
   const ArbReg& reg = *I->second;
   
+  // cast to float
+  // @todo type handle half-floats, etc. 
   float values[4];
+  uniformCloak = ShCastManager::instance()->doCast(shTypeIndex<float>(), uniformCloak);
+  const ShDataCloak<float> floatCloak = 
+    (*shref_dynamic_cast<const ShDataCloak<float> >(uniformCloak));
   for (i = 0; i < uniform->size(); i++) {
     // TODO clean this up and handle different types
-    values[i] = (*shref_dynamic_cast<ShDataCloak<float> >(uniformCloak->get(i)))[0];
+    values[i] = floatCloak[i]; 
   }
   for (; i < 4; i++) {
     values[i] = 0.0;

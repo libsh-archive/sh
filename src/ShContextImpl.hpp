@@ -24,8 +24,8 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHGENERICIMPL_HPP
-#define SHGENERICIMPL_HPP
+#ifndef SHCONTEXTIMPL_HPP
+#define SHCONTEXTIMPL_HPP
 
 #include "ShContext.hpp"
 #include "ShTypeInfo.hpp"

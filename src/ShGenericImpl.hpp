@@ -31,6 +31,7 @@
 #include "ShAttrib.hpp"
 #include "ShLib.hpp"
 #include "ShInstructions.hpp"
+#include "ShDebug.hpp"
 
 namespace SH {
 
@@ -38,6 +39,7 @@ template<int N, typename T>
 ShGeneric<N, T>::ShGeneric(const ShVariableNodePtr& node)
   : ShVariable(node)
 {
+  SH_DEBUG_ASSERT(node); // DEBUG
 }
 
 template<int N, typename T>
@@ -46,6 +48,7 @@ ShGeneric<N, T>::ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, boo
 {
   m_swizzle = swizzle;
   m_neg = neg;
+  SH_DEBUG_ASSERT(node); // DEBUG
 }
 
 template<int N, typename T>
@@ -61,70 +64,88 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator=(const ShGeneric<N, T>& other)
 }
 
 template<int N, typename T>
-ShGeneric<N, T>& ShGeneric<N, T>::operator+=(const ShGeneric<N, T>& right)
+template<typename T2>
+ShGeneric<N, T>& ShGeneric<N, T>::operator=(const ShGeneric<N, T2>& other)
+{
+  shASN(*this, other);
+  return *this;
+}
+
+template<int N, typename T>
+template<typename T2>
+ShGeneric<N, T>& ShGeneric<N, T>::operator+=(const ShGeneric<N, T2>& right)
 {
   *this = *this + right;
   return *this;
 }
 
 template<int N, typename T>
-ShGeneric<N, T>& ShGeneric<N, T>::operator-=(const ShGeneric<N, T>& right)
+template<typename T2>
+ShGeneric<N, T>& ShGeneric<N, T>::operator-=(const ShGeneric<N, T2>& right)
 {
   *this = *this - right;
   return *this;
 }
 
 template<int N, typename T>
-ShGeneric<N, T>& ShGeneric<N, T>::operator*=(const ShGeneric<N, T>& right)
+template<typename T2>
+ShGeneric<N, T>& ShGeneric<N, T>::operator*=(const ShGeneric<N, T2>& right)
 {
   *this = *this * right;
   return *this;
 }
 
 template<int N, typename T>
-ShGeneric<N, T>& ShGeneric<N, T>::operator/=(const ShGeneric<N, T>& right)
+template<typename T2>
+ShGeneric<N, T>& ShGeneric<N, T>::operator/=(const ShGeneric<N, T2>& right)
 {
   *this = *this / right;
   return *this;
 }
 
 template<int N, typename T>
-ShGeneric<N, T>& ShGeneric<N, T>::operator%=(const ShGeneric<N, T>& right)
+template<typename T2>
+ShGeneric<N, T>& ShGeneric<N, T>::operator%=(const ShGeneric<N, T2>& right)
 {
   *this = *this % right;
   return *this;
 }
 
 template<int N, typename T>
-ShGeneric<N, T>& ShGeneric<N, T>::operator+=(const ShGeneric<1, T>& right)
+template<typename T2>
+ShGeneric<N, T>& ShGeneric<N, T>::operator+=(const ShGeneric<1, T2>& right)
 {
   *this = *this + right;
   return *this;
 }
 
 template<int N, typename T>
-ShGeneric<N, T>& ShGeneric<N, T>::operator-=(const ShGeneric<1, T>& right)
+template<typename T2>
+ShGeneric<N, T>& ShGeneric<N, T>::operator-=(const ShGeneric<1, T2>& right)
 {
   *this = *this - right;
   return *this;
 }
 
 template<int N, typename T>
-ShGeneric<N, T>& ShGeneric<N, T>::operator*=(const ShGeneric<1, T>& right)
+template<typename T2>
+ShGeneric<N, T>& ShGeneric<N, T>::operator*=(const ShGeneric<1, T2>& right)
 {
   *this = *this * right;
   return *this;
 }
 
 template<int N, typename T>
-ShGeneric<N, T>& ShGeneric<N, T>::operator/=(const ShGeneric<1, T>& right)
+template<typename T2>
+ShGeneric<N, T>& ShGeneric<N, T>::operator/=(const ShGeneric<1, T2>& right)
 {
   *this = *this / right;
   return *this;
 }
 
 template<int N, typename T>
-ShGeneric<N, T>& ShGeneric<N, T>::operator%=(const ShGeneric<1, T>& right)
+template<typename T2>
+ShGeneric<N, T>& ShGeneric<N, T>::operator%=(const ShGeneric<1, T2>& right)
 {
   *this = *this / right;
   return *this;
@@ -211,9 +232,7 @@ ShGeneric<4, T> ShGeneric<N, T>::operator()(int i1, int i2, int i3, int i4) cons
 template<int N, typename T>
 void ShGeneric<N, T>::range(T low, T high) 
 {
-  ShDataCloak<T> lowCloak(1, low);
-  ShDataCloak<T> highCloak(1, high);
-  rangeCloak(&lowCloak, &highCloak);
+  rangeCloak(new ShDataCloak<T>(1, low), new ShDataCloak<T>(1, high));
 }
 
 template<int N, typename T>
@@ -271,9 +290,9 @@ void ShGeneric<N, T>::setValue(int index, const T &cloakValue)
 template<int N, typename T>
 void ShGeneric<N, T>::setValues(const T cloakValues[]) 
 {
-  CloakTypePtr cloak(new CloakType(N));
+  CloakTypePtr cloakPtr(new CloakType(N));
   for(int i = 0; i < N; ++i) {
-    (*cloak)[i] = cloakValues[i]; 
+    (*cloakPtr)[i] = cloakValues[i]; 
   }
   setCloak(cloakPtr);
 }
@@ -282,6 +301,7 @@ template<typename T>
 ShGeneric<1, T>::ShGeneric(const ShVariableNodePtr& node)
   : ShVariable(node)
 {
+  SH_DEBUG_ASSERT(node); // DEBUG
 }
 
 template<typename T>
@@ -290,6 +310,7 @@ ShGeneric<1, T>::ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, boo
 {
   m_swizzle = swizzle;
   m_neg = neg;
+  SH_DEBUG_ASSERT(node); // DEBUG
 }
 
 template<typename T>
@@ -305,6 +326,15 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator=(const ShGeneric<1, T>& other)
 }
 
 template<typename T>
+template<typename T2>
+ShGeneric<1, T>& ShGeneric<1, T>::operator=(const ShGeneric<1, T2>& other)
+{
+  shASN(*this, other);
+  return *this;
+}
+
+
+template<typename T>
 ShGeneric<1, T>& ShGeneric<1, T>::operator=(T other)
 {
   shASN(*this, ShAttrib<1, SH_TEMP, T>(other));
@@ -312,35 +342,40 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator=(T other)
 }
 
 template<typename T>
-ShGeneric<1, T>& ShGeneric<1, T>::operator+=(const ShGeneric<1, T>& right)
+template<typename T2>
+ShGeneric<1, T>& ShGeneric<1, T>::operator+=(const ShGeneric<1, T2>& right)
 {
   *this = *this + right;
   return *this;
 }
 
 template<typename T>
-ShGeneric<1, T>& ShGeneric<1, T>::operator-=(const ShGeneric<1, T>& right)
+template<typename T2>
+ShGeneric<1, T>& ShGeneric<1, T>::operator-=(const ShGeneric<1, T2>& right)
 {
   *this = *this - right;
   return *this;
 }
 
 template<typename T>
-ShGeneric<1, T>& ShGeneric<1, T>::operator*=(const ShGeneric<1, T>& right)
+template<typename T2>
+ShGeneric<1, T>& ShGeneric<1, T>::operator*=(const ShGeneric<1, T2>& right)
 {
   *this = *this * right;
   return *this;
 }
 
 template<typename T>
-ShGeneric<1, T>& ShGeneric<1, T>::operator/=(const ShGeneric<1, T>& right)
+template<typename T2>
+ShGeneric<1, T>& ShGeneric<1, T>::operator/=(const ShGeneric<1, T2>& right)
 {
   *this = *this / right;
   return *this;
 }
 
 template<typename T>
-ShGeneric<1, T>& ShGeneric<1, T>::operator%=(const ShGeneric<1, T>& right)
+template<typename T2>
+ShGeneric<1, T>& ShGeneric<1, T>::operator%=(const ShGeneric<1, T2>& right)
 {
   *this = *this % right;
   return *this;
@@ -427,9 +462,7 @@ ShGeneric<4, T> ShGeneric<1, T>::operator()(int i1, int i2, int i3, int i4) cons
 template<typename T>
 void ShGeneric<1, T>::range(T low, T high) 
 {
-  ShDataCloak<T> lowCloak(1, low);
-  ShDataCloak<T> highCloak(1, high);
-  rangeCloak(&lowCloak, &highCloak);
+  rangeCloak(new ShDataCloak<T>(1, low), new ShDataCloak<T>(1, high));
 }
 
 template<typename T>
@@ -461,6 +494,37 @@ template<int N2>
 ShGeneric<N2, T> ShGeneric<1, T>::swiz(int indices[]) const
 {
   return ShGeneric<N2, T>(m_node, m_swizzle * ShSwizzle(1, N2, indices), m_neg);
+}
+
+template<typename T>
+void ShGeneric<1, T>::getValues(T dest[]) const
+{
+  CloakTypePtr c = shref_dynamic_cast<CloakType>(cloak()); 
+  dest[0] = (*c)[0]; 
+}
+
+template<typename T>
+T ShGeneric<1, T>::getValue(int index) const
+{
+  CloakTypePtr c = shref_dynamic_cast<CloakType>(cloak(index)); 
+  return (*c)[0];
+}
+
+template<typename T>
+void ShGeneric<1, T>::setValue(int index, const T &cloakValue) 
+{
+  CloakTypePtr cloak(new CloakType(1, cloakValue));
+  setCloak(cloak, false, ShSwizzle(1, index));
+}
+
+template<typename T>
+void ShGeneric<1, T>::setValues(const T cloakValues[]) 
+{
+  CloakTypePtr cloak(new CloakType(1));
+  for(int i = 0; i < N; ++i) {
+    (*cloak)[i] = cloakValues[i]; 
+  }
+  setCloak(new CloakType(1, cloakValues[0]));
 }
 
 }

@@ -29,6 +29,7 @@
 
 #include "ShVariableNode.hpp"
 #include "ShCtrlGraph.hpp"
+#include "ShProgramNode.hpp"
 #include <map>
 
 namespace SH { 
@@ -41,6 +42,9 @@ struct ShVariableReplacer {
 
   // replaces variables in node based on varMap
   void operator()(ShCtrlGraphNodePtr node);
+
+  // replaces variables in a ShProgramNode::VarList based on varMap 
+  void operator()(ShProgramNode::VarList &varList);
 
   // replaces node in a single variable using varMap
   void repVar(ShVariable& var);

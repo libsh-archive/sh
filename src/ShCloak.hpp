@@ -59,6 +59,9 @@ class ShCloak: public ShRefCountable {
 
     // Copies components from other, applying swizzle as a write mask and
     // negating if neg = true
+    //
+    // @todo if other is not the same type as this, then it must be
+    // automatically castable (implement explicit cast?)
     virtual void set(ShPointer<const ShCloak> other) = 0;
     virtual void set(ShPointer<const ShCloak> other, int index) = 0;
     virtual void set(ShPointer<const ShCloak> other, bool neg, const ShSwizzle &writemask) = 0;
@@ -86,6 +89,8 @@ class ShDataCloak: public ShCloak {
     typedef ShPointer<const ShDataCloak<T> > CPtrType;
     typedef T DataType;
     typedef std::vector<DataType> DataVec;
+    typedef typename DataVec::iterator iterator;
+    typedef typename DataVec::const_iterator const_iterator;
 
     // Constructs a data holding wrapper and sets the value to a default value
     // (typically zero)
@@ -134,9 +139,21 @@ class ShDataCloak: public ShCloak {
     /// returns the value stored in this wrapper 
     const DataVec& data() const; 
 
+    iterator begin();
+    iterator end();
+
+    const_iterator begin() const;
+    const_iterator end() const;
+
     /// encodes the tuple values into a string
-    /// for now, the encoding cannot contain commas
+    /// for now, the encoding cannot contain the character '$' 
+    /// and the istream >> T function cannot read $'s
     std::string encode() const;
+    // TODO switch to fixed byte-length encodings so we don't
+    // need these whacky special characters 
+    //
+    // For now, make all encodings human-readable so they will
+    // still be useful if we switch to byte encodings
 
     /// deocdes values from a string (inverse of encode)
     // returns new size.  
@@ -144,18 +161,23 @@ class ShDataCloak: public ShCloak {
     int decode(std::string value);
     
   protected:
-    void updateTypeIndex(); 
     DataVec m_data; // actual data value
 };
 
-/*
+// utility functions
+template<typename T>
+ShPointer<ShDataCloak<T> > cloak_cast(ShCloakPtr c);
+
+template<typename T>
+ShPointer<const ShDataCloak<T> > cloak_cast(ShCloakCPtr c);
+
 #define SH_CLOAK_POINTER_TYPE(name, typeString) \
   typedef ShPointer<ShDataCloak<name> > Sh ## typeString ## CloakPtr; \
   typedef ShPointer<const ShDataCloak<name> > Sh ## typeString ## CloakCPtr;
 
-SH_CLOAK_POINTER_TYPE(double, Double);
-SH_CLOAK_POINTER_TYPE(float, Float);
-*/
+SH_CLOAK_POINTER_TYPE(double, d );
+SH_CLOAK_POINTER_TYPE(float, f );
+
 /*
 SH_CLOAK_POINTER_TYPE(int, "i");
 SH_CLOAK_POINTER_TYPE(short, "s");

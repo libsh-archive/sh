@@ -24,7 +24,9 @@ ShBackendCodePtr ArbCodeStrategy::generate(const std::string& target,
 {
   std::string::size_type loc = target.rfind(':');
   std::string unit = (loc == std::string::npos ? target : target.substr(loc + 1));
+  SH_DEBUG_PRINT("ArbCodeStrategy::generate1");
   ArbCodePtr code = new ArbCode(shader, unit, textures);
+  SH_DEBUG_PRINT("ArbCodeStrategy::generate2");
   code->generate();
   return code;
 }

@@ -46,7 +46,13 @@ public:
   void print(std::ostream& out, int indent) const;
   void graphvizDump(std::ostream& out) const;
   
+  /**@name Add statement at start.
+   * Adds the given statement after the statements in this block */
   void addStatement(const ShStatement& stmt);
+
+  /**@name Add statement at end.
+   * Adds the given statement before the statements in this block */
+  void prependStatement(const ShStatement& stmt);
 
   typedef std::list<ShStatement> ShStmtList;
 
@@ -59,12 +65,20 @@ public:
     return m_statements.erase(I);
   }
 
+  // Place all the elements of l before the iterator I and removes them
+  // from l
   void splice(ShStmtList::iterator I, ShStmtList &l) {
     m_statements.splice(I, l);
   }
+
+  // Places all the elements starting from lI in l before the iterator I and
+  // removes them from l
+  void splice(ShStmtList::iterator I, ShStmtList &l, ShStmtList::iterator lI) {
+    m_statements.splice(I, l, lI);
+  }
   
-private:
   ShStmtList m_statements;
+//private:
 };
 
 typedef ShPointer<ShBasicBlock> ShBasicBlockPtr;

@@ -66,21 +66,48 @@ public:
   typedef ShPointer<CloakType> CloakTypePtr;
   typedef ShPointer<const CloakType> CloakTypeCPtr;
 
+
   ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, bool neg);
   ~ShGeneric();
 
+  // This is needed because the templated assignment op is 
+  // non-default, hence C++ spec 12.8.10 says the default
+  // is implicitly defined.  Here that doesn't work so well. 
   ShGeneric& operator=(const ShGeneric& other);
+
+  template<typename T2>
+  ShGeneric& operator=(const ShGeneric<N, T2>& other);
   
-  ShGeneric& operator+=(const ShGeneric& right);
-  ShGeneric& operator-=(const ShGeneric& right);
-  ShGeneric& operator*=(const ShGeneric& right);
-  ShGeneric& operator/=(const ShGeneric& right);
-  ShGeneric& operator%=(const ShGeneric& right);
-  ShGeneric& operator+=(const ShGeneric<1, T>& right);
-  ShGeneric& operator-=(const ShGeneric<1, T>& right);
-  ShGeneric& operator*=(const ShGeneric<1, T>& right);
-  ShGeneric& operator/=(const ShGeneric<1, T>& right);
-  ShGeneric& operator%=(const ShGeneric<1, T>& right);
+  template<typename T2>
+  ShGeneric& operator+=(const ShGeneric<N, T2>& right);
+
+  template<typename T2>
+  ShGeneric& operator-=(const ShGeneric<N, T2>& right);
+
+  template<typename T2>
+  ShGeneric& operator*=(const ShGeneric<N, T2>& right);
+
+  template<typename T2>
+  ShGeneric& operator/=(const ShGeneric<N, T2>& right);
+
+  template<typename T2>
+  ShGeneric& operator%=(const ShGeneric<N, T2>& right);
+
+  template<typename T2>
+  ShGeneric& operator+=(const ShGeneric<1, T2>& right);
+
+  template<typename T2>
+  ShGeneric& operator-=(const ShGeneric<1, T2>& right);
+
+  template<typename T2>
+  ShGeneric& operator*=(const ShGeneric<1, T2>& right);
+
+  template<typename T2>
+  ShGeneric& operator/=(const ShGeneric<1, T2>& right);
+
+  template<typename T2>
+  ShGeneric& operator%=(const ShGeneric<1, T2>& right);
+
   ShGeneric& operator+=(T);
   ShGeneric& operator-=(T);
   ShGeneric& operator*=(T);
@@ -121,6 +148,7 @@ public:
 
 protected:
   ShGeneric(const ShVariableNodePtr& node);
+
 };
 
 template<typename T>
@@ -133,17 +161,32 @@ public:
   typedef ShPointer<CloakType> CloakTypePtr;
   typedef ShPointer<const CloakType> CloakTypeCPtr;
 
+
   ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, bool neg);
   ~ShGeneric();
 
-  ShGeneric& operator=(const ShGeneric& other);
+  ShGeneric& operator=(const ShGeneric<1, T>& other);
+
+  template<typename T2>
+  ShGeneric& operator=(const ShGeneric<1, T2>& other);
+
   ShGeneric& operator=(T);
   
-  ShGeneric& operator+=(const ShGeneric& right);
-  ShGeneric& operator-=(const ShGeneric& right);
-  ShGeneric& operator*=(const ShGeneric& right);
-  ShGeneric& operator/=(const ShGeneric& right);
-  ShGeneric& operator%=(const ShGeneric& right);
+  template<typename T2>
+  ShGeneric& operator+=(const ShGeneric<1, T2>& right);
+
+  template<typename T2>
+  ShGeneric& operator-=(const ShGeneric<1, T2>& right);
+
+  template<typename T2>
+  ShGeneric& operator*=(const ShGeneric<1, T2>& right);
+
+  template<typename T2>
+  ShGeneric& operator/=(const ShGeneric<1, T2>& right);
+
+  template<typename T2>
+  ShGeneric& operator%=(const ShGeneric<1, T2>& right);
+
   ShGeneric& operator+=(T);
   ShGeneric& operator-=(T);
   ShGeneric& operator*=(T);
@@ -183,6 +226,7 @@ public:
 
 protected:
   ShGeneric(const ShVariableNodePtr& node);
+
 };
 
 }

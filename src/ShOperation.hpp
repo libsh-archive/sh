@@ -58,6 +58,8 @@ enum ShOperation {
   SH_OP_ATAN2, ///< Binary arctan of src[1]/src[0] (result between -pi and pi)
   SH_OP_CEIL, ///< Unary smallest integer not less than src[0]
   SH_OP_COS, ///< Unary cosine function
+  SH_OP_CMUL, ///< Unary product of components
+  SH_OP_CSUM, ///< Unary sum of components
   SH_OP_DOT, ///< Binary dot product
   SH_OP_DX, ///< Unary derivative in x
   SH_OP_DY, ///< Unary derivative in y
@@ -97,13 +99,30 @@ enum ShOperation {
                 ///  code passed to the backend.
 
   SH_OP_FETCH, ///< Unary (takes a stream). Fetch an element from a stream. Similar to TEX
+
+  SH_OP_LO,  ///< Extracts a lower bound from a range arithmetic type
+  SH_OP_HI,  ///< Extracts an upper bound from a range arithmetic type
+  SH_OP_SETLO, ///< Sets a lower bound on an interval arithmetic type from a regular tuple
+  SH_OP_SETHI, ///< Sets an upper bound on an interval arithmetic type from a regular tuple
 };
 
 /** Information related to a specific operation */
-struct ShOperationInfo {
+struct
+ShOperationInfo {
   const char* name; ///< The operation's name, e.g. "ASN"
   int arity; ///< The arity of the operation. 1, 2 or 3.
+
+  enum ResultSource {
+    LINEAR,   // dest[i] depends only on src_j[i] for all 0 <= j < arity
+    ALL,      // dest[i] depends on all elements of src_j for all 0 <= j < arity
+    EXTERNAL, // Statement yields its results from an external source
+              // (e.g. TEX)
+    IGNORE   // Does not yield a result
+  } result_source;
+
+  bool commutative; ///< True if order of sources does not matter.
 };
+
 
 extern const ShOperationInfo opInfo[];
 

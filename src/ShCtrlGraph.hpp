@@ -85,6 +85,22 @@ public:
   void append(const ShPointer<ShCtrlGraphNode>& node,
               ShVariable cond);
 
+  /** Splits this control graph node into two nodes A, B, at the given statement.
+   * A is this, and keeps all predecessor information, 
+   * B is a new node that takes over all successor/follower
+   * B is NOT appended by default as a child of A 
+   *
+   * A contains a block with all the statements before the given iterator.
+   * B contains a block with all statements after and including the given iterator.
+   *
+   * This is useful for splicing in a control graph between A and B to replace 
+   * some statement (or TODO a sequence of statements)
+   *
+   * Returns B. 
+   */
+  ShPointer<ShCtrlGraphNode> 
+  split(ShBasicBlock::ShStmtList::iterator stmt);
+
   /// Whether this node has been "marked". Useful for mark and sweep
   /// type algorithms.
   bool marked() const;

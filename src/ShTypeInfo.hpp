@@ -34,14 +34,15 @@
 
 namespace SH {
 
-/// forward declaration of ShEval
-class ShEval;
+/// forward declarations 
 class ShCloakFactory;
 
 struct ShTypeInfo: ShRefCountable {
+  /** Returns a unique string representation for this type */
   virtual const char* name() const = 0;
+
+  /** Returns the factory that generates ShCloak objects of this type */
   virtual ShPointer<const ShCloakFactory> cloakFactory() = 0; 
-  virtual ShPointer<const ShEval> eval()= 0;
 };
 
 typedef ShPointer<ShTypeInfo> ShTypeInfoPtr;
@@ -49,13 +50,19 @@ typedef ShPointer<const ShTypeInfo> ShTypeInfoCPtr;
 
 // generic level
 template<typename T>
-struct ShConcreteTypeInfo: public ShTypeInfo  {
+struct ShConcreteTypeInfo: public ShTypeInfo {
   public:
     static const char* m_name; 
 
-    /// default boolean values to use for ops with boolean resoluts
-    static const T trueValue;
-    static const T falseValue;
+    /// default boolean values to use for ops with boolean results
+    static const T TrueVal;
+    static const T FalseVal;
+
+    /// default values for additive/multiplicative identities 
+    static const T ZERO;
+    static const T ONE;
+
+    ShConcreteTypeInfo();
 
     /// default range information
     // (0,1) by default
@@ -64,13 +71,36 @@ struct ShConcreteTypeInfo: public ShTypeInfo  {
 
     const char* name() const; 
     ShPointer<const ShCloakFactory> cloakFactory();
-    ShPointer<const ShEval> eval();
 
   protected:
     static ShPointer<ShCloakFactory> m_cloakFactory;
-    static ShPointer<ShEval> m_eval;
 };
 
+//default initialization (adds concrete type infos and creates 
+// eval providers for core Sh types
+void shTypeInfoInit(); 
+
+// Given a type T, returns ShConcreteTypeInfo<T>::TrueVal if the arg is true
+// ::FalseVal otherwise
+template<typename T>
+T shTypeInfoCond(bool cond);
+
+// Provides a least common ancestor in the type tree for 
+// a given pair of types in a typedef named type 
+template<typename T1, typename T2>
+struct ShCommonType; 
+
+template<typename T1, typename T2, typename T3>
+struct ShCommonType3 {
+  typedef typename ShCommonType<typename ShCommonType<T1, T2>::type, T3>::type type;
+};
+
+
+// TODO could make this into a tree traversal to reduce amount
+// of code when we hav 12+ base types
+//
+// But template metapgrogramming that might also lead to very
+// obfuscated code...
 
 }
 

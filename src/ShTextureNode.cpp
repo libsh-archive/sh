@@ -28,6 +28,7 @@
 #include "ShTextureNode.hpp"
 #include "ShEnvironment.hpp"
 #include "ShDebug.hpp"
+#include "ShGeneric.hpp"
 #include "ShAttrib.hpp"
 
 namespace SH {

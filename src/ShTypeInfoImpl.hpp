@@ -33,11 +33,19 @@
 
 namespace SH {
 
+// values that should usually work
+template<typename T> const T ShConcreteTypeInfo<T>::TrueVal = (T) 1;
+template<typename T> const T ShConcreteTypeInfo<T>::FalseVal = (T) 0;
+
+template<typename T> const T ShConcreteTypeInfo<T>::ZERO = (T) 0;
+template<typename T> const T ShConcreteTypeInfo<T>::ONE = (T) 1;
+
 template<typename T>
 ShPointer<ShCloakFactory> ShConcreteTypeInfo<T>::m_cloakFactory;   
 
 template<typename T>
-ShPointer<ShEval> ShConcreteTypeInfo<T>::m_eval;   
+ShConcreteTypeInfo<T>::ShConcreteTypeInfo()
+{}
 
 template<typename T>
 T ShConcreteTypeInfo<T>::defaultLo(ShSemanticType type)
@@ -75,13 +83,59 @@ ShCloakFactoryCPtr ShConcreteTypeInfo<T>::cloakFactory()
 }
 
 template<typename T>
-ShEvalCPtr ShConcreteTypeInfo<T>::eval() 
+T shTypeInfoCond(bool cond) 
 {
-  if(!m_eval) {
-    m_eval = new ShDataEval<T>();
-  }
-  return m_eval;
+  return cond ? ShConcreteTypeInfo<T>::TrueVal : ShConcreteTypeInfo<T>::FalseVal;
 }
+
+// Type precedence information 
+// 
+// currently available types:
+// float, double, int, ShInterval<double>, ShInterval<float>
+template<typename T> 
+struct ShCommonType<T, T> { typedef T type; };
+
+// @todo type this shouldn't really be just *any* T
+template<typename T> 
+struct ShCommonType<ShInterval<double>, T> { typedef ShInterval<double> type; };
+
+template<typename T> 
+struct ShCommonType<T, ShInterval<double> > { typedef ShInterval<double> type; };
+
+template<> struct ShCommonType<ShInterval<float>, double> { typedef ShInterval<double> type; };
+template<> struct ShCommonType<ShInterval<float>, float> { typedef ShInterval<float> type; };
+template<> struct ShCommonType<ShInterval<float>, int> { typedef ShInterval<float> type; };
+template<> struct ShCommonType<ShInterval<float>, short> { typedef ShInterval<float> type; };
+template<> struct ShCommonType<ShInterval<float>, char> { typedef ShInterval<float> type; };
+template<> struct ShCommonType<double, ShInterval<float> > { typedef ShInterval<double> type; };
+template<> struct ShCommonType<float, ShInterval<float> > { typedef ShInterval<float> type; };
+template<> struct ShCommonType<int, ShInterval<float> > { typedef ShInterval<float> type; };
+template<> struct ShCommonType<short, ShInterval<float> > { typedef ShInterval<float> type; };
+template<> struct ShCommonType<char, ShInterval<float> > { typedef ShInterval<float> type; };
+
+template<> struct ShCommonType<double, float> { typedef double type; };
+template<> struct ShCommonType<double, int> { typedef double type; };
+template<> struct ShCommonType<double, short> { typedef double type; };
+template<> struct ShCommonType<double, char> { typedef double type; };
+template<> struct ShCommonType<float, double> { typedef double type; };
+template<> struct ShCommonType<int, double> { typedef double type; };
+template<> struct ShCommonType<short, double> { typedef double type; };
+template<> struct ShCommonType<char, double> { typedef double type; };
+
+template<> struct ShCommonType<float, int> { typedef float type; };
+template<> struct ShCommonType<float, short> { typedef float type; };
+template<> struct ShCommonType<float, char> { typedef float type; };
+template<> struct ShCommonType<int, float> { typedef float type; };
+template<> struct ShCommonType<short, float> { typedef float type; };
+template<> struct ShCommonType<char, float> { typedef float type; };
+
+template<> struct ShCommonType<int, short> { typedef int type; };
+template<> struct ShCommonType<int, char> { typedef int type; };
+template<> struct ShCommonType<short, int> { typedef int type; };
+template<> struct ShCommonType<char, int> { typedef int type; };
+
+template<> struct ShCommonType<short, char> { typedef short type; };
+template<> struct ShCommonType<char, short> { typedef short type; };
 
 }
 

@@ -30,10 +30,12 @@
 namespace SH { 
 
 ShVariableReplacer::ShVariableReplacer(ShVarMap& v)
-  : varMap(v) {
+  : varMap(v) 
+{
 }
 
-void ShVariableReplacer::operator()(ShCtrlGraphNodePtr node) {
+void ShVariableReplacer::operator()(ShCtrlGraphNodePtr node) 
+{
   if (!node) return;
   ShBasicBlockPtr block = node->block;
   if (!block) return;
@@ -45,7 +47,19 @@ void ShVariableReplacer::operator()(ShCtrlGraphNodePtr node) {
   }
 }
 
-void ShVariableReplacer::repVar(ShVariable& var) {
+void ShVariableReplacer::operator()(ShProgramNode::VarList &varList) 
+{
+  ShProgramNode::VarList::iterator I;
+  for(I = varList.begin(); I != varList.end();) {
+    if(varMap.count(*I) > 0) {
+      varList.insert(I, varMap[*I]);
+      I = varList.erase(I);
+    } else ++I;
+  }
+}
+
+void ShVariableReplacer::repVar(ShVariable& var) 
+{
   ShVarMap::iterator I = varMap.find(var.node());
   if (I == varMap.end()) return;
   var = ShVariable(I->second, var.swizzle(), var.neg());

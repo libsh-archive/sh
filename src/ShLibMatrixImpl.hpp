@@ -19,15 +19,16 @@ transpose(const ShMatrix<Rows, Cols, Binding, T>& m)
   return result;
 }
 
-template<int M, int N, int P, ShBindingType Binding, ShBindingType Binding2, typename T>
+template<int M, int N, int P, ShBindingType Binding, ShBindingType Binding2, 
+  typename T1, typename T2>
 inline
-ShMatrix<M, P, SH_TEMP, T>
-operator|(const ShMatrix<M, N, Binding, T>& a,
-          const ShMatrix<N, P, Binding2, T>& b)
+ShMatrix<M, P, SH_TEMP, CT1T2>
+operator|(const ShMatrix<M, N, Binding, T1>& a,
+          const ShMatrix<N, P, Binding2, T2>& b)
 {
-  ShMatrix<P, N, SH_TEMP, T> tb = transpose(b);
+  ShMatrix<P, N, SH_TEMP, T2> tb = transpose(b);
 
-  ShMatrix<M, P, SH_TEMP, T> result;
+  ShMatrix<M, P, SH_TEMP, CT1T2> result;
   for (int i = 0; i < M; i++) {
     for (int j = 0; j < P; j++) {
       result[i][j] = dot(a[i], tb[j]);
@@ -36,11 +37,12 @@ operator|(const ShMatrix<M, N, Binding, T>& a,
   return result;
 }
 
-template<int M, int N, ShBindingType Binding, typename T>
+template<int M, int N, ShBindingType Binding, typename T1, typename T2>
 inline
-ShGeneric<M, T> operator|(const ShMatrix<M, N, Binding, T>& a, const ShGeneric<N, T>& b)
+ShGeneric<M, CT1T2> operator|(const ShMatrix<M, N, Binding, T1>& a, 
+    const ShGeneric<N, T2>& b)
 {
-  ShAttrib<M, SH_TEMP, T> ret;
+  ShAttrib<M, SH_TEMP, CT1T2> ret;
   for (int i = 0; i < M; i++) {
     ret[i] = dot(a[i], b);
   }

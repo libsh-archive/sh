@@ -49,13 +49,13 @@ ShGeneric<M, float> fillcast(float a)
   return fillcast<M>(ShAttrib<1, SH_CONST, float>(a));
 }
 
-template<int M, int N, typename T> 
+template<int M, int N, typename T1, typename T2> 
 inline
-ShGeneric<M+N, T> join(const ShGeneric<M, T>& a, const ShGeneric<N, T>& b)
+ShGeneric<M+N, CT1T2> join(const ShGeneric<M, T1>& a, const ShGeneric<N, T2>& b)
 {
   int indices[M+N];
   for(int i = 0; i < M+N; ++i) indices[i] = i; 
-  ShAttrib<M+N, SH_TEMP, T> result;
+  ShAttrib<M+N, SH_TEMP, CT1T2> result;
   result.template swiz<M>(indices) = a;
   result.template swiz<N>(indices + M) = b;
   return result;

@@ -28,17 +28,19 @@ transpose(const ShMatrix<Rows, Cols, Binding, T>& m);
  * Only works on matrices of compatible sizes.
  * @todo should also define * and mmult to mean the same thing.
  */
-template<int M, int N, int P, ShBindingType Binding, ShBindingType Binding2, typename T>
-ShMatrix<M, P, SH_TEMP, T>
-operator|(const ShMatrix<M, N, Binding, T>& a,
-          const ShMatrix<N, P, Binding2, T>& b);
+template<int M, int N, int P, ShBindingType Binding, ShBindingType Binding2, 
+  typename T1, typename T2>
+ShMatrix<M, P, SH_TEMP, CT1T2>
+operator|(const ShMatrix<M, N, Binding, T1>& a,
+          const ShMatrix<N, P, Binding2, T2>& b);
 
 /** Matrix-tuple multiplication.
  * Treats the tuple as a column vector.
  * @todo should also define * and mmult to mean the same thing.
  */
-template<int M, int N, ShBindingType Binding, typename T>
-ShGeneric<M, T> operator|(const ShMatrix<M, N, Binding, T>& a, const ShGeneric<N, T>& b);
+template<int M, int N, ShBindingType Binding, typename T1, typename T2>
+ShGeneric<M, CT1T2> 
+operator|(const ShMatrix<M, N, Binding, T1>& a, const ShGeneric<N, T2>& b);
 
 /*@}*/
 

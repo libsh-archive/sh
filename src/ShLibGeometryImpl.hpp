@@ -7,18 +7,18 @@
 
 namespace SH {
 
-template<typename T>
+template<typename T1, typename T2>
 inline
-ShGeneric<3, T> cross(const ShGeneric<3, T>& left, const ShGeneric<3, T>& right)
+ShGeneric<3, CT1T2> cross(const ShGeneric<3, T1>& left, const ShGeneric<3, T2>& right)
 {
-  ShAttrib<3, SH_TEMP, T> t;
+  ShAttrib<3, SH_TEMP, CT1T2> t;
   shXPD(t, left, right);
   return t;
 }
 
-template<typename T>
+template<typename T1, typename T2>
 inline
-ShGeneric<3, T> operator^(const ShGeneric<3, T>& left, const ShGeneric<3, T>& right)
+ShGeneric<3, CT1T2> operator^(const ShGeneric<3, T1>& left, const ShGeneric<3, T2>& right)
 {
   return cross(left, right);
 }
@@ -32,60 +32,60 @@ ShGeneric<N, T> normalize(const ShGeneric<N, T>& var)
   return t;
 }
 
-template<int N, typename T>
+template<int N, typename T1, typename T2>
 inline
-ShGeneric<1,  T> dot(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
+ShGeneric<1, CT1T2> dot(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
 {
-  ShAttrib<1, SH_TEMP, T> t;
+  ShAttrib<1, SH_TEMP, CT1T2> t;
   shDOT(t, left, right);
   return t;
 }
 
-template<int N, typename T>
+template<int N, typename T1, typename T2>
 inline
-ShGeneric<1,  T> operator|(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right)
+ShGeneric<1,  CT1T2> operator|(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
 {
   return dot(left, right);
 }
 
-template<int N, typename T>
+template<int N, typename T1, typename T2>
 inline
-ShGeneric<N, T> reflect(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
+ShGeneric<N, CT1T2> reflect(const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b)
 {
-  ShGeneric<N, T> bn = normalize(b);
-  return 2.0 * dot(a, b) * b - a;
+  ShGeneric<N, T2> bn = normalize(b);
+  return 2 * dot(a, b) * b - a;
 }
 
-template<int N, typename T>
-ShGeneric<N, T> refract(const ShGeneric<N, T>& v, const ShGeneric<N, T>& n,
-                        const ShGeneric<1, T>& theta)
+template<int N, typename T1, typename T2, typename T3>
+ShGeneric<N, CT1T2T3> refract(const ShGeneric<N, T1>& v, const ShGeneric<N, T2>& n,
+                        const ShGeneric<1, T3>& theta)
 {
-  ShGeneric<N, T> vn = normalize(v);
-  ShGeneric<N, T> nn = normalize(n);
-  ShAttrib1f c = (vn|nn);
-  ShAttrib1f k = c*c - 1.0f;
-  k = 1.0f + theta*theta*k;
-  k = clamp(k, 0.0f, 1.0f);
-  ShAttrib1f a = theta;
-  ShAttrib1f b = theta*c + sqrt(k);
+  ShGeneric<N, T1> vn = normalize(v);
+  ShGeneric<N, T2> nn = normalize(n);
+  ShGeneric<1, CT1T2T3> c = (vn|nn);
+  ShGeneric<1, CT1T2T3> k = c*c - 1;
+  k = 1 + theta*theta*k;
+  k = clamp(k, 0, 1); 
+  ShGeneric<1, CT1T2T3> a = theta;
+  ShGeneric<1, CT1T2T3> b = theta*c + sqrt(k);
   return (a*vn + b*nn);
 }
 
-template<int N, typename T>
+template<int N, typename T1, typename T2>
 inline
-ShGeneric<N, T> faceforward(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
+ShGeneric<N, CT1T2> faceforward(const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b)
 {
-  return (2.0 * (dot(a, b) > 0.0) - 1.0) * b;
+  return (2 * (dot(a, b) > 0) - 1) * b;
 }
 
-template<typename T>
+template<typename T1, typename T2, typename T3>
 inline
-ShGeneric<4, T> lit(const ShGeneric<1, T>& a,
-                    const ShGeneric<1, T>& b,
-                    const ShGeneric<1, T>& c)
+ShGeneric<4, CT1T2T3> lit(const ShGeneric<1, T1>& a,
+                          const ShGeneric<1, T2>& b,
+                          const ShGeneric<1, T3>& c)
 {
-  ShAttrib<4, SH_TEMP, T> r;
-  r(0,3) = ShConstAttrib2f(1.0, 1.0);
+  ShAttrib<4, SH_TEMP, CT1T2T3> r;
+  r(0,3) = ShAttrib<2, SH_CONST, CT1T2T3>(1, 1);
   r(1) = pos(a);
   r(2) = (a < 0 && b < 0) * pow(b, c);
   return r;

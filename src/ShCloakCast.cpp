@@ -24,32 +24,11 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHSTMTDATA_HPP
-#define SHSTMTDATA_HPP
-
-#include "ShRefCount.hpp"
+#include "ShCloakCast.hpp"
 
 namespace SH {
 
-struct ShStmtData: public ShRefCountable {
-  virtual ~ShStmtData();
-}; 
-typedef ShPointer<ShStmtData > ShStmtDataPtr;
-typedef ShPointer<const ShStmtData > ShStmtDataCPtr;
-
-// denotes the type used to compute the statement
-struct ShStmtTypeData: public ShStmtData {
-  ShStmtTypeData(int typeIndex);
-  int typeIndex() const;
-  int& typeIndex();
-
-  private:
-    int m_typeIndex;
-};
-typedef ShPointer<ShStmtTypeData> ShStmtTypeDataPtr;
-typedef ShPointer<const ShStmtTypeData> ShStmtTypeDataCPtr;
-
+ShCloakCast::~ShCloakCast()
+{}
 
 }
-
-#endif

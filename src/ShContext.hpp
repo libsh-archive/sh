@@ -70,6 +70,10 @@ public:
   /// Generates a unique number the first time a type is passed to this function.
   int type_index(const std::string &typeName) const;
 
+  /// Returns number of types currently registered.
+  // All type indices lie in the range [1, result]
+  int num_types() const;
+
   ShPointer<ShTypeInfo> type_info(int typeIndex) const;
 
   /// utility function to add a ShTypeInfo object to the two maps

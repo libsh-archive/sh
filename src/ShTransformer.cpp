@@ -497,52 +497,5 @@ void ShTransformer::convertTextureLookups()
 }
 
 
-struct FloatConverter {
-  FloatConverter(ShVarMap &converts)
-    : m_converts(converts)
-  {
-    m_floatTypeIndex = ShContext::current()->type_index("float");
-  }
-
-  void operator()(ShCtrlGraphNodePtr node) {
-    if (!node) return;
-    ShBasicBlockPtr block = node->block;
-    if (!block) return;
-    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-      convert(*I);
-    }
-  }
-
-  void convert(ShStatement &stmt) {
-    if(stmt.dest.node()) convert(stmt.dest.node()); 
-    for(int i = 0; i < 3; ++i) if(stmt.src[i].node()) convert(stmt.src[i].node()); 
-    // TODO improve this stupidity when other types arrive
-  }
-
-  void convert(const ShVariableNodePtr &p) {
-    if(p->typeIndex() != m_floatTypeIndex && m_converts.count(p) == 0) {
-      m_converts[p] = p->clone(m_floatTypeIndex);
-      // TODO this only works for doubles! fix this!
-    }
-  }
-
-
-  int m_floatTypeIndex;
-  ShVarMap &m_converts;
-};
-
-void ShTransformer::convertToFloat(ShVarMap &converts)
-{
-  FloatConverter floatconv(converts);
-  m_program->ctrlGraph->dfs(floatconv);
-
-  ShVariableReplacer vr(converts);
-  m_program->ctrlGraph->dfs(vr);
-
-  // TODO fix the input/output lists
-
-  if(!converts.empty()) m_changed = true;
-}
-
 }
 

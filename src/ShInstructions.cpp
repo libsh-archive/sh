@@ -67,10 +67,10 @@ void sh ## op(ShVariable& dest, const ShVariable& src)\
 {\
   sizes_match(dest, src);\
   if(immediate()) {\
+    SH_DEBUG_PRINT(__FILE__ << ":" << __LINE__); \
     has_values(dest, src);\
-    ShEvalCPtr cloakEval(ShContext::current()->type_info(dest.typeIndex())->eval());\
     ShCloakPtr result = dest.cloak();\
-    cloakEval->unaryOp(SH_OP_ ## op, result, src.cloak());\
+    (*ShEval::instance())(SH_OP_ ## op, result, src.cloak(), 0, 0);\
     dest.setCloak(result);\
   } else {\
     ShStatement stmt(dest, SH_OP_ ## op, src);\
@@ -81,9 +81,8 @@ void sh ## op(ShVariable& dest, const ShVariable& src)\
 #define SHINST_BINARY_OP_CORE(op)\
   if(immediate()) {\
     has_values(dest, a, b);\
-    ShEvalCPtr cloakEval(ShContext::current()->type_info(dest.typeIndex())->eval());\
     ShCloakPtr result = dest.cloak();\
-    cloakEval->binaryOp(SH_OP_ ## op, result, a.cloak(), b.cloak());\
+    (*ShEval::instance())(SH_OP_ ## op, result, a.cloak(), b.cloak(), 0);\
     dest.setCloak(result);\
   } else {\
     ShStatement stmt(dest, a, SH_OP_ ## op, b);\
@@ -104,16 +103,14 @@ void sh ## op(ShVariable& dest, const ShVariable& a, const ShVariable &b, const 
   SH_DEBUG_ASSERT(condition);\
   if(immediate()) {\
     has_values(dest, a, b, c);\
-    ShEvalCPtr cloakEval(ShContext::current()->type_info(dest.typeIndex())->eval());\
     ShCloakPtr result = dest.cloak();\
-    cloakEval->ternaryOp(SH_OP_ ## op, result, a.cloak(), b.cloak(), c.cloak());\
+    (*ShEval::instance())(SH_OP_ ## op, result, a.cloak(), b.cloak(), c.cloak());\
     dest.setCloak(result);\
   } else {\
     ShStatement stmt(dest, SH_OP_ ## op, a, b, c);\
     addStatement(stmt);\
   }\
 }
-
 
 // TODO 
 // intelligent type selection for operators
@@ -147,8 +144,25 @@ void shDOT(ShVariable& dest, const ShVariable& a, const ShVariable& b)
   SHINST_BINARY_OP_CORE(DOT);
 }
 
-SHINST_UNARY_OP(DX);
-SHINST_UNARY_OP(DY);
+void shDX(ShVariable &dest, const ShVariable& a)
+{
+  if(immediate()) {
+      shError(ShScopeException("Cannot take derivatives in immediate mode"));
+  }
+  ShStatement stmt(dest, SH_OP_DX, a);
+  addStatement(stmt);
+}
+
+void shDY(ShVariable &dest, const ShVariable& a)
+{
+  if(immediate()) {
+      shError(ShScopeException("Cannot take derivatives in immediate mode"));
+  }
+  SH_DEBUG_ASSERT(!immediate());
+  ShStatement stmt(dest, SH_OP_DY, a);
+  addStatement(stmt);
+}
+
 SHINST_UNARY_OP(EXP);
 SHINST_UNARY_OP(EXP2);
 SHINST_UNARY_OP(EXP10);
@@ -192,8 +206,67 @@ SHINST_TERNARY_OP(COND,
     dest.size() == c.size() &&
     (dest.size() == a.size() || a.size() == 1)));
 
+void shLO(ShVariable& dest, const ShVariable& src)
+{
+  sizes_match(dest, src); // TODO check types are okay
+  if(immediate()) {
+    has_values(dest, src);
+    ShCloakPtr result = dest.cloak();
+    (*ShEval::instance())(SH_OP_LO, result, src.cloak(), 0, 0);
+    dest.setCloak(result);
+  } else {
+    ShStatement stmt(dest, SH_OP_LO, src);
+    addStatement(stmt);
+  }
+}
+
+void shHI(ShVariable& dest, const ShVariable& src)
+{
+  sizes_match(dest, src); // TODO check types are okay
+  if(immediate()) {
+    has_values(dest, src);
+    ShCloakPtr result = dest.cloak();
+    (*ShEval::instance())(SH_OP_LO, result, src.cloak(), 0, 0);
+    dest.setCloak(result);
+  } else {
+    ShStatement stmt(dest, SH_OP_LO, src);
+    addStatement(stmt);
+  }
+}
+
+void shSETLO(ShVariable& dest, const ShVariable& src)
+{
+  sizes_match(dest, src); // TODO check types are okay
+  if(immediate()) {
+    has_values(dest, src);
+    ShCloakPtr result = dest.cloak();
+    (*ShEval::instance())(SH_OP_LO, result, src.cloak(), 0, 0);
+    dest.setCloak(result);
+  } else {
+    ShStatement stmt(dest, SH_OP_LO, src);
+    addStatement(stmt);
+  }
+}
+
+void shSETHI(ShVariable& dest, const ShVariable& src)
+{
+  sizes_match(dest, src); // TODO check types are okay
+  if(immediate()) {
+    has_values(dest, src);
+    ShCloakPtr result = dest.cloak();
+    (*ShEval::instance())(SH_OP_LO, result, src.cloak(), 0, 0);
+    dest.setCloak(result);
+  } else {
+    ShStatement stmt(dest, SH_OP_LO, src);
+    addStatement(stmt);
+  }
+}
+
 void shKIL(const ShVariable& a)
 {
+  if(immediate()) {
+      shError(ShScopeException("Cannot kill in immediate mode"));
+  }
   SH_DEBUG_ASSERT(!immediate());
   ShStatement stmt(a, SH_OP_KIL, a);
   addStatement(stmt);

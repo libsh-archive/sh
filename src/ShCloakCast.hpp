@@ -24,24 +24,38 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#include <iostream>
-#include "ShStmtData.hpp"
+#ifndef SHCLOAKCAST_HPP
+#define SHCLOAKCAST_HPP
+
+#include "ShRefCount.hpp"
 
 namespace SH {
-ShStmtData::~ShStmtData() {}
 
-ShStmtTypeData::ShStmtTypeData(int typeIndex)
-  : m_typeIndex(typeIndex) {}
+class ShCloak;
+struct ShCloakCast: public ShRefCountable {
+  public:
+    virtual ~ShCloakCast();
 
-int ShStmtTypeData::typeIndex() const 
-{
-  return m_typeIndex;
+    virtual ShPointer<ShCloak> operator()(ShPointer<ShCloak> value) const = 0;
+    virtual ShPointer<const ShCloak> operator()(
+        ShPointer<const ShCloak> value) const = 0;
+};
+
+typedef ShPointer<ShCloakCast> ShCloakCastPtr;
+typedef ShPointer<const ShCloakCast> ShCloakCastCPtr;
+
+template<typename DEST, typename SRC>
+struct ShDataCloakCast: public ShCloakCast {
+  public:
+    ShPointer<ShCloak> operator()(ShPointer<ShCloak> value) const;
+    ShPointer<const ShCloak> operator()(ShPointer<const ShCloak> value) const;
+
+    void doCast(DEST &dest, const SRC &src) const;
+};
+
+
 }
 
-int& ShStmtTypeData::typeIndex() 
-{
-  return m_typeIndex;
-}
+#include "ShCloakCastImpl.hpp"
 
-} // namespace SH
-
+#endif

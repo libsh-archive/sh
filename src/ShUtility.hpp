@@ -73,6 +73,17 @@ struct SelectType<false, T1, T2> {
   typedef T2 type;
 };
 
+/// MatchType::matches = (T1 == T2)
+template<typename T1, typename T2>
+struct MatchType {
+  static const bool matches = false; 
+};
+
+template<typename T>
+struct MatchType<T, T> {
+  static const bool matches = true; 
+};
+
 }
 
 #endif

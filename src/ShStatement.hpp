@@ -32,9 +32,28 @@
 #include <list>
 #include "ShOperation.hpp"
 #include "ShVariable.hpp"
-#include "ShStmtData.hpp"
 
 namespace SH {
+
+#ifdef IGNORE
+#undef IGNORE
+#endif
+
+
+/** Dummy class representing additional information that can be stored
+ *  in statements.
+ */
+class 
+ShStatementInfo {
+public:
+  virtual ~ShStatementInfo();
+
+  virtual ShStatementInfo* clone() const = 0;
+  
+protected:
+  ShStatementInfo();
+
+};
 
 /** A single statement.
  * Represent a statement of the form 
@@ -44,47 +63,80 @@ namespace SH {
  * or, for op == SH_OP_ASN:
  * <pre>dest := src[0]</pre>
  */
-class ShStatement {
+class
+ShStatement {
 public:
   ShStatement(ShVariable dest, ShOperation op);
   ShStatement(ShVariable dest, ShOperation op, ShVariable src);
   ShStatement(ShVariable dest, ShVariable src0, ShOperation op, ShVariable src1);
   ShStatement(ShVariable dest, ShOperation op, ShVariable src0, ShVariable src1, ShVariable src2);
+  ShStatement(const ShStatement& other);
+  
+  ~ShStatement();
 
-  // retrieves statement data of the given class (T must be a ShStmtDataPtr)
-  // Assumes that there is a unique matching element in the list
-  // or returns 0 if there is no matching element
-  template<typename T>
-  T data(); 
+  ShStatement& operator=(const ShStatement& other);
+  
   
   ShVariable dest;
   ShVariable src[3];
   
   ShOperation op;
 
+  // Used by the optimizer and anything else that needs to store extra
+  // information in statements.
+  // Anything in here will be deleted when this statement is deleted.
+  std::list<ShStatementInfo*> info;
 
   // The following are used for the optimizer.
   
   std::set<ShStatement*> ud[3];
   std::set<ShStatement*> du;
 
+  // Return the first entry in info whose type matches T, or 0 if no
+  // such entry exists.
+  template<typename T>
+  T* get_info();
 
+  // Delete and remove all info entries matching the given type.
+  template<typename T>
+  void destroy_info();
+
+  // Add the given statement information to the end of the info list.
+  void add_info(ShStatementInfo* new_info);
+
+  // Remove the given statement information from the list.
+  // Does not delete it, so be careful!
+  void remove_info(ShStatementInfo* old_info);
+  
   bool marked;
-
-protected:
-  std::list<ShStmtDataPtr> m_data;
 };
 
 std::ostream& operator<<(std::ostream& out, const SH::ShStatement& stmt);
 
 template<typename T>
-T ShStatement::data()
+T* ShStatement::get_info()
 {
-  T result;
-  for(std::list<ShStmtDataPtr>::iterator I = m_data.begin(); I != m_data.end(); ++I) {
-    if((result = dynamic_cast<T>(*I))) return result; 
+  for (std::list<ShStatementInfo*>::iterator I = info.begin(); I != info.end(); ++I) {
+    T* item = dynamic_cast<T*>(*I);
+    if (item) {
+      return item;
+    }
   }
   return 0;
+}
+
+template<typename T>
+void ShStatement::destroy_info()
+{
+  for (std::list<ShStatementInfo*>::iterator I = info.begin(); I != info.end();) {
+    T* item = dynamic_cast<T*>(*I);
+    if (item) {
+      I = info.erase(I);
+      delete item;
+    } else {
+      ++I;
+    }
+  }
 }
 
 } // namespace SH

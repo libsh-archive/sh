@@ -4,6 +4,7 @@
 #include "ShDebug.hpp"
 #include "ShError.hpp"
 #include "ShAttrib.hpp"
+#include "ShContext.hpp"
 
 namespace shgl {
 
@@ -228,7 +229,7 @@ void ArbCode::emit(const ShStatement& stmt)
 
 void ArbCode::emit_div(const ShStatement& stmt)
 {
-  // TODO all these new ShVariableNodes should probably handle other types
+  // @todo type should handle other types (half-floats, fixed point)
   ShVariable rcp(new ShVariableNode(SH_TEMP, 1, shTypeIndex<float>()));
   m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp, stmt.src[1]));
   m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0], rcp));
@@ -492,7 +493,7 @@ void ArbCode::emit_tex(const ShStatement& stmt)
   ShVariable tmpsrc;
   
   if (!stmt.dest.swizzle().identity()) {
-    tmpdest = ShVariable(new ShVariableNode(SH_TEMP, 4));
+    tmpdest = ShVariable(new ShVariableNode(SH_TEMP, 4, shTypeIndex<float>()));
     tmpsrc = tmpdest;
     delay = true;
   }
@@ -504,7 +505,7 @@ void ArbCode::emit_tex(const ShStatement& stmt)
   if (tnode->size() == 2) {
     // Special case for LUMINANCE_ALPHA
     if (!delay) {
-      tmpdest = ShVariable(new ShVariableNode(SH_TEMP, 4));
+      tmpdest = ShVariable(new ShVariableNode(SH_TEMP, 4, shTypeIndex<float>()));
       tmpsrc = tmpdest;
     }
     tmpsrc = tmpsrc(0,3);
@@ -519,7 +520,7 @@ void ArbCode::emit_tex(const ShStatement& stmt)
 void ArbCode::emit_nvcond(const ShStatement& stmt)
 {
 
-  ShVariable dummy(new ShVariableNode(SH_TEMP, stmt.src[0].size()));
+  ShVariable dummy(new ShVariableNode(SH_TEMP, stmt.src[0].size(), shTypeIndex<float>()));
   ArbInst updatecc(SH_ARB_MOV, dummy, stmt.src[0]);
   updatecc.update_cc = true;
   m_instructions.push_back(updatecc);

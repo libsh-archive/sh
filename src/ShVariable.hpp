@@ -58,7 +58,7 @@ public:
   int size() const; ///< Get the number of elements in this variable,
                     /// after swizzling.
                     
-  int typeIndex() const; ///< Returns index of the data type held in this node 
+  int typeIndex() const; ///< Returns index of the data type held in this node, or 0 if no node. 
 
   /**@name Metadata
    * This data is useful for various things, including asset

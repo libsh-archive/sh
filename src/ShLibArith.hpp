@@ -15,14 +15,14 @@ namespace SH {
  * On tuples, this operator acts componentwise.
  * @todo scalar promotion.
  */
-template<int N, typename T>
-ShGeneric<N, T> operator+(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> operator+(const ShGeneric<1, T>& left, const ShGeneric<N, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> operator+(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
-template<typename T>
-ShGeneric<1, T> operator+(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator+(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator+(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator+(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right);
+template<typename T1, typename T2>
+ShGeneric<1, CT1T2> operator+(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right);
 SH_SHLIB_CONST_SCALAR_OP(operator+);
 SH_SHLIB_CONST_N_OP_BOTH(operator+);
 
@@ -30,14 +30,14 @@ SH_SHLIB_CONST_N_OP_BOTH(operator+);
  * On tuples, this operator acts componentwise.
  * @todo scalar promotion.
  */
-template<int N, typename T>
-ShGeneric<N, T> operator-(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> operator-(const ShGeneric<1, T>& left, const ShGeneric<N, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> operator-(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
-template<typename T>
-ShGeneric<1, T> operator-(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator-(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator-(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator-(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right);
+template<typename T1, typename T2>
+ShGeneric<1, CT1T2> operator-(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right);
 SH_SHLIB_CONST_SCALAR_OP(operator-);
 SH_SHLIB_CONST_N_OP_BOTH(operator-);
 
@@ -46,14 +46,14 @@ SH_SHLIB_CONST_N_OP_BOTH(operator-);
  * If a scalar is multiplied by a tuple, the scalar is promoted by
  * duplication to a tuple.
  */
-template<int N, typename T>
-ShGeneric<N, T> operator*(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> operator*(const ShGeneric<1, T>& left, const ShGeneric<N, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> operator*(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
-template<typename T>
-ShGeneric<1, T> operator*(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator*(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator*(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator*(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right);
+template<typename T1, typename T2>
+ShGeneric<1, CT1T2> operator*(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right);
 SH_SHLIB_CONST_SCALAR_OP(operator*);
 SH_SHLIB_CONST_N_OP_BOTH(operator*);
 
@@ -62,14 +62,14 @@ SH_SHLIB_CONST_N_OP_BOTH(operator*);
  * If a tuple is divided by a scalar (or vice versa), the scalar is promoted by
  * duplication to a tuple.
  */
-template<int N, typename T>
-ShGeneric<N, T> operator/(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> operator/(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> operator/(const ShGeneric<1, T>& left, const ShGeneric<N, T>& right);
-template<typename T>
-ShGeneric<1, T> operator/(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator/(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator/(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator/(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right);
+template<typename T1, typename T2>
+ShGeneric<1, CT1T2> operator/(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right);
 SH_SHLIB_CONST_SCALAR_OP(operator/);
 SH_SHLIB_CONST_N_OP_LEFT(operator/);
 
@@ -120,12 +120,14 @@ ShGeneric<N, T> log(const ShGeneric<N, T>& var);
  * Raise a tuple to a power.
  * @todo scalar promotion.
  */
-template<int N, typename T>
-ShGeneric<N, T> pow(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> pow(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
-template<typename T>
-ShGeneric<1, T> pow(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
+template<int N, typename T1, typename T2, typename T3>
+ShGeneric<N, CT1T2>
+pow(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right);
+template<int N, typename T1, typename T2, typename T3>
+ShGeneric<N, CT1T2>
+pow(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right);
+template<typename T1, typename T2, typename T3>
+ShGeneric<1, CT1T2> pow(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right);
 
 SH_SHLIB_CONST_SCALAR_OP(pow);
 SH_SHLIB_CONST_N_OP_RIGHT(pow);
@@ -135,27 +137,30 @@ SH_SHLIB_CONST_N_OP_RIGHT(pow);
  * Multiply-add is potentially cheaper than a separate multiply and
  * add.  Note: potentially.
  */
-template<int N, typename T>
-ShGeneric<N, T> mad(const ShGeneric<N, T>& m1, const ShGeneric<N, T>& m2, 
-                    const ShGeneric<N, T>& a);
-template<int N, typename T>
-ShGeneric<N, T> mad(const ShGeneric<N, T>& m1, const ShGeneric<1, T>& m2, 
-                    const ShGeneric<N, T>& a);
-template<int N, typename T>
-ShGeneric<N, T> mad(const ShGeneric<1, T>& m1, const ShGeneric<N, T>& m2, 
-                    const ShGeneric<N, T>& a);
-template<typename T>
-ShGeneric<1, T> mad(const ShGeneric<1, T>& m1, const ShGeneric<1, T>& m2, 
-                    const ShGeneric<1, T>& a);
+template<int N, typename T1, typename T2, typename T3>
+ShGeneric<N, CT1T2T3>
+mad(const ShGeneric<N, T1>& m1, const ShGeneric<N, T2>& m2, 
+                    const ShGeneric<N, T3>& a);
+template<int N, typename T1, typename T2, typename T3>
+ShGeneric<N, CT1T2T3>
+mad(const ShGeneric<N, T1>& m1, const ShGeneric<1, T2>& m2, 
+                    const ShGeneric<N, T3>& a);
+template<int N, typename T1, typename T2, typename T3>
+ShGeneric<N, CT1T2T3>
+mad(const ShGeneric<1, T1>& m1, const ShGeneric<N, T2>& m2, 
+                    const ShGeneric<N, T3>& a);
+template<typename T1, typename T2, typename T3>
+ShGeneric<1, CT1T2T3> mad(const ShGeneric<1, T1>& m1, const ShGeneric<1, T2>& m2, 
+                    const ShGeneric<1, T3>& a);
 
-template<int N, typename T> 
-ShGeneric<N, T> mad(T m1, const ShGeneric<N, T>& m2, const ShGeneric<N, T>& a);
-template<int N, typename T> 
-ShGeneric<N, T> mad(double m1, const ShGeneric<N, T>& m2, const ShGeneric<N, T>& a);
-template<int N, typename T> 
-ShGeneric<N, T> mad(const ShGeneric<N, T>& m1, T m2, const ShGeneric<N, T>& a);
-template<int N, typename T> 
-ShGeneric<N, T> mad(const ShGeneric<N, T>& m1, double m2, const ShGeneric<N, T>& a);
+//@todo type should not use double here, but overloading problems need to be
+//resolved
+template<int N, typename T1, typename T2> 
+ShGeneric<N, CT1T2>
+mad(double m1, const ShGeneric<N, T1>& m2, const ShGeneric<N, T2>& a);
+template<int N, typename T1, typename T2> 
+ShGeneric<N, CT1T2>
+mad(const ShGeneric<N, T1>& m1, double m2, const ShGeneric<N, T2>& a);
 
 /* Reciprocal
  * One divided by the given value, for each component.
@@ -181,18 +186,24 @@ ShGeneric<N, T> rsqrt(const ShGeneric<N, T>& var);
  * Blend between two tuples.   The blend value can be a scalar
  * or a tuple.
  */
-template<int N, typename T>
-ShGeneric<N, T> lerp(const ShGeneric<N, T>& f, const ShGeneric<N, T>& a, 
-                     const ShGeneric<N, T>& b);
-template<int N, typename T>
-ShGeneric<N, T> lerp(const ShGeneric<1, T>& f, const ShGeneric<N, T>& a, 
-                     const ShGeneric<N, T>& b);
-template<typename T>
-ShGeneric<1, T> lerp(const ShGeneric<1, T>& f, const ShGeneric<1, T>& a, 
-                     const ShGeneric<1, T>& b);
-template<int N, typename T>
-ShGeneric<N, T> lerp(T f, const ShGeneric<N, T>& a, 
-                     const ShGeneric<N, T>& b);
+template<int N, typename T1, typename T2, typename T3>
+ShGeneric<N, CT1T2T3>
+lerp(const ShGeneric<N, T1>& f, const ShGeneric<N, T2>& a, 
+                     const ShGeneric<N, T3>& b);
+template<int N, typename T1, typename T2, typename T3>
+ShGeneric<N, CT1T2T3>
+lerp(const ShGeneric<1, T1>& f, const ShGeneric<N, T2>& a, 
+                     const ShGeneric<N, T3>& b);
+template<typename T1, typename T2, typename T3>
+ShGeneric<1, CT1T2T3> 
+lerp(const ShGeneric<1, T1>& f, const ShGeneric<1, T2>& a, 
+     const ShGeneric<1, T3>& b);
+//@todo type fix double f to a templated type (there are overload resolution
+//problems, e.g. if first arg is ShAttrib this function matches better
+//than the above functions)
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2>
+lerp(double f, const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b);
 }
 
 #include "ShLibArithImpl.hpp"

@@ -1,6 +1,7 @@
 #ifndef SHEVALIMPL_HPP 
 #define SHEVALIMPL_HPP
 
+#include <numeric>
 #include "ShEval.hpp"
 #include "ShCloak.hpp"
 #include "ShDebug.hpp"
@@ -9,260 +10,140 @@
 
 namespace SH {
 
-
-/******************************************************
- ***  Virtual Function Definitions  for ShDataCloak ***
- ******************************************************/
-template<typename T> 
-void ShDataEval<T>::srcUnaryOp(ShOperation op, ShCloakPtr src) const
+template<ShOperation OP, typename T>
+void ShRegularOp<OP, T>::operator()( 
+    ShCloakPtr dest, ShCloakCPtr a, ShCloakCPtr b, ShCloakCPtr c) const
 {
-  ShPointer<const ShDataCloak<T> > srcCast = shref_dynamic_cast<const ShDataCloak<T> >(src); 
-  switch(op) {
-    case SH_OP_KIL: KIL(srcCast->data());
-    default: SH_DEBUG_ASSERT(0);
-  }
+  typename std::vector<T> *destVec;
+  const typename std::vector<T> *aVec, *bVec, *cVec;
+
+  SH_DEBUG_ASSERT(dest && a);
+  destVec = &shref_dynamic_cast<ShDataCloak<T> >(dest)->data();
+  aVec = &shref_dynamic_cast<const ShDataCloak<T> >(a)->data();
+
+  if(b) bVec = &shref_dynamic_cast<const ShDataCloak<T> >(b)->data(); 
+  else bVec = 0;
+
+  if(c) cVec = &shref_dynamic_cast<const ShDataCloak<T> >(c)->data();  
+  else cVec = 0;
+
+  ShRegularOpChooser<OP, T>::Op::doop(destVec, aVec, bVec, cVec);
 }
 
-#define SHDCE_UNARY_OP(op) case SH_OP_ ## op: op(destCast->data(), srcCast->data())
-template<typename T> 
-void ShDataEval<T>::unaryOp(ShOperation op, ShCloakPtr dest, ShCloakCPtr src) const
+template<ShOperation OP, typename T1, typename T2>
+void ShIntervalOp<OP, T1, T2>::operator()( 
+    ShCloakPtr dest, ShCloakCPtr a, ShCloakCPtr b, ShCloakCPtr c) const
 {
-  ShPointer<ShDataCloak<T> > destCast = shref_dynamic_cast<ShDataCloak<T> >(dest); 
-  ShPointer<const ShDataCloak<T> > srcCast = shref_dynamic_cast<const ShDataCloak<T> >(src); 
-  switch(op) {
-    //SHDCE_UNARY_OP(NEG);
-    SHDCE_UNARY_OP(ABS);
-    SHDCE_UNARY_OP(ACOS);
-    SHDCE_UNARY_OP(ASIN);
-    SHDCE_UNARY_OP(ATAN);
-    SHDCE_UNARY_OP(CEIL);
-    SHDCE_UNARY_OP(COS);
-    SHDCE_UNARY_OP(DX);
-    SHDCE_UNARY_OP(DY);
-    SHDCE_UNARY_OP(EXP);
-    SHDCE_UNARY_OP(EXP2);
-    SHDCE_UNARY_OP(EXP10);
-    SHDCE_UNARY_OP(FLR);
-    SHDCE_UNARY_OP(FRAC);
-    SHDCE_UNARY_OP(LOG);
-    SHDCE_UNARY_OP(LOG2);
-    SHDCE_UNARY_OP(LOG10);
-    SHDCE_UNARY_OP(RCP);
-    SHDCE_UNARY_OP(RSQ);
-    SHDCE_UNARY_OP(SIN);
-    SHDCE_UNARY_OP(SGN);
-    SHDCE_UNARY_OP(SQRT);
-    SHDCE_UNARY_OP(TAN);
-    SHDCE_UNARY_OP(NORM);
-    default: SH_DEBUG_ASSERT(0);
-  }
-}
 
-#define SHDCE_BINARY_OP(op) case SH_OP_ ## op: op(destCast->data(), aCast->data(), bCast->data())
-template<typename T> 
-void ShDataEval<T>::binaryOp(ShOperation op, ShCloakPtr dest, 
-    ShCloakCPtr a, ShCloakCPtr b) const
-{
-  ShPointer<ShDataCloak<T> > destCast = shref_dynamic_cast<ShDataCloak<T> >(dest); 
-  ShPointer<const ShDataCloak<T> > aCast = shref_dynamic_cast<const ShDataCloak<T> >(a); 
-  ShPointer<const ShDataCloak<T> > bCast = shref_dynamic_cast<const ShDataCloak<T> >(b); 
-  switch(op) {
-    SHDCE_BINARY_OP(ADD);
-    SHDCE_BINARY_OP(MUL);
-    SHDCE_BINARY_OP(DIV);
-    SHDCE_BINARY_OP(SLT);
-    SHDCE_BINARY_OP(SLE);
-    SHDCE_BINARY_OP(SGT);
-    SHDCE_BINARY_OP(SGE);
-    SHDCE_BINARY_OP(SEQ);
-    SHDCE_BINARY_OP(SNE);
-    SHDCE_BINARY_OP(ATAN2);
-    SHDCE_BINARY_OP(DOT);
-    SHDCE_BINARY_OP(MAX);
-    SHDCE_BINARY_OP(MIN);
-    SHDCE_BINARY_OP(MOD);
-    SHDCE_BINARY_OP(POW);
-    SHDCE_BINARY_OP(XPD);
-    default: SH_DEBUG_ASSERT(0);
-  }
-}
+  SH_DEBUG_ASSERT(dest && a);
 
-#define SHDCE_TERNARY_OP(op) case SH_OP_ ## op: op(destCast->data(), aCast->data(), bCast->data(), cCast->data())
-template<typename T> 
-void ShDataEval<T>::ternaryOp(ShOperation op, ShCloakPtr dest,
-    ShCloakCPtr a, ShCloakCPtr b, ShCloakCPtr c) const
-{
-  ShPointer<ShDataCloak<T> > destCast = shref_dynamic_cast<ShDataCloak<T> >(dest); 
-  ShPointer<const ShDataCloak<T> > aCast = shref_dynamic_cast<const ShDataCloak<T> >(a); 
-  ShPointer<const ShDataCloak<T> > bCast = shref_dynamic_cast<const ShDataCloak<T> >(b); 
-  ShPointer<const ShDataCloak<T> > cCast = shref_dynamic_cast<const ShDataCloak<T> >(c); 
-  switch(op) {
-    SHDCE_TERNARY_OP(LRP);
-    SHDCE_TERNARY_OP(MAD);
-    SHDCE_TERNARY_OP(COND);
-    default: SH_DEBUG_ASSERT(0);
-  }
-}
+  typename std::vector<T1> &destVec = 
+    shref_dynamic_cast<ShDataCloak<T1> >(dest)->data();
 
+  const typename std::vector<T2> &aVec = 
+    shref_dynamic_cast<const ShDataCloak<T2> >(a)->data();
 
-/**************************************************************
- ***  Static Template Function Definitions  for ShDataCloak ***
- **************************************************************/
-#define SHEVAL_CWISE_UNARY_OP(op, opsrc) \
-template<typename T>\
-void ShDataEval<T>::op(DataVec & dest, const DataVec &src) \
-{\
-  int so = src.size() > 1;\
-\
-  typename DataVec::iterator D = dest.begin();\
-  typename DataVec::const_iterator S = src.begin();\
-  for(; D != dest.end(); S += so, ++D) {\
-    (*D) = opsrc;\
-  }\
-}
-
-#define SHEVAL_CWISE_BINARY_OP(op, opsrc) \
-template<typename T>\
-void ShDataEval<T>::op(DataVec & dest, const DataVec &a, const DataVec &b) \
-{\
-  int ao = a.size() > 1;\
-  int bo = b.size() > 1;\
-\
-  typename DataVec::iterator D = dest.begin();\
-  typename DataVec::const_iterator A = a.begin();\
-  typename DataVec::const_iterator B = b.begin();\
-  for(; D != dest.end(); A += ao, B += bo, ++D) {\
-    (*D) = opsrc;\
-  }\
-}
-
-#define SHEVAL_CWISE_TERNARY_OP(op, opsrc) \
-template<typename T>\
-void ShDataEval<T>::op(DataVec & dest, const DataVec &a, const DataVec &b, const DataVec &c) \
-{\
-  int ao = a.size() > 1;\
-  int bo = b.size() > 1;\
-  int co = c.size() > 1;\
-\
-  typename DataVec::iterator D = dest.begin();\
-  typename DataVec::const_iterator A = a.begin();\
-  typename DataVec::const_iterator B = b.begin();\
-  typename DataVec::const_iterator C = c.begin();\
-  for(; D != dest.end(); A += ao, B += bo, C += co, ++D) {\
-    (*D) = opsrc;\
-  }\
-}
-
-SHEVAL_CWISE_UNARY_OP(ASN, (*S));
-//SHEVAL_CWISE_UNARY_OP(NEG, -(*S));
-
-SHEVAL_CWISE_BINARY_OP(ADD, (*A) + (*B));
-SHEVAL_CWISE_BINARY_OP(MUL, (*A) * (*B));
-SHEVAL_CWISE_BINARY_OP(DIV, (*A) / (*B));
-
-template<typename T>
-void ShDataEval<T>::SLT(DataVec & dest, const DataVec &a, const DataVec &b) 
-{
-  int ao = a.size() > 1;
-  int bo = b.size() > 1;
-
-  typename DataVec::iterator D = dest.begin();
-  typename DataVec::const_iterator A = a.begin();
-  typename DataVec::const_iterator B = b.begin();
-  for(; D != dest.end(); A += ao, B += bo, ++D) {
-    (*D) = ((*A) < (*B) ? 
-            ShConcreteTypeInfo<T>::trueValue : 
-            ShConcreteTypeInfo<T>::falseValue);
-  }
-}
-//SHEVAL_CWISE_BINARY_OP(SLT, ((*A) < (*B) ? ShConcreteTypeInfo<T>::trueValue : ShConcreteTypeInfo<T>::falseValue));
-SHEVAL_CWISE_BINARY_OP(SLE, ((*A) <= (*B) ? ShConcreteTypeInfo<T>::trueValue : ShConcreteTypeInfo<T>::falseValue));
-SHEVAL_CWISE_BINARY_OP(SGT, ((*A) > (*B) ? ShConcreteTypeInfo<T>::trueValue : ShConcreteTypeInfo<T>::falseValue));
-SHEVAL_CWISE_BINARY_OP(SGE, ((*A) >= (*B) ? ShConcreteTypeInfo<T>::trueValue : ShConcreteTypeInfo<T>::falseValue));
-SHEVAL_CWISE_BINARY_OP(SEQ, ((*A) == (*B) ? ShConcreteTypeInfo<T>::trueValue : ShConcreteTypeInfo<T>::falseValue));
-SHEVAL_CWISE_BINARY_OP(SNE, ((*A) != (*B) ? ShConcreteTypeInfo<T>::trueValue : ShConcreteTypeInfo<T>::falseValue));
-
-// TODO handle double cases using template specialization
-SHEVAL_CWISE_UNARY_OP(ABS, std::fabs(*S));
-SHEVAL_CWISE_UNARY_OP(ACOS, std::acos(*S));
-SHEVAL_CWISE_UNARY_OP(ASIN, std::asin(*S));
-SHEVAL_CWISE_UNARY_OP(ATAN, std::atan(*S));
-SHEVAL_CWISE_BINARY_OP(ATAN2, std::atan2((*A), (*B)));
-SHEVAL_CWISE_UNARY_OP(CEIL, std::ceil(*S));
-SHEVAL_CWISE_UNARY_OP(COS, std::cos(*S));
-
-template<typename T> 
-void ShDataEval<T>::DOT(DataVec & dest, const DataVec &a, const DataVec &b)
-{
-  // dest.size should be 1 and a.size == b.size
-  typename DataVec::const_iterator A = a.begin();
-  typename DataVec::const_iterator B = b.begin();
-  T &result = dest[0];
-  result = 0; 
-  for(; A != a.end(); ++A, ++B) result += (*A) * (*B); 
+  ShConcreteIntervalOp<OP, T1, T2>::doop(destVec, aVec);
 }
 
 template<typename T>
-void ShDataEval<T>::DX(DataVec & dest, const DataVec &src)
-{
-  shError(ShScopeException("Cannot take derivatives in immediate mode"));
+void _shInitFloatOps() {
+  int typeIndex = shTypeIndex<T>();
+  ShEval* eval = ShEval::instance();
+
+  eval->addOp(SH_OP_ABS, new ShRegularOp<SH_OP_ABS, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_ACOS, new ShRegularOp<SH_OP_ACOS, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_ASIN, new ShRegularOp<SH_OP_ASIN, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_ASN, new ShRegularOp<SH_OP_ASN, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_ATAN, new ShRegularOp<SH_OP_ATAN, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_CEIL, new ShRegularOp<SH_OP_CEIL, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_COS, new ShRegularOp<SH_OP_COS, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_EXP, new ShRegularOp<SH_OP_EXP, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_EXP2, new ShRegularOp<SH_OP_EXP2, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_EXP10, new ShRegularOp<SH_OP_EXP10, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_FLR, new ShRegularOp<SH_OP_FLR, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_FRAC, new ShRegularOp<SH_OP_FRAC, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_LOG, new ShRegularOp<SH_OP_LOG, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_LOG2, new ShRegularOp<SH_OP_LOG2, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_LOG10, new ShRegularOp<SH_OP_LOG10, T>(), typeIndex, typeIndex);
+  //eval->addOp(SH_OP_NEG, new ShRegularOp<SH_OP_NEG, T>());
+  eval->addOp(SH_OP_NORM, new ShRegularOp<SH_OP_NORM, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_RCP, new ShRegularOp<SH_OP_RCP, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_RSQ, new ShRegularOp<SH_OP_RSQ, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_SIN, new ShRegularOp<SH_OP_SIN, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_SGN, new ShRegularOp<SH_OP_SGN, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_SQRT, new ShRegularOp<SH_OP_SQRT, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_TAN, new ShRegularOp<SH_OP_TAN, T>(), typeIndex, typeIndex);
+
+  eval->addOp(SH_OP_ADD, new ShRegularOp<SH_OP_ADD, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_ATAN2, new ShRegularOp<SH_OP_ATAN2, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_DIV, new ShRegularOp<SH_OP_DIV, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_DOT, new ShRegularOp<SH_OP_DOT, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_MAX, new ShRegularOp<SH_OP_MAX, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_MIN, new ShRegularOp<SH_OP_MIN, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_MOD, new ShRegularOp<SH_OP_MOD, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_MUL, new ShRegularOp<SH_OP_MUL, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_POW, new ShRegularOp<SH_OP_POW, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_SEQ, new ShRegularOp<SH_OP_SEQ, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_SGE, new ShRegularOp<SH_OP_SGE, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_SGT, new ShRegularOp<SH_OP_SGT, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_SLE, new ShRegularOp<SH_OP_SLE, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_SLT, new ShRegularOp<SH_OP_SLT, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_SNE, new ShRegularOp<SH_OP_SNE, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_XPD, new ShRegularOp<SH_OP_XPD, T>(), typeIndex, typeIndex, typeIndex);
+
+  eval->addOp(SH_OP_LRP, new ShRegularOp<SH_OP_LRP, T>(), typeIndex, typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_MAD, new ShRegularOp<SH_OP_MAD, T>(), typeIndex, typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_COND, new ShRegularOp<SH_OP_COND, T>(), typeIndex, typeIndex, typeIndex, typeIndex);
 }
 
 template<typename T>
-void ShDataEval<T>::DY(DataVec & dest, const DataVec &src)
-{
-  shError(ShScopeException("Cannot take derivatives in immediate mode"));
+void _shInitIntOps() {
+  int typeIndex = shTypeIndex<T>();
+  ShEval* eval = ShEval::instance();
+
+  eval->addOp(SH_OP_ABS, new ShRegularOp<SH_OP_ABS, T>(), typeIndex, typeIndex);
+  eval->addOp(SH_OP_ASN, new ShRegularOp<SH_OP_ASN, T>(), typeIndex, typeIndex);
+  //eval->addOp(SH_OP_NEG, new ShRegularOp<SH_OP_NEG, T>());
+  eval->addOp(SH_OP_SGN, new ShRegularOp<SH_OP_SGN, T>(), typeIndex, typeIndex);
+
+  eval->addOp(SH_OP_ADD, new ShRegularOp<SH_OP_ADD, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_DIV, new ShRegularOp<SH_OP_DIV, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_DOT, new ShRegularOp<SH_OP_DOT, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_MAX, new ShRegularOp<SH_OP_MAX, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_MIN, new ShRegularOp<SH_OP_MIN, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_MOD, new ShRegularOp<SH_OP_MOD, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_MUL, new ShRegularOp<SH_OP_MUL, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_POW, new ShRegularOp<SH_OP_POW, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_SEQ, new ShRegularOp<SH_OP_SEQ, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_SGE, new ShRegularOp<SH_OP_SGE, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_SGT, new ShRegularOp<SH_OP_SGT, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_SLE, new ShRegularOp<SH_OP_SLE, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_SLT, new ShRegularOp<SH_OP_SLT, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_SNE, new ShRegularOp<SH_OP_SNE, T>(), typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_XPD, new ShRegularOp<SH_OP_XPD, T>(), typeIndex, typeIndex, typeIndex);
+
+  eval->addOp(SH_OP_LRP, new ShRegularOp<SH_OP_LRP, T>(), typeIndex, typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_MAD, new ShRegularOp<SH_OP_MAD, T>(), typeIndex, typeIndex, typeIndex, typeIndex);
+  eval->addOp(SH_OP_COND, new ShRegularOp<SH_OP_COND, T>(), typeIndex, typeIndex, typeIndex, typeIndex);
 }
-
-SHEVAL_CWISE_UNARY_OP(EXP, std::exp(*S));
-SHEVAL_CWISE_UNARY_OP(EXP2, exp2(*S));
-SHEVAL_CWISE_UNARY_OP(EXP10,exp10(*S));
-SHEVAL_CWISE_UNARY_OP(FLR, std::floor(*S));
-SHEVAL_CWISE_UNARY_OP(FRAC, (*S) - std::floor(*S));
-SHEVAL_CWISE_UNARY_OP(LOG, std::log(*S)); 
-SHEVAL_CWISE_UNARY_OP(LOG2, log2(*S)); 
-SHEVAL_CWISE_UNARY_OP(LOG10, log10(*S)); 
-SHEVAL_CWISE_TERNARY_OP(LRP, (*A) * (*B) + (1 - (*A)) * (*C)); 
-SHEVAL_CWISE_TERNARY_OP(MAD, (*A) * (*B) + (*C)); 
-SHEVAL_CWISE_BINARY_OP(MAX, std::max((*A), (*B))); 
-SHEVAL_CWISE_BINARY_OP(MIN, std::min((*A), (*B))); 
-SHEVAL_CWISE_BINARY_OP(MOD, std::fmod((*A), (*B))); 
-SHEVAL_CWISE_BINARY_OP(POW, std::pow((*A), (*B))); 
-SHEVAL_CWISE_UNARY_OP(RCP, 1.0 / (*S)); 
-SHEVAL_CWISE_UNARY_OP(RSQ, 1.0 / std::sqrt(*S)); 
-SHEVAL_CWISE_UNARY_OP(SGN, ((*S) < 0 ? -1 : ((*S) > 0 ? 1 : 0))); 
-SHEVAL_CWISE_UNARY_OP(SIN, std::sin(*S)); 
-SHEVAL_CWISE_UNARY_OP(SQRT, std::sqrt(*S)); 
-SHEVAL_CWISE_UNARY_OP(TAN, std::tan(*S)); 
-
-template<typename T> 
-void ShDataEval<T>::NORM(DataVec & dest, const DataVec &src)
-{
-  // assume dest.size == src.size 
-  typename DataVec::const_iterator S = src.begin();
-  T m = 0;
-  for(; S != src.end(); ++S) m += (*S) * (*S); 
-  m = 1.0 / std::sqrt(m);
-
-  typename DataVec::iterator D = dest.begin();
-  S = src.begin();
-  for(; S != src.end(); ++D, ++S) (*D) = (*S) * m; 
-}
-
-template<typename T> 
-void ShDataEval<T>::XPD(DataVec & dest, const DataVec &a, const DataVec &b)
-{
-  dest[0] = a[1] * b[2] - a[2] * b[1];
-  dest[1] = -(a[0] * b[2] - a[2] * b[0]);
-  dest[2] = a[0] * b[1] - a[1] * b[0];
-}
-
-SHEVAL_CWISE_TERNARY_OP(COND, ((*A) > 0 ? (*B) : (*C))); 
 
 template<typename T>
-void ShDataEval<T>::KIL(const DataVec& cond)
-{
-  shError(ShScopeException("Cannot kill in immediate mode"));
+void _shInitIntervalOps() {
+  int typeIndex = shTypeIndex<T>();
+  int intervalTypeIndex = shTypeIndex<ShInterval<T> >();
+
+  ShEval* eval = ShEval::instance();
+
+  eval->addOp(SH_OP_LO, new ShIntervalOp<SH_OP_LO, T, ShInterval<T> >(), 
+      typeIndex, intervalTypeIndex);
+  eval->addOp(SH_OP_HI, new ShIntervalOp<SH_OP_HI, T, ShInterval<T> >(), 
+      typeIndex, intervalTypeIndex);
+
+  eval->addOp(SH_OP_SETLO, new ShIntervalOp<SH_OP_SETLO, ShInterval<T>, T>(), 
+      intervalTypeIndex, typeIndex);
+  eval->addOp(SH_OP_SETHI, new ShIntervalOp<SH_OP_SETHI, ShInterval<T>, T>(), 
+      intervalTypeIndex, typeIndex);
 }
 
 }

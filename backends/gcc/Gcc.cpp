@@ -1556,6 +1556,19 @@ namespace ShGcc {
 		 << resolve(stmt.src[0], i)
 		 << ");" << std::endl;
 	  }
+      case SH::SH_OP_TAN:
+	{
+	for(int i = 0; i < stmt.dest.size(); i++)
+	  {
+	  m_code << "  "
+		 << resolve(stmt.dest, i)
+		 << " = tan("
+		 << resolve(stmt.src[0], i)
+		 << ");" << std::endl;
+	  }
+
+	break;
+	}
 
 	break;
 	}

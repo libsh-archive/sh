@@ -152,6 +152,9 @@ tests = [
      [[l, [math.tan(x) for x in l]]
        for l in [[0.0, 1.0, 2.0],
                  [0.5, 0.8, 0.9],
+
+                 # TODO the next two test data don't work so well since 
+                 # they're near the asymptotes for tan 
                  [math.pi, math.pi/2.0, math.pi*2.0],
                  [-math.pi, -math.pi/2.0, -math.pi*2.0],
                  [3.0, 4.0, 5.0],
@@ -202,7 +205,17 @@ def varsize(s):
     if s == 's': return '1'
     return s
 
+def seqToAttrib(x): 
+  return 'ShAttrib' + str(len(x)) + 'f(' + ', '.join([str(y) for y in x]) + ')' 
+
 for test in tests:
+    terms = test[1]
+    ops = test[3]
+    ops = map(lambda x: 'out = ' + x, ops)
+    ops.append('sh' + test[0] + '(out, ' +
+               ', '.join([string.ascii_uppercase[i] for i in range(len(terms))]) + ')')
+    cases = test[4]
+
     filename = test[0] + '.cpp'
     print test[0]
     f = open(filename, 'w')
@@ -216,29 +229,53 @@ using namespace SH;
 
 int main(int argc, char** argv) {
   Test test(argc, argv);
+  if (test.on_host()) {
 ''')
-    terms = test[1]
-    ops = test[3]
-    ops = map(lambda x: 'out = ' + x, ops)
-    ops.append('sh' + test[0] + '(out, ' +
-               ', '.join([string.ascii_uppercase[i] for i in range(len(terms))]) + ')')
-    cases = test[4]
+    for combination in cartesianProduct(terms):
+        f.write('    {\n')
+        max = 1
+        for i, size in enumerate(combination):
+            f.write('      ShAttrib<' + varsize(size) + ', SH_TEMP, float> ' + string.ascii_uppercase[i]
+                + ';\n')
+            nsize = int(varsize(size))
+            if nsize > max: max = nsize
+        outsize = test[2]
+        if outsize == 'v': outsize = str(max)
+        f.write('      ShAttrib<' + outsize + ', SH_TEMP, float> out;\n')
+        f.write('\n')
+        for oi, op in enumerate(ops):
+            max = 1
+            for case in cases:
+                if len(case) - 1 != len(combination): continue
+                if not reduce(operator.__and__,
+                              [len(x[0]) == int(varsize(x[1]))
+                               for x in zip(case[:-1], combination)], 1):
+                    continue
+                for i in range(0, len(combination)): 
+                    f.write('      ' + string.ascii_uppercase[i] + ' = ' + seqToAttrib(case[i]) + ';\n')
+                f.write('      ' + op + ';\n')
+                f.write('      test.check("' + op + ' [' + ' x '.join(combination)
+                + ']", out, ' + seqToAttrib(case[len(combination)]) + ');\n') 
+                f.write('\n')
+        f.write('    }\n')
+    f.write('''  } else {
+''')
     for combination in cartesianProduct(terms):
         for oi, op in enumerate(ops):
             prgname = test[0] + ''.join(combination) + str(oi);
-            f.write('  ShProgram ' + prgname + ' = SH_BEGIN_PROGRAM("gpu:stream") {\n')
+            f.write('    ShProgram ' + prgname + ' = SH_BEGIN_PROGRAM("gpu:stream") {\n')
             max = 1
             for i, size in enumerate(combination):
-                f.write('    ShAttrib<' + varsize(size) + ', SH_INPUT> ' + string.ascii_uppercase[i]
+                f.write('      ShAttrib<' + varsize(size) + ', SH_INPUT, float> ' + string.ascii_uppercase[i]
                     + ';\n')
                 nsize = int(varsize(size))
                 if nsize > max: max = nsize
             outsize = test[2]
             if outsize == 'v': outsize = str(max)
-            f.write('    ShAttrib<' + outsize + ', SH_OUTPUT> out;\n')
-            f.write('    ' + op + ';\n')
-            f.write('  } SH_END;\n')
-            f.write('  ' + prgname + '.name("' + op + ' [' + ' x '.join(combination) + ']");\n')
+            f.write('      ShAttrib<' + outsize + ', SH_OUTPUT, float> out;\n')
+            f.write('      ' + op + ';\n')
+            f.write('    } SH_END;\n')
+            f.write('    ' + prgname + '.name("' + op + ' [' + ' x '.join(combination) + ']");\n')
             f.write('\n')
             for case in cases:
                 if len(case) - 1 != len(combination): continue
@@ -246,10 +283,11 @@ int main(int argc, char** argv) {
                               [len(x[0]) == int(varsize(x[1]))
                                for x in zip(case[:-1], combination)], 1):
                     continue
-                f.write('  test.run(' + prgname + ', ')
-                f.write(', '.join(['ShAttrib' + str(len(x)) + 'f(' + ', '.join([str(y) for y in x]) + ')' for x in case]) + ');\n')
+                f.write('    test.run(' + prgname + ', ')
+                f.write(', '.join([seqToAttrib(x) for x in case]) + ');\n')
             f.write('\n')
-    f.write('''}
+    f.write('''  }
+}
 ''')
 
 

@@ -73,6 +73,7 @@ int ShVariable::size() const
 
 int ShVariable::typeIndex() const 
 {
+  if(!m_node) return 0;
   return m_node->typeIndex();
 }
 
@@ -118,22 +119,22 @@ ShCloakPtr ShVariable::cloak() const
 
 ShCloakPtr ShVariable::cloak(int index) const
 {
-  return m_node->cloak()->get(m_neg, ShSwizzle(size(), index) * m_swizzle); 
+  return m_node->cloak()->get(m_neg, m_swizzle * ShSwizzle(size(), index)); 
 }
 
 void ShVariable::setCloak(ShCloakCPtr other, bool neg, const ShSwizzle &writemask)
 {
-  m_node->setCloak(other, neg ^ m_neg, writemask * m_swizzle);
+  m_node->setCloak(other, neg ^ m_neg, m_swizzle * writemask);
 }
 
 void ShVariable::setCloak(ShCloakCPtr other, int index) 
 {
-  m_node->setCloak(other, m_neg, ShSwizzle(size(), index) * m_swizzle);
+  m_node->setCloak(other, m_neg, m_swizzle * ShSwizzle(size(), index));
 }
 
 void ShVariable::setCloak(ShCloakCPtr other)
 {
-  setCloak(other);
+  m_node->setCloak(other, m_neg, m_swizzle);
 }
 
 ShVariable ShVariable::operator()() const

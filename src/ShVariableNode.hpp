@@ -68,11 +68,13 @@ public:
   // If keepUniform is set to false, then the new variable  
   // has m_uniform set to false even if the original m_uniform was true. 
   //
-  // TODO Currently this does not work if the newKind is SH_CONST
+  // @todo Currently this does not work if the newKind is SH_CONST
   // and old kind was not CONST/uniform since the old one won't have 
   // a ShCloak node to clone...
   // To fix this, VariableNode should hold the type_index of its data
   // as well, so that it can generate new cloaks on demand.
+  //
+  // @todo clean this up...eventually we will need dozens of these functions...
   // @{
   ShVariableNodePtr clone(ShBindingType newKind, 
       bool updateVarList = true, bool keepUniform = true) const;
@@ -84,6 +86,9 @@ public:
       int newSize, bool updateVarList = true, bool keepUniform = true) const;
 
   ShVariableNodePtr clone(int newTypeIndex, 
+      bool updateVarList = true, bool keepUniform = true) const;
+
+  ShVariableNodePtr clone(ShBindingType newKind, int newSize, int newTypeIndex, 
       bool updateVarList = true, bool keepUniform = true) const;
   // @}
 
@@ -120,6 +125,7 @@ public:
 
   /// Update elements of a cloak applying the given writemask and negation
   void setCloak(ShPointer<const ShCloak> other);
+  void setCloak(ShPointer<const ShCloak> other, int index);
   void setCloak(ShPointer<const ShCloak> other, bool neg, const ShSwizzle &writemask);
 
   /// Retrieve the cloak 
