@@ -49,18 +49,17 @@ namespace SH {
 
   ShScheduler::ShScheduler(){
 
-    
-    //tex = ShTexture2D<ShColor4f>( SIZE, SIZE );
-    tub[0] = new ShUberbuffer( SIZE, SIZE, 1, 4, 6408 /* - hack: instead of GL_RGBA */ );
-    tub[1] = new ShUberbuffer( SIZE, SIZE, 1, 4, 6408 /* - hack: instead of GL_RGBA */ );
-    
-    /// temporary hack
-    tub[2] = new ShUberbuffer( SIZE, SIZE, 1, 4, 6408 /* - hack: instead of GL_RGBA */ );
+
+    for(int i=0;i<UN;i+=1)
+      tub[i] = new ShUberbuffer( SIZE, SIZE, 1, 4, 34836 /*6408*/ /* - hack: instead of GL_RGBA */ );
 
     fb = new ShFramebuffer( SIZE, SIZE, 1, 4 ); 
     
   }
 
+  void ShScheduler::allocate_uberbuffers(int i){
+    tub[i] = new ShUberbuffer( SIZE, SIZE, 1, 4, 34836 /*6408*/ /* - hack: instead of GL_RGBA */ );
+  }
 
   void ShScheduler::bind(ShComplexProgram pgm1,	ShComplexProgram pgm2){
 
@@ -82,7 +81,7 @@ namespace SH {
     fprograms.push_back(complex_shader[1]->getProgram(0));
 
     for(int i=1;i<N;i+=1)
-        fprograms.push_back(shHideInputs(complex_shader[1]->getProgram(i), (i-1)%2));
+        fprograms.push_back(shHideInputs(complex_shader[1]->getProgram(i)));
   }
 	
 
@@ -149,7 +148,7 @@ ShMatrix4x4f ortho(int x1, int y1, int x2, int y2)
     /* FIRST PASSES */
     
     // I set it only ONCE here
-    shDrawBuffer(fb);
+//    shDrawBuffer(fb);
 
     /// nasty hack
 ///    for(int i=1;i<fprograms.size();i+=1){
@@ -161,6 +160,9 @@ ShMatrix4x4f ortho(int x1, int y1, int x2, int y2)
 
     for(int i=0;i<fprograms.size()-1;i+=1){
 
+      //std::cout<<"Allocate new uber-buffers "<<i<<std::endl;
+      //allocate_uberbuffers(i%UN);
+
       std::cout<<"Loop "<<i<<std::endl;
 
       /// bind the shaders first
@@ -171,19 +173,22 @@ ShMatrix4x4f ortho(int x1, int y1, int x2, int y2)
 
       // attach the correct mem object
       if(i>0)
-	 gtexture.attach( tub[(i-1)%2]);
+	 gtexture.attach( tub[(i+UN-1)%UN]);
       
       std::cout<<"break2"<<std::endl;
-
       
-      fb->bind(tub[i%2]);
+	fb->bind(tub[i%UN]);
+	shDrawBuffer(fb);
+	shClearBuffer();
 
       ShEnvironment::backend->render_planar(data);
 
       // detach the memory objects
-      fb->bind(0);
       if(i>0)
-	gtexture.attach(tub[2]);
+	gtexture.attach(0);
+
+	fb->bind(0);
+	shDrawBuffer(0);
 
       std::cout<<"End Loop "<<i<<std::endl;
 
@@ -202,24 +207,23 @@ ShMatrix4x4f ortho(int x1, int y1, int x2, int y2)
     int N = fprograms.size()-1;
     shBindShader(vprograms[0]);
     shBindShader(fprograms[N]);
-    //gtexture.attach( tub[(N-1)%2]);
-    gtexture.attach( tub[2]);
+    gtexture.attach( tub[(N-1)%UN]);
 
     std::cout<<"After bind!"<<std::endl;
 
     // call the backend to render
     ShEnvironment::backend->render(data);
 
-    /// intro hacker
-    gtexture.attach( tub[2]);
-    
+
+    gtexture.attach(0);
+
     std::cout<<"Out RUN!"<<std::endl;
 
 }
 
 
 
-ShProgram  shHideInputs(ShProgram prgm, int turn){ 	   
+ShProgram  shHideInputs(ShProgram prgm){ 	   
   ShProgram hider = SH_BEGIN_PROGRAM {
     ShProgramNode::VarList::const_iterator I;
     int count = 0;

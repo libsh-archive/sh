@@ -45,10 +45,15 @@ namespace SH {
 
 #define SIZE 512 
 
+
+#define UN (10)
+
   class ShScheduler {
   public:
     
     ShScheduler();
+
+    void allocate_uberbuffers(int);
 
     /// currnet bound multi-pass shader programs
     ShComplexProgram complex_shader[2];
@@ -73,7 +78,7 @@ namespace SH {
 
   private: /* uber buffer stuff */
     //  ShTexture2D<ShColor4f>* tex;
-    ShUberbufferPtr tub[3]; 
+    ShUberbufferPtr tub[UN]; 
     ShFramebufferPtr fb; 
 
 

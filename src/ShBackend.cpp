@@ -136,6 +136,10 @@ void ShBackend::init2(void)
   printf("no init for this backend...\n");
 }
 
+void ShBackend::clearFrameBuffer(){
+   printf("clearFrameBuffer not supported for this backend...\n");
+}
+
 void ShBackend::init()
 {
   if (m_doneInit) return;

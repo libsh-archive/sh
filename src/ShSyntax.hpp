@@ -175,6 +175,9 @@ void shBindShader(int target, ShProgram& shader);
 /// Change the render target
 void shDrawBuffer(ShFramebufferPtr fb);
 
+/// clears the render target (including the depth bit)
+void shClearBuffer();
+
 void shIf(bool);
 void shElse();
 void shEndIf();
@@ -191,7 +194,7 @@ void shEndFor();
 void shBreak();
 void shContinue();
 
-  ShProgram  shHideInputs(ShProgram prgm, int);
+  ShProgram  shHideInputs(ShProgram prgm);
 
 }
 

@@ -30,6 +30,8 @@
 #include "ShEnvironment.hpp"
 #include "ShUberbuffer.hpp"
 
+#include <iostream>
+
 namespace SH {
 
 ShFramebuffer::ShFramebuffer(int width, int height, int depth, int elements)
@@ -61,7 +63,7 @@ void ShFramebuffer::bind( ShUberbufferPtr ub ) {
   if( ShEnvironment::framebuffer == this ) {
     // update backend if this is the active draw buffer
     if( ShEnvironment::backend ) ShEnvironment::backend->bindFramebuffer();
-  }
+  } 
 }
 
 ShUberbufferPtr ShFramebuffer::getUberbuffer() {

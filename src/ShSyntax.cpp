@@ -93,6 +93,10 @@ void shDrawBuffer(ShFramebufferPtr fb ) {
   ShEnvironment::backend->bindFramebuffer();
 }
 
+void shClearBuffer(){
+  ShEnvironment::backend->clearFrameBuffer();
+}
+
 void shIf(bool)
 {
   ShRefCount<ShToken> token = new ShToken(SH_TOKEN_IF);
