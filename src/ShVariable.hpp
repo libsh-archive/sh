@@ -73,6 +73,7 @@ public:
   /// Return true if this variable is negated
   bool neg() const;
 
+  bool& neg();
   
   /// Get the values of this variable, with swizzling taken into account
   void getValues(ShVariableNode::ValueType dest[]) const;

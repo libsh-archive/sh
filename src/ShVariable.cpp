@@ -90,6 +90,11 @@ bool ShVariable::neg() const
   return m_neg;
 }
 
+bool& ShVariable::neg()
+{
+  return m_neg;
+}
+
 void ShVariable::getValues(ShVariableNode::ValueType dest[]) const
 {
   for (int i = 0; i < size(); i++) {

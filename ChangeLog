@@ -1,3 +1,13 @@
+2003-11-21  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShOptimizer.cpp (MoveEliminator): Don't eliminate moves
+	where the RHS is negated (that's a legitimate move).
+	(CopyPropagator): Assign negations properly in copy propagation.
+
+	* src/ShAlgebra.cpp (copyCtrlGraph): Added a clearMarked() call
+	before we do a DFS on the graph node that's to be copied. This
+	makes Tibi's life much better.
+
 2003-11-17 Kevin Moule (krmoule@cgl.uwaterloo.ca)
 
 	* backends/arb/ShArb.cpp: re-added Backend instance, accidentally

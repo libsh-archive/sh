@@ -84,7 +84,7 @@ struct CopyPropagator {
           && I->dest.node()->kind() == SH_VAR_TEMP
           && I->dest.swizzle().identity()
           && I->src[0].swizzle().identity()) {
-        m_acp.push_back(std::make_pair(I->dest.node(), I->src[0].node()));
+        m_acp.push_back(std::make_pair(I->dest, I->src[0]));
       }
     }
     m_acp.clear();
@@ -93,7 +93,7 @@ struct CopyPropagator {
   void removeACP(const ShVariable& var)
   {
     for (ACP::iterator I = m_acp.begin(); I != m_acp.end();) {
-      if (I->first == var.node() || I->second == var.node()) {
+      if (I->first.node() == var.node() || I->second.node() == var.node()) {
         I = m_acp.erase(I);
         continue;
       }
@@ -105,15 +105,16 @@ struct CopyPropagator {
   void copyValue(ShVariable& var)
   {
     for (ACP::const_iterator I = m_acp.begin(); I != m_acp.end(); ++I) {
-      if (I->first == var.node()) {
+      if (I->first.node() == var.node()) {
         changed = true;
-        var.node() = I->second;
+        var.node() = I->second.node();
+        var.neg() = var.neg() ^ (I->first.neg() ^ I->second.neg());
         break;
       }
     }
   }
 
-  typedef std::list< std::pair<ShVariableNodePtr, ShVariableNodePtr> > ACP;
+  typedef std::list< std::pair<ShVariable, ShVariable> > ACP;
   ACP m_acp;
   
   ShOptimizer& o;
@@ -165,6 +166,7 @@ struct MoveEliminator {
   void eliminateMove(ShStatement& stmt)
   {
     if (stmt.op != SH_OP_ASN) return;
+    if (stmt.src[0].neg()) return;
     if (stmt.src[0].node()->kind() != SH_VAR_TEMP) return;
     if (!stmt.src[0].swizzle().identity()) return;
 
