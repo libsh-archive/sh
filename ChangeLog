@@ -1,5 +1,8 @@
 2003-08-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShOptimizer.cpp (struct TempFinder): Mark temporaries used
+	in branches as necessary.
+
 	* src/ShEnvironment.hpp (struct ShEnvironment): Added the
 	optimizationLevel variable indication the level of
 	optimizations. Set this to 1 to turn on optimizations.

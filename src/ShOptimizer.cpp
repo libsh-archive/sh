@@ -226,6 +226,10 @@ struct TempFinder {
         if (I->src3.node()->kind() == SH_VAR_TEMP) optimizer.m_tum.insert(I->src3.node());
       }
     }
+    for (std::vector<ShCtrlGraphBranch>::const_iterator I = node->successors.begin();
+         I != node->successors.end(); ++I) {
+      if (I->cond.node()->kind() == SH_VAR_TEMP) optimizer.m_tum.insert(I->cond.node());
+    }
   }
   
   ShOptimizer& optimizer;
