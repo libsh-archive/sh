@@ -10,7 +10,7 @@ DAGNode::DAGNode(ShVariable var)
 	:	m_var(var),
 		m_label(var.node()->name())
 {
-	cout << "Creating new node with name " << m_label << "\n";
+	//cout << "Creating new node with name " << m_label << "\n";
 	m_type = DAG_LEAF;
 }
 
@@ -18,7 +18,7 @@ DAGNode::DAGNode(ShOperation op)
 	:	m_op(op),
 		m_label(static_cast<std::string>(opInfo[op].name))	
 {
-	cout << "Creating new node with name " << m_label << "\n";
+	//cout << "Creating new node with name " << m_label << "\n";
 	m_type = DAG_OP;
 }
 
@@ -26,7 +26,7 @@ DAGNode::DAGNode(ShOperation op, DAGNode* kid)
 	:	m_op(op),
 		m_label(static_cast<std::string>(opInfo[op].name))
 {
-	cout << "Creating new node with name " << m_label << " Kids: " << kid->m_label << "\n";
+	//cout << "Creating new node with name " << m_label << " Kids: " << kid->m_label << "\n";
 	m_type = DAG_OP;
 	successors.push_back(kid);
 	kid->predecessors.push_back(this);
@@ -36,7 +36,7 @@ DAGNode::DAGNode(ShOperation op, DAGNode *kid0, DAGNode* kid1)
 	:	m_op(op),
 		m_label(static_cast<std::string>(opInfo[op].name))
 {
-	cout << "Creating new node with name " << m_label << " Kids: " << kid0->m_label << " " << kid1->m_label <<"\n";
+	//cout << "Creating new node with name " << m_label << " Kids: " << kid0->m_label << " " << kid1->m_label <<"\n";
 	m_type = DAG_OP;
 	successors.push_back(kid0);
 	successors.push_back(kid1);
@@ -48,7 +48,7 @@ DAGNode::DAGNode(ShOperation op, DAGNode* kid0, DAGNode* kid1, DAGNode* kid2)
 	:	m_op(op),
 		m_label(static_cast<std::string>(opInfo[op].name))
 {
-	cout << "Creating new node with name " << m_label << " Kids: " << kid0->m_label << " " << kid1->m_label << kid2->m_label << "\n";
+	//cout << "Creating new node with name " << m_label << " Kids: " << kid0->m_label << " " << kid1->m_label << kid2->m_label << "\n";
 	m_type = DAG_OP;
 	successors.push_back(kid0);
 	successors.push_back(kid1);

@@ -444,3 +444,139 @@ int RDS::cost(DAGNode::DAGNode* v) {
 	unvisitall(v);
 	return countmarked(v);
 }
+
+
+void RDS::set_nodelist(DAGNode::DAGNode *v) {
+	if (m_visited[v]) return;
+
+	m_visited[v] = true;
+	m_nodelist.push_back(v);
+
+	for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end(); ++I) {
+		set_nodelist(*I);
+	}
+}
+
+// brute force. code will be cleaned up later.
+void RDS::full_search() {
+	DAGNode::DAGNode *root = m_graph->m_root;
+	bool found = false;
+	int low_cost = 0;
+
+	// get a list of all the nodes in the graph
+	for (DAGNode::DAGNodeVector::iterator I = root->successors.begin(); I != root->successors.end(); ++I) {
+		set_nodelist(*I);
+	}	
+
+	// case zero
+	int n = m_nodelist.size();
+	bool marked[n];
+	unmarkall(root);
+
+	if(valid(root)) {
+		found = true;
+		low_cost = cost(root);
+	}
+
+	// use next-ksubset to choose marked nodes
+	for (int k = 1; k < n; k++) {
+		int *a = (int *) malloc(sizeof(int) * (n+1));
+
+		for (int j = 0; j <= k; j++) {
+			a[j] = j;
+		}
+
+		ksub_mtc = false;
+		a = next_ksubset(n, k, a);
+
+		// mark according to subsets
+		unmarkall(root);
+
+		for (int j = 0; j < n; j++) {
+			m_marked[m_nodelist.at(a[j])] = true;
+		}
+
+		m_marked[root] = true;
+
+		bool isvalid = true;
+
+		if (!valid(root)) 
+			isvalid = false;
+
+		for (int j = 0; j < n && isvalid; j++) {
+			if (!valid(m_nodelist.at(j)))
+				isvalid = false;
+		}
+
+		if (isvalid) {
+			int this_cost = cost(root);
+
+			// see if present optimal partition
+			if (!found || this_cost < low_cost) {
+				for (int j = 0; j < n; j++) {
+					marked[j] = false;
+				}
+
+				for (int j = 0; j < k; j++) {
+					marked[a[j]] = true;
+				}
+
+				low_cost = this_cost;
+				found = true;
+			}
+		}
+
+		// check all other subsets
+		while(ksub_mtc) {				
+			a = next_ksubset(n, k, a);
+		
+			// mark according to subsets
+			unmarkall(root);
+
+			for (int j = 0; j < n; j++) {
+				m_marked[m_nodelist.at(a[j])] = true;
+			}
+
+			m_marked[root] = true;
+
+			bool isvalid = true;
+
+			if (!valid(root)) 
+				isvalid = false;
+
+			for (int j = 0; j < n && isvalid; j++) {
+					if (!valid(m_nodelist.at(j)))
+						isvalid = false;
+			}
+
+			if (isvalid) {
+				int this_cost = cost(root);
+
+				// see if present optimal partition
+				if (!found || this_cost < low_cost) {
+					for (int j = 0; j < n; j++) {
+						marked[j] = false;
+					}
+
+					for (int j = 0; j < k; j++) {
+						marked[a[j]] = true;
+					}
+
+					low_cost = this_cost;
+					found = true;
+				}
+			}
+		}
+	}
+
+	// mark the correct set of passes
+	unvisitall(root);
+	unmarkall(root);
+
+	for(int i = 0; i < n; i++) {
+		if (marked[i])
+			m_marked[m_nodelist.at(i)] = true;
+	}
+
+	set_partition();
+}

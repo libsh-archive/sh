@@ -36,6 +36,9 @@ class SH_DLLEXPORT RDS {
 		rds_subdivide(m_pdt->get_root());
 		set_partition();
 	};
+
+	// brute force
+	void full_search();
   
 	// return partial dom tree for this program
 	PDomTree::PDomTree *get_pdt() {
@@ -47,6 +50,7 @@ class SH_DLLEXPORT RDS {
   private:
 	typedef std::set<DAGNode::DAGNode*> ChildrenSet;
     typedef std::vector<DAGNode::DAGNode*> PassVector;	
+	typedef std::vector<DAGNode::DAGNode*> NodeVector;
 
 	// limits
 	int max_ops;
@@ -105,6 +109,11 @@ class SH_DLLEXPORT RDS {
 	int countmarked(DAGNode::DAGNode *v);
 	int countnodes(DAGNode::DAGNode *v);
 	void unvisitall(DAGNode::DAGNode *v);
+
+	// for brute force
+	void set_nodelist(DAGNode::DAGNode *v);
+	NodeVector m_nodelist;
+
   };
 
 #endif
