@@ -1,5 +1,23 @@
 2004-11-05  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	The following changes were made after the 0.7.5 release.
+	
+	* backends/gl/PBufferStreams.cpp: Implemented SH_OP_LOOKUP in arb
+	backend stream implementation.
+
+	* src/ShChannelImpl.hpp (operator[]): Implemented operator[].
+
+	* src/ShChannel.hpp: Added operator[] for indexed stream lookup.
+
+	* src/ShStatement.cpp: Add SH_OP_LOOKUP information.
+
+	* src/ShStatement.hpp: Add SH_OP_LOOKUP for indexed stream lookups.
+
+	* src/ShChannel.hpp: Remove const version of operator(). It's
+	always const.
+
+2004-11-05  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
 	* src/ShWrap.hpp, src/ShInterp.hpp, src/ShClamping.hpp: More
 	missing "this->" parts. Also fixed indentation.
 

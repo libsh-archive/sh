@@ -29,6 +29,7 @@
 
 #include "ShChannelNode.hpp"
 #include "ShProgram.hpp"
+#include "ShGeneric.hpp"
 
 namespace SH {
 
@@ -58,10 +59,11 @@ public:
 
   /// Fetch the current element from this stream.
   /// This is only useful in stream programs
-  T operator()();
-  /// Fetch the current element from this stream.
-  /// This is only useful in stream programs
-  const T operator()() const;
+  T operator()() const;
+
+  /// Indexed lookup from the stream
+  template<typename Ts>
+  T operator[](const ShGeneric<1, Ts>& index) const;
 
   /// Return the node internally wrapped by this channel object
   ShChannelNodePtr node();
