@@ -37,8 +37,8 @@ namespace SH {
 ShProgram connect(const ShChannelNodePtr& node, const ShProgram& program)
 {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
-    ShVariable out(new ShVariableNode(SH_OUTPUT,
-                                      node->size(), node->specialType()));
+    ShVariable out(node->clone(SH_OUTPUT));
+
     ShVariable streamVar(node);
     ShStatement stmt(out, SH_OP_FETCH, streamVar);
     ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
@@ -46,7 +46,8 @@ ShProgram connect(const ShChannelNodePtr& node, const ShProgram& program)
   return connect(nibble, program);
 }
 
-ShStream::ShStream(const ShChannelNodePtr& channel)
+ShStream::ShStream(const ShChannelNodePtr& channel, int stride, int offset )
+    : m_stride( stride ), m_offset( offset )
 {
   append(channel);
 }
@@ -74,6 +75,17 @@ ShStream::NodeList::iterator ShStream::end()
 int ShStream::size() const
 {
   return m_nodes.size();
+}
+
+int ShStream::stride() const
+{
+  return m_stride;
+}
+
+
+int ShStream::offset() const
+{
+  return m_offset;
 }
 
 void ShStream::append(const ShChannelNodePtr& node)

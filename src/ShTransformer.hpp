@@ -31,6 +31,8 @@
 #include "ShBackend.hpp"
 #include "ShProgram.hpp"
 #include "ShCtrlGraph.hpp"
+#include "ShInternals.hpp"
+#include "ShVariableType.hpp"
 
 namespace SH {
 
@@ -91,6 +93,35 @@ public:
   //@{
   void convertTextureLookups();
   //@}
+
+  
+  /**@name Removes interval arithmetic computation
+   * Converts computations on N-tuple intervals of type T into
+   * computation on regular N-tuples of type T. 
+   *
+   * (Implemented in ShIntervalConverter.?pp)
+   *
+   * splits contains a split into exactly 2 new variables for each interval
+   * variable encountered
+   */
+  void convertIntervalTypes(VarSplitMap &splits);
+
+
+  typedef std::map<ShValueType, ShValueType> ValueTypeMap;  
+  /**@name Arithmetic type conversions
+   * Converts ops on other basic non-float Sh types to float storage types based on the
+   * floatMapping.  
+   * For each key k (a type index to convert), in floatMapping, the converter
+   * changes it to use floating point type index floatMapping[k].
+   *
+   * (Note, the converter does not handle cases where floatMapping[j] exists,
+   * but j is also floatMapping[k])
+   *
+   */
+  void convertToFloat(ValueTypeMap &typeMap);
+
+  //@todo  use dependent uniforms in conversion and spliting functions
+  //instead of separate VarSplitMaps and ShVarMaps
   
 private:
   /// NOT IMPLEMENTED

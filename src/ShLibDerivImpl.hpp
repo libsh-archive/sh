@@ -31,43 +31,43 @@
 
 namespace SH {
 
-template<int N, typename T>
+template<int N, ShValueType V>
 inline
-ShGeneric<N, T> dx(const ShGeneric<N, T>& var)
+ShGeneric<N, V> dx(const ShGeneric<N, V>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  ShAttrib<N, SH_TEMP, V> t;
   shDX(t, var);
   return t;
 }
 
-template<int N, typename T>
+template<int N, ShValueType V>
 inline
-ShGeneric<N, T> dy(const ShGeneric<N, T>& var)
+ShGeneric<N, V> dy(const ShGeneric<N, V>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  ShAttrib<N, SH_TEMP, V> t;
   shDY(t, var);
   return t;
 }
 
-template<int N, typename T>
+template<int N, ShValueType V>
 inline
-ShGeneric<N, T> fwidth(const ShGeneric<N, T>& var)
+ShGeneric<N, V> fwidth(const ShGeneric<N, V>& var)
 {
   return max(abs(dx(var)), abs(dy(var)));
 }
 
-template<typename T>
+template<ShValueType V>
 inline
-ShGeneric<2, T> gradient(const ShGeneric<1, T>& var)
+ShGeneric<2, V> gradient(const ShGeneric<1, V>& var)
 {
   return ShAttrib2f(dx(var), dy(var));
 }
 
-template<int N, typename T>
+template<int N, ShValueType V>
 inline
-ShMatrix<2, N, SH_TEMP, T> jacobian(const ShGeneric<N, T>& var)
+ShMatrix<2, N, SH_TEMP, V> jacobian(const ShGeneric<N, V>& var)
 {
-  ShMatrix<2, N, SH_TEMP, T> ret;
+  ShMatrix<2, N, SH_TEMP, V> ret;
   ret[0] = dx(var);
   ret[1] = dy(var);
   return ret;

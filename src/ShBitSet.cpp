@@ -212,7 +212,7 @@ ShBitRef ShBitSet::operator[](std::size_t i)
 std::ostream& operator<<(std::ostream& out, const ShBitSet& bitset)
 {
   for (std::size_t i = 0; i < bitset.size(); i++) {
-    out << bitset[i] ? '1' : '0';
+    out << (bitset[i] ? '1' : '0');
   }
   return out;
 }

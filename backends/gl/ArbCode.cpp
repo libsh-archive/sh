@@ -37,11 +37,14 @@
 #include "ShOptimizations.hpp"
 #include "ShEnvironment.hpp"
 #include "ShContext.hpp"
+#include "ShTypeInfo.hpp"
+#include "ShVariant.hpp"
 #include "ShTextureNode.hpp"
 #include "ShSyntax.hpp"
 #include "ArbReg.hpp"
 #include "Arb.hpp"
 #include "ShAttrib.hpp"
+#include "ShCastManager.hpp"
 #include "ShError.hpp"
 
 namespace shgl {
@@ -110,10 +113,10 @@ using namespace SH;
 ArbCode::ArbCode(const ShProgramNodeCPtr& shader, const std::string& unit,
                  TextureStrategy* texture)
   : m_texture(texture), m_shader(0), m_originalShader(0), m_unit(unit),
-    m_numTemps(0), m_numInputs(0), m_numOutputs(0), m_numParams(0), m_numParamBindings(0),
+    m_numTemps(0), m_numHalfTemps(0), m_numInputs(0), m_numOutputs(0), m_numParams(0), m_numParamBindings(0),
     m_numConsts(0),
     m_numTextures(0), m_programId(0), m_environment(0), m_max_label(0),
-    m_address_register(new ShVariableNode(SH_TEMP, 1))
+    m_address_register(new ShVariableNode(SH_TEMP, 1, SH_FLOAT))
 {
   m_originalShader =  const_cast<ShProgramNode*>(shader.object());
 
@@ -121,28 +124,49 @@ ArbCode::ArbCode(const ShProgramNodeCPtr& shader, const std::string& unit,
   if (unit == "vertex") m_environment |= SH_ARB_VP;
 
   const GLubyte* extensions = glGetString(GL_EXTENSIONS);
+  if(extensions) { // DEBUGGING
+    std::string extstr(reinterpret_cast<const char*>(extensions));
 
-  std::string extstr(reinterpret_cast<const char*>(extensions));
-
-  if (unit == "fragment") {
-    if (extstr.find("NV_fragment_program_option") != std::string::npos) {
-      m_environment |= SH_ARB_NVFP;
+    if (unit == "fragment") {
+      if (extstr.find("NV_fragment_program_option") != std::string::npos) {
+        m_environment |= SH_ARB_NVFP;
+      }
+      if (extstr.find("NV_fragment_program2") != std::string::npos) {
+        m_environment |= SH_ARB_NVFP2;
+      }
+      if (extstr.find("ATI_draw_buffers") != std::string::npos) {
+        m_environment |= SH_ARB_ATIDB;
+      }
     }
-    if (extstr.find("NV_fragment_program2") != std::string::npos) {
-      m_environment |= SH_ARB_NVFP2;
-    }
-    if (extstr.find("ATI_draw_buffers") != std::string::npos) {
-      m_environment |= SH_ARB_ATIDB;
+    if (unit == "vertex") {
+      if (extstr.find("NV_vertex_program2_option") != std::string::npos) {
+        m_environment |= SH_ARB_NVVP2;
+      }
+      if (extstr.find("NV_vertex_program3") != std::string::npos) {
+        m_environment |= SH_ARB_NVVP3;
+      }
     }
   }
-  if (unit == "vertex") {
-    if (extstr.find("NV_vertex_program2_option") != std::string::npos) {
-      m_environment |= SH_ARB_NVVP2;
-    }
-    if (extstr.find("NV_vertex_program3") != std::string::npos) {
-      m_environment |= SH_ARB_NVVP3;
-    }
-  }
+
+  // initialize m_convertMap
+  m_convertMap[SH_DOUBLE] = SH_FLOAT; 
+
+  bool halfSupport = m_environment & (SH_ARB_NVFP | SH_ARB_NVFP2);
+  if(!halfSupport) m_convertMap[SH_HALF] = SH_FLOAT;
+
+  m_convertMap[SH_INT] = SH_FLOAT;
+  m_convertMap[SH_SHORT] = halfSupport ? SH_HALF: SH_FLOAT;
+  m_convertMap[SH_BYTE] = halfSupport ? SH_HALF: SH_FLOAT;
+  m_convertMap[SH_UINT] = SH_FLOAT;
+  m_convertMap[SH_USHORT] = halfSupport ? SH_HALF: SH_FLOAT;
+  m_convertMap[SH_UBYTE] = halfSupport ? SH_HALF: SH_FLOAT;
+
+  m_convertMap[SH_FRAC_INT] = SH_FLOAT;
+  m_convertMap[SH_FRAC_SHORT] = SH_FLOAT;
+  m_convertMap[SH_FRAC_BYTE] = halfSupport ? SH_HALF : SH_FLOAT;
+  m_convertMap[SH_FRAC_UINT] = SH_FLOAT;
+  m_convertMap[SH_FRAC_USHORT] = SH_FLOAT;
+  m_convertMap[SH_FRAC_UBYTE] = halfSupport ? SH_HALF : SH_FLOAT;
 }
 
 ArbCode::~ArbCode()
@@ -164,9 +188,11 @@ void ArbCode::generate()
   ShContext::current()->enter(m_shader);
   ShTransformer transform(m_shader);
 
+
   transform.convertInputOutput(); 
   transform.splitTuples(4, m_splits);
   transform.convertTextureLookups();
+  transform.convertToFloat(m_convertMap);
   
   if(transform.changed()) {
     optimize(m_shader);
@@ -217,8 +243,13 @@ bool ArbCode::allocateRegister(const ShVariableNodePtr& var)
 
   int idx = m_tempRegs.front();
   m_tempRegs.pop_front();
-  if (idx + 1 > m_numTemps) m_numTemps = idx + 1;
-  m_registers[var] = new ArbReg(SH_ARB_REG_TEMP, idx);
+  if(var->valueType() == SH_HALF) {
+    if (idx + 1 > m_numHalfTemps) m_numHalfTemps = idx + 1;
+    m_registers[var] = new ArbReg(SH_ARB_REG_HALF_TEMP, idx);
+  } else {
+    if (idx + 1 > m_numTemps) m_numTemps = idx + 1;
+    m_registers[var] = new ArbReg(SH_ARB_REG_TEMP, idx);
+  }
   m_reglist.push_back(m_registers[var]);
   
   return true;
@@ -299,16 +330,20 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
 
   if (!uniform) return;
 
+  ShVariantCPtr uniformVariant = uniform->getVariant();
   RegMap::const_iterator I = m_registers.find(uniform);
   if (I == m_registers.end()) { // perhaps uniform was split
     if( m_splits.count(uniform) > 0 ) {
       ShTransformer::VarNodeVec &splitVec = m_splits[uniform];
+
       int offset = 0;
+      int copySwiz[4];
       for(ShTransformer::VarNodeVec::iterator it = splitVec.begin();
           it != splitVec.end(); offset += (*it)->size(), ++it) {
-        for(i = 0; i < (*it)->size(); ++i) {
-          (*it)->setValue(i, uniform->getValue(i + offset));
-        }
+        // TODO switch to properly swizzled version
+        for(i = 0; i < (*it)->size(); ++i) copySwiz[i] = i + offset;
+        (*it)->setVariant(uniformVariant->get(false,
+            ShSwizzle(uniform->size(), (*it)->size(), copySwiz))); 
         updateUniform(*it);
       }
     } 
@@ -322,9 +357,17 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
     
   const ArbReg& reg = *I->second;
   
+  // @todo type remove the two copies done below
+  // (although it probably won't matter with all the other work we're doing...
+  // cast to float 
   float values[4];
+  ShPointer<ShDataVariant<SH_FLOAT, SH_HOST> > floatVariant = 
+    new ShDataVariant<SH_FLOAT, SH_HOST>(uniform->size()); 
+  floatVariant->set(uniformVariant);
+
   for (i = 0; i < uniform->size(); i++) {
-    values[i] = (float)uniform->getValue(i);
+    // TODO clean this up and handle different types
+    values[i] = (*floatVariant)[i]; 
   }
   for (; i < 4; i++) {
     values[i] = 0.0;
@@ -485,16 +528,22 @@ std::ostream& ArbCode::print(std::ostream& out)
   for (RegList::const_iterator I = m_reglist.begin();
        I != m_reglist.end(); ++I) {
     if ((*I)->type == SH_ARB_REG_TEMP) continue;
+    if ((*I)->type == SH_ARB_REG_HALF_TEMP) continue;
     if ((*I)->type == SH_ARB_REG_TEXTURE) continue;
     out << "  ";
     (*I)->printDecl(out);
     out << endl;
   }
-  if (m_numTemps) {
+  if (m_numTemps +  m_numHalfTemps > 0) {
     out << "  TEMP ";
     for (int i = 0; i < m_numTemps; i++) {
       if (i > 0) out << ", ";
       out << ArbReg(SH_ARB_REG_TEMP, i);
+    }
+    if(m_numTemps > 0 && m_numHalfTemps > 0) out << ", ";
+    for (int i = 0; i < m_numHalfTemps; i++) {
+      if (i > 0) out << ", ";
+      out << ArbReg(SH_ARB_REG_HALF_TEMP, i);
     }
     out << ";" << endl;
   }
@@ -623,7 +672,7 @@ std::ostream& ArbCode::print(std::ostream& out)
   return out;
 }
 
-std::ostream& ArbCode::printInputOutputFormat(std::ostream& out) {
+std::ostream& ArbCode::describe_interface(std::ostream& out) {
   ShProgramNode::VarList::const_iterator I;
   out << "Inputs:" << std::endl;
   for (I = m_shader->inputs.begin(); I != m_shader->inputs.end(); ++I) {
@@ -724,9 +773,9 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
     
     ShStructuralNodePtr body = node->structnodes.back();
 
-    ShVariable maxloop(new ShVariableNode(SH_CONST, 1));
-    float maxloopval = 255.0;
-    maxloop.setValues(&maxloopval);
+    float maxloopval = 255.0f;
+    ShConstAttrib1f maxloop(maxloopval);
+
     m_shader->constants.push_back(maxloop.node());
     m_instructions.push_back(ArbInst(SH_ARB_REP, ShVariable(), maxloop));
     genStructNode(header);
@@ -750,9 +799,9 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
       }
     }
     
-    ShVariable maxloop(new ShVariableNode(SH_CONST, 1));
-    float maxloopval = 255.0;
-    maxloop.setValues(&maxloopval);
+    float maxloopval = 255.0f;
+    ShConstAttrib1f maxloop(maxloopval);
+
     m_shader->constants.push_back(maxloop.node());
     m_instructions.push_back(ArbInst(SH_ARB_REP, ShVariable(), maxloop));
     genStructNode(loopnode);
@@ -786,7 +835,11 @@ void ArbCode::allocRegs()
   allocConsts(limits);
 
   try {
-    allocTemps(limits);
+    allocTemps(limits, false);
+    bool halfSupport = m_environment & (SH_ARB_NVFP | SH_ARB_NVFP2);
+    if(halfSupport) {
+      allocTemps(limits, true);
+    }
   } catch (int) {
     std::ostringstream os;
     os << "Out of temporary registers (" << limits.temps()
@@ -933,13 +986,20 @@ void ArbCode::allocConsts(const ArbLimits& limits)
        I != m_shader->constants.end(); ++I) {
     ShVariableNodePtr node = *I;
 
+    // @todo type don't really need to copy here, or shold use the
+    // ArbReg's array...but whatever
+    ShPointer<ShDataVariant<SH_FLOAT, SH_HOST> > variant =
+        new ShDataVariant<SH_FLOAT, SH_HOST>(node->size());
+    variant->set(node->getVariant());
+
     // TODO: improve efficiency
     RegMap::const_iterator J;
     for (J = m_registers.begin(); J != m_registers.end(); ++J) {
       if (J->second->type != SH_ARB_REG_CONST) continue;
       int f = 0;
+      // TODO handle other stuff
       for (int i = 0; i < node->size(); i++) {
-        if (J->second->values[i] == node->getValue(i)) f++;
+        if (J->second->values[i] == (*variant)[i]) f++;
       }
       if (f == node->size()) break;
     }
@@ -947,7 +1007,7 @@ void ArbCode::allocConsts(const ArbLimits& limits)
       m_registers[node] = new ArbReg(SH_ARB_REG_CONST, m_numConsts, node->name());
       m_reglist.push_back(m_registers[node]);
       for (int i = 0; i < 4; i++) {
-        m_registers[node]->values[i] = (float)(i < node->size() ? node->getValue(i) : 0.0);
+        m_registers[node]->values[i] = (float)(i < node->size() ? (*variant)[i] : 0.0);
       }
       m_numConsts++;
     } else {
@@ -956,19 +1016,21 @@ void ArbCode::allocConsts(const ArbLimits& limits)
   }
 }
 
-bool mark(ShLinearAllocator& allocator, ShVariableNodePtr node, int i)
+bool mark(ShLinearAllocator& allocator, ShVariableNodePtr node, int i, bool half)
 {
   if (!node) return false;
   if (node->kind() != SH_TEMP) return false;
+  if (half && (node->valueType() != SH_HALF)) return false; 
   if (node->hasValues()) return false;
   allocator.mark(node, i);
   return true;
 }
 
-bool markable(ShVariableNodePtr node)
+bool markable(ShVariableNodePtr node, bool half)
 {
   if (!node) return false;
   if (node->kind() != SH_TEMP) return false;
+  if (half && (node->valueType() != SH_HALF)) return false; 
   if (node->hasValues()) return false;
   return true;
 }
@@ -989,7 +1051,10 @@ struct ArbScope {
   UsageMap write_map; // locations last written to
 };
 
-void ArbCode::allocTemps(const ArbLimits& limits)
+// @todo type
+// cheap hack with half to allocate temps twice, once for non-half temporaries
+// once for half temporaries
+void ArbCode::allocTemps(const ArbLimits& limits, bool half)
 {
 
   typedef std::list<ArbScope> ScopeStack;
@@ -1058,12 +1123,12 @@ void ArbCode::allocTemps(const ArbLimits& limits)
         const ArbScope& scope = scopestack.back();
         for (ArbScope::MarkList::const_iterator I = scope.need_mark.begin();
              I != scope.need_mark.end(); ++I) {
-          mark(allocator, *I, (int)i);
+          mark(allocator, *I, (int)i, half);
         }
         scopestack.pop_back();
       }
 
-      if (markable(instr.dest.node())) {
+      if (markable(instr.dest.node(), half)) {
         std::bitset<4> writemask;
         for (int k = 0; k < instr.dest.size(); k++) {
           writemask[instr.dest.swizzle()[k]] = true;
@@ -1073,7 +1138,7 @@ void ArbCode::allocTemps(const ArbLimits& limits)
           ArbScope& scope = *S;
 
           if ((used & writemask).any()) {
-            mark(allocator, instr.dest.node().object(), scope.start);
+            mark(allocator, instr.dest.node().object(), scope.start, half);
             scope.need_mark.insert(instr.dest.node().object());
           }
           
@@ -1085,7 +1150,7 @@ void ArbCode::allocTemps(const ArbLimits& limits)
       }
       
       for (int j = 0; j < ArbInst::max_num_sources; j++) {
-        if (!markable(instr.src[j].node())) continue;
+        if (!markable(instr.src[j].node(), half)) continue;
         std::bitset<4> usemask;
         for (int k = 0; k < instr.src[j].size(); k++) {
           usemask[instr.src[j].swizzle()[k]] = true;
@@ -1105,12 +1170,12 @@ void ArbCode::allocTemps(const ArbLimits& limits)
       const ArbScope& scope = scopestack.back();
       for (ArbScope::MarkList::const_iterator I = scope.need_mark.begin();
            I != scope.need_mark.end(); ++I) {
-        mark(allocator, *I, (int)i);
+        mark(allocator, *I, (int)i, half);
       }
       scopestack.pop_back();
     }
 
-    if (mark(allocator, instr.dest.node(), (int)i)) {
+    if (mark(allocator, instr.dest.node(), (int)i, half)) {
       for (ScopeStack::iterator S = scopestack.begin(); S != scopestack.end(); ++S) {
         ArbScope& scope = *S;
         std::bitset<4> writemask;
@@ -1127,7 +1192,7 @@ void ArbCode::allocTemps(const ArbLimits& limits)
     }
     
     for (int j = 0; j < ArbInst::max_num_sources; j++) {
-      if (mark(allocator, instr.src[j].node(), (int)i)) {
+      if (mark(allocator, instr.src[j].node(), (int)i, half)) {
         for (ScopeStack::iterator S = scopestack.begin(); S != scopestack.end(); ++S) {
           ArbScope& scope = *S;
           // Mark uses that weren't recently written to.
@@ -1136,7 +1201,7 @@ void ArbCode::allocTemps(const ArbLimits& limits)
             usemask[instr.src[j].swizzle()[k]] = true;
           }
           if ((usemask & ~scope.write_map[instr.src[j].node().object()]).any()) {
-            mark(allocator, instr.src[j].node(), scope.start);
+            mark(allocator, instr.src[j].node(), scope.start, half);
             scope.need_mark.insert(instr.src[j].node().object());
           }
         }
@@ -1145,8 +1210,16 @@ void ArbCode::allocTemps(const ArbLimits& limits)
   }
   
   m_tempRegs.clear();
-  m_numTemps = 0;
-  for (int i = 0; i < limits.temps(); i++) {
+  int limit;
+  if(half) {
+    m_numHalfTemps = 0;
+    limit = limits.halftemps(); 
+  } else {
+    m_numTemps = 0;
+    limit = limits.temps();
+  }
+
+  for (int i = 0; i < limit; i++) {
     m_tempRegs.push_back(i);
   }
   

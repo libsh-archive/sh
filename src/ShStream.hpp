@@ -42,10 +42,10 @@ namespace SH {
 class
 SH_DLLEXPORT ShStream {
 public:
-  ShStream(const ShChannelNodePtr& node);
+  ShStream(const ShChannelNodePtr& node, int _stride = 1, int _offset = 0);
   
   template<typename T>
-  ShStream(const ShChannel<T>& channel);
+  ShStream(const ShChannel<T>& channel, int _stride = 1, int _offset = 0);
 
   typedef std::list<ShChannelNodePtr> NodeList;
 
@@ -54,6 +54,9 @@ public:
   NodeList::iterator begin();
   NodeList::iterator end();
   int size() const;
+  // right now `functional' (non-updatable)... if you need to change them, create a new stream
+  int stride() const;
+  int offset() const;
 
   template<typename T>
   void append(const ShChannel<T>& channel);
@@ -67,6 +70,8 @@ public:
   
 private:
   std::list<ShChannelNodePtr> m_nodes;
+  int m_stride; // Tuple lengths between tuples in this stream
+  int m_offset; // Tuple lengths from the beginning where this stream starts
 };
 
 /** Combine two streams.

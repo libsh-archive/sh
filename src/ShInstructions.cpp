@@ -28,15 +28,10 @@
 #include "ShInstructions.hpp"
 #include "ShStatement.hpp"
 #include "ShContext.hpp"
+#include "ShVariant.hpp"
+#include "ShEval.hpp"
 #include "ShDebug.hpp"
 #include "ShError.hpp"
-
-#ifdef WIN32
-// TODO: quick fix, maybe this should be handled elsewhere or
-// implemented better?
-inline float roundf(float f) { return floorf(f + 0.5); }
-inline float cbrtf(float f) { return pow(f, 1.0f/3.0f); }
-#endif /* WIN32 */
 
 namespace {
 
@@ -91,665 +86,231 @@ inline void addStatement(const ShStatement& stmt)
   ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
 }
 
-typedef float T;
-
-inline T slt(T a, T b) { return a < b ? 1.0f : 0.0f; }
-inline T sle(T a, T b) { return a <= b ? 1.0f : 0.0f; }
-inline T sgt(T a, T b) { return a > b ? 1.0f : 0.0f; }
-inline T sge(T a, T b) { return a >= b ? 1.0f : 0.0f; }
-inline T seq(T a, T b) { return a == b ? 1.0f : 0.0f; }
-inline T sne(T a, T b) { return a != b ? 1.0f : 0.0f; }
-inline T max(T a, T b) { return a > b ? a : b; }
-inline T min(T a, T b) { return a < b ? a : b; }
-inline T lrp(T alpha, T a, T b) { return alpha*a + (1.0f-alpha)*b; }
-inline T cond(T alpha, T a, T b) { return alpha > 0.0f ? a : b; }
-inline T mad(T a, T b, T c) { return a * b + c; }
-inline T frac(T a) { return fmodf(a, 1.0f); }
-inline T sgn(T a) { return (a < 0.0f ? -1.0f : (a == 0.0f ? 0.0f : 1.0f)); }
-
-// TODO: Replace ifdef with an autoconf check
-#ifdef WIN32
-inline T exp2f(T a) { return powf(2.0, a); }
-inline T exp10f(T a) { return powf(10.0, a); }
-inline T log2f(T a) { return logf(a)/logf(2.0); }
-#endif
-#ifdef __APPLE__
-inline T exp10f(T a) { return powf(10.0, a); }
-#endif
 }
-
-#define CWISE_BINARY_OP(d, a, b, op) \
-do {\
-  has_values(d, a, b);\
-  T* v_d = new T[d.size()];\
-  T* v_a = new T[a.size()];\
-  a.getValues(v_a);\
-  T* v_b = new T[b.size()];\
-  b.getValues(v_b);\
-  for (int i = 0; i < d.size(); i++) v_d[i] = op(v_a[(a.size() == 1 ? 0 : i)],\
-                                                 v_b[(b.size() == 1 ? 0 : i)]);\
-  d.setValues(v_d);\
-  delete [] v_d;\
-  delete [] v_a;\
-  delete [] v_b;\
-} while (0)
-
-#define CWISE_BINARY_INLOP(d, a, b, op) \
-do {\
-  has_values(d, a, b);\
-  T* v_d = new T[d.size()];\
-  T* v_a = new T[a.size()];\
-  a.getValues(v_a);\
-  T* v_b = new T[b.size()];\
-  b.getValues(v_b);\
-  for (int i = 0; i < d.size(); i++) v_d[i] = v_a[(a.size() == 1 ? 0 : i)] op\
-                                              v_b[(b.size() == 1 ? 0 : i)];\
-  d.setValues(v_d);\
-  delete [] v_d;\
-  delete [] v_a;\
-  delete [] v_b;\
-} while (0)
-
-#define CWISE_TRINARY_OP(d, a, b, c, op) \
-do {\
-  has_values(d, a, b, c);\
-  T* v_a = new T[a.size()];\
-  a.getValues(v_a);\
-  T* v_b = new T[b.size()];\
-  b.getValues(v_b);\
-  T* v_c = new T[c.size()];\
-  c.getValues(v_c);\
-  T* v_d = new T[d.size()];\
-  for (int i = 0; i < d.size(); i++) v_d[i] = op(v_a[(a.size() == 1 ? 0 : i)],\
-                                                 v_b[(b.size() == 1 ? 0 : i)],\
-                                                 v_c[(c.size() == 1 ? 0 : i)]\
-                                                 );\
-  d.setValues(v_d);\
-  delete [] v_d;\
-  delete [] v_a;\
-  delete [] v_b;\
-  delete [] v_c;\
-} while (0)
-
-#define CWISE_UNARY_OP(d, a, op) \
-do {\
-  has_values(d, a);\
-  T* v_a = new T[a.size()];\
-  T* v_d = new T[d.size()];\
-  a.getValues(v_a);\
-  for (int i = 0; i < d.size(); i++) v_d[i] = op(v_a[(a.size() == 1 ? 0 : i)]);\
-  d.setValues(v_d);\
-  delete [] v_a;\
-  delete [] v_d;\
-} while (0)
 
 namespace SH {
-
-void shASN(ShVariable& dest, const ShVariable& src)
-{
-  sizes_match(dest, src);
-  if (immediate()) {
-    has_values(dest, src);
-    T* vals = new T[src.size()];
-    src.getValues(vals);
-    dest.setValues(vals);
-    delete [] vals;
-  } else {
-    ShStatement stmt(dest, SH_OP_ASN, src);
-    addStatement(stmt);
+#define SHINST_UNARY_OP_CORE(op)\
+  if(immediate()) {\
+    has_values(dest, src);\
+    ShVariant *dv, *sv;\
+    bool newd, news;\
+    newd = dest.loadVariant(dv);\
+    news = src.loadVariant(sv);\
+    (*ShEval::instance())(SH_OP_ ## op, dv, sv, 0, 0);\
+    if(newd) {\
+      dest.setVariant(dv); \
+      delete dv;\
+    } else {\
+      dest.updateVariant();\
+    }\
+    if(news) delete sv;\
+  } else {\
+    ShStatement stmt(dest, SH_OP_ ## op, src);\
+    addStatement(stmt);\
   }
+
+#define SHINST_UNARY_OP(op)\
+void sh ## op(ShVariable& dest, const ShVariable& src)\
+{\
+  sizes_match(dest, src);\
+  SHINST_UNARY_OP_CORE(op);\
 }
 
-void shADD(ShVariable& dest, const ShVariable& a, const ShVariable& b)
-{
-  sizes_match(dest, a, b, true, true);
-  if (immediate()) {
-    CWISE_BINARY_INLOP(dest, a, b, +);
-  } else {
-    ShStatement stmt(dest, a, SH_OP_ADD, b);
-    addStatement(stmt);
-  }
+#define SHINST_BINARY_OP_CORE(op)\
+  if(immediate()) {\
+    has_values(dest, a, b);\
+    ShVariant *dv, *av, *bv;\
+    bool newd, newa, newb;\
+    newd = dest.loadVariant(dv);\
+    newa = a.loadVariant(av);\
+    newb = b.loadVariant(bv);\
+    (*ShEval::instance())(SH_OP_ ## op, dv, av, bv, 0);\
+    if(newd) {\
+      dest.setVariant(dv); \
+      delete dv;\
+    } else {\
+      dest.updateVariant();\
+    }\
+    if(newa) delete av;\
+    if(newb) delete bv;\
+  } else {\
+    ShStatement stmt(dest, a, SH_OP_ ## op, b);\
+    addStatement(stmt);\
+  }\
+
+#define SHINST_BINARY_OP(op, scalar_a, scalar_b)\
+void sh ## op(ShVariable& dest, const ShVariable& a, const ShVariable &b)\
+{\
+  sizes_match(dest, a, b, scalar_a, scalar_b);\
+  SHINST_BINARY_OP_CORE(op);\
 }
 
-void shMUL(ShVariable& dest, const ShVariable& a, const ShVariable& b)
-{
-  sizes_match(dest, a, b, true, true);
-  if (immediate()) {
-    CWISE_BINARY_INLOP(dest, a, b, *);
-  } else {
-    ShStatement stmt(dest, a, SH_OP_MUL, b);
-    addStatement(stmt);
-  }
+
+#define SHINST_TERNARY_OP(op, condition)\
+void sh ## op(ShVariable& dest, const ShVariable& a, const ShVariable &b, const ShVariable &c)\
+{\
+  SH_DEBUG_ASSERT(condition);\
+  if(immediate()) {\
+    has_values(dest, a, b, c);\
+    ShVariant *dv, *av, *bv, *cv;\
+    bool newd, newa, newb, newc;\
+    newd = dest.loadVariant(dv);\
+    newa = a.loadVariant(av);\
+    newb = b.loadVariant(bv);\
+    newc = c.loadVariant(cv);\
+    (*ShEval::instance())(SH_OP_ ## op, dv, av, bv, cv);\
+    if(newd) {\
+      dest.setVariant(dv); \
+      delete dv;\
+    } else {\
+      dest.updateVariant();\
+    }\
+    if(newa) delete av;\
+    if(newb) delete bv;\
+    if(newc) delete cv;\
+  } else {\
+    ShStatement stmt(dest, SH_OP_ ## op, a, b, c);\
+    addStatement(stmt);\
+  }\
 }
 
-void shDIV(ShVariable& dest, const ShVariable& a, const ShVariable& b)
-{
-  sizes_match(dest, a, b, true, true);
-  if (immediate()) {
-    CWISE_BINARY_INLOP(dest, a, b, /);
-  } else {
-    ShStatement stmt(dest, a, SH_OP_DIV, b);
-    addStatement(stmt);
-  }
-}
+// TODO 
+// intelligent type selection for operators
+// (Instead of just selecting evaluator based on dest.valueType,
+// select based on some kind of type hierarchy)
 
-void shSLT(ShVariable& dest, const ShVariable& a, const ShVariable& b)
-{
-  sizes_match(dest, a, b, true, true);
-  if (immediate()) {
-    CWISE_BINARY_OP(dest, a, b, slt);
-  } else {
-    ShStatement stmt(dest, a, SH_OP_SLT, b);
-    addStatement(stmt);
-  }
-}
+SHINST_UNARY_OP(ASN);
 
-void shSLE(ShVariable& dest, const ShVariable& a, const ShVariable& b)
-{
-  sizes_match(dest, a, b, true, true);
-  if (immediate()) {
-    CWISE_BINARY_OP(dest, a, b, sle);
-  } else {
-    ShStatement stmt(dest, a, SH_OP_SLE, b);
-    addStatement(stmt);
-  }
-}
+SHINST_BINARY_OP(ADD, true, true);
+SHINST_BINARY_OP(MUL, true, true);
+SHINST_BINARY_OP(DIV, true, true);
+SHINST_BINARY_OP(SLT, true, true);
+SHINST_BINARY_OP(SLE, true, true);
+SHINST_BINARY_OP(SGT, true, true);
+SHINST_BINARY_OP(SGE, true, true);
+SHINST_BINARY_OP(SEQ, true, true);
+SHINST_BINARY_OP(SNE, true, true);
 
-void shSGT(ShVariable& dest, const ShVariable& a, const ShVariable& b)
-{
-  sizes_match(dest, a, b, true, true);
-  if (immediate()) {
-    CWISE_BINARY_OP(dest, a, b, sgt);
-  } else {
-    ShStatement stmt(dest, a, SH_OP_SGT, b);
-    addStatement(stmt);
-  }
-}
+SHINST_UNARY_OP(ABS);
+SHINST_UNARY_OP(ACOS);
+SHINST_UNARY_OP(ASIN);
+SHINST_UNARY_OP(ATAN);
+SHINST_BINARY_OP(ATAN2, false, false);
+SHINST_UNARY_OP(CBRT);
+SHINST_UNARY_OP(CEIL);
+SHINST_UNARY_OP(COS);
 
-void shSGE(ShVariable& dest, const ShVariable& a, const ShVariable& b)
-{
-  sizes_match(dest, a, b, true, true);
-  if (immediate()) {
-    CWISE_BINARY_OP(dest, a, b, sge);
-  } else {
-    ShStatement stmt(dest, a, SH_OP_SGE, b);
-    addStatement(stmt);
-  }
-}
-
-void shSEQ(ShVariable& dest, const ShVariable& a, const ShVariable& b)
-{
-  sizes_match(dest, a, b, true, true);
-  if (immediate()) {
-    CWISE_BINARY_OP(dest, a, b, seq);
-  } else {
-    ShStatement stmt(dest, a, SH_OP_SEQ, b);
-    addStatement(stmt);
-  }
-}
-
-void shSNE(ShVariable& dest, const ShVariable& a, const ShVariable& b)
-{
-  sizes_match(dest, a, b, true, true);
-  if (immediate()) {
-    CWISE_BINARY_OP(dest, a, b, sne);
-  } else {
-    ShStatement stmt(dest, a, SH_OP_SNE, b);
-    addStatement(stmt);
-  }
-}
-
-void shABS(ShVariable& dest, const ShVariable& a)
-{
-  sizes_match(dest, a);
-  if (immediate()) {
-    CWISE_UNARY_OP(dest, a, std::fabs);
-  } else {
-    ShStatement stmt(dest, SH_OP_ABS, a);
-    addStatement(stmt);
-  }
-}
-
-void shACOS(ShVariable& dest, const ShVariable& a)
-{
-  sizes_match(dest, a);
-  if (immediate()) {
-    CWISE_UNARY_OP(dest, a, std::acos);
-  } else {
-    ShStatement stmt(dest, SH_OP_ACOS, a);
-    addStatement(stmt);
-  }
-}
-
-void shASIN(ShVariable& dest, const ShVariable& a)
-{
-  sizes_match(dest, a);
-  if (immediate()) {
-    CWISE_UNARY_OP(dest, a, std::asin);
-  } else {
-    ShStatement stmt(dest, SH_OP_ASIN, a);
-    addStatement(stmt);
-  }
-}
-
-void shATAN(ShVariable& dest, const ShVariable& a)
-{
-  sizes_match(dest, a);
-  if (immediate()) {
-    CWISE_UNARY_OP(dest, a, std::atan);
-  } else {
-    ShStatement stmt(dest, SH_OP_ATAN, a);
-    addStatement(stmt);
-  }
-}
-
-void shATAN2(ShVariable& dest, const ShVariable& a, const ShVariable& b)
-{
-  sizes_match(dest, a, b);
-  if (immediate()) {
-    CWISE_BINARY_OP(dest, a, b, atan2f);
-  } else {
-    ShStatement stmt(dest, a, SH_OP_ATAN2, b);
-    addStatement(stmt);
-  }
-}
-
-void shCBRT(ShVariable& dest, const ShVariable& a)
-{
-  sizes_match(dest, a);
-  if (immediate()) {
-    CWISE_UNARY_OP(dest, a, cbrtf);
-  } else {
-    ShStatement stmt(dest, SH_OP_CBRT, a);
-    addStatement(stmt);
-  }
-}
-void shCEIL(ShVariable& dest, const ShVariable& a)
-{
-  sizes_match(dest, a);
-  if (immediate()) {
-    CWISE_UNARY_OP(dest, a, ceilf);
-  } else {
-    ShStatement stmt(dest, SH_OP_CEIL, a);
-    addStatement(stmt);
-  }
-}
-
-void shCOS(ShVariable& dest, const ShVariable& a)
-{
-  sizes_match(dest, a);
-  if (immediate()) {
-    CWISE_UNARY_OP(dest, a, std::cos);
-  } else {
-    ShStatement stmt(dest, SH_OP_COS, a);
-    addStatement(stmt);
-  }
-}
-
-void shCMUL(ShVariable& dest, const ShVariable& a)
+void shCMUL(ShVariable& dest, const ShVariable& src)
 {
   SH_DEBUG_ASSERT(dest.size() == 1);
-  if (immediate()) {
-    T* v_a = new T[a.size()];
-    a.getValues(v_a);
-    T f = v_a[0];
-    for (int i = 1; i < a.size(); i++) f *= v_a[i];
-    dest.setValues(&f);
-    delete [] v_a;
-  } else {
-    ShStatement stmt(dest, SH_OP_CMUL, a);
-    addStatement(stmt);
-  }
+  SHINST_UNARY_OP_CORE(CMUL);
 }
 
-void shCSUM(ShVariable& dest, const ShVariable& a)
+void shCSUM(ShVariable& dest, const ShVariable& src)
 {
   SH_DEBUG_ASSERT(dest.size() == 1);
-  if (immediate()) {
-    T* v_a = new T[a.size()];
-    a.getValues(v_a);
-    T f = v_a[0];
-    for (int i = 1; i < a.size(); i++) f += v_a[i];
-    dest.setValues(&f);
-    delete [] v_a;
-  } else {
-    ShStatement stmt(dest, SH_OP_CMUL, a);
-    addStatement(stmt);
-  }
+  SHINST_UNARY_OP_CORE(CSUM);
 }
 
 void shDOT(ShVariable& dest, const ShVariable& a, const ShVariable& b)
 {
   SH_DEBUG_ASSERT(dest.size() == 1);
   sizes_match(a, b);
-  if (immediate()) {
-    T* v_a = new T[a.size()];
-    a.getValues(v_a);
-    T* v_b = new T[a.size()];
-    b.getValues(v_b);
-    T f = 0.0;
-    for (int i = 0; i < a.size(); i++) f += v_a[i] * v_b[i];
-    dest.setValues(&f);
-    delete [] v_a;
-    delete [] v_b;
-  } else {
-    ShStatement stmt(dest, a, SH_OP_DOT, b);
-    addStatement(stmt);
-  }
+  SHINST_BINARY_OP_CORE(DOT);
 }
 
-void shDX(ShVariable& dest, const ShVariable& a)
+void shDX(ShVariable &dest, const ShVariable& a)
 {
-  sizes_match(dest, a);
-  if (immediate()) {
-    shError(ShScopeException("Cannot take derivatives in immediate mode"));
-  } else {
-    ShStatement stmt(dest, SH_OP_DX, a);
-    addStatement(stmt);
+  if(immediate()) {
+      shError(ShScopeException("Cannot take derivatives in immediate mode"));
   }
+  ShStatement stmt(dest, SH_OP_DX, a);
+  addStatement(stmt);
 }
 
-void shDY(ShVariable& dest, const ShVariable& a)
+void shDY(ShVariable &dest, const ShVariable& a)
 {
-  sizes_match(dest, a);
-  if (immediate()) {
-    shError(ShScopeException("Cannot take derivatives in immediate mode"));
-  } else {
-    ShStatement stmt(dest, SH_OP_DY, a);
-    addStatement(stmt);
+  if(immediate()) {
+      shError(ShScopeException("Cannot take derivatives in immediate mode"));
   }
+  SH_DEBUG_ASSERT(!immediate());
+  ShStatement stmt(dest, SH_OP_DY, a);
+  addStatement(stmt);
 }
 
-void shEXP(ShVariable& dest, const ShVariable& a)
-{
-  sizes_match(dest, a);
-  if (immediate()) {
-    CWISE_UNARY_OP(dest, a, expf);
-  } else {
-    ShStatement stmt(dest, SH_OP_EXP, a);
-    addStatement(stmt);
-  }
-}
+SHINST_UNARY_OP(EXP);
+SHINST_UNARY_OP(EXP2);
+SHINST_UNARY_OP(EXP10);
+SHINST_UNARY_OP(FLR);
+SHINST_BINARY_OP(MOD, false, false);
+SHINST_UNARY_OP(FRAC);
+SHINST_TERNARY_OP(LRP,
+    (dest.size() == b.size() &&
+    dest.size() == c.size() &&
+    (dest.size() == a.size() || a.size() == 1)));
+
+SHINST_UNARY_OP(LOG);
+SHINST_UNARY_OP(LOG2);
+SHINST_UNARY_OP(LOG10);
   
-void shEXP2(ShVariable& dest, const ShVariable& a)
-{
-  sizes_match(dest, a);
-  if (immediate()) {
-    CWISE_UNARY_OP(dest, a, exp2f);
-  } else {
-    ShStatement stmt(dest, SH_OP_EXP2, a);
-    addStatement(stmt);
-  }
-}
+SHINST_TERNARY_OP(MAD,
+    (dest.size() == c.size() &&
+    (dest.size() == a.size() || (dest.size() == b.size() && a.size() == 1)) &&
+    (dest.size() == b.size() || (dest.size() == a.size() && b.size() == 1))));
 
-void shEXP10(ShVariable& dest, const ShVariable& a)
-{
-  sizes_match(dest, a);
-  if (immediate()) {
-    CWISE_UNARY_OP(dest, a, exp10f);
-  } else {
-    ShStatement stmt(dest, SH_OP_EXP10, a);
-    addStatement(stmt);
-  }
-}
+SHINST_BINARY_OP(MAX, false, false);
+SHINST_BINARY_OP(MIN, false, false);
+SHINST_BINARY_OP(POW, false, true);
+SHINST_UNARY_OP(RCP);
+SHINST_UNARY_OP(RND);
+SHINST_UNARY_OP(RSQ);
+SHINST_UNARY_OP(SGN);
+SHINST_UNARY_OP(SIN);
+SHINST_UNARY_OP(SQRT);
+SHINST_UNARY_OP(TAN);
+SHINST_UNARY_OP(NORM);
 
-void shFLR(ShVariable& dest, const ShVariable& a)
-{
-  sizes_match(dest, a);
-  if (immediate()) {
-    CWISE_UNARY_OP(dest, a, floorf);
-  } else {
-    ShStatement stmt(dest, SH_OP_FLR, a);
-    addStatement(stmt);
-  }
-}
-
-void shMOD(ShVariable& dest, const ShVariable& a, const ShVariable& b)
-{
-  sizes_match(dest, a, b);
-  if (immediate()) {
-    CWISE_BINARY_OP(dest, a, b, fmodf);
-  } else {
-    ShStatement stmt(dest, a, SH_OP_MOD, b);
-    addStatement(stmt);
-  }
-}
-
-void shFRAC(ShVariable& dest, const ShVariable& a)
-{
-  sizes_match(dest, a);
-  if (immediate()) {
-    CWISE_UNARY_OP(dest, a, frac);
-  } else {
-    ShStatement stmt(dest, SH_OP_FRAC, a);
-    addStatement(stmt);
-  }
-}
-
-void shLRP(ShVariable& dest, const ShVariable& alpha,
-           const ShVariable& a, const ShVariable& b)
-{
-  SH_DEBUG_ASSERT(dest.size() == a.size() &&
-                  dest.size() == b.size() &&
-                  (dest.size() == alpha.size() || alpha.size() == 1));
-  if (immediate()) {
-    CWISE_TRINARY_OP(dest, alpha, a, b, lrp);
-  } else {
-    ShStatement stmt(dest, SH_OP_LRP, alpha, a, b);
-    addStatement(stmt);
-  }
-}
-
-void shLOG(ShVariable& dest, const ShVariable& a)
-{
-  sizes_match(dest, a);
-  if (immediate()) {
-    CWISE_UNARY_OP(dest, a, logf);
-  } else {
-    ShStatement stmt(dest, SH_OP_LOG, a);
-    addStatement(stmt);
-  }
-}
-  
-void shLOG2(ShVariable& dest, const ShVariable& a)
-{
-  sizes_match(dest, a);
-  if (immediate()) {
-    CWISE_UNARY_OP(dest, a, log2f);
-  } else {
-    ShStatement stmt(dest, SH_OP_LOG2, a);
-    addStatement(stmt);
-  }
-}
-
-void shLOG10(ShVariable& dest, const ShVariable& a)
-{
-  sizes_match(dest, a);
-  if (immediate()) {
-    CWISE_UNARY_OP(dest, a, log10f);
-  } else {
-    ShStatement stmt(dest, SH_OP_LOG10, a);
-    addStatement(stmt);
-  }
-}
-
-void shMAD(ShVariable& dest, const ShVariable& a,
-           const ShVariable& b, const ShVariable& c)
-{
-  SH_DEBUG_ASSERT(dest.size() == c.size() &&
-                  (dest.size() == a.size() || (dest.size() == b.size() && a.size() == 1)) &&
-                  (dest.size() == b.size() || (dest.size() == a.size() && b.size() == 1)));
-  if (immediate()) {
-    CWISE_TRINARY_OP(dest, a, b, c, mad);
-  } else {
-    ShStatement stmt(dest, SH_OP_MAD, a, b, c);
-    addStatement(stmt);
-  }
-}
-
-void shMAX(ShVariable& dest, const ShVariable& a, const ShVariable& b)
-{
-  sizes_match(dest, a, b);
-  if (immediate()) {
-    CWISE_BINARY_OP(dest, a, b, max);
-  } else {
-    ShStatement stmt(dest, a, SH_OP_MAX, b);
-    addStatement(stmt);
-  }
-}
-
-void shMIN(ShVariable& dest, const ShVariable& a, const ShVariable& b)
-{
-  sizes_match(dest, a, b);
-  if (immediate()) {
-    CWISE_BINARY_OP(dest, a, b, min);
-  } else {
-    ShStatement stmt(dest, a, SH_OP_MIN, b);
-    addStatement(stmt);
-  }
-}
-
-void shPOW(ShVariable& dest, const ShVariable& a, const ShVariable& b)
-{
-  sizes_match(dest, a, b, false, true);
-  if (immediate()) {
-    CWISE_BINARY_OP(dest, a, b, powf);
-  } else {
-    ShStatement stmt(dest, a, SH_OP_POW, b);
-    addStatement(stmt);
-  }
-}
-
-void shRCP(ShVariable& dest, const ShVariable& a)
-{
-  sizes_match(dest, a);
-  if (immediate()) {
-    CWISE_UNARY_OP(dest, a, 1.0f / );
-  } else {
-    ShStatement stmt(dest, SH_OP_RCP, a);
-    addStatement(stmt);
-  }
-}
-
-void shRND(ShVariable& dest, const ShVariable& a)
-{
-  sizes_match(dest, a);
-  if (immediate()) {
-    CWISE_UNARY_OP(dest, a, roundf);
-  } else {
-    ShStatement stmt(dest, SH_OP_RND, a);
-    addStatement(stmt);
-  }
-}
-
-void shRSQ(ShVariable& dest, const ShVariable& a)
-{
-  sizes_match(dest, a);
-  if (immediate()) {
-    CWISE_UNARY_OP(dest, a, 1.0f / sqrt);
-  } else {
-    ShStatement stmt(dest, SH_OP_RSQ, a);
-    addStatement(stmt);
-  }
-}
-
-void shSGN(ShVariable& dest, const ShVariable& a)
-{
-  sizes_match(dest, a);
-  if (immediate()) {
-    CWISE_UNARY_OP(dest, a, sgn);
-  } else {
-    ShStatement stmt(dest, SH_OP_SGN, a);
-    addStatement(stmt);
-  }
-}
-
-void shSIN(ShVariable& dest, const ShVariable& a)
-{
-  sizes_match(dest, a);
-  if (immediate()) {
-    CWISE_UNARY_OP(dest, a, std::sin);
-  } else {
-    ShStatement stmt(dest, SH_OP_SIN, a);
-    addStatement(stmt);
-  }
-}
-
-void shSQRT(ShVariable& dest, const ShVariable& a)
-{
-  sizes_match(dest, a);
-  if (immediate()) {
-    CWISE_UNARY_OP(dest, a, std::sqrt);
-  } else {
-    ShStatement stmt(dest, SH_OP_SQRT, a);
-    addStatement(stmt);
-  }
-}
-
-void shTAN(ShVariable& dest, const ShVariable& a)
-{
-  sizes_match(dest, a);
-  if (immediate()) {
-    CWISE_UNARY_OP(dest, a, std::tan);
-  } else {
-    ShStatement stmt(dest, SH_OP_TAN, a);
-    addStatement(stmt);
-  }
-}
-
-void shNORM(ShVariable& dest, const ShVariable& a)
-{
-  sizes_match(dest, a);
-  if (immediate()) {
-    T* v_a = new T[a.size()];
-    a.getValues(v_a);
-    T s = 0.0;
-    for (int i = 0; i < a.size(); i++) s += v_a[i] * v_a[i];
-    s = std::sqrt(s);
-    for (int i = 0; i < a.size(); i++) v_a[i] /= s;
-    dest.setValues(v_a);
-    delete [] v_a;
-  } else {
-    ShStatement stmt(dest, SH_OP_NORM, a);
-    addStatement(stmt);
-  }
-}
 
 void shXPD(ShVariable& dest, const ShVariable& a, const ShVariable& b)
 {
   SH_DEBUG_ASSERT(dest.size() == 3 && a.size() == 3 && b.size() == 3);
-  if (immediate()) {
-    T v_a[3];
-    a.getValues(v_a);
-    T v_b[3];
-    b.getValues(v_b);
-    T result[3];
-    result[0] = v_a[1] * v_b[2] - v_a[2] * v_b[1];
-    result[1] = -(v_a[0] * v_b[2] - v_a[2] * v_b[0]);
-    result[2] = v_a[0] * v_b[1] - v_a[1] * v_b[0];
-    dest.setValues(result);
-  } else {
-    ShStatement stmt(dest, a, SH_OP_XPD, b);
-    addStatement(stmt);
-  }
+  SHINST_BINARY_OP_CORE(XPD);
 }
 
-void shCOND(ShVariable& dest, const ShVariable& alpha,
-            const ShVariable& a, const ShVariable& b)
+SHINST_TERNARY_OP(COND,
+    (dest.size() == b.size() &&
+    dest.size() == c.size() &&
+    (dest.size() == a.size() || a.size() == 1)));
+
+void shLO(ShVariable& dest, const ShVariable& src)
 {
-  SH_DEBUG_ASSERT(dest.size() == a.size() &&
-                  dest.size() == b.size() &&
-                  (dest.size() == alpha.size() || alpha.size() == 1));
-  if (immediate()) {
-    CWISE_TRINARY_OP(dest, alpha, a, b, cond);
-  } else {
-    ShStatement stmt(dest, SH_OP_COND, alpha, a, b);
-    addStatement(stmt);
-  }
+  sizes_match(dest, src); // TODO check types are okay
+  SHINST_UNARY_OP_CORE(LO);
+}
+
+void shHI(ShVariable& dest, const ShVariable& src)
+{
+  sizes_match(dest, src); // TODO check types are okay
+  SHINST_UNARY_OP_CORE(HI);
+}
+
+void shSETLO(ShVariable& dest, const ShVariable& src)
+{
+  sizes_match(dest, src); // TODO check types are okay
+  SHINST_UNARY_OP_CORE(SETLO);
+}
+
+void shSETHI(ShVariable& dest, const ShVariable& src)
+{
+  sizes_match(dest, src); // TODO check types are okay
+  SHINST_UNARY_OP_CORE(SETHI);
 }
 
 void shKIL(const ShVariable& a)
 {
+  if(immediate()) {
+      shError(ShScopeException("Cannot kill in immediate mode"));
+  }
   SH_DEBUG_ASSERT(!immediate());
   ShStatement stmt(a, SH_OP_KIL, a);
   addStatement(stmt);

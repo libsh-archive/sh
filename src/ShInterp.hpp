@@ -45,22 +45,22 @@ public:
   ShInterp()
     : T()
   {
-    m_node->traits().interpolation(level());
+    this->m_node->traits().interpolation(level());
   }
   ShInterp(int width)
     : T(width)
   {
-    m_node->traits().interpolation(level());
+    this->m_node->traits().interpolation(level());
   }
   ShInterp(int width, int height)
     : T(width, height)
   {
-    m_node->traits().interpolation(level());
+    this->m_node->traits().interpolation(level());
   }
   ShInterp(int width, int height, int depth)
     : T(width, height, depth)
   {
-    m_node->traits().interpolation(level());
+    this->m_node->traits().interpolation(level());
   }
 
   typedef typename T::return_type return_type;

@@ -1,0 +1,5 @@
+#!/bin/bash
+for i in *.prof; do
+  echo $i
+  grep 'lt-' $i
+done

@@ -28,16 +28,16 @@
 
 namespace SH {
 
-ShChannelNode::ShChannelNode(ShSemanticType specType, int elements)
-  : ShVariableNode(SH_STREAM, elements),
+ShChannelNode::ShChannelNode(ShSemanticType specType, int elements, ShValueType valueType)
+  : ShVariableNode(SH_STREAM, elements, valueType),
     m_memory(0), m_count(0)
 {
   specialType(specType);
 }
 
-ShChannelNode::ShChannelNode(ShSemanticType specType, int elements,
+ShChannelNode::ShChannelNode(ShSemanticType specType, int elements, ShValueType valueType,
                              const ShMemoryPtr& memory, int count)
-  : ShVariableNode(SH_STREAM, elements),
+  : ShVariableNode(SH_STREAM, elements, valueType),
     m_memory(memory), m_count(count)
 {
   specialType(specType);

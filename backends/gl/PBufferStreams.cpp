@@ -40,7 +40,8 @@
 #include "ShOptimizations.hpp"
 #include "ShException.hpp"
 #include "ShError.hpp"
-#include "ShContext.hpp"
+#include "ShTypeInfo.hpp"
+#include "ShVariant.hpp"
 
 #ifdef DO_PBUFFER_TIMING
 #include <sys/time.h>
@@ -50,6 +51,7 @@
 namespace shgl {
 
 using namespace SH;
+
 
 #ifdef DO_PBUFFER_TIMING
 
@@ -114,28 +116,31 @@ class TexFetcher {
 public:
   TexFetcher(StreamInputMap& input_map,
              ShVariableNodePtr tc_node,
-             bool indexed)
+             bool indexed,
+             ShVariableNodePtr width_var,
+             ShProgramNodePtr program)
     : input_map(input_map),
       tc_node(tc_node),
-      indexed(indexed)
+      indexed(indexed),
+      width_var(width_var),
+      program(program)
   {
   }
 
   void operator()(ShCtrlGraphNode* node)
   {
-    ShVariable coordsVar(tc_node);
     if (!node->block) return;
     for (ShBasicBlock::ShStmtList::iterator I = node->block->begin();
          I != node->block->end(); ++I) {
       ShStatement& stmt = *I;
-      if (stmt.op != SH_OP_FETCH) continue;
+      if (stmt.op != SH_OP_FETCH && stmt.op != SH_OP_LOOKUP) continue;
       
       if (!stmt.src[0].node()) {
-        SH_DEBUG_WARN("FETCH from null stream");
+        SH_DEBUG_WARN("FETCH/LOOKUP from null stream");
         continue;
       }
       if (stmt.src[0].node()->kind() != SH_STREAM) {
-        SH_DEBUG_WARN("FETCH from non-stream");
+        SH_DEBUG_WARN("FETCH/LOOKUP from non-stream");
         continue;
       }
       
@@ -153,10 +158,26 @@ public:
 
       ShVariable texVar(J->second);
 
-      if (indexed) {
-        stmt = ShStatement(stmt.dest, texVar, SH_OP_TEXI, coordsVar);
+      if (stmt.op == SH_OP_FETCH) {
+        ShVariable coordsVar(tc_node);
+        if (indexed) {
+          stmt = ShStatement(stmt.dest, texVar, SH_OP_TEXI, coordsVar);
+        } else {
+          stmt = ShStatement(stmt.dest, texVar, SH_OP_TEX, coordsVar);
+        }
       } else {
-        stmt = ShStatement(stmt.dest, texVar, SH_OP_TEX, coordsVar);
+        // Make sure our actualy index is a temporary in the program.
+        ShContext::current()->enter(program);
+        ShVariable coordsVar(new ShVariableNode(SH_TEMP, 2, SH_FLOAT));
+        ShContext::current()->exit();
+        
+        ShBasicBlock::ShStmtList new_stmts;
+        new_stmts.push_back(ShStatement(coordsVar(0), stmt.src[1], SH_OP_MOD, width_var));
+        new_stmts.push_back(ShStatement(coordsVar(1), stmt.src[1], SH_OP_DIV, width_var));
+        new_stmts.push_back(ShStatement(stmt.dest, texVar, SH_OP_TEXI, coordsVar));
+        I = node->block->erase(I);
+        node->block->splice(I, new_stmts);
+        I--;
       }
       // The following is useful for debugging
       // stmt = ShStatement(stmt.dest, SH_OP_ASN, coordsVar);
@@ -167,6 +188,8 @@ private:
   StreamInputMap& input_map;
   ShVariableNodePtr tc_node;
   bool indexed;
+  ShVariableNodePtr width_var;
+  ShProgramNodePtr program;
 };
 
 PBufferStreams::PBufferStreams(void) :
@@ -253,6 +276,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   
   ShChannelNodePtr output = *dest.begin();
   int count = output->count();
+  ShValueType valueType = output->valueType();
 
   // Pick a size for the texture that just fits the output data.
   int tex_size = 1;
@@ -299,11 +323,11 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
     switch (extension) {
     case SH_ARB_NV_FLOAT_BUFFER:
       tex = new ShTextureNode(SH_TEXTURE_RECT, I->first->size(),
-                              traits, tex_size, tex_size, 1);
+                              I->first->valueType(), traits, tex_size, tex_size, 1);
       break;
     case SH_ARB_ATI_PIXEL_FORMAT_FLOAT:
       tex = new ShTextureNode(SH_TEXTURE_2D, I->first->size(),
-                              traits, tex_size, tex_size, 1);
+                              I->first->valueType(), traits, tex_size, tex_size, 1);
       break;
     default:
       tex = 0;
@@ -325,8 +349,14 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   
   ShVariableNodePtr tc_node = fp.node()->inputs.back(); // there should be only one input anyways
 
+  // Make a guaranteed uniform variable, by "pushing" the global scope
+  ShContext::current()->enter(0);
+  ShAttrib1f width = tex_size;
+  ShContext::current()->exit();
+  
   // replace FETCH with TEX
-  TexFetcher texFetcher(input_map, tc_node, extension == SH_ARB_NV_FLOAT_BUFFER);
+  TexFetcher texFetcher(input_map, tc_node, extension == SH_ARB_NV_FLOAT_BUFFER,
+                        width.node(), fp.node());
   fp.node()->ctrlGraph->dfs(texFetcher);
   fp.node()->collectVariables(); // necessary to collect all the new textures
 
@@ -443,8 +473,9 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   ShHostStoragePtr outhost
     = shref_dynamic_cast<ShHostStorage>(output->memory()->findStorage("host"));
   if (!outhost) {
+    int datasize = shTypeInfo(valueType)->datasize(); 
     outhost = new ShHostStorage(output->memory().object(),
-                                sizeof(float) * output->size() * output->count());
+                                datasize * output->size() * output->count());
   }
   TIMING_RESULT(findouthost);
 
@@ -474,23 +505,43 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   }
 
   DECLARE_TIMER(readback);
-  
+
+  // @todo half-float
+  ShVariantPtr  resultBuffer; 
+  int resultDatasize = output->size() * count;
+  GLenum readpixelType;
+  ShValueType convertedType; 
+  readpixelType = shGlType(valueType, convertedType);
+  if(convertedType != SH_VALUETYPE_END) {
+      SH_DEBUG_WARN("ARB backend does not handle stream output type " << valueTypeName[valueType] << " natively."
+          << "  Using " << valueTypeName[convertedType] << " temporary buffer.");
+      resultBuffer = shVariantFactory(convertedType, SH_MEM)->generate(resultDatasize);
+  } else {
+      resultBuffer = shVariantFactory(valueType, SH_MEM)->generate(
+          outhost->data(), resultDatasize, false);
+  }
+
   glReadPixels(0, 0, tex_size, count / tex_size, format,
-               GL_FLOAT, outhost->data());
+               readpixelType, resultBuffer->array());
   gl_error = glGetError();
   if (gl_error != GL_NO_ERROR) {
     shError(PBufferStreamException("Could not do glReadPixels()"));
     return;
   }
   if (count % tex_size) {
-    glReadPixels(0, count / tex_size, count % tex_size, 1, format, GL_FLOAT,
-                 reinterpret_cast<float*>(outhost->data())
-                 + (count - (count % tex_size)) * output->size());
+    glReadPixels(0, count / tex_size, count % tex_size, 1, format, readpixelType,
+                 (char*)(resultBuffer->array()) + (count - (count % tex_size)) * output->size() * resultBuffer->datasize());
     gl_error = glGetError();
     if (gl_error != GL_NO_ERROR) {
       shError(PBufferStreamException("Could not do rest of glReadPixels()"));
       return;
     }
+  }
+
+  if(convertedType != SH_VALUETYPE_END) { // need to copy to outhoust->data()
+    ShVariantPtr outhostVariant = shVariantFactory(valueType, SH_MEM)->generate(
+          outhost->data(), resultDatasize, false);
+    outhostVariant->set(resultBuffer);
   }
 
   TIMING_RESULT(readback);
@@ -499,9 +550,6 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   // that GLUT (or whatever UI toolkit) is setting up its one context when
   // its about to redraw. -Kevin
   restoreContext();
-
-  // TODO: This just seems wrong.
-  // ShEnvironment::boundShaders().clear();
   
   TIMING_RESULT(onerun);
 }

@@ -26,6 +26,7 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "ShContext.hpp"
 #include "ShDebug.hpp"
+#include "ShTypeInfo.hpp"
 
 namespace SH {
 
@@ -35,6 +36,10 @@ ShContext* ShContext::current()
 {
   if (!m_instance) {
     m_instance = new ShContext();
+
+    // must be done this way since
+    // init_types requires a ShContext object, 
+    ShTypeInfo::init();
   }
   return m_instance;
 }
@@ -44,6 +49,7 @@ ShContext::ShContext()
     m_throw_errors(true)
 {
 }
+
 
 int ShContext::optimization() const
 {

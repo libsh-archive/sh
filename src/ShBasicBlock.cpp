@@ -62,6 +62,11 @@ void ShBasicBlock::addStatement(const ShStatement& stmt)
   m_statements.push_back(stmt);
 }
 
+void ShBasicBlock::prependStatement(const ShStatement& stmt)
+{
+  m_statements.push_front(stmt);
+}
+
 ShBasicBlock::ShStmtList::const_iterator ShBasicBlock::begin() const
 {
   return m_statements.begin();

@@ -28,8 +28,8 @@
 
 namespace SH {
 
-ShPaletteNode::ShPaletteNode(int elements, ShSemanticType semantic, std::size_t length)
-  : ShVariableNode(SH_PALETTE, elements, semantic),
+ShPaletteNode::ShPaletteNode(int elements, ShSemanticType semantic, ShValueType valueType, std::size_t length)
+  : ShVariableNode(SH_PALETTE, elements, valueType, semantic),
     m_length(length),
     m_nodes(new ShVariableNodePtr[length])
 {

@@ -34,13 +34,16 @@
 #include "ShProgram.hpp"
 #include "ShSyntax.hpp"
 #include "ShStatement.hpp"
+#include "ShAlgebra.hpp"
+#include "ShError.hpp"
+#include "ShException.hpp"
 
 namespace SH {
 
 template<typename T>
 ShChannel<T>::ShChannel()
   : ShMetaForwarder(0),
-    m_node(new ShChannelNode(T::semantic_type, T::typesize))
+    m_node(new ShChannelNode(T::semantic_type, T::typesize, T::value_type))
 {
   real_meta(m_node.object());
 }
@@ -48,7 +51,7 @@ ShChannel<T>::ShChannel()
 template<typename T>
 ShChannel<T>::ShChannel(const ShMemoryPtr& memory, int count)
   : ShMetaForwarder(0),
-    m_node(new ShChannelNode(T::semantic_type, T::typesize, memory, count))
+    m_node(new ShChannelNode(T::semantic_type, T::typesize, T::value_type, memory, count))
 {
   real_meta(m_node.object());
 }
@@ -90,10 +93,10 @@ const ShChannelNodePtr ShChannel<T>::node() const
 }
 
 template<typename T>
-T ShChannel<T>::operator()()
+T ShChannel<T>::operator()() const
 {
   // TODO: shError() maybe instead.
-  SH_DEBUG_ASSERT(ShContext::current()->parsing());
+  if (!ShContext::current()->parsing()) shError(ShScopeException("Stream fetch outside program"));
   
   T t;
   ShVariable streamVar(m_node);
@@ -103,15 +106,17 @@ T ShChannel<T>::operator()()
   
   return t;
 }
+
 template<typename T>
-const T ShChannel<T>::operator()() const
+template<ShValueType V>
+T ShChannel<T>::operator[](const ShGeneric<1, V>& index) const
 {
   // TODO: shError() maybe instead.
-  SH_DEBUG_ASSERT(ShContext::current()->parsing());
+  if (!ShContext::current()->parsing()) shError(ShScopeException("Indexed stream fetch outside program"));
   
   T t;
   ShVariable streamVar(m_node);
-  ShStatement stmt(t, SH_OP_FETCH, streamVar);
+  ShStatement stmt(t, streamVar, SH_OP_LOOKUP, index);
 
   ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
   

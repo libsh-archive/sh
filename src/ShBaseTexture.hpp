@@ -54,8 +54,11 @@ public:
   ShBaseTexture1D(const ShTextureTraits& traits);
   ShBaseTexture1D(int width, const ShTextureTraits& traits);
 
-  T operator()(const ShGeneric<1, float>& coords) const;
-  T operator[](const ShGeneric<1, float>& coords) const;
+  template<ShValueType V2>
+  T operator()(const ShGeneric<1, V2>& coords) const;
+
+  template<ShValueType V2>
+  T operator[](const ShGeneric<1, V2>& coords) const;
 
   ShMemoryPtr memory();
   void memory(ShMemoryPtr memory);
@@ -75,13 +78,18 @@ public:
   ShBaseTexture2D(const ShTextureTraits& traits);
   ShBaseTexture2D(int width, int height, const ShTextureTraits& traits);
 
-  T operator()(const ShGeneric<2, float>& coords) const;
-  T operator[](const ShGeneric<2, float>& coords) const;
+  template<ShValueType V2>
+  T operator()(const ShGeneric<2, V2>& coords) const;
+
   /// Texture lookup with derivatives
-  T operator()(const ShGeneric<2, float>& coords,
-               const ShGeneric<2, float>& dx,
-               const ShGeneric<2, float>& dy) const;
+  template<ShValueType V2, ShValueType V3, ShValueType V4>
+  T operator()(const ShGeneric<2, V2>& coords,
+               const ShGeneric<2, V3>& dx,
+               const ShGeneric<2, V4>& dy) const;
   
+  template<ShValueType V2>
+  T operator[](const ShGeneric<2, V2>& coords) const;
+
   ShMemoryPtr memory();
   void memory(ShMemoryPtr memory);
   void size(int width, int height);
@@ -102,8 +110,11 @@ public:
   ShBaseTextureRect(const ShTextureTraits& traits);
   ShBaseTextureRect(int width, int height, const ShTextureTraits& traits);
 
-  T operator()(const ShGeneric<2, float>& coords) const;
-  T operator[](const ShGeneric<2, float>& coords) const;
+  template<ShValueType V2>
+  T operator()(const ShGeneric<2, V2>& coords) const;
+
+  template<ShValueType V2>
+  T operator[](const ShGeneric<2, V2>& coords) const;
 
   ShMemoryPtr memory();
   void memory(ShMemoryPtr memory);
@@ -125,8 +136,11 @@ public:
   ShBaseTexture3D(const ShTextureTraits& traits);
   ShBaseTexture3D(int width, int height, int depth, const ShTextureTraits& traits);
 
-  T operator()(const ShGeneric<3, float>& coords) const;
-  T operator[](const ShGeneric<3, float>& coords) const;
+  template<ShValueType V2>
+  T operator()(const ShGeneric<3, V2>& coords) const;
+
+  template<ShValueType V2>
+  T operator[](const ShGeneric<3, V2>& coords) const;
 
   ShMemoryPtr memory();
   void memory(ShMemoryPtr memory);
@@ -148,7 +162,8 @@ public:
   ShBaseTextureCube(const ShTextureTraits& traits);
   ShBaseTextureCube(int width, int height, const ShTextureTraits& traits);
 
-  T operator()(const ShGeneric<3, float>& coords) const;
+  template<ShValueType V2>
+  T operator()(const ShGeneric<3, V2>& coords) const;
 
   ShMemoryPtr memory(ShCubeDirection face);
   void memory(ShMemoryPtr memory, ShCubeDirection face);
