@@ -65,7 +65,7 @@ ShProgram shNoisify(bool useTexture) {
   ShProgram kernel = SH_BEGIN_FRAGMENT_PROGRAM {
     ShInputAttrib1f SH_DECL(noise_scale);
     typename T::InputType SH_NAMEDECL(in, "result");
-    ShAttrib<N, SH_INPUT, typename T::ValueType> SH_NAMEDECL(tc, "texcoord");
+    ShAttrib<N, SH_INPUT, T::value_type> SH_NAMEDECL(tc, "texcoord");
 
     typename T::OutputType SH_NAMEDECL(out, "result");
 

@@ -66,6 +66,10 @@
 #include "ShChannel.hpp"
 #include "ShStream.hpp"
 #include "ShQuaternion.hpp"
+#include "ShVariant.hpp"
+#include "ShTypeInfo.hpp"
+#include "ShMemoryDep.hpp"
+#include "ShPalette.hpp"
 
 /** \namespace SH
  * \brief The main Sh namespace.

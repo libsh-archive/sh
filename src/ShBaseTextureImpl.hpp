@@ -29,87 +29,74 @@
 
 #include "ShBaseTexture.hpp"
 #include "ShContext.hpp"
+#include "ShError.hpp"
+#include "ShLibMisc.hpp"
 
 namespace SH {
 
 template<typename T>
 ShBaseTexture1D<T>::ShBaseTexture1D(int width, const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_1D, T::typesize, traits, width))
+  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_1D, T::typesize, T::value_type, traits, width))
 {
 }
 
 template<typename T>
 ShBaseTexture2D<T>::ShBaseTexture2D(int width, int height, const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_2D, T::typesize, traits, width, height))
+  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_2D, T::typesize, T::value_type, traits, width, height))
 {
 }
 
 template<typename T>
 ShBaseTextureRect<T>::ShBaseTextureRect(int width, int height, const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_RECT, T::typesize, traits, width, height))
+  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_RECT, T::typesize, T::value_type, traits, width, height))
 {
 }
 
 template<typename T>
 ShBaseTexture3D<T>::ShBaseTexture3D(int width, int height, int depth, const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_3D, T::typesize, traits, width, height, depth))
+  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_3D, T::typesize, T::value_type, traits, width, height, depth))
 {
 }
 
 template<typename T>
 ShBaseTextureCube<T>::ShBaseTextureCube(int width, int height, const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_CUBE, T::typesize, traits, width, height))
+  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_CUBE, T::typesize, T::value_type, traits, width, height))
 {
 }
 
 template<typename T>
 ShBaseTexture1D<T>::ShBaseTexture1D(const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_1D, T::typesize, traits, 0))
+  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_1D, T::typesize, T::value_type, traits, 0))
 {
 }
 
 template<typename T>
 ShBaseTexture2D<T>::ShBaseTexture2D(const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_2D, T::typesize, traits, 0, 0))
+  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_2D, T::typesize, T::value_type, traits, 0, 0))
 {
 }
 
 template<typename T>
 ShBaseTextureRect<T>::ShBaseTextureRect(const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_RECT, T::typesize, traits, 0, 0))
+  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_RECT, T::typesize, T::value_type, traits, 0, 0))
 {
 }
 
 template<typename T>
 ShBaseTexture3D<T>::ShBaseTexture3D(const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_3D, T::typesize, traits, 0, 0, 0))
+  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_3D, T::typesize, T::value_type, traits, 0, 0, 0))
 {
 }
 
 template<typename T>
 ShBaseTextureCube<T>::ShBaseTextureCube(const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_CUBE, T::typesize, traits, 0, 0))
+  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_CUBE, T::typesize, T::value_type, traits, 0, 0))
 {
 }
 
 template<typename T>
-T ShBaseTexture1D<T>::operator()(const ShGeneric<1, float>& coords) const
-{
-  if (ShContext::current()->parsing()) {
-    T t;
-    ShVariable texVar(m_node);
-    ShStatement stmt(t, texVar, SH_OP_TEX, coords);
-    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  } else {
-    // TODO!
-    T t;
-    return t;
-  }
-}
-
-template<typename T>
-T ShBaseTexture2D<T>::operator()(const ShGeneric<2, float>& coords) const
+template<ShValueType V2>
+T ShBaseTexture1D<T>::operator()(const ShGeneric<1, V2>& coords) const
 {
   if (ShContext::current()->parsing()) {
     T t;
@@ -125,7 +112,8 @@ T ShBaseTexture2D<T>::operator()(const ShGeneric<2, float>& coords) const
 }
 
 template<typename T>
-T ShBaseTextureRect<T>::operator()(const ShGeneric<2, float>& coords) const
+template<ShValueType V2>
+T ShBaseTexture2D<T>::operator()(const ShGeneric<2, V2>& coords) const
 {
   if (ShContext::current()->parsing()) {
     T t;
@@ -141,7 +129,43 @@ T ShBaseTextureRect<T>::operator()(const ShGeneric<2, float>& coords) const
 }
 
 template<typename T>
-T ShBaseTexture3D<T>::operator()(const ShGeneric<3, float>& coords) const
+template<ShValueType V2, ShValueType V3, ShValueType V4>
+T ShBaseTexture2D<T>::operator()(const ShGeneric<2, V2>& coords,
+                                 const ShGeneric<2, V3>& dx,
+                                 const ShGeneric<2, V4>& dy) const
+{
+  if (ShContext::current()->parsing()) {
+    T t;
+    ShVariable texVar(m_node);
+    ShStatement stmt(t, SH_OP_TEXD, texVar, coords, join(dx, dy));
+    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  } else {
+    shError(ShScopeException("Cannot do derivative texture lookup in immediate mode"));
+    T t; return t;
+  }
+}
+
+template<typename T>
+template<ShValueType V2>
+T ShBaseTextureRect<T>::operator()(const ShGeneric<2, V2>& coords) const
+{
+  if (ShContext::current()->parsing()) {
+    T t;
+    ShVariable texVar(m_node);
+    ShStatement stmt(t, texVar, SH_OP_TEX, coords);
+    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  } else {
+    // TODO!
+    T t;
+    return t;
+  }
+}
+
+template<typename T>
+template<ShValueType V2>
+T ShBaseTexture3D<T>::operator()(const ShGeneric<3, V2>& coords) const
 {
   if (ShContext::current()->parsing()) {
     T t;
@@ -157,7 +181,8 @@ T ShBaseTexture3D<T>::operator()(const ShGeneric<3, float>& coords) const
 } 
 
 template<typename T>
-T ShBaseTextureCube<T>::operator()(const ShGeneric<3, float>& coords) const
+template<ShValueType V2>
+T ShBaseTextureCube<T>::operator()(const ShGeneric<3, V2>& coords) const
 {
   if (ShContext::current()->parsing()) {
     T t;
@@ -173,7 +198,8 @@ T ShBaseTextureCube<T>::operator()(const ShGeneric<3, float>& coords) const
 } 
 
 template<typename T>
-T ShBaseTexture1D<T>::operator[](const ShGeneric<1, float>& coords) const
+template<ShValueType V2>
+T ShBaseTexture1D<T>::operator[](const ShGeneric<1, V2>& coords) const
 {
   if (ShContext::current()->parsing()) {
     T t;
@@ -189,7 +215,8 @@ T ShBaseTexture1D<T>::operator[](const ShGeneric<1, float>& coords) const
 }
 
 template<typename T>
-T ShBaseTexture2D<T>::operator[](const ShGeneric<2, float>& coords) const
+template<ShValueType V2>
+T ShBaseTexture2D<T>::operator[](const ShGeneric<2, V2>& coords) const
 {
   if (ShContext::current()->parsing()) {
     T t;
@@ -205,7 +232,8 @@ T ShBaseTexture2D<T>::operator[](const ShGeneric<2, float>& coords) const
 }
 
 template<typename T>
-T ShBaseTextureRect<T>::operator[](const ShGeneric<2, float>& coords) const
+template<ShValueType V2>
+T ShBaseTextureRect<T>::operator[](const ShGeneric<2, V2>& coords) const
 {
   if (ShContext::current()->parsing()) {
     T t;
@@ -221,7 +249,8 @@ T ShBaseTextureRect<T>::operator[](const ShGeneric<2, float>& coords) const
 }
 
 template<typename T>
-T ShBaseTexture3D<T>::operator[](const ShGeneric<3, float>& coords) const
+template<ShValueType V2>
+T ShBaseTexture3D<T>::operator[](const ShGeneric<3, V2>& coords) const
 {
   if (ShContext::current()->parsing()) {
     T t;

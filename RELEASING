@@ -10,7 +10,7 @@
     (e.g. $HOME/sh-dist-$DATE)
  - make
  - make install
- - for smashtest and shdemo:
+ - for shrike:
    - make distclean ; bootstrap ; ./configure ... --with-sh=$HOME/sh-dist-$DATE
    - make
    - run, check that everything works

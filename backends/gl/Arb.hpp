@@ -31,24 +31,27 @@
 #include "GlBackend.hpp"
 #include "ShBackend.hpp"
 #include "ShProgram.hpp"
+#include "ShException.hpp"
 
 namespace shgl {
 
 class ArbCodeStrategy : public CodeStrategy {
 public:
-  ArbCodeStrategy(int context = 0);
+  ArbCodeStrategy(void);
   
   SH::ShBackendCodePtr generate(const std::string& target,
                                 const SH::ShProgramNodeCPtr& shader,
                                 TextureStrategy* textures);
 
-  ArbCodeStrategy* create(int context);
-
-private:
-  int m_context;
+  ArbCodeStrategy* create(void);
 };
 
 unsigned int arbTarget(const std::string& unit);
+
+class ArbException : public SH::ShBackendException {
+public:
+  ArbException(const std::string& message);
+};
 
 }
 

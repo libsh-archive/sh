@@ -32,6 +32,7 @@
 namespace SH {
 
 template<typename T>
+inline
 ShPointer<T>::ShPointer()
   : m_object(0)
 {
@@ -43,6 +44,7 @@ ShPointer<T>::ShPointer()
 }
 
 template<typename T>
+inline
 ShPointer<T>::ShPointer(T* object)
   : m_object(object)
 {
@@ -55,6 +57,7 @@ ShPointer<T>::ShPointer(T* object)
 }
 
 template<typename T>
+inline
 ShPointer<T>::ShPointer(const ShPointer<T>& other)
   : m_object(other.m_object)
 {
@@ -71,6 +74,7 @@ ShPointer<T>::ShPointer(const ShPointer<T>& other)
 
 template<typename T>
 template<typename S>
+inline
 ShPointer<T>::ShPointer(const ShPointer<S>& other)
   : m_object(other.object())
 {
@@ -87,6 +91,24 @@ ShPointer<T>::ShPointer(const ShPointer<S>& other)
 }
 
 template<typename T>
+inline
+void ShPointer<T>::releaseRef()
+{
+  if (m_object && m_object->releaseRef() == 0) {
+#ifdef SH_REFCOUNT_DEBUGGING
+    SH_RCDEBUG_RED;
+    std::cerr << "[dstr] " << std::flush << std::setw(10) << m_object << " <" << typeid(*m_object).name() << ">" << std::endl;
+    SH_RCDEBUG_NORMAL;
+#endif
+    delete m_object;
+#ifdef SH_REFCOUNT_DEBUGGING
+    m_object = 0;
+#endif
+  }
+}
+
+template<typename T>
+inline
 ShPointer<T>::~ShPointer()
 {
 #ifdef SH_REFCOUNT_DEBUGGING
@@ -99,6 +121,21 @@ ShPointer<T>::~ShPointer()
 }
 
 template<typename T>
+inline
+void ShPointer<T>::swap(ShPointer<T>& other)
+{
+#ifdef SH_REFCOUNT_DEBUGGING
+  SH_RCDEBUG_BLUE;
+  std::cerr << "[swap] " << std::flush << std::setw(10) << other.m_object << " <" << (other.m_object ? typeid(*(other.m_object)).name() : "n/a") << ">" << " (was " << m_object << " <" << (m_object ? typeid(*(m_object)).name() : "n/a") << ">" << ")" << std::endl;
+  SH_RCDEBUG_NORMAL;
+#endif
+  T* t = m_object;
+  m_object = other.m_object;
+  other.m_object = t;
+}
+
+template<typename T>
+inline
 ShPointer<T>& ShPointer<T>::operator=(T* object)
 {
 #ifdef SH_REFCOUNT_DEBUGGING
@@ -114,6 +151,7 @@ ShPointer<T>& ShPointer<T>::operator=(T* object)
 }
 
 template<typename T>
+inline
 ShPointer<T>& ShPointer<T>::operator=(const ShPointer<T>& other)
 {
 #ifdef SH_REFCOUNT_DEBUGGING
@@ -130,6 +168,7 @@ ShPointer<T>& ShPointer<T>::operator=(const ShPointer<T>& other)
 
 template<typename T>
 template<typename S>
+inline
 ShPointer<T>& ShPointer<T>::operator=(const ShPointer<S>& other)
 {
 #ifdef SH_REFCOUNT_DEBUGGING
@@ -145,43 +184,49 @@ ShPointer<T>& ShPointer<T>::operator=(const ShPointer<S>& other)
 }
 
 template<typename T>
+inline
 bool ShPointer<T>::operator==(const ShPointer<T>& other) const
 {
   return m_object == other.m_object;
 }
 
 template<typename T>
+inline
 bool ShPointer<T>::operator!=(const ShPointer<T>& other) const
 {
   return m_object != other.m_object;
 }
 
 template<typename T>
+inline
 bool ShPointer<T>::operator<(const ShPointer<T>& other) const
 {
   return m_object < other.m_object; // TODO: Make sure this is portable...
 }
 
-
 template<typename T>
+inline
 T& ShPointer<T>::operator*() const
 {
   return *m_object;
 }
 
 template<typename T>
+inline
 T* ShPointer<T>::operator->() const
 {
   return m_object;
 }
 
 template<typename T>
+inline
 ShPointer<T>::operator bool() const
 {
   return m_object != 0;
 }
 
 template<typename T>
+inline
 int ShPointer<T>::refCount() const
 {
   if (!m_object)
@@ -190,41 +235,13 @@ int ShPointer<T>::refCount() const
     return m_object->refCount();
 }
 
-
 template<typename T>
+inline
 T* ShPointer<T>::object() const
 {
   return m_object;
 }
 
-template<typename T>
-void ShPointer<T>::swap(ShPointer<T>& other)
-{
-#ifdef SH_REFCOUNT_DEBUGGING
-  SH_RCDEBUG_BLUE;
-  std::cerr << "[swap] " << std::flush << std::setw(10) << other.m_object << " <" << (other.m_object ? typeid(*(other.m_object)).name() : "n/a") << ">" << " (was " << m_object << " <" << (m_object ? typeid(*(m_object)).name() : "n/a") << ">" << ")" << std::endl;
-  SH_RCDEBUG_NORMAL;
-#endif
-  T* t = m_object;
-  m_object = other.m_object;
-  other.m_object = t;
-}
-
-template<typename T>
-void ShPointer<T>::releaseRef()
-{
-  if (m_object && m_object->releaseRef() == 0) {
-#ifdef SH_REFCOUNT_DEBUGGING
-    SH_RCDEBUG_RED;
-    std::cerr << "[dstr] " << std::flush << std::setw(10) << m_object << " <" << typeid(*m_object).name() << ">" << std::endl;
-    SH_RCDEBUG_NORMAL;
-#endif
-    delete m_object;
-#ifdef SH_REFCOUNT_DEBUGGING
-    m_object = 0;
-#endif
-  }
-}
 
 template<typename T, typename S>
 ShPointer<T> shref_static_cast(const ShPointer<S>& other)

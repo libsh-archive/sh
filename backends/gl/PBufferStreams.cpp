@@ -30,30 +30,18 @@
 //#define DO_PBUFFER_TIMING
 
 // Turn this on to debug the fragment programs.
-#define SH_DEBUG_PBS_PRINTFP
+//#define SH_DEBUG_PBS_PRINTFP
 
 #include <map>
 #include <fstream>
 #include <cstdlib>
 
-// Extensions for ATI and Nvidia
-
-#ifndef GLX_ATI_pixel_format_float
-#define GLX_ATI_pixel_format_float  1
-
-#define GLX_RGBA_FLOAT_ATI_BIT				0x00000100
-
-#endif // GLX_ATI_pixel_format_float
-
-#ifndef GLX_FLOAT_COMPONENTS_NV
-#define GLX_FLOAT_COMPONENTS_NV         0x20B0
-#endif // GLX_FLOAT_COMPONENTS_NV
-
 #include "sh.hpp"
 #include "ShOptimizations.hpp"
 #include "ShException.hpp"
 #include "ShError.hpp"
-#include "ShContext.hpp"
+#include "ShTypeInfo.hpp"
+#include "ShVariant.hpp"
 
 #ifdef DO_PBUFFER_TIMING
 #include <sys/time.h>
@@ -63,6 +51,7 @@
 namespace shgl {
 
 using namespace SH;
+
 
 #ifdef DO_PBUFFER_TIMING
 
@@ -127,49 +116,68 @@ class TexFetcher {
 public:
   TexFetcher(StreamInputMap& input_map,
              ShVariableNodePtr tc_node,
-             bool indexed)
+             bool indexed,
+             ShVariableNodePtr width_var,
+             ShProgramNodePtr program)
     : input_map(input_map),
       tc_node(tc_node),
-      indexed(indexed)
+      indexed(indexed),
+      width_var(width_var),
+      program(program)
   {
   }
 
   void operator()(ShCtrlGraphNode* node)
   {
-    ShVariable coordsVar(tc_node);
     if (!node->block) return;
     for (ShBasicBlock::ShStmtList::iterator I = node->block->begin();
          I != node->block->end(); ++I) {
       ShStatement& stmt = *I;
-      if (stmt.op != SH_OP_FETCH) continue;
+      if (stmt.op != SH_OP_FETCH && stmt.op != SH_OP_LOOKUP) continue;
       
       if (!stmt.src[0].node()) {
-        SH_DEBUG_WARN("FETCH from null stream");
+        SH_DEBUG_WARN("FETCH/LOOKUP from null stream");
         continue;
       }
       if (stmt.src[0].node()->kind() != SH_STREAM) {
-        SH_DEBUG_WARN("FETCH from non-stream");
+        SH_DEBUG_WARN("FETCH/LOOKUP from non-stream");
         continue;
       }
       
       ShChannelNodePtr stream_node = shref_dynamic_cast<ShChannelNode>(stmt.src[0].node());
-      StreamInputMap::const_iterator I = input_map.find(stream_node);
-      if (I == input_map.end()) {
+      StreamInputMap::const_iterator J = input_map.find(stream_node);
+      if (J == input_map.end()) {
         SH_DEBUG_WARN("Stream node not found in input map");
         continue;
       }
 
-      if (!I->second) {
+      if (!J->second) {
         SH_DEBUG_WARN("No texture allocated for stream node");
         continue;
       }
 
-      ShVariable texVar(I->second);
+      ShVariable texVar(J->second);
 
-      if (indexed) {
-        stmt = ShStatement(stmt.dest, texVar, SH_OP_TEXI, coordsVar);
+      if (stmt.op == SH_OP_FETCH) {
+        ShVariable coordsVar(tc_node);
+        if (indexed) {
+          stmt = ShStatement(stmt.dest, texVar, SH_OP_TEXI, coordsVar);
+        } else {
+          stmt = ShStatement(stmt.dest, texVar, SH_OP_TEX, coordsVar);
+        }
       } else {
-        stmt = ShStatement(stmt.dest, texVar, SH_OP_TEX, coordsVar);
+        // Make sure our actualy index is a temporary in the program.
+        ShContext::current()->enter(program);
+        ShVariable coordsVar(new ShVariableNode(SH_TEMP, 2, SH_FLOAT));
+        ShContext::current()->exit();
+        
+        ShBasicBlock::ShStmtList new_stmts;
+        new_stmts.push_back(ShStatement(coordsVar(0), stmt.src[1], SH_OP_MOD, width_var));
+        new_stmts.push_back(ShStatement(coordsVar(1), stmt.src[1], SH_OP_DIV, width_var));
+        new_stmts.push_back(ShStatement(stmt.dest, texVar, SH_OP_TEXI, coordsVar));
+        I = node->block->erase(I);
+        node->block->splice(I, new_stmts);
+        I--;
       }
       // The following is useful for debugging
       // stmt = ShStatement(stmt.dest, SH_OP_ASN, coordsVar);
@@ -180,48 +188,17 @@ private:
   StreamInputMap& input_map;
   ShVariableNodePtr tc_node;
   bool indexed;
+  ShVariableNodePtr width_var;
+  ShProgramNodePtr program;
 };
 
-class GlxState {
-public:
-  GlxState()
-    : display(0), drawable(0), context(0)
-  {
-    display = glXGetCurrentDisplay();
-    if (display) {
-      drawable = glXGetCurrentDrawable();
-      context = glXGetCurrentContext();
-    }
-  }
-
-  ~GlxState()
-  {
-    if (display) {
-      glXMakeCurrent(display, drawable, context);
-    }
-  }
-
-private:
-  Display* display;
-  GLXDrawable drawable;
-  GLXContext context;
-};
-
-PBufferStreams::PBufferStreams(int context)
-  : m_context(context),
-    m_setup_vp(-1),
-    m_display(0)
+PBufferStreams::PBufferStreams(void) :
+  m_setup_vp(false)
 {
 }
 
 PBufferStreams::~PBufferStreams()
 {
-  // TODO: destroy our GLX information.
-}
-
-StreamStrategy* PBufferStreams::create(int context)
-{
-  return new PBufferStreams(context);
 }
 
 #ifdef DO_PBUFFER_TIMING
@@ -245,124 +222,10 @@ void fillin()
 #define TIMING_RESULT(t) 
 #endif
 
-FloatExtension PBufferStreams::setupContext(int width, int height)
-{
-  if (m_info.valid()
-      && m_info.width == width
-      && m_info.height == height) {
-    DECLARE_TIMER(activatecontext);
-    shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->setContext(m_info.shcontext);
-    glXMakeCurrent(m_display, m_info.pbuffer, m_info.context);
-    TIMING_RESULT(activatecontext);
-    return m_info.extension;
-  }
-  DECLARE_TIMER(makecontext);
-  if (m_info.shcontext >= 0) {
-    shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->setContext(m_info.shcontext);
-    shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->destroyContext();
-  }
-  // Figure out what extension we're using
-  m_info.extension = SH_ARB_NO_FLOAT_EXT;
-  m_info.width = width;
-  m_info.height = height;
-  m_info.pbuffer = 0;
-  m_info.context = 0;
-
-  m_info.shcontext
-    = shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->newContext();
-  
-  // This is glx specific for now
-
-  if (!m_display) {
-    m_display = glXGetCurrentDisplay();
-    if (!m_display) m_display = XOpenDisplay(0);
-    if (!m_display) {
-      shError(PBufferStreamException("Could not open X display"));
-      return m_info.extension;
-    }
-  }
-  
-  int scrnum;
-  scrnum = DefaultScreen(m_display);
-
-  std::vector<int> fb_base_attribs;
-  fb_base_attribs.push_back(GLX_DOUBLEBUFFER); fb_base_attribs.push_back(False);
-  fb_base_attribs.push_back(GLX_RED_SIZE); fb_base_attribs.push_back(32);
-  fb_base_attribs.push_back(GLX_GREEN_SIZE); fb_base_attribs.push_back(32);
-  fb_base_attribs.push_back(GLX_BLUE_SIZE); fb_base_attribs.push_back(32);
-  fb_base_attribs.push_back(GLX_DRAWABLE_TYPE); fb_base_attribs.push_back(GLX_PBUFFER_BIT);
-  
-  int items;
-
-  GLXFBConfig* fb_config = 0;
-
-  // Try NVIDIA
-  if (!fb_config) {
-    std::vector<int> fb_attribs(fb_base_attribs);
-    fb_attribs.push_back(GLX_RENDER_TYPE); fb_attribs.push_back(GLX_RGBA_BIT);
-    fb_attribs.push_back(GLX_FLOAT_COMPONENTS_NV); fb_attribs.push_back(True);
-    fb_attribs.push_back(None);
-    
-    fb_config = glXChooseFBConfig(m_display, scrnum, &fb_attribs.front(), &items);
-    if (fb_config) {
-      m_info.extension = SH_ARB_NV_FLOAT_BUFFER;
-    }
-  }
-  // Try ATI
-  if (!fb_config) {
-    std::vector<int> fb_attribs(fb_base_attribs);
-    fb_attribs.push_back(GLX_RENDER_TYPE); fb_attribs.push_back(GLX_RGBA_FLOAT_ATI_BIT);
-    fb_attribs.push_back(None);
-    
-    fb_config = glXChooseFBConfig(m_display, scrnum, &fb_attribs.front(), &items);
-    if (fb_config) {
-      m_info.extension = SH_ARB_ATI_PIXEL_FORMAT_FLOAT;
-    }
-  }
-
-  if (!fb_config) {
-    shError(PBufferStreamException("Could not get GLX FB Config!\n"
-                                   "Your card may not support the appropriate extensions."));
-    return SH_ARB_NO_FLOAT_EXT;
-  }
-
-  if (m_info.extension == SH_ARB_NO_FLOAT_EXT) {
-    shError(PBufferStreamException("Could not choose a floating-point extension!\n"
-                                   "Your card may not support the appropriate extensions."));
-    return m_info.extension;
-  }
-
-  // Set up the pbuffer
-  int pbuffer_attribs[] = {
-    GLX_PBUFFER_WIDTH, width,
-    GLX_PBUFFER_HEIGHT, height,
-    GLX_LARGEST_PBUFFER, False,
-    None
-  };
-
-  m_info.pbuffer = glXCreatePbuffer(m_display, fb_config[0], pbuffer_attribs);
-  if (!m_info.pbuffer) {
-    shError(PBufferStreamException("Could not make pbuffer!"));
-    return SH_ARB_NO_FLOAT_EXT;
-  }
-  
-  m_info.context = glXCreateNewContext(m_display, fb_config[0], GLX_RGBA_TYPE, 0, True);
-  if (!m_info.context) {
-    shError(PBufferStreamException("Could not create PBuffer context"));
-    XFree(fb_config);
-    return SH_ARB_NO_FLOAT_EXT;
-  }
-  glXMakeCurrent(m_display, m_info.pbuffer, m_info.context);
-  
-  TIMING_RESULT(makecontext);
-  return m_info.extension;
-}
-
 void PBufferStreams::execute(const ShProgramNodeCPtr& program,
                              ShStream& dest)
 {
   DECLARE_TIMER(overhead);
-  int prev = shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->context();
 
   // Check program target
   if (program->target() != "gpu:stream") {
@@ -413,6 +276,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   
   ShChannelNodePtr output = *dest.begin();
   int count = output->count();
+  ShValueType valueType = output->valueType();
 
   // Pick a size for the texture that just fits the output data.
   int tex_size = 1;
@@ -421,8 +285,6 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
     tex_size <<= 1;
   }
 
-  GlxState prevstate;
-  
   FloatExtension extension = setupContext(tex_size, tex_size);
 
   if (extension == SH_ARB_NO_FLOAT_EXT) return;
@@ -461,11 +323,11 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
     switch (extension) {
     case SH_ARB_NV_FLOAT_BUFFER:
       tex = new ShTextureNode(SH_TEXTURE_RECT, I->first->size(),
-                              traits, tex_size, tex_size, 1);
+                              I->first->valueType(), traits, tex_size, tex_size, 1);
       break;
     case SH_ARB_ATI_PIXEL_FORMAT_FLOAT:
       tex = new ShTextureNode(SH_TEXTURE_2D, I->first->size(),
-                              traits, tex_size, tex_size, 1);
+                              I->first->valueType(), traits, tex_size, tex_size, 1);
       break;
     default:
       tex = 0;
@@ -477,7 +339,6 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   }
   TIMING_RESULT(texsetup);
   
-
   DECLARE_TIMER(fpsetup);
   // Add in the texcoord variable
   ShProgram fp = ShProgram(shref_const_cast<ShProgramNode>(program))
@@ -488,12 +349,17 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   
   ShVariableNodePtr tc_node = fp.node()->inputs.back(); // there should be only one input anyways
 
+  // Make a guaranteed uniform variable, by "pushing" the global scope
+  ShContext::current()->enter(0);
+  ShAttrib1f width = tex_size;
+  ShContext::current()->exit();
+  
   // replace FETCH with TEX
-  TexFetcher texFetcher(input_map, tc_node, extension == SH_ARB_NV_FLOAT_BUFFER);
+  TexFetcher texFetcher(input_map, tc_node, extension == SH_ARB_NV_FLOAT_BUFFER,
+                        width.node(), fp.node());
   fp.node()->ctrlGraph->dfs(texFetcher);
   fp.node()->collectVariables(); // necessary to collect all the new textures
 
-  
   // optimize
   optimize(fp);
 
@@ -502,16 +368,12 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   gl_error = glGetError();
   if (gl_error != GL_NO_ERROR) {
     shError(PBufferStreamException("Could not enable GL_VERTEX_PROGRAM_ARB"));
-    //glXDestroyContext(m_display, pbuffer_ctxt);
-    //XFree(fb_config);
     return;
   }
   glEnable(GL_FRAGMENT_PROGRAM_ARB);
   gl_error = glGetError();
   if (gl_error != GL_NO_ERROR) {
     shError(PBufferStreamException("Could not enable GL_FRAGMENT_PROGRAM_ARB"));
-    //glXDestroyContext(m_display, pbuffer_ctxt);
-    //XFree(fb_config);
     return;
   }
 #ifdef SH_DEBUG_PBS_PRINTFP
@@ -536,16 +398,14 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
 
   DECLARE_TIMER(vpsetup);
 
-  int curcontext = shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->context();
-  if (m_setup_vp != curcontext) {
+  if (!m_setup_vp)
+    {
     // The (trivial) vertex program
-    if (m_setup_vp < 0) {
-      m_vp = keep<ShPosition4f>() & keep<ShTexCoord2f>();
-      m_vp.node()->target() = "gpu:vertex";
-    }
+    m_vp = keep<ShPosition4f>() & keep<ShTexCoord2f>();
+    m_vp.node()->target() = "gpu:vertex";
     shCompile(m_vp);
-    m_setup_vp = curcontext;
-  }
+    m_setup_vp = true;
+    }
 
   TIMING_RESULT(vpsetup);
 
@@ -605,8 +465,6 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   gl_error = glGetError();
   if (gl_error != GL_NO_ERROR) {
     shError(PBufferStreamException("Could not render"));
-    //glXDestroyContext(m_display, pbuffer_ctxt);
-    //XFree(fb_config);
     return;
   }
   
@@ -615,8 +473,9 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   ShHostStoragePtr outhost
     = shref_dynamic_cast<ShHostStorage>(output->memory()->findStorage("host"));
   if (!outhost) {
+    int datasize = shTypeInfo(valueType)->datasize(); 
     outhost = new ShHostStorage(output->memory().object(),
-                                sizeof(float) * output->size() * output->count());
+                                datasize * output->size() * output->count());
   }
   TIMING_RESULT(findouthost);
 
@@ -646,38 +505,51 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   }
 
   DECLARE_TIMER(readback);
-  
+
+  // @todo half-float
+  ShVariantPtr  resultBuffer; 
+  int resultDatasize = output->size() * count;
+  GLenum readpixelType;
+  ShValueType convertedType; 
+  readpixelType = shGlType(valueType, convertedType);
+  if(convertedType != SH_VALUETYPE_END) {
+      SH_DEBUG_WARN("ARB backend does not handle stream output type " << valueTypeName[valueType] << " natively."
+          << "  Using " << valueTypeName[convertedType] << " temporary buffer.");
+      resultBuffer = shVariantFactory(convertedType, SH_MEM)->generate(resultDatasize);
+  } else {
+      resultBuffer = shVariantFactory(valueType, SH_MEM)->generate(
+          outhost->data(), resultDatasize, false);
+  }
+
   glReadPixels(0, 0, tex_size, count / tex_size, format,
-               GL_FLOAT, outhost->data());
+               readpixelType, resultBuffer->array());
   gl_error = glGetError();
   if (gl_error != GL_NO_ERROR) {
     shError(PBufferStreamException("Could not do glReadPixels()"));
-    //glXDestroyContext(m_display, pbuffer_ctxt);
-    //XFree(fb_config);
     return;
   }
   if (count % tex_size) {
-    glReadPixels(0, count / tex_size, count % tex_size, 1, format, GL_FLOAT,
-                 reinterpret_cast<float*>(outhost->data())
-                 + (count - (count % tex_size)) * output->size());
+    glReadPixels(0, count / tex_size, count % tex_size, 1, format, readpixelType,
+                 (char*)(resultBuffer->array()) + (count - (count % tex_size)) * output->size() * resultBuffer->datasize());
     gl_error = glGetError();
     if (gl_error != GL_NO_ERROR) {
       shError(PBufferStreamException("Could not do rest of glReadPixels()"));
-      //glXDestroyContext(m_display, pbuffer_ctxt);
-      //XFree(fb_config);
       return;
     }
   }
 
+  if(convertedType != SH_VALUETYPE_END) { // need to copy to outhoust->data()
+    ShVariantPtr outhostVariant = shVariantFactory(valueType, SH_MEM)->generate(
+          outhost->data(), resultDatasize, false);
+    outhostVariant->set(resultBuffer);
+  }
+
   TIMING_RESULT(readback);
   
-  // Clean up
-  shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->setContext(prev);
-  //glXDestroyContext(m_display, pbuffer_ctxt);
-  //XFree(fb_config);
-
-  // TODO: This just seems wrong.
-  // ShEnvironment::boundShaders().clear();
+  // TODO: I think this is necessary, but it doesn't seem to be. I assume
+  // that GLUT (or whatever UI toolkit) is setting up its one context when
+  // its about to redraw. -Kevin
+  restoreContext();
   
   TIMING_RESULT(onerun);
 }

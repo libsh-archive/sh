@@ -40,7 +40,9 @@ SH_DLLEXPORT ShException {
 public:
   /// Construct a general exception with the given message.
   ShException(const std::string& message);
-
+  virtual ~ShException(); // Make this class virtual in orer to get
+                          // RTTI info in.
+  
   /// Return an informative message describing the exception.
   const std::string& message() const;
   

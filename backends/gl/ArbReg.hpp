@@ -40,6 +40,7 @@ enum ArbRegType {
   SH_ARB_REG_ATTRIB,
   SH_ARB_REG_PARAM,
   SH_ARB_REG_TEMP,
+  SH_ARB_REG_HALF_TEMP, // @todo type may want to rethink this
   SH_ARB_REG_ADDRESS,
   SH_ARB_REG_OUTPUT,
   SH_ARB_REG_CONST,
@@ -98,6 +99,7 @@ struct ArbReg : public SH::ShRefCountable {
     struct {
       ArbRegBinding binding;
       int bindingIndex;
+      int bindingCount;
     };
     float values[4];
   };

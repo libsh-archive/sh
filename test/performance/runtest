@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# runtes program runs suffix 
+PROG=$1
+RUNS=$2
+
+if test -f `which prospect`; then
+  for ((i=1; $i <= $RUNS; ++i)); do
+      echo "Run $i"
+      prospect -H 100000 -o prospect.temp $PROG > $PROG\_$i.out
+      c++filt < prospect.temp > $PROG\_$i.prof
+  done
+else
+  echo "prospect not found"
+fi

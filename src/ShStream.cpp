@@ -37,8 +37,8 @@ namespace SH {
 ShProgram connect(const ShChannelNodePtr& node, const ShProgram& program)
 {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
-    ShVariable out(new ShVariableNode(SH_OUTPUT,
-                                      node->size(), node->specialType()));
+    ShVariable out(node->clone(SH_OUTPUT));
+
     ShVariable streamVar(node);
     ShStatement stmt(out, SH_OP_FETCH, streamVar);
     ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);

@@ -27,18 +27,19 @@
 #ifndef SH_GLTEXTURESTORAGE_HPP
 #define SH_GLTEXTURESTORAGE_HPP
 
-#include "GlBackend.hpp"
+#include "ShVariableType.hpp"
 #include "ShMemory.hpp"
+#include "GlBackend.hpp"
 #include "GlTextureName.hpp"
 
 namespace shgl {
 
 class GlTextureStorage : public SH::ShStorage {
 public:
-  GlTextureStorage(int context,
-                   SH::ShMemory* memory, GLenum target,
+  GlTextureStorage(SH::ShMemory* memory, GLenum target,
                    GLenum format, GLint internalFormat,
-                   int width, int height, int depth,
+                   SH::ShValueType valueType, 
+                   int width, int height, int depth, int tuplesize,
                    GlTextureNamePtr name);
   
   ~GlTextureStorage();
@@ -50,18 +51,23 @@ public:
   GLenum target() const { return m_target; }
   GLenum format() const { return m_format; }
   GLint internalFormat() const { return m_internalFormat; }
+  SH::ShValueType valueType() const { return m_valueType; }
   int width() const { return m_width; }
   int height() const { return m_height; }
   int depth() const { return m_depth; }
-  int context() const { return m_context; }
+  int tuplesize() const { return m_tuplesize; }
+  int count() const { return m_width * m_height * m_depth * m_tuplesize; }
   
 private:
-  int m_context;
   GlTextureNamePtr m_name;
+
+  // OpenGL texture params.  type will be determined by the Transfer function
   GLenum m_target;
   GLenum m_format;
   GLint m_internalFormat;
-  int m_width, m_height, m_depth;
+
+  SH::ShValueType m_valueType; // type index expected of data on host
+  int m_width, m_height, m_depth, m_tuplesize;
   
   unsigned int m_params;
 

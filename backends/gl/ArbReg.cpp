@@ -40,6 +40,7 @@ struct {
   {"ATTRIB", "i"},
   {"PARAM", "u"},
   {"TEMP", "t"},
+  {"HALFTEMP", "h"},
   {"ADDRESS", "a"},
   {"OUTPUT", "o"},
   {"PARAM", "c"},
@@ -80,12 +81,12 @@ struct {
 };
 
 ArbReg::ArbReg()
-  : type(SH_ARB_REG_TEMP), index(-1), name(""), binding(SH_ARB_REG_NONE), bindingIndex(-1)
+  : type(SH_ARB_REG_TEMP), index(-1), name(""), binding(SH_ARB_REG_NONE), bindingIndex(-1), bindingCount(1)
 {
 }
   
 ArbReg::ArbReg(ArbRegType type, int index, std::string name)
-  : type(type), index(index), name(name), binding(SH_ARB_REG_NONE), bindingIndex(-1) 
+  : type(type), index(index), name(name), binding(SH_ARB_REG_NONE), bindingIndex(-1), bindingCount(1)
 {
 }
 
@@ -101,10 +102,20 @@ std::ostream& ArbReg::printDecl(std::ostream& out) const
     }
     out << "}";
   } else if (binding != SH_ARB_REG_NONE) {
-    out << " = " << arbRegBindingInfo[binding].name;
-    if (arbRegBindingInfo[binding].indexed) {
-      out << "[" << bindingIndex << "]";
+    if (bindingCount > 1) {
+      out << "[" << bindingCount << "]";
     }
+    out << " = ";
+    if (bindingCount > 1) out << "{ ";
+    out << arbRegBindingInfo[binding].name;
+    if (arbRegBindingInfo[binding].indexed) {
+      out << "[" << bindingIndex;
+      if (bindingCount > 1) {
+        out << " .. " << (bindingIndex + bindingCount - 1);
+      }
+      out << "]";
+    }
+    if (bindingCount > 1) out << " }";
   }
   out << ";"; 
   if(!name.empty() && type != SH_ARB_REG_CONST) out << " # " << name;

@@ -142,6 +142,19 @@ SH_DLLEXPORT
 void shCOND(ShVariable& dest, const ShVariable& cond,
             const ShVariable& a, const ShVariable& b);
 
+// interval arithmetic ops 
+SH_DLLEXPORT
+void shLO(ShVariable &dest, const ShVariable &a);
+
+SH_DLLEXPORT
+void shHI(ShVariable &dest, const ShVariable &a);
+
+SH_DLLEXPORT
+void shSETLO(ShVariable &dest, const ShVariable &a);
+
+SH_DLLEXPORT
+void shSETHI(ShVariable &dest, const ShVariable &a);
+
 SH_DLLEXPORT
 void shKIL(const ShVariable& cond);
 
