@@ -55,6 +55,9 @@ public:
 
 enum GlslProgramType { SH_GLSL_FP, SH_GLSL_VP }; 
 
+void print_infolog(GLhandleARB obj);
+void print_shader_source(GLhandleARB shader);
+
 }
 
 #endif

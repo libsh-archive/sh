@@ -33,12 +33,7 @@
 #include "Glsl.hpp"
 #include "GlTextures.hpp"
 #include "GlBackend.hpp"
-
-#ifdef WIN32
-#include "WGLPBufferStreams.hpp"
-#else
-#include "GLXPBufferStreams.hpp"
-#endif /* WIN32 */
+#include "PBufferStreams.hpp"
 
 namespace shgl {
 
@@ -46,11 +41,7 @@ struct GlslBackend : public GlBackend {
   GlslBackend()
     : GlBackend(new GlslCodeStrategy(),
                 new GlTextures(),
-#ifdef WIN32
-                new WGLPBufferStreams())
-#else
-                new GLXPBufferStreams())
-#endif /* WIN32 */
+                new PBufferStreams())
   {
   }
 

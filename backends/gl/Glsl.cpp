@@ -27,6 +27,7 @@
 #include "GlBackend.hpp"
 #include "Glsl.hpp"
 #include "GlslCode.hpp"
+#include <iostream>
 
 namespace shgl {
 
@@ -64,5 +65,40 @@ GlslException::GlslException(const std::string& message)
 {
 }
 
+void print_infolog(GLhandleARB obj)
+{
+  int infolog_len;
+  glGetObjectParameterivARB(obj, GL_OBJECT_INFO_LOG_LENGTH_ARB, &infolog_len);
+  
+  if (infolog_len > 0) {
+    char* infolog = (char*)malloc(infolog_len);
+    int nb_chars;
+    glGetInfoLogARB(obj, infolog_len, &nb_chars, infolog);
+    std::cout << infolog << std::endl;
+    free(infolog);
+  }
 }
 
+void print_shader_source(GLhandleARB shader)
+{
+  int source_len;
+  glGetObjectParameterivARB(shader, GL_OBJECT_SHADER_SOURCE_LENGTH_ARB, &source_len);
+  
+  if (source_len > 0) {
+    char* source = (char*)malloc(source_len);
+    int nb_chars;
+    glGetShaderSourceARB(shader, source_len, &nb_chars, source);
+
+    std::stringstream ss(source);
+    for (int i=1; !ss.eof(); i++) {
+      char line[1024];
+      ss.getline(line, sizeof(line));
+      std::cout.width(4); std::cout << i;
+      std::cout.width(0); std::cout << ":  " << line << std::endl;
+    }
+
+    free(source);
+  }
+}
+
+}

@@ -113,42 +113,6 @@ void GlslCode::generate()
   ShContext::current()->exit();
 }
 
-void GlslCode::print_infolog(GLhandleARB obj)
-{
-  int infolog_len;
-  glGetObjectParameterivARB(obj, GL_OBJECT_INFO_LOG_LENGTH_ARB, &infolog_len);
-  
-  if (infolog_len > 0) {
-    char* infolog = (char*)malloc(infolog_len);
-    int nb_chars;
-    glGetInfoLogARB(obj, infolog_len, &nb_chars, infolog);
-    cout << infolog << endl;
-    free(infolog);
-  }
-}
-
-void GlslCode::print_shader_source()
-{
-  int source_len;
-  glGetObjectParameterivARB(m_arb_shader, GL_OBJECT_SHADER_SOURCE_LENGTH_ARB, &source_len);
-  
-  if (source_len > 0) {
-    char* source = (char*)malloc(source_len);
-    int nb_chars;
-    glGetShaderSourceARB(m_arb_shader, source_len, &nb_chars, source);
-
-    stringstream ss(source);
-    for (int i=1; !ss.eof(); i++) {
-      char line[1024];
-      ss.getline(line, sizeof(line));
-      cout.width(4); cout << i;
-      cout.width(0); cout << ":  " << line << endl;
-    }
-
-    free(source);
-  }
-}
-
 void GlslCode::upload()
 {
   stringstream code;
@@ -168,7 +132,7 @@ void GlslCode::upload()
     cout << "Shader infolog:" << endl;
     print_infolog(m_arb_shader);
     cout << "Shader code:" << endl;
-    print_shader_source();
+    print_shader_source(m_arb_shader);
     cout << endl;
     return;
   }
@@ -201,24 +165,13 @@ void GlslCode::bind()
     cout << "Program infolog:" << endl;
     print_infolog(m_arb_program);
     cout << "Shader code:" << endl;
-    print_shader_source();
+    print_shader_source(m_arb_shader);
     cout << endl;
     return;
   }
 
   glUseProgramObjectARB(m_arb_program);
   ShContext::current()->set_binding(m_target, ShProgram(m_originalShader));
-
-  // Whenever the program is linked, we must reinitialize the uniforms
-  // because their values are reset.  Also, we must call
-  // glUseProgramObjectARB before we can get the location of uniforms.
-  for (GlslVariableMap::NodeList::iterator i = m_varmap->node_begin();
-       i != m_varmap->node_end(); i++) {
-    ShVariableNodePtr node = *i;
-    if (node->hasValues() && node->uniform()) {
-      updateUniform(node);
-    }
-  }
 
 #ifdef SH_DEBUG_GLSL_BACKEND
   // This is slow, it should not be enable in release code
@@ -232,6 +185,17 @@ void GlslCode::bind()
     print_infolog(m_arb_program);
   }
 #endif
+
+  // Whenever the program is linked, we must reinitialize the uniforms
+  // because their values are reset.  Also, we must call
+  // glUseProgramObjectARB before we can get the location of uniforms.
+  for (GlslVariableMap::NodeList::iterator i = m_varmap->node_begin();
+       i != m_varmap->node_end(); i++) {
+    ShVariableNodePtr node = *i;
+    if (node->hasValues() && node->uniform()) {
+      updateUniform(node);
+    }
+  }
 }
 
 void GlslCode::update()
@@ -391,6 +355,12 @@ void GlslCode::emit(const ShStatement &stmt)
     break;
   case SH_OP_NORM:
     m_lines.push_back(resolve(stmt.dest, stmt.src[0].size()) + " = normalize(" + resolve(stmt.src[0]) + ")");
+    break;
+  case SH_OP_POW:
+    m_lines.push_back(resolve(stmt.dest, max(stmt.src[0].size(), stmt.src[1].size())) + " = pow(" + resolve(stmt.src[0]) + ", " + resolve(stmt.src[1]) + ")");
+    break;
+  case SH_OP_MAX:
+    m_lines.push_back(resolve(stmt.dest, max(stmt.src[0].size(), stmt.src[1].size())) + " = max(" + resolve(stmt.src[0]) + ", " + resolve(stmt.src[1]) + ")");
     break;
   default:
     m_lines.push_back("// *** unhandled operation " + 
