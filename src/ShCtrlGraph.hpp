@@ -63,7 +63,8 @@ public:
   ~ShCtrlGraphNode();
 
   ShBasicBlockPtr block;
-  std::vector<ShCtrlGraphBranch> successors; ///< Conditional successors
+  typedef std::vector<ShCtrlGraphBranch> SuccessorList;
+  SuccessorList successors; ///< Conditional successors
   ShPointer<ShCtrlGraphNode> follower; ///< Unconditional successor
 
   typedef std::list<ShCtrlGraphNode*> ShPredList;

@@ -163,11 +163,19 @@ void ArbCode::generate()
     ShContext::current()->enter(m_shader);
   }
 
-  m_shader->ctrlGraph->entry()->clearMarked();
-  genNode(m_shader->ctrlGraph->entry());
+  if (m_environment & SH_ARB_NVFP2) {
+    // In NV_fragment_program2, we actually generate structured code.
+    ShStructural str(m_shader->ctrlGraph);
 
-  if (m_environment & SH_ARB_NVVP2) {
-    m_instructions.push_back(ArbInst(SH_ARB_LABEL, getLabel(m_shader->ctrlGraph->exit())));
+    genStructNode(str.head());
+    
+  } else {
+    m_shader->ctrlGraph->entry()->clearMarked();
+    genNode(m_shader->ctrlGraph->entry());
+    
+    if (m_environment & SH_ARB_NVVP2) {
+      m_instructions.push_back(ArbInst(SH_ARB_LABEL, getLabel(m_shader->ctrlGraph->exit())));
+    }
   }
   m_shader->ctrlGraph->entry()->clearMarked();
   allocRegs();
@@ -454,6 +462,10 @@ std::ostream& ArbCode::print(std::ostream& out)
        I != m_instructions.end(); ++I) {
     if (I->op == SH_ARB_LABEL) {
       out << "label" << I->label << ": ";
+    } else if (I->op == SH_ARB_ELSE) {
+      out << "  ELSE;";
+    } else if (I->op == SH_ARB_ENDIF) {
+      out << "  ENDIF;";
     } else if (I->op == SH_ARB_BRA) {
       if (I->src[0].node()) {
         out << "  MOVC ";
@@ -465,6 +477,23 @@ std::ostream& ArbCode::print(std::ostream& out)
       out << "  BRA label" << I->label;
       if (I->src[0].node()) {
         out << "  (GT)";
+        // TODO: swizzle
+      }
+      out << ";";
+    } else if (I->op == SH_ARB_IF) {
+      if (I->src[0].node()) {
+        out << "  MOVC ";
+        printVar(out, true, I->src[0], false);
+        out << ", ";
+        printVar(out, false, I->src[0], false, I->src[0].swizzle());
+        out << ";" << endl;
+      }
+      out << "  IF ";
+      if (I->src[0].node()) {
+        out << "GT";
+        // TODO: swizzle
+      } else {
+        out << "TR";
       }
       out << ";";
     } else if (!printSamplingInstruction(out, *I)) {
@@ -540,6 +569,45 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
   }
 
   genNode(node->follower);
+}
+
+void ArbCode::genStructNode(const ShStructuralNodePtr& node)
+{
+  if (!node) return;
+
+  if (node->type == ShStructuralNode::UNREDUCED) {
+    ShBasicBlockPtr block = node->cfg_node->block;
+    if (block) for (ShBasicBlock::ShStmtList::const_iterator I = block->begin();
+                    I != block->end(); ++I) {
+      const ShStatement& stmt = *I;
+      emit(stmt);
+    }
+  } else if (node->type == ShStructuralNode::BLOCK) {
+    for (ShStructuralNode::StructNodeList::const_iterator I = node->structnodes.begin();
+         I != node->structnodes.end(); ++I) {
+      genStructNode(*I);
+    }
+  } else if (node->type == ShStructuralNode::IFELSE) {
+    ShStructuralNodePtr header = node->structnodes.front();
+    // TODO Check that header->successors is only two.
+    ShVariable cond;
+    ShStructuralNodePtr ifnode, elsenode;
+    for (ShStructuralNode::SuccessorList::iterator I = header->succs.begin();
+         I != header->succs.end(); ++I) {
+      if (I->first.node()) {
+        ifnode = I->second;
+        cond = I->first;
+      } else {
+        elsenode = I->second;
+      }
+    }
+    genStructNode(header);
+    m_instructions.push_back(ArbInst(SH_ARB_IF, ShVariable(), cond)); {
+      genStructNode(ifnode);
+    } m_instructions.push_back(ArbInst(SH_ARB_ELSE, ShVariable())); {
+      genStructNode(elsenode);
+    } m_instructions.push_back(ArbInst(SH_ARB_ENDIF, ShVariable()));
+  }
 }
 
 void ArbCode::allocRegs()

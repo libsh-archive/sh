@@ -54,7 +54,7 @@ std::ostream& ShCtrlGraphNode::print(std::ostream& out, int indent) const
     out << "->" << std::endl;
     follower->print(out, indent + 2);
   }
-  for (std::vector<ShCtrlGraphBranch>::const_iterator I = successors.begin();
+  for (SuccessorList::const_iterator I = successors.begin();
        I != successors.end(); ++I) {
     shPrintIndent(out, indent);
     if (!I->cond.null()) {
@@ -80,7 +80,7 @@ std::ostream& ShCtrlGraphNode::graphvizDump(std::ostream& out) const
   }
   out << ";" << std::endl;
 
-  for (std::vector<ShCtrlGraphBranch>::const_iterator I = successors.begin();
+  for (SuccessorList::const_iterator I = successors.begin();
        I != successors.end(); ++I) {
     I->node->graphvizDump(out);
     out << "\"" << this << "\" ";
@@ -118,7 +118,7 @@ void ShCtrlGraphNode::clearMarked() const
 
   if (follower) follower->clearMarked();
   
-  for (std::vector<ShCtrlGraphBranch>::const_iterator I = successors.begin();
+  for (SuccessorList::const_iterator I = successors.begin();
        I != successors.end(); ++I) {
     I->node->clearMarked();
   }
@@ -243,7 +243,7 @@ struct ComputePreds {
   void operator()(ShCtrlGraphNode* node) {
     if (!node) return;
     
-    for (std::vector<ShCtrlGraphBranch>::iterator I = node->successors.begin();
+    for (ShCtrlGraphNode::SuccessorList::iterator I = node->successors.begin();
          I != node->successors.end(); ++I) {
       if (I->node) I->node->predecessors.push_back(node);
     }
@@ -293,7 +293,8 @@ void ShCtrlGraph::copy(ShCtrlGraphNodePtr& newHead, ShCtrlGraphNodePtr& newTail)
   for (CtrlGraphCopyMap::iterator I = copyMap.begin(); I != copyMap.end(); ++I) {
     ShCtrlGraphNodePtr node = I->second; // Get the new node
     if (!node) continue;
-    for (std::vector<ShCtrlGraphBranch>::iterator J = node->successors.begin(); J != node->successors.end(); ++J) {
+    for (ShCtrlGraphNode::SuccessorList::iterator J = node->successors.begin();
+         J != node->successors.end(); ++J) {
       J->node = copyMap[J->node];
     }
     node->follower = copyMap[node->follower];

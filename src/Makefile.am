@@ -5,6 +5,9 @@ lib_LTLIBRARIES = libsh.la
 libsh_la_LIBADD = $(LIBLTDL)
 libsh_la_LDFLAGS = -export-dynamic -no-undefined
 
+incincdir = $(includedir)/sh
+incinc_HEADERS  = ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp
+
 # General/internals
 libsh_la_SOURCES  = ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp
 libsh_la_SOURCES += ShEnvironment.cpp ShException.cpp ShError.cpp
@@ -30,9 +33,12 @@ libsh_la_SOURCES += ShContext.hpp ShContext.cpp
 libsh_la_SOURCES += ShBackend.cpp ShBackend.hpp 
 libsh_la_SOURCES += ShLinearAllocator.hpp ShLinearAllocator.cpp
 
-# Optimizer
-libsh_la_SOURCES += ShDomTree.hpp ShOptimizer.hpp ShTransformer.hpp ShBitSet.hpp ShBitSet.cpp
-libsh_la_SOURCES += ShDomTree.cpp ShOptimizer.cpp ShTransformer.cpp
+# Optimizer and compiler internals
+libsh_la_SOURCES += ShDomTree.hpp ShOptimizer.hpp ShTransformer.hpp ShBitSet.hpp
+libsh_la_SOURCES += ShDomTree.cpp ShOptimizer.cpp ShTransformer.cpp ShBitSet.cpp
+incinc_HEADERS   += ShDomTree.hpp ShOptimizer.hpp ShTransformer.hpp ShBitSet.hpp
+libsh_la_SOURCES += ShStructural.hpp ShStructural.cpp
+incinc_HEADERS   += ShStructural.hpp
 
 # Library functions
 libsh_la_SOURCES += ShLib.hpp
@@ -77,9 +83,7 @@ libsh_la_SOURCES += ShChannelNode.hpp ShChannelNode.cpp
 libsh_la_SOURCES += ShChannel.hpp ShChannelImpl.hpp
 libsh_la_SOURCES += ShStream.hpp ShStreamImpl.hpp ShStream.cpp
 
-incincdir = $(includedir)/sh
 
-incinc_HEADERS  = ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp
 incinc_HEADERS += ShBlock.hpp ShCtrlGraph.hpp
 incinc_HEADERS += ShDebug.hpp ShEnvironment.hpp ShError.hpp
 incinc_HEADERS += ShException.hpp ShLib.hpp
@@ -111,7 +115,7 @@ incinc_HEADERS += ShColor.hpp ShColorImpl.hpp ShLibColor.hpp
 incinc_HEADERS += ShPosition.hpp ShPositionImpl.hpp ShLibPosition.hpp
 incinc_HEADERS += ShNormal.hpp ShNormalImpl.hpp ShLibNormal.hpp
 incinc_HEADERS += ShTexCoord.hpp ShTexCoordImpl.hpp ShLibTexCoord.hpp
-incinc_HEADERS += ShDomTree.hpp ShOptimizer.hpp ShTransformer.hpp ShAlgebra.hpp ShInternals.hpp
+incinc_HEADERS += ShAlgebra.hpp ShInternals.hpp
 incinc_HEADERS += ShFixedManipulator.hpp
 incinc_HEADERS += ShManipulator.hpp ShManipulatorImpl.hpp
 incinc_HEADERS += ShNibbles.hpp ShNibblesImpl.hpp

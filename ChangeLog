@@ -1,3 +1,26 @@
+2004-07-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbCode.cpp: Implement conditionals using IF on the
+	NV40 using the new Structural Analysis discovery code.
+
+	* backends/gl/ArbCode.hpp: Add genStructNode() prototype.
+
+	* backends/gl/ArbInst.cpp (arbOpInfo): Operation info for IF,
+	ELSE, ENDIF.
+
+	* backends/gl/ArbInst.hpp: Add IF, ELSE, ENDIF.
+
+	* src/ShStructural.cpp: Implementation of Structural Analysis algorithm.
+
+	* src/ShStructural.hpp: Added Structural Analysis
+	algorithm. Doesn't do loops yet.
+
+	* test/sandbox/Makefile: Improve Makefile overall, add dependencies.
+
+	* src/ShSwizzle.hpp: Added comparison (==) operator.
+
+	* src/ShVariable.hpp: Added comparison (==) operator.
+
 2004-07-13  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShSyntax.hpp (SH_NAME): Added this macro.

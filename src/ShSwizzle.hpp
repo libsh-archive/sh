@@ -86,6 +86,9 @@ public:
 
   /// Determine whether this is an identity swizzle.
   bool identity() const;
+
+  /// Determine whether two swizzles are identical
+  bool operator==(const ShSwizzle& other) const;
   
 private:
   std::size_t m_srcSize;

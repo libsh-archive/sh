@@ -1,9 +1,27 @@
+SOURCES = $(wildcard *.cpp)
+EXECUTABLES = $(SOURCES:.cpp=)
+OBJECTS = $(SOURCES:.cpp=.o)
+DEPENDS = $(SOURCES:.cpp=.d)
+CPPFLAGS = -I../../src 
+CXXFLAGS = -g -O0 -Wall
+LDFLAGS = ../../src/libsh.la -lGL
+
 all:
 
-%: %.cpp
-	libtool --mode=link $(CXX) -o $@ -Wall -g -O0 -I../../src $< ../../src/libsh.la -lGL
+clean:
+	rm -f *.o $(EXECUTABLES) *.d
+
+%: %.o
+	libtool --mode=link $(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
 %.o: %.cpp
-	$(CXX) -o $@ -Wall -g -O0 -I../../src $<
+	$(CXX) -c -o $@ $(CPPFLAGS) $(CXXFLAGS) -I../../src $<
+
+%.d: %.cpp
+	$(CXX) -M $(CPPFLAGS) $< > $@.$$$$; \
+            sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+            rm -f $@.$$$$
+
+include $(DEPENDS)
 
 

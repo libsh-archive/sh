@@ -101,7 +101,8 @@ public:
   ShVariable operator()(int size, int indices[]) const;
   
   ShVariable operator-() const;
-  
+
+  bool operator==(const ShVariable& other) const;
 
 protected:
   

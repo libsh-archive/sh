@@ -85,7 +85,10 @@ ArbOpInfo arbOpInfo[] = {
   {"DIV", 2, false},
   {"DP2", 2, true},
   {"NRM", 1, false},
-
+  {"IF", 1, false},
+  {"ELSE", 0, false},
+  {"ENDIF", 0, false},
+  
   {"<fun>", 0, false}
 };
 

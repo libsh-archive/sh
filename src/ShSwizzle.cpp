@@ -158,6 +158,11 @@ bool ShSwizzle::identity() const
   return true;
 }
 
+bool ShSwizzle::operator==(const ShSwizzle& other) const
+{
+  return m_srcSize == other.m_srcSize && m_indices == other.m_indices;
+}
+
 std::ostream& operator<<(std::ostream& out, const ShSwizzle& swizzle)
 {
   if (swizzle.identity()) return out;

@@ -10,6 +10,7 @@
 #include "ShProgram.hpp"
 #include "ShSwizzle.hpp"
 #include "ShRefCount.hpp"
+#include "ShStructural.hpp"
 #include "ArbLimits.hpp"
 #include "ArbReg.hpp"
 #include "ArbInst.hpp"
@@ -59,6 +60,11 @@ private:
 
   /// Generate code for this node and those following it.
   void genNode(SH::ShCtrlGraphNodePtr node);
+
+  /// Generate code for this structural node and those contained by
+  /// it.
+  /// Right now this is geared specifically at NV_fragment_program2.
+  void genStructNode(const SH::ShStructuralNodePtr& node);
 
   /// Generate code for a single Sh statement.
   void emit(const SH::ShStatement& stmt);
