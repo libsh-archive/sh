@@ -1,3 +1,8 @@
+2004-04-06  Jack Wang  <jmwang@uwaterloo.ca>
+
+	* src/ShImage.hpp, src/ShImage.cpp: Added writePng16(), which writes
+	16 bit png images.
+
 2004-04-05  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShVariable.cpp (setValues): Lock the node before we call all

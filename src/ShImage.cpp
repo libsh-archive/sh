@@ -272,6 +272,76 @@ void ShImage::loadPng(const std::string& filename)
   png_destroy_read_struct(&png_ptr, &info_ptr, 0);
 }
 
+void ShImage::savePng16(const std::string& filename, int inverse_alpha)
+{
+  FILE* fout = std::fopen(filename.c_str(), "w");
+  png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+  png_infop info_ptr = png_create_info_struct(png_ptr);
+  setjmp(png_ptr->jmpbuf);
+
+  /* Setup PNG I/O */
+  png_init_io(png_ptr, fout);
+	 
+  /* Optionally setup a callback to indicate when a row has been
+   * written. */  
+
+  /* Setup filtering. Use Paeth filtering */
+  png_set_filter(png_ptr, 0, PNG_FILTER_PAETH);
+
+  /* Setup compression level. */
+  png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
+
+  /* Setup PNG header information and write it to the file */
+
+  int color_type;
+  switch (m_elements) {
+  case 1:
+    color_type = PNG_COLOR_TYPE_GRAY;
+    break;
+  case 2:
+    color_type = PNG_COLOR_TYPE_GRAY_ALPHA;
+    break;
+  case 3:
+    color_type = PNG_COLOR_TYPE_RGB;
+    break;
+  case 4:
+    color_type = PNG_COLOR_TYPE_RGBA;
+    break;
+  default:
+    throw ShImageException("Invalid element size");
+  }
+   
+  png_set_IHDR(png_ptr, info_ptr,
+               m_width, m_height,
+               16, 
+               color_type,
+               PNG_INTERLACE_NONE, 
+               PNG_COMPRESSION_TYPE_DEFAULT, 
+               PNG_FILTER_TYPE_DEFAULT);
+  png_write_info(png_ptr, info_ptr); 
+    
+  // Actual writing
+  png_uint_16* tempLine = (png_uint_16*)malloc(m_width * sizeof(png_uint_16) * m_elements);
+
+  for(int i=0;i<m_height;i+=1){
+    for(int j=0;j<m_width;j+=1){
+      for(int k = 0;k<m_elements;k+=1)
+        tempLine[m_elements*j+k] = static_cast<png_uint_16>((*this)(j, i, k)*65535.0); 
+       
+      // inverse alpha
+      if(inverse_alpha && m_elements == 4)
+        tempLine[m_elements*j+3] = 65535 - tempLine[m_elements*j+3];
+    }
+    png_write_row(png_ptr, (png_byte*)tempLine);
+  }
+
+  // closing and freeing the structs
+  png_write_end(png_ptr, info_ptr);
+  png_destroy_write_struct(&png_ptr, &info_ptr);
+  free(tempLine);
+  fclose(fout);
+}
+
 const float* ShImage::data() const
 {
   if (!m_memory) return 0;

@@ -69,6 +69,8 @@ public:
   void savePng(const std::string& filename, int inverse_alpha=0);///< Save a PNG image into
                                              ///this file
   
+  void savePng16(const std::string& filename, int inverse_alpha=0);///< Save a PNG image into
+  
   
 
   const float* data() const;
