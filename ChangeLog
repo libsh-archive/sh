@@ -1,5 +1,8 @@
 2004-05-21  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShSyntax.hpp, src/ShSyntax.cpp: Add shBind, shCompile and
+	deprecate old functions with "Shader" in the names. Fixes issue1.
+
 	* Get rid of explicit instantiation. Fixes issue103.
 
 2004-05-20  Bryan Chan <b8chan@uwaterloo.ca>
