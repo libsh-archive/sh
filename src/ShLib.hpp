@@ -520,18 +520,20 @@ ShVariableN<N, T> cos(const ShVariableN<N, T>& var)
   }
 }
 
-// Dot product
-template<int N, typename T>
-ShVariableN<1,  T> dot(const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
+/// Componentwise/scalar dot product
+template<int M, int N, typename T>
+ShVariableN<1,  T> dot(const ShVariableN<M, T>& left, const ShVariableN<N, T>& right)
 {
+  ShCheckDims<M, true, N, true>();
   if (!ShEnvironment::insideShader) {
     assert(left.hasValues());
-    T lvals[N];
+    T lvals[M];
     left.getValues(lvals);
     T rvals[N];
     right.getValues(rvals);
     T result = 0.0;
-    for (int i = 0; i < N; i++) result += lvals[i] * rvals[i];
+    for (int i = 0; i < M || i < N; i++) result += 
+        ( M == 1 ? lvals[0] : lvals[i] ) * ( N == 1 ? rvals[0] : rvals[i] );
     return ShConstant<1, T>(result);
   } else {
     ShAttrib<1, SH_VAR_TEMP, T, false> t;
@@ -540,6 +542,18 @@ ShVariableN<1,  T> dot(const ShVariableN<N, T>& left, const ShVariableN<N, T>& r
     return t;
   }
 }
+
+template<int N, typename T>
+ShVariableN<1,  T> dot(T left, const ShVariableN<N, T>& right) {
+  return dot(ShConstant1f(left), right);
+}
+
+template<int M, typename T>
+ShVariableN<1,  T> dot(const ShVariableN<M, T>& left, T right) {
+  return dot(left, ShConstant1f(right));
+}
+
+
 
 /// greatest integer >= argument 
 template<int N, typename T>
