@@ -86,6 +86,8 @@ void TexFetcher::operator()(ShCtrlGraphNode* node)
       } else {
         stmt = ShStatement(stmt.dest, texVar, SH_OP_TEX, coordsVar);
       }
+      // The following is useful for debugging
+      // stmt = ShStatement(stmt.dest, SH_OP_ASN, coordsVar(0,1,0,1));
     } else {
       // Make sure our actualy index is a temporary in the program.
       ShContext::current()->enter(program);
@@ -100,8 +102,6 @@ void TexFetcher::operator()(ShCtrlGraphNode* node)
       node->block->splice(I, new_stmts);
       I--;
     }
-    // The following is useful for debugging
-    // stmt = ShStatement(stmt.dest, SH_OP_ASN, coordsVar);
   }
 }
 

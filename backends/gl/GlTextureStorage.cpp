@@ -126,6 +126,7 @@ class HostGlTextureTransfer : public ShTransfer {
   
   bool transfer(const ShStorage* from, ShStorage* to)
   {
+    std::cerr << "host->opengl:texture" << std::endl; 
     const ShHostStorage* host = dynamic_cast<const ShHostStorage*>(from);
     GlTextureStorage* texture = dynamic_cast<GlTextureStorage*>(to);
 
@@ -157,6 +158,8 @@ class HostGlTextureTransfer : public ShTransfer {
     int height = texture->height();
     int depth = texture->depth();
 
+    std::cerr << "   Target has " << count << "/" << width << "x" << height << "x" << depth << std::endl;
+    
     // If the texture is not full, must not copy more than count
     bool full_copy = (count == (width * height * depth));
 
@@ -249,15 +252,12 @@ class GlTextureHostTransfer : public ShTransfer {
   bool transfer(const ShStorage* from, ShStorage* to)
   {
     std::cerr << "Transferring opengl:texture to host" << std::endl;
-    std::cerr << "Casting..." << std::endl;
     const GlTextureStorage* texture = dynamic_cast<const GlTextureStorage*>(from);
     ShHostStorage* host = dynamic_cast<ShHostStorage*>(to);
 
-    std::cerr << "Binding texture..." << std::endl;
     // Bind texture name for this scope.
     GlTextureName::Binding binding(texture->texName());
 
-    std::cerr << "Setting up types..." << std::endl;
     ShValueType valueType = texture->valueType(); 
     int count = texture->count();
     int tuplesize = texture->tuplesize();
@@ -273,7 +273,6 @@ class GlTextureHostTransfer : public ShTransfer {
     // If the texture is not full, must not copy more than count
     bool full_copy = (count == (width * height * depth));
 
-    std::cerr << "Setting up variants..." << std::endl;
     // TODO: Type conversion stuff.
     ShVariantPtr hostVariant = shVariantFactory(valueType,
                                                 SH_MEM)->generate(host->data(), count * tuplesize, false);
@@ -285,15 +284,12 @@ class GlTextureHostTransfer : public ShTransfer {
       dataVariant = hostVariant; 
     }
 
-    std::cerr << "glGetTexImage..." << std::endl;
     SH_GL_CHECK_ERROR(glGetTexImage(texture->target(), 0, texture->format(), type, dataVariant->array()));
 
     if (dataVariant != hostVariant) {
-      std::cerr << "Copying data..." << std::endl;
       hostVariant->set(dataVariant);
     }
 
-    std::cerr << "Done transferring" << std::endl;
     return true;
   }
   

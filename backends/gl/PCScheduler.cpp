@@ -1,5 +1,8 @@
 #include "PCScheduler.hpp"
 #include <list>
+#include <sstream>
+#include <fstream>
+#include <cstdlib>
 #include "GlBackend.hpp"
 #include "ShSchedule.hpp"
 #include "Utils.hpp"
@@ -14,10 +17,66 @@
 #include "ShManipulator.hpp"
 #include "GlTextures.hpp"
 #include "ShClamping.hpp"
+#include "ShImage.hpp"
+
+#define PCS_DEBUG_LOG
 
 namespace {
 using namespace SH;
 using namespace shgl;
+
+const std::string dump_directory = "dumps/";
+
+std::string dump_depth_buffer(const std::string& filename,
+                       int width, int height)
+{
+  ShImage img(width, height, 1);
+
+  SH_GL_CHECK_ERROR(glReadPixels(0, 0, width, height,
+                                 GL_DEPTH_COMPONENT, GL_FLOAT,
+                                 img.data()));
+
+  std::string fname = dump_directory + "depth_" + filename;
+  img.savePng(fname);
+  return fname;
+}
+
+std::string dump_color_buffer(const std::string& filename,
+                       int width, int height)
+{
+  ShImage img(width, height, 3);
+
+  SH_GL_CHECK_ERROR(glReadPixels(0, 0, width, height,
+                                 GL_RGB, GL_FLOAT,
+                                 img.data()));
+
+  std::string fname = dump_directory + "color_" + filename;
+  img.savePng(fname);
+  return fname;
+}
+
+std::string dump_stencil_buffer(const std::string& filename,
+                       int width, int height)
+{
+  ShImage img(width, height, 1);
+
+  SH_GL_CHECK_ERROR(glReadPixels(0, 0, width, height,
+                                 GL_STENCIL_INDEX, GL_FLOAT,
+                                 img.data()));
+
+  std::string fname = dump_directory + "stencil_" + filename;
+  img.savePng(fname);
+  return fname;
+}
+
+std::string make_unique_filename(const std::string& prefix,
+                                 const std::string& ending)
+{
+  static int count = 0;
+  std::ostringstream os;
+  os << prefix << count++ << ending;
+  return os.str();
+}
 
 ShProgramNodePtr replace_temps_and_fetches(const ShPass& pass,
                                            std::vector<ShTextureNodePtr>& temp_buffers,
@@ -42,7 +101,8 @@ ShProgramNodePtr replace_temps_and_fetches(const ShPass& pass,
       // TOOD: types??
       ShVariable out(new ShVariableNode(SH_OUTPUT, mapping.length, SH_FLOAT));
       ShVariable texVar(texnode);
-      ShStatement stmt(out, texVar, SH_OP_TEX, tc);
+      // TODO: rect vs 2d
+      ShStatement stmt(out, texVar, SH_OP_TEXI, tc);
       ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
     } SH_END;
 
@@ -166,6 +226,29 @@ private:
   ShProgram m_copy_fp;
   
   std::vector<ShChannelNodePtr> m_output_channels;
+
+#ifdef PCS_DEBUG_LOG
+  std::ofstream m_debug_log;
+
+  std::string debug_img(const std::string& filename, bool dims = true)
+  {
+    int width = m_width, height = m_height;
+    if (m_width < 64) {
+      width = 64;
+    }
+    if (m_height < 64) {
+      height = 64;
+    }
+    std::ostringstream os;
+
+    os << "<img src=\"" << filename << "\"";
+    if (dims) {
+      os << " width=\"" << width << "\" height=\"" << height << "\"";
+    }
+    os << " border=3>";
+    return os.str();
+  }
+#endif
 };
 
 typedef ShPointer<PCSchedule> PCSchedulePtr;
@@ -179,8 +262,8 @@ PCScheduler::PCScheduler()
 ShBackendSchedulePtr PCScheduler::prepare(ShSchedule* schedule)
 {
   std::cerr << "Preparing schedule " << schedule << std::endl;
-  double pc_increment = 1.0/schedule->num_passes();
-  double current_pc = pc_increment; // 0 is special
+  double pc_increment = 1.0/(schedule->num_passes() + 1);
+  double current_pc = pc_increment; // 0 is special, avoid 1
 
   PCSchedulePtr pc_schedule = new PCSchedule(schedule);
 
@@ -244,6 +327,20 @@ ShBackendSchedulePtr PCScheduler::prepare(ShSchedule* schedule)
 PCSchedule::PCSchedule(ShSchedule* schedule)
   : m_schedule(schedule), m_width(0), m_height(0)
 {
+#ifdef PCS_DEBUG_LOG
+  m_debug_log.open("pc_dump.html", std::ofstream::out | std::ofstream::trunc);
+  m_debug_log << "<html><head><title>My Control Flow Execution</title></head>" << std::endl
+              << "</head><body>" << std::endl;
+  m_debug_log << "<h3>My life as a schedule</h3>" << std::endl;
+
+  std::string gv_filename = make_unique_filename(dump_directory + "schedule", ".dot");
+  std::string img_filename = make_unique_filename(dump_directory + "schedule", ".png");
+  std::ofstream gvfile(gv_filename.c_str());
+  schedule->dump_graphviz(gvfile);
+  gvfile.close();
+  system(std::string("dot -Tpng -o " + img_filename + " " + gv_filename).c_str());
+  m_debug_log << "<p>This is my schedule:<br>" << debug_img(img_filename, false) << "</p>" << std::endl;
+#endif
   // Ensure we're at the global scope
   ShContext::current()->enter(0);
   
@@ -253,7 +350,7 @@ PCSchedule::PCSchedule(ShSchedule* schedule)
 
     // TODO: change depending on rect vs 2d
     tc = pos(0,1);
-    pos(0,1) = 2.0 * pos(0,1) * (rcp(m_size)) - 1.0;
+    pos(0,1) = 2.0 * pos(0,1) * (rcp(m_size)) + ShAttrib2f(-1.0, -1.0);
   } SH_END;
 
   m_dummy_fp = SH_BEGIN_FRAGMENT_PROGRAM {
@@ -265,11 +362,15 @@ PCSchedule::PCSchedule(ShSchedule* schedule)
   } SH_END;
 
   m_pred_fp = SH_BEGIN_FRAGMENT_PROGRAM {
+    ShOutputAttrib4f out = cond(m_pred_kill,
+                                ShConstAttrib4f(1.0, 0.0, 0.0, 1.0),
+                                ShConstAttrib4f(0.0, 1.0, 0.0, 1.0));
+    
     ShInputTexCoord2f tc;
 
     ShAttrib1f predicate = m_pred_texture[tc](0);
     
-    discard(cond(m_pred_kill, predicate, 1.0 - (predicate > 0)));
+    discard(cond(m_pred_kill, predicate, !predicate));
   } SH_END;
 
   m_copy_fp = SH_BEGIN_FRAGMENT_PROGRAM {
@@ -284,12 +385,18 @@ PCSchedule::PCSchedule(ShSchedule* schedule)
 
 PCSchedule::~PCSchedule()
 {
+#ifdef PCS_DEBUG_LOG
+  m_debug_log << "</body></html>" << std::endl;
+  m_debug_log.close();
+#endif
   SH_GL_CHECK_ERROR(glDeleteOcclusionQueriesNV(1, &m_query));
 }
 
 void PCSchedule::pre_execution(int width, int height, const ShStream& outputs)
 {
-  std::cerr << "Pre-execution " << width << "x" << height << " with " << outputs.size() << " outputs." << std::endl;
+#ifdef PCS_DEBUG_LOG
+  m_debug_log << "<p>I am about to execute in a " << width << "x" << height << " window with " << outputs.size() << " outputs." << "</p>" << std::endl;
+#endif
   m_output_channels.clear();
   for (ShStream::NodeList::const_iterator I = outputs.begin(); I != outputs.end(); ++I) {
     m_output_channels.push_back(*I);
@@ -316,6 +423,8 @@ void PCSchedule::pre_execution(int width, int height, const ShStream& outputs)
   std::cerr << "Activating." << std::endl;
   PBufferHandlePtr old_context = m_context->activate();
 
+  SH_GL_CHECK_ERROR(glViewport(0, 0, m_width, m_height));
+  
   SH_GL_CHECK_ERROR(glEnable(GL_VERTEX_PROGRAM_ARB));
   SH_GL_CHECK_ERROR(glEnable(GL_FRAGMENT_PROGRAM_ARB));
   SH_GL_CHECK_ERROR(glClearColor(0.3, 0.4, 0.5, 0.6));
@@ -326,6 +435,16 @@ void PCSchedule::pre_execution(int width, int height, const ShStream& outputs)
     std::cerr << "Allocate temporary buffer " << i << std::endl;
     temp_buffers[i]->setTexSize(m_width, m_height);
     temp_buffers[i]->memory(new GlTextureMemory(temp_buffers[i]));
+  }
+  for (PCChannelMap::iterator I = channel_map.begin(); I != channel_map.end(); ++I) {
+    const ShChannelNodePtr& channel = I->first;
+    const ShTextureNodePtr& texture = I->second;
+
+    // TODO: Check that channel size matches output channel sizes.
+
+    texture->setTexSize(m_width, m_height);
+    texture->set_count(channel->count());
+    texture->memory(channel->memory());
   }
   std::cerr << "Allocate predicate texture" << std::endl;
   m_pred_texture.size(m_width, m_height);
@@ -345,10 +464,12 @@ void PCSchedule::pre_execution(int width, int height, const ShStream& outputs)
   SH_GL_CHECK_ERROR(glDepthFunc(GL_ALWAYS));
   SH_GL_CHECK_ERROR(glDepthMask(GL_TRUE));
   
+  dump_depth_buffer(make_unique_filename("init", ".png"), m_width, m_height);
 
   // Initialize depth buffer
-  draw_quad(0.0, 0.0, m_width, m_height, 1.0/m_schedule->num_passes());
+  draw_quad(0.0, 0.0, m_width, m_height, 1.0/(m_schedule->num_passes() + 1));
 
+  dump_depth_buffer(make_unique_filename("init", ".png"), m_width, m_height);
   
   std::cerr << "Restoring context." << std::endl;
   if (old_context) old_context->restore();
@@ -368,20 +489,20 @@ void PCSchedule::draw_quad(double x1, double y1, double x2, double y2,
 
 void PCSchedule::execute_pass(ShPass* pass)
 {
-  std::cerr << "Attempting pass execution [" << pass << "]" << std::endl;
   if (!pass->count) return;
-  std::cerr << "Performing execution." << std::endl;
+#ifdef PCS_DEBUG_LOG
+  m_debug_log << "<hr><p><b>Executing [" << pass << "]</b></p>" << std::endl
+              << "<ul>";
+#endif
 
   // Assume CTT for now, so just one context
   PBufferHandlePtr old_context = m_context->activate();
   
-  std::cerr << "glEnable calls." << std::endl;
   SH_GL_CHECK_ERROR(glPushAttrib(GL_ENABLE_BIT));
   
   //SH_GL_CHECK_ERROR(glDisable(GL_STENCIL_TEST));
   // SH_GL_CHECK_ERROR(glDisable(GL_DEPTH_TEST));
   
-  std::cerr << "Retrieve backend data." << std::endl;
   PCPassPtr pc_pass = shref_dynamic_cast<PCPass>(pass->backend_data);
   SH_DEBUG_ASSERT(pc_pass);
 
@@ -400,22 +521,32 @@ void PCSchedule::execute_pass(ShPass* pass)
   SH_GL_CHECK_ERROR(glStencilFunc(GL_ALWAYS, 1, stencil_mask));
   SH_GL_CHECK_ERROR(glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP));
 
+#ifdef PCS_DEBUG_LOG
+  m_debug_log << "<li>Cleared the stencil. It looks like this:<br>" << std::endl;
+  m_debug_log << debug_img(dump_stencil_buffer(make_unique_filename("stencilclear", ".png"), m_width, m_height))
+              << std::endl;
+#endif
+
   // TODO: Should really store the mappings in pc_pass, since we might
   // have multiple outputs with ATI_draw_buffers
   std::list<Mapping>::const_iterator O = pass->outputs.begin();
   for (std::list<ShProgramNodePtr>::iterator I = pc_pass->programs.begin();
        I != pc_pass->programs.end(); ++I, ++O) {
-    std::cerr << "Executing program" << std::endl;
+#ifdef PCS_DEBUG_LOG
+    m_debug_log << "<li>Running this program:<br>" << std::endl;
+    m_debug_log << "<pre>";
+    (*I)->code()->print(m_debug_log);
+    
+    m_debug_log << "</pre>" << std::endl;
+#endif
+
     std::list<ShProgramNodePtr>::iterator J = I; ++J;
 
     m_copy_texture.size(m_width, m_height);
     if (O->type == MAPPING_TEMP) {
-      std::cerr << "Setting up temporary " << O->id << std::endl;
       m_copy_texture.memory(temp_buffers[O->id]->memory());
       m_copy_texture.memory()->dump(std::cerr) << std::endl;
-      
     } else if (O->type == MAPPING_OUTPUT) {
-      std::cerr << "Setting up output" << std::endl;
       // TODO: perhaps handle non-stream outputs?
       m_copy_texture.memory(m_output_channels[O->id]->memory());
       m_copy_texture.node()->set_count(m_output_channels[O->id]->count());
@@ -424,34 +555,58 @@ void PCSchedule::execute_pass(ShPass* pass)
       SH_DEBUG_ASSERT(false);
     }
 
+#if 0 // SILLY DEBUG HACK
+    SH_GL_CHECK_ERROR(glClear(GL_COLOR_BUFFER_BIT));
+    shBind(m_black_fp);
+    SH_GL_CHECK_ERROR(glDepthFunc(GL_ALWAYS));
+    draw_quad(0.0, 0.0, m_width, m_height, pc_pass->pc);
+#else    
     std::cerr << "Running init" << std::endl;
     SH_GL_CHECK_ERROR(glClear(GL_COLOR_BUFFER_BIT));
     shBind(m_copy_fp);
 
+    
     SH_GL_CHECK_ERROR(glDepthFunc(GL_ALWAYS));
     draw_quad(0.0, 0.0, m_width, m_height, pc_pass->pc);
+
+#ifdef PCS_DEBUG_LOG
+    m_debug_log
+      << "<li>Copied in this color buffer:<br>"
+      << debug_img(dump_color_buffer(make_unique_filename("copy", ".png"), m_width, m_height)) << std::endl;
+#endif
     
-    if (J == pc_pass->programs.end() && pass->predicate_pass) {
-      std::cerr << "Setting up stencil" << std::endl;
-      SH_GL_CHECK_ERROR(glClear(GL_STENCIL_BUFFER_BIT));
-      SH_GL_CHECK_ERROR(glStencilFunc(GL_ALWAYS, 1, stencil_mask));
-      SH_GL_CHECK_ERROR(glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP));
+    if (J == pc_pass->programs.end()) {
+      SH_GL_CHECK_ERROR(glStencilOp(GL_REPLACE, GL_KEEP, GL_REPLACE));
     }
     std::cerr << "Running pass" << std::endl;
     ShProgram prg(*I);
     shBind(prg);
 
+# if 1
     SH_GL_CHECK_ERROR(glDepthFunc(GL_EQUAL));
-    //SH_GL_CHECK_ERROR(glDepthFunc(GL_ALWAYS));
+# else
+    SH_GL_CHECK_ERROR(glDepthFunc(GL_ALWAYS));
+# endif
     // draw a quad at depth = pc
     draw_quad(0.0, 0.0, m_width, m_height, pc_pass->pc);
-    // TODO either use RTT or CTT to store result in buffer
-
-    std::cerr << "CTT" << std::endl;
+#ifdef PCS_DEBUG_LOG
+    m_debug_log
+      << "<li>Running the pass to yield this (color/depth/stencil):<br>"
+      << debug_img(dump_color_buffer(make_unique_filename("copy", ".png"), m_width, m_height)) << std::endl
+      << debug_img(dump_depth_buffer(make_unique_filename("copy", ".png"), m_width, m_height)) << std::endl
+      << debug_img(dump_stencil_buffer(make_unique_filename("copy", ".png"), m_width, m_height)) << std::endl;
+#endif
+    
+#endif // ! SILLY DEBUG HACK
     copy_framebuffer_to_texture(m_context, m_copy_texture.node());
   }
 
+#if 1
   if (pass->predicate_pass) {
+#ifdef PCS_DEBUG_LOG
+    m_debug_log
+      << "<li>Looks like I need to do some predication..." << std::endl;
+#endif
     std::cerr << "Predication" << std::endl;
     PCPassPtr pred_pc_pass = shref_dynamic_cast<PCPass>(pass->predicate_pass->backend_data);
     SH_DEBUG_ASSERT(pred_pc_pass);
@@ -473,11 +628,20 @@ void PCSchedule::execute_pass(ShPass* pass)
     if (!bad_occlusion_query) {
       SH_GL_CHECK_ERROR(glBeginOcclusionQueryNV(m_query));
     }
+
     
     // draw a quad at depth = pc_pred, killing if false
     m_pred_kill = 0.0;
     draw_quad(0.0, 0.0, m_width, m_height, pred_pc_pass->pc);
 
+#ifdef PCS_DEBUG_LOG
+    m_debug_log
+      << "<li>After collecting the true predicates I got:<br>" << std::endl
+      << debug_img(dump_color_buffer(make_unique_filename("copy", ".png"), m_width, m_height)) << std::endl
+      << debug_img(dump_depth_buffer(make_unique_filename("copy", ".png"), m_width, m_height)) << std::endl
+      << debug_img(dump_stencil_buffer(make_unique_filename("copy", ".png"), m_width, m_height)) << std::endl;
+#endif
+    
     if (!bad_occlusion_query) {
       SH_GL_CHECK_ERROR(glEndOcclusionQueryNV());
     }
@@ -486,6 +650,13 @@ void PCSchedule::execute_pass(ShPass* pass)
     // draw a quad at depth = pc_default, killing if true
     draw_quad(0.0, 0.0, m_width, m_height, default_pc_pass->pc);
 
+#ifdef PCS_DEBUG_LOG
+    m_debug_log
+      << "<li>After collecting the false predicates I got:<br>" << std::endl
+      << debug_img(dump_color_buffer(make_unique_filename("copy", ".png"), m_width, m_height)) << std::endl
+      << debug_img(dump_depth_buffer(make_unique_filename("copy", ".png"), m_width, m_height)) << std::endl
+      << debug_img(dump_stencil_buffer(make_unique_filename("copy", ".png"), m_width, m_height)) << std::endl;
+#endif
     // Turn off stencil
     SH_GL_CHECK_ERROR(glStencilFunc(GL_ALWAYS, 1, stencil_mask));
     if (bad_occlusion_query) {
@@ -505,10 +676,34 @@ void PCSchedule::execute_pass(ShPass* pass)
     pass->predicate_pass->count += pred_count;
     pass->default_pass->count += pass->count - pred_count;
 
-    std::cerr << "from " << pass->count << " there were " << pred_count << " true, "
-              << (pass->count - pred_count) << " false predicates." << std::endl;
+#ifdef PCS_DEBUG_LOG
+    m_debug_log << "<li>From " << pass->count << " total predicates, " << pred_count << " were true, and "
+                << (pass->count - pred_count) << " false." << std::endl;
+#endif
   } else if (pass->default_pass) {
+#else
+  if (pass->default_pass) {
+#endif
+
+    SH_GL_CHECK_ERROR(glDepthFunc(GL_ALWAYS));
+    SH_GL_CHECK_ERROR(glDepthMask(GL_TRUE));
+    SH_GL_CHECK_ERROR(glStencilFunc(GL_EQUAL, 1, stencil_mask));
+    SH_GL_CHECK_ERROR(glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP));
+
+    PCPassPtr default_pc_pass = shref_dynamic_cast<PCPass>(pass->default_pass->backend_data);
+    SH_DEBUG_ASSERT(default_pc_pass);
+    shBind(m_black_fp);
+    draw_quad(0.0, 0.0, m_width, m_height, default_pc_pass->pc);
+    
     pass->default_pass->count += pass->count;
+
+#ifdef PCS_DEBUG_LOG
+    m_debug_log
+      << "<li>After updating the depth buffer I got:<br>" << std::endl
+      << debug_img(dump_color_buffer(make_unique_filename("copy", ".png"), m_width, m_height)) << std::endl
+      << debug_img(dump_depth_buffer(make_unique_filename("copy", ".png"), m_width, m_height)) << std::endl
+      << debug_img(dump_stencil_buffer(make_unique_filename("copy", ".png"), m_width, m_height)) << std::endl;
+#endif
   }
   pass->count = 0;
   m_schedule->remove_eligible(pass);
@@ -524,6 +719,10 @@ void PCSchedule::execute_pass(ShPass* pass)
   SH_GL_CHECK_ERROR(glPopAttrib());
 
   if (old_context) old_context->restore();
+
+#ifdef PCS_DEBUG_LOG
+  m_debug_log << "</ul>" << std::endl;
+#endif
 }
 
 ScheduleStrategy* PCScheduler::create()

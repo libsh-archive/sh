@@ -65,7 +65,8 @@ struct TempCounter {
     
     // Go find registers
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-      if (I->dest.node() && I->dest.node()->kind() == SH_TEMP) {
+      if (I->dest.node() && I->dest.node()->kind() == SH_TEMP
+          && !I->dest.node()->uniform()) {
         ShVariableNode* vnode = I->dest.node().object();
 
         if (inblock.find(vnode) == inblock.end()) {
@@ -77,7 +78,8 @@ struct TempCounter {
         }
       }
       for (int i = 0; i < opInfo[I->op].arity; i++) {
-        if (I->src[i].node() && I->src[i].node()->kind() == SH_TEMP) {
+        if (I->src[i].node() && I->src[i].node()->kind() == SH_TEMP
+            && !I->src[i].node()->uniform()) {
           ShVariableNode* vnode = I->src[i].node().object();
           
           if (inblock.find(vnode) == inblock.end()) {
