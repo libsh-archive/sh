@@ -107,7 +107,7 @@ ShSwizzle& ShSwizzle::operator=(const ShSwizzle& other)
   return *this;
 }
 
-ShSwizzle::ShSwizzle& ShSwizzle::operator*=(const ShSwizzle& other)
+ShSwizzle& ShSwizzle::operator*=(const ShSwizzle& other)
 {
   std::vector<int> indices;
 
@@ -131,7 +131,7 @@ ShSwizzle ShSwizzle::operator*(const ShSwizzle& other) const
 
 int ShSwizzle::size() const
 {
-  return m_indices.size();
+  return (int)m_indices.size();
 }
 
 int ShSwizzle::operator[](int index) const
