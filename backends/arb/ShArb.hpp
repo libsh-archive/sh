@@ -30,6 +30,9 @@ private:
 
   /// Generate code for this node and those following it.
   void genNode(SH::ShCtrlGraphNodePtr node);
+
+  /// Allocate registers, after the code has been generated
+  void allocRegs();
   
   SH::ShRefCount<ArbBackend> m_backend;
   SH::ShShader m_shader;

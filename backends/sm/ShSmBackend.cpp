@@ -101,7 +101,7 @@ void BackendCode::upload()
   for (int i = 0; i < m_maxOR; i++) m_oR[i] = smOutputReg(i);
   for (int i = 0; i < m_maxCR; i++) m_cR[i] = smConstantReg(i);
 
-
+  int i = 0;
   for (SmInstList::const_iterator I = m_instructions.begin(); I != m_instructions.end();
        ++I) {
     if (I->op == OP_TEX) {
@@ -115,7 +115,9 @@ void BackendCode::upload()
     } else {
       smInstr(I->op, getSmReg(I->dest), getSmReg(I->src1), getSmReg(I->src2), getSmReg(I->src3));
     }
+    i++;
   }
+  SH_DEBUG_PRINT(i << " instructions uploaded.");
   
   smShaderEnd();
 }
@@ -234,6 +236,9 @@ std::ostream& BackendCode::print(std::ostream& out)
   
   out << std::endl;
   out << "// Shader body" << std::endl;
+#ifdef SH_DEBUG
+  int i = 0;
+#endif
   for (SmInstList::const_iterator I = m_instructions.begin(); I != m_instructions.end();
        ++I) {
     out << "sm" << opNames[I->op] << "(" << printVar(I->dest);
@@ -246,7 +251,11 @@ std::ostream& BackendCode::print(std::ostream& out)
     if (!I->src3.null()) {
       out << ", " << printVar(I->src3);
     }
-    out << ");" << std::endl;
+    out << ");";
+#ifdef SH_DEBUG
+    out << " // PC = " << i++;
+#endif
+    out << std::endl;
   }
   out << std::endl;
   out << "smShaderEnd();" << std::endl;

@@ -2,8 +2,8 @@ check_PROGRAMS = do if for matrix ops point simple texture uniforms shvector whi
 
 AM_CPPFLAGS = -I../src
 
-LDADD = ../../sm/src/libsm.la ../src/libsh.la ../backends/sm/ShSmBackend.o ../backends/arb/ShArb.o
-LDFLAGS = -all-static
+LDADD = -lGL ../../sm/src/libsm.la ../src/libsh.la ../backends/sm/ShSmBackend.o ../backends/arb/ShArb.o
+# LDFLAGS = -all-static
 
 do_SOURCES = do.cpp
 if_SOURCES = if.cpp

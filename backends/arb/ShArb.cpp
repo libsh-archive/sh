@@ -1,5 +1,7 @@
 #include "ShArb.hpp"
 #include <iostream>
+#include <sstream>
+#include <GL/gl.h>
 #include "ShVariable.hpp"
 #include "ShDebug.hpp"
 
@@ -7,70 +9,73 @@ namespace ShArb {
 
 using namespace SH;
 
+/** All the possible operations in the ARB spec.
+ */
 enum ArbOp {
-
   // VERTEX AND FRAGMENT
   
   // Vector
-  ARB_ABS,
-  ARB_FLR,
-  ARB_FRC,
-  ARB_LIT,
-  ARB_MOV,
+  SH_ARB_ABS,
+  SH_ARB_FLR,
+  SH_ARB_FRC,
+  SH_ARB_LIT,
+  SH_ARB_MOV,
 
   // Scalar
-  ARB_EX2,
-  ARB_LG2,
-  ARB_RCP,
-  ARB_RSQ,
+  SH_ARB_EX2,
+  SH_ARB_LG2,
+  SH_ARB_RCP,
+  SH_ARB_RSQ,
 
   // Binary scalar
-  ARB_POW,
+  SH_ARB_POW,
 
   // Binary vector
-  ARB_ADD,
-  ARB_DP3,
-  ARB_DP4,
-  ARB_DPH,
-  ARB_DST,
-  ARB_MAX,
-  ARB_MIN,
-  ARB_MUL,
-  ARB_SGE,
-  ARB_SLT,
-  ARB_SUB,
-  ARB_XPD,
+  SH_ARB_ADD,
+  SH_ARB_DP3,
+  SH_ARB_DP4,
+  SH_ARB_DPH,
+  SH_ARB_DST,
+  SH_ARB_MAX,
+  SH_ARB_MIN,
+  SH_ARB_MUL,
+  SH_ARB_SGE,
+  SH_ARB_SLT,
+  SH_ARB_SUB,
+  SH_ARB_XPD,
 
   // Trinary
-  ARB_MAD,
+  SH_ARB_MAD,
 
   // Swizzling
-  ARB_SWZ,
+  SH_ARB_SWZ,
 
   // VERTEX ONLY
   // Scalar
-  ARB_EXP,
-  ARB_LOG,
+  SH_ARB_EXP,
+  SH_ARB_LOG,
   
   // FRAGMENT ONLY
   // Scalar
-  ARB_COS,
-  ARB_SIN,
-  ARB_SCS,
+  SH_ARB_COS,
+  SH_ARB_SIN,
+  SH_ARB_SCS,
 
   // Trinary
-  ARB_CMP,
-  ARB_LRP,
+  SH_ARB_CMP,
+  SH_ARB_LRP,
 
   // Sampling
-  ARB_TEX,
-  ARB_TXP,
-  ARB_TXB,
+  SH_ARB_TEX,
+  SH_ARB_TXP,
+  SH_ARB_TXB,
 
   // KIL
-  ARB_KIL
+  SH_ARB_KIL
 };
 
+/** Information about the operations from ArbOp.
+ */
 static struct {
   char* name;
   bool vp, fp;
@@ -138,6 +143,8 @@ static struct {
   {"KIL", false, true, 0, false}
 };
 
+/** An ARB instruction.
+ */
 struct ArbInst {
   ArbInst(ArbOp op, const ShVariable& dest)
     : op(op), dest(dest)
@@ -171,6 +178,134 @@ struct ArbInst {
   ShVariable src[3];
 };
 
+/** Possible register types in the ARB spec.
+ */
+enum ShArbRegType {
+  SH_ARB_REG_ATTRIB,
+  SH_ARB_REG_PARAM,
+  SH_ARB_REG_TEMP,
+  SH_ARB_REG_ADDRESS,
+  SH_ARB_REG_OUTPUT
+};
+
+/** Information about ShArbRegType members.
+ */
+struct {
+  char* name;
+  char* estName;
+} shArbRegTypeInfo[] = {
+  {"ATTRIB", "i"},
+  {"PARAM", "u"},
+  {"TEMP", "t"},
+  {"ADDRESS", "a"},
+  {"OUTPUT", "o"}
+};
+
+/** Possible bindings for a register (see ARB spec).
+ */
+enum ShArbRegBinding {
+  // VERTEX and FRAGMENT
+  // Parameter
+  SH_ARB_REG_PARAMPRG,
+  // Output
+  SH_ARB_REG_RESULTCOL,
+
+  // VERTEX
+  // Input
+  SH_ARB_REG_VERTEXPOS,
+  SH_ARB_REG_VERTEXWGT,
+  SH_ARB_REG_VERTEXNRM,
+  SH_ARB_REG_VERTEXCOL,
+  SH_ARB_REG_VERTEXFOG,
+  SH_ARB_REG_VERTEXTEX,
+  SH_ARB_REG_VERTEXMAT,
+  SH_ARB_REG_VERTEXATR,
+  // Output
+  SH_ARB_REG_RESULTPOS,
+  SH_ARB_REG_RESULTFOG,
+  SH_ARB_REG_RESULTPTS, ///< Result point size
+  SH_ARB_REG_RESULTTEX,
+
+  // FRAGMENT
+  // Input
+  SH_ARB_REG_FRAGMENTCOL,
+  SH_ARB_REG_FRAGMENTTEX,
+  SH_ARB_REG_FRAGMENTFOG,
+  SH_ARB_REG_FRAGMENTPOS,
+  // Output
+  SH_ARB_REG_RESULTDPT,
+
+  SH_ARB_REG_NONE
+};
+
+/** Information about the ShArbRegBinding members.
+ */
+struct {
+  ShArbRegType type;
+  char* name;
+  bool indexed;
+} shArbRegBindingInfo[] = {
+  {SH_ARB_REG_PARAM, "program.env", true},
+  {SH_ARB_REG_OUTPUT, "result.color", false}, // TODO: Special case?
+  
+  {SH_ARB_REG_ATTRIB, "vertex.position", false},
+  {SH_ARB_REG_ATTRIB, "vertex.weight", true},
+  {SH_ARB_REG_ATTRIB, "vertex.normal", false},
+  {SH_ARB_REG_ATTRIB, "vertex.color", false}, // TODO: Special case?
+  {SH_ARB_REG_ATTRIB, "vertex.fogcoord", false},
+  {SH_ARB_REG_ATTRIB, "vertex.matrixindex", true},
+  {SH_ARB_REG_ATTRIB, "vertex.attrib", true},
+  {SH_ARB_REG_OUTPUT, "result.position", false},
+  {SH_ARB_REG_OUTPUT, "result.fogcoord", false},
+  {SH_ARB_REG_OUTPUT, "result.pointsize", false},
+  {SH_ARB_REG_OUTPUT, "result.texcoord", true},
+
+  {SH_ARB_REG_ATTRIB, "fragment.color", false}, // TODO: Special case?
+  {SH_ARB_REG_ATTRIB, "fragment.texcoord", true},
+  {SH_ARB_REG_ATTRIB, "fragment.fogcoord", false},
+  {SH_ARB_REG_ATTRIB, "fragment.position", false},
+  {SH_ARB_REG_OUTPUT, "result.depth", false},
+
+  {SH_ARB_REG_ATTRIB, "<nil>", false},
+};
+
+/** An ARB register.
+ */
+struct ArbReg {
+  ArbReg(ShArbRegType type, int index)
+    : type(type), index(index), binding(SH_ARB_REG_NONE)
+  {
+  }
+
+  ShArbRegType type;
+  int index;
+  ShArbRegBinding binding;
+  int bindingIndex;
+
+  friend std::ostream& operator<<(std::ostream& out, const ArbReg& reg);
+
+  /// Print a declaration for this register
+  std::ostream& printDecl(std::ostream& out) {
+    out << shArbRegTypeInfo[type].name << " " << *this;
+    if (binding != SH_ARB_REG_NONE) {
+      out << " = " << shArbRegBindingInfo[binding].name;
+      if (shArbRegBindingInfo[binding].indexed) {
+        out << "[" << bindingIndex << "]";
+      }
+    }
+    out << ";";
+    return out;
+  }
+};
+
+/** Output a use of an arb register.
+ */
+std::ostream& operator<<(std::ostream& out, const ArbReg& reg)
+{
+  out << shArbRegTypeInfo[reg.type].estName << reg.index;
+  return out;
+}
+
 using namespace SH;
 
 static SH::ShRefCount<ArbBackend> instance = new ArbBackend();
@@ -180,6 +315,8 @@ ArbCode::ArbCode(ArbBackendPtr backend, const ShShader& shader)
 {
   shader->ctrlGraph->entry()->clearMarked();
   genNode(shader->ctrlGraph->entry());
+  shader->ctrlGraph->entry()->clearMarked();
+  allocRegs();
 }
 
 ArbCode::~ArbCode()
@@ -199,12 +336,17 @@ void ArbCode::freeRegister(const ShVariableNodePtr& var)
 
 void ArbCode::upload()
 {
-  // TODO
+  // TODO: anything?
 }
 
 void ArbCode::bind()
 {
-  // TODO
+  std::ostringstream out;
+  print(out);
+  std::string text = out.str();
+  unsigned int target = (m_shader->kind() == 0 ? GL_VERTEX_PROGRAM_ARB : GL_FRAGMENT_PROGRAM_ARB);
+  glProgramStringARB(target, GL_PROGRAM_FORMAT_ASCII_ARB, text.size(), text.c_str());
+  // TODO: Check for errors
 }
 
 void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
@@ -231,6 +373,7 @@ std::ostream& ArbCode::print(std::ostream& out)
     for (int i = 0; i < arbOpInfo[I->op].arity; i++) {
       out << ", " << I->src[i].name() << I->src[i].swizzle();
     }
+    out << ';';
     out << std::endl;
   }
   
@@ -247,22 +390,22 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
     const ShStatement& stmt = *I;
     switch (stmt.op) {
     case SH_OP_ASN:
-      m_instructions.push_back(ArbInst(ARB_MOV, stmt.dest, stmt.src1));
+      m_instructions.push_back(ArbInst(SH_ARB_MOV, stmt.dest, stmt.src1));
       break;
     case SH_OP_NEG:
-      m_instructions.push_back(ArbInst(ARB_MOV, stmt.dest, -stmt.src1));
+      m_instructions.push_back(ArbInst(SH_ARB_MOV, stmt.dest, -stmt.src1));
       break;
     case SH_OP_ADD:
-      m_instructions.push_back(ArbInst(ARB_ADD, stmt.dest, stmt.src1, stmt.src2));
+      m_instructions.push_back(ArbInst(SH_ARB_ADD, stmt.dest, stmt.src1, stmt.src2));
       break;
     case SH_OP_MUL:
-      m_instructions.push_back(ArbInst(ARB_MUL, stmt.dest, stmt.src1, stmt.src2));
+      m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src1, stmt.src2));
       break;
     case SH_OP_DIV:
       {
       ShVariable rcp(new ShVariableNode(SH_VAR_TEMP, stmt.src2.size()));
-      m_instructions.push_back(ArbInst(ARB_RCP, rcp, stmt.src2));
-      m_instructions.push_back(ArbInst(ARB_MUL, stmt.dest, stmt.src1, rcp));
+      m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp, stmt.src2));
+      m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src1, rcp));
       }
       break;
     default:
@@ -271,6 +414,15 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
   }
 
   genNode(node->follower);
+}
+
+void ArbCode::allocRegs()
+{
+  for (ShShaderNode::VarList::const_iterator I = m_shader->inputs.begin();
+       I != m_shader->inputs.end(); ++I) {
+    // Allocate an input register
+  }
+
 }
 
 ArbBackend::ArbBackend()
