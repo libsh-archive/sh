@@ -159,7 +159,7 @@ shbackenddir = $(prefix)/lib/sh
 shbackend_LTLIBRARIES = libshcc.la
 
 libshcc_la_LDFLAGS = -L$(prefix)/lib -module
-libshcc_la_LIBADD = $(top_srcdir)/src/libsh.la 
+libshcc_la_LIBADD = $(top_builddir)/src/libsh.la 
 BUILT_SOURCES = CcTexturesString.hpp
 libshcc_la_SOURCES = Cc.cpp Cc.hpp CcEmit.cpp CcTexturesString.hpp CcTextures.hpp
 
@@ -171,7 +171,7 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(shbackend_LTLIBRARIES)
 
-libshcc_la_DEPENDENCIES = $(top_srcdir)/src/libsh.la
+libshcc_la_DEPENDENCIES = $(top_builddir)/src/libsh.la
 am_libshcc_la_OBJECTS = Cc.lo CcEmit.lo
 libshcc_la_OBJECTS = $(am_libshcc_la_OBJECTS)
 

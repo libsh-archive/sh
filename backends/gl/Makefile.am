@@ -33,7 +33,7 @@ endif
 
 if ENABLE_ARB_BACKEND
 libsharb_la_LDFLAGS = -L$(prefix)/lib -module
-libsharb_la_LIBADD = $(top_srcdir)/src/libsh.la 
+libsharb_la_LIBADD = $(top_builddir)/src/libsh.la 
 libsharb_la_SOURCES = Arb.cpp ArbCode.cpp ArbEmit.cpp ArbInst.cpp ArbLimits.cpp \
 		      ArbReg.cpp \
 		      Arb.hpp ArbCode.hpp ArbInst.hpp ArbLimits.hpp \
@@ -43,7 +43,7 @@ endif
 
 if ENABLE_GLSL_BACKEND
 libshglsl_la_LDFLAGS = -L$(prefix)/lib -module
-libshglsl_la_LIBADD = $(top_srcdir)/src/libsh.la 
+libshglsl_la_LIBADD = $(top_builddir)/src/libsh.la 
 libshglsl_la_SOURCES = Glsl.cpp Glsl.hpp GlslCode.cpp GlslCode.hpp \
 		       GlslBackend.cpp GlslVariable.cpp GlslVariable.hpp \
 		       GlslVariableMap.cpp GlslVariableMap.hpp GlslEmit.cpp \

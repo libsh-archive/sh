@@ -16,7 +16,7 @@ fi
 case ${host_os}
      in darwin*)
 	 if test -f /sw/include/png.h ; then
-	    CXXFLAGS="-I/sw/include $CXXFLAGS"
+	    CPPFLAGS="-I/sw/include $CPPFLAGS"
 	    LDFLAGS="-L/sw/lib $LDFLAGS"
 	 fi
 esac

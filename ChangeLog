@@ -1,3 +1,16 @@
+2005-03-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> osx branch
+
+	* README.osx: Continue to increase the accuracy of this document.
+
+	* configure.ac: Replace CPPFLAGS, not CXXFLAGS. Removes a warning
+	on Darwin.
+
+	* Allow out-of-source tree building, by changing various
+	Makefile.ams appropriately.
+
+	* src/ShSwizzleImpl.hpp (idswiz): Replace an "ifdef __MAC__" with
+	"ifdef __APPLE__"
+
 2005-03-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShAttrib.cpp, src/ShVector.cpp, ...: Remove explicit

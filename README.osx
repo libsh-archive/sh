@@ -7,9 +7,12 @@ versions on diferent OS's
 
 If you have checked out Sh from Subversion, you will need to have
 fink installed with the following packages:
-	automake1.7 or newer  (Panther comes with 1.6.3 and Sh needs >=1.7)
-	libtool14
-If you have downloaded a release of Sh you should not need fink.
+  automake1.7 or newer  (Panther comes with 1.6.3 and Sh needs >=1.7)
+  libtool14
+
+To compile Sh, regardless of whether you got it from Subversion or a
+release, you will need the following fink packages:
+  libpng3
 
 Configure Sh just as you would for any other backend, i.e.
   ./configure [any additional options]

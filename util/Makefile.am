@@ -1,4 +1,4 @@
-INCLUDES = -I../src $(LTDLINCL) 
+INCLUDES = -I$(top_srcdir)/src $(LTDLINCL) 
 
 EXTRA_DIST = Makefile.win32
 

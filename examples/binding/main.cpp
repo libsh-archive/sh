@@ -77,6 +77,8 @@ void display()
   glutSolidDodecahedron();
   glPopMatrix();
 
+  shUnbind();
+  
   gprintf(10, 10, "Space - Toggle animation");
   gprintf(10, 24, "    c - Change color");
 
