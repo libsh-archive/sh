@@ -38,7 +38,7 @@ namespace SH {
  * @todo copy constructor, operator=(), etc.
  */
 template<typename T>
-class ShChannel {
+class ShChannel : public ShMetaForwarder {
 public:
   typedef typename T::ValueType ValueType;
   /// Construct a channel without any associated memory.

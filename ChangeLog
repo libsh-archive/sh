@@ -1,5 +1,8 @@
 2004-05-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShChannel.hpp: Actually make ShChannel inherit from
+	ShMetaForwarder. Sigh.
+
 	* src/ShProgram.hpp (class ShProgramNode): Use ShMeta.
 
 	* src/ShChannel.hpp (class ShChannel): Use ShMetaForwarder.
