@@ -1,4 +1,5 @@
-import socket,re
+#scons file for shader testing
+import socket,re,glob,os
 
 env = Environment( LIBS    = Split('sh GL png'),
                    CPPPATH = Split('. .. ../src'),
@@ -10,5 +11,16 @@ if re.compile("p[\d]+.ecf").match(socket.gethostname()):
 	env['LIBPATH'] = ['/u/0T5/merchan/usr/lib']
 	runcom = 'LD_LIBRARY_PATH="/u/0T5/merchan/usr/lib" ' + runcom
 
-prog = env.Program('add-im',Split('add_im.cpp test.cpp'))
-test = env.Command('test',prog,runcom)
+# prog = env.Program('add-im',Split('add_im.cpp test.cpp'))
+# shdr = env.Program('shader',['main.cpp'])
+# test = env.Command('test',prog,runcom)
+
+cppre = re.compile('.cpp')
+for i in glob.glob('shader*.cpp'):
+  progname = cppre.sub('',i)
+  shdr = env.Program( progname , Split(i) )
+  runs = env.Command( 'c'+progname, shdr, "./"+progname )
+  # os.system("./" + progname)
+  for j in glob.glob('rds*graph'):
+    # os.system('mv '+j+' '+progname+j)
+    env.Command(progname+j, runs, 'mv '+j+' '+progname+j)
