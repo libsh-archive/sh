@@ -32,14 +32,502 @@
 #include "ShDebug.hpp" 
 #include "ShStream.hpp" 
 
-extern "C" void __cpu_lookup(float* d, void* t, float* s)
+void __cpu_lookup1D(SH::ShTextureNode* tex, float* src, float* dst)
   {
-  SH_DEBUG_PRINT("__cpu_lookup called with " << d << ", " << t << ", " << s);
+  if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
+    {
+    SH_DEBUG_PRINT("1D/SH_FILTER_MIPMAP textures unsupported...");
+    return;
+    }
+
+  SH::ShHostStoragePtr storage = SH::shref_dynamic_cast<SH::ShHostStorage>(tex->memory()->findStorage("host"));
+  if (!storage)
+    {
+    SH_DEBUG_PRINT("failed to find host storage...");
+    }
+  float* data = (float*)storage->data();
+  
+  switch(tex->traits().interpolation())
+    {
+    case 0:
+      {
+      // nearest neighbour
+      float s = src[0];
+      switch(tex->traits().wrapping())
+	{
+	case SH::ShTextureTraits::SH_WRAP_CLAMP:
+	case SH::ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE:
+	  s = std::max((float)0, std::min((float)1, s));
+	  break;
+	case SH::ShTextureTraits::SH_WRAP_REPEAT:
+	  s = s - floor(s);
+	  break;
+	}
+
+      int u = (int)floor(tex->width()*s);
+      u = std::max(0, std::min(tex->width()-1, u));
+
+      switch(tex->traits().clamping())
+	{
+	case SH::ShTextureTraits::SH_CLAMPED:
+	  for(int i = 0; i < tex->size(); i++)
+	    {
+	    dst[i] = std::max((float)0, std::min((float)1, data[tex->size()*u + i]));
+	    }
+	  break;
+	case SH::ShTextureTraits::SH_UNCLAMPED:
+	  for(int i = 0; i < tex->size(); i++)
+	    {
+	    dst[i] = data[tex->size()*u + i];
+	    }
+	  break;
+	}
+      break;
+      }
+    case 1:
+      // linear interpolation
+      SH_DEBUG_PRINT("1D/LINEAR textures unsupported...");
+      break;
+    }
   }
 
-extern "C" void __cpu_lookupi(float* d, void* t, float* s)
+void __cpu_lookup2D(SH::ShTextureNode* tex, float* src, float* dst)
   {
-  SH_DEBUG_PRINT("__cpu_lookupi called with " << d << ", " << t << ", " << s);
+  if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
+    {
+    SH_DEBUG_PRINT("2D/SH_FILTER_MIPMAP textures unsupported...");
+    return;
+    }
+
+  SH::ShHostStoragePtr storage = SH::shref_dynamic_cast<SH::ShHostStorage>(tex->memory()->findStorage("host"));
+  if (!storage)
+    {
+    SH_DEBUG_PRINT("failed to find host storage...");
+    }
+  float* data = (float*)storage->data();
+  
+  switch(tex->traits().interpolation())
+    {
+    case 0:
+      {
+      // nearest neighbour
+      float s = src[0];
+      switch(tex->traits().wrapping())
+	{
+	case SH::ShTextureTraits::SH_WRAP_CLAMP:
+	case SH::ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE:
+	  s = std::max((float)0, std::min((float)1, s));
+	  break;
+	case SH::ShTextureTraits::SH_WRAP_REPEAT:
+	  s = s - floor(s);
+	  break;
+	}
+
+      float t = src[1];
+      switch(tex->traits().wrapping())
+	{
+	case SH::ShTextureTraits::SH_WRAP_CLAMP:
+	case SH::ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE:
+	  t = std::max((float)0, std::min((float)1, t));
+	  break;
+	case SH::ShTextureTraits::SH_WRAP_REPEAT:
+	  t = t - floor(t);
+	  break;
+	}
+
+      int u = (int)floor(tex->width()*s);
+      u = std::max(0, std::min(tex->width()-1, u));
+
+      int v = (int)floor(tex->width()*t);
+      v = std::max(0, std::min(tex->height()-1, v));
+
+      int offset = v*tex->width()+u;
+
+      switch(tex->traits().clamping())
+	{
+	case SH::ShTextureTraits::SH_CLAMPED:
+	  for(int i = 0; i < tex->size(); i++)
+	    {
+	    dst[i] = std::max((float)0, std::min((float)1, data[tex->size()*offset + i]));
+	    }
+	  break;
+	case SH::ShTextureTraits::SH_UNCLAMPED:
+	  for(int i = 0; i < tex->size(); i++)
+	    {
+	    dst[i] = data[tex->size()*offset + i];
+	    }
+	  break;
+	}
+      break;
+      }
+    case 1:
+      // linear interpolation
+      SH_DEBUG_PRINT("2D/LINEAR textures unsupported...");
+      break;
+    }
+  }
+
+void __cpu_lookupRECT(SH::ShTextureNode* tex, float* src, float* dst)
+  {
+  if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
+    {
+    SH_DEBUG_PRINT("RECT/SH_FILTER_MIPMAP textures unsupported...");
+    return;
+    }
+
+  SH::ShHostStoragePtr storage = SH::shref_dynamic_cast<SH::ShHostStorage>(tex->memory()->findStorage("host"));
+  if (!storage)
+    {
+    SH_DEBUG_PRINT("failed to find host storage...");
+    }
+  float* data = (float*)storage->data();
+  
+  switch(tex->traits().interpolation())
+    {
+    case 0:
+      {
+      // nearest neighbour
+      float s = src[0];
+      switch(tex->traits().wrapping())
+	{
+	case SH::ShTextureTraits::SH_WRAP_CLAMP:
+	case SH::ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE:
+	  s = std::max((float)0, std::min((float)1, s));
+	  break;
+	case SH::ShTextureTraits::SH_WRAP_REPEAT:
+	  s = s - floor(s);
+	  break;
+	}
+
+      float t = src[1];
+      switch(tex->traits().wrapping())
+	{
+	case SH::ShTextureTraits::SH_WRAP_CLAMP:
+	case SH::ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE:
+	  t = std::max((float)0, std::min((float)1, t));
+	  break;
+	case SH::ShTextureTraits::SH_WRAP_REPEAT:
+	  t = t - floor(t);
+	  break;
+	}
+
+      int u = (int)floor(tex->width()*s);
+      u = std::max(0, std::min(tex->width()-1, u));
+
+      int v = (int)floor(tex->width()*t);
+      v = std::max(0, std::min(tex->height()-1, v));
+
+      int offset = v*tex->width()+u;
+
+      switch(tex->traits().clamping())
+	{
+	case SH::ShTextureTraits::SH_CLAMPED:
+	  for(int i = 0; i < tex->size(); i++)
+	    {
+	    dst[i] = std::max((float)0, std::min((float)1, data[tex->size()*offset + i]));
+	    }
+	  break;
+	case SH::ShTextureTraits::SH_UNCLAMPED:
+	  for(int i = 0; i < tex->size(); i++)
+	    {
+	    dst[i] = data[tex->size()*offset + i];
+	    }
+	  break;
+	}
+      break;
+      }
+    case 1:
+      // linear interpolation
+      SH_DEBUG_PRINT("RECT/LINEAR textures unsupported...");
+      break;
+    }
+  }
+
+void __cpu_lookup3D(SH::ShTextureNode* tex, float* src, float* dst)
+  {
+  SH_DEBUG_PRINT("3D textures unsupported...");
+  }
+
+void __cpu_lookupCUBE(SH::ShTextureNode* tex, float* src, float* dst)
+  {
+  SH_DEBUG_PRINT("CUBE textures unsupported...");
+  }
+
+extern "C" void __cpu_lookup(void *t, float* src, float* dst)
+  {
+  // [0, 1) float based texture lookup
+  SH::ShTextureNode* tex = (SH::ShTextureNode*)t;
+
+  switch(tex->dims())
+    {
+    case SH::SH_TEXTURE_1D:
+      __cpu_lookup1D(tex, src, dst);
+      break;
+    case SH::SH_TEXTURE_2D:
+      __cpu_lookup2D(tex, src, dst);
+      break;
+    case SH::SH_TEXTURE_RECT:
+      __cpu_lookupRECT(tex, src, dst);
+      break;
+    case SH::SH_TEXTURE_3D:
+      __cpu_lookup3D(tex, src, dst);
+      break;
+    case SH::SH_TEXTURE_CUBE:
+      __cpu_lookupCUBE(tex, src, dst);
+      break;
+    default:
+      SH_DEBUG_PRINT("unknown texture dimension (" << tex->dims() << ")");
+      break;
+    }
+  }
+
+void __cpu_lookupi1D(SH::ShTextureNode* tex, float* src, float* dst)
+  {
+  if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
+    {
+    SH_DEBUG_PRINT("1D/SH_FILTER_MIPMAP textures unsupported...");
+    return;
+    }
+
+  SH::ShHostStoragePtr storage = SH::shref_dynamic_cast<SH::ShHostStorage>(tex->memory()->findStorage("host"));
+  if (!storage)
+    {
+    SH_DEBUG_PRINT("failed to find host storage...");
+    }
+  float* data = (float*)storage->data();
+  
+  switch(tex->traits().interpolation())
+    {
+    case 0:
+      {
+      // nearest neighbour
+      float s = src[0];
+      switch(tex->traits().wrapping())
+	{
+	case SH::ShTextureTraits::SH_WRAP_CLAMP:
+	case SH::ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE:
+	  s = std::max((float)0, std::min((float)tex->width(), s));
+	  break;
+	case SH::ShTextureTraits::SH_WRAP_REPEAT:
+	  s = tex->width()*(s/tex->width() - floor(s/tex->width()));
+	  break;
+	}
+
+      int u = (int)floor(s);
+      u = std::max(0, std::min(tex->width()-1, u));
+
+      switch(tex->traits().clamping())
+	{
+	case SH::ShTextureTraits::SH_CLAMPED:
+	  for(int i = 0; i < tex->size(); i++)
+	    {
+	    dst[i] = std::max((float)0, std::min((float)1, data[tex->size()*u + i]));
+	    }
+	  break;
+	case SH::ShTextureTraits::SH_UNCLAMPED:
+	  for(int i = 0; i < tex->size(); i++)
+	    {
+	    dst[i] = data[tex->size()*u + i];
+	    }
+	  break;
+	}
+      break;
+      }
+    case 1:
+      // linear interpolation
+      SH_DEBUG_PRINT("1D/LINEAR textures unsupported...");
+      break;
+    }
+  }
+
+void __cpu_lookupi2D(SH::ShTextureNode* tex, float* src, float* dst)
+  {
+  if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
+    {
+    SH_DEBUG_PRINT("2D/SH_FILTER_MIPMAP textures unsupported...");
+    return;
+    }
+
+  SH::ShHostStoragePtr storage = SH::shref_dynamic_cast<SH::ShHostStorage>(tex->memory()->findStorage("host"));
+  if (!storage)
+    {
+    SH_DEBUG_PRINT("failed to find host storage...");
+    }
+  float* data = (float*)storage->data();
+  
+  switch(tex->traits().interpolation())
+    {
+    case 0:
+      {
+      // nearest neighbour
+      float s = src[0];
+      switch(tex->traits().wrapping())
+	{
+	case SH::ShTextureTraits::SH_WRAP_CLAMP:
+	case SH::ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE:
+	  s = std::max((float)0, std::min((float)tex->width(), s));
+	  break;
+	case SH::ShTextureTraits::SH_WRAP_REPEAT:
+	  s = tex->width()*(s/tex->width() - floor(s/tex->width()));
+	  break;
+	}
+
+      float t = src[1];
+      switch(tex->traits().wrapping())
+	{
+	case SH::ShTextureTraits::SH_WRAP_CLAMP:
+	case SH::ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE:
+	  t = std::max((float)0, std::min((float)tex->height(), t));
+	  break;
+	case SH::ShTextureTraits::SH_WRAP_REPEAT:
+	  t = tex->height()*(t/tex->height() - floor(t/tex->height()));
+	  break;
+	}
+
+      int u = (int)floor(s);
+      u = std::max(0, std::min(tex->width()-1, u));
+
+      int v = (int)floor(t);
+      v = std::max(0, std::min(tex->height()-1, v));
+
+      int offset = v*tex->width()+u;
+
+      switch(tex->traits().clamping())
+	{
+	case SH::ShTextureTraits::SH_CLAMPED:
+	  for(int i = 0; i < tex->size(); i++)
+	    {
+	    dst[i] = std::max((float)0, std::min((float)1, data[tex->size()*offset + i]));
+	    }
+	  break;
+	case SH::ShTextureTraits::SH_UNCLAMPED:
+	  for(int i = 0; i < tex->size(); i++)
+	    {
+	    dst[i] = data[tex->size()*offset + i];
+	    }
+	  break;
+	}
+      break;
+      }
+    case 1:
+      // linear interpolation
+      SH_DEBUG_PRINT("2D/LINEAR textures unsupported...");
+      break;
+    }
+  }
+
+void __cpu_lookupiRECT(SH::ShTextureNode* tex, float* src, float* dst)
+  {
+  if (tex->traits().filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP)
+    {
+    SH_DEBUG_PRINT("RECT/SH_FILTER_MIPMAP textures unsupported...");
+    return;
+    }
+
+  SH::ShHostStoragePtr storage = SH::shref_dynamic_cast<SH::ShHostStorage>(tex->memory()->findStorage("host"));
+  if (!storage)
+    {
+    SH_DEBUG_PRINT("failed to find host storage...");
+    }
+  float* data = (float*)storage->data();
+  
+  switch(tex->traits().interpolation())
+    {
+    case 0:
+      {
+      // nearest neighbour
+      float s = src[0];
+      switch(tex->traits().wrapping())
+	{
+	case SH::ShTextureTraits::SH_WRAP_CLAMP:
+	case SH::ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE:
+	  s = std::max((float)0, std::min((float)tex->width(), s));
+	  break;
+	case SH::ShTextureTraits::SH_WRAP_REPEAT:
+	  s = tex->width()*(s/tex->width() - floor(s/tex->width()));
+	  break;
+	}
+
+      float t = src[1];
+      switch(tex->traits().wrapping())
+	{
+	case SH::ShTextureTraits::SH_WRAP_CLAMP:
+	case SH::ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE:
+	  t = std::max((float)0, std::min((float)tex->height(), t));
+	  break;
+	case SH::ShTextureTraits::SH_WRAP_REPEAT:
+	  t = tex->height()*(t/tex->height() - floor(t/tex->height()));
+	  break;
+	}
+
+      int u = (int)floor(s);
+      u = std::max(0, std::min(tex->width()-1, u));
+
+      int v = (int)floor(t);
+      v = std::max(0, std::min(tex->height()-1, v));
+
+      int offset = v*tex->width()+u;
+
+      switch(tex->traits().clamping())
+	{
+	case SH::ShTextureTraits::SH_CLAMPED:
+	  for(int i = 0; i < tex->size(); i++)
+	    {
+	    dst[i] = std::max((float)0, std::min((float)1, data[tex->size()*offset + i]));
+	    }
+	  break;
+	case SH::ShTextureTraits::SH_UNCLAMPED:
+	  for(int i = 0; i < tex->size(); i++)
+	    {
+	    dst[i] = data[tex->size()*offset + i];
+	    }
+	  break;
+	}
+      break;
+      }
+    case 1:
+      // linear interpolation
+      SH_DEBUG_PRINT("RECT/LINEAR textures unsupported...");
+      break;
+    }
+  }
+
+void __cpu_lookupi3D(SH::ShTextureNode* tex, float* src, float* dst)
+  {
+  SH_DEBUG_PRINT("3D textures unsupported...");
+  }
+
+void __cpu_lookupiCUBE(SH::ShTextureNode* tex, float* src, float* dst)
+  {
+  SH_DEBUG_PRINT("CUBE textures unsupported...");
+  }
+
+extern "C" void __cpu_lookupi(void* t, float* src, float* dst)
+  {
+  // [0, size] integer based texture lookup
+  SH::ShTextureNode* tex = (SH::ShTextureNode*)t;
+
+  switch(tex->dims())
+    {
+    case SH::SH_TEXTURE_1D:
+      __cpu_lookupi1D(tex, src, dst);
+      break;
+    case SH::SH_TEXTURE_2D:
+      __cpu_lookupi2D(tex, src, dst);
+      break;
+    case SH::SH_TEXTURE_RECT:
+      __cpu_lookupiRECT(tex, src, dst);
+      break;
+    case SH::SH_TEXTURE_3D:
+      __cpu_lookupi3D(tex, src, dst);
+      break;
+    case SH::SH_TEXTURE_CUBE:
+      __cpu_lookupiCUBE(tex, src, dst);
+      break;
+    default:
+      SH_DEBUG_PRINT("unknown texture dimension (" << tex->dims() << ")");
+      break;
+    }
   }
 
 std::string encode(const SH::ShVariable& v)
@@ -992,7 +1480,7 @@ namespace ShCPU {
       case SH::SH_OP_NORM:
 	{
 	m_code << "    {" << std::endl;
-	m_code << "    float len = 1.0/(";
+	m_code << "    float len = 1.0/sqrt(";
 	for(int i = 0; i < stmt.dest.size(); i++)
 	  {
 	  if (i != 0) m_code << " + ";
@@ -1042,11 +1530,11 @@ namespace ShCPU {
 	  if (stmt.src[1].swizzle().identity())
 	    {
 	    m_code << "  __cpu_lookup("
-		   << resolve(stmt.dest)
-		   << ", "
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << resolve(stmt.src[1])
+		   << ", "
+		   << resolve(stmt.dest)
 		   << ");" << std::endl;
 	    }
 	  else
@@ -1063,11 +1551,11 @@ namespace ShCPU {
 		     << ";" << std::endl;
 	      }
 	    m_code << "    __cpu_lookup("
-		   << resolve(stmt.dest)
-		   << ", "
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << "input"
+		   << ", "
+		   << resolve(stmt.dest)
 		   << ");" << std::endl;
 	    m_code << "    }" << std::endl;
 	    }
@@ -1079,11 +1567,11 @@ namespace ShCPU {
 	    m_code << "    {" << std::endl;
 	    m_code << "    float result[" << stmt.dest.size() << "];" << std::endl;
 	    m_code << "    __cpu_lookup("
-		   << "result"
-		   << ", "
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << resolve(stmt.src[1])
+		   << ", "
+		   << "result"
 		   << ");" << std::endl;
 	    for(int i = 0; i < stmt.dest.size(); i++)
 	      {
@@ -1110,11 +1598,11 @@ namespace ShCPU {
 		     << ";" << std::endl;
 	      }
 	    m_code << "    __cpu_lookup("
-		   << "result"
-		   << ", "
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << "input"
+		   << ", "
+		   << "result"
 		   << ");" << std::endl;
 	    for(int i = 0; i < stmt.dest.size(); i++)
 	      {
@@ -1137,11 +1625,11 @@ namespace ShCPU {
 	  if (stmt.src[1].swizzle().identity())
 	    {
 	    m_code << "  __cpu_lookupi("
-		   << resolve(stmt.dest)
-		   << ", "
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << resolve(stmt.src[1])
+		   << ", "
+		   << resolve(stmt.dest)
 		   << ");" << std::endl;
 	    }
 	  else
@@ -1158,11 +1646,11 @@ namespace ShCPU {
 		     << ";" << std::endl;
 	      }
 	    m_code << "    __cpu_lookupi("
-		   << resolve(stmt.dest)
-		   << ", "
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << "input"
+		   << ", "
+		   << resolve(stmt.dest)
 		   << ");" << std::endl;
 	    m_code << "    }" << std::endl;
 	    }
@@ -1174,11 +1662,11 @@ namespace ShCPU {
 	    m_code << "    {" << std::endl;
 	    m_code << "    float result[" << stmt.dest.size() << "];" << std::endl;
 	    m_code << "    __cpu_lookupi("
-		   << "result"
-		   << ", "
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << resolve(stmt.src[1])
+		   << ", "
+		   << "result"
 		   << ");" << std::endl;
 	    for(int i = 0; i < stmt.dest.size(); i++)
 	      {
@@ -1205,11 +1693,11 @@ namespace ShCPU {
 		     << ";" << std::endl;
 	      }
 	    m_code << "    __cpu_lookupi("
-		   << "result"
-		   << ", "
 		   << resolve(stmt.src[0])
 		   << ", "
 		   << "input"
+		   << ", "
+		   << "result"
 		   << ");" << std::endl;
 	    for(int i = 0; i < stmt.dest.size(); i++)
 	      {
@@ -1385,8 +1873,8 @@ namespace ShCPU {
     std::stringstream prologue;
     prologue << "#include <math.h>" << std::endl;
     prologue << std::endl;
-    prologue << "extern \"C\" void __cpu_lookup(float*, void*, float*);" << std::endl;
-    prologue << "extern \"C\" void __cpu_lookupi(float*, void*, float*);" << std::endl;
+    prologue << "extern \"C\" void __cpu_lookup(void*, float*, float*);" << std::endl;
+    prologue << "extern \"C\" void __cpu_lookupi(void*, float*, float*);" << std::endl;
     prologue << std::endl;
     prologue << "extern \"C\" "
 	   << " void func("
