@@ -72,7 +72,7 @@ ShProgram ShKernelLight::spotLight() {
 
     irrad = lightColor;
     irrad *= t > cosang; // if outside light angle, always 0 
-    irrad *= (t < cosf) * (t - cosang) / (cosf - cosang) + (t > cosf); // linear blend between start of falloff and 0 
+    irrad *= (t < cosf) * (t - cosang) / (cosf - cosang) + (t >= cosf); // linear blend between start of falloff and 0 
   } SH_END;
   return kernel;
 }

@@ -69,26 +69,6 @@ class ShKernelLib {
      */
     static ShProgram outputPass( const ShProgram &p );
 
-    /** Bump program
-     * Takes a gradient direction and applies 
-     * IN(0) ShAttrib2f gradient  - gradient
-     * IN(1) ShNormal3f normal    - normalized normal vector (tangent space) 
-     *
-     * OUT(0) ShNormal3f normal   - perturbed normal (tangent space)
-     */
-    static ShProgram bump();
-
-    /** VCS Bump program
-     * Takes a gradient direction and applies 
-     * IN(0) ShAttrib2f gradient  - gradient
-     * IN(1) ShNormal3f normal    - normalized normal vector (VCS)
-     * IN(2) ShVector3f tangent   - normalized tangent vector (VCS)
-     * IN(3) ShVector3f tangent2  - normalized secondary tangent (VCS)
-     *
-     * OUT(0) ShNormal3f normal   - perturbed normal (VCS)
-     */
-    static ShProgram vcsBump();
-
     /** Basis Conversion program 
      * Takes 3 vectors for an orthonormal basis and converts the fourth 
      * vector.

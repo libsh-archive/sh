@@ -5,7 +5,7 @@ lib_LTLIBRARIES = libshutil.la
 libshutil_la_LIBADD = $(LIBLTDL)
 libshutil_la_LDFLAGS = -export-dynamic -no-undefined
 
-libshutil_la_SOURCES = ShKernelLib.cpp ShObjMesh.cpp
+libshutil_la_SOURCES = ShKernelLib.cpp ShKernelSurfMap.cpp ShObjMesh.cpp
 
 incincdir = $(includedir)/sh
 
@@ -21,6 +21,7 @@ incinc_HEADERS = ShNoise.hpp \
 								 ShKernelLightImpl.hpp \
 								 ShKernelSurface.hpp \
 								 ShKernelSurfaceImpl.hpp \
+								 ShKernelSurfMap.hpp \
 								 ShKernelPost.hpp \
 								 ShKernelPostImpl.hpp \
 								 ShMesh.hpp \

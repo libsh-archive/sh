@@ -60,28 +60,4 @@ ShProgram ShKernelLib::shChangeBasis(std::string name,
   return kernel;
 }
 
-ShProgram ShKernelLib::bump() {
-  ShProgram kernel = SH_BEGIN_PROGRAM() {
-    ShInputAttrib2f SH_DECL(gradient);
-    ShInOutNormal3f SH_DECL(normal);
-    normal(1,2) += gradient;
-    normal = normalize( normal );
-  } SH_END;
-  return kernel;
-}
-
-ShProgram ShKernelLib::vcsBump() {
-  ShProgram kernel = SH_BEGIN_PROGRAM() {
-    ShInputAttrib2f SH_DECL(gradient);
-    ShInOutNormal3f SH_DECL(normal);
-    ShInputVector3f SH_DECL(tangent);
-    ShInputVector3f SH_DECL(tangent2);
-
-    normal += gradient(0) * tangent;
-    normal += gradient(1) * tangent2;
-    normal = normalize( normal );
-  } SH_END;
-  return kernel;
-}
-
 };

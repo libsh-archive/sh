@@ -24,51 +24,42 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHUTIL_KERNELPOST_HPP 
-#define SHUTIL_KERNELPOST_HPP 
+#ifndef SHUTIL_KERNELSURFMAP_HPP 
+#define SHUTIL_KERNELSURFMAP_HPP 
 
-#include <string>
-#include "ShMatrix.hpp"
-#include "ShTexture.hpp"
 #include "ShProgram.hpp"
 
-/** \file ShKernelPost.hpp
- * These are postprocessing kernels.  Several postprocessing kernels can be
- * connected together to create a more complicated postprocessing kernel.
- *
- * They must take an input result of type T and return one output of type T named result.
+/** \file ShKernelSurfMap.hpp
+ * 
  */
 
 namespace ShUtil {
 
 using namespace SH;
 
-class ShKernelPost {
+class ShKernelSurfMap {
   public:
-    /** screen space Halftoning/Hatching in each color channel using tex as a threshold image
-     * IN(0) ShAttrib1f scaling   - scaling on posh(0,1) before doing texture lookup
-     * IN(1) T result 
-     * IN(2) ShPosition4f posh    - homogeneous position (HDCS)
+    /** Bump program
+     * Takes a gradient direction and applies 
+     * IN(0) ShAttrib2f gradient  - gradient
+     * IN(1) ShNormal3f normalt    - normalized normal vector (tangent space) 
      *
-     * OUT(0) T result            - output result 
+     * OUT(0) ShNormal3f normalt   - perturbed normal (tangent space)
      */
-    template<typename T>
-    static ShProgram halftone(const ShBaseTexture2D<T> &tex);
+    static ShProgram bump();
 
-    /** screen space noise 
-     * IN(0) ShAttrib1f scaling   - scaling on posh(0,1) before doing noise lookup 
-     * IN(1) ShAttrib1f noiseScale - scaling on cellnoise
-     * IN(1) T result 
-     * IN(0) ShPosition4f posh    - homogeneous position (HDCS)
+    /** VCS Bump program
+     * Takes a gradient direction and applies 
+     * IN(0) ShAttrib2f gradient  - gradient
+     * IN(1) ShNormal3f normal    - normalized normal vector (VCS)
+     * IN(2) ShVector3f tangent   - normalized tangent vector (VCS)
+     * IN(3) ShVector3f tangent2  - normalized secondary tangent (VCS)
      *
-     * OUT(0) T result            - output result 
+     * OUT(0) ShNormal3f normal   - perturbed normal (VCS)
      */
-    template<typename T>
-    static ShProgram noisify();
+    static ShProgram vcsBump();
 };
 
 }
-
-#include "ShKernelPostImpl.hpp"
 
 #endif

@@ -24,58 +24,33 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHUTIL_KERNELPOSTIMPL_HPP 
-#define SHUTIL_KERNELPOSTIMPL_HPP 
-
-#include <sstream>
-#include "ShSyntax.hpp"
-#include "ShPosition.hpp"
-#include "ShManipulator.hpp"
-#include "ShAlgebra.hpp"
-#include "ShProgram.hpp"
-#include "ShNibbles.hpp"
-#include "ShKernelPost.hpp"
+#include "ShKernelSurfMap.hpp"
 #include "ShUtil.hpp"
-
-/** \file ShKernelPostImpl.hpp
- * This is an implementation of useful postprocessing kernels 
- */
+#include "ShSyntax.hpp"
 
 namespace ShUtil {
 
-using namespace SH;
+ShProgram ShKernelSurfMap::bump() {
+  ShProgram kernel = SH_BEGIN_PROGRAM() {
+    ShInputAttrib2f SH_DECL(gradient);
+    ShInOutNormal3f SH_DECL(normalt);
 
-template<typename T>
-ShProgram ShKernelPost::halftone(const ShBaseTexture2D<T> &tex) {
-  ShProgram kernel = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShInputAttrib1f SH_NAMEDECL(scale, "scaling");
-    typename T::InputType SH_NAMEDECL(in, "result");
-    ShInputPosition4f SH_DECL(posh);
-
-    typename T::OutputType SH_NAMEDECL(out, "result");
-
-    ShAttrib2f texcoord = frac(posh(0,1) * scale); 
-    // TODO rotate color components...
-    out = in > tex(texcoord);
+    normalt(1,2) += gradient;
   } SH_END;
   return kernel;
 }
 
-template<typename T>
-ShProgram ShKernelPost::noisify() {
-  ShProgram kernel = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShInputAttrib1f SH_DECL(scaling);
-    ShInputAttrib1f SH_DECL(noiseScale);
-    typename T::InputType SH_NAMEDECL(in, "result");
-    ShInputPosition4f SH_DECL(posh);
+ShProgram ShKernelSurfMap::vcsBump() {
+  ShProgram kernel = SH_BEGIN_PROGRAM() {
+    ShInputAttrib2f SH_DECL(gradient);
+    ShInOutNormal3f SH_DECL(normal);
+    ShInputVector3f SH_DECL(tangent);
+    ShInputVector3f SH_DECL(tangent2);
 
-    typename T::OutputType SH_NAMEDECL(out, "result");
-
-    out = in + cellnoise<3>(posh(0,1)*scaling)*noiseScale; 
+    normal = mad(gradient(0), tangent, normal);
+    normal = mad(gradient(1), tangent2, normal);
   } SH_END;
   return kernel;
 }
 
-}
-
-#endif
+};

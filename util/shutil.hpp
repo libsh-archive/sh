@@ -32,6 +32,7 @@
 #include "ShNoise.hpp"
 #include "ShKernelLib.hpp"
 #include "ShKernelLight.hpp"
+#include "ShKernelSurfMap.hpp"
 #include "ShKernelSurface.hpp"
 #include "ShKernelPost.hpp"
 #include "ShMesh.hpp"

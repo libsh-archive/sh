@@ -125,7 +125,7 @@ ShProgram ShKernelSurface::gooch() {
 
     normal = normalize(normal);
     lightVec = normalize(lightVec);
-    result = lerp(mad((normal | lightVec), ShConstant1f(0.5f), ShConstant1f(0.5f)), warm, cool) * kd * irrad;
+    result = lerp(mad((normal | lightVec), ShConstant1f(0.5f), ShConstant1f(0.5f)) * irrad, warm, cool) * kd;
   } SH_END;
   return kernel;
 }
