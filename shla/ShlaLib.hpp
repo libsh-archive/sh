@@ -79,11 +79,10 @@ using namespace SH;
     \
     global::bindDefault( fsh ); \
 \
-    ShFramebufferPtr oldfb = ShEnvironment::framebuffer;\
     global::useRenderbuf();\
     global::drawQuad();\
     global::detachAll();\
-    shDrawBuffer( oldfb );\
+    shDrawBuffer(0);/* TODO restore old renderbuf */\
     glFinish();\
     /*std::cout << "Done binary op" << ( ShTimer::now() - start ).value() / 1000.0 << "s" << std::endl; */\
 \
@@ -125,11 +124,10 @@ SHLA_LIB_VEC_OP( operator-, op1(tc) - op2(tc) );
 \
     global::bindDefault( fsh ); \
 \
-    ShFramebufferPtr oldfb = ShEnvironment::framebuffer;\
     global::useRenderbuf();\
     global::drawQuad();\
     global::detachAll();\
-    shDrawBuffer( oldfb );\
+    shDrawBuffer( 0 );/* TODO restore old renderbuf */\
 \
     return result; \
   }
@@ -189,7 +187,6 @@ T op( const ShlaVector<T, N, N, K> &a, int size = 1 ) { \
   /*start = ShTimer::now(); */\
   ShlaVector<T, N, N> resultVec; \
   global::bindReduce( fsh );\
-  ShFramebufferPtr oldfb = ShEnvironment::framebuffer;\
 \
   global::accumInit( a.getMem()); \
   for( int curN = N / 2; curN >= size; curN /= 2 ) { \
@@ -204,10 +201,9 @@ T op( const ShlaVector<T, N, N, K> &a, int size = 1 ) { \
     global::useRenderbuf();\
     /*global::drawQuad(curN +2, curN +2); */\
     global::drawQuad();\
-    shDrawBuffer( 0 ); /* TODO get rid of temp fix for u-buffer bugs */\
+    shDrawBuffer( 0 ); \
   }\
   global::detachAll();\
-  shDrawBuffer( oldfb );\
   glFinish();\
 \
   /*std::cout << "Done Reduce Op" << ( ShTimer::now() - start ).value() / 1000.0 << "s" << std::endl; */\
@@ -293,14 +289,13 @@ template<typename T, int M, int N, ShlaVectorKind K>
 void initFsh( ShProgram fsh, ShlaVector<T, M, N, K> &a ) { 
   typedef ShlaRenderGlobal<T, M, N> global;
 
-  ShFramebufferPtr oldfb = ShEnvironment::framebuffer;
   global::renderbuf->bind( a.getMem() );
   global::bindDefault( fsh ); 
 
   global::useRenderbuf();
   global::drawQuad();
   global::detachAll();
-  shDrawBuffer( oldfb );
+  shDrawBuffer( 0 );
 }
 
 

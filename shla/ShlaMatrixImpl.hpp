@@ -92,7 +92,6 @@ ShlaVector<VecT, M, N> ShlaDenseMatrix<T, M, N>::operator|( const ShlaVector<Vec
 
   ShlaVector<VecT, M, N> result;
 #if 0
-  ShFramebufferPtr oldfb = ShEnvironment::framebuffer;
 
   vecGlobal::bindDefault( fsh );
   vecTex.attach( v.getMem() );
@@ -173,9 +172,6 @@ ShlaVector<VecT, M, N> ShlaBandedMatrix<T, M, N>::operator|( const ShlaVector<Ve
 
   ShlaVector<VecT, M, N> result;
 
-  // TODO get rid of this hack - 
-  ShFramebufferPtr oldfb = ShEnvironment::framebuffer;
-
   vecGlobal::bindDefault( fsh );
   vecTex.attach( v.getMem() );
 
@@ -208,8 +204,6 @@ ShlaVector<VecT, M, N> ShlaBandedMatrix<T, M, N>::operator|( const ShlaVector<Ve
     diagTex.attach( 0 ); 
   }
   vecGlobal::detachAll();
-
-  shDrawBuffer( oldfb );
 
   glFinish();
   //std::cout << "Done banded matrix multiply " << ( ShTimer::now() - start ).value() / 1000.0 << "s" << std::endl;
@@ -253,8 +247,6 @@ ShlaBandedMatrix<T, M, N> ShlaBandedMatrix<T, M, N>::operator*( const ShlaBanded
   ShlaBandedMatrix<T, M, N> result;
 
   // TODO get rid of this hack - 
-  ShFramebufferPtr oldfb = ShEnvironment::framebuffer;
-
   SH_DEBUG_PRINT( "Binding Shader" );
   global::bindDefault( fsh );
 
@@ -291,9 +283,6 @@ ShlaBandedMatrix<T, M, N> ShlaBandedMatrix<T, M, N>::operator*( const ShlaBanded
     diag1.attach( 0 );
   }
   global::detachAll();
-
-  shDrawBuffer( oldfb );
-  
   return result;
 }
 
