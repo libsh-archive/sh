@@ -39,6 +39,10 @@ class ShConstant : public ShVariableN<N, T>
 {
 public:
   ShConstant(T value);
+  ShConstant(T value0, T value1);
+  ShConstant(T value0, T value1, T value2);
+  ShConstant(T value0, T value1, T value2, T value3);
+  
   explicit ShConstant(T values[N]);
 
 private:

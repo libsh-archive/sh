@@ -39,6 +39,33 @@ ShConstant<N, T>::ShConstant(T value)
 }
 
 template<int N, typename T>
+ShConstant<N, T>::ShConstant(T value0, T value1)
+  : ShVariableN<N, T>(new ShVariableNode(SH_VAR_CONST, N))
+{
+  m_node->setValue(0, value0);
+  m_node->setValue(1, value1);
+}
+
+template<int N, typename T>
+ShConstant<N, T>::ShConstant(T value0, T value1, T value2)
+  : ShVariableN<N, T>(new ShVariableNode(SH_VAR_CONST, N))
+{
+  m_node->setValue(0, value0);
+  m_node->setValue(1, value1);
+  m_node->setValue(2, value2);
+}
+
+template<int N, typename T>
+ShConstant<N, T>::ShConstant(T value0, T value1, T value2, T value3)
+  : ShVariableN<N, T>(new ShVariableNode(SH_VAR_CONST, N))
+{
+  m_node->setValue(0, value0);
+  m_node->setValue(1, value1);
+  m_node->setValue(2, value2);
+  m_node->setValue(3, value3);
+}
+
+template<int N, typename T>
 ShConstant<N, T>::ShConstant(T values[N])
   : ShVariableN<N, T>(new ShVariableNode(SH_VAR_CONST, N))
 {

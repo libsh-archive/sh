@@ -29,6 +29,7 @@
 #include <cstring>
 #include <cstdio>
 #include <png.h>
+#include <sstream>
 #include "ShException.hpp"
 
 namespace SH {
@@ -130,9 +131,11 @@ void ShImage::loadPng(const std::string& filename)
   png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, 0);
 
   int bit_depth = png_get_bit_depth(png_ptr, info_ptr);
-  if (bit_depth != 8) {
+  if (bit_depth % 8) {
     png_destroy_read_struct(&png_ptr, 0, 0);
-    throw ShImageException("Invalid bit depth");
+    std::ostringstream os;
+    os << "Invalid bit depth " << bit_depth;
+    throw ShImageException(os.str());
   }
 
   int colour_type = png_get_color_type(png_ptr, info_ptr);
@@ -164,7 +167,14 @@ void ShImage::loadPng(const std::string& filename)
   for (int y = 0; y < m_height; y++) {
     for (int x = 0; x < m_width; x++) {
       for (int i = 0; i < m_depth; i++) {
-        m_data[m_depth * (y * m_width + x) + i] = row_pointers[y][x * m_depth + i]/255.0;
+	png_byte *row = row_pointers[y];
+	int index = m_depth * (y * m_width + x) + i;
+	long data = 0;
+	for (int j = 0; j < bit_depth/8; j++) {
+	  data <<= 8;
+	  data += row[(x * m_depth + i) * bit_depth/8 + j];
+	}
+	m_data[index] = data / static_cast<float>((1 << bit_depth) - 1);
       }
     }
   }
