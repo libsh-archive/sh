@@ -1429,7 +1429,7 @@ ShBackendCodePtr AtiBackend::generateCode(int kind, const ShProgram& shader)
 void AtiBackend::allocFramebuffer(ShFramebufferPtr fb) 
 {
   if( !fb ) {
-    SH_DEBUG_WARN( "No framebfufer object" );
+    SH_DEBUG_WARN( "No framebuffer object" );
     return;
   }
   ShUberbufferPtr ub = fb->getUberbuffer();
@@ -1445,7 +1445,7 @@ void AtiBackend::allocUberbuffer( ShUberbufferPtr ub) {
 
   ShUberbuffer::PropertyMap props = ub->properties();
   int numProps = props.size();
-  GLint* propsArray = new GLint[ numProps << 1 + 4 ];
+  GLint* propsArray = new GLint[ numProps * 2 + 4 ];
 
   int i = 0;
   for( ShUberbuffer::PropertyMap::iterator pmit = props.begin();
@@ -1460,8 +1460,10 @@ void AtiBackend::allocUberbuffer( ShUberbufferPtr ub) {
   propsArray[2] = GL_COLOR_BUFFER_ATI;
   propsArray[3] = GL_TRUE;
 
-  ub->setMem( glAllocMem2DATI(GL_RGBA_FLOAT32_ATI, ub->width(), ub->height(), 
+  ub->setMem( glAllocMem2DATI(ub->format(), ub->width(), ub->height(), 
 			  numProps + 2, propsArray ) );
+
+  delete[] propsArray;
 
   printUbErrors();
 }
