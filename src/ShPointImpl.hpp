@@ -81,7 +81,7 @@ ShPoint<N, Binding, T, Swizzled>::ShPoint(const ShVariableNodePtr& node, const S
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShPoint<N, Binding, T, Swizzled>::ShPoint(T data[N])
+ShPoint<N, Binding, T, Swizzled>::ShPoint(H data[N])
   : ParentType(data)
 {
   m_node->specialType(SH_POINT);
@@ -184,7 +184,7 @@ ShPoint<N, Binding, T, Swizzled>::operator%=(const ShGeneric<N, T2>& right)
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<N, Binding, T, Swizzled>&
-ShPoint<N, Binding, T, Swizzled>::operator+=(T right)
+ShPoint<N, Binding, T, Swizzled>::operator+=(H right)
 {
   ParentType::operator+=(right);
   return *this;
@@ -193,7 +193,7 @@ ShPoint<N, Binding, T, Swizzled>::operator+=(T right)
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<N, Binding, T, Swizzled>&
-ShPoint<N, Binding, T, Swizzled>::operator-=(T right)
+ShPoint<N, Binding, T, Swizzled>::operator-=(H right)
 {
   ParentType::operator-=(right);
   return *this;
@@ -202,7 +202,7 @@ ShPoint<N, Binding, T, Swizzled>::operator-=(T right)
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<N, Binding, T, Swizzled>&
-ShPoint<N, Binding, T, Swizzled>::operator*=(T right)
+ShPoint<N, Binding, T, Swizzled>::operator*=(H right)
 {
   ParentType::operator*=(right);
   return *this;
@@ -211,7 +211,7 @@ ShPoint<N, Binding, T, Swizzled>::operator*=(T right)
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<N, Binding, T, Swizzled>&
-ShPoint<N, Binding, T, Swizzled>::operator/=(T right)
+ShPoint<N, Binding, T, Swizzled>::operator/=(H right)
 {
   ParentType::operator/=(right);
   return *this;
@@ -220,7 +220,7 @@ ShPoint<N, Binding, T, Swizzled>::operator/=(T right)
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<N, Binding, T, Swizzled>&
-ShPoint<N, Binding, T, Swizzled>::operator%=(T right)
+ShPoint<N, Binding, T, Swizzled>::operator%=(H right)
 {
   ParentType::operator%=(right);
   return *this;
@@ -374,7 +374,7 @@ ShPoint<1, Binding, T, Swizzled>::ShPoint(const ShVariableNodePtr& node, const S
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShPoint<1, Binding, T, Swizzled>::ShPoint(T data[1])
+ShPoint<1, Binding, T, Swizzled>::ShPoint(H data[1])
   : ParentType(data)
 {
   m_node->specialType(SH_POINT);
@@ -382,7 +382,7 @@ ShPoint<1, Binding, T, Swizzled>::ShPoint(T data[1])
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShPoint<1, Binding, T, Swizzled>::ShPoint(T s0)
+ShPoint<1, Binding, T, Swizzled>::ShPoint(H s0)
   : ParentType(s0)
 {
   m_node->specialType(SH_POINT);
@@ -426,7 +426,7 @@ ShPoint<1, Binding, T, Swizzled>::operator=(const ShPoint<1, Binding, T2, Swizzl
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<1, Binding, T, Swizzled>&
-ShPoint<1, Binding, T, Swizzled>::operator=(T other)
+ShPoint<1, Binding, T, Swizzled>::operator=(H other)
 {
   ParentType::operator=(other);
   return *this;
@@ -494,7 +494,7 @@ ShPoint<1, Binding, T, Swizzled>::operator%=(const ShGeneric<1, T2>& right)
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<1, Binding, T, Swizzled>&
-ShPoint<1, Binding, T, Swizzled>::operator+=(T right)
+ShPoint<1, Binding, T, Swizzled>::operator+=(H right)
 {
   ParentType::operator+=(right);
   return *this;
@@ -503,7 +503,7 @@ ShPoint<1, Binding, T, Swizzled>::operator+=(T right)
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<1, Binding, T, Swizzled>&
-ShPoint<1, Binding, T, Swizzled>::operator-=(T right)
+ShPoint<1, Binding, T, Swizzled>::operator-=(H right)
 {
   ParentType::operator-=(right);
   return *this;
@@ -512,7 +512,7 @@ ShPoint<1, Binding, T, Swizzled>::operator-=(T right)
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<1, Binding, T, Swizzled>&
-ShPoint<1, Binding, T, Swizzled>::operator*=(T right)
+ShPoint<1, Binding, T, Swizzled>::operator*=(H right)
 {
   ParentType::operator*=(right);
   return *this;
@@ -521,7 +521,7 @@ ShPoint<1, Binding, T, Swizzled>::operator*=(T right)
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<1, Binding, T, Swizzled>&
-ShPoint<1, Binding, T, Swizzled>::operator/=(T right)
+ShPoint<1, Binding, T, Swizzled>::operator/=(H right)
 {
   ParentType::operator/=(right);
   return *this;
@@ -530,7 +530,7 @@ ShPoint<1, Binding, T, Swizzled>::operator/=(T right)
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<1, Binding, T, Swizzled>&
-ShPoint<1, Binding, T, Swizzled>::operator%=(T right)
+ShPoint<1, Binding, T, Swizzled>::operator%=(H right)
 {
   ParentType::operator%=(right);
   return *this;
@@ -634,7 +634,7 @@ ShPoint<2, Binding, T, Swizzled>::ShPoint(const ShVariableNodePtr& node, const S
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShPoint<2, Binding, T, Swizzled>::ShPoint(T data[2])
+ShPoint<2, Binding, T, Swizzled>::ShPoint(H data[2])
   : ParentType(data)
 {
   m_node->specialType(SH_POINT);
@@ -642,7 +642,7 @@ ShPoint<2, Binding, T, Swizzled>::ShPoint(T data[2])
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShPoint<2, Binding, T, Swizzled>::ShPoint(T s0, T s1)
+ShPoint<2, Binding, T, Swizzled>::ShPoint(H s0, H s1)
   : ParentType(s0, s1)
 {
   m_node->specialType(SH_POINT);
@@ -754,7 +754,7 @@ ShPoint<2, Binding, T, Swizzled>::operator%=(const ShGeneric<2, T2>& right)
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<2, Binding, T, Swizzled>&
-ShPoint<2, Binding, T, Swizzled>::operator+=(T right)
+ShPoint<2, Binding, T, Swizzled>::operator+=(H right)
 {
   ParentType::operator+=(right);
   return *this;
@@ -763,7 +763,7 @@ ShPoint<2, Binding, T, Swizzled>::operator+=(T right)
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<2, Binding, T, Swizzled>&
-ShPoint<2, Binding, T, Swizzled>::operator-=(T right)
+ShPoint<2, Binding, T, Swizzled>::operator-=(H right)
 {
   ParentType::operator-=(right);
   return *this;
@@ -772,7 +772,7 @@ ShPoint<2, Binding, T, Swizzled>::operator-=(T right)
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<2, Binding, T, Swizzled>&
-ShPoint<2, Binding, T, Swizzled>::operator*=(T right)
+ShPoint<2, Binding, T, Swizzled>::operator*=(H right)
 {
   ParentType::operator*=(right);
   return *this;
@@ -781,7 +781,7 @@ ShPoint<2, Binding, T, Swizzled>::operator*=(T right)
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<2, Binding, T, Swizzled>&
-ShPoint<2, Binding, T, Swizzled>::operator/=(T right)
+ShPoint<2, Binding, T, Swizzled>::operator/=(H right)
 {
   ParentType::operator/=(right);
   return *this;
@@ -790,7 +790,7 @@ ShPoint<2, Binding, T, Swizzled>::operator/=(T right)
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<2, Binding, T, Swizzled>&
-ShPoint<2, Binding, T, Swizzled>::operator%=(T right)
+ShPoint<2, Binding, T, Swizzled>::operator%=(H right)
 {
   ParentType::operator%=(right);
   return *this;
@@ -944,7 +944,7 @@ ShPoint<3, Binding, T, Swizzled>::ShPoint(const ShVariableNodePtr& node, const S
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShPoint<3, Binding, T, Swizzled>::ShPoint(T data[3])
+ShPoint<3, Binding, T, Swizzled>::ShPoint(H data[3])
   : ParentType(data)
 {
   m_node->specialType(SH_POINT);
@@ -952,7 +952,7 @@ ShPoint<3, Binding, T, Swizzled>::ShPoint(T data[3])
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShPoint<3, Binding, T, Swizzled>::ShPoint(T s0, T s1, T s2)
+ShPoint<3, Binding, T, Swizzled>::ShPoint(H s0, H s1, H s2)
   : ParentType(s0, s1, s2)
 {
   m_node->specialType(SH_POINT);
@@ -1064,7 +1064,7 @@ ShPoint<3, Binding, T, Swizzled>::operator%=(const ShGeneric<3, T2>& right)
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<3, Binding, T, Swizzled>&
-ShPoint<3, Binding, T, Swizzled>::operator+=(T right)
+ShPoint<3, Binding, T, Swizzled>::operator+=(H right)
 {
   ParentType::operator+=(right);
   return *this;
@@ -1073,7 +1073,7 @@ ShPoint<3, Binding, T, Swizzled>::operator+=(T right)
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<3, Binding, T, Swizzled>&
-ShPoint<3, Binding, T, Swizzled>::operator-=(T right)
+ShPoint<3, Binding, T, Swizzled>::operator-=(H right)
 {
   ParentType::operator-=(right);
   return *this;
@@ -1082,7 +1082,7 @@ ShPoint<3, Binding, T, Swizzled>::operator-=(T right)
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<3, Binding, T, Swizzled>&
-ShPoint<3, Binding, T, Swizzled>::operator*=(T right)
+ShPoint<3, Binding, T, Swizzled>::operator*=(H right)
 {
   ParentType::operator*=(right);
   return *this;
@@ -1091,7 +1091,7 @@ ShPoint<3, Binding, T, Swizzled>::operator*=(T right)
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<3, Binding, T, Swizzled>&
-ShPoint<3, Binding, T, Swizzled>::operator/=(T right)
+ShPoint<3, Binding, T, Swizzled>::operator/=(H right)
 {
   ParentType::operator/=(right);
   return *this;
@@ -1100,7 +1100,7 @@ ShPoint<3, Binding, T, Swizzled>::operator/=(T right)
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<3, Binding, T, Swizzled>&
-ShPoint<3, Binding, T, Swizzled>::operator%=(T right)
+ShPoint<3, Binding, T, Swizzled>::operator%=(H right)
 {
   ParentType::operator%=(right);
   return *this;
@@ -1254,7 +1254,7 @@ ShPoint<4, Binding, T, Swizzled>::ShPoint(const ShVariableNodePtr& node, const S
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShPoint<4, Binding, T, Swizzled>::ShPoint(T data[4])
+ShPoint<4, Binding, T, Swizzled>::ShPoint(H data[4])
   : ParentType(data)
 {
   m_node->specialType(SH_POINT);
@@ -1262,7 +1262,7 @@ ShPoint<4, Binding, T, Swizzled>::ShPoint(T data[4])
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
-ShPoint<4, Binding, T, Swizzled>::ShPoint(T s0, T s1, T s2, T s3)
+ShPoint<4, Binding, T, Swizzled>::ShPoint(H s0, H s1, H s2, H s3)
   : ParentType(s0, s1, s2, s3)
 {
   m_node->specialType(SH_POINT);
@@ -1374,7 +1374,7 @@ ShPoint<4, Binding, T, Swizzled>::operator%=(const ShGeneric<4, T2>& right)
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<4, Binding, T, Swizzled>&
-ShPoint<4, Binding, T, Swizzled>::operator+=(T right)
+ShPoint<4, Binding, T, Swizzled>::operator+=(H right)
 {
   ParentType::operator+=(right);
   return *this;
@@ -1383,7 +1383,7 @@ ShPoint<4, Binding, T, Swizzled>::operator+=(T right)
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<4, Binding, T, Swizzled>&
-ShPoint<4, Binding, T, Swizzled>::operator-=(T right)
+ShPoint<4, Binding, T, Swizzled>::operator-=(H right)
 {
   ParentType::operator-=(right);
   return *this;
@@ -1392,7 +1392,7 @@ ShPoint<4, Binding, T, Swizzled>::operator-=(T right)
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<4, Binding, T, Swizzled>&
-ShPoint<4, Binding, T, Swizzled>::operator*=(T right)
+ShPoint<4, Binding, T, Swizzled>::operator*=(H right)
 {
   ParentType::operator*=(right);
   return *this;
@@ -1401,7 +1401,7 @@ ShPoint<4, Binding, T, Swizzled>::operator*=(T right)
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<4, Binding, T, Swizzled>&
-ShPoint<4, Binding, T, Swizzled>::operator/=(T right)
+ShPoint<4, Binding, T, Swizzled>::operator/=(H right)
 {
   ParentType::operator/=(right);
   return *this;
@@ -1410,7 +1410,7 @@ ShPoint<4, Binding, T, Swizzled>::operator/=(T right)
 template<ShBindingType Binding, typename T, bool Swizzled>
 inline
 ShPoint<4, Binding, T, Swizzled>&
-ShPoint<4, Binding, T, Swizzled>::operator%=(T right)
+ShPoint<4, Binding, T, Swizzled>::operator%=(H right)
 {
   ParentType::operator%=(right);
   return *this;

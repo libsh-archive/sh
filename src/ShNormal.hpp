@@ -44,6 +44,19 @@ namespace SH {
 template<int N, ShBindingType Binding, typename T=float, bool Swizzled=false>
 class ShNormal : public ShVector<N, Binding, T, Swizzled> {
 public:
+  typedef T ValueType;
+  typedef typename ShHostType<T>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemoryType<T>::type MemoryType; 
+  static const int typesize = N;
+  static const ShBindingType binding_type = Binding;
+  static const ShSemanticType semantic_type = SH_NORMAL;
+
+  typedef ShNormal<N, SH_INPUT, T> InputType;
+  typedef ShNormal<N, SH_OUTPUT, T> OutputType;
+  typedef ShNormal<N, SH_INOUT, T> InOutType;
+  typedef ShNormal<N, SH_TEMP, T> TempType;
+  typedef ShNormal<N, SH_CONST, T> ConstType;
   ShNormal();
   
   template<typename T2>
@@ -53,7 +66,7 @@ public:
   template<typename T2>
   ShNormal(const ShNormal<N, Binding, T2, Swizzled>& other);
   ShNormal(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShNormal(T data[N]);
+  explicit ShNormal(H data[N]);
   
   ~ShNormal();
 
@@ -82,11 +95,11 @@ public:
   
   template<typename T2>
   ShNormal& operator%=(const ShGeneric<N, T2>& right);
-  ShNormal& operator*=(T);
-  ShNormal& operator/=(T);
-  ShNormal& operator%=(T);
-  ShNormal& operator+=(T);
-  ShNormal& operator-=(T);
+  ShNormal& operator*=(H);
+  ShNormal& operator/=(H);
+  ShNormal& operator%=(H);
+  ShNormal& operator+=(H);
+  ShNormal& operator-=(H);
   
   template<typename T2>
   ShNormal& operator+=(const ShGeneric<1, T2>&);
@@ -112,23 +125,26 @@ public:
   ShNormal<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShNormal operator-() const;
-  typedef T ValueType;
-  static const int typesize = N;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_NORMAL;
-
-  typedef ShNormal<N, SH_INPUT, T> InputType;
-  typedef ShNormal<N, SH_OUTPUT, T> OutputType;
-  typedef ShNormal<N, SH_INOUT, T> InOutType;
-  typedef ShNormal<N, SH_TEMP, T> TempType;
-  typedef ShNormal<N, SH_CONST, T> ConstType;
-private:
-  typedef ShVector<N, Binding, T, Swizzled> ParentType;
+  private:
+    typedef ShVector<N, Binding, T, Swizzled> ParentType;
 };
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShNormal<1, Binding, T, Swizzled> : public ShVector<1, Binding, T, Swizzled> {
 public:
+  typedef T ValueType;
+  typedef typename ShHostType<T>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemoryType<T>::type MemoryType; 
+  static const int typesize = 1;
+  static const ShBindingType binding_type = Binding;
+  static const ShSemanticType semantic_type = SH_NORMAL;
+
+  typedef ShNormal<1, SH_INPUT, T> InputType;
+  typedef ShNormal<1, SH_OUTPUT, T> OutputType;
+  typedef ShNormal<1, SH_INOUT, T> InOutType;
+  typedef ShNormal<1, SH_TEMP, T> TempType;
+  typedef ShNormal<1, SH_CONST, T> ConstType;
   ShNormal();
   
   template<typename T2>
@@ -138,9 +154,9 @@ public:
   template<typename T2>
   ShNormal(const ShNormal<1, Binding, T2, Swizzled>& other);
   ShNormal(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShNormal(T data[1]);
+  explicit ShNormal(H data[1]);
   
-  ShNormal(T);
+  ShNormal(H);
   
   ~ShNormal();
 
@@ -152,7 +168,7 @@ public:
   ShNormal& operator=(const ShNormal<1, Binding, T2, Swizzled>& other);
   ShNormal& operator=(const ShNormal<1, Binding, T, Swizzled>& other);
 
-  ShNormal& operator=(T other);
+  ShNormal& operator=(H other);
 
   ShNormal& operator=(const ShProgram& prg);
 
@@ -171,11 +187,11 @@ public:
   
   template<typename T2>
   ShNormal& operator%=(const ShGeneric<1, T2>& right);
-  ShNormal& operator*=(T);
-  ShNormal& operator/=(T);
-  ShNormal& operator%=(T);
-  ShNormal& operator+=(T);
-  ShNormal& operator-=(T);
+  ShNormal& operator*=(H);
+  ShNormal& operator/=(H);
+  ShNormal& operator%=(H);
+  ShNormal& operator+=(H);
+  ShNormal& operator-=(H);
   ShNormal<1, Binding, T, true> operator()(int) const;
   ShNormal<2, Binding, T, true> operator()(int, int) const;
   ShNormal<3, Binding, T, true> operator()(int, int, int) const;
@@ -186,23 +202,26 @@ public:
   ShNormal<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShNormal operator-() const;
-  typedef T ValueType;
-  static const int typesize = 1;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_NORMAL;
-
-  typedef ShNormal<1, SH_INPUT, T> InputType;
-  typedef ShNormal<1, SH_OUTPUT, T> OutputType;
-  typedef ShNormal<1, SH_INOUT, T> InOutType;
-  typedef ShNormal<1, SH_TEMP, T> TempType;
-  typedef ShNormal<1, SH_CONST, T> ConstType;
-private:
-  typedef ShVector<1, Binding, T, Swizzled> ParentType;
+  private:
+    typedef ShVector<1, Binding, T, Swizzled> ParentType;
 };
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShNormal<2, Binding, T, Swizzled> : public ShVector<2, Binding, T, Swizzled> {
 public:
+  typedef T ValueType;
+  typedef typename ShHostType<T>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemoryType<T>::type MemoryType; 
+  static const int typesize = 2;
+  static const ShBindingType binding_type = Binding;
+  static const ShSemanticType semantic_type = SH_NORMAL;
+
+  typedef ShNormal<2, SH_INPUT, T> InputType;
+  typedef ShNormal<2, SH_OUTPUT, T> OutputType;
+  typedef ShNormal<2, SH_INOUT, T> InOutType;
+  typedef ShNormal<2, SH_TEMP, T> TempType;
+  typedef ShNormal<2, SH_CONST, T> ConstType;
   ShNormal();
   
   template<typename T2>
@@ -212,9 +231,9 @@ public:
   template<typename T2>
   ShNormal(const ShNormal<2, Binding, T2, Swizzled>& other);
   ShNormal(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShNormal(T data[2]);
+  explicit ShNormal(H data[2]);
   
-  ShNormal(T, T);
+  ShNormal(H, H);
   template<typename T2, typename T3>
   ShNormal(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&);
   
@@ -245,11 +264,11 @@ public:
   
   template<typename T2>
   ShNormal& operator%=(const ShGeneric<2, T2>& right);
-  ShNormal& operator*=(T);
-  ShNormal& operator/=(T);
-  ShNormal& operator%=(T);
-  ShNormal& operator+=(T);
-  ShNormal& operator-=(T);
+  ShNormal& operator*=(H);
+  ShNormal& operator/=(H);
+  ShNormal& operator%=(H);
+  ShNormal& operator+=(H);
+  ShNormal& operator-=(H);
   
   template<typename T2>
   ShNormal& operator+=(const ShGeneric<1, T2>&);
@@ -275,23 +294,26 @@ public:
   ShNormal<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShNormal operator-() const;
-  typedef T ValueType;
-  static const int typesize = 2;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_NORMAL;
-
-  typedef ShNormal<2, SH_INPUT, T> InputType;
-  typedef ShNormal<2, SH_OUTPUT, T> OutputType;
-  typedef ShNormal<2, SH_INOUT, T> InOutType;
-  typedef ShNormal<2, SH_TEMP, T> TempType;
-  typedef ShNormal<2, SH_CONST, T> ConstType;
-private:
-  typedef ShVector<2, Binding, T, Swizzled> ParentType;
+  private:
+    typedef ShVector<2, Binding, T, Swizzled> ParentType;
 };
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShNormal<3, Binding, T, Swizzled> : public ShVector<3, Binding, T, Swizzled> {
 public:
+  typedef T ValueType;
+  typedef typename ShHostType<T>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemoryType<T>::type MemoryType; 
+  static const int typesize = 3;
+  static const ShBindingType binding_type = Binding;
+  static const ShSemanticType semantic_type = SH_NORMAL;
+
+  typedef ShNormal<3, SH_INPUT, T> InputType;
+  typedef ShNormal<3, SH_OUTPUT, T> OutputType;
+  typedef ShNormal<3, SH_INOUT, T> InOutType;
+  typedef ShNormal<3, SH_TEMP, T> TempType;
+  typedef ShNormal<3, SH_CONST, T> ConstType;
   ShNormal();
   
   template<typename T2>
@@ -301,9 +323,9 @@ public:
   template<typename T2>
   ShNormal(const ShNormal<3, Binding, T2, Swizzled>& other);
   ShNormal(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShNormal(T data[3]);
+  explicit ShNormal(H data[3]);
   
-  ShNormal(T, T, T);
+  ShNormal(H, H, H);
   template<typename T2, typename T3, typename T4>
   ShNormal(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&);
   
@@ -334,11 +356,11 @@ public:
   
   template<typename T2>
   ShNormal& operator%=(const ShGeneric<3, T2>& right);
-  ShNormal& operator*=(T);
-  ShNormal& operator/=(T);
-  ShNormal& operator%=(T);
-  ShNormal& operator+=(T);
-  ShNormal& operator-=(T);
+  ShNormal& operator*=(H);
+  ShNormal& operator/=(H);
+  ShNormal& operator%=(H);
+  ShNormal& operator+=(H);
+  ShNormal& operator-=(H);
   
   template<typename T2>
   ShNormal& operator+=(const ShGeneric<1, T2>&);
@@ -364,23 +386,26 @@ public:
   ShNormal<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShNormal operator-() const;
-  typedef T ValueType;
-  static const int typesize = 3;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_NORMAL;
-
-  typedef ShNormal<3, SH_INPUT, T> InputType;
-  typedef ShNormal<3, SH_OUTPUT, T> OutputType;
-  typedef ShNormal<3, SH_INOUT, T> InOutType;
-  typedef ShNormal<3, SH_TEMP, T> TempType;
-  typedef ShNormal<3, SH_CONST, T> ConstType;
-private:
-  typedef ShVector<3, Binding, T, Swizzled> ParentType;
+  private:
+    typedef ShVector<3, Binding, T, Swizzled> ParentType;
 };
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShNormal<4, Binding, T, Swizzled> : public ShVector<4, Binding, T, Swizzled> {
 public:
+  typedef T ValueType;
+  typedef typename ShHostType<T>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemoryType<T>::type MemoryType; 
+  static const int typesize = 4;
+  static const ShBindingType binding_type = Binding;
+  static const ShSemanticType semantic_type = SH_NORMAL;
+
+  typedef ShNormal<4, SH_INPUT, T> InputType;
+  typedef ShNormal<4, SH_OUTPUT, T> OutputType;
+  typedef ShNormal<4, SH_INOUT, T> InOutType;
+  typedef ShNormal<4, SH_TEMP, T> TempType;
+  typedef ShNormal<4, SH_CONST, T> ConstType;
   ShNormal();
   
   template<typename T2>
@@ -390,9 +415,9 @@ public:
   template<typename T2>
   ShNormal(const ShNormal<4, Binding, T2, Swizzled>& other);
   ShNormal(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShNormal(T data[4]);
+  explicit ShNormal(H data[4]);
   
-  ShNormal(T, T, T, T);
+  ShNormal(H, H, H, H);
   template<typename T2, typename T3, typename T4, typename T5>
   ShNormal(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&, const ShGeneric<1, T5>&);
   
@@ -423,11 +448,11 @@ public:
   
   template<typename T2>
   ShNormal& operator%=(const ShGeneric<4, T2>& right);
-  ShNormal& operator*=(T);
-  ShNormal& operator/=(T);
-  ShNormal& operator%=(T);
-  ShNormal& operator+=(T);
-  ShNormal& operator-=(T);
+  ShNormal& operator*=(H);
+  ShNormal& operator/=(H);
+  ShNormal& operator%=(H);
+  ShNormal& operator+=(H);
+  ShNormal& operator-=(H);
   
   template<typename T2>
   ShNormal& operator+=(const ShGeneric<1, T2>&);
@@ -453,18 +478,8 @@ public:
   ShNormal<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShNormal operator-() const;
-  typedef T ValueType;
-  static const int typesize = 4;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_NORMAL;
-
-  typedef ShNormal<4, SH_INPUT, T> InputType;
-  typedef ShNormal<4, SH_OUTPUT, T> OutputType;
-  typedef ShNormal<4, SH_INOUT, T> InOutType;
-  typedef ShNormal<4, SH_TEMP, T> TempType;
-  typedef ShNormal<4, SH_CONST, T> ConstType;
-private:
-  typedef ShVector<4, Binding, T, Swizzled> ParentType;
+  private:
+    typedef ShVector<4, Binding, T, Swizzled> ParentType;
 };
 
 typedef ShNormal<1, SH_INPUT, ShInterval<double> > ShInputNormal1i_d;

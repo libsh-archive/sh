@@ -44,6 +44,19 @@ namespace SH {
 template<int N, ShBindingType Binding, typename T=float, bool Swizzled=false>
 class ShTexCoord : public ShAttrib<N, Binding, T, Swizzled> {
 public:
+  typedef T ValueType;
+  typedef typename ShHostType<T>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemoryType<T>::type MemoryType; 
+  static const int typesize = N;
+  static const ShBindingType binding_type = Binding;
+  static const ShSemanticType semantic_type = SH_TEXCOORD;
+
+  typedef ShTexCoord<N, SH_INPUT, T> InputType;
+  typedef ShTexCoord<N, SH_OUTPUT, T> OutputType;
+  typedef ShTexCoord<N, SH_INOUT, T> InOutType;
+  typedef ShTexCoord<N, SH_TEMP, T> TempType;
+  typedef ShTexCoord<N, SH_CONST, T> ConstType;
   ShTexCoord();
   
   template<typename T2>
@@ -53,7 +66,7 @@ public:
   template<typename T2>
   ShTexCoord(const ShTexCoord<N, Binding, T2, Swizzled>& other);
   ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShTexCoord(T data[N]);
+  explicit ShTexCoord(H data[N]);
   
   ~ShTexCoord();
 
@@ -82,11 +95,11 @@ public:
   
   template<typename T2>
   ShTexCoord& operator%=(const ShGeneric<N, T2>& right);
-  ShTexCoord& operator*=(T);
-  ShTexCoord& operator/=(T);
-  ShTexCoord& operator%=(T);
-  ShTexCoord& operator+=(T);
-  ShTexCoord& operator-=(T);
+  ShTexCoord& operator*=(H);
+  ShTexCoord& operator/=(H);
+  ShTexCoord& operator%=(H);
+  ShTexCoord& operator+=(H);
+  ShTexCoord& operator-=(H);
   
   template<typename T2>
   ShTexCoord& operator+=(const ShGeneric<1, T2>&);
@@ -112,23 +125,26 @@ public:
   ShTexCoord<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShTexCoord operator-() const;
-  typedef T ValueType;
-  static const int typesize = N;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_TEXCOORD;
-
-  typedef ShTexCoord<N, SH_INPUT, T> InputType;
-  typedef ShTexCoord<N, SH_OUTPUT, T> OutputType;
-  typedef ShTexCoord<N, SH_INOUT, T> InOutType;
-  typedef ShTexCoord<N, SH_TEMP, T> TempType;
-  typedef ShTexCoord<N, SH_CONST, T> ConstType;
-private:
-  typedef ShAttrib<N, Binding, T, Swizzled> ParentType;
+  private:
+    typedef ShAttrib<N, Binding, T, Swizzled> ParentType;
 };
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShTexCoord<1, Binding, T, Swizzled> : public ShAttrib<1, Binding, T, Swizzled> {
 public:
+  typedef T ValueType;
+  typedef typename ShHostType<T>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemoryType<T>::type MemoryType; 
+  static const int typesize = 1;
+  static const ShBindingType binding_type = Binding;
+  static const ShSemanticType semantic_type = SH_TEXCOORD;
+
+  typedef ShTexCoord<1, SH_INPUT, T> InputType;
+  typedef ShTexCoord<1, SH_OUTPUT, T> OutputType;
+  typedef ShTexCoord<1, SH_INOUT, T> InOutType;
+  typedef ShTexCoord<1, SH_TEMP, T> TempType;
+  typedef ShTexCoord<1, SH_CONST, T> ConstType;
   ShTexCoord();
   
   template<typename T2>
@@ -138,9 +154,9 @@ public:
   template<typename T2>
   ShTexCoord(const ShTexCoord<1, Binding, T2, Swizzled>& other);
   ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShTexCoord(T data[1]);
+  explicit ShTexCoord(H data[1]);
   
-  ShTexCoord(T);
+  ShTexCoord(H);
   
   ~ShTexCoord();
 
@@ -152,7 +168,7 @@ public:
   ShTexCoord& operator=(const ShTexCoord<1, Binding, T2, Swizzled>& other);
   ShTexCoord& operator=(const ShTexCoord<1, Binding, T, Swizzled>& other);
 
-  ShTexCoord& operator=(T other);
+  ShTexCoord& operator=(H other);
 
   ShTexCoord& operator=(const ShProgram& prg);
 
@@ -171,11 +187,11 @@ public:
   
   template<typename T2>
   ShTexCoord& operator%=(const ShGeneric<1, T2>& right);
-  ShTexCoord& operator*=(T);
-  ShTexCoord& operator/=(T);
-  ShTexCoord& operator%=(T);
-  ShTexCoord& operator+=(T);
-  ShTexCoord& operator-=(T);
+  ShTexCoord& operator*=(H);
+  ShTexCoord& operator/=(H);
+  ShTexCoord& operator%=(H);
+  ShTexCoord& operator+=(H);
+  ShTexCoord& operator-=(H);
   ShTexCoord<1, Binding, T, true> operator()(int) const;
   ShTexCoord<2, Binding, T, true> operator()(int, int) const;
   ShTexCoord<3, Binding, T, true> operator()(int, int, int) const;
@@ -186,23 +202,26 @@ public:
   ShTexCoord<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShTexCoord operator-() const;
-  typedef T ValueType;
-  static const int typesize = 1;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_TEXCOORD;
-
-  typedef ShTexCoord<1, SH_INPUT, T> InputType;
-  typedef ShTexCoord<1, SH_OUTPUT, T> OutputType;
-  typedef ShTexCoord<1, SH_INOUT, T> InOutType;
-  typedef ShTexCoord<1, SH_TEMP, T> TempType;
-  typedef ShTexCoord<1, SH_CONST, T> ConstType;
-private:
-  typedef ShAttrib<1, Binding, T, Swizzled> ParentType;
+  private:
+    typedef ShAttrib<1, Binding, T, Swizzled> ParentType;
 };
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShTexCoord<2, Binding, T, Swizzled> : public ShAttrib<2, Binding, T, Swizzled> {
 public:
+  typedef T ValueType;
+  typedef typename ShHostType<T>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemoryType<T>::type MemoryType; 
+  static const int typesize = 2;
+  static const ShBindingType binding_type = Binding;
+  static const ShSemanticType semantic_type = SH_TEXCOORD;
+
+  typedef ShTexCoord<2, SH_INPUT, T> InputType;
+  typedef ShTexCoord<2, SH_OUTPUT, T> OutputType;
+  typedef ShTexCoord<2, SH_INOUT, T> InOutType;
+  typedef ShTexCoord<2, SH_TEMP, T> TempType;
+  typedef ShTexCoord<2, SH_CONST, T> ConstType;
   ShTexCoord();
   
   template<typename T2>
@@ -212,9 +231,9 @@ public:
   template<typename T2>
   ShTexCoord(const ShTexCoord<2, Binding, T2, Swizzled>& other);
   ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShTexCoord(T data[2]);
+  explicit ShTexCoord(H data[2]);
   
-  ShTexCoord(T, T);
+  ShTexCoord(H, H);
   template<typename T2, typename T3>
   ShTexCoord(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&);
   
@@ -245,11 +264,11 @@ public:
   
   template<typename T2>
   ShTexCoord& operator%=(const ShGeneric<2, T2>& right);
-  ShTexCoord& operator*=(T);
-  ShTexCoord& operator/=(T);
-  ShTexCoord& operator%=(T);
-  ShTexCoord& operator+=(T);
-  ShTexCoord& operator-=(T);
+  ShTexCoord& operator*=(H);
+  ShTexCoord& operator/=(H);
+  ShTexCoord& operator%=(H);
+  ShTexCoord& operator+=(H);
+  ShTexCoord& operator-=(H);
   
   template<typename T2>
   ShTexCoord& operator+=(const ShGeneric<1, T2>&);
@@ -275,23 +294,26 @@ public:
   ShTexCoord<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShTexCoord operator-() const;
-  typedef T ValueType;
-  static const int typesize = 2;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_TEXCOORD;
-
-  typedef ShTexCoord<2, SH_INPUT, T> InputType;
-  typedef ShTexCoord<2, SH_OUTPUT, T> OutputType;
-  typedef ShTexCoord<2, SH_INOUT, T> InOutType;
-  typedef ShTexCoord<2, SH_TEMP, T> TempType;
-  typedef ShTexCoord<2, SH_CONST, T> ConstType;
-private:
-  typedef ShAttrib<2, Binding, T, Swizzled> ParentType;
+  private:
+    typedef ShAttrib<2, Binding, T, Swizzled> ParentType;
 };
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShTexCoord<3, Binding, T, Swizzled> : public ShAttrib<3, Binding, T, Swizzled> {
 public:
+  typedef T ValueType;
+  typedef typename ShHostType<T>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemoryType<T>::type MemoryType; 
+  static const int typesize = 3;
+  static const ShBindingType binding_type = Binding;
+  static const ShSemanticType semantic_type = SH_TEXCOORD;
+
+  typedef ShTexCoord<3, SH_INPUT, T> InputType;
+  typedef ShTexCoord<3, SH_OUTPUT, T> OutputType;
+  typedef ShTexCoord<3, SH_INOUT, T> InOutType;
+  typedef ShTexCoord<3, SH_TEMP, T> TempType;
+  typedef ShTexCoord<3, SH_CONST, T> ConstType;
   ShTexCoord();
   
   template<typename T2>
@@ -301,9 +323,9 @@ public:
   template<typename T2>
   ShTexCoord(const ShTexCoord<3, Binding, T2, Swizzled>& other);
   ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShTexCoord(T data[3]);
+  explicit ShTexCoord(H data[3]);
   
-  ShTexCoord(T, T, T);
+  ShTexCoord(H, H, H);
   template<typename T2, typename T3, typename T4>
   ShTexCoord(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&);
   
@@ -334,11 +356,11 @@ public:
   
   template<typename T2>
   ShTexCoord& operator%=(const ShGeneric<3, T2>& right);
-  ShTexCoord& operator*=(T);
-  ShTexCoord& operator/=(T);
-  ShTexCoord& operator%=(T);
-  ShTexCoord& operator+=(T);
-  ShTexCoord& operator-=(T);
+  ShTexCoord& operator*=(H);
+  ShTexCoord& operator/=(H);
+  ShTexCoord& operator%=(H);
+  ShTexCoord& operator+=(H);
+  ShTexCoord& operator-=(H);
   
   template<typename T2>
   ShTexCoord& operator+=(const ShGeneric<1, T2>&);
@@ -364,23 +386,26 @@ public:
   ShTexCoord<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShTexCoord operator-() const;
-  typedef T ValueType;
-  static const int typesize = 3;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_TEXCOORD;
-
-  typedef ShTexCoord<3, SH_INPUT, T> InputType;
-  typedef ShTexCoord<3, SH_OUTPUT, T> OutputType;
-  typedef ShTexCoord<3, SH_INOUT, T> InOutType;
-  typedef ShTexCoord<3, SH_TEMP, T> TempType;
-  typedef ShTexCoord<3, SH_CONST, T> ConstType;
-private:
-  typedef ShAttrib<3, Binding, T, Swizzled> ParentType;
+  private:
+    typedef ShAttrib<3, Binding, T, Swizzled> ParentType;
 };
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShTexCoord<4, Binding, T, Swizzled> : public ShAttrib<4, Binding, T, Swizzled> {
 public:
+  typedef T ValueType;
+  typedef typename ShHostType<T>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemoryType<T>::type MemoryType; 
+  static const int typesize = 4;
+  static const ShBindingType binding_type = Binding;
+  static const ShSemanticType semantic_type = SH_TEXCOORD;
+
+  typedef ShTexCoord<4, SH_INPUT, T> InputType;
+  typedef ShTexCoord<4, SH_OUTPUT, T> OutputType;
+  typedef ShTexCoord<4, SH_INOUT, T> InOutType;
+  typedef ShTexCoord<4, SH_TEMP, T> TempType;
+  typedef ShTexCoord<4, SH_CONST, T> ConstType;
   ShTexCoord();
   
   template<typename T2>
@@ -390,9 +415,9 @@ public:
   template<typename T2>
   ShTexCoord(const ShTexCoord<4, Binding, T2, Swizzled>& other);
   ShTexCoord(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShTexCoord(T data[4]);
+  explicit ShTexCoord(H data[4]);
   
-  ShTexCoord(T, T, T, T);
+  ShTexCoord(H, H, H, H);
   template<typename T2, typename T3, typename T4, typename T5>
   ShTexCoord(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&, const ShGeneric<1, T5>&);
   
@@ -423,11 +448,11 @@ public:
   
   template<typename T2>
   ShTexCoord& operator%=(const ShGeneric<4, T2>& right);
-  ShTexCoord& operator*=(T);
-  ShTexCoord& operator/=(T);
-  ShTexCoord& operator%=(T);
-  ShTexCoord& operator+=(T);
-  ShTexCoord& operator-=(T);
+  ShTexCoord& operator*=(H);
+  ShTexCoord& operator/=(H);
+  ShTexCoord& operator%=(H);
+  ShTexCoord& operator+=(H);
+  ShTexCoord& operator-=(H);
   
   template<typename T2>
   ShTexCoord& operator+=(const ShGeneric<1, T2>&);
@@ -453,18 +478,8 @@ public:
   ShTexCoord<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShTexCoord operator-() const;
-  typedef T ValueType;
-  static const int typesize = 4;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_TEXCOORD;
-
-  typedef ShTexCoord<4, SH_INPUT, T> InputType;
-  typedef ShTexCoord<4, SH_OUTPUT, T> OutputType;
-  typedef ShTexCoord<4, SH_INOUT, T> InOutType;
-  typedef ShTexCoord<4, SH_TEMP, T> TempType;
-  typedef ShTexCoord<4, SH_CONST, T> ConstType;
-private:
-  typedef ShAttrib<4, Binding, T, Swizzled> ParentType;
+  private:
+    typedef ShAttrib<4, Binding, T, Swizzled> ParentType;
 };
 
 typedef ShTexCoord<1, SH_INPUT, ShInterval<double> > ShInputTexCoord1i_d;

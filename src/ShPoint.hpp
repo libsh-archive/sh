@@ -44,6 +44,19 @@ namespace SH {
 template<int N, ShBindingType Binding, typename T=float, bool Swizzled=false>
 class ShPoint : public ShAttrib<N, Binding, T, Swizzled> {
 public:
+  typedef T ValueType;
+  typedef typename ShHostType<T>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemoryType<T>::type MemoryType; 
+  static const int typesize = N;
+  static const ShBindingType binding_type = Binding;
+  static const ShSemanticType semantic_type = SH_POINT;
+
+  typedef ShPoint<N, SH_INPUT, T> InputType;
+  typedef ShPoint<N, SH_OUTPUT, T> OutputType;
+  typedef ShPoint<N, SH_INOUT, T> InOutType;
+  typedef ShPoint<N, SH_TEMP, T> TempType;
+  typedef ShPoint<N, SH_CONST, T> ConstType;
   ShPoint();
   
   template<typename T2>
@@ -53,7 +66,7 @@ public:
   template<typename T2>
   ShPoint(const ShPoint<N, Binding, T2, Swizzled>& other);
   ShPoint(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShPoint(T data[N]);
+  explicit ShPoint(H data[N]);
   
   ~ShPoint();
 
@@ -82,11 +95,11 @@ public:
   
   template<typename T2>
   ShPoint& operator%=(const ShGeneric<N, T2>& right);
-  ShPoint& operator*=(T);
-  ShPoint& operator/=(T);
-  ShPoint& operator%=(T);
-  ShPoint& operator+=(T);
-  ShPoint& operator-=(T);
+  ShPoint& operator*=(H);
+  ShPoint& operator/=(H);
+  ShPoint& operator%=(H);
+  ShPoint& operator+=(H);
+  ShPoint& operator-=(H);
   
   template<typename T2>
   ShPoint& operator+=(const ShGeneric<1, T2>&);
@@ -112,23 +125,26 @@ public:
   ShPoint<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShPoint operator-() const;
-  typedef T ValueType;
-  static const int typesize = N;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_POINT;
-
-  typedef ShPoint<N, SH_INPUT, T> InputType;
-  typedef ShPoint<N, SH_OUTPUT, T> OutputType;
-  typedef ShPoint<N, SH_INOUT, T> InOutType;
-  typedef ShPoint<N, SH_TEMP, T> TempType;
-  typedef ShPoint<N, SH_CONST, T> ConstType;
-private:
-  typedef ShAttrib<N, Binding, T, Swizzled> ParentType;
+  private:
+    typedef ShAttrib<N, Binding, T, Swizzled> ParentType;
 };
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShPoint<1, Binding, T, Swizzled> : public ShAttrib<1, Binding, T, Swizzled> {
 public:
+  typedef T ValueType;
+  typedef typename ShHostType<T>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemoryType<T>::type MemoryType; 
+  static const int typesize = 1;
+  static const ShBindingType binding_type = Binding;
+  static const ShSemanticType semantic_type = SH_POINT;
+
+  typedef ShPoint<1, SH_INPUT, T> InputType;
+  typedef ShPoint<1, SH_OUTPUT, T> OutputType;
+  typedef ShPoint<1, SH_INOUT, T> InOutType;
+  typedef ShPoint<1, SH_TEMP, T> TempType;
+  typedef ShPoint<1, SH_CONST, T> ConstType;
   ShPoint();
   
   template<typename T2>
@@ -138,9 +154,9 @@ public:
   template<typename T2>
   ShPoint(const ShPoint<1, Binding, T2, Swizzled>& other);
   ShPoint(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShPoint(T data[1]);
+  explicit ShPoint(H data[1]);
   
-  ShPoint(T);
+  ShPoint(H);
   
   ~ShPoint();
 
@@ -152,7 +168,7 @@ public:
   ShPoint& operator=(const ShPoint<1, Binding, T2, Swizzled>& other);
   ShPoint& operator=(const ShPoint<1, Binding, T, Swizzled>& other);
 
-  ShPoint& operator=(T other);
+  ShPoint& operator=(H other);
 
   ShPoint& operator=(const ShProgram& prg);
 
@@ -171,11 +187,11 @@ public:
   
   template<typename T2>
   ShPoint& operator%=(const ShGeneric<1, T2>& right);
-  ShPoint& operator*=(T);
-  ShPoint& operator/=(T);
-  ShPoint& operator%=(T);
-  ShPoint& operator+=(T);
-  ShPoint& operator-=(T);
+  ShPoint& operator*=(H);
+  ShPoint& operator/=(H);
+  ShPoint& operator%=(H);
+  ShPoint& operator+=(H);
+  ShPoint& operator-=(H);
   ShPoint<1, Binding, T, true> operator()(int) const;
   ShPoint<2, Binding, T, true> operator()(int, int) const;
   ShPoint<3, Binding, T, true> operator()(int, int, int) const;
@@ -186,23 +202,26 @@ public:
   ShPoint<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShPoint operator-() const;
-  typedef T ValueType;
-  static const int typesize = 1;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_POINT;
-
-  typedef ShPoint<1, SH_INPUT, T> InputType;
-  typedef ShPoint<1, SH_OUTPUT, T> OutputType;
-  typedef ShPoint<1, SH_INOUT, T> InOutType;
-  typedef ShPoint<1, SH_TEMP, T> TempType;
-  typedef ShPoint<1, SH_CONST, T> ConstType;
-private:
-  typedef ShAttrib<1, Binding, T, Swizzled> ParentType;
+  private:
+    typedef ShAttrib<1, Binding, T, Swizzled> ParentType;
 };
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShPoint<2, Binding, T, Swizzled> : public ShAttrib<2, Binding, T, Swizzled> {
 public:
+  typedef T ValueType;
+  typedef typename ShHostType<T>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemoryType<T>::type MemoryType; 
+  static const int typesize = 2;
+  static const ShBindingType binding_type = Binding;
+  static const ShSemanticType semantic_type = SH_POINT;
+
+  typedef ShPoint<2, SH_INPUT, T> InputType;
+  typedef ShPoint<2, SH_OUTPUT, T> OutputType;
+  typedef ShPoint<2, SH_INOUT, T> InOutType;
+  typedef ShPoint<2, SH_TEMP, T> TempType;
+  typedef ShPoint<2, SH_CONST, T> ConstType;
   ShPoint();
   
   template<typename T2>
@@ -212,9 +231,9 @@ public:
   template<typename T2>
   ShPoint(const ShPoint<2, Binding, T2, Swizzled>& other);
   ShPoint(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShPoint(T data[2]);
+  explicit ShPoint(H data[2]);
   
-  ShPoint(T, T);
+  ShPoint(H, H);
   template<typename T2, typename T3>
   ShPoint(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&);
   
@@ -245,11 +264,11 @@ public:
   
   template<typename T2>
   ShPoint& operator%=(const ShGeneric<2, T2>& right);
-  ShPoint& operator*=(T);
-  ShPoint& operator/=(T);
-  ShPoint& operator%=(T);
-  ShPoint& operator+=(T);
-  ShPoint& operator-=(T);
+  ShPoint& operator*=(H);
+  ShPoint& operator/=(H);
+  ShPoint& operator%=(H);
+  ShPoint& operator+=(H);
+  ShPoint& operator-=(H);
   
   template<typename T2>
   ShPoint& operator+=(const ShGeneric<1, T2>&);
@@ -275,23 +294,26 @@ public:
   ShPoint<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShPoint operator-() const;
-  typedef T ValueType;
-  static const int typesize = 2;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_POINT;
-
-  typedef ShPoint<2, SH_INPUT, T> InputType;
-  typedef ShPoint<2, SH_OUTPUT, T> OutputType;
-  typedef ShPoint<2, SH_INOUT, T> InOutType;
-  typedef ShPoint<2, SH_TEMP, T> TempType;
-  typedef ShPoint<2, SH_CONST, T> ConstType;
-private:
-  typedef ShAttrib<2, Binding, T, Swizzled> ParentType;
+  private:
+    typedef ShAttrib<2, Binding, T, Swizzled> ParentType;
 };
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShPoint<3, Binding, T, Swizzled> : public ShAttrib<3, Binding, T, Swizzled> {
 public:
+  typedef T ValueType;
+  typedef typename ShHostType<T>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemoryType<T>::type MemoryType; 
+  static const int typesize = 3;
+  static const ShBindingType binding_type = Binding;
+  static const ShSemanticType semantic_type = SH_POINT;
+
+  typedef ShPoint<3, SH_INPUT, T> InputType;
+  typedef ShPoint<3, SH_OUTPUT, T> OutputType;
+  typedef ShPoint<3, SH_INOUT, T> InOutType;
+  typedef ShPoint<3, SH_TEMP, T> TempType;
+  typedef ShPoint<3, SH_CONST, T> ConstType;
   ShPoint();
   
   template<typename T2>
@@ -301,9 +323,9 @@ public:
   template<typename T2>
   ShPoint(const ShPoint<3, Binding, T2, Swizzled>& other);
   ShPoint(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShPoint(T data[3]);
+  explicit ShPoint(H data[3]);
   
-  ShPoint(T, T, T);
+  ShPoint(H, H, H);
   template<typename T2, typename T3, typename T4>
   ShPoint(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&);
   
@@ -334,11 +356,11 @@ public:
   
   template<typename T2>
   ShPoint& operator%=(const ShGeneric<3, T2>& right);
-  ShPoint& operator*=(T);
-  ShPoint& operator/=(T);
-  ShPoint& operator%=(T);
-  ShPoint& operator+=(T);
-  ShPoint& operator-=(T);
+  ShPoint& operator*=(H);
+  ShPoint& operator/=(H);
+  ShPoint& operator%=(H);
+  ShPoint& operator+=(H);
+  ShPoint& operator-=(H);
   
   template<typename T2>
   ShPoint& operator+=(const ShGeneric<1, T2>&);
@@ -364,23 +386,26 @@ public:
   ShPoint<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShPoint operator-() const;
-  typedef T ValueType;
-  static const int typesize = 3;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_POINT;
-
-  typedef ShPoint<3, SH_INPUT, T> InputType;
-  typedef ShPoint<3, SH_OUTPUT, T> OutputType;
-  typedef ShPoint<3, SH_INOUT, T> InOutType;
-  typedef ShPoint<3, SH_TEMP, T> TempType;
-  typedef ShPoint<3, SH_CONST, T> ConstType;
-private:
-  typedef ShAttrib<3, Binding, T, Swizzled> ParentType;
+  private:
+    typedef ShAttrib<3, Binding, T, Swizzled> ParentType;
 };
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShPoint<4, Binding, T, Swizzled> : public ShAttrib<4, Binding, T, Swizzled> {
 public:
+  typedef T ValueType;
+  typedef typename ShHostType<T>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemoryType<T>::type MemoryType; 
+  static const int typesize = 4;
+  static const ShBindingType binding_type = Binding;
+  static const ShSemanticType semantic_type = SH_POINT;
+
+  typedef ShPoint<4, SH_INPUT, T> InputType;
+  typedef ShPoint<4, SH_OUTPUT, T> OutputType;
+  typedef ShPoint<4, SH_INOUT, T> InOutType;
+  typedef ShPoint<4, SH_TEMP, T> TempType;
+  typedef ShPoint<4, SH_CONST, T> ConstType;
   ShPoint();
   
   template<typename T2>
@@ -390,9 +415,9 @@ public:
   template<typename T2>
   ShPoint(const ShPoint<4, Binding, T2, Swizzled>& other);
   ShPoint(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShPoint(T data[4]);
+  explicit ShPoint(H data[4]);
   
-  ShPoint(T, T, T, T);
+  ShPoint(H, H, H, H);
   template<typename T2, typename T3, typename T4, typename T5>
   ShPoint(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&, const ShGeneric<1, T5>&);
   
@@ -423,11 +448,11 @@ public:
   
   template<typename T2>
   ShPoint& operator%=(const ShGeneric<4, T2>& right);
-  ShPoint& operator*=(T);
-  ShPoint& operator/=(T);
-  ShPoint& operator%=(T);
-  ShPoint& operator+=(T);
-  ShPoint& operator-=(T);
+  ShPoint& operator*=(H);
+  ShPoint& operator/=(H);
+  ShPoint& operator%=(H);
+  ShPoint& operator+=(H);
+  ShPoint& operator-=(H);
   
   template<typename T2>
   ShPoint& operator+=(const ShGeneric<1, T2>&);
@@ -453,18 +478,8 @@ public:
   ShPoint<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShPoint operator-() const;
-  typedef T ValueType;
-  static const int typesize = 4;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_POINT;
-
-  typedef ShPoint<4, SH_INPUT, T> InputType;
-  typedef ShPoint<4, SH_OUTPUT, T> OutputType;
-  typedef ShPoint<4, SH_INOUT, T> InOutType;
-  typedef ShPoint<4, SH_TEMP, T> TempType;
-  typedef ShPoint<4, SH_CONST, T> ConstType;
-private:
-  typedef ShAttrib<4, Binding, T, Swizzled> ParentType;
+  private:
+    typedef ShAttrib<4, Binding, T, Swizzled> ParentType;
 };
 
 typedef ShPoint<1, SH_INPUT, ShInterval<double> > ShInputPoint1i_d;

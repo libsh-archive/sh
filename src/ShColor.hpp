@@ -44,6 +44,19 @@ namespace SH {
 template<int N, ShBindingType Binding, typename T=float, bool Swizzled=false>
 class ShColor : public ShAttrib<N, Binding, T, Swizzled> {
 public:
+  typedef T ValueType;
+  typedef typename ShHostType<T>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemoryType<T>::type MemoryType; 
+  static const int typesize = N;
+  static const ShBindingType binding_type = Binding;
+  static const ShSemanticType semantic_type = SH_COLOR;
+
+  typedef ShColor<N, SH_INPUT, T> InputType;
+  typedef ShColor<N, SH_OUTPUT, T> OutputType;
+  typedef ShColor<N, SH_INOUT, T> InOutType;
+  typedef ShColor<N, SH_TEMP, T> TempType;
+  typedef ShColor<N, SH_CONST, T> ConstType;
   ShColor();
   
   template<typename T2>
@@ -53,7 +66,7 @@ public:
   template<typename T2>
   ShColor(const ShColor<N, Binding, T2, Swizzled>& other);
   ShColor(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShColor(T data[N]);
+  explicit ShColor(H data[N]);
   
   ~ShColor();
 
@@ -82,11 +95,11 @@ public:
   
   template<typename T2>
   ShColor& operator%=(const ShGeneric<N, T2>& right);
-  ShColor& operator*=(T);
-  ShColor& operator/=(T);
-  ShColor& operator%=(T);
-  ShColor& operator+=(T);
-  ShColor& operator-=(T);
+  ShColor& operator*=(H);
+  ShColor& operator/=(H);
+  ShColor& operator%=(H);
+  ShColor& operator+=(H);
+  ShColor& operator-=(H);
   
   template<typename T2>
   ShColor& operator+=(const ShGeneric<1, T2>&);
@@ -112,23 +125,26 @@ public:
   ShColor<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShColor operator-() const;
-  typedef T ValueType;
-  static const int typesize = N;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_COLOR;
-
-  typedef ShColor<N, SH_INPUT, T> InputType;
-  typedef ShColor<N, SH_OUTPUT, T> OutputType;
-  typedef ShColor<N, SH_INOUT, T> InOutType;
-  typedef ShColor<N, SH_TEMP, T> TempType;
-  typedef ShColor<N, SH_CONST, T> ConstType;
-private:
-  typedef ShAttrib<N, Binding, T, Swizzled> ParentType;
+  private:
+    typedef ShAttrib<N, Binding, T, Swizzled> ParentType;
 };
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShColor<1, Binding, T, Swizzled> : public ShAttrib<1, Binding, T, Swizzled> {
 public:
+  typedef T ValueType;
+  typedef typename ShHostType<T>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemoryType<T>::type MemoryType; 
+  static const int typesize = 1;
+  static const ShBindingType binding_type = Binding;
+  static const ShSemanticType semantic_type = SH_COLOR;
+
+  typedef ShColor<1, SH_INPUT, T> InputType;
+  typedef ShColor<1, SH_OUTPUT, T> OutputType;
+  typedef ShColor<1, SH_INOUT, T> InOutType;
+  typedef ShColor<1, SH_TEMP, T> TempType;
+  typedef ShColor<1, SH_CONST, T> ConstType;
   ShColor();
   
   template<typename T2>
@@ -138,9 +154,9 @@ public:
   template<typename T2>
   ShColor(const ShColor<1, Binding, T2, Swizzled>& other);
   ShColor(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShColor(T data[1]);
+  explicit ShColor(H data[1]);
   
-  ShColor(T);
+  ShColor(H);
   
   ~ShColor();
 
@@ -152,7 +168,7 @@ public:
   ShColor& operator=(const ShColor<1, Binding, T2, Swizzled>& other);
   ShColor& operator=(const ShColor<1, Binding, T, Swizzled>& other);
 
-  ShColor& operator=(T other);
+  ShColor& operator=(H other);
 
   ShColor& operator=(const ShProgram& prg);
 
@@ -171,11 +187,11 @@ public:
   
   template<typename T2>
   ShColor& operator%=(const ShGeneric<1, T2>& right);
-  ShColor& operator*=(T);
-  ShColor& operator/=(T);
-  ShColor& operator%=(T);
-  ShColor& operator+=(T);
-  ShColor& operator-=(T);
+  ShColor& operator*=(H);
+  ShColor& operator/=(H);
+  ShColor& operator%=(H);
+  ShColor& operator+=(H);
+  ShColor& operator-=(H);
   ShColor<1, Binding, T, true> operator()(int) const;
   ShColor<2, Binding, T, true> operator()(int, int) const;
   ShColor<3, Binding, T, true> operator()(int, int, int) const;
@@ -186,23 +202,26 @@ public:
   ShColor<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShColor operator-() const;
-  typedef T ValueType;
-  static const int typesize = 1;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_COLOR;
-
-  typedef ShColor<1, SH_INPUT, T> InputType;
-  typedef ShColor<1, SH_OUTPUT, T> OutputType;
-  typedef ShColor<1, SH_INOUT, T> InOutType;
-  typedef ShColor<1, SH_TEMP, T> TempType;
-  typedef ShColor<1, SH_CONST, T> ConstType;
-private:
-  typedef ShAttrib<1, Binding, T, Swizzled> ParentType;
+  private:
+    typedef ShAttrib<1, Binding, T, Swizzled> ParentType;
 };
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShColor<2, Binding, T, Swizzled> : public ShAttrib<2, Binding, T, Swizzled> {
 public:
+  typedef T ValueType;
+  typedef typename ShHostType<T>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemoryType<T>::type MemoryType; 
+  static const int typesize = 2;
+  static const ShBindingType binding_type = Binding;
+  static const ShSemanticType semantic_type = SH_COLOR;
+
+  typedef ShColor<2, SH_INPUT, T> InputType;
+  typedef ShColor<2, SH_OUTPUT, T> OutputType;
+  typedef ShColor<2, SH_INOUT, T> InOutType;
+  typedef ShColor<2, SH_TEMP, T> TempType;
+  typedef ShColor<2, SH_CONST, T> ConstType;
   ShColor();
   
   template<typename T2>
@@ -212,9 +231,9 @@ public:
   template<typename T2>
   ShColor(const ShColor<2, Binding, T2, Swizzled>& other);
   ShColor(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShColor(T data[2]);
+  explicit ShColor(H data[2]);
   
-  ShColor(T, T);
+  ShColor(H, H);
   template<typename T2, typename T3>
   ShColor(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&);
   
@@ -245,11 +264,11 @@ public:
   
   template<typename T2>
   ShColor& operator%=(const ShGeneric<2, T2>& right);
-  ShColor& operator*=(T);
-  ShColor& operator/=(T);
-  ShColor& operator%=(T);
-  ShColor& operator+=(T);
-  ShColor& operator-=(T);
+  ShColor& operator*=(H);
+  ShColor& operator/=(H);
+  ShColor& operator%=(H);
+  ShColor& operator+=(H);
+  ShColor& operator-=(H);
   
   template<typename T2>
   ShColor& operator+=(const ShGeneric<1, T2>&);
@@ -275,23 +294,26 @@ public:
   ShColor<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShColor operator-() const;
-  typedef T ValueType;
-  static const int typesize = 2;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_COLOR;
-
-  typedef ShColor<2, SH_INPUT, T> InputType;
-  typedef ShColor<2, SH_OUTPUT, T> OutputType;
-  typedef ShColor<2, SH_INOUT, T> InOutType;
-  typedef ShColor<2, SH_TEMP, T> TempType;
-  typedef ShColor<2, SH_CONST, T> ConstType;
-private:
-  typedef ShAttrib<2, Binding, T, Swizzled> ParentType;
+  private:
+    typedef ShAttrib<2, Binding, T, Swizzled> ParentType;
 };
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShColor<3, Binding, T, Swizzled> : public ShAttrib<3, Binding, T, Swizzled> {
 public:
+  typedef T ValueType;
+  typedef typename ShHostType<T>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemoryType<T>::type MemoryType; 
+  static const int typesize = 3;
+  static const ShBindingType binding_type = Binding;
+  static const ShSemanticType semantic_type = SH_COLOR;
+
+  typedef ShColor<3, SH_INPUT, T> InputType;
+  typedef ShColor<3, SH_OUTPUT, T> OutputType;
+  typedef ShColor<3, SH_INOUT, T> InOutType;
+  typedef ShColor<3, SH_TEMP, T> TempType;
+  typedef ShColor<3, SH_CONST, T> ConstType;
   ShColor();
   
   template<typename T2>
@@ -301,9 +323,9 @@ public:
   template<typename T2>
   ShColor(const ShColor<3, Binding, T2, Swizzled>& other);
   ShColor(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShColor(T data[3]);
+  explicit ShColor(H data[3]);
   
-  ShColor(T, T, T);
+  ShColor(H, H, H);
   template<typename T2, typename T3, typename T4>
   ShColor(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&);
   
@@ -334,11 +356,11 @@ public:
   
   template<typename T2>
   ShColor& operator%=(const ShGeneric<3, T2>& right);
-  ShColor& operator*=(T);
-  ShColor& operator/=(T);
-  ShColor& operator%=(T);
-  ShColor& operator+=(T);
-  ShColor& operator-=(T);
+  ShColor& operator*=(H);
+  ShColor& operator/=(H);
+  ShColor& operator%=(H);
+  ShColor& operator+=(H);
+  ShColor& operator-=(H);
   
   template<typename T2>
   ShColor& operator+=(const ShGeneric<1, T2>&);
@@ -364,23 +386,26 @@ public:
   ShColor<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShColor operator-() const;
-  typedef T ValueType;
-  static const int typesize = 3;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_COLOR;
-
-  typedef ShColor<3, SH_INPUT, T> InputType;
-  typedef ShColor<3, SH_OUTPUT, T> OutputType;
-  typedef ShColor<3, SH_INOUT, T> InOutType;
-  typedef ShColor<3, SH_TEMP, T> TempType;
-  typedef ShColor<3, SH_CONST, T> ConstType;
-private:
-  typedef ShAttrib<3, Binding, T, Swizzled> ParentType;
+  private:
+    typedef ShAttrib<3, Binding, T, Swizzled> ParentType;
 };
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShColor<4, Binding, T, Swizzled> : public ShAttrib<4, Binding, T, Swizzled> {
 public:
+  typedef T ValueType;
+  typedef typename ShHostType<T>::type H; 
+  typedef H HostType; 
+  typedef typename ShMemoryType<T>::type MemoryType; 
+  static const int typesize = 4;
+  static const ShBindingType binding_type = Binding;
+  static const ShSemanticType semantic_type = SH_COLOR;
+
+  typedef ShColor<4, SH_INPUT, T> InputType;
+  typedef ShColor<4, SH_OUTPUT, T> OutputType;
+  typedef ShColor<4, SH_INOUT, T> InOutType;
+  typedef ShColor<4, SH_TEMP, T> TempType;
+  typedef ShColor<4, SH_CONST, T> ConstType;
   ShColor();
   
   template<typename T2>
@@ -390,9 +415,9 @@ public:
   template<typename T2>
   ShColor(const ShColor<4, Binding, T2, Swizzled>& other);
   ShColor(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShColor(T data[4]);
+  explicit ShColor(H data[4]);
   
-  ShColor(T, T, T, T);
+  ShColor(H, H, H, H);
   template<typename T2, typename T3, typename T4, typename T5>
   ShColor(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&, const ShGeneric<1, T5>&);
   
@@ -423,11 +448,11 @@ public:
   
   template<typename T2>
   ShColor& operator%=(const ShGeneric<4, T2>& right);
-  ShColor& operator*=(T);
-  ShColor& operator/=(T);
-  ShColor& operator%=(T);
-  ShColor& operator+=(T);
-  ShColor& operator-=(T);
+  ShColor& operator*=(H);
+  ShColor& operator/=(H);
+  ShColor& operator%=(H);
+  ShColor& operator+=(H);
+  ShColor& operator-=(H);
   
   template<typename T2>
   ShColor& operator+=(const ShGeneric<1, T2>&);
@@ -453,18 +478,8 @@ public:
   ShColor<N2, Binding, T, true> swiz(int indices[]) const;
   
   ShColor operator-() const;
-  typedef T ValueType;
-  static const int typesize = 4;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_COLOR;
-
-  typedef ShColor<4, SH_INPUT, T> InputType;
-  typedef ShColor<4, SH_OUTPUT, T> OutputType;
-  typedef ShColor<4, SH_INOUT, T> InOutType;
-  typedef ShColor<4, SH_TEMP, T> TempType;
-  typedef ShColor<4, SH_CONST, T> ConstType;
-private:
-  typedef ShAttrib<4, Binding, T, Swizzled> ParentType;
+  private:
+    typedef ShAttrib<4, Binding, T, Swizzled> ParentType;
 };
 
 typedef ShColor<1, SH_INPUT, ShInterval<double> > ShInputColor1i_d;

@@ -36,7 +36,7 @@ class Impl(semantic.Impl):
 #         common.inprint("if (Binding == SH_CONST || uniform()) {")
 #         common.indent()
 #         common.inprint("SH_DEBUG_ASSERT(" + other + ".hasValues());")
-#         common.inprint("T data[" + self.sizevar(size) + "];")
+#         common.inprint("H data[" + self.sizevar(size) + "];")
 #         common.inprint(other + ".getValues(data);")
 #         common.inprint("setValues(data);")
 #         common.deindent()
@@ -61,7 +61,7 @@ class Impl(semantic.Impl):
         common.inprint("if (Binding == SH_CONST) {")
         common.indent()
         for i in range(0, size):
-            if args[0][0] == "T":
+            if args[0][0] == "H":
                 common.inprint("setValue(" + str(i) + ", s" + str(i) + ");")
             else:
                 common.inprint("SH_DEBUG_ASSERT(s" + str(i) + ".hasValues());")
@@ -116,7 +116,7 @@ class Impl(semantic.Impl):
 
         common.inprint(self.tpl(size))
         common.inprint("inline")
-        common.inprint(self.tplcls(size) + "::" + self.name + "(T data[" + self.sizevar(size) + "])")
+        common.inprint(self.tplcls(size) + "::" + self.name + "(H data[" + self.sizevar(size) + "])")
         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
                        "(new ShVariableNode(Binding, " + self.sizevar(size) + ",shTypeIndex<T>()))")
         common.inprint("{")
@@ -135,7 +135,7 @@ class Impl(semantic.Impl):
         common.inprint("")
 
         if size > 0:
-            self.scalarcons([["T", "s" + str(x)] for x in range(0, size)], size)
+            self.scalarcons([["H", "s" + str(x)] for x in range(0, size)], size)
         if size > 1:
             self.scalarcons([["const ShGeneric<1, T" + str(x + 2) + ">&", "s" + str(x)] for x in range(0, size)], size, ["T" + str(x + 2) for x in range(0, size)])
 
@@ -154,7 +154,7 @@ class Impl(semantic.Impl):
 #             common.indent()
 #             common.inprint("SH_DEBUG_ASSERT(!ShEnvironment::insideShader);")
 #             common.inprint("SH_DEBUG_ASSERT(" + other + ".hasValues());")
-#             common.inprint("T data[" + self.sizevar(size) + "];")
+#             common.inprint("H data[" + self.sizevar(size) + "];")
 #             common.inprint(other + ".getValues(data);")
 #             common.inprint("setValues(data);")
 #             common.deindent()
