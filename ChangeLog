@@ -1,5 +1,9 @@
 2004-07-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShLibMatrix.hpp: Added operator* for existing matrix
+	multiplication functions. Resolves issue92.
+	Added row vector / matrix multiplication. Resolves issue93.
+
 	* src/ShProgram.hpp: Added introspection iterators. Resolves issue37.
 
 	* src/ShProgramNode.hpp: Added introspection iterators.

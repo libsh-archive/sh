@@ -36,6 +36,15 @@ operator|(const ShMatrix<M, N, Binding, T>& a,
   return result;
 }
 
+template<int M, int N, int P, ShBindingType Binding, ShBindingType Binding2, typename T>
+inline
+ShMatrix<M, P, SH_TEMP, T>
+operator*(const ShMatrix<M, N, Binding, T>& a,
+          const ShMatrix<N, P, Binding2, T>& b)
+{
+  return a | b;
+}
+
 template<int M, int N, ShBindingType Binding, typename T>
 inline
 ShGeneric<M, T> operator|(const ShMatrix<M, N, Binding, T>& a, const ShGeneric<N, T>& b)
@@ -45,6 +54,31 @@ ShGeneric<M, T> operator|(const ShMatrix<M, N, Binding, T>& a, const ShGeneric<N
     ret[i] = dot(a[i], b);
   }
   return ret;
+}
+
+template<int M, int N, ShBindingType Binding, typename T>
+inline
+ShGeneric<N, T> operator|(const ShGeneric<M, T>& a, const ShMatrix<M, N, Binding, T>& b)
+{
+  ShAttrib<N, SH_TEMP, T> ret;
+  for (int i = 0; i < N; i++) {
+    ret[i] = dot(a, b()(i));
+  }
+  return ret;
+}
+
+template<int M, int N, ShBindingType Binding, typename T>
+inline
+ShGeneric<N, T> operator*(const ShGeneric<M, T>& a, const ShMatrix<M, N, Binding, T>& b)
+{
+  return a | b;
+}
+
+template<int M, int N, ShBindingType Binding, typename T>
+inline
+ShGeneric<M, T> operator*(const ShMatrix<M, N, Binding, T>& a, const ShGeneric<N, T>& b)
+{
+  return a | b;
 }
 
 }

@@ -118,16 +118,6 @@ ShMatrix<Rows, Cols, Binding, T>::operator-=(const ShMatrix<Rows, Cols, Binding2
 template<int Rows, int Cols, ShBindingType Binding, typename T>
 template<ShBindingType Binding2>
 ShMatrix<Rows, Cols, Binding, T>&
-ShMatrix<Rows, Cols, Binding, T>::operator*=(const ShMatrix<Rows, Cols, Binding2, T>& other)
-{
-  for (int i = 0; i < Rows; i++)
-    m_data[i] *= other[i];
-  return *this;
-}
-
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-template<ShBindingType Binding2>
-ShMatrix<Rows, Cols, Binding, T>&
 ShMatrix<Rows, Cols, Binding, T>::operator/=(const ShMatrix<Rows, Cols, Binding2, T>& other)
 {
   for (int i = 0; i < Rows; i++)

@@ -123,13 +123,6 @@ public:
   template<ShBindingType Binding2>
   ShMatrix& operator-=(const ShMatrix<Rows, Cols, Binding2, T>& other);
 
-  /** \brief Definition of the *= operation
-   *
-   * Returns the address of a matrix where the result is the current matrix += (for each element) with the matrix in the parameters
-   * \param other The other matrix that is used in the *=operation
-   */
-  template<ShBindingType Binding2>
-  ShMatrix& operator*=(const ShMatrix<Rows, Cols, Binding2, T>& other);
 
   /** \brief Definition of the /= operation
    *

@@ -26,19 +26,31 @@ transpose(const ShMatrix<Rows, Cols, Binding, T>& m);
 
 /** Matrix multiplication.
  * Only works on matrices of compatible sizes.
- * @todo should also define * and mmult to mean the same thing.
  */
 template<int M, int N, int P, ShBindingType Binding, ShBindingType Binding2, typename T>
 ShMatrix<M, P, SH_TEMP, T>
 operator|(const ShMatrix<M, N, Binding, T>& a,
           const ShMatrix<N, P, Binding2, T>& b);
+template<int M, int N, int P, ShBindingType Binding, ShBindingType Binding2, typename T>
+ShMatrix<M, P, SH_TEMP, T>
+operator*(const ShMatrix<M, N, Binding, T>& a,
+          const ShMatrix<N, P, Binding2, T>& b);
 
 /** Matrix-tuple multiplication.
  * Treats the tuple as a column vector.
- * @todo should also define * and mmult to mean the same thing.
  */
 template<int M, int N, ShBindingType Binding, typename T>
 ShGeneric<M, T> operator|(const ShMatrix<M, N, Binding, T>& a, const ShGeneric<N, T>& b);
+template<int M, int N, ShBindingType Binding, typename T>
+ShGeneric<M, T> operator*(const ShMatrix<M, N, Binding, T>& a, const ShGeneric<N, T>& b);
+
+/** Tuple-matrix multiplication.
+ * Treats the tuple as a row vector.
+ */
+template<int M, int N, ShBindingType Binding, typename T>
+ShGeneric<N, T> operator|(const ShGeneric<M, T>& a, const ShMatrix<M, N, Binding, T>& b);
+template<int M, int N, ShBindingType Binding, typename T>
+ShGeneric<N, T> operator*(const ShGeneric<M, T>& a, const ShMatrix<M, N, Binding, T>& b);
 
 /*@}*/
 
