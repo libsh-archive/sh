@@ -61,6 +61,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="../src;../../include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="4"
 				UsePrecompiledHeader="0"
@@ -106,6 +107,9 @@
 					RelativePath="..\src\ShAlgebra.cpp">
 				</File>
 				<File
+					RelativePath="..\src\ShArrayData.cpp">
+				</File>
+				<File
 					RelativePath="..\src\ShBackend.cpp">
 				</File>
 				<File
@@ -133,6 +137,9 @@
 					RelativePath="..\src\ShException.cpp">
 				</File>
 				<File
+					RelativePath="..\src\ShFramebuffer.cpp">
+				</File>
+				<File
 					RelativePath="..\src\ShImage.cpp">
 				</File>
 				<File
@@ -140,6 +147,9 @@
 				</File>
 				<File
 					RelativePath="..\src\ShLinearAllocator.cpp">
+				</File>
+				<File
+					RelativePath="..\src\ShMemoryObject.cpp">
 				</File>
 				<File
 					RelativePath="..\src\ShOptimizer.cpp">
@@ -169,6 +179,9 @@
 					RelativePath="..\src\ShTokenizer.cpp">
 				</File>
 				<File
+					RelativePath="..\src\ShUberbuffer.cpp">
+				</File>
+				<File
 					RelativePath="..\src\ShUtility.cpp">
 				</File>
 				<File
@@ -188,6 +201,30 @@
 						RelativePath="..\backends\arb\ShArb.cpp">
 					</File>
 				</Filter>
+				<Filter
+					Name="ati"
+					Filter="">
+					<File
+						RelativePath="..\backends\ati\extensions.c">
+					</File>
+					<File
+						RelativePath="..\backends\ati\ShAti.cpp">
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="shla"
+				Filter="">
+			</Filter>
+			<Filter
+				Name="util"
+				Filter="">
+				<File
+					RelativePath="..\util\ShPerlin.cpp">
+				</File>
+				<File
+					RelativePath="..\util\ShWorley.cpp">
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -202,6 +239,9 @@
 				</File>
 				<File
 					RelativePath="..\src\ShAlgebra.hpp">
+				</File>
+				<File
+					RelativePath="..\src\ShArrayData.hpp">
 				</File>
 				<File
 					RelativePath="..\src\ShAttrib.hpp">
@@ -249,6 +289,9 @@
 					RelativePath="..\src\ShException.hpp">
 				</File>
 				<File
+					RelativePath="..\src\ShFramebuffer.hpp">
+				</File>
+				<File
 					RelativePath="..\src\ShImage.hpp">
 				</File>
 				<File
@@ -283,6 +326,9 @@
 				</File>
 				<File
 					RelativePath="..\src\ShMatrixImpl.hpp">
+				</File>
+				<File
+					RelativePath="..\src\ShMemoryObject.hpp">
 				</File>
 				<File
 					RelativePath="..\src\ShNormal.hpp">
@@ -336,6 +382,9 @@
 					RelativePath="..\src\ShTokenizer.hpp">
 				</File>
 				<File
+					RelativePath="..\src\ShUberbuffer.hpp">
+				</File>
+				<File
 					RelativePath="..\src\ShUtility.hpp">
 				</File>
 				<File
@@ -358,6 +407,66 @@
 						RelativePath="..\backends\arb\ShArb.hpp">
 					</File>
 				</Filter>
+				<Filter
+					Name="ati"
+					Filter="">
+					<File
+						RelativePath="..\backends\ati\extensions.h">
+					</File>
+					<File
+						RelativePath="..\backends\ati\glati.h">
+					</File>
+					<File
+						RelativePath="..\backends\ati\ShAti.hpp">
+					</File>
+					<File
+						RelativePath="..\backends\ati\wglati.h">
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="shla"
+				Filter="">
+				<File
+					RelativePath="..\shla\shla.hpp">
+				</File>
+				<File
+					RelativePath="..\shla\ShlaLib.hpp">
+				</File>
+				<File
+					RelativePath="..\shla\ShlaMatrix.hpp">
+				</File>
+				<File
+					RelativePath="..\shla\ShlaMatrixImpl.hpp">
+				</File>
+				<File
+					RelativePath="..\shla\ShlaRenderGlobal.hpp">
+				</File>
+				<File
+					RelativePath="..\shla\ShlaRenderGlobalImpl.hpp">
+				</File>
+				<File
+					RelativePath="..\shla\ShlaVector.hpp">
+				</File>
+				<File
+					RelativePath="..\shla\ShlaVectorImpl.hpp">
+				</File>
+			</Filter>
+			<Filter
+				Name="util"
+				Filter="">
+				<File
+					RelativePath="..\util\ShPerlin.hpp">
+				</File>
+				<File
+					RelativePath="..\util\shutil.hpp">
+				</File>
+				<File
+					RelativePath="..\util\ShUtilLib.hpp">
+				</File>
+				<File
+					RelativePath="..\util\ShWorley.hpp">
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
