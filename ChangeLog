@@ -1,3 +1,15 @@
+2005-01-21  Francois Marier  <francois@serioushack.com>
+
+	* src/ShSyntax.hpp, src/ShSyntax.cpp: Added a new function,
+	shUpdate(), which uploads any textures and uniform parameters
+	which are out-of-date but required on all compilation targets that
+	have any programs bound.
+
+	* src/ShBackend.hpp, backends/gl/ArbCode.cpp,
+	backends/gl/ArbCode.hpp, backends/cc/Cc.cpp, backends/cc/Cc.hpp:
+	The backend code now has an update() method which is called by
+	shUpdate().
+
 2005-01-19  Francois Marier  <francois@serioushack.com>
 
 	* src/ShTextureNode.cpp, src/ShTextureNode.hpp,
@@ -8,7 +20,6 @@
 	* backends/gl/GlTextureStorage.hpp, GlTextureStorage.cpp: Changed
 	the glTexImage calls to only allocate the necessary space and
 	added glTexSubImage calls to do the actual copying.  Fixes issue151.
-	
 
 2005-01-17  Francois Marier  <francois@serioushack.com>
 

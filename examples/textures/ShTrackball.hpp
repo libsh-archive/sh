@@ -24,22 +24,26 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#include "UberTextures.hpp"
-#include "Arb.hpp"
+#ifndef SHTRACKBALL_HPP
+#define SHTRACKBALL_HPP
 
-namespace shgl {
+#include <sh/sh.hpp>
 
-using namespace SH;
+namespace SH {
 
-struct AtiBackend : public GlBackend {
-  AtiBackend()
-    : GlBackend(new ArbCodeStrategy(), new UberTextures(), 0) // new PBufferStreams())
-  {
-  }
+class ShTrackball {
+public:
+  ShTrackball() : m_width(0.0), m_height(0.0) {}
+  
+  ~ShTrackball() {}
 
-  std::string name() const { return "ati"; }
+  void resize(float width, float height);
+  ShMatrix4x4f rotate(float sx, float sy, float ex, float ey) const;
+
+private:
+  float m_width, m_height;
 };
 
-static AtiBackend* backend = new AtiBackend();
-
 }
+
+#endif

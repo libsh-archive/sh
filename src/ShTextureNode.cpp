@@ -37,11 +37,11 @@ ShTextureNode::ShTextureNode(ShTextureDims dims, int size,
                              ShValueType valueType,
                              const ShTextureTraits& traits,
                              int width, int height, int depth, int max_nb_elements)
-  : ShVariableNode(SH_TEXTURE, size, valueType),
+  : ShVariableNode(SH_TEXTURE, size, valueType), m_count(max_nb_elements),
     m_dims(dims),
     m_memory(new ShMemoryPtr[dims == SH_TEXTURE_CUBE ? 6 : 1]),
     m_traits(traits),
-    m_width(width), m_height(height), m_depth(depth), m_count(max_nb_elements)
+    m_width(width), m_height(height), m_depth(depth)
 {
   if (m_dims == SH_TEXTURE_1D) {
     ShAttrib1f v = ShAttrib1f(width);

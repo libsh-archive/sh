@@ -10,13 +10,7 @@ else
 ARB_LIBS =
 endif
 
-if ENABLE_ATI_BACKEND
-ATI_LIBS = libshati.la
-else
-ATI_LIBS =
-endif
-
-shbackend_LTLIBRARIES = $(ARB_LIBS) $(ATI_LIBS)
+shbackend_LTLIBRARIES = $(ARB_LIBS)
 
 GLBACKEND_SOURCES = GlBackend.cpp GlBackend.hpp \
 		  GlTextureName.hpp GlTextureName.cpp \
@@ -38,18 +32,4 @@ libsharb_la_SOURCES = Arb.cpp ArbCode.cpp ArbEmit.cpp ArbInst.cpp ArbLimits.cpp 
 		      Arb.hpp ArbCode.hpp ArbInst.hpp ArbLimits.hpp \
 		      ArbReg.hpp ArbBackend.cpp \
                        $(GLBACKEND_SOURCES) $(GLTEXTURE_SOURCES) $(PBUFFERSTREAM_SOURCES)
-endif
-
-if ENABLE_ATI_BACKEND
-libshati_la_LDFLAGS = -L$(prefix)/lib -module
-libshati_la_LIBADD = $(top_srcdir)/src/libsh.la
-nodist_libshati_la_SOURCES = uberbuffers/UberTextures.hpp uberbuffers/UberTextures.cpp \
-			     uberbuffers/UberStorage.hpp uberbuffers/UberStorage.cpp \
-		             uberbuffers/AtiBackend.cpp uberbuffers/uberbuffers.hpp
-
-dist_libshati_la_SOURCES = Arb.cpp ArbCode.cpp ArbEmit.cpp ArbInst.cpp ArbLimits.cpp \
-			   ArbReg.cpp \
-			   Arb.hpp ArbCode.hpp ArbInst.hpp ArbLimits.hpp \
-		      	   ArbReg.hpp \
-			   $(GLBACKEND_SOURCES)
 endif
