@@ -52,6 +52,7 @@ OVERALL LARGE TASKS:
  X begin the optimizer
  / matrices
  / textures
+    - just mipmapping missing, pretty much
  - directx backend
  - Cg backend
  - integrate Kevin's shgl stuff
@@ -119,16 +120,15 @@ TEXTURES:
  - turn 3-textures into 4-textures automatically... in sm backend!
  X update notification
  - mip mapping
- - other lookup mechanisms (bilinear etc.)
- - generic traits mechanism
+ X other lookup mechanisms (bilinear etc.)
+ X generic traits mechanism
  X 1D
- - 3D
+ X 3D
  / cube maps
     X high-level
     X ARB
     - SM
- - in ARB backend, share textures between multiple shaders
-    - maybe a generic bookkeeping mechanism for this
+ X share textures between multiple shaders
 
 ARB BACKEND:
  X split into multiple files
