@@ -88,9 +88,26 @@ void shBindShader(int kind, ShProgram& shader)
 }
 
 void shDrawBuffer(ShFramebufferPtr fb ) {
-  if (!ShEnvironment::backend || ShEnvironment::framebuffer == fb) return;
-  ShEnvironment::framebuffer = fb;
-  ShEnvironment::backend->bindFramebuffer();
+  shDrawBuffers(fb, 0, 0, 0);
+}
+
+void shDrawBuffers(ShFramebufferPtr fb1,ShFramebufferPtr fb2,ShFramebufferPtr fb3, ShFramebufferPtr fb4 ) {
+  
+  ShEnvironment::backend->unbindFramebuffers();
+
+  ShEnvironment::framebuffer[0] = fb1;
+  ShEnvironment::framebuffer[1] = fb2;
+  ShEnvironment::framebuffer[2] = fb3;
+  ShEnvironment::framebuffer[3] = fb4;
+ 
+  ShEnvironment::backend->bindFramebuffers();
+
+  ShEnvironment::backend->drawFramebuffers();
+}
+
+
+void shDrawBuffers(int N, ShFramebufferPtr* fb ) {
+
 }
 
 void shClearBuffer(){

@@ -351,6 +351,7 @@ enum ShAtiRegBinding {
   SH_ATI_REG_FRAGMENTPOS,
   // Output
   SH_ATI_REG_RESULTDPT,
+  SH_ATI_REG_RESULTCOLI,
 
   SH_ATI_REG_NONE
 };
@@ -383,7 +384,9 @@ struct {
   {SH_ATI_REG_ATTRIB, "fragment.texcoord", true},
   {SH_ATI_REG_ATTRIB, "fragment.fogcoord", false},
   {SH_ATI_REG_ATTRIB, "fragment.position", false},
+
   {SH_ATI_REG_OUTPUT, "result.depth", false},
+  {SH_ATI_REG_OUTPUT, "result.color", true},
 
   {SH_ATI_REG_ATTRIB, "<nil>", false},
 };
@@ -427,7 +430,7 @@ AtiBindingSpecs shAtiVertexOutputBindingSpecs[] = {
 };
 
 AtiBindingSpecs shAtiFragmentOutputBindingSpecs[] = {
-  {SH_ATI_REG_RESULTCOL, 1, SH_VAR_COLOR, false},
+  {SH_ATI_REG_RESULTCOLI, 4, SH_VAR_COLOR, false},
   {SH_ATI_REG_RESULTDPT, 1, SH_VAR_ATTRIB, false},
   {SH_ATI_REG_NONE, 0, SH_VAR_ATTRIB}
 };
@@ -931,6 +934,8 @@ std::ostream& AtiCode::print(std::ostream& out)
     out << "!!ARBfp1.0" << endl;
     break;
   }
+
+   out << "OPTION ATI_draw_buffers;" << endl;
 
   // Print register declarations
   
@@ -1441,8 +1446,13 @@ void AtiCode::allocTemps()
 
 AtiBackend::AtiBackend()
 {
-  m_framebufBinding = 0;
-  tempfb = 0;
+  for(int i=0;i<4;i+=1)
+    free_buffers[i] = 0;
+
+  tempfb = -1;
+
+  ATIfb = -1;
+
 #ifdef WIN32
 	DWORD err;
 	if ((glProgramStringARB = (PFNGLPROGRAMSTRINGARBPROC)wglGetProcAddress("glProgramStringARB")) == NULL)
@@ -1493,6 +1503,12 @@ void AtiBackend::init2(void)
 
 AtiBackend::~AtiBackend()
 {
+  if(ATIfb>=0)
+    glDeleteFramebufferATI(ATIfb);
+
+  if(tempfb>=0)
+    glDeleteFramebufferATI(tempfb);
+  
 }
 
 std::string AtiBackend::name() const
@@ -1515,9 +1531,10 @@ void AtiBackend::allocFramebuffer(ShFramebufferPtr fb)
     SH_DEBUG_WARN("No framebuffer object (This is probably okay)");
     return;
   }
-  if( !fb->fb() ) {
-    fb->setFb( glCreateFramebufferATI() );
+  if( ATIfb<0 ) {
+    ATIfb =  glCreateFramebufferATI();
   }
+
   ShUberbufferPtr ub = fb->getUberbuffer();
 
   allocUberbuffer(ub);
@@ -1575,51 +1592,140 @@ void AtiBackend::allocUberbuffer(ShUberbufferPtr ub) {
   PRINT_GL_ERROR("Allocating mem");
 }
 
-void AtiBackend::bindFramebuffer() {
-  ShFramebufferPtr fb = ShEnvironment::framebuffer;
-  allocFramebuffer(fb);
+
+ int AtiBackend::getAuxBuffer(ShFramebufferPtr fb, int ctrl){
+
+   if(!fb)
+     return -2;
+
+   int ret = -1;
+   std::map<ShFramebufferPtr, int>::iterator I =  uber_map.find(fb);
+   std::cout<<"Find: "<<I->first.object()<<std::endl;
+
+   /// if not found
+   if (I == uber_map.end()){
+
+     if(ctrl==1){
+       int i=0;
+       for(i=0;i<4;i+=1)
+	 if(free_buffers[i]==0){
+	   uber_map[fb] = i;
+	   free_buffers[i] = 1;
+	   ret = i;
+	   std::cout<<"Aux buffer loop: "<<i<<std::endl;
+	   break;
+	 } else {
+	   std::cout<<"Buffer skipped "<<i<<std::endl;
+	 }
+     }
+   } else {	
+     std::cout<<"Aux is Already allocated"<<std::endl;
+     ret = I->second;
+     
+     // delete if required
+     if(ctrl==3){
+       // remove from the map
+       uber_map.erase(I);
+       // also free the bitset
+       if(ret>=0 && ret<4)
+	 free_buffers[ret]=0;
+       else 
+	  std::cout<<"Error in Aux 2"<<std::endl;
+     }
+   }// else
+    
+  return ret;
+}
+
+// this call occur after bindFramebuffer on all buffers
+void AtiBackend::drawFramebuffers(){
+  
+  CHECK_GL_ERROR();
+
+  GLenum draw_buffers[] = {GL_NONE, GL_NONE, GL_NONE, GL_NONE};
+  
+  
+  int bScreen = 1;// 0 - if we render to some arbitrary memory, 1 - if we want to render to GL_BACK
+
+  for(int i=0;i<4;i+=1)
+    if(ShEnvironment::framebuffer[i]){
+      draw_buffers[i] = GL_AUX0 + getAuxBuffer(ShEnvironment::framebuffer[i]);
+      bScreen = 0;
+    }
+
+  if(bScreen){
+    glBindFramebufferATI(GL_DRAW_FRAMEBUFFER_ATI, 0);
+    draw_buffers[0]= GL_BACK_LEFT;// should be changed
+  } else {
+    glBindFramebufferATI(GL_DRAW_FRAMEBUFFER_ATI, ATIfb);
+  }
+
+  glDrawBuffersATI(4, draw_buffers);
+
+  SH_DEBUG_PRINT(GL_BACK_LEFT<<":"<<GL_AUX0<<"Draw into buffers: "<<draw_buffers[0]<<" "<<draw_buffers[1]<<" "<<draw_buffers[2]<<" "<<draw_buffers[3]);
+
+   PRINT_GL_ERROR( "Binding Framebuffer" );
+}
+
+void AtiBackend::unbindFramebuffers(){
+  
+  glBindFramebufferATI(GL_DRAW_FRAMEBUFFER_ATI, ATIfb);
+
+  for(int i=0;i<4;i+=1)
+    unbindFramebuffer(i);
+}
+
+
+void AtiBackend::unbindFramebuffer(int k){
+    ShFramebufferPtr fb = ShEnvironment::framebuffer[k];
+    CHECK_GL_ERROR();
+    
+    if(fb){
+      int nBuf = getAuxBuffer(fb, 3);
+      if(nBuf>=0)
+	glAttachMemATI( GL_DRAW_FRAMEBUFFER_ATI, nBuf + GL_AUX0, 0 );
+    }
+
+   PRINT_GL_ERROR( "unbinding Framebuffers" );
+}
+
+void AtiBackend::bindFramebuffers(){
+
+  glBindFramebufferATI(GL_DRAW_FRAMEBUFFER_ATI, ATIfb);
+
+  for(int i=0;i<4;i+=1)
+    bindFramebuffer(i);
+}
+
+void AtiBackend::bindFramebuffer(int k) {
+  ShFramebufferPtr fb = ShEnvironment::framebuffer[k];
+  allocFramebuffer( fb );
 
   CHECK_GL_ERROR();
 
-  if(fb) {
+  
+  if( fb ) {
+
+    int nBuf = getAuxBuffer(fb);
+      
+    if(nBuf<0)
+      SH_DEBUG_PRINT(" Error in bindFramebuffers!!!");
+      
+
+    nBuf+= GL_AUX0;
+
+
+    SH_DEBUG_PRINT( "Using buffer: "<<nBuf - GL_AUX0);
+
     ShUberbufferPtr ub = fb->getUberbuffer();
-    if(ub) {
-      allocUberbuffer(ub);
-      glBindFramebufferATI(GL_DRAW_FRAMEBUFFER_ATI, fb->fb());
-      SH_DEBUG_PRINT("Bind GL_DRAW_FRAMEBUFFER_ATI to fb " << fb->fb()); 
+    if( ub ) {
+      allocUberbuffer( ub );
+      glAttachMemATI( GL_DRAW_FRAMEBUFFER_ATI,nBuf, ub->mem() );
+        
+      SH_DEBUG_PRINT( "Attach GL_AUX"<<nBuf-GL_AUX0<<" to mem " << ub->mem() ); 
 
-      glAttachMemATI(GL_DRAW_FRAMEBUFFER_ATI, GL_AUX0, ub->mem());
-      SH_DEBUG_PRINT("Attach GL_AUX0 to mem " << ub->mem()); 
-
-      m_framebufBinding = fb->fb(); 
-
-      //TODO other buffers 
-      glDrawBuffer(GL_AUX0); 
-      SH_DEBUG_PRINT("Set DrawBuffer to GL_AUX0");
-    } else {
-      glAttachMemATI(GL_DRAW_FRAMEBUFFER_ATI, GL_AUX0, 0);
-      SH_DEBUG_PRINT("Detach mem from GL_AUX0 for fb " << m_framebufBinding ); 
-
-      glDrawBuffer(GL_AUX0);
-      SH_DEBUG_PRINT("Set DrawBuffer to GL_AUX0"); 
-    }
-  } else {
-      /* if(m_framebufBinding != 0) {
-        glAttachMemATI(GL_DRAW_FRAMEBUFFER_ATI, GL_AUX0, 0);
-        SH_DEBUG_PRINT("Detach GL_AUX0 from mem " << m_framebufBinding);
-        m_framebufBinding = 0;
-      } */
-      if( m_framebufBinding != 0 ) {
-        glAttachMemATI(GL_DRAW_FRAMEBUFFER_ATI, GL_AUX0, 0);
-        SH_DEBUG_PRINT("Detach mem from GL_AUX0 for fb " << m_framebufBinding ); 
-
-        glBindFramebufferATI(GL_DRAW_FRAMEBUFFER_ATI, 0);
-        SH_DEBUG_PRINT( "Unbind GL_DRAW_FRAMEBUFFER_ATI" );
-        m_framebufBinding = 0;
-      }
-      glDrawBuffer(GL_BACK);
-      SH_DEBUG_PRINT("Set DrawBuffer to GL_BACK"); 
-  }
+    }// if 
+  }// if
 
   PRINT_GL_ERROR("Binding Framebuffer");
 }
@@ -1717,11 +1823,9 @@ void AtiBackend::getUberbufferData(const ShUberbuffer *ub, int xoffset, int yoff
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
 
-  if( m_framebufBinding ) {
-    glBindFramebufferATI( GL_DRAW_FRAMEBUFFER_ATI, 0 );
-    SH_DEBUG_PRINT("Temporarily unbind framebuffer fb " << m_framebufBinding );
-  }
-
+  glBindFramebufferATI( GL_DRAW_FRAMEBUFFER_ATI, 0 );
+  SH_DEBUG_PRINT("Temporarily unbind framebuffer fb " << ATIfb );
+  
   // use this dummy memory object to force GL_AUXn to be
   // a float framebuffer, so ReadPixels can return unclamped values with full precision
   GLint propsArray[] = { GL_TEXTURE_2D, GL_TRUE, GL_COLOR_BUFFER_ATI, GL_TRUE };
@@ -1827,10 +1931,14 @@ void AtiBackend::getUberbufferData(const ShUberbuffer *ub, int xoffset, int yoff
   glReadBuffer(oldReadBuf);
   glDrawBuffer(GL_BACK); // TODO temp fix? maybe?
   glDrawBuffer(oldDrawBuf);
-  if( m_framebufBinding ) {
+
+  /// does not always work: we need to find what was previously bound ...
+/*
+  if( ATIfb ) {
     glBindFramebufferATI( GL_DRAW_FRAMEBUFFER_ATI, m_framebufBinding );
     SH_DEBUG_PRINT("Restore original binding GL_READ_FRAMEBUFFER_ATI to fb " << m_framebufBinding);
   }
+*/
 
   glDeleteTextures(1, &texBinding);
 
@@ -1896,11 +2004,9 @@ void AtiBackend::copyUberbufferData(SH::ShUberbufferPtr dest, SH::ShUberbufferPt
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
 
-  if( m_framebufBinding ) {
-    glBindFramebufferATI( GL_DRAW_FRAMEBUFFER_ATI, 0 );
-    SH_DEBUG_PRINT("Temporarily unbind framebuffer fb " << m_framebufBinding );
-  }
-
+  glBindFramebufferATI( GL_DRAW_FRAMEBUFFER_ATI, 0 );
+  SH_DEBUG_PRINT("Temporarily unbind framebuffer fb " << ATIfb );
+  
   // use this dummy memory object to force GL_AUXn to be
   // a float framebuffer, so ReadPixels can return unclamped values with full precision
   if( !tempfb ) {
@@ -1979,10 +2085,14 @@ void AtiBackend::copyUberbufferData(SH::ShUberbufferPtr dest, SH::ShUberbufferPt
   }
   glDrawBuffer(GL_BACK); // TODO temp fix? maybe?
   glDrawBuffer(oldDrawBuf);
+
+/// same as for getUberbufferData
+/*
   if( m_framebufBinding ) {
     glBindFramebufferATI( GL_DRAW_FRAMEBUFFER_ATI, m_framebufBinding );
     SH_DEBUG_PRINT("Restore original binding GL_READ_FRAMEBUFFER_ATI to fb " << m_framebufBinding);
   }
+*/
 
   glDeleteTextures(1, &texBinding);
 
@@ -2008,6 +2118,7 @@ void AtiBackend::render(SH::ShVertexArray& data){
 
   glVertexPointer(3, GL_DOUBLE, 0, data.getData(0));
   glNormalPointer(GL_DOUBLE, 0, data.getData(1));
+  //add texture coords pointer here....
 
   glDrawElements(GL_TRIANGLES, data.getIndexSize(0), GL_UNSIGNED_SHORT, data.getIndex(0));
 
@@ -2045,10 +2156,6 @@ void AtiBackend::render_planar(SH::ShVertexArray& data){
 void AtiBackend::deleteFramebuffer(const ShFramebuffer* fb) {
   CHECK_GL_ERROR();
 
-  if( !fb->fb() ) return;
-  glDeleteFramebufferATI( fb->fb() );
-  SH_DEBUG_PRINT("Deleting fb " << fb->fb() ); 
-
   PRINT_GL_ERROR("Deleting framebuffer"); 
 }
 
@@ -2062,4 +2169,4 @@ void AtiBackend::deleteUberbuffer(const ShUberbuffer* ub) {
   PRINT_GL_ERROR("Deleting uber buffer "); 
 }
 
-}
+}// ShAti namespace

@@ -59,7 +59,10 @@ struct ShEnvironment
   static ShBackendPtr backend;
 
   /// The currently active framebuffer
-  static ShFramebufferPtr framebuffer;
+  static ShFramebufferPtr framebuffer[4];
+
+  /// fb  is currently active
+  static int isSelected(ShFramebufferPtr fb);
 
   /// 0 means no optimizations. The default level is 1.
   static int optimizationLevel;

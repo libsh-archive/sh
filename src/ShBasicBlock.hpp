@@ -35,6 +35,8 @@ namespace SH {
 /** A basic block.
  * A basic block is a block composed of * simpler statements.
  */
+
+
 class ShBasicBlock : public ShBlock {
 public:
   ~ShBasicBlock();

@@ -31,6 +31,7 @@
 #include <vector>
 #include <list>
 #include <set>
+#include <map>
 #include "ShBackend.hpp"
 #include "ShRefCount.hpp"
 #include "ShCtrlGraph.hpp"
@@ -190,7 +191,14 @@ public:
   //TODO - implement more super/framebuffer methods.
   // It may be a good idea to split this off into a Buffer manager class
   // that works with the Backend.
-  virtual void bindFramebuffer();
+
+
+  // this function should be static; it is not because of linking problems
+  void bindFramebuffers();
+  void unbindFramebuffers();
+  void bindFramebuffer(int);
+  void unbindFramebuffer(int);
+  void drawFramebuffers();
 
   // set subregion of uberbuffer with given data
   // (works like glTexSubImage and should be implemented using glMemSubImage 
@@ -235,10 +243,22 @@ private:
   int m_params[2]; ///< Maximum number of parameters for each shader kind
   int m_texs[2]; ///< Maximum number of TEX instructions for each shader kind
 
-  int m_framebufBinding; ///< Uberbuffer that GL_AUX0 is bound to (TODO accomodate other aux buffres later)
+  /// the uber buffers maps
+  std::map<SH::ShFramebufferPtr, int> uber_map;
+  int free_buffers[4];
+  
+
+  /// API
+  /// ctrl == 1 means create one if one not found
+  /// ctrl == 2 means do not create one if one not found
+  /// ctrl == 3 means delete the one if found
+  int getAuxBuffer(SH::ShFramebufferPtr, int ctrl = 1);
 
   /// hack for now - glDeleteFramebuffer or glCreateFramebuffer 
-  unsigned int tempfb; 
+  int tempfb; 
+  
+  /// we are using ONE framebuffer for all our purposes until the API is straightened out
+  int ATIfb;
 
 };
 

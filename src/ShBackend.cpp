@@ -174,4 +174,22 @@ void ShBackend::init()
   m_doneInit = true;
 }
 
+void ShBackend::bindFramebuffers(){
+   printf("bindFramebuffers not supported for this backend...\n");
+ }
+
+void ShBackend::bindFramebuffer(int i){
+   printf("bindFramebuffers not supported for this backend...\n");
+ }
+
+void ShBackend::unbindFramebuffers(){
+   printf("bindFramebuffers not supported for this backend...\n");
+ }
+void ShBackend::unbindFramebuffer(int){
+   printf("bindFramebuffers not supported for this backend...\n");
+ }
+void ShBackend::drawFramebuffers(){
+   printf("bindFramebuffers not supported for this backend...\n");
+ }
+
 }

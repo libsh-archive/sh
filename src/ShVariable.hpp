@@ -91,13 +91,13 @@ public:
   
   ShVariable operator-() const;
   
-
-protected:
   ShVariable(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg)
     : m_node(node), m_swizzle(swizzle), m_neg(neg)
   {
   }
-  
+
+protected:  
+
   ShVariableNodePtr m_node; ///< The actual variable node we refer to.
   ShSwizzle m_swizzle; ///< Swizzling applied to this variable.
   bool m_neg; ///< True iff this variable is negated

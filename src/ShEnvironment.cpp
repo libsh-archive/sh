@@ -35,10 +35,20 @@ ShProgram ShEnvironment::shader = 0;
 bool ShEnvironment::insideShader = false;
 ShProgram ShEnvironment::boundShader[shShaderKinds] = {0, 0};
 ShBackendPtr ShEnvironment::backend = 0;
-ShFramebufferPtr ShEnvironment::framebuffer = 0;
+ShFramebufferPtr ShEnvironment::framebuffer[4]  = {0, 0, 0, 0};
 int ShEnvironment::optimizationLevel = 1;
 bool ShEnvironment::useExceptions = false;
 
   ShScheduler ShEnvironment::scheduler;
 
+  int ShEnvironment::isSelected(ShFramebufferPtr fb){
+    int ret = 0;
+    for(int i=0;i<4;i+=1)
+      if(fb==framebuffer[i]){
+	ret = 1;
+	break;
+      }
+	
+    return ret;
+  }
 }

@@ -175,6 +175,9 @@ void shBindShader(int target, ShProgram& shader);
 /// Change the render target
 void shDrawBuffer(ShFramebufferPtr fb);
 
+/// Change the render target
+void shDrawBuffers(ShFramebufferPtr fb1,ShFramebufferPtr fb2,ShFramebufferPtr fb3,ShFramebufferPtr fb4);
+
 /// clears the render target (including the depth bit)
 void shClearBuffer();
 

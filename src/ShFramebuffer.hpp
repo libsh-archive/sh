@@ -55,8 +55,6 @@ class ShFramebuffer: public ShRefCountable {
     int height() const; ///< Determine the height of the framebuffer 
     int depth() const; ///< Determine the depth of the framebuffer 
     int elements() const; ///< Determine the elements (floats per element) of the framebuffer
-    unsigned int fb() const; ///< Determine framebuffer id of the framebuffer
-    void setFb( unsigned int fb );
 
     /** \brief 
      */
@@ -70,7 +68,6 @@ class ShFramebuffer: public ShRefCountable {
 
   protected:
     int m_width, m_height, m_depth, m_elements;
-    unsigned int m_fb;
 
     ShUberbufferPtr m_ub;
 };

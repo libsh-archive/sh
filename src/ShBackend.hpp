@@ -35,6 +35,7 @@
 #include "ShVariableNode.hpp"
 #include "ShFramebuffer.hpp"
 #include "ShUberbuffer.hpp"
+#include "ShFramebuffer.hpp"
 
 #include "ShArrayData.hpp"
 
@@ -76,7 +77,13 @@ public:
   /// ShEnvironment::shader is the same as shader before calling this,
   /// since extra variables may be declared inside this function!
   virtual ShBackendCodePtr generateCode(int kind, const ShProgram& shader) = 0;
-  virtual void bindFramebuffer() = 0;
+  
+  virtual void bindFramebuffers();
+  virtual void bindFramebuffer(int);
+  virtual void unbindFramebuffers();
+  virtual void unbindFramebuffer(int);
+  virtual void drawFramebuffers();
+
   virtual void clearFrameBuffer();
   virtual void setUberbufferData(SH::ShUberbufferPtr ub, int xoffset, int yoffset,
          int width, int height, const float *data );

@@ -61,6 +61,26 @@ public:
   void loadPng(const std::string& filename); ///< Load a PNG file into
                                              ///this image.
 
+   void savePng(const std::string& filename, int inverse_alpha = 0); ///< Load a PNG file into
+                                             ///this image.
+
+
+  void loadRawData(float* data);/// load raw data froma buffer. it assumes that 
+                                   /// all parameters (m_width, m_height, m_depth are already set and data 
+                                   /// is allocated. Call next funxtion if you do not know
+
+  void loadRawData(int width, int height, int depth, float* data);
+
+  /// streamify the image 
+  void streamify(const ShImage& other,  ShImage* reverse = 0, float* clear_col = 0);
+
+  /// merge this image with another image
+  void merge(const ShImage& other, float* clear_col = 0);
+
+
+  /// compose inverses: 
+  void compose(const ShImage& other);
+
   const float* data() const; ///< Access the raw pixel data.
   
 private:

@@ -415,19 +415,13 @@ struct UdDuBuilder {
   void operator()(ShCtrlGraphNodePtr node) {
     typedef std::set<ShStatement*> StmtSet;
     typedef std::map<ShVariableNodePtr, StmtSet> DefMap;
-    // defs contains all of the possible contributor's to the key's
+    // defs contains all of the possible contributors to the key's
     // definition at the current point.
     DefMap defs;
     
     if (!node) return;
     ShBasicBlockPtr block = node->block;
     if (!block) return;
-
-    // TODO: Handle "non assigning" statements like KIL
-    // TODO: What about branch conditions. They need to have ud/du
-    // links too. Perhaps we should insert bogus branch instructions
-    // at the end of each block while we're doing the optimizations,
-    // and remove them later. I think this is the cleanest approach.
     
     // initialize defs at the start of the block, using the reaching
     // definitions solution.

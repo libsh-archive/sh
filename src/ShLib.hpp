@@ -388,7 +388,7 @@ SH_SHLIB_CONST_SCALAR_OP(operator!=);
 template<int M, int N, typename T>
 ShVariableN<N, T> cond(const ShVariableN<M, T>& condition, const ShVariableN<N, T>& left, const ShVariableN<N, T>& right)
 {
-  ShCheckDims<N, true, M, true>();
+  //ShCheckDims<N, true, M, true>();
   if (!ShEnvironment::insideShader) {
     assert(condition.hasValues());
     assert(left.hasValues());
