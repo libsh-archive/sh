@@ -30,11 +30,6 @@ namespace shgl {
 using namespace SH;
 using namespace std;
 
-struct GlslMapping {
-  ShOperation op;
-  const char* code;
-};
-
 static GlslMapping opCodeTable[] = {
   {SH_OP_ABS,   "abs($0)"},
   {SH_OP_ACOS,  "acos($0)"},
@@ -68,33 +63,13 @@ static GlslMapping opCodeTable[] = {
   {SH_OP_RCP,   "1.0f / $0"},
   {SH_OP_RND,   "floor($0 + 0.5)"},
   {SH_OP_RSQ,   "inversesqrt($0)"},
-  {SH_OP_SEQ,   "equal($0, $1)"},
-  {SH_OP_SGE,   "greaterThanEqual($0, $1)"},
   {SH_OP_SGN,   "sign($0)"},
-  {SH_OP_SGT,   "greaterThan($0, $1)"},
   {SH_OP_SIN,   "sin($0)"},
-  {SH_OP_SLE,   "lessThanEqual($0, $1)"},
-  {SH_OP_SLT,   "lessThan($0, $1)"},
-  {SH_OP_SNE,   "not(equal($0, $1))"}, // notEqual() doesn't work on NVIDIA
   {SH_OP_SQRT,  "sqrt($0)"},
   {SH_OP_TAN,   "tan($0)"},
   {SH_OP_XPD,   "cross($0, $1)"},
 
   {SH_OPERATION_END,  0} 
-};
-
-struct GlslOpCodeVecs
-{
-  GlslOpCodeVecs(const GlslMapping& mapping);
-
-  GlslOpCodeVecs() {}
-  bool operator<(const GlslOpCodeVecs &other) {
-    return op < other.op;
-  }
-
-  ShOperation op;
-  vector<int> index;
-  vector<string> frag;
 };
 
 typedef map<SH::ShOperation, GlslOpCodeVecs> GlslOpCodeMap;
@@ -121,6 +96,22 @@ GlslOpCodeVecs::GlslOpCodeVecs(const GlslMapping& mapping)
   }
 }
 
+void GlslCode::table_substitution(const ShStatement& stmt, GlslOpCodeVecs codeVecs)
+{
+  stringstream line;
+  line << resolve(stmt.dest) << " = ";
+  
+  unsigned i;
+  for (i=0; i < codeVecs.index.size(); i++) { 
+    const ShVariable& src = stmt.src[codeVecs.index[i]];
+    line << codeVecs.frag[i] << resolve(src);
+  }
+
+  line << codeVecs.frag[i]; // code fragment after the last variable
+    
+  m_lines.push_back(line.str());
+}
+
 void GlslCode::emit(const ShStatement &stmt)
 {
   static GlslOpCodeMap opCodeMap;
@@ -132,26 +123,21 @@ void GlslCode::emit(const ShStatement &stmt)
     }
   }
 
-  stringstream line;
-  line << resolve(stmt.dest) << " = ";
-  
   if(opCodeMap.find(stmt.op) != opCodeMap.end()) {
     // Handle ops in the table first  
-    GlslOpCodeVecs codeVecs = opCodeMap[stmt.op];
-
-    unsigned i;
-    for (i=0; i < codeVecs.index.size(); i++) { 
-      const ShVariable& src = stmt.src[codeVecs.index[i]];
-      line << codeVecs.frag[i] << resolve(src);
-    }
-
-    line << codeVecs.frag[i]; // code fragment after the last variable
-    
-    m_lines.push_back(line.str());
+    table_substitution(stmt, opCodeMap[stmt.op]);
   } 
   else {
     // Handle the rest of the operations
     switch(stmt.op) {
+    case SH_OP_SEQ:
+    case SH_OP_SGT:
+    case SH_OP_SGE:
+    case SH_OP_SNE:
+    case SH_OP_SLT:
+    case SH_OP_SLE:
+      emit_logic(stmt);
+      break;
     case SH_OP_CMUL:
       emit_prod(stmt);
       break;
@@ -235,6 +221,64 @@ void GlslCode::emit_log(const ShStatement& stmt, double base)
 
   m_lines.push_back(resolve(temp) + " = " + s.str());
   m_lines.push_back(resolve(stmt.dest) + " = log2(" + resolve(stmt.src[0]) + ") / " + resolve(temp) + "");
+}
+
+void GlslCode::emit_logic(const ShStatement& stmt)
+{
+  GlslMapping mapping;
+  mapping.op = stmt.op;
+
+  if ((stmt.src[0].size() > 1) || (stmt.src[1].size() > 1) ) {
+    switch (stmt.op) {
+    case SH_OP_SEQ:
+      mapping.code = "equal($0, $1)";
+      break;
+    case SH_OP_SGT:
+      mapping.code = "greaterThan($0, $1)";
+      break;
+    case SH_OP_SGE:
+      mapping.code = "greaterThanEqual($0, $1)";
+      break;
+    case SH_OP_SNE:
+      mapping.code = "not(equal($0, $1))"; // notEqual() doesn't work on NVIDIA
+      break;
+    case SH_OP_SLT:
+      mapping.code = "lessThan($0, $1)";
+      break;
+    case SH_OP_SLE:
+      mapping.code = "lessThanEqual($0, $1)";
+      break;
+    default:
+      SH_DEBUG_ASSERT(0);
+    }
+  } else {
+    switch (stmt.op) {
+    case SH_OP_SEQ:
+      mapping.code = "($0 == $1)";
+      break;
+    case SH_OP_SGT:
+      mapping.code = "($0 > $1)";
+      break;
+    case SH_OP_SGE:
+      mapping.code = "($0 >= $1)";
+      break;
+    case SH_OP_SNE:
+      mapping.code = "($0 != $1)";
+      break;
+    case SH_OP_SLT:
+      mapping.code = "($0 < $1)";
+      break;
+    case SH_OP_SLE:
+      mapping.code = "($0 <= $1)";
+      break;
+    default:
+      SH_DEBUG_ASSERT(0);
+    }
+  }
+
+  // TODO: cache these mappings
+
+  table_substitution(stmt, mapping);
 }
 
 void GlslCode::emit_prod(const ShStatement& stmt)

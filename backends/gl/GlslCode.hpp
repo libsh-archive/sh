@@ -44,6 +44,25 @@ struct TextureInfo {
   bool preset;
 };
 
+struct GlslMapping {
+  SH::ShOperation op;
+  const char* code;
+};
+
+struct GlslOpCodeVecs
+{
+  GlslOpCodeVecs(const GlslMapping& mapping);
+
+  GlslOpCodeVecs() {}
+  bool operator<(const GlslOpCodeVecs &other) {
+    return op < other.op;
+  }
+
+  SH::ShOperation op;
+  std::vector<int> index;
+  std::vector<std::string> frag;
+};
+
 class GlslCode : public SH::ShBackendCode {
 public:
   GlslCode(const SH::ShProgramNodeCPtr& program, const std::string& target,
@@ -111,9 +130,12 @@ private:
   void emit_exp(const SH::ShStatement& stmt, double power);
   void emit_lit(const SH::ShStatement& stmt);
   void emit_log(const SH::ShStatement& stmt, double base);
+  void emit_logic(const SH::ShStatement& stmt);
   void emit_prod(const SH::ShStatement& stmt);
   void emit_sum(const SH::ShStatement& stmt);
   void emit_texture(const SH::ShStatement& stmt);
+
+  void table_substitution(const SH::ShStatement& stmt, GlslOpCodeVecs codeVecs);
   
   std::string resolve(const SH::ShVariable& v, int index = -1) const;
 
