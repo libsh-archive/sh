@@ -85,6 +85,9 @@ public:
   /// Two references are equal if they point to the same object.
   bool operator==(const ShRefCount<T>& other) const;
 
+  /// Two references are equal if they point to the same object.
+  bool operator!=(const ShRefCount<T>& other) const;
+
   /// Actually compares the pointers.
   bool operator<(const ShRefCount<T>& other) const;
 
@@ -192,6 +195,12 @@ template<typename T>
 bool ShRefCount<T>::operator==(const ShRefCount<T>& other) const
 {
   return m_object == other.m_object;
+}
+
+template<typename T>
+bool ShRefCount<T>::operator!=(const ShRefCount<T>& other) const
+{
+  return m_object != other.m_object;
 }
 
 template<typename T>

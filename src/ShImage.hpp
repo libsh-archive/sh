@@ -32,26 +32,36 @@
 
 namespace SH {
 
+/** An image, consisting of a rectangle of floating-point elements.
+ */
 class ShImage : public ShRefCountable {
 public:
-  ShImage();
-  ShImage(int width, int height, int depth);
-  ShImage(const ShImage& other);
+  ShImage(); ///< Construct an empty image
+  ShImage(int width, int height, int depth); ///< Construct a black
+                                             ///image at the given width/height/depth
+  ShImage(const ShImage& other); ///< Copy an image
 
   ~ShImage();
 
-  ShImage& operator=(const ShImage& other);
+  ShImage& operator=(const ShImage& other); ///< Copy the data from
+                                            ///one image to another
 
-  int width() const;
-  int height() const;
-  int depth() const;
+  int width() const; ///< Determine the width of the image
+  int height() const; ///< Determine the height of the image
+  int depth() const; ///< Determine the depth (floats per pixel) of
+                     ///the image
 
-  float operator()(int x, int y, int i) const;
-  float& operator()(int x, int y, int i);
+  float operator()(int x, int y, int i) const; ///< Retrieve a
+                                               ///particular component
+                                               ///from the image.
+  float& operator()(int x, int y, int i);  ///< Retrieve a
+                                               ///particular component
+                                               ///from the image.
 
-  void loadPng(const std::string& filename);
+  void loadPng(const std::string& filename); ///< Load a PNG file into
+                                             ///this image.
 
-  const float* data() const;
+  const float* data() const; ///< Access the raw pixel data.
   
 private:
   int m_width, m_height;

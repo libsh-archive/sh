@@ -19,3 +19,4 @@ point
 *.dot
 julia
 constants
+copy

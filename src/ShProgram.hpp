@@ -31,8 +31,8 @@
 #include <map>
 #include "ShRefCount.hpp"
 #include "ShTokenizer.hpp"
-#include "ShCtrlGraph.hpp"
 #include "ShVariableNode.hpp"
+#include "ShCtrlGraph.hpp"
 
 namespace SH {
 
@@ -58,11 +58,14 @@ public:
   /// Notify this shader that a uniform variable has changed.
   void updateUniform(const ShVariableNodePtr& uniform);
 
-  /// The tokenizer for this shader's body
+  /// The tokenizer for this shader's body. Used only during
+  /// construction of the program (before parsing)
   ShTokenizer tokenizer;
 
-  /// The control graph (the parsed form of the token list)
-  ShCtrlGraphPtr ctrlGraph;
+  /// The control graph (the parsed form of the token
+  /// list). Constructed during the parsing step, when shEndShader()
+  /// is called.
+  ShRefCount<ShCtrlGraph> ctrlGraph;
 
   /// Call after contructing the control graph [after optimization!]
   /// to make lists of all the variables used in the shader.
@@ -81,12 +84,12 @@ public:
   
 private:
 
-  void collectNodeVars(const ShCtrlGraphNodePtr& node);
+  void collectNodeVars(const ShRefCount<ShCtrlGraphNode>& node);
   void collectVar(const ShVariableNodePtr& node);
 
-  int m_kind;
+  int m_kind; ///< Whether this is a vertex/fragment shader, etc.
 
-  std::map< ShRefCount<ShBackend>, ShRefCount<ShBackendCode> > m_code;
+  std::map< ShRefCount<ShBackend>, ShRefCount<ShBackendCode> > m_code; ///< Compiled code is cached here.
 };
 
 typedef ShRefCount<ShProgramNode> ShProgram;

@@ -31,6 +31,7 @@
 #include "ShEnvironment.hpp"
 #include "ShDebug.hpp"
 #include "ShTextureNode.hpp"
+#include "ShCtrlGraph.hpp"
 
 namespace SH {
 

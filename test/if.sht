@@ -21,7 +21,7 @@ ShProgram shader = SH_BEGIN_SHADER(0) {
   ShOutputAttrib1f out; NAME(out);
   
   temp = in * in;
-  SH_IF(F::f()) {
+  SH_IF(temp) {
     out = temp + temp;
     SH_IF(in + in) {
       out = temp + in;

@@ -64,7 +64,13 @@ public:
 };
   
 /** A tokenizer.
- * Mostly a stack of ShBlockLists, with some argument separation facilities.
+ * This is used during construction of the program, i.e. within a
+ * BeginShader/EndShader block, to process control statements in a
+ * tokenized fashion.
+ *
+ * Once the shader has been parsed there is no more need for the
+ * tokenizer.
+ *
  */
 class ShTokenizer {
 public:

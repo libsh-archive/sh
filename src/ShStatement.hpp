@@ -80,7 +80,7 @@ enum ShOperation {
 /** Information related to a specific operation */
 struct ShOperationInfo {
   const char* name; ///< The operation's name, e.g. "ASN"
-  int arity; ///< The arity of the operation. Either 1 or 2.
+  int arity; ///< The arity of the operation. 1, 2 or 3.
 };
 
 extern const ShOperationInfo opInfo[];

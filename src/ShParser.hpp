@@ -31,8 +31,14 @@
 
 namespace SH {
 
+/** Recursive-descent parser for control structures.
+ * This parser takes a list of blocks containing tokens and basic
+ * blocks and parses it into a control graph.
+ */
 class ShParser {
 public:
+  /** Parse blocks into the control graph between head and tail.
+   */
   static void parse(ShCtrlGraphNodePtr& head,
                     ShCtrlGraphNodePtr& tail,
                     ShBlockListPtr blocks);

@@ -64,6 +64,9 @@ public:
   /// Obtain the actual node this variable refers to.
   const ShVariableNodePtr& node() const;
 
+  /// Obtain the actual node this variable refers to.
+  ShVariableNodePtr& node();
+  
   /// Return true if this variable is negated
   bool neg() const;
 

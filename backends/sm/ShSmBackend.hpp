@@ -37,6 +37,7 @@
 #include "ShBasicBlock.hpp"
 #include "ShRefCount.hpp"
 #include "ShTextureNode.hpp"
+#include "ShCtrlGraph.hpp"
 
 namespace ShSm {
 

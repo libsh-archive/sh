@@ -51,6 +51,9 @@ struct ShEnvironment
 
   /// The currently active backend
   static ShBackendPtr backend;
+
+  /// 0 means no optimizations (default)
+  static int optimizationLevel;
 };
 
 }

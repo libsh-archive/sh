@@ -27,7 +27,11 @@
 #ifndef SHOPTIMIZER_HPP
 #define SHOPTIMIZER_HPP
 
+#include <list>
+#include <utility>
+#include <set>
 #include "ShCtrlGraph.hpp"
+#include "ShBasicBlock.hpp"
 
 namespace SH {
 
@@ -40,6 +44,28 @@ public:
 
 private:
   ShCtrlGraphPtr m_graph;
+
+  friend class CopyPropagator;
+  typedef std::list< std::pair<ShVariableNodePtr, ShVariableNodePtr> > ACP;
+  ACP m_acp;
+  void copyPropagation();
+  void localCopyProp(ShBasicBlockPtr block);
+  void copyValue(ShVariable& var);
+  void removeACP(const ShVariable& var);
+
+  friend class MoveEliminator;
+  typedef std::list<ShStatement> AME;
+  AME m_ame;
+  void moveElimination();
+  void localMoveElim(ShBasicBlockPtr block);
+  void eliminateMove(ShStatement& stmt);
+  void removeAME(ShVariableNodePtr node);
+
+  friend class TempFinder;
+  friend class TempRemover;
+  typedef std::set<ShVariableNodePtr> TempUsageMap;
+  TempUsageMap m_tum;
+  void unusedTempsRemoval();
   
   /// NOT IMPLEMENTED
   ShOptimizer(const ShOptimizer& other);

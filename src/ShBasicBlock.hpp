@@ -48,6 +48,12 @@ public:
 
   ShStmtList::const_iterator begin() const;
   ShStmtList::const_iterator end() const;
+  ShStmtList::iterator begin();
+  ShStmtList::iterator end();
+
+  void erase(ShStmtList::iterator I) {
+    m_statements.erase(I);
+  }
   
 private:
   ShStmtList m_statements;

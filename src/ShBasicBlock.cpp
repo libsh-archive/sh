@@ -72,5 +72,15 @@ ShBasicBlock::ShStmtList::const_iterator ShBasicBlock::end() const
   return m_statements.end();
 }
 
+ShBasicBlock::ShStmtList::iterator ShBasicBlock::begin()
+{
+  return m_statements.begin();
+}
+
+ShBasicBlock::ShStmtList::iterator ShBasicBlock::end()
+{
+  return m_statements.end();
+}
+
 
 }

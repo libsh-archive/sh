@@ -33,7 +33,7 @@
 #include "ShToken.hpp"
 #include "ShProgram.hpp"
 #include "ShBackend.hpp"
-#include "ShDomTree.hpp"
+#include "ShOptimizer.hpp"
 
 namespace SH {
 
@@ -55,6 +55,9 @@ void shEndShader()
   
   ShEnvironment::shader->ctrlGraph = new ShCtrlGraph(ShEnvironment::shader->tokenizer.blockList());
 
+  ShOptimizer optimizer(ShEnvironment::shader->ctrlGraph);
+  optimizer.optimize(ShEnvironment::optimizationLevel);
+  
   //ShDomTree domTree(ShEnvironment::shader->ctrlGraph);
   //domTree.debugDump();
 

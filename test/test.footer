@@ -12,8 +12,9 @@
     ShBackendCodePtr code = backend->generateCode(shader);
     std::cerr << "Printing code:" << std::endl;
     code->print(std::cout);
+
     std::string dumpfilename = argv[0];
-    dumpfilename += "-control.dot";
+    dumpfilename += "-control-0.dot";
 
     std::ofstream dumpfile(dumpfilename.c_str());
     ShEnvironment::shader->ctrlGraph->graphvizDump(dumpfile);

@@ -43,17 +43,26 @@ struct ShCtrlGraphBranch {
                     ShVariable cond);
   
   ShRefCount<ShCtrlGraphNode> node; ///< The successor node
-  ShVariable cond; ///< For conditional branches. Can be null.
+  ShVariable cond; ///< If this is 1, take this branch.
 };
 
+/** A node in the control graph.
+ * This contains of (optionally) some code, in the form of a basic
+ * block, 0 or more conditional successors (nodes which will be
+ * branched to if a particular variable is greater than 0) and one
+ * unconditional successor, which is another node that will be
+ * branched to if none of the conditional successors' conditions are true.
+ *
+ * Only the exit node of a control graph will have an unconditional
+ * successor of 0.
+ */
 class ShCtrlGraphNode : public ShRefCountable {
 public:
   ShCtrlGraphNode();
 
   ShBasicBlockPtr block;
   std::vector<ShCtrlGraphBranch> successors; ///< Conditional successors
-  ShRefCount<ShCtrlGraphNode> follower; ///< Unconditional successor,
-                                        ///  if any
+  ShRefCount<ShCtrlGraphNode> follower; ///< Unconditional successor
 
   /// Output a graph node _and its successors_ at the given
   /// indentation level.
@@ -79,8 +88,11 @@ public:
   // mutable.
   void mark() const; ///< Set the marked flag
   void clearMarked() const; ///< Clears the marked flag of this and
-                            ///  all successors' flags
-  
+                            ///  all successors'/followers flags
+
+  template<typename F>
+  void dfs(F& functor);
+
 private:
   mutable bool m_marked;
 };
@@ -101,6 +113,9 @@ public:
 
   ShCtrlGraphNodePtr entry() const;
 
+  template<typename F>
+  void dfs(F& functor);
+  
 private:
   ShCtrlGraphNodePtr m_entry;
   ShCtrlGraphNodePtr m_exit;
@@ -109,6 +124,27 @@ private:
 };
 
 typedef ShRefCount<ShCtrlGraph> ShCtrlGraphPtr;
+
+template<typename F>
+void ShCtrlGraphNode::dfs(F& functor)
+{
+  if (this == 0) return;
+  if (m_marked) return;
+  mark();
+  functor(this);
+  for (std::vector<ShCtrlGraphBranch>::iterator I = successors.begin(); I != successors.end(); ++I) {
+    I->node->dfs(functor);
+  }
+  follower->dfs(functor);
+}
+
+template<typename F>
+void ShCtrlGraph::dfs(F& functor)
+{
+  m_entry->clearMarked();
+  m_entry->dfs(functor);
+  m_entry->clearMarked();
+}
 
 }
 

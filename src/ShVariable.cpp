@@ -78,6 +78,11 @@ const ShVariableNodePtr& ShVariable::node() const
   return m_node;
 }
 
+ShVariableNodePtr& ShVariable::node() 
+{
+  return m_node;
+}
+
 bool ShVariable::neg() const
 {
   return m_neg;

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include "sh.hpp"
+#include "ShCtrlGraph.hpp"
 
 using namespace SH;
 
@@ -13,5 +14,6 @@ int main(int argc, char** argv)
   if (argc > 1) {
     backendName = argv[1];
   }
-  
+
+  ShEnvironment::optimizationLevel = 1;
   try {
