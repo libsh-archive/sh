@@ -26,21 +26,33 @@
 //////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
-// Simple sheduler implementation. 
+// Simple scheduler implementation. 
 //-----------------------------------------------------------------------------
 
-#ifndef _SHSCHEDULER_HPP_
-#define _SHSCHEDULER_HPP_
+#ifndef SHSCHEDULER_HPP
+#define SHSCHEDULER_HPP
 
-#include "ShCtrlGraph.hpp"
+#include "ShProgram.hpp"
+#include "ShSchedule.hpp"
+#include "ShStream.hpp"
 
-class ShScheduler
-{
+namespace SH {
+
+class ShScheduler{
 public:
-	ShScheduler();
+	ShScheduler();      // need to create an empty schedule here
+                      // leave all memory management to the schedule
 	~ShScheduler();
+	void addProgram(const ShProgramNodeCPtr& program); 
+                                      // add a program to the schedule
+	void execute(ShStream& dest);      // execute programs in the schedule
+private:
+	
 };
 
-#endif // _SHSCHEDULER_HPP_
+} // end namespace SH
+
+#endif // SHSCHEDULER_HPP
 
 
+d

@@ -30,13 +30,24 @@
 // intermediate values.
 //-----------------------------------------------------------------------------
 
-#ifndef _SHSCHEDULE_HPP_
-#define _SHSCHEDULE_HPP_
+#ifndef SHSCHEDULE_HPP
+#define SHSCHEDULE_HPP
 
-class ShSchedule
-{
+#include "ShProgram.hpp"
+#include "ShMemory.hpp"
+
+namespace SH {
+
+class ShSchedule{
 public:
-	ShSchedule();
-	~ShShedule();
+  ShSchedule();
+  ~ShSchedule();
+private:
+  // will need storage for the programs
+  // and buffers for intermediate results  
 };
-#endif //_SHSCHEDULE_HPP_
+
+} // end SH
+
+#endif //SHSCHEDULE_HPP
+

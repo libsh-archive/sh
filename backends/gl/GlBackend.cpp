@@ -127,6 +127,10 @@ GlBackend::execute(const SH::ShProgramNodeCPtr& program,
   }
 }
 
+//-----------------------------------------------------------------------------
+// TODO: Overload GlBackend:execute for a schedule
+//-----------------------------------------------------------------------------
+
 int GlBackend::newContext()
 {
   int context_num = m_contexts.size();

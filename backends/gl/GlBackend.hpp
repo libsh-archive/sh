@@ -29,6 +29,7 @@
 
 #include "ShProgram.hpp"
 #include "ShStream.hpp"
+#include "ShSchedule.hpp"	// TODO: Create a header file
 #include "ShTextureNode.hpp"
 
 #ifdef WIN32
@@ -93,6 +94,7 @@ public:
 
   // execute a stream program, if supported
   virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
+  // TODO: Add execute for a schedule
 
   virtual int newContext();
   virtual int context() const;
