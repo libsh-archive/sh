@@ -3,6 +3,8 @@ REQUIREMENTS
  - g++ > 3.0.0, 3.2 is recommended.
  - libpng
  - for the ARB backend, a recent glext.h as well as GL drivers and headers
+   You can obtain the latest glext.h from the SGI OpenGL Registry at
+   http://oss.sgi.com/projects/ogl-sample/registry/
  - for the SM backend, an installed version of SM (use configure --with-sm=DIR
    to specify the installation directory of SM)
 

@@ -7,6 +7,8 @@ BACKENDS = arb cpu
 
 all: $(TESTS)
 
+install:
+
 clean:
 	rm -f testlist
 	rm -f $(TESTS)

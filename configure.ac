@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT(sh, 0.0.20040322, libsh-devel@lists.sourceforge.net, libsh)
+AC_INIT(sh, 0.7.1, libsh-devel@lists.sourceforge.net, libsh)
 AC_CONFIG_SRCDIR([src/ShAttrib.hpp])
 AM_INIT_AUTOMAKE
 
@@ -49,42 +49,43 @@ GL_WITH_GL_DIR
 
 
 # SH_CHECK_BACKEND([sm], [SM])
-# if test "x$ac_backend_sm" = xtrue ; then
+# if test "x$sh_backend_sm" = xtrue ; then
 #   SM_CHECK_SM_HEADERS([],
 #     [AC_MSG_WARN([sm.hpp not found. Disabling SM backend.])
-#      ac_backend_sm=false ])
+#      sh_backend_sm=false ])
 # fi
-ac_backend_sm=false
-AC_MSG_WARN([The SM backend is disabled for the moment.])
+sh_backend_sm=false
+SH_DECLARE_BACKEND([sm], [SM])
+SH_BACKEND_MESSAGE([sm], [The SM backend is disabled for the moment.])
 
-AM_CONDITIONAL(ENABLE_SM_BACKEND, test x$ac_backend_sm = xtrue)
+AM_CONDITIONAL(ENABLE_SM_BACKEND, test x$sh_backend_sm = xtrue)
 
 SH_CHECK_BACKEND([arb], [OpenGL ARB])
-if test "x$ac_backend_arb" = xtrue ; then
+if test "x$sh_backend_arb" = xtrue ; then
   GL_CHECK_GL_HEADERS([],
-    [AC_MSG_WARN([OpenGL headers (GL/gl.h and GL/glext.h) not found. Disabling ARB backend.])
-     ac_backend_arb=false])
+    [SH_BACKEND_MESSAGE([arb], [OpenGL headers (GL/gl.h and GL/glext.h) not found. Disabling ARB backend.])
+     sh_backend_arb=false])
   GL_CHECK_GLEXT_VERSION([18], [], [
-    AC_MSG_WARN([glext.h version 18 or greater (available at http://oss.sgi.com/projects/ogl-sample/registry/) not found. Disabling ARB backend.])
-    ac_backend_arb=false
+    SH_BACKEND_MESSAGE([arb], [glext.h version 18 or greater (available at http://oss.sgi.com/projects/ogl-sample/registry/) not found. Disabling ARB backend.])
+    sh_backend_arb=false
   ])
 fi
-AM_CONDITIONAL(ENABLE_ARB_BACKEND, test x$ac_backend_arb = xtrue)
+AM_CONDITIONAL(ENABLE_ARB_BACKEND, test x$sh_backend_arb = xtrue)
 
 SH_CHECK_NONDEFAULT_BACKEND([ati], [ATI])
-if test "x$ac_backend_ati" = xtrue ; then
+if test "x$sh_backend_ati" = xtrue ; then
   GL_CHECK_GL_HEADERS([],
-    [AC_MSG_WARN([OpenGL headers (GL/gl.h and GL/glext.h) not found. Disabling ATI backend.])
-     ac_backend_ati=false])
+    [SH_BACKEND_MESSAGE([ati], [OpenGL headers (GL/gl.h and GL/glext.h) not found. Disabling ATI backend.])
+     sh_backend_ati=false])
   GL_CHECK_GLEXT_VERSION([18], [], [
-    AC_MSG_WARN([glext.h version 18 or greater (available at http://oss.sgi.com/projects/ogl-sample/regi\
+    SH_BACKEND_MESSAGE([ati], [glext.h version 18 or greater (available at http://oss.sgi.com/projects/ogl-sample/regi\
 stry/) not found. Disabling ATI backend.])
-    ac_backend_ati=false
+    sh_backend_ati=false
   ])
 fi
-AM_CONDITIONAL(ENABLE_ATI_BACKEND, test x$ac_backend_ati = xtrue)
+AM_CONDITIONAL(ENABLE_ATI_BACKEND, test x$sh_backend_ati = xtrue)
 
-AM_CONDITIONAL(ENABLE_GL_BACKENDS, test x$ac_backend_ati = xtrue -o x$ac_backend_arb = xtrue)
+AM_CONDITIONAL(ENABLE_GL_BACKENDS, test x$sh_backend_ati = xtrue -o x$sh_backend_arb = xtrue)
 
 AC_ARG_ENABLE([docs],
 	      AC_HELP_STRING([--enable-docs],
@@ -119,8 +120,4 @@ AC_CONFIG_FILES([Makefile
 		 doc/Makefile])
 AC_OUTPUT
 
-
-echo "Summary:"
-echo "SM Backend: $ac_backend_sm"
-echo "ARB Backend: $ac_backend_arb"
-echo "ATI Backend: $ac_backend_ati"
+SH_SUMMARISE_BACKENDS
