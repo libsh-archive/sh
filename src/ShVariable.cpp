@@ -24,7 +24,7 @@ bool ShVariable::hasValues() const
 
 int ShVariable::size() const
 {
-  return m_node->size();
+  return m_swizzle.size();
 }
 
 std::string ShVariable::name() const
@@ -56,6 +56,7 @@ void ShVariable::getValues(ShVariableNode::ValueType dest[]) const
 {
   for (int i = 0; i < size(); i++) {
     dest[i] = m_node->getValue(m_swizzle[i]);
+    if (m_neg) dest[i] = -dest[i];
   }
 }
 

@@ -11,44 +11,44 @@ ShSwizzle::ShSwizzle(int srcSize)
 
 ShSwizzle::ShSwizzle(int srcSize, int i0)
 {
-  if (i0 < 0 || i0 >= srcSize) throw ShSwizzleException(i0, srcSize);
+  if (i0 < 0 || i0 >= srcSize) throw ShSwizzleException(*this, i0, srcSize);
   m_indices.push_back(i0);
 }
 
 ShSwizzle::ShSwizzle(int srcSize, int i0, int i1)
 {
-  if (i0 < 0 || i0 >= srcSize) throw ShSwizzleException(i0, srcSize);
+  if (i0 < 0 || i0 >= srcSize) throw ShSwizzleException(*this, i0, srcSize);
   m_indices.push_back(i0);
-  if (i1 < 0 || i1 >= srcSize) throw ShSwizzleException(i1, srcSize);
+  if (i1 < 0 || i1 >= srcSize) throw ShSwizzleException(*this, i1, srcSize);
   m_indices.push_back(i1);
 }
 
 ShSwizzle::ShSwizzle(int srcSize, int i0, int i1, int i2)
 {
-  if (i0 < 0 || i0 >= srcSize) throw ShSwizzleException(i0, srcSize);
+  if (i0 < 0 || i0 >= srcSize) throw ShSwizzleException(*this, i0, srcSize);
   m_indices.push_back(i0);
-  if (i1 < 0 || i1 >= srcSize) throw ShSwizzleException(i1, srcSize);
+  if (i1 < 0 || i1 >= srcSize) throw ShSwizzleException(*this, i1, srcSize);
   m_indices.push_back(i1);
-  if (i2 < 0 || i2 >= srcSize) throw ShSwizzleException(i2, srcSize);
+  if (i2 < 0 || i2 >= srcSize) throw ShSwizzleException(*this, i2, srcSize);
   m_indices.push_back(i2);
 }
 
 ShSwizzle::ShSwizzle(int srcSize, int i0, int i1, int i2, int i3)
 {
-  if (i0 < 0 || i0 >= srcSize) throw ShSwizzleException(i0, srcSize);
+  if (i0 < 0 || i0 >= srcSize) throw ShSwizzleException(*this, i0, srcSize);
   m_indices.push_back(i0);
-  if (i1 < 0 || i1 >= srcSize) throw ShSwizzleException(i1, srcSize);
+  if (i1 < 0 || i1 >= srcSize) throw ShSwizzleException(*this, i1, srcSize);
   m_indices.push_back(i1);
-  if (i2 < 0 || i2 >= srcSize) throw ShSwizzleException(i2, srcSize);
+  if (i2 < 0 || i2 >= srcSize) throw ShSwizzleException(*this, i2, srcSize);
   m_indices.push_back(i2);
-  if (i3 < 0 || i3 >= srcSize) throw ShSwizzleException(i3, srcSize);
+  if (i3 < 0 || i3 >= srcSize) throw ShSwizzleException(*this, i3, srcSize);
   m_indices.push_back(i3);
 }
 
 ShSwizzle::ShSwizzle(int srcSize, int size, int* indices)
 {
   for (int i = 0; i < size; i++) {
-    if (indices[i] < 0 || indices[i] >= srcSize) throw ShSwizzleException(indices[i], srcSize);
+    if (indices[i] < 0 || indices[i] >= srcSize) throw ShSwizzleException(*this, indices[i], srcSize);
     m_indices.push_back(indices[i]);
   }
 }
@@ -64,10 +64,11 @@ ShSwizzle::~ShSwizzle()
 
 ShSwizzle& ShSwizzle::operator=(const ShSwizzle& other)
 {
-  m_indices.clear();
-  for (int i = 0; i < other.size(); i++) {
-    m_indices.push_back(other[i]);
-  }
+  m_indices = other.m_indices;
+  //  m_indices.clear();
+  //  for (int i = 0; i < other.size(); i++) {
+  //    m_indices.push_back(other[i]);
+  //  }
   return *this;
 }
 
@@ -77,7 +78,7 @@ ShSwizzle::ShSwizzle& ShSwizzle::operator*=(const ShSwizzle& other)
 
   for (int i = 0; i < other.size(); i++) {
     if (other[i] < 0 || other[i] >= size()) {
-      throw ShSwizzleException(other[i], size());
+      throw ShSwizzleException(*this, other[i], size());
     }
     indices.push_back(m_indices[other[i]]);
   }
@@ -99,15 +100,15 @@ int ShSwizzle::size() const
 
 int ShSwizzle::operator[](int index) const
 {
-  if (index >= size() || index < 0) throw ShSwizzleException(index, size());
+  if (index >= size() || index < 0) throw ShSwizzleException(*this, index, size());
   return m_indices[index];
 }
 
-ShSwizzleException::ShSwizzleException(int index, int size)
+ShSwizzleException::ShSwizzleException(const ShSwizzle& s, int index, int size)
   : ShException("")
 {
   std::ostringstream out;
-  out << "Swizzle error: " << index << " out of range [0, " << size << ")" << std::ends;
+  out << "Swizzle error: " << index << " out of range [0, " << size << ") in " << s << std::ends;
 
   m_message = out.str();
 }

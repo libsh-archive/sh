@@ -69,7 +69,7 @@ private:
 class ShSwizzleException : public ShException 
 {
 public:
-  ShSwizzleException(int idx, int size);
+  ShSwizzleException(const ShSwizzle& s, int idx, int size);
 };
   
 }
