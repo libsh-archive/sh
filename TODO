@@ -11,13 +11,15 @@ OPTIMIZER:
 
 SHADER ALGEBRA:
  - fix combine() to operate correctly on empty graphs.
- - operator&() for combine()
+ X operator&() for combine()
  X replaceUniform()
- - permute()
- - extract()
- - drop()
- - make connect work with shader b having more inputs than shader a's outputs
- - add operator<< for uniforms
+ X add operator>> for uniform extraction
+ X shPermute()
+ X shExtract()
+ X shDrop()
+ X shKeep(), shLose(), shDup()
+ X make connect work with inputs != outputs 
+ X add operator<< for uniforms
  - add constant() for uniforms with operator<<
  - allow semantic connection
  - implement named temporary extraction
