@@ -99,8 +99,8 @@ OPERATIONS:
 |X|X| | | asin
 | | | | | atan
 | | | | | cross
-|X|X| | | min
-|X|X| | | max
+|X|X|X|X| min
+|X|X|X|X| max
 | | | | | exp
 | | | | | log
 | | | | | fmod
