@@ -1,0 +1,40 @@
+Additional OSX Notes
+====================
+
+The OSX version of Sh has been tested on limited platforms.  It works on OSX v10.3.5.  It may work in previous versions. TODO: check opengl versions on diferent OS's
+
+In order to build this, you need to have fink installed, as well as the following packages:
+	automake1.7 or newer  (Panther comes with 1.6.3 and Sh needs >=1.7)
+
+The default configure prefix does not seem to work properly.  Thus, you must configure like so:
+  ./configure --prefix=/usr/local
+
+The gcc and ARB backends are known to work.
+
+The ATI backend and floating point buffers do not work yet, mostly because I do not have appropriate hardware to test on.  It shouldn't  be too much work to get it going.
+
+
+
+Maintainer Notes
+================
+
+this may break the main build:
+i had to comment out -no-undefined libtool option in util/Makefile.am.  There were undefined extrernals.  Perhaps autoconf was unable to include the sh dynamic library in this step for some reason?  Is this flag needed for linux?
+
+Perhaps there is a way to merge the boostrap switch statement
+
+I needed to modify ShLibClampImpl.hpp to build recent shrike checkins because of the explicit instantiation of 
+  template<int N, typename T>
+  ShGeneric<1, T> max(const ShGeneric<N, T>& a)
+was creating a zero-length array.  Were you having this problem on other platforms?
+
+leaving SH_INSTALL_PREFIX blank causes it to be defined as "NONE".  Is this consistent with other platforms? (general bug or OSX-only bug?)
+
+make shmedia fails
+    Darwin's cp doesn't support -a option
+    a quick web search suggests that -pPR does the same thing and is supported in linux
+
+i have some initial code for floating point buffers, but it is commented out.
+
+also note the cross-platform way I refactored GL contexts in PBufferStreams.?pp
+
