@@ -40,6 +40,13 @@ ShVariable::ShVariable(const ShVariableNodePtr& node)
 {
 }
 
+ShVariable::ShVariable(const ShVariableNodePtr& node,
+                       const ShSwizzle& swizzle,
+                       bool neg)
+  : m_node(node), m_swizzle(swizzle), m_neg(neg)
+{
+}
+
 bool ShVariable::null() const
 {
   return !m_node;

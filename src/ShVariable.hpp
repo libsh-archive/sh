@@ -45,6 +45,7 @@ class ShVariable {
 public:
   ShVariable();
   ShVariable(const ShVariableNodePtr& node);
+  ShVariable(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
 
   ~ShVariable() {}
 
@@ -121,10 +122,6 @@ public:
   
 
 protected:
-  ShVariable(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg)
-    : m_node(node), m_swizzle(swizzle), m_neg(neg)
-  {
-  }
   
   ShVariableNodePtr m_node; ///< The actual variable node we refer to.
   ShSwizzle m_swizzle; ///< Swizzling applied to this variable.

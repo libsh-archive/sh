@@ -49,6 +49,18 @@ ShProgram ShKernelLib::outputPass( const ShProgram &p ) {
   return passer;
 }
 
+ShProgram ShKernelLib::inputPass( const ShProgram &p ) {
+  ShProgram passer = SH_BEGIN_PROGRAM() {
+    for( ShProgramNode::VarList::const_iterator it = p->inputs.begin();
+        it != p->inputs.end(); ++it ) {
+      ShVariableNodePtr var = *it;
+      ShVariable inout(new ShVariableNode(SH_INOUT, var->size(), var->specialType()));
+      inout.name( var->name() ); 
+    }
+  } SH_END;
+  return passer;
+}
+
 ShProgram ShKernelLib::shChangeBasis(std::string name, 
     std::string b0Name, std::string b1Name, std::string b2Name) {
   ShProgram kernel = SH_BEGIN_PROGRAM() {

@@ -69,6 +69,14 @@ class ShKernelLib {
      */
     static ShProgram outputPass( const ShProgram &p );
 
+    /** Generates a passthrough program using the outputs of a given ShProgram
+     * and keeps all the names.
+     *
+     * Useful in a cases where vsh outputs need to be duplicated before
+     * being passed to fsh 
+     */
+    static ShProgram inputPass( const ShProgram &p );
+
     /** Basis Conversion program 
      * Takes 3 vectors for an orthonormal basis and converts the fourth 
      * vector.

@@ -1,3 +1,9 @@
+2004-04-20  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* util/ShKernelLib.cpp (inputPass): Implemented inputPass().
+
+	* util/ShKernelLib.hpp: Added inputPass().
+
 2004-04-19  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShAlgebra.cpp (connect): Recover properly on error.
