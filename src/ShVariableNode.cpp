@@ -64,7 +64,8 @@ ShPool* ShVariableNodeEval::m_pool = 0;
 ShVariableNode::ShVariableNode(ShBindingType kind, int size, ShValueType valueType, ShSemanticType type)
   : m_uniform(!ShContext::current()->parsing() && kind == SH_TEMP),
     m_kind(kind), m_specialType(type),
-    m_size(size), m_valueType(valueType), 
+    m_valueType(valueType), 
+    m_size(size), 
     m_id(m_maxID++), m_locked(0),
     m_variant(0),
     m_eval(0)
@@ -78,7 +79,8 @@ ShVariableNode::ShVariableNode(const ShVariableNode& old, ShBindingType newKind,
           bool updateVarList, bool keepUniform)
   : ShMeta(old), 
     m_uniform(old.m_uniform), m_kind(newKind), m_specialType(newType),
-    m_size(newSize), m_valueType(newValueType),
+    m_valueType(newValueType), 
+    m_size(newSize), 
     m_id(m_maxID++), m_locked(0),
     m_variant(0),
     m_eval(new ShVariableNodeEval)
@@ -245,8 +247,11 @@ void ShVariableNode::rangeVariant(const ShVariant* low, const ShVariant* high,
     newHi = factory->generate(oldHi);
   }
 
-  newLo->set(low, neg, writemask);
-  newHi->set(high, neg, writemask);
+  // @todo type slow temporary solution
+  for(int i = 0; i < writemask.size(); ++i) {
+    newLo->set(low, neg, ShSwizzle(m_size, writemask[i]));
+    newHi->set(high, neg, ShSwizzle(m_size, writemask[i]));
+  }
 
   meta("lowBound", newLo->encode());
   meta("highBound", newHi->encode());
@@ -352,12 +357,12 @@ ShVariant* ShVariableNode::makeLow() const
     case SH_VECTOR:
     case SH_NORMAL:
     case SH_POSITION:
-      result = factory->generateOne();
+      result = factory->generateOne(m_size);
       // @todo types handle unsigned types
       result->negate();
       break;
     default:
-      result = factory->generateZero();
+      result = factory->generateZero(m_size);
   }
   return result;
 }
@@ -365,7 +370,7 @@ ShVariant* ShVariableNode::makeLow() const
 ShVariant* ShVariableNode::makeHigh() const
 {
   const ShVariantFactory* factory = shVariantFactory(m_valueType);
-  return factory->generateOne(); 
+  return factory->generateOne(m_size); 
 }
 
 

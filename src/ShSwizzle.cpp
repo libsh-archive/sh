@@ -31,74 +31,68 @@
 
 namespace SH {
 
-ShSwizzle::ShSwizzle(int srcSize, int i0, int i1)
+ShSwizzle::ShSwizzle(T srcSize, T i0, T i1)
   : m_srcSize(srcSize),
-    m_indices(new int[2]),
     m_size(2)
 {
+  alloc();
   checkSrcSize(i0);
   checkSrcSize(i1);
-  m_indices[0] = i0;
-  m_indices[1] = i1;
+  get(0) = i0;
+  get(1) = i1;
 }
 
-ShSwizzle::ShSwizzle(int srcSize, int i0, int i1, int i2)
+ShSwizzle::ShSwizzle(T srcSize, T i0, T i1, T i2)
   : m_srcSize(srcSize),
-    m_indices(new int[3]),
     m_size(3)
 {
+  alloc();
   checkSrcSize(i0);
   checkSrcSize(i1);
   checkSrcSize(i2);
-  m_indices[0] = i0;
-  m_indices[1] = i1;
-  m_indices[2] = i2;
+  get(0) = i0;
+  get(1) = i1;
+  get(2) = i2;
 }
 
-ShSwizzle::ShSwizzle(int srcSize, int i0, int i1, int i2, int i3)
+ShSwizzle::ShSwizzle(T srcSize, T i0, T i1, T i2, T i3)
   : m_srcSize(srcSize),
-    m_indices(new int[4]),
     m_size(4)
 {
+  alloc();
   checkSrcSize(i0);
   checkSrcSize(i1);
   checkSrcSize(i2);
   checkSrcSize(i3);
-  m_indices[0] = i0;
-  m_indices[1] = i1;
-  m_indices[2] = i2;
-  m_indices[3] = i3;
+  get(0) = i0;
+  get(1) = i1;
+  get(2) = i2;
+  get(3) = i3;
 }
 
-ShSwizzle::ShSwizzle(int srcSize, int size, int* indices)
+ShSwizzle::ShSwizzle(T srcSize, T size, T* indices)
   : m_srcSize(srcSize),
-    m_indices(new int[size]),
     m_size(size)
 {
-  for (int i = 0; i < size; i++) {
+  alloc();
+  for (T i = 0; i < size; i++) {
     checkSrcSize(indices[i]);
-    m_indices[i] = indices[i];
+    get(i) = indices[i];
   }
 }
 
-
-ShSwizzle& ShSwizzle::operator*=(const ShSwizzle& other)
+#ifdef SH_SWIZZLE_CHAR
+ShSwizzle::ShSwizzle(T srcSize, T size, int* indices)
+  : m_srcSize(srcSize),
+    m_size(size)
 {
-  int* indices = new int[other.m_size];
-
-  for (int i = 0; i < other.m_size; i++) {
-    if (other[i] < 0 || other[i] >= m_size) {
-      delete indices;
-      shError( ShSwizzleException(*this, other[i], size()) );
-    }
-    indices[i] = m_indices[other[i]];
+  alloc();
+  for (T i = 0; i < size; i++) {
+    checkSrcSize(indices[i]);
+    get(i) = indices[i];
   }
-  m_srcSize = other.m_srcSize;
-  m_size = other.m_size;
-  delete [] m_indices;
-  m_indices = indices;
-  return *this;
 }
+#endif
 
 ShSwizzleException::ShSwizzleException(const ShSwizzle& s, int index, int size)
   : ShException("")
@@ -113,7 +107,7 @@ std::ostream& operator<<(std::ostream& out, const ShSwizzle& swizzle)
 {
   if (swizzle.identity()) return out;
   out << "(";
-  for (int i = 0; i < swizzle.size(); i++) {
+  for (ShSwizzle::T i = 0; i < swizzle.size(); i++) {
     if (i > 0) out << ", ";
     out << swizzle[i];
   }

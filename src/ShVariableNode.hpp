@@ -216,12 +216,14 @@ protected:
   void update_dependents();
   void detach_dependencies();
   
-  bool m_uniform;
   
+   
+  bool m_uniform;
   ShBindingType m_kind;
   ShSemanticType m_specialType;
-  int m_size;
   ShValueType m_valueType;
+
+  int m_size;
   int m_id;
   int m_locked;
 

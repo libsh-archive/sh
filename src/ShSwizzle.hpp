@@ -32,6 +32,18 @@
 #include "ShDllExport.hpp"
 #include "ShException.hpp"
 
+// This uses char indices instead of ints and uses a union of char[4] instead
+// of a dynamically allocated pointer for small swizzles
+#define SH_SWIZZLE_CHAR 
+
+// This uses a bool to indicate identity if SH_SWIZZLE_CHAR
+// or an unallocated m_indices = 0 if not SH_SWIZZLE_CHAR
+//
+// Prevents having to go through the array to check for identities and 
+// removes a memory lookup when getting indices from identity swizzles 
+// @todo not implemented yet
+//#define SH_SWIZZLE_ID
+
 namespace SH {
 
 /** Represents swizzling of a variable.
@@ -57,20 +69,33 @@ class
 SH_DLLEXPORT
 ShSwizzle {
 public:
+#ifdef SH_SWIZZLE_CHAR
+    typedef char T;
+#else 
+    typedef int T;
+#endif
+
   // Null swizzle
   ShSwizzle();
   /// Identity swizzle: does nothing at all.
-  ShSwizzle(int srcSize);
+  ShSwizzle(T srcSize);
   /// Use one element from the original tuple.
-  ShSwizzle(int srcSize, int i0);
+  ShSwizzle(T srcSize, T i0);
   /// Use two elements from the original tuple.
-  ShSwizzle(int srcSize, int i0, int i1);
+  ShSwizzle(T srcSize, T i0, T i1);
   /// Use three elements from the original tuple.
-  ShSwizzle(int srcSize, int i0, int i1, int i2);
+  ShSwizzle(T srcSize, T i0, T i1, T i2);
   /// Use four elements from the original tuple.
-  ShSwizzle(int srcSize, int i0, int i1, int i2, int i3);
+  ShSwizzle(T srcSize, T i0, T i1, T i2, T i3);
   /// Use an arbitrary number of elements from the original tuple.
-  ShSwizzle(int srcSize, int size, int* indices);
+  ShSwizzle(T srcSize, T size, T* indices);
+
+#ifdef SH_SWIZZLE_CHAR
+  /// Use an arbitrary number of elements from the original tuple.
+  /// This is defined in addition to the char version in case
+  /// you happen to have data in an integer array.
+  ShSwizzle(T srcSize, T size, int* indices);
+#endif
 
   ShSwizzle(const ShSwizzle& other);
   ~ShSwizzle();
@@ -85,9 +110,9 @@ public:
   ShSwizzle operator*(const ShSwizzle& other) const;
 
   /// Determine how many elements this swizzle results in.
-  int size() const { return m_size; }
+  T size() const { return m_size; }
   /// Obtain the index of the \a i'th element. 0 <= i < size().
-  int operator[](int i) const;
+  T operator[](T i) const;
 
   /// Determine whether this is an identity swizzle.
   bool identity() const;
@@ -96,19 +121,39 @@ public:
   bool operator==(const ShSwizzle& other) const;
   
 private:
+
   // deletes indices and throws an exception if index < 0 or index >= m_srcSize
-  void checkSrcSize(int index) const; 
+  void checkSrcSize(T index); 
 
   // deletes indices and throws an exception if index < 0 or index >= m_size 
-  void checkSize(int index) const; 
+  void checkSize(T index); 
 
   // deletes and reallocates m_indices if newsize doesn't match m_size 
-  void realloc(int newsize); 
+  void realloc(T newsize); 
 
-  int m_srcSize;
-  //std::vector<int> m_indices;
-  int* m_indices;
-  int m_size;
+  // allocates the m_indices array to current m_size;
+  void  alloc(); 
+
+  // deallocates the m_indices array;
+  void dealloc();
+
+  T get(T index) const;
+  T& get(T index);
+  T* getptr();
+  const T* getptr() const;
+
+  // Declare these two first so alignment problems don't make the ShSwizzle struct larger
+  T m_srcSize;
+  T m_size;
+
+#ifdef SH_SWIZZLE_CHAR
+  union {
+    char local[4]; 
+    char* ptr;
+  } m_indices; // if m_size <= 4, no need to dynamically allocate array.  
+#else
+  T *m_indices;
+#endif
 
   friend SH_DLLEXPORT std::ostream& operator<<(std::ostream& out, const ShSwizzle& swizzle);
 };

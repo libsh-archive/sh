@@ -34,92 +34,151 @@ namespace SH {
 
 inline ShSwizzle::ShSwizzle()
   : m_srcSize(0),
-    m_indices(0),
     m_size(0)
 {
+#ifndef SH_SWIZZLE_CHAR
+  m_indices = 0;
+#endif
+  // otherwise, we don't do dynamic memory allocation anyway, so nothing to wory
+  // about
 }
 
-inline ShSwizzle::ShSwizzle(int srcSize)
+inline ShSwizzle::ShSwizzle(T srcSize)
   : m_srcSize(srcSize),
-    m_indices(new int[srcSize]),
     m_size(srcSize)
 {
-  for (int i = 0; i < srcSize; i++) m_indices[i] = i;
+  alloc();
+  for (T i = 0; i < srcSize; i++) get(i) = i;
 }
 
-inline ShSwizzle::ShSwizzle(int srcSize, int i0)
+inline ShSwizzle::ShSwizzle(T srcSize, T i0)
   : m_srcSize(srcSize),
-    m_indices(new int[1]),
     m_size(1)
 {
+  alloc();
   checkSrcSize(i0);
-  m_indices[0] = i0;
+  get(0) = i0;
 }
 
 inline ShSwizzle::ShSwizzle(const ShSwizzle& other)
   : m_srcSize(other.m_srcSize),
-    m_indices(new int[other.m_size]),
     m_size(other.m_size)
 {
-  memcpy(m_indices, other.m_indices, sizeof(int)*m_size);
+  alloc();
+  memcpy(getptr(), other.getptr(), sizeof(T)*m_size);
 }
 
 inline ShSwizzle::~ShSwizzle()
 {
-  delete [] m_indices;
+  dealloc();
 }
 
 inline ShSwizzle& ShSwizzle::operator=(const ShSwizzle& other)
 {
   realloc(other.m_size);
-  memcpy(m_indices, other.m_indices, sizeof(int)*m_size);
+  memcpy(getptr(), other.getptr(), sizeof(T)*m_size);
   m_srcSize = other.m_srcSize;
   return *this;
 }
 
 inline ShSwizzle ShSwizzle::operator*(const ShSwizzle& other) const
 {
-  ShSwizzle swizzle(*this);
-  swizzle *= other;
-  return swizzle;
+  ShSwizzle result(other.m_size);
+  for(T i = 0; i < other.m_size; ++i) result.get(i) = get(other[i]);
+  return result;
 }
 
-inline int ShSwizzle::operator[](int index) const
+inline ShSwizzle& ShSwizzle::operator*=(const ShSwizzle& other)
 {
-  checkSize(index);
-  return m_indices[index];
+    (*this) = (*this) * other;
+    return (*this);
 }
 
-inline void ShSwizzle::checkSrcSize(int index) const
+inline ShSwizzle::T ShSwizzle::operator[](T index) const
+{
+  if (index >= m_size || index < 0) shError( ShSwizzleException(*this, index, m_size) );
+  return get(index); 
+}
+
+inline void ShSwizzle::checkSrcSize(T index) 
 {
   if (index < 0 || index >= m_srcSize) {
-    delete [] m_indices;
+    dealloc();
     shError( ShSwizzleException(*this, index, m_srcSize) );
   }
 }
 
-inline void ShSwizzle::checkSize(int index) const
+inline void ShSwizzle::checkSize(T index) 
 {
   if (index < 0 || index >= m_size) {
-    delete [] m_indices;
+    dealloc();
     shError( ShSwizzleException(*this, index, m_size) );
   }
 }
 
-inline void ShSwizzle::realloc(int newsize) 
+inline void ShSwizzle::alloc() 
+{
+#ifdef SH_SWIZZLE_CHAR
+  if(m_size > 4) m_indices.ptr = new T[m_size];
+#else
+  m_indices = new T[m_size];
+#endif
+}
+
+inline void ShSwizzle::realloc(T newsize) 
 {
   if(m_size != newsize) {
-    delete [] m_indices;
+    dealloc();
     m_size = newsize;
-    m_indices = new int[m_size];
+    alloc();
   }
+}
+
+inline void ShSwizzle::dealloc()
+{
+#ifdef SH_SWIZZLE_CHAR
+  if(m_size > 4) delete m_indices.ptr;
+#else
+  delete [] m_indices;
+#endif
+}
+
+inline ShSwizzle::T ShSwizzle::get(T index) const
+{
+  return getptr()[index];
+}
+
+inline ShSwizzle::T& ShSwizzle::get(T index) 
+{
+  return getptr()[index];
+}
+
+inline ShSwizzle::T* ShSwizzle::getptr() 
+{
+
+#ifdef SH_SWIZZLE_CHAR
+  if(m_size <= 4) return m_indices.local;
+  else return m_indices.ptr;
+#else
+  return m_indices;
+#endif
+}
+
+inline const ShSwizzle::T* ShSwizzle::getptr() const
+{
+#ifdef SH_SWIZZLE_CHAR
+  if(m_size <= 4) return m_indices.local;
+  else return m_indices.ptr;
+#else
+  return m_indices;
+#endif
 }
 
 inline bool ShSwizzle::identity() const
 {
   if (m_size != m_srcSize) return false;
-  for (int i = 0; i < m_size; i++) {
-    if (m_indices[i] != i) return false;
+  for (T i = 0; i < m_size; i++) {
+    if (get(i) != i) return false;
   }
   return true;
 }
@@ -128,7 +187,7 @@ inline bool ShSwizzle::operator==(const ShSwizzle& other) const
 {
   if (m_srcSize != other.m_srcSize) return false;
   if (m_size != other.m_size) return false;
-  return memcmp(m_indices, other.m_indices, sizeof(int)*m_size) == 0;
+  return memcmp(getptr(), other.getptr(), sizeof(T)*m_size) == 0;
 }
 
 } // namespace SH

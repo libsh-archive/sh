@@ -1,3 +1,15 @@
+2004-10-29 Bryan Chan <b8chan@cgl.uwaterloo.ca>
+	* src/ShSwizzle.hpp, ShSwizzleImpl.hpp ShSwizzle.cpp:
+		Assume swizzles only for small tuples ==> use char size, srcSize, indices 
+		Union of char[4] and char* to prevent allocation for small swizzles
+	
+	* src/ShVariableNode.hpp, ShVariableNode.cpp (ShVariableNode, rangeVariant):
+		Fixed bug setting lower/upper bounds.  
+		Moved some of fields around to give better alignment. 
+
+	==> simple vec test = , matrix mul test = 
+
+
 2004-10-28 Bryan Chan <b8chan@cgl.uwaterloo.ca>
 	Merged trunk up to r1646
 
