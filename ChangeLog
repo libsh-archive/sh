@@ -1,3 +1,159 @@
+2003-11-17 Kevin Moule (krmoule@cgl.uwaterloo.ca)
+
+	* backends/arb/ShArb.cpp: re-added Backend instance, accidentally
+	  removed during WIN32 port
+
+2003-11-16 Bryan Can (b8chan@cgl.uwaterloo.ca)
+
+	* util/Makefile.am, util/Perlin.cpp, util/Perlin.hpp, util/ShPerlin.cpp,
+	  util/ShPerlin.hpp, util/ShUtilLib.hpp, util/ShWorley.cpp, util/ShWorley.hpp,
+	  util/Worley.cpp, util/Worley.hpp, util/shutil.hpp: fixed some include bugs in
+	  utils renamed utils to match other sh files
+
+2003-11-16  Kevin Moule (krmoule@cgl.uwaterloo.ca)
+
+	* src/ShInit.cpp: ifdef's for WIN32 only code...
+
+	* src/Makefile.am: Added ShInit.cpp
+
+	* backends/arb/ShArb.cpp: ifdef's for wglGetProcAddress
+
+2003-11-14  Bryan Chan (b8chan@cgl.uwaterloo.ca)
+
+	* util/shutil.hpp: more doc fixing
+
+	* util/Makefile.am, util/Perlin.hpp, util/ShUtilLib.hpp,
+	util/shutil.hpp: fixed some doc output bugs
+
+	* doc/Doxyfile, doc/Makefile.am: updated for libshutil
+
+	* config/ltdl.m4: Changed ltdl.m4 back to the version that comes
+	with automake 1.4-p6
+
+	* Makefile.am, configure.ac: Added util directory
+
+	* backends/arb/ShArb.cpp, backends/arb/ShArb.hpp: Stefanus' fix for
+	write masking Changed dot product to accept scalars
+
+	* backends/sm/ShSmBackend.cpp: Changed dot to accept scalars
+
+	* src/ShLib.hpp: Made dot product also accept scalars
+
+	* util/Makefile.am, util/Perlin.cpp, util/Perlin.hpp,
+	util/ShUtilLib.hpp, util/Worley.cpp, util/Worley.hpp: Initial
+	checkin of utilities including hash functions, Perlin noise 
+	and Worley textures
+
+2003-11-11  Kevin Moule (krmoule@cgl.uwaterloo.ca)
+
+	* win32/.cvsignore, win32/sh.sln, win32/sh.suo, win32/sh.vcproj:
+	WIN32 build files...
+
+	* src/ShMatrix.hpp, src/ShMatrixImpl.hpp: cosmetic changes...
+
+	* src/sh.hpp, src/ShInit.cpp: added ShInit function...
+
+	* backends/arb/ShArb.cpp: sweeping changes for WIN32 build...
+
+2003-11-06  Bryan Chan (b8chan@cgl.uwaterloo.ca)
+
+	* src/ShMatrix.hpp: fixed shadowed template parameter compile
+	warnings in gcc3.3.2
+
+2003-10-31  Bryan Chan (b8chan@cgl.uwaterloo.ca)
+
+	* src/ShLib.hpp: fixed bug introduced by me to fix another bug (for
+	mad dimension checking)
+
+2003-10-31  Kevin Moule (krmoule@cgl.uwaterloo.ca)
+
+	* src/ShOptimizer.hpp: friend classes renamed to struct as per cpp
+	file
+
+	* src/ShOptimizer.cpp: unsigned changes for vector::size()
+
+	* src/ShMatrixImpl.hpp: typo
+
+	* src/ShMatrix.hpp: proper syntax for template friend functions
+
+	* src/ShDomTree.hpp: missing header file for std::find()
+
+	* src/ShBitSet.cpp: operator= missing return values...
+
+	* src/ShAlgebra.cpp: for scoping rules for WIN32...
+
+2003-10-30  Kevin Moule (krmoule@cgl.uwaterloo.ca)
+
+	* backends/arb/ShArb.hpp: ArbInst/ArbReg are structs not classes...
+
+	* src/ShVariableNode.cpp: cleanup for warnings generated under WIN32...
+
+	* src/ShToken.hpp: ShTokenArgument is actually a struct...
+
+	* src/ShSwizzle.cpp: warnings and improper C++ syntax under WIN32...
+
+	* src/ShImage.cpp: binary mode fopen needed for WIN32
+
+	* src/ShBitSet.cpp: cleanup for WIN32 warnings...
+
+	* src/ShBackend.cpp: WIN32 changes for ltdl...
+
+2003-10-24  Bryan Chan (b8chan@cgl.uwaterloo.ca)
+
+	* src/ShAlgebra.cpp: small fix because I can't tell the difference
+	  between != and ==
+
+	* src/ShLib.hpp: Added dimension checks for mad, lerp, fmod
+
+	* src/ShLinearAllocator.cpp: Changed linear allocator to use
+	multiset
+
+2003-10-22  Bryan Chan (b8chan@cgl.uwaterloo.ca)
+
+	* backends/arb/ShArb.cpp, backends/sm/ShSmBackend.cpp, src/ShLib.hpp,
+	src/ShStatement.cpp, src/ShStatement.hpp: Added mad (Multiply & Add)
+	operation
+
+2003-10-17  Gabriel Renaud (g2renaud@cgl.uwaterloo.ca)
+
+	* src/ShAttrib.hpp, src/ShDomTree.cpp, src/ShDomTree.hpp,
+	src/ShMatrix.hpp, src/ShMatrixImpl.hpp, src/ShVariable.cpp,
+	src/ShVariable.hpp: Change ShMatrix.hpp, ShAttrib, and ShVariable,
+	so that we have matrix operations and output on the console
+
+2003-10-16  Bryan Chan (b8chan@cgl.uwaterloo.ca)
+
+	* src/ShLib.hpp, src/ShStatement.cpp, src/ShStatement.hpp: Added
+	floor, ceil, lerp, fmod.
+
+	* backends/sm/ShSmBackend.cpp: Added ceil, floor, fmod, lerp ops
+
+	* backends/arb/ShArb.cpp, backends/arb/ShArb.hpp: Added abs, ceil,
+	floor, fmod, lerp, sle, and sge ops.  Added sin/cos not implemented
+	warnings in vertex programs
+
+2003-10-15  Bryan Chan (b8chan@cgl.uwaterloo.ca)
+
+	* src/ShLinearAllocator.cpp: Fixed allocation for common
+	starters/enders
+
+2003-10-13  Bryan Chan (b8chan@cgl.uwaterloo.ca)
+
+	* src/ShOptimizer.cpp: Backed out changes for error messages
+
+2003-10-08  Bryan Chan (b8chan@cgl.uwaterloo.ca)
+
+	* src/ShError.cpp, src/ShError.hpp: Added improved error handling
+
+2003-10-06  Bryan Chan (b8chan@cgl.uwaterloo.ca)
+
+	* backends/sm/ShSmBackend.cpp, src/Makefile.am, src/ShAlgebra.cpp,
+	src/ShBitSet.cpp, src/ShEnvironment.cpp, src/ShEnvironment.hpp,
+	src/ShException.cpp, src/ShException.hpp, src/ShImage.cpp,
+	src/ShOptimizer.cpp, src/ShParser.cpp, src/ShProgram.cpp,
+	src/ShSwizzle.cpp, src/ShTokenizer.cpp: Added ShError for error
+	handling
+	
 2003-09-02  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* test/*.sht: Update to use new program specification syntax.
@@ -133,4 +289,3 @@
 
 	* doc/Makefile.am: Added proper rules to build the documentation
 	and install/upload it as well.
-
