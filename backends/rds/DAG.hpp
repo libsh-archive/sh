@@ -22,10 +22,10 @@
 class SH_DLLEXPORT DAGNode {
   public:
 	DAGNode() {}	
-	DAGNode(SH::ShVariable var);
+	DAGNode(SH::ShVariable *var);
 	DAGNode(SH::ShStatement *stmt);
 
-	SH::ShVariable m_var;
+	SH::ShVariable *m_var;
 	SH::ShStatement *m_stmt;
 
 	std::string m_label;
@@ -36,10 +36,10 @@ class SH_DLLEXPORT DAGNode {
 	typedef std::map<DAGNode *, bool> CutMap;
 	CutMap m_cut;
 
-	typedef std::set<SH::ShVariableNodePtr> IdSet;
+	typedef std::set<SH::ShVariable*> IdSet;
 	IdSet id_list;
 
-	typedef std::vector<DAGNode *> DAGNodeVector;
+	typedef std::vector<DAGNode*> DAGNodeVector;
 	DAGNodeVector predecessors;
 	DAGNodeVector successors;
 
@@ -67,14 +67,14 @@ class SH_DLLEXPORT DAG {
 
 	void print(int indent);
   private:
-	typedef std::map<SH::ShVariableNodePtr, DAGNode*> NodeMap;
+	typedef std::vector<SH::ShVariable*> VarVector;
+	typedef std::map<SH::ShVariableNodePtr, VarVector> VarVectorMap;
+	typedef std::map<SH::ShVariable*, DAGNode*> NodeMap;
+	VarVectorMap m_nodevector;
 	NodeMap node;
 
-	typedef std::vector<DAGNode*> OpVector;
-	typedef std::map<SH::ShOperation, OpVector> OpMap;
-	OpMap ops[4];
-
 	void DAG::add_statement(SH::ShStatement *stmt);
+	SH::ShVariable *find_var(SH::ShVariable *var);
 };
 
 #endif

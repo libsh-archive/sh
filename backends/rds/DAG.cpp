@@ -5,9 +5,9 @@ using namespace SH;
 using namespace std;
 
 // creates a leaf node
-DAGNode::DAGNode(ShVariable var) 
+DAGNode::DAGNode(ShVariable *var) 
 	:	m_var(var),
-		m_label(var.node()->name())
+		m_label(var->node()->name())
 {
 	m_visited = false;
 }
@@ -70,7 +70,7 @@ void DAGNode::print(int indent) {
 	cout << "-->";
 	cout << m_label << " {";
 	for (IdSet::iterator I = id_list.begin(); I != id_list.end(); ++I) {
-		cout << " " << (*I)->name();
+		cout << " " << (*I)->name() << (*I)->swizzle();
 	}
 	cout << " }\n";
 	for (DAGNodeVector::iterator I = successors.begin(); I != successors.end(); ++I) {
@@ -96,6 +96,32 @@ void DAGNode::dump_stmts() {
 	print_stmts();
 }
 
+
+// returns node associated with this variable
+// creates a new one if it doesn't exist
+ShVariable *DAG::find_var(ShVariable *var) {
+	VarVectorMap::iterator node_it;
+
+	node_it = m_nodevector.find(var->node());
+				
+	if (node_it == m_nodevector.end()) {
+		VarVector v;
+		v.push_back(var);
+		m_nodevector[var->node()] = v;
+	}
+	else {
+		for (VarVector::iterator I = (*node_it).second.begin(); I != (*node_it).second.end(); ++I) {
+			if ((*I)->swizzle() == var->swizzle() && (*I)->neg() == var->neg()) {
+				return *I;
+			}
+		}
+		
+		(*node_it).second.push_back(var);
+	}
+
+	return var;
+}
+
 // adds an Sh statement to the graph
 void DAG::add_statement(Stmt *stmt) {
 	NodeMap::iterator node_it;
@@ -110,49 +136,16 @@ void DAG::add_statement(Stmt *stmt) {
 	// Step 1
 	// go through each of the src fields, creating new nodes if they don't exist
 	for (int i = 0; i < src_size; i++) {
-		node_it = node.find(stmt->src[i].node());
+		node_it = node.find( find_var( &(stmt->src[i]) ));
 				
 		if (node_it == node.end()) {
-			src[i] = new DAGNode(stmt->src[i]);
-			node[stmt->src[i].node()] = src[i];
+			src[i] = new DAGNode( &(stmt->src[i]) );
+			node[&(stmt->src[i])] = src[i];
 		}
 		else {
 			src[i] = (*node_it).second;
 		}
 	}
-
-	/*	skip Step 2 for now -- just create a node for each statement
-		this can be used to find common subexpressions; we might not do this
-	// Step 2
-	if (stmt.op == SH_OP_ASN) {
-		// in assignment, just set n to node(src[0])
-		n = src[0];
-		created = true;
-	}
-	else {
-		// see if a node for this operator exists
-		op_it = ops[src_size].find(stmt.op);
-
-		if (op_it != ops[src_size].end()) {
-			// see if matching set of kids in vector for this operation
-			op_v = (*op_it).second;
-
-			for(OpVector::iterator V = op_v.begin(); !created && V != op_v.end(); ++V) {
-				DAGNode *v = *V;
-				for (int i = 0; i < src_size; i++) {
-					if (v->successors.at(i) != src[i]) {
-						break;
-					}
-					else if (i == src_size - 1) {
-						created = true;
-						n = v;
-					}
-				}
-			}
-		}
-	}
-
-	*/ 
 
 	// create a new node for the statement (if full Step 2, check created here first)
 	n = new DAGNode(stmt);
@@ -166,7 +159,8 @@ void DAG::add_statement(Stmt *stmt) {
 
 	// Step 3
 	// delete dest from list of ids for node(dest)
-	NodeMap::iterator dest_it = node.find(stmt->dest.node());
+	ShVariable *var = find_var(&(stmt->dest));
+	NodeMap::iterator dest_it = node.find(var);
 	DAGNode *dest;
 
 	if (dest_it != node.end()) {
@@ -175,9 +169,9 @@ void DAG::add_statement(Stmt *stmt) {
 	}
 
 	// append dest to list of ids for n
-	n->id_list.insert(stmt->dest.node());
+	n->id_list.insert(var);
 
-	node[stmt->dest.node()] = n;
+	node[var] = n;
 }
 
 DAG::DAG(ShBasicBlockPtr block)

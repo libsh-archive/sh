@@ -37,7 +37,7 @@ void RDS::print_partitions(char *filename) {
 #ifdef RDS_DEBUG
       SH_DEBUG_PRINT( "Pass starting at " << (*I)->m_label );
 #endif
-      m_pdt->graphvizDump(*I, dump);
+//      m_pdt->graphvizDump(*I, dump);
     }
   dump << "}" << std::endl;
   dump.close();
@@ -74,7 +74,7 @@ void RDS::rds_search() {
 
 	DAGNode::DAGNode *p = m_pdt->get_root();
 	DAGNode::DAGNode *d = m_graph->m_root;
-		  
+
 	// this sets m_mrlist
 	unvisitall(d);
 	unfixall(d);
@@ -88,16 +88,16 @@ void RDS::rds_search() {
 		m_fixed[m] = RDS_MARKED;
 		m_ops_used = 0;
 		rds_subdivide(p);
-		unvisitall(p);
-		int cost_s = cost(p);
+		unvisitall(d);
+		int cost_s = cost(d);
 
 		// find cost of recomputing subregion m
 		unmarkall(d);
 		m_fixed[m] = RDS_UNMARKED;
 		m_ops_used = 0;
 		rds_subdivide(p);
-		unvisitall(p);
-		int cost_r = cost(p); 
+		unvisitall(d);
+		int cost_r = cost(d); 
 #ifdef RDS_DEBUG
     SH_DEBUG_PRINT( "Cost Save = " << cost_s << " Cost Recompute = " << cost_r );
 #endif
@@ -107,7 +107,14 @@ void RDS::rds_search() {
 	}
 
 	unmarkall(d);
+	unvisitall(d);
+	m_ops_used = 0;
 	rds_subdivide(p);
+#ifdef RDS_DEBUG
+	unvisitall(d);
+	SH_DEBUG_PRINT("Cost Final = " << cost(d));
+#endif
+	unvisitall(d);
 }
 
 // partitions m_graph by marking nodes to indicate pass boundaries
@@ -349,9 +356,8 @@ int *RDS::next_ksubset(int n, int k, int *a) {
 	return a;
 }
   
-
 int RDS::countnodes(DAGNode::DAGNode *v) {
-	if (v->m_visited) return 0;
+	if (v->m_visited || v->successors.size() < 1) return 0;
 	v->m_visited = true;
 	int count = 1;
 	
@@ -387,7 +393,7 @@ void RDS::unmarkall(DAGNode::DAGNode *v) {
 // partitions graph; roots of partitions based on marked nodes
 void RDS::partition(DAGNode::DAGNode *v)
 {    
-  if (!v) return;
+	if (!v) return;
 	if (v->m_visited) return;
 
 #ifdef RDS_DEBUG
@@ -420,13 +426,13 @@ void RDS::partition(DAGNode::DAGNode *v)
 }
 
 bool RDS::valid(DAGNode::DAGNode* v) {
-	unvisitall(v);
+  unvisitall(v);
 
   if (m_rdsh) {
     return countnodes(v) <= m_limits->instrs();
   }
 
-	return countnodes(v) <= (m_limits->instrs() - m_ops_used);
+  return countnodes(v) <= (m_limits->instrs() - m_ops_used);
 }
 
 bool RDS::recompute(DAGNode::DAGNode* v) {
@@ -458,7 +464,7 @@ int RDS::countmarked(DAGNode::DAGNode* v) {
 	if (v->m_marked) count++;
 	
 	for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end(); ++I) {
-			count += countnodes(*I);
+			count += countmarked(*I);
 	} 
 	return count;
 }

@@ -5,10 +5,11 @@
 #include <map>
 #include <vector>
 #include <algorithm>
-//#include "sh.hpp"      // necessary?
+
 #include "ShDllExport.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShProgramNode.hpp"
+#include "ShBasicBlock.hpp"
 #include "PDomTree.hpp"
 #include "Limits.hpp"
 
@@ -50,6 +51,8 @@ public:
 	void print_partitions(char* filename);
 	void print_partition();
 	void print_partition_stmt();
+
+	SH::ShBasicBlockPtr get_block(DAGNode::DAGNode* node);
 private:
   typedef std::set<DAGNode::DAGNode*> ChildrenSet;
   typedef std::vector<DAGNode::DAGNode*> PassVector;	

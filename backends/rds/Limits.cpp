@@ -63,7 +63,7 @@ void Limits::dump_limits()
 ArbLimits::ArbLimits(const std::string& target)
 {
   unsigned int arb_target;
-  if (target == "vertex")
+  /*if (target == "vertex")
     arb_target = GL_VERTEX_PROGRAM_ARB;
   else if (target == "fragment")
     arb_target = GL_FRAGMENT_PROGRAM_ARB;
@@ -74,13 +74,13 @@ ArbLimits::ArbLimits(const std::string& target)
   CHECK_ERROR(glGetProgramivARB(arb_target, GL_MAX_PROGRAM_INSTRUCTIONS_ARB,
                                         &m_instrs));
 
-  /* TODO implement proper detection of half-float limits. */
+  // TODO implement proper detection of half-float limits.
   m_halftemps = (target == "gpu:vertex" ? 0 : 64);
 
-  /* TODO implement proper detection of NVIDIA.
-   * NVIDIA's GlGetProgramivARB does not update m_temps, so set it to 32 here.
-   * ATI will still have the right number because its drivers should set m_temps properly.
-   */
+  // TODO implement proper detection of NVIDIA.
+  //  NVIDIA's GlGetProgramivARB does not update m_temps, so set it to 32 here.
+  //  ATI will still have the right number because its drivers should set m_temps properly.
+   
   m_temps = (target == "gpu:vertex" ? 12 : 32);
   CHECK_ERROR(glGetProgramivARB(arb_target, GL_MAX_PROGRAM_TEMPORARIES_ARB,
                                         &m_temps));
@@ -98,11 +98,11 @@ ArbLimits::ArbLimits(const std::string& target)
   if (target == "gpu:vertex") {
     CHECK_ERROR(glGetProgramivARB(arb_target, GL_MAX_PROGRAM_TEX_INSTRUCTIONS_ARB,
                                           &m_texs));
-  }
+  }*/
 }
 
 FakeLimits::FakeLimits() {
-  m_instrs = 4;
+  m_instrs = 5;
 }
 
 }
