@@ -1,3 +1,5 @@
+# -*- makefile -*-
+
 RELEASE_TARGETS = libsh.dll libsh.lib
 DEBUG_TARGETS = libshd.dll libshd.lib
 
@@ -85,8 +87,8 @@ libsh_dll_SOURCES += ShStream.hpp ShStreamImpl.hpp ShStream.cpp
 libsh_dll_CXXFILES = $(filter %.cpp,$(libsh_dll_SOURCES))
 libsh_dll_RELEASE_OBJECTS = $(libsh_dll_CXXFILES:.cpp=.r.obj)
 libsh_dll_DEBUG_OBJECTS = $(libsh_dll_CXXFILES:.cpp=.d.obj)
-libsh_dll_RELEASE_LDADD = $(LIBPNG_DIR)\lib\libpng.dll.a
-libsh_dll_DEBUG_LDADD = $(LIBPNG_DIR)\lib\libpng.dll.a
+libsh_dll_RELEASE_LDADD = $(LIBPNG_DIR)\lib\libpng.lib $(ZLIB_DIR)\zdll.lib
+libsh_dll_DEBUG_LDADD = $(LIBPNG_DIR)\lib\libpng.lib $(ZLIB_DIR)\zdll.lib
 
 libsh.dll libsh.lib: $(libsh_dll_RELEASE_OBJECTS)
 	$(CXX) /Felibsh /LD $^ $(libsh_dll_RELEASE_LDADD) $(RELEASE_LDFLAGS)

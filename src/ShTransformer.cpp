@@ -341,7 +341,10 @@ struct InputOutputConvertor {
   ShVariableNodePtr dupNode(ShVariableNodePtr node, ShBindingType newBinding = SH_TEMP) {
     ShVariableNodePtr result( new ShVariableNode(newBinding,
           node->size(), node->specialType()));
-    result->name(node->name());
+    if (node->has_name()) {
+      // TODO: should really copy all meta information here.
+      result->name(node->name());
+    }
     return result;
   }
   

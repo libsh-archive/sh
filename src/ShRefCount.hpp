@@ -150,6 +150,8 @@ public:
   /// Obtain a pointer to the object we reference count
   T* object() const;
 
+  void swap(ShPointer& other);
+
 private:
   void releaseRef();
   
