@@ -66,11 +66,16 @@ ArbOpInfo arbOpInfo[] = {
   // Swizzling
   {"SWZ", 2, true}, // should this really be a collectingOp?
 
+  
   // VERTEX ONLY
   // Scalar
   {"EXP", 1, false},
   {"LOG", 1, false},
   
+  // Misc
+  {"ARL", 1, false},
+  {"MOV", 3, false},
+
   // FRAGMENT ONLY
   // Scalar
   {"COS", 1, false},

@@ -77,6 +77,10 @@ enum ArbOp {
   SH_ARB_EXP,
   SH_ARB_LOG,
   
+  // Weird,
+  SH_ARB_ARL,
+  SH_ARB_ARRAYMOV, // Kind of hacky but works.
+  
   // FRAGMENT ONLY
   // Scalar
   SH_ARB_COS,

@@ -56,7 +56,7 @@ public:
 
   /// Return one of the variables represented by this palette.
   ShVariableNodePtr get_node(std::size_t index);
-  
+
 private:
   std::size_t m_length;
   ShVariableNodePtr* m_nodes;

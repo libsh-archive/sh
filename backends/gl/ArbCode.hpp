@@ -115,6 +115,7 @@ private:
   void emit_cmul(const SH::ShStatement& stmt);
   void emit_csum(const SH::ShStatement& stmt);
   void emit_kil(const SH::ShStatement& stmt);
+  void emit_pal(const SH::ShStatement& stmt);
   
   /// Allocate registers, after the code has been generated
   void allocRegs();
@@ -127,6 +128,9 @@ private:
   
   /// Allocate a uniform register, if necessary.
   void allocParam(const ArbLimits& limits, const SH::ShVariableNodePtr& node);
+
+  /// Allocate a palette of uniform registers, if necessary.
+  void allocPalette(const ArbLimits& limits, const SH::ShPaletteNodePtr& node);
 
   /// Allocate constants (called by allocRegs)
   void allocConsts(const ArbLimits& limits);
@@ -152,7 +156,8 @@ private:
   /// Output a use of a variable.
   std::ostream& printVar(std::ostream& out, bool dest, const SH::ShVariable& var,
                          bool collectingOp,
-                         const SH::ShSwizzle& destSwiz) const;
+                         const SH::ShSwizzle& destSwiz,
+                         bool do_swiz) const;
 
   /// Check whether inst is a sampling instruction. If so, output it
   /// and return true. Otherwise, output nothing and return false.
@@ -182,6 +187,10 @@ private:
 
   /// The number of parameter registers used in this shader.
   int m_numParams;
+
+  /// The number of parameter bindings used in this shader (can be
+  /// shared by multiple parameters).
+  int m_numParamBindings;
 
   /// The number of constant 4-tuples used in this shader.
   int m_numConsts;
@@ -213,6 +222,9 @@ private:
   typedef std::map<SH::ShCtrlGraphNodePtr, int> LabelMap;
   LabelMap m_label_map; 
   int m_max_label;
+
+  // For array lookup
+  SH::ShVariable m_address_register;
 };
 
 typedef SH::ShPointer<ArbCode> ArbCodePtr;
