@@ -220,9 +220,15 @@ ShProgram operator<<(const ShManipulator<T> &m, const ShProgram &p) {
 }
 
 template<typename T>
+ShManipulator<T> shPermute(T i0) {
+  ShManipulator<T> m;
+  m(i0);
+  return m;
+}
+template<typename T>
 ShManipulator<T> shPermute(T i0, T i1) {
   ShManipulator<T> m;
-  m.m(i0); m.m(i1);
+  m(i0); m(i1);
   return m;
 }
 template<typename T>

@@ -36,6 +36,8 @@ namespace SH {
 // Dynamic list of channels
 class ShStream {
 public:
+  ShStream(const ShChannelNodePtr& node);
+  
   template<typename T>
   ShStream(const ShChannel<T>& channel);
 
@@ -43,6 +45,8 @@ public:
 
   NodeList::const_iterator begin() const;
   NodeList::const_iterator end() const;
+  NodeList::iterator begin();
+  NodeList::iterator end();
   int size() const;
 
   template<typename T>

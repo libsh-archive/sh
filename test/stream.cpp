@@ -20,39 +20,88 @@ int main(int argc, char** argv)
       return -1;
     }
     
-    double data[] = {1.0, 0.0, 1.0,
-                     0.5, 0.5, 0.5,
-                     0.6, 0.2, 0.1,
-                     0.7, 0.2, 0.4,
+    float data1[] = {0.7, 0.0, 1.0,
+                    0.5, 0.5, 0.5,
+                    0.6, 0.2, 0.1,
+                    0.7, 0.2, 0.4,
+                    0.0, 0.1, 0.0,
     };
+    float data2[] = {-0.7, 0.0, 1.0,
+                    -0.5, 0.5, 0.5,
+                    -0.6, 0.2, 0.1,
+                    -0.7, 0.2, 0.4,
+                    -0.0, 0.1, 0.0,
+    };
+    
+    const int elements = sizeof(data1)/sizeof(float*)/3;
+    
+    float out_data1[elements * 3];
 
-    double out_data[4 * 3];
+    for (int i = 0; i < elements * 3; i++) {
+      out_data1[i] = -1.0;
+    }
 
-    ShChannel<ShColor3f> stream1(data, 4);
-    ShChannel<ShColor3f> stream2(data, 4);
+    float out_data2[elements * 3];
+
+    for (int i = 0; i < elements * 3; i++) {
+      out_data2[i] = -1.0;
+    }
+
+    ShChannel<ShColor3f> stream1(data1, elements);
+    ShChannel<ShColor3f> stream2(data2, elements);
+    ShChannel<ShColor3f> output1(out_data1, elements);
+    ShChannel<ShColor3f> output2(out_data2, elements);
     
     ShProgram shader = SH_BEGIN_PROGRAM("gpu:stream") {
-      ShInputColor3f colors[2];
-      ShOutputColor3f color_out;
+      ShInputColor3f color_in[2];
+      ShOutputColor3f color_out[2];
 
-      ShColor3f c = stream1();
-      
-      color_out = colors[0] + 2.0 * colors[1] + c;
-    } SH_END_PROGRAM;
+      color_out[0] = color_in[1] * 2.0f; // + color_in[1];
+      color_out[1] = color_in[0];
+    } SH_END;
 
     std::cout << "shader:" << std::endl;
     shader->ctrlGraph->print(std::cout, 0);
 
-    ShStream combined = combine(stream2, stream1);
-    ShProgram final = shader << combined; // combine(stream1, stream2);
+    //ShStream combined = combine(stream1, stream2);
+
+    ShProgram final = shader << (stream1 & stream2);
+    
     //ShProgram final = shader << stream1;// << ShConstant3f(1.0, 0.0, 0.0);// << stream2;
 
     std::cout << "final:" << std::endl;
     final->ctrlGraph->print(std::cout, 0);
 
-    ShChannel<ShColor3f> output(out_data, 4);
-    ShStream outputStream = output;
-    backend->execute(final, outputStream);
+    ShStream s = output1 & output2;
+    //output1 & output2 = shader << stream1 << stream2;
+    
+    backend->execute(final, s);
+
+    std::cerr << "out_data1 = [";
+    for (int i = 0; i < elements * 3; i++) {
+      if (i % 3 == 0) {
+        if (i > 0) std::cerr << "; ";
+        std::cerr << "(";
+      } else if (i > 0) {
+        std::cerr << ", ";
+      }
+      std::cerr << out_data1[i];
+      if (i % 3 == 2) std::cerr << ")";
+    }
+    std::cerr << "]" << std::endl;
+
+    std::cerr << "out_data2 = [";
+    for (int i = 0; i < elements * 3; i++) {
+      if (i % 3 == 0) {
+        if (i > 0) std::cerr << "; ";
+        std::cerr << "(";
+      } else if (i > 0) {
+        std::cerr << ", ";
+      }
+      std::cerr << out_data2[i];
+      if (i % 3 == 2) std::cerr << ")";
+    }
+    std::cerr << "]" << std::endl;
     
     return 0;
   } catch (const ShException& e) {

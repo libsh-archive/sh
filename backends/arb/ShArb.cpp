@@ -63,22 +63,6 @@ PFNGLGETPROGRAMIVARBPROC glGetProgramivARB = NULL;
 
 namespace ShArb {
 
-const unsigned int shGlCubeMapTargets[] = {
-  GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-  GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
-  GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
-  GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
-  GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
-  GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
-};
-
-const unsigned int shGlTextureType[] = {
-  GL_TEXTURE_1D,
-  GL_TEXTURE_2D,
-  GL_TEXTURE_3D,
-  GL_TEXTURE_CUBE_MAP,
-};
-
 using namespace SH;
 
 #define shGlProgramStringARB glProgramStringARB
@@ -96,71 +80,6 @@ unsigned int shArbTarget(const std::string& shTarget)
   if (shTarget == "gpu:fragment") return GL_FRAGMENT_PROGRAM_ARB;  
   return 0;
 }
-
-/** All the possible operations in the ARB spec.
- */
-enum ArbOp {
-  // VERTEX AND FRAGMENT
-  
-  // Vector
-  SH_ARB_ABS,
-  SH_ARB_FLR,
-  SH_ARB_FRC,
-  SH_ARB_LIT,
-  SH_ARB_MOV,
-
-  // Scalar
-  SH_ARB_EX2,
-  SH_ARB_LG2,
-  SH_ARB_RCP,
-  SH_ARB_RSQ,
-
-  // Binary scalar
-  SH_ARB_POW,
-
-  // Binary vector
-  SH_ARB_ADD,
-  SH_ARB_DP3,
-  SH_ARB_DP4,
-  SH_ARB_DPH,
-  SH_ARB_DST,
-  SH_ARB_MAX,
-  SH_ARB_MIN,
-  SH_ARB_MUL,
-  SH_ARB_SGE,
-  SH_ARB_SLT,
-  SH_ARB_SUB,
-  SH_ARB_XPD,
-
-  // Trinary
-  SH_ARB_MAD,
-
-  // Swizzling
-  SH_ARB_SWZ,
-
-  // VERTEX ONLY
-  // Scalar
-  SH_ARB_EXP,
-  SH_ARB_LOG,
-  
-  // FRAGMENT ONLY
-  // Scalar
-  SH_ARB_COS,
-  SH_ARB_SIN,
-  SH_ARB_SCS,
-
-  // Trinary
-  SH_ARB_CMP,
-  SH_ARB_LRP,
-
-  // Sampling
-  SH_ARB_TEX,
-  SH_ARB_TXP,
-  SH_ARB_TXB,
-
-  // KIL
-  SH_ARB_KIL
-};
 
 /** Information about the operations from ArbOp.
  */
@@ -232,127 +151,6 @@ static struct {
   {"KIL", false, true, 0, false, false}
 };
 
-/** An ARB instruction.
- */
-struct ArbInst {
-  ArbInst(ArbOp op, const ShVariable& dest)
-    : op(op), dest(dest)
-  {
-  }
-
-  ArbInst(ArbOp op, const ShVariable& dest, const ShVariable& src0)
-    : op(op), dest(dest)
-  {
-    src[0] = src0;
-  }
-
-  ArbInst(ArbOp op, const ShVariable& dest, const ShVariable& src0,
-          const ShVariable& src1)
-    : op(op), dest(dest)
-  {
-    src[0] = src0;
-    src[1] = src1;
-  }
-  ArbInst(ArbOp op, const ShVariable& dest, const ShVariable& src0,
-          const ShVariable& src1, const ShVariable& src2)
-    : op(op), dest(dest)
-  {
-    src[0] = src0;
-    src[1] = src1;
-    src[2] = src2;
-  }
-  
-  ArbOp op;
-  ShVariable dest;
-  ShVariable src[3];
-};
-
-/** Information about ShArbRegType members.
- */
-struct {
-  char* name;
-  char* estName;
-} shArbRegTypeInfo[] = {
-  {"ATTRIB", "i"},
-  {"PARAM", "u"},
-  {"TEMP", "t"},
-  {"ADDRESS", "a"},
-  {"OUTPUT", "o"},
-  {"PARAM", "c"},
-  {"<texture>", "<texture>"}
-};
-
-/** Possible bindings for a register (see ARB spec).
- */
-enum ShArbRegBinding {
-  // VERTEX and FRAGMENT
-  // Parameter
-  SH_ARB_REG_PARAMLOC,
-  SH_ARB_REG_PARAMENV,
-  // Output
-  SH_ARB_REG_RESULTCOL,
-
-  // VERTEX
-  // Input
-  SH_ARB_REG_VERTEXPOS,
-  SH_ARB_REG_VERTEXWGT,
-  SH_ARB_REG_VERTEXNRM,
-  SH_ARB_REG_VERTEXCOL,
-  SH_ARB_REG_VERTEXFOG,
-  SH_ARB_REG_VERTEXTEX,
-  SH_ARB_REG_VERTEXMAT,
-  SH_ARB_REG_VERTEXATR,
-  // Output
-  SH_ARB_REG_RESULTPOS,
-  SH_ARB_REG_RESULTFOG,
-  SH_ARB_REG_RESULTPTS, ///< Result point size
-  SH_ARB_REG_RESULTTEX,
-
-  // FRAGMENT
-  // Input
-  SH_ARB_REG_FRAGMENTCOL,
-  SH_ARB_REG_FRAGMENTTEX,
-  SH_ARB_REG_FRAGMENTFOG,
-  SH_ARB_REG_FRAGMENTPOS,
-  // Output
-  SH_ARB_REG_RESULTDPT,
-
-  SH_ARB_REG_NONE
-};
-
-/** Information about the ShArbRegBinding members.
- */
-struct {
-  ShArbRegType type;
-  char* name;
-  bool indexed;
-} shArbRegBindingInfo[] = {
-  {SH_ARB_REG_PARAM, "program.local", true},
-  {SH_ARB_REG_PARAM, "program.env", true},
-  {SH_ARB_REG_OUTPUT, "result.color", false}, // TODO: Special case?
-  
-  {SH_ARB_REG_ATTRIB, "vertex.position", false},
-  {SH_ARB_REG_ATTRIB, "vertex.weight", true},
-  {SH_ARB_REG_ATTRIB, "vertex.normal", false},
-  {SH_ARB_REG_ATTRIB, "vertex.color", false}, // TODO: Special case?
-  {SH_ARB_REG_ATTRIB, "vertex.fogcoord", false},
-  {SH_ARB_REG_ATTRIB, "vertex.texcoord", true},
-  {SH_ARB_REG_ATTRIB, "vertex.matrixindex", true},
-  {SH_ARB_REG_ATTRIB, "vertex.attrib", true},
-  {SH_ARB_REG_OUTPUT, "result.position", false},
-  {SH_ARB_REG_OUTPUT, "result.fogcoord", false},
-  {SH_ARB_REG_OUTPUT, "result.pointsize", false},
-  {SH_ARB_REG_OUTPUT, "result.texcoord", true},
-
-  {SH_ARB_REG_ATTRIB, "fragment.color", false}, // TODO: Special case?
-  {SH_ARB_REG_ATTRIB, "fragment.texcoord", true},
-  {SH_ARB_REG_ATTRIB, "fragment.fogcoord", false},
-  {SH_ARB_REG_ATTRIB, "fragment.position", false},
-  {SH_ARB_REG_OUTPUT, "result.depth", false},
-
-  {SH_ARB_REG_ATTRIB, "<nil>", false},
-};
-
 struct ArbBindingSpecs {
   ShArbRegBinding binding;
   int maxBindings;
@@ -387,7 +185,7 @@ ArbBindingSpecs shArbVertexOutputBindingSpecs[] = {
 };
 
 ArbBindingSpecs shArbFragmentOutputBindingSpecs[] = {
-  {SH_ARB_REG_RESULTCOL, 1, SH_VAR_COLOR, false},
+  {SH_ARB_REG_RESULTCOL, 1, SH_VAR_COLOR, true},
   {SH_ARB_REG_RESULTDPT, 1, SH_VAR_ATTRIB, false},
   {SH_ARB_REG_NONE, 0, SH_VAR_ATTRIB}
 };
@@ -398,62 +196,6 @@ ArbBindingSpecs* shArbBindingSpecs(bool output, const std::string& target)
     return output ? shArbVertexOutputBindingSpecs : shArbVertexAttribBindingSpecs;
   if (target == "gpu:fragment")
     return output ? shArbFragmentOutputBindingSpecs : shArbFragmentAttribBindingSpecs;
-}
-
-/** An ARB register.
- */
-struct ArbReg {
-  ArbReg()
-    : type(SH_ARB_REG_TEMP), index(-1), binding(SH_ARB_REG_NONE), bindingIndex(-1)
-  {
-  }
-  
-  ArbReg(ShArbRegType type, int index)
-    : type(type), index(index), binding(SH_ARB_REG_NONE), bindingIndex(-1)
-  {
-  }
-
-  ShArbRegType type;
-  int index;
-
-  union {
-    struct {
-      ShArbRegBinding binding;
-      int bindingIndex;
-    };
-    float values[4];
-  };
-
-  friend std::ostream& operator<<(std::ostream& out, const ArbReg& reg);
-
-  /// Print a declaration for this register
-  std::ostream& printDecl(std::ostream& out) const
-  {
-    out << shArbRegTypeInfo[type].name << " " << *this;
-    if (type == SH_ARB_REG_CONST) {
-      out << " = " << "{";
-      for (int i = 0; i < 4; i++) {
-        if (i) out << ", ";
-        out << values[i];
-      }
-      out << "}";
-    } else if (binding != SH_ARB_REG_NONE) {
-      out << " = " << shArbRegBindingInfo[binding].name;
-      if (shArbRegBindingInfo[binding].indexed) {
-        out << "[" << bindingIndex << "]";
-      }
-    }
-    out << ";";
-    return out;
-  }
-};
-
-/** Output a use of an arb register.
- */
-std::ostream& operator<<(std::ostream& out, const ArbReg& reg)
-{
-  out << shArbRegTypeInfo[reg.type].estName << reg.index;
-  return out;
 }
 
 using namespace SH;
@@ -518,7 +260,8 @@ void ArbCode::upload()
   std::ostringstream out;
   print(out);
   std::string text = out.str();
-  shGlProgramStringARB(shArbTarget(m_target), GL_PROGRAM_FORMAT_ASCII_ARB, (GLsizei)text.size(), text.c_str());
+  shGlProgramStringARB(shArbTarget(m_target), GL_PROGRAM_FORMAT_ASCII_ARB,
+                       (GLsizei)text.size(), text.c_str());
   int error = glGetError();
   if (error == GL_INVALID_OPERATION) {
     int pos = -1;
@@ -529,7 +272,10 @@ void ArbCode::upload()
     SH_DEBUG_WARN("Code (30 chars): " << text.substr(pos, 30));
   }
   if (error != GL_NO_ERROR) {
-    SH_DEBUG_ERROR("Error uploading ARB program: " << error);
+    SH_DEBUG_ERROR("Error uploading ARB program (" << m_target << "): " << error);
+    SH_DEBUG_ERROR("shGlProgramStringARB(" << shArbTarget(m_target)
+                   << ", GL_PROGRAM_FORMAT_ASCII_ARB, " << (GLsizei)text.size() << 
+                   ", <program text>);");
   }
 }
 
@@ -554,151 +300,6 @@ void ArbCode::bind()
   for (ShProgramNode::VarList::const_iterator I = m_shader->textures.begin(); I != m_shader->textures.end();
        ++I) {
     loadTexture(*I);
-  }
-}
-
-void ArbCode::loadTexture(ShTextureNodePtr texture) 
-{
-  if (!texture) return;
-  
-  RegMap::const_iterator texRegIterator = m_registers.find(texture);
-  
-  SH_DEBUG_ASSERT(texRegIterator != m_registers.end());
-  
-  const ArbReg& texReg = texRegIterator->second;
-  
-  shGlActiveTextureARB(GL_TEXTURE0 + texReg.index);
-  
-  glBindTexture(shGlTextureType[texture->dims()], texReg.bindingIndex);
-  
-  if (1) {
-    glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  } else {
-    glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  }
-  if (1) {
-    glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  } else {
-    glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(shGlTextureType[texture->dims()], GL_TEXTURE_WRAP_T, GL_REPEAT);
-  }
-    
-  ShDataTextureNodePtr datatex = texture;
-  if (datatex) {
-    loadDataTexture(datatex);
-    return;
-  }
-
-  ShCubeTextureNodePtr cubetex = texture;
-  if (cubetex) {
-    loadCubeTexture(cubetex);
-    return;
-  }
-    
-  SH_DEBUG_WARN(texture->name() << " is not a valid texture!");
-}
-
-void ArbCode::loadDataTexture(ShDataTextureNodePtr texture, unsigned int type)
-{
-  if (!type) {
-    switch (texture->dims()) {
-    case SH_TEXTURE_1D:
-      type = GL_TEXTURE_1D;
-      break;
-    case SH_TEXTURE_2D:
-      type = GL_TEXTURE_2D;
-      break;
-    case SH_TEXTURE_3D:
-      type = GL_TEXTURE_3D;
-      break;
-    default:
-      SH_DEBUG_ERROR("No type specified and no known type for this texture.");
-      break;
-    }
-  }
-
-  // TODO: Other types of textures.
-  // TODO: Element Format
-  // TODO: sampling/filtering
-  // TODO: wrap/clamp
-  unsigned int format;
-
-
-  ShDataMemoryObjectPtr dataMem = texture->mem();
-  if( dataMem ) { // 
-    switch (texture->elements()) {
-    case 1:
-      format = GL_LUMINANCE;
-      break;
-    case 2:
-      format = GL_LUMINANCE_ALPHA;
-      break;
-    case 3:
-      format = GL_RGB;
-      break;
-    case 4:
-      format = GL_RGBA;
-      break;
-    default:
-      format = 0;
-      break;
-    }
-
-    switch(type) {
-    case GL_TEXTURE_1D:
-      glTexImage1D(type, 0, texture->elements(), texture->width(), 0, format, GL_FLOAT, dataMem->data());
-      break;
-    case GL_TEXTURE_2D:
-    case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
-    case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
-    case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
-    case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
-    case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
-    case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
-      glTexImage2D(type, 0, texture->elements(), texture->width(), texture->height(), 0, format, GL_FLOAT,
-                   dataMem->data());
-      break;
-    case GL_TEXTURE_3D:
-      glTexImage3D(type, 0, texture->elements(), texture->width(), texture->height(), texture->depth(),
-                   0, format, GL_FLOAT, dataMem->data());
-      break;
-    default:
-      SH_DEBUG_WARN("Texture type not handled by ARB backend");
-      break;
-    }
-  } else {
-    ShExternalMemoryObjectPtr extMem = texture->mem();
-    if( extMem ) {
-      extMem->attach();
-    } else {
-      SH_DEBUG_ERROR("No memory object/image loaded for texture"); 
-    }
-  } 
-
-  int error = glGetError();
-  if (error != GL_NO_ERROR) {
-    SH_DEBUG_ERROR("Error loading texture: " << error);
-    switch(error) {
-    case GL_INVALID_ENUM:
-      SH_DEBUG_ERROR("INVALID_ENUM");
-      break;
-    case GL_INVALID_VALUE:
-      SH_DEBUG_ERROR("INVALID_VALUE");
-      break;
-    case GL_INVALID_OPERATION:
-      SH_DEBUG_ERROR("INVALID_OPERATION");
-      break;
-    }
-  }
-}
-
-void ArbCode::loadCubeTexture(ShCubeTextureNodePtr cube)
-{
-  for (int i = 0; i < 6; i++) {
-    loadDataTexture(cube->face(static_cast<ShCubeDirection>(i)), shGlCubeMapTargets[i]);
   }
 }
 
@@ -812,13 +413,16 @@ bool ArbCode::printSamplingInstruction(std::ostream& out, const ArbInst& instr) 
     out << "1D";
     break;
   case SH_TEXTURE_2D:
-    out << "2D"; // TODO: RECT
+    out << "2D";
     break;
   case SH_TEXTURE_3D:
     out << "3D";
     break;
   case SH_TEXTURE_CUBE:
     out << "CUBE";
+    break;
+  case SH_TEXTURE_RECT:
+    out << "RECT";
     break;
   }
   return true;
@@ -1298,21 +902,6 @@ void ArbCode::allocConsts()
   }
 }
 
-void ArbCode::allocTextures()
-{
-  
-  for (ShProgramNode::VarList::const_iterator I = m_shader->textures.begin();
-       I != m_shader->textures.end(); ++I) {
-    ShTextureNodePtr node = *I;
-    int binding, index;
-    index = m_numTextures;
-    glGenTextures(1, (GLuint*)&binding);
-    m_registers[node] = ArbReg(SH_ARB_REG_TEXTURE, index);
-    m_registers[node].bindingIndex = binding;
-    m_numTextures++;
-  }
-}
-
 void mark(ShLinearAllocator& allocator, ShVariableNodePtr node, int i)
 {
   if (!node) return;
@@ -1347,23 +936,23 @@ void ArbCode::allocTemps()
 ArbBackend::ArbBackend()
 {
 #ifdef WIN32
-	DWORD err;
-	if ((glProgramStringARB = (PFNGLPROGRAMSTRINGARBPROC)wglGetProcAddress("glProgramStringARB")) == NULL)
-		err = GetLastError();
-	if ((glBindProgramARB = (PFNGLBINDPROGRAMARBPROC)wglGetProcAddress("glBindProgramARB")) == NULL)
-		err = GetLastError();
-	if ((glGenProgramsARB = (PFNGLGENPROGRAMSARBPROC)wglGetProcAddress("glGenProgramsARB")) == NULL)
-		err = GetLastError();
-	if ((glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC)wglGetProcAddress("glActiveTextureARB")) == NULL)
-		err = GetLastError();
-	if ((glTexImage3D = (PFNGLTEXIMAGE3DPROC)wglGetProcAddress("glTexImage3D")) == NULL)
-		err = GetLastError();
-	if ((glProgramEnvParameter4fvARB = (PFNGLPROGRAMENVPARAMETER4FVARBPROC)wglGetProcAddress("glProgramEnvParameter4fvARB")) == NULL)
-		err = GetLastError();
-	if ((glProgramLocalParameter4fvARB = (PFNGLPROGRAMLOCALPARAMETER4FVARBPROC)wglGetProcAddress("glProgramLocalParameter4fvARB")) == NULL)
-		err = GetLastError();
-	if ((glGetProgramivARB = (PFNGLGETPROGRAMIVARBPROC)wglGetProcAddress("glGetProgramivARB")) == NULL)
-		err = GetLastError();
+  DWORD err;
+  if ((glProgramStringARB = (PFNGLPROGRAMSTRINGARBPROC)wglGetProcAddress("glProgramStringARB")) == NULL)
+    err = GetLastError();
+  if ((glBindProgramARB = (PFNGLBINDPROGRAMARBPROC)wglGetProcAddress("glBindProgramARB")) == NULL)
+    err = GetLastError();
+  if ((glGenProgramsARB = (PFNGLGENPROGRAMSARBPROC)wglGetProcAddress("glGenProgramsARB")) == NULL)
+    err = GetLastError();
+  if ((glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC)wglGetProcAddress("glActiveTextureARB")) == NULL)
+    err = GetLastError();
+  if ((glTexImage3D = (PFNGLTEXIMAGE3DPROC)wglGetProcAddress("glTexImage3D")) == NULL)
+    err = GetLastError();
+  if ((glProgramEnvParameter4fvARB = (PFNGLPROGRAMENVPARAMETER4FVARBPROC)wglGetProcAddress("glProgramEnvParameter4fvARB")) == NULL)
+    err = GetLastError();
+  if ((glProgramLocalParameter4fvARB = (PFNGLPROGRAMLOCALPARAMETER4FVARBPROC)wglGetProcAddress("glProgramLocalParameter4fvARB")) == NULL)
+    err = GetLastError();
+  if ((glGetProgramivARB = (PFNGLGETPROGRAMIVARBPROC)wglGetProcAddress("glGetProgramivARB")) == NULL)
+    err = GetLastError();
 #endif /* WIN32 */
 
   // TODO Max TEX instructions, texture indirections
@@ -1405,7 +994,6 @@ std::string ArbBackend::name() const
 
 ShBackendCodePtr ArbBackend::generateCode(const std::string& target, const ShProgram& shader)
 {
-
   SH_DEBUG_ASSERT(shader.object());
   ArbCodePtr code = new ArbCode(this, shader, target);
   code->generate();

@@ -25,7 +25,7 @@ SHADER ALGEBRA:
  - implement named temporary extraction
 
 STREAMS:
- / implement execute() for Arb
+ X implement execute() for Arb
  - implement execute() for Sm
  X add ShChannelNode
  X add ShChannel
@@ -33,6 +33,8 @@ STREAMS:
  X implement combine/connect operations
  - implement stream _extraction_ operation
     (replace stream usages with an input variable)
+ - allow using a stream as both input and output with multiple output streams
+    (cache output first, then copy at the very end)
 
 MATRICES:
  X operator()() extracts submatrix
@@ -96,6 +98,7 @@ GENERIC SMALL TASKS:
  X rename "shader kind" to "shader target" throughout the code.
  X replace integers for shader targets with strings
  - add a switchBackend() function that clears boundShaders(), etc.
+ - add more tests to test/constant.sht
 
 GENERIC MEDIUM TASKS:
  X port more of the ShLib calls to the new model.

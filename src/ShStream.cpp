@@ -45,12 +45,27 @@ ShProgram connect(const ShChannelNodePtr& node, const ShProgram& program)
   return connect(nibble, program);
 }
 
+ShStream::ShStream(const ShChannelNodePtr& channel)
+{
+  append(channel);
+}
+
 ShStream::NodeList::const_iterator ShStream::begin() const
 {
   return m_nodes.begin();
 }
 
 ShStream::NodeList::const_iterator ShStream::end() const
+{
+  return m_nodes.end();
+}
+
+ShStream::NodeList::iterator ShStream::begin() 
+{
+  return m_nodes.begin();
+}
+
+ShStream::NodeList::iterator ShStream::end() 
 {
   return m_nodes.end();
 }

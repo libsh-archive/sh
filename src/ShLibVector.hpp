@@ -31,29 +31,9 @@
 #include "ShLib.hpp"
 
 namespace SH {
-SH_SHLIB_BINARY_OPERATION(ShVector, operator+, N);
-SH_SHLIB_BINARY_OPERATION(ShVector, operator-, N);
-SH_SHLIB_UNEQ_BINARY_OPERATION(ShVector, operator*, N);
 
-SH_SHLIB_LEFT_SCALAR_OPERATION(ShVector, operator*);
-
-SH_SHLIB_UNEQ_BINARY_OPERATION(ShVector, operator/, N);
-SH_SHLIB_BINARY_OPERATION(ShVector, operator^, N);
-SH_SHLIB_BINARY_OPERATION(ShVector, operator<, N);
-SH_SHLIB_BINARY_OPERATION(ShVector, operator<=, N);
-SH_SHLIB_BINARY_OPERATION(ShVector, operator>, N);
-SH_SHLIB_BINARY_OPERATION(ShVector, operator>=, N);
-SH_SHLIB_BINARY_OPERATION(ShVector, operator==, N);
-SH_SHLIB_BINARY_OPERATION(ShVector, operator!=, N);
-
-SH_SHLIB_UNARY_OPERATION(ShVector, abs, N);
-SH_SHLIB_UNARY_OPERATION(ShVector, acos, N);
-SH_SHLIB_UNARY_OPERATION(ShVector, asin, N);
-SH_SHLIB_UNARY_OPERATION(ShVector, cos, N);
-SH_SHLIB_UNARY_OPERATION(ShVector, frac, N);
-SH_SHLIB_UNARY_OPERATION(ShVector, sin, N);
-SH_SHLIB_UNARY_OPERATION(ShVector, sqrt, N);
-SH_SHLIB_UNARY_OPERATION(ShVector, normalize, N);
+SH_SHLIB_USUAL_OPERATIONS(ShVector);
+SH_SHLIB_USUAL_SUBTRACT(ShVector);
 
 SH_SHLIB_LEFT_MATRIX_OPERATION(ShVector, operator|, M);
 

@@ -52,10 +52,10 @@ private:
   ShConstant<N, T>& operator=(const ShConstant<N, T>& other);
 };
 
-typedef ShConstant<1, double> ShConstant1f;
-typedef ShConstant<2, double> ShConstant2f;
-typedef ShConstant<3, double> ShConstant3f;
-typedef ShConstant<4, double> ShConstant4f;
+typedef ShConstant<1, float> ShConstant1f;
+typedef ShConstant<2, float> ShConstant2f;
+typedef ShConstant<3, float> ShConstant3f;
+typedef ShConstant<4, float> ShConstant4f;
 
 }
 

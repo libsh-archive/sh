@@ -58,7 +58,8 @@ void shEndShader()
   
   ShEnvironment::insideShader = false;
 
-  if (!ShEnvironment::shader->target().empty()) {
+  if (ShEnvironment::shader->target() == "gpu:vertex" ||
+      ShEnvironment::shader->target() == "gpu:fragment") {
     shCompileShader(ShEnvironment::shader);
   }
 }

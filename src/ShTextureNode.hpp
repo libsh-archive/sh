@@ -37,7 +37,8 @@ enum ShTextureDims {
   SH_TEXTURE_1D,
   SH_TEXTURE_2D,
   SH_TEXTURE_3D,
-  SH_TEXTURE_CUBE
+  SH_TEXTURE_CUBE,
+  SH_TEXTURE_RECT
 };
 
 enum ShCubeDirection {

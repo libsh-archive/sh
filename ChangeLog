@@ -1,3 +1,42 @@
+2004-01-21  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	The 2601-line patch of doom!
+	
+	* src/ShTextureNode.hpp (ShTextureDims): Add SH_TEXTURE_RECT enum
+	value.
+
+	* src/ShTexture.hpp (ShTextureRect): Add ShTextureRect.
+
+	* src/ShSyntax.cpp (shEndShader): Only attempt to immediately
+	compile vertex and fragment programs.
+
+	* src/ShStream.hpp (ShStream): Add non-const begin() and end().
+
+	* src/ShInternals.cpp (repVar): Remove... you guessed it, annoying
+	debug output.
+
+	* src/ShAlgebra.cpp (connect): Remove annoying debug output.
+	(connect): Remove annoying debug output.
+	(replaceUniform): Remove annoying debug output.
+
+	* src/ShLib*.hpp: Add double conversion operators for constant
+	types. Tremendously improve the special type macros to actually
+	set up constant-overloaded library functions, etc.
+
+	* src/ShAttrib.hpp, src/ShVariable.hpp, ...: Change ShFoo1f to
+	actually be a float type, instead of a double.
+
+	* backends/arb/ShArbStream.cpp (execute): Arb stream execution
+	works now! At least on nvidia... Hooray! Aka the "Stefanus is
+	allowed to sleep again" change. This was a lot more work than this
+	puny little ChangeLog entry might suggest.
+
+	* backends/arb/ShArbTexture.cpp, backends/arbShArbReg.cpp: Split
+	these out of ShArb.cpp to make it a little more manageable.
+
+	* backends/arb/ShArb.hpp: Added some classes from ShArb.cpp to
+	facilitate splitting ShArb.cpp into more manageable chunks.
+
 2004-01-20  Bryan Chan  <b8chan@uwaterloo.ca>
 	* src/ShInternals.?pp: Moved ShVariableReplacer here from ShAlgebra
 

@@ -48,7 +48,7 @@ void ShVariableReplacer::operator()(ShCtrlGraphNodePtr node) {
 void ShVariableReplacer::repVar(ShVariable& var) {
   VarMap::iterator I = varMap.find(var.node());
   if (I == varMap.end()) return;
-  SH_DEBUG_PRINT("Replacing " << var.node()->name() << " with " << I->second->name());
+  // SH_DEBUG_PRINT("Replacing " << var.node()->name() << " with " << I->second->name());
   var.node() = I->second;
 }
 

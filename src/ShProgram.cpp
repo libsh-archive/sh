@@ -55,7 +55,7 @@ void ShProgramNode::compile(const std::string& target, ShRefCount<ShBackend>& ba
   ShEnvironment::insideShader = true;
   ShBackendCodePtr code = backend->generateCode(target, this);
 #ifdef SH_DEBUG
-  code->print(std::cerr);
+  //code->print(std::cerr);
 #endif
   ShEnvironment::insideShader = false;
   m_code[std::make_pair(target, backend)] = code;

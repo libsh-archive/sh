@@ -101,7 +101,7 @@ ShTexture1D<T>::ShTexture1D(int length)
 }
 
 template<typename T>
-T ShTexture1D<T>::operator()(const ShVariableN<1, double>& coords) const
+T ShTexture1D<T>::operator()(const ShVariableN<1, float>& coords) const
 {
   T t;
   ShVariable texVar(m_node);
@@ -124,7 +124,7 @@ ShTexture2D<T>::ShTexture2D(int width, int height)
 }
 
 template<typename T>
-T ShTexture2D<T>::operator()(const ShVariableN<2, double>& coords) const
+T ShTexture2D<T>::operator()(const ShVariableN<2, float>& coords) const
 {
   T t;
   ShVariable texVar(m_node);
@@ -147,7 +147,7 @@ ShTexture3D<T>::ShTexture3D(int width, int height, int depth)
 }
 
 template<typename T>
-T ShTexture3D<T>::operator()(const ShVariableN<3, double>& coords) const
+T ShTexture3D<T>::operator()(const ShVariableN<3, float>& coords) const
 {
   T t;
   ShVariable texVar(m_node);
@@ -177,7 +177,7 @@ void ShTextureCube<T>::set(ShCubeDirection dir, const ShTexture2D<T>& texture)
 }
 
 template<typename T>
-T ShTextureCube<T>::operator()(const ShVariableN<3, double>& dir) const
+T ShTextureCube<T>::operator()(const ShVariableN<3, float>& dir) const
 {
   T t;
   ShVariable texVar(m_node);
@@ -185,6 +185,29 @@ T ShTextureCube<T>::operator()(const ShVariableN<3, double>& dir) const
   
   ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
   return t;
+}
+
+template<typename T>
+ShTextureRect<T>::ShTextureRect(int width, int height)
+  : ShTexture<T>(new ShDataTextureNode(SH_TEXTURE_RECT, width, height, 1, T().size()))
+{
+}
+
+template<typename T>
+T ShTextureRect<T>::operator[](const ShVariableN<2, float>& coords) const
+{
+  T t;
+  ShVariable texVar(m_node);
+  ShStatement stmt(t, texVar, SH_OP_TEX, coords);
+  
+  ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+  return t;
+}
+
+template<typename T>
+void ShTextureRect<T>::load(const ShImage& image)
+{
+  loadImage(image);
 }
 
 }

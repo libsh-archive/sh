@@ -1,17 +1,48 @@
 // -*- C++ -*-
-ShProgram shader = SH_BEGIN_VERTEX_PROGRAM {
-  
-  ShInputAttrib4f in1; NAME(in1);
-  ShOutputAttrib4f out1; NAME(out1);
-  ShOutputAttrib1f out2; NAME(out2);
 
-  out1 = in1 * 1.0;
-  out1 = 2.0 * in1;
-  out2 = in1(1) < 3.0;
-  out2 += 4.0;
-  out1 *= 5.0;
-  out2 = 6.0;
+// TODO: Complete this
+
+#define TEST_SCALAR(type)                       \
+{                                               \
+  Sh ## type ## 1f var;                           \
+  var = var + 1.0; var = var + 1.0f;            \
+  var = var - 1.0; var = var - 1.0f;            \
+  var = var * 1.0; var = var * 1.0f;            \
+  var = var / 1.0; var = var / 1.0f;            \
+  var = 1.0 * var; var = 1.0f * var;            \
+  var = 1.0 / var; var = 1.0f / var;            \
+  var += 1.0; var += 1.0f;                      \
+  var -= 1.0; var -= 1.0f;                      \
+  var *= 1.0; var *= 1.0f;                      \
+  var /= 1.0; var /= 1.0f;                      \
+}
+
+#define TEST_VECTOR(type)                       \
+{                                               \
+  Sh ## type ## 4f var;                           \
+  var = 1.0 * var; var = 1.0f * var;                \
+  var = var * 1.0; var = var * 1.0f;                \
+  var = var / 1.0; var = var / 1.0f;                \
+  var *= 1.0; var *= 1.0f;                        \
+  var /= 1.0; var /= 1.0f;                        \
+}
+
+#define TEST_BOTH(type) \
+TEST_SCALAR(type) \
+TEST_VECTOR(type)
+
+ShProgram shader = SH_BEGIN_VERTEX_PROGRAM {
+
+  TEST_BOTH(Attrib);
+  TEST_BOTH(Vector);
+  TEST_BOTH(Point);
+  TEST_BOTH(Color);
+  TEST_BOTH(TexCoord);
+  TEST_BOTH(Normal);
+  TEST_BOTH(Position);
   
+  TEST_SCALAR(Attrib);
+  TEST_VECTOR(Attrib);
   
 } SH_END_PROGRAM;
 

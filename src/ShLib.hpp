@@ -50,25 +50,55 @@ template<typename T> \
 ShVariableN<1, T> operation(T left, const ShVariableN<1, T>& right) \
 { \
   return operation(ShConstant1f(left), right); \
-}
-
-#define SH_SHLIB_CONST_N_OP_LEFT(operation) \
-template<int N, typename T> \
-ShVariableN<N, T> operation(const ShVariableN<N, T>& left, T right) \
+} \
+template<typename T> \
+ShVariableN<1, T> operation(const ShVariableN<1, T>& left, double right) \
 { \
   return operation(left, ShConstant1f(right)); \
-}
-
-#define SH_SHLIB_CONST_N_OP_RIGHT(operation) \
-template<int N, typename T> \
-ShVariableN<N, T> operation(T left, const ShVariableN<N, T>& right) \
+} \
+template<typename T> \
+ShVariableN<1, T> operation(double left, const ShVariableN<1, T>& right) \
 { \
   return operation(ShConstant1f(left), right); \
 }
 
+#define SH_SHLIB_CONST_N_OP_RETSIZE_LEFT(operation, retsize) \
+template<int N, typename T> \
+ShVariableN<retsize, T> operation(const ShVariableN<N, T>& left, T right) \
+{ \
+  return operation(left, ShConstant1f(right)); \
+} \
+template<int N, typename T> \
+ShVariableN<retsize, T> operation(const ShVariableN<N, T>& left, double right) \
+{ \
+  return operation(left, ShConstant1f(right)); \
+}
+
+#define SH_SHLIB_CONST_N_OP_RETSIZE_RIGHT(operation, retsize) \
+template<int N, typename T> \
+ShVariableN<retsize, T> operation(T left, const ShVariableN<N, T>& right) \
+{ \
+  return operation(ShConstant1f(left), right); \
+} \
+template<int N, typename T> \
+ShVariableN<retsize, T> operation(double left, const ShVariableN<N, T>& right) \
+{ \
+  return operation(ShConstant1f(left), right); \
+}
+
+#define SH_SHLIB_CONST_N_OP_LEFT(operation) \
+  SH_SHLIB_CONST_N_OP_RETSIZE_LEFT(operation, N);
+
+#define SH_SHLIB_CONST_N_OP_RIGHT(operation) \
+  SH_SHLIB_CONST_N_OP_RETSIZE_RIGHT(operation, N);
+
 #define SH_SHLIB_CONST_N_OP_BOTH(operation) \
 SH_SHLIB_CONST_N_OP_LEFT(operation); \
 SH_SHLIB_CONST_N_OP_RIGHT(operation);
+
+#define SH_SHLIB_CONST_N_OP_RETSIZE_BOTH(operation, retsize) \
+SH_SHLIB_CONST_N_OP_RETSIZE_LEFT(operation, retsize); \
+SH_SHLIB_CONST_N_OP_RETSIZE_RIGHT(operation, retsize);
 
 namespace SH {
 
@@ -465,22 +495,12 @@ ShVariableN<1,  T> opfunc(const ShVariableN<M, T>& left, const ShVariableN<N, T>
     ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);\
     return t;\
   }\
-}\
-\
-template<int N, typename T>\
-ShVariableN<1,  T> opfunc(T left, const ShVariableN<N, T>& right) {\
-  return opfunc(ShConstant1f(left), right);\
-}\
-\
-template<int M, typename T>\
-ShVariableN<1,  T> opfunc(const ShVariableN<M, T>& left, T right) {\
-  return opfunc(left, ShConstant1f(right));\
 }
 
 SH_LIB_DOTPRODUCT(dot);
 SH_LIB_DOTPRODUCT(operator|);
 
-
+SH_SHLIB_CONST_N_OP_RETSIZE_BOTH(dot, 1);
 
 /// greatest integer >= argument 
 template<int N, typename T>
@@ -537,7 +557,7 @@ ShVariableN<N, T> frac(const ShVariableN<N, T>& var)
     T vals[N];
     var.getValues(vals);
     T result[N];
-    for (int i = 0; i < N; i++) result[i] = std::fmod(vals[i], 1.0); // TODO: Check that this is correct
+    for (int i = 0; i < N; i++) result[i] = fmodf(vals[i], 1.0f); // TODO: Check that this is correct
     return ShConstant<N, T>(result);
   } else {
     ShAttrib<N, SH_VAR_TEMP, T, false> t;
@@ -563,7 +583,7 @@ ShVariableN<N, T> lerp(const ShVariableN<M, T>& f, const ShVariableN<N, T>& a,
     f.getValues(fvals);
     T result[N];
     for (int i = 0; i < N; i++) {
-        double fi = ( M == 1 ? fvals[0] : fvals[i] ); 
+        T fi = ( M == 1 ? fvals[0] : fvals[i] ); 
         result[i] = fi * avals[i] + (1 - fi) * bvals[i]; 
     }
     return ShConstant<N, T>(result);
@@ -632,7 +652,19 @@ ShVariableN<N, T> mad(T m1, const ShVariableN<N, T>& m2, const ShVariableN<N, T>
 }
 
 template<int N, typename T> 
+ShVariableN<N, T> mad(double m1, const ShVariableN<N, T>& m2, const ShVariableN<N, T>& a)
+{ 
+  return mad(ShConstant1f(m1), m2, a); 
+}
+
+template<int N, typename T> 
 ShVariableN<N, T> mad(const ShVariableN<N, T>& m1, T m2, const ShVariableN<N, T>& a)
+{ 
+  return mad(m1, ShConstant1f(m2), a); 
+}
+
+template<int N, typename T> 
+ShVariableN<N, T> mad(const ShVariableN<N, T>& m1, double m2, const ShVariableN<N, T>& a)
 { 
   return mad(m1, ShConstant1f(m2), a); 
 }
@@ -775,7 +807,7 @@ ShVariableN<N, T> normalize(const ShVariableN<N, T>& var)
 {
   if (!ShEnvironment::insideShader) {
     ShAttrib1f sizeVar = sqrt(dot(var, var));
-    double size;
+    T size;
     sizeVar.getValues(&size);
     assert(var.hasValues());
     T vals[N];
@@ -900,6 +932,142 @@ librettype<libretsize, SH_VAR_TEMP, T, false> libop(const ShMatrix<M, N, K1, T>&
 
 #define SH_SHLIB_LEFT_MATRIX_OPERATION(libtype, libop, libretsize) \
   SH_SHLIB_LEFT_MATRIX_RETTYPE_OPERATION(libtype, libop, libtype, libretsize)
+
+// All the scalar constant stuff
+
+#define SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(libtype, libop, librettype, libretsize) \
+template<int K1, typename T, bool S1> \
+librettype<libretsize, SH_VAR_TEMP, T, false> \
+libop(const libtype<1, K1, T, S1>& left, T right) \
+{ \
+  return libop(left, ShConstant1f(right)); \
+} \
+template<int K1, typename T, bool S1> \
+librettype<libretsize, SH_VAR_TEMP, T, false> \
+libop(T left, const libtype<1, K1, T, S1>& right) \
+{ \
+  return libop(ShConstant1f(left), right); \
+} \
+template<int K1, typename T, bool S1> \
+librettype<libretsize, SH_VAR_TEMP, T, false> \
+libop(const libtype<1, K1, T, S1>& left, double right) \
+{ \
+  return libop(left, ShConstant1f(right)); \
+} \
+template<int K1, typename T, bool S1> \
+librettype<libretsize, SH_VAR_TEMP, T, false> \
+libop(double left, const libtype<1, K1, T, S1>& right) \
+{ \
+  return libop(ShConstant1f(left), right); \
+}
+
+#define SH_SHLIB_SPECIAL_CONST_SCALAR_OP(libtype, libop) \
+  SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(libtype, libop, libtype, 1)
+
+#define SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_LEFT(libtype, libop, librettype, libretsize) \
+template<int N, int K1, typename T, bool S1> \
+librettype<libretsize, SH_VAR_TEMP, T, false> \
+libop(const libtype<N, K1, T, S1>& left, T right) \
+{ \
+  return libop(left, ShConstant1f(right)); \
+} \
+template<int N, int K1, typename T, bool S1> \
+librettype<libretsize, SH_VAR_TEMP, T, false> \
+libop(const libtype<N, K1, T, S1>& left, double right) \
+{ \
+  return libop(left, ShConstant1f(right)); \
+}
+#define SH_SHLIB_SPECIAL_CONST_N_OP_LEFT(libtype, libop) \
+  SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_LEFT(libtype, libop, libtype, N)
+
+#define SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_RIGHT(libtype, libop, librettype, libretsize) \
+template<int N, int K1, typename T, bool S1> \
+librettype<libretsize, SH_VAR_TEMP, T, false> \
+libop(T left, const libtype<N, K1, T, S1>& right) \
+{ \
+  return libop(ShConstant1f(left), right); \
+} \
+template<int N, int K1, typename T, bool S1> \
+librettype<libretsize, SH_VAR_TEMP, T, false> \
+libop(double left, const libtype<N, K1, T, S1>& right) \
+{ \
+  return libop(ShConstant1f(left), right); \
+}
+#define SH_SHLIB_SPECIAL_CONST_N_OP_RIGHT(libtype, libop) \
+  SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_RIGHT(libtype, libop, libtype, N)
+
+#define SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_BOTH(libtype, operation, librettype, libretsize) \
+SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_LEFT(libtype, operation, librettype, libretsize); \
+SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_RIGHT(libtype, operation, librettype, libretsize);
+
+#define SH_SHLIB_SPECIAL_CONST_N_OP_BOTH(libtype, operation) \
+SH_SHLIB_SPECIAL_CONST_N_OP_LEFT(libtype, operation); \
+SH_SHLIB_SPECIAL_CONST_N_OP_RIGHT(libtype, operation);
+
+// Standard stuff
+
+#define SH_SHLIB_USUAL_OPERATIONS(type) \
+  SH_SHLIB_USUAL_OPERATIONS_RETTYPE(type, type)
+
+#define SH_SHLIB_USUAL_OPERATIONS_RETTYPE(type, rettype) \
+SH_SHLIB_BINARY_RETTYPE_OPERATION(type, operator+, rettype, N);      \
+SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, operator+, rettype, 1);  \
+                                                        \
+SH_SHLIB_UNEQ_BINARY_RETTYPE_OPERATION(type, operator*, rettype, N); \
+SH_SHLIB_LEFT_SCALAR_RETTYPE_OPERATION(type, operator*, rettype);    \
+SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, operator*, rettype, 1);  \
+SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_BOTH(type, operator*, rettype, N);  \
+                                                        \
+SH_SHLIB_UNEQ_BINARY_RETTYPE_OPERATION(type, operator/, rettype, N); \
+SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, operator/, rettype, 1);  \
+SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_LEFT(type, operator/, rettype, N);  \
+                                                        \
+SH_SHLIB_BINARY_RETTYPE_OPERATION(type, pow, rettype, N);            \
+SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, pow, rettype, 1);        \
+SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_RIGHT(type, pow, rettype, N);       \
+                                                        \
+SH_SHLIB_BINARY_RETTYPE_OPERATION(type, operator^, rettype, N);      \
+SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, operator^, rettype, 1);  \
+SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_RIGHT(type, operator^, rettype, N); \
+                                                        \
+SH_SHLIB_BINARY_RETTYPE_OPERATION(type, operator<, rettype, N);      \
+SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, operator<, rettype, 1);  \
+SH_SHLIB_BINARY_RETTYPE_OPERATION(type, operator<=, rettype, N);     \
+SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, operator<=, rettype, 1); \
+SH_SHLIB_BINARY_RETTYPE_OPERATION(type, operator>, rettype, N);      \
+SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, operator>, rettype, 1);  \
+SH_SHLIB_BINARY_RETTYPE_OPERATION(type, operator>=, rettype, N);     \
+SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, operator>=, rettype, 1); \
+SH_SHLIB_BINARY_RETTYPE_OPERATION(type, operator==, rettype, N);     \
+SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, operator==, rettype, 1); \
+SH_SHLIB_BINARY_RETTYPE_OPERATION(type, operator!=, rettype, N);     \
+SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, operator!=, rettype, 1); \
+                                                        \
+SH_SHLIB_UNARY_RETTYPE_OPERATION(type, abs, rettype, N);             \
+SH_SHLIB_UNARY_RETTYPE_OPERATION(type, acos, rettype, N);            \
+SH_SHLIB_UNARY_RETTYPE_OPERATION(type, asin, rettype, N);            \
+SH_SHLIB_UNARY_RETTYPE_OPERATION(type, cos, rettype, N);             \
+SH_SHLIB_BINARY_RETTYPE_OPERATION(type, dot, rettype, 1);           \
+SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_BOTH(type, dot, rettype, 1);           \
+SH_SHLIB_BINARY_RETTYPE_OPERATION(type, fmod, rettype, N);           \
+SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, fmod, rettype, 1);       \
+                                                        \
+SH_SHLIB_UNARY_RETTYPE_OPERATION(type, frac, rettype, N);            \
+SH_SHLIB_UNARY_RETTYPE_OPERATION(type, sin, rettype, N);             \
+SH_SHLIB_UNARY_RETTYPE_OPERATION(type, sqrt, rettype, N);            \
+SH_SHLIB_UNARY_RETTYPE_OPERATION(type, normalize, rettype, N);       \
+                                                        \
+SH_SHLIB_BINARY_RETTYPE_OPERATION(type, min, rettype, N);            \
+SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, min, rettype, 1);        \
+SH_SHLIB_BINARY_RETTYPE_OPERATION(type, pos, rettype, N);            \
+SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, pos, rettype, 1);        \
+SH_SHLIB_BINARY_RETTYPE_OPERATION(type, max, rettype, N);            \
+SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(type, max, rettype, 1);
+
+// Points have different subtraction, so we don't include them in our "usuals"
+#define SH_SHLIB_USUAL_SUBTRACT(type) \
+SH_SHLIB_BINARY_OPERATION(type, operator-, N);      \
+SH_SHLIB_SPECIAL_CONST_SCALAR_OP(type, operator-);  \
 
 #include "ShLibAttrib.hpp"
 #include "ShLibVector.hpp"

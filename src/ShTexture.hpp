@@ -58,7 +58,7 @@ public:
   ShTexture1D(int length);
 
   /// Lookup a value, coords being in [0,1]
-  T operator()(const ShVariableN<1, double>& coords) const;
+  T operator()(const ShVariableN<1, float>& coords) const;
 
   void load(const ShImage& image);
 };
@@ -69,7 +69,7 @@ public:
   ShTexture2D(int width, int height);
 
   /// Lookup a value, coords being in [0,1] x [0,1]
-  T operator()(const ShVariableN<2, double>& coords) const;
+  T operator()(const ShVariableN<2, float>& coords) const;
 
   void load(const ShImage& image);
 };
@@ -80,7 +80,7 @@ public:
   ShTexture3D(int width, int height, int depth);
 
   /// Lookup a value, coords being in [0,1] x [0,1] x [0,1]
-  T operator()(const ShVariableN<3, double>& coords) const;
+  T operator()(const ShVariableN<3, float>& coords) const;
 
   /// Load the given image at the given depth slice 
   // (loads the 2D plane with tex coords (x,y,slice), 
@@ -95,10 +95,21 @@ public:
 
   void set(ShCubeDirection dir, const ShTexture2D<T>& texture);
 
-  T operator()(const ShVariableN<3, double>& direction) const ;
+  T operator()(const ShVariableN<3, float>& direction) const;
   
 private:
   ShCubeTextureNodePtr m_node;
+};
+
+template<typename T>
+class ShTextureRect : public ShTexture<T> {
+public:
+  ShTextureRect(int width, int height);
+
+  /// Lookup a value, coords being in [0,width] x [0,height]
+  T operator[](const ShVariableN<2, float>& coords) const;
+
+  void load(const ShImage& image);
 };
 
 }

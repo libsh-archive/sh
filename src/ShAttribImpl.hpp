@@ -182,6 +182,7 @@ template<int N, int Kind, typename T, bool Swizzled>
 ShAttrib<N, Kind, T, Swizzled>&
 ShAttrib<N, Kind, T, Swizzled>::operator=(T other)
 {
+  ShIntEqual<N, 1>();
   return operator=(ShConstant1f(other));
 }
 
@@ -209,7 +210,7 @@ ShAttrib<N, Kind, T, Swizzled>::operator-=(const ShVariableN<N, T>& right)
 template<int N, int Kind, typename T, bool Swizzled>
 template<typename T2>
 ShAttrib<N, Kind, T, Swizzled>&
-ShAttrib<N, Kind, T, Swizzled>::operator*=(const T2& right)
+ShAttrib<N, Kind, T, Swizzled>::operator*=(T2 right)
 {
   *this = *this * right;
 
@@ -220,9 +221,29 @@ ShAttrib<N, Kind, T, Swizzled>::operator*=(const T2& right)
 template<int N, int Kind, typename T, bool Swizzled>
 template<typename T2>
 ShAttrib<N, Kind, T, Swizzled>&
-ShAttrib<N, Kind, T, Swizzled>::operator/=(const T2& right)
+ShAttrib<N, Kind, T, Swizzled>::operator/=(T2 right)
 {
   *this = *this / right;
+
+  return *this;
+}
+
+/// In-place addition
+template<int N, int Kind, typename T, bool Swizzled>
+ShAttrib<N, Kind, T, Swizzled>&
+ShAttrib<N, Kind, T, Swizzled>::operator+=(const ShConstant<N, T>& right)
+{
+  *this = *this + right;
+
+  return *this;
+}
+
+/// In-place subtraction
+template<int N, int Kind, typename T, bool Swizzled>
+ShAttrib<N, Kind, T, Swizzled>&
+ShAttrib<N, Kind, T, Swizzled>::operator-=(const ShConstant<N, T>& right)
+{
+  *this = *this - right;
 
   return *this;
 }

@@ -65,7 +65,7 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   int aosize, bisize;
   aosize = a->outputs.size();
   bisize = b->inputs.size();
-  SH_DEBUG_PRINT( "Connecting " << aosize << " outputs to " << bisize << " inputs" );
+  //SH_DEBUG_PRINT( "Connecting " << aosize << " outputs to " << bisize << " inputs" );
   std::string rtarget;
 
   if (a->target().empty()) {
@@ -117,15 +117,15 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   
   ShVariableReplacer::VarMap varMap;
 
-  SH_DEBUG_PRINT("Smashing variables together");
+  // SH_DEBUG_PRINT("Smashing variables together");
   
   ShEnvironment::shader = program;
   ShEnvironment::insideShader = true;
   
   ShProgramNode::VarList::const_iterator I, J;  
   for (I = a->outputs.begin(), J = b->inputs.begin(); I != a->outputs.end() && J != b->inputs.end(); ++I, ++J) {
-    SH_DEBUG_PRINT("Smashing variables " << (*I)->nameOfType() << " " <<(*I)->name() 
-        << " -> " << (*J)->nameOfType() << " " << (*J)->name() );
+    // SH_DEBUG_PRINT("Smashing variables " << (*I)->nameOfType() << " " <<(*I)->name() 
+    //     << " -> " << (*J)->nameOfType() << " " << (*J)->name() );
     if( (*I)->size() != (*J)->size() ) {
       ShError( ShAlgebraException( "Cannot smash variables " + 
             (*I)->nameOfType() + " " + (*I)->name() + " and " + 
@@ -146,7 +146,7 @@ ShProgram connect(const ShProgram& a, const ShProgram& b)
   optimizer.optimize(ShEnvironment::optimizationLevel);
   
   program->collectVariables();
-  SH_DEBUG_PRINT( "Done");
+  // SH_DEBUG_PRINT( "Done");
 
   return program;
 }
@@ -239,7 +239,7 @@ ShProgram replaceUniform(const ShProgram& a, const ShVariable& v)
   
   ShVariableReplacer::VarMap varMap;
 
-  SH_DEBUG_PRINT("Adding a new input to replace the uniform");
+  // SH_DEBUG_PRINT("Adding a new input to replace the uniform");
   
   ShEnvironment::shader = program;
   ShEnvironment::insideShader = true;

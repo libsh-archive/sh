@@ -85,7 +85,7 @@ void ShDataMemoryObject::setData(const float *data) {
 }
 
 void ShDataMemoryObject::setPartialData(const float *data, int count) {
-  std::memcpy(m_data, data, count * m_elements);
+  std::memcpy(m_data, data, count * m_elements * sizeof(float));
 }
 
 float* ShDataMemoryObject::data() const {

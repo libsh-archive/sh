@@ -69,8 +69,11 @@ public:
 
   ShAttrib& operator+=(const ShVariableN<N, T>& right);
   ShAttrib& operator-=(const ShVariableN<N, T>& right);
-  template<typename T2> ShAttrib& operator*=(const T2& right);
-  template<typename T2> ShAttrib& operator/=(const T2& right);
+  template<typename T2> ShAttrib& operator*=(T2 right);
+  template<typename T2> ShAttrib& operator/=(T2 right);
+
+  ShAttrib& operator+=(const ShConstant<N, T>& right);
+  ShAttrib& operator-=(const ShConstant<N, T>& right);
 
   /**@name Swizzling
    * Generate a new attribute by selecting the given elements from
@@ -95,33 +98,21 @@ public:
   typedef T ValueType;
 };
 
-typedef ShAttrib<1, SH_VAR_INPUT, double> ShInputAttrib1f;
-typedef ShAttrib<1, SH_VAR_OUTPUT, double> ShOutputAttrib1f;
-typedef ShAttrib<1, SH_VAR_TEMP, double> ShAttrib1f;
+typedef ShAttrib<1, SH_VAR_INPUT, float> ShInputAttrib1f;
+typedef ShAttrib<1, SH_VAR_OUTPUT, float> ShOutputAttrib1f;
+typedef ShAttrib<1, SH_VAR_TEMP, float> ShAttrib1f;
 
-typedef ShAttrib<2, SH_VAR_INPUT, double> ShInputAttrib2f;
-typedef ShAttrib<2, SH_VAR_OUTPUT, double> ShOutputAttrib2f;
-typedef ShAttrib<2, SH_VAR_TEMP, double> ShAttrib2f;
+typedef ShAttrib<2, SH_VAR_INPUT, float> ShInputAttrib2f;
+typedef ShAttrib<2, SH_VAR_OUTPUT, float> ShOutputAttrib2f;
+typedef ShAttrib<2, SH_VAR_TEMP, float> ShAttrib2f;
 
-typedef ShAttrib<3, SH_VAR_INPUT, double> ShInputAttrib3f;
-typedef ShAttrib<3, SH_VAR_OUTPUT, double> ShOutputAttrib3f;
-typedef ShAttrib<3, SH_VAR_TEMP, double> ShAttrib3f;
+typedef ShAttrib<3, SH_VAR_INPUT, float> ShInputAttrib3f;
+typedef ShAttrib<3, SH_VAR_OUTPUT, float> ShOutputAttrib3f;
+typedef ShAttrib<3, SH_VAR_TEMP, float> ShAttrib3f;
 
-typedef ShAttrib<4, SH_VAR_INPUT, double> ShInputAttrib4f;
-typedef ShAttrib<4, SH_VAR_OUTPUT, double> ShOutputAttrib4f;
-typedef ShAttrib<4, SH_VAR_TEMP, double> ShAttrib4f;
-
-template<int Kind, typename T, bool Swizzled>
-ShAttrib<1, Kind, T, Swizzled>& operator+=(ShAttrib<1, Kind, T, Swizzled>& a, T t)
-{
-  return a += ShConstant1f(t);
-}
-
-template<int Kind, typename T, bool Swizzled>
-ShAttrib<1, Kind, T, Swizzled>& operator-=(ShAttrib<1, Kind, T, Swizzled>& a, T t)
-{
-  return a -= ShConstant1f(t);
-}
+typedef ShAttrib<4, SH_VAR_INPUT, float> ShInputAttrib4f;
+typedef ShAttrib<4, SH_VAR_OUTPUT, float> ShOutputAttrib4f;
+typedef ShAttrib<4, SH_VAR_TEMP, float> ShAttrib4f;
 
 
 } // namespace SH

@@ -78,7 +78,7 @@ public:
 
   std::string nameOfType() const; ///< Get a string of this var's specialType, kind, & size
 
-  typedef double ValueType;
+  typedef float ValueType; ///< This is not necessarily correct. Oh well.
   
   /// For variables with values only. Sets the value of the i'th entry.
   /// If i is outside [0, size - 1] this is a no-op.

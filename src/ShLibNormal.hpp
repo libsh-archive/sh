@@ -33,29 +33,8 @@
 
 namespace SH {
 
-SH_SHLIB_BINARY_OPERATION(ShNormal, operator+, N);
-SH_SHLIB_BINARY_OPERATION(ShNormal, operator-, N);
-SH_SHLIB_UNEQ_BINARY_OPERATION(ShNormal, operator*, N);
-
-SH_SHLIB_LEFT_SCALAR_OPERATION(ShNormal, operator*);
-
-SH_SHLIB_UNEQ_BINARY_OPERATION(ShNormal, operator/, N);
-SH_SHLIB_BINARY_OPERATION(ShNormal, operator^, N);
-SH_SHLIB_BINARY_OPERATION(ShNormal, operator<, N);
-SH_SHLIB_BINARY_OPERATION(ShNormal, operator<=, N);
-SH_SHLIB_BINARY_OPERATION(ShNormal, operator>, N);
-SH_SHLIB_BINARY_OPERATION(ShNormal, operator>=, N);
-SH_SHLIB_BINARY_OPERATION(ShNormal, operator==, N);
-SH_SHLIB_BINARY_OPERATION(ShNormal, operator!=, N);
-
-SH_SHLIB_UNARY_OPERATION(ShNormal, abs, N);
-SH_SHLIB_UNARY_OPERATION(ShNormal, acos, N);
-SH_SHLIB_UNARY_OPERATION(ShNormal, asin, N);
-SH_SHLIB_UNARY_OPERATION(ShNormal, cos, N);
-SH_SHLIB_UNARY_OPERATION(ShNormal, frac, N);
-SH_SHLIB_UNARY_OPERATION(ShNormal, sin, N);
-SH_SHLIB_UNARY_OPERATION(ShNormal, sqrt, N);
-SH_SHLIB_UNARY_OPERATION(ShNormal, normalize, N);
+SH_SHLIB_USUAL_OPERATIONS(ShNormal);
+SH_SHLIB_USUAL_SUBTRACT(ShNormal);
 
 SH_SHLIB_LEFT_MATRIX_OPERATION(ShNormal, operator|, M);
 

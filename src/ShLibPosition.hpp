@@ -34,29 +34,10 @@
 #include "ShLib.hpp"
 
 namespace SH {
-SH_SHLIB_BINARY_RETTYPE_OPERATION(ShPosition, operator+, ShPoint, N);
+
+SH_SHLIB_USUAL_OPERATIONS_RETTYPE(ShPosition, ShPoint);
 SH_SHLIB_BINARY_RETTYPE_OPERATION(ShPosition, operator-, ShVector, N);
-SH_SHLIB_UNEQ_BINARY_RETTYPE_OPERATION(ShPosition, operator*, ShPoint, N);
-
-SH_SHLIB_LEFT_SCALAR_RETTYPE_OPERATION(ShPosition, operator*, ShPoint);
-
-SH_SHLIB_UNEQ_BINARY_RETTYPE_OPERATION(ShPosition, operator/, ShPoint, N);
-SH_SHLIB_BINARY_RETTYPE_OPERATION(ShPosition, operator^, ShPoint, N);
-SH_SHLIB_BINARY_RETTYPE_OPERATION(ShPosition, operator<, ShPoint, N);
-SH_SHLIB_BINARY_RETTYPE_OPERATION(ShPosition, operator<=, ShPoint, N);
-SH_SHLIB_BINARY_RETTYPE_OPERATION(ShPosition, operator>, ShPoint, N);
-SH_SHLIB_BINARY_RETTYPE_OPERATION(ShPosition, operator>=, ShPoint, N);
-SH_SHLIB_BINARY_RETTYPE_OPERATION(ShPosition, operator==, ShPoint, N);
-SH_SHLIB_BINARY_RETTYPE_OPERATION(ShPosition, operator!=, ShPoint, N);
-
-SH_SHLIB_UNARY_RETTYPE_OPERATION(ShPosition, abs, ShPoint, N);
-SH_SHLIB_UNARY_RETTYPE_OPERATION(ShPosition, acos, ShPoint, N);
-SH_SHLIB_UNARY_RETTYPE_OPERATION(ShPosition, asin, ShPoint, N);
-SH_SHLIB_UNARY_RETTYPE_OPERATION(ShPosition, cos, ShPoint, N);
-SH_SHLIB_UNARY_RETTYPE_OPERATION(ShPosition, frac, ShPoint, N);
-SH_SHLIB_UNARY_RETTYPE_OPERATION(ShPosition, sin, ShPoint, N);
-SH_SHLIB_UNARY_RETTYPE_OPERATION(ShPosition, sqrt, ShPoint, N);
-SH_SHLIB_UNARY_RETTYPE_OPERATION(ShPosition, normalize, ShPoint, N);
+SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(ShPosition, operator-, ShVector, 1);
 
 SH_SHLIB_LEFT_MATRIX_RETTYPE_OPERATION(ShPosition, operator|, ShPoint, M);
 
