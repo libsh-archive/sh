@@ -24,44 +24,19 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SH_HPP
-#define SH_HPP
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
-#include "ShException.hpp"
-#include "ShProgram.hpp"
-#include "ShSyntax.hpp"
-#include "ShAttrib.hpp"
-#include "ShMatrix.hpp"
-#include "ShVector.hpp"
-#include "ShPoint.hpp"
-#include "ShColor.hpp"
-#include "ShTexCoord.hpp"
-#include "ShNormal.hpp"
-#include "ShPosition.hpp"
-#include "ShLib.hpp"
-#include "ShTexture.hpp"
-#include "ShBackend.hpp"
-#include "ShImage.hpp"
-#include "ShAlgebra.hpp"
-
-/** \namespace SH
- * \brief The main Sh namespace.
- *
- * All Sh classes, functions and objects reside within this namespace.
- */
-
-/** \file sh.hpp
- * \brief The main Sh include file.
- * You should only have to include this file to use Sh.
- */
+#ifdef WIN32
+#include "../backends/arb/ShArb.hpp"
+#endif /* WIN32 */
 
 namespace SH {
-    /** \brief SH Initialization Function.
-     *
-     * The function needs to be called prior to the use of any other SH functions. Additionally,
-	 * in Windows, this function needs to be called after a OpenGL context/window has been created.
-     */
-    void ShInit();
-}
 
-#endif
+void ShInit(void)
+  {
+  static SH::ShRefCount<ShArb::ArbBackend> instance = new ShArb::ArbBackend();
+  }
+
+}
