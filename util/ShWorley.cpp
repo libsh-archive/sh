@@ -220,8 +220,8 @@ ShAttrib3f ShWorley::worley(ShAttrib2f p, ShAttrib4f c, ShWorleyMetric m ) {
 
 ShProgram ShWorley::worleyProgram( ShWorleyMetric m ) {
   ShProgram program = SH_BEGIN_PROGRAM() {
-    ShInputAttrib2f p;
     ShInputAttrib4f coefficient;
+    ShInputAttrib2f p;
 
     ShAttrib1f tempScalar;
     ShAttrib2f tempGradient;
