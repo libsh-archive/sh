@@ -51,32 +51,14 @@ template<int N, ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShGeneric<N, T>& other)
   : ShGeneric<N, T>(new ShVariableNode(Binding, N))
 {
-  if (Binding == SH_CONST || uniform()) {
-    SH_DEBUG_ASSERT(Binding == SH_CONST || !ShEnvironment::insideShader);
-    SH_DEBUG_ASSERT(other.hasValues());
-    T data[N];
-    other.getValues(data);
-    setValues(data);
-  } else {
-    ShStatement asn(*this, SH_OP_ASN, other);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
-  }
+  shASN(*this, other);
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShAttrib<N, Binding, T, Swizzled>& other)
   : ShGeneric<N, T>(new ShVariableNode(Binding, N))
 {
-  if (Binding == SH_CONST || uniform()) {
-    SH_DEBUG_ASSERT(Binding == SH_CONST || !ShEnvironment::insideShader);
-    SH_DEBUG_ASSERT(other.hasValues());
-    T data[N];
-    other.getValues(data);
-    setValues(data);
-  } else {
-    ShStatement asn(*this, SH_OP_ASN, other);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
-  }
+  shASN(*this, other);
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
@@ -242,32 +224,14 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T>& other)
   : ShGeneric<1, T>(new ShVariableNode(Binding, 1))
 {
-  if (Binding == SH_CONST || uniform()) {
-    SH_DEBUG_ASSERT(Binding == SH_CONST || !ShEnvironment::insideShader);
-    SH_DEBUG_ASSERT(other.hasValues());
-    T data[1];
-    other.getValues(data);
-    setValues(data);
-  } else {
-    ShStatement asn(*this, SH_OP_ASN, other);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
-  }
+  shASN(*this, other);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShAttrib<1, Binding, T, Swizzled>& other)
   : ShGeneric<1, T>(new ShVariableNode(Binding, 1))
 {
-  if (Binding == SH_CONST || uniform()) {
-    SH_DEBUG_ASSERT(Binding == SH_CONST || !ShEnvironment::insideShader);
-    SH_DEBUG_ASSERT(other.hasValues());
-    T data[1];
-    other.getValues(data);
-    setValues(data);
-  } else {
-    ShStatement asn(*this, SH_OP_ASN, other);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
-  }
+  shASN(*this, other);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -444,32 +408,14 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShGeneric<2, T>& other)
   : ShGeneric<2, T>(new ShVariableNode(Binding, 2))
 {
-  if (Binding == SH_CONST || uniform()) {
-    SH_DEBUG_ASSERT(Binding == SH_CONST || !ShEnvironment::insideShader);
-    SH_DEBUG_ASSERT(other.hasValues());
-    T data[2];
-    other.getValues(data);
-    setValues(data);
-  } else {
-    ShStatement asn(*this, SH_OP_ASN, other);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
-  }
+  shASN(*this, other);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShAttrib<2, Binding, T, Swizzled>& other)
   : ShGeneric<2, T>(new ShVariableNode(Binding, 2))
 {
-  if (Binding == SH_CONST || uniform()) {
-    SH_DEBUG_ASSERT(Binding == SH_CONST || !ShEnvironment::insideShader);
-    SH_DEBUG_ASSERT(other.hasValues());
-    T data[2];
-    other.getValues(data);
-    setValues(data);
-  } else {
-    ShStatement asn(*this, SH_OP_ASN, other);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
-  }
+  shASN(*this, other);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -663,32 +609,14 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShGeneric<3, T>& other)
   : ShGeneric<3, T>(new ShVariableNode(Binding, 3))
 {
-  if (Binding == SH_CONST || uniform()) {
-    SH_DEBUG_ASSERT(Binding == SH_CONST || !ShEnvironment::insideShader);
-    SH_DEBUG_ASSERT(other.hasValues());
-    T data[3];
-    other.getValues(data);
-    setValues(data);
-  } else {
-    ShStatement asn(*this, SH_OP_ASN, other);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
-  }
+  shASN(*this, other);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShAttrib<3, Binding, T, Swizzled>& other)
   : ShGeneric<3, T>(new ShVariableNode(Binding, 3))
 {
-  if (Binding == SH_CONST || uniform()) {
-    SH_DEBUG_ASSERT(Binding == SH_CONST || !ShEnvironment::insideShader);
-    SH_DEBUG_ASSERT(other.hasValues());
-    T data[3];
-    other.getValues(data);
-    setValues(data);
-  } else {
-    ShStatement asn(*this, SH_OP_ASN, other);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
-  }
+  shASN(*this, other);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -887,32 +815,14 @@ template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShGeneric<4, T>& other)
   : ShGeneric<4, T>(new ShVariableNode(Binding, 4))
 {
-  if (Binding == SH_CONST || uniform()) {
-    SH_DEBUG_ASSERT(Binding == SH_CONST || !ShEnvironment::insideShader);
-    SH_DEBUG_ASSERT(other.hasValues());
-    T data[4];
-    other.getValues(data);
-    setValues(data);
-  } else {
-    ShStatement asn(*this, SH_OP_ASN, other);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
-  }
+  shASN(*this, other);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShAttrib<4, Binding, T, Swizzled>& other)
   : ShGeneric<4, T>(new ShVariableNode(Binding, 4))
 {
-  if (Binding == SH_CONST || uniform()) {
-    SH_DEBUG_ASSERT(Binding == SH_CONST || !ShEnvironment::insideShader);
-    SH_DEBUG_ASSERT(other.hasValues());
-    T data[4];
-    other.getValues(data);
-    setValues(data);
-  } else {
-    ShStatement asn(*this, SH_OP_ASN, other);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(asn);
-  }
+  shASN(*this, other);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>

@@ -80,10 +80,11 @@ public:
   /// Generate the backend code for a particular shader. Ensure that
   /// ShEnvironment::shader is the same as shader before calling this,
   /// since extra variables may be declared inside this function!
-  virtual ShBackendCodePtr generateCode(const std::string& target, const ShProgram& shader) = 0;
+  virtual ShBackendCodePtr generateCode(const std::string& target,
+                                        const ShProgramNodeCPtr& shader) = 0;
 
   // execute a stream program, if supported
-  virtual void execute(const ShProgram& program, ShStream& dest) = 0;
+  virtual void execute(const ShProgramNodeCPtr& program, ShStream& dest) = 0;
   
   typedef std::vector< ShPointer<ShBackend> > ShBackendList;
 

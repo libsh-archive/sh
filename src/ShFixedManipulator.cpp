@@ -124,8 +124,7 @@ ShProgram ShDupNode::applyToInputs(ShManipVarIterator &finger, ShManipVarIterato
               + " to incompatible type " + (*finger)->nameOfType()));
       }
       ShVariable output = makeVariable((*finger), SH_OUTPUT);
-      ShStatement stmt(output, SH_OP_ASN, input);
-      ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+      shASN(output, input);
     }
   } SH_END;
   return result;
@@ -140,8 +139,7 @@ ShProgram ShDupNode::applyToOutputs(ShManipVarIterator &finger, ShManipVarIterat
 
     for(int i = 0; i < m_numDups; ++i) {
       ShVariable output = makeVariable((*finger), SH_OUTPUT);
-      ShStatement stmt(output, SH_OP_ASN, input);
-      ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+      shASN(output, input);
     }
     ++finger;
   } SH_END;
@@ -158,14 +156,14 @@ ShProgramManipNode::ShProgramManipNode(const ShProgram &p)
 
 ShProgram ShProgramManipNode::applyToInputs(ShManipVarIterator &finger, ShManipVarIterator end) const {
   std::size_t i;
-  for(i = 0; i < p->outputs.size() && finger != end; ++i, ++finger);
+  for(i = 0; i < p.node()->outputs.size() && finger != end; ++i, ++finger);
   // allow extra outputs from p 
   return p; 
 }
 
 ShProgram ShProgramManipNode::applyToOutputs(ShManipVarIterator &finger, ShManipVarIterator end) const {
   std::size_t i;
-  for(i = 0; i < p->inputs.size() && finger != end; ++i, ++finger);
+  for(i = 0; i < p.node()->inputs.size() && finger != end; ++i, ++finger);
   // allow extra inputs from p 
   return p; 
 }
@@ -189,14 +187,14 @@ ShProgram ShTreeManipNode::applyToOutputs(ShManipVarIterator &finger, ShManipVar
 }
 
 ShProgram operator<<(const ShProgram &p, const ShFixedManipulator &m) {
-  ShManipVarIterator finger = p->inputs.begin();
-  ShProgram manipulator = m->applyToInputs(finger, p->inputs.end()); 
+  ShManipVarIterator finger = p.node()->inputs.begin();
+  ShProgram manipulator = m->applyToInputs(finger, p.node()->inputs.end()); 
   return p << manipulator;
 }
 
 ShProgram operator<<(const ShFixedManipulator &m, const ShProgram &p) {
-  ShManipVarIterator finger = p->outputs.begin();
-  ShProgram manipulator = m->applyToOutputs(finger, p->outputs.end()); 
+  ShManipVarIterator finger = p.node()->outputs.begin();
+  ShProgram manipulator = m->applyToOutputs(finger, p.node()->outputs.end()); 
   return manipulator << p;
 }
 

@@ -29,6 +29,7 @@
 #include "ShChannelNode.hpp"
 #include "ShSyntax.hpp"
 #include "ShAlgebra.hpp"
+#include "ShContext.hpp"
 
 namespace SH {
 
@@ -40,7 +41,7 @@ ShProgram connect(const ShChannelNodePtr& node, const ShProgram& program)
                                       node->size(), node->specialType()));
     ShVariable streamVar(node);
     ShStatement stmt(out, SH_OP_FETCH, streamVar);
-    ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
   } SH_END_PROGRAM;
   return connect(nibble, program);
 }
@@ -119,7 +120,7 @@ ShProgram operator<<(const ShProgram& program, const ShStream& stream)
 
 ShStream& ShStream::operator=(const ShProgram& program)
 {
-  ShEnvironment::backend->execute(program, *this);
+  ShEnvironment::backend->execute(program.node(), *this);
   return *this;
 }
 

@@ -49,7 +49,7 @@ namespace SH {
  */
 class ShTransformer {
 public:
-  ShTransformer(ShProgram program);
+  ShTransformer(const ShProgramNodePtr& program);
   ShTransformer::~ShTransformer();
   bool changed(); //< returns true iff one of the transformations changed the shader
 
@@ -97,8 +97,7 @@ private:
   /// NOT IMPLEMENTED
   ShTransformer& operator=(const ShTransformer& other);
 
-  ShProgram m_program;
-  ShCtrlGraphPtr m_graph;
+  ShProgramNodePtr m_program;
   bool m_changed;
 };
 

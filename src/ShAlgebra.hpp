@@ -36,18 +36,18 @@ namespace SH {
 
 /** Replace inputs of b with outputs of a.
  * Functional composition.
- * Let A = a->outputs.size(), B = b->inputs.size().
+ * Let A = a.outputs.size(), B = b.inputs.size().
  * If A > B, extra outputs are kept at end
  * If A < B, extra inputs are kept at end
  */
-ShProgram connect(const ShProgram& a, const ShProgram& b);
+ShProgram connect(ShProgram a, ShProgram b);
 
 /** Combine a and b.
  * Use all inputs from a and b and all outputs from a and b,
  * concatenated in order,
  * and perform all operations from both programs.
  */
-ShProgram combine(const ShProgram& a, const ShProgram& b);
+ShProgram combine(ShProgram a, ShProgram b);
 
 /** Combine a and b.
  * Use all inputs from a and b and all outputs from a and b,
@@ -62,7 +62,7 @@ ShProgram combine(const ShProgram& a, const ShProgram& b);
  * For instance, if a has inputs x, y, k, x, z and b has inputs w, y, x, v
  * then the result has inputs x, y, k, z, w, v
  */
-ShProgram namedCombine(const ShProgram& a, const ShProgram& b);
+ShProgram namedCombine(ShProgram a, ShProgram b);
 
 /** Replace inputs of b with outputs of a.
  * Functional composition.
@@ -73,39 +73,39 @@ ShProgram namedCombine(const ShProgram& a, const ShProgram& b);
  * another output of a.
  * Extra inputs remain at the end.  Extra outputs remain iff keepExtra = true 
  */
-ShProgram namedConnect(const ShProgram& a, const ShProgram& b, bool keepExtra = false );
+ShProgram namedConnect(ShProgram a, ShProgram b, bool keepExtra = false );
 
 /** Renames all inputs named oldName to newName.
  */
-ShProgram renameInput(const ShProgram &a, std::string oldName, std::string newName);
+ShProgram renameInput(ShProgram a, const std::string& oldName, const std::string& newName);
 
 /** Renames all outputs named oldName to newName.
  */
-ShProgram renameOutput(const ShProgram &a, std::string oldName, std::string newName);
+ShProgram renameOutput(ShProgram a, const std::string& oldName, const std::string& newName);
 
 /** Swizzles named outputs of a to match named inputs of b.
  * This only works on programs with inputs/outputs that all have unique names. 
  * Also, the inputs of b must be a subset of the outputs of a.
  */
-ShProgram namedAlign(const ShProgram &a, const ShProgram &b);
+ShProgram namedAlign(ShProgram a, ShProgram b);
 
 /** Replaces parameter with attribute.
  * Replaces a uniform parameter by appending a
  * varying input attribute to the end of the list of inputs.
  */
-ShProgram replaceUniform(const ShProgram &a, const ShVariable &var); 
+ShProgram replaceUniform(ShProgram a, const ShVariable &var); 
 
 /** Equivalent to combine(a,b).
  */
-ShProgram operator&(const ShProgram& a, const ShProgram& b);
+ShProgram operator&(ShProgram a, ShProgram b);
 
 /** Equivalent to connect(b,a).
  */
-ShProgram operator<<(const ShProgram& a, const ShProgram& b);
+ShProgram operator<<(ShProgram a, ShProgram b);
 
 /** Equivalent to replaceUniform(p,var).
  */
-ShProgram operator>>(const ShProgram &p, const ShVariable &var); 
+ShProgram operator>>(ShProgram p, const ShVariable &var); 
 
 /** Application operator.
  * The operator used for combine can also be used to apply a program
@@ -113,7 +113,7 @@ ShProgram operator>>(const ShProgram &p, const ShVariable &var);
  * read, which is equivalent to replacing an input with a parameter.
  */
 template<int N, typename T>
-ShProgram operator<<(const ShProgram& a, const ShGeneric<N, T>& v) {
+ShProgram operator<<(ShProgram a, const ShGeneric<N, T>& v) {
   ShProgram vNibble = SH_BEGIN_PROGRAM() {
     ShAttrib<N, SH_OUTPUT, T> out;
     out.node()->specialType(v.node()->specialType());

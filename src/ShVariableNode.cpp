@@ -29,6 +29,7 @@
 #include "ShEnvironment.hpp"
 #include "ShVariableNode.hpp"
 #include "ShDebug.hpp"
+#include "ShContext.hpp"
 
 namespace SH {
 
@@ -53,7 +54,7 @@ const char* ShSemanticTypeName[] = {
 };
 
 ShVariableNode::ShVariableNode(ShBindingType kind, int size, ShSemanticType type)
-  : m_uniform(!ShEnvironment::insideShader && kind != SH_TEXTURE && kind != SH_STREAM),
+  : m_uniform(!ShContext::current()->parsing() && kind != SH_TEXTURE && kind != SH_STREAM),
     m_kind(kind), m_specialType(type),
     m_size(size), m_id(m_maxID++), m_locked(0),
     m_values(0)
@@ -64,17 +65,17 @@ ShVariableNode::ShVariableNode(ShBindingType kind, int size, ShSemanticType type
   }
   switch (m_kind) {
   case SH_INPUT:
-    assert(ShEnvironment::shader);
-    ShEnvironment::shader->inputs.push_back(this);
+    assert(ShContext::current()->parsing());
+    ShContext::current()->parsing()->inputs.push_back(this);
     break;
   case SH_OUTPUT:
-    assert(ShEnvironment::shader);
-    ShEnvironment::shader->outputs.push_back(this);
+    assert(ShContext::current()->parsing());
+    ShContext::current()->parsing()->outputs.push_back(this);
     break;
   case SH_INOUT:
-    assert(ShEnvironment::shader);
-    ShEnvironment::shader->outputs.push_back(this);
-    ShEnvironment::shader->inputs.push_back(this);
+    assert(ShContext::current()->parsing());
+    ShContext::current()->parsing()->outputs.push_back(this);
+    ShContext::current()->parsing()->inputs.push_back(this);
     break;
   default:
     // Do nothing
@@ -126,9 +127,10 @@ void ShVariableNode::unlock()
 {
   m_locked--;
   if (m_locked == 0 && m_uniform) {
-    for (ShEnvironment::BoundShaderMap::iterator I = ShEnvironment::boundShaders().begin();
-         I != ShEnvironment::boundShaders().end(); ++I) {
-      if (I->second) I->second->code(I->first, ShEnvironment::backend)->updateUniform(this);
+    
+    for (ShBoundIterator I = shBeginBound(); I != shEndBound(); ++I) {
+      // TODO: Maybe pass in the backend unit to updateUniform
+      if (I->second.node()) I->second.updateUniform(this);
     }
   }
 }
@@ -247,9 +249,9 @@ void ShVariableNode::setValue(int i, ValueType value)
   m_values[i] = value;
 
   if (m_uniform && !m_locked) {
-    for (ShEnvironment::BoundShaderMap::iterator I = ShEnvironment::boundShaders().begin();
-         I != ShEnvironment::boundShaders().end(); ++I) {
-      if (I->second) I->second->code(I->first, ShEnvironment::backend)->updateUniform(this);
+    for (ShBoundIterator I = shBeginBound(); I != shEndBound(); ++I) {
+      // TODO: Maybe pass in the backend unit to updateUniform
+      if (I->second.node()) I->second.updateUniform(this);
     }
   }
 }
