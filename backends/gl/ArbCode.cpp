@@ -584,7 +584,7 @@ std::ostream& ArbCode::print(std::ostream& out)
     out << endl;
   }
   bool halfSupport = m_environment & SH_ARB_NVFP;
-  if (m_numTemps +  m_numHalfTemps > 0) {
+  if (m_numTemps > 0) { 
     if(halfSupport) {
       out << "  LONG TEMP ";
     } else {
@@ -595,16 +595,16 @@ std::ostream& ArbCode::print(std::ostream& out)
       out << ArbReg(SH_ARB_REG_TEMP, i);
     }
     out << ";" << endl;
+  }
 
-    if(m_numHalfTemps > 0) { 
-      SH_DEBUG_ASSERT(halfSupport); // assume half support...
-      out << "   SHORT TEMP ";
-      for (int i = 0; i < m_numHalfTemps; i++) {
-        if (i > 0) out << ", ";
-        out << ArbReg(SH_ARB_REG_HALF_TEMP, i);
-      }
-      out << ";" << endl;
+  if(m_numHalfTemps > 0) { 
+    SH_DEBUG_ASSERT(halfSupport); // assume half support...
+    out << "  SHORT TEMP ";
+    for (int i = 0; i < m_numHalfTemps; i++) {
+      if (i > 0) out << ", ";
+      out << ArbReg(SH_ARB_REG_HALF_TEMP, i);
     }
+    out << ";" << endl;
   }
 
   out << endl;
