@@ -82,6 +82,19 @@ void ShMemory::removeStorage(const ShPointer<ShStorage>& storage)
   // TODO: fix this, refcount lossage.
 }
 
+void ShMemory::add_dep(ShMemoryDep* dep)
+{
+  dependencies.push_back(dep);
+}
+
+void ShMemory::flush()
+{
+  ShHostStoragePtr storage = shref_dynamic_cast<ShHostStorage>(findStorage("host"));
+  storage->dirtyall();
+  for(std::list<ShMemoryDep*>::iterator i = dependencies.begin() ; i != dependencies.end() ; i++)
+    (*i)->memory_update();
+}
+
 ////////////////////////
 // --- ShTransfer --- //
 ////////////////////////
@@ -172,9 +185,11 @@ void ShStorage::dirty()
   // TODO: Maybe in the future check that the sync worked
   sync();
 
-  // TODO: Don't do this if we are the only sync'd storage of the
-  // memory.
-  // That's an optimization though.
+  dirtyall();
+}
+
+void ShStorage::dirtyall()
+{
   m_timestamp++;
   m_memory->updateTimestamp(m_timestamp);
 }

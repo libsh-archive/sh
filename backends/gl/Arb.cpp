@@ -32,23 +32,22 @@ namespace shgl {
 
 using namespace SH;
 
-ArbCodeStrategy::ArbCodeStrategy(int context)
-  : m_context(context)
+ArbCodeStrategy::ArbCodeStrategy(void)
 {
 }
 
-ArbCodeStrategy* ArbCodeStrategy::create(int context)
+ArbCodeStrategy* ArbCodeStrategy::create(void)
 {
-  return new ArbCodeStrategy(context);
+  return new ArbCodeStrategy;
 }
 
 ShBackendCodePtr ArbCodeStrategy::generate(const std::string& target,
                                            const ShProgramNodeCPtr& shader,
-                                           TextureStrategy* textures)
+                                           TextureStrategy* texture)
 {
   std::string::size_type loc = target.rfind(':');
   std::string unit = (loc == std::string::npos ? target : target.substr(loc + 1));
-  ArbCodePtr code = new ArbCode(shader, unit, textures);
+  ArbCodePtr code = new ArbCode(shader, unit, texture);
   code->generate();
   return code;
 }
@@ -58,6 +57,11 @@ unsigned int arbTarget(const std::string& unit)
   if (unit == "vertex") return GL_VERTEX_PROGRAM_ARB;
   if (unit == "fragment") return GL_FRAGMENT_PROGRAM_ARB;  
   return 0;
+}
+
+ArbException::ArbException(const std::string& message)
+  : ShBackendException(std::string("ARB error: ") + message)
+{
 }
 
 }

@@ -29,10 +29,11 @@
 
 #include "ShDllExport.hpp"
 #include "ShRefCount.hpp"
-#include "ShVariableNode.hpp"
 #include "ShSwizzle.hpp"
 #include "ShUtility.hpp"
 #include "ShMetaForwarder.hpp"
+#include "ShVariant.hpp"
+#include "ShVariableNode.hpp"
 
 namespace SH {
 
@@ -53,7 +54,15 @@ public:
 
   ~ShVariable() {}
 
+  /* Executes a program and assigns the result to this variable.
+   *
+   * In retained mode, the prg gets inserted into the ShProgram currently
+   * being defined.
+   */
   ShVariable& operator=(const ShProgram& prg);
+ 
+  /* Attaches a ShProgram to this variable, making it a dependent uniform. */
+  void attach(const ShProgram& prg);
   
   bool null() const; ///< true iff node is a null pointer.
   
@@ -63,6 +72,8 @@ public:
   
   int size() const; ///< Get the number of elements in this variable,
                     /// after swizzling.
+                    
+  ShValueType valueType() const; ///< Returns index of the data type held in this node, or 0 if no node. 
 
   /**@name Metadata
    * This data is useful for various things, including asset
@@ -72,11 +83,15 @@ public:
 
   
   /// Set a range of values for this variable
-  void range(ShVariableNode::ValueType low, ShVariableNode::ValueType high);
-  /// Obtain a lower bound on this variable
-  ShVariableNode::ValueType lowBound() const;
-  /// Obtain an upper bound on this variable
-  ShVariableNode::ValueType highBound() const;
+  // TODO check if this works when swizzle contains one index more than once
+  void rangeVariant(const ShVariant* low, const ShVariant* high);
+
+  /// Obtain a lower bounds on this variable (tuple of same size as this)
+  // @{
+  ShVariantPtr lowBoundVariant() const;
+
+  /// Obtain an upper bounds on this variable (tuple of same size as this)
+  ShVariantPtr highBoundVariant() const;
 
   //@}
   
@@ -90,28 +105,75 @@ public:
   bool neg() const;
 
   bool& neg();
+
+  ///
   
-  /// Get the values of this variable, with swizzling taken into account
-  void getValues(ShVariableNode::ValueType dest[]) const;
-  ShVariableNode::ValueType getValue(int index) const;
+  /// Returns a copy of the variant (with swizzling & proper negation)
+  ShVariantPtr getVariant() const;
+  ShVariantPtr getVariant(int index) const;
+
+  /** Sets result to this' variant if possible.
+   * Otherwise, if swizzling or negation are required, then 
+   * makes a copy into result.
+   * @returns whether a copy was allocated
+   *
+   * (This function should only be used internally. the ref count
+   * on result will be 1 if it's allocated as a copy.  You may
+   * assign this to a refcounted pointer, and then manually release a ref.
+   * @todo type figure out a cleaner way) 
+   *
+   * Since this allows you to possibly change the variant values without
+   * triggering a uniform update, if loadVariant returns false, you must
+   * call updateVariant() afterwards if you change any values in result. 
+   * @{
+   */
+  bool loadVariant(ShVariant *&result) const;
+  void updateVariant();
+  // @}
+
   
-  /// Set the values of this variable, using the swizzle as a
-  /// writemask.
-  void setValues(ShVariableNode::ValueType values[]);
-  void setValue(int index, ShVariableNode::ValueType value);
-  
+  /** Sets the elements of this variant from other accounting for 
+   * this' writemask and negations
+   * @{
+   */
+  void setVariant(const ShVariant* other, bool neg, const ShSwizzle &writemask); 
+  void setVariant(ShVariantCPtr other, bool neg, const ShSwizzle &writemask); 
+  // @}
+ 
+  /** Sets the indicated element of this' variant from other 
+   * @{
+   */
+  void setVariant(const ShVariant* other, int index); 
+  void setVariant(ShVariantCPtr other, int index); 
+  // @}
+
+  /** Sets this' variant from the contents of other
+   * @{
+   */
+  void setVariant(const ShVariant* other);
+  void setVariant(ShVariantCPtr other);
+  // @}
+
+
   ShVariable operator()() const; ///< Identity swizzle
   ShVariable operator()(int) const;
   ShVariable operator()(int, int) const;
   ShVariable operator()(int, int, int) const;
   ShVariable operator()(int, int, int, int) const;
   ShVariable operator()(int size, int indices[]) const;
+  ShVariable operator()(const ShSwizzle &swizzle) const;
+
   
   ShVariable operator-() const;
 
   bool operator==(const ShVariable& other) const;
   bool operator!=(const ShVariable& other) const { return !((*this) == other); }
 
+  /// @internal used by ShMatrix to set up its rows when swizzled.
+  /// Sets this variable's node, swizzle, and negation bit to be
+  /// identical to the given variable.
+  void clone(const ShVariable& other);
+  
 protected:
   
   ShVariableNodePtr m_node; ///< The actual variable node we refer to.

@@ -24,6 +24,7 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
+#include "ShContext.hpp"
 #include "GlTextures.hpp"
 #include <sstream>
 #include "GlTextureName.hpp"
@@ -75,10 +76,37 @@ ShCubeDirection glToShCubeDir(GLuint target)
 
 GLenum shGlInternalFormat(const ShTextureNodePtr& node)
 {
+  GLenum byteformats[4] = {GL_LUMINANCE8, GL_LUMINANCE8_ALPHA8, GL_RGB8, GL_RGBA8}; 
+  GLenum shortformats[4] = {GL_LUMINANCE16, GL_LUMINANCE16_ALPHA16, GL_RGB16, GL_RGBA16}; 
+
+  GLenum halfformats_nv[4] = {GL_FLOAT_R16_NV, GL_FLOAT_RGBA16_NV, GL_FLOAT_RGB16_NV, GL_FLOAT_RGBA16_NV};
+  GLenum fpformats_nv[4] = {GL_FLOAT_R32_NV, GL_FLOAT_RGBA32_NV, GL_FLOAT_RGB32_NV, GL_FLOAT_RGBA32_NV};
+
+  GLenum halfformats_ati[4] = {GL_LUMINANCE_FLOAT16_ATI,
+                             GL_LUMINANCE_ALPHA_FLOAT16_ATI,
+                             GL_RGB_FLOAT16_ATI,
+                             GL_RGBA_FLOAT16_ATI};
+
+  GLenum fpformats_ati[4] = {GL_LUMINANCE_FLOAT32_ATI,
+                             GL_LUMINANCE_ALPHA_FLOAT32_ATI,
+                             GL_RGB_FLOAT32_ATI,
+                             GL_RGBA_FLOAT32_ATI};
+  GLenum* formats = 0;
+  bool clamped = (node->traits().clamping() == SH::ShTextureTraits::SH_CLAMPED);
+  // @todo type - assume that !clamped means unclamped for now...
+  // may have other clamping modes later on?
+  
+  std::string exts(reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS)));
+
+  // note that right now 1/2/3D float textures on NV are only supported through
+  // the ATI extension, so we only use nv for RECT. 
+  bool float_nv = (exts.find("NV_float_buffer") != std::string::npos) && 
+                  (node->dims() == SH_TEXTURE_RECT);
+
+  bool float_ati = (exts.find("ATI_texture_float") != std::string::npos);
+
+  // @todo type respect CLAMPED flag 
   if (node->size() < 0 || node->size() > 4) return 0;
-  if (node->traits().clamping() == SH::ShTextureTraits::SH_CLAMPED) {
-    return node->size();
-  } else if (node->traits().clamping() == SH::ShTextureTraits::SH_UNCLAMPED) {
 #if defined( __APPLE__ )
     //    std::string exts(reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS)));
     //GLenum fpformats_apple[4] = { 
@@ -87,29 +115,83 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node)
     GLenum* fpformats = 0;
     //    if (exts.find("GL_APPLE_float_pixels") != std::string::npos) 
     //fpformats = fpformats_apple;
-#else
-    std::string exts(reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS)));
-    GLenum fpformats_nv[4] = {GL_FLOAT_R_NV, GL_FLOAT_RGBA_NV, GL_FLOAT_RGB_NV, GL_FLOAT_RGBA_NV};
-    GLenum fpformats_ati[4] = {GL_LUMINANCE_FLOAT32_ATI,
-                               GL_LUMINANCE_ALPHA_FLOAT32_ATI,
-                               GL_RGB_FLOAT32_ATI,
-                               GL_RGBA_FLOAT32_ATI};
-    GLenum* fpformats = 0;
-    if (exts.find("NV_float_buffer") != std::string::npos) {
-      fpformats = fpformats_nv;
-    } else if (exts.find("ATI_texture_float") != std::string::npos) {
-      fpformats = fpformats_ati;
+#endif // __APPLE
+  // @todo type
+  // handle fractional types
+  // right now all available formats - double, float, signed ints, unsigned ints should
+  // be stored internally as float if possible
+
+  if(clamped) {
+    switch(node->valueType()) {
+      case SH_DOUBLE:
+      case SH_FLOAT:        
+      case SH_HALF:
+      case SH_FINT:
+      case SH_FSHORT:
+      case SH_FUINT:
+      case SH_FUSHORT:
+        formats = shortformats;
+        break;
+
+     case SH_FBYTE:
+     case SH_FUBYTE:
+        formats = byteformats;
+        break;
+
+      case SH_INT: 
+      case SH_UINT:
+      case SH_SHORT: 
+      case SH_USHORT:
+      case SH_BYTE:
+      case SH_UBYTE:
+        SH_DEBUG_WARN("Using integer data type for a [0,1] clamped texture format is not advised.");
+        formats = byteformats;
+        break;
+
+     default:
+        SH_DEBUG_ERROR("Could not find appropriate clamped texture format \n"
+                       "Using default instead!");
+        return node->size();
+        break;
     }
-#endif
-    if (!fpformats) {
-      SH_DEBUG_ERROR("Could not find appropriate floating-point format extension\n"
-                     "Using non-floating point texture instead!");
+  } else { // if ( clamped )
+    switch(node->valueType()) {
+      case SH_DOUBLE:
+      case SH_FLOAT:        
+      case SH_INT: 
+      case SH_UINT:
+        if (float_nv) formats = fpformats_nv;
+        else if (float_ati) formats = fpformats_ati;
+        break;
+    case SH_HALF:
+    case SH_SHORT: 
+    case SH_BYTE:
+    case SH_USHORT:
+    case SH_UBYTE:
+      if (float_nv) formats = halfformats_nv;
+      else if (float_ati) formats = halfformats_ati;
+      break;
+
+    case SH_FINT:
+    case SH_FSHORT:
+    case SH_FUINT:
+    case SH_FUSHORT:
+      formats = shortformats;
+      break;
+
+    case SH_FBYTE:
+    case SH_FUBYTE:
+      formats = byteformats;
+      break;
+    default:
+      SH_DEBUG_ERROR("Could not find appropriate unclamped texture format \n"
+		     "Using default instead!");
       return node->size();
+      break;
     }
-    
-    return fpformats[node->size() - 1];
-  }
-  return 0;
+  } // if (clamped)
+  
+  return formats[node->size() - 1];
 }
 
 GLenum shGlFormat(const ShTextureNodePtr& node)
@@ -130,10 +212,55 @@ GLenum shGlFormat(const ShTextureNodePtr& node)
   return 0;
 }
 
+/* Returns glReadPixels/glTexImage type for a given value type 
+ * and returns a value type for the temporary buffer
+ * (or SH_VALUETYPE_END if we can read pixels directly into
+ * the original buffer)*/
+GLenum shGlType(ShValueType valueType, ShValueType &convertedType) {
+  convertedType = SH_VALUETYPE_END;
+  GLenum result = GL_NONE;
+  switch(valueType) {
+    case SH_DOUBLE:
+    case SH_HALF:
+    case SH_INT: 
+    case SH_SHORT: 
+    case SH_BYTE:
+    case SH_UINT:
+    case SH_USHORT:
+    case SH_UBYTE:
+      convertedType = SH_FLOAT;
+    case SH_FLOAT:        result = GL_FLOAT; break;
+
+
+    case SH_FINT:     result = GL_INT; break;
+    case SH_FSHORT:   result = GL_SHORT; break;
+    case SH_FBYTE:    result = GL_BYTE; break;
+    case SH_FUINT:    result = GL_UNSIGNED_INT; break;
+    case SH_FUSHORT:  result = GL_UNSIGNED_SHORT; break;
+    case SH_FUBYTE:   result = GL_UNSIGNED_BYTE; break;
+
+    default:
+      SH_DEBUG_ERROR("Unsupported value type to glReadPixel type conversion"); 
+      break;
+  }
+
+  std::string exts(reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS)));
+  if(valueType == SH_HALF) { 
+        if((exts.find("NV_half_float") != std::string::npos)) {
+          convertedType = SH_VALUETYPE_END; 
+          result = GL_HALF_FLOAT_NV; 
+        } else if(exts.find("APPLE_float_pixels") != std::string::npos) {
+          convertedType = SH_VALUETYPE_END; 
+          //result = HALF_APPLE; 
+        }
+  }
+  SH_DEBUG_ASSERT(result != GL_NONE);
+  return result;
+}
+
 struct StorageFinder {
-  StorageFinder(const ShTextureNodePtr& node, int context,
-                bool ignoreTarget = false)
-    : node(node), context(context), ignoreTarget(ignoreTarget)
+  StorageFinder(const ShTextureNodePtr& node, bool ignoreTarget = false)
+    : node(node), ignoreTarget(ignoreTarget)
   {
   }
   
@@ -141,9 +268,6 @@ struct StorageFinder {
   {
     GlTextureStoragePtr t = shref_dynamic_cast<GlTextureStorage>(storage);
     if (!t) {
-      return false;
-    }
-    if (t->context() != context) {
       return false;
     }
     if (!ignoreTarget) {
@@ -157,18 +281,16 @@ struct StorageFinder {
   }
   
   const ShTextureNodePtr& node;
-  int context;
   bool ignoreTarget;
 };
 
-GlTextures::GlTextures(int context)
-  : m_context(context)
+GlTextures::GlTextures(void)
 {
 }
 
-TextureStrategy* GlTextures::create(int context)
+TextureStrategy* GlTextures::create(void)
 {
-  return new GlTextures(context);
+  return new GlTextures;
 }
 
 
@@ -178,16 +300,16 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node,
   if (!node) return;
 
   // TODO: Check for memories that are 0
-  
-  if (!node->meta("opengl:preset").empty()) {
+
+  if (!node->meta("opengl:texid").empty())
+    {
     SH_GL_CHECK_ERROR(glActiveTextureARB(target));
     GLuint name;
-    std::istringstream is(node->meta("opengl:preset"));
+    std::istringstream is(node->meta("opengl:texid"));
     is >> name; // TODO: Check for errors
     SH_GL_CHECK_ERROR(glBindTexture(shGlTargets[node->dims()], name));
-    node->meta("opengl:texid", node->meta("opengl:preset"));
     return;
-  } 
+    } 
   
   if (node->dims() == SH_TEXTURE_CUBE) {
     
@@ -204,7 +326,7 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node,
         GlTextureStorage* s = dynamic_cast<GlTextureStorage*>(*S);
         if (!s) continue;
         ShCubeDirection dir = glToShCubeDir(s->target());
-        if (s->memory() != node->memory(dir).object() || !StorageFinder(node, m_context, true)(s))
+        if (s->memory() != node->memory(dir).object() || !StorageFinder(node, true)(s))
           break;
       }
       // If we got through the whole list, we've found a matching list.
@@ -217,21 +339,21 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node,
       texname->params(node->traits());
       for (int i = 0; i < 6; i++) {
         ShCubeDirection dir = static_cast<ShCubeDirection>(i);
-        GlTextureStoragePtr storage = new GlTextureStorage(m_context,
-                                                           node->memory(dir).object(),
+        GlTextureStoragePtr storage = new GlTextureStorage(node->memory(dir).object(),
                                                            shGlCubeMapTargets[i],
                                                            shGlFormat(node),
                                                            shGlInternalFormat(node),
+                                                           node->valueType(),
                                                            node->width(), node->height(),
-                                                           node->depth(),
-                                                           texname);
+                                                           node->depth(), node->size(),
+                                                           node->count(), texname);
         storage->sync();
       }
       SH_GL_CHECK_ERROR(glActiveTextureARB(target));
       SH_GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_CUBE_MAP, texname->value()));
       std::ostringstream os;
       os << texname->value();
-      node->meta("opengl:texid", os.str());
+      node->meta("opengl:alloc_texid", os.str());
     } else {
       // Just synchronize the storages
       GlTextureName::StorageList::const_iterator S;
@@ -244,22 +366,23 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node,
       SH_GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_CUBE_MAP, (*I)->value()));
       std::ostringstream os;
       os << (*I)->value();
-      node->meta("opengl:texid", os.str());
+      node->meta("opengl:alloc_texid", os.str());
     }
   } else {
 
-    StorageFinder finder(node, m_context);
+    StorageFinder finder(node);
     GlTextureStoragePtr storage =
       shref_dynamic_cast<GlTextureStorage>(node->memory()->findStorage("opengl:texture", finder));
     if (!storage) {
       GlTextureNamePtr name = new GlTextureName(shGlTargets[node->dims()]);
-      storage = new GlTextureStorage(m_context,
-                                     node->memory().object(),
+      storage = new GlTextureStorage(node->memory().object(),
                                      shGlTargets[node->dims()],
                                      shGlFormat(node),
                                      shGlInternalFormat(node),
-                                     node->width(), node->height(), node->depth(),
-                                     name);
+                                     node->valueType(),
+                                     node->width(), node->height(), 
+                                     node->depth(), node->size(),
+                                     node->count(), name);
       name->params(node->traits());
     }
 
@@ -269,7 +392,7 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node,
 
     std::ostringstream os;
     os << storage->name();
-    node->meta("opengl:texid", os.str());
+    node->meta("opengl:alloc_texid", os.str());
   }
 }
 

@@ -124,9 +124,10 @@ class
 SH_DLLEXPORT ShTextureNode : public ShVariableNode {
 public:
   ShTextureNode(ShTextureDims dims,
-                int size, // scalars per tuple
+                int size, // scalars per tuple 
+                ShValueType valueType, // type index 
                 const ShTextureTraits&,
-                int width, int height = 0, int depth = 0);
+                int width, int height = 1, int depth = 1, int max_nb_elements = -1);
   virtual ~ShTextureNode();
 
   ShTextureDims dims() const;
@@ -143,15 +144,20 @@ public:
   const ShTextureTraits& traits() const; // valid for all texture nodes
   ShTextureTraits& traits(); // valid for all texture nodes
   int width() const; // valid for all texture nodes
-  int height() const; // not for SH_TEXTURE_1D
-  int depth() const; // only for SH_TEXTURE_3D
+  int height() const; // 1 for SH_TEXTURE_1D
+  int depth() const; // 1 unless SH_TEXTURE_3D
+  int count() const; // number of elements  
 
   void setTexSize(int w);
   void setTexSize(int w, int h);
   void setTexSize(int w, int h, int d);
   const ShVariable& texSizeVar() const;
+
+  void count(int n);
   
 private:
+  int m_count; // max nb of elements sent to the GPU or -1 if unknown (used by the stream backend)
+
   ShTextureDims m_dims;
   
   ShMemoryPtr* m_memory; // array of either 1 or 6 (for cubemaps)

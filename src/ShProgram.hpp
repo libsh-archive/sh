@@ -33,6 +33,10 @@
 
 namespace SH {
 
+class ShStream;
+template<typename T> class ShChannel;
+class ShRecord;
+
 /** Thin wrapper around ShProgramNode.
  */
 class
@@ -115,7 +119,63 @@ public:
   ShProgramNode::TexList::const_iterator textures_end() const { return m_node->textures_end(); }
   ShProgramNode::ChannelList::const_iterator channels_begin() const { return m_node->channels_begin(); }
   ShProgramNode::ChannelList::const_iterator channels_end() const { return m_node->channels_end(); }
+  ShProgramNode::PaletteList::const_iterator palettes_begin() const { return m_node->palettes_begin(); }
+  ShProgramNode::PaletteList::const_iterator palettes_end() const { return m_node->palettes_end(); }
 
+  // Call operators for channels and streams.
+  // Equivalent to operator<< invocations.
+  // Note that the template functions are implemented in
+  // ShChannelImpl.hpp
+  template<typename T0>
+  ShProgram operator()(const ShChannel<T0>& t0) const;
+  ShProgram operator()(const ShStream& s0) const;
+  template<typename T0, typename T1>
+  ShProgram operator()(const ShChannel<T0>& t0,
+                        const ShChannel<T1>& t1) const;
+  ShProgram operator()(const ShStream& s0,
+                        const ShStream& s1) const;
+  template<typename T0, typename T1, typename T2>
+  ShProgram operator()(const ShChannel<T0>& t0,
+                        const ShChannel<T1>& t1,
+                        const ShChannel<T2>& t2) const;
+  ShProgram operator()(const ShStream& s0,
+                        const ShStream& s1,
+                        const ShStream& s2) const;
+  template<typename T0, typename T1, typename T2, typename T3>
+  ShProgram operator()(const ShChannel<T0>& t0,
+                        const ShChannel<T1>& t1,
+                        const ShChannel<T2>& t2,
+                        const ShChannel<T3>& t3) const;
+  ShProgram operator()(const ShStream& s0,
+                        const ShStream& s1,
+                        const ShStream& s2,
+                        const ShStream& s3) const;
+  template<typename T0, typename T1, typename T2, typename T3,
+           typename T4>
+  ShProgram operator()(const ShChannel<T0>& t0,
+                        const ShChannel<T1>& t1,
+                        const ShChannel<T2>& t2,
+                        const ShChannel<T3>& t3,
+                        const ShChannel<T4>& t4) const;
+  ShProgram operator()(const ShStream& s0,
+                        const ShStream& s1,
+                        const ShStream& s2,
+                        const ShStream& s3,
+                        const ShStream& s4) const;
+  
+  // Call operators for records
+  // May want to merge these with above in the long term. 
+  ShProgram operator()(const ShRecord &rec) const;
+  ShProgram operator()(const ShVariable &v0) const;
+  ShProgram operator()(const ShVariable &v0, 
+                       const ShVariable &v1) const;
+  ShProgram operator()(const ShVariable &v0, 
+                       const ShVariable &v1, 
+                       const ShVariable &v2) const;
+  ShProgram operator()(const ShVariable &v0, 
+                       const ShVariable &v1, 
+                       const ShVariable &v2, 
+                       const ShVariable &v3) const;
   
 private:
 

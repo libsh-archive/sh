@@ -1,6 +1,6 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT(sh, 0.7.2, libsh-devel@lists.sourceforge.net, libsh)
-AC_CONFIG_SRCDIR([src/ShAttrib.hpp])
+AC_INIT(Sh, 0.7.6, libsh-devel@lists.sourceforge.net, libsh)
+AC_CONFIG_SRCDIR([src/ShVariable.hpp])
 AM_INIT_AUTOMAKE
 
 AM_CONFIG_HEADER(config.h)
@@ -42,7 +42,7 @@ AC_CHECK_HEADER([sstream], [], [AC_MSG_ERROR([sh requires <sstream>. Please use 
 # Checks for library functions.
 AC_CHECK_FUNCS([pow sqrt])
 
-required_glext_version=18
+required_glext_version=21
 
 # Mac OSX Tests
 case $host_os in darwin*)
@@ -52,7 +52,6 @@ case $host_os in darwin*)
   required_glext_version=7
   ;;
 esac
-
 
 # Backends
 
@@ -77,27 +76,26 @@ if test "x$sh_backend_arb" = xtrue ; then
   GL_CHECK_GL_HEADERS([],
     [SH_BACKEND_MESSAGE([arb], [OpenGL headers (GL/gl.h and GL/glext.h) not found. Disabling ARB backend.])
      sh_backend_arb=false])
-  GL_CHECK_GLEXT_VERSION([$required_glext_version], [], [
+  GL_CHECK_GLEXT_VERSION([[$required_glext_version], [], [
     SH_BACKEND_MESSAGE([arb], [glext.h version 18 or greater (available at http://oss.sgi.com/projects/ogl-sample/registry/) not found. Disabling ARB backend.])
     sh_backend_arb=false
   ])
 fi
 AM_CONDITIONAL(ENABLE_ARB_BACKEND, test x$sh_backend_arb = xtrue)
 
-SH_CHECK_NONDEFAULT_BACKEND([ati], [ATI])
-if test "x$sh_backend_ati" = xtrue ; then
+SH_CHECK_BACKEND([glsl], [OpenGL Shading Language])
+if test "x$sh_backend_glsl" = xtrue ; then
   GL_CHECK_GL_HEADERS([],
-    [SH_BACKEND_MESSAGE([ati], [OpenGL headers (GL/gl.h and GL/glext.h) not found. Disabling ATI backend.])
-     sh_backend_ati=false])
+    [SH_BACKEND_MESSAGE([glsl], [OpenGL headers (GL/gl.h and GL/glext.h) not found. Disabling GLSL backend.])
+     sh_backend_glsl=false])
   GL_CHECK_GLEXT_VERSION([$required_glext_version], [], [
-    SH_BACKEND_MESSAGE([ati], [glext.h version 18 or greater (available at http://oss.sgi.com/projects/ogl-sample/regi\
-stry/) not found. Disabling ATI backend.])
-    sh_backend_ati=false
+    SH_BACKEND_MESSAGE([glsl], [glext.h version 21 or greater (available at http://oss.sgi.com/projects/ogl-sample/registry/) not found. Disabling GLSL backend.])
+    sh_backend_glsl=false
   ])
 fi
-AM_CONDITIONAL(ENABLE_ATI_BACKEND, test x$sh_backend_ati = xtrue)
+AM_CONDITIONAL(ENABLE_GLSL_BACKEND, test x$sh_backend_glsl = xtrue)
 
-AM_CONDITIONAL(ENABLE_GL_BACKENDS, test x$sh_backend_ati = xtrue -o x$sh_backend_arb = xtrue)
+AM_CONDITIONAL(ENABLE_GL_BACKENDS, test x$sh_backend_arb = xtrue -o x$sh_backend_glsl = xtrue)
 
 AC_ARG_ENABLE([docs],
 	      AC_HELP_STRING([--enable-docs],
@@ -118,7 +116,11 @@ fi
 AM_CONDITIONAL(ENABLE_DOXYGEN_DOCS, test x$sh_enable_docs = xtrue)
 
 # Store the prefix as a variable
-AC_DEFINE_UNQUOTED(SH_INSTALL_PREFIX, "$prefix", [Installation prefix directory])
+if test "x$prefix" = xNONE ; then
+   AC_DEFINE_UNQUOTED(SH_INSTALL_PREFIX, "/usr/local", [Installation prefix directory])
+else
+   AC_DEFINE_UNQUOTED(SH_INSTALL_PREFIX, "$prefix", [Installation prefix directory])
+fi
 
 
 AC_CONFIG_FILES([Makefile
@@ -126,10 +128,15 @@ AC_CONFIG_FILES([Makefile
 		 test/Makefile
 		 test/regress/Makefile
 		 backends/Makefile
-		 backends/gcc/Makefile
+		 backends/cc/Makefile
 		 backends/sm/Makefile
 		 backends/gl/Makefile
 		 util/Makefile
+		 examples/Makefile
+		 examples/binding/Makefile
+		 examples/glut/Makefile
+		 examples/particle/Makefile
+		 examples/textures/Makefile
 		 doc/Makefile])
 AC_OUTPUT
 

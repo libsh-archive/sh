@@ -331,7 +331,7 @@ void ShQuaternion<B, T>::setUnit(bool flag)
 }
 
 template<ShBindingType B, typename T>
-void ShQuaternion<B, T>::getValues(T values[]) const
+void ShQuaternion<B, T>::getValues(HostType values[]) const
 {
   m_data.getValues(values);
 }

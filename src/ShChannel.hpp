@@ -29,6 +29,7 @@
 
 #include "ShChannelNode.hpp"
 #include "ShProgram.hpp"
+#include "ShGeneric.hpp"
 
 namespace SH {
 
@@ -40,7 +41,6 @@ namespace SH {
 template<typename T>
 class ShChannel : public ShMetaForwarder {
 public:
-  typedef typename T::ValueType ValueType;
   /// Construct a channel without any associated memory.
   ShChannel();
   /// Construct a channel with \a count elements in \a memory
@@ -58,10 +58,11 @@ public:
 
   /// Fetch the current element from this stream.
   /// This is only useful in stream programs
-  T operator()();
-  /// Fetch the current element from this stream.
-  /// This is only useful in stream programs
-  const T operator()() const;
+  T operator()() const;
+
+  /// Indexed lookup from the stream
+  template<typename T2>
+  T operator[](const ShGeneric<1, T2>& index) const;
 
   /// Return the node internally wrapped by this channel object
   ShChannelNodePtr node();

@@ -31,22 +31,34 @@
 #include "ShDllExport.hpp"
 #include "ShVariableNode.hpp"
 #include "ShCtrlGraph.hpp"
+#include "ShBackend.hpp"
+#include "ShProgramNode.hpp"
+#include "ShStructural.hpp"
+#include <map>
 
 namespace SH { 
 
+typedef std::map<ShVariableNodePtr, ShVariableNodePtr> ShVarMap;
+
 struct
 SH_DLLEXPORT ShVariableReplacer {
-  typedef std::map<ShVariableNodePtr, ShVariableNodePtr> VarMap;
 
-  ShVariableReplacer(VarMap& v);
+  ShVariableReplacer(ShVarMap& v);
 
   // replaces variables in node based on varMap
   void operator()(ShCtrlGraphNodePtr node);
 
+  // replaces variables in a ShProgramNode::VarList based on varMap 
+  void operator()(ShProgramNode::VarList &varList);
+
+  // replaces variables in a ShStructuralNode and all Structural
+  // Nodes in its region.
+  void operator()(ShStructuralNodePtr node);
+
   // replaces node in a single variable using varMap
   void repVar(ShVariable& var);
 
-  VarMap& varMap;
+  ShVarMap& varMap;
 };
 
 }

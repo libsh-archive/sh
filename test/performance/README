@@ -1,0 +1,16 @@
+Very rough first attempt at some performance tests.  This certainly does not cover all Sh functionality, but it was a simple test to make sure
+the storage type branch was not significantly slower on basic computation. 
+
+Test descriptions
+    compile         5000 compiles to cc backend with optimizations
+    mat_asn_scal    100000 asn matrix elements as scalars (from libsh-devel list)
+    mat_asn_vec     100000 asn matrix rows as vectors (from libsh-devel list)
+    mat_mul         30000 4x4 matrix-matrix multiplication
+    vec3_add        1000000 vec adds, not swizzled 
+    vec3_add_swiz   1000000 vec adds, all operands swizzed
+
+Running tests
+    make all
+    ./runall
+
+Use ./sum to get a summary

@@ -27,6 +27,8 @@
 #include <iostream>
 
 #include "ShVariable.hpp"
+#include "ShDebug.hpp"
+#include "ShRecord.hpp"
 #include "ShProgram.hpp"
 
 namespace SH {
@@ -51,7 +53,14 @@ ShVariable::ShVariable(const ShVariableNodePtr& node,
 {
 }
 
-ShVariable& ShVariable::operator=(const ShProgram& prgc)
+ShVariable& ShVariable::operator=(const ShProgram &prg) {
+  // @todo range
+  ShRecord rec(*this); 
+  rec = prg;
+  return *this;
+}
+
+void ShVariable::attach(const ShProgram& prgc)
 {
   ShProgram prg(prgc);
   if (prg.node()->finished()) {
@@ -59,7 +68,6 @@ ShVariable& ShVariable::operator=(const ShProgram& prgc)
   } else {
     prg.node()->assign(m_node);
   }
-  return *this;
 }
 
 bool ShVariable::null() const
@@ -82,19 +90,25 @@ int ShVariable::size() const
   return m_swizzle.size();
 }
 
-void ShVariable::range(ShVariableNode::ValueType low, ShVariableNode::ValueType high)
+ShValueType ShVariable::valueType() const 
 {
-  m_node->range(low, high);
+  if(!m_node) return SH_VALUETYPE_END;
+  return m_node->valueType();
 }
 
-ShVariableNode::ValueType ShVariable::lowBound() const
+void ShVariable::rangeVariant(const ShVariant* low, const ShVariant* high)
 {
-  return m_node->lowBound();
+  m_node->rangeVariant(low, high, m_neg, m_swizzle);
 }
 
-ShVariableNode::ValueType ShVariable::highBound() const
+ShVariantPtr ShVariable::lowBoundVariant() const
 {
-  return m_node->highBound();
+  return m_node->lowBoundVariant()->get(m_neg, m_swizzle);
+}
+
+ShVariantPtr ShVariable::highBoundVariant() const
+{
+  return m_node->highBoundVariant()->get(m_neg, m_swizzle);
 }
 
 const ShSwizzle& ShVariable::swizzle() const
@@ -117,34 +131,64 @@ bool& ShVariable::neg()
   return m_neg;
 }
 
-void ShVariable::getValues(ShVariableNode::ValueType dest[]) const
+ShVariantPtr ShVariable::getVariant() const
 {
-  for (int i = 0; i < size(); i++) {
-    dest[i] = m_node->getValue(m_swizzle[i]);
-    if (m_neg) dest[i] = -dest[i];
+  return m_node->getVariant()->get(m_neg, m_swizzle);
+}
+
+ShVariantPtr ShVariable::getVariant(int index) const
+{
+  return m_node->getVariant()->get(m_neg, m_swizzle * ShSwizzle(size(), index)); 
+}
+
+
+bool ShVariable::loadVariant(ShVariant *&result) const
+{
+  if((!m_neg) && m_swizzle.identity()) {
+    result = const_cast<ShVariant*>(m_node->getVariant());
+    return false;
   }
+  // @todo type figure out a nicer, but just as efficient way than this hackery without
+  // exposing unwanted functionality in ShVariant or ShVariableNode. 
+  ShVariantPtr temp = getVariant();
+  temp->acquireRef();
+  result = temp.object();
+  return true;
 }
 
-ShVariableNode::ValueType ShVariable::getValue(int i) const
+void ShVariable::updateVariant() 
 {
-  ShVariableNode::ValueType value = m_node->getValue(m_swizzle[i]);
-  if (m_neg) value = -value;
-  return value;
+  m_node->update_all();
 }
 
-void ShVariable::setValues(ShVariableNode::ValueType values[])
+void ShVariable::setVariant(const ShVariant* other, bool neg, const ShSwizzle &writemask)
 {
-  m_node->lock();
-  for (int i = 0; i < size(); i++) {
-    m_node->setValue(m_swizzle[i], values[i]); 
-  }
-  m_node->unlock();
-  m_neg = false;
+  m_node->setVariant(other, neg ^ m_neg, m_swizzle * writemask);
 }
 
-void ShVariable::setValue(int index, ShVariableNode::ValueType value)
+void ShVariable::setVariant(ShVariantCPtr other, bool neg, const ShSwizzle &writemask)
 {
-  m_node->setValue(m_swizzle[index], (m_neg ? -value : value)); 
+  setVariant(other.object(), neg, writemask); 
+}
+
+void ShVariable::setVariant(const ShVariant* other, int index)
+{
+  m_node->setVariant(other, m_neg, m_swizzle * ShSwizzle(size(), index));
+}
+
+void ShVariable::setVariant(ShVariantCPtr other, int index)
+{
+  setVariant(other.object(), index); 
+}
+
+void ShVariable::setVariant(const ShVariant* other)
+{
+  m_node->setVariant(other, m_neg, m_swizzle);
+}
+
+void ShVariable::setVariant(ShVariantCPtr other)
+{
+  setVariant(other.object());
 }
 
 ShVariable ShVariable::operator()() const
@@ -177,28 +221,30 @@ ShVariable ShVariable::operator()(int n, int indices[]) const
   return ShVariable(m_node, m_swizzle * ShSwizzle(size(), n, indices), m_neg);
 }
 
+ShVariable ShVariable::operator()(const ShSwizzle &swizzle) const
+{
+  return ShVariable(m_node, m_swizzle * swizzle, m_neg);
+}
 
-std::ostream& operator<<(std::ostream& _out, const ShVariable& shVariableToPrint){
- 
-  if (!shVariableToPrint.m_node){
-    _out<<"[null]";
-    return _out;
+std::ostream& operator<<(std::ostream& out, const ShVariable& v)
+{
+  if (!v.m_node){
+    out << "[null]";
+    return out;
+  }
+  if (!v.hasValues()){
+    out << "[not uniform]";
+    return out;
   }
 
-  _out<<'[';
-
-  if(shVariableToPrint.size() > 0)
-    _out << (( shVariableToPrint.neg() ? -1.0 : 1.0 ) *  
-      shVariableToPrint.m_node->getValue(shVariableToPrint.swizzle()[0]) );
-
-  for (int k = 1; k < shVariableToPrint.size(); k++) {
-    _out<<", ";
-    _out << (( shVariableToPrint.neg() ? -1.0 : 1.0 ) *  
-      shVariableToPrint.m_node->getValue(shVariableToPrint.swizzle()[k]) );
-   }
-
-  _out<<']';
-  return _out;
+  if(v.size() > 1) {
+    out << '[';
+  }
+  out << v.getVariant()->encodeArray();
+  if(v.size() > 1) {
+    out<<']';
+  }
+  return out;
 }
 
 
@@ -210,6 +256,13 @@ ShVariable ShVariable::operator-() const
 bool ShVariable::operator==(const ShVariable& other) const
 {
   return m_node == other.m_node && m_swizzle == other.m_swizzle && m_neg == other.m_neg;
+}
+
+void ShVariable::clone(const ShVariable& other)
+{
+  m_node = other.m_node;
+  m_swizzle = other.m_swizzle;
+  m_neg = other.m_neg;
 }
 
 

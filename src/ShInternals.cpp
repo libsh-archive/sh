@@ -29,24 +29,56 @@
 
 namespace SH { 
 
-ShVariableReplacer::ShVariableReplacer(VarMap& v)
-  : varMap(v) {
+ShVariableReplacer::ShVariableReplacer(ShVarMap& v)
+  : varMap(v) 
+{
 }
 
-void ShVariableReplacer::operator()(ShCtrlGraphNodePtr node) {
+void ShVariableReplacer::operator()(ShCtrlGraphNodePtr node) 
+{
+  // replace variables that are conditions in branches
+  ShCtrlGraphNode::SuccessorList::iterator I;
+  for(I = node->successors.begin(); I != node->successors.end(); ++I) {
+    repVar(I->cond);
+  }
+
+  // replace variables in the block
   if (!node) return;
   ShBasicBlockPtr block = node->block;
   if (!block) return;
   for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-    if(!I->dest.null()) repVar(I->dest);
+    repVar(I->dest);
     for (int i = 0; i < 3; i++) {
-      if( !I->src[i].null() ) repVar(I->src[i]);
+      repVar(I->src[i]);
     }
+  }
+
+}
+
+void ShVariableReplacer::operator()(ShStructuralNodePtr node) 
+{
+  if(node->cfg_node) operator()(node->cfg_node);
+  for (ShStructuralNode::StructNodeList::iterator I = node->structnodes.begin(); 
+      I != node->structnodes.end(); ++I) {
+    operator()(*I);
   }
 }
 
-void ShVariableReplacer::repVar(ShVariable& var) {
-  VarMap::iterator I = varMap.find(var.node());
+void ShVariableReplacer::operator()(ShProgramNode::VarList &varList) 
+{
+  ShProgramNode::VarList::iterator I;
+  for(I = varList.begin(); I != varList.end();) {
+    if(varMap.count(*I) > 0) {
+      varList.insert(I, varMap[*I]);
+      I = varList.erase(I);
+    } else ++I;
+  }
+}
+
+void ShVariableReplacer::repVar(ShVariable& var) 
+{
+  if(var.null()) return;
+  ShVarMap::iterator I = varMap.find(var.node());
   if (I == varMap.end()) return;
   var = ShVariable(I->second, var.swizzle(), var.neg());
 }

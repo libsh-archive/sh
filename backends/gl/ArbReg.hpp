@@ -40,6 +40,7 @@ enum ArbRegType {
   SH_ARB_REG_ATTRIB,
   SH_ARB_REG_PARAM,
   SH_ARB_REG_TEMP,
+  SH_ARB_REG_HALF_TEMP, // @todo type may want to rethink this
   SH_ARB_REG_ADDRESS,
   SH_ARB_REG_OUTPUT,
   SH_ARB_REG_CONST,
@@ -51,8 +52,9 @@ enum ArbRegType {
 enum ArbRegBinding {
   // VERTEX and FRAGMENT
   // Parameter
-  SH_ARB_REG_PARAMLOC,
-  SH_ARB_REG_PARAMENV,
+  SH_ARB_REG_PROGRAMLOC,
+  SH_ARB_REG_PROGRAMENV,
+  SH_ARB_REG_STATE,
   // Output
   SH_ARB_REG_RESULTCOL,
 
@@ -92,15 +94,18 @@ struct ArbReg : public SH::ShRefCountable {
 
   ArbRegType type;
   int index;
+  bool preset;
   std::string name; //< variable name (if any) associated with the register
 
-  union {
-    struct {
-      ArbRegBinding binding;
-      int bindingIndex;
-    };
+  struct BindingInfo
+    {
+    ArbRegBinding type;
+    int index;
+    int count;
+    std::string name;
     float values[4];
-  };
+    };
+  BindingInfo binding;
 
   friend std::ostream& operator<<(std::ostream& out, const ArbReg& reg);
   

@@ -29,6 +29,7 @@
 
 #include "ShLibMisc.hpp"
 #include "ShInstructions.hpp"
+#include "ShProgram.hpp"
 
 namespace SH {
 
@@ -54,9 +55,9 @@ ShGeneric<M, T> cast(const ShGeneric<N, T>& a)
 
 template<int M> 
 inline
-ShGeneric<M, float> cast(float a)
+ShGeneric<M, double> cast(double a)
 {
-  return cast<M>(ShAttrib<1, SH_CONST, float>(a));
+  return cast<M>(ShAttrib<1, SH_CONST, double>(a));
 }
 
 template<int M, int N, typename T> 
@@ -71,20 +72,52 @@ ShGeneric<M, T> fillcast(const ShGeneric<N, T>& a)
 
 template<int M> 
 inline
-ShGeneric<M, float> fillcast(float a)
+ShGeneric<M, double> fillcast(double a)
 {
-  return fillcast<M>(ShAttrib<1, SH_CONST, float>(a));
+  return fillcast<M>(ShAttrib<1, SH_CONST, double>(a));
 }
 
-template<int M, int N, typename T> 
+template<int M, int N, typename T1, typename T2> 
 inline
-ShGeneric<M+N, T> join(const ShGeneric<M, T>& a, const ShGeneric<N, T>& b)
+ShGeneric<M+N, CT1T2> join(const ShGeneric<M, T1>& a, const ShGeneric<N, T2>& b)
 {
   int indices[M+N];
   for(int i = 0; i < M+N; ++i) indices[i] = i; 
-  ShAttrib<M+N, SH_TEMP, T> result;
+  ShAttrib<M+N, SH_TEMP, CT1T2> result;
   result.template swiz<M>(indices) = a;
   result.template swiz<N>(indices + M) = b;
+  return result;
+}
+
+template<int M, int N, int O, typename T1, typename T2, typename T3> 
+inline
+ShGeneric<M+N+O, CT1T2T3> join(const ShGeneric<M, T1>& a, 
+			       const ShGeneric<N, T2> &b, 
+			       const ShGeneric<O, T3> &c)
+{
+  int indices[M+N+O];
+  for(int i = 0; i < M+N+O; ++i) indices[i] = i; 
+  ShAttrib<M+N+O, SH_TEMP, CT1T2T3> result;
+  result.template swiz<M>(indices) = a;
+  result.template swiz<N>(indices + M) = b;
+  result.template swiz<N>(indices + M + N) = c;
+  return result;
+}
+
+template<int M, int N, int O, int P, typename T1, typename T2, typename T3, typename T4> 
+inline
+ShGeneric<M+N+O+P, CT1T2T3T4> join(const ShGeneric<M, T1>& a, 
+				   const ShGeneric<N, T2> &b, 
+				   const ShGeneric<O, T3> &c, 
+				   const ShGeneric<P, T4> &d)
+{
+  int indices[M+N+O+P];
+  for(int i = 0; i < M+N+O+P; ++i) indices[i] = i; 
+  ShAttrib<M+N+O+P, SH_TEMP, CT1T2T3T4> result;
+  result.template swiz<M>(indices) = a;
+  result.template swiz<N>(indices + M) = b;
+  result.template swiz<N>(indices + M + N) = c;
+  result.template swiz<N>(indices + M + N + O) = d;
   return result;
 }
 
@@ -100,6 +133,13 @@ inline
 void kill(const ShGeneric<N, T>& c)
 {
   discard(c);
+}
+
+template<typename T>
+ShProgram freeze(const ShProgram& p,
+                 const T& uniform)
+{
+  return (p >> uniform) << (T::ConstType)(uniform);
 }
 
 }

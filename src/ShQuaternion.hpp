@@ -34,13 +34,14 @@ namespace SH {
 
 /** A Quaternion.
  */
-template<ShBindingType B, typename T=float>
+template<ShBindingType B, typename T = float>
 class ShQuaternion
 {
   template <ShBindingType B2, typename T2>
   friend std::ostream& operator<<(std::ostream& out, 
                                   const ShQuaternion<B2, T2>& q);
 public:
+  typedef typename ShHostType<T>::type HostType;
   
   /** \brief Constructor for ShQuaternion.
    *    
@@ -213,7 +214,7 @@ public:
    * Outputs the current content of the quaternion as a T array
    * \param values output T array
    */  
-  void getValues(T values []) const;
+  void getValues(HostType values []) const;
 
   /** \brief Definition of the setUnit function
    *

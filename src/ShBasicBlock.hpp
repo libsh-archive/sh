@@ -43,30 +43,53 @@ class
 SH_DLLEXPORT
 ShBasicBlock : public ShBlock {
 public:
+  typedef std::list<ShStatement> ShStmtList;
+  typedef ShStmtList::iterator iterator;
+  typedef ShStmtList::const_iterator const_iterator;
+  typedef ShStmtList::reverse_iterator reverse_iterator;
+  typedef ShStmtList::const_reverse_iterator const_reverse_iterator;
+
   ~ShBasicBlock();
 
   void print(std::ostream& out, int indent) const;
   void graphvizDump(std::ostream& out) const;
-  
+
+  /**@name Add statement at start.
+   * Adds the given statement after the statements in this block */
   void addStatement(const ShStatement& stmt);
 
-  typedef std::list<ShStatement> ShStmtList;
+  /**@name Add statement at end.
+   * Adds the given statement before the statements in this block */
+  void prependStatement(const ShStatement& stmt);
 
-  ShStmtList::const_iterator begin() const;
-  ShStmtList::const_iterator end() const;
-  ShStmtList::iterator begin();
-  ShStmtList::iterator end();
+  /* List ops 
+   * @{ */
+  bool empty() { return m_statements.empty(); }
 
-  ShStmtList::iterator erase(ShStmtList::iterator I) {
-    return m_statements.erase(I);
-  }
+  const_iterator begin() const { return m_statements.begin(); }
+  const_iterator end() const { return m_statements.end(); }
+  iterator begin() { return m_statements.begin(); }
+  iterator end() { return m_statements.end(); } 
 
-  void splice(ShStmtList::iterator I, ShStmtList &l) {
-    m_statements.splice(I, l);
+  const_reverse_iterator rbegin() const { return m_statements.rbegin(); }
+  const_reverse_iterator rend() const { return m_statements.rend(); }
+  reverse_iterator rbegin() { return m_statements.rbegin(); }
+  reverse_iterator rend() { return m_statements.rend(); } 
+
+  iterator erase(iterator I) { return m_statements.erase(I); }
+
+  // Place all the elements of l before the iterator I and removes them
+  // from l
+  void splice(iterator I, ShStmtList &l) { m_statements.splice(I, l); }
+
+  // Places all the elements starting from lI in l before the iterator I and
+  // removes them from l
+  void splice(iterator I, ShStmtList &l, iterator lI) {
+    m_statements.splice(I, l, lI, l.end());
   }
   
-private:
   ShStmtList m_statements;
+//private:
 };
 
 typedef ShPointer<ShBasicBlock> ShBasicBlockPtr;

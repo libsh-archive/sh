@@ -24,12 +24,14 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#include "ShParser.hpp"
 #include <string>
-#include "ShToken.hpp"
+#include <sstream>
+#include "ShParser.hpp"
 #include "ShBasicBlock.hpp"
+#include "ShCfgBlock.hpp"
 #include "ShTokenizer.hpp"
 #include "ShException.hpp"
+#include "ShVariable.hpp"
 #include "ShError.hpp"
 
 namespace SH {
@@ -61,12 +63,11 @@ void ShParser::parseStmts(ShCtrlGraphNodePtr& head,
   }
   
   ShBasicBlockPtr basic = shref_dynamic_cast<ShBasicBlock>(next);
+  ShCfgBlockPtr cfg = shref_dynamic_cast<ShCfgBlock>(next);
   ShTokenPtr token = shref_dynamic_cast<ShToken>(next);
 
   if (basic) {
-    // This is a basic block. Just make a node for it.
-    head = tail = new ShCtrlGraphNode();
-    tail->block = basic;
+    parseBlock(head, tail, basic);
     blocks->removeFront();
   } else if (token) {
     // This is a token. Check what type it has.
@@ -86,14 +87,22 @@ void ShParser::parseStmts(ShCtrlGraphNodePtr& head,
     case SH_TOKEN_BREAK:
     case SH_TOKEN_CONTINUE:
       return; // TODO: break, continue semantics
+    case SH_TOKEN_STARTSEC:
+      parseSection(head, tail, blocks);
+      break;
     case SH_TOKEN_ELSE:
     case SH_TOKEN_ENDIF:
     case SH_TOKEN_ENDWHILE:
     case SH_TOKEN_UNTIL:
     case SH_TOKEN_ENDFOR:
+    case SH_TOKEN_ENDSEC:
       return;
     }
-  } else { // not a basic block, not a token
+  } else if (cfg) {
+    head = cfg->entry();
+    tail = cfg->exit();
+    blocks->removeFront();
+  } else { // not a basic/cfg block, not a token
     return;
   }
   if (tail) {
@@ -106,18 +115,28 @@ void ShParser::parseStmts(ShCtrlGraphNodePtr& head,
   }
 }
 
+void ShParser::parseBlock(ShCtrlGraphNodePtr& head,
+                          ShCtrlGraphNodePtr& tail, ShBasicBlockPtr block)
+{
+  head = tail = new ShCtrlGraphNode();
+  tail->block = block;
+  
+  /* Move SH_OP_DECL statement sinto the node's declaration set */
+  for(ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end();) {
+    if(I->op == SH_OP_DECL) {
+      head->addDecl(I->dest.node());
+      I = block->erase(I);
+    } else ++I;
+  }
+}
+
 void ShParser::parseIf(ShCtrlGraphNodePtr& head,
                        ShCtrlGraphNodePtr& tail, ShBlockListPtr blocks)
 {
   head = tail = 0;
   
-  ShTokenPtr ifToken = shref_dynamic_cast<ShToken>(blocks->getFront());
-  blocks->removeFront();
+  ShTokenPtr ifToken = popToken(blocks, SH_TOKEN_IF, 1); 
   
-  checkCond(ifToken);
-  checkCond(ifToken->type() == SH_TOKEN_IF);
-  checkCond(ifToken->arguments.size() == 1);
-
   ShTokenArgument condArg = ifToken->arguments.front();
   
   parseStmts(head, tail, condArg.blockList);
@@ -128,18 +147,13 @@ void ShParser::parseIf(ShCtrlGraphNodePtr& head,
   ShCtrlGraphNodePtr headIf = 0, tailIf = 0, headElse = 0, tailElse = 0;
   parseStmts(headIf, tailIf, blocks);
   
-  ShTokenPtr nt = shref_dynamic_cast<ShToken>(blocks->getFront());
-  checkCond(nt);
+  ShTokenPtr nt = popToken(blocks); 
 
   if (nt->type() == SH_TOKEN_ELSE) {
-    blocks->removeFront();
     parseStmts(headElse, tailElse, blocks);
-    
-    nt = shref_dynamic_cast<ShToken>(blocks->getFront());
-    checkCond(nt);
+    nt = popToken(blocks);
   }
   checkCond(nt->type() == SH_TOKEN_ENDIF);
-  blocks->removeFront();
 
   if (!headIf) headIf = tailIf = new ShCtrlGraphNode();
   if (!headElse) headElse = tailElse = new ShCtrlGraphNode();
@@ -159,11 +173,7 @@ void ShParser::parseFor(ShCtrlGraphNodePtr& head,
 {
   head = tail = 0;
   
-  ShTokenPtr forToken = shref_dynamic_cast<ShToken>(blocks->getFront());
-  checkCond(forToken);
-  checkCond(forToken->type() == SH_TOKEN_FOR);
-  checkCond(forToken->arguments.size() == 3);
-  blocks->removeFront();
+  ShTokenPtr forToken = popToken(blocks, SH_TOKEN_FOR, 3); 
   
   ShTokenArgument initArg = forToken->arguments[0];
   ShTokenArgument condArg = forToken->arguments[1];
@@ -192,10 +202,7 @@ void ShParser::parseFor(ShCtrlGraphNodePtr& head,
     headBody = tailBody = new ShCtrlGraphNode();
   }
   
-  ShTokenPtr nt = shref_dynamic_cast<ShToken>(blocks->getFront());
-  checkCond(nt);
-  checkCond(nt->type() == SH_TOKEN_ENDFOR);
-  blocks->removeFront();
+  ShTokenPtr nt = popToken(blocks, SH_TOKEN_ENDFOR);
 
   tail->append(headCond);
   tailCond->append(headBody, condArg.result);
@@ -209,11 +216,7 @@ void ShParser::parseWhile(ShCtrlGraphNodePtr& head,
 {
   head = tail = 0;
   
-  ShTokenPtr whileToken = shref_dynamic_cast<ShToken>(blocks->getFront());
-  checkCond(whileToken);
-  checkCond(whileToken->type() == SH_TOKEN_WHILE);
-  checkCond(whileToken->arguments.size() == 1);
-  blocks->removeFront();
+  ShTokenPtr whileToken = popToken(blocks, SH_TOKEN_WHILE, 1);
   
   ShTokenArgument condArg = whileToken->arguments[0];
   
@@ -228,10 +231,7 @@ void ShParser::parseWhile(ShCtrlGraphNodePtr& head,
     headBody = tailBody = new ShCtrlGraphNode();
   }
   
-  ShTokenPtr nt = shref_dynamic_cast<ShToken>(blocks->getFront());
-  checkCond(nt);
-  checkCond(nt->type() == SH_TOKEN_ENDWHILE);
-  blocks->removeFront();
+  ShTokenPtr nt = popToken(blocks, SH_TOKEN_ENDWHILE);
 
   tail->append(headBody, condArg.result);
   tailBody->append(head);
@@ -242,21 +242,14 @@ void ShParser::parseDo(ShCtrlGraphNodePtr& head,
 {
   head = tail = 0;
   
-  ShTokenPtr doToken = shref_dynamic_cast<ShToken>(blocks->getFront());
-  checkCond(doToken);
-  checkCond(doToken->type() == SH_TOKEN_DO);
-  blocks->removeFront();
+  ShTokenPtr doToken = popToken(blocks, SH_TOKEN_DO);
 
   parseStmts(head, tail, blocks);
   if (!tail) {
     head = tail = new ShCtrlGraphNode();
   }
 
-  ShTokenPtr nt = shref_dynamic_cast<ShToken>(blocks->getFront());
-  checkCond(nt);
-  checkCond(nt->type() == SH_TOKEN_UNTIL);
-  checkCond(nt->arguments.size() == 1);
-  blocks->removeFront();
+  ShTokenPtr nt = popToken(blocks, SH_TOKEN_UNTIL, 1);
 
   ShTokenArgument condArg = nt->arguments[0];
 
@@ -277,6 +270,62 @@ void ShParser::parseDo(ShCtrlGraphNodePtr& head,
   // Otherwise, continue looping.
   tailCond->append(head);
   tail = fallthrough;
+}
+
+void ShParser::parseSection(ShCtrlGraphNodePtr& head,
+                           ShCtrlGraphNodePtr& tail,
+                           ShBlockListPtr blocks)
+{
+  ShTokenPtr startToken = popToken(blocks, SH_TOKEN_STARTSEC);
+
+  // @todo range this is a really stupid way of grabbing the name...
+  ShBasicBlockPtr basic = shref_dynamic_cast<ShBasicBlock>(blocks->getFront());
+  SH_DEBUG_ASSERT(basic && !basic->empty() && basic->begin()->op == SH_OP_COMMENT);
+  std::string name = basic->begin()->get_info<ShInfoComment>()->comment;
+  basic->erase(basic->begin());
+
+  ShCtrlGraphNodePtr secHead, secTail;
+  parseStmts(secHead, secTail, blocks);
+  if(!secTail) {
+    secHead = secTail = new ShCtrlGraphNode();
+  }
+
+  ShTokenPtr nt = popToken(blocks, SH_TOKEN_ENDSEC);
+
+  head = new ShCtrlGraphNode();
+  head->block = new ShBasicBlock();
+
+  ShStatement startStmt(SH_OP_STARTSEC);
+  startStmt.add_info(new ShInfoComment(name));
+  head->block->addStatement(startStmt);
+
+  tail = new ShCtrlGraphNode();
+  tail->block = new ShBasicBlock();
+  //tail->block->addStatement(ShStatement(foo, SH_OP_ENDSEC, foo));
+  ShStatement endStmt(SH_OP_ENDSEC);
+  endStmt.add_info(new ShInfoComment(name));
+  tail->block->addStatement(endStmt);
+
+  head->append(secHead);
+  secTail->append(tail);
+}
+
+ShTokenPtr ShParser::popToken(ShBlockListPtr blocks, ShTokenType expectedType, unsigned int expectedArgs)
+{
+  ShTokenPtr result = shref_dynamic_cast<ShToken>(blocks->getFront());
+  checkCond(result);
+  checkCond(result->type() == expectedType);
+  checkCond(result->arguments.size() == expectedArgs);
+  blocks->removeFront();
+  return result;
+}
+
+ShTokenPtr ShParser::popToken(ShBlockListPtr blocks)
+{
+  ShTokenPtr result = shref_dynamic_cast<ShToken>(blocks->getFront());
+  checkCond(result);
+  blocks->removeFront();
+  return result;
 }
 
 }

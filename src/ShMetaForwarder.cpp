@@ -59,7 +59,7 @@ void ShMetaForwarder::internal(bool i)
   m_meta->internal(i);
 }
 
-const std::string& ShMetaForwarder::title() const
+std::string ShMetaForwarder::title() const
 {
   return m_meta->title();
 }
@@ -69,7 +69,7 @@ void ShMetaForwarder::title(const std::string& t)
   m_meta->title(t);
 }
 
-const std::string& ShMetaForwarder::description() const
+std::string ShMetaForwarder::description() const
 {
   return m_meta->description();
 }

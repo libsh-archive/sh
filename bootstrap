@@ -4,55 +4,53 @@ rm -rf libltdl
 
 echo "You may ignore messages about updating aclocal.m4."
 
-# Machine specific
+if test "x${LIBTOOLIZE}" = "x" ; then
+    case ${MACHTYPE}
+	in *apple*darwin*)
+	    LIBTOOLIZE="/sw/bin/glibtoolize --ltdl"
+	    ;;
+	*)
+	    LIBTOOLIZE="libtoolize --ltdl"
+    esac
+else
+    LIBTOOLIZE="$LIBTOOLIZE --ltdl"
+fi
+export LIBTOOLIZE
+
+if test "x${AUTOMAKE}" = "x" ; then
+    case ${MACHTYPE}
+	in *apple*darwin*)
+	    AUTOMAKE=/sw/bin/automake
+	    ;;
+	*)
+	    AUTOMAKE=automake
+    esac
+fi
+export AUTOMAKE
+
+if test "x${ACLOCAL}" = "x" ; then
+    case ${MACHTYPE}
+	in *apple*darwin*)
+	    AUTOMAKE=/sw/bin/automake
+	    ;;
+	*)
+	    ACLOCAL=aclocal
+    esac
+fi
+export ACLOCAL
+
+# ltdl seems to require these now...
 case ${MACHTYPE}
-in *apple*darwin*)  # Mac OSX
-
-  if test "x${LIBTOOLIZE}" = "x" ; then
-    LIBTOOLIZE="/sw/bin/glibtoolize --ltdl"
-  else
-    LIBTOOLIZE="$LIBTOOLIZE --ltdl"
-  fi
-  export LIBTOOLIZE
-
-  # need to use fink's autoconf utils because Apple's is too old
-  if test "x${AUTOMAKE}" = "x" ; then
-    AUTOMAKE=/sw/bin/automake
-  fi
-  export AUTOMAKE
-  if test "x${ACLOCAL}" = "x" ; then
-    ACLOCAL=/sw/bin/aclocal
-  fi
-  export ACLOCAL
-
-  # ltdl seems to require these now...
-  cp /usr/share/aclocal/libtool.m4 ./config
-  cp /usr/share/aclocal/ltdl.m4 ./config
-
-;;
-*) # all others
-
-  if test "x${LIBTOOLIZE}" = "x" ; then
-    LIBTOOLIZE="libtoolize --ltdl"
-  else
-    LIBTOOLIZE="$LIBTOOLIZE --ltdl"
-  fi
-  export LIBTOOLIZE
-
-  if test "x${AUTOMAKE}" = "x" ; then
-    AUTOMAKE=automake
-  fi
-  export AUTOMAKE
-  if test "x${ACLOCAL}" = "x" ; then
-    ACLOCAL=aclocal
-  fi
-  export ACLOCAL
-
-  # ltdl seems to require these now...
-  cp /usr/share/libtool/libtool.m4 .
-  cp /usr/share/libtool/ltdl.m4 .
-
+    in *apple*darwin*)
+	M4PRFX=/usr/share/aclocal
+	M4DEST=config
+	;;
+    *)
+	M4PRFX=/usr/share/libtool
+	M4DEST=.
 esac
+cp $M4PRFX/libtool.m4 $M4DEST
+cp $M4PRFX/ltdl.m4 $M4DEST
 
 cat config/*.m4 > acinclude.m4
 

@@ -28,7 +28,7 @@
 #define SHSWIZZLE_HPP
 
 #include <iosfwd>
-#include <vector>
+//#include <vector>
 #include "ShDllExport.hpp"
 #include "ShException.hpp"
 
@@ -54,10 +54,13 @@ namespace SH {
  * particular the size of) the tuple which they are swizzling.
  */
 class
-SH_DLLEXPORT ShSwizzle {
+SH_DLLEXPORT
+ShSwizzle {
 public:
+
   // Null swizzle
   ShSwizzle();
+
   /// Identity swizzle: does nothing at all.
   ShSwizzle(int srcSize);
   /// Use one element from the original tuple.
@@ -72,6 +75,9 @@ public:
   ShSwizzle(int srcSize, int size, int* indices);
 
   ShSwizzle(const ShSwizzle& other);
+
+  /* Construct swizzle from repeating other n times */ 
+  ShSwizzle(const ShSwizzle& other, int n);
   ~ShSwizzle();
 
   ShSwizzle& operator=(const ShSwizzle& other);
@@ -84,8 +90,11 @@ public:
   ShSwizzle operator*(const ShSwizzle& other) const;
 
   /// Determine how many elements this swizzle results in.
-  int size() const;
+  int size() const { return m_size; }
+
   /// Obtain the index of the \a i'th element. 0 <= i < size().
+  /// This is int so that printing out the result won't give something
+  /// weird
   int operator[](int i) const;
 
   /// Determine whether this is an identity swizzle.
@@ -95,8 +104,37 @@ public:
   bool operator==(const ShSwizzle& other) const;
   
 private:
-  std::size_t m_srcSize;
-  std::vector<int> m_indices;
+  // copies the other swizzle's elements 
+  void copy(const ShSwizzle &other, bool islocal);
+
+  // throws an exception if index < 0 or index >= m_srcSize
+  void checkSrcSize(int index); 
+
+  // allocates the m_indices array to current m_size
+  // returns true 
+  bool alloc(); 
+
+  // deallocates the m_indices array 
+  void dealloc();
+
+  // returns whether we're using local 
+  bool local() const;
+
+  // returns the identity swiz value on this machine
+  int idswiz() const;
+
+  // Declare these two first so alignment problems don't make the ShSwizzle struct larger
+  int m_srcSize;
+  int m_size;
+
+  // when srcSize <= 255 and size <= 4, use local.
+  // local is always initialized to 0x03020101, so identity comparison is
+  // just an integer comparison using intval
+  union {
+    unsigned char local[4];
+    int intval;
+    int* ptr;
+  } m_index;
 
   friend SH_DLLEXPORT std::ostream& operator<<(std::ostream& out, const ShSwizzle& swizzle);
 };
@@ -111,5 +149,7 @@ public:
 };
   
 }
+
+#include "ShSwizzleImpl.hpp"
   
 #endif

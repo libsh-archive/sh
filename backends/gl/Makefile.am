@@ -10,19 +10,22 @@ else
 ARB_LIBS =
 endif
 
-if ENABLE_ATI_BACKEND
-ATI_LIBS = libshati.la
+if ENABLE_GLSL_BACKEND
+GLSL_LIBS = libshglsl.la
 else
-ATI_LIBS =
+GLSL_LIBS =
 endif
 
-shbackend_LTLIBRARIES = $(ARB_LIBS) $(ATI_LIBS)
+shbackend_LTLIBRARIES = $(ARB_LIBS) $(GLSL_LIBS)
 
 GLBACKEND_SOURCES = GlBackend.cpp GlBackend.hpp \
 		  GlTextureName.hpp GlTextureName.cpp
 GLTEXTURE_SOURCES = GlTextureStorage.hpp GlTextureStorage.cpp \
 		     GlTextures.hpp GlTextures.cpp 
-PBUFFERSTREAM_SOURCES = PBufferStreams.hpp PBufferStreams.cpp
+PBUFFERSTREAM_SOURCES = PBufferStreams.hpp PBufferStreams.cpp \
+			PBufferContext.hpp PBufferContext.cpp \
+			GLXPBufferContext.hpp GLXPBufferContext.cpp \
+			Utils.hpp Utils.cpp
 
 if ENABLE_ARB_BACKEND
 libsharb_la_LDFLAGS = -L$(prefix)/lib -module
@@ -34,16 +37,13 @@ libsharb_la_SOURCES = Arb.cpp ArbCode.cpp ArbEmit.cpp ArbInst.cpp ArbLimits.cpp 
                        $(GLBACKEND_SOURCES) $(GLTEXTURE_SOURCES) $(PBUFFERSTREAM_SOURCES)
 endif
 
-if ENABLE_ATI_BACKEND
-libshati_la_LDFLAGS = -L$(prefix)/lib -module
-libshati_la_LIBADD = $(top_srcdir)/src/libsh.la
-nodist_libshati_la_SOURCES = uberbuffers/UberTextures.hpp uberbuffers/UberTextures.cpp \
-			     uberbuffers/UberStorage.hpp uberbuffers/UberStorage.cpp \
-		             uberbuffers/AtiBackend.cpp uberbuffers/uberbuffers.hpp
-
-dist_libshati_la_SOURCES = Arb.cpp ArbCode.cpp ArbEmit.cpp ArbInst.cpp ArbLimits.cpp \
-			   ArbReg.cpp \
-			   Arb.hpp ArbCode.hpp ArbInst.hpp ArbLimits.hpp \
-		      	   ArbReg.hpp \
-			   $(GLBACKEND_SOURCES)
+if ENABLE_GLSL_BACKEND
+libshglsl_la_LDFLAGS = -L$(prefix)/lib -module
+libshglsl_la_LIBADD = $(top_srcdir)/src/libsh.la 
+libshglsl_la_SOURCES = Glsl.cpp Glsl.hpp GlslCode.cpp GlslCode.hpp \
+		       GlslBackend.cpp GlslVariable.cpp GlslVariable.hpp \
+		       GlslVariableMap.cpp GlslVariableMap.hpp GlslEmit.cpp \
+		       GlslSet.cpp GlslSet.hpp \
+		       $(GLBACKEND_SOURCES) $(GLTEXTURE_SOURCES) \
+		       $(PBUFFERSTREAM_SOURCES)
 endif

@@ -30,30 +30,21 @@
 //#define DO_PBUFFER_TIMING
 
 // Turn this on to debug the fragment programs.
-#define SH_DEBUG_PBS_PRINTFP
+//#define SH_DEBUG_PBS_PRINTFP
 
 #include <map>
 #include <fstream>
 #include <cstdlib>
-
-// Extensions for ATI and Nvidia
-
-#ifndef GLX_ATI_pixel_format_float
-#define GLX_ATI_pixel_format_float  1
-
-#define GLX_RGBA_FLOAT_ATI_BIT				0x00000100
-
-#endif // GLX_ATI_pixel_format_float
-
-#ifndef GLX_FLOAT_COMPONENTS_NV
-#define GLX_FLOAT_COMPONENTS_NV         0x20B0
-#endif // GLX_FLOAT_COMPONENTS_NV
+#include <list>
 
 #include "sh.hpp"
 #include "ShOptimizations.hpp"
 #include "ShException.hpp"
 #include "ShError.hpp"
-#include "ShContext.hpp"
+#include "ShTypeInfo.hpp"
+#include "ShVariant.hpp"
+#include "PBufferContext.hpp"
+#include "Utils.hpp"
 
 #ifdef DO_PBUFFER_TIMING
 #include <sys/time.h>
@@ -63,6 +54,7 @@
 namespace shgl {
 
 using namespace SH;
+
 
 #ifdef DO_PBUFFER_TIMING
 
@@ -93,98 +85,89 @@ public:
   }
 };
 
-typedef std::map<ShChannelNodePtr, ShTextureNodePtr> StreamInputMap;
-
-class StreamInputGatherer {
+class PBufferStreamCache : public ShInfo {
 public:
-  StreamInputGatherer(StreamInputMap& input_map)
-    : input_map(input_map)
-  {
-  }
+  PBufferStreamCache(ShProgramNode* stream_program,
+                     ShProgramNode* vertex_program);
+
+  ShInfo* clone() const;
+
+  void update_channels(int width, int height);
+
+  void build_sets(ShProgramNode* vertex_program);
+
+  typedef std::list<ShProgramSetPtr>::iterator set_iterator;
+  typedef std::list<ShProgramSetPtr>::const_iterator set_const_iterator;
+  typedef std::list<ShProgramNodePtr>::iterator program_iterator;
+  typedef std::list<ShProgramNodePtr>::const_iterator program_const_iterator;
+
+  set_iterator sets_begin() { return m_program_sets.begin(); }
+  set_iterator sets_end() { return m_program_sets.end(); }
+  set_const_iterator sets_begin() const { return m_program_sets.begin(); }
+  set_const_iterator sets_end() const { return m_program_sets.end(); }
+
+  program_iterator programs_begin() { return m_programs.begin(); }
+  program_iterator programs_end() { return m_programs.end(); }
+  program_const_iterator programs_begin() const { return m_programs.begin(); }
+  program_const_iterator programs_end() const { return m_programs.end(); }
   
-  void operator()(const ShCtrlGraphNode* node)
-  {
-    if (!node->block) return;
+private:
+  ShProgramNode* m_stream_program;
+  ShProgramNode* m_vertex_program;
+  ChannelMap m_channel_map;
+  std::list<ShProgramNodePtr> m_programs;
+  std::list<ShProgramSetPtr> m_program_sets;
+
+  PBufferStreamCache(const PBufferStreamCache& other);
+  PBufferStreamCache& operator=(const PBufferStreamCache& other);
+};
+
+PBufferStreamCache::PBufferStreamCache(ShProgramNode* stream_program,
+                                       ShProgramNode* vertex_program)
+  : m_stream_program(stream_program),
+    m_vertex_program(vertex_program)
+{
+  FloatExtension extension = PBufferFactory::instance()->get_extension();
+  ShTextureDims dims;
+  
+  switch (extension) {
+  case SH_ARB_NV_FLOAT_BUFFER:
+    dims = SH_TEXTURE_RECT;
+    break;
+  case SH_ARB_ATI_PIXEL_FORMAT_FLOAT:
+    dims = SH_TEXTURE_2D;
+    break;
+  case SH_ARB_NO_FLOAT_EXT:
+    throw PBufferStreamException("No floating point rendering target.\n"
+                                 "Ensure your system supports floating point pbuffers.");
+    break;
+  } 
+
+  ChannelGatherer gatherer(m_channel_map, dims);
+  stream_program->ctrlGraph->dfs(gatherer);
+
+  split_program(stream_program, m_programs, "gpu:fragment");
+
+  for (std::list<ShProgramNodePtr>::iterator I = m_programs.begin();
+       I != m_programs.end(); ++I) {
+    ShProgram with_tc = ShProgram(*I) & lose<ShTexCoord2f>("streamcoord");
     
-    for (ShBasicBlock::ShStmtList::const_iterator I = node->block->begin();
-         I != node->block->end(); ++I) {
-      const ShStatement& stmt = *I;
-      if (stmt.op != SH_OP_FETCH) continue;
+    TexFetcher fetcher(m_channel_map, with_tc.node()->inputs.back(),
+                       dims == SH_TEXTURE_RECT, with_tc.node());
+    with_tc.node()->ctrlGraph->dfs(fetcher);
 
-      // TODO: ought to complain here
-      if (stmt.src[0].node()->kind() != SH_STREAM) continue;
-
-      ShChannelNodePtr stream_node = shref_dynamic_cast<ShChannelNode>(stmt.src[0].node());
-      input_map.insert(std::make_pair(stream_node, ShTextureNodePtr(0)));
-    }
+    optimize(with_tc);
+    
+    *I = with_tc.node();
   }
 
-private:
-  StreamInputMap& input_map;
-};
+  build_sets(vertex_program);
+}
 
-class TexFetcher {
-public:
-  TexFetcher(StreamInputMap& input_map,
-             ShVariableNodePtr tc_node,
-             bool indexed)
-    : input_map(input_map),
-      tc_node(tc_node),
-      indexed(indexed)
-  {
-  }
 
-  void operator()(ShCtrlGraphNode* node)
-  {
-    ShVariable coordsVar(tc_node);
-    if (!node->block) return;
-    for (ShBasicBlock::ShStmtList::iterator I = node->block->begin();
-         I != node->block->end(); ++I) {
-      ShStatement& stmt = *I;
-      if (stmt.op != SH_OP_FETCH) continue;
-      
-      if (!stmt.src[0].node()) {
-        SH_DEBUG_WARN("FETCH from null stream");
-        continue;
-      }
-      if (stmt.src[0].node()->kind() != SH_STREAM) {
-        SH_DEBUG_WARN("FETCH from non-stream");
-        continue;
-      }
-      
-      ShChannelNodePtr stream_node = shref_dynamic_cast<ShChannelNode>(stmt.src[0].node());
-      StreamInputMap::const_iterator I = input_map.find(stream_node);
-      if (I == input_map.end()) {
-        SH_DEBUG_WARN("Stream node not found in input map");
-        continue;
-      }
-
-      if (!I->second) {
-        SH_DEBUG_WARN("No texture allocated for stream node");
-        continue;
-      }
-
-      ShVariable texVar(I->second);
-
-      if (indexed) {
-        stmt = ShStatement(stmt.dest, texVar, SH_OP_TEXI, coordsVar);
-      } else {
-        stmt = ShStatement(stmt.dest, texVar, SH_OP_TEX, coordsVar);
-      }
-      // The following is useful for debugging
-      // stmt = ShStatement(stmt.dest, SH_OP_ASN, coordsVar);
-    }
-  }
-  
-private:
-  StreamInputMap& input_map;
-  ShVariableNodePtr tc_node;
-  bool indexed;
-};
-
+class GlSaveState {
 #if defined( WIN32 )
 #elif defined( __APPLE__ )
-class GlSaveState {
 public:
   GlSaveState()
     : context(0)
@@ -201,9 +184,9 @@ public:
 
 private:
   AGLContext context;
-};
+
 #else // Linux
-class GlSaveState {
+
 public:
   GlSaveState()
     : display(0), drawable(0), context(0)
@@ -221,37 +204,57 @@ public:
       glXMakeCurrent(display, drawable, context);
     }
   }
-
-private:
-  Display* display;
-  GLXDrawable drawable;
-  GLXContext context;
-};
 #endif
+};
 
-#if defined( __APPLE__ )
+
+ShInfo* PBufferStreamCache::clone() const
+{
+  return new PBufferStreamCache(m_stream_program, m_vertex_program);
+}
+
+void PBufferStreamCache::update_channels(int width, int height)
+{
+  for (ChannelMap::iterator I = m_channel_map.begin(); I != m_channel_map.end(); ++I) {
+    ShChannelNode* channel = I->first.object();
+    ShTextureNode* texture = I->second.object();
+
+    SH_DEBUG_ASSERT(channel);
+    SH_DEBUG_ASSERT(texture);
+
+    texture->memory(channel->memory());
+    texture->setTexSize(width, height);
+    texture->count(channel->count());
+  }
+}
+
+void PBufferStreamCache::build_sets(ShProgramNode* vertex_program)
+{
+  m_vertex_program = vertex_program;
+  m_program_sets.clear();
+  for (std::list<ShProgramNodePtr>::iterator I = m_programs.begin(); I != m_programs.end(); ++I) {
+    m_program_sets.push_back(new ShProgramSet(ShProgram(vertex_program),
+                                              ShProgram(*I)));
+  }
+}
+
+PBufferStreams::PBufferStreams(void) :
+  m_shaders(NULL), m_setup_vp(false)
+{
+}
+
+
 PBufferStreams::PBufferStreams(int context)
   : m_context(context),
     m_setup_vp(-1)
-{
-}
-#else
-PBufferStreams::PBufferStreams(int context)
-  : m_context(context),
-    m_setup_vp(-1),
-    m_display(0)
-{
-}
+#if !defined( __APPLE__ )
+  , m_display(0)
 #endif
+{
+}
 
 PBufferStreams::~PBufferStreams()
 {
-  // TODO: destroy our GLX information.
-}
-
-StreamStrategy* PBufferStreams::create(int context)
-{
-  return new PBufferStreams(context);
 }
 
 #ifdef DO_PBUFFER_TIMING
@@ -275,167 +278,13 @@ void fillin()
 #define TIMING_RESULT(t) 
 #endif
 
-FloatExtension PBufferStreams::setupContext(int width, int height)
+void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
+                                ShStream& dest)
 {
-  if (m_info.valid()
-      && m_info.width == width
-      && m_info.height == height) {
-    DECLARE_TIMER(activatecontext);
-    shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->setContext(m_info.shcontext);
-    makeCurrenContext();
-    TIMING_RESULT(activatecontext);
-    return m_info.extension;
-  }
-  DECLARE_TIMER(makecontext);
-  if (m_info.shcontext >= 0) {
-    shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->setContext(m_info.shcontext);
-    shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->destroyContext();
-  }
-  // Figure out what extension we're using
-  m_info.extension = SH_ARB_NO_FLOAT_EXT;
-  m_info.width = width;
-  m_info.height = height;
-  m_info.pbuffer = 0;
-  m_info.context = 0;
-
-  m_info.shcontext
-    = shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->newContext();
+  // Let's get rid of that constness... Yes, yes, I know...
+  ShProgramNodePtr program = shref_const_cast<ShProgramNode>(program_const);
   
-  // This is glx specific for now
-#if defined( WIN32 )
-#elif defined( __APPLE__ )
-#else
-  if (!m_display) {
-    m_display = glXGetCurrentDisplay();
-    if (!m_display) m_display = XOpenDisplay(0);
-    if (!m_display) {
-      shError(PBufferStreamException("Could not open X display"));
-      return m_info.extension;
-    }
-  }
-#endif
-
-#if !defined( __APPLE__ )  
-  int scrnum;
-  scrnum = DefaultScreen(m_display);
-
-  std::vector<int> fb_base_attribs;
-  fb_base_attribs.push_back(GLX_DOUBLEBUFFER); fb_base_attribs.push_back(False);
-  fb_base_attribs.push_back(GLX_RED_SIZE); fb_base_attribs.push_back(32);
-  fb_base_attribs.push_back(GLX_GREEN_SIZE); fb_base_attribs.push_back(32);
-  fb_base_attribs.push_back(GLX_BLUE_SIZE); fb_base_attribs.push_back(32);
-  fb_base_attribs.push_back(GLX_DRAWABLE_TYPE); fb_base_attribs.push_back(GLX_PBUFFER_BIT);
-  
-  int items;
-
-  GLXFBConfig* fb_config = 0;
-
-  // Try NVIDIA
-  if (!fb_config) {
-    std::vector<int> fb_attribs(fb_base_attribs);
-    fb_attribs.push_back(GLX_RENDER_TYPE); fb_attribs.push_back(GLX_RGBA_BIT);
-    fb_attribs.push_back(GLX_FLOAT_COMPONENTS_NV); fb_attribs.push_back(True);
-    fb_attribs.push_back(None);
-    
-    fb_config = glXChooseFBConfig(m_display, scrnum, &fb_attribs.front(), &items);
-    if (fb_config) {
-      m_info.extension = SH_ARB_NV_FLOAT_BUFFER;
-    }
-  }
-  // Try ATI
-  if (!fb_config) {
-    std::vector<int> fb_attribs(fb_base_attribs);
-    fb_attribs.push_back(GLX_RENDER_TYPE); fb_attribs.push_back(GLX_RGBA_FLOAT_ATI_BIT);
-    fb_attribs.push_back(None);
-    
-    fb_config = glXChooseFBConfig(m_display, scrnum, &fb_attribs.front(), &items);
-    if (fb_config) {
-      m_info.extension = SH_ARB_ATI_PIXEL_FORMAT_FLOAT;
-    }
-  }
-
-  if (!fb_config) {
-    shError(PBufferStreamException("Could not get GLX FB Config!\n"
-                                   "Your card may not support the appropriate extensions."));
-    return SH_ARB_NO_FLOAT_EXT;
-  }
-
-  if (m_info.extension == SH_ARB_NO_FLOAT_EXT) {
-    shError(PBufferStreamException("Could not choose a floating-point extension!\n"
-                                   "Your card may not support the appropriate extensions."));
-    return m_info.extension;
-  }
-
-  // Set up the pbuffer
-  int pbuffer_attribs[] = {
-    GLX_PBUFFER_WIDTH, width,
-    GLX_PBUFFER_HEIGHT, height,
-    GLX_LARGEST_PBUFFER, False,
-    None
-  };
-#else // __APPLE
-  //  const int kSamples = 4;
-  //  GLint attrib[] = { AGL_RGBA, AGL_DOUBLEBUFFER, AGL_DEPTH_SIZE, 16, AGL_SAMPLE_BUFFERS_ARB, 1, AGL_SAMPLES_ARB, kSamples, AGL_NO_RECOVERY, AGL_NONE };  
-  std::vector<GLint> agl_attribs;
-  agl_attribs.push_back(AGL_RGBA);
-  agl_attribs.push_back(AGL_DOUBLEBUFFER);
-  agl_attribs.push_back(AGL_RED_SIZE);   agl_attribs.push_back(32);
-  agl_attribs.push_back(AGL_GREEN_SIZE); agl_attribs.push_back(32);
-  agl_attribs.push_back(AGL_BLUE_SIZE);  agl_attribs.push_back(32);
-  agl_attribs.push_back(AGL_NO_RECOVERY);
-  agl_attribs.push_back(AGL_NONE);
-  m_info.extension = SH_ARB_NV_FLOAT_BUFFER;
-
-#endif // !defined( __APPLE__ )
-
-#if defined( WIN32 )
-#elif defined( __APPLE__ )
-  // build context
-  m_info.pixformat = aglChoosePixelFormat(NULL, 0, &agl_attribs[0]);
-  if (aglGetError() != AGL_NO_ERROR) {
-    shError(PBufferStreamException("Could not create supported pixel format"));
-    return SH_ARB_NO_FLOAT_EXT;
-  }
-
-  m_info.context = aglCreateContext(m_info.pixformat, NULL);
-  if (!m_info.context) {
-    shError(PBufferStreamException("Could not create PBuffer context"));
-    return SH_ARB_NO_FLOAT_EXT;
-  }
-
-  const int kPbufferMaxLevels = 0;
-  m_info.pbuffer = 0;
-  aglCreatePBuffer(m_info.width, m_info.height, GL_TEXTURE_2D, GL_RGBA, kPbufferMaxLevels, &(m_info.pbuffer));
-  if (!m_info.pbuffer) {
-    shError(PBufferStreamException("Could not make pbuffer!"));
-    return SH_ARB_NO_FLOAT_EXT;
-  }
-  makeCurrenContext();
-#else
-  m_info.pbuffer = glXCreatePbuffer(m_display, fb_config[0], pbuffer_attribs);
-  if (!m_info.pbuffer) {
-    shError(PBufferStreamException("Could not make pbuffer!"));
-    return SH_ARB_NO_FLOAT_EXT;
-  }
-  
-  m_info.context = glXCreateNewContext(m_display, fb_config[0], GLX_RGBA_TYPE, 0, True);
-  if (!m_info.context) {
-    shError(PBufferStreamException("Could not create PBuffer context"));
-    XFree(fb_config);
-    return SH_ARB_NO_FLOAT_EXT;
-  }
-  makeCurrenContext()
-#endif
-  
-  TIMING_RESULT(makecontext);
-  return m_info.extension;
-}
-
-void PBufferStreams::execute(const ShProgramNodeCPtr& program,
-                             ShStream& dest)
-{
   DECLARE_TIMER(overhead);
-  int prev = shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->context();
 
   // Check program target
   if (program->target() != "gpu:stream") {
@@ -463,29 +312,16 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
     return;
   }
   TIMING_RESULT(overhead);
-  
-  if (dest.size() > 1) {
-    DECLARE_TIMER(overall);
-    // TODO: If any stream channels are used as both inputs and
-    // outputs we will want to cache their new values elsewhere and
-    // then overwrite them at the end.
-    int i = 0;
-    for (ShStream::NodeList::iterator I = dest.begin(); I != dest.end(); ++I, ++i) {
-      ShStream s(*I);
-      DECLARE_TIMER(specialize);
-      ShProgram p = shSwizzle(i) << shref_const_cast<ShProgramNode>(program);
-      TIMING_RESULT(specialize);
-      execute(p.node(), s);
-    }
-    TIMING_RESULT(overall);
-    return;
-  }
 
-  DECLARE_TIMER(onerun);
-  // --- Set up the GLX context
-  
-  ShChannelNodePtr output = *dest.begin();
-  int count = output->count();
+  // TODO: Check that the size of each output matches the size of each dest.
+
+  int count = (*dest.begin())->count();
+
+  for (ShStream::iterator I = dest.begin(); I != dest.end(); ++I) {
+    if (count != (*I)->count()) {
+      shError(PBufferStreamException("All stream outputs must be of the same size"));
+    }
+  }
 
   // Pick a size for the texture that just fits the output data.
   int tex_size = 1;
@@ -494,266 +330,204 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
     tex_size <<= 1;
   }
 
-  GlSaveState prevstate;
+  GlSaveState prevstate; // MacOS port addition
   
-  FloatExtension extension = setupContext(tex_size, tex_size);
+  DECLARE_TIMER(onerun);
 
-  if (extension == SH_ARB_NO_FLOAT_EXT) return;
+  PBufferFactory* factory = PBufferFactory::instance();
 
-  DECLARE_TIMER(gather);
-  
-  StreamInputMap input_map;
-
-  // Do a DFS through the program's control graph.
-  StreamInputGatherer gatherer(input_map);
-  program->ctrlGraph->dfs(gatherer);
-
-  TIMING_RESULT(gather);
-  
-  if (input_map.empty()) {
-    shError(PBufferStreamException("Stream program does not use any streams!"));
+  if (!factory) {
+    throw PBufferStreamException("No PBuffer support found.\n"
+                                 "Ensure your system supports floating point pbuffers.");
     return;
   }
 
-  DECLARE_TIMER(texsetup);
-  // First, allocate textures for each input stream.
-  // Need to ensure that input stream sizes are the same.
-  for (StreamInputMap::iterator I = input_map.begin(); I != input_map.end(); ++I) {
-    if (I->first->count() != count) {
-      SH_DEBUG_ERROR("Input lengths of stream program do not match ("
-                     << I->first->count() << " != " << count << ")");
-      return;
-    }
-    ShTextureNodePtr tex;
-    ShTextureTraits traits = ShArrayTraits();
-    traits.clamping(ShTextureTraits::SH_UNCLAMPED);
-
-    // TODO!
-    // We're copying a far larger amount of memory in here than we
-    // should. Don't do this.
-    switch (extension) {
-    case SH_ARB_NV_FLOAT_BUFFER:
-      tex = new ShTextureNode(SH_TEXTURE_RECT, I->first->size(),
-                              traits, tex_size, tex_size, 1);
-      break;
-    case SH_ARB_ATI_PIXEL_FORMAT_FLOAT:
-      tex = new ShTextureNode(SH_TEXTURE_2D, I->first->size(),
-                              traits, tex_size, tex_size, 1);
-      break;
-    default:
-      tex = 0;
-      break;
-    }
-
-    tex->memory(I->first->memory());
-    I->second = tex;
-  }
-  TIMING_RESULT(texsetup);
+  FloatExtension extension = factory->get_extension();
   
+  // --- Set up the GLX context
+  PBufferContextPtr context = factory->get_context(tex_size, tex_size);
 
-  DECLARE_TIMER(fpsetup);
-  // Add in the texcoord variable
-  ShProgram fp = ShProgram(shref_const_cast<ShProgramNode>(program))
-    & lose<ShTexCoord2f>("streamcoord");
-
-  // Make it a fragment program
-  fp.node()->target() = "gpu:fragment";
-  
-  ShVariableNodePtr tc_node = fp.node()->inputs.back(); // there should be only one input anyways
-
-  // replace FETCH with TEX
-  TexFetcher texFetcher(input_map, tc_node, extension == SH_ARB_NV_FLOAT_BUFFER);
-  fp.node()->ctrlGraph->dfs(texFetcher);
-  fp.node()->collectVariables(); // necessary to collect all the new textures
-
-  
-  // optimize
-  optimize(fp);
-
-  int gl_error;
-  glEnable(GL_VERTEX_PROGRAM_ARB);
-  gl_error = glGetError();
-  if (gl_error != GL_NO_ERROR) {
-    shError(PBufferStreamException("Could not enable GL_VERTEX_PROGRAM_ARB"));
-    //glXDestroyContext(m_display, pbuffer_ctxt);
-    //XFree(fb_config);
-    return;
-  }
-  glEnable(GL_FRAGMENT_PROGRAM_ARB);
-  gl_error = glGetError();
-  if (gl_error != GL_NO_ERROR) {
-    shError(PBufferStreamException("Could not enable GL_FRAGMENT_PROGRAM_ARB"));
-    //glXDestroyContext(m_display, pbuffer_ctxt);
-    //XFree(fb_config);
-    return;
-  }
-#ifdef SH_DEBUG_PBS_PRINTFP
-  {
-  std::ofstream fpgv("pb.dot");
-  fp.node()->ctrlGraph->graphvizDump(fpgv);
-  }
-  system("dot -Tps -o pb.ps pb.dot");
-#endif
-
-  // generate code
-  shCompile(fp);
-
-#ifdef SH_DEBUG_PBS_PRINTFP
- {
-  std::ofstream fpdbg("pbufferstream.fp");
-  fp.code()->print(fpdbg);
- }
-#endif
-
-  TIMING_RESULT(fpsetup);
+  PBufferHandlePtr old_handle = context->activate();
 
   DECLARE_TIMER(vpsetup);
 
-  int curcontext = shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->context();
-  if (m_setup_vp != curcontext) {
+  // --- Set up the vertex program
+  if (!m_setup_vp) {
     // The (trivial) vertex program
-    if (m_setup_vp < 0) {
-      m_vp = keep<ShPosition4f>() & keep<ShTexCoord2f>();
-      m_vp.node()->target() = "gpu:vertex";
-    }
+    m_vp = keep<ShPosition4f>() & keep<ShTexCoord2f>();
+    m_vp.node()->target() = "gpu:vertex";
     shCompile(m_vp);
-    m_setup_vp = curcontext;
+    m_setup_vp = true;
   }
-
+  
   TIMING_RESULT(vpsetup);
 
-  DECLARE_TIMER(binding);
-  // Then, bind vertex (pass-through) and fragment program
-  shBind(m_vp);
-  shBind(fp);
-  TIMING_RESULT(binding);
-
-  DECLARE_TIMER(clear);
-  glClear(GL_COLOR_BUFFER_BIT);
-  TIMING_RESULT(clear);
-
-  DECLARE_TIMER(rendersetup);
-  glViewport(0, 0, tex_size, tex_size);
-
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-
-  float tc_right;
-  float tc_upper;
-
-  if (extension == SH_ARB_NV_FLOAT_BUFFER) {
-    tc_right = static_cast<float>(tex_size);
-    tc_upper = static_cast<float>(tex_size);
-  } else {
-    tc_right = 1.0;
-    tc_upper = 1.0;
-  }
-  TIMING_RESULT(rendersetup);
-
-  DECLARE_TIMER(render);
-
-  // Generate quad geometry
-  glBegin(GL_QUADS); {
-    glTexCoord2f(0.0, 0.0);
-    glVertex3f(-1.0, -1.0, 0.0);
-    glTexCoord2f(0.0, tc_upper);
-    glVertex3f(-1.0,  1.0, 0.0);
-    glTexCoord2f(tc_right, tc_upper);
-    glVertex3f( 1.0,  1.0, 0.0);
-    glTexCoord2f(tc_right, 0.0);
-    glVertex3f( 1.0, -1.0, 0.0);
-  } glEnd();
-
-  TIMING_RESULT(render);
-
-  DECLARE_TIMER(finish);
-  glFinish();
-
-  TIMING_RESULT(finish);
-
-  
-  gl_error = glGetError();
-  if (gl_error != GL_NO_ERROR) {
-    shError(PBufferStreamException("Could not render"));
-    //glXDestroyContext(m_display, pbuffer_ctxt);
-    //XFree(fb_config);
-    return;
+  // --- Set up the fragment programs and such
+  PBufferStreamCache* cache = program->get_info<PBufferStreamCache>();
+  if (!cache) {
+    cache = new PBufferStreamCache(program.object(), m_vp.node().object());
+    program->add_info(cache);
   }
   
-  DECLARE_TIMER(findouthost);
+  cache->update_channels(tex_size, tex_size);
 
-  ShHostStoragePtr outhost
-    = shref_dynamic_cast<ShHostStorage>(output->memory()->findStorage("host"));
-  if (!outhost) {
-    outhost = new ShHostStorage(output->memory().object(),
-                                sizeof(float) * output->size() * output->count());
-  }
-  TIMING_RESULT(findouthost);
+  // Run each fragment program
 
-  DECLARE_TIMER(dirtyouthost);
-  // Read back
-  outhost->dirty();
-  TIMING_RESULT(dirtyouthost);
-  
+  ShStream::iterator dest_iter = dest.begin();
+  for (PBufferStreamCache::set_iterator I = cache->sets_begin();
+       I != cache->sets_end(); ++I, ++dest_iter) {
 
-  GLenum format;
-  switch (output->size()) {
-  case 1:
-    format = GL_RED;
-    break;
-  case 2:
-    SH_DEBUG_ASSERT(0 && "Sorry, 2-component outputs aren't working right now!");
-    break;
-  case 3:
-    format = GL_RGB;
-    break;
-  case 4:
-    format = GL_RGBA;
-    break;
-  default:
-    SH_DEBUG_ASSERT(false);
-    break;
-  }
+    ShChannelNode* output = dest_iter->object();
+    
+    DECLARE_TIMER(binding);
+    // Then, bind vertex (pass-through) and fragment program
+    shBind(**I);
+    TIMING_RESULT(binding);
 
-  DECLARE_TIMER(readback);
-  
-  glReadPixels(0, 0, tex_size, count / tex_size, format,
-               GL_FLOAT, outhost->data());
-  gl_error = glGetError();
-  if (gl_error != GL_NO_ERROR) {
-    shError(PBufferStreamException("Could not do glReadPixels()"));
-    //glXDestroyContext(m_display, pbuffer_ctxt);
-    //XFree(fb_config);
-    return;
-  }
-  if (count % tex_size) {
-    glReadPixels(0, count / tex_size, count % tex_size, 1, format, GL_FLOAT,
-                 reinterpret_cast<float*>(outhost->data())
-                 + (count - (count % tex_size)) * output->size());
-    gl_error = glGetError();
+    DECLARE_TIMER(clear);
+    glClear(GL_COLOR_BUFFER_BIT);
+    TIMING_RESULT(clear);
+
+    DECLARE_TIMER(rendersetup);
+    glViewport(0, 0, tex_size, tex_size);
+    
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    
+    float tc_right;
+    float tc_upper;
+    
+    if (extension == SH_ARB_NV_FLOAT_BUFFER) {
+      tc_right = static_cast<float>(tex_size);
+      tc_upper = static_cast<float>(tex_size);
+    } else {
+      tc_right = 1.0;
+      tc_upper = 1.0;
+    }
+    TIMING_RESULT(rendersetup);
+
+    DECLARE_TIMER(render);
+    
+    // Generate quad geometry
+    glBegin(GL_QUADS); {
+      glTexCoord2f(0.0, 0.0);
+      glVertex3f(-1.0, -1.0, 0.0);
+      glTexCoord2f(0.0, tc_upper);
+      glVertex3f(-1.0,  1.0, 0.0);
+      glTexCoord2f(tc_right, tc_upper);
+      glVertex3f( 1.0,  1.0, 0.0);
+      glTexCoord2f(tc_right, 0.0);
+      glVertex3f( 1.0, -1.0, 0.0);
+    } glEnd();
+    
+    TIMING_RESULT(render);
+    
+    DECLARE_TIMER(finish);
+    glFinish();
+    
+    TIMING_RESULT(finish);
+    
+    // Unbind, just to be safe
+    shUnbind(**I);
+    
+    int gl_error = glGetError();
     if (gl_error != GL_NO_ERROR) {
-      shError(PBufferStreamException("Could not do rest of glReadPixels()"));
-      //glXDestroyContext(m_display, pbuffer_ctxt);
-      //XFree(fb_config);
+      shError(PBufferStreamException("Could not render"));
       return;
     }
+  
+    DECLARE_TIMER(findouthost);
+
+    ShValueType valueType = output->valueType();
+    
+    ShHostStoragePtr outhost
+      = shref_dynamic_cast<ShHostStorage>(output->memory()->findStorage("host"));
+    if (!outhost) {
+      int datasize = shTypeInfo(valueType)->datasize(); 
+      outhost = new ShHostStorage(output->memory().object(),
+                                  datasize * output->size() * output->count());
+    }
+    TIMING_RESULT(findouthost);
+    
+    DECLARE_TIMER(dirtyouthost);
+    // Read back
+    outhost->dirty();
+    TIMING_RESULT(dirtyouthost);
+    
+    
+    GLenum format;
+    switch (output->size()) {
+    case 1:
+      format = GL_RED;
+      break;
+    case 2:
+      SH_DEBUG_ASSERT(0 && "Sorry, 2-component outputs aren't working right now!");
+      break;
+    case 3:
+      format = GL_RGB;
+      break;
+    case 4:
+      format = GL_RGBA;
+      break;
+    default:
+      SH_DEBUG_ASSERT(false);
+      break;
+    }
+    
+    DECLARE_TIMER(readback);
+    
+    // @todo half-float
+    ShVariantPtr  resultBuffer; 
+    int resultDatasize = output->size() * count;
+    GLenum readpixelType;
+    ShValueType convertedType; 
+    readpixelType = shGlType(valueType, convertedType);
+    if(convertedType != SH_VALUETYPE_END) {
+      SH_DEBUG_WARN("ARB backend does not handle stream output type " << shValueTypeName(valueType) << " natively."
+                    << "  Using " << shValueTypeName(convertedType) << " temporary buffer.");
+      resultBuffer = shVariantFactory(convertedType, SH_MEM)->generate(resultDatasize);
+    } else {
+      resultBuffer = shVariantFactory(valueType, SH_MEM)->generate(
+                                                                   outhost->data(), resultDatasize, false);
+    }
+    
+    glReadPixels(0, 0, tex_size, count / tex_size, format,
+                 readpixelType, resultBuffer->array());
+    gl_error = glGetError();
+    if (gl_error != GL_NO_ERROR) {
+      shError(PBufferStreamException("Could not do glReadPixels()"));
+      return;
+    }
+    if (count % tex_size) {
+      glReadPixels(0, count / tex_size, count % tex_size, 1, format, readpixelType,
+                   (char*)(resultBuffer->array()) + (count - (count % tex_size)) * output->size() * resultBuffer->datasize());
+      gl_error = glGetError();
+      if (gl_error != GL_NO_ERROR) {
+        shError(PBufferStreamException("Could not do rest of glReadPixels()"));
+        return;
+      }
+    }
+    
+    if(convertedType != SH_VALUETYPE_END) { // need to copy to outhoust->data()
+      ShVariantPtr outhostVariant = shVariantFactory(valueType, SH_MEM)->generate(
+                                                                                  outhost->data(), resultDatasize, false);
+      outhostVariant->set(resultBuffer);
+    }
+    
+    TIMING_RESULT(readback);
   }
-
-  TIMING_RESULT(readback);
   
-  // Clean up
-  shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->setContext(prev);
-  //glXDestroyContext(m_display, pbuffer_ctxt);
-  //XFree(fb_config);
-
-  // TODO: This just seems wrong.
-  // ShEnvironment::boundShaders().clear();
-  
-  TIMING_RESULT(onerun);
+  if (old_handle) {
+    old_handle->restore();
+  }
 }
 
+StreamStrategy* PBufferStreams::create()
+{
+  return new PBufferStreams();
+}
 
 }

@@ -32,8 +32,11 @@
 #include "ShContext.hpp"
 #include "ShTokenizer.hpp"
 #include "ShToken.hpp"
+#include "ShInfo.hpp"
+#include "ShStatement.hpp"
 #include "ShProgram.hpp"
 #include "ShBackend.hpp"
+#include "ShTransformer.hpp"
 #include "ShOptimizations.hpp"
 
 namespace SH {
@@ -53,10 +56,8 @@ void shEndShader()
   assert(parsing);
   
   parsing->ctrlGraph = new ShCtrlGraph(parsing->tokenizer.blockList());
-
-  optimize(parsing);
   
-  parsing->collectVariables();
+  optimize(parsing);
   
   context->exit();
 
@@ -96,10 +97,58 @@ void shBind(ShProgram& prg)
   prg.code(ShEnvironment::backend)->bind();
 }
 
-void shBind(ShProgram& prg, const std::string& target)
+void shBind(const ShProgramSet& s)
+{
+  if (!ShEnvironment::backend) return;
+  s.backend_set(ShEnvironment::backend)->bind();
+}
+
+void shBind(const std::string& target, ShProgram& prg)
 {
   if (!ShEnvironment::backend) return;
   prg.code(target, ShEnvironment::backend)->bind();
+}
+
+void shUnbind()
+{
+  if (!ShEnvironment::backend) return;
+  ShEnvironment::backend->unbind_all();
+}
+
+void shUnbind(ShProgram& prg)
+{
+  if (!ShEnvironment::backend) return;
+  prg.code(ShEnvironment::backend)->unbind();
+}
+
+void shUnbind(const ShProgramSet& s)
+{
+  if (!ShEnvironment::backend) return;
+  s.backend_set(ShEnvironment::backend)->unbind();
+}
+
+void shUnbind(const std::string& target, ShProgram& prg)
+{
+  if (!ShEnvironment::backend) return;
+  prg.code(target, ShEnvironment::backend)->unbind();
+}
+
+void shLink(const ShProgramSet& s)
+{
+  if (!ShEnvironment::backend) return;
+  s.backend_set(ShEnvironment::backend)->link();
+}
+
+typedef std::map<std::string, ShProgram> BoundProgramMap;
+
+void shUpdate()
+{
+  if (!ShEnvironment::backend) return;
+  
+  for (BoundProgramMap::iterator i = ShContext::current()->begin_bound(); 
+       i != ShContext::current()->end_bound(); i++) {
+    i->second.code(ShEnvironment::backend)->update();
+  }
 }
 
 void shBindShader(ShProgram& shader)
@@ -109,7 +158,7 @@ void shBindShader(ShProgram& shader)
 
 void shBindShader(const std::string& target, ShProgram& shader)
 {
-  shBind(shader, target);
+  shBind(target, shader);
 }
 
 bool shSetBackend(const std::string& name)
@@ -120,33 +169,71 @@ bool shSetBackend(const std::string& name)
   return true;
 }
 
+bool shEvaluateCondition(const ShVariable& arg)
+{
+  bool cond = false;
+  for (int i = 0; i < arg.size(); i++) {
+    cond = cond || arg.getVariant(i)->isTrue();
+  }
+  return cond;
+}
+
+
+bool shProcessArg(const ShVariable& arg,
+                  bool* internal_cond)
+{
+  if (ShContext::current()->parsing()) {
+    ShContext::current()->parsing()->tokenizer.processArg(arg);
+  } else {
+    if (internal_cond) *internal_cond = shEvaluateCondition(arg);
+  }
+  return true;
+}
+
+bool shPushArgQueue()
+{
+  if (ShContext::current()->parsing()) ShContext::current()->parsing()->tokenizer.pushArgQueue();
+  return true;
+}
+
+bool shPushArg()
+{
+  if (ShContext::current()->parsing()) ShContext::current()->parsing()->tokenizer.pushArg();
+  return true;
+}
+
 void shInit()
 {
+  ShContext::current();
   // TODO: Initialize backends
 }
 
 void shIf(bool)
 {
+  if (!ShContext::current()->parsing()) return;
   ShPointer<ShToken> token = new ShToken(SH_TOKEN_IF);
-
+    
   token->arguments.push_back(ShContext::current()->parsing()->tokenizer.getArgument());
   ShContext::current()->parsing()->tokenizer.popArgQueue();
-
+    
   ShContext::current()->parsing()->tokenizer.blockList()->addBlock(token);
 }
 
 void shEndIf()
 {
+  if (!ShContext::current()->parsing()) return;
   ShContext::current()->parsing()->tokenizer.blockList()->addBlock(new ShToken(SH_TOKEN_ENDIF));
 }
 
 void shElse()
 {
+  if (!ShContext::current()->parsing()) return;
   ShContext::current()->parsing()->tokenizer.blockList()->addBlock(new ShToken(SH_TOKEN_ELSE));
 }
 
 void shWhile(bool)
 {
+  if (!ShContext::current()->parsing()) return;
   ShPointer<ShToken> token = new ShToken(SH_TOKEN_WHILE);
 
   token->arguments.push_back(ShContext::current()->parsing()->tokenizer.getArgument());
@@ -157,16 +244,19 @@ void shWhile(bool)
 
 void shEndWhile()
 {
+  if (!ShContext::current()->parsing()) return;
   ShContext::current()->parsing()->tokenizer.blockList()->addBlock(new ShToken(SH_TOKEN_ENDWHILE));
 }
 
 void shDo()
 {
+  if (!ShContext::current()->parsing()) return;
   ShContext::current()->parsing()->tokenizer.blockList()->addBlock(new ShToken(SH_TOKEN_DO));
 }
 
 void shUntil(bool)
 {
+  if (!ShContext::current()->parsing()) return;
   ShPointer<ShToken> token = new ShToken(SH_TOKEN_UNTIL);
 
   token->arguments.push_back(ShContext::current()->parsing()->tokenizer.getArgument());
@@ -177,6 +267,7 @@ void shUntil(bool)
 
 void shFor(bool)
 {
+  if (!ShContext::current()->parsing()) return;
   ShPointer<ShToken> token = new ShToken(SH_TOKEN_FOR);
 
   for (int i = 0; i < 3; i++) {
@@ -189,17 +280,40 @@ void shFor(bool)
 
 void shEndFor()
 {
+  if (!ShContext::current()->parsing()) return;
   ShContext::current()->parsing()->tokenizer.blockList()->addBlock(new ShToken(SH_TOKEN_ENDFOR));
 }
 
 void ShBreak()
 {
+  if (!ShContext::current()->parsing()) return;
   ShContext::current()->parsing()->tokenizer.blockList()->addBlock(new ShToken(SH_TOKEN_BREAK));
 }
 
 void ShContinue()
 {
+  if (!ShContext::current()->parsing()) return;
   ShContext::current()->parsing()->tokenizer.blockList()->addBlock(new ShToken(SH_TOKEN_CONTINUE));
+}
+
+void shBeginSection()
+{
+  if (!ShContext::current()->parsing()) return;
+  ShContext::current()->parsing()->tokenizer.blockList()->addBlock(new ShToken(SH_TOKEN_STARTSEC));
+}
+
+void shEndSection()
+{
+  if (!ShContext::current()->parsing()) return;
+  ShContext::current()->parsing()->tokenizer.blockList()->addBlock(new ShToken(SH_TOKEN_ENDSEC));
+}
+
+void shComment(const std::string& comment)
+{
+  if (!ShContext::current()->parsing()) return;
+  ShStatement stmt(SH_OP_COMMENT);
+  stmt.add_info(new ShInfoComment(comment));
+  ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
 }
 
 }

@@ -1,48 +1,72 @@
 # -*- makefile -*-
+include ../win32.mk
 
-RELEASE_TARGETS = libsh.dll libsh.lib
-DEBUG_TARGETS = libshd.dll libshd.lib
+CPPFLAGS += -DSH_DLLEXPORT="__declspec(dllexport)"
 
-all: all-release all-debug
+ALL_TARGETS =
+INSTALL_TARGETS =
+RELEASE_TARGETS = libsh.dll
+DEBUG_TARGETS = libshd.dll
 
+ifeq ($(BUILD_RELEASE), 1)
+	ALL_TARGETS += all-release
+	INSTALL_TARGETS += install-release
+endif
+
+ifeq ($(BUILD_DEBUG), 1)
+	ALL_TARGETS += all-debug
+	INSTALL_TARGETS += install-debug
+endif
+
+all: $(ALL_TARGETS)
+install: $(INSTALL_TARGETS)
 all-release: $(RELEASE_TARGETS)
 all-debug: $(DEBUG_TARGETS)
 
-CLEANFILES = $(RELEASE_TARGETS) $(DEBUG_TARGETS)
-
+# General/internals
 libsh_dll_SOURCES  = ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp
 libsh_dll_SOURCES += ShEnvironment.cpp ShException.cpp ShError.cpp
 libsh_dll_SOURCES += ShParser.cpp 
 libsh_dll_SOURCES += ShProgram.cpp ShProgram.hpp
 libsh_dll_SOURCES += ShProgramNode.cpp ShProgramNode.hpp
+libsh_dll_SOURCES += ShProgramSet.cpp ShProgramSet.hpp
+libsh_dll_SOURCES += ShRecord.hpp ShRecord.cpp 
+libsh_dll_SOURCES += ShInfo.hpp ShInfoImpl.hpp ShInfo.cpp
 libsh_dll_SOURCES += ShStatement.cpp ShSwizzle.cpp ShSyntax.cpp ShToken.cpp
 libsh_dll_SOURCES += ShTokenizer.cpp ShUtility.cpp ShVariable.cpp ShVariableNode.cpp
+libsh_dll_SOURCES += ShOperation.hpp ShOperation.cpp 
 libsh_dll_SOURCES += ShInternals.hpp ShInternals.cpp
 libsh_dll_SOURCES += ShBasicBlock.hpp
 libsh_dll_SOURCES += ShBlock.hpp ShCtrlGraph.hpp
+libsh_dll_SOURCES += ShCfgBlock.hpp ShCfgBlock.cpp 
 libsh_dll_SOURCES += ShDebug.hpp ShEnvironment.hpp ShError.hpp
 libsh_dll_SOURCES += ShException.hpp
 libsh_dll_SOURCES += ShParser.hpp ShRefCount.hpp ShStatement.hpp
-libsh_dll_SOURCES += ShSwizzle.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp
+libsh_dll_SOURCES += ShSwizzle.hpp ShSwizzleImpl.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp
 libsh_dll_SOURCES += ShUtility.hpp ShVariable.hpp ShVariableNode.hpp sh.hpp
+libsh_dll_SOURCES += ShGraph.hpp ShGraphImpl.hpp 
 libsh_dll_SOURCES += ShInstructions.hpp ShInstructions.cpp
-libsh_dll_SOURCES += ShMeta.hpp ShMeta.cpp
+libsh_dll_SOURCES += ShMeta.hpp ShMetaImpl.hpp
 libsh_dll_SOURCES += ShMetaForwarder.hpp ShMetaForwarder.cpp
 libsh_dll_SOURCES += ShContext.hpp ShContext.cpp
+libsh_dll_SOURCES += ShMath.hpp 
+libsh_dll_SOURCES += ShDllExport.hpp
+libsh_dll_SOURCES += ShPool.hpp ShPool.cpp
 
 # Backend
 libsh_dll_SOURCES += ShBackend.cpp ShBackend.hpp 
 libsh_dll_SOURCES += ShLinearAllocator.hpp ShLinearAllocator.cpp
 
 # Optimizer and compiler internals
-libsh_dll_SOURCES += ShDomTree.hpp ShOptimizations.hpp ShTransformer.hpp ShBitSet.hpp
-libsh_dll_SOURCES += ShDomTree.cpp ShOptimizations.cpp ShTransformer.cpp ShBitSet.cpp
-incinc_HEADERS   += ShDomTree.hpp ShOptimizations.hpp ShTransformer.hpp ShBitSet.hpp
-libsh_dll_SOURCES += ShStructural.hpp ShStructural.cpp
-incinc_HEADERS   += ShStructural.hpp
+libsh_dll_SOURCES += ShTransformer.hpp ShBitSet.hpp
+libsh_dll_SOURCES += ShTransformer.cpp ShBitSet.cpp
+libsh_dll_SOURCES += ShTransformerImpl.hpp 
+libsh_dll_SOURCES += ShTypeConvertTransformer.cpp 
+libsh_dll_SOURCES += ShOptimizations.cpp ShOptimizations.hpp
 libsh_dll_SOURCES += ShValueTracking.cpp ShConstProp.cpp
 libsh_dll_SOURCES += ShEvaluate.cpp ShEvaluate.hpp
-incinc_HEADERS   += ShEvaluate.hpp
+libsh_dll_SOURCES += ShStructural.hpp ShStructural.cpp
+libsh_dll_SOURCES += ShSection.hpp ShSectionImpl.hpp ShSection.cpp 
 
 # Library functions
 libsh_dll_SOURCES += ShLib.hpp
@@ -60,10 +84,15 @@ libsh_dll_SOURCES += ShBaseTexture.hpp ShBaseTextureImpl.hpp ShBaseTexture.cpp
 libsh_dll_SOURCES += ShArray.hpp ShTable.hpp ShTexture.hpp
 libsh_dll_SOURCES += ShWrap.hpp ShClamping.hpp ShInterp.hpp
 libsh_dll_SOURCES += ShTextureNode.hpp ShImage.hpp ShImage3D.hpp
-libsh_dll_SOURCES += ShMemory.hpp ShMemory.cpp
+libsh_dll_SOURCES += ShMemory.hpp ShMemory.cpp ShMemoryDep.hpp
 libsh_dll_SOURCES += ShTextureNode.cpp ShImage.cpp ShImage3D.cpp
 
 # Types
+libsh_dll_SOURCES += ShVariableType.hpp ShVariableType.cpp
+libsh_dll_SOURCES += ShTypeInfo.hpp ShTypeInfoImpl.hpp ShTypeInfo.cpp
+libsh_dll_SOURCES += ShTypeInfoCasts.cpp ShTypeInfoOps.cpp 
+libsh_dll_SOURCES += ShStorageType.hpp ShStorageTypeImpl.hpp ShStorageType.cpp
+libsh_dll_SOURCES += ShDataType.hpp ShDataTypeImpl.hpp ShDataType.cpp
 libsh_dll_SOURCES += ShGeneric.hpp ShGenericImpl.hpp
 libsh_dll_SOURCES += ShAttrib.hpp ShAttribImpl.hpp
 libsh_dll_SOURCES += ShLibAttrib.hpp
@@ -75,6 +104,15 @@ libsh_dll_SOURCES += ShNormal.hpp ShNormalImpl.hpp ShLibNormal.hpp
 libsh_dll_SOURCES += ShTexCoord.hpp ShTexCoordImpl.hpp ShLibTexCoord.hpp
 libsh_dll_SOURCES += ShMatrix.hpp ShMatrixImpl.hpp
 libsh_dll_SOURCES += ShQuaternion.hpp ShQuaternionImpl.hpp
+libsh_dll_SOURCES += ShVariant.hpp ShVariantImpl.hpp ShVariant.cpp
+libsh_dll_SOURCES += ShVariantFactory.hpp ShVariantFactoryImpl.hpp 
+libsh_dll_SOURCES += ShVariantCast.hpp ShVariantCastImpl.hpp 
+libsh_dll_SOURCES += ShCastManager.hpp ShCastManager.cpp 
+libsh_dll_SOURCES += ShEval.hpp ShEvalImpl.hpp ShEval.cpp
+libsh_dll_SOURCES += ShConcreteRegularOpImpl.hpp 
+libsh_dll_SOURCES += ShConcreteCTypeOpImpl.hpp  ShConcreteCTypeOp.cpp
+libsh_dll_SOURCES += ShHalf.hpp ShHalfImpl.hpp 
+libsh_dll_SOURCES += ShFraction.hpp ShFractionImpl.hpp 
 
 # Shader Algebra
 libsh_dll_SOURCES += ShAlgebra.hpp ShAlgebra.cpp
@@ -87,31 +125,48 @@ libsh_dll_SOURCES += ShChannelNode.hpp ShChannelNode.cpp
 libsh_dll_SOURCES += ShChannel.hpp ShChannelImpl.hpp
 libsh_dll_SOURCES += ShStream.hpp ShStreamImpl.hpp ShStream.cpp
 
+# Palettes
+libsh_dll_SOURCES += ShPalette.hpp ShPaletteImpl.hpp
+libsh_dll_SOURCES += ShPaletteNode.hpp ShPaletteNode.cpp
+
+# These should really be moved up top
+
 libsh_dll_CXXFILES = $(filter %.cpp,$(libsh_dll_SOURCES))
 libsh_dll_RELEASE_OBJECTS = $(libsh_dll_CXXFILES:.cpp=.r.obj)
 libsh_dll_DEBUG_OBJECTS = $(libsh_dll_CXXFILES:.cpp=.d.obj)
-libsh_dll_RELEASE_LDADD = $(LIBPNG_DIR)\lib\libpng.lib $(ZLIB_DIR)\zdll.lib
-libsh_dll_DEBUG_LDADD = $(LIBPNG_DIR)\lib\libpng.lib $(ZLIB_DIR)\zdll.lib
 
-libsh.dll libsh.lib: $(libsh_dll_RELEASE_OBJECTS)
-	$(CXX) /Felibsh /LD $^ $(libsh_dll_RELEASE_LDADD) $(RELEASE_LDFLAGS)
+libsh_dll_RELEASE_LDADD = $(LIBPNG_RELEASE_LDADD) $(ZLIB_RELEASE_LDADD)
+libsh_dll_DEBUG_LDADD = $(LIBPNG_DEBUG_LDADD) $(ZLIB_DEBUG_LDADD)
 
-libshd.dll libshd.lib: $(libsh_dll_DEBUG_OBJECTS)
-	$(CXX) /Felibshd /LD $^ $(libsh_dll_DEBUG_LDADD) $(DEBUG_LDFLAGS)
+libsh.dll: $(libsh_dll_RELEASE_OBJECTS)
+	$(LD) /DLL /OUT:$@ $^ $(RELEASE_LDFLAGS) $(libsh_dll_RELEASE_LDADD)
 
-install: libsh.dll libshd.dll $(wildcard *.hpp)
+libshd.dll: $(libsh_dll_DEBUG_OBJECTS)
+	$(LD) /DLL /OUT:$@ $^ $(DEBUG_LDFLAGS) $(libsh_dll_DEBUG_LDADD)
+
+install-common:
 	-mkdir $(SH_INSTALLDIR)
+	-mkdir $(SH_INSTALLDIR)\include
 	-mkdir $(SH_INSTALLDIR)\include\sh
 	-mkdir $(SH_INSTALLDIR)\lib
-	copy libsh.dll $(SH_INSTALLDIR)\lib
-	copy libsh.lib $(SH_INSTALLDIR)\lib
-	copy libshd.dll $(SH_INSTALLDIR)\lib
-	copy libshd.lib $(SH_INSTALLDIR)\lib
 	copy *.hpp $(SH_INSTALLDIR)\include\sh
+
+install-release: $(RELEASE_TARGETS) install-common
+	copy libsh.dll $(SH_INSTALLDIR)
+	copy libsh.lib $(SH_INSTALLDIR)\lib
+
+install-debug: $(DEBUG_TARGETS) install-common
+	copy libshd.dll $(SH_INSTALLDIR)
+	copy libshd.pdb $(SH_INSTALLDIR)
+	copy libshd.lib $(SH_INSTALLDIR)\lib
+
+clean:
+	-del $(RELEASE_TARGETS) $(DEBUG_TARGETS)
+	-del *.obj *.d
+	-del *.lib *.exp *.pdb *.idb *.ilk
 
 libsh_dll_DEPENDS = $(libsh_dll_CXXFILES:.cpp=.r.d) $(libsh_dll_CXXFILES:.cpp=.d.d)
 
-include ../win32.mk
-CPPFLAGS += -DSH_DLLEXPORT="__declspec(dllexport)"
-include $(libsh_dll_DEPENDS)
-
+ifeq ($(GEN_DEPENDENCIES), 1)
+-include $(libsh_dll_DEPENDS)
+endif

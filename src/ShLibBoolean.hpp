@@ -30,7 +30,7 @@
 #include "ShGeneric.hpp"
 #include "ShLib.hpp"
 
-
+#ifndef WIN32 
 namespace SH {
 
 /** \defgroup lib_boolean Boolean and conditional functions
@@ -39,76 +39,100 @@ namespace SH {
  */
 
 /// Componentwise less-than
-template<int N, typename T>
-ShGeneric<N, T> operator<(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> operator<(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> operator<(const ShGeneric<1, T>& left, const ShGeneric<N, T>& right);
-template<typename T>
-ShGeneric<1, T> operator<(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
-SH_SHLIB_CONST_SCALAR_OP(operator<);
-SH_SHLIB_CONST_N_OP_BOTH(operator<);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2>
+operator<(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2>
+operator<(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2>
+operator<(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right);
+template<typename T1, typename T2>
+ShGeneric<1, CT1T2>
+operator<(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right);
+SH_SHLIB_CONST_SCALAR_OP_DECL(operator<);
+SH_SHLIB_CONST_N_OP_BOTH_DECL(operator<);
 
 /// Componentwise less-than-or-equal
-template<int N, typename T>
-ShGeneric<N, T> operator<=(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> operator<=(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> operator<=(const ShGeneric<1, T>& left, const ShGeneric<N, T>& right);
-template<typename T>
-ShGeneric<1, T> operator<=(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
-SH_SHLIB_CONST_SCALAR_OP(operator<=);
-SH_SHLIB_CONST_N_OP_BOTH(operator<=);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2>
+operator<=(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2>
+operator<=(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2>
+operator<=(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right);
+template<typename T1, typename T2>
+ShGeneric<1, CT1T2>
+operator<=(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right);
+SH_SHLIB_CONST_SCALAR_OP_DECL(operator<=);
+SH_SHLIB_CONST_N_OP_BOTH_DECL(operator<=);
 
 /// Componentwise greater-than
-template<int N, typename T>
-ShGeneric<N, T> operator>(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> operator>(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> operator>(const ShGeneric<1, T>& left, const ShGeneric<N, T>& right);
-template<typename T>
-ShGeneric<1, T> operator>(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
-SH_SHLIB_CONST_SCALAR_OP(operator>);
-SH_SHLIB_CONST_N_OP_BOTH(operator>);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2>
+operator>(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2>
+operator>(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2>
+operator>(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right);
+template<typename T1, typename T2>
+ShGeneric<1, CT1T2>
+operator>(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right);
+SH_SHLIB_CONST_SCALAR_OP_DECL(operator>);
+SH_SHLIB_CONST_N_OP_BOTH_DECL(operator>);
 
 /// Componentwise greater-than-or-equal
-template<int N, typename T>
-ShGeneric<N, T> operator>=(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> operator>=(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> operator>=(const ShGeneric<1, T>& left, const ShGeneric<N, T>& right);
-template<typename T>
-ShGeneric<1, T> operator>=(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
-SH_SHLIB_CONST_SCALAR_OP(operator>=);
-SH_SHLIB_CONST_N_OP_BOTH(operator>=);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2>
+operator>=(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2>
+operator>=(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2>
+operator>=(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right);
+template<typename T1, typename T2>
+ShGeneric<1, CT1T2>
+operator>=(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right);
+SH_SHLIB_CONST_SCALAR_OP_DECL(operator>=);
+SH_SHLIB_CONST_N_OP_BOTH_DECL(operator>=);
 
 /// Componentwise equal
-template<int N, typename T>
-ShGeneric<N, T> operator==(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> operator==(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> operator==(const ShGeneric<1, T>& left, const ShGeneric<N, T>& right);
-template<typename T>
-ShGeneric<1, T> operator==(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
-SH_SHLIB_CONST_SCALAR_OP(operator==);
-SH_SHLIB_CONST_N_OP_BOTH(operator==);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2>
+operator==(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2>
+operator==(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2>
+operator==(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right);
+template<typename T1, typename T2>
+ShGeneric<1, CT1T2>
+operator==(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right);
+SH_SHLIB_CONST_SCALAR_OP_DECL(operator==);
+SH_SHLIB_CONST_N_OP_BOTH_DECL(operator==);
 
 /// Componentwise not equal
-template<int N, typename T>
-ShGeneric<N, T> operator!=(const ShGeneric<N, T>& left, const ShGeneric<N, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> operator!=(const ShGeneric<N, T>& left, const ShGeneric<1, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> operator!=(const ShGeneric<1, T>& left, const ShGeneric<N, T>& right);
-template<typename T>
-ShGeneric<1, T> operator!=(const ShGeneric<1, T>& left, const ShGeneric<1, T>& right);
-SH_SHLIB_CONST_SCALAR_OP(operator!=);
-SH_SHLIB_CONST_N_OP_BOTH(operator!=);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2>
+operator!=(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2>
+operator!=(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2>
+operator!=(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right);
+template<typename T1, typename T2>
+ShGeneric<1, CT1T2>
+operator!=(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right);
+SH_SHLIB_CONST_SCALAR_OP_DECL(operator!=);
+SH_SHLIB_CONST_N_OP_BOTH_DECL(operator!=);
 
 /** Conditional assignment.
  *  dest[i] = ((src[0][i] > 0.0) ? src[1][i] : src[2][i])
@@ -121,27 +145,30 @@ SH_SHLIB_CONST_N_OP_BOTH(operator!=);
  *  also be used in the first argument, in which case it applies to 
  *  all elements.
  */
-template<int N, typename T>
-ShGeneric<N, T> cond(const ShGeneric<N, T>& condition, const ShGeneric<N, T>& left,
-                     const ShGeneric<N, T>& right);
-template<int N, typename T>
-ShGeneric<N, T> cond(const ShGeneric<1, T>& condition, const ShGeneric<N, T>& left,
-                     const ShGeneric<N, T>& right);
-template<typename T>
-ShGeneric<1, T> cond(const ShGeneric<1, T>& condition, const ShGeneric<1, T>& left,
-                     const ShGeneric<1, T>& right);
+template<int N, typename T1, typename T2, typename T3>
+ShGeneric<N, CT1T2T3> 
+cond(const ShGeneric<N, T1>& condition, const ShGeneric<N, T2>& left,
+                     const ShGeneric<N, T3>& right);
+template<int N, typename T1, typename T2, typename T3>
+ShGeneric<N, CT1T2T3> 
+cond(const ShGeneric<1, T1>& condition, const ShGeneric<N, T2>& left,
+                     const ShGeneric<N, T3>& right);
+template<int N, typename T1, typename T2, typename T3>
+ShGeneric<N, CT1T2T3> 
+cond(const ShGeneric<1, T1>& condition, const ShGeneric<1, T2>& left,
+                     const ShGeneric<1, T3>& right);
 
 /// Boolean negation
 template<int N, typename T>
 ShGeneric<N, T> operator!(const ShGeneric<N, T>& a);
 
 /// Componentwise minimum
-template<int N, typename T>
-ShGeneric<N, T> operator&&(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator&&(const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b);
 
 /// Componentwise maximum
-template<int N, typename T>
-ShGeneric<N, T> operator||(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator||(const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b);
 
 /// Maximum of all components
 template<int N, typename T>
@@ -154,6 +181,7 @@ ShGeneric<1, T> all(const ShGeneric<N, T>& a);
 /*@}*/
 
 }
+#endif
 
 #include "ShLibBooleanImpl.hpp"
 

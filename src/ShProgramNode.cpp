@@ -28,11 +28,13 @@
 #include <cassert>
 #include <algorithm>
 #include <sstream>
+#include <fstream>
 #include "ShBackend.hpp"
 #include "ShEnvironment.hpp"
 #include "ShContext.hpp"
 #include "ShDebug.hpp"
 #include "ShTextureNode.hpp"
+#include "ShPaletteNode.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShError.hpp"
 
@@ -61,13 +63,18 @@ void ShProgramNode::compile(const std::string& target, const ShPointer<ShBackend
   if (!backend) return;
 
   ShContext::current()->enter(this);
-
-  collectVariables();
-
-  ShBackendCodePtr code = backend->generateCode(target, this);
+  ShBackendCodePtr code = 0;
+  try {
+    collectDecls();
+    collectVariables();
+    code = backend->generate_code(target, this);
 #ifdef SH_DEBUG
-  // code->print(std::cerr);
+    // code->print(std::cerr);
 #endif
+  } catch (...) {
+    ShContext::current()->exit();
+    throw;
+  }
   ShContext::current()->exit();
   m_code[std::make_pair(target, backend)] = code;
 }
@@ -102,21 +109,53 @@ std::string ShProgramNode::describe_interface() const
   os << std::endl;
   os << std::endl;
   os << "Inputs:" << std::endl;
-  for (VarList::const_iterator I = inputs.begin(); I != inputs.end(); ++I) {
-    os << "  " << (*I)->nameOfType() << " " << (*I)->name() << ";" << std::endl;
-  }
-  os << std::endl;
+  os << describe(inputs) << std::endl;
   os << "Outputs:" << std::endl;
-  for (VarList::const_iterator I = outputs.begin(); I != outputs.end(); ++I) {
-    os << "  " << (*I)->nameOfType() << " " << (*I)->name() << ";" << std::endl;
-  }
-  os << std::endl;
+  os << describe(outputs) << std::endl;
+  os << "Channels:" << std::endl;
+  os << describe(channels) << std::endl;
   os << "Uniforms:" << std::endl;
-  for (VarList::const_iterator I = uniforms.begin(); I != uniforms.end(); ++I) {
-    os << "  " << (*I)->nameOfType() << " " << (*I)->name() << ";" << std::endl;
-  }
+  os << describe(uniforms) << std::endl;
 
   return os.str();
+}
+
+std::string ShProgramNode::describe_vars() const
+{
+  std::ostringstream os;
+  os << describe_interface(); 
+  os << "Temps:" << std::endl;
+  os << describe(temps) << std::endl;
+  os << "Constants:" << std::endl;
+  os << describe(constants) << std::endl;
+  return os.str();
+}
+
+std::string ShProgramNode::describe_decls() const
+{
+  std::ostringstream os;
+  os << "Temp Declarations:" << std::endl;
+  for(VarSet::const_iterator I = tempDecls.begin(); I != tempDecls.end(); ++I) {
+    os << (*I)->nameOfType() << " " << (*I)->name() << std::endl;
+  }
+  return os.str();
+}
+
+void ShProgramNode::dump(std::string filename) const
+{
+  SH_DEBUG_PRINT("Dumping " << filename);
+  std::string varfile = filename + ".vars";
+  std::ofstream varout(varfile.c_str());
+  varout << "ShProgram "; 
+  varout << describe_vars(); 
+  varout << describe_decls();
+
+  std::string dotfile = filename + ".dot";
+  std::string psfile = filename + ".ps";
+  std::ofstream dotout(dotfile.c_str());
+  ctrlGraph->graphvizDump(dotout);
+  std::string cmd = std::string("dot -Tps < ") + dotfile + " > " + psfile; 
+  system(cmd.c_str());
 }
 
 void ShProgramNode::updateUniform(const ShVariableNodePtr& uniform)
@@ -133,11 +172,60 @@ void ShProgramNode::collectVariables()
   constants.clear();
   textures.clear();
   channels.clear();
+  palettes.clear();
   if (ctrlGraph->entry()) {
     ctrlGraph->entry()->clearMarked();
     collectNodeVars(ctrlGraph->entry());
     ctrlGraph->entry()->clearMarked();
   }
+}
+
+void ShProgramNode::collectDecls()
+{
+  tempDecls.clear();
+  // @todo range - use collectVariables temps result
+  // to pare out unnecessary declarations (i.e. variables
+  // that may have disappeared already due to transformations)
+  // (may actually want to put this cleaning up step in collectVariables
+  // since some temps might be removed during optimizations)
+  if (ctrlGraph->entry()) {
+    ctrlGraph->entry()->clearMarked();
+    collectNodeDecls(ctrlGraph->entry());
+    ctrlGraph->entry()->clearMarked();
+  }
+}
+
+bool ShProgramNode::hasDecl(ShVariableNodePtr node) const {
+  return tempDecls.find(node) != tempDecls.end();
+}
+
+void ShProgramNode::addDecl(ShVariableNodePtr node, ShCtrlGraphNodePtr cfgNode) {
+  tempDecls.insert(node);
+  SH_DEBUG_ASSERT(ctrlGraph->entry());
+  cfgNode->addDecl(node);
+}
+
+void ShProgramNode::addDecl(ShVariableNodePtr node) {
+  addDecl(node, ctrlGraph->entry());
+}
+
+void ShProgramNode::collectNodeDecls(const ShCtrlGraphNodePtr& node)
+{
+  if(node->marked()) return;
+  node->mark();
+  tempDecls.insert(node->decl_begin(), node->decl_end());
+  /* @todo range
+  for(ShCtrlGraphNode::DeclIt I = node->decl_begin(); I != node->decl_end(); ++I) {
+    SH_DEBUG_PRINT("  collectDecls - " << (*I)->name());
+  }
+  */
+
+  for (std::vector<ShCtrlGraphBranch>::const_iterator J = node->successors.begin();
+       J != node->successors.end(); ++J) {
+    collectNodeDecls(J->node);
+  }
+  
+  if (node->follower) collectNodeDecls(node->follower);
 }
 
 void ShProgramNode::collectNodeVars(const ShCtrlGraphNodePtr& node)
@@ -198,7 +286,14 @@ void ShProgramNode::collectVar(const ShVariableNodePtr& var)
                   shref_dynamic_cast<ShChannelNode>(var)) == channels.end()) {
       channels.push_back(shref_dynamic_cast<ShChannelNode>(var));
     }
+  case SH_PALETTE:
+    if (std::find(palettes.begin(), palettes.end(),
+                  shref_dynamic_cast<ShPaletteNode>(var)) == palettes.end()) {
+      palettes.push_back(shref_dynamic_cast<ShPaletteNode>(var));
+    }
     break;
+  default:
+    SH_DEBUG_ASSERT(0);
   }
 }
 
@@ -220,9 +315,11 @@ ShPointer<ShProgramNode> ShProgramNode::clone() const
   ctrlGraph->copy(head, tail);
 
   ShProgramNodePtr result = new ShProgramNode(target());
+  result->ShInfoHolder::operator=(*this);
   result->ctrlGraph = new ShCtrlGraph(head, tail);
   result->inputs = inputs;
   result->outputs = outputs;
+  result->collectDecls();
   result->collectVariables();
   return result;
 }
@@ -297,6 +394,16 @@ ShProgramNode::ChannelList::const_iterator ShProgramNode::channels_end() const
   return channels.end();
 }
 
+ShProgramNode::PaletteList::const_iterator ShProgramNode::palettes_begin() const
+{
+  return palettes.begin();
+}
+
+ShProgramNode::PaletteList::const_iterator ShProgramNode::palettes_end() const
+{
+  return palettes.end();
+}
+
 bool ShProgramNode::finished() const
 {
   return m_finished;
@@ -314,6 +421,22 @@ void ShProgramNode::finish()
 void ShProgramNode::assign(const ShVariableNodePtr& var) const
 {
   m_assigned_var = var;
+}
+
+std::string ShProgramNode::describe(const VarList &varlist) {
+  std::ostringstream os;
+  for(VarList::const_iterator I = varlist.begin(); I != varlist.end(); ++I) {
+    os << "  " << (*I)->nameOfType() << " " << (*I)->name() << std::endl;
+  }
+  return os.str();
+}
+
+std::string ShProgramNode::describe(const ChannelList& chanlist) {
+  std::ostringstream os;
+  for(ChannelList::const_iterator I = chanlist.begin(); I != chanlist.end(); ++I) {
+    os << "  " << (*I)->nameOfType() << " " << (*I)->name() << std::endl;
+  }
+  return os.str();
 }
 
 }

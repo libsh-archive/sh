@@ -35,6 +35,7 @@ struct ArbLimits {
   ArbLimits(const std::string& target);
   
   int instrs() const { return m_instrs; }
+  int halftemps() const { return m_halftemps; }
   int temps() const { return m_temps; }
   int attribs() const { return m_attribs; }
   int params() const { return m_params; }
@@ -44,6 +45,7 @@ struct ArbLimits {
   
 private:
   int m_instrs; ///< Maximum number of instructions for each shader target
+  int m_halftemps; ///< Maximum number of half-float temporaries for each shader target
   int m_temps; ///< Maximum number of temporaries for each shader target
   int m_attribs; ///<Maximum number of attributes for each shader target
   int m_params; ///< Maximum number of parameters for each shader target

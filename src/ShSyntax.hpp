@@ -37,9 +37,9 @@
 
 /// @internal
 //@{
-#define SH_PUSH_ARG_QUEUE ::SH::ShContext::current()->parsing()->tokenizer.pushArgQueue()
-#define SH_PUSH_ARG ::SH::ShContext::current()->parsing()->tokenizer.pushArg()
-#define SH_PROCESS_ARG(arg) ::SH::ShContext::current()->parsing()->tokenizer.processArg(arg)
+#define SH_PUSH_ARG_QUEUE ::SH::shPushArgQueue()
+#define SH_PUSH_ARG ::SH::shPushArg()
+#define SH_PROCESS_ARG(arg, internal_cond) ::SH::shProcessArg(arg, internal_cond)
 //@}
 
 /// @name Shader definitions
@@ -74,19 +74,28 @@
  * @see SH_ELSE
  * @see SH_ENDIF
  */
-#define SH_IF(cond) ::SH::shIf(SH_PUSH_ARG_QUEUE && SH_PUSH_ARG && SH_PROCESS_ARG(cond)); {{
+#define SH_IF(cond) { \
+  bool sh__internal_cond; \
+  ::SH::shIf(SH_PUSH_ARG_QUEUE && SH_PUSH_ARG && SH_PROCESS_ARG(cond, &sh__internal_cond)); \
+  if (ShContext::current()->parsing() || sh__internal_cond) {{
 /** \def SH_ELSE
  * Indicate the start of the else-block of an if statement.
  * @see SH_IF
  * @see SH_ENDIF
  */
-#define SH_ELSE  }} ::SH::shElse(); {{
+#define SH_ELSE  \
+  }} \
+  ::SH::shElse(); \
+  if (ShContext::current()->parsing() || !sh__internal_cond) {{
 /** \def SH_ENDIF
  * Indicate the end of an if-statement.
  * @see SH_IF
  * @see SH_ELSE
  */
-#define SH_ENDIF ::SH::shEndIf();}}
+#define SH_ENDIF \
+  }} \
+  ::SH::shEndIf(); \
+}
 //@}
 
 /// @name While loops
@@ -95,12 +104,21 @@
  * Begin a while statement, iterating as long as \a cond is satisfied.
  * @see SH_ENDWHILE
  */
-#define SH_WHILE(cond) ::SH::shWhile(SH_PUSH_ARG_QUEUE && SH_PUSH_ARG && SH_PROCESS_ARG(cond)); {{{
+#define SH_WHILE(cond) { \
+  bool sh__internal_cond; \
+  ::SH::shWhile(SH_PUSH_ARG_QUEUE && SH_PUSH_ARG && SH_PROCESS_ARG(cond, &sh__internal_cond)); \
+  bool sh__internal_firsttime = true; \
+  while ((sh__internal_firsttime && (ShContext::current()->parsing() || sh__internal_cond)) \
+         || (!ShContext::current()->parsing() && ::SH::shEvaluateCondition(cond))) {{{
 /** \def SH_ENDWHILE
  * Indicate the end of a while-statement.
  * @see SH_WHILE
  */
-#define SH_ENDWHILE ::SH::shEndWhile();}}}
+#define SH_ENDWHILE \
+    sh__internal_firsttime = false; \
+  }}} \
+  ::SH::shEndWhile(); \
+}
 //@}
 
 /// @name Do-until loops
@@ -109,12 +127,16 @@
  * Indicate the start of a do-until statement.
  * @see SH_UNTIL
  */
-#define SH_DO       ::SH::shDo(); {{{{
+#define SH_DO       { \
+  ::SH::shDo(); \
+  do {{{{
 /** \def SH_UNTIL(cond)
  * End a do-until statement, iterating as long as \a cond is satisfied.
  * @see SH_DO
  */
-#define SH_UNTIL(cond) ::SH::shUntil(SH_PUSH_ARG_QUEUE && SH_PUSH_ARG && SH_PROCESS_ARG(cond));}}}}
+#define SH_UNTIL(cond) \
+  }}}} while (!ShContext::current()->parsing() && ::SH::shEvaluateCondition(cond)); \
+  if (ShContext::current()->parsing()) ::SH::shUntil(SH_PUSH_ARG_QUEUE && SH_PUSH_ARG && SH_PROCESS_ARG(cond, 0)); }
 //@}
 
 /// @name For loops
@@ -126,15 +148,29 @@
  * @see SH_ENDFOR
  */
 // TODO: It is possible to make declaring variables in init work. do so.
-#define SH_FOR(init,cond,update) ::SH::shFor(SH_PUSH_ARG_QUEUE \
-                                 && SH_PUSH_ARG && SH_PROCESS_ARG(init) \
-                                 && SH_PUSH_ARG && SH_PROCESS_ARG(cond) \
-                                 && SH_PUSH_ARG && SH_PROCESS_ARG(update)); {{{{{
+#define SH_FOR(init,cond,update) { \
+  if (ShContext::current()->parsing()) \
+    ::SH::shFor(SH_PUSH_ARG_QUEUE \
+             && SH_PUSH_ARG && SH_PROCESS_ARG(init, 0) \
+             && SH_PUSH_ARG && SH_PROCESS_ARG(cond, 0) \
+             && SH_PUSH_ARG && SH_PROCESS_ARG(update, 0)); \
+  if (!ShContext::current()->parsing()) init; \
+  bool sh__internal_first_time = true; \
+  while (1) {{{{{ \
+    if (!ShContext::current()->parsing()) { \
+      if (!sh__internal_first_time) { update; } \
+      else { sh__internal_first_time = false; } \
+      if (!shEvaluateCondition(cond)) break; \
+    }                                                                                  
 /** \def SH_ENDFOR
  * Indicate the end of a for statement
  * @see SH_FOR
  */
-#define SH_ENDFOR     ::SH::shEndFor();}}}}}
+#define SH_ENDFOR \
+    if (ShContext::current()->parsing()) break; \
+  }}}}} \
+  ::SH::shEndFor(); \
+}
 //@}
 
 /// @name Loop flow control
@@ -146,7 +182,7 @@
  * @see SH_DO
  * @see SH_FOR
  */
-#define SH_BREAK    ::SH::shBreak();
+#define SH_BREAK    if (!ShContext::current()->parsing()) { break; } else { ::SH::shBreak(); }
 /** \def SH_CONTINUE
  * Break out of a loop, continuing with the next iteration.
  * @see SH_BREAK
@@ -154,8 +190,28 @@
  * @see SH_DO
  * @see SH_FOR
  */
-#define SH_CONTINUE ::SH::shBreak();
+#define SH_CONTINUE if (!ShContext::current()->parsing()) { continue; } else { ::SH::shBreak(); }
 //@}
+
+/** \def SH_BEGIN_SECTION
+ * Starts a block grouping - for affine analysis and organization of code for
+ * visual languages.
+ *
+ * @todo range This interface is really quite crappy
+ * @param name - String name of the block (this shouldn't be required... 
+ *               This is only to keep me sane when debugging 
+ */
+#define SH_BEGIN_SECTION(name) \
+  {{{{{{ \
+    if(ShContext::current()->parsing()) { \
+      ::SH::shBeginSection(); \
+      ::SH::shComment(name); \
+    }
+
+#define SH_END_SECTION \
+    if(ShContext::current()->parsing()) { ::SH::shEndSection(); } \
+  }}}}}} 
+
 
 /// @name Named Declaration macros 
 //@{
@@ -193,6 +249,22 @@ namespace SH {
 
 /// \internal
 SH_DLLEXPORT
+bool shProcessArg(const ShVariable& arg, bool* internal_cond);
+
+/// \internal
+SH_DLLEXPORT
+bool shPushArg();
+
+/// \internal
+SH_DLLEXPORT
+bool shPushArgQueue();
+
+/// \internal
+SH_DLLEXPORT
+bool shEvaluateCondition(const ShVariable& arg);
+
+/// \internal
+SH_DLLEXPORT
 ShProgram shBeginShader(const std::string& kind = "");
 /// \internal
 SH_DLLEXPORT
@@ -226,10 +298,38 @@ void shBindShader(ShProgram& shader);
 SH_DLLEXPORT
 void shBindShader(const std::string& target, ShProgram& shader);
 
+/// Bind a set of programs
+SH_DLLEXPORT
+void shBind(const ShProgramSet& s);
+
+/// Unbind all currently bound programs
+SH_DLLEXPORT
+void shUnbind();
+
+/// Unbind a program.
+SH_DLLEXPORT
+void shUnbind(ShProgram& prg);
+/// Unbind a program with the given target.
+SH_DLLEXPORT
+void shUnbind(const std::string& target, ShProgram& shader);
+
+/// Unbind a set of programs, if it's bound
+SH_DLLEXPORT
+void shUnbind(const ShProgramSet& s);
+
+/// Link a set of programs
+SH_DLLEXPORT
+void shLink(const ShProgramSet& s);
+
+/// Upload any textures and uniform parameters which are out-of-date
+/// but required on all compilation targets that have any programs
+/// bound
+SH_DLLEXPORT
+void shUpdate();
+
 /// Switch to a particular backend
 SH_DLLEXPORT
 bool shSetBackend(const std::string& name);
-
 
 /** \brief SH Initialization Function.
  *
@@ -276,6 +376,18 @@ void shBreak();
 /// \internal
 SH_DLLEXPORT
 void shContinue();
+
+/// \internal
+SH_DLLEXPORT
+void shBeginSection();
+/// \internal
+SH_DLLEXPORT
+void shEndSection();
+
+/// \internal
+/// Adds a comment to the immediate representation 
+SH_DLLEXPORT
+void shComment(const std::string& comment);
 
 }
 

@@ -30,6 +30,7 @@
 #include "ShGeneric.hpp"
 #include "ShLib.hpp"
 
+#ifndef WIN32
 namespace SH {
 
 /** \defgroup lib_misc Miscellaneous operations
@@ -47,7 +48,7 @@ namespace SH {
 template<int M, int N, typename T> 
 ShGeneric<M, T> cast(const ShGeneric<N, T>& a);
 template<int M> 
-ShGeneric<M, float> cast(float a);
+ShGeneric<M, double> cast(double a); // @todo type do a cpp type -> value type map
 
 /** Fill Casting.
  * Casts ShGeneric<N, T> to ShGeneric<M, T>.
@@ -57,13 +58,28 @@ ShGeneric<M, float> cast(float a);
 template<int M, int N, typename T> 
 ShGeneric<M, T> fillcast(const ShGeneric<N, T>& a);
 template<int M> 
-ShGeneric<M, float> fillcast(float a);
+ShGeneric<M, double> fillcast(double a); // @todo type do a cpp type -> value type map
 
 /** Join two tuples 
  * Creates an M+N tuple with components of a first then b.
  */
-template<int M, int N, typename T> 
-ShGeneric<M+N, T> join(const ShGeneric<M, T>& a, const ShGeneric<N, T> &b);
+template<int M, int N, typename T1, typename T2> 
+ShGeneric<M+N, CT1T2> 
+join(const ShGeneric<M, T1>& a, const ShGeneric<N, T2> &b);
+
+/** Join three tuples 
+ * Creates an M+N+O tuple with components of a first then b and c.
+ */
+template<int M, int N, int O, typename T1, typename T2, typename T3> 
+ShGeneric<M+N+O, CT1T2T3> 
+join(const ShGeneric<M, T1>& a, const ShGeneric<N, T2> &b, const ShGeneric<O, T3> &c);
+
+/** Join four tuples 
+ * Creates an M+N+O+P tuple with components of a first then b, c and d.
+ */
+template<int M, int N, int O, int P, typename T1, typename T2, typename T3, typename T4> 
+ShGeneric<M+N+O+P, CT1T2T3T4> 
+join(const ShGeneric<M, T1>& a, const ShGeneric<N, T2> &b, const ShGeneric<O, T3> &c, const ShGeneric<P, T4> &d);
 
 /** Fragment discard. Only for fragment programs.
  * Discards the current fragment if any(c) > 0.
@@ -77,9 +93,20 @@ void discard(const ShGeneric<N, T>& c);
 template<int N, typename T>
 void kill(const ShGeneric<N, T>& c);
 
+/** Uniform freezing.
+ *
+ * Replace uses of the given uniform in the given program with a
+ * constant containing its current value, and return the resulting
+ * program.
+ */
+template<typename T>
+ShProgram freeze(const ShProgram& p,
+                 const T& uniform);
+
 /*@}*/
 
 }
+#endif
 
 #include "ShLibMiscImpl.hpp"
 

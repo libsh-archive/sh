@@ -27,6 +27,7 @@
 #ifndef GLBACKEND_HPP
 #define GLBACKEND_HPP
 
+#include "ShVariableType.hpp"
 #include "ShProgram.hpp"
 #include "ShStream.hpp"
 #include "ShTextureNode.hpp"
@@ -37,6 +38,7 @@
 
 #include <GL/gl.h>
 #include <GL/glext.h>
+#include <GL/wglext.h>
 
 extern PFNGLPROGRAMSTRINGARBPROC glProgramStringARB;
 extern PFNGLBINDPROGRAMARBPROC glBindProgramARB;
@@ -44,8 +46,47 @@ extern PFNGLGENPROGRAMSARBPROC glGenProgramsARB;
 extern PFNGLPROGRAMENVPARAMETER4FVARBPROC glProgramEnvParameter4fvARB;
 extern PFNGLPROGRAMLOCALPARAMETER4FVARBPROC glProgramLocalParameter4fvARB;
 extern PFNGLGETPROGRAMIVARBPROC glGetProgramivARB;
-extern PFNGLTEXIMAGE3DPROC glTexImage3D;
 extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
+
+extern PFNGLTEXIMAGE3DPROC glTexImage3D;
+extern PFNGLTEXSUBIMAGE3DPROC glTexSubImage3D;
+
+// WGL_ARB_pixel_format
+extern PFNWGLGETPIXELFORMATATTRIBIVARBPROC wglGetPixelFormatAttribivARB;
+extern PFNWGLGETPIXELFORMATATTRIBFVARBPROC wglGetPixelFormatAttribfvARB;
+extern PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB;
+
+// WGL_ARB_pbuffer
+extern PFNWGLCREATEPBUFFERARBPROC wglCreatePbufferARB;
+extern PFNWGLGETPBUFFERDCARBPROC wglGetPbufferDCARB;
+extern PFNWGLRELEASEPBUFFERDCARBPROC wglReleasePbufferDCARB;
+extern PFNWGLDESTROYPBUFFERARBPROC wglDestroyPbufferARB;
+extern PFNWGLQUERYPBUFFERARBPROC wglQueryPbufferARB;
+
+extern PFNGLGETOBJECTPARAMETERIVARBPROC glGetObjectParameterivARB;
+extern PFNGLGETINFOLOGARBPROC glGetInfoLogARB;
+extern PFNGLGETSHADERSOURCEARBPROC glGetShaderSourceARB;
+extern PFNGLDELETEOBJECTARBPROC glDeleteObjectARB;
+extern PFNGLCREATESHADEROBJECTARBPROC glCreateShaderObjectARB;
+extern PFNGLSHADERSOURCEARBPROC glShaderSourceARB;
+extern PFNGLUNIFORM1FARBPROC glUniform1fARB;
+extern PFNGLUNIFORM2FARBPROC glUniform2fARB;
+extern PFNGLUNIFORM3FARBPROC glUniform3fARB;
+extern PFNGLUNIFORM4FARBPROC glUniform4fARB;
+extern PFNGLUNIFORM1IARBPROC glUniform1iARB;
+extern PFNGLUNIFORM2IARBPROC glUniform2iARB;
+extern PFNGLUNIFORM3IARBPROC glUniform3iARB;
+extern PFNGLUNIFORM4IARBPROC glUniform4iARB;
+extern PFNGLGETUNIFORMLOCATIONARBPROC glGetUniformLocationARB;
+extern PFNGLCOMPILESHADERARBPROC glCompileShaderARB;
+extern PFNGLCREATEPROGRAMOBJECTARBPROC glCreateProgramObjectARB;
+extern PFNGLDETACHOBJECTARBPROC glDetachObjectARB;
+extern PFNGLATTACHOBJECTARBPROC glAttachObjectARB;
+extern PFNGLLINKPROGRAMARBPROC glLinkProgramARB;
+extern PFNGLUSEPROGRAMOBJECTARBPROC glUseProgramObjectARB;
+extern PFNGLVALIDATEPROGRAMARBPROC glValidateProgramARB;
+
+// extern PFN ARBPROC ARB;
 
 #else
 
@@ -60,7 +101,6 @@ extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include <GL/glx.h>
-//#include <GL/glut.h>
 #endif /* __APPLE */
 
 #endif /* WIN32 */
@@ -68,58 +108,49 @@ extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
 namespace shgl {
 
 struct TextureStrategy {
-  virtual TextureStrategy* create(int context) = 0;
+  virtual TextureStrategy* create() = 0;
   
   virtual void bindTexture(const SH::ShTextureNodePtr& texture,
                            GLenum target) = 0;
 };
 
 struct StreamStrategy {
-  virtual StreamStrategy* create(int context) = 0;
+  virtual StreamStrategy* create() = 0;
   virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest) = 0;
 };
 
 struct CodeStrategy {
-  virtual CodeStrategy* create(int context) = 0;
+  virtual CodeStrategy* create() = 0;
   virtual SH::ShBackendCodePtr generate(const std::string& target,
                                         const SH::ShProgramNodeCPtr& shader,
-                                        TextureStrategy* textures) = 0;
+                                        TextureStrategy* texture) = 0;
+
+  // If you want to use a special set generation function, override
+  // generate_set, and override use_default_set() to return false.
+  virtual SH::ShBackendSetPtr generate_set(const SH::ShProgramSet& s);
+  virtual bool use_default_set() const;
+
+  virtual void unbind_all();
+  virtual bool use_default_unbind_all() const;
 };
 
 class GlBackend : public SH::ShBackend {
 public:
-  virtual SH::ShBackendCodePtr generateCode(const std::string& target,
-                                            const SH::ShProgramNodeCPtr& shader);
+  virtual SH::ShBackendCodePtr generate_code(const std::string& target,
+                                             const SH::ShProgramNodeCPtr& shader);
+  virtual SH::ShBackendSetPtr generate_set(const SH::ShProgramSet& s);
+  virtual void unbind_all();
 
   // execute a stream program, if supported
   virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
 
-  virtual int newContext();
-  virtual int context() const;
-  virtual void setContext(int context);
-  virtual void destroyContext();
-  
 protected:
-  GlBackend(CodeStrategy* code, TextureStrategy* texture,
-            StreamStrategy* stream);
+  GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrategy* stream);
   
 private:
-  int m_curContext;
-
-  struct Context {
-    Context(CodeStrategy* code,
-            TextureStrategy* textures,
-            StreamStrategy* streams)
-      : code(code), textures(textures), streams(streams)
-    {
-    }
-    
-    CodeStrategy* code;
-    TextureStrategy* textures;
-    StreamStrategy* streams;
-  };
-  
-  std::vector<Context> m_contexts;
+  CodeStrategy* m_code;
+  TextureStrategy* m_texture;
+  StreamStrategy* m_stream;
 
   // NOT IMPLEMENTED
   GlBackend(const GlBackend& other);
@@ -127,6 +158,12 @@ private:
 };
 
 void shGlCheckError(const char* desc, const char* file, int line);
+
+/* Returns glReadPixels/glTexImage type for a given value type 
+ * and returns a value type for the temporary buffer
+ * (or SH_VALUETYPE_END if we can use the original buffer directly) 
+ */
+GLenum shGlType(SH::ShValueType valueType, SH::ShValueType &convertedType); 
 
 }
 

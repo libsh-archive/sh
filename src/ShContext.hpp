@@ -64,6 +64,8 @@ public:
 
   /// \internal
   void set_binding(const std::string& unit, ShProgram program);
+  /// \internal
+  void unset_binding(const std::string& unit);
 
   /// The program currently being constructed. May be null.
   ShProgramNodePtr parsing();
@@ -101,7 +103,6 @@ ShBoundIterator shBeginBound();
 /// Get end of bound program map for current context
 SH_DLLEXPORT
 ShBoundIterator shEndBound();
-
 
 }
 

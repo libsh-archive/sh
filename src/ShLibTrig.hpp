@@ -31,6 +31,7 @@
 #include "ShLib.hpp"
 
 
+#ifndef WIN32
 namespace SH {
 
 /** \defgroup lib_trig Trigonometric functions
@@ -95,6 +96,7 @@ ShGeneric<N, T> tan(const ShGeneric<N, T>& var);
 /*@}*/
 
 }
+#endif
 
 #include "ShLibTrigImpl.hpp"
 

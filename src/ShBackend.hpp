@@ -33,6 +33,7 @@
 #include "ShDllExport.hpp"
 #include "ShRefCount.hpp"
 #include "ShProgram.hpp"
+#include "ShProgramSet.hpp"
 #include "ShVariableNode.hpp"
 
 namespace SH  {
@@ -59,6 +60,12 @@ public:
   /// Bind this shader code after it has been uploaded.
   virtual void bind() = 0;
 
+  /// Unbind this shader.
+  virtual void unbind() = 0;
+
+  /// Upload any textures and uniform parameters which are out-of-date but required
+  virtual void update() = 0;
+
   /// Update the value of a uniform parameter after it has changed.
   virtual void updateUniform(const ShVariableNodePtr& uniform) = 0;
 
@@ -67,11 +74,26 @@ public:
   /// Prints input and output specification in target-specific format
   // (Useful for how to format long tuple input on targets 
   // that only support limited tuple lengths) 
-  virtual std::ostream& printInputOutputFormat(std::ostream& out) = 0;
+  virtual std::ostream& describe_interface(std::ostream& out) = 0;
 };
 
 typedef ShPointer<ShBackendCode> ShBackendCodePtr;
 typedef ShPointer<const ShBackendCode> ShBackendCodeCPtr;
+
+// A backend-specific set of programs, to be linked together/bound at once
+class
+SH_DLLEXPORT ShBackendSet : public ShRefCountable {
+public:
+  virtual ~ShBackendSet();
+
+  virtual void link() = 0;
+
+  virtual void bind() = 0;
+  virtual void unbind() = 0;
+};
+
+typedef ShPointer<ShBackendSet> ShBackendSetPtr;
+typedef ShPointer<const ShBackendSet> ShBackendSetCPtr;
 
 class ShTransformer;
 class
@@ -83,11 +105,16 @@ public:
   /// Generate the backend code for a particular shader. Ensure that
   /// ShEnvironment::shader is the same as shader before calling this,
   /// since extra variables may be declared inside this function!
-  virtual ShBackendCodePtr generateCode(const std::string& target,
-                                        const ShProgramNodeCPtr& shader) = 0;
+  virtual ShBackendCodePtr generate_code(const std::string& target,
+                                         const ShProgramNodeCPtr& shader) = 0;
 
+  virtual ShBackendSetPtr generate_set(const ShProgramSet& s);
+  
   // execute a stream program, if supported
   virtual void execute(const ShProgramNodeCPtr& program, ShStream& dest) = 0;
+
+  // Unbind all programs bound under this backend
+  virtual void unbind_all();
   
   typedef std::vector< ShPointer<ShBackend> > ShBackendList;
 

@@ -31,6 +31,7 @@
 #include "ShLib.hpp"
 #include "ShMatrix.hpp"
 
+#ifndef WIN32
 namespace SH {
 
 /** \defgroup lib_deriv Derivatives
@@ -67,6 +68,7 @@ ShMatrix<2, N, SH_TEMP, T> jacobian(const ShGeneric<N, T>& var);
 /*@}*/
 
 }
+#endif
 
 #include "ShLibDerivImpl.hpp"
 
