@@ -590,5 +590,6 @@ libtype<libretsize, SH_VAR_TEMP, T, false> libop(const ShMatrix<M, N, K1, T>& a,
 #include "ShLibPoint.hpp"
 #include "ShLibColor.hpp"
 #include "ShLibTexCoord.hpp"
+#include "ShLibNormal.hpp"
 
 #endif

@@ -15,5 +15,6 @@ libsh_la_SOURCES = ShBackend.cpp ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp \
                    ShVector.hpp ShLibVector.hpp \
                    ShPoint.hpp ShLibPoint.hpp \
                    ShColor.hpp ShLibColor.hpp \
+                   ShNormal.hpp ShLibNormal.hpp \
                    ShTexCoord.hpp ShLibTexCoord.hpp
 
