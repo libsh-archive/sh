@@ -1,3 +1,9 @@
+2005-03-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShAttrib.cpp, src/ShVector.cpp, ...: Remove explicit
+	instantiation files and the python scripts in scripts/ that
+	generated them (they haven't been used for a long time).
+
 2005-03-25  Francois Marier  <francois@serioushack.com>
 
 	* src/ShLibClampImpl.hpp: Add scalar version of mod.
