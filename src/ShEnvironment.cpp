@@ -29,15 +29,6 @@
 
 namespace SH {
 
-ShProgram ShEnvironment::shader = 0;
-bool ShEnvironment::insideShader = false;
-ShEnvironment::BoundShaderMap* ShEnvironment::m_boundShader = 0;
 ShBackendPtr ShEnvironment::backend = 0;
-
-ShEnvironment::BoundShaderMap& ShEnvironment::boundShaders()
-{
-  if (!m_boundShader) m_boundShader = new std::map<std::string, ShProgram>();
-  return *m_boundShader;
-}
 
 }

@@ -261,6 +261,56 @@ void ShCtrlGraph::computePredecessors()
   dfs(comp);
 }
 
+typedef std::map<ShCtrlGraphNodePtr, ShCtrlGraphNodePtr> CtrlGraphCopyMap;
+
+struct CtrlGraphCopier {
+  CtrlGraphCopier(CtrlGraphCopyMap& copyMap)
+    : copyMap(copyMap)
+  {
+  }
+  
+  void operator()(ShCtrlGraphNodePtr node) {
+    if (!node) return;
+    ShCtrlGraphNodePtr newNode = new ShCtrlGraphNode(*node);
+    copyMap[node] = newNode;
+  }
+
+  CtrlGraphCopyMap& copyMap;
+};
+
+void ShCtrlGraph::copy(ShCtrlGraphNodePtr& newHead, ShCtrlGraphNodePtr& newTail) const
+{
+  CtrlGraphCopyMap copyMap;
+  copyMap[0] = 0;
+  
+  CtrlGraphCopier copier(copyMap);
+  SH_DEBUG_ASSERT(m_entry);
+  SH_DEBUG_ASSERT(m_exit); // catch empty tails
+  m_entry->clearMarked();
+  m_entry->dfs(copier);
+
+  // Replace the successors and followers in the new graph with their new equivalents
+  for (CtrlGraphCopyMap::iterator I = copyMap.begin(); I != copyMap.end(); ++I) {
+    ShCtrlGraphNodePtr node = I->second; // Get the new node
+    if (!node) continue;
+    for (std::vector<ShCtrlGraphBranch>::iterator J = node->successors.begin(); J != node->successors.end(); ++J) {
+      J->node = copyMap[J->node];
+    }
+    node->follower = copyMap[node->follower];
+    if (node->block) {
+      ShBasicBlockPtr new_block = new ShBasicBlock(*node->block);
+      node->block = new_block;
+    }
+  }
+  newHead = copyMap[m_entry];
+  newTail = copyMap[m_exit];
+  SH_DEBUG_ASSERT(newHead);
+  SH_DEBUG_ASSERT(newTail);
+
+  m_entry->clearMarked();
+}
+
+
 
 }
 

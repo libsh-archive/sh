@@ -21,7 +21,7 @@ class ArbBindingSpecs;
 
 class ArbCode : public SH::ShBackendCode {
 public:
-  ArbCode(const SH::ShProgram& shader, const std::string& target,
+  ArbCode(const SH::ShProgramNodeCPtr& program, const std::string& target,
           TextureStrategy* textures);
   virtual ~ArbCode();
 
@@ -104,9 +104,9 @@ private:
   bool printSamplingInstruction(std::ostream& out, const ArbInst& inst) const;
   
   TextureStrategy* m_textures;
-  SH::ShProgram m_shader; // internally visible shader ShTransformered to fit this target (ARB)
-  SH::ShProgram m_originalShader; // original shader (should alway use this for external (e.g. globals))
-  std::string m_target;
+  SH::ShProgramNodePtr m_shader; // internally visible shader ShTransformered to fit this target (ARB)
+  SH::ShProgramNodeCPtr m_originalShader; // original shader (should alway use this for external (e.g. globals))
+  std::string m_unit;
 
   typedef std::vector<ArbInst> ArbInstList;
   ArbInstList m_instructions;

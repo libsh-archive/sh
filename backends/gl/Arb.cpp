@@ -19,18 +19,20 @@ ArbCodeStrategy* ArbCodeStrategy::create(int context)
 }
 
 ShBackendCodePtr ArbCodeStrategy::generate(const std::string& target,
-                                           const ShProgram& shader,
+                                           const ShProgramNodeCPtr& shader,
                                            TextureStrategy* textures)
 {
-  ArbCodePtr code = new ArbCode(shader, target, textures);
+  std::string::size_type loc = target.rfind(':');
+  std::string unit = (loc == std::string::npos ? target : target.substr(loc + 1));
+  ArbCodePtr code = new ArbCode(shader, unit, textures);
   code->generate();
   return code;
 }
 
-unsigned int arbTarget(const std::string& shTarget)
+unsigned int arbTarget(const std::string& unit)
 {
-  if (shTarget == "gpu:vertex") return GL_VERTEX_PROGRAM_ARB;
-  if (shTarget == "gpu:fragment") return GL_FRAGMENT_PROGRAM_ARB;  
+  if (unit == "vertex") return GL_VERTEX_PROGRAM_ARB;
+  if (unit == "fragment") return GL_FRAGMENT_PROGRAM_ARB;  
   return 0;
 }
 

@@ -35,7 +35,7 @@
 #include "ShDebug.hpp"
 #include "ShAlgebra.hpp"
 #include "ShManipulator.hpp"
-#include "ShEnvironment.hpp"
+#include "ShInstructions.hpp"
 
 namespace SH {
 
@@ -126,8 +126,8 @@ ShProgram operator<<(const ShProgram &p, const ShManipulator<T> &m) {
      * default output value is zero, so for those that have
      * no matching inputs, they become zero outputs */
     std::vector<ShVariable> outputs;
-    for(ShProgramNode::VarList::const_iterator inIt = p->inputs.begin();
-        inIt != p->inputs.end(); ++inIt) {
+    for(ShProgramNode::VarList::const_iterator inIt = p.node()->inputs.begin();
+        inIt != p.node()->inputs.end(); ++inIt) {
       ShVariable out(ShVariable(new ShVariableNode(SH_OUTPUT, 
               (*inIt)->size(), (*inIt)->specialType())));
       out.name((*inIt)->name());
@@ -140,8 +140,8 @@ ShProgram operator<<(const ShProgram &p, const ShManipulator<T> &m) {
     std::vector<bool> used(size, false); //mark used inputs
     for(typename RangeVec::const_iterator irvIt = mranges.begin();
         irvIt != mranges.end(); ++irvIt) {
-      int start = irvIt->absStartIndex( p->inputs );
-      int end = irvIt->absEndIndex( p->inputs ); 
+      int start = irvIt->absStartIndex( p.node()->inputs );
+      int end = irvIt->absEndIndex( p.node()->inputs ); 
 
       if(start == OFFSET_RANGE_BAD_OFFSET || end == OFFSET_RANGE_BAD_OFFSET ) continue;
       if(start == OFFSET_RANGE_BAD_INDEX || end == OFFSET_RANGE_BAD_INDEX ) {
@@ -164,8 +164,7 @@ ShProgram operator<<(const ShProgram &p, const ShManipulator<T> &m) {
               outputs[i].node()->size(), outputs[i].node()->specialType()));
         input.name(outputs[i].name());
 
-        ShStatement stmt(outputs[i], SH_OP_ASN, input);
-        ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+        shASN(outputs[i], input);
       }
     }
   } SH_END;
@@ -181,8 +180,8 @@ ShProgram operator<<(const ShManipulator<T> &m, const ShProgram &p) {
   ShProgram permuter = SH_BEGIN_PROGRAM() {
     /* Make shader inputs from p's outputs */
     std::vector<ShVariable> inputs;
-    for(ShProgramNode::VarList::const_iterator outIt = p->outputs.begin();
-        outIt != p->outputs.end(); ++outIt) {
+    for(ShProgramNode::VarList::const_iterator outIt = p.node()->outputs.begin();
+        outIt != p.node()->outputs.end(); ++outIt) {
       ShVariable in(new ShVariableNode(SH_INPUT, (*outIt)->size(), 
             (*outIt)->specialType()));
       in.name((*outIt)->name());
@@ -194,8 +193,8 @@ ShProgram operator<<(const ShManipulator<T> &m, const ShProgram &p) {
     /* Make shader outputs from permuted ranges of inputs */
     for(typename RangeVec::const_iterator irvIt = mranges.begin();
         irvIt != mranges.end(); ++irvIt) {
-      int start = irvIt->absStartIndex( p->outputs );
-      int end = irvIt->absEndIndex( p->outputs ); 
+      int start = irvIt->absStartIndex( p.node()->outputs );
+      int end = irvIt->absEndIndex( p.node()->outputs ); 
 
       if(start == OFFSET_RANGE_BAD_OFFSET || end == OFFSET_RANGE_BAD_OFFSET ) continue;
       if(start == OFFSET_RANGE_BAD_INDEX || end == OFFSET_RANGE_BAD_INDEX ) {
@@ -210,8 +209,7 @@ ShProgram operator<<(const ShManipulator<T> &m, const ShProgram &p) {
               inputs[i].node()->size(), inputs[i].node()->specialType()));
         output.name( inputs[i].name() );
 
-        ShStatement stmt(output, SH_OP_ASN, inputs[i]);
-        ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+        shASN(output, inputs[i]);
       }
     }
   } SH_END;

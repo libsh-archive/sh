@@ -145,6 +145,9 @@ public:
   
   /// Determine the predecessors in this graph
   void computePredecessors();
+
+  // Make a copy of this control graph placing the result into head and tail.
+  void copy(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail) const;
   
 private:
   ShCtrlGraphNodePtr m_entry;

@@ -30,7 +30,7 @@
 #include "ShStream.hpp"
 #include "ShDebug.hpp"
 #include "ShVariable.hpp"
-#include "ShEnvironment.hpp"
+#include "ShContext.hpp"
 #include "ShProgram.hpp"
 #include "ShSyntax.hpp"
 #include "ShStatement.hpp"
@@ -93,13 +93,13 @@ template<typename T>
 T ShChannel<T>::operator()()
 {
   // TODO: shError() maybe instead.
-  SH_DEBUG_ASSERT(ShEnvironment::insideShader);
+  SH_DEBUG_ASSERT(ShContext::current()->parsing());
   
   T t;
   ShVariable streamVar(m_node);
   ShStatement stmt(t, SH_OP_FETCH, streamVar);
 
-  ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+  ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
   
   return t;
 }
@@ -107,13 +107,13 @@ template<typename T>
 const T ShChannel<T>::operator()() const
 {
   // TODO: shError() maybe instead.
-  SH_DEBUG_ASSERT(ShEnvironment::insideShader);
+  SH_DEBUG_ASSERT(ShContext::current()->parsing());
   
   T t;
   ShVariable streamVar(m_node);
   ShStatement stmt(t, SH_OP_FETCH, streamVar);
 
-  ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+  ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
   
   return t;
 }

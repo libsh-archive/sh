@@ -57,7 +57,7 @@ namespace ShCPU {
   class CPUBackendCode: public SH::ShBackendCode
     {
     public:
-      CPUBackendCode(const SH::ShProgram& program);
+      CPUBackendCode(const SH::ShProgramNodeCPtr& program);
       ~CPUBackendCode(void);
 
       bool allocateRegister(const SH::ShVariableNodePtr& var);
@@ -116,7 +116,7 @@ namespace ShCPU {
       void emit(SH::ShCtrlGraphNodePtr node);
       
     private:
-      const SH::ShProgram& m_program;
+      const SH::ShProgramNodeCPtr& m_program;
 
       std::map<SH::ShCtrlGraphNodePtr, int> m_label_map;
       std::map<SH::ShVariableNodePtr, CPUVariable> m_varmap;
@@ -143,9 +143,9 @@ namespace ShCPU {
       std::string name(void) const;
 
       SH::ShBackendCodePtr generateCode(const std::string& target,
-					const SH::ShProgram& program);
+					const SH::ShProgramNodeCPtr& program);
       
-      void execute(const SH::ShProgram& program, SH::ShStream& dest);
+      void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
     };
 
 

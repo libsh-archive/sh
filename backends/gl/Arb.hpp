@@ -13,7 +13,7 @@ public:
   ArbCodeStrategy(int context = 0);
   
   SH::ShBackendCodePtr generate(const std::string& target,
-                                const SH::ShProgram& shader,
+                                const SH::ShProgramNodeCPtr& shader,
                                 TextureStrategy* textures);
 
   ArbCodeStrategy* create(int context);
@@ -22,7 +22,7 @@ private:
   int m_context;
 };
 
-unsigned int arbTarget(const std::string& shTarget);
+unsigned int arbTarget(const std::string& unit);
 
 }
 

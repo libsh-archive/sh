@@ -27,7 +27,7 @@
 #include <algorithm>
 #include <map>
 #include <list>
-#include "ShEnvironment.hpp"
+#include "ShContext.hpp"
 #include "ShError.hpp"
 #include "ShDebug.hpp"
 #include "ShVariableNode.hpp"
@@ -36,8 +36,8 @@
 
 namespace SH {
 
-ShTransformer::ShTransformer(ShProgram program)
-  : m_program(program), m_graph(program->ctrlGraph), m_changed(false)
+ShTransformer::ShTransformer(const ShProgramNodePtr& program)
+  : m_program(program), m_changed(false)
 {
 }
 
@@ -99,10 +99,11 @@ struct VariableSplitter {
     ShTransformer::VarNodeVec &nodeVarNodeVec = splits[node];
     ShVariableNodePtr newNode;
     for(offset = 0; n > 0; offset += maxTuple, n -= maxTuple) {
-      if(node->uniform()) ShEnvironment::insideShader = false;
+      ShProgramNodePtr prev = ShContext::current()->parsing();
+      if(node->uniform()) ShContext::current()->exit();
       newNode = new ShVariableNode(node->kind(), n < maxTuple ? n : maxTuple, node->specialType());
       newNode->name(node->name());
-      if(node->uniform()) ShEnvironment::insideShader = true;
+      if(node->uniform()) ShContext::current()->enter(prev);
 
       if( node->hasValues() ) { 
         for(i = 0; i < newNode->size(); ++i){
@@ -300,19 +301,20 @@ void ShTransformer::splitTuples(int maxTuple, ShTransformer::VarSplitMap &splits
   VariableSplitter vs(maxTuple, splits, m_changed);
   vs.splitVarList(m_program->inputs);
   vs.splitVarList(m_program->outputs);
-  m_graph->dfs(vs);
+  m_program->ctrlGraph->dfs(vs);
 
 
   StatementSplitter ss(maxTuple, splits, m_changed);
-  m_graph->dfs(ss);
+  m_program->ctrlGraph->dfs(ss);
 }
 
 static int id = 0;
 
 // Output Convertion to temporaries 
 struct InputOutputConvertor {
-  InputOutputConvertor(ShProgram program, ShVariableReplacer::VarMap &varMap, bool& changed)
-    : m_program(program), m_graph(program->ctrlGraph), m_varMap( varMap ), m_changed(changed), m_id(++id)
+  InputOutputConvertor(const ShProgramNodePtr& program,
+                       ShVariableReplacer::VarMap &varMap, bool& changed)
+    : m_program(program), m_varMap( varMap ), m_changed(changed), m_id(++id)
   {}
 
   void operator()(ShCtrlGraphNodePtr node) {
@@ -368,8 +370,8 @@ struct InputOutputConvertor {
     m_changed = true;
 
     // create block after exit
-    ShCtrlGraphNodePtr oldExit = m_graph->appendExit(); 
-    ShCtrlGraphNodePtr oldEntry = m_graph->prependEntry();
+    ShCtrlGraphNodePtr oldExit = m_program->ctrlGraph->appendExit(); 
+    ShCtrlGraphNodePtr oldEntry = m_program->ctrlGraph->prependEntry();
 
     for(ShVariableReplacer::VarMap::const_iterator it = m_varMap.begin(); it != m_varMap.end(); ++it) {
       // assign temporary to output
@@ -402,8 +404,7 @@ struct InputOutputConvertor {
     }
   }
 
-  ShProgram m_program;
-  ShCtrlGraphPtr m_graph;
+  ShProgramNodePtr m_program;
   ShVariableReplacer::VarMap &m_varMap; // maps from outputs used as srcs in computation to their temporary variables
   bool& m_changed;
   int m_id;
@@ -416,10 +417,10 @@ void ShTransformer::convertInputOutput()
   InputOutputConvertor ioc(m_program, varMap, m_changed);
   std::for_each(m_program->inputs.begin(), m_program->inputs.end(), ioc);
   std::for_each(m_program->outputs.begin(), m_program->outputs.end(), ioc);
-  m_graph->dfs(ioc);
+  m_program->ctrlGraph->dfs(ioc);
 
   ShVariableReplacer vr(varMap);
-  m_graph->dfs(vr);
+  m_program->ctrlGraph->dfs(vr);
 
   ioc.updateGraph(); 
 }
@@ -470,7 +471,7 @@ struct TextureLookupConverter {
 void ShTransformer::convertTextureLookups()
 {
   TextureLookupConverter conv;
-  m_graph->dfs(conv);
+  m_program->ctrlGraph->dfs(conv);
   if (conv.changed) m_changed = true;
 }
 

@@ -29,12 +29,9 @@
 
 #include "ShVariableNode.hpp"
 #include "ShCtrlGraph.hpp"
-#include "ShProgram.hpp"
 #include <map>
 
-
 namespace SH { 
-
 
 struct ShVariableReplacer {
   typedef std::map<ShVariableNodePtr, ShVariableNodePtr> VarMap;
@@ -49,18 +46,6 @@ struct ShVariableReplacer {
 
   VarMap& varMap;
 };
-
-// makes a copy of the control graph nodes, blocks, and statements, 
-// but keeps original ShVariableNode objects 
-extern void copyCtrlGraph(ShCtrlGraphNodePtr head, ShCtrlGraphNodePtr tail,
-                       ShCtrlGraphNodePtr& newHead, ShCtrlGraphNodePtr& newTail);
-
-// clones Control graph nodes in a program, but does not change the ShVariableNodes
-// (This allows platform-specific transformations on the IR while still maintaining
-// information about the uniform, texture variables associated with the original 
-// ShProgram)
-extern ShProgram cloneProgram(ShProgram p);
-
 
 }
 

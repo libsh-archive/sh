@@ -1,7 +1,7 @@
 #include <cmath>
 #include "ShInstructions.hpp"
 #include "ShStatement.hpp"
-#include "ShEnvironment.hpp"
+#include "ShContext.hpp"
 #include "ShDebug.hpp"
 
 namespace {
@@ -10,7 +10,7 @@ using namespace SH;
 
 bool immediate()
 {
-  return !ShEnvironment::insideShader;
+  return !ShContext::current()->parsing();
 }
 
 void sizes_match(const ShVariable& a, const ShVariable& b)
@@ -54,7 +54,7 @@ void has_values(const ShVariable& a, const ShVariable& b,
 
 void addStatement(const ShStatement& stmt)
 {
-  ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+  ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
 }
 
 typedef float T;
