@@ -34,6 +34,7 @@
 #include "ShProgram.hpp"
 #include "ShSyntax.hpp"
 #include "ShStatement.hpp"
+#include "ShAlgebra.hpp"
 
 namespace SH {
 

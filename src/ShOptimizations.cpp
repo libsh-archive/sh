@@ -320,7 +320,7 @@ void remove_dead_code(ShProgram& p, bool& changed)
 
   while (!w.empty()) {
     ShStatement* stmt = w.front(); w.pop();
-    ValueTracking* vt = stmt->template get_info<ValueTracking>();
+    ValueTracking* vt = stmt->get_info<ValueTracking>();
     if (!vt) continue; // Should never happen!
     
     for (int i = 0; i < opInfo[stmt->op].arity; i++) {

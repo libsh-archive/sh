@@ -40,26 +40,26 @@ public:
   ShWrapClamp()
     : T()
   {
-    m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP);
+    this->m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP);
   }
   ShWrapClamp(int width)
     : T(width)
   {
-    m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP);
+    this->m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP);
   }
   ShWrapClamp(int width, int height)
     : T(width, height)
   {
-    m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP);
+    this->m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP);
   }
   ShWrapClamp(int width, int height, int depth)
     : T(width, height, depth)
   {
-    m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP);
+    this->m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP);
   }
 
-	typedef ShWrapClamp<typename T::rectangular_type> rectangular_type;
-	typedef typename T::base_type base_type;
+  typedef ShWrapClamp<typename T::rectangular_type> rectangular_type;
+  typedef typename T::base_type base_type;
   typedef typename T::return_type return_type;
 };
 
@@ -74,26 +74,26 @@ public:
   ShWrapClampToEdge()
     : T()
   {
-    m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE);
+    this->m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE);
   }
   ShWrapClampToEdge(int width)
     : T(width)
   {
-    m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE);
+    this->m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE);
   }
   ShWrapClampToEdge(int width, int height)
     : T(width, height)
   {
-    m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE);
+    this->m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE);
   }
   ShWrapClampToEdge(int width, int height, int depth)
     : T(width, height, depth)
   {
-    m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE);
+    this->m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE);
   }
 
-	typedef ShWrapClampToEdge<typename T::rectangular_type> rectangular_type;
-	typedef typename T::base_type base_type;
+  typedef ShWrapClampToEdge<typename T::rectangular_type> rectangular_type;
+  typedef typename T::base_type base_type;
   typedef typename T::return_type return_type;
 };
 
@@ -108,26 +108,26 @@ public:
   ShWrapRepeat()
     : T()
   {
-    m_node->traits().wrapping(ShTextureTraits::SH_WRAP_REPEAT);
+    this->m_node->traits().wrapping(ShTextureTraits::SH_WRAP_REPEAT);
   }
   ShWrapRepeat(int width)
     : T(width)
   {
-    m_node->traits().wrapping(ShTextureTraits::SH_WRAP_REPEAT);
+    this->m_node->traits().wrapping(ShTextureTraits::SH_WRAP_REPEAT);
   }
   ShWrapRepeat(int width, int height)
     : T(width, height)
   {
-    m_node->traits().wrapping(ShTextureTraits::SH_WRAP_REPEAT);
+    this->m_node->traits().wrapping(ShTextureTraits::SH_WRAP_REPEAT);
   }
   ShWrapRepeat(int width, int height, int depth)
     : T(width, height, depth)
   {
-    m_node->traits().wrapping(ShTextureTraits::SH_WRAP_REPEAT);
+    this->m_node->traits().wrapping(ShTextureTraits::SH_WRAP_REPEAT);
   }
 
-	typedef ShWrapRepeat<typename T::rectangular_type> rectangular_type;
-	typedef typename T::base_type base_type;
+  typedef ShWrapRepeat<typename T::rectangular_type> rectangular_type;
+  typedef typename T::base_type base_type;
   typedef typename T::return_type return_type;
 };
 

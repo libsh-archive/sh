@@ -29,6 +29,8 @@
 
 #include <iostream>
 #include <algorithm>
+#include <string>
+#include <sstream>
 #include "ShMatrix.hpp"
 #include "ShUtility.hpp"
 

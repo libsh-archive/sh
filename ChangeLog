@@ -1,3 +1,24 @@
+2004-11-05  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShWrap.hpp, src/ShInterp.hpp, src/ShClamping.hpp: More
+	missing "this->" parts. Also fixed indentation.
+
+	* src/scripts/ShAttribImpl.hpp.py: Refer to parent members
+	(m_node) using "this->" to disambiguate them. Required to compile
+	under gcc 3.4.
+
+	* src/scripts/semantic.py: Refer to parent members (m_node,
+	m_swizzle, m_neg) using "this->" to disambiguate them. Required to
+	compile under gcc 3.4.
+
+	* src/ShChannelImpl.hpp: Include ShAlgebra.hpp. Fixes gcc 3.4
+	compile failure.
+
+	* src/ShOptimizations.cpp, src/ShValueTracking.cpp,
+	src/ShConstProp.cpp: Fixed several gcc 3.4 compile failures by
+	removing 'template' qualifier for template member function calls
+	that don't need it.
+	
 2004-10-28  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
 
 	* backends/gl/WGLPBufferStreams.*: Changed pbuffer management

@@ -40,26 +40,26 @@ public:
   ShClamped()
     : T()
   {
-    m_node->traits().clamping(ShTextureTraits::SH_CLAMPED);
+    this->m_node->traits().clamping(ShTextureTraits::SH_CLAMPED);
   }
   ShClamped(int width)
     : T(width)
   {
-    m_node->traits().clamping(ShTextureTraits::SH_CLAMPED);
+    this->m_node->traits().clamping(ShTextureTraits::SH_CLAMPED);
   }
   ShClamped(int width, int height)
     : T(width, height)
   {
-    m_node->traits().clamping(ShTextureTraits::SH_CLAMPED);
+    this->m_node->traits().clamping(ShTextureTraits::SH_CLAMPED);
   }
   ShClamped(int width, int height, int depth)
     : T(width, height, depth)
   {
-    m_node->traits().clamping(ShTextureTraits::SH_CLAMPED);
+    this->m_node->traits().clamping(ShTextureTraits::SH_CLAMPED);
   }
 
-	typedef ShClamped<typename T::rectangular_type> rectangular_type;
-	typedef typename T::base_type base_type;
+  typedef ShClamped<typename T::rectangular_type> rectangular_type;
+  typedef typename T::base_type base_type;
   typedef typename T::return_type return_type;
 };
 
@@ -74,26 +74,26 @@ public:
   ShUnclamped()
     : T()
   {
-    m_node->traits().clamping(ShTextureTraits::SH_UNCLAMPED);
+    this->m_node->traits().clamping(ShTextureTraits::SH_UNCLAMPED);
   }
   ShUnclamped(int width)
     : T(width)
   {
-    m_node->traits().clamping(ShTextureTraits::SH_UNCLAMPED);
+    this->m_node->traits().clamping(ShTextureTraits::SH_UNCLAMPED);
   }
   ShUnclamped(int width, int height)
     : T(width, height)
   {
-    m_node->traits().clamping(ShTextureTraits::SH_UNCLAMPED);
+    this->m_node->traits().clamping(ShTextureTraits::SH_UNCLAMPED);
   }
   ShUnclamped(int width, int height, int depth)
     : T(width, height, depth)
   {
-    m_node->traits().clamping(ShTextureTraits::SH_UNCLAMPED);
+    this->m_node->traits().clamping(ShTextureTraits::SH_UNCLAMPED);
   }
 
-	typedef ShUnclamped<typename T::rectangular_type> rectangular_type;
-	typedef typename T::base_type base_type;
+  typedef ShUnclamped<typename T::rectangular_type> rectangular_type;
+  typedef typename T::base_type base_type;
   typedef typename T::return_type return_type;
 };
 

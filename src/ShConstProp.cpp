@@ -480,7 +480,7 @@ struct InitConstProp {
     ShBasicBlockPtr block = node->block;
     if (!block) return;
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-      I->template destroy_info<ConstProp>();
+      I->destroy_info<ConstProp>();
       ConstProp* cp = new ConstProp(&(*I), worklist);
       I->add_info(cp);
     }
@@ -497,7 +497,7 @@ struct DumpConstProp {
     if (!block) return;
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
       std::cerr << "{" << *I << "} --- ";
-      ConstProp* cp = I->template get_info<ConstProp>();
+      ConstProp* cp = I->get_info<ConstProp>();
 
       if (!cp) {
         std::cerr << "NO CP INFORMATION" << std::endl;
@@ -535,7 +535,7 @@ struct FinishConstProp
     ShBasicBlockPtr block = node->block;
     if (!block) return;
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-      ConstProp* cp = I->template get_info<ConstProp>();
+      ConstProp* cp = I->get_info<ConstProp>();
 
       if (!cp) continue;
 
@@ -679,7 +679,7 @@ struct FinishConstProp
     // Clean up
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
       // Remove constant propagation information.
-      I->template destroy_info<ConstProp>();
+      I->destroy_info<ConstProp>();
     }
   }
 
@@ -841,7 +841,7 @@ void propagate_constants(ShProgram& p)
   
   while (!worklist.empty()) {
     ValueTracking::Def def = worklist.front(); worklist.pop();
-    ValueTracking* vt = def.stmt->template get_info<ValueTracking>();
+    ValueTracking* vt = def.stmt->get_info<ValueTracking>();
     if (!vt) {
 #ifdef SH_DEBUG_CONSTPROP
       SH_DEBUG_PRINT(*def.stmt << " on worklist does not have VT information?");
@@ -852,7 +852,7 @@ void propagate_constants(ShProgram& p)
 
     for (ValueTracking::DefUseChain::iterator use = vt->uses[def.index].begin();
          use != vt->uses[def.index].end(); ++use) {
-      ConstProp* cp = use->stmt->template get_info<ConstProp>();
+      ConstProp* cp = use->stmt->get_info<ConstProp>();
       if (!cp) {
 #ifdef SH_DEBUG_CONSTPROP
         SH_DEBUG_PRINT("Use " << *use->stmt << " does not have const prop information!");
@@ -862,7 +862,7 @@ void propagate_constants(ShProgram& p)
 
       ConstProp::Cell cell = cp->src[use->source][use->index];
 
-      ValueTracking* ut = use->stmt->template get_info<ValueTracking>();
+      ValueTracking* ut = use->stmt->get_info<ValueTracking>();
       if (!ut) {
         // Should never happen...
 #ifdef SH_DEBUG_CONSTPROP
@@ -881,7 +881,7 @@ void propagate_constants(ShProgram& p)
       for (ValueTracking::UseDefChain::iterator possdef
              = ut->defs[use->source][use->index].begin();
            possdef != ut->defs[use->source][use->index].end(); ++possdef) {
-        ConstProp* dcp = possdef->stmt->template get_info<ConstProp>();
+        ConstProp* dcp = possdef->stmt->get_info<ConstProp>();
         if (!dcp) {
 #ifdef SH_DEBUG_CONSTPROP
           SH_DEBUG_PRINT("Possible def " << *dcp->stmt << " on worklist does not have CP information?");

@@ -59,10 +59,10 @@ class Impl(semantic.Impl):
         common.indent()
         for i in range(0, size):
             if type == "T":
-                common.inprint("m_node->setValue(" + str(i) + ", s" + str(i) + ");")
+                common.inprint("this->m_node->setValue(" + str(i) + ", s" + str(i) + ");")
             else:
                 common.inprint("SH_DEBUG_ASSERT(s" + str(i) + ".hasValues());")
-                common.inprint("m_node->setValue(" + str(i) + ", s" + str(i) + ".getValue(0));")
+                common.inprint("this->m_node->setValue(" + str(i) + ", s" + str(i) + ".getValue(0));")
         common.deindent()
         common.inprint("} else {")
         common.indent()
@@ -120,7 +120,7 @@ class Impl(semantic.Impl):
         common.indent()
         common.inprint("if (Binding == SH_CONST) {")
         common.indent()
-        common.inprint("for (int i = 0; i < " + self.sizevar(size) + "; i++) m_node->setValue(i, data[i]);")
+        common.inprint("for (int i = 0; i < " + self.sizevar(size) + "; i++) this->m_node->setValue(i, data[i]);")
         common.deindent()
         common.inprint("} else {")
         common.indent()

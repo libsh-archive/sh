@@ -209,7 +209,7 @@ class Impl:
             common.inprint("  : ParentType(" + ', '.join([re.sub(r'\[.*\]', r'', x[-1]) for x in args]) + ")")
         common.inprint("{")
         common.indent()
-        common.inprint("m_node->specialType(" + self.enum + ");")
+        common.inprint("this->m_node->specialType(" + self.enum + ");")
         common.deindent()
         common.inprint("}")
         common.inprint("")
@@ -301,9 +301,9 @@ class Impl:
             args = ["N"] + args
         else:
             args = [str(size)] + args
-        common.inprint("return " + self.tplcls(num, "true") + "(m_node, " +
-                       "m_swizzle * ShSwizzle(" + ', '.join(args) + "), " +
-                       "m_neg);")
+        common.inprint("return " + self.tplcls(num, "true") + "(this->m_node, " +
+                       "this->m_swizzle * ShSwizzle(" + ', '.join(args) + "), " +
+                       "this->m_neg);")
         common.deindent()
         common.inprint("}")
         common.inprint("")
@@ -320,9 +320,9 @@ class Impl:
             args = ["N"] + args
         else:
             args = [str(size)] + args
-        common.inprint("return " + self.tplcls("N2", "true") + "(m_node, " +
-                       "m_swizzle * ShSwizzle(" + ', '.join(args) + "), " +
-                       "m_neg);")
+        common.inprint("return " + self.tplcls("N2", "true") + "(this->m_node, " +
+                       "this->m_swizzle * ShSwizzle(" + ', '.join(args) + "), " +
+                       "this->m_neg);")
         common.deindent()
         common.inprint("}")
         common.inprint("")
@@ -338,7 +338,7 @@ class Impl:
                        self.tplcls(size) + "::operator-() const")
         common.inprint("{")
         common.indent()
-        common.inprint("return " + self.tplcls(size) + "(m_node, m_swizzle, !m_neg);");
+        common.inprint("return " + self.tplcls(size) + "(this->m_node, this->m_swizzle, !this->m_neg);");
         common.deindent()
         common.inprint("}")
 

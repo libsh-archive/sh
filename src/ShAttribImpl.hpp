@@ -78,7 +78,7 @@ ShAttrib<N, Binding, T, Swizzled>::ShAttrib(T data[N])
   : ShGeneric<N, T>(new ShVariableNode(Binding, N))
 {
   if (Binding == SH_CONST) {
-    for (int i = 0; i < N; i++) m_node->setValue(i, data[i]);
+    for (int i = 0; i < N; i++) this->m_node->setValue(i, data[i]);
   } else {
     (*this) = ShAttrib<N, SH_CONST, T>(data);
   }
@@ -257,7 +257,7 @@ inline
 ShAttrib<1, Binding, T, true>
 ShAttrib<N, Binding, T, Swizzled>::operator()(int s0) const
 {
-  return ShAttrib<1, Binding, T, true>(m_node, m_swizzle * ShSwizzle(N, s0), m_neg);
+  return ShAttrib<1, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(N, s0), this->m_neg);
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
@@ -265,7 +265,7 @@ inline
 ShAttrib<2, Binding, T, true>
 ShAttrib<N, Binding, T, Swizzled>::operator()(int s0, int s1) const
 {
-  return ShAttrib<2, Binding, T, true>(m_node, m_swizzle * ShSwizzle(N, s0, s1), m_neg);
+  return ShAttrib<2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(N, s0, s1), this->m_neg);
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
@@ -273,7 +273,7 @@ inline
 ShAttrib<3, Binding, T, true>
 ShAttrib<N, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
 {
-  return ShAttrib<3, Binding, T, true>(m_node, m_swizzle * ShSwizzle(N, s0, s1, s2), m_neg);
+  return ShAttrib<3, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(N, s0, s1, s2), this->m_neg);
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
@@ -281,7 +281,7 @@ inline
 ShAttrib<4, Binding, T, true>
 ShAttrib<N, Binding, T, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
 {
-  return ShAttrib<4, Binding, T, true>(m_node, m_swizzle * ShSwizzle(N, s0, s1, s2, s3), m_neg);
+  return ShAttrib<4, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(N, s0, s1, s2, s3), this->m_neg);
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
@@ -289,7 +289,7 @@ template<int N2>
 ShAttrib<N2, Binding, T, true>
 ShAttrib<N, Binding, T, Swizzled>::swiz(int indices[]) const
 {
-  return ShAttrib<N2, Binding, T, true>(m_node, m_swizzle * ShSwizzle(N, N2, indices), m_neg);
+  return ShAttrib<N2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(N, N2, indices), this->m_neg);
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
@@ -297,14 +297,14 @@ inline
 ShAttrib<1, Binding, T, true>
 ShAttrib<N, Binding, T, Swizzled>::operator[](int s0) const
 {
-  return ShAttrib<1, Binding, T, true>(m_node, m_swizzle * ShSwizzle(N, s0), m_neg);
+  return ShAttrib<1, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(N, s0), this->m_neg);
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<N, Binding, T, Swizzled>
 ShAttrib<N, Binding, T, Swizzled>::operator-() const
 {
-  return ShAttrib<N, Binding, T, Swizzled>(m_node, m_swizzle, !m_neg);
+  return ShAttrib<N, Binding, T, Swizzled>(this->m_node, this->m_swizzle, !this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -344,7 +344,7 @@ ShAttrib<1, Binding, T, Swizzled>::ShAttrib(T data[1])
   : ShGeneric<1, T>(new ShVariableNode(Binding, 1))
 {
   if (Binding == SH_CONST) {
-    for (int i = 0; i < 1; i++) m_node->setValue(i, data[i]);
+    for (int i = 0; i < 1; i++) this->m_node->setValue(i, data[i]);
   } else {
     (*this) = ShAttrib<1, SH_CONST, T>(data);
   }
@@ -356,7 +356,7 @@ ShAttrib<1, Binding, T, Swizzled>::ShAttrib(T s0)
   : ShGeneric<1, T>(new ShVariableNode(Binding, 1))
 {
   if (Binding == SH_CONST) {
-    m_node->setValue(0, s0);
+    this->m_node->setValue(0, s0);
   } else {
     (*this)[0] = ShAttrib<1, SH_CONST, T>(s0);
   }
@@ -499,7 +499,7 @@ inline
 ShAttrib<1, Binding, T, true>
 ShAttrib<1, Binding, T, Swizzled>::operator()(int s0) const
 {
-  return ShAttrib<1, Binding, T, true>(m_node, m_swizzle * ShSwizzle(1, s0), m_neg);
+  return ShAttrib<1, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(1, s0), this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -507,7 +507,7 @@ inline
 ShAttrib<2, Binding, T, true>
 ShAttrib<1, Binding, T, Swizzled>::operator()(int s0, int s1) const
 {
-  return ShAttrib<2, Binding, T, true>(m_node, m_swizzle * ShSwizzle(1, s0, s1), m_neg);
+  return ShAttrib<2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(1, s0, s1), this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -515,7 +515,7 @@ inline
 ShAttrib<3, Binding, T, true>
 ShAttrib<1, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
 {
-  return ShAttrib<3, Binding, T, true>(m_node, m_swizzle * ShSwizzle(1, s0, s1, s2), m_neg);
+  return ShAttrib<3, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(1, s0, s1, s2), this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -523,7 +523,7 @@ inline
 ShAttrib<4, Binding, T, true>
 ShAttrib<1, Binding, T, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
 {
-  return ShAttrib<4, Binding, T, true>(m_node, m_swizzle * ShSwizzle(1, s0, s1, s2, s3), m_neg);
+  return ShAttrib<4, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(1, s0, s1, s2, s3), this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -531,7 +531,7 @@ template<int N2>
 ShAttrib<N2, Binding, T, true>
 ShAttrib<1, Binding, T, Swizzled>::swiz(int indices[]) const
 {
-  return ShAttrib<N2, Binding, T, true>(m_node, m_swizzle * ShSwizzle(1, N2, indices), m_neg);
+  return ShAttrib<N2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(1, N2, indices), this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -539,14 +539,14 @@ inline
 ShAttrib<1, Binding, T, true>
 ShAttrib<1, Binding, T, Swizzled>::operator[](int s0) const
 {
-  return ShAttrib<1, Binding, T, true>(m_node, m_swizzle * ShSwizzle(1, s0), m_neg);
+  return ShAttrib<1, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(1, s0), this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<1, Binding, T, Swizzled>
 ShAttrib<1, Binding, T, Swizzled>::operator-() const
 {
-  return ShAttrib<1, Binding, T, Swizzled>(m_node, m_swizzle, !m_neg);
+  return ShAttrib<1, Binding, T, Swizzled>(this->m_node, this->m_swizzle, !this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -586,7 +586,7 @@ ShAttrib<2, Binding, T, Swizzled>::ShAttrib(T data[2])
   : ShGeneric<2, T>(new ShVariableNode(Binding, 2))
 {
   if (Binding == SH_CONST) {
-    for (int i = 0; i < 2; i++) m_node->setValue(i, data[i]);
+    for (int i = 0; i < 2; i++) this->m_node->setValue(i, data[i]);
   } else {
     (*this) = ShAttrib<2, SH_CONST, T>(data);
   }
@@ -598,8 +598,8 @@ ShAttrib<2, Binding, T, Swizzled>::ShAttrib(T s0, T s1)
   : ShGeneric<2, T>(new ShVariableNode(Binding, 2))
 {
   if (Binding == SH_CONST) {
-    m_node->setValue(0, s0);
-    m_node->setValue(1, s1);
+    this->m_node->setValue(0, s0);
+    this->m_node->setValue(1, s1);
   } else {
     (*this)[0] = ShAttrib<1, SH_CONST, T>(s0);
     (*this)[1] = ShAttrib<1, SH_CONST, T>(s1);
@@ -613,9 +613,9 @@ ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T>& s0, const ShG
 {
   if (Binding == SH_CONST) {
     SH_DEBUG_ASSERT(s0.hasValues());
-    m_node->setValue(0, s0.getValue(0));
+    this->m_node->setValue(0, s0.getValue(0));
     SH_DEBUG_ASSERT(s1.hasValues());
-    m_node->setValue(1, s1.getValue(0));
+    this->m_node->setValue(1, s1.getValue(0));
   } else {
     (*this)[0] = s0;
     (*this)[1] = s1;
@@ -795,7 +795,7 @@ inline
 ShAttrib<1, Binding, T, true>
 ShAttrib<2, Binding, T, Swizzled>::operator()(int s0) const
 {
-  return ShAttrib<1, Binding, T, true>(m_node, m_swizzle * ShSwizzle(2, s0), m_neg);
+  return ShAttrib<1, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(2, s0), this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -803,7 +803,7 @@ inline
 ShAttrib<2, Binding, T, true>
 ShAttrib<2, Binding, T, Swizzled>::operator()(int s0, int s1) const
 {
-  return ShAttrib<2, Binding, T, true>(m_node, m_swizzle * ShSwizzle(2, s0, s1), m_neg);
+  return ShAttrib<2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(2, s0, s1), this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -811,7 +811,7 @@ inline
 ShAttrib<3, Binding, T, true>
 ShAttrib<2, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
 {
-  return ShAttrib<3, Binding, T, true>(m_node, m_swizzle * ShSwizzle(2, s0, s1, s2), m_neg);
+  return ShAttrib<3, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(2, s0, s1, s2), this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -819,7 +819,7 @@ inline
 ShAttrib<4, Binding, T, true>
 ShAttrib<2, Binding, T, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
 {
-  return ShAttrib<4, Binding, T, true>(m_node, m_swizzle * ShSwizzle(2, s0, s1, s2, s3), m_neg);
+  return ShAttrib<4, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(2, s0, s1, s2, s3), this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -827,7 +827,7 @@ template<int N2>
 ShAttrib<N2, Binding, T, true>
 ShAttrib<2, Binding, T, Swizzled>::swiz(int indices[]) const
 {
-  return ShAttrib<N2, Binding, T, true>(m_node, m_swizzle * ShSwizzle(2, N2, indices), m_neg);
+  return ShAttrib<N2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(2, N2, indices), this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -835,14 +835,14 @@ inline
 ShAttrib<1, Binding, T, true>
 ShAttrib<2, Binding, T, Swizzled>::operator[](int s0) const
 {
-  return ShAttrib<1, Binding, T, true>(m_node, m_swizzle * ShSwizzle(2, s0), m_neg);
+  return ShAttrib<1, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(2, s0), this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<2, Binding, T, Swizzled>
 ShAttrib<2, Binding, T, Swizzled>::operator-() const
 {
-  return ShAttrib<2, Binding, T, Swizzled>(m_node, m_swizzle, !m_neg);
+  return ShAttrib<2, Binding, T, Swizzled>(this->m_node, this->m_swizzle, !this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -882,7 +882,7 @@ ShAttrib<3, Binding, T, Swizzled>::ShAttrib(T data[3])
   : ShGeneric<3, T>(new ShVariableNode(Binding, 3))
 {
   if (Binding == SH_CONST) {
-    for (int i = 0; i < 3; i++) m_node->setValue(i, data[i]);
+    for (int i = 0; i < 3; i++) this->m_node->setValue(i, data[i]);
   } else {
     (*this) = ShAttrib<3, SH_CONST, T>(data);
   }
@@ -894,9 +894,9 @@ ShAttrib<3, Binding, T, Swizzled>::ShAttrib(T s0, T s1, T s2)
   : ShGeneric<3, T>(new ShVariableNode(Binding, 3))
 {
   if (Binding == SH_CONST) {
-    m_node->setValue(0, s0);
-    m_node->setValue(1, s1);
-    m_node->setValue(2, s2);
+    this->m_node->setValue(0, s0);
+    this->m_node->setValue(1, s1);
+    this->m_node->setValue(2, s2);
   } else {
     (*this)[0] = ShAttrib<1, SH_CONST, T>(s0);
     (*this)[1] = ShAttrib<1, SH_CONST, T>(s1);
@@ -911,11 +911,11 @@ ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T>& s0, const ShG
 {
   if (Binding == SH_CONST) {
     SH_DEBUG_ASSERT(s0.hasValues());
-    m_node->setValue(0, s0.getValue(0));
+    this->m_node->setValue(0, s0.getValue(0));
     SH_DEBUG_ASSERT(s1.hasValues());
-    m_node->setValue(1, s1.getValue(0));
+    this->m_node->setValue(1, s1.getValue(0));
     SH_DEBUG_ASSERT(s2.hasValues());
-    m_node->setValue(2, s2.getValue(0));
+    this->m_node->setValue(2, s2.getValue(0));
   } else {
     (*this)[0] = s0;
     (*this)[1] = s1;
@@ -1096,7 +1096,7 @@ inline
 ShAttrib<1, Binding, T, true>
 ShAttrib<3, Binding, T, Swizzled>::operator()(int s0) const
 {
-  return ShAttrib<1, Binding, T, true>(m_node, m_swizzle * ShSwizzle(3, s0), m_neg);
+  return ShAttrib<1, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(3, s0), this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -1104,7 +1104,7 @@ inline
 ShAttrib<2, Binding, T, true>
 ShAttrib<3, Binding, T, Swizzled>::operator()(int s0, int s1) const
 {
-  return ShAttrib<2, Binding, T, true>(m_node, m_swizzle * ShSwizzle(3, s0, s1), m_neg);
+  return ShAttrib<2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(3, s0, s1), this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -1112,7 +1112,7 @@ inline
 ShAttrib<3, Binding, T, true>
 ShAttrib<3, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
 {
-  return ShAttrib<3, Binding, T, true>(m_node, m_swizzle * ShSwizzle(3, s0, s1, s2), m_neg);
+  return ShAttrib<3, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(3, s0, s1, s2), this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -1120,7 +1120,7 @@ inline
 ShAttrib<4, Binding, T, true>
 ShAttrib<3, Binding, T, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
 {
-  return ShAttrib<4, Binding, T, true>(m_node, m_swizzle * ShSwizzle(3, s0, s1, s2, s3), m_neg);
+  return ShAttrib<4, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(3, s0, s1, s2, s3), this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -1128,7 +1128,7 @@ template<int N2>
 ShAttrib<N2, Binding, T, true>
 ShAttrib<3, Binding, T, Swizzled>::swiz(int indices[]) const
 {
-  return ShAttrib<N2, Binding, T, true>(m_node, m_swizzle * ShSwizzle(3, N2, indices), m_neg);
+  return ShAttrib<N2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(3, N2, indices), this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -1136,14 +1136,14 @@ inline
 ShAttrib<1, Binding, T, true>
 ShAttrib<3, Binding, T, Swizzled>::operator[](int s0) const
 {
-  return ShAttrib<1, Binding, T, true>(m_node, m_swizzle * ShSwizzle(3, s0), m_neg);
+  return ShAttrib<1, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(3, s0), this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<3, Binding, T, Swizzled>
 ShAttrib<3, Binding, T, Swizzled>::operator-() const
 {
-  return ShAttrib<3, Binding, T, Swizzled>(m_node, m_swizzle, !m_neg);
+  return ShAttrib<3, Binding, T, Swizzled>(this->m_node, this->m_swizzle, !this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -1183,7 +1183,7 @@ ShAttrib<4, Binding, T, Swizzled>::ShAttrib(T data[4])
   : ShGeneric<4, T>(new ShVariableNode(Binding, 4))
 {
   if (Binding == SH_CONST) {
-    for (int i = 0; i < 4; i++) m_node->setValue(i, data[i]);
+    for (int i = 0; i < 4; i++) this->m_node->setValue(i, data[i]);
   } else {
     (*this) = ShAttrib<4, SH_CONST, T>(data);
   }
@@ -1195,10 +1195,10 @@ ShAttrib<4, Binding, T, Swizzled>::ShAttrib(T s0, T s1, T s2, T s3)
   : ShGeneric<4, T>(new ShVariableNode(Binding, 4))
 {
   if (Binding == SH_CONST) {
-    m_node->setValue(0, s0);
-    m_node->setValue(1, s1);
-    m_node->setValue(2, s2);
-    m_node->setValue(3, s3);
+    this->m_node->setValue(0, s0);
+    this->m_node->setValue(1, s1);
+    this->m_node->setValue(2, s2);
+    this->m_node->setValue(3, s3);
   } else {
     (*this)[0] = ShAttrib<1, SH_CONST, T>(s0);
     (*this)[1] = ShAttrib<1, SH_CONST, T>(s1);
@@ -1214,13 +1214,13 @@ ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T>& s0, const ShG
 {
   if (Binding == SH_CONST) {
     SH_DEBUG_ASSERT(s0.hasValues());
-    m_node->setValue(0, s0.getValue(0));
+    this->m_node->setValue(0, s0.getValue(0));
     SH_DEBUG_ASSERT(s1.hasValues());
-    m_node->setValue(1, s1.getValue(0));
+    this->m_node->setValue(1, s1.getValue(0));
     SH_DEBUG_ASSERT(s2.hasValues());
-    m_node->setValue(2, s2.getValue(0));
+    this->m_node->setValue(2, s2.getValue(0));
     SH_DEBUG_ASSERT(s3.hasValues());
-    m_node->setValue(3, s3.getValue(0));
+    this->m_node->setValue(3, s3.getValue(0));
   } else {
     (*this)[0] = s0;
     (*this)[1] = s1;
@@ -1402,7 +1402,7 @@ inline
 ShAttrib<1, Binding, T, true>
 ShAttrib<4, Binding, T, Swizzled>::operator()(int s0) const
 {
-  return ShAttrib<1, Binding, T, true>(m_node, m_swizzle * ShSwizzle(4, s0), m_neg);
+  return ShAttrib<1, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(4, s0), this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -1410,7 +1410,7 @@ inline
 ShAttrib<2, Binding, T, true>
 ShAttrib<4, Binding, T, Swizzled>::operator()(int s0, int s1) const
 {
-  return ShAttrib<2, Binding, T, true>(m_node, m_swizzle * ShSwizzle(4, s0, s1), m_neg);
+  return ShAttrib<2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(4, s0, s1), this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -1418,7 +1418,7 @@ inline
 ShAttrib<3, Binding, T, true>
 ShAttrib<4, Binding, T, Swizzled>::operator()(int s0, int s1, int s2) const
 {
-  return ShAttrib<3, Binding, T, true>(m_node, m_swizzle * ShSwizzle(4, s0, s1, s2), m_neg);
+  return ShAttrib<3, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(4, s0, s1, s2), this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -1426,7 +1426,7 @@ inline
 ShAttrib<4, Binding, T, true>
 ShAttrib<4, Binding, T, Swizzled>::operator()(int s0, int s1, int s2, int s3) const
 {
-  return ShAttrib<4, Binding, T, true>(m_node, m_swizzle * ShSwizzle(4, s0, s1, s2, s3), m_neg);
+  return ShAttrib<4, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(4, s0, s1, s2, s3), this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -1434,7 +1434,7 @@ template<int N2>
 ShAttrib<N2, Binding, T, true>
 ShAttrib<4, Binding, T, Swizzled>::swiz(int indices[]) const
 {
-  return ShAttrib<N2, Binding, T, true>(m_node, m_swizzle * ShSwizzle(4, N2, indices), m_neg);
+  return ShAttrib<N2, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(4, N2, indices), this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
@@ -1442,14 +1442,14 @@ inline
 ShAttrib<1, Binding, T, true>
 ShAttrib<4, Binding, T, Swizzled>::operator[](int s0) const
 {
-  return ShAttrib<1, Binding, T, true>(m_node, m_swizzle * ShSwizzle(4, s0), m_neg);
+  return ShAttrib<1, Binding, T, true>(this->m_node, this->m_swizzle * ShSwizzle(4, s0), this->m_neg);
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
 ShAttrib<4, Binding, T, Swizzled>
 ShAttrib<4, Binding, T, Swizzled>::operator-() const
 {
-  return ShAttrib<4, Binding, T, Swizzled>(m_node, m_swizzle, !m_neg);
+  return ShAttrib<4, Binding, T, Swizzled>(this->m_node, this->m_swizzle, !this->m_neg);
 }
 
 
