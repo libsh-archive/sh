@@ -27,6 +27,8 @@
 #include "ShStorageType.hpp"
 #include "ShOptimizations.hpp"
 
+//#define SH_GLSL_DEBUG
+
 namespace shgl {
 
 using namespace SH;
@@ -164,6 +166,17 @@ void GlslCode::upload()
     os << endl;
     shError(GlslError(os.str()));
     return;
+#ifdef SH_GLSL_DEBUG
+  } else {
+    std::ostringstream os;
+    os << "Shader compile status (target = " << m_target << "): OK" << endl << endl;
+    os << "Shader infolog:" << endl;
+    print_infolog(m_arb_shader, os);
+    os << "Shader code:" << endl;
+    print_shader_source(m_arb_shader, os);
+    os << endl;
+    cerr << os.str();
+#endif
   }
 }
 

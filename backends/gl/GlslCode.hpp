@@ -134,6 +134,8 @@ private:
 
   /// Generate code for a single Sh statement.
   void emit(const SH::ShStatement& stmt);
+  void emit_cbrt(const SH::ShStatement& stmt);
+  void emit_discard(const SH::ShStatement& stmt);
   void emit_exp(const SH::ShStatement& stmt, double power);
   void emit_lit(const SH::ShStatement& stmt);
   void emit_log(const SH::ShStatement& stmt, double base);
@@ -141,8 +143,7 @@ private:
   void emit_prod(const SH::ShStatement& stmt);
   void emit_sum(const SH::ShStatement& stmt);
   void emit_texture(const SH::ShStatement& stmt);
-  void emit_discard(const SH::ShStatement& stmt);
-
+  
   void table_substitution(const SH::ShStatement& stmt, GlslOpCodeVecs codeVecs);
   
   std::string resolve(const SH::ShVariable& v, int index = -1) const;

@@ -1,3 +1,26 @@
+2005-03-16  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslEmit.cpp (table_substitution): Make use of
+	glsl_typename().
+
+	(emit_logic): Remove unnecessary parantheses. Make use of
+	glsl_typename().
+
+	(emit_cbrt): Add this function to handle the CBRT operation
+	separately and properly initialize the 1/3 constant.
+
+	(allocate_temp): Set the binding to SH_TEMP, not the same as
+	stmt.dest necessarily.
+
+	(resolve_constant): Output the constants in the glsl code using
+	the maximum precision.
+
+	(emit_lit): All constants should be of size 1 since each component
+	of the output is computed separately.
+
+	* backends/gl/GlslCode.cpp: Added a debug #define to
+	always display the glsl shader source code.
+
 2005-03-15  Francois Marier  <francois@serioushack.com>
 
 	Fixes for ATI support in the glsl backend.

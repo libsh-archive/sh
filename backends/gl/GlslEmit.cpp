@@ -38,7 +38,6 @@ static GlslMapping opCodeTable[] = {
   {SH_OP_ASN,   "$0"},
   {SH_OP_ATAN,  "atan($0)"},
   //{SH_OP_ATAN2, "atan($1 / $0)"}, // FIXME
-  {SH_OP_CBRT,  "pow($0, 1.0/3.0)"},
   {SH_OP_CEIL,  "ceil($0)"},
   {SH_OP_COND,  "bool($0) ? $1 : $2"},
   {SH_OP_COS,   "cos($0)"},
@@ -99,12 +98,7 @@ void GlslCode::table_substitution(const ShStatement& stmt, GlslOpCodeVecs codeVe
 {
   stringstream line;
   line << resolve(stmt.dest) << " = ";
-
-  if (stmt.dest.size() > 1) {
-    line << "vec" << stmt.dest().size() << "(";
-  } else {
-    line << "float" << "(";
-  }
+  line << glsl_typename(stmt.dest.valueType(), stmt.dest.size()) << "(";
   
   unsigned i;
   for (i=0; i < codeVecs.index.size(); i++) { 
@@ -136,13 +130,8 @@ void GlslCode::emit(const ShStatement &stmt)
   else {
     // Handle the rest of the operations
     switch(stmt.op) {
-    case SH_OP_SEQ:
-    case SH_OP_SGT:
-    case SH_OP_SGE:
-    case SH_OP_SNE:
-    case SH_OP_SLT:
-    case SH_OP_SLE:
-      emit_logic(stmt);
+    case SH_OP_CBRT:
+      emit_cbrt(stmt);
       break;
     case SH_OP_CMUL:
       emit_prod(stmt);
@@ -168,6 +157,14 @@ void GlslCode::emit(const ShStatement &stmt)
     case SH_OP_LOG10:
       emit_log(stmt, 10);
       break;
+    case SH_OP_SEQ:
+    case SH_OP_SGE:
+    case SH_OP_SGT:
+    case SH_OP_SLE:
+    case SH_OP_SLT:
+    case SH_OP_SNE:
+      emit_logic(stmt);
+      break;
     case SH_OP_TEX:
     case SH_OP_TEXI:
       emit_texture(stmt);
@@ -183,7 +180,7 @@ ShVariableNodePtr GlslCode::allocate_temp(const ShStatement& stmt, int size) con
 {
   // allocate a temporary variable based on the destination variable
   const ShVariableNodePtr& dest_node = stmt.dest.node();
-  ShVariableNode* node = new ShVariableNode(dest_node->kind(), (size > 0) ? size : dest_node->size(),
+  ShVariableNode* node = new ShVariableNode(SH_TEMP, (size > 0) ? size : dest_node->size(),
 					    dest_node->valueType(), dest_node->specialType());
   ShVariableNodePtr node_ptr = ShPointer<ShVariableNode>(node);
   return node_ptr;
@@ -194,6 +191,7 @@ string GlslCode::resolve_constant(double constant, const ShVariable& var, int si
   if (size <= 0) size = var.size(); // default size is size of variable
 
   stringstream s;
+  s.precision(16);
   s << glsl_typename(var.valueType(), size);
 
   s << "(";
@@ -206,13 +204,13 @@ string GlslCode::resolve_constant(double constant, const ShVariable& var, int si
   return s.str();
 }
 
-void GlslCode::emit_exp(const ShStatement& stmt, double power)
+void GlslCode::emit_cbrt(const ShStatement& stmt)
 {
-  SH_DEBUG_ASSERT((SH_OP_EXP == stmt.op) || (SH_OP_EXP10 == stmt.op));
+  SH_DEBUG_ASSERT(SH_OP_CBRT == stmt.op);
 
   ShVariable temp(allocate_temp(stmt));
-  append_line(resolve(temp) + " = " + resolve_constant(power, temp));
-  append_line(resolve(stmt.dest) + " = pow(" + resolve(temp) + ", " + resolve(stmt.src[0]) + ")");
+  append_line(resolve(temp) + " = " + resolve_constant(1.0 / 3.0, temp));
+  append_line(resolve(stmt.dest) + " = pow(" + resolve(stmt.src[0]) + ", " + resolve(temp) + ")");
 }
 
 void GlslCode::emit_discard(const ShStatement& stmt)
@@ -220,6 +218,15 @@ void GlslCode::emit_discard(const ShStatement& stmt)
   SH_DEBUG_ASSERT((SH_OP_KIL == stmt.op));
 
   append_line(string("if (bool(") + resolve(stmt.src[0]) + ")) discard;");
+}
+
+void GlslCode::emit_exp(const ShStatement& stmt, double power)
+{
+  SH_DEBUG_ASSERT((SH_OP_EXP == stmt.op) || (SH_OP_EXP10 == stmt.op));
+
+  ShVariable temp(allocate_temp(stmt));
+  append_line(resolve(temp) + " = " + resolve_constant(power, temp));
+  append_line(resolve(stmt.dest) + " = pow(" + resolve(temp) + ", " + resolve(stmt.src[0]) + ")");
 }
 
 void GlslCode::emit_lit(const ShStatement& stmt)
@@ -234,7 +241,7 @@ void GlslCode::emit_lit(const ShStatement& stmt)
 
   append_line(resolve(stmt.dest, 2) + " = " + resolve(stmt.src[0], 0) + 
 	      " > " + resolve_constant(0, stmt.src[0], 1) + " ? pow(max(" + 
-	      resolve_constant(0, stmt.dest) + ", " + resolve(stmt.src[0], 1) + 
+	      resolve_constant(0, stmt.dest, 1) + ", " + resolve(stmt.src[0], 1) + 
 	      "), clamp(" + resolve(stmt.src[0], 2) + ", " + 
 	      resolve_constant(-128, stmt.dest, 1) + ", " + 
 	      resolve_constant(128, stmt.dest, 1) + ")) : " + resolve_constant(0, stmt.dest, 1));
@@ -284,22 +291,22 @@ void GlslCode::emit_logic(const ShStatement& stmt)
   } else {
     switch (stmt.op) {
     case SH_OP_SEQ:
-      mapping.code = "($0 == $1)";
+      mapping.code = "$0 == $1";
       break;
     case SH_OP_SGT:
-      mapping.code = "($0 > $1)";
+      mapping.code = "$0 > $1";
       break;
     case SH_OP_SGE:
-      mapping.code = "($0 >= $1)";
+      mapping.code = "$0 >= $1";
       break;
     case SH_OP_SNE:
-      mapping.code = "($0 != $1)";
+      mapping.code = "$0 != $1";
       break;
     case SH_OP_SLT:
-      mapping.code = "($0 < $1)";
+      mapping.code = "$0 < $1";
       break;
     case SH_OP_SLE:
-      mapping.code = "($0 <= $1)";
+      mapping.code = "$0 <= $1";
       break;
     default:
       SH_DEBUG_ASSERT(0);
@@ -307,17 +314,10 @@ void GlslCode::emit_logic(const ShStatement& stmt)
   }
 
   // TODO: cache these mappings
-
-  // TODO: Do this more generally
-  std::ostringstream os;
-  if (stmt.dest.size() > 1) {
-    os << "vec" << stmt.dest().size() << "(" << mapping.code << ")";
-  } else {
-    os << "float" << "(" << mapping.code << ")";
-  }
-
-  mapping.code = os.str().c_str();
   
+  string s = glsl_typename(stmt.dest.valueType(), stmt.dest.size()) + "(" + string(mapping.code) + ")";
+  mapping.code = s.c_str();
+
   table_substitution(stmt, mapping);
 }
 
