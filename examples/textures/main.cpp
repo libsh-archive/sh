@@ -245,11 +245,17 @@ int main(int argc, char** argv)
 
   initShaders();
 
-  kd_images[0].loadPng("rustkd.png");
-  ks_images[0].loadPng("rustks.png");
-  kd_images[1].loadPng("kd.png");
-  ks_images[1].loadPng("ks.png");
-  
+  try {
+    kd_images[0].loadPng("rustkd.png");
+    ks_images[0].loadPng("rustks.png");
+    kd_images[1].loadPng("kd.png");
+    ks_images[1].loadPng("ks.png");
+  } 
+  catch (const ShException& e) {
+    std::cerr << e.message() << std::endl;
+    throw e;
+  }
+
   glEnable(GL_DEPTH_TEST);
   glClearColor(0.0, 0.0, 0.0, 1.0);
   setupView();
