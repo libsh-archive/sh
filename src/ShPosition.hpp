@@ -91,14 +91,6 @@ private:
   typedef ShPoint<N, Binding, T, Swizzled> ParentType;
 };
 
-/** A vertex or fragment position.
- * 
- * This is semantically a point, but is bound preferentially to the position
- * input and output of the rasterizer or to the vertex position when
- * used in vertex and fragment shaders.
- * 
- *
- */
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShPosition<1, Binding, T, Swizzled> : public ShPoint<1, Binding, T, Swizzled> {
 public:
@@ -147,14 +139,6 @@ private:
   typedef ShPoint<1, Binding, T, Swizzled> ParentType;
 };
 
-/** A vertex or fragment position.
- * 
- * This is semantically a point, but is bound preferentially to the position
- * input and output of the rasterizer or to the vertex position when
- * used in vertex and fragment shaders.
- * 
- *
- */
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShPosition<2, Binding, T, Swizzled> : public ShPoint<2, Binding, T, Swizzled> {
 public:
@@ -204,14 +188,6 @@ private:
   typedef ShPoint<2, Binding, T, Swizzled> ParentType;
 };
 
-/** A vertex or fragment position.
- * 
- * This is semantically a point, but is bound preferentially to the position
- * input and output of the rasterizer or to the vertex position when
- * used in vertex and fragment shaders.
- * 
- *
- */
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShPosition<3, Binding, T, Swizzled> : public ShPoint<3, Binding, T, Swizzled> {
 public:
@@ -261,14 +237,6 @@ private:
   typedef ShPoint<3, Binding, T, Swizzled> ParentType;
 };
 
-/** A vertex or fragment position.
- * 
- * This is semantically a point, but is bound preferentially to the position
- * input and output of the rasterizer or to the vertex position when
- * used in vertex and fragment shaders.
- * 
- *
- */
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShPosition<4, Binding, T, Swizzled> : public ShPoint<4, Binding, T, Swizzled> {
 public:

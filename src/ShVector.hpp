@@ -90,13 +90,6 @@ private:
   typedef ShAttrib<N, Binding, T, Swizzled> ParentType;
 };
 
-/** A (geometric) n-vector.
- * 
- * By "vector" we mean a geometric vector, not just a tuple or an
- * array (unlike the unfortunate terminology in the standard
- * library).
- *
- */
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShVector<1, Binding, T, Swizzled> : public ShAttrib<1, Binding, T, Swizzled> {
 public:
@@ -145,13 +138,6 @@ private:
   typedef ShAttrib<1, Binding, T, Swizzled> ParentType;
 };
 
-/** A (geometric) n-vector.
- * 
- * By "vector" we mean a geometric vector, not just a tuple or an
- * array (unlike the unfortunate terminology in the standard
- * library).
- *
- */
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShVector<2, Binding, T, Swizzled> : public ShAttrib<2, Binding, T, Swizzled> {
 public:
@@ -201,13 +187,6 @@ private:
   typedef ShAttrib<2, Binding, T, Swizzled> ParentType;
 };
 
-/** A (geometric) n-vector.
- * 
- * By "vector" we mean a geometric vector, not just a tuple or an
- * array (unlike the unfortunate terminology in the standard
- * library).
- *
- */
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShVector<3, Binding, T, Swizzled> : public ShAttrib<3, Binding, T, Swizzled> {
 public:
@@ -257,13 +236,6 @@ private:
   typedef ShAttrib<3, Binding, T, Swizzled> ParentType;
 };
 
-/** A (geometric) n-vector.
- * 
- * By "vector" we mean a geometric vector, not just a tuple or an
- * array (unlike the unfortunate terminology in the standard
- * library).
- *
- */
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShVector<4, Binding, T, Swizzled> : public ShAttrib<4, Binding, T, Swizzled> {
 public:

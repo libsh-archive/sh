@@ -30,7 +30,7 @@ class Impl(semantic.Impl):
         common.indent()
         common.inprint("if (Binding == SH_CONST || uniform()) {")
         common.indent()
-        common.inprint("SH_DEBUG_ASSERT(!ShEnvironment::insideShader);")
+        common.inprint("SH_DEBUG_ASSERT(Binding == SH_CONST || !ShEnvironment::insideShader);")
         common.inprint("SH_DEBUG_ASSERT(" + other + ".hasValues());")
         common.inprint("T data[" + self.sizevar(size) + "];")
         common.inprint(other + ".getValues(data);")

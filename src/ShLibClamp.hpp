@@ -7,7 +7,8 @@
 namespace SH {
 
 
-/** \defgroup lib_clamping Clamping.
+/** \defgroup lib_clamping Clamping
+ * @ingroup library
  * Various operations that reduce information in values somehow,
  * e.g. clamping them to ranges, throwing away their sign, or
  * selecting one out of two tuples.

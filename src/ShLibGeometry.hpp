@@ -7,6 +7,7 @@
 namespace SH {
 
 /** \defgroup lib_geometry Geometric operations.
+ * @ingroup library
  * @todo distance, sqdistance, length, rlength, rsqlength, sqlength, perp,
  * perpdot, projnorm should be implemented too.   Different distance functions
  * also possible: L1, L2, Linf.

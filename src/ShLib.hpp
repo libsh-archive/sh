@@ -33,14 +33,12 @@
 #include "ShGeneric.hpp"
 #include "ShAttrib.hpp"
 
-/** \file ShLib.hpp
- * \brief The Sh library functions.
- * 
+/** \defgroup library Library Functions
  */
 
 #define SH_SHLIB_CONST_SCALAR_OP(operation) \
 template<typename T> \
-ShAttrib<1, SH_TEMP, T> operation(const ShGeneric<1, T>& left, T right) \
+ShGeneric<1, T> operation(const ShGeneric<1, T>& left, T right) \
 { \
   return operation(left, ShAttrib<1, SH_CONST, T>(right)); \
 } \

@@ -97,20 +97,6 @@ private:
   typedef ShGeneric<N, T> ParentType;
 };
 
-/** A generic attribute (or parameter) holding N values.
- * 
- * The reason we have the Swizzle template argument is so that
- * swizzled variables, which need to be copied (i.e. have an ASN
- * statement generated) when another variable is initialized through
- * them, may otherwise be simply placed into new variables (through
- * copy constructor eliding, as per paragraph 12.8.15 of the C++
- * standard), causing variables to share ShVariableNodes when they
- * shouldn't. By making swizzled variables separate types we enforce
- * calling a conversion constructor instead, which cannot be elided.
- * If this paragraph confuses you, and you're not modifying Sh
- * internals, you may safely ignore it.
- *
- */
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShAttrib<1, Binding, T, Swizzled> : public ShGeneric<1, T> {
 public:
@@ -159,20 +145,6 @@ private:
   typedef ShGeneric<1, T> ParentType;
 };
 
-/** A generic attribute (or parameter) holding N values.
- * 
- * The reason we have the Swizzle template argument is so that
- * swizzled variables, which need to be copied (i.e. have an ASN
- * statement generated) when another variable is initialized through
- * them, may otherwise be simply placed into new variables (through
- * copy constructor eliding, as per paragraph 12.8.15 of the C++
- * standard), causing variables to share ShVariableNodes when they
- * shouldn't. By making swizzled variables separate types we enforce
- * calling a conversion constructor instead, which cannot be elided.
- * If this paragraph confuses you, and you're not modifying Sh
- * internals, you may safely ignore it.
- *
- */
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShAttrib<2, Binding, T, Swizzled> : public ShGeneric<2, T> {
 public:
@@ -222,20 +194,6 @@ private:
   typedef ShGeneric<2, T> ParentType;
 };
 
-/** A generic attribute (or parameter) holding N values.
- * 
- * The reason we have the Swizzle template argument is so that
- * swizzled variables, which need to be copied (i.e. have an ASN
- * statement generated) when another variable is initialized through
- * them, may otherwise be simply placed into new variables (through
- * copy constructor eliding, as per paragraph 12.8.15 of the C++
- * standard), causing variables to share ShVariableNodes when they
- * shouldn't. By making swizzled variables separate types we enforce
- * calling a conversion constructor instead, which cannot be elided.
- * If this paragraph confuses you, and you're not modifying Sh
- * internals, you may safely ignore it.
- *
- */
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShAttrib<3, Binding, T, Swizzled> : public ShGeneric<3, T> {
 public:
@@ -285,20 +243,6 @@ private:
   typedef ShGeneric<3, T> ParentType;
 };
 
-/** A generic attribute (or parameter) holding N values.
- * 
- * The reason we have the Swizzle template argument is so that
- * swizzled variables, which need to be copied (i.e. have an ASN
- * statement generated) when another variable is initialized through
- * them, may otherwise be simply placed into new variables (through
- * copy constructor eliding, as per paragraph 12.8.15 of the C++
- * standard), causing variables to share ShVariableNodes when they
- * shouldn't. By making swizzled variables separate types we enforce
- * calling a conversion constructor instead, which cannot be elided.
- * If this paragraph confuses you, and you're not modifying Sh
- * internals, you may safely ignore it.
- *
- */
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShAttrib<4, Binding, T, Swizzled> : public ShGeneric<4, T> {
 public:

@@ -87,10 +87,6 @@ private:
   typedef ShVector<N, Binding, T, Swizzled> ParentType;
 };
 
-/** An n-normal.
- * 
- *
- */
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShNormal<1, Binding, T, Swizzled> : public ShVector<1, Binding, T, Swizzled> {
 public:
@@ -139,10 +135,6 @@ private:
   typedef ShVector<1, Binding, T, Swizzled> ParentType;
 };
 
-/** An n-normal.
- * 
- *
- */
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShNormal<2, Binding, T, Swizzled> : public ShVector<2, Binding, T, Swizzled> {
 public:
@@ -192,10 +184,6 @@ private:
   typedef ShVector<2, Binding, T, Swizzled> ParentType;
 };
 
-/** An n-normal.
- * 
- *
- */
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShNormal<3, Binding, T, Swizzled> : public ShVector<3, Binding, T, Swizzled> {
 public:
@@ -245,10 +233,6 @@ private:
   typedef ShVector<3, Binding, T, Swizzled> ParentType;
 };
 
-/** An n-normal.
- * 
- *
- */
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShNormal<4, Binding, T, Swizzled> : public ShVector<4, Binding, T, Swizzled> {
 public:

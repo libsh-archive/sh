@@ -7,7 +7,8 @@
 
 namespace SH {
 
-/** \defgroup lib_trig Trigonometric functions.
+/** \defgroup lib_trig Trigonometric functions
+ * @ingroup library
  * @todo tan, atan, atan2, hyperbolic functions, secant, cosecant, etc.
  * @{
  */

@@ -6,7 +6,8 @@
 
 namespace SH {
 
-/** \defgroup lib_misc Miscellaneous operations.
+/** \defgroup lib_misc Miscellaneous operations
+ * @ingroup library
  * Some special versions of type-cast operators are defined to be able to
  * deal with tuple size changes in various useful ways.
  * @{

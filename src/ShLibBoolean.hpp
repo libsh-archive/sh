@@ -7,7 +7,8 @@
 
 namespace SH {
 
-/** \defgroup lib_boolean Boolean and conditional functions.
+/** \defgroup lib_boolean Boolean and conditional functions
+ * @ingroup library
  * @{
  */
 

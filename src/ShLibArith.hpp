@@ -7,6 +7,7 @@
 namespace SH {
 
 /** \defgroup lib_arith Arithmetic operations
+ * @ingroup library
  * @{
  */
 

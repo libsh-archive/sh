@@ -87,10 +87,6 @@ private:
   typedef ShAttrib<N, Binding, T, Swizzled> ParentType;
 };
 
-/** An n-point.
- * 
- *
- */
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShPoint<1, Binding, T, Swizzled> : public ShAttrib<1, Binding, T, Swizzled> {
 public:
@@ -139,10 +135,6 @@ private:
   typedef ShAttrib<1, Binding, T, Swizzled> ParentType;
 };
 
-/** An n-point.
- * 
- *
- */
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShPoint<2, Binding, T, Swizzled> : public ShAttrib<2, Binding, T, Swizzled> {
 public:
@@ -192,10 +184,6 @@ private:
   typedef ShAttrib<2, Binding, T, Swizzled> ParentType;
 };
 
-/** An n-point.
- * 
- *
- */
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShPoint<3, Binding, T, Swizzled> : public ShAttrib<3, Binding, T, Swizzled> {
 public:
@@ -245,10 +233,6 @@ private:
   typedef ShAttrib<3, Binding, T, Swizzled> ParentType;
 };
 
-/** An n-point.
- * 
- *
- */
 template<ShBindingType Binding, typename T, bool Swizzled>
 class ShPoint<4, Binding, T, Swizzled> : public ShAttrib<4, Binding, T, Swizzled> {
 public:

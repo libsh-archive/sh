@@ -8,6 +8,7 @@
 namespace SH {
 
 /** \defgroup lib_matrix Matrix operations
+ * @ingroup library
  * @todo Move all the functions from ShMatrix.hpp here.
  * @{
  */

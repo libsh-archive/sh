@@ -30,7 +30,7 @@ class Class:
         self.close()
 
     def declare_sized(self, size):
-        self.maincomment()
+        #self.maincomment()
         self.open_sized(size)
         self.constructors(size)
         self.constructors_sized(size)

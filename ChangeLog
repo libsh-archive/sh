@@ -1,3 +1,11 @@
+2004-04-13  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/scripts/semantic.py (Class.declare_sized): Don't include
+	doxygen comments for specializations.
+
+	* src/ShBaseTexture.hpp: There's no need for ShBaseTexture*<T> to
+	be refcountable.
+
 2004-04-12  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* Once more, a gigantic patch. ShLib has been split up into

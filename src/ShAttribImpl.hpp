@@ -52,7 +52,7 @@ ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShGeneric<N, T>& other)
   : ShGeneric<N, T>(new ShVariableNode(Binding, N))
 {
   if (Binding == SH_CONST || uniform()) {
-    SH_DEBUG_ASSERT(!ShEnvironment::insideShader);
+    SH_DEBUG_ASSERT(Binding == SH_CONST || !ShEnvironment::insideShader);
     SH_DEBUG_ASSERT(other.hasValues());
     T data[N];
     other.getValues(data);
@@ -68,7 +68,7 @@ ShAttrib<N, Binding, T, Swizzled>::ShAttrib(const ShAttrib<N, Binding, T, Swizzl
   : ShGeneric<N, T>(new ShVariableNode(Binding, N))
 {
   if (Binding == SH_CONST || uniform()) {
-    SH_DEBUG_ASSERT(!ShEnvironment::insideShader);
+    SH_DEBUG_ASSERT(Binding == SH_CONST || !ShEnvironment::insideShader);
     SH_DEBUG_ASSERT(other.hasValues());
     T data[N];
     other.getValues(data);
@@ -245,7 +245,7 @@ ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShGeneric<1, T>& other)
   : ShGeneric<1, T>(new ShVariableNode(Binding, 1))
 {
   if (Binding == SH_CONST || uniform()) {
-    SH_DEBUG_ASSERT(!ShEnvironment::insideShader);
+    SH_DEBUG_ASSERT(Binding == SH_CONST || !ShEnvironment::insideShader);
     SH_DEBUG_ASSERT(other.hasValues());
     T data[1];
     other.getValues(data);
@@ -261,7 +261,7 @@ ShAttrib<1, Binding, T, Swizzled>::ShAttrib(const ShAttrib<1, Binding, T, Swizzl
   : ShGeneric<1, T>(new ShVariableNode(Binding, 1))
 {
   if (Binding == SH_CONST || uniform()) {
-    SH_DEBUG_ASSERT(!ShEnvironment::insideShader);
+    SH_DEBUG_ASSERT(Binding == SH_CONST || !ShEnvironment::insideShader);
     SH_DEBUG_ASSERT(other.hasValues());
     T data[1];
     other.getValues(data);
@@ -449,7 +449,7 @@ ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShGeneric<2, T>& other)
   : ShGeneric<2, T>(new ShVariableNode(Binding, 2))
 {
   if (Binding == SH_CONST || uniform()) {
-    SH_DEBUG_ASSERT(!ShEnvironment::insideShader);
+    SH_DEBUG_ASSERT(Binding == SH_CONST || !ShEnvironment::insideShader);
     SH_DEBUG_ASSERT(other.hasValues());
     T data[2];
     other.getValues(data);
@@ -465,7 +465,7 @@ ShAttrib<2, Binding, T, Swizzled>::ShAttrib(const ShAttrib<2, Binding, T, Swizzl
   : ShGeneric<2, T>(new ShVariableNode(Binding, 2))
 {
   if (Binding == SH_CONST || uniform()) {
-    SH_DEBUG_ASSERT(!ShEnvironment::insideShader);
+    SH_DEBUG_ASSERT(Binding == SH_CONST || !ShEnvironment::insideShader);
     SH_DEBUG_ASSERT(other.hasValues());
     T data[2];
     other.getValues(data);
@@ -670,7 +670,7 @@ ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShGeneric<3, T>& other)
   : ShGeneric<3, T>(new ShVariableNode(Binding, 3))
 {
   if (Binding == SH_CONST || uniform()) {
-    SH_DEBUG_ASSERT(!ShEnvironment::insideShader);
+    SH_DEBUG_ASSERT(Binding == SH_CONST || !ShEnvironment::insideShader);
     SH_DEBUG_ASSERT(other.hasValues());
     T data[3];
     other.getValues(data);
@@ -686,7 +686,7 @@ ShAttrib<3, Binding, T, Swizzled>::ShAttrib(const ShAttrib<3, Binding, T, Swizzl
   : ShGeneric<3, T>(new ShVariableNode(Binding, 3))
 {
   if (Binding == SH_CONST || uniform()) {
-    SH_DEBUG_ASSERT(!ShEnvironment::insideShader);
+    SH_DEBUG_ASSERT(Binding == SH_CONST || !ShEnvironment::insideShader);
     SH_DEBUG_ASSERT(other.hasValues());
     T data[3];
     other.getValues(data);
@@ -896,7 +896,7 @@ ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShGeneric<4, T>& other)
   : ShGeneric<4, T>(new ShVariableNode(Binding, 4))
 {
   if (Binding == SH_CONST || uniform()) {
-    SH_DEBUG_ASSERT(!ShEnvironment::insideShader);
+    SH_DEBUG_ASSERT(Binding == SH_CONST || !ShEnvironment::insideShader);
     SH_DEBUG_ASSERT(other.hasValues());
     T data[4];
     other.getValues(data);
@@ -912,7 +912,7 @@ ShAttrib<4, Binding, T, Swizzled>::ShAttrib(const ShAttrib<4, Binding, T, Swizzl
   : ShGeneric<4, T>(new ShVariableNode(Binding, 4))
 {
   if (Binding == SH_CONST || uniform()) {
-    SH_DEBUG_ASSERT(!ShEnvironment::insideShader);
+    SH_DEBUG_ASSERT(Binding == SH_CONST || !ShEnvironment::insideShader);
     SH_DEBUG_ASSERT(other.hasValues());
     T data[4];
     other.getValues(data);

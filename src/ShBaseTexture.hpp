@@ -12,7 +12,7 @@ namespace SH {
 /** Base type for 1D Textures.
  */
 template<typename T>
-class ShBaseTexture1D : public ShRefCountable {
+class ShBaseTexture1D {
 public:
   ShBaseTexture1D(const ShTextureTraits& traits);
   ShBaseTexture1D(int width, const ShTextureTraits& traits);
@@ -36,7 +36,7 @@ protected:
 /** Base type for 2D Textures.
  */
 template<typename T>
-class ShBaseTexture2D : public ShRefCountable {
+class ShBaseTexture2D {
 public:
   ShBaseTexture2D(const ShTextureTraits& traits);
   ShBaseTexture2D(int width, int height, const ShTextureTraits& traits);
@@ -60,7 +60,7 @@ protected:
 /** Base type for Rectangular Textures.
  */
 template<typename T>
-class ShBaseTextureRect : public ShRefCountable {
+class ShBaseTextureRect {
 public:
   ShBaseTextureRect(const ShTextureTraits& traits);
   ShBaseTextureRect(int width, int height, const ShTextureTraits& traits);
@@ -84,7 +84,7 @@ protected:
 /** Base type for 3D Textures.
  */
 template<typename T>
-class ShBaseTexture3D : public ShRefCountable {
+class ShBaseTexture3D {
 public:
   ShBaseTexture3D(const ShTextureTraits& traits);
   ShBaseTexture3D(int width, int height, int depth, const ShTextureTraits& traits);
@@ -108,7 +108,7 @@ protected:
 /** Base type for Cube Textures.
  */
 template<typename T>
-class ShBaseTextureCube : public ShRefCountable {
+class ShBaseTextureCube {
 public:
   ShBaseTextureCube(const ShTextureTraits& traits);
   ShBaseTextureCube(int width, int height, const ShTextureTraits& traits);
