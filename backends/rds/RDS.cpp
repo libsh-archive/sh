@@ -460,10 +460,6 @@ void RDS::partition(DAGNode::DAGNode *v)
 bool RDS::valid(DAGNode::DAGNode* v) {
   v->set_resources();
 
-#ifdef RDS_DEBUG
-  v->print_resources();
-#endif
-
   if (m_rdsh) {
     return  v->halftemps() <= m_limits->halftemps() &&
 			v->temps() <= m_limits->temps() &&
@@ -473,21 +469,12 @@ bool RDS::valid(DAGNode::DAGNode* v) {
 			v->instrs() <= m_limits->instrs();
   }
 
-
- if(	v->halftemps() <= (m_limits->halftemps() - m_halftemps_used) &&
+ return v->halftemps() <= (m_limits->halftemps() - m_halftemps_used) &&
 			v->temps() <= (m_limits->temps() - m_temps_used) &&
 			v->attribs() <= (m_limits->attribs() - m_attribs_used) &&
 			v->params() <= (m_limits->params()  - m_params_used) &&
 			v->texs() <= (m_limits->texs() - m_texs_used) && 
-			v->instrs() <= (m_limits->instrs() - m_ops_used) )
- {
-#ifdef RDS_DEBUG
-    SH_DEBUG_PRINT ("Valid!!!\n");
-#endif
-    return true;
-  }
-
- return false;
+			v->instrs() <= (m_limits->instrs() - m_ops_used);
 }
 
 // true if pass starting at v consumes less than 1/2 the max resources

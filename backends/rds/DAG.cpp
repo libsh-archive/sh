@@ -27,18 +27,6 @@ DAGNode::DAGNode(ShStatement *stmt)
 	init_resources();
 }
 
-void DAGNode::init_resources(){
-	m_instrs = 0;		
-	m_params = 0;		
-	m_attribs = 0;		
-	m_temps = 0;		
-	m_halftemps = 0;	
-	m_texs = 0;			
-	m_consts = 0;		
-	m_outputs = 0;
-	m_channels = 0;
-}
-
 // adds a node to successors of this one
 void DAGNode::add_kid(DAGNode *kid)
 {
@@ -54,6 +42,19 @@ void DAGNode::unvisitall()
 	for (DAGNodeVector::iterator I = successors.begin(); I != successors.end(); ++I) {
 		(*I)->unvisitall();
 	}
+}
+
+// reset all resource consumption fields
+void DAGNode::init_resources(){
+	m_instrs = 0;		
+	m_params = 0;		
+	m_attribs = 0;		
+	m_temps = 0;		
+	m_halftemps = 0;	
+	m_texs = 0;			
+	m_consts = 0;		
+	m_outputs = 0;
+	m_channels = 0;
 }
 
 ShBasicBlock::ShStmtList DAGNode::dag_to_stmt(ShBasicBlock::ShStmtList stmts, bool cut)
@@ -341,5 +342,3 @@ DAG::DAG(ShBasicBlockPtr block)
 void DAG::print(int indent) {
 	m_root->print(indent);
 }
-
-
