@@ -84,7 +84,7 @@ incinc_HEADERS = ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp \
                    ShUtility.hpp \
 		   ShVariable.hpp ShVariableNode.hpp \
 		   ShGeneric.hpp ShGenericImpl.hpp \
-		   sh.hpp \
+		   sh.hpp shimpl.hpp \
                    ShMatrix.hpp ShMatrixImpl.hpp \
 		   ShArray.hpp ShTable.hpp ShTexture.hpp \
 		   ShWrap.hpp \
