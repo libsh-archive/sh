@@ -1,5 +1,7 @@
 2005-03-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> osx branch
 
+	* win32/Sh.vcproj: Added another missing file.
+
 	* backends/gl/GlslEmit.cpp (emit_discard): Remove an incorrect
 	comment.
 
