@@ -214,41 +214,58 @@ ShProgram namedCombine(const ShProgram &a, const ShProgram &b) {
 
 ShProgram namedConnect(const ShProgram &a, const ShProgram &b, bool keepExtra) {
   // positions of a pair of matched a output and b input 
-  typedef std::pair<int, int> MatchedChannels; 
-  typedef std::vector<MatchedChannels> MatchedChannelVec;
+  typedef std::map<int, int> MatchedChannelMap; 
 
   std::vector<bool> aMatch(a->outputs.size(), false);
   std::vector<bool> bMatch(b->inputs.size(), false);
-  MatchedChannelVec mcv;
+  MatchedChannelMap mcm;
   int i, j;
+  ShProgramNode::VarList::const_iterator I, J;
 
   i = 0;
-  for(ShProgramNode::VarList::const_iterator I = a->outputs.begin();
-      I != a->outputs.end(); ++I, ++i) {
+  for(I = a->outputs.begin(); I != a->outputs.end(); ++I, ++i) {
     j = 0;
-    for(ShProgramNode::VarList::const_iterator J = b->inputs.begin();
-      J != b->inputs.end(); ++J, ++j) {
-      if(bMatch[j] || (*I)->name() != (*J)->name() || (*I)->size() != (*J)->size()) continue; 
-      mcv.push_back(MatchedChannels(i,j));
+    for(J = b->inputs.begin(); J != b->inputs.end(); ++J, ++j) {
+      if(bMatch[j]) continue;
+      if((*I)->name() != (*J)->name()) continue;
+      if((*I)->size() != (*J)->size()) {
+        SH_DEBUG_WARN("Named connect matched channel name " << (*I)->name() 
+            << " but output size " << (*I)->size() << " != " << " input size " << (*J)->size() );
+      }
+      mcm[i] = j;
       aMatch[i] = true;
       bMatch[j] = true;
     }
   }
 
-  std::vector<int> aSwiz, bSwiz;
-  for(i = 0; i < mcv.size(); ++i) {
-    aSwiz.push_back(mcv[i].first);
-    bSwiz.push_back(mcv[i].second);
+  std::vector<int> swiz(b->inputs.size(), 0); 
+  for(MatchedChannelMap::iterator mcmit = mcm.begin(); mcmit != mcm.end(); ++mcmit) {
+    swiz[mcmit->second] = mcmit->first;
   }
-  if( keepExtra ) {
-    for(i = 0; i < aMatch.size(); ++i) {
-      if( !aMatch[i] ) aSwiz.push_back(i);
+
+  // swizzle unmatched inputs and make a pass them through properly
+  ShProgram passer = SH_BEGIN_PROGRAM() {} SH_END;
+  int newInputIdx = a->outputs.size(); // index of next new input added to a
+  for(j = 0, J= b->inputs.begin(); J != b->inputs.end(); ++J, ++j) {
+    if( !bMatch[j] ) {
+      ShProgram passOne = SH_BEGIN_PROGRAM() {
+        ShVariable var(new ShVariableNode(SH_INOUT, (*J)->size(), 
+              (*J)->specialType()));
+        var.name((*J)->name());
+      } SH_END;
+      passer = passer & passOne; 
+      swiz[j] = newInputIdx++;
     }
   }
-  for(i = 0; i < bMatch.size(); ++i) {
-    if( !bMatch[i] ) bSwiz.push_back(i);
+  ShProgram aPass = combine(a, passer);
+
+  if( keepExtra ) {
+    for(i = 0; i < aMatch.size(); ++i) {
+      if( !aMatch[i] ) swiz.push_back(i);
+    }
   }
-  return b << shSwizzle(bSwiz) << ( shSwizzle(aSwiz) << a );
+   
+  return b << ( shSwizzle(swiz) << aPass ); 
 }
 
 ShProgram operator<<(const ShProgram& a, const ShProgram& b)

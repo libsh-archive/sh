@@ -31,6 +31,8 @@
 #include "ShWorley.hpp"
 #include "ShNoise.hpp"
 #include "ShKernelLib.hpp"
+#include "ShMesh.hpp"
+#include "ShObjMesh.hpp"
 
 /** \namespace ShUtil
  * \brief The main ShUtil namespace.

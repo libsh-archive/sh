@@ -120,20 +120,12 @@ ShProgram ShKernelLib::shVsh(const ShMatrix<N, N, Kind, T> &mv, const ShMatrix<N
     ShOutputVector3f SH_NAMEDECL(lv, "lightVec");    // OUT(5): light vector (VCS)
     ShOutputPosition4f SH_NAMEDECL(pd, "posh");      // OUT(6): position (HDCS)
 
-
-    ShPoint3f pvTemp = (mv | pm)(0,1,2); 
-    ShNormal3f nvTemp = normalize(mv | nm); 
-    ShVector3f vvTemp = normalize(-pvTemp);
-    ShVector3f lvTemp = normalize(lpv - pvTemp); 
-    ShVector3f hvTemp = normalize(vvTemp + lvTemp); 
-
     uo = u;
-    pv = pvTemp;
-    nv = nvTemp;
-    vv = vvTemp;
-    hv = hvTemp;
-    lv = lvTemp;
-
+    pv = (mv | pm)(0,1,2); 
+    nv = normalize(mv | nm); 
+    vv = normalize(-pv);
+    lv = normalize(lpv - pv); 
+    hv = normalize(vv + lv); 
 
     pd = mvp | pm;
   } SH_END;

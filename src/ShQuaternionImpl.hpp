@@ -107,8 +107,13 @@ ShQuaternion<K, T>::dot(const ShQuaternion<K2, T>& q) const
 template<int K, typename T>
 ShQuaternion<SH_TEMP, T> ShQuaternion<K, T>::conjugate() const 
 {
+  /*  TODO after bug fix, revert to old code 
   ShVector4f conjData = -m_data;
   conjData(0) = -conjData(0);
+ */
+  ShVector4f conjData;
+  conjData(0) = m_data(0);
+  conjData(1,2,3) = -m_data(1,2,3);
   conjData.setUnit(m_data.isUnit());
 
   return ShQuaternion(conjData);

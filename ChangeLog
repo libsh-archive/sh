@@ -1,3 +1,17 @@
+2004-02-26  Bryan Chan <b8chan@uwaterloo.ca>
+	* util/ShMesh*, util/ShObjMesh*:
+	Added half-edge mesh structure and cleaned up OBJ file reader a bit
+	(still work in progress, interface will probably change)
+
+	* src/ShAlgebra.cpp (namedConnect):
+	Properly handle case where there are extra inputs & extra outputs.
+
+	* util/ShKernelLibImpl.hpp (shVsh):
+	Updated since outputs can be used as temps
+
+	* src/ShVariable.cpp (operator<<):
+	Fixed output of variables with m_neg set.
+	
 2004-02-23  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* util/ShKernelLibImpl.hpp: Clamp specular components in

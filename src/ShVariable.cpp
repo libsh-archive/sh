@@ -138,7 +138,7 @@ ShVariableNode::ValueType ShVariable::getValue(int i) const
 void ShVariable::setValues(ShVariableNode::ValueType values[])
 {
   for (int i = 0; i < size(); i++) {
-    m_node->setValue(m_swizzle[i], values[i]);
+    m_node->setValue(m_swizzle[i], values[i]); 
   }
 }
 
@@ -183,11 +183,13 @@ std::ostream& operator<<(std::ostream& _out, const ShVariable& shVariableToPrint
   _out<<'[';
 
   if(shVariableToPrint.size() > 0)
-    _out<<shVariableToPrint.m_node->getValue(shVariableToPrint.swizzle()[0]);
+    _out << (( shVariableToPrint.neg() ? -1.0 : 1.0 ) *  
+      shVariableToPrint.m_node->getValue(shVariableToPrint.swizzle()[0]) );
 
   for (int k = 1; k < shVariableToPrint.size(); k++) {
     _out<<", ";
-    _out<<shVariableToPrint.m_node->getValue(shVariableToPrint.swizzle()[k]);
+    _out << (( shVariableToPrint.neg() ? -1.0 : 1.0 ) *  
+      shVariableToPrint.m_node->getValue(shVariableToPrint.swizzle()[k]) );
    }
 
   _out<<']';
