@@ -7,4 +7,4 @@ shbackend_LTLIBRARIES = libshrds.la
 
 libshrds_la_LDFLAGS = -L$(prefix)/lib -module
 libshrds_la_LIBADD = $(top_srcdir)/src/libsh.la 
-libshrds_la_SOURCES = PDomTree.cpp Partition.cpp RDS.cpp
+libshrds_la_SOURCES = PDomTree.cpp Partition.cpp RDS.cpp RDSBackend.cpp
