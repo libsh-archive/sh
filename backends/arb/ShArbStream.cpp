@@ -175,7 +175,7 @@ void ArbBackend::execute(const ShProgram& program,
     int i = 0;
     for (ShStream::NodeList::iterator I = dest.begin(); I != dest.end(); ++I, ++i) {
       ShStream s(*I);
-      execute(shPermute(i) << program, s);
+      execute(shSwizzle(i) << program, s);
     }
     return;
   }
