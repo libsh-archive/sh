@@ -582,7 +582,7 @@ namespace ShCPU {
     m_bec->emit(node);
     }
   
-  CPUBackendCode::CPUBackendCode(const SH::ShProgram& program) :
+  CPUBackendCode::CPUBackendCode(const SH::ShProgramNodeCPtr& program) :
     m_program(program),
     m_handle(NULL),
     m_func(NULL),
@@ -2164,7 +2164,7 @@ namespace ShCPU {
     }
 
   SH::ShBackendCodePtr CPUBackend::generateCode(const std::string& target,
-						const SH::ShProgram& program)
+						const SH::ShProgramNodeCPtr& program)
     {
     SH_DEBUG_PRINT(__FUNCTION__);
     CPUBackendCodePtr backendcode = new CPUBackendCode(program);
@@ -2172,7 +2172,7 @@ namespace ShCPU {
     return backendcode;
     }
 
-  void CPUBackend::execute(const SH::ShProgram& program, SH::ShStream& dest)
+  void CPUBackend::execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest)
     {
     SH_DEBUG_PRINT(__FUNCTION__);
 

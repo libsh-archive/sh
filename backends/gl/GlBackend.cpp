@@ -62,14 +62,14 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* textures,
 
 SH::ShBackendCodePtr
 GlBackend::generateCode(const std::string& target,
-                        const SH::ShProgram& shader)
+                        const SH::ShProgramNodeCPtr& shader)
 {
   return m_contexts[m_curContext].code->generate(target, shader,
                                                  m_contexts[m_curContext].textures);
 }
 
 void
-GlBackend::execute(const SH::ShProgram& program,
+GlBackend::execute(const SH::ShProgramNodeCPtr& program,
                    SH::ShStream& dest)
 {
   // TODO: error otherwise.

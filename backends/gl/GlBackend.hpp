@@ -43,23 +43,23 @@ struct TextureStrategy {
 
 struct StreamStrategy {
   virtual StreamStrategy* create(int context) = 0;
-  virtual void execute(const SH::ShProgram& program, SH::ShStream& dest) = 0;
+  virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest) = 0;
 };
 
 struct CodeStrategy {
   virtual CodeStrategy* create(int context) = 0;
   virtual SH::ShBackendCodePtr generate(const std::string& target,
-                                        const SH::ShProgram& shader,
+                                        const SH::ShProgramNodeCPtr& shader,
                                         TextureStrategy* textures) = 0;
 };
 
 class GlBackend : public SH::ShBackend {
 public:
   virtual SH::ShBackendCodePtr generateCode(const std::string& target,
-                                            const SH::ShProgram& shader);
+                                            const SH::ShProgramNodeCPtr& shader);
 
   // execute a stream program, if supported
-  virtual void execute(const SH::ShProgram& program, SH::ShStream& dest);
+  virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
 
   virtual int newContext();
   virtual int context() const;

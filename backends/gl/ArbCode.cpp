@@ -93,20 +93,20 @@ ArbBindingSpecs arbFragmentOutputBindingSpecs[] = {
   {SH_ARB_REG_NONE, 0, SH_ATTRIB}
 };
 
-ArbBindingSpecs* arbBindingSpecs(bool output, const std::string& target)
+ArbBindingSpecs* arbBindingSpecs(bool output, const std::string& unit)
 {
-  if (target == "gpu:vertex")
+  if (unit == "vertex")
     return output ? arbVertexOutputBindingSpecs : arbVertexAttribBindingSpecs;
-  if (target == "gpu:fragment")
+  if (unit == "fragment")
     return output ? arbFragmentOutputBindingSpecs : arbFragmentAttribBindingSpecs;
   return 0;
 }
 
 using namespace SH;
 
-ArbCode::ArbCode(const ShProgram& shader, const std::string& target,
+ArbCode::ArbCode(const ShProgramNodeCPtr& shader, const std::string& unit,
                  TextureStrategy* textures)
-  : m_textures(textures), m_shader(shader), m_originalShader(m_shader), m_target(target),
+  : m_textures(textures), m_shader(0), m_originalShader(shader), m_unit(unit),
     m_numTemps(0), m_numInputs(0), m_numOutputs(0), m_numParams(0), m_numConsts(0),
     m_numTextures(0), m_programId(0)
 {
@@ -119,9 +119,8 @@ ArbCode::~ArbCode()
 void ArbCode::generate()
 {
   // Transform code to be ARB_fragment_program compatible
-  m_shader = cloneProgram(m_originalShader);
-  ShEnvironment::insideShader = true;
-  ShEnvironment::shader = m_shader;
+  m_shader = m_originalShader->clone();
+  ShContext::current()->enter(m_shader);
   ShTransformer transform(m_shader);
 
   transform.convertInputOutput(); 
@@ -133,17 +132,17 @@ void ArbCode::generate()
     optimizer.optimize(ShContext::current()->optimization());
     m_shader->collectVariables();
   } else {
-    m_shader = m_originalShader;
-    ShEnvironment::shader = m_shader;
+    m_shader = shref_const_cast<ShProgramNode>(m_originalShader);
+    ShContext::current()->exit();
+    ShContext::current()->enter(m_shader);
   }
 
   m_shader->ctrlGraph->entry()->clearMarked();
   genNode(m_shader->ctrlGraph->entry());
   m_shader->ctrlGraph->entry()->clearMarked();
   allocRegs();
-
-  ShEnvironment::insideShader = false;
-  ShEnvironment::shader = 0;
+  
+  ShContext::current()->exit();
 }
 
 bool ArbCode::allocateRegister(const ShVariableNodePtr& var)
@@ -181,12 +180,12 @@ void ArbCode::upload()
     SH_GL_CHECK_ERROR(shGlGenProgramsARB(1, &m_programId));
   }
 
-  SH_GL_CHECK_ERROR(shGlBindProgramARB(arbTarget(m_target), m_programId));
+  SH_GL_CHECK_ERROR(shGlBindProgramARB(arbTarget(m_unit), m_programId));
   
   std::ostringstream out;
   print(out);
   std::string text = out.str();
-  shGlProgramStringARB(arbTarget(m_target), GL_PROGRAM_FORMAT_ASCII_ARB,
+  shGlProgramStringARB(arbTarget(m_unit), GL_PROGRAM_FORMAT_ASCII_ARB,
                        (GLsizei)text.size(), text.c_str());
   int error = glGetError();
   if (error == GL_INVALID_OPERATION) {
@@ -202,8 +201,8 @@ void ArbCode::upload()
     }
   }
   if (error != GL_NO_ERROR) {
-    SH_DEBUG_ERROR("Error uploading ARB program (" << m_target << "): " << error);
-    SH_DEBUG_ERROR("shGlProgramStringARB(" << arbTarget(m_target)
+    SH_DEBUG_ERROR("Error uploading ARB program (" << m_unit << "): " << error);
+    SH_DEBUG_ERROR("shGlProgramStringARB(" << arbTarget(m_unit)
                    << ", GL_PROGRAM_FORMAT_ASCII_ARB, " << (GLsizei)text.size() << 
                    ", <program text>);");
   }
@@ -215,9 +214,11 @@ void ArbCode::bind()
     upload();
   }
   
-  SH_GL_CHECK_ERROR(shGlBindProgramARB(arbTarget(m_target), m_programId));
+  SH_GL_CHECK_ERROR(shGlBindProgramARB(arbTarget(m_unit), m_programId));
   
-  SH::ShEnvironment::boundShaders()[m_target] = m_originalShader; 
+
+  ShContext::current()->set_binding(std::string("arb:") + m_unit,
+                                    shref_const_cast<ShProgramNode>(m_originalShader));
 
   // Initialize constants
   for (RegMap::const_iterator I = m_registers.begin(); I != m_registers.end(); ++I) {
@@ -272,10 +273,10 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
   if (reg.type != SH_ARB_REG_PARAM) return;
   switch(reg.binding) {
   case SH_ARB_REG_PARAMLOC:
-    SH_GL_CHECK_ERROR(shGlProgramLocalParameter4fvARB(arbTarget(m_target), reg.bindingIndex, values));
+    SH_GL_CHECK_ERROR(shGlProgramLocalParameter4fvARB(arbTarget(m_unit), reg.bindingIndex, values));
     break;
   case SH_ARB_REG_PARAMENV:
-    SH_GL_CHECK_ERROR(shGlProgramEnvParameter4fvARB(arbTarget(m_target), reg.bindingIndex, values));
+    SH_GL_CHECK_ERROR(shGlProgramEnvParameter4fvARB(arbTarget(m_unit), reg.bindingIndex, values));
     break;
   default:
     return;
@@ -375,8 +376,8 @@ std::ostream& ArbCode::print(std::ostream& out)
   LineNumberer endl;
 
   // Print version header
-  if (m_target == "gpu:vertex") out << "!!ARBvp1.0" << endl;
-  if (m_target == "gpu:fragment") out << "!!ARBfp1.0" << endl;
+  if (m_unit == "vertex") out << "!!ARBvp1.0" << endl;
+  if (m_unit == "fragment") out << "!!ARBfp1.0" << endl;
 
   // Print register declarations
   
@@ -501,7 +502,7 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       }
       break;
     case SH_OP_COS:
-      if( m_target == "gpu:vertex" ) 
+      if( m_unit == "vertex" ) 
       {
         genTrigInst(stmt.dest, stmt.src[0], SH_OP_COS);
       }
@@ -576,7 +577,7 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       }
       break;
     case SH_OP_LRP:
-      if(m_target == "gpu:vertex") {
+      if(m_unit == "vertex") {
         ShVariable t(new ShVariableNode(SH_TEMP, stmt.src[1].size()));
         // lerp(f,a,b)=f*a + (1-f)*b = f*(a-b) + b 
         m_instructions.push_back(ArbInst(SH_ARB_ADD, t, stmt.src[1], -stmt.src[2]));
@@ -660,7 +661,7 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       }
       break;
     case SH_OP_SIN:
-      if( m_target == "gpu:vertex" ) 
+      if( m_unit == "vertex" ) 
       {
         genTrigInst(stmt.dest, stmt.src[0], SH_OP_SIN);
       }
@@ -712,7 +713,7 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
       break;
 
     case SH_OP_TAN:
-      if (m_target == "gpu:vertex") {
+      if (m_unit == "vertex") {
         // TODO: fix for vertex program (use genTrigInst)
       } else {
         ShVariable tmp(new ShVariableNode(SH_TEMP, stmt.src[0].size()));
@@ -972,7 +973,7 @@ void ArbCode::genDot( const ShVariable& dest,
 
 void ArbCode::allocRegs()
 {
-  ArbLimits limits(m_target);
+  ArbLimits limits(m_unit);
   
   allocInputs(limits);
   
@@ -1018,9 +1019,9 @@ void ArbCode::bindSpecial(const ShProgramNode::VarList::const_iterator& begin,
 void ArbCode::allocInputs(const ArbLimits& limits)
 {
   // First, try to assign some "special" output register bindings
-  for (int i = 0; arbBindingSpecs(false, m_target)[i].binding != SH_ARB_REG_NONE; i++) {
+  for (int i = 0; arbBindingSpecs(false, m_unit)[i].binding != SH_ARB_REG_NONE; i++) {
     bindSpecial(m_shader->inputs.begin(), m_shader->inputs.end(),
-                arbBindingSpecs(false, m_target)[i], m_inputBindings,
+                arbBindingSpecs(false, m_unit)[i], m_inputBindings,
                 SH_ARB_REG_ATTRIB, m_numInputs);
   }
   
@@ -1031,8 +1032,8 @@ void ArbCode::allocInputs(const ArbLimits& limits)
     m_registers[node] = ArbReg(SH_ARB_REG_ATTRIB, m_numInputs++, node->name());
 
     // Binding
-    for (int i = 0; arbBindingSpecs(false, m_target)[i].binding != SH_ARB_REG_NONE; i++) {
-      const ArbBindingSpecs& specs = arbBindingSpecs(false, m_target)[i];
+    for (int i = 0; arbBindingSpecs(false, m_unit)[i].binding != SH_ARB_REG_NONE; i++) {
+      const ArbBindingSpecs& specs = arbBindingSpecs(false, m_unit)[i];
 
       if (specs.allowGeneric && m_inputBindings[i] < specs.maxBindings) {
         m_registers[node].binding = specs.binding;
@@ -1047,9 +1048,9 @@ void ArbCode::allocInputs(const ArbLimits& limits)
 void ArbCode::allocOutputs(const ArbLimits& limits)
 {
   // First, try to assign some "special" output register bindings
-  for (int i = 0; arbBindingSpecs(true, m_target)[i].binding != SH_ARB_REG_NONE; i++) {
+  for (int i = 0; arbBindingSpecs(true, m_unit)[i].binding != SH_ARB_REG_NONE; i++) {
     bindSpecial(m_shader->outputs.begin(), m_shader->outputs.end(),
-                arbBindingSpecs(true, m_target)[i], m_outputBindings,
+                arbBindingSpecs(true, m_unit)[i], m_outputBindings,
                 SH_ARB_REG_OUTPUT, m_numOutputs);
   }
   
@@ -1060,8 +1061,8 @@ void ArbCode::allocOutputs(const ArbLimits& limits)
     m_registers[node] = ArbReg(SH_ARB_REG_OUTPUT, m_numOutputs++, node->name());
 
     // Binding
-    for (int i = 0; arbBindingSpecs(true, m_target)[i].binding != SH_ARB_REG_NONE; i++) {
-      const ArbBindingSpecs& specs = arbBindingSpecs(true, m_target)[i];
+    for (int i = 0; arbBindingSpecs(true, m_unit)[i].binding != SH_ARB_REG_NONE; i++) {
+      const ArbBindingSpecs& specs = arbBindingSpecs(true, m_unit)[i];
 
       if (specs.allowGeneric && m_outputBindings[i] < specs.maxBindings) {
         m_registers[node].binding = specs.binding;

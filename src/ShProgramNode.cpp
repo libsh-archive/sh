@@ -29,6 +29,7 @@
 #include <algorithm>
 #include "ShBackend.hpp"
 #include "ShEnvironment.hpp"
+#include "ShContext.hpp"
 #include "ShDebug.hpp"
 #include "ShTextureNode.hpp"
 #include "ShCtrlGraph.hpp"
@@ -57,8 +58,7 @@ void ShProgramNode::compile(const std::string& target, const ShPointer<ShBackend
 {
   if (!backend) return;
 
-  ShEnvironment::program = this;
-  ShEnvironment::insideShader = true;
+  ShContext::current()->enter(this);
 
   collectVariables();
 
@@ -66,7 +66,7 @@ void ShProgramNode::compile(const std::string& target, const ShPointer<ShBackend
 #ifdef SH_DEBUG
   // code->print(std::cerr);
 #endif
-  ShEnvironment::insideShader = false;
+  ShContext::current()->exit();
   m_code[std::make_pair(target, backend)] = code;
 }
 
@@ -82,7 +82,6 @@ ShPointer<ShBackendCode> ShProgramNode::code(const ShPointer<ShBackend>& backend
 
 ShPointer<ShBackendCode> ShProgramNode::code(const std::string& target, const ShPointer<ShBackend>& backend) {
   if (!backend) return 0;
-  assert(!ShEnvironment::insideShader);
 
   if (m_code.find(std::make_pair(target, backend)) == m_code.end()) compile(target, backend);
 

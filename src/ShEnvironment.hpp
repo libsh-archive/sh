@@ -42,12 +42,6 @@ namespace SH {
 class ShEnvironment {
 public:
   
-  /// The shader currently being defined
-  static ShProgramNodePtr program;
-
-  /// Whether we are in the process of defining a shader
-  static bool insideShader;
-
   /// The currently active backend
   static ShBackendPtr backend;
 

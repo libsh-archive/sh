@@ -36,9 +36,9 @@
 
 /// @internal
 //@{
-#define SH_PUSH_ARG_QUEUE ::SH::ShEnvironment::shader->tokenizer.pushArgQueue()
-#define SH_PUSH_ARG ::SH::ShEnvironment::shader->tokenizer.pushArg()
-#define SH_PROCESS_ARG(arg) ::SH::ShEnvironment::shader->tokenizer.processArg(arg)
+#define SH_PUSH_ARG_QUEUE ::SH::ShContext::current()->parsing()->tokenizer.pushArgQueue()
+#define SH_PUSH_ARG ::SH::ShContext::current()->parsing()->tokenizer.pushArg()
+#define SH_PROCESS_ARG(arg) ::SH::ShContext::current()->parsing()->tokenizer.processArg(arg)
 //@}
 
 /// @name Shader definitions

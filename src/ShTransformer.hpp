@@ -44,8 +44,7 @@ namespace SH {
  * will no longer be the same)
  *
  * Global requirements for running ShTransformer:
- * ShEnvironment::shader = program 
- * ShEnvironment::insideShader = true
+ * ShContext::current()->parsing() == program
  */
 class ShTransformer {
 public:

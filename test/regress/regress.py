@@ -205,7 +205,7 @@ int main(int argc, char** argv) {
             f.write('    ShAttrib<' + outsize + ', SH_OUTPUT> out;\n')
             f.write('    ' + op + ';\n')
             f.write('  } SH_END;\n')
-            f.write('  ' + prgname + '->name("' + op + ' [' + ' x '.join(combination) + ']");\n')
+            f.write('  ' + prgname + '.name("' + op + ' [' + ' x '.join(combination) + ']");\n')
             f.write('\n')
             for case in cases:
                 if len(case) - 1 != len(combination): continue

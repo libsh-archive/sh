@@ -29,8 +29,6 @@
 
 namespace SH {
 
-ShProgramNodePtr ShEnvironment::program = 0;
-bool ShEnvironment::insideShader = false;
 ShBackendPtr ShEnvironment::backend = 0;
 
 }

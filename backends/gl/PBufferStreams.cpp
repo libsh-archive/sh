@@ -349,7 +349,7 @@ FloatExtension PBufferStreams::setupContext(int width, int height)
   return m_info.extension;
 }
 
-void PBufferStreams::execute(const ShProgram& program,
+void PBufferStreams::execute(const ShProgramNodeCPtr& program,
                              ShStream& dest)
 {
   DECLARE_TIMER(overhead);
@@ -391,9 +391,9 @@ void PBufferStreams::execute(const ShProgram& program,
     for (ShStream::NodeList::iterator I = dest.begin(); I != dest.end(); ++I, ++i) {
       ShStream s(*I);
       DECLARE_TIMER(specialize);
-      ShProgram p = shSwizzle(i) << program;
+      ShProgram p = shSwizzle(i) << shref_const_cast<ShProgramNode>(program);
       TIMING_RESULT(specialize);
-      execute(p, s);
+      execute(p.node(), s);
     }
     TIMING_RESULT(overall);
     return;
@@ -471,21 +471,21 @@ void PBufferStreams::execute(const ShProgram& program,
 
   DECLARE_TIMER(fpsetup);
   // Add in the texcoord variable
-  ShProgram fp = program & lose<ShTexCoord2f>();
+  ShProgram fp = ShProgram(shref_const_cast<ShProgramNode>(program)) & lose<ShTexCoord2f>();
 
   // Make it a fragment program
-  fp->target() = "gpu:fragment";
+  fp.node()->target() = "gpu:fragment";
   
-  ShVariableNodePtr tc_node = fp->inputs.back(); // there should be only one input anyways
+  ShVariableNodePtr tc_node = fp.node()->inputs.back(); // there should be only one input anyways
 
   // replace FETCH with TEX
   TexFetcher texFetcher(input_map, tc_node, extension == SH_ARB_NV_FLOAT_BUFFER);
-  fp->ctrlGraph->dfs(texFetcher);
-  fp->collectVariables(); // necessary to collect all the new textures
+  fp.node()->ctrlGraph->dfs(texFetcher);
+  fp.node()->collectVariables(); // necessary to collect all the new textures
 
   
   // optimize
-  ShOptimizer optimizer(fp->ctrlGraph);
+  ShOptimizer optimizer(fp.node()->ctrlGraph);
   optimizer.optimize(ShContext::current()->optimization());
 
   int gl_error;
@@ -518,7 +518,7 @@ void PBufferStreams::execute(const ShProgram& program,
     // The (trivial) vertex program
     if (m_setup_vp < 0) {
       m_vp = keep<ShPosition4f>() & keep<ShTexCoord2f>();
-      m_vp->target() = "gpu:vertex";
+      m_vp.node()->target() = "gpu:vertex";
     }
     shCompile(m_vp);
     m_setup_vp = curcontext;
@@ -652,8 +652,10 @@ void PBufferStreams::execute(const ShProgram& program,
   shref_dynamic_cast<GlBackend>(ShEnvironment::backend)->setContext(prev);
   //glXDestroyContext(m_display, pbuffer_ctxt);
   //XFree(fb_config);
+
+  // TODO: This just seems wrong.
+  // ShEnvironment::boundShaders().clear();
   
-  ShEnvironment::boundShaders().clear();
   TIMING_RESULT(onerun);
 }
 

@@ -39,8 +39,8 @@ std::string ShKernelLib::makeName(std::string prefix, int index) {
 
 ShProgram ShKernelLib::outputPass( const ShProgram &p ) {
   ShProgram passer = SH_BEGIN_PROGRAM() {
-    for( ShProgramNode::VarList::const_iterator it = p->outputs.begin();
-        it != p->outputs.end(); ++it ) {
+    for( ShProgramNode::VarList::const_iterator it = p.node()->outputs.begin();
+        it != p.node()->outputs.end(); ++it ) {
       ShVariableNodePtr var = *it;
       ShVariable inout(new ShVariableNode(SH_INOUT, var->size(), var->specialType()));
       inout.name( var->name() ); 
@@ -51,8 +51,8 @@ ShProgram ShKernelLib::outputPass( const ShProgram &p ) {
 
 ShProgram ShKernelLib::inputPass( const ShProgram &p ) {
   ShProgram passer = SH_BEGIN_PROGRAM() {
-    for( ShProgramNode::VarList::const_iterator it = p->inputs.begin();
-        it != p->inputs.end(); ++it ) {
+    for( ShProgramNode::VarList::const_iterator it = p.node()->inputs.begin();
+        it != p.node()->inputs.end(); ++it ) {
       ShVariableNodePtr var = *it;
       ShVariable inout(new ShVariableNode(SH_INOUT, var->size(), var->specialType()));
       inout.name( var->name() ); 
