@@ -19,6 +19,8 @@ public:
     BLOCK,
     IF,
     IFELSE,
+    SELFLOOP,
+    WHILELOOP
   };
 
   ShStructuralNode(const ShCtrlGraphNodePtr& node);

@@ -28,6 +28,7 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
+#include <bitset>
 
 #include "ShVariable.hpp"
 #include "ShDebug.hpp"
@@ -40,6 +41,7 @@
 #include "ShSyntax.hpp"
 #include "ArbReg.hpp"
 #include "Arb.hpp"
+#include "ShAttrib.hpp"
 
 namespace shgl {
 
@@ -108,7 +110,8 @@ ArbCode::ArbCode(const ShProgramNodeCPtr& shader, const std::string& unit,
                  TextureStrategy* textures)
   : m_textures(textures), m_shader(0), m_originalShader(shader), m_unit(unit),
     m_numTemps(0), m_numInputs(0), m_numOutputs(0), m_numParams(0), m_numConsts(0),
-    m_numTextures(0), m_programId(0), m_environment(0), m_max_label(0)
+    m_numTextures(0), m_programId(0), m_environment(0), m_max_label(0),
+    m_regalloc_hack(false)
 {
   if (unit == "fragment") m_environment |= SH_ARB_FP;
   if (unit == "vertex") m_environment |= SH_ARB_VP;
@@ -420,6 +423,7 @@ bool ArbCode::printSamplingInstruction(std::ostream& out, const ArbInst& instr) 
 std::ostream& ArbCode::print(std::ostream& out)
 {
   LineNumberer endl;
+  const char* swizChars = "xyzw";
 
   // Print version header
   if (m_unit == "vertex") {
@@ -480,6 +484,29 @@ std::ostream& ArbCode::print(std::ostream& out)
         // TODO: swizzle
       }
       out << ";";
+    } else if (I->op == SH_ARB_REP) {
+      out << "  REP ";
+      printVar(out, false, I->src[0], false, I->src[0].swizzle());
+      out << ";";
+    } else if (I->op == SH_ARB_BRK) {
+      if (I->src[0].node()) {
+        out << "  MOVC ";
+        printVar(out, true, I->src[0], false);
+        out << ", ";
+        printVar(out, false, I->src[0], false, I->src[0].swizzle());
+        out << ";" << endl;
+      }
+      out << "  BRK ";
+      if (I->src[0].node()) {
+        out << " (LE.";
+        for (int i = 0; i < I->src[0].swizzle().size(); i++) {
+          out << swizChars[I->src[0].swizzle()[i]];
+        }
+        out << ")";
+      }
+      out << ";";
+    } else if (I->op == SH_ARB_ENDREP) {
+      out << "  ENDREP;";
     } else if (I->op == SH_ARB_IF) {
       if (I->src[0].node()) {
         out << "  MOVC ";
@@ -588,6 +615,7 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
       genStructNode(*I);
     }
   } else if (node->type == ShStructuralNode::IFELSE) {
+    m_regalloc_hack = true;
     ShStructuralNodePtr header = node->structnodes.front();
     // TODO Check that header->successors is only two.
     ShVariable cond;
@@ -607,6 +635,24 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
     } m_instructions.push_back(ArbInst(SH_ARB_ELSE, ShVariable())); {
       genStructNode(elsenode);
     } m_instructions.push_back(ArbInst(SH_ARB_ENDIF, ShVariable()));
+  } else if (node->type == ShStructuralNode::WHILELOOP) {
+    m_regalloc_hack = true;
+    ShStructuralNodePtr header = node->structnodes.front();
+
+    ShVariable cond = header->succs.front().first;
+    
+    ShStructuralNodePtr body = node->structnodes.back();
+
+    ShVariable maxloop(new ShVariableNode(SH_CONST, 1));
+    float maxloopval = 255.0;
+    maxloop.setValues(&maxloopval);
+    m_shader->constants.push_back(maxloop.node());
+    m_instructions.push_back(ArbInst(SH_ARB_REP, ShVariable(), maxloop));
+    genStructNode(header);
+    m_instructions.push_back(ArbInst(SH_ARB_BRK, ShVariable(), cond));
+    genStructNode(body);
+    
+    m_instructions.push_back(ArbInst(SH_ARB_ENDREP, ShVariable()));
   }
 }
 
@@ -756,23 +802,77 @@ void ArbCode::allocConsts(const ArbLimits& limits)
   }
 }
 
-void mark(ShLinearAllocator& allocator, ShVariableNodePtr node, int i)
+bool mark(ShLinearAllocator& allocator, ShVariableNodePtr node, int i)
 {
-  if (!node) return;
-  if (node->kind() != SH_TEMP) return;
-  if (node->hasValues()) return;
+  if (!node) return false;
+  if (node->kind() != SH_TEMP) return false;
+  if (node->hasValues()) return false;
   allocator.mark(node, i);
+  return true;
 }
+
+struct ArbScope {
+  ArbScope(int start)
+    : start(start)
+  {
+  }
+  
+  typedef std::map< ShVariableNode*, std::bitset<4> > UsageMap;
+
+  typedef std::set<ShVariableNode*> MarkList;
+  
+  MarkList need_mark; // Need to mark at end of loop
+  int start; // location where loop started
+  UsageMap usage_map;
+};
 
 void ArbCode::allocTemps(const ArbLimits& limits)
 {
+  typedef std::list<ArbScope> ScopeStack;
+  ScopeStack scopestack;
+  
   ShLinearAllocator allocator(this);
 
   for (std::size_t i = 0; i < m_instructions.size(); i++) {
     ArbInst instr = m_instructions[i];
-    mark(allocator, instr.dest.node(), (int)i);
+    if (instr.op == SH_ARB_REP) {
+      scopestack.push_back((int)i);
+    }
+    if (instr.op == SH_ARB_ENDREP) {
+      const ArbScope& scope = scopestack.back();
+      for (ArbScope::MarkList::const_iterator I = scope.need_mark.begin();
+           I != scope.need_mark.end(); ++I) {
+        mark(allocator, *I, (int)i);
+      }
+      scopestack.pop_back();
+    }
+
+    if (mark(allocator, instr.dest.node(), (int)i)) {
+      for (ScopeStack::iterator S = scopestack.begin(); S != scopestack.end(); ++S) {
+        ArbScope& scope = *S;
+        std::bitset<4> writemask;
+        for (int i = 0; i < instr.dest.size(); i++) {
+          writemask[instr.dest.swizzle()[i]] = true;
+        }
+        writemask &= scope.usage_map[instr.dest.node().object()];
+        
+        if (writemask.any()) {
+          mark(allocator, instr.dest.node(), scope.start);
+          scope.need_mark.insert(instr.dest.node().object());
+        }
+      }        
+    }
+    
     for (int j = 0; j < 3; j++) {
-      mark(allocator, instr.src[j].node(), (int)i);
+      if (mark(allocator, instr.src[j].node(), (int)i)) {
+        for (ScopeStack::iterator S = scopestack.begin(); S != scopestack.end(); ++S) {
+          ArbScope& scope = *S;
+          // Mark uses
+          for (int i = 0; i < instr.src[j].size(); i++) {
+            scope.usage_map[instr.src[j].node().object()][instr.src[j].swizzle()[i]] = true;
+          }
+        }
+      }
     }
   }
   

@@ -94,7 +94,10 @@ enum ArbOp {
   SH_ARB_IF,
   SH_ARB_ELSE,
   SH_ARB_ENDIF,
-
+  SH_ARB_REP,
+  SH_ARB_ENDREP,
+  SH_ARB_BRK,
+  
   // Special "operations" for emit
   SH_ARB_FUN
 };

@@ -88,6 +88,9 @@ ArbOpInfo arbOpInfo[] = {
   {"IF", 1, false},
   {"ELSE", 0, false},
   {"ENDIF", 0, false},
+  {"REP", 1, false},
+  {"ENDREP", 0, false},
+  {"BRK", 1, false},
   
   {"<fun>", 0, false}
 };

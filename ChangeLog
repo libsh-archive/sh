@@ -1,3 +1,9 @@
+2004-07-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbCode.cpp (allocTemps): Handle loops in the
+	allocator. It's not graph colouring, but it works and it's not
+	completely stupid either :).
+
 2004-07-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/ArbCode.cpp: Implement conditionals using IF on the

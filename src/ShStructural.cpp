@@ -2,9 +2,11 @@
 #include <iostream>
 #include <sstream>
 #include <map>
+#include <set>
 #include "ShDebug.hpp"
 
-// #define SH_STRUCTURAL_DEBUG
+#define SH_STRUCTURAL_DEBUG
+
 #ifdef SH_STRUCTURAL_DEBUG
 #  define SH_STR_DEBUG_PRINT(x) SH_DEBUG_PRINT(x)
 #else
@@ -17,6 +19,8 @@ const char* nodetypename[] ={
   "BLOCK",
   "IF",
   "IFELSE",
+  "SELFLOOP",
+  "WHILELOOP"
 };
 
 std::string gvname(const SH::ShStructuralNode* p)
@@ -64,16 +68,52 @@ bool descendent(const SH::ShStructuralNodePtr& a,
   return n;
 }
 
-}
-
-namespace SH {
-
 template<typename Container, typename T>
 bool contains(const Container& c,
               const T& v)
 {
   return find(c.begin(), c.end(), v) != c.end();
 }
+
+template<typename Container>
+void reach_under_traverse(SH::ShStructuralNode* head,
+                          SH::ShStructuralNode* node,
+                          Container& r)
+{
+  if (contains(r, node)) return;
+  if (node == head) return;
+
+  r.push_front(node);
+  for (SH::ShStructuralNode::PredecessorList::iterator I = node->preds.begin();
+       I != node->preds.end(); ++I) {
+    reach_under_traverse(head, I->second, r);
+  }
+}
+
+template<typename T>
+void reach_under(const SH::ShStructuralNodePtr& a,
+                 T& container)
+{
+  using namespace SH;
+  bool backedge = false;
+  for (ShStructuralNode::PredecessorList::iterator I = a->preds.begin();
+       I != a->preds.end(); ++I) {
+    ShStructuralNode* p = I->second;
+    // Check that p->a is a backedge
+
+    if (!descendent(a, p)) continue;
+
+    reach_under_traverse(a.object(), p, container);
+
+    backedge = true;
+  }
+
+  if (backedge) container.push_front(a.object());
+}
+
+}
+
+namespace SH {
 
 ShStructuralNode::ShStructuralNode(const ShCtrlGraphNodePtr& node)
   : type(UNREDUCED),
@@ -126,11 +166,6 @@ std::ostream& ShStructuralNode::dump(std::ostream& out, int noedges) const
   }
 
   if (noedges <= 0) {
-    /*
-    for (ChildList::const_iterator I = children.begin(); I != children.end(); ++I) {
-      out << gvfrom(this) << " -> " << gvto(I->object()) << ";" << std::endl;
-    }
-    */
     for (SuccessorList::const_iterator I = succs.begin(); I != succs.end(); ++I) {
       //if (find(children.begin(), children.end(), I->second) != children.end()) continue;
       out << gvfrom(this) << " -> " << gvto(I->second.object());
@@ -246,7 +281,31 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
 
       // Find cyclic regions
       if (!newnode) {
-        // TODO
+        typedef std::list<ShStructuralNode*> ReachUnder;
+        //        typedef NodeSet ReachUnder;
+        ReachUnder ru;
+        reach_under(node, ru);
+        SH_STR_DEBUG_PRINT("Reach under set for " << node);
+        for (ReachUnder::iterator I = ru.begin(); I != ru.end(); ++I) {
+          SH_STR_DEBUG_PRINT("  " << *I);
+        }
+
+        if (ru.size() == 1) {
+          SH_STR_DEBUG_PRINT("Found a self-loop");
+          SH_DEBUG_ASSERT(ru.front() == node);
+          newnode = new ShStructuralNode(ShStructuralNode::SELFLOOP);
+        }
+        if (ru.size() == 2 && ru.back()->succs.size() == 1) {
+          SH_STR_DEBUG_PRINT("Found a while-loop");
+          SH_DEBUG_ASSERT(ru.front() == node);
+          SH_DEBUG_ASSERT(ru.back() != node);
+          newnode = new ShStructuralNode(ShStructuralNode::WHILELOOP);
+        }
+        if (newnode) {
+          for (ReachUnder::iterator I = ru.begin(); I != ru.end(); ++I) {
+            nodeset.push_back(*I);
+          }
+        }
       }
       
       // Fix up the graph.
