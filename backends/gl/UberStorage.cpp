@@ -51,6 +51,9 @@ GLenum getFormat(int pitch)
 
 void UberStorage::bindAsTexture()
 {
+
+  SH_DEBUG_PRINT("Bind the texture!");
+
   unbind(); // Just to be safe
 
   // Bind to our name
@@ -126,6 +129,9 @@ unsigned int UberStorage::alloc(int bForce)
   /// property array is constant for the time being
   GLint propsArray[4] = {GL_TEXTURE_2D, GL_TRUE, GL_COLOR_BUFFER_ATI, GL_TRUE};
   GLenum format = getFormat(m_pitch);
+  
+  SH_DEBUG_PRINT("Allocate uberbuffer: "<<m_width<<" "<<m_height<<" "<<m_pitch);
+
   m_mem = SH_GL_CHECK_ERROR(glAllocMem2DATI(format, m_width, m_height, 2, propsArray));
 
   return m_mem;
@@ -207,6 +213,9 @@ void UberStorage::clearBuffer(float* col){
 
 bool UberUberTransfer::transfer(const SH::ShStorage* from, SH::ShStorage* to)
 {
+
+  SH_DEBUG_PRINT("Inside UberUber transfer");
+
   const UberStorage* src_storage = dynamic_cast<const UberStorage*>(from);
   UberStorage* dst_storage = dynamic_cast<UberStorage*>(to);
   
@@ -307,11 +316,15 @@ bool UberUberTransfer::transfer(const SH::ShStorage* from, SH::ShStorage* to)
   glMatrixMode(GL_MODELVIEW);
   glPopMatrix();
 
+
+  return true;
 }
 
 
 bool UberHostTransfer::transfer(const SH::ShStorage* from, SH::ShStorage* to)
 {
+   SH_DEBUG_PRINT("Inside UberHost transfer");
+
   const UberStorage* ustorage = dynamic_cast<const UberStorage*>(from);
   SH::ShHostStorage* hstorage = dynamic_cast<SH::ShHostStorage*>(to);
   
@@ -345,13 +358,8 @@ bool UberHostTransfer::transfer(const SH::ShStorage* from, SH::ShStorage* to)
   glFrontFace(GL_CCW);
   SH_DEBUG_PRINT("Temporarily glDisabled vertex/fragment programs and GL lighting");
 
-  // attach ubuf to texture
-  GLuint texBinding;
-  glGenTextures(1, &texBinding);
-  glActiveTextureARB(GL_TEXTURE7);
-  glEnable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, texBinding);
-  //TODO save all this state before messing with it (for now just assume nobody uses
+  GlTextureName::Binding binding(ustorage->textureName());
+
   //texture unit 7
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -440,8 +448,6 @@ bool UberHostTransfer::transfer(const SH::ShStorage* from, SH::ShStorage* to)
   // restore state
   glPopAttrib();
 
-  glDeleteTextures(1, &texBinding);
-
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
 
@@ -457,6 +463,9 @@ bool UberHostTransfer::transfer(const SH::ShStorage* from, SH::ShStorage* to)
 
 bool HostUberTransfer::transfer(const SH::ShStorage* from, SH::ShStorage* to)
 {
+
+   SH_DEBUG_PRINT("Inside HostUber transfer");
+
   const SH::ShHostStorage* hstorage = dynamic_cast<const SH::ShHostStorage*>(from);
   UberStorage* ustorage = dynamic_cast<UberStorage*>(to);
   
@@ -478,15 +487,7 @@ bool HostUberTransfer::transfer(const SH::ShStorage* from, SH::ShStorage* to)
   int pitch = ustorage->pitch();
   GLenum format = getFormat(ustorage->pitch());
 
-  //bind the texture 
-  GLuint texBinding;
-  glGenTextures(1, &texBinding);
-  glActiveTextureARB(GL_TEXTURE7);
-
-  // TODO!!! Save the texture binding
-  
-  //TODO handle other dimensions
-  glBindTexture(GL_TEXTURE_2D, texBinding); 
+  GlTextureName::Binding binding(ustorage->textureName());
 
   //attach the uber buffer
   SH_GL_CHECK_ERROR(glAttachMemATI(GL_TEXTURE_2D, GL_IMAGES_ATI, mem)); 
@@ -510,8 +511,7 @@ bool HostUberTransfer::transfer(const SH::ShStorage* from, SH::ShStorage* to)
   SH_GL_CHECK_ERROR(glAttachMemATI(GL_TEXTURE_2D, GL_IMAGES_ATI, 0));
   SH_DEBUG_PRINT("Detach GL_TEXTURE_2D from mem " << mem); 
 
-  //delete texture
-  glDeleteTextures(1, (GLuint*)&texBinding);
+  return true;
 
 }
 

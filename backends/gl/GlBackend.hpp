@@ -28,6 +28,7 @@ extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include <GL/glx.h>
+//#include <GL/glut.h>
 
 #endif /* WIN32 */
 
@@ -75,10 +76,13 @@ private:
   GlBackend& operator=(const GlBackend& other);
 };
 
-void shGlCheckError(const char* desc = "");
+void shGlCheckError(const char* desc, const char* file, int line);
 
 }
 
-#define SH_GL_CHECK_ERROR(op) op; shGlCheckError( # op );
+#define SH_GL_CHECK_ERROR(op) \
+  op;shGlCheckError( # op, (char*) __FILE__, (int) __LINE__);
+
+
 
 #endif

@@ -16,7 +16,8 @@ PFNGLGETPROGRAMIVARBPROC glGetProgramivARB = 0;
 
 namespace shgl {
 
-void shGlCheckError(const char* desc)
+
+void shGlCheckError(const char* desc, const char* file, int line)
 {
   GLenum errnum = glGetError();
   char* error = 0;
@@ -48,7 +49,8 @@ void shGlCheckError(const char* desc)
     error = "Unknown error!";
     break;
   }
-  SH_DEBUG_ERROR("GL ERROR " << desc << ": " << error);
+  SH_DEBUG_PRINT("GL ERROR on " << file << ": " <<line<<": "<< error);
+  SH_DEBUG_PRINT("GL ERROR call: " << desc);
 }
 
 GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture,

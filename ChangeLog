@@ -1,3 +1,14 @@
+2004-03-02  Tiberiu Stefan Popa  <stpopa@pentane.math.uwaterloo.ca>
+
+	* backends/gl/UberTextures.cpp (bindTexture): Use node->size()
+	instead of node->dims().
+
+	* backends/gl/GlBackend.hpp (SH_GL_CHECK_ERROR): Add file and line
+	info 
+
+	* backends/gl/UberStorage.cpp (transfer): Return true on HostUber
+	transfers
+
 2004-03-01  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/*: Fixed up ATI uberbuffer backend.

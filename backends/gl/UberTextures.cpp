@@ -159,7 +159,7 @@ void UberTextures::bindTexture(const ShTextureNodePtr& node,
     if (!storage) {
       GlTextureNamePtr name = new GlTextureName(shGlTargets[node->dims()]);
       storage = new UberStorage(node->memory().object(), name,
-                                node->width(), node->height(), node->dims());
+                                node->width(), node->height(), node->size());
       name->params(node->traits());
     }
     storage->bindAsTexture();
