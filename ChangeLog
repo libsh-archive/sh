@@ -1,3 +1,15 @@
+2004-07-07  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbCode.cpp (genNode): Use emit function to generate code.
+
+	* backends/gl/ArbCode.hpp: Add emit* functions.
+
+	* backends/gl/ArbEmit.cpp: Add new table-driven emit code.
+
+2004-07-06  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbCode.cpp (genNode): Handle SH_OP_SNE.
+
 2004-07-05  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* Resolved issue43.

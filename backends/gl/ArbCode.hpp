@@ -18,6 +18,7 @@ namespace shgl {
 
 class ArbCode;
 class ArbBindingSpecs;
+class ArbMapping;
 
 class ArbCode : public SH::ShBackendCode {
 public:
@@ -43,24 +44,24 @@ private:
   /// Generate code for this node and those following it.
   void genNode(SH::ShCtrlGraphNodePtr node);
 
-  /// Generate code for DIV (either op2 is scalar or op1.size() == op2.size())
-  void genDiv( const SH::ShVariable &dest, const SH::ShVariable &op1, 
-      const SH::ShVariable &op2 );
+  /// Generate code for a single Sh statement.
+  void emit(const SH::ShStatement& stmt);
 
-  /// Generate code for a Dot Product 
-
-  /// Generate code for a scalar/vector binary op where the scalar
-  /// should be promoted to a vector by duplicating components
-  void genScalarVectorInst( const SH::ShVariable &dest, const SH::ShVariable &op1, 
-      const SH::ShVariable &op2, int opcode );
- 
-  /// Generate code for polynomial approximations of trig functions.
-  void genTrigInst( const SH::ShVariable &dest, const SH::ShVariable& src,
-      int opcode );
-
-  void genDot( const SH::ShVariable &dest, const SH::ShVariable& src0,
-      const SH::ShVariable& src1);
-
+  /// Special code cases
+  void emit_div(const SH::ShStatement& stmt);
+  void emit_sqrt(const SH::ShStatement& stmt);
+  void emit_lerp(const SH::ShStatement& stmt);
+  void emit_dot2(const SH::ShStatement& stmt);
+  void emit_eq(const SH::ShStatement& stmt);
+  void emit_ceil(const SH::ShStatement& stmt);
+  void emit_mod(const SH::ShStatement& stmt);
+  void emit_trig(const SH::ShStatement& stmt);
+  void emit_invtrig(const SH::ShStatement& stmt);
+  void emit_tan(const SH::ShStatement& stmt);
+  void emit_exp(const SH::ShStatement& stmt);
+  void emit_log(const SH::ShStatement& stmt);
+  void emit_norm(const SH::ShStatement& stmt);
+  
   /// Allocate registers, after the code has been generated
   void allocRegs();
 
@@ -147,6 +148,8 @@ private:
 
   /// ARB Program ID we are bound to. 0 if code hasn't been uploaded yet.
   unsigned int m_programId;
+
+  static ArbMapping table[];
 };
 
 typedef SH::ShPointer<ArbCode> ArbCodePtr;

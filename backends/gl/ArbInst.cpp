@@ -61,7 +61,20 @@ ArbOpInfo arbOpInfo[] = {
   {"TXB", false, true, 3, true, false},
 
   // KIL
-  {"KIL", false, true, 0, false, false}
+  {"KIL", false, true, 0, false, false},
+
+  // NV_vertex_program/NV_fragment_program
+  {"DDX", false, true, 1, true, false},
+  {"DDY", false, true, 1, true, false},
+  {"SEQ", true, true, 1, false, false},
+  {"SNE", true, true, 1, false, false},
+  
+  // NV_fragment_program2
+  {"DIV", false, true, 2, false, false},
+  {"DP2", false, true, 2, false, false},
+  {"NRM", false, true, 1, false, false},
+
+  {"<fun>", false, false, 0, false, false}
 };
 
 }

@@ -67,7 +67,21 @@ enum ArbOp {
   SH_ARB_TXB,
 
   // KIL
-  SH_ARB_KIL
+  SH_ARB_KIL,
+
+  // NV_vertex_program/NV_fragment_program
+  SH_ARB_DDX,
+  SH_ARB_DDY,
+  SH_ARB_SEQ,
+  SH_ARB_SNE,
+  
+  // NV_fragment_program2
+  SH_ARB_DIV,
+  SH_ARB_DP2,
+  SH_ARB_NRM,
+  
+  // Special "operations" for emit
+  SH_ARB_FUN
 };
 
 /** Information about the operations from ArbOp.
