@@ -116,6 +116,13 @@ bool shSetBackend(const std::string& name)
   return true;
 }
 
+void shInit()
+{
+#ifdef WIN32
+  static SH::ShPointer<ShArb::ArbBackend> instance = new ShArb::ArbBackend();
+#endif /* WIN32 */
+}
+
 void shIf(bool)
 {
   ShPointer<ShToken> token = new ShToken(SH_TOKEN_IF);
