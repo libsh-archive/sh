@@ -789,6 +789,7 @@ ShVariableN<3, T> cross(const ShVariableN<3, T>& left, const ShVariableN<3, T>& 
 {
   if (!ShEnvironment::insideShader) {
     assert(left.hasValues());
+    assert(right.hasValues());
     T lvals[3];
     left.getValues(lvals);
     T rvals[3];
