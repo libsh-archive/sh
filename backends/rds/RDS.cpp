@@ -380,7 +380,7 @@ void RDS::partition(DAGNode::DAGNode *v)
 	m_visited[v] = true;
     
     // partition each of v's children
-	for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end();  ) {
+	for (DAGNode::DAGNodeVector::iterator I = v->successors.begin(); I != v->successors.end(); ++I) {
 		DAGNode::DAGNode *w = *I;
       
 		if (!m_visited[w]) {
@@ -389,10 +389,7 @@ void RDS::partition(DAGNode::DAGNode *v)
       
 		// cut w off from v if it's marked
 		if (m_marked[w]) {
-			I = v->successors.erase(I); 
-		}
-		else {
-			++I;
+			v->m_cut[w] = true; 
 		}
     }
    

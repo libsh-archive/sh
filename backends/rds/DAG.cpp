@@ -4,8 +4,6 @@
 
 using namespace SH;
 
-
-
 DAGNode::DAGNode(ShVariable var) 
 	:	m_var(var),
 		m_label(var.node()->name())
@@ -29,6 +27,7 @@ DAGNode::DAGNode(ShOperation op, DAGNode* kid)
 	//cout << "Creating new node with name " << m_label << " Kids: " << kid->m_label << "\n";
 	m_type = DAG_OP;
 	successors.push_back(kid);
+	m_cut[kid] = false;
 	kid->predecessors.push_back(this);
 }
 
@@ -40,6 +39,8 @@ DAGNode::DAGNode(ShOperation op, DAGNode *kid0, DAGNode* kid1)
 	m_type = DAG_OP;
 	successors.push_back(kid0);
 	successors.push_back(kid1);
+	m_cut[kid0] = false;
+	m_cut[kid1] = false;
 	kid0->predecessors.push_back(this);
 	kid1->predecessors.push_back(this);
 }
@@ -53,6 +54,9 @@ DAGNode::DAGNode(ShOperation op, DAGNode* kid0, DAGNode* kid1, DAGNode* kid2)
 	successors.push_back(kid0);
 	successors.push_back(kid1);
 	successors.push_back(kid2);
+	m_cut[kid0] = false;
+	m_cut[kid1] = false;
+	m_cut[kid2] = false;
 	kid0->predecessors.push_back(this);
 	kid1->predecessors.push_back(this);
 	kid2->predecessors.push_back(this);
@@ -209,6 +213,7 @@ DAG::DAG(ShBasicBlockPtr block)
 			//(*I).second->id_list.erase((*I).first);
 			node[(*I).first] = parent;
 			m_root->successors.push_back(parent);
+			m_root->m_cut[parent] = false;
 			parent->predecessors.push_back(m_root);
 		}
 	}

@@ -186,7 +186,12 @@ void PDomTree::printGraph(DAGNode::DAGNode *node, int indent) {
 	cout << numbering(node) << " " << node->m_label << "\n";
 
 	for (DAGNode::DAGNodeVector::iterator I = node->successors.begin(); I != node->successors.end(); ++I) {
-		printGraph(*I, indent + 2);
+		if (!node->m_cut[*I])
+			printGraph(*I, indent + 2);
+		else {
+			shPrintIndent(cout, indent + 2);
+			cout << "cut--> " << numbering(*I) << " " << (*I)->m_label << "\n";
+		}
 	}
 }
 

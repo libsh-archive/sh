@@ -23,6 +23,7 @@
  * Creates a directed acyclic graph for a basic block
  */
 
+
 class SH_DLLEXPORT DAGNode {
   public:
 	DAGNode() {}
@@ -42,6 +43,9 @@ class SH_DLLEXPORT DAGNode {
 
 	typedef std::set<SH::ShVariableNodePtr> IdSet;
 	IdSet id_list;
+
+	typedef std::map<DAGNode *, bool> CutMap;
+	CutMap m_cut;
 
 	typedef std::vector<DAGNode *> DAGNodeVector;
 	DAGNodeVector predecessors;
