@@ -57,6 +57,13 @@ public:
 
   ShAttrib2f size() const;
 
+	int width() {
+		return m_node->width();
+	}
+	int height() {
+		return m_node->height;
+	}
+
   typedef T return_type;
 };
 

@@ -58,6 +58,8 @@ public:
     m_node->traits().clamping(ShTextureTraits::SH_CLAMPED);
   }
 
+	typedef ShClamped<typename T::rectangular_type> rectangular_type;
+	typedef typename T::base_type base_type;
   typedef typename T::return_type return_type;
 };
 
@@ -90,6 +92,8 @@ public:
     m_node->traits().clamping(ShTextureTraits::SH_UNCLAMPED);
   }
 
+	typedef ShUnclamped<typename T::rectangular_type> rectangular_type;
+	typedef typename T::base_type base_type;
   typedef typename T::return_type return_type;
 };
 
