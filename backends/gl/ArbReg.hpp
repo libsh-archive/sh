@@ -94,6 +94,7 @@ struct ArbReg : public SH::ShRefCountable {
 
   ArbRegType type;
   int index;
+  bool preset;
   std::string name; //< variable name (if any) associated with the register
 
   struct BindingInfo

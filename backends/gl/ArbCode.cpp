@@ -339,8 +339,8 @@ void ArbCode::bind()
       updateUniform(node);
     }
   }
-  // Make sure all textures are loaded.
 
+  // Make sure all textures are loaded.
   bindTextures();
 }
 
@@ -1273,24 +1273,88 @@ void ArbCode::allocTemps(const ArbLimits& limits, bool half)
 }
 
 void ArbCode::allocTextures(const ArbLimits& limits)
-{
+  {
+  std::list<GLuint> reserved;
+
+  // reserved any texunits specified at the program level
+  if (!m_shader->meta("opengl:reservetex").empty())
+    {
+    GLuint index;
+    std::istringstream is(m_shader->meta("opengl:reservetex"));
+
+    while(1)
+      {
+      is >> index;
+      if (!is) break;
+      reserved.push_back(index);
+      }
+    }
+
+  // reserve and allocate any preset texunits
   for (ShProgramNode::TexList::const_iterator I = m_shader->textures.begin();
-       I != m_shader->textures.end(); ++I) {
+       I != m_shader->textures.end();
+       ++I)
+    {
     ShTextureNodePtr node = *I;
-    int index;
-    index = m_numTextures;
-    m_registers[node] = new ArbReg(SH_ARB_REG_TEXTURE, index, node->name());
-    m_reglist.push_back(m_registers[node]);
-    m_numTextures++;
+    
+    if (!node->meta("opengl:texunit").empty())
+      {
+      GLuint index;
+      std::istringstream is(node->meta("opengl:texunit"));
+      is >> index; // TODO: Check for errors
+
+      if (std::find(reserved.begin(), reserved.end(), index) == reserved.end())
+	{
+	m_registers[node] = new ArbReg(SH_ARB_REG_TEXTURE, index, node->name());
+	m_registers[node]->preset = true;
+	m_reglist.push_back(m_registers[node]);
+	reserved.push_back(index);
+	}
+      else
+	{
+	// TODO: flag some sort of error for multiple tex unit use
+	}
+      }
+    }
+
+  // allocate remaining textures units with respect to the reserved list
+  for (ShProgramNode::TexList::const_iterator I = m_shader->textures.begin();
+       I != m_shader->textures.end();
+       ++I)
+    {
+    ShTextureNodePtr node = *I;
+    
+    if (node->meta("opengl:texunit").empty())
+      {
+      GLuint index;
+      index = m_numTextures;
+
+      // TODO: should there be an upperlimit of the texunit, maybe query
+      // OpenGL for the maximum number of texunits
+      while(1)
+	{
+	if (std::find(reserved.begin(), reserved.end(), index) == reserved.end()) break;
+	else index++;
+	}
+      
+      m_registers[node] = new ArbReg(SH_ARB_REG_TEXTURE, index, node->name());
+      m_reglist.push_back(m_registers[node]);
+      m_numTextures = index;
+      }
+    }
   }
-}
 
 void ArbCode::bindTextures()
-{
+  {
   for (ShProgramNode::TexList::const_iterator I = m_shader->textures.begin();
-       I != m_shader->textures.end(); ++I) {
-    m_texture->bindTexture(*I, GL_TEXTURE0 + m_registers[*I]->index);
+       I != m_shader->textures.end();
+       ++I)
+    {
+    if (!m_registers[*I]->preset)
+      {
+      m_texture->bindTexture(*I, GL_TEXTURE0 + m_registers[*I]->index);
+      }
+    }
   }
-}
 
 }
