@@ -109,10 +109,7 @@ ShPointer<ShBackend> ShBackend::lookup(const std::string& name)
   SH_DEBUG_PRINT("Looking up " << name);
 
   HMODULE mod = NULL;
-#define SH_WIN32_BACKENDS_DIR "\\DEV\\SH\\BACKENDS\\GL"
-
-  std::string libname(SH_WIN32_BACKENDS_DIR);
-  libname += "\\LIBSH";
+  std::string libname("LIBSH");
   libname += name;
 #ifdef SH_DEBUG
   libname += "D";
