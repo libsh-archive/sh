@@ -89,6 +89,12 @@ public:
   /// Call after contructing the control graph [after optimization!]
   /// to make lists of all the variables used in the shader.
   void collectVariables();
+
+  /// Set a name for this program
+  void name(const std::string& name);
+
+  /// Get this program's name - may be empty.
+  std::string name() const;
   
   typedef std::list<ShVariableNodePtr> VarList;
   typedef std::list<ShTextureNodePtr> TexList;
@@ -111,6 +117,8 @@ public:
 private:
 
   std::string m_target; ///< Can be empty, if there is no target associated with this program.
+
+  std::string m_name; ///< Can be empty, until one is set with name().
   
   void collectNodeVars(const ShRefCount<ShCtrlGraphNode>& node);
   void collectVar(const ShVariableNodePtr& node);

@@ -36,6 +36,7 @@ GENERIC SMALL TASKS:
  - add a switchBackend() function that clears boundShaders(), etc.
  - add ShIOVariable types as a single variable used for both Input and Output
  - add more tests to test/constant.sht
+    - in particular, cond
 
 GENERIC MEDIUM TASKS:
  X port more of the ShLib calls to the new model.

@@ -1,10 +1,10 @@
 check_PROGRAMS = algebra combine connect constants copy do if for julia matrix ops point \
 		 rch simple texture uniforms shvector while neg stream io2temp ref mem \
-		 longtuple inout error stream_inverse
+		 longtuple inout error stream_inverse kill
 
 INCLUDES = -I../src
 
-LDADD = ../src/libsh.la
+LDADD =  -lGL ../src/libsh.la
 
 AM_CXXFLAGS = -g -O0
 
@@ -37,6 +37,7 @@ io2temp_SOURCES = io2temp.cpp
 longtuple_SOURCES = longtuple.cpp
 inout_SOURCES = inout.cpp
 error_SOURCES = error.cpp
+kill_SOURCES = kill.cpp
 
 %.cpp: %.sht test.header test.footer
 	cat test.header > $@
