@@ -48,14 +48,11 @@ struct DefFinder {
 
   void operator()(ShCtrlGraphNodePtr node)
   {
-    SH_DEBUG_PRINT("Finding a definition");
     if (!node) return;
     ShBasicBlockPtr block = node->block;
     if (!block) return;
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-      SH_DEBUG_PRINT("Considering definition");
       if (I->op != SH_OP_KIL && I->op != SH_OP_OPTBRA && I->dest.node()->kind() == SH_TEMP) {
-        SH_DEBUG_PRINT("Marking definition");
         r.defs.push_back(ReachingDefs::Definition(&(*I), node, offset));
         offset += I->dest.size();
         r.defsize += I->dest.size();
@@ -246,6 +243,39 @@ struct UdDuClearer {
   }
 };
 
+struct UdDuDumper {
+  void operator()(ShCtrlGraphNodePtr node) {
+    if (!node) return;
+    ShBasicBlockPtr block = node->block;
+    if (!block) return;
+
+    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+      ValueTracking* vt = I->template get_info<ValueTracking>();
+      if (!vt) {
+        SH_DEBUG_PRINT(*I << "HAS NO VALUE TRACKING");
+        continue;
+      }
+      for (int i = 0; i < opInfo[I->op].arity; i++) {
+        //SH_DEBUG_PRINT("  ud[" << i << "]");
+        int e = 0;
+        for (ValueTracking::TupleUseDefChain::iterator E = vt->defs[i].begin();
+             E != vt->defs[i].end(); ++E, ++e) {
+          for (ValueTracking::UseDefChain::iterator J = E->begin(); J != E->end(); ++J) {
+            SH_DEBUG_PRINT("{" << *I << "}.src" << i << "[" << e << "] comes from {" << *J->stmt << "}.dst[" << J->index << "]");
+          }
+        }
+      }
+      int e = 0;
+      for (ValueTracking::TupleDefUseChain::iterator E = vt->uses.begin();
+           E != vt->uses.end(); ++E, ++e) {
+        for (ValueTracking::DefUseChain::iterator J = E->begin(); J != E->end(); ++J) {
+          SH_DEBUG_PRINT("{" << *I << "}.dst[" << e << "] contributes to {" << *J->stmt << "}.src" << J->source << "[" << J->index << "]");
+        }
+      }
+    }
+  }
+};
+
 }
 
 namespace SH {
@@ -280,7 +310,7 @@ void add_value_tracking(ShProgram& p)
     graph->dfs(iter);
   } while (changed);
 
-#if 1
+#if 0
   SH_DEBUG_PRINT("Dumping Reaching Defs");
   SH_DEBUG_PRINT("defsize = " << r.defsize);
   SH_DEBUG_PRINT("defs.size() = " << r.defs.size());
@@ -305,6 +335,9 @@ void add_value_tracking(ShProgram& p)
   
   UdDuBuilder builder(r);
   graph->dfs(builder);
+
+  UdDuDumper dumper;
+  graph->dfs(dumper);
 
 }
 

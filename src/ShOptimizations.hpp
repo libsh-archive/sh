@@ -49,10 +49,15 @@ struct ValueTracking : public ShStatementInfo {
   };
 
   // For each tuple element, track all of the uses of our definition.
-  std::vector< std::set<Use> > uses;
+  typedef std::set<Use> DefUseChain;
+  typedef std::vector<DefUseChain> TupleDefUseChain;
+  TupleDefUseChain uses;
+  
   // For each tuple element in each of our sources, track all the
   // definition points.
-  std::vector< std::set<Def> > defs[3];
+  typedef std::set<Def> UseDefChain;
+  typedef std::vector<UseDefChain> TupleUseDefChain;
+  TupleUseDefChain defs[3];
 };
 
 }
