@@ -173,6 +173,7 @@ public:
   std::string name() const;
 
   SH::ShBackendCodePtr generateCode(int kind, const SH::ShProgram& shader);
+  virtual void bindFramebuffer();
 
   int instrs(int kind) { return m_instrs[kind]; }
   int temps(int kind) { return m_temps[kind]; }

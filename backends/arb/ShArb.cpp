@@ -670,12 +670,7 @@ void ArbCode::loadDataTexture(ShDataTextureNodePtr texture, unsigned int type)
       break;
     }
   } else {
-    ShExternalMemoryObjectPtr extMem = texture->mem();
-    if( extMem ) {
-      extMem->attach();
-    } else {
-      SH_DEBUG_ERROR("No memory object/image loaded for texture"); 
-    }
+    SH_DEBUG_ERROR("Invalid memory object/image loaded for texture"); 
   } 
 
   int error = glGetError();
@@ -1394,6 +1389,9 @@ ShBackendCodePtr ArbBackend::generateCode(int kind, const ShProgram& shader)
   ArbCodePtr code = new ArbCode(this, shader, kind);
   code->generate();
   return code;
+}
+
+void ArbBackend::bindFramebuffer() {
 }
 
 }
