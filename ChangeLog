@@ -1,5 +1,9 @@
 2004-05-28  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShLibBooleanImpl.hpp: Implemented operator||, operator&&,
+	operator!, as well as any and all. Resolves issue52, issue51,
+	issue125, issue54 and issue53.
+
 	* backends/gl/ArbCode.cpp (genNode): Implemented EXP, EXP2, LOG, LOG2.
 
 	* src/ShInstructions.hpp: Added sh{EXP,LOG}{,2,10}() functions.

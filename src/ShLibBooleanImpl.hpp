@@ -208,20 +208,44 @@ ShGeneric<1, T> cond(const ShGeneric<1, T>& condition, const ShGeneric<1, T>& le
 
 // TODO
 
-// template<int N, typename T>
-// ShGeneric<N, T> operator!(const ShGeneric<N, T>& a);
+template<int N, typename T>
+ShGeneric<N, T> operator!(const ShGeneric<N, T>& a)
+{
+  return 1.0f - (a > 0.0f);
+}
 
-// template<int N, typename T>
-// ShGeneric<N, T> operator&&(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b);
 
-// template<int N, typename T>
-// ShGeneric<N, T> operator||(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b);
+template<int N, typename T>
+ShGeneric<N, T> operator&&(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
+{
+  return min(a,b);
+}
 
-// template<int N, typename T>
-// ShGeneric<1, T> any(const ShGeneric<N, T>& a);
+template<int N, typename T>
+ShGeneric<N, T> operator||(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
+{
+  return max(a,b);
+}
 
-// template<int N, typename T>
-// ShGeneric<1, T> all(const ShGeneric<N, T>& a);
+template<int N, typename T>
+ShGeneric<1, T> any(const ShGeneric<N, T>& a)
+{
+  ShAttrib<1, SH_TEMP, T> t = a(0);
+  for (int i = 1; i < N; i++) {
+    t = t || a(i);
+  }
+  return t;
+}
+
+template<int N, typename T>
+ShGeneric<1, T> all(const ShGeneric<N, T>& a)
+{
+  ShAttrib<1, SH_TEMP, T> t = a(0);
+  for (int i = 1; i < N; i++) {
+    t = t && a(i);
+  }
+  return t;
+}
 
 }
 
