@@ -1,3 +1,21 @@
+2005-02-25  Francois Marier  <francois@serioushack.com>
+
+	* sh/trunk/backends/cc/Cc.cpp, Cc.hpp, 
+	sh/trunk/backends/gl/ArbCode.cpp, ArbCode.hpp, 
+	sh/trunk/src/ShBackend.hpp: Added the unbind() method.
+
+	* sh/trunk/src/ShSyntax.cpp, ShSyntax.hpp: Added the shUnbind
+	function to unbind a previously bound shader (does nothing if the
+	shader was not already bound).
+
+	* sh/trunk/backends/gl/ArbCode.cpp,
+	sh/trunk/backends/gl/PBufferStreams.cpp: Move the
+	glEnable(GL_*_PROGRAM_ARB) and glDisable calls to the bind() and
+	unbind() methods of ArbCode.
+
+	* sh/examples/*: Remove the glEnable(GL_*_PROGRAM_ARB) calls.
+	Replace the glDisable(GL_*_PROGRAM_ARB) calls with shUnbind().
+	
 2005-02-23  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/Makefile.win32 (libsharb_dll_SOURCES): Update for
