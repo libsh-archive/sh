@@ -510,8 +510,12 @@ struct ConstProp : public ShStatementInfo {
 
     // Ignore KIL, optbra, etc.
     if (opInfo[stmt->op].result_source == ShOperationInfo::IGNORE) return;
-    
-    if (opInfo[stmt->op].result_source == ShOperationInfo::EXTERNAL) {
+
+    if (stmt->op == SH_OP_ASN) {
+      for (int i = 0; i < stmt->dest.size(); i++) {
+        dest.push_back(Cell(src[0][i]));
+      }
+    } else if (opInfo[stmt->op].result_source == ShOperationInfo::EXTERNAL) {
       // This statement never results in a constant
       // E.g. texture fetches, stream fetches.
       for (int i = 0; i < stmt->dest.size(); i++) {
@@ -527,9 +531,9 @@ struct ConstProp : public ShStatementInfo {
         for (int s = 0; s < opInfo[stmt->op].arity; s++) {
           if (src[s][idx(i,s)].state != Cell::CONSTANT) {
             allconst = false;
-          }
-          if (src[s][idx(i,s)].state != Cell::UNIFORM) {
-            alluniform = false;
+            if (src[s][idx(i,s)].state != Cell::UNIFORM) {
+              alluniform = false;
+            }
           }
         }
         if (allconst) {
@@ -554,14 +558,14 @@ struct ConstProp : public ShStatementInfo {
     } else if (opInfo[stmt->op].result_source == ShOperationInfo::ALL) {
       // build statement ONLY if ALL elements of ALL sources are constant
       bool allconst = true;
-      bool alluniform = true;
+      bool alluniform = true; // all statements are either uniform or constant
       for (int s = 0; s < opInfo[stmt->op].arity; s++) {
         for (unsigned int k = 0; k < src[s].size(); k++) {
           if (src[s][k].state != Cell::CONSTANT) {
             allconst = false;
-          }
-          if (src[s][k].state != Cell::UNIFORM) {
-            alluniform = false;
+            if (src[s][k].state != Cell::UNIFORM) {
+              alluniform = false;
+            }
           }
         }
       }
@@ -601,22 +605,35 @@ struct ConstProp : public ShStatementInfo {
 
   struct Uniform {
     Uniform()
-      : valuenum(-1)
+      : constant(false),
+        valuenum(-1)
+    {
+    }
+
+    Uniform(float constval)
+      : constant(true),
+        constval(constval)
     {
     }
     
     Uniform(int valuenum, int index, bool neg)
-      : valuenum(valuenum), index(index), neg(neg)
+      : constant(false),
+        valuenum(valuenum), index(index), neg(neg)
     {
     }
 
     bool operator==(const Uniform& other) const
     {
-      if (valuenum != other.valuenum) return false;
-      if (index != other.index) return false;
-      if (neg != other.neg) return false;
+      if (constant != other.constant) return false;
 
-      return true;
+      if (constant) {
+        return constval != other.constval;
+      } else {
+        if (valuenum != other.valuenum) return false;
+        if (index != other.index) return false;
+        if (neg != other.neg) return false;
+        return true;
+      }
     }
 
     bool operator!=(const Uniform& other) const
@@ -627,6 +644,9 @@ struct ConstProp : public ShStatementInfo {
     ValueNum valuenum;
     int index;
     bool neg;
+
+    bool constant;
+    float constval;
   };
 
   class Value {
@@ -705,7 +725,11 @@ struct ConstProp : public ShStatementInfo {
     {
       for (int i = 0; i < opInfo[cp->stmt->op].arity; i++) {
         for (int j = 0; j < cp->src[i].size(); j++) {
-          src[i].push_back(cp->src[i][j].uniform);
+          if (cp->src[i][j].state == Cell::UNIFORM) {
+            src[i].push_back(cp->src[i][j].uniform);
+          } else {
+            src[i].push_back(Uniform(cp->src[i][j].value));
+          }
         }
       }
     }
@@ -798,8 +822,12 @@ std::vector<ConstProp::Value*> ConstProp::Value::m_values = std::vector<ConstPro
 
 std::ostream& operator<<(std::ostream& out, const ConstProp::Uniform& uniform)
 {
-  if (uniform.neg) out << '-';
-  out << "v" << uniform.valuenum << "[" << uniform.index << "]";
+  if (uniform.constant) {
+    out << uniform.constval;
+  } else {
+    if (uniform.neg) out << '-';
+    out << "v" << uniform.valuenum << "[" << uniform.index << "]";
+  }
   return out;
 }
 
@@ -811,7 +839,7 @@ void ConstProp::Value::dump(std::ostream& out)
     if (m_values[i]->type == NODE) {
       out << "node " << m_values[i]->node->name() << std::endl;
     } else if (m_values[i]->type == STMT) {
-      out << "stmt " << opInfo[m_values[i]->op].name << " ";
+      out << "stmt [" << m_values[i]->destsize << "] " << opInfo[m_values[i]->op].name << " ";
       for (int j = 0; j < opInfo[m_values[i]->op].arity; j++) {
         if (j) out << ", ";
         for (std::vector<Uniform>::iterator U = m_values[i]->src[j].begin();
@@ -953,6 +981,8 @@ struct FinishConstProp
           }
 
           if (!lift_uniforms) continue;
+
+          SH_DEBUG_PRINT("Considering " << *I << " for uniform lifting");
           
           bool alluniform = true;
           for (int s = 0; s < opInfo[I->op].arity; s++) {
@@ -962,11 +992,16 @@ struct FinishConstProp
                 break;
               }
             }
-            if (alluniform) break; // We don't care about all-uniforms.
-            // Except we might care in the case of output assignments.
+            if (!alluniform) break;
           }
-          if (!alluniform) {
+          if (!alluniform || I->dest.node()->kind() == SH_OUTPUT) {
+            SH_DEBUG_PRINT("Really considering " << *I << " for uniform lifting");
             for (int s = 0; s < opInfo[I->op].arity; s++) {
+              if (I->src[s].uniform()) {
+                SH_DEBUG_PRINT(*I << ".src[" << s << "] is already a uniform");
+                continue;
+              }
+
               bool mixed = false;
               bool neg = false;
               ConstProp::ValueNum uniform = -1;
@@ -990,19 +1025,28 @@ struct FinishConstProp
               }
               
               
-              if (mixed) continue;
-              if (uniform < 0) continue;
+              if (mixed) {
+                SH_DEBUG_PRINT(*I << ".src[" << s << "] is mixed");
+                continue;
+              }
+              if (uniform < 0) {
+                SH_DEBUG_PRINT(*I << ".src[" << s << "] is not uniform");
+                continue;
+              }
               ConstProp::Value* value = ConstProp::Value::get(uniform);
 
-              if (value->type == ConstProp::Value::NODE) continue;
 
-              SH_DEBUG_PRINT("Lifting uniform with " << indices.size() << " indices");
+              SH_DEBUG_PRINT("Lifting " << *I << ".src[" << s << "]");
               
               ShSwizzle swizzle(value->destsize, indices.size(), &(*indices.begin()));
               SH_DEBUG_PRINT("Swizzle = " << swizzle);
               // Build a uniform to represent this computation.
               ShVariableNodePtr node = build_uniform(value, uniform);
-              I->src[s] = ShVariable(node, swizzle, neg);
+              if (node) {
+                I->src[s] = ShVariable(node, swizzle, neg);
+              } else {
+                SH_DEBUG_PRINT("Could not lift " << *I << ".src[" << s << "] for some reason");
+              }
             }
           }
         }
@@ -1016,17 +1060,24 @@ struct FinishConstProp
   ShVariableNodePtr build_uniform(ConstProp::Value* value,
                                   ConstProp::ValueNum valuenum)
   {
+    if (value->type == ConstProp::Value::NODE) {
+      return value->node;
+    }
+    
     ShContext::current()->enter(0);
     ShVariableNodePtr node = new ShVariableNode(SH_TEMP, value->destsize);
     ShContext::current()->exit();
 
     SH_DEBUG_PRINT("Lifting value #" << valuenum);
+
+    bool broken = false;
     
     ShProgram prg = SH_BEGIN_PROGRAM("uniform") {
       ShStatement stmt(node, value->op);
 
       for (int i = 0; i < opInfo[value->op].arity; i++) {
         stmt.src[i] = compute(value->src[i]);
+        if (stmt.src[i].null()) broken = true;
       }
 
       ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
@@ -1043,6 +1094,7 @@ struct FinishConstProp
       system(cmdline.c_str());
     }
 
+    if (broken) return 0;
     node->attach(prg.node());
 
     value->type = ConstProp::Value::NODE;
@@ -1054,26 +1106,51 @@ struct FinishConstProp
   ShVariable compute(const std::vector<ConstProp::Uniform>& src)
   {
     ConstProp::ValueNum v = -1;
+    
     bool allsame = true;
     bool neg = false;
     std::vector<int> indices;
+    std::vector<float> constvals;
     for (int i = 0; i < src.size(); i++) {
-      if (v < 0) {
-        v = src[i].valuenum;
-        neg = src[i].neg;
-      } else {
-        if (v != src[i].valuenum || neg != src[i].neg) {
+      if (src[i].constant) {
+        if (v >= 0) {
           allsame = false;
+          break;
         }
+        constvals.push_back(src[i].constval);
+      } else {
+        if (v < 0 && constvals.empty()) {
+          v = src[i].valuenum;
+          neg = src[i].neg;
+        } else {
+          if (v != src[i].valuenum || neg != src[i].neg || !constvals.empty()) {
+            allsame = false;
+          }
+        }
+        indices.push_back(src[i].index);
       }
-      indices.push_back(src[i].index);
     }
     if (!allsame) {
-      // TODO: Make intermediate variables, combine them together.
       SH_DEBUG_PRINT("Source is not heterogenous");
-      return ShVariable();
+      // TODO: Make intermediate variables, combine them together.
+      ShVariable r = ShVariable(new ShVariableNode(SH_TEMP, src.size()));
+      
+      for (int i = 0; i < src.size(); i++) {
+        std::vector<ConstProp::Uniform> v;
+        v.push_back(src[i]);
+        ShVariable scalar = compute(v);
+        ShStatement stmt(r(i), SH_OP_ASN, scalar);
+        ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+      }
+      return r;
     }
 
+    if (!constvals.empty()) {
+      ShVariable var(new ShVariableNode(SH_CONST, constvals.size()));
+      var.setValues(&*constvals.begin());
+      return var;
+    }
+    
     ConstProp::Value* value = ConstProp::Value::get(v);
     
     if (value->type == ConstProp::Value::NODE) {
@@ -1088,6 +1165,7 @@ struct FinishConstProp
 
       for (int i = 0; i < opInfo[value->op].arity; i++) {
         stmt.src[i] = compute(value->src[i]);
+        if (stmt.src[i].null()) return ShVariable();
       }
 
       ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);

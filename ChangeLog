@@ -5,6 +5,9 @@
 	setting up a statement-based cell.
 	(propagate_constants): Set negatives appropriately when
 	propagating uniforms.
+	(...): Added support for mixed (constant/uniform) operations to be
+	lifted. Seems to be slightly broken still.
+	(ConstProp::updateDest): Handle SH_OP_ASN specially.
 
 2004-08-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
