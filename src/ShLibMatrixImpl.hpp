@@ -242,6 +242,64 @@ inverse(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix)
   return adjoint(matrix) * rcp(det(matrix));
 }
 
+template<int N, typename T>
+ShMatrix<1, N, SH_TEMP, T>
+rowmat(const ShGeneric<N, T>& s0)
+{
+  ShMatrix<1, N, SH_TEMP, T> r;
+  r[0] = s0;
+  return r;
+}
+
+template<int N, typename T>
+ShMatrix<2, N, SH_TEMP, T>
+rowmat(const ShGeneric<N, T>& s0,
+       const ShGeneric<N, T>& s1)
+{
+  ShMatrix<2, N, SH_TEMP, T> r;
+  r[0] = s0;
+  r[1] = s1;
+  return r;
+}
+
+template<int N, typename T>
+ShMatrix<3, N, SH_TEMP, T>
+rowmat(const ShGeneric<N, T>& s0,
+       const ShGeneric<N, T>& s1,
+       const ShGeneric<N, T>& s2)
+{
+  ShMatrix<3, N, SH_TEMP, T> r;
+  r[0] = s0;
+  r[1] = s1;
+  r[2] = s2;
+  return r;
+}
+
+
+template<int N, typename T>
+ShMatrix<4, N, SH_TEMP, T>
+rowmat(const ShGeneric<N, T>& s0,
+       const ShGeneric<N, T>& s1,
+       const ShGeneric<N, T>& s2,
+       const ShGeneric<N, T>& s3)
+{
+  ShMatrix<4, N, SH_TEMP, T> r;
+  r[0] = s0;
+  r[1] = s1;
+  r[2] = s2;
+  r[3] = s3;
+  return r;
+}
+
+template<int N, typename T>
+ShMatrix<N, N, SH_TEMP, T>
+diag(const ShGeneric<N, T>& a)
+{
+  ShMatrix<N, N, SH_TEMP, T> r;
+  
+  for (int i = 0; i < N; ++i) r[i][i] = a[i];
+  return r;
+}
 
 }
 

@@ -137,6 +137,32 @@ template<int RowsCols, ShBindingType Binding2, typename T2>
 ShMatrix<RowsCols,RowsCols, SH_TEMP, T2>
 inverse(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
 
+template<int N, typename T>
+ShMatrix<1, N, SH_TEMP, T>
+rowmat(const ShGeneric<N, T>& s0);
+
+template<int N, typename T>
+ShMatrix<2, N, SH_TEMP, T>
+rowmat(const ShGeneric<N, T>& s0,
+       const ShGeneric<N, T>& s1);
+
+template<int N, typename T>
+ShMatrix<3, N, SH_TEMP, T>
+rowmat(const ShGeneric<N, T>& s0,
+       const ShGeneric<N, T>& s1,
+       const ShGeneric<N, T>& s2);
+
+template<int N, typename T>
+ShMatrix<4, N, SH_TEMP, T>
+rowmat(const ShGeneric<N, T>& s0,
+       const ShGeneric<N, T>& s1,
+       const ShGeneric<N, T>& s2,
+       const ShGeneric<N, T>& s3);
+
+template<int N, typename T>
+ShMatrix<N, N, SH_TEMP, T>
+diag(const ShGeneric<N, T>& a);
+
 /*@}*/
 
 }

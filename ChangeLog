@@ -2,6 +2,7 @@
 
 	* src/ShLibMatrix.hpp: Moved (and renamed) inverse, adjoint,
 	transpose, cofactors and det here. Resolves issue94.
+	Added diag and rowmat. Resolves issue98 and half of issue97.
 
 	* Added copyright statements to the heads of all the files that
 	were missing.
