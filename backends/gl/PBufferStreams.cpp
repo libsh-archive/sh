@@ -377,19 +377,6 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   // optimize
   optimize(fp);
 
-  int gl_error;
-  glEnable(GL_VERTEX_PROGRAM_ARB);
-  gl_error = glGetError();
-  if (gl_error != GL_NO_ERROR) {
-    shError(PBufferStreamException("Could not enable GL_VERTEX_PROGRAM_ARB"));
-    return;
-  }
-  glEnable(GL_FRAGMENT_PROGRAM_ARB);
-  gl_error = glGetError();
-  if (gl_error != GL_NO_ERROR) {
-    shError(PBufferStreamException("Could not enable GL_FRAGMENT_PROGRAM_ARB"));
-    return;
-  }
 #ifdef SH_DEBUG_PBS_PRINTFP
   {
   std::ofstream fpgv("pb.dot");
@@ -476,7 +463,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program,
   TIMING_RESULT(finish);
 
   
-  gl_error = glGetError();
+  int gl_error = glGetError();
   if (gl_error != GL_NO_ERROR) {
     shError(PBufferStreamException("Could not render"));
     return;

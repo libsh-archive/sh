@@ -17,6 +17,9 @@ int gprintf(int x, int y, char* fmt, ...);
 // Animation data
 float angle = 0;
 
+ShProgram vsh;
+ShProgram fsh;
+
 void display()
   {
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -30,8 +33,8 @@ void display()
   
   // turn off vertex and fragment programs, this
   // effectively turns off Sh
-  glDisable(GL_VERTEX_PROGRAM_ARB);
-  glDisable(GL_FRAGMENT_PROGRAM_ARB);
+  shUnbind(vsh);
+  shUnbind(fsh);
 
   // push modelview matrix and load the rotation
   // for the point light
@@ -54,8 +57,9 @@ void display()
   glPopMatrix();
   
   // turn vertex and fragment programs back on 
-  glEnable(GL_VERTEX_PROGRAM_ARB);
-  glEnable(GL_FRAGMENT_PROGRAM_ARB);
+  // bind programs
+  shBind(vsh);
+  shBind(fsh);
 
   // setup the modelview matrix with the rotation
   // for the dodecahedron and draw it
@@ -150,7 +154,7 @@ void init_sh()
   ambient.meta("opengl:readonly", "true");
   
   // construct vertex program
-  ShProgram vsh = SH_BEGIN_VERTEX_PROGRAM {
+  vsh = SH_BEGIN_VERTEX_PROGRAM {
     ShInputPosition4f ipos;
     ShInputNormal3f inrm;
 
@@ -166,7 +170,7 @@ void init_sh()
   } SH_END;
 
   // construct fragment program
-  ShProgram fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+  fsh = SH_BEGIN_FRAGMENT_PROGRAM {
     ShInputPosition4f ipos;
     ShInputNormal3f inrm;
     ShInputVector3f ilightv;
@@ -180,9 +184,6 @@ void init_sh()
     oclr = pos(inrm|ilightv)*diffuse + ambient;
   } SH_END;
 
-  // bind programs
-  shBind(vsh);
-  shBind(fsh);
   }
 
 int main(int argc, char** argv)

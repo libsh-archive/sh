@@ -120,8 +120,6 @@ int main(int argc, char** argv)
   initShaders();
   
   glEnable(GL_DEPTH_TEST);
-  glEnable(GL_VERTEX_PROGRAM_ARB);
-  glEnable(GL_FRAGMENT_PROGRAM_ARB);
   glClearColor(0.0, 0.0, 0.0, 1.0);
   setupView();
 
