@@ -1,3 +1,8 @@
+2004-01-15  Bryan Chan  <b8chan@enora.cgl.uwaterloo.ca>
+	* src/Makefile.am: Added missing headers
+
+	* src/ShManipulator.?pp: Added input manipulation
+	
 2004-01-15  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* test/stream.cpp: Added initial stream test.

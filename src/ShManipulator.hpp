@@ -9,30 +9,50 @@ namespace SH {
 /** \brief A ShManipulator is a ShProgram output manipulator. 
  * This kind of manipulator permutes the outputs of 
  * a ShProgram based on given integer indices. 
+ *
+ * (negative indices -k mean k^th channel from the end, with -1
+ * being the last output channel) 
  */
 class ShManipulator {
   public:
     /** \brief Creates empty manipulator of given size
      */
     ShManipulator();
-    ShManipulator( const ShManipulator &m );
+    ShManipulator(const ShManipulator &m);
     
   protected:
     typedef std::pair<int, int> IndexRange; 
     typedef std::vector< IndexRange > IndexRangeVector;
 
-    void append( int i );
-    void append( int start, int end );
-    void append( IndexRange r ); 
+    void append(int i);
+    void append(int start, int end);
+    void append(IndexRange r); 
 
     IndexRangeVector m_ranges; 
 
-    friend ShProgram operator<<( const ShProgram &p, const ShManipulator &m );
+    friend ShProgram operator<<(const ShProgram &p, const ShManipulator &m); 
+    friend ShProgram operator<<(const ShManipulator &m, const ShProgram &p);
 };
 
-/** \brief Applies a manipulator to a ShProgram
+/** \brief Applies a manipulator to inputs of a ShProgram
+ *
+ * The permutation ranges are more restrictive than output manipulation
+ * since inputs cannot be repeated, and should not be discarded.
+ *
+ * This means that ranges in the manipulator must not overlap, and any inputs not 
+ * in a range are appended at the end in order.
  */
-ShProgram operator<<( const ShProgram &p, const ShManipulator &m );
+ShProgram operator<<(const ShProgram &p, const ShManipulator &m); 
+ShProgram operator>>(const ShManipulator &m, const ShProgram &p); /// Equiv. to p << m 
+
+/** \brief Applies a manipulator to the outputs of a ShProgram
+ *
+ * This makes sense since >> is left associative, so 
+ *    p >> m >> q
+ * looks like manipulating p's output channels to use as q's inputs.
+ */
+ShProgram operator<<(const ShManipulator &m, const ShProgram &p);
+ShProgram operator>>(const ShProgram &p, const ShManipulator &m); /// Equiv. to m << p 
 
 
 #if 0
@@ -43,8 +63,8 @@ ShProgram operator<<( const ShProgram &p, const ShManipulator &m );
  */
 class ShFixedSizeManipulator: public ShManipulator {
   public:
-    ShFixedSizeManipulator( int srcSize );
-    ShFixedSizeManipulator operator&( const ShFixedSizeManipulator &b ) const;
+    ShFixedSizeManipulator(int srcSize);
+    ShFixedSizeManipulator operator&(const ShFixedSizeManipulator &b) const;
 
   protected:
     int m_srcSize;
@@ -53,19 +73,19 @@ class ShFixedSizeManipulator: public ShManipulator {
 /// keep(n) is a fixed size manipulator that passes through n shader outputs (n > 0)
 class keep: public ShFixedSizeManipulator {
   public:
-    keep( int n = 1 );
+    keep(int n = 1);
 };
 
 /// lose(n) is a fixed size manipulator that discards n shader outputs (n > 0) 
 /// inputs (n > 0) 
 class lose: public ShFixedSizeManipulator {
   public:
-    lose( int n = 1 );
+    lose(int n = 1);
 };
 
 #endif
 
-/// permute( a1, ... ) is a manipulator that permutes 
+/// permute(a1, ...) is a manipulator that permutes 
 // shader outputs based on given indices
 //
 class shPermute: public ShManipulator {
@@ -76,21 +96,21 @@ class shPermute: public ShManipulator {
      * if an index >= 0, then uses index'th output
      * if index < 0, then uses program size + index'th output
      */
-    shPermute( int outputSize, ... ); 
-    shPermute( std::vector<int> indices );
+    shPermute(int outputSize, ...); 
+    shPermute(std::vector<int> indices);
 
-    shPermute operator*( const shPermute &p ) const;
+    shPermute operator*(const shPermute &p) const;
 };
 
 /// range manipulator that permutes ranges of shader
 // outputs based on given indices
 class shRange: public ShManipulator {
   public:
-    shRange( int i );
-    shRange( int start, int end );
+    shRange(int i);
+    shRange(int start, int end);
 
-    shRange operator()( int i );
-    shRange operator()( int start, int end );
+    shRange operator()(int i);
+    shRange operator()(int start, int end);
 };
 
 /** extract is a manipulator that removes the kth output
@@ -101,7 +121,7 @@ class shRange: public ShManipulator {
  */
 class shExtract: public ShManipulator {
   public:
-    shExtract( int k ); 
+    shExtract(int k); 
 };
 
 /** drop is a manipulator that discards the k outputs.
@@ -111,7 +131,7 @@ class shExtract: public ShManipulator {
  */
 class shDrop: public ShManipulator {
   public:
-    shDrop( int k );
+    shDrop(int k);
 };
 
 }

@@ -59,4 +59,4 @@ incinc_HEADERS = ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp \
                    ShNormal.hpp ShLibNormal.hpp \
                    ShTexCoord.hpp ShLibTexCoord.hpp \
                    ShDomTree.hpp ShOptimizer.hpp ShAlgebra.hpp \
-									 ShManipulator.hpp ShStreamNode.hpp ShStream.hpp 
+									 ShManipulator.hpp ShStreamNode.hpp ShStream.hpp ShStreamImpl.hpp 

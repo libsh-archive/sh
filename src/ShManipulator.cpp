@@ -25,7 +25,76 @@ void ShManipulator::append(IndexRange r) {
   m_ranges.push_back(r);
 }
 
+/* input permutation  */
 ShProgram operator<<(const ShProgram &p, const ShManipulator &m) {
+  int size = p->inputs.size();
+  int i;
+
+  ShProgram permuter = SH_BEGIN_PROGRAM() {
+    /* Make shader outputs from p's inputs */
+    std::vector<ShVariable> outputs;
+    for(ShProgramNode::VarList::const_iterator inIt = p->inputs.begin();
+        inIt != p->inputs.end(); ++inIt) {
+      outputs.push_back(ShVariable(new ShVariableNode(SH_VAR_OUTPUT, 
+              (*inIt)->size(), (*inIt)->specialType())));
+    }
+
+    int size = outputs.size();
+
+    /* Make shader outputs from permuted ranges of inputs */
+    std::vector<bool> used(size, false); //mark used inputs
+    for(ShManipulator::IndexRangeVector::const_iterator irvIt = m.m_ranges.begin();
+        irvIt != m.m_ranges.end(); ++irvIt) {
+      int start = irvIt->first;
+      if(start < 0) start = size + start;
+      
+      int end = irvIt->second;
+      if(end < 0) end = size + end;
+
+      if(start < 0 || start >= size || end < 0 || end >= size) {
+        std::ostringstream os;
+        os << "Invalid ShManipulator Range (" << irvIt->first << ", " <<
+          irvIt->second << ") for an ShProgram with output size " << size;
+         
+        ShError(ShAlgebraException(os.str())); 
+      }
+
+      for(i = start; i <= end; ++i) {
+        if(used[i]) {
+          std::ostringstream os;
+          os << "Duplicate index " << i << " in range (" << start 
+            << ", " << end << ") not allowed for input manipulators"; 
+          ShError(ShAlgebraException(os.str()));
+        }
+        used[i] = true;
+
+        ShVariable input(new ShVariableNode(SH_VAR_INPUT, 
+              outputs[i].node()->size(), outputs[i].node()->specialType()));
+
+        ShStatement stmt(outputs[i], SH_OP_ASN, input);
+        ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+      }
+    }
+
+    for(i = 0; i < size; ++i) {
+      if(!used[i]) {
+        ShVariable input(new ShVariableNode(SH_VAR_INPUT, 
+              outputs[i].node()->size(), outputs[i].node()->specialType()));
+
+        ShStatement stmt(outputs[i], SH_OP_ASN, input);
+        ShEnvironment::shader->tokenizer.blockList()->addStatement(stmt);
+      }
+    }
+  } SH_END_PROGRAM;
+
+  return connect(permuter, p); 
+}
+
+ShProgram operator>>(const ShManipulator &m, const ShProgram &p) {
+  return p << m;
+}
+
+ShProgram operator<<(const ShManipulator &m, const ShProgram &p) {
   int size = p->outputs.size();
 
   ShProgram permuter = SH_BEGIN_PROGRAM() {
@@ -68,6 +137,11 @@ ShProgram operator<<(const ShProgram &p, const ShManipulator &m) {
 
   return connect(p, permuter); 
 }
+
+ShProgram operator>>(const ShProgram &p, const ShManipulator &m) {
+  return m << p;
+}
+
 
 #if 0
 ShFixedSizeManipulator::ShFixedSizeManipulator(int srcSize)
@@ -150,8 +224,8 @@ shRange shRange::operator()(int start, int end) {
 
 shExtract::shExtract(int k) {
   append(k);
-  append(0, k - 1);
-  append(k + 1, -1);
+  if( k != 0 ) append(0, k - 1);
+  if( k != -1 ) append(k + 1, -1);
 }
 
 shDrop::shDrop(int k) {
