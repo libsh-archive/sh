@@ -62,13 +62,18 @@ void ShProgramNode::compile(const std::string& target, const ShPointer<ShBackend
   if (!backend) return;
 
   ShContext::current()->enter(this);
-
-  collectVariables();
-
-  ShBackendCodePtr code = backend->generateCode(target, this);
+  ShBackendCodePtr code = 0;
+  try {
+    collectVariables();
+    
+    code = backend->generateCode(target, this);
 #ifdef SH_DEBUG
-  // code->print(std::cerr);
+    // code->print(std::cerr);
 #endif
+  } catch (...) {
+    ShContext::current()->exit();
+    throw;
+  }
   ShContext::current()->exit();
   m_code[std::make_pair(target, backend)] = code;
 }

@@ -167,23 +167,31 @@ void ArbCode::generate()
     ShContext::current()->enter(m_shader);
   }
 
-  if (m_environment & SH_ARB_NVFP2) {
-    // In NV_fragment_program2, we actually generate structured code.
-    ShStructural str(m_shader->ctrlGraph);
+  try {
+    if (m_environment & SH_ARB_NVFP2) {
+      // In NV_fragment_program2, we actually generate structured code.
+      ShStructural str(m_shader->ctrlGraph);
 
-    genStructNode(str.head());
+      genStructNode(str.head());
     
-  } else {
-    m_shader->ctrlGraph->entry()->clearMarked();
-    genNode(m_shader->ctrlGraph->entry());
+    } else {
+      m_shader->ctrlGraph->entry()->clearMarked();
+      genNode(m_shader->ctrlGraph->entry());
     
-    if (m_environment & SH_ARB_NVVP2) {
-      m_instructions.push_back(ArbInst(SH_ARB_LABEL, getLabel(m_shader->ctrlGraph->exit())));
+      if (m_environment & SH_ARB_NVVP2) {
+        m_instructions.push_back(ArbInst(SH_ARB_LABEL, getLabel(m_shader->ctrlGraph->exit())));
+      }
     }
+    m_shader->ctrlGraph->entry()->clearMarked();
+    allocRegs();
+  } catch (...) {
+    std::cerr << "Caught exception in ARB code generation" << std::endl;
+    m_shader->ctrlGraph->entry()->clearMarked();
+    std::cerr << "parsing: " << ShContext::current()->parsing() << std::endl;
+    ShContext::current()->exit();
+    std::cerr << "parsing: " << ShContext::current()->parsing() << std::endl;
+    throw;
   }
-  m_shader->ctrlGraph->entry()->clearMarked();
-  allocRegs();
-  
   ShContext::current()->exit();
 }
 

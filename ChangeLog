@@ -1,8 +1,15 @@
 2004-10-22  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
+	* src/ShTransformer.cpp: Instead of popping the current program,
+	push 0, when constructing uniforms.
+
+	* src/ShProgramNode.cpp (compile): More exception safety fixes.
+
 	* backends/gl/ArbCode.cpp (upload): Call shError() when the driver
 	doesn't allow code to be uploaded (e.g. due to failing instruction
 	limits).
+	(generate): Exception safety fix (leave context and rethrow
+	exception if we get one).
 
 	* src/ShException.cpp (ShBackendException): Implement
 	ShBackendException constructor.

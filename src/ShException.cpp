@@ -33,6 +33,10 @@ ShException::ShException(const std::string& message)
 {
 }
 
+ShException::~ShException()
+{
+}
+
 const std::string& ShException::message() const
 {
   return m_message;
