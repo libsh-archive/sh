@@ -24,6 +24,26 @@ public:
 };
 
 template<typename T>
+class ShWrapClampToEdge : public T {
+public:
+  ShWrapClampToEdge(int width)
+    : T(width)
+  {
+    m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE);
+  }
+  ShWrapClampToEdge(int width, int height)
+    : T(width, height)
+  {
+    m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE);
+  }
+  ShWrapClampToEdge(int width, int height, int depth)
+    : T(width, height, depth)
+  {
+    m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE);
+  }
+};
+
+template<typename T>
 class ShWrapRepeat : public T {
 public:
   ShWrapRepeat(int width)

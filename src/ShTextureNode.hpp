@@ -60,6 +60,7 @@ public:
   
   enum Wrapping {
     SH_WRAP_CLAMP,
+    SH_WRAP_CLAMP_TO_EDGE,
     SH_WRAP_REPEAT
   };
   enum Clamping {
