@@ -4,6 +4,7 @@
 #include <map>
 #include <set>
 #include <iostream>
+#include <sstream>
 #include "ShOperation.hpp"
 #include "ShVariableNode.hpp"
 #include "ShContext.hpp"
@@ -128,48 +129,69 @@ struct ScheduleBuilder {
     node_to_pass[node.object()] = &passes.back();
     pass_to_node[&passes.back()] = node.object();
 
-    // TODO: We need to turn shared temporaries into inputs/outputs
+    // We need to turn shared temporaries into inputs/outputs
 
     std::set<ShVariableNode*> handled_output;
     std::set<ShVariableNode*> handled_input;
 
+    typedef std::list<std::pair<ShVariableNode*, ShVariableNode*> > TempList;
+    TempList output_temps, input_temps;
+    
     ShContext::current()->enter(pass.program);
-    if (new_body->block) for (ShBasicBlock::ShStmtList::iterator I = new_body->block->begin();
-                              I != new_body->block->end(); ++I) {
-      if (I->dest.node() && I->dest.node()->kind() == SH_TEMP) {
-        ShVariableNode* vnode = I->dest.node().object();
-        if (handled_output.find(vnode) == handled_output.end() &&
-            register_map.find(vnode) != register_map.end()) {
-          // Need to add an output for this node
-          ShVariableNodePtr outnode = new ShVariableNode(SH_OUTPUT,
-                                                         vnode->size(),
-                                                         vnode->valueType());
+    if (new_body->block) {
+      for (ShBasicBlock::ShStmtList::iterator I = new_body->block->begin();
+           I != new_body->block->end(); ++I) {
+        if (I->dest.node() && I->dest.node()->kind() == SH_TEMP) {
+          ShVariableNode* vnode = I->dest.node().object();
+          if (handled_output.find(vnode) == handled_output.end() &&
+              register_map.find(vnode) != register_map.end()) {
+            // Need to add an output for this node
+            ShVariableNodePtr outnode = new ShVariableNode(SH_OUTPUT,
+                                                           vnode->size(),
+                                                           vnode->valueType());
           
-          // TODO: Add an assignment statement at end of pass
-          
-          pass.outputs.push_back(register_map[vnode]);
-          handled_output.insert(vnode);
+            {
+              std::ostringstream os;
+              os << "buf[" << register_map[vnode].id << "]_out";
+              outnode->name(os.str());
+            }
+            pass.outputs.push_back(register_map[vnode]);
+            handled_output.insert(vnode);
+            output_temps.push_back(std::make_pair(vnode, outnode.object()));
+          }
+        }
+        for (int i = 0; i < opInfo[I->op].arity; i++) {
+          if (!I->src[i].node() || I->src[i].node()->kind() != SH_TEMP) continue;
+          ShVariableNode* vnode = I->src[i].node().object();
+
+          if (handled_input.find(vnode) != handled_input.end() ||
+              register_map.find(vnode) == register_map.end()) continue;
+
+          // Need to add an input for this node
+          ShVariableNodePtr innode = new ShVariableNode(SH_INPUT,
+                                                        vnode->size(),
+                                                        vnode->valueType());
+          {
+            std::ostringstream os;
+            os << "buf[" << register_map[vnode].id << "]_in";
+            innode->name(os.str());
+          }
+          pass.inputs.push_back(register_map[vnode]);
+          handled_input.insert(vnode);
+          input_temps.push_back(std::make_pair(vnode, innode.object()));
         }
       }
-      for (int i = 0; i < opInfo[I->op].arity; i++) {
-        if (!I->src[i].node() || I->src[i].node()->kind() != SH_TEMP) continue;
-        ShVariableNode* vnode = I->src[i].node().object();
 
-        if (handled_input.find(vnode) != handled_input.end() ||
-            register_map.find(vnode) == register_map.end()) continue;
-
-        // Need to add an input for this node
-        ShVariableNodePtr innode = new ShVariableNode(SH_INPUT,
-                                                      vnode->size(),
-                                                      vnode->valueType());
-        
-        // TODO: Add an assignment statement at beginning of pass
-        pass.inputs.push_back(register_map[vnode]);
-        handled_output.insert(vnode);
+      // Add the assignment statements connecting the temporaries to inputs/outputs.
+      for (TempList::const_iterator I = input_temps.begin(); I != input_temps.end(); ++I){
+        new_body->block->prependStatement(ShStatement(ShVariable(I->first), SH_OP_ASN,
+                                                      ShVariable(I->second)));
+      }
+      for (TempList::const_iterator I = output_temps.begin(); I != output_temps.end(); ++I){
+        new_body->block->addStatement(ShStatement(ShVariable(I->second), SH_OP_ASN,
+                                                  ShVariable(I->first)));
       }
     }
-
-    // TODO: Add assignment statements
     
     ShContext::current()->exit();
   }
@@ -267,9 +289,9 @@ void ShSchedule::dump_graphviz(std::ostream& out)
     out << ";" << std::endl;
     if (pass.predicate_pass) {
       out << "  \"" << &pass << "\" -> \"" << pass.predicate_pass << "\""
-          << " [label=\"b" << pass.predicate.id << "\"];" << std::endl;
+          << " [label=\"buf[" << pass.predicate.id << "]\"];" << std::endl;
       out << "  \"" << &pass << "\" -> \"" << pass.default_pass << "\""
-          << " [label=\"!b" << pass.predicate.id << "\"];" << std::endl;
+          << " [label=\"not buf[" << pass.predicate.id << "]\"];" << std::endl;
     } else {
       if (pass.default_pass) {
         out << "  \"" << &pass << "\" -> \"" << pass.default_pass << "\";" << std::endl;
