@@ -23,7 +23,9 @@
 #include "ShClamping.hpp"
 #include "ShImage.hpp"
 
-#define PCS_DEBUG_LOG
+//#define PCS_DEBUG_LOG
+
+#define USE_TILES
 
 namespace {
 using namespace SH;
@@ -166,13 +168,21 @@ namespace shgl {
 using namespace SH;
 
 struct PCPass : public ShVoid {
-  PCPass(double pc) : pc(pc)
+  PCPass(double pc) : 
+    pc(pc)
+#ifdef USE_TILES
+    , tile_counts(0)
+#endif
   {
   }
   
   double pc;
 
   std::list<ShProgramNodePtr> programs;
+
+#ifdef USE_TILES
+  int* tile_counts;
+#endif
 };
 
 typedef ShPointer<PCPass> PCPassPtr;
@@ -201,7 +211,7 @@ private:
 
   ShSchedule* m_schedule;
   
-  GLuint m_query;
+  GLuint* m_queries;
 
   // Vertex program
   ShProgram m_vp;
@@ -210,6 +220,11 @@ private:
   ShProgram m_dummy_fp;
 
   int m_width, m_height;
+
+#ifdef USE_TILES
+  int m_twidth, m_theight;
+  int m_xtiles, m_ytiles;
+#endif
 
   PBufferContextPtr m_context;
 
@@ -322,7 +337,7 @@ ShBackendSchedulePtr PCScheduler::prepare(ShSchedule* schedule)
 }
 
 PCSchedule::PCSchedule(ShSchedule* schedule)
-  : m_schedule(schedule), m_width(0), m_height(0)
+  : m_schedule(schedule), m_queries(0), m_width(0), m_height(0)
 {
 #ifdef PCS_DEBUG_LOG
   m_debug_log.open("pc_dump.html", std::ofstream::out | std::ofstream::trunc);
@@ -386,7 +401,9 @@ PCSchedule::~PCSchedule()
   m_debug_log << "</body></html>" << std::endl;
   m_debug_log.close();
 #endif
-  SH_GL_CHECK_ERROR(glDeleteOcclusionQueriesNV(1, &m_query));
+  // TODO
+  //SH_GL_CHECK_ERROR(glDeleteOcclusionQueriesNV(1, &m_query));
+  delete [] m_queries;
 }
 
 void PCSchedule::pre_execution(int width, int height, const ShStream& outputs)
@@ -410,6 +427,7 @@ void PCSchedule::pre_execution(int width, int height, const ShStream& outputs)
   m_width = width;
   m_height = height;
 
+
   m_size = ShAttrib2f(m_width, m_height);
 
 #ifdef WIN32
@@ -426,7 +444,39 @@ void PCSchedule::pre_execution(int width, int height, const ShStream& outputs)
   SH_GL_CHECK_ERROR(glEnable(GL_FRAGMENT_PROGRAM_ARB));
   SH_GL_CHECK_ERROR(glClearColor(0.3, 0.4, 0.5, 0.6));
   SH_GL_CHECK_ERROR(glDisable(GL_CULL_FACE));
-  SH_GL_CHECK_ERROR(glGenOcclusionQueriesNV(1, &m_query));
+
+  delete [] m_queries;
+#ifdef USE_TILES
+  m_twidth = std::min(m_width, 16);
+  m_theight = std::min(m_height, 16);
+  m_xtiles = m_width/m_twidth;
+  m_ytiles = m_height/m_theight;
+
+  m_queries = new GLuint[m_xtiles * m_ytiles];
+  SH_GL_CHECK_ERROR(glGenOcclusionQueriesNV(m_xtiles * m_ytiles, m_queries));
+
+  for (ShSchedule::PassList::iterator I = m_schedule->begin(); I != m_schedule->end();
+       ++I) {
+    ShPass& pass = *I;
+
+    PCPassPtr pc_pass = shref_dynamic_cast<PCPass>(pass.backend_data);
+    SH_DEBUG_ASSERT(pc_pass);
+    
+    delete [] pc_pass->tile_counts;
+    pc_pass->tile_counts = new int[m_xtiles * m_ytiles];
+    
+    for (int i = 0; i < m_xtiles * m_ytiles; i++) {
+      if (I == m_schedule->begin()) {
+	pc_pass->tile_counts[i] = m_twidth * m_theight;
+      } else {
+	pc_pass->tile_counts[i] = 0;
+      }
+    }
+  }
+#else
+  m_queries = new GLuint[1];
+  SH_GL_CHECK_ERROR(glGenOcclusionQueriesNV(1, m_queries));
+#endif // !USE_TILES
 
   for (std::size_t i = 0; i < temp_buffers.size(); i++) {
     temp_buffers[i]->setTexSize(m_width, m_height);
@@ -542,15 +592,8 @@ void PCSchedule::execute_pass(ShPass* pass)
       SH_DEBUG_ASSERT(false);
     }
 
-#if 0 // SILLY DEBUG HACK
-    SH_GL_CHECK_ERROR(glClear(GL_COLOR_BUFFER_BIT));
-    shBind(m_black_fp);
-    SH_GL_CHECK_ERROR(glDepthFunc(GL_ALWAYS));
-    draw_quad(0.0, 0.0, m_width, m_height, pc_pass->pc);
-#else    
     SH_GL_CHECK_ERROR(glClear(GL_COLOR_BUFFER_BIT));
     shBind(m_copy_fp);
-
     
     SH_GL_CHECK_ERROR(glDepthFunc(GL_ALWAYS));
     draw_quad(0.0, 0.0, m_width, m_height, pc_pass->pc);
@@ -567,13 +610,22 @@ void PCSchedule::execute_pass(ShPass* pass)
     ShProgram prg(*I);
     shBind(prg);
 
-# if 1
     SH_GL_CHECK_ERROR(glDepthFunc(GL_EQUAL));
-# else
-    SH_GL_CHECK_ERROR(glDepthFunc(GL_ALWAYS));
-# endif
     // draw a quad at depth = pc
+
+#ifdef USE_TILES
+    for (int y = 0; y < m_ytiles; y++) {
+      for (int x = 0; x < m_xtiles; x++) {
+	int i = y*m_xtiles + x;
+	if (pc_pass->tile_counts[i] == 0) continue;
+	draw_quad(x     * m_twidth, y     * m_theight, 
+		  (x+1) * m_twidth, (y+1) * m_theight,
+		  pc_pass->pc);
+      }
+    }
+#else
     draw_quad(0.0, 0.0, m_width, m_height, pc_pass->pc);
+#endif
 #ifdef PCS_DEBUG_LOG
     m_debug_log
       << "<li>Running the pass to yield this (color/depth/stencil):<br>"
@@ -582,11 +634,9 @@ void PCSchedule::execute_pass(ShPass* pass)
       << debug_img(dump_stencil_buffer(make_unique_filename("copy", ".png"), m_width, m_height)) << std::endl;
 #endif
     
-#endif // ! SILLY DEBUG HACK
     copy_framebuffer_to_texture(m_context, m_copy_texture.node());
   }
 
-#if 1
   if (pass->predicate_pass) {
 #ifdef PCS_DEBUG_LOG
     m_debug_log
@@ -608,15 +658,35 @@ void PCSchedule::execute_pass(ShPass* pass)
     m_pred_texture.size(m_width, m_height);
 
     shBind(m_pred_fp);
-    
+    m_pred_kill = -1.0;
+
+#ifdef USE_TILES
+    // Assume not bad_occlusion_query
+    for (int y = 0; y < m_ytiles; y++) {
+      for (int x = 0; x < m_xtiles; x++) {
+	int i = y*m_xtiles + x;
+	if (pc_pass->tile_counts[i] == 0) continue;
+
+	SH_GL_CHECK_ERROR(glBeginOcclusionQueryNV(m_queries[i]));
+	draw_quad(x     * m_twidth, y     * m_theight, 
+		  (x+1) * m_twidth, (y+1) * m_theight,
+		  pred_pc_pass->pc);
+	SH_GL_CHECK_ERROR(glEndOcclusionQueryNV());
+      }
+    }
+#else
     if (!bad_occlusion_query) {
-      SH_GL_CHECK_ERROR(glBeginOcclusionQueryNV(m_query));
+      SH_GL_CHECK_ERROR(glBeginOcclusionQueryNV(m_queries[0]));
+    }
+    // draw a quad at depth = pc_pred, killing if false
+    draw_quad(0.0, 0.0, m_width, m_height, pred_pc_pass->pc);
+
+    if (!bad_occlusion_query) {
+      SH_GL_CHECK_ERROR(glEndOcclusionQueryNV());
     }
 
     
-    // draw a quad at depth = pc_pred, killing if false
-    m_pred_kill = -1.0;
-    draw_quad(0.0, 0.0, m_width, m_height, pred_pc_pass->pc);
+#endif // !USE_TILES
 
 #ifdef PCS_DEBUG_LOG
     m_debug_log
@@ -625,16 +695,13 @@ void PCSchedule::execute_pass(ShPass* pass)
       << debug_img(dump_depth_buffer(make_unique_filename("copy", ".png"), m_width, m_height)) << std::endl
       << debug_img(dump_stencil_buffer(make_unique_filename("copy", ".png"), m_width, m_height)) << std::endl;
 #endif
-    
-    if (!bad_occlusion_query) {
-      SH_GL_CHECK_ERROR(glEndOcclusionQueryNV());
-    }
 
     m_pred_kill = 1.0;
     // Shouldn't be necessary
     shBind(m_pred_fp);
     // draw a quad at depth = pc_default, killing if true
     draw_quad(0.0, 0.0, m_width, m_height, default_pc_pass->pc);
+
 
 #ifdef PCS_DEBUG_LOG
     m_debug_log
@@ -650,27 +717,77 @@ void PCSchedule::execute_pass(ShPass* pass)
       SH_GL_CHECK_ERROR(glDepthMask(GL_FALSE));
       shBind(m_dummy_fp);
       
-      SH_GL_CHECK_ERROR(glBeginOcclusionQueryNV(m_query));
+      SH_GL_CHECK_ERROR(glBeginOcclusionQueryNV(m_queries[0]));
       // draw a quad at depth = pc_pred
       draw_quad(0.0, 0.0, m_width, m_height, pred_pc_pass->pc);
       SH_GL_CHECK_ERROR(glEndOcclusionQueryNV());
     }
 
+
+#ifdef USE_TILES
+
+    GLuint available = 0;
+
+    GLuint* pred_count = new GLuint[m_xtiles * m_ytiles];
+
+    for (int i = 0; i < m_xtiles * m_ytiles; i++) {
+      if (pc_pass->tile_counts[i] == 0) continue;
+      do {
+	glGetOcclusionQueryuivNV(m_queries[i],
+				 GL_PIXEL_COUNT_AVAILABLE_NV,
+				 &available);
+      } while (available != GL_TRUE);
+      glGetOcclusionQueryuivNV(m_queries[i], GL_PIXEL_COUNT_NV, &pred_count[i]);
+    }
+
+#ifdef PCS_DEBUG_LOG
+    m_debug_log << "<table border=2>" << std::endl;
+#endif
+    for (int y = 0; y < m_ytiles; y++) {
+#ifdef PCS_DEBUG_LOG
+      m_debug_log << "<tr>" << std::endl;
+#endif
+      for (int x = 0; x < m_xtiles; x++) {
+	int i = y * m_xtiles + x;
+#ifdef PCS_DEBUG_LOG
+	if (pc_pass->tile_counts[i] == 0) {
+	  m_debug_log << "<td>N/A</td>";
+	} else {
+	  m_debug_log << "<td>" << pred_count[i] << "/" << (pc_pass->tile_counts[i] - pred_count[i])
+		      << "</td>";
+	}
+#endif
+	if (pc_pass->tile_counts[i] == 0) continue;
+        pass->predicate_pass->count += pred_count[i];
+        pass->default_pass->count += pc_pass->tile_counts[i] - pred_count[i];
+        pred_pc_pass->tile_counts[i] += pred_count[i];
+        default_pc_pass->tile_counts[i] += pc_pass->tile_counts[i] - pred_count[i];
+	pc_pass->tile_counts[i] = 0;
+      }
+#ifdef PCS_DEBUG_LOG
+      m_debug_log << "</tr>" << std::endl;
+#endif
+    }
+#ifdef PCS_DEBUG_LOG
+    m_debug_log << "</table>" << std::endl;
+#endif
+
+    delete [] pred_count;
+
+#else
     GLuint pred_count;
-    SH_GL_CHECK_ERROR(glGetOcclusionQueryuivNV(m_query, GL_PIXEL_COUNT_NV, &pred_count));
+    SH_GL_CHECK_ERROR(glGetOcclusionQueryuivNV(m_queries[0], GL_PIXEL_COUNT_NV, &pred_count));
 
     pass->predicate_pass->count += pred_count;
     pass->default_pass->count += pass->count - pred_count;
-
 #ifdef PCS_DEBUG_LOG
     m_debug_log << "<li>From " << pass->count << " total predicates, " << pred_count << " were true, and "
                 << (pass->count - pred_count) << " false." << std::endl;
 #endif
-  } else if (pass->default_pass) {
-#else
-  if (pass->default_pass) {
-#endif
+#endif // !USE_TILES
 
+
+  } else if (pass->default_pass) {
     SH_GL_CHECK_ERROR(glDepthFunc(GL_ALWAYS));
     SH_GL_CHECK_ERROR(glDepthMask(GL_TRUE));
     SH_GL_CHECK_ERROR(glStencilFunc(GL_EQUAL, 1, stencil_mask));
@@ -680,7 +797,19 @@ void PCSchedule::execute_pass(ShPass* pass)
     SH_DEBUG_ASSERT(default_pc_pass);
     shBind(m_black_fp);
     draw_quad(0.0, 0.0, m_width, m_height, default_pc_pass->pc);
-    
+
+#ifdef USE_TILES
+    for (int y = 0; y < m_ytiles; y++) {
+      for (int x = 0; x < m_xtiles; x++) {
+	int i = y * m_xtiles + x;
+	if (pc_pass->tile_counts[i] == 0) continue;
+
+        default_pc_pass->tile_counts[i] += pc_pass->tile_counts[i];
+	pc_pass->tile_counts[i] = 0;
+      }
+    }
+#endif // USE_TILES    
+
     pass->default_pass->count += pass->count;
 
 #ifdef PCS_DEBUG_LOG
@@ -689,7 +818,7 @@ void PCSchedule::execute_pass(ShPass* pass)
       << debug_img(dump_color_buffer(make_unique_filename("copy", ".png"), m_width, m_height)) << std::endl
       << debug_img(dump_depth_buffer(make_unique_filename("copy", ".png"), m_width, m_height)) << std::endl
       << debug_img(dump_stencil_buffer(make_unique_filename("copy", ".png"), m_width, m_height)) << std::endl;
-#endif
+#endif // PCS_DEBUG_LOG
   }
   pass->count = 0;
   m_schedule->remove_eligible(pass);

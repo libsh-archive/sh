@@ -40,6 +40,7 @@
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include <GL/wglext.h>
+#include "fbo.h"
 
 extern PFNGLPROGRAMSTRINGARBPROC glProgramStringARB;
 extern PFNGLBINDPROGRAMARBPROC glBindProgramARB;
@@ -70,6 +71,27 @@ extern PFNGLGENOCCLUSIONQUERIESNVPROC glGenOcclusionQueriesNV;
 extern PFNGLDELETEOCCLUSIONQUERIESNVPROC glDeleteOcclusionQueriesNV;
 extern PFNGLENDOCCLUSIONQUERYNVPROC glEndOcclusionQueryNV;
 extern PFNGLGETOCCLUSIONQUERYUIVNVPROC glGetOcclusionQueryuivNV;
+
+// EXT_framebuffer_object
+#ifdef GL_EXT_framebuffer_object 
+extern PFNGLISRENDERBUFFEREXTPROC                       glIsRenderbufferEXT;
+extern PFNGLBINDRENDERBUFFEREXTPROC                     glBindRenderbufferEXT;
+extern PFNGLDELETERENDERBUFFERSEXTPROC                  glDeleteRenderbuffersEXT;
+extern PFNGLGENRENDERBUFFERSEXTPROC                     glGenRenderbuffersEXT;
+extern PFNGLRENDERBUFFERSTORAGEEXTPROC                  glRenderbufferStorageEXT;
+extern PFNGLGETRENDERBUFFERPARAMETERIVEXTPROC           glGetRenderbufferParameterivEXT;
+extern PFNGLISFRAMEBUFFEREXTPROC                        glIsFramebufferEXT;
+extern PFNGLBINDFRAMEBUFFEREXTPROC                      glBindFramebufferEXT;
+extern PFNGLDELETEFRAMEBUFFERSEXTPROC                   glDeleteFramebuffersEXT;
+extern PFNGLGENFRAMEBUFFERSEXTPROC                      glGenFramebuffersEXT;
+extern PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC               glCheckFramebufferStatusEXT;
+extern PFNGLFRAMEBUFFERTEXTURE1DEXTPROC                 glFramebufferTexture1DEXT;
+extern PFNGLFRAMEBUFFERTEXTURE2DEXTPROC                 glFramebufferTexture2DEXT;
+extern PFNGLFRAMEBUFFERTEXTURE3DEXTPROC                 glFramebufferTexture3DEXT;
+extern PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC              glFramebufferRenderbufferEXT;
+extern PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC  glGetFramebufferAttachmentParameterivEXT;
+extern PFNGLGENERATEMIPMAPEXTPROC                       glGenerateMipmapEXT;
+#endif
 
 #else
 
