@@ -29,4 +29,9 @@
 
 namespace SH {
 
+ShScheduler::ShScheduler()
+{
+	// TODO
+}
+
 } // end SH

@@ -26,28 +26,47 @@
 //////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
-// Simple scheduler implementation. 
+// A very simple scheduler implementation.
 //-----------------------------------------------------------------------------
 
 #ifndef SHSCHEDULER_HPP
 #define SHSCHEDULER_HPP
 
-#include "ShProgram.hpp"
-#include "ShSchedule.hpp"
-#include "ShStream.hpp"
+#include <list>
+#include "ShDllExport.hpp"
+#include "ShMeta.hpp"
 
 namespace SH {
 
-class ShScheduler{
+// TODO: Make sure I didn't miss anything in here 
+class
+SH_DLLEXPORT ShScheduler : public virtual ShMeta {
 public:
-	ShScheduler();      // need to create an empty schedule here
-                      // leave all memory management to the schedule
-	~ShScheduler();
-	void addProgram(const ShProgramNodeCPtr& program); 
-                                      // add a program to the schedule
-	void execute(ShStream& dest);      // execute programs in the schedule
+	ShScheduler();        // must initialize a schedule
+	~ShScheduler();       // whatever cleanups we might need
 private:
-	
+  struct Pass{
+    ShProgramNode prog;
+	list<int> inputs;
+	list<int> outputs;
+  };
+
+  struct Output{
+    bool isStream;
+	ShChannelNode out;
+  }
+
+  struct Input{
+    bool isStream;
+	ShChannelNode in;
+  };
+
+  struct Schedule{
+    Pass::const_iterator begin() const;
+	Pass::const_iterator end() const;
+	push_back(Pass p);
+  };
+
 };
 
 } // end namespace SH
