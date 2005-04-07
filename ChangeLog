@@ -1,3 +1,21 @@
+2005-04-07  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> osx branch
+
+	* Merged trunk up to r2275. Hopefully for the last time.
+
+2005-04-06  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslEmit.cpp (emit_log): Removed the static constant
+	to fix a bug when using both log and log10 in the same program.
+
+2005-04-05  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibMatrixImpl.hpp (trace): Add this function.
+
+2005-04-04  Francois Marier  <francois@serioushack.com>
+
+	* src/ShMatrix.hpp, ShMatrixImpl.hpp (operator-): Add this method.
+	(operator*=): Add this method.
+
 2005-03-29  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> osx branch
 
 	* util/: Fix this directory from being a strange mix of old and

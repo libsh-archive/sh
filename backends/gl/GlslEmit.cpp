@@ -1,6 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright 2005 Serious Hack Inc.
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -279,7 +279,7 @@ void GlslCode::emit_log(const ShStatement& stmt, double base)
 {
   SH_DEBUG_ASSERT((SH_OP_LOG == stmt.op) || (SH_OP_LOG10 == stmt.op));
 
-  static const double log2_base = log(base) / log(2.0);
+  const double log2_base = log(base) / log(2.0);
 
   ShVariable temp(allocate_constant(stmt, log2_base)); 
   append_line(resolve(stmt.dest) + " = log2(" + resolve(stmt.src[0]) + ") / " + resolve(temp) + "");
