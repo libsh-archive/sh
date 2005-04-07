@@ -36,22 +36,22 @@ test.add_call(shtest.Call(shtest.Call.call, 'exp10', 1))
 insert_into(test, 10)
 test.output(sys.stdout, False)
 
-# # Test exp in immediate mode
-# test = shtest.ImmediateTest('exp_im', 1)
-# test.add_call(shtest.Call(shtest.Call.call, 'exp', 1))
-# insert_into(test)
-# test.output(sys.stdout, False)
+# Test exp in immediate mode
+test = shtest.ImmediateTest('exp_im', 1)
+test.add_call(shtest.Call(shtest.Call.call, 'exp', 1))
+insert_into(test)
+test.output(sys.stdout, False)
 
-# # Test exp2 in immediate mode
-# test = shtest.ImmediateTest('exp2_im', 1)
-# test.add_call(shtest.Call(shtest.Call.call, 'exp2', 1))
-# insert_into(test, 2)
-# test.output(sys.stdout, False)
+# Test exp2 in immediate mode
+test = shtest.ImmediateTest('exp2_im', 1)
+test.add_call(shtest.Call(shtest.Call.call, 'exp2', 1))
+insert_into(test, 2)
+test.output(sys.stdout, False)
 
-# # Test exp10 in immediate mode
-# test = shtest.ImmediateTest('exp10_im', 1)
-# test.add_call(shtest.Call(shtest.Call.call, 'exp10', 1))
-# insert_into(test, 10)
-# test.output(sys.stdout, False)
+# Test exp10 in immediate mode
+test = shtest.ImmediateTest('exp10_im', 1)
+test.add_call(shtest.Call(shtest.Call.call, 'exp10', 1))
+insert_into(test, 10)
+test.output(sys.stdout, False)
 
 test.output_footer(sys.stdout)

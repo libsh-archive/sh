@@ -84,7 +84,7 @@ def init_inputs(indent, src_arg_types, immediate=False):
 
 def init_expected(indent, arg, argtype, immediate=False):
     out = ''
-    varname = 'exp'
+    varname = 'expected'
     out += init_variable(indent, arg, argtype, varname, immediate)
     return out
 
@@ -304,7 +304,7 @@ class StreamTest(Test):
                 out.write('\n')
                 out.write('    if (test.run(' + p + ', '
                           + variable_names(src_arg_types)
-                          + ', ' + 'exp' + ') != 0) errors++;\n')
+                          + ', ' + 'expected' + ') != 0) errors++;\n')
                 out.write('  }\n')
                 test_nb += 1
             out.write('\n')
@@ -332,7 +332,7 @@ class ImmediateTest(Test):
                 out.write('    ' + make_variable(test[0], 'SH_TEMP', types[0], False) +  ' out;\n')
                 out.write('    ' + str(call) + ';\n')
                 out.write('\n')
-                out.write('    if (test.check("' + testname + '", out, exp' + ') != 0) errors++;\n')
+                out.write('    if (test.check("' + testname + '", out, expected' + ') != 0) errors++;\n')
                 out.write('  }\n\n')
         if standalone:
             self.output_footer(out)
