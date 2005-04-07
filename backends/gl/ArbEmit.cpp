@@ -332,16 +332,13 @@ void ArbCode::emit_ceil(const ShStatement& stmt)
 void ArbCode::emit_mod(const ShStatement& stmt)
 {
   // TODO - is this really optimal?
-  ShVariable t1(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
-  ShVariable t2(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
+  ShVariable t1(new ShVariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
+  ShVariable t2(new ShVariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
   
-  // result = x - sign(x/y)*floor(abs(x/y))*y
+  // result = x - y*floor(x/y)
   emit(ShStatement(t1, stmt.src[0], SH_OP_DIV, stmt.src[1]));
-  m_instructions.push_back(ArbInst(SH_ARB_ABS, t2, t1));
-  emit(ShStatement(t1, SH_OP_SGN, t1));
-  m_instructions.push_back(ArbInst(SH_ARB_FLR, t2, t2)); 
-  m_instructions.push_back(ArbInst(SH_ARB_MUL, t1, t1, t2)); 
-  m_instructions.push_back(ArbInst(SH_ARB_MUL, t1, t1, stmt.src[1])); 
+  m_instructions.push_back(ArbInst(SH_ARB_FLR, t2, t1));
+  m_instructions.push_back(ArbInst(SH_ARB_MUL, t1, stmt.src[1], t2)); 
   m_instructions.push_back(ArbInst(SH_ARB_SUB, stmt.dest, stmt.src[0], t1)); 
 }
 

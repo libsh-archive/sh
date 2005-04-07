@@ -1,3 +1,10 @@
+2005-04-07  Francois Marier  <francois@serioushack.com>
+
+	* backends/cc/CcEmit.cpp, backends/gl/ArbEmit.cpp (emit_mod),
+	src/ShConcreteCTypeOp.cpp, src/ShConcreteCTypeOpImpl.hpp: Fix the
+	mod function so that it matches the glsl one and produces a nice
+	sawtooth function.
+
 2005-04-07  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/cc/Makefile.am (libshcc_la_LIBADD): Fix building out of

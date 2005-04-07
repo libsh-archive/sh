@@ -276,7 +276,7 @@ struct ShConcreteCTypeOp<SH_OP_DOT, T>
 SHCCTO_BINARY_OP(SH_OP_MAX, std::max((*A), (*B))); 
 SHCCTO_BINARY_OP(SH_OP_MIN, std::min((*A), (*B))); 
 
-SHCCTO_BINARY_OP(SH_OP_MOD, (*A) % (*B)); 
+SHCCTO_BINARY_OP(SH_OP_MOD, ((*A) - (*B) * std::floor((double)(*A) / (*B)))); 
 SHCCTO_OP_CMATH_SPEC(SH_OP_MOD);
 
 SHCCTO_BINARY_OP(SH_OP_MUL, (*A) * (*B));

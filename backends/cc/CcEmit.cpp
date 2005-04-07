@@ -167,7 +167,7 @@ const CcOpCode opCodeTable[] = {
   {SH_OP_MAD,   "$0 * $1 + $2"},
   {SH_OP_MAX,   "($0 > $1 ? $0 : $1)"},
   {SH_OP_MIN,   "($0 < $1 ? $0 : $1)"}, 
-  {SH_OP_MOD,   "fmod($0, $1)"},
+  {SH_OP_MOD,   "($0 - $1 * floor((double)$0 / $1))"},
   {SH_OP_POW,   "pow($0, $1)"},
   {SH_OP_RCP,   "1 / #0"},
   {SH_OP_RND,   "floor(#0 + 0.5)"},

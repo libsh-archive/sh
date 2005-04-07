@@ -154,8 +154,8 @@ SHCCTO_BINARY_OP_SPEC(float,  SH_OP_ATAN2, atan2f((*A), (*B)));
 
 
 // Binary Ops
-SHCCTO_BINARY_OP_SPEC(double, SH_OP_MOD, std::fmod((*A), (*B))); 
-SHCCTO_BINARY_OP_SPEC(float,  SH_OP_MOD, fmodf((*A), (*B))); 
+SHCCTO_BINARY_OP_SPEC(double, SH_OP_MOD, ((*A) - (*B) * std::floor((*A) / (*B)))); 
+SHCCTO_BINARY_OP_SPEC(float,  SH_OP_MOD, ((*A) - (*B) * floorf((*A) / (*B)))); 
 SHCCTO_BINARY_OP_SPEC(double, SH_OP_POW, std::pow((*A), (*B))); 
 SHCCTO_BINARY_OP_SPEC(float,  SH_OP_POW, powf((*A), (*B))); 
 
