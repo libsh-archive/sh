@@ -1,3 +1,10 @@
+2005-04-07  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/cc/Makefile.am (libshcc_la_LIBADD): Fix building out of
+	tree for CC backend.
+
+	* Merged OSX trunk.
+
 2005-04-07  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> osx branch
 
 	* Merged trunk up to r2275. Hopefully for the last time.
