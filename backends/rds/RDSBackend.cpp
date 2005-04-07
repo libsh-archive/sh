@@ -90,6 +90,9 @@ void RDSBackend::execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& des
   std::cout << program->describe_interface() << std::endl;
 #endif
 
+#ifdef RDS_DEBUG
+  SH_DEBUG_PRINT("Creating RDS object");
+#endif
   RDS rds(program->clone());
   rds.force_fake_limits();
 #ifdef RDS_DEBUG
