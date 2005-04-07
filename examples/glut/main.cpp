@@ -22,9 +22,16 @@
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
 #include <sh/sh.hpp>
-#include <GL/glut.h>
-#include <GL/glext.h>
-#include <GL/glu.h>
+#ifdef __APPLE__
+# include <OpenGL/gl.h>
+# include <OpenGL/glext.h>
+# include <OpenGL/glu.h>
+# include <GLUT/glut.h>
+#else
+# include <GL/glut.h>
+# include <GL/glext.h>
+# include <GL/glu.h>
+#endif
 #include "Camera.hpp"
 #include <iostream>
 
@@ -74,6 +81,15 @@ void initShaders()
   } SH_END;
 
   shaders = new ShProgramSet(vsh, fsh);
+
+#if 0
+  cout << "Vertex Unit:" << endl;
+  vsh.node()->code()->print(cout);
+  cout << "--" << endl;
+  cout << "Fragment Unit:" << endl;
+  fsh.node()->code()->print(cout);
+  cout << "--" << endl;
+#endif
 }
 
 void display()
@@ -189,7 +205,7 @@ int gprintf(int x, int y, char* fmt, ...)
   // setup the matrices for a direct
   // screen coordinate transform when
   // using glRasterPos
-  int vp[4];
+  GLint vp[4];
   glGetIntegerv(GL_VIEWPORT, vp);
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
@@ -254,15 +270,6 @@ int main(int argc, char** argv)
   initShaders();
 
   shBind(*shaders);
-
-#if 0
-  cout << "Vertex Unit:" << endl;
-  vsh.node()->code()->print(cout);
-  cout << "--" << endl;
-  cout << "Fragment Unit:" << endl;
-  fsh.node()->code()->print(cout);
-  cout << "--" << endl;
-#endif
 
   glutMainLoop();
 

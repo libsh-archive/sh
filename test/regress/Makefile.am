@@ -1,7 +1,7 @@
 INCLUDES = -I../../src
 AM_CXXFLAGS = -Wall -g -O0
 AM_LDFLAGS = -g -L../../src
-LDADD = -lsh -lGL
+LDADD = -lsh $(GL_LIBS)
 TESTS = abs acos add asin atan atan2 cbrt ceil clamp cmul comparisons \
 	cond cos cross csum div dot exp floor frac length lerp lit log \
 	mad matrix_add matrix_div matrix_mul matrix_neg matrix_sub max \

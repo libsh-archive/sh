@@ -116,7 +116,11 @@ class HostGlTextureTransfer : public ShTransfer {
     case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
     case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
     case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
+#if defined( __APPLE__ )
+    case GL_TEXTURE_RECTANGLE_EXT:
+#else
     case GL_TEXTURE_RECTANGLE_NV:
+#endif
       if (full_copy) {
 	SH_GL_CHECK_ERROR(glTexImage2D(texture->target(), 0,
 				       texture->internalFormat(),

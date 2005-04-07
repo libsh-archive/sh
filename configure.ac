@@ -3,12 +3,23 @@ AC_INIT(Sh, 0.7.6, libsh-devel@lists.sourceforge.net, libsh)
 AC_CONFIG_SRCDIR([src/ShVariable.hpp])
 AM_INIT_AUTOMAKE
 
+AC_CANONICAL_HOST
+
 AM_CONFIG_HEADER(config.h)
 
 # Checks for programs.
 if test "x$CXXFLAGS" = x ; then
     CXXFLAGS="-Wall -g -O2"
 fi
+
+# Additional libraries if in OSX
+case ${host_os}
+     in darwin*)
+	 if test -f /sw/include/png.h ; then
+	    CPPFLAGS="-I/sw/include $CPPFLAGS"
+	    LDFLAGS="-L/sw/lib $LDFLAGS"
+	 fi
+esac
 
 AC_PROG_CXX
 AC_LIBLTDL_CONVENIENCE
@@ -42,11 +53,47 @@ AC_CHECK_HEADER([sstream], [], [AC_MSG_ERROR([sh requires <sstream>. Please use 
 # Checks for library functions.
 AC_CHECK_FUNCS([pow sqrt])
 
+required_glext_version=21
+
+# Mac OSX Tests
+case $host_os in 
+  darwin*)
+    AC_MSG_NOTICE([configuring OSX build, you have $host_os])
+    AC_CHECK_LIB([mx], [log2f])
+    LDFLAGS="$LDFLAGS -flat_namespace"
+    required_glext_version=7
+    enable_pbuffer_streams=false
+    ;;
+  *) enable_pbuffer_streams=true ;;
+esac
+
+AM_CONDITIONAL(INCLUDE_PBUFFERSTREAMS, test x$enable_pbuffer_streams = xtrue)
 # Backends
 
 SM_WITH_SM_DIR
 GL_WITH_GL_DIR
 
+#version spec is done in the style [current[:release=0[:age=0]]]
+BACKEND_LIB_VERSION=1:0:0
+AC_SUBST(BACKEND_LIB_VERSION)
+
+dnl Shared library extensions (LTDL_SHLIB_EXT gets it wrong on OS X)
+AC_LIBTOOL_SYS_DYNAMIC_LINKER
+
+# This is an abysmal hack against different versions of aclocal
+if test "x$shrext" = x; then
+   my_shrext=$shrext_cmds
+else
+   my_shrext=$shrext
+fi
+tst_shrext=`echo $my_shrext | sed -n 's/^\(\$.*\)/\1/p'`
+if test "x$tst_shrext" = x; then
+   sh_shlib_ext=$my_shrext
+else
+   sh_shlib_ext=`module="" eval echo $my_shrext`
+fi
+
+AC_DEFINE_UNQUOTED(SH_SHLIB_EXT, "$sh_shlib_ext", [Platform-specific shared library extension])
 
 # SH_CHECK_BACKEND([sm], [SM])
 # if test "x$sh_backend_sm" = xtrue ; then
@@ -65,7 +112,7 @@ if test "x$sh_backend_arb" = xtrue ; then
   GL_CHECK_GL_HEADERS([],
     [SH_BACKEND_MESSAGE([arb], [OpenGL headers (GL/gl.h and GL/glext.h) not found. Disabling ARB backend.])
      sh_backend_arb=false])
-  GL_CHECK_GLEXT_VERSION([18], [], [
+  GL_CHECK_GLEXT_VERSION([$required_glext_version], [], [
     SH_BACKEND_MESSAGE([arb], [glext.h version 18 or greater (available at http://oss.sgi.com/projects/ogl-sample/registry/) not found. Disabling ARB backend.])
     sh_backend_arb=false
   ])
@@ -77,10 +124,9 @@ if test "x$sh_backend_glsl" = xtrue ; then
   GL_CHECK_GL_HEADERS([],
     [SH_BACKEND_MESSAGE([glsl], [OpenGL headers (GL/gl.h and GL/glext.h) not found. Disabling GLSL backend.])
      sh_backend_glsl=false])
-  GL_CHECK_GLEXT_VERSION([21], [], [
-    SH_BACKEND_MESSAGE([glsl], [glext.h version 21 or greater (available at http://oss.sgi.com/projects/ogl-sample/registry/) not found. Disabling GLSL backend.])
-    sh_backend_glsl=false
-  ])
+  GL_CHECK_GLEXT_EXTENSION([ARB_shading_language_100], [], [
+    SH_BACKEND_MESSAGE([glsl], [Headers for ARB_shading_language_100 not found. You may need to upgrade your glext.h from http://oss.sgi.com/projects/ogl-sample/registry/. Disabling GLSL backend.])
+    sh_backend_glsl=false])
 fi
 AM_CONDITIONAL(ENABLE_GLSL_BACKEND, test x$sh_backend_glsl = xtrue)
 
@@ -127,6 +173,8 @@ AC_CONFIG_FILES([Makefile
 		 examples/particle/Makefile
 		 examples/textures/Makefile
 		 doc/Makefile])
+
 AC_OUTPUT
 
 SH_SUMMARISE_BACKENDS
+

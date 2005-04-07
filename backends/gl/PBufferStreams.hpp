@@ -36,7 +36,7 @@ struct PBufferStreams : public StreamStrategy {
   void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
 
   virtual StreamStrategy* create();
-  
+
 private:
   SH::ShProgramSet* m_shaders;
   bool m_setup_vp;

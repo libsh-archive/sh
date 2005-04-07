@@ -22,9 +22,15 @@
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
 #include <sh/sh.hpp>
-#include <GL/glut.h>
-#include <GL/glext.h>
-#include <GL/glu.h>
+#ifdef __APPLE__
+# include <GLUT/glut.h>
+# include <OpenGL/glext.h>
+# include <OpenGL/glu.h>
+#else
+# include <GL/glut.h>
+# include <GL/glext.h>
+# include <GL/glu.h>
+#endif
 #include "Camera.hpp"
 #include <iostream>
 
@@ -213,7 +219,7 @@ int gprintf(int x, int y, char* fmt, ...)
   // setup the matrices for a direct
   // screen coordinate transform when
   // using glRasterPos
-  int vp[4];
+  GLint vp[4];
   glGetIntegerv(GL_VIEWPORT, vp);
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();

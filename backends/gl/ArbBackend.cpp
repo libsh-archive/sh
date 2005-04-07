@@ -39,7 +39,12 @@ struct ArbBackend : public GlBackend {
   ArbBackend()
     : GlBackend(new ArbCodeStrategy(),
                 new GlTextures(),
+#ifdef __APPLE__
+                // For now...
+                0)
+#else
                 new PBufferStreams())
+#endif
   {
   }
 

@@ -1,3 +1,7 @@
+2005-04-07  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> osx branch
+
+	* Merged trunk up to r2275. Hopefully for the last time.
+
 2005-04-06  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslEmit.cpp (emit_log): Removed the static constant
@@ -12,30 +16,72 @@
 	* src/ShMatrix.hpp, ShMatrixImpl.hpp (operator-): Add this method.
 	(operator*=): Add this method.
 
-2005-03-31  Francois Marier  <francois@serioushack.com>
+2005-03-29  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> osx branch
 
-	* src/ShMatrix.hpp: Removed unnecessary typedef (HostType, not
-	used anywhere).  
-	Added a few typedefs and static to match ShAttrib.  Necessary to
-	support ShMatrix as an Input/Output parameter to a stream program.
+	* util/: Fix this directory from being a strange mix of old and
+	new revisions to be the same as trunk at r2203.
 
-	* backends/gl/GlslCode.cpp (gen_structural_node): Removed
-	unnecessary if statement in while loops by duplicating the
-	condition evaluation code.
+2005-03-28  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> osx branch
 
-	* backends/gl/GlslEmit.cpp (emit_logic): Removed duplicate cast to
-	the destination variable's type and size.
+	* config/gl.m4 (GL_CHECK_GL_HEADERS): We don't need -framework
+	AGL. Remove it.
 
-2005-03-30  Francois Marier  <francois@serioushack.com>
+2005-03-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> osx branch
 
-	* backends/gl/GlslEmit.cpp (table_substitution): Properly cast all
-	substituted parameters to allow parameters with different sizes.
+	* README.osx: Continue to increase the accuracy of this document.
+
+	* configure.ac: Replace CPPFLAGS, not CXXFLAGS. Removes a warning
+	on Darwin.
+
+	* Allow out-of-source tree building, by changing various
+	Makefile.ams appropriately.
+
+	* src/ShSwizzleImpl.hpp (idswiz): Replace an "ifdef __MAC__" with
+	"ifdef __APPLE__"
 
 2005-03-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShAttrib.cpp, src/ShVector.cpp, ...: Remove explicit
 	instantiation files and the python scripts in scripts/ that
 	generated them (they haven't been used for a long time).
+
+2005-03-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> osx branch
+
+	* win32/Sh.vcproj: Added another missing file.
+
+	* backends/gl/GlslEmit.cpp (emit_discard): Remove an incorrect
+	comment.
+
+	* src/ShLibClampImpl.hpp: Uncommented some commented out code.
+
+	* win32/Sh.sln: Added this missing file from the trunk.
+
+	* examples/glut/Makefile.am (LDADD): Use GLUT_LIBS and GL_LIBS.
+
+	* examples/glut/main.cpp: Make this compile on Apple.
+
+	* backends/gl/Makefile.am: No pbuffer streams on Apple... 
+
+	* backends/gl/ArbBackend.cpp: No pbuffer streams on Apple.
+
+	* configure.ac: Check for ARB_shading_language_100 for GLSL
+	support.
+	Disable PBuffer streams on darwin.
+
+	* config/gl.m4: Substitute GL_LIBS and GLUT_LIBS.
+	(GL_CHECK_GLEXT_EXTENSION): Added this function.
+
+	* examples/binding/Makefile.am (LDADD): Use GLUT_LIBS, GL_LIBS.
+
+	* examples/binding/main.cpp (main): Catch exceptions.
+	Handle Apple headers.
+
+	* Merge trunk up to r2189.
+
+	* backends/gl/GlTextures.cpp: Implement APPLE_float_pixels
+	support.
+
+	* README.osx: Update this a little.
 
 2005-03-25  Francois Marier  <francois@serioushack.com>
 

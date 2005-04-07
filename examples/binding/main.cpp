@@ -25,10 +25,17 @@
 #include <windows.h>
 #endif /* WIN32 */
 
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
+#include <OpenGL/glu.h>
+#include <GLUT/glut.h>
+#else
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
+#endif
 
 #include <sh/sh.hpp>
 #include <iostream>
@@ -92,6 +99,8 @@ void display()
   glutSolidDodecahedron();
   glPopMatrix();
 
+  shUnbind();
+  
   gprintf(10, 10, "Space - Toggle animation");
   gprintf(10, 24, "    c - Change color");
 
@@ -212,6 +221,7 @@ void init_sh()
 
 int main(int argc, char** argv)
   {
+    try {
   // initialize GLUT
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE|GLUT_DEPTH);
@@ -229,6 +239,18 @@ int main(int argc, char** argv)
   init_sh();
   
   glutMainLoop();
+
+    } catch (const ShException& e) {
+      std::cerr << "Sh error: " << e.message() << std::endl;
+      return 1;
+    } catch (const std::exception& e) {
+      std::cerr << "C++ error: " << e.what() << std::endl;
+      return 1;
+    } catch (...) {
+      std::cerr << "Unknown error." << std::endl;
+      throw;
+      return 1;
+    }
   }
 
 int gprintf(int x, int y, char* fmt, ...)
@@ -242,7 +264,7 @@ int gprintf(int x, int y, char* fmt, ...)
   // setup the matrices for a direct
   // screen coordinate transform when
   // using glRasterPos
-  int vp[4];
+  GLint vp[4];
   glGetIntegerv(GL_VIEWPORT, vp);
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
