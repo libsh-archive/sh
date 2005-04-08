@@ -1,3 +1,19 @@
+2005-04-08  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbCode.hpp, backends/gl/ArbCode.cpp,
+	backends/gl/ArbEmit.cpp: Implement RET for NVFP2. There are still
+	some interactions with input/output transformers that won't work
+	right, e.g. if you read from an output variable RET won't do the
+	right thing.
+
+	* backends/gl/ArbInst.hpp, backends/gl/ArbInst.cpp: Added
+	RET instruction.
+
+	* src/ShInstructions.hpp, src/ShInstructions.cpp: Added
+	shRET() instruction call.
+	  
+    * src/ShOperation.hpp, src/ShOperation.cpp: Added SH_OP_RET.
+    
 2005-04-07  Francois Marier  <francois@serioushack.com>
 
 	* backends/cc/CcEmit.cpp, backends/gl/ArbEmit.cpp (emit_mod),

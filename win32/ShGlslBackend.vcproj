@@ -20,7 +20,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GR /EHsc /wd4003"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\src;\dev\opengl\include"
+				AdditionalIncludeDirectories="..\src;..\..\opengl\include"
 				PreprocessorDefinitions="SH_DLLEXPORT=&quot;__declspec(dllimport)&quot;;WIN32;NOMINMAX;_USE_MATH_DEFINES;_DEBUG;SH_DEBUG"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -76,7 +76,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GR /EHsc /wd4003"
-				AdditionalIncludeDirectories="..\src;\dev\opengl\include"
+				AdditionalIncludeDirectories="..\src;..\..\opengl\include"
 				PreprocessorDefinitions="SH_DLLEXPORT=&quot;__declspec(dllimport)&quot;;WIN32;NOMINMAX;_USE_MATH_DEFINES"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="TRUE"

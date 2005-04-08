@@ -170,6 +170,9 @@ ArbMapping ArbCode::table[] = {
 
   {SH_OP_PAL,  SH_ARB_VP, 0, SH_ARB_FUN, &ArbCode::emit_pal},
 
+//  {SH_OP_RET,  SH_ARB_NVFP2, 0, SH_ARB_FUN, &ArbCode::emit_ret},
+  {SH_OP_RET,  SH_ARB_NVFP2, 0, SH_ARB_RET, 0},
+
   {SH_OP_ASN, SH_ARB_END, 0, SH_ARB_FUN, 0}
 };
 
@@ -584,6 +587,15 @@ void ArbCode::emit_cmul(const ShStatement& stmt)
 void ArbCode::emit_kil(const ShStatement& stmt)
 {
   m_instructions.push_back(ArbInst(SH_ARB_KIL, -stmt.src[0]));
+}
+
+void ArbCode::emit_ret(const ShStatement& stmt)
+{
+  ShVariable dummy(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
+  ArbInst updatecc(SH_ARB_MOV, dummy, stmt.src[0]);
+  updatecc.update_cc = true;
+  m_instructions.push_back(updatecc);
+  m_instructions.push_back(ArbInst(SH_ARB_RET));
 }
 
 void ArbCode::emit_pal(const ShStatement& stmt)

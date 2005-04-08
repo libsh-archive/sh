@@ -158,10 +158,6 @@ struct InitLiveCode {
           || I->dest.node()->kind() != SH_TEMP
           || I->dest.node()->uniform()
           || !p->hasDecl(I->dest.node())
-          /*
-          || I->op == SH_OP_FETCH // Keep stream fetches, since these
-                                  // are like inputs.
-          */
           || I->op == SH_OP_OPTBRA) {
         I->marked = true;
         w.push(&(*I));

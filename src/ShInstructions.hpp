@@ -142,6 +142,8 @@ void shCOND(ShVariable& dest, const ShVariable& cond,
             const ShVariable& a, const ShVariable& b);
 SH_DLLEXPORT
 void shKIL(const ShVariable& cond);
+SH_DLLEXPORT
+void shRET(const ShVariable& cond);
 
 /*@}*/
 

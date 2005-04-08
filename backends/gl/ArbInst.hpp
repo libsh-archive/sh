@@ -125,6 +125,7 @@ enum ArbOp {
   SH_ARB_REP,
   SH_ARB_ENDREP,
   SH_ARB_BRK,
+  SH_ARB_RET,
   
   // Special "operations" for emit
   SH_ARB_FUN
@@ -145,6 +146,11 @@ extern ArbOpInfo arbOpInfo[];
 struct ArbInst {
   static const int max_num_sources = 4;
   
+  explicit ArbInst(ArbOp op)
+    : op(op), invert(false), update_cc(false), ccode(NOCC)
+  {
+  }
+
   ArbInst(ArbOp op, int label)
     : op(op), label(label), invert(false),
       update_cc(false), ccode(NOCC)

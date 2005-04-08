@@ -120,6 +120,7 @@ ArbOpInfo arbOpInfo[] = {
   {"REP", 1, false},
   {"ENDREP", 0, false},
   {"BRK", 1, false},
+  {"RET", 0, false},
   
   {"<fun>", 0, false}
 };

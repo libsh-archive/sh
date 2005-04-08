@@ -660,6 +660,29 @@ std::ostream& ArbCode::print(std::ostream& out)
         out << ")";
       }
       out << ";";
+    } else if (I->op == SH_ARB_RET) {
+      if (I->src[0].node()) {
+        out << "  MOVC ";
+        printVar(out, true, I->src[0], false);
+        out << ", ";
+        printVar(out, false, I->src[0], false, I->src[0].swizzle());
+        out << ";" << endl;
+      }
+      out << "  RET ";
+      if (I->src[0].node()) {
+        out << " (";
+        if (I->invert) {
+          out << "LE";
+        } else {
+          out << "GT";
+        }
+        out << ".";
+        for (int i = 0; i < I->src[0].swizzle().size(); i++) {
+          out << swizChars[I->src[0].swizzle()[i]];
+        }
+        out << ")";
+      }
+      out << ";";
     } else if (I->op == SH_ARB_ENDREP) {
       out << "  ENDREP;";
     } else if (I->op == SH_ARB_IF) {
@@ -695,7 +718,9 @@ std::ostream& ArbCode::print(std::ostream& out)
       out << arbOpInfo[I->op].name;
       if (I->update_cc) out << "C";
       out << " ";
-      printVar(out, true, I->dest, arbOpInfo[I->op].collectingOp);
+      if (I->dest.node()) {
+        printVar(out, true, I->dest, arbOpInfo[I->op].collectingOp);
+      }
       if (I->ccode != ArbInst::NOCC) {
         out << " (";
         out << arbCCnames[I->ccode];

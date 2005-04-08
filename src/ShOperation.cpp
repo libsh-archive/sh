@@ -109,6 +109,9 @@ const ShOperationInfo opInfo[] = {
   {"PAL", 2, ShOperationInfo::EXTERNAL, false},
 
   {"COMMENT", 0, ShOperationInfo::IGNORE, false}, // special comment tag
+
+  {"RET", 1, ShOperationInfo::IGNORE, false},
+
   {0, 0, ShOperationInfo::IGNORE, false}
 };
 

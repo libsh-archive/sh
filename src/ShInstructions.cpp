@@ -283,10 +283,20 @@ SHINST_TERNARY_OP(COND,
 void shKIL(const ShVariable& a)
 {
   if(immediate()) {
-      shError(ShScopeException("Cannot kill in immediate mode"));
+    shError(ShScopeException("Cannot kill in immediate mode"));
   }
   SH_DEBUG_ASSERT(!immediate());
   ShStatement stmt(a, SH_OP_KIL, a);
+  addStatement(stmt);
+}
+
+void shRET(const ShVariable& a)
+{
+  if(immediate()) {
+    shError(ShScopeException("Cannot return in immediate mode"));
+  }
+  SH_DEBUG_ASSERT(!immediate());
+  ShStatement stmt(a, SH_OP_RET, a);
   addStatement(stmt);
 }
 

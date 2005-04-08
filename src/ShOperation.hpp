@@ -132,6 +132,9 @@ enum ShOperation {
   SH_OP_COMMENT, ///< For internal use.  Stores a comment at this point in the IR.
                  ///< Statements of this kind MUST have a ShInfoComment attached
 
+  // Control flow
+  SH_OP_RET,
+
   SH_OPERATION_END, ///< End of List marker.  Not an actual op
 };
 

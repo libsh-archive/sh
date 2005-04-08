@@ -20,7 +20,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GR /EHsc /wd4003"
 				Optimization="0"
-				AdditionalIncludeDirectories="\dev\opengl\include;\dev\libpng;\dev\zlib"
+				AdditionalIncludeDirectories="..\..\opengl\include;..\..\libpng;..\..\zlib"
 				PreprocessorDefinitions="SH_DLLEXPORT=&quot;__declspec(dllexport)&quot;;WIN32;NOMINMAX;_USE_MATH_DEFINES;_DEBUG;SH_DEBUG"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -38,7 +38,7 @@
 				AdditionalDependencies="zlibd.lib libpngd.lib"
 				OutputFile="$(OutDir)/libshd.dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="\dev\libpng;\dev\zlib"
+				AdditionalLibraryDirectories="..\..\libpng;..\..\zlib"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/libshd.pdb"
 				SubSystem="2"
@@ -76,7 +76,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GR /EHsc /wd4003"
-				AdditionalIncludeDirectories="\dev\opengl\include;\dev\libpng;\dev\zlib"
+				AdditionalIncludeDirectories="..\..\opengl\include;..\..\libpng;..\..\zlib"
 				PreprocessorDefinitions="SH_DLLEXPORT=&quot;__declspec(dllexport)&quot;;WIN32;NOMINMAX;_USE_MATH_DEFINES"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="TRUE"
@@ -92,7 +92,7 @@
 				AdditionalDependencies="zlib.lib libpng.lib"
 				OutputFile="$(OutDir)/libsh.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="\dev\libpng;\dev\zlib"
+				AdditionalLibraryDirectories="..\..\libpng;..\..\zlib"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/libsh.pdb"
 				SubSystem="2"
@@ -240,10 +240,10 @@
 				RelativePath="..\src\ShProgram.cpp">
 			</File>
 			<File
-				RelativePath="..\src\ShProgramSet.cpp">
+				RelativePath="..\src\ShProgramNode.cpp">
 			</File>
 			<File
-				RelativePath="..\src\ShProgramNode.cpp">
+				RelativePath="..\src\ShProgramSet.cpp">
 			</File>
 			<File
 				RelativePath="..\src\ShRecord.cpp">
@@ -619,10 +619,10 @@
 				RelativePath="..\src\ShProgram.hpp">
 			</File>
 			<File
-				RelativePath="..\src\ShProgramSet.hpp">
+				RelativePath="..\src\ShProgramNode.hpp">
 			</File>
 			<File
-				RelativePath="..\src\ShProgramNode.hpp">
+				RelativePath="..\src\ShProgramSet.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShQuaternion.hpp">

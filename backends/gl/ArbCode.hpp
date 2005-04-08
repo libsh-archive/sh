@@ -118,6 +118,7 @@ private:
   void emit_lit(const SH::ShStatement& stmt);
   void emit_rnd(const SH::ShStatement& stmt);
   void emit_cbrt(const SH::ShStatement& stmt);
+  void emit_ret(const SH::ShStatement& stmt);
 
   /// Allocate registers, after the code has been generated
   void allocRegs();
