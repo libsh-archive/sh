@@ -446,12 +446,7 @@ namespace ShCc {
     std::stringstream epilogue;
     epilogue << "}" << std::endl;
 
-    // output code for debugging...
-    //SH_CC_DEBUG_PRINT(prologue.str());
-    //SH_CC_DEBUG_PRINT(m_code.str());
-    //SH_CC_DEBUG_PRINT(epilogue.str());
-
-//#ifdef SH_CC_DEBUG
+#ifdef SH_CC_DEBUG
     SH_CC_DEBUG_PRINT("Outputting generated C++ code to ccstream.cpp");
     std::ofstream dbgout("ccstream.cpp");
     dbgout << prologue.str();
@@ -459,7 +454,7 @@ namespace ShCc {
     dbgout << epilogue.str();
     dbgout.flush();
     dbgout.close();
-//#endif
+#endif
 
 #ifdef WIN32
     // generate temporary names for the
