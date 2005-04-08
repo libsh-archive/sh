@@ -97,6 +97,9 @@ public:
   ShGeneric& operator=(const ShGeneric<N, T2>& other);
 
   ShGeneric& operator=(const ShProgram& other);
+
+  ShGeneric& operator++();
+  ShGeneric& operator--();
   
   template<typename T2>
   ShGeneric& operator+=(const ShGeneric<N, T2>& right);

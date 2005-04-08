@@ -136,6 +136,9 @@ public:""")
         common.inprint(self.name + "& operator=(const ShProgram& prg);\n")
 
     def modifying(self, size):
+        common.inprint("\n" + self.name + "& operator++();")
+        common.inprint("\n" + self.name + "& operator--();")
+        
         common.inprint("\ntemplate<typename T2>")
         common.inprint(self.name + "& operator+=(const ShGeneric<" + self.sizevar(size) + ", T2>& right);")
         common.inprint("\ntemplate<typename T2>")
@@ -331,6 +334,9 @@ class Impl:
             s = "N"
         else:
             s = str(size)
+        self.assign("operator++", [], size, [])
+        self.assign("operator--", [], size, [])
+
         self.assign("operator+=", [["const ShGeneric<" + s + ", T2>&", "right"]], size, ["typename T2"])
         self.assign("operator-=", [["const ShGeneric<" + s + ", T2>&", "right"]], size, ["typename T2"])
         self.assign("operator*=", [["const ShGeneric<" + s + ", T2>&", "right"]], size, ["typename T2"])

@@ -92,6 +92,10 @@ public:
   ShAttrib& operator=(const ShProgram& prg);
 
   
+  ShAttrib& operator++();
+  
+  ShAttrib& operator--();
+  
   template<typename T2>
   ShAttrib& operator+=(const ShGeneric<N, T2>& right);
   
@@ -182,6 +186,10 @@ public:
   ShAttrib& operator=(const ShProgram& prg);
 
   
+  ShAttrib& operator++();
+  
+  ShAttrib& operator--();
+  
   template<typename T2>
   ShAttrib& operator+=(const ShGeneric<1, T2>& right);
   
@@ -256,6 +264,10 @@ public:
 
   ShAttrib& operator=(const ShProgram& prg);
 
+  
+  ShAttrib& operator++();
+  
+  ShAttrib& operator--();
   
   template<typename T2>
   ShAttrib& operator+=(const ShGeneric<2, T2>& right);
@@ -347,6 +359,10 @@ public:
   ShAttrib& operator=(const ShProgram& prg);
 
   
+  ShAttrib& operator++();
+  
+  ShAttrib& operator--();
+  
   template<typename T2>
   ShAttrib& operator+=(const ShGeneric<3, T2>& right);
   
@@ -436,6 +452,10 @@ public:
 
   ShAttrib& operator=(const ShProgram& prg);
 
+  
+  ShAttrib& operator++();
+  
+  ShAttrib& operator--();
   
   template<typename T2>
   ShAttrib& operator+=(const ShGeneric<4, T2>& right);

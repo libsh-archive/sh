@@ -137,6 +137,24 @@ ShAttrib<N, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShAttrib<N, Binding, T, Swizzled>&
+ShAttrib<N, Binding, T, Swizzled>::operator++()
+{
+  ParentType::operator++();
+  return *this;
+}
+
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShAttrib<N, Binding, T, Swizzled>&
+ShAttrib<N, Binding, T, Swizzled>::operator--()
+{
+  ParentType::operator--();
+  return *this;
+}
+
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
 inline
 ShAttrib<N, Binding, T, Swizzled>&
@@ -455,6 +473,24 @@ ShAttrib<1, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShAttrib<1, Binding, T, Swizzled>&
+ShAttrib<1, Binding, T, Swizzled>::operator++()
+{
+  ParentType::operator++();
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShAttrib<1, Binding, T, Swizzled>&
+ShAttrib<1, Binding, T, Swizzled>::operator--()
+{
+  ParentType::operator--();
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
 inline
 ShAttrib<1, Binding, T, Swizzled>&
@@ -728,6 +764,24 @@ ShAttrib<2, Binding, T, Swizzled>&
 ShAttrib<2, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 {
   ParentType::operator=(prg);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShAttrib<2, Binding, T, Swizzled>&
+ShAttrib<2, Binding, T, Swizzled>::operator++()
+{
+  ParentType::operator++();
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShAttrib<2, Binding, T, Swizzled>&
+ShAttrib<2, Binding, T, Swizzled>::operator--()
+{
+  ParentType::operator--();
   return *this;
 }
 
@@ -1063,6 +1117,24 @@ ShAttrib<3, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShAttrib<3, Binding, T, Swizzled>&
+ShAttrib<3, Binding, T, Swizzled>::operator++()
+{
+  ParentType::operator++();
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShAttrib<3, Binding, T, Swizzled>&
+ShAttrib<3, Binding, T, Swizzled>::operator--()
+{
+  ParentType::operator--();
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
 inline
 ShAttrib<3, Binding, T, Swizzled>&
@@ -1394,6 +1466,24 @@ ShAttrib<4, Binding, T, Swizzled>&
 ShAttrib<4, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 {
   ParentType::operator=(prg);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShAttrib<4, Binding, T, Swizzled>&
+ShAttrib<4, Binding, T, Swizzled>::operator++()
+{
+  ParentType::operator++();
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShAttrib<4, Binding, T, Swizzled>&
+ShAttrib<4, Binding, T, Swizzled>::operator--()
+{
+  ParentType::operator--();
   return *this;
 }
 

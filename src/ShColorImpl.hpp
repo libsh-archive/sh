@@ -129,6 +129,24 @@ ShColor<N, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShColor<N, Binding, T, Swizzled>&
+ShColor<N, Binding, T, Swizzled>::operator++()
+{
+  ParentType::operator++();
+  return *this;
+}
+
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShColor<N, Binding, T, Swizzled>&
+ShColor<N, Binding, T, Swizzled>::operator--()
+{
+  ParentType::operator--();
+  return *this;
+}
+
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
 inline
 ShColor<N, Binding, T, Swizzled>&
@@ -439,6 +457,24 @@ ShColor<1, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShColor<1, Binding, T, Swizzled>&
+ShColor<1, Binding, T, Swizzled>::operator++()
+{
+  ParentType::operator++();
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShColor<1, Binding, T, Swizzled>&
+ShColor<1, Binding, T, Swizzled>::operator--()
+{
+  ParentType::operator--();
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
 inline
 ShColor<1, Binding, T, Swizzled>&
@@ -695,6 +731,24 @@ ShColor<2, Binding, T, Swizzled>&
 ShColor<2, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 {
   ParentType::operator=(prg);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShColor<2, Binding, T, Swizzled>&
+ShColor<2, Binding, T, Swizzled>::operator++()
+{
+  ParentType::operator++();
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShColor<2, Binding, T, Swizzled>&
+ShColor<2, Binding, T, Swizzled>::operator--()
+{
+  ParentType::operator--();
   return *this;
 }
 
@@ -1009,6 +1063,24 @@ ShColor<3, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShColor<3, Binding, T, Swizzled>&
+ShColor<3, Binding, T, Swizzled>::operator++()
+{
+  ParentType::operator++();
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShColor<3, Binding, T, Swizzled>&
+ShColor<3, Binding, T, Swizzled>::operator--()
+{
+  ParentType::operator--();
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
 inline
 ShColor<3, Binding, T, Swizzled>&
@@ -1315,6 +1387,24 @@ ShColor<4, Binding, T, Swizzled>&
 ShColor<4, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 {
   ParentType::operator=(prg);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShColor<4, Binding, T, Swizzled>&
+ShColor<4, Binding, T, Swizzled>::operator++()
+{
+  ParentType::operator++();
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShColor<4, Binding, T, Swizzled>&
+ShColor<4, Binding, T, Swizzled>::operator--()
+{
+  ParentType::operator--();
   return *this;
 }
 

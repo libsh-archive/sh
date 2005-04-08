@@ -302,7 +302,7 @@ void GlslCode::emit_logic(const ShStatement& stmt)
       mapping.code = "greaterThanEqual($0, $1)";
       break;
     case SH_OP_SNE:
-      mapping.code = "not(equal($0, $1))"; // notEqual() doesn't work on NVIDIA
+      mapping.code = "notEqual($0, $1)";
       break;
     case SH_OP_SLT:
       mapping.code = "lessThan($0, $1)";

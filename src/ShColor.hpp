@@ -76,6 +76,10 @@ public:
   ShColor& operator=(const ShProgram& prg);
 
   
+  ShColor& operator++();
+  
+  ShColor& operator--();
+  
   template<typename T2>
   ShColor& operator+=(const ShGeneric<N, T2>& right);
   
@@ -166,6 +170,10 @@ public:
   ShColor& operator=(const ShProgram& prg);
 
   
+  ShColor& operator++();
+  
+  ShColor& operator--();
+  
   template<typename T2>
   ShColor& operator+=(const ShGeneric<1, T2>& right);
   
@@ -240,6 +248,10 @@ public:
 
   ShColor& operator=(const ShProgram& prg);
 
+  
+  ShColor& operator++();
+  
+  ShColor& operator--();
   
   template<typename T2>
   ShColor& operator+=(const ShGeneric<2, T2>& right);
@@ -331,6 +343,10 @@ public:
   ShColor& operator=(const ShProgram& prg);
 
   
+  ShColor& operator++();
+  
+  ShColor& operator--();
+  
   template<typename T2>
   ShColor& operator+=(const ShGeneric<3, T2>& right);
   
@@ -420,6 +436,10 @@ public:
 
   ShColor& operator=(const ShProgram& prg);
 
+  
+  ShColor& operator++();
+  
+  ShColor& operator--();
   
   template<typename T2>
   ShColor& operator+=(const ShGeneric<4, T2>& right);

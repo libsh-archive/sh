@@ -79,6 +79,10 @@ public:
   ShVector& operator=(const ShProgram& prg);
 
   
+  ShVector& operator++();
+  
+  ShVector& operator--();
+  
   template<typename T2>
   ShVector& operator+=(const ShGeneric<N, T2>& right);
   
@@ -169,6 +173,10 @@ public:
   ShVector& operator=(const ShProgram& prg);
 
   
+  ShVector& operator++();
+  
+  ShVector& operator--();
+  
   template<typename T2>
   ShVector& operator+=(const ShGeneric<1, T2>& right);
   
@@ -243,6 +251,10 @@ public:
 
   ShVector& operator=(const ShProgram& prg);
 
+  
+  ShVector& operator++();
+  
+  ShVector& operator--();
   
   template<typename T2>
   ShVector& operator+=(const ShGeneric<2, T2>& right);
@@ -334,6 +346,10 @@ public:
   ShVector& operator=(const ShProgram& prg);
 
   
+  ShVector& operator++();
+  
+  ShVector& operator--();
+  
   template<typename T2>
   ShVector& operator+=(const ShGeneric<3, T2>& right);
   
@@ -423,6 +439,10 @@ public:
 
   ShVector& operator=(const ShProgram& prg);
 
+  
+  ShVector& operator++();
+  
+  ShVector& operator--();
   
   template<typename T2>
   ShVector& operator+=(const ShGeneric<4, T2>& right);

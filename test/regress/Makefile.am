@@ -2,11 +2,10 @@ INCLUDES = -I../../src
 AM_CXXFLAGS = -Wall -g -O0
 AM_LDFLAGS = -g -L../../src
 LDADD = -lsh $(GL_LIBS)
-TESTS = abs acos add asin atan atan2 cbrt ceil clamp cmul comparisons \
-	cond cos cross csum div dot exp floor frac length lerp lit log \
-	mad matrix_add matrix_div matrix_mul matrix_neg matrix_sub max \
-	min mod mul neg pow rcp rnd rsqrt sign sin sort sqrt sub tan \
-	tex trace
+TESTS = abs add cbrt ceil clamp comparisons cond cross dec_inc div dot \
+	exp floor frac length lerp lit log mad matrix_add matrix_div \
+	matrix_mul matrix_neg matrix_sub max min mod mul neg pow \
+	prod_sum rcp rnd rsqrt sign sort sqrt sub tex trace trig
 check_PROGRAMS = $(TESTS)
 BACKENDS = arb cc host glsl
 EXTRA_DIST = shtest.py common.py
@@ -21,7 +20,7 @@ clean:
 	rm -f testlist
 	rm -f $(TESTS)
 	rm -f *.o *.pyc
-	rm -f $(TESTS:=.cpp)
+	rm -f $(TESTS:=.cpp) ccstream.cpp
 	rm -rf .libs
 
 %.cpp: %.cpp.py shtest.py common.py
@@ -29,34 +28,22 @@ clean:
 
 abs_SOURCES = abs.cpp $(common)
 EXTRA_DIST += abs.cpp.py
-acos_SOURCES = acos.cpp $(common)
-EXTRA_DIST += acos.cpp.py
 add_SOURCES = add.cpp $(common)
 EXTRA_DIST += add.cpp.py
-asin_SOURCES = asin.cpp $(common)
-EXTRA_DIST += asin.cpp.py
-atan_SOURCES = atan.cpp $(common)
-EXTRA_DIST += atan.cpp.py
-atan2_SOURCES = atan2.cpp $(common)
-EXTRA_DIST += atan2.cpp.py
 cbrt_SOURCES = cbrt.cpp $(common)
 EXTRA_DIST += cbrt.cpp.py
 ceil_SOURCES = ceil.cpp $(common)
 EXTRA_DIST += ceil.cpp.py
 clamp_SOURCES = clamp.cpp $(common)
 EXTRA_DIST += clamp.cpp.py
-cmul_SOURCES = cmul.cpp $(common)
-EXTRA_DIST += cmul.cpp.py
 comparisons_SOURCES = comparisons.cpp $(common)
 EXTRA_DIST += comparisons.cpp.py
 cond_SOURCES = cond.cpp $(common)
 EXTRA_DIST += cond.cpp.py
-cos_SOURCES = cos.cpp $(common)
-EXTRA_DIST += cos.cpp.py
 cross_SOURCES = cross.cpp $(common)
 EXTRA_DIST += cross.cpp.py
-csum_SOURCES = csum.cpp $(common)
-EXTRA_DIST += csum.cpp.py
+dec_inc_SOURCES = dec_inc.cpp $(common)
+EXTRA_DIST += dec_inc.cpp.py
 div_SOURCES = div.cpp $(common)
 EXTRA_DIST += div.cpp.py
 dot_SOURCES = dot.cpp $(common)
@@ -101,6 +88,8 @@ neg_SOURCES = neg.cpp $(common)
 EXTRA_DIST += neg.cpp.py
 pow_SOURCES = pow.cpp $(common)
 EXTRA_DIST += pow.cpp.py
+prod_sum_SOURCES = prod_sum.cpp $(common)
+EXTRA_DIST += prod_sum.cpp.py
 rcp_SOURCES = rcp.cpp $(common)
 EXTRA_DIST += rcp.cpp.py
 rnd_SOURCES = rnd.cpp $(common)
@@ -109,17 +98,15 @@ rsqrt_SOURCES = rsqrt.cpp $(common)
 EXTRA_DIST += rsqrt.cpp.py
 sign_SOURCES = sign.cpp $(common)
 EXTRA_DIST += sign.cpp.py
-sin_SOURCES = sin.cpp $(common)
-EXTRA_DIST += sin.cpp.py
 sort_SOURCES = sort.cpp $(common)
 EXTRA_DIST += sort.cpp.py
 sqrt_SOURCES = sqrt.cpp $(common)
 EXTRA_DIST += sqrt.cpp.py
 sub_SOURCES = sub.cpp $(common)
 EXTRA_DIST += sub.cpp.py
-tan_SOURCES = tan.cpp $(common)
-EXTRA_DIST += tan.cpp.py
 tex_SOURCES = tex.cpp $(common)
 EXTRA_DIST += tex.cpp.py
 trace_SOURCES = trace.cpp $(common)
 EXTRA_DIST += trace.cpp.py
+trig_SOURCES = trig.cpp $(common)
+EXTRA_DIST += trig.cpp.py

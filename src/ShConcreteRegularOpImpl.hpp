@@ -138,7 +138,7 @@ struct ShConcreteRegularOp<SH_OP_CMUL, T>
   {
     // dest->size should be 1 and a->size == b->size
     (*dest)[0] = std::accumulate(a->begin(), a->end(), 
-                      ShDataTypeInfo<T, SH_HOST>::Zero, 
+                      ShDataTypeInfo<T, SH_HOST>::One, 
                       std::multiplies<typename Variant::DataType>());
   }
 };

@@ -1,3 +1,19 @@
+2005-04-08  Francois Marier  <francois@serioushack.com>
+
+	* src/scripts/semantic.py: Add operator++() and operator--()
+
+	* src/ShGenericImpl.hpp, ShGeneric.hpp (operator++): Add this
+	method.
+
+	* src/ShGenericImpl.hpp, ShGeneric.hpp (operator--): Add this
+	method.
+
+	* backends/gl/GlslEmit.cpp (emit_logic): Removed the notEqual()
+	work-around on NVIDIA since the bug has been fixed.
+
+	* src/ShConcreteRegularOpImpl.hpp, ShConcreteCTypeOpImpl.hpp: 
+	Fix implementation of prod in immediate mode.
+
 2005-04-08  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/gl/ArbCode.hpp, backends/gl/ArbCode.cpp,
@@ -12,7 +28,7 @@
 	* src/ShInstructions.hpp, src/ShInstructions.cpp: Added
 	shRET() instruction call.
 	  
-    * src/ShOperation.hpp, src/ShOperation.cpp: Added SH_OP_RET.
+	* src/ShOperation.hpp, src/ShOperation.cpp: Added SH_OP_RET.
     
 2005-04-07  Francois Marier  <francois@serioushack.com>
 

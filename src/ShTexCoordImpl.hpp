@@ -129,6 +129,24 @@ ShTexCoord<N, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 }
 
 template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShTexCoord<N, Binding, T, Swizzled>&
+ShTexCoord<N, Binding, T, Swizzled>::operator++()
+{
+  ParentType::operator++();
+  return *this;
+}
+
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShTexCoord<N, Binding, T, Swizzled>&
+ShTexCoord<N, Binding, T, Swizzled>::operator--()
+{
+  ParentType::operator--();
+  return *this;
+}
+
+template<int N, ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
 inline
 ShTexCoord<N, Binding, T, Swizzled>&
@@ -439,6 +457,24 @@ ShTexCoord<1, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShTexCoord<1, Binding, T, Swizzled>&
+ShTexCoord<1, Binding, T, Swizzled>::operator++()
+{
+  ParentType::operator++();
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShTexCoord<1, Binding, T, Swizzled>&
+ShTexCoord<1, Binding, T, Swizzled>::operator--()
+{
+  ParentType::operator--();
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
 inline
 ShTexCoord<1, Binding, T, Swizzled>&
@@ -695,6 +731,24 @@ ShTexCoord<2, Binding, T, Swizzled>&
 ShTexCoord<2, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 {
   ParentType::operator=(prg);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShTexCoord<2, Binding, T, Swizzled>&
+ShTexCoord<2, Binding, T, Swizzled>::operator++()
+{
+  ParentType::operator++();
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShTexCoord<2, Binding, T, Swizzled>&
+ShTexCoord<2, Binding, T, Swizzled>::operator--()
+{
+  ParentType::operator--();
   return *this;
 }
 
@@ -1009,6 +1063,24 @@ ShTexCoord<3, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 }
 
 template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShTexCoord<3, Binding, T, Swizzled>&
+ShTexCoord<3, Binding, T, Swizzled>::operator++()
+{
+  ParentType::operator++();
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShTexCoord<3, Binding, T, Swizzled>&
+ShTexCoord<3, Binding, T, Swizzled>::operator--()
+{
+  ParentType::operator--();
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
 template<typename T2>
 inline
 ShTexCoord<3, Binding, T, Swizzled>&
@@ -1315,6 +1387,24 @@ ShTexCoord<4, Binding, T, Swizzled>&
 ShTexCoord<4, Binding, T, Swizzled>::operator=(const ShProgram& prg)
 {
   ParentType::operator=(prg);
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShTexCoord<4, Binding, T, Swizzled>&
+ShTexCoord<4, Binding, T, Swizzled>::operator++()
+{
+  ParentType::operator++();
+  return *this;
+}
+
+template<ShBindingType Binding, typename T, bool Swizzled>
+inline
+ShTexCoord<4, Binding, T, Swizzled>&
+ShTexCoord<4, Binding, T, Swizzled>::operator--()
+{
+  ParentType::operator--();
   return *this;
 }
 

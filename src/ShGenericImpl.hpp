@@ -104,6 +104,28 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator=(const ShGeneric<N, T2>& other)
 }
 
 template<int N, typename T>
+ShGeneric<N, T>& ShGeneric<N, T>::operator++()
+{
+  ShAttrib<N, SH_TEMP, T> tmp;
+  for (int i=0; i < N; i++) {
+    tmp[i] = 1;
+  }
+  *this = *this + tmp;
+  return *this;
+}
+
+template<int N, typename T>
+ShGeneric<N, T>& ShGeneric<N, T>::operator--()
+{
+  ShAttrib<N, SH_TEMP, T> tmp;
+  for (int i=0; i < N; i++) {
+    tmp[i] = 1;
+  }
+  *this = *this - tmp;
+  return *this;
+}
+
+template<int N, typename T>
 template<typename T2>
 inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator+=(const ShGeneric<N, T2>& right)
