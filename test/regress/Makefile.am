@@ -4,8 +4,8 @@ AM_LDFLAGS = -g -L../../src
 LDADD = -lsh $(GL_LIBS)
 TESTS = abs add cbrt ceil clamp comparisons cond cross dec_inc div dot \
 	exp floor frac length lerp lit log mad matrix_add matrix_div \
-	matrix_mul matrix_neg matrix_sub max min mod mul neg pow \
-	prod_sum rcp rnd rsqrt sign sort sqrt sub tex trace trig
+	matrix_mul matrix_neg matrix_sub max_min mod mul neg pow \
+	prod_sum rcp rnd sign sort sqrt sub tex trace trig
 check_PROGRAMS = $(TESTS)
 BACKENDS = arb cc host glsl
 EXTRA_DIST = shtest.py common.py
@@ -62,10 +62,8 @@ lit_SOURCES = lit.cpp $(common)
 EXTRA_DIST += lit.cpp.py
 log_SOURCES = log.cpp $(common)
 EXTRA_DIST += log.cpp.py
-max_SOURCES = max.cpp $(common)
-EXTRA_DIST += max.cpp.py
-min_SOURCES = min.cpp $(common)
-EXTRA_DIST += min.cpp.py
+max_min_SOURCES = max_min.cpp $(common)
+EXTRA_DIST += max_min.cpp.py
 mad_SOURCES = mad.cpp $(common)
 EXTRA_DIST += mad.cpp.py
 matrix_add_SOURCES = matrix_add.cpp $(common)
@@ -94,8 +92,6 @@ rcp_SOURCES = rcp.cpp $(common)
 EXTRA_DIST += rcp.cpp.py
 rnd_SOURCES = rnd.cpp $(common)
 EXTRA_DIST += rnd.cpp.py
-rsqrt_SOURCES = rsqrt.cpp $(common)
-EXTRA_DIST += rsqrt.cpp.py
 sign_SOURCES = sign.cpp $(common)
 EXTRA_DIST += sign.cpp.py
 sort_SOURCES = sort.cpp $(common)

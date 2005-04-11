@@ -18,8 +18,17 @@ def insert_into(test):
     test.add_test(neg((5000)))
     test.add_test(neg((-0.3333)))
 
+# Test the negation operator in stream programs
 test = shtest.StreamTest('neg', 1)
 test.add_call(shtest.Call(shtest.Call.prefix, '-', 1))
 insert_into(test)
-test.output(sys.stdout)
+test.output_header(sys.stdout)
+test.output(sys.stdout, False)
 
+# Test the negation operator in immediate mode
+test = shtest.ImmediateTest('neg_im', 1)
+test.add_call(shtest.Call(shtest.Call.prefix, '-', 1))
+insert_into(test)
+test.output(sys.stdout, False)
+
+test.output_footer(sys.stdout)
