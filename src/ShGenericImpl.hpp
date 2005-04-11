@@ -104,24 +104,18 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator=(const ShGeneric<N, T2>& other)
 }
 
 template<int N, typename T>
+inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator++()
 {
-  ShAttrib<N, SH_TEMP, T> tmp;
-  for (int i=0; i < N; i++) {
-    tmp[i] = 1;
-  }
-  *this = *this + tmp;
+  *this += 1;
   return *this;
 }
 
 template<int N, typename T>
+inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator--()
 {
-  ShAttrib<N, SH_TEMP, T> tmp;
-  for (int i=0; i < N; i++) {
-    tmp[i] = 1;
-  }
-  *this = *this - tmp;
+  *this -= 1;
   return *this;
 }
 
@@ -458,6 +452,22 @@ inline
 ShGeneric<1, T>& ShGeneric<1, T>::operator=(host_type other)
 {
   shASN(*this, ShAttrib<1, SH_CONST, T>(other));
+  return *this;
+}
+
+template<typename T>
+inline
+ShGeneric<1, T>& ShGeneric<1, T>::operator++()
+{
+  *this += 1;
+  return *this;
+}
+
+template<typename T>
+inline
+ShGeneric<1, T>& ShGeneric<1, T>::operator--()
+{
+  *this -= 1;
   return *this;
 }
 

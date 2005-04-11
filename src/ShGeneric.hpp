@@ -213,6 +213,9 @@ public:
   ShGeneric& operator=(host_type);
   ShGeneric& operator=(const ShProgram& other);
   
+  ShGeneric& operator++();
+  ShGeneric& operator--();
+
   template<typename T2>
   ShGeneric& operator+=(const ShGeneric<1, T2>& right);
 
