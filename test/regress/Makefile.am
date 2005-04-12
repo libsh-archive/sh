@@ -3,7 +3,7 @@ AM_CXXFLAGS = -Wall -g -O0
 AM_LDFLAGS = -g -L../../src
 LDADD = -lsh $(GL_LIBS)
 TESTS = abs add cbrt ceil clamp comparisons cross dec_inc div dot exp \
-	floor frac length lerp lit log logical mad matrix_add \
+	floor frac length_distance lerp lit log logical mad matrix_add \
 	matrix_div matrix_mul matrix_neg matrix_sub max_min mod mul \
 	neg pow prod_sum rcp rnd sign sort sqrt sub tex trace trig
 check_PROGRAMS = $(TESTS)
@@ -52,8 +52,8 @@ floor_SOURCES = floor.cpp $(common)
 EXTRA_DIST += floor.cpp.py
 frac_SOURCES = frac.cpp $(common)
 EXTRA_DIST += frac.cpp.py
-length_SOURCES = length.cpp $(common)
-EXTRA_DIST += length.cpp.py
+length_distance_SOURCES = length_distance.cpp $(common)
+EXTRA_DIST += length_distance.cpp.py
 lerp_SOURCES = lerp.cpp $(common)
 EXTRA_DIST += lerp.cpp.py
 lit_SOURCES = lit.cpp $(common)
