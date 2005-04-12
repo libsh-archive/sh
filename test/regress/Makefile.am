@@ -2,10 +2,10 @@ INCLUDES = -I../../src
 AM_CXXFLAGS = -Wall -g -O0
 AM_LDFLAGS = -g -L../../src
 LDADD = -lsh $(GL_LIBS)
-TESTS = abs add cbrt ceil clamp comparisons cond cross dec_inc div dot \
-	exp floor frac length lerp lit log mad matrix_add matrix_div \
-	matrix_mul matrix_neg matrix_sub max_min mod mul neg pow \
-	prod_sum rcp rnd sign sort sqrt sub tex trace trig
+TESTS = abs add cbrt ceil clamp comparisons cross dec_inc div dot exp \
+	floor frac length lerp lit log logical mad matrix_add \
+	matrix_div matrix_mul matrix_neg matrix_sub max_min mod mul \
+	neg pow prod_sum rcp rnd sign sort sqrt sub tex trace trig
 check_PROGRAMS = $(TESTS)
 BACKENDS = arb cc host glsl
 EXTRA_DIST = shtest.py common.py
@@ -38,8 +38,6 @@ clamp_SOURCES = clamp.cpp $(common)
 EXTRA_DIST += clamp.cpp.py
 comparisons_SOURCES = comparisons.cpp $(common)
 EXTRA_DIST += comparisons.cpp.py
-cond_SOURCES = cond.cpp $(common)
-EXTRA_DIST += cond.cpp.py
 cross_SOURCES = cross.cpp $(common)
 EXTRA_DIST += cross.cpp.py
 dec_inc_SOURCES = dec_inc.cpp $(common)
@@ -62,6 +60,8 @@ lit_SOURCES = lit.cpp $(common)
 EXTRA_DIST += lit.cpp.py
 log_SOURCES = log.cpp $(common)
 EXTRA_DIST += log.cpp.py
+logical_SOURCES = logical.cpp $(common)
+EXTRA_DIST += logical.cpp.py
 max_min_SOURCES = max_min.cpp $(common)
 EXTRA_DIST += max_min.cpp.py
 mad_SOURCES = mad.cpp $(common)
