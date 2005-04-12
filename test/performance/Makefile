@@ -12,7 +12,8 @@ LDFLAGS = ../../src/libsh.la
 all: $(EXECUTABLES)
 
 clean:
-	rm -f *.o $(EXECUTABLES) *.d *.log
+	rm -f *.o $(EXECUTABLES) *.d *.log *.out *.prof *.temp
+	rm -rf .libs
 
 %: %.o
 	libtool --mode=link $(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
@@ -21,10 +22,8 @@ clean:
 	$(CXX) -c -o $@ $(CPPFLAGS) $(CXXFLAGS) -I../../src $<
 
 %.d: %.cpp
-	$(CXX) -M $(CPPFLAGS) $< > $@.$$$$; \
+	@$(CXX) -M $(CPPFLAGS) $< > $@.$$$$; \
             sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
             rm -f $@.$$$$
 
-include $(DEPENDS)
-
-
+-include $(DEPENDS)
