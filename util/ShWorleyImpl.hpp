@@ -248,7 +248,7 @@ void worley(ShGeneric<K, T> result[], const ShGeneric<D, T> &p,
   }
 
   // sort points & gradients by distance
-  groupEvenOddSort<L>(props); 
+  groupsort<L>(props); 
 
   // weighted sum of basis function values to get final result
   for(j = 0; j < L; ++j) result[j] = cast<K>(props[j]);

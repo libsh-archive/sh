@@ -32,12 +32,9 @@ namespace ShUtil {
 
 using namespace SH;
 
-//TODO extend to vector versions
-
 /** \file ShFunc.hpp
  * \brief Miscellaneous small Sh utility functions.  
  */
-
 
 /** \brief Cubic interpolated step between 0 and 1. 
  * Returns 0 if x < a,
@@ -47,23 +44,6 @@ using namespace SH;
 template<int N, typename T>
 ShGeneric<N, T> smoothstep(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b,
     const ShGeneric<N, T> x); 
-
-/** \brief Euclidean distance between two points.
- */
-template<int N, typename T>
-ShGeneric<1, T> distance(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b); 
-
-/** \brief L1 distance between two points
- * The L1 distance is a sum of the absolute component-wise differences.
- */
-template<int N, typename T>
-ShGeneric<1, T> lOneDistance(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b); 
-
-/** \brief Linfinity distance between two points 
- * Linfinity distance is the maximum absolute component-wise difference.
- */
-template<int N, typename T>
-ShGeneric<1, T> lInfDistance(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b); 
 
 /** \brief Parallel linear congruential generator
  * 
@@ -90,28 +70,6 @@ ShGeneric<N, T> hashlcg(const ShGeneric<N, T>& p);
  */
 template<int N, typename T>
 ShGeneric<N, T> hashmrg(const ShGeneric<N, T>& p); 
-
-
-/** \brief Sorts components of an n-tuple
- * Uses an even-odd transposition sort to sort the components of an n-tuple.
- * (Ordered from smallest to largset)
- */
-template<int N, ShBindingType Binding, typename T>
-ShAttrib<N, Binding, T> evenOddSort(const ShAttrib<N, Binding, T>& v);
-
-/** \brief Sorts groups of components v[i](j), 0 <= i < S
- * by the components in v[0](j) 0 <= j < N.
- * This also uses an even-odd transposition sort.
- */
-template<int S, int N, ShBindingType Binding, typename T>
-void groupEvenOddSort(ShAttrib<N, Binding, T> v[]);
-
-/** \brief Sorts groups of components v[i](j), 0 <= i < S
- * by the components in v[0](j) 0 <= j < N.
- * This uses a bitonic sorting network 
- */
-//template<int S, int N, ShBindingType Binding, typename T>
-//void groupBitonicSort(ShAttrib<N, Binding, T> v[]);
 
 /** \brief Given orthonormal basis b0, b1, b2 and vector v relative to coordinate space C,
  * does change of basis on v to the orthonormal basis b0, b1, b2
