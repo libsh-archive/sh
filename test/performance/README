@@ -9,8 +9,11 @@ Test descriptions
     vec3_add        1000000 vec adds, not swizzled 
     vec3_add_swiz   1000000 vec adds, all operands swizzed
 
-Running tests
+Running all tests:
     make all
     ./runall
+
+Running a specific test for a given number of runs:
+    ./runtest vec3_add 5
 
 Use ./sum to get a summary
