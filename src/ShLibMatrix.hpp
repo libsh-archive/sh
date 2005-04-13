@@ -154,6 +154,14 @@ template<int RowsCols, ShBindingType Binding2, typename T2>
 ShMatrix<RowsCols,RowsCols, SH_TEMP, T2>
 inverse(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
 
+/** \brief Trace of a matrix.
+ *
+ * Returns the sum of the diagonal entries of a matrix.
+ */
+template<int RowsCols, ShBindingType Binding, typename T>
+ShGeneric<1, T>
+trace(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix);
+
 template<int N, typename T>
 ShMatrix<1, N, SH_TEMP, T>
 rowmat(const ShGeneric<N, T>& s0);
@@ -272,14 +280,6 @@ scale(const ShGeneric<2, T>& a);
 template<int N, typename T>
 ShMatrix<N, N, SH_TEMP, T>
 scale(const ShGeneric<1, T>& a);
-
-/** \brief Trace of a matrix.
- *
- * Returns the sum of the diagonal entries of a matrix.
- */
-template<int RowsCols, ShBindingType Binding, typename T>
-ShGeneric<1, T>
-trace(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix);
 
 /*@}*/
 
