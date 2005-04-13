@@ -2,10 +2,11 @@ INCLUDES = -I../../src
 AM_CXXFLAGS = -Wall -g -O0
 AM_LDFLAGS = -g -L../../src
 LDADD = -lsh $(GL_LIBS)
-TESTS = abs add cbrt ceil clamp comparisons cross dec_inc div dot exp \
-	floor frac length_distance lerp lit log logical mad matrix_add \
-	matrix_div matrix_mul matrix_neg matrix_sub max_min mod mul \
-	neg pow prod_sum rcp rnd sign sort sqrt sub tex trace trig
+TESTS = abs add cbrt ceil clamp comparisons cross dec_inc det div dot \
+	exp floor frac length_distance lerp lit log logical mad \
+	matrix_add matrix_div matrix_mul matrix_neg matrix_sub max_min \
+	mod mul neg pow prod_sum rcp rnd sign sort sqrt sub tex trace \
+	transpose trig
 check_PROGRAMS = $(TESTS)
 BACKENDS = arb cc host glsl
 EXTRA_DIST = shtest.py common.py
@@ -42,6 +43,8 @@ cross_SOURCES = cross.cpp $(common)
 EXTRA_DIST += cross.cpp.py
 dec_inc_SOURCES = dec_inc.cpp $(common)
 EXTRA_DIST += dec_inc.cpp.py
+det_SOURCES = det.cpp $(common)
+EXTRA_DIST += det.cpp.py
 div_SOURCES = div.cpp $(common)
 EXTRA_DIST += div.cpp.py
 dot_SOURCES = dot.cpp $(common)
@@ -104,5 +107,7 @@ tex_SOURCES = tex.cpp $(common)
 EXTRA_DIST += tex.cpp.py
 trace_SOURCES = trace.cpp $(common)
 EXTRA_DIST += trace.cpp.py
+transpose_SOURCES = transpose.cpp $(common)
+EXTRA_DIST += transpose.cpp.py
 trig_SOURCES = trig.cpp $(common)
 EXTRA_DIST += trig.cpp.py
