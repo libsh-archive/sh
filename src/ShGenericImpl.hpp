@@ -34,7 +34,6 @@
 namespace SH {
 
 template<int N, typename T>
-inline
 ShGeneric<N, T>::ShGeneric(const ShVariableNodePtr& node)
   : ShVariable(node)
 {
@@ -42,7 +41,6 @@ ShGeneric<N, T>::ShGeneric(const ShVariableNodePtr& node)
 }
 
 template<int N, typename T>
-inline
 ShGeneric<N, T>::ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, bool neg)
   : ShVariable(node)
 {
@@ -52,24 +50,12 @@ ShGeneric<N, T>::ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, boo
 }
 
 template<int N, typename T>
-inline
 ShGeneric<N, T>::~ShGeneric()
 {
 }
 
-//template<int N, typename T>
-//ShGeneric<N, T>::ShGeneric(const ShGeneric<N, T>& other)
-//  : ShVariable(new ShVariableNode(SH_TEMP, N, T, 
-//        other.node()->specialType()))
-//{
-//  SH_DEBUG_ASSERT(other.node());
-//  SH_DEBUG_ASSERT(m_node);
-//  shASN(*this, other);
-//}
-
 template<int N, typename T>
 template<typename T2>
-inline
 ShGeneric<N, T>::ShGeneric(const ShGeneric<N, T2>& other)
   : ShVariable(new ShVariableNode(SH_TEMP, N, value_type, 
         other.node()->specialType()))
@@ -80,7 +66,6 @@ ShGeneric<N, T>::ShGeneric(const ShGeneric<N, T2>& other)
 }
 
 template<int N, typename T>
-inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator=(const ShProgram& prg)
 {
   this->ShVariable::operator=(prg);
@@ -88,7 +73,6 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator=(const ShProgram& prg)
 }
 
 template<int N, typename T>
-inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator=(const ShGeneric<N, T>& other)
 {
   shASN(*this, other);
@@ -104,7 +88,6 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator=(const ShGeneric<N, T2>& other)
 }
 
 template<int N, typename T>
-inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator++()
 {
   *this += 1;
@@ -112,7 +95,6 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator++()
 }
 
 template<int N, typename T>
-inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator--()
 {
   *this -= 1;
@@ -121,7 +103,6 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator--()
 
 template<int N, typename T>
 template<typename T2>
-inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator+=(const ShGeneric<N, T2>& right)
 {
   *this = *this + right;
@@ -130,7 +111,6 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator+=(const ShGeneric<N, T2>& right)
 
 template<int N, typename T>
 template<typename T2>
-inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator-=(const ShGeneric<N, T2>& right)
 {
   *this = *this - right;
@@ -139,7 +119,6 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator-=(const ShGeneric<N, T2>& right)
 
 template<int N, typename T>
 template<typename T2>
-inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator*=(const ShGeneric<N, T2>& right)
 {
   *this = *this * right;
@@ -148,7 +127,6 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator*=(const ShGeneric<N, T2>& right)
 
 template<int N, typename T>
 template<typename T2>
-inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator/=(const ShGeneric<N, T2>& right)
 {
   *this = *this / right;
@@ -157,7 +135,6 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator/=(const ShGeneric<N, T2>& right)
 
 template<int N, typename T>
 template<typename T2>
-inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator%=(const ShGeneric<N, T2>& right)
 {
   *this = *this % right;
@@ -166,7 +143,6 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator%=(const ShGeneric<N, T2>& right)
 
 template<int N, typename T>
 template<typename T2>
-inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator+=(const ShGeneric<1, T2>& right)
 {
   *this = *this + right;
@@ -175,7 +151,6 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator+=(const ShGeneric<1, T2>& right)
 
 template<int N, typename T>
 template<typename T2>
-inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator-=(const ShGeneric<1, T2>& right)
 {
   *this = *this - right;
@@ -184,7 +159,6 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator-=(const ShGeneric<1, T2>& right)
 
 template<int N, typename T>
 template<typename T2>
-inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator*=(const ShGeneric<1, T2>& right)
 {
   *this = *this * right;
@@ -193,7 +167,6 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator*=(const ShGeneric<1, T2>& right)
 
 template<int N, typename T>
 template<typename T2>
-inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator/=(const ShGeneric<1, T2>& right)
 {
   *this = *this / right;
@@ -202,7 +175,6 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator/=(const ShGeneric<1, T2>& right)
 
 template<int N, typename T>
 template<typename T2>
-inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator%=(const ShGeneric<1, T2>& right)
 {
   *this = *this % right;
@@ -210,7 +182,6 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator%=(const ShGeneric<1, T2>& right)
 }
 
 template<int N, typename T>
-inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator+=(host_type right)
 {
   *this = *this + right;
@@ -218,7 +189,6 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator+=(host_type right)
 }
 
 template<int N, typename T>
-inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator-=(host_type right)
 {
   *this = *this - right;
@@ -226,7 +196,6 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator-=(host_type right)
 }
 
 template<int N, typename T>
-inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator*=(host_type right)
 {
   *this = *this * right;
@@ -234,7 +203,6 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator*=(host_type right)
 }
 
 template<int N, typename T>
-inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator/=(host_type right)
 {
   *this = *this / right;
@@ -242,7 +210,6 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator/=(host_type right)
 }
 
 template<int N, typename T>
-inline
 ShGeneric<N, T>& ShGeneric<N, T>::operator%=(host_type right)
 {
   *this = *this % right;
@@ -250,7 +217,6 @@ ShGeneric<N, T>& ShGeneric<N, T>::operator%=(host_type right)
 }
 
 template<int N, typename T>
-inline
 ShGeneric<N, T> ShGeneric<N, T>::operator-() const
 {
   return ShGeneric<N, T>(m_node, m_swizzle, !m_neg);
@@ -258,42 +224,36 @@ ShGeneric<N, T> ShGeneric<N, T>::operator-() const
 
 
 template<int N, typename T>
-inline
 ShGeneric<N, T> ShGeneric<N, T>::operator()() const
 {
   return ShGeneric<N, T>(m_node, m_swizzle, m_neg);
 }
 
 template<int N, typename T>
-inline
 ShGeneric<1, T> ShGeneric<N, T>::operator()(int i1) const
 {
   return ShGeneric<1, T>(m_node, m_swizzle * ShSwizzle(size(), i1), m_neg);
 }
 
 template<int N, typename T>
-inline
 ShGeneric<1, T> ShGeneric<N, T>::operator[](int i1) const
 {
   return ShGeneric<1, T>(m_node, m_swizzle * ShSwizzle(size(), i1), m_neg);
 }
 
 template<int N, typename T>
-inline
 ShGeneric<2, T> ShGeneric<N, T>::operator()(int i1, int i2) const
 {
   return ShGeneric<2, T>(m_node, m_swizzle * ShSwizzle(size(), i1, i2), m_neg);
 }
 
 template<int N, typename T>
-inline
 ShGeneric<3, T> ShGeneric<N, T>::operator()(int i1, int i2, int i3) const
 {
   return ShGeneric<3, T>(m_node, m_swizzle * ShSwizzle(size(), i1, i2, i3), m_neg);
 }
 
 template<int N, typename T>
-inline
 ShGeneric<4, T> ShGeneric<N, T>::operator()(int i1, int i2, int i3, int i4) const
 {
   return ShGeneric<4, T>(m_node, m_swizzle * ShSwizzle(size(), i1, i2, i3, i4), m_neg);
@@ -375,7 +335,6 @@ void ShGeneric<N, T>::setValues(const host_type variantValues[])
 }
 
 template<typename T>
-inline
 ShGeneric<1, T>::ShGeneric(const ShVariableNodePtr& node)
   : ShVariable(node)
 {
@@ -383,7 +342,6 @@ ShGeneric<1, T>::ShGeneric(const ShVariableNodePtr& node)
 }
 
 template<typename T>
-inline
 ShGeneric<1, T>::ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, bool neg)
   : ShVariable(node)
 {
@@ -393,25 +351,12 @@ ShGeneric<1, T>::ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, boo
 }
 
 template<typename T>
-inline
 ShGeneric<1, T>::~ShGeneric()
 {
 }
 
-//template<typename T>
-//ShGeneric<1, T>::ShGeneric(const ShGeneric<1, T>& other)
-//  : ShVariable(new ShVariableNode(SH_TEMP, 1, T, 
-//        other.node()->specialType()))
-//{
-//  SH_DEBUG_ASSERT(other.node());
-//  SH_DEBUG_ASSERT(m_node);
-//  SH_DEBUG_PRINT(m_node->size() << " " << other.node()->size());
-//  shASN(*this, other);
-//}
-
 template<typename T>
 template<typename T2>
-inline
 ShGeneric<1, T>::ShGeneric(const ShGeneric<1, T2>& other)
   : ShVariable(new ShVariableNode(SH_TEMP, 1, value_type, other.node()->specialType()))
 {
@@ -422,7 +367,6 @@ ShGeneric<1, T>::ShGeneric(const ShGeneric<1, T2>& other)
 }
 
 template<typename T>
-inline
 ShGeneric<1, T>& ShGeneric<1, T>::operator=(const ShProgram& prg)
 {
   this->ShVariable::operator=(prg);
@@ -430,7 +374,6 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator=(const ShProgram& prg)
 }
 
 template<typename T>
-inline
 ShGeneric<1, T>& ShGeneric<1, T>::operator=(const ShGeneric<1, T>& other)
 {
   shASN(*this, other);
@@ -439,7 +382,6 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator=(const ShGeneric<1, T>& other)
 
 template<typename T>
 template<typename T2>
-inline
 ShGeneric<1, T>& ShGeneric<1, T>::operator=(const ShGeneric<1, T2>& other)
 {
   shASN(*this, other);
@@ -448,7 +390,6 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator=(const ShGeneric<1, T2>& other)
 
 
 template<typename T>
-inline
 ShGeneric<1, T>& ShGeneric<1, T>::operator=(host_type other)
 {
   shASN(*this, ShAttrib<1, SH_CONST, T>(other));
@@ -456,7 +397,6 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator=(host_type other)
 }
 
 template<typename T>
-inline
 ShGeneric<1, T>& ShGeneric<1, T>::operator++()
 {
   *this += 1;
@@ -464,7 +404,6 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator++()
 }
 
 template<typename T>
-inline
 ShGeneric<1, T>& ShGeneric<1, T>::operator--()
 {
   *this -= 1;
@@ -473,7 +412,6 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator--()
 
 template<typename T>
 template<typename T2>
-inline
 ShGeneric<1, T>& ShGeneric<1, T>::operator+=(const ShGeneric<1, T2>& right)
 {
   *this = *this + right;
@@ -482,7 +420,6 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator+=(const ShGeneric<1, T2>& right)
 
 template<typename T>
 template<typename T2>
-inline
 ShGeneric<1, T>& ShGeneric<1, T>::operator-=(const ShGeneric<1, T2>& right)
 {
   *this = *this - right;
@@ -491,7 +428,6 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator-=(const ShGeneric<1, T2>& right)
 
 template<typename T>
 template<typename T2>
-inline
 ShGeneric<1, T>& ShGeneric<1, T>::operator*=(const ShGeneric<1, T2>& right)
 {
   *this = *this * right;
@@ -500,7 +436,6 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator*=(const ShGeneric<1, T2>& right)
 
 template<typename T>
 template<typename T2>
-inline
 ShGeneric<1, T>& ShGeneric<1, T>::operator/=(const ShGeneric<1, T2>& right)
 {
   *this = *this / right;
@@ -509,7 +444,6 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator/=(const ShGeneric<1, T2>& right)
 
 template<typename T>
 template<typename T2>
-inline
 ShGeneric<1, T>& ShGeneric<1, T>::operator%=(const ShGeneric<1, T2>& right)
 {
   *this = *this % right;
@@ -517,7 +451,6 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator%=(const ShGeneric<1, T2>& right)
 }
 
 template<typename T>
-inline
 ShGeneric<1, T>& ShGeneric<1, T>::operator*=(host_type right)
 {
   *this = *this * right;
@@ -525,7 +458,6 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator*=(host_type right)
 }
 
 template<typename T>
-inline
 ShGeneric<1, T>& ShGeneric<1, T>::operator/=(host_type right)
 {
   *this = *this / right;
@@ -533,7 +465,6 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator/=(host_type right)
 }
 
 template<typename T>
-inline
 ShGeneric<1, T>& ShGeneric<1, T>::operator%=(host_type right)
 {
   *this = *this % right;
@@ -541,7 +472,6 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator%=(host_type right)
 }
 
 template<typename T>
-inline
 ShGeneric<1, T>& ShGeneric<1, T>::operator+=(host_type right)
 {
   *this = *this + right;
@@ -549,7 +479,6 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator+=(host_type right)
 }
 
 template<typename T>
-inline
 ShGeneric<1, T>& ShGeneric<1, T>::operator-=(host_type right)
 {
   *this = *this - right;
@@ -557,7 +486,6 @@ ShGeneric<1, T>& ShGeneric<1, T>::operator-=(host_type right)
 }
 
 template<typename T>
-inline
 ShGeneric<1, T> ShGeneric<1, T>::operator-() const
 {
   return ShGeneric<1, T>(m_node, m_swizzle, !m_neg);
@@ -565,42 +493,36 @@ ShGeneric<1, T> ShGeneric<1, T>::operator-() const
 
 
 template<typename T>
-inline
 ShGeneric<1, T> ShGeneric<1, T>::operator()() const
 {
   return ShGeneric<1, T>(m_node, m_swizzle, m_neg);
 }
 
 template<typename T>
-inline
 ShGeneric<1, T> ShGeneric<1, T>::operator()(int i1) const
 {
   return ShGeneric<1, T>(m_node, m_swizzle * ShSwizzle(size(), i1), m_neg);
 }
 
 template<typename T>
-inline
 ShGeneric<1, T> ShGeneric<1, T>::operator[](int i1) const
 {
   return ShGeneric<1, T>(m_node, m_swizzle * ShSwizzle(size(), i1), m_neg);
 }
 
 template<typename T>
-inline
 ShGeneric<2, T> ShGeneric<1, T>::operator()(int i1, int i2) const
 {
   return ShGeneric<2, T>(m_node, m_swizzle * ShSwizzle(size(), i1, i2), m_neg);
 }
 
 template<typename T>
-inline
 ShGeneric<3, T> ShGeneric<1, T>::operator()(int i1, int i2, int i3) const
 {
   return ShGeneric<3, T>(m_node, m_swizzle * ShSwizzle(size(), i1, i2, i3), m_neg);
 }
 
 template<typename T>
-inline
 ShGeneric<4, T> ShGeneric<1, T>::operator()(int i1, int i2, int i3, int i4) const
 {
   return ShGeneric<4, T>(m_node, m_swizzle * ShSwizzle(size(), i1, i2, i3, i4), m_neg);
