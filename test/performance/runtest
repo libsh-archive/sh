@@ -42,19 +42,12 @@ fi
 
 # Make sure the prospect command is available
 PROSPECT=`which prospect`
-if [ x"$PROSPECT" == "x" ] ; then
-	echo "ERROR: the 'prospect' executable was not found."
-	need_prospect
-	exit 3
-fi
-
-if [ -x $PROSPECT ] ; then
-	for ((i=1; $i <= $RUNS; ++i)); do
-		echo "Run $i"
+for ((i=1; $i <= $RUNS; ++i)); do
+	echo "Run $i"
+	if [ x"$PROSPECT" == "x" ] ; then
+		time $PROG > $PROG\_$i.out	
+	else
 		prospect -H 100000 -o prospect.temp $PROG > $PROG\_$i.out
 		c++filt < prospect.temp > $PROG\_$i.prof
-	done
-else
-	echo "ERROR: cannot run '$PROSPECT'."
-	exit 4
-fi
+	fi
+done
