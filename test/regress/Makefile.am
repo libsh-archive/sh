@@ -2,11 +2,11 @@ INCLUDES = -I../../src
 AM_CXXFLAGS = -Wall -g -O0
 AM_LDFLAGS = -g -L../../src
 LDADD = -lsh $(GL_LIBS)
-TESTS = abs add cbrt ceil clamp comparisons cross dec_inc det div dot \
-	exp floor frac length_distance lerp lit log logical mad \
-	matrix_add matrix_div matrix_mul matrix_neg matrix_sub max_min \
-	mod mul neg pow prod_sum rcp rnd sign sort sqrt sub tex trace \
-	transpose trig
+TESTS = abs add cbrt ceil clamp comparisons cross dec_inc div dot exp \
+	floor frac length_distance lerp lit log logical mad matrix_add \
+	matrix_div matrix_functions matrix_mul matrix_neg matrix_sub \
+	max_min mod mul neg pow prod_sum rcp rnd sign sort sqrt sub \
+	tex trig
 check_PROGRAMS = $(TESTS)
 BACKENDS = arb cc host glsl
 EXTRA_DIST = shtest.py common.py
@@ -17,12 +17,9 @@ checkall:
 	for i in $(BACKENDS) ; do SH_REGRESS_BACKEND=$$i $(MAKE) check ; done
 
 clean:
-	rm -f *.log
-	rm -f testlist
-	rm -f $(TESTS)
-	rm -f *.o *.pyc
-	rm -f $(TESTS:=.cpp) ccstream.cpp
-	rm -rf .libs
+	@rm -f *.log
+	@rm -f testlist
+	@rm -f $(TESTS:=.cpp) ccstream.cpp
 
 %.cpp: %.cpp.py shtest.py common.py
 	python $< > $@
@@ -43,8 +40,6 @@ cross_SOURCES = cross.cpp $(common)
 EXTRA_DIST += cross.cpp.py
 dec_inc_SOURCES = dec_inc.cpp $(common)
 EXTRA_DIST += dec_inc.cpp.py
-det_SOURCES = det.cpp $(common)
-EXTRA_DIST += det.cpp.py
 div_SOURCES = div.cpp $(common)
 EXTRA_DIST += div.cpp.py
 dot_SOURCES = dot.cpp $(common)
@@ -73,14 +68,14 @@ matrix_add_SOURCES = matrix_add.cpp $(common)
 EXTRA_DIST += matrix_add.cpp.py
 matrix_div_SOURCES = matrix_div.cpp $(common)
 EXTRA_DIST += matrix_div.cpp.py
-EXTRA_DIST += matrix_msub.cpp.py
+matrix_functions_SOURCES = matrix_functions.cpp $(common)
+EXTRA_DIST += matrix_functions.cpp.py
 matrix_mul_SOURCES = matrix_mul.cpp $(common)
 EXTRA_DIST += matrix_mul.cpp.py
 matrix_neg_SOURCES = matrix_neg.cpp $(common)
 EXTRA_DIST += matrix_neg.cpp.py
 matrix_sub_SOURCES = matrix_sub.cpp $(common)
 EXTRA_DIST += matrix_sub.cpp.py
-EXTRA_DIST += mmul.cpp.py
 mod_SOURCES = mod.cpp $(common)
 EXTRA_DIST += mod.cpp.py
 mul_SOURCES = mul.cpp $(common)
@@ -105,9 +100,5 @@ sub_SOURCES = sub.cpp $(common)
 EXTRA_DIST += sub.cpp.py
 tex_SOURCES = tex.cpp $(common)
 EXTRA_DIST += tex.cpp.py
-trace_SOURCES = trace.cpp $(common)
-EXTRA_DIST += trace.cpp.py
-transpose_SOURCES = transpose.cpp $(common)
-EXTRA_DIST += transpose.cpp.py
 trig_SOURCES = trig.cpp $(common)
 EXTRA_DIST += trig.cpp.py
