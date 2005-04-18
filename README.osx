@@ -35,8 +35,3 @@ I needed to modify ShLibClampImpl.hpp to build recent shrike checkins because of
   template<int N, typename T>
   ShGeneric<1, T> max(const ShGeneric<N, T>& a)
 was creating a zero-length array.  Were you having this problem on other platforms?
-
-make shmedia fails
-    Darwin's cp doesn't support -a option
-    a quick web search suggests that -pPR does the same thing and is supported in linux
-
