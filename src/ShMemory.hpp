@@ -113,6 +113,8 @@ typedef ShPointer<const ShMemory> ShMemoryCPtr;
 class
 SH_DLLEXPORT ShTransfer {
 public:
+  virtual ~ShTransfer() {}
+
   /// Returns true if the transfer succeeded.
   virtual bool transfer(const ShStorage* from, ShStorage* to) = 0;
 

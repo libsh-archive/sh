@@ -35,6 +35,10 @@ namespace SH {
 /**************************************************************
  *** Use Specialization to define particular ops 
  **************************************************************/
+#define SHCCTO_UNARY_OP_SPEC_TMPL(T, op, opsrc)\
+template<>\
+SHCCTO_UNARY_OP_SPEC(T, op, opsrc)
+
 #define SHCCTO_UNARY_OP_SPEC(T, op, opsrc)\
 void ShConcreteCTypeOp<op, T>::doop(DataPtr dest, DataCPtr a, DataCPtr b, DataCPtr c) \
 {\
@@ -80,8 +84,8 @@ void ShConcreteCTypeOp<op, T>::doop(DataPtr dest, DataCPtr a, DataCPtr b, DataCP
 }   
 
 /* Specializations for unary ops */
-SHCCTO_UNARY_OP_SPEC(double, SH_OP_ABS, std::fabs(*A));
-SHCCTO_UNARY_OP_SPEC(float,  SH_OP_ABS, fabsf(*A));
+SHCCTO_UNARY_OP_SPEC_TMPL(double, SH_OP_ABS, std::fabs(*A));
+SHCCTO_UNARY_OP_SPEC_TMPL(float,  SH_OP_ABS, fabsf(*A));
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_ACOS, std::acos(*A));
 SHCCTO_UNARY_OP_SPEC(float,  SH_OP_ACOS, acosf(*A));
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_ASIN, std::asin(*A));
@@ -133,14 +137,14 @@ void ShConcreteCTypeOp<SH_OP_NORM, float>::doop(DataPtr dest, DataCPtr a, DataCP
   for(; A != a->end(); ++D, ++A) (*D) = (*A) / m; 
 }
 
-SHCCTO_UNARY_OP_SPEC(double, SH_OP_RCP, 1.0 / (*A)); 
-SHCCTO_UNARY_OP_SPEC(float,  SH_OP_RCP, 1.0f / (*A)); 
+SHCCTO_UNARY_OP_SPEC_TMPL(double, SH_OP_RCP, 1.0 / (*A)); 
+SHCCTO_UNARY_OP_SPEC_TMPL(float,  SH_OP_RCP, 1.0f / (*A)); 
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_RND, std::floor(*A + 0.5)); 
 SHCCTO_UNARY_OP_SPEC(float,  SH_OP_RND, floorf(*A + 0.5f)); 
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_RSQ, 1.0 / std::sqrt(*A)); 
 SHCCTO_UNARY_OP_SPEC(float,  SH_OP_RSQ, 1.0f / sqrtf(*A)); 
-SHCCTO_UNARY_OP_SPEC(double, SH_OP_SGN, ((*A) < 0 ? -1 : (*A) > 0 ? 1 : 0)); 
-SHCCTO_UNARY_OP_SPEC(float , SH_OP_SGN, ((*A) < 0 ? -1 : (*A) > 0 ? 1 : 0)); 
+SHCCTO_UNARY_OP_SPEC_TMPL(double, SH_OP_SGN, ((*A) < 0 ? -1 : (*A) > 0 ? 1 : 0)); 
+SHCCTO_UNARY_OP_SPEC_TMPL(float , SH_OP_SGN, ((*A) < 0 ? -1 : (*A) > 0 ? 1 : 0)); 
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_SIN, std::sin(*A)); 
 SHCCTO_UNARY_OP_SPEC(float,  SH_OP_SIN, sinf(*A)); 
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_SQRT, std::sqrt(*A)); 

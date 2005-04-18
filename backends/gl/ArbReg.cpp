@@ -30,7 +30,7 @@ namespace shgl {
 
 /** Information about ArbRegType members.
  */
-struct {
+static struct {
   char* name;
   char* estName;
 } arbRegTypeInfo[] = {
@@ -46,7 +46,7 @@ struct {
 
 /** Information about the ArbRegBinding members.
  */
-struct {
+static struct {
   ArbRegType type;
   char* name;
   bool indexed;

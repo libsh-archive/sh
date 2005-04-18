@@ -58,8 +58,7 @@ public:
   typedef ShMatrix<Rows, Cols, SH_INOUT, T> InOutType;
   typedef ShMatrix<Rows, Cols, SH_TEMP, T> TempType;
   typedef ShMatrix<Rows, Cols, SH_CONST, T> ConstType;
-  typedef ShMatrix<Rows, Cols, SH_TEMP, T> TempType;
-    
+
   /** \brief Identity constructor.
    *
    * Constructs an identity matrix.

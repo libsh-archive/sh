@@ -532,7 +532,7 @@ namespace ShCc {
     pid_t pid = fork();
     if (pid == 0) {
       // child
-      execlp("cc", "cc", "-O2", "-shared", "-o", sofile, ccfile, NULL);
+      execlp("cc", "cc", "-O2", "-shared", "-o", sofile, ccfile, (void*)NULL);
       SH_CC_DEBUG_PRINT("exec failed (" << errno << ")");
       exit(-1);
     } else if (pid > 0) {

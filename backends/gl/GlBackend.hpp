@@ -105,18 +105,20 @@ extern PFNGLVALIDATEPROGRAMARBPROC glValidateProgramARB;
 namespace shgl {
 
 struct TextureStrategy {
+  virtual ~TextureStrategy() {}
   virtual TextureStrategy* create() = 0;
-  
   virtual void bindTexture(const SH::ShTextureNodePtr& texture,
                            GLenum target) = 0;
 };
 
 struct StreamStrategy {
+  virtual ~StreamStrategy() {}
   virtual StreamStrategy* create() = 0;
   virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest) = 0;
 };
 
 struct CodeStrategy {
+  virtual ~CodeStrategy() {}
   virtual CodeStrategy* create() = 0;
   virtual SH::ShBackendCodePtr generate(const std::string& target,
                                         const SH::ShProgramNodeCPtr& shader,
