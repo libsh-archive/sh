@@ -325,6 +325,12 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
     shBind(**I);
     TIMING_RESULT(binding);
 
+#ifdef SH_DEBUG_PBS_PRINTFP
+    for (ShProgramSet::NodeList::const_iterator i = (*I)->begin(); i != (*I)->end(); i++) {
+      (*i)->code()->print(std::cerr);  
+    }
+#endif
+
     DECLARE_TIMER(clear);
     glClear(GL_COLOR_BUFFER_BIT);
     TIMING_RESULT(clear);
