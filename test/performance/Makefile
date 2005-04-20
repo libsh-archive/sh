@@ -12,14 +12,15 @@ LDFLAGS = ../../src/libsh.la
 all: $(EXECUTABLES)
 
 clean:
-	rm -f *.o $(EXECUTABLES) *.d *.log *.out *.prof *.temp
-	rm -rf .libs
+	@rm -f *.o $(EXECUTABLES) *.d *.log *.out *.prof *.temp
+	@rm -rf .libs
 
 %: %.o
-	libtool --mode=link $(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
+	@libtool --mode=link $(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDFLAGS) > /dev/null
 
 %.o: %.cpp
-	$(CXX) -c -o $@ $(CPPFLAGS) $(CXXFLAGS) -I../../src $<
+	@echo Compiling $@
+	@$(CXX) -c -o $@ $(CPPFLAGS) $(CXXFLAGS) -I../../src $<
 
 %.d: %.cpp
 	@$(CXX) -M $(CPPFLAGS) $< > $@.$$$$; \
