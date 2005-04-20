@@ -282,7 +282,7 @@ template<int K, int L, int P, int D, typename T>
 ShProgram shWorley(const GeneratorFactory<P, D, T> *genFactory,
         const PropertyFactory<L, D, T> *propFactory) {
   ShProgram program = SH_BEGIN_PROGRAM() {
-    ShTexCoord<D, SH_INPUT, T> SH_DECL(texcoord);
+    ShAttrib<D, SH_INPUT, T, SH_TEXCOORD> SH_DECL(texcoord);
 
     ShAttrib<K, SH_OUTPUT, T> result[L]; 
     worley(&result[0], texcoord, genFactory, propFactory); 

@@ -1,3 +1,13 @@
+2005-04-20  Francois Marier  <francois@serioushack.com>
+
+	* src/, src/scripts/, util/: Make semantic types template
+	parametrization of ShAttrib.  The semantic type is now an extra
+	template parameter before swizzle.
+
+	This means however that it is no longer possible to have types
+	like ShColor<3, SH_TEMP, float>, but the typedefs such as
+	ShColor3f are still available from within ShColor.hpp.
+
 2005-04-08  Francois Marier  <francois@serioushack.com>
 
 	* src/scripts/semantic.py: Add operator++() and operator--()

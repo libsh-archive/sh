@@ -57,11 +57,11 @@ public:
     print_values(varname.c_str(), s.str());
   }
 
-  template<int N, SH::ShBindingType Binding, typename T, bool swizzled>
-  void mem_from_host(typename SH::ShAttrib<N, Binding, T, swizzled>::mem_type mem[], const SH::ShAttrib<N, Binding, T, swizzled>& host)
+  template<int N, SH::ShBindingType Binding, typename T, SH::ShSemanticType Semantic, bool swizzled>
+  void mem_from_host(typename SH::ShAttrib<N, Binding, T, Semantic, swizzled>::mem_type mem[], const SH::ShAttrib<N, Binding, T, Semantic, swizzled>& host)
   {
     using namespace SH;
-    ShVariantPtr memVariant = new ShDataVariant<typename ShAttrib<N, Binding, T, swizzled>::storage_type, SH_MEM>(mem, host.size(), false);
+    ShVariantPtr memVariant = new ShDataVariant<typename ShAttrib<N, Binding, T, Semantic, swizzled>::storage_type, SH_MEM>(mem, host.size(), false);
     memVariant->set(host.getVariant());
   }
 

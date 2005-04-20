@@ -24,7 +24,7 @@ types = {"ShHalf": "h",
 
 class Class:
     def __init__(self, name, comment_name, enum, comment, parent = "ShAttrib",
-                 parentargs = "<N, Binding, T, Swizzled>"):
+                 parentargs = "<N, Binding, T, Semantic, Swizzled>"):
         self.name = "Sh" + name
         self.comment_name = comment_name
         self.enum = enum
@@ -73,19 +73,24 @@ class Class:
 
         self.typedefs()
 
+    def declare_parametrization(self):
+        self.maincomment()
+        common.inprint('')
+        self.typedefs()
+
     def maincomment(self):
         common.doxygen(self.comment)
 
     def open(self):
-        common.inprint("""template<int N, ShBindingType Binding, typename T=float, bool Swizzled=false>
+        common.inprint("""template<int N, ShBindingType Binding, typename T=float, ShSemanticType Semantic=SH_ATTRIB, bool Swizzled=false>
 class """ + self.name + " : public " + self.parent + self.parentargs + """ {
 public:""")
         common.indent()
 
     def open_sized(self, size):
         pa = self.parentargs.replace("N", self.sizevar(size))
-        common.inprint("template<ShBindingType Binding, typename T, bool Swizzled>\n" +
-                       "class " + self.name + "<" + str(size) + ", Binding, T, Swizzled>" +
+        common.inprint("template<ShBindingType Binding, typename T, ShSemanticType Semantic, bool Swizzled>\n" +
+                       "class " + self.name + "<" + str(size) + ", Binding, T, Semantic, Swizzled>" +
                        " : public " + self.parent + pa + " {\n" +
                        "public:")
         common.indent()
@@ -103,9 +108,9 @@ public:""")
         # note: need to put the default copy constructor, otherwise it is
         # implicitly defined and not what we want 
         common.inprint(self.name + "(const " + self.name + "<" +
-          self.sizevar(size) + ", Binding, T, Swizzled>& other);")
+          self.sizevar(size) + ", Binding, T, Semantic, Swizzled>& other);")
         common.inprint("\ntemplate<typename T2>")
-        common.inprint(self.name + "(const " + self.name + "<" + self.sizevar(size) + ", Binding, T2, Swizzled>& other);")
+        common.inprint(self.name + "(const " + self.name + "<" + self.sizevar(size) + ", Binding, T2, Semantic, Swizzled>& other);")
         common.inprint(self.name + "(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);")
         # common.inprint(self.name + "(const ShProgram&);")
         common.inprint("explicit " + self.name + "(host_type data[" + self.sizevar(size) + "]);")
@@ -128,9 +133,9 @@ public:""")
                        self.name + "& operator=(const ShGeneric<" + self.sizevar(size) + ", T2>& other);\n" +
                        "\ntemplate<typename T2>\n" +
                        self.name + "& operator=(const " + self.name + "<" +
-                       self.sizevar(size) + ", Binding, T2, Swizzled>& other);\n" +
+                       self.sizevar(size) + ", Binding, T2, Semantic, Swizzled>& other);\n" +
                        self.name + "& operator=(const " + self.name + "<" +
-                       self.sizevar(size) + ", Binding, T, Swizzled>& other);\n")
+                       self.sizevar(size) + ", Binding, T, Semantic, Swizzled>& other);\n")
         if size == 1:
             common.inprint(self.name + "& operator=(host_type other);\n")
         common.inprint(self.name + "& operator=(const ShProgram& prg);\n")
@@ -170,11 +175,11 @@ public:""")
     def swizzles(self):
         for num in range(1, 5):
             args = ', '.join(["int"] * num)
-            common.inprint(self.name + "<" + str(num) + ", Binding, T, true> operator()(" + args + ") const;")
-        common.inprint(self.name + "<1, Binding, T, true> operator[](int) const;")
+            common.inprint(self.name + "<" + str(num) + ", Binding, T, Semantic, true> operator()(" + args + ") const;")
+        common.inprint(self.name + "<1, Binding, T, Semantic, true> operator[](int) const;")
         common.inprint('')
         common.inprint("template<int N2>\n" +
-                       self.name + "<N2, Binding, T, true> swiz(int indices[]) const;")
+                       self.name + "<N2, Binding, T, Semantic, true> swiz(int indices[]) const;")
         common.inprint('')
         common.inprint(self.name + " operator-() const;")
 
@@ -183,12 +188,12 @@ public:""")
 typedef typename ShHostType<T>::type host_type; 
 typedef typename ShMemType<T>::type mem_type; 
 static const ShBindingType binding_type = Binding;
-static const ShSemanticType semantic_type = """ + self.enum + """;\n""")
-        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_INPUT, T> InputType;")
-        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_OUTPUT, T> OutputType;")
-        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_INOUT, T> InOutType;")
-        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_TEMP, T> TempType;")
-        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_CONST, T> ConstType;")
+static const ShSemanticType semantic_type = Semantic;\n""")
+        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_INPUT, T, Semantic> InputType;")
+        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_OUTPUT, T, Semantic> OutputType;")
+        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_INOUT, T, Semantic> InOutType;")
+        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_TEMP, T, Semantic> TempType;")
+        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_CONST, T, Semantic> ConstType;")
 
     def private_constants(self, size):
         common.inprint("private:")
@@ -201,11 +206,11 @@ static const ShSemanticType semantic_type = """ + self.enum + """;\n""")
         name = self.name.replace('Sh', '', 1)
         for t in types:
             for i in range(1, 5):
-                common.inprint("typedef Sh" + name + "<" + str(i) + ", SH_INPUT, " + t + "> ShInput" + name + str(i) + types[t] + ";")
-                common.inprint("typedef Sh" + name + "<" + str(i) + ", SH_OUTPUT, " + t + "> ShOutput" + name + str(i) + types[t] + ";")
-                common.inprint("typedef Sh" + name + "<" + str(i) + ", SH_INOUT, " + t + "> ShInOut" + name + str(i) + types[t] + ";")
-                common.inprint("typedef Sh" + name + "<" + str(i) + ", SH_TEMP, " + t + "> Sh" + name + str(i) + types[t] + ";")
-                common.inprint("typedef Sh" + name + "<" + str(i) + ", SH_CONST, " + t + "> ShConst" + name + str(i) + types[t] + ";")
+                common.inprint("typedef ShAttrib<" + str(i) + ", SH_INPUT, " + t + ", " + self.enum + "> ShInput" + name + str(i) + types[t] + ";")
+                common.inprint("typedef ShAttrib<" + str(i) + ", SH_OUTPUT, " + t + ", " + self.enum + "> ShOutput" + name + str(i) + types[t] + ";")
+                common.inprint("typedef ShAttrib<" + str(i) + ", SH_INOUT, " + t + ", " + self.enum + "> ShInOut" + name + str(i) + types[t] + ";")
+                common.inprint("typedef ShAttrib<" + str(i) + ", SH_TEMP, " + t + ", " + self.enum + "> Sh" + name + str(i) + types[t] + ";")
+                common.inprint("typedef ShAttrib<" + str(i) + ", SH_CONST, " + t + ", " + self.enum + "> ShConst" + name + str(i) + types[t] + ";")
             common.inprint("\n")
 
 class Impl:
@@ -241,7 +246,7 @@ class Impl:
         s = "template<"
         if size <= 0:
             s += "int N, "
-        s += "ShBindingType Binding, typename T, bool Swizzled>"
+        s += "ShBindingType Binding, typename T, ShSemanticType Semantic, bool Swizzled>"
         return s
 
     def tplcls(self, size, swiz = "Swizzled", type="T"):
@@ -253,7 +258,7 @@ class Impl:
                 s += "N"
             else:
                 s += str(size)
-        s += ", Binding, " + type + ", " + swiz + ">"
+        s += ", Binding, " + type + ", Semantic, " + swiz + ">"
         return s
 
     def constructor(self, args, size, extraTplArg=[]):

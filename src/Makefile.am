@@ -99,12 +99,12 @@ incinc_HEADERS   += ShDataType.hpp ShDataTypeImpl.hpp
 libsh_la_SOURCES += ShGeneric.hpp ShGenericImpl.hpp
 libsh_la_SOURCES += ShAttrib.hpp ShAttribImpl.hpp
 libsh_la_SOURCES += ShLibAttrib.hpp
-libsh_la_SOURCES += ShVector.hpp ShVectorImpl.hpp ShLibVector.hpp
-libsh_la_SOURCES += ShPoint.hpp ShPointImpl.hpp ShLibPoint.hpp
-libsh_la_SOURCES += ShPosition.hpp ShPositionImpl.hpp ShLibPosition.hpp
-libsh_la_SOURCES += ShColor.hpp ShColorImpl.hpp ShLibColor.hpp
-libsh_la_SOURCES += ShNormal.hpp ShNormalImpl.hpp ShLibNormal.hpp
-libsh_la_SOURCES += ShTexCoord.hpp ShTexCoordImpl.hpp ShLibTexCoord.hpp
+libsh_la_SOURCES += ShVector.hpp ShLibVector.hpp
+libsh_la_SOURCES += ShPoint.hpp ShLibPoint.hpp
+libsh_la_SOURCES += ShPosition.hpp ShLibPosition.hpp
+libsh_la_SOURCES += ShColor.hpp ShLibColor.hpp
+libsh_la_SOURCES += ShNormal.hpp ShLibNormal.hpp
+libsh_la_SOURCES += ShTexCoord.hpp ShLibTexCoord.hpp
 libsh_la_SOURCES += ShMatrix.hpp ShMatrixImpl.hpp
 libsh_la_SOURCES += ShQuaternion.hpp ShQuaternionImpl.hpp
 libsh_la_SOURCES += ShVariant.hpp ShVariantImpl.hpp ShVariant.cpp
@@ -163,12 +163,12 @@ incinc_HEADERS += ShBaseTexture.hpp ShBaseTextureImpl.hpp
 incinc_HEADERS += ShTextureNode.hpp ShImage.hpp ShImage3D.hpp
 incinc_HEADERS += ShLinearAllocator.hpp
 incinc_HEADERS += ShLibAttrib.hpp
-incinc_HEADERS += ShVector.hpp ShVectorImpl.hpp ShLibVector.hpp
-incinc_HEADERS += ShPoint.hpp ShPointImpl.hpp ShLibPoint.hpp
-incinc_HEADERS += ShColor.hpp ShColorImpl.hpp ShLibColor.hpp
-incinc_HEADERS += ShPosition.hpp ShPositionImpl.hpp ShLibPosition.hpp
-incinc_HEADERS += ShNormal.hpp ShNormalImpl.hpp ShLibNormal.hpp
-incinc_HEADERS += ShTexCoord.hpp ShTexCoordImpl.hpp ShLibTexCoord.hpp
+incinc_HEADERS += ShVector.hpp ShLibVector.hpp
+incinc_HEADERS += ShPoint.hpp ShLibPoint.hpp
+incinc_HEADERS += ShColor.hpp ShLibColor.hpp
+incinc_HEADERS += ShPosition.hpp ShLibPosition.hpp
+incinc_HEADERS += ShNormal.hpp ShLibNormal.hpp
+incinc_HEADERS += ShTexCoord.hpp ShLibTexCoord.hpp
 incinc_HEADERS += ShAlgebra.hpp ShInternals.hpp
 incinc_HEADERS += ShFixedManipulator.hpp
 incinc_HEADERS += ShManipulator.hpp ShManipulatorImpl.hpp
@@ -199,14 +199,14 @@ GENERATED  = ShAttrib.hpp ShAttribImpl.hpp \
 	     ShTexCoord.hpp ShTexCoordImpl.hpp
 
 %.hpp: scripts/%.hpp.py scripts/common.py scripts/semantic.py
-	rm -f $@
+	@rm -f $@
 	python $< > $@
-	chmod -w $@
+	@chmod -w $@
 
 %.cpp: scripts/%.cpp.py scripts/common.py scripts/semantic.py
-	rm -f $@
+	@rm -f $@
 	python $< > $@
-	chmod -w $@
+	@chmod -w $@
 
 %.o: $(GENERATED)
 %.Plo: $(GENERATED)
@@ -214,4 +214,4 @@ GENERATED  = ShAttrib.hpp ShAttribImpl.hpp \
 all-generated: $(GENERATED)
 
 clean-generated:
-	rm -f $(GENERATED)
+	@rm -f $(GENERATED)

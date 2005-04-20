@@ -24,14 +24,14 @@
 #ifndef SHLIBTEXCOORD_HPP
 #define SHLIBTEXCOORD_HPP
 
-#include "ShTexCoord.hpp"
+#include "ShAttrib.hpp"
 #include "ShLib.hpp"
 
 // TODO: should have same homogeneous promotion rules as Point and Position
 namespace SH {
 
-SH_SHLIB_USUAL_OPERATIONS(ShTexCoord);
-SH_SHLIB_USUAL_SUBTRACT(ShTexCoord);
+SH_SHLIB_USUAL_OPERATIONS(SH_TEXCOORD);
+SH_SHLIB_USUAL_SUBTRACT(SH_TEXCOORD);
 
 }
 

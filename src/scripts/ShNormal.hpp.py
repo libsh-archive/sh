@@ -10,8 +10,7 @@ decl = semantic.Class("Normal", "normal", "SH_NORMAL",
                       """An n-normal.
 """, "ShVector")
 
-decl.declare_all()
+decl.declare_parametrization()
 
 common.endnamespace()
-common.inprint('#include "ShNormalImpl.hpp"')
 common.endguard("SHNORMAL_HPP")

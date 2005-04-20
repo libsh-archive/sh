@@ -63,7 +63,7 @@ public:
    * \param values 4-vector from which we will get the values from 
    */  
   template<ShBindingType B2>
-  ShQuaternion(const ShVector<4, B2, T>& values);
+  ShQuaternion(const ShAttrib<4, B2, T, SH_VECTOR>& values);
   
   
   /** \brief Constructor for ShQuaternion with an angle and axis of rotation.
@@ -74,7 +74,7 @@ public:
    */  
   template<ShBindingType B2, ShBindingType B3>
   ShQuaternion(const ShAttrib<1, B2, T>& angle, 
-               const ShVector<3, B3, T>& axis);
+               const ShAttrib<3, B3, T, SH_VECTOR>& axis);
   
   
   /** \brief Constructor for ShQuaternion with a rotation matrix.
@@ -139,7 +139,7 @@ public:
    * \param right 3-vector converted to a quaternion multiplied to this one
    */  
   template<ShBindingType B2>
-  ShQuaternion& operator*=(const ShVector<3, B2, T>& right);
+  ShQuaternion& operator*=(const ShAttrib<3, B2, T, SH_VECTOR>& right);
   
   /** \brief Definition of the times-assign operation with a 3-normal
    *
@@ -148,7 +148,7 @@ public:
    * \param right 3-normal converted to a quaternion multiplied to this one
    */  
   template<ShBindingType B2>
-  ShQuaternion& operator*=(const ShNormal<3, B2, T>& right);
+  ShQuaternion& operator*=(const ShAttrib<3, B2, T, SH_NORMAL>& right);
 
   /** \brief Definition of the add operation with another quaternion
    *
@@ -189,7 +189,7 @@ public:
    * \param q2 3-vector converted to a quaternion multiplied to this one
    */  
   template<ShBindingType B2>
-  ShQuaternion<SH_TEMP, T> operator*(const ShVector<3, B2, T>& q2);
+  ShQuaternion<SH_TEMP, T> operator*(const ShAttrib<3, B2, T, SH_VECTOR>& q2);
   
   /** \brief Definition of the times operation with a 3-normal
    *
@@ -198,7 +198,7 @@ public:
    * \param q2 3-normal converted to a quaternion multiplied to this one
    */  
   template<ShBindingType B2>
-  ShQuaternion<SH_TEMP, T> operator*(const ShNormal<3, B2, T>& q2);
+  ShQuaternion<SH_TEMP, T> operator*(const ShAttrib<3, B2, T, SH_NORMAL>& q2);
 
   /** \brief Definition of the normalize function
    *
@@ -265,9 +265,9 @@ public:
    * 
    * Returns the values of this quaternion as a vector
    */
-  ShVector<4, SH_TEMP, T> getVector() const;
+  ShAttrib<4, SH_TEMP, T, SH_VECTOR> getVector() const;
 private:
-  ShVector<4, B, T> m_data;
+  ShAttrib<4, B, T, SH_VECTOR> m_data;
 };
 
 template<ShBindingType B, typename T, ShBindingType B2>

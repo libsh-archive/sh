@@ -28,7 +28,7 @@ class Impl(semantic.Impl):
         #common.inprint("inline")
         common.inprint(self.tplcls(size) + "::" + self.name + "(" + ', '.join([' '.join(x) for x in args]) + ")")
         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
-                       "(new ShVariableNode(Binding, " + self.sizevar(size) + ", ShStorageTypeInfo<T>::value_type))")
+                       "(new ShVariableNode(Binding, " + self.sizevar(size) + ", ShStorageTypeInfo<T>::value_type, Semantic))")
         common.inprint("{")
         common.indent()
         common.inprint("shASN(*this, " + other + ");")
@@ -42,7 +42,7 @@ class Impl(semantic.Impl):
         #common.inprint("inline")
         common.inprint(self.tplcls(size) + "::" + self.name + "(" + ', '.join([' '.join(x) for x in args]) + ")")
         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
-                       "(new ShVariableNode(Binding, " + self.sizevar(size) + ", ShStorageTypeInfo<T>::value_type))")
+                       "(new ShVariableNode(Binding, " + self.sizevar(size) + ", ShStorageTypeInfo<T>::value_type, Semantic))")
         common.inprint("{")
         common.indent()
         
@@ -66,7 +66,7 @@ class Impl(semantic.Impl):
                 if data != "":
                     data += ", "
                 data += "s" + str(i)
-            common.inprint("(*this) = ShAttrib<" + self.sizevar(size) + ", SH_CONST, T>(" + data + ");")
+            common.inprint("(*this) = ShAttrib<" + self.sizevar(size) + ", SH_CONST, T, Semantic>(" + data + ");")
         common.deindent()
         common.inprint("}")
         common.deindent()
@@ -78,7 +78,7 @@ class Impl(semantic.Impl):
         #common.inprint("inline")
         common.inprint(self.tplcls(size) + "::" + self.name + "()")
         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
-                       "(new ShVariableNode(Binding, " + self.sizevar(size) + ", ShStorageTypeInfo<T>::value_type))")
+                       "(new ShVariableNode(Binding, " + self.sizevar(size) + ", ShStorageTypeInfo<T>::value_type, Semantic))")
         common.inprint("{")
         common.inprint("}")
         common.inprint("")
@@ -102,7 +102,7 @@ class Impl(semantic.Impl):
         #common.inprint("inline")
         common.inprint(self.tplcls(size) + "::" + self.name + "(host_type data[" + self.sizevar(size) + "])")
         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
-                       "(new ShVariableNode(Binding, " + self.sizevar(size) + ", ShStorageTypeInfo<T>::value_type))")
+                       "(new ShVariableNode(Binding, " + self.sizevar(size) + ", ShStorageTypeInfo<T>::value_type, Semantic))")
         common.inprint("{")
         common.indent()
         common.inprint("if (Binding == SH_CONST) {")
@@ -111,7 +111,7 @@ class Impl(semantic.Impl):
         common.deindent()
         common.inprint("} else {")
         common.indent()
-        common.inprint("(*this) = ShAttrib<" + self.sizevar(size) + ", SH_CONST, T>(data);")
+        common.inprint("(*this) = ShAttrib<" + self.sizevar(size) + ", SH_CONST, T, Semantic>(data);")
         common.deindent()
         common.inprint("}")
         common.deindent()

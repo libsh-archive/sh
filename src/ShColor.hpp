@@ -38,789 +38,338 @@ namespace SH {
  * 
  *
  */
-template<int N, ShBindingType Binding, typename T=float, bool Swizzled=false>
-class ShColor : public ShAttrib<N, Binding, T, Swizzled> {
-public:
-  typedef T storage_type;
-  typedef typename ShHostType<T>::type host_type; 
-  typedef typename ShMemType<T>::type mem_type; 
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_COLOR;
 
-  typedef ShColor<N, SH_INPUT, T> InputType;
-  typedef ShColor<N, SH_OUTPUT, T> OutputType;
-  typedef ShColor<N, SH_INOUT, T> InOutType;
-  typedef ShColor<N, SH_TEMP, T> TempType;
-  typedef ShColor<N, SH_CONST, T> ConstType;
-  ShColor();
-  
-  template<typename T2>
-  ShColor(const ShGeneric<N, T2>& other);
-  ShColor(const ShColor<N, Binding, T, Swizzled>& other);
-  
-  template<typename T2>
-  ShColor(const ShColor<N, Binding, T2, Swizzled>& other);
-  ShColor(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShColor(host_type data[N]);
-  
-  ~ShColor();
-
-  
-  template<typename T2>
-  ShColor& operator=(const ShGeneric<N, T2>& other);
-  
-  template<typename T2>
-  ShColor& operator=(const ShColor<N, Binding, T2, Swizzled>& other);
-  ShColor& operator=(const ShColor<N, Binding, T, Swizzled>& other);
-
-  ShColor& operator=(const ShProgram& prg);
-
-  
-  ShColor& operator++();
-  
-  ShColor& operator--();
-  
-  template<typename T2>
-  ShColor& operator+=(const ShGeneric<N, T2>& right);
-  
-  template<typename T2>
-  ShColor& operator-=(const ShGeneric<N, T2>& right);
-  
-  template<typename T2>
-  ShColor& operator*=(const ShGeneric<N, T2>& right);
-  
-  template<typename T2>
-  ShColor& operator/=(const ShGeneric<N, T2>& right);
-  
-  template<typename T2>
-  ShColor& operator%=(const ShGeneric<N, T2>& right);
-  ShColor& operator*=(host_type);
-  ShColor& operator/=(host_type);
-  ShColor& operator%=(host_type);
-  ShColor& operator+=(host_type);
-  ShColor& operator-=(host_type);
-  
-  template<typename T2>
-  ShColor& operator+=(const ShGeneric<1, T2>&);
-  
-  template<typename T2>
-  ShColor& operator-=(const ShGeneric<1, T2>&);
-  
-  template<typename T2>
-  ShColor& operator*=(const ShGeneric<1, T2>&);
-  
-  template<typename T2>
-  ShColor& operator/=(const ShGeneric<1, T2>&);
-  
-  template<typename T2>
-  ShColor& operator%=(const ShGeneric<1, T2>&);
-  ShColor<1, Binding, T, true> operator()(int) const;
-  ShColor<2, Binding, T, true> operator()(int, int) const;
-  ShColor<3, Binding, T, true> operator()(int, int, int) const;
-  ShColor<4, Binding, T, true> operator()(int, int, int, int) const;
-  ShColor<1, Binding, T, true> operator[](int) const;
-  
-  template<int N2>
-  ShColor<N2, Binding, T, true> swiz(int indices[]) const;
-  
-  ShColor operator-() const;
-  private:
-    typedef ShAttrib<N, Binding, T, Swizzled> ParentType;
-};
-
-template<ShBindingType Binding, typename T, bool Swizzled>
-class ShColor<1, Binding, T, Swizzled> : public ShAttrib<1, Binding, T, Swizzled> {
-public:
-  typedef T storage_type;
-  typedef typename ShHostType<T>::type host_type; 
-  typedef typename ShMemType<T>::type mem_type; 
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_COLOR;
-
-  typedef ShColor<1, SH_INPUT, T> InputType;
-  typedef ShColor<1, SH_OUTPUT, T> OutputType;
-  typedef ShColor<1, SH_INOUT, T> InOutType;
-  typedef ShColor<1, SH_TEMP, T> TempType;
-  typedef ShColor<1, SH_CONST, T> ConstType;
-  ShColor();
-  
-  template<typename T2>
-  ShColor(const ShGeneric<1, T2>& other);
-  ShColor(const ShColor<1, Binding, T, Swizzled>& other);
-  
-  template<typename T2>
-  ShColor(const ShColor<1, Binding, T2, Swizzled>& other);
-  ShColor(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShColor(host_type data[1]);
-  
-  ShColor(host_type);
-  
-  ~ShColor();
-
-  
-  template<typename T2>
-  ShColor& operator=(const ShGeneric<1, T2>& other);
-  
-  template<typename T2>
-  ShColor& operator=(const ShColor<1, Binding, T2, Swizzled>& other);
-  ShColor& operator=(const ShColor<1, Binding, T, Swizzled>& other);
-
-  ShColor& operator=(host_type other);
-
-  ShColor& operator=(const ShProgram& prg);
-
-  
-  ShColor& operator++();
-  
-  ShColor& operator--();
-  
-  template<typename T2>
-  ShColor& operator+=(const ShGeneric<1, T2>& right);
-  
-  template<typename T2>
-  ShColor& operator-=(const ShGeneric<1, T2>& right);
-  
-  template<typename T2>
-  ShColor& operator*=(const ShGeneric<1, T2>& right);
-  
-  template<typename T2>
-  ShColor& operator/=(const ShGeneric<1, T2>& right);
-  
-  template<typename T2>
-  ShColor& operator%=(const ShGeneric<1, T2>& right);
-  ShColor& operator*=(host_type);
-  ShColor& operator/=(host_type);
-  ShColor& operator%=(host_type);
-  ShColor& operator+=(host_type);
-  ShColor& operator-=(host_type);
-  ShColor<1, Binding, T, true> operator()(int) const;
-  ShColor<2, Binding, T, true> operator()(int, int) const;
-  ShColor<3, Binding, T, true> operator()(int, int, int) const;
-  ShColor<4, Binding, T, true> operator()(int, int, int, int) const;
-  ShColor<1, Binding, T, true> operator[](int) const;
-  
-  template<int N2>
-  ShColor<N2, Binding, T, true> swiz(int indices[]) const;
-  
-  ShColor operator-() const;
-  private:
-    typedef ShAttrib<1, Binding, T, Swizzled> ParentType;
-};
-
-template<ShBindingType Binding, typename T, bool Swizzled>
-class ShColor<2, Binding, T, Swizzled> : public ShAttrib<2, Binding, T, Swizzled> {
-public:
-  typedef T storage_type;
-  typedef typename ShHostType<T>::type host_type; 
-  typedef typename ShMemType<T>::type mem_type; 
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_COLOR;
-
-  typedef ShColor<2, SH_INPUT, T> InputType;
-  typedef ShColor<2, SH_OUTPUT, T> OutputType;
-  typedef ShColor<2, SH_INOUT, T> InOutType;
-  typedef ShColor<2, SH_TEMP, T> TempType;
-  typedef ShColor<2, SH_CONST, T> ConstType;
-  ShColor();
-  
-  template<typename T2>
-  ShColor(const ShGeneric<2, T2>& other);
-  ShColor(const ShColor<2, Binding, T, Swizzled>& other);
-  
-  template<typename T2>
-  ShColor(const ShColor<2, Binding, T2, Swizzled>& other);
-  ShColor(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShColor(host_type data[2]);
-  
-  ShColor(host_type, host_type);
-  template<typename T2, typename T3>
-  ShColor(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&);
-  
-  ~ShColor();
-
-  
-  template<typename T2>
-  ShColor& operator=(const ShGeneric<2, T2>& other);
-  
-  template<typename T2>
-  ShColor& operator=(const ShColor<2, Binding, T2, Swizzled>& other);
-  ShColor& operator=(const ShColor<2, Binding, T, Swizzled>& other);
-
-  ShColor& operator=(const ShProgram& prg);
-
-  
-  ShColor& operator++();
-  
-  ShColor& operator--();
-  
-  template<typename T2>
-  ShColor& operator+=(const ShGeneric<2, T2>& right);
-  
-  template<typename T2>
-  ShColor& operator-=(const ShGeneric<2, T2>& right);
-  
-  template<typename T2>
-  ShColor& operator*=(const ShGeneric<2, T2>& right);
-  
-  template<typename T2>
-  ShColor& operator/=(const ShGeneric<2, T2>& right);
-  
-  template<typename T2>
-  ShColor& operator%=(const ShGeneric<2, T2>& right);
-  ShColor& operator*=(host_type);
-  ShColor& operator/=(host_type);
-  ShColor& operator%=(host_type);
-  ShColor& operator+=(host_type);
-  ShColor& operator-=(host_type);
-  
-  template<typename T2>
-  ShColor& operator+=(const ShGeneric<1, T2>&);
-  
-  template<typename T2>
-  ShColor& operator-=(const ShGeneric<1, T2>&);
-  
-  template<typename T2>
-  ShColor& operator*=(const ShGeneric<1, T2>&);
-  
-  template<typename T2>
-  ShColor& operator/=(const ShGeneric<1, T2>&);
-  
-  template<typename T2>
-  ShColor& operator%=(const ShGeneric<1, T2>&);
-  ShColor<1, Binding, T, true> operator()(int) const;
-  ShColor<2, Binding, T, true> operator()(int, int) const;
-  ShColor<3, Binding, T, true> operator()(int, int, int) const;
-  ShColor<4, Binding, T, true> operator()(int, int, int, int) const;
-  ShColor<1, Binding, T, true> operator[](int) const;
-  
-  template<int N2>
-  ShColor<N2, Binding, T, true> swiz(int indices[]) const;
-  
-  ShColor operator-() const;
-  private:
-    typedef ShAttrib<2, Binding, T, Swizzled> ParentType;
-};
-
-template<ShBindingType Binding, typename T, bool Swizzled>
-class ShColor<3, Binding, T, Swizzled> : public ShAttrib<3, Binding, T, Swizzled> {
-public:
-  typedef T storage_type;
-  typedef typename ShHostType<T>::type host_type; 
-  typedef typename ShMemType<T>::type mem_type; 
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_COLOR;
-
-  typedef ShColor<3, SH_INPUT, T> InputType;
-  typedef ShColor<3, SH_OUTPUT, T> OutputType;
-  typedef ShColor<3, SH_INOUT, T> InOutType;
-  typedef ShColor<3, SH_TEMP, T> TempType;
-  typedef ShColor<3, SH_CONST, T> ConstType;
-  ShColor();
-  
-  template<typename T2>
-  ShColor(const ShGeneric<3, T2>& other);
-  ShColor(const ShColor<3, Binding, T, Swizzled>& other);
-  
-  template<typename T2>
-  ShColor(const ShColor<3, Binding, T2, Swizzled>& other);
-  ShColor(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShColor(host_type data[3]);
-  
-  ShColor(host_type, host_type, host_type);
-  template<typename T2, typename T3, typename T4>
-  ShColor(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&);
-  
-  ~ShColor();
-
-  
-  template<typename T2>
-  ShColor& operator=(const ShGeneric<3, T2>& other);
-  
-  template<typename T2>
-  ShColor& operator=(const ShColor<3, Binding, T2, Swizzled>& other);
-  ShColor& operator=(const ShColor<3, Binding, T, Swizzled>& other);
-
-  ShColor& operator=(const ShProgram& prg);
-
-  
-  ShColor& operator++();
-  
-  ShColor& operator--();
-  
-  template<typename T2>
-  ShColor& operator+=(const ShGeneric<3, T2>& right);
-  
-  template<typename T2>
-  ShColor& operator-=(const ShGeneric<3, T2>& right);
-  
-  template<typename T2>
-  ShColor& operator*=(const ShGeneric<3, T2>& right);
-  
-  template<typename T2>
-  ShColor& operator/=(const ShGeneric<3, T2>& right);
-  
-  template<typename T2>
-  ShColor& operator%=(const ShGeneric<3, T2>& right);
-  ShColor& operator*=(host_type);
-  ShColor& operator/=(host_type);
-  ShColor& operator%=(host_type);
-  ShColor& operator+=(host_type);
-  ShColor& operator-=(host_type);
-  
-  template<typename T2>
-  ShColor& operator+=(const ShGeneric<1, T2>&);
-  
-  template<typename T2>
-  ShColor& operator-=(const ShGeneric<1, T2>&);
-  
-  template<typename T2>
-  ShColor& operator*=(const ShGeneric<1, T2>&);
-  
-  template<typename T2>
-  ShColor& operator/=(const ShGeneric<1, T2>&);
-  
-  template<typename T2>
-  ShColor& operator%=(const ShGeneric<1, T2>&);
-  ShColor<1, Binding, T, true> operator()(int) const;
-  ShColor<2, Binding, T, true> operator()(int, int) const;
-  ShColor<3, Binding, T, true> operator()(int, int, int) const;
-  ShColor<4, Binding, T, true> operator()(int, int, int, int) const;
-  ShColor<1, Binding, T, true> operator[](int) const;
-  
-  template<int N2>
-  ShColor<N2, Binding, T, true> swiz(int indices[]) const;
-  
-  ShColor operator-() const;
-  private:
-    typedef ShAttrib<3, Binding, T, Swizzled> ParentType;
-};
-
-template<ShBindingType Binding, typename T, bool Swizzled>
-class ShColor<4, Binding, T, Swizzled> : public ShAttrib<4, Binding, T, Swizzled> {
-public:
-  typedef T storage_type;
-  typedef typename ShHostType<T>::type host_type; 
-  typedef typename ShMemType<T>::type mem_type; 
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_COLOR;
-
-  typedef ShColor<4, SH_INPUT, T> InputType;
-  typedef ShColor<4, SH_OUTPUT, T> OutputType;
-  typedef ShColor<4, SH_INOUT, T> InOutType;
-  typedef ShColor<4, SH_TEMP, T> TempType;
-  typedef ShColor<4, SH_CONST, T> ConstType;
-  ShColor();
-  
-  template<typename T2>
-  ShColor(const ShGeneric<4, T2>& other);
-  ShColor(const ShColor<4, Binding, T, Swizzled>& other);
-  
-  template<typename T2>
-  ShColor(const ShColor<4, Binding, T2, Swizzled>& other);
-  ShColor(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShColor(host_type data[4]);
-  
-  ShColor(host_type, host_type, host_type, host_type);
-  template<typename T2, typename T3, typename T4, typename T5>
-  ShColor(const ShGeneric<1, T2>&, const ShGeneric<1, T3>&, const ShGeneric<1, T4>&, const ShGeneric<1, T5>&);
-  
-  ~ShColor();
-
-  
-  template<typename T2>
-  ShColor& operator=(const ShGeneric<4, T2>& other);
-  
-  template<typename T2>
-  ShColor& operator=(const ShColor<4, Binding, T2, Swizzled>& other);
-  ShColor& operator=(const ShColor<4, Binding, T, Swizzled>& other);
-
-  ShColor& operator=(const ShProgram& prg);
-
-  
-  ShColor& operator++();
-  
-  ShColor& operator--();
-  
-  template<typename T2>
-  ShColor& operator+=(const ShGeneric<4, T2>& right);
-  
-  template<typename T2>
-  ShColor& operator-=(const ShGeneric<4, T2>& right);
-  
-  template<typename T2>
-  ShColor& operator*=(const ShGeneric<4, T2>& right);
-  
-  template<typename T2>
-  ShColor& operator/=(const ShGeneric<4, T2>& right);
-  
-  template<typename T2>
-  ShColor& operator%=(const ShGeneric<4, T2>& right);
-  ShColor& operator*=(host_type);
-  ShColor& operator/=(host_type);
-  ShColor& operator%=(host_type);
-  ShColor& operator+=(host_type);
-  ShColor& operator-=(host_type);
-  
-  template<typename T2>
-  ShColor& operator+=(const ShGeneric<1, T2>&);
-  
-  template<typename T2>
-  ShColor& operator-=(const ShGeneric<1, T2>&);
-  
-  template<typename T2>
-  ShColor& operator*=(const ShGeneric<1, T2>&);
-  
-  template<typename T2>
-  ShColor& operator/=(const ShGeneric<1, T2>&);
-  
-  template<typename T2>
-  ShColor& operator%=(const ShGeneric<1, T2>&);
-  ShColor<1, Binding, T, true> operator()(int) const;
-  ShColor<2, Binding, T, true> operator()(int, int) const;
-  ShColor<3, Binding, T, true> operator()(int, int, int) const;
-  ShColor<4, Binding, T, true> operator()(int, int, int, int) const;
-  ShColor<1, Binding, T, true> operator[](int) const;
-  
-  template<int N2>
-  ShColor<N2, Binding, T, true> swiz(int indices[]) const;
-  
-  ShColor operator-() const;
-  private:
-    typedef ShAttrib<4, Binding, T, Swizzled> ParentType;
-};
-
-typedef ShColor<1, SH_INPUT, ShFracUShort> ShInputColor1fus;
-typedef ShColor<1, SH_OUTPUT, ShFracUShort> ShOutputColor1fus;
-typedef ShColor<1, SH_INOUT, ShFracUShort> ShInOutColor1fus;
-typedef ShColor<1, SH_TEMP, ShFracUShort> ShColor1fus;
-typedef ShColor<1, SH_CONST, ShFracUShort> ShConstColor1fus;
-typedef ShColor<2, SH_INPUT, ShFracUShort> ShInputColor2fus;
-typedef ShColor<2, SH_OUTPUT, ShFracUShort> ShOutputColor2fus;
-typedef ShColor<2, SH_INOUT, ShFracUShort> ShInOutColor2fus;
-typedef ShColor<2, SH_TEMP, ShFracUShort> ShColor2fus;
-typedef ShColor<2, SH_CONST, ShFracUShort> ShConstColor2fus;
-typedef ShColor<3, SH_INPUT, ShFracUShort> ShInputColor3fus;
-typedef ShColor<3, SH_OUTPUT, ShFracUShort> ShOutputColor3fus;
-typedef ShColor<3, SH_INOUT, ShFracUShort> ShInOutColor3fus;
-typedef ShColor<3, SH_TEMP, ShFracUShort> ShColor3fus;
-typedef ShColor<3, SH_CONST, ShFracUShort> ShConstColor3fus;
-typedef ShColor<4, SH_INPUT, ShFracUShort> ShInputColor4fus;
-typedef ShColor<4, SH_OUTPUT, ShFracUShort> ShOutputColor4fus;
-typedef ShColor<4, SH_INOUT, ShFracUShort> ShInOutColor4fus;
-typedef ShColor<4, SH_TEMP, ShFracUShort> ShColor4fus;
-typedef ShColor<4, SH_CONST, ShFracUShort> ShConstColor4fus;
+typedef ShAttrib<1, SH_INPUT, ShFracUShort, SH_COLOR> ShInputColor1fus;
+typedef ShAttrib<1, SH_OUTPUT, ShFracUShort, SH_COLOR> ShOutputColor1fus;
+typedef ShAttrib<1, SH_INOUT, ShFracUShort, SH_COLOR> ShInOutColor1fus;
+typedef ShAttrib<1, SH_TEMP, ShFracUShort, SH_COLOR> ShColor1fus;
+typedef ShAttrib<1, SH_CONST, ShFracUShort, SH_COLOR> ShConstColor1fus;
+typedef ShAttrib<2, SH_INPUT, ShFracUShort, SH_COLOR> ShInputColor2fus;
+typedef ShAttrib<2, SH_OUTPUT, ShFracUShort, SH_COLOR> ShOutputColor2fus;
+typedef ShAttrib<2, SH_INOUT, ShFracUShort, SH_COLOR> ShInOutColor2fus;
+typedef ShAttrib<2, SH_TEMP, ShFracUShort, SH_COLOR> ShColor2fus;
+typedef ShAttrib<2, SH_CONST, ShFracUShort, SH_COLOR> ShConstColor2fus;
+typedef ShAttrib<3, SH_INPUT, ShFracUShort, SH_COLOR> ShInputColor3fus;
+typedef ShAttrib<3, SH_OUTPUT, ShFracUShort, SH_COLOR> ShOutputColor3fus;
+typedef ShAttrib<3, SH_INOUT, ShFracUShort, SH_COLOR> ShInOutColor3fus;
+typedef ShAttrib<3, SH_TEMP, ShFracUShort, SH_COLOR> ShColor3fus;
+typedef ShAttrib<3, SH_CONST, ShFracUShort, SH_COLOR> ShConstColor3fus;
+typedef ShAttrib<4, SH_INPUT, ShFracUShort, SH_COLOR> ShInputColor4fus;
+typedef ShAttrib<4, SH_OUTPUT, ShFracUShort, SH_COLOR> ShOutputColor4fus;
+typedef ShAttrib<4, SH_INOUT, ShFracUShort, SH_COLOR> ShInOutColor4fus;
+typedef ShAttrib<4, SH_TEMP, ShFracUShort, SH_COLOR> ShColor4fus;
+typedef ShAttrib<4, SH_CONST, ShFracUShort, SH_COLOR> ShConstColor4fus;
 
 
-typedef ShColor<1, SH_INPUT, short> ShInputColor1s;
-typedef ShColor<1, SH_OUTPUT, short> ShOutputColor1s;
-typedef ShColor<1, SH_INOUT, short> ShInOutColor1s;
-typedef ShColor<1, SH_TEMP, short> ShColor1s;
-typedef ShColor<1, SH_CONST, short> ShConstColor1s;
-typedef ShColor<2, SH_INPUT, short> ShInputColor2s;
-typedef ShColor<2, SH_OUTPUT, short> ShOutputColor2s;
-typedef ShColor<2, SH_INOUT, short> ShInOutColor2s;
-typedef ShColor<2, SH_TEMP, short> ShColor2s;
-typedef ShColor<2, SH_CONST, short> ShConstColor2s;
-typedef ShColor<3, SH_INPUT, short> ShInputColor3s;
-typedef ShColor<3, SH_OUTPUT, short> ShOutputColor3s;
-typedef ShColor<3, SH_INOUT, short> ShInOutColor3s;
-typedef ShColor<3, SH_TEMP, short> ShColor3s;
-typedef ShColor<3, SH_CONST, short> ShConstColor3s;
-typedef ShColor<4, SH_INPUT, short> ShInputColor4s;
-typedef ShColor<4, SH_OUTPUT, short> ShOutputColor4s;
-typedef ShColor<4, SH_INOUT, short> ShInOutColor4s;
-typedef ShColor<4, SH_TEMP, short> ShColor4s;
-typedef ShColor<4, SH_CONST, short> ShConstColor4s;
+typedef ShAttrib<1, SH_INPUT, short, SH_COLOR> ShInputColor1s;
+typedef ShAttrib<1, SH_OUTPUT, short, SH_COLOR> ShOutputColor1s;
+typedef ShAttrib<1, SH_INOUT, short, SH_COLOR> ShInOutColor1s;
+typedef ShAttrib<1, SH_TEMP, short, SH_COLOR> ShColor1s;
+typedef ShAttrib<1, SH_CONST, short, SH_COLOR> ShConstColor1s;
+typedef ShAttrib<2, SH_INPUT, short, SH_COLOR> ShInputColor2s;
+typedef ShAttrib<2, SH_OUTPUT, short, SH_COLOR> ShOutputColor2s;
+typedef ShAttrib<2, SH_INOUT, short, SH_COLOR> ShInOutColor2s;
+typedef ShAttrib<2, SH_TEMP, short, SH_COLOR> ShColor2s;
+typedef ShAttrib<2, SH_CONST, short, SH_COLOR> ShConstColor2s;
+typedef ShAttrib<3, SH_INPUT, short, SH_COLOR> ShInputColor3s;
+typedef ShAttrib<3, SH_OUTPUT, short, SH_COLOR> ShOutputColor3s;
+typedef ShAttrib<3, SH_INOUT, short, SH_COLOR> ShInOutColor3s;
+typedef ShAttrib<3, SH_TEMP, short, SH_COLOR> ShColor3s;
+typedef ShAttrib<3, SH_CONST, short, SH_COLOR> ShConstColor3s;
+typedef ShAttrib<4, SH_INPUT, short, SH_COLOR> ShInputColor4s;
+typedef ShAttrib<4, SH_OUTPUT, short, SH_COLOR> ShOutputColor4s;
+typedef ShAttrib<4, SH_INOUT, short, SH_COLOR> ShInOutColor4s;
+typedef ShAttrib<4, SH_TEMP, short, SH_COLOR> ShColor4s;
+typedef ShAttrib<4, SH_CONST, short, SH_COLOR> ShConstColor4s;
 
 
-typedef ShColor<1, SH_INPUT, ShFracUInt> ShInputColor1fui;
-typedef ShColor<1, SH_OUTPUT, ShFracUInt> ShOutputColor1fui;
-typedef ShColor<1, SH_INOUT, ShFracUInt> ShInOutColor1fui;
-typedef ShColor<1, SH_TEMP, ShFracUInt> ShColor1fui;
-typedef ShColor<1, SH_CONST, ShFracUInt> ShConstColor1fui;
-typedef ShColor<2, SH_INPUT, ShFracUInt> ShInputColor2fui;
-typedef ShColor<2, SH_OUTPUT, ShFracUInt> ShOutputColor2fui;
-typedef ShColor<2, SH_INOUT, ShFracUInt> ShInOutColor2fui;
-typedef ShColor<2, SH_TEMP, ShFracUInt> ShColor2fui;
-typedef ShColor<2, SH_CONST, ShFracUInt> ShConstColor2fui;
-typedef ShColor<3, SH_INPUT, ShFracUInt> ShInputColor3fui;
-typedef ShColor<3, SH_OUTPUT, ShFracUInt> ShOutputColor3fui;
-typedef ShColor<3, SH_INOUT, ShFracUInt> ShInOutColor3fui;
-typedef ShColor<3, SH_TEMP, ShFracUInt> ShColor3fui;
-typedef ShColor<3, SH_CONST, ShFracUInt> ShConstColor3fui;
-typedef ShColor<4, SH_INPUT, ShFracUInt> ShInputColor4fui;
-typedef ShColor<4, SH_OUTPUT, ShFracUInt> ShOutputColor4fui;
-typedef ShColor<4, SH_INOUT, ShFracUInt> ShInOutColor4fui;
-typedef ShColor<4, SH_TEMP, ShFracUInt> ShColor4fui;
-typedef ShColor<4, SH_CONST, ShFracUInt> ShConstColor4fui;
+typedef ShAttrib<1, SH_INPUT, ShFracUInt, SH_COLOR> ShInputColor1fui;
+typedef ShAttrib<1, SH_OUTPUT, ShFracUInt, SH_COLOR> ShOutputColor1fui;
+typedef ShAttrib<1, SH_INOUT, ShFracUInt, SH_COLOR> ShInOutColor1fui;
+typedef ShAttrib<1, SH_TEMP, ShFracUInt, SH_COLOR> ShColor1fui;
+typedef ShAttrib<1, SH_CONST, ShFracUInt, SH_COLOR> ShConstColor1fui;
+typedef ShAttrib<2, SH_INPUT, ShFracUInt, SH_COLOR> ShInputColor2fui;
+typedef ShAttrib<2, SH_OUTPUT, ShFracUInt, SH_COLOR> ShOutputColor2fui;
+typedef ShAttrib<2, SH_INOUT, ShFracUInt, SH_COLOR> ShInOutColor2fui;
+typedef ShAttrib<2, SH_TEMP, ShFracUInt, SH_COLOR> ShColor2fui;
+typedef ShAttrib<2, SH_CONST, ShFracUInt, SH_COLOR> ShConstColor2fui;
+typedef ShAttrib<3, SH_INPUT, ShFracUInt, SH_COLOR> ShInputColor3fui;
+typedef ShAttrib<3, SH_OUTPUT, ShFracUInt, SH_COLOR> ShOutputColor3fui;
+typedef ShAttrib<3, SH_INOUT, ShFracUInt, SH_COLOR> ShInOutColor3fui;
+typedef ShAttrib<3, SH_TEMP, ShFracUInt, SH_COLOR> ShColor3fui;
+typedef ShAttrib<3, SH_CONST, ShFracUInt, SH_COLOR> ShConstColor3fui;
+typedef ShAttrib<4, SH_INPUT, ShFracUInt, SH_COLOR> ShInputColor4fui;
+typedef ShAttrib<4, SH_OUTPUT, ShFracUInt, SH_COLOR> ShOutputColor4fui;
+typedef ShAttrib<4, SH_INOUT, ShFracUInt, SH_COLOR> ShInOutColor4fui;
+typedef ShAttrib<4, SH_TEMP, ShFracUInt, SH_COLOR> ShColor4fui;
+typedef ShAttrib<4, SH_CONST, ShFracUInt, SH_COLOR> ShConstColor4fui;
 
 
-typedef ShColor<1, SH_INPUT, ShFracByte> ShInputColor1fb;
-typedef ShColor<1, SH_OUTPUT, ShFracByte> ShOutputColor1fb;
-typedef ShColor<1, SH_INOUT, ShFracByte> ShInOutColor1fb;
-typedef ShColor<1, SH_TEMP, ShFracByte> ShColor1fb;
-typedef ShColor<1, SH_CONST, ShFracByte> ShConstColor1fb;
-typedef ShColor<2, SH_INPUT, ShFracByte> ShInputColor2fb;
-typedef ShColor<2, SH_OUTPUT, ShFracByte> ShOutputColor2fb;
-typedef ShColor<2, SH_INOUT, ShFracByte> ShInOutColor2fb;
-typedef ShColor<2, SH_TEMP, ShFracByte> ShColor2fb;
-typedef ShColor<2, SH_CONST, ShFracByte> ShConstColor2fb;
-typedef ShColor<3, SH_INPUT, ShFracByte> ShInputColor3fb;
-typedef ShColor<3, SH_OUTPUT, ShFracByte> ShOutputColor3fb;
-typedef ShColor<3, SH_INOUT, ShFracByte> ShInOutColor3fb;
-typedef ShColor<3, SH_TEMP, ShFracByte> ShColor3fb;
-typedef ShColor<3, SH_CONST, ShFracByte> ShConstColor3fb;
-typedef ShColor<4, SH_INPUT, ShFracByte> ShInputColor4fb;
-typedef ShColor<4, SH_OUTPUT, ShFracByte> ShOutputColor4fb;
-typedef ShColor<4, SH_INOUT, ShFracByte> ShInOutColor4fb;
-typedef ShColor<4, SH_TEMP, ShFracByte> ShColor4fb;
-typedef ShColor<4, SH_CONST, ShFracByte> ShConstColor4fb;
+typedef ShAttrib<1, SH_INPUT, ShFracByte, SH_COLOR> ShInputColor1fb;
+typedef ShAttrib<1, SH_OUTPUT, ShFracByte, SH_COLOR> ShOutputColor1fb;
+typedef ShAttrib<1, SH_INOUT, ShFracByte, SH_COLOR> ShInOutColor1fb;
+typedef ShAttrib<1, SH_TEMP, ShFracByte, SH_COLOR> ShColor1fb;
+typedef ShAttrib<1, SH_CONST, ShFracByte, SH_COLOR> ShConstColor1fb;
+typedef ShAttrib<2, SH_INPUT, ShFracByte, SH_COLOR> ShInputColor2fb;
+typedef ShAttrib<2, SH_OUTPUT, ShFracByte, SH_COLOR> ShOutputColor2fb;
+typedef ShAttrib<2, SH_INOUT, ShFracByte, SH_COLOR> ShInOutColor2fb;
+typedef ShAttrib<2, SH_TEMP, ShFracByte, SH_COLOR> ShColor2fb;
+typedef ShAttrib<2, SH_CONST, ShFracByte, SH_COLOR> ShConstColor2fb;
+typedef ShAttrib<3, SH_INPUT, ShFracByte, SH_COLOR> ShInputColor3fb;
+typedef ShAttrib<3, SH_OUTPUT, ShFracByte, SH_COLOR> ShOutputColor3fb;
+typedef ShAttrib<3, SH_INOUT, ShFracByte, SH_COLOR> ShInOutColor3fb;
+typedef ShAttrib<3, SH_TEMP, ShFracByte, SH_COLOR> ShColor3fb;
+typedef ShAttrib<3, SH_CONST, ShFracByte, SH_COLOR> ShConstColor3fb;
+typedef ShAttrib<4, SH_INPUT, ShFracByte, SH_COLOR> ShInputColor4fb;
+typedef ShAttrib<4, SH_OUTPUT, ShFracByte, SH_COLOR> ShOutputColor4fb;
+typedef ShAttrib<4, SH_INOUT, ShFracByte, SH_COLOR> ShInOutColor4fb;
+typedef ShAttrib<4, SH_TEMP, ShFracByte, SH_COLOR> ShColor4fb;
+typedef ShAttrib<4, SH_CONST, ShFracByte, SH_COLOR> ShConstColor4fb;
 
 
-typedef ShColor<1, SH_INPUT, int> ShInputColor1i;
-typedef ShColor<1, SH_OUTPUT, int> ShOutputColor1i;
-typedef ShColor<1, SH_INOUT, int> ShInOutColor1i;
-typedef ShColor<1, SH_TEMP, int> ShColor1i;
-typedef ShColor<1, SH_CONST, int> ShConstColor1i;
-typedef ShColor<2, SH_INPUT, int> ShInputColor2i;
-typedef ShColor<2, SH_OUTPUT, int> ShOutputColor2i;
-typedef ShColor<2, SH_INOUT, int> ShInOutColor2i;
-typedef ShColor<2, SH_TEMP, int> ShColor2i;
-typedef ShColor<2, SH_CONST, int> ShConstColor2i;
-typedef ShColor<3, SH_INPUT, int> ShInputColor3i;
-typedef ShColor<3, SH_OUTPUT, int> ShOutputColor3i;
-typedef ShColor<3, SH_INOUT, int> ShInOutColor3i;
-typedef ShColor<3, SH_TEMP, int> ShColor3i;
-typedef ShColor<3, SH_CONST, int> ShConstColor3i;
-typedef ShColor<4, SH_INPUT, int> ShInputColor4i;
-typedef ShColor<4, SH_OUTPUT, int> ShOutputColor4i;
-typedef ShColor<4, SH_INOUT, int> ShInOutColor4i;
-typedef ShColor<4, SH_TEMP, int> ShColor4i;
-typedef ShColor<4, SH_CONST, int> ShConstColor4i;
+typedef ShAttrib<1, SH_INPUT, int, SH_COLOR> ShInputColor1i;
+typedef ShAttrib<1, SH_OUTPUT, int, SH_COLOR> ShOutputColor1i;
+typedef ShAttrib<1, SH_INOUT, int, SH_COLOR> ShInOutColor1i;
+typedef ShAttrib<1, SH_TEMP, int, SH_COLOR> ShColor1i;
+typedef ShAttrib<1, SH_CONST, int, SH_COLOR> ShConstColor1i;
+typedef ShAttrib<2, SH_INPUT, int, SH_COLOR> ShInputColor2i;
+typedef ShAttrib<2, SH_OUTPUT, int, SH_COLOR> ShOutputColor2i;
+typedef ShAttrib<2, SH_INOUT, int, SH_COLOR> ShInOutColor2i;
+typedef ShAttrib<2, SH_TEMP, int, SH_COLOR> ShColor2i;
+typedef ShAttrib<2, SH_CONST, int, SH_COLOR> ShConstColor2i;
+typedef ShAttrib<3, SH_INPUT, int, SH_COLOR> ShInputColor3i;
+typedef ShAttrib<3, SH_OUTPUT, int, SH_COLOR> ShOutputColor3i;
+typedef ShAttrib<3, SH_INOUT, int, SH_COLOR> ShInOutColor3i;
+typedef ShAttrib<3, SH_TEMP, int, SH_COLOR> ShColor3i;
+typedef ShAttrib<3, SH_CONST, int, SH_COLOR> ShConstColor3i;
+typedef ShAttrib<4, SH_INPUT, int, SH_COLOR> ShInputColor4i;
+typedef ShAttrib<4, SH_OUTPUT, int, SH_COLOR> ShOutputColor4i;
+typedef ShAttrib<4, SH_INOUT, int, SH_COLOR> ShInOutColor4i;
+typedef ShAttrib<4, SH_TEMP, int, SH_COLOR> ShColor4i;
+typedef ShAttrib<4, SH_CONST, int, SH_COLOR> ShConstColor4i;
 
 
-typedef ShColor<1, SH_INPUT, double> ShInputColor1d;
-typedef ShColor<1, SH_OUTPUT, double> ShOutputColor1d;
-typedef ShColor<1, SH_INOUT, double> ShInOutColor1d;
-typedef ShColor<1, SH_TEMP, double> ShColor1d;
-typedef ShColor<1, SH_CONST, double> ShConstColor1d;
-typedef ShColor<2, SH_INPUT, double> ShInputColor2d;
-typedef ShColor<2, SH_OUTPUT, double> ShOutputColor2d;
-typedef ShColor<2, SH_INOUT, double> ShInOutColor2d;
-typedef ShColor<2, SH_TEMP, double> ShColor2d;
-typedef ShColor<2, SH_CONST, double> ShConstColor2d;
-typedef ShColor<3, SH_INPUT, double> ShInputColor3d;
-typedef ShColor<3, SH_OUTPUT, double> ShOutputColor3d;
-typedef ShColor<3, SH_INOUT, double> ShInOutColor3d;
-typedef ShColor<3, SH_TEMP, double> ShColor3d;
-typedef ShColor<3, SH_CONST, double> ShConstColor3d;
-typedef ShColor<4, SH_INPUT, double> ShInputColor4d;
-typedef ShColor<4, SH_OUTPUT, double> ShOutputColor4d;
-typedef ShColor<4, SH_INOUT, double> ShInOutColor4d;
-typedef ShColor<4, SH_TEMP, double> ShColor4d;
-typedef ShColor<4, SH_CONST, double> ShConstColor4d;
+typedef ShAttrib<1, SH_INPUT, double, SH_COLOR> ShInputColor1d;
+typedef ShAttrib<1, SH_OUTPUT, double, SH_COLOR> ShOutputColor1d;
+typedef ShAttrib<1, SH_INOUT, double, SH_COLOR> ShInOutColor1d;
+typedef ShAttrib<1, SH_TEMP, double, SH_COLOR> ShColor1d;
+typedef ShAttrib<1, SH_CONST, double, SH_COLOR> ShConstColor1d;
+typedef ShAttrib<2, SH_INPUT, double, SH_COLOR> ShInputColor2d;
+typedef ShAttrib<2, SH_OUTPUT, double, SH_COLOR> ShOutputColor2d;
+typedef ShAttrib<2, SH_INOUT, double, SH_COLOR> ShInOutColor2d;
+typedef ShAttrib<2, SH_TEMP, double, SH_COLOR> ShColor2d;
+typedef ShAttrib<2, SH_CONST, double, SH_COLOR> ShConstColor2d;
+typedef ShAttrib<3, SH_INPUT, double, SH_COLOR> ShInputColor3d;
+typedef ShAttrib<3, SH_OUTPUT, double, SH_COLOR> ShOutputColor3d;
+typedef ShAttrib<3, SH_INOUT, double, SH_COLOR> ShInOutColor3d;
+typedef ShAttrib<3, SH_TEMP, double, SH_COLOR> ShColor3d;
+typedef ShAttrib<3, SH_CONST, double, SH_COLOR> ShConstColor3d;
+typedef ShAttrib<4, SH_INPUT, double, SH_COLOR> ShInputColor4d;
+typedef ShAttrib<4, SH_OUTPUT, double, SH_COLOR> ShOutputColor4d;
+typedef ShAttrib<4, SH_INOUT, double, SH_COLOR> ShInOutColor4d;
+typedef ShAttrib<4, SH_TEMP, double, SH_COLOR> ShColor4d;
+typedef ShAttrib<4, SH_CONST, double, SH_COLOR> ShConstColor4d;
 
 
-typedef ShColor<1, SH_INPUT, unsigned char> ShInputColor1ub;
-typedef ShColor<1, SH_OUTPUT, unsigned char> ShOutputColor1ub;
-typedef ShColor<1, SH_INOUT, unsigned char> ShInOutColor1ub;
-typedef ShColor<1, SH_TEMP, unsigned char> ShColor1ub;
-typedef ShColor<1, SH_CONST, unsigned char> ShConstColor1ub;
-typedef ShColor<2, SH_INPUT, unsigned char> ShInputColor2ub;
-typedef ShColor<2, SH_OUTPUT, unsigned char> ShOutputColor2ub;
-typedef ShColor<2, SH_INOUT, unsigned char> ShInOutColor2ub;
-typedef ShColor<2, SH_TEMP, unsigned char> ShColor2ub;
-typedef ShColor<2, SH_CONST, unsigned char> ShConstColor2ub;
-typedef ShColor<3, SH_INPUT, unsigned char> ShInputColor3ub;
-typedef ShColor<3, SH_OUTPUT, unsigned char> ShOutputColor3ub;
-typedef ShColor<3, SH_INOUT, unsigned char> ShInOutColor3ub;
-typedef ShColor<3, SH_TEMP, unsigned char> ShColor3ub;
-typedef ShColor<3, SH_CONST, unsigned char> ShConstColor3ub;
-typedef ShColor<4, SH_INPUT, unsigned char> ShInputColor4ub;
-typedef ShColor<4, SH_OUTPUT, unsigned char> ShOutputColor4ub;
-typedef ShColor<4, SH_INOUT, unsigned char> ShInOutColor4ub;
-typedef ShColor<4, SH_TEMP, unsigned char> ShColor4ub;
-typedef ShColor<4, SH_CONST, unsigned char> ShConstColor4ub;
+typedef ShAttrib<1, SH_INPUT, unsigned char, SH_COLOR> ShInputColor1ub;
+typedef ShAttrib<1, SH_OUTPUT, unsigned char, SH_COLOR> ShOutputColor1ub;
+typedef ShAttrib<1, SH_INOUT, unsigned char, SH_COLOR> ShInOutColor1ub;
+typedef ShAttrib<1, SH_TEMP, unsigned char, SH_COLOR> ShColor1ub;
+typedef ShAttrib<1, SH_CONST, unsigned char, SH_COLOR> ShConstColor1ub;
+typedef ShAttrib<2, SH_INPUT, unsigned char, SH_COLOR> ShInputColor2ub;
+typedef ShAttrib<2, SH_OUTPUT, unsigned char, SH_COLOR> ShOutputColor2ub;
+typedef ShAttrib<2, SH_INOUT, unsigned char, SH_COLOR> ShInOutColor2ub;
+typedef ShAttrib<2, SH_TEMP, unsigned char, SH_COLOR> ShColor2ub;
+typedef ShAttrib<2, SH_CONST, unsigned char, SH_COLOR> ShConstColor2ub;
+typedef ShAttrib<3, SH_INPUT, unsigned char, SH_COLOR> ShInputColor3ub;
+typedef ShAttrib<3, SH_OUTPUT, unsigned char, SH_COLOR> ShOutputColor3ub;
+typedef ShAttrib<3, SH_INOUT, unsigned char, SH_COLOR> ShInOutColor3ub;
+typedef ShAttrib<3, SH_TEMP, unsigned char, SH_COLOR> ShColor3ub;
+typedef ShAttrib<3, SH_CONST, unsigned char, SH_COLOR> ShConstColor3ub;
+typedef ShAttrib<4, SH_INPUT, unsigned char, SH_COLOR> ShInputColor4ub;
+typedef ShAttrib<4, SH_OUTPUT, unsigned char, SH_COLOR> ShOutputColor4ub;
+typedef ShAttrib<4, SH_INOUT, unsigned char, SH_COLOR> ShInOutColor4ub;
+typedef ShAttrib<4, SH_TEMP, unsigned char, SH_COLOR> ShColor4ub;
+typedef ShAttrib<4, SH_CONST, unsigned char, SH_COLOR> ShConstColor4ub;
 
 
-typedef ShColor<1, SH_INPUT, float> ShInputColor1f;
-typedef ShColor<1, SH_OUTPUT, float> ShOutputColor1f;
-typedef ShColor<1, SH_INOUT, float> ShInOutColor1f;
-typedef ShColor<1, SH_TEMP, float> ShColor1f;
-typedef ShColor<1, SH_CONST, float> ShConstColor1f;
-typedef ShColor<2, SH_INPUT, float> ShInputColor2f;
-typedef ShColor<2, SH_OUTPUT, float> ShOutputColor2f;
-typedef ShColor<2, SH_INOUT, float> ShInOutColor2f;
-typedef ShColor<2, SH_TEMP, float> ShColor2f;
-typedef ShColor<2, SH_CONST, float> ShConstColor2f;
-typedef ShColor<3, SH_INPUT, float> ShInputColor3f;
-typedef ShColor<3, SH_OUTPUT, float> ShOutputColor3f;
-typedef ShColor<3, SH_INOUT, float> ShInOutColor3f;
-typedef ShColor<3, SH_TEMP, float> ShColor3f;
-typedef ShColor<3, SH_CONST, float> ShConstColor3f;
-typedef ShColor<4, SH_INPUT, float> ShInputColor4f;
-typedef ShColor<4, SH_OUTPUT, float> ShOutputColor4f;
-typedef ShColor<4, SH_INOUT, float> ShInOutColor4f;
-typedef ShColor<4, SH_TEMP, float> ShColor4f;
-typedef ShColor<4, SH_CONST, float> ShConstColor4f;
+typedef ShAttrib<1, SH_INPUT, float, SH_COLOR> ShInputColor1f;
+typedef ShAttrib<1, SH_OUTPUT, float, SH_COLOR> ShOutputColor1f;
+typedef ShAttrib<1, SH_INOUT, float, SH_COLOR> ShInOutColor1f;
+typedef ShAttrib<1, SH_TEMP, float, SH_COLOR> ShColor1f;
+typedef ShAttrib<1, SH_CONST, float, SH_COLOR> ShConstColor1f;
+typedef ShAttrib<2, SH_INPUT, float, SH_COLOR> ShInputColor2f;
+typedef ShAttrib<2, SH_OUTPUT, float, SH_COLOR> ShOutputColor2f;
+typedef ShAttrib<2, SH_INOUT, float, SH_COLOR> ShInOutColor2f;
+typedef ShAttrib<2, SH_TEMP, float, SH_COLOR> ShColor2f;
+typedef ShAttrib<2, SH_CONST, float, SH_COLOR> ShConstColor2f;
+typedef ShAttrib<3, SH_INPUT, float, SH_COLOR> ShInputColor3f;
+typedef ShAttrib<3, SH_OUTPUT, float, SH_COLOR> ShOutputColor3f;
+typedef ShAttrib<3, SH_INOUT, float, SH_COLOR> ShInOutColor3f;
+typedef ShAttrib<3, SH_TEMP, float, SH_COLOR> ShColor3f;
+typedef ShAttrib<3, SH_CONST, float, SH_COLOR> ShConstColor3f;
+typedef ShAttrib<4, SH_INPUT, float, SH_COLOR> ShInputColor4f;
+typedef ShAttrib<4, SH_OUTPUT, float, SH_COLOR> ShOutputColor4f;
+typedef ShAttrib<4, SH_INOUT, float, SH_COLOR> ShInOutColor4f;
+typedef ShAttrib<4, SH_TEMP, float, SH_COLOR> ShColor4f;
+typedef ShAttrib<4, SH_CONST, float, SH_COLOR> ShConstColor4f;
 
 
-typedef ShColor<1, SH_INPUT, char> ShInputColor1b;
-typedef ShColor<1, SH_OUTPUT, char> ShOutputColor1b;
-typedef ShColor<1, SH_INOUT, char> ShInOutColor1b;
-typedef ShColor<1, SH_TEMP, char> ShColor1b;
-typedef ShColor<1, SH_CONST, char> ShConstColor1b;
-typedef ShColor<2, SH_INPUT, char> ShInputColor2b;
-typedef ShColor<2, SH_OUTPUT, char> ShOutputColor2b;
-typedef ShColor<2, SH_INOUT, char> ShInOutColor2b;
-typedef ShColor<2, SH_TEMP, char> ShColor2b;
-typedef ShColor<2, SH_CONST, char> ShConstColor2b;
-typedef ShColor<3, SH_INPUT, char> ShInputColor3b;
-typedef ShColor<3, SH_OUTPUT, char> ShOutputColor3b;
-typedef ShColor<3, SH_INOUT, char> ShInOutColor3b;
-typedef ShColor<3, SH_TEMP, char> ShColor3b;
-typedef ShColor<3, SH_CONST, char> ShConstColor3b;
-typedef ShColor<4, SH_INPUT, char> ShInputColor4b;
-typedef ShColor<4, SH_OUTPUT, char> ShOutputColor4b;
-typedef ShColor<4, SH_INOUT, char> ShInOutColor4b;
-typedef ShColor<4, SH_TEMP, char> ShColor4b;
-typedef ShColor<4, SH_CONST, char> ShConstColor4b;
+typedef ShAttrib<1, SH_INPUT, char, SH_COLOR> ShInputColor1b;
+typedef ShAttrib<1, SH_OUTPUT, char, SH_COLOR> ShOutputColor1b;
+typedef ShAttrib<1, SH_INOUT, char, SH_COLOR> ShInOutColor1b;
+typedef ShAttrib<1, SH_TEMP, char, SH_COLOR> ShColor1b;
+typedef ShAttrib<1, SH_CONST, char, SH_COLOR> ShConstColor1b;
+typedef ShAttrib<2, SH_INPUT, char, SH_COLOR> ShInputColor2b;
+typedef ShAttrib<2, SH_OUTPUT, char, SH_COLOR> ShOutputColor2b;
+typedef ShAttrib<2, SH_INOUT, char, SH_COLOR> ShInOutColor2b;
+typedef ShAttrib<2, SH_TEMP, char, SH_COLOR> ShColor2b;
+typedef ShAttrib<2, SH_CONST, char, SH_COLOR> ShConstColor2b;
+typedef ShAttrib<3, SH_INPUT, char, SH_COLOR> ShInputColor3b;
+typedef ShAttrib<3, SH_OUTPUT, char, SH_COLOR> ShOutputColor3b;
+typedef ShAttrib<3, SH_INOUT, char, SH_COLOR> ShInOutColor3b;
+typedef ShAttrib<3, SH_TEMP, char, SH_COLOR> ShColor3b;
+typedef ShAttrib<3, SH_CONST, char, SH_COLOR> ShConstColor3b;
+typedef ShAttrib<4, SH_INPUT, char, SH_COLOR> ShInputColor4b;
+typedef ShAttrib<4, SH_OUTPUT, char, SH_COLOR> ShOutputColor4b;
+typedef ShAttrib<4, SH_INOUT, char, SH_COLOR> ShInOutColor4b;
+typedef ShAttrib<4, SH_TEMP, char, SH_COLOR> ShColor4b;
+typedef ShAttrib<4, SH_CONST, char, SH_COLOR> ShConstColor4b;
 
 
-typedef ShColor<1, SH_INPUT, unsigned short> ShInputColor1us;
-typedef ShColor<1, SH_OUTPUT, unsigned short> ShOutputColor1us;
-typedef ShColor<1, SH_INOUT, unsigned short> ShInOutColor1us;
-typedef ShColor<1, SH_TEMP, unsigned short> ShColor1us;
-typedef ShColor<1, SH_CONST, unsigned short> ShConstColor1us;
-typedef ShColor<2, SH_INPUT, unsigned short> ShInputColor2us;
-typedef ShColor<2, SH_OUTPUT, unsigned short> ShOutputColor2us;
-typedef ShColor<2, SH_INOUT, unsigned short> ShInOutColor2us;
-typedef ShColor<2, SH_TEMP, unsigned short> ShColor2us;
-typedef ShColor<2, SH_CONST, unsigned short> ShConstColor2us;
-typedef ShColor<3, SH_INPUT, unsigned short> ShInputColor3us;
-typedef ShColor<3, SH_OUTPUT, unsigned short> ShOutputColor3us;
-typedef ShColor<3, SH_INOUT, unsigned short> ShInOutColor3us;
-typedef ShColor<3, SH_TEMP, unsigned short> ShColor3us;
-typedef ShColor<3, SH_CONST, unsigned short> ShConstColor3us;
-typedef ShColor<4, SH_INPUT, unsigned short> ShInputColor4us;
-typedef ShColor<4, SH_OUTPUT, unsigned short> ShOutputColor4us;
-typedef ShColor<4, SH_INOUT, unsigned short> ShInOutColor4us;
-typedef ShColor<4, SH_TEMP, unsigned short> ShColor4us;
-typedef ShColor<4, SH_CONST, unsigned short> ShConstColor4us;
+typedef ShAttrib<1, SH_INPUT, unsigned short, SH_COLOR> ShInputColor1us;
+typedef ShAttrib<1, SH_OUTPUT, unsigned short, SH_COLOR> ShOutputColor1us;
+typedef ShAttrib<1, SH_INOUT, unsigned short, SH_COLOR> ShInOutColor1us;
+typedef ShAttrib<1, SH_TEMP, unsigned short, SH_COLOR> ShColor1us;
+typedef ShAttrib<1, SH_CONST, unsigned short, SH_COLOR> ShConstColor1us;
+typedef ShAttrib<2, SH_INPUT, unsigned short, SH_COLOR> ShInputColor2us;
+typedef ShAttrib<2, SH_OUTPUT, unsigned short, SH_COLOR> ShOutputColor2us;
+typedef ShAttrib<2, SH_INOUT, unsigned short, SH_COLOR> ShInOutColor2us;
+typedef ShAttrib<2, SH_TEMP, unsigned short, SH_COLOR> ShColor2us;
+typedef ShAttrib<2, SH_CONST, unsigned short, SH_COLOR> ShConstColor2us;
+typedef ShAttrib<3, SH_INPUT, unsigned short, SH_COLOR> ShInputColor3us;
+typedef ShAttrib<3, SH_OUTPUT, unsigned short, SH_COLOR> ShOutputColor3us;
+typedef ShAttrib<3, SH_INOUT, unsigned short, SH_COLOR> ShInOutColor3us;
+typedef ShAttrib<3, SH_TEMP, unsigned short, SH_COLOR> ShColor3us;
+typedef ShAttrib<3, SH_CONST, unsigned short, SH_COLOR> ShConstColor3us;
+typedef ShAttrib<4, SH_INPUT, unsigned short, SH_COLOR> ShInputColor4us;
+typedef ShAttrib<4, SH_OUTPUT, unsigned short, SH_COLOR> ShOutputColor4us;
+typedef ShAttrib<4, SH_INOUT, unsigned short, SH_COLOR> ShInOutColor4us;
+typedef ShAttrib<4, SH_TEMP, unsigned short, SH_COLOR> ShColor4us;
+typedef ShAttrib<4, SH_CONST, unsigned short, SH_COLOR> ShConstColor4us;
 
 
-typedef ShColor<1, SH_INPUT, ShFracUByte> ShInputColor1fub;
-typedef ShColor<1, SH_OUTPUT, ShFracUByte> ShOutputColor1fub;
-typedef ShColor<1, SH_INOUT, ShFracUByte> ShInOutColor1fub;
-typedef ShColor<1, SH_TEMP, ShFracUByte> ShColor1fub;
-typedef ShColor<1, SH_CONST, ShFracUByte> ShConstColor1fub;
-typedef ShColor<2, SH_INPUT, ShFracUByte> ShInputColor2fub;
-typedef ShColor<2, SH_OUTPUT, ShFracUByte> ShOutputColor2fub;
-typedef ShColor<2, SH_INOUT, ShFracUByte> ShInOutColor2fub;
-typedef ShColor<2, SH_TEMP, ShFracUByte> ShColor2fub;
-typedef ShColor<2, SH_CONST, ShFracUByte> ShConstColor2fub;
-typedef ShColor<3, SH_INPUT, ShFracUByte> ShInputColor3fub;
-typedef ShColor<3, SH_OUTPUT, ShFracUByte> ShOutputColor3fub;
-typedef ShColor<3, SH_INOUT, ShFracUByte> ShInOutColor3fub;
-typedef ShColor<3, SH_TEMP, ShFracUByte> ShColor3fub;
-typedef ShColor<3, SH_CONST, ShFracUByte> ShConstColor3fub;
-typedef ShColor<4, SH_INPUT, ShFracUByte> ShInputColor4fub;
-typedef ShColor<4, SH_OUTPUT, ShFracUByte> ShOutputColor4fub;
-typedef ShColor<4, SH_INOUT, ShFracUByte> ShInOutColor4fub;
-typedef ShColor<4, SH_TEMP, ShFracUByte> ShColor4fub;
-typedef ShColor<4, SH_CONST, ShFracUByte> ShConstColor4fub;
+typedef ShAttrib<1, SH_INPUT, ShFracUByte, SH_COLOR> ShInputColor1fub;
+typedef ShAttrib<1, SH_OUTPUT, ShFracUByte, SH_COLOR> ShOutputColor1fub;
+typedef ShAttrib<1, SH_INOUT, ShFracUByte, SH_COLOR> ShInOutColor1fub;
+typedef ShAttrib<1, SH_TEMP, ShFracUByte, SH_COLOR> ShColor1fub;
+typedef ShAttrib<1, SH_CONST, ShFracUByte, SH_COLOR> ShConstColor1fub;
+typedef ShAttrib<2, SH_INPUT, ShFracUByte, SH_COLOR> ShInputColor2fub;
+typedef ShAttrib<2, SH_OUTPUT, ShFracUByte, SH_COLOR> ShOutputColor2fub;
+typedef ShAttrib<2, SH_INOUT, ShFracUByte, SH_COLOR> ShInOutColor2fub;
+typedef ShAttrib<2, SH_TEMP, ShFracUByte, SH_COLOR> ShColor2fub;
+typedef ShAttrib<2, SH_CONST, ShFracUByte, SH_COLOR> ShConstColor2fub;
+typedef ShAttrib<3, SH_INPUT, ShFracUByte, SH_COLOR> ShInputColor3fub;
+typedef ShAttrib<3, SH_OUTPUT, ShFracUByte, SH_COLOR> ShOutputColor3fub;
+typedef ShAttrib<3, SH_INOUT, ShFracUByte, SH_COLOR> ShInOutColor3fub;
+typedef ShAttrib<3, SH_TEMP, ShFracUByte, SH_COLOR> ShColor3fub;
+typedef ShAttrib<3, SH_CONST, ShFracUByte, SH_COLOR> ShConstColor3fub;
+typedef ShAttrib<4, SH_INPUT, ShFracUByte, SH_COLOR> ShInputColor4fub;
+typedef ShAttrib<4, SH_OUTPUT, ShFracUByte, SH_COLOR> ShOutputColor4fub;
+typedef ShAttrib<4, SH_INOUT, ShFracUByte, SH_COLOR> ShInOutColor4fub;
+typedef ShAttrib<4, SH_TEMP, ShFracUByte, SH_COLOR> ShColor4fub;
+typedef ShAttrib<4, SH_CONST, ShFracUByte, SH_COLOR> ShConstColor4fub;
 
 
-typedef ShColor<1, SH_INPUT, ShHalf> ShInputColor1h;
-typedef ShColor<1, SH_OUTPUT, ShHalf> ShOutputColor1h;
-typedef ShColor<1, SH_INOUT, ShHalf> ShInOutColor1h;
-typedef ShColor<1, SH_TEMP, ShHalf> ShColor1h;
-typedef ShColor<1, SH_CONST, ShHalf> ShConstColor1h;
-typedef ShColor<2, SH_INPUT, ShHalf> ShInputColor2h;
-typedef ShColor<2, SH_OUTPUT, ShHalf> ShOutputColor2h;
-typedef ShColor<2, SH_INOUT, ShHalf> ShInOutColor2h;
-typedef ShColor<2, SH_TEMP, ShHalf> ShColor2h;
-typedef ShColor<2, SH_CONST, ShHalf> ShConstColor2h;
-typedef ShColor<3, SH_INPUT, ShHalf> ShInputColor3h;
-typedef ShColor<3, SH_OUTPUT, ShHalf> ShOutputColor3h;
-typedef ShColor<3, SH_INOUT, ShHalf> ShInOutColor3h;
-typedef ShColor<3, SH_TEMP, ShHalf> ShColor3h;
-typedef ShColor<3, SH_CONST, ShHalf> ShConstColor3h;
-typedef ShColor<4, SH_INPUT, ShHalf> ShInputColor4h;
-typedef ShColor<4, SH_OUTPUT, ShHalf> ShOutputColor4h;
-typedef ShColor<4, SH_INOUT, ShHalf> ShInOutColor4h;
-typedef ShColor<4, SH_TEMP, ShHalf> ShColor4h;
-typedef ShColor<4, SH_CONST, ShHalf> ShConstColor4h;
+typedef ShAttrib<1, SH_INPUT, ShHalf, SH_COLOR> ShInputColor1h;
+typedef ShAttrib<1, SH_OUTPUT, ShHalf, SH_COLOR> ShOutputColor1h;
+typedef ShAttrib<1, SH_INOUT, ShHalf, SH_COLOR> ShInOutColor1h;
+typedef ShAttrib<1, SH_TEMP, ShHalf, SH_COLOR> ShColor1h;
+typedef ShAttrib<1, SH_CONST, ShHalf, SH_COLOR> ShConstColor1h;
+typedef ShAttrib<2, SH_INPUT, ShHalf, SH_COLOR> ShInputColor2h;
+typedef ShAttrib<2, SH_OUTPUT, ShHalf, SH_COLOR> ShOutputColor2h;
+typedef ShAttrib<2, SH_INOUT, ShHalf, SH_COLOR> ShInOutColor2h;
+typedef ShAttrib<2, SH_TEMP, ShHalf, SH_COLOR> ShColor2h;
+typedef ShAttrib<2, SH_CONST, ShHalf, SH_COLOR> ShConstColor2h;
+typedef ShAttrib<3, SH_INPUT, ShHalf, SH_COLOR> ShInputColor3h;
+typedef ShAttrib<3, SH_OUTPUT, ShHalf, SH_COLOR> ShOutputColor3h;
+typedef ShAttrib<3, SH_INOUT, ShHalf, SH_COLOR> ShInOutColor3h;
+typedef ShAttrib<3, SH_TEMP, ShHalf, SH_COLOR> ShColor3h;
+typedef ShAttrib<3, SH_CONST, ShHalf, SH_COLOR> ShConstColor3h;
+typedef ShAttrib<4, SH_INPUT, ShHalf, SH_COLOR> ShInputColor4h;
+typedef ShAttrib<4, SH_OUTPUT, ShHalf, SH_COLOR> ShOutputColor4h;
+typedef ShAttrib<4, SH_INOUT, ShHalf, SH_COLOR> ShInOutColor4h;
+typedef ShAttrib<4, SH_TEMP, ShHalf, SH_COLOR> ShColor4h;
+typedef ShAttrib<4, SH_CONST, ShHalf, SH_COLOR> ShConstColor4h;
 
 
-typedef ShColor<1, SH_INPUT, ShFracShort> ShInputColor1fs;
-typedef ShColor<1, SH_OUTPUT, ShFracShort> ShOutputColor1fs;
-typedef ShColor<1, SH_INOUT, ShFracShort> ShInOutColor1fs;
-typedef ShColor<1, SH_TEMP, ShFracShort> ShColor1fs;
-typedef ShColor<1, SH_CONST, ShFracShort> ShConstColor1fs;
-typedef ShColor<2, SH_INPUT, ShFracShort> ShInputColor2fs;
-typedef ShColor<2, SH_OUTPUT, ShFracShort> ShOutputColor2fs;
-typedef ShColor<2, SH_INOUT, ShFracShort> ShInOutColor2fs;
-typedef ShColor<2, SH_TEMP, ShFracShort> ShColor2fs;
-typedef ShColor<2, SH_CONST, ShFracShort> ShConstColor2fs;
-typedef ShColor<3, SH_INPUT, ShFracShort> ShInputColor3fs;
-typedef ShColor<3, SH_OUTPUT, ShFracShort> ShOutputColor3fs;
-typedef ShColor<3, SH_INOUT, ShFracShort> ShInOutColor3fs;
-typedef ShColor<3, SH_TEMP, ShFracShort> ShColor3fs;
-typedef ShColor<3, SH_CONST, ShFracShort> ShConstColor3fs;
-typedef ShColor<4, SH_INPUT, ShFracShort> ShInputColor4fs;
-typedef ShColor<4, SH_OUTPUT, ShFracShort> ShOutputColor4fs;
-typedef ShColor<4, SH_INOUT, ShFracShort> ShInOutColor4fs;
-typedef ShColor<4, SH_TEMP, ShFracShort> ShColor4fs;
-typedef ShColor<4, SH_CONST, ShFracShort> ShConstColor4fs;
+typedef ShAttrib<1, SH_INPUT, ShFracShort, SH_COLOR> ShInputColor1fs;
+typedef ShAttrib<1, SH_OUTPUT, ShFracShort, SH_COLOR> ShOutputColor1fs;
+typedef ShAttrib<1, SH_INOUT, ShFracShort, SH_COLOR> ShInOutColor1fs;
+typedef ShAttrib<1, SH_TEMP, ShFracShort, SH_COLOR> ShColor1fs;
+typedef ShAttrib<1, SH_CONST, ShFracShort, SH_COLOR> ShConstColor1fs;
+typedef ShAttrib<2, SH_INPUT, ShFracShort, SH_COLOR> ShInputColor2fs;
+typedef ShAttrib<2, SH_OUTPUT, ShFracShort, SH_COLOR> ShOutputColor2fs;
+typedef ShAttrib<2, SH_INOUT, ShFracShort, SH_COLOR> ShInOutColor2fs;
+typedef ShAttrib<2, SH_TEMP, ShFracShort, SH_COLOR> ShColor2fs;
+typedef ShAttrib<2, SH_CONST, ShFracShort, SH_COLOR> ShConstColor2fs;
+typedef ShAttrib<3, SH_INPUT, ShFracShort, SH_COLOR> ShInputColor3fs;
+typedef ShAttrib<3, SH_OUTPUT, ShFracShort, SH_COLOR> ShOutputColor3fs;
+typedef ShAttrib<3, SH_INOUT, ShFracShort, SH_COLOR> ShInOutColor3fs;
+typedef ShAttrib<3, SH_TEMP, ShFracShort, SH_COLOR> ShColor3fs;
+typedef ShAttrib<3, SH_CONST, ShFracShort, SH_COLOR> ShConstColor3fs;
+typedef ShAttrib<4, SH_INPUT, ShFracShort, SH_COLOR> ShInputColor4fs;
+typedef ShAttrib<4, SH_OUTPUT, ShFracShort, SH_COLOR> ShOutputColor4fs;
+typedef ShAttrib<4, SH_INOUT, ShFracShort, SH_COLOR> ShInOutColor4fs;
+typedef ShAttrib<4, SH_TEMP, ShFracShort, SH_COLOR> ShColor4fs;
+typedef ShAttrib<4, SH_CONST, ShFracShort, SH_COLOR> ShConstColor4fs;
 
 
-typedef ShColor<1, SH_INPUT, ShFracInt> ShInputColor1fi;
-typedef ShColor<1, SH_OUTPUT, ShFracInt> ShOutputColor1fi;
-typedef ShColor<1, SH_INOUT, ShFracInt> ShInOutColor1fi;
-typedef ShColor<1, SH_TEMP, ShFracInt> ShColor1fi;
-typedef ShColor<1, SH_CONST, ShFracInt> ShConstColor1fi;
-typedef ShColor<2, SH_INPUT, ShFracInt> ShInputColor2fi;
-typedef ShColor<2, SH_OUTPUT, ShFracInt> ShOutputColor2fi;
-typedef ShColor<2, SH_INOUT, ShFracInt> ShInOutColor2fi;
-typedef ShColor<2, SH_TEMP, ShFracInt> ShColor2fi;
-typedef ShColor<2, SH_CONST, ShFracInt> ShConstColor2fi;
-typedef ShColor<3, SH_INPUT, ShFracInt> ShInputColor3fi;
-typedef ShColor<3, SH_OUTPUT, ShFracInt> ShOutputColor3fi;
-typedef ShColor<3, SH_INOUT, ShFracInt> ShInOutColor3fi;
-typedef ShColor<3, SH_TEMP, ShFracInt> ShColor3fi;
-typedef ShColor<3, SH_CONST, ShFracInt> ShConstColor3fi;
-typedef ShColor<4, SH_INPUT, ShFracInt> ShInputColor4fi;
-typedef ShColor<4, SH_OUTPUT, ShFracInt> ShOutputColor4fi;
-typedef ShColor<4, SH_INOUT, ShFracInt> ShInOutColor4fi;
-typedef ShColor<4, SH_TEMP, ShFracInt> ShColor4fi;
-typedef ShColor<4, SH_CONST, ShFracInt> ShConstColor4fi;
+typedef ShAttrib<1, SH_INPUT, ShFracInt, SH_COLOR> ShInputColor1fi;
+typedef ShAttrib<1, SH_OUTPUT, ShFracInt, SH_COLOR> ShOutputColor1fi;
+typedef ShAttrib<1, SH_INOUT, ShFracInt, SH_COLOR> ShInOutColor1fi;
+typedef ShAttrib<1, SH_TEMP, ShFracInt, SH_COLOR> ShColor1fi;
+typedef ShAttrib<1, SH_CONST, ShFracInt, SH_COLOR> ShConstColor1fi;
+typedef ShAttrib<2, SH_INPUT, ShFracInt, SH_COLOR> ShInputColor2fi;
+typedef ShAttrib<2, SH_OUTPUT, ShFracInt, SH_COLOR> ShOutputColor2fi;
+typedef ShAttrib<2, SH_INOUT, ShFracInt, SH_COLOR> ShInOutColor2fi;
+typedef ShAttrib<2, SH_TEMP, ShFracInt, SH_COLOR> ShColor2fi;
+typedef ShAttrib<2, SH_CONST, ShFracInt, SH_COLOR> ShConstColor2fi;
+typedef ShAttrib<3, SH_INPUT, ShFracInt, SH_COLOR> ShInputColor3fi;
+typedef ShAttrib<3, SH_OUTPUT, ShFracInt, SH_COLOR> ShOutputColor3fi;
+typedef ShAttrib<3, SH_INOUT, ShFracInt, SH_COLOR> ShInOutColor3fi;
+typedef ShAttrib<3, SH_TEMP, ShFracInt, SH_COLOR> ShColor3fi;
+typedef ShAttrib<3, SH_CONST, ShFracInt, SH_COLOR> ShConstColor3fi;
+typedef ShAttrib<4, SH_INPUT, ShFracInt, SH_COLOR> ShInputColor4fi;
+typedef ShAttrib<4, SH_OUTPUT, ShFracInt, SH_COLOR> ShOutputColor4fi;
+typedef ShAttrib<4, SH_INOUT, ShFracInt, SH_COLOR> ShInOutColor4fi;
+typedef ShAttrib<4, SH_TEMP, ShFracInt, SH_COLOR> ShColor4fi;
+typedef ShAttrib<4, SH_CONST, ShFracInt, SH_COLOR> ShConstColor4fi;
 
 
-typedef ShColor<1, SH_INPUT, unsigned int> ShInputColor1ui;
-typedef ShColor<1, SH_OUTPUT, unsigned int> ShOutputColor1ui;
-typedef ShColor<1, SH_INOUT, unsigned int> ShInOutColor1ui;
-typedef ShColor<1, SH_TEMP, unsigned int> ShColor1ui;
-typedef ShColor<1, SH_CONST, unsigned int> ShConstColor1ui;
-typedef ShColor<2, SH_INPUT, unsigned int> ShInputColor2ui;
-typedef ShColor<2, SH_OUTPUT, unsigned int> ShOutputColor2ui;
-typedef ShColor<2, SH_INOUT, unsigned int> ShInOutColor2ui;
-typedef ShColor<2, SH_TEMP, unsigned int> ShColor2ui;
-typedef ShColor<2, SH_CONST, unsigned int> ShConstColor2ui;
-typedef ShColor<3, SH_INPUT, unsigned int> ShInputColor3ui;
-typedef ShColor<3, SH_OUTPUT, unsigned int> ShOutputColor3ui;
-typedef ShColor<3, SH_INOUT, unsigned int> ShInOutColor3ui;
-typedef ShColor<3, SH_TEMP, unsigned int> ShColor3ui;
-typedef ShColor<3, SH_CONST, unsigned int> ShConstColor3ui;
-typedef ShColor<4, SH_INPUT, unsigned int> ShInputColor4ui;
-typedef ShColor<4, SH_OUTPUT, unsigned int> ShOutputColor4ui;
-typedef ShColor<4, SH_INOUT, unsigned int> ShInOutColor4ui;
-typedef ShColor<4, SH_TEMP, unsigned int> ShColor4ui;
-typedef ShColor<4, SH_CONST, unsigned int> ShConstColor4ui;
+typedef ShAttrib<1, SH_INPUT, unsigned int, SH_COLOR> ShInputColor1ui;
+typedef ShAttrib<1, SH_OUTPUT, unsigned int, SH_COLOR> ShOutputColor1ui;
+typedef ShAttrib<1, SH_INOUT, unsigned int, SH_COLOR> ShInOutColor1ui;
+typedef ShAttrib<1, SH_TEMP, unsigned int, SH_COLOR> ShColor1ui;
+typedef ShAttrib<1, SH_CONST, unsigned int, SH_COLOR> ShConstColor1ui;
+typedef ShAttrib<2, SH_INPUT, unsigned int, SH_COLOR> ShInputColor2ui;
+typedef ShAttrib<2, SH_OUTPUT, unsigned int, SH_COLOR> ShOutputColor2ui;
+typedef ShAttrib<2, SH_INOUT, unsigned int, SH_COLOR> ShInOutColor2ui;
+typedef ShAttrib<2, SH_TEMP, unsigned int, SH_COLOR> ShColor2ui;
+typedef ShAttrib<2, SH_CONST, unsigned int, SH_COLOR> ShConstColor2ui;
+typedef ShAttrib<3, SH_INPUT, unsigned int, SH_COLOR> ShInputColor3ui;
+typedef ShAttrib<3, SH_OUTPUT, unsigned int, SH_COLOR> ShOutputColor3ui;
+typedef ShAttrib<3, SH_INOUT, unsigned int, SH_COLOR> ShInOutColor3ui;
+typedef ShAttrib<3, SH_TEMP, unsigned int, SH_COLOR> ShColor3ui;
+typedef ShAttrib<3, SH_CONST, unsigned int, SH_COLOR> ShConstColor3ui;
+typedef ShAttrib<4, SH_INPUT, unsigned int, SH_COLOR> ShInputColor4ui;
+typedef ShAttrib<4, SH_OUTPUT, unsigned int, SH_COLOR> ShOutputColor4ui;
+typedef ShAttrib<4, SH_INOUT, unsigned int, SH_COLOR> ShInOutColor4ui;
+typedef ShAttrib<4, SH_TEMP, unsigned int, SH_COLOR> ShColor4ui;
+typedef ShAttrib<4, SH_CONST, unsigned int, SH_COLOR> ShConstColor4ui;
 
 
 
 } // namespace SH
-#include "ShColorImpl.hpp"
 
 #endif // SH_SHCOLOR_HPP

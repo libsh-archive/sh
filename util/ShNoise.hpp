@@ -62,7 +62,7 @@ class ShNoise
   private:
     static ShAttrib<1, SH_CONST, T> constP, invP;
     static bool m_init;
-    static ShArray3D<ShColor<M, SH_TEMP, T> > noiseTex; ///< pseudorandom 2D perlin noise texture 
+    static ShArray3D<ShAttrib<M, SH_TEMP, T, SH_COLOR> > noiseTex; ///< pseudorandom 2D perlin noise texture 
 
     static void init();
 };

@@ -153,26 +153,24 @@ SH_SHLIB_CONST_TRINARY_OP_011_RETSIZE_DECL(operation, N);
 
 #define SH_SHLIB_UNARY_RETTYPE_OPERATION(libtype, libop, librettype, libretsize) \
 template<int N, ShBindingType K1, typename T, bool S1> \
-librettype<libretsize, SH_TEMP, T, false> \
-libop(const libtype<N, K1, T, S1>& var) \
+ShAttrib<libretsize, SH_TEMP, T, librettype, false> \
+libop(const ShAttrib<N, K1, T, libtype, S1>& var) \
 { \
   ShGeneric<libretsize, T> t = libop(static_cast< ShGeneric<N, T> >(var)); \
-  return librettype<libretsize, SH_TEMP, T, false>(t.node(), t.swizzle(), t.neg()); \
+  return ShAttrib<libretsize, SH_TEMP, T, librettype, false>(t.node(), t.swizzle(), t.neg()); \
 }
 
 #define SH_SHLIB_UNARY_OPERATION(libtype, libop, libretsize) \
   SH_SHLIB_UNARY_RETTYPE_OPERATION(libtype, libop, libtype, libretsize)
 
 #define SH_SHLIB_BINARY_RETTYPE_OPERATION(libtype, libop, librettype, libretsize) \
-template<int N, ShBindingType K1, ShBindingType K2, typename T1, \
-  typename T2, bool S1, bool S2> \
-librettype<libretsize, SH_TEMP, typename ShCommonType<T1, T2>::type, false> \
-libop(const libtype<N, K1, T1, S1>& left, const libtype<N, K2, T2, S2>& right) \
+template<int N, ShBindingType K1, ShBindingType K2, typename T1, typename T2, bool S1, bool S2> \
+ShAttrib<libretsize, SH_TEMP, typename ShCommonType<T1, T2>::type, librettype, false> \
+libop(const ShAttrib<N, K1, T1, libtype, S1>& left, const ShAttrib<N, K2, T2, libtype, S2>& right) \
 { \
   ShGeneric<libretsize, typename ShCommonType<T1, T2>::type> t = libop(\
-            static_cast< ShGeneric<N, T1> >(left), \
-            static_cast< ShGeneric<N, T2> >(right)); \
-  return librettype<libretsize, SH_TEMP, typename ShCommonType<T1, T2>::type, false>(t.node(), \
+      static_cast< ShGeneric<N, T1> >(left), static_cast< ShGeneric<N, T2> >(right)); \
+  return ShAttrib<libretsize, SH_TEMP, typename ShCommonType<T1, T2>::type, librettype, false>(t.node(), \
       t.swizzle(), t.neg()); \
 }
 
@@ -180,15 +178,13 @@ libop(const libtype<N, K1, T1, S1>& left, const libtype<N, K2, T2, S2>& right) \
   SH_SHLIB_BINARY_RETTYPE_OPERATION(libtype, libop, libtype, libretsize)
 
 #define SH_SHLIB_UNEQ_BINARY_RETTYPE_OPERATION(libtype, libop, librettype, libretsize) \
-template<int N, int M, ShBindingType K1, ShBindingType K2, typename T1, \
-  typename T2, bool S1, bool S2> \
-librettype<libretsize, SH_TEMP, typename ShCommonType<T1, T2>::type, false> \
-libop(const libtype<N, K1, T1, S1>& left, const libtype<M, K2, T2, S2>& right) \
+template<int N, int M, ShBindingType K1, ShBindingType K2, typename T1, typename T2, bool S1, bool S2> \
+ShAttrib<libretsize, SH_TEMP, typename ShCommonType<T1, T2>::type, librettype, false> \
+libop(const ShAttrib<N, K1, T1, libtype, S1>& left, const ShAttrib<M, K2, T2, libtype, S2>& right) \
 { \
   ShGeneric<libretsize, typename ShCommonType<T1, T2>::type> t = libop(\
-      static_cast< ShGeneric<N, T1> >(left), \
-      static_cast< ShGeneric<M, T2> >(right)); \
-  return librettype<libretsize, SH_TEMP, typename ShCommonType<T1, T2>::type, false>(\
+      static_cast< ShGeneric<N, T1> >(left), static_cast< ShGeneric<M, T2> >(right)); \
+  return ShAttrib<libretsize, SH_TEMP, typename ShCommonType<T1, T2>::type, librettype, false>(\
       t.node(), t.swizzle(), t.neg()); \
 }
 
@@ -196,15 +192,13 @@ libop(const libtype<N, K1, T1, S1>& left, const libtype<M, K2, T2, S2>& right) \
   SH_SHLIB_UNEQ_BINARY_RETTYPE_OPERATION(libtype, libop, libtype, libretsize)
 
 #define SH_SHLIB_LEFT_SCALAR_RETTYPE_OPERATION(libtype, libop, librettype) \
-template<int M, ShBindingType K1, ShBindingType K2, typename T1, \
-  typename T2, bool S1, bool S2> \
-librettype<M, SH_TEMP, typename ShCommonType<T1, T2>::type, false> \
-libop(const libtype<1, K2, T1, S2>& left, const libtype<M, K1, T2, S1>& right) \
+template<int M, ShBindingType K1, ShBindingType K2, typename T1, typename T2, bool S1, bool S2> \
+ShAttrib<M, SH_TEMP, typename ShCommonType<T1, T2>::type, librettype, false> \
+libop(const ShAttrib<1, K2, T1, libtype, S2>& left, const ShAttrib<M, K1, T2, libtype, S1>& right) \
 { \
   ShGeneric<M, typename ShCommonType<T1, T2>::type> t = libop( \
-      static_cast< ShGeneric<1, T1> >(left), \
-      static_cast< ShGeneric<M, T2> >(right)); \
-  return librettype<M, SH_TEMP, typename ShCommonType<T1, T2>::type, false>(\
+      static_cast< ShGeneric<1, T1> >(left), static_cast< ShGeneric<M, T2> >(right)); \
+  return ShAttrib<M, SH_TEMP, typename ShCommonType<T1, T2>::type, librettype, false>(\
       t.node(), t.swizzle(), t.neg()); \
 }
 
@@ -212,14 +206,14 @@ libop(const libtype<1, K2, T1, S2>& left, const libtype<M, K1, T2, S1>& right) \
   SH_SHLIB_LEFT_SCALAR_RETTYPE_OPERATION(libtype, libop, libtype)
 
 #define SH_SHLIB_LEFT_MATRIX_RETTYPE_OPERATION(libtype, libop, librettype, libretsize) \
-template<int M, int N, ShBindingType K1, ShBindingType K2, typename T1, \
-  typename T2, bool S1> \
-librettype<libretsize, SH_TEMP, typename ShCommonType<T1, T2>::type, false> \
-libop(const ShMatrix<M, N, K1, T1>& a, const libtype<N, K2, T2, S1>& b) \
+template<int M, int N, ShBindingType K1, ShBindingType K2, typename T1, typename T2, bool S1> \
+ShAttrib<libretsize, SH_TEMP, typename ShCommonType<T1, T2>::type, librettype, false> \
+libop(const ShMatrix<M, N, K1, T1>& a, const ShAttrib<N, K2, T2, libtype, S1>& b) \
 { \
   ShGeneric<libretsize, typename ShCommonType<T1, T2>::type> t = libop(a, \
-                                       static_cast< ShGeneric<N, T2> >(b)); \
-  return librettype<libretsize, K1, typename ShCommonType<T1, T2>::type, S1>(t.node(), t.swizzle(), t.neg()); \
+      static_cast< ShGeneric<N, T2> >(b)); \
+  return ShAttrib<libretsize, K1, typename ShCommonType<T1, T2>::type, librettype, S1>(\
+      t.node(), t.swizzle(), t.neg()); \
 }
 
 #define SH_SHLIB_LEFT_MATRIX_OPERATION(libtype, libop, libretsize) \
@@ -229,14 +223,14 @@ libop(const ShMatrix<M, N, K1, T1>& a, const libtype<N, K2, T2, S1>& b) \
 
 #define SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(libtype, libop, librettype, libretsize) \
 template<ShBindingType K, typename T, bool S> \
-librettype<libretsize, SH_TEMP, T, false> \
-libop(const libtype<1, K, T, S>& left, double right) \
+ShAttrib<libretsize, SH_TEMP, T, librettype, false> \
+libop(const ShAttrib<1, K, T, libtype, S>& left, double right) \
 { \
   return libop(left, ShAttrib<1, SH_CONST, T>(right)); \
 } \
 template<ShBindingType K, typename T, bool S> \
-librettype<libretsize, SH_TEMP, T, false> \
-libop(double left, const libtype<1, K, T, S>& right) \
+ShAttrib<libretsize, SH_TEMP, T, librettype, false> \
+libop(double left, const ShAttrib<1, K, T, libtype, S>& right) \
 { \
   return libop(ShAttrib<1, SH_CONST, T>(left), right); \
 } 
@@ -246,8 +240,8 @@ libop(double left, const libtype<1, K, T, S>& right) \
 
 #define SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_LEFT(libtype, libop, librettype, libretsize) \
 template<int N, ShBindingType K, typename T, bool S> \
-librettype<libretsize, SH_TEMP, T, false> \
-libop(const libtype<N, K, T, S>& left, double right) \
+ShAttrib<libretsize, SH_TEMP, T, librettype, false> \
+libop(const ShAttrib<N, K, T, libtype, S>& left, double right) \
 { \
   return libop(left, ShAttrib<1, SH_CONST, T>(right)); \
 } 
@@ -257,8 +251,8 @@ libop(const libtype<N, K, T, S>& left, double right) \
 
 #define SH_SHLIB_SPECIAL_RETTYPE_CONST_N_OP_RIGHT(libtype, libop, librettype, libretsize) \
 template<int N, ShBindingType K, typename T, bool S> \
-librettype<libretsize, SH_TEMP, T, false> \
-libop(double left, const libtype<N, K, T, S>& right) \
+ShAttrib<libretsize, SH_TEMP, T, librettype, false> \
+libop(double left, const ShAttrib<N, K, T, libtype, S>& right) \
 { \
   return libop(ShAttrib<1, SH_CONST, T>(left), right); \
 } 

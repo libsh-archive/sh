@@ -37,7 +37,7 @@ using namespace SH;
 
 
 template<int M, typename T, int P>
-ShArray3D<ShColor<M, SH_TEMP, T> > ShNoise<M, T, P>::noiseTex(P, P, P); // pseudorandom 3D noise texture
+ShArray3D<ShAttrib<M, SH_TEMP, T, SH_COLOR> > ShNoise<M, T, P>::noiseTex(P, P, P); // pseudorandom 3D noise texture
 
 template<int M, typename T, int P>
 bool ShNoise<M, T, P>::m_init = false; // whether Perlin is initialized. 
