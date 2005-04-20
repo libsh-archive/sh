@@ -6,7 +6,9 @@ use File::Copy;
 use File::Temp;
 
 # When changing the copyright notice, one must also change the appropriate
-# string in src/scripts/common.py
+# strings in:
+#    - src/scripts/common.py
+#    - backend/cc/CcTexturesString.hpp
 my $copyright_text = <<END_OF_COPYRIGHT_TEXT;
 // Sh: A GPU metaprogramming language.
 //
