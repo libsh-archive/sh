@@ -57,7 +57,7 @@ struct sh_gcc_backend_wrap_clamp
 
 struct sh_gcc_backend_wrap_repeat
 {
-  static inline int wrap(int src, int Max) 
+  static int wrap(int src, int Max) 
   {
     src %= Max;
     if(src < 0) src += Max;

@@ -31,7 +31,6 @@
 namespace SH {
 
 template<int N, typename T>
-inline
 ShGeneric<N, T> acos(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
@@ -40,7 +39,6 @@ ShGeneric<N, T> acos(const ShGeneric<N, T>& var)
 }
 
 template<int N, typename T>
-inline
 ShGeneric<N, T> asin(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
@@ -49,7 +47,6 @@ ShGeneric<N, T> asin(const ShGeneric<N, T>& var)
 }
 
 template<int N, typename T>
-inline
 ShGeneric<N, T> atan(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
@@ -58,7 +55,6 @@ ShGeneric<N, T> atan(const ShGeneric<N, T>& var)
 }
 
 template<int N, typename T>
-inline
 ShGeneric<N, T> atan2(const ShGeneric<N, T>& y, const ShGeneric<N, T>& x)
 {
   ShAttrib<N, SH_TEMP, T> t;
@@ -67,7 +63,6 @@ ShGeneric<N, T> atan2(const ShGeneric<N, T>& y, const ShGeneric<N, T>& x)
 }
 
 template<int N, typename T>
-inline
 ShGeneric<N, T> cos(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
@@ -76,7 +71,6 @@ ShGeneric<N, T> cos(const ShGeneric<N, T>& var)
 }
 
 template<int N, typename T>
-inline
 ShGeneric<N, T> sin(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
@@ -85,7 +79,6 @@ ShGeneric<N, T> sin(const ShGeneric<N, T>& var)
 }
 
 template<int N, typename T>
-inline
 ShGeneric<N, T> tan(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;

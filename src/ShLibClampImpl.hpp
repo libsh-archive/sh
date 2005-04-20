@@ -32,7 +32,6 @@
 namespace SH {
 
 template<int N, typename T>
-inline
 ShGeneric<N, T> abs(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
@@ -41,7 +40,6 @@ ShGeneric<N, T> abs(const ShGeneric<N, T>& var)
 }
 
 template<int N, typename T>
-inline
 ShGeneric<N, T> ceil(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
@@ -50,7 +48,6 @@ ShGeneric<N, T> ceil(const ShGeneric<N, T>& var)
 }
 
 template<int N, typename T>
-inline
 ShGeneric<N, T> floor(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
@@ -59,7 +56,6 @@ ShGeneric<N, T> floor(const ShGeneric<N, T>& var)
 }
 
 template<int N, typename T>
-inline
 ShGeneric<N, T> round(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
@@ -68,7 +64,6 @@ ShGeneric<N, T> round(const ShGeneric<N, T>& var)
 }
 
 template<int N, typename T1, typename T2>
-inline
 ShGeneric<N, CT1T2> mod(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
 {
   ShAttrib<N, SH_TEMP, CT1T2> t;
@@ -76,7 +71,6 @@ ShGeneric<N, CT1T2> mod(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& ri
   return t;
 }
 template<int N, typename T1, typename T2>
-inline
 ShGeneric<N, CT1T2> mod(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right)
 {
   ShAttrib<N, SH_TEMP, CT1T2> t;
@@ -84,7 +78,6 @@ ShGeneric<N, CT1T2> mod(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& ri
   return t;
 }
 template<int N, typename T1, typename T2>
-inline
 ShGeneric<N, CT1T2> mod(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right)
 {
   ShAttrib<N, SH_TEMP, CT1T2> t;
@@ -92,7 +85,6 @@ ShGeneric<N, CT1T2> mod(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& ri
   return t;
 }
 template<typename T1, typename T2>
-inline
 ShGeneric<1, CT1T2> mod(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right)
 {
   ShAttrib<1, SH_TEMP, CT1T2> t;
@@ -130,7 +122,6 @@ SH_SHLIB_CONST_SCALAR_OP(operator%);
 SH_SHLIB_CONST_N_OP_LEFT(operator%);
 
 template<int N, typename T>
-inline
 ShGeneric<N, T> frac(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
@@ -146,7 +137,6 @@ ShGeneric<N, T> pos(const ShGeneric<N, T>& var)
 }
 
 template<int N, typename T1, typename T2>
-inline
 ShGeneric<N,  CT1T2> max(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
 {
   ShAttrib<N, SH_TEMP, CT1T2> t;
@@ -156,7 +146,6 @@ ShGeneric<N,  CT1T2> max(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& r
 SH_SHLIB_CONST_SCALAR_OP(max);
 
 template<int N, typename T1, typename T2>
-inline
 ShGeneric<N,  CT1T2> min(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
 {
   ShAttrib<N, SH_TEMP, CT1T2> t;
@@ -181,6 +170,7 @@ ShGeneric<1, T> max(const ShGeneric<N, T>& a)
 }
 
 template<typename T>
+inline
 ShGeneric<1, T> max(const ShGeneric<1, T>& a)
 {
   return a;
@@ -202,6 +192,7 @@ ShGeneric<1, T> min(const ShGeneric<N, T>& a)
 }
 
 template<typename T>
+inline
 ShGeneric<1, T> min(const ShGeneric<1, T>& a)
 {
   return a;
@@ -239,7 +230,6 @@ ShGeneric<N, T> sat(const ShGeneric<N, T>& var)
 }
 
 template<int N, typename T>
-inline
 ShGeneric<N, T> sign(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;

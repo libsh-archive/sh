@@ -31,7 +31,6 @@
 namespace SH {
 
 template<typename T1, typename T2>
-inline
 ShGeneric<3, CT1T2> cross(const ShGeneric<3, T1>& left, const ShGeneric<3, T2>& right)
 {
   ShAttrib<3, SH_TEMP, CT1T2> t;
@@ -47,7 +46,6 @@ ShGeneric<3, CT1T2> operator^(const ShGeneric<3, T1>& left, const ShGeneric<3, T
 }
 
 template<int N, typename T>
-inline
 ShGeneric<N, T> normalize(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
@@ -56,7 +54,6 @@ ShGeneric<N, T> normalize(const ShGeneric<N, T>& var)
 }
 
 template<int N, typename T1, typename T2>
-inline
 ShGeneric<1, CT1T2> dot(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
 {
   ShAttrib<1, SH_TEMP, CT1T2> t;
@@ -73,7 +70,6 @@ ShGeneric<1,  CT1T2> operator|(const ShGeneric<N, T1>& left, const ShGeneric<N, 
 SH_SHLIB_CONST_N_OP_RETSIZE_BOTH(dot, 1);
 
 template<int N, typename T1, typename T2>
-inline
 ShGeneric<N, CT1T2> reflect(const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b)
 {
   ShGeneric<N, T2> bn = normalize(b);
@@ -103,7 +99,6 @@ ShGeneric<N, CT1T2> faceforward(const ShGeneric<N, T1>& a, const ShGeneric<N, T2
 }
 
 template<typename T1, typename T2, typename T3>
-inline
 ShGeneric<4, CT1T2T3> lit(const ShGeneric<1, T1>& a,
                           const ShGeneric<1, T2>& b,
                           const ShGeneric<1, T3>& c)
@@ -115,36 +110,42 @@ ShGeneric<4, CT1T2T3> lit(const ShGeneric<1, T1>& a,
 }
 
 template<int N, typename T>
+inline
 ShGeneric<1, T> distance(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
 {
   return length(a-b);
 }
 
 template<int N, typename T>
+inline
 ShGeneric<1, T> distance_1(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
 {
   return length_1(a-b);
 }
 
 template<int N, typename T>
+inline
 ShGeneric<1, T> distance_inf(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
 {
   return length_inf(a-b);
 }
 
 template<int N, typename T>
+inline
 ShGeneric<1, T> length(const ShGeneric<N, T>& a)
 {
   return sqrt(dot(a, a));
 }
 
 template<int N, typename T>
+inline
 ShGeneric<1, T> length_1(const ShGeneric<N, T>& a)
 {
   return sum(abs(a));
 }
 
 template<int N, typename T>
+inline
 ShGeneric<1, T> length_inf(const ShGeneric<N, T>& a)
 {
   return max(abs(a));

@@ -29,7 +29,6 @@
 namespace SH {
 
 template<int N, typename T>
-inline
 ShGeneric<N, T> dx(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
@@ -38,7 +37,6 @@ ShGeneric<N, T> dx(const ShGeneric<N, T>& var)
 }
 
 template<int N, typename T>
-inline
 ShGeneric<N, T> dy(const ShGeneric<N, T>& var)
 {
   ShAttrib<N, SH_TEMP, T> t;
@@ -61,7 +59,6 @@ ShGeneric<2, T> gradient(const ShGeneric<1, T>& var)
 }
 
 template<int N, typename T>
-inline
 ShMatrix<2, N, SH_TEMP, T> jacobian(const ShGeneric<N, T>& var)
 {
   ShMatrix<2, N, SH_TEMP, T> ret;

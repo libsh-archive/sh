@@ -58,9 +58,7 @@ operator/(const ShMatrix<N, M, Binding, T1>& a,
   return r;
 }
 
-template<int M, int N, int P, ShBindingType Binding, ShBindingType Binding2, 
-  typename T1, typename T2>
-inline
+template<int M, int N, int P, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
 ShMatrix<M, P, SH_TEMP, CT1T2>
 operator|(const ShMatrix<M, N, Binding, T1>& a,
           const ShMatrix<N, P, Binding2, T2>& b)
@@ -86,7 +84,6 @@ operator*(const ShMatrix<M, N, Binding, T1>& a,
 }
 
 template<int M, int N, ShBindingType Binding, typename T1, typename T2>
-inline
 ShGeneric<M, CT1T2> operator|(const ShMatrix<M, N, Binding, T1>& a, const ShGeneric<N, T2>& b)
 {
   ShAttrib<M, SH_TEMP, CT1T2> ret;
@@ -97,7 +94,6 @@ ShGeneric<M, CT1T2> operator|(const ShMatrix<M, N, Binding, T1>& a, const ShGene
 }
 
 template<int M, int N, ShBindingType Binding, typename T1, typename T2>
-inline
 ShGeneric<N, CT1T2> operator|(const ShGeneric<M, T1>& a, const ShMatrix<M, N, Binding, T2>& b)
 {
   ShAttrib<N, SH_TEMP, CT1T2> ret;
@@ -172,6 +168,7 @@ operator/(const ShMatrix<M, N, Binding, T1>& a, const ShGeneric<1, T2>& b)
 
 
 template<ShBindingType Binding, typename T>
+inline
 ShAttrib1f
 det(const ShMatrix<1, 1, Binding, T>& matrix)
 {
@@ -214,6 +211,7 @@ det(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix)
 
 //Matrix of Cofactors
 template<ShBindingType Binding, typename T>
+inline
 ShMatrix<1, 1, SH_TEMP, T>
 cofactors(const ShMatrix<1, 1, Binding, T>& matrix){
   return matrix;
@@ -487,6 +485,7 @@ translate(const ShGeneric<2, T>& a)
 
 
 template<typename T>
+inline
 ShMatrix<4, 4, SH_TEMP, T>
 scale(const ShGeneric<3, T>& a)
 {
@@ -494,6 +493,7 @@ scale(const ShGeneric<3, T>& a)
 }
 
 template<typename T>
+inline
 ShMatrix<3, 3, SH_TEMP, T>
 scale(const ShGeneric<2, T>& a)
 {
@@ -501,6 +501,7 @@ scale(const ShGeneric<2, T>& a)
 }
 
 template<int N, typename T>
+inline
 ShMatrix<N, N, SH_TEMP, T>
 scale(const ShGeneric<1, T>& a)
 {

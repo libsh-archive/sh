@@ -320,7 +320,7 @@ void ShObjMesh::normalizeNormals() {
 struct ObjVertLess {
  static const float EPS;
 
- inline bool operator()( const ShObjVertex *a, const ShObjVertex *b ) const {
+ bool operator()( const ShObjVertex *a, const ShObjVertex *b ) const {
    float aval[3], bval[3];
    a->pos.getValues(aval); b->pos.getValues(bval);
 
