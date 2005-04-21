@@ -1,3 +1,7 @@
+2005-04-21  Francois Marier  <francois@serioushack.com>
+
+	Release of 0.7.7
+
 2005-04-20  Francois Marier  <francois@serioushack.com>
 
 	* src/, src/scripts/, util/: Make semantic types template
@@ -39,7 +43,7 @@
 	shRET() instruction call.
 	  
 	* src/ShOperation.hpp, src/ShOperation.cpp: Added SH_OP_RET.
-    
+
 2005-04-07  Francois Marier  <francois@serioushack.com>
 
 	* backends/cc/CcEmit.cpp, backends/gl/ArbEmit.cpp (emit_mod),
@@ -376,6 +380,7 @@
 	* src/ShProgramSet.hpp, src/ShProgramSet.cpp: Added program sets.
 
 2005-03-02  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+
 	* backends/gl/ArbCode.cpp (ArbCode::print): Fixed NVFP register
 	decls to use "SHORT TEMP" and "LONG TEMP"
 
@@ -455,7 +460,8 @@
 	ShVariable.cpp: Backed out some const changes that don't make
 	sense.
 
-Merged in some fixes from arithmetic
+	Merged in some fixes from arithmetic:
+	
 	*  src/ShSection.hpp, ShSectionImpl.hpp (realDump):
 	Graphviz dump should work now (no more cfg nodes in wrong places).
 
@@ -677,7 +683,7 @@ Merged in some fixes from arithmetic
 2005-01-26  Bryan Chan <b8chan@cgl.uwaterloo.ca>
 	
 	* util/ShObjMesh.cpp:
-        Improved vertex normal generation.
+	Improved vertex normal generation.
 
 2005-01-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 

@@ -1,6 +1,6 @@
 INCLUDES = -I$(top_srcdir)/src
 
-EXTRA_DIST = Makefile.win32
+EXTRA_DIST = Makefile.win32 WGLPBufferContext.hpp WGLPBufferContext.cpp
 
 shbackenddir = $(prefix)/lib/sh
 

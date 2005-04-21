@@ -9,7 +9,7 @@ TESTS = abs add cbrt ceil clamp comparisons cross dec_inc div dot exp \
 	tex trig
 check_PROGRAMS = $(TESTS)
 BACKENDS = arb cc host glsl
-EXTRA_DIST = shtest.py common.py
+EXTRA_DIST = shtest.py common.py tex_squares.png
 
 common = test.cpp test.hpp
 
