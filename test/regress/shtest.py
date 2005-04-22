@@ -94,7 +94,7 @@ def make_test(expected, values, types=[]):
     types = types + (len(values) + 1 - len(types)) * ['float']
     return (expected, values, types)
 
-def make_testname(src_arg_types, types, key):
+def make_testname(src_arg_types, types, key, testnumber):
     name = enum_value_type[types[0]]
     for arg, argtype in src_arg_types:
         name += '_'
@@ -102,6 +102,7 @@ def make_testname(src_arg_types, types, key):
             name += str(len(arg))
         name += enum_value_type[argtype]
     name += '_' + key
+    name += '_test' + str(testnumber)
     return name
 
 def variable_names(src_arg_types):
@@ -284,7 +285,7 @@ class StreamTest(Test):
             types = test[2]
             src_arg_types = zip(test[1], types[1:])
             for i, call in enumerate(testcalls):
-                argkey = make_testname(src_arg_types, types, call.key())
+                argkey = make_testname(src_arg_types, types, call.key(), test_nb)
                 if not programs.has_key(argkey):
                     programs[argkey] = []
                     progname = self.name + '_' + string.ascii_lowercase[i] + '_' + argkey
@@ -324,7 +325,7 @@ class ImmediateTest(Test):
             types = test[2]
             src_arg_types = zip(test[1], types[1:])
             for i, call in enumerate(testcalls):
-                testname = make_testname(src_arg_types, types, call.key())
+                testname = make_testname(src_arg_types, types, call.key(), test_nb)
                 out.write('  { // ' + testname + '\n')
                 out.write(init_inputs('    ', src_arg_types, False))
                 out.write(init_expected('    ', test[0], types[0], False))
@@ -334,6 +335,7 @@ class ImmediateTest(Test):
                 out.write('\n')
                 out.write('    if (test.check("' + testname + '", out, expected' + ') != 0) errors++;\n')
                 out.write('  }\n\n')
+            test_nb += 1
         if standalone:
             self.output_footer(out)
 

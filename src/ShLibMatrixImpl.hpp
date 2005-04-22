@@ -213,7 +213,8 @@ det(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix)
 template<ShBindingType Binding, typename T>
 inline
 ShMatrix<1, 1, SH_TEMP, T>
-cofactors(const ShMatrix<1, 1, Binding, T>& matrix){
+cofactors(const ShMatrix<1, 1, Binding, T>& matrix)
+{
   return matrix;
 }
     
@@ -222,13 +223,11 @@ ShMatrix<2, 2, SH_TEMP, T>
 cofactors(const ShMatrix<2, 2, Binding, T>& matrix)
 {
   ShMatrix<2, 2, Binding, T> r;
-  r.m_data[0][0]= matrix[1][1];
-  r.m_data[1][0]=-matrix[0][1];
-  r.m_data[0][1]=-matrix[1][0];
-  r.m_data[1][1]= matrix[0][0];
-    
+  r[0][0] = matrix[1][1];
+  r[1][0] = -matrix[0][1];
+  r[0][1] = -matrix[1][0];
+  r[1][1] = matrix[0][0];
   return r;
-  //return matrix;
 }
   
 template<int RowsCols, ShBindingType Binding, typename T>
@@ -239,10 +238,11 @@ cofactors(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix)
 
   for (int i = 0; i < RowsCols; i++) {
     for (int j = 0; j < RowsCols; j++) {
-      if( (i+j)%2 ==0)	  
-        r[i][j]= det(matrix.subMatrix(i,j));
-      else
-        r[i][j]=-det(matrix.subMatrix(i,j));
+      if((i+j) % 2 == 0) {
+        r[i][j] = det(matrix.subMatrix(i,j));
+      } else {
+        r[i][j] = -det(matrix.subMatrix(i,j));
+      }
     }
   }
   return r;
@@ -254,10 +254,10 @@ ShMatrix<N, M, SH_TEMP, T>
 transpose(const ShMatrix<M, N, Binding, T>& matrix)
 {    
   ShMatrix<N, M, SH_TEMP, T> r;
-    
+
   for (int i = 0; i < N; i++) {
     for (int j = 0; j < M; j++) {	  
-      r[i][j]= matrix[j][i];	
+      r[i][j] = matrix[j][i];	
     }
   }
     
