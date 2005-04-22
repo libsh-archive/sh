@@ -3,10 +3,10 @@ AM_CXXFLAGS = -Wall -g -O0
 AM_LDFLAGS = -g -L../../src
 LDADD = -lsh $(GL_LIBS)
 TESTS = abs add cbrt ceil clamp comparisons cross dec_inc div dot exp \
-	floor frac length_distance lerp lit log logical mad matrix_add \
-	matrix_div matrix_functions matrix_mul matrix_neg matrix_sub \
-	max_min mod mul neg pow prod_sum rcp rnd sign sort sqrt sub \
-	tex trig
+	floor frac length_distance lerp lighting log logical mad \
+	matrix_add matrix_div matrix_functions matrix_mul matrix_neg \
+	matrix_sub max_min mod mul neg pow prod_sum rcp rnd sign sort \
+	sqrt sub tex trig
 check_PROGRAMS = $(TESTS)
 BACKENDS = arb cc host glsl
 EXTRA_DIST = shtest.py common.py tex_squares.png
@@ -54,8 +54,8 @@ length_distance_SOURCES = length_distance.cpp $(common)
 EXTRA_DIST += length_distance.cpp.py
 lerp_SOURCES = lerp.cpp $(common)
 EXTRA_DIST += lerp.cpp.py
-lit_SOURCES = lit.cpp $(common)
-EXTRA_DIST += lit.cpp.py
+lighting_SOURCES = lighting.cpp $(common)
+EXTRA_DIST += lighting.cpp.py
 log_SOURCES = log.cpp $(common)
 EXTRA_DIST += log.cpp.py
 logical_SOURCES = logical.cpp $(common)

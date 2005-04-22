@@ -1,12 +1,19 @@
 #!/usr/bin/python
 
 import string
+from math import sqrt
 
 def cross_product(a, b):
     return (a[1]*b[2] - a[2]*b[1], a[2]*b[0] - a[0]*b[2], a[0]*b[1] - a[1]*b[0]);
 
 def dot_product(a, b):
     return sum([x*y for (x,y) in zip(a,b)])
+
+def length(a):
+    s = 0
+    for x in a:
+        s += x*x
+    return [sqrt(s)]
 
 def upzip(a, b):
     if len(a) > len(b):

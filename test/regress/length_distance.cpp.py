@@ -1,13 +1,7 @@
 #!/usr/bin/python
 
-from math import sqrt
 import shtest, sys, common
-
-def length(a):
-    s = 0
-    for x in a:
-        s += x*x
-    return [sqrt(s)]
+from common import *
 
 def length_1(a):
     result = 0
