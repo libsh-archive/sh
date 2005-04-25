@@ -1,0 +1,45 @@
+// -*- C++ -*-
+
+    ShBackendPtr backend = ShBackend::lookup(backendName);
+
+    if (!backend) {
+      std::cerr << "Error opening " << backendName << " backend." << std::endl;
+      return -1;
+    }
+
+    SH_DEBUG_ASSERT(!shader->target().empty());
+
+    ShBackendCodePtr code = shader->code(backend);
+    std::cout << "Printing Input/Output Format:" << std::endl;
+    code->printInputOutputFormat(std::cout);
+
+    std::cout << "Printing code:" << std::endl;
+    code->print(std::cout);
+
+    std::string dumpfilename = argv[0];
+
+    // Get rid of some libtool annoyingness
+    int slash;
+    for (slash = dumpfilename.size() - 1; slash >= 0; slash--) {
+      if (dumpfilename[slash] == '/') break;
+    }
+    if (dumpfilename[slash] == '/') dumpfilename = dumpfilename.substr(slash + 1);
+    if (dumpfilename.substr(0, 3) == "lt-") dumpfilename = dumpfilename.substr(3);
+
+    dumpfilename += "-control.dot";
+
+    std::ofstream dumpfile(dumpfilename.c_str());
+    shader->ctrlGraph->graphvizDump(dumpfile);
+ 
+    return 0;
+  } catch (const ShException& e) {
+    std::cerr << "SH Exception: " << e.message() << std::endl;
+    return -1;
+  } catch (const std::exception& e) {
+    std::cerr << "C++ Exception: " << e.what() << std::endl;
+    return -1;
+  } catch (...) {
+    std::cerr << "Unknown exception caught." << std::endl;
+    return -1;
+  }
+}

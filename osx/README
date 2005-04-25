@@ -1,0 +1,19 @@
+INSTALLATION
+
+See the "INSTALL" file for directions.
+
+STATUS 
+
+Sh is currently roughly in the "alpha" stage. Most things are
+working. For an overview of what's not working (that we know of) see
+https://issues.libsh.org/, our issue tracker.
+
+While there are still bugs here and there, it's certainly usable in
+real applications. We welcome your feedback, and would love to hear
+from you if you're using Sh for something interesting.
+
+You can reach us at libsh-devel@libsh.org. See the Sh homepage for
+details on subscribing to the mailing lists.
+
+ - the Sh team - http://libsh.org/
+

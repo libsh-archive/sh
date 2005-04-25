@@ -1,0 +1,13 @@
+ShAttrib4f uniform(2.0, 3.0, 4.0, 5.0); NAME(uniform);
+ShAttrib4f computed; NAME(computed);
+
+computed(3) = uniform(1) + uniform(2) - uniform(0);
+
+ShProgram shader = SH_BEGIN_VERTEX_PROGRAM {
+  ShInputAttrib4f in1; NAME(in1);
+  ShInputAttrib4f in2; NAME(in2);
+  ShOutputAttrib4f out; NAME(out);
+  
+  out = computed + uniform;
+  
+} SH_END_PROGRAM;
