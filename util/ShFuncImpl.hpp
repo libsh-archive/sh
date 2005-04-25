@@ -37,7 +37,7 @@ namespace ShUtil {
 using namespace SH;
 
 template<int N, typename T>
-ShGeneric<N, T> smoothstep(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b,
+ShGeneric<N, T> deprecated_smoothstep(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b,
     const ShGeneric<N, T> x) {
   ShGeneric<N, T> t = (x - a) / (b - a);
   // TODO fix this for other types
@@ -110,6 +110,33 @@ ShGeneric<3, T> changeBasis(const ShGeneric<3, T> &b0,
   result(1) = b1 | v;
   result(2) = b2 | v;
   return result;
+}
+
+/** Evaluate cubic Bernstein (Bezier) basis functions.
+ */
+template <int N, typename T>
+ShAttrib4f bernstein_basis_4(const ShGeneric<N, T>& t)
+{
+   ShAttrib4f r;
+   ShAttrib<N,SH_TEMP, T> it = fillcast<N>(ShAttrib<1,SH_TEMP, T>(1.0f)) - t;
+   r(0) = it*it*it;
+   r(1) = 3.0*it*it*t;
+   r(2) = 3.0*it*t*t;
+   r(3) = t*t*t;
+   return r;
+}
+
+/** Evaluate cubic Bezier spline.
+ */
+template <int N, typename T>
+ShGeneric<N, T> bezier(const ShGeneric<N, T>& t, const ShAttrib4f& p)
+{
+   ShAttrib4f B = bernstein_basis_4(t);
+   ShGeneric<N, T> r = B[0] * p[0];
+   for (int i=1; i<4; i++) {
+      r += B[i] * p[i];  
+   }
+   return r;
 }
 
 }

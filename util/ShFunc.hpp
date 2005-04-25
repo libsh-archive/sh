@@ -42,7 +42,7 @@ using namespace SH;
  * cubic interpolation between 0 and 1 otherwise
  */
 template<int N, typename T>
-ShGeneric<N, T> smoothstep(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b,
+ShGeneric<N, T> deprecated_smoothstep(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b,
     const ShGeneric<N, T> x); 
 
 /** \brief Parallel linear congruential generator

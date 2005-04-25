@@ -237,6 +237,24 @@ ShGeneric<N, T> sign(const ShGeneric<N, T>& var)
   return t;
 }
 
+template <int N, typename T>
+inline
+ShGeneric<N, T>
+smoothstep (const ShGeneric<N, T>& t, const ShGeneric<N, T>& c, const ShGeneric<N, T>& w)
+{
+   return clamp((t - c)/w + 0.5f, 0.0f, 1.0f);
+}
+
+template <int N, typename T>
+inline
+ShGeneric<N, T>
+smoothpulse (const ShGeneric<N, T>& t, const ShGeneric<N, T>& r0, 
+	     const ShGeneric<N, T>& r1, const ShGeneric<N, T>& w)
+{
+   return sstep(t,r0,w) - sstep(t,r1,w);
+}
+
+
 }
 
 #endif

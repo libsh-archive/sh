@@ -1,6 +1,14 @@
-2005-04-21  Francois Marier  <francois@serioushack.com>
+2005-04-25  Francois Marier  <francois@serioushack.com>
 
-	Release of 0.7.7
+	* util/ShFunc.hpp, ShFuncImpl.hpp: Rename "smoothstep" to
+	"deprecated_smoothstep" since it is a cubic function whereas the
+	book defines is as a linear function.
+
+	Move the bezier function implementation here from Shrike's
+	utilimpl.hpp. It should be moved to the core later.
+
+	* src/ShLibClamp.hpp, ShLibClampImpl.hpp: Add the smoothstep() and
+	smoothpulse() functions from Shrike's utilimpl.hpp (issue63).
 
 2005-04-20  Francois Marier  <francois@serioushack.com>
 
