@@ -255,6 +255,7 @@ class Test:
         out.write('#include "test.hpp"\n\n')
         out.write('int main(int argc, char** argv) {\n')
         out.write('  using namespace SH;\n\n')
+        out.write('  char* last_test = "none";\n\n')
         out.write('  try {\n')
         out.write('  int errors = 0;\n')
         out.write('  Test test(argc, argv);\n\n')
@@ -262,10 +263,10 @@ class Test:
     def output_footer(self, out):
         out.write('  if (errors !=0) return 1;\n')
         out.write("""  } catch (const ShException &e) {
-    std::cout << "Caught Sh Exception." << std::endl << e.message() << std::endl;
+    std::cout << "Caught Sh Exception in '" << last_test << "'." << std::endl << e.message() << std::endl;
     return 2;
   } catch (const std::exception& e) {
-    std::cerr << "Caught C++ exception: " << e.what() << std::endl;
+    std::cerr << "Caught C++ exception in '" << last_test << "' : " << e.what() << std::endl;
     return 3;
   }
 }""")
@@ -298,6 +299,7 @@ class StreamTest(Test):
                     out.write('    ' + str(call) + ';\n')
                     out.write('  } SH_END;\n\n')
                     out.write('  ' + progname + '.name("' + progname + '");\n')
+                    out.write('  last_test = "' + progname + '";\n')
             for p in programs[argkey]:
                 out.write('  {\n');
                 out.write(init_inputs('    ', src_arg_types))
@@ -327,6 +329,7 @@ class ImmediateTest(Test):
             for i, call in enumerate(testcalls):
                 testname = make_testname(src_arg_types, types, call.key(), test_nb)
                 out.write('  { // ' + testname + '\n')
+                out.write('    last_test = "' + testname + '";\n')
                 out.write(init_inputs('    ', src_arg_types, False))
                 out.write(init_expected('    ', test[0], types[0], False))
                 out.write('\n')
