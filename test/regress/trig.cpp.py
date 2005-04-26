@@ -9,7 +9,7 @@ def atan2_test(p, q, types=[]):
     result = [math.atan2(a, b) for (a, b) in common.upzip(p, q)]
     return shtest.make_test(result, [p, q], types)
 
-# for cos() and sin()
+# for cos(), sin(), cosh() and sinh()
 def insert_into1(test, op):
     test.add_test(func((0.0, 1.0, 2.0, 3.0), op))
     test.add_test(func((0.3, 0.5, 0.8, 0.9), op))
@@ -28,7 +28,7 @@ def insert_into2(test, op):
     test.add_test(func((-0.5, -0.9, -0.1), op))
     test.add_test(func((0.5, 0.6, 0.9), op))
 
-# for tan()
+# for tan() and tanh()
 def insert_into3(test, op):
     test.add_test(func((0.0, 1.0, 2.0, 3.0), op))
     test.add_test(func((0.3, 0.5, 0.8, 0.9), op))
@@ -88,10 +88,28 @@ test.add_call(shtest.Call(shtest.Call.call, 'asin', 1))
 insert_into2(test, math.asin)
 test.output(sys.stdout, False)
 
-# Test tan in steam programs
+# Test tan in stream programs
 test = shtest.StreamTest('tan', 1)
 test.add_call(shtest.Call(shtest.Call.call, 'tan', 1))
 insert_into3(test, math.tan)
+test.output(sys.stdout, False)
+
+# Test cosh in stream programs
+test = shtest.StreamTest('cosh', 1)
+test.add_call(shtest.Call(shtest.Call.call, 'cosh', 1))
+insert_into1(test, math.cosh)
+test.output(sys.stdout, False)
+
+# Test sinh in stream programs
+test = shtest.StreamTest('sinh', 1)
+test.add_call(shtest.Call(shtest.Call.call, 'sinh', 1))
+insert_into1(test, math.sinh)
+test.output(sys.stdout, False)
+
+# Test tanh in stream programs
+test = shtest.StreamTest('tanh', 1)
+test.add_call(shtest.Call(shtest.Call.call, 'tanh', 1))
+insert_into3(test, math.tanh)
 test.output(sys.stdout, False)
 
 # Test atan in stream programs
@@ -130,10 +148,28 @@ test.add_call(shtest.Call(shtest.Call.call, 'asin', 1))
 insert_into2(test, math.asin)
 test.output(sys.stdout, False)
 
-# Test tan in steam programs
+# Test tan in immediate mode
 test = shtest.ImmediateTest('tan_im', 1)
 test.add_call(shtest.Call(shtest.Call.call, 'tan', 1))
 insert_into3(test, math.tan)
+test.output(sys.stdout, False)
+
+# Test cosh in immediate mode
+test = shtest.ImmediateTest('cosh_im', 1)
+test.add_call(shtest.Call(shtest.Call.call, 'cosh', 1))
+insert_into1(test, math.cosh)
+test.output(sys.stdout, False)
+
+# Test sinh in immediate mode
+test = shtest.ImmediateTest('sinh_im', 1)
+test.add_call(shtest.Call(shtest.Call.call, 'sinh', 1))
+insert_into1(test, math.sinh)
+test.output(sys.stdout, False)
+
+# Test tanh in immediate mode
+test = shtest.ImmediateTest('tanh_im', 1)
+test.add_call(shtest.Call(shtest.Call.call, 'tanh', 1))
+insert_into3(test, math.tanh)
 test.output(sys.stdout, False)
 
 # Test atan in immediate mode

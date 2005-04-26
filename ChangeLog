@@ -1,3 +1,19 @@
+2005-04-26  Francois Marier  <francois@serioushack.com>
+
+	* src/ShOperation.hpp, ShOperation.cpp, ShInstructions.hpp,
+	ShInstructions.cpp, ShLibTrig.hpp, ShLibTrigImpl.hpp, ShLib.hpp,
+	ShEvalImpl.hpp: Add the COSH, SINH and TANH IR operations.
+
+	* src/ShConcreteCTypeOp.cpp, ShConcreteRegularOpImpl.hpp:
+	Implementation of the hyperbolic trig functions in immediate mode.
+	
+	* backends/gl/ArbEmit.cpp, ArbCode.hpp, GlslEmit.cpp,
+	GlslCode.hpp: Add approximations for the COSH, SINH and TANH
+	operations.
+
+	* backends/cc/CcEmit.cpp: Use the standard C functions to
+	implement COSH, SINH and TANH.
+
 2005-04-25  Francois Marier  <francois@serioushack.com>
 
 	* util/ShFunc.hpp, ShFuncImpl.hpp: Rename "smoothstep" to

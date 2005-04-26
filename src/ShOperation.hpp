@@ -62,6 +62,7 @@ enum ShOperation {
   SH_OP_CBRT, ///< Unary componentwise cube root
   SH_OP_CEIL, ///< Unary smallest integer not less than src[0]
   SH_OP_COS, ///< Unary cosine function
+  SH_OP_COSH, ///< Unary hyperbolic cosine function
   SH_OP_CMUL, ///< Unary product of components
   SH_OP_CSUM, ///< Unary sum of components
   SH_OP_DOT, ///< Binary dot product
@@ -91,9 +92,11 @@ enum ShOperation {
   SH_OP_RSQ, ///< Unary reciprocal square root
 
   SH_OP_SIN, ///< Unary sine function
+  SH_OP_SINH, ///< Unary hyperbolic sine function
   SH_OP_SGN, ///< Unary componentwise sign
   SH_OP_SQRT, ///< Unary square root
   SH_OP_TAN, ///< Unary tangent
+  SH_OP_TANH, ///< Unary hyperbolic tangent
 
   // "Vector" operations
   SH_OP_NORM, ///< Normalize vector

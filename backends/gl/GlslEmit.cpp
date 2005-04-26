@@ -183,6 +183,11 @@ void GlslCode::emit(const ShStatement &stmt)
     case SH_OP_TEXI:
       emit_texture(stmt);
       break;
+    case SH_OP_COSH:
+    case SH_OP_SINH:
+    case SH_OP_TANH:
+      emit_hyperbolic(stmt);
+      break;
     default:
       shError(ShException(string("Glsl Code: Unknown operation ") + opInfo[stmt.op].name));
       break;
@@ -253,6 +258,35 @@ void GlslCode::emit_exp(const ShStatement& stmt, double power)
 
   ShVariable temp(allocate_constant(stmt, power));
   append_line(resolve(stmt.dest) + " = pow(" + resolve(temp) + ", " + resolve(stmt.src[0]) + ")");
+}
+
+void GlslCode::emit_hyperbolic(const ShStatement& stmt)
+{
+  ShVariable two(allocate_constant(stmt, 2));
+  ShVariable e(allocate_constant(stmt, M_E));
+
+  ShVariable e_plusX(allocate_temp(stmt));
+  ShVariable e_minusX(allocate_temp(stmt));
+  append_line(resolve(e_plusX) + " = pow(" + resolve(e) + ", " + resolve(stmt.src[0]) + ")");
+  append_line(resolve(e_minusX) + " = pow(" + resolve(e) + ", -(" + resolve(stmt.src[0]) + "))");
+
+  switch (stmt.op) {
+  case SH_OP_COSH:
+    // cosh x = [e^x + e^-x] / 2
+    append_line(resolve(stmt.dest) + " = (" + resolve(e_plusX) + " + " + resolve(e_minusX) + ") / " + resolve(two));
+    break;
+  case SH_OP_SINH:
+    // sinh x = [e^x - e^-x] / 2
+    append_line(resolve(stmt.dest) + " = (" + resolve(e_plusX) + " - " + resolve(e_minusX) + ") / " + resolve(two));
+    break;
+  case SH_OP_TANH:
+    // tanh x = sinh x / cosh x = [e^x - e^-x] / [e^x + e^-x]
+    append_line(resolve(stmt.dest) + " = (" + resolve(e_plusX) + " - " + resolve(e_minusX) + ") / " +
+                                        "(" + resolve(e_plusX) + " + " + resolve(e_minusX) + ")");
+    break;
+  default:
+    SH_DEBUG_ASSERT(0);
+  }
 }
 
 void GlslCode::emit_lit(const ShStatement& stmt)

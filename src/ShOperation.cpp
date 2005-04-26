@@ -53,6 +53,7 @@ const ShOperationInfo opInfo[] = {
   {"CBRT", 1, ShOperationInfo::LINEAR, false},
   {"CEIL", 1, ShOperationInfo::LINEAR, false},
   {"COS", 1, ShOperationInfo::LINEAR, false},
+  {"COSH", 1, ShOperationInfo::LINEAR, false},
   {"CMUL", 1, ShOperationInfo::ALL, false},
   {"CSUM", 1, ShOperationInfo::ALL, false},
   {"DOT", 2, ShOperationInfo::ALL, true},
@@ -82,9 +83,11 @@ const ShOperationInfo opInfo[] = {
   {"RSQ", 1, ShOperationInfo::LINEAR, false},
 
   {"SIN", 1, ShOperationInfo::LINEAR, false},
+  {"SINH", 1, ShOperationInfo::LINEAR, false},
   {"SGN", 1, ShOperationInfo::LINEAR, false},
   {"SQRT", 1, ShOperationInfo::LINEAR, false},
   {"TAN", 1, ShOperationInfo::LINEAR, false},
+  {"TANH", 1, ShOperationInfo::LINEAR, false},
 
   {"NORM", 1, ShOperationInfo::ALL, false},
   {"XPD", 2, ShOperationInfo::ALL, false}, // Not quite true, but probably good enough

@@ -76,6 +76,8 @@ void shCEIL(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
 void shCOS(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
+void shCOSH(ShVariable& dest, const ShVariable& a);
+SH_DLLEXPORT
 void shCMUL(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
 void shCSUM(ShVariable& dest, const ShVariable& a);
@@ -128,9 +130,13 @@ void shSGN(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
 void shSIN(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
+void shSINH(ShVariable& dest, const ShVariable& a);
+SH_DLLEXPORT
 void shSQRT(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
 void shTAN(ShVariable& dest, const ShVariable& a);
+SH_DLLEXPORT
+void shTANH(ShVariable& dest, const ShVariable& a);
 
 SH_DLLEXPORT
 void shNORM(ShVariable& dest, const ShVariable& a);

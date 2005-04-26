@@ -132,9 +132,12 @@ ArbMapping ArbCode::table[] = {
   */
   {SH_OP_COS,   SH_ARB_FP,  scalarize, SH_ARB_COS, 0},
   {SH_OP_COS,   SH_ARB_VP,  0,         SH_ARB_FUN, &ArbCode::emit_trig},
+  {SH_OP_COSH,  SH_ARB_ANY, 0,         SH_ARB_FUN, &ArbCode::emit_hyperbolic},
   {SH_OP_SIN,   SH_ARB_FP,  scalarize, SH_ARB_SIN, 0},
   {SH_OP_SIN,   SH_ARB_VP,  0,         SH_ARB_FUN, &ArbCode::emit_trig},
+  {SH_OP_SINH,  SH_ARB_ANY, 0,         SH_ARB_FUN, &ArbCode::emit_hyperbolic},
   {SH_OP_TAN,   SH_ARB_ANY, 0,         SH_ARB_FUN, &ArbCode::emit_tan},
+  {SH_OP_TANH,  SH_ARB_ANY, 0,         SH_ARB_FUN, &ArbCode::emit_hyperbolic},
 
   // Derivatives
   {SH_OP_DX, SH_ARB_NVFP, 0, SH_ARB_DDX, 0},
@@ -456,6 +459,43 @@ void ArbCode::emit_exp(const ShStatement& stmt)
   m_shader->constants.push_back(base.node());
 
   m_instructions.push_back(ArbInst(SH_ARB_POW, stmt.dest, base, stmt.src[0]));
+}
+
+void ArbCode::emit_hyperbolic(const ShStatement& stmt)
+{
+  ShConstAttrib1f two(2.0f);
+  m_shader->constants.push_back(two.node());
+
+  ShVariable e_plusX(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT)); // e^x
+  ShVariable e_minusX(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT)); // e^-x
+  emit(ShStatement(e_plusX, SH_OP_EXP, stmt.src[0]));
+  emit(ShStatement(e_minusX, SH_OP_NEG, stmt.src[0]));
+  emit(ShStatement(e_minusX, SH_OP_EXP, e_minusX));
+
+  ShVariable temp_cosh(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT)); // e^x + e^-x
+  ShVariable temp_sinh(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT)); // e^x - e^-x
+  m_instructions.push_back(ArbInst(SH_ARB_ADD, temp_cosh, e_plusX, e_minusX)); 
+  m_instructions.push_back(ArbInst(SH_ARB_SUB, temp_sinh, e_plusX, e_minusX)); 
+
+  switch (stmt.op) {
+  case SH_OP_COSH:
+    // cosh x = [e^x + e^-x] / 2
+    m_instructions.push_back(ArbInst(SH_ARB_DIV, stmt.dest, temp_cosh, two));
+    break;
+  case SH_OP_SINH:
+    // cosh x = [e^x - e^-x] / 2
+    m_instructions.push_back(ArbInst(SH_ARB_DIV, stmt.dest, temp_sinh, two));
+    break;
+  case SH_OP_TANH:
+    // tanh x = sinh x / cosh x = [e^x - e^-x] / [e^x + e^-x]
+    for (int i=0; i < temp_cosh.size(); i++) {
+      m_instructions.push_back(ArbInst(SH_ARB_RCP, temp_cosh(i), temp_cosh(i)));
+    } // (not dividing directly because of NVIDIA bug -- see emit_div)
+    m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, temp_sinh, temp_cosh));
+    break;
+  default:
+    SH_DEBUG_ASSERT(0);
+  }
 }
 
 void ArbCode::emit_log(const ShStatement& stmt)

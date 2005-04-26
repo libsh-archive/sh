@@ -106,6 +106,7 @@ private:
   void emit_invtrig(const SH::ShStatement& stmt);
   void emit_tan(const SH::ShStatement& stmt);
   void emit_exp(const SH::ShStatement& stmt);
+  void emit_hyperbolic(const SH::ShStatement& stmt);
   void emit_log(const SH::ShStatement& stmt);
   void emit_norm(const SH::ShStatement& stmt);
   void emit_sgn(const SH::ShStatement& stmt);

@@ -33,7 +33,7 @@ namespace SH {
 
 /** \defgroup lib_trig Trigonometric functions
  * @ingroup library
- * @todo tan, atan, atan2, hyperbolic functions, secant, cosecant, etc.
+ * @todo inverse hyperbolic functions
  * @{
  */
 
@@ -89,6 +89,27 @@ ShGeneric<N, T> sin(const ShGeneric<N, T>& var);
  */
 template<int N, typename T>
 ShGeneric<N, T> tan(const ShGeneric<N, T>& var);
+
+/** Hyperbolic cosine.
+ * Operates componentwise on tuples.
+ * Returns the hypebolic cosine of x.
+ */
+template<int N, typename T>
+ShGeneric<N, T> cosh(const ShGeneric<N, T>& var);
+
+/** Hyperbolic sine.
+ * Operates componentwise on tuples.
+ * Returns the hyperbolic sine of x.
+ */
+template<int N, typename T>
+ShGeneric<N, T> sinh(const ShGeneric<N, T>& var);
+
+/** Hyperbolic tangent.
+ * Operates componentwise on tuples.
+ * Returns the hyperbolic tangent of x.   Equivalent to sinh(x)/cosh(x).
+ */
+template<int N, typename T>
+ShGeneric<N, T> tanh(const ShGeneric<N, T>& var);
 
 /*@}*/
 

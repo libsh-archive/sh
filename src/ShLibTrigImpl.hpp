@@ -86,6 +86,30 @@ ShGeneric<N, T> tan(const ShGeneric<N, T>& var)
   return t;
 }
 
+template<int N, typename T>
+ShGeneric<N, T> cosh(const ShGeneric<N, T>& var)
+{
+  ShAttrib<N, SH_TEMP, T> t;
+  shCOSH(t, var);
+  return t;
+}
+
+template<int N, typename T>
+ShGeneric<N, T> sinh(const ShGeneric<N, T>& var)
+{
+  ShAttrib<N, SH_TEMP, T> t;
+  shSINH(t, var);
+  return t;
+}
+
+template<int N, typename T>
+ShGeneric<N, T> tanh(const ShGeneric<N, T>& var)
+{
+  ShAttrib<N, SH_TEMP, T> t;
+  shTANH(t, var);
+  return t;
+}
+
 }
 
 #endif

@@ -144,6 +144,7 @@ struct ShConcreteRegularOp<SH_OP_CMUL, T>
 };
 
 SHCRO_UNARY_OP(SH_OP_COS, cos(*A));
+SHCRO_UNARY_OP(SH_OP_COSH, cosh(*A));
 
 template<typename T>
 struct ShConcreteRegularOp<SH_OP_CSUM, T>
@@ -216,9 +217,11 @@ SHCRO_UNARY_OP(SH_OP_RCP, rcp(*A));
 SHCRO_UNARY_OP(SH_OP_RND, rnd(*A));
 SHCRO_UNARY_OP(SH_OP_RSQ, rsq(*A));
 SHCRO_UNARY_OP(SH_OP_SIN, sin(*A));
-SHCRO_UNARY_OP(SH_OP_SGN, sgn(*A)); 
-SHCRO_UNARY_OP(SH_OP_SQRT, sqrt(*A)); 
-SHCRO_UNARY_OP(SH_OP_TAN, tan(*A)); 
+SHCRO_UNARY_OP(SH_OP_SINH, sinh(*A));
+SHCRO_UNARY_OP(SH_OP_SGN, sgn(*A));
+SHCRO_UNARY_OP(SH_OP_SQRT, sqrt(*A));
+SHCRO_UNARY_OP(SH_OP_TAN, tan(*A));
+SHCRO_UNARY_OP(SH_OP_TANH, tan(*A));
 
 // Binary ops
 SHCRO_BINARY_OP(SH_OP_ADD, (*A) + (*B));
