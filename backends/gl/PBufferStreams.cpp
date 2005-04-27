@@ -312,9 +312,30 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
   
   cache->update_channels(tex_size, tex_size);
 
-  // Run each fragment program
+  ShStream::iterator dest_iter;
+  ShStream* intermediate_stream = NULL;
+  if (dest.size() > 1) {
+    // Make an intermediate stream so that updates take effect only
+    // once all of the programs have been executed.
+    intermediate_stream = new ShStream();
+    for (ShStream::const_iterator i = dest.begin(); i != dest.end(); i++) {
+      ShChannelNode* node = i->object();
+      int count = (*i)->count();
+      int tuplesize = node->size();
+      int valuesize = shTypeInfo(node->valueType())->datasize();
+      int length = count * tuplesize * valuesize;
+    
+      ShHostMemoryPtr channel_mem = new ShHostMemory(length);
+      ShChannelNodePtr channel_copy = new ShChannelNode(node->specialType(), tuplesize, node->valueType(), channel_mem, count);
+      intermediate_stream->append(channel_copy);
+    }
+    dest_iter = intermediate_stream->begin();
+  } else {
+    // Use the output stream directly
+    dest_iter = dest.begin();
+  }
 
-  ShStream::iterator dest_iter = dest.begin();
+  // Run each fragment program
   for (PBufferStreamCache::set_iterator I = cache->sets_begin();
        I != cache->sets_end(); ++I, ++dest_iter) {
 
@@ -466,7 +487,42 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
     
     TIMING_RESULT(readback);
   }
-  
+
+  if (intermediate_stream) {
+    // Once all programs have been executed, update the values in the
+    // output stream using the values from the intermediate stream.
+    ShStream::const_iterator j = intermediate_stream->begin();
+    for (ShStream::const_iterator i = dest.begin(); i != dest.end(); j++, i++) {
+      ShChannelNode* intermediate_node = j->object();
+      ShChannelNode* real_node = i->object();
+
+      ShValueType valueType = real_node->valueType();
+      int datasize = shTypeInfo(valueType)->datasize(); 
+      int size = real_node->size();
+      int count = real_node->count();
+    
+      ShHostStoragePtr real_host 
+	= shref_dynamic_cast<ShHostStorage>(real_node->memory()->findStorage("host"));
+      if (!real_host) {
+	real_host = new ShHostStorage(real_node->memory().object(), datasize * size * count);
+      }
+      ShVariantPtr real_variant 
+	= shVariantFactory(valueType, SH_MEM)->generate(real_host->data(), size * count, false);
+
+      ShHostStoragePtr intermediate_host 
+	= shref_dynamic_cast<ShHostStorage>(intermediate_node->memory()->findStorage("host"));
+      if (!intermediate_host) {
+	intermediate_host = new ShHostStorage(intermediate_node->memory().object(), datasize * size * count);
+      }
+      ShVariantPtr intermediate_variant 
+	= shVariantFactory(valueType, SH_MEM)->generate(intermediate_host->data(), size * count, false);
+
+      real_variant->set(intermediate_variant); // copy channel data
+      real_host->dirty();
+    }
+    delete intermediate_stream;
+  }
+
   if (old_handle) {
     old_handle->restore();
   }
