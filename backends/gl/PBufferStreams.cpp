@@ -432,7 +432,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
       format = GL_RED;
       break;
     case 2:
-      SH_DEBUG_ASSERT(0 && "Sorry, 2-component outputs aren't working right now!");
+      format = GL_RGB; // glReadPixels doesn't support 2-component output
       break;
     case 3:
       format = GL_RGB;
@@ -448,22 +448,37 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
     DECLARE_TIMER(readback);
     
     // @todo half-float
-    ShVariantPtr  resultBuffer; 
-    int resultDatasize = output->size() * count;
     GLenum readpixelType;
     ShValueType convertedType; 
     readpixelType = shGlType(valueType, convertedType);
-    if(convertedType != SH_VALUETYPE_END) {
-      SH_DEBUG_WARN("GL backend does not handle stream output type " << shValueTypeName(valueType) << " natively."
-                    << "  Using " << shValueTypeName(convertedType) << " temporary buffer.");
-      resultBuffer = shVariantFactory(convertedType, SH_MEM)->generate(resultDatasize);
-    } else {
-      resultBuffer = shVariantFactory(valueType, SH_MEM)->generate(
-                                                                   outhost->data(), resultDatasize, false);
+    if (convertedType != SH_VALUETYPE_END) {
+      SH_DEBUG_WARN("GL backend does not handle stream output type " 
+		    << shValueTypeName(valueType) << " natively."
+                    << "  Using " << shValueTypeName(convertedType) 
+		    << " temporary buffer.");
     }
     
-    glReadPixels(0, 0, tex_size, count / tex_size, format,
-                 readpixelType, resultBuffer->array());
+    ShVariantPtr  resultBuffer;
+    int resultDatasize = output->size() * count;
+    bool using_temporary_buffer = false;
+    if ((output->size() != 2) && (SH_VALUETYPE_END == convertedType)) {
+      // Use the output buffer directly
+      resultBuffer = shVariantFactory(valueType, SH_MEM)->
+	generate(outhost->data(), resultDatasize, false);
+    } else {
+      if (2 == output->size()) {
+	// Hack to support 2-component outputs (add an extra component)
+	resultDatasize = 3 * count;
+	if (SH_VALUETYPE_END == convertedType) convertedType = valueType;
+      }
+      // Use a temporary buffer
+      resultBuffer = shVariantFactory(convertedType, SH_MEM)->
+	generate(resultDatasize);
+      using_temporary_buffer = true;
+    }
+    
+    glReadPixels(0, 0, tex_size, count / tex_size, format, // actual copy of the
+                 readpixelType, resultBuffer->array());    // results to the stream
     gl_error = glGetError();
     if (gl_error != GL_NO_ERROR) {
       shError(PBufferStreamException("Could not do glReadPixels()"));
@@ -471,7 +486,8 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
     }
     if (count % tex_size) {
       glReadPixels(0, count / tex_size, count % tex_size, 1, format, readpixelType,
-                   (char*)(resultBuffer->array()) + (count - (count % tex_size)) * output->size() * resultBuffer->datasize());
+                   (char*)(resultBuffer->array()) + (count - (count % tex_size)) * 
+		   output->size() * resultBuffer->datasize());
       gl_error = glGetError();
       if (gl_error != GL_NO_ERROR) {
         shError(PBufferStreamException("Could not do rest of glReadPixels()"));
@@ -479,9 +495,14 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
       }
     }
     
-    if(convertedType != SH_VALUETYPE_END) { // need to copy to outhoust->data()
-      ShVariantPtr outhostVariant = shVariantFactory(valueType, SH_MEM)->generate(
-                                                                                  outhost->data(), resultDatasize, false);
+    if (using_temporary_buffer) { // need to copy to outhoust->data()
+      if (2 == output->size()) {
+	// Hack to support 2-component output (discard third component)
+	resultBuffer = resultBuffer->get(false, ShSwizzle(3,0,1), count);
+	resultDatasize = 2 * count;
+      }
+      ShVariantPtr outhostVariant = shVariantFactory(valueType, SH_MEM)->
+	generate(outhost->data(), resultDatasize, false);
       outhostVariant->set(resultBuffer);
     }
     

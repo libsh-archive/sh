@@ -1,3 +1,13 @@
+2005-04-28  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/PBufferStreams.cpp (execute): Add support for
+	two-component output by using a GL_RGB buffer and discarding the
+	third component after the copy.
+
+	* src/ShVariant.hpp, ShVariantImpl: Add a count parameter to the
+	ShDataVariant copy constructor to fix the problem where only the
+	first element was being copied.
+
 2005-04-26  Francois Marier  <francois@serioushack.com>
 
 	* src/ShOperation.hpp, ShOperation.cpp, ShInstructions.hpp,

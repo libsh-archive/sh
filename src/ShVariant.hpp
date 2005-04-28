@@ -135,8 +135,9 @@ ShVariant: public ShRefCountable {
     virtual ShPointer<ShVariant> get(int index) const = 0;
 
     /// Creates a copy of the Variant with the given swizzle and negation
+    /// for a given number of elements (defaults to 1)
     /// swizzle.m_srcSize must equal size()
-    virtual ShPointer<ShVariant> get(bool neg, const ShSwizzle &swizzle) const = 0; 
+    virtual ShPointer<ShVariant> get(bool neg, const ShSwizzle &swizzle, int count=1) const = 0; 
 
     /// Returns true iff other is the same size, type, and has the same values
     // This uses shDataTypeEquals
@@ -213,7 +214,7 @@ class ShDataVariant: public ShVariant {
     /// Constructs a data array using values from another array
     /// swizzled and negated as requested. 
     ShDataVariant(const ShDataVariant<T, DT> &other);
-    ShDataVariant(const ShDataVariant<T, DT> &other, bool neg, const ShSwizzle &swizzle); 
+    ShDataVariant(const ShDataVariant<T, DT> &other, bool neg, const ShSwizzle &swizzle, int count=1); 
 
     virtual ~ShDataVariant();
 
@@ -242,7 +243,7 @@ class ShDataVariant: public ShVariant {
 
     ShVariantPtr get() const; 
     ShVariantPtr get(int index) const; 
-    ShVariantPtr get(bool neg, const ShSwizzle &swizzle) const; 
+    ShVariantPtr get(bool neg, const ShSwizzle &swizzle, int count=1) const; 
 
     bool equals(ShVariantCPtr other) const; 
     bool equals(const ShVariant* other) const; 

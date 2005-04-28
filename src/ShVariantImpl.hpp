@@ -96,12 +96,17 @@ ShDataVariant<T, DT>::ShDataVariant(const ShDataVariant<T, DT> &other)
 
 template<typename T, ShDataType DT>
 ShDataVariant<T, DT>::ShDataVariant(const ShDataVariant<T, DT> &other, 
-    bool neg, const ShSwizzle &swizzle)
+    bool neg, const ShSwizzle &swizzle, int count)
   : m_managed(true)
 {
-  alloc(swizzle.size());
-  for(int i = 0; i < swizzle.size(); ++i) {
-    m_begin[i] = other[swizzle[i]];
+  const int swizzle_size = swizzle.size();
+  const int other_size = other.size() / count;
+  
+  alloc(swizzle_size * count);
+  for (int j = 0; j < count; j++) {
+    for (int i = 0; i < swizzle_size; ++i) {
+      m_begin[j*swizzle_size + i] = other[j*other_size + swizzle[i]];
+    }
   }
   if(neg) negate();
 }
@@ -247,9 +252,9 @@ ShVariantPtr ShDataVariant<T, DT>::get(int index) const
 }
 
 template<typename T, ShDataType DT>
-ShVariantPtr ShDataVariant<T, DT>::get(bool neg, const ShSwizzle &swizzle) const 
+ShVariantPtr ShDataVariant<T, DT>::get(bool neg, const ShSwizzle &swizzle, int count) const 
 {
-  return new ShDataVariant<T, DT>(*this, neg, swizzle);
+  return new ShDataVariant<T, DT>(*this, neg, swizzle, count);
 }
 
 
