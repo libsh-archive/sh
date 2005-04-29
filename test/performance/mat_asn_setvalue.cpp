@@ -29,8 +29,9 @@ int main()
 {
   shInit();
   ShMatrix4x4f m;
-  int i, j;
+  int i, j, k;
   for (i = 0; i < 1000000; i++) // 1 million
     for (j = 0; j < 4; j++)
-      m[j] = ShConstAttrib4f(0, 0, 0, 0);
+      for (k = 0; k < 4; k++)
+        m[j].setValue(k, 0);
 }

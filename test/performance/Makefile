@@ -4,8 +4,8 @@ OBJECTS = $(SOURCES:.cpp=.o)
 DEPENDS = $(SOURCES:.cpp=.d)
 CPPFLAGS = -I../../src 
 #CXXFLAGS = -g -O0 -Wall
-CXXFLAGS = -g -O2 -Wall
-LDFLAGS = ../../src/libsh.la 
+CXXFLAGS = -O2 -Wall
+LDFLAGS = ../../src/libsh.la
 
 # LDFLAGS = ../../src/libsh.la
 
@@ -13,10 +13,23 @@ all: $(EXECUTABLES)
 
 clean:
 	@rm -f *.o $(EXECUTABLES) *.d *.log *.out *.prof *.temp
+	@rm -f *.gprof gmon.out
 	@rm -rf .libs
 
 %: %.o
 	@libtool --mode=link $(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDFLAGS) > /dev/null
+
+%.prof: %.gprof
+	@./$< # Run the program to generate gprof data
+	@libtool --mode=execute gprof $< > $@
+	@rm -f gmon.out
+
+%.gprof: %.gprof.o
+	@libtool --mode=link $(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDFLAGS) -pg > /dev/null
+
+%.gprof.o: %.cpp
+	@echo Compiling $@ with gprof support
+	@$(CXX) -c -o $@ $(CPPFLAGS) $(CXXFLAGS) -pg -I../../src $<
 
 %.o: %.cpp
 	@echo Compiling $@
