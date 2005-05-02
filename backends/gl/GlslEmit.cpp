@@ -100,21 +100,28 @@ void GlslCode::table_substitution(const ShStatement& stmt, GlslOpCodeVecs codeVe
   line << resolve(stmt.dest) << " = ";
   line << glsl_typename(stmt.dest.valueType(), stmt.dest.size()) << "("; // cast for the destination size
   
-  // find the size of the biggest parameter
-  int param_size=0;
-  for (unsigned i=0; i < codeVecs.index.size(); i++) {
+  unsigned i=0;
+  if (SH_OP_ASN == stmt.op) {
+    // assignments should not be cast twice
     const ShVariable& src = stmt.src[codeVecs.index[i]];
-    if (src.size() > param_size) {
-      param_size = src.size();
+    line << codeVecs.frag[i] << resolve(src);
+  } 
+  else {
+    // find the size of the biggest parameter
+    int param_size=0;
+    for (i=0; i < codeVecs.index.size(); i++) {
+      const ShVariable& src = stmt.src[codeVecs.index[i]];
+      if (src.size() > param_size) {
+	param_size = src.size();
+      }
     }
-  }
 
-  // print each parameter
-  unsigned i;
-  for (i=0; i < codeVecs.index.size(); i++) { 
-    const ShVariable& src = stmt.src[codeVecs.index[i]];
-    line << codeVecs.frag[i] << glsl_typename(src.valueType(), param_size)
-	 << "(" << resolve(src) << ")";
+    // print each parameter
+    for (i=0; i < codeVecs.index.size(); i++) { 
+      const ShVariable& src = stmt.src[codeVecs.index[i]];
+      line << codeVecs.frag[i] << glsl_typename(src.valueType(), param_size)
+	   << "(" << resolve(src) << ")";
+    }
   }
 
   line << codeVecs.frag[i]; // code fragment after the last variable

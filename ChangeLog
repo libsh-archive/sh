@@ -1,3 +1,11 @@
+2005-05-02  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslEmit.cpp (table_substitution): Don't cast
+	variables twice in the case of assignment operations.
+
+	* backends/gl/GlslCode.cpp (real_update_uniform): Output more
+	information about the unknown uniform in the debug message.
+
 2005-04-28  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/PBufferStreams.cpp (execute): Add support for
