@@ -125,8 +125,17 @@ void GlslVariableMap::allocate_builtin_inputs()
   for (ShProgramNode::VarList::const_iterator i = m_shader->inputs_begin(); i != m_shader->inputs_end(); i++) {
     allocate_builtin(*i, glslBindingSpecs(false, m_unit), m_input_bindings, false);
   }
+
+  int input_nb = 0;
   for (ShProgramNode::VarList::const_iterator i = m_shader->inputs_begin(); i != m_shader->inputs_end(); i++) {
     allocate_builtin(*i, glslBindingSpecs(false, m_unit), m_input_bindings, true);
+    
+    // warn if the input could not be bound to a built-in variable during the second pass
+    if (m_varmap.find(*i) == m_varmap.end()) {
+      cerr << "Could not bind " << (shIsInteger((*i)->valueType()) ? "int" : "float") 
+	   << " input " << input_nb << " to a built-in variable." << endl;
+    }
+    input_nb++;
   }
 }
 
@@ -135,8 +144,17 @@ void GlslVariableMap::allocate_builtin_outputs()
   for (ShProgramNode::VarList::const_iterator i = m_shader->outputs_begin(); i != m_shader->outputs_end(); i++) {
     allocate_builtin(*i, glslBindingSpecs(true, m_unit), m_output_bindings, false);
   }
+
+  int output_nb = 0;
   for (ShProgramNode::VarList::const_iterator i = m_shader->outputs_begin(); i != m_shader->outputs_end(); i++) {
     allocate_builtin(*i, glslBindingSpecs(true, m_unit), m_output_bindings, true);
+
+    // warn if the output could not be bound to a built-in variable during the second pass
+    if (m_varmap.find(*i) == m_varmap.end()) {
+      cerr << "Could not bind " << (shIsInteger((*i)->valueType()) ? "int" : "float") 
+	   << " output " << output_nb << " to a built-in variable." << endl;
+    }
+    output_nb++;
   }
 }
 

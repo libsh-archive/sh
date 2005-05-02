@@ -1,5 +1,11 @@
 2005-05-02  Francois Marier  <francois@serioushack.com>
 
+	* backends/gl/GlslVariableMap.cpp (allocate_builtin_inputs):
+	Display an error if an input was left unassigned. 
+
+	* backends/gl/GlslVariableMap.cpp (allocate_builtin_outputs):
+	Display an error if an output was left unassigned. 
+
 	* backends/gl/GlslEmit.cpp (table_substitution): Don't cast
 	variables twice in the case of assignment operations.
 
