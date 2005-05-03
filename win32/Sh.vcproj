@@ -75,7 +75,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/GR /EHsc /wd4003"
+				AdditionalOptions="/GR /EHsc /wd4003 /O2"
 				AdditionalIncludeDirectories="..\..\opengl\include;..\..\libpng;..\..\zlib"
 				PreprocessorDefinitions="SH_DLLEXPORT=&quot;__declspec(dllexport)&quot;;WIN32;NOMINMAX;_USE_MATH_DEFINES"
 				RuntimeLibrary="2"
