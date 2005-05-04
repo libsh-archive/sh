@@ -1,3 +1,18 @@
+2005-05-04  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbCode.cpp (printVar): Scalar variables which were
+	not assigned a register should just be inserted as immediate
+	values.
+
+	* backends/gl/GlslVariableMap.cpp (real_resolve): Remove
+	unnecessary parentheses around negated variables.
+
+	* backends/gl/GlslVariable.cpp (GlslVariable): Don't assign a glsl
+	variable to scalar constants.  Insert them in the code directly.
+
+	* backends/gl/GlslCode.cpp (real_update_uniform): Display more
+	information in the debugging message (size and kind).
+
 2005-05-02  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslVariableMap.cpp (allocate_builtin_inputs):

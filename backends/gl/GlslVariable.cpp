@@ -75,6 +75,12 @@ GlslVariable::GlslVariable(const ShVariableNodePtr& v)
 {
   if (v->hasValues()) {
     m_values = v->getVariant()->encodeArray();
+
+    // Scalar constants are not assigned a variable
+    if ((1 == m_size) && (SH_CONST == m_kind)) {
+      m_name = m_values;
+      m_builtin = true;
+    }
   }
   if (m_texture) {
     ShTextureNodePtr texture = shref_dynamic_cast<ShTextureNode>(v);

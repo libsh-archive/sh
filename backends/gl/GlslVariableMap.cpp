@@ -240,7 +240,7 @@ string GlslVariableMap::real_resolve(const ShVariable& v, const string& array_in
     }
 
     if (v.neg()) {
-      s =  string("-(") + s + ")";
+      s =  string("-") + s;
     }
   }
 

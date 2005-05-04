@@ -438,16 +438,23 @@ std::ostream& ArbCode::printVar(std::ostream& out, bool dest, const ShVariable& 
 {
   RegMap::const_iterator I = m_registers.find(var.node());
   if (I == m_registers.end()) {
-    out << "<no reg for " << var.name() << ">";
-    return out;
+    if ((1 == var.size()) && (SH_CONST == var.node()->kind())) {
+      // Immediate value -- no need for a register
+      if (var.neg()) out << '-';
+      out << var.name();
+      return out; // no swizzling
+    } else {
+      std::cerr << "No register allocated for variable '" << var.name() << "' (size=" 
+		<< var.size() << "; kind=" << var.node()->kind() << ")" << std::endl;
+      out << "<no reg for " << var.name() << ">";
+      return out;
+    }
+  } else {
+    // The variable has a register assigned to it
+    if (var.neg()) out << '-';
+    const ArbReg& reg = *I->second;
+    out << reg;
   }
-  const ArbReg& reg = *I->second;
-
-  // Negation
-  if (var.neg()) out << '-';
-
-  // Register name
-  out << reg;
 
   if (do_swiz) {
     // Swizzling
