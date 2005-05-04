@@ -362,7 +362,6 @@ ShGeneric<1, T>::ShGeneric(const ShGeneric<1, T2>& other)
 {
   SH_DEBUG_ASSERT(other.node());
   SH_DEBUG_ASSERT(m_node);
-  SH_DEBUG_PRINT(m_node->size() << " " << other.node()->size());
   shASN(*this, other);
 }
 
