@@ -440,8 +440,7 @@ std::ostream& ArbCode::printVar(std::ostream& out, bool dest, const ShVariable& 
   if (I == m_registers.end()) {
     if ((1 == var.size()) && (SH_CONST == var.node()->kind())) {
       // Immediate value -- no need for a register
-      if (var.neg()) out << '-';
-      out << var.name();
+      out << var.getVariant()->encodeArray();
       return out; // no swizzling
     } else {
       std::cerr << "No register allocated for variable '" << var.name() << "' (size=" 
