@@ -1,3 +1,9 @@
+2005-05-05  Francois Marier  <francois@serioushack.com>
+
+	* src/ShVariableNode.cpp (delete): Only free the pointer from the
+	pool if the memory pool was actualy being used.  This fixes a
+	problem reported on libsh-devel by Jamie Burns.
+
 2005-05-04  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/ArbCode.cpp (printVar): Scalar variables which were

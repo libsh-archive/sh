@@ -473,8 +473,9 @@ void* ShVariableNode::operator new(std::size_t size)
 
 void ShVariableNode::operator delete(void* ptr)
 {
-  // Really, if we don't have a pool, we should throw an exception or something.
-  m_pool->free(ptr);
+  // We won't have a pool if the object is an instance of a class
+  // derived from ShVariableNode (ShChannelNode for example)
+  if (m_pool) m_pool->free(ptr);
 }
 #endif
 
