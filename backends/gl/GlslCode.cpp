@@ -370,7 +370,7 @@ void GlslCode::real_update_uniform(const ShVariableNodePtr& uniform, const strin
 	 << (shIsInteger(uniform->valueType()) ? "int" : "float")
 	 << " uniform '" << name << "' (name=" << uniform->name()
 	 << "; size=" << uniform->size() << "; kind=" << uniform->kind()
-	 << ")." << endl;
+	 << "; hasvalues=" << uniform->hasValues() << ")." << endl;
   }
 }
 
