@@ -208,6 +208,21 @@ ShProgram freeze(const ShProgram& p,
   return (p >> uniform) << (T::ConstType)(uniform);
 }
 
+template<int N, int M, typename T1, typename T2>
+ShGeneric<N, CT1T2> poly(const ShGeneric<N, T1>& a, const ShGeneric<M, T2>& b)
+{
+  ShAttrib<N, SH_TEMP, CT1T2> t;
+  
+  for (int i=0; i < N; i++) {
+    t[i] = pow(a[i], 0) * b[0];
+    for (int j=1; j < M; j++) {
+      t[i] += pow(a[i], j) * b[j];
+    }
+  }
+
+  return t;
+}
+
 }
 
 #endif

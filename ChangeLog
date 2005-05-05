@@ -1,5 +1,8 @@
 2005-05-05  Francois Marier  <francois@serioushack.com>
 
+	* src/ShLibMiscImpl.hpp, ShLibMisc.hpp (poly): Add the poly()
+	library function.
+
 	* src/ShVariableNode.cpp (delete): Only free the pointer from the
 	pool if the memory pool was actualy being used.  This fixes a
 	problem reported on libsh-devel by Jamie Burns.

@@ -115,6 +115,12 @@ template<typename T>
 ShProgram freeze(const ShProgram& p,
                  const T& uniform);
 
+/* Evaluation of polynomial of order M at a using coefficients in b.
+ */
+template<int N, int M, typename T1, typename T2>
+ShGeneric<N, CT1T2>
+poly(const ShGeneric<N, T1>& a, const ShGeneric<M, T2>& b);
+
 /*@}*/
 
 }
