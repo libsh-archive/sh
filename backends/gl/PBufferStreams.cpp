@@ -265,12 +265,19 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
       shError(PBufferStreamException("All stream outputs must be of the same size"));
     }
   }
-
+  
   // Pick a size for the texture that just fits the output data.
   int tex_size = 1;
-  
-  while (tex_size * tex_size < count) {
-    tex_size <<= 1;
+  {
+    // The texture size needs to be as large as the area that will be
+    // read.  In the case of 2-component output, we need to read an
+    // extra element.
+    int tex_elem_count = count;
+    if (2 == count) tex_elem_count = 3;
+    
+    while (tex_size * tex_size < tex_elem_count) {
+      tex_size <<= 1;
+    }
   }
   
   DECLARE_TIMER(onerun);

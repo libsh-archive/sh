@@ -1,3 +1,11 @@
+2005-05-06  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/PBufferStreams.cpp (execute): Allocate a bigger
+	texture for 2-component outputs.
+
+	* src/ShLibMiscImpl.hpp (poly): Remove unnecessary invocations of
+	the pow() function.
+
 2005-05-05  Francois Marier  <francois@serioushack.com>
 
 	* src/ShLibMiscImpl.hpp, ShLibMisc.hpp (poly): Add the poly()
