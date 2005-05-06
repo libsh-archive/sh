@@ -25,11 +25,22 @@ def insert_into(test, func):
     test.add_test(func((1.0,), (1,)))
     test.add_test(func((1.0, 2.0), (2,)))
     test.add_test(func((1.0, 2.0, 3.0), (3, 0, 0, -0.5)))
-    test.add_test(func((1.0, 2.0, 3.0, 4.0), (4, -10)))
+    test.add_test(func((1.0, 2.0, 3.0, 4.0), (4, -10, 1)))
 
     test.add_test(func((1.0,), (1, 4, 5, 35.2)))
     test.add_test(func((-10.0, 0.2), (0.3,)))
+    test.add_test(func((0.5, -0.2, 13.0, 42), (1, -1, 0)))
+
+    # Test 2-component output
+    test.add_test(func((1,), (-1, 0)))
+    test.add_test(func((0.4,), (-1, 4)))
+    test.add_test(func((1.0, -0.2), (1, 4, 5, 35.2)))
+    test.add_test(func((-10.0, 0.2), (0.3,))) # works
+    test.add_test(func((-10.0, 0.2), (0.3, 20)))
     test.add_test(func((0.5, -0.2, 13.0, 42), (1, -1)))
+    test.add_test(func((1.0, 2.0, 3.0, 4.0), (4, -10)))
+    test.add_test(func((1.0, 2.0, 3.0), (4, -10)))
+    test.add_test(func((1.0, 2.0), (4, -10)))
 
 # Test poly in stream programs
 test = shtest.StreamTest('poly', 2)
