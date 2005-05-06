@@ -212,11 +212,16 @@ template<int N, int M, typename T1, typename T2>
 ShGeneric<N, CT1T2> poly(const ShGeneric<N, T1>& a, const ShGeneric<M, T2>& b)
 {
   ShAttrib<N, SH_TEMP, CT1T2> t;
-  
+
   for (int i=0; i < N; i++) {
-    t[i] = pow(a[i], 0) * b[0];
-    for (int j=1; j < M; j++) {
-      t[i] += pow(a[i], j) * b[j];
+    ShGeneric<1, CT1T2> r_i = t[i];
+    ShGeneric<1, T1> a_i = a[i];
+
+    r_i = b[0];                        // j = 0
+    if (M >= 2) r_i += a_i * b[1];     // j = 1
+    if (M >= 3) r_i += a_i*a_i * b[2]; // j = 2
+    for (int j=3; j < M; j++) {
+      r_i += pow(a_i, j) * b[j];
     }
   }
 
