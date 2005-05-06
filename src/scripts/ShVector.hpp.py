@@ -13,8 +13,7 @@ By "vector" we mean a geometric vector, not just a tuple or an
 array (unlike the unfortunate terminology in the standard
 library).""")
 
-decl.declare_all()
+decl.declare_parametrization()
 
 common.endnamespace()
-common.inprint('#include "ShVectorImpl.hpp"')
 common.endguard("SHVECTOR_HPP")

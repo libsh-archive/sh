@@ -1,3 +1,26 @@
+// Sh: A GPU metaprogramming language.
+//
+// Copyright 2003-2005 Serious Hack Inc.
+// 
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+// 
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+// 
+// 1. The origin of this software must not be misrepresented; you must
+// not claim that you wrote the original software. If you use this
+// software in a product, an acknowledgment in the product documentation
+// would be appreciated but is not required.
+// 
+// 2. Altered source versions must be plainly marked as such, and must
+// not be misrepresented as being the original software.
+// 
+// 3. This notice may not be removed or altered from any source
+// distribution.
+//////////////////////////////////////////////////////////////////////////////
 #ifndef SHEVALIMPL_HPP 
 #define SHEVALIMPL_HPP
 
@@ -57,6 +80,7 @@ void _shInitFloatOps() {
   eval->addOp(SH_OP_CBRT, new ShRegularOp<SH_OP_CBRT, T>(), V, V);
   eval->addOp(SH_OP_CEIL, new ShRegularOp<SH_OP_CEIL, T>(), V, V);
   eval->addOp(SH_OP_COS, new ShRegularOp<SH_OP_COS, T>(), V, V);
+  eval->addOp(SH_OP_COSH, new ShRegularOp<SH_OP_COSH, T>(), V, V);
   eval->addOp(SH_OP_CSUM, new ShRegularOp<SH_OP_CSUM, T>(), V, V);
   eval->addOp(SH_OP_CMUL, new ShRegularOp<SH_OP_CMUL, T>(), V, V);
   eval->addOp(SH_OP_EXP, new ShRegularOp<SH_OP_EXP, T>(), V, V);
@@ -73,9 +97,11 @@ void _shInitFloatOps() {
   eval->addOp(SH_OP_RND, new ShRegularOp<SH_OP_RND, T>(), V, V);
   eval->addOp(SH_OP_RSQ, new ShRegularOp<SH_OP_RSQ, T>(), V, V);
   eval->addOp(SH_OP_SIN, new ShRegularOp<SH_OP_SIN, T>(), V, V);
+  eval->addOp(SH_OP_SINH, new ShRegularOp<SH_OP_SINH, T>(), V, V);
   eval->addOp(SH_OP_SGN, new ShRegularOp<SH_OP_SGN, T>(), V, V);
   eval->addOp(SH_OP_SQRT, new ShRegularOp<SH_OP_SQRT, T>(), V, V);
   eval->addOp(SH_OP_TAN, new ShRegularOp<SH_OP_TAN, T>(), V, V);
+  eval->addOp(SH_OP_TANH, new ShRegularOp<SH_OP_TANH, T>(), V, V);
 
   eval->addOp(SH_OP_ADD, new ShRegularOp<SH_OP_ADD, T>(), V, V, V);
   eval->addOp(SH_OP_ATAN2, new ShRegularOp<SH_OP_ATAN2, T>(), V, V, V);

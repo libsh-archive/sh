@@ -10,8 +10,7 @@ decl = semantic.Class("TexCoord", "texture coordinate", "SH_TEXCOORD",
                       """A texture coordinate.
 """)
 
-decl.declare_all()
+decl.declare_parametrization()
 
 common.endnamespace()
-common.inprint('#include "ShTexCoordImpl.hpp"')
 common.endguard("SHTEXCOORD_HPP")

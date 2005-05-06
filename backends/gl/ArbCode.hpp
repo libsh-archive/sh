@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -74,6 +71,7 @@ public:
   
   virtual void upload();
   virtual void bind();
+  virtual void unbind();
   virtual void update();
   virtual void updateUniform(const SH::ShVariableNodePtr& uniform);
   
@@ -108,6 +106,7 @@ private:
   void emit_invtrig(const SH::ShStatement& stmt);
   void emit_tan(const SH::ShStatement& stmt);
   void emit_exp(const SH::ShStatement& stmt);
+  void emit_hyperbolic(const SH::ShStatement& stmt);
   void emit_log(const SH::ShStatement& stmt);
   void emit_norm(const SH::ShStatement& stmt);
   void emit_sgn(const SH::ShStatement& stmt);
@@ -118,7 +117,10 @@ private:
   void emit_kil(const SH::ShStatement& stmt);
   void emit_pal(const SH::ShStatement& stmt);
   void emit_lit(const SH::ShStatement& stmt);
-  
+  void emit_rnd(const SH::ShStatement& stmt);
+  void emit_cbrt(const SH::ShStatement& stmt);
+  void emit_ret(const SH::ShStatement& stmt);
+
   /// Allocate registers, after the code has been generated
   void allocRegs();
 

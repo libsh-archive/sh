@@ -976,12 +976,25 @@ ShAffine<TT> cos(const ShAffine<TT>& a)
 }
 
 template<typename TT>
+ShAffine<TT> cosh(const ShAffine<TT>& a) 
+{
+  // @todo range fix this
+  return lerp(ShAffine<TT>(0.5), exp(a), exp(-a));
+}
+
+template<typename TT>
 ShAffine<TT> sin(const ShAffine<TT>& a) 
 {
   // @todo range fix this
   return ShAffine<TT>(sin(a.to_interval()));
 }
 
+template<typename TT>
+ShAffine<TT> sinh(const ShAffine<TT>& a) 
+{
+  // @todo range fix this
+  return lerp(ShAffine<TT>(0.5), exp(a), -exp(-a));
+}
 
 template<typename TT>
 ShAffine<TT> tan(const ShAffine<TT>& a) 

@@ -72,7 +72,7 @@ void affineApprox(ShAaVariable &dest,
   dest.ASN(aaMUL(*src[0], *C++));
   ShAaSyms assigned = src[0]->use(); // keeps track of symbols assigned to so far
 
-  for(int i = 1; i < src.size(); ++i, ++C) {
+  for(size_t i = 1; i < src.size(); ++i, ++C) {
     ShAaSyms add = src[i]->use() - assigned;
     ShAaSyms isct = src[i]->use() & assigned;
 
@@ -263,7 +263,8 @@ ShAaVariable aaMUL(const ShAaVariable &a, const ShAaVariable &b,
   //shMUL(gamma, -alpha, beta);
   shMUL(delta, a.radius(), b.radius());
   affineApprox(result, a, b, alpha, beta, gamma, delta, newsyms);
-  shMUL(result.center(), alpha, beta);
+  ShVariable resultCenter = result.center();
+  shMUL(resultCenter, alpha, beta);
   return result;
 }
 
@@ -443,7 +444,8 @@ ShAaVariable aaFLR(const ShAaVariable& a, const ShAaSyms& newsyms)
   // come up with the two options
   ShAaVariable result(new ShAaVariableNode(*a.node(), a.use() | newsyms));
   result.ZERO();
-  shASN(result.center(), flr_lo);
+  ShVariable resultCenter = result.center();
+  shASN(resultCenter, flr_lo);
 
   ShVariable half = ShConstAttrib1f(0.5f).repeat(a.size());
   ShAaVariable resultB(new ShAaVariableNode(*a.node(), a.use() | newsyms));
@@ -471,13 +473,15 @@ ShAaVariable aaFRAC(const ShAaVariable& a, const ShAaSyms& newsyms)
   // come up with the two options
   ShAaVariable result(new ShAaVariableNode(*a.node(), a.use() | newsyms));
   result.ZERO().ASN(a);
-  shFRAC(result.center(), result.center());
+  ShVariable resultCenter = result.center();
+  shFRAC(resultCenter, resultCenter);
 
 
   ShVariable half = ShConstAttrib1f(0.5f).repeat(a.size());
   ShAaVariable resultB(new ShAaVariableNode(*a.node(), a.use() | newsyms));
   resultB.ZERO().setErr(half, newsyms);
-  shASN(resultB.center(), half);
+  ShVariable resultBCenter = resultB.center();
+  shASN(resultBCenter, half);
 
   result.COND(keep, resultB);
   return result;
@@ -599,10 +603,12 @@ ShAaVariable aaESCJOIN(const ShAaVariable& a, const ShAaSyms& destsyms, const Sh
 
   ShVariable joinerr = result.temp(a.name() + "_joinerr");
   for(int i = 0; i < a.size(); ++i) {
-    ShVariable joinErri = a.err(i, joinSyms[i]);
-    ShVariable absErri = a.node()->makeTemp(joinErri.size(), "_jointemp");
-    shABS(absErri, joinErri); 
-    shCSUM(joinerr(i), absErri); 
+    ShVariable erri = a.err(i, joinSyms[i]);
+    ShVariable absErri = a.node()->makeTemp(erri.size(), "_jointemp");
+    shABS(absErri, erri); 
+
+    ShVariable joinerri = joinerr(i); 
+    shCSUM(joinerri, absErri); 
   }
   result.setErr(joinerr, newsyms);
   return result;
@@ -625,7 +631,8 @@ ShVariable aaLASTERR(const ShAaVariable& a, const ShAaSyms& syms)
   int idx = syms[0].last();
   ShVariable result(a.temp(a.name() + "_lasterr"));
   for(int i = 0; i < a.size(); ++i) {
-    shASN(result(i), a.err(i, idx)); 
+    ShVariable resulti = result(i);
+    shASN(resulti, a.err(i, idx)); 
   }
   return result;
 }
@@ -641,7 +648,8 @@ ShAaVariable aaFROMIVAL(const ShVariable& a, const ShAaSyms& newsyms)
   shHI(ahi, a);
 
   // assign lo + hi / 2 to center
-  shLRP(result.center(), ShConstAttrib1f(0.5f), ahi, alo);
+  ShVariable resultCenter = result.center();
+  shLRP(resultCenter, ShConstAttrib1f(0.5f), ahi, alo);
 
   // assign hi - lo / 2 to the input error symbol
   ShVariable aerr = result.temp(a.name() + "_err");
@@ -669,7 +677,8 @@ ShAaVariable aaFROMTUPLE(const ShVariable& a)
 {
   ShAaVariable result(new ShAaVariableNode(a.node(), ShAaSyms(a.size()),
       SH_TEMP, "_2aa"));
-  shASN(result.center(), a);
+  ShVariable resultCenter = result.center();
+  shASN(resultCenter, a);
   return result;
 }
 

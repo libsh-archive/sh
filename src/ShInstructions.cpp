@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -110,7 +107,7 @@ namespace SH {
   }
 
 #define SHINST_UNARY_OP(op)\
-void sh ## op(const ShVariable& dest, const ShVariable& src)\
+void sh ## op(ShVariable& dest, const ShVariable& src)\
 {\
   sizes_match(dest, src);\
   SHINST_UNARY_OP_CORE(op);\
@@ -139,7 +136,7 @@ void sh ## op(const ShVariable& dest, const ShVariable& src)\
   }\
 
 #define SHINST_BINARY_OP(op, scalar_a, scalar_b)\
-void sh ## op(const ShVariable& dest, const ShVariable& a, const ShVariable &b)\
+void sh ## op(ShVariable& dest, const ShVariable& a, const ShVariable &b)\
 {\
   sizes_match(dest, a, b, scalar_a, scalar_b);\
   SHINST_BINARY_OP_CORE(op);\
@@ -147,7 +144,7 @@ void sh ## op(const ShVariable& dest, const ShVariable& a, const ShVariable &b)\
 
 
 #define SHINST_TERNARY_OP(op, condition)\
-void sh ## op(const ShVariable& dest, const ShVariable& a, const ShVariable &b, const ShVariable &c)\
+void sh ## op(ShVariable& dest, const ShVariable& a, const ShVariable &b, const ShVariable &c)\
 {\
   SH_DEBUG_ASSERT(condition);\
   if(immediate()) {\
@@ -199,27 +196,28 @@ SHINST_BINARY_OP(ATAN2, false, false);
 SHINST_UNARY_OP(CBRT);
 SHINST_UNARY_OP(CEIL);
 SHINST_UNARY_OP(COS);
+SHINST_UNARY_OP(COSH);
 
-void shCMUL(const ShVariable& dest, const ShVariable& src)
+void shCMUL(ShVariable& dest, const ShVariable& src)
 {
   SH_DEBUG_ASSERT(dest.size() == 1);
   SHINST_UNARY_OP_CORE(CMUL);
 }
 
-void shCSUM(const ShVariable& dest, const ShVariable& src)
+void shCSUM(ShVariable& dest, const ShVariable& src)
 {
   SH_DEBUG_ASSERT(dest.size() == 1);
   SHINST_UNARY_OP_CORE(CSUM);
 }
 
-void shDOT(const ShVariable& dest, const ShVariable& a, const ShVariable& b)
+void shDOT(ShVariable& dest, const ShVariable& a, const ShVariable& b)
 {
   SH_DEBUG_ASSERT(dest.size() == 1);
   sizes_match(a, b);
   SHINST_BINARY_OP_CORE(DOT);
 }
 
-void shDX(const ShVariable& dest, const ShVariable& a)
+void shDX(ShVariable& dest, const ShVariable& a)
 {
   if(immediate()) {
       shError(ShScopeException("Cannot take derivatives in immediate mode"));
@@ -228,7 +226,7 @@ void shDX(const ShVariable& dest, const ShVariable& a)
   addStatement(stmt);
 }
 
-void shDY(const ShVariable& dest, const ShVariable& a)
+void shDY(ShVariable& dest, const ShVariable& a)
 {
   if(immediate()) {
       shError(ShScopeException("Cannot take derivatives in immediate mode"));
@@ -242,7 +240,7 @@ SHINST_UNARY_OP(EXP);
 SHINST_UNARY_OP(EXP2);
 SHINST_UNARY_OP(EXP10);
 SHINST_UNARY_OP(FLR);
-SHINST_BINARY_OP(MOD, false, false);
+SHINST_BINARY_OP(MOD, true, true);
 SHINST_UNARY_OP(FRAC);
 SHINST_TERNARY_OP(LRP,
     (dest.size() == b.size() &&
@@ -261,18 +259,20 @@ SHINST_TERNARY_OP(MAD,
 
 SHINST_BINARY_OP(MAX, false, false);
 SHINST_BINARY_OP(MIN, false, false);
-SHINST_BINARY_OP(POW, false, true);
+SHINST_BINARY_OP(POW, true, true);
 SHINST_UNARY_OP(RCP);
 SHINST_UNARY_OP(RND);
 SHINST_UNARY_OP(RSQ);
 SHINST_UNARY_OP(SGN);
 SHINST_UNARY_OP(SIN);
+SHINST_UNARY_OP(SINH);
 SHINST_UNARY_OP(SQRT);
 SHINST_UNARY_OP(TAN);
+SHINST_UNARY_OP(TANH);
 SHINST_UNARY_OP(NORM);
 
 
-void shXPD(const ShVariable& dest, const ShVariable& a, const ShVariable& b)
+void shXPD(ShVariable& dest, const ShVariable& a, const ShVariable& b)
 {
   SH_DEBUG_ASSERT(dest.size() == 3 && a.size() == 3 && b.size() == 3);
   SHINST_BINARY_OP_CORE(XPD);
@@ -294,7 +294,7 @@ SHINST_BINARY_OP(UNION, true, true);
 SHINST_BINARY_OP(ISCT, true, true);
 SHINST_BINARY_OP(CONTAINS, true, true);
 
-void shERRFROM(const ShVariable& dest, const ShVariable& a, const ShVariable& b)
+void shERRFROM(ShVariable& dest, const ShVariable& a, const ShVariable& b)
 {
   sizes_match(dest, a);
   if(immediate()) {
@@ -304,7 +304,7 @@ void shERRFROM(const ShVariable& dest, const ShVariable& a, const ShVariable& b)
   addStatement(stmt);
 }
 
-void shLASTERR(const ShVariable& dest, const ShVariable& a, const ShVariable& b)
+void shLASTERR(ShVariable& dest, const ShVariable& a, const ShVariable& b)
 {
   sizes_match(dest, a);
   SH_DEBUG_ASSERT(b.size() == 1);
@@ -318,7 +318,7 @@ void shLASTERR(const ShVariable& dest, const ShVariable& a, const ShVariable& b)
 void shKIL(const ShVariable& a)
 {
   if(immediate()) {
-      shError(ShScopeException("Cannot kill in immediate mode"));
+    shError(ShScopeException("Cannot kill in immediate mode"));
   }
   SH_DEBUG_ASSERT(!immediate());
   ShStatement stmt(a, SH_OP_KIL, a);
@@ -332,6 +332,16 @@ void shDBG(const ShVariable& a)
   }
   SH_DEBUG_ASSERT(!immediate());
   ShStatement stmt(a, SH_OP_DBG, a);
+  addStatement(stmt);
+}
+
+void shRET(const ShVariable& a)
+{
+  if(immediate()) {
+    shError(ShScopeException("Cannot return in immediate mode"));
+  }
+  SH_DEBUG_ASSERT(!immediate());
+  ShStatement stmt(a, SH_OP_RET, a);
   addStatement(stmt);
 }
 

@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -33,7 +30,7 @@ namespace shgl {
 
 /** Information about ArbRegType members.
  */
-struct {
+static struct {
   char* name;
   char* estName;
 } arbRegTypeInfo[] = {
@@ -49,7 +46,7 @@ struct {
 
 /** Information about the ArbRegBinding members.
  */
-struct {
+static struct {
   ArbRegType type;
   char* name;
   bool indexed;
@@ -82,7 +79,7 @@ struct {
 };
 
 ArbReg::ArbReg()
-  : type(SH_ARB_REG_TEMP), index(-1), name("")
+  : type(SH_ARB_REG_TEMP), index(-1), preset(false), name("")
 {
     binding.type = SH_ARB_REG_NONE;
     binding.index = -1;
@@ -90,7 +87,7 @@ ArbReg::ArbReg()
 }
   
 ArbReg::ArbReg(ArbRegType type, int index, std::string name)
-  : type(type), index(index), name(name)
+  : type(type), index(index), preset(false), name(name)
 {
     binding.type = SH_ARB_REG_NONE;
     binding.index = -1;

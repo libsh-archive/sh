@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -103,6 +100,11 @@ void ShContext::set_binding(const std::string& unit, const ShProgram program)
   } else {
     m_bound[unit] = program;
   }
+}
+
+void ShContext::unset_binding(const std::string& unit)
+{
+  m_bound.erase(unit);
 }
 
 ShProgramNodePtr ShContext::parsing()

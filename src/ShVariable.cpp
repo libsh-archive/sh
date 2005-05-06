@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -156,37 +153,37 @@ bool ShVariable::loadVariant(ShVariant *&result) const
   return true;
 }
 
-void ShVariable::updateVariant() const
+void ShVariable::updateVariant() 
 {
   m_node->update_all();
 }
 
-void ShVariable::setVariant(const ShVariant* other, bool neg, const ShSwizzle &writemask) const
+void ShVariable::setVariant(const ShVariant* other, bool neg, const ShSwizzle &writemask)
 {
   m_node->setVariant(other, neg ^ m_neg, m_swizzle * writemask);
 }
 
-void ShVariable::setVariant(ShVariantCPtr other, bool neg, const ShSwizzle &writemask) const
+void ShVariable::setVariant(ShVariantCPtr other, bool neg, const ShSwizzle &writemask)
 {
   setVariant(other.object(), neg, writemask); 
 }
 
-void ShVariable::setVariant(const ShVariant* other, int index) const
+void ShVariable::setVariant(const ShVariant* other, int index)
 {
   m_node->setVariant(other, m_neg, m_swizzle * ShSwizzle(size(), index));
 }
 
-void ShVariable::setVariant(ShVariantCPtr other, int index) const 
+void ShVariable::setVariant(ShVariantCPtr other, int index)
 {
   setVariant(other.object(), index); 
 }
 
-void ShVariable::setVariant(const ShVariant* other) const
+void ShVariable::setVariant(const ShVariant* other)
 {
   m_node->setVariant(other, m_neg, m_swizzle);
 }
 
-void ShVariable::setVariant(ShVariantCPtr other) const
+void ShVariable::setVariant(ShVariantCPtr other)
 {
   setVariant(other.object());
 }

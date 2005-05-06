@@ -1,11 +1,11 @@
-INCLUDES = -I../src $(LTDLINCL) 
+INCLUDES = -I$(top_srcdir)/src $(LTDLINCL) 
 
 EXTRA_DIST = Makefile.win32
 
 lib_LTLIBRARIES = libshutil.la
 
 libshutil_la_LIBADD = $(LIBLTDL)
-libshutil_la_LDFLAGS = -export-dynamic -no-undefined
+libshutil_la_LDFLAGS = -export-dynamic # -no-undefined
 
 libshutil_la_SOURCES = ShKernelLib.cpp ShKernelSurfMap.cpp ShObjMesh.cpp 
 

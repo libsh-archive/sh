@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -35,9 +32,8 @@ namespace SH {
 
 /** \defgroup lib_geometry Geometric operations.
  * @ingroup library
- * @todo distance, sqdistance, length, rlength, rsqlength, sqlength, perp,
- * perpdot, projnorm should be implemented too.   Different distance functions
- * also possible: L1, L2, Linf.
+ * @todo sqdistance, rlength, rsqlength, sqlength, perp,
+ * perpdot, projnorm should be implemented too.
  * @{
  */
 
@@ -131,6 +127,18 @@ ShGeneric<1, T> distance_inf(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
  */
 template<int N, typename T>
 ShGeneric<1, T> length(const ShGeneric<N, T>& a);
+
+/** Manhattan Length
+ * Computes the Manhattan distance between the zero vector and a.
+ */
+template<int N, typename T>
+ShGeneric<1, T> length_1(const ShGeneric<N, T>& a);
+
+/** Inf Length
+ * Computes the Inf norm distance between the zero vector and a.
+ */
+template<int N, typename T>
+ShGeneric<1, T> length_inf(const ShGeneric<N, T>& a);
 
 }
 #endif

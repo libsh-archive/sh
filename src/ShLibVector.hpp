@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -27,50 +24,47 @@
 #ifndef SHLIBVECTOR_HPP
 #define SHLIBVECTOR_HPP
 
-#include "ShVector.hpp"
+#include "ShAttrib.hpp"
 #include "ShLib.hpp"
 
 namespace SH {
 
-SH_SHLIB_USUAL_NON_UNIT_OPS_RETTYPE(ShVector, ShVector);
+SH_SHLIB_USUAL_NON_UNIT_OPS_RETTYPE(SH_VECTOR, SH_VECTOR);
 
 template<int N, ShBindingType B1, typename T, bool S1> 
-  ShVector<N, SH_TEMP, T, false> 
-  abs(const ShVector<N, B1, T, S1>& var) 
-  { 
-    ShGeneric<N, T> t = abs(static_cast< ShGeneric<N, T> >(var)); 
-    ShVector<N, SH_TEMP, T, false> vec(t.node(), t.swizzle(), t.neg()); 
-    return vec;
-  }
+ShAttrib<N, SH_TEMP, T, SH_VECTOR, false>
+abs(const ShAttrib<N, B1, T, SH_VECTOR, S1>& var) 
+{ 
+  ShGeneric<N, T> t = abs(static_cast< ShGeneric<N, T> >(var)); 
+  ShAttrib<N, SH_TEMP, T, SH_VECTOR, false> vec(t.node(), t.swizzle(), t.neg()); 
+  return vec;
+}
 
 template<int N, ShBindingType B1, typename T, bool S1> 
-  ShVector<N, SH_TEMP, T, false> 
-  normalize(const ShVector<N, B1, T, S1>& var) 
-  {
-    ShGeneric<N, T> t = normalize(static_cast< ShGeneric<N, T> >(var)); 
-    ShVector<N, SH_TEMP, T, false> vec(t.node(), t.swizzle(), t.neg()); 
-    return vec;
-  }
+ShAttrib<N, SH_TEMP, T, SH_VECTOR, false> 
+normalize(const ShAttrib<N, B1, T, SH_VECTOR, S1>& var) 
+{
+  ShGeneric<N, T> t = normalize(static_cast< ShGeneric<N, T> >(var)); 
+  ShAttrib<N, SH_TEMP, T, SH_VECTOR, false> vec(t.node(), t.swizzle(), t.neg()); 
+  return vec;
+}
 
+SH_SHLIB_USUAL_SUBTRACT(SH_VECTOR);
 
-
-
-SH_SHLIB_USUAL_SUBTRACT(ShVector);
-
-SH_SHLIB_LEFT_MATRIX_OPERATION(ShVector, operator|, M);
+SH_SHLIB_LEFT_MATRIX_OPERATION(SH_VECTOR, operator|, M);
 
 template<int N, ShBindingType B1, ShBindingType B2, typename T, bool S1, bool S2>
-ShGeneric<1, T> operator|(const ShVector<N, B1, T, S1>& a,
-                            const ShVector<N, B2, T, S2>& b)
+ShGeneric<1, T>
+operator|(const ShAttrib<N, B1, T, SH_VECTOR, S1>& a, const ShAttrib<N, B2, T, SH_VECTOR, S2>& b)
 {
   return dot(a, b);
 }
 
 template<ShBindingType B1, ShBindingType B2, typename T, bool S1>
-ShVector<3, SH_TEMP, T, false> operator|(const ShMatrix<4, 4, B1, T>& m,
-                                             const ShVector<3, B2, T, S1>& v)
+ShAttrib<3, SH_TEMP, T, SH_VECTOR, false> 
+operator|(const ShMatrix<4, 4, B1, T>& m, const ShAttrib<3, B2, T, SH_VECTOR, S1>& v)
 {
-  ShVector<3, SH_TEMP, T, false> t;
+  ShAttrib<3, SH_TEMP, T, SH_VECTOR, false> t;
   for (int i = 0; i < 3; i++) {
     t(i) = dot(m[i](0,1,2), v);
   }
@@ -78,10 +72,10 @@ ShVector<3, SH_TEMP, T, false> operator|(const ShMatrix<4, 4, B1, T>& m,
 }
 
 template<ShBindingType B1, ShBindingType B2, typename T, bool S1>
-ShVector<2, SH_TEMP, T, false> operator|(const ShMatrix<3, 3, B1, T>& m,
-                                             const ShVector<2, B2, T, S1>& v)
+ShAttrib<2, SH_TEMP, T, SH_VECTOR, false>
+operator|(const ShMatrix<3, 3, B1, T>& m, const ShAttrib<2, B2, T, SH_VECTOR, S1>& v)
 {
-  ShVector<2, SH_TEMP, T, false> t;
+  ShAttrib<2, SH_TEMP, T, SH_VECTOR, false> t;
   for (int i = 0; i < 2; i++) {
     t(i) = dot(m[i](0,1), v);
   }
@@ -89,10 +83,10 @@ ShVector<2, SH_TEMP, T, false> operator|(const ShMatrix<3, 3, B1, T>& m,
 }
 
 template<ShBindingType B1, ShBindingType B2, typename T, bool S1>
-ShVector<1, SH_TEMP, T, false> operator|(const ShMatrix<2, 2, B1, T>& m,
-                                             const ShVector<1, B2, T, S1>& v)
+ShAttrib<1, SH_TEMP, T, SH_VECTOR, false>
+operator|(const ShMatrix<2, 2, B1, T>& m, const ShAttrib<1, B2, T, SH_VECTOR, S1>& v)
 {
-  ShVector<1, SH_TEMP, T, false> t;
+  ShAttrib<1, SH_TEMP, T, SH_VECTOR, false> t;
   for (int i = 0; i < 1; i++) {
     t(i) = dot(m[i](0), v);
   }

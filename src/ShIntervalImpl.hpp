@@ -428,10 +428,24 @@ ShInterval<TT> cos(const ShInterval<TT> &a)
 }
 
 template<typename TT>
+ShInterval<TT> cosh(const ShInterval<TT> &a) 
+{
+  //@todo
+  return lerp(ShInterval<TT>(0.5), exp(a), exp(-a));
+}
+
+template<typename TT>
 ShInterval<TT> sin(const ShInterval<TT> &a) 
 {
   // @todo
   return ShInterval<TT>(-1, 1);
+}
+
+template<typename TT>
+ShInterval<TT> sinh(const ShInterval<TT> &a) 
+{
+  //@todo
+  return lerp(ShInterval<TT>(0.5), exp(a), -exp(-a));
 }
 
 

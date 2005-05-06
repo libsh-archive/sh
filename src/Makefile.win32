@@ -29,6 +29,7 @@ libsh_dll_SOURCES += ShEnvironment.cpp ShException.cpp ShError.cpp
 libsh_dll_SOURCES += ShParser.cpp 
 libsh_dll_SOURCES += ShProgram.cpp ShProgram.hpp
 libsh_dll_SOURCES += ShProgramNode.cpp ShProgramNode.hpp
+libsh_dll_SOURCES += ShProgramSet.cpp ShProgramSet.hpp
 libsh_dll_SOURCES += ShRecord.hpp ShRecord.cpp 
 libsh_dll_SOURCES += ShStatement.cpp ShSwizzle.cpp ShSyntax.cpp ShToken.cpp
 libsh_dll_SOURCES += ShTokenizer.cpp ShUtility.cpp ShVariable.cpp ShVariableNode.cpp

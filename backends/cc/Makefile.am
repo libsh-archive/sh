@@ -2,10 +2,12 @@ INCLUDES = -I$(top_srcdir)/src
 
 shbackenddir = $(prefix)/lib/sh
 
+EXTRA_DIST = Makefile.win32
+
 shbackend_LTLIBRARIES = libshcc.la
 
 libshcc_la_LDFLAGS = -L$(prefix)/lib -module
-libshcc_la_LIBADD = $(top_srcdir)/src/libsh.la 
+libshcc_la_LIBADD = $(top_builddir)/src/libsh.la 
 BUILT_SOURCES=CcTexturesString.hpp
 libshcc_la_SOURCES = Cc.cpp Cc.hpp CcEmit.cpp CcTexturesString.hpp CcTextures.hpp
 

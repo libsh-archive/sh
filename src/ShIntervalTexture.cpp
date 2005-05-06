@@ -65,7 +65,7 @@ ShIntervalTexture::ShIntervalTexture(ShTextureNodePtr other)
 // save the original texture and all the mipmap levels on its right
 void ShIntervalTexture::memory_update() 
 {
-  size_t i, j;
+  size_t i;
 
   size_t_array widths(m_dims + 1);
   // index of the first non-tuple element dimension.  
@@ -75,8 +75,8 @@ void ShIntervalTexture::memory_update()
   if(m_dims > 2) widths[m_dims - 3] = m_other->depth();
   if(m_dims > 1) widths[m_dims - 2] = m_other->height();
   m_width = widths[m_dims - 1] = m_other->width();
-  size_t tupleSize = widths[m_dims] = m_other->size();
-  size_t count = m_other->count(); // basically all the dimensions multiplied together, except tuple size 
+  //size_t tupleSize = widths[m_dims] = m_other->size();
+  //size_t count = m_other->count(); // basically all the dimensions multiplied together, except tuple size 
 
   // cannot handle nD rectangles for now
   for(i = 0; i < FIRST; ++i) {
@@ -198,12 +198,15 @@ ShRecord ShIntervalTexture::rect_lookup(const ShVariable &lo, const ShVariable &
 
     size_t size = lo.size();
 
+    ShVariable clamplo(makeTemp(lo, "clamplo"));
+    ShVariable clamphi(makeTemp(hi, "clamphi"));
+
     // clamp to [0, texsize]
-    shMAX(lo, lo, ZERO.repeat(size));
-    shMIN(hi, hi, m_other->texSizeVar());
+    shMAX(clamplo, lo, ZERO.repeat(size));
+    shMIN(clamphi, hi, m_other->texSizeVar());
 
     ShVariable width(makeTemp(lo, "width"));
-    shADD(width, hi, -lo);
+    shADD(width, clamphi, -clamplo);
 
     ShVariable wu(makeTemp(lo, "wu")); // start with a guess about the level
 #if 0
@@ -225,9 +228,9 @@ ShRecord ShIntervalTexture::rect_lookup(const ShVariable &lo, const ShVariable &
 
     ShVariable au(makeTemp(lo, "au"));
     ShVariable bu(makeTemp(lo, "bu"));
-    shMUL(au, lo, scale);
+    shMUL(au, clamplo, scale);
     shFLR(au, au);
-    shMUL(bu, hi, scale);
+    shMUL(bu, clamphi, scale);
     shFLR(bu, bu);
 
     ShVariable diff(makeTemp(lo, "diff"));
@@ -253,11 +256,13 @@ ShRecord ShIntervalTexture::rect_lookup(const ShVariable &lo, const ShVariable &
     shPOW(scale, HALF.repeat(size), l); 
     shMUL(offset, ShConstAttrib1f(m_width), scale);
 
-    shMUL(scaledLo, lo, scale); 
-    shADD(scaledLo(0), scaledLo(0), offset);
+    shMUL(scaledLo, clamplo, scale); 
+    ShVariable scaledLo0 = scaledLo(0);
+    shADD(scaledLo0, scaledLo0, offset);
 
-    shMUL(scaledHi, hi, scale);
-    shADD(scaledHi(0), scaledHi(0), offset);
+    shMUL(scaledHi, clamphi, scale);
+    ShVariable scaledHi0 = scaledHi(0);
+    shADD(scaledHi0, scaledHi0, offset);
 
     ShVariable resultLo(m_node[0]->clone(SH_TEMP, 0, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, true, false));
     ShVariable resultHi(m_node[1]->clone(SH_TEMP, 0, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, true, false));
@@ -275,7 +280,8 @@ ShRecord ShIntervalTexture::rect_lookup(const ShVariable &lo, const ShVariable &
       ShVariable texcoord(makeTemp(lo, "texcoord"));
 
       for(j = 0; j < m_dims; ++j) {
-        shASN(texcoord(j), (1 & (i >> j)) ? ONE : ZERO);  // really stupid
+        ShVariable texcoordj = texcoord(j);
+        shASN(texcoordj, (1 & (i >> j)) ? ONE : ZERO);  // really stupid
       }
       shLRP(texcoord, texcoord, scaledLo, scaledHi);
 

@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -63,6 +60,31 @@ extern PFNWGLRELEASEPBUFFERDCARBPROC wglReleasePbufferDCARB;
 extern PFNWGLDESTROYPBUFFERARBPROC wglDestroyPbufferARB;
 extern PFNWGLQUERYPBUFFERARBPROC wglQueryPbufferARB;
 
+extern PFNGLGETOBJECTPARAMETERIVARBPROC glGetObjectParameterivARB;
+extern PFNGLGETINFOLOGARBPROC glGetInfoLogARB;
+extern PFNGLGETSHADERSOURCEARBPROC glGetShaderSourceARB;
+extern PFNGLDELETEOBJECTARBPROC glDeleteObjectARB;
+extern PFNGLCREATESHADEROBJECTARBPROC glCreateShaderObjectARB;
+extern PFNGLSHADERSOURCEARBPROC glShaderSourceARB;
+extern PFNGLUNIFORM1FARBPROC glUniform1fARB;
+extern PFNGLUNIFORM2FARBPROC glUniform2fARB;
+extern PFNGLUNIFORM3FARBPROC glUniform3fARB;
+extern PFNGLUNIFORM4FARBPROC glUniform4fARB;
+extern PFNGLUNIFORM1IARBPROC glUniform1iARB;
+extern PFNGLUNIFORM2IARBPROC glUniform2iARB;
+extern PFNGLUNIFORM3IARBPROC glUniform3iARB;
+extern PFNGLUNIFORM4IARBPROC glUniform4iARB;
+extern PFNGLGETUNIFORMLOCATIONARBPROC glGetUniformLocationARB;
+extern PFNGLCOMPILESHADERARBPROC glCompileShaderARB;
+extern PFNGLCREATEPROGRAMOBJECTARBPROC glCreateProgramObjectARB;
+extern PFNGLDETACHOBJECTARBPROC glDetachObjectARB;
+extern PFNGLATTACHOBJECTARBPROC glAttachObjectARB;
+extern PFNGLLINKPROGRAMARBPROC glLinkProgramARB;
+extern PFNGLUSEPROGRAMOBJECTARBPROC glUseProgramObjectARB;
+extern PFNGLVALIDATEPROGRAMARBPROC glValidateProgramARB;
+
+// extern PFN ARBPROC ARB;
+
 #else
 
 #define GL_GLEXT_VERBOSE 1
@@ -83,28 +105,40 @@ extern PFNWGLQUERYPBUFFERARBPROC wglQueryPbufferARB;
 namespace shgl {
 
 struct TextureStrategy {
-  virtual TextureStrategy* create(void) = 0;
-  
+  virtual ~TextureStrategy() {}
+  virtual TextureStrategy* create() = 0;
   virtual void bindTexture(const SH::ShTextureNodePtr& texture,
                            GLenum target) = 0;
 };
 
 struct StreamStrategy {
-  virtual StreamStrategy* create(void) = 0;
+  virtual ~StreamStrategy() {}
+  virtual StreamStrategy* create() = 0;
   virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest) = 0;
 };
 
 struct CodeStrategy {
-  virtual CodeStrategy* create(void) = 0;
+  virtual ~CodeStrategy() {}
+  virtual CodeStrategy* create() = 0;
   virtual SH::ShBackendCodePtr generate(const std::string& target,
                                         const SH::ShProgramNodeCPtr& shader,
                                         TextureStrategy* texture) = 0;
+
+  // If you want to use a special set generation function, override
+  // generate_set, and override use_default_set() to return false.
+  virtual SH::ShBackendSetPtr generate_set(const SH::ShProgramSet& s);
+  virtual bool use_default_set() const;
+
+  virtual void unbind_all();
+  virtual bool use_default_unbind_all() const;
 };
 
 class GlBackend : public SH::ShBackend {
 public:
-  virtual SH::ShBackendCodePtr generateCode(const std::string& target,
-                                            const SH::ShProgramNodeCPtr& shader);
+  virtual SH::ShBackendCodePtr generate_code(const std::string& target,
+                                             const SH::ShProgramNodeCPtr& shader);
+  virtual SH::ShBackendSetPtr generate_set(const SH::ShProgramSet& s);
+  virtual void unbind_all();
 
   // execute a stream program, if supported
   virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);

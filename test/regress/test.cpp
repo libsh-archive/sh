@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -33,6 +30,13 @@ Test::Test(int argc, char** argv)
   if (env_var != NULL) m_backend = env_var;
   if (argc >= 2) m_backend = argv[1];
   if (m_backend != "host") SH::shSetBackend(m_backend);
+}
+
+void Test::print_values(const char* varname, const std::string& values)
+{
+  std::cout << varname << " = [ ";
+  std::cout << values;
+  std::cout << " ]" << std::endl;;
 }
 
 void Test::print_fail(std::string name)

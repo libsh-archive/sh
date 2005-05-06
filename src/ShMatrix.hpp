@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -49,10 +46,19 @@ class ShMatrixRows;
 template<int Rows, int Cols, ShBindingType Binding, typename T>
 class ShMatrix: public virtual ShMeta {
 public:
-  typedef typename ShHostType<T>::type H; 
-  typedef H HostType; 
-  typedef H host_type;
-    
+  typedef T storage_type;
+  typedef typename ShHostType<T>::type host_type; 
+  typedef typename ShMemType<T>::type mem_type;
+  static const ShValueType value_type = ShStorageTypeInfo<T>::value_type;
+  static const ShBindingType binding_type = Binding;
+  static const int typesize = Rows * Cols;
+
+  typedef ShMatrix<Rows, Cols, SH_INPUT, T> InputType;
+  typedef ShMatrix<Rows, Cols, SH_OUTPUT, T> OutputType;
+  typedef ShMatrix<Rows, Cols, SH_INOUT, T> InOutType;
+  typedef ShMatrix<Rows, Cols, SH_TEMP, T> TempType;
+  typedef ShMatrix<Rows, Cols, SH_CONST, T> ConstType;
+
   /** \brief Identity constructor.
    *
    * Constructs an identity matrix.
@@ -142,7 +148,20 @@ public:
    */
   template<ShBindingType Binding2>
   ShMatrix& operator/=(const ShMatrix<Rows, Cols, Binding2, T>& other);    
+
+  /** \brief Modifying matrix multiplication
+   *
+   * Replace the matrix by the result of the matrix multiplied by the
+   * other.  Note: the two matrices must have the same size.
+   */
+  template<ShBindingType Binding2>
+  ShMatrix& operator*=(const ShMatrix<Rows, Cols, Binding2, T>& other);    
    
+  /** \brief Negation
+   *
+   * Assign each entry to its negated value.
+   */
+  ShMatrix& operator-();
 
   /** \brief Obtain a submatrix of this matrix.
    *
@@ -187,7 +206,7 @@ public:
   //@{
 
   /// Set a range of values for this matrix
-  void range(H low, H high);
+  void range(host_type low, host_type high);
 
   //@}
   

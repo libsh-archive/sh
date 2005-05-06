@@ -25,14 +25,18 @@ value_type_enum = {'d': 'double',
 
 enum_value_type = dict(zip(value_type_enum.values(), value_type_enum.keys()))
 
-def make_variable(arg, binding_type, value_type):
-    if (type(arg[0]) == tuple) or (type(arg[0]) == list):
-        nrows = len(arg[0])
-        ncols = len(arg)
+def make_variable(arg, binding_type, value_type, immediate=False):
+    if is_array(arg) and is_array(arg[0]):
+        ncols = len(arg[0])
+        nrows = len(arg)
         return 'ShMatrix<' + str(nrows) + ', ' + str(ncols) + ', ' + binding_type + ', ' + value_type + '>'    
-    else:
+    elif is_array(arg):
         size = len(arg)
         return 'ShAttrib<' + str(size) + ', ' + binding_type + ', ' + value_type + '>'
+    elif immediate:
+        return value_type
+    else:
+        return 'ShAttrib<1, ' + binding_type + ', ' + value_type  + '>'
 
 def init_matrix(indent, arg, argtype, varname):
     out = ''
@@ -51,29 +55,37 @@ def init_matrix(indent, arg, argtype, varname):
 def init_attrib(indent, arg, argtype, varname):
     out = indent
     out += make_variable(arg, 'SH_CONST', argtype) + ' ' + varname
-    out += '(' + ', '.join([str(a) for a in arg]) + ')'
+    out += '(' + ', '.join([(argtype + "(" + str(a) + ")") for a in arg]) + ')'
     out += ';\n'
     return out
 
-def init_variable(indent, arg, argtype, varname):
-    if (type(arg[0]) == tuple) or (type(arg[0]) == list):
-        return init_matrix(indent, arg, argtype, varname)
-    else:
-        return init_attrib(indent, arg, argtype, varname)
+def init_scalar(indent, arg, argtype, varname, immediate):
+    out = indent
+    out += make_variable(arg, 'SH_CONST', argtype, immediate) + ' ' + varname
+    out += '(' + argtype + '(' + str(arg) + '));\n'
+    return out
 
-def init_inputs(indent, src_arg_types):
+def init_variable(indent, arg, argtype, varname, immediate):
+    if is_array(arg) and is_array(arg[0]):
+        return init_matrix(indent, arg, argtype, varname)
+    elif is_array(arg):
+        return init_attrib(indent, arg, argtype, varname)
+    else:
+        return init_scalar(indent, arg, argtype, varname, immediate)
+
+def init_inputs(indent, src_arg_types, immediate=False):
     out = ''
     i = 0
     for arg, argtype in src_arg_types:
         varname =  string.ascii_lowercase[i]
-        out += init_variable(indent, arg, argtype, varname)
+        out += init_variable(indent, arg, argtype, varname, immediate)
         i += 1;
     return out
 
-def init_expected(indent, arg, argtype):
+def init_expected(indent, arg, argtype, immediate=False):
     out = ''
-    varname = 'exp'
-    out += init_variable(indent, arg, argtype, varname)
+    varname = 'expected'
+    out += init_variable(indent, arg, argtype, varname, immediate)
     return out
 
 # types are a list of dest then src types ('f' used as default) 
@@ -81,6 +93,27 @@ def make_test(expected, values, types=[]):
     types = [value_type_enum.has_key(x) and value_type_enum[x] or x for x in types] 
     types = types + (len(values) + 1 - len(types)) * ['float']
     return (expected, values, types)
+
+def make_testname(src_arg_types, types, key, testnumber):
+    name = enum_value_type[types[0]]
+    for arg, argtype in src_arg_types:
+        name += '_'
+        if is_array(arg):
+            name += str(len(arg))
+        name += enum_value_type[argtype]
+    name += '_' + key
+    name += '_test' + str(testnumber)
+    return name
+
+def variable_names(src_arg_types):
+    names = ''
+    i = 0
+    for arg, argtype in src_arg_types:
+        if i != 0:
+            names += ', '
+        names += string.ascii_lowercase[i]
+        i += 1
+    return names
 
 # Handles different styles of function calls that assign their value to a
 # variable out
@@ -222,18 +255,18 @@ class Test:
         out.write('#include "test.hpp"\n\n')
         out.write('int main(int argc, char** argv) {\n')
         out.write('  using namespace SH;\n\n')
+        out.write('  char* last_test = "none";\n\n')
         out.write('  try {\n')
         out.write('  int errors = 0;\n')
         out.write('  Test test(argc, argv);\n\n')
-        self.output_textures(out)
 
     def output_footer(self, out):
         out.write('  if (errors !=0) return 1;\n')
         out.write("""  } catch (const ShException &e) {
-    std::cout << "Caught Sh Exception." << std::endl << e.message() << std::endl;
+    std::cout << "Caught Sh Exception in '" << last_test << "'." << std::endl << e.message() << std::endl;
     return 2;
   } catch (const std::exception& e) {
-    std::cerr << "Caught C++ exception: " << e.what() << std::endl;
+    std::cerr << "Caught C++ exception in '" << last_test << "' : " << e.what() << std::endl;
     return 3;
   }
 }""")
@@ -243,15 +276,17 @@ class StreamTest(Test):
     def __init__(self, name, arity):
         Test.__init__(self, name, arity)
 
-    def output(self, out):
-        self.output_header(out)
+    def output(self, out, standalone=True):
+        if standalone:
+            self.output_header(out)
+        self.output_textures(out)
         programs = {}
         test_nb = 0
         for test, testcalls in self.tests:
             types = test[2]
             src_arg_types = zip(test[1], types[1:])
             for i, call in enumerate(testcalls):
-                argkey = enum_value_type[types[0]] + '_' + '_'.join([str(len(arg)) + enum_value_type[argtype] for arg, argtype in src_arg_types]) + '_' + call.key()
+                argkey = make_testname(src_arg_types, types, call.key(), test_nb)
                 if not programs.has_key(argkey):
                     programs[argkey] = []
                     progname = self.name + '_' + string.ascii_lowercase[i] + '_' + argkey
@@ -264,41 +299,48 @@ class StreamTest(Test):
                     out.write('    ' + str(call) + ';\n')
                     out.write('  } SH_END;\n\n')
                     out.write('  ' + progname + '.name("' + progname + '");\n')
+                    out.write('  last_test = "' + progname + '";\n')
             for p in programs[argkey]:
                 out.write('  {\n');
                 out.write(init_inputs('    ', src_arg_types))
                 out.write(init_expected('    ', test[0], types[0]))
                 out.write('\n')
                 out.write('    if (test.run(' + p + ', '
-                          + ', '.join([ string.ascii_lowercase[a] for a in range(len(src_arg_types))])
-                          + ', ' + 'exp' + ') != 0) errors++;\n')
+                          + variable_names(src_arg_types)
+                          + ', ' + 'expected' + ') != 0) errors++;\n')
                 out.write('  }\n')
                 test_nb += 1
             out.write('\n')
-        self.output_footer(out)
+        if standalone:
+            self.output_footer(out)
 
 class ImmediateTest(Test):
     def __init__(self, name, arity):
         Test.__init__(self, name, arity)
 
-    def output(self, out):
-        self.output_header(out)
+    def output(self, out, standalone=True):
+        if standalone:
+            self.output_header(out)
+        self.output_textures(out)
         test_nb = 0
         for test, testcalls in self.tests:
             types = test[2]
             src_arg_types = zip(test[1], types[1:])
             for i, call in enumerate(testcalls):
-                testname = enum_value_type[types[0]] + '_' + '_'.join([str(len(arg)) + enum_value_type[argtype] for arg, argtype in src_arg_types]) + '_' + call.key()
+                testname = make_testname(src_arg_types, types, call.key(), test_nb)
                 out.write('  { // ' + testname + '\n')
-                out.write(init_inputs('    ', src_arg_types))
-                out.write(init_expected('    ', test[0], types[0]))
+                out.write('    last_test = "' + testname + '";\n')
+                out.write(init_inputs('    ', src_arg_types, False))
+                out.write(init_expected('    ', test[0], types[0], False))
                 out.write('\n')
-                out.write('    ' + make_variable(test[0], 'SH_TEMP', types[0]) +  ' out;\n')
+                out.write('    ' + make_variable(test[0], 'SH_TEMP', types[0], False) +  ' out;\n')
                 out.write('    ' + str(call) + ';\n')
                 out.write('\n')
-                out.write('    if (test.check("' + testname + '", out, exp' + ') != 0) errors++;\n')
+                out.write('    if (test.check("' + testname + '", out, expected' + ') != 0) errors++;\n')
                 out.write('  }\n\n')
-        self.output_footer(out)
+            test_nb += 1
+        if standalone:
+            self.output_footer(out)
 
 if __name__ == "__main__":
     foo = StreamTest("add", 2)

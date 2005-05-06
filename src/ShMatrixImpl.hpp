@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -149,6 +146,25 @@ ShMatrix<Rows, Cols, Binding, T>::operator/=(const ShMatrix<Rows, Cols, Binding2
 {
   for (int i = 0; i < Rows; i++)
     m_data[i] /= other[i];
+  return *this;
+}
+
+template<int Rows, int Cols, ShBindingType Binding, typename T>
+template<ShBindingType Binding2>
+ShMatrix<Rows, Cols, Binding, T>&
+ShMatrix<Rows, Cols, Binding, T>::operator*=(const ShMatrix<Rows, Cols, Binding2, T>& other)
+{
+  ShMatrix<Rows, Cols, SH_TEMP, T> r = *this * other;
+  *this = r;
+  return *this;
+}
+
+template<int Rows, int Cols, ShBindingType Binding, typename T>
+ShMatrix<Rows, Cols, Binding, T>&
+ShMatrix<Rows, Cols, Binding, T>::operator-()
+{
+  for (int i = 0; i < Rows; i++)
+    m_data[i] = -(m_data[i]);
   return *this;
 }
 
@@ -370,7 +386,7 @@ ShMatrixRows<Rows, Cols, T>::operator()(int i0, int i1, int i2, int i3) const
 }
 
 template<int Rows, int Cols, ShBindingType Binding, typename T>
-void ShMatrix<Rows, Cols, Binding, T>::range(H low, H high)
+void ShMatrix<Rows, Cols, Binding, T>::range(host_type low, host_type high)
 {
   for (int i = 0; i < Rows; i++) m_data[i].range(low, high);
 }

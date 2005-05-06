@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -56,6 +53,7 @@ const ShOperationInfo opInfo[] = {
   {"CBRT", 1, ShOperationInfo::LINEAR, true, true, false},
   {"CEIL", 1, ShOperationInfo::LINEAR, true, true, false},
   {"COS", 1, ShOperationInfo::LINEAR, true, true, false},
+  {"COSH", 1, ShOperationInfo::LINEAR, true, true, false},
   {"CMUL", 1, ShOperationInfo::ALL, true, true, false},
   {"CSUM", 1, ShOperationInfo::ALL, true, false, false},
   {"DOT", 2, ShOperationInfo::ALL, true, true, true},
@@ -85,9 +83,11 @@ const ShOperationInfo opInfo[] = {
   {"RSQ", 1, ShOperationInfo::LINEAR, true, true, false},
 
   {"SIN", 1, ShOperationInfo::LINEAR, true, true, false},
+  {"SINH", 1, ShOperationInfo::LINEAR, true, true, false},
   {"SGN", 1, ShOperationInfo::LINEAR, true, true, false},
   {"SQRT", 1, ShOperationInfo::LINEAR, true, true, false},
   {"TAN", 1, ShOperationInfo::LINEAR, true, true, false},
+  {"TANH", 1, ShOperationInfo::LINEAR, false},
 
   {"NORM", 1, ShOperationInfo::ALL, true, true, false},
   {"XPD", 2, ShOperationInfo::ALL, true, true, false}, // Not quite true, but probably good enough
@@ -131,6 +131,7 @@ const ShOperationInfo opInfo[] = {
 
   {"COMMENT", 0, ShOperationInfo::IGNORE, false, false, false}, // special comment tag
   
+  {"RET", 1, ShOperationInfo::IGNORE, false, false, false},
   {0, 0, ShOperationInfo::IGNORE, true, true, false}
 };
 

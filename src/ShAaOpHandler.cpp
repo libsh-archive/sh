@@ -243,7 +243,8 @@ ShProgram getProgram(ShStatement& stmt, SymAllocator& alloc) {
                   << " stmt = " << stmt);
               SH_DEBUG_ASSERT(0);
             }
-            shASN(alloc(stmt.dest).center(), stmt.src[0]);
+            ShVariable destCenter = alloc(stmt.dest).center();
+            shASN(destCenter, stmt.src[0]);
           }
         } else if(shIsInterval(stmt.dest.valueType())) {
           SH_DEBUG_ASSERT(shIsAffine(stmt.src[0].valueType()));

@@ -259,11 +259,13 @@ ShAaVariable& ShAaVariable::ASN(const ShAaVariable &other, const ShAaSyms& used,
   SH_DEBUG_ASSERT(size() == other.size());
 
   if(changeCenter) {
-    shASN(center(), other.center());
+    ShVariable c = center();
+    shASN(c, other.center());
   }
   for(int i = 0; i < size(); ++i) {
     if(used[i].empty()) continue;
-    shASN(err(i, used[i]), other.err(i, used[i]));
+    ShVariable erri = err(i, used[i]);
+    shASN(erri, other.err(i, used[i]));
   }
   return *this;
 }
@@ -271,7 +273,8 @@ ShAaVariable& ShAaVariable::ASN(const ShAaVariable &other, const ShAaSyms& used,
 ShAaVariable& ShAaVariable::ASN(const ShVariable& other, const ShAaSyms& used) {
   for(int i = 0; i < size(); ++i) {
     if(used[i].empty()) continue;
-    shASN(err(i, used[i]), other(i));
+    ShVariable erri = err(i, used[i]);
+    shASN(erri, other(i));
   }
   return *this;
 }
@@ -279,7 +282,8 @@ ShAaVariable& ShAaVariable::ASN(const ShVariable& other, const ShAaSyms& used) {
 ShAaVariable& ShAaVariable::ZERO() {
   // @todo range make this ASN
   ShConstAttrib1f ZERO(0.0f);
-  shASN(center(), ShVariable(ZERO.node(), ShSwizzle(ZERO.swizzle(), size()), false));
+  ShVariable c = center();
+  shASN(c, ShVariable(ZERO.node(), ShSwizzle(ZERO.swizzle(), size()), false));
   for(int i = 0; i < size(); ++i) {
     if((*m_node)(i).empty()) continue;
     ShVariable erri = err(i, (*m_node)(i)); // get tuple for all error symbols
@@ -298,7 +302,8 @@ ShAaVariable& ShAaVariable::ADD(const ShAaVariable& other, const ShAaSyms& used,
   SH_DEBUG_ASSERT(size() == other.size());
 
   if(changeCenter) {
-    shADD(center(), center(), other.center());
+    ShVariable c = center();
+    shADD(c, c, other.center());
   }
   for(int i = 0; i < size(); ++i) {
     if(used[i].empty()) continue;
@@ -311,13 +316,15 @@ ShAaVariable& ShAaVariable::ADD(const ShAaVariable& other, const ShAaSyms& used,
 ShAaVariable& ShAaVariable::ADD(const ShVariable& other) {
   SH_DEBUG_ASSERT(size() == other.size());
 
-  shADD(center(), center(), other);
+  ShVariable c = center();
+  shADD(c, c, other);
   return *this;
 }
 
 ShAaVariable& ShAaVariable::MUL(const ShVariable& other) {
   SH_DEBUG_ASSERT(size() == other.size());
-  shMUL(center(), center(), other);
+  ShVariable c = center();
+  shMUL(c, c, other);
   for(int i = 0; i < size(); ++i) {
     if(use(i).empty()) continue;
     ShVariable myerr = err(i);
@@ -337,7 +344,8 @@ ShAaVariable& ShAaVariable::MAD(const ShAaVariable& other, const ShVariable& sca
   // @todo range - this doesn't work if this == other 
   
   if(changeCenter) {
-    shMAD(center(), other.center(), scalar, center());
+    ShVariable c = center();
+    shMAD(c, other.center(), scalar, c);
   }
   for(int i = 0; i < size(); ++i) {
     if(used[i].empty()) continue;
@@ -359,7 +367,8 @@ ShAaVariable& ShAaVariable::COND(const ShVariable& condvar, const ShAaVariable& 
   SH_DEBUG_ASSERT(size() == other.size() && size() == condvar.size());
 
   if(changeCenter) {
-    shCOND(center(), condvar, other.center(), center()); 
+    ShVariable c = center();
+    shCOND(c, condvar, other.center(), c); 
   }
 
   for(int i = 0; i < size(); ++i) {
@@ -373,7 +382,8 @@ ShAaVariable& ShAaVariable::COND(const ShVariable& condvar, const ShAaVariable& 
 ShAaVariable& ShAaVariable::setErr(const ShVariable& other, const ShAaSyms &used) {
   SH_DEBUG_ASSERT(size() == used.size());
   for(int i = 0; i < size(); ++i) {
-    shASN(err(i, used[i].last()), other(i)); 
+    ShVariable erri = err(i, used[i].last());
+    shASN(erri, other(i)); 
   }
   return *this;
 }
@@ -392,14 +402,15 @@ ShAaVariable& ShAaVariable::addErr(const ShVariable& other, const ShAaSyms &used
 ShVariable ShAaVariable::radius() const {
   ShVariable result = makeTemp("_radius");
   for(int i = 0; i < size(); ++i) {
+    ShVariable resulti = result(i);
     if(use(i).empty()) {
-      shASN(result(i), ShConstAttrib1f(0.0));
+      shASN(resulti, ShConstAttrib1f(0.0));
     } else {
       ShVariable erri = err(i);
       ShVariable abs_err(erri.node()->clone(SH_TEMP, erri.size()));
       abs_err.name(erri.name() + "_abs");
       shABS(abs_err, erri);
-      shCSUM(result(i), abs_err); 
+      shCSUM(resulti, abs_err); 
     }
   }
   return result;

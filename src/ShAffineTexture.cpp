@@ -301,15 +301,18 @@ ShRecord ShAffineTexture::rect_lookup(const ShVariable &lo, const ShVariable &hi
 
     size_t size = lo.size();
 
+    ShVariable clamplo(makeTemp(lo, "clamplo"));
+    ShVariable clamphi(makeTemp(hi, "clamphi"));
+
     // clamp
-    shMAX(lo, lo, ZERO.repeat(size));
-    shMIN(hi, hi, m_other->texSizeVar());
+    shMAX(clamplo, lo, ZERO.repeat(size));
+    shMIN(clamphi, hi, m_other->texSizeVar());
 
     ShVariable center(makeTemp(lo, "center"));
-    shLRP(center, lo, hi, HALF.repeat(size));
+    shLRP(center, clamplo, clamphi, HALF.repeat(size));
     
     ShVariable width(makeTemp(lo, "width"));
-    shADD(width, hi, -lo);
+    shADD(width, clamphi, -clamplo);
 
     ShVariable level(makeTemp(lo, "level")); // start with a guess about the level
     shLOG2(level, width);
@@ -329,10 +332,10 @@ ShRecord ShAffineTexture::rect_lookup(const ShVariable &lo, const ShVariable &hi
     ShVariable cell_lo(makeTemp(lo, "cell_lo"));
     ShVariable cell_hi(makeTemp(hi, "cell_hi"));
 
-    shMUL(cell_lo, lo, scale);
+    shMUL(cell_lo, clamplo, scale);
     shFLR(cell_lo, cell_lo); 
 
-    shMUL(cell_hi, hi, scale);
+    shMUL(cell_hi, clamphi, scale);
     shFLR(cell_hi, cell_hi); 
 
     ShVariable inc_level(makeTemp(lo, "inc_level")); // should be bool - whether to increase level
@@ -367,8 +370,9 @@ ShRecord ShAffineTexture::rect_lookup(const ShVariable &lo, const ShVariable &hi
     shCOND(texscale, max_level, texscale, ONE);
 
     ShVariable texcoord(makeTemp(lo, "texcoord"));
-    shMUL(texcoord, lo, texscale);
-    shADD(texcoord(0), texcoord(0), offset);
+    shMUL(texcoord, clamplo, texscale);
+    ShVariable texcoord0 = texcoord(0);
+    shADD(texcoord0, texcoord0, offset);
 
     for(size_t i = 0; i < m_dims + 2; ++i) {
       ShVariable resulti(m_node[i]->clone(SH_TEMP, 0, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, true, false));

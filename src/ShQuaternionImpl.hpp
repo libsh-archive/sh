@@ -1,26 +1,23 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
-//
+// Copyright 2003-2005 Serious Hack Inc.
+// 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
 // arising from the use of this software.
-//
+// 
 // Permission is granted to anyone to use this software for any purpose,
 // including commercial applications, and to alter it and redistribute it
 // freely, subject to the following restrictions:
-//
+// 
 // 1. The origin of this software must not be misrepresented; you must
 // not claim that you wrote the original software. If you use this
 // software in a product, an acknowledgment in the product documentation
 // would be appreciated but is not required.
-//
+// 
 // 2. Altered source versions must be plainly marked as such, and must
 // not be misrepresented as being the original software.
-//
+// 
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
@@ -46,7 +43,7 @@ ShQuaternion<B, T>::ShQuaternion(const ShQuaternion<B2, T>& other)
 
 template<ShBindingType B, typename T>
 template<ShBindingType B2>
-ShQuaternion<B, T>::ShQuaternion(const ShVector<4, B2, T>& values)
+ShQuaternion<B, T>::ShQuaternion(const ShAttrib<4, B2, T, SH_VECTOR>& values)
   : m_data(values)
 {
 }
@@ -54,7 +51,7 @@ ShQuaternion<B, T>::ShQuaternion(const ShVector<4, B2, T>& values)
 template<ShBindingType B, typename T>
 template<ShBindingType B2, ShBindingType B3>   
 ShQuaternion<B, T>::ShQuaternion(const ShAttrib<1, B2, T>& angle, 
-                                 const ShVector<3, B3, T>& axis)
+                                 const ShAttrib<3, B3, T, SH_VECTOR>& axis)
 {
   m_data(0) = cos(angle/2.0);
   m_data(1,2,3) = SH::normalize(axis);
@@ -182,7 +179,7 @@ ShQuaternion<B, T>::operator*=(const ShAttrib<1, B2, T>& right)
 template<ShBindingType B, typename T>
 template<ShBindingType B2>
 ShQuaternion<B, T>& 
-ShQuaternion<B, T>::operator*=(const ShVector<3, B2, T>& right) 
+ShQuaternion<B, T>::operator*=(const ShAttrib<3, B2, T, SH_VECTOR>& right) 
 {
   ShVector4f v;
   v(0) = 0.0;
@@ -195,7 +192,7 @@ ShQuaternion<B, T>::operator*=(const ShVector<3, B2, T>& right)
 template<ShBindingType B, typename T>
 template<ShBindingType B2>
 ShQuaternion<B, T>& 
-ShQuaternion<B, T>::operator*=(const ShNormal<3, B2, T>& right) 
+ShQuaternion<B, T>::operator*=(const ShAttrib<3, B2, T, SH_NORMAL>& right) 
 {
   ShVector4f v;
   v(0) = 0.0;
@@ -259,7 +256,7 @@ ShMatrix<4, 4, SH_TEMP, T> ShQuaternion<B, T>::getMatrix() const
 }
 
 template<ShBindingType B, typename T>
-ShVector<4, SH_TEMP, T> ShQuaternion<B, T>::getVector() const
+ShAttrib<4, SH_TEMP, T, SH_VECTOR> ShQuaternion<B, T>::getVector() const
 {
   return m_data;
 }
@@ -303,7 +300,7 @@ ShQuaternion<B, T>::operator*(const ShAttrib<1, B2, T>& c)
 template<ShBindingType B, typename T>
 template<ShBindingType B2>
 ShQuaternion<SH_TEMP, T> 
-ShQuaternion<B, T>::operator*(const ShVector<3, B2, T>& v)
+ShQuaternion<B, T>::operator*(const ShAttrib<3, B2, T, SH_VECTOR>& v)
 {
   ShQuaternion<B, T> r = *this;
   return (r *= v);
@@ -312,7 +309,7 @@ ShQuaternion<B, T>::operator*(const ShVector<3, B2, T>& v)
 template<ShBindingType B, typename T>
 template<ShBindingType B2>
 ShQuaternion<SH_TEMP, T> 
-ShQuaternion<B, T>::operator*(const ShNormal<3, B2, T>& v)
+ShQuaternion<B, T>::operator*(const ShAttrib<3, B2, T, SH_NORMAL>& v)
 {
   ShQuaternion<B, T> r = *this;
   return (r *= v);
@@ -346,8 +343,7 @@ operator*(const ShAttrib<1, B2, T>& c, const ShQuaternion<B, T>& q)
 
 template<ShBindingType B1, ShBindingType B2, typename T>
 extern ShQuaternion<SH_TEMP, T>
-slerp(const ShQuaternion<B1, T>& q1, const ShQuaternion<B2, T>& q2, 
-      const ShAttrib1f& t)
+slerp(const ShQuaternion<B1, T>& q1, const ShQuaternion<B2, T>& q2, const ShAttrib1f& t)
 {
   //TODO::q1 and q2 must be unit quaternions, we cannot call normalize here
   //since it's not a const function.

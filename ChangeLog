@@ -1,3 +1,558 @@
+2005-05-06	Bryan Chan <b8chan@cgl.uwaterloo.ca>
+	Merged trunk in up to r2375
+
+2005-05-06  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/PBufferStreams.cpp (execute): Allocate a bigger
+	texture for 2-component outputs.
+
+	* src/ShLibMiscImpl.hpp (poly): Remove unnecessary invocations of
+	the pow() function.
+
+2005-05-05  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibMiscImpl.hpp, ShLibMisc.hpp (poly): Add the poly()
+	library function.
+
+	* src/ShVariableNode.cpp (delete): Only free the pointer from the
+	pool if the memory pool was actualy being used.  This fixes a
+	problem reported on libsh-devel by Jamie Burns.
+
+2005-05-04  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbCode.cpp (printVar): Scalar variables which were
+	not assigned a register should just be inserted as immediate
+	values.
+
+	* backends/gl/GlslVariableMap.cpp (real_resolve): Remove
+	unnecessary parentheses around negated variables.
+
+	* backends/gl/GlslVariable.cpp (GlslVariable): Don't assign a glsl
+	variable to scalar constants.  Insert them in the code directly.
+
+	* backends/gl/GlslCode.cpp (real_update_uniform): Display more
+	information in the debugging message (size and kind).
+
+2005-05-02  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslVariableMap.cpp (allocate_builtin_inputs):
+	Display an error if an input was left unassigned. 
+
+	* backends/gl/GlslVariableMap.cpp (allocate_builtin_outputs):
+	Display an error if an output was left unassigned. 
+
+	* backends/gl/GlslEmit.cpp (table_substitution): Don't cast
+	variables twice in the case of assignment operations.
+
+	* backends/gl/GlslCode.cpp (real_update_uniform): Output more
+	information about the unknown uniform in the debug message.
+
+2005-04-28  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/PBufferStreams.cpp (execute): Add support for
+	two-component output by using a GL_RGB buffer and discarding the
+	third component after the copy.
+
+	* src/ShVariant.hpp, ShVariantImpl: Add a count parameter to the
+	ShDataVariant copy constructor to fix the problem where only the
+	first element was being copied.
+
+2005-04-26  Francois Marier  <francois@serioushack.com>
+
+	* src/ShOperation.hpp, ShOperation.cpp, ShInstructions.hpp,
+	ShInstructions.cpp, ShLibTrig.hpp, ShLibTrigImpl.hpp, ShLib.hpp,
+	ShEvalImpl.hpp: Add the COSH, SINH and TANH IR operations.
+
+	* src/ShConcreteCTypeOp.cpp, ShConcreteRegularOpImpl.hpp:
+	Implementation of the hyperbolic trig functions in immediate mode.
+	
+	* backends/gl/ArbEmit.cpp, ArbCode.hpp, GlslEmit.cpp,
+	GlslCode.hpp: Add approximations for the COSH, SINH and TANH
+	operations.
+
+	* backends/cc/CcEmit.cpp: Use the standard C functions to
+	implement COSH, SINH and TANH.
+
+2005-04-25  Francois Marier  <francois@serioushack.com>
+
+	* util/ShFunc.hpp, ShFuncImpl.hpp: Rename "smoothstep" to
+	"deprecated_smoothstep" since it is a cubic function whereas the
+	book defines is as a linear function.
+
+	Move the bezier function implementation here from Shrike's
+	utilimpl.hpp. It should be moved to the core later.
+
+	* src/ShLibClamp.hpp, ShLibClampImpl.hpp: Add the smoothstep() and
+	smoothpulse() functions from Shrike's utilimpl.hpp (issue63).
+
+2005-04-20  Francois Marier  <francois@serioushack.com>
+
+	* src/, src/scripts/, util/: Make semantic types template
+	parametrization of ShAttrib.  The semantic type is now an extra
+	template parameter before swizzle.
+
+	This means however that it is no longer possible to have types
+	like ShColor<3, SH_TEMP, float>, but the typedefs such as
+	ShColor3f are still available from within ShColor.hpp.
+
+2005-04-08  Francois Marier  <francois@serioushack.com>
+
+	* src/scripts/semantic.py: Add operator++() and operator--()
+
+	* src/ShGenericImpl.hpp, ShGeneric.hpp (operator++): Add this
+	method.
+
+	* src/ShGenericImpl.hpp, ShGeneric.hpp (operator--): Add this
+	method.
+
+	* backends/gl/GlslEmit.cpp (emit_logic): Removed the notEqual()
+	work-around on NVIDIA since the bug has been fixed.
+
+	* src/ShConcreteRegularOpImpl.hpp, ShConcreteCTypeOpImpl.hpp: 
+	Fix implementation of prod in immediate mode.
+
+2005-04-08  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/ArbCode.hpp, backends/gl/ArbCode.cpp,
+	backends/gl/ArbEmit.cpp: Implement RET for NVFP2. There are still
+	some interactions with input/output transformers that won't work
+	right, e.g. if you read from an output variable RET won't do the
+	right thing.
+
+	* backends/gl/ArbInst.hpp, backends/gl/ArbInst.cpp: Added
+	RET instruction.
+
+	* src/ShInstructions.hpp, src/ShInstructions.cpp: Added
+	shRET() instruction call.
+	  
+	* src/ShOperation.hpp, src/ShOperation.cpp: Added SH_OP_RET.
+
+2005-04-07  Francois Marier  <francois@serioushack.com>
+
+	* backends/cc/CcEmit.cpp, backends/gl/ArbEmit.cpp (emit_mod),
+	src/ShConcreteCTypeOp.cpp, src/ShConcreteCTypeOpImpl.hpp: Fix the
+	mod function so that it matches the glsl one and produces a nice
+	sawtooth function.
+
+2005-04-07  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/cc/Makefile.am (libshcc_la_LIBADD): Fix building out of
+	tree for CC backend.
+
+	* Merged OSX trunk.
+
+2005-04-07  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> osx branch
+
+	* Merged trunk up to r2275. Hopefully for the last time.
+
+2005-04-06  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslEmit.cpp (emit_log): Removed the static constant
+	to fix a bug when using both log and log10 in the same program.
+
+2005-04-05  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibMatrixImpl.hpp (trace): Add this function.
+
+2005-04-04  Francois Marier  <francois@serioushack.com>
+
+	* src/ShMatrix.hpp, ShMatrixImpl.hpp (operator-): Add this method.
+	(operator*=): Add this method.
+
+2005-03-29  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> osx branch
+
+	* util/: Fix this directory from being a strange mix of old and
+	new revisions to be the same as trunk at r2203.
+
+2005-03-28  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> osx branch
+
+	* config/gl.m4 (GL_CHECK_GL_HEADERS): We don't need -framework
+	AGL. Remove it.
+
+2005-03-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> osx branch
+
+	* README.osx: Continue to increase the accuracy of this document.
+
+	* configure.ac: Replace CPPFLAGS, not CXXFLAGS. Removes a warning
+	on Darwin.
+
+	* Allow out-of-source tree building, by changing various
+	Makefile.ams appropriately.
+
+	* src/ShSwizzleImpl.hpp (idswiz): Replace an "ifdef __MAC__" with
+	"ifdef __APPLE__"
+
+2005-03-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShAttrib.cpp, src/ShVector.cpp, ...: Remove explicit
+	instantiation files and the python scripts in scripts/ that
+	generated them (they haven't been used for a long time).
+
+2005-03-26  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> osx branch
+
+	* win32/Sh.vcproj: Added another missing file.
+
+	* backends/gl/GlslEmit.cpp (emit_discard): Remove an incorrect
+	comment.
+
+	* src/ShLibClampImpl.hpp: Uncommented some commented out code.
+
+	* win32/Sh.sln: Added this missing file from the trunk.
+
+	* examples/glut/Makefile.am (LDADD): Use GLUT_LIBS and GL_LIBS.
+
+	* examples/glut/main.cpp: Make this compile on Apple.
+
+	* backends/gl/Makefile.am: No pbuffer streams on Apple... 
+
+	* backends/gl/ArbBackend.cpp: No pbuffer streams on Apple.
+
+	* configure.ac: Check for ARB_shading_language_100 for GLSL
+	support.
+	Disable PBuffer streams on darwin.
+
+	* config/gl.m4: Substitute GL_LIBS and GLUT_LIBS.
+	(GL_CHECK_GLEXT_EXTENSION): Added this function.
+
+	* examples/binding/Makefile.am (LDADD): Use GLUT_LIBS, GL_LIBS.
+
+	* examples/binding/main.cpp (main): Catch exceptions.
+	Handle Apple headers.
+
+	* Merge trunk up to r2189.
+
+	* backends/gl/GlTextures.cpp: Implement APPLE_float_pixels
+	support.
+
+	* README.osx: Update this a little.
+
+2005-03-25  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibClampImpl.hpp: Add scalar version of mod.
+
+	* src/ShLibArithImpl.hpp: Add scalar version of pow.
+
+	* src/ShInstructions.cpp: Enable scalar versions of mod and pow.
+	
+	* backends/gl/GlslEmit.cpp: Fixed cond so that it behaves
+	according to the book when a < 0.
+
+2005-03-23  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibMiscImpl.hpp, ShLibMisc.hpp (sort, groupsort): Add
+	these functions based on util/ShFunc.hpp
+
+2005-03-21  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/GlslEmit.cpp (emit_discard): Fix discard.
+
+2005-03-18  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslVariable.cpp (GlslVariable): Use the contents of
+	meta("opengl:state") to initialize m_name and m_builtin.
+
+	* backends/gl/GlslVariable.hpp: Add a builtin() method.
+
+	* backends/gl/GlslVariableMap.cpp (allocate_temp): Add a check to
+	avoid double insertions in the map.
+	Don't set the name for built-in variables.
+	Use the new builtin() method to determine whether or not a
+	variable is built-in.
+
+	* backends/gl/GlslVariableMap.hpp, GlslVariableMap.cpp: Remove
+	allocate_palette() since it's the same as allocate_temp().
+
+	* backends/gl/GlslVariableMap.cpp (GlslVariableMap): Use
+	allocate_temp() instead of allocate_palette().
+	
+	* backends/gl/GlslCode.cpp (updateUniform): Remove warning about
+	unknown uniform.  This caused unnecessary output in the examples.
+
+	* examples/binding/main.cpp: Remove debugging output.
+	Remove unnecessary glDisable() calls in gprintf().
+
+2005-03-17  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslVariableMap.cpp, GlslVariableMap.hpp,
+	GlslVariable.cpp, GlslVariable.hpp, GlslEmit.cpp, GlslCode.cpp,
+	GlslCode.hpp: Add support for the PAL operation and initialize the
+	palette uniforms properly.
+	
+2005-03-16  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslCode.hpp, GlslEmit.cpp (allocate_constant): Add
+	this function and make use of it in operations that depend on a
+	constant (cbrt, exp and log).  Instead of using a temporary
+	variable, these operations now use a constant that's initialized
+	beforehand.
+
+	* backends/gl/GlslEmit.cpp (table_substitution): Make use of
+	glsl_typename().
+
+	(emit_logic): Remove unnecessary parantheses. Make use of
+	glsl_typename().
+
+	(emit_cbrt): Add this function to handle the CBRT operation
+	separately and properly initialize the 1/3 constant.
+
+	(allocate_temp): Set the binding to SH_TEMP, not the same as
+	stmt.dest necessarily.
+
+	(resolve_constant): Output the constants in the glsl code using
+	the maximum precision.
+
+	(emit_lit): All constants should be of size 1 since each component
+	of the output is computed separately.
+
+	* backends/gl/GlslCode.cpp: Added a debug #define to
+	always display the glsl shader source code.
+
+2005-03-15  Francois Marier  <francois@serioushack.com>
+
+	Fixes for ATI support in the glsl backend.
+	
+	* backends/gl/GlslVariableMap.cpp: Repeat scalars instead of
+	swizzling them. 
+
+	* backends/gl/GlslEmit.cpp, GlslCode.hpp: Cast all literals
+	properly through a new resolve_constant() method.
+
+	* backends/gl/GlslEmit.cpp: Remove superfluous operation and
+	constant in prod and sum.  Remove the "f" from float literals.
+
+	* backends/gl/GlslVariableMap.cpp, GlslVariableMap.hpp (resolve):
+	The swizzle to access the first component is unnecessary when the
+	variable is a scalar.
+
+	* backends/gl/Glsl.cpp, Glsl.hpp (glsl_typename): Add this
+	function.
+
+	* backends/gl/GlslVariable.cpp (type_string): Make use of
+	glsl_typename.
+	
+2005-03-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/GlslEmit.cpp (emit_texture): Swizzle texture lookups
+	to the expected size. Fixes many GLSL backend problems on ATI (but
+	not all of them, in particular implicit bool->float casts).
+	(table_substitution): Just cast everything statically.
+	(emit_logic): Add bool->float casts.
+
+	* win32/ShArbBackend.vcproj, win32/ShGlslBackend.vcproj: Include
+	Utils.cpp and Utils.hpp
+
+	* backends/gl/Makefile.win32 (PBUFFERSTREAM_SOURCES): Include
+	Utils.*.
+
+	* backends/gl/Makefile.am (PBUFFERSTREAM_SOURCES): Include
+	Utils.[ch]pp.
+
+	* backends/gl/Utils.cpp (split_program): Add this function.
+
+	The "Make Arno and Nils Happy" patch.
+	
+	* backends/gl/PBufferStreams.cpp: PBufferStreams caches its
+	fragment programs now. Hooray, particle system demo is about 100
+	times faster....
+
+	* src/ShProgramSet.hpp (ShProgramSet): Make ShProgramSets
+	reference-countable. Happy Pi day.
+
+2005-03-14  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslCode.cpp, GlslCode.hpp: Support for control flow
+	constructs.
+		
+	* backends/gl/GlslEmit.cpp: Cast variables to bool when they are
+	used in a conditional or loop statement.
+
+2005-03-09  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbEmit.cpp (emit_ceil): Allocate a temporary
+	variable to prevent reading from stmt.dest.
+
+	* backends/gl/ArbEmit.cpp (emit_cmul): Added a missing parameter
+	to the MUL operation.
+
+	* backends/gl/ArbEmit.cpp, backends/gl/ArbCode.hpp: Added the CBRT
+	and RND operations.
+	
+2005-03-09  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+	
+	* src/ShTypeInfo.hpp, ShTypeInfo.cpp (m_valueTypes):
+	Changed to pointer to avoid static initialization snafus. 
+
+2005-03-04  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* configure.ac: Bump glext.h version to 21 for the GLSL backend.
+
+	Merged glsl branch into trunk.
+
+2005-03-04  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> (glsl branch)
+
+	* backends/gl/GlslEmit.cpp (emit_discard): Fix KIL implementation
+	(KIL doesn't return anything).
+
+	* src/ShSyntax.cpp (shUnbind): Use ShBackend::unbind_all().
+
+	* backends/gl/GlBackend.hpp: Add unbind_all() to CodeStrategy.
+
+	* backends/gl/Glsl.hpp: Add unbind_all().
+
+	* backends/gl/Glsl.cpp (unbind_all): Implement glsl-specific
+	unbind_all() using GlslSet.
+
+	* src/ShBackend.cpp (unbind_all): Default implementation.
+
+	* src/ShBackend.hpp: Added unbind_all() functions
+
+	* backends/gl/GlslCode.hpp: Remove the optimize() function.
+
+	* backends/gl/GlslCode.cpp (unbind): Keep around the old
+	GlslSet::current() (it can become null if it already was
+	m_fallback_set). This fixes a segfault related to binding.
+
+	* src/ShSyntax.cpp (shUnbind): Implement shUnbind().
+
+	* src/ShSyntax.hpp: Add parameterless shUnbind() prototype.
+
+	* backends/gl/PBufferStreams.cpp (execute): Unbind our shaders.
+
+	* backends/gl/GlslSet.cpp (GlslSet copy constructor): Use attach()
+	to attach shaders.
+	(GlslSet::operator=): Call detach and attach.
+
+2005-03-02  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> (glsl branch)
+
+	* examples/glut/main.cpp: Use a ShProgramSet to contain the shaders.
+
+	* backends/cc/Cc.cpp (ShCc): Rename generateCode() to
+	generate_code().
+
+	* backends/cc/Cc.hpp (ShBackend): Rename generateCode() to
+	generate_code().
+
+	* backends/gl/GlslCode.cpp: Implemented GlslSet functionality, and
+	use GlslSet functionality appropriately from GlslCode.
+
+	* backends/gl/GlslCode.hpp (GlslSet): Added this class.
+	(GlslCode): Simplified a fair bit, moving a lot to GlslSet.
+
+	* backends/gl/Glsl.hpp: More ProgramSet changes.
+
+	* backends/gl/GlBackend.hpp (CodeStrategy): Added ShProgramSet
+	support.
+	(GlBackend): Rename generateCode() to generate_code().
+
+	* win32/Sh.vcproj: Added ShProgramSet files.
+
+	* src/Makefile.win32 (libsh_dll_SOURCES): Added ShProgramSet
+	files.
+
+	* src/Makefile.am (libsh_la_SOURCES): Add ShProgramSet files
+	(incinc_HEADERS): Add ShProgramSet.hpp header.
+
+	* src/sh.hpp: Include ShProgramSet.hpp.
+
+	* src/ShBackend.hpp, src/ShBackend.cpp: Added backend program set
+	mechanism.
+
+	* src/ShSyntax.hpp, src/ShSyntax.cpp: Added functions to
+	bind/link/unbind program sets.
+
+	* src/ShProgramSet.hpp, src/ShProgramSet.cpp: Added program sets.
+
+2005-03-02  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+
+	* backends/gl/ArbCode.cpp (ArbCode::print): Fixed NVFP register
+	decls to use "SHORT TEMP" and "LONG TEMP"
+
+2005-03-02  Stefanus Du Toit  <sjdutoit@uwaterloo.ca> (glsl branch)
+
+	* src/ShBackend.hpp: Rename generateCode() to generate_code().
+
+	* examples/glut/main.cpp (main): Use arb backend by default, allow
+	passing in a backend name.
+	(display): Add back in the gprintfs.
+	
+2005-03-01  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* util/ShObjMesh.cpp (ShTriple::ShTriple): Be a little less
+	aggressive about unexpected characters, and in particular restore
+	skipws.
+
+2005-02-25  Francois Marier  <francois@serioushack.com>
+
+	* sh/trunk/backends/cc/Cc.cpp, Cc.hpp, 
+	sh/trunk/backends/gl/ArbCode.cpp, ArbCode.hpp, 
+	sh/trunk/src/ShBackend.hpp: Added the unbind() method.
+
+	* sh/trunk/src/ShSyntax.cpp, ShSyntax.hpp: Added the shUnbind
+	function to unbind a previously bound shader (does nothing if the
+	shader was not already bound).
+
+	* sh/trunk/backends/gl/ArbCode.cpp,
+	sh/trunk/backends/gl/PBufferStreams.cpp: Move the
+	glEnable(GL_*_PROGRAM_ARB) and glDisable calls to the bind() and
+	unbind() methods of ArbCode.
+
+	* sh/examples/*: Remove the glEnable(GL_*_PROGRAM_ARB) calls.
+	Replace the glDisable(GL_*_PROGRAM_ARB) calls with shUnbind().
+	
+2005-02-23  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl/Makefile.win32 (libsharb_dll_SOURCES): Update for
+	the new PBufferContext classes. Sorry for forgetting these.
+
+2005-02-22  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/gl: Folded in some changes from the cflow branch. In
+	particular, improved PBuffer context handling.
+
+	* src/ShConstProp.cpp (operator<<(ostream&, ConstProp::Cell)):
+	Output the encoded value instead of the value pointer. Doh.
+	(ConstProp::updateDest): Don't mark entirely constant expressions
+	as uniform. Fixes issue159.
+	(struct FinishConstProp): Break out based on uniform < 0 first, so
+	that we get less confusing debugging messages.
+
+	* src/ShInfoImpl.hpp (destroy_info): Actually delete the items we
+	wish to destroy. Should fix some memory leaks...
+
+	* src/ShBitSet.cpp (operator=): Handle self-assignment correctly.
+
+2005-02-18  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+	
+	* backends/gl/ArbCode.cpp: Added support for "opengl:texunit" and
+	"opengl:preset" on ShTextures and "opengl:reservetex" on ShPrograms.
+	
+	* backends/gl/ArbReg.cpp, backends/gl/ArbReg.hpp: Added preset
+	flag to ArbReg for textures with reserved units.
+	
+	* backends/gl/GlTextures.cpp: Removed "opengl:preset" processing,
+	this is now done in ArbCode.cpp. Renamed "opengl:texid" to
+	"opengl:alloc_texid".
+	
+2005-02-14  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShLibMatrixImpl.hpp (rotate): Fix rotations.
+
+2005-02-11  Bryan Chan  <b8chan@cgl.uwaterloo.ca>
+
+	* src/ShInstructions.hpp, ShInstructions.cpp, src/ShVariable.hpp,
+	ShVariable.cpp: Backed out some const changes that don't make
+	sense.
+
+	Merged in some fixes from arithmetic:
+	
+	*  src/ShSection.hpp, ShSectionImpl.hpp (realDump):
+	Graphviz dump should work now (no more cfg nodes in wrong places).
+
+	* backends/gl/GlTextures.cpp (shGlInternalFormat):
+	Changed to use ATI's extensions on NV cards when the tex dims are non-RECT
+	(NV's recent drivers only support 1/2/3D float textures through
+	ATI_texture_float)
+
 2004-02-11 Bryan Chan <b8chan@cgl.uwaterloo.ca>
 	Merged trunk in up to r1997. 
 
@@ -128,7 +683,7 @@ To merge into trunk:
 2005-01-26  Bryan Chan <b8chan@cgl.uwaterloo.ca>
 	
 	* util/ShObjMesh.cpp:
-        Improved vertex normal generation.
+	Improved vertex normal generation.
 
 2004-01-26 Bryan Chan <b8chan@cgl.uwaterloo.ca>
 	* src/ShAaOps.hpp, ShAaOps.cpp ShAaOpHandler.cpp:

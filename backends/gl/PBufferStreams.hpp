@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -32,23 +29,16 @@
 
 namespace shgl {
 
-enum FloatExtension {
-  SH_ARB_NV_FLOAT_BUFFER,
-  SH_ARB_ATI_PIXEL_FORMAT_FLOAT,
-  SH_ARB_NO_FLOAT_EXT
-};
-
 struct PBufferStreams : public StreamStrategy {
-  PBufferStreams(void);
+  PBufferStreams();
   virtual ~PBufferStreams();
 
-  virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
+  void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
+
+  virtual StreamStrategy* create();
 
 private:
-  virtual FloatExtension setupContext(int width, int height) = 0;
-  virtual void restoreContext(void) = 0;
-
-private:
+  SH::ShProgramSet* m_shaders;
   bool m_setup_vp;
   SH::ShProgram m_vp;
 };

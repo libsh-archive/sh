@@ -49,7 +49,7 @@
 // @todo range Change this to use a wrapper like ShAaVariable for cleaner code. 
 
 // @todo debug
-#define SH_DEBUG_ICONV
+// #define SH_DEBUG_ICONV
 namespace {
 
 using namespace SH;

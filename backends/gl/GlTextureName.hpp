@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -55,8 +52,8 @@ public:
   StorageList::const_iterator endStorages() const { return m_storages.end(); }
 
   typedef std::list<GlTextureName*> NameList;
-  static NameList::const_iterator beginNames() { return m_names.begin(); }
-  static NameList::const_iterator endNames() { return m_names.end(); }
+  static NameList::const_iterator beginNames() { return m_names->begin(); }
+  static NameList::const_iterator endNames() { return m_names->end(); }
 
   // Utility class to bind texture temporarily
   struct Binding {
@@ -71,7 +68,7 @@ private:
   GLenum m_target;
   GLuint m_name;
   StorageList m_storages;
-  static NameList m_names;
+  static NameList* m_names;
   SH::ShTextureTraits m_params;
 
   bool m_managed; // True if we generated our own name

@@ -1,18 +1,49 @@
+// Sh: A GPU metaprogramming language.
+//
+// Copyright 2003-2005 Serious Hack Inc.
+// 
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+// 
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+// 
+// 1. The origin of this software must not be misrepresented; you must
+// not claim that you wrote the original software. If you use this
+// software in a product, an acknowledgment in the product documentation
+// would be appreciated but is not required.
+// 
+// 2. Altered source versions must be plainly marked as such, and must
+// not be misrepresented as being the original software.
+// 
+// 3. This notice may not be removed or altered from any source
+// distribution.
+//////////////////////////////////////////////////////////////////////////////
 #include <sh/sh.hpp>
-#include <GL/glut.h>
-#include <GL/glext.h>
-#include <GL/glu.h>
+#ifdef __APPLE__
+# include <GLUT/glut.h>
+# include <OpenGL/glext.h>
+# include <OpenGL/glu.h>
+#else
+# include <GL/glut.h>
+# include <GL/glext.h>
+# include <GL/glu.h>
+#endif
 #include "Camera.hpp"
+#include <iostream>
 
 using namespace SH;
+using namespace std;
 
 ShMatrix4x4f mv, mvd;
 ShPoint3f lightPos;
 Camera camera;
-ShProgram vsh, fsh;
+ShProgramSet* shaders;
 
-ShTexture2D<ShColor3f> kd(512, 512);
-ShTexture2D<ShColor3f> ks(512, 512);
+ShClamped<ShTexture2D<ShColor3f> > kd(512, 512);
+ShClamped<ShTexture2D<ShColor3f> > ks(513, 512);
 
 int gprintf(int x, int y, char* fmt, ...);
 
@@ -39,7 +70,7 @@ void xTexture()
 
 void initShaders()
 {
-  vsh = SH_BEGIN_VERTEX_PROGRAM {
+  ShProgram vsh = SH_BEGIN_VERTEX_PROGRAM {
     ShInOutTexCoord2f u;
     ShInOutPosition4f pos;
     ShInOutNormal3f normal;
@@ -55,7 +86,7 @@ void initShaders()
   ShColor3f SH_DECL(diffusecolor) = ShColor3f(0.2, 0.2, 0.2);
   ShAttrib1f exponent(30.0);
 
-  fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+  ShProgram fsh = SH_BEGIN_FRAGMENT_PROGRAM {
     ShInputTexCoord2f u;
     ShInputPosition4f position;
     ShInputNormal3f normal;
@@ -74,18 +105,22 @@ void initShaders()
     ShNormal3f nv = normal;
     color += color*kd(u) + ks(u)*pow(pos(hv | nv), exponent);
   } SH_END;
+
+  shaders = new ShProgramSet(vsh, fsh);
 }
 
 void display()
 {
-  shUpdate();
-
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  shBind(*shaders);
+  
   glFrontFace(GL_CW);
   glutSolidTeapot(2.5);
   glFrontFace(GL_CCW);
 
+  shUnbind(*shaders);
+  
   // Help information
   if (show_help) {
     gprintf(30, 100, "Sh Texture Example Help");
@@ -173,50 +208,6 @@ void keyboard(unsigned char k, int x, int y)
   glutPostRedisplay();
 }
 
-int main(int argc, char** argv)
-{
-  glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-  glutInitWindowSize(512, 512);
-  glutCreateWindow("Sh Texture Example");
-  glutDisplayFunc(display);
-  glutReshapeFunc(reshape);
-  glutMouseFunc(mouse);
-  glutMotionFunc(motion);
-  glutKeyboardFunc(keyboard);
-    
-  shSetBackend("arb");
-
-  initShaders();
-
-  kd_images[0].loadPng("rustkd.png");
-  ks_images[0].loadPng("rustks.png");
-  kd_images[1].loadPng("kd.png");
-  ks_images[1].loadPng("ks.png");
-  
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_VERTEX_PROGRAM_ARB);
-  glEnable(GL_FRAGMENT_PROGRAM_ARB);
-  glClearColor(0.0, 0.0, 0.0, 1.0);
-  setupView();
-
-  // Place the camera at its initial position
-  camera.move(0.0, 0.0, -15.0);
-
-  // Set up the light position
-  lightPos = ShPoint3f(5.0, 5.0, 5.0);
-  
-  initShaders();
-
-  // Set the initial texture
-  xTexture();
-
-  shBind(vsh);
-  shBind(fsh);
-  
-  glutMainLoop();
-}
-
 int gprintf(int x, int y, char* fmt, ...)
 {
   char temp[1024];
@@ -228,7 +219,7 @@ int gprintf(int x, int y, char* fmt, ...)
   // setup the matrices for a direct
   // screen coordinate transform when
   // using glRasterPos
-  int vp[4];
+  GLint vp[4];
   glGetIntegerv(GL_VIEWPORT, vp);
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
@@ -242,8 +233,6 @@ int gprintf(int x, int y, char* fmt, ...)
   // texturing off and disable depth testing
   glPushAttrib(GL_ENABLE_BIT);
   glDisable(GL_DEPTH_TEST);
-  glDisable(GL_VERTEX_PROGRAM_ARB);
-  glDisable(GL_FRAGMENT_PROGRAM_ARB);
 
   // render the character through glut
   char* p = temp;
@@ -262,4 +251,67 @@ int gprintf(int x, int y, char* fmt, ...)
   glPopMatrix();
   
   return p-temp;
+}
+
+int main(int argc, char** argv)
+{
+  glutInit(&argc, argv);
+  glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+  glutInitWindowSize(512, 512);
+  glutCreateWindow("Sh Texture Example");
+  glutDisplayFunc(display);
+  glutReshapeFunc(reshape);
+  glutMouseFunc(mouse);
+  glutMotionFunc(motion);
+  glutKeyboardFunc(keyboard);
+    
+  std::string backend_name("arb");
+  if (argc > 1) {
+    backend_name = argv[1];
+  }
+  
+  shSetBackend(backend_name);
+
+  initShaders();
+
+  try {
+    kd_images[0].loadPng("rustkd.png");
+    ks_images[0].loadPng("rustks.png");
+    kd_images[1].loadPng("kd.png");
+    ks_images[1].loadPng("ks.png");
+  } 
+  catch (const ShException& e) {
+    std::cerr << e.message() << std::endl;
+    throw e;
+  }
+
+  glEnable(GL_DEPTH_TEST);
+  glClearColor(0.0, 0.0, 0.0, 1.0);
+  setupView();
+
+  // Place the camera at its initial position
+  camera.move(0.0, 0.0, -15.0);
+
+  // Set up the light position
+  lightPos = ShPoint3f(5.0, 5.0, 5.0);
+  
+  initShaders();
+
+  // Set the initial texture
+  xTexture();
+  
+  shBind(*shaders);
+  
+#if 0
+  cout << "Vertex Unit:" << endl;
+  vsh.node()->code()->print(cout);
+  cout << "--" << endl;
+  cout << "Fragment Unit:" << endl;
+  fsh.node()->code()->print(cout);
+  cout << "--" << endl;
+#endif
+  
+  glutMainLoop();
+
+  delete shaders;
 }

@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -161,6 +158,11 @@ namespace ShCc {
   }
 
   void CcBackendCode::bind(void) 
+  {
+    SH_CC_DEBUG_PRINT(__FUNCTION__);
+  }
+
+  void CcBackendCode::unbind(void)
   {
     SH_CC_DEBUG_PRINT(__FUNCTION__);
   }
@@ -446,12 +448,7 @@ namespace ShCc {
     std::stringstream epilogue;
     epilogue << "}" << std::endl;
 
-    // output code for debugging...
-    //SH_CC_DEBUG_PRINT(prologue.str());
-    //SH_CC_DEBUG_PRINT(m_code.str());
-    //SH_CC_DEBUG_PRINT(epilogue.str());
-
-//#ifdef SH_CC_DEBUG
+#ifdef SH_CC_DEBUG
     SH_CC_DEBUG_PRINT("Outputting generated C++ code to ccstream.cpp");
     std::ofstream dbgout("ccstream.cpp");
     dbgout << prologue.str();
@@ -459,7 +456,7 @@ namespace ShCc {
     dbgout << epilogue.str();
     dbgout.flush();
     dbgout.close();
-//#endif
+#endif
 
 #ifdef WIN32
     // generate temporary names for the
@@ -537,7 +534,7 @@ namespace ShCc {
     pid_t pid = fork();
     if (pid == 0) {
       // child
-      execlp("cc", "cc", "-O2", "-shared", "-o", sofile, ccfile, NULL);
+      execlp("cc", "cc", "-O2", "-shared", "-o", sofile, ccfile, (void*)NULL);
       SH_CC_DEBUG_PRINT("exec failed (" << errno << ")");
       exit(-1);
     } else if (pid > 0) {
@@ -700,8 +697,8 @@ namespace ShCc {
     return "cc";
   }
 
-  ShBackendCodePtr CcBackend::generateCode(const std::string& target,
-						const ShProgramNodeCPtr& program) {
+  ShBackendCodePtr CcBackend::generate_code(const std::string& target,
+                                            const ShProgramNodeCPtr& program) {
     SH_CC_DEBUG_PRINT(__FUNCTION__);
     CcBackendCodePtr backendcode = new CcBackendCode(program);
     backendcode->generate();

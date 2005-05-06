@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -152,6 +149,8 @@ public:
   void setTexSize(int w, int h);
   void setTexSize(int w, int h, int d);
   const ShVariable& texSizeVar() const;
+
+  void count(int n);
   
 private:
   int m_count; // max nb of elements sent to the GPU or -1 if unknown (used by the stream backend)

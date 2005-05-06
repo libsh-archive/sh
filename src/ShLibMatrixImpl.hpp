@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -31,9 +28,37 @@
 
 namespace SH {
 
-template<int M, int N, int P, ShBindingType Binding, ShBindingType Binding2, 
-  typename T1, typename T2>
-inline
+template<int M, int N, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
+ShMatrix<N, M, SH_TEMP, CT1T2>
+operator+(const ShMatrix<N, M, Binding, T1>& a, 
+	  const ShMatrix<N, M, Binding2, T2>& b)
+{
+  ShMatrix<N, M, SH_TEMP, CT1T2> r(a);
+  r += b;
+  return r;
+}
+
+template<int M, int N, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
+ShMatrix<N, M, SH_TEMP, CT1T2>
+operator-(const ShMatrix<N, M, Binding, T1>& a, 
+	  const ShMatrix<N, M, Binding2, T2>& b)
+{
+  ShMatrix<N, M, SH_TEMP, CT1T2> r(a);
+  r -= b;
+  return r;
+}
+
+template<int M, int N, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
+ShMatrix<N, M, SH_TEMP, CT1T2>
+operator/(const ShMatrix<N, M, Binding, T1>& a, 
+	  const ShMatrix<N, M, Binding2, T2>& b)
+{
+  ShMatrix<N, M, SH_TEMP, CT1T2> r(a);
+  r /= b;
+  return r;
+}
+
+template<int M, int N, int P, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
 ShMatrix<M, P, SH_TEMP, CT1T2>
 operator|(const ShMatrix<M, N, Binding, T1>& a,
           const ShMatrix<N, P, Binding2, T2>& b)
@@ -59,9 +84,7 @@ operator*(const ShMatrix<M, N, Binding, T1>& a,
 }
 
 template<int M, int N, ShBindingType Binding, typename T1, typename T2>
-inline
-ShGeneric<M, CT1T2> operator|(const ShMatrix<M, N, Binding, T1>& a, 
-    const ShGeneric<N, T2>& b)
+ShGeneric<M, CT1T2> operator|(const ShMatrix<M, N, Binding, T1>& a, const ShGeneric<N, T2>& b)
 {
   ShAttrib<M, SH_TEMP, CT1T2> ret;
   for (int i = 0; i < M; i++) {
@@ -71,12 +94,14 @@ ShGeneric<M, CT1T2> operator|(const ShMatrix<M, N, Binding, T1>& a,
 }
 
 template<int M, int N, ShBindingType Binding, typename T1, typename T2>
-inline
 ShGeneric<N, CT1T2> operator|(const ShGeneric<M, T1>& a, const ShMatrix<M, N, Binding, T2>& b)
 {
   ShAttrib<N, SH_TEMP, CT1T2> ret;
   for (int i = 0; i < N; i++) {
-    ret[i] = dot(a, b()(i));
+    ret[i] = 0;
+    for (int j=0; j < M; j++) {
+      ret[i] += a[j] * b[j][i];
+    }
   }
   return ret;
 }
@@ -143,6 +168,7 @@ operator/(const ShMatrix<M, N, Binding, T1>& a, const ShGeneric<1, T2>& b)
 
 
 template<ShBindingType Binding, typename T>
+inline
 ShAttrib1f
 det(const ShMatrix<1, 1, Binding, T>& matrix)
 {
@@ -185,8 +211,10 @@ det(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix)
 
 //Matrix of Cofactors
 template<ShBindingType Binding, typename T>
+inline
 ShMatrix<1, 1, SH_TEMP, T>
-cofactors(const ShMatrix<1, 1, Binding, T>& matrix){
+cofactors(const ShMatrix<1, 1, Binding, T>& matrix)
+{
   return matrix;
 }
     
@@ -195,13 +223,11 @@ ShMatrix<2, 2, SH_TEMP, T>
 cofactors(const ShMatrix<2, 2, Binding, T>& matrix)
 {
   ShMatrix<2, 2, Binding, T> r;
-  r.m_data[0][0]= matrix[1][1];
-  r.m_data[1][0]=-matrix[0][1];
-  r.m_data[0][1]=-matrix[1][0];
-  r.m_data[1][1]= matrix[0][0];
-    
+  r[0][0] = matrix[1][1];
+  r[1][0] = -matrix[0][1];
+  r[0][1] = -matrix[1][0];
+  r[1][1] = matrix[0][0];
   return r;
-  //return matrix;
 }
   
 template<int RowsCols, ShBindingType Binding, typename T>
@@ -212,10 +238,11 @@ cofactors(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix)
 
   for (int i = 0; i < RowsCols; i++) {
     for (int j = 0; j < RowsCols; j++) {
-      if( (i+j)%2 ==0)	  
-        r[i][j]= det(matrix.subMatrix(i,j));
-      else
-        r[i][j]=-det(matrix.subMatrix(i,j));
+      if((i+j) % 2 == 0) {
+        r[i][j] = det(matrix.subMatrix(i,j));
+      } else {
+        r[i][j] = -det(matrix.subMatrix(i,j));
+      }
     }
   }
   return r;
@@ -227,10 +254,10 @@ ShMatrix<N, M, SH_TEMP, T>
 transpose(const ShMatrix<M, N, Binding, T>& matrix)
 {    
   ShMatrix<N, M, SH_TEMP, T> r;
-    
+
   for (int i = 0; i < N; i++) {
     for (int j = 0; j < M; j++) {	  
-      r[i][j]= matrix[j][i];	
+      r[i][j] = matrix[j][i];	
     }
   }
     
@@ -251,6 +278,17 @@ ShMatrix<RowsCols, RowsCols, SH_TEMP, T>
 inverse(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix)
 {
   return adjoint(matrix)/det(matrix);
+}
+
+template<int RowsCols, ShBindingType Binding, typename T>
+ShGeneric<1, T>
+trace(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix)
+{
+  ShAttrib<1, SH_TEMP, T> r(matrix[0][0]);
+  for (int i=1; i < RowsCols; i++) {
+    r += matrix[i][i];
+  }
+  return r;
 }
 
 template<int N, typename T>
@@ -398,9 +436,9 @@ rotate(const ShGeneric<3, T>& axis,
   result[2][0] -= xyz(1) * s;
   result[2][1] += xyz(0) * s;
   
-  result[0][0] *= 2.0; result[0][0] += c;
-  result[1][1] *= 2.0; result[1][1] += c;
-  result[2][2] *= 2.0; result[2][2] += c;
+  result[0][0] *= xyz(0); result[0][0] += c;
+  result[1][1] *= xyz(1); result[1][1] += c;
+  result[2][2] *= xyz(2); result[2][2] += c;
 
   return result;
 }
@@ -447,6 +485,7 @@ translate(const ShGeneric<2, T>& a)
 
 
 template<typename T>
+inline
 ShMatrix<4, 4, SH_TEMP, T>
 scale(const ShGeneric<3, T>& a)
 {
@@ -454,6 +493,7 @@ scale(const ShGeneric<3, T>& a)
 }
 
 template<typename T>
+inline
 ShMatrix<3, 3, SH_TEMP, T>
 scale(const ShGeneric<2, T>& a)
 {
@@ -461,12 +501,12 @@ scale(const ShGeneric<2, T>& a)
 }
 
 template<int N, typename T>
+inline
 ShMatrix<N, N, SH_TEMP, T>
 scale(const ShGeneric<1, T>& a)
 {
   return diag(join(fillcast<N - 1>(a), ShConstAttrib1f(1.0)));
 }
-
 
 }
 

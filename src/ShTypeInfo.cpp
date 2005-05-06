@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -37,20 +34,23 @@ using namespace SH;
 
 // sets up m_valueType entries for host & memory type for the given value type
 template<typename T>
-void setTypeInfo(ShTypeInfo::TypeInfoMap &valueTypes) {
+void setTypeInfo(ShTypeInfo::TypeInfoMap *valueTypes) {
   ShValueType V = ShStorageTypeInfo<T>::value_type;
-  valueTypes(V, SH_HOST) = ShDataTypeInfo<T, SH_HOST>::instance();
-  valueTypes(V, SH_MEM) = ShDataTypeInfo<T, SH_MEM>::instance();
+  (*valueTypes)(V, SH_HOST) = ShDataTypeInfo<T, SH_HOST>::instance();
+  (*valueTypes)(V, SH_MEM) = ShDataTypeInfo<T, SH_MEM>::instance();
 }
 
 }
 
 namespace SH {
 
-ShTypeInfo::TypeInfoMap ShTypeInfo::m_valueTypes;
+ShTypeInfo::TypeInfoMap* ShTypeInfo::m_valueTypes;
 
 void ShTypeInfo::init()
 {
+  if(m_valueTypes) return;
+  m_valueTypes = new TypeInfoMap();
+
   setTypeInfo<ShAffine<double> >(m_valueTypes);
   setTypeInfo<ShAffine<float> >(m_valueTypes);
 
@@ -85,7 +85,8 @@ void ShTypeInfo::init()
 
 const ShTypeInfo* ShTypeInfo::get(ShValueType valueType, ShDataType dataType)
 {
-  const ShTypeInfo* result = m_valueTypes(valueType, dataType);
+  init();
+  const ShTypeInfo* result = (*m_valueTypes)(valueType, dataType);
   if(!result) SH_DEBUG_PRINT("Null ShTypeInfo");
   return result;
 }

@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -76,6 +73,7 @@ ArbMapping ArbCode::table[] = {
   {SH_OP_POW,  SH_ARB_ANY,   scalarize,    SH_ARB_POW, 0},
   {SH_OP_RCP,  SH_ARB_ANY,   scalarize,    SH_ARB_RCP, 0},
   {SH_OP_RSQ,  SH_ARB_ANY,   scalarize,    SH_ARB_RSQ, 0},
+  {SH_OP_CBRT, SH_ARB_ANY,   scalarize,    SH_ARB_FUN, &ArbCode::emit_cbrt},
   {SH_OP_SQRT, SH_ARB_ANY,   scalarize,    SH_ARB_FUN, &ArbCode::emit_sqrt},
 
   {SH_OP_LRP, SH_ARB_FP,  0, SH_ARB_LRP, 0},
@@ -121,6 +119,7 @@ ArbMapping ArbCode::table[] = {
   {SH_OP_MOD,  SH_ARB_ANY, 0, SH_ARB_FUN, &ArbCode::emit_mod},
   {SH_OP_MAX,  SH_ARB_ANY, 0, SH_ARB_MAX, 0},
   {SH_OP_MIN,  SH_ARB_ANY, 0, SH_ARB_MIN, 0},
+  {SH_OP_RND,  SH_ARB_ANY, 0, SH_ARB_FUN, &ArbCode::emit_rnd},
   {SH_OP_SGN,  SH_ARB_NVVP2, 0, SH_ARB_SSG, 0},
   {SH_OP_SGN,  SH_ARB_ANY, 0, SH_ARB_FUN, &ArbCode::emit_sgn},
   
@@ -133,9 +132,12 @@ ArbMapping ArbCode::table[] = {
   */
   {SH_OP_COS,   SH_ARB_FP,  scalarize, SH_ARB_COS, 0},
   {SH_OP_COS,   SH_ARB_VP,  0,         SH_ARB_FUN, &ArbCode::emit_trig},
+  {SH_OP_COSH,  SH_ARB_ANY, 0,         SH_ARB_FUN, &ArbCode::emit_hyperbolic},
   {SH_OP_SIN,   SH_ARB_FP,  scalarize, SH_ARB_SIN, 0},
   {SH_OP_SIN,   SH_ARB_VP,  0,         SH_ARB_FUN, &ArbCode::emit_trig},
+  {SH_OP_SINH,  SH_ARB_ANY, 0,         SH_ARB_FUN, &ArbCode::emit_hyperbolic},
   {SH_OP_TAN,   SH_ARB_ANY, 0,         SH_ARB_FUN, &ArbCode::emit_tan},
+  {SH_OP_TANH,  SH_ARB_ANY, 0,         SH_ARB_FUN, &ArbCode::emit_hyperbolic},
 
   // Derivatives
   {SH_OP_DX, SH_ARB_NVFP, 0, SH_ARB_DDX, 0},
@@ -170,6 +172,9 @@ ArbMapping ArbCode::table[] = {
   {SH_OP_KIL,  SH_ARB_FP,    0,            SH_ARB_FUN, &ArbCode::emit_kil},
 
   {SH_OP_PAL,  SH_ARB_VP, 0, SH_ARB_FUN, &ArbCode::emit_pal},
+
+//  {SH_OP_RET,  SH_ARB_NVFP2, 0, SH_ARB_FUN, &ArbCode::emit_ret},
+  {SH_OP_RET,  SH_ARB_NVFP2, 0, SH_ARB_RET, 0},
 
   {SH_OP_ASN, SH_ARB_END, 0, SH_ARB_FUN, 0}
 };
@@ -324,23 +329,22 @@ void ArbCode::emit_eq(const ShStatement& stmt)
 
 void ArbCode::emit_ceil(const ShStatement& stmt)
 {
-  m_instructions.push_back(ArbInst(SH_ARB_FLR, stmt.dest, -stmt.src[0])); 
-  m_instructions.push_back(ArbInst(SH_ARB_MOV, stmt.dest, -stmt.dest));
+  ShVariable t(new ShVariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
+
+  m_instructions.push_back(ArbInst(SH_ARB_FLR, t, -stmt.src[0])); 
+  m_instructions.push_back(ArbInst(SH_ARB_MOV, stmt.dest, -t));
 }
 
 void ArbCode::emit_mod(const ShStatement& stmt)
 {
   // TODO - is this really optimal?
-  ShVariable t1(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
-  ShVariable t2(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
+  ShVariable t1(new ShVariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
+  ShVariable t2(new ShVariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
   
-  // result = x - sign(x/y)*floor(abs(x/y))*y
+  // result = x - y*floor(x/y)
   emit(ShStatement(t1, stmt.src[0], SH_OP_DIV, stmt.src[1]));
-  m_instructions.push_back(ArbInst(SH_ARB_ABS, t2, t1));
-  emit(ShStatement(t1, SH_OP_SGN, t1));
-  m_instructions.push_back(ArbInst(SH_ARB_FLR, t2, t2)); 
-  m_instructions.push_back(ArbInst(SH_ARB_MUL, t1, t1, t2)); 
-  m_instructions.push_back(ArbInst(SH_ARB_MUL, t1, t1, stmt.src[1])); 
+  m_instructions.push_back(ArbInst(SH_ARB_FLR, t2, t1));
+  m_instructions.push_back(ArbInst(SH_ARB_MUL, t1, stmt.src[1], t2)); 
   m_instructions.push_back(ArbInst(SH_ARB_SUB, stmt.dest, stmt.src[0], t1)); 
 }
 
@@ -455,6 +459,43 @@ void ArbCode::emit_exp(const ShStatement& stmt)
   m_shader->constants.push_back(base.node());
 
   m_instructions.push_back(ArbInst(SH_ARB_POW, stmt.dest, base, stmt.src[0]));
+}
+
+void ArbCode::emit_hyperbolic(const ShStatement& stmt)
+{
+  ShConstAttrib1f two(2.0f);
+  m_shader->constants.push_back(two.node());
+
+  ShVariable e_plusX(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT)); // e^x
+  ShVariable e_minusX(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT)); // e^-x
+  emit(ShStatement(e_plusX, SH_OP_EXP, stmt.src[0]));
+  emit(ShStatement(e_minusX, SH_OP_NEG, stmt.src[0]));
+  emit(ShStatement(e_minusX, SH_OP_EXP, e_minusX));
+
+  ShVariable temp_cosh(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT)); // e^x + e^-x
+  ShVariable temp_sinh(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT)); // e^x - e^-x
+  m_instructions.push_back(ArbInst(SH_ARB_ADD, temp_cosh, e_plusX, e_minusX)); 
+  m_instructions.push_back(ArbInst(SH_ARB_SUB, temp_sinh, e_plusX, e_minusX)); 
+
+  switch (stmt.op) {
+  case SH_OP_COSH:
+    // cosh x = [e^x + e^-x] / 2
+    m_instructions.push_back(ArbInst(SH_ARB_DIV, stmt.dest, temp_cosh, two));
+    break;
+  case SH_OP_SINH:
+    // cosh x = [e^x - e^-x] / 2
+    m_instructions.push_back(ArbInst(SH_ARB_DIV, stmt.dest, temp_sinh, two));
+    break;
+  case SH_OP_TANH:
+    // tanh x = sinh x / cosh x = [e^x - e^-x] / [e^x + e^-x]
+    for (int i=0; i < temp_cosh.size(); i++) {
+      m_instructions.push_back(ArbInst(SH_ARB_RCP, temp_cosh(i), temp_cosh(i)));
+    } // (not dividing directly because of NVIDIA bug -- see emit_div)
+    m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, temp_sinh, temp_cosh));
+    break;
+  default:
+    SH_DEBUG_ASSERT(0);
+  }
 }
 
 void ArbCode::emit_log(const ShStatement& stmt)
@@ -578,7 +619,7 @@ void ArbCode::emit_cmul(const ShStatement& stmt)
   
   m_instructions.push_back(ArbInst(SH_ARB_MOV, prod, stmt.src[0](0)));
   for (int i = 1; i < stmt.src[0].size(); i++) {
-    m_instructions.push_back(ArbInst(SH_ARB_MUL, prod, stmt.src[0](i)));
+    m_instructions.push_back(ArbInst(SH_ARB_MUL, prod, prod, stmt.src[0](i)));
   }
   m_instructions.push_back(ArbInst(SH_ARB_MOV, stmt.dest, prod));
 }
@@ -586,6 +627,15 @@ void ArbCode::emit_cmul(const ShStatement& stmt)
 void ArbCode::emit_kil(const ShStatement& stmt)
 {
   m_instructions.push_back(ArbInst(SH_ARB_KIL, -stmt.src[0]));
+}
+
+void ArbCode::emit_ret(const ShStatement& stmt)
+{
+  ShVariable dummy(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
+  ArbInst updatecc(SH_ARB_MOV, dummy, stmt.src[0]);
+  updatecc.update_cc = true;
+  m_instructions.push_back(updatecc);
+  m_instructions.push_back(ArbInst(SH_ARB_RET));
 }
 
 void ArbCode::emit_pal(const ShStatement& stmt)
@@ -601,6 +651,29 @@ void ArbCode::emit_lit(const ShStatement& stmt)
   m_instructions.push_back(inst);
 
   emit(ShStatement(stmt.dest, SH_OP_ASN, tmp));
+}
+
+void ArbCode::emit_rnd(const ShStatement& stmt)
+{
+  ShVariable t(new ShVariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
+  
+  ShVariantPtr c1_values = new ShDataVariant<float, SH_HOST>(stmt.src[0].size(), 0.5f); 
+  ShVariable c1(new ShVariableNode(SH_CONST, stmt.src[0].size(), SH_FLOAT));
+  c1.setVariant(c1_values);
+  m_shader->constants.push_back(c1.node());
+
+  m_instructions.push_back(ArbInst(SH_ARB_ADD, t, stmt.src[0], c1)); 
+  m_instructions.push_back(ArbInst(SH_ARB_FLR, stmt.dest, t));
+}
+
+void ArbCode::emit_cbrt(const ShStatement& stmt)
+{
+  ShVariable t(new ShVariableNode(SH_TEMP, 1, SH_FLOAT));
+  ShConstAttrib1f c(3.0f);
+  m_shader->constants.push_back(c.node());
+
+  m_instructions.push_back(ArbInst(SH_ARB_RCP, t, c)); 
+  m_instructions.push_back(ArbInst(SH_ARB_POW, stmt.dest, stmt.src[0], t));
 }
 
 }

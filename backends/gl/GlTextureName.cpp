@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -37,7 +34,7 @@ GlTextureName::GlTextureName(GLenum target)
     m_managed(true)
 {
   glGenTextures(1, &m_name);
-  m_names.push_back(this);
+  m_names->push_back(this);
 }
 
 GlTextureName::GlTextureName(GLenum target, GLuint name)
@@ -47,12 +44,12 @@ GlTextureName::GlTextureName(GLenum target, GLuint name)
              SH::ShTextureTraits::SH_WRAP_CLAMP, SH::ShTextureTraits::SH_CLAMPED),
     m_managed(false)
 {
-  m_names.push_back(this);
+  m_names->push_back(this);
 }
 
 GlTextureName::~GlTextureName()
 {
-  m_names.erase(std::remove(m_names.begin(), m_names.end(), this));
+  m_names->erase(std::remove(m_names->begin(), m_names->end(), this), m_names->end());
   if (m_managed) {
     glDeleteTextures(1, &m_name);
   }
@@ -97,7 +94,7 @@ void GlTextureName::params(const SH::ShTextureTraits& params)
   m_params = params;
 }
 
-GlTextureName::NameList GlTextureName::m_names = GlTextureName::NameList();
+GlTextureName::NameList* GlTextureName::m_names = new GlTextureName::NameList();
 
 GlTextureName::Binding::Binding(const ShPointer<const GlTextureName>& name)
 {
@@ -113,8 +110,13 @@ GlTextureName::Binding::Binding(const ShPointer<const GlTextureName>& name)
   case GL_TEXTURE_CUBE_MAP:
     SH_GL_CHECK_ERROR(glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &last));
     break;
+#if defined( __APPLE__ )
+  case GL_TEXTURE_RECTANGLE_EXT:
+    SH_GL_CHECK_ERROR(glGetIntegerv(GL_TEXTURE_BINDING_RECTANGLE_EXT, &last));
+#else
   case GL_TEXTURE_RECTANGLE_NV:
     SH_GL_CHECK_ERROR(glGetIntegerv(GL_TEXTURE_BINDING_RECTANGLE_NV, &last));
+#endif // __APPLE__
     break;
   case GL_TEXTURE_3D:
     SH_GL_CHECK_ERROR(glGetIntegerv(GL_TEXTURE_BINDING_3D, &last));

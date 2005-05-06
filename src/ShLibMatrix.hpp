@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -39,6 +36,27 @@ namespace SH {
  * @{
  */
 
+/** Matrix addition.
+ * Only works on matrices of same sizes.
+ */
+template<int M, int N, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
+ShMatrix<N, M, SH_TEMP, CT1T2>
+operator+(const ShMatrix<N, M, Binding, T1>& a, const ShMatrix<N, M, Binding2, T2>& b);
+
+/** Matrix subtraction.
+ * Only works on matrices of same sizes.
+ */
+template<int M, int N, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
+ShMatrix<N, M, SH_TEMP, CT1T2>
+operator-(const ShMatrix<N, M, Binding, T1>& a, const ShMatrix<N, M, Binding2, T2>& b);
+
+/** Matrix division.
+ * Only works on matrices of same sizes.
+ */
+template<int M, int N, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
+ShMatrix<N, M, SH_TEMP, CT1T2>
+operator/(const ShMatrix<N, M, Binding, T1>& a, const ShMatrix<N, M, Binding2, T2>& b);
+
 /** Matrix multiplication.
  * Only works on matrices of compatible sizes.
  */
@@ -56,8 +74,7 @@ operator*(const ShMatrix<M, N, Binding, T1>& a,
  * Treats the tuple as a column vector.
  */
 template<int M, int N, ShBindingType Binding, typename T1, typename T2>
-ShGeneric<M, CT1T2> 
-operator|(const ShMatrix<M, N, Binding, T1>& a, const ShGeneric<N, T2>& b);
+ShGeneric<M, CT1T2> operator|(const ShMatrix<M, N, Binding, T1>& a, const ShGeneric<N, T2>& b);
 template<int M, int N, ShBindingType Binding, typename T1, typename T2>
 ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding, T1>& a, const ShGeneric<N, T2>& b);
 
@@ -73,16 +90,20 @@ ShGeneric<N, CT1T2> operator*(const ShGeneric<M, T1>& a, const ShMatrix<M, N, Bi
 template<int M, int N, ShBindingType Binding, typename T1, typename T2>
 ShMatrix<M, N, SH_TEMP, CT1T2>
 operator*(const ShMatrix<M, N, Binding, T1>& a, const ShGeneric<1, T2>& b);
+
 template<int M, ShBindingType Binding, typename T1, typename T2>
 ShMatrix<M, 1, SH_TEMP, CT1T2>
 operator*(const ShMatrix<M, 1, Binding, T1>& a, const ShGeneric<1, T2>& b);
+
 /// Scalar-matrix multiplication
 template<int M, int N, ShBindingType Binding, typename T1, typename T2>
 ShMatrix<M, N, SH_TEMP, CT1T2>
 operator*(const ShGeneric<1, T1>& a, const ShMatrix<M, N, Binding, T2>& b);
+
 template<int N, ShBindingType Binding, typename T1, typename T2>
 ShMatrix<1, N, SH_TEMP, CT1T2>
 operator*(const ShGeneric<1, T1>& a, const ShMatrix<1, N, Binding, T2>& b);
+
 /// Matrix-scalar division
 template<int M, int N, ShBindingType Binding, typename T1, typename T2>
 ShMatrix<M, N, SH_TEMP, CT1T2>
@@ -132,6 +153,14 @@ adjoint(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
 template<int RowsCols, ShBindingType Binding2, typename T2>
 ShMatrix<RowsCols,RowsCols, SH_TEMP, T2>
 inverse(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
+
+/** \brief Trace of a matrix.
+ *
+ * Returns the sum of the diagonal entries of a matrix.
+ */
+template<int RowsCols, ShBindingType Binding, typename T>
+ShGeneric<1, T>
+trace(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix);
 
 template<int N, typename T>
 ShMatrix<1, N, SH_TEMP, T>

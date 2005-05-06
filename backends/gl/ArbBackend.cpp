@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -34,11 +31,7 @@
 #include "GlTextures.hpp"
 #include "GlBackend.hpp"
 
-#ifdef WIN32
-#include "WGLPBufferStreams.hpp"
-#else
-#include "GLXPBufferStreams.hpp"
-#endif /* WIN32 */
+#include "PBufferStreams.hpp"
 
 namespace shgl {
 
@@ -46,11 +39,12 @@ struct ArbBackend : public GlBackend {
   ArbBackend()
     : GlBackend(new ArbCodeStrategy(),
                 new GlTextures(),
-#ifdef WIN32
-                new WGLPBufferStreams())
+#ifdef __APPLE__
+                // For now...
+                0)
 #else
-                new GLXPBufferStreams())
-#endif /* WIN32 */
+                new PBufferStreams())
+#endif
   {
   }
 
@@ -65,27 +59,19 @@ BOOL APIENTRY DllMain(HANDLE hModule,
                       DWORD  ul_reason_for_call, 
                       LPVOID lpReserved)
 {
-  std::cerr << "Arb Backend DllMain called!" << std::endl;
-  std::cerr << "Have backend: " << backend << std::endl;
-  std::cerr << "lpReserved = " << lpReserved << std::endl;
-  std::cerr << "hModule = " << hModule << std::endl;
   switch (ul_reason_for_call) {
   case DLL_PROCESS_ATTACH:
-    std::cerr << "Process attach!" << std::endl;
     if (backend) return TRUE;
     backend = new ArbBackend();
     break;
   case DLL_THREAD_ATTACH:
   case DLL_THREAD_DETACH:
-    std::cerr << "Thread!" << std::endl;
     break;
   case DLL_PROCESS_DETACH:
-    std::cerr << "Process detach!" << std::endl;
     delete backend;
-    std::cerr << "Deleted backend!" << std::endl;
     break;
   default:
-    std::cerr << "Some Other Thing!" << std::endl;
+    break;
   }
   return TRUE;
 }

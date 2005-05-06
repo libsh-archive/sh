@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -34,7 +31,6 @@
 namespace SH {
 
 template<int M, int N, typename T> 
-inline
 ShGeneric<M, T> cast(const ShGeneric<N, T>& a)
 {
   int copySize = std::min(M, N);
@@ -61,7 +57,6 @@ ShGeneric<M, double> cast(double a)
 }
 
 template<int M, int N, typename T> 
-inline
 ShGeneric<M, T> fillcast(const ShGeneric<N, T>& a)
 {
   if( M <= N ) return cast<M>(a);
@@ -78,7 +73,6 @@ ShGeneric<M, double> fillcast(double a)
 }
 
 template<int M, int N, typename T1, typename T2> 
-inline
 ShGeneric<M+N, CT1T2> join(const ShGeneric<M, T1>& a, const ShGeneric<N, T2>& b)
 {
   int indices[M+N];
@@ -90,7 +84,6 @@ ShGeneric<M+N, CT1T2> join(const ShGeneric<M, T1>& a, const ShGeneric<N, T2>& b)
 }
 
 template<int M, int N, int O, typename T1, typename T2, typename T3> 
-inline
 ShGeneric<M+N+O, CT1T2T3> join(const ShGeneric<M, T1>& a, 
 			       const ShGeneric<N, T2> &b, 
 			       const ShGeneric<O, T3> &c)
@@ -105,7 +98,6 @@ ShGeneric<M+N+O, CT1T2T3> join(const ShGeneric<M, T1>& a,
 }
 
 template<int M, int N, int O, int P, typename T1, typename T2, typename T3, typename T4> 
-inline
 ShGeneric<M+N+O+P, CT1T2T3T4> join(const ShGeneric<M, T1>& a, 
 				   const ShGeneric<N, T2> &b, 
 				   const ShGeneric<O, T3> &c, 
@@ -135,7 +127,81 @@ void kill(const ShGeneric<N, T>& c)
   discard(c);
 }
 
+template<int N, typename T> 
+ShGeneric<N, T> sort(const ShGeneric<N, T>& a)
+{
+  ShGeneric<N, T> result(a);
+  groupsort<1>(&result);
+  return result;
+}
+
+template<int S, int N, typename T>
+void groupsort(ShGeneric<N, T> v[]) {
+  const int NE = (N + 1) / 2; // number of even elements
+  const int NO = N / 2; // number of odd elements
+  const int NU = NO; // number of components to compare for (2i, 2i+1) comparisons
+  const int ND = NE - 1; // number of componnets to compare for (2i, 2i-1) comparisons
+
+  int i, j;
+  // hold even/odd temps and condition code for (2i, 2i+1) "up" and (2i, 2i-1) "down" comparisons 
+  ShAttrib<NU, SH_TEMP, T> eu, ou, ccu; 
+  ShAttrib<ND, SH_TEMP, T> ed, od, ccd; 
+
+  // even and odd swizzle (elms 0..NE-1 are the "even" subsequence, NE..N-1 "odd")
+  int eswiz[NE], oswiz[NO]; 
+  for(i = 0; i < NE; ++i) eswiz[i] = i;
+  for(i = 0; i < NO; ++i) oswiz[i] = NE + i;
+
+  for(i = 0; i < NE; ++i) { 
+    // TODO note the interesting syntax (does appear to be C++ standard) 
+    // that's required so that the gcc parser does 
+    // not crap out on the template swiz code
+    //
+    // if this doesn't work on other platforms, we may have to
+    // rewrite the swiz function
+
+    // compare 2i, 2i+1
+    eu = v[0].template swiz<NU>(eswiz);
+    ou = v[0].template swiz<NU>(oswiz);
+    if (S > 1) ccu = eu < ou; 
+    v[0].template swiz<NU>(eswiz) = min(eu, ou); 
+    v[0].template swiz<NU>(oswiz) = max(eu, ou); 
+
+    for(j = 1; j < S; ++j) {
+      eu = v[j].template swiz<NU>(eswiz);
+      ou = v[j].template swiz<NU>(oswiz);
+      v[j].template swiz<NU>(eswiz) = cond(ccu, eu, ou); 
+      v[j].template swiz<NU>(oswiz) = cond(ccu, ou, eu); 
+    }
+
+    // compare 2i, 2i-1
+    ed = v[0].template swiz<ND>(eswiz + 1);
+    od = v[0].template swiz<ND>(oswiz);
+    if (S > 1) ccd = ed > od; 
+    v[0].template swiz<ND>(eswiz + 1) = max(ed, od);
+    v[0].template swiz<ND>(oswiz) = min(ed, od);
+
+    for(j = 1; j < S; ++j) {
+      ed = v[j].template swiz<ND>(eswiz + 1);
+      od = v[j].template swiz<ND>(oswiz);
+      v[j].template swiz<ND>(eswiz + 1) = cond(ccd, ed, od); 
+      v[j].template swiz<ND>(oswiz) = cond(ccd, od, ed); 
+    }
+  }
+
+  // reswizzle "even" to 0, 2, 4,... "odd" to 1, 3, 5, ..
+  int resultEswiz[NE], resultOswiz[NO]; 
+  for(i = 0; i < NE; ++i) resultEswiz[i] = i * 2;
+  for(i = 0; i < NO; ++i) resultOswiz[i] = i * 2 + 1; 
+  for(i = 0; i < S; ++i) {
+    ShAttrib<NE, SH_TEMP, T> evens = v[i].template swiz<NE>(eswiz);
+    v[i].template swiz<NO>(resultOswiz) = v[i].template swiz<NO>(oswiz);
+    v[i].template swiz<NE>(resultEswiz) = evens;
+  }
+}
+
 template<typename T>
+inline
 ShProgram freeze(const ShProgram& p,
                  const T& uniform)
 {
@@ -147,6 +213,26 @@ inline
 void dbg_output(const ShGeneric<N, T>& a)
 {
   shDBG(c);
+}
+
+template<int N, int M, typename T1, typename T2>
+ShGeneric<N, CT1T2> poly(const ShGeneric<N, T1>& a, const ShGeneric<M, T2>& b)
+{
+  ShAttrib<N, SH_TEMP, CT1T2> t;
+
+  for (int i=0; i < N; i++) {
+    ShGeneric<1, CT1T2> r_i = t[i];
+    ShGeneric<1, T1> a_i = a[i];
+
+    r_i = b[0];                        // j = 0
+    if (M >= 2) r_i += a_i * b[1];     // j = 1
+    if (M >= 3) r_i += a_i*a_i * b[2]; // j = 2
+    for (int j=3; j < M; j++) {
+      r_i += pow(a_i, j) * b[j];
+    }
+  }
+
+  return t;
 }
 
 }

@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Bryan Chan, Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -40,7 +37,7 @@ using namespace SH;
 
 
 template<int M, typename T, int P>
-ShArray3D<ShColor<M, SH_TEMP, T> > ShNoise<M, T, P>::noiseTex(P, P, P); // pseudorandom 3D noise texture
+ShArray3D<ShAttrib<M, SH_TEMP, T, SH_COLOR> > ShNoise<M, T, P>::noiseTex(P, P, P); // pseudorandom 3D noise texture
 
 template<int M, typename T, int P>
 bool ShNoise<M, T, P>::m_init = false; // whether Perlin is initialized. 

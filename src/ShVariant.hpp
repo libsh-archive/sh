@@ -23,6 +23,28 @@
 /// 
 /// 3. This notice may not be removed or altered from any source
 /// distribution.
+// Sh: A GPU metaprogramming language.
+//
+// Copyright 2003-2005 Serious Hack Inc.
+// 
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+// 
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+// 
+// 1. The origin of this software must not be misrepresented; you must
+// not claim that you wrote the original software. If you use this
+// software in a product, an acknowledgment in the product documentation
+// would be appreciated but is not required.
+// 
+// 2. Altered source versions must be plainly marked as such, and must
+// not be misrepresented as being the original software.
+// 
+// 3. This notice may not be removed or altered from any source
+// distribution.
 //////////////////////////////////////////////////////////////////////////////
 #ifndef SHVARIANT_HPP
 #define SHVARIANT_HPP
@@ -113,8 +135,9 @@ ShVariant: public ShRefCountable {
     virtual ShPointer<ShVariant> get(int index) const = 0;
 
     /// Creates a copy of the Variant with the given swizzle and negation
+    /// for a given number of elements (defaults to 1)
     /// swizzle.m_srcSize must equal size()
-    virtual ShPointer<ShVariant> get(bool neg, const ShSwizzle &swizzle) const = 0; 
+    virtual ShPointer<ShVariant> get(bool neg, const ShSwizzle &swizzle, int count=1) const = 0; 
 
     /// Returns true iff other is the same size, type, and has the same values
     // This uses shDataTypeEquals
@@ -191,7 +214,7 @@ class ShDataVariant: public ShVariant {
     /// Constructs a data array using values from another array
     /// swizzled and negated as requested. 
     ShDataVariant(const ShDataVariant<T, DT> &other);
-    ShDataVariant(const ShDataVariant<T, DT> &other, bool neg, const ShSwizzle &swizzle); 
+    ShDataVariant(const ShDataVariant<T, DT> &other, bool neg, const ShSwizzle &swizzle, int count=1); 
 
     virtual ~ShDataVariant();
 
@@ -220,7 +243,7 @@ class ShDataVariant: public ShVariant {
 
     ShVariantPtr get() const; 
     ShVariantPtr get(int index) const; 
-    ShVariantPtr get(bool neg, const ShSwizzle &swizzle) const; 
+    ShVariantPtr get(bool neg, const ShSwizzle &swizzle, int count=1) const; 
 
     bool equals(ShVariantCPtr other) const; 
     bool equals(const ShVariant* other) const; 

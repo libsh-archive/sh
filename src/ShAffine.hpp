@@ -347,7 +347,11 @@ public:
   template<typename TT>
   friend ShAffine<TT> cos(const ShAffine<TT>& a); 
   template<typename TT>
+  friend ShAffine<TT> cosh(const ShAffine<TT>& a); 
+  template<typename TT>
   friend ShAffine<TT> sin(const ShAffine<TT>& a);
+  template<typename TT>
+  friend ShAffine<TT> sinh(const ShAffine<TT>& a);
 
   template<typename TT>
   friend ShAffine<TT> tan(const ShAffine<TT>& a);

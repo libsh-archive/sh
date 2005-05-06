@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -481,8 +478,9 @@ void* ShVariableNode::operator new(std::size_t size)
 
 void ShVariableNode::operator delete(void* ptr)
 {
-  // Really, if we don't have a pool, we should throw an exception or something.
-  m_pool->free(ptr);
+  // We won't have a pool if the object is an instance of a class
+  // derived from ShVariableNode (ShChannelNode for example)
+  if (m_pool) m_pool->free(ptr);
 }
 #endif
 

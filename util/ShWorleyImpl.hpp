@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Bryan Chan, Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -251,7 +248,7 @@ void worley(ShGeneric<K, T> result[], const ShGeneric<D, T> &p,
   }
 
   // sort points & gradients by distance
-  groupEvenOddSort<L>(props); 
+  groupsort<L>(props); 
 
   // weighted sum of basis function values to get final result
   for(j = 0; j < L; ++j) result[j] = cast<K>(props[j]);
@@ -285,7 +282,7 @@ template<int K, int L, int P, int D, typename T>
 ShProgram shWorley(const GeneratorFactory<P, D, T> *genFactory,
         const PropertyFactory<L, D, T> *propFactory) {
   ShProgram program = SH_BEGIN_PROGRAM() {
-    ShTexCoord<D, SH_INPUT, T> SH_DECL(texcoord);
+    ShAttrib<D, SH_INPUT, T, SH_TEXCOORD> SH_DECL(texcoord);
 
     ShAttrib<K, SH_OUTPUT, T> result[L]; 
     worley(&result[0], texcoord, genFactory, propFactory); 

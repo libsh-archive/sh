@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -97,10 +94,46 @@ void shBind(ShProgram& prg)
   prg.code(ShEnvironment::backend)->bind();
 }
 
+void shBind(const ShProgramSet& s)
+{
+  if (!ShEnvironment::backend) return;
+  s.backend_set(ShEnvironment::backend)->bind();
+}
+
 void shBind(const std::string& target, ShProgram& prg)
 {
   if (!ShEnvironment::backend) return;
   prg.code(target, ShEnvironment::backend)->bind();
+}
+
+void shUnbind()
+{
+  if (!ShEnvironment::backend) return;
+  ShEnvironment::backend->unbind_all();
+}
+
+void shUnbind(ShProgram& prg)
+{
+  if (!ShEnvironment::backend) return;
+  prg.code(ShEnvironment::backend)->unbind();
+}
+
+void shUnbind(const ShProgramSet& s)
+{
+  if (!ShEnvironment::backend) return;
+  s.backend_set(ShEnvironment::backend)->unbind();
+}
+
+void shUnbind(const std::string& target, ShProgram& prg)
+{
+  if (!ShEnvironment::backend) return;
+  prg.code(target, ShEnvironment::backend)->unbind();
+}
+
+void shLink(const ShProgramSet& s)
+{
+  if (!ShEnvironment::backend) return;
+  s.backend_set(ShEnvironment::backend)->link();
 }
 
 typedef std::map<std::string, ShProgram> BoundProgramMap;

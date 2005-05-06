@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -30,6 +27,8 @@
 #include "ShDllExport.hpp"
 #include "ShException.hpp"
 #include "ShContext.hpp"
+#include "ShProgramNode.hpp"
+#include "ShProgramSet.hpp"
 #include "ShProgram.hpp"
 #include "ShSyntax.hpp"
 #include "ShInterval.hpp"

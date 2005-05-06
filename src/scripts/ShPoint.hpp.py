@@ -10,8 +10,7 @@ decl = semantic.Class("Point", "point", "SH_POINT",
                       """An n-point.
 """)
 
-decl.declare_all()
+decl.declare_parametrization()
 
 common.endnamespace()
-common.inprint('#include "ShPointImpl.hpp"')
 common.endguard("SHPOINT_HPP")

@@ -280,7 +280,8 @@ struct AffineInputToIntervalBase: public ShTransformerParent {
         iaInput.name("ia_" + node->name());
         ShVariableNodePtr tempNode = node->clone(SH_TEMP);
         aamap[node] = tempNode; 
-        shASN(ShVariable(tempNode), iaInput);
+        ShVariable tempVar(tempNode);
+        shASN(tempVar, iaInput);
 
         m_program->inputs.insert(I, iaInput.node());
         I = m_program->inputs.erase(I);

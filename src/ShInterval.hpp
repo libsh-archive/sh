@@ -181,7 +181,11 @@ struct ShInterval {
   template<typename TT>
   friend ShInterval<TT> cos(const ShInterval<TT> &a); 
   template<typename TT>
+  friend ShInterval<TT> cosh(const ShInterval<TT> &a); 
+  template<typename TT>
   friend ShInterval<TT> sin(const ShInterval<TT> &a);
+  template<typename TT>
+  friend ShInterval<TT> sinh(const ShInterval<TT> &a);
 
   template<typename TT>
   friend ShInterval<TT> tan(const ShInterval<TT> &a);

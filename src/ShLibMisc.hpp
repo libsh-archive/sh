@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -93,6 +90,21 @@ void discard(const ShGeneric<N, T>& c);
 template<int N, typename T>
 void kill(const ShGeneric<N, T>& c);
 
+/** Sort components of a in increasing order.
+ *
+ * Creates an N tuple with the components of a * in sorted increasing
+ * order using an even-odd transposition sort.
+ */
+template<int N, typename T> 
+ShGeneric<N, T> sort(const ShGeneric<N, T>& a);
+
+/** \brief Sorts groups of components v[i](j), 0 <= i < S
+  * by the components in v[0](j) 0 <= j < N.
+  * Uses an even-odd transposition sort.
+  */
+template<int S, int N, typename T>
+void groupsort(ShGeneric<N, T> v[]);
+
 /** Uniform freezing.
  *
  * Replace uses of the given uniform in the given program with a
@@ -111,6 +123,12 @@ ShProgram freeze(const ShProgram& p,
  */
 template<int N, typename T>
 void dbg_output(const ShGeneric<N, T>& a);
+
+/* Evaluation of polynomial of order M at a using coefficients in b.
+ */
+template<int N, int M, typename T1, typename T2>
+ShGeneric<N, CT1T2>
+poly(const ShGeneric<N, T1>& a, const ShGeneric<M, T2>& b);
 
 /*@}*/
 

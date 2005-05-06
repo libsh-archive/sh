@@ -4,27 +4,40 @@ OBJECTS = $(SOURCES:.cpp=.o)
 DEPENDS = $(SOURCES:.cpp=.d)
 CPPFLAGS = -I../../src 
 #CXXFLAGS = -g -O0 -Wall
-CXXFLAGS = -g -O2 -Wall
-LDFLAGS = ../../src/libsh.la 
+CXXFLAGS = -O2 -Wall
+LDFLAGS = ../../src/libsh.la
 
 # LDFLAGS = ../../src/libsh.la
 
 all: $(EXECUTABLES)
 
 clean:
-	rm -f *.o $(EXECUTABLES) *.d *.log
+	@rm -f *.o $(EXECUTABLES) *.d *.log *.out *.prof *.temp
+	@rm -f *.gprof gmon.out
+	@rm -rf .libs
 
 %: %.o
-	libtool --mode=link $(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
+	@libtool --mode=link $(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDFLAGS) > /dev/null
+
+%.prof: %.gprof
+	@./$< # Run the program to generate gprof data
+	@libtool --mode=execute gprof $< > $@
+	@rm -f gmon.out
+
+%.gprof: %.gprof.o
+	@libtool --mode=link $(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDFLAGS) -pg > /dev/null
+
+%.gprof.o: %.cpp
+	@echo Compiling $@ with gprof support
+	@$(CXX) -c -o $@ $(CPPFLAGS) $(CXXFLAGS) -pg -I../../src $<
 
 %.o: %.cpp
-	$(CXX) -c -o $@ $(CPPFLAGS) $(CXXFLAGS) -I../../src $<
+	@echo Compiling $@
+	@$(CXX) -c -o $@ $(CPPFLAGS) $(CXXFLAGS) -I../../src $<
 
 %.d: %.cpp
-	$(CXX) -M $(CPPFLAGS) $< > $@.$$$$; \
+	@$(CXX) -M $(CPPFLAGS) $< > $@.$$$$; \
             sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
             rm -f $@.$$$$
 
-include $(DEPENDS)
-
-
+-include $(DEPENDS)

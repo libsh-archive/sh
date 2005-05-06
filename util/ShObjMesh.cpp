@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -44,6 +41,8 @@ struct Triple {
       idx[0] = idx[1] = idx[2] = 0;
       while(in.peek() != '\n' && isspace(in.peek())) in.ignore();
 
+      if (in.peek() == '\n') return;
+      
       // each vertex spec must not have spaces (just copying what the old ShObjFile did...)
       in >> std::noskipws;  
       for(int i = 0; i < 3;) {
@@ -52,9 +51,12 @@ struct Triple {
           in.clear();
           if(in.peek() == '/') {
             ++i;
-            in.ignore(); 
-          }else {
-            return;
+            in.ignore();
+          } else if (isspace(in.peek())) {
+            break;
+          } else {
+            // ?
+            break;
           }
         } 
       }
@@ -96,7 +98,9 @@ std::istream& ShObjMesh::readObj(std::istream &in) {
   // read in verts,tangents,normals, etc. first 
   while (in) {
     in >> std::ws >> ch;
-    if (!in) break; // TODO: Check for error conditions.
+    if (!in) {
+      break; // TODO: Check for error conditions.
+    }
     switch (ch) {
       case 'v': {
         ch = in.get();
@@ -316,7 +320,7 @@ void ShObjMesh::normalizeNormals() {
 struct ObjVertLess {
  static const float EPS;
 
- inline bool operator()( const ShObjVertex *a, const ShObjVertex *b ) const {
+ bool operator()( const ShObjVertex *a, const ShObjVertex *b ) const {
    float aval[3], bval[3];
    a->pos.getValues(aval); b->pos.getValues(bval);
 

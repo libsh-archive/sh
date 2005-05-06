@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -65,7 +62,7 @@ using namespace SH;
 #define shGlDeleteProgramsARB glDeleteProgramsARB
 #define shGlBindProgramARB glBindProgramARB
 
-#define ARBCODE_DEBUG
+// #define ARBCODE_DEBUG
 
 struct ArbBindingSpecs {
   ArbRegBinding binding;
@@ -158,7 +155,7 @@ ArbCode::ArbCode(const ShProgramNodeCPtr& shader, const std::string& unit,
   // initialize m_convertMap
   m_convertMap[SH_DOUBLE] = SH_FLOAT; 
 
-  bool halfSupport = m_environment & (SH_ARB_NVFP | SH_ARB_NVFP2);
+  bool halfSupport = m_environment & SH_ARB_NVFP; 
   if(!halfSupport) m_convertMap[SH_HALF] = SH_FLOAT;
 
   m_convertMap[SH_INT] = SH_FLOAT;
@@ -362,9 +359,26 @@ void ArbCode::bind()
       updateUniform(node);
     }
   }
-  // Make sure all textures are loaded.
 
+  // Make sure all textures are loaded.
   bindTextures();
+  
+  if (m_unit == "vertex") {
+    SH_GL_CHECK_ERROR(glEnable(GL_VERTEX_PROGRAM_ARB));
+  } else if (m_unit == "fragment") {
+    SH_GL_CHECK_ERROR(glEnable(GL_FRAGMENT_PROGRAM_ARB));
+  }
+}
+
+void ArbCode::unbind()
+{
+  ShContext::current()->unset_binding(std::string("arb:") + m_unit);
+
+  if (m_unit == "vertex") {
+    SH_GL_CHECK_ERROR(glDisable(GL_VERTEX_PROGRAM_ARB));
+  } else if (m_unit == "fragment") {
+    SH_GL_CHECK_ERROR(glDisable(GL_FRAGMENT_PROGRAM_ARB));
+  }
 }
 
 void ArbCode::update()
@@ -447,16 +461,22 @@ std::ostream& ArbCode::printVar(std::ostream& out, bool dest, const ShVariable& 
 {
   RegMap::const_iterator I = m_registers.find(var.node());
   if (I == m_registers.end()) {
-    out << "<no reg for " << var.name() << ">";
-    return out;
+    if ((1 == var.size()) && (SH_CONST == var.node()->kind())) {
+      // Immediate value -- no need for a register
+      out << var.getVariant()->encodeArray();
+      return out; // no swizzling
+    } else {
+      std::cerr << "No register allocated for variable '" << var.name() << "' (size=" 
+		<< var.size() << "; kind=" << var.node()->kind() << ")" << std::endl;
+      out << "<no reg for " << var.name() << ">";
+      return out;
+    }
+  } else {
+    // The variable has a register assigned to it
+    if (var.neg()) out << '-';
+    const ArbReg& reg = *I->second;
+    out << reg;
   }
-  const ArbReg& reg = *I->second;
-
-  // Negation
-  if (var.neg()) out << '-';
-
-  // Register name
-  out << reg;
 
   if (do_swiz) {
     // Swizzling
@@ -589,13 +609,23 @@ std::ostream& ArbCode::print(std::ostream& out)
     (*I)->printDecl(out);
     out << endl;
   }
-  if (m_numTemps +  m_numHalfTemps > 0) {
-    out << "  TEMP ";
+  bool halfSupport = m_environment & SH_ARB_NVFP;
+  if (m_numTemps > 0) { 
+    if(halfSupport) {
+      out << "  LONG TEMP ";
+    } else {
+      out << "  TEMP ";
+    }
     for (int i = 0; i < m_numTemps; i++) {
       if (i > 0) out << ", ";
       out << ArbReg(SH_ARB_REG_TEMP, i);
     }
-    if(m_numTemps > 0 && m_numHalfTemps > 0) out << ", ";
+    out << ";" << endl;
+  }
+
+  if(m_numHalfTemps > 0) { 
+    SH_DEBUG_ASSERT(halfSupport); // assume half support...
+    out << "  SHORT TEMP ";
     for (int i = 0; i < m_numHalfTemps; i++) {
       if (i > 0) out << ", ";
       out << ArbReg(SH_ARB_REG_HALF_TEMP, i);
@@ -659,6 +689,29 @@ std::ostream& ArbCode::print(std::ostream& out)
         out << ")";
       }
       out << ";";
+    } else if (I->op == SH_ARB_RET) {
+      if (I->src[0].node()) {
+        out << "  MOVC ";
+        printVar(out, true, I->src[0], false);
+        out << ", ";
+        printVar(out, false, I->src[0], false, I->src[0].swizzle());
+        out << ";" << endl;
+      }
+      out << "  RET ";
+      if (I->src[0].node()) {
+        out << " (";
+        if (I->invert) {
+          out << "LE";
+        } else {
+          out << "GT";
+        }
+        out << ".";
+        for (int i = 0; i < I->src[0].swizzle().size(); i++) {
+          out << swizChars[I->src[0].swizzle()[i]];
+        }
+        out << ")";
+      }
+      out << ";";
     } else if (I->op == SH_ARB_ENDREP) {
       out << "  ENDREP;";
     } else if (I->op == SH_ARB_IF) {
@@ -694,7 +747,9 @@ std::ostream& ArbCode::print(std::ostream& out)
       out << arbOpInfo[I->op].name;
       if (I->update_cc) out << "C";
       out << " ";
-      printVar(out, true, I->dest, arbOpInfo[I->op].collectingOp);
+      if (I->dest.node()) {
+        printVar(out, true, I->dest, arbOpInfo[I->op].collectingOp);
+      }
       if (I->ccode != ArbInst::NOCC) {
         out << " (";
         out << arbCCnames[I->ccode];
@@ -893,7 +948,7 @@ void ArbCode::allocRegs()
 
   try {
     allocTemps(limits, false);
-    bool halfSupport = m_environment & (SH_ARB_NVFP | SH_ARB_NVFP2);
+    bool halfSupport = m_environment & SH_ARB_NVFP; 
     if(halfSupport) {
       allocTemps(limits, true);
     }
@@ -1296,24 +1351,100 @@ void ArbCode::allocTemps(const ArbLimits& limits, bool half)
 }
 
 void ArbCode::allocTextures(const ArbLimits& limits)
-{
+  {
+  std::list<GLuint> reserved;
+
+  // reserved any texunits specified at the program level
+  if (!m_shader->meta("opengl:reservetex").empty())
+    {
+    GLuint index;
+    std::istringstream is(m_shader->meta("opengl:reservetex"));
+
+    while(1)
+      {
+      is >> index;
+      if (!is) break;
+      reserved.push_back(index);
+      }
+    }
+
+  // reserve and allocate any preset texunits
   for (ShProgramNode::TexList::const_iterator I = m_shader->textures.begin();
-       I != m_shader->textures.end(); ++I) {
+       I != m_shader->textures.end();
+       ++I)
+    {
     ShTextureNodePtr node = *I;
-    int index;
-    index = m_numTextures;
-    m_registers[node] = new ArbReg(SH_ARB_REG_TEXTURE, index, node->name());
-    m_reglist.push_back(m_registers[node]);
-    m_numTextures++;
+    
+    if (!node->meta("opengl:texunit").empty() ||
+	!node->meta("opengl:preset").empty())
+      {
+      GLuint index;
+      std::istringstream is;
+
+      if (!node->meta("opengl:texunit").empty())
+	{
+	is.str(node->meta("opengl:texunit"));
+	}
+      else
+	{
+	is.str(node->meta("opengl:preset"));
+	}
+
+      is >> index; // TODO: Check for errors
+
+      if (std::find(reserved.begin(), reserved.end(), index) == reserved.end())
+	{
+	m_registers[node] = new ArbReg(SH_ARB_REG_TEXTURE, index, node->name());
+	m_registers[node]->preset = true;
+	m_reglist.push_back(m_registers[node]);
+	reserved.push_back(index);
+	}
+      else
+	{
+	// TODO: flag some sort of error for multiple tex unit use
+	}
+      }
+    }
+
+  // allocate remaining textures units with respect to the reserved list
+  for (ShProgramNode::TexList::const_iterator I = m_shader->textures.begin();
+       I != m_shader->textures.end();
+       ++I)
+    {
+    ShTextureNodePtr node = *I;
+    
+    if (node->meta("opengl:texunit").empty() &&
+	node->meta("opengl:preset").empty())
+      {
+      GLuint index;
+      index = m_numTextures;
+
+      // TODO: should there be an upperlimit of the texunit, maybe query
+      // OpenGL for the maximum number of texunits
+      while(1)
+	{
+	if (std::find(reserved.begin(), reserved.end(), index) == reserved.end()) break;
+	else index++;
+	}
+      
+      m_registers[node] = new ArbReg(SH_ARB_REG_TEXTURE, index, node->name());
+      m_reglist.push_back(m_registers[node]);
+      m_numTextures = index + 1;
+      }
+    }
   }
-}
 
 void ArbCode::bindTextures()
-{
+  {
   for (ShProgramNode::TexList::const_iterator I = m_shader->textures.begin();
-       I != m_shader->textures.end(); ++I) {
-    m_texture->bindTexture(*I, GL_TEXTURE0 + m_registers[*I]->index);
+       I != m_shader->textures.end();
+       ++I)
+    {
+    if (!m_registers[*I]->preset)
+      {
+      m_texture->bindTexture(*I, GL_TEXTURE0 + m_registers[*I]->index);
+      }
+    }
   }
-}
 
 }

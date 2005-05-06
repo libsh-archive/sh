@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -166,6 +163,21 @@ ShGeneric<N, T> sat(const ShGeneric<N, T>& a);
  */
 template<int N, typename T>
 ShGeneric<N, T> sign(const ShGeneric<N, T>& var);
+
+
+/** Linear smooth step.
+ * Linear smooth step of t centered around c with width w.
+ */
+template <int N, typename T>
+ShGeneric<N, T> smoothstep (const ShGeneric<N, T>& t, const ShGeneric<N, T>& c,
+			    const ShGeneric<N, T>& w);
+
+/** Linear smooth pulse.
+ * Linear smooth pulse of t between r0 and r1 with width w.
+ */
+template <int N, typename T>
+ShGeneric<N, T> smoothpulse (const ShGeneric<N, T>& t, const ShGeneric<N, T>& r0, 
+			     const ShGeneric<N, T>& r1, const ShGeneric<N, T>& w);
 
 /*@}*/
 

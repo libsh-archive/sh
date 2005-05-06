@@ -1,21 +1,55 @@
-// -*- C++ -*-
+// Sh: A GPU metaprogramming language.
+//
+// Copyright 2003-2005 Serious Hack Inc.
+// 
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+// 
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+// 
+// 1. The origin of this software must not be misrepresented; you must
+// not claim that you wrote the original software. If you use this
+// software in a product, an acknowledgment in the product documentation
+// would be appreciated but is not required.
+// 
+// 2. Altered source versions must be plainly marked as such, and must
+// not be misrepresented as being the original software.
+// 
+// 3. This notice may not be removed or altered from any source
+// distribution.
+//////////////////////////////////////////////////////////////////////////////
 #ifdef WIN32
 #include <windows.h>
 #endif /* WIN32 */
 
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
+#include <OpenGL/glu.h>
+#include <GLUT/glut.h>
+#else
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
+#endif
 
 #include <sh/sh.hpp>
+#include <iostream>
 
 using namespace SH;
+using namespace std;
 
 int gprintf(int x, int y, char* fmt, ...);
 
 // Animation data
 float angle = 0;
+
+ShProgram vsh;
+ShProgram fsh;
 
 void display()
   {
@@ -30,8 +64,8 @@ void display()
   
   // turn off vertex and fragment programs, this
   // effectively turns off Sh
-  glDisable(GL_VERTEX_PROGRAM_ARB);
-  glDisable(GL_FRAGMENT_PROGRAM_ARB);
+  shUnbind(vsh);
+  shUnbind(fsh);
 
   // push modelview matrix and load the rotation
   // for the point light
@@ -54,8 +88,9 @@ void display()
   glPopMatrix();
   
   // turn vertex and fragment programs back on 
-  glEnable(GL_VERTEX_PROGRAM_ARB);
-  glEnable(GL_FRAGMENT_PROGRAM_ARB);
+  // bind programs
+  shBind(vsh);
+  shBind(fsh);
 
   // setup the modelview matrix with the rotation
   // for the dodecahedron and draw it
@@ -64,6 +99,8 @@ void display()
   glutSolidDodecahedron();
   glPopMatrix();
 
+  shUnbind();
+  
   gprintf(10, 10, "Space - Toggle animation");
   gprintf(10, 24, "    c - Change color");
 
@@ -150,7 +187,7 @@ void init_sh()
   ambient.meta("opengl:readonly", "true");
   
   // construct vertex program
-  ShProgram vsh = SH_BEGIN_VERTEX_PROGRAM {
+  vsh = SH_BEGIN_VERTEX_PROGRAM {
     ShInputPosition4f ipos;
     ShInputNormal3f inrm;
 
@@ -166,7 +203,7 @@ void init_sh()
   } SH_END;
 
   // construct fragment program
-  ShProgram fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+  fsh = SH_BEGIN_FRAGMENT_PROGRAM {
     ShInputPosition4f ipos;
     ShInputNormal3f inrm;
     ShInputVector3f ilightv;
@@ -180,13 +217,11 @@ void init_sh()
     oclr = pos(inrm|ilightv)*diffuse + ambient;
   } SH_END;
 
-  // bind programs
-  shBind(vsh);
-  shBind(fsh);
   }
 
 int main(int argc, char** argv)
   {
+    try {
   // initialize GLUT
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE|GLUT_DEPTH);
@@ -204,6 +239,18 @@ int main(int argc, char** argv)
   init_sh();
   
   glutMainLoop();
+
+    } catch (const ShException& e) {
+      std::cerr << "Sh error: " << e.message() << std::endl;
+      return 1;
+    } catch (const std::exception& e) {
+      std::cerr << "C++ error: " << e.what() << std::endl;
+      return 1;
+    } catch (...) {
+      std::cerr << "Unknown error." << std::endl;
+      throw;
+      return 1;
+    }
   }
 
 int gprintf(int x, int y, char* fmt, ...)
@@ -217,7 +264,7 @@ int gprintf(int x, int y, char* fmt, ...)
   // setup the matrices for a direct
   // screen coordinate transform when
   // using glRasterPos
-  int vp[4];
+  GLint vp[4];
   glGetIntegerv(GL_VIEWPORT, vp);
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
@@ -231,8 +278,6 @@ int gprintf(int x, int y, char* fmt, ...)
   // texturing off and disable depth testing
   glPushAttrib(GL_ENABLE_BIT);
   glDisable(GL_DEPTH_TEST);
-  glDisable(GL_VERTEX_PROGRAM_ARB);
-  glDisable(GL_FRAGMENT_PROGRAM_ARB);
 
   // render the character through glut
   char* p = temp;

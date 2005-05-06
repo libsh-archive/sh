@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -158,6 +155,7 @@ const CcOpCode opCodeTable[] = {
   {SH_OP_CBRT,  "pow(#0, 1 / 3.0)"},
   {SH_OP_CEIL,  "ceil(#0)"},
   {SH_OP_COS,   "cos(#0)"},
+  {SH_OP_COSH,  "cosh(#0)"},
   {SH_OP_EXP,   "exp(#0)"},
   {SH_OP_EXP2,  "exp2(#0)"},
   {SH_OP_EXP10, "exp10(#0)"},
@@ -170,15 +168,17 @@ const CcOpCode opCodeTable[] = {
   {SH_OP_MAD,   "$0 * $1 + $2"},
   {SH_OP_MAX,   "($0 > $1 ? $0 : $1)"},
   {SH_OP_MIN,   "($0 < $1 ? $0 : $1)"}, 
-  {SH_OP_MOD,   "fmod($0, $1)"},
+  {SH_OP_MOD,   "($0 - $1 * floor((double)$0 / $1))"},
   {SH_OP_POW,   "pow($0, $1)"},
   {SH_OP_RCP,   "1 / #0"},
   {SH_OP_RND,   "floor(#0 + 0.5)"},
   {SH_OP_RSQ,   "1 / sqrt(#0)"},
   {SH_OP_SIN,   "sin(#0)"},
+  {SH_OP_SINH,  "sinh(#0)"},
   {SH_OP_SGN,   "(#0 < 0 ? -1 : (#0 > 0 ? 1 : 0))"},
   {SH_OP_SQRT,  "sqrt(#0)"},
   {SH_OP_TAN,   "tan(#0)"},
+  {SH_OP_TANH,  "tanh(#0)"},
   {SH_OP_COND,  "($0 > 0 ? $1 : $2)"},
   {SH_OP_FETCH, "#0"},
 

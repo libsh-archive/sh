@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -81,7 +78,7 @@ class HostGlTextureTransfer : public ShTransfer {
         const_cast<void *>(host->data()), count * tuplesize, false);
 
     if(convertedType != SH_VALUETYPE_END) {
-      SH_DEBUG_WARN("ARB backend does not handle " << shValueTypeName(valueType) << " natively.  Converting to " << shValueTypeName(convertedType));
+      SH_DEBUG_WARN("GL backend does not handle " << shValueTypeName(valueType) << " natively.  Converting to " << shValueTypeName(convertedType));
       dataVariant = shVariantFactory(convertedType, SH_MEM)->generate(count * tuplesize);
       dataVariant->set(hostVariant);
     } else {
@@ -119,7 +116,11 @@ class HostGlTextureTransfer : public ShTransfer {
     case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
     case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
     case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
+#if defined( __APPLE__ )
+    case GL_TEXTURE_RECTANGLE_EXT:
+#else
     case GL_TEXTURE_RECTANGLE_NV:
+#endif
       if (full_copy) {
 	SH_GL_CHECK_ERROR(glTexImage2D(texture->target(), 0,
 				       texture->internalFormat(),
