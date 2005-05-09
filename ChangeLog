@@ -1,3 +1,9 @@
+2005-05-09  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* configure.ac: On OS X, add -lSystem instead of -lmx. This seems
+	to be more appropriate, and allows linking with libraries such as
+	wxwidgets without causing duplicate symbols.
+
 2005-05-06  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/PBufferStreams.cpp (execute): Allocate a bigger
