@@ -53,6 +53,8 @@ libsh_la_SOURCES += ShPool.hpp ShPool.cpp
 incinc_HEADERS   += ShPool.hpp
 libsh_la_SOURCES += ShLp.hpp ShLpImpl.hpp
 incinc_HEADERS   += ShLp.hpp
+libsh_la_SOURCES += ShMultiArray.hpp
+incinc_HEADERS   += ShMultiArray.hpp
 
 # Backend
 libsh_la_SOURCES += ShBackend.cpp ShBackend.hpp 

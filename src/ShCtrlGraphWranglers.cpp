@@ -55,9 +55,95 @@ void replaceStmt(ShCtrlGraphNodePtr node, ShBasicBlock::ShStmtList::iterator stm
   exitBlock->addStatement(ShStatement(stmt->dest, SH_OP_ASN, ShVariable(*O)));
 
   spliceProgram(node, stmt, program);
+  removeStmt(node, stmt);
+}
 
-  // remove stmt from node
+void removeStmt(ShCtrlGraphNodePtr node, ShBasicBlock::ShStmtList::iterator stmt)
+{
   node->block->erase(stmt);
+}
+
+void structSplit(ShStructuralNodePtr from, ShStructuralNodePtr to, ShCtrlGraphNodePtr fromCfg,
+    ShCtrlGraphNodePtr toCfg) {
+  ShStructuralNode::CfgMatchList cfgmatch; 
+
+  for(ShStructuralNode::SuccessorList::iterator S = from->succs.begin();
+      S != from->succs.end();) {
+    if(S->second == to) {
+      from->getSuccs(cfgmatch, *S);
+      S = from->succs.erase(S);
+    } else ++S;
+  }
+
+  // can only handle a single entry node in to right now
+  ShCtrlGraphNodePtr toEntry; 
+
+  SH_DEBUG_PRINT("split cfgmatch size = " << cfgmatch.size()); 
+
+  ShStructuralNode::CfgMatchList::iterator I;
+  for(I = cfgmatch.begin(); I != cfgmatch.end(); ++I) {
+    if(!toEntry) {
+      toEntry = I->to;
+    } else if(toEntry != I->to) {
+      SH_DEBUG_ERROR("Cannot handle multiple-entries in to node");
+    }
+    I->from->follower = fromCfg;
+    if(!I->isFollower()) I->from->successors.erase(I->S);
+  }
+  if(toEntry) toCfg->follower = toEntry;
+}
+
+void structReplaceExits(ShStructuralNodePtr node, ShCtrlGraphNodePtr head, ShCtrlGraphNodePtr tail) { 
+  ShStructuralNode::CfgMatchList cfgmatch;
+
+  node->getExits(cfgmatch);
+
+  ShCtrlGraphNodePtr end;
+
+  SH_DEBUG_PRINT("structReplaceExits match size = " << cfgmatch.size());
+  ShStructuralNode::CfgMatchList::iterator I;
+  for(I = cfgmatch.begin(); I != cfgmatch.end(); ++I) {
+    if(!end) {
+      end = I->to;
+    } else if(end != I->to) {
+      SH_DEBUG_ERROR("Cannot handle branching exits from node");
+    }
+    I->from->follower = head;
+    if(!I->isFollower()) {
+      I->from->successors.erase(I->S);
+    }
+  }
+  if(end && tail) tail->follower = end; 
+}
+
+void structReplaceEntries(ShStructuralNodePtr node, ShCtrlGraphNodePtr head, ShCtrlGraphNodePtr tail) { 
+  ShStructuralNode::CfgMatchList cfgmatch; 
+
+  node->getEntries(cfgmatch);
+
+  ShCtrlGraphNodePtr entry; // the entry into this node
+
+  SH_DEBUG_PRINT("structReplaceEntries match size = " << cfgmatch.size());
+  ShStructuralNode::CfgMatchList::iterator I;
+  for(I = cfgmatch.begin(); I != cfgmatch.end(); ++I) {
+    if(!entry) {
+      entry = I->to;
+    } else if(entry != I->to) {
+      SH_DEBUG_ERROR("Cannot handle multiple-exits from node");
+    }
+    if(I->isFollower()) I->from->follower = head;
+    else I->S->node = head;
+  }
+  if(entry && tail) tail->follower = entry; 
+}
+
+void structRemove(ShStructuralNodePtr node) 
+{
+  ShCtrlGraphNodePtr empty = new ShCtrlGraphNode();
+  empty->block = new ShBasicBlock();
+
+  structReplaceExits(node, 0, empty);
+  structReplaceEntries(node, empty, 0);
 }
 
 }

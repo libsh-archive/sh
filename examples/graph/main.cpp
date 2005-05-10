@@ -27,8 +27,12 @@ enum Graph {
   GR_FLR, // floor (FLR)
   GR_FRAC, // frac
   GR_NORM, // norm
+  GR_NOISE, // perlin noise
   GR_TEX, // texture lookup (1D)
   GR_TEXI, // texture lookup (RECT)
+  GR_POS, // positive of a polynomial 
+  GR_MAX, // max of EXP and LOG 
+  GR_MIN, // min of EXP and LOG 
   GR_LRP  // lerp between EXP and LOG (LRP, EXP, LOG)
 };
 const int NUMGRAPHS = (int)(GR_LRP) + 1;
@@ -45,8 +49,12 @@ const char* GraphName[] = {
   "floor",
   "frac",
   "norm",
+  "noise",
   "tex",
   "texi",
+  "pos",
+  "max",
+  "min",
   "lrp"
 };
 
@@ -54,9 +62,13 @@ ShAttrib1f rangeWidth;
 ShAttrib1f eps;
 ShAttrib2f offset;
 ShAttrib1f myscale;
+ShAttrib1f myscale2;
+ShAttrib1f edge;
+ShAttrib1f edge2;
+ShAttrib1f edge3;
 ShProgram vsh, fsh[NUMGRAPHS];
 #define DBG_MODE
-Graph mode = GR_TEX; 
+Graph mode = GR_RCP; 
 
 ShAttrib<5, SH_TEMP, float> coeff;
 ShAttrib<3, SH_TEMP, float> denom;
@@ -114,6 +126,9 @@ struct PlotFunction {
           case GR_NORM:
             value = normalize(t); break;
 
+          case GR_NOISE:
+            value = perlin<1>(t); break;
+
           case GR_TEX:
             {
               value = tex(t); break; 
@@ -123,6 +138,15 @@ struct PlotFunction {
             {
               value = tex[t]; break; 
             }
+          case GR_POS:
+            {
+              value = pos(t * mad(t, mad(t, coeff(3), coeff(2)), coeff(1)) + coeff(0)); break; 
+            }
+          case GR_MAX:
+            value = SH::max(coeff(0) * exp(t), coeff(1) * log(t)); break;
+
+          case GR_MIN:
+            value = SH::min(coeff(0) * exp(t), coeff(1) * log(t)); break;
 
           case GR_LRP:
             value = lerp(coeff(0), exp(t), log(t)); break;
@@ -151,6 +175,18 @@ void initShaders() {
     myscale.name("myscale");
     myscale = 5.0f; 
 
+    myscale2.name("myscale2");
+    myscale2 = 20.0; 
+
+    edge.name("edge");
+    edge = 0.1;
+
+    edge2.name("edge");
+    edge2 = 0.01;
+
+    edge3.name("edge");
+    edge3 = 0.01;
+
     coeff.name("coeff");
     denom.name("denom");
 
@@ -158,6 +194,10 @@ void initShaders() {
     ShColor3f SH_DECL(bkgdColor) = ShConstAttrib3f(1, 1, 1);
     ShColor3f SH_DECL(gridColor) = ShConstAttrib3f(0, 0, 1);
     ShColor3f SH_DECL(inrangeColor) = ShConstAttrib3f(0, 0, 0);
+    ShColor3f SH_DECL(edgeColor) = ShConstAttrib3f(0.5,0.5,0.5);
+
+    ShColor3f SH_DECL(aaColor) = ShConstAttrib3f(1, 0.75, 0.25); 
+    ShColor3f SH_DECL(iaColor) = ShConstAttrib3f(0.5, 0.25, 1);
 
     // take plot function, find if there's an intersection,
     // kill if no isct
@@ -191,11 +231,13 @@ void initShaders() {
 
         // check if in curve
         ShAttrib1f SH_DECL(val) = func(pos(0));  // evaluate function 
-        ShAttrib1f inCurve = abs(val - pos(1)) < scaled_eps; 
+        ShAttrib1f deriv = abs(dx(val));
+        ShAttrib1f inCurve = abs(val - pos(1)) < scaled_eps * myscale2 * deriv; 
 
         // check if in range
         ShAttrib1f SH_DECL(inRange) = 0.0f;
-        ShColor3f rangeColor = inrangeColor;
+        ShAttrib1f SH_DECL(inEdge) = 0.0f;
+        ShColor3f rangeColor = inrangeColor; 
 
         ShAttrib1f start = floor(pos(0) / rangeWidth) * rangeWidth; 
         ShAttrib1f end = ceil(pos(0) / rangeWidth) * rangeWidth; 
@@ -213,7 +255,10 @@ void initShaders() {
         ShAttrib1f errValue = (pos(0) - center) / range_radius(range);
         
         inRange = abs(errValue * result_inerr + result_center - pos(1)) < result_other;
-        rangeColor(0) = inRange; 
+        rangeColor = cond(inRange, aaColor, rangeColor);
+
+        // check if in edge
+        inEdge = inRange && (abs(errValue * result_inerr + result_center - pos(1)) - result_other > -edge2);
 /*
         // @todo debug
         inRange = 1;
@@ -234,15 +279,25 @@ void initShaders() {
 
         ShAttrib1f SH_DECL(inRangei);
         inRangei = range_lo(range_contains(result_rangei, pos(1)));
-        rangeColor(1) = inRangei; 
+        rangeColor = cond(inRangei && !inRange, iaColor, aaColor);
+        //rangeColor(1) = lerp(inRange, ShConstAttrib1f(0.0f), inRangei); 
         inRange = inRange || inRangei;
+
+        inEdge = inEdge || (inRangei && 
+           (abs(pos(1) - range_center(result_rangei)) - range_radius(result_rangei) > -edge3));    
+
+
 #endif
+        inEdge = inEdge || (inRange && (abs(pos(0) - center) - rangeWidth > -edge));
+
 
 
         // check if in grid
-        ShAttrib1f inGrid = (abs(pos(0)) < scaled_eps) + (abs(pos(1)) < scaled_eps); 
+        //ShAttrib1f inGrid = (abs(pos(0)) < scaled_eps) + (abs(pos(1)) < scaled_eps); 
+        ShAttrib1f inGrid = 0.0f; 
 
-        color = lerp(inGrid, gridColor, lerp(inCurve, funcColor, lerp(inRange, rangeColor, bkgdColor)));
+        color = lerp(inGrid, gridColor, 
+            lerp(inEdge, edgeColor, lerp(inCurve, funcColor, lerp(inRange, rangeColor, bkgdColor))));
         //color=pos(0,1,0);
       } SH_END;
 
@@ -378,6 +433,15 @@ void keyboard(unsigned char k, int x, int y)
       case '-': if(mode == GR_LINE) mode = GR_LRP; 
                 else mode = static_cast<Graph>(mode - 1);
                 shBind(fsh[mode]); break;
+
+      case 'a': myscale2 *= 1.05f; break;
+      case 'z': myscale2 /= 1.05f; break; 
+      case 's': edge *= 1.05f; break;
+      case 'x': edge /= 1.05f; break; 
+      case 'd': edge2 *= 1.05f; break;
+      case 'c': edge2 /= 1.05f; break; 
+      case 'f': edge3 *= 1.05f; break;
+      case 'v': edge3 /= 1.05f; break; 
     }
   glutPostRedisplay();
 }
@@ -386,8 +450,8 @@ int main(int argc, char** argv)
 {
   coeff(0) = 0.0f; 
   coeff(1) = 0.0f; 
-  coeff(2) = 3.0f;;
-  coeff(3) = -2.0f;
+  coeff(2) = 1.5f; 
+  coeff(3) = -1.0; 
 
   denom(0) = 1.0f;
 

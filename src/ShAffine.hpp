@@ -394,6 +394,9 @@ public:
   friend ShAffine<TT> max(const ShAffine<TT>& a, const ShAffine<TT>& b);
 
   template<typename TT>
+  friend ShAffine<TT> pos(const ShAffine<TT>& a);
+
+  template<typename TT>
   friend ShAffine<TT> floor(const ShAffine<TT>& a);
 
   template<typename TT>

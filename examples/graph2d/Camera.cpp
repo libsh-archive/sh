@@ -71,12 +71,6 @@ ShMatrix4x4f Camera::shModelViewProjection(ShMatrix4x4f viewport)
   return (viewport | (proj | (trans | rots)));
 }
 
-void Camera::reset()
-{
-  rots = ShMatrix4x4f();
-  trans = ShMatrix4x4f();
-}
-
 void Camera::move(float x, float y, float z)
 {
   ShMatrix4x4f m;

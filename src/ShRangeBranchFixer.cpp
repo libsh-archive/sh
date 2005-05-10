@@ -30,6 +30,7 @@
 #include <fstream>
 #include "ShContext.hpp"
 #include "ShCfgBlock.hpp"
+#include "ShCtrlGraphWranglers.hpp"
 #include "ShBitSet.hpp"
 #include "ShAttrib.hpp"
 #include "ShVariableNode.hpp"
@@ -187,96 +188,6 @@ struct RangeBranchFixer {
         new ShCfgBlock(entry, false));
     ShContext::current()->parsing()->tokenizer.blockList()->addBlock(
         new ShCfgBlock(exit, false));
-  }
-
-  /** Takes any edges in the structural graph between from and to, and
-   * replaces corresponding edges in the cfg by unconditional edges between from and fromCfg
-   * and toCfg and to 
-   */
-  void split(ShStructuralNodePtr from, ShStructuralNodePtr to, ShCtrlGraphNodePtr fromCfg,
-      ShCtrlGraphNodePtr toCfg) {
-    ShStructuralNode::CfgMatchList cfgmatch; 
-
-    for(ShStructuralNode::SuccessorList::iterator S = from->succs.begin();
-        S != from->succs.end();) {
-      if(S->second == to) {
-        from->getSuccs(cfgmatch, *S);
-        S = from->succs.erase(S);
-      } else ++S;
-    }
-
-    // can only handle a single entry node in to right now
-    ShCtrlGraphNodePtr toEntry; 
-
-    SH_DEBUG_PRINT("split cfgmatch size = " << cfgmatch.size()); 
-
-    ShStructuralNode::CfgMatchList::iterator I;
-    for(I = cfgmatch.begin(); I != cfgmatch.end(); ++I) {
-      if(!toEntry) {
-        toEntry = I->to;
-      } else if(toEntry != I->to) {
-        SH_DEBUG_ERROR("Cannot handle multiple-entries in to node");
-      }
-      I->from->follower = fromCfg;
-      if(!I->isFollower()) I->from->successors.erase(I->S);
-    }
-    if(toEntry) toCfg->follower = toEntry;
-  }
-
-  // replace all edges (from,to) that leave node with unconditional edges
-  // (from, head) and (tail, to)
-  //
-  // @todo range - this currently only works if all node exits go to the same
-  // place 
-  //
-  void replaceExits(ShStructuralNodePtr node, ShCtrlGraphNodePtr head, ShCtrlGraphNodePtr tail) { 
-    ShStructuralNode::CfgMatchList cfgmatch;
-
-    node->getExits(cfgmatch);
-
-    ShCtrlGraphNodePtr end;
-
-    SH_DEBUG_PRINT("replaceExits match size = " << cfgmatch.size());
-    ShStructuralNode::CfgMatchList::iterator I;
-    for(I = cfgmatch.begin(); I != cfgmatch.end(); ++I) {
-      if(!end) {
-        end = I->to;
-      } else if(end != I->to) {
-        SH_DEBUG_ERROR("Cannot handle branching exits from node");
-      }
-      I->from->follower = head;
-      if(!I->isFollower()) {
-        I->from->successors.erase(I->S);
-      }
-    }
-    if(end) tail->follower = end; 
-  }
-
-  // replace all edges (from, to) that enter node with edges (from, head) that
-  // keep their original cond var (or lack of cond var),
-  // and unconditional edge (tail, to)
-  //
-  // @todo range - this currently only works if there is a single entry into
-  // node in all matching pred edges
-  void replaceEntries(ShStructuralNodePtr node, ShCtrlGraphNodePtr head, ShCtrlGraphNodePtr tail) { 
-    ShStructuralNode::CfgMatchList cfgmatch; 
-
-    node->getEntries(cfgmatch);
-
-    ShCtrlGraphNodePtr entry; // the entry into this node
-
-    SH_DEBUG_PRINT("replaceEntries match size = " << cfgmatch.size());
-    ShStructuralNode::CfgMatchList::iterator I;
-    for(I = cfgmatch.begin(); I != cfgmatch.end(); ++I) {
-      if(!entry) {
-        entry = I->to;
-      } else if(entry != I->to) {
-        SH_DEBUG_ERROR("Cannot handle multiple-exits from node");
-      }
-      if(I->isFollower()) I->from->follower = head;
-      else I->S->node = head;
-    }
-    if(entry) tail->follower = entry; 
   }
 
   // Fixes any IF (and later LOOP maybe) structural nodes under node (including
@@ -472,10 +383,10 @@ struct RangeBranchFixer {
     ShCtrlGraphNodePtr newExit = newGraph.node()->ctrlGraph->exit();
 
     // Do some more graph mangling to get things in the right places
-    split(condNode, thenNode, newEntry, thenEntry);
-    replaceExits(thenNode, thenExit, newExit);
-    split(condNode, elseNode, newEntry, elseEntry);
-    replaceExits(elseNode, elseExit, newExit);
+    structSplit(condNode, thenNode, newEntry, thenEntry);
+    structReplaceExits(thenNode, thenExit, newExit);
+    structSplit(condNode, elseNode, newEntry, elseEntry);
+    structReplaceExits(elseNode, elseExit, newExit);
 
     // add newHead to the region
     // (Note, the structnodes no longer matches the expected format for an
@@ -598,8 +509,8 @@ struct RangeBranchFixer {
     ShCtrlGraphNodePtr newExit = newGraph.node()->ctrlGraph->exit();
 
     // Do some more graph mangling to get things in the right places
-    replaceExits(selfNode, selfExit, newExit); 
-    replaceEntries(selfNode, newEntry, selfEntry); 
+    structReplaceExits(selfNode, selfExit, newExit); 
+    structReplaceEntries(selfNode, newEntry, selfEntry); 
 
     std::ofstream fout2("selfloop-after.dot");
     newGraph.node()->ctrlGraph->graphvizDump(fout2);
@@ -735,10 +646,10 @@ struct RangeBranchFixer {
     ShCtrlGraphNodePtr newExit = newGraph.node()->ctrlGraph->exit();
 
     // Do some more graph mangling to get things in the right places
-    replaceExits(condNode, condExit, newExit); 
-    replaceEntries(condNode, newEntry, condEntry); 
-    split(condNode, bodyNode, condExit, bodyEntry);
-    split(bodyNode, condNode, bodyExit, condEntry);
+    structReplaceExits(condNode, condExit, newExit); 
+    structReplaceEntries(condNode, newEntry, condEntry); 
+    structSplit(condNode, bodyNode, condExit, bodyEntry);
+    structSplit(bodyNode, condNode, bodyExit, condEntry);
 
     std::ofstream fout2("whileloop-after.dot");
     newGraph.node()->ctrlGraph->graphvizDump(fout2);

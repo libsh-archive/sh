@@ -50,7 +50,9 @@ namespace SH {
 class ShSectionNode: public ShRefCountable {
   public:
     /** Constructs an empty section */
-    ShSectionNode();
+    ShSectionNode(ShStructuralNodePtr structnode);
+
+    ShStructuralNodePtr structnode;
 
     typedef std::set<ShPointer<ShSectionNode> > SectionSet;
     typedef SectionSet::iterator iterator;
@@ -102,6 +104,10 @@ class ShSectionTree {
   public:
     ShSectionNodePtr root;
 
+    /** Initializes a sectiontree with null root */
+    ShSectionTree();
+
+    /** Initializes a section tree from the given structural analysis */
     ShSectionTree(ShStructural &structural);
 
     /* DFS through the section tree

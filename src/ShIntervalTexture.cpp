@@ -253,8 +253,9 @@ ShRecord ShIntervalTexture::rect_lookup(const ShVariable &lo, const ShVariable &
     ShVariable scaledLo(makeTemp(lo, "scaledLo"));
     ShVariable scaledHi(makeTemp(hi, "scaledHi"));
     ShVariable offset(makeTemp(scale, "offset", 1));
+    ShConstAttrib1f texWidth = m_width; 
     shPOW(scale, HALF.repeat(size), l); 
-    shMUL(offset, ShConstAttrib1f(m_width), scale);
+    shMUL(offset, texWidth, scale(0));
 
     shMUL(scaledLo, clamplo, scale); 
     ShVariable scaledLo0 = scaledLo(0);

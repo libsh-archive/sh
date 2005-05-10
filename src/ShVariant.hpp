@@ -193,6 +193,9 @@ class ShDataVariant: public ShVariant {
     typedef DataType* iterator;
     typedef const DataType* const_iterator;
 
+    /// Constructs an empty array
+    ShDataVariant();
+
     /// Constructs a data array and sets the value to a default value
     /// (typically zero)
     ShDataVariant(int N); 
@@ -217,6 +220,9 @@ class ShDataVariant: public ShVariant {
     ShDataVariant(const ShDataVariant<T, DT> &other, bool neg, const ShSwizzle &swizzle, int count=1); 
 
     virtual ~ShDataVariant();
+
+    /// Assigns another data array to this
+    ShDataVariant& operator=(const ShDataVariant<T, DT>& other);
 
     ShValueType valueType() const; 
     ShDataType dataType() const; 

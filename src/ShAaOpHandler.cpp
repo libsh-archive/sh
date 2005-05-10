@@ -25,6 +25,7 @@
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
 
+#include <sstream>
 #include "ShSyntax.hpp"
 #include "ShVariableNode.hpp"
 #include "ShAttrib.hpp"
@@ -199,181 +200,188 @@ ShProgram getProgram(ShStatement& stmt, SymAllocator& alloc) {
    * sourced from non-affine variables */
   bool special = true;
   ShProgram result = SH_BEGIN_PROGRAM() {
-    switch(stmt.op) {
-      case SH_OP_LO: 
-        SH_DEBUG_ASSERT(shIsAffine(stmt.src[0].valueType()));
-        shASN(stmt.dest, alloc(stmt.src[0]).lo()); 
-        break;
-      case SH_OP_HI: 
-        SH_DEBUG_ASSERT(shIsAffine(stmt.src[0].valueType()));
-        shASN(stmt.dest, alloc(stmt.src[0]).hi()); 
-        break;
-      case SH_OP_WIDTH: 
-        SH_DEBUG_ASSERT(shIsAffine(stmt.src[0].valueType()));
-        shASN(stmt.dest, alloc(stmt.src[0]).width()); 
-        break;
-      case SH_OP_RADIUS: 
-        SH_DEBUG_ASSERT(shIsAffine(stmt.src[0].valueType()));
-        shASN(stmt.dest, alloc(stmt.src[0]).radius()); 
-        break;
-      case SH_OP_CENTER: 
-        SH_DEBUG_ASSERT(shIsAffine(stmt.src[0].valueType()));
-        shASN(stmt.dest, alloc(stmt.src[0]).center()); 
-        break;
-      case SH_OP_IVAL:
-        alloc(stmt.dest).ASN(aaIVAL(stmt.src[0], stmt.src[1], stmtSyms->newdest));
-        break;
-      case SH_OP_LASTERR:
-        {
-          SH_DEBUG_ASSERT(shIsRegularValueType(stmt.dest.valueType()));
-          shASN(stmt.dest, aaLASTERR(alloc(stmt.src[0], stmtSyms->src[0]), stmtSyms->src[1])); 
-        }
-        break;
-      case SH_OP_ASN:
-        if(shIsAffine(stmt.dest.valueType())) {
-          ShValueType srcvt = stmt.src[0].valueType();
-          if(shIsAffine(srcvt)) { // handled below 
-            special = false;
-          } else if (shIsInterval(srcvt)) { // assign to new errsyms
-            alloc(stmt.dest).ASN(aaFROMIVAL(stmt.src[0], stmtSyms->newdest));
-          } else { //  
-            if(!shIsRegularValueType(srcvt)) {
-              SH_DEBUG_PRINT("Expecting regular src[0], actual type = "
-                  << srcvt << " " << shValueTypeName(srcvt) 
-                  << " stmt = " << stmt);
-              SH_DEBUG_ASSERT(0);
-            }
-            ShVariable destCenter = alloc(stmt.dest).center();
-            shASN(destCenter, stmt.src[0]);
+    // make a section
+    std::ostringstream secOut;
+    secOut << stmt;
+    SH_BEGIN_SECTION(secOut.str()) {
+      switch(stmt.op) {
+        case SH_OP_LO: 
+          SH_DEBUG_ASSERT(shIsAffine(stmt.src[0].valueType()));
+          shASN(stmt.dest, alloc(stmt.src[0]).lo()); 
+          break;
+        case SH_OP_HI: 
+          SH_DEBUG_ASSERT(shIsAffine(stmt.src[0].valueType()));
+          shASN(stmt.dest, alloc(stmt.src[0]).hi()); 
+          break;
+        case SH_OP_WIDTH: 
+          SH_DEBUG_ASSERT(shIsAffine(stmt.src[0].valueType()));
+          shASN(stmt.dest, alloc(stmt.src[0]).width()); 
+          break;
+        case SH_OP_RADIUS: 
+          SH_DEBUG_ASSERT(shIsAffine(stmt.src[0].valueType()));
+          shASN(stmt.dest, alloc(stmt.src[0]).radius()); 
+          break;
+        case SH_OP_CENTER: 
+          SH_DEBUG_ASSERT(shIsAffine(stmt.src[0].valueType()));
+          shASN(stmt.dest, alloc(stmt.src[0]).center()); 
+          break;
+        case SH_OP_IVAL:
+          alloc(stmt.dest).ASN(aaIVAL(stmt.src[0], stmt.src[1], stmtSyms->newdest));
+          break;
+        case SH_OP_LASTERR:
+          {
+            SH_DEBUG_ASSERT(shIsRegularValueType(stmt.dest.valueType()));
+            shASN(stmt.dest, aaLASTERR(alloc(stmt.src[0], stmtSyms->src[0]), stmtSyms->src[1])); 
           }
-        } else if(shIsInterval(stmt.dest.valueType())) {
-          SH_DEBUG_ASSERT(shIsAffine(stmt.src[0].valueType()));
-          shASN(stmt.dest, aaTOIVAL(alloc(stmt.src[0], stmtSyms->src[0]))); 
-        } else { 
-          SH_DEBUG_ASSERT(shIsAffine(stmt.src[0].valueType()));
-          // shouldn't be here...this ASN doesn't work.
-          SH_DEBUG_PRINT("Offensive statement: " << stmt);
-          SH_DEBUG_ASSERT(0 && "It's the end of the world! Is your data properly backed up off-site?");
-        }
-        break;
-      default:
-        special = false;
-        break;
-    }
+          break;
+        case SH_OP_ASN:
+          if(shIsAffine(stmt.dest.valueType())) {
+            ShValueType srcvt = stmt.src[0].valueType();
+            if(shIsAffine(srcvt)) { // handled below 
+              special = false;
+            } else if (shIsInterval(srcvt)) { // assign to new errsyms
+              alloc(stmt.dest).ASN(aaFROMIVAL(stmt.src[0], stmtSyms->newdest));
+            } else { //  
+              if(!shIsRegularValueType(srcvt)) {
+                SH_DEBUG_PRINT("Expecting regular src[0], actual type = "
+                    << srcvt << " " << shValueTypeName(srcvt) 
+                    << " stmt = " << stmt);
+                SH_DEBUG_ASSERT(0);
+              }
+              ShVariable destCenter = alloc(stmt.dest).center();
+              shASN(destCenter, stmt.src[0]);
+            }
+          } else if(shIsInterval(stmt.dest.valueType())) {
+            SH_DEBUG_ASSERT(shIsAffine(stmt.src[0].valueType()));
+            shASN(stmt.dest, aaTOIVAL(alloc(stmt.src[0], stmtSyms->src[0]))); 
+          } else { 
+            SH_DEBUG_ASSERT(shIsAffine(stmt.src[0].valueType()));
+            // shouldn't be here...this ASN doesn't work.
+            SH_DEBUG_PRINT("Offensive statement: " << stmt);
+            SH_DEBUG_ASSERT(0 && "It's the end of the world! Is your data properly backed up off-site?");
+          }
+          break;
+        default:
+          special = false;
+          break;
+      }
+    } SH_END_SECTION;
   } SH_END;
   if(special) return result;
  
   /* handle all affine ops */
   result = SH_BEGIN_PROGRAM() {
+    std::ostringstream secOut;
+    secOut << stmt;
+    SH_BEGIN_SECTION(secOut.str()) {
 
-    ShAaVariable dest; 
-    ShValueType destValueType = stmt.dest.valueType();
-    if(shIsAffine(destValueType)) {
-      dest = alloc(stmt.dest); 
-    } else if(shIsInterval(destValueType)) {
-      dest = ShAaVariable(new ShAaVariableNode(stmt.dest.node(), stmtSyms->dest));  
-    } else {
-      // @todo range - handle IA dests 
-      SH_DEBUG_PRINT("non-IA/AA dest on stmt " << stmt); 
-      SH_DEBUG_ASSERT(0 && "Cannot handle non-IA/AA dests yet");
-    }
-
-    ShAaVariable *src = 0;
-    if(arity > 0) src = new ShAaVariable[arity];
-    for(int i = 0; i < arity; ++i) {
-      /* ignore tex sources */
-      if(stmt.src[i].node()->kind() == SH_TEXTURE) {
-        continue;
-      }
-
-      /* @todo range handle IA inputs */
-      ShValueType srcValueType = stmt.src[i].valueType();
-      if(shIsAffine(srcValueType)) {
-        src[i] = alloc(stmt.src[i], stmtSyms->src[i]);
-
-        /* Handle when src is wrapping same variables as dest */ 
-        if(src[i].node() == dest.node()) {
-          src[i] = src[i].clone();
-        }
-      } else if (shIsInterval(srcValueType)) {
-        src[i] = aaFROMIVAL(stmt.src[i], stmtSyms->src[i]); 
+      ShAaVariable dest; 
+      ShValueType destValueType = stmt.dest.valueType();
+      if(shIsAffine(destValueType)) {
+        dest = alloc(stmt.dest); 
+      } else if(shIsInterval(destValueType)) {
+        dest = ShAaVariable(new ShAaVariableNode(stmt.dest.node(), stmtSyms->dest));  
       } else {
-        // @todo range - handle these properly with special case ops 
-        src[i] = aaFROMTUPLE(stmt.src[i]);
+        // @todo range - handle IA dests 
+        SH_DEBUG_PRINT("non-IA/AA dest on stmt " << stmt); 
+        SH_DEBUG_ASSERT(0 && "Cannot handle non-IA/AA dests yet");
       }
 
-      /* @todo range handle vectorization of scalars */
-      if(opInfo[stmt.op].result_source == ShOperationInfo::LINEAR && 
-          stmt.src[i].size() < stmt.dest.size() && stmt.src[i].size() == 1) {
-        src[i] = src[i].repeat(stmt.dest.size());
+      ShAaVariable *src = 0;
+      if(arity > 0) src = new ShAaVariable[arity];
+      for(int i = 0; i < arity; ++i) {
+        /* ignore tex sources */
+        if(stmt.src[i].node()->kind() == SH_TEXTURE) {
+          continue;
+        }
+
+        /* @todo range handle IA inputs */
+        ShValueType srcValueType = stmt.src[i].valueType();
+        if(shIsAffine(srcValueType)) {
+          src[i] = alloc(stmt.src[i], stmtSyms->src[i]);
+
+          /* Handle when src is wrapping same variables as dest */ 
+          if(src[i].node() == dest.node()) {
+            src[i] = src[i].clone();
+          }
+        } else if (shIsInterval(srcValueType)) {
+          src[i] = aaFROMIVAL(stmt.src[i], stmtSyms->src[i]); 
+        } else {
+          // @todo range - handle these properly with special case ops 
+          src[i] = aaFROMTUPLE(stmt.src[i]);
+        }
+
+        /* @todo range handle vectorization of scalars */
+        if(opInfo[stmt.op].result_source == ShOperationInfo::LINEAR && 
+            stmt.src[i].size() < stmt.dest.size() && stmt.src[i].size() == 1) {
+          src[i] = src[i].repeat(stmt.dest.size());
+        }
+        
       }
-      
-    }
 
-    dest.ZERO(); // always zero out dest - dead code will deal with some of the inefficiency
-                 // @todo range - implement SSA... 
-                 // @todo range - check if perhaps this can be handled before
-                 // this
-    switch(stmt.op) {
-      case SH_OP_ASN:   dest.ASN(src[0]); break; 
-      case SH_OP_ADD:   dest.ASN(aaADD(src[0], src[1]));  break;
-      case SH_OP_MUL:   dest.ASN(aaMUL(src[0], src[1], stmtSyms->newdest)); break;
-    //  case SH_OP_DIV:   return affineDIV(stmt, alloc);
+      dest.ZERO(); // always zero out dest - dead code will deal with some of the inefficiency
+                   // @todo range - implement SSA... 
+                   // @todo range - check if perhaps this can be handled before
+                   // this
+      switch(stmt.op) {
+        case SH_OP_ASN:   dest.ASN(src[0]); break; 
+        case SH_OP_ADD:   dest.ASN(aaADD(src[0], src[1]));  break;
+        case SH_OP_MUL:   dest.ASN(aaMUL(src[0], src[1], stmtSyms->newdest)); break;
+      //  case SH_OP_DIV:   return affineDIV(stmt, alloc);
 
 #if 0
-      case SH_OP_SLT:   return affineSLT(N, valueType);
-      case SH_OP_SLE:   return affineSLE(N, valueType);
-      case SH_OP_SGT:   return affineSGT(N, valueType);
-      case SH_OP_SGE:   return affineSGE(N, valueType);
+        case SH_OP_SLT:   return affineSLT(N, valueType);
+        case SH_OP_SLE:   return affineSLE(N, valueType);
+        case SH_OP_SGT:   return affineSGT(N, valueType);
+        case SH_OP_SGE:   return affineSGE(N, valueType);
 
-      case SH_OP_CEIL:   return affineBinaryMonotonic<SH_OP_CEIL>(N, valueType);
-      case SH_OP_CSUM:   return affineCSUM(N, valueType);
+        case SH_OP_CEIL:   return affineBinaryMonotonic<SH_OP_CEIL>(N, valueType);
 #endif
-      case SH_OP_DOT:   dest.ASN(aaDOT(src[0], src[1], stmtSyms->newdest)); break; 
-      case SH_OP_EXP:   dest.ASN(aaEXP(src[0], stmtSyms->newdest)); break; 
-      case SH_OP_EXP2:  dest.ASN(aaEXP2(src[0], stmtSyms->newdest)); break;  
-      case SH_OP_EXP10: dest.ASN(aaEXP10(src[0], stmtSyms->newdest)); break;   
-      case SH_OP_FLR:   dest.ASN(aaFLR(src[0], stmtSyms->newdest)); break;   
-      case SH_OP_FRAC:  dest.ASN(aaFRAC(src[0], stmtSyms->newdest)); break;   
-      case SH_OP_LOG:   dest.ASN(aaLOG(src[0], stmtSyms->newdest)); break; 
-      case SH_OP_LOG2:  dest.ASN(aaLOG2(src[0], stmtSyms->newdest)); break; 
-      case SH_OP_LOG10: dest.ASN(aaLOG10(src[0], stmtSyms->newdest)); break; 
-      case SH_OP_LRP:   dest.ASN(aaLRP(src[0], src[1], src[2], stmtSyms->newdest)); break; 
-      case SH_OP_MAD:   dest.ASN(aaMAD(src[0], src[1], src[2], stmtSyms->newdest)); break; 
+        case SH_OP_CSUM:  dest.ASN(aaCSUM(src[0])); break;
+        case SH_OP_DOT:   dest.ASN(aaDOT(src[0], src[1], stmtSyms->newdest)); break; 
+        case SH_OP_EXP:   dest.ASN(aaEXP(src[0], stmtSyms->newdest)); break; 
+        case SH_OP_EXP2:  dest.ASN(aaEXP2(src[0], stmtSyms->newdest)); break;  
+        case SH_OP_EXP10: dest.ASN(aaEXP10(src[0], stmtSyms->newdest)); break;   
+        case SH_OP_FLR:   dest.ASN(aaFLR(src[0], stmtSyms->newdest)); break;   
+        case SH_OP_FRAC:  dest.ASN(aaFRAC(src[0], stmtSyms->newdest)); break;   
+        case SH_OP_LOG:   dest.ASN(aaLOG(src[0], stmtSyms->newdest)); break; 
+        case SH_OP_LOG2:  dest.ASN(aaLOG2(src[0], stmtSyms->newdest)); break; 
+        case SH_OP_LOG10: dest.ASN(aaLOG10(src[0], stmtSyms->newdest)); break; 
+        case SH_OP_LRP:   dest.ASN(aaLRP(src[0], src[1], src[2], stmtSyms->newdest)); break; 
+        case SH_OP_MAD:   dest.ASN(aaMAD(src[0], src[1], src[2], stmtSyms->newdest)); break; 
+        case SH_OP_MAX:   dest.ASN(aaMAX(src[0], src[1], stmtSyms->newdest)); break; 
+        case SH_OP_MIN:   dest.ASN(aaMIN(src[0], src[1], stmtSyms->newdest)); break; 
+        case SH_OP_NORM:  dest.ASN(aaNORM(src[0], stmtSyms->newdest)); break; 
+        case SH_OP_POW:   dest.ASN(aaPOW(src[0], src[1], stmtSyms->newdest)); break;
+        case SH_OP_RCP:   dest.ASN(aaRCP(src[0], stmtSyms->newdest)); break; 
+        case SH_OP_RSQ:   dest.ASN(aaRSQ(src[0], stmtSyms->newdest)); break; 
 #if 0
-      case SH_OP_MAX:   return affineBinaryMonotonic<SH_OP_MAX>(N, valueType);
-      case SH_OP_MIN:   return affineBinaryMonotonic<SH_OP_MIN>(N, valueType);
+        case SH_OP_RND:   return affineBinaryMonotonic<SH_OP_RND>(N, valueType);
+        case SH_OP_SGN:   return affineBinaryMonotonic<SH_OP_SGN>(N, valueType);
 #endif
-      case SH_OP_NORM:  dest.ASN(aaNORM(src[0], stmtSyms->newdest)); break; 
-      case SH_OP_POW:   dest.ASN(aaPOW(src[0], src[1], stmtSyms->newdest)); break;
-      case SH_OP_RCP:   dest.ASN(aaRCP(src[0], stmtSyms->newdest)); break; 
-      case SH_OP_RSQ:   dest.ASN(aaRSQ(src[0], stmtSyms->newdest)); break; 
-#if 0
-      case SH_OP_RND:   return affineBinaryMonotonic<SH_OP_RND>(N, valueType);
-      case SH_OP_SGN:   return affineBinaryMonotonic<SH_OP_SGN>(N, valueType);
-#endif
-      case SH_OP_SQRT:  dest.ASN(aaSQRT(src[0], stmtSyms->newdest)); break; 
-      case SH_OP_TEX:   dest.ASN(aaTEX(stmt.src[0], src[1], stmtSyms->dest, stmtSyms->newdest)); break; 
-      case SH_OP_TEXI:  dest.ASN(aaTEXI(stmt.src[0], src[1], stmtSyms->dest, stmtSyms->newdest)); break; 
+        case SH_OP_SQRT:  dest.ASN(aaSQRT(src[0], stmtSyms->newdest)); break; 
+        case SH_OP_TEX:   dest.ASN(aaTEX(stmt.src[0], src[1], stmtSyms->dest, stmtSyms->newdest)); break; 
+        case SH_OP_TEXI:  dest.ASN(aaTEXI(stmt.src[0], src[1], stmtSyms->dest, stmtSyms->newdest)); break; 
 #if 0
 
-      case SH_OP_UNION:   return affineUNION(N, valueType);
-      case SH_OP_ISCT:   return affineISCT(N, valueType);
-      case SH_OP_CONTAINS:   avCONTAINS(dest, src[0]); break;
-      // @todo type add in some more operations
+        case SH_OP_UNION:   return affineUNION(N, valueType);
+        case SH_OP_ISCT:   return affineISCT(N, valueType);
+        case SH_OP_CONTAINS:   avCONTAINS(dest, src[0]); break;
+        // @todo type add in some more operations
 #endif
-      case SH_OP_ESCJOIN: dest.ASN(aaESCJOIN(src[0], stmtSyms->dest, stmtSyms->newdest)); break;
-      case SH_OP_ERRFROM: dest.ASN(src[0], stmtSyms->dest, false); break;
-      default:
-        SH_DEBUG_PRINT("Unable to translate op: " << opInfo[stmt.op].name << " in " << stmt);
-        shError(ShTransformerException(
-              "Cannot translate affine arithmetic operator" ));
-    }
-    if(arity > 0) delete[] src;
+        case SH_OP_ESCJOIN: dest.ASN(aaESCJOIN(src[0], stmtSyms->dest, stmtSyms->newdest)); break;
+        case SH_OP_ERRFROM: dest.ASN(src[0], stmtSyms->dest, false); break;
+        default:
+          SH_DEBUG_PRINT("Unable to translate op: " << opInfo[stmt.op].name << " in " << stmt);
+          shError(ShTransformerException(
+                "Cannot translate affine arithmetic operator" ));
+      }
+      if(arity > 0) delete[] src;
 
-    if(shIsInterval(destValueType)) {
-      shASN(stmt.dest, aaTOIVAL(dest));
-    }
+      if(shIsInterval(destValueType)) {
+        shASN(stmt.dest, aaTOIVAL(dest));
+      }
+    } SH_END_SECTION;
   } SH_END;
   return result; 
 }

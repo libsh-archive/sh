@@ -80,8 +80,8 @@ ShAaVariable aaCBRT(const ShAaVariable& a);
 ShAaVariable aaCEIL(const ShAaVariable& a);
 ShAaVariable aaCOS(const ShAaVariable& a);
 ShAaVariable aaCMUL(const ShAaVariable& a);
-ShAaVariable aaCSUM(const ShAaVariable& a);
 #endif
+ShAaVariable aaCSUM(const ShAaVariable& a);
 ShAaVariable aaDOT(const ShAaVariable& a, const ShAaVariable& b, const ShAaSyms& newsyms);
 #if 0
 ShAaVariable aaDX(const ShAaVariable& a);
@@ -102,9 +102,14 @@ ShAaVariable aaLRP(const ShAaVariable& alpha, const ShAaVariable& a,
 // @todo range - scalar version 
 ShAaVariable aaMAD(const ShAaVariable& a, const ShAaVariable& b, 
                    const ShAaVariable& c, const ShAaSyms& newsyms);
+
+ShAaVariable aaPOS(const ShAaVariable& a, const ShAaSyms& newsyms);
+
+SH_DLLEXPORT
+ShAaVariable aaMAX(const ShAaVariable& a, const ShAaVariable& b, const ShAaSyms& newsyms);
+SH_DLLEXPORT
+ShAaVariable aaMIN(const ShAaVariable& a, const ShAaVariable& b, const ShAaSyms& newsyms);
 #if 0
-ShAaVariable aaMAX(const ShAaVariable& a, const ShAaVariable& b);
-ShAaVariable aaMIN(const ShAaVariable& a, const ShAaVariable& b);
 ShAaVariable aaMOD(const ShAaVariable& a, const ShAaVariable& b);
 #endif
 ShAaVariable aaPOW(const ShAaVariable& a, const ShAaVariable& b, const ShAaSyms& newsyms);
@@ -128,6 +133,7 @@ ShAaVariable aaNORM(const ShAaVariable& a, const ShAaSyms& newsyms);
 ShAaVariable aaXPD(const ShAaVariable& a, const ShAaVariable& b);
 #endif
 
+// @todo range shouldn't really use destsyms 
 ShAaVariable aaTEX(const ShVariable& texVar, const ShAaVariable& coord, 
                    const ShAaSyms& destsyms, const ShAaSyms& newsyms);
 ShAaVariable aaTEXI(const ShVariable& texVar, const ShAaVariable& coord, 

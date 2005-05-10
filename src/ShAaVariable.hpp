@@ -274,6 +274,7 @@ struct ShAaVariable {
    * where condvar > 0, use the other tuple element 
    * where condvar <=0, the original value remains 
    **/ 
+  ShAaVariable& COND(const ShVariable& condvar, const ShVariable& other);
   ShAaVariable& COND(const ShVariable& condvar, const ShAaVariable& other);
   ShAaVariable& COND(const ShVariable& condvar, const ShAaVariable& other, const ShAaSyms& used, bool changeCenter=true); 
 

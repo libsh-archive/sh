@@ -40,6 +40,13 @@ ShPool* ShDataVariant<T, DT>::m_pool = 0;
 #endif
 
 template<typename T, ShDataType DT>
+ShDataVariant<T, DT>::ShDataVariant()
+  : m_managed(false)
+{
+  alloc(0);
+}
+
+template<typename T, ShDataType DT>
 ShDataVariant<T, DT>::ShDataVariant(int N)
   : m_managed(true)
 {
@@ -115,6 +122,14 @@ template<typename T, ShDataType DT>
 ShDataVariant<T, DT>::~ShDataVariant() 
 {
   if(m_managed) delete[] m_begin;
+}
+
+template<typename T, ShDataType DT>
+ShDataVariant<T, DT>& ShDataVariant<T, DT>::operator=(const ShDataVariant<T, DT>& other) 
+{
+  if(managed) delete[] m_begin;
+  alloc(other.size());
+  std::copy(other.begin(), other.end(), m_begin);
 }
 
 template<typename T, ShDataType DT>
@@ -380,6 +395,11 @@ std::string ShDataVariant<T, DT>::encodeArray() const {
 
 template<typename T, ShDataType DT>
 void ShDataVariant<T, DT>::alloc(int N) {
+  if(N == 0) {
+    m_managed = false;
+    m_begin = m_end = 0;
+    return;
+  }
   // SH_DEBUG_PRINT("alloc " << valueTypeName[V] << " " << dataTypeName[DT]);
   m_begin = new DataType[N];
   m_end = m_begin + N;

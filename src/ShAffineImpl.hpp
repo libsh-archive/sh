@@ -1060,28 +1060,36 @@ bool boundsEqual(const ShAffine<TT>& a, const ShAffine<TT>& b)
 }
 
 /** Clamping operators **/
+
+// @todo range - note these two ops are not commutative, 
+// but should be...
 template<typename TT>
 ShAffine<TT> min(const ShAffine<TT>& a, const ShAffine<TT>& b) 
 {
-  ShInterval<TT> abounds = a;
-  ShInterval<TT> bbounds = b;
-  if(abounds.hi() < bbounds.lo()) return a;
-  if(bbounds.hi() < abounds.lo()) return b;
-
-  // @todo range fix this
-  return ShAffine<TT>(min(abounds, bbounds));
+  return a - pos(a - b);
 }
 
 template<typename TT>
 ShAffine<TT> max(const ShAffine<TT>& a, const ShAffine<TT>& b) 
 {
-  ShInterval<TT> abounds = a;
-  ShInterval<TT> bbounds = b;
-  if(abounds.lo() > bbounds.hi()) return a;
-  if(bbounds.lo() < abounds.hi()) return b;
+  return pos(a - b) + b;
+}
 
-  // @todo range fix this
-  return ShAffine<TT>(max(abounds, bbounds));
+template<typename TT>
+ShAffine<TT> pos(const ShAffine<TT>& a)
+{
+  ShInterval<TT> abounds = a;
+  TT lo = abounds.lo();
+  TT hi = abounds.hi();
+  if(lo > 0) return a; 
+  if(hi <= 0) return ShAffine<TT>(static_cast<TT>(0.0));
+  TT scaling = 0.5 * hi / (hi - lo); 
+
+  ShAffine<TT> result = a;
+  result *= scaling;
+  result.m_center = hi / 2;
+
+  return result; 
 }
 
 // If floor is constant across a, then return a constant

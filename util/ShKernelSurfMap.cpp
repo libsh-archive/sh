@@ -31,23 +31,27 @@ namespace ShUtil {
 
 ShProgram ShKernelSurfMap::bump() {
   ShProgram kernel = SH_BEGIN_PROGRAM() {
-    ShInputAttrib2f SH_DECL(gradient);
-    ShInOutNormal3f SH_DECL(normalt);
+    SH_BEGIN_SECTION("surfmap:bump") {
+      ShInputAttrib2f SH_DECL(gradient);
+      ShInOutNormal3f SH_DECL(normalt);
 
-    normalt(1,2) += gradient;
+      normalt(1,2) += gradient;
+    } SH_END_SECTION;
   } SH_END;
   return kernel;
 }
 
 ShProgram ShKernelSurfMap::vcsBump() {
   ShProgram kernel = SH_BEGIN_PROGRAM() {
-    ShInputAttrib2f SH_DECL(gradient);
-    ShInOutNormal3f SH_DECL(normal);
-    ShInputVector3f SH_DECL(tangent);
-    ShInputVector3f SH_DECL(tangent2);
+    SH_BEGIN_SECTION("surfmap:vcsbump") {
+      ShInputAttrib2f SH_DECL(gradient);
+      ShInOutNormal3f SH_DECL(normal);
+      ShInputVector3f SH_DECL(tangent);
+      ShInputVector3f SH_DECL(tangent2);
 
-    normal = mad(gradient(0), tangent, normal);
-    normal = mad(gradient(1), tangent2, normal);
+      normal = mad(gradient(0), tangent, normal);
+      normal = mad(gradient(1), tangent2, normal);
+    } SH_END_SECTION;
   } SH_END;
   return kernel;
 }

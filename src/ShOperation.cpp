@@ -73,7 +73,7 @@ const ShOperationInfo opInfo[] = {
   {"LRP", 3, ShOperationInfo::LINEAR, true, true, false},
 
   {"MAD", 3, ShOperationInfo::LINEAR, true, true, false},
-  {"MAX", 2, ShOperationInfo::LINEAR, true, true, false},
+  {"MAX", 2, ShOperationInfo::LINEAR, true, true, true},
   {"MIN", 2, ShOperationInfo::LINEAR, true, true, true},
   {"MOD", 2, ShOperationInfo::LINEAR, true, true, true},
 

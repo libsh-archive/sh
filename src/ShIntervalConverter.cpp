@@ -276,8 +276,24 @@ ShProgram intervalRCP(int N, ShValueType valueType)
     ShVariablePair a(SH_INPUT, N, valueType);
     ShVariablePair r(SH_OUTPUT, N, valueType);
 
-    shRCP(r.lo, a.hi);
-    shRCP(r.hi, a.lo);
+    // @todo range debugging hack
+    // using conditionals hopefully to get by NaNs
+    // (check if a.lo < 0 && 0 < a.hi 
+    //
+    ShVariablePair test(SH_TEMP, N, valueType);
+    ShVariablePair zerocond(SH_TEMP, N, valueType);
+    shSLT(test.lo, a.lo, ShConstAttrib1f(1e-4).repeat(N));
+    shSLT(test.hi, ShConstAttrib1f(-1e-4).repeat(N), a.hi);
+
+    shMUL(test.lo, test.lo, test.hi);
+
+    SH_IF(test.lo) {
+      shASN(r.lo, ShConstAttrib1f(-1e8).repeat(N));
+      shASN(r.hi, ShConstAttrib1f(1e8).repeat(N));
+    } SH_ELSE {
+      shRCP(r.lo, a.hi);
+      shRCP(r.hi, a.lo);
+    } SH_ENDIF;
   } SH_END;
   return result;
 }

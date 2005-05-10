@@ -71,12 +71,24 @@
 #include "ShRecord.hpp"
 #include "ShQuaternion.hpp"
 #include "ShVariant.hpp"
+#include "ShStorageType.hpp"
 #include "ShTypeInfo.hpp"
 #include "ShMemoryDep.hpp"
 #include "ShPalette.hpp"
 #include "ShInclusion.hpp"
 #include "ShAaScanCore.hpp"
 #include "ShAaScanErr.hpp"
+
+// @todo range - probably don't want to include all of these
+#include "ShStructural.hpp"
+#include "ShSection.hpp"
+#include "ShAaHier.hpp" 
+#include "ShAaOpHandler.hpp"  
+#include "ShAaOps.hpp" 
+#include "ShAaSymPlacer.hpp"  
+#include "ShAaSyms.hpp"
+#include "ShAaVariable.hpp"
+
 
 /** \namespace SH
  * \brief The main Sh namespace.

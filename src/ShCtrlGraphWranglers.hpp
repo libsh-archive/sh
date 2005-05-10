@@ -28,6 +28,7 @@
 #define SHCTRLGRAPHWRANGLERS_HPP
 
 #include "ShCtrlGraph.hpp"
+#include "ShStructural.hpp"
 #include "ShBasicBlock.hpp"
 #include "ShProgram.hpp"
 
@@ -65,7 +66,46 @@ void spliceProgram(ShCtrlGraphNodePtr node, ShBasicBlock::ShStmtList::iterator s
 SH_DLLEXPORT
 void replaceStmt(ShCtrlGraphNodePtr node, ShBasicBlock::ShStmtList::iterator stmt, ShProgram &program); 
 
+/* Removes a statement from a block */ 
+SH_DLLEXPORT
+void removeStmt(ShCtrlGraphNodePtr node, ShBasicBlock::ShStmtList::iterator stmt);
 
+
+/** Takes any edges in the structural graph between from and to, and
+ * replaces corresponding edges in the cfg by unconditional edges between from and fromCfg
+ * and toCfg and to 
+ */
+SH_DLLEXPORT
+void structSplit(ShStructuralNodePtr from, ShStructuralNodePtr to, ShCtrlGraphNodePtr fromCfg,
+    ShCtrlGraphNodePtr toCfg); 
+
+// replace all edges (from,to) that leave node with unconditional edges
+// (from, head) and (tail, to)
+//
+// @todo range - this currently only works if all node exits go to the same
+// place 
+//
+SH_DLLEXPORT
+void structReplaceExits(ShStructuralNodePtr node, 
+                        ShCtrlGraphNodePtr head, ShCtrlGraphNodePtr tail); 
+
+// replace all edges (from, to) that enter node with edges (from, head) that
+// keep their original cond var (or lack of cond var),
+// and unconditional edge (tail, to)
+//
+// @todo range - this currently only works if there is a single entry into
+// node in all matching pred edges
+SH_DLLEXPORT
+void structReplaceEntries(ShStructuralNodePtr node, 
+                          ShCtrlGraphNodePtr head, ShCtrlGraphNodePtr tail); 
+
+/* @todo range assumes single exit destination cfg node.
+ *
+ * Removes the node from the graph, redirecting pred edges to the exit
+ * destination. 
+ */
+SH_DLLEXPORT
+void structRemove(ShStructuralNodePtr node);
 
 }
 

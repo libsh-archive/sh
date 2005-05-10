@@ -35,6 +35,10 @@ int main()
    TEST((x + x) - (x + x));
    TEST(x % x);
    TEST(x % y);
+   TEST(pos(x));
+   TEST(pos(-x));
+   TEST(min(x, y));
+   TEST(max(x, y));
 
    std::cout << "YEAH" << std::endl;
    std::cout << "YEAH" << std::endl;

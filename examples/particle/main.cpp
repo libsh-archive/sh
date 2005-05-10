@@ -368,6 +368,7 @@ int main(int argc, char** argv)
   cout << "--" << endl;
 #endif
  
+  glutIdleFunc(idle);
   glutMainLoop();
   return 0;
   }
@@ -569,6 +570,12 @@ void update_streams(void)
 
   try 
     {
+      // @todo debug - change size of streams
+      posA.count(posA.count() / 2);
+      posB.count(posB.count() / 2);
+      velA.count(velA.count() / 2);
+      velB.count(velB.count() / 2);
+      
     // The value of dir specifcies whether to run particle_updateA, which
     // will take the data from stream 'A' and run the particle program to
     // generate stream 'B', or the opposite using 'B' to generate 'A'. The

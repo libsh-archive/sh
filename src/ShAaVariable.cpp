@@ -355,6 +355,18 @@ ShAaVariable& ShAaVariable::MAD(const ShAaVariable& other, const ShVariable& sca
   return *this;
 }
 
+ShAaVariable& ShAaVariable::COND(const ShVariable& condvar, const ShVariable& other)
+{
+  ShVariable c = center();
+  shCOND(c, condvar, other, c);
+  ShConstAttrib1f ZERO(0.0f);
+  for(int i = 0; i < size(); ++i) {
+    if(use(i).empty()) continue;
+    ShVariable myerr = err(i);
+    shCOND(myerr, condvar, ZERO.repeat(myerr.size()), myerr);
+  }
+}
+
 ShAaVariable& ShAaVariable::COND(const ShVariable& condvar, const ShAaVariable& other)
 {
   return COND(condvar, other, other.use());

@@ -45,15 +45,17 @@ using namespace SH;
 template<typename T>
 ShProgram ShKernelSurface::diffuse() {
   ShProgram kernel = SH_BEGIN_FRAGMENT_PROGRAM {
-    typename T::InputType SH_DECL(kd);
-    typename T::InputType SH_DECL(irrad);
-    ShInputNormal3f SH_DECL(normal);
-    ShInputVector3f SH_DECL(lightVec);
-    ShInputPosition4f SH_DECL(posh);
+    SH_BEGIN_SECTION("surface:diffuse") {
+      typename T::InputType SH_DECL(kd);
+      typename T::InputType SH_DECL(irrad);
+      ShInputNormal3f SH_DECL(normal);
+      ShInputVector3f SH_DECL(lightVec);
+      ShInputPosition4f SH_DECL(posh);
 
-    irrad *= pos(dot(normalize(normal), normalize(lightVec)));
-    typename T::OutputType SH_DECL(result);
-    result = irrad * kd; 
+      irrad *= pos(dot(normalize(normal), normalize(lightVec)));
+      typename T::OutputType SH_DECL(result);
+      result = irrad * kd; 
+    } SH_END_SECTION;
   } SH_END;
   return kernel;
 }
@@ -85,23 +87,25 @@ ShProgram ShKernelSurface::specular() {
 template<typename T>
 ShProgram ShKernelSurface::phong() {
   ShProgram kernel = SH_BEGIN_PROGRAM("gpu:fragment") {
-    typename T::InputType SH_DECL(kd);
-    typename T::InputType SH_DECL(ks);
-    ShInputAttrib1f SH_DECL(specExp);
-    typename T::InputType SH_DECL(irrad);
+    SH_BEGIN_SECTION("surface:phong") {
+      typename T::InputType SH_DECL(kd);
+      typename T::InputType SH_DECL(ks);
+      ShInputAttrib1f SH_DECL(specExp);
+      typename T::InputType SH_DECL(irrad);
 
-    ShInputNormal3f SH_DECL(normal);
-    ShInputVector3f SH_DECL(halfVec);
-    ShInputVector3f SH_DECL(lightVec);
-    ShInputPosition4f SH_DECL(posh);
+      ShInputNormal3f SH_DECL(normal);
+      ShInputVector3f SH_DECL(halfVec);
+      ShInputVector3f SH_DECL(lightVec);
+      ShInputPosition4f SH_DECL(posh);
 
-    typename T::OutputType SH_DECL(result);
+      typename T::OutputType SH_DECL(result);
 
-    normal = normalize(normal);
-    halfVec = normalize(halfVec);
-    lightVec = normalize(lightVec);
-    irrad *= pos(normal | lightVec);
-    result = irrad * (kd + ks * pow(pos(normal | halfVec), specExp)); 
+      normal = normalize(normal);
+      halfVec = normalize(halfVec);
+      lightVec = normalize(lightVec);
+      irrad *= pos(normal | lightVec);
+      result = irrad * (kd + ks * pow(pos(normal | halfVec), specExp)); 
+    } SH_END_SECTION;
   } SH_END;
   return kernel;
 }
@@ -109,20 +113,22 @@ ShProgram ShKernelSurface::phong() {
 template<typename T>
 ShProgram ShKernelSurface::gooch() {
   ShProgram kernel = SH_BEGIN_PROGRAM("gpu:fragment") {
-    typename T::InputType SH_DECL(kd);
-    typename T::InputType SH_DECL(cool);
-    typename T::InputType SH_DECL(warm);
-    typename T::InputType SH_DECL(irrad);
+    SH_BEGIN_SECTION("surface:gooch") {
+      typename T::InputType SH_DECL(kd);
+      typename T::InputType SH_DECL(cool);
+      typename T::InputType SH_DECL(warm);
+      typename T::InputType SH_DECL(irrad);
 
-    ShInputNormal3f SH_DECL(normal);
-    ShInputVector3f SH_DECL(lightVec);
-    ShInputPosition4f SH_DECL(posh);
+      ShInputNormal3f SH_DECL(normal);
+      ShInputVector3f SH_DECL(lightVec);
+      ShInputPosition4f SH_DECL(posh);
 
-    typename T::OutputType SH_DECL(result);
+      typename T::OutputType SH_DECL(result);
 
-    normal = normalize(normal);
-    lightVec = normalize(lightVec);
-    result = lerp(mad((normal | lightVec), ShConstAttrib1f(0.5f), ShConstAttrib1f(0.5f)) * irrad, warm, cool) * kd;
+      normal = normalize(normal);
+      lightVec = normalize(lightVec);
+      result = lerp(mad((normal | lightVec), ShConstAttrib1f(0.5f), ShConstAttrib1f(0.5f)) * irrad, warm, cool) * kd;
+    } SH_END_SECTION;
   } SH_END;
   return kernel;
 }

@@ -102,6 +102,10 @@ struct MultiArrayIndex {
     return product(m_lengths);
   }
 
+  void reset() {
+    m_cur = size_t_array(static_cast<size_t>(0), m_start.size()); 
+  }
+
   friend std::ostream& operator<<(std::ostream& out, const MultiArrayIndex& idx)
   {
     out << idx.index() << " cur=" << idx.m_cur;

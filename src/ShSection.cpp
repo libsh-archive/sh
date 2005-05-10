@@ -54,8 +54,9 @@ void ShSectionNode::addChild(ShPointer<ShSectionNode> child)
   child->parent = this;
 }
 
-ShSectionNode::ShSectionNode()
-  : parent(0)
+ShSectionNode::ShSectionNode(ShStructuralNodePtr structnode)
+  : structnode(structnode), 
+    parent(0)
 {
 }
 
@@ -109,8 +110,12 @@ int ShSectionNode::depth()
   return parent->depth() + 1;
 }
 
+ShSectionTree::ShSectionTree()
+{
+}
+
 ShSectionTree::ShSectionTree(ShStructural& structural) 
-  : root(new ShSectionNode())
+  : root(new ShSectionNode(structural.head()))
 {
   makeSection(structural.head(), root);
 }
@@ -142,7 +147,7 @@ std::ostream& ShSectionTree::dump(std::ostream& out)
 void ShSectionTree::makeSection(ShStructuralNodePtr structNode, ShSectionNodePtr section) 
 {
   if(structNode->type == ShStructuralNode::SECTION) {
-    ShSectionNodePtr newSection = new ShSectionNode(); 
+    ShSectionNodePtr newSection = new ShSectionNode(structNode); 
     section->addChild(newSection);
     section = newSection;
   }

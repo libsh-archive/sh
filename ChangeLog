@@ -1,3 +1,28 @@
+2005-05-10  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+	* examples/bb:
+	Branch & Bound global optimizer
+
+	* examples/implicit:
+	Branch & bound implicit surface intersector (meta sphere/cylinder/plane, heightfields)
+	
+	* src/ShChannel.hpp ShChannelImpl.hpp ShChannelNode.hpp 
+		ShChannelNode.cpp (count):
+	Allow user to manipulate channel count.
+
+	* src/ShAaOps.hpp ShAaOps.cpp, ShAaOpHandler.cpp, ShAffine.hpp ShAffineImpl.hpp:
+	Added various ops (POS, MAX, MIN, CSUM).
+
+	* src/ShAaOpHandler.cpp:
+	Fixed some issues with assignments to scalars. 
+
+	* src/ShCtrlGraphWranglers.hpp:
+	Moved structural graph manipulations over here.
+
+	* util/ShKernelLightImpl.hpp ShKernelSurfaceImpl.hpp, ShKernelSurfMapImpl.hpp:
+	Wrapped these kernels in SECTION markers so they show up in graphviz
+	dumps as separate blocks.
+
+
 2005-05-06	Bryan Chan <b8chan@cgl.uwaterloo.ca>
 	Merged trunk in up to r2375
 

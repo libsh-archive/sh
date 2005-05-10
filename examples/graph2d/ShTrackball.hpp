@@ -1,6 +1,9 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright 2003-2005 Serious Hack Inc.
+// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
+// Project administrator: Michael D. McCool
+// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
+//          Michael D. McCool
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -21,41 +24,26 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHCHANNELNODE_HPP
-#define SHCHANNELNODE_HPP
+#ifndef SHTRACKBALL_HPP
+#define SHTRACKBALL_HPP
 
-#include "ShDllExport.hpp"
-#include "ShVariableNode.hpp"
-#include "ShMemory.hpp"
+#include <sh/sh.hpp>
 
 namespace SH {
 
-class
-SH_DLLEXPORT ShChannelNode : public ShVariableNode {
+class ShTrackball {
 public:
-  ShChannelNode(ShSemanticType specType, int elements, ShValueType valueType);
-  ShChannelNode(ShSemanticType specType, int elements, ShValueType valueType,
-                const ShMemoryPtr& memory, int count);
-  virtual ~ShChannelNode();
+  ShTrackball() : m_width(0.0), m_height(0.0) {}
+  
+  ~ShTrackball() {}
 
-  void memory(const ShMemoryPtr& memory, int count);
-  ShPointer<const ShMemory> memory() const;
-  ShMemoryPtr memory();
-  
-  int count() const;
-  void count(int c); 
-  
+  void resize(float width, float height);
+  ShMatrix4x4f rotate(float sx, float sy, float ex, float ey) const;
+
 private:
-  ShMemoryPtr m_memory;
-  int m_count;
-
-  // NOT IMPLEMENTED
-  ShChannelNode(const ShChannelNode& other);
-  ShChannelNode& operator=(const ShChannelNode& other);
+  float m_width, m_height;
 };
 
-typedef ShPointer<ShChannelNode> ShChannelNodePtr;
-typedef ShPointer<const ShChannelNode> ShChannelNodeCPtr;
-
 }
+
 #endif

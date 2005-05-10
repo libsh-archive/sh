@@ -66,6 +66,12 @@ int ShChannel<T>::count() const
 }
 
 template<typename T>
+void ShChannel<T>::count(int c) 
+{
+  m_node->count(c);
+}
+
+template<typename T>
 ShMemoryPtr ShChannel<T>::memory()
 {
   return m_node->memory();

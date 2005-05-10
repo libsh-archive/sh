@@ -81,7 +81,6 @@ void ShSectionTree::realDump(std::ostream& out, std::ostream& cfgout,
 #endif
       out << ";" << std::endl;
 
-
       // @todo this is copied from CtrlGraph.cpp...
       for (ShCtrlGraphNode::SuccessorList::const_iterator I = c->successors.begin();
            I != c->successors.end(); ++I) {

@@ -9,7 +9,6 @@ class Camera {
 public:
   Camera();
 
-  void reset();
   void move(float x, float y, float z);
   void rotate(float a, float x, float y, float z);
   void orbit(int sx, int sy, int x, int y, int w, int h);

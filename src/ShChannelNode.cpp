@@ -65,4 +65,9 @@ int ShChannelNode::count() const
   return m_count;
 }
 
+void ShChannelNode::count(int c) 
+{
+  m_count = c;
+}
+
 }

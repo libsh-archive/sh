@@ -287,6 +287,62 @@ ShAaVariable aaMAD(const ShAaVariable &a, const ShAaVariable &b,
   return aaADD(ab, c);
 }
 
+ShAaVariable aaPOS(const ShAaVariable& a, const ShAaSyms& newsyms)
+{
+  ShVariable aCenter = a.center();
+  ShVariable aRadius = a.radius(); 
+
+  ShVariable aLo = a.temp(a.name() + "_lo");
+  ShVariable aHi = a.temp(a.name() + "_hi");
+  shADD(aLo, aCenter, -aRadius);
+  shADD(aHi, aCenter, aRadius);
+
+  ShAaVariable result(new ShAaVariableNode(*a.node(), a.use() | newsyms));
+
+  // if lo < 0 && hi > 0, scale radius to hi / 2 and center = hi / 2
+  // if hi <= 0, set to 0
+  // else keep
+  ShConstAttrib1f ZERO(0.0f);
+  ShConstAttrib1f HALF(0.5f);
+
+  ShVariable loLtZero = a.temp(a.name() + "_lo-le-0");
+  shSLT(loLtZero, aLo, ZERO.repeat(aLo.size()));
+  //ShAaVariable scaledResult(a.clone());
+  ShAaVariable scaledResult(result.clone());
+  ShVariable scaling = a.temp(a.name() + "_scaling");
+  ShVariable halfHi = a.temp(a.name() + "_half_hi");
+
+  shMUL(halfHi, aHi, HALF.repeat(aHi.size()));
+
+  // @todo range fix
+#if 0
+  shRCP(scaling, aRadius);
+  shMUL(scaling, scaling, halfHi);
+  scaledResult.MUL(scaling);
+  shASN(scaledResult.center(), halfHi);
+#endif
+  ShVariable scaledResultCenter = scaledResult.center();
+  shASN(scaledResultCenter, halfHi);
+  scaledResult.setErr(halfHi, newsyms);
+  result.COND(loLtZero, scaledResult);
+
+  ShVariable hiLeZero = a.temp(a.name() + "_hi-lt-0");
+  shSLT(hiLeZero, aHi, ZERO.repeat(aHi.size()));
+  result.COND(hiLeZero, ZERO.repeat(a.size()));
+
+  return result;
+}
+
+ShAaVariable aaMAX(const ShAaVariable& a, const ShAaVariable& b, const ShAaSyms& newsyms)
+{
+  return aaADD(aaPOS(aaADD(a, b.NEG()), newsyms), b); 
+}
+
+ShAaVariable aaMIN(const ShAaVariable& a, const ShAaVariable& b, const ShAaSyms& newsyms)
+{
+  return aaADD(a, aaPOS(aaADD(a, b.NEG()), newsyms).NEG()); 
+}
+
 ShAaVariable aaNORM(const ShAaVariable& a, const ShAaSyms& newsyms)
 {
   // need to do some weird stuff to get the right syms
@@ -363,6 +419,16 @@ ShAaVariable aaSQRT(const ShAaVariable& a, const ShAaSyms& newsyms)
   // deal with bounds < 0 case...
   ShAaVariable result(new ShAaVariableNode(*a.node(), a.use() | newsyms));
   convexApprox<__aaop_sqrt>(result, a, newsyms, true); 
+  return result;
+}
+
+ShAaVariable aaCSUM(const ShAaVariable &a)
+{
+  if(a.size() == 1) return a;
+  ShAaVariable result = aaADD(a(0), a(1)); 
+  for(int i = 2; i < a.size(); ++i) {
+    result = aaADD(result, a(i));
+  }
   return result;
 }
 
