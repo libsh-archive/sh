@@ -408,24 +408,28 @@ void ShDataVariant<T, DT>::operator delete(void* ptr, std::size_t size)
 #endif
 
 template<typename T, ShDataType DT>
+inline
 ShPointer<ShDataVariant<T, DT> > variant_cast(ShVariantPtr c)
 {
   return shref_dynamic_cast<ShDataVariant<T, DT> >(c);
 }
 
 template<typename T, ShDataType DT>
+inline
 ShPointer<const ShDataVariant<T, DT> > variant_cast(ShVariantCPtr c)
 {
   return shref_dynamic_cast<const ShDataVariant<T, DT> >(c);
 }
 
 template<typename T, ShDataType DT>
+inline
 ShDataVariant<T, DT>* variant_cast(ShVariant* c)
 {
   return dynamic_cast<ShDataVariant<T, DT>*>(c);
 }
 
 template<typename T, ShDataType DT>
+inline
 const ShDataVariant<T, DT>* variant_cast(const ShVariant* c)
 {
   return dynamic_cast<const ShDataVariant<T, DT>*>(c);

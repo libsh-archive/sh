@@ -48,12 +48,23 @@ class Impl(semantic.Impl):
         
         common.inprint("if (Binding == SH_CONST) {")
         common.indent()
-        for i in range(0, size):
+        if size > 1:
+            values = ""
+            for i in range(0, size):
+                if i > 0: values += ", "
+                if args[0][0] == "host_type":
+                    values += "s" + str(i)
+                else:
+                    common.inprint("SH_DEBUG_ASSERT(s" + str(i) + ".hasValues());")
+                    values += "s" + str(i) + ".getValue(0)"
+            common.inprint("host_type data[" + str(size) + "] = {" + values + "};")
+            common.inprint("setValues(data);")
+        else:
             if args[0][0] == "host_type":
-                common.inprint("setValue(" + str(i) + ", s" + str(i) + ");")
+                common.inprint("setValue(0, s0);")
             else:
-                common.inprint("SH_DEBUG_ASSERT(s" + str(i) + ".hasValues());")
-                common.inprint("setValue(" + str(i) + ", s" + str(i) + ".getValue(0));")
+                common.inprint("SH_DEBUG_ASSERT(s0.hasValues());")
+                common.inprint("setValue(0, s0.getValue(0));")
         common.deindent()
         common.inprint("} else {")
         common.indent()

@@ -1,3 +1,16 @@
+2005-05-10  Francois Marier  <francois@serioushack.com>
+
+	Improve the speed of row by row matrix assignment (mat_asn_vec).
+
+	* src/scripts/ShAttribImpl.hpp.py (Impl.scalarcons): Set all
+	values at once using setValues() instead of several calls to
+	setValue().
+	
+	* src/ShVariantImpl.hpp: Inline all the variant_cast() functions.
+
+	* src/ShGenericImpl.hpp (setValues): Replace the std::copy call by
+	a for loop.
+
 2005-05-09  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslEmit.cpp (emit_texture): Fix the swizzle for

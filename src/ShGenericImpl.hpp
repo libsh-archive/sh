@@ -313,21 +313,23 @@ typename ShGeneric<N, T>::host_type ShGeneric<N, T>::getValue(int index) const
 template<int N, typename T>
 void ShGeneric<N, T>::setValue(int index, const host_type &variantValue) 
 {
-  if(m_swizzle.identity() && !m_neg) {
-    VariantTypePtr c = variant_cast<T, SH_HOST>(m_node->getVariant()); 
+  if (m_swizzle.identity() && !m_neg) {
+    VariantTypePtr c(variant_cast<T, SH_HOST>(m_node->getVariant())); 
     (*c)[index] = variantValue;
   } else {
-    VariantTypePtr variant(new VariantType(1, variantValue));
-    setVariant(variant, false, ShSwizzle(N, index));
+    VariantTypePtr variantPtr(new VariantType(1, variantValue));
+    setVariant(variantPtr, false, ShSwizzle(N, index));
   }
 }
 
 template<int N, typename T>
 void ShGeneric<N, T>::setValues(const host_type variantValues[]) 
 {
-  if(m_swizzle.identity() && !m_neg) {
-    VariantTypePtr variantPtr(variant_cast<T, SH_HOST>(m_node->getVariant()));
-    std::copy(variantValues, variantValues + N, variantPtr->begin()); 
+  if (m_swizzle.identity() && !m_neg) {
+    VariantTypePtr c(variant_cast<T, SH_HOST>(m_node->getVariant())); 
+    for (int i=0; i < N; i++) {
+      (*c)[i] = variantValues[i];
+    }
   } else {
     VariantTypePtr variantPtr(new VariantType(N, variantValues, false));
     setVariant(variantPtr);

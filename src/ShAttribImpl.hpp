@@ -629,8 +629,8 @@ ShAttrib<2, Binding, T, Semantic, Swizzled>::ShAttrib(host_type s0, host_type s1
   : ShGeneric<2, T>(new ShVariableNode(Binding, 2, ShStorageTypeInfo<T>::value_type, Semantic))
 {
   if (Binding == SH_CONST) {
-    setValue(0, s0);
-    setValue(1, s1);
+    host_type data[2] = {s0, s1};
+    setValues(data);
   } else {
     (*this) = ShAttrib<2, SH_CONST, T, Semantic>(s0, s1);
   }
@@ -643,9 +643,9 @@ ShAttrib<2, Binding, T, Semantic, Swizzled>::ShAttrib(const ShGeneric<1, T2>& s0
 {
   if (Binding == SH_CONST) {
     SH_DEBUG_ASSERT(s0.hasValues());
-    setValue(0, s0.getValue(0));
     SH_DEBUG_ASSERT(s1.hasValues());
-    setValue(1, s1.getValue(0));
+    host_type data[2] = {s0.getValue(0), s1.getValue(0)};
+    setValues(data);
   } else {
     (*this)[0] = s0;
     (*this)[1] = s1;
@@ -939,9 +939,8 @@ ShAttrib<3, Binding, T, Semantic, Swizzled>::ShAttrib(host_type s0, host_type s1
   : ShGeneric<3, T>(new ShVariableNode(Binding, 3, ShStorageTypeInfo<T>::value_type, Semantic))
 {
   if (Binding == SH_CONST) {
-    setValue(0, s0);
-    setValue(1, s1);
-    setValue(2, s2);
+    host_type data[3] = {s0, s1, s2};
+    setValues(data);
   } else {
     (*this) = ShAttrib<3, SH_CONST, T, Semantic>(s0, s1, s2);
   }
@@ -954,11 +953,10 @@ ShAttrib<3, Binding, T, Semantic, Swizzled>::ShAttrib(const ShGeneric<1, T2>& s0
 {
   if (Binding == SH_CONST) {
     SH_DEBUG_ASSERT(s0.hasValues());
-    setValue(0, s0.getValue(0));
     SH_DEBUG_ASSERT(s1.hasValues());
-    setValue(1, s1.getValue(0));
     SH_DEBUG_ASSERT(s2.hasValues());
-    setValue(2, s2.getValue(0));
+    host_type data[3] = {s0.getValue(0), s1.getValue(0), s2.getValue(0)};
+    setValues(data);
   } else {
     (*this)[0] = s0;
     (*this)[1] = s1;
@@ -1253,10 +1251,8 @@ ShAttrib<4, Binding, T, Semantic, Swizzled>::ShAttrib(host_type s0, host_type s1
   : ShGeneric<4, T>(new ShVariableNode(Binding, 4, ShStorageTypeInfo<T>::value_type, Semantic))
 {
   if (Binding == SH_CONST) {
-    setValue(0, s0);
-    setValue(1, s1);
-    setValue(2, s2);
-    setValue(3, s3);
+    host_type data[4] = {s0, s1, s2, s3};
+    setValues(data);
   } else {
     (*this) = ShAttrib<4, SH_CONST, T, Semantic>(s0, s1, s2, s3);
   }
@@ -1269,13 +1265,11 @@ ShAttrib<4, Binding, T, Semantic, Swizzled>::ShAttrib(const ShGeneric<1, T2>& s0
 {
   if (Binding == SH_CONST) {
     SH_DEBUG_ASSERT(s0.hasValues());
-    setValue(0, s0.getValue(0));
     SH_DEBUG_ASSERT(s1.hasValues());
-    setValue(1, s1.getValue(0));
     SH_DEBUG_ASSERT(s2.hasValues());
-    setValue(2, s2.getValue(0));
     SH_DEBUG_ASSERT(s3.hasValues());
-    setValue(3, s3.getValue(0));
+    host_type data[4] = {s0.getValue(0), s1.getValue(0), s2.getValue(0), s3.getValue(0)};
+    setValues(data);
   } else {
     (*this)[0] = s0;
     (*this)[1] = s1;
