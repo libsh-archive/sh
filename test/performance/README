@@ -17,3 +17,10 @@ Running a specific test for a given number of runs:
     ./runtest vec3_add 5
 
 Use ./sum to get a summary
+
+
+Profiling SH
+------------
+
+To run any of the tests through gprof (generates a <test>.prof file):
+  make <testname>.prof
