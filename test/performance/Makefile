@@ -20,7 +20,8 @@ clean:
 	@libtool --mode=link $(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LDFLAGS) > /dev/null
 
 %.prof: %.gprof
-	@./$< # Run the program to generate gprof data
+	@echo Running $< to generate gprof data
+	@./$<
 	@libtool --mode=execute gprof $< > $@
 	@rm -f gmon.out
 
