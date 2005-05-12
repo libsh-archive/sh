@@ -74,7 +74,7 @@ public:
           TextureStrategy* texture);
   virtual ~GlslCode();
 
-  virtual bool allocateRegister(const SH::ShVariableNodePtr& var) { return false; }
+  virtual bool allocateRegister(const SH::ShVariableNodePtr& var) { return true; }
   virtual void freeRegister(const SH::ShVariableNodePtr& var) {}
 
   virtual void upload();
