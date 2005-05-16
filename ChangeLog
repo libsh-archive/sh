@@ -1,3 +1,8 @@
+2005-05-16  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibMiscImpl.hpp (poly): Improve efficiency of the
+	algorithm used to compute poly().
+
 2005-05-10  Francois Marier  <francois@serioushack.com>
 
 	Improve the speed of row by row matrix assignment (mat_asn_vec).

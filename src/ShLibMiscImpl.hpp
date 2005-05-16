@@ -217,11 +217,10 @@ ShGeneric<N, CT1T2> poly(const ShGeneric<N, T1>& a, const ShGeneric<M, T2>& b)
     ShGeneric<1, CT1T2> r_i = t[i];
     ShGeneric<1, T1> a_i = a[i];
 
-    r_i = b[0];                        // j = 0
-    if (M >= 2) r_i += a_i * b[1];     // j = 1
-    if (M >= 3) r_i += a_i*a_i * b[2]; // j = 2
-    for (int j=3; j < M; j++) {
-      r_i += pow(a_i, j) * b[j];
+    // Uses Horner's rule
+    r_i = b[M - 1];
+    for (int j = M - 1; j > 0; j--) {
+      r_i = mad(a_i, r_i, b[j-1]);
     }
   }
 
