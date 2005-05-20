@@ -191,7 +191,7 @@ public:
   
   void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
   
-  bool can_handle(const std::string& target);
+  int can_handle(const std::string& target);
 };
 
 

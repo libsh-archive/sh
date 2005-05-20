@@ -1,6 +1,18 @@
 2005-05-20  Francois Marier  <francois@serioushack.com>
 
 	Backend infrastructure improvements (issue31):
+
+	* backends/cc/Cc.cpp, Cc.hpp, ArbBackend.cpp, GlslBackend.cpp:
+	Make the can_handle() method return an integer cost instead of a
+	boolean value.
+
+	* backends/gl/GlBackend.cpp, GlBackend.hpp (can_handle): Return an
+	integer cost instead of a boolean. Only provide the costs that are
+	common to both Arb and Glsl.
+
+	* src/ShBackend.cpp, ShBackend.hpp: Remove the generic
+	can_handle() function since it is not used by the other backends
+	anymore.  Make the pure virtual can_handle() method return an int.
 	
 	* src/ShBackend.cpp, ShBackend.hpp: Add lists of selected and
 	instantiated backends.

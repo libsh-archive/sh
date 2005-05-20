@@ -44,6 +44,23 @@ struct GlslBackend : public GlBackend {
 
   std::string name() const { return "glsl"; }
   std::string version() const { return "1.0"; }
+
+  int can_handle(const std::string& target)
+  {
+    int res = 0;
+    res = GlBackend::can_handle(target);
+    if (res > 0) return res;
+
+    if (("gpu:vertex" == target) || ("gpu:fragment" == target)) return 5;
+    if (("vertex" == target) || ("fragment" == target))         return 5;
+    if (("*:vertex" == target) || ("*:fragment" == target))     return 5;
+
+    if (("gpu:stream" == target)) return 10;
+    if (("*:stream" == target))   return 10;
+    if (("stream" == target))     return 10;
+
+    return 0;
+  }
 };
 
 #ifdef WIN32

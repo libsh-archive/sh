@@ -116,9 +116,9 @@ public:
   /// Unbind all programs bound under this backend
   virtual void unbind_all();
   
-  /// Returns true if the backend can handle the given target
-  virtual bool can_handle(const std::string& target) { return false; }
-
+  /// Returns the cost for the backend to handle the given target 
+  /// (0 == not handled, 1 == best backend for the target)
+  virtual int can_handle(const std::string& target) { return 0; }
 
   typedef std::list< ShPointer<ShBackend> > ShBackendList;
 
@@ -141,12 +141,6 @@ public:
 
 protected:
   ShBackend();
-  
-  /// Returns true if the target is compatible with the backend if we
-  /// consider the generic type of the backend (i.e. "cpu" or "gpu")
-  /// and the kind of program it refers to (e.g. "stream", "vertex" or
-  /// "fragment").
-  bool can_handle(const std::string& target, const char* type, const char* kind);
   
 private:
   static void init();

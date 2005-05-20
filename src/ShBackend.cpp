@@ -232,15 +232,6 @@ void ShBackend::clear_backends()
   m_selected_backends->clear();
 }
 
-bool ShBackend::can_handle(const std::string& target, const char* type, const char* kind)
-{ 
-  if (target == kind) return true;                             // e.g. "stream"
-  if (target == (std::string("*:") + kind)) return true;       // e.g. "*:stream"
-  if (target == (std::string(type) + ":" + kind)) return true; // e.g. "gpu:stream"
-  if (target == (name() + ":" + kind)) return true;            // e.g. "arb:stream"
-  return false;
-}
-
 ShPointer<ShBackend> ShBackend::get_backend(const std::string& target)
 {
   using namespace std;

@@ -378,12 +378,12 @@ void GlBackend::execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest
   m_stream->execute(program, dest);
 }
 
-bool GlBackend::can_handle(const std::string& target)
+int GlBackend::can_handle(const std::string& target)
 {
-  if (ShBackend::can_handle(target, "gpu", "stream")) return true;
-  if (ShBackend::can_handle(target, "gpu", "vertex")) return true;
-  if (ShBackend::can_handle(target, "gpu", "fragment")) return true;
-  return false;
+  if (target == name() + ":" + "vertex") return 1;
+  if (target == name() + ":" + "fragment") return 1;
+  if (target == name() + ":" + "stream") return 1;
+  return 0;
 }
 
 }
