@@ -34,7 +34,6 @@
 #include "ShAttrib.hpp"
 #include "ShContext.hpp"
 #include "ShStatement.hpp"
-#include "ShEnvironment.hpp"
 #include "ShDebug.hpp"
 
 namespace SH {

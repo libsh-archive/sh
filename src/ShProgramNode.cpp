@@ -27,7 +27,6 @@
 #include <sstream>
 #include <fstream>
 #include "ShBackend.hpp"
-#include "ShEnvironment.hpp"
 #include "ShContext.hpp"
 #include "ShDebug.hpp"
 #include "ShTextureNode.hpp"
@@ -73,17 +72,20 @@ void ShProgramNode::compile(const std::string& target, const ShPointer<ShBackend
   m_code[std::make_pair(target, backend)] = code;
 }
 
-ShPointer<ShBackendCode> ShProgramNode::code() {
-  return code(ShEnvironment::backend);
+ShPointer<ShBackendCode> ShProgramNode::code()
+{
+  return code(ShBackend::get_backend(m_target));
 }
 
-ShPointer<ShBackendCode> ShProgramNode::code(const ShPointer<ShBackend>& backend) {
+ShPointer<ShBackendCode> ShProgramNode::code(const ShPointer<ShBackend>& backend)
+{
   if (m_target.empty()) shError( ShException( "Invalid ShProgram target" ) );
 
   return code(m_target, backend);
 }
 
-ShPointer<ShBackendCode> ShProgramNode::code(const std::string& target, const ShPointer<ShBackend>& backend) {
+ShPointer<ShBackendCode> ShProgramNode::code(const std::string& target, const ShPointer<ShBackend>& backend)
+{
   if (!backend) return 0;
 
   if (m_code.find(std::make_pair(target, backend)) == m_code.end()) compile(target, backend);

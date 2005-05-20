@@ -31,7 +31,6 @@
 #include "ShError.hpp"
 #include "ShOptimizations.hpp"
 #include "ShInternals.hpp"
-#include "ShEnvironment.hpp"
 #include "ShContext.hpp"
 #include "ShManipulator.hpp"
 #include "ShFixedManipulator.hpp"

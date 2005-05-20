@@ -328,6 +328,10 @@ void shUpdate();
 SH_DLLEXPORT
 bool shSetBackend(const std::string& name);
 
+/// Add a backend to the list of selected backends
+SH_DLLEXPORT
+bool shUseBackend(const std::string& name);
+
 /** \brief SH Initialization Function.
  *
  * The function needs to be called prior to the use of any other SH functions. Additionally,

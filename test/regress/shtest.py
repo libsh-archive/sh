@@ -291,7 +291,7 @@ class StreamTest(Test):
                     programs[argkey] = []
                     progname = self.name + '_' + string.ascii_lowercase[i] + '_' + argkey
                     programs[argkey].append(progname)
-                    out.write('  ShProgram ' + progname + ' = SH_BEGIN_PROGRAM("gpu:stream") {\n')
+                    out.write('  ShProgram ' + progname + ' = SH_BEGIN_PROGRAM("stream") {\n')
                     for j, (arg, argtype) in enumerate(src_arg_types):
                         out.write('    ' + make_variable(arg, 'SH_INPUT', argtype)
                                   + ' ' + string.ascii_lowercase[j] + ';\n')

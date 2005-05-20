@@ -25,7 +25,6 @@
 #include <fstream>
 #include <cassert>
 #include "ShSyntax.hpp"
-#include "ShEnvironment.hpp"
 #include "ShContext.hpp"
 #include "ShTokenizer.hpp"
 #include "ShToken.hpp"
@@ -60,22 +59,22 @@ void shEndShader()
 
   parsing->finish();
 
-  // TODO. See issue129.
-//   if (!ShEnvironment::shader->target().empty()) {
-//     shCompile(ShEnvironment::shader);
-//   }
+  // TODO: compile the program? See issue129.
+  
 }
 
 void shCompile(ShProgram& prg)
 {
-  if (!ShEnvironment::backend) return;
-  prg.compile(ShEnvironment::backend);
+  ShBackendPtr backend = ShBackend::get_backend(prg.target());
+  if (!backend) return;
+  prg.compile(backend);
 }
 
 void shCompile(ShProgram& prg, const std::string& target)
 {
-  if (!ShEnvironment::backend) return;
-  prg.compile(target, ShEnvironment::backend);
+  ShBackendPtr backend = ShBackend::get_backend(target);
+  if (!backend) return;
+  prg.compile(target, backend);
 }
 
 void shCompileShader(ShProgram& prg)
@@ -90,61 +89,71 @@ void shCompileShader(const std::string& target, ShProgram& prg)
 
 void shBind(ShProgram& prg)
 {
-  if (!ShEnvironment::backend) return;
-  prg.code(ShEnvironment::backend)->bind();
+  ShBackendPtr backend = ShBackend::get_backend(prg.target());
+  if (!backend) return;
+  prg.code(backend)->bind();
 }
 
 void shBind(const ShProgramSet& s)
 {
-  if (!ShEnvironment::backend) return;
-  s.backend_set(ShEnvironment::backend)->bind();
+  ShBackendPtr backend = ShBackend::get_backend((*(s.begin()))->target());
+  if (!backend) return;
+  s.backend_set(backend)->bind();
 }
 
 void shBind(const std::string& target, ShProgram& prg)
 {
-  if (!ShEnvironment::backend) return;
-  prg.code(target, ShEnvironment::backend)->bind();
+  ShBackendPtr backend = ShBackend::get_backend(target);
+  if (!backend) return;
+  prg.code(target, backend)->bind();
 }
 
 void shUnbind()
 {
-  if (!ShEnvironment::backend) return;
-  ShEnvironment::backend->unbind_all();
+  for (ShBackend::ShBackendList::iterator i = ShBackend::begin(); 
+       i != ShBackend::end(); i++) {
+    (*i)->unbind_all();
+  }
 }
 
 void shUnbind(ShProgram& prg)
 {
-  if (!ShEnvironment::backend) return;
-  prg.code(ShEnvironment::backend)->unbind();
+  ShBackendPtr backend = ShBackend::get_backend(prg.target());
+  if (!backend) return;
+  prg.code(backend)->unbind();
 }
 
 void shUnbind(const ShProgramSet& s)
 {
-  if (!ShEnvironment::backend) return;
-  s.backend_set(ShEnvironment::backend)->unbind();
+  ShBackendPtr backend = ShBackend::get_backend((*(s.begin()))->target());
+  if (!backend) return;
+  s.backend_set(backend)->unbind();
 }
 
 void shUnbind(const std::string& target, ShProgram& prg)
 {
-  if (!ShEnvironment::backend) return;
-  prg.code(target, ShEnvironment::backend)->unbind();
+  ShBackendPtr backend = ShBackend::get_backend(target);
+  if (!backend) return;
+  prg.code(target, backend)->unbind();
 }
 
 void shLink(const ShProgramSet& s)
 {
-  if (!ShEnvironment::backend) return;
-  s.backend_set(ShEnvironment::backend)->link();
+  ShBackendPtr backend = ShBackend::get_backend((*(s.begin()))->target());
+  if (!backend) return;
+  s.backend_set(backend)->link();
 }
 
 typedef std::map<std::string, ShProgram> BoundProgramMap;
 
 void shUpdate()
 {
-  if (!ShEnvironment::backend) return;
-  
   for (BoundProgramMap::iterator i = ShContext::current()->begin_bound(); 
        i != ShContext::current()->end_bound(); i++) {
-    i->second.code(ShEnvironment::backend)->update();
+    ShBackendPtr backend = ShBackend::get_backend(i->second.target());
+    if (backend) {
+      i->second.code(backend)->update();
+    }
   }
 }
 
@@ -160,10 +169,13 @@ void shBindShader(const std::string& target, ShProgram& shader)
 
 bool shSetBackend(const std::string& name)
 {
-  ShBackendPtr backend = SH::ShBackend::lookup(name);
-  if (!backend) return false;
-  SH::ShEnvironment::backend = backend;
-  return true;
+  SH::ShBackend::clear_backends();
+  return SH::ShBackend::use_backend(name);
+}
+
+bool shUseBackend(const std::string& name)
+{
+  return SH::ShBackend::use_backend(name);
 }
 
 bool shEvaluateCondition(const ShVariable& arg)

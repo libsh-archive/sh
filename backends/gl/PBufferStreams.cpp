@@ -229,12 +229,6 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
   
   DECLARE_TIMER(overhead);
 
-  // Check program target
-  if (program->target() != "gpu:stream") {
-    shError(PBufferStreamException("This backend can only execute ``gpu:stream'' programs."));
-    return;
-  }
-
   // Make sure program has no inputs
   if (!program->inputs.empty()) {
     shError(PBufferStreamException("Stream program has unbound inputs, and can hence not be executed."));

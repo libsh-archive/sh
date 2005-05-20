@@ -32,19 +32,22 @@
 #endif
 
 #include <algorithm>
+#include <dirent.h>
 
 #include "ShBackend.hpp"
 #include "ShProgram.hpp"
 #include "ShDebug.hpp"
-#include "ShEnvironment.hpp"
 #include "ShInternals.hpp"
 #include "ShTransformer.hpp"
 #include "ShSyntax.hpp"
 
 namespace SH {
 
-ShBackend::ShBackendList* ShBackend::m_backends = 0;
+ShBackend::ShBackendList* ShBackend::m_instantiated_backends = 0;
+ShBackend::ShBackendList* ShBackend::m_selected_backends = 0;
+std::set<std::string>* ShBackend::m_selected_backend_names = 0;
 bool ShBackend::m_doneInit = false;
+bool ShBackend::m_all_backends_loaded = false;
 
 ShBackendCode::~ShBackendCode()
 {
@@ -108,13 +111,13 @@ void ShTrivialBackendSet::unbind()
  
 ShBackend::ShBackend()
 {
-  init();
-  m_backends->push_back(this);
 }
 
 ShBackend::~ShBackend()
 {
-  m_backends->erase(std::remove(begin(), end(), ShBackendPtr(this)), end());
+  m_instantiated_backends->remove(ShBackendPtr(this));
+  m_selected_backends->remove(ShBackendPtr(this));
+  m_selected_backend_names->erase(name());
 }
 
 ShBackendSetPtr ShBackend::generate_set(const ShProgramSet& s)
@@ -125,77 +128,173 @@ ShBackendSetPtr ShBackend::generate_set(const ShProgramSet& s)
 ShBackend::ShBackendList::iterator ShBackend::begin()
 {
   init();
-  return m_backends->begin();
+  return m_instantiated_backends->begin();
 }
 
 ShBackend::ShBackendList::iterator ShBackend::end()
 {
   init();
-  if (!m_backends) m_backends = new ShBackendList();
-  return m_backends->end();
+  return m_instantiated_backends->end();
 }
 
 ShPointer<ShBackend> ShBackend::lookup(const std::string& name)
 {
   init();
   
-  for (ShBackendList::iterator I = begin(); I != end(); ++I) {
+  for (ShBackendList::iterator I = m_instantiated_backends->begin(); 
+       I != m_instantiated_backends->end(); ++I) {
     if ((*I)->name() == name) return *I;
   }
+
+  std::string libname;
 #ifndef WIN32
-  std::string libname(SH_INSTALL_PREFIX);
+  libname = SH_INSTALL_PREFIX;
   libname += "/lib/sh/libsh" + name + ".so";
-  
-  lt_dlhandle handle = lt_dlopenext(libname.c_str());
-
-  if (!handle) {
-    SH_DEBUG_ERROR("Could not open " << libname << ": " << lt_dlerror());
-    return 0;
-  }
-
-  for (ShBackendList::iterator I = begin(); I != end(); ++I) {
-    if ((*I)->name() == name) {
-      return *I;
-    }
-  }
-
-  SH_DEBUG_ERROR("Could not find " << name << "backend");
-
-  return 0;
 #else
-  
-  HMODULE mod = NULL;
-  std::string libname("LIBSH");
+  libname = "LIBSH";
   libname += name;
-#ifdef SH_DEBUG
-  libname += "D";
-#endif
+# ifdef SH_DEBUG
+    libname += "D";
+# endif
   libname += ".DLL";
-  mod = LoadLibrary(libname.c_str());
+#endif /* WIN32 */
 
-  if (!mod) {
-    SH_DEBUG_ERROR("Could not open " << libname);
-    return 0;
-  }
+  load_library(libname);
 
-  for (ShBackendList::iterator I = begin(); I != end(); ++I) {
-    if ((*I)->name() == name) {
-      return *I;
-    }
+  for (ShBackendList::iterator I = m_instantiated_backends->begin();
+       I != m_instantiated_backends->end(); ++I) {
+    if ((*I)->name() == name) return *I;
   }
   
-  SH_DEBUG_ERROR("Could not find " << name << "backend");
+  SH_DEBUG_ERROR("Could not find the " << name << " backend");
   
   return 0;
-#endif
+}
+
+void ShBackend::load_library(const std::string& filename)
+{
+  init();
+  ShBackend* backend = 0;
+
+#ifndef WIN32
+  unsigned extension_pos = filename.rfind(".so");
+  unsigned filename_pos = filename.rfind("/") + 1;
+  std::string backend_name = filename.substr(filename_pos, extension_pos - filename_pos);
+
+  lt_dlhandle module = lt_dlopenext(filename.c_str());
+  if (module) {
+    // Instantiate the backend
+    std::string init_function_name = "shBackend_" + backend_name + "_instantiate";
+    typedef ShBackend* EntryPoint();
+    EntryPoint* instantiate = (EntryPoint*)lt_dlsym(module, init_function_name.c_str()); 
+   
+    if (instantiate) {
+      backend = (*instantiate)();
+    } else {
+      SH_DEBUG_ERROR("Could not find " << init_function_name);
+    }
+  } else {
+    SH_DEBUG_WARN("Could not open " << filename << ": " << lt_dlerror());
+  }
+#else
+  HMODULE module = NULL;
+  module = LoadLibrary(filename.c_str());
+
+  if (module) {
+    // TODO: Instantiate the backend
+  } else {
+    SH_DEBUG_ERROR("Could not open " << filename);
+  }
+#endif /* WIN32 */
+
+  if (backend) {
+    m_instantiated_backends->push_back(backend);
+  }
+}
+
+bool ShBackend::use_backend(const std::string& name)
+{
+  init();
+  if (m_selected_backend_names->find(name) != m_selected_backend_names->end()) {
+    return true; // already selected
+  }
+  ShBackendPtr backend = SH::ShBackend::lookup(name);
+  if (!backend) return false;
+  m_selected_backends->push_back(backend);
+  m_selected_backend_names->insert(name);
+  return true;
+}
+
+void ShBackend::clear_backends()
+{
+  init();
+  m_selected_backend_names->clear();
+  m_selected_backends->clear();
+}
+
+bool ShBackend::can_handle(const std::string& target, const char* type, const char* kind)
+{ 
+  if (target == kind) return true;                             // e.g. "stream"
+  if (target == (std::string("*:") + kind)) return true;       // e.g. "*:stream"
+  if (target == (std::string(type) + ":" + kind)) return true; // e.g. "gpu:stream"
+  if (target == (name() + ":" + kind)) return true;            // e.g. "arb:stream"
+  return false;
+}
+
+ShPointer<ShBackend> ShBackend::get_backend(const std::string& target)
+{
+  using namespace std;
+
+  init();
+  if (m_selected_backends->size() > 0) {
+    // First look in all selected backends
+    for (ShBackendList::iterator i = m_selected_backends->begin(); 
+	 i != m_selected_backends->end(); i++) {
+      if ((*i)->can_handle(target)) return *i;
+    }
+  }
+
+  if (!m_all_backends_loaded) {
+    // Instantiate all installed backends
+#ifndef WIN32
+    string search_path(SH_INSTALL_PREFIX);
+    search_path += "/lib/sh/";
+
+    DIR* dirp = opendir(search_path.c_str());
+    if (dirp) {
+      // Go through all files in lib/sh/
+      for (struct dirent* entry = readdir(dirp); entry != 0; entry = readdir(dirp)) {
+	string filename(entry->d_name);
+	unsigned extension_pos = filename.rfind(".so");
+	if ((filename.find("libsh") == 0) && ((filename.size() - 3) == extension_pos)) {
+	  load_library(search_path + filename);
+	}
+      }
+      closedir(dirp);
+    }
+#else
+    // TODO: Find all DLLs
+#endif /* WIN32 */
+    m_all_backends_loaded = true;
+  }
+
+  // Look in all instantiated backends
+  for (ShBackendList::iterator i = m_instantiated_backends->begin(); 
+       i != m_instantiated_backends->end(); i++) {
+    if ((*i)->can_handle(target)) return *i;
+  }
+
+  cerr << "Could not find a backend that supports the '" << target << "' target." << endl;
+  return 0;
 }
 
 void ShBackend::init()
 {
   if (m_doneInit) return;
-  // SH_DEBUG_PRINT("Initializing backend system");
   
-  m_backends = new ShBackendList();
+  m_instantiated_backends = new ShBackendList();
+  m_selected_backends = new ShBackendList();
+  m_selected_backend_names = new std::set<std::string>();
 
 #ifndef WIN32
   if (lt_dlinit()) {
@@ -204,6 +303,8 @@ void ShBackend::init()
 
   std::string searchpath(SH_INSTALL_PREFIX);
   searchpath += "/lib/sh";
+
+  // TODO: add ~/.shbackends/ to the search path
 
   if (lt_dladdsearchdir(searchpath.c_str())) {
     SH_DEBUG_ERROR("Could not add " + searchpath + " to search dir: " << lt_dlerror());

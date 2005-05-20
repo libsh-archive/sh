@@ -97,37 +97,65 @@ class
 SH_DLLEXPORT ShBackend : public ShRefCountable {
 public:
   virtual ~ShBackend();
-  virtual std::string name() const = 0;
 
-  /// Generate the backend code for a particular shader. Ensure that
-  /// ShEnvironment::shader is the same as shader before calling this,
-  /// since extra variables may be declared inside this function!
+  /// Short name of the backend
+  virtual std::string name() const { return "";}
+
+  /// Backend-specific version number
+  virtual std::string version() const = 0;
+
+  /// Generate the backend code for a particular shader.
   virtual ShBackendCodePtr generate_code(const std::string& target,
                                          const ShProgramNodeCPtr& shader) = 0;
 
   virtual ShBackendSetPtr generate_set(const ShProgramSet& s);
   
-  // execute a stream program, if supported
+  /// Execute a stream program, if supported
   virtual void execute(const ShProgramNodeCPtr& program, ShStream& dest) = 0;
 
-  // Unbind all programs bound under this backend
+  /// Unbind all programs bound under this backend
   virtual void unbind_all();
   
-  typedef std::vector< ShPointer<ShBackend> > ShBackendList;
+  /// Returns true if the backend can handle the given target
+  virtual bool can_handle(const std::string& target) { return false; }
+
+
+  typedef std::list< ShPointer<ShBackend> > ShBackendList;
 
   static ShBackendList::iterator begin();
   static ShBackendList::iterator end();
 
   static ShPointer<ShBackend> lookup(const std::string& name);
 
+  /// Load the given library and initialize the backend it contains
+  static void ShBackend::load_library(const std::string& filename);
+
+  /// Add a backend to the list of selected backends
+  static bool use_backend(const std::string& name);
+
+  /// Clear the list of selected backends
+  static void clear_backends();
+
+  /// Returns a backend that can run the specified target
+  static ShPointer<ShBackend> get_backend(const std::string& target);
+
 protected:
   ShBackend();
+  
+  /// Returns true if the target is compatible with the backend if we
+  /// consider the generic type of the backend (i.e. "cpu" or "gpu")
+  /// and the kind of program it refers to (e.g. "stream", "vertex" or
+  /// "fragment").
+  bool can_handle(const std::string& target, const char* type, const char* kind);
   
 private:
   static void init();
 
-  static ShBackendList* m_backends;
+  static ShBackendList* m_instantiated_backends;
+  static ShBackendList* m_selected_backends;
+  static std::set<std::string>* m_selected_backend_names;
   static bool m_doneInit;
+  static bool m_all_backends_loaded;
 };
 
 typedef ShPointer<ShBackend> ShBackendPtr;

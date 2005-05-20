@@ -328,11 +328,9 @@ int main(int argc, char** argv)
 
   try
     {
-    std::string backend_name("arb");
     if (argc > 1) {
-      backend_name = argv[1];
+      shUseBackend(argv[1]);
     }
-    shSetBackend(backend_name);
 
     init_shaders();
     init_streams();

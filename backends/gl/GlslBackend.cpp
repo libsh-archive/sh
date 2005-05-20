@@ -43,6 +43,7 @@ struct GlslBackend : public GlBackend {
   }
 
   std::string name() const { return "glsl"; }
+  std::string version() const { return "1.0"; }
 };
 
 #ifdef WIN32
@@ -79,6 +80,12 @@ BOOL APIENTRY DllMain(HANDLE hModule,
 }
 
 #else
-static GlslBackend* backend = new GlslBackend();
+
+extern "C"
+GlslBackend* shBackend_libshglsl_instantiate()
+{
+  return new GlslBackend();
+}
+
 #endif /* WIN32 */
 }

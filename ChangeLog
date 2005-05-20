@@ -1,3 +1,50 @@
+2005-05-20  Francois Marier  <francois@serioushack.com>
+
+	Backend infrastructure improvements (issue31):
+	
+	* src/ShBackend.cpp, ShBackend.hpp: Add lists of selected and
+	instantiated backends.
+	Add get_backend(), can_handle(), use_backend(), clear_backends()
+	and load_library().
+	Remove all references to ShEnvironment.  
+
+	* src/ShSyntax.cpp: Convert all calls to ShEnvironment::backend to
+	calls to ShBackend::get_backend().
+	Remove the ShEnvironment include.
+	Add an shUseBackend() method.
+
+	* src/ShSyntax.hpp: Add an shUseBackend() method.
+
+	* src/ShStream.cpp (operator=): Convert call to
+	ShEnvironment::backend to ShBackend::get_backend(). 
+
+	* backends/gl/ArbCode.cpp, src/scripts/ShAttribImpl.hpp.py,
+	src/ShAttribImpl.hpp, ShProgramNode.cpp, ShTextureNode.cpp,
+	ShFixedManipulator.cpp, ShAlgebra.cpp, ShVariableNode.cpp: 
+	Remove the ShEnvironment include.
+
+	* backends/gl/GlBackend.cpp, GlBackend.hpp (can_handle): Add this
+	method.
+	
+	* backends/gl/ArbBackend.cpp, GlslBackend.cpp: Remove the static
+	variable and instead add a non-member function to initialize the
+	backend.
+	(version): Add this method.
+
+	* backends/gl/PBufferStreams.cpp (execute): Removed the target
+	check since by that time it should have already been done.
+
+	* backends/gl/GlTextureStorage.cpp (HostGlTextureTransfer):
+	Changed a dynamic_cast to a static_cast as a hack to support two
+	copies of this class to be loaded at the same time.
+
+	* test/regress/shtest.py: Set the backend to "stream" instead of
+	"gpu:stream" since we want to test the "cc" backend as well.
+
+	* examples/particle/main.cpp, glut/main.cpp, textures/main.cpp:
+	Instead of always calling shSetBackend, only call shUseBackend
+	when a backend name has been specified on the command line.
+
 2005-05-16  Francois Marier  <francois@serioushack.com>
 
 	* src/ShLibMiscImpl.hpp (poly): Improve efficiency of the

@@ -143,6 +143,8 @@ public:
   // execute a stream program, if supported
   virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
 
+  virtual bool can_handle(const std::string& target);
+
 protected:
   GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrategy* stream);
   

@@ -49,6 +49,8 @@ struct ArbBackend : public GlBackend {
   }
 
   std::string name() const { return "arb"; }
+  std::string version() const { return "1.0"; }
+
 };
 
 #ifdef WIN32
@@ -77,6 +79,12 @@ BOOL APIENTRY DllMain(HANDLE hModule,
 }
 
 #else
-static ArbBackend* backend = new ArbBackend();
+
+extern "C"
+ArbBackend* shBackend_libsharb_instantiate()
+{
+  return new ArbBackend();
+}
+
 #endif /* WIN32 */
 }

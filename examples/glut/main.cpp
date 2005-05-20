@@ -251,12 +251,9 @@ int main(int argc, char** argv)
   glutMotionFunc(motion);
   glutKeyboardFunc(keyboard);
 
-  std::string backend_name("arb");
   if (argc > 1) {
-    backend_name = argv[1];
+    shUseBackend(argv[1]);
   }
-  
-  shSetBackend(backend_name);
 
   glEnable(GL_DEPTH_TEST);
   glClearColor(0.0, 0.0, 0.0, 1.0);

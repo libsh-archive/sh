@@ -349,15 +349,13 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
 #endif /* WIN32 */
   }
 
-SH::ShBackendCodePtr
-GlBackend::generate_code(const std::string& target,
-                         const SH::ShProgramNodeCPtr& shader)
+SH::ShBackendCodePtr GlBackend::generate_code(const std::string& target,
+					      const SH::ShProgramNodeCPtr& shader)
 {
   return m_code->generate(target, shader, m_texture);
 }
 
-SH::ShBackendSetPtr
-GlBackend::generate_set(const ShProgramSet& s)
+SH::ShBackendSetPtr GlBackend::generate_set(const ShProgramSet& s)
 {
   if (m_code->use_default_set()) {
     return SH::ShBackend::generate_set(s);
@@ -366,8 +364,7 @@ GlBackend::generate_set(const ShProgramSet& s)
   }
 }
 
-void
-GlBackend::unbind_all()
+void GlBackend::unbind_all()
 {
   if (m_code->use_default_unbind_all()) {
     SH::ShBackend::unbind_all();
@@ -376,11 +373,17 @@ GlBackend::unbind_all()
   }
 }
 
-void
-GlBackend::execute(const SH::ShProgramNodeCPtr& program,
-                   SH::ShStream& dest)
+void GlBackend::execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest)
 {
- m_stream->execute(program, dest);
+  m_stream->execute(program, dest);
+}
+
+bool GlBackend::can_handle(const std::string& target)
+{
+  if (ShBackend::can_handle(target, "gpu", "stream")) return true;
+  if (ShBackend::can_handle(target, "gpu", "vertex")) return true;
+  if (ShBackend::can_handle(target, "gpu", "fragment")) return true;
+  return false;
 }
 
 }

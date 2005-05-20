@@ -28,7 +28,6 @@
 #include "ShError.hpp"
 #include "ShAlgebra.hpp"
 #include "ShFixedManipulator.hpp"
-#include "ShEnvironment.hpp"
 
 namespace SH {
 

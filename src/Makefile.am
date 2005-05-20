@@ -12,7 +12,7 @@ incinc_HEADERS  = ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp
 
 # General/internals
 libsh_la_SOURCES  = ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp
-libsh_la_SOURCES += ShEnvironment.cpp ShException.cpp ShError.cpp
+libsh_la_SOURCES += ShException.cpp ShError.cpp
 libsh_la_SOURCES += ShParser.cpp 
 libsh_la_SOURCES += ShProgram.cpp ShProgram.hpp
 libsh_la_SOURCES += ShProgramNode.cpp ShProgramNode.hpp
@@ -30,7 +30,7 @@ libsh_la_SOURCES += ShBasicBlock.hpp
 libsh_la_SOURCES += ShBlock.hpp ShCtrlGraph.hpp
 libsh_la_SOURCES += ShCfgBlock.hpp ShCfgBlock.cpp 
 incinc_HEADERS 	 += ShCfgBlock.hpp 
-libsh_la_SOURCES += ShDebug.hpp ShEnvironment.hpp ShError.hpp
+libsh_la_SOURCES += ShDebug.hpp ShError.hpp
 libsh_la_SOURCES += ShException.hpp
 libsh_la_SOURCES += ShParser.hpp ShRefCount.hpp ShStatement.hpp
 libsh_la_SOURCES += ShSwizzle.hpp ShSwizzleImpl.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp
@@ -136,7 +136,7 @@ incinc_HEADERS   += ShPalette.hpp ShPaletteImpl.hpp ShPaletteNode.hpp
 
 # These should really be moved up top
 incinc_HEADERS += ShBlock.hpp ShCtrlGraph.hpp
-incinc_HEADERS += ShDebug.hpp ShEnvironment.hpp ShError.hpp
+incinc_HEADERS += ShDebug.hpp ShError.hpp
 incinc_HEADERS += ShException.hpp ShLib.hpp
 incinc_HEADERS += ShLibArith.hpp ShLibArithImpl.hpp
 incinc_HEADERS += ShLibBoolean.hpp ShLibBooleanImpl.hpp

@@ -33,7 +33,6 @@
 #include "ShLinearAllocator.hpp"
 #include "ShInternals.hpp"
 #include "ShOptimizations.hpp"
-#include "ShEnvironment.hpp"
 #include "ShContext.hpp"
 #include "ShTypeInfo.hpp"
 #include "ShVariant.hpp"

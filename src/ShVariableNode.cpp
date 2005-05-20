@@ -24,7 +24,6 @@
 #include <sstream>
 #include <cassert>
 #include <algorithm>
-#include "ShEnvironment.hpp"
 #include "ShVariableNode.hpp"
 #include "ShDebug.hpp"
 #include "ShContext.hpp"
