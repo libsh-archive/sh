@@ -374,7 +374,7 @@ void init_streams(void)
   {
   // Specifiy the generic particle update program, later it will
   // be specialized for the the actual particle update.
-  particle = SH_BEGIN_PROGRAM("gpu:stream") {
+  particle = SH_BEGIN_PROGRAM("cpu:stream") {
     ShInOutPoint3f pos;
     ShInOutVector3f vel;
     ShInputVector3f acc;
@@ -505,7 +505,7 @@ void init_shaders(void)
   // This vertex program will be used for all our shading, it
   // simply transforms the incoming position/normal and generates
   // a light vector. 
-  vsh = SH_BEGIN_VERTEX_PROGRAM {
+  vsh = SH_BEGIN_PROGRAM("gpu:vertex") {
     ShInOutPosition4f pos;
     ShInOutNormal3f normal;
     ShOutputVector3f lightv;
@@ -529,7 +529,7 @@ void init_shaders(void)
   // program will be used in conjunction with this fragment program
   // the transformed normal and generated light vector are simply
   // ignored.
-  particle_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+  particle_fsh = SH_BEGIN_PROGRAM("gpu:fragment") {
     ShOutputColor3f color;
 
     color = cond(simtime < 0.5,
@@ -544,7 +544,7 @@ void init_shaders(void)
   // This fragment shader will be used to shade the other pieces
   // of geometry (the plane and particle shooter). Its just a simple
   // diffuse shader (using the global uniform diffuse_color).
-  plane_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+  plane_fsh = SH_BEGIN_PROGRAM("gpu:fragment") {
     ShInputPosition4f pos;
     ShInputNormal3f normal;
     ShInputVector3f lightv;
