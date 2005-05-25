@@ -33,6 +33,7 @@
 #endif
 
 #include <algorithm>
+#include <cctype>
 
 #include "ShBackend.hpp"
 #include "ShProgram.hpp"
@@ -137,7 +138,7 @@ string ShBackend::lookup_filename(const string& name)
   libname = SH_INSTALL_PREFIX;
   libname += "/lib/sh/" + name + ".so";
 #else
-  libname = name.uppercase();
+  libname = name;
 # ifdef SH_DEBUG
     libname += "D";
 # endif
@@ -159,7 +160,9 @@ bool ShBackend::load_library(const string& filename)
   unsigned extension_pos = filename.rfind(".so");
   unsigned filename_pos = filename.rfind("/") + 1;
 #else
-  unsigned extension_pos = filename.lowercase().rfind(".dll");
+  string uc_filename;
+  std::transform(filename.begin(), filename.end(), uc_filename.begin(), toupper);
+  unsigned extension_pos = filename.rfind(".DLL");
   unsigned filename_pos = filename.rfind("\\") + 1;
 #endif
 

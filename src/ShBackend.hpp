@@ -36,7 +36,7 @@
 #ifndef WIN32
   struct lt_dlhandle_struct;
 #else
-// TODO: forward declaration of HMODULE
+# include <windows.h>
 #endif
 
 namespace SH  {
