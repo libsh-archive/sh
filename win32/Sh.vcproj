@@ -177,9 +177,6 @@
 				RelativePath="..\src\ShDomTree.cpp">
 			</File>
 			<File
-				RelativePath="..\src\ShEnvironment.cpp">
-			</File>
-			<File
 				RelativePath="..\src\ShError.cpp">
 			</File>
 			<File
@@ -367,9 +364,6 @@
 				RelativePath="..\src\ShColor.hpp">
 			</File>
 			<File
-				RelativePath="..\src\ShColorImpl.hpp">
-			</File>
-			<File
 				RelativePath="..\src\ShConcreteCTypeOpImpl.hpp">
 			</File>
 			<File
@@ -395,9 +389,6 @@
 			</File>
 			<File
 				RelativePath="..\src\ShDomTree.hpp">
-			</File>
-			<File
-				RelativePath="..\src\ShEnvironment.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShError.hpp">
@@ -580,9 +571,6 @@
 				RelativePath="..\src\ShNormal.hpp">
 			</File>
 			<File
-				RelativePath="..\src\ShNormalImpl.hpp">
-			</File>
-			<File
 				RelativePath="..\src\ShOperation.hpp">
 			</File>
 			<File
@@ -604,16 +592,10 @@
 				RelativePath="..\src\ShPoint.hpp">
 			</File>
 			<File
-				RelativePath="..\src\ShPointImpl.hpp">
-			</File>
-			<File
 				RelativePath="..\src\ShPool.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShPosition.hpp">
-			</File>
-			<File
-				RelativePath="..\src\ShPositionImpl.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShProgram.hpp">
@@ -673,9 +655,6 @@
 				RelativePath="..\src\ShTexCoord.hpp">
 			</File>
 			<File
-				RelativePath="..\src\ShTexCoordImpl.hpp">
-			</File>
-			<File
 				RelativePath="..\src\ShTexture.hpp">
 			</File>
 			<File
@@ -728,9 +707,6 @@
 			</File>
 			<File
 				RelativePath="..\src\ShVector.hpp">
-			</File>
-			<File
-				RelativePath="..\src\ShVectorImpl.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShWrap.hpp">
