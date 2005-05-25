@@ -129,7 +129,7 @@ struct CodeStrategy {
   virtual SH::ShBackendSetPtr generate_set(const SH::ShProgramSet& s);
   virtual bool use_default_set() const;
 
-  virtual void unbind_all();
+  virtual void unbind_all_programs();
   virtual bool use_default_unbind_all() const;
 };
 
@@ -138,12 +138,10 @@ public:
   virtual SH::ShBackendCodePtr generate_code(const std::string& target,
                                              const SH::ShProgramNodeCPtr& shader);
   virtual SH::ShBackendSetPtr generate_set(const SH::ShProgramSet& s);
-  virtual void unbind_all();
+  virtual void unbind_all_programs();
 
   // execute a stream program, if supported
   virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
-
-  virtual int can_handle(const std::string& target);
 
 protected:
   GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrategy* stream);

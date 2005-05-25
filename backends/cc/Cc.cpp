@@ -725,19 +725,19 @@ void CcBackend::execute(const ShProgramNodeCPtr& program, ShStream& dest)
   backendcode->execute(dest);
 }
 
-int CcBackend::can_handle(const std::string& target)
-{
-  if (("cc:stream" == target)) return 1;
-  if (("cpu:stream" == target)) return 5;
-  if (("*:stream" == target)) return 10;
-  if (("stream" == target)) return 10;
-  return 0;
-}
-
 extern "C" {
   CcBackend* shBackend_libshcc_instantiate()
   {
     return new CcBackend();
+  }
+
+  int shBackend_libshcc_target_cost(const std::string& target)
+  {
+    if ("cc:stream" == target)  return 1;
+    if ("cpu:stream" == target) return 5;
+    if ("*:stream" == target)   return 10;
+    if ("stream" == target)     return 10;
+    return 0;
   }
 }
 

@@ -33,6 +33,12 @@
 #include "ShProgramSet.hpp"
 #include "ShVariableNode.hpp"
 
+#ifndef WIN32
+  struct lt_dlhandle_struct;
+#else
+// TODO: forward declaration of HMODULE
+#endif
+
 namespace SH  {
 
 class ShStream;
@@ -98,58 +104,74 @@ SH_DLLEXPORT ShBackend : public ShRefCountable {
 public:
   virtual ~ShBackend();
 
-  /// Short name of the backend
+  /** Short name of the backend (e.g. "arb", "cc", "glsl")*/
   virtual std::string name() const { return "";}
 
-  /// Backend-specific version number
+  /** Backend-specific version number */
   virtual std::string version() const = 0;
 
-  /// Generate the backend code for a particular shader.
+  /** Generate the backend code for a particular shader. */
   virtual ShBackendCodePtr generate_code(const std::string& target,
                                          const ShProgramNodeCPtr& shader) = 0;
 
   virtual ShBackendSetPtr generate_set(const ShProgramSet& s);
   
-  /// Execute a stream program, if supported
+  /** Execute a stream program, if supported */
   virtual void execute(const ShProgramNodeCPtr& program, ShStream& dest) = 0;
-
-  /// Unbind all programs bound under this backend
-  virtual void unbind_all();
   
-  /// Returns the cost for the backend to handle the given target 
-  /// (0 == not handled, 1 == best backend for the target)
-  virtual int can_handle(const std::string& target) { return 0; }
+  /** Unbind all programs bound under the backend */
+  virtual void unbind_all_programs();
 
-  typedef std::list< ShPointer<ShBackend> > ShBackendList;
+  /** Unbind all programs bound under all backends */
+  static void unbind_all_backends();
 
-  static ShBackendList::iterator begin();
-  static ShBackendList::iterator end();
-
-  static ShPointer<ShBackend> lookup(const std::string& name);
-
-  /// Load the given library and initialize the backend it contains
-  static void ShBackend::load_library(const std::string& filename);
-
-  /// Add a backend to the list of selected backends
+  /** Add a backend to the list of selected backends */
   static bool use_backend(const std::string& name);
 
-  /// Clear the list of selected backends
+  /** Clear the list of selected backends */
   static void clear_backends();
 
-  /// Returns a backend that can run the specified target
+  /** Returns a backend that can run the specified target */
   static ShPointer<ShBackend> get_backend(const std::string& target);
+
+#ifndef WIN32
+  typedef lt_dlhandle_struct* LibraryHandle;
+#else
+  typedef HMODULE LibraryHandle;
+#endif
+  typedef std::map<std::string, LibraryHandle> LibraryMap;
+  typedef std::map<std::string, ShPointer<ShBackend> > BackendMap;
+  typedef std::set<std::string> BackendSet;
 
 protected:
   ShBackend();
   
 private:
+  /* The string related to the backend name in these data is stored as
+     "libsharb", "libshcc", "libshglsl", etc. */
+  static BackendMap* m_instantiated_backends;
+  static BackendSet* m_selected_backends;
+  static LibraryMap* m_loaded_libraries;
+  static bool m_done_init;
+  static bool m_all_backends_loaded;
+
+  /** Initialize the data structures */
   static void init();
 
-  static ShBackendList* m_instantiated_backends;
-  static ShBackendList* m_selected_backends;
-  static std::set<std::string>* m_selected_backend_names;
-  static bool m_doneInit;
-  static bool m_all_backends_loaded;
+  /** Convert the user-visible backend name (e.g. "arb") to a filename
+   * Returns an empty string if a library cannot be found. */
+  static std::string lookup_filename(const std::string& name);
+
+  /** Load the given library and initialize the backend it contains
+   * Returns true if the library was loaded successfully. */
+  static bool load_library(const std::string& filename);
+
+  /** Return the cost of the given target on the given backend
+   * (0 == not handled, 1 == perfect match, 2 == very good, etc.) */
+  static int target_cost(const std::string& backend_name, const std::string& target);
+  
+  /** Instantiate and initialize the backend */
+  static ShPointer<ShBackend> instantiate_backend(const std::string& backend_name);
 };
 
 typedef ShPointer<ShBackend> ShBackendPtr;

@@ -151,9 +151,9 @@ bool CodeStrategy::use_default_set() const
   return true;
 }
 
-void CodeStrategy::unbind_all()
+void CodeStrategy::unbind_all_programs()
 {
-  SH_DEBUG_ERROR("shgl::CodeStrategy::unbind_all() called!");
+  SH_DEBUG_ERROR("shgl::CodeStrategy::unbind_all_programs() called!");
   SH_DEBUG_ASSERT(false);
 }
 
@@ -364,26 +364,18 @@ SH::ShBackendSetPtr GlBackend::generate_set(const ShProgramSet& s)
   }
 }
 
-void GlBackend::unbind_all()
+void GlBackend::unbind_all_programs()
 {
   if (m_code->use_default_unbind_all()) {
-    SH::ShBackend::unbind_all();
+    SH::ShBackend::unbind_all_programs();
   } else {
-    m_code->unbind_all();
+    m_code->unbind_all_programs();
   }
 }
 
 void GlBackend::execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest)
 {
   m_stream->execute(program, dest);
-}
-
-int GlBackend::can_handle(const std::string& target)
-{
-  if (target == name() + ":" + "vertex") return 1;
-  if (target == name() + ":" + "fragment") return 1;
-  if (target == name() + ":" + "stream") return 1;
-  return 0;
 }
 
 }

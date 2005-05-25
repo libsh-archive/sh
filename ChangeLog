@@ -1,3 +1,28 @@
+2005-05-25  Francois Marier  <francois@serioushack.com>
+
+	Backend infrastructure improvements (issue31):
+	
+	* src/ShBackend.cpp (target_cost): Separate library loading,
+	backend instantiation and cost function.  A backend is no longer
+	initialized unless it is the best backend that should be used.
+
+	* backends/cc/Cc.cpp, Cc.hpp, backends/gl/ArbBackend.cpp,
+	GlslBackend.cpp: Remove the can_handle() method to replace it with
+	the target_cost() non-member function.
+	
+	* src/ShBackend.hpp, ShBackend.cpp: Add an unbind_all_backends()
+	static method that iterates through all backends and calls
+	"unbind_all_programs()" on them.
+
+	* backends/gl/GlBackend.cpp, GlBackend.hpp: Rename the
+	unbind_all() methods to unbind_all_programs() in order to
+	differentiate them from ShBackend::unbind_all_backends().	
+	Remove the can_handle() method.
+
+	* src/ShSyntax.cpp (shUnbind): No need to iterate through all
+	backends, this is done from within ShBackend now.
+
+
 2005-05-20  Francois Marier  <francois@serioushack.com>
 
 	Backend infrastructure improvements (issue31):

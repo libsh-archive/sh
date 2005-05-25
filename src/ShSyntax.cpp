@@ -110,10 +110,7 @@ void shBind(const std::string& target, ShProgram& prg)
 
 void shUnbind()
 {
-  for (ShBackend::ShBackendList::iterator i = ShBackend::begin(); 
-       i != ShBackend::end(); i++) {
-    (*i)->unbind_all();
-  }
+  ShBackend::unbind_all_backends();
 }
 
 void shUnbind(ShProgram& prg)

@@ -50,23 +50,6 @@ struct ArbBackend : public GlBackend {
 
   std::string name() const { return "arb"; }
   std::string version() const { return "1.0"; }
-
-  int can_handle(const std::string& target)
-  {
-    int res = 0;
-    res = GlBackend::can_handle(target);
-    if (res > 0) return res;
-
-    if (("gpu:vertex" == target) || ("gpu:fragment" == target)) return 2;
-    if (("vertex" == target) || ("fragment" == target))         return 2;
-    if (("*:vertex" == target) || ("*:fragment" == target))     return 2;
-
-    if (("gpu:stream" == target)) return 5;
-    if (("*:stream" == target))   return 5;
-    if (("stream" == target))     return 5;
-
-    return 0;
-  }
 };
 
 #ifdef WIN32
@@ -96,10 +79,28 @@ BOOL APIENTRY DllMain(HANDLE hModule,
 
 #else
 
-extern "C"
-ArbBackend* shBackend_libsharb_instantiate()
-{
-  return new ArbBackend();
+extern "C" {
+  ArbBackend* shBackend_libsharb_instantiate()
+  {
+    return new ArbBackend();
+  }
+
+  int shBackend_libsharb_target_cost(const std::string& target)
+  {
+    if ("arb:vertex" == target)   return 1;
+    if ("arb:fragment" == target) return 1;
+    if ("arb:stream" == target)   return 1;
+
+    if (("gpu:vertex" == target) || ("gpu:fragment" == target)) return 2;
+    if (("vertex" == target) || ("fragment" == target))         return 2;
+    if (("*:vertex" == target) || ("*:fragment" == target))     return 2;
+
+    if ("gpu:stream" == target) return 5;
+    if ("*:stream" == target)   return 5;
+    if ("stream" == target)     return 5;
+
+    return 0;
+  }
 }
 
 #endif /* WIN32 */
