@@ -35,8 +35,6 @@
 
 #ifndef WIN32
   struct lt_dlhandle_struct;
-#else
-# include <windows.h>
 #endif
 
 namespace SH  {
@@ -137,7 +135,7 @@ public:
 #ifndef WIN32
   typedef lt_dlhandle_struct* LibraryHandle;
 #else
-  typedef HMODULE LibraryHandle;
+  typedef void* LibraryHandle;
 #endif
   typedef std::map<std::string, LibraryHandle> LibraryMap;
   typedef std::map<std::string, ShPointer<ShBackend> > BackendMap;
