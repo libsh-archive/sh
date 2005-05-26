@@ -20,7 +20,7 @@
 // 
 // 3. This notice may not be removed or altered from any source
 // distribution.
-////////////////////ppppp//////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -162,7 +162,10 @@ bool ShBackend::load_library(const string& filename)
 #else
   string uc_filename;
   std::transform(filename.begin(), filename.end(), uc_filename.begin(), toupper);
-  unsigned extension_pos = filename.rfind(".DLL");
+  unsigned extension_pos = filename.rfind("_DEBUG.DLL");
+  if (-1 == extension_pos) {
+    extension_pos = filename.rfind(".DLL");
+  }
   unsigned filename_pos = filename.rfind("\\") + 1;
 #endif
 
