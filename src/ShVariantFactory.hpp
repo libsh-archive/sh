@@ -31,7 +31,7 @@
 
 namespace SH {
 
-struct ShVariant;
+class ShVariant;
 
 struct 
 SH_DLLEXPORT 

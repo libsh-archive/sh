@@ -36,7 +36,7 @@
 namespace SH {
 
 /// forward declarations 
-class ShVariantFactory;
+struct ShVariantFactory;
 
 
 /** A holder of information about a data type and how to allocate it 
