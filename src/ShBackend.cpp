@@ -140,7 +140,7 @@ string ShBackend::lookup_filename(const string& name)
 #else
   libname = name;
 # ifdef SH_DEBUG
-    libname += "D";
+    libname += "_DEBUG";
 # endif
   libname += ".DLL";
 #endif /* WIN32 */
