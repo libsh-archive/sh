@@ -3,6 +3,8 @@
 	* src/ShBackend.cpp: Refactor the code related to the library
 	loading and search paths.
 	Add a user path for user-installed libraries on UNIX.
+	(~ShBackend): Unload the library whenever the backend is
+	destroyed.
 
 	* src/ShBackend.hpp (load_libraries): Add this method.
 

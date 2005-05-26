@@ -119,10 +119,21 @@ ShBackend::ShBackend()
 
 ShBackend::~ShBackend()
 {
-  m_instantiated_backends->erase(name());
-  // TODO: unload the library
-  m_loaded_libraries->erase(name());
-  m_selected_backends->erase(name());
+  string backend_name = name();
+  m_instantiated_backends->erase(backend_name);
+
+#ifndef WIN32
+  if (!lt_dlclose((*m_loaded_libraries)[backend_name])) {
+    SH_DEBUG_ERROR("Could not unload the " << backend_name << " library: " << lt_dlerror());
+  }
+#else
+  if (!FreeLibrary((HMODULE)(*m_loaded_libraries)[backend_name])) {
+    SH_DEBUG_ERROR("Could not unload the " << backend_name << " library.");
+  }
+#endif
+
+  m_loaded_libraries->erase(backend_name);
+  m_selected_backends->erase(backend_name);
 }
 
 ShBackendSetPtr ShBackend::generate_set(const ShProgramSet& s)
