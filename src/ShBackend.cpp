@@ -198,20 +198,16 @@ ShBackendPtr ShBackend::instantiate_backend(const string& backend_name)
   LibraryHandle module = (*m_loaded_libraries)[backend_name];
   string init_function_name = "shBackend_" + backend_name + "_instantiate";
 
-#ifndef WIN32
   typedef ShBackend* EntryPoint();
+#ifndef WIN32
   EntryPoint* instantiate = (EntryPoint*)lt_dlsym(module, init_function_name.c_str()); 
-   
+#else
+  EntryPoint* instantiate = (EntryPoint*)GetProcAddress(module, init_function_name.c_str());  
+#endif /* WIN32 */
+
   if (instantiate) {
     backend = (*instantiate)();
-  }
-#else
-  // TODO: find the instantiate function
-  if (true) {
-    backend = 0; // TODO: run the instantiate function
-  }
-#endif /* WIN32 */
-  else {
+  } else {
     SH_DEBUG_ERROR("Could not find " << init_function_name);
   }
 
@@ -245,19 +241,16 @@ int ShBackend::target_cost(const string& backend_name, const string& target)
   LibraryHandle module = (*m_loaded_libraries)[backend_name];
   SH_DEBUG_ASSERT(module); // library not loaded
 
-#ifndef WIN32
   typedef int EntryPoint(const string&);
-  EntryPoint* func = (EntryPoint*)lt_dlsym(module, init_function_name.c_str()); 
+#ifndef WIN32
+  EntryPoint* func = (EntryPoint*)lt_dlsym(module, init_function_name.c_str());
+#else
+  EntryPoint* func = (EntryPoint*)GetProcAddress(module, init_function_name.c_str());
+#endif /* WIN32 */
+
   if (func) {
      cost = (*func)(target);
-  }
-#else
-  // TODO: find the target_cost function
-  if (true) {
-    cost = 1; // TODO: run the target_cost function
-  }
-#endif /* WIN32 */
-  else {
+  } else {
     SH_DEBUG_ERROR("Could not find " << init_function_name);
   }
 
