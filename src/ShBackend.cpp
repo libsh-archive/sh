@@ -28,6 +28,7 @@
 #ifndef WIN32
 # include <ltdl.h>
 # include <dirent.h>
+# define LOCAL_BACKEND_DIRNAME ".shbackends"
 #else
 # include <windows.h>
 #endif
@@ -135,8 +136,7 @@ string ShBackend::lookup_filename(const string& name)
   string libname;
 
 #ifndef WIN32
-  libname = SH_INSTALL_PREFIX;
-  libname += "/lib/sh/" + name + ".so";
+  libname = name + ".so";
 #else
   libname = name;
 # ifdef SH_DEBUG
@@ -187,6 +187,26 @@ bool ShBackend::load_library(const string& filename)
     SH_DEBUG_WARN("Could not open " << filename);
     return false;
   }
+}
+
+void ShBackend::load_libraries(const string& directory)
+{
+#ifndef WIN32
+  DIR* dirp = opendir(directory.c_str());
+  if (dirp) {
+    // Go through all files in lib/sh/
+    for (struct dirent* entry = readdir(dirp); entry != 0; entry = readdir(dirp)) {
+      string filename(entry->d_name);
+      unsigned extension_pos = filename.rfind(".so");
+      if ((filename.find("libsh") == 0) && ((filename.size() - 3) == extension_pos)) {
+	load_library(directory + "/" + filename);
+      }
+    }
+    closedir(dirp);
+  }
+#else
+  // TODO
+#endif
 }
 
 ShBackendPtr ShBackend::instantiate_backend(const string& backend_name)
@@ -267,24 +287,11 @@ ShPointer<ShBackend> ShBackend::get_backend(const string& target)
   if ((0 == m_selected_backends->size()) && (!m_all_backends_loaded)) {
     // Load all installed backend libraries
 #ifndef WIN32
-    string search_path(SH_INSTALL_PREFIX);
-    search_path += "/lib/sh/";
-    
-    DIR* dirp = opendir(search_path.c_str());
-    if (dirp) {
-      // Go through all files in lib/sh/
-      for (struct dirent* entry = readdir(dirp); entry != 0; entry = readdir(dirp)) {
-	string filename(entry->d_name);
-	unsigned extension_pos = filename.rfind(".so");
-	if ((filename.find("libsh") == 0) && ((filename.size() - 3) == extension_pos)) {
-	  load_library(search_path + filename);
-	}
-      }
-      closedir(dirp);
-    }
+    load_libraries(string(getenv("HOME")) + "/" + LOCAL_BACKEND_DIRNAME);
+    load_libraries(string(SH_INSTALL_PREFIX) + "/lib/sh");
 #else
-    // TODO: Find all DLLs
-#endif /* WIN32 */
+    load_libraries(string("C:\\windows\\system32");
+#endif
     m_all_backends_loaded = true;
   }
 
@@ -333,11 +340,15 @@ void ShBackend::init()
     SH_DEBUG_ERROR("Error initializing ltdl: " << lt_dlerror());
   }
 
+  string userpath(getenv("HOME"));
+  userpath += "/";
+  userpath += LOCAL_BACKEND_DIRNAME;
+  if (lt_dladdsearchdir(userpath.c_str())) {
+    SH_DEBUG_ERROR("Could not add " + userpath + " to search dir: " << lt_dlerror());
+  }
+
   string searchpath(SH_INSTALL_PREFIX);
   searchpath += "/lib/sh";
-
-  // TODO: add ~/.shbackends/ to the search path
-
   if (lt_dladdsearchdir(searchpath.c_str())) {
     SH_DEBUG_ERROR("Could not add " + searchpath + " to search dir: " << lt_dlerror());
   }

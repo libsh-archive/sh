@@ -1,3 +1,11 @@
+2005-05-26  Francois Marier  <francois@serioushack.com>
+
+	* src/ShBackend.cpp: Refactor the code related to the library
+	loading and search paths.
+	Add a user path for user-installed libraries on UNIX.
+
+	* src/ShBackend.hpp (load_libraries): Add this method.
+
 2005-05-25  Francois Marier  <francois@serioushack.com>
 
 	Backend infrastructure improvements (issue31):

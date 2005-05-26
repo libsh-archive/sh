@@ -164,6 +164,9 @@ private:
    * Returns true if the library was loaded successfully. */
   static bool load_library(const std::string& filename);
 
+  /** Load all libraries contained in the given directory */
+  static void load_libraries(const std::string& directory);
+
   /** Return the cost of the given target on the given backend
    * (0 == not handled, 1 == perfect match, 2 == very good, etc.) */
   static int target_cost(const std::string& backend_name, const std::string& target);
