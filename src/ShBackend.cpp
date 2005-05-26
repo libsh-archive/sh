@@ -154,9 +154,7 @@ string ShBackend::lookup_filename(const string& name)
     libname += "_DEBUG";
 # endif
   libname += ".DLL";
-#endif /* WIN32 */
-
-  // TODO: check if the file exists and is readable
+#endif
 
   return libname;
 }
@@ -174,9 +172,7 @@ bool ShBackend::load_library(const string& filename)
   string uc_filename;
   std::transform(filename.begin(), filename.end(), uc_filename.begin(), toupper);
   unsigned extension_pos = filename.rfind("_DEBUG.DLL");
-  if (-1 == extension_pos) {
-    extension_pos = filename.rfind(".DLL");
-  }
+  if (-1 == extension_pos) extension_pos = filename.rfind(".DLL");
   unsigned filename_pos = filename.rfind("\\") + 1;
 #endif
 
@@ -216,8 +212,8 @@ void ShBackend::load_libraries(const string& directory)
     closedir(dirp);
   }
 #else
-  // TODO
-#endif
+  // TODO: find all DLLs in the directory and load the ones starting with "libsh"
+#endif /* WIN32 */
 }
 
 ShBackendPtr ShBackend::instantiate_backend(const string& backend_name)
@@ -237,7 +233,7 @@ ShBackendPtr ShBackend::instantiate_backend(const string& backend_name)
   EntryPoint* instantiate = (EntryPoint*)lt_dlsym(module, init_function_name.c_str()); 
 #else
   EntryPoint* instantiate = (EntryPoint*)GetProcAddress((HMODULE)module, init_function_name.c_str());  
-#endif /* WIN32 */
+#endif
 
   if (instantiate) {
     backend = (*instantiate)();
@@ -280,7 +276,7 @@ int ShBackend::target_cost(const string& backend_name, const string& target)
   EntryPoint* func = (EntryPoint*)lt_dlsym(module, init_function_name.c_str());
 #else
   EntryPoint* func = (EntryPoint*)GetProcAddress((HMODULE)module, init_function_name.c_str());
-#endif /* WIN32 */
+#endif
 
   if (func) {
      cost = (*func)(target);
@@ -363,7 +359,7 @@ void ShBackend::init()
   if (lt_dladdsearchdir(searchpath.c_str())) {
     SH_DEBUG_ERROR("Could not add " + searchpath + " to search dir: " << lt_dlerror());
   }
-#endif
+#endif /* WIN32 */
 
   m_done_init = true;
 }
