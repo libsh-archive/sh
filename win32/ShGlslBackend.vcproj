@@ -36,7 +36,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libshd.lib opengl32.lib"
-				OutputFile="$(OutDir)/libshglsld.dll"
+				OutputFile="$(OutDir)/libshglsl_debug.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(OutDir)"
 				GenerateDebugInformation="TRUE"

@@ -54,39 +54,40 @@ BOOL APIENTRY DllMain(HANDLE hModule,
                       DWORD  ul_reason_for_call, 
                       LPVOID lpReserved)
 {
-  std::cerr << "Glsl Backend DllMain called!" << std::endl;
-  std::cerr << "Have backend: " << backend << std::endl;
-  std::cerr << "lpReserved = " << lpReserved << std::endl;
-  std::cerr << "hModule = " << hModule << std::endl;
   switch (ul_reason_for_call) {
   case DLL_PROCESS_ATTACH:
-    std::cerr << "Process attach!" << std::endl;
     if (backend) return TRUE;
     backend = new GlslBackend();
     break;
   case DLL_THREAD_ATTACH:
   case DLL_THREAD_DETACH:
-    std::cerr << "Thread!" << std::endl;
-    break;
+	  break;
   case DLL_PROCESS_DETACH:
-    std::cerr << "Process detach!" << std::endl;
     delete backend;
-    std::cerr << "Deleted backend!" << std::endl;
     break;
   default:
-    std::cerr << "Some Other Thing!" << std::endl;
+	  break;
   }
   return TRUE;
 }
+#endif // WIN32
 
-#else
+}
 
 extern "C" {
+  using namespace shgl;
+
+#ifdef WIN32
+  __declspec(dllexport) 
+#endif
   GlslBackend* shBackend_libshglsl_instantiate()
   {
     return new GlslBackend();
   }
 
+#ifdef WIN32
+  __declspec(dllexport) 
+#endif
   int shBackend_libshglsl_target_cost(const std::string& target)
   {
     if ("glsl:vertex" == target)   return 1;
@@ -105,5 +106,3 @@ extern "C" {
   }
 }
 
-#endif /* WIN32 */
-}

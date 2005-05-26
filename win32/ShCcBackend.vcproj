@@ -35,7 +35,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libshd.lib"
-				OutputFile="$(OutDir)/libshccd.dll"
+				OutputFile="$(OutDir)/libshcc_debug.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(OutDir)"
 				GenerateDebugInformation="TRUE"

@@ -725,12 +725,24 @@ void CcBackend::execute(const ShProgramNodeCPtr& program, ShStream& dest)
   backendcode->execute(dest);
 }
 
+
+}
+
+
 extern "C" {
+  using namespace ShCc;
+
+#ifdef WIN32
+  __declspec(dllexport) 
+#endif
   CcBackend* shBackend_libshcc_instantiate()
   {
     return new CcBackend();
   }
 
+#ifdef WIN32
+  __declspec(dllexport) 
+#endif
   int shBackend_libshcc_target_cost(const std::string& target)
   {
     if ("cc:stream" == target)  return 1;
@@ -739,6 +751,4 @@ extern "C" {
     if ("stream" == target)     return 10;
     return 0;
   }
-}
-
 }

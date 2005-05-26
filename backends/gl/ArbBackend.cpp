@@ -77,15 +77,25 @@ BOOL APIENTRY DllMain(HANDLE hModule,
   return TRUE;
 }
 
-#else
+#endif // WIN32
+
+
+}
 
 extern "C" {
-  ArbBackend* shBackend_libsharb_instantiate()
+  using namespace shgl;
+#ifdef WIN32
+  __declspec(dllexport) 
+#endif
+  ArbBackend* shBackend_libsharb_instantiate() 
   {
     return new ArbBackend();
   }
 
-  int shBackend_libsharb_target_cost(const std::string& target)
+#ifdef WIN32
+  __declspec(dllexport) 
+#endif
+  int shBackend_libsharb_target_cost(const std::string& target) 
   {
     if ("arb:vertex" == target)   return 1;
     if ("arb:fragment" == target) return 1;
@@ -101,7 +111,4 @@ extern "C" {
 
     return 0;
   }
-}
-
-#endif /* WIN32 */
 }
