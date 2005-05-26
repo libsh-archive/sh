@@ -297,7 +297,7 @@ ShPointer<ShBackend> ShBackend::get_backend(const string& target)
     load_libraries(string(getenv("HOME")) + "/" + LOCAL_BACKEND_DIRNAME);
     load_libraries(string(SH_INSTALL_PREFIX) + "/lib/sh");
 #else
-    load_libraries(string("C:\\windows\\system32");
+    load_libraries(string("C:\\windows\\system32"));
 #endif
     m_all_backends_loaded = true;
   }
