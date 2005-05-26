@@ -39,7 +39,7 @@ using namespace SH;
 using namespace std;
 
 // defines
-#define NUM_PARTICLES 4096
+#define NUM_PARTICLES 65536
 
 // forward declarations
 void init_shaders(void);
