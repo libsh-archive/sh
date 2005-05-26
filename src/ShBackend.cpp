@@ -202,7 +202,7 @@ ShBackendPtr ShBackend::instantiate_backend(const string& backend_name)
 #ifndef WIN32
   EntryPoint* instantiate = (EntryPoint*)lt_dlsym(module, init_function_name.c_str()); 
 #else
-  EntryPoint* instantiate = (EntryPoint*)GetProcAddress(module, init_function_name.c_str());  
+  EntryPoint* instantiate = (EntryPoint*)GetProcAddress((HMODULE)module, init_function_name.c_str());  
 #endif /* WIN32 */
 
   if (instantiate) {
@@ -245,7 +245,7 @@ int ShBackend::target_cost(const string& backend_name, const string& target)
 #ifndef WIN32
   EntryPoint* func = (EntryPoint*)lt_dlsym(module, init_function_name.c_str());
 #else
-  EntryPoint* func = (EntryPoint*)GetProcAddress(module, init_function_name.c_str());
+  EntryPoint* func = (EntryPoint*)GetProcAddress((HMODULE)module, init_function_name.c_str());
 #endif /* WIN32 */
 
   if (func) {
