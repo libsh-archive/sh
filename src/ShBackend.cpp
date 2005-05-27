@@ -169,11 +169,11 @@ bool ShBackend::load_library(const string& filename)
   unsigned extension_pos = filename.rfind(".so");
   unsigned filename_pos = filename.rfind("/") + 1;
 #else
-  string uc_filename;
+  string uc_filename(filename);
   std::transform(filename.begin(), filename.end(), uc_filename.begin(), toupper);
-  unsigned extension_pos = filename.rfind("_DEBUG.DLL");
-  if (-1 == extension_pos) extension_pos = filename.rfind(".DLL");
-  unsigned filename_pos = filename.rfind("\\") + 1;
+  unsigned extension_pos = uc_filename.rfind("_DEBUG.DLL");
+  if (uc_filename.npos == extension_pos) extension_pos = uc_filename.rfind(".DLL");
+  unsigned filename_pos = uc_filename.rfind("\\") + 1;
 #endif
 
   string backend_name = filename.substr(filename_pos, extension_pos - filename_pos);
@@ -206,13 +206,21 @@ void ShBackend::load_libraries(const string& directory)
       string filename(entry->d_name);
       unsigned extension_pos = filename.rfind(".so");
       if ((filename.find("libsh") == 0) && ((filename.size() - 3) == extension_pos)) {
-	load_library(directory + "/" + filename);
+        load_library(directory + "/" + filename);
       }
     }
     closedir(dirp);
   }
 #else
-  // TODO: find all DLLs in the directory and load the ones starting with "libsh"
+  string filenames = directory + "\\libsh*.dll";
+  WIN32_FIND_DATA find_data;
+
+  HANDLE file_handle = FindFirstFile(filenames.c_str(), &find_data);
+  while (file_handle != INVALID_HANDLE_VALUE) {
+    load_library(string(find_data.cFileName));
+	if (!FindNextFile(file_handle, &find_data)) break;
+  }
+  FindClose(file_handle);
 #endif /* WIN32 */
 }
 
@@ -297,6 +305,7 @@ ShPointer<ShBackend> ShBackend::get_backend(const string& target)
     load_libraries(string(getenv("HOME")) + "/" + LOCAL_BACKEND_DIRNAME);
     load_libraries(string(SH_INSTALL_PREFIX) + "/lib/sh");
 #else
+    load_libraries(string("."));
     load_libraries(string("C:\\windows\\system32"));
 #endif
     m_all_backends_loaded = true;
