@@ -164,6 +164,9 @@ private:
    * Returns an empty string if a library cannot be found. */
   static std::string lookup_filename(const std::string& backend_name);
 
+  /** Check that the backend name doesn't contain invalid characters. */
+  static bool is_valid_name(const std::string& backend_name);
+
   /** Load the given library and initialize the backend it contains
    * Returns true if the library was loaded successfully. */
   static bool load_library(const std::string& filename);

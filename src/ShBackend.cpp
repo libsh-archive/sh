@@ -158,6 +158,20 @@ string ShBackend::lookup_filename(const string& backend_name)
   return libname;
 }
 
+bool ShBackend::is_valid_name(const string& backend_name)
+{
+  unsigned length = backend_name.size();
+  for (unsigned i=0; i < length; i++) {
+    char c = backend_name[i];
+    if (isalnum(c) || ('_' == c)) {
+      continue;
+    } else {
+      return false; // found an invalid character
+    }
+  }
+  return true;
+}
+
 bool ShBackend::load_library(const string& filename)
 {
   init();
@@ -177,6 +191,8 @@ bool ShBackend::load_library(const string& filename)
   filename_pos += 5; // remove the "libsh" portion of the filename
 
   string backend_name = filename.substr(filename_pos, extension_pos - filename_pos);
+  if (!is_valid_name(backend_name)) return false; // invalid backend -- don't load
+ 
   if (m_loaded_libraries->find(backend_name) != m_loaded_libraries->end()) {
     return true; // already loaded
   }
@@ -218,7 +234,7 @@ void ShBackend::load_libraries(const string& directory)
   HANDLE file_handle = FindFirstFile(filenames.c_str(), &find_data);
   while (file_handle != INVALID_HANDLE_VALUE) {
     load_library(string(find_data.cFileName));
-	if (!FindNextFile(file_handle, &find_data)) break;
+    if (!FindNextFile(file_handle, &find_data)) break;
   }
   FindClose(file_handle);
 #endif /* WIN32 */

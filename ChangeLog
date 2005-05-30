@@ -1,4 +1,9 @@
-2005-05-27  Francois Marier  <francois@serioushack.com>
+2005-05-30  Francois Marier  <francois@serioushack.com>
+
+	* src/ShBackend.cpp, ShBackend.hpp (is_valid_name): Add this
+	method.
+	(load_library): Check whether the backend name is valid before
+	trying to load the library (issue194).
 
 	* src/ShVariableType.hpp, ShVariableType.cpp: Add the SH_PLANE
 	semantic type.
