@@ -58,16 +58,7 @@ class HostGlTextureTransfer : public ShTransfer {
   bool transfer(const ShStorage* from, ShStorage* to)
   {
     const ShHostStorage* host = dynamic_cast<const ShHostStorage*>(from);
-    // TODO: this cast should be a dynamic_cast.  However when two or
-    // more GL backends are loaded in memory, there are two different
-    // GlTextureStorage classes (different internal type id or
-    // something like that) and so a dynamic cast will not work even
-    // though the two copies of the class are the same.
-    //
-    // We should really fix this by preventing more than one copy of
-    // GlBackend, PBufferStream, etc. from being loaded at the same
-    // time.
-    GlTextureStorage* texture = static_cast<GlTextureStorage*>(to);
+    GlTextureStorage* texture = dynamic_cast<GlTextureStorage*>(to);
 
     // Bind texture name for this scope.
     GlTextureName::Binding binding(texture->texName());

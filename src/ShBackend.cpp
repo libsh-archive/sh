@@ -163,6 +163,8 @@ bool ShBackend::is_valid_name(const string& backend_name)
   unsigned length = backend_name.size();
   if (0 == length) return false;
 
+  if ("gl" == backend_name) return false; // not a real backend
+
   for (unsigned i=0; i < length; i++) {
     char c = backend_name[i];
     if (isalnum(c) || ('_' == c)) {

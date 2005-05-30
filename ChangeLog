@@ -6,6 +6,15 @@
 
 2005-05-30  Francois Marier  <francois@serioushack.com>
 
+	* backends/gl/Makefile.am: Moving the common GL stuff into a
+	separate library.
+
+	* src/ShBackend.cpp: Ignore the libshgl library since it is not a
+	real backend.
+	
+	* backends/gl/GlTextureStorage.cpp (HostGlTextureTransfer):
+	Restoring the dynamic_cast.
+
 	* src/ShBackend.cpp, ShBackend.hpp (is_valid_name): Add this
 	method.
 	(load_library): Check whether the backend name is valid before
