@@ -6,6 +6,9 @@
 
 2005-05-30  Francois Marier  <francois@serioushack.com>
 
+	* backends/gl/GlslVariable.cpp (GlslVariable): Typecast all
+	numerical constants.
+	
 	* backends/gl/Makefile.am: Moving the common GL stuff into a
 	separate library.
 

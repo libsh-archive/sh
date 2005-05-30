@@ -78,7 +78,7 @@ GlslVariable::GlslVariable(const ShVariableNodePtr& v)
 
     // Scalar constants are not assigned a variable
     if ((1 == m_size) && (SH_CONST == m_kind)) {
-      m_name = m_values;
+      m_name = type_string() + "(" + m_values + ")";
       m_builtin = true;
     }
   }
