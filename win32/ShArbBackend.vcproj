@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="ShGlBackend"
+	Name="ShArbBackend"
 	ProjectGUID="{FEA8789F-A94C-44E6-8583-45C3383D1A40}"
 	Keyword="Win32Proj">
 	<Platforms>

@@ -36,7 +36,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="zlibd.lib libpngd.lib"
-				OutputFile="$(OutDir)/libshd.dll"
+				OutputFile="$(OutDir)/libsh_debug.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\libpng;..\..\zlib"
 				GenerateDebugInformation="TRUE"
@@ -364,9 +364,6 @@
 				RelativePath="..\src\ShColor.hpp">
 			</File>
 			<File
-				RelativePath="..\src\ShPlane.hpp">
-			</File>
-			<File
 				RelativePath="..\src\ShConcreteCTypeOpImpl.hpp">
 			</File>
 			<File
@@ -487,9 +484,6 @@
 				RelativePath="..\src\ShLibColor.hpp">
 			</File>
 			<File
-				RelativePath="..\src\ShLibPlane.hpp">
-			</File>
-			<File
 				RelativePath="..\src\ShLibDeriv.hpp">
 			</File>
 			<File
@@ -515,6 +509,9 @@
 			</File>
 			<File
 				RelativePath="..\src\ShLibNormal.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShLibPlane.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShLibPoint.hpp">
@@ -593,6 +590,9 @@
 			</File>
 			<File
 				RelativePath="..\src\ShParser.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShPlane.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShPoint.hpp">
