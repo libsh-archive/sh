@@ -1,3 +1,9 @@
+2005-05-30  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* test/regress/Makefile.am (INCLUDES): Use $(top_srcdir) to allow
+	out-of-source build.
+	(AM_LDFLAGS): Use $(top_builddir) to allow out-of-source build.
+
 2005-05-30  Francois Marier  <francois@serioushack.com>
 
 	* src/ShBackend.cpp, ShBackend.hpp (is_valid_name): Add this
