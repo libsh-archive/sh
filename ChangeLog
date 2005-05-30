@@ -1,3 +1,20 @@
+2005-05-27  Francois Marier  <francois@serioushack.com>
+
+	* src/ShVariableType.hpp, ShVariableType.cpp: Add the SH_PLANE
+	semantic type.
+
+	* src/scripts/ShPlane.hpp.py, src/ShPlane.hpp, ShLibPlane.hpp: Add
+	these files for the new SH_PLANE semantic type.
+	
+	* src/ShSyntax.cpp, ShSyntax.hpp (shHaveBackend): Add this
+	function (issue34).
+	(shClearBackends): Add this function (issue33).
+	(shFindBackend): Add this function (issue34).
+
+	* src/ShBackend.cpp, ShBackend.hpp (have_backend): Add this
+	method.
+	(target_handler): Add this method and make get_backend() use it.
+
 2005-05-26  Francois Marier  <francois@serioushack.com>
 
 	* src/ShBackend.cpp: Refactor the code related to the library

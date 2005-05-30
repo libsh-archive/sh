@@ -167,12 +167,31 @@ void shBindShader(const std::string& target, ShProgram& shader)
 bool shSetBackend(const std::string& name)
 {
   SH::ShBackend::clear_backends();
+  if (name.empty()) return false;
   return SH::ShBackend::use_backend(name);
 }
 
 bool shUseBackend(const std::string& name)
 {
+  if (name.empty()) return false;
   return SH::ShBackend::use_backend(name);
+}
+
+bool shHaveBackend(const std::string& name)
+{
+  if (name.empty()) return false;
+  return SH::ShBackend::have_backend(name);
+}
+
+void shClearBackends()
+{
+  return SH::ShBackend::clear_backends();
+}
+
+std::string shFindBackend(const std::string& target)
+{
+  if (target.empty()) return "";
+  return SH::ShBackend::target_handler(target, false);
 }
 
 bool shEvaluateCondition(const ShVariable& arg)
@@ -183,7 +202,6 @@ bool shEvaluateCondition(const ShVariable& arg)
   }
   return cond;
 }
-
 
 bool shProcessArg(const ShVariable& arg,
                   bool* internal_cond)

@@ -71,6 +71,7 @@ enum ShSemanticType {
   SH_COLOR,
   SH_TEXCOORD,
   SH_POSITION,
+  SH_PLANE,
   
   SH_SEMANTICTYPE_END
 };

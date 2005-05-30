@@ -124,10 +124,16 @@ public:
   static void unbind_all_backends();
 
   /** Add a backend to the list of selected backends */
-  static bool use_backend(const std::string& name);
+  static bool use_backend(const std::string& backend_name);
+
+  /** Checks whether the backend is available or not */
+  static bool have_backend(const std::string& backend_name);
 
   /** Clear the list of selected backends */
   static void clear_backends();
+
+  /** Find the name of the best backend that handles the given target */
+  static std::string target_handler(const std::string& target, bool restrict_to_selected);
 
   /** Returns a backend that can run the specified target */
   static ShPointer<ShBackend> get_backend(const std::string& target);
@@ -145,8 +151,6 @@ protected:
   ShBackend();
   
 private:
-  /* The string related to the backend name in these data is stored as
-     "libsharb", "libshcc", "libshglsl", etc. */
   static BackendMap* m_instantiated_backends;
   static BackendSet* m_selected_backends;
   static LibraryMap* m_loaded_libraries;
@@ -156,9 +160,9 @@ private:
   /** Initialize the data structures */
   static void init();
 
-  /** Convert the user-visible backend name (e.g. "arb") to a filename
+  /** Convert the backend name (e.g. "arb") to a filename
    * Returns an empty string if a library cannot be found. */
-  static std::string lookup_filename(const std::string& name);
+  static std::string lookup_filename(const std::string& backend_name);
 
   /** Load the given library and initialize the backend it contains
    * Returns true if the library was loaded successfully. */

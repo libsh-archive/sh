@@ -21,36 +21,18 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#include "ShVariableType.hpp"
+#ifndef SHLIBPLANE_HPP
+#define SHLIBPLANE_HPP
+
+#include "ShAttrib.hpp"
+#include "ShLib.hpp"
 
 namespace SH {
+SH_SHLIB_USUAL_OPERATIONS(SH_PLANE);
+SH_SHLIB_USUAL_SUBTRACT(SH_PLANE);
 
-const char* bindingTypeName[] = {
-  "Input",
-  "Output",
-  "InOut",
-  "",
-  "Constant",
-  "Texture",
-  "Stream",
-  "Palette",
+SH_SHLIB_LEFT_MATRIX_OPERATION(SH_PLANE, operator|, M);
 
-  "Invalid Binding Type"
-};
+}
 
-const char* semanticTypeName[] = {
-  "Attrib",
-  "Point",
-  "Vector",
-  "Normal",
-  "Color",
-  "TexCoord",
-  "Position",
-  "Plane",
-
-  "Invalid Semantic Type"
-};
-
-
-} // namespace SH
-
+#endif

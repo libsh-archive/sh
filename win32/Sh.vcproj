@@ -364,6 +364,9 @@
 				RelativePath="..\src\ShColor.hpp">
 			</File>
 			<File
+				RelativePath="..\src\ShPlane.hpp">
+			</File>
+			<File
 				RelativePath="..\src\ShConcreteCTypeOpImpl.hpp">
 			</File>
 			<File
@@ -482,6 +485,9 @@
 			</File>
 			<File
 				RelativePath="..\src\ShLibColor.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShLibPlane.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShLibDeriv.hpp">

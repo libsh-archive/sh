@@ -332,6 +332,18 @@ bool shSetBackend(const std::string& name);
 SH_DLLEXPORT
 bool shUseBackend(const std::string& name);
 
+/// Checks whether the backend is available
+SH_DLLEXPORT
+bool shHaveBackend(const std::string& name);
+
+/// Clear the list of selected backends
+SH_DLLEXPORT
+void shClearBackends();
+
+/// Find the name of the best backend that handles the given target
+SH_DLLEXPORT
+std::string shFindBackend(const std::string& target);
+
 /** \brief SH Initialization Function.
  *
  * The function needs to be called prior to the use of any other SH functions. Additionally,
