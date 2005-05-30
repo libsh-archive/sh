@@ -161,6 +161,8 @@ string ShBackend::lookup_filename(const string& backend_name)
 bool ShBackend::is_valid_name(const string& backend_name)
 {
   unsigned length = backend_name.size();
+  if (0 == length) return false;
+
   for (unsigned i=0; i < length; i++) {
     char c = backend_name[i];
     if (isalnum(c) || ('_' == c)) {
@@ -329,7 +331,25 @@ string ShBackend::target_handler(const string& target, bool restrict_to_selected
     load_libraries(string(SH_INSTALL_PREFIX) + "/lib/sh");
 #else
     load_libraries(string("."));
-    load_libraries(string("C:\\windows\\system32")); // TODO: go through the path instead
+
+    // Search the system path
+    string path(getenv("PATH"));
+    unsigned length = path.size();
+    unsigned start = 0;
+    unsigned end = length - 1;
+    while (start < length) {
+      while ((start != end) && (' ' == path[start])) start++; // trim leading whitespace
+      unsigned separator = path.find(";", start);
+      if (separator != path.npos) end = separator - 1;
+      while ((start != end ) && (' ' == path[end])) end--; // trim trailing whitespace
+
+      string entry = path.substr(start, end - start + 1);
+      load_libraries(entry);
+
+      if (path.npos == separator) break; // reached the end of the path
+      start = separator + 1;
+      end = length - 1;
+    }
 #endif
     m_all_backends_loaded = true;
   }
