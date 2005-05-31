@@ -178,7 +178,7 @@ ShHalf::T ShHalf::to_val(double value) {
   // INF in value, and is rather slow. 
   result = (sign << 15);
   if(fraction == 0) { // zero
-  } else if(fabsf(value) > 65504) { // INF
+  } else if(fabs(value) > 65504) { // INF
     result |= 31 << 10;
   } else if(exponent < -13) { // denormalized 
     int significand = (int)(fraction * (1LL << (exponent + 24)));

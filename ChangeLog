@@ -1,3 +1,10 @@
+2005-05-31  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* src/Makefile.win32: Updated to reflect previous changes to VS project
+	files.
+	
+	* src/ShHalfImpl.hpp: Changed fabsf to fabs, code uses doubles.
+
 2005-05-30  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* test/regress/Makefile.am (INCLUDES): Use $(top_srcdir) to allow
