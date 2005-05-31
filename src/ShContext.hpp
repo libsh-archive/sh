@@ -53,6 +53,10 @@ public:
   void enable_optimization(const std::string& name);
   /// Check whether an optimization is disabled
   bool optimization_disabled(const std::string& name) const;
+
+  bool is_bound(const std::string& target);
+  ShProgramNodePtr bound_program(const std::string& target);
+
   
   typedef std::map<std::string, ShProgram> BoundProgramMap;
 
@@ -92,6 +96,14 @@ private:
 };
 
 typedef ShContext::BoundProgramMap::iterator ShBoundIterator;
+
+/// Check whether a program is bound to the given target
+SH_DLLEXPORT
+bool shIsBound(const std::string& target);
+
+/// Return the program bound to the given target
+SH_DLLEXPORT
+ShProgramNodePtr shBound(const std::string& target);
 
 /// Get beginning of bound program map for current context
 SH_DLLEXPORT

@@ -1,3 +1,10 @@
+2005-05-31  Francois Marier  <francois@serioushack.com>
+
+	* src/ShContext.cpp, ShContext.hpp (bound_program): Add this method.
+	(is_bound): Add this method.
+	(shIsBound): Add this function.
+	(shBound): Add this function.
+
 2005-05-31  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
 
 	* src/Makefile.win32: Updated to reflect previous changes to VS project

@@ -83,6 +83,29 @@ bool ShContext::optimization_disabled(const std::string& name) const
   return m_disabled_optimizations.find(name) != m_disabled_optimizations.end();
 }
 
+bool ShContext::is_bound(const std::string& target)
+{
+  return bound_program(target);
+}
+
+ShProgramNodePtr ShContext::bound_program(const std::string& target)
+{
+  // Look for an exact match first
+  if (m_bound.find(target) != m_bound.end()) return m_bound[target].node();
+  
+  if (("gpu:vertex" == target) || ("*:vertex" == target) || ("vertex" == target)) {
+    if (m_bound.find("arb:vertex") != m_bound.end()) return m_bound["arb:vertex"].node();
+    if (m_bound.find("glsl:vertex") != m_bound.end()) return m_bound["glsl:vertex"].node();
+  }
+
+  if (("gpu:fragment" == target) || ("*:fragment" == target) || ("fragment" == target)) {
+    if (m_bound.find("arb:fragment") != m_bound.end()) return m_bound["arb:fragment"].node();
+    if (m_bound.find("glsl:fragment") != m_bound.end()) return m_bound["glsl:fragment"].node();
+  }
+
+  return 0;
+}
+
 ShContext::BoundProgramMap::iterator ShContext::begin_bound()
 {
   return m_bound.begin();
@@ -122,6 +145,16 @@ void ShContext::exit()
 {
   SH_DEBUG_ASSERT(!m_parsing.empty());
   m_parsing.pop();
+}
+
+bool shIsBound(const std::string& target)
+{
+  return ShContext::current()->is_bound(target);
+}
+
+ShProgramNodePtr shBound(const std::string& target)
+{
+  return ShContext::current()->bound_program(target);
 }
 
 ShBoundIterator shBeginBound()
