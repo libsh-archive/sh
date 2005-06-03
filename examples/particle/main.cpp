@@ -328,9 +328,6 @@ int main(int argc, char** argv)
 
   try
     {
-    if (argc > 1) {
-      shUseBackend(argv[1]);
-    }
 
     init_shaders();
     init_streams();
