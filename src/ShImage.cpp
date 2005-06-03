@@ -363,7 +363,7 @@ ShImage ShImage::getNormalImage()
       y = ((*this)(i,jp1,0) - (*this)(i,jm1,0))/2.0f;
       output_image(i,j,1) = y/2.0f + 0.5f;
       z = x*x + y*y;
-      z = (z > 1.0f) ? z = 0.0f : sqrt(1 - z);
+      z = (z > 1.0f) ? z = 0.0f : std::sqrt(1 - z);
       output_image(i,j,2) = z;
     }
   }
