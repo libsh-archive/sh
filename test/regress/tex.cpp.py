@@ -44,11 +44,11 @@ test.add_texture(shtest.GenTexture("ShTexture2D<ShColor3fb>",
     "ShFracByte", 3, (8, 8), "frac_byte2d_tex", "(-i + j + elem - 1) / 10.0"))
 test.clear_call()
 test.add_call(shtest.Call(shtest.Call.call, 'frac_byte2d_tex', 1))
-test.add_make_test((-.1, 0, .1), [(0, 0)]) # should really try out [] lookup
-test.add_make_test((-.8, -.7, -.6), [(1, 0)]) # i = 7, j = 0 
-test.add_make_test((.6, .7, .8), [(0, 1)]) # i = 0, j = 7
-test.add_make_test((-.1, 0, .1), [(1, 1)]) # i = j = 7
-test.add_make_test((.0, .1, .2), [(4/7.0, 5/7.0)]) # i = 4, j = 5 
+#test.add_make_test((-.1, 0, .1), [(0, 0)]) # should really try out [] lookup
+#test.add_make_test((-.8, -.7, -.6), [(1, 0)]) # i = 7, j = 0 
+#test.add_make_test((.6, .7, .8), [(0, 1)]) # i = 0, j = 7
+#test.add_make_test((-.1, 0, .1), [(1, 1)]) # i = j = 7
+#test.add_make_test((.0, .1, .2), [(4/7.0, 5/7.0)]) # i = 4, j = 5 
 
 
 # test half textures
