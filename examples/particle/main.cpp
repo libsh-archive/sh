@@ -39,7 +39,7 @@ using namespace SH;
 using namespace std;
 
 // defines
-#define NUM_PARTICLES 65536
+#define NUM_PARTICLES 16384
 
 // forward declarations
 void init_shaders(void);
@@ -328,7 +328,10 @@ int main(int argc, char** argv)
 
   try
     {
-
+    if (argc > 1) {
+      shUseBackend(argv[1]);
+    }
+      
     init_shaders();
     init_streams();
   
@@ -371,7 +374,7 @@ void init_streams(void)
   {
   // Specifiy the generic particle update program, later it will
   // be specialized for the the actual particle update.
-  particle = SH_BEGIN_PROGRAM("cpu:stream") {
+  particle = SH_BEGIN_PROGRAM("stream") {
     ShInOutPoint3f pos;
     ShInOutVector3f vel;
     ShInputVector3f acc;
