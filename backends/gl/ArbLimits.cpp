@@ -22,7 +22,6 @@
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
 #include "ArbLimits.hpp"
-#include "GlBackend.hpp"
 #include "Arb.hpp"
 
 namespace shgl {
