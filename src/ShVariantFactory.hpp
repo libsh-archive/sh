@@ -50,7 +50,7 @@ ShVariantFactory {
   /// array as data
   /// @param managed Set to true iff this should make a copy
   //                 rather than using the given array internally.
-  virtual ShVariant* generate(void *data, int N, bool managed = true) const = 0;  
+  virtual ShVariant* generate(int N, void *data, bool managed = true) const = 0;  
 
   /// Creates an ShDataVariant object with N elements set to zero.
   virtual ShVariant* generateZero(int N = 1) const = 0;
@@ -65,7 +65,7 @@ struct ShDataVariantFactory: public ShVariantFactory {
 
   ShVariant* generate(std::string s) const; 
 
-  ShVariant* generate(void *data, int N, bool managed = true) const;  
+  ShVariant* generate(int N, void *data, bool managed = true) const;  
 
   ShVariant* generateZero(int N = 1) const;
   ShVariant* generateOne(int N = 1) const;

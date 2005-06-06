@@ -74,7 +74,7 @@ class HostGlTextureTransfer : public ShTransfer {
     ShVariantPtr dataVariant; 
     // @todo a little hackish...but we promise host->data() will not change... 
     ShVariantPtr hostVariant = shVariantFactory(valueType, SH_MEM)->generate(
-        const_cast<void *>(host->data()), count * tuplesize, false);
+        count * tuplesize, const_cast<void *>(host->data()), false);
 
     if(convertedType != SH_VALUETYPE_END) {
       SH_DEBUG_WARN("GL backend does not handle " << shValueTypeName(valueType) << " natively.  Converting to " << shValueTypeName(convertedType));

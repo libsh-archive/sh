@@ -331,7 +331,8 @@ void ShGeneric<N, T>::setValues(const host_type variantValues[])
       (*c)[i] = variantValues[i];
     }
   } else {
-    VariantTypePtr variantPtr(new VariantType(N, variantValues, false));
+		host_type* data = const_cast<host_type*>(variantValues);
+		VariantTypePtr variantPtr(new VariantType(N, data, false));
     setVariant(variantPtr);
   }
 }

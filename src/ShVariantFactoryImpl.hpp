@@ -42,9 +42,9 @@ ShVariant* ShDataVariantFactory<T, DT>::generate(std::string s) const
 }
 
 template<typename T, ShDataType DT>
-ShVariant* ShDataVariantFactory<T, DT>::generate(void *data, int N, bool managed) const
+ShVariant* ShDataVariantFactory<T, DT>::generate(int N, void *data, bool managed) const
 {
-  return new ShDataVariant<T, DT>(data, N, managed);
+  return new ShDataVariant<T, DT>(N, data, managed);
 }
 
 template<typename T, ShDataType DT>

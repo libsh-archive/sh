@@ -72,7 +72,7 @@ ShDataVariant<T, DT>::ShDataVariant(std::string encodedValue)
 }
 
 template<typename T, ShDataType DT>
-ShDataVariant<T, DT>::ShDataVariant(void *data, int N, bool managed)
+ShDataVariant<T, DT>::ShDataVariant(int N, void *data, bool managed)
   : m_managed(managed)
 {
   if(m_managed) {
@@ -191,7 +191,7 @@ void ShDataVariant<T, DT>::set(const ShVariant* other, int index)
     m_begin[index] = (*cast_other)[0];
   } else {
     // make a new DataVariant that uses the index element as it's array 
-    ShDataVariant *temp = new ShDataVariant(m_begin + index, 1, false);
+    ShDataVariant *temp = new ShDataVariant(1, m_begin + index, false);
     ShCastManager::instance()->doCast(temp, other);
     delete temp; // okay - it doesn't delete its array
   }

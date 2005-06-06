@@ -465,7 +465,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
     if ((output->size() != 2) && (SH_VALUETYPE_END == convertedType)) {
       // Use the output buffer directly
       resultBuffer = shVariantFactory(valueType, SH_MEM)->
-	generate(outhost->data(), resultDatasize, false);
+	generate(resultDatasize, outhost->data(), false);
     } else {
       if (2 == output->size()) {
 	// Hack to support 2-component outputs (add an extra component)
@@ -503,7 +503,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
 	resultDatasize = 2 * count;
       }
       ShVariantPtr outhostVariant = shVariantFactory(valueType, SH_MEM)->
-	generate(outhost->data(), resultDatasize, false);
+	generate(resultDatasize, outhost->data(), false);
       outhostVariant->set(resultBuffer);
     }
     
@@ -529,7 +529,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
 	real_host = new ShHostStorage(real_node->memory().object(), datasize * size * count);
       }
       ShVariantPtr real_variant 
-	= shVariantFactory(valueType, SH_MEM)->generate(real_host->data(), size * count, false);
+	= shVariantFactory(valueType, SH_MEM)->generate(size * count, real_host->data(), false);
 
       ShHostStoragePtr intermediate_host 
 	= shref_dynamic_cast<ShHostStorage>(intermediate_node->memory()->findStorage("host"));
@@ -537,7 +537,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
 	intermediate_host = new ShHostStorage(intermediate_node->memory().object(), datasize * size * count);
       }
       ShVariantPtr intermediate_variant 
-	= shVariantFactory(valueType, SH_MEM)->generate(intermediate_host->data(), size * count, false);
+	= shVariantFactory(valueType, SH_MEM)->generate(size * count, intermediate_host->data(), false);
 
       real_variant->set(intermediate_variant); // copy channel data
       real_host->dirty();

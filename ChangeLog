@@ -1,3 +1,16 @@
+2005-06-06  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* backend/gl/GLTextureStorage.cpp, backends/gl/PBufferStreams.cpp:
+	Fixed ShVariant constructors to match changes made below.
+
+	* src/ShGenericImpl.hpp:
+	Fixed ShVariant constructors to match changes made below.
+
+	* src/ShVariant.hpp, src/ShVariantImpl.hpp, src/ShVariantFactory.hpp,
+	src/ShVariantFactoryImpl.hpp: Modified ShDataVariant constructor 
+	arguments to be consistent with other constructors. Associated
+	generate() functions were also modified for consistency.
+
 2005-06-06  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/Glsl.cpp, GlslSet.cpp, GlslCode.cpp, ArbLimits.hpp,

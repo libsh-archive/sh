@@ -209,7 +209,7 @@ class ShDataVariant: public ShVariant {
     /// of the given size.  This uses the given array internally
     /// iff managed = false, otherwise it allocates a new array 
     /// and makes a copy.
-    ShDataVariant(void *data, int N, bool managed = true);
+    ShDataVariant(int N, void *data, bool managed = true);
 
     /// Constructs a data array using values from another array
     /// swizzled and negated as requested. 
