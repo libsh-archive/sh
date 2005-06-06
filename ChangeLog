@@ -1,3 +1,9 @@
+2005-06-06  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/Glsl.cpp, GlslSet.cpp, GlslCode.cpp, ArbLimits.hpp,
+	ArbCode.hpp, ArbCode.cpp:  Change some ints to GLints to fix
+	compilation errors on OSX (issue195).
+
 2005-05-31  Francois Marier  <francois@serioushack.com>
 
 	* src/ShContext.cpp, ShContext.hpp (bound_program): Add this method.

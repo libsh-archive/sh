@@ -150,7 +150,7 @@ void GlslSet::link()
   SH_GL_CHECK_ERROR(glLinkProgramARB(m_arb_program));
 
   // Check linking
-  int linked;
+  GLint linked;
   glGetObjectParameterivARB(m_arb_program, GL_OBJECT_LINK_STATUS_ARB, &linked);
   if (linked != GL_TRUE) {
     cout << "Program link status: FAILED" << endl << endl;
@@ -191,7 +191,7 @@ void GlslSet::bind()
 #ifdef SH_DEBUG_GLSL_BACKEND
   // This could be slow, it should not be enabled in release code
   glValidateProgramARB(m_arb_program);
-  int validated;
+  GLint validated;
   glGetObjectParameterivARB(m_arb_program, GL_OBJECT_VALIDATE_STATUS_ARB, &validated);
   if (validated != GL_TRUE) {
     cout << "Program validate status: FAILED" << endl;

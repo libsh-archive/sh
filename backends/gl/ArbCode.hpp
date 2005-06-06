@@ -233,7 +233,7 @@ private:
   SH::ShTransformer::ValueTypeMap m_convertMap;
 
   /// ARB Program ID we are bound to. 0 if code hasn't been uploaded yet.
-  unsigned int m_programId;
+  GLuint m_programId;
 
   static ArbMapping table[];
 

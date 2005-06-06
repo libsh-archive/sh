@@ -154,7 +154,7 @@ void GlslCode::upload()
   SH_GL_CHECK_ERROR(glCompileShaderARB(m_arb_shader));
 
   // Check compilation
-  int compiled;
+  GLint compiled;
   glGetObjectParameterivARB(m_arb_shader, GL_OBJECT_COMPILE_STATUS_ARB, &compiled);
   if (compiled != GL_TRUE) {
     std::ostringstream os;

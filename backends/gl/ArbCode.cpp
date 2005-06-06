@@ -301,7 +301,7 @@ void ArbCode::upload()
   error_os << "Failed to upload ARB program." << std::endl;
   if (error == GL_INVALID_OPERATION) {
     error_os << "Program error:" << std::endl;
-    int pos = -1;
+    GLint pos = -1;
     SH_GL_CHECK_ERROR(glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &pos));
     if (pos >= 0){
       const unsigned char* message = glGetString(GL_PROGRAM_ERROR_STRING_ARB);

@@ -24,6 +24,7 @@
 #ifndef ARBLIMITS_HPP
 #define ARBLIMITS_HPP
 
+#include "GlBackend.hpp"
 #include <string>
 
 namespace shgl {
@@ -41,12 +42,12 @@ struct ArbLimits {
   const std::string& target() const { return m_target; }
   
 private:
-  int m_instrs; ///< Maximum number of instructions for each shader target
+  GLint m_instrs; ///< Maximum number of instructions for each shader target
   int m_halftemps; ///< Maximum number of half-float temporaries for each shader target
-  int m_temps; ///< Maximum number of temporaries for each shader target
-  int m_attribs; ///<Maximum number of attributes for each shader target
-  int m_params; ///< Maximum number of parameters for each shader target
-  int m_texs; ///< Maximum number of TEX instructions for each shader target
+  GLint m_temps; ///< Maximum number of temporaries for each shader target
+  GLint m_attribs; ///<Maximum number of attributes for each shader target
+  GLint m_params; ///< Maximum number of parameters for each shader target
+  GLint m_texs; ///< Maximum number of TEX instructions for each shader target
 
   std::string m_target;
 };
