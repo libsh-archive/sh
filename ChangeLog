@@ -1,5 +1,8 @@
 2005-06-06  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
 
+	* test/regress/test.hpp:
+	Fixed ShVariant constructors to match changes made below.
+
 	* backend/gl/GLTextureStorage.cpp, backends/gl/PBufferStreams.cpp:
 	Fixed ShVariant constructors to match changes made below.
 
