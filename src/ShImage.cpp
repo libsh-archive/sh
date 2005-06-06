@@ -41,13 +41,13 @@ ShImage::ShImage()
 
 ShImage::ShImage(int width, int height, int elements)
   : m_width(width), m_height(height), m_elements(elements),
-    m_memory(new ShHostMemory(sizeof(float) * m_width * m_height * m_elements))
+    m_memory(new ShHostMemory(sizeof(float) * m_width * m_height * m_elements, SH_FLOAT))
 {
 }
 
 ShImage::ShImage(const ShImage& other)
   : m_width(other.m_width), m_height(other.m_height), m_elements(other.m_elements),
-    m_memory(other.m_memory ? new ShHostMemory(sizeof(float) * m_width * m_height * m_elements) : 0)
+    m_memory(other.m_memory ? new ShHostMemory(sizeof(float) * m_width * m_height * m_elements, SH_FLOAT) : 0)
 {
   if (m_memory) {
     std::memcpy(m_memory->hostStorage()->data(),
@@ -65,7 +65,7 @@ ShImage& ShImage::operator=(const ShImage& other)
   m_width = other.m_width;
   m_height = other.m_height;
   m_elements = other.m_elements;
-  m_memory = (other.m_memory ? new ShHostMemory(sizeof(float) * m_width * m_height * m_elements) : 0);
+  m_memory = (other.m_memory ? new ShHostMemory(sizeof(float) * m_width * m_height * m_elements, SH_FLOAT) : 0);
   std::memcpy(m_memory->hostStorage()->data(),
               other.m_memory->hostStorage()->data(),
               m_width * m_height * m_elements * sizeof(float));
@@ -250,7 +250,7 @@ void ShImage::loadPng(const std::string& filename)
   
   png_bytep* row_pointers = png_get_rows(png_ptr, info_ptr);
 
-  m_memory = new ShHostMemory(sizeof(float) * m_width * m_height * m_elements);
+  m_memory = new ShHostMemory(sizeof(float) * m_width * m_height * m_elements, SH_FLOAT);
 
   for (int y = 0; y < m_height; y++) {
     for (int x = 0; x < m_width; x++) {

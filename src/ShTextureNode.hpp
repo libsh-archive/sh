@@ -56,7 +56,7 @@ enum ShCubeDirection {
 };
 
 /** Texture traits.
- * An enumeration of the various wrapping an clamping modes supported
+ * An enumeration of the various wrapping modes supported
  * by textures.
  */
 class 
@@ -72,19 +72,13 @@ public:
     SH_WRAP_CLAMP_TO_EDGE,
     SH_WRAP_REPEAT
   };
-  enum Clamping {
-    SH_CLAMPED,
-    SH_UNCLAMPED
-  };
 
   ShTextureTraits(unsigned int interpolation,
                   Filtering filtering,
-                  Wrapping wrapping,
-                  Clamping clamping)
+                  Wrapping wrapping)
     : m_interpolation(interpolation),
       m_filtering(filtering),
-      m_wrapping(wrapping),
-      m_clamping(clamping)
+      m_wrapping(wrapping)
   {
   }
 
@@ -92,8 +86,7 @@ public:
   {
     return m_interpolation == other.m_interpolation
       && m_filtering == other.m_filtering
-      && m_wrapping == other.m_wrapping
-      && m_clamping == other.m_clamping;
+      && m_wrapping == other.m_wrapping;
   }
 
   bool operator!=(const ShTextureTraits& other) const { return !(*this == other); }
@@ -107,14 +100,11 @@ public:
   Wrapping wrapping() const { return m_wrapping; }
   ShTextureTraits& wrapping(Wrapping wrapping) { m_wrapping = wrapping; return *this; }
   
-  Clamping clamping() const { return m_clamping; }
-  ShTextureTraits& clamping(Clamping clamping) { m_clamping = clamping; return *this; }
 
 private:
   unsigned int m_interpolation;
   Filtering m_filtering;
   Wrapping m_wrapping;
-  Clamping m_clamping;
 };
 
 class 

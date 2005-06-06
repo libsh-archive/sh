@@ -21,8 +21,8 @@ test.add_make_test((1.0, 0.0, 0.0), [(0.5/4.0, 0.5/4.0)])
 test.add_make_test((1.0, 0.0, 0.0), [(4.5/4.0, -3.5/4.0)])
 
 # test clamping
-test.add_texture(shtest.GenTexture("ShClamped< ShTexture2D<ShColor3f> >",
-    "float", 3, (16, 16), "clamp_tex", "(i - 2 * j + 4 * elem) / 2"))
+test.add_texture(shtest.GenTexture("ShTexture2D<ShColor3fub>",
+    "ShFracUByte", "SH_FUBYTE", 3, (16, 16), "clamp_tex", "(i - 2 * j + 4 * elem) / 2"))
 test.clear_call()
 test.add_call(shtest.Call(shtest.Call.call, 'clamp_tex', 1))
 test.add_make_test((0, 1, 1), [(0, 0)], ['i', 'i'])
@@ -30,7 +30,7 @@ test.add_make_test((0, 0, 0), [(1.0, 1.0)])
 
 # test fractional textures
 test.add_texture(shtest.GenTexture("ShTexture2D<ShColor4fui>",
-    "ShFracUInt", 4, (8, 8), "frac_uint2d_tex", "(i + 3 * j + 7 * elem) / 100.0"))
+    "ShFracUInt", "SH_FUINT", 4, (8, 8), "frac_uint2d_tex", "(i + 3 * j + 7 * elem) / 100.0"))
 test.clear_call()
 test.add_call(shtest.Call(shtest.Call.call, 'frac_uint2d_tex', 1))
 test.add_make_test((0, .07, .14, .21), [(0, 0)]) # should really try out [] lookup
@@ -41,7 +41,7 @@ test.add_make_test((.19, .26, .33, .40), [(4/7.0, 5/7.0)]) # i = 4, j = 5
 
 # test signed fractional textures (these break since scale & bias doesn't work yet)
 test.add_texture(shtest.GenTexture("ShTexture2D<ShColor3fb>",
-    "ShFracByte", 3, (8, 8), "frac_byte2d_tex", "(-i + j + elem - 1) / 10.0"))
+    "ShFracByte", "SH_FBYTE", 3, (8, 8), "frac_byte2d_tex", "(-i + j + elem - 1) / 10.0"))
 test.clear_call()
 test.add_call(shtest.Call(shtest.Call.call, 'frac_byte2d_tex', 1))
 #test.add_make_test((-.1, 0, .1), [(0, 0)]) # should really try out [] lookup
@@ -52,8 +52,8 @@ test.add_call(shtest.Call(shtest.Call.call, 'frac_byte2d_tex', 1))
 
 
 # test half textures
-test.add_texture(shtest.GenTexture("ShUnclamped< ShTexture2D<ShColor3h> >",
-    "ShHalf", 3, (16, 16), "half2d_tex", "100 * (i - 8) + 10 * (j - 8) + elem"))
+test.add_texture(shtest.GenTexture("ShTexture2D<ShColor3h>",
+    "ShHalf", "SH_HALF", 3, (16, 16), "half2d_tex", "100 * (i - 8) + 10 * (j - 8) + elem"))
 test.clear_call()
 test.add_call(shtest.Call(shtest.Call.call, 'half2d_tex', 1))
 test.add_make_test((-880, -879, -878), [(0, 0)], ['i', 'i'])
@@ -62,8 +62,8 @@ test.add_make_test((10, 11, 12), [(8/15.0, 9/15.0)])
 test.add_make_test((-730, -729, -728), [(-2, 2)]) # should clamp to 0,1 
 
 # repeat, but with rect lookups
-test.add_texture(shtest.GenTexture("ShUnclamped< ShTextureRect<ShColor3h> >",
-    "ShHalf", 3, (16, 16), "half_rect_tex", "100 * (i - 8) + 10 * (j - 8) + elem"))
+test.add_texture(shtest.GenTexture("ShTextureRect<ShColor3h>",
+    "ShHalf", "SH_HALF", 3, (16, 16), "half_rect_tex", "100 * (i - 8) + 10 * (j - 8) + elem"))
 test.clear_call()
 test.add_call(shtest.Call(shtest.Call.lookup, 'half_rect_tex', 1))
 test.add_make_test((-880, -879, -878), [(0, 0)], ['i', 'i'])
@@ -72,8 +72,8 @@ test.add_make_test((10, 11, 12), [(8, 9)])
 test.add_make_test((-730, -729, -728), [(-20, 20)]) # should clamp to 0,1 
 test.add_make_test((-730, -729, -728), [(-20, 20)]) # should clamp to 0,1 
 
-test.add_texture(shtest.GenTexture("ShUnclamped< ShArrayRect<ShColor3f> >",
-    "float", 3, (16, 16), "float_array", "i + 3 * j"))
+test.add_texture(shtest.GenTexture("ShArrayRect<ShColor3f>",
+    "float", "SH_FLOAT", 3, (16, 16), "float_array", "i + 3 * j"))
 test.clear_call()
 test.add_call(shtest.Call(shtest.Call.lookup, 'float_array', 1))
 test.add_make_test((32, 32, 32), [(8, 8)], ['i', 'i'])

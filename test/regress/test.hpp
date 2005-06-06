@@ -82,7 +82,7 @@ public:
     IT* _in = new IT[in.size()];
     mem_from_host(_in, in);
     
-    ShHostMemoryPtr mem_in = new ShHostMemory(in.size()*sizeof(IT), _in);
+    ShHostMemoryPtr mem_in = new ShHostMemory(in.size()*sizeof(IT), _in, T::value_type);
     ShChannel<typename T::TempType> chan_in(mem_in, 1);
     
     stringstream s;
@@ -138,7 +138,7 @@ public:
     OT* _res = new OT[res.size()];
     mem_from_host(_res, res);
 
-    SH::ShHostMemoryPtr mem_out = new SH::ShHostMemory(res.size()*sizeof(OT), _out);
+    SH::ShHostMemoryPtr mem_out = new SH::ShHostMemory(res.size()*sizeof(OT), _out, OUTPUT::value_type);
     SH::ShChannel<typename OUTPUT::TempType> chan_out(mem_out, 1);
 
     std::vector<std::string> inputs(1);
@@ -165,7 +165,7 @@ public:
     OT* _res = new OT[res.size()];
     mem_from_host(_res, res);
 
-    SH::ShHostMemoryPtr mem_out = new SH::ShHostMemory(res.size()*sizeof(OT), _out);
+    SH::ShHostMemoryPtr mem_out = new SH::ShHostMemory(res.size()*sizeof(OT), _out, OUTPUT::value_type);
     SH::ShChannel<typename OUTPUT::TempType> chan_out(mem_out, 1);
 
     std::vector<std::string> inputs(2);
@@ -193,7 +193,7 @@ public:
     OT* _res = new OT[res.size()];
     mem_from_host(_res, res);
   
-    SH::ShHostMemoryPtr mem_out = new SH::ShHostMemory(res.size()*sizeof(OT), _out);
+    SH::ShHostMemoryPtr mem_out = new SH::ShHostMemory(res.size()*sizeof(OT), _out, OUTPUT::value_type);
     SH::ShChannel<typename OUTPUT::TempType> chan_out(mem_out, 1);
 
     std::vector<std::string> inputs(3);

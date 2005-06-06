@@ -31,6 +31,7 @@
 #include "ShDllExport.hpp"
 #include "ShRefCount.hpp"
 #include "ShMemoryDep.hpp"
+#include "ShStorageType.hpp"
 
 namespace SH {
 
@@ -75,7 +76,7 @@ public:
 
 protected:
   ShMemory();
-  
+
 private:
   void updateTimestamp(int timestamp);
 
@@ -167,7 +168,7 @@ public:
   /// This will sync, if necessary.
   void dirty();
   
-  // Mark an upcoming write to this storage.
+  /// Mark an upcoming write to this storage.
   /// Don't call sync, all storages are replaced.
   void dirtyall();
   
@@ -192,8 +193,20 @@ public:
   /// Called by ShMemory when it destructs. Necessary for refcounting purposes.
   void orphan();
   
+  /// Return the type that is stored inside this object
+  ShValueType value_type() const { return m_value_type; }
+
+  /// Change the internal type (does NOT convert the values)
+  void value_type(ShValueType value_type) { m_value_type = value_type; }
+
+  /// Return the size in bytes of one value in the storage array
+  int value_size() const { return m_value_size; }
+
 protected:
-  ShStorage(ShMemory* memory);
+  ShStorage(ShMemory* memory, ShValueType value_type);
+  
+  ShValueType m_value_type; // type index expected of data on host
+  int m_value_size; // size of one element
 
 private:
   ShMemory* m_memory;
@@ -220,8 +233,8 @@ typedef ShPointer<const ShStorage> ShStorageCPtr;
 class
 SH_DLLEXPORT ShHostStorage : public ShStorage {
 public:
-  ShHostStorage(ShMemory* memory, int length); ///< Internally managed storage
-  ShHostStorage(ShMemory* memory, int length, void* data); ///< Externally managed storage
+  ShHostStorage(ShMemory* memory, int length, ShValueType storage_type); ///< Internally managed storage
+  ShHostStorage(ShMemory* memory, int length, void* data, ShValueType storage_type); ///< Externally managed storage
 
   /// Destruct this storage.
   /// If the memory was allocated internally, it will be freed automatically.
@@ -258,8 +271,8 @@ typedef ShPointer<const ShHostStorage> ShHostStorageCPtr;
 class
 SH_DLLEXPORT ShHostMemory : public ShMemory {
 public:
-  ShHostMemory(int length);
-  ShHostMemory(int length, void* data);
+  ShHostMemory(int length, ShValueType value_type = SH_FLOAT);
+  ShHostMemory(int length, void* data, ShValueType value_type = SH_FLOAT);
 
   ~ShHostMemory();
 

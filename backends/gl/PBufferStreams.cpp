@@ -326,7 +326,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
       int valuesize = shTypeInfo(node->valueType())->datasize();
       int length = count * tuplesize * valuesize;
     
-      ShHostMemoryPtr channel_mem = new ShHostMemory(length);
+      ShHostMemoryPtr channel_mem = new ShHostMemory(length, node->valueType());
       ShChannelNodePtr channel_copy = new ShChannelNode(node->specialType(), tuplesize, node->valueType(), channel_mem, count);
       intermediate_stream->append(channel_copy);
     }
@@ -417,10 +417,13 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
     if (!outhost) {
       int datasize = shTypeInfo(valueType)->datasize(); 
       outhost = new ShHostStorage(output->memory().object(),
-                                  datasize * output->size() * output->count());
+                                  datasize * output->size() * output->count(),
+				  valueType);
     }
     TIMING_RESULT(findouthost);
     
+    SH_DEBUG_ASSERT(outhost->value_type() == valueType);
+
     DECLARE_TIMER(dirtyouthost);
     // Read back
     outhost->dirty();
@@ -526,7 +529,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
       ShHostStoragePtr real_host 
 	= shref_dynamic_cast<ShHostStorage>(real_node->memory()->findStorage("host"));
       if (!real_host) {
-	real_host = new ShHostStorage(real_node->memory().object(), datasize * size * count);
+	real_host = new ShHostStorage(real_node->memory().object(), datasize * size * count, valueType);
       }
       ShVariantPtr real_variant 
 	= shVariantFactory(valueType, SH_MEM)->generate(size * count, real_host->data(), false);
@@ -534,7 +537,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
       ShHostStoragePtr intermediate_host 
 	= shref_dynamic_cast<ShHostStorage>(intermediate_node->memory()->findStorage("host"));
       if (!intermediate_host) {
-	intermediate_host = new ShHostStorage(intermediate_node->memory().object(), datasize * size * count);
+	intermediate_host = new ShHostStorage(intermediate_node->memory().object(), datasize * size * count, valueType);
       }
       ShVariantPtr intermediate_variant 
 	= shVariantFactory(valueType, SH_MEM)->generate(size * count, intermediate_host->data(), false);

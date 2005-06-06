@@ -48,7 +48,6 @@ public:
   GLenum target() const { return m_target; }
   GLenum format() const { return m_format; }
   GLint internalFormat() const { return m_internalFormat; }
-  SH::ShValueType valueType() const { return m_valueType; }
   int width() const { return m_width; }
   int height() const { return m_height; }
   int depth() const { return m_depth; }
@@ -63,7 +62,6 @@ private:
   GLenum m_format;
   GLint m_internalFormat;
 
-  SH::ShValueType m_valueType; // type index expected of data on host
   int m_width, m_height, m_depth, m_tuplesize, m_count;
   
   unsigned int m_params;

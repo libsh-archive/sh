@@ -439,7 +439,7 @@ void CcBackendCode::emitTexLookup(const ShStatement& stmt, const char* texfunc) 
   }
 
   // names of the functors to use for different texture lookup types 
-  std::string srcInterp, srcFilter, srcWrap, destClamp; 
+  std::string srcInterp, srcFilter, srcWrap;
 
   if(node->traits().interpolation() != 0) {
       //shError(ShBackendException("cc backend supports only nearest-neighbour texture lookup."));
@@ -462,14 +462,6 @@ void CcBackendCode::emitTexLookup(const ShStatement& stmt, const char* texfunc) 
     default:
       shError(ShBackendException("cc backend does not support requested texture wrapping mode."));
       break;
-  }
-
-  switch(node->traits().clamping()) {
-    case ShTextureTraits::SH_CLAMPED:
-      destClamp = "sh_gcc_backend_clamped";
-      break;
-    default:
-      destClamp = "sh_gcc_backend_unclamped";
   }
 
   m_code << "  {" << std::endl;
@@ -503,8 +495,7 @@ void CcBackendCode::emitTexLookup(const ShStatement& stmt, const char* texfunc) 
      << node->height() << ", "
      << node->depth() <<  ", "
      << ctype(node->valueType()) << "," 
-     << srcWrap << ", "
-     << destClamp << ">("
+     << srcWrap << ">("
    << resolve(stmt.src[0])
    << ", "
    << srcvar

@@ -1,3 +1,59 @@
+2005-06-06  Francois Marier  <francois@serioushack.com>
+
+	Removing ShUnclamped and adding types to ShStorage:
+	
+	* src/ShMemory.cpp, ShMemory.hpp: 
+	Add a value type to ShStorage.
+	Add an extra parameter to the ShHostStorage and ShHostMemory
+	constructors (defaults to SH_FLOAT in the case of ShHostMemory).
+	Do type conversion on host-to-host transfers.
+	Add value_type() and value_size() methods to ShStorage.
+
+	* src/sh.hpp, Makefile.am, Makefile.win32, win32/Sh.vcproj:
+	Remove ShClamping.h
+
+	* src/ShTable.hpp, ShTexture.hpp, ShTextureNode.hpp, ShArray.hpp:
+	Remove the clamping trait.
+
+	* src/ShImage.cpp, ShImage3D.cpp: Explicitely specify that the
+	host memory type should be SH_FLOAT.
+
+	* backends/cc/CcTexturesString.hpp, CcTextures.hpp, CcEmit.cpp:
+	Remove all clamping-related code and comments.
+
+	* backends/cc/Cc.cpp: Specify the host memory type when
+	constructing the host storage.
+
+	* backends/gl/PBufferContext.cpp: Remove unused constructor.  
+	Add assert to make sure the type of both storage objects match in
+	the transfer method.
+
+	* backends/gl/PBufferContext.hpp: Remove unused constructor and
+	make_storage method.
+
+	* backends/gl/Utils.cpp, GlTextureName.cpp: Remove the clamping
+	trait.
+	
+	* backends/gl/PBufferStreams.cpp: Specify the value type when
+	creating storage and memory objects.
+	Add assert to ensure proper types.
+
+	* backends/gl/GlTextures.cpp: Remove all clamped code and leave
+	only the unclamped alternative.
+
+	* backends/gl/GlTextureStorage.cpp, GlTextureStorage.hpp: Remove
+	the m_valueType member and the valueType() method since they have
+	been moved to ShStorage.
+	Do type conversion on host-to-GL transfers.
+
+	* test/regress/shtest.py, test.hpp, tex.cpp.py: Specify the value
+	type when creating the host memory.
+
+	* test/regress/tex.cpp.py: Remove all ShUnclamped and ShClamped.
+
+	* examples/textures/main.cpp: Change textures from AttribNf to
+	AttribNfub.
+	
 2005-06-06  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
 
 	* test/regress/test.hpp:

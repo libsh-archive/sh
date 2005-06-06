@@ -43,13 +43,6 @@ PBufferHandle::~PBufferHandle()
 {
 }
 
-PBufferStorage::PBufferStorage(const ShPointer<PBufferContext>& context,
-                               ShMemory* memory)
-  : ShStorage(memory),
-    m_context(context)
-{
-}
-
 PBufferStorage::~PBufferStorage()
 {
 }
@@ -72,6 +65,8 @@ class PBufferGlTextureTransfer : public ShTransfer {
     
     PBufferHandlePtr handle = context->activate();
     GlTextureStorage* texture = dynamic_cast<GlTextureStorage*>(to);
+
+    SH_DEBUG_ASSERT(from->value_type() == to->value_type());
 
     SH_DEBUG_ASSERT(texture->target() == GL_TEXTURE_2D ||
                     texture->target() == GL_TEXTURE_RECTANGLE_NV);

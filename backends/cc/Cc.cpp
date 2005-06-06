@@ -613,7 +613,7 @@ bool CcBackendCode::execute(ShStream& dest)
 
     if (!storage) {
       storage = new ShHostStorage(channel->memory().object(),
-				  datasize * channel->size() * channel->count());
+				  datasize * channel->size() * channel->count(), channel->valueType());
     }
     storage->dirty();
     streams[sidx] = storage->data();
@@ -652,7 +652,7 @@ bool CcBackendCode::execute(ShStream& dest)
     if (!storage) {
       SH_CC_DEBUG_PRINT("  Allocating new storage?");
       storage = new ShHostStorage(channel->memory().object(),
-				  datasize * channel->size() * channel->count());
+				  datasize * channel->size() * channel->count(), channel->valueType());
     }
     storage->dirty();
     outputs[oidx] = storage->data();

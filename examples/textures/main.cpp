@@ -42,8 +42,8 @@ ShPoint3f lightPos;
 Camera camera;
 ShProgramSet* shaders;
 
-ShTexture2D<ShColor3f> kd(512, 512);
-ShTexture2D<ShColor3f> ks(512, 512);
+ShTexture2D<ShColor3fub> kd(512, 512);
+ShTexture2D<ShColor3fub> ks(512, 512);
 
 int gprintf(int x, int y, char* fmt, ...);
 

@@ -179,9 +179,10 @@ class ImageTexture:
 # Generates a 2D/3D texture using the provided code snippet
 # to fill in the array (by generating host data type values)
 class GenTexture:
-    def __init__(self, textype, tex_value_type, tex_size, dims, name, code):
+    def __init__(self, textype, tex_value_type, storage_type, tex_size, dims, name, code):
         self.textype = textype
         self.tex_value_type = tex_value_type
+        self.storage_type = storage_type
         self.tex_size = tex_size
         self.dims = dims
         self.name = name
@@ -211,7 +212,7 @@ class GenTexture:
         r += "       (*data)[index] = " + self.code + ";\n" 
         r += "    }\n"
         r += "    " + self.mem() + "->set(data);\n"
-        r += "    ShPointer<ShHostMemory> hostmem = new ShHostMemory(" + self.size() + " * " + self.mem() + "->datasize(), " + self.mem() + "->array());\n"
+        r += "    ShPointer<ShHostMemory> hostmem = new ShHostMemory(" + self.size() + " * " + self.mem() + "->datasize(), " + self.mem() + "->array(), " + self.storage_type + ");\n"
         r += "    " + self.name + ".memory(hostmem);\n"
         r += "  }\n"
         return r

@@ -23,6 +23,7 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "ShMemory.hpp"
 #include "ShDebug.hpp"
+#include "ShVariant.hpp"
 #include <cstring>
 #include <algorithm>
 
@@ -123,8 +124,7 @@ int ShStorage::timestamp() const
 
 void ShStorage::setTimestamp(int timestamp)
 {
-  SH_DEBUG_ASSERT(timestamp >= m_timestamp); // TODO: Assert this
-                                             // assertion :).
+  SH_DEBUG_ASSERT(timestamp >= m_timestamp); // TODO: Assert this assertion :)
   m_timestamp = timestamp;
 }
 
@@ -147,8 +147,7 @@ void ShStorage::sync()
 {
   SH_DEBUG_ASSERT(m_memory);
   
-  if (m_memory->timestamp() == timestamp()) return; // We are already
-                                                    // in sync
+  if (m_memory->timestamp() == timestamp()) return; // We are already in sync
 
   // Out of sync. Find the cheapest other storage to sync from
   ShStorage* source = 0;
@@ -231,8 +230,10 @@ void ShStorage::addTransfer(const std::string& from,
   (*m_transfers)[std::make_pair(from, to)] = transfer;
 }
 
-ShStorage::ShStorage(ShMemory* memory)
-  : m_memory(memory), m_timestamp(-1)
+ShStorage::ShStorage(ShMemory* memory, ShValueType value_type)
+  : m_value_type(value_type), 
+    m_value_size(shTypeInfo(value_type)->datasize()),
+    m_memory(memory), m_timestamp(-1)
 {
   m_memory->addStorage(this);
 }
@@ -243,16 +244,16 @@ ShStorage::TransferMap* ShStorage::m_transfers = 0;
 // --- ShHostStorage --- //
 ///////////////////////////
 
-ShHostStorage::ShHostStorage(ShMemory* memory, int length)
-  : ShStorage(memory),
+ShHostStorage::ShHostStorage(ShMemory* memory, int length, ShValueType value_type)
+  : ShStorage(memory, value_type),
     m_length(length),
     m_data(new char[length]),
     m_managed(true)
 {
 }
 
-ShHostStorage::ShHostStorage(ShMemory* memory, int length, void* data)
-  : ShStorage(memory),
+ShHostStorage::ShHostStorage(ShMemory* memory, int length, void* data, ShValueType value_type)
+  : ShStorage(memory, value_type),
     m_length(length),
     m_data(data),
     m_managed(false)
@@ -291,14 +292,14 @@ void* ShHostStorage::data()
 // --- ShHostMemory --- //
 //////////////////////////
 
-ShHostMemory::ShHostMemory(int length)
-  : m_hostStorage(new ShHostStorage(this, length))
+ShHostMemory::ShHostMemory(int length, ShValueType value_type)
+  : m_hostStorage(new ShHostStorage(this, length, value_type))
 {
   m_hostStorage->setTimestamp(0);
 }
 
-ShHostMemory::ShHostMemory(int length, void* data)
-  : m_hostStorage(new ShHostStorage(this, length, data))
+ShHostMemory::ShHostMemory(int length, void* data, ShValueType value_type)
+  : m_hostStorage(new ShHostStorage(this, length, data, value_type))
 {
   m_hostStorage->setTimestamp(0);
 }
@@ -331,7 +332,17 @@ public:
     // Check that sizes match
     if (host_from->length() != host_to->length()) return false;
 
-    std::memcpy(host_to->data(), host_from->data(), host_to->length());
+    if (host_from->value_type() == host_to->value_type()) {
+      std::memcpy(host_to->data(), host_from->data(), host_to->length());
+    } else {
+      // Do the type conversion
+      const int nb_values = host_from->length() / host_from->value_size();
+      ShVariantPtr from_variant = shVariantFactory(host_from->value_type(), SH_MEM)->
+	generate(nb_values, const_cast<void*>(host_from->data()), false);
+      ShVariantPtr to_variant = shVariantFactory(host_to->value_type(), SH_MEM)->
+	generate(nb_values, host_to->data(), false);
+      to_variant->set(from_variant);
+    }
     
     return true;
   }

@@ -99,9 +99,6 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node)
                                GL_RGBA_FLOAT32_APPLE};
 #endif
   GLenum* formats = 0;
-  bool clamped = (node->traits().clamping() == SH::ShTextureTraits::SH_CLAMPED);
-  // @todo type - assume that !clamped means unclamped for now...
-  // may have other clamping modes later on?
   
   std::string exts(reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS)));
 
@@ -132,80 +129,44 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node)
   }
 #endif
   
-  // @todo type respect CLAMPED flag 
   if (node->size() < 0 || node->size() > 4) return 0;
   // @todo type
   // handle fractional types
   // right now all available formats - double, float, signed ints, unsigned ints should
   // be stored internally as float if possible
 
-  if(clamped) {
-    switch(node->valueType()) {
-    case SH_DOUBLE:
-    case SH_FLOAT:        
-    case SH_HALF:
-    case SH_FINT:
-    case SH_FSHORT:
-    case SH_FUINT:
-    case SH_FUSHORT:
-      formats = shortformats;
-      break;
-
-    case SH_FBYTE:
-    case SH_FUBYTE:
-      formats = byteformats;
-      break;
-
-    case SH_INT: 
-    case SH_UINT:
-    case SH_SHORT: 
-    case SH_USHORT:
-    case SH_BYTE:
-    case SH_UBYTE:
-      SH_DEBUG_WARN("Using integer data type for a [0,1] clamped texture format is not advised.");
-      formats = byteformats;
-      break;
-
-    default:
-      SH_DEBUG_ERROR("Could not find appropriate clamped texture format \n"
-                     "Using default instead!");
-      return node->size();
-      break;
-    }
-  } else { // if ( clamped )
-    switch(node->valueType()) {
-    case SH_DOUBLE:
-    case SH_FLOAT:        
-    case SH_INT: 
-    case SH_UINT:
-      formats = float_formats;
-      break;
-    case SH_HALF:
-    case SH_SHORT: 
-    case SH_BYTE:
-    case SH_USHORT:
-    case SH_UBYTE:
-      formats = half_formats;
-      break;
-
-    case SH_FINT:
-    case SH_FSHORT:
-    case SH_FUINT:
-    case SH_FUSHORT:
-      formats = shortformats;
-      break;
-
-    case SH_FBYTE:
-    case SH_FUBYTE:
-      formats = byteformats;
-      break;
-    default:
-      SH_DEBUG_ERROR("Could not find appropriate unclamped texture format \n"
-		     "Using default instead!");
-      return node->size();
-      break;
-    }
-  } // if (clamped)
+  switch(node->valueType()) {
+  case SH_DOUBLE:
+  case SH_FLOAT:        
+  case SH_INT: 
+  case SH_UINT:
+    formats = float_formats;
+    break;
+  case SH_HALF:
+  case SH_SHORT: 
+  case SH_BYTE:
+  case SH_USHORT:
+  case SH_UBYTE:
+    formats = half_formats;
+    break;
+    
+  case SH_FINT:
+  case SH_FSHORT:
+  case SH_FUINT:
+  case SH_FUSHORT:
+    formats = shortformats;
+    break;
+    
+  case SH_FBYTE:
+  case SH_FUBYTE:
+    formats = byteformats;
+    break;
+  default:
+    SH_DEBUG_ERROR("Could not find appropriate texture format \n"
+		   "Using default instead!");
+    return node->size();
+    break;
+  }
   
   return formats[node->size() - 1];
 }

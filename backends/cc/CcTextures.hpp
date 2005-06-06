@@ -27,12 +27,12 @@
  * This implements 1D, 2D, and 3D texture lookup functions, 
  * clamps texture coordinates, but  
  *
- * Assume interpolation/mipmapping and clamping afterwards 
+ * Assume interpolation/mipmapping afterwards 
  *
  * src indices are assumed to be integers, even if the int 
  * allows floating point values.
  *
- * All of the parameters such as tuple-size, clamp mode, etc.
+ * All of the parameters such as tuple-size, etc.
  * will be known statically at time of code emission, so they
  * are all template parameters.
  */
@@ -65,27 +65,8 @@ struct sh_gcc_backend_wrap_repeat
   }
 };
 
-struct sh_gcc_backend_clamped
-{
-  template<typename T>
-  static inline T clamp(T dest) 
-  {
-    return dest < 0 ? 0 : (dest > 1 ? 1 : dest);
-  }
-};
-
-struct sh_gcc_backend_unclamped
-{
-  template<typename T>
-  static inline T clamp(T dest) 
-  {
-    return dest; 
-  }
-};
-
 template<int TexDims, int TexSize, int TexWidth, int TexHeight, int TexDepth, typename TexType,
-  typename SrcWrap, typename DestClamp,
-  typename IndexType, typename MemoryType> 
+  typename SrcWrap, typename IndexType, typename MemoryType> 
 void sh_cc_backend_lookupi(const void *texture, IndexType *src, MemoryType *dest)
 {
   const TexType* data = reinterpret_cast<const TexType*>(texture);
@@ -98,13 +79,12 @@ void sh_cc_backend_lookupi(const void *texture, IndexType *src, MemoryType *dest
 
   int start = index * TexSize; 
   for(int i = 0; i < TexSize; ++i) {
-    dest[i] = static_cast<MemoryType>(DestClamp::clamp(data[start + i])); 
+    dest[i] = static_cast<MemoryType>(data[start + i]); 
   }
 }
 
 template<int TexDims, int TexSize, int TexWidth, int TexHeight, int TexDepth, typename TexType,
-  typename SrcWrap, typename DestClamp,
-  typename IndexType, typename MemoryType> 
+  typename SrcWrap, typename IndexType, typename MemoryType> 
 void sh_cc_backend_lookup(const void *texture, IndexType *src, MemoryType *dest)
 {
   IndexType scaled_src[TexDims];
@@ -113,6 +93,6 @@ void sh_cc_backend_lookup(const void *texture, IndexType *src, MemoryType *dest)
   if(TexDims > 2) scaled_src[2] = TexDepth * src[2];
 
   sh_cc_backend_lookupi<TexDims, TexSize, TexWidth, TexHeight, TexDepth, TexType, 
-    SrcWrap, DestClamp>(texture, scaled_src, dest);
+    SrcWrap>(texture, scaled_src, dest);
 }
 

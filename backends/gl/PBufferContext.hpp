@@ -55,9 +55,6 @@ class PBufferContext;
 
 class PBufferStorage : public SH::ShStorage {
 public:
-  PBufferStorage(const SH::ShPointer<PBufferContext>& context,
-                 SH::ShMemory* memory);
-
   ~PBufferStorage();
 
   SH::ShPointer<PBufferContext> context() const;
@@ -80,8 +77,6 @@ public:
   const void* id() const { return m_id; }
   
   virtual PBufferHandlePtr activate() = 0;
-
-  PBufferStoragePtr make_storage(SH::ShMemory* memory) { return new PBufferStorage(this, memory); }
 
 protected:
   PBufferContext(int width, int height, void* id);

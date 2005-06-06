@@ -31,7 +31,7 @@ namespace SH {
 struct
 ShTableTraits : public ShTextureTraits {
   ShTableTraits()
-    : ShTextureTraits(1, SH_FILTER_NONE, SH_WRAP_CLAMP_TO_EDGE, SH_CLAMPED)
+    : ShTextureTraits(1, SH_FILTER_NONE, SH_WRAP_CLAMP_TO_EDGE)
   {
   }
 };

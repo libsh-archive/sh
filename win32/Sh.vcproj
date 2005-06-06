@@ -358,9 +358,6 @@
 				RelativePath="..\src\ShChannelNode.hpp">
 			</File>
 			<File
-				RelativePath="..\src\ShClamping.hpp">
-			</File>
-			<File
 				RelativePath="..\src\ShColor.hpp">
 			</File>
 			<File

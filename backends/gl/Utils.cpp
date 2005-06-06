@@ -48,7 +48,6 @@ void ChannelGatherer::operator()(const ShCtrlGraphNode* node)
 
     ShTextureNodePtr tex;
     ShTextureTraits traits = ShArrayTraits();
-    traits.clamping(ShTextureTraits::SH_UNCLAMPED);
 
     tex = new ShTextureNode(dims, channel->size(), channel->valueType(),
                             traits, 1, 1, 1, 0);
