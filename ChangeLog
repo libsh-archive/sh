@@ -1,3 +1,10 @@
+2005-06-07  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/PBufferStreams.cpp (execute): Only use an
+	intermediate stream if there are channels that are both being read
+	from and written to.  That way if users are already
+	double-buffering, no intermediate stream will be used (issue152).
+
 2005-06-06  Francois Marier  <francois@serioushack.com>
 
 	Removing ShUnclamped and adding types to ShStorage:

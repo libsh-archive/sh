@@ -33,6 +33,7 @@
 #include <fstream>
 #include <cstdlib>
 #include <list>
+#include <set>
 
 #include "sh.hpp"
 #include "ShOptimizations.hpp"
@@ -313,9 +314,27 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
   
   cache->update_channels(tex_size, tex_size);
 
+  // Check whether some channels are both being read and written to
+  bool rw_channels = false;
+  if (dest.size() > 1) {
+    std::set<ShChannelNode*> input_channels;
+    for (ShProgramNode::ChannelList::const_iterator i = program->channels_begin();
+	 i != program->channels_end(); i++) {
+      input_channels.insert(i->object());
+    }
+
+    for (ShStream::const_iterator i = dest.begin(); i != dest.end(); i++) {
+      if (input_channels.find(i->object()) != input_channels.end()) {
+	SH_DEBUG_WARN("Using an intermediate stream during execution since some of the channels are both being read from and written to.");
+	rw_channels = true;
+	break;
+      }
+    }
+  }
+
   ShStream::iterator dest_iter;
   ShStream* intermediate_stream = NULL;
-  if (dest.size() > 1) {
+  if (rw_channels) {
     // Make an intermediate stream so that updates take effect only
     // once all of the programs have been executed.
     intermediate_stream = new ShStream();
@@ -325,9 +344,10 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
       int tuplesize = node->size();
       int valuesize = shTypeInfo(node->valueType())->datasize();
       int length = count * tuplesize * valuesize;
-    
+
       ShHostMemoryPtr channel_mem = new ShHostMemory(length, node->valueType());
-      ShChannelNodePtr channel_copy = new ShChannelNode(node->specialType(), tuplesize, node->valueType(), channel_mem, count);
+      ShChannelNodePtr channel_copy = new ShChannelNode(node->specialType(), tuplesize, 
+							node->valueType(), channel_mem, count);
       intermediate_stream->append(channel_copy);
     }
     dest_iter = intermediate_stream->begin();
