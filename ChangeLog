@@ -1,3 +1,15 @@
+2005-06-08  Francois Marier  <francois@serioushack.com>
+
+	* src/ShProgramNode.cpp, ShProgramNode.hpp, ShProgram.hpp
+	(is_compiled): Add this method (issue35).
+
+	* src/ShBackend.cpp, ShBackend.hpp (derived_targets): Add this
+	method to reduce coupling between the available backends and the
+	methods that take a "target" argument.
+
+	* src/ShContext.cpp (bound_program): Make use of the new
+	derived_backends() method in ShBackend.
+
 2005-06-07  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/PBufferStreams.cpp (execute): Only use an

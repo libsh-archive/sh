@@ -442,4 +442,43 @@ void ShBackend::unbind_all_backends()
   }
 }
 
+list<string> ShBackend::derived_targets(const string& target)
+{
+  list<string> ret;
+
+  // Vertex shaders
+  if (("vertex" == target) || ("*:vertex" == target)) {
+    ret.push_back("arb:vertex");
+    ret.push_back("glsl:vertex");
+    ret.push_back("gpu:vertex");
+  } else if ("gpu:vertex" == target) {
+    ret.push_back("arb:vertex");
+    ret.push_back("glsl:vertex");
+  } 
+  // Fragment shaders
+  else if (("fragment" == target) || ("*:fragment" == target)) {
+    ret.push_back("arb:fragment");
+    ret.push_back("glsl:fragment");
+    ret.push_back("gpu:fragment");
+  } else if ("gpu:fragment" == target) {
+    ret.push_back("arb:fragment");
+    ret.push_back("glsl:fragment");
+  } 
+  // Stream programs
+  else if (("stream" == target) || ("*:stream" == target)) {
+    ret.push_back("arb:stream");
+    ret.push_back("glsl:stream");
+    ret.push_back("cc:stream");
+    ret.push_back("cpu:stream");
+    ret.push_back("gpu:stream");
+  } else if ("gpu:stream" == target) {
+    ret.push_back("arb:stream");
+    ret.push_back("glsl:stream");
+  } else if ("cpu:stream" == target) {
+    ret.push_back("cc:stream");
+  }
+
+  return ret;
+}
+
 }

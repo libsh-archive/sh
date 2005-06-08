@@ -138,6 +138,11 @@ public:
   /** Returns a backend that can run the specified target */
   static ShPointer<ShBackend> get_backend(const std::string& target);
 
+  /** Returns a list of targets derived from a generic target
+      name. e.g. "arb:vertex, glsl:vertex" is returned when the
+      generic target is "gpu:vertex". */
+  static std::list<std::string> derived_targets(const std::string& target);
+
 #ifndef WIN32
   typedef lt_dlhandle_struct* LibraryHandle;
 #else

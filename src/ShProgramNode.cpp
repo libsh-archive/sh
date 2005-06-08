@@ -72,6 +72,35 @@ void ShProgramNode::compile(const std::string& target, const ShPointer<ShBackend
   m_code[std::make_pair(target, backend)] = code;
 }
 
+bool ShProgramNode::is_compiled() const
+{
+  if (m_target.empty()) shError( ShException( "Invalid ShProgram target" ) );
+
+  return is_compiled(m_target, ShBackend::get_backend(m_target));
+}
+
+bool ShProgramNode::is_compiled(const std::string& target) const
+{
+  if (target.empty()) shError( ShException( "Invalid compilation target" ) );
+
+  return is_compiled(target, ShBackend::get_backend(target));
+}
+
+bool ShProgramNode::is_compiled(const std::string& target, const ShPointer<ShBackend>& backend) const
+{
+  // Try for a perfect match first
+  if (m_code.find(std::make_pair(target, backend)) != m_code.end()) return true;
+
+  // Look for a derived target
+  std::list<std::string> derived_targets = ShBackend::derived_targets(target);
+  for (std::list<std::string>::const_iterator i = derived_targets.begin(); 
+       i != derived_targets.end(); i++) {
+    if (m_code.find(std::make_pair(*i, backend)) != m_code.end()) return true;
+  }
+
+  return false;
+}
+
 ShPointer<ShBackendCode> ShProgramNode::code()
 {
   return code(ShBackend::get_backend(m_target));

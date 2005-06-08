@@ -92,15 +92,12 @@ ShProgramNodePtr ShContext::bound_program(const std::string& target)
 {
   // Look for an exact match first
   if (m_bound.find(target) != m_bound.end()) return m_bound[target].node();
-  
-  if (("gpu:vertex" == target) || ("*:vertex" == target) || ("vertex" == target)) {
-    if (m_bound.find("arb:vertex") != m_bound.end()) return m_bound["arb:vertex"].node();
-    if (m_bound.find("glsl:vertex") != m_bound.end()) return m_bound["glsl:vertex"].node();
-  }
 
-  if (("gpu:fragment" == target) || ("*:fragment" == target) || ("fragment" == target)) {
-    if (m_bound.find("arb:fragment") != m_bound.end()) return m_bound["arb:fragment"].node();
-    if (m_bound.find("glsl:fragment") != m_bound.end()) return m_bound["glsl:fragment"].node();
+  // Look for a derived target
+  std::list<std::string> derived_targets = ShBackend::derived_targets(target);
+  for (std::list<std::string>::const_iterator i = derived_targets.begin(); 
+       i != derived_targets.end(); i++) {
+    if (m_bound.find(*i) != m_bound.end()) return m_bound[*i].node();
   }
 
   return 0;
