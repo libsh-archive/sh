@@ -1,5 +1,9 @@
 2005-06-08  Francois Marier  <francois@serioushack.com>
 
+	* src/ShContext.cpp, ShContext.hpp (set_binding): There's no
+	reason why the ShProgram argument shouldn't be a constant
+	reference.
+
 	* src/ShProgramNode.cpp, ShProgramNode.hpp, ShProgram.hpp
 	(is_compiled): Add this method (issue35).
 

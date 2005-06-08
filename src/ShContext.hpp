@@ -64,7 +64,7 @@ public:
   BoundProgramMap::iterator end_bound();
 
   /// \internal
-  void set_binding(const std::string& unit, ShProgram program);
+  void set_binding(const std::string& unit, const ShProgram& program);
   /// \internal
   void unset_binding(const std::string& unit);
 

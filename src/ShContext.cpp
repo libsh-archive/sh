@@ -113,7 +113,7 @@ ShContext::BoundProgramMap::iterator ShContext::end_bound()
   return m_bound.end();
 }
 
-void ShContext::set_binding(const std::string& unit, const ShProgram program)
+void ShContext::set_binding(const std::string& unit, const ShProgram& program)
 {
   if (!program.node()) {
     m_bound.erase(unit);
