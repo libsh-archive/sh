@@ -119,10 +119,10 @@ insert_into4(test, math.atan)
 test.output(sys.stdout, False)
 
 # Test atan2 in stream programs
-test = shtest.StreamTest('atan2', 2)
-test.add_call(shtest.Call(shtest.Call.call, 'atan2', 2))
-insert_into5(test)
-test.output(sys.stdout, False)
+#test = shtest.StreamTest('atan2', 2)
+#test.add_call(shtest.Call(shtest.Call.call, 'atan2', 2))
+#insert_into5(test)
+#test.output(sys.stdout, False)
 
 # Test cos in immediate mode
 test = shtest.ImmediateTest('cos_im', 1)
