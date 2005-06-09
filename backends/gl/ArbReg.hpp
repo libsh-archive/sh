@@ -79,6 +79,7 @@ enum ArbRegBinding {
   SH_ARB_REG_FRAGMENTPOS,
   // Output
   SH_ARB_REG_RESULTDPT,
+  SH_ARB_REG_RESULTCOL_ATI,
 
   SH_ARB_REG_NONE
 };

@@ -93,7 +93,7 @@ ArbBindingSpecs arbVertexOutputBindingSpecs[] = {
 };
 
 ArbBindingSpecs arbFragmentOutputBindingSpecs[] = {
-  {SH_ARB_REG_RESULTCOL, 1, SH_COLOR, true},
+  {SH_ARB_REG_RESULTCOL, 1, SH_COLOR, true}, // modified by constructor if ATI_draw_buffers is present
   {SH_ARB_REG_RESULTDPT, 1, SH_ATTRIB, false},
   {SH_ARB_REG_NONE, 0, SH_ATTRIB}
 };
@@ -135,6 +135,8 @@ ArbCode::ArbCode(const ShProgramNodeCPtr& shader, const std::string& unit,
       }
       if (extstr.find("ATI_draw_buffers") != std::string::npos) {
         m_environment |= SH_ARB_ATIDB;
+	arbFragmentOutputBindingSpecs[0].binding = SH_ARB_REG_RESULTCOL_ATI;
+	arbFragmentOutputBindingSpecs[0].maxBindings = 4;
       }
     }
     if (unit == "vertex") {

@@ -74,6 +74,7 @@ static struct {
   {SH_ARB_REG_ATTRIB, "fragment.fogcoord", false},
   {SH_ARB_REG_ATTRIB, "fragment.position", false},
   {SH_ARB_REG_OUTPUT, "result.depth", false},
+  {SH_ARB_REG_OUTPUT, "result.color", true}, // Needs ATI_draw_buffers extension
 
   {SH_ARB_REG_ATTRIB, "<nil>", false},
 };

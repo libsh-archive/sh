@@ -1,3 +1,8 @@
+2005-06-09  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbCode.cpp, ArbReg.cpp, ArbReg.hpp: Add support for
+	the extra color ouputs of the ATI_draw_buffers extension.
+
 2005-06-08  Francois Marier  <francois@serioushack.com>
 
 	* src/ShContext.cpp, ShContext.hpp (set_binding): There's no
