@@ -58,7 +58,7 @@ test.clear_call()
 test.add_call(shtest.Call(shtest.Call.call, 'half2d_tex', 1))
 test.add_make_test((-880, -879, -878), [(0, 0)], ['i', 'i'])
 test.add_make_test((770, 771, 772), [(1.0, 1.0)])
-test.add_make_test((10, 11, 12), [(8/15.0, 9/15.0)])
+test.add_make_test((10, 11, 12), [(8.5/16.0, 9.5/16.0)])
 test.add_make_test((-730, -729, -728), [(-2, 2)]) # should clamp to 0,1 
 
 # repeat, but with rect lookups
@@ -67,8 +67,8 @@ test.add_texture(shtest.GenTexture("ShTextureRect<ShColor3h>",
 test.clear_call()
 test.add_call(shtest.Call(shtest.Call.lookup, 'half_rect_tex', 1))
 test.add_make_test((-880, -879, -878), [(0, 0)], ['i', 'i'])
-test.add_make_test((770, 771, 772), [(15, 15.0)])
-test.add_make_test((10, 11, 12), [(8, 9)])
+test.add_make_test((770, 771, 772), [(15.5, 15.5)])
+test.add_make_test((10, 11, 12), [(8.5, 9.5)])
 test.add_make_test((-730, -729, -728), [(-20, 20)]) # should clamp to 0,1 
 test.add_make_test((-730, -729, -728), [(-20, 20)]) # should clamp to 0,1 
 
