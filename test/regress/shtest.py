@@ -257,20 +257,25 @@ class Test:
         out.write('int main(int argc, char** argv) {\n')
         out.write('  using namespace SH;\n\n')
         out.write('  char* last_test = "none";\n\n')
-        out.write('  try {\n')
-        out.write('  int errors = 0;\n')
         out.write('  Test test(argc, argv);\n\n')
+        out.write('  int errors = 0;\n')
 
+    def start_catch(self, out):
+        out.write('    try {\n')
+
+    def end_catch(self, out):
+        out.write("""    } catch (const ShException &e) {
+      std::cout << "Caught Sh Exception in '" << last_test << "'." << std::endl << e.message() << std::endl;
+      errors++;
+    } catch (const std::exception& e) {
+      std::cerr << "Caught C++ exception in '" << last_test << "' : " << e.what() << std::endl;
+      errors++;
+    }""")
+        out.write('\n')
+        
     def output_footer(self, out):
         out.write('  if (errors !=0) return 1;\n')
-        out.write("""  } catch (const ShException &e) {
-    std::cout << "Caught Sh Exception in '" << last_test << "'." << std::endl << e.message() << std::endl;
-    return 2;
-  } catch (const std::exception& e) {
-    std::cerr << "Caught C++ exception in '" << last_test << "' : " << e.what() << std::endl;
-    return 3;
-  }
-}""")
+        out.write('}\n')
         out.write("\n")
 
 class StreamTest(Test):
@@ -287,11 +292,11 @@ class StreamTest(Test):
             types = test[2]
             src_arg_types = zip(test[1], types[1:])
             for i, call in enumerate(testcalls):
-                argkey = make_testname(src_arg_types, types, call.key(), test_nb)
-                if not programs.has_key(argkey):
-                    programs[argkey] = []
-                    progname = self.name + '_' + string.ascii_lowercase[i] + '_' + argkey
-                    programs[argkey].append(progname)
+                testname = make_testname(src_arg_types, types, call.key(), test_nb)
+                if not programs.has_key(testname):
+                    programs[testname] = []
+                    progname = self.name + '_' + string.ascii_lowercase[i] + '_' + testname
+                    programs[testname].append(progname)
                     out.write('  ShProgram ' + progname + ' = SH_BEGIN_PROGRAM("stream") {\n')
                     for j, (arg, argtype) in enumerate(src_arg_types):
                         out.write('    ' + make_variable(arg, 'SH_INPUT', argtype)
@@ -301,14 +306,16 @@ class StreamTest(Test):
                     out.write('  } SH_END;\n\n')
                     out.write('  ' + progname + '.name("' + progname + '");\n')
                     out.write('  last_test = "' + progname + '";\n')
-            for p in programs[argkey]:
-                out.write('  {\n');
+            for p in programs[testname]:
+                out.write('  {  // ' + testname + '\n')
                 out.write(init_inputs('    ', src_arg_types))
                 out.write(init_expected('    ', test[0], types[0]))
                 out.write('\n')
-                out.write('    if (test.run(' + p + ', '
+                self.start_catch(out)
+                out.write('      if (test.run(' + p + ', '
                           + variable_names(src_arg_types)
                           + ', ' + 'expected' + ') != 0) errors++;\n')
+                self.end_catch(out)
                 out.write('  }\n')
                 test_nb += 1
             out.write('\n')
@@ -329,7 +336,7 @@ class ImmediateTest(Test):
             src_arg_types = zip(test[1], types[1:])
             for i, call in enumerate(testcalls):
                 testname = make_testname(src_arg_types, types, call.key(), test_nb)
-                out.write('  { // ' + testname + '\n')
+                out.write('  {  // ' + testname + '\n')
                 out.write('    last_test = "' + testname + '";\n')
                 out.write(init_inputs('    ', src_arg_types, False))
                 out.write(init_expected('    ', test[0], types[0], False))
@@ -337,8 +344,11 @@ class ImmediateTest(Test):
                 out.write('    ' + make_variable(test[0], 'SH_TEMP', types[0], False) +  ' out;\n')
                 out.write('    ' + str(call) + ';\n')
                 out.write('\n')
-                out.write('    if (test.check("' + testname + '", out, expected' + ') != 0) errors++;\n')
-                out.write('  }\n\n')
+                self.start_catch(out)
+                out.write('      if (test.check("' + testname + '", out, expected' + ') != 0) errors++;\n')
+                self.end_catch(out)
+                out.write('\n')
+                out.write('  }\n')
             test_nb += 1
         if standalone:
             self.output_footer(out)
