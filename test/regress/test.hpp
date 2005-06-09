@@ -99,10 +99,10 @@ public:
   /// Check results and output differences
   template<typename T>
   int output_result(const std::string& name, const std::vector<std::string>& inputs,
-		    const T& out, const T& exp, int out_size)
+		    const T& out, const T& exp, int out_size, const double epsilon)
   {
     for(int i=0; i < out_size; i++) {
-      if (fabs(out[i] - exp[i]) > EPSILON) {
+      if (fabs(out[i] - exp[i]) > epsilon) {
         print_fail(name);
 	for (unsigned j=0; j < inputs.size(); j++) {
 	  char label[4] = "  A";
@@ -124,7 +124,7 @@ public:
 
   /// Run stream test on current backend (1 input parameter)
   template <class INPUT1, class OUTPUT>
-  int run(SH::ShProgram& program, const INPUT1& in1, const OUTPUT& res)
+  int run(SH::ShProgram& program, const INPUT1& in1, const OUTPUT& res, const double epsilon = EPSILON)
   {
     if (on_host()) return 0; // skip this test
 
@@ -145,13 +145,13 @@ public:
     SH::ShProgram program1 = bind_input(program, in1, inputs[0]);
     chan_out = program1;
 
-    return output_result(program.name(), inputs, _out, _res, res.size());
+    return output_result(program.name(), inputs, _out, _res, res.size(), epsilon);
   }
 
   /// Run stream test on current backend (2 input parameters)
   template <class INPUT1, class INPUT2, class OUTPUT>
   int run(SH::ShProgram& program, const INPUT1& in1, const INPUT2& in2,
-	  const OUTPUT& res)
+	  const OUTPUT& res, const double epsilon = EPSILON)
   {
     if (on_host()) return 0; // skip this test
 
@@ -173,13 +173,13 @@ public:
     SH::ShProgram program2 = bind_input(program1, in2, inputs[1]);
     chan_out = program2;
 
-    return output_result(program.name(), inputs, _out, _res, res.size());
+    return output_result(program.name(), inputs, _out, _res, res.size(), epsilon);
   }
 
   /// Run stream test on current backend (3 input parameters)
   template <class INPUT1, class INPUT2, class INPUT3, class OUTPUT>
   int run(SH::ShProgram& program, const INPUT1& in1, const INPUT2& in2,
-           const INPUT3& in3, const OUTPUT res)
+           const INPUT3& in3, const OUTPUT res, const double epsilon = EPSILON)
   {
     if (on_host()) return 0; // skip this test
 
@@ -202,12 +202,12 @@ public:
     SH::ShProgram program3 = bind_input(program2, in3, inputs[2]);
     chan_out = program3;
 
-    return output_result(program.name(), inputs, _out, _res, res.size());
+    return output_result(program.name(), inputs, _out, _res, res.size(), epsilon);
   }
 
   /// Check results from running ops on the host
   template <class OUTPUT, class EXPECTED>
-  int check(std::string name, const OUTPUT &out, const EXPECTED &res)
+  int check(std::string name, const OUTPUT &out, const EXPECTED &res, const double epsilon = EPSILON)
   {
     if (!on_host()) return 0; // skip this test
  
@@ -225,7 +225,7 @@ public:
     }
     
     std::vector<std::string> inputs(0);
-    return output_result(name, inputs, _out, _res, res.size());
+    return output_result(name, inputs, _out, _res, res.size(), epsilon);
   }
   
 private:

@@ -89,10 +89,10 @@ def init_expected(indent, arg, argtype, immediate=False):
     return out
 
 # types are a list of dest then src types ('f' used as default) 
-def make_test(expected, values, types=[]):
+def make_test(expected, values, types=[], epsilon=0):
     types = [value_type_enum.has_key(x) and value_type_enum[x] or x for x in types] 
     types = types + (len(values) + 1 - len(types)) * ['float']
-    return (expected, values, types)
+    return (expected, values, types, epsilon)
 
 def make_testname(src_arg_types, types, key, testnumber):
     name = enum_value_type[types[0]]
@@ -241,8 +241,8 @@ class Test:
         self.textures.append(texture)
 
     # add a test case to use against the current call list
-    def add_make_test(self, expected, values, types=[]):
-        self.add_test(make_test(expected, values, types))
+    def add_make_test(self, expected, values, types=[], epsilon=0):
+        self.add_test(make_test(expected, values, types, epsilon))
 
     # add a test case to use against the current call list
     def add_test(self, test):
@@ -311,11 +311,16 @@ class StreamTest(Test):
                 out.write(init_inputs('    ', src_arg_types))
                 out.write(init_expected('    ', test[0], types[0]))
                 out.write('\n')
+
                 self.start_catch(out)
+                epsilon = ''
+                if test[3] > 0:
+                    epsilon = ', ' + str(test[3])
                 out.write('      if (test.run(' + p + ', '
                           + variable_names(src_arg_types)
-                          + ', ' + 'expected' + ') != 0) errors++;\n')
+                          + ', ' + 'expected' + epsilon + ') != 0) errors++;\n')
                 self.end_catch(out)
+
                 out.write('  }\n')
                 test_nb += 1
             out.write('\n')
@@ -345,7 +350,10 @@ class ImmediateTest(Test):
                 out.write('    ' + str(call) + ';\n')
                 out.write('\n')
                 self.start_catch(out)
-                out.write('      if (test.check("' + testname + '", out, expected' + ') != 0) errors++;\n')
+                epsilon = ''
+                if test[3] > 0:
+                    epsilon = ', ' + str(test[3])
+                out.write('      if (test.check("' + testname + '", out, expected' + epsilon + ') != 0) errors++;\n')
                 self.end_catch(out)
                 out.write('\n')
                 out.write('  }\n')
