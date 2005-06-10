@@ -40,9 +40,9 @@
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\libpng;..\..\zlib"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/libshd.pdb"
+				ProgramDatabaseFile="$(OutDir)/libsh_debug.pdb"
 				SubSystem="2"
-				ImportLibrary="$(OutDir)/libshd.lib"
+				ImportLibrary="$(OutDir)/libsh_debug.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>

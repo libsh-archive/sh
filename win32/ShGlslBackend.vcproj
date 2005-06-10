@@ -35,14 +35,14 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libshd.lib opengl32.lib"
+				AdditionalDependencies="libsh_debug.lib opengl32.lib"
 				OutputFile="$(OutDir)/libshglsl_debug.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(OutDir)"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/libshglsld.pdb"
+				ProgramDatabaseFile="$(OutDir)/libshglsl_debug.pdb"
 				SubSystem="2"
-				ImportLibrary="$(OutDir)/libshglsld.lib"
+				ImportLibrary="$(OutDir)/libshglsl_debug.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>

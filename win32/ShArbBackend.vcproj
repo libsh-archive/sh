@@ -35,14 +35,14 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libshd.lib opengl32.lib"
+				AdditionalDependencies="libsh_debug.lib opengl32.lib"
 				OutputFile="$(OutDir)/libsharb_debug.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(OutDir)"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/libsharbd.pdb"
+				ProgramDatabaseFile="$(OutDir)/libsharb_debug.pdb"
 				SubSystem="2"
-				ImportLibrary="$(OutDir)/libsharbd.lib"
+				ImportLibrary="$(OutDir)/libsharb_debug.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
