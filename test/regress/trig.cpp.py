@@ -2,8 +2,8 @@
 
 import shtest, sys, math, common
 
-def func(l, op, types=[]):
-    return shtest.make_test([op(x) for x in l], [l], types)
+def func(l, op, types=[], epsilon=0):
+    return shtest.make_test([op(x) for x in l], [l], types, epsilon)
 
 def atan2_test(p, q, types=[]):
     result = [math.atan2(a, b) for (a, b) in common.upzip(p, q)]
@@ -14,8 +14,8 @@ def insert_into1(test, op):
     test.add_test(func((0.0, 1.0, 2.0, 3.0), op))
     test.add_test(func((0.3, 0.5, 0.8, 0.9), op))
     test.add_test(func((math.pi, -math.pi, 0.0), op))
-    test.add_test(func((math.pi*2.0, math.pi/2.0, 0.0), op))
-    test.add_test(func((-math.pi*2.0, -math.pi/2.0, 0.0), op))
+    test.add_test(func((math.pi*2.0, -math.pi*2.0), op, [], 0.05))
+    test.add_test(func((math.pi/2.0, -math.pi/2.0), op, [], 0.0005))
     test.add_test(func((3.0,), op))
     test.add_test(func((-0.5, -1.0, -3.0, -4.0), op))
     test.add_test(func((0.5, 1.5, 2.5), op))

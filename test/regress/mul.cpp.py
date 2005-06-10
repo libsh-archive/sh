@@ -21,13 +21,13 @@ def insert_into(test, modifying=False):
     # 1 * N
     if not modifying:
         test.add_test(mul((1.0,), (3.0, 4.0, 5.0)))
-        test.add_test(mul(0.5, (10.0, 5679.0, -0.5)))
-        test.add_test(mul(2.3, (10.0, 5679.0, -0.5)))
-        test.add_test(mul(0.0, (10.0, 5679.0, -0.5)))
+        test.add_test(mul(0.5, (10.0, 569.0, -0.5)))
+        test.add_test(mul(2.3, (10.0, 569.0, -0.5)))
+        test.add_test(mul(0.0, (10.0, 569.0, -0.5)))
 
     # N * 1
-    test.add_test(mul((10.0, 5679.0, -0.5), -0.1))
-    test.add_test(mul((10.0, 5679.0, -0.5), -1.4))
+    test.add_test(mul((10.0, 569.0, -0.5), -0.1))
+    test.add_test(mul((10.0, 569.0, -0.5), -1.4))
 
 # Test regular multiplication in stream programs
 test = shtest.StreamTest('mul', 2)

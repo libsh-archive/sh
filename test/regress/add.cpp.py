@@ -27,12 +27,12 @@ def insert_into(test, modifying=False):
     
     test.add_make_test((0, 1, 2), [(1.3, 2.97, -5.4), (-.31, -1.5, 8)], ['i', 'f', 'f'])
 
-    test.add_test(add((3, 4.2, 50.0, -5003.47), -8.2)) # N + 1
+    test.add_test(add((3, 4.2, 50.0, -503.47), -8.2)) # N + 1
 
     if not modifying:
         test.add_test(add((1.0,), (3.0, 4.0, 5.0)))
         test.add_test(add((1,), (3, 4, 5), ['s', 's', 's']))
-        test.add_test(add(1, (3, 4.2, 50.0, -5003.47))) # 1 + N
+        test.add_test(add(1, (3, 4.2, 50.0, -503.47))) # 1 + N
 
 # Test regular add in stream programs
 test = shtest.StreamTest('add', 2)

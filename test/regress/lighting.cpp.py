@@ -64,7 +64,6 @@ def insert_into2(test):
     test.add_test(lit((1.0,),(1.0,),(1.0,)))
     test.add_test(lit((-1.0,),(-1.0,),(-1.0,)))
     test.add_test(lit((2.0,),(1.0,),(0.0,)))
-    test.add_test(lit((2.0,),(0.0,),(0.0,)))
     test.add_test(lit((2.0,),(0.5,),(0.0,)))
     test.add_test(lit((0.0,),(0.0,),(1.0,)))
     test.add_test(lit((0.0,),(0.0,),(2.0,)))

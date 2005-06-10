@@ -51,8 +51,8 @@ def insert_into1(test, func):
 
     test.add_test(length_test((1.0,), func))
     test.add_test(length_test((-1.0,), func))
-    test.add_test(length_test((1000.0,), func))
-    test.add_test(length_test((-1000.0,), func))
+    test.add_test(length_test((100.0,), func))
+    test.add_test(length_test((-100.0,), func))
     test.add_test(length_test((0.5,), func))
     test.add_test(length_test((-0.5,), func))
 
@@ -78,8 +78,8 @@ def insert_into2(test, func):
 
     test.add_test(distance_test((1.0,), (1.0,), func))
     test.add_test(distance_test((-1.0,), (1.0,), func))
-    test.add_test(distance_test((1000.0,), (2.0,), func))
-    test.add_test(distance_test((-1000.0,), (2.4,), func))
+    test.add_test(distance_test((100.0,), (2.0,), func))
+    test.add_test(distance_test((-100.0,), (2.4,), func))
     test.add_test(distance_test((0.5,), (0.1,), func))
     test.add_test(distance_test((-0.5,), (0.7333,), func))
 
