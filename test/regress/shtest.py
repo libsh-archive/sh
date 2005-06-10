@@ -4,6 +4,8 @@ import string, sys
 
 from common import * 
 
+EPSILON = 0.01
+
 value_type_enum = {'d': 'double',
             'f': 'float',
             'h': 'ShHalf',
@@ -313,7 +315,7 @@ class StreamTest(Test):
                 out.write('\n')
 
                 self.start_catch(out)
-                epsilon = ''
+                epsilon = ', ' + str(EPSILON)
                 if test[3] > 0:
                     epsilon = ', ' + str(test[3])
                 out.write('      if (test.run(' + p + ', '
@@ -350,7 +352,7 @@ class ImmediateTest(Test):
                 out.write('    ' + str(call) + ';\n')
                 out.write('\n')
                 self.start_catch(out)
-                epsilon = ''
+                epsilon = ', ' + str(EPSILON)
                 if test[3] > 0:
                     epsilon = ', ' + str(test[3])
                 out.write('      if (test.check("' + testname + '", out, expected' + epsilon + ') != 0) errors++;\n')

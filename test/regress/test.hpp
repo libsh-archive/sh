@@ -28,9 +28,6 @@
 #include <iomanip>
 #include <sh.hpp>
 
-// @todo type fix epsilon checks
-#define EPSILON 1e-2
-
 #define COLOR_GREEN "[32m"
 #define COLOR_RED "[31m"
 #define COLOR_BLUE "[34m"
@@ -124,7 +121,7 @@ public:
 
   /// Run stream test on current backend (1 input parameter)
   template <class INPUT1, class OUTPUT>
-  int run(SH::ShProgram& program, const INPUT1& in1, const OUTPUT& res, const double epsilon = EPSILON)
+  int run(SH::ShProgram& program, const INPUT1& in1, const OUTPUT& res, const double epsilon)
   {
     if (on_host()) return 0; // skip this test
 
@@ -151,7 +148,7 @@ public:
   /// Run stream test on current backend (2 input parameters)
   template <class INPUT1, class INPUT2, class OUTPUT>
   int run(SH::ShProgram& program, const INPUT1& in1, const INPUT2& in2,
-	  const OUTPUT& res, const double epsilon = EPSILON)
+	  const OUTPUT& res, const double epsilon)
   {
     if (on_host()) return 0; // skip this test
 
@@ -179,7 +176,7 @@ public:
   /// Run stream test on current backend (3 input parameters)
   template <class INPUT1, class INPUT2, class INPUT3, class OUTPUT>
   int run(SH::ShProgram& program, const INPUT1& in1, const INPUT2& in2,
-           const INPUT3& in3, const OUTPUT res, const double epsilon = EPSILON)
+           const INPUT3& in3, const OUTPUT res, const double epsilon)
   {
     if (on_host()) return 0; // skip this test
 
@@ -207,7 +204,7 @@ public:
 
   /// Check results from running ops on the host
   template <class OUTPUT, class EXPECTED>
-  int check(std::string name, const OUTPUT &out, const EXPECTED &res, const double epsilon = EPSILON)
+  int check(std::string name, const OUTPUT &out, const EXPECTED &res, const double epsilon)
   {
     if (!on_host()) return 0; // skip this test
  
