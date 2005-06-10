@@ -39,7 +39,6 @@ static GlslMapping opCodeTable[] = {
   {SH_OP_ATAN,  "atan($0)"},
   //{SH_OP_ATAN2, "atan($1 / $0)"}, // FIXME
   {SH_OP_CEIL,  "ceil($0)"},
-  {SH_OP_COND,  "($0 > 0) ? $1 : $2"},
   {SH_OP_COS,   "cos($0)"},
   {SH_OP_DOT,   "dot($0, $1)"},
   {SH_OP_DIV,   "$0 / $1"},
@@ -157,6 +156,9 @@ void GlslCode::emit(const ShStatement &stmt)
     case SH_OP_CSUM:
       emit_sum(stmt);
       break;
+    case SH_OP_COND:
+      emit_cond(stmt);
+      break;
     case SH_OP_EXP:
       emit_exp(stmt, M_E);
       break;
@@ -250,6 +252,15 @@ void GlslCode::emit_cbrt(const ShStatement& stmt)
 
   ShVariable temp(allocate_constant(stmt, 1.0 / 3.0));
   append_line(resolve(stmt.dest) + " = pow(" + resolve(stmt.src[0]) + ", " + resolve(temp) + ")");
+}
+
+void GlslCode::emit_cond(const ShStatement& stmt)
+{
+  SH_DEBUG_ASSERT(SH_OP_COND == stmt.op);
+
+  append_line(resolve(stmt.dest) + " = (" + resolve(stmt.src[0]) + " > " + 
+	      resolve_constant(0, stmt.src[0]) + ") ? " + resolve(stmt.src[1]) +
+	      " : " + resolve(stmt.src[2]));
 }
 
 void GlslCode::emit_discard(const ShStatement& stmt)

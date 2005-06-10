@@ -1,3 +1,8 @@
+2005-06-10  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslEmit.cpp, GlslCode.hpp (emit_cond): Add this
+	method to properly typecast the 0 constant.
+
 2005-06-09  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/ArbCode.cpp, ArbReg.cpp, ArbReg.hpp: Add support for
