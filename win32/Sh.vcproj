@@ -174,9 +174,6 @@
 				RelativePath="..\src\ShDataType.cpp">
 			</File>
 			<File
-				RelativePath="..\src\ShDomTree.cpp">
-			</File>
-			<File
 				RelativePath="..\src\ShError.cpp">
 			</File>
 			<File
@@ -383,9 +380,6 @@
 			</File>
 			<File
 				RelativePath="..\src\ShDllExport.hpp">
-			</File>
-			<File
-				RelativePath="..\src\ShDomTree.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShError.hpp">
