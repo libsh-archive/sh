@@ -12,10 +12,16 @@ def exp_test(p, base, types=[], epsilon=0):
     return shtest.make_test(result, [p], types, epsilon)
 
 def insert_into(test, base=0):
-    test.add_test(exp_test((0.0, 1.0, 2.0, 4.0), base))
+    test.add_test(exp_test((0.0, 1.0, 2.0), base))
     test.add_test(exp_test((0.1, 0.25, 0.3, 0.5), base))
-    test.add_test(exp_test((2.3, 3.8, -2.0, -3.0), base))
-    test.add_test(exp_test((-0.5, -1.0, 2.9), base))
+    test.add_test(exp_test((-2.0, -3.0), base))
+    test.add_test(exp_test((-0.5, -1.0), base))
+    if base == 10:
+        test.add_test(exp_test((2.3, 2.9), base, [], 0.1))
+        test.add_test(exp_test((3.8, 4.0), base, [], 1))
+    else:
+        test.add_test(exp_test((2.3, 2.9), base))
+        test.add_test(exp_test((3.8, 4.0), base))
 
 # Test exp in stream programs
 test = shtest.StreamTest('exp', 1)
