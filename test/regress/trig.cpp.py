@@ -14,7 +14,7 @@ def insert_into1(test, op):
     test.add_test(func((0.0, 1.0, 2.0, 3.0), op))
     test.add_test(func((0.3, 0.5, 0.8, 0.9), op))
     test.add_test(func((math.pi, -math.pi, 0.0), op))
-    test.add_test(func((math.pi*2.0, -math.pi*2.0), op, [], 0.05))
+    test.add_test(func((math.pi*2.0, -math.pi*2.0), op, [], 0.06))
     test.add_test(func((math.pi/2.0, -math.pi/2.0), op, [], 0.0005))
     test.add_test(func((3.0,), op))
     test.add_test(func((-0.5, -1.0, -3.0, -4.0), op))
