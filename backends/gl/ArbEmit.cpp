@@ -273,16 +273,22 @@ void ArbCode::emit(const ShStatement& stmt)
   }
 }
 
-void ArbCode::emit_div(const ShStatement& stmt)
+void ArbCode::real_div(const ShVariable& dest, const ShVariable& src0,
+		       const ShVariable& src1)
 {
   // @todo type should handle other types (half-floats, fixed point)
 
-  ShVariable rcp(new ShVariableNode(SH_TEMP, stmt.src[1].size(), SH_FLOAT));
+  ShVariable rcp(new ShVariableNode(SH_TEMP, src1.size(), SH_FLOAT));
 
-  for (int i = 0; i < stmt.src[1].size(); i++) {
-    m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp(i), stmt.src[1](i)));
+  for (int i = 0; i < src1.size(); i++) {
+    m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp(i), src1(i)));
   }
-  m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0], rcp));
+  m_instructions.push_back(ArbInst(SH_ARB_MUL, dest, src0, rcp));
+}
+
+void ArbCode::emit_div(const ShStatement& stmt)
+{
+  real_div(stmt.dest, stmt.src[0], stmt.src[1]);
 }
 
 void ArbCode::emit_sqrt(const ShStatement& stmt)
@@ -474,24 +480,23 @@ void ArbCode::emit_hyperbolic(const ShStatement& stmt)
 
   ShVariable temp_cosh(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT)); // e^x + e^-x
   ShVariable temp_sinh(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT)); // e^x - e^-x
-  m_instructions.push_back(ArbInst(SH_ARB_ADD, temp_cosh, e_plusX, e_minusX)); 
-  m_instructions.push_back(ArbInst(SH_ARB_SUB, temp_sinh, e_plusX, e_minusX)); 
 
   switch (stmt.op) {
   case SH_OP_COSH:
     // cosh x = [e^x + e^-x] / 2
-    m_instructions.push_back(ArbInst(SH_ARB_DIV, stmt.dest, temp_cosh, two));
+    m_instructions.push_back(ArbInst(SH_ARB_ADD, temp_cosh, e_plusX, e_minusX)); 
+    real_div(stmt.dest, temp_cosh, two);
     break;
   case SH_OP_SINH:
     // cosh x = [e^x - e^-x] / 2
-    m_instructions.push_back(ArbInst(SH_ARB_DIV, stmt.dest, temp_sinh, two));
+    m_instructions.push_back(ArbInst(SH_ARB_SUB, temp_sinh, e_plusX, e_minusX)); 
+    real_div(stmt.dest, temp_sinh, two);
     break;
   case SH_OP_TANH:
     // tanh x = sinh x / cosh x = [e^x - e^-x] / [e^x + e^-x]
-    for (int i=0; i < temp_cosh.size(); i++) {
-      m_instructions.push_back(ArbInst(SH_ARB_RCP, temp_cosh(i), temp_cosh(i)));
-    } // (not dividing directly because of NVIDIA bug -- see emit_div)
-    m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, temp_sinh, temp_cosh));
+    m_instructions.push_back(ArbInst(SH_ARB_ADD, temp_cosh, e_plusX, e_minusX)); 
+    m_instructions.push_back(ArbInst(SH_ARB_SUB, temp_sinh, e_plusX, e_minusX)); 
+    real_div(stmt.dest, temp_sinh, temp_cosh);
     break;
   default:
     SH_DEBUG_ASSERT(0);

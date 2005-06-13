@@ -1,3 +1,14 @@
+2005-06-13  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbEmit.cpp, ArbCode.hpp (real_div): Add this method.
+
+	* backends/gl/ArbEmit.cpp (emit_div): Make use of real_div().
+	(emit_hyperbolic): Make use of real_div().
+	Remove useless instructions in COSH and SINH.
+
+	* backends/gl/GlslEmit.cpp (emit_discard): Properly cast the zero
+	constant.
+
 2005-06-10  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslEmit.cpp, GlslCode.hpp (emit_cond): Add this
