@@ -271,8 +271,8 @@ typedef ShPointer<const ShHostStorage> ShHostStorageCPtr;
 class
 SH_DLLEXPORT ShHostMemory : public ShMemory {
 public:
-  ShHostMemory(int length, ShValueType value_type = SH_FLOAT);
-  ShHostMemory(int length, void* data, ShValueType value_type = SH_FLOAT);
+  ShHostMemory(int length, ShValueType value_type);
+  ShHostMemory(int length, void* data, ShValueType value_type);
 
   ~ShHostMemory();
 

@@ -1,4 +1,10 @@
 2005-06-13  Francois Marier  <francois@serioushack.com>
+	
+	* src/ShMemory.hpp: Remove the default value of "value_type" in
+	the ShHostMemory constructors.
+
+	* examples/particle/main.cpp: Must specify the value_type when
+	creating ShHostMemory objects.
 
 	* backends/gl/ArbEmit.cpp, ArbCode.hpp (real_div): Add this method.
 

@@ -419,10 +419,10 @@ void init_streams(void)
   // be double buffering the particle system updates. The memory
   // objects will allocate the memory needed internally, only the
   // size of the memory is given (in bytes, hence the 3*sizeof(float))
-  ShHostMemoryPtr host_posA = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES);
-  ShHostMemoryPtr host_posB = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES);
-  ShHostMemoryPtr host_velA = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES);
-  ShHostMemoryPtr host_velB = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES);
+  ShHostMemoryPtr host_posA = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
+  ShHostMemoryPtr host_posB = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
+  ShHostMemoryPtr host_velA = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
+  ShHostMemoryPtr host_velB = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
 
   // Allocate the associated ShChannel objects for each of
   // the ShHostMemory objects. The type of channel will determine
