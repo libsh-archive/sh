@@ -20,7 +20,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GR /EHsc /wd4003"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\opengl\include;..\..\libpng;..\..\zlib"
+				AdditionalIncludeDirectories="..\..\opengl\include;..\..\libpng\include;..\..\zlib\include"
 				PreprocessorDefinitions="SH_DLLEXPORT=&quot;__declspec(dllexport)&quot;;WIN32;NOMINMAX;_USE_MATH_DEFINES;_DEBUG;SH_DEBUG"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -35,10 +35,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="zlibd.lib libpngd.lib"
+				AdditionalDependencies="zdll.lib libpng.lib"
 				OutputFile="$(OutDir)/libsh_debug.dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\libpng;..\..\zlib"
+				AdditionalLibraryDirectories="..\..\libpng\lib;..\..\zlib\lib"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/libsh_debug.pdb"
 				SubSystem="2"
@@ -76,7 +76,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GR /EHsc /wd4003 /O2"
-				AdditionalIncludeDirectories="..\..\opengl\include;..\..\libpng;..\..\zlib"
+				AdditionalIncludeDirectories="..\..\opengl\include;..\..\libpng\include;..\..\zlib\include"
 				PreprocessorDefinitions="SH_DLLEXPORT=&quot;__declspec(dllexport)&quot;;WIN32;NOMINMAX;_USE_MATH_DEFINES"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="TRUE"
@@ -89,10 +89,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="zlib.lib libpng.lib"
+				AdditionalDependencies="zdll.lib libpng.lib"
 				OutputFile="$(OutDir)/libsh.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\libpng;..\..\zlib"
+				AdditionalLibraryDirectories="..\..\libpng\lib;..\..\zlib\lib"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/libsh.pdb"
 				SubSystem="2"
