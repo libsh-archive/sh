@@ -1,3 +1,8 @@
+2005-06-14  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslEmit.cpp (emit_cond): Make cond() follow the
+	Glsl spec except on NVIDIA where component-wise COND is available.
+
 2005-06-13  Francois Marier  <francois@serioushack.com>
 	
 	* src/ShMemory.hpp: Remove the default value of "value_type" in

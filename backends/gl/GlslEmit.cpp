@@ -257,10 +257,22 @@ void GlslCode::emit_cbrt(const ShStatement& stmt)
 void GlslCode::emit_cond(const ShStatement& stmt)
 {
   SH_DEBUG_ASSERT(SH_OP_COND == stmt.op);
+  static string vendor((char*)glGetString(GL_VENDOR));
 
-  append_line(resolve(stmt.dest) + " = (" + resolve(stmt.src[0]) + " > " + 
-	      resolve_constant(0, stmt.src[0]) + ") ? " + resolve(stmt.src[1]) +
-	      " : " + resolve(stmt.src[2]));
+  const int size = stmt.src[0].size();
+  if (("NVIDIA Corporation" == vendor) || (1 == size)) {
+    // CG has a component-wise COND operator
+    append_line(resolve(stmt.dest) + " = (" + resolve(stmt.src[0]) + " > " + 
+		resolve_constant(0, stmt.src[0]) + ") ? " + resolve(stmt.src[1]) +
+		" : " + resolve(stmt.src[2]));
+  } else {
+    // The Glsl spec requires the first argument to COND to be a scalar
+    for (int i=0; i < size; i++) {
+      append_line(resolve(stmt.dest, i) + " = (" + resolve(stmt.src[0], i) + " > " + 
+		  resolve_constant(0, stmt.src[0], 1) + ") ? " + resolve(stmt.src[1], i) +
+		  " : " + resolve(stmt.src[2], i));
+    }
+  }
 }
 
 void GlslCode::emit_discard(const ShStatement& stmt)
@@ -391,7 +403,7 @@ void GlslCode::emit_logic(const ShStatement& stmt)
     }
   }
 
-  // TODO: cache these mappings
+  // TODO: cache these mappings?
   
   table_substitution(stmt, mapping);
 }
@@ -455,7 +467,7 @@ void GlslCode::emit_texture(const ShStatement& stmt)
     line << "Cube";
     break;
   case SH_TEXTURE_RECT:
-    line << "2DRect";
+    line << "2DRect"; // Not supported on ATI, but there is no equivalent
     break;
   }
 
