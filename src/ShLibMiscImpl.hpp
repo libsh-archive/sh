@@ -135,8 +135,11 @@ ShGeneric<N, T> sort(const ShGeneric<N, T>& a)
   return result;
 }
 
-template<int S, int N, typename T>
-void groupsort(ShGeneric<N, T> v[]) {
+template<int S, typename VarType>
+void groupsort(VarType v[]) {
+  const int N = VarType::typesize;
+  typedef VarType::storage_type T;
+
   const int NE = (N + 1) / 2; // number of even elements
   const int NO = N / 2; // number of odd elements
   const int NU = NO; // number of components to compare for (2i, 2i+1) comparisons
@@ -144,6 +147,7 @@ void groupsort(ShGeneric<N, T> v[]) {
 
   int i, j;
   // hold even/odd temps and condition code for (2i, 2i+1) "up" and (2i, 2i-1) "down" comparisons 
+
   ShAttrib<NU, SH_TEMP, T> eu, ou, ccu; 
   ShAttrib<ND, SH_TEMP, T> ed, od, ccd; 
 
@@ -153,13 +157,6 @@ void groupsort(ShGeneric<N, T> v[]) {
   for(i = 0; i < NO; ++i) oswiz[i] = NE + i;
 
   for(i = 0; i < NE; ++i) { 
-    // TODO note the interesting syntax (does appear to be C++ standard) 
-    // that's required so that the gcc parser does 
-    // not crap out on the template swiz code
-    //
-    // if this doesn't work on other platforms, we may have to
-    // rewrite the swiz function
-
     // compare 2i, 2i+1
     eu = v[0].template swiz<NU>(eswiz);
     ou = v[0].template swiz<NU>(oswiz);

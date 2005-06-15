@@ -102,8 +102,8 @@ ShGeneric<N, T> sort(const ShGeneric<N, T>& a);
   * by the components in v[0](j) 0 <= j < N.
   * Uses an even-odd transposition sort.
   */
-template<int S, int N, typename T>
-void groupsort(ShGeneric<N, T> v[]);
+template<int S, typename T>
+void groupsort(T v[]);
 
 /** Uniform freezing.
  *
