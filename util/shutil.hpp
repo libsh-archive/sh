@@ -35,6 +35,7 @@
 #include "ShKernelPost.hpp"
 #include "ShMesh.hpp"
 #include "ShObjMesh.hpp"
+#include <string>
 
 /** \namespace ShUtil
  * \brief The main ShUtil namespace.
@@ -48,6 +49,10 @@
  * You can use this to include all available extra utilities.
  */
 namespace ShUtil {
+
+/// Converts "/" to "\" on Windows and the reverse on other OSes
+std::string normalize_path(const std::string& path);
+
 }
 
 #endif

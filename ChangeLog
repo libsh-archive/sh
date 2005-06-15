@@ -1,3 +1,9 @@
+2005-06-15  Francois Marier  <francois@serioushack.com>
+
+	* util/shutil.cpp, shutil.hpp: Add the normalize_path() function
+	to convert the path separators in the pathname to "\" on Windows
+	and to "/" on UNIX.
+
 2005-06-14  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslEmit.cpp (emit_cond): Make cond() follow the

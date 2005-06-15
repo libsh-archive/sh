@@ -118,6 +118,9 @@
 			<File
 				RelativePath="..\util\ShObjMesh.cpp">
 			</File>
+			<File
+				RelativePath="..\util\shutil.cpp">
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"

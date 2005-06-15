@@ -34,7 +34,7 @@ libshutil_lib_SOURCES += ShMesh.hpp ShMeshImpl.hpp
 libshutil_lib_SOURCES += ShNoise.hpp ShNoiseImpl.hpp
 libshutil_lib_SOURCES += ShObjMesh.cpp ShObjMesh.hpp
 libshutil_lib_SOURCES += ShWorley.hpp ShWorleyImpl.hpp
-libshutil_lib_SOURCES += shutil.hpp
+libshutil_lib_SOURCES += shutil.hpp shutil.cpp
 
 libshutil_lib_CXXFILES = $(filter %.cpp,$(libshutil_lib_SOURCES))
 libshutil_lib_RELEASE_OBJECTS = $(libshutil_lib_CXXFILES:.cpp=.r.obj)
