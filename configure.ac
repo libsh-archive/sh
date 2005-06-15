@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT(Sh, 0.7.7, libsh-devel@lists.libsh.org, libsh)
+AC_INIT(Sh, 0.7.8, libsh-devel@lists.libsh.org, libsh)
 AC_CONFIG_SRCDIR([src/ShVariable.hpp])
 AM_INIT_AUTOMAKE
 
