@@ -5,6 +5,8 @@ REQUIREMENTS
  - for the ARB backend, a recent glext.h as well as GL drivers and headers
    You can obtain the latest glext.h from the SGI OpenGL Registry at
    http://oss.sgi.com/projects/ogl-sample/registry/
+ - for the ARB or GLSL backends, you need a GPU that supports shaders: at 
+   least a GeForce 5200FX or a Radeon 9600
 
 INSTALLING
 
