@@ -27,10 +27,10 @@ upload-docs:
 	cd doc ; $(MAKE) upload-docs ; cd ..
 
 dist-zip: distdir
-	zip -r $(distdir).zip $(distdir)
+	zip -rq $(distdir).zip $(distdir)
 	$(am__remove_distdir)
 
 dist dist-all: distdir
 	$(AMTAR) chof - $(distdir) | GZIP=$(GZIP_ENV) gzip -c >$(distdir).tar.gz
-	zip -r $(distdir).zip $(distdir)
+	zip -rq $(distdir).zip $(distdir)
 	$(am__remove_distdir)
