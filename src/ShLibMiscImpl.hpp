@@ -138,7 +138,7 @@ ShGeneric<N, T> sort(const ShGeneric<N, T>& a)
 template<int S, typename VarType>
 void groupsort(VarType v[]) {
   const int N = VarType::typesize;
-  typedef VarType::storage_type T;
+  typedef typename VarType::storage_type T;
 
   const int NE = (N + 1) / 2; // number of even elements
   const int NO = N / 2; // number of odd elements
