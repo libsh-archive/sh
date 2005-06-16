@@ -42,7 +42,7 @@ public:
   SH::ShBackendSetPtr generate_set(const SH::ShProgramSet& s);
   bool use_default_set() const;
 
-  void unbind_all();
+  void unbind_all_programs();
   bool use_default_unbind_all() const;
   
   GlslCodeStrategy* create(void);

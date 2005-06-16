@@ -1,3 +1,10 @@
+2005-06-16  Francois Marier  <francois@serioushack.com>
+	
+	After the 0.7.8 release:
+
+	* backends/gl/Glsl.hpp, Glsl.cpp: Rename unbind_all() to
+	unbind_all_programs().
+
 2005-06-15  Francois Marier  <francois@serioushack.com>
 
 	* util/shutil.cpp, shutil.hpp: Add the normalize_path() function

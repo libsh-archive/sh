@@ -62,7 +62,7 @@ bool GlslCodeStrategy::use_default_set() const
   return false;
 }
 
-void GlslCodeStrategy::unbind_all()
+void GlslCodeStrategy::unbind_all_programs()
 {
   if (GlslSet::current()) GlslSet::current()->unbind();
 }
