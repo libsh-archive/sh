@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -109,7 +106,7 @@
   ::SH::shWhile(SH_PUSH_ARG_QUEUE && SH_PUSH_ARG && SH_PROCESS_ARG(cond, &sh__internal_cond)); \
   bool sh__internal_firsttime = true; \
   while ((sh__internal_firsttime && (ShContext::current()->parsing() || sh__internal_cond)) \
-         || (!ShContext::current()->parsing() && ::SH::shEvaluateCondition(cond))) {{{ \
+         || (!ShContext::current()->parsing() && ::SH::shEvaluateCondition(cond))) {{{
 /** \def SH_ENDWHILE
  * Indicate the end of a while-statement.
  * @see SH_WHILE
@@ -192,6 +189,26 @@
  */
 #define SH_CONTINUE if (!ShContext::current()->parsing()) { continue; } else { ::SH::shBreak(); }
 //@}
+
+/** \def SH_BEGIN_SECTION
+ * Starts a block grouping - for affine analysis and organization of code for
+ * visual languages.
+ *
+ * @todo range This interface is really quite crappy
+ * @param name - String name of the block (this shouldn't be required... 
+ *               This is only to keep me sane when debugging 
+ */
+#define SH_BEGIN_SECTION(name) \
+  {{{{{{ \
+    if(ShContext::current()->parsing()) { \
+      ::SH::shBeginSection(); \
+      ::SH::shComment(name); \
+    }
+
+#define SH_END_SECTION \
+    if(ShContext::current()->parsing()) { ::SH::shEndSection(); } \
+  }}}}}} 
+
 
 /// @name Named Declaration macros 
 //@{
@@ -278,10 +295,54 @@ void shBindShader(ShProgram& shader);
 SH_DLLEXPORT
 void shBindShader(const std::string& target, ShProgram& shader);
 
+/// Bind a set of programs
+SH_DLLEXPORT
+void shBind(const ShProgramSet& s);
+
+/// Unbind all currently bound programs
+SH_DLLEXPORT
+void shUnbind();
+
+/// Unbind a program.
+SH_DLLEXPORT
+void shUnbind(ShProgram& prg);
+/// Unbind a program with the given target.
+SH_DLLEXPORT
+void shUnbind(const std::string& target, ShProgram& shader);
+
+/// Unbind a set of programs, if it's bound
+SH_DLLEXPORT
+void shUnbind(const ShProgramSet& s);
+
+/// Link a set of programs
+SH_DLLEXPORT
+void shLink(const ShProgramSet& s);
+
+/// Upload any textures and uniform parameters which are out-of-date
+/// but required on all compilation targets that have any programs
+/// bound
+SH_DLLEXPORT
+void shUpdate();
+
 /// Switch to a particular backend
 SH_DLLEXPORT
 bool shSetBackend(const std::string& name);
 
+/// Add a backend to the list of selected backends
+SH_DLLEXPORT
+bool shUseBackend(const std::string& name);
+
+/// Checks whether the backend is available
+SH_DLLEXPORT
+bool shHaveBackend(const std::string& name);
+
+/// Clear the list of selected backends
+SH_DLLEXPORT
+void shClearBackends();
+
+/// Find the name of the best backend that handles the given target
+SH_DLLEXPORT
+std::string shFindBackend(const std::string& target);
 
 /** \brief SH Initialization Function.
  *
@@ -328,6 +389,18 @@ void shBreak();
 /// \internal
 SH_DLLEXPORT
 void shContinue();
+
+/// \internal
+SH_DLLEXPORT
+void shBeginSection();
+/// \internal
+SH_DLLEXPORT
+void shEndSection();
+
+/// \internal
+/// Adds a comment to the immediate representation 
+SH_DLLEXPORT
+void shComment(const std::string& comment);
 
 }
 

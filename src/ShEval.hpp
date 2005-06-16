@@ -1,13 +1,38 @@
+// Sh: A GPU metaprogramming language.
+//
+// Copyright 2003-2005 Serious Hack Inc.
+// 
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+// 
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+// 
+// 1. The origin of this software must not be misrepresented; you must
+// not claim that you wrote the original software. If you use this
+// software in a product, an acknowledgment in the product documentation
+// would be appreciated but is not required.
+// 
+// 2. Altered source versions must be plainly marked as such, and must
+// not be misrepresented as being the original software.
+// 
+// 3. This notice may not be removed or altered from any source
+// distribution.
+//////////////////////////////////////////////////////////////////////////////
 #ifndef SHEVAL_HPP 
 #define SHEVAL_HPP
 
 #include <vector>
 #include <map>
+#include "ShHashMap.hpp"
+#include "ShInfo.hpp"
 #include "ShStatement.hpp"
 #include "ShVariant.hpp"
 #include "ShOperation.hpp"
 #include "ShRefCount.hpp"
-#include "ShInterval.hpp"
+#include "ShHalf.hpp"
 
 namespace SH {
 
@@ -42,7 +67,7 @@ class ShEvalOp;
 
 struct 
 SH_DLLEXPORT
-ShEvalOpInfo: public ShStatementInfo {
+ShEvalOpInfo: public ShInfo {
   ShOperation m_op;
 
   const ShEvalOp* m_evalOp;
@@ -56,7 +81,7 @@ ShEvalOpInfo: public ShStatementInfo {
   ShEvalOpInfo(ShOperation op, const ShEvalOp* evalOp, ShValueType dest, 
       ShValueType src0, ShValueType src1, ShValueType src2);
 
-  ShStatementInfo* clone() const;
+  ShInfo* clone() const;
 
   std::string encode() const;
 };
@@ -72,9 +97,13 @@ ShEval {
      *
      * TODO (should really break this out into separate functions.  EvalOps can
      * have a single function in th einterface)
-     */
+     * @{*/
     void operator()(ShOperation op, ShVariant* dest,
         const ShVariant* a, const ShVariant* b, const ShVariant* c) const;
+
+    void operator()(ShOperation op, ShVariantPtr dest,
+        ShVariantCPtr a, ShVariantCPtr b, ShVariantCPtr c) const;
+    // @}
 
     /** Registers a evalOp for a certain operation/source type index combination */ 
     void addOp(ShOperation op, const ShEvalOp* evalOp, ShValueType dest, 
@@ -84,10 +113,14 @@ ShEval {
     /** Returns a new op info representing the types that arguments
      * should be cast into for an operation.
      * Caches the result.
+     *
+     * @{
      */
     const ShEvalOpInfo* getEvalOpInfo(ShOperation op, ShValueType dest,
         ShValueType src0, ShValueType src1 = SH_VALUETYPE_END, 
         ShValueType src2 = SH_VALUETYPE_END) const;
+    const ShEvalOpInfo* getEvalOpInfo(const ShStatement &stmt) const;
+    //@}
 
     /** debugging function */ 
     std::string availableOps() const;
@@ -102,8 +135,8 @@ ShEval {
     typedef OpInfoList OpInfoMap[SH_OPERATION_END];
     OpInfoMap m_evalOpMap; 
 
-    mutable const ShEvalOpInfo* m_evalOpCache[SH_OPERATION_END][SH_VALUETYPE_END]
-                                             [SH_VALUETYPE_END][SH_VALUETYPE_END];
+    typedef ShPairPairHashMap<ShOperation, ShValueType, ShValueType, ShValueType, const ShEvalOpInfo*> EvalOpCache;
+    mutable EvalOpCache  m_evalOpCache;
 
     static ShEval* m_instance;
 };
@@ -128,7 +161,7 @@ ShEvalOp {
 //
 // 2) Functions 
 //    template<ShOperation S>
-//    static void unaryOp(ShDataVariant<V1> &dest, const ShDataVariant<V2> &src);
+//    static void unaryOp(ShDataVariant<T1> &dest, const ShDataVariant<T2> &src);
 //
 //    and similarly for binary, ternary ops 
 //    (for most ops, only T1 = T2 is supported directly,
@@ -143,7 +176,7 @@ ShEvalOp {
 /** A ShRegularOp is one where all the arguments and the destination
  * are variants of type V (data type SH_HOST).
  */
-template<ShOperation S, ShValueType V>
+template<ShOperation S, typename T>
 struct ShRegularOp: public ShEvalOp {
   void operator()(ShVariant* dest, const ShVariant* a, 
       const ShVariant* b, const ShVariant* c) const; 
@@ -156,9 +189,9 @@ struct ShRegularOp: public ShEvalOp {
 // 1) special float/double cmath functions (for C built in types)
 // 2) other special functions (sgn, rcp, rsq, etc.) that C types don't have
 // OR, use helper functions 
-template<ShOperation S, ShValueType V>
+template<ShOperation S, typename T>
 struct ShConcreteRegularOp {
-  typedef ShDataVariant<V, SH_HOST> Variant;
+  typedef ShDataVariant<T, SH_HOST> Variant;
   typedef Variant* DataPtr; 
   typedef const Variant* DataCPtr; 
 
@@ -171,67 +204,45 @@ struct ShConcreteRegularOp {
 //
 //TODO - not all the functions make sense on integer types...may
 //want to not declare the ones that don't make sense...
-template<ShOperation S, ShValueType V>
+template<ShOperation S, typename T>
 struct ShConcreteCTypeOp {
-  typedef ShDataVariant<V, SH_HOST> Variant;
+  typedef ShDataVariant<T, SH_HOST> Variant;
   typedef Variant* DataPtr; 
   typedef const Variant* DataCPtr; 
 
   static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0);
 };
 
-template<ShOperation S, ShValueType V>
+template<ShOperation S, typename T>
 struct ShRegularOpChooser {
-  typedef ShConcreteRegularOp<S, V> Op;
+  typedef ShConcreteRegularOp<S, T> Op;
 };
 
-#define SHOPC_CTYPE_OP(V)\
+#define SHOPC_CTYPE_OP(T)\
 template<ShOperation S>\
-struct ShRegularOpChooser<S, V> {\
-  typedef ShConcreteCTypeOp<S, V> Op;\
+struct ShRegularOpChooser<S, T> {\
+  typedef ShConcreteCTypeOp<S, T> Op;\
 };
 
-SHOPC_CTYPE_OP(SH_DOUBLE);
-SHOPC_CTYPE_OP(SH_FLOAT);
-SHOPC_CTYPE_OP(SH_INT);
-
-/** A ShIntervalOP is one where one argument is an interval type,
- * and the other argument must be its corresponding bound type.
- */
-template<ShOperation S, ShValueType V1, ShValueType V2>
-struct ShIntervalOp: public ShEvalOp {
-  void operator()(ShVariant* dest, const ShVariant* a, 
-      const ShVariant* b, const ShVariant* c) const; 
-};
-
-template<ShOperation S, ShValueType V1, ShValueType V2>
-struct ShConcreteIntervalOp{
-  static void doop(ShDataVariant<V1, SH_HOST> &dest, 
-      const ShDataVariant<V2, SH_HOST> &a);
-      
-};
-
+SHOPC_CTYPE_OP(double);
+SHOPC_CTYPE_OP(float);
+SHOPC_CTYPE_OP(ShHalf);
+SHOPC_CTYPE_OP(int);
 
 // initializes the regular Ops for a floating point type T
-// with ShOpEvalOp<OP, V> objects
-template<ShValueType V>
+// with ShOpEvalOp<OP, T> objects
+template<typename T>
 void _shInitFloatOps();
 
 // initializes the regular Ops for an integer type T
 // (a subset of the floating point ones)
-template<ShValueType V>
+template<typename T>
 void _shInitIntOps();
-
-template<ShValueType V, ShValueType IntervalT>
-void _shInitIntervalOps();
-
 
 }
 
 #include "ShEvalImpl.hpp"
 #include "ShConcreteRegularOpImpl.hpp"
 #include "ShConcreteCTypeOpImpl.hpp"
-#include "ShConcreteIntervalOpImpl.hpp"
-//#include "ShIntervalEvalImpl.hpp"
 
 #endif

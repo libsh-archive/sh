@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -27,6 +24,8 @@
 #include "ShProgram.hpp"
 #include "ShBackend.hpp"
 #include "ShStream.hpp"
+#include "ShRecord.hpp"
+#include "ShAlgebra.hpp"
 
 namespace SH {
 
@@ -97,6 +96,38 @@ ShProgram ShProgram::operator()(const ShStream& s0,
                                  const ShStream& s4) const
 {
   return (*this) << s0 << s1 << s2 << s3 << s4;
+}
+
+ShProgram ShProgram::operator()(const ShRecord &rec) const 
+{
+  return (*this) << rec; 
+}
+
+ShProgram ShProgram::operator()(const ShVariable &v0) const 
+{
+  return (*this) << v0; 
+}
+
+ShProgram ShProgram::operator()(const ShVariable &v0, 
+                                const ShVariable &v1) const
+{
+  return operator()(v0 & v1);
+
+}
+
+ShProgram ShProgram::operator()(const ShVariable &v0, 
+                                const ShVariable &v1, 
+                                const ShVariable &v2) const
+{
+  return operator()(v0 & v1 & v2);
+}
+
+ShProgram ShProgram::operator()(const ShVariable &v0, 
+                                const ShVariable &v1, 
+                                const ShVariable &v2, 
+                                const ShVariable &v3) const
+{
+  return operator()(v0 & v1 & v2 & v3);
 }
 
 }

@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -42,8 +39,14 @@ namespace SH {
 class
 SH_DLLEXPORT ShStream {
 public:
-  ShStream(const ShChannelNodePtr& node, int _stride = 1, int _offset = 0);
+  typedef std::list<ShChannelNodePtr> NodeList;
+  typedef NodeList::iterator iterator;
+  typedef NodeList::const_iterator const_iterator;
+
+  ShStream();
+  ShStream(const ShChannelNodePtr& node);
   
+  /*
   template<typename T>
   ShStream(const ShChannel<T>& channel, int _stride = 1, int _offset = 0);
 
@@ -53,13 +56,12 @@ public:
    * and reset.  Probably not wise in the long run.
    */
   ShStream(const ShStream &other, int _stride = 1, int _offset = 0);
+*/
 
-  typedef std::list<ShChannelNodePtr> NodeList;
-
-  NodeList::const_iterator begin() const;
-  NodeList::const_iterator end() const;
-  NodeList::iterator begin();
-  NodeList::iterator end();
+  const_iterator begin() const;
+  const_iterator end() const;
+  iterator begin();
+  iterator end();
   int size() const;
 
   template<typename T>
@@ -73,7 +75,7 @@ public:
   ShStream& operator=(const ShProgram& program);
   
 private:
-  std::list<ShChannelNodePtr> m_nodes;
+  NodeList m_nodes;
 };
 
 /** Combine two streams.

@@ -14,8 +14,7 @@ input and output of the rasterizer or to the vertex position when
 used in vertex and fragment shaders.
 """, "ShPoint")
 
-decl.declare_all()
+decl.declare_parametrization()
 
 common.endnamespace()
-common.inprint('#include "ShPositionImpl.hpp"')
 common.endguard("SHPOSITION_HPP")

@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -70,28 +67,15 @@ public:
   // If keepUniform is set to false, then the new variable  
   // has m_uniform set to false even if the original m_uniform was true. 
   //
-  // @todo Currently this does not work if the newKind is SH_CONST
-  // and old kind was not CONST/uniform since the old one won't have 
-  // a ShVariant node to clone...
-  // To fix this, VariableNode should hold the type_index of its data
-  // as well, so that it can generate new variants on demand.
-  //
-  // @todo clean this up...eventually we will need dozens of these functions...
+  // Arguments that are set to their default values means use the same
+  // as the old node.
   // @{
-  ShVariableNodePtr clone(ShBindingType newKind, 
-      bool updateVarList = true, bool keepUniform = true) const;
-
-  ShVariableNodePtr clone(ShBindingType newKind, ShSemanticType newType, 
-      bool updateVarList = true, bool keepUniform = true) const;
-
-  ShVariableNodePtr clone(ShBindingType newKind, ShSemanticType newType, 
-      int newSize, bool updateVarList = true, bool keepUniform = true) const;
-
-  ShVariableNodePtr clone(ShValueType newValueType, 
-      bool updateVarList = true, bool keepUniform = true) const;
-
-  ShVariableNodePtr clone(ShBindingType newKind, int newSize, ShValueType newValueType, 
-      bool updateVarList = true, bool keepUniform = true) const;
+  ShVariableNodePtr clone(ShBindingType newKind = SH_BINDINGTYPE_END, 
+      int newSize = 0, 
+      ShValueType newValueType = SH_VALUETYPE_END,
+      ShSemanticType newType = SH_SEMANTICTYPE_END,
+      bool updateVarList = true, 
+      bool keepUniform = true) const;
   // @}
 
   bool uniform() const; ///< Is this a uniform (non-shader specific) variable?
@@ -111,6 +95,9 @@ public:
   std::string name() const; ///< Get this variable's name
   void name(const std::string& n); ///< Set this variable's name
 
+  /// Whether this variable has ranges set
+  bool hasRange();
+ 
   /// Set a range of possible values for this variable's elements
   // low and high must be scalar elements (otherwise this just uses the first component)
   void rangeVariant(const ShVariant* low, const ShVariant* high);
@@ -198,7 +185,7 @@ protected:
   // When maintainUniform is true, the old.m_uniform is used instead
   // of setting up the value based on current ShContext state
   ShVariableNode(const ShVariableNode& old, ShBindingType newKind, 
-      ShSemanticType newType, int newSize, ShValueType newValueType, 
+      int newSize, ShValueType newValueType, ShSemanticType newType, 
       bool updateVarList, bool keepUniform);
 
   // Generates default low bound based on current special type
@@ -209,6 +196,14 @@ protected:
 
 
   void programVarListInit(); /// After kind, size and type are set, this 
+
+  /** Adds this to the declared temps set. 
+   * If current parsing program has cfg node (i.e. this is a transformation,
+   * not a new program specification), then adds to programs entry node.
+   * Else adds an SH_OP_DECL as a dummy statement into current parsing block.
+   */
+  void programDeclInit(); 
+                          
 
   void add_dependent(ShVariableNode* dep);
   void remove_dependent(ShVariableNode* dep);

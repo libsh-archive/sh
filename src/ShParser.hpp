@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -29,6 +26,7 @@
 
 #include "ShDllExport.hpp"
 #include "ShCtrlGraph.hpp"
+#include "ShToken.hpp"
 
 namespace SH {
 
@@ -46,6 +44,9 @@ public:
                     ShBlockListPtr blocks);
   
 private:
+  static void parseBlock(ShCtrlGraphNodePtr& head, 
+                         ShCtrlGraphNodePtr& tail,
+                         ShBasicBlockPtr block);
   static void parseStmts(ShCtrlGraphNodePtr& head,
                          ShCtrlGraphNodePtr& tail,
                          ShBlockListPtr blocks);
@@ -61,6 +62,16 @@ private:
   static void parseDo(ShCtrlGraphNodePtr& head,
                       ShCtrlGraphNodePtr& tail,
                       ShBlockListPtr blocks);
+  static void parseSection(ShCtrlGraphNodePtr& head,
+                           ShCtrlGraphNodePtr& tail,
+                           ShBlockListPtr blocks);
+
+  /* Just pops a token */
+  static ShTokenPtr popToken(ShBlockListPtr blocks);
+
+  /* Checks if front of block list matches expected, pops, and returns */
+  static ShTokenPtr popToken(ShBlockListPtr blocks, ShTokenType expectedType, unsigned int expectedArgs=0);
+
 
   // NOT IMPLEMENTED
   ShParser();

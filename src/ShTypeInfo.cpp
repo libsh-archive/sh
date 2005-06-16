@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -26,7 +23,6 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "ShTypeInfo.hpp"
 #include "ShContext.hpp"
-#include "ShInterval.hpp"
 #include "ShEval.hpp"
 #include "ShCastManager.hpp"
 #include "ShVariantCast.hpp"
@@ -35,40 +31,41 @@ namespace {
 using namespace SH;
 
 // sets up m_valueType entries for host & memory type for the given value type
-template<ShValueType V>
-void setTypeInfo(const ShTypeInfo* valueTypes[SH_VALUETYPE_END][SH_DATATYPE_END]) {
-  valueTypes[V][SH_HOST] = ShDataTypeInfo<V, SH_HOST>::instance();
-  valueTypes[V][SH_MEM] = ShDataTypeInfo<V, SH_MEM>::instance();
+template<typename T>
+void setTypeInfo(ShTypeInfo::TypeInfoMap &valueTypes) {
+  ShValueType V = ShStorageTypeInfo<T>::value_type;
+  valueTypes(V, SH_HOST) = ShDataTypeInfo<T, SH_HOST>::instance();
+  valueTypes(V, SH_MEM) = ShDataTypeInfo<T, SH_MEM>::instance();
 }
 
 }
 
 namespace SH {
 
-const ShTypeInfo* ShTypeInfo::m_valueTypes[SH_VALUETYPE_END][SH_DATATYPE_END];
+ShTypeInfo::TypeInfoMap* ShTypeInfo::m_valueTypes;
 
 void ShTypeInfo::init()
 {
-  setTypeInfo<SH_INTERVAL_DOUBLE>(m_valueTypes);
-  setTypeInfo<SH_INTERVAL_FLOAT>(m_valueTypes);
+  if(m_valueTypes) return;
+  m_valueTypes = new TypeInfoMap();
 
-  setTypeInfo<SH_DOUBLE>(m_valueTypes);
-  setTypeInfo<SH_FLOAT>(m_valueTypes);
-  setTypeInfo<SH_HALF>(m_valueTypes);
+  setTypeInfo<double>(*m_valueTypes);
+  setTypeInfo<float>(*m_valueTypes);
+  setTypeInfo<ShHalf>(*m_valueTypes);
 
-  setTypeInfo<SH_INT>(m_valueTypes);
-  setTypeInfo<SH_SHORT>(m_valueTypes);
-  setTypeInfo<SH_BYTE>(m_valueTypes);
-  setTypeInfo<SH_UINT>(m_valueTypes);
-  setTypeInfo<SH_USHORT>(m_valueTypes);
-  setTypeInfo<SH_UBYTE>(m_valueTypes);
+  setTypeInfo<int>(*m_valueTypes);
+  setTypeInfo<short>(*m_valueTypes);
+  setTypeInfo<char>(*m_valueTypes);
+  setTypeInfo<unsigned int>(*m_valueTypes);
+  setTypeInfo<unsigned short>(*m_valueTypes);
+  setTypeInfo<unsigned char>(*m_valueTypes);
 
-  setTypeInfo<SH_FRAC_INT>(m_valueTypes);
-  setTypeInfo<SH_FRAC_SHORT>(m_valueTypes);
-  setTypeInfo<SH_FRAC_BYTE>(m_valueTypes);
-  setTypeInfo<SH_FRAC_UINT>(m_valueTypes);
-  setTypeInfo<SH_FRAC_USHORT>(m_valueTypes);
-  setTypeInfo<SH_FRAC_UBYTE>(m_valueTypes);
+  setTypeInfo<ShFracInt> (*m_valueTypes);
+  setTypeInfo<ShFracShort> (*m_valueTypes);
+  setTypeInfo<ShFracByte> (*m_valueTypes);
+  setTypeInfo<ShFracUInt> (*m_valueTypes);
+  setTypeInfo<ShFracUShort> (*m_valueTypes);
+  setTypeInfo<ShFracUByte> (*m_valueTypes);
 
   addOps();
 
@@ -79,12 +76,10 @@ void ShTypeInfo::init()
 
 const ShTypeInfo* ShTypeInfo::get(ShValueType valueType, ShDataType dataType)
 {
-  return m_valueTypes[valueType][dataType];
-}
-
-int shNumTypes()
-{
-  return (int)(SH_VALUETYPE_END); 
+  init();
+  const ShTypeInfo* result = (*m_valueTypes)(valueType, dataType);
+  if(!result) SH_DEBUG_PRINT("Null ShTypeInfo");
+  return result;
 }
 
 const ShTypeInfo* shTypeInfo(ShValueType valueType, ShDataType dataType)
@@ -95,6 +90,13 @@ const ShTypeInfo* shTypeInfo(ShValueType valueType, ShDataType dataType)
 const ShVariantFactory* shVariantFactory(ShValueType valueType, ShDataType dataType)
 {
   return shTypeInfo(valueType, dataType)->variantFactory();  
+}
+
+const char* shValueTypeName(ShValueType valueType)
+{
+  const ShTypeInfo* typeInfo = shTypeInfo(valueType, SH_HOST);
+  if(!typeInfo) return ShStorageTypeInfo<ShInvalidStorageType>::name; 
+  return typeInfo->name();
 }
 
 }

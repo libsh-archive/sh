@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -27,6 +24,8 @@
 #include <iostream>
 
 #include "ShVariable.hpp"
+#include "ShDebug.hpp"
+#include "ShRecord.hpp"
 #include "ShProgram.hpp"
 
 namespace SH {
@@ -51,7 +50,14 @@ ShVariable::ShVariable(const ShVariableNodePtr& node,
 {
 }
 
-ShVariable& ShVariable::operator=(const ShProgram& prgc)
+ShVariable& ShVariable::operator=(const ShProgram &prg) {
+  // @todo range
+  ShRecord rec(*this); 
+  rec = prg;
+  return *this;
+}
+
+void ShVariable::attach(const ShProgram& prgc)
 {
   ShProgram prg(prgc);
   if (prg.node()->finished()) {
@@ -59,7 +65,6 @@ ShVariable& ShVariable::operator=(const ShProgram& prgc)
   } else {
     prg.node()->assign(m_node);
   }
-  return *this;
 }
 
 bool ShVariable::null() const
@@ -148,7 +153,7 @@ bool ShVariable::loadVariant(ShVariant *&result) const
   return true;
 }
 
-void ShVariable::updateVariant()
+void ShVariable::updateVariant() 
 {
   m_node->update_all();
 }
@@ -163,12 +168,12 @@ void ShVariable::setVariant(ShVariantCPtr other, bool neg, const ShSwizzle &writ
   setVariant(other.object(), neg, writemask); 
 }
 
-void ShVariable::setVariant(const ShVariant* other, int index) 
+void ShVariable::setVariant(const ShVariant* other, int index)
 {
   m_node->setVariant(other, m_neg, m_swizzle * ShSwizzle(size(), index));
 }
 
-void ShVariable::setVariant(ShVariantCPtr other, int index) 
+void ShVariable::setVariant(ShVariantCPtr other, int index)
 {
   setVariant(other.object(), index); 
 }
@@ -213,6 +218,11 @@ ShVariable ShVariable::operator()(int n, int indices[]) const
   return ShVariable(m_node, m_swizzle * ShSwizzle(size(), n, indices), m_neg);
 }
 
+ShVariable ShVariable::operator()(const ShSwizzle &swizzle) const
+{
+  return ShVariable(m_node, m_swizzle * swizzle, m_neg);
+}
+
 std::ostream& operator<<(std::ostream& out, const ShVariable& v)
 {
   if (!v.m_node){
@@ -224,9 +234,13 @@ std::ostream& operator<<(std::ostream& out, const ShVariable& v)
     return out;
   }
 
-  out << '[';
-  out << v.getVariant()->encode();
-  out<<']';
+  if(v.size() > 1) {
+    out << '[';
+  }
+  out << v.getVariant()->encodeArray();
+  if(v.size() > 1) {
+    out<<']';
+  }
   return out;
 }
 

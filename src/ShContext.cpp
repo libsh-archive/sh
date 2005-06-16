@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -86,6 +83,26 @@ bool ShContext::optimization_disabled(const std::string& name) const
   return m_disabled_optimizations.find(name) != m_disabled_optimizations.end();
 }
 
+bool ShContext::is_bound(const std::string& target)
+{
+  return bound_program(target);
+}
+
+ShProgramNodePtr ShContext::bound_program(const std::string& target)
+{
+  // Look for an exact match first
+  if (m_bound.find(target) != m_bound.end()) return m_bound[target].node();
+
+  // Look for a derived target
+  std::list<std::string> derived_targets = ShBackend::derived_targets(target);
+  for (std::list<std::string>::const_iterator i = derived_targets.begin(); 
+       i != derived_targets.end(); i++) {
+    if (m_bound.find(*i) != m_bound.end()) return m_bound[*i].node();
+  }
+
+  return 0;
+}
+
 ShContext::BoundProgramMap::iterator ShContext::begin_bound()
 {
   return m_bound.begin();
@@ -96,13 +113,18 @@ ShContext::BoundProgramMap::iterator ShContext::end_bound()
   return m_bound.end();
 }
 
-void ShContext::set_binding(const std::string& unit, const ShProgram program)
+void ShContext::set_binding(const std::string& unit, const ShProgram& program)
 {
   if (!program.node()) {
     m_bound.erase(unit);
   } else {
     m_bound[unit] = program;
   }
+}
+
+void ShContext::unset_binding(const std::string& unit)
+{
+  m_bound.erase(unit);
 }
 
 ShProgramNodePtr ShContext::parsing()
@@ -120,6 +142,16 @@ void ShContext::exit()
 {
   SH_DEBUG_ASSERT(!m_parsing.empty());
   m_parsing.pop();
+}
+
+bool shIsBound(const std::string& target)
+{
+  return ShContext::current()->is_bound(target);
+}
+
+ShProgramNodePtr shBound(const std::string& target)
+{
+  return ShContext::current()->bound_program(target);
 }
 
 ShBoundIterator shBeginBound()

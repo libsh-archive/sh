@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -27,14 +24,14 @@
 #ifndef SHLIBCOLOR_HPP
 #define SHLIBCOLOR_HPP
 
-#include "ShColor.hpp"
+#include "ShAttrib.hpp"
 #include "ShLib.hpp"
 
 namespace SH {
-SH_SHLIB_USUAL_OPERATIONS(ShColor);
-SH_SHLIB_USUAL_SUBTRACT(ShColor);
+SH_SHLIB_USUAL_OPERATIONS(SH_COLOR);
+SH_SHLIB_USUAL_SUBTRACT(SH_COLOR);
 
-SH_SHLIB_LEFT_MATRIX_OPERATION(ShColor, operator|, M);
+SH_SHLIB_LEFT_MATRIX_OPERATION(SH_COLOR, operator|, M);
 
 }
 

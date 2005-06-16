@@ -20,7 +20,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GR /EHsc /wd4003"
 				Optimization="0"
-				AdditionalIncludeDirectories="\dev\opengl\include;\dev\libpng;\dev\zlib"
+				AdditionalIncludeDirectories="..\..\opengl\include;..\..\libpng\include;..\..\zlib\include"
 				PreprocessorDefinitions="SH_DLLEXPORT=&quot;__declspec(dllexport)&quot;;WIN32;NOMINMAX;_USE_MATH_DEFINES;_DEBUG;SH_DEBUG"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -35,14 +35,14 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="zlibd.lib libpngd.lib"
-				OutputFile="$(OutDir)/libshd.dll"
+				AdditionalDependencies="zlib.lib libpng.lib"
+				OutputFile="$(OutDir)/libsh_debug.dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="\dev\libpng;\dev\zlib"
+				AdditionalLibraryDirectories="..\..\libpng\lib;..\..\zlib\lib"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/libshd.pdb"
+				ProgramDatabaseFile="$(OutDir)/libsh_debug.pdb"
 				SubSystem="2"
-				ImportLibrary="$(OutDir)/libshd.lib"
+				ImportLibrary="$(OutDir)/libsh_debug.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -75,8 +75,8 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/GR /EHsc /wd4003"
-				AdditionalIncludeDirectories="\dev\opengl\include;\dev\libpng;\dev\zlib"
+				AdditionalOptions="/GR /EHsc /wd4003 /O2"
+				AdditionalIncludeDirectories="..\..\opengl\include;..\..\libpng\include;..\..\zlib\include"
 				PreprocessorDefinitions="SH_DLLEXPORT=&quot;__declspec(dllexport)&quot;;WIN32;NOMINMAX;_USE_MATH_DEFINES"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="TRUE"
@@ -92,7 +92,7 @@
 				AdditionalDependencies="zlib.lib libpng.lib"
 				OutputFile="$(OutDir)/libsh.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="\dev\libpng;\dev\zlib"
+				AdditionalLibraryDirectories="..\..\libpng\lib;..\..\zlib\lib"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/libsh.pdb"
 				SubSystem="2"
@@ -130,8 +130,7 @@
 	<Files>
 		<Filter
 			Name="Source Files"
-			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
+			Filter="">
 			<File
 				RelativePath="..\src\ShAlgebra.cpp">
 			</File>
@@ -154,6 +153,9 @@
 				RelativePath="..\src\ShCastManager.cpp">
 			</File>
 			<File
+				RelativePath="..\src\ShCfgBlock.cpp">
+			</File>
+			<File
 				RelativePath="..\src\ShChannelNode.cpp">
 			</File>
 			<File
@@ -170,12 +172,6 @@
 			</File>
 			<File
 				RelativePath="..\src\ShDataType.cpp">
-			</File>
-			<File
-				RelativePath="..\src\ShDomTree.cpp">
-			</File>
-			<File
-				RelativePath="..\src\ShEnvironment.cpp">
 			</File>
 			<File
 				RelativePath="..\src\ShError.cpp">
@@ -199,13 +195,13 @@
 				RelativePath="..\src\ShImage3D.cpp">
 			</File>
 			<File
+				RelativePath="..\src\ShInfo.cpp">
+			</File>
+			<File
 				RelativePath="..\src\ShInstructions.cpp">
 			</File>
 			<File
 				RelativePath="..\src\ShInternals.cpp">
-			</File>
-			<File
-				RelativePath="..\src\ShIntervalConverter.cpp">
 			</File>
 			<File
 				RelativePath="..\src\ShLinearAllocator.cpp">
@@ -241,7 +237,16 @@
 				RelativePath="..\src\ShProgramNode.cpp">
 			</File>
 			<File
+				RelativePath="..\src\ShProgramSet.cpp">
+			</File>
+			<File
+				RelativePath="..\src\ShRecord.cpp">
+			</File>
+			<File
 				RelativePath="..\src\ShStatement.cpp">
+			</File>
+			<File
+				RelativePath="..\src\ShStorageType.cpp">
 			</File>
 			<File
 				RelativePath="..\src\ShStream.cpp">
@@ -300,8 +305,7 @@
 		</Filter>
 		<Filter
 			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			Filter="">
 			<File
 				RelativePath="..\src\sh.hpp">
 			</File>
@@ -339,6 +343,9 @@
 				RelativePath="..\src\ShCastManager.hpp">
 			</File>
 			<File
+				RelativePath="..\src\ShCfgBlock.hpp">
+			</File>
+			<File
 				RelativePath="..\src\ShChannel.hpp">
 			</File>
 			<File
@@ -348,19 +355,10 @@
 				RelativePath="..\src\ShChannelNode.hpp">
 			</File>
 			<File
-				RelativePath="..\src\ShClamping.hpp">
-			</File>
-			<File
 				RelativePath="..\src\ShColor.hpp">
 			</File>
 			<File
-				RelativePath="..\src\ShColorImpl.hpp">
-			</File>
-			<File
 				RelativePath="..\src\ShConcreteCTypeOpImpl.hpp">
-			</File>
-			<File
-				RelativePath="..\src\ShConcreteIntervalOpImpl.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShConcreteRegularOpImpl.hpp">
@@ -384,12 +382,6 @@
 				RelativePath="..\src\ShDllExport.hpp">
 			</File>
 			<File
-				RelativePath="..\src\ShDomTree.hpp">
-			</File>
-			<File
-				RelativePath="..\src\ShEnvironment.hpp">
-			</File>
-			<File
 				RelativePath="..\src\ShError.hpp">
 			</File>
 			<File
@@ -408,6 +400,12 @@
 				RelativePath="..\src\ShFixedManipulator.hpp">
 			</File>
 			<File
+				RelativePath="..\src\ShFraction.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShFractionImpl.hpp">
+			</File>
+			<File
 				RelativePath="..\src\ShGeneric.hpp">
 			</File>
 			<File
@@ -420,10 +418,25 @@
 				RelativePath="..\src\ShGraphImpl.hpp">
 			</File>
 			<File
+				RelativePath="..\src\ShHalf.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShHalfImpl.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShHashMap.hpp">
+			</File>
+			<File
 				RelativePath="..\src\ShImage.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShImage3D.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShInfo.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShInfoImpl.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShInstructions.hpp">
@@ -433,12 +446,6 @@
 			</File>
 			<File
 				RelativePath="..\src\ShInterp.hpp">
-			</File>
-			<File
-				RelativePath="..\src\ShInterval.hpp">
-			</File>
-			<File
-				RelativePath="..\src\ShIntervalImpl.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShLib.hpp">
@@ -480,12 +487,6 @@
 				RelativePath="..\src\ShLibGeometryImpl.hpp">
 			</File>
 			<File
-				RelativePath="..\src\ShLibInterval.hpp">
-			</File>
-			<File
-				RelativePath="..\src\ShLibIntervalImpl.hpp">
-			</File>
-			<File
 				RelativePath="..\src\ShLibMatrix.hpp">
 			</File>
 			<File
@@ -499,6 +500,9 @@
 			</File>
 			<File
 				RelativePath="..\src\ShLibNormal.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShLibPlane.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShLibPoint.hpp">
@@ -561,9 +565,6 @@
 				RelativePath="..\src\ShNormal.hpp">
 			</File>
 			<File
-				RelativePath="..\src\ShNormalImpl.hpp">
-			</File>
-			<File
 				RelativePath="..\src\ShOperation.hpp">
 			</File>
 			<File
@@ -582,10 +583,10 @@
 				RelativePath="..\src\ShParser.hpp">
 			</File>
 			<File
-				RelativePath="..\src\ShPoint.hpp">
+				RelativePath="..\src\ShPlane.hpp">
 			</File>
 			<File
-				RelativePath="..\src\ShPointImpl.hpp">
+				RelativePath="..\src\ShPoint.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShPool.hpp">
@@ -594,19 +595,22 @@
 				RelativePath="..\src\ShPosition.hpp">
 			</File>
 			<File
-				RelativePath="..\src\ShPositionImpl.hpp">
-			</File>
-			<File
 				RelativePath="..\src\ShProgram.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShProgramNode.hpp">
 			</File>
 			<File
+				RelativePath="..\src\ShProgramSet.hpp">
+			</File>
+			<File
 				RelativePath="..\src\ShQuaternion.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShQuaternionImpl.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShRecord.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShRefCount.hpp">
@@ -616,6 +620,12 @@
 			</File>
 			<File
 				RelativePath="..\src\ShStatement.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShStorageType.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShStorageTypeImpl.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShStream.hpp">
@@ -640,9 +650,6 @@
 			</File>
 			<File
 				RelativePath="..\src\ShTexCoord.hpp">
-			</File>
-			<File
-				RelativePath="..\src\ShTexCoordImpl.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShTexture.hpp">
@@ -697,9 +704,6 @@
 			</File>
 			<File
 				RelativePath="..\src\ShVector.hpp">
-			</File>
-			<File
-				RelativePath="..\src\ShVectorImpl.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShWrap.hpp">

@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -111,8 +108,8 @@ ShProgram access(const ShBaseTextureCube<T> &tex, const std::string & tcname, co
   return nibble;
 }
 
-template<typename T, int Rows, int Cols, ShBindingType Binding, ShValueType V>
-ShProgram transform(const ShMatrix<Rows, Cols, Binding, V> &m, const std::string & name) {
+template<typename T, int Rows, int Cols, ShBindingType Binding, typename T2>
+ShProgram transform(const ShMatrix<Rows, Cols, Binding, T2> &m, const std::string & name) {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T::InOutType SH_NAMEDECL(attrib, name) = m | attrib;
   } SH_END;

@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -39,147 +36,179 @@ namespace SH {
  * @{
  */
 
+/** Matrix addition.
+ * Only works on matrices of same sizes.
+ */
+template<int M, int N, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
+ShMatrix<N, M, SH_TEMP, CT1T2>
+operator+(const ShMatrix<N, M, Binding, T1>& a, const ShMatrix<N, M, Binding2, T2>& b);
+
+/** Matrix subtraction.
+ * Only works on matrices of same sizes.
+ */
+template<int M, int N, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
+ShMatrix<N, M, SH_TEMP, CT1T2>
+operator-(const ShMatrix<N, M, Binding, T1>& a, const ShMatrix<N, M, Binding2, T2>& b);
+
+/** Matrix division.
+ * Only works on matrices of same sizes.
+ */
+template<int M, int N, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
+ShMatrix<N, M, SH_TEMP, CT1T2>
+operator/(const ShMatrix<N, M, Binding, T1>& a, const ShMatrix<N, M, Binding2, T2>& b);
+
 /** Matrix multiplication.
  * Only works on matrices of compatible sizes.
  */
 template<int M, int N, int P, ShBindingType Binding, ShBindingType Binding2, 
-  ShValueType V1, ShValueType V2>
-ShMatrix<M, P, SH_TEMP, CV1V2>
-operator|(const ShMatrix<M, N, Binding, V1>& a,
-          const ShMatrix<N, P, Binding2, V2>& b);
-template<int M, int N, int P, ShBindingType Binding, ShBindingType Binding2, ShValueType V1, ShValueType V2>
-ShMatrix<M, P, SH_TEMP, CV1V2>
-operator*(const ShMatrix<M, N, Binding, V1>& a,
-          const ShMatrix<N, P, Binding2, V2>& b);
+  typename T1, typename T2>
+ShMatrix<M, P, SH_TEMP, CT1T2>
+operator|(const ShMatrix<M, N, Binding, T1>& a,
+          const ShMatrix<N, P, Binding2, T2>& b);
+template<int M, int N, int P, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
+ShMatrix<M, P, SH_TEMP, CT1T2>
+operator*(const ShMatrix<M, N, Binding, T1>& a,
+          const ShMatrix<N, P, Binding2, T2>& b);
 
 /** Matrix-tuple multiplication.
  * Treats the tuple as a column vector.
  */
-template<int M, int N, ShBindingType Binding, ShValueType V1, ShValueType V2>
-ShGeneric<M, CV1V2> 
-operator|(const ShMatrix<M, N, Binding, V1>& a, const ShGeneric<N, V2>& b);
-template<int M, int N, ShBindingType Binding, ShValueType V1, ShValueType V2>
-ShGeneric<M, CV1V2> operator*(const ShMatrix<M, N, Binding, V1>& a, const ShGeneric<N, V2>& b);
+template<int M, int N, ShBindingType Binding, typename T1, typename T2>
+ShGeneric<M, CT1T2> operator|(const ShMatrix<M, N, Binding, T1>& a, const ShGeneric<N, T2>& b);
+template<int M, int N, ShBindingType Binding, typename T1, typename T2>
+ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding, T1>& a, const ShGeneric<N, T2>& b);
 
 /** Tuple-matrix multiplication.
  * Treats the tuple as a row vector.
  */
-template<int M, int N, ShBindingType Binding, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator|(const ShGeneric<M, V1>& a, const ShMatrix<M, N, Binding, V2>& b);
-template<int M, int N, ShBindingType Binding, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator*(const ShGeneric<M, V1>& a, const ShMatrix<M, N, Binding, V2>& b);
+template<int M, int N, ShBindingType Binding, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator|(const ShGeneric<M, T1>& a, const ShMatrix<M, N, Binding, T2>& b);
+template<int M, int N, ShBindingType Binding, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator*(const ShGeneric<M, T1>& a, const ShMatrix<M, N, Binding, T2>& b);
 
 /// Matrix-scalar multiplication
-template<int M, int N, ShBindingType Binding, ShValueType V1, ShValueType V2>
-ShMatrix<M, N, SH_TEMP, CV1V2>
-operator*(const ShMatrix<M, N, Binding, V1>& a, const ShGeneric<1, V2>& b);
-template<int M, ShBindingType Binding, ShValueType V1, ShValueType V2>
-ShMatrix<M, 1, SH_TEMP, CV1V2>
-operator*(const ShMatrix<M, 1, Binding, V1>& a, const ShGeneric<1, V2>& b);
+template<int M, int N, ShBindingType Binding, typename T1, typename T2>
+ShMatrix<M, N, SH_TEMP, CT1T2>
+operator*(const ShMatrix<M, N, Binding, T1>& a, const ShGeneric<1, T2>& b);
+
+template<int M, ShBindingType Binding, typename T1, typename T2>
+ShMatrix<M, 1, SH_TEMP, CT1T2>
+operator*(const ShMatrix<M, 1, Binding, T1>& a, const ShGeneric<1, T2>& b);
+
 /// Scalar-matrix multiplication
-template<int M, int N, ShBindingType Binding, ShValueType V1, ShValueType V2>
-ShMatrix<M, N, SH_TEMP, CV1V2>
-operator*(const ShGeneric<1, V1>& a, const ShMatrix<M, N, Binding, V2>& b);
-template<int N, ShBindingType Binding, ShValueType V1, ShValueType V2>
-ShMatrix<1, N, SH_TEMP, CV1V2>
-operator*(const ShGeneric<1, V1>& a, const ShMatrix<1, N, Binding, V2>& b);
+template<int M, int N, ShBindingType Binding, typename T1, typename T2>
+ShMatrix<M, N, SH_TEMP, CT1T2>
+operator*(const ShGeneric<1, T1>& a, const ShMatrix<M, N, Binding, T2>& b);
+
+template<int N, ShBindingType Binding, typename T1, typename T2>
+ShMatrix<1, N, SH_TEMP, CT1T2>
+operator*(const ShGeneric<1, T1>& a, const ShMatrix<1, N, Binding, T2>& b);
+
 /// Matrix-scalar division
-template<int M, int N, ShBindingType Binding, ShValueType V1, ShValueType V2>
-ShMatrix<M, N, SH_TEMP, CV1V2>
-operator/(const ShMatrix<M, N, Binding, V1>& a, const ShGeneric<1, V2>& b);
+template<int M, int N, ShBindingType Binding, typename T1, typename T2>
+ShMatrix<M, N, SH_TEMP, CT1T2>
+operator/(const ShMatrix<M, N, Binding, T1>& a, const ShGeneric<1, T2>& b);
 
 /** \brief Returns the determinant for the given matrix
  *
  */
-template<ShBindingType Binding2, ShValueType V2>
-ShAttrib1f det(const ShMatrix<1, 1, Binding2, V2>& matrix);
+template<ShBindingType Binding2, typename T2>
+ShAttrib1f det(const ShMatrix<1, 1, Binding2, T2>& matrix);
 
-template<ShBindingType Binding2, ShValueType V2>
-ShAttrib1f det(const ShMatrix<2, 2, Binding2, V2>& matrix);
+template<ShBindingType Binding2, typename T2>
+ShAttrib1f det(const ShMatrix<2, 2, Binding2, T2>& matrix);
     
-template<int RowsCols, ShBindingType Binding2, ShValueType V2>
-ShAttrib1f det(const ShMatrix<RowsCols, RowsCols, Binding2, V2>& matrix);
+template<int RowsCols, ShBindingType Binding2, typename T2>
+ShAttrib1f det(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
 
 
 /** \brief Returns the matrix of cofactors for the given matrix 
  *
  */
-template<int RowsCols, ShBindingType Binding2, ShValueType V2>
-ShMatrix<RowsCols, RowsCols, SH_TEMP, V2>
-cofactors(const ShMatrix<RowsCols, RowsCols, Binding2, V2>& matrix);
+template<int RowsCols, ShBindingType Binding2, typename T2>
+ShMatrix<RowsCols, RowsCols, SH_TEMP, T2>
+cofactors(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
     
 /** \brief Returns the transpose of the given matrix.
  *
  * The matrix is flipped around its diagonal.
  *
  */
-template<int M, int N, ShBindingType Binding2, ShValueType V2>
-ShMatrix<N, M, SH_TEMP, V2>
-transpose(const ShMatrix<M, N, Binding2, V2>& matrix);
+template<int M, int N, ShBindingType Binding2, typename T2>
+ShMatrix<N, M, SH_TEMP, T2>
+transpose(const ShMatrix<M, N, Binding2, T2>& matrix);
   
 /** \brief Returns the adjoint of the given matrix.
  *
  */
-template<int RowsCols, ShBindingType Binding2, ShValueType V2>
-ShMatrix<RowsCols, RowsCols, SH_TEMP, V2>
-adjoint(const ShMatrix<RowsCols, RowsCols, Binding2, V2>& matrix);
+template<int RowsCols, ShBindingType Binding2, typename T2>
+ShMatrix<RowsCols, RowsCols, SH_TEMP, T2>
+adjoint(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
 
 /** \brief Invert a matrix
  *
  * Results are undefined if the matrix is non-invertible.
  *
  */
-template<int RowsCols, ShBindingType Binding2, ShValueType V2>
-ShMatrix<RowsCols,RowsCols, SH_TEMP, V2>
-inverse(const ShMatrix<RowsCols, RowsCols, Binding2, V2>& matrix);
+template<int RowsCols, ShBindingType Binding2, typename T2>
+ShMatrix<RowsCols,RowsCols, SH_TEMP, T2>
+inverse(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
 
-template<int N, ShValueType V>
-ShMatrix<1, N, SH_TEMP, V>
-rowmat(const ShGeneric<N, V>& s0);
+/** \brief Trace of a matrix.
+ *
+ * Returns the sum of the diagonal entries of a matrix.
+ */
+template<int RowsCols, ShBindingType Binding, typename T>
+ShGeneric<1, T>
+trace(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix);
 
-template<int N, ShValueType V1, ShValueType V2>
-ShMatrix<2, N, SH_TEMP, CV1V2>
-rowmat(const ShGeneric<N, V1>& s0,
-       const ShGeneric<N, V2>& s1);
+template<int N, typename T>
+ShMatrix<1, N, SH_TEMP, T>
+rowmat(const ShGeneric<N, T>& s0);
 
-template<int N, ShValueType V1, ShValueType V2, ShValueType V3>
-ShMatrix<3, N, SH_TEMP, CV1V2V3>
-rowmat(const ShGeneric<N, V1>& s0,
-       const ShGeneric<N, V2>& s1,
-       const ShGeneric<N, V3>& s2);
+template<int N, typename T1, typename T2>
+ShMatrix<2, N, SH_TEMP, CT1T2>
+rowmat(const ShGeneric<N, T1>& s0,
+       const ShGeneric<N, T2>& s1);
 
-template<int N, ShValueType V1, ShValueType V2, ShValueType V3, ShValueType V4>
-ShMatrix<4, N, SH_TEMP, CV1V2V3V4>
-rowmat(const ShGeneric<N, V1>& s0,
-       const ShGeneric<N, V2>& s1,
-       const ShGeneric<N, V3>& s2,
-       const ShGeneric<N, V4>& s3);
+template<int N, typename T1, typename T2, typename T3>
+ShMatrix<3, N, SH_TEMP, CT1T2T3>
+rowmat(const ShGeneric<N, T1>& s0,
+       const ShGeneric<N, T2>& s1,
+       const ShGeneric<N, T3>& s2);
 
-template<int N, ShValueType V>
-ShMatrix<N, 1, SH_TEMP, V>
-colmat(const ShGeneric<N, V>& s0);
+template<int N, typename T1, typename T2, typename T3, typename T4>
+ShMatrix<4, N, SH_TEMP, CT1T2T3T4>
+rowmat(const ShGeneric<N, T1>& s0,
+       const ShGeneric<N, T2>& s1,
+       const ShGeneric<N, T3>& s2,
+       const ShGeneric<N, T4>& s3);
 
-template<int N, ShValueType V>
-ShMatrix<N, 2, SH_TEMP, V>
-colmat(const ShGeneric<N, V>& s0,
-       const ShGeneric<N, V>& s1);
+template<int N, typename T>
+ShMatrix<N, 1, SH_TEMP, T>
+colmat(const ShGeneric<N, T>& s0);
 
-template<int N, ShValueType V>
-ShMatrix<N, 3, SH_TEMP, V>
-colmat(const ShGeneric<N, V>& s0,
-       const ShGeneric<N, V>& s1,
-       const ShGeneric<N, V>& s2);
+template<int N, typename T>
+ShMatrix<N, 2, SH_TEMP, T>
+colmat(const ShGeneric<N, T>& s0,
+       const ShGeneric<N, T>& s1);
 
-template<int N, ShValueType V>
-ShMatrix<N, 4, SH_TEMP, V>
-colmat(const ShGeneric<N, V>& s0,
-       const ShGeneric<N, V>& s1,
-       const ShGeneric<N, V>& s2,
-       const ShGeneric<N, V>& s3);
+template<int N, typename T>
+ShMatrix<N, 3, SH_TEMP, T>
+colmat(const ShGeneric<N, T>& s0,
+       const ShGeneric<N, T>& s1,
+       const ShGeneric<N, T>& s2);
 
-template<int N, ShValueType V>
-ShMatrix<N, N, SH_TEMP, V>
-diag(const ShGeneric<N, V>& a);
+template<int N, typename T>
+ShMatrix<N, 4, SH_TEMP, T>
+colmat(const ShGeneric<N, T>& s0,
+       const ShGeneric<N, T>& s1,
+       const ShGeneric<N, T>& s2,
+       const ShGeneric<N, T>& s3);
+
+template<int N, typename T>
+ShMatrix<N, N, SH_TEMP, T>
+diag(const ShGeneric<N, T>& a);
 
 /*@}*/
 
@@ -194,63 +223,63 @@ diag(const ShGeneric<N, V>& a);
  * The angle is specified in radians. The result is an affine
  * transformation matrix.
  */
-template<ShValueType V>
-ShMatrix<4, 4, SH_TEMP, V>
-rotate(const ShGeneric<3, V>& axis, const ShGeneric<1, V>& angle);
+template<typename T>
+ShMatrix<4, 4, SH_TEMP, T>
+rotate(const ShGeneric<3, T>& axis, const ShGeneric<1, T>& angle);
 
 /** \brief 2D Rotation about the given angle
  *
  * The angle is specified in radians. The result is an affine
  * transformation matrix.
  */
-template<ShValueType V>
-ShMatrix<3, 3, SH_TEMP, V>
-rotate(const ShGeneric<1, V>& angle);
+template<typename T>
+ShMatrix<3, 3, SH_TEMP, T>
+rotate(const ShGeneric<1, T>& angle);
 
 /** \brief 3D Translation
  *
  * Returns an affine transformation matrix translating by the given
  * vector.
  */
-template<ShValueType V>
-ShMatrix<4, 4, SH_TEMP, V>
-translate(const ShGeneric<3, V>& a);
+template<typename T>
+ShMatrix<4, 4, SH_TEMP, T>
+translate(const ShGeneric<3, T>& a);
 
 /** \brief 2D Translation
  *
  * Returns an affine transformation matrix translating by the given
  * vector.
  */
-template<ShValueType V>
-ShMatrix<3, 3, SH_TEMP, V>
-translate(const ShGeneric<2, V>& a);
+template<typename T>
+ShMatrix<3, 3, SH_TEMP, T>
+translate(const ShGeneric<2, T>& a);
 
 /** \brief 3D Scale
  *
  * Returns an affine transformation matrix scaling by the given
  * nonuniform vector.
  */
-template<ShValueType V>
-ShMatrix<4, 4, SH_TEMP, V>
-scale(const ShGeneric<3, V>& a);
+template<typename T>
+ShMatrix<4, 4, SH_TEMP, T>
+scale(const ShGeneric<3, T>& a);
 
 /** \brief 2D Scale
  *
  * Returns an affine transformation matrix scaling by the given
  * nonuniform vector.
  */
-template<ShValueType V>
-ShMatrix<3, 3, SH_TEMP, V>
-scale(const ShGeneric<2, V>& a);
+template<typename T>
+ShMatrix<3, 3, SH_TEMP, T>
+scale(const ShGeneric<2, T>& a);
 
 /** \brief Uniform scale in N-1 dimensions
  *
  * Returns an NxN affine transformation matrix performing a uniform
  * scale of the given amount in (N-1) dimensions.
  */
-template<int N, ShValueType V>
-ShMatrix<N, N, SH_TEMP, V>
-scale(const ShGeneric<1, V>& a);
+template<int N, typename T>
+ShMatrix<N, N, SH_TEMP, T>
+scale(const ShGeneric<1, T>& a);
 
 /*@}*/
 

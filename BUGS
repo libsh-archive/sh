@@ -1,6 +1,5 @@
-Right now, when you use an ShStream, it will read more
-input data than there actually is. This may cause issues
-under certain circumstances.
-
 See https://issues.libsh.org/ for all of our currently active
 issues. Please report bugs there.
+
+If you encounter problems with Sh and are not sure whether they 
+are bugs or not, feel free to email libsh-users@lists.libsh.org.

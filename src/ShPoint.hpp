@@ -6,27 +6,24 @@
 //
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
-//
+// Copyright 2003-2005 Serious Hack Inc.
+// 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
 // arising from the use of this software.
-//
+// 
 // Permission is granted to anyone to use this software for any purpose,
 // including commercial applications, and to alter it and redistribute it
 // freely, subject to the following restrictions:
-//
+// 
 // 1. The origin of this software must not be misrepresented; you must
 // not claim that you wrote the original software. If you use this
 // software in a product, an acknowledgment in the product documentation
 // would be appreciated but is not required.
-//
+// 
 // 2. Altered source versions must be plainly marked as such, and must
 // not be misrepresented as being the original software.
-//
+// 
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
@@ -41,823 +38,338 @@ namespace SH {
  * 
  *
  */
-template<int N, ShBindingType Binding, ShValueType V=SH_FLOAT, bool Swizzled=false>
-class ShPoint : public ShAttrib<N, Binding, V, Swizzled> {
-public:
-  static const ShValueType value_type = V;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_POINT;
-  typedef typename ShHostType<V>::type H; 
-  typedef H HostType; 
-  typedef typename ShMemType<V>::type MemType; 
-  static const int typesize = N;
 
-  typedef ShPoint<N, SH_INPUT, V> InputType;
-  typedef ShPoint<N, SH_OUTPUT, V> OutputType;
-  typedef ShPoint<N, SH_INOUT, V> InOutType;
-  typedef ShPoint<N, SH_TEMP, V> TempType;
-  typedef ShPoint<N, SH_CONST, V> ConstType;
-  ShPoint();
-  
-  template<ShValueType V2>
-  ShPoint(const ShGeneric<N, V2>& other);
-  ShPoint(const ShPoint<N, Binding, V, Swizzled>& other);
-  
-  template<ShValueType V2>
-  ShPoint(const ShPoint<N, Binding, V2, Swizzled>& other);
-  ShPoint(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShPoint(H data[N]);
-  
-  ~ShPoint();
-
-  
-  template<ShValueType V2>
-  ShPoint& operator=(const ShGeneric<N, V2>& other);
-  
-  template<ShValueType V2>
-  ShPoint& operator=(const ShPoint<N, Binding, V2, Swizzled>& other);
-  ShPoint& operator=(const ShPoint<N, Binding, V, Swizzled>& other);
-
-  ShPoint& operator=(const ShProgram& prg);
-
-  
-  template<ShValueType V2>
-  ShPoint& operator+=(const ShGeneric<N, V2>& right);
-  
-  template<ShValueType V2>
-  ShPoint& operator-=(const ShGeneric<N, V2>& right);
-  
-  template<ShValueType V2>
-  ShPoint& operator*=(const ShGeneric<N, V2>& right);
-  
-  template<ShValueType V2>
-  ShPoint& operator/=(const ShGeneric<N, V2>& right);
-  
-  template<ShValueType V2>
-  ShPoint& operator%=(const ShGeneric<N, V2>& right);
-  ShPoint& operator*=(H);
-  ShPoint& operator/=(H);
-  ShPoint& operator%=(H);
-  ShPoint& operator+=(H);
-  ShPoint& operator-=(H);
-  
-  template<ShValueType V2>
-  ShPoint& operator+=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShPoint& operator-=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShPoint& operator*=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShPoint& operator/=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShPoint& operator%=(const ShGeneric<1, V2>&);
-  ShPoint<1, Binding, V, true> operator()(int) const;
-  ShPoint<2, Binding, V, true> operator()(int, int) const;
-  ShPoint<3, Binding, V, true> operator()(int, int, int) const;
-  ShPoint<4, Binding, V, true> operator()(int, int, int, int) const;
-  ShPoint<1, Binding, V, true> operator[](int) const;
-  
-  template<int N2>
-  ShPoint<N2, Binding, V, true> swiz(int indices[]) const;
-  
-  ShPoint operator-() const;
-  private:
-    typedef ShAttrib<N, Binding, V, Swizzled> ParentType;
-};
-
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-class ShPoint<1, Binding, V, Swizzled> : public ShAttrib<1, Binding, V, Swizzled> {
-public:
-  static const ShValueType value_type = V;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_POINT;
-  typedef typename ShHostType<V>::type H; 
-  typedef H HostType; 
-  typedef typename ShMemType<V>::type MemType; 
-  static const int typesize = 1;
-
-  typedef ShPoint<1, SH_INPUT, V> InputType;
-  typedef ShPoint<1, SH_OUTPUT, V> OutputType;
-  typedef ShPoint<1, SH_INOUT, V> InOutType;
-  typedef ShPoint<1, SH_TEMP, V> TempType;
-  typedef ShPoint<1, SH_CONST, V> ConstType;
-  ShPoint();
-  
-  template<ShValueType V2>
-  ShPoint(const ShGeneric<1, V2>& other);
-  ShPoint(const ShPoint<1, Binding, V, Swizzled>& other);
-  
-  template<ShValueType V2>
-  ShPoint(const ShPoint<1, Binding, V2, Swizzled>& other);
-  ShPoint(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShPoint(H data[1]);
-  
-  ShPoint(H);
-  
-  ~ShPoint();
-
-  
-  template<ShValueType V2>
-  ShPoint& operator=(const ShGeneric<1, V2>& other);
-  
-  template<ShValueType V2>
-  ShPoint& operator=(const ShPoint<1, Binding, V2, Swizzled>& other);
-  ShPoint& operator=(const ShPoint<1, Binding, V, Swizzled>& other);
-
-  ShPoint& operator=(H other);
-
-  ShPoint& operator=(const ShProgram& prg);
-
-  
-  template<ShValueType V2>
-  ShPoint& operator+=(const ShGeneric<1, V2>& right);
-  
-  template<ShValueType V2>
-  ShPoint& operator-=(const ShGeneric<1, V2>& right);
-  
-  template<ShValueType V2>
-  ShPoint& operator*=(const ShGeneric<1, V2>& right);
-  
-  template<ShValueType V2>
-  ShPoint& operator/=(const ShGeneric<1, V2>& right);
-  
-  template<ShValueType V2>
-  ShPoint& operator%=(const ShGeneric<1, V2>& right);
-  ShPoint& operator*=(H);
-  ShPoint& operator/=(H);
-  ShPoint& operator%=(H);
-  ShPoint& operator+=(H);
-  ShPoint& operator-=(H);
-  ShPoint<1, Binding, V, true> operator()(int) const;
-  ShPoint<2, Binding, V, true> operator()(int, int) const;
-  ShPoint<3, Binding, V, true> operator()(int, int, int) const;
-  ShPoint<4, Binding, V, true> operator()(int, int, int, int) const;
-  ShPoint<1, Binding, V, true> operator[](int) const;
-  
-  template<int N2>
-  ShPoint<N2, Binding, V, true> swiz(int indices[]) const;
-  
-  ShPoint operator-() const;
-  private:
-    typedef ShAttrib<1, Binding, V, Swizzled> ParentType;
-};
-
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-class ShPoint<2, Binding, V, Swizzled> : public ShAttrib<2, Binding, V, Swizzled> {
-public:
-  static const ShValueType value_type = V;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_POINT;
-  typedef typename ShHostType<V>::type H; 
-  typedef H HostType; 
-  typedef typename ShMemType<V>::type MemType; 
-  static const int typesize = 2;
-
-  typedef ShPoint<2, SH_INPUT, V> InputType;
-  typedef ShPoint<2, SH_OUTPUT, V> OutputType;
-  typedef ShPoint<2, SH_INOUT, V> InOutType;
-  typedef ShPoint<2, SH_TEMP, V> TempType;
-  typedef ShPoint<2, SH_CONST, V> ConstType;
-  ShPoint();
-  
-  template<ShValueType V2>
-  ShPoint(const ShGeneric<2, V2>& other);
-  ShPoint(const ShPoint<2, Binding, V, Swizzled>& other);
-  
-  template<ShValueType V2>
-  ShPoint(const ShPoint<2, Binding, V2, Swizzled>& other);
-  ShPoint(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShPoint(H data[2]);
-  
-  ShPoint(H, H);
-  template<ShValueType V2, ShValueType V3>
-  ShPoint(const ShGeneric<1, V2>&, const ShGeneric<1, V3>&);
-  
-  ~ShPoint();
-
-  
-  template<ShValueType V2>
-  ShPoint& operator=(const ShGeneric<2, V2>& other);
-  
-  template<ShValueType V2>
-  ShPoint& operator=(const ShPoint<2, Binding, V2, Swizzled>& other);
-  ShPoint& operator=(const ShPoint<2, Binding, V, Swizzled>& other);
-
-  ShPoint& operator=(const ShProgram& prg);
-
-  
-  template<ShValueType V2>
-  ShPoint& operator+=(const ShGeneric<2, V2>& right);
-  
-  template<ShValueType V2>
-  ShPoint& operator-=(const ShGeneric<2, V2>& right);
-  
-  template<ShValueType V2>
-  ShPoint& operator*=(const ShGeneric<2, V2>& right);
-  
-  template<ShValueType V2>
-  ShPoint& operator/=(const ShGeneric<2, V2>& right);
-  
-  template<ShValueType V2>
-  ShPoint& operator%=(const ShGeneric<2, V2>& right);
-  ShPoint& operator*=(H);
-  ShPoint& operator/=(H);
-  ShPoint& operator%=(H);
-  ShPoint& operator+=(H);
-  ShPoint& operator-=(H);
-  
-  template<ShValueType V2>
-  ShPoint& operator+=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShPoint& operator-=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShPoint& operator*=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShPoint& operator/=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShPoint& operator%=(const ShGeneric<1, V2>&);
-  ShPoint<1, Binding, V, true> operator()(int) const;
-  ShPoint<2, Binding, V, true> operator()(int, int) const;
-  ShPoint<3, Binding, V, true> operator()(int, int, int) const;
-  ShPoint<4, Binding, V, true> operator()(int, int, int, int) const;
-  ShPoint<1, Binding, V, true> operator[](int) const;
-  
-  template<int N2>
-  ShPoint<N2, Binding, V, true> swiz(int indices[]) const;
-  
-  ShPoint operator-() const;
-  private:
-    typedef ShAttrib<2, Binding, V, Swizzled> ParentType;
-};
-
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-class ShPoint<3, Binding, V, Swizzled> : public ShAttrib<3, Binding, V, Swizzled> {
-public:
-  static const ShValueType value_type = V;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_POINT;
-  typedef typename ShHostType<V>::type H; 
-  typedef H HostType; 
-  typedef typename ShMemType<V>::type MemType; 
-  static const int typesize = 3;
-
-  typedef ShPoint<3, SH_INPUT, V> InputType;
-  typedef ShPoint<3, SH_OUTPUT, V> OutputType;
-  typedef ShPoint<3, SH_INOUT, V> InOutType;
-  typedef ShPoint<3, SH_TEMP, V> TempType;
-  typedef ShPoint<3, SH_CONST, V> ConstType;
-  ShPoint();
-  
-  template<ShValueType V2>
-  ShPoint(const ShGeneric<3, V2>& other);
-  ShPoint(const ShPoint<3, Binding, V, Swizzled>& other);
-  
-  template<ShValueType V2>
-  ShPoint(const ShPoint<3, Binding, V2, Swizzled>& other);
-  ShPoint(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShPoint(H data[3]);
-  
-  ShPoint(H, H, H);
-  template<ShValueType V2, ShValueType V3, ShValueType V4>
-  ShPoint(const ShGeneric<1, V2>&, const ShGeneric<1, V3>&, const ShGeneric<1, V4>&);
-  
-  ~ShPoint();
-
-  
-  template<ShValueType V2>
-  ShPoint& operator=(const ShGeneric<3, V2>& other);
-  
-  template<ShValueType V2>
-  ShPoint& operator=(const ShPoint<3, Binding, V2, Swizzled>& other);
-  ShPoint& operator=(const ShPoint<3, Binding, V, Swizzled>& other);
-
-  ShPoint& operator=(const ShProgram& prg);
-
-  
-  template<ShValueType V2>
-  ShPoint& operator+=(const ShGeneric<3, V2>& right);
-  
-  template<ShValueType V2>
-  ShPoint& operator-=(const ShGeneric<3, V2>& right);
-  
-  template<ShValueType V2>
-  ShPoint& operator*=(const ShGeneric<3, V2>& right);
-  
-  template<ShValueType V2>
-  ShPoint& operator/=(const ShGeneric<3, V2>& right);
-  
-  template<ShValueType V2>
-  ShPoint& operator%=(const ShGeneric<3, V2>& right);
-  ShPoint& operator*=(H);
-  ShPoint& operator/=(H);
-  ShPoint& operator%=(H);
-  ShPoint& operator+=(H);
-  ShPoint& operator-=(H);
-  
-  template<ShValueType V2>
-  ShPoint& operator+=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShPoint& operator-=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShPoint& operator*=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShPoint& operator/=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShPoint& operator%=(const ShGeneric<1, V2>&);
-  ShPoint<1, Binding, V, true> operator()(int) const;
-  ShPoint<2, Binding, V, true> operator()(int, int) const;
-  ShPoint<3, Binding, V, true> operator()(int, int, int) const;
-  ShPoint<4, Binding, V, true> operator()(int, int, int, int) const;
-  ShPoint<1, Binding, V, true> operator[](int) const;
-  
-  template<int N2>
-  ShPoint<N2, Binding, V, true> swiz(int indices[]) const;
-  
-  ShPoint operator-() const;
-  private:
-    typedef ShAttrib<3, Binding, V, Swizzled> ParentType;
-};
-
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-class ShPoint<4, Binding, V, Swizzled> : public ShAttrib<4, Binding, V, Swizzled> {
-public:
-  static const ShValueType value_type = V;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_POINT;
-  typedef typename ShHostType<V>::type H; 
-  typedef H HostType; 
-  typedef typename ShMemType<V>::type MemType; 
-  static const int typesize = 4;
-
-  typedef ShPoint<4, SH_INPUT, V> InputType;
-  typedef ShPoint<4, SH_OUTPUT, V> OutputType;
-  typedef ShPoint<4, SH_INOUT, V> InOutType;
-  typedef ShPoint<4, SH_TEMP, V> TempType;
-  typedef ShPoint<4, SH_CONST, V> ConstType;
-  ShPoint();
-  
-  template<ShValueType V2>
-  ShPoint(const ShGeneric<4, V2>& other);
-  ShPoint(const ShPoint<4, Binding, V, Swizzled>& other);
-  
-  template<ShValueType V2>
-  ShPoint(const ShPoint<4, Binding, V2, Swizzled>& other);
-  ShPoint(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShPoint(H data[4]);
-  
-  ShPoint(H, H, H, H);
-  template<ShValueType V2, ShValueType V3, ShValueType V4, ShValueType V5>
-  ShPoint(const ShGeneric<1, V2>&, const ShGeneric<1, V3>&, const ShGeneric<1, V4>&, const ShGeneric<1, V5>&);
-  
-  ~ShPoint();
-
-  
-  template<ShValueType V2>
-  ShPoint& operator=(const ShGeneric<4, V2>& other);
-  
-  template<ShValueType V2>
-  ShPoint& operator=(const ShPoint<4, Binding, V2, Swizzled>& other);
-  ShPoint& operator=(const ShPoint<4, Binding, V, Swizzled>& other);
-
-  ShPoint& operator=(const ShProgram& prg);
-
-  
-  template<ShValueType V2>
-  ShPoint& operator+=(const ShGeneric<4, V2>& right);
-  
-  template<ShValueType V2>
-  ShPoint& operator-=(const ShGeneric<4, V2>& right);
-  
-  template<ShValueType V2>
-  ShPoint& operator*=(const ShGeneric<4, V2>& right);
-  
-  template<ShValueType V2>
-  ShPoint& operator/=(const ShGeneric<4, V2>& right);
-  
-  template<ShValueType V2>
-  ShPoint& operator%=(const ShGeneric<4, V2>& right);
-  ShPoint& operator*=(H);
-  ShPoint& operator/=(H);
-  ShPoint& operator%=(H);
-  ShPoint& operator+=(H);
-  ShPoint& operator-=(H);
-  
-  template<ShValueType V2>
-  ShPoint& operator+=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShPoint& operator-=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShPoint& operator*=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShPoint& operator/=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShPoint& operator%=(const ShGeneric<1, V2>&);
-  ShPoint<1, Binding, V, true> operator()(int) const;
-  ShPoint<2, Binding, V, true> operator()(int, int) const;
-  ShPoint<3, Binding, V, true> operator()(int, int, int) const;
-  ShPoint<4, Binding, V, true> operator()(int, int, int, int) const;
-  ShPoint<1, Binding, V, true> operator[](int) const;
-  
-  template<int N2>
-  ShPoint<N2, Binding, V, true> swiz(int indices[]) const;
-  
-  ShPoint operator-() const;
-  private:
-    typedef ShAttrib<4, Binding, V, Swizzled> ParentType;
-};
-
-typedef ShPoint<1, SH_INPUT, SH_SHORT> ShInputPoint1s;
-typedef ShPoint<1, SH_OUTPUT, SH_SHORT> ShOutputPoint1s;
-typedef ShPoint<1, SH_INOUT, SH_SHORT> ShInOutPoint1s;
-typedef ShPoint<1, SH_TEMP, SH_SHORT> ShPoint1s;
-typedef ShPoint<1, SH_CONST, SH_SHORT> ShConstPoint1s;
-typedef ShPoint<2, SH_INPUT, SH_SHORT> ShInputPoint2s;
-typedef ShPoint<2, SH_OUTPUT, SH_SHORT> ShOutputPoint2s;
-typedef ShPoint<2, SH_INOUT, SH_SHORT> ShInOutPoint2s;
-typedef ShPoint<2, SH_TEMP, SH_SHORT> ShPoint2s;
-typedef ShPoint<2, SH_CONST, SH_SHORT> ShConstPoint2s;
-typedef ShPoint<3, SH_INPUT, SH_SHORT> ShInputPoint3s;
-typedef ShPoint<3, SH_OUTPUT, SH_SHORT> ShOutputPoint3s;
-typedef ShPoint<3, SH_INOUT, SH_SHORT> ShInOutPoint3s;
-typedef ShPoint<3, SH_TEMP, SH_SHORT> ShPoint3s;
-typedef ShPoint<3, SH_CONST, SH_SHORT> ShConstPoint3s;
-typedef ShPoint<4, SH_INPUT, SH_SHORT> ShInputPoint4s;
-typedef ShPoint<4, SH_OUTPUT, SH_SHORT> ShOutputPoint4s;
-typedef ShPoint<4, SH_INOUT, SH_SHORT> ShInOutPoint4s;
-typedef ShPoint<4, SH_TEMP, SH_SHORT> ShPoint4s;
-typedef ShPoint<4, SH_CONST, SH_SHORT> ShConstPoint4s;
+typedef ShAttrib<1, SH_INPUT, ShFracUShort, SH_POINT> ShInputPoint1fus;
+typedef ShAttrib<1, SH_OUTPUT, ShFracUShort, SH_POINT> ShOutputPoint1fus;
+typedef ShAttrib<1, SH_INOUT, ShFracUShort, SH_POINT> ShInOutPoint1fus;
+typedef ShAttrib<1, SH_TEMP, ShFracUShort, SH_POINT> ShPoint1fus;
+typedef ShAttrib<1, SH_CONST, ShFracUShort, SH_POINT> ShConstPoint1fus;
+typedef ShAttrib<2, SH_INPUT, ShFracUShort, SH_POINT> ShInputPoint2fus;
+typedef ShAttrib<2, SH_OUTPUT, ShFracUShort, SH_POINT> ShOutputPoint2fus;
+typedef ShAttrib<2, SH_INOUT, ShFracUShort, SH_POINT> ShInOutPoint2fus;
+typedef ShAttrib<2, SH_TEMP, ShFracUShort, SH_POINT> ShPoint2fus;
+typedef ShAttrib<2, SH_CONST, ShFracUShort, SH_POINT> ShConstPoint2fus;
+typedef ShAttrib<3, SH_INPUT, ShFracUShort, SH_POINT> ShInputPoint3fus;
+typedef ShAttrib<3, SH_OUTPUT, ShFracUShort, SH_POINT> ShOutputPoint3fus;
+typedef ShAttrib<3, SH_INOUT, ShFracUShort, SH_POINT> ShInOutPoint3fus;
+typedef ShAttrib<3, SH_TEMP, ShFracUShort, SH_POINT> ShPoint3fus;
+typedef ShAttrib<3, SH_CONST, ShFracUShort, SH_POINT> ShConstPoint3fus;
+typedef ShAttrib<4, SH_INPUT, ShFracUShort, SH_POINT> ShInputPoint4fus;
+typedef ShAttrib<4, SH_OUTPUT, ShFracUShort, SH_POINT> ShOutputPoint4fus;
+typedef ShAttrib<4, SH_INOUT, ShFracUShort, SH_POINT> ShInOutPoint4fus;
+typedef ShAttrib<4, SH_TEMP, ShFracUShort, SH_POINT> ShPoint4fus;
+typedef ShAttrib<4, SH_CONST, ShFracUShort, SH_POINT> ShConstPoint4fus;
 
 
-typedef ShPoint<1, SH_INPUT, SH_FRAC_UINT> ShInputPoint1fui;
-typedef ShPoint<1, SH_OUTPUT, SH_FRAC_UINT> ShOutputPoint1fui;
-typedef ShPoint<1, SH_INOUT, SH_FRAC_UINT> ShInOutPoint1fui;
-typedef ShPoint<1, SH_TEMP, SH_FRAC_UINT> ShPoint1fui;
-typedef ShPoint<1, SH_CONST, SH_FRAC_UINT> ShConstPoint1fui;
-typedef ShPoint<2, SH_INPUT, SH_FRAC_UINT> ShInputPoint2fui;
-typedef ShPoint<2, SH_OUTPUT, SH_FRAC_UINT> ShOutputPoint2fui;
-typedef ShPoint<2, SH_INOUT, SH_FRAC_UINT> ShInOutPoint2fui;
-typedef ShPoint<2, SH_TEMP, SH_FRAC_UINT> ShPoint2fui;
-typedef ShPoint<2, SH_CONST, SH_FRAC_UINT> ShConstPoint2fui;
-typedef ShPoint<3, SH_INPUT, SH_FRAC_UINT> ShInputPoint3fui;
-typedef ShPoint<3, SH_OUTPUT, SH_FRAC_UINT> ShOutputPoint3fui;
-typedef ShPoint<3, SH_INOUT, SH_FRAC_UINT> ShInOutPoint3fui;
-typedef ShPoint<3, SH_TEMP, SH_FRAC_UINT> ShPoint3fui;
-typedef ShPoint<3, SH_CONST, SH_FRAC_UINT> ShConstPoint3fui;
-typedef ShPoint<4, SH_INPUT, SH_FRAC_UINT> ShInputPoint4fui;
-typedef ShPoint<4, SH_OUTPUT, SH_FRAC_UINT> ShOutputPoint4fui;
-typedef ShPoint<4, SH_INOUT, SH_FRAC_UINT> ShInOutPoint4fui;
-typedef ShPoint<4, SH_TEMP, SH_FRAC_UINT> ShPoint4fui;
-typedef ShPoint<4, SH_CONST, SH_FRAC_UINT> ShConstPoint4fui;
+typedef ShAttrib<1, SH_INPUT, short, SH_POINT> ShInputPoint1s;
+typedef ShAttrib<1, SH_OUTPUT, short, SH_POINT> ShOutputPoint1s;
+typedef ShAttrib<1, SH_INOUT, short, SH_POINT> ShInOutPoint1s;
+typedef ShAttrib<1, SH_TEMP, short, SH_POINT> ShPoint1s;
+typedef ShAttrib<1, SH_CONST, short, SH_POINT> ShConstPoint1s;
+typedef ShAttrib<2, SH_INPUT, short, SH_POINT> ShInputPoint2s;
+typedef ShAttrib<2, SH_OUTPUT, short, SH_POINT> ShOutputPoint2s;
+typedef ShAttrib<2, SH_INOUT, short, SH_POINT> ShInOutPoint2s;
+typedef ShAttrib<2, SH_TEMP, short, SH_POINT> ShPoint2s;
+typedef ShAttrib<2, SH_CONST, short, SH_POINT> ShConstPoint2s;
+typedef ShAttrib<3, SH_INPUT, short, SH_POINT> ShInputPoint3s;
+typedef ShAttrib<3, SH_OUTPUT, short, SH_POINT> ShOutputPoint3s;
+typedef ShAttrib<3, SH_INOUT, short, SH_POINT> ShInOutPoint3s;
+typedef ShAttrib<3, SH_TEMP, short, SH_POINT> ShPoint3s;
+typedef ShAttrib<3, SH_CONST, short, SH_POINT> ShConstPoint3s;
+typedef ShAttrib<4, SH_INPUT, short, SH_POINT> ShInputPoint4s;
+typedef ShAttrib<4, SH_OUTPUT, short, SH_POINT> ShOutputPoint4s;
+typedef ShAttrib<4, SH_INOUT, short, SH_POINT> ShInOutPoint4s;
+typedef ShAttrib<4, SH_TEMP, short, SH_POINT> ShPoint4s;
+typedef ShAttrib<4, SH_CONST, short, SH_POINT> ShConstPoint4s;
 
 
-typedef ShPoint<1, SH_INPUT, SH_FRAC_BYTE> ShInputPoint1fb;
-typedef ShPoint<1, SH_OUTPUT, SH_FRAC_BYTE> ShOutputPoint1fb;
-typedef ShPoint<1, SH_INOUT, SH_FRAC_BYTE> ShInOutPoint1fb;
-typedef ShPoint<1, SH_TEMP, SH_FRAC_BYTE> ShPoint1fb;
-typedef ShPoint<1, SH_CONST, SH_FRAC_BYTE> ShConstPoint1fb;
-typedef ShPoint<2, SH_INPUT, SH_FRAC_BYTE> ShInputPoint2fb;
-typedef ShPoint<2, SH_OUTPUT, SH_FRAC_BYTE> ShOutputPoint2fb;
-typedef ShPoint<2, SH_INOUT, SH_FRAC_BYTE> ShInOutPoint2fb;
-typedef ShPoint<2, SH_TEMP, SH_FRAC_BYTE> ShPoint2fb;
-typedef ShPoint<2, SH_CONST, SH_FRAC_BYTE> ShConstPoint2fb;
-typedef ShPoint<3, SH_INPUT, SH_FRAC_BYTE> ShInputPoint3fb;
-typedef ShPoint<3, SH_OUTPUT, SH_FRAC_BYTE> ShOutputPoint3fb;
-typedef ShPoint<3, SH_INOUT, SH_FRAC_BYTE> ShInOutPoint3fb;
-typedef ShPoint<3, SH_TEMP, SH_FRAC_BYTE> ShPoint3fb;
-typedef ShPoint<3, SH_CONST, SH_FRAC_BYTE> ShConstPoint3fb;
-typedef ShPoint<4, SH_INPUT, SH_FRAC_BYTE> ShInputPoint4fb;
-typedef ShPoint<4, SH_OUTPUT, SH_FRAC_BYTE> ShOutputPoint4fb;
-typedef ShPoint<4, SH_INOUT, SH_FRAC_BYTE> ShInOutPoint4fb;
-typedef ShPoint<4, SH_TEMP, SH_FRAC_BYTE> ShPoint4fb;
-typedef ShPoint<4, SH_CONST, SH_FRAC_BYTE> ShConstPoint4fb;
+typedef ShAttrib<1, SH_INPUT, ShFracUInt, SH_POINT> ShInputPoint1fui;
+typedef ShAttrib<1, SH_OUTPUT, ShFracUInt, SH_POINT> ShOutputPoint1fui;
+typedef ShAttrib<1, SH_INOUT, ShFracUInt, SH_POINT> ShInOutPoint1fui;
+typedef ShAttrib<1, SH_TEMP, ShFracUInt, SH_POINT> ShPoint1fui;
+typedef ShAttrib<1, SH_CONST, ShFracUInt, SH_POINT> ShConstPoint1fui;
+typedef ShAttrib<2, SH_INPUT, ShFracUInt, SH_POINT> ShInputPoint2fui;
+typedef ShAttrib<2, SH_OUTPUT, ShFracUInt, SH_POINT> ShOutputPoint2fui;
+typedef ShAttrib<2, SH_INOUT, ShFracUInt, SH_POINT> ShInOutPoint2fui;
+typedef ShAttrib<2, SH_TEMP, ShFracUInt, SH_POINT> ShPoint2fui;
+typedef ShAttrib<2, SH_CONST, ShFracUInt, SH_POINT> ShConstPoint2fui;
+typedef ShAttrib<3, SH_INPUT, ShFracUInt, SH_POINT> ShInputPoint3fui;
+typedef ShAttrib<3, SH_OUTPUT, ShFracUInt, SH_POINT> ShOutputPoint3fui;
+typedef ShAttrib<3, SH_INOUT, ShFracUInt, SH_POINT> ShInOutPoint3fui;
+typedef ShAttrib<3, SH_TEMP, ShFracUInt, SH_POINT> ShPoint3fui;
+typedef ShAttrib<3, SH_CONST, ShFracUInt, SH_POINT> ShConstPoint3fui;
+typedef ShAttrib<4, SH_INPUT, ShFracUInt, SH_POINT> ShInputPoint4fui;
+typedef ShAttrib<4, SH_OUTPUT, ShFracUInt, SH_POINT> ShOutputPoint4fui;
+typedef ShAttrib<4, SH_INOUT, ShFracUInt, SH_POINT> ShInOutPoint4fui;
+typedef ShAttrib<4, SH_TEMP, ShFracUInt, SH_POINT> ShPoint4fui;
+typedef ShAttrib<4, SH_CONST, ShFracUInt, SH_POINT> ShConstPoint4fui;
 
 
-typedef ShPoint<1, SH_INPUT, SH_FRAC_UBYTE> ShInputPoint1fub;
-typedef ShPoint<1, SH_OUTPUT, SH_FRAC_UBYTE> ShOutputPoint1fub;
-typedef ShPoint<1, SH_INOUT, SH_FRAC_UBYTE> ShInOutPoint1fub;
-typedef ShPoint<1, SH_TEMP, SH_FRAC_UBYTE> ShPoint1fub;
-typedef ShPoint<1, SH_CONST, SH_FRAC_UBYTE> ShConstPoint1fub;
-typedef ShPoint<2, SH_INPUT, SH_FRAC_UBYTE> ShInputPoint2fub;
-typedef ShPoint<2, SH_OUTPUT, SH_FRAC_UBYTE> ShOutputPoint2fub;
-typedef ShPoint<2, SH_INOUT, SH_FRAC_UBYTE> ShInOutPoint2fub;
-typedef ShPoint<2, SH_TEMP, SH_FRAC_UBYTE> ShPoint2fub;
-typedef ShPoint<2, SH_CONST, SH_FRAC_UBYTE> ShConstPoint2fub;
-typedef ShPoint<3, SH_INPUT, SH_FRAC_UBYTE> ShInputPoint3fub;
-typedef ShPoint<3, SH_OUTPUT, SH_FRAC_UBYTE> ShOutputPoint3fub;
-typedef ShPoint<3, SH_INOUT, SH_FRAC_UBYTE> ShInOutPoint3fub;
-typedef ShPoint<3, SH_TEMP, SH_FRAC_UBYTE> ShPoint3fub;
-typedef ShPoint<3, SH_CONST, SH_FRAC_UBYTE> ShConstPoint3fub;
-typedef ShPoint<4, SH_INPUT, SH_FRAC_UBYTE> ShInputPoint4fub;
-typedef ShPoint<4, SH_OUTPUT, SH_FRAC_UBYTE> ShOutputPoint4fub;
-typedef ShPoint<4, SH_INOUT, SH_FRAC_UBYTE> ShInOutPoint4fub;
-typedef ShPoint<4, SH_TEMP, SH_FRAC_UBYTE> ShPoint4fub;
-typedef ShPoint<4, SH_CONST, SH_FRAC_UBYTE> ShConstPoint4fub;
+typedef ShAttrib<1, SH_INPUT, ShFracByte, SH_POINT> ShInputPoint1fb;
+typedef ShAttrib<1, SH_OUTPUT, ShFracByte, SH_POINT> ShOutputPoint1fb;
+typedef ShAttrib<1, SH_INOUT, ShFracByte, SH_POINT> ShInOutPoint1fb;
+typedef ShAttrib<1, SH_TEMP, ShFracByte, SH_POINT> ShPoint1fb;
+typedef ShAttrib<1, SH_CONST, ShFracByte, SH_POINT> ShConstPoint1fb;
+typedef ShAttrib<2, SH_INPUT, ShFracByte, SH_POINT> ShInputPoint2fb;
+typedef ShAttrib<2, SH_OUTPUT, ShFracByte, SH_POINT> ShOutputPoint2fb;
+typedef ShAttrib<2, SH_INOUT, ShFracByte, SH_POINT> ShInOutPoint2fb;
+typedef ShAttrib<2, SH_TEMP, ShFracByte, SH_POINT> ShPoint2fb;
+typedef ShAttrib<2, SH_CONST, ShFracByte, SH_POINT> ShConstPoint2fb;
+typedef ShAttrib<3, SH_INPUT, ShFracByte, SH_POINT> ShInputPoint3fb;
+typedef ShAttrib<3, SH_OUTPUT, ShFracByte, SH_POINT> ShOutputPoint3fb;
+typedef ShAttrib<3, SH_INOUT, ShFracByte, SH_POINT> ShInOutPoint3fb;
+typedef ShAttrib<3, SH_TEMP, ShFracByte, SH_POINT> ShPoint3fb;
+typedef ShAttrib<3, SH_CONST, ShFracByte, SH_POINT> ShConstPoint3fb;
+typedef ShAttrib<4, SH_INPUT, ShFracByte, SH_POINT> ShInputPoint4fb;
+typedef ShAttrib<4, SH_OUTPUT, ShFracByte, SH_POINT> ShOutputPoint4fb;
+typedef ShAttrib<4, SH_INOUT, ShFracByte, SH_POINT> ShInOutPoint4fb;
+typedef ShAttrib<4, SH_TEMP, ShFracByte, SH_POINT> ShPoint4fb;
+typedef ShAttrib<4, SH_CONST, ShFracByte, SH_POINT> ShConstPoint4fb;
 
 
-typedef ShPoint<1, SH_INPUT, SH_HALF> ShInputPoint1h;
-typedef ShPoint<1, SH_OUTPUT, SH_HALF> ShOutputPoint1h;
-typedef ShPoint<1, SH_INOUT, SH_HALF> ShInOutPoint1h;
-typedef ShPoint<1, SH_TEMP, SH_HALF> ShPoint1h;
-typedef ShPoint<1, SH_CONST, SH_HALF> ShConstPoint1h;
-typedef ShPoint<2, SH_INPUT, SH_HALF> ShInputPoint2h;
-typedef ShPoint<2, SH_OUTPUT, SH_HALF> ShOutputPoint2h;
-typedef ShPoint<2, SH_INOUT, SH_HALF> ShInOutPoint2h;
-typedef ShPoint<2, SH_TEMP, SH_HALF> ShPoint2h;
-typedef ShPoint<2, SH_CONST, SH_HALF> ShConstPoint2h;
-typedef ShPoint<3, SH_INPUT, SH_HALF> ShInputPoint3h;
-typedef ShPoint<3, SH_OUTPUT, SH_HALF> ShOutputPoint3h;
-typedef ShPoint<3, SH_INOUT, SH_HALF> ShInOutPoint3h;
-typedef ShPoint<3, SH_TEMP, SH_HALF> ShPoint3h;
-typedef ShPoint<3, SH_CONST, SH_HALF> ShConstPoint3h;
-typedef ShPoint<4, SH_INPUT, SH_HALF> ShInputPoint4h;
-typedef ShPoint<4, SH_OUTPUT, SH_HALF> ShOutputPoint4h;
-typedef ShPoint<4, SH_INOUT, SH_HALF> ShInOutPoint4h;
-typedef ShPoint<4, SH_TEMP, SH_HALF> ShPoint4h;
-typedef ShPoint<4, SH_CONST, SH_HALF> ShConstPoint4h;
+typedef ShAttrib<1, SH_INPUT, int, SH_POINT> ShInputPoint1i;
+typedef ShAttrib<1, SH_OUTPUT, int, SH_POINT> ShOutputPoint1i;
+typedef ShAttrib<1, SH_INOUT, int, SH_POINT> ShInOutPoint1i;
+typedef ShAttrib<1, SH_TEMP, int, SH_POINT> ShPoint1i;
+typedef ShAttrib<1, SH_CONST, int, SH_POINT> ShConstPoint1i;
+typedef ShAttrib<2, SH_INPUT, int, SH_POINT> ShInputPoint2i;
+typedef ShAttrib<2, SH_OUTPUT, int, SH_POINT> ShOutputPoint2i;
+typedef ShAttrib<2, SH_INOUT, int, SH_POINT> ShInOutPoint2i;
+typedef ShAttrib<2, SH_TEMP, int, SH_POINT> ShPoint2i;
+typedef ShAttrib<2, SH_CONST, int, SH_POINT> ShConstPoint2i;
+typedef ShAttrib<3, SH_INPUT, int, SH_POINT> ShInputPoint3i;
+typedef ShAttrib<3, SH_OUTPUT, int, SH_POINT> ShOutputPoint3i;
+typedef ShAttrib<3, SH_INOUT, int, SH_POINT> ShInOutPoint3i;
+typedef ShAttrib<3, SH_TEMP, int, SH_POINT> ShPoint3i;
+typedef ShAttrib<3, SH_CONST, int, SH_POINT> ShConstPoint3i;
+typedef ShAttrib<4, SH_INPUT, int, SH_POINT> ShInputPoint4i;
+typedef ShAttrib<4, SH_OUTPUT, int, SH_POINT> ShOutputPoint4i;
+typedef ShAttrib<4, SH_INOUT, int, SH_POINT> ShInOutPoint4i;
+typedef ShAttrib<4, SH_TEMP, int, SH_POINT> ShPoint4i;
+typedef ShAttrib<4, SH_CONST, int, SH_POINT> ShConstPoint4i;
 
 
-typedef ShPoint<1, SH_INPUT, SH_INT> ShInputPoint1i;
-typedef ShPoint<1, SH_OUTPUT, SH_INT> ShOutputPoint1i;
-typedef ShPoint<1, SH_INOUT, SH_INT> ShInOutPoint1i;
-typedef ShPoint<1, SH_TEMP, SH_INT> ShPoint1i;
-typedef ShPoint<1, SH_CONST, SH_INT> ShConstPoint1i;
-typedef ShPoint<2, SH_INPUT, SH_INT> ShInputPoint2i;
-typedef ShPoint<2, SH_OUTPUT, SH_INT> ShOutputPoint2i;
-typedef ShPoint<2, SH_INOUT, SH_INT> ShInOutPoint2i;
-typedef ShPoint<2, SH_TEMP, SH_INT> ShPoint2i;
-typedef ShPoint<2, SH_CONST, SH_INT> ShConstPoint2i;
-typedef ShPoint<3, SH_INPUT, SH_INT> ShInputPoint3i;
-typedef ShPoint<3, SH_OUTPUT, SH_INT> ShOutputPoint3i;
-typedef ShPoint<3, SH_INOUT, SH_INT> ShInOutPoint3i;
-typedef ShPoint<3, SH_TEMP, SH_INT> ShPoint3i;
-typedef ShPoint<3, SH_CONST, SH_INT> ShConstPoint3i;
-typedef ShPoint<4, SH_INPUT, SH_INT> ShInputPoint4i;
-typedef ShPoint<4, SH_OUTPUT, SH_INT> ShOutputPoint4i;
-typedef ShPoint<4, SH_INOUT, SH_INT> ShInOutPoint4i;
-typedef ShPoint<4, SH_TEMP, SH_INT> ShPoint4i;
-typedef ShPoint<4, SH_CONST, SH_INT> ShConstPoint4i;
+typedef ShAttrib<1, SH_INPUT, double, SH_POINT> ShInputPoint1d;
+typedef ShAttrib<1, SH_OUTPUT, double, SH_POINT> ShOutputPoint1d;
+typedef ShAttrib<1, SH_INOUT, double, SH_POINT> ShInOutPoint1d;
+typedef ShAttrib<1, SH_TEMP, double, SH_POINT> ShPoint1d;
+typedef ShAttrib<1, SH_CONST, double, SH_POINT> ShConstPoint1d;
+typedef ShAttrib<2, SH_INPUT, double, SH_POINT> ShInputPoint2d;
+typedef ShAttrib<2, SH_OUTPUT, double, SH_POINT> ShOutputPoint2d;
+typedef ShAttrib<2, SH_INOUT, double, SH_POINT> ShInOutPoint2d;
+typedef ShAttrib<2, SH_TEMP, double, SH_POINT> ShPoint2d;
+typedef ShAttrib<2, SH_CONST, double, SH_POINT> ShConstPoint2d;
+typedef ShAttrib<3, SH_INPUT, double, SH_POINT> ShInputPoint3d;
+typedef ShAttrib<3, SH_OUTPUT, double, SH_POINT> ShOutputPoint3d;
+typedef ShAttrib<3, SH_INOUT, double, SH_POINT> ShInOutPoint3d;
+typedef ShAttrib<3, SH_TEMP, double, SH_POINT> ShPoint3d;
+typedef ShAttrib<3, SH_CONST, double, SH_POINT> ShConstPoint3d;
+typedef ShAttrib<4, SH_INPUT, double, SH_POINT> ShInputPoint4d;
+typedef ShAttrib<4, SH_OUTPUT, double, SH_POINT> ShOutputPoint4d;
+typedef ShAttrib<4, SH_INOUT, double, SH_POINT> ShInOutPoint4d;
+typedef ShAttrib<4, SH_TEMP, double, SH_POINT> ShPoint4d;
+typedef ShAttrib<4, SH_CONST, double, SH_POINT> ShConstPoint4d;
 
 
-typedef ShPoint<1, SH_INPUT, SH_FLOAT> ShInputPoint1f;
-typedef ShPoint<1, SH_OUTPUT, SH_FLOAT> ShOutputPoint1f;
-typedef ShPoint<1, SH_INOUT, SH_FLOAT> ShInOutPoint1f;
-typedef ShPoint<1, SH_TEMP, SH_FLOAT> ShPoint1f;
-typedef ShPoint<1, SH_CONST, SH_FLOAT> ShConstPoint1f;
-typedef ShPoint<2, SH_INPUT, SH_FLOAT> ShInputPoint2f;
-typedef ShPoint<2, SH_OUTPUT, SH_FLOAT> ShOutputPoint2f;
-typedef ShPoint<2, SH_INOUT, SH_FLOAT> ShInOutPoint2f;
-typedef ShPoint<2, SH_TEMP, SH_FLOAT> ShPoint2f;
-typedef ShPoint<2, SH_CONST, SH_FLOAT> ShConstPoint2f;
-typedef ShPoint<3, SH_INPUT, SH_FLOAT> ShInputPoint3f;
-typedef ShPoint<3, SH_OUTPUT, SH_FLOAT> ShOutputPoint3f;
-typedef ShPoint<3, SH_INOUT, SH_FLOAT> ShInOutPoint3f;
-typedef ShPoint<3, SH_TEMP, SH_FLOAT> ShPoint3f;
-typedef ShPoint<3, SH_CONST, SH_FLOAT> ShConstPoint3f;
-typedef ShPoint<4, SH_INPUT, SH_FLOAT> ShInputPoint4f;
-typedef ShPoint<4, SH_OUTPUT, SH_FLOAT> ShOutputPoint4f;
-typedef ShPoint<4, SH_INOUT, SH_FLOAT> ShInOutPoint4f;
-typedef ShPoint<4, SH_TEMP, SH_FLOAT> ShPoint4f;
-typedef ShPoint<4, SH_CONST, SH_FLOAT> ShConstPoint4f;
+typedef ShAttrib<1, SH_INPUT, unsigned char, SH_POINT> ShInputPoint1ub;
+typedef ShAttrib<1, SH_OUTPUT, unsigned char, SH_POINT> ShOutputPoint1ub;
+typedef ShAttrib<1, SH_INOUT, unsigned char, SH_POINT> ShInOutPoint1ub;
+typedef ShAttrib<1, SH_TEMP, unsigned char, SH_POINT> ShPoint1ub;
+typedef ShAttrib<1, SH_CONST, unsigned char, SH_POINT> ShConstPoint1ub;
+typedef ShAttrib<2, SH_INPUT, unsigned char, SH_POINT> ShInputPoint2ub;
+typedef ShAttrib<2, SH_OUTPUT, unsigned char, SH_POINT> ShOutputPoint2ub;
+typedef ShAttrib<2, SH_INOUT, unsigned char, SH_POINT> ShInOutPoint2ub;
+typedef ShAttrib<2, SH_TEMP, unsigned char, SH_POINT> ShPoint2ub;
+typedef ShAttrib<2, SH_CONST, unsigned char, SH_POINT> ShConstPoint2ub;
+typedef ShAttrib<3, SH_INPUT, unsigned char, SH_POINT> ShInputPoint3ub;
+typedef ShAttrib<3, SH_OUTPUT, unsigned char, SH_POINT> ShOutputPoint3ub;
+typedef ShAttrib<3, SH_INOUT, unsigned char, SH_POINT> ShInOutPoint3ub;
+typedef ShAttrib<3, SH_TEMP, unsigned char, SH_POINT> ShPoint3ub;
+typedef ShAttrib<3, SH_CONST, unsigned char, SH_POINT> ShConstPoint3ub;
+typedef ShAttrib<4, SH_INPUT, unsigned char, SH_POINT> ShInputPoint4ub;
+typedef ShAttrib<4, SH_OUTPUT, unsigned char, SH_POINT> ShOutputPoint4ub;
+typedef ShAttrib<4, SH_INOUT, unsigned char, SH_POINT> ShInOutPoint4ub;
+typedef ShAttrib<4, SH_TEMP, unsigned char, SH_POINT> ShPoint4ub;
+typedef ShAttrib<4, SH_CONST, unsigned char, SH_POINT> ShConstPoint4ub;
 
 
-typedef ShPoint<1, SH_INPUT, SH_BYTE> ShInputPoint1b;
-typedef ShPoint<1, SH_OUTPUT, SH_BYTE> ShOutputPoint1b;
-typedef ShPoint<1, SH_INOUT, SH_BYTE> ShInOutPoint1b;
-typedef ShPoint<1, SH_TEMP, SH_BYTE> ShPoint1b;
-typedef ShPoint<1, SH_CONST, SH_BYTE> ShConstPoint1b;
-typedef ShPoint<2, SH_INPUT, SH_BYTE> ShInputPoint2b;
-typedef ShPoint<2, SH_OUTPUT, SH_BYTE> ShOutputPoint2b;
-typedef ShPoint<2, SH_INOUT, SH_BYTE> ShInOutPoint2b;
-typedef ShPoint<2, SH_TEMP, SH_BYTE> ShPoint2b;
-typedef ShPoint<2, SH_CONST, SH_BYTE> ShConstPoint2b;
-typedef ShPoint<3, SH_INPUT, SH_BYTE> ShInputPoint3b;
-typedef ShPoint<3, SH_OUTPUT, SH_BYTE> ShOutputPoint3b;
-typedef ShPoint<3, SH_INOUT, SH_BYTE> ShInOutPoint3b;
-typedef ShPoint<3, SH_TEMP, SH_BYTE> ShPoint3b;
-typedef ShPoint<3, SH_CONST, SH_BYTE> ShConstPoint3b;
-typedef ShPoint<4, SH_INPUT, SH_BYTE> ShInputPoint4b;
-typedef ShPoint<4, SH_OUTPUT, SH_BYTE> ShOutputPoint4b;
-typedef ShPoint<4, SH_INOUT, SH_BYTE> ShInOutPoint4b;
-typedef ShPoint<4, SH_TEMP, SH_BYTE> ShPoint4b;
-typedef ShPoint<4, SH_CONST, SH_BYTE> ShConstPoint4b;
+typedef ShAttrib<1, SH_INPUT, float, SH_POINT> ShInputPoint1f;
+typedef ShAttrib<1, SH_OUTPUT, float, SH_POINT> ShOutputPoint1f;
+typedef ShAttrib<1, SH_INOUT, float, SH_POINT> ShInOutPoint1f;
+typedef ShAttrib<1, SH_TEMP, float, SH_POINT> ShPoint1f;
+typedef ShAttrib<1, SH_CONST, float, SH_POINT> ShConstPoint1f;
+typedef ShAttrib<2, SH_INPUT, float, SH_POINT> ShInputPoint2f;
+typedef ShAttrib<2, SH_OUTPUT, float, SH_POINT> ShOutputPoint2f;
+typedef ShAttrib<2, SH_INOUT, float, SH_POINT> ShInOutPoint2f;
+typedef ShAttrib<2, SH_TEMP, float, SH_POINT> ShPoint2f;
+typedef ShAttrib<2, SH_CONST, float, SH_POINT> ShConstPoint2f;
+typedef ShAttrib<3, SH_INPUT, float, SH_POINT> ShInputPoint3f;
+typedef ShAttrib<3, SH_OUTPUT, float, SH_POINT> ShOutputPoint3f;
+typedef ShAttrib<3, SH_INOUT, float, SH_POINT> ShInOutPoint3f;
+typedef ShAttrib<3, SH_TEMP, float, SH_POINT> ShPoint3f;
+typedef ShAttrib<3, SH_CONST, float, SH_POINT> ShConstPoint3f;
+typedef ShAttrib<4, SH_INPUT, float, SH_POINT> ShInputPoint4f;
+typedef ShAttrib<4, SH_OUTPUT, float, SH_POINT> ShOutputPoint4f;
+typedef ShAttrib<4, SH_INOUT, float, SH_POINT> ShInOutPoint4f;
+typedef ShAttrib<4, SH_TEMP, float, SH_POINT> ShPoint4f;
+typedef ShAttrib<4, SH_CONST, float, SH_POINT> ShConstPoint4f;
 
 
-typedef ShPoint<1, SH_INPUT, SH_INTERVAL_DOUBLE> ShInputPoint1i_d;
-typedef ShPoint<1, SH_OUTPUT, SH_INTERVAL_DOUBLE> ShOutputPoint1i_d;
-typedef ShPoint<1, SH_INOUT, SH_INTERVAL_DOUBLE> ShInOutPoint1i_d;
-typedef ShPoint<1, SH_TEMP, SH_INTERVAL_DOUBLE> ShPoint1i_d;
-typedef ShPoint<1, SH_CONST, SH_INTERVAL_DOUBLE> ShConstPoint1i_d;
-typedef ShPoint<2, SH_INPUT, SH_INTERVAL_DOUBLE> ShInputPoint2i_d;
-typedef ShPoint<2, SH_OUTPUT, SH_INTERVAL_DOUBLE> ShOutputPoint2i_d;
-typedef ShPoint<2, SH_INOUT, SH_INTERVAL_DOUBLE> ShInOutPoint2i_d;
-typedef ShPoint<2, SH_TEMP, SH_INTERVAL_DOUBLE> ShPoint2i_d;
-typedef ShPoint<2, SH_CONST, SH_INTERVAL_DOUBLE> ShConstPoint2i_d;
-typedef ShPoint<3, SH_INPUT, SH_INTERVAL_DOUBLE> ShInputPoint3i_d;
-typedef ShPoint<3, SH_OUTPUT, SH_INTERVAL_DOUBLE> ShOutputPoint3i_d;
-typedef ShPoint<3, SH_INOUT, SH_INTERVAL_DOUBLE> ShInOutPoint3i_d;
-typedef ShPoint<3, SH_TEMP, SH_INTERVAL_DOUBLE> ShPoint3i_d;
-typedef ShPoint<3, SH_CONST, SH_INTERVAL_DOUBLE> ShConstPoint3i_d;
-typedef ShPoint<4, SH_INPUT, SH_INTERVAL_DOUBLE> ShInputPoint4i_d;
-typedef ShPoint<4, SH_OUTPUT, SH_INTERVAL_DOUBLE> ShOutputPoint4i_d;
-typedef ShPoint<4, SH_INOUT, SH_INTERVAL_DOUBLE> ShInOutPoint4i_d;
-typedef ShPoint<4, SH_TEMP, SH_INTERVAL_DOUBLE> ShPoint4i_d;
-typedef ShPoint<4, SH_CONST, SH_INTERVAL_DOUBLE> ShConstPoint4i_d;
+typedef ShAttrib<1, SH_INPUT, char, SH_POINT> ShInputPoint1b;
+typedef ShAttrib<1, SH_OUTPUT, char, SH_POINT> ShOutputPoint1b;
+typedef ShAttrib<1, SH_INOUT, char, SH_POINT> ShInOutPoint1b;
+typedef ShAttrib<1, SH_TEMP, char, SH_POINT> ShPoint1b;
+typedef ShAttrib<1, SH_CONST, char, SH_POINT> ShConstPoint1b;
+typedef ShAttrib<2, SH_INPUT, char, SH_POINT> ShInputPoint2b;
+typedef ShAttrib<2, SH_OUTPUT, char, SH_POINT> ShOutputPoint2b;
+typedef ShAttrib<2, SH_INOUT, char, SH_POINT> ShInOutPoint2b;
+typedef ShAttrib<2, SH_TEMP, char, SH_POINT> ShPoint2b;
+typedef ShAttrib<2, SH_CONST, char, SH_POINT> ShConstPoint2b;
+typedef ShAttrib<3, SH_INPUT, char, SH_POINT> ShInputPoint3b;
+typedef ShAttrib<3, SH_OUTPUT, char, SH_POINT> ShOutputPoint3b;
+typedef ShAttrib<3, SH_INOUT, char, SH_POINT> ShInOutPoint3b;
+typedef ShAttrib<3, SH_TEMP, char, SH_POINT> ShPoint3b;
+typedef ShAttrib<3, SH_CONST, char, SH_POINT> ShConstPoint3b;
+typedef ShAttrib<4, SH_INPUT, char, SH_POINT> ShInputPoint4b;
+typedef ShAttrib<4, SH_OUTPUT, char, SH_POINT> ShOutputPoint4b;
+typedef ShAttrib<4, SH_INOUT, char, SH_POINT> ShInOutPoint4b;
+typedef ShAttrib<4, SH_TEMP, char, SH_POINT> ShPoint4b;
+typedef ShAttrib<4, SH_CONST, char, SH_POINT> ShConstPoint4b;
 
 
-typedef ShPoint<1, SH_INPUT, SH_FRAC_USHORT> ShInputPoint1fus;
-typedef ShPoint<1, SH_OUTPUT, SH_FRAC_USHORT> ShOutputPoint1fus;
-typedef ShPoint<1, SH_INOUT, SH_FRAC_USHORT> ShInOutPoint1fus;
-typedef ShPoint<1, SH_TEMP, SH_FRAC_USHORT> ShPoint1fus;
-typedef ShPoint<1, SH_CONST, SH_FRAC_USHORT> ShConstPoint1fus;
-typedef ShPoint<2, SH_INPUT, SH_FRAC_USHORT> ShInputPoint2fus;
-typedef ShPoint<2, SH_OUTPUT, SH_FRAC_USHORT> ShOutputPoint2fus;
-typedef ShPoint<2, SH_INOUT, SH_FRAC_USHORT> ShInOutPoint2fus;
-typedef ShPoint<2, SH_TEMP, SH_FRAC_USHORT> ShPoint2fus;
-typedef ShPoint<2, SH_CONST, SH_FRAC_USHORT> ShConstPoint2fus;
-typedef ShPoint<3, SH_INPUT, SH_FRAC_USHORT> ShInputPoint3fus;
-typedef ShPoint<3, SH_OUTPUT, SH_FRAC_USHORT> ShOutputPoint3fus;
-typedef ShPoint<3, SH_INOUT, SH_FRAC_USHORT> ShInOutPoint3fus;
-typedef ShPoint<3, SH_TEMP, SH_FRAC_USHORT> ShPoint3fus;
-typedef ShPoint<3, SH_CONST, SH_FRAC_USHORT> ShConstPoint3fus;
-typedef ShPoint<4, SH_INPUT, SH_FRAC_USHORT> ShInputPoint4fus;
-typedef ShPoint<4, SH_OUTPUT, SH_FRAC_USHORT> ShOutputPoint4fus;
-typedef ShPoint<4, SH_INOUT, SH_FRAC_USHORT> ShInOutPoint4fus;
-typedef ShPoint<4, SH_TEMP, SH_FRAC_USHORT> ShPoint4fus;
-typedef ShPoint<4, SH_CONST, SH_FRAC_USHORT> ShConstPoint4fus;
+typedef ShAttrib<1, SH_INPUT, unsigned short, SH_POINT> ShInputPoint1us;
+typedef ShAttrib<1, SH_OUTPUT, unsigned short, SH_POINT> ShOutputPoint1us;
+typedef ShAttrib<1, SH_INOUT, unsigned short, SH_POINT> ShInOutPoint1us;
+typedef ShAttrib<1, SH_TEMP, unsigned short, SH_POINT> ShPoint1us;
+typedef ShAttrib<1, SH_CONST, unsigned short, SH_POINT> ShConstPoint1us;
+typedef ShAttrib<2, SH_INPUT, unsigned short, SH_POINT> ShInputPoint2us;
+typedef ShAttrib<2, SH_OUTPUT, unsigned short, SH_POINT> ShOutputPoint2us;
+typedef ShAttrib<2, SH_INOUT, unsigned short, SH_POINT> ShInOutPoint2us;
+typedef ShAttrib<2, SH_TEMP, unsigned short, SH_POINT> ShPoint2us;
+typedef ShAttrib<2, SH_CONST, unsigned short, SH_POINT> ShConstPoint2us;
+typedef ShAttrib<3, SH_INPUT, unsigned short, SH_POINT> ShInputPoint3us;
+typedef ShAttrib<3, SH_OUTPUT, unsigned short, SH_POINT> ShOutputPoint3us;
+typedef ShAttrib<3, SH_INOUT, unsigned short, SH_POINT> ShInOutPoint3us;
+typedef ShAttrib<3, SH_TEMP, unsigned short, SH_POINT> ShPoint3us;
+typedef ShAttrib<3, SH_CONST, unsigned short, SH_POINT> ShConstPoint3us;
+typedef ShAttrib<4, SH_INPUT, unsigned short, SH_POINT> ShInputPoint4us;
+typedef ShAttrib<4, SH_OUTPUT, unsigned short, SH_POINT> ShOutputPoint4us;
+typedef ShAttrib<4, SH_INOUT, unsigned short, SH_POINT> ShInOutPoint4us;
+typedef ShAttrib<4, SH_TEMP, unsigned short, SH_POINT> ShPoint4us;
+typedef ShAttrib<4, SH_CONST, unsigned short, SH_POINT> ShConstPoint4us;
 
 
-typedef ShPoint<1, SH_INPUT, SH_UBYTE> ShInputPoint1ub;
-typedef ShPoint<1, SH_OUTPUT, SH_UBYTE> ShOutputPoint1ub;
-typedef ShPoint<1, SH_INOUT, SH_UBYTE> ShInOutPoint1ub;
-typedef ShPoint<1, SH_TEMP, SH_UBYTE> ShPoint1ub;
-typedef ShPoint<1, SH_CONST, SH_UBYTE> ShConstPoint1ub;
-typedef ShPoint<2, SH_INPUT, SH_UBYTE> ShInputPoint2ub;
-typedef ShPoint<2, SH_OUTPUT, SH_UBYTE> ShOutputPoint2ub;
-typedef ShPoint<2, SH_INOUT, SH_UBYTE> ShInOutPoint2ub;
-typedef ShPoint<2, SH_TEMP, SH_UBYTE> ShPoint2ub;
-typedef ShPoint<2, SH_CONST, SH_UBYTE> ShConstPoint2ub;
-typedef ShPoint<3, SH_INPUT, SH_UBYTE> ShInputPoint3ub;
-typedef ShPoint<3, SH_OUTPUT, SH_UBYTE> ShOutputPoint3ub;
-typedef ShPoint<3, SH_INOUT, SH_UBYTE> ShInOutPoint3ub;
-typedef ShPoint<3, SH_TEMP, SH_UBYTE> ShPoint3ub;
-typedef ShPoint<3, SH_CONST, SH_UBYTE> ShConstPoint3ub;
-typedef ShPoint<4, SH_INPUT, SH_UBYTE> ShInputPoint4ub;
-typedef ShPoint<4, SH_OUTPUT, SH_UBYTE> ShOutputPoint4ub;
-typedef ShPoint<4, SH_INOUT, SH_UBYTE> ShInOutPoint4ub;
-typedef ShPoint<4, SH_TEMP, SH_UBYTE> ShPoint4ub;
-typedef ShPoint<4, SH_CONST, SH_UBYTE> ShConstPoint4ub;
+typedef ShAttrib<1, SH_INPUT, ShFracUByte, SH_POINT> ShInputPoint1fub;
+typedef ShAttrib<1, SH_OUTPUT, ShFracUByte, SH_POINT> ShOutputPoint1fub;
+typedef ShAttrib<1, SH_INOUT, ShFracUByte, SH_POINT> ShInOutPoint1fub;
+typedef ShAttrib<1, SH_TEMP, ShFracUByte, SH_POINT> ShPoint1fub;
+typedef ShAttrib<1, SH_CONST, ShFracUByte, SH_POINT> ShConstPoint1fub;
+typedef ShAttrib<2, SH_INPUT, ShFracUByte, SH_POINT> ShInputPoint2fub;
+typedef ShAttrib<2, SH_OUTPUT, ShFracUByte, SH_POINT> ShOutputPoint2fub;
+typedef ShAttrib<2, SH_INOUT, ShFracUByte, SH_POINT> ShInOutPoint2fub;
+typedef ShAttrib<2, SH_TEMP, ShFracUByte, SH_POINT> ShPoint2fub;
+typedef ShAttrib<2, SH_CONST, ShFracUByte, SH_POINT> ShConstPoint2fub;
+typedef ShAttrib<3, SH_INPUT, ShFracUByte, SH_POINT> ShInputPoint3fub;
+typedef ShAttrib<3, SH_OUTPUT, ShFracUByte, SH_POINT> ShOutputPoint3fub;
+typedef ShAttrib<3, SH_INOUT, ShFracUByte, SH_POINT> ShInOutPoint3fub;
+typedef ShAttrib<3, SH_TEMP, ShFracUByte, SH_POINT> ShPoint3fub;
+typedef ShAttrib<3, SH_CONST, ShFracUByte, SH_POINT> ShConstPoint3fub;
+typedef ShAttrib<4, SH_INPUT, ShFracUByte, SH_POINT> ShInputPoint4fub;
+typedef ShAttrib<4, SH_OUTPUT, ShFracUByte, SH_POINT> ShOutputPoint4fub;
+typedef ShAttrib<4, SH_INOUT, ShFracUByte, SH_POINT> ShInOutPoint4fub;
+typedef ShAttrib<4, SH_TEMP, ShFracUByte, SH_POINT> ShPoint4fub;
+typedef ShAttrib<4, SH_CONST, ShFracUByte, SH_POINT> ShConstPoint4fub;
 
 
-typedef ShPoint<1, SH_INPUT, SH_FRAC_SHORT> ShInputPoint1fs;
-typedef ShPoint<1, SH_OUTPUT, SH_FRAC_SHORT> ShOutputPoint1fs;
-typedef ShPoint<1, SH_INOUT, SH_FRAC_SHORT> ShInOutPoint1fs;
-typedef ShPoint<1, SH_TEMP, SH_FRAC_SHORT> ShPoint1fs;
-typedef ShPoint<1, SH_CONST, SH_FRAC_SHORT> ShConstPoint1fs;
-typedef ShPoint<2, SH_INPUT, SH_FRAC_SHORT> ShInputPoint2fs;
-typedef ShPoint<2, SH_OUTPUT, SH_FRAC_SHORT> ShOutputPoint2fs;
-typedef ShPoint<2, SH_INOUT, SH_FRAC_SHORT> ShInOutPoint2fs;
-typedef ShPoint<2, SH_TEMP, SH_FRAC_SHORT> ShPoint2fs;
-typedef ShPoint<2, SH_CONST, SH_FRAC_SHORT> ShConstPoint2fs;
-typedef ShPoint<3, SH_INPUT, SH_FRAC_SHORT> ShInputPoint3fs;
-typedef ShPoint<3, SH_OUTPUT, SH_FRAC_SHORT> ShOutputPoint3fs;
-typedef ShPoint<3, SH_INOUT, SH_FRAC_SHORT> ShInOutPoint3fs;
-typedef ShPoint<3, SH_TEMP, SH_FRAC_SHORT> ShPoint3fs;
-typedef ShPoint<3, SH_CONST, SH_FRAC_SHORT> ShConstPoint3fs;
-typedef ShPoint<4, SH_INPUT, SH_FRAC_SHORT> ShInputPoint4fs;
-typedef ShPoint<4, SH_OUTPUT, SH_FRAC_SHORT> ShOutputPoint4fs;
-typedef ShPoint<4, SH_INOUT, SH_FRAC_SHORT> ShInOutPoint4fs;
-typedef ShPoint<4, SH_TEMP, SH_FRAC_SHORT> ShPoint4fs;
-typedef ShPoint<4, SH_CONST, SH_FRAC_SHORT> ShConstPoint4fs;
+typedef ShAttrib<1, SH_INPUT, ShHalf, SH_POINT> ShInputPoint1h;
+typedef ShAttrib<1, SH_OUTPUT, ShHalf, SH_POINT> ShOutputPoint1h;
+typedef ShAttrib<1, SH_INOUT, ShHalf, SH_POINT> ShInOutPoint1h;
+typedef ShAttrib<1, SH_TEMP, ShHalf, SH_POINT> ShPoint1h;
+typedef ShAttrib<1, SH_CONST, ShHalf, SH_POINT> ShConstPoint1h;
+typedef ShAttrib<2, SH_INPUT, ShHalf, SH_POINT> ShInputPoint2h;
+typedef ShAttrib<2, SH_OUTPUT, ShHalf, SH_POINT> ShOutputPoint2h;
+typedef ShAttrib<2, SH_INOUT, ShHalf, SH_POINT> ShInOutPoint2h;
+typedef ShAttrib<2, SH_TEMP, ShHalf, SH_POINT> ShPoint2h;
+typedef ShAttrib<2, SH_CONST, ShHalf, SH_POINT> ShConstPoint2h;
+typedef ShAttrib<3, SH_INPUT, ShHalf, SH_POINT> ShInputPoint3h;
+typedef ShAttrib<3, SH_OUTPUT, ShHalf, SH_POINT> ShOutputPoint3h;
+typedef ShAttrib<3, SH_INOUT, ShHalf, SH_POINT> ShInOutPoint3h;
+typedef ShAttrib<3, SH_TEMP, ShHalf, SH_POINT> ShPoint3h;
+typedef ShAttrib<3, SH_CONST, ShHalf, SH_POINT> ShConstPoint3h;
+typedef ShAttrib<4, SH_INPUT, ShHalf, SH_POINT> ShInputPoint4h;
+typedef ShAttrib<4, SH_OUTPUT, ShHalf, SH_POINT> ShOutputPoint4h;
+typedef ShAttrib<4, SH_INOUT, ShHalf, SH_POINT> ShInOutPoint4h;
+typedef ShAttrib<4, SH_TEMP, ShHalf, SH_POINT> ShPoint4h;
+typedef ShAttrib<4, SH_CONST, ShHalf, SH_POINT> ShConstPoint4h;
 
 
-typedef ShPoint<1, SH_INPUT, SH_USHORT> ShInputPoint1us;
-typedef ShPoint<1, SH_OUTPUT, SH_USHORT> ShOutputPoint1us;
-typedef ShPoint<1, SH_INOUT, SH_USHORT> ShInOutPoint1us;
-typedef ShPoint<1, SH_TEMP, SH_USHORT> ShPoint1us;
-typedef ShPoint<1, SH_CONST, SH_USHORT> ShConstPoint1us;
-typedef ShPoint<2, SH_INPUT, SH_USHORT> ShInputPoint2us;
-typedef ShPoint<2, SH_OUTPUT, SH_USHORT> ShOutputPoint2us;
-typedef ShPoint<2, SH_INOUT, SH_USHORT> ShInOutPoint2us;
-typedef ShPoint<2, SH_TEMP, SH_USHORT> ShPoint2us;
-typedef ShPoint<2, SH_CONST, SH_USHORT> ShConstPoint2us;
-typedef ShPoint<3, SH_INPUT, SH_USHORT> ShInputPoint3us;
-typedef ShPoint<3, SH_OUTPUT, SH_USHORT> ShOutputPoint3us;
-typedef ShPoint<3, SH_INOUT, SH_USHORT> ShInOutPoint3us;
-typedef ShPoint<3, SH_TEMP, SH_USHORT> ShPoint3us;
-typedef ShPoint<3, SH_CONST, SH_USHORT> ShConstPoint3us;
-typedef ShPoint<4, SH_INPUT, SH_USHORT> ShInputPoint4us;
-typedef ShPoint<4, SH_OUTPUT, SH_USHORT> ShOutputPoint4us;
-typedef ShPoint<4, SH_INOUT, SH_USHORT> ShInOutPoint4us;
-typedef ShPoint<4, SH_TEMP, SH_USHORT> ShPoint4us;
-typedef ShPoint<4, SH_CONST, SH_USHORT> ShConstPoint4us;
+typedef ShAttrib<1, SH_INPUT, ShFracShort, SH_POINT> ShInputPoint1fs;
+typedef ShAttrib<1, SH_OUTPUT, ShFracShort, SH_POINT> ShOutputPoint1fs;
+typedef ShAttrib<1, SH_INOUT, ShFracShort, SH_POINT> ShInOutPoint1fs;
+typedef ShAttrib<1, SH_TEMP, ShFracShort, SH_POINT> ShPoint1fs;
+typedef ShAttrib<1, SH_CONST, ShFracShort, SH_POINT> ShConstPoint1fs;
+typedef ShAttrib<2, SH_INPUT, ShFracShort, SH_POINT> ShInputPoint2fs;
+typedef ShAttrib<2, SH_OUTPUT, ShFracShort, SH_POINT> ShOutputPoint2fs;
+typedef ShAttrib<2, SH_INOUT, ShFracShort, SH_POINT> ShInOutPoint2fs;
+typedef ShAttrib<2, SH_TEMP, ShFracShort, SH_POINT> ShPoint2fs;
+typedef ShAttrib<2, SH_CONST, ShFracShort, SH_POINT> ShConstPoint2fs;
+typedef ShAttrib<3, SH_INPUT, ShFracShort, SH_POINT> ShInputPoint3fs;
+typedef ShAttrib<3, SH_OUTPUT, ShFracShort, SH_POINT> ShOutputPoint3fs;
+typedef ShAttrib<3, SH_INOUT, ShFracShort, SH_POINT> ShInOutPoint3fs;
+typedef ShAttrib<3, SH_TEMP, ShFracShort, SH_POINT> ShPoint3fs;
+typedef ShAttrib<3, SH_CONST, ShFracShort, SH_POINT> ShConstPoint3fs;
+typedef ShAttrib<4, SH_INPUT, ShFracShort, SH_POINT> ShInputPoint4fs;
+typedef ShAttrib<4, SH_OUTPUT, ShFracShort, SH_POINT> ShOutputPoint4fs;
+typedef ShAttrib<4, SH_INOUT, ShFracShort, SH_POINT> ShInOutPoint4fs;
+typedef ShAttrib<4, SH_TEMP, ShFracShort, SH_POINT> ShPoint4fs;
+typedef ShAttrib<4, SH_CONST, ShFracShort, SH_POINT> ShConstPoint4fs;
 
 
-typedef ShPoint<1, SH_INPUT, SH_UINT> ShInputPoint1ui;
-typedef ShPoint<1, SH_OUTPUT, SH_UINT> ShOutputPoint1ui;
-typedef ShPoint<1, SH_INOUT, SH_UINT> ShInOutPoint1ui;
-typedef ShPoint<1, SH_TEMP, SH_UINT> ShPoint1ui;
-typedef ShPoint<1, SH_CONST, SH_UINT> ShConstPoint1ui;
-typedef ShPoint<2, SH_INPUT, SH_UINT> ShInputPoint2ui;
-typedef ShPoint<2, SH_OUTPUT, SH_UINT> ShOutputPoint2ui;
-typedef ShPoint<2, SH_INOUT, SH_UINT> ShInOutPoint2ui;
-typedef ShPoint<2, SH_TEMP, SH_UINT> ShPoint2ui;
-typedef ShPoint<2, SH_CONST, SH_UINT> ShConstPoint2ui;
-typedef ShPoint<3, SH_INPUT, SH_UINT> ShInputPoint3ui;
-typedef ShPoint<3, SH_OUTPUT, SH_UINT> ShOutputPoint3ui;
-typedef ShPoint<3, SH_INOUT, SH_UINT> ShInOutPoint3ui;
-typedef ShPoint<3, SH_TEMP, SH_UINT> ShPoint3ui;
-typedef ShPoint<3, SH_CONST, SH_UINT> ShConstPoint3ui;
-typedef ShPoint<4, SH_INPUT, SH_UINT> ShInputPoint4ui;
-typedef ShPoint<4, SH_OUTPUT, SH_UINT> ShOutputPoint4ui;
-typedef ShPoint<4, SH_INOUT, SH_UINT> ShInOutPoint4ui;
-typedef ShPoint<4, SH_TEMP, SH_UINT> ShPoint4ui;
-typedef ShPoint<4, SH_CONST, SH_UINT> ShConstPoint4ui;
+typedef ShAttrib<1, SH_INPUT, ShFracInt, SH_POINT> ShInputPoint1fi;
+typedef ShAttrib<1, SH_OUTPUT, ShFracInt, SH_POINT> ShOutputPoint1fi;
+typedef ShAttrib<1, SH_INOUT, ShFracInt, SH_POINT> ShInOutPoint1fi;
+typedef ShAttrib<1, SH_TEMP, ShFracInt, SH_POINT> ShPoint1fi;
+typedef ShAttrib<1, SH_CONST, ShFracInt, SH_POINT> ShConstPoint1fi;
+typedef ShAttrib<2, SH_INPUT, ShFracInt, SH_POINT> ShInputPoint2fi;
+typedef ShAttrib<2, SH_OUTPUT, ShFracInt, SH_POINT> ShOutputPoint2fi;
+typedef ShAttrib<2, SH_INOUT, ShFracInt, SH_POINT> ShInOutPoint2fi;
+typedef ShAttrib<2, SH_TEMP, ShFracInt, SH_POINT> ShPoint2fi;
+typedef ShAttrib<2, SH_CONST, ShFracInt, SH_POINT> ShConstPoint2fi;
+typedef ShAttrib<3, SH_INPUT, ShFracInt, SH_POINT> ShInputPoint3fi;
+typedef ShAttrib<3, SH_OUTPUT, ShFracInt, SH_POINT> ShOutputPoint3fi;
+typedef ShAttrib<3, SH_INOUT, ShFracInt, SH_POINT> ShInOutPoint3fi;
+typedef ShAttrib<3, SH_TEMP, ShFracInt, SH_POINT> ShPoint3fi;
+typedef ShAttrib<3, SH_CONST, ShFracInt, SH_POINT> ShConstPoint3fi;
+typedef ShAttrib<4, SH_INPUT, ShFracInt, SH_POINT> ShInputPoint4fi;
+typedef ShAttrib<4, SH_OUTPUT, ShFracInt, SH_POINT> ShOutputPoint4fi;
+typedef ShAttrib<4, SH_INOUT, ShFracInt, SH_POINT> ShInOutPoint4fi;
+typedef ShAttrib<4, SH_TEMP, ShFracInt, SH_POINT> ShPoint4fi;
+typedef ShAttrib<4, SH_CONST, ShFracInt, SH_POINT> ShConstPoint4fi;
 
 
-typedef ShPoint<1, SH_INPUT, SH_DOUBLE> ShInputPoint1d;
-typedef ShPoint<1, SH_OUTPUT, SH_DOUBLE> ShOutputPoint1d;
-typedef ShPoint<1, SH_INOUT, SH_DOUBLE> ShInOutPoint1d;
-typedef ShPoint<1, SH_TEMP, SH_DOUBLE> ShPoint1d;
-typedef ShPoint<1, SH_CONST, SH_DOUBLE> ShConstPoint1d;
-typedef ShPoint<2, SH_INPUT, SH_DOUBLE> ShInputPoint2d;
-typedef ShPoint<2, SH_OUTPUT, SH_DOUBLE> ShOutputPoint2d;
-typedef ShPoint<2, SH_INOUT, SH_DOUBLE> ShInOutPoint2d;
-typedef ShPoint<2, SH_TEMP, SH_DOUBLE> ShPoint2d;
-typedef ShPoint<2, SH_CONST, SH_DOUBLE> ShConstPoint2d;
-typedef ShPoint<3, SH_INPUT, SH_DOUBLE> ShInputPoint3d;
-typedef ShPoint<3, SH_OUTPUT, SH_DOUBLE> ShOutputPoint3d;
-typedef ShPoint<3, SH_INOUT, SH_DOUBLE> ShInOutPoint3d;
-typedef ShPoint<3, SH_TEMP, SH_DOUBLE> ShPoint3d;
-typedef ShPoint<3, SH_CONST, SH_DOUBLE> ShConstPoint3d;
-typedef ShPoint<4, SH_INPUT, SH_DOUBLE> ShInputPoint4d;
-typedef ShPoint<4, SH_OUTPUT, SH_DOUBLE> ShOutputPoint4d;
-typedef ShPoint<4, SH_INOUT, SH_DOUBLE> ShInOutPoint4d;
-typedef ShPoint<4, SH_TEMP, SH_DOUBLE> ShPoint4d;
-typedef ShPoint<4, SH_CONST, SH_DOUBLE> ShConstPoint4d;
-
-
-typedef ShPoint<1, SH_INPUT, SH_INTERVAL_FLOAT> ShInputPoint1i_f;
-typedef ShPoint<1, SH_OUTPUT, SH_INTERVAL_FLOAT> ShOutputPoint1i_f;
-typedef ShPoint<1, SH_INOUT, SH_INTERVAL_FLOAT> ShInOutPoint1i_f;
-typedef ShPoint<1, SH_TEMP, SH_INTERVAL_FLOAT> ShPoint1i_f;
-typedef ShPoint<1, SH_CONST, SH_INTERVAL_FLOAT> ShConstPoint1i_f;
-typedef ShPoint<2, SH_INPUT, SH_INTERVAL_FLOAT> ShInputPoint2i_f;
-typedef ShPoint<2, SH_OUTPUT, SH_INTERVAL_FLOAT> ShOutputPoint2i_f;
-typedef ShPoint<2, SH_INOUT, SH_INTERVAL_FLOAT> ShInOutPoint2i_f;
-typedef ShPoint<2, SH_TEMP, SH_INTERVAL_FLOAT> ShPoint2i_f;
-typedef ShPoint<2, SH_CONST, SH_INTERVAL_FLOAT> ShConstPoint2i_f;
-typedef ShPoint<3, SH_INPUT, SH_INTERVAL_FLOAT> ShInputPoint3i_f;
-typedef ShPoint<3, SH_OUTPUT, SH_INTERVAL_FLOAT> ShOutputPoint3i_f;
-typedef ShPoint<3, SH_INOUT, SH_INTERVAL_FLOAT> ShInOutPoint3i_f;
-typedef ShPoint<3, SH_TEMP, SH_INTERVAL_FLOAT> ShPoint3i_f;
-typedef ShPoint<3, SH_CONST, SH_INTERVAL_FLOAT> ShConstPoint3i_f;
-typedef ShPoint<4, SH_INPUT, SH_INTERVAL_FLOAT> ShInputPoint4i_f;
-typedef ShPoint<4, SH_OUTPUT, SH_INTERVAL_FLOAT> ShOutputPoint4i_f;
-typedef ShPoint<4, SH_INOUT, SH_INTERVAL_FLOAT> ShInOutPoint4i_f;
-typedef ShPoint<4, SH_TEMP, SH_INTERVAL_FLOAT> ShPoint4i_f;
-typedef ShPoint<4, SH_CONST, SH_INTERVAL_FLOAT> ShConstPoint4i_f;
-
-
-typedef ShPoint<1, SH_INPUT, SH_FRAC_INT> ShInputPoint1fi;
-typedef ShPoint<1, SH_OUTPUT, SH_FRAC_INT> ShOutputPoint1fi;
-typedef ShPoint<1, SH_INOUT, SH_FRAC_INT> ShInOutPoint1fi;
-typedef ShPoint<1, SH_TEMP, SH_FRAC_INT> ShPoint1fi;
-typedef ShPoint<1, SH_CONST, SH_FRAC_INT> ShConstPoint1fi;
-typedef ShPoint<2, SH_INPUT, SH_FRAC_INT> ShInputPoint2fi;
-typedef ShPoint<2, SH_OUTPUT, SH_FRAC_INT> ShOutputPoint2fi;
-typedef ShPoint<2, SH_INOUT, SH_FRAC_INT> ShInOutPoint2fi;
-typedef ShPoint<2, SH_TEMP, SH_FRAC_INT> ShPoint2fi;
-typedef ShPoint<2, SH_CONST, SH_FRAC_INT> ShConstPoint2fi;
-typedef ShPoint<3, SH_INPUT, SH_FRAC_INT> ShInputPoint3fi;
-typedef ShPoint<3, SH_OUTPUT, SH_FRAC_INT> ShOutputPoint3fi;
-typedef ShPoint<3, SH_INOUT, SH_FRAC_INT> ShInOutPoint3fi;
-typedef ShPoint<3, SH_TEMP, SH_FRAC_INT> ShPoint3fi;
-typedef ShPoint<3, SH_CONST, SH_FRAC_INT> ShConstPoint3fi;
-typedef ShPoint<4, SH_INPUT, SH_FRAC_INT> ShInputPoint4fi;
-typedef ShPoint<4, SH_OUTPUT, SH_FRAC_INT> ShOutputPoint4fi;
-typedef ShPoint<4, SH_INOUT, SH_FRAC_INT> ShInOutPoint4fi;
-typedef ShPoint<4, SH_TEMP, SH_FRAC_INT> ShPoint4fi;
-typedef ShPoint<4, SH_CONST, SH_FRAC_INT> ShConstPoint4fi;
+typedef ShAttrib<1, SH_INPUT, unsigned int, SH_POINT> ShInputPoint1ui;
+typedef ShAttrib<1, SH_OUTPUT, unsigned int, SH_POINT> ShOutputPoint1ui;
+typedef ShAttrib<1, SH_INOUT, unsigned int, SH_POINT> ShInOutPoint1ui;
+typedef ShAttrib<1, SH_TEMP, unsigned int, SH_POINT> ShPoint1ui;
+typedef ShAttrib<1, SH_CONST, unsigned int, SH_POINT> ShConstPoint1ui;
+typedef ShAttrib<2, SH_INPUT, unsigned int, SH_POINT> ShInputPoint2ui;
+typedef ShAttrib<2, SH_OUTPUT, unsigned int, SH_POINT> ShOutputPoint2ui;
+typedef ShAttrib<2, SH_INOUT, unsigned int, SH_POINT> ShInOutPoint2ui;
+typedef ShAttrib<2, SH_TEMP, unsigned int, SH_POINT> ShPoint2ui;
+typedef ShAttrib<2, SH_CONST, unsigned int, SH_POINT> ShConstPoint2ui;
+typedef ShAttrib<3, SH_INPUT, unsigned int, SH_POINT> ShInputPoint3ui;
+typedef ShAttrib<3, SH_OUTPUT, unsigned int, SH_POINT> ShOutputPoint3ui;
+typedef ShAttrib<3, SH_INOUT, unsigned int, SH_POINT> ShInOutPoint3ui;
+typedef ShAttrib<3, SH_TEMP, unsigned int, SH_POINT> ShPoint3ui;
+typedef ShAttrib<3, SH_CONST, unsigned int, SH_POINT> ShConstPoint3ui;
+typedef ShAttrib<4, SH_INPUT, unsigned int, SH_POINT> ShInputPoint4ui;
+typedef ShAttrib<4, SH_OUTPUT, unsigned int, SH_POINT> ShOutputPoint4ui;
+typedef ShAttrib<4, SH_INOUT, unsigned int, SH_POINT> ShInOutPoint4ui;
+typedef ShAttrib<4, SH_TEMP, unsigned int, SH_POINT> ShPoint4ui;
+typedef ShAttrib<4, SH_CONST, unsigned int, SH_POINT> ShConstPoint4ui;
 
 
 
 } // namespace SH
-#include "ShPointImpl.hpp"
 
 #endif // SH_SHPOINT_HPP

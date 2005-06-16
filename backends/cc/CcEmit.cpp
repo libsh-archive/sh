@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -158,6 +155,7 @@ const CcOpCode opCodeTable[] = {
   {SH_OP_CBRT,  "pow(#0, 1 / 3.0)"},
   {SH_OP_CEIL,  "ceil(#0)"},
   {SH_OP_COS,   "cos(#0)"},
+  {SH_OP_COSH,  "cosh(#0)"},
   {SH_OP_EXP,   "exp(#0)"},
   {SH_OP_EXP2,  "exp2(#0)"},
   {SH_OP_EXP10, "exp10(#0)"},
@@ -170,15 +168,17 @@ const CcOpCode opCodeTable[] = {
   {SH_OP_MAD,   "$0 * $1 + $2"},
   {SH_OP_MAX,   "($0 > $1 ? $0 : $1)"},
   {SH_OP_MIN,   "($0 < $1 ? $0 : $1)"}, 
-  {SH_OP_MOD,   "fmod($0, $1)"},
+  {SH_OP_MOD,   "($0 - $1 * floor((double)$0 / $1))"},
   {SH_OP_POW,   "pow($0, $1)"},
   {SH_OP_RCP,   "1 / #0"},
   {SH_OP_RND,   "floor(#0 + 0.5)"},
   {SH_OP_RSQ,   "1 / sqrt(#0)"},
   {SH_OP_SIN,   "sin(#0)"},
+  {SH_OP_SINH,  "sinh(#0)"},
   {SH_OP_SGN,   "(#0 < 0 ? -1 : (#0 > 0 ? 1 : 0))"},
   {SH_OP_SQRT,  "sqrt(#0)"},
   {SH_OP_TAN,   "tan(#0)"},
+  {SH_OP_TANH,  "tanh(#0)"},
   {SH_OP_COND,  "($0 > 0 ? $1 : $2)"},
   {SH_OP_FETCH, "#0"},
 
@@ -307,6 +307,40 @@ void CcBackendCode::emit(const ShStatement& stmt) {
         break;
       }
 
+    case SH_OP_LIT:
+      {
+        m_code << "  {" << std::endl;
+	
+	// Clamp to zero the first two arguments
+	m_code << "    " << resolve(stmt.src[0], 0) << " = (" 
+	       << resolve(stmt.src[0], 0) << " > 0) ? " 
+	       << resolve(stmt.src[0], 0) << " : 0;" << std::endl;
+	m_code << "    " << resolve(stmt.src[0], 1) << " = (" 
+	       << resolve(stmt.src[0], 1) << " > 0) ? " 
+	       << resolve(stmt.src[0], 1) << " : 0;" << std::endl;
+
+	// Clamp to -128, 128 the third argument
+	m_code << "    " << resolve(stmt.src[0], 2) << " = (" 
+	       << resolve(stmt.src[0], 2) << " > -128.0) ? " 
+	       << resolve(stmt.src[0], 2) << " : -128.0;" << std::endl;
+	m_code << "    " << resolve(stmt.src[0], 2) << " = (" 
+	       << resolve(stmt.src[0], 2) << " < 128.0) ? " 
+	       << resolve(stmt.src[0], 2) << " : 128.0;" << std::endl;
+
+	// Result according to OpenGL spec
+	m_code << "    " << resolve(stmt.dest, 0) << " = 1;" << std::endl;
+	m_code << "    " << resolve(stmt.dest, 1) << " = "
+	       << resolve(stmt.src[0], 0) << ";" << std::endl;
+	m_code << "    " << resolve(stmt.dest, 2) << " = (" 
+	       << resolve(stmt.src[0], 0) << " > 0)" << " * pow(" 
+	       << resolve(stmt.src[0], 1) << ", " << resolve(stmt.src[0], 2)
+	       << ");" << std::endl;
+	m_code << "    " << resolve(stmt.dest, 3) << " = 1;" << std::endl;
+
+	m_code << "  }" << std::endl;
+	break;
+      }
+
     case SH_OP_NORM:
       {
         m_code << "  {" << std::endl;
@@ -405,11 +439,11 @@ void CcBackendCode::emitTexLookup(const ShStatement& stmt, const char* texfunc) 
   }
 
   // names of the functors to use for different texture lookup types 
-  std::string srcInterp, srcFilter, srcWrap, destClamp; 
+  std::string srcInterp, srcFilter, srcWrap;
 
   if(node->traits().interpolation() != 0) {
       //shError(ShBackendException("cc backend supports only nearest-neighbour texture lookup."));
-      SH_DEBUG_WARN("cc backend supports only nearest-neighbour texture lookup.");
+      //SH_DEBUG_WARN("cc backend supports only nearest-neighbour texture lookup.");
   }
 
   if (node->traits().filtering() != ShTextureTraits::SH_FILTER_NONE) {
@@ -428,14 +462,6 @@ void CcBackendCode::emitTexLookup(const ShStatement& stmt, const char* texfunc) 
     default:
       shError(ShBackendException("cc backend does not support requested texture wrapping mode."));
       break;
-  }
-
-  switch(node->traits().clamping()) {
-    case ShTextureTraits::SH_CLAMPED:
-      destClamp = "sh_gcc_backend_clamped";
-      break;
-    default:
-      destClamp = "sh_gcc_backend_unclamped";
   }
 
   m_code << "  {" << std::endl;
@@ -468,8 +494,8 @@ void CcBackendCode::emitTexLookup(const ShStatement& stmt, const char* texfunc) 
      << node->width() << ", "
      << node->height() << ", "
      << node->depth() <<  ", "
-     << srcWrap << ", "
-     << destClamp << ">("
+     << ctype(node->valueType()) << "," 
+     << srcWrap << ">("
    << resolve(stmt.src[0])
    << ", "
    << srcvar

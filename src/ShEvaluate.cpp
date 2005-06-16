@@ -1,5 +1,28 @@
+// Sh: A GPU metaprogramming language.
+//
+// Copyright 2003-2005 Serious Hack Inc.
+// 
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+// 
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+// 
+// 1. The origin of this software must not be misrepresented; you must
+// not claim that you wrote the original software. If you use this
+// software in a product, an acknowledgment in the product documentation
+// would be appreciated but is not required.
+// 
+// 2. Altered source versions must be plainly marked as such, and must
+// not be misrepresented as being the original software.
+// 
+// 3. This notice may not be removed or altered from any source
+// distribution.
+//////////////////////////////////////////////////////////////////////////////
 #include "ShEvaluate.hpp"
-#include "ShInstructions.hpp"
+#include "ShEval.hpp"
 #include "ShDebug.hpp"
 #include "ShContext.hpp"
 #include "ShVariant.hpp"
@@ -8,156 +31,35 @@ namespace SH {
 
 void evaluate(ShStatement& stmt)
 {
+  if(stmt.dest.null()) return;
   // TODO: Maybe not do this _every_ time we call evaluate...
   stmt.dest.node()->addVariant();
-  for (int i = 0; i < opInfo[stmt.op].arity; i++) {
+  int arity = opInfo[stmt.op].arity;
+  for (int i = 0; i < arity; i++) {
     stmt.src[i].node()->addVariant();
   }
   // Make sure we are outside of a program definition
   ShContext::current()->enter(0);
-  switch (stmt.op) {
-  case SH_OP_ASN:
-    shASN(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_ADD:
-    shADD(stmt.dest, stmt.src[0], stmt.src[1]);
-    break;
-  case SH_OP_MUL:
-    shMUL(stmt.dest, stmt.src[0], stmt.src[1]);
-    break;
-  case SH_OP_DIV:
-    shDIV(stmt.dest, stmt.src[0], stmt.src[1]);
-    break;
-  case SH_OP_SLT:
-    shSLT(stmt.dest, stmt.src[0], stmt.src[1]);
-    break;
-  case SH_OP_SLE:
-    shSLE(stmt.dest, stmt.src[0], stmt.src[1]);
-    break;
-  case SH_OP_SGT:
-    shSGT(stmt.dest, stmt.src[0], stmt.src[1]);
-    break;
-  case SH_OP_SGE:
-    shSGE(stmt.dest, stmt.src[0], stmt.src[1]);
-    break;
-  case SH_OP_SEQ:
-    shSEQ(stmt.dest, stmt.src[0], stmt.src[1]);
-    break;
-  case SH_OP_SNE:
-    shSNE(stmt.dest, stmt.src[0], stmt.src[1]);
-    break;
-  case SH_OP_ABS:
-    shABS(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_ACOS:
-    shACOS(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_ASIN:
-    shASIN(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_ATAN:
-    shATAN(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_ATAN2:
-    shATAN2(stmt.dest, stmt.src[0], stmt.src[1]);
-    break;
-  case SH_OP_CEIL:
-    shCEIL(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_COS:
-    shCOS(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_CMUL:
-    shCMUL(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_CSUM:
-    shCSUM(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_DOT:
-    shDOT(stmt.dest, stmt.src[0], stmt.src[1]);
-    break;
-  case SH_OP_DX:
-    shDX(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_DY:
-    shDY(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_EXP:
-    shEXP(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_EXP2:
-    shEXP2(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_EXP10:
-    shEXP10(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_FLR:
-    shFLR(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_FRAC:
-    shFRAC(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_LOG:
-    shLOG(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_LOG2:
-    shLOG2(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_LOG10:
-    shLOG10(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_LRP:
-    shLRP(stmt.dest, stmt.src[0], stmt.src[1], stmt.src[2]);
-    break;
-  case SH_OP_MAD:
-    shMAD(stmt.dest, stmt.src[0], stmt.src[1], stmt.src[2]);
-    break;
-  case SH_OP_MAX:
-    shMAX(stmt.dest, stmt.src[0], stmt.src[1]);
-    break;
-  case SH_OP_MIN:
-    shMIN(stmt.dest, stmt.src[0], stmt.src[1]);
-    break;
-  case SH_OP_MOD:
-    shMOD(stmt.dest, stmt.src[0], stmt.src[1]);
-    break;
-  case SH_OP_POW:
-    shPOW(stmt.dest, stmt.src[0], stmt.src[1]);
-    break;
-  case SH_OP_RCP:
-    shRCP(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_RSQ:
-    shRSQ(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_SGN:
-    shSGN(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_SIN:
-    shSIN(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_SQRT:
-    shSQRT(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_TAN:
-    shTAN(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_NORM:
-    shNORM(stmt.dest, stmt.src[0]);
-    break;
-  case SH_OP_XPD:
-    shXPD(stmt.dest, stmt.src[0], stmt.src[1]);
-    break;
-  case SH_OP_COND:
-    shCOND(stmt.dest, stmt.src[0], stmt.src[1], stmt.src[2]);
-    break;
-  case SH_OP_KIL:
-    shKIL(stmt.src[0]);
-    break;
-  default:
-    // TODO: Replace with shError().
-    SH_DEBUG_ASSERT(0 && "Invalid Statement");
-    break;
+  ShVariant *dv, *sv[3];
+  dv = sv[0] = sv[1] = sv[2] = 0;
+  bool newd, news[3];
+  if(stmt.op == SH_OP_KIL) {
+    newd = false;
+  } else {
+    newd = stmt.dest.loadVariant(dv);
+  }
+  for(int i = 0; i < arity; ++i) {
+    news[i] = stmt.src[i].loadVariant(sv[i]);
+  }
+  (*ShEval::instance())(stmt.op, dv, sv[0], sv[1], sv[2]);
+  if(newd) {
+    stmt.dest.setVariant(dv);
+    delete dv;
+  } else {
+    stmt.dest.updateVariant();
+  }
+  for(int i = 0; i < arity; ++i) {
+    if(news[i]) delete sv[i];
   }
   ShContext::current()->exit();
 }

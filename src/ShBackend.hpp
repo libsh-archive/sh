@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -33,7 +30,12 @@
 #include "ShDllExport.hpp"
 #include "ShRefCount.hpp"
 #include "ShProgram.hpp"
+#include "ShProgramSet.hpp"
 #include "ShVariableNode.hpp"
+
+#ifndef WIN32
+  struct lt_dlhandle_struct;
+#endif
 
 namespace SH  {
 
@@ -59,6 +61,12 @@ public:
   /// Bind this shader code after it has been uploaded.
   virtual void bind() = 0;
 
+  /// Unbind this shader.
+  virtual void unbind() = 0;
+
+  /// Upload any textures and uniform parameters which are out-of-date but required
+  virtual void update() = 0;
+
   /// Update the value of a uniform parameter after it has changed.
   virtual void updateUniform(const ShVariableNodePtr& uniform) = 0;
 
@@ -73,37 +81,110 @@ public:
 typedef ShPointer<ShBackendCode> ShBackendCodePtr;
 typedef ShPointer<const ShBackendCode> ShBackendCodeCPtr;
 
+// A backend-specific set of programs, to be linked together/bound at once
+class
+SH_DLLEXPORT ShBackendSet : public ShRefCountable {
+public:
+  virtual ~ShBackendSet();
+
+  virtual void link() = 0;
+
+  virtual void bind() = 0;
+  virtual void unbind() = 0;
+};
+
+typedef ShPointer<ShBackendSet> ShBackendSetPtr;
+typedef ShPointer<const ShBackendSet> ShBackendSetCPtr;
+
 class ShTransformer;
 class
 SH_DLLEXPORT ShBackend : public ShRefCountable {
 public:
   virtual ~ShBackend();
-  virtual std::string name() const = 0;
 
-  /// Generate the backend code for a particular shader. Ensure that
-  /// ShEnvironment::shader is the same as shader before calling this,
-  /// since extra variables may be declared inside this function!
-  virtual ShBackendCodePtr generateCode(const std::string& target,
-                                        const ShProgramNodeCPtr& shader) = 0;
+  /** Short name of the backend (e.g. "arb", "cc", "glsl")*/
+  virtual std::string name() const { return "";}
 
-  // execute a stream program, if supported
+  /** Backend-specific version number */
+  virtual std::string version() const = 0;
+
+  /** Generate the backend code for a particular shader. */
+  virtual ShBackendCodePtr generate_code(const std::string& target,
+                                         const ShProgramNodeCPtr& shader) = 0;
+
+  virtual ShBackendSetPtr generate_set(const ShProgramSet& s);
+  
+  /** Execute a stream program, if supported */
   virtual void execute(const ShProgramNodeCPtr& program, ShStream& dest) = 0;
   
-  typedef std::vector< ShPointer<ShBackend> > ShBackendList;
+  /** Unbind all programs bound under the backend */
+  virtual void unbind_all_programs();
 
-  static ShBackendList::iterator begin();
-  static ShBackendList::iterator end();
+  /** Unbind all programs bound under all backends */
+  static void unbind_all_backends();
 
-  static ShPointer<ShBackend> lookup(const std::string& name);
+  /** Add a backend to the list of selected backends */
+  static bool use_backend(const std::string& backend_name);
+
+  /** Checks whether the backend is available or not */
+  static bool have_backend(const std::string& backend_name);
+
+  /** Clear the list of selected backends */
+  static void clear_backends();
+
+  /** Find the name of the best backend that handles the given target */
+  static std::string target_handler(const std::string& target, bool restrict_to_selected);
+
+  /** Returns a backend that can run the specified target */
+  static ShPointer<ShBackend> get_backend(const std::string& target);
+
+  /** Returns a list of targets derived from a generic target
+      name. e.g. "arb:vertex, glsl:vertex" is returned when the
+      generic target is "gpu:vertex". */
+  static std::list<std::string> derived_targets(const std::string& target);
+
+#ifndef WIN32
+  typedef lt_dlhandle_struct* LibraryHandle;
+#else
+  typedef void* LibraryHandle;
+#endif
+  typedef std::map<std::string, LibraryHandle> LibraryMap;
+  typedef std::map<std::string, ShPointer<ShBackend> > BackendMap;
+  typedef std::set<std::string> BackendSet;
 
 protected:
   ShBackend();
   
 private:
+  static BackendMap* m_instantiated_backends;
+  static BackendSet* m_selected_backends;
+  static LibraryMap* m_loaded_libraries;
+  static bool m_done_init;
+  static bool m_all_backends_loaded;
+
+  /** Initialize the data structures */
   static void init();
 
-  static ShBackendList* m_backends;
-  static bool m_doneInit;
+  /** Convert the backend name (e.g. "arb") to a filename
+   * Returns an empty string if a library cannot be found. */
+  static std::string lookup_filename(const std::string& backend_name);
+
+  /** Check that the backend name doesn't contain invalid characters. */
+  static bool is_valid_name(const std::string& backend_name);
+
+  /** Load the given library and initialize the backend it contains
+   * Returns true if the library was loaded successfully. */
+  static bool load_library(const std::string& filename);
+
+  /** Load all libraries contained in the given directory */
+  static void load_libraries(const std::string& directory);
+
+  /** Return the cost of the given target on the given backend
+   * (0 == not handled, 1 == perfect match, 2 == very good, etc.) */
+  static int target_cost(const std::string& backend_name, const std::string& target);
+  
+  /** Instantiate and initialize the backend */
+  static ShPointer<ShBackend> instantiate_backend(const std::string& backend_name);
 };
 
 typedef ShPointer<ShBackend> ShBackendPtr;

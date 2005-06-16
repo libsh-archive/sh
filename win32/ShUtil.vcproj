@@ -35,7 +35,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/libshutild.lib"/>
+				OutputFile="$(OutDir)/libshutil_debug.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -117,6 +117,9 @@
 			</File>
 			<File
 				RelativePath="..\util\ShObjMesh.cpp">
+			</File>
+			<File
+				RelativePath="..\util\shutil.cpp">
 			</File>
 		</Filter>
 		<Filter

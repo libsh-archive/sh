@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -27,8 +24,11 @@
 #ifndef SHDATATYPE_HPP
 #define SHDATATYPE_HPP
 
+#include "ShUtility.hpp"
 #include "ShVariableType.hpp"
-#include "ShInterval.hpp"
+#include "ShHalf.hpp"
+#include "ShFraction.hpp"
+#include "ShStorageType.hpp"
 
 /** @file ShDataType.hpp
  * Defines the host computation and memory storage c++ types associated with
@@ -37,121 +37,88 @@
  * Also defines   
  */
 namespace SH {
-
-/// Used to denote the kinds of C++ data types associated with a Value type. 
+/**  Used to denote the kinds of C++ data types associated with a Value type. 
+ */
 enum ShDataType {
-  SH_HOST, ///< computation data type on the host
-  SH_MEM, ///< data type stored in memory on the host
+  SH_HOST,  //< computation data type on the host
+  SH_MEM,  //< data type stored in memory on the host
   SH_DATATYPE_END
 };
 
 SH_DLLEXPORT
 extern const char* dataTypeName[];
 
-/// Sets the actual host computation and memory data types for a given Value type.
-/// The default is computation and memory types equal the Value type.
-/// Defined below are the exceptions to this rule
-///
-/// half floats - memory type is 1 sign bit, 5 exponent bits, 10 mantissa bits
-///               see ATI_pixel_format_float for specification
-///               (NV_half_float is similar, except it has NaN and INF)
-///
-// @{
-template<ShValueType V, ShDataType DT>
-struct ShDataTypeCppType;
+/** Sets the actual host computation and memory data types for a given Value type.
+ *  The default is computation and memory types equal the Value type.
+ *  Defined below are the exceptions to this rule
+ * 
+ *  half floats - memory type is 1 sign bit, 5 exponent bits, 10 mantissa bits
+ *                see ATI_pixel_format_float for specification
+ *                (NV_half_float is similar, except it has NaN and INF)
+ * 
+ * @{ */
+template<typename T, ShDataType DT> struct ShDataTypeCppType; 
 
-#define SH_VALUETYPE_DATATYPE(V, hostType, memType)\
-  template<> struct ShDataTypeCppType<V, SH_HOST> { typedef hostType type; }; \
-  template<> struct ShDataTypeCppType<V, SH_MEM> { typedef memType type; }; 
+template<typename T> struct ShDataTypeCppType<T, SH_HOST> { typedef T type; }; 
+template<typename T> struct ShDataTypeCppType<T, SH_MEM> { typedef T type; }; 
 
-SH_VALUETYPE_DATATYPE(SH_INTERVAL_DOUBLE, ShInterval<double>, ShInterval<double>);
-SH_VALUETYPE_DATATYPE(SH_INTERVAL_FLOAT, ShInterval<float>, ShInterval<float>);
+// define special cases here
+#define SH_VALUETYPE_DATATYPE(T, hostType, memType)\
+  template<> struct ShDataTypeCppType<T, SH_HOST> { typedef hostType type; }; \
+  template<> struct ShDataTypeCppType<T, SH_MEM> { typedef memType type; }; 
 
-SH_VALUETYPE_DATATYPE(SH_DOUBLE, double, double);
-SH_VALUETYPE_DATATYPE(SH_FLOAT, float, float);
-SH_VALUETYPE_DATATYPE(SH_HALF, float, unsigned short);
+SH_VALUETYPE_DATATYPE(ShHalf, float, ShHalf); 
 
-SH_VALUETYPE_DATATYPE(SH_INT, int, int);
-SH_VALUETYPE_DATATYPE(SH_SHORT, short, short);
-SH_VALUETYPE_DATATYPE(SH_BYTE, char, char);
-SH_VALUETYPE_DATATYPE(SH_UINT, unsigned int, unsigned int);
-SH_VALUETYPE_DATATYPE(SH_USHORT, unsigned short, unsigned short);
-SH_VALUETYPE_DATATYPE(SH_UBYTE, unsigned char, unsigned char);
-
-SH_VALUETYPE_DATATYPE(SH_FRAC_INT, float, int);
-SH_VALUETYPE_DATATYPE(SH_FRAC_SHORT, float, short);
-SH_VALUETYPE_DATATYPE(SH_FRAC_BYTE, float, char);
-SH_VALUETYPE_DATATYPE(SH_FRAC_UINT, float, unsigned int);
-SH_VALUETYPE_DATATYPE(SH_FRAC_USHORT, float, unsigned short);
-SH_VALUETYPE_DATATYPE(SH_FRAC_UBYTE, float, unsigned char);
-
-template<ShValueType V> struct ShHostType { typedef typename ShDataTypeCppType<V, SH_HOST>::type type; };
-template<ShValueType V> struct ShMemType { typedef typename ShDataTypeCppType<V, SH_MEM>::type type; };
+template<typename T> struct ShHostType { typedef typename ShDataTypeCppType<T, SH_HOST>::type type; };
+template<typename T> struct ShMemType { typedef typename ShDataTypeCppType<T, SH_MEM>::type type; };
 // @}
 
-/// Sets the constant values for a given data type.
-// Currently only the additive and multiplicative inverses are here.
-// And with all current types, Zero is a false value and One is a true value
-// (although usually not the only ones).
-template<ShValueType V, ShDataType DT> 
+/**  Sets the constant values for a given data type.
+ * Currently only the additive and multiplicative inverses are here.
+ * And with all current types, Zero is a false value and One is a true value
+ * (although usually not the only ones).
+ * @{ */
+template<typename T, ShDataType DT> 
 struct ShDataTypeConstant {
-    typedef typename ShDataTypeCppType<V, DT>::type type;
+    typedef typename ShDataTypeCppType<T, DT>::type type;
     static const type Zero; /* additive identity and also a true value */ \
     static const type One; /* multiplicative identity also a false value */ \
 };
 
-template<ShValueType V, ShDataType DT>
-const typename ShDataTypeCppType<V, DT>::type ShDataTypeConstant<V, DT>::Zero = 0; 
+template<typename T, ShDataType DT>
+const typename ShDataTypeCppType<T, DT>::type ShDataTypeConstant<T, DT>::Zero = 
+  (typename ShDataTypeCppType<T, DT>::type)(0.0); 
 
-template<ShValueType V, ShDataType DT>
-const typename ShDataTypeCppType<V, DT>::type ShDataTypeConstant<V, DT>::One = 1; 
-
-/** Special cases
- * @{  */
-#define SH_DTC_SPEC(V, DT) \
-template<> struct ShDataTypeConstant<V, DT> { \
-    typedef ShDataTypeCppType<V, DT>::type type; \
-    static const type Zero; /* additive identity and also a true value */ \
-    static const type One; /* multiplicative identity also a false value */ \
-};
-
-SH_DTC_SPEC(SH_HALF, SH_MEM);
-SH_DTC_SPEC(SH_FRAC_INT, SH_MEM);
-SH_DTC_SPEC(SH_FRAC_SHORT, SH_MEM);
-SH_DTC_SPEC(SH_FRAC_BYTE, SH_MEM);
-SH_DTC_SPEC(SH_FRAC_UINT, SH_MEM);
-SH_DTC_SPEC(SH_FRAC_USHORT, SH_MEM);
-SH_DTC_SPEC(SH_FRAC_UBYTE, SH_MEM);
+template<typename T, ShDataType DT>
+const typename ShDataTypeCppType<T, DT>::type ShDataTypeConstant<T, DT>::One = 
+  (typename ShDataTypeCppType<T, DT>::type)(1.0); 
 // @}
 
 /** Returns the boolean cond in the requested data type */
-template<ShValueType V, ShDataType DT>
+template<typename T, ShDataType DT>
 inline
-typename ShDataTypeCppType<V, DT>::type shDataTypeCond(bool cond);
+typename ShDataTypeCppType<T, DT>::type shDataTypeCond(bool cond);
 
 /** Returns a whether the two values are exactly the same.
  * This is is useful for the range types.
- * @{
- */
+ * @{ */
 template<typename T>
 inline
 bool shDataTypeEqual(const T &a, const T &b);
 // @}
 
 /** Returns whether the value is always greater than zero (i.e. true) 
- * @{
  */
 template<typename T>
 inline
 bool shDataTypeIsPositive(const T &a);
 
-//@}
 
 /** Casts one data type to another data type 
- *@{ */
-template<ShValueType V1, ShDataType DT1, ShValueType V2, ShDataType DT2>
-void shDataTypeCast(typename ShDataTypeCppType<V1, DT1>::type &dest,
-                    const typename ShDataTypeCppType<V2, DT2>::type &src);
+ */
+template<typename T1, ShDataType DT1, typename T2, ShDataType DT2>
+void shDataTypeCast(typename ShDataTypeCppType<T1, DT1>::type &dest,
+                    const typename ShDataTypeCppType<T2, DT2>::type &src);
 
 }
 

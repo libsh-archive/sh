@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -79,6 +76,8 @@ void shCEIL(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
 void shCOS(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
+void shCOSH(ShVariable& dest, const ShVariable& a);
+SH_DLLEXPORT
 void shCMUL(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
 void shCSUM(ShVariable& dest, const ShVariable& a);
@@ -98,6 +97,8 @@ SH_DLLEXPORT
 void shFLR(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
 void shFRAC(ShVariable& dest, const ShVariable& a);
+SH_DLLEXPORT
+void shLIT(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
 void shLOG(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
@@ -129,9 +130,13 @@ void shSGN(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
 void shSIN(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
+void shSINH(ShVariable& dest, const ShVariable& a);
+SH_DLLEXPORT
 void shSQRT(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
 void shTAN(ShVariable& dest, const ShVariable& a);
+SH_DLLEXPORT
+void shTANH(ShVariable& dest, const ShVariable& a);
 
 SH_DLLEXPORT
 void shNORM(ShVariable& dest, const ShVariable& a);
@@ -141,22 +146,10 @@ void shXPD(ShVariable& dest, const ShVariable& a, const ShVariable& b);
 SH_DLLEXPORT
 void shCOND(ShVariable& dest, const ShVariable& cond,
             const ShVariable& a, const ShVariable& b);
-
-// interval arithmetic ops 
-SH_DLLEXPORT
-void shLO(ShVariable &dest, const ShVariable &a);
-
-SH_DLLEXPORT
-void shHI(ShVariable &dest, const ShVariable &a);
-
-SH_DLLEXPORT
-void shSETLO(ShVariable &dest, const ShVariable &a);
-
-SH_DLLEXPORT
-void shSETHI(ShVariable &dest, const ShVariable &a);
-
 SH_DLLEXPORT
 void shKIL(const ShVariable& cond);
+SH_DLLEXPORT
+void shRET(const ShVariable& cond);
 
 /*@}*/
 

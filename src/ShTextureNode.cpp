@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -26,7 +23,6 @@
 //////////////////////////////////////////////////////////////////////////////
 #include <cassert>
 #include "ShTextureNode.hpp"
-#include "ShEnvironment.hpp"
 #include "ShDebug.hpp"
 #include "ShGeneric.hpp"
 #include "ShAttrib.hpp"
@@ -36,13 +32,15 @@ namespace SH {
 ShTextureNode::ShTextureNode(ShTextureDims dims, int size,
                              ShValueType valueType,
                              const ShTextureTraits& traits,
-                             int width, int height, int depth)
-  : ShVariableNode(SH_TEXTURE, size, valueType),
+                             int width, int height, int depth, int max_nb_elements)
+  : ShVariableNode(SH_TEXTURE, size, valueType), m_count(max_nb_elements),
     m_dims(dims),
     m_memory(new ShMemoryPtr[dims == SH_TEXTURE_CUBE ? 6 : 1]),
     m_traits(traits),
     m_width(width), m_height(height), m_depth(depth)
 {
+  ShContext::current()->enter(0); // need m_texSizeVar to be uniform
+
   if (m_dims == SH_TEXTURE_1D) {
     ShAttrib1f v = ShAttrib1f(width);
     m_texSizeVar = ShVariable(v.node());
@@ -53,6 +51,8 @@ ShTextureNode::ShTextureNode(ShTextureDims dims, int size,
     ShAttrib2f v = ShAttrib2f(width, height);
     m_texSizeVar = ShVariable(v.node());
   }
+
+  ShContext::current()->exit(); // need m_texSizeVar to be uniform
 }
 
 ShTextureNode::~ShTextureNode()
@@ -114,16 +114,20 @@ ShTextureTraits& ShTextureNode::traits()
 void ShTextureNode::setTexSize(int w)
 {
   m_width = w;
+  ShContext::current()->enter(0);
   ShAttrib1f s(m_texSizeVar.node(), ShSwizzle(m_texSizeVar().size()), false);
   s = static_cast<float>(w);
+  ShContext::current()->exit();
 }
 
 void ShTextureNode::setTexSize(int w, int h)
 {
   m_width = w;
   m_height = h;
+  ShContext::current()->enter(0);
   ShAttrib2f s(m_texSizeVar.node(), ShSwizzle(m_texSizeVar().size()), false);
   s = ShAttrib2f(w, h);
+  ShContext::current()->exit();
 }
 
 void ShTextureNode::setTexSize(int w, int h, int d)
@@ -131,8 +135,10 @@ void ShTextureNode::setTexSize(int w, int h, int d)
   m_width = w;
   m_height = h;
   m_depth = d;
+  ShContext::current()->enter(0);
   ShAttrib3f s(m_texSizeVar.node(), ShSwizzle(m_texSizeVar().size()), false);
   s = ShAttrib3f(w, h, d);
+  ShContext::current()->exit();
 }
 
 int ShTextureNode::width() const
@@ -152,7 +158,12 @@ int ShTextureNode::depth() const
 
 int ShTextureNode::count() const
 {
-  return m_width * m_height * m_depth;
+  return (m_count != -1) ? m_count : m_width * m_height * m_depth;
+}
+
+void ShTextureNode::count(int n)
+{
+  m_count = n;
 }
 
 const ShVariable& ShTextureNode::texSizeVar() const

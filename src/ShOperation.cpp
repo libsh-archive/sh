@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -52,35 +49,45 @@ const ShOperationInfo opInfo[] = {
   {"ASIN", 1, ShOperationInfo::LINEAR, false},
   {"ATAN", 1, ShOperationInfo::LINEAR, false},
   {"ATAN2", 2, ShOperationInfo::LINEAR, false},
+
   {"CBRT", 1, ShOperationInfo::LINEAR, false},
   {"CEIL", 1, ShOperationInfo::LINEAR, false},
   {"COS", 1, ShOperationInfo::LINEAR, false},
+  {"COSH", 1, ShOperationInfo::LINEAR, false},
   {"CMUL", 1, ShOperationInfo::ALL, false},
   {"CSUM", 1, ShOperationInfo::ALL, false},
   {"DOT", 2, ShOperationInfo::ALL, true},
   {"DX", 1, ShOperationInfo::EXTERNAL, false},
   {"DY", 1, ShOperationInfo::EXTERNAL, false},
+
   {"EXP", 1, ShOperationInfo::LINEAR, false},
   {"EXP2", 1, ShOperationInfo::LINEAR, false},
   {"EXP10", 1, ShOperationInfo::LINEAR, false},
   {"FLR", 1, ShOperationInfo::LINEAR, false},
   {"FRAC", 1, ShOperationInfo::LINEAR, false},
+
+  {"LIT", 1, ShOperationInfo::ALL, false},
+  {"LOG", 1, ShOperationInfo::LINEAR, false},
+  {"LOG2", 1, ShOperationInfo::LINEAR, false},
+  {"LOG10", 1, ShOperationInfo::LINEAR, false},
   {"LRP", 3, ShOperationInfo::LINEAR, false},
+
   {"MAD", 3, ShOperationInfo::LINEAR, false},
   {"MAX", 2, ShOperationInfo::LINEAR, false},
   {"MIN", 2, ShOperationInfo::LINEAR, true},
   {"MOD", 2, ShOperationInfo::LINEAR, true},
-  {"LOG", 1, ShOperationInfo::LINEAR, false},
-  {"LOG2", 1, ShOperationInfo::LINEAR, false},
-  {"LOG10", 1, ShOperationInfo::LINEAR, false},
+
   {"POW", 2, ShOperationInfo::LINEAR, false},
   {"RCP", 1, ShOperationInfo::LINEAR, false},
   {"RND", 1, ShOperationInfo::LINEAR, false},
   {"RSQ", 1, ShOperationInfo::LINEAR, false},
+
   {"SIN", 1, ShOperationInfo::LINEAR, false},
+  {"SINH", 1, ShOperationInfo::LINEAR, false},
   {"SGN", 1, ShOperationInfo::LINEAR, false},
   {"SQRT", 1, ShOperationInfo::LINEAR, false},
   {"TAN", 1, ShOperationInfo::LINEAR, false},
+  {"TANH", 1, ShOperationInfo::LINEAR, false},
 
   {"NORM", 1, ShOperationInfo::ALL, false},
   {"XPD", 2, ShOperationInfo::ALL, false}, // Not quite true, but probably good enough
@@ -94,17 +101,20 @@ const ShOperationInfo opInfo[] = {
   {"KIL", 1, ShOperationInfo::IGNORE, false},
 
   {"OPTBRA", 1, ShOperationInfo::IGNORE, false},
+  {"DECL", 0, ShOperationInfo::IGNORE, false},
+
+  {"STARTSEC", 0, ShOperationInfo::IGNORE, false},
+  {"ENDSEC", 0, ShOperationInfo::IGNORE, false},
 
   {"FETCH", 1, ShOperationInfo::EXTERNAL, false},
   {"LOOKUP", 2, ShOperationInfo::EXTERNAL, false},
 
   {"PAL", 2, ShOperationInfo::EXTERNAL, false},
 
-  {"LO", 1, ShOperationInfo::LINEAR, false},
-  {"HI", 1, ShOperationInfo::LINEAR, false},
-  {"SETLO", 1, ShOperationInfo::LINEAR, false},
-  {"SETHI", 1, ShOperationInfo::LINEAR, false},
-  
+  {"COMMENT", 0, ShOperationInfo::IGNORE, false}, // special comment tag
+
+  {"RET", 1, ShOperationInfo::IGNORE, false},
+
   {0, 0, ShOperationInfo::IGNORE, false}
 };
 

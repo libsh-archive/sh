@@ -34,14 +34,14 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libshd.lib"
-				OutputFile="$(OutDir)/libshccd.dll"
+				AdditionalDependencies="libsh_debug.lib"
+				OutputFile="$(OutDir)/libshcc_debug.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(OutDir)"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/libshccd.pdb"
+				ProgramDatabaseFile="$(OutDir)/libshcc_debug.pdb"
 				SubSystem="2"
-				ImportLibrary="$(OutDir)/libshccd.lib"
+				ImportLibrary="$(OutDir)/libshcc_debug.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -74,6 +74,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/GR /EHsc /wd4003 /O2"
 				AdditionalIncludeDirectories="..\src"
 				PreprocessorDefinitions="SH_DLLEXPORT=&quot;__declspec(dllimport)&quot;;WIN32;NOMINMAX;_USE_MATH_DEFINES"
 				RuntimeLibrary="2"

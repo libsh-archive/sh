@@ -6,27 +6,24 @@
 //
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
-//
+// Copyright 2003-2005 Serious Hack Inc.
+// 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
 // arising from the use of this software.
-//
+// 
 // Permission is granted to anyone to use this software for any purpose,
 // including commercial applications, and to alter it and redistribute it
 // freely, subject to the following restrictions:
-//
+// 
 // 1. The origin of this software must not be misrepresented; you must
 // not claim that you wrote the original software. If you use this
 // software in a product, an acknowledgment in the product documentation
 // would be appreciated but is not required.
-//
+// 
 // 2. Altered source versions must be plainly marked as such, and must
 // not be misrepresented as being the original software.
-//
+// 
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
@@ -44,823 +41,338 @@ namespace SH {
  * library).
  *
  */
-template<int N, ShBindingType Binding, ShValueType V=SH_FLOAT, bool Swizzled=false>
-class ShVector : public ShAttrib<N, Binding, V, Swizzled> {
-public:
-  static const ShValueType value_type = V;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_VECTOR;
-  typedef typename ShHostType<V>::type H; 
-  typedef H HostType; 
-  typedef typename ShMemType<V>::type MemType; 
-  static const int typesize = N;
 
-  typedef ShVector<N, SH_INPUT, V> InputType;
-  typedef ShVector<N, SH_OUTPUT, V> OutputType;
-  typedef ShVector<N, SH_INOUT, V> InOutType;
-  typedef ShVector<N, SH_TEMP, V> TempType;
-  typedef ShVector<N, SH_CONST, V> ConstType;
-  ShVector();
-  
-  template<ShValueType V2>
-  ShVector(const ShGeneric<N, V2>& other);
-  ShVector(const ShVector<N, Binding, V, Swizzled>& other);
-  
-  template<ShValueType V2>
-  ShVector(const ShVector<N, Binding, V2, Swizzled>& other);
-  ShVector(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShVector(H data[N]);
-  
-  ~ShVector();
-
-  
-  template<ShValueType V2>
-  ShVector& operator=(const ShGeneric<N, V2>& other);
-  
-  template<ShValueType V2>
-  ShVector& operator=(const ShVector<N, Binding, V2, Swizzled>& other);
-  ShVector& operator=(const ShVector<N, Binding, V, Swizzled>& other);
-
-  ShVector& operator=(const ShProgram& prg);
-
-  
-  template<ShValueType V2>
-  ShVector& operator+=(const ShGeneric<N, V2>& right);
-  
-  template<ShValueType V2>
-  ShVector& operator-=(const ShGeneric<N, V2>& right);
-  
-  template<ShValueType V2>
-  ShVector& operator*=(const ShGeneric<N, V2>& right);
-  
-  template<ShValueType V2>
-  ShVector& operator/=(const ShGeneric<N, V2>& right);
-  
-  template<ShValueType V2>
-  ShVector& operator%=(const ShGeneric<N, V2>& right);
-  ShVector& operator*=(H);
-  ShVector& operator/=(H);
-  ShVector& operator%=(H);
-  ShVector& operator+=(H);
-  ShVector& operator-=(H);
-  
-  template<ShValueType V2>
-  ShVector& operator+=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShVector& operator-=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShVector& operator*=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShVector& operator/=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShVector& operator%=(const ShGeneric<1, V2>&);
-  ShVector<1, Binding, V, true> operator()(int) const;
-  ShVector<2, Binding, V, true> operator()(int, int) const;
-  ShVector<3, Binding, V, true> operator()(int, int, int) const;
-  ShVector<4, Binding, V, true> operator()(int, int, int, int) const;
-  ShVector<1, Binding, V, true> operator[](int) const;
-  
-  template<int N2>
-  ShVector<N2, Binding, V, true> swiz(int indices[]) const;
-  
-  ShVector operator-() const;
-  private:
-    typedef ShAttrib<N, Binding, V, Swizzled> ParentType;
-};
-
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-class ShVector<1, Binding, V, Swizzled> : public ShAttrib<1, Binding, V, Swizzled> {
-public:
-  static const ShValueType value_type = V;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_VECTOR;
-  typedef typename ShHostType<V>::type H; 
-  typedef H HostType; 
-  typedef typename ShMemType<V>::type MemType; 
-  static const int typesize = 1;
-
-  typedef ShVector<1, SH_INPUT, V> InputType;
-  typedef ShVector<1, SH_OUTPUT, V> OutputType;
-  typedef ShVector<1, SH_INOUT, V> InOutType;
-  typedef ShVector<1, SH_TEMP, V> TempType;
-  typedef ShVector<1, SH_CONST, V> ConstType;
-  ShVector();
-  
-  template<ShValueType V2>
-  ShVector(const ShGeneric<1, V2>& other);
-  ShVector(const ShVector<1, Binding, V, Swizzled>& other);
-  
-  template<ShValueType V2>
-  ShVector(const ShVector<1, Binding, V2, Swizzled>& other);
-  ShVector(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShVector(H data[1]);
-  
-  ShVector(H);
-  
-  ~ShVector();
-
-  
-  template<ShValueType V2>
-  ShVector& operator=(const ShGeneric<1, V2>& other);
-  
-  template<ShValueType V2>
-  ShVector& operator=(const ShVector<1, Binding, V2, Swizzled>& other);
-  ShVector& operator=(const ShVector<1, Binding, V, Swizzled>& other);
-
-  ShVector& operator=(H other);
-
-  ShVector& operator=(const ShProgram& prg);
-
-  
-  template<ShValueType V2>
-  ShVector& operator+=(const ShGeneric<1, V2>& right);
-  
-  template<ShValueType V2>
-  ShVector& operator-=(const ShGeneric<1, V2>& right);
-  
-  template<ShValueType V2>
-  ShVector& operator*=(const ShGeneric<1, V2>& right);
-  
-  template<ShValueType V2>
-  ShVector& operator/=(const ShGeneric<1, V2>& right);
-  
-  template<ShValueType V2>
-  ShVector& operator%=(const ShGeneric<1, V2>& right);
-  ShVector& operator*=(H);
-  ShVector& operator/=(H);
-  ShVector& operator%=(H);
-  ShVector& operator+=(H);
-  ShVector& operator-=(H);
-  ShVector<1, Binding, V, true> operator()(int) const;
-  ShVector<2, Binding, V, true> operator()(int, int) const;
-  ShVector<3, Binding, V, true> operator()(int, int, int) const;
-  ShVector<4, Binding, V, true> operator()(int, int, int, int) const;
-  ShVector<1, Binding, V, true> operator[](int) const;
-  
-  template<int N2>
-  ShVector<N2, Binding, V, true> swiz(int indices[]) const;
-  
-  ShVector operator-() const;
-  private:
-    typedef ShAttrib<1, Binding, V, Swizzled> ParentType;
-};
-
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-class ShVector<2, Binding, V, Swizzled> : public ShAttrib<2, Binding, V, Swizzled> {
-public:
-  static const ShValueType value_type = V;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_VECTOR;
-  typedef typename ShHostType<V>::type H; 
-  typedef H HostType; 
-  typedef typename ShMemType<V>::type MemType; 
-  static const int typesize = 2;
-
-  typedef ShVector<2, SH_INPUT, V> InputType;
-  typedef ShVector<2, SH_OUTPUT, V> OutputType;
-  typedef ShVector<2, SH_INOUT, V> InOutType;
-  typedef ShVector<2, SH_TEMP, V> TempType;
-  typedef ShVector<2, SH_CONST, V> ConstType;
-  ShVector();
-  
-  template<ShValueType V2>
-  ShVector(const ShGeneric<2, V2>& other);
-  ShVector(const ShVector<2, Binding, V, Swizzled>& other);
-  
-  template<ShValueType V2>
-  ShVector(const ShVector<2, Binding, V2, Swizzled>& other);
-  ShVector(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShVector(H data[2]);
-  
-  ShVector(H, H);
-  template<ShValueType V2, ShValueType V3>
-  ShVector(const ShGeneric<1, V2>&, const ShGeneric<1, V3>&);
-  
-  ~ShVector();
-
-  
-  template<ShValueType V2>
-  ShVector& operator=(const ShGeneric<2, V2>& other);
-  
-  template<ShValueType V2>
-  ShVector& operator=(const ShVector<2, Binding, V2, Swizzled>& other);
-  ShVector& operator=(const ShVector<2, Binding, V, Swizzled>& other);
-
-  ShVector& operator=(const ShProgram& prg);
-
-  
-  template<ShValueType V2>
-  ShVector& operator+=(const ShGeneric<2, V2>& right);
-  
-  template<ShValueType V2>
-  ShVector& operator-=(const ShGeneric<2, V2>& right);
-  
-  template<ShValueType V2>
-  ShVector& operator*=(const ShGeneric<2, V2>& right);
-  
-  template<ShValueType V2>
-  ShVector& operator/=(const ShGeneric<2, V2>& right);
-  
-  template<ShValueType V2>
-  ShVector& operator%=(const ShGeneric<2, V2>& right);
-  ShVector& operator*=(H);
-  ShVector& operator/=(H);
-  ShVector& operator%=(H);
-  ShVector& operator+=(H);
-  ShVector& operator-=(H);
-  
-  template<ShValueType V2>
-  ShVector& operator+=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShVector& operator-=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShVector& operator*=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShVector& operator/=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShVector& operator%=(const ShGeneric<1, V2>&);
-  ShVector<1, Binding, V, true> operator()(int) const;
-  ShVector<2, Binding, V, true> operator()(int, int) const;
-  ShVector<3, Binding, V, true> operator()(int, int, int) const;
-  ShVector<4, Binding, V, true> operator()(int, int, int, int) const;
-  ShVector<1, Binding, V, true> operator[](int) const;
-  
-  template<int N2>
-  ShVector<N2, Binding, V, true> swiz(int indices[]) const;
-  
-  ShVector operator-() const;
-  private:
-    typedef ShAttrib<2, Binding, V, Swizzled> ParentType;
-};
-
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-class ShVector<3, Binding, V, Swizzled> : public ShAttrib<3, Binding, V, Swizzled> {
-public:
-  static const ShValueType value_type = V;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_VECTOR;
-  typedef typename ShHostType<V>::type H; 
-  typedef H HostType; 
-  typedef typename ShMemType<V>::type MemType; 
-  static const int typesize = 3;
-
-  typedef ShVector<3, SH_INPUT, V> InputType;
-  typedef ShVector<3, SH_OUTPUT, V> OutputType;
-  typedef ShVector<3, SH_INOUT, V> InOutType;
-  typedef ShVector<3, SH_TEMP, V> TempType;
-  typedef ShVector<3, SH_CONST, V> ConstType;
-  ShVector();
-  
-  template<ShValueType V2>
-  ShVector(const ShGeneric<3, V2>& other);
-  ShVector(const ShVector<3, Binding, V, Swizzled>& other);
-  
-  template<ShValueType V2>
-  ShVector(const ShVector<3, Binding, V2, Swizzled>& other);
-  ShVector(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShVector(H data[3]);
-  
-  ShVector(H, H, H);
-  template<ShValueType V2, ShValueType V3, ShValueType V4>
-  ShVector(const ShGeneric<1, V2>&, const ShGeneric<1, V3>&, const ShGeneric<1, V4>&);
-  
-  ~ShVector();
-
-  
-  template<ShValueType V2>
-  ShVector& operator=(const ShGeneric<3, V2>& other);
-  
-  template<ShValueType V2>
-  ShVector& operator=(const ShVector<3, Binding, V2, Swizzled>& other);
-  ShVector& operator=(const ShVector<3, Binding, V, Swizzled>& other);
-
-  ShVector& operator=(const ShProgram& prg);
-
-  
-  template<ShValueType V2>
-  ShVector& operator+=(const ShGeneric<3, V2>& right);
-  
-  template<ShValueType V2>
-  ShVector& operator-=(const ShGeneric<3, V2>& right);
-  
-  template<ShValueType V2>
-  ShVector& operator*=(const ShGeneric<3, V2>& right);
-  
-  template<ShValueType V2>
-  ShVector& operator/=(const ShGeneric<3, V2>& right);
-  
-  template<ShValueType V2>
-  ShVector& operator%=(const ShGeneric<3, V2>& right);
-  ShVector& operator*=(H);
-  ShVector& operator/=(H);
-  ShVector& operator%=(H);
-  ShVector& operator+=(H);
-  ShVector& operator-=(H);
-  
-  template<ShValueType V2>
-  ShVector& operator+=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShVector& operator-=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShVector& operator*=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShVector& operator/=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShVector& operator%=(const ShGeneric<1, V2>&);
-  ShVector<1, Binding, V, true> operator()(int) const;
-  ShVector<2, Binding, V, true> operator()(int, int) const;
-  ShVector<3, Binding, V, true> operator()(int, int, int) const;
-  ShVector<4, Binding, V, true> operator()(int, int, int, int) const;
-  ShVector<1, Binding, V, true> operator[](int) const;
-  
-  template<int N2>
-  ShVector<N2, Binding, V, true> swiz(int indices[]) const;
-  
-  ShVector operator-() const;
-  private:
-    typedef ShAttrib<3, Binding, V, Swizzled> ParentType;
-};
-
-template<ShBindingType Binding, ShValueType V, bool Swizzled>
-class ShVector<4, Binding, V, Swizzled> : public ShAttrib<4, Binding, V, Swizzled> {
-public:
-  static const ShValueType value_type = V;
-  static const ShBindingType binding_type = Binding;
-  static const ShSemanticType semantic_type = SH_VECTOR;
-  typedef typename ShHostType<V>::type H; 
-  typedef H HostType; 
-  typedef typename ShMemType<V>::type MemType; 
-  static const int typesize = 4;
-
-  typedef ShVector<4, SH_INPUT, V> InputType;
-  typedef ShVector<4, SH_OUTPUT, V> OutputType;
-  typedef ShVector<4, SH_INOUT, V> InOutType;
-  typedef ShVector<4, SH_TEMP, V> TempType;
-  typedef ShVector<4, SH_CONST, V> ConstType;
-  ShVector();
-  
-  template<ShValueType V2>
-  ShVector(const ShGeneric<4, V2>& other);
-  ShVector(const ShVector<4, Binding, V, Swizzled>& other);
-  
-  template<ShValueType V2>
-  ShVector(const ShVector<4, Binding, V2, Swizzled>& other);
-  ShVector(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShVector(H data[4]);
-  
-  ShVector(H, H, H, H);
-  template<ShValueType V2, ShValueType V3, ShValueType V4, ShValueType V5>
-  ShVector(const ShGeneric<1, V2>&, const ShGeneric<1, V3>&, const ShGeneric<1, V4>&, const ShGeneric<1, V5>&);
-  
-  ~ShVector();
-
-  
-  template<ShValueType V2>
-  ShVector& operator=(const ShGeneric<4, V2>& other);
-  
-  template<ShValueType V2>
-  ShVector& operator=(const ShVector<4, Binding, V2, Swizzled>& other);
-  ShVector& operator=(const ShVector<4, Binding, V, Swizzled>& other);
-
-  ShVector& operator=(const ShProgram& prg);
-
-  
-  template<ShValueType V2>
-  ShVector& operator+=(const ShGeneric<4, V2>& right);
-  
-  template<ShValueType V2>
-  ShVector& operator-=(const ShGeneric<4, V2>& right);
-  
-  template<ShValueType V2>
-  ShVector& operator*=(const ShGeneric<4, V2>& right);
-  
-  template<ShValueType V2>
-  ShVector& operator/=(const ShGeneric<4, V2>& right);
-  
-  template<ShValueType V2>
-  ShVector& operator%=(const ShGeneric<4, V2>& right);
-  ShVector& operator*=(H);
-  ShVector& operator/=(H);
-  ShVector& operator%=(H);
-  ShVector& operator+=(H);
-  ShVector& operator-=(H);
-  
-  template<ShValueType V2>
-  ShVector& operator+=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShVector& operator-=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShVector& operator*=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShVector& operator/=(const ShGeneric<1, V2>&);
-  
-  template<ShValueType V2>
-  ShVector& operator%=(const ShGeneric<1, V2>&);
-  ShVector<1, Binding, V, true> operator()(int) const;
-  ShVector<2, Binding, V, true> operator()(int, int) const;
-  ShVector<3, Binding, V, true> operator()(int, int, int) const;
-  ShVector<4, Binding, V, true> operator()(int, int, int, int) const;
-  ShVector<1, Binding, V, true> operator[](int) const;
-  
-  template<int N2>
-  ShVector<N2, Binding, V, true> swiz(int indices[]) const;
-  
-  ShVector operator-() const;
-  private:
-    typedef ShAttrib<4, Binding, V, Swizzled> ParentType;
-};
-
-typedef ShVector<1, SH_INPUT, SH_SHORT> ShInputVector1s;
-typedef ShVector<1, SH_OUTPUT, SH_SHORT> ShOutputVector1s;
-typedef ShVector<1, SH_INOUT, SH_SHORT> ShInOutVector1s;
-typedef ShVector<1, SH_TEMP, SH_SHORT> ShVector1s;
-typedef ShVector<1, SH_CONST, SH_SHORT> ShConstVector1s;
-typedef ShVector<2, SH_INPUT, SH_SHORT> ShInputVector2s;
-typedef ShVector<2, SH_OUTPUT, SH_SHORT> ShOutputVector2s;
-typedef ShVector<2, SH_INOUT, SH_SHORT> ShInOutVector2s;
-typedef ShVector<2, SH_TEMP, SH_SHORT> ShVector2s;
-typedef ShVector<2, SH_CONST, SH_SHORT> ShConstVector2s;
-typedef ShVector<3, SH_INPUT, SH_SHORT> ShInputVector3s;
-typedef ShVector<3, SH_OUTPUT, SH_SHORT> ShOutputVector3s;
-typedef ShVector<3, SH_INOUT, SH_SHORT> ShInOutVector3s;
-typedef ShVector<3, SH_TEMP, SH_SHORT> ShVector3s;
-typedef ShVector<3, SH_CONST, SH_SHORT> ShConstVector3s;
-typedef ShVector<4, SH_INPUT, SH_SHORT> ShInputVector4s;
-typedef ShVector<4, SH_OUTPUT, SH_SHORT> ShOutputVector4s;
-typedef ShVector<4, SH_INOUT, SH_SHORT> ShInOutVector4s;
-typedef ShVector<4, SH_TEMP, SH_SHORT> ShVector4s;
-typedef ShVector<4, SH_CONST, SH_SHORT> ShConstVector4s;
+typedef ShAttrib<1, SH_INPUT, ShFracUShort, SH_VECTOR> ShInputVector1fus;
+typedef ShAttrib<1, SH_OUTPUT, ShFracUShort, SH_VECTOR> ShOutputVector1fus;
+typedef ShAttrib<1, SH_INOUT, ShFracUShort, SH_VECTOR> ShInOutVector1fus;
+typedef ShAttrib<1, SH_TEMP, ShFracUShort, SH_VECTOR> ShVector1fus;
+typedef ShAttrib<1, SH_CONST, ShFracUShort, SH_VECTOR> ShConstVector1fus;
+typedef ShAttrib<2, SH_INPUT, ShFracUShort, SH_VECTOR> ShInputVector2fus;
+typedef ShAttrib<2, SH_OUTPUT, ShFracUShort, SH_VECTOR> ShOutputVector2fus;
+typedef ShAttrib<2, SH_INOUT, ShFracUShort, SH_VECTOR> ShInOutVector2fus;
+typedef ShAttrib<2, SH_TEMP, ShFracUShort, SH_VECTOR> ShVector2fus;
+typedef ShAttrib<2, SH_CONST, ShFracUShort, SH_VECTOR> ShConstVector2fus;
+typedef ShAttrib<3, SH_INPUT, ShFracUShort, SH_VECTOR> ShInputVector3fus;
+typedef ShAttrib<3, SH_OUTPUT, ShFracUShort, SH_VECTOR> ShOutputVector3fus;
+typedef ShAttrib<3, SH_INOUT, ShFracUShort, SH_VECTOR> ShInOutVector3fus;
+typedef ShAttrib<3, SH_TEMP, ShFracUShort, SH_VECTOR> ShVector3fus;
+typedef ShAttrib<3, SH_CONST, ShFracUShort, SH_VECTOR> ShConstVector3fus;
+typedef ShAttrib<4, SH_INPUT, ShFracUShort, SH_VECTOR> ShInputVector4fus;
+typedef ShAttrib<4, SH_OUTPUT, ShFracUShort, SH_VECTOR> ShOutputVector4fus;
+typedef ShAttrib<4, SH_INOUT, ShFracUShort, SH_VECTOR> ShInOutVector4fus;
+typedef ShAttrib<4, SH_TEMP, ShFracUShort, SH_VECTOR> ShVector4fus;
+typedef ShAttrib<4, SH_CONST, ShFracUShort, SH_VECTOR> ShConstVector4fus;
 
 
-typedef ShVector<1, SH_INPUT, SH_FRAC_UINT> ShInputVector1fui;
-typedef ShVector<1, SH_OUTPUT, SH_FRAC_UINT> ShOutputVector1fui;
-typedef ShVector<1, SH_INOUT, SH_FRAC_UINT> ShInOutVector1fui;
-typedef ShVector<1, SH_TEMP, SH_FRAC_UINT> ShVector1fui;
-typedef ShVector<1, SH_CONST, SH_FRAC_UINT> ShConstVector1fui;
-typedef ShVector<2, SH_INPUT, SH_FRAC_UINT> ShInputVector2fui;
-typedef ShVector<2, SH_OUTPUT, SH_FRAC_UINT> ShOutputVector2fui;
-typedef ShVector<2, SH_INOUT, SH_FRAC_UINT> ShInOutVector2fui;
-typedef ShVector<2, SH_TEMP, SH_FRAC_UINT> ShVector2fui;
-typedef ShVector<2, SH_CONST, SH_FRAC_UINT> ShConstVector2fui;
-typedef ShVector<3, SH_INPUT, SH_FRAC_UINT> ShInputVector3fui;
-typedef ShVector<3, SH_OUTPUT, SH_FRAC_UINT> ShOutputVector3fui;
-typedef ShVector<3, SH_INOUT, SH_FRAC_UINT> ShInOutVector3fui;
-typedef ShVector<3, SH_TEMP, SH_FRAC_UINT> ShVector3fui;
-typedef ShVector<3, SH_CONST, SH_FRAC_UINT> ShConstVector3fui;
-typedef ShVector<4, SH_INPUT, SH_FRAC_UINT> ShInputVector4fui;
-typedef ShVector<4, SH_OUTPUT, SH_FRAC_UINT> ShOutputVector4fui;
-typedef ShVector<4, SH_INOUT, SH_FRAC_UINT> ShInOutVector4fui;
-typedef ShVector<4, SH_TEMP, SH_FRAC_UINT> ShVector4fui;
-typedef ShVector<4, SH_CONST, SH_FRAC_UINT> ShConstVector4fui;
+typedef ShAttrib<1, SH_INPUT, short, SH_VECTOR> ShInputVector1s;
+typedef ShAttrib<1, SH_OUTPUT, short, SH_VECTOR> ShOutputVector1s;
+typedef ShAttrib<1, SH_INOUT, short, SH_VECTOR> ShInOutVector1s;
+typedef ShAttrib<1, SH_TEMP, short, SH_VECTOR> ShVector1s;
+typedef ShAttrib<1, SH_CONST, short, SH_VECTOR> ShConstVector1s;
+typedef ShAttrib<2, SH_INPUT, short, SH_VECTOR> ShInputVector2s;
+typedef ShAttrib<2, SH_OUTPUT, short, SH_VECTOR> ShOutputVector2s;
+typedef ShAttrib<2, SH_INOUT, short, SH_VECTOR> ShInOutVector2s;
+typedef ShAttrib<2, SH_TEMP, short, SH_VECTOR> ShVector2s;
+typedef ShAttrib<2, SH_CONST, short, SH_VECTOR> ShConstVector2s;
+typedef ShAttrib<3, SH_INPUT, short, SH_VECTOR> ShInputVector3s;
+typedef ShAttrib<3, SH_OUTPUT, short, SH_VECTOR> ShOutputVector3s;
+typedef ShAttrib<3, SH_INOUT, short, SH_VECTOR> ShInOutVector3s;
+typedef ShAttrib<3, SH_TEMP, short, SH_VECTOR> ShVector3s;
+typedef ShAttrib<3, SH_CONST, short, SH_VECTOR> ShConstVector3s;
+typedef ShAttrib<4, SH_INPUT, short, SH_VECTOR> ShInputVector4s;
+typedef ShAttrib<4, SH_OUTPUT, short, SH_VECTOR> ShOutputVector4s;
+typedef ShAttrib<4, SH_INOUT, short, SH_VECTOR> ShInOutVector4s;
+typedef ShAttrib<4, SH_TEMP, short, SH_VECTOR> ShVector4s;
+typedef ShAttrib<4, SH_CONST, short, SH_VECTOR> ShConstVector4s;
 
 
-typedef ShVector<1, SH_INPUT, SH_FRAC_BYTE> ShInputVector1fb;
-typedef ShVector<1, SH_OUTPUT, SH_FRAC_BYTE> ShOutputVector1fb;
-typedef ShVector<1, SH_INOUT, SH_FRAC_BYTE> ShInOutVector1fb;
-typedef ShVector<1, SH_TEMP, SH_FRAC_BYTE> ShVector1fb;
-typedef ShVector<1, SH_CONST, SH_FRAC_BYTE> ShConstVector1fb;
-typedef ShVector<2, SH_INPUT, SH_FRAC_BYTE> ShInputVector2fb;
-typedef ShVector<2, SH_OUTPUT, SH_FRAC_BYTE> ShOutputVector2fb;
-typedef ShVector<2, SH_INOUT, SH_FRAC_BYTE> ShInOutVector2fb;
-typedef ShVector<2, SH_TEMP, SH_FRAC_BYTE> ShVector2fb;
-typedef ShVector<2, SH_CONST, SH_FRAC_BYTE> ShConstVector2fb;
-typedef ShVector<3, SH_INPUT, SH_FRAC_BYTE> ShInputVector3fb;
-typedef ShVector<3, SH_OUTPUT, SH_FRAC_BYTE> ShOutputVector3fb;
-typedef ShVector<3, SH_INOUT, SH_FRAC_BYTE> ShInOutVector3fb;
-typedef ShVector<3, SH_TEMP, SH_FRAC_BYTE> ShVector3fb;
-typedef ShVector<3, SH_CONST, SH_FRAC_BYTE> ShConstVector3fb;
-typedef ShVector<4, SH_INPUT, SH_FRAC_BYTE> ShInputVector4fb;
-typedef ShVector<4, SH_OUTPUT, SH_FRAC_BYTE> ShOutputVector4fb;
-typedef ShVector<4, SH_INOUT, SH_FRAC_BYTE> ShInOutVector4fb;
-typedef ShVector<4, SH_TEMP, SH_FRAC_BYTE> ShVector4fb;
-typedef ShVector<4, SH_CONST, SH_FRAC_BYTE> ShConstVector4fb;
+typedef ShAttrib<1, SH_INPUT, ShFracUInt, SH_VECTOR> ShInputVector1fui;
+typedef ShAttrib<1, SH_OUTPUT, ShFracUInt, SH_VECTOR> ShOutputVector1fui;
+typedef ShAttrib<1, SH_INOUT, ShFracUInt, SH_VECTOR> ShInOutVector1fui;
+typedef ShAttrib<1, SH_TEMP, ShFracUInt, SH_VECTOR> ShVector1fui;
+typedef ShAttrib<1, SH_CONST, ShFracUInt, SH_VECTOR> ShConstVector1fui;
+typedef ShAttrib<2, SH_INPUT, ShFracUInt, SH_VECTOR> ShInputVector2fui;
+typedef ShAttrib<2, SH_OUTPUT, ShFracUInt, SH_VECTOR> ShOutputVector2fui;
+typedef ShAttrib<2, SH_INOUT, ShFracUInt, SH_VECTOR> ShInOutVector2fui;
+typedef ShAttrib<2, SH_TEMP, ShFracUInt, SH_VECTOR> ShVector2fui;
+typedef ShAttrib<2, SH_CONST, ShFracUInt, SH_VECTOR> ShConstVector2fui;
+typedef ShAttrib<3, SH_INPUT, ShFracUInt, SH_VECTOR> ShInputVector3fui;
+typedef ShAttrib<3, SH_OUTPUT, ShFracUInt, SH_VECTOR> ShOutputVector3fui;
+typedef ShAttrib<3, SH_INOUT, ShFracUInt, SH_VECTOR> ShInOutVector3fui;
+typedef ShAttrib<3, SH_TEMP, ShFracUInt, SH_VECTOR> ShVector3fui;
+typedef ShAttrib<3, SH_CONST, ShFracUInt, SH_VECTOR> ShConstVector3fui;
+typedef ShAttrib<4, SH_INPUT, ShFracUInt, SH_VECTOR> ShInputVector4fui;
+typedef ShAttrib<4, SH_OUTPUT, ShFracUInt, SH_VECTOR> ShOutputVector4fui;
+typedef ShAttrib<4, SH_INOUT, ShFracUInt, SH_VECTOR> ShInOutVector4fui;
+typedef ShAttrib<4, SH_TEMP, ShFracUInt, SH_VECTOR> ShVector4fui;
+typedef ShAttrib<4, SH_CONST, ShFracUInt, SH_VECTOR> ShConstVector4fui;
 
 
-typedef ShVector<1, SH_INPUT, SH_FRAC_UBYTE> ShInputVector1fub;
-typedef ShVector<1, SH_OUTPUT, SH_FRAC_UBYTE> ShOutputVector1fub;
-typedef ShVector<1, SH_INOUT, SH_FRAC_UBYTE> ShInOutVector1fub;
-typedef ShVector<1, SH_TEMP, SH_FRAC_UBYTE> ShVector1fub;
-typedef ShVector<1, SH_CONST, SH_FRAC_UBYTE> ShConstVector1fub;
-typedef ShVector<2, SH_INPUT, SH_FRAC_UBYTE> ShInputVector2fub;
-typedef ShVector<2, SH_OUTPUT, SH_FRAC_UBYTE> ShOutputVector2fub;
-typedef ShVector<2, SH_INOUT, SH_FRAC_UBYTE> ShInOutVector2fub;
-typedef ShVector<2, SH_TEMP, SH_FRAC_UBYTE> ShVector2fub;
-typedef ShVector<2, SH_CONST, SH_FRAC_UBYTE> ShConstVector2fub;
-typedef ShVector<3, SH_INPUT, SH_FRAC_UBYTE> ShInputVector3fub;
-typedef ShVector<3, SH_OUTPUT, SH_FRAC_UBYTE> ShOutputVector3fub;
-typedef ShVector<3, SH_INOUT, SH_FRAC_UBYTE> ShInOutVector3fub;
-typedef ShVector<3, SH_TEMP, SH_FRAC_UBYTE> ShVector3fub;
-typedef ShVector<3, SH_CONST, SH_FRAC_UBYTE> ShConstVector3fub;
-typedef ShVector<4, SH_INPUT, SH_FRAC_UBYTE> ShInputVector4fub;
-typedef ShVector<4, SH_OUTPUT, SH_FRAC_UBYTE> ShOutputVector4fub;
-typedef ShVector<4, SH_INOUT, SH_FRAC_UBYTE> ShInOutVector4fub;
-typedef ShVector<4, SH_TEMP, SH_FRAC_UBYTE> ShVector4fub;
-typedef ShVector<4, SH_CONST, SH_FRAC_UBYTE> ShConstVector4fub;
+typedef ShAttrib<1, SH_INPUT, ShFracByte, SH_VECTOR> ShInputVector1fb;
+typedef ShAttrib<1, SH_OUTPUT, ShFracByte, SH_VECTOR> ShOutputVector1fb;
+typedef ShAttrib<1, SH_INOUT, ShFracByte, SH_VECTOR> ShInOutVector1fb;
+typedef ShAttrib<1, SH_TEMP, ShFracByte, SH_VECTOR> ShVector1fb;
+typedef ShAttrib<1, SH_CONST, ShFracByte, SH_VECTOR> ShConstVector1fb;
+typedef ShAttrib<2, SH_INPUT, ShFracByte, SH_VECTOR> ShInputVector2fb;
+typedef ShAttrib<2, SH_OUTPUT, ShFracByte, SH_VECTOR> ShOutputVector2fb;
+typedef ShAttrib<2, SH_INOUT, ShFracByte, SH_VECTOR> ShInOutVector2fb;
+typedef ShAttrib<2, SH_TEMP, ShFracByte, SH_VECTOR> ShVector2fb;
+typedef ShAttrib<2, SH_CONST, ShFracByte, SH_VECTOR> ShConstVector2fb;
+typedef ShAttrib<3, SH_INPUT, ShFracByte, SH_VECTOR> ShInputVector3fb;
+typedef ShAttrib<3, SH_OUTPUT, ShFracByte, SH_VECTOR> ShOutputVector3fb;
+typedef ShAttrib<3, SH_INOUT, ShFracByte, SH_VECTOR> ShInOutVector3fb;
+typedef ShAttrib<3, SH_TEMP, ShFracByte, SH_VECTOR> ShVector3fb;
+typedef ShAttrib<3, SH_CONST, ShFracByte, SH_VECTOR> ShConstVector3fb;
+typedef ShAttrib<4, SH_INPUT, ShFracByte, SH_VECTOR> ShInputVector4fb;
+typedef ShAttrib<4, SH_OUTPUT, ShFracByte, SH_VECTOR> ShOutputVector4fb;
+typedef ShAttrib<4, SH_INOUT, ShFracByte, SH_VECTOR> ShInOutVector4fb;
+typedef ShAttrib<4, SH_TEMP, ShFracByte, SH_VECTOR> ShVector4fb;
+typedef ShAttrib<4, SH_CONST, ShFracByte, SH_VECTOR> ShConstVector4fb;
 
 
-typedef ShVector<1, SH_INPUT, SH_HALF> ShInputVector1h;
-typedef ShVector<1, SH_OUTPUT, SH_HALF> ShOutputVector1h;
-typedef ShVector<1, SH_INOUT, SH_HALF> ShInOutVector1h;
-typedef ShVector<1, SH_TEMP, SH_HALF> ShVector1h;
-typedef ShVector<1, SH_CONST, SH_HALF> ShConstVector1h;
-typedef ShVector<2, SH_INPUT, SH_HALF> ShInputVector2h;
-typedef ShVector<2, SH_OUTPUT, SH_HALF> ShOutputVector2h;
-typedef ShVector<2, SH_INOUT, SH_HALF> ShInOutVector2h;
-typedef ShVector<2, SH_TEMP, SH_HALF> ShVector2h;
-typedef ShVector<2, SH_CONST, SH_HALF> ShConstVector2h;
-typedef ShVector<3, SH_INPUT, SH_HALF> ShInputVector3h;
-typedef ShVector<3, SH_OUTPUT, SH_HALF> ShOutputVector3h;
-typedef ShVector<3, SH_INOUT, SH_HALF> ShInOutVector3h;
-typedef ShVector<3, SH_TEMP, SH_HALF> ShVector3h;
-typedef ShVector<3, SH_CONST, SH_HALF> ShConstVector3h;
-typedef ShVector<4, SH_INPUT, SH_HALF> ShInputVector4h;
-typedef ShVector<4, SH_OUTPUT, SH_HALF> ShOutputVector4h;
-typedef ShVector<4, SH_INOUT, SH_HALF> ShInOutVector4h;
-typedef ShVector<4, SH_TEMP, SH_HALF> ShVector4h;
-typedef ShVector<4, SH_CONST, SH_HALF> ShConstVector4h;
+typedef ShAttrib<1, SH_INPUT, int, SH_VECTOR> ShInputVector1i;
+typedef ShAttrib<1, SH_OUTPUT, int, SH_VECTOR> ShOutputVector1i;
+typedef ShAttrib<1, SH_INOUT, int, SH_VECTOR> ShInOutVector1i;
+typedef ShAttrib<1, SH_TEMP, int, SH_VECTOR> ShVector1i;
+typedef ShAttrib<1, SH_CONST, int, SH_VECTOR> ShConstVector1i;
+typedef ShAttrib<2, SH_INPUT, int, SH_VECTOR> ShInputVector2i;
+typedef ShAttrib<2, SH_OUTPUT, int, SH_VECTOR> ShOutputVector2i;
+typedef ShAttrib<2, SH_INOUT, int, SH_VECTOR> ShInOutVector2i;
+typedef ShAttrib<2, SH_TEMP, int, SH_VECTOR> ShVector2i;
+typedef ShAttrib<2, SH_CONST, int, SH_VECTOR> ShConstVector2i;
+typedef ShAttrib<3, SH_INPUT, int, SH_VECTOR> ShInputVector3i;
+typedef ShAttrib<3, SH_OUTPUT, int, SH_VECTOR> ShOutputVector3i;
+typedef ShAttrib<3, SH_INOUT, int, SH_VECTOR> ShInOutVector3i;
+typedef ShAttrib<3, SH_TEMP, int, SH_VECTOR> ShVector3i;
+typedef ShAttrib<3, SH_CONST, int, SH_VECTOR> ShConstVector3i;
+typedef ShAttrib<4, SH_INPUT, int, SH_VECTOR> ShInputVector4i;
+typedef ShAttrib<4, SH_OUTPUT, int, SH_VECTOR> ShOutputVector4i;
+typedef ShAttrib<4, SH_INOUT, int, SH_VECTOR> ShInOutVector4i;
+typedef ShAttrib<4, SH_TEMP, int, SH_VECTOR> ShVector4i;
+typedef ShAttrib<4, SH_CONST, int, SH_VECTOR> ShConstVector4i;
 
 
-typedef ShVector<1, SH_INPUT, SH_INT> ShInputVector1i;
-typedef ShVector<1, SH_OUTPUT, SH_INT> ShOutputVector1i;
-typedef ShVector<1, SH_INOUT, SH_INT> ShInOutVector1i;
-typedef ShVector<1, SH_TEMP, SH_INT> ShVector1i;
-typedef ShVector<1, SH_CONST, SH_INT> ShConstVector1i;
-typedef ShVector<2, SH_INPUT, SH_INT> ShInputVector2i;
-typedef ShVector<2, SH_OUTPUT, SH_INT> ShOutputVector2i;
-typedef ShVector<2, SH_INOUT, SH_INT> ShInOutVector2i;
-typedef ShVector<2, SH_TEMP, SH_INT> ShVector2i;
-typedef ShVector<2, SH_CONST, SH_INT> ShConstVector2i;
-typedef ShVector<3, SH_INPUT, SH_INT> ShInputVector3i;
-typedef ShVector<3, SH_OUTPUT, SH_INT> ShOutputVector3i;
-typedef ShVector<3, SH_INOUT, SH_INT> ShInOutVector3i;
-typedef ShVector<3, SH_TEMP, SH_INT> ShVector3i;
-typedef ShVector<3, SH_CONST, SH_INT> ShConstVector3i;
-typedef ShVector<4, SH_INPUT, SH_INT> ShInputVector4i;
-typedef ShVector<4, SH_OUTPUT, SH_INT> ShOutputVector4i;
-typedef ShVector<4, SH_INOUT, SH_INT> ShInOutVector4i;
-typedef ShVector<4, SH_TEMP, SH_INT> ShVector4i;
-typedef ShVector<4, SH_CONST, SH_INT> ShConstVector4i;
+typedef ShAttrib<1, SH_INPUT, double, SH_VECTOR> ShInputVector1d;
+typedef ShAttrib<1, SH_OUTPUT, double, SH_VECTOR> ShOutputVector1d;
+typedef ShAttrib<1, SH_INOUT, double, SH_VECTOR> ShInOutVector1d;
+typedef ShAttrib<1, SH_TEMP, double, SH_VECTOR> ShVector1d;
+typedef ShAttrib<1, SH_CONST, double, SH_VECTOR> ShConstVector1d;
+typedef ShAttrib<2, SH_INPUT, double, SH_VECTOR> ShInputVector2d;
+typedef ShAttrib<2, SH_OUTPUT, double, SH_VECTOR> ShOutputVector2d;
+typedef ShAttrib<2, SH_INOUT, double, SH_VECTOR> ShInOutVector2d;
+typedef ShAttrib<2, SH_TEMP, double, SH_VECTOR> ShVector2d;
+typedef ShAttrib<2, SH_CONST, double, SH_VECTOR> ShConstVector2d;
+typedef ShAttrib<3, SH_INPUT, double, SH_VECTOR> ShInputVector3d;
+typedef ShAttrib<3, SH_OUTPUT, double, SH_VECTOR> ShOutputVector3d;
+typedef ShAttrib<3, SH_INOUT, double, SH_VECTOR> ShInOutVector3d;
+typedef ShAttrib<3, SH_TEMP, double, SH_VECTOR> ShVector3d;
+typedef ShAttrib<3, SH_CONST, double, SH_VECTOR> ShConstVector3d;
+typedef ShAttrib<4, SH_INPUT, double, SH_VECTOR> ShInputVector4d;
+typedef ShAttrib<4, SH_OUTPUT, double, SH_VECTOR> ShOutputVector4d;
+typedef ShAttrib<4, SH_INOUT, double, SH_VECTOR> ShInOutVector4d;
+typedef ShAttrib<4, SH_TEMP, double, SH_VECTOR> ShVector4d;
+typedef ShAttrib<4, SH_CONST, double, SH_VECTOR> ShConstVector4d;
 
 
-typedef ShVector<1, SH_INPUT, SH_FLOAT> ShInputVector1f;
-typedef ShVector<1, SH_OUTPUT, SH_FLOAT> ShOutputVector1f;
-typedef ShVector<1, SH_INOUT, SH_FLOAT> ShInOutVector1f;
-typedef ShVector<1, SH_TEMP, SH_FLOAT> ShVector1f;
-typedef ShVector<1, SH_CONST, SH_FLOAT> ShConstVector1f;
-typedef ShVector<2, SH_INPUT, SH_FLOAT> ShInputVector2f;
-typedef ShVector<2, SH_OUTPUT, SH_FLOAT> ShOutputVector2f;
-typedef ShVector<2, SH_INOUT, SH_FLOAT> ShInOutVector2f;
-typedef ShVector<2, SH_TEMP, SH_FLOAT> ShVector2f;
-typedef ShVector<2, SH_CONST, SH_FLOAT> ShConstVector2f;
-typedef ShVector<3, SH_INPUT, SH_FLOAT> ShInputVector3f;
-typedef ShVector<3, SH_OUTPUT, SH_FLOAT> ShOutputVector3f;
-typedef ShVector<3, SH_INOUT, SH_FLOAT> ShInOutVector3f;
-typedef ShVector<3, SH_TEMP, SH_FLOAT> ShVector3f;
-typedef ShVector<3, SH_CONST, SH_FLOAT> ShConstVector3f;
-typedef ShVector<4, SH_INPUT, SH_FLOAT> ShInputVector4f;
-typedef ShVector<4, SH_OUTPUT, SH_FLOAT> ShOutputVector4f;
-typedef ShVector<4, SH_INOUT, SH_FLOAT> ShInOutVector4f;
-typedef ShVector<4, SH_TEMP, SH_FLOAT> ShVector4f;
-typedef ShVector<4, SH_CONST, SH_FLOAT> ShConstVector4f;
+typedef ShAttrib<1, SH_INPUT, unsigned char, SH_VECTOR> ShInputVector1ub;
+typedef ShAttrib<1, SH_OUTPUT, unsigned char, SH_VECTOR> ShOutputVector1ub;
+typedef ShAttrib<1, SH_INOUT, unsigned char, SH_VECTOR> ShInOutVector1ub;
+typedef ShAttrib<1, SH_TEMP, unsigned char, SH_VECTOR> ShVector1ub;
+typedef ShAttrib<1, SH_CONST, unsigned char, SH_VECTOR> ShConstVector1ub;
+typedef ShAttrib<2, SH_INPUT, unsigned char, SH_VECTOR> ShInputVector2ub;
+typedef ShAttrib<2, SH_OUTPUT, unsigned char, SH_VECTOR> ShOutputVector2ub;
+typedef ShAttrib<2, SH_INOUT, unsigned char, SH_VECTOR> ShInOutVector2ub;
+typedef ShAttrib<2, SH_TEMP, unsigned char, SH_VECTOR> ShVector2ub;
+typedef ShAttrib<2, SH_CONST, unsigned char, SH_VECTOR> ShConstVector2ub;
+typedef ShAttrib<3, SH_INPUT, unsigned char, SH_VECTOR> ShInputVector3ub;
+typedef ShAttrib<3, SH_OUTPUT, unsigned char, SH_VECTOR> ShOutputVector3ub;
+typedef ShAttrib<3, SH_INOUT, unsigned char, SH_VECTOR> ShInOutVector3ub;
+typedef ShAttrib<3, SH_TEMP, unsigned char, SH_VECTOR> ShVector3ub;
+typedef ShAttrib<3, SH_CONST, unsigned char, SH_VECTOR> ShConstVector3ub;
+typedef ShAttrib<4, SH_INPUT, unsigned char, SH_VECTOR> ShInputVector4ub;
+typedef ShAttrib<4, SH_OUTPUT, unsigned char, SH_VECTOR> ShOutputVector4ub;
+typedef ShAttrib<4, SH_INOUT, unsigned char, SH_VECTOR> ShInOutVector4ub;
+typedef ShAttrib<4, SH_TEMP, unsigned char, SH_VECTOR> ShVector4ub;
+typedef ShAttrib<4, SH_CONST, unsigned char, SH_VECTOR> ShConstVector4ub;
 
 
-typedef ShVector<1, SH_INPUT, SH_BYTE> ShInputVector1b;
-typedef ShVector<1, SH_OUTPUT, SH_BYTE> ShOutputVector1b;
-typedef ShVector<1, SH_INOUT, SH_BYTE> ShInOutVector1b;
-typedef ShVector<1, SH_TEMP, SH_BYTE> ShVector1b;
-typedef ShVector<1, SH_CONST, SH_BYTE> ShConstVector1b;
-typedef ShVector<2, SH_INPUT, SH_BYTE> ShInputVector2b;
-typedef ShVector<2, SH_OUTPUT, SH_BYTE> ShOutputVector2b;
-typedef ShVector<2, SH_INOUT, SH_BYTE> ShInOutVector2b;
-typedef ShVector<2, SH_TEMP, SH_BYTE> ShVector2b;
-typedef ShVector<2, SH_CONST, SH_BYTE> ShConstVector2b;
-typedef ShVector<3, SH_INPUT, SH_BYTE> ShInputVector3b;
-typedef ShVector<3, SH_OUTPUT, SH_BYTE> ShOutputVector3b;
-typedef ShVector<3, SH_INOUT, SH_BYTE> ShInOutVector3b;
-typedef ShVector<3, SH_TEMP, SH_BYTE> ShVector3b;
-typedef ShVector<3, SH_CONST, SH_BYTE> ShConstVector3b;
-typedef ShVector<4, SH_INPUT, SH_BYTE> ShInputVector4b;
-typedef ShVector<4, SH_OUTPUT, SH_BYTE> ShOutputVector4b;
-typedef ShVector<4, SH_INOUT, SH_BYTE> ShInOutVector4b;
-typedef ShVector<4, SH_TEMP, SH_BYTE> ShVector4b;
-typedef ShVector<4, SH_CONST, SH_BYTE> ShConstVector4b;
+typedef ShAttrib<1, SH_INPUT, float, SH_VECTOR> ShInputVector1f;
+typedef ShAttrib<1, SH_OUTPUT, float, SH_VECTOR> ShOutputVector1f;
+typedef ShAttrib<1, SH_INOUT, float, SH_VECTOR> ShInOutVector1f;
+typedef ShAttrib<1, SH_TEMP, float, SH_VECTOR> ShVector1f;
+typedef ShAttrib<1, SH_CONST, float, SH_VECTOR> ShConstVector1f;
+typedef ShAttrib<2, SH_INPUT, float, SH_VECTOR> ShInputVector2f;
+typedef ShAttrib<2, SH_OUTPUT, float, SH_VECTOR> ShOutputVector2f;
+typedef ShAttrib<2, SH_INOUT, float, SH_VECTOR> ShInOutVector2f;
+typedef ShAttrib<2, SH_TEMP, float, SH_VECTOR> ShVector2f;
+typedef ShAttrib<2, SH_CONST, float, SH_VECTOR> ShConstVector2f;
+typedef ShAttrib<3, SH_INPUT, float, SH_VECTOR> ShInputVector3f;
+typedef ShAttrib<3, SH_OUTPUT, float, SH_VECTOR> ShOutputVector3f;
+typedef ShAttrib<3, SH_INOUT, float, SH_VECTOR> ShInOutVector3f;
+typedef ShAttrib<3, SH_TEMP, float, SH_VECTOR> ShVector3f;
+typedef ShAttrib<3, SH_CONST, float, SH_VECTOR> ShConstVector3f;
+typedef ShAttrib<4, SH_INPUT, float, SH_VECTOR> ShInputVector4f;
+typedef ShAttrib<4, SH_OUTPUT, float, SH_VECTOR> ShOutputVector4f;
+typedef ShAttrib<4, SH_INOUT, float, SH_VECTOR> ShInOutVector4f;
+typedef ShAttrib<4, SH_TEMP, float, SH_VECTOR> ShVector4f;
+typedef ShAttrib<4, SH_CONST, float, SH_VECTOR> ShConstVector4f;
 
 
-typedef ShVector<1, SH_INPUT, SH_INTERVAL_DOUBLE> ShInputVector1i_d;
-typedef ShVector<1, SH_OUTPUT, SH_INTERVAL_DOUBLE> ShOutputVector1i_d;
-typedef ShVector<1, SH_INOUT, SH_INTERVAL_DOUBLE> ShInOutVector1i_d;
-typedef ShVector<1, SH_TEMP, SH_INTERVAL_DOUBLE> ShVector1i_d;
-typedef ShVector<1, SH_CONST, SH_INTERVAL_DOUBLE> ShConstVector1i_d;
-typedef ShVector<2, SH_INPUT, SH_INTERVAL_DOUBLE> ShInputVector2i_d;
-typedef ShVector<2, SH_OUTPUT, SH_INTERVAL_DOUBLE> ShOutputVector2i_d;
-typedef ShVector<2, SH_INOUT, SH_INTERVAL_DOUBLE> ShInOutVector2i_d;
-typedef ShVector<2, SH_TEMP, SH_INTERVAL_DOUBLE> ShVector2i_d;
-typedef ShVector<2, SH_CONST, SH_INTERVAL_DOUBLE> ShConstVector2i_d;
-typedef ShVector<3, SH_INPUT, SH_INTERVAL_DOUBLE> ShInputVector3i_d;
-typedef ShVector<3, SH_OUTPUT, SH_INTERVAL_DOUBLE> ShOutputVector3i_d;
-typedef ShVector<3, SH_INOUT, SH_INTERVAL_DOUBLE> ShInOutVector3i_d;
-typedef ShVector<3, SH_TEMP, SH_INTERVAL_DOUBLE> ShVector3i_d;
-typedef ShVector<3, SH_CONST, SH_INTERVAL_DOUBLE> ShConstVector3i_d;
-typedef ShVector<4, SH_INPUT, SH_INTERVAL_DOUBLE> ShInputVector4i_d;
-typedef ShVector<4, SH_OUTPUT, SH_INTERVAL_DOUBLE> ShOutputVector4i_d;
-typedef ShVector<4, SH_INOUT, SH_INTERVAL_DOUBLE> ShInOutVector4i_d;
-typedef ShVector<4, SH_TEMP, SH_INTERVAL_DOUBLE> ShVector4i_d;
-typedef ShVector<4, SH_CONST, SH_INTERVAL_DOUBLE> ShConstVector4i_d;
+typedef ShAttrib<1, SH_INPUT, char, SH_VECTOR> ShInputVector1b;
+typedef ShAttrib<1, SH_OUTPUT, char, SH_VECTOR> ShOutputVector1b;
+typedef ShAttrib<1, SH_INOUT, char, SH_VECTOR> ShInOutVector1b;
+typedef ShAttrib<1, SH_TEMP, char, SH_VECTOR> ShVector1b;
+typedef ShAttrib<1, SH_CONST, char, SH_VECTOR> ShConstVector1b;
+typedef ShAttrib<2, SH_INPUT, char, SH_VECTOR> ShInputVector2b;
+typedef ShAttrib<2, SH_OUTPUT, char, SH_VECTOR> ShOutputVector2b;
+typedef ShAttrib<2, SH_INOUT, char, SH_VECTOR> ShInOutVector2b;
+typedef ShAttrib<2, SH_TEMP, char, SH_VECTOR> ShVector2b;
+typedef ShAttrib<2, SH_CONST, char, SH_VECTOR> ShConstVector2b;
+typedef ShAttrib<3, SH_INPUT, char, SH_VECTOR> ShInputVector3b;
+typedef ShAttrib<3, SH_OUTPUT, char, SH_VECTOR> ShOutputVector3b;
+typedef ShAttrib<3, SH_INOUT, char, SH_VECTOR> ShInOutVector3b;
+typedef ShAttrib<3, SH_TEMP, char, SH_VECTOR> ShVector3b;
+typedef ShAttrib<3, SH_CONST, char, SH_VECTOR> ShConstVector3b;
+typedef ShAttrib<4, SH_INPUT, char, SH_VECTOR> ShInputVector4b;
+typedef ShAttrib<4, SH_OUTPUT, char, SH_VECTOR> ShOutputVector4b;
+typedef ShAttrib<4, SH_INOUT, char, SH_VECTOR> ShInOutVector4b;
+typedef ShAttrib<4, SH_TEMP, char, SH_VECTOR> ShVector4b;
+typedef ShAttrib<4, SH_CONST, char, SH_VECTOR> ShConstVector4b;
 
 
-typedef ShVector<1, SH_INPUT, SH_FRAC_USHORT> ShInputVector1fus;
-typedef ShVector<1, SH_OUTPUT, SH_FRAC_USHORT> ShOutputVector1fus;
-typedef ShVector<1, SH_INOUT, SH_FRAC_USHORT> ShInOutVector1fus;
-typedef ShVector<1, SH_TEMP, SH_FRAC_USHORT> ShVector1fus;
-typedef ShVector<1, SH_CONST, SH_FRAC_USHORT> ShConstVector1fus;
-typedef ShVector<2, SH_INPUT, SH_FRAC_USHORT> ShInputVector2fus;
-typedef ShVector<2, SH_OUTPUT, SH_FRAC_USHORT> ShOutputVector2fus;
-typedef ShVector<2, SH_INOUT, SH_FRAC_USHORT> ShInOutVector2fus;
-typedef ShVector<2, SH_TEMP, SH_FRAC_USHORT> ShVector2fus;
-typedef ShVector<2, SH_CONST, SH_FRAC_USHORT> ShConstVector2fus;
-typedef ShVector<3, SH_INPUT, SH_FRAC_USHORT> ShInputVector3fus;
-typedef ShVector<3, SH_OUTPUT, SH_FRAC_USHORT> ShOutputVector3fus;
-typedef ShVector<3, SH_INOUT, SH_FRAC_USHORT> ShInOutVector3fus;
-typedef ShVector<3, SH_TEMP, SH_FRAC_USHORT> ShVector3fus;
-typedef ShVector<3, SH_CONST, SH_FRAC_USHORT> ShConstVector3fus;
-typedef ShVector<4, SH_INPUT, SH_FRAC_USHORT> ShInputVector4fus;
-typedef ShVector<4, SH_OUTPUT, SH_FRAC_USHORT> ShOutputVector4fus;
-typedef ShVector<4, SH_INOUT, SH_FRAC_USHORT> ShInOutVector4fus;
-typedef ShVector<4, SH_TEMP, SH_FRAC_USHORT> ShVector4fus;
-typedef ShVector<4, SH_CONST, SH_FRAC_USHORT> ShConstVector4fus;
+typedef ShAttrib<1, SH_INPUT, unsigned short, SH_VECTOR> ShInputVector1us;
+typedef ShAttrib<1, SH_OUTPUT, unsigned short, SH_VECTOR> ShOutputVector1us;
+typedef ShAttrib<1, SH_INOUT, unsigned short, SH_VECTOR> ShInOutVector1us;
+typedef ShAttrib<1, SH_TEMP, unsigned short, SH_VECTOR> ShVector1us;
+typedef ShAttrib<1, SH_CONST, unsigned short, SH_VECTOR> ShConstVector1us;
+typedef ShAttrib<2, SH_INPUT, unsigned short, SH_VECTOR> ShInputVector2us;
+typedef ShAttrib<2, SH_OUTPUT, unsigned short, SH_VECTOR> ShOutputVector2us;
+typedef ShAttrib<2, SH_INOUT, unsigned short, SH_VECTOR> ShInOutVector2us;
+typedef ShAttrib<2, SH_TEMP, unsigned short, SH_VECTOR> ShVector2us;
+typedef ShAttrib<2, SH_CONST, unsigned short, SH_VECTOR> ShConstVector2us;
+typedef ShAttrib<3, SH_INPUT, unsigned short, SH_VECTOR> ShInputVector3us;
+typedef ShAttrib<3, SH_OUTPUT, unsigned short, SH_VECTOR> ShOutputVector3us;
+typedef ShAttrib<3, SH_INOUT, unsigned short, SH_VECTOR> ShInOutVector3us;
+typedef ShAttrib<3, SH_TEMP, unsigned short, SH_VECTOR> ShVector3us;
+typedef ShAttrib<3, SH_CONST, unsigned short, SH_VECTOR> ShConstVector3us;
+typedef ShAttrib<4, SH_INPUT, unsigned short, SH_VECTOR> ShInputVector4us;
+typedef ShAttrib<4, SH_OUTPUT, unsigned short, SH_VECTOR> ShOutputVector4us;
+typedef ShAttrib<4, SH_INOUT, unsigned short, SH_VECTOR> ShInOutVector4us;
+typedef ShAttrib<4, SH_TEMP, unsigned short, SH_VECTOR> ShVector4us;
+typedef ShAttrib<4, SH_CONST, unsigned short, SH_VECTOR> ShConstVector4us;
 
 
-typedef ShVector<1, SH_INPUT, SH_UBYTE> ShInputVector1ub;
-typedef ShVector<1, SH_OUTPUT, SH_UBYTE> ShOutputVector1ub;
-typedef ShVector<1, SH_INOUT, SH_UBYTE> ShInOutVector1ub;
-typedef ShVector<1, SH_TEMP, SH_UBYTE> ShVector1ub;
-typedef ShVector<1, SH_CONST, SH_UBYTE> ShConstVector1ub;
-typedef ShVector<2, SH_INPUT, SH_UBYTE> ShInputVector2ub;
-typedef ShVector<2, SH_OUTPUT, SH_UBYTE> ShOutputVector2ub;
-typedef ShVector<2, SH_INOUT, SH_UBYTE> ShInOutVector2ub;
-typedef ShVector<2, SH_TEMP, SH_UBYTE> ShVector2ub;
-typedef ShVector<2, SH_CONST, SH_UBYTE> ShConstVector2ub;
-typedef ShVector<3, SH_INPUT, SH_UBYTE> ShInputVector3ub;
-typedef ShVector<3, SH_OUTPUT, SH_UBYTE> ShOutputVector3ub;
-typedef ShVector<3, SH_INOUT, SH_UBYTE> ShInOutVector3ub;
-typedef ShVector<3, SH_TEMP, SH_UBYTE> ShVector3ub;
-typedef ShVector<3, SH_CONST, SH_UBYTE> ShConstVector3ub;
-typedef ShVector<4, SH_INPUT, SH_UBYTE> ShInputVector4ub;
-typedef ShVector<4, SH_OUTPUT, SH_UBYTE> ShOutputVector4ub;
-typedef ShVector<4, SH_INOUT, SH_UBYTE> ShInOutVector4ub;
-typedef ShVector<4, SH_TEMP, SH_UBYTE> ShVector4ub;
-typedef ShVector<4, SH_CONST, SH_UBYTE> ShConstVector4ub;
+typedef ShAttrib<1, SH_INPUT, ShFracUByte, SH_VECTOR> ShInputVector1fub;
+typedef ShAttrib<1, SH_OUTPUT, ShFracUByte, SH_VECTOR> ShOutputVector1fub;
+typedef ShAttrib<1, SH_INOUT, ShFracUByte, SH_VECTOR> ShInOutVector1fub;
+typedef ShAttrib<1, SH_TEMP, ShFracUByte, SH_VECTOR> ShVector1fub;
+typedef ShAttrib<1, SH_CONST, ShFracUByte, SH_VECTOR> ShConstVector1fub;
+typedef ShAttrib<2, SH_INPUT, ShFracUByte, SH_VECTOR> ShInputVector2fub;
+typedef ShAttrib<2, SH_OUTPUT, ShFracUByte, SH_VECTOR> ShOutputVector2fub;
+typedef ShAttrib<2, SH_INOUT, ShFracUByte, SH_VECTOR> ShInOutVector2fub;
+typedef ShAttrib<2, SH_TEMP, ShFracUByte, SH_VECTOR> ShVector2fub;
+typedef ShAttrib<2, SH_CONST, ShFracUByte, SH_VECTOR> ShConstVector2fub;
+typedef ShAttrib<3, SH_INPUT, ShFracUByte, SH_VECTOR> ShInputVector3fub;
+typedef ShAttrib<3, SH_OUTPUT, ShFracUByte, SH_VECTOR> ShOutputVector3fub;
+typedef ShAttrib<3, SH_INOUT, ShFracUByte, SH_VECTOR> ShInOutVector3fub;
+typedef ShAttrib<3, SH_TEMP, ShFracUByte, SH_VECTOR> ShVector3fub;
+typedef ShAttrib<3, SH_CONST, ShFracUByte, SH_VECTOR> ShConstVector3fub;
+typedef ShAttrib<4, SH_INPUT, ShFracUByte, SH_VECTOR> ShInputVector4fub;
+typedef ShAttrib<4, SH_OUTPUT, ShFracUByte, SH_VECTOR> ShOutputVector4fub;
+typedef ShAttrib<4, SH_INOUT, ShFracUByte, SH_VECTOR> ShInOutVector4fub;
+typedef ShAttrib<4, SH_TEMP, ShFracUByte, SH_VECTOR> ShVector4fub;
+typedef ShAttrib<4, SH_CONST, ShFracUByte, SH_VECTOR> ShConstVector4fub;
 
 
-typedef ShVector<1, SH_INPUT, SH_FRAC_SHORT> ShInputVector1fs;
-typedef ShVector<1, SH_OUTPUT, SH_FRAC_SHORT> ShOutputVector1fs;
-typedef ShVector<1, SH_INOUT, SH_FRAC_SHORT> ShInOutVector1fs;
-typedef ShVector<1, SH_TEMP, SH_FRAC_SHORT> ShVector1fs;
-typedef ShVector<1, SH_CONST, SH_FRAC_SHORT> ShConstVector1fs;
-typedef ShVector<2, SH_INPUT, SH_FRAC_SHORT> ShInputVector2fs;
-typedef ShVector<2, SH_OUTPUT, SH_FRAC_SHORT> ShOutputVector2fs;
-typedef ShVector<2, SH_INOUT, SH_FRAC_SHORT> ShInOutVector2fs;
-typedef ShVector<2, SH_TEMP, SH_FRAC_SHORT> ShVector2fs;
-typedef ShVector<2, SH_CONST, SH_FRAC_SHORT> ShConstVector2fs;
-typedef ShVector<3, SH_INPUT, SH_FRAC_SHORT> ShInputVector3fs;
-typedef ShVector<3, SH_OUTPUT, SH_FRAC_SHORT> ShOutputVector3fs;
-typedef ShVector<3, SH_INOUT, SH_FRAC_SHORT> ShInOutVector3fs;
-typedef ShVector<3, SH_TEMP, SH_FRAC_SHORT> ShVector3fs;
-typedef ShVector<3, SH_CONST, SH_FRAC_SHORT> ShConstVector3fs;
-typedef ShVector<4, SH_INPUT, SH_FRAC_SHORT> ShInputVector4fs;
-typedef ShVector<4, SH_OUTPUT, SH_FRAC_SHORT> ShOutputVector4fs;
-typedef ShVector<4, SH_INOUT, SH_FRAC_SHORT> ShInOutVector4fs;
-typedef ShVector<4, SH_TEMP, SH_FRAC_SHORT> ShVector4fs;
-typedef ShVector<4, SH_CONST, SH_FRAC_SHORT> ShConstVector4fs;
+typedef ShAttrib<1, SH_INPUT, ShHalf, SH_VECTOR> ShInputVector1h;
+typedef ShAttrib<1, SH_OUTPUT, ShHalf, SH_VECTOR> ShOutputVector1h;
+typedef ShAttrib<1, SH_INOUT, ShHalf, SH_VECTOR> ShInOutVector1h;
+typedef ShAttrib<1, SH_TEMP, ShHalf, SH_VECTOR> ShVector1h;
+typedef ShAttrib<1, SH_CONST, ShHalf, SH_VECTOR> ShConstVector1h;
+typedef ShAttrib<2, SH_INPUT, ShHalf, SH_VECTOR> ShInputVector2h;
+typedef ShAttrib<2, SH_OUTPUT, ShHalf, SH_VECTOR> ShOutputVector2h;
+typedef ShAttrib<2, SH_INOUT, ShHalf, SH_VECTOR> ShInOutVector2h;
+typedef ShAttrib<2, SH_TEMP, ShHalf, SH_VECTOR> ShVector2h;
+typedef ShAttrib<2, SH_CONST, ShHalf, SH_VECTOR> ShConstVector2h;
+typedef ShAttrib<3, SH_INPUT, ShHalf, SH_VECTOR> ShInputVector3h;
+typedef ShAttrib<3, SH_OUTPUT, ShHalf, SH_VECTOR> ShOutputVector3h;
+typedef ShAttrib<3, SH_INOUT, ShHalf, SH_VECTOR> ShInOutVector3h;
+typedef ShAttrib<3, SH_TEMP, ShHalf, SH_VECTOR> ShVector3h;
+typedef ShAttrib<3, SH_CONST, ShHalf, SH_VECTOR> ShConstVector3h;
+typedef ShAttrib<4, SH_INPUT, ShHalf, SH_VECTOR> ShInputVector4h;
+typedef ShAttrib<4, SH_OUTPUT, ShHalf, SH_VECTOR> ShOutputVector4h;
+typedef ShAttrib<4, SH_INOUT, ShHalf, SH_VECTOR> ShInOutVector4h;
+typedef ShAttrib<4, SH_TEMP, ShHalf, SH_VECTOR> ShVector4h;
+typedef ShAttrib<4, SH_CONST, ShHalf, SH_VECTOR> ShConstVector4h;
 
 
-typedef ShVector<1, SH_INPUT, SH_USHORT> ShInputVector1us;
-typedef ShVector<1, SH_OUTPUT, SH_USHORT> ShOutputVector1us;
-typedef ShVector<1, SH_INOUT, SH_USHORT> ShInOutVector1us;
-typedef ShVector<1, SH_TEMP, SH_USHORT> ShVector1us;
-typedef ShVector<1, SH_CONST, SH_USHORT> ShConstVector1us;
-typedef ShVector<2, SH_INPUT, SH_USHORT> ShInputVector2us;
-typedef ShVector<2, SH_OUTPUT, SH_USHORT> ShOutputVector2us;
-typedef ShVector<2, SH_INOUT, SH_USHORT> ShInOutVector2us;
-typedef ShVector<2, SH_TEMP, SH_USHORT> ShVector2us;
-typedef ShVector<2, SH_CONST, SH_USHORT> ShConstVector2us;
-typedef ShVector<3, SH_INPUT, SH_USHORT> ShInputVector3us;
-typedef ShVector<3, SH_OUTPUT, SH_USHORT> ShOutputVector3us;
-typedef ShVector<3, SH_INOUT, SH_USHORT> ShInOutVector3us;
-typedef ShVector<3, SH_TEMP, SH_USHORT> ShVector3us;
-typedef ShVector<3, SH_CONST, SH_USHORT> ShConstVector3us;
-typedef ShVector<4, SH_INPUT, SH_USHORT> ShInputVector4us;
-typedef ShVector<4, SH_OUTPUT, SH_USHORT> ShOutputVector4us;
-typedef ShVector<4, SH_INOUT, SH_USHORT> ShInOutVector4us;
-typedef ShVector<4, SH_TEMP, SH_USHORT> ShVector4us;
-typedef ShVector<4, SH_CONST, SH_USHORT> ShConstVector4us;
+typedef ShAttrib<1, SH_INPUT, ShFracShort, SH_VECTOR> ShInputVector1fs;
+typedef ShAttrib<1, SH_OUTPUT, ShFracShort, SH_VECTOR> ShOutputVector1fs;
+typedef ShAttrib<1, SH_INOUT, ShFracShort, SH_VECTOR> ShInOutVector1fs;
+typedef ShAttrib<1, SH_TEMP, ShFracShort, SH_VECTOR> ShVector1fs;
+typedef ShAttrib<1, SH_CONST, ShFracShort, SH_VECTOR> ShConstVector1fs;
+typedef ShAttrib<2, SH_INPUT, ShFracShort, SH_VECTOR> ShInputVector2fs;
+typedef ShAttrib<2, SH_OUTPUT, ShFracShort, SH_VECTOR> ShOutputVector2fs;
+typedef ShAttrib<2, SH_INOUT, ShFracShort, SH_VECTOR> ShInOutVector2fs;
+typedef ShAttrib<2, SH_TEMP, ShFracShort, SH_VECTOR> ShVector2fs;
+typedef ShAttrib<2, SH_CONST, ShFracShort, SH_VECTOR> ShConstVector2fs;
+typedef ShAttrib<3, SH_INPUT, ShFracShort, SH_VECTOR> ShInputVector3fs;
+typedef ShAttrib<3, SH_OUTPUT, ShFracShort, SH_VECTOR> ShOutputVector3fs;
+typedef ShAttrib<3, SH_INOUT, ShFracShort, SH_VECTOR> ShInOutVector3fs;
+typedef ShAttrib<3, SH_TEMP, ShFracShort, SH_VECTOR> ShVector3fs;
+typedef ShAttrib<3, SH_CONST, ShFracShort, SH_VECTOR> ShConstVector3fs;
+typedef ShAttrib<4, SH_INPUT, ShFracShort, SH_VECTOR> ShInputVector4fs;
+typedef ShAttrib<4, SH_OUTPUT, ShFracShort, SH_VECTOR> ShOutputVector4fs;
+typedef ShAttrib<4, SH_INOUT, ShFracShort, SH_VECTOR> ShInOutVector4fs;
+typedef ShAttrib<4, SH_TEMP, ShFracShort, SH_VECTOR> ShVector4fs;
+typedef ShAttrib<4, SH_CONST, ShFracShort, SH_VECTOR> ShConstVector4fs;
 
 
-typedef ShVector<1, SH_INPUT, SH_UINT> ShInputVector1ui;
-typedef ShVector<1, SH_OUTPUT, SH_UINT> ShOutputVector1ui;
-typedef ShVector<1, SH_INOUT, SH_UINT> ShInOutVector1ui;
-typedef ShVector<1, SH_TEMP, SH_UINT> ShVector1ui;
-typedef ShVector<1, SH_CONST, SH_UINT> ShConstVector1ui;
-typedef ShVector<2, SH_INPUT, SH_UINT> ShInputVector2ui;
-typedef ShVector<2, SH_OUTPUT, SH_UINT> ShOutputVector2ui;
-typedef ShVector<2, SH_INOUT, SH_UINT> ShInOutVector2ui;
-typedef ShVector<2, SH_TEMP, SH_UINT> ShVector2ui;
-typedef ShVector<2, SH_CONST, SH_UINT> ShConstVector2ui;
-typedef ShVector<3, SH_INPUT, SH_UINT> ShInputVector3ui;
-typedef ShVector<3, SH_OUTPUT, SH_UINT> ShOutputVector3ui;
-typedef ShVector<3, SH_INOUT, SH_UINT> ShInOutVector3ui;
-typedef ShVector<3, SH_TEMP, SH_UINT> ShVector3ui;
-typedef ShVector<3, SH_CONST, SH_UINT> ShConstVector3ui;
-typedef ShVector<4, SH_INPUT, SH_UINT> ShInputVector4ui;
-typedef ShVector<4, SH_OUTPUT, SH_UINT> ShOutputVector4ui;
-typedef ShVector<4, SH_INOUT, SH_UINT> ShInOutVector4ui;
-typedef ShVector<4, SH_TEMP, SH_UINT> ShVector4ui;
-typedef ShVector<4, SH_CONST, SH_UINT> ShConstVector4ui;
+typedef ShAttrib<1, SH_INPUT, ShFracInt, SH_VECTOR> ShInputVector1fi;
+typedef ShAttrib<1, SH_OUTPUT, ShFracInt, SH_VECTOR> ShOutputVector1fi;
+typedef ShAttrib<1, SH_INOUT, ShFracInt, SH_VECTOR> ShInOutVector1fi;
+typedef ShAttrib<1, SH_TEMP, ShFracInt, SH_VECTOR> ShVector1fi;
+typedef ShAttrib<1, SH_CONST, ShFracInt, SH_VECTOR> ShConstVector1fi;
+typedef ShAttrib<2, SH_INPUT, ShFracInt, SH_VECTOR> ShInputVector2fi;
+typedef ShAttrib<2, SH_OUTPUT, ShFracInt, SH_VECTOR> ShOutputVector2fi;
+typedef ShAttrib<2, SH_INOUT, ShFracInt, SH_VECTOR> ShInOutVector2fi;
+typedef ShAttrib<2, SH_TEMP, ShFracInt, SH_VECTOR> ShVector2fi;
+typedef ShAttrib<2, SH_CONST, ShFracInt, SH_VECTOR> ShConstVector2fi;
+typedef ShAttrib<3, SH_INPUT, ShFracInt, SH_VECTOR> ShInputVector3fi;
+typedef ShAttrib<3, SH_OUTPUT, ShFracInt, SH_VECTOR> ShOutputVector3fi;
+typedef ShAttrib<3, SH_INOUT, ShFracInt, SH_VECTOR> ShInOutVector3fi;
+typedef ShAttrib<3, SH_TEMP, ShFracInt, SH_VECTOR> ShVector3fi;
+typedef ShAttrib<3, SH_CONST, ShFracInt, SH_VECTOR> ShConstVector3fi;
+typedef ShAttrib<4, SH_INPUT, ShFracInt, SH_VECTOR> ShInputVector4fi;
+typedef ShAttrib<4, SH_OUTPUT, ShFracInt, SH_VECTOR> ShOutputVector4fi;
+typedef ShAttrib<4, SH_INOUT, ShFracInt, SH_VECTOR> ShInOutVector4fi;
+typedef ShAttrib<4, SH_TEMP, ShFracInt, SH_VECTOR> ShVector4fi;
+typedef ShAttrib<4, SH_CONST, ShFracInt, SH_VECTOR> ShConstVector4fi;
 
 
-typedef ShVector<1, SH_INPUT, SH_DOUBLE> ShInputVector1d;
-typedef ShVector<1, SH_OUTPUT, SH_DOUBLE> ShOutputVector1d;
-typedef ShVector<1, SH_INOUT, SH_DOUBLE> ShInOutVector1d;
-typedef ShVector<1, SH_TEMP, SH_DOUBLE> ShVector1d;
-typedef ShVector<1, SH_CONST, SH_DOUBLE> ShConstVector1d;
-typedef ShVector<2, SH_INPUT, SH_DOUBLE> ShInputVector2d;
-typedef ShVector<2, SH_OUTPUT, SH_DOUBLE> ShOutputVector2d;
-typedef ShVector<2, SH_INOUT, SH_DOUBLE> ShInOutVector2d;
-typedef ShVector<2, SH_TEMP, SH_DOUBLE> ShVector2d;
-typedef ShVector<2, SH_CONST, SH_DOUBLE> ShConstVector2d;
-typedef ShVector<3, SH_INPUT, SH_DOUBLE> ShInputVector3d;
-typedef ShVector<3, SH_OUTPUT, SH_DOUBLE> ShOutputVector3d;
-typedef ShVector<3, SH_INOUT, SH_DOUBLE> ShInOutVector3d;
-typedef ShVector<3, SH_TEMP, SH_DOUBLE> ShVector3d;
-typedef ShVector<3, SH_CONST, SH_DOUBLE> ShConstVector3d;
-typedef ShVector<4, SH_INPUT, SH_DOUBLE> ShInputVector4d;
-typedef ShVector<4, SH_OUTPUT, SH_DOUBLE> ShOutputVector4d;
-typedef ShVector<4, SH_INOUT, SH_DOUBLE> ShInOutVector4d;
-typedef ShVector<4, SH_TEMP, SH_DOUBLE> ShVector4d;
-typedef ShVector<4, SH_CONST, SH_DOUBLE> ShConstVector4d;
-
-
-typedef ShVector<1, SH_INPUT, SH_INTERVAL_FLOAT> ShInputVector1i_f;
-typedef ShVector<1, SH_OUTPUT, SH_INTERVAL_FLOAT> ShOutputVector1i_f;
-typedef ShVector<1, SH_INOUT, SH_INTERVAL_FLOAT> ShInOutVector1i_f;
-typedef ShVector<1, SH_TEMP, SH_INTERVAL_FLOAT> ShVector1i_f;
-typedef ShVector<1, SH_CONST, SH_INTERVAL_FLOAT> ShConstVector1i_f;
-typedef ShVector<2, SH_INPUT, SH_INTERVAL_FLOAT> ShInputVector2i_f;
-typedef ShVector<2, SH_OUTPUT, SH_INTERVAL_FLOAT> ShOutputVector2i_f;
-typedef ShVector<2, SH_INOUT, SH_INTERVAL_FLOAT> ShInOutVector2i_f;
-typedef ShVector<2, SH_TEMP, SH_INTERVAL_FLOAT> ShVector2i_f;
-typedef ShVector<2, SH_CONST, SH_INTERVAL_FLOAT> ShConstVector2i_f;
-typedef ShVector<3, SH_INPUT, SH_INTERVAL_FLOAT> ShInputVector3i_f;
-typedef ShVector<3, SH_OUTPUT, SH_INTERVAL_FLOAT> ShOutputVector3i_f;
-typedef ShVector<3, SH_INOUT, SH_INTERVAL_FLOAT> ShInOutVector3i_f;
-typedef ShVector<3, SH_TEMP, SH_INTERVAL_FLOAT> ShVector3i_f;
-typedef ShVector<3, SH_CONST, SH_INTERVAL_FLOAT> ShConstVector3i_f;
-typedef ShVector<4, SH_INPUT, SH_INTERVAL_FLOAT> ShInputVector4i_f;
-typedef ShVector<4, SH_OUTPUT, SH_INTERVAL_FLOAT> ShOutputVector4i_f;
-typedef ShVector<4, SH_INOUT, SH_INTERVAL_FLOAT> ShInOutVector4i_f;
-typedef ShVector<4, SH_TEMP, SH_INTERVAL_FLOAT> ShVector4i_f;
-typedef ShVector<4, SH_CONST, SH_INTERVAL_FLOAT> ShConstVector4i_f;
-
-
-typedef ShVector<1, SH_INPUT, SH_FRAC_INT> ShInputVector1fi;
-typedef ShVector<1, SH_OUTPUT, SH_FRAC_INT> ShOutputVector1fi;
-typedef ShVector<1, SH_INOUT, SH_FRAC_INT> ShInOutVector1fi;
-typedef ShVector<1, SH_TEMP, SH_FRAC_INT> ShVector1fi;
-typedef ShVector<1, SH_CONST, SH_FRAC_INT> ShConstVector1fi;
-typedef ShVector<2, SH_INPUT, SH_FRAC_INT> ShInputVector2fi;
-typedef ShVector<2, SH_OUTPUT, SH_FRAC_INT> ShOutputVector2fi;
-typedef ShVector<2, SH_INOUT, SH_FRAC_INT> ShInOutVector2fi;
-typedef ShVector<2, SH_TEMP, SH_FRAC_INT> ShVector2fi;
-typedef ShVector<2, SH_CONST, SH_FRAC_INT> ShConstVector2fi;
-typedef ShVector<3, SH_INPUT, SH_FRAC_INT> ShInputVector3fi;
-typedef ShVector<3, SH_OUTPUT, SH_FRAC_INT> ShOutputVector3fi;
-typedef ShVector<3, SH_INOUT, SH_FRAC_INT> ShInOutVector3fi;
-typedef ShVector<3, SH_TEMP, SH_FRAC_INT> ShVector3fi;
-typedef ShVector<3, SH_CONST, SH_FRAC_INT> ShConstVector3fi;
-typedef ShVector<4, SH_INPUT, SH_FRAC_INT> ShInputVector4fi;
-typedef ShVector<4, SH_OUTPUT, SH_FRAC_INT> ShOutputVector4fi;
-typedef ShVector<4, SH_INOUT, SH_FRAC_INT> ShInOutVector4fi;
-typedef ShVector<4, SH_TEMP, SH_FRAC_INT> ShVector4fi;
-typedef ShVector<4, SH_CONST, SH_FRAC_INT> ShConstVector4fi;
+typedef ShAttrib<1, SH_INPUT, unsigned int, SH_VECTOR> ShInputVector1ui;
+typedef ShAttrib<1, SH_OUTPUT, unsigned int, SH_VECTOR> ShOutputVector1ui;
+typedef ShAttrib<1, SH_INOUT, unsigned int, SH_VECTOR> ShInOutVector1ui;
+typedef ShAttrib<1, SH_TEMP, unsigned int, SH_VECTOR> ShVector1ui;
+typedef ShAttrib<1, SH_CONST, unsigned int, SH_VECTOR> ShConstVector1ui;
+typedef ShAttrib<2, SH_INPUT, unsigned int, SH_VECTOR> ShInputVector2ui;
+typedef ShAttrib<2, SH_OUTPUT, unsigned int, SH_VECTOR> ShOutputVector2ui;
+typedef ShAttrib<2, SH_INOUT, unsigned int, SH_VECTOR> ShInOutVector2ui;
+typedef ShAttrib<2, SH_TEMP, unsigned int, SH_VECTOR> ShVector2ui;
+typedef ShAttrib<2, SH_CONST, unsigned int, SH_VECTOR> ShConstVector2ui;
+typedef ShAttrib<3, SH_INPUT, unsigned int, SH_VECTOR> ShInputVector3ui;
+typedef ShAttrib<3, SH_OUTPUT, unsigned int, SH_VECTOR> ShOutputVector3ui;
+typedef ShAttrib<3, SH_INOUT, unsigned int, SH_VECTOR> ShInOutVector3ui;
+typedef ShAttrib<3, SH_TEMP, unsigned int, SH_VECTOR> ShVector3ui;
+typedef ShAttrib<3, SH_CONST, unsigned int, SH_VECTOR> ShConstVector3ui;
+typedef ShAttrib<4, SH_INPUT, unsigned int, SH_VECTOR> ShInputVector4ui;
+typedef ShAttrib<4, SH_OUTPUT, unsigned int, SH_VECTOR> ShOutputVector4ui;
+typedef ShAttrib<4, SH_INOUT, unsigned int, SH_VECTOR> ShInOutVector4ui;
+typedef ShAttrib<4, SH_TEMP, unsigned int, SH_VECTOR> ShVector4ui;
+typedef ShAttrib<4, SH_CONST, unsigned int, SH_VECTOR> ShConstVector4ui;
 
 
 
 } // namespace SH
-#include "ShVectorImpl.hpp"
 
 #endif // SH_SHVECTOR_HPP

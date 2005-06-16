@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -28,6 +25,7 @@
 #define SHCASTMANAGER_HPP
 
 #include <map>
+#include "ShHashMap.hpp"
 #include "ShRefCount.hpp"
 #include "ShGraph.hpp"
 #include "ShTypeInfo.hpp"
@@ -113,9 +111,8 @@ ShCastMgrGraph: public ShGraph<ShCastMgrGraphType>
     void addEdge(ShCastMgrEdge* edge); 
 
   protected:
-    typedef ShCastMgrVertex* VertexArray[SH_VALUETYPE_END][SH_DATATYPE_END];
+    typedef ShPairHashMap<ShValueType, ShDataType, ShCastMgrVertex*> VertexArray;
     VertexArray m_vert;
-    
 };
 
 class 
@@ -131,8 +128,6 @@ ShCastManager {
     /** Casts the contents of the src variant to dest variant
      * Both must be previously allocated and the same size,
      * and caller should check dest != src.
-     * (If you want to skip this check often, change the internal
-     * implementation to use memmove instead of memcpy)
      *
      * When dest, src have same type, this just becomes a data copy.
      * @{
@@ -171,10 +166,10 @@ ShCastManager {
     // add cached versions of cast order for different casts between indices
     // FirstCastMap[dest][destdt][src][srcdt] holds the first caster to use for 
     // getting from src to dest (or 0 if no cast path exists)
-    typedef const ShVariantCast* FirstCastMap[SH_VALUETYPE_END][SH_DATATYPE_END]
-                                             [SH_VALUETYPE_END][SH_DATATYPE_END]; 
+    typedef ShPairPairHashMap<ShValueType, ShDataType, ShValueType, ShDataType, 
+              const ShVariantCast*> FirstCastMap;
 
-    typedef int CastDistMap[SH_VALUETYPE_END][SH_VALUETYPE_END]; 
+    typedef ShPairHashMap<ShValueType, ShValueType, int> CastDistMap;
 
     // shortest paths using any kind of cast
     FirstCastMap m_castStep;

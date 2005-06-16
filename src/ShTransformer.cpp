@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -25,6 +22,7 @@
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
 #include <algorithm>
+#include <sstream>
 #include <map>
 #include <list>
 #include "ShContext.hpp"
@@ -34,6 +32,8 @@
 #include "ShVariableNode.hpp"
 #include "ShInternals.hpp"
 #include "ShTransformer.hpp"
+
+// #define SH_DBG_TRANSFORMER
 
 namespace SH {
 
@@ -110,7 +110,11 @@ struct VariableSplitter {
       //if(node->uniform()) ShContext::current()->exit(); 
 
       int newSize = n < maxTuple ? n : maxTuple;
-      newNode = node->clone(node->kind(), node->specialType(), newSize, false); 
+      newNode = node->clone(SH_BINDINGTYPE_END, newSize, 
+          SH_VALUETYPE_END, SH_SEMANTICTYPE_END, false); 
+      std::ostringstream sout;
+      sout << node->name() << "_" << offset;
+      newNode->name(sout.str());
 
       // @todo type should not be necessary any more
       // if(node->uniform()) ShContext::current()->enter(0);
@@ -172,7 +176,10 @@ struct StatementSplitter {
       // TODO check that uniforms don't get screwed
       // TODO check that typing works correctly - temporary should
       // have same type as the statement's operation type
-      ShVariable tempVar(v.node()->clone(SH_TEMP, SH_ATTRIB, tsize, true, false)); 
+      ShVariable tempVar(resizeCloneNode(v.node(), tsize));
+      std::ostringstream sout;
+      sout << v.name() << "_" << i << "_temp";
+      tempVar.name(sout.str());
       vv.push_back(tempVar);
 
       int* tempSwiz = new int[tsize];
@@ -227,6 +234,10 @@ struct StatementSplitter {
     delete [] swizr;
   }
 
+  ShVariableNodePtr resizeCloneNode(ShVariableNodePtr node, int newSize) {
+    return node->clone(SH_TEMP, newSize, SH_VALUETYPE_END, 
+        SH_SEMANTICTYPE_END, true, false);
+  }
   // works on two assumptions
   // 1) special cases for DOT, XPD (and any other future non-componentwise ops) implemented separately
   // 2) Everything else is in the form N = [1|N]+ in terms of tuple sizes involved in dest and src
@@ -242,6 +253,34 @@ struct StatementSplitter {
     } else destVec.push_back(dest.node());
 
     switch(oldStmt.op) {
+      case SH_OP_CSUM:
+        {
+          SH_DEBUG_ASSERT(destSwiz.size() == 1);
+          ShVariable partialt = ShVariable(resizeCloneNode(dest.node(), 1));
+          ShVariable sumt = ShVariable(resizeCloneNode(dest.node(), 1));
+
+          stmts.push_back(ShStatement(sumt, SH_OP_CSUM, srcVec[0][0]));
+          for(size_t i = 1; i < srcVec[0].size(); ++i) {
+            stmts.push_back(ShStatement(partialt, SH_OP_CSUM, srcVec[0][i]));
+            stmts.push_back(ShStatement(sumt, sumt, SH_OP_ADD, partialt));
+          }
+          resultVec.push_back(sumt);
+        }
+        break;
+      case SH_OP_CMUL:
+        {
+          SH_DEBUG_ASSERT(destSwiz.size() == 1);
+          ShVariable partialt = ShVariable(resizeCloneNode(dest.node(), 1));
+          ShVariable prodt = ShVariable(resizeCloneNode(dest.node(), 1));
+
+          stmts.push_back(ShStatement(prodt, SH_OP_CMUL, srcVec[0][0]));
+          for(size_t i = 1; i < srcVec[0].size(); ++i) {
+            stmts.push_back(ShStatement(partialt, SH_OP_CMUL, srcVec[0][i]));
+            stmts.push_back(ShStatement(prodt, prodt, SH_OP_MUL, partialt));
+          }
+          resultVec.push_back(prodt);
+        }
+        break;
       case SH_OP_DOT:
         { 
           // TODO for large tuples, may want to use another dot to sum up results instead of 
@@ -250,8 +289,8 @@ struct StatementSplitter {
 
           // TODO check that this works correctly for weird types
           // (temporaries should have same type as the ShStatement's operation type) 
-          ShVariable dott = ShVariable(dest.node()->clone(SH_TEMP, SH_ATTRIB, 1, true, false));
-          ShVariable sumt = ShVariable(dest.node()->clone(SH_TEMP, SH_ATTRIB, 1, true, false));
+          ShVariable dott = ShVariable(resizeCloneNode(dest.node(), 1));
+          ShVariable sumt = ShVariable(resizeCloneNode(dest.node(), 1));
 
           stmts.push_back(ShStatement(sumt, srcVec[0][0], SH_OP_DOT, srcVec[1][0]));
           for(i = 1; i < srcVec[0].size(); ++i) {
@@ -267,7 +306,7 @@ struct StatementSplitter {
               srcVec[1].size() == 1 && srcVec[1][0].size() == 3); 
 
           // TODO check typing
-          ShVariable result = ShVariable(dest.node()->clone(SH_TEMP, SH_ATTRIB, 3, true, false));
+          ShVariable result = ShVariable(resizeCloneNode(dest.node(), 3));
 
           stmts.push_back(ShStatement(result, srcVec[0][0], SH_OP_XPD, srcVec[1][0]));
           resultVec.push_back(result);
@@ -281,7 +320,7 @@ struct StatementSplitter {
           if( srcVec[2].size() > srcVec[maxi].size() ) maxi = 2;
           for(i = 0; i < srcVec[maxi].size(); ++i) {
             // TODO check typing
-            ShVariable resultPart(dest.node()->clone(SH_TEMP, SH_ATTRIB, srcVec[maxi][i].size(), true, false));
+            ShVariable resultPart(resizeCloneNode(dest.node(), srcVec[maxi][i].size()));
 
             ShStatement newStmt(resultPart, oldStmt.op);
             for(j = 0; j < 3 && !srcVec[j].empty(); ++j) {
@@ -327,15 +366,25 @@ struct StatementSplitter {
 
 void ShTransformer::splitTuples(int maxTuple, ShTransformer::VarSplitMap &splits) {
   SH_DEBUG_ASSERT(maxTuple > 0); 
+#ifdef SH_DBG_TRANSFORMER
+  m_program->dump("splittupl_start");
+#endif
 
   VariableSplitter vs(maxTuple, splits, m_changed);
   vs.splitVarList(m_program->inputs);
   vs.splitVarList(m_program->outputs);
   m_program->ctrlGraph->dfs(vs);
 
+#ifdef SH_DBG_TRANSFORMER
+  m_program->dump("splittupl_vars");
+#endif
 
   StatementSplitter ss(maxTuple, splits, m_changed);
   m_program->ctrlGraph->dfs(ss);
+
+#ifdef SH_DBG_TRANSFORMER
+  m_program->dump("splittupl_done");
+#endif
 }
 
 static int id = 0;
@@ -356,11 +405,19 @@ struct InputOutputConvertor {
     }
   }
 
+  // Turn node into a temporary, but do not update var list and do not keep
+  // uniform
+  ShVariableNodePtr cloneNode(ShVariableNodePtr node, const char* suffix, ShBindingType binding_type=SH_TEMP) {
+    ShVariableNodePtr result = node->clone(binding_type, 0, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, false, false);
+    result->name(node->name() + suffix); 
+    return result;
+  }
+
   /* Convert all INOUT nodes that appear in a VarList (use std::for_each with this object)
    * (currently InOuts are always converted) */ 
   void operator()(ShVariableNodePtr node) {
     if (node->kind() != SH_INOUT || m_varMap.count(node) > 0) return;
-    m_varMap[node] = node->clone(SH_TEMP, false, false); 
+    m_varMap[node] = cloneNode(node, "_ioc-iot");
   }
 
   // Convert inputs, outputs only when they appear in incompatible locations
@@ -371,7 +428,7 @@ struct InputOutputConvertor {
       const ShVariableNodePtr &oldNode = stmt.dest.node();
       if(oldNode->kind() == SH_INPUT) { 
         if(m_varMap.count(oldNode) == 0) {
-          m_varMap[oldNode] = oldNode->clone(SH_TEMP, false, false);
+          m_varMap[oldNode] = cloneNode(oldNode, "_ioc-it");
         }
       }
     }
@@ -380,7 +437,7 @@ struct InputOutputConvertor {
         const ShVariableNodePtr &oldNode = stmt.src[i].node();
         if(oldNode->kind() == SH_OUTPUT) { 
           if(m_varMap.count(oldNode) == 0) {
-            m_varMap[oldNode] = oldNode->clone(SH_TEMP, false, false);
+            m_varMap[oldNode] = cloneNode(oldNode, "_ioc-ot");
           }
         }
       }
@@ -406,8 +463,8 @@ struct InputOutputConvertor {
               ShVariable(it->second), SH_OP_ASN, ShVariable(oldNode)));
       } else if(oldNode->kind() == SH_INOUT) {
         // replace INOUT nodes in input/output lists with INPUT and OUTPUT nodes
-        ShVariableNodePtr newInNode(oldNode->clone(SH_INPUT, false, false));
-        ShVariableNodePtr newOutNode(oldNode->clone(SH_OUTPUT, false, false));
+        ShVariableNodePtr newInNode(cloneNode(oldNode, "_ioc-i", SH_INPUT));
+        ShVariableNodePtr newOutNode(cloneNode(oldNode, "_ioc-o", SH_OUTPUT));
 
         std::replace(m_program->inputs.begin(), m_program->inputs.end(),
             oldNode, newInNode);
@@ -432,6 +489,9 @@ struct InputOutputConvertor {
 
 void ShTransformer::convertInputOutput()
 {
+#ifdef SH_DBG_TRANSFORMER
+  m_program->dump("ioconvert_start");
+#endif
   ShVarMap varMap; // maps from outputs used as srcs in computation to their temporary variables
 
   InputOutputConvertor ioc(m_program, varMap, m_changed);
@@ -443,6 +503,10 @@ void ShTransformer::convertInputOutput()
   m_program->ctrlGraph->dfs(vr);
 
   ioc.updateGraph(); 
+
+#ifdef SH_DBG_TRANSFORMER
+  m_program->dump("ioconvert_done");
+#endif
 }
 
 struct TextureLookupConverter {
@@ -458,6 +522,10 @@ struct TextureLookupConverter {
     }
   }
 
+  ShVariableNodePtr cloneNode(ShVariableNodePtr node) {
+    return node->clone(SH_TEMP, 0, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, true, false);
+  }
+
   void convert(ShBasicBlockPtr block, ShBasicBlock::ShStmtList::iterator& I)
   {
     const ShStatement& stmt = *I;
@@ -470,14 +538,14 @@ struct TextureLookupConverter {
     if (stmt.op == SH_OP_TEX && tn->dims() == SH_TEXTURE_RECT) {
       // TODO check typing
       //ShVariable tc(new ShVariableNode(SH_TEMP, tn->texSizeVar().size()));
-      ShVariable tc(tn->texSizeVar().node()->clone(SH_TEMP, true, false));
+      ShVariable tc(cloneNode(tn->texSizeVar().node()));
 
       newStmts.push_back(ShStatement(tc, stmt.src[1], SH_OP_MUL, tn->texSizeVar()));
       newStmts.push_back(ShStatement(stmt.dest, stmt.src[0], SH_OP_TEXI, tc));
     } else if (stmt.op == SH_OP_TEXI && tn->dims() != SH_TEXTURE_RECT) {
       // TODO check typing
       //ShVariable tc(new ShVariableNode(SH_TEMP, tn->texSizeVar().size()));
-      ShVariable tc(tn->texSizeVar().node()->clone(SH_TEMP, true, false));
+      ShVariable tc(cloneNode(tn->texSizeVar().node()));
 
       newStmts.push_back(ShStatement(tc, stmt.src[1], SH_OP_DIV, tn->texSizeVar()));
       newStmts.push_back(ShStatement(stmt.dest, stmt.src[0], SH_OP_TEX, tc));
@@ -496,11 +564,41 @@ struct TextureLookupConverter {
 
 void ShTransformer::convertTextureLookups()
 {
+#ifdef SH_DBG_TRANSFORMER
+  m_program->dump("texlkup_start");
+#endif
+
   TextureLookupConverter conv;
   m_program->ctrlGraph->dfs(conv);
   if (conv.changed) m_changed = true;
+
+#ifdef SH_DBG_TRANSFORMER
+  m_program->dump("texlkup_done");
+#endif
 }
 
+struct DummyOpStripperBase: public ShTransformerParent 
+{
+ bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node) { 
+   switch(I->op) {
+     case SH_OP_STARTSEC:
+     case SH_OP_ENDSEC:
+     case SH_OP_COMMENT:
+       I = node->block->erase(I);
+       return true;
+     default:
+       break;
+   }
+   return false; 
+ }
+};
+typedef ShDefaultTransformer<DummyOpStripperBase> DummyOpStripper;
+
+void ShTransformer::stripDummyOps()
+{
+  DummyOpStripper dos;
+  m_changed |= dos.transform(m_program);
+}
 
 }
 

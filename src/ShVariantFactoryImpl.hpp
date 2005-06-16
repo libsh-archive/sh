@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -32,49 +29,49 @@
 
 namespace SH {
 
-template<ShValueType V, ShDataType DT>
-ShVariant* ShDataVariantFactory<V, DT>::generate(int N) const
+template<typename T, ShDataType DT>
+ShVariant* ShDataVariantFactory<T, DT>::generate(int N) const
 {
-  return new ShDataVariant<V, DT>(N);
+  return new ShDataVariant<T, DT>(N);
 }
 
-template<ShValueType V, ShDataType DT>
-ShVariant* ShDataVariantFactory<V, DT>::generate(std::string s) const
+template<typename T, ShDataType DT>
+ShVariant* ShDataVariantFactory<T, DT>::generate(std::string s) const
 {
-  return new ShDataVariant<V, DT>(s);
+  return new ShDataVariant<T, DT>(s);
 }
 
-template<ShValueType V, ShDataType DT>
-ShVariant* ShDataVariantFactory<V, DT>::generate(void *data, int N, bool managed) const
+template<typename T, ShDataType DT>
+ShVariant* ShDataVariantFactory<T, DT>::generate(int N, void *data, bool managed) const
 {
-  return new ShDataVariant<V, DT>(data, N, managed);
+  return new ShDataVariant<T, DT>(N, data, managed);
 }
 
-template<ShValueType V, ShDataType DT>
-ShVariant* ShDataVariantFactory<V, DT>::generateZero(int N) const
+template<typename T, ShDataType DT>
+ShVariant* ShDataVariantFactory<T, DT>::generateZero(int N) const
 {
-  return new ShDataVariant<V, DT>(N);
+  return new ShDataVariant<T, DT>(N);
 }
 
-template<ShValueType V, ShDataType DT>
-ShVariant* ShDataVariantFactory<V, DT>::generateOne(int N) const
+template<typename T, ShDataType DT>
+ShVariant* ShDataVariantFactory<T, DT>::generateOne(int N) const
 {
-  return new ShDataVariant<V, DT>(N, ShDataTypeConstant<V, DT>::One);
+  return new ShDataVariant<T, DT>(N, ShDataTypeConstant<T, DT>::One);
 }
 
-template<ShValueType V, ShDataType DT>
-ShDataVariantFactory<V, DT>* ShDataVariantFactory<V, DT>::m_instance = 0;
+template<typename T, ShDataType DT>
+ShDataVariantFactory<T, DT>* ShDataVariantFactory<T, DT>::m_instance = 0;
 
-template<ShValueType V, ShDataType DT>
-const ShDataVariantFactory<V, DT>*
-ShDataVariantFactory<V, DT>::instance() 
+template<typename T, ShDataType DT>
+const ShDataVariantFactory<T, DT>*
+ShDataVariantFactory<T, DT>::instance() 
 {
-  if(!m_instance) m_instance = new ShDataVariantFactory<V, DT>();
+  if(!m_instance) m_instance = new ShDataVariantFactory<T, DT>();
   return m_instance;
 }
 
-template<ShValueType V, ShDataType DT>
-ShDataVariantFactory<V, DT>::ShDataVariantFactory()
+template<typename T, ShDataType DT>
+ShDataVariantFactory<T, DT>::ShDataVariantFactory()
 {}
 
 }

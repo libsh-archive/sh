@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -48,11 +45,18 @@ ShProgram connect(const ShChannelNodePtr& node, const ShProgram& program)
   return connect(nibble, program);
 }
 
-ShStream::ShStream(const ShChannelNodePtr& channel, int stride, int offset )
+
+//ShStream::ShStream(const ShChannelNodePtr& channel, int stride, int offset )
+
+ShStream::ShStream()
+{
+}
+ShStream::ShStream(const ShChannelNodePtr& channel)
 {
   append(channel);
 }
 
+/*
 ShStream::ShStream(const ShStream &other, int _stride, int _offset)
 {
   using namespace std;
@@ -64,23 +68,24 @@ ShStream::ShStream(const ShStream &other, int _stride, int _offset)
     m_nodes.push_back( ptr );
   }
 }
+*/
 
-ShStream::NodeList::const_iterator ShStream::begin() const
+ShStream::const_iterator ShStream::begin() const
 {
   return m_nodes.begin();
 }
 
-ShStream::NodeList::const_iterator ShStream::end() const
+ShStream::const_iterator ShStream::end() const
 {
   return m_nodes.end();
 }
 
-ShStream::NodeList::iterator ShStream::begin() 
+ShStream::iterator ShStream::begin() 
 {
   return m_nodes.begin();
 }
 
-ShStream::NodeList::iterator ShStream::end() 
+ShStream::iterator ShStream::end() 
 {
   return m_nodes.end();
 }
@@ -134,7 +139,8 @@ ShProgram operator<<(const ShProgram& program, const ShStream& stream)
 
 ShStream& ShStream::operator=(const ShProgram& program)
 {
-  ShEnvironment::backend->execute(program.node(), *this);
+  ShBackendPtr backend = ShBackend::get_backend(program.target());
+  backend->execute(program.node(), *this);
   return *this;
 }
 

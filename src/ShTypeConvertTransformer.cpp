@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -129,25 +126,6 @@ struct FloatConverter {
   FloatConverter(ShTransformer::ValueTypeMap &valueTypeMap, ShVarMap &converts)
     : m_valueTypeMap(valueTypeMap), m_converts(converts), m_eval(ShEval::instance())
   {
-    m_floatIndices.push_back(SH_DOUBLE);
-    m_floatIndices.push_back(SH_FLOAT);
-    m_floatIndices.push_back(SH_HALF);
-
-    m_intIndices.push_back(SH_INT);
-    m_intIndices.push_back(SH_SHORT);
-    m_intIndices.push_back(SH_BYTE);
-    
-    m_uintIndices.push_back(SH_UINT);
-    m_uintIndices.push_back(SH_USHORT);
-    m_uintIndices.push_back(SH_UBYTE);
-
-    m_fracIndices.push_back(SH_FRAC_INT);
-    m_fracIndices.push_back(SH_FRAC_SHORT);
-    m_fracIndices.push_back(SH_FRAC_BYTE);
-    
-    m_ufracIndices.push_back(SH_FRAC_UINT);
-    m_ufracIndices.push_back(SH_FRAC_USHORT);
-    m_ufracIndices.push_back(SH_FRAC_UBYTE);
   }
 
   void operator()(ShCtrlGraphNodePtr node) {
@@ -164,28 +142,25 @@ struct FloatConverter {
   // @todo might want to make these more global (perhaps even
   // put it into the TypeInfo for standard types?)
   bool isFloat(ShValueType valueType) {
-    return std::find(m_floatIndices.begin(), m_floatIndices.end(), valueType) != m_floatIndices.end();
+    return shIsFloat(valueType) && shIsRegularValueType(valueType);
   }
 
   bool isInt(ShValueType valueType) {
-    return std::find(m_intIndices.begin(), m_intIndices.end(), valueType) != m_intIndices.end();
+    return shIsInteger(valueType) && shIsSigned(valueType);
   }
 
   // @todo not implemented yet 
   bool isUint(ShValueType valueType) {
-    return std::find(m_uintIndices.begin(), m_uintIndices.end(), valueType) != m_uintIndices.end();
-    return false;
+    return shIsInteger(valueType) && !shIsSigned(valueType);
   }
 
   // @todo not implemented yet 
   bool isFrac(ShValueType valueType) {
-    //return std::find(m_fracIndices.begin(), m_fracIndices.end(), valueType) != m_fracIndices.end();
-    return false;
+    return shIsFraction(valueType) && shIsSigned(valueType);
   }
 
   bool isUfrac(ShValueType valueType) {
-    //return std::find(m_ufracIndices.begin(), m_fracIndices.end(), valueType) != m_fracIndices.end();
-    return false;
+    return shIsFraction(valueType) && !shIsSigned(valueType);
   }
 
   // flags to apply following operations (in order) 
@@ -236,24 +211,24 @@ struct FloatConverter {
     }
     // @todo make sure to run make another temp in case
     // one of var/result is an IN/OUT and hence cannot be used in computation 
-    ShVariable temp(var.node()->clone(SH_TEMP, SH_ATTRIB, var.size(), false, false));
+    ShVariable temp(var.node()->clone(SH_TEMP, var.size(), SH_VALUETYPE_END, SH_SEMANTICTYPE_END, false, false));
 
     stmtList.insert(I, ShStatement(temp, SH_OP_ASN, var));
 
     if(operations & APPLY_MAX_1) {
-      ShVariable one(var.node()->clone(SH_CONST, SH_ATTRIB, 1, false, false));
+      ShVariable one(var.node()->clone(SH_CONST, 1, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, false, false));
       one.setVariant(shVariantFactory(var.valueType())->generateOne());
       stmtList.insert(I, ShStatement(temp, temp, SH_OP_MAX, one)); 
     }
 
     if(operations & APPLY_MAX0)  {
-      ShVariable zero(var.node()->clone(SH_CONST, SH_ATTRIB, 1, false, false));
+      ShVariable zero(var.node()->clone(SH_CONST, 1, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, false, false));
       zero.setVariant(shVariantFactory(var.valueType())->generateZero());
       stmtList.insert(I, ShStatement(temp, temp, SH_OP_MAX, zero)); 
     }
 
     if(operations & APPLY_MIN1)  {
-      ShVariable one(var.node()->clone(SH_CONST, SH_ATTRIB, 1, false, false));
+      ShVariable one(var.node()->clone(SH_CONST, 1, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, false, false));
       one.setVariant(shVariantFactory(var.valueType())->generateOne());
       stmtList.insert(I, ShStatement(temp, temp, SH_OP_MIN, one)); 
     }
@@ -263,32 +238,54 @@ struct FloatConverter {
     stmtList.insert(I, ShStatement(result, SH_OP_ASN, temp));
 
     if((operations & APPLY_FLR) && (operations - APPLY_FLR)) {
+#ifdef SH_DEBUG_TYPECONVERT
       SH_DEBUG_PRINT("Unhandled conversion operations");
+#endif
     }
   }
 
   // Adds required conversions for statment *I
   void fixStatement(ShBasicBlock::ShStmtList &stmtList, const ShBasicBlock::ShStmtList::iterator &I) {
     ShStatement &stmt = *I;
+    if(stmt.dest.null()) return;
 #ifdef SH_DEBUG_TYPECONVERT
     SH_DEBUG_PRINT("Checking a statement op=" << opInfo[stmt.op].name);
 #endif
 
-    // Get the operation information used for this statement 
-    const ShEvalOpInfo* evalOpInfo = m_eval->getEvalOpInfo(
-        stmt.op,
-        stmt.dest.valueType(), 
-        stmt.src[0].valueType(),
-        stmt.src[1].valueType(),
-        stmt.src[2].valueType());
-
+    const ShEvalOpInfo* evalOpInfo; 
     ShEvalOpInfo* texInfo = 0;
+    switch(stmt.op) {
+      case SH_OP_TEX:
+      case SH_OP_TEXI:
+      case SH_OP_FETCH:
+      case SH_OP_TEXD:
+      case SH_OP_DX:
+      case SH_OP_DY:
+        // @todo type think of a cleaner solution.
+        // - we probably shouldn't be using the host-side set of operations
+        // anyway - maybe use a functor given by the backend that decides
+        // which types to use for a given set of src/dest types 
+        
+        // temporary hack - make an evalop for this
+        evalOpInfo = texInfo = new ShEvalOpInfo(stmt.op, 0, stmt.dest.valueType(), stmt.src[0].valueType(), stmt.src[1].valueType(), stmt.src[2].valueType());
+        break;
+      default:
+        evalOpInfo = m_eval->getEvalOpInfo(
+            stmt.op,
+            stmt.dest.valueType(), 
+            stmt.src[0].valueType(),
+            stmt.src[1].valueType(),
+            stmt.src[2].valueType());
+        break;
+    }
+
     if(!evalOpInfo) {
       switch(stmt.op) {
         case SH_OP_TEX:
         case SH_OP_TEXI:
         case SH_OP_FETCH:
         case SH_OP_TEXD:
+        case SH_OP_KIL:
           // @todo type think of a cleaner solution.
           // - we probably shouldn't be using the host-side set of operations
           // anyway - maybe use a functor given by the backend that decides
@@ -297,12 +294,14 @@ struct FloatConverter {
           // temporary hack - make an evalop for this
           evalOpInfo = texInfo = new ShEvalOpInfo(stmt.op, 0, stmt.dest.valueType(), stmt.src[0].valueType(), stmt.src[1].valueType(), stmt.src[2].valueType());
           break;
+
         default:
           // It could also be that no operation matched the arguments
           SH_DEBUG_PRINT("Possible problem finding evaluator for op = " << opInfo[stmt.op].name); 
           return;
       }
     }
+
 
     for(int i = 0; i < 3; ++i) {
       ShValueType srcValueType = stmt.src[i].valueType();
@@ -319,7 +318,7 @@ struct FloatConverter {
       // involved are converted if their type is in m_valueTypeMap
       ShValueType tempValueType = opValueType;
       if(m_valueTypeMap.count(tempValueType) > 0) tempValueType = m_valueTypeMap[tempValueType];
-      ShVariable temp(stmt.src[i].node()->clone(SH_TEMP, stmt.src[i].size(), tempValueType, false, false));
+      ShVariable temp(stmt.src[i].node()->clone(SH_TEMP, stmt.src[i].size(), tempValueType, SH_SEMANTICTYPE_END, false, false));
 
       ShVariableNodePtr varNode = stmt.src[i].node();
       if(m_converts.count(varNode) > 0) varNode = m_converts[varNode];
@@ -350,7 +349,7 @@ struct FloatConverter {
 
       ShValueType tempValueType = opDest;
       if(m_valueTypeMap.count(tempValueType) > 0) tempValueType = m_valueTypeMap[tempValueType];
-      ShVariable temp(stmt.dest.node()->clone(SH_TEMP, stmt.dest.size(), tempValueType, false, false));
+      ShVariable temp(stmt.dest.node()->clone(SH_TEMP, stmt.dest.size(), tempValueType, SH_SEMANTICTYPE_END, false, false));
 
       ShVariableNodePtr varNode = stmt.dest.node();
       if(m_converts.count(varNode) > 0) varNode = m_converts[varNode];
@@ -377,7 +376,7 @@ struct FloatConverter {
     if(m_converts.count(p) > 0) return; 
     if(m_valueTypeMap.count(p->valueType()) == 0) return; 
     ShVariableNodePtr &converted_p = m_converts[p] 
-      = p->clone(m_valueTypeMap[p->valueType()], false);
+      = p->clone(SH_BINDINGTYPE_END, 0, m_valueTypeMap[p->valueType()], SH_SEMANTICTYPE_END, false);
 
     if(p->hasValues()) {
       converted_p->setVariant(p->getVariant());
@@ -408,13 +407,6 @@ struct FloatConverter {
 
   private:
     ShEval* m_eval;
-    typedef std::vector<int> TypeIndexSet; 
-
-    TypeIndexSet m_floatIndices;
-    TypeIndexSet m_intIndices;
-    TypeIndexSet m_uintIndices;
-    TypeIndexSet m_fracIndices;
-    TypeIndexSet m_ufracIndices;
 };
 
 void ShTransformer::convertToFloat(ValueTypeMap &valueTypeMap)

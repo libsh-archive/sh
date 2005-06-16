@@ -10,8 +10,7 @@ decl = semantic.Class("Color", "color", "SH_COLOR",
                       """An n-color.
 """)
 
-decl.declare_all()
+decl.declare_parametrization()
 
 common.endnamespace()
-common.inprint('#include "ShColorImpl.hpp"')
 common.endguard("SHCOLOR_HPP")

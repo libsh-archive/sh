@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -32,6 +29,7 @@
  */
 
 #include <iosfwd>
+#include <map>
 #include "ShDllExport.hpp"
 
 namespace SH {
@@ -91,6 +89,36 @@ template<typename T, typename T1, typename T2>
 struct MatchEitherType {
     static const bool matches = MatchType<T1, T>::matches ||
                                     MatchType<T2, T>::matches;
+};
+
+/** Returns true if T matches a given templated type.
+ * For example, MatchTemplateType<int, ShInterval>::matches == false
+ * but MatchTemplateType<ShInterval<int>, ShInterval>::matches == true
+ *
+ * You can subclass this like this:
+ * template<typename T> struct MatchMyType: public MatchTemplateType<T, MyType> {}; 
+ * to match your own complex types with less typing (hah hah, stupid pun).
+ *
+ * The basic class here is standards compliant and works in VC .NET 2003,
+ * but not sure what will happen in more complex template vodoo.
+ */
+template<typename T, template<typename A> class B>
+struct MatchTemplateType {
+    static const bool matches = false; 
+};
+
+template<typename T, template<typename A> class B>
+struct MatchTemplateType<B<T>, B> {
+    static const bool matches = true; 
+};
+
+/** Takes a templated type and returns its template parameter. */
+template<typename T, template<typename A> class B>
+struct TemplateParameterType; 
+
+template<typename T, template<typename A> class B>
+struct TemplateParameterType<B<T>, B> {
+    typedef T type;
 };
 
 }

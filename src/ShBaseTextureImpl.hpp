@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -95,8 +92,8 @@ ShBaseTextureCube<T>::ShBaseTextureCube(const ShTextureTraits& traits)
 }
 
 template<typename T>
-template<ShValueType V2>
-T ShBaseTexture1D<T>::operator()(const ShGeneric<1, V2>& coords) const
+template<typename T2>
+T ShBaseTexture1D<T>::operator()(const ShGeneric<1, T2>& coords) const
 {
   if (ShContext::current()->parsing()) {
     T t;
@@ -112,8 +109,8 @@ T ShBaseTexture1D<T>::operator()(const ShGeneric<1, V2>& coords) const
 }
 
 template<typename T>
-template<ShValueType V2>
-T ShBaseTexture2D<T>::operator()(const ShGeneric<2, V2>& coords) const
+template<typename T2>
+T ShBaseTexture2D<T>::operator()(const ShGeneric<2, T2>& coords) const
 {
   if (ShContext::current()->parsing()) {
     T t;
@@ -129,10 +126,10 @@ T ShBaseTexture2D<T>::operator()(const ShGeneric<2, V2>& coords) const
 }
 
 template<typename T>
-template<ShValueType V2, ShValueType V3, ShValueType V4>
-T ShBaseTexture2D<T>::operator()(const ShGeneric<2, V2>& coords,
-                                 const ShGeneric<2, V3>& dx,
-                                 const ShGeneric<2, V4>& dy) const
+template<typename T2, typename T3, typename T4>
+T ShBaseTexture2D<T>::operator()(const ShGeneric<2, T2>& coords,
+                                 const ShGeneric<2, T3>& dx,
+                                 const ShGeneric<2, T4>& dy) const
 {
   if (ShContext::current()->parsing()) {
     T t;
@@ -147,8 +144,8 @@ T ShBaseTexture2D<T>::operator()(const ShGeneric<2, V2>& coords,
 }
 
 template<typename T>
-template<ShValueType V2>
-T ShBaseTextureRect<T>::operator()(const ShGeneric<2, V2>& coords) const
+template<typename T2>
+T ShBaseTextureRect<T>::operator()(const ShGeneric<2, T2>& coords) const
 {
   if (ShContext::current()->parsing()) {
     T t;
@@ -164,25 +161,8 @@ T ShBaseTextureRect<T>::operator()(const ShGeneric<2, V2>& coords) const
 }
 
 template<typename T>
-template<ShValueType V2>
-T ShBaseTexture3D<T>::operator()(const ShGeneric<3, V2>& coords) const
-{
-  if (ShContext::current()->parsing()) {
-    T t;
-    ShVariable texVar(m_node);
-    ShStatement stmt(t, texVar, SH_OP_TEX, coords);
-    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  } else {
-    // TODO!
-    T t;
-    return t;
-  }
-} 
-
-template<typename T>
-template<ShValueType V2>
-T ShBaseTextureCube<T>::operator()(const ShGeneric<3, V2>& coords) const
+template<typename T2>
+T ShBaseTexture3D<T>::operator()(const ShGeneric<3, T2>& coords) const
 {
   if (ShContext::current()->parsing()) {
     T t;
@@ -198,8 +178,25 @@ T ShBaseTextureCube<T>::operator()(const ShGeneric<3, V2>& coords) const
 } 
 
 template<typename T>
-template<ShValueType V2>
-T ShBaseTexture1D<T>::operator[](const ShGeneric<1, V2>& coords) const
+template<typename T2>
+T ShBaseTextureCube<T>::operator()(const ShGeneric<3, T2>& coords) const
+{
+  if (ShContext::current()->parsing()) {
+    T t;
+    ShVariable texVar(m_node);
+    ShStatement stmt(t, texVar, SH_OP_TEX, coords);
+    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+    return t;
+  } else {
+    // TODO!
+    T t;
+    return t;
+  }
+} 
+
+template<typename T>
+template<typename T2>
+T ShBaseTexture1D<T>::operator[](const ShGeneric<1, T2>& coords) const
 {
   if (ShContext::current()->parsing()) {
     T t;
@@ -215,8 +212,8 @@ T ShBaseTexture1D<T>::operator[](const ShGeneric<1, V2>& coords) const
 }
 
 template<typename T>
-template<ShValueType V2>
-T ShBaseTexture2D<T>::operator[](const ShGeneric<2, V2>& coords) const
+template<typename T2>
+T ShBaseTexture2D<T>::operator[](const ShGeneric<2, T2>& coords) const
 {
   if (ShContext::current()->parsing()) {
     T t;
@@ -232,8 +229,8 @@ T ShBaseTexture2D<T>::operator[](const ShGeneric<2, V2>& coords) const
 }
 
 template<typename T>
-template<ShValueType V2>
-T ShBaseTextureRect<T>::operator[](const ShGeneric<2, V2>& coords) const
+template<typename T2>
+T ShBaseTextureRect<T>::operator[](const ShGeneric<2, T2>& coords) const
 {
   if (ShContext::current()->parsing()) {
     T t;
@@ -249,8 +246,8 @@ T ShBaseTextureRect<T>::operator[](const ShGeneric<2, V2>& coords) const
 }
 
 template<typename T>
-template<ShValueType V2>
-T ShBaseTexture3D<T>::operator[](const ShGeneric<3, V2>& coords) const
+template<typename T2>
+T ShBaseTexture3D<T>::operator[](const ShGeneric<3, T2>& coords) const
 {
   if (ShContext::current()->parsing()) {
     T t;

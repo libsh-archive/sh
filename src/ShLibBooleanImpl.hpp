@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -33,252 +30,252 @@
 
 namespace SH {
 
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator<(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right)
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator<(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CV1V2> t;
+  ShAttrib<N, SH_TEMP, CT1T2> t;
   shSLT(t, left, right);
   return t;
 }
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator<(const ShGeneric<N, V1>& left, const ShGeneric<1, V2>& right)
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator<(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CV1V2> t;
+  ShAttrib<N, SH_TEMP, CT1T2> t;
   shSLT(t, left, right);
   return t;
 }
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator<(const ShGeneric<1, V1>& left, const ShGeneric<N, V2>& right)
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator<(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CV1V2> t;
+  ShAttrib<N, SH_TEMP, CT1T2> t;
   shSLT(t, left, right);
   return t;
 }
-template<ShValueType V1, ShValueType V2>
-ShGeneric<1, CV1V2> operator<(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right)
+template<typename T1, typename T2>
+ShGeneric<1, CT1T2> operator<(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right)
 {
-  ShAttrib<1, SH_TEMP, CV1V2> t;
+  ShAttrib<1, SH_TEMP, CT1T2> t;
   shSLT(t, left, right);
   return t;
 }
 SH_SHLIB_CONST_SCALAR_OP(operator<);
 SH_SHLIB_CONST_N_OP_BOTH(operator<);
 
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator<=(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right)
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator<=(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CV1V2> t;
+  ShAttrib<N, SH_TEMP, CT1T2> t;
   shSLE(t, left, right);
   return t;
 }
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator<=(const ShGeneric<N, V1>& left, const ShGeneric<1, V2>& right)
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator<=(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CV1V2> t;
+  ShAttrib<N, SH_TEMP, CT1T2> t;
   shSLE(t, left, right);
   return t;
 }
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator<=(const ShGeneric<1, V1>& left, const ShGeneric<N, V2>& right)
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator<=(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CV1V2> t;
+  ShAttrib<N, SH_TEMP, CT1T2> t;
   shSLE(t, left, right);
   return t;
 }
-template<ShValueType V1, ShValueType V2>
-ShGeneric<1, CV1V2> operator<=(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right)
+template<typename T1, typename T2>
+ShGeneric<1, CT1T2> operator<=(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right)
 {
-  ShAttrib<1, SH_TEMP, CV1V2> t;
+  ShAttrib<1, SH_TEMP, CT1T2> t;
   shSLE(t, left, right);
   return t;
 }
 SH_SHLIB_CONST_SCALAR_OP(operator<=);
 SH_SHLIB_CONST_N_OP_BOTH(operator<=);
 
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator>(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right)
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator>(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CV1V2> t;
+  ShAttrib<N, SH_TEMP, CT1T2> t;
   shSGT(t, left, right);
   return t;
 }
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator>(const ShGeneric<N, V1>& left, const ShGeneric<1, V2>& right)
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator>(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CV1V2> t;
+  ShAttrib<N, SH_TEMP, CT1T2> t;
   shSGT(t, left, right);
   return t;
 }
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator>(const ShGeneric<1, V1>& left, const ShGeneric<N, V2>& right)
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator>(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CV1V2> t;
+  ShAttrib<N, SH_TEMP, CT1T2> t;
   shSGT(t, left, right);
   return t;
 }
-template<ShValueType V1, ShValueType V2>
-ShGeneric<1, CV1V2> operator>(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right)
+template<typename T1, typename T2>
+ShGeneric<1, CT1T2> operator>(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right)
 {
-  ShAttrib<1, SH_TEMP, CV1V2> t;
+  ShAttrib<1, SH_TEMP, CT1T2> t;
   shSGT(t, left, right);
   return t;
 }
 SH_SHLIB_CONST_SCALAR_OP(operator>);
 SH_SHLIB_CONST_N_OP_BOTH(operator>);
 
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator>=(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right)
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator>=(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CV1V2> t;
+  ShAttrib<N, SH_TEMP, CT1T2> t;
   shSGE(t, left, right);
   return t;
 }
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator>=(const ShGeneric<N, V1>& left, const ShGeneric<1, V2>& right)
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator>=(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CV1V2> t;
+  ShAttrib<N, SH_TEMP, CT1T2> t;
   shSGE(t, left, right);
   return t;
 }
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator>=(const ShGeneric<1, V1>& left, const ShGeneric<N, V2>& right)
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator>=(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CV1V2> t;
+  ShAttrib<N, SH_TEMP, CT1T2> t;
   shSGE(t, left, right);
   return t;
 }
-template<ShValueType V1, ShValueType V2>
-ShGeneric<1, CV1V2> operator>=(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right)
+template<typename T1, typename T2>
+ShGeneric<1, CT1T2> operator>=(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right)
 {
-  ShAttrib<1, SH_TEMP, CV1V2> t;
+  ShAttrib<1, SH_TEMP, CT1T2> t;
   shSGE(t, left, right);
   return t;
 }
 SH_SHLIB_CONST_SCALAR_OP(operator>=);
 SH_SHLIB_CONST_N_OP_BOTH(operator>=);
 
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator==(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right)
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator==(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CV1V2> t;
+  ShAttrib<N, SH_TEMP, CT1T2> t;
   shSEQ(t, left, right);
   return t;
 }
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator==(const ShGeneric<N, V1>& left, const ShGeneric<1, V2>& right)
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator==(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CV1V2> t;
+  ShAttrib<N, SH_TEMP, CT1T2> t;
   shSEQ(t, left, right);
   return t;
 }
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator==(const ShGeneric<1, V1>& left, const ShGeneric<N, V2>& right)
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator==(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CV1V2> t;
+  ShAttrib<N, SH_TEMP, CT1T2> t;
   shSEQ(t, left, right);
   return t;
 }
-template<ShValueType V1, ShValueType V2>
-ShGeneric<1, CV1V2> operator==(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right)
+template<typename T1, typename T2>
+ShGeneric<1, CT1T2> operator==(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right)
 {
-  ShAttrib<1, SH_TEMP, CV1V2> t;
+  ShAttrib<1, SH_TEMP, CT1T2> t;
   shSEQ(t, left, right);
   return t;
 }
 SH_SHLIB_CONST_SCALAR_OP(operator==);
 SH_SHLIB_CONST_N_OP_BOTH(operator==);
 
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator!=(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right)
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator!=(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CV1V2> t;
+  ShAttrib<N, SH_TEMP, CT1T2> t;
   shSNE(t, left, right);
   return t;
 }
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator!=(const ShGeneric<N, V1>& left, const ShGeneric<1, V2>& right)
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator!=(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CV1V2> t;
+  ShAttrib<N, SH_TEMP, CT1T2> t;
   shSNE(t, left, right);
   return t;
 }
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator!=(const ShGeneric<1, V1>& left, const ShGeneric<N, V2>& right)
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator!=(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CV1V2> t;
+  ShAttrib<N, SH_TEMP, CT1T2> t;
   shSNE(t, left, right);
   return t;
 }
-template<ShValueType V1, ShValueType V2>
-ShGeneric<1, CV1V2> operator!=(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right)
+template<typename T1, typename T2>
+ShGeneric<1, CT1T2> operator!=(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right)
 {
-  ShAttrib<1, SH_TEMP, CV1V2> t;
+  ShAttrib<1, SH_TEMP, CT1T2> t;
   shSNE(t, left, right);
   return t;
 }
 SH_SHLIB_CONST_SCALAR_OP(operator!=);
 SH_SHLIB_CONST_N_OP_BOTH(operator!=);
 
-template<int N, ShValueType V1, ShValueType V2, ShValueType V3>
-ShGeneric<N, CV1V2V3> cond(const ShGeneric<N, V1>& condition, const ShGeneric<N, V2>& left,
-                     const ShGeneric<N, V3>& right)
+template<int N, typename T1, typename T2, typename T3>
+ShGeneric<N, CT1T2T3> cond(const ShGeneric<N, T1>& condition, const ShGeneric<N, T2>& left,
+                     const ShGeneric<N, T3>& right)
 {
-  ShAttrib<N, SH_TEMP, CV1V2V3> t;
+  ShAttrib<N, SH_TEMP, CT1T2T3> t;
   shCOND(t, condition, left, right);
   return t;
 }
-template<int N, ShValueType V1, ShValueType V2, ShValueType V3>
-ShGeneric<N, CV1V2V3> cond(const ShGeneric<1, V1>& condition, const ShGeneric<N, V2>& left,
-                     const ShGeneric<N, V3>& right)
+template<int N, typename T1, typename T2, typename T3>
+ShGeneric<N, CT1T2T3> cond(const ShGeneric<1, T1>& condition, const ShGeneric<N, T2>& left,
+                     const ShGeneric<N, T3>& right)
 {
-  ShAttrib<N, SH_TEMP, CV1V2V3> t;
+  ShAttrib<N, SH_TEMP, CT1T2T3> t;
   shCOND(t, condition, left, right);
   return t;
 }
-template<ShValueType V1, ShValueType V2, ShValueType V3>
-ShGeneric<1, CV1V2V3> cond(const ShGeneric<1, V1>& condition, const ShGeneric<1, V2>& left,
-                     const ShGeneric<1, V3>& right)
+template<typename T1, typename T2, typename T3>
+ShGeneric<1, CT1T2T3> cond(const ShGeneric<1, T1>& condition, const ShGeneric<1, T2>& left,
+                     const ShGeneric<1, T3>& right)
 {
-  ShAttrib<1, SH_TEMP, CV1V2V3> t;
+  ShAttrib<1, SH_TEMP, CT1T2T3> t;
   shCOND(t, condition, left, right);
   return t;
 }
 
 // TODO
 
-template<int N, ShValueType V>
-ShGeneric<N, V> operator!(const ShGeneric<N, V>& a)
+template<int N, typename T>
+ShGeneric<N, T> operator!(const ShGeneric<N, T>& a)
 {
   return 1.0f - (a > 0.0f);
 }
 
 
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator&&(const ShGeneric<N, V1>& a, const ShGeneric<N, V2>& b)
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator&&(const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b)
 {
   return min(a,b);
 }
 
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator||(const ShGeneric<N, V1>& a, const ShGeneric<N, V2>& b)
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator||(const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b)
 {
   return max(a,b);
 }
 
-template<int N, ShValueType V>
-ShGeneric<1, V> any(const ShGeneric<N, V>& a)
+template<int N, typename T>
+ShGeneric<1, T> any(const ShGeneric<N, T>& a)
 {
-  ShAttrib<1, SH_TEMP, V> t = a(0);
+  ShAttrib<1, SH_TEMP, T> t = a(0);
   for (int i = 1; i < N; i++) {
     t = t || a(i);
   }
   return t;
 }
 
-template<int N, ShValueType V>
-ShGeneric<1, V> all(const ShGeneric<N, V>& a)
+template<int N, typename T>
+ShGeneric<1, T> all(const ShGeneric<N, T>& a)
 {
-  ShAttrib<1, SH_TEMP, V> t = a(0);
+  ShAttrib<1, SH_TEMP, T> t = a(0);
   for (int i = 1; i < N; i++) {
     t = t && a(i);
   }

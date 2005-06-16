@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -34,7 +31,7 @@
 
 namespace SH {
 
-struct ShVariant;
+class ShVariant;
 
 struct 
 SH_DLLEXPORT 
@@ -53,7 +50,7 @@ ShVariantFactory {
   /// array as data
   /// @param managed Set to true iff this should make a copy
   //                 rather than using the given array internally.
-  virtual ShVariant* generate(void *data, int N, bool managed = true) const = 0;  
+  virtual ShVariant* generate(int N, void *data, bool managed = true) const = 0;  
 
   /// Creates an ShDataVariant object with N elements set to zero.
   virtual ShVariant* generateZero(int N = 1) const = 0;
@@ -62,13 +59,13 @@ ShVariantFactory {
   virtual ShVariant* generateOne(int N = 1) const = 0;
 };
 
-template<ShValueType V, ShDataType DT>
+template<typename T, ShDataType DT>
 struct ShDataVariantFactory: public ShVariantFactory {
   ShVariant* generate(int N) const;
 
   ShVariant* generate(std::string s) const; 
 
-  ShVariant* generate(void *data, int N, bool managed = true) const;  
+  ShVariant* generate(int N, void *data, bool managed = true) const;  
 
   ShVariant* generateZero(int N = 1) const;
   ShVariant* generateOne(int N = 1) const;

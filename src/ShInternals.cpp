@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -36,10 +33,10 @@ ShVariableReplacer::ShVariableReplacer(ShVarMap& v)
 
 void ShVariableReplacer::operator()(ShCtrlGraphNodePtr node) 
 {
-  // replace variables that are conditions in branches 
+  // replace variables that are conditions in branches
   ShCtrlGraphNode::SuccessorList::iterator I;
   for(I = node->successors.begin(); I != node->successors.end(); ++I) {
-    repVar(I->cond); 
+    repVar(I->cond);
   }
 
   // replace variables in the block
@@ -53,6 +50,15 @@ void ShVariableReplacer::operator()(ShCtrlGraphNodePtr node)
     }
   }
 
+}
+
+void ShVariableReplacer::operator()(ShStructuralNodePtr node) 
+{
+  if(node->cfg_node) operator()(node->cfg_node);
+  for (ShStructuralNode::StructNodeList::iterator I = node->structnodes.begin(); 
+      I != node->structnodes.end(); ++I) {
+    operator()(*I);
+  }
 }
 
 void ShVariableReplacer::operator()(ShProgramNode::VarList &varList) 

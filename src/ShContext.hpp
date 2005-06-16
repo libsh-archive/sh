@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -56,6 +53,10 @@ public:
   void enable_optimization(const std::string& name);
   /// Check whether an optimization is disabled
   bool optimization_disabled(const std::string& name) const;
+
+  bool is_bound(const std::string& target);
+  ShProgramNodePtr bound_program(const std::string& target);
+
   
   typedef std::map<std::string, ShProgram> BoundProgramMap;
 
@@ -63,7 +64,9 @@ public:
   BoundProgramMap::iterator end_bound();
 
   /// \internal
-  void set_binding(const std::string& unit, ShProgram program);
+  void set_binding(const std::string& unit, const ShProgram& program);
+  /// \internal
+  void unset_binding(const std::string& unit);
 
   /// The program currently being constructed. May be null.
   ShProgramNodePtr parsing();
@@ -93,6 +96,14 @@ private:
 };
 
 typedef ShContext::BoundProgramMap::iterator ShBoundIterator;
+
+/// Check whether a program is bound to the given target
+SH_DLLEXPORT
+bool shIsBound(const std::string& target);
+
+/// Return the program bound to the given target
+SH_DLLEXPORT
+ShProgramNodePtr shBound(const std::string& target);
 
 /// Get beginning of bound program map for current context
 SH_DLLEXPORT

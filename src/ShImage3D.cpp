@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -42,7 +39,7 @@ ShImage3D::ShImage3D()
 
 ShImage3D::ShImage3D(int width, int height, int depth, int elements)
   : m_width(width), m_height(height), m_depth(depth), m_elements(elements),
-    m_memory(new ShHostMemory(sizeof(float) * m_width * m_height * m_depth * m_elements))
+    m_memory(new ShHostMemory(sizeof(float) * m_width * m_height * m_depth * m_elements, SH_FLOAT))
 {
 }
 
@@ -50,7 +47,7 @@ ShImage3D::ShImage3D(const ShImage3D& other)
   : m_width(other.m_width), m_height(other.m_height), m_depth(other.m_depth),
     m_elements(other.m_elements),
     m_memory(other.m_memory ?
-             new ShHostMemory(sizeof(float) * m_width * m_height * m_depth * m_elements) : 0)
+             new ShHostMemory(sizeof(float) * m_width * m_height * m_depth * m_elements, SH_FLOAT) : 0)
 {
   if (m_memory) {
     std::memcpy(m_memory->hostStorage()->data(),
@@ -70,7 +67,7 @@ ShImage3D& ShImage3D::operator=(const ShImage3D& other)
   m_depth = other.m_depth;
   m_elements = other.m_elements;
   m_memory = (other.m_memory ?
-              new ShHostMemory(sizeof(float) * m_width * m_height * m_depth * m_elements) : 0);
+              new ShHostMemory(sizeof(float) * m_width * m_height * m_depth * m_elements, SH_FLOAT) : 0);
   std::memcpy(m_memory->hostStorage()->data(),
               other.m_memory->hostStorage()->data(),
               m_width * m_height * m_depth * m_elements * sizeof(float));

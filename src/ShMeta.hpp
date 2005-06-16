@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -40,6 +37,9 @@ public:
     : m_meta(0) 
   {
   }
+
+  ShMeta(const ShMeta &other);
+
   virtual ~ShMeta();
   
   virtual std::string name() const;
@@ -57,6 +57,7 @@ public:
 
   virtual std::string meta(const std::string& key) const;
   virtual void meta(const std::string& key, const std::string& value);
+  virtual bool has_meta(const std::string& key) const;
 
 private:
   typedef std::map<std::string, std::string> MetaMap;

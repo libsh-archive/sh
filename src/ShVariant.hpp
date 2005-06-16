@@ -23,6 +23,28 @@
 /// 
 /// 3. This notice may not be removed or altered from any source
 /// distribution.
+// Sh: A GPU metaprogramming language.
+//
+// Copyright 2003-2005 Serious Hack Inc.
+// 
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+// 
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+// 
+// 1. The origin of this software must not be misrepresented; you must
+// not claim that you wrote the original software. If you use this
+// software in a product, an acknowledgment in the product documentation
+// would be appreciated but is not required.
+// 
+// 2. Altered source versions must be plainly marked as such, and must
+// not be misrepresented as being the original software.
+// 
+// 3. This notice may not be removed or altered from any source
+// distribution.
 //////////////////////////////////////////////////////////////////////////////
 #ifndef SHVARIANT_HPP
 #define SHVARIANT_HPP
@@ -69,7 +91,7 @@ ShVariant: public ShRefCountable {
     virtual bool typeMatches(ShValueType valueType, ShDataType dataType) const = 0;
 
     //// Gives the associated type name 
-    virtual std::string typeName() const = 0; 
+    virtual const char* typeName() const = 0; 
 
     /// Gives the number of elements stored in this data array 
     virtual int size() const = 0;
@@ -113,8 +135,9 @@ ShVariant: public ShRefCountable {
     virtual ShPointer<ShVariant> get(int index) const = 0;
 
     /// Creates a copy of the Variant with the given swizzle and negation
+    /// for a given number of elements (defaults to 1)
     /// swizzle.m_srcSize must equal size()
-    virtual ShPointer<ShVariant> get(bool neg, const ShSwizzle &swizzle) const = 0; 
+    virtual ShPointer<ShVariant> get(bool neg, const ShSwizzle &swizzle, int count=1) const = 0; 
 
     /// Returns true iff other is the same size, type, and has the same values
     // This uses shDataTypeEquals
@@ -159,12 +182,14 @@ typedef ShPointer<const ShVariant> ShVariantCPtr;
  *
  * @see ShMemory 
  **/ 
-template<ShValueType V, ShDataType DT>
+template<typename T, ShDataType DT=SH_HOST>
 class ShDataVariant: public ShVariant {
   public:
-    typedef ShPointer<ShDataVariant<V, DT> > PtrType;
-    typedef ShPointer<const ShDataVariant<V, DT> > CPtrType;
-    typedef typename ShDataTypeCppType<V, DT>::type DataType;
+    static const ShValueType value_type = ShStorageTypeInfo<T>::value_type;
+    static const ShDataType data_type = DT;
+    typedef ShDataVariant<T, DT>* PtrType;
+    typedef const ShDataVariant<T, DT>* CPtrType;
+    typedef typename ShDataTypeCppType<T, DT>::type DataType;
     typedef DataType* iterator;
     typedef const DataType* const_iterator;
 
@@ -184,21 +209,21 @@ class ShDataVariant: public ShVariant {
     /// of the given size.  This uses the given array internally
     /// iff managed = false, otherwise it allocates a new array 
     /// and makes a copy.
-    ShDataVariant(void *data, int N, bool managed = true);
+    ShDataVariant(int N, void *data, bool managed = true);
 
     /// Constructs a data array using values from another array
     /// swizzled and negated as requested. 
-    ShDataVariant(const ShDataVariant<V, DT> &other);
-    ShDataVariant(const ShDataVariant<V, DT> &other, bool neg, const ShSwizzle &swizzle); 
+    ShDataVariant(const ShDataVariant<T, DT> &other);
+    ShDataVariant(const ShDataVariant<T, DT> &other, bool neg, const ShSwizzle &swizzle, int count=1); 
 
-    ~ShDataVariant();
+    virtual ~ShDataVariant();
 
     ShValueType valueType() const; 
     ShDataType dataType() const; 
     bool typeMatches(ShValueType valueType, ShDataType dataType) const; 
 
     //// Gives the associated type name 
-    std::string typeName() const; 
+    const char* typeName() const; 
 
     //std::string typeName() const; 
     
@@ -218,7 +243,7 @@ class ShDataVariant: public ShVariant {
 
     ShVariantPtr get() const; 
     ShVariantPtr get(int index) const; 
-    ShVariantPtr get(bool neg, const ShSwizzle &swizzle) const; 
+    ShVariantPtr get(bool neg, const ShSwizzle &swizzle, int count=1) const; 
 
     bool equals(ShVariantCPtr other) const; 
     bool equals(const ShVariant* other) const; 
@@ -278,23 +303,23 @@ class ShDataVariant: public ShVariant {
 //
 // Refcounted and non-refcounted versions
 //@{
-template<ShValueType V, ShDataType DT>
-ShPointer<ShDataVariant<V, DT> > variant_cast(ShVariantPtr c);
+template<typename T, ShDataType DT>
+ShPointer<ShDataVariant<T, DT> > variant_cast(ShVariantPtr c);
 
-template<ShValueType V, ShDataType DT>
-ShPointer<const ShDataVariant<V, DT> > variant_cast(ShVariantCPtr c);
+template<typename T, ShDataType DT>
+ShPointer<const ShDataVariant<T, DT> > variant_cast(ShVariantCPtr c);
 
-template<ShValueType V, ShDataType DT>
-ShDataVariant<V, DT>* variant_cast(ShVariant* c);
+template<typename T, ShDataType DT>
+ShDataVariant<T, DT>* variant_cast(ShVariant* c);
 
-template<ShValueType V, ShDataType DT>
-const ShDataVariant<V, DT>* variant_cast(const ShVariant* c);
+template<typename T, ShDataType DT>
+const ShDataVariant<T, DT>* variant_cast(const ShVariant* c);
 // @}
 
 // Make a copy of c cast to the requested type 
 //@{
-template<ShValueType V, ShDataType DT>
-ShPointer<ShDataVariant<V, DT> > variant_convert(ShVariantCPtr c);
+template<typename T, ShDataType DT>
+ShPointer<ShDataVariant<T, DT> > variant_convert(ShVariantCPtr c);
 // @}
 
 

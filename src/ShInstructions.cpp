@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -199,6 +196,7 @@ SHINST_BINARY_OP(ATAN2, false, false);
 SHINST_UNARY_OP(CBRT);
 SHINST_UNARY_OP(CEIL);
 SHINST_UNARY_OP(COS);
+SHINST_UNARY_OP(COSH);
 
 void shCMUL(ShVariable& dest, const ShVariable& src)
 {
@@ -219,7 +217,7 @@ void shDOT(ShVariable& dest, const ShVariable& a, const ShVariable& b)
   SHINST_BINARY_OP_CORE(DOT);
 }
 
-void shDX(ShVariable &dest, const ShVariable& a)
+void shDX(ShVariable& dest, const ShVariable& a)
 {
   if(immediate()) {
       shError(ShScopeException("Cannot take derivatives in immediate mode"));
@@ -228,7 +226,7 @@ void shDX(ShVariable &dest, const ShVariable& a)
   addStatement(stmt);
 }
 
-void shDY(ShVariable &dest, const ShVariable& a)
+void shDY(ShVariable& dest, const ShVariable& a)
 {
   if(immediate()) {
       shError(ShScopeException("Cannot take derivatives in immediate mode"));
@@ -242,13 +240,14 @@ SHINST_UNARY_OP(EXP);
 SHINST_UNARY_OP(EXP2);
 SHINST_UNARY_OP(EXP10);
 SHINST_UNARY_OP(FLR);
-SHINST_BINARY_OP(MOD, false, false);
+SHINST_BINARY_OP(MOD, true, true);
 SHINST_UNARY_OP(FRAC);
 SHINST_TERNARY_OP(LRP,
     (dest.size() == b.size() &&
     dest.size() == c.size() &&
     (dest.size() == a.size() || a.size() == 1)));
 
+SHINST_UNARY_OP(LIT);
 SHINST_UNARY_OP(LOG);
 SHINST_UNARY_OP(LOG2);
 SHINST_UNARY_OP(LOG10);
@@ -260,14 +259,16 @@ SHINST_TERNARY_OP(MAD,
 
 SHINST_BINARY_OP(MAX, false, false);
 SHINST_BINARY_OP(MIN, false, false);
-SHINST_BINARY_OP(POW, false, true);
+SHINST_BINARY_OP(POW, true, true);
 SHINST_UNARY_OP(RCP);
 SHINST_UNARY_OP(RND);
 SHINST_UNARY_OP(RSQ);
 SHINST_UNARY_OP(SGN);
 SHINST_UNARY_OP(SIN);
+SHINST_UNARY_OP(SINH);
 SHINST_UNARY_OP(SQRT);
 SHINST_UNARY_OP(TAN);
+SHINST_UNARY_OP(TANH);
 SHINST_UNARY_OP(NORM);
 
 
@@ -282,37 +283,23 @@ SHINST_TERNARY_OP(COND,
     dest.size() == c.size() &&
     (dest.size() == a.size() || a.size() == 1)));
 
-void shLO(ShVariable& dest, const ShVariable& src)
-{
-  sizes_match(dest, src); // TODO check types are okay
-  SHINST_UNARY_OP_CORE(LO);
-}
-
-void shHI(ShVariable& dest, const ShVariable& src)
-{
-  sizes_match(dest, src); // TODO check types are okay
-  SHINST_UNARY_OP_CORE(HI);
-}
-
-void shSETLO(ShVariable& dest, const ShVariable& src)
-{
-  sizes_match(dest, src); // TODO check types are okay
-  SHINST_UNARY_OP_CORE(SETLO);
-}
-
-void shSETHI(ShVariable& dest, const ShVariable& src)
-{
-  sizes_match(dest, src); // TODO check types are okay
-  SHINST_UNARY_OP_CORE(SETHI);
-}
-
 void shKIL(const ShVariable& a)
 {
   if(immediate()) {
-      shError(ShScopeException("Cannot kill in immediate mode"));
+    shError(ShScopeException("Cannot kill in immediate mode"));
   }
   SH_DEBUG_ASSERT(!immediate());
   ShStatement stmt(a, SH_OP_KIL, a);
+  addStatement(stmt);
+}
+
+void shRET(const ShVariable& a)
+{
+  if(immediate()) {
+    shError(ShScopeException("Cannot return in immediate mode"));
+  }
+  SH_DEBUG_ASSERT(!immediate());
+  ShStatement stmt(a, SH_OP_RET, a);
   addStatement(stmt);
 }
 

@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -30,6 +27,34 @@
 #include "ShError.hpp"
 
 namespace SH {
+
+ShSwizzle::ShSwizzle(const ShSwizzle& other, int n)
+  : m_srcSize(other.m_srcSize),
+    m_size(other.m_size * n)
+{
+  SH_DEBUG_ASSERT(n >= 1);
+  int i, j;
+  if(alloc()) {
+    for(j = 0; j < other.m_size; ++j) {
+      m_index.ptr[j] = other[j];
+    }
+    for(i = 1; i < n; ++i) for(j = 0; j < other.m_size; ++j) {
+      m_index.ptr[i * other.m_size + j] = m_index.ptr[j];
+    }
+  } else {
+    SH_DEBUG_ASSERT(other.local());
+    for(j = 0; j < other.m_size; ++j) {
+      m_index.local[j] = other.m_index.local[j];
+    }
+    if(other.m_size == 1) {
+      for(j = 1; j < n; ++j) m_index.local[j] = m_index.local[0];
+    } else if(other.m_size == 2) {
+      for(j = 2; j < 4; ++j) m_index.local[j] = m_index.local[j-2];
+    } else {
+      SH_DEBUG_ASSERT(n == 1);
+    }
+  }
+}
 
 ShSwizzleException::ShSwizzleException(const ShSwizzle& s, int index, int size)
   : ShException("")

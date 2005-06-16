@@ -1,15 +1,53 @@
 #!/bin/bash
 
-# runtes program runs suffix 
-PROG=$1
-RUNS=$2
+function show_help {
+	echo ""
+	echo "Usage: "
+	echo "  $0 TESTNAME [ NB_RUNS ]"
+	echo ""
+	echo "where TESTNAME is the name of the test program to execute"
+	echo "and NB_RUNS is the number of repetitions (defaults to 5)."
+}
 
-if test -f `which prospect`; then
-  for ((i=1; $i <= $RUNS; ++i)); do
-      echo "Run $i"
-      prospect -H 100000 -o prospect.temp $PROG > $PROG\_$i.out
-      c++filt < prospect.temp > $PROG\_$i.prof
-  done
-else
-  echo "prospect not found"
+function need_prospect {
+	echo ""
+	echo "The prospect package must be installed for this script to work."
+	echo ""
+	echo "You can get it from http://prospect.sourceforge.net/"
+	echo ""
+	echo "On Debian systems, you can install it using:"
+	echo "    apt-get install prospect"
+}
+
+# Error checking for the first argument
+if [ x"$1" == "x" ] ; then
+	echo "ERROR: no test program was specified."
+	show_help
+	exit 1
 fi
+if [ -x $1 ] ; then
+	PROG=$1
+else
+	echo "ERROR: cannot run test program '$1'."
+	show_help
+	exit 2
+fi
+
+# Processing second argument
+if [ x"$2" == "x" ] ; then
+	RUNS=5
+else
+	RUNS=$2
+fi
+
+# Make sure the prospect command is available
+PROSPECT=`which prospect`
+for ((i=1; $i <= $RUNS; ++i)); do
+	echo "Run $i"
+	if [ x"$PROSPECT" == "x" ] ; then
+		time $PROG
+	else
+		prospect -H 100000 -o prospect.temp $PROG > $PROG\_$i.out
+		c++filt < prospect.temp > $PROG\_$i.prof
+	fi
+done

@@ -1,37 +1,46 @@
 REQUIREMENTS
 
- - g++ > 3.0.0, >= 3.2 is recommended.
+ - g++ > 3.0.0, >= 4.0 is recommended.
  - libpng
  - for the ARB backend, a recent glext.h as well as GL drivers and headers
    You can obtain the latest glext.h from the SGI OpenGL Registry at
    http://oss.sgi.com/projects/ogl-sample/registry/
- - for the SM backend, an installed version of SM (use configure --with-sm=DIR
-   to specify the installation directory of SM)
-
-Currently Sh has only been tested on GNU/Linux, but we are planning to
-suppot more platforms soon.
+ - for the ARB or GLSL backends, you need a GPU that supports shaders: at 
+   least a GeForce 5200FX or a Radeon 9600
 
 INSTALLING
 
 Quick compile and installation:
-./configure
-make
-make install
-[optional] make check
+  ./configure
+  make
+  make install
+  [optional] make check
 
 ./configure --help will present you with possible options to configure.
 
 For a local installation, the following is useful:
 
-./configure --prefix=$HOME/install/sh
+  ./configure --prefix=$HOME/install/sh
 
 which will install it under the specified directory (absolute path
 is required).
 
+OUT-OF-SOURCE BUILDING
+
+The recommended way to build Sh is to create a new empty directory and run
+the configure script from there.
+
+For example if sh has been uncompressed in ~/src/sh/:
+
+  cd $HOME/src/
+  mkdir sh_debug
+  cd sh_debug
+  ../sh/configure --prefix=$HOME/install/sh
+
 DEVELOPMENT
 
 If compiling from CVS, first run:
-$ ./bootstrap
+  ./bootstrap
 (also run this if you change any Makefile.am or the configure.ac)
 You will need recent versions of autoconf, automake, libtool and
 libltdl.

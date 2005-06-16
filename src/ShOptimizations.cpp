@@ -1,3 +1,26 @@
+// Sh: A GPU metaprogramming language.
+//
+// Copyright 2003-2005 Serious Hack Inc.
+// 
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+// 
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+// 
+// 1. The origin of this software must not be misrepresented; you must
+// not claim that you wrote the original software. If you use this
+// software in a product, an acknowledgment in the product documentation
+// would be appreciated but is not required.
+// 
+// 2. Altered source versions must be plainly marked as such, and must
+// not be misrepresented as being the original software.
+// 
+// 3. This notice may not be removed or altered from any source
+// distribution.
+//////////////////////////////////////////////////////////////////////////////
 #include "ShOptimizations.hpp"
 #include <map>
 #include <set>
@@ -62,6 +85,11 @@ struct Straightener {
     if (node->follower == graph->exit()) return;
     if (!node->successors.empty()) return;
     if (node->follower->predecessors.size() > 1) return;
+
+    // conditions added for maintaining section START/END marker invariants
+    // node cannot end in an ENDSEC, node->follower cannot start with a STARTSEC
+    if (node->block && !node->block->empty() && node->block->rbegin()->op == SH_OP_ENDSEC) return; 
+    if (node->follower->block && !node->follower->block->empty() && node->follower->block->begin()->op == SH_OP_STARTSEC) return; 
     
     if (!node->block) node->block = new ShBasicBlock();
     if (!node->follower->block) node->follower->block = new ShBasicBlock();
@@ -70,6 +98,9 @@ struct Straightener {
       node->block->addStatement(*I);
     }
     node->successors = node->follower->successors;
+
+    // merge in declarations
+    node->insert_decls(node->follower->decl_begin(), node->follower->decl_end());
 
     // Update predecessors
     
@@ -103,8 +134,8 @@ struct Straightener {
 typedef std::queue<ShStatement*> DeadCodeWorkList;
 
 struct InitLiveCode {
-  InitLiveCode(DeadCodeWorkList& w)
-    : w(w)
+  InitLiveCode(ShProgramNodeCPtr p, DeadCodeWorkList& w)
+    : p(p), w(w)
   {
   }
   
@@ -114,13 +145,19 @@ struct InitLiveCode {
     if (!block) return;
 
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-      if (I->dest.node()->kind() != SH_TEMP
+#ifdef SH_DEBUG_OPTIMIZER
+      if(!I->dest.null() && I->dest.node()->kind() == SH_TEMP && !p->hasDecl(I->dest.node())) {
+        SH_DEBUG_PRINT("No decl for " << I->dest.name());
+      }
+#endif
+      // @todo range check if IGNORE is right
+      // maybe use a different flag
+      // @todo range conditions here are probably too conservative for 
+      // inputs, outputs used in computation -> use the valuetracking
+      if (opInfo[I->op].result_source == ShOperationInfo::IGNORE
+          || I->dest.node()->kind() != SH_TEMP
           || I->dest.node()->uniform()
-          || I->op == SH_OP_KIL
-          /*
-          || I->op == SH_OP_FETCH // Keep stream fetches, since these
-                                  // are like inputs.
-          */
+          || !p->hasDecl(I->dest.node())
           || I->op == SH_OP_OPTBRA) {
         I->marked = true;
         w.push(&(*I));
@@ -130,6 +167,7 @@ struct InitLiveCode {
     }
   }
 
+  ShProgramNodeCPtr p;
   DeadCodeWorkList& w;
 };
 
@@ -179,7 +217,10 @@ struct CopyPropagator {
           && I->dest.node() != I->src[0].node()
           && I->dest.node()->kind() == SH_TEMP
           && I->dest.swizzle().identity()
-          && I->src[0].swizzle().identity()) {
+          && I->src[0].swizzle().identity()
+
+		  // added to preserve casts
+          && (I->dest.valueType() == I->src[0].valueType())) {
         m_acp.push_back(std::make_pair(I->dest, I->src[0]));
       }
     }
@@ -240,6 +281,7 @@ struct ForwardSubst {
     if (!block) return;
     for (ShBasicBlock::ShStmtList::iterator I = block->begin();
          I != block->end(); ++I) {
+      if(I->dest.null()) continue;
       substitute(*I);
       
       removeAME(I->dest.node());
@@ -315,7 +357,7 @@ void remove_dead_code(ShProgram& p, bool& changed)
 
   ShCtrlGraphPtr graph = p.node()->ctrlGraph;
   
-  InitLiveCode init(w);
+  InitLiveCode init(p.node(), w);
   graph->dfs(init);
 
   while (!w.empty()) {
@@ -328,6 +370,7 @@ void remove_dead_code(ShProgram& p, bool& changed)
       for (ValueTracking::TupleUseDefChain::iterator C = vt->defs[i].begin();
            C != vt->defs[i].end(); ++C) {
         for (ValueTracking::UseDefChain::iterator I = C->begin(); I != C->end(); ++I) {
+          if (I->kind != ValueTracking::Def::STMT) continue;
           if (I->stmt->marked) continue;
           I->stmt->marked = true;
           w.push(I->stmt);
@@ -355,6 +398,12 @@ void forward_substitute(ShProgram& p, bool& changed)
 void optimize(ShProgram& p, int level)
 {
   if (level <= 0) return;
+
+  p.node()->collectDecls();
+#ifdef SH_DEBUG_OPTIMIZER
+  SH_DEBUG_PRINT("After collecting declarations");
+  SH_DEBUG_PRINT(p.node()->describe_decls());
+#endif
 
 #ifdef SH_DEBUG_OPTIMIZER
   int pass = 0;
@@ -411,6 +460,7 @@ void optimize(ShProgram& p, int level)
     pass++;
 #endif
   } while (changed);
+  p.node()->collectVariables();
 }
 
 void optimize(const ShProgramNodePtr& n, int level)

@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -41,7 +38,6 @@ namespace SH {
 template<typename T>
 class ShChannel : public ShMetaForwarder {
 public:
-  static const ShValueType ValueType = T::value_type;
   /// Construct a channel without any associated memory.
   ShChannel();
   /// Construct a channel with \a count elements in \a memory
@@ -62,8 +58,8 @@ public:
   T operator()() const;
 
   /// Indexed lookup from the stream
-  template<ShValueType V>
-  T operator[](const ShGeneric<1, V>& index) const;
+  template<typename T2>
+  T operator[](const ShGeneric<1, T2>& index) const;
 
   /// Return the node internally wrapped by this channel object
   ShChannelNodePtr node();

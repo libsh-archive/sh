@@ -1,3 +1,26 @@
+// Sh: A GPU metaprogramming language.
+//
+// Copyright 2003-2005 Serious Hack Inc.
+// 
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+// 
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+// 
+// 1. The origin of this software must not be misrepresented; you must
+// not claim that you wrote the original software. If you use this
+// software in a product, an acknowledgment in the product documentation
+// would be appreciated but is not required.
+// 
+// 2. Altered source versions must be plainly marked as such, and must
+// not be misrepresented as being the original software.
+// 
+// 3. This notice may not be removed or altered from any source
+// distribution.
+//////////////////////////////////////////////////////////////////////////////
 #ifdef WIN32
 #include <windows.h>
 #endif /* WIN32 */
@@ -13,9 +36,10 @@
 #include "Camera.hpp"
 
 using namespace SH;
+using namespace std;
 
 // defines
-#define NUM_PARTICLES 4096
+#define NUM_PARTICLES 16384
 
 // forward declarations
 void init_shaders(void);
@@ -66,6 +90,9 @@ ShProgram vsh;
 ShProgram particle_fsh;
 ShProgram plane_fsh;
 
+ShProgramSet* particle_shaders;
+ShProgramSet* plane_shaders;
+
 //-------------------------------------------------------------------
 // GLUT data
 //-------------------------------------------------------------------
@@ -83,15 +110,13 @@ void setup_view()
 void display()
   {
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
+  
   // Bind in the programs used to shade the particles
-  shBind(vsh);
-  shBind(particle_fsh);
-
   // The updating of the stream is done using double buffering, if we just
   // ran particle_updateA then the latest data state is in stream 'B', otherwise
   // its in stream 'A' (because particle_updateB was the last to be run). Based
   // on the value of dir, render the appropriate stream
+  float* particle_positions = 0;
   if (dir == 0)
     {
     // Use the ShChannel object to fetch the ShHostStorage object
@@ -104,13 +129,7 @@ void display()
       posA_storage->sync();
 
       // fetch the raw data pointer and simply render the particles as points
-      float* posA_data = (float*)posA_storage->data();
-      glBegin(GL_POINTS);
-      for(int i = 0; i < NUM_PARTICLES; i++)
-       {
-       glVertex3fv(&posA_data[3*i]);
-       }
-      glEnd();
+      particle_positions = (float*)posA_storage->data();
       }
     }
   else
@@ -124,20 +143,22 @@ void display()
       // to make sure that the ShHostStorage updated
       posB_storage->sync();
 
-      float* posB_data = (float*)posB_storage->data();
-
-      // fetch the raw data pointer and simply render the particles as points
-      glBegin(GL_POINTS);
-      for(int i = 0; i < NUM_PARTICLES; i++)
-       {
-       glVertex3fv(&posB_data[3*i]);
-       }
-      glEnd();
+      particle_positions = (float*)posB_storage->data();
       }
     }
 
-  // Bind in the fragment program to shade the plane pillar
-  shBind(plane_fsh);
+  if (particle_positions) {
+    shBind(*particle_shaders);
+    glBegin(GL_POINTS);
+    for(int i = 0; i < NUM_PARTICLES; i++)
+      {
+        glVertex3fv(&particle_positions[3*i]);
+      }
+    glEnd();
+  }
+  
+  // Bind in the programs to shade the plane pillar
+  shBind(*plane_shaders);
 
   // set the color and render the plane as a simple quad
   diffuse_color = ShColor3f(0.5, 0.7, 0.9);
@@ -184,6 +205,7 @@ void display()
   glVertex3f(-.2, 1,  .2);
   glEnd();
 
+  shUnbind(*plane_shaders);
   // Help information
   if (show_help)
     {
@@ -198,7 +220,6 @@ void display()
     {
     gprintf(10, 10, "'H' for help...");
     }
-  
   glutSwapBuffers();
   }
 
@@ -302,15 +323,15 @@ int main(int argc, char** argv)
   glutKeyboardFunc(keyboard);
   
   glEnable(GL_DEPTH_TEST);
-  glEnable(GL_VERTEX_PROGRAM_ARB);
-  glEnable(GL_FRAGMENT_PROGRAM_ARB);
   glClearColor(0.0, 0.0, 0.0, 1.0);
   glPointSize(5);
 
   try
     {
-    shSetBackend("arb");
-
+    if (argc > 1) {
+      shUseBackend(argv[1]);
+    }
+      
     init_shaders();
     init_streams();
   
@@ -333,6 +354,17 @@ int main(int argc, char** argv)
     std::cerr << "Unknown exception caught." << std::endl;
     return 1;
     }
+
+#if 0
+  cout << "Vertex Unit:" << endl;
+  vsh.node()->code()->print(cout);
+  cout << "--" << endl;
+  cout << "Fragment Unit:" << endl;
+  particle_fsh.node()->code()->print(cout);
+  cout << "--" << endl;
+  plane_fsh.node()->code()->print(cout);
+  cout << "--" << endl;
+#endif
  
   glutMainLoop();
   return 0;
@@ -342,7 +374,7 @@ void init_streams(void)
   {
   // Specifiy the generic particle update program, later it will
   // be specialized for the the actual particle update.
-  particle = SH_BEGIN_PROGRAM("gpu:stream") {
+  particle = SH_BEGIN_PROGRAM("stream") {
     ShInOutPoint3f pos;
     ShInOutVector3f vel;
     ShInputVector3f acc;
@@ -387,10 +419,10 @@ void init_streams(void)
   // be double buffering the particle system updates. The memory
   // objects will allocate the memory needed internally, only the
   // size of the memory is given (in bytes, hence the 3*sizeof(float))
-  ShHostMemoryPtr host_posA = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES);
-  ShHostMemoryPtr host_posB = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES);
-  ShHostMemoryPtr host_velA = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES);
-  ShHostMemoryPtr host_velB = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES);
+  ShHostMemoryPtr host_posA = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
+  ShHostMemoryPtr host_posB = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
+  ShHostMemoryPtr host_velA = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
+  ShHostMemoryPtr host_velB = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
 
   // Allocate the associated ShChannel objects for each of
   // the ShHostMemory objects. The type of channel will determine
@@ -473,7 +505,7 @@ void init_shaders(void)
   // This vertex program will be used for all our shading, it
   // simply transforms the incoming position/normal and generates
   // a light vector. 
-  vsh = SH_BEGIN_VERTEX_PROGRAM {
+  vsh = SH_BEGIN_PROGRAM("gpu:vertex") {
     ShInOutPosition4f pos;
     ShInOutNormal3f normal;
     ShOutputVector3f lightv;
@@ -497,7 +529,7 @@ void init_shaders(void)
   // program will be used in conjunction with this fragment program
   // the transformed normal and generated light vector are simply
   // ignored.
-  particle_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+  particle_fsh = SH_BEGIN_PROGRAM("gpu:fragment") {
     ShOutputColor3f color;
 
     color = cond(simtime < 0.5,
@@ -512,7 +544,7 @@ void init_shaders(void)
   // This fragment shader will be used to shade the other pieces
   // of geometry (the plane and particle shooter). Its just a simple
   // diffuse shader (using the global uniform diffuse_color).
-  plane_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+  plane_fsh = SH_BEGIN_PROGRAM("gpu:fragment") {
     ShInputPosition4f pos;
     ShInputNormal3f normal;
     ShInputVector3f lightv;
@@ -523,10 +555,16 @@ void init_shaders(void)
     
     color = (normal|lightv)*diffuse_color;
   } SH_END;
+
+  particle_shaders = new ShProgramSet(vsh, particle_fsh);
+  plane_shaders = new ShProgramSet(vsh, plane_fsh);
   }
 
 void update_streams(void)
   {
+  shUnbind(*plane_shaders);
+  shUnbind(*particle_shaders);
+
   try 
     {
     // The value of dir specifcies whether to run particle_updateA, which
@@ -576,12 +614,9 @@ int gprintf(int x, int y, char* fmt, ...)
   glPushMatrix();
   glLoadIdentity();
 
-  // just in case, turn lighting and
-  // texturing off and disable depth testing
+  // just in case, turn lighting off and disable depth testing
   glPushAttrib(GL_ENABLE_BIT);
   glDisable(GL_DEPTH_TEST);
-  glDisable(GL_VERTEX_PROGRAM_ARB);
-  glDisable(GL_FRAGMENT_PROGRAM_ARB);
 
   // render the character through glut
   char* p = temp;

@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -28,12 +25,14 @@
 #include <fstream>
 #include <cassert>
 #include "ShSyntax.hpp"
-#include "ShEnvironment.hpp"
 #include "ShContext.hpp"
 #include "ShTokenizer.hpp"
 #include "ShToken.hpp"
+#include "ShInfo.hpp"
+#include "ShStatement.hpp"
 #include "ShProgram.hpp"
 #include "ShBackend.hpp"
+#include "ShTransformer.hpp"
 #include "ShOptimizations.hpp"
 
 namespace SH {
@@ -53,31 +52,29 @@ void shEndShader()
   assert(parsing);
   
   parsing->ctrlGraph = new ShCtrlGraph(parsing->tokenizer.blockList());
-
-  optimize(parsing);
   
-  parsing->collectVariables();
+  optimize(parsing);
   
   context->exit();
 
   parsing->finish();
 
-  // TODO. See issue129.
-//   if (!ShEnvironment::shader->target().empty()) {
-//     shCompile(ShEnvironment::shader);
-//   }
+  // TODO: compile the program? See issue129.
+  
 }
 
 void shCompile(ShProgram& prg)
 {
-  if (!ShEnvironment::backend) return;
-  prg.compile(ShEnvironment::backend);
+  ShBackendPtr backend = ShBackend::get_backend(prg.target());
+  if (!backend) return;
+  prg.compile(backend);
 }
 
 void shCompile(ShProgram& prg, const std::string& target)
 {
-  if (!ShEnvironment::backend) return;
-  prg.compile(target, ShEnvironment::backend);
+  ShBackendPtr backend = ShBackend::get_backend(target);
+  if (!backend) return;
+  prg.compile(target, backend);
 }
 
 void shCompileShader(ShProgram& prg)
@@ -92,14 +89,69 @@ void shCompileShader(const std::string& target, ShProgram& prg)
 
 void shBind(ShProgram& prg)
 {
-  if (!ShEnvironment::backend) return;
-  prg.code(ShEnvironment::backend)->bind();
+  ShBackendPtr backend = ShBackend::get_backend(prg.target());
+  if (!backend) return;
+  prg.code(backend)->bind();
 }
 
-void shBind(ShProgram& prg, const std::string& target)
+void shBind(const ShProgramSet& s)
 {
-  if (!ShEnvironment::backend) return;
-  prg.code(target, ShEnvironment::backend)->bind();
+  ShBackendPtr backend = ShBackend::get_backend((*(s.begin()))->target());
+  if (!backend) return;
+  s.backend_set(backend)->bind();
+}
+
+void shBind(const std::string& target, ShProgram& prg)
+{
+  ShBackendPtr backend = ShBackend::get_backend(target);
+  if (!backend) return;
+  prg.code(target, backend)->bind();
+}
+
+void shUnbind()
+{
+  ShBackend::unbind_all_backends();
+}
+
+void shUnbind(ShProgram& prg)
+{
+  ShBackendPtr backend = ShBackend::get_backend(prg.target());
+  if (!backend) return;
+  prg.code(backend)->unbind();
+}
+
+void shUnbind(const ShProgramSet& s)
+{
+  ShBackendPtr backend = ShBackend::get_backend((*(s.begin()))->target());
+  if (!backend) return;
+  s.backend_set(backend)->unbind();
+}
+
+void shUnbind(const std::string& target, ShProgram& prg)
+{
+  ShBackendPtr backend = ShBackend::get_backend(target);
+  if (!backend) return;
+  prg.code(target, backend)->unbind();
+}
+
+void shLink(const ShProgramSet& s)
+{
+  ShBackendPtr backend = ShBackend::get_backend((*(s.begin()))->target());
+  if (!backend) return;
+  s.backend_set(backend)->link();
+}
+
+typedef std::map<std::string, ShProgram> BoundProgramMap;
+
+void shUpdate()
+{
+  for (BoundProgramMap::iterator i = ShContext::current()->begin_bound(); 
+       i != ShContext::current()->end_bound(); i++) {
+    ShBackendPtr backend = ShBackend::get_backend(i->second.target());
+    if (backend) {
+      i->second.code(backend)->update();
+    }
+  }
 }
 
 void shBindShader(ShProgram& shader)
@@ -109,15 +161,37 @@ void shBindShader(ShProgram& shader)
 
 void shBindShader(const std::string& target, ShProgram& shader)
 {
-  shBind(shader, target);
+  shBind(target, shader);
 }
 
 bool shSetBackend(const std::string& name)
 {
-  ShBackendPtr backend = SH::ShBackend::lookup(name);
-  if (!backend) return false;
-  SH::ShEnvironment::backend = backend;
-  return true;
+  SH::ShBackend::clear_backends();
+  if (name.empty()) return false;
+  return SH::ShBackend::use_backend(name);
+}
+
+bool shUseBackend(const std::string& name)
+{
+  if (name.empty()) return false;
+  return SH::ShBackend::use_backend(name);
+}
+
+bool shHaveBackend(const std::string& name)
+{
+  if (name.empty()) return false;
+  return SH::ShBackend::have_backend(name);
+}
+
+void shClearBackends()
+{
+  return SH::ShBackend::clear_backends();
+}
+
+std::string shFindBackend(const std::string& target)
+{
+  if (target.empty()) return "";
+  return SH::ShBackend::target_handler(target, false);
 }
 
 bool shEvaluateCondition(const ShVariable& arg)
@@ -128,7 +202,6 @@ bool shEvaluateCondition(const ShVariable& arg)
   }
   return cond;
 }
-
 
 bool shProcessArg(const ShVariable& arg,
                   bool* internal_cond)
@@ -245,6 +318,26 @@ void ShContinue()
 {
   if (!ShContext::current()->parsing()) return;
   ShContext::current()->parsing()->tokenizer.blockList()->addBlock(new ShToken(SH_TOKEN_CONTINUE));
+}
+
+void shBeginSection()
+{
+  if (!ShContext::current()->parsing()) return;
+  ShContext::current()->parsing()->tokenizer.blockList()->addBlock(new ShToken(SH_TOKEN_STARTSEC));
+}
+
+void shEndSection()
+{
+  if (!ShContext::current()->parsing()) return;
+  ShContext::current()->parsing()->tokenizer.blockList()->addBlock(new ShToken(SH_TOKEN_ENDSEC));
+}
+
+void shComment(const std::string& comment)
+{
+  if (!ShContext::current()->parsing()) return;
+  ShStatement stmt(SH_OP_COMMENT);
+  stmt.add_info(new ShInfoComment(comment));
+  ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
 }
 
 }

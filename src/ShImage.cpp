@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -44,13 +41,13 @@ ShImage::ShImage()
 
 ShImage::ShImage(int width, int height, int elements)
   : m_width(width), m_height(height), m_elements(elements),
-    m_memory(new ShHostMemory(sizeof(float) * m_width * m_height * m_elements))
+    m_memory(new ShHostMemory(sizeof(float) * m_width * m_height * m_elements, SH_FLOAT))
 {
 }
 
 ShImage::ShImage(const ShImage& other)
   : m_width(other.m_width), m_height(other.m_height), m_elements(other.m_elements),
-    m_memory(other.m_memory ? new ShHostMemory(sizeof(float) * m_width * m_height * m_elements) : 0)
+    m_memory(other.m_memory ? new ShHostMemory(sizeof(float) * m_width * m_height * m_elements, SH_FLOAT) : 0)
 {
   if (m_memory) {
     std::memcpy(m_memory->hostStorage()->data(),
@@ -68,7 +65,7 @@ ShImage& ShImage::operator=(const ShImage& other)
   m_width = other.m_width;
   m_height = other.m_height;
   m_elements = other.m_elements;
-  m_memory = (other.m_memory ? new ShHostMemory(sizeof(float) * m_width * m_height * m_elements) : 0);
+  m_memory = (other.m_memory ? new ShHostMemory(sizeof(float) * m_width * m_height * m_elements, SH_FLOAT) : 0);
   std::memcpy(m_memory->hostStorage()->data(),
               other.m_memory->hostStorage()->data(),
               m_width * m_height * m_elements * sizeof(float));
@@ -253,7 +250,7 @@ void ShImage::loadPng(const std::string& filename)
   
   png_bytep* row_pointers = png_get_rows(png_ptr, info_ptr);
 
-  m_memory = new ShHostMemory(sizeof(float) * m_width * m_height * m_elements);
+  m_memory = new ShHostMemory(sizeof(float) * m_width * m_height * m_elements, SH_FLOAT);
 
   for (int y = 0; y < m_height; y++) {
     for (int x = 0; x < m_width; x++) {
@@ -366,7 +363,7 @@ ShImage ShImage::getNormalImage()
       y = ((*this)(i,jp1,0) - (*this)(i,jm1,0))/2.0f;
       output_image(i,j,1) = y/2.0f + 0.5f;
       z = x*x + y*y;
-      z = (z > 1.0f) ? z = 0.0f : sqrt(1 - z);
+      z = (z > 1.0f) ? z = 0.0f : std::sqrt(1 - z);
       output_image(i,j,2) = z;
     }
   }

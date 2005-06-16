@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -42,14 +39,14 @@ namespace SH {
  * On tuples, this operator acts componentwise.
  * @todo scalar promotion.
  */
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator+(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right);
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator+(const ShGeneric<1, V1>& left, const ShGeneric<N, V2>& right);
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator+(const ShGeneric<N, V1>& left, const ShGeneric<1, V2>& right);
-template<ShValueType V1, ShValueType V2>
-ShGeneric<1, CV1V2> operator+(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator+(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator+(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator+(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right);
+template<typename T1, typename T2>
+ShGeneric<1, CT1T2> operator+(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right);
 SH_SHLIB_CONST_SCALAR_OP_DECL(operator+);
 SH_SHLIB_CONST_N_OP_BOTH_DECL(operator+);
 
@@ -57,14 +54,14 @@ SH_SHLIB_CONST_N_OP_BOTH_DECL(operator+);
  * On tuples, this operator acts componentwise.
  * @todo scalar promotion.
  */
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator-(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right);
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator-(const ShGeneric<1, V1>& left, const ShGeneric<N, V2>& right);
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator-(const ShGeneric<N, V1>& left, const ShGeneric<1, V2>& right);
-template<ShValueType V1, ShValueType V2>
-ShGeneric<1, CV1V2> operator-(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator-(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator-(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator-(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right);
+template<typename T1, typename T2>
+ShGeneric<1, CT1T2> operator-(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right);
 SH_SHLIB_CONST_SCALAR_OP_DECL(operator-);
 SH_SHLIB_CONST_N_OP_BOTH_DECL(operator-);
 
@@ -73,14 +70,14 @@ SH_SHLIB_CONST_N_OP_BOTH_DECL(operator-);
  * If a scalar is multiplied by a tuple, the scalar is promoted by
  * duplication to a tuple.
  */
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator*(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right);
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator*(const ShGeneric<1, V1>& left, const ShGeneric<N, V2>& right);
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator*(const ShGeneric<N, V1>& left, const ShGeneric<1, V2>& right);
-template<ShValueType V1, ShValueType V2>
-ShGeneric<1, CV1V2> operator*(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator*(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator*(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator*(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right);
+template<typename T1, typename T2>
+ShGeneric<1, CT1T2> operator*(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right);
 SH_SHLIB_CONST_SCALAR_OP_DECL(operator*);
 SH_SHLIB_CONST_N_OP_BOTH_DECL(operator*);
 
@@ -89,14 +86,14 @@ SH_SHLIB_CONST_N_OP_BOTH_DECL(operator*);
  * If a tuple is divided by a scalar (or vice versa), the scalar is promoted by
  * duplication to a tuple.
  */
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator/(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right);
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator/(const ShGeneric<N, V1>& left, const ShGeneric<1, V2>& right);
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2> operator/(const ShGeneric<1, V1>& left, const ShGeneric<N, V2>& right);
-template<ShValueType V1, ShValueType V2>
-ShGeneric<1, CV1V2> operator/(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator/(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator/(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> operator/(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right);
+template<typename T1, typename T2>
+ShGeneric<1, CT1T2> operator/(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right);
 SH_SHLIB_CONST_SCALAR_OP_DECL(operator/);
 SH_SHLIB_CONST_N_OP_LEFT_DECL(operator/);
 
@@ -105,70 +102,70 @@ SH_SHLIB_CONST_N_OP_LEFT_DECL(operator/);
  * Operates componentwise on tuples.
  * Returns the natural exponent of x.
  */
-template<int N, ShValueType V>
-ShGeneric<N, V> exp(const ShGeneric<N, V>& var);
+template<int N, typename T>
+ShGeneric<N, T> exp(const ShGeneric<N, T>& var);
 
 /** Exponent base 2.
  * Operates componentwise on tuples.
  * Returns the exponent of x using base 2.
  */
-template<int N, ShValueType V>
-ShGeneric<N, V> exp2(const ShGeneric<N, V>& var);
+template<int N, typename T>
+ShGeneric<N, T> exp2(const ShGeneric<N, T>& var);
 
 /** Exponent base 10.
  * Operates componentwise on tuples.
  * Returns the exponent of x using base 10.
  */
-template<int N, ShValueType V>
-ShGeneric<N, V> exp(const ShGeneric<N, V>& var);
+template<int N, typename T>
+ShGeneric<N, T> exp(const ShGeneric<N, T>& var);
 
 /** Minus-one Exponent base 10.
  * Operates componentwise on tuples.
  * Returns the exponent of x - 1 using base 10.
  */
-template<int N, ShValueType V>
-ShGeneric<N, V> expm1(const ShGeneric<N, V>& x);
+template<int N, typename T>
+ShGeneric<N, T> expm1(const ShGeneric<N, T>& x);
 
 /** Natural Logarithm.
  * Operates componentwise on tuples.
  * Returns the natural logarithm of x.
  */
-template<int N, ShValueType V>
-ShGeneric<N, V> log(const ShGeneric<N, V>& var);
+template<int N, typename T>
+ShGeneric<N, T> log(const ShGeneric<N, T>& var);
 
 /** Logarithm base 2.
  * Operates componentwise on tuples.
  * Returns the logarithm of x using base 2.
  */
-template<int N, ShValueType V>
-ShGeneric<N, V> log2(const ShGeneric<N, V>& var);
+template<int N, typename T>
+ShGeneric<N, T> log2(const ShGeneric<N, T>& var);
 
 /** Logarithm base 10.
  * Operates componentwise on tuples.
  * Returns the logarithm of x using base 10.
  */
-template<int N, ShValueType V>
-ShGeneric<N, V> log(const ShGeneric<N, V>& var);
+template<int N, typename T>
+ShGeneric<N, T> log(const ShGeneric<N, T>& var);
 
 /** Plus-One Logarithm base 10.
  * Operates componentwise on tuples.
  * Returns the logarithm of x + 1 using base 10.
  */
-template<int N, ShValueType V>
-ShGeneric<N, V> logp1(const ShGeneric<N, V>& x);
+template<int N, typename T>
+ShGeneric<N, T> logp1(const ShGeneric<N, T>& x);
 
 /** Power.
  * Raise a tuple to a power.
  * @todo scalar promotion.
  */
-template<int N, ShValueType V1, ShValueType V2, ShValueType V3>
-ShGeneric<N, CV1V2>
-pow(const ShGeneric<N, V1>& left, const ShGeneric<N, V2>& right);
-template<int N, ShValueType V1, ShValueType V2, ShValueType V3>
-ShGeneric<N, CV1V2>
-pow(const ShGeneric<N, V1>& left, const ShGeneric<1, V2>& right);
-template<ShValueType V1, ShValueType V2, ShValueType V3>
-ShGeneric<1, CV1V2> pow(const ShGeneric<1, V1>& left, const ShGeneric<1, V2>& right);
+template<int N, typename T1, typename T2, typename T3>
+ShGeneric<N, CT1T2>
+pow(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right);
+template<int N, typename T1, typename T2, typename T3>
+ShGeneric<N, CT1T2>
+pow(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right);
+template<typename T1, typename T2, typename T3>
+ShGeneric<1, CT1T2> pow(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right);
 
 SH_SHLIB_CONST_SCALAR_OP_DECL(pow);
 SH_SHLIB_CONST_N_OP_RIGHT_DECL(pow);
@@ -178,62 +175,62 @@ SH_SHLIB_CONST_N_OP_RIGHT_DECL(pow);
  * Multiply-add is potentially cheaper than a separate multiply and
  * add.  Note: potentially.
  */
-template<int N, ShValueType V1, ShValueType V2, ShValueType V3>
-ShGeneric<N, CV1V2V3>
-mad(const ShGeneric<N, V1>& m1, const ShGeneric<N, V2>& m2, 
-                    const ShGeneric<N, V3>& a);
-template<int N, ShValueType V1, ShValueType V2, ShValueType V3>
-ShGeneric<N, CV1V2V3>
-mad(const ShGeneric<N, V1>& m1, const ShGeneric<1, V2>& m2, 
-                    const ShGeneric<N, V3>& a);
-template<int N, ShValueType V1, ShValueType V2, ShValueType V3>
-ShGeneric<N, CV1V2V3>
-mad(const ShGeneric<1, V1>& m1, const ShGeneric<N, V2>& m2, 
-                    const ShGeneric<N, V3>& a);
-template<ShValueType V1, ShValueType V2, ShValueType V3>
-ShGeneric<1, CV1V2V3> mad(const ShGeneric<1, V1>& m1, const ShGeneric<1, V2>& m2, 
-                    const ShGeneric<1, V3>& a);
+template<int N, typename T1, typename T2, typename T3>
+ShGeneric<N, CT1T2T3>
+mad(const ShGeneric<N, T1>& m1, const ShGeneric<N, T2>& m2, 
+                    const ShGeneric<N, T3>& a);
+template<int N, typename T1, typename T2, typename T3>
+ShGeneric<N, CT1T2T3>
+mad(const ShGeneric<N, T1>& m1, const ShGeneric<1, T2>& m2, 
+                    const ShGeneric<N, T3>& a);
+template<int N, typename T1, typename T2, typename T3>
+ShGeneric<N, CT1T2T3>
+mad(const ShGeneric<1, T1>& m1, const ShGeneric<N, T2>& m2, 
+                    const ShGeneric<N, T3>& a);
+template<typename T1, typename T2, typename T3>
+ShGeneric<1, CT1T2T3> mad(const ShGeneric<1, T1>& m1, const ShGeneric<1, T2>& m2, 
+                    const ShGeneric<1, T3>& a);
 
 //@todo type should not use double here, but overloading problems need to be
 //resolved
-//template<int N, ShValueType V> 
-//ShGeneric<N, V> 
-//mad(T m1, const ShGeneric<N, V>& m2, const ShGeneric<N, V>& a);
-//template<int N, ShValueType V> 
-//ShGeneric<N, V>
-//mad(const ShGeneric<N, V>& m1, V m2, const ShGeneric<N, V>& a);
+//template<int N, typename T> 
+//ShGeneric<N, T> 
+//mad(T m1, const ShGeneric<N, T>& m2, const ShGeneric<N, T>& a);
+//template<int N, typename T> 
+//ShGeneric<N, T>
+//mad(const ShGeneric<N, T>& m1, T m2, const ShGeneric<N, T>& a);
 
 //@todo type not sure these are a good idea
-template<int N, ShValueType V1, ShValueType V2> 
-ShGeneric<N, CV1V2> 
-mad(double m1, const ShGeneric<N, V1>& m2, const ShGeneric<N, V2>& a);
-template<int N, ShValueType V1, ShValueType V2> 
-ShGeneric<N, CV1V2>
-mad(const ShGeneric<N, V1>& m1, double m2, const ShGeneric<N, V2>& a);
+template<int N, typename T1, typename T2> 
+ShGeneric<N, CT1T2> 
+mad(double m1, const ShGeneric<N, T1>& m2, const ShGeneric<N, T2>& a);
+template<int N, typename T1, typename T2> 
+ShGeneric<N, CT1T2>
+mad(const ShGeneric<N, T1>& m1, double m2, const ShGeneric<N, T2>& a);
 
 /* Reciprocal
  * One divided by the given value, for each component.
  */
-template<int N, ShValueType V>
-ShGeneric<N, V> rcp(const ShGeneric<N, V>& var);
+template<int N, typename T>
+ShGeneric<N, T> rcp(const ShGeneric<N, T>& var);
 
 /* Square root.
  * The square root of each component of the input is evaluated.
  */
-template<int N, ShValueType V>
-ShGeneric<N, V> sqrt(const ShGeneric<N, V>& var);
+template<int N, typename T>
+ShGeneric<N, T> sqrt(const ShGeneric<N, T>& var);
 
 /* Reciprocal square root.
  * The inverse of the square root of each component of the input is evaluated.
  */
-template<int N, ShValueType V>
-ShGeneric<N, V> rsqrt(const ShGeneric<N, V>& var);
+template<int N, typename T>
+ShGeneric<N, T> rsqrt(const ShGeneric<N, T>& var);
 
 /* Cube root.
  * The cube root of each component of the input is evaluated.
  */
-template<int N, ShValueType V>
-ShGeneric<N, V> cbrt(const ShGeneric<N, V>& var);
+template<int N, typename T>
+ShGeneric<N, T> cbrt(const ShGeneric<N, T>& var);
 
 /*@}*/
 
@@ -241,35 +238,35 @@ ShGeneric<N, V> cbrt(const ShGeneric<N, V>& var);
  * Blend between two tuples.   The blend value can be a scalar
  * or a tuple.
  */
-template<int N, ShValueType V1, ShValueType V2, ShValueType V3>
-ShGeneric<N, CV1V2V3>
-lerp(const ShGeneric<N, V1>& f, const ShGeneric<N, V2>& a, 
-                     const ShGeneric<N, V3>& b);
-template<int N, ShValueType V1, ShValueType V2, ShValueType V3>
-ShGeneric<N, CV1V2V3>
-lerp(const ShGeneric<1, V1>& f, const ShGeneric<N, V2>& a, 
-                     const ShGeneric<N, V3>& b);
-template<ShValueType V1, ShValueType V2, ShValueType V3>
-ShGeneric<1, CV1V2V3> 
-lerp(const ShGeneric<1, V1>& f, const ShGeneric<1, V2>& a, 
-     const ShGeneric<1, V3>& b);
+template<int N, typename T1, typename T2, typename T3>
+ShGeneric<N, CT1T2T3>
+lerp(const ShGeneric<N, T1>& f, const ShGeneric<N, T2>& a, 
+                     const ShGeneric<N, T3>& b);
+template<int N, typename T1, typename T2, typename T3>
+ShGeneric<N, CT1T2T3>
+lerp(const ShGeneric<1, T1>& f, const ShGeneric<N, T2>& a, 
+                     const ShGeneric<N, T3>& b);
+template<typename T1, typename T2, typename T3>
+ShGeneric<1, CT1T2T3> 
+lerp(const ShGeneric<1, T1>& f, const ShGeneric<1, T2>& a, 
+     const ShGeneric<1, T3>& b);
 
-template<int N, ShValueType V1, ShValueType V2>
-ShGeneric<N, CV1V2>
-lerp(double f, const ShGeneric<N, V1>& a, const ShGeneric<N, V2>& b);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2>
+lerp(double f, const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b);
 
 
 /* Sum of components.
  * Addition of all components into a single result.
  */
-template<int N, ShValueType V>
-ShGeneric<1, V> sum(const ShGeneric<N, V>& var);
+template<int N, typename T>
+ShGeneric<1, T> sum(const ShGeneric<N, T>& var);
 
 /* Product of components.
  * Multiplication of all components into a single result.
  */
-template<int N, ShValueType V>
-ShGeneric<1, V> prod(const ShGeneric<N, V>& var);
+template<int N, typename T>
+ShGeneric<1, T> prod(const ShGeneric<N, T>& var);
 
 }
 #endif

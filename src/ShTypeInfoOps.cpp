@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -43,22 +40,13 @@ void ShTypeInfo::addOps()
   /// loss of information. I think prefering loss of precision by going to float 
   /// over losing sign information sounds better) 
   ///
-  /// 1) if either operand is i_d or operands are d x i_f, use i_d
-  /// 2) else if one operand is i_f, use i_f
-  /// 3) else if either operand is d, use d 
-  /// 4) else if either operand is f or we have i x ui, use f 
-  /// 5) else if operands are integers/unsigned integers use i
-  /// 6) else use float (this includes all fractionals)
-  _shInitFloatOps<SH_INTERVAL_DOUBLE>();
-  _shInitIntervalOps<SH_DOUBLE, SH_INTERVAL_DOUBLE>();
+  /// 1) else if either operand is d, use d 
+  /// 2) else if either operand is f, h, or fractional, use f
+  /// 3) otherwise, use int
+  _shInitFloatOps<double>();
+  _shInitFloatOps<float>();
 
-  _shInitFloatOps<SH_INTERVAL_FLOAT>();
-  _shInitIntervalOps<SH_FLOAT, SH_INTERVAL_FLOAT>();
-
-  _shInitFloatOps<SH_DOUBLE>();
-  _shInitFloatOps<SH_FLOAT>();
-
-  _shInitIntOps<SH_INT>();
+  _shInitIntOps<int>();
 }
 
 }

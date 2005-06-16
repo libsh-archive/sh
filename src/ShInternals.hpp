@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -33,6 +30,7 @@
 #include "ShCtrlGraph.hpp"
 #include "ShBackend.hpp"
 #include "ShProgramNode.hpp"
+#include "ShStructural.hpp"
 #include <map>
 
 namespace SH { 
@@ -49,6 +47,10 @@ SH_DLLEXPORT ShVariableReplacer {
 
   // replaces variables in a ShProgramNode::VarList based on varMap 
   void operator()(ShProgramNode::VarList &varList);
+
+  // replaces variables in a ShStructuralNode and all Structural
+  // Nodes in its region.
+  void operator()(ShStructuralNodePtr node);
 
   // replaces node in a single variable using varMap
   void repVar(ShVariable& var);

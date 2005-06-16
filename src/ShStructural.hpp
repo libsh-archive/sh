@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -32,20 +29,23 @@
 #include <iosfwd>
 #include "ShDllExport.hpp"
 #include "ShRefCount.hpp"
+#include "ShInfo.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShVariable.hpp"
+#include "ShStatement.hpp"
 
 namespace SH {
 
 class
-SH_DLLEXPORT ShStructuralNode : public ShRefCountable {
+SH_DLLEXPORT ShStructuralNode : public virtual ShRefCountable /*, public virtual ShInfo */ {
 public:
   friend class ShStructural;
   
   enum NodeType {
     UNREDUCED,
     BLOCK,
-    IF,
+    SECTION,
+    IF, ///< never used - we only make ifelses
     IFELSE,
     SELFLOOP,
     WHILELOOP
@@ -62,6 +62,7 @@ public:
   ShStructuralNode* container;
   typedef std::list< ShPointer< ShStructuralNode> > StructNodeList;
   StructNodeList structnodes; ///< Nodes in this region
+  bool contains(ShCtrlGraphNodePtr node) const; ///< Contains the cfg_node in this region
   
   // Graph structure
   ShCtrlGraphNodePtr cfg_node;
@@ -71,6 +72,45 @@ public:
   typedef std::pair<ShVariable, ShStructuralNode*> PredecessorEdge;
   typedef std::list<PredecessorEdge> PredecessorList;
   PredecessorList preds;
+
+  // Functions to access underlying CFG structure
+  
+  /** Flags whether entry is marked by a STARTSEC and
+   * exit marked by an ENDSEC that has not already been
+   * handled in a SECTION reduced block 
+   * Remember to set these when building reduced nodes */
+  ShStatement *secStart, *secEnd; 
+ 
+ 
+  /** Describes a cfg edge.
+   * Used in searching for cfg edges that match criteria in the structural
+   * graph.
+   */
+  struct CfgMatch {
+    ShCtrlGraphNodePtr from, to;
+    ShCtrlGraphNode::SuccessorList::iterator S; //< set to succ.end() if edge is from->follower 
+
+    CfgMatch();
+    CfgMatch(ShCtrlGraphNodePtr from); //< for a follower
+    CfgMatch(ShCtrlGraphNodePtr from, 
+        ShCtrlGraphNode::SuccessorList::iterator S); //< for a successor 
+        
+    bool isFollower(); 
+  };
+  typedef std::list<CfgMatch> CfgMatchList; 
+
+  // Retrieves successors from CFG that match the given SuccessorEdge
+  void getSuccs(CfgMatchList &result, const SuccessorEdge &edge);
+  void getPreds(CfgMatchList &result, const PredecessorEdge &edge);
+  
+  // Retrieves all successors from CFG in this node that leave the given node 
+  // node = 0 indicates the typical case of node = this;
+  void getExits(CfgMatchList &result, ShPointer<ShStructuralNode> node = 0);
+
+  // Retrieves all successor edges from CFG in this node that enter the given node 
+  // node = 0 indicates the typical case of node = this
+  void getEntries(CfgMatchList &result, ShPointer<ShStructuralNode> node = 0);
+
 
   // Spanning tree
   ShStructuralNode* parent;

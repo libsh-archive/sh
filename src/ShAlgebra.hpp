@@ -1,26 +1,23 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
-//
+// Copyright 2003-2005 Serious Hack Inc.
+// 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
 // arising from the use of this software.
-//
+// 
 // Permission is granted to anyone to use this software for any purpose,
 // including commercial applications, and to alter it and redistribute it
 // freely, subject to the following restrictions:
-//
+// 
 // 1. The origin of this software must not be misrepresented; you must
 // not claim that you wrote the original software. If you use this
 // software in a product, an acknowledgment in the product documentation
 // would be appreciated but is not required.
-//
+// 
 // 2. Altered source versions must be plainly marked as such, and must
 // not be misrepresented as being the original software.
-//
+// 
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
@@ -97,12 +94,12 @@ ShProgram renameOutput(ShProgram a, const std::string& oldName, const std::strin
 SH_DLLEXPORT
 ShProgram namedAlign(ShProgram a, ShProgram b);
 
-/** Replaces parameter with attribute.
- * Replaces a uniform parameter by appending a
- * varying input attribute to the end of the list of inputs.
+/** Replaces variable with input attribute.
+ * Replaces a variable by appending an
+ * input attribute to the end of the list of inputs.
  */
 SH_DLLEXPORT
-ShProgram replaceUniform(ShProgram a, const ShVariable &var); 
+ShProgram replaceVariable(ShProgram a, const ShVariable &var); 
 
 /** Equivalent to combine(a,b).
  */
@@ -114,7 +111,7 @@ ShProgram operator&(ShProgram a, ShProgram b);
 SH_DLLEXPORT
 ShProgram operator<<(ShProgram a, ShProgram b);
 
-/** Equivalent to replaceUniform(p,var).
+/** Equivalent to replaceVariable(p,var).
  */
 SH_DLLEXPORT
 ShProgram operator>>(ShProgram p, const ShVariable &var); 
@@ -124,15 +121,8 @@ ShProgram operator>>(ShProgram p, const ShVariable &var);
  * to a variable.   The implementation supports currying with delayed
  * read, which is equivalent to replacing an input with a parameter.
  */
-template<int N, ShValueType V>
-ShProgram operator<<(ShProgram a, const ShGeneric<N, V>& v) {
-  ShProgram vNibble = SH_BEGIN_PROGRAM() {
-    ShAttrib<N, SH_OUTPUT, V> out;
-    out.node()->specialType(v.node()->specialType());
-    out = v;
-  } SH_END_PROGRAM;
-  return connect(vNibble, a); 
-}
+SH_DLLEXPORT
+ShProgram operator<<(ShProgram a, const ShVariable& var); 
 
 }
 

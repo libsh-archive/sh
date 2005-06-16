@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -31,7 +28,6 @@
 #include "ShError.hpp"
 #include "ShAlgebra.hpp"
 #include "ShFixedManipulator.hpp"
-#include "ShEnvironment.hpp"
 
 namespace SH {
 
@@ -71,7 +67,7 @@ ShLoseNode::ShLoseNode(int numChannels)
 }
 
 ShProgram ShLoseNode::applyToInputs(ShManipVarIterator &finger, ShManipVarIterator end) const {
-  SH_DEBUG_PRINT( "Applying lose " << m_numChannels  );
+  //SH_DEBUG_PRINT( "Applying lose " << m_numChannels  );
   ShProgram result = SH_BEGIN_PROGRAM() {
     for(int i = 0; i < m_numChannels; ++i, ++finger) {
       if(finger == end) {
