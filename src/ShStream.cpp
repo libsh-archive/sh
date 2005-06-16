@@ -45,12 +45,12 @@ ShProgram connect(const ShChannelNodePtr& node, const ShProgram& program)
   return connect(nibble, program);
 }
 
-
 //ShStream::ShStream(const ShChannelNodePtr& channel, int stride, int offset )
 
 ShStream::ShStream()
 {
 }
+
 ShStream::ShStream(const ShChannelNodePtr& channel)
 {
   append(channel);

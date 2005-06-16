@@ -21,24 +21,26 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHTRACKBALL_HPP
-#define SHTRACKBALL_HPP
+#ifndef PBUFFERSTREAMS_HPP
+#define PBUFFERSTREAMS_HPP
 
-#include <sh/sh.hpp>
+#include "ShProgram.hpp"
+#include "GlBackend.hpp"
 
-namespace SH {
+namespace shgl {
 
-class ShTrackball {
-public:
-  ShTrackball() : m_width(0.0), m_height(0.0) {}
-  
-  ~ShTrackball() {}
+struct PBufferStreams : public StreamStrategy {
+  PBufferStreams();
+  virtual ~PBufferStreams();
 
-  void resize(float width, float height);
-  ShMatrix4x4f rotate(float sx, float sy, float ex, float ey) const;
+  void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
+
+  virtual StreamStrategy* create();
 
 private:
-  float m_width, m_height;
+  SH::ShProgramSet* m_shaders;
+  bool m_setup_vp;
+  SH::ShProgram m_vp;
 };
 
 }

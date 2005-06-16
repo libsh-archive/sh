@@ -21,36 +21,45 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
-#ifndef CAMERA_HPP
-#define CAMERA_HPP
+#ifndef GLSL_HPP
+#define GLSL_HPP
 
-#include <iostream>
+#include <string>
+#include "GlBackend.hpp"
+#include "ShBackend.hpp"
+#include "ShProgram.hpp"
+#include "ShException.hpp"
 
-#include <sh/sh.hpp>
+namespace shgl {
 
-class Camera {
+class GlslCodeStrategy : public CodeStrategy {
 public:
-  Camera();
-
-  void move(float x, float y, float z);
-  void rotate(float a, float x, float y, float z);
-  void orbit(int sx, int sy, int x, int y, int w, int h);
+  GlslCodeStrategy(void);
   
-  void glModelView();
-  void glProjection(float aspect);
+  SH::ShBackendCodePtr generate(const std::string& target,
+                                const SH::ShProgramNodeCPtr& shader,
+                                TextureStrategy* textures);
+  SH::ShBackendSetPtr generate_set(const SH::ShProgramSet& s);
+  bool use_default_set() const;
 
-  SH::ShMatrix4x4f shModelView();
-  SH::ShMatrix4x4f shModelViewProjection(SH::ShMatrix4x4f viewport);
-
-private:
-  SH::ShMatrix4x4f perspective(float fov, float aspect, float znear, float zfar);
-
-  SH::ShMatrix4x4f proj;
-  SH::ShMatrix4x4f rots;
-  SH::ShMatrix4x4f trans;
-
-  friend std::ostream &operator<<(std::ostream &output, Camera &camera);
-  friend std::istream &operator>>(std::istream &input, Camera &camera);
+  void unbind_all();
+  bool use_default_unbind_all() const;
+  
+  GlslCodeStrategy* create(void);
 };
+
+unsigned int glslTarget(const std::string& unit);
+
+class GlslException : public SH::ShBackendException {
+public:
+  GlslException(const std::string& message);
+};
+
+enum GlslProgramType { SH_GLSL_FP, SH_GLSL_VP }; 
+
+void print_infolog(GLhandleARB obj, std::ostream& out = std::cerr);
+void print_shader_source(GLhandleARB shader, std::ostream& out = std::cerr);
+std::string glsl_typename(SH::ShValueType type, int size);
+}
 
 #endif
