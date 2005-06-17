@@ -1,0 +1,9 @@
+bind_program is a simple program that creates a shader, binds it and unbinds 
+it before being destroyed.
+
+It is repeated 100,000 times by default and can be used to make sure that 
+memory usage is not growing.
+
+To run it through valgrind:
+
+  libtool --mode=execute valgrind bind_program
