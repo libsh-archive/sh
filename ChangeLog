@@ -1,3 +1,9 @@
+2005-06-17  Francois Marier  <francois@serioushack.com>
+
+	* src/ShImage.hpp (load_PNG): Add this function with a deprecated
+	comment because it is mentionned in one of the examples of the
+	book.
+
 2005-06-16  Francois Marier  <francois@serioushack.com>
 	
 	After the 0.7.8 release:

@@ -61,10 +61,15 @@ public:
                                                ///particular component
                                                ///from the image.
 
-
+  /** Load a PNG file into this image 
+   *
+   * @deprecated Provided for backward compatibility with the book
+   * (e.g. page 181)
+   */
+  void load_PNG(const std::string& filename) { loadPng(filename); }
   void loadPng(const std::string& filename); ///< Load a PNG file into
                                              ///this image.
-
+  
   void savePng(const std::string& filename, int inverse_alpha=0);///< Save a PNG image into
                                              ///this file
   
