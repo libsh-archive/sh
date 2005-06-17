@@ -319,18 +319,20 @@ void ArbCode::emit_eq(const ShStatement& stmt)
   ShVariable t1(new ShVariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
   ShVariable t2(new ShVariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
 
-  ArbOp op;
+  ArbOp op, combine;
   if (stmt.op == SH_OP_SEQ) {
     op = SH_ARB_SGE;
+    combine = SH_ARB_MUL;
   } else if (stmt.op == SH_OP_SNE) {
     op = SH_ARB_SLT;
+    combine = SH_ARB_MAX;
   } else {
     SH_DEBUG_ASSERT(false);
   }
   
-  m_instructions.push_back(ArbInst(SH_ARB_SGE, t1, stmt.src[0], stmt.src[1]));
-  m_instructions.push_back(ArbInst(SH_ARB_SGE, t2, stmt.src[1], stmt.src[0]));
-  m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, t1, t2));
+  m_instructions.push_back(ArbInst(op, t1, stmt.src[0], stmt.src[1]));
+  m_instructions.push_back(ArbInst(op, t2, stmt.src[1], stmt.src[0]));
+  m_instructions.push_back(ArbInst(combine, stmt.dest, t1, t2));
 }
 
 void ArbCode::emit_ceil(const ShStatement& stmt)

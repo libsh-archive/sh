@@ -1,5 +1,9 @@
 2005-06-17  Francois Marier  <francois@serioushack.com>
 
+	* backends/gl/ArbEmit.cpp (emit_eq): Fix emit_eq so that it works
+	when emitting SNE.  This will fix the issue of SNE not working on
+	ATI.
+
 	* src/ShImage.hpp (load_PNG): Add this function with a deprecated
 	comment because it is mentionned in one of the examples of the
 	book.
