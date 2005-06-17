@@ -317,7 +317,7 @@ struct ConstProp : public ShInfo {
       for (std::size_t i = 0; i < m_values.size(); i++) {
         if (m_values[i]->type == NODE && m_values[i]->node == node) return i;
       }
-      m_values.push_back(new Value(node));
+      m_values.push_back(new Value(node)); // FIXME: Never gets deleted
       return m_values.size() - 1;
     }
 
@@ -346,7 +346,7 @@ struct ConstProp : public ShInfo {
 
     static ValueNum lookup(ConstProp* cp)
     {
-      Value* val = new Value(cp);
+      Value* val = new Value(cp); // FIXME: Never gets deleted
       
       for (std::size_t i = 0; i < m_values.size(); i++) {
         if (m_values[i]->type != STMT) continue;
