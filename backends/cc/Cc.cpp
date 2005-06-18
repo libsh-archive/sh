@@ -752,10 +752,38 @@ void CcBackend::execute(const ShProgramNodeCPtr& program, ShStream& dest)
 {
   SH_CC_DEBUG_PRINT(__FUNCTION__);
 
+  ShProgramNodePtr prg = shref_const_cast<ShProgramNode>(program);
+  ShPointer<ShBackend> b(this);
+
   CcBackendCodePtr backendcode = shref_dynamic_cast<CcBackendCode>(prg->code(b)); // = new CcBackendCode(program);
   backendcode->execute(dest);
 }
 
-static CcBackend* backend = new CcBackend();
+
+}
+
+
+extern "C" {
+  using namespace ShCc;
+
+#ifdef WIN32
+  __declspec(dllexport) 
+#endif
+  CcBackend* shBackend_libshcc_instantiate()
+  {
+    return new CcBackend();
+  }
+
+#ifdef WIN32
+  __declspec(dllexport) 
+#endif
+  int shBackend_libshcc_target_cost(const std::string& target)
+  {
+    if ("cc:stream" == target)  return 1;
+    if ("cpu:stream" == target) return 5;
+    if ("*:stream" == target)   return 10;
+    if ("stream" == target)     return 10;
+    return 0;
+  }
 }
 

@@ -46,9 +46,9 @@ ShChannel<T>::ShChannel()
 }
 
 template<typename T>
-ShChannel<T>::ShChannel(const ShMemoryPtr& memory, int count, int stride, int offset)
+ShChannel<T>::ShChannel(const ShMemoryPtr& memory, int count/*, int stride, int offset*/)
   : ShMetaForwarder(0),
-    m_node(new ShChannelNode(T::semantic_type, T::typesize, T::value_type, memory, count, stride, offset))
+    m_node(new ShChannelNode(T::semantic_type, T::typesize, T::value_type, memory, count/*, stride, offset*/))
 {
   real_meta(m_node.object());
 }

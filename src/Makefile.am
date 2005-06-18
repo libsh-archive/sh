@@ -136,9 +136,9 @@ libsh_la_SOURCES += ShPaletteNode.hpp ShPaletteNode.cpp
 incinc_HEADERS   += ShPalette.hpp ShPaletteImpl.hpp ShPaletteNode.hpp
 
 # Stream operations
-libsh_la_SOURCES += ShLibStream.hpp
-libsh_la_SOURCES += ShLibStream.hpp ShLibStream.cpp
-incinc_HEADERS   += ShLibStream.hpp
+#libsh_la_SOURCES += ShLibStream.hpp
+#libsh_la_SOURCES += ShLibStream.hpp ShLibStream.cpp
+#incinc_HEADERS   += ShLibStream.hpp
 
 # These should really be moved up top
 incinc_HEADERS += ShBlock.hpp ShCtrlGraph.hpp

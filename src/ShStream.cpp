@@ -139,6 +139,7 @@ ShProgram operator<<(const ShProgram& program, const ShStream& stream)
 
 ShStream& ShStream::operator=(const ShProgram& program)
 {
+  std::cerr << "From operator= invoking the backend -- " << __FUNCTION__ << std::endl;
   ShBackendPtr backend = ShBackend::get_backend(program.target());
   backend->execute(program.node(), *this);
   return *this;

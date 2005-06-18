@@ -41,7 +41,7 @@ public:
   /// Construct a channel without any associated memory.
   ShChannel();
   /// Construct a channel with \a count elements in \a memory
-  ShChannel(const ShMemoryPtr& memory, int count, int stride=1, int offset=0);
+  ShChannel(const ShMemoryPtr& memory, int count/*, int stride=1, int offset=0*/);
 
   /// Set this channel to use \a count elements in \a memory
   void memory(const ShMemoryPtr& memory, int count);

@@ -393,6 +393,8 @@ ShProgram replaceVariable(ShProgram a, const ShVariable& v)
 }
 
 ShProgram operator<<(ShProgram a, const ShVariable& var) {
+  std::cerr << "binding operator for program,variable  " << __FUNCTION__ << std::endl;
+
   ShProgram vNibble = SH_BEGIN_PROGRAM() {
     ShVariable out(var.node()->clone(SH_OUTPUT, var.size(), var.valueType(), SH_SEMANTICTYPE_END, true, false));
     shASN(out, var);

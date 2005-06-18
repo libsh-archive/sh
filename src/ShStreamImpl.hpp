@@ -30,14 +30,16 @@
 namespace SH {
 
 template<typename T>
-ShStream::ShStream(const ShChannel<T>& channel, int _stride, int _offset)
+ShStream::ShStream(const ShChannel<T>& channel/*, int _stride, int _offset*/)
 {
+  std::cerr << "Constructing from implicti conversion (ShStream)" << __FUNCTION__ << std::endl;
   m_nodes.push_back(channel.node());
 }
 
 template<typename T>
 void ShStream::append(const ShChannel<T>& channel)
 {
+  std::cerr << "Now appending (push_back into m_nodes)" << __FUNCTION__ << std::endl;
   m_nodes.push_back(channel.node());
 }
 
@@ -51,6 +53,7 @@ void ShStream::prepend(const ShChannel<T>& channel)
 template<typename T1, typename T2>
 ShStream combine(const ShChannel<T1>& left, const ShChannel<T2>& right)
 {
+  std::cerr << "combine1 -- const channels " << __FUNCTION__ << std::endl;
   ShStream stream(left);
   stream.append(right);
   return stream;
@@ -76,12 +79,14 @@ ShStream combine(const ShChannel<T1>& left, const ShStream& right)
 template<typename T1, typename T2>
 ShStream operator&(const ShChannel<T1>& left, const ShChannel<T2>& right)
 {
+  std::cerr << "operator combine from 1" << __FUNCTION__ << std::endl;
   return combine(left, right);
 }
 
 template<typename T2>
 ShStream operator&(const ShStream& left, const ShChannel<T2>& right)
 {
+  std::cerr << "(templated) operator combine from 2" << __FUNCTION__ << std::endl;
   return combine(left, right);
 }
 

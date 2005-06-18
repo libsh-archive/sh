@@ -1,9 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright (c) 2003 University of Waterloo Computer Graphics Laboratory
-// Project administrator: Michael D. McCool
-// Authors: Zheng Qin, Stefanus Du Toit, Kevin Moule, Tiberiu S. Popa,
-//          Bryan Chan, Michael D. McCool
+// Copyright 2003-2005 Serious Hack Inc.
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -38,6 +35,7 @@
 #include "ShKernelPost.hpp"
 #include "ShMesh.hpp"
 #include "ShObjMesh.hpp"
+#include <string>
 
 /** \namespace ShUtil
  * \brief The main ShUtil namespace.
@@ -51,6 +49,10 @@
  * You can use this to include all available extra utilities.
  */
 namespace ShUtil {
+
+/// Converts "/" to "\" on Windows and the reverse on other OSes
+std::string normalize_path(const std::string& path);
+
 }
 
 #endif

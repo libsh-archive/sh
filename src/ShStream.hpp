@@ -46,10 +46,8 @@ public:
   ShStream();
   ShStream(const ShChannelNodePtr& node);
   
-  /*
   template<typename T>
-  ShStream(const ShChannel<T>& channel, int _stride = 1, int _offset = 0); */
-
+  ShStream(const ShChannel<T>& channel/*, int _stride = 1, int _offset = 0*/);
 
   /* The default values make for a problematic copy constructor: don't
    * know whether to take stride/offset in `other' or those specified

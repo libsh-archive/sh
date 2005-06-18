@@ -225,6 +225,7 @@ void fillin()
 void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
                              ShStream& dest)
 {
+  std::cerr << "Executing in PBufferStream: " << __FUNCTION__ << std::endl;
   // Let's get rid of that constness... Yes, yes, I know...
   ShProgramNodePtr program = shref_const_cast<ShProgramNode>(program_const);
   
@@ -308,10 +309,11 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
   // --- Set up the fragment programs and such
   PBufferStreamCache* cache = program->get_info<PBufferStreamCache>();
   if (!cache) {
+    std::cerr << "Allocating new cache in PbufferStream " << __FUNCTION__ << std::endl;
     cache = new PBufferStreamCache(program.object(), m_vp.node().object());
     program->add_info(cache);
-  }
-  
+  }  
+
   cache->update_channels(tex_size, tex_size);
 
   // Check whether some channels are both being read and written to
@@ -335,6 +337,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
   ShStream::iterator dest_iter;
   ShStream* intermediate_stream = NULL;
   if (rw_channels) {
+    std::cerr << "--[ Using read/write channels." << std::endl;
     // Make an intermediate stream so that updates take effect only
     // once all of the programs have been executed.
     intermediate_stream = new ShStream();
@@ -352,6 +355,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
     }
     dest_iter = intermediate_stream->begin();
   } else {
+    std::cerr << "--[ Using output stream directly" << std::endl;
     // Use the output stream directly
     dest_iter = dest.begin();
   }

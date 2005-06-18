@@ -33,9 +33,9 @@ namespace SH {
 class
 SH_DLLEXPORT ShChannelNode : public ShVariableNode {
 public:
-  ShChannelNode(ShSemanticType specType, int elements, ShValueType valueType, int stride = 1, int offset = 0);
+  ShChannelNode(ShSemanticType specType, int elements, ShValueType valueType/*, int stride = 1, int offset = 0*/);
   ShChannelNode(ShSemanticType specType, int elements, ShValueType valueType,
-                const ShMemoryPtr& memory, int count, int stride = 1, int offset = 0);
+                const ShMemoryPtr& memory, int count/*, int stride = 1, int offset = 0*/);
   virtual ~ShChannelNode();
 
   void memory(const ShMemoryPtr& memory, int count);
