@@ -465,8 +465,12 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
       format = GL_RGBA;
       break;
     default:
-      SH_DEBUG_ASSERT(false);
-      break;
+      {
+	std::stringstream s;
+	s << "Output size of " << output->size() << " is not currently supported.";
+	shError(PBufferStreamException(s.str()));
+	break;
+      }
     }
     
     DECLARE_TIMER(readback);
