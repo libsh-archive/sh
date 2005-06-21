@@ -379,7 +379,7 @@ ostream& GlslCode::print(ostream& out)
   SH_DEBUG_ASSERT(m_varmap);
   const string BLOCK_INDENT("    ");
 
-  out << "// OpenGL SL " << ((m_unit == SH_GLSL_VP) ? "Vertex" : "Fragment") << " Program" << endl;
+  out << "// OpenGL " << ((m_unit == SH_GLSL_VP) ? "Vertex" : "Fragment") << " Program" << endl;
   out << endl;
 
   // Declare Uniforms
