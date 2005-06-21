@@ -41,6 +41,7 @@ using namespace std;
 ShMatrix4x4f mv, mvd;
 ShPoint3f lightPos;
 Camera camera;
+ShProgram vsh, fsh;
 ShProgramSet* shaders;
 
 ShColor3f diffusecolor;
@@ -55,7 +56,7 @@ bool show_help = false;
 
 void initShaders()
 {
-  ShProgram vsh = SH_BEGIN_VERTEX_PROGRAM {
+  vsh = SH_BEGIN_VERTEX_PROGRAM {
     ShInOutPosition4f pos;
     ShInOutNormal3f normal;
     ShOutputVector3f lightv;
@@ -67,7 +68,7 @@ void initShaders()
     normal = mv | normal; // Project normal
   } SH_END;
 
-  ShProgram fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+  fsh = SH_BEGIN_FRAGMENT_PROGRAM {
     ShInputPosition4f pos;
     ShInputNormal3f normal;
     ShInputVector3f lightv;
@@ -267,6 +268,15 @@ int main(int argc, char** argv)
   initShaders();
 
   shBind(*shaders);
+
+#if 0
+  cout << "Vertex Unit:" << endl;
+  vsh.node()->code()->print(cout);
+  cout << "--" << endl;
+  cout << "Fragment Unit:" << endl;
+  fsh.node()->code()->print(cout);
+  cout << "--" << endl;
+#endif
 
   glutMainLoop();
 
