@@ -1,5 +1,11 @@
 2005-06-21  Francois Marier  <francois@serioushack.com>
 
+	* backends/cc/Cc.cpp, Cc.hpp (delete_temporary_files): Add this
+	method to delete the temporary files created before execution.
+	(execute): Call delete_temporary_files() once execution is done.
+	(generate): Move the library loading code to load_shader_func.
+	(load_shader_func): Add this method.
+	
 	* src/ShMemory.hpp, ShMemory.cpp (dirtyall): Use
 	increment_timestamp to update the memory timestamp and to
 	correctly handle out-of-sync objects.

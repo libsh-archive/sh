@@ -469,6 +469,12 @@ bool CcBackendCode::generate(void)
   dbgout.close();
 #endif
 
+  return load_shader_func(prologue, epilogue);
+}
+
+bool CcBackendCode::load_shader_func(const std::stringstream& prologue,
+				     const std::stringstream& epilogue)
+{
 #ifdef WIN32
   // generate temporary names for the
   // code and the dll
@@ -482,6 +488,8 @@ bool CcBackendCode::generate(void)
   char dllfile[1024];
   sprintf(cppfile, "%s.cpp", prefix);
   sprintf(dllfile, "%s.dll", prefix);
+  m_code_filename = cppfile;
+  m_lib_filename  = dllfile;
 
   // write the code out to cppfile
   std::ofstream fout(cppfile);
@@ -527,6 +535,7 @@ bool CcBackendCode::generate(void)
   }
 
   return true;
+
 #else
   char name[32];
   tmpnam(name);
@@ -534,6 +543,8 @@ bool CcBackendCode::generate(void)
   char sofile[32];
   sprintf(ccfile, "%s.cc", name);
   sprintf(sofile, "%s.so", name);
+  m_code_filename = ccfile;
+  m_lib_filename  = sofile;
 
   std::ofstream fout(ccfile);
   fout << prologue.str();
@@ -576,6 +587,19 @@ bool CcBackendCode::generate(void)
     return false;
   }
 #endif /* WIN32 */
+}
+
+void CcBackendCode::delete_temporary_files()
+{
+  if (!m_code_filename.empty()) {
+    remove(m_code_filename.c_str());
+    m_code_filename = "";
+  }
+
+  if (!m_lib_filename.empty()) {
+    remove(m_lib_filename.c_str());
+    m_lib_filename = "";
+  }
 }
 
 bool CcBackendCode::execute(ShStream& dest) 
@@ -723,6 +747,7 @@ void CcBackend::execute(const ShProgramNodeCPtr& program, ShStream& dest)
     
   CcBackendCodePtr backendcode = shref_dynamic_cast<CcBackendCode>(prg->code(b)); // = new CcBackendCode(program);
   backendcode->execute(dest);
+  backendcode->delete_temporary_files();
 }
 
 

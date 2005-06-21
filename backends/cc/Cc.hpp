@@ -167,6 +167,12 @@ private:
 
   CcShaderFunc m_shader_func;
 
+  std::string m_code_filename;
+  std::string m_lib_filename;
+
+  void delete_temporary_files();
+  bool load_shader_func(const std::stringstream& prologue, const std::stringstream& epilogue);
+
   int m_cur_temp;
 
   void** m_params;
