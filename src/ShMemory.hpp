@@ -78,7 +78,7 @@ protected:
   ShMemory();
 
 private:
-  void updateTimestamp(int timestamp);
+  int increment_timestamp();
 
   void addStorage(const ShPointer<ShStorage>& storage);
 

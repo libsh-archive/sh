@@ -1,5 +1,11 @@
 2005-06-21  Francois Marier  <francois@serioushack.com>
 
+	* src/ShMemory.hpp, ShMemory.cpp (dirtyall): Use
+	increment_timestamp to update the memory timestamp and to
+	correctly handle out-of-sync objects.
+	(increment_timestamp): Add this method to replace updateTimestamp.
+	(updateTimestamp): Remove this method.
+	
 	* src/ShLibMatrixImpl.hpp, ShLibMatrix.hpp (operator|): Expand
 	matrices if their sizes are not compatible.
 	(operator*): Allow matrices of incompatible sizes

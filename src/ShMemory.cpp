@@ -59,10 +59,9 @@ ShMemory::ShMemory()
 {
 }
 
-void ShMemory::updateTimestamp(int timestamp)
+int ShMemory::increment_timestamp()
 {
-  SH_DEBUG_ASSERT(timestamp >= m_timestamp);
-  m_timestamp = timestamp;
+  return ++m_timestamp;
 }
 
 void ShMemory::addStorage(const ShPointer<ShStorage>& storage)
@@ -186,8 +185,7 @@ void ShStorage::dirty()
 
 void ShStorage::dirtyall()
 {
-  m_timestamp++;
-  m_memory->updateTimestamp(m_timestamp);
+  m_timestamp = m_memory->increment_timestamp();
 }
 
 int ShStorage::cost(ShStorage* from, ShStorage* to)
