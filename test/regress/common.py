@@ -9,6 +9,25 @@ def cross_product(a, b):
 def dot_product(a, b):
     return sum([x*y for (x,y) in zip(a,b)])
 
+# Return a new matrix based on the original one but expanded to the
+# given dimensions.  It can either be expanded to a zero matrix or an
+# identity matrix (the default).
+def matrix_expand(m, nrows, ncols, identity):
+    nrows_old = len(m)
+    ncols_old = len(m[0])
+
+    res = [[0] * ncols for i in range(nrows)]
+    if identity:
+        for i in range(nrows):
+            for j in range(ncols):
+                if i == j: res[i][j] = 1
+                
+    for i in range(nrows_old):
+        for j in range(ncols_old):
+            res[i][j] = m[i][j]
+
+    return res
+
 def length(a):
     s = 0
     for x in a:

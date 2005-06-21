@@ -92,9 +92,9 @@ lit(const ShGeneric<1, T1>& a,
 
 /** Inner (dot) product.
  */
-template<int N, typename T1, typename T2>
+template<int N1, int N2, typename T1, typename T2>
 ShGeneric<1, CT1T2> 
-dot(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right);
+dot(const ShGeneric<N1, T1>& left, const ShGeneric<N2, T2>& right);
 
 template<int N, typename T1, typename T2>
 ShGeneric<1, CT1T2> 

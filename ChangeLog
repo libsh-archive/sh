@@ -1,5 +1,15 @@
 2005-06-21  Francois Marier  <francois@serioushack.com>
 
+	* src/ShLibMatrixImpl.hpp, ShLibMatrix.hpp (operator|): Expand
+	matrices if their sizes are not compatible.
+	(operator*): Allow matrices of incompatible sizes
+
+	* src/ShLibGeometryImpl.hpp, ShLibGeometry.hpp (dot): Allow
+	vectors of different sizes and return an ShException in that case.
+	This is necessary for the matrix expansion changes.
+
+	* src/test/regress/common.py: Add a matrix_expansion function.
+
 	* src/ShMatrix.hpp, ShMatrixImpl.hpp: Remove unused copy
 	constructor.
 

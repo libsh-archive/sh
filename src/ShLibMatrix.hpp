@@ -58,17 +58,16 @@ ShMatrix<N, M, SH_TEMP, CT1T2>
 operator/(const ShMatrix<N, M, Binding, T1>& a, const ShMatrix<N, M, Binding2, T2>& b);
 
 /** Matrix multiplication.
- * Only works on matrices of compatible sizes.
+ * Only works on matrices of compatible sizes or ones that can be expanded to be compatible.
  */
-template<int M, int N, int P, ShBindingType Binding, ShBindingType Binding2, 
-  typename T1, typename T2>
+template<int M, int N1, int N2, int P, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
 ShMatrix<M, P, SH_TEMP, CT1T2>
-operator|(const ShMatrix<M, N, Binding, T1>& a,
-          const ShMatrix<N, P, Binding2, T2>& b);
-template<int M, int N, int P, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
+operator|(const ShMatrix<M, N1, Binding, T1>& a,
+          const ShMatrix<N2, P, Binding2, T2>& b);
+template<int M, int N1, int N2, int P, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
 ShMatrix<M, P, SH_TEMP, CT1T2>
-operator*(const ShMatrix<M, N, Binding, T1>& a,
-          const ShMatrix<N, P, Binding2, T2>& b);
+operator*(const ShMatrix<M, N1, Binding, T1>& a,
+          const ShMatrix<N2, P, Binding2, T2>& b);
 
 /** Matrix-tuple multiplication.
  * Treats the tuple as a column vector.

@@ -58,27 +58,58 @@ operator/(const ShMatrix<N, M, Binding, T1>& a,
   return r;
 }
 
-template<int M, int N, int P, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
+template<int M, int N1, int N2, int P, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
 ShMatrix<M, P, SH_TEMP, CT1T2>
-operator|(const ShMatrix<M, N, Binding, T1>& a,
-          const ShMatrix<N, P, Binding2, T2>& b)
+operator|(const ShMatrix<M, N1, Binding, T1>& a,
+          const ShMatrix<N2, P, Binding2, T2>& b)
 {
-  ShMatrix<P, N, SH_TEMP, T2> tb = transpose(b);
-
+  ShMatrix<P, N2, SH_TEMP, T2> tb = transpose(b);
   ShMatrix<M, P, SH_TEMP, CT1T2> result;
-  for (int i = 0; i < M; i++) {
-    for (int j = 0; j < P; j++) {
-      result[i][j] = dot(a[i], tb[j]);
+
+  if (N1 > N2) {
+    // Matrix b must be expanded
+    for (int i = 0; i < M; i++) {
+      for (int j = 0; j < P; j++) {
+	ShAttrib<1, SH_TEMP, CT1T2> sum = a[i][0] * tb[j][0];
+	for (int k = 1; k < N2; k++) {
+	  sum += a[i][k] * tb[j][k];
+	}
+	for (int k = N2; k < N1; k++) {
+	  if (k == j) sum += a[i][k];
+	}
+	result[i][j] = sum;
+      }
+    }
+  } else if (N2 > N1) {
+    // Matrix a must be expanded
+    for (int i = 0; i < M; i++) {
+      for (int j = 0; j < P; j++) {
+	ShAttrib<1, SH_TEMP, CT1T2> sum = a[i][0] * tb[j][0];
+	for (int k = 1; k < N1; k++) {
+	  sum += a[i][k] * tb[j][k];
+	}
+	for (int k = N1; k < N2; k++) {
+	  if (k == i) sum += tb[j][k];
+	}
+	result[i][j] = sum;
+      }
+    }
+  } else {
+    // Sizes are compatible, no expansion
+    for (int i = 0; i < M; i++) {
+      for (int j = 0; j < P; j++) {
+	result[i][j] = dot(a[i], tb[j]);
+      }
     }
   }
   return result;
 }
 
-template<int M, int N, int P, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
+template<int M, int N1, int N2, int P, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
 inline
 ShMatrix<M, P, SH_TEMP, CT1T2>
-operator*(const ShMatrix<M, N, Binding, T1>& a,
-          const ShMatrix<N, P, Binding2, T2>& b)
+operator*(const ShMatrix<M, N1, Binding, T1>& a,
+          const ShMatrix<N2, P, Binding2, T2>& b)
 {
   return a | b;
 }

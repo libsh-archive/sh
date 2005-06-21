@@ -27,6 +27,14 @@ def matmult(m1, m2):
         for i in range(len(m2)):
             colvec[i][0] = m2[i]
         m2 = colvec
+
+    # Perform matrix expansion if necessary
+    if ncols1 < nrows2:
+        m1 = matrix_expand(m1, nrows1, nrows2, True)
+        ncols1 = nrows2
+    elif ncols1 > nrows2:
+        m2 = matrix_expand(m2, ncols1, ncols2, True)
+        nrows2 = ncols1
         
     res = [[None] * ncols2 for i in range(nrows1)]
         
@@ -99,6 +107,15 @@ def insert_into(test, modifying=False):
         test.add_test(mul(((1.0, 2.0, 3.0),(3.0, 4.0, 5.0),(5.0, 6.0, 7.0)), (1.0, -0.3, 10.1)))
         test.add_test(mul(((1.0, 2.0, 3.0),(3.0, 4.0, 5.0)), (1.0, -0.3, 10.1)))
 
+    # Matrix expansion
+    if not modifying:
+        # 4x3 * 4x4 => first matrix should be expanded to 4x4
+        test.add_test(mul(((0.0, 1.0, 2.0),(0.0, 1.0, 0.0),(0.0, 0.0, 1.0),(1.0, 2.0, -0.334)), ((1.0, 2.0, 3.0, 4.0),(3.0, 4.0, 5.0, 6.0),(5.0, 6.0, 7.0, 8.0),(9.0, -10.0, -11.0,-12.0))))
+        # 2x1 * 2x2 => first matrix should be expanded to 2x2
+        test.add_test(mul(((-0.5,),(2.1,)), ((-1.0, 2.3),(30, -4))))
+        # 2x3 * 2x2 => second matrix should be expanded to 3x2
+        test.add_test(mul(((-0.5, 10.0, 1.2),(2.1, 1.2, 0.3)), ((-1.0, 2.3),(30, -4))))
+    
 # Test regular multiplication of matrices in immediate mode
 test = shtest.ImmediateTest('mul', 2)
 test.add_call(shtest.Call(shtest.Call.infix, '*', 2))
