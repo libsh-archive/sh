@@ -68,6 +68,8 @@ Ignore the message about needing to run aclocal.
 ------------------------------
 REGRESSION TESTS
 ------------------------------
+Extra requirement: Python
+
 To run the test suite on the cc backend:
 
   make check
