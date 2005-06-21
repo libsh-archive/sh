@@ -135,6 +135,7 @@ private:
   /// Generate code for a single Sh statement.
   void emit(const SH::ShStatement& stmt);
   void emit_cbrt(const SH::ShStatement& stmt);
+  void emit_comment(const SH::ShStatement& stmt);
   void emit_cond(const SH::ShStatement& stmt);
   void emit_discard(const SH::ShStatement& stmt);
   void emit_exp(const SH::ShStatement& stmt, double power);

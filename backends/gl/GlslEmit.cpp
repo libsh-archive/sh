@@ -197,6 +197,9 @@ void GlslCode::emit(const ShStatement &stmt)
     case SH_OP_TANH:
       emit_hyperbolic(stmt);
       break;
+    case SH_OP_COMMENT:
+      emit_comment(stmt);
+      break;
     default:
       shError(ShException(string("Glsl Code: Unknown operation ") + opInfo[stmt.op].name));
       break;
@@ -252,6 +255,11 @@ void GlslCode::emit_cbrt(const ShStatement& stmt)
 
   ShVariable temp(allocate_constant(stmt, 1.0 / 3.0));
   append_line(resolve(stmt.dest) + " = pow(" + resolve(stmt.src[0]) + ", " + resolve(temp) + ")");
+}
+
+void GlslCode::emit_comment(const ShStatement& stmt)
+{
+  append_line("// " + stmt.get_info<ShInfoComment>()->comment, false);
 }
 
 void GlslCode::emit_cond(const ShStatement& stmt)

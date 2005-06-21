@@ -1,5 +1,11 @@
 2005-06-21  Francois Marier  <francois@serioushack.com>
 
+	* backends/gl/GlslCode.hpp, GlslEmit.cpp (emit_comment): Add this
+	method.
+
+	* backends/gl/GlslEmit.cpp (emit): Add support for the
+	SH_OP_COMMENT operation.
+
 	* backends/cc/Cc.cpp, Cc.hpp (delete_temporary_files): Add this
 	method to delete the temporary files created before execution.
 	(execute): Call delete_temporary_files() once execution is done.
