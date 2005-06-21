@@ -34,8 +34,7 @@ struct
 ShFilteredTextureTraits : public ShTextureTraits {
   ShFilteredTextureTraits()
     : ShTextureTraits(1, SH_FILTER_MIPMAP, SH_WRAP_CLAMP_TO_EDGE)
-  {
-  }
+  {}
 };
 
 template<typename T> class ShTextureRect;
@@ -52,8 +51,8 @@ public:
   ShTexture1D(int width)
     : ShBaseTexture1D<T>(width, ShFilteredTextureTraits())
   {}
-	typedef ShTextureRect<T> rectangular_type;
-	typedef ShBaseTexture1D<T> base_type;
+  typedef ShTextureRect<T> rectangular_type;
+  typedef ShBaseTexture1D<T> base_type;
   typedef T return_type;
 };
 
@@ -69,11 +68,11 @@ public:
   ShTexture2D(int width, int height)
     : ShBaseTexture2D<T>(width, height, ShFilteredTextureTraits())
   {}
-//    ShTexture2D(int width, int height, ShTextureTraits& traits)
-//     : ShBaseTexture2D<T>(width, height, traits)
-//   {}
-	typedef ShTextureRect<T> rectangular_type;
-	typedef ShBaseTexture2D<T> base_type;
+  //    ShTexture2D(int width, int height, ShTextureTraits& traits)
+  //     : ShBaseTexture2D<T>(width, height, traits)
+  //   {}
+  typedef ShTextureRect<T> rectangular_type;
+  typedef ShBaseTexture2D<T> base_type;
   typedef T return_type;
 };
 
@@ -89,11 +88,11 @@ public:
   ShTextureRect(int width, int height)
     : ShBaseTextureRect<T>(width, height, ShFilteredTextureTraits())
   {}
-//    ShTextureRect(int width, int height, ShTextureTraits& traits)
-//     : ShBaseTextureRect<T>(width, height, traits)
-//   {}
-	typedef ShTextureRect<T> rectangular_type;
-	typedef ShBaseTextureRect<T> base_type;
+  //    ShTextureRect(int width, int height, ShTextureTraits& traits)
+  //     : ShBaseTextureRect<T>(width, height, traits)
+  //   {}
+  typedef ShTextureRect<T> rectangular_type;
+  typedef ShBaseTextureRect<T> base_type;
   typedef T return_type;
 };
 
@@ -109,8 +108,8 @@ public:
   ShTexture3D(int width, int height, int depth)
     : ShBaseTexture3D<T>(width, height, depth, ShFilteredTextureTraits())
   {}
-	typedef ShTextureRect<T> rectangular_type;
-	typedef ShBaseTexture3D<T> base_type;
+  typedef ShTextureRect<T> rectangular_type;
+  typedef ShBaseTexture3D<T> base_type;
   typedef T return_type;
 };
 
@@ -129,8 +128,8 @@ public:
   ShTextureCube(int width, int height)
     : ShBaseTextureCube<T>(width, height, ShFilteredTextureTraits())
   {}
-	typedef ShTextureRect<T> rectangular_type;
-	typedef ShBaseTextureCube<T> base_type;
+  typedef ShTextureRect<T> rectangular_type;
+  typedef ShBaseTextureCube<T> base_type;
   typedef T return_type;
 };
 
