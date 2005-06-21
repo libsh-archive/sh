@@ -102,8 +102,8 @@ AC_DEFINE_UNQUOTED(SH_SHLIB_EXT, "$sh_shlib_ext", [Platform-specific shared libr
 #      sh_backend_sm=false ])
 # fi
 sh_backend_sm=false
-SH_DECLARE_BACKEND([sm], [SM])
-SH_BACKEND_MESSAGE([sm], [The SM backend is disabled for the moment.])
+#SH_DECLARE_BACKEND([sm], [SM])
+#SH_BACKEND_MESSAGE([sm], [The SM backend is disabled for the moment.])
 
 AM_CONDITIONAL(ENABLE_SM_BACKEND, test x$sh_backend_sm = xtrue)
 
