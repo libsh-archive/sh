@@ -618,6 +618,8 @@ std::ostream& ArbCode::print(std::ostream& out)
        I != m_instructions.end(); ++I) {
     if (I->op == SH_ARB_LABEL) {
       out << "label" << I->label << ": ";
+    } else if (I->op == SH_ARB_COMMENT) {
+      out << "### " << I->comment;
     } else if (I->op == SH_ARB_ELSE) {
       out << "  ELSE;";
     } else if (I->op == SH_ARB_ENDIF) {

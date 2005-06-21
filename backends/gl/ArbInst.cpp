@@ -122,7 +122,9 @@ ArbOpInfo arbOpInfo[] = {
   {"BRK", 1, false},
   {"RET", 0, false},
   
-  {"<fun>", 0, false}
+  {"<fun>", 0, false},
+
+  {"<comment>", 0, false}
 };
 
 char* arbCCnames[] = {

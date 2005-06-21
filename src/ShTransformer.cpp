@@ -583,7 +583,7 @@ struct DummyOpStripperBase: public ShTransformerParent
    switch(I->op) {
      case SH_OP_STARTSEC:
      case SH_OP_ENDSEC:
-     case SH_OP_COMMENT:
+//     case SH_OP_COMMENT:
        I = node->block->erase(I);
        return true;
      default:

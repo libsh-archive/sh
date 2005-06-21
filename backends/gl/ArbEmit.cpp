@@ -176,6 +176,8 @@ ArbMapping ArbCode::table[] = {
 //  {SH_OP_RET,  SH_ARB_NVFP2, 0, SH_ARB_FUN, &ArbCode::emit_ret},
   {SH_OP_RET,  SH_ARB_NVFP2, 0, SH_ARB_RET, 0},
 
+  {SH_OP_COMMENT, SH_ARB_ANY, 0, SH_ARB_FUN, &ArbCode::emit_comment},
+
   {SH_OP_ASN, SH_ARB_END, 0, SH_ARB_FUN, 0}
 };
 
@@ -681,6 +683,11 @@ void ArbCode::emit_cbrt(const ShStatement& stmt)
 
   m_instructions.push_back(ArbInst(SH_ARB_RCP, t, c)); 
   m_instructions.push_back(ArbInst(SH_ARB_POW, stmt.dest, stmt.src[0], t));
+}
+
+void ArbCode::emit_comment(const ShStatement& stmt)
+{
+  m_instructions.push_back(ArbInst(SH_ARB_COMMENT, stmt.get_info<ShInfoComment>()->comment));
 }
 
 }

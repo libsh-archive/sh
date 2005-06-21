@@ -128,7 +128,10 @@ enum ArbOp {
   SH_ARB_RET,
   
   // Special "operations" for emit
-  SH_ARB_FUN
+  SH_ARB_FUN,
+
+  // Just comments
+  SH_ARB_COMMENT,
 };
 
 /** Information about the operations from ArbOp.
@@ -154,6 +157,12 @@ struct ArbInst {
   ArbInst(ArbOp op, int label)
     : op(op), label(label), invert(false),
       update_cc(false), ccode(NOCC)
+  {
+  }
+
+  ArbInst(ArbOp op, const std::string& comment)
+    : op(op), invert(false), update_cc(false), ccode(NOCC),
+    comment(comment)
   {
   }
 
@@ -231,6 +240,8 @@ struct ArbInst {
 
   SH::ShSwizzle ccswiz;
   
+  // Only used for COMMENTs
+  std::string comment;
 };
 
 extern char* arbCCnames[];
