@@ -238,6 +238,12 @@ ShStorage::ShStorage(ShMemory* memory, ShValueType value_type)
   m_memory->addStorage(this);
 }
 
+void ShStorage::value_type(ShValueType value_type)
+{ 
+  m_value_type = value_type;
+  m_value_size = shTypeInfo(value_type)->datasize();
+}
+
 ShStorage::TransferMap* ShStorage::m_transfers = 0;
 
 ///////////////////////////

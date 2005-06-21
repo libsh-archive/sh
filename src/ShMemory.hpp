@@ -197,7 +197,7 @@ public:
   ShValueType value_type() const { return m_value_type; }
 
   /// Change the internal type (does NOT convert the values)
-  void value_type(ShValueType value_type) { m_value_type = value_type; }
+  void value_type(ShValueType value_type);
 
   /// Return the size in bytes of one value in the storage array
   int value_size() const { return m_value_size; }

@@ -1,3 +1,11 @@
+2005-06-21  Francois Marier  <francois@serioushack.com>
+
+	* src/ShMatrix.hpp, ShMatrixImpl.hpp: Remove unused copy
+	constructor.
+
+	* src/ShMemory.cpp, ShMemory.hpp (value_type): When changing the
+	value type, also update the size.
+
 2005-06-17  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/ArbEmit.cpp (emit_eq): Fix emit_eq so that it works

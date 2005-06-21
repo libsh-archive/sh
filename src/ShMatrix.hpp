@@ -72,13 +72,6 @@ public:
    *
    * Construct a matrix with the same contents as the given matrix.
    */
-  ShMatrix(const ShMatrix<Rows, Cols, Binding, T>& other);
-
-
-  /** \brief Copy constructor.
-   *
-   * Construct a matrix with the same contents as the given matrix.
-   */
   template<ShBindingType Binding2>
   ShMatrix(const ShMatrix<Rows, Cols, Binding2, T>& other);
   

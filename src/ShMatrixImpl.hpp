@@ -44,13 +44,6 @@ ShMatrix<Rows, Cols, Binding, T>::ShMatrix()
 }
 
 template<int Rows, int Cols, ShBindingType Binding, typename T>
-ShMatrix<Rows, Cols, Binding, T>::ShMatrix(const ShMatrix<Rows, Cols, Binding, T>& other)
-{
-  for (int i = 0; i < Rows; i++)
-    m_data[i] = other[i];
-}
-
-template<int Rows, int Cols, ShBindingType Binding, typename T>
 template<ShBindingType Binding2>
 ShMatrix<Rows, Cols, Binding, T>::ShMatrix(const ShMatrix<Rows, Cols, Binding2, T>& other)
 {
