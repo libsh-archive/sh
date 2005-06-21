@@ -450,7 +450,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
     TIMING_RESULT(dirtyouthost);
     
     
-    GLenum format;
+    GLenum format = GL_RGB;
     switch (output->size()) {
     case 1:
       format = GL_RED;

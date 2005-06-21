@@ -491,6 +491,7 @@ struct UdDuDumper {
   }
 
   void operator()(ShProgramNodePtr p) {
+#ifdef SH_DEBUG
     InputValueTracking* ivt = p->get_info<InputValueTracking>();
     SH_DEBUG_ASSERT(ivt);
     SH_DEBUG_PRINT("Input Valuetracking:\n" << *ivt);
@@ -498,6 +499,7 @@ struct UdDuDumper {
     OutputValueTracking* ovt = p->get_info<OutputValueTracking>();
     SH_DEBUG_ASSERT(ovt);
     SH_DEBUG_PRINT("Output Valuetracking:\n" << *ovt);
+#endif
   }
 };
 
