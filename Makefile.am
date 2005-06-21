@@ -35,3 +35,5 @@ dist dist-all: distdir
 	$(AMTAR) chof - $(distdir) | GZIP=$(GZIP_ENV) gzip -c >$(distdir).tar.gz
 	zip -rq $(distdir).zip $(distdir)
 	$(am__remove_distdir)
+
+test: check
