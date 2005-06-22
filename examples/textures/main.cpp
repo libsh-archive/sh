@@ -272,10 +272,10 @@ int main(int argc, char** argv)
   initShaders();
 
   try {
-    kd_images[0].loadPng("rustkd.png");
-    ks_images[0].loadPng("rustks.png");
-    kd_images[1].loadPng("kd.png");
-    ks_images[1].loadPng("ks.png");
+    kd_images[0].loadPng("tex_rustkd.png");
+    ks_images[0].loadPng("tex_rustks.png");
+    kd_images[1].loadPng("tex_kd.png");
+    ks_images[1].loadPng("tex_ks.png");
   } 
   catch (const ShException& e) {
     std::cerr << e.message() << std::endl;
