@@ -556,7 +556,11 @@ bool CcBackendCode::load_shader_func(const std::stringstream& prologue,
   pid_t pid = fork();
   if (pid == 0) {
     // child
+#ifdef __APPLE__
+    execlp("cc", "cc", "-O2", "-o", sofile, ccfile, (void*)NULL);
+#else
     execlp("cc", "cc", "-O2", "-shared", "-o", sofile, ccfile, (void*)NULL);
+#endif // __APPLE__
     SH_CC_DEBUG_PRINT("exec failed (" << errno << ")");
     exit(-1);
   } else if (pid > 0) {
