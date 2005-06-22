@@ -191,7 +191,7 @@ class HostGlTextureTransfer : public ShTransfer {
     return true;
   }
   
-  int cost()
+  int cost(const ShStorage* from, const ShStorage* to)
   {
     // Texture downloads are expensive!
     return 100;

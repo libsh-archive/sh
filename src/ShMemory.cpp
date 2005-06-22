@@ -88,7 +88,7 @@ void ShMemory::flush()
 {
   ShHostStoragePtr storage = shref_dynamic_cast<ShHostStorage>(findStorage("host"));
   storage->dirtyall();
-  for(std::list<ShMemoryDep*>::iterator i = dependencies.begin() ; i != dependencies.end() ; i++)
+  for(std::list<ShMemoryDep*>::iterator i = dependencies.begin(); i != dependencies.end(); i++)
     (*i)->memory_update();
 }
 
@@ -142,18 +142,18 @@ void ShStorage::orphan()
   m_memory = 0;
 }
 
-void ShStorage::sync()
+void ShStorage::sync() const
 {
   SH_DEBUG_ASSERT(m_memory);
   
   if (m_memory->timestamp() == timestamp()) return; // We are already in sync
 
   // Out of sync. Find the cheapest other storage to sync from
-  ShStorage* source = 0;
+  const ShStorage* source = 0;
   int transfer_cost = -1;
   ShMemory::StorageList::const_iterator I;
   for (I = m_memory->m_storages.begin(); I != m_memory->m_storages.end(); ++I) {
-    ShStorage* other = I->object();
+    const ShStorage* other = I->object();
     if (other == this) continue;
     if (other->timestamp() < m_memory->timestamp()) continue;
     int local_cost = cost(other, this);
@@ -170,7 +170,9 @@ void ShStorage::sync()
   // cheap, working one.
 
   // Do the actual transfer
-  if (!transfer(source, this)) {
+  // Need to cast away the constness since we actually want to write TO this,
+  // although all we're doing is "updating" it to the latest version.
+  if (!transfer(source, const_cast<ShStorage*>(this))) {
     SH_DEBUG_WARN("Transfer from " << source << " to " << this << " failed!");
   }
 }
@@ -188,7 +190,7 @@ void ShStorage::dirtyall()
   m_timestamp = m_memory->increment_timestamp();
 }
 
-int ShStorage::cost(ShStorage* from, ShStorage* to)
+int ShStorage::cost(const ShStorage* from, const ShStorage* to)
 {
   if (!from) return -1;
   if (!to) return -1;
@@ -197,10 +199,10 @@ int ShStorage::cost(ShStorage* from, ShStorage* to)
   TransferMap::const_iterator I = m_transfers->find(std::make_pair(from->id(), to->id()));
   if (I == m_transfers->end()) return -1;
 
-  return I->second->cost();
+  return I->second->cost(from, to);
 }
 
-bool ShStorage::transfer(ShStorage* from, ShStorage* to)
+bool ShStorage::transfer(const ShStorage* from, ShStorage* to)
 {
   if (!from) return false;
   if (!to) return false;
@@ -299,13 +301,15 @@ void* ShHostStorage::data()
 ShHostMemory::ShHostMemory(int length, ShValueType value_type)
   : m_hostStorage(new ShHostStorage(this, length, value_type))
 {
-  m_hostStorage->setTimestamp(0);
+  // Make the host storage represent the newest version of the memory
+  m_hostStorage->dirtyall();
 }
 
 ShHostMemory::ShHostMemory(int length, void* data, ShValueType value_type)
   : m_hostStorage(new ShHostStorage(this, length, data, value_type))
 {
-  m_hostStorage->setTimestamp(0);
+  // Make the host storage represent the newest version of the memory
+  m_hostStorage->dirtyall();
 }
 
 ShHostMemory::~ShHostMemory()
@@ -351,7 +355,7 @@ public:
     return true;
   }
 
-  int cost()
+  int cost(const ShStorage* from, const ShStorage* to)
   {
     return 10; // Maybe this should be 0, but you never know...
   }

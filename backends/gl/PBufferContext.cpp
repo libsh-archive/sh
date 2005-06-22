@@ -82,7 +82,7 @@ class PBufferGlTextureTransfer : public ShTransfer {
     return true;
   }
 
-  int cost()
+  int cost(const ShStorage* from, const ShStorage* to)
   {
     return 20;
   }

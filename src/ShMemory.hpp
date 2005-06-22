@@ -122,7 +122,7 @@ public:
   /// Returns -1 if transfer impossible, otherwise the cost of
   /// transfer.
   /// @todo Perhaps this needs more information, e.g. size of the storages.
-  virtual int cost() = 0;
+  virtual int cost(const ShStorage* from, const ShStorage* to) = 0;
 
 protected:
   ShTransfer(const std::string& from, const std::string& to);
@@ -151,8 +151,7 @@ public:
 
   /// Return the version of the data currently stored by this storage
   int timestamp() const;
-  /// Force-set the version of the data currently stored by this storage
-  void setTimestamp(int timestamp);
+  
   /// Return the memory this storage represents
   const ShMemory* memory() const;
   /// Return the memory this storage represents
@@ -160,9 +159,7 @@ public:
 
   /// Make sure this storage is in sync with the latest version of the
   /// memory.
-  /// @todo Maybe make this const... after all, we need to do this on a
-  /// read!
-  void sync();
+  void sync() const;
 
   /// Mark an upcoming write to this storage.
   /// This will sync, if necessary.
@@ -179,11 +176,11 @@ public:
   
   /// Return the cost of transferring from one storage to another.
   /// Returns -1 if there is no possible transfer.
-  static int cost(ShStorage* from, ShStorage* to);
+  static int cost(const ShStorage* from, const ShStorage* to);
 
   /// Transfer data from one storage to another.
   /// Returns true if the transfer succeeded.
-  static bool transfer(ShStorage* from, ShStorage* to);
+  static bool transfer(const ShStorage* from, ShStorage* to);
 
   /// Use this to register new transfer functions when they are instantiated.
   static void addTransfer(const std::string& from,
@@ -212,6 +209,9 @@ private:
   ShMemory* m_memory;
   int m_timestamp;
 
+  /// Force-set the version of the data currently stored by this storage
+  void setTimestamp(int timestamp);
+  
   typedef std::map<std::pair<std::string, std::string>, ShTransfer*> TransferMap;
   static TransferMap* m_transfers;
 
