@@ -48,8 +48,8 @@ public:
   ShTable1D(int width)
     : ShBaseTexture1D<T>(width, ShTableTraits())
   {}
-	typedef ShTableRect<T> rectangular_type;
-	typedef ShBaseTexture1D<T> base_type;
+  typedef ShTableRect<T> rectangular_type;
+  typedef ShBaseTexture1D<T> base_type;
   typedef T return_type;
 };
 
@@ -63,8 +63,8 @@ public:
   ShTable2D(int width, int height)
     : ShBaseTexture2D<T>(width, height, ShTableTraits())
   {}
-	typedef ShTableRect<T> rectangular_type;
-	typedef ShBaseTexture2D<T> base_type;
+  typedef ShTableRect<T> rectangular_type;
+  typedef ShBaseTexture2D<T> base_type;
   typedef T return_type;
 };
 
@@ -78,8 +78,8 @@ public:
   ShTableRect(int width, int height)
     : ShBaseTextureRect<T>(width, height, ShTableTraits())
   {}
-	typedef ShTableRect<T> rectangular_type;
-	typedef ShBaseTextureRect<T> base_type;
+  typedef ShTableRect<T> rectangular_type;
+  typedef ShBaseTextureRect<T> base_type;
   typedef T return_type;
 };
 
@@ -93,8 +93,8 @@ public:
   ShTable3D(int width, int height, int depth)
     : ShBaseTexture3D<T>(width, height, depth, ShTableTraits())
   {}
-	typedef ShTableRect<T> rectangular_type;
-	typedef ShBaseTexture3D<T> base_type;
+  typedef ShTableRect<T> rectangular_type;
+  typedef ShBaseTexture3D<T> base_type;
   typedef T return_type;
 };
 
@@ -108,8 +108,8 @@ public:
   ShTableCube(int width, int height)
     : ShBaseTextureCube<T>(width, height, ShTableTraits())
   {}
-	typedef ShTableRect<T> rectangular_type;
-	typedef ShBaseTextureCube<T> base_type;
+  typedef ShTableRect<T> rectangular_type;
+  typedef ShBaseTextureCube<T> base_type;
   typedef T return_type;
 };
 
