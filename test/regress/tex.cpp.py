@@ -6,7 +6,7 @@ import shtest, sys
 
 # test float textures
 test = shtest.StreamTest('tex', 1)
-test.add_texture(shtest.ImageTexture("ShTexture2D<ShColor3f>", "test2d_tex", "tex_squares.png")) 
+test.add_texture(shtest.ImageTexture("ShTexture2D<ShColor3f>", "test2d_tex", "tex.png")) 
 test.add_call(shtest.Call(shtest.Call.call, 'test2d_tex', 1))
 test.add_make_test((1.0, 0.0, 0.0), [(0.0, 0.0)])
 test.add_make_test((0.0, 1.0, 0.0), [(1.0, 0.0)])
@@ -14,7 +14,7 @@ test.add_make_test((0.0, 0.0, 1.0), [(1.0, 1.0)])
 test.add_make_test((0.5, 0.5, 0.5), [(0.0, 1.0)])
 
 # test wrap repeat
-test.add_texture(shtest.ImageTexture("ShWrapRepeat<ShTexture2D<ShColor3f> >", "repeat_tex", "tex_squares.png")) 
+test.add_texture(shtest.ImageTexture("ShWrapRepeat<ShTexture2D<ShColor3f> >", "repeat_tex", "tex.png")) 
 test.clear_call()
 test.add_call(shtest.Call(shtest.Call.call, 'repeat_tex', 1))
 test.add_make_test((1.0, 0.0, 0.0), [(0.5/4.0, 0.5/4.0)])

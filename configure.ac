@@ -174,7 +174,7 @@ AC_CONFIG_FILES([Makefile
 		 examples/textures/Makefile
 		 doc/Makefile])
 
-AC_CONFIG_LINKS(test/regress/tex_squares.png:test/regress/tex_squares.png)
+AC_CONFIG_LINKS(test/regress/tex.png:test/regress/tex_squares.png)
 
 AC_OUTPUT
 
