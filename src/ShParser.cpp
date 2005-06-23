@@ -84,6 +84,10 @@ void ShParser::parseStmts(ShCtrlGraphNodePtr& head,
     case SH_TOKEN_BREAK:
     case SH_TOKEN_CONTINUE:
       return; // TODO: break, continue semantics
+    case SH_TOKEN_STARTSWITCH:
+    case SH_TOKEN_ENDSWITCH:
+    case SH_TOKEN_CASE:
+      return; // TODO: switch semantics
     case SH_TOKEN_STARTSEC:
       parseSection(head, tail, blocks);
       break;
