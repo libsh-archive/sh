@@ -52,7 +52,7 @@ ShProgram vsh;
 ShProgram fsh;
 
 void display()
-  {
+{
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
   // setup the model view matrix with an initial
@@ -105,65 +105,64 @@ void display()
   gprintf(10, 24, "    c - Change color");
 
   glutSwapBuffers();
-  }
+}
 
 void reshape(int width, int height)
-  {
+{
   glViewport(0, 0, width, height);
   
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluPerspective(45, (float)width/(float)height, .1, 100);
-  }
+}
 
 void idle(void)
-  {
+{
   // while idling advance the rotation angle 
   angle += .1;
   glutPostRedisplay();
-  }
+}
 
 void keyboard(unsigned char k, int x, int y)
-  {
-  switch(k)
+{
+  switch(k) {
+  case 'q':
+    // quit
+    exit(0);
+    break;
+  case 'c':
+    // change the color using the standard
+    // OpenGL material model
+    float col[4];
+    col[0] = 0.4*((float)rand()/(RAND_MAX-1));
+    col[1] = 0.4*((float)rand()/(RAND_MAX-1));
+    col[2] = 0.4*((float)rand()/(RAND_MAX-1));
+    col[3] = 1;
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, col);
+    break;
+  case ' ':
     {
-    case 'q':
-      // quit
-      exit(0);
-      break;
-    case 'c':
-      // change the color using the standard
-      // OpenGL material model
-      float col[4];
-      col[0] = 0.4*((float)rand()/(RAND_MAX-1));
-      col[1] = 0.4*((float)rand()/(RAND_MAX-1));
-      col[2] = 0.4*((float)rand()/(RAND_MAX-1));
-      col[3] = 1;
-      glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, col);
-      break;
-    case ' ':
-      {
       // toggle animation
       static bool idling = false;
       if (idling) glutIdleFunc(NULL);
       else glutIdleFunc(idle);
       idling = !idling;
       break;
-      }
     }
-
-  glutPostRedisplay();
   }
 
+  glutPostRedisplay();
+}
+
 void init_gl(void)
-  {
+{
   glEnable(GL_DEPTH_TEST);
   glClearColor(0.0, 0.0, 0.0, 1.0);
   glPointSize(5);
-  }
+}
 
 void init_sh()
-  {
+{
   // set OpenGL backend
   shSetBackend("arb");
 
@@ -217,44 +216,44 @@ void init_sh()
     oclr = pos(inrm|ilightv)*diffuse + ambient;
   } SH_END;
 
-  }
+}
 
 int main(int argc, char** argv)
-  {
-    try {
-  // initialize GLUT
-  glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE|GLUT_DEPTH);
-  glutInitWindowSize(512, 512);
-  glutCreateWindow("Sh Binding Example");
+{
+  try {
+    // initialize GLUT
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE|GLUT_DEPTH);
+    glutInitWindowSize(512, 512);
+    glutCreateWindow("Sh Binding Example");
 
-  glutDisplayFunc(display);
-  glutReshapeFunc(reshape);
-  glutKeyboardFunc(keyboard);
+    glutDisplayFunc(display);
+    glutReshapeFunc(reshape);
+    glutKeyboardFunc(keyboard);
   
-  // initialize OpenGL
-  init_gl();
+    // initialize OpenGL
+    init_gl();
 
-  // initialize Sh
-  init_sh();
+    // initialize Sh
+    init_sh();
   
-  glutMainLoop();
+    glutMainLoop();
 
-    } catch (const ShException& e) {
-      std::cerr << "Sh error: " << e.message() << std::endl;
-      return 1;
-    } catch (const std::exception& e) {
-      std::cerr << "C++ error: " << e.what() << std::endl;
-      return 1;
-    } catch (...) {
-      std::cerr << "Unknown error." << std::endl;
-      throw;
-      return 1;
-    }
+  } catch (const ShException& e) {
+    std::cerr << "Sh error: " << e.message() << std::endl;
+    return 1;
+  } catch (const std::exception& e) {
+    std::cerr << "C++ error: " << e.what() << std::endl;
+    return 1;
+  } catch (...) {
+    std::cerr << "Unknown error." << std::endl;
+    throw;
+    return 1;
   }
+}
 
 int gprintf(int x, int y, char* fmt, ...)
-  {
+{
   char temp[1024];
   va_list va;
   va_start(va, fmt);
@@ -282,11 +281,10 @@ int gprintf(int x, int y, char* fmt, ...)
   // render the character through glut
   char* p = temp;
   glRasterPos2f(x, y);
-  while(*p)
-    {
+  while(*p) {
     glutBitmapCharacter(GLUT_BITMAP_8_BY_13, (*p));
     p++;
-    }
+  }
 
   // reset OpenGL to what is was
   // before we started
@@ -297,4 +295,4 @@ int gprintf(int x, int y, char* fmt, ...)
   glPopMatrix();
 
   return p-temp;
-  }
+}
