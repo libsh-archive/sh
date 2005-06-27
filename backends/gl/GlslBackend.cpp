@@ -92,15 +92,25 @@ extern "C" {
   {
     if ("glsl:vertex" == target)   return 1;
     if ("glsl:fragment" == target) return 1;
+#ifndef __APPLE__
     if ("glsl:stream" == target)   return 1;
+#else
+    if ("glsl:stream" == target)   return 0;
+#endif
     
     if (("gpu:vertex" == target) || ("gpu:fragment" == target)) return 5;
     if (("vertex" == target) || ("fragment" == target))         return 5;
     if (("*:vertex" == target) || ("*:fragment" == target))     return 5;
 
+#ifndef __APPLE__
     if ("gpu:stream" == target) return 10;
     if ("*:stream" == target)   return 10;
     if ("stream" == target)     return 10;
+#else
+    if ("gpu:stream" == target) return 0;
+    if ("*:stream" == target)   return 0;
+    if ("stream" == target)     return 0;
+#endif
 
     return 0;
   }

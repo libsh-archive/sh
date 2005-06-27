@@ -1,3 +1,23 @@
+2005-06-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/cc/Cc.cpp (load_shader_func): Use -bundle on OSX
+	instead of -shared. Fixes issue196.
+
+	* backends/gl/ArbBackend.cpp (shBackend_libsharb_target_cost):
+	Indicate that we cannot run stream programs on OSX yet.
+
+	* backends/gl/GlslBackend.cpp (shBackend_libshglsl_target_cost):
+	Indicate that we cannot run stream programs on OSX yet.
+
+	* examples/particle/Camera.cpp: Copy from glut example for OSX fixes.
+
+	* examples/particle/main.cpp (gprintf): Use GLint instead of int
+	for viewport variable.
+	Correct headers for OSX.
+
+	* examples/particles/Makefile.am (LDADD): Use GLUT_LIBS and
+	GL_LIBS for cross-platform compilation (osx in particular).
+
 2005-06-22  Francois Marier  <francois@serioushack.com>
 
 	* backends/cc/Cc.cpp (load_shader_func): Remove the -shared

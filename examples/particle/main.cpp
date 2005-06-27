@@ -27,9 +27,15 @@
 
 #include <iostream>
 
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
+#include <GLUT/glut.h>
+#else
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include <GL/glut.h>
+#endif
 
 #include <sh/sh.hpp>
 
@@ -604,7 +610,7 @@ int gprintf(int x, int y, char* fmt, ...)
   // setup the matrices for a direct
   // screen coordinate transform when
   // using glRasterPos
-  int vp[4];
+  GLint vp[4];
   glGetIntegerv(GL_VIEWPORT, vp);
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();

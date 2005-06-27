@@ -542,7 +542,11 @@ bool CcBackendCode::load_shader_func(const std::stringstream& prologue,
   char ccfile[32];
   char sofile[32];
   sprintf(ccfile, "%s.cc", name);
+  #ifdef __APPLE__
+  sprintf(sofile, "%s.dylib", name);
+  #else
   sprintf(sofile, "%s.so", name);
+  #endif
   m_code_filename = ccfile;
   m_lib_filename  = sofile;
 
@@ -557,7 +561,7 @@ bool CcBackendCode::load_shader_func(const std::stringstream& prologue,
   if (pid == 0) {
     // child
 #ifdef __APPLE__
-    execlp("cc", "cc", "-O2", "-o", sofile, ccfile, (void*)NULL);
+    execlp("cc", "cc", "-O2", "-bundle", "-o", sofile, ccfile, (void*)NULL);
 #else
     execlp("cc", "cc", "-O2", "-shared", "-o", sofile, ccfile, (void*)NULL);
 #endif // __APPLE__
