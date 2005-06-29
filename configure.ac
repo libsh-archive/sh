@@ -134,12 +134,12 @@ AM_CONDITIONAL(ENABLE_GL_BACKENDS, test x$sh_backend_arb = xtrue -o x$sh_backend
 
 AC_ARG_ENABLE([docs],
 	      AC_HELP_STRING([--enable-docs],
-                             [generate doxygen documentation (default=yes)]),
+                             [generate doxygen documentation (default=no)]),
 	      [case ${enableval} in
 	         yes) sh_enable_docs=true ;;
 		 no)  sh_enable_docs=false ;;
                  *) AC_MSG_ERROR(bad value ${enableval} for --enable-docs) ;;
-              esac],[sh_enable_docs=true])
+              esac],[sh_enable_docs=false])
 
 if test "x$sh_enable_docs" = xtrue ; then
   DOXYGEN_FIND_DOXYGEN
@@ -170,10 +170,13 @@ AC_CONFIG_FILES([Makefile
 		 examples/Makefile
 		 examples/binding/Makefile
 		 examples/glut/Makefile
+		 examples/mipmap/Makefile
 		 examples/particle/Makefile
 		 examples/textures/Makefile
 		 doc/Makefile])
 
+# Add symlinks to support out of source building
+AC_CONFIG_LINKS(doc/Doxyfile:doc/Doxyfile.real)
 AC_CONFIG_LINKS(test/regress/tex.png:test/regress/tex_squares.png)
 AC_CONFIG_LINKS(examples/textures/tex_kd.png:examples/textures/kd.png)
 AC_CONFIG_LINKS(examples/textures/tex_ks.png:examples/textures/ks.png)
