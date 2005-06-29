@@ -250,7 +250,7 @@ ShStorage::TransferMap* ShStorage::m_transfers = 0;
 // --- ShHostStorage --- //
 ///////////////////////////
 
-ShHostStorage::ShHostStorage(ShMemory* memory, int length, ShValueType value_type)
+ShHostStorage::ShHostStorage(ShMemory* memory, std::size_t length, ShValueType value_type)
   : ShStorage(memory, value_type),
     m_length(length),
     m_data(new char[length]),
@@ -258,7 +258,7 @@ ShHostStorage::ShHostStorage(ShMemory* memory, int length, ShValueType value_typ
 {
 }
 
-ShHostStorage::ShHostStorage(ShMemory* memory, int length, void* data, ShValueType value_type)
+ShHostStorage::ShHostStorage(ShMemory* memory, std::size_t length, void* data, ShValueType value_type)
   : ShStorage(memory, value_type),
     m_length(length),
     m_data(data),
@@ -279,7 +279,7 @@ std::string ShHostStorage::id() const
 }
 
 
-int ShHostStorage::length() const
+std::size_t ShHostStorage::length() const
 {
   return m_length;
 }
@@ -298,14 +298,14 @@ void* ShHostStorage::data()
 // --- ShHostMemory --- //
 //////////////////////////
 
-ShHostMemory::ShHostMemory(int length, ShValueType value_type)
+ShHostMemory::ShHostMemory(std::size_t length, ShValueType value_type)
   : m_hostStorage(new ShHostStorage(this, length, value_type))
 {
   // Make the host storage represent the newest version of the memory
   m_hostStorage->dirtyall();
 }
 
-ShHostMemory::ShHostMemory(int length, void* data, ShValueType value_type)
+ShHostMemory::ShHostMemory(std::size_t length, void* data, ShValueType value_type)
   : m_hostStorage(new ShHostStorage(this, length, data, value_type))
 {
   // Make the host storage represent the newest version of the memory
@@ -344,7 +344,7 @@ public:
       std::memcpy(host_to->data(), host_from->data(), host_to->length());
     } else {
       // Do the type conversion
-      const int nb_values = host_from->length() / host_from->value_size();
+      const std::size_t nb_values = host_from->length() / host_from->value_size();
       ShVariantPtr from_variant = shVariantFactory(host_from->value_type(), SH_MEM)->
 	generate(nb_values, const_cast<void*>(host_from->data()), false);
       ShVariantPtr to_variant = shVariantFactory(host_to->value_type(), SH_MEM)->

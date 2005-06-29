@@ -233,8 +233,8 @@ typedef ShPointer<const ShStorage> ShStorageCPtr;
 class
 SH_DLLEXPORT ShHostStorage : public ShStorage {
 public:
-  ShHostStorage(ShMemory* memory, int length, ShValueType storage_type); ///< Internally managed storage
-  ShHostStorage(ShMemory* memory, int length, void* data, ShValueType storage_type); ///< Externally managed storage
+  ShHostStorage(ShMemory* memory, std::size_t length, ShValueType storage_type); ///< Internally managed storage
+  ShHostStorage(ShMemory* memory, std::size_t length, void* data, ShValueType storage_type); ///< Externally managed storage
 
   /// Destruct this storage.
   /// If the memory was allocated internally, it will be freed automatically.
@@ -243,7 +243,7 @@ public:
   std::string id() const;
 
   /// Return the length (in bytes) of data represented by this storage.
-  int length() const;
+  std::size_t length() const;
 
   /// Return the location of the storage's data on the host
   const void* data() const;
@@ -251,8 +251,8 @@ public:
   void* data();
   
 private:
-  int m_length; ///< number of bytes stored
-  void* m_data; ///< the actual data, stored on the host
+  std::size_t m_length; ///< number of bytes stored
+  void* m_data;         ///< the actual data, stored on the host
 
   bool m_managed; ///< Did we create the data? If so, this is true
 
@@ -271,8 +271,8 @@ typedef ShPointer<const ShHostStorage> ShHostStorageCPtr;
 class
 SH_DLLEXPORT ShHostMemory : public ShMemory {
 public:
-  ShHostMemory(int length, ShValueType value_type);
-  ShHostMemory(int length, void* data, ShValueType value_type);
+  ShHostMemory(std::size_t length, ShValueType value_type);
+  ShHostMemory(std::size_t length, void* data, ShValueType value_type);
 
   ~ShHostMemory();
 
