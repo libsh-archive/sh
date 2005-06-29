@@ -170,7 +170,6 @@ AC_CONFIG_FILES([Makefile
 		 examples/Makefile
 		 examples/binding/Makefile
 		 examples/glut/Makefile
-		 examples/mipmap/Makefile
 		 examples/particle/Makefile
 		 examples/textures/Makefile
 		 doc/Makefile])
