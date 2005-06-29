@@ -35,7 +35,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="zlib.lib libpng.lib"
+				AdditionalDependencies="zlib1.lib libpng13.lib"
 				OutputFile="$(OutDir)/libsh_debug.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\libpng\lib;..\..\zlib\lib"
