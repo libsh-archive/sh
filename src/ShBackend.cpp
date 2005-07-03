@@ -25,13 +25,17 @@
 #include "config.h"
 #endif
 
-#ifndef WIN32
+#if defined(WIN32)
+# include <windows.h>
+#elif defined(__APPLE__)
+# include <CoreFoundation/CoreFoundation.h>
+# include <dirent.h>
+#else
 # include <ltdl.h>
 # include <dirent.h>
 # define LOCAL_BACKEND_DIRNAME ".shbackends"
-#else
-# include <windows.h>
 #endif
+
 
 #include <algorithm>
 #include <cctype>
@@ -42,6 +46,25 @@
 #include "ShInternals.hpp"
 #include "ShTransformer.hpp"
 #include "ShSyntax.hpp"
+
+namespace {
+
+template<typename EntryPoint>
+EntryPoint* load_function(SH::ShBackend::LibraryHandle module, const char* name)
+{
+#if defined(WIN32)
+  return (EntryPoint*)GetProcAddress((HMODULE)module, name);  
+#elif defined(__APPLE__)
+  CFStringRef n = CFStringCreateWithCString(kCFAllocatorDefault, name, kCFStringEncodingASCII);
+  EntryPoint* p = (EntryPoint*)CFBundleGetFunctionPointerForName(module, n);
+  CFRelease(n);
+  return p;
+#else)
+  return (EntryPoint*)lt_dlsym(module, name); 
+#endif
+}
+
+}
 
 namespace SH {
 
@@ -122,13 +145,15 @@ ShBackend::~ShBackend()
   string backend_name = name();
   m_instantiated_backends->erase(backend_name);
 
-#ifndef WIN32
-  if (!lt_dlclose((*m_loaded_libraries)[backend_name])) {
-    SH_DEBUG_ERROR("Could not unload the " << backend_name << " library: " << lt_dlerror());
-  }
-#else
+#if defined(WIN32)
   if (!FreeLibrary((HMODULE)(*m_loaded_libraries)[backend_name])) {
     SH_DEBUG_ERROR("Could not unload the " << backend_name << " library.");
+  }
+#elif defined(__APPLE__)
+  CFRelease((*m_loaded_libraries)[backend_name]);
+#else
+  if (!lt_dlclose((*m_loaded_libraries)[backend_name])) {
+    SH_DEBUG_ERROR("Could not unload the " << backend_name << " library: " << lt_dlerror());
   }
 #endif
 
@@ -146,13 +171,15 @@ string ShBackend::lookup_filename(const string& backend_name)
   init();
   string libname = "libsh" + backend_name;
 
-#ifndef WIN32
-  libname += ".so";
-#else
+#if defined(WIN32)
 # ifdef SH_DEBUG
     libname += "_DEBUG";
 # endif
   libname += ".DLL";
+#elif defined(__APPLE__)
+  libname += ".bundle";
+#else
+  libname += ".so";
 #endif
 
   return libname;
@@ -182,15 +209,18 @@ bool ShBackend::load_library(const string& filename)
 
   if (filename.empty()) return false;
 
-#ifndef WIN32
-  unsigned extension_pos = filename.rfind(".so");
-  unsigned filename_pos = filename.rfind("/") + 1;
-#else
+#if defined(WIN32)
   string uc_filename(filename);
   std::transform(filename.begin(), filename.end(), uc_filename.begin(), toupper);
   unsigned extension_pos = uc_filename.rfind("_DEBUG.DLL");
   if (uc_filename.npos == extension_pos) extension_pos = uc_filename.rfind(".DLL");
   unsigned filename_pos = uc_filename.rfind("\\") + 1;
+#elif defined(__APPLE__)
+  unsigned extension_pos = filename.rfind(".bundle");
+  unsigned filename_pos = filename.rfind("/") + 1;
+#else
+  unsigned extension_pos = filename.rfind(".so");
+  unsigned filename_pos = filename.rfind("/") + 1;
 #endif
   filename_pos += 5; // remove the "libsh" portion of the filename
 
@@ -201,10 +231,24 @@ bool ShBackend::load_library(const string& filename)
     return true; // already loaded
   }
 
-#ifndef WIN32
-  LibraryHandle module = lt_dlopenext(filename.c_str());
-#else
+#if defined(WIN32)
   LibraryHandle module = LoadLibrary(filename.c_str());
+#elif defined(__APPLE__)
+  CFURLRef bundleURL;
+  CFStringRef n = CFStringCreateWithCString(kCFAllocatorDefault, filename.c_str(), kCFStringEncodingASCII);
+
+  bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, 
+											n,
+											kCFURLPOSIXPathStyle,
+											true );
+											
+  CFRelease(n);											
+
+  LibraryHandle module = CFBundleCreate( kCFAllocatorDefault, bundleURL );
+  
+  CFRelease( bundleURL );
+#else
+  LibraryHandle module = lt_dlopenext(filename.c_str());
 #endif
   
   if (module) {
@@ -224,8 +268,12 @@ void ShBackend::load_libraries(const string& directory)
     // Go through all files in lib/sh/
     for (struct dirent* entry = readdir(dirp); entry != 0; entry = readdir(dirp)) {
       string filename(entry->d_name);
+# ifdef __APPLE__
+      unsigned extension_pos = filename.rfind(".bundle");
+# else
       unsigned extension_pos = filename.rfind(".so");
-      if ((filename.find("libsh") == 0) && ((filename.size() - 3) == extension_pos)) {
+#endif
+      if ((filename.find("libsh") == 0) && (std::string::npos != extension_pos)) {
         load_library(directory + "/" + filename);
       }
     }
@@ -244,6 +292,7 @@ void ShBackend::load_libraries(const string& directory)
 #endif /* WIN32 */
 }
 
+
 ShBackendPtr ShBackend::instantiate_backend(const string& backend_name)
 {
   init();
@@ -257,11 +306,8 @@ ShBackendPtr ShBackend::instantiate_backend(const string& backend_name)
   string init_function_name = "shBackend_libsh" + backend_name + "_instantiate";
 
   typedef ShBackend* EntryPoint();
-#ifndef WIN32
-  EntryPoint* instantiate = (EntryPoint*)lt_dlsym(module, init_function_name.c_str()); 
-#else
-  EntryPoint* instantiate = (EntryPoint*)GetProcAddress((HMODULE)module, init_function_name.c_str());  
-#endif
+
+  EntryPoint* instantiate = load_function<EntryPoint>(module, init_function_name.c_str());
 
   if (instantiate) {
     backend = (*instantiate)();
@@ -305,11 +351,8 @@ int ShBackend::target_cost(const string& backend_name, const string& target)
   SH_DEBUG_ASSERT(module); // library not loaded
 
   typedef int EntryPoint(const string&);
-#ifndef WIN32
-  EntryPoint* func = (EntryPoint*)lt_dlsym(module, init_function_name.c_str());
-#else
-  EntryPoint* func = (EntryPoint*)GetProcAddress((HMODULE)module, init_function_name.c_str());
-#endif
+  
+  EntryPoint* func = load_function<EntryPoint>(module, init_function_name.c_str());
 
   if (func) {
      cost = (*func)(target);
@@ -328,10 +371,7 @@ string ShBackend::target_handler(const string& target, bool restrict_to_selected
 
   if (!selected_only && !m_all_backends_loaded) {
     // Load all installed backend libraries
-#ifndef WIN32
-    load_libraries(string(getenv("HOME")) + "/" + LOCAL_BACKEND_DIRNAME);
-    load_libraries(string(SH_INSTALL_PREFIX) + "/lib/sh");
-#else
+#if defined(WIN32)
     load_libraries(string("."));
 
     // Search the system path
@@ -352,6 +392,14 @@ string ShBackend::target_handler(const string& target, bool restrict_to_selected
       start = separator + 1;
       end = length - 1;
     }
+#elif defined(__APPLE__)
+    load_libraries(string(getenv("HOME")) + "/Library/Sh/Backends");
+    load_libraries("/Local/Library/Sh/Backends");
+    load_libraries("/Library/Sh/Backends");
+    load_libraries("/System/Library/Sh/Backends");
+#else
+    load_libraries(string(getenv("HOME")) + "/" + LOCAL_BACKEND_DIRNAME);
+    load_libraries(string(SH_INSTALL_PREFIX) + "/lib/sh");
 #endif
     m_all_backends_loaded = true;
   }
@@ -404,7 +452,7 @@ void ShBackend::init()
   m_selected_backends = new BackendSet();
   m_loaded_libraries = new LibraryMap();
 
-#ifndef WIN32
+#if !defined(WIN32) && !defined(__APPLE__)
   if (lt_dlinit()) {
     SH_DEBUG_ERROR("Error initializing ltdl: " << lt_dlerror());
   }

@@ -33,7 +33,10 @@
 #include "ShProgramSet.hpp"
 #include "ShVariableNode.hpp"
 
-#ifndef WIN32
+#if defined(WIN32)
+#elif defined(__APPLE__)
+#include <CoreFoundation/CoreFoundation.h>
+#else
   struct lt_dlhandle_struct;
 #endif
 
@@ -143,10 +146,12 @@ public:
       generic target is "gpu:vertex". */
   static std::list<std::string> derived_targets(const std::string& target);
 
-#ifndef WIN32
-  typedef lt_dlhandle_struct* LibraryHandle;
-#else
+#if defined(WIN32)
   typedef void* LibraryHandle;
+#elif defined(__APPLE__)
+  typedef CFBundleRef LibraryHandle;
+#else
+  typedef lt_dlhandle_struct* LibraryHandle;
 #endif
   typedef std::map<std::string, LibraryHandle> LibraryMap;
   typedef std::map<std::string, ShPointer<ShBackend> > BackendMap;

@@ -416,8 +416,8 @@ bool CcBackendCode::generate(void)
   // c) convert output data array to the memory storage type
 
   SH_CC_DEBUG_PRINT("Creating label map...");
-  LabelFunctor fl(m_label_map);
-  m_program->ctrlGraph->dfs(fl);
+  LabelFunctor f(m_label_map);
+  m_program->ctrlGraph->dfs(f);
 
   allocate_consts();
   allocate_inputs();
