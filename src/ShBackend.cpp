@@ -59,7 +59,7 @@ EntryPoint* load_function(SH::ShBackend::LibraryHandle module, const char* name)
   EntryPoint* p = (EntryPoint*)CFBundleGetFunctionPointerForName(module, n);
   CFRelease(n);
   return p;
-#else)
+#else
   return (EntryPoint*)lt_dlsym(module, name); 
 #endif
 }
