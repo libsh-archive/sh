@@ -272,7 +272,8 @@ void ShBackend::load_libraries(const string& directory)
       unsigned extension_pos = filename.rfind(".bundle");
 # else
       unsigned extension_pos = filename.rfind(".so");
-#endif
+      if ((filename.size() - 3) != extension_pos) continue; // skip files like libsharb.so.0.0.0
+# endif
       if ((filename.find("libsh") == 0) && (std::string::npos != extension_pos)) {
         load_library(directory + "/" + filename);
       }
