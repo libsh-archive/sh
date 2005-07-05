@@ -11,6 +11,7 @@
 				3EB30C2B08787EE200729309,
 				3EF90EC90878935800A31AD9,
 				3EF90F450878A05000A31AD9,
+				3E60CEAD087A18320078BC55,
 			);
 			isa = PBXGroup;
 			name = Products;
@@ -44,10 +45,12 @@
 				3EB30C2A08787EE200729309,
 				3EF90EC80878935800A31AD9,
 				3EF90F440878A05000A31AD9,
+				3E60CEAC087A18320078BC55,
 			);
 		};
 		0867D691FE84028FC02AAC07 = {
 			children = (
+				3E60CEBE087A188F0078BC55,
 				3EF90FA00878A2BA00A31AD9,
 				3EF90F9F0878A2AC00A31AD9,
 				3EB30C2E08787F2B00729309,
@@ -58,6 +61,7 @@
 				3EB30C2C08787EE200729309,
 				3EF90ECB0878935800A31AD9,
 				3EF90F460878A05000A31AD9,
+				3E60CEAF087A18320078BC55,
 			);
 			isa = PBXGroup;
 			name = Sh;
@@ -314,6 +318,226 @@
 //3E2
 //3E3
 //3E4
+		3E60CEA9087A18320078BC55 = {
+			buildActionMask = 2147483647;
+			files = (
+				3E60CEC5087A18AA0078BC55,
+				3E60CEC8087A18AA0078BC55,
+			);
+			isa = PBXResourcesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3E60CEAA087A18320078BC55 = {
+			buildActionMask = 2147483647;
+			files = (
+				3E60CEC4087A18AA0078BC55,
+				3E60CEC6087A18AA0078BC55,
+				3E60CEC7087A18AA0078BC55,
+			);
+			isa = PBXSourcesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3E60CEAB087A18320078BC55 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXFrameworksBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3E60CEAC087A18320078BC55 = {
+			buildPhases = (
+				3E60CEA9087A18320078BC55,
+				3E60CEAA087A18320078BC55,
+				3E60CEAB087A18320078BC55,
+			);
+			buildRules = (
+			);
+			buildSettings = {
+				FRAMEWORK_VERSION = 7;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "Particles-Info.plist";
+				INSTALL_PATH = "$(LOCAL_APPS_DIR)/Sh Examples";
+				OPTIMIZATION_CFLAGS = "";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "-framework OpenGL -framework GLUT -framework Sh -lobjc";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = Particles;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			dependencies = (
+				3E60CEB1087A187C0078BC55,
+				3E60CEB3087A187C0078BC55,
+				3E60CEB5087A187C0078BC55,
+			);
+			isa = PBXNativeTarget;
+			name = Particles;
+			productName = Particles;
+			productReference = 3E60CEAD087A18320078BC55;
+			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>Particles</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.yourcompany.Particles</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+</dict>
+</plist>
+";
+			productType = "com.apple.product-type.application";
+		};
+		3E60CEAD087A18320078BC55 = {
+			explicitFileType = wrapper.application;
+			includeInIndex = 0;
+			isa = PBXFileReference;
+			path = Particles.app;
+			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		3E60CEAF087A18320078BC55 = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.xml;
+			name = "Particles-Info.plist";
+			path = "/Users/sdt/svn/sh-trunk/xcode/Particles-Info.plist";
+			refType = 0;
+			sourceTree = "<absolute>";
+		};
+		3E60CEB0087A187C0078BC55 = {
+			containerPortal = 0867D690FE84028FC02AAC07;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 8D07F2BC0486CC7A007CD1D0;
+			remoteInfo = Sh;
+		};
+		3E60CEB1087A187C0078BC55 = {
+			isa = PBXTargetDependency;
+			target = 8D07F2BC0486CC7A007CD1D0;
+			targetProxy = 3E60CEB0087A187C0078BC55;
+		};
+		3E60CEB2087A187C0078BC55 = {
+			containerPortal = 0867D690FE84028FC02AAC07;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 3EB30C2A08787EE200729309;
+			remoteInfo = CcBackend;
+		};
+		3E60CEB3087A187C0078BC55 = {
+			isa = PBXTargetDependency;
+			target = 3EB30C2A08787EE200729309;
+			targetProxy = 3E60CEB2087A187C0078BC55;
+		};
+		3E60CEB4087A187C0078BC55 = {
+			containerPortal = 0867D690FE84028FC02AAC07;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 3EF90F440878A05000A31AD9;
+			remoteInfo = ArbBackend;
+		};
+		3E60CEB5087A187C0078BC55 = {
+			isa = PBXTargetDependency;
+			target = 3EF90F440878A05000A31AD9;
+			targetProxy = 3E60CEB4087A187C0078BC55;
+		};
+		3E60CEBE087A188F0078BC55 = {
+			children = (
+				3E60CEBF087A18AA0078BC55,
+				3E60CEC0087A18AA0078BC55,
+				3E60CEC1087A18AA0078BC55,
+				3E60CEC2087A18AA0078BC55,
+				3E60CEC3087A18AA0078BC55,
+			);
+			isa = PBXGroup;
+			name = Particles;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		3E60CEBF087A18AA0078BC55 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			name = Camera.cpp;
+			path = ../examples/particle/Camera.cpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		3E60CEC0087A18AA0078BC55 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.h;
+			name = Camera.hpp;
+			path = ../examples/particle/Camera.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		3E60CEC1087A18AA0078BC55 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			name = main.cpp;
+			path = ../examples/particle/main.cpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		3E60CEC2087A18AA0078BC55 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			name = ShTrackball.cpp;
+			path = ../examples/particle/ShTrackball.cpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		3E60CEC3087A18AA0078BC55 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.h;
+			name = ShTrackball.hpp;
+			path = ../examples/particle/ShTrackball.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		3E60CEC4087A18AA0078BC55 = {
+			fileRef = 3E60CEBF087A18AA0078BC55;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3E60CEC5087A18AA0078BC55 = {
+			fileRef = 3E60CEC0087A18AA0078BC55;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3E60CEC6087A18AA0078BC55 = {
+			fileRef = 3E60CEC1087A18AA0078BC55;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3E60CEC7087A18AA0078BC55 = {
+			fileRef = 3E60CEC2087A18AA0078BC55;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3E60CEC8087A18AA0078BC55 = {
+			fileRef = 3E60CEC3087A18AA0078BC55;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		3EB30A8D08787D7600729309 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
@@ -4516,6 +4740,7 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				DEBUGGING_SYMBOLS = YES;
+				FRAMEWORK_VERSION = 7;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -4530,6 +4755,7 @@
 		4F0BB7ED011F40E904CA0E50 = {
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_VERSION = 7;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_OPTIMIZATION_LEVEL = 2;
 				ZERO_LINK = NO;
