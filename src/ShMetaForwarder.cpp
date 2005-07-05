@@ -76,12 +76,12 @@ void ShMetaForwarder::description(const std::string& d)
   m_meta->description(d);
 }
 
-std::string ShMetaForwarder::meta(std::string key) const
+std::string ShMetaForwarder::meta(const std::string& key) const
 {
   return m_meta->meta(key);
 }
 
-void ShMetaForwarder::meta(std::string key, std::string value)
+void ShMetaForwarder::meta(const std::string& key, const std::string& value)
 {
   m_meta->meta(key, value);
 }

@@ -49,8 +49,8 @@ public:
   std::string description() const;
   void description(const std::string& d);
 
-  std::string meta(std::string key) const;
-  void meta(std::string key, std::string value);
+  std::string meta(const std::string& key) const;
+  void meta(const std::string& key, const std::string& value);
 
 protected:
   ShMeta* real_meta();
