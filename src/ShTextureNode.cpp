@@ -36,7 +36,7 @@ ShTextureNode::ShTextureNode(ShTextureDims dims, int size,
                              const ShTextureTraits& traits,
                              int width, int height, int depth, int max_nb_elements)
   : ShVariableNode(SH_TEXTURE, size, valueType), m_count(max_nb_elements),
-    m_dims(dims), m_nb_memories(1), m_mipmap_levels(1), m_traits(traits),
+    m_dims(dims), m_nb_memories(SH_TEXTURE_CUBE == dims ? 6 : 1), m_mipmap_levels(1), m_traits(traits),
     m_width(width), m_height(height), m_depth(depth), m_old_filtering(traits.filtering())
 {
   ShContext::current()->enter(0); // need m_texSizeVar to be uniform
@@ -52,7 +52,13 @@ ShTextureNode::ShTextureNode(ShTextureDims dims, int size,
     m_texSizeVar = ShVariable(v.node());
   }
 
-  initialize_memories(NULL, true);
+  // will be destroyed in initialize_memories()
+  m_memory = new ShMemoryPtr[m_nb_memories];
+  for (int i=0; i < m_nb_memories; i++) {
+    m_memory[i] = NULL;
+  }
+
+  initialize_memories(true);
 
   ShContext::current()->exit(); // need m_texSizeVar to be uniform
 }
@@ -62,12 +68,23 @@ ShTextureNode::~ShTextureNode()
   delete [] m_memory;
 }
 
-void ShTextureNode::initialize_memories(ShMemoryPtr base_memory, bool force_initialization)
+void ShTextureNode::initialize_memories(bool force_initialization)
 {
   if ((m_traits.filtering() == m_old_filtering) && !force_initialization) {
     return; // skip initialization if the filtering trait didn't change
   }
+
+  // make a copy of the base textures
+  ShMemoryPtr* old_memory = new ShMemoryPtr[6];
+  if (SH_TEXTURE_CUBE == m_dims) {
+    for (int i=0; i < 6; i++) {
+      old_memory[i] = m_memory[i * m_mipmap_levels];
+    }
+  } else {
+    old_memory[0] = m_memory[0];
+  }
   
+  // update m_mipmap_levels and m_nb_memories
   if ((m_traits.filtering() == ShTextureTraits::SH_FILTER_MIPMAP_NEAREST) ||
       (m_traits.filtering() == ShTextureTraits::SH_FILTER_MIPMAP_LINEAR)) {
     SH_DEBUG_ASSERT(m_width == m_height);
@@ -78,29 +95,31 @@ void ShTextureNode::initialize_memories(ShMemoryPtr base_memory, bool force_init
   } else {
     m_mipmap_levels = 1;  
   }
-
-  if (SH_TEXTURE_CUBE == m_dims) {
-    m_nb_memories = 6 * m_mipmap_levels;
-  } else {
-    m_nb_memories = m_mipmap_levels;
-  }
+  m_nb_memories = (SH_TEXTURE_CUBE == m_dims) ? 6 * m_mipmap_levels : m_mipmap_levels;
  
-  if (base_memory) {
-    delete [] m_memory;
-  }
+  // reset all textures
+  delete [] m_memory;
   m_memory = new ShMemoryPtr[m_nb_memories];
-
   for (int i=0; i < m_nb_memories; i++) {
     m_memory[i] = NULL;
   }
-  m_memory[0] = base_memory;
+
+  // restore base textures
+  if (SH_TEXTURE_CUBE == m_dims) {
+    for (int i=0; i < 6; i++) {
+      m_memory[i * m_mipmap_levels] = old_memory[i];
+    }
+  } else {
+    m_memory[0] = old_memory[0];
+  }
+  delete [] old_memory;
 
   m_old_filtering = m_traits.filtering();
 }
 
 int ShTextureNode::mipmap_levels()
 {
-  initialize_memories(m_memory[0], false);
+  initialize_memories(false);
   return m_mipmap_levels;
 }
 
@@ -120,7 +139,7 @@ ShMemoryPtr ShTextureNode::memory_error(int n) const
 
 ShMemoryPtr ShTextureNode::memory(int n)
 {
-  initialize_memories(m_memory[0], false); // nb_memories will change if filtering was changed
+  initialize_memories(false); // nb_memories will change if filtering was changed
   if (n < m_nb_memories) {
     return m_memory[n];
   } else {
@@ -139,7 +158,7 @@ ShPointer<const ShMemory> ShTextureNode::memory(int n) const
 
 void ShTextureNode::memory(ShMemoryPtr memory, int n)
 {
-  initialize_memories(m_memory[0], false); // nb_memories will change if filtering was changed
+  initialize_memories(false); // nb_memories will change if filtering was changed
   if (n < m_nb_memories) {
     m_memory[n] = memory;
   } else {
@@ -178,7 +197,7 @@ void ShTextureNode::setTexSize(int w)
   ShContext::current()->enter(0);
   ShAttrib1f s(m_texSizeVar.node(), ShSwizzle(m_texSizeVar().size()), false);
   s = static_cast<float>(w);
-  initialize_memories(m_memory[0], true);
+  initialize_memories(true);
   ShContext::current()->exit();
 }
 
@@ -189,7 +208,7 @@ void ShTextureNode::setTexSize(int w, int h)
   ShContext::current()->enter(0);
   ShAttrib2f s(m_texSizeVar.node(), ShSwizzle(m_texSizeVar().size()), false);
   s = ShAttrib2f(w, h);
-  initialize_memories(m_memory[0], true);
+  initialize_memories(true);
   ShContext::current()->exit();
 }
 
@@ -201,7 +220,7 @@ void ShTextureNode::setTexSize(int w, int h, int d)
   ShContext::current()->enter(0);
   ShAttrib3f s(m_texSizeVar.node(), ShSwizzle(m_texSizeVar().size()), false);
   s = ShAttrib3f(w, h, d);
-  initialize_memories(m_memory[0], true);
+  initialize_memories(true);
   ShContext::current()->exit();
 }
 

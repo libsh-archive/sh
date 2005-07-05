@@ -1,5 +1,11 @@
 2005-07-05  Francois Marier  <francois@serioushack.com>
 
+	* src/ShTextureNode.cpp (initialize_memories): Make a copy of all
+	the base textures (one per face for cube maps).
+
+	* src/ShTextureNode.hpp: Remove the (now) useless base_memory
+	parameter.
+
 	Adding mipmapping support in ShTextures:
 	
 	* backends/gl/GlTextureStorage.cpp: Specify the mipmap level when

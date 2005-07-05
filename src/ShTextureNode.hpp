@@ -161,7 +161,7 @@ private:
   ShVariable m_texSizeVar;
   ShTextureTraits::Filtering m_old_filtering;
 
-  void initialize_memories(ShMemoryPtr base_memory, bool force_initialization);
+  void initialize_memories(bool force_initialization);
   float interpolate1D(float* base_data, int scale, int x, int component);
   float interpolate2D(float* base_data, int scale, int x, int y, int component);
   float interpolate3D(float* base_data, int scale, int x, int y, int z, int component);
