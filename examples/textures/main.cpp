@@ -23,6 +23,7 @@
 //////////////////////////////////////////////////////////////////////////////
 #include <sh/sh.hpp>
 #ifdef __APPLE__
+# include <CoreFoundation/CoreFoundation.h>
 # include <GLUT/glut.h>
 # include <OpenGL/glext.h>
 # include <OpenGL/glu.h>
@@ -272,16 +273,69 @@ int main(int argc, char** argv)
   initShaders();
 
   try {
+#ifdef __APPLE__
+    CFBundleRef mainBundle = CFBundleGetMainBundle();
+    CFStringRef s;
+    char* filename;
+    
+    s = CFURLCopyFileSystemPath(CFBundleCopyResourceURL(mainBundle, CFSTR("rustkd"), CFSTR("png"), NULL),
+                                kCFURLPOSIXPathStyle);
+    filename = new char[CFStringGetLength(s) + 1];
+    CFStringGetCString(s, filename, CFStringGetLength(s) + 1, kCFStringEncodingASCII);
+    kd_images[0].loadPng(filename);
+    delete [] filename;
+
+    s = CFURLCopyFileSystemPath(CFBundleCopyResourceURL(mainBundle, CFSTR("rustks"), CFSTR("png"), NULL),
+                                kCFURLPOSIXPathStyle);
+    filename = new char[CFStringGetLength(s) + 1];
+    CFStringGetCString(s, filename, CFStringGetLength(s) + 1, kCFStringEncodingASCII);
+    ks_images[0].loadPng(filename);
+    delete [] filename;
+
+    s = CFURLCopyFileSystemPath(CFBundleCopyResourceURL(mainBundle, CFSTR("kd"), CFSTR("png"), NULL),
+                                kCFURLPOSIXPathStyle);
+    filename = new char[CFStringGetLength(s) + 1];
+    CFStringGetCString(s, filename, CFStringGetLength(s) + 1, kCFStringEncodingASCII);
+    kd_images[1].loadPng(filename);
+    delete [] filename;
+    
+    s = CFURLCopyFileSystemPath(CFBundleCopyResourceURL(mainBundle, CFSTR("ks"), CFSTR("png"), NULL),
+                                kCFURLPOSIXPathStyle);
+    filename = new char[CFStringGetLength(s) + 1];
+    CFStringGetCString(s, filename, CFStringGetLength(s) + 1, kCFStringEncodingASCII);
+    ks_images[1].loadPng(filename);
+    delete [] filename;
+#else
     kd_images[0].loadPng("tex_rustkd.png");
     ks_images[0].loadPng("tex_rustks.png");
     kd_images[1].loadPng("tex_kd.png");
     ks_images[1].loadPng("tex_ks.png");
+#endif
   } 
   catch (const ShException& e) {
+#ifdef __APPLE__
+    CFStringRef s = CFStringCreateWithCString(kCFAllocatorDefault, e.message().c_str(), kCFStringEncodingASCII);
+    CFOptionFlags flags;
+    CFUserNotificationDisplayAlert(0, kCFUserNotificationStopAlertLevel,
+                                  NULL, NULL, NULL, CFSTR("Error loading images"),
+                                  s, NULL, NULL, NULL, &flags);
+    CFRelease(s);
+#else
     std::cerr << e.message() << std::endl;
-    throw e;
+#endif
+    exit(1);
+  } catch (const std::exception& e) {
+#ifdef __APPLE__
+    CFStringRef s = CFStringCreateWithCString(kCFAllocatorDefault, e.what(), kCFStringEncodingASCII);
+    CFOptionFlags flags;
+    CFUserNotificationDisplayAlert(0, kCFUserNotificationStopAlertLevel,
+                                   NULL, NULL, NULL, CFSTR("Error loading images"),
+                                   s, NULL, NULL, NULL, &flags);
+    CFRelease(s);
+#endif
+    exit(1);
   }
-
+  
   glEnable(GL_DEPTH_TEST);
   glClearColor(0.0, 0.0, 0.0, 1.0);
   setupView();

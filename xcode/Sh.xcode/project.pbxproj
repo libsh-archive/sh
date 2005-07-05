@@ -12,6 +12,7 @@
 				3EF90EC90878935800A31AD9,
 				3EF90F450878A05000A31AD9,
 				3E60CEAD087A18320078BC55,
+				3E3EA9D2087A19DA00A1405F,
 			);
 			isa = PBXGroup;
 			name = Products;
@@ -46,10 +47,12 @@
 				3EF90EC80878935800A31AD9,
 				3EF90F440878A05000A31AD9,
 				3E60CEAC087A18320078BC55,
+				3E3EA9D1087A19DA00A1405F,
 			);
 		};
 		0867D691FE84028FC02AAC07 = {
 			children = (
+				3E3EA9E1087A1A6200A1405F,
 				3E60CEBE087A188F0078BC55,
 				3EF90FA00878A2BA00A31AD9,
 				3EF90F9F0878A2AC00A31AD9,
@@ -62,6 +65,7 @@
 				3EF90ECB0878935800A31AD9,
 				3EF90F460878A05000A31AD9,
 				3E60CEAF087A18320078BC55,
+				3E3EA9D4087A19DA00A1405F,
 			);
 			isa = PBXGroup;
 			name = Sh;
@@ -318,6 +322,262 @@
 //3E2
 //3E3
 //3E4
+		3E3EA9CE087A19DA00A1405F = {
+			buildActionMask = 2147483647;
+			files = (
+				3E3EA9ED087A1A8B00A1405F,
+				3E3EA9EE087A1A8B00A1405F,
+				3E3EA9F0087A1A8B00A1405F,
+				3E3EA9F1087A1A8B00A1405F,
+			);
+			isa = PBXResourcesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3E3EA9CF087A19DA00A1405F = {
+			buildActionMask = 2147483647;
+			files = (
+				3E3EA9EB087A1A8B00A1405F,
+				3E3EA9EF087A1A8B00A1405F,
+				3E3EA9F2087A1A8B00A1405F,
+			);
+			isa = PBXSourcesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3E3EA9D0087A19DA00A1405F = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXFrameworksBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3E3EA9D1087A19DA00A1405F = {
+			buildPhases = (
+				3E3EA9CE087A19DA00A1405F,
+				3E3EA9CF087A19DA00A1405F,
+				3E3EA9D0087A19DA00A1405F,
+			);
+			buildRules = (
+			);
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "TexturesExample-Info.plist";
+				INSTALL_PATH = "$(LOCAL_APPS_DIR)/Sh Examples";
+				OPTIMIZATION_CFLAGS = "";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "-framework CoreFoundation -framework OpenGL -framework GLUT -framework Sh -lobjc";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = TexturesExample;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			dependencies = (
+				3E3EA9D6087A1A4200A1405F,
+				3E3EA9D8087A1A4200A1405F,
+			);
+			isa = PBXNativeTarget;
+			name = TexturesExample;
+			productName = TexturesExample;
+			productReference = 3E3EA9D2087A19DA00A1405F;
+			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>TexturesExample</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.yourcompany.TexturesExample</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+</dict>
+</plist>
+";
+			productType = "com.apple.product-type.application";
+		};
+		3E3EA9D2087A19DA00A1405F = {
+			explicitFileType = wrapper.application;
+			includeInIndex = 0;
+			isa = PBXFileReference;
+			path = TexturesExample.app;
+			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		3E3EA9D4087A19DA00A1405F = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.xml;
+			name = "TexturesExample-Info.plist";
+			path = "/Users/sdt/svn/sh-trunk/xcode/TexturesExample-Info.plist";
+			refType = 0;
+			sourceTree = "<absolute>";
+		};
+		3E3EA9D5087A1A4200A1405F = {
+			containerPortal = 0867D690FE84028FC02AAC07;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 8D07F2BC0486CC7A007CD1D0;
+			remoteInfo = Sh;
+		};
+		3E3EA9D6087A1A4200A1405F = {
+			isa = PBXTargetDependency;
+			target = 8D07F2BC0486CC7A007CD1D0;
+			targetProxy = 3E3EA9D5087A1A4200A1405F;
+		};
+		3E3EA9D7087A1A4200A1405F = {
+			containerPortal = 0867D690FE84028FC02AAC07;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 3EF90F440878A05000A31AD9;
+			remoteInfo = ArbBackend;
+		};
+		3E3EA9D8087A1A4200A1405F = {
+			isa = PBXTargetDependency;
+			target = 3EF90F440878A05000A31AD9;
+			targetProxy = 3E3EA9D7087A1A4200A1405F;
+		};
+		3E3EA9E1087A1A6200A1405F = {
+			children = (
+				3E3EA9E2087A1A8B00A1405F,
+				3E3EA9E3087A1A8B00A1405F,
+				3E3EA9E4087A1A8B00A1405F,
+				3E3EA9E5087A1A8B00A1405F,
+				3E3EA9E6087A1A8B00A1405F,
+				3E3EA9E7087A1A8B00A1405F,
+				3E3EA9E8087A1A8B00A1405F,
+				3E3EA9E9087A1A8B00A1405F,
+				3E3EA9EA087A1A8B00A1405F,
+			);
+			isa = PBXGroup;
+			name = TexturesExample;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		3E3EA9E2087A1A8B00A1405F = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			name = Camera.cpp;
+			path = ../examples/textures/Camera.cpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		3E3EA9E3087A1A8B00A1405F = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.h;
+			name = Camera.hpp;
+			path = ../examples/textures/Camera.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		3E3EA9E4087A1A8B00A1405F = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			name = kd.png;
+			path = ../examples/textures/kd.png;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		3E3EA9E5087A1A8B00A1405F = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			name = ks.png;
+			path = ../examples/textures/ks.png;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		3E3EA9E6087A1A8B00A1405F = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			name = main.cpp;
+			path = ../examples/textures/main.cpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		3E3EA9E7087A1A8B00A1405F = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			name = rustkd.png;
+			path = ../examples/textures/rustkd.png;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		3E3EA9E8087A1A8B00A1405F = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			name = rustks.png;
+			path = ../examples/textures/rustks.png;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		3E3EA9E9087A1A8B00A1405F = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			name = ShTrackball.cpp;
+			path = ../examples/textures/ShTrackball.cpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		3E3EA9EA087A1A8B00A1405F = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.h;
+			name = ShTrackball.hpp;
+			path = ../examples/textures/ShTrackball.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		3E3EA9EB087A1A8B00A1405F = {
+			fileRef = 3E3EA9E2087A1A8B00A1405F;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3E3EA9ED087A1A8B00A1405F = {
+			fileRef = 3E3EA9E4087A1A8B00A1405F;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3E3EA9EE087A1A8B00A1405F = {
+			fileRef = 3E3EA9E5087A1A8B00A1405F;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3E3EA9EF087A1A8B00A1405F = {
+			fileRef = 3E3EA9E6087A1A8B00A1405F;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3E3EA9F0087A1A8B00A1405F = {
+			fileRef = 3E3EA9E7087A1A8B00A1405F;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3E3EA9F1087A1A8B00A1405F = {
+			fileRef = 3E3EA9E8087A1A8B00A1405F;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3E3EA9F2087A1A8B00A1405F = {
+			fileRef = 3E3EA9E9087A1A8B00A1405F;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		3E60CEA9087A18320078BC55 = {
 			buildActionMask = 2147483647;
 			files = (
@@ -358,7 +618,6 @@
 				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = "Particles-Info.plist";
 				INSTALL_PATH = "$(LOCAL_APPS_DIR)/Sh Examples";
-				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-framework OpenGL -framework GLUT -framework Sh -lobjc";
 				OTHER_REZFLAGS = "";
