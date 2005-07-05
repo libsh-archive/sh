@@ -1,3 +1,9 @@
+2005-07-05  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShRefCount.hpp (class ShPointer): Use Boost's
+	unspecified_bool_type trick to allow implicit conversion to bool
+	but nothing else.
+
 2005-06-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* backends/cc/Cc.cpp (load_shader_func): Use -bundle on OSX

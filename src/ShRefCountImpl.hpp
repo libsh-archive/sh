@@ -217,13 +217,6 @@ T* ShPointer<T>::operator->() const
 
 template<typename T>
 inline
-ShPointer<T>::operator bool() const
-{
-  return m_object != 0;
-}
-
-template<typename T>
-inline
 int ShPointer<T>::refCount() const
 {
   if (!m_object)

@@ -138,9 +138,14 @@ public:
   T& operator*() const;
   T* operator->() const;
 
+  // Idea taken from the Boost shared_ptr implementation.
+  typedef T * (ShPointer<T>::*unspecified_bool_type)() const;
+    
   /// Return true iff this is not a reference to a null pointer
-  /// @todo Maybe use boost's unspecified-bool-type trick
-  operator bool() const;
+  operator unspecified_bool_type() const
+  {
+    return m_object == 0 ? 0 : &ShPointer<T>::object;
+  }  
 
   /// Obtain the total amount of references to the referenced object.
   int refCount() const;
