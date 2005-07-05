@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="ShGlslBackend"
-	ProjectGUID="{FEA8789F-A94C-44E6-8583-45C3383D1A40}"
+	ProjectGUID="{51FE302B-9FB8-4525-B7AB-E1447ED75CBE}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
