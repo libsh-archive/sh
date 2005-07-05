@@ -39,6 +39,8 @@ SH_DLLEXPORT ShBaseTexture : public ShMetaForwarder {
 public:
   ShBaseTexture(const ShTextureNodePtr& node);
 
+  void build_mipmaps() { m_node->build_mipmaps(); }
+
 protected:
   ShTextureNodePtr m_node;
 };
@@ -57,8 +59,8 @@ public:
   template<typename T2>
   T operator[](const ShGeneric<1, T2>& coords) const;
 
-  ShMemoryPtr memory();
-  void memory(ShMemoryPtr memory);
+  ShMemoryPtr memory(int mipmap_level=0);
+  void memory(ShMemoryPtr memory, int mipmap_level=0);
   void size(int width);
 
   ShAttrib1f size() const;
@@ -87,8 +89,8 @@ public:
   template<typename T2>
   T operator[](const ShGeneric<2, T2>& coords) const;
 
-  ShMemoryPtr memory();
-  void memory(ShMemoryPtr memory);
+  ShMemoryPtr memory(int mipmap_level=0);
+  void memory(ShMemoryPtr memory, int mipmap_level=0);
   void size(int width, int height);
 
   ShAttrib2f size() const;
@@ -113,8 +115,8 @@ public:
   template<typename T2>
   T operator[](const ShGeneric<2, T2>& coords) const;
 
-  ShMemoryPtr memory();
-  void memory(ShMemoryPtr memory);
+  ShMemoryPtr memory(int mipmap_level=0);
+  void memory(ShMemoryPtr memory, int mipmap_level=0);
   void size(int width, int height);
 
   ShAttrib2f size() const;
@@ -139,8 +141,8 @@ public:
   template<typename T2>
   T operator[](const ShGeneric<3, T2>& coords) const;
 
-  ShMemoryPtr memory();
-  void memory(ShMemoryPtr memory);
+  ShMemoryPtr memory(int mipmap_level=0);
+  void memory(ShMemoryPtr memory, int mipmap_level=0);
   void size(int width, int height, int depth);
 
   ShAttrib3f size() const;
@@ -162,8 +164,8 @@ public:
   template<typename T2>
   T operator()(const ShGeneric<3, T2>& coords) const;
 
-  ShMemoryPtr memory(ShCubeDirection face);
-  void memory(ShMemoryPtr memory, ShCubeDirection face);
+  ShMemoryPtr memory(ShCubeDirection face, int mipmap_level=0);
+  void memory(ShMemoryPtr memory, ShCubeDirection face, int mipmap_level=0);
   void size(int width, int height);
 
   ShAttrib2f size() const;

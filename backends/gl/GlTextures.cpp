@@ -185,7 +185,7 @@ GLenum shGlFormat(const ShTextureNodePtr& node)
   default:
     break;
   }
-  // TODO: Warn or something
+  SH_DEBUG_ERROR("Invalid GL format for the texture.");
   return 0;
 }
 
@@ -275,23 +275,21 @@ TextureStrategy* GlTextures::create(void)
 }
 
 
-void GlTextures::bindTexture(const ShTextureNodePtr& node,
-                             GLenum target)
+void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target)
 {
   if (!node) return;
 
-  // TODO: Check for memories that are 0
-
-  if (!node->meta("opengl:texid").empty())
-    {
+  if (!node->meta("opengl:texid").empty()) {
     SH_GL_CHECK_ERROR(glActiveTextureARB(target));
     GLuint name;
     std::istringstream is(node->meta("opengl:texid"));
     is >> name; // TODO: Check for errors
     SH_GL_CHECK_ERROR(glBindTexture(shGlTargets[node->dims()], name));
     return;
-    } 
-  
+  } 
+
+  int mipmap_levels = node->mipmap_levels();
+
   if (node->dims() == SH_TEXTURE_CUBE) {
     
     // Look for a cubemap that happens to have just the right storages
@@ -307,7 +305,11 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node,
         GlTextureStorage* s = dynamic_cast<GlTextureStorage*>(*S);
         if (!s) continue;
         ShCubeDirection dir = glToShCubeDir(s->target());
-        if (s->memory() != node->memory(dir).object() || !StorageFinder(node, true)(s))
+        if (!node->memory(dir, 0)) {
+	  shError(ShException("No memory associated with the cube map texture."));
+	  return;
+	}
+        if (s->memory() != node->memory(dir, 0).object() || !StorageFinder(node, true)(s))
           break;
       }
       // If we got through the whole list, we've found a matching list.
@@ -320,16 +322,54 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node,
       texname->params(node->traits());
       for (int i = 0; i < 6; i++) {
         ShCubeDirection dir = static_cast<ShCubeDirection>(i);
-        GlTextureStoragePtr storage = new GlTextureStorage(node->memory(dir).object(),
+	if (!node->memory(dir, 0)) {
+	  std::stringstream s;
+	  s << "No memory for the cube map texture (direction = " << dir << ").";
+	  shError(ShException(s.str()));
+	  return;
+	}
+        GlTextureStoragePtr storage = new GlTextureStorage(node->memory(dir, 0).object(),
                                                            shGlCubeMapTargets[i],
                                                            shGlFormat(node),
                                                            shGlInternalFormat(node),
                                                            node->valueType(),
                                                            node->width(), node->height(),
                                                            node->depth(), node->size(),
-                                                           node->count(), texname);
+                                                           node->count(), texname, 0);
         storage->sync();
+
+	if (mipmap_levels > 1) {
+	  if (!node->memory(dir, 1)) {
+	    SH_DEBUG_WARN("Automatically generated missing mipmap levels (dir = " << dir << ").");
+	    node->build_mipmaps();
+	  }
+
+	  int width = node->width();
+	  int height = node->height();
+	  for (int j=1; j < mipmap_levels; j++) {
+	    if (!node->memory(dir, j)) {
+	      std::stringstream s;
+	      s << "No memory for the cube map texture at mipmap level " << j 
+		<< " (dir = " << dir << ", nb levels = " << mipmap_levels << ").";
+	      shError(ShException(s.str()));
+	    }
+	    
+	    width /= 2;
+	    height /= 2;
+	    int count = width * height * node->depth();
+	    GlTextureStoragePtr mip_storage = new GlTextureStorage(node->memory(dir, j).object(),
+								   shGlTargets[node->dims()],
+								   shGlFormat(node),
+								   shGlInternalFormat(node),
+								   node->valueType(),
+								   width, height,
+								   node->depth(), node->size(),
+								   count, texname, j);
+	    mip_storage->sync();
+	  }
+	}
       }
+
       SH_GL_CHECK_ERROR(glActiveTextureARB(target));
       SH_GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_CUBE_MAP, texname->value()));
       std::ostringstream os;
@@ -350,20 +390,58 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node,
       node->meta("opengl:alloc_texid", os.str());
     }
   } else {
+    if (!node->memory(0)) {
+      shError(ShException("No memory associated with the texture."));
+      return;
+    }
+
+    if ((mipmap_levels > 1) && (!node->memory(1))) {
+      std::stringstream s;
+      s << "Automatically generated the " << mipmap_levels << " mipmap levels.";
+      SH_DEBUG_WARN(s.str());
+      node->build_mipmaps();
+    }
 
     StorageFinder finder(node);
     GlTextureStoragePtr storage =
-      shref_dynamic_cast<GlTextureStorage>(node->memory()->findStorage("opengl:texture", finder));
+      shref_dynamic_cast<GlTextureStorage>(node->memory(0)->findStorage("opengl:texture", finder));
     if (!storage) {
       GlTextureNamePtr name = new GlTextureName(shGlTargets[node->dims()]);
-      storage = new GlTextureStorage(node->memory().object(),
+      storage = new GlTextureStorage(node->memory(0).object(),
                                      shGlTargets[node->dims()],
                                      shGlFormat(node),
                                      shGlInternalFormat(node),
                                      node->valueType(),
                                      node->width(), node->height(), 
                                      node->depth(), node->size(),
-                                     node->count(), name);
+                                     node->count(), name, 0);
+      if (mipmap_levels > 1) {
+	storage->sync();
+	
+	int width = node->width();
+	int height = node->height();
+	for (int i=1; i < mipmap_levels; i++) {
+	  if (!node->memory(i)) {
+	    std::stringstream s;
+	    s << "No memory for the texture at mipmap level " << i << " (nb levels = " << mipmap_levels << ").";
+	    shError(ShException(s.str()));
+	  }
+
+	  width /= 2;
+	  height /= 2;
+	  int count = width * height * node->depth();
+	  GlTextureStoragePtr mip_storage = new GlTextureStorage(node->memory(i).object(),
+								 shGlTargets[node->dims()],
+								 shGlFormat(node),
+								 shGlInternalFormat(node),
+								 node->valueType(),
+								 width, height,
+								 node->depth(), node->size(),
+								 count, name, i);
+	  mip_storage->sync();
+	}
+      }
+
       name->params(node->traits());
     }
 

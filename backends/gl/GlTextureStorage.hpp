@@ -37,7 +37,7 @@ public:
                    GLenum format, GLint internalFormat,
                    SH::ShValueType valueType, 
                    int width, int height, int depth, int tuplesize,
-                   int count, GlTextureNamePtr name);
+                   int count, GlTextureNamePtr name, GLint mipmap_level);
   
   ~GlTextureStorage();
   
@@ -53,6 +53,7 @@ public:
   int depth() const { return m_depth; }
   int tuplesize() const { return m_tuplesize; }
   int count() const { return (m_count != -1) ? m_count : m_width * m_height * m_depth; }
+  GLint mipmap_level() const { return m_mipmap_level; }
   
 private:
   GlTextureNamePtr m_name;
@@ -69,7 +70,7 @@ private:
   GlTextureStorage(const GlTextureStorage&);
   GlTextureStorage& operator=(const GlTextureStorage&);
   
-  // TODO: Mipmapping?
+  GLint m_mipmap_level;
 };
 
 typedef SH::ShPointer<GlTextureStorage> GlTextureStoragePtr;

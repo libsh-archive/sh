@@ -448,6 +448,9 @@
 				RelativePath="..\src\ShInterp.hpp">
 			</File>
 			<File
+				RelativePath="..\src\ShMIPFilter.hpp">
+			</File>
+			<File
 				RelativePath="..\src\ShLib.hpp">
 			</File>
 			<File

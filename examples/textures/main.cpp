@@ -43,8 +43,8 @@ ShPoint3f lightPos;
 Camera camera;
 ShProgramSet* shaders;
 
-ShTexture2D<ShColor3fub> kd(512, 512);
-ShTexture2D<ShColor3fub> ks(512, 512);
+ShMIPFilter<ShTexture2D<ShColor3fub> > kd(512, 512);
+ShNoMIPFilter<ShTexture2D<ShColor3fub> > ks(512, 512);
 
 int gprintf(int x, int y, char* fmt, ...);
 
@@ -54,19 +54,24 @@ int cur_x, cur_y;
 
 bool show_help = false;
 
-ShImage kd_images[2];
+const int MIPMAP_LEVELS = 10;
+
+ShImage kd_images[MIPMAP_LEVELS + 1];
 ShImage ks_images[2];
 
 void rustTexture()
 {
-  kd.memory(kd_images[0].memory());
-  ks.memory(ks_images[0].memory());
+  kd.memory(kd_images[0].memory(), 0);
+  kd.build_mipmaps();
+  ks.memory(ks_images[0].memory(), 0);
 }
 
 void xTexture()
 {
-  kd.memory(kd_images[1].memory());
-  ks.memory(ks_images[1].memory());
+  for (int i=0; i < MIPMAP_LEVELS; i++) {
+    kd.memory(kd_images[1 + i].memory(), i);
+  }
+  ks.memory(ks_images[1].memory(), 0);
 }
 
 void initShaders()
@@ -127,8 +132,7 @@ void display()
     gprintf(30, 100, "Sh Texture Example Help");
     gprintf(30, 80,  "  '1' - Default texture");
     gprintf(30, 65,  "  '2' - Rusty texture");
-    gprintf(30, 50,  "  'U' - Invoke shUpdate()");
-    gprintf(30, 30,  "  'Q' - Quit");
+    gprintf(30, 10,  "  'Q' - Quit");
   } else {
     gprintf(10, 10, "'H' for help...");
   }
@@ -197,10 +201,6 @@ void keyboard(unsigned char k, int x, int y)
   case 'Q':
     exit(0);
     break;
-  case 'u':
-  case 'U':
-    shUpdate();
-    break;
   case 'h':
   case 'H':
     show_help = !show_help;
@@ -265,7 +265,7 @@ int main(int argc, char** argv)
   glutMouseFunc(mouse);
   glutMotionFunc(motion);
   glutKeyboardFunc(keyboard);
-    
+
   if (argc > 1) {
     shUseBackend(argv[1]);
   }
@@ -310,6 +310,12 @@ int main(int argc, char** argv)
     ks_images[0].loadPng("tex_rustks.png");
     kd_images[1].loadPng("tex_kd.png");
     ks_images[1].loadPng("tex_ks.png");
+
+    for (int i=1; i < MIPMAP_LEVELS; i++) {
+      stringstream s;
+      s << "kd" << i << ".png";
+      kd_images[1 + i].loadPng(s.str());
+    }
 #endif
   } 
   catch (const ShException& e) {

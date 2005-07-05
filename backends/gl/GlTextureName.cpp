@@ -89,7 +89,19 @@ void GlTextureName::params(const SH::ShTextureTraits& params)
     SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_REPEAT));
     SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_R, GL_REPEAT));
   }
-  // TODO: SH_FILTER (Mipmapping)
+  if (params.filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP_LINEAR) {
+    if (0 == params.interpolation()) {
+      SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR));
+    } else {
+      SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+    }
+  } else if (params.filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP_NEAREST) {
+    if (0 == params.interpolation()) {
+      SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST));
+    } else {
+      SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST));
+    }
+  }
   
   m_params = params;
 }

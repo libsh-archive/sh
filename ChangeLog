@@ -1,3 +1,64 @@
+2005-07-05  Francois Marier  <francois@serioushack.com>
+
+	Adding mipmapping support in ShTextures:
+	
+	* backends/gl/GlTextureStorage.cpp: Specify the mipmap level when
+	transfering textures to the graphics card.
+	Add the mipmap_level parameter to the constructor.
+
+	* backends/gl/GlTextureStorage.hpp: Add a mipmap_level parameter
+	to the constructor.
+	Add the mipmap_level() method.
+	Add the m_mipmap_level member.
+
+	* backends/gl/GlTextures.cpp (shGlFormat): Replace a comment by an
+	assertion.
+	(bindTexture): Create extra GLStorage for the mipmap levels if it
+	is enabled.
+
+	* backends/gl/GlTextureName.cpp (params): Turn on mipmapping if it
+	is set in the traits.
+
+	* src/ShTextureNode.hpp: Add m_mipmap_levels and m_nb_memories.
+	Add the mipmap_level parameter to the memory() methods.
+	Remove SH_FILTER_MIPMAP and replace it with
+	SH_FILTER_MIPMAP_NEAREST and SH_FILTER_MIPMAP_LINEAR.
+	Add the mipmap_levels() and build_mipmaps() public methods.
+	
+	* src/ShTextureNode.cpp: Add interpolation methods to generate
+	mipmaps automatically.
+	Reinitialize the memories when the texture size is changed.
+	Add the mipmap_level parameter to the memory() methods.
+	Add the mipmap_levels() and build_mipmaps() public methods.
+
+	* src/ShTexture.hpp: Make the default mipmap filtering be linear.
+
+	* src/ShBaseTextureImpl.hpp, ShBaseTexture.hpp: Add the
+	mipmap_level parameter to all memory() methods.
+	Add the build_mipmaps() public method.
+	
+	* src/ShMIPFilter.hpp: New file containing the ShNoMIPFilter and
+	ShMIPFilter templates.
+
+	* src/sh.hpp: Include ShMIPFilter.hpp
+	
+	* backends/cc/Cc.cpp, backends/gl/Utils.cpp, PBufferStreams.cpp:
+	Add the mipmap_level to the memory() calls.
+	
+	* win32/Sh.vcproj, src/Makefile.am, src/Makefile.win32: Add
+	ShMIPFilter.hpp to the project and makefiles.
+
+	* test/regress/tex.cpp.py: Make all the textures be non-mipmapped
+	for now.
+
+	* configure.ac, examples/Makefile.am, examples/mipmap/*: Add the
+	mipmap example to test that mipmap is working correctly.
+
+	* examples/textures/*: Turn on mipmapping in the diffuse textures
+	and off in the specular textures.  One texture, default, will
+	provide all the images for the mipmap levels while the other one,
+	rust, will let Sh generate them.
+
 2005-07-05  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShRefCount.hpp (class ShPointer): Use Boost's

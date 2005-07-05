@@ -33,7 +33,7 @@ namespace SH {
 struct 
 ShFilteredTextureTraits : public ShTextureTraits {
   ShFilteredTextureTraits()
-    : ShTextureTraits(1, SH_FILTER_MIPMAP, SH_WRAP_CLAMP_TO_EDGE)
+    : ShTextureTraits(1, SH_FILTER_MIPMAP_LINEAR, SH_WRAP_CLAMP_TO_EDGE)
   {}
 };
 

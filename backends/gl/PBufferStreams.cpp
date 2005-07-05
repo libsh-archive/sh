@@ -176,7 +176,7 @@ void PBufferStreamCache::update_channels(int width, int height)
     SH_DEBUG_ASSERT(channel);
     SH_DEBUG_ASSERT(texture);
 
-    texture->memory(channel->memory());
+    texture->memory(channel->memory(), 0);
     texture->setTexSize(width, height);
     texture->count(channel->count());
   }

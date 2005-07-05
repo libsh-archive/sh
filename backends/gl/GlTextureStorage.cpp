@@ -33,11 +33,12 @@ GlTextureStorage::GlTextureStorage(ShMemory* memory, GLenum target,
                                    GLenum format, GLint internalFormat,
                                    ShValueType valueType, 
                                    int width, int height, int depth, int tuplesize,
-                                   int count, GlTextureNamePtr name)
+                                   int count, GlTextureNamePtr name, GLint mipmap_level)
   : ShStorage(memory, valueType),
     m_name(name), m_target(target), m_format(format), 
     m_internalFormat(internalFormat),
-    m_width(width), m_height(height), m_depth(depth), m_tuplesize(tuplesize), m_count(count)
+    m_width(width), m_height(height), m_depth(depth), m_tuplesize(tuplesize), m_count(count),
+    m_mipmap_level(mipmap_level)
 {
   m_name->addStorage(this);
 }
@@ -75,6 +76,7 @@ class HostGlTextureTransfer : public ShTransfer {
     // @todo a little hackish...but we promise host->data() will not change... 
     ShVariantPtr host_variant = shVariantFactory(host_type, SH_MEM)->
       generate(count * tuplesize, const_cast<void*>(host->data()), false);
+    SH_DEBUG_ASSERT(host_variant);
 
     if(converted_type != SH_VALUETYPE_END) {
       SH_DEBUG_WARN("GL backend does not handle " << shValueTypeName(texture_type) 
@@ -99,16 +101,16 @@ class HostGlTextureTransfer : public ShTransfer {
     switch(texture->target()) {
     case GL_TEXTURE_1D:
       if (full_copy) {
-	SH_GL_CHECK_ERROR(glTexImage1D(texture->target(), 0,
+	SH_GL_CHECK_ERROR(glTexImage1D(texture->target(), texture->mipmap_level(),
 				       texture->internalFormat(),
 				       width, 0, texture->format(), type,
 				       data_variant->array()));
       } else {
-	SH_GL_CHECK_ERROR(glTexImage1D(texture->target(), 0,
+	SH_GL_CHECK_ERROR(glTexImage1D(texture->target(), texture->mipmap_level(),
 				       texture->internalFormat(),
 				       width, 0, texture->format(), type,
 				       NULL));
-	SH_GL_CHECK_ERROR(glTexSubImage1D(texture->target(), 0, 0,
+	SH_GL_CHECK_ERROR(glTexSubImage1D(texture->target(), texture->mipmap_level(), 0,
 					  count, texture->format(), type,
 					  data_variant->array()));
       }
@@ -126,36 +128,36 @@ class HostGlTextureTransfer : public ShTransfer {
     case GL_TEXTURE_RECTANGLE_NV:
 #endif
       if (full_copy) {
-	SH_GL_CHECK_ERROR(glTexImage2D(texture->target(), 0,
+	SH_GL_CHECK_ERROR(glTexImage2D(texture->target(), texture->mipmap_level(),
 				       texture->internalFormat(),
 				       width, height, 0, texture->format(),
 				       type, data_variant->array()));
       } else {
-	SH_GL_CHECK_ERROR(glTexImage2D(texture->target(), 0,
+	SH_GL_CHECK_ERROR(glTexImage2D(texture->target(), texture->mipmap_level(),
 				       texture->internalFormat(),
 				       width, height, 0, texture->format(),
 				       type, NULL));
 	int last_row_count = count % width;
 	int full_rows_count = count - last_row_count;
 	int full_rows_height = full_rows_count / width;
-	SH_GL_CHECK_ERROR(glTexSubImage2D(texture->target(), 0, 0, 0,
+	SH_GL_CHECK_ERROR(glTexSubImage2D(texture->target(), texture->mipmap_level(), 0, 0,
 					  width, full_rows_height, texture->format(),
 					  type, data_variant->array()));
 	int array_offset = full_rows_height * width * data_variant->datasize() * tuplesize;
-	SH_GL_CHECK_ERROR(glTexSubImage2D(texture->target(), 0, 0, full_rows_height,
+	SH_GL_CHECK_ERROR(glTexSubImage2D(texture->target(), texture->mipmap_level(), 0, full_rows_height,
 					  last_row_count, 1, texture->format(),
 					  type, static_cast<char*>(data_variant->array()) + array_offset));
       }
       break;
     case GL_TEXTURE_3D:
       if (full_copy) {
-	SH_GL_CHECK_ERROR(glTexImage3D(texture->target(), 0,
+	SH_GL_CHECK_ERROR(glTexImage3D(texture->target(), texture->mipmap_level(),
 				       texture->internalFormat(),
 				       width, height,
 				       depth, 0, texture->format(),
 				       type, data_variant->array()));
       } else {
-	SH_GL_CHECK_ERROR(glTexImage3D(texture->target(), 0,
+	SH_GL_CHECK_ERROR(glTexImage3D(texture->target(), texture->mipmap_level(),
 				       texture->internalFormat(),
 				       width, height,
 				       depth, 0, texture->format(),
@@ -166,17 +168,17 @@ class HostGlTextureTransfer : public ShTransfer {
 	int full_rows_height = full_rows_count / width;
 	int full_surfaces_count = count - last_surface_count;
 	int full_surfaces_depth = full_surfaces_count / (width * height);
-	SH_GL_CHECK_ERROR(glTexSubImage3D(texture->target(), 0, 0, 0,
+	SH_GL_CHECK_ERROR(glTexSubImage3D(texture->target(), texture->mipmap_level(), 0, 0,
 					  0, width, height,
 					  full_surfaces_depth, texture->format(),
 					  type, data_variant->array()));
 	int array_offset = full_surfaces_depth * width * height * data_variant->datasize() * tuplesize;
-	SH_GL_CHECK_ERROR(glTexSubImage3D(texture->target(), 0, 0, 0,
+	SH_GL_CHECK_ERROR(glTexSubImage3D(texture->target(), texture->mipmap_level(), 0, 0,
 					  full_surfaces_depth, width, full_rows_height,
 					  1, texture->format(),
 					  type, static_cast<char*>(data_variant->array()) + array_offset));
 	array_offset += full_rows_height * width * data_variant->datasize() * tuplesize;
-	SH_GL_CHECK_ERROR(glTexSubImage3D(texture->target(), 0, 0, full_rows_height,
+	SH_GL_CHECK_ERROR(glTexSubImage3D(texture->target(), texture->mipmap_level(), 0, full_rows_height,
 					  full_surfaces_depth, last_row_count, 1,
 					  1, texture->format(),
 					  type, static_cast<char*>(data_variant->array()) + array_offset));

@@ -51,7 +51,7 @@ void ChannelGatherer::operator()(const ShCtrlGraphNode* node)
 
     tex = new ShTextureNode(dims, channel->size(), channel->valueType(),
                             traits, 1, 1, 1, 0);
-    tex->memory(channel->memory());
+    tex->memory(channel->memory(), 0);
 
     channel_map.insert(std::make_pair(channel, tex));
   }

@@ -6,7 +6,7 @@ import shtest, sys
 
 # test float textures
 test = shtest.StreamTest('tex', 1)
-test.add_texture(shtest.ImageTexture("ShTexture2D<ShColor3f>", "test2d_tex", "tex.png")) 
+test.add_texture(shtest.ImageTexture("ShNoMIPFilter<ShTexture2D<ShColor3f> >", "test2d_tex", "tex.png")) 
 test.add_call(shtest.Call(shtest.Call.call, 'test2d_tex', 1))
 test.add_make_test((1.0, 0.0, 0.0), [(0.0, 0.0)])
 test.add_make_test((0.0, 1.0, 0.0), [(1.0, 0.0)])
@@ -14,14 +14,14 @@ test.add_make_test((0.0, 0.0, 1.0), [(1.0, 1.0)])
 test.add_make_test((0.5, 0.5, 0.5), [(0.0, 1.0)])
 
 # test wrap repeat
-test.add_texture(shtest.ImageTexture("ShWrapRepeat<ShTexture2D<ShColor3f> >", "repeat_tex", "tex.png")) 
+test.add_texture(shtest.ImageTexture("ShNoMIPFilter<ShWrapRepeat<ShTexture2D<ShColor3f> > >", "repeat_tex", "tex.png")) 
 test.clear_call()
 test.add_call(shtest.Call(shtest.Call.call, 'repeat_tex', 1))
 test.add_make_test((1.0, 0.0, 0.0), [(0.5/4.0, 0.5/4.0)])
 test.add_make_test((1.0, 0.0, 0.0), [(4.5/4.0, -3.5/4.0)])
 
 # test clamping
-test.add_texture(shtest.GenTexture("ShTexture2D<ShColor3fub>",
+test.add_texture(shtest.GenTexture("ShNoMIPFilter<ShTexture2D<ShColor3fub> >",
     "ShFracUByte", "SH_FUBYTE", 3, (16, 16), "clamp_tex", "(i - 2 * j + 4 * elem) / 2"))
 test.clear_call()
 test.add_call(shtest.Call(shtest.Call.call, 'clamp_tex', 1))
@@ -29,7 +29,7 @@ test.add_make_test((0, 1, 1), [(0, 0)], ['i', 'i'])
 test.add_make_test((0, 0, 0), [(1.0, 1.0)])
 
 # test fractional textures
-test.add_texture(shtest.GenTexture("ShTexture2D<ShColor4fui>",
+test.add_texture(shtest.GenTexture("ShNoMIPFilter<ShTexture2D<ShColor4fui> >",
     "ShFracUInt", "SH_FUINT", 4, (8, 8), "frac_uint2d_tex", "(i + 3 * j + 7 * elem) / 100.0"))
 test.clear_call()
 test.add_call(shtest.Call(shtest.Call.call, 'frac_uint2d_tex', 1))
@@ -40,7 +40,7 @@ test.add_make_test((.28, .35, .42, .49), [(1, 1)]) # i = j = 7
 test.add_make_test((.19, .26, .33, .40), [(4/7.0, 5/7.0)]) # i = 4, j = 5 
 
 # test signed fractional textures (these break since scale & bias doesn't work yet)
-test.add_texture(shtest.GenTexture("ShTexture2D<ShColor3fb>",
+test.add_texture(shtest.GenTexture("ShNoMIPFilter<ShTexture2D<ShColor3fb> >",
     "ShFracByte", "SH_FBYTE", 3, (8, 8), "frac_byte2d_tex", "(-i + j + elem - 1) / 10.0"))
 test.clear_call()
 test.add_call(shtest.Call(shtest.Call.call, 'frac_byte2d_tex', 1))
@@ -52,7 +52,7 @@ test.add_call(shtest.Call(shtest.Call.call, 'frac_byte2d_tex', 1))
 
 
 # test half textures
-test.add_texture(shtest.GenTexture("ShTexture2D<ShColor3h>",
+test.add_texture(shtest.GenTexture("ShNoMIPFilter<ShTexture2D<ShColor3h> >",
     "ShHalf", "SH_HALF", 3, (16, 16), "half2d_tex", "100 * (i - 8) + 10 * (j - 8) + elem"))
 test.clear_call()
 test.add_call(shtest.Call(shtest.Call.call, 'half2d_tex', 1))
@@ -62,7 +62,7 @@ test.add_make_test((10, 11, 12), [(8.5/16.0, 9.5/16.0)])
 test.add_make_test((-730, -729, -728), [(-2, 2)]) # should clamp to 0,1 
 
 # repeat, but with rect lookups
-test.add_texture(shtest.GenTexture("ShTextureRect<ShColor3h>",
+test.add_texture(shtest.GenTexture("ShNoMIPFilter<ShTextureRect<ShColor3h> >",
     "ShHalf", "SH_HALF", 3, (16, 16), "half_rect_tex", "100 * (i - 8) + 10 * (j - 8) + elem"))
 test.clear_call()
 test.add_call(shtest.Call(shtest.Call.lookup, 'half_rect_tex', 1))

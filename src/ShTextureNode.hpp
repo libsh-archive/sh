@@ -64,7 +64,8 @@ SH_DLLEXPORT ShTextureTraits {
 public:
   enum Filtering {
     SH_FILTER_NONE,
-    SH_FILTER_MIPMAP
+    SH_FILTER_MIPMAP_NEAREST,
+    SH_FILTER_MIPMAP_LINEAR
   };
   
   enum Wrapping {
@@ -120,12 +121,12 @@ public:
   ShTextureDims dims() const;
 
   // Memory
-  ShPointer<const ShMemory> memory(int n = 0) const;
-  ShPointer<const ShMemory> memory(ShCubeDirection dir) const;
-  ShMemoryPtr memory(int n = 0);
-  ShMemoryPtr memory(ShCubeDirection dir);
-  void memory(ShMemoryPtr memory, int n = 0);
-  void memory(ShMemoryPtr memory, ShCubeDirection dir);
+  ShPointer<const ShMemory> memory(int n) const;
+  ShPointer<const ShMemory> memory(ShCubeDirection dir, int n) const;
+  ShMemoryPtr memory(int n);
+  ShMemoryPtr memory(ShCubeDirection dir, int n);
+  void memory(ShMemoryPtr memory, int n);
+  void memory(ShMemoryPtr memory, ShCubeDirection dir, int n);
 
   // Basic properties - not all may be valid for all types
   const ShTextureTraits& traits() const; // valid for all texture nodes
@@ -134,6 +135,7 @@ public:
   int height() const; // 1 for SH_TEXTURE_1D
   int depth() const; // 1 unless SH_TEXTURE_3D
   int count() const; // number of elements  
+  int mipmap_levels();
 
   void setTexSize(int w);
   void setTexSize(int w, int h);
@@ -141,19 +143,30 @@ public:
   const ShVariable& texSizeVar() const;
 
   void count(int n);
+
+  void build_mipmaps();
   
 private:
   int m_count; // max nb of elements sent to the GPU or -1 if unknown (used by the stream backend)
 
   ShTextureDims m_dims;
   
-  ShMemoryPtr* m_memory; // array of either 1 or 6 (for cubemaps)
-  
+  ShMemoryPtr* m_memory; // array
+  int m_nb_memories; // size of the array
+  int m_mipmap_levels;
+
   ShTextureTraits m_traits;
   int m_width, m_height, m_depth;
 
   ShVariable m_texSizeVar;
-  
+  ShTextureTraits::Filtering m_old_filtering;
+
+  void initialize_memories(ShMemoryPtr base_memory, bool force_initialization);
+  float interpolate1D(float* base_data, int scale, int x, int component);
+  float interpolate2D(float* base_data, int scale, int x, int y, int component);
+  float interpolate3D(float* base_data, int scale, int x, int y, int z, int component);
+  ShMemoryPtr memory_error(int n) const;
+
   // NOT IMPLEMENTED
   ShTextureNode(const ShTextureNode& other);
   ShTextureNode& operator=(const ShTextureNode& other);

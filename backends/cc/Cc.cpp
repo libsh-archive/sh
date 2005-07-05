@@ -656,8 +656,7 @@ bool CcBackendCode::execute(ShStream& dest)
         ;I != m_program->textures_end(); ++I, ++tidx) {
     ShTextureNodePtr texture = (*I);
 
-    ShHostStoragePtr storage = shref_dynamic_cast<ShHostStorage>(
-								 texture->memory()->findStorage("host"));
+    ShHostStoragePtr storage = shref_dynamic_cast<ShHostStorage>(texture->memory(0)->findStorage("host"));
 
     // @todo type this doesn't work with cube maps
     // but should be taken care of
