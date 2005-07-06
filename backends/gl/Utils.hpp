@@ -55,7 +55,7 @@ struct ChannelGatherer {
 class TexFetcher {
 public:
   TexFetcher(ChannelMap& channel_map,
-             const SH::ShVariableNodePtr& tc_node,
+             std::list<SH::ShVariableNodePtr> &tc_node,
              bool indexed,
              const SH::ShProgramNodePtr& program);
 
@@ -63,7 +63,8 @@ public:
 
 private:
   ChannelMap& channel_map;
-  SH::ShVariableNodePtr tc_node;
+  std::list<SH::ShVariableNodePtr> &tc_node;
+  std::list<SH::ShVariableNodePtr>::iterator tc_node_itr;
   bool indexed;
   SH::ShProgramNodePtr program;
 };

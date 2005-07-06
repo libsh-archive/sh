@@ -58,11 +58,12 @@ void ChannelGatherer::operator()(const ShCtrlGraphNode* node)
 }
 
 TexFetcher::TexFetcher(ChannelMap& channel_map,
-                       const ShVariableNodePtr& tc_node,
+                       std::list<ShVariableNodePtr> &tc_node,
                        bool indexed,
                        const ShProgramNodePtr& program)
     : channel_map(channel_map),
       tc_node(tc_node),
+      tc_node_itr(tc_node.begin()),
       indexed(indexed),
       program(program)
 {
@@ -99,23 +100,18 @@ void TexFetcher::operator()(ShCtrlGraphNode* node)
 
     ShVariable texVar(J->second);
 
-    std::cerr << "Made it this far inside TexFetcher: " << __FUNCTION__ << std::endl;
-
     if (stmt.op == SH_OP_FETCH) {
-      std::cerr << "It's a FETCH: " << __FUNCTION__ << std::endl;
-
-      ShVariable coordsVar(tc_node);
+      // if (tc_node_itr == tc_node.end()) return; // only reason to pass list instead of just iterator
+      ShVariable coordsVar(*tc_node_itr);
       if (indexed) {
-	std::cerr << "It's an indexed FETCH: " << __FUNCTION__ << std::endl;
         stmt = ShStatement(stmt.dest, texVar, SH_OP_TEXI, coordsVar);
       } else {
-	std::cerr << "It's not an indexed FETCH: " << __FUNCTION__ << std::endl;
         stmt = ShStatement(stmt.dest, texVar, SH_OP_TEX, coordsVar);
       }
       // The following is useful for debugging
       // stmt = ShStatement(stmt.dest, SH_OP_ASN, coordsVar(0,1,0,1));
+      tc_node_itr++;
     } else {
-      std::cerr << "It's a not a FETCH: " << __FUNCTION__ << std::endl;
       // Make sure our actualy index is a temporary in the program.
       ShContext::current()->enter(program);
       ShVariable coordsVar(new ShVariableNode(SH_TEMP, 2, SH_FLOAT));

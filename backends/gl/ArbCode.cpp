@@ -189,6 +189,7 @@ void ArbCode::generate()
 {
   // Transform code to be ARB_fragment_program compatible
   ShProgramNodePtr temp_shader = m_originalShader->clone();
+
   m_shader = temp_shader.object();
   m_shader->acquireRef();
   temp_shader = NULL;
@@ -1414,6 +1415,7 @@ void ArbCode::allocTextures(const ArbLimits& limits)
 
 void ArbCode::bindTextures()
   {
+
   for (ShProgramNode::TexList::const_iterator I = m_shader->textures.begin();
        I != m_shader->textures.end();
        ++I)

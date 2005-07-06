@@ -89,6 +89,8 @@ class HostGlTextureTransfer : public ShTransfer {
       data_variant = host_variant;
     }
 
+    std::cerr  << __FUNCTION__ << "The data_variant has size " << data_variant->size() << std::endl; // XXX
+
     int width = texture->width();
     int height = texture->height();
     int depth = texture->depth();
@@ -131,6 +133,7 @@ class HostGlTextureTransfer : public ShTransfer {
 				       width, height, 0, texture->format(),
 				       type, data_variant->array()));
       } else {
+	std::cerr  << __FUNCTION__ << ": Testing invocations to texImage2D" << std::endl; // XXX
 	SH_GL_CHECK_ERROR(glTexImage2D(texture->target(), 0,
 				       texture->internalFormat(),
 				       width, height, 0, texture->format(),
