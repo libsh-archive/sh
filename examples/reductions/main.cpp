@@ -25,26 +25,26 @@ int main()
 
   // allocate space
   ShHostMemoryPtr data = new ShHostMemory( sizeof(float) * STREAM_LENGTH, SH_FLOAT );
+  ShHostMemoryPtr data2 = new ShHostMemory( sizeof(float) * STREAM_LENGTH, SH_FLOAT );
   ShHostMemoryPtr res = new ShHostMemory( sizeof(float) * STREAM_LENGTH, SH_FLOAT );
   ShChannel<ShAttrib1f> seq(data, STREAM_LENGTH);
+  ShChannel<ShAttrib1f> seqp(data2, STREAM_LENGTH, 1, 0);
   ShChannel<ShAttrib1f> seq2(res, STREAM_LENGTH);
 
   // find actual location of data
   ShHostStoragePtr data_loc = shref_dynamic_cast<ShHostStorage>( data->findStorage("host") );
+  ShHostStoragePtr data2_loc = shref_dynamic_cast<ShHostStorage>( data2->findStorage("host") );
   // sync barrier
   data_loc->dirty();
+  data2_loc->dirty();
+
   // initialize stream
   float *cur_value = (float *)data_loc->data();
-  for( int i = 0; i < STREAM_LENGTH; i++ )
+  float *cur_value2 = (float *)data2_loc->data();
+  for( int i = 0; i < STREAM_LENGTH; i++ ) {
     cur_value[i] = i;
-
-  ShProgram mul2 = SH_BEGIN_PROGRAM("stream") {
-    ShInputAttrib1f in;
-    ShOutputAttrib1f out;
-
-    out = 2 * in;
-
-  } SH_END;
+    cur_value2[i] = 0;
+  }
 
   ShProgram redkern = SH_BEGIN_PROGRAM("stream") {
     ShInputAttrib1f in1, in2;
@@ -53,13 +53,10 @@ int main()
     out = in1 + in2;
 
   } SH_END;
-  
-  ShBackendPtr backend = ShBackend::get_backend(mul2.target());
-  std::cerr << "Running the program on " << backend->name() << " backend." << std::endl;
 
-  ShProgram update = mul2 << seq;
+  ShProgram update = redkern << seq << seqp;
   seq2 = update;
-
+  
   // stupid check
   ShHostMemoryPtr res_data = shref_dynamic_cast< ShHostMemory >( seq2.memory() );
   if( res_data ) {

@@ -25,17 +25,17 @@
 
 namespace SH {
 
-  ShChannelNode::ShChannelNode(ShSemanticType specType, int elements, ShValueType valueType/*, int stride, int offset*/)
+  ShChannelNode::ShChannelNode(ShSemanticType specType, int elements, ShValueType valueType, int stride, int offset)
   : ShVariableNode(SH_STREAM, elements, valueType),
-  m_memory(0), m_count(0)//, m_stride(stride), m_offset(offset)
+  m_memory(0), m_count(0), m_stride(stride), m_offset(offset)
 {
   specialType(specType);
 }
 
 ShChannelNode::ShChannelNode(ShSemanticType specType, int elements, ShValueType valueType,
-                             const ShMemoryPtr& memory, int count/*, int stride, int offset*/)
+                             const ShMemoryPtr& memory, int count, int stride, int offset)
   : ShVariableNode(SH_STREAM, elements, valueType),
-  m_memory(memory), m_count(count)//, m_stride(stride), m_offset(offset)
+  m_memory(memory), m_count(count), m_stride(stride), m_offset(offset)
 {
   specialType(specType);
 }

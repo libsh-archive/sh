@@ -172,6 +172,7 @@ AC_CONFIG_FILES([Makefile
 		 examples/glut/Makefile
 		 examples/particle/Makefile
 		 examples/textures/Makefile
+		 examples/reductions/Makefile
 		 doc/Makefile])
 
 AC_OUTPUT

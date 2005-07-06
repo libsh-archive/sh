@@ -79,7 +79,6 @@ ShManipulator<T>::~ShManipulator() {
 
 template<typename T>
 ShManipulator<T>& ShManipulator<T>::operator()(T i) {
-  std::cerr << "In operator() of shmanipulator -- most likely called by swizzle " << __FUNCTION__ << std::endl;
   m_ranges.push_back(IndexRange(i, i));
   return *this;
 }
@@ -92,7 +91,6 @@ ShManipulator<T>& ShManipulator<T>::operator()(T start, T end) {
 
 template<typename T>
 ShManipulator<T>& ShManipulator<T>::operator()(const IndexRange &range) {
-  std::cerr << "In operator() of shmanipulator [indexrange] -- most likely called by swizzle " << __FUNCTION__ << std::endl;
   m_ranges.push_back(range);
   return *this;
 }

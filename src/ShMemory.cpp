@@ -155,8 +155,12 @@ void ShStorage::sync()
   ShMemory::StorageList::const_iterator I;
   for (I = m_memory->m_storages.begin(); I != m_memory->m_storages.end(); ++I) {
     ShStorage* other = I->object();
-    if (other == this) continue;
-    if (other->timestamp() < m_memory->timestamp()) continue;
+    if (other == this) {
+      continue;
+    }
+    if (other->timestamp() < m_memory->timestamp()) {
+      continue;
+    }
     int local_cost = cost(other, this);
     if (local_cost < 0) continue; // Can't transfer from that storage.
     if (!source || local_cost < transfer_cost) {
