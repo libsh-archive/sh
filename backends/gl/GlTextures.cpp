@@ -340,8 +340,10 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target)
 
 	if (mipmap_levels > 1) {
 	  if (!node->memory(dir, 1)) {
-	    SH_DEBUG_WARN("Automatically generated missing mipmap levels (dir = " << dir << ").");
-	    node->build_mipmaps();
+	    std::stringstream s;
+	    s << "Automatically generated the " << mipmap_levels << " mipmap levels (dir = " << dir << ").";
+	    SH_DEBUG_WARN(s.str());
+	    node->build_mipmaps(dir);
 	  }
 
 	  int width = node->width();
@@ -358,7 +360,7 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target)
 	    height /= 2;
 	    int count = width * height * node->depth();
 	    GlTextureStoragePtr mip_storage = new GlTextureStorage(node->memory(dir, j).object(),
-								   shGlTargets[node->dims()],
+								   shGlCubeMapTargets[i],
 								   shGlFormat(node),
 								   shGlInternalFormat(node),
 								   node->valueType(),
@@ -454,6 +456,5 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target)
     node->meta("opengl:alloc_texid", os.str());
   }
 }
-
 
 }

@@ -144,7 +144,7 @@ public:
 
   void count(int n);
 
-  void build_mipmaps();
+  void build_mipmaps(ShCubeDirection dir = SH_CUBE_POS_X);
   
 private:
   int m_count; // max nb of elements sent to the GPU or -1 if unknown (used by the stream backend)

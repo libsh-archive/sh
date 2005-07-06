@@ -1,3 +1,13 @@
+2005-07-06  Francois Marier  <francois@serioushack.com>
+
+	* src/ShTextureNode.cpp, ShTextureNode.hpp (build_mipmaps): Only
+	build one face of the cube map at a time (takes an extra optional
+	parameter).
+	Fix the base memory pointer for cube maps.
+
+	* backends/gl/GlTextures.cpp (bindTexture): Give the proper target
+	for cube map mipmap levels.
+
 2005-07-05  Francois Marier  <francois@serioushack.com>
 
 	* src/ShTextureNode.cpp (initialize_memories): Make a copy of all

@@ -290,82 +290,75 @@ float ShTextureNode::interpolate3D(float* base_data, int scale,
   return sum / (scale * scale * scale);
 }
 
-void ShTextureNode::build_mipmaps()
+void ShTextureNode::build_mipmaps(ShCubeDirection dir)
 {
   int width = m_width;
   int height = m_height;
   int depth = m_depth;
 
-  int nb_directions = 1;
-  if (SH_TEXTURE_CUBE == m_dims) {
-    nb_directions = 6;
-  }
-
   int levels = mipmap_levels();
-  for (int j=0; j < nb_directions; j++) {
-    for (int i=1; i < levels; i++) {
+  int direction = static_cast<int>(dir);
+  for (int i=1; i < levels; i++) {
+    switch (m_dims) {
+    case SH_TEXTURE_3D:
+      depth >>= 1;
+    case SH_TEXTURE_2D:
+    case SH_TEXTURE_RECT:
+    case SH_TEXTURE_CUBE:
+      height >>= 1;
+    case SH_TEXTURE_1D:
+      width >>= 1;
+    }
 
-      switch (m_dims) {
-      case SH_TEXTURE_3D:
-	depth >>= 1;
-      case SH_TEXTURE_2D:
-      case SH_TEXTURE_RECT:
-      case SH_TEXTURE_CUBE:
-	height >>= 1;
-      case SH_TEXTURE_1D:
-	width >>= 1;
+    int memsize = m_size * width * height * depth * shTypeInfo(SH_FLOAT)->datasize();
+    ShHostMemoryPtr memory = new ShHostMemory(memsize, SH_FLOAT);
+    float* new_data = reinterpret_cast<float*>(memory->hostStorage()->data());
+
+    ShHostStoragePtr base_storage = shref_dynamic_cast<ShHostStorage>(m_memory[direction * levels]->findStorage("host"));
+    SH_DEBUG_ASSERT(SH_FLOAT == base_storage->value_type());
+    float* base_data = reinterpret_cast<float*>(base_storage->data());
+
+    // Nb of texels (for each axis) in the base texture used to
+    // generate one texel in this mipmap level
+    //
+    // e.g. given an 8x8 base texture, each texel at mipmap level 2
+    // will use 4 texels from the base texture in the x axis by 4
+    // texels in the y axis (total of 16 texels to look at).
+    int scale = 1 << i;
+
+    switch (m_dims) {
+    case SH_TEXTURE_1D:
+      for (int x=0; x < width; x++) {
+	for (int c=0; c < m_size; c++) {
+	  new_data[m_size * x + c] = interpolate1D(base_data, scale, x, c);
+	}
       }
-
-      int memsize = m_size * width * height * depth * shTypeInfo(SH_FLOAT)->datasize();
-      ShHostMemoryPtr memory = new ShHostMemory(memsize, SH_FLOAT);
-      float* new_data = reinterpret_cast<float*>(memory->hostStorage()->data());
-
-      ShHostStoragePtr base_storage = shref_dynamic_cast<ShHostStorage>(m_memory[0]->findStorage("host"));
-      SH_DEBUG_ASSERT(SH_FLOAT == base_storage->value_type());
-      float* base_data = reinterpret_cast<float*>(base_storage->data());
-
-      // Nb of texels (for each axis) in the base texture used to
-      // generate one texel in this mipmap level
-      //
-      // e.g. given an 8x8 base texture, each texel at mipmap level 2
-      // will use 4 texels from the base texture in the x axis by 4
-      // texels in the y axis (total of 16 texels to look at).
-      int scale = 1 << i;
-
-      switch (m_dims) {
-      case SH_TEXTURE_1D:
+      break;
+    case SH_TEXTURE_2D:
+    case SH_TEXTURE_RECT:
+    case SH_TEXTURE_CUBE:
+      for (int y=0; y < height; y++) {
 	for (int x=0; x < width; x++) {
 	  for (int c=0; c < m_size; c++) {
-	    new_data[m_size * x + c] = interpolate1D(base_data, scale, x, c);
+	    new_data[m_size * (y * width + x) + c] = interpolate2D(base_data, scale, x, y, c);
 	  }
 	}
-	break;
-      case SH_TEXTURE_2D:
-      case SH_TEXTURE_RECT:
-      case SH_TEXTURE_CUBE:
+      }
+      break;
+    case SH_TEXTURE_3D:
+      for (int z=0; z < depth; z++) {
 	for (int y=0; y < height; y++) {
 	  for (int x=0; x < width; x++) {
 	    for (int c=0; c < m_size; c++) {
-	      new_data[m_size * (y * width + x) + c] = interpolate2D(base_data, scale, x, y, c);
+	      new_data[m_size * (z * height + (y * width + x)) + c] = interpolate3D(base_data, scale, x, y, z, c);
 	    }
 	  }
 	}
-	break;
-      case SH_TEXTURE_3D:
-	for (int z=0; z < depth; z++) {
-	  for (int y=0; y < height; y++) {
-	    for (int x=0; x < width; x++) {
-	      for (int c=0; c < m_size; c++) {
-		new_data[m_size * (z * height + (y * width + x)) + c] = interpolate3D(base_data, scale, x, y, z, c);
-	      }
-	    }
-	  }
-	}
-	break;
       }
-
-      m_memory[j * levels + i] = memory;
+      break;
     }
+
+    m_memory[direction * levels + i] = memory;
   }
 }
 
