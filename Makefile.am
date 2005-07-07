@@ -19,7 +19,7 @@ EXTRA_DIST = BUGS CODING_STANDARDS README.osx README.w32.txt \
 	     win32/prebuild.bat win32/ShArbBackend.vcproj \
 	     win32/ShCcBackend.vcproj win32/ShGlslBackend.vcproj \
 	     win32/Sh.sln win32/ShUtil.vcproj win32/Sh.vcproj \
-	     win32/ShGlutExample.vcproj
+	     win32/ShGlutExample.vcproj COPYING
 
 docs:
 	cd doc ; $(MAKE) docs ; cd ..
