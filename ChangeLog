@@ -1,5 +1,8 @@
 2005-07-07  Francois Marier  <francois@serioushack.com>
 
+	* add_libsh_copyright_notice.pl, COPYING, *.cpp, *.hpp: Change the
+	license and copyright notices to the GNU LGPL.
+	
 	* src/ShException.cpp, ShException.hpp: Make ShException inherit
 	from std::exception and add a what() method so that ShExceptions
 	can be handled in the same way as regular C++ exceptions.
