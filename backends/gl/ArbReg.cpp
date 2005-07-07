@@ -101,7 +101,8 @@ std::ostream& ArbReg::printDecl(std::ostream& out) const
     for (int i = 0; i < 4; i++) {
       if (i) out << ", ";
       std::streamsize prec = out.precision();
-      out.precision(std::numeric_limits<float>::digits10);
+//      out.precision(std::numeric_limits<float>::digits10);
+      out.precision(20);
       out << binding.values[i];
       out.precision(prec);
     }
