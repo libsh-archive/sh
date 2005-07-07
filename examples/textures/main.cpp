@@ -338,6 +338,8 @@ int main(int argc, char** argv)
                                    NULL, NULL, NULL, CFSTR("Error loading images"),
                                    s, NULL, NULL, NULL, &flags);
     CFRelease(s);
+#else
+    std::cerr << e.what() << std::endl;
 #endif
     exit(1);
   }
