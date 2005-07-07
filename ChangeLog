@@ -1,5 +1,8 @@
 2005-07-07  Francois Marier  <francois@serioushack.com>
 
+	* backends/gl/ArbCode.cpp: Map result.depth to SH_POSITION
+	variables only to avoid generic mappings.
+
 	* add_libsh_copyright_notice.pl, COPYING, *.cpp, *.hpp: Change the
 	license and copyright notices to the GNU LGPL.
 	

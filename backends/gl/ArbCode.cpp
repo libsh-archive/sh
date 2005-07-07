@@ -90,7 +90,7 @@ ArbBindingSpecs arbVertexOutputBindingSpecs[] = {
 
 ArbBindingSpecs arbFragmentOutputBindingSpecs[] = {
   {SH_ARB_REG_RESULTCOL, 1, SH_COLOR, true}, // modified by constructor if ATI_draw_buffers is present
-  {SH_ARB_REG_RESULTDPT, 1, SH_ATTRIB, false},
+  {SH_ARB_REG_RESULTDPT, 1, SH_POSITION, false},
   {SH_ARB_REG_NONE, 0, SH_ATTRIB}
 };
 
