@@ -33,16 +33,17 @@ namespace SH {
  * You should derive from this class to make more specific exceptions.
  */
 class
-SH_DLLEXPORT ShException {
+SH_DLLEXPORT ShException : public std::exception {
 public:
   /// Construct a general exception with the given message.
   ShException(const std::string& message);
-  virtual ~ShException(); // Make this class virtual in orer to get
+  virtual ~ShException() throw (); // Make this class virtual in orer to get
                           // RTTI info in.
   
   /// Return an informative message describing the exception.
   const std::string& message() const;
-  
+
+  virtual const char* ShException::what() const throw();
 protected:
   std::string m_message;
 };

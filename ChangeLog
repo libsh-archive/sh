@@ -1,3 +1,9 @@
+2005-07-07  Francois Marier  <francois@serioushack.com>
+
+	* src/ShException.cpp, ShException.hpp: Make ShException inherit
+	from std::exception and add a what() method so that ShExceptions
+	can be handled in the same way as regular C++ exceptions.
+
 2005-07-06  Francois Marier  <francois@serioushack.com>
 
 	* src/ShTextureNode.cpp, ShTextureNode.hpp (build_mipmaps): Only

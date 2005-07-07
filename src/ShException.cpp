@@ -30,13 +30,18 @@ ShException::ShException(const std::string& message)
 {
 }
 
-ShException::~ShException()
+ShException::~ShException() throw()
 {
 }
 
 const std::string& ShException::message() const
 {
   return m_message;
+}
+
+const char* ShException::what() const throw()
+{
+  return m_message.c_str();
 }
 
 ShParseException::ShParseException(const std::string& message)
