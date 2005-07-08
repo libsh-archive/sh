@@ -361,12 +361,6 @@ void GlslCode::real_update_uniform(const ShVariableNodePtr& uniform, const strin
     } else {
       update_float_uniform(uniform, location);
     }
-  } else {
-    stringstream s;
-    s << "Cannot find location of "
-      << (shIsInteger(uniform->valueType()) ? "int" : "float")
-      << " uniform '" << name << "' (name=" << uniform->name() << ").";
-    SH_DEBUG_WARN(s.str());
   }
 }
 
