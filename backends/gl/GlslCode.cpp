@@ -121,7 +121,7 @@ void GlslCode::generate()
     gen_structural_node(structural.head());
     m_shader->ctrlGraph->entry()->clearMarked();
     allocate_textures();
-  } 
+  }
   catch (...) {
     m_shader->ctrlGraph->entry()->clearMarked();
     ShContext::current()->exit();
@@ -353,7 +353,7 @@ void GlslCode::updateUniform(const ShVariableNodePtr& uniform)
 
 void GlslCode::real_update_uniform(const ShVariableNodePtr& uniform, const string& name)
 {
-  // TODO: cache these
+  // TODO: cache these?
   GLint location = glGetUniformLocationARB(m_bound, name.c_str());
   if (location != -1) {
     if (shIsInteger(uniform->valueType())) {
@@ -362,11 +362,11 @@ void GlslCode::real_update_uniform(const ShVariableNodePtr& uniform, const strin
       update_float_uniform(uniform, location);
     }
   } else {
-    cerr << "Cannot find location of "
-	 << (shIsInteger(uniform->valueType()) ? "int" : "float")
-	 << " uniform '" << name << "' (name=" << uniform->name()
-	 << "; size=" << uniform->size() << "; kind=" << uniform->kind()
-	 << "; hasvalues=" << uniform->hasValues() << ")." << endl;
+    stringstream s;
+    s << "Cannot find location of "
+      << (shIsInteger(uniform->valueType()) ? "int" : "float")
+      << " uniform '" << name << "' (name=" << uniform->name() << ").";
+    SH_DEBUG_WARN(s.str());
   }
 }
 

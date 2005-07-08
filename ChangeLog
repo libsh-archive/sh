@@ -1,5 +1,9 @@
 2005-07-08  Francois Marier  <francois@serioushack.com>
 
+	* backends/gl/GlslCode.cpp (real_update_uniform): Turn the unknown
+	uniform message into a debug warning since it is likely to come
+	from an internal error.
+
 	* src/ShAlgebra.cpp (connect): Add a missing collectVariables().
 	(combine): Add a missing collectVariables().
 
