@@ -90,6 +90,10 @@ GlslVariableMap::GlslVariableMap(ShProgramNode* shader, GlslProgramType unit)
        i != m_shader->constants_end(); i++) {
     allocate_temp(*i);
   }
+  for (ShProgramNode::VarList::const_iterator i = m_shader->uniforms_begin();
+       i != m_shader->uniforms_end(); i++) {
+    allocate_temp(*i);
+  }
 }
 
 void GlslVariableMap::allocate_builtin(const ShVariableNodePtr& node,

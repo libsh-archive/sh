@@ -1,5 +1,8 @@
 2005-07-08  Francois Marier  <francois@serioushack.com>
 
+	* backends/gl/GlslVariableMap.cpp (GlslVariableMap): Allocate
+	GlslVariables for the uniforms.
+
 	* backends/gl/PBufferStreams.cpp (execute): Only print the
 	fragment program when SH_DEBUG_PBS_PRINTFP is defined.
 
