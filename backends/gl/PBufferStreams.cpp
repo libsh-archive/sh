@@ -151,7 +151,7 @@ PBufferStreamCache::PBufferStreamCache(ShProgramNode* stream_program,
     //ShProgram with_tc = ShProgram(*I) & lose<ShTexCoord2f>("streamcoord");
     ShProgram with_tc = ShProgram(*I);
 
-    for(int i = 0; i< m_channel_map.size(); i++)
+    for(ChannelMap::size_type i = 0; i< m_channel_map.size(); i++)
       with_tc = with_tc & lose<ShTexCoord2f>("streamcoord");
 
     /*TexFetcher fetcher(m_channel_map, with_tc.node()->inputs.back(),
@@ -160,7 +160,9 @@ PBufferStreamCache::PBufferStreamCache(ShProgramNode* stream_program,
     for( ShProgramNode::VarList::size_type i = 0;
 	 i < (with_tc.node()->inputs.size() - m_channel_map.size()); i++, ++myit);
     std::list<ShVariableNodePtr> mylist(myit, with_tc.node()->inputs.end());
-    TexFetcher fetcher(m_channel_map, mylist, // probably should just pass the iterator
+    TexFetcher fetcher(m_channel_map,
+		       //std::list<ShVariableNodePtr>(myit, with_tc.node()->inputs.end()), // probably should just pass the iterator
+		       mylist, // probably should just pass the iterator
                        dims == SH_TEXTURE_RECT, with_tc.node());
     with_tc.node()->ctrlGraph->dfs(fetcher);
 
@@ -296,11 +298,14 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
   }
 
   FloatExtension extension = factory->get_extension();
-  
+
   // --- Set up the GLX context
   PBufferContextPtr context = factory->get_context(tex_size, tex_size);
 
   PBufferHandlePtr old_handle = context->activate();
+
+  OffStrideGatherer offstrides;
+  program->ctrlGraph->dfs( offstrides );
 
   DECLARE_TIMER(vpsetup);
 
@@ -308,6 +313,30 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
   if (!m_setup_vp) {
     //m_vp = keep<ShPosition4f>() & keep<ShTexCoord2f>();   // The identity vertex program
     //m_vp.node()->target() = "gpu:vertex";
+
+    ShProgram m_vp2 = SH_BEGIN_PROGRAM("gpu:vertex") {
+      ShInputPosition4f ipos;
+      ShOutputPosition4f opos;
+      opos = ipos;
+    } SH_END;
+
+    ShProgram newprog = m_vp2;
+
+    for( OffStrideGatherer::iterator i = offstrides.begin(); i != offstrides.end(); ++i ) {
+
+      ShProgram vp_coordgen = SH_BEGIN_PROGRAM("gpu:vertex") {
+	ShInputTexCoord2f tc;
+	ShOutputTexCoord2f otc;
+
+	otc = tc * i->first;
+      } SH_END;
+
+      newprog = newprog & vp_coordgen;
+    }
+    /* begin XXX */
+    newprog.code()->print(std::cerr);
+    /* end XXX */
+
     float delta = 1.0 / (float)tex_size * 2.0f;
     m_vp = SH_BEGIN_PROGRAM("gpu:vertex") {
       ShInputPosition4f ipos;
@@ -526,8 +555,8 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
       using_temporary_buffer = true;
     }
     
-    int freq = 2.0; // this should be from stride
-    glReadPixels(0, 0, tex_size / freq, count / tex_size, format, // actual copy of the
+    float freq = 2.0; // this should be from stride  // XXX
+    glReadPixels(0, 0, (int)tex_size / freq, (int)count / tex_size, format, // actual copy of the
                  readpixelType, resultBuffer->array());    // results to the stream
     gl_error = glGetError();
     if (gl_error != GL_NO_ERROR) {

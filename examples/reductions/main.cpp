@@ -27,8 +27,8 @@ int main()
   ShHostMemoryPtr data = new ShHostMemory( sizeof(float) * STREAM_LENGTH, SH_FLOAT );
   ShHostMemoryPtr data2 = new ShHostMemory( sizeof(float) * STREAM_LENGTH, SH_FLOAT );
   ShHostMemoryPtr res = new ShHostMemory( sizeof(float) * STREAM_LENGTH, SH_FLOAT );
-  ShChannel<ShAttrib1f> seq(data, STREAM_LENGTH);
-  ShChannel<ShAttrib1f> seqp(data2, STREAM_LENGTH, 1, 0);
+  ShChannel<ShAttrib1f> seq(data, STREAM_LENGTH, 2);
+  ShChannel<ShAttrib1f> seqp(data2, STREAM_LENGTH, 1);
   ShChannel<ShAttrib1f> seq2(res, STREAM_LENGTH);
 
   // find actual location of data

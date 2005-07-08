@@ -141,4 +141,27 @@ void split_program(ShProgramNode* program,
   }
 }
 
+void OffStrideGatherer::operator()(SH::ShCtrlGraphNode* node)
+{
+  using namespace SH;
+  // TODO: fold this back into ChannelGatherer
+  if (!node) return;  
+
+  ShBasicBlockPtr block = node->block;
+  if (!block) return;
+
+  for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+    const ShStatement& stmt = *I;
+    if (stmt.op != SH_OP_FETCH) continue;
+
+    if (stmt.src[0].node()->kind() != SH_STREAM) continue;
+    
+    ShChannelNodePtr channel = shref_dynamic_cast<ShChannelNode>(stmt.src[0].node());
+
+    m_list.push_back( std::pair<int, int>(channel->stride(), channel->offset()) );
+  }
+
+  return;
+}
+
 }
