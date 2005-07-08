@@ -364,8 +364,10 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
     TIMING_RESULT(binding);
 
 #ifdef SH_DEBUG_PBS_PRINTFP
-    for (ShProgramSet::NodeList::const_iterator i = (*I)->begin(); i != (*I)->end(); i++) {
-      (*i)->code()->print(std::cerr);  
+    {
+      ShProgramSet::NodeList::const_iterator i = (*I)->begin();
+      ++i;
+      (*i)->code()->print(std::cerr);
     }
 #endif
 

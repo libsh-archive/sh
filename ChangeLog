@@ -1,5 +1,8 @@
 2005-07-08  Francois Marier  <francois@serioushack.com>
 
+	* backends/gl/PBufferStreams.cpp (execute): Only print the
+	fragment program when SH_DEBUG_PBS_PRINTFP is defined.
+
 	* backends/gl/GlslCode.cpp (real_update_uniform): Turn the unknown
 	uniform message into a debug warning since it is likely to come
 	from an internal error.
