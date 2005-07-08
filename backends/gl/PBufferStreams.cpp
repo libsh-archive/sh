@@ -314,44 +314,43 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
     //m_vp = keep<ShPosition4f>() & keep<ShTexCoord2f>();   // The identity vertex program
     //m_vp.node()->target() = "gpu:vertex";
 
-    ShProgram m_vp2 = SH_BEGIN_PROGRAM("gpu:vertex") {
+    float delta = 1.0 / (float)tex_size * 2.0f;
+
+    ShProgram vp_coordgen = SH_BEGIN_PROGRAM("gpu:vertex") {
       ShInputPosition4f ipos;
       ShOutputPosition4f opos;
-      opos = ipos;
+      ShInputTexCoord2f tc;
+
+      int cnt = 0;
+      for( OffStrideGatherer::iterator i = offstrides.begin(); i != offstrides.end(); ++i, cnt++ ) {
+	std::ostringstream os;
+	os << cnt;
+	/* [ (stride, offset) ] */
+	ShOutputTexCoord2f SH_NAMEDECL(offset, "offset" + os.str() ) = tc * ShAttrib2f((float)(i->first) - delta /10., 1.0);
+      }
+
+      ipos = opos;
     } SH_END;
 
-    ShProgram newprog = m_vp2;
+    //std::cerr << __FUNCTION__ << "*** Now Checking newly generated program... " << std::endl; // XXX
+    //vp_coordgen.node()->code()->print( std::cerr );
 
-    for( OffStrideGatherer::iterator i = offstrides.begin(); i != offstrides.end(); ++i ) {
+    //m_vp = m_vp & vp_coordgen;
 
-      ShProgram vp_coordgen = SH_BEGIN_PROGRAM("gpu:vertex") {
-	ShInputTexCoord2f tc;
-	ShOutputTexCoord2f otc;
-
-	otc = tc * i->first;
-      } SH_END;
-
-      newprog = newprog & vp_coordgen;
-    }
-    /* begin XXX */
-    newprog.code()->print(std::cerr);
-    /* end XXX */
-
-    float delta = 1.0 / (float)tex_size * 2.0f;
+    /*
     m_vp = SH_BEGIN_PROGRAM("gpu:vertex") {
       ShInputPosition4f ipos;
       ShOutputPosition4f opos;
       ShInputTexCoord2f tc;
       ShOutputTexCoord2f otc;
       ShOutputTexCoord2f otc2;
-      //ShOutputTexCoord2f otc2;
-      //ShAttrib2f SH_DECL(offset) = ShAttrib2f(delta, 0.0);
-      ShAttrib2f SH_DECL(offset) = ShAttrib2f(2.0 - delta /10., 1.0);
 
       opos = ipos;
-      otc = tc * offset;
-      otc2 = otc;
+      otc = tc * ShAttrib2f(2.0 - delta /10., 1.0);
+      otc2 = tc * ShAttrib2f(3.0 - delta /10., 1.0);
     } SH_END;
+    */
+    m_vp = vp_coordgen;
 
     shCompile(m_vp);
     m_setup_vp = true;
