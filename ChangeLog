@@ -1,3 +1,8 @@
+2005-07-08  Francois Marier  <francois@serioushack.com>
+
+	* src/ShAlgebra.cpp (connect): Add a missing collectVariables().
+	(combine): Add a missing collectVariables().
+
 2005-07-07  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/ArbCode.cpp: Map result.depth to SH_POSITION

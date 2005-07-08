@@ -156,6 +156,8 @@ ShProgram connect(ShProgram pa, ShProgram pb)
   ShVariableReplacer replacer(varMap);
   program->ctrlGraph->dfs(replacer);
 
+  program->collectVariables();
+
   optimize(program);
   return program;
 }
@@ -196,6 +198,8 @@ ShProgram combine(ShProgram pa, ShProgram pb)
   program->inputs.insert(program->inputs.end(), b->inputs.begin(), b->inputs.end());
   program->outputs = a->outputs;
   program->outputs.insert(program->outputs.end(), b->outputs.begin(), b->outputs.end());
+
+  program->collectVariables();
 
   optimize(program);
   return program;
