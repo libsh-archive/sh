@@ -1,5 +1,8 @@
 2005-07-08  Francois Marier  <francois@serioushack.com>
 
+	* util/ShNoiseImpl.hpp (turbulence): Add a missing return
+	statement.
+
 	* backends/gl/GlslVariableMap.cpp (GlslVariableMap): Allocate
 	GlslVariables for the uniforms.
 

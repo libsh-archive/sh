@@ -219,7 +219,7 @@ ShGeneric<N, T> turbulence(const ShGeneric<M, T> &p, bool useTexture=true) {
 #else
 ShGeneric<N, T> turbulence(const ShGeneric<M, T> &p, bool useTexture) {
 #endif
-  abs(sperlin<N>(p, useTexture));
+  return abs(sperlin<N>(p, useTexture));
 }
 SHNOISE_WITH_AMP(turbulence);
 
