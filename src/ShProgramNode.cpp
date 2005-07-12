@@ -337,6 +337,7 @@ ShPointer<ShProgramNode> ShProgramNode::clone() const
 
   ShProgramNodePtr result = new ShProgramNode(target());
   result->ShInfoHolder::operator=(*this);
+  result->ShMeta::operator=(*this);
   result->ctrlGraph = new ShCtrlGraph(head, tail);
   result->inputs = inputs;
   result->outputs = outputs;
