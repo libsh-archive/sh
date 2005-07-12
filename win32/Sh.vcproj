@@ -448,9 +448,6 @@
 				RelativePath="..\src\ShInterp.hpp">
 			</File>
 			<File
-				RelativePath="..\src\ShMIPFilter.hpp">
-			</File>
-			<File
 				RelativePath="..\src\ShLib.hpp">
 			</File>
 			<File
@@ -557,6 +554,9 @@
 			</File>
 			<File
 				RelativePath="..\src\ShMetaImpl.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShMIPFilter.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShNibbles.hpp">
@@ -717,6 +717,9 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}">
 		</Filter>
+		<File
+			RelativePath="..\ChangeLog">
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

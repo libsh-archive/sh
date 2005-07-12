@@ -59,11 +59,13 @@ ShGeneric<N, CT1T2>
 reflect(const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b);
 
 /** Compute refraction vector.
- * Refract vector a about normal b using relative index of refraction c.
+ * @param normal Outward facing normal vector
+ * @param view Outward facing view vector
+ * @param eta Ratio of IOR of second surface divided by IOR of first
  */
 template<int N, typename T1, typename T2, typename T3>
 ShGeneric<N, CT1T2T3> 
-refract(const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b, const ShGeneric<1, T3>& c);
+refract(const ShGeneric<N, T1>& view, const ShGeneric<N, T2>& normal, const ShGeneric<1, T3>& eta);
 
 /** Make a vector face the same way as another
  * Negates b if it does not face the same way as a (i.e. the dot

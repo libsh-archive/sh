@@ -1,3 +1,13 @@
+2005-07-12  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/ShLibGeometry.hpp: Document sane convention for
+	refract() parameters.
+
+	* src/ShLibGeometryImpl.hpp: Change refract() to conform to a
+	sane convention for its inputs. Resolves issue200.
+	
+	* backends/gl/ArbEmit.cpp: Better implementation of SGN.
+
 2005-07-12  Andrew Lauritzen  <atlaurit@localhost.localdomain>
 
 	* src/ShProgramNode.cpp (clone): Cloning ShProgramNodes now copies
