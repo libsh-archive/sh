@@ -71,12 +71,15 @@ public:
    * variable in computation and inputs cannot be used as a dest, and
    * inout variables are not supported directly.
    *
+   * Optionally one can provide a ShVarTransformMap that the function will
+   * update with any new variable transformations that it makes.
+   *
    * @todo currently all or none approach to conversion.
    * could parameterize this with flags to choose INPUT, OUTPUT, INOUT
    */
   //@{
   friend struct InputOutputConvertor;
-  void convertInputOutput();
+  void convertInputOutput(ShVarTransformMap *varTransMap = 0);
   //@}
   
   /**@name Texture lookup conversion

@@ -125,7 +125,16 @@ private:
   void allocRegs();
 
   /// Allocate an input register, if necessary.
+  /// Calls the relivent generic or semantic input alloc function.
   void allocInputs(const ArbLimits& limits);
+
+  /// Allocate inputs with "generic" bindings.
+  /// Only relivent to vertex shaders for this backend.
+  void allocGenericInputs(const ArbLimits& limits);
+
+  /// Allocate inputs with "semantic" bindings.
+  /// Only relivent to vertex shaders for this backend.
+  void allocSemanticInputs(const ArbLimits& limits);
   
   /// Allocate an output register, if necessary.
   void allocOutputs(const ArbLimits& limits);
@@ -220,6 +229,9 @@ private:
   std::vector<int> m_outputBindings;
   std::vector<int> m_inputBindings;
 
+  /// Map any new variables that we create back to their originals in
+  /// m_originalShader.
+  SH::ShVarTransformMap m_originalVarsMap;
 
   //@todo remove m_splits and m_converts with dependent uniforms 
   

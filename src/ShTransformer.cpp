@@ -440,7 +440,7 @@ struct InputOutputConvertor {
     }
   }
 
-  void updateGraph() {
+  void updateGraph(ShVarTransformMap *varTransMap) {
     if(m_varMap.empty()) return;
     m_changed = true;
 
@@ -468,6 +468,12 @@ struct InputOutputConvertor {
         std::replace(m_program->outputs.begin(), m_program->outputs.end(),
             oldNode, newOutNode);
 
+        // we replaced original nodes from the inputs/outputs so store that in our
+        // transform map so that the user can get back to the *real* originals if
+        // they so wish.
+        varTransMap->add_variable_transform(oldNode, newInNode);
+        varTransMap->add_variable_transform(oldNode, newOutNode);
+
         // add mov statements to/from temporary 
         oldEntry->block->addStatement(ShStatement(
               ShVariable(it->second), SH_OP_ASN, ShVariable(newInNode)));
@@ -483,7 +489,7 @@ struct InputOutputConvertor {
   int m_id;
 };
 
-void ShTransformer::convertInputOutput()
+void ShTransformer::convertInputOutput(ShVarTransformMap *varTransMap)
 {
 #ifdef SH_DBG_TRANSFORMER
   m_program->dump("ioconvert_start");
@@ -498,7 +504,20 @@ void ShTransformer::convertInputOutput()
   ShVariableReplacer vr(varMap);
   m_program->ctrlGraph->dfs(vr);
 
-  ioc.updateGraph(); 
+  // If they didn't provide a map, make a temporary one
+  bool TempVarMap = false;
+  if (!varTransMap) {
+    varTransMap = new ShVarTransformMap();
+    TempVarMap = true;
+  }
+
+  ioc.updateGraph(varTransMap);
+
+  // Cleanup
+  if (TempVarMap) {
+    delete varTransMap;
+    varTransMap = 0;
+  }
 
 #ifdef SH_DBG_TRANSFORMER
   m_program->dump("ioconvert_done");

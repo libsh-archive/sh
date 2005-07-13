@@ -54,6 +54,46 @@ SH_DLLEXPORT ShVariableReplacer {
   ShVarMap& varMap;
 };
 
+
+/** Keeps a (potentially composite) mapping from new variables (ex. when compiling)
+ * to the originals and supports querying for the original variable from which
+ * the given "transformed" variable was derived.
+ */
+class
+SH_DLLEXPORT ShVarTransformMap {
+private:
+  ShVarMap m_NewToOldMap;
+
+public:
+  ShVarTransformMap() {}
+  explicit ShVarTransformMap(const ShVarTransformMap &m)
+    : m_NewToOldMap(m.m_NewToOldMap)
+  {}
+  ShVarTransformMap & operator=(const ShVarTransformMap &m)
+  {
+    m_NewToOldMap = m.m_NewToOldMap;
+    return *this;
+  }
+
+  /// Clear the map out
+  void clear() { m_NewToOldMap.clear(); }
+
+  /// Indicate that we are creating a new transformed variable derived from the
+  /// given original variable. If the original variable is already in the map, the
+  /// mapping from new to old will follow the chain all the way back.
+  void add_variable_transform(ShVariableNodePtr origVar, ShVariableNodePtr newVar);
+
+  /// Get the original variable (ALL the way back) that gave rise to the given
+  /// transformed variable. If a mapping is not found for the given variable,
+  /// the variable itself is return (ie. it has not been transformed at all).
+  ShVariableNodePtr get_original_variable(ShVariableNodePtr newVar) const
+  {
+    ShVarMap::const_iterator i = m_NewToOldMap.find(newVar);
+    return (i != m_NewToOldMap.end() ? i->second : newVar);
+  }
+};
+
+
 }
 
 #endif

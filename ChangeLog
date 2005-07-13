@@ -1,3 +1,12 @@
+2005-07-12  Andrew Lauritzen  <atlaurit@localhost.localdomain>
+
+	* src/ShInternals.*: Add a utility class for tracking variable
+	transformations (while compiling, etc).
+
+	* backends/gl/ArbCode.hpp: Added "generic" binding support for
+	vertex shader inputs if requested (by metadata). Resolves issue100
+	for the ARB backend.
+
 2005-07-12  Stefanus Du Toit  <sdt@serioushack.com>
 
 	* src/ShLibGeometry.hpp: Document sane convention for

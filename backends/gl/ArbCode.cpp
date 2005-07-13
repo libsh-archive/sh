@@ -183,7 +183,12 @@ void dump(ShProgramNodePtr foo, std::string desc) {
 
 void ArbCode::generate()
 {
+  // Keep a mapping back to the original variables
+  m_originalVarsMap.clear();
+
   // Transform code to be ARB_fragment_program compatible
+  // TODO: clone should update m_originalVarsMap to map our cloned variables
+  // back to the originals in m_originalShader.
   ShProgramNodePtr temp_shader = m_originalShader->clone();
   m_shader = temp_shader.object();
   m_shader->acquireRef();
@@ -193,7 +198,9 @@ void ArbCode::generate()
   ShTransformer transform(m_shader);
 
   dump(m_shader, "arbcode_start");
-  transform.convertInputOutput(); 
+  // Record changes that the transformer makes to the input/output variables
+  // so that we have a mapping from the changed ones back to the originals.
+  transform.convertInputOutput(&m_originalVarsMap);
   //dump(m_shader, "arbcode_io");
   transform.convertTextureLookups();
   //dump(m_shader, "arbcode_io");
@@ -209,6 +216,7 @@ void ArbCode::generate()
   } else {
     m_shader->releaseRef();
     m_shader = m_originalShader;
+    m_originalVarsMap.clear();       // We're now pointing directly to the originals
     ShContext::current()->exit();
     ShContext::current()->enter(m_shader);
   }
@@ -972,9 +980,9 @@ void ArbCode::bindSpecial(const ShProgramNode::VarList::const_iterator& begin,
   }    
 }
 
-void ArbCode::allocInputs(const ArbLimits& limits)
+void ArbCode::allocSemanticInputs(const ArbLimits& limits)
 {
-  // First, try to assign some "special" output register bindings
+  // First, try to assign some "special" input register bindings
   for (int i = 0; arbBindingSpecs(false, m_unit)[i].binding != SH_ARB_REG_NONE; i++) {
     bindSpecial(m_shader->inputs.begin(), m_shader->inputs.end(),
                 arbBindingSpecs(false, m_unit)[i], m_inputBindings,
@@ -1000,6 +1008,55 @@ void ArbCode::allocInputs(const ArbLimits& limits)
       }
     }
   }
+}
+
+void ArbCode::allocGenericInputs(const ArbLimits& limits)
+{
+  // First look for a position variable and map it to generic attribute 0
+  for (ShProgramNode::VarList::const_iterator I = m_shader->inputs.begin();
+       I != m_shader->inputs.end(); ++I) {
+    ShVariableNodePtr node = *I;
+    if (m_registers.find(node) == m_registers.end() &&
+        node->specialType() == SH_POSITION) {
+      m_registers[node] = new ArbReg(SH_ARB_REG_ATTRIB, m_numInputs++, node->name());
+      m_registers[node]->binding.type = SH_ARB_REG_VERTEXATR;
+      m_registers[node]->binding.index = 0;    // map to vertex.attrib[0]
+      m_reglist.push_back(m_registers[node]);
+
+      // Set the associated metadata so the caller knows which attrib we used
+      // Note that we want to change the metadata in the ORIGINAL variables so that
+      // it is accessible to the user.
+      m_originalVarsMap.get_original_variable(node)->meta("opengl:attribindex", "0");
+      break;                                   // We only want to bind at most one
+    }
+  }
+
+  // Ok, now second pass, everything else we just do in order, using indices 1 and up
+  int AttribIndex = 1;
+  for (ShProgramNode::VarList::const_iterator I = m_shader->inputs.begin();
+       I != m_shader->inputs.end(); ++I) {
+    ShVariableNodePtr node = *I;
+    if (m_registers.find(node) != m_registers.end()) continue;
+
+    m_registers[node] = new ArbReg(SH_ARB_REG_ATTRIB, m_numInputs++, node->name());
+    m_registers[node]->binding.type = SH_ARB_REG_VERTEXATR;
+    m_registers[node]->binding.index = AttribIndex++;
+    m_reglist.push_back(m_registers[node]);
+
+    // See comment in the above block.
+    std::ostringstream os;
+    os << m_registers[node]->binding.index;
+    m_originalVarsMap.get_original_variable(node)->meta("opengl:attribindex", os.str());
+  }
+}
+
+void ArbCode::allocInputs(const ArbLimits& limits)
+{
+  // Vertex shaders with opengl:matching set to "generic" need to be bound differently
+  if (m_unit == "vertex" && (m_shader->meta("opengl:matching") == "generic"))
+    allocGenericInputs(limits);
+  else
+    allocSemanticInputs(limits);
 }
 
 void ArbCode::allocOutputs(const ArbLimits& limits)
