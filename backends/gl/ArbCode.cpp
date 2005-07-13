@@ -1027,7 +1027,7 @@ void ArbCode::allocGenericInputs(const ArbLimits& limits)
       // Note that we want to change the metadata in the ORIGINAL variables so that
       // it is accessible to the user.
       m_originalVarsMap.get_original_variable(node)->meta("opengl:attribindex", "0");
-      break;                                   // We only want to bind at most one
+      break;                                   // we only want to bind at most one
     }
   }
 

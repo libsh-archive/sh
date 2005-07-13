@@ -83,10 +83,7 @@ void ShVarTransformMap::add_variable_transform(ShVariableNodePtr origVar, ShVari
   // We need only go one level of depth since we store the mappings to the ORIGINAL,
   // instead of traversing the chain each time.
   ShVarMap::iterator i = m_NewToOldMap.find(origVar);
-  if (i == m_NewToOldMap.end())
-    m_NewToOldMap[newVar] = origVar;
-  else
-    m_NewToOldMap[newVar] = i->second;
+  m_NewToOldMap[newVar] = (i == m_NewToOldMap.end() ? origVar : i->second);
 }
 
 }
