@@ -316,10 +316,12 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
 
     float delta = 1.0 / (float)tex_size * 2.0f;
 
-    ShProgram vp_coordgen = SH_BEGIN_PROGRAM("gpu:vertex") {
+    m_vp = SH_BEGIN_PROGRAM("gpu:vertex") {
       ShInputPosition4f ipos;
       ShOutputPosition4f opos;
       ShInputTexCoord2f tc;
+
+      opos = ipos ;
 
       int cnt = 0;
       for( OffStrideGatherer::iterator i = offstrides.begin(); i != offstrides.end(); ++i, cnt++ ) {
@@ -328,29 +330,8 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
 	/* [ (stride, offset) ] */
 	ShOutputTexCoord2f SH_NAMEDECL(offset, "offset" + os.str() ) = tc * ShAttrib2f((float)(i->first) - delta /10., 1.0);
       }
-
-      ipos = opos;
+      
     } SH_END;
-
-    //std::cerr << __FUNCTION__ << "*** Now Checking newly generated program... " << std::endl; // XXX
-    //vp_coordgen.node()->code()->print( std::cerr );
-
-    //m_vp = m_vp & vp_coordgen;
-
-    /*
-    m_vp = SH_BEGIN_PROGRAM("gpu:vertex") {
-      ShInputPosition4f ipos;
-      ShOutputPosition4f opos;
-      ShInputTexCoord2f tc;
-      ShOutputTexCoord2f otc;
-      ShOutputTexCoord2f otc2;
-
-      opos = ipos;
-      otc = tc * ShAttrib2f(2.0 - delta /10., 1.0);
-      otc2 = tc * ShAttrib2f(3.0 - delta /10., 1.0);
-    } SH_END;
-    */
-    m_vp = vp_coordgen;
 
     shCompile(m_vp);
     m_setup_vp = true;
