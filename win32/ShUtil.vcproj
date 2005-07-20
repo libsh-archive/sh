@@ -166,22 +166,10 @@
 				RelativePath="..\util\ShMeshImpl.hpp">
 			</File>
 			<File
-				RelativePath="..\util\ShNoise.hpp">
-			</File>
-			<File
-				RelativePath="..\util\ShNoiseImpl.hpp">
-			</File>
-			<File
 				RelativePath="..\util\ShObjMesh.hpp">
 			</File>
 			<File
 				RelativePath="..\util\shutil.hpp">
-			</File>
-			<File
-				RelativePath="..\util\ShWorley.hpp">
-			</File>
-			<File
-				RelativePath="..\util\ShWorleyImpl.hpp">
 			</File>
 		</Filter>
 		<Filter

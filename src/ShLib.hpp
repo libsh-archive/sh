@@ -140,6 +140,12 @@ SH_SHLIB_CONST_TRINARY_OP_011_RETSIZE_DECL(operation, N);
 #include "ShLibMisc.hpp"
 #include "ShLibTrig.hpp"
 #include "ShLibDeriv.hpp"
+#include "ShLibNoise.hpp"
+#include "ShLibWorley.hpp"
+// If you add anything to this list, make sure that ShLib.hpp is
+// included before the header guard since these libraries must always
+// be loaded by ShLib.hpp, no matter who includes them.  See
+// ShLibNoise.hpp for an example.
 
 #undef CT1T2 
 #undef CT1T2T3 

@@ -454,6 +454,18 @@
 				RelativePath="..\src\ShLibArith.hpp">
 			</File>
 			<File
+				RelativePath="..\src\ShLibNoise.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShLibNoiseImpl.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShLibWorley.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShLibWorleyImpl.hpp">
+			</File>
+			<File
 				RelativePath="..\src\ShLibArithImpl.hpp">
 			</File>
 			<File

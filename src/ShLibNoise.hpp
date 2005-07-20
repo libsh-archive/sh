@@ -17,53 +17,18 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHUTIL_NOISE_HPP 
-#define SHUTIL_NOISE_HPP 
+#include "ShLib.hpp" // ShLibNoise needs to be included from within ShLib
 
-#include "ShAttrib.hpp"
-#include "ShArray.hpp"
-#include "ShTypeInfo.hpp"
-
-// @todo type remove these later when noise becomes part of standard library 
-#define CT1T2 typename ShCommonType<T1, T2>::type
-
-namespace ShUtil {
-
-
-using namespace SH;
-
-/** \file ShNoise.hpp
- * This is an implementation of Perlin noise.
- */
-
-/** \brief A Perlin noise/turbulence generator.
- * M = dimensions of the result (1 <= M <= 4 currently)
- * P = period of the noise texture
- */
-template<int M, typename T, int P = 16>
-class ShNoise 
-{
-  public:
-    /** \brief Generates a single octave Perlin noise with frequency 1 in each
-     * of K dimensions.
-     * If useTexture is on, then the pattern repeats at every P cells.
-     */
-    template<int K>
-    static ShGeneric<M, T> perlin(const ShGeneric<K, T> &p, bool useTexture);
-
-    /** \brief Generates a cell noise value using unit cube cells  */
-    template<int K>
-    static ShGeneric<M, T> cellnoise(const ShGeneric<K, T> &p, bool useTexture);
-
-  private:
-    static ShAttrib<1, SH_CONST, T> constP, invP;
-    static bool m_init;
-    static ShArray3D<ShAttrib<M, SH_TEMP, T, SH_COLOR> > noiseTex; ///< pseudorandom 2D perlin noise texture 
-
-    static void init();
-};
+#ifndef SHLIBNOISE_HPP
+#define SHLIBNOISE_HPP
 
 #ifndef WIN32
+namespace SH {
+
+/** \defgroup lib_noise Noise functions
+ * @ingroup library
+ * @{
+ */
 
 // Returns summed octaves of Perlin improved noise
 // @{
@@ -132,11 +97,11 @@ ShGeneric<N, CT1T2> sturbulence(const ShGeneric<M, T1> &p, const ShGeneric<K, T2
     bool useTexture = true);
 // @}
 
-#endif // ifndef WIN32
+// @}
 
-}
-#include "ShNoiseImpl.hpp" 
+} // namespace SH
+#endif // WIN32
 
-//@todo type remove these later
-#undef CT1T2
-#endif
+#include "ShLibNoiseImpl.hpp"
+
+#endif // SHLIBNOISE_HPP

@@ -17,11 +17,12 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
+#include "ShLib.hpp" // ShLibGeometry needs to be included from within ShLib
+
 #ifndef SHLIBGEOMETRY_HPP
 #define SHLIBGEOMETRY_HPP
 
 #include "ShGeneric.hpp"
-#include "ShLib.hpp"
 
 #ifndef WIN32
 namespace SH {

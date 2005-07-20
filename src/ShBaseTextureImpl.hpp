@@ -23,7 +23,6 @@
 #include "ShBaseTexture.hpp"
 #include "ShContext.hpp"
 #include "ShError.hpp"
-#include "ShLibMisc.hpp"
 
 namespace SH {
 

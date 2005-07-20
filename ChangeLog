@@ -1,3 +1,31 @@
+2005-07-20  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLib.hpp: Add ShLibNoise.hpp and ShLibWorley to the include
+	list.
+
+	* src/ShGenericImpl.hpp, ShBaseTextureImpl.hpp: Remove the
+	unnecessary include of ShLib.hpp.
+	
+	* src/ShMatrixImpl.hpp: Include ShLibMisc.hpp.
+	
+	* src/ShLibMisc.hpp, ShLibGeometry.hpp, ShLibMatrix.hpp,
+	ShLibArith.hpp, ShLibClamp.hpp, ShLibTrig.hpp, ShLibDeriv.hpp,
+	ShLibBoolean.hpp: Move the ShLib.hpp include before the header
+	guard to guarantee that the file will be included by ShLib.hpp,
+	not the other way around.  This is necessary because some macros
+	are undefined by ShLib.
+
+	* src/ShLibMiscImpl.hpp: Move sort() after groupsort() since
+	sort() calls groupsort().
+
+	* src/ShLibWorley.hpp, ShLibWorleyImpl.hpp, ShLibNoise.hpp,
+	ShLibNoiseImpl.hpp: Create these files from the related files
+	under util/.
+
+	* ShNoiseImpl.hpp, ShWorleyImpl.hpp, shutil.hpp, ShNoise.hpp,
+	ShWorley.hpp, Makefile.am: Remove the noise and worley code since
+	it is now part of the core.
+	
 2005-07-12  Andrew Lauritzen  <atlaurit@localhost.localdomain>
 
 	* src/ShInternals.*: Add a utility class for tracking variable

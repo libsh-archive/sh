@@ -17,11 +17,12 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
+#include "ShLib.hpp" // ShLibMatrix needs to be included from within ShLib
+
 #ifndef SHLIBMATRIX_HPP
 #define SHLIBMATRIX_HPP
 
 #include "ShGeneric.hpp"
-#include "ShLib.hpp"
 #include "ShMatrix.hpp"
 
 #ifndef WIN32

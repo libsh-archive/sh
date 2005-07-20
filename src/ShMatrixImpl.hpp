@@ -26,6 +26,7 @@
 #include <sstream>
 #include "ShMatrix.hpp"
 #include "ShUtility.hpp"
+#include "ShLibMisc.hpp"
 
 namespace SH {
 

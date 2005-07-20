@@ -17,20 +17,41 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHUTIL_NOISEIMPL_HPP
-#define SHUTIL_NOISEIMPL_HPP
+#ifndef SHLIBNOISEIMPL_HPP
+#define SHLIBNOISEIMPL_HPP
 
-#include <cstdlib>
-#include "ShDebug.hpp"
-#include "ShNoise.hpp"
-#include "ShFunc.hpp"
+#include "ShLibNoise.hpp"
+#include "ShArray.hpp"
 #include "ShImage3D.hpp"
-#include "ShLib.hpp"
 
-namespace ShUtil {
+namespace SH {
 
-using namespace SH;
+/** \brief A Perlin noise/turbulence generator.
+ * M = dimensions of the result (1 <= M <= 4 currently)
+ * P = period of the noise texture
+ */
+template<int M, typename T, int P = 16>
+class ShNoise 
+{
+  public:
+    /** \brief Generates a single octave Perlin noise with frequency 1 in each
+     * of K dimensions.
+     * If useTexture is on, then the pattern repeats at every P cells.
+     */
+    template<int K>
+    static ShGeneric<M, T> perlin(const ShGeneric<K, T> &p, bool useTexture);
 
+    /** \brief Generates a cell noise value using unit cube cells  */
+    template<int K>
+    static ShGeneric<M, T> cellnoise(const ShGeneric<K, T> &p, bool useTexture);
+
+  private:
+    static ShAttrib<1, SH_CONST, T> constP, invP;
+    static bool m_init;
+    static ShArray3D<ShAttrib<M, SH_TEMP, T, SH_COLOR> > noiseTex; ///< pseudorandom 2D perlin noise texture 
+
+    static void init();
+};
 
 template<int M, typename T, int P>
 ShArray3D<ShAttrib<M, SH_TEMP, T, SH_COLOR> > ShNoise<M, T, P>::noiseTex(P, P, P); // pseudorandom 3D noise texture
@@ -233,6 +254,6 @@ ShGeneric<N, T> sturbulence(const ShGeneric<M, T> &p, bool useTexture) {
 }
 SHNOISE_WITH_AMP(sturbulence);
 
-} // namespace ShUtil
+} // namespace SH
 
-#endif
+#endif // SHLIBNOISEIMPL_HPP

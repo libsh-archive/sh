@@ -22,7 +22,6 @@
 
 #include "ShGeneric.hpp"
 #include "ShAttrib.hpp"
-#include "ShLib.hpp"
 #include "ShInstructions.hpp"
 #include "ShDebug.hpp"
 #include "ShProgram.hpp"

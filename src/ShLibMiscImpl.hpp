@@ -123,14 +123,6 @@ void kill(const ShGeneric<N, T>& c)
   discard(c);
 }
 
-template<int N, typename T> 
-ShGeneric<N, T> sort(const ShGeneric<N, T>& a)
-{
-  ShGeneric<N, T> result(a);
-  groupsort<1>(&result);
-  return result;
-}
-
 template<int S, typename VarType>
 void groupsort(VarType v[]) {
   const int N = VarType::typesize;
@@ -191,6 +183,14 @@ void groupsort(VarType v[]) {
     v[i].template swiz<NO>(resultOswiz) = v[i].template swiz<NO>(oswiz);
     v[i].template swiz<NE>(resultEswiz) = evens;
   }
+}
+
+template<int N, typename T> 
+ShGeneric<N, T> sort(const ShGeneric<N, T>& a)
+{
+  ShGeneric<N, T> result(a);
+  groupsort<1>(&result);
+  return result;
 }
 
 template<typename T>

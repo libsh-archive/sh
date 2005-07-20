@@ -10,11 +10,7 @@ libshutil_la_SOURCES = ShKernelLib.cpp ShKernelSurfMap.cpp ShObjMesh.cpp shutil.
 
 incincdir = $(includedir)/sh
 
-incinc_HEADERS = ShNoise.hpp \
-                 ShNoiseImpl.hpp \
-                 ShWorley.hpp \
-                 ShWorleyImpl.hpp \
-                 ShFunc.hpp \
+incinc_HEADERS = ShFunc.hpp \
                  ShFuncImpl.hpp \
                  ShKernelLib.hpp \
                  ShKernelLibImpl.hpp \

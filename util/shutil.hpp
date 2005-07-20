@@ -21,9 +21,6 @@
 #define SHUTIL_HPP
 
 #include "ShFunc.hpp"
-#include "ShWorley.hpp"
-#include "ShWorleyImpl.hpp"
-#include "ShNoise.hpp"
 #include "ShKernelLib.hpp"
 #include "ShKernelLight.hpp"
 #include "ShKernelSurfMap.hpp"
