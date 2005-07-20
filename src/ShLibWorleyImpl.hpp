@@ -147,8 +147,8 @@ struct CellnoisePropFactory: public PropertyFactory<N, D, T> {
   ShGeneric<N, T> operator()(const ShGeneric<D, T> &p,
                              const Generator<D, T> &g) const; 
 
-  private:
-    bool m_useTexture;
+private:
+  bool m_useTexture;
 };
 
 template<typename TexType, typename T>
@@ -162,11 +162,11 @@ struct Tex2DPropFactory: public PropertyFactory<TexType::typesize, 2, T> {
     return m_tex(frac(g.cell * invScale * m_scale)) * ShConstAttrib1f(1.0f);
   }
 
-  private:
-    const ShBaseTexture2D<TexType> &m_tex;
-    const ShGeneric<1, T> &m_scale;
-    ShConstAttrib2f invScale;
-    // TODO remove invScale and restrict to RECT textures later 
+private:
+  const ShBaseTexture2D<TexType> &m_tex;
+  const ShGeneric<1, T> &m_scale;
+  ShConstAttrib2f invScale;
+  // TODO remove invScale and restrict to RECT textures later 
 };
 
 //----------------
@@ -347,8 +347,7 @@ ShGeneric<N, T>
 CellnoisePropFactory<N, D, T>::operator() (const ShGeneric<D, T> &p, 
                                            const Generator<D, T> &g) const
 {
-  // TODO remove frac once Issue58 fixed
-  return frac(cellnoise<N>(g.cell, m_useTexture));
+  return cellnoise<N>(g.cell, m_useTexture);
 }
 
 template<typename TexType, typename T>

@@ -1,5 +1,8 @@
 2005-07-20  Francois Marier  <francois@serioushack.com>
 
+	* src/ShLibWorleyImpl.hpp (operator()): Remove frac() since issue58
+	is resolved.
+
 	* src/ShLib.hpp: Add ShLibNoise.hpp and ShLibWorley to the include
 	list.
 
