@@ -1,5 +1,8 @@
 2005-07-20  Francois Marier  <francois@serioushack.com>
 
+	* src/ShLibNoise.hpp, ShLibNoiseImpl.hpp: Add dummy implementations of noise(),
+	snoise(), linnoise() and slinnoise().
+
 	* src/ShLibWorleyImpl.hpp (operator()): Remove frac() since issue58
 	is resolved.
 

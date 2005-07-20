@@ -30,13 +30,37 @@ namespace SH {
  * @{
  */
 
+// Returns summed octaves of Perlin noise
+// @{
+template<int N, int M, typename T>
+ShGeneric<N, T> noise(const ShGeneric<M, T> &p, bool useTexture = true);
+
+template<int N, int M, int K, typename T1, typename T2>
+ShGeneric<N, CT1T2> noise(const ShGeneric<M, T1> &p,
+                          const ShGeneric<K, T2> &amp,
+                          bool useTexture = true);
+// @}
+
+// Returns summed octaves of signed Perlin noise
+// @{
+template<int N, int M, typename T>
+ShGeneric<N, T> snoise(const ShGeneric<M, T> &p, bool useTexture = true);
+
+template<int N, int M, int K, typename T1, typename T2>
+ShGeneric<N, CT1T2> snoise(const ShGeneric<M, T1> &p,
+                          const ShGeneric<K, T2> &amp,
+                          bool useTexture = true);
+// @}
+
 // Returns summed octaves of Perlin improved noise
 // @{
 template<int N, int M, typename T>
 ShGeneric<N, T> perlin(const ShGeneric<M, T> &p, bool useTexture = true);
 
 template<int N, int M, int K, typename T1, typename T2>
-ShGeneric<N, CT1T2> perlin(const ShGeneric<M, T1> &p, const ShGeneric<K, T2> &amp, bool useTexture = true);
+ShGeneric<N, CT1T2> perlin(const ShGeneric<M, T1> &p,
+                           const ShGeneric<K, T2> &amp,
+                           bool useTexture = true);
 // @}
 
 // Returns summed octaves of signed Perlin improved noise
@@ -45,7 +69,9 @@ template<int N, int M, typename T>
 ShGeneric<N, T> sperlin(const ShGeneric<M, T> &p, bool useTexture = true);
 
 template<int N, int M, int K, typename T1, typename T2>
-ShGeneric<N, CT1T2> sperlin(const ShGeneric<M, T1> &p, const ShGeneric<K, T2> &amp, bool useTexture = true);
+ShGeneric<N, CT1T2> sperlin(const ShGeneric<M, T1> &p, 
+                            const ShGeneric<K, T2> &amp, 
+                            bool useTexture = true);
 // @}
 
 // Returns summed octaves of cell noise 
@@ -54,8 +80,9 @@ template<int N, int M, typename T>
 ShGeneric<N, T> cellnoise(const ShGeneric<M, T> &p, bool useTexture = true);
 
 template<int N, int M, int K, typename T1, typename T2>
-ShGeneric<N, CT1T2> cellnoise(const ShGeneric<M, T1> &p, const ShGeneric<K, T2> &amp, 
-    bool useTexture = true);
+ShGeneric<N, CT1T2> cellnoise(const ShGeneric<M, T1> &p, 
+                              const ShGeneric<K, T2> &amp, 
+                              bool useTexture = true);
 // @}
 
 // Returns summed octaves of signed cell noise 
@@ -64,8 +91,31 @@ template<int N, int M, typename T>
 ShGeneric<N, T> scellnoise(const ShGeneric<M, T> &p, bool useTexture = true);
 
 template<int N, int M, int K, typename T1, typename T2>
-ShGeneric<N, CT1T2> scellnoise(const ShGeneric<M, T1> &p, const ShGeneric<K, T2> &amp,
-    bool useTexture = true); 
+ShGeneric<N, CT1T2> scellnoise(const ShGeneric<M, T1> &p, 
+                               const ShGeneric<K, T2> &amp,
+                               bool useTexture = true); 
+// @}
+
+// Returns summed octaves of bilinearly interpolated cell noise 
+// @{
+template<int N, int M, typename T>
+ShGeneric<N, T> linnoise(const ShGeneric<M, T> &p, bool useTexture = true);
+
+template<int N, int M, int K, typename T1, typename T2>
+ShGeneric<N, CT1T2> linnoise(const ShGeneric<M, T1> &p, 
+                             const ShGeneric<K, T2> &amp, 
+                             bool useTexture = true);
+// @}
+
+// Returns summed octaves of bilinearly interpolated signed cell noise 
+// @{
+template<int N, int M, typename T>
+ShGeneric<N, T> slinnoise(const ShGeneric<M, T> &p, bool useTexture = true);
+
+template<int N, int M, int K, typename T1, typename T2>
+ShGeneric<N, CT1T2> slinnoise(const ShGeneric<M, T1> &p, 
+                              const ShGeneric<K, T2> &amp,
+                              bool useTexture = true); 
 // @}
 
 // Returns M octaves of turbulence in N-dimensional space (currently 1 <= N <= 4,
@@ -82,8 +132,9 @@ template<int N, int M, typename T>
 ShGeneric<N, T> turbulence(const ShGeneric<M, T> &p, bool useTexture = true);
 
 template<int N, int M, int K, typename T1, typename T2>
-ShGeneric<N, CT1T2> turbulence(const ShGeneric<M, T1> &p, const ShGeneric<K, T2> &amp, 
-    bool useTexture = true);
+ShGeneric<N, CT1T2> turbulence(const ShGeneric<M, T1> &p, 
+                               const ShGeneric<K, T2> &amp, 
+                               bool useTexture = true);
 // @}
 
 /** \brief Turbulence functions sum several octaves of Perlin noise. 
@@ -93,8 +144,9 @@ template<int N, int M, typename T>
 ShGeneric<N, T> sturbulence(const ShGeneric<M, T> &p, bool useTexture = true);
 
 template<int N, int M, int K, typename T1, typename T2>
-ShGeneric<N, CT1T2> sturbulence(const ShGeneric<M, T1> &p, const ShGeneric<K, T2> &amp, 
-    bool useTexture = true);
+ShGeneric<N, CT1T2> sturbulence(const ShGeneric<M, T1> &p,
+                                const ShGeneric<K, T2> &amp, 
+                                bool useTexture = true);
 // @}
 
 // @}
