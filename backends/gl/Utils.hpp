@@ -79,12 +79,18 @@ class OffStrideGatherer {
 public:
   typedef std::list< std::pair <int, int > > OffStrideList;
   typedef std::list< std::pair <int, int > >::iterator iterator;
+
+  OffStrideGatherer() : m_maxstride( 0 ) {}
+
   void operator()(SH::ShCtrlGraphNode* node);
+
+  int get_maxstride() const { return m_maxstride; }
+
   iterator begin() { return m_list.begin(); }
   iterator end() { return m_list.end(); }
 private:
-  //std::list< std::pair <int, int > > m_list;
   OffStrideList m_list; // (stride, offset) list
+  int m_maxstride;
 };
 
 

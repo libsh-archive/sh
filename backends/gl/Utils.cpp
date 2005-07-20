@@ -159,6 +159,8 @@ void OffStrideGatherer::operator()(SH::ShCtrlGraphNode* node)
     ShChannelNodePtr channel = shref_dynamic_cast<ShChannelNode>(stmt.src[0].node());
 
     m_list.push_back( std::pair<int, int>(channel->stride(), channel->offset()) );
+
+    if ( channel->stride() > m_maxstride ) m_maxstride = channel->stride();
   }
 
   return;

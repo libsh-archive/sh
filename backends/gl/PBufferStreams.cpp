@@ -314,7 +314,8 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
     //m_vp = keep<ShPosition4f>() & keep<ShTexCoord2f>();   // The identity vertex program
     //m_vp.node()->target() = "gpu:vertex";
 
-    float delta = 1.0 / (float)tex_size * 2.0f;
+    float delta = 1.0 / (float)tex_size;
+    float corr = 1.0 / (float)tex_size / 2.; // linear interp
 
     m_vp = SH_BEGIN_PROGRAM("gpu:vertex") {
       ShInputPosition4f ipos;
@@ -328,7 +329,14 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
 	std::ostringstream os;
 	os << cnt;
 	/* [ (stride, offset) ] */
-	ShOutputTexCoord2f SH_NAMEDECL(offset, "offset" + os.str() ) = tc * ShAttrib2f((float)(i->first) - delta /10., 1.0);
+	/* // -- identity
+	ShOutputTexCoord2f SH_NAMEDECL(offset, "offset" + os.str() ) = (tc - ShAttrib2f(corr, 0.)) * ShAttrib2f(1., 1.0)
+	                                                               + ShAttrib2f(0., 0.);
+	*/
+	ShOutputTexCoord2f SH_NAMEDECL(offset, "offset" + os.str() ) = (tc - ShAttrib2f(corr, 0.)) * ShAttrib2f(i->first, 1.0)
+	                                                               + ShAttrib2f(i->second * delta, 0.);
+
+
       }
       
     } SH_END;
@@ -401,11 +409,11 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
     shBind(**I);
     TIMING_RESULT(binding);
 
-    // #ifdef SH_DEBUG_PBS_PRINTFP // XXX
+#ifdef SH_DEBUG_PBS_PRINTFP
     for (ShProgramSet::NodeList::const_iterator i = (*I)->begin(); i != (*I)->end(); i++) {
       (*i)->code()->print(std::cerr);  
     }
-    // #endif // XXX
+#endif
 
     DECLARE_TIMER(clear);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -535,9 +543,9 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
       using_temporary_buffer = true;
     }
     
-    float freq = 2.0; // this should be from stride  // XXX
-    glReadPixels(0, 0, (int)tex_size / freq, (int)count / tex_size, format, // actual copy of the
-                 readpixelType, resultBuffer->array());    // results to the stream
+    float freq = offstrides.get_maxstride();
+    glReadPixels(0, 0, (int)(tex_size / freq), (int)(count / tex_size), format, // actual copy of the
+                 readpixelType, resultBuffer->array());                         // results to the stream
     gl_error = glGetError();
     if (gl_error != GL_NO_ERROR) {
       shError(PBufferStreamException("Could not do glReadPixels()"));
