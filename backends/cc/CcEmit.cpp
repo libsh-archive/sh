@@ -412,10 +412,17 @@ void CcBackendCode::emit(const ShStatement& stmt) {
       }
     default:
       {
-      m_code << "  // *** unhandled operation "
-             << opInfo[stmt.op].name
-             << " ***" << std::endl;
-      break;
+        // TODO: once FETCH is implemented, we should be able to
+        // return an error here and not break the unit tests.
+
+        // std::stringstream s;
+        // s << "CC Code: Unknown operation " << opInfo[stmt.op].name;
+        // shError(s.str());
+        // break;
+
+        m_code << "  // *** unhandled operation " << opInfo[stmt.op].name
+               << " ***" << std::endl;
+        break;
       }
   }
 }
