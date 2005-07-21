@@ -57,17 +57,6 @@ namespace SH {
  * containing the weighted sum of all properties.
  */
 
-#ifndef WIN32
-
-/** \brief Worley texture generator.
- * This uses the DefaultGeneratorFactory and DistSqPropFactory 
- * TODO allow arbitrary distance function
- * @{
- */
-template<int K, int D, typename T>
-ShGeneric<K, T> worley(const ShGeneric<D, T> &p, bool useTexture = true); 
-//@}
-
 // A Generator point represents the position of a generator relative
 // to the cell origin of a lookup position. 
 //
@@ -102,6 +91,17 @@ struct PropertyFactory {
   virtual ~PropertyFactory() {} 
   virtual ShGeneric<N, T> operator()(const ShGeneric<D, T> &p, const Generator<D, T> &g) const = 0; 
 };
+
+#ifndef WIN32
+
+/** \brief Worley texture generator.
+ * This uses the DefaultGeneratorFactory and DistSqPropFactory 
+ * TODO allow arbitrary distance function
+ * @{
+ */
+template<int K, int D, typename T>
+ShGeneric<K, T> worley(const ShGeneric<D, T> &p, bool useTexture = true); 
+//@}
 
 /** \brief Worley texture generator.
  * This uses a GeneratorFactory and PropertyFactory of your choice.
