@@ -266,7 +266,8 @@ SHINST_UNARY_OP(SQRT);
 SHINST_UNARY_OP(TAN);
 SHINST_UNARY_OP(TANH);
 SHINST_UNARY_OP(NORM);
-
+SHINST_UNARY_OP(NOISE);
+SHINST_UNARY_OP(HASH);
 
 void shXPD(ShVariable& dest, const ShVariable& a, const ShVariable& b)
 {

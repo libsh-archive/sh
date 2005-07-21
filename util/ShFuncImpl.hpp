@@ -66,35 +66,6 @@ ShGeneric<N, T> hashlcg(const ShGeneric<N, T>& p) {
   return result;
 }
 
-
-static const int MRG_REPS = 2; // total instructions for hashmrg will be MRG_REPS * N * 2 + 2 
-/** \brief MRG style pseudorandom vector generator
- *
- * Generates a random vector using a multiple-recursive generator style. (LCG on steroids)
- * Treat x,y,z,w as seeds a0, a1, a2, a3
- * and repeatedly apply an = b * (an-1, an-2, an-3, an-4), where b is a vector
- * Take as output (an, an-1, an-2, an3) after suitable number of iterations.
- *
- * This appears to reduce correlation in the output components when input components are 
- * similar, but the behaviour needs to be studied further.
- *
- * \sa template<int N, typename T> ShGeneric<N, T> hashlcg(const ShGeneric<N, T>& p)
- */
-template<int N, typename T>
-ShGeneric<N, T> hashmrg(const ShGeneric<N, T>& p) {
-  ShAttrib<N, SH_TEMP, T> result = frac(p * 0.01);
-  ShGeneric<N, T> a = fillcast<N>(
-      ShConstAttrib4f(M_PI * M_PI * M_PI * M_PI, std::exp(4.0), 
-          std::pow(13.0, M_PI / 2.0), std::sqrt(1997.0)));
-
-  for(int i = 0; i < MRG_REPS; ++i) {
-    for(int j = 0; j < N; ++j) { 
-      result(j) = frac(dot(result, a));
-    }
-  }
-  return result;
-}
-
 /** \brief Given 3 orthonormal basis vectors b0, b1, b2, specified relative to a coordinate space C, 
  * this does a change of basis on a vector v in space C to the orthonormal basis
  */

@@ -52,21 +52,6 @@ ShGeneric<N, T> deprecated_smoothstep(const ShGeneric<N, T>& a, const ShGeneric<
 template<int N, typename T>
 ShGeneric<N, T> hashlcg(const ShGeneric<N, T>& p); 
 
-/** \brief MRG style pseudorandom vector generator
- *
- * Generates a random vector using a multiple-recursive generator style. (LCG on steroids)
- * Treat x,y,z,w as seeds a0, a1, a2, a3
- * and repeatedly apply an = b * (an-1, an-2, an-3, an-4), where b is a vector
- * Take as output (an, an-1, an-2, an3) after suitable number of iterations.
- *
- * This appears to reduce correlation in the output components when input components are 
- * similar, but the behaviour needs to be studied further.
- *
- * \sa template<int N, typename T> ShGeneric<N, T> hashlcg(const ShGeneric<N, T>& p)
- */
-template<int N, typename T>
-ShGeneric<N, T> hashmrg(const ShGeneric<N, T>& p); 
-
 /** \brief Given orthonormal basis b0, b1, b2 and vector v relative to coordinate space C,
  * does change of basis on v to the orthonormal basis b0, b1, b2
  */

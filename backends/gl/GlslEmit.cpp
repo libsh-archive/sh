@@ -173,6 +173,9 @@ void GlslCode::emit(const ShStatement &stmt)
     case SH_OP_LOG10:
       emit_log(stmt, 10);
       break;
+    case SH_OP_NOISE:
+      emit_noise(stmt);
+      break;
     case SH_OP_PAL:
       emit_pal(stmt);
       break;
@@ -410,6 +413,19 @@ void GlslCode::emit_logic(const ShStatement& stmt)
   // TODO: cache these mappings?
   
   table_substitution(stmt, mapping);
+}
+
+void GlslCode::emit_noise(const ShStatement& stmt)
+{
+  SH_DEBUG_ASSERT(SH_OP_NOISE == stmt.op);
+
+  int output_size = stmt.dest.size();
+  SH_DEBUG_ASSERT((output_size <= 4) && (output_size >= 1));
+  
+  stringstream line;
+  line << resolve(stmt.dest) << " = " << "noise" << output_size << "("
+       << resolve(stmt.src[0]) << ")";
+  append_line(line.str());
 }
 
 void GlslCode::emit_pal(const ShStatement& stmt)

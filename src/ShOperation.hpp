@@ -71,6 +71,8 @@ enum ShOperation {
   SH_OP_FLR, ///< Unary smallest integer not greater than src[0]
   SH_OP_FRAC, ///< Unary fractional part
 
+  SH_OP_HASH, ///< Procedural hash function
+
   SH_OP_LIT, ///< Compute lighting coefficients
   SH_OP_LOG, ///< Unary natural log
   SH_OP_LOG2, ///< Unary base-2 log
@@ -81,6 +83,8 @@ enum ShOperation {
   SH_OP_MAX, ///< Binary componentwise maximum
   SH_OP_MIN, ///< Binary componentwise minimum
   SH_OP_MOD, ///< Binary float modulus, result has same sign as src[0] 
+
+  SH_OP_NOISE, ///< Noise function
 
   SH_OP_POW, ///< Binary power
   SH_OP_RCP, ///< Unary reciprocal

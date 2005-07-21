@@ -139,6 +139,7 @@ private:
   void emit_lit(const SH::ShStatement& stmt);
   void emit_log(const SH::ShStatement& stmt, double base);
   void emit_logic(const SH::ShStatement& stmt);
+  void emit_noise(const SH::ShStatement& stmt);
   void emit_pal(const SH::ShStatement& stmt);
   void emit_prod(const SH::ShStatement& stmt);
   void emit_sum(const SH::ShStatement& stmt);

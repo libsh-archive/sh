@@ -105,6 +105,8 @@ SH_DLLEXPORT
 void shLRP(ShVariable& dest, const ShVariable& alpha,
            const ShVariable& a, const ShVariable& b);
 SH_DLLEXPORT
+void shHASH(ShVariable& dest, const ShVariable& a);
+SH_DLLEXPORT
 void shMAD(ShVariable& dest, const ShVariable& a,
            const ShVariable& b, const ShVariable& c);
 SH_DLLEXPORT
@@ -113,6 +115,8 @@ SH_DLLEXPORT
 void shMIN(ShVariable& dest, const ShVariable& a, const ShVariable& b);
 SH_DLLEXPORT
 void shMOD(ShVariable& dest, const ShVariable& a, const ShVariable& b);
+SH_DLLEXPORT
+void shNOISE(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
 void shPOW(ShVariable& dest, const ShVariable& a, const ShVariable& b);
 SH_DLLEXPORT

@@ -1,7 +1,30 @@
+2005-07-21  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibNoise.hpp: Add the hash() function and move cellnoise
+	and scellnoise in the same section.
+
+	* src/ShLibNoiseImpl.hpp: Add hash() and rename all calls to
+	hashmrg() to calls to the new function. 
+
+	* src/ShOperation.cpp, ShOperation.hpp, ShEvalImpl.hpp: Add the
+	NOISE and HASH IR operations.
+
+	* src/ShInstructions.cpp, ShInstructions.hpp: Add shHASH().
+
+	* src/ShConcreteCTypeOpImpl.hpp, ShConcreteRegularOpImpl.hpp: Add
+	dummy implementations for NOISE and HASH.
+
+	* backends/gl/GlslEmit.cpp, GlslCode.hpp: Add a real
+	implementation of the NOISE IR operation using the noise[1234]()
+	glsl function.
+	
+	* util/ShFunc.hpp, ShFunc.cpp: Remove hashmrg() since it has been
+	moved into the core.
+	
 2005-07-20  Francois Marier  <francois@serioushack.com>
 
-	* src/ShLibNoise.hpp, ShLibNoiseImpl.hpp: Add dummy implementations of noise(),
-	snoise(), linnoise() and slinnoise().
+	* src/ShLibNoise.hpp, ShLibNoiseImpl.hpp: Add dummy
+	implementations of noise(), snoise(), linnoise() and slinnoise().
 
 	* src/ShLibWorleyImpl.hpp (operator()): Remove frac() since issue58
 	is resolved.

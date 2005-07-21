@@ -26,6 +26,25 @@
 
 namespace SH {
 
+static const int MRG_REPS = 2; // total instructions for hashmrg will be MRG_REPS * N * 2 + 2 
+
+template<int N, int M, typename T>
+ShGeneric<N, T> hash(const ShGeneric<M, T>& p)
+{
+  ShAttrib<N, SH_TEMP, T> result = cast<N>(frac(p * 0.01));
+  ShGeneric<N, T> a = fillcast<N>(ShConstAttrib4f(M_PI * M_PI * M_PI * M_PI, 
+                                                  std::exp(4.0), 
+                                                  std::pow(13.0, M_PI / 2.0), 
+                                                  std::sqrt(1997.0)));
+
+  for(int i = 0; i < MRG_REPS; ++i) {
+    for(int j = 0; j < N; ++j) { 
+      result(j) = frac(dot(result, a));
+    }
+  }
+  return result;
+}
+
 /** \brief A Perlin noise/turbulence generator.
  * M = dimensions of the result (1 <= M <= 4 currently)
  * P = period of the noise texture
@@ -155,7 +174,7 @@ ShGeneric<M, T> ShNoise<M, T, P>::perlin(const ShGeneric<K, T> &p, bool useTextu
     if(useTexture) {
       grad[i] = noiseTex(fillcast<3>(intLatticePoint)); // lookup 3D texture
     } else {
-      grad[i] = cast<M>(hashmrg(intLatticePoint)); 
+      grad[i] = hash<M>(intLatticePoint); 
     }
   }
 
@@ -183,7 +202,7 @@ ShGeneric<M, T> ShNoise<M, T, P>::cellnoise(const ShGeneric<K, T> &p, bool useTe
     ip = frac(ip * invP);
     return noiseTex(fillcast<3>(ip));
   } 
-  return fillcast<M>(hashmrg(ip));
+  return hash<M>(ip);
 }
 
 template<int M, typename T, int P>

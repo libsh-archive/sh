@@ -25,6 +25,50 @@
 #ifndef WIN32
 namespace SH {
 
+/** \defgroup lib_hash Hash functions
+ * @ingroup library
+ * @{
+ */
+
+/** \brief MRG style pseudorandom vector generator
+ *
+ * Generates a random vector using a multiple-recursive generator style. (LCG on steroids)
+ * Treat x,y,z,w as seeds a0, a1, a2, a3
+ * and repeatedly apply an = b * (an-1, an-2, an-3, an-4), where b is a vector
+ * Take as output (an, an-1, an-2, an3) after suitable number of iterations.
+ *
+ * This appears to reduce correlation in the output components when input components are 
+ * similar, but the behaviour needs to be studied further.
+ *
+ * \sa template<int N, int M, typename T> ShGeneric<N, T> hashlcg(const ShGeneric<M, T>& p)
+ */
+template<int N, int M, typename T>
+ShGeneric<N, T> hash(const ShGeneric<M, T>& p); 
+
+// Returns summed octaves of cell noise 
+// @{
+template<int N, int M, typename T>
+ShGeneric<N, T> cellnoise(const ShGeneric<M, T> &p, bool useTexture = true);
+
+template<int N, int M, int K, typename T1, typename T2>
+ShGeneric<N, CT1T2> cellnoise(const ShGeneric<M, T1> &p, 
+                              const ShGeneric<K, T2> &amp, 
+                              bool useTexture = true);
+// @}
+
+// Returns summed octaves of signed cell noise 
+// @{
+template<int N, int M, typename T>
+ShGeneric<N, T> scellnoise(const ShGeneric<M, T> &p, bool useTexture = true);
+
+template<int N, int M, int K, typename T1, typename T2>
+ShGeneric<N, CT1T2> scellnoise(const ShGeneric<M, T1> &p, 
+                               const ShGeneric<K, T2> &amp,
+                               bool useTexture = true); 
+// @}
+// @}
+
+
 /** \defgroup lib_noise Noise functions
  * @ingroup library
  * @{
@@ -72,28 +116,6 @@ template<int N, int M, int K, typename T1, typename T2>
 ShGeneric<N, CT1T2> sperlin(const ShGeneric<M, T1> &p, 
                             const ShGeneric<K, T2> &amp, 
                             bool useTexture = true);
-// @}
-
-// Returns summed octaves of cell noise 
-// @{
-template<int N, int M, typename T>
-ShGeneric<N, T> cellnoise(const ShGeneric<M, T> &p, bool useTexture = true);
-
-template<int N, int M, int K, typename T1, typename T2>
-ShGeneric<N, CT1T2> cellnoise(const ShGeneric<M, T1> &p, 
-                              const ShGeneric<K, T2> &amp, 
-                              bool useTexture = true);
-// @}
-
-// Returns summed octaves of signed cell noise 
-// @{
-template<int N, int M, typename T>
-ShGeneric<N, T> scellnoise(const ShGeneric<M, T> &p, bool useTexture = true);
-
-template<int N, int M, int K, typename T1, typename T2>
-ShGeneric<N, CT1T2> scellnoise(const ShGeneric<M, T1> &p, 
-                               const ShGeneric<K, T2> &amp,
-                               bool useTexture = true); 
 // @}
 
 // Returns summed octaves of bilinearly interpolated cell noise 

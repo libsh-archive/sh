@@ -33,17 +33,18 @@ namespace {
 template<typename T1, typename T2>
 T1 _sh_intpow(T1 x, T2 pow)
 {
-	T1 result = 1;
-	if(pow < 0) { 
-		x = 1 / x;
-		pow = -pow;
-	}
-	for(;pow; pow >>= 1, x *= x) {
-		if(pow & 1) result *= x;
-	}
-	return result;
+  T1 result = 1;
+  if (pow < 0) { 
+    x = 1 / x;
+    pow = -pow;
+  }
+  for (;pow; pow >>= 1, x *= x) {
+    if (pow & 1) result *= x;
+  }
+  return result;
 }
 }
+
 namespace SH {
 
 /* Partial specialization for different operations */ 
@@ -244,6 +245,40 @@ struct ShConcreteCTypeOp<SH_OP_LIT, T>
     (*dest)[1] = x;
     (*dest)[2] = (x > 0) ? std::pow(y,w) : 0;
     (*dest)[3] = 1;
+  }
+};
+
+template<typename T>
+struct ShConcreteCTypeOp<SH_OP_HASH, T>
+{
+  typedef ShDataVariant<T, SH_HOST> Variant; 
+  typedef Variant* DataPtr; 
+  typedef const Variant* DataCPtr; 
+
+  static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
+  {
+    SH_DEBUG_ASSERT(dest && a);
+    typename Variant::iterator D = dest->begin();
+    typename Variant::const_iterator A = a->begin();
+    for(; D != dest->end(); ++A, ++D) (*D) = (*A);
+    // TODO: implement the real algorithm
+  }
+};
+
+template<typename T>
+struct ShConcreteCTypeOp<SH_OP_NOISE, T>
+{
+  typedef ShDataVariant<T, SH_HOST> Variant; 
+  typedef Variant* DataPtr; 
+  typedef const Variant* DataCPtr; 
+
+  static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
+  {
+    SH_DEBUG_ASSERT(dest && a);
+    typename Variant::iterator D = dest->begin();
+    typename Variant::const_iterator A = a->begin();
+    for(; D != dest->end(); ++A, ++D) (*D) = (*A);
+    // TODO: implement the real algorithm
   }
 };
 

@@ -69,10 +69,12 @@ void _shInitFloatOps() {
   eval->addOp(SH_OP_EXP10, new ShRegularOp<SH_OP_EXP10, T>(), V, V);
   eval->addOp(SH_OP_FLR, new ShRegularOp<SH_OP_FLR, T>(), V, V);
   eval->addOp(SH_OP_FRAC, new ShRegularOp<SH_OP_FRAC, T>(), V, V);
+  eval->addOp(SH_OP_HASH, new ShRegularOp<SH_OP_HASH, T>(), V, V);
   eval->addOp(SH_OP_LOG, new ShRegularOp<SH_OP_LOG, T>(), V, V);
   eval->addOp(SH_OP_LOG2, new ShRegularOp<SH_OP_LOG2, T>(), V, V);
   eval->addOp(SH_OP_LOG10, new ShRegularOp<SH_OP_LOG10, T>(), V, V);
   //eval->addOp(SH_OP_NEG, new ShRegularOp<SH_OP_NEG, T>());
+  eval->addOp(SH_OP_NOISE, new ShRegularOp<SH_OP_NOISE, T>(), V, V);
   eval->addOp(SH_OP_NORM, new ShRegularOp<SH_OP_NORM, T>(), V, V);
   eval->addOp(SH_OP_RCP, new ShRegularOp<SH_OP_RCP, T>(), V, V);
   eval->addOp(SH_OP_RND, new ShRegularOp<SH_OP_RND, T>(), V, V);

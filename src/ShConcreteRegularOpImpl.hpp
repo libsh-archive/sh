@@ -191,6 +191,40 @@ struct ShConcreteRegularOp<SH_OP_LIT, T>
 };
 
 template<typename T>
+struct ShConcreteRegularOp<SH_OP_HASH, T>
+{
+  typedef ShDataVariant<T, SH_HOST> Variant; 
+  typedef Variant* DataPtr; 
+  typedef const Variant* DataCPtr; 
+
+  static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
+  {
+    SH_DEBUG_ASSERT(dest && a);
+    typename Variant::iterator D = dest->begin();
+    typename Variant::const_iterator A = a->begin();
+    for(; D != dest->end(); ++A, ++D) (*D) = (*A);
+    // TODO: implement the real algorithm
+  }
+};
+
+template<typename T>
+struct ShConcreteRegularOp<SH_OP_NOISE, T>
+{
+  typedef ShDataVariant<T, SH_HOST> Variant; 
+  typedef Variant* DataPtr; 
+  typedef const Variant* DataCPtr; 
+
+  static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
+  {
+    SH_DEBUG_ASSERT(dest && a);
+    typename Variant::iterator D = dest->begin();
+    typename Variant::const_iterator A = a->begin();
+    for(; D != dest->end(); ++A, ++D) (*D) = (*A);
+    // TODO: implement the real algorithm
+  }
+};
+
+template<typename T>
 struct ShConcreteRegularOp<SH_OP_NORM, T>
 {
   typedef ShDataVariant<T, SH_HOST> Variant; 

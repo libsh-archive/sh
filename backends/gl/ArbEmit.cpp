@@ -166,6 +166,9 @@ ArbMapping ArbCode::table[] = {
   {SH_OP_COND, SH_ARB_NVVP2, 0,            SH_ARB_FUN, &ArbCode::emit_nvcond},
   {SH_OP_COND, SH_ARB_ANY,   negate_first, SH_ARB_CMP, 0},
   {SH_OP_KIL,  SH_ARB_FP,    0,            SH_ARB_FUN, &ArbCode::emit_kil},
+  /* TODO
+  {SH_OP_NOISE, SH_ARB_ANY,  0,            SH_ARB_FUN, &ArbCode::emit_noise},
+  */
 
   {SH_OP_PAL,  SH_ARB_VP, 0, SH_ARB_FUN, &ArbCode::emit_pal},
 

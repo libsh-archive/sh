@@ -62,6 +62,8 @@ const ShOperationInfo opInfo[] = {
   {"FLR", 1, ShOperationInfo::LINEAR, false},
   {"FRAC", 1, ShOperationInfo::LINEAR, false},
 
+  {"HASH", 1, ShOperationInfo::LINEAR, false},
+
   {"LIT", 1, ShOperationInfo::ALL, false},
   {"LOG", 1, ShOperationInfo::LINEAR, false},
   {"LOG2", 1, ShOperationInfo::LINEAR, false},
@@ -72,6 +74,8 @@ const ShOperationInfo opInfo[] = {
   {"MAX", 2, ShOperationInfo::LINEAR, false},
   {"MIN", 2, ShOperationInfo::LINEAR, true},
   {"MOD", 2, ShOperationInfo::LINEAR, true},
+
+  {"NOISE", 1, ShOperationInfo::LINEAR, false},
 
   {"POW", 2, ShOperationInfo::LINEAR, false},
   {"RCP", 1, ShOperationInfo::LINEAR, false},
