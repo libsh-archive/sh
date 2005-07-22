@@ -40,6 +40,13 @@ def make_variable(arg, binding_type, value_type, immediate=False):
     else:
         return 'ShAttrib<1, ' + binding_type + ', ' + value_type  + '>'
 
+# Convert complex numbers to floats
+def number_literal(n):
+    if (type(n) == complex):
+        return str(n.real)
+    else:
+        return str(n)
+
 def init_matrix(indent, arg, argtype, varname):
     out = ''
     out += indent + make_variable(arg, 'SH_TEMP', argtype) + ' ' + varname + ';\n'
@@ -48,7 +55,7 @@ def init_matrix(indent, arg, argtype, varname):
         j = 0
         out += indent;
         for cell in row:
-            out += varname + '[' + str(i) + '](' + str(j) + ') = ' + str(cell) + '; ';
+            out += varname + '[' + str(i) + '](' + str(j) + ') = ' + number_literal(cell) + '; ';
             j +=1
         out += '\n'
         i += 1
@@ -57,14 +64,14 @@ def init_matrix(indent, arg, argtype, varname):
 def init_attrib(indent, arg, argtype, varname):
     out = indent
     out += make_variable(arg, 'SH_CONST', argtype) + ' ' + varname
-    out += '(' + ', '.join([(argtype + "(" + str(a) + ")") for a in arg]) + ')'
+    out += '(' + ', '.join([(argtype + "(" + number_literal(a) + ")") for a in arg]) + ')'
     out += ';\n'
     return out
 
 def init_scalar(indent, arg, argtype, varname, immediate):
     out = indent
     out += make_variable(arg, 'SH_CONST', argtype, immediate) + ' ' + varname
-    out += '(' + argtype + '(' + str(arg) + '));\n'
+    out += '(' + argtype + '(' + number_literal(arg) + '));\n'
     return out
 
 def init_variable(indent, arg, argtype, varname, immediate):
