@@ -122,10 +122,7 @@ ArbMapping ArbCode::table[] = {
   // Trig
   {SH_OP_ACOS,  SH_ARB_ANY, 0,         SH_ARB_FUN, &ArbCode::emit_invtrig},
   {SH_OP_ASIN,  SH_ARB_ANY, 0,         SH_ARB_FUN, &ArbCode::emit_invtrig},
-  /* TODO
-  {SH_OP_ATAN,  SH_ARB_ANY, 0,         SH_ARB_FUN, &ArbCode::emit_invtrig},
-  {SH_OP_ATAN2, SH_ARB_ANY, 0,         SH_ARB_FUN, &ArbCode::emit_invtrig},
-  */
+  //{SH_OP_ATAN,  SH_ARB_ANY, 0,         SH_ARB_FUN, &ArbCode::emit_invtrig},
   {SH_OP_COS,   SH_ARB_FP,  scalarize, SH_ARB_COS, 0},
   {SH_OP_COS,   SH_ARB_VP,  0,         SH_ARB_FUN, &ArbCode::emit_trig},
   {SH_OP_COSH,  SH_ARB_ANY, 0,         SH_ARB_FUN, &ArbCode::emit_hyperbolic},
