@@ -51,9 +51,12 @@ enum ShOperation {
   // The bulk
   SH_OP_ABS, ///< Unary absolute value
   SH_OP_ACOS, ///< Unary arccosine (result between -pi/2 and pi/2)
+  SH_OP_ACOSH, ///< Unary hyperbolic arccosine (result between -pi/2 and pi/2)
   SH_OP_ASIN, ///< Unary arcsine (result between 0 and pi)
+  SH_OP_ASINH, ///< Unary hyperbolic arcsine (result between 0 and pi)
   SH_OP_ATAN, ///< Unary arctan (result between -pi/2 and pi/2)
   SH_OP_ATAN2, ///< Binary arctan of src[1]/src[0] (result between -pi and pi)
+  SH_OP_ATANH, ///< Unary hyperbolic arctan (result between -pi/2 and pi/2)
 
   SH_OP_CBRT, ///< Unary componentwise cube root
   SH_OP_CEIL, ///< Unary smallest integer not less than src[0]

@@ -42,9 +42,12 @@ const ShOperationInfo opInfo[] = {
   
   {"ABS", 1, ShOperationInfo::LINEAR, false},
   {"ACOS", 1, ShOperationInfo::LINEAR, false},
+  {"ACOSH", 1, ShOperationInfo::LINEAR, false},
   {"ASIN", 1, ShOperationInfo::LINEAR, false},
+  {"ASINH", 1, ShOperationInfo::LINEAR, false},
   {"ATAN", 1, ShOperationInfo::LINEAR, false},
   {"ATAN2", 2, ShOperationInfo::LINEAR, false},
+  {"ATANH", 1, ShOperationInfo::LINEAR, false},
 
   {"CBRT", 1, ShOperationInfo::LINEAR, false},
   {"CEIL", 1, ShOperationInfo::LINEAR, false},

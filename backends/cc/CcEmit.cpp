@@ -145,9 +145,12 @@ const CcOpCode opCodeTable[] = {
 
   {SH_OP_ABS,   "fabs(#0)"}, 
   {SH_OP_ACOS,  "acos(#0)"},
+  {SH_OP_ACOSH, "acosh(#0)"},
   {SH_OP_ASIN,  "asin(#0)"},
+  {SH_OP_ASINH, "asinh(#0)"},
   {SH_OP_ATAN,  "atan(#0)"},
-  {SH_OP_ATAN2, "atan2(#0, #1)"},
+  {SH_OP_ATANH, "atanh(#0)"},
+  {SH_OP_ATAN2, "atan2(#1, #0)"},
   {SH_OP_CBRT,  "pow(#0, 1 / 3.0)"},
   {SH_OP_CEIL,  "ceil(#0)"},
   {SH_OP_COS,   "cos(#0)"},

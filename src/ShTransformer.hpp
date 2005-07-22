@@ -110,6 +110,14 @@ public:
    */
   void stripDummyOps();
 
+  /** Replace atan2 by a division followed by an arctan.
+   */
+  void expand_atan2();
+
+  /** Replace atanh, asinh and acosh with a log.
+   */
+  void expand_inverse_hyperbolic();
+
 private:
   /// NOT IMPLEMENTED
   ShTransformer(const ShTransformer& other);

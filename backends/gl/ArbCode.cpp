@@ -208,6 +208,8 @@ void ArbCode::generate()
   //dump(m_shader, "arbcode_conv2float");
   transform.splitTuples(4, m_splits);
   transform.stripDummyOps();
+  transform.expand_atan2();
+  transform.expand_inverse_hyperbolic();
   //dump(m_shader, "arbcode_split");
   dump(m_shader, "arbcode_done");
  

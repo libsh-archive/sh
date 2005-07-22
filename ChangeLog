@@ -1,3 +1,30 @@
+2005-07-22  Francois Marier  <francois@serioushack.com>
+
+	* src/ShOperation.hpp, ShOperation.cpp: Add IR operations for the
+	inverse hyperbolic functions.
+
+	* src/ShLibTrigImpl.hpp, ShLibTrig.hpp, ShInstructions.hpp: Add
+	library functions for the inverse hyperbolic functions.
+
+	* src/ShTransformer.hpp, ShTransformer.cpp: Add implementations
+	for the inverse hyperbolic functions and for ATAN2.
+	
+	* backends/cc/CcEmit.cpp, src/ShConcreteCTypeOp.cpp,
+	ShConcreteRegularOpImpl.hpp: Fix the ATAN2 mapping to agree with
+	the book.
+
+	* src/ShConcreteCTypeOpImpl.hpp, ShEvalImpl.hpp,
+	ShConcreteCTypeOp.cpp backends/cc/CcEmit.cpp, ShInstructions.cpp,
+	ShConcreteRegularOpImpl.hpp: Add mappings for the inverse
+	hyperbolic functions.
+	
+	* backends/gl/ArbCode.cpp, GlslCode.cpp (generate): Call the
+	tranformers to expand ATAN2 and the inverse hyperbolic functions.
+
+	* src/ShTransformer.cpp (struct DummyOpStripperBase): Fix the
+	dummy op stripper so that the changes are not ignored (m_changed =
+	true).
+	
 2005-07-21  Francois Marier  <francois@serioushack.com>
 
 	* src/ShLibNoise.hpp: Add the hash() function and move cellnoise

@@ -598,8 +598,8 @@ struct DummyOpStripperBase: public ShTransformerParent
    switch(I->op) {
      case SH_OP_STARTSEC:
      case SH_OP_ENDSEC:
-//     case SH_OP_COMMENT:
        I = node->block->erase(I);
+       m_changed = true;
        return true;
      default:
        break;
@@ -615,5 +615,134 @@ void ShTransformer::stripDummyOps()
   m_changed |= dos.transform(m_program);
 }
 
+ShVariableNodePtr allocate_constant(const ShVariable& dest, double constant)
+{
+  const ShVariableNodePtr& dest_node = dest.node();
+  ShVariableNode* node = new ShVariableNode(SH_CONST, dest_node->size(), 
+                                            dest_node->valueType(), 
+                                            dest_node->specialType());
+    
+  ShDataVariant<double>* variant = new ShDataVariant<double>(dest_node->size(), 
+                                                             constant);
+  node->setVariant(variant);
+  
+  ShVariableNodePtr node_ptr = ShPointer<ShVariableNode>(node);
+  return node_ptr;
 }
 
+ShVariableNodePtr allocate_temp(const ShVariable& dest)
+{
+  const ShVariableNodePtr& dest_node = dest.node();
+  ShVariableNode* node = new ShVariableNode(SH_TEMP, dest_node->size(), 
+                                            dest_node->valueType(), 
+                                            dest_node->specialType());
+  ShVariableNodePtr node_ptr = ShPointer<ShVariableNode>(node);
+  return node_ptr;
+}
+
+struct ATan2ExpanderBase: public ShTransformerParent 
+{
+  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node)
+  { 
+    if (SH_OP_ATAN2 == I->op) {
+      ShBasicBlock::ShStmtList new_stmts;
+      
+      // atan2(a, b) = atan(b/a)
+      ShVariable tmp(allocate_temp(I->dest));
+      new_stmts.push_back(ShStatement(tmp, I->src[1], SH_OP_DIV, I->src[0]));
+      new_stmts.push_back(ShStatement(I->dest, SH_OP_ATAN, tmp));
+
+      // TODO: the result is currently incorrect in the following cases:
+      //    a < 0 and b >= 0
+      //    a < 0 and b < 0
+      //    a = 0
+
+      I = node->block->erase(I);
+      node->block->splice(I, new_stmts);
+      m_changed = true;
+      return true;
+    } else {
+      return false;
+    }
+  }
+};
+
+typedef ShDefaultTransformer<ATan2ExpanderBase> ATan2Expander;
+void ShTransformer::expand_atan2()
+{
+  ATan2Expander expander;
+  m_changed |= expander.transform(m_program);
+}
+
+struct InverseHyperbolicExpanderBase: public ShTransformerParent 
+{
+  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node)
+  { 
+    ShBasicBlock::ShStmtList new_stmts;
+    switch (I->op) {
+    case SH_OP_ACOSH:
+      {
+        // acosh(x) = ln(x +- sqrt(x^2 - 1))
+        // TODO: how do we deal with the "plus or minus" sign ?
+        ShVariable minus_one(allocate_constant(I->src[0], -1));
+        ShVariable tmp(allocate_temp(I->src[0]));
+                
+        new_stmts.push_back(ShStatement(tmp, I->src[0], SH_OP_MUL, I->src[0]));
+        new_stmts.push_back(ShStatement(tmp, tmp, SH_OP_ADD, minus_one));
+        new_stmts.push_back(ShStatement(tmp, SH_OP_SQRT, tmp));
+        new_stmts.push_back(ShStatement(tmp, I->src[0], SH_OP_ADD, tmp));
+        new_stmts.push_back(ShStatement(I->dest, SH_OP_LOG, tmp));
+        break;
+      }
+    case SH_OP_ASINH:
+      {
+        // asinh(x) = ln(x + sqrt(x^2 + 1))
+        ShVariable one(allocate_constant(I->src[0], 1));
+        ShVariable tmp(allocate_temp(I->src[0]));
+                
+        new_stmts.push_back(ShStatement(tmp, I->src[0], SH_OP_MUL, I->src[0]));
+        new_stmts.push_back(ShStatement(tmp, tmp, SH_OP_ADD, one));
+        new_stmts.push_back(ShStatement(tmp, SH_OP_SQRT, tmp));
+        new_stmts.push_back(ShStatement(tmp, I->src[0], SH_OP_ADD, tmp));
+        new_stmts.push_back(ShStatement(I->dest, SH_OP_LOG, tmp));
+        break;
+      }
+    case SH_OP_ATANH:
+      {
+        // atanh(x) = 1/2 * ln((1+x) / (1-x))
+        ShVariable one(allocate_constant(I->src[0], 1));
+        ShVariable tmp1(allocate_temp(I->src[0]));
+        ShVariable tmp2(allocate_temp(I->src[0]));
+        ShVariable half(allocate_constant(I->src[0], 0.5));
+
+        new_stmts.push_back(ShStatement(tmp1, one, SH_OP_ADD, I->src[0]));
+        new_stmts.push_back(ShStatement(tmp2, SH_OP_NEG, I->src[0]));
+        new_stmts.push_back(ShStatement(tmp2, one, SH_OP_ADD, tmp2));
+        new_stmts.push_back(ShStatement(tmp1, tmp1, SH_OP_DIV, tmp2));
+        new_stmts.push_back(ShStatement(tmp1, SH_OP_LOG, tmp1));
+        new_stmts.push_back(ShStatement(I->dest, half, SH_OP_MUL, tmp1));
+        break;
+      }
+    default:
+      break;
+    }
+
+    if (!new_stmts.empty()) {
+      I = node->block->erase(I);
+      node->block->splice(I, new_stmts);
+      m_changed = true;
+      return true;
+    } else {
+      return false;
+    }
+  }
+};
+
+typedef ShDefaultTransformer<InverseHyperbolicExpanderBase> InverseHyperbolicExpander;
+void ShTransformer::expand_inverse_hyperbolic()
+{
+  InverseHyperbolicExpander expander;
+  m_changed |= expander.transform(m_program);
+}
+
+}

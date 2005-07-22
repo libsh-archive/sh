@@ -60,11 +60,17 @@ void shABS(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
 void shACOS(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
+void shACOSH(ShVariable& dest, const ShVariable& a);
+SH_DLLEXPORT
 void shASIN(ShVariable& dest, const ShVariable& a);
+SH_DLLEXPORT
+void shASINH(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
 void shATAN(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
 void shATAN2(ShVariable& dest, const ShVariable& a, const ShVariable& b);
+SH_DLLEXPORT
+void shATANH(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT
 void shCBRT(ShVariable& dest, const ShVariable& a);
 SH_DLLEXPORT

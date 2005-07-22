@@ -107,6 +107,26 @@ ShGeneric<N, T> sinh(const ShGeneric<N, T>& var);
 template<int N, typename T>
 ShGeneric<N, T> tanh(const ShGeneric<N, T>& var);
 
+/** Hyperbolic arccosine.
+ * Operates componentwise on tuples.
+ * Returns the hypebolic arccosine of x.
+ */
+template<int N, typename T>
+ShGeneric<N, T> acosh(const ShGeneric<N, T>& var);
+
+/** Hyperbolic arcsine.
+ * Operates componentwise on tuples.
+ * Returns the hyperbolic arcsine of x.
+ */
+template<int N, typename T>
+ShGeneric<N, T> asinh(const ShGeneric<N, T>& var);
+
+/** Hyperbolic arctangent.
+ * Operates componentwise on tuples.
+ * Returns the hyperbolic arctangent of x.
+ */
+template<int N, typename T>
+ShGeneric<N, T> atanh(const ShGeneric<N, T>& var);
 /*@}*/
 
 }

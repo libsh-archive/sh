@@ -55,9 +55,12 @@ void _shInitFloatOps() {
 
   eval->addOp(SH_OP_ABS, new ShRegularOp<SH_OP_ABS, T>(), V, V);
   eval->addOp(SH_OP_ACOS, new ShRegularOp<SH_OP_ACOS, T>(), V, V);
+  eval->addOp(SH_OP_ACOSH, new ShRegularOp<SH_OP_ACOSH, T>(), V, V);
   eval->addOp(SH_OP_ASIN, new ShRegularOp<SH_OP_ASIN, T>(), V, V);
+  eval->addOp(SH_OP_ASINH, new ShRegularOp<SH_OP_ASINH, T>(), V, V);
   eval->addOp(SH_OP_ASN, new ShRegularOp<SH_OP_ASN, T>(), V, V);
   eval->addOp(SH_OP_ATAN, new ShRegularOp<SH_OP_ATAN, T>(), V, V);
+  eval->addOp(SH_OP_ATANH, new ShRegularOp<SH_OP_ATANH, T>(), V, V);
   eval->addOp(SH_OP_CBRT, new ShRegularOp<SH_OP_CBRT, T>(), V, V);
   eval->addOp(SH_OP_CEIL, new ShRegularOp<SH_OP_CEIL, T>(), V, V);
   eval->addOp(SH_OP_COS, new ShRegularOp<SH_OP_COS, T>(), V, V);

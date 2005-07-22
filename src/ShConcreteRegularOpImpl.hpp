@@ -117,9 +117,12 @@ struct ShConcreteRegularOp<op, T>\
 // Unary ops
 SHCRO_UNARY_OP(SH_OP_ABS, abs(*A));
 SHCRO_UNARY_OP(SH_OP_ACOS, acos(*A));
+SHCRO_UNARY_OP(SH_OP_ACOSH, acosh(*A));
 SHCRO_UNARY_OP(SH_OP_ASIN, asin(*A));
+SHCRO_UNARY_OP(SH_OP_ASINH, asinh(*A));
 SHCRO_UNARY_OP(SH_OP_ASN, (*A));
 SHCRO_UNARY_OP(SH_OP_ATAN, atan(*A));
+SHCRO_UNARY_OP(SH_OP_ATANH, atanh(*A));
 SHCRO_UNARY_OP(SH_OP_CBRT, cbrt(*A));
 SHCRO_UNARY_OP(SH_OP_CEIL, ceil(*A));
 
@@ -255,7 +258,7 @@ SHCRO_UNARY_OP(SH_OP_TANH, tan(*A));
 
 // Binary ops
 SHCRO_BINARY_OP(SH_OP_ADD, (*A) + (*B));
-SHCRO_BINARY_OP(SH_OP_ATAN2, atan2((*A), (*B)));
+SHCRO_BINARY_OP(SH_OP_ATAN2, atan2((*B), (*A)));
 SHCRO_BINARY_OP(SH_OP_DIV, (*A) / (*B));
 SHCRO_BINARY_OP(SH_OP_MAX, max((*A), (*B))); 
 SHCRO_BINARY_OP(SH_OP_MIN, min((*A), (*B))); 

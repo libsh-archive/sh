@@ -84,10 +84,16 @@ SHCCTO_UNARY_OP_SPEC_TMPL(double, SH_OP_ABS, std::fabs(*A));
 SHCCTO_UNARY_OP_SPEC_TMPL(float,  SH_OP_ABS, fabsf(*A));
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_ACOS, std::acos(*A));
 SHCCTO_UNARY_OP_SPEC(float,  SH_OP_ACOS, acosf(*A));
+SHCCTO_UNARY_OP_SPEC(double, SH_OP_ACOSH, acosh(*A));
+SHCCTO_UNARY_OP_SPEC(float,  SH_OP_ACOSH, acoshf(*A));
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_ASIN, std::asin(*A));
 SHCCTO_UNARY_OP_SPEC(float,  SH_OP_ASIN, asinf(*A));
+SHCCTO_UNARY_OP_SPEC(double, SH_OP_ASINH, asinh(*A));
+SHCCTO_UNARY_OP_SPEC(float,  SH_OP_ASINH, asinhf(*A));
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_ATAN, std::atan(*A));
 SHCCTO_UNARY_OP_SPEC(float,  SH_OP_ATAN, atanf(*A));
+SHCCTO_UNARY_OP_SPEC(double, SH_OP_ATANH, atanh(*A));
+SHCCTO_UNARY_OP_SPEC(float,  SH_OP_ATANH, atanhf(*A));
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_CBRT, std::pow(*A, 1.0 / 3.0));
 SHCCTO_UNARY_OP_SPEC(float,  SH_OP_CBRT, powf(*A, 1.0f / 3.0f));
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_CEIL, std::ceil(*A));
@@ -155,8 +161,8 @@ SHCCTO_UNARY_OP_SPEC_TMPL(double, SH_OP_TANH, std::tanh(*A));
 SHCCTO_UNARY_OP_SPEC_TMPL(float,  SH_OP_TANH, tanhf(*A)); 
 
 /* Specializations for binary ops */
-SHCCTO_BINARY_OP_SPEC(double, SH_OP_ATAN2, std::atan2((*A), (*B)));
-SHCCTO_BINARY_OP_SPEC(float,  SH_OP_ATAN2, atan2f((*A), (*B)));
+SHCCTO_BINARY_OP_SPEC(double, SH_OP_ATAN2, std::atan2((*B), (*A)));
+SHCCTO_BINARY_OP_SPEC(float,  SH_OP_ATAN2, atan2f((*B), (*A)));
 
 
 // Binary Ops

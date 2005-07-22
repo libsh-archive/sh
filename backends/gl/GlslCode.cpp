@@ -100,6 +100,8 @@ void GlslCode::generate()
   transform.convertToFloat(convert_map);
   transform.splitTuples(4, m_splits);
   transform.stripDummyOps();
+  transform.expand_atan2();
+  transform.expand_inverse_hyperbolic();
 
   if (transform.changed()) {
     optimize(m_shader);
