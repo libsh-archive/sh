@@ -33,7 +33,6 @@ static GlslMapping opCodeTable[] = {
   {SH_OP_ASIN,  "asin($0)"},
   {SH_OP_ASN,   "$0"},
   {SH_OP_ATAN,  "atan($0)"},
-  //{SH_OP_ATAN2, "atan($1 / $0)"}, // FIXME
   {SH_OP_CEIL,  "ceil($0)"},
   {SH_OP_COS,   "cos($0)"},
   {SH_OP_DOT,   "dot($0, $1)"},
