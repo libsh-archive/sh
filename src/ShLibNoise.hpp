@@ -45,6 +45,9 @@ namespace SH {
 template<int N, int M, typename T>
 ShGeneric<N, T> hash(const ShGeneric<M, T>& p); 
 
+template<int N, int M, typename T>
+ShGeneric<N, T> texhash(const ShGeneric<M, T>& p); 
+
 // Returns summed octaves of cell noise 
 // @{
 template<int N, int M, typename T>

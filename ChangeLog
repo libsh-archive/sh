@@ -1,3 +1,8 @@
+2005-07-25  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibNoise.hpp, ShLibNoiseImpl.hpp: Add a dummy texhash()
+	function (it just calls hash() right now).
+
 2005-07-22  Francois Marier  <francois@serioushack.com>
 
 	* src/ShOperation.hpp, ShOperation.cpp: Add IR operations for the

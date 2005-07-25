@@ -45,6 +45,12 @@ ShGeneric<N, T> hash(const ShGeneric<M, T>& p)
   return result;
 }
 
+template<int N, int M, typename T>
+ShGeneric<N, T> texhash(const ShGeneric<M, T>& p)
+{
+  return hash<N>(p);
+}
+
 /** \brief A Perlin noise/turbulence generator.
  * M = dimensions of the result (1 <= M <= 4 currently)
  * P = period of the noise texture
