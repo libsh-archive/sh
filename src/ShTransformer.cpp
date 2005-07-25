@@ -682,8 +682,7 @@ struct InverseHyperbolicExpanderBase: public ShTransformerParent
     switch (I->op) {
     case SH_OP_ACOSH:
       {
-        // acosh(x) = ln(x +- sqrt(x^2 - 1))
-        // TODO: how do we deal with the "plus or minus" sign ?
+        // acosh(x) = ln(x + sqrt(x^2 - 1))
         ShVariable minus_one(allocate_constant(I->src[0], -1));
         ShVariable tmp(allocate_temp(I->src[0]));
                 

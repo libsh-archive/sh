@@ -145,12 +145,18 @@ const CcOpCode opCodeTable[] = {
 
   {SH_OP_ABS,   "fabs(#0)"}, 
   {SH_OP_ACOS,  "acos(#0)"},
-  {SH_OP_ACOSH, "acosh(#0)"},
   {SH_OP_ASIN,  "asin(#0)"},
-  {SH_OP_ASINH, "asinh(#0)"},
   {SH_OP_ATAN,  "atan(#0)"},
-  {SH_OP_ATANH, "atanh(#0)"},
   {SH_OP_ATAN2, "atan2(#1, #0)"},
+#ifdef WIN32
+  {SH_OP_ACOSH, "log(#0 + sqrt(#0 * #0 - 1.0))"},
+  {SH_OP_ASINH, "log(#0 + sqrt(#0 * #0 + 1.0))"},
+  {SH_OP_ATANH, "log((1.0 + #0)/(1.0 - #0)) / 2.0"},
+#else
+  {SH_OP_ACOSH, "acosh(#0)"},
+  {SH_OP_ASINH, "asinh(#0)"},
+  {SH_OP_ATANH, "atanh(#0)"},
+#endif
   {SH_OP_CBRT,  "pow(#0, 1 / 3.0)"},
   {SH_OP_CEIL,  "ceil(#0)"},
   {SH_OP_COS,   "cos(#0)"},

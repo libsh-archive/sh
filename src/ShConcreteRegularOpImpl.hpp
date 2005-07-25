@@ -117,14 +117,21 @@ struct ShConcreteRegularOp<op, T>\
 // Unary ops
 SHCRO_UNARY_OP(SH_OP_ABS, abs(*A));
 SHCRO_UNARY_OP(SH_OP_ACOS, acos(*A));
-SHCRO_UNARY_OP(SH_OP_ACOSH, acosh(*A));
 SHCRO_UNARY_OP(SH_OP_ASIN, asin(*A));
-SHCRO_UNARY_OP(SH_OP_ASINH, asinh(*A));
 SHCRO_UNARY_OP(SH_OP_ASN, (*A));
 SHCRO_UNARY_OP(SH_OP_ATAN, atan(*A));
-SHCRO_UNARY_OP(SH_OP_ATANH, atanh(*A));
 SHCRO_UNARY_OP(SH_OP_CBRT, cbrt(*A));
 SHCRO_UNARY_OP(SH_OP_CEIL, ceil(*A));
+
+#ifdef WIN32
+SHCRO_UNARY_OP(SH_OP_ACOSH, log((*A) + sqrt((*A) * (*A) - 1)));
+SHCRO_UNARY_OP(SH_OP_ASINH, log((*A) + sqrt((*A) * (*A) + 1)));
+SHCRO_UNARY_OP(SH_OP_ATANH, log((1.0 + (*A))/(1.0 - (*A)))/2.0);
+#else
+SHCRO_UNARY_OP(SH_OP_ACOSH, acosh(*A));
+SHCRO_UNARY_OP(SH_OP_ASINH, asinh(*A));
+SHCRO_UNARY_OP(SH_OP_ATANH, atanh(*A));
+#endif
 
 template<typename T>
 struct ShConcreteRegularOp<SH_OP_CMUL, T>
