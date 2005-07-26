@@ -103,6 +103,13 @@ def make_test(expected, values, types=[], epsilon=0):
     types = types + (len(values) + 1 - len(types)) * ['float']
     return (expected, values, types, epsilon)
 
+def identifier(s):
+    ret = ""
+    for c in s:
+        if c.isalnum():
+            ret += c
+    return ret
+        
 def make_testname(src_arg_types, types, key, testnumber):
     name = enum_value_type[types[0]]
     for arg, argtype in src_arg_types:
@@ -110,7 +117,7 @@ def make_testname(src_arg_types, types, key, testnumber):
         if is_array(arg):
             name += str(len(arg))
         name += enum_value_type[argtype]
-    name += '_' + key
+    name += '_' + identifier(key)
     name += '_test' + str(testnumber)
     return name
 
