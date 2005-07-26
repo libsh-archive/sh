@@ -31,41 +31,6 @@ SH_SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(SH_POINT, operator-, SH_VECTOR, 1)
 
 SH_SHLIB_LEFT_MATRIX_OPERATION(SH_POINT, operator|, M)
 
-// TODO: Special cases for homogeneous matrix multiplication etc.
-
-template<ShBindingType B1, ShBindingType B2, typename T, bool S1>
-ShAttrib<3, SH_TEMP, T, SH_POINT, false>
-operator|(const ShMatrix<4, 4, B1, T>& m, const ShAttrib<3, B2, T, SH_POINT, S1>& v)
-{
-  ShAttrib<4, SH_TEMP, T, SH_POINT, false> t;
-  t(0,1,2) = v;
-  t(3) = ShAttrib<1, SH_CONST, T>(1.0f);
-  ShAttrib<4, SH_TEMP, T, SH_POINT, false> r = m | t;
-  return r(0,1,2)/r(3);
-}
-
-template<ShBindingType B1, ShBindingType B2, typename T, bool S1>
-ShAttrib<2, SH_TEMP, T, SH_POINT, false>
-operator|(const ShMatrix<3, 3, B1, T>& m, const ShAttrib<2, B2, T, SH_POINT, S1>& v)
-{
-  ShAttrib<3, SH_TEMP, T, SH_POINT, false> t;
-  t(0,1) = v;
-  t(2) = ShAttrib<1, SH_CONST, T>(1.0f);
-  ShAttrib<3, SH_TEMP, T, SH_POINT, false> r = m | t;
-  return r(0,1)/r(2);
-}
-
-template<ShBindingType B1, ShBindingType B2, typename T, bool S1>
-ShAttrib<1, SH_TEMP, T, SH_POINT, false>
-operator|(const ShMatrix<2, 2, B1, T>& m, const ShAttrib<1, B2, T, SH_POINT, S1>& v)
-{
-  ShAttrib<2, SH_TEMP, T, SH_POINT, false> t;
-  t(0) = v;
-  t(1) = ShAttrib<1, SH_CONST, T>(1.0f);
-  ShAttrib<2, SH_TEMP, T, SH_POINT, false> r = m | t;
-  return r(0)/r(1);
-}
-
 }
 
 #endif

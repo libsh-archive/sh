@@ -70,39 +70,6 @@ operator|(const ShAttrib<N, B1, T, SH_NORMAL, S1>& a, const ShAttrib<N, B2, T, S
   return dot(a, b);
 }
 
-template<ShBindingType B1, ShBindingType B2, typename T, bool S1>
-ShAttrib<3, SH_TEMP, T, SH_NORMAL, false>
-operator|(const ShMatrix<4, 4, B1, T>& m, const ShAttrib<3, B2, T, SH_NORMAL, S1>& v)
-{
-  ShAttrib<3, SH_TEMP, T, SH_NORMAL, false> t;
-  for (int i = 0; i < 3; i++) {
-    t(i) = dot(m[i](0,1,2), v);
-  }
-  return t;
-}
-
-template<ShBindingType B1, ShBindingType B2, typename T, bool S1>
-ShAttrib<2, SH_TEMP, T, SH_NORMAL, false>
-operator|(const ShMatrix<3, 3, B1, T>& m, const ShAttrib<2, B2, T, SH_NORMAL, S1>& v)
-{
-  ShAttrib<2, SH_TEMP, T, SH_NORMAL, false> t;
-  for (int i = 0; i < 2; i++) {
-    t(i) = dot(m[i](0,1), v);
-  }
-  return t;
-}
-
-template<ShBindingType B1, ShBindingType B2, typename T, bool S1>
-ShAttrib<1, SH_TEMP, T, SH_NORMAL, false>
-operator|(const ShMatrix<2, 2, B1, T>& m, const ShAttrib<1, B2, T, SH_NORMAL, S1>& v)
-{
-  ShAttrib<1, SH_TEMP, T, SH_NORMAL, false> t;
-  for (int i = 0; i < 1; i++) {
-    t(i) = dot(m[i](0), v);
-  }
-  return t;
-}
-
 }
 
 #endif

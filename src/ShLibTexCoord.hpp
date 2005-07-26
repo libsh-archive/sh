@@ -23,7 +23,6 @@
 #include "ShAttrib.hpp"
 #include "ShLib.hpp"
 
-// TODO: should have same homogeneous promotion rules as Point and Position
 namespace SH {
 
 SH_SHLIB_USUAL_OPERATIONS(SH_TEXCOORD);

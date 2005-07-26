@@ -80,6 +80,10 @@ ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding, T1>& a, const ShGene
  * elements in the tuple, the weight of the last column is assumed to
  * be ZERO. @{ */
 template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
+ShGeneric<M, CT1T2> operator|(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_VECTOR, swizzled>& b);
+template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
+ShGeneric<M, CT1T2> operator|(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_NORMAL, swizzled>& b);
+template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
 ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_VECTOR, swizzled>& b);
 template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
 ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_NORMAL, swizzled>& b);
@@ -89,6 +93,12 @@ ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding1, T1>& a, const ShAtt
  * If the matrix on the left has one more column than the number of
  * elements in the tuple, the weight of the last column is assumed to
  * be ONE. @{ */
+template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
+ShGeneric<M, CT1T2> operator|(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_TEXCOORD, swizzled>& b);
+template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
+ShGeneric<M, CT1T2> operator|(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_POINT, swizzled>& b);
+template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
+ShGeneric<M, CT1T2> operator|(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_PLANE, swizzled>& b);
 template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
 ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_TEXCOORD, swizzled>& b);
 template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>

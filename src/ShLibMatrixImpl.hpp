@@ -150,6 +150,24 @@ ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding, T1>& a, const ShGene
 template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, 
          typename T1, typename T2, bool swizzled>
 inline
+ShGeneric<M, CT1T2> operator|(const ShMatrix<M, N, Binding1, T1>& a,
+                              const ShAttrib<N-1, Binding2, T2, SH_VECTOR, swizzled>& b)
+{
+  return a | cast<N>(b);
+}
+
+template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, 
+         typename T1, typename T2, bool swizzled>
+inline
+ShGeneric<M, CT1T2> operator|(const ShMatrix<M, N, Binding1, T1>& a,
+                              const ShAttrib<N-1, Binding2, T2, SH_NORMAL, swizzled>& b)
+{
+  return a | cast<N>(b);
+}
+
+template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, 
+         typename T1, typename T2, bool swizzled>
+inline
 ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding1, T1>& a,
                               const ShAttrib<N-1, Binding2, T2, SH_VECTOR, swizzled>& b)
 {
@@ -167,7 +185,7 @@ ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding1, T1>& a,
 
 template<int M, int N, ShBindingType Binding1, ShBindingType Binding2,
          typename T1, typename T2, bool swizzled>
-ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding1, T1>& a,
+ShGeneric<M, CT1T2> operator|(const ShMatrix<M, N, Binding1, T1>& a,
                               const ShAttrib<N-1, Binding2, T2, SH_TEXCOORD, swizzled>& b)
 {
   ShAttrib<N, SH_TEMP, T2, SH_TEXCOORD, swizzled> tmp = cast<N>(b);
@@ -177,7 +195,7 @@ ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding1, T1>& a,
 
 template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, 
          typename T1, typename T2, bool swizzled>
-ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding1, T1>& a,
+ShGeneric<M, CT1T2> operator|(const ShMatrix<M, N, Binding1, T1>& a,
                               const ShAttrib<N-1, Binding2, T2, SH_POINT, swizzled>& b)
 {
   ShAttrib<N, SH_TEMP, T2, SH_POINT, swizzled> tmp = cast<N>(b);
@@ -187,12 +205,39 @@ ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding1, T1>& a,
 
 template<int M, int N, ShBindingType Binding1, ShBindingType Binding2,
          typename T1, typename T2, bool swizzled>
-ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding1, T1>& a,
+ShGeneric<M, CT1T2> operator|(const ShMatrix<M, N, Binding1, T1>& a,
                               const ShAttrib<N-1, Binding2, T2, SH_PLANE, swizzled>& b)
 {
   ShAttrib<N, SH_TEMP, T2, SH_PLANE, swizzled> tmp = cast<N>(b);
   tmp[N-1] = static_cast<T2>(1);
   return a | tmp;
+}
+
+template<int M, int N, ShBindingType Binding1, ShBindingType Binding2,
+         typename T1, typename T2, bool swizzled>
+inline
+ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding1, T1>& a,
+                              const ShAttrib<N-1, Binding2, T2, SH_TEXCOORD, swizzled>& b)
+{
+  return a | b;
+}
+
+template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, 
+         typename T1, typename T2, bool swizzled>
+inline
+ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding1, T1>& a,
+                              const ShAttrib<N-1, Binding2, T2, SH_POINT, swizzled>& b)
+{
+  return a | b;
+}
+
+template<int M, int N, ShBindingType Binding1, ShBindingType Binding2,
+         typename T1, typename T2, bool swizzled>
+inline
+ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding1, T1>& a,
+                              const ShAttrib<N-1, Binding2, T2, SH_PLANE, swizzled>& b)
+{
+  return a | b;
 }
 
 template<int M, int N, ShBindingType Binding, typename T1, typename T2>

@@ -1,5 +1,11 @@
 2005-07-26  Francois Marier  <francois@serioushack.com>
 
+	* src/ShLibNormal.hpp, ShLibPoint.hpp, ShLibVector.hpp,
+	ShLibTexCoord.hpp: Remove unnecessary expansion methods.
+
+	* src/ShLibMatrixImpl.hpp, ShLibMatrix.hpp (operator|): Add
+	tuple-expansion for this operator as well.
+	
 	* src/ShLibMatrixImpl.hpp, ShLibMatrix.hpp (operator*): Add tuple
 	expansion for matrix-tuple multiplication of certain semantic
 	types.
