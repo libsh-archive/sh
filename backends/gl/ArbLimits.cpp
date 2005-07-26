@@ -19,13 +19,16 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "ArbLimits.hpp"
 #include "Arb.hpp"
+#include <stdio.h>
 
 namespace shgl {
 
 ArbLimits::ArbLimits(const std::string& target)
 {
+  	
+  //printf("target: %s\n", target.c_str());
   unsigned int arb_target = arbTarget(target);
-  
+ 
   m_instrs = (target == "gpu:vertex" ? 128 : 48);
   SH_GL_CHECK_ERROR(glGetProgramivARB(arb_target, GL_MAX_PROGRAM_INSTRUCTIONS_ARB,
                                         &m_instrs));

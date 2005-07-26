@@ -22,6 +22,7 @@
 #include "ShVariant.hpp"
 #include <cstring>
 #include <algorithm>
+#include <stdio.h>
 
 namespace SH {
 
@@ -140,6 +141,8 @@ void ShStorage::orphan()
 
 void ShStorage::sync() const
 {
+  //return; // lets not sync anything for now
+	
   SH_DEBUG_ASSERT(m_memory);
   
   if (m_memory->timestamp() == timestamp()) return; // We are already in sync
@@ -153,7 +156,11 @@ void ShStorage::sync() const
     if (other == this) continue;
     if (other->timestamp() < m_memory->timestamp()) continue;
     int local_cost = cost(other, this);
-    if (local_cost < 0) continue; // Can't transfer from that storage.
+   
+   //if (local_cost < 0) {printf("ShMemory.cpp: memory: %s, can't transfer, from:%s, to:%s\n", m_memory->getTag(), other->id().c_str(), this->id().c_str()); continue;} // Can't transfer from that storage.
+    if (local_cost < 0) 
+	    continue;
+    
     if (!source || local_cost < transfer_cost) {
       source = other;
       transfer_cost = local_cost;
@@ -188,9 +195,9 @@ void ShStorage::dirtyall()
 
 int ShStorage::cost(const ShStorage* from, const ShStorage* to)
 {
-  if (!from) return -1;
-  if (!to) return -1;
-  if (!m_transfers) return false;
+  if (!from) {printf("cost(): no from!\n"); return -1;}
+  if (!to) {printf("cost(): no to!\n"); return -1;}
+  if (!m_transfers) {printf("cost(): no m_transfers!\n"); return false;}
   
   TransferMap::const_iterator I = m_transfers->find(std::make_pair(from->id(), to->id()));
   if (I == m_transfers->end()) return -1;

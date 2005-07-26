@@ -20,33 +20,12 @@
 #include "ShContext.hpp"
 #include "GlTextures.hpp"
 #include <sstream>
-#include "GlTextureName.hpp"
-#include "GlTextureStorage.hpp"
+#include <cstring>
 
 namespace shgl {
 
 using namespace SH;
 
-const unsigned int shGlTargets[] = {
-  GL_TEXTURE_1D,
-  GL_TEXTURE_2D,
-#if defined ( __APPLE__ )
-  GL_TEXTURE_RECTANGLE_EXT,
-#else
-  GL_TEXTURE_RECTANGLE_NV,
-#endif
-  GL_TEXTURE_3D,
-  GL_TEXTURE_CUBE_MAP,
-};
-
-const unsigned int shGlCubeMapTargets[] = {
-  GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-  GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
-  GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
-  GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
-  GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
-  GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
-};
 
 ShCubeDirection glToShCubeDir(GLuint target)
 {
@@ -104,8 +83,10 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node)
 #ifndef __APPLE__
   // note that right now 1/2/3D float textures on NV are only supported through
   // the ATI extension, so we only use nv for RECT. 
-  bool float_nv = (exts.find("NV_float_buffer") != std::string::npos) && 
-                  (node->dims() == SH_TEXTURE_RECT);
+  bool float_nv = (exts.find("NV_float_buffer") != std::string::npos)/* && 
+                  (node->dims() == SH_TEXTURE_RECT)*/;
+  if(!float_nv)
+    printf("no NV float buffers!\n");
 
   bool float_ati = (exts.find("ATI_texture_float") != std::string::npos);
 
@@ -136,7 +117,7 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node)
   case SH_FLOAT:        
   case SH_INT: 
   case SH_UINT:
-    formats = float_formats;
+    formats = half_formats;
     break;
   case SH_HALF:
   case SH_SHORT: 
@@ -228,38 +209,13 @@ GLenum shGlType(ShValueType valueType, ShValueType &convertedType) {
     if (exts.find("APPLE_float_pixels") != std::string::npos) {
       convertedType = SH_VALUETYPE_END; 
       result = GL_HALF_APPLE; 
-    }
+    
 #endif
   }
   SH_DEBUG_ASSERT(result != GL_NONE);
   return result;
 }
 
-struct StorageFinder {
-  StorageFinder(const ShTextureNodePtr& node, bool ignoreTarget = false)
-    : node(node), ignoreTarget(ignoreTarget)
-  {
-  }
-  
-  bool operator()(const ShStoragePtr& storage) const
-  {
-    GlTextureStoragePtr t = shref_dynamic_cast<GlTextureStorage>(storage);
-    if (!t) {
-      return false;
-    }
-    if (!ignoreTarget) {
-      if (t->texName()->params() != node->traits()) return false;
-      if (t->target() != shGlTargets[node->dims()]) return false;
-    }
-    if (t->width() != node->width()) return false;
-    if (t->height() != node->height()) return false;
-    if (t->depth() != node->depth()) return false;
-    return true;
-  }
-  
-  const ShTextureNodePtr& node;
-  bool ignoreTarget;
-};
 
 GlTextures::GlTextures(void)
 {
@@ -305,7 +261,7 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target)
 	  shError(ShException("No memory associated with the cube map texture."));
 	  return;
 	}
-        if (s->memory() != node->memory(dir, 0).object() || !StorageFinder(node, true)(s))
+        if (s->memory() != node->memory(dir, 0).object() || !StorageFinder(node, false, false, true)(s))
           break;
       }
       // If we got through the whole list, we've found a matching list.
@@ -393,17 +349,26 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target)
       return;
     }
 
-    if ((mipmap_levels > 1) && (!node->memory(1))) {
+   //FIXME: uncomment the mipmaps creation  
+   /* if ((mipmap_levels > 1) && (!node->memory(1))) {
       std::stringstream s;
       s << "Automatically generated the " << mipmap_levels << " mipmap levels.";
       SH_DEBUG_WARN(s.str());
       node->build_mipmaps();
     }
+*/
+     
+    StorageFinder strictFinder(node, false, true, false);
+    StorageFinder finder(node, false, false, false);
+    if(!node->memory(0))  
+      printf("no memory assigned!\n");
 
-    StorageFinder finder(node);
     GlTextureStoragePtr storage =
-      shref_dynamic_cast<GlTextureStorage>(node->memory(0)->findStorage("opengl:texture", finder));
+      shref_dynamic_cast<GlTextureStorage>(node->memory(0)->findStorage("opengl:texture", strictFinder));
+    if(!storage) shref_dynamic_cast<GlTextureStorage>(node->memory(0)->findStorage("opengl:texture", finder));
+
     if (!storage) {
+	    printf("GlTextures.cpp: Could not find any texture storages with appropriate attributes for memory object: %s, creating a new one\n", node->memory(0)->getTag());
       GlTextureNamePtr name = new GlTextureName(shGlTargets[node->dims()]);
       storage = new GlTextureStorage(node->memory(0).object(),
                                      shGlTargets[node->dims()],
@@ -414,8 +379,8 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target)
                                      node->depth(), node->size(),
                                      node->count(), name, 0);
       if (mipmap_levels > 1) {
-	storage->sync();
-	
+      storage->sync();
+      	
 	int width = node->width();
 	int height = node->height();
 	for (int i=1; i < mipmap_levels; i++) {
@@ -441,16 +406,17 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target)
       }
 
       name->params(node->traits());
-    }
+    }//if
 
     SH_GL_CHECK_ERROR(glActiveTextureARB(target));
-    storage->sync();
+    //storage->sync();
+    storage->dirty(); // need to mark it up to date, so execute() won't write into it
     SH_GL_CHECK_ERROR(glBindTexture(shGlTargets[node->dims()], storage->name()));
 
     std::ostringstream os;
     os << storage->name();
     node->meta("opengl:alloc_texid", os.str());
-  }
+  }//else
 }
 
 }

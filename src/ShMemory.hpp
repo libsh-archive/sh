@@ -50,6 +50,9 @@ SH_DLLEXPORT ShMemory : public ShRefCountable {
 public:
   virtual ~ShMemory();
 
+  char* getTag(){return m_tag;}
+  void setTag(char* tag){strcpy(m_tag, tag);}
+
   /// Return the timestamp of the most up-to-date storage of this memory
   int timestamp() const;
 
@@ -74,6 +77,7 @@ protected:
   ShMemory();
 
 private:
+  char m_tag[256];
   int increment_timestamp();
 
   void addStorage(const ShPointer<ShStorage>& storage);

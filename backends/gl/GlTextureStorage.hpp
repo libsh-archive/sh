@@ -50,10 +50,19 @@ public:
   int tuplesize() const { return m_tuplesize; }
   int count() const { return (m_count != -1) ? m_count : m_width * m_height * m_depth; }
   GLint mipmap_level() const { return m_mipmap_level; }
-  
+
+  bool allocate(void); // returns true if allocated correctly
+
+//FIXME: might want to propagate those to the ancestor in the future 
+  void setWrite(){m_writeflag = true;}
+  void clearWrite(){m_writeflag = false;}
+  bool isWrite(){return m_writeflag;}
+   
 private:
   GlTextureNamePtr m_name;
 
+  bool m_writeflag;
+   
   // OpenGL texture params.  type will be determined by the Transfer function
   GLenum m_target;
   GLenum m_format;
@@ -71,6 +80,34 @@ private:
 
 typedef SH::ShPointer<GlTextureStorage> GlTextureStoragePtr;
 
-}
 
+
+
+/** An ShMemory initially originating in GPU texture memory.
+ * @see ShMemory
+ * @see GlTextureStorage
+ */
+/*class
+SH_DLLEXPORT GlTextureMemory : public ShMemory {
+public:
+  GlTextureMemory(int length);
+  GlTextureMemory(int length, void* data);
+
+  ~GlTextureMemory();
+
+  GlTextureStoragePtr textureStorage();
+  ShPointer<const GlTextureStorage> textureStorage() const;
+
+private:
+  GlTextureStoragePtr m_textureStorage;
+  // NOT IMPLEMENTED
+  GlTextureMemory& operator=(const GlTextureMemory& other);
+  GlTextureMemory(const GlTextureMemory& other);
+};
+
+typedef ShPointer<GlTextureMemory> GlTexturetMemoryPtr;
+typedef ShPointer<const GlTextureMemory> GlTextureMemoryCPtr;
+*/
+
+}
 #endif

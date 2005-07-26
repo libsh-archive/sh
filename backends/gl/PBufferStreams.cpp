@@ -29,7 +29,9 @@
 #include <fstream>
 #include <cstdlib>
 #include <list>
+#include <iostream>
 #include <set>
+#include <vector>
 
 #include "sh.hpp"
 #include "ShOptimizations.hpp"
@@ -39,11 +41,16 @@
 #include "ShVariant.hpp"
 #include "PBufferContext.hpp"
 #include "Utils.hpp"
+#include "GlTextureStorage.hpp"
+#include "GlTextureName.hpp"
+#include "GlTextures.hpp"
 
 #ifdef DO_PBUFFER_TIMING
 #include <sys/time.h>
 #include <time.h>
 #endif
+
+#define FBO
 
 namespace shgl {
 
@@ -126,7 +133,9 @@ PBufferStreamCache::PBufferStreamCache(ShProgramNode* stream_program,
   
   switch (extension) {
   case SH_ARB_NV_FLOAT_BUFFER:
-    dims = SH_TEXTURE_RECT;
+//FIXME: temporary change	  
+    //SH_TEXTURE_RECT;
+    dims = SH_TEXTURE_2D;
     break;
   case SH_ARB_ATI_PIXEL_FORMAT_FLOAT:
     dims = SH_TEXTURE_2D;
@@ -147,7 +156,7 @@ PBufferStreamCache::PBufferStreamCache(ShProgramNode* stream_program,
     ShProgram with_tc = ShProgram(*I) & lose<ShTexCoord2f>("streamcoord");
     
     TexFetcher fetcher(m_channel_map, with_tc.node()->inputs.back(),
-                       dims == SH_TEXTURE_RECT, with_tc.node());
+                       dims == SH_TEXTURE_2D/*RECT*/, with_tc.node());
     with_tc.node()->ctrlGraph->dfs(fetcher);
 
     optimize(with_tc);
@@ -221,6 +230,7 @@ void fillin()
 void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
                              ShStream& dest)
 {
+
   // Let's get rid of that constness... Yes, yes, I know...
   ShProgramNodePtr program = shref_const_cast<ShProgramNode>(program_const);
   
@@ -250,13 +260,6 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
   // TODO: Check that the size of each output matches the size of each dest.
 
   int count = (*dest.begin())->count();
-
-  for (ShStream::iterator I = dest.begin(); I != dest.end(); ++I) {
-    if (count != (*I)->count()) {
-      shError(PBufferStreamException("All stream outputs must be of the same size"));
-    }
-  }
-  
   // Pick a size for the texture that just fits the output data.
   int tex_size = 1;
   {
@@ -270,9 +273,68 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
       tex_size <<= 1;
     }
   }
+
+  std::vector<GlTextureStoragePtr> outtexs;  
+  for (ShStream::iterator I = dest.begin(); I != dest.end(); ++I) {
+    if (count != (*I)->count()) {
+      shError(PBufferStreamException("All stream outputs must be of the same size"));
+    }
+#ifdef FBO
+    // find/create texturestorages for outputs 
+    ShChannelNode* output = &(**I);
+    ShTextureNodePtr tex;
+    ShTextureTraits traits = ShArrayTraits();
+    
+    tex = new ShTextureNode(SH_TEXTURE_2D, output->size(), output->valueType(),
+                         traits, 1, 1, 1, 0);
+    tex->memory(output->memory(), 0);
+    tex->setTexSize(tex_size, tex_size);
+    tex->count(output->count());
+   
+    StorageFinder strictWriteFinder(tex, true, true, false);
+    StorageFinder writeFinder(tex, true, false, false);
+
+    GlTextureStoragePtr outtex = shref_dynamic_cast<GlTextureStorage>(output->memory()->findStorage("opengl:texture", strictWriteFinder));
+    //if(outtex) printf("found an appropriate tex storage for writting\n");
+    /*if(!outtex) GlTextureStoragePtr outtex = shref_dynamic_cast<GlTextureStorage>(output->memory()->findStorage("opengl:texture", writeFinder));*/
+
+    if(!outtex){
+      		
+	// the newly created texstorage must be compatible with a texture storage 
+	// used for stream inputs, so have to create it with the same attributes
+
+     	printf("FYI: creating a texture storage for stream output\n");    
+   
+        GlTextureNamePtr name = new GlTextureName(GL_TEXTURE_2D);
+	name->params(traits);
+	outtex = new GlTextureStorage(tex->memory(0).object(),
+                                     GL_TEXTURE_2D,
+                                     shGlFormat(tex),
+                                     shGlInternalFormat(tex),
+                                     tex->valueType(),
+                                     tex->width(), tex->height(), 
+                                     tex->depth(), tex->size(),
+                                     tex->count(), name, 0);
+
+	outtex->allocate();
+	/*outtex->sync(); //possible optimization would be to just allocate space for the texture,
+	//not allocate and copy from other up-to-date storage, since we are going to write to it anyway
+	*/
+		
+	
+
+    }//if
+
+    outtex->setWrite();
+    outtexs.push_back(outtex);
+
+#endif //FBO    
+  }//for
+  
   
   DECLARE_TIMER(onerun);
 
+#ifndef FBO  
   PBufferFactory* factory = PBufferFactory::instance();
 
   if (!factory) {
@@ -287,6 +349,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
   PBufferContextPtr context = factory->get_context(tex_size, tex_size);
 
   PBufferHandlePtr old_handle = context->activate();
+#endif//fbo
 
   DECLARE_TIMER(vpsetup);
 
@@ -310,53 +373,48 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
   
   cache->update_channels(tex_size, tex_size);
 
-  // Check whether some channels are both being read and written to
-  bool rw_channels = false;
-  if (dest.size() > 1) {
-    std::set<ShChannelNode*> input_channels;
-    for (ShProgramNode::ChannelList::const_iterator i = program->channels_begin();
-	 i != program->channels_end(); i++) {
-      input_channels.insert(i->object());
-    }
+  ShStream::iterator dest_iter= dest.begin();
+   
+#ifdef FBO
+  //check if texstorage has been created
+      //create an FBO
+     //FIXME: dont create and destroy an FBO every time, rather have a global one
+     GLuint fb, depth_rb;
+     SH_GL_CHECK_ERROR(glGenFramebuffersEXT(1, &fb));
+     SH_GL_CHECK_ERROR(glGenRenderbuffersEXT(1, &depth_rb));
+ 
+     SH_GL_CHECK_ERROR(glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb));
+     // initialize depth renderbuffer
+     SH_GL_CHECK_ERROR(glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depth_rb));
+     SH_GL_CHECK_ERROR(glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT,
+                                 GL_DEPTH_COMPONENT24, tex_size, tex_size));
+     SH_GL_CHECK_ERROR(glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
+                                     GL_DEPTH_ATTACHMENT_EXT,
+                                     GL_RENDERBUFFER_EXT, depth_rb));
 
-    for (ShStream::const_iterator i = dest.begin(); i != dest.end(); i++) {
-      if (input_channels.find(i->object()) != input_channels.end()) {
-	SH_DEBUG_WARN("Using an intermediate stream during execution since some of the channels are both being read from and written to.");
-	rw_channels = true;
-	break;
-      }
-    }
-  }
-
-  ShStream::iterator dest_iter;
-  ShStream* intermediate_stream = NULL;
-  if (rw_channels) {
-    // Make an intermediate stream so that updates take effect only
-    // once all of the programs have been executed.
-    intermediate_stream = new ShStream();
-    for (ShStream::const_iterator i = dest.begin(); i != dest.end(); i++) {
-      ShChannelNode* node = i->object();
-      int count = (*i)->count();
-      int tuplesize = node->size();
-      int valuesize = shTypeInfo(node->valueType())->datasize();
-      int length = count * tuplesize * valuesize;
-
-      ShHostMemoryPtr channel_mem = new ShHostMemory(length, node->valueType());
-      ShChannelNodePtr channel_copy = new ShChannelNode(node->specialType(), tuplesize, 
-							node->valueType(), channel_mem, count);
-      intermediate_stream->append(channel_copy);
-    }
-    dest_iter = intermediate_stream->begin();
-  } else {
-    // Use the output stream directly
-    dest_iter = dest.begin();
-  }
+    
+#endif//FBO
 
   // Run each fragment program
+  int i=0; 
   for (PBufferStreamCache::set_iterator I = cache->sets_begin();
-       I != cache->sets_end(); ++I, ++dest_iter) {
+       I != cache->sets_end(); ++I, ++dest_iter, ++i) {
 
     ShChannelNode* output = dest_iter->object();
+    
+#ifdef FBO
+ 
+    GlTextureStoragePtr outtex = outtexs[i];
+        
+    SH_GL_CHECK_ERROR(glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+                                  GL_COLOR_ATTACHMENT0_EXT,
+                                  GL_TEXTURE_2D, outtex->name(), 0));
+
+    SH_GL_CHECK_ERROR(GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT));
+    if(status != GL_FRAMEBUFFER_COMPLETE_EXT)
+       printf("FBO IS INCOMPLETE!\n");
+       
+#endif //FBO
     
     DECLARE_TIMER(binding);
     // Then, bind vertex (pass-through) and fragment program
@@ -372,28 +430,42 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
 #endif
 
     DECLARE_TIMER(clear);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     TIMING_RESULT(clear);
 
     DECLARE_TIMER(rendersetup);
+    
+    
+    int old_viewport[4];
+    glGetIntegerv(GL_VIEWPORT, old_viewport);
     glViewport(0, 0, tex_size, tex_size);
     
     glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
     glLoadIdentity();
     
     glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
     glLoadIdentity();
     
     float tc_right;
     float tc_upper;
-    
+
+    tc_right = static_cast<float>(tex_size);
+    tc_upper = static_cast<float>(tex_size);
+/*
+#ifndef FBO    
     if (extension == SH_ARB_NV_FLOAT_BUFFER) {
       tc_right = static_cast<float>(tex_size);
       tc_upper = static_cast<float>(tex_size);
     } else {
+#endif	    
       tc_right = 1.0;
       tc_upper = 1.0;
+#ifndef FBO
     }
+#endif
+*/
     TIMING_RESULT(rendersetup);
 
     DECLARE_TIMER(render);
@@ -420,6 +492,16 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
     // Unbind, just to be safe
     shUnbind(**I);
     
+// return state
+    glViewport(0,0,old_viewport[2], old_viewport[3]);
+ 
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+
+    
     int gl_error = glGetError();
     if (gl_error != GL_NO_ERROR) {
       shError(PBufferStreamException("Could not render"));
@@ -430,23 +512,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
 
     ShValueType valueType = output->valueType();
     
-    ShHostStoragePtr outhost
-      = shref_dynamic_cast<ShHostStorage>(output->memory()->findStorage("host"));
-    if (!outhost) {
-      int datasize = shTypeInfo(valueType)->datasize(); 
-      outhost = new ShHostStorage(output->memory().object(),
-                                  datasize * output->size() * output->count(),
-				  valueType);
-    }
-    TIMING_RESULT(findouthost);
-    
-    SH_DEBUG_ASSERT(outhost->value_type() == valueType);
-
-    DECLARE_TIMER(dirtyouthost);
-    // Read back
-    outhost->dirty();
-    TIMING_RESULT(dirtyouthost);
-    
+    //FIXME// check for the backend type, if GL use pbuffer binding as opposed to copying back on the host
     
     GLenum format = GL_RGB;
     switch (output->size()) {
@@ -469,8 +535,36 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
 	shError(PBufferStreamException(s.str()));
 	break;
       }
-    }
+    }//switch
+
+     
+    /*if(output->memory()->findStorage("host")){
+    	output->memory()->removeStorage(output->memory()->findStorage("host"));
+    }*/
+       
+#ifndef FBO
+	// use host memory for now until texture storage is created    
+//	printf("PBufferStreams.cpp: Could not find texture storages in memory: %s, copying results to the host\n", output->memory()->getTag());
+	ShHostStoragePtr outhost = shref_dynamic_cast<ShHostStorage>(output->memory()->findStorage("host"));
+    	if (!outhost) {
+    	  int datasize = shTypeInfo(valueType)->datasize(); 
+    	  outhost = new ShHostStorage(output->memory().object(), datasize * output->size() * output->count(), valueType);
+	}
     
+   // Read back
+   // FIXME check for backend
+      TIMING_RESULT(findouthost);
+      SH_DEBUG_ASSERT(outhost->value_type() == valueType);
+      DECLARE_TIMER(dirtyouthost);
+      outhost->dirtyall();
+      TIMING_RESULT(dirtyouthost);
+   
+            
+    // do the copy: pbuffer->texture    
+    // Bind texture name for this scope.
+    //GlTextureName::Binding binding(outGPU->texName());
+    
+     
     DECLARE_TIMER(readback);
     
     // @todo half-float
@@ -533,46 +627,30 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
     }
     
     TIMING_RESULT(readback);
-  }
-
-  if (intermediate_stream) {
-    // Once all programs have been executed, update the values in the
-    // output stream using the values from the intermediate stream.
-    ShStream::const_iterator j = intermediate_stream->begin();
-    for (ShStream::const_iterator i = dest.begin(); i != dest.end(); j++, i++) {
-      ShChannelNode* intermediate_node = j->object();
-      ShChannelNode* real_node = i->object();
-
-      ShValueType valueType = real_node->valueType();
-      int datasize = shTypeInfo(valueType)->datasize(); 
-      int size = real_node->size();
-      int count = real_node->count();
+#endif //FBO
     
-      ShHostStoragePtr real_host 
-	= shref_dynamic_cast<ShHostStorage>(real_node->memory()->findStorage("host"));
-      if (!real_host) {
-	real_host = new ShHostStorage(real_node->memory().object(), datasize * size * count, valueType);
-      }
-      ShVariantPtr real_variant 
-	= shVariantFactory(valueType, SH_MEM)->generate(size * count, real_host->data(), false);
+  }//for
 
-      ShHostStoragePtr intermediate_host 
-	= shref_dynamic_cast<ShHostStorage>(intermediate_node->memory()->findStorage("host"));
-      if (!intermediate_host) {
-	intermediate_host = new ShHostStorage(intermediate_node->memory().object(), datasize * size * count, valueType);
-      }
-      ShVariantPtr intermediate_variant 
-	= shVariantFactory(valueType, SH_MEM)->generate(size * count, intermediate_host->data(), false);
+  int k = 0;
+  for (ShStream::iterator I = dest.begin(); I != dest.end(); ++I, k++) {
 
-      real_variant->set(intermediate_variant); // copy channel data
-      real_host->dirty();
-    }
-    delete intermediate_stream;
-  }
+     outtexs[k]->clearWrite();
+     outtexs[k]->dirtyall();
+  }//for
 
-  if (old_handle) {
+#ifdef FBO
+// delete fb, rb
+   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+   glDeleteFramebuffersEXT(1, &fb);
+   glDeleteRenderbuffersEXT(1, &depth_rb);
+
+#endif //FBO
+
+#ifndef FBO
+   if (old_handle) {
     old_handle->restore();
   }
+#endif //FBO
 }
 
 StreamStrategy* PBufferStreams::create()
