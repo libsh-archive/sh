@@ -68,11 +68,34 @@ operator*(const ShMatrix<M, N1, Binding, T1>& a,
 
 /** Matrix-tuple multiplication.
  * Treats the tuple as a column vector.
- */
+ * @{ */
 template<int M, int N, ShBindingType Binding, typename T1, typename T2>
 ShGeneric<M, CT1T2> operator|(const ShMatrix<M, N, Binding, T1>& a, const ShGeneric<N, T2>& b);
 template<int M, int N, ShBindingType Binding, typename T1, typename T2>
 ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding, T1>& a, const ShGeneric<N, T2>& b);
+// @}
+
+/** Matrix-tuple multiplication.
+ * If the matrix on the left has one more column than the number of
+ * elements in the tuple, the weight of the last column is assumed to
+ * be ZERO. @{ */
+template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
+ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_VECTOR, swizzled>& b);
+template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
+ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_NORMAL, swizzled>& b);
+// @}
+
+/** Matrix-tuple multiplication.
+ * If the matrix on the left has one more column than the number of
+ * elements in the tuple, the weight of the last column is assumed to
+ * be ONE. @{ */
+template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
+ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_TEXCOORD, swizzled>& b);
+template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
+ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_POINT, swizzled>& b);
+template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
+ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_PLANE, swizzled>& b);
+// @}
 
 /** Tuple-matrix multiplication.
  * Treats the tuple as a row vector.

@@ -1,5 +1,9 @@
 2005-07-26  Francois Marier  <francois@serioushack.com>
 
+	* src/ShLibMatrixImpl.hpp, ShLibMatrix.hpp (operator*): Add tuple
+	expansion for matrix-tuple multiplication of certain semantic
+	types.
+
 	* backends/gl/ArbEmit.cpp (emit_tex): Fix a bug in the
 	LUMINANCE_ALPHA special case so that texture lookups work with
 	2-component variables.
