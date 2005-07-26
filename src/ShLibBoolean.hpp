@@ -142,15 +142,19 @@ SH_SHLIB_CONST_N_OP_BOTH_DECL(operator!=);
 template<int N, typename T1, typename T2, typename T3>
 ShGeneric<N, CT1T2T3> 
 cond(const ShGeneric<N, T1>& condition, const ShGeneric<N, T2>& left,
-                     const ShGeneric<N, T3>& right);
+     const ShGeneric<N, T3>& right);
 template<int N, typename T1, typename T2, typename T3>
 ShGeneric<N, CT1T2T3> 
 cond(const ShGeneric<1, T1>& condition, const ShGeneric<N, T2>& left,
-                     const ShGeneric<N, T3>& right);
-template<int N, typename T1, typename T2, typename T3>
-ShGeneric<N, CT1T2T3> 
+     const ShGeneric<N, T3>& right);
+template<typename T1, typename T2, typename T3>
+ShGeneric<1, CT1T2T3> 
 cond(const ShGeneric<1, T1>& condition, const ShGeneric<1, T2>& left,
-                     const ShGeneric<1, T3>& right);
+     const ShGeneric<1, T3>& right);
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> 
+cond(const CT1T2& condition, const ShGeneric<N, T1>& left, 
+     const ShGeneric<N, T2>& right);
 
 /// Boolean negation
 template<int N, typename T>

@@ -213,31 +213,41 @@ SH_SHLIB_CONST_SCALAR_OP(operator!=);
 SH_SHLIB_CONST_N_OP_BOTH(operator!=);
 
 template<int N, typename T1, typename T2, typename T3>
-ShGeneric<N, CT1T2T3> cond(const ShGeneric<N, T1>& condition, const ShGeneric<N, T2>& left,
-                     const ShGeneric<N, T3>& right)
+ShGeneric<N, CT1T2T3> cond(const ShGeneric<N, T1>& condition, 
+                           const ShGeneric<N, T2>& left,
+                           const ShGeneric<N, T3>& right)
 {
   ShAttrib<N, SH_TEMP, CT1T2T3> t;
   shCOND(t, condition, left, right);
   return t;
 }
 template<int N, typename T1, typename T2, typename T3>
-ShGeneric<N, CT1T2T3> cond(const ShGeneric<1, T1>& condition, const ShGeneric<N, T2>& left,
-                     const ShGeneric<N, T3>& right)
+ShGeneric<N, CT1T2T3> cond(const ShGeneric<1, T1>& condition,
+                           const ShGeneric<N, T2>& left,
+                           const ShGeneric<N, T3>& right)
 {
   ShAttrib<N, SH_TEMP, CT1T2T3> t;
   shCOND(t, condition, left, right);
   return t;
 }
 template<typename T1, typename T2, typename T3>
-ShGeneric<1, CT1T2T3> cond(const ShGeneric<1, T1>& condition, const ShGeneric<1, T2>& left,
-                     const ShGeneric<1, T3>& right)
+ShGeneric<1, CT1T2T3> cond(const ShGeneric<1, T1>& condition, 
+                           const ShGeneric<1, T2>& left,
+                           const ShGeneric<1, T3>& right)
 {
   ShAttrib<1, SH_TEMP, CT1T2T3> t;
   shCOND(t, condition, left, right);
   return t;
 }
-
-// TODO
+template<int N, typename T1, typename T2>
+ShGeneric<N, CT1T2> cond(const CT1T2& condition, 
+                         const ShGeneric<N, T1>& left, 
+                         const ShGeneric<N, T2>& right)
+{
+  ShAttrib<N, SH_TEMP, CT1T2> t;
+  shCOND(t, ShAttrib<1, SH_CONST, CT1T2>(condition), left, right);
+  return t;
+}
 
 template<int N, typename T>
 ShGeneric<N, T> operator!(const ShGeneric<N, T>& a)

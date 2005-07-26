@@ -1,5 +1,9 @@
 2005-07-26  Francois Marier  <francois@serioushack.com>
 
+	* src/ShLibBooleanImpl.hpp, ShLibBoolean.hpp (cond): Adding a
+	version of cond where the first parameter doesn't have to be an Sh
+	type.
+
 	* src/ShLibNormal.hpp, ShLibPoint.hpp, ShLibVector.hpp,
 	ShLibTexCoord.hpp: Remove unnecessary expansion methods.
 
