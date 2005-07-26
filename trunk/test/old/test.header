@@ -1,0 +1,21 @@
+// -*- C++ -*-
+#include <iostream>
+#include <fstream>
+#include <exception>
+#include "sh.hpp"
+#include "ShCtrlGraph.hpp"
+#include "ShDebug.hpp"
+
+using namespace SH;
+
+#define NAME(x) {x.name(#x);}
+
+int main(int argc, char** argv)
+{
+  std::string backendName("arb");
+  if (argc > 1) {
+    backendName = argv[1];
+  }
+
+  // ShEnvironment::optimizationLevel = 1;
+  try {

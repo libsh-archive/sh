@@ -1,0 +1,21 @@
+Additional Mac OS X Notes
+=========================
+
+The Mac OS X version of Sh has been tested on Panther.
+
+To compile Sh, you will need the following fink packages:
+  libpng3
+
+To build Sh, simply open the Xcode project in the "xcode/" directory
+and build it. You can also do
+
+  cd xcode
+  xcodebuild -alltargets install
+
+We have tested Sh with Xcode 1.5.
+
+Currently the cc and ARB backends are known to work.
+
+Floating point textures should work, but are untested. PBufferStreams
+(i.e. stream programs in the ARB backend) have not been implemented on
+OSX yet.
