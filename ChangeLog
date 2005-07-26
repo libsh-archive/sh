@@ -1,3 +1,9 @@
+2005-07-26  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbEmit.cpp (emit_tex): Fix a bug in the
+	LUMINANCE_ALPHA special case so that texture lookups work with
+	2-component variables.
+
 2005-07-25  Francois Marier  <francois@serioushack.com>
 
 	* src/ShLibNoise.hpp, ShLibNoiseImpl.hpp: Add a dummy texhash()

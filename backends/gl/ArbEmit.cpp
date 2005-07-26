@@ -553,16 +553,12 @@ void ArbCode::emit_tex(const ShStatement& stmt)
     delay = true;
   }
 
-
   SH_DEBUG_ASSERT(tnode);
 
   if (tnode->size() == 2) {
     // Special case for LUMINANCE_ALPHA
-    if (!delay) {
-      tmpdest = ShVariable(new ShVariableNode(SH_TEMP, 4, SH_FLOAT));
-      tmpsrc = tmpdest;
-    }
-    tmpsrc = tmpsrc(0,3);
+    tmpdest = ShVariable(new ShVariableNode(SH_TEMP, 4, SH_FLOAT));
+    tmpsrc = tmpdest(0,3);
     delay = true;
   }
 
