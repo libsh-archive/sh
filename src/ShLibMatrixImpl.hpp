@@ -24,6 +24,35 @@
 
 namespace SH {
 
+#define SH_MATRIX_MSVC_OPERATOR_HACK(op, semantic, N, NminusOne) \
+template<int M, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled> \
+ShAttrib<NminusOne, SH_TEMP, CT1T2, semantic> \
+op (const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<NminusOne, Binding2, T2, semantic, swizzled>& b) \
+{ \
+  return op<M, N, Binding1, Binding2, T1, T2, swizzled>(a, b); \
+}
+
+SH_MATRIX_MSVC_OPERATOR_HACK(operator|, SH_NORMAL, 4, 3)
+SH_MATRIX_MSVC_OPERATOR_HACK(operator|, SH_NORMAL, 3, 2)
+SH_MATRIX_MSVC_OPERATOR_HACK(operator*, SH_NORMAL, 4, 3)
+SH_MATRIX_MSVC_OPERATOR_HACK(operator*, SH_NORMAL, 3, 2)
+SH_MATRIX_MSVC_OPERATOR_HACK(operator|, SH_PLANE, 4, 3)
+SH_MATRIX_MSVC_OPERATOR_HACK(operator|, SH_PLANE, 3, 2)
+SH_MATRIX_MSVC_OPERATOR_HACK(operator*, SH_PLANE, 4, 3)
+SH_MATRIX_MSVC_OPERATOR_HACK(operator*, SH_PLANE, 3, 2)
+SH_MATRIX_MSVC_OPERATOR_HACK(operator|, SH_POINT, 4, 3)
+SH_MATRIX_MSVC_OPERATOR_HACK(operator|, SH_POINT, 3, 2)
+SH_MATRIX_MSVC_OPERATOR_HACK(operator*, SH_POINT, 4, 3)
+SH_MATRIX_MSVC_OPERATOR_HACK(operator*, SH_POINT, 3, 2)
+SH_MATRIX_MSVC_OPERATOR_HACK(operator|, SH_TEXCOORD, 4, 3)
+SH_MATRIX_MSVC_OPERATOR_HACK(operator|, SH_TEXCOORD, 3, 2)
+SH_MATRIX_MSVC_OPERATOR_HACK(operator*, SH_TEXCOORD, 4, 3)
+SH_MATRIX_MSVC_OPERATOR_HACK(operator*, SH_TEXCOORD, 3, 2)
+SH_MATRIX_MSVC_OPERATOR_HACK(operator|, SH_VECTOR, 4, 3)
+SH_MATRIX_MSVC_OPERATOR_HACK(operator|, SH_VECTOR, 3, 2)
+SH_MATRIX_MSVC_OPERATOR_HACK(operator*, SH_VECTOR, 4, 3)
+SH_MATRIX_MSVC_OPERATOR_HACK(operator*, SH_VECTOR, 3, 2)
+
 template<int M, int N, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
 ShMatrix<N, M, SH_TEMP, CT1T2>
 operator+(const ShMatrix<N, M, Binding, T1>& a, 
@@ -160,11 +189,9 @@ operator|(const ShMatrix<M, N, Binding1, T1>& a,
   return ret;
 }
 
-template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, 
-         typename T1, typename T2, bool swizzled>
+template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
 ShAttrib<N-1, SH_TEMP, CT1T2, SH_NORMAL>
-operator|(const ShMatrix<M, N, Binding1, T1>& a,
-          const ShAttrib<N-1, Binding2, T2, SH_NORMAL, swizzled>& b)
+operator|(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_NORMAL, swizzled>& b)
 {
   ShAttrib<N-1, SH_TEMP, CT1T2, SH_NORMAL> ret;
   for (int i = 0; i < N-1; i++) {
