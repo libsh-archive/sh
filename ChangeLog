@@ -1,3 +1,10 @@
+2005-07-27  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibMatrixImpl.hpp, ShLibMatrix.hpp: Optimize the
+	matrix-tuple product for SH_VECTOR and SH_NORMAL.  
+	Make the matrix-tuple expansion work as intended by returning the
+	same semantic type and size as the argument.
+
 2005-07-27  Stefanus Du Toit  <sdt@serioushack.com>
 
 	* src/ShOptimizations.cpp: Added empty block removal optimization,
