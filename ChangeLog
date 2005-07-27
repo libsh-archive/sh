@@ -16,6 +16,12 @@
 	
 2005-07-27  Francois Marier  <francois@serioushack.com>
 
+	* src/ShLibMiscImpl.hpp, ShLibMisc.hpp (join): Add support for
+	scalars in the 2-argument version of join.
+
+	* src/ShLibArithImpl.hpp (lerp): Fix the support for scalars.
+	(mad): Fix the support for scalars.
+	
 	* src/ShLibMatrixImpl.hpp, ShLibMatrix.hpp: Optimize the
 	matrix-tuple product for SH_VECTOR and SH_NORMAL.  
 	Make the matrix-tuple expansion work as intended by returning the

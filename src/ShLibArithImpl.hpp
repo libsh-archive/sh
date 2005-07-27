@@ -290,14 +290,17 @@ ShGeneric<1, CT1T2T3> mad(const ShGeneric<1, T1>& m1, const ShGeneric<1, T2>& m2
 }
 
 template<int N, typename T1, typename T2> 
-ShGeneric<N, CT1T2> mad(double m1, const ShGeneric<N, T1>& m2, const ShGeneric<N, T2>& a)
+ShGeneric<N, CT1T2> 
+mad(const CT1T2& m1, const ShGeneric<N, T1>& m2, const ShGeneric<N, T2>& a)
 {
   ShAttrib<N, SH_TEMP, CT1T2> t;
   shMAD(t, ShAttrib<1, SH_CONST, CT1T2>(m1), m2, a);
   return t;
 }
-template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> mad(const ShGeneric<N, T1>& m1, double m2, const ShGeneric<N, T2>& a)
+
+template<int N, typename T1, typename T2> 
+ShGeneric<N, CT1T2>
+mad(const ShGeneric<N, T1>& m1, const CT1T2& m2, const ShGeneric<N, T2>& a)
 {
   ShAttrib<N, SH_TEMP, CT1T2> t;
   shMAD(t, m1, ShAttrib<1, SH_CONST, CT1T2>(m2), a);
@@ -338,7 +341,7 @@ ShGeneric<N, T> cbrt(const ShGeneric<N, T>& var)
 
 template<int N, typename T1, typename T2, typename T3>
 ShGeneric<N, CT1T2T3> lerp(const ShGeneric<N, T1>& f, const ShGeneric<N, T2>& a, 
-                     const ShGeneric<N, T3>& b)
+                           const ShGeneric<N, T3>& b)
 {
   ShAttrib<N, SH_TEMP, CT1T2T3> t;
   shLRP(t, f, a, b);
@@ -347,7 +350,7 @@ ShGeneric<N, CT1T2T3> lerp(const ShGeneric<N, T1>& f, const ShGeneric<N, T2>& a,
 
 template<int N, typename T1, typename T2, typename T3>
 ShGeneric<N, CT1T2T3> lerp(const ShGeneric<1, T1>& f, const ShGeneric<N, T2>& a, 
-                     const ShGeneric<N, T3>& b)
+                           const ShGeneric<N, T3>& b)
 {
   ShAttrib<N, SH_TEMP, CT1T2T3> t;
   shLRP(t, f, a, b);
@@ -356,18 +359,18 @@ ShGeneric<N, CT1T2T3> lerp(const ShGeneric<1, T1>& f, const ShGeneric<N, T2>& a,
 
 template<typename T1, typename T2, typename T3>
 ShGeneric<1, CT1T2T3> lerp(const ShGeneric<1, T1>& f, const ShGeneric<1, T2>& a, 
-                     const ShGeneric<1, T3>& b)
+                           const ShGeneric<1, T3>& b)
 {
   ShAttrib<1, SH_TEMP, CT1T2T3> t;
   shLRP(t, f, a, b);
   return t;
 }
-//@todo type see explanation in LibArith.hpp file
+
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> lerp(double f, const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b)
+ShGeneric<N, CT1T2> lerp(const CT1T2& f, const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b)
 {
   ShAttrib<N, SH_TEMP, CT1T2> t;
-  shLRP(t, f, a, b);
+  shLRP(t, ShAttrib<1, SH_CONST, CT1T2>(f), a, b);
   return t;
 }
 

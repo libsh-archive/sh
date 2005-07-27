@@ -79,6 +79,18 @@ ShGeneric<M+N, CT1T2> join(const ShGeneric<M, T1>& a, const ShGeneric<N, T2>& b)
   return result;
 }
 
+template<int M, typename T> 
+ShGeneric<M+1, T> join(const T& a, const ShGeneric<M, T>& b)
+{
+  return join(ShAttrib<1, SH_CONST, T>(a), b);
+}
+
+template<int M, typename T> 
+ShGeneric<M+1, T> join(const ShGeneric<M, T>& a, const T& b)
+{
+  return join(a, ShAttrib<1, SH_CONST, T>(b));
+}
+
 template<int M, int N, int O, typename T1, typename T2, typename T3> 
 ShGeneric<M+N+O, CT1T2T3> join(const ShGeneric<M, T1>& a, 
 			       const ShGeneric<N, T2> &b, 

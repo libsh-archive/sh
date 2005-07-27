@@ -56,10 +56,17 @@ ShGeneric<M, double> fillcast(double a); // @todo type do a cpp type -> value ty
 
 /** Join two tuples 
  * Creates an M+N tuple with components of a first then b.
- */
+ * @{ */
 template<int M, int N, typename T1, typename T2> 
 ShGeneric<M+N, CT1T2> 
 join(const ShGeneric<M, T1>& a, const ShGeneric<N, T2> &b);
+template<int M, typename T> 
+ShGeneric<M+1, T> 
+join(const T& a, const ShGeneric<M, T>& b);
+template<int M, typename T> 
+ShGeneric<M+1, T> 
+join(const ShGeneric<M, T>& a, const T& b);
+// @}
 
 /** Join three tuples 
  * Creates an M+N+O tuple with components of a first then b and c.

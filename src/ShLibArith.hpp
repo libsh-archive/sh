@@ -175,35 +175,26 @@ SH_SHLIB_CONST_N_OP_RIGHT_DECL(pow);
 template<int N, typename T1, typename T2, typename T3>
 ShGeneric<N, CT1T2T3>
 mad(const ShGeneric<N, T1>& m1, const ShGeneric<N, T2>& m2, 
-                    const ShGeneric<N, T3>& a);
+    const ShGeneric<N, T3>& a);
 template<int N, typename T1, typename T2, typename T3>
 ShGeneric<N, CT1T2T3>
 mad(const ShGeneric<N, T1>& m1, const ShGeneric<1, T2>& m2, 
-                    const ShGeneric<N, T3>& a);
+    const ShGeneric<N, T3>& a);
 template<int N, typename T1, typename T2, typename T3>
 ShGeneric<N, CT1T2T3>
 mad(const ShGeneric<1, T1>& m1, const ShGeneric<N, T2>& m2, 
-                    const ShGeneric<N, T3>& a);
+    const ShGeneric<N, T3>& a);
 template<typename T1, typename T2, typename T3>
-ShGeneric<1, CT1T2T3> mad(const ShGeneric<1, T1>& m1, const ShGeneric<1, T2>& m2, 
-                    const ShGeneric<1, T3>& a);
+ShGeneric<1, CT1T2T3>
+mad(const ShGeneric<1, T1>& m1, const ShGeneric<1, T2>& m2, 
+    const ShGeneric<1, T3>& a);
 
-//@todo type should not use double here, but overloading problems need to be
-//resolved
-//template<int N, typename T> 
-//ShGeneric<N, T> 
-//mad(T m1, const ShGeneric<N, T>& m2, const ShGeneric<N, T>& a);
-//template<int N, typename T> 
-//ShGeneric<N, T>
-//mad(const ShGeneric<N, T>& m1, T m2, const ShGeneric<N, T>& a);
-
-//@todo type not sure these are a good idea
 template<int N, typename T1, typename T2> 
 ShGeneric<N, CT1T2> 
-mad(double m1, const ShGeneric<N, T1>& m2, const ShGeneric<N, T2>& a);
+mad(const CT1T2& m1, const ShGeneric<N, T1>& m2, const ShGeneric<N, T2>& a);
 template<int N, typename T1, typename T2> 
 ShGeneric<N, CT1T2>
-mad(const ShGeneric<N, T1>& m1, double m2, const ShGeneric<N, T2>& a);
+mad(const ShGeneric<N, T1>& m1, const CT1T2& m2, const ShGeneric<N, T2>& a);
 
 /* Reciprocal
  * One divided by the given value, for each component.
@@ -250,7 +241,7 @@ lerp(const ShGeneric<1, T1>& f, const ShGeneric<1, T2>& a,
 
 template<int N, typename T1, typename T2>
 ShGeneric<N, CT1T2>
-lerp(double f, const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b);
+lerp(const CT1T2& f, const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b);
 
 
 /* Sum of components.
