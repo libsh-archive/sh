@@ -43,10 +43,12 @@ template<int Rows, int Cols, ShBindingType Binding, typename T>
 class ShMatrix: public virtual ShMeta {
 public:
   typedef T storage_type;
-  typedef typename ShHostType<T>::type host_type; 
+  typedef typename ShHostType<T>::type host_type;
   typedef typename ShMemType<T>::type mem_type;
   static const ShValueType value_type = ShStorageTypeInfo<T>::value_type;
   static const ShBindingType binding_type = Binding;
+  static const int rows = Rows;
+  static const int cols = Cols;
   static const int typesize = Rows * Cols;
 
   typedef ShMatrix<Rows, Cols, SH_INPUT, T> InputType;
