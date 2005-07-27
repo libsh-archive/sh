@@ -41,7 +41,7 @@ public:
     UNREDUCED,
     BLOCK,
     SECTION,
-    IF, ///< never used - we only make ifelses
+    IF,
     IFELSE,
     SELFLOOP,
     WHILELOOP

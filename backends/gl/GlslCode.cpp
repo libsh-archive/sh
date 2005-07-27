@@ -466,6 +466,21 @@ void GlslCode::gen_structural_node(const ShStructuralNodePtr& node)
 
     append_line("} // if", false);
   } 
+  else if (node->type == ShStructuralNode::IF) {
+    ShStructuralNodePtr header = node->structnodes.front();
+    SH_DEBUG_ASSERT(1 == header->succs.size());
+
+    ShStructuralNode::SuccessorList::iterator B = header->succs.begin();
+    ShVariable cond = B->first;
+    ShStructuralNodePtr ifnode = B->second;
+
+    gen_structural_node(header);
+    append_line("if (bool(" + resolve(cond.node()) + ")) {", false);
+    m_indent++;
+    gen_structural_node(ifnode);
+    m_indent--;
+    append_line("} // if", false);
+  } 
   else if (node->type == ShStructuralNode::WHILELOOP) {
     ShStructuralNodePtr header = node->structnodes.front();
     ShVariable cond = header->succs.front().first;

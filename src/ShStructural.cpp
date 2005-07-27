@@ -468,6 +468,12 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
           nodeset.push_back(n);
           newnode = new ShStructuralNode(ShStructuralNode::IFELSE);
           newnode->secStart = node->secStart;
+        } else if (m->succs.size() == 1 && m->succs.front().second == n) {
+          SH_STR_DEBUG_PRINT("FOUND IF");
+          nodeset.push_back(node);
+          nodeset.push_back(m);
+          newnode = new ShStructuralNode(ShStructuralNode::IF);
+          newnode->secStart = node->secStart;
         }
       }
 

@@ -1,3 +1,17 @@
+2005-07-27  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/ShOptimizations.cpp: Added empty block removal optimization,
+	enabled by default.
+	
+	* src/ShStructural.hpp: Removed comment about IF being unused cause
+	it isn't anymore.
+	
+	* src/ShStructural.cpp: Handle IF nodes.
+	
+	* backends/gl/ArbCode.cpp: Handle IF nodes in structural analysis.
+	
+	* backends/gl/GlslCode.cpp: Handle IF nodes in structural analysis.
+	
 2005-07-26  Francois Marier  <francois@serioushack.com>
 
 	* src/ShLibBooleanImpl.hpp, ShLibBoolean.hpp (cond): Adding a

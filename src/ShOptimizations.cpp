@@ -127,6 +127,73 @@ struct Straightener {
   bool& changed;
 };
 
+
+// Remove empty blocks
+struct EmptyBlockRemover {
+  EmptyBlockRemover(const ShCtrlGraphPtr& graph, bool& changed)
+    : graph(graph), changed(changed)
+  {
+  }
+
+  void operator()(const ShCtrlGraphNodePtr& node)
+  {
+    if (!node) return;
+    if (!node->follower) return;
+    if (node == graph->entry()) return;
+    if (!node->successors.empty()) return;
+
+    // TODO: section stuff?
+    if (node->block && !node->block->empty()) return;
+
+    to_remove.push_back(node);
+  }
+
+  void finish()
+  {
+    for (std::list<ShCtrlGraphNodePtr>::iterator I = to_remove.begin(); I != to_remove.end(); ++I) {
+      remove(*I);
+    }
+  }
+
+  void remove(const ShCtrlGraphNodePtr& node)
+  {
+    for (ShCtrlGraphNode::ShPredList::iterator P = node->predecessors.begin(); P != node->predecessors.end(); ++P) {
+      ShCtrlGraphNode* pred = *P;
+      for (std::vector<ShCtrlGraphBranch>::iterator S = pred->successors.begin(); S != pred->successors.end(); ++S) {
+        if (S->node == node) {
+          S->node = node->follower;
+        }
+      }
+      if (pred->follower == node) {
+        pred->follower = node->follower;
+      }
+    }
+
+    // Remove ourselves from our follower's preds
+    for (ShCtrlGraphNode::ShPredList::iterator P = node->follower->predecessors.begin(); P != node->follower->predecessors.end();) {
+      if (*P == node.object()) {
+        P = node->follower->predecessors.erase(P);
+      } else {
+        ++P;
+      }
+    }
+
+    // Add in our predecessors to our follower's preds.
+    for (ShCtrlGraphNode::ShPredList::iterator P = node->predecessors.begin(); P != node->predecessors.end(); ++P) {
+      if (std::find(node->follower->predecessors.begin(), node->follower->predecessors.end(), *P) == node->follower->predecessors.end()) {
+        node->follower->predecessors.push_back(*P);
+      }
+    }
+
+    changed = true;
+  }
+
+  ShCtrlGraphPtr graph;
+  bool& changed;
+
+  std::list<ShCtrlGraphNodePtr> to_remove;
+};
+
 typedef std::queue<ShStatement*> DeadCodeWorkList;
 
 struct InitLiveCode {
@@ -347,6 +414,13 @@ void straighten(ShProgram& p, bool& changed)
   p.node()->ctrlGraph->dfs(s);
 }
 
+void remove_empty_blocks(ShProgram& p, bool& changed)
+{
+  EmptyBlockRemover e(p.node()->ctrlGraph, changed);
+  p.node()->ctrlGraph->dfs(e);
+  e.finish();
+}
+
 void remove_dead_code(ShProgram& p, bool& changed)
 {
   DeadCodeWorkList w;
@@ -431,6 +505,10 @@ void optimize(ShProgram& p, int level)
     }
     
     p.node()->ctrlGraph->computePredecessors();
+
+    if (!ShContext::current()->optimization_disabled("remove_empty_blocks")) {
+      remove_empty_blocks(p, changed);
+    }
 
     if (!ShContext::current()->optimization_disabled("straightening")) {
       straighten(p, changed);
