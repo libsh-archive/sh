@@ -1,5 +1,7 @@
 2005-07-27  Stefanus Du Toit  <sdt@serioushack.com>
 
+	* src/ShOptimizations.cpp: Added redundant edge removal optimization.
+	
 	* src/ShLibMatrixImpl.hpp: Add hack for MSVC which cannot handle
 	as beefy template matching as gcc, in particular for operator| and
 	operator* for matrices with special types.

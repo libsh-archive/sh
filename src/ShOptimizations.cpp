@@ -180,7 +180,7 @@ struct EmptyBlockRemover {
 
     // Add in our predecessors to our follower's preds.
     for (ShCtrlGraphNode::ShPredList::iterator P = node->predecessors.begin(); P != node->predecessors.end(); ++P) {
-      if (std::find(node->follower->predecessors.begin(), node->follower->predecessors.end(), *P) == node->follower->predecessors.end()) {
+      if (std::find(node->follower->  predecessors.begin(), node->follower->predecessors.end(), *P) == node->follower->predecessors.end()) {
         node->follower->predecessors.push_back(*P);
       }
     }
@@ -192,6 +192,39 @@ struct EmptyBlockRemover {
   bool& changed;
 
   std::list<ShCtrlGraphNodePtr> to_remove;
+};
+
+
+// Remove redundant edges
+struct RedundantEdgeRemover {
+  RedundantEdgeRemover(bool& changed)
+    : changed(changed)
+  {
+  }
+
+  void operator()(const ShCtrlGraphNodePtr& node)
+  {
+    if (!node) return;
+    if (!node->follower) return;
+    if (node->successors.empty()) return;
+
+    ShCtrlGraphNode::SuccessorList::iterator I = node->successors.end();
+    I--;
+    while (1) {
+      if (I->node == node->follower) {
+        I = node->successors.erase(I);
+        if (I != node->successors.begin()) {
+          --I;
+        } else {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+  }
+
+  bool& changed;
 };
 
 typedef std::queue<ShStatement*> DeadCodeWorkList;
@@ -408,6 +441,12 @@ void remove_branch_instructions(ShProgram& p)
   p.node()->ctrlGraph->dfs(r);
 }
 
+void remove_redundant_edges(ShProgram& p, bool& changed)
+{
+  RedundantEdgeRemover r(changed);
+  p.node()->ctrlGraph->dfs(r);
+}
+
 void straighten(ShProgram& p, bool& changed)
 {
   Straightener s(p.node()->ctrlGraph, changed);
@@ -512,6 +551,10 @@ void optimize(ShProgram& p, int level)
 
     if (!ShContext::current()->optimization_disabled("straightening")) {
       straighten(p, changed);
+    }
+
+    if (!ShContext::current()->optimization_disabled("remove_redundant_edges")) {
+      remove_redundant_edges(p, changed);
     }
 
     insert_branch_instructions(p);
