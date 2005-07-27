@@ -1,0 +1,39 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "luac", "luac\luac.vcproj", "{E240C2DA-7D35-4604-81E7-54EB49656E35}"
+	ProjectSection(ProjectDependencies) = postProject
+		{86B30CD8-8C99-4CFF-804E-16EB5891A1D8} = {86B30CD8-8C99-4CFF-804E-16EB5891A1D8}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "liblua", "liblua\liblua.vcproj", "{86B30CD8-8C99-4CFF-804E-16EB5891A1D8}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lua", "lua\lua.vcproj", "{E240C2DA-7D35-4604-81E7-54EB49656E35}"
+	ProjectSection(ProjectDependencies) = postProject
+		{86B30CD8-8C99-4CFF-804E-16EB5891A1D8} = {86B30CD8-8C99-4CFF-804E-16EB5891A1D8}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{E240C2DA-7D35-4604-81E7-54EB49656E35}.Debug.ActiveCfg = Debug|Win32
+		{E240C2DA-7D35-4604-81E7-54EB49656E35}.Debug.Build.0 = Debug|Win32
+		{E240C2DA-7D35-4604-81E7-54EB49656E35}.Release.ActiveCfg = Release|Win32
+		{E240C2DA-7D35-4604-81E7-54EB49656E35}.Release.Build.0 = Release|Win32
+		{86B30CD8-8C99-4CFF-804E-16EB5891A1D8}.Debug.ActiveCfg = Debug|Win32
+		{86B30CD8-8C99-4CFF-804E-16EB5891A1D8}.Debug.Build.0 = Debug|Win32
+		{86B30CD8-8C99-4CFF-804E-16EB5891A1D8}.Release.ActiveCfg = Release|Win32
+		{86B30CD8-8C99-4CFF-804E-16EB5891A1D8}.Release.Build.0 = Release|Win32
+		{E240C2DA-7D35-4604-81E7-54EB49656E35}.Debug.ActiveCfg = Debug|Win32
+		{E240C2DA-7D35-4604-81E7-54EB49656E35}.Debug.Build.0 = Debug|Win32
+		{E240C2DA-7D35-4604-81E7-54EB49656E35}.Release.ActiveCfg = Release|Win32
+		{E240C2DA-7D35-4604-81E7-54EB49656E35}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
