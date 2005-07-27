@@ -16,6 +16,9 @@
 	
 2005-07-27  Francois Marier  <francois@serioushack.com>
 
+	* src/ShLibMatrixImpl.hpp (operator|): Support non-square matrices
+	in the expanded matrix-tuple products.
+
 	* src/ShLibMiscImpl.hpp, ShLibMisc.hpp (join): Add support for
 	scalars in the 2-argument version of join.
 

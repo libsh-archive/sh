@@ -182,22 +182,24 @@ ShAttrib<N-1, SH_TEMP, CT1T2, SH_VECTOR>
 operator|(const ShMatrix<M, N, Binding1, T1>& a,
           const ShAttrib<N-1, Binding2, T2, SH_VECTOR, swizzled>& b)
 {
-  ShAttrib<N-1, SH_TEMP, CT1T2, SH_VECTOR> ret;
-  for (int i = 0; i < N-1; i++) {
+  ShAttrib<M, SH_TEMP, CT1T2, SH_VECTOR> ret;
+  for (int i = 0; i < M; i++) {
     ret[i] = dot(cast<N-1>(a[i]), b);
   }
-  return ret;
+  return cast<N-1>(ret);
 }
 
-template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
+template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, 
+         typename T1, typename T2, bool swizzled>
 ShAttrib<N-1, SH_TEMP, CT1T2, SH_NORMAL>
-operator|(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_NORMAL, swizzled>& b)
+operator|(const ShMatrix<M, N, Binding1, T1>& a, 
+          const ShAttrib<N-1, Binding2, T2, SH_NORMAL, swizzled>& b)
 {
-  ShAttrib<N-1, SH_TEMP, CT1T2, SH_NORMAL> ret;
-  for (int i = 0; i < N-1; i++) {
+  ShAttrib<M, SH_TEMP, CT1T2, SH_NORMAL> ret;
+  for (int i = 0; i < M; i++) {
     ret[i] = dot(cast<N-1>(a[i]), b);
   }
-  return ret;
+  return cast<N-1>(ret);
 }
 
 template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, 
