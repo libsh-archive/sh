@@ -164,7 +164,6 @@ AC_CONFIG_FILES([Makefile
 		 test/regress/Makefile
 		 backends/Makefile
 		 backends/cc/Makefile
-		 backends/sm/Makefile
 		 backends/gl/Makefile
 		 util/Makefile
 		 examples/Makefile
@@ -179,6 +178,15 @@ AC_CONFIG_FILES([Makefile
 AC_CONFIG_LINKS(doc/Doxyfile:doc/Doxyfile.real)
 AC_CONFIG_LINKS(test/regress/tex.png:test/regress/tex_squares.png)
 AC_CONFIG_LINKS(examples/textures/tex_kd.png:examples/textures/kd.png)
+AC_CONFIG_LINKS(examples/textures/tex_kd1.png:examples/textures/kd1.png)
+AC_CONFIG_LINKS(examples/textures/tex_kd2.png:examples/textures/kd2.png)
+AC_CONFIG_LINKS(examples/textures/tex_kd3.png:examples/textures/kd3.png)
+AC_CONFIG_LINKS(examples/textures/tex_kd4.png:examples/textures/kd4.png)
+AC_CONFIG_LINKS(examples/textures/tex_kd5.png:examples/textures/kd5.png)
+AC_CONFIG_LINKS(examples/textures/tex_kd6.png:examples/textures/kd6.png)
+AC_CONFIG_LINKS(examples/textures/tex_kd7.png:examples/textures/kd7.png)
+AC_CONFIG_LINKS(examples/textures/tex_kd8.png:examples/textures/kd8.png)
+AC_CONFIG_LINKS(examples/textures/tex_kd9.png:examples/textures/kd9.png)
 AC_CONFIG_LINKS(examples/textures/tex_ks.png:examples/textures/ks.png)
 AC_CONFIG_LINKS(examples/textures/tex_rustkd.png:examples/textures/rustkd.png)
 AC_CONFIG_LINKS(examples/textures/tex_rustks.png:examples/textures/rustks.png)
@@ -186,4 +194,3 @@ AC_CONFIG_LINKS(examples/textures/tex_rustks.png:examples/textures/rustks.png)
 AC_OUTPUT
 
 SH_SUMMARISE_BACKENDS
-

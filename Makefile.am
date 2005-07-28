@@ -13,23 +13,25 @@ DIST_SUBDIRS = libltdl src backends test util doc examples
 ## Do not put a directory here since the distributed tarball will include its
 ## *entire* contents, including .svn, .libs, .o and binary files.
 EXTRA_DIST = BUGS CODING_STANDARDS README.osx README.w32.txt \
-             Makefile.win32 win32.mk win32/postbuild_arb.bat \
+             Makefile.win32 win32.mk COPYING \
+	     win32/postbuild_arb.bat \
 	     win32/postbuild_cc.bat win32/postbuild_glsl.bat \
 	     win32/postbuild_sh.bat win32/postbuild_util.bat \
 	     win32/prebuild.bat win32/ShArbBackend.vcproj \
 	     win32/ShCcBackend.vcproj win32/ShGlslBackend.vcproj \
 	     win32/Sh.sln win32/ShUtil.vcproj win32/Sh.vcproj \
-	     win32/ShGlutExample.vcproj COPYING
+	     win32/ShGlutExample.vcproj \
+	     xcode/ArbBackend-Info.plist xcode/CcBackend-Info.plist \
+	     xcode/Particles-Info.plist xcode/GlutExample-Info.plist \
+	     xcode/Info.plist xcode/Particles-Info.plist xcode/version.plist \
+	     xcode/TexturesExample-Info.plist xcode/Sh.xcode/project.pbxproj \
+	     xcode/English.lproj/InfoPlist.strings
 
 docs:
 	cd doc ; $(MAKE) docs ; cd ..
 
 upload-docs:
 	cd doc ; $(MAKE) upload-docs ; cd ..
-
-dist-zip: distdir
-	zip -rq $(distdir).zip $(distdir)
-	$(am__remove_distdir)
 
 dist dist-all: distdir
 	$(AMTAR) chof - $(distdir) | GZIP=$(GZIP_ENV) gzip -c >$(distdir).tar.gz

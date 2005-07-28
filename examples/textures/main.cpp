@@ -309,7 +309,7 @@ int main(int argc, char** argv)
 
     for (int i=1; i < MIPMAP_LEVELS; i++) {
       stringstream s;
-      s << "kd" << i << ".png";
+      s << "tex_kd" << i << ".png";
       kd_images[1 + i].loadPng(s.str());
     }
 #endif
