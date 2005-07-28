@@ -1,0 +1,5 @@
+make
+g++ -Wall -O2 -o shparticleex main.o ShTrackball.o Camera.o  -L/home/ababkin/install/sh/lib -lglut /usr/lib/libGL.so -lGLU /home/ababkin/install/lib/libsh.so -lpng -Wl,--rpath -Wl,/home/ababkin/install/lib -Wl,--rpath -Wl,/home/ababkin/install/lib -lGLEW 
+
+
+

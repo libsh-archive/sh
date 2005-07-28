@@ -1,0 +1,72 @@
+17c17
+< //a
+---
+> // 
+47d46
+< #define EM_RES 512 // env map resolution
+55a55,57
+> //PFNGLMULTITEXCOORD3FPROC glMultiTexCoord3fARB;
+> 
+> 
+128,129d129
+< ShTextureCube<ShColor3f> em(EM_RES, EM_RES);
+< 
+132,138d131
+< ShImage em_imageA;
+< ShImage em_imageB;
+< ShImage em_imageC;
+< ShImage em_imageD;
+< ShImage em_imageE;
+< ShImage em_imageF;
+< 
+153,159c146
+<     em_imageA.loadPng("sky1/A.png");    
+<     em_imageB.loadPng("sky1/C.png"); 
+<     em_imageC.loadPng("sky1/E.png");
+<     em_imageD.loadPng("sky1/E.png");
+<     em_imageE.loadPng("sky1/D.png");
+<     em_imageF.loadPng("sky1/B.png");
+< 			
+---
+> 
+162,172d148
+< 
+<     em.memory(em_imageA.memory(), static_cast<ShCubeDirection>(0));
+<     em.memory(em_imageB.memory(), static_cast<ShCubeDirection>(1));
+<     em.memory(em_imageC.memory(), static_cast<ShCubeDirection>(2));
+<     em.memory(em_imageD.memory(), static_cast<ShCubeDirection>(3));
+<     em.memory(em_imageE.memory(), static_cast<ShCubeDirection>(4));
+<     em.memory(em_imageF.memory(), static_cast<ShCubeDirection>(5));
+< 
+< 
+< 
+< 
+181,184c157
+<  ShMatrix4x4f imv = inverse(mv);
+<   wCamOrig = (imv | ShPoint3f(.0,.0,.0));
+< 
+<  // gravity = (imv | ShVector3f(.0,-9.8,.0));
+---
+>   wCamOrig = (inverse(mv) | ShPoint3f(.0,.0,.0));
+896d868
+<     ShOutputMatrix4x4f mtm;
+902c874
+<     ShMatrix4x4f imtm; // inverse model transformation matrix
+---
+>     ShMatrix4x4f mtm, imtm; // model translation matrix
+955,957c927,928
+<    color = em(t1*camray+posm);
+<    
+<   /* ShAttrib1f lifetime(1.0-parttime);
+---
+>  
+>    ShAttrib1f lifetime(1.0-parttime);
+965,966c936
+<                       ShConstColor3f(1.0, 0.0, 0.0))); // red*/
+< 
+---
+>                       ShConstColor3f(1.0, 0.0, 0.0))); // red
+968c938
+<  //     color = ShConstColor3f(1.0, 1.0, 1.0);
+---
+>       //color = ShConstColor3f(1.0, 1.0, 1.0);
