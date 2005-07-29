@@ -172,7 +172,6 @@
 				3EB30AC008787D7600729309,
 				3EB30AC108787D7600729309,
 				3EB30AC208787D7600729309,
-				3EB30AC308787D7600729309,
 				3EB30AC408787D7600729309,
 				3EB30AC508787D7600729309,
 				3EB30AC608787D7600729309,
@@ -1359,15 +1358,6 @@
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShFractionImpl.hpp;
 			path = ../src/ShFractionImpl.hpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		3EB30AC308787D7600729309 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
-			name = ShGeneric.cpp;
-			path = ../src/ShGeneric.cpp;
 			refType = 2;
 			sourceTree = SOURCE_ROOT;
 		};
@@ -3067,12 +3057,6 @@
 				ATTRIBUTES = (
 					Public,
 				);
-			};
-		};
-		3EB30B8908787D7700729309 = {
-			fileRef = 3EB30AC308787D7600729309;
-			isa = PBXBuildFile;
-			settings = {
 			};
 		};
 		3EB30B8A08787D7700729309 = {
@@ -5867,7 +5851,6 @@
 				3EB30B8108787D7700729309,
 				3EB30B8308787D7700729309,
 				3EB30B8508787D7700729309,
-				3EB30B8908787D7700729309,
 				3EB30B9108787D7700729309,
 				3EB30B9308787D7700729309,
 				3EB30B9508787D7700729309,
