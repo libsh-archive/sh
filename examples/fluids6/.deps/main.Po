@@ -1,0 +1,855 @@
+main.o: main.cpp /usr/include/c++/3.3/iostream \
+  /usr/include/c++/3.3/i486-linux/bits/c++config.h \
+  /usr/include/c++/3.3/i486-linux/bits/os_defines.h \
+  /usr/include/features.h /usr/include/sys/cdefs.h \
+  /usr/include/gnu/stubs.h /usr/include/c++/3.3/ostream \
+  /usr/include/c++/3.3/ios /usr/include/c++/3.3/iosfwd \
+  /usr/include/c++/3.3/i486-linux/bits/c++locale.h \
+  /usr/include/c++/3.3/clocale /usr/include/locale.h \
+  /usr/lib/gcc-lib/i486-linux/3.3.4/include/stddef.h \
+  /usr/include/bits/locale.h /usr/include/xlocale.h \
+  /usr/include/langinfo.h /usr/include/nl_types.h /usr/include/iconv.h \
+  /usr/include/libintl.h /usr/include/c++/3.3/cctype /usr/include/ctype.h \
+  /usr/include/bits/types.h /usr/include/bits/wordsize.h \
+  /usr/include/bits/typesizes.h /usr/include/endian.h \
+  /usr/include/bits/endian.h /usr/include/c++/3.3/bits/stringfwd.h \
+  /usr/include/c++/3.3/bits/fpos.h \
+  /usr/include/c++/3.3/i486-linux/bits/c++io.h \
+  /usr/include/c++/3.3/cstdio /usr/include/c++/3.3/cstddef \
+  /usr/include/stdio.h /usr/include/libio.h /usr/include/_G_config.h \
+  /usr/include/wchar.h /usr/include/bits/wchar.h /usr/include/gconv.h \
+  /usr/lib/gcc-lib/i486-linux/3.3.4/include/stdarg.h \
+  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+  /usr/include/bits/stdio.h /usr/include/c++/3.3/i486-linux/bits/gthr.h \
+  /usr/include/c++/3.3/i486-linux/bits/gthr-default.h \
+  /usr/include/pthread.h /usr/include/sched.h /usr/include/time.h \
+  /usr/include/bits/sched.h /usr/include/bits/time.h \
+  /usr/include/signal.h /usr/include/bits/sigset.h \
+  /usr/include/bits/pthreadtypes.h /usr/include/bits/initspin.h \
+  /usr/include/bits/sigthread.h /usr/include/unistd.h \
+  /usr/include/bits/posix_opt.h /usr/include/bits/environments.h \
+  /usr/include/bits/confname.h /usr/include/getopt.h \
+  /usr/include/c++/3.3/cwchar /usr/include/c++/3.3/ctime \
+  /usr/include/c++/3.3/bits/functexcept.h \
+  /usr/include/c++/3.3/exception_defines.h /usr/include/c++/3.3/exception \
+  /usr/include/c++/3.3/bits/char_traits.h /usr/include/c++/3.3/cstring \
+  /usr/include/string.h /usr/include/c++/3.3/bits/localefwd.h \
+  /usr/include/c++/3.3/bits/ios_base.h \
+  /usr/include/c++/3.3/i486-linux/bits/atomicity.h \
+  /usr/include/c++/3.3/bits/locale_classes.h /usr/include/c++/3.3/string \
+  /usr/include/c++/3.3/memory /usr/include/c++/3.3/bits/stl_algobase.h \
+  /usr/include/c++/3.3/climits \
+  /usr/lib/gcc-lib/i486-linux/3.3.4/include/limits.h \
+  /usr/lib/gcc-lib/i486-linux/3.3.4/include/syslimits.h \
+  /usr/include/limits.h /usr/include/bits/posix1_lim.h \
+  /usr/include/bits/local_lim.h /usr/include/linux/limits.h \
+  /usr/include/bits/posix2_lim.h /usr/include/bits/xopen_lim.h \
+  /usr/include/c++/3.3/cstdlib /usr/include/stdlib.h \
+  /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h \
+  /usr/include/sys/types.h /usr/include/sys/select.h \
+  /usr/include/bits/select.h /usr/include/sys/sysmacros.h \
+  /usr/include/alloca.h /usr/include/c++/3.3/new \
+  /usr/include/c++/3.3/bits/stl_pair.h \
+  /usr/include/c++/3.3/bits/type_traits.h \
+  /usr/include/c++/3.3/bits/stl_iterator_base_types.h \
+  /usr/include/c++/3.3/bits/stl_iterator_base_funcs.h \
+  /usr/include/c++/3.3/bits/concept_check.h \
+  /usr/include/c++/3.3/bits/stl_iterator.h \
+  /usr/include/c++/3.3/bits/stl_alloc.h \
+  /usr/include/c++/3.3/bits/stl_threads.h \
+  /usr/include/c++/3.3/bits/stl_construct.h \
+  /usr/include/c++/3.3/bits/stl_uninitialized.h \
+  /usr/include/c++/3.3/bits/stl_raw_storage_iter.h \
+  /usr/include/c++/3.3/bits/stl_function.h \
+  /usr/include/c++/3.3/bits/basic_string.h /usr/include/c++/3.3/algorithm \
+  /usr/include/c++/3.3/bits/stl_algo.h \
+  /usr/include/c++/3.3/bits/stl_heap.h \
+  /usr/include/c++/3.3/bits/stl_tempbuf.h \
+  /usr/include/c++/3.3/bits/basic_string.tcc \
+  /usr/include/c++/3.3/streambuf /usr/include/c++/3.3/bits/streambuf.tcc \
+  /usr/include/c++/3.3/bits/basic_ios.h \
+  /usr/include/c++/3.3/bits/streambuf_iterator.h \
+  /usr/include/c++/3.3/bits/locale_facets.h /usr/include/c++/3.3/cwctype \
+  /usr/include/wctype.h /usr/include/c++/3.3/i486-linux/bits/ctype_base.h \
+  /usr/include/c++/3.3/i486-linux/bits/ctype_inline.h \
+  /usr/include/c++/3.3/bits/codecvt.h \
+  /usr/include/c++/3.3/i486-linux/bits/codecvt_specializations.h \
+  /usr/include/c++/3.3/i486-linux/bits/time_members.h \
+  /usr/include/c++/3.3/i486-linux/bits/messages_members.h \
+  /usr/include/c++/3.3/bits/basic_ios.tcc \
+  /usr/include/c++/3.3/bits/ostream.tcc /usr/include/c++/3.3/locale \
+  /usr/include/c++/3.3/bits/locale_facets.tcc /usr/include/c++/3.3/cerrno \
+  /usr/include/errno.h /usr/include/bits/errno.h \
+  /usr/include/linux/errno.h /usr/include/asm/errno.h \
+  /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
+  /usr/include/c++/3.3/cmath /usr/include/math.h \
+  /usr/include/bits/huge_val.h /usr/include/bits/nan.h \
+  /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h \
+  /usr/include/bits/mathinline.h /usr/include/c++/3.3/bits/cmath.tcc \
+  /usr/include/c++/3.3/limits /usr/include/c++/3.3/typeinfo \
+  /usr/include/c++/3.3/istream /usr/include/c++/3.3/bits/istream.tcc \
+  /usr/include/GL/glew.h /usr/include/GL/glu.h /usr/include/GL/gl.h \
+  /usr/include/GL/glut.h /usr/include/GL/freeglut_std.h \
+  /usr/include/GL/glxew.h /usr/include/X11/Xlib.h /usr/include/X11/X.h \
+  /usr/include/X11/Xfuncproto.h /usr/include/X11/Xosdefs.h \
+  /usr/include/X11/Xutil.h /usr/include/X11/Xmd.h \
+  /home/ababkin/install/sh/include/sh/sh.hpp \
+  /home/ababkin/install/sh/include/sh/ShDllExport.hpp \
+  /home/ababkin/install/sh/include/sh/ShException.hpp \
+  /home/ababkin/install/sh/include/sh/ShContext.hpp \
+  /usr/include/c++/3.3/map /usr/include/c++/3.3/bits/stl_tree.h \
+  /usr/include/c++/3.3/bits/stl_map.h \
+  /usr/include/c++/3.3/bits/stl_multimap.h \
+  /home/ababkin/install/sh/include/sh/ShProgram.hpp \
+  /home/ababkin/install/sh/include/sh/ShProgramNode.hpp \
+  /usr/include/c++/3.3/list /usr/include/c++/3.3/bits/stl_list.h \
+  /usr/include/c++/3.3/bits/list.tcc /usr/include/c++/3.3/utility \
+  /usr/include/c++/3.3/bits/stl_relops.h \
+  /home/ababkin/install/sh/include/sh/ShRefCount.hpp \
+  /home/ababkin/install/sh/include/sh/ShRefCountImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShTokenizer.hpp \
+  /usr/include/c++/3.3/stack /usr/include/c++/3.3/bits/stl_deque.h \
+  /usr/include/c++/3.3/bits/stl_stack.h \
+  /usr/include/c++/3.3/bits/deque.tcc /usr/include/c++/3.3/queue \
+  /usr/include/c++/3.3/bits/stl_vector.h \
+  /usr/include/c++/3.3/bits/stl_queue.h \
+  /usr/include/c++/3.3/bits/vector.tcc /usr/include/c++/3.3/vector \
+  /usr/include/c++/3.3/bits/stl_bvector.h \
+  /home/ababkin/install/sh/include/sh/ShVariable.hpp \
+  /home/ababkin/install/sh/include/sh/ShSwizzle.hpp \
+  /home/ababkin/install/sh/include/sh/ShSwizzleImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShError.hpp \
+  /home/ababkin/install/sh/include/sh/ShDebug.hpp ../../config.h \
+  /home/ababkin/install/sh/include/sh/ShUtility.hpp \
+  /home/ababkin/install/sh/include/sh/ShMetaForwarder.hpp \
+  /home/ababkin/install/sh/include/sh/ShVariant.hpp \
+  /home/ababkin/install/sh/include/sh/ShPool.hpp \
+  /home/ababkin/install/sh/include/sh/ShVariableType.hpp \
+  /home/ababkin/install/sh/include/sh/ShDataType.hpp \
+  /home/ababkin/install/sh/include/sh/ShHalf.hpp \
+  /home/ababkin/install/sh/include/sh/ShHalfImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShMath.hpp \
+  /home/ababkin/install/sh/include/sh/ShFraction.hpp \
+  /home/ababkin/install/sh/include/sh/ShFractionImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShStorageType.hpp \
+  /home/ababkin/install/sh/include/sh/ShStorageTypeImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShDataTypeImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShVariantImpl.hpp \
+  /usr/include/c++/3.3/sstream /usr/include/c++/3.3/bits/sstream.tcc \
+  /home/ababkin/install/sh/include/sh/ShCastManager.hpp \
+  /home/ababkin/install/sh/include/sh/ShHashMap.hpp \
+  /usr/include/c++/3.3/ext/hash_map \
+  /usr/include/c++/3.3/ext/stl_hashtable.h /usr/include/c++/3.3/iterator \
+  /usr/include/c++/3.3/bits/stream_iterator.h \
+  /usr/include/c++/3.3/ext/stl_hash_fun.h \
+  /home/ababkin/install/sh/include/sh/ShGraph.hpp \
+  /usr/include/c++/3.3/set /usr/include/c++/3.3/bits/stl_set.h \
+  /usr/include/c++/3.3/bits/stl_multiset.h \
+  /home/ababkin/install/sh/include/sh/ShGraphImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShTypeInfo.hpp \
+  /home/ababkin/install/sh/include/sh/ShTypeInfoImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShVariantFactory.hpp \
+  /home/ababkin/install/sh/include/sh/ShVariantFactoryImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShVariableNode.hpp \
+  /home/ababkin/install/sh/include/sh/ShMeta.hpp \
+  /home/ababkin/install/sh/include/sh/ShMetaImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShBlock.hpp \
+  /home/ababkin/install/sh/include/sh/ShStatement.hpp \
+  /home/ababkin/install/sh/include/sh/ShOperation.hpp \
+  /home/ababkin/install/sh/include/sh/ShInfo.hpp \
+  /home/ababkin/install/sh/include/sh/ShInfoImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShToken.hpp \
+  /home/ababkin/install/sh/include/sh/ShCtrlGraph.hpp \
+  /home/ababkin/install/sh/include/sh/ShBasicBlock.hpp \
+  /home/ababkin/install/sh/include/sh/ShTextureNode.hpp \
+  /home/ababkin/install/sh/include/sh/ShMemory.hpp \
+  /home/ababkin/install/sh/include/sh/ShMemoryDep.hpp \
+  /home/ababkin/install/sh/include/sh/ShChannelNode.hpp \
+  /home/ababkin/install/sh/include/sh/ShPaletteNode.hpp \
+  /home/ababkin/install/sh/include/sh/ShBackend.hpp \
+  /home/ababkin/install/sh/include/sh/ShProgramSet.hpp \
+  /home/ababkin/install/sh/include/sh/ShSyntax.hpp \
+  /home/ababkin/install/sh/include/sh/ShAttrib.hpp \
+  /home/ababkin/install/sh/include/sh/ShGeneric.hpp \
+  /home/ababkin/install/sh/include/sh/ShGenericImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShLib.hpp \
+  /usr/include/c++/3.3/cassert /usr/include/assert.h \
+  /home/ababkin/install/sh/include/sh/ShLibArith.hpp \
+  /home/ababkin/install/sh/include/sh/ShLibArithImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShInstructions.hpp \
+  /home/ababkin/install/sh/include/sh/ShLibBoolean.hpp \
+  /home/ababkin/install/sh/include/sh/ShLibBooleanImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShLibClamp.hpp \
+  /home/ababkin/install/sh/include/sh/ShLibClampImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShLibMiscImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShLibMisc.hpp \
+  /home/ababkin/install/sh/include/sh/ShLibGeometry.hpp \
+  /home/ababkin/install/sh/include/sh/ShLibGeometryImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShLibMatrix.hpp \
+  /home/ababkin/install/sh/include/sh/ShMatrix.hpp \
+  /home/ababkin/install/sh/include/sh/ShMatrixImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShLibMatrixImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShLibTrig.hpp \
+  /home/ababkin/install/sh/include/sh/ShLibTrigImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShLibDeriv.hpp \
+  /home/ababkin/install/sh/include/sh/ShLibDerivImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShAttribImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShVector.hpp \
+  /home/ababkin/install/sh/include/sh/ShPoint.hpp \
+  /home/ababkin/install/sh/include/sh/ShColor.hpp \
+  /home/ababkin/install/sh/include/sh/ShTexCoord.hpp \
+  /home/ababkin/install/sh/include/sh/ShNormal.hpp \
+  /home/ababkin/install/sh/include/sh/ShPosition.hpp \
+  /home/ababkin/install/sh/include/sh/ShLibAttrib.hpp \
+  /home/ababkin/install/sh/include/sh/ShLibVector.hpp \
+  /home/ababkin/install/sh/include/sh/ShLibPoint.hpp \
+  /home/ababkin/install/sh/include/sh/ShLibColor.hpp \
+  /home/ababkin/install/sh/include/sh/ShLibTexCoord.hpp \
+  /home/ababkin/install/sh/include/sh/ShLibNormal.hpp \
+  /home/ababkin/install/sh/include/sh/ShLibPosition.hpp \
+  /home/ababkin/install/sh/include/sh/ShArray.hpp \
+  /home/ababkin/install/sh/include/sh/ShBaseTexture.hpp \
+  /home/ababkin/install/sh/include/sh/ShBaseTextureImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShTable.hpp \
+  /home/ababkin/install/sh/include/sh/ShTexture.hpp \
+  /home/ababkin/install/sh/include/sh/ShWrap.hpp \
+  /home/ababkin/install/sh/include/sh/ShInterp.hpp \
+  /home/ababkin/install/sh/include/sh/ShMIPFilter.hpp \
+  /home/ababkin/install/sh/include/sh/ShImage.hpp \
+  /home/ababkin/install/sh/include/sh/ShImage3D.hpp \
+  /home/ababkin/install/sh/include/sh/ShAlgebra.hpp \
+  /home/ababkin/install/sh/include/sh/ShNibbles.hpp \
+  /home/ababkin/install/sh/include/sh/ShNibblesImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShManipulator.hpp \
+  /home/ababkin/install/sh/include/sh/ShManipulatorImpl.hpp \
+  /usr/include/c++/3.3/cstdarg \
+  /home/ababkin/install/sh/include/sh/ShFixedManipulator.hpp \
+  /home/ababkin/install/sh/include/sh/ShChannel.hpp \
+  /home/ababkin/install/sh/include/sh/ShChannelImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShStream.hpp \
+  /home/ababkin/install/sh/include/sh/ShStreamImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShRecord.hpp \
+  /home/ababkin/install/sh/include/sh/ShQuaternion.hpp \
+  /home/ababkin/install/sh/include/sh/ShQuaternionImpl.hpp \
+  /home/ababkin/install/sh/include/sh/ShPalette.hpp \
+  /home/ababkin/install/sh/include/sh/ShPaletteImpl.hpp Camera.hpp
+
+/usr/include/c++/3.3/iostream:
+
+/usr/include/c++/3.3/i486-linux/bits/c++config.h:
+
+/usr/include/c++/3.3/i486-linux/bits/os_defines.h:
+
+/usr/include/features.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/gnu/stubs.h:
+
+/usr/include/c++/3.3/ostream:
+
+/usr/include/c++/3.3/ios:
+
+/usr/include/c++/3.3/iosfwd:
+
+/usr/include/c++/3.3/i486-linux/bits/c++locale.h:
+
+/usr/include/c++/3.3/clocale:
+
+/usr/include/locale.h:
+
+/usr/lib/gcc-lib/i486-linux/3.3.4/include/stddef.h:
+
+/usr/include/bits/locale.h:
+
+/usr/include/xlocale.h:
+
+/usr/include/langinfo.h:
+
+/usr/include/nl_types.h:
+
+/usr/include/iconv.h:
+
+/usr/include/libintl.h:
+
+/usr/include/c++/3.3/cctype:
+
+/usr/include/ctype.h:
+
+/usr/include/bits/types.h:
+
+/usr/include/bits/wordsize.h:
+
+/usr/include/bits/typesizes.h:
+
+/usr/include/endian.h:
+
+/usr/include/bits/endian.h:
+
+/usr/include/c++/3.3/bits/stringfwd.h:
+
+/usr/include/c++/3.3/bits/fpos.h:
+
+/usr/include/c++/3.3/i486-linux/bits/c++io.h:
+
+/usr/include/c++/3.3/cstdio:
+
+/usr/include/c++/3.3/cstddef:
+
+/usr/include/stdio.h:
+
+/usr/include/libio.h:
+
+/usr/include/_G_config.h:
+
+/usr/include/wchar.h:
+
+/usr/include/bits/wchar.h:
+
+/usr/include/gconv.h:
+
+/usr/lib/gcc-lib/i486-linux/3.3.4/include/stdarg.h:
+
+/usr/include/bits/stdio_lim.h:
+
+/usr/include/bits/sys_errlist.h:
+
+/usr/include/bits/stdio.h:
+
+/usr/include/c++/3.3/i486-linux/bits/gthr.h:
+
+/usr/include/c++/3.3/i486-linux/bits/gthr-default.h:
+
+/usr/include/pthread.h:
+
+/usr/include/sched.h:
+
+/usr/include/time.h:
+
+/usr/include/bits/sched.h:
+
+/usr/include/bits/time.h:
+
+/usr/include/signal.h:
+
+/usr/include/bits/sigset.h:
+
+/usr/include/bits/pthreadtypes.h:
+
+/usr/include/bits/initspin.h:
+
+/usr/include/bits/sigthread.h:
+
+/usr/include/unistd.h:
+
+/usr/include/bits/posix_opt.h:
+
+/usr/include/bits/environments.h:
+
+/usr/include/bits/confname.h:
+
+/usr/include/getopt.h:
+
+/usr/include/c++/3.3/cwchar:
+
+/usr/include/c++/3.3/ctime:
+
+/usr/include/c++/3.3/bits/functexcept.h:
+
+/usr/include/c++/3.3/exception_defines.h:
+
+/usr/include/c++/3.3/exception:
+
+/usr/include/c++/3.3/bits/char_traits.h:
+
+/usr/include/c++/3.3/cstring:
+
+/usr/include/string.h:
+
+/usr/include/c++/3.3/bits/localefwd.h:
+
+/usr/include/c++/3.3/bits/ios_base.h:
+
+/usr/include/c++/3.3/i486-linux/bits/atomicity.h:
+
+/usr/include/c++/3.3/bits/locale_classes.h:
+
+/usr/include/c++/3.3/string:
+
+/usr/include/c++/3.3/memory:
+
+/usr/include/c++/3.3/bits/stl_algobase.h:
+
+/usr/include/c++/3.3/climits:
+
+/usr/lib/gcc-lib/i486-linux/3.3.4/include/limits.h:
+
+/usr/lib/gcc-lib/i486-linux/3.3.4/include/syslimits.h:
+
+/usr/include/limits.h:
+
+/usr/include/bits/posix1_lim.h:
+
+/usr/include/bits/local_lim.h:
+
+/usr/include/linux/limits.h:
+
+/usr/include/bits/posix2_lim.h:
+
+/usr/include/bits/xopen_lim.h:
+
+/usr/include/c++/3.3/cstdlib:
+
+/usr/include/stdlib.h:
+
+/usr/include/bits/waitflags.h:
+
+/usr/include/bits/waitstatus.h:
+
+/usr/include/sys/types.h:
+
+/usr/include/sys/select.h:
+
+/usr/include/bits/select.h:
+
+/usr/include/sys/sysmacros.h:
+
+/usr/include/alloca.h:
+
+/usr/include/c++/3.3/new:
+
+/usr/include/c++/3.3/bits/stl_pair.h:
+
+/usr/include/c++/3.3/bits/type_traits.h:
+
+/usr/include/c++/3.3/bits/stl_iterator_base_types.h:
+
+/usr/include/c++/3.3/bits/stl_iterator_base_funcs.h:
+
+/usr/include/c++/3.3/bits/concept_check.h:
+
+/usr/include/c++/3.3/bits/stl_iterator.h:
+
+/usr/include/c++/3.3/bits/stl_alloc.h:
+
+/usr/include/c++/3.3/bits/stl_threads.h:
+
+/usr/include/c++/3.3/bits/stl_construct.h:
+
+/usr/include/c++/3.3/bits/stl_uninitialized.h:
+
+/usr/include/c++/3.3/bits/stl_raw_storage_iter.h:
+
+/usr/include/c++/3.3/bits/stl_function.h:
+
+/usr/include/c++/3.3/bits/basic_string.h:
+
+/usr/include/c++/3.3/algorithm:
+
+/usr/include/c++/3.3/bits/stl_algo.h:
+
+/usr/include/c++/3.3/bits/stl_heap.h:
+
+/usr/include/c++/3.3/bits/stl_tempbuf.h:
+
+/usr/include/c++/3.3/bits/basic_string.tcc:
+
+/usr/include/c++/3.3/streambuf:
+
+/usr/include/c++/3.3/bits/streambuf.tcc:
+
+/usr/include/c++/3.3/bits/basic_ios.h:
+
+/usr/include/c++/3.3/bits/streambuf_iterator.h:
+
+/usr/include/c++/3.3/bits/locale_facets.h:
+
+/usr/include/c++/3.3/cwctype:
+
+/usr/include/wctype.h:
+
+/usr/include/c++/3.3/i486-linux/bits/ctype_base.h:
+
+/usr/include/c++/3.3/i486-linux/bits/ctype_inline.h:
+
+/usr/include/c++/3.3/bits/codecvt.h:
+
+/usr/include/c++/3.3/i486-linux/bits/codecvt_specializations.h:
+
+/usr/include/c++/3.3/i486-linux/bits/time_members.h:
+
+/usr/include/c++/3.3/i486-linux/bits/messages_members.h:
+
+/usr/include/c++/3.3/bits/basic_ios.tcc:
+
+/usr/include/c++/3.3/bits/ostream.tcc:
+
+/usr/include/c++/3.3/locale:
+
+/usr/include/c++/3.3/bits/locale_facets.tcc:
+
+/usr/include/c++/3.3/cerrno:
+
+/usr/include/errno.h:
+
+/usr/include/bits/errno.h:
+
+/usr/include/linux/errno.h:
+
+/usr/include/asm/errno.h:
+
+/usr/include/asm-generic/errno.h:
+
+/usr/include/asm-generic/errno-base.h:
+
+/usr/include/c++/3.3/cmath:
+
+/usr/include/math.h:
+
+/usr/include/bits/huge_val.h:
+
+/usr/include/bits/nan.h:
+
+/usr/include/bits/mathdef.h:
+
+/usr/include/bits/mathcalls.h:
+
+/usr/include/bits/mathinline.h:
+
+/usr/include/c++/3.3/bits/cmath.tcc:
+
+/usr/include/c++/3.3/limits:
+
+/usr/include/c++/3.3/typeinfo:
+
+/usr/include/c++/3.3/istream:
+
+/usr/include/c++/3.3/bits/istream.tcc:
+
+/usr/include/GL/glew.h:
+
+/usr/include/GL/glu.h:
+
+/usr/include/GL/gl.h:
+
+/usr/include/GL/glut.h:
+
+/usr/include/GL/freeglut_std.h:
+
+/usr/include/GL/glxew.h:
+
+/usr/include/X11/Xlib.h:
+
+/usr/include/X11/X.h:
+
+/usr/include/X11/Xfuncproto.h:
+
+/usr/include/X11/Xosdefs.h:
+
+/usr/include/X11/Xutil.h:
+
+/usr/include/X11/Xmd.h:
+
+/home/ababkin/install/sh/include/sh/sh.hpp:
+
+/home/ababkin/install/sh/include/sh/ShDllExport.hpp:
+
+/home/ababkin/install/sh/include/sh/ShException.hpp:
+
+/home/ababkin/install/sh/include/sh/ShContext.hpp:
+
+/usr/include/c++/3.3/map:
+
+/usr/include/c++/3.3/bits/stl_tree.h:
+
+/usr/include/c++/3.3/bits/stl_map.h:
+
+/usr/include/c++/3.3/bits/stl_multimap.h:
+
+/home/ababkin/install/sh/include/sh/ShProgram.hpp:
+
+/home/ababkin/install/sh/include/sh/ShProgramNode.hpp:
+
+/usr/include/c++/3.3/list:
+
+/usr/include/c++/3.3/bits/stl_list.h:
+
+/usr/include/c++/3.3/bits/list.tcc:
+
+/usr/include/c++/3.3/utility:
+
+/usr/include/c++/3.3/bits/stl_relops.h:
+
+/home/ababkin/install/sh/include/sh/ShRefCount.hpp:
+
+/home/ababkin/install/sh/include/sh/ShRefCountImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShTokenizer.hpp:
+
+/usr/include/c++/3.3/stack:
+
+/usr/include/c++/3.3/bits/stl_deque.h:
+
+/usr/include/c++/3.3/bits/stl_stack.h:
+
+/usr/include/c++/3.3/bits/deque.tcc:
+
+/usr/include/c++/3.3/queue:
+
+/usr/include/c++/3.3/bits/stl_vector.h:
+
+/usr/include/c++/3.3/bits/stl_queue.h:
+
+/usr/include/c++/3.3/bits/vector.tcc:
+
+/usr/include/c++/3.3/vector:
+
+/usr/include/c++/3.3/bits/stl_bvector.h:
+
+/home/ababkin/install/sh/include/sh/ShVariable.hpp:
+
+/home/ababkin/install/sh/include/sh/ShSwizzle.hpp:
+
+/home/ababkin/install/sh/include/sh/ShSwizzleImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShError.hpp:
+
+/home/ababkin/install/sh/include/sh/ShDebug.hpp:
+
+../../config.h:
+
+/home/ababkin/install/sh/include/sh/ShUtility.hpp:
+
+/home/ababkin/install/sh/include/sh/ShMetaForwarder.hpp:
+
+/home/ababkin/install/sh/include/sh/ShVariant.hpp:
+
+/home/ababkin/install/sh/include/sh/ShPool.hpp:
+
+/home/ababkin/install/sh/include/sh/ShVariableType.hpp:
+
+/home/ababkin/install/sh/include/sh/ShDataType.hpp:
+
+/home/ababkin/install/sh/include/sh/ShHalf.hpp:
+
+/home/ababkin/install/sh/include/sh/ShHalfImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShMath.hpp:
+
+/home/ababkin/install/sh/include/sh/ShFraction.hpp:
+
+/home/ababkin/install/sh/include/sh/ShFractionImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShStorageType.hpp:
+
+/home/ababkin/install/sh/include/sh/ShStorageTypeImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShDataTypeImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShVariantImpl.hpp:
+
+/usr/include/c++/3.3/sstream:
+
+/usr/include/c++/3.3/bits/sstream.tcc:
+
+/home/ababkin/install/sh/include/sh/ShCastManager.hpp:
+
+/home/ababkin/install/sh/include/sh/ShHashMap.hpp:
+
+/usr/include/c++/3.3/ext/hash_map:
+
+/usr/include/c++/3.3/ext/stl_hashtable.h:
+
+/usr/include/c++/3.3/iterator:
+
+/usr/include/c++/3.3/bits/stream_iterator.h:
+
+/usr/include/c++/3.3/ext/stl_hash_fun.h:
+
+/home/ababkin/install/sh/include/sh/ShGraph.hpp:
+
+/usr/include/c++/3.3/set:
+
+/usr/include/c++/3.3/bits/stl_set.h:
+
+/usr/include/c++/3.3/bits/stl_multiset.h:
+
+/home/ababkin/install/sh/include/sh/ShGraphImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShTypeInfo.hpp:
+
+/home/ababkin/install/sh/include/sh/ShTypeInfoImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShVariantFactory.hpp:
+
+/home/ababkin/install/sh/include/sh/ShVariantFactoryImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShVariableNode.hpp:
+
+/home/ababkin/install/sh/include/sh/ShMeta.hpp:
+
+/home/ababkin/install/sh/include/sh/ShMetaImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShBlock.hpp:
+
+/home/ababkin/install/sh/include/sh/ShStatement.hpp:
+
+/home/ababkin/install/sh/include/sh/ShOperation.hpp:
+
+/home/ababkin/install/sh/include/sh/ShInfo.hpp:
+
+/home/ababkin/install/sh/include/sh/ShInfoImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShToken.hpp:
+
+/home/ababkin/install/sh/include/sh/ShCtrlGraph.hpp:
+
+/home/ababkin/install/sh/include/sh/ShBasicBlock.hpp:
+
+/home/ababkin/install/sh/include/sh/ShTextureNode.hpp:
+
+/home/ababkin/install/sh/include/sh/ShMemory.hpp:
+
+/home/ababkin/install/sh/include/sh/ShMemoryDep.hpp:
+
+/home/ababkin/install/sh/include/sh/ShChannelNode.hpp:
+
+/home/ababkin/install/sh/include/sh/ShPaletteNode.hpp:
+
+/home/ababkin/install/sh/include/sh/ShBackend.hpp:
+
+/home/ababkin/install/sh/include/sh/ShProgramSet.hpp:
+
+/home/ababkin/install/sh/include/sh/ShSyntax.hpp:
+
+/home/ababkin/install/sh/include/sh/ShAttrib.hpp:
+
+/home/ababkin/install/sh/include/sh/ShGeneric.hpp:
+
+/home/ababkin/install/sh/include/sh/ShGenericImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShLib.hpp:
+
+/usr/include/c++/3.3/cassert:
+
+/usr/include/assert.h:
+
+/home/ababkin/install/sh/include/sh/ShLibArith.hpp:
+
+/home/ababkin/install/sh/include/sh/ShLibArithImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShInstructions.hpp:
+
+/home/ababkin/install/sh/include/sh/ShLibBoolean.hpp:
+
+/home/ababkin/install/sh/include/sh/ShLibBooleanImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShLibClamp.hpp:
+
+/home/ababkin/install/sh/include/sh/ShLibClampImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShLibMiscImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShLibMisc.hpp:
+
+/home/ababkin/install/sh/include/sh/ShLibGeometry.hpp:
+
+/home/ababkin/install/sh/include/sh/ShLibGeometryImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShLibMatrix.hpp:
+
+/home/ababkin/install/sh/include/sh/ShMatrix.hpp:
+
+/home/ababkin/install/sh/include/sh/ShMatrixImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShLibMatrixImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShLibTrig.hpp:
+
+/home/ababkin/install/sh/include/sh/ShLibTrigImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShLibDeriv.hpp:
+
+/home/ababkin/install/sh/include/sh/ShLibDerivImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShAttribImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShVector.hpp:
+
+/home/ababkin/install/sh/include/sh/ShPoint.hpp:
+
+/home/ababkin/install/sh/include/sh/ShColor.hpp:
+
+/home/ababkin/install/sh/include/sh/ShTexCoord.hpp:
+
+/home/ababkin/install/sh/include/sh/ShNormal.hpp:
+
+/home/ababkin/install/sh/include/sh/ShPosition.hpp:
+
+/home/ababkin/install/sh/include/sh/ShLibAttrib.hpp:
+
+/home/ababkin/install/sh/include/sh/ShLibVector.hpp:
+
+/home/ababkin/install/sh/include/sh/ShLibPoint.hpp:
+
+/home/ababkin/install/sh/include/sh/ShLibColor.hpp:
+
+/home/ababkin/install/sh/include/sh/ShLibTexCoord.hpp:
+
+/home/ababkin/install/sh/include/sh/ShLibNormal.hpp:
+
+/home/ababkin/install/sh/include/sh/ShLibPosition.hpp:
+
+/home/ababkin/install/sh/include/sh/ShArray.hpp:
+
+/home/ababkin/install/sh/include/sh/ShBaseTexture.hpp:
+
+/home/ababkin/install/sh/include/sh/ShBaseTextureImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShTable.hpp:
+
+/home/ababkin/install/sh/include/sh/ShTexture.hpp:
+
+/home/ababkin/install/sh/include/sh/ShWrap.hpp:
+
+/home/ababkin/install/sh/include/sh/ShInterp.hpp:
+
+/home/ababkin/install/sh/include/sh/ShMIPFilter.hpp:
+
+/home/ababkin/install/sh/include/sh/ShImage.hpp:
+
+/home/ababkin/install/sh/include/sh/ShImage3D.hpp:
+
+/home/ababkin/install/sh/include/sh/ShAlgebra.hpp:
+
+/home/ababkin/install/sh/include/sh/ShNibbles.hpp:
+
+/home/ababkin/install/sh/include/sh/ShNibblesImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShManipulator.hpp:
+
+/home/ababkin/install/sh/include/sh/ShManipulatorImpl.hpp:
+
+/usr/include/c++/3.3/cstdarg:
+
+/home/ababkin/install/sh/include/sh/ShFixedManipulator.hpp:
+
+/home/ababkin/install/sh/include/sh/ShChannel.hpp:
+
+/home/ababkin/install/sh/include/sh/ShChannelImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShStream.hpp:
+
+/home/ababkin/install/sh/include/sh/ShStreamImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShRecord.hpp:
+
+/home/ababkin/install/sh/include/sh/ShQuaternion.hpp:
+
+/home/ababkin/install/sh/include/sh/ShQuaternionImpl.hpp:
+
+/home/ababkin/install/sh/include/sh/ShPalette.hpp:
+
+/home/ababkin/install/sh/include/sh/ShPaletteImpl.hpp:
+
+Camera.hpp:

@@ -457,10 +457,8 @@ void display()
   // ran particle_updateA then the latest data state is in stream 'B', otherwise
   // its in stream 'A' (because particle_updateB was the last to be run). Based
   // on the value of dir, render the appropriate stream
-  float* particle_positions = 0;
+ /* float* particle_positions = 0;
   float* particle_velocities = 0;
-/* if (dir == 0)
-    {*/
     // Use the ShChannel object to fetch the ShHostStorage object
     ShHostStoragePtr posA_storage = shref_dynamic_cast<ShHostStorage>(posA.memory()->findStorage("host"));
     if (posA_storage)
@@ -484,35 +482,7 @@ void display()
       // fetch the raw data pointer and simply render the particles as points
       particle_velocities = (float*)velA_storage->data();
       }
-/*    }
-  else
-    {
-    // Use the ShChannel object to fetch the ShHostStorage object
-    ShHostStoragePtr posB_storage = shref_dynamic_cast<ShHostStorage>(posB.memory()->findStorage("host"));
-    if (posB_storage)
-      {
-      // The ShHostStorage object may be out data with respect to
-      // the lastest copy on the graphics card, call sync() first
-      // to make sure that the ShHostStorage updated
-      posB_storage->sync();
-
-      particle_positions = (float*)posB_storage->data();
-      }
-    ShHostStoragePtr velB_storage = shref_dynamic_cast<ShHostStorage>(velB.memory()->findStorage("host"));
-    if (velB_storage)
-      {
-      // The ShHostStorage object may be out data with respect to
-      // the lastest copy on the graphics card, call sync() first
-      // to make sure that the ShHostStorage updated
-      velB_storage->sync();
-
-      particle_velocities = (float*)velB_storage->data();
-      }
-    }
-*/
   float* particle_times = 0;
-/*  if (dir == 0)
-    {*/
     // Use the ShChannel object to fetch the ShHostStorage object
     ShHostStoragePtr timeA_storage = shref_dynamic_cast<ShHostStorage>(timeA.memory()->findStorage("host"));
     if (timeA_storage)
@@ -525,23 +495,7 @@ void display()
       // fetch the raw data pointer and simply render the particles as points
       particle_times = (float*)timeA_storage->data();
       }
-/*    }
-  else
-    {
-    // Use the ShChannel object to fetch the ShHostStorage object
-    ShHostStoragePtr timeB_storage = shref_dynamic_cast<ShHostStorage>(timeB.memory()->findStorage("host"));
-    if (timeB_storage)
-      {
-      // The ShHostStorage object may be out data with respect to
-      // the lastest copy on the graphics card, call sync() first
-      // to make sure that the ShHostStorage updated
-      timeB_storage->sync();
-
-      particle_times = (float*)timeB_storage->data();
-      }
-    }
 */
-
   
   float* terrain_positions = 0;
   
@@ -617,7 +571,7 @@ void display()
   }
 #endif // TERRAIN
   
-  
+ /* 
 // if(fmode > 0){
   if (particle_positions) {
   shBind(*particle_shaders);
@@ -668,7 +622,7 @@ void display()
 
   }//if
 // }//if fmode
-
+*/
 
  /*
   shBind(*particle_shaders);
