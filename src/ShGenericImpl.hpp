@@ -26,6 +26,10 @@
 #include "ShDebug.hpp"
 #include "ShProgram.hpp"
 
+#ifdef __APPLE__
+#include "ShLib.hpp"
+#endif
+
 namespace SH {
 
 template<int N, typename T>
