@@ -21,6 +21,7 @@
 #define SHBASETEXTUREIMPL_HPP
 
 #include "ShBaseTexture.hpp"
+#include "ShAttribImpl.hpp"
 #include "ShContext.hpp"
 #include "ShError.hpp"
 
