@@ -833,9 +833,7 @@ typedef ShAttrib<4, SH_CONST, unsigned int, SH_ATTRIB> ShConstAttrib4ui;
 
 
 } // namespace SH
-#ifndef SH_DO_NOT_INCLUDE_ATTRIB_IMPL
-# include "ShGenericImpl.hpp"
-# include "ShAttribImpl.hpp"
-#endif
+#include "ShGenericImpl.hpp"
+#include "ShAttribImpl.hpp"
 
 #endif // SH_SHATTRIB_HPP

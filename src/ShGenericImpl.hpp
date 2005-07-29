@@ -25,7 +25,6 @@
 #include "ShInstructions.hpp"
 #include "ShDebug.hpp"
 #include "ShProgram.hpp"
-#include "ShLib.hpp"
 
 namespace SH {
 

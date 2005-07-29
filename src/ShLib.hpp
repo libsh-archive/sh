@@ -23,21 +23,8 @@
 #include <cmath>
 #include <cassert>
 #include "ShVariable.hpp"
-
-#ifndef SH_DO_NOT_INCLUDE_GENERIC_IMPL
-#define SH_DO_NOT_INCLUDE_GENERIC_IMPL
 #include "ShGeneric.hpp"
-#else
-#include "ShGeneric.hpp"
-#endif
-
-#ifndef SH_DO_NOT_INCLUDE_ATTRIB_IMPL
-#define SH_DO_NOT_INCLUDE_ATTRIB_IMPL
 #include "ShAttrib.hpp"
-#else
-#include "ShAttrib.hpp"
-#endif
-
 #include "ShTypeInfo.hpp"
 
 /** \defgroup library Library Functions

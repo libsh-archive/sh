@@ -25,12 +25,7 @@
 #include "ShTextureNode.hpp"
 #include "ShMemory.hpp"
 #include "ShVariable.hpp"
-#ifndef SH_DO_NOT_INCLUDE_ATTRIB_IMPL
-#define SH_DO_NOT_INCLUDE_ATTRIB_IMPL
 #include "ShAttrib.hpp"
-#else
-#include "ShAttrib.hpp"
-#endif
 #include "ShMetaForwarder.hpp"
 
 namespace SH {
