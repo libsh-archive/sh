@@ -54,29 +54,7 @@
 		};
 		0867D691FE84028FC02AAC07 = {
 			children = (
-				3EBE9644087EC9CA00DA8A69,
-				3EBE9645087EC9CA00DA8A69,
-				3EBE9646087EC9CA00DA8A69,
-				3EBE9647087EC9CA00DA8A69,
-				3EBE9648087EC9CA00DA8A69,
-				3EBE9649087EC9CA00DA8A69,
-				3EBE964A087EC9CA00DA8A69,
-				3EBE964B087EC9CA00DA8A69,
-				3EBE964C087EC9CA00DA8A69,
-				3EBE964D087EC9CA00DA8A69,
-				3EBE964E087EC9CA00DA8A69,
-				3EBE964F087EC9CA00DA8A69,
-				3EBE9650087EC9CA00DA8A69,
-				3EBE9651087EC9CA00DA8A69,
-				3EBE9652087EC9CA00DA8A69,
-				3EBE9653087EC9CA00DA8A69,
-				3EBE9654087EC9CA00DA8A69,
-				3EBE9655087EC9CA00DA8A69,
-				3EBE9656087EC9CA00DA8A69,
-				3EBE9657087EC9CA00DA8A69,
-				3EBE9658087EC9CA00DA8A69,
-				3EBE9659087EC9CA00DA8A69,
-				3EBE965A087EC9CA00DA8A69,
+				3EC22E010899D79800EB5F51,
 				3E3EA9E1087A1A6200A1405F,
 				3E60CEBE087A188F0078BC55,
 				3EF90FA00878A2BA00A31AD9,
@@ -137,6 +115,11 @@
 		};
 		08FB77ACFE841707C02AAC07 = {
 			children = (
+				3E5FD0490899DCD700A1BAFF,
+				3E5FD04A0899DCD700A1BAFF,
+				3E5FD04B0899DCD700A1BAFF,
+				3E5FD04C0899DCD700A1BAFF,
+				3E5FD04D0899DCD700A1BAFF,
 				3EB30A8D08787D7600729309,
 				3EB30A8E08787D7600729309,
 				3EB30A8F08787D7600729309,
@@ -617,6 +600,96 @@
 			settings = {
 			};
 		};
+		3E5FD0490899DCD700A1BAFF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.h;
+			name = ShLibNoise.hpp;
+			path = ../src/ShLibNoise.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		3E5FD04A0899DCD700A1BAFF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.h;
+			name = ShLibNoiseImpl.hpp;
+			path = ../src/ShLibNoiseImpl.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		3E5FD04B0899DCD700A1BAFF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.h;
+			name = ShLibWorley.hpp;
+			path = ../src/ShLibWorley.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		3E5FD04C0899DCD700A1BAFF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.h;
+			name = ShLibWorleyImpl.hpp;
+			path = ../src/ShLibWorleyImpl.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		3E5FD04D0899DCD700A1BAFF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.h;
+			name = ShMIPFilter.hpp;
+			path = ../src/ShMIPFilter.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		3E5FD04E0899DCD700A1BAFF = {
+			fileRef = 3E5FD0490899DCD700A1BAFF;
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					Public,
+				);
+			};
+		};
+		3E5FD04F0899DCD700A1BAFF = {
+			fileRef = 3E5FD04A0899DCD700A1BAFF;
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					Public,
+				);
+			};
+		};
+		3E5FD0500899DCD700A1BAFF = {
+			fileRef = 3E5FD04B0899DCD700A1BAFF;
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					Public,
+				);
+			};
+		};
+		3E5FD0510899DCD700A1BAFF = {
+			fileRef = 3E5FD04C0899DCD700A1BAFF;
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					Public,
+				);
+			};
+		};
+		3E5FD0520899DCD700A1BAFF = {
+			fileRef = 3E5FD04D0899DCD700A1BAFF;
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					Public,
+				);
+			};
+		};
 		3E60CEA9087A18320078BC55 = {
 			buildActionMask = 2147483647;
 			files = (
@@ -631,6 +704,7 @@
 			files = (
 				3E60CEC4087A18AA0078BC55,
 				3E60CEC7087A18AA0078BC55,
+				3EC22E040899D80700EB5F51,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -657,7 +731,7 @@
 				INFOPLIST_FILE = "Particles-Info.plist";
 				INSTALL_PATH = "$(LOCAL_APPS_DIR)/Sh Examples";
 				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "-framework OpenGL -framework GLUT -framework Sh -lobjc";
+				OTHER_LDFLAGS = "-framework CoreFoundation -framework OpenGL -framework GLUT -framework Sh -lobjc";
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = Particles;
 				SECTORDER_FLAGS = "";
@@ -749,6 +823,7 @@
 		};
 		3E60CEBE087A188F0078BC55 = {
 			children = (
+				3EC22E030899D80700EB5F51,
 				3E60CEBF087A18AA0078BC55,
 				3E60CEC0087A18AA0078BC55,
 				3E60CEC2087A18AA0078BC55,
@@ -4369,12 +4444,8 @@
 				3EBE9667087EC9CA00DA8A69,
 				3EBE9668087EC9CA00DA8A69,
 				3EBE9669087EC9CA00DA8A69,
-				3EBE966A087EC9CA00DA8A69,
-				3EBE966B087EC9CA00DA8A69,
 				3EBE966D087EC9CA00DA8A69,
 				3EBE966F087EC9CA00DA8A69,
-				3EBE9670087EC9CA00DA8A69,
-				3EBE9671087EC9CA00DA8A69,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4481,207 +4552,171 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShFunc.hpp;
-			path = ../util/ShFunc.hpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
+			path = "/Users/sdt/svn/sh-trunk/util/ShFunc.hpp";
+			refType = 0;
+			sourceTree = "<absolute>";
 		};
 		3EBE9645087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShFuncImpl.hpp;
-			path = ../util/ShFuncImpl.hpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
+			path = "/Users/sdt/svn/sh-trunk/util/ShFuncImpl.hpp";
+			refType = 0;
+			sourceTree = "<absolute>";
 		};
 		3EBE9646087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.cpp;
 			name = ShKernelLib.cpp;
-			path = ../util/ShKernelLib.cpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
+			path = "/Users/sdt/svn/sh-trunk/util/ShKernelLib.cpp";
+			refType = 0;
+			sourceTree = "<absolute>";
 		};
 		3EBE9647087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShKernelLib.hpp;
-			path = ../util/ShKernelLib.hpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
+			path = "/Users/sdt/svn/sh-trunk/util/ShKernelLib.hpp";
+			refType = 0;
+			sourceTree = "<absolute>";
 		};
 		3EBE9648087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShKernelLibImpl.hpp;
-			path = ../util/ShKernelLibImpl.hpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
+			path = "/Users/sdt/svn/sh-trunk/util/ShKernelLibImpl.hpp";
+			refType = 0;
+			sourceTree = "<absolute>";
 		};
 		3EBE9649087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShKernelLight.hpp;
-			path = ../util/ShKernelLight.hpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
+			path = "/Users/sdt/svn/sh-trunk/util/ShKernelLight.hpp";
+			refType = 0;
+			sourceTree = "<absolute>";
 		};
 		3EBE964A087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShKernelLightImpl.hpp;
-			path = ../util/ShKernelLightImpl.hpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
+			path = "/Users/sdt/svn/sh-trunk/util/ShKernelLightImpl.hpp";
+			refType = 0;
+			sourceTree = "<absolute>";
 		};
 		3EBE964B087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShKernelPost.hpp;
-			path = ../util/ShKernelPost.hpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
+			path = "/Users/sdt/svn/sh-trunk/util/ShKernelPost.hpp";
+			refType = 0;
+			sourceTree = "<absolute>";
 		};
 		3EBE964C087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShKernelPostImpl.hpp;
-			path = ../util/ShKernelPostImpl.hpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
+			path = "/Users/sdt/svn/sh-trunk/util/ShKernelPostImpl.hpp";
+			refType = 0;
+			sourceTree = "<absolute>";
 		};
 		3EBE964D087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShKernelSurface.hpp;
-			path = ../util/ShKernelSurface.hpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
+			path = "/Users/sdt/svn/sh-trunk/util/ShKernelSurface.hpp";
+			refType = 0;
+			sourceTree = "<absolute>";
 		};
 		3EBE964E087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShKernelSurfaceImpl.hpp;
-			path = ../util/ShKernelSurfaceImpl.hpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
+			path = "/Users/sdt/svn/sh-trunk/util/ShKernelSurfaceImpl.hpp";
+			refType = 0;
+			sourceTree = "<absolute>";
 		};
 		3EBE964F087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.cpp;
 			name = ShKernelSurfMap.cpp;
-			path = ../util/ShKernelSurfMap.cpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
+			path = "/Users/sdt/svn/sh-trunk/util/ShKernelSurfMap.cpp";
+			refType = 0;
+			sourceTree = "<absolute>";
 		};
 		3EBE9650087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShKernelSurfMap.hpp;
-			path = ../util/ShKernelSurfMap.hpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
+			path = "/Users/sdt/svn/sh-trunk/util/ShKernelSurfMap.hpp";
+			refType = 0;
+			sourceTree = "<absolute>";
 		};
 		3EBE9651087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShMesh.hpp;
-			path = ../util/ShMesh.hpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
+			path = "/Users/sdt/svn/sh-trunk/util/ShMesh.hpp";
+			refType = 0;
+			sourceTree = "<absolute>";
 		};
 		3EBE9652087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShMeshImpl.hpp;
-			path = ../util/ShMeshImpl.hpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		3EBE9653087EC9CA00DA8A69 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.h;
-			name = ShNoise.hpp;
-			path = ../util/ShNoise.hpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		3EBE9654087EC9CA00DA8A69 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.h;
-			name = ShNoiseImpl.hpp;
-			path = ../util/ShNoiseImpl.hpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
+			path = "/Users/sdt/svn/sh-trunk/util/ShMeshImpl.hpp";
+			refType = 0;
+			sourceTree = "<absolute>";
 		};
 		3EBE9655087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.cpp;
 			name = ShObjMesh.cpp;
-			path = ../util/ShObjMesh.cpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
+			path = "/Users/sdt/svn/sh-trunk/util/ShObjMesh.cpp";
+			refType = 0;
+			sourceTree = "<absolute>";
 		};
 		3EBE9656087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShObjMesh.hpp;
-			path = ../util/ShObjMesh.hpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
+			path = "/Users/sdt/svn/sh-trunk/util/ShObjMesh.hpp";
+			refType = 0;
+			sourceTree = "<absolute>";
 		};
 		3EBE9657087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.cpp;
 			name = shutil.cpp;
-			path = ../util/shutil.cpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
+			path = "/Users/sdt/svn/sh-trunk/util/shutil.cpp";
+			refType = 0;
+			sourceTree = "<absolute>";
 		};
 		3EBE9658087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = shutil.hpp;
-			path = ../util/shutil.hpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		3EBE9659087EC9CA00DA8A69 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.h;
-			name = ShWorley.hpp;
-			path = ../util/ShWorley.hpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		3EBE965A087EC9CA00DA8A69 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.h;
-			name = ShWorleyImpl.hpp;
-			path = ../util/ShWorleyImpl.hpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
+			path = "/Users/sdt/svn/sh-trunk/util/shutil.hpp";
+			refType = 0;
+			sourceTree = "<absolute>";
 		};
 		3EBE965B087EC9CA00DA8A69 = {
 			fileRef = 3EBE9644087EC9CA00DA8A69;
@@ -4812,24 +4847,6 @@
 				);
 			};
 		};
-		3EBE966A087EC9CA00DA8A69 = {
-			fileRef = 3EBE9653087EC9CA00DA8A69;
-			isa = PBXBuildFile;
-			settings = {
-				ATTRIBUTES = (
-					Public,
-				);
-			};
-		};
-		3EBE966B087EC9CA00DA8A69 = {
-			fileRef = 3EBE9654087EC9CA00DA8A69;
-			isa = PBXBuildFile;
-			settings = {
-				ATTRIBUTES = (
-					Public,
-				);
-			};
-		};
 		3EBE966C087EC9CA00DA8A69 = {
 			fileRef = 3EBE9655087EC9CA00DA8A69;
 			isa = PBXBuildFile;
@@ -4860,24 +4877,6 @@
 				);
 			};
 		};
-		3EBE9670087EC9CA00DA8A69 = {
-			fileRef = 3EBE9659087EC9CA00DA8A69;
-			isa = PBXBuildFile;
-			settings = {
-				ATTRIBUTES = (
-					Public,
-				);
-			};
-		};
-		3EBE9671087EC9CA00DA8A69 = {
-			fileRef = 3EBE965A087EC9CA00DA8A69;
-			isa = PBXBuildFile;
-			settings = {
-				ATTRIBUTES = (
-					Public,
-				);
-			};
-		};
 		3EBE9672087EC9FF00DA8A69 = {
 			containerPortal = 0867D690FE84028FC02AAC07;
 			isa = PBXContainerItemProxy;
@@ -4889,6 +4888,48 @@
 			isa = PBXTargetDependency;
 			target = 8D07F2BC0486CC7A007CD1D0;
 			targetProxy = 3EBE9672087EC9FF00DA8A69;
+		};
+		3EC22E010899D79800EB5F51 = {
+			children = (
+				3EBE9644087EC9CA00DA8A69,
+				3EBE9645087EC9CA00DA8A69,
+				3EBE9646087EC9CA00DA8A69,
+				3EBE9647087EC9CA00DA8A69,
+				3EBE9648087EC9CA00DA8A69,
+				3EBE9649087EC9CA00DA8A69,
+				3EBE964A087EC9CA00DA8A69,
+				3EBE964B087EC9CA00DA8A69,
+				3EBE964C087EC9CA00DA8A69,
+				3EBE964D087EC9CA00DA8A69,
+				3EBE964E087EC9CA00DA8A69,
+				3EBE964F087EC9CA00DA8A69,
+				3EBE9650087EC9CA00DA8A69,
+				3EBE9651087EC9CA00DA8A69,
+				3EBE9652087EC9CA00DA8A69,
+				3EBE9655087EC9CA00DA8A69,
+				3EBE9656087EC9CA00DA8A69,
+				3EBE9657087EC9CA00DA8A69,
+				3EBE9658087EC9CA00DA8A69,
+			);
+			isa = PBXGroup;
+			name = ShUtil;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		3EC22E030899D80700EB5F51 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			name = main.cpp;
+			path = ../examples/particle/main.cpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		3EC22E040899D80700EB5F51 = {
+			fileRef = 3EC22E030899D80700EB5F51;
+			isa = PBXBuildFile;
+			settings = {
+			};
 		};
 		3EF90EC50878935800A31AD9 = {
 			buildActionMask = 2147483647;
@@ -5563,6 +5604,9 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_GROUP = admin;
+				INSTALL_MODE_FLAG = "a-w,a+rX,gu+rw";
+				INSTALL_OWNER = root;
 				OPTIMIZATION_CFLAGS = "-O0";
 				REZ_PREPROCESSOR_DEFINITIONS = SH_DEBUG;
 				ZERO_LINK = NO;
@@ -5576,6 +5620,9 @@
 				FRAMEWORK_VERSION = 7;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_OPTIMIZATION_LEVEL = 2;
+				INSTALL_GROUP = admin;
+				INSTALL_MODE_FLAG = "a-w,a+rX,gu+rw";
+				INSTALL_OWNER = root;
 				ZERO_LINK = NO;
 			};
 			isa = PBXBuildStyle;
@@ -5605,7 +5652,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 0.7.9;
 				DYLIB_CURRENT_VERSION = 0.7.9;
 				FRAMEWORK_SEARCH_PATHS = "";
-				FRAMEWORK_VERSION = 0.7;
+				FRAMEWORK_VERSION = 7;
 				GCC_ENABLE_TRIGRAPHS = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
@@ -5775,6 +5822,11 @@
 				3EB30C1608787D7700729309,
 				3EB30C1708787D7700729309,
 				3EB30C1808787D7700729309,
+				3E5FD04E0899DCD700A1BAFF,
+				3E5FD04F0899DCD700A1BAFF,
+				3E5FD0500899DCD700A1BAFF,
+				3E5FD0510899DCD700A1BAFF,
+				3E5FD0520899DCD700A1BAFF,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
