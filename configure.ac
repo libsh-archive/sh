@@ -173,6 +173,9 @@ AC_CONFIG_FILES([Makefile
 		 examples/mipmap/Makefile
 		 examples/particle/Makefile
 		 examples/textures/Makefile
+		 examples/fluids2/Makefile
+		 examples/fluids6/Makefile
+		 examples/boltzmann/Makefile
 		 doc/Makefile])
 
 # Add symlinks to support out of source building
