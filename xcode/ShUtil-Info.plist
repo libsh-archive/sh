@@ -5,18 +5,16 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>GlutExample</string>
-	<key>CFBundleIconFile</key>
-	<string>Sh</string>
+	<string>ShUtil</string>
 	<key>CFBundleIdentifier</key>
-	<string>org.libsh.GlutExample</string>
+	<string>org.libsh.ShUtil</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
-	<string>APPL</string>
+	<string>FMWK</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>0.7.8</string>
+	<string>1.0</string>
 </dict>
 </plist>

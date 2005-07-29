@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>Sh</string>
 	<key>CFBundleIconFile</key>
-	<string></string>
+	<string>Sh</string>
 	<key>CFBundleIdentifier</key>
 	<string>org.libsh.sh</string>
 	<key>CFBundleInfoDictionaryVersion</key>

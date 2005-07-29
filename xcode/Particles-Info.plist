@@ -6,6 +6,8 @@
 	<string>English</string>
 	<key>CFBundleExecutable</key>
 	<string>Particles</string>
+	<key>CFBundleIconFile</key>
+	<string>Sh</string>
 	<key>CFBundleIdentifier</key>
 	<string>org.libsh.Particles</string>
 	<key>CFBundleInfoDictionaryVersion</key>
