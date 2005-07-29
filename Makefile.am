@@ -25,7 +25,8 @@ EXTRA_DIST = BUGS CODING_STANDARDS README.osx README.w32.txt \
 	     xcode/Particles-Info.plist xcode/GlutExample-Info.plist \
 	     xcode/Info.plist xcode/Particles-Info.plist xcode/version.plist \
 	     xcode/TexturesExample-Info.plist xcode/Sh.xcode/project.pbxproj \
-	     xcode/English.lproj/InfoPlist.strings
+	     xcode/English.lproj/InfoPlist.strings xcode/Sh.icns \
+	     xcode/Sh.pmsp xcode/ShUtil-Info.plist
 
 docs:
 	cd doc ; $(MAKE) docs ; cd ..
