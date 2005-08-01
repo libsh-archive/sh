@@ -1,6 +1,10 @@
  - make sure all "release-critical" bugs are fixed
+ 
  - edit configure.ac and change the version at the top
- - make distclean
+ - make a new svn branch for the release:
+     svn cp https://svn.libsh.org/sh/{trunk,tags/0.7.9}
+
+ - check out that branch in a separate directory
  - ./bootstrap
  - ./configure (with usual arguments)
  - make dist
@@ -12,15 +16,24 @@
  - make install
  - make checkall
  - test each program under examples/
+
+ - commit and merge the changes back to the trunk (if any)
  
- - for shrike:
-   - make distclean ; bootstrap ; ./configure ... --with-sh=$HOME/sh-dist-$DATE
-   - make
-   - run, check that everything works
-   - if appropriate, apply same release procedure
+ - repeat similar steps for shrike and shmedia
  
  - copy using anonymous FTP to upload.sourceforge.net in the incoming directory
  - add to file tracker (remember the ChangeLog entries, etc.)
+ 
  - make upload-docs (must "apt-get install doxygen graphviz" first)
+
+ - copy source file to dali:/home/torrent/pub
+ - create a torrent for it:
+     btmakemetafile shmedia-0.7.9.tar.gz http://69.159.216.164:25409/announce
+ - copy the torrent to /var/www/libsh.org/torrents/
+ - modify the /home/torrent/bin/start_seeders script
+
+ - modify the download page (dali:/var/www/libsh.org/download.tphp) to update the version number
+ 
  - add news to homepage (dali.serioushack.com:/var/www/libsh.org/index.thtml)
  - e-mail the release notes (+ download link) to the mailing list
+ - add a note on Sourceforge for the RSS feed
