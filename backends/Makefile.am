@@ -1,14 +1,8 @@
-if ENABLE_SM_BACKEND
-SM_SUBDIR = sm
-else
-SM_SUBDIR =
-endif
-
 if ENABLE_GL_BACKENDS
 GL_SUBDIR = gl
 else
 GL_SUBDIR =
 endif
 
-SUBDIRS = cc $(SM_SUBDIR) $(GL_SUBDIR)
+SUBDIRS = cc $(GL_SUBDIR)
 EXTRA_DIST = Makefile.win32

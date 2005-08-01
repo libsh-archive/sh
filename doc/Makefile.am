@@ -18,4 +18,4 @@ install-data-local: docs
 	$(INSTALL_DATA) html/*.css $(DESTDIR)$(prefix)/share/doc/libsh/html
 	$(INSTALL_DATA) html/*.dot $(DESTDIR)$(prefix)/share/doc/libsh/html
 
-EXTRA_DIST = Doxyfile
+EXTRA_DIST = Doxyfile.real
