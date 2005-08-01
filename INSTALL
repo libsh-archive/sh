@@ -72,6 +72,7 @@ Extra requirement: Python
 
 To run the test suite on the cc backend:
 
+  make install
   make check
 
 To specify a different backend (e.g. arb):
