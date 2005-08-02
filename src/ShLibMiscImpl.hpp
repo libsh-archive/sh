@@ -37,6 +37,9 @@ ShGeneric<M, T> cast(const ShGeneric<N, T>& a)
   if(M < N) {
     result = a.template swiz<M>(indices);
   } else if( M > N ) {
+    for (int i=0; i < (M - N); i++) {
+      result[M - 1 - i] = static_cast<T>(0);
+    }
     result.template swiz<N>(indices) = a;
   } else { // M == N
     shASN(result, a);

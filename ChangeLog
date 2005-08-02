@@ -1,3 +1,8 @@
+2005-08-02  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibMiscImpl.hpp (cast): Make sure all components are
+	initialized to zero to avoid problems in some environments.
+
 2005-07-27  Andrew Lauritzen  <atlaurit@localhost.localdomain>
 
 	* src/ShMatrix.hpp: Added "rows" and "cols" static variables to
