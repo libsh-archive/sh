@@ -36,7 +36,7 @@ template<int N, typename T>
 ShGeneric<N, T>::ShGeneric(const ShVariableNodePtr& node)
   : ShVariable(node)
 {
-  SH_DEBUG_ASSERT(node); // DEBUG
+  SH_DEBUG_ASSERT(node);
 }
 
 template<int N, typename T>
@@ -45,7 +45,7 @@ ShGeneric<N, T>::ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, boo
 {
   m_swizzle = swizzle;
   m_neg = neg;
-  SH_DEBUG_ASSERT(node); // DEBUG
+  SH_DEBUG_ASSERT(node);
 }
 
 template<int N, typename T>
@@ -340,7 +340,7 @@ template<typename T>
 ShGeneric<1, T>::ShGeneric(const ShVariableNodePtr& node)
   : ShVariable(node)
 {
-  SH_DEBUG_ASSERT(node); // DEBUG
+  SH_DEBUG_ASSERT(node);
 }
 
 template<typename T>
@@ -349,7 +349,7 @@ ShGeneric<1, T>::ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, boo
 {
   m_swizzle = swizzle;
   m_neg = neg;
-  SH_DEBUG_ASSERT(node); // DEBUG
+  SH_DEBUG_ASSERT(node);
 }
 
 template<typename T>
