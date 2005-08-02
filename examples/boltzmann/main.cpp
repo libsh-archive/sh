@@ -30,63 +30,33 @@
 #include <stdio.h>
 
 #include <GL/glew.h>
-//#include <GL/gl.h>
-//#include <GL/glext.h>
 #include <GL/glut.h>
 
+#ifndef WIN32
 #include <GL/glxew.h>
-//#include <GL/glx.h>
-//#include <GL/glxext.h>
+#endif
 
 
 #include <sh/sh.hpp>
 using namespace std;
 
 #include "Camera.hpp"
+#include "texture3d.hpp"
 
 using namespace SH;
-// using namespace std;
 
 // defines
-
-#define NUM_PARTICLES /*1048576*/ 16384 /*262144*/  /*4096*/ //1024
-#define SQR_NUM_PARTICLES /*1024*/ 128 /*512*/  /*64*/ //32
-
-#define HM_RES 256 // height map texture resolution
-#define TM_RES 128 // terrain mesh resolution
-#define EM_RES 512 // env map resolution
-#define TT_RES 16 // terrain texture resolution
-
-// scene objects
-#define TERRAIN
-
-
-//#define LIFE_TIME 2.0
-#define LIFE_STEP_FACTOR 25.0
-#define MIN_SPEED 0.2
-#define DAMP_FACTOR 0.4
-
-#define PBUFFERSIZE 512
-#define SQRNUMSLICES 8 // the square root of the number of slices
-#define SLICEFACTOR 1 // factor of increasing of the numberof slices when rendering the volume
-#define SLICERES 64
-
-#define NUMMODES 2
-
-#define PCO .05 // Particle Cube Offset
-
-#define SCALE 5.0f
-
-ShAttrib1f lifeStep;
+#define SCALE 5
+#define GRID_2D_RES 512
+#define SQR_GRID_3D_RES 8
+#define GRID_3D_RES (SQR_GRID_3D_RES*SQR_GRID_3D_RES)
 
 // forward declarations
 void init_shaders(void);
 void init_streams(void);
-void init_pbuffers(void);
 void init_FBO(void);
 void reset_streams(void);
 void update_streams(void);
-void setup_terrain_stream(void);
 void setup_texouts();
 void load_textures(void);
 int gprintf(int x, int y, char* fmt, ...);
@@ -97,104 +67,27 @@ fresnel (
    ShAttrib1f eta
 );
 
-class Texture3D{
+
+// channels holding the distribution packages
+ShChannel<ShVector4f> dp0;
+ShChannel<ShVector4f> dp1;
+ShChannel<ShVector4f> dp2;
+ShChannel<ShVector4f> dp3;
+ShChannel<ShVector4f> dp4;
+ShChannel<ShVector4f> color;
+
+
+Display *dpy;
+int screen;
+GLXDrawable win;
+GLXContext ctx;
  
- public:
- Texture3D(ShTexture2D<ShColor4f>* ptex2d, unsigned int res/*size of one dimension in each slice*/, unsigned int ns/*number of slices in one row, total number of slices would be ns^2*/){
-    ptexture = ptex2d;	
-    numslices = ns;
-    res2d = res;
- }
- ShColor4f operator() (ShVector3d tc3d){
-     ShTexCoord2f tc, tc2;
-     ShAttrib1f ss = numslices*numslices; // real number of slices
-     ShAttrib1f rss = 1.0/ss; // reciprocal of ss
-    ShAttrib1f a =  (tc3d(2)/(2.0)+0.5)/rss ;
-    ShAttrib1f a1 = floor( (tc3d(2)/(2.0)+0.5)/rss );
-     ShAttrib1f a2 = a1+1.0;
-
-     ShAttrib1f lx = tc3d(0)/numslices;
-     ShAttrib1f ly = tc3d(1)/numslices;
-
-     ShAttrib1f r2n = 2.0/numslices;
-
-     tc  = ShTexCoord2f((lx + r2n*(-(numslices-1.0)/2 +        a1%numslices  ) )/2+ShAttrib1f(0.5),
-     			(ly + r2n*(-(numslices-1.0)/2 +  floor(a1/numslices) ) )/2+ShAttrib1f(0.5));
-   
-     tc2 = ShTexCoord2f((lx + r2n*(-(numslices-1.0)/2 +        a2%numslices  ) )/2+ShAttrib1f(0.5),
-     			(ly + r2n*(-(numslices-1.0)/2 +  floor(a2/numslices) ) )/2+ShAttrib1f(0.5));
-   
- 
-
-     
-     
-     /*  tc2 = ShTexCoord2f((tc3d(0)/(numslices) + (2.0/numslices)*(-(numslices-1.0)/2 + floor(((tc3d(2)+(1.0/(numslices*numslices)))/(2.0)+0.5) * numslices*numslices)%numslices) )/2+ShAttrib1f(0.5),
-     			(tc3d(1)/(numslices) + (2.0/numslices)*(-(numslices-1.0)/2 + floor( floor(((tc3d(2)+(1.0/(numslices*numslices)))/(2.0)+0.5) * numslices*numslices)/numslices)) )/2+ShAttrib1f(0.5));*/
-
-     //return texture(tc);
-     //return lerp( numslices*numslices*( (tc3d(2)/2.0+0.5) % (1.0 / (numslices*numslices)) )  ,texture(tc), texture(tc2));
-     return lerp(  a-a1  ,(*ptexture)(tc2), (*ptexture)(tc));
-  } 
- ShPoint3f scatter(ShPoint3f pos, ShAttrib1f scale){
-    	  
-    return ShPoint3f(pos(0)/(numslices*scale) + (2.0/numslices)*(-(numslices-1.0)/2 + floor(       (pos(2)/(2.0*scale)+0.5) * numslices*numslices)%numslices),
-        	     pos(1)/(numslices*scale) + (2.0/numslices)*(-(numslices-1.0)/2 + floor( floor((pos(2)/(2.0*scale)+0.5) * numslices*numslices)/numslices)),
-    	ShAttrib1f(0.0));
- }
-
- ShTexCoord2f get2DTexCoord(ShPoint3f tc3d){
- 
-	 return ShTexCoord2f((tc3d(0)/numslices + (2.0/numslices)*(-(numslices-1.0)/2 + floor( floor( (tc3d(2)/2.0+0.5) * numslices*numslices)%numslices)) )/2+ShAttrib1f(0.5),
-     			     (tc3d(1)/numslices + (2.0/numslices)*(-(numslices-1.0)/2 + floor( floor( (tc3d(2)/2.0+0.5) * numslices*numslices)/numslices)) )/2+ShAttrib1f(0.5));
-
- }
-
-// data	 
- ShTexture2D<ShColor4f>* ptexture;
- unsigned int numslices;
- unsigned int res2d; // size of a 2d dimension
- 
-  
- };//class
-
-
-//-------------------------------------------------------------------
-// stream data
-//-------------------------------------------------------------------
-
-// direction the particle_updateX is going
-int dir = 0;
-
-// channels holding the particle data
-ShChannel<ShPoint3f> posA;
-//ShChannel<ShPoint3f> posB;
-ShChannel<ShVector3f> initvelA;
-//ShChannel<ShVector3f> initvelB;
-ShChannel<ShVector3f> velA;
-//ShChannel<ShVector3f> velB;
-ShChannel<ShVector3f> timeA;
-//ShChannel<ShVector3f> timeB;
-
-ShChannel<ShPoint3f> terrain;
-
-//pbuffers
- Display *dpy;
- int screen;
- GLXDrawable win;
- GLXContext ctx;
- 
-/* GLXPbufferSGIX pb;
- GLXContext pb_ctx;
- int pb_texid;*/
-
 // FBOs
 GLuint fb1;
 GLuint color_tex_id;
 GLuint depth_rb;
 
- 
 // states
- 
 int fmode = 0;
 
 // uniforms 
@@ -204,9 +97,8 @@ ShAttrib1f simtime(0.0);
 ShConstAttrib1f timedelta(0.005);
 
 // programs
-ShProgram particle;  
-ShProgram particle_updateA;
-//ShProgram particle_updateB;
+ShProgram streaming;  
+ShProgram lbm_update;
 
 //-------------------------------------------------------------------
 // shader data
@@ -221,42 +113,47 @@ ShMatrix4x4f mvd;
 ShMatrix4x4f v, vd; // orientation only, no translation
 ShPoint3f wCamOrig; // camera origin in world space
 
-// shader uniforms
-ShColor3f diffuse_color = ShColor3f(0.5, 0.7, 0.9);
-
 // programs
-ShProgram vsh;
+/*ShProgram vsh;
 ShProgram particle_vsh;
 ShProgram particle_fsh;
 ShProgram particle_volume_vsh;
 ShProgram particle_volume_fsh;
-ShProgram plane_vsh;
-ShProgram plane_fsh;
 ShProgram terrain_vsh;
 ShProgram terrain_fsh;
 ShProgram skybox_vsh;
-ShProgram skybox_fsh;
+ShProgram skybox_fsh;*/
+ShProgram plane_vsh;
+ShProgram plane_fsh;
 
-ShProgramSet* particle_shaders;
+/*ShProgramSet* particle_shaders;
 ShProgramSet* particle_volume_shaders;
-ShProgramSet* plane_shaders;
 ShProgramSet* terrain_shaders;
-ShProgramSet* skybox_shaders;
+ShProgramSet* skybox_shaders;*/
+ShProgramSet* plane_shaders;
 
-//hightmap and normalmap textures
-ShArray2D<ShColor3f> hm(HM_RES, HM_RES);
-ShArray2D<ShColor3f> nm(HM_RES, HM_RES);
-ShArray2D<ShColor3fub> terrt(TT_RES, TT_RES); // terrain texture
+//distribution package textures 
+ShArray2D<ShColor4f> dpt0;
+ShArray2D<ShColor4f> dpt1;
+ShArray2D<ShColor4f> dpt2;
+ShArray2D<ShColor4f> dpt3;
+ShArray2D<ShColor4f> dpt4;
+ShArray2D<ShColor4f> colort;
 
-ShArray2D<ShColor3f> texpos;
+Texture3D dpt3d0(&dpt0, SQR_GRID_3D_RES);
+Texture3D dpt3d1(&dpt1, SQR_GRID_3D_RES);
+Texture3D dpt3d2(&dpt2, SQR_GRID_3D_RES);
+Texture3D dpt3d3(&dpt3, SQR_GRID_3D_RES);
+Texture3D dpt3d4(&dpt4, SQR_GRID_3D_RES);
+Texture3D colort3d4(&colort, SQR_GRID_3D_RES);
 
-ShNoMIPFilter<ShTextureCube<ShColor3f> > em(EM_RES, EM_RES); //env map
+//ShNoMIPFilter<ShTextureCube<ShColor3f> > em(EM_RES, EM_RES); //env map
 
-ShTexture2D<ShColor4f> color_tex; //(PBUFFERSIZE, PBUFFERSIZE);
-Texture3D color_tex3d(&color_tex, SLICERES, SQRNUMSLICES);
+/*ShTexture2D<ShColor4f> color_tex; 
+Texture3D color_tex3d(&color_tex, SLICERES, SQRNUMSLICES);*/
 
 
-ShImage hm_image;
+/*ShImage hm_image;
 ShImage nm_image;
 ShImage em_imageA;
 ShImage em_imageB;
@@ -264,7 +161,7 @@ ShImage em_imageC;
 ShImage em_imageD;
 ShImage em_imageE;
 ShImage em_imageF;
-ShImage terr_image;
+ShImage terr_image;*/
 
 
 //-------------------------------------------------------------------
@@ -307,71 +204,9 @@ glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 
 }
 
-void init_pbuffers(void){
-/*  dpy = XOpenDisplay(0);
-  printf("p0.0\n");
-  screen = DefaultScreen(dpy);
-  printf("p0.1\n");
-  win = glXGetCurrentDrawable();
-  printf("p0.2\n");
-  ctx = glXGetCurrentContext();
-  printf("p1\n");
-  
- int num = 0;
- int attrib[] = {
-  GLX_DOUBLEBUFFER,  False,
-  GLX_RED_SIZE,      8,
-  GLX_GREEN_SIZE,    8,
-  GLX_BLUE_SIZE,    8,
-  GLX_ALPHA_SIZE,    8,
-  GLX_DEPTH_SIZE,	8,
-  GLX_RENDER_TYPE_SGIX, GLX_RGBA_BIT_SGIX,
-  GLX_DRAWABLE_TYPE_SGIX, GLX_PBUFFER_SGIX,
-  //GLX_MAX_PBUFFER_WIDTH_SGIX, PBUFFERWIDTH,
-  //GLX_MAX_PBUFFER_HEIGHT_SGIX, PBUFFERHEIGHT,
- None
- };
-  printf("p1.5\n");
-
- GLXFBConfigSGIX* conf = glXChooseFBConfigSGIX(dpy, screen, attrib, &num);
-  printf("p2\n");
-
-  if(conf == NULL || num < 1)
-    {printf("none of the %d returned configs satisfied the conditions\n", num); exit(-1);}
-
-    int pbufferattrib[] = {GLX_PRESERVED_CONTENTS_SGIX, True, None};
-
-    pb = glXCreateGLXPbufferSGIX(dpy, conf[0], PBUFFERSIZE, PBUFFERSIZE, pbufferattrib);
-  printf("p2\n");
-    if(!pb){printf("pb was not allocated\n"); exit(-1);}
-    else{ printf("pb allocated\n");}
-
-    pb_ctx = glXCreateContextWithConfigSGIX(dpy, conf[0], GLX_RGBA_TYPE_SGIX, ctx, true);
-    //pb_ctx = glXMakeContextCurrent(dpy, conf[0], GLX_RGBA_TYPE, ctx, true);
-
-//    glXCopyContext(dpy, ctx, pb_ctx, GL_ALL_ATTRIB_BITS);
-
-   if(!pb_ctx){
-    printf("pb_ctx was not allocated\n");
-    exit(-1);
-   }else
-    printf("pb_ctx context created\n");
-
-   glGenTextures(1, (GLuint*)(&pb_texid));
-
-   char tid[5];
-   sprintf(tid, "%d",pb_texid);
-   pbtex.meta("opengl:texid", tid);
-
-   printf("tid: %s\n", tid);
-
-
-*/	
-}
-
 void load_textures(void){
 
-    hm_image.loadPng("hm2.png");
+   /* hm_image.loadPng("hm2.png");
     nm_image.loadPng("nm2.png");
     em_imageA.loadPng("sky2/A.png");    
     em_imageB.loadPng("sky2/C.png"); 
@@ -379,27 +214,34 @@ void load_textures(void){
     em_imageD.loadPng("sky2/F.png");
     em_imageE.loadPng("sky2/D.png");
     em_imageF.loadPng("sky2/B.png");
-    terr_image.loadPng("densitysprite2.png"/*"bumps.png"*/);
+    terr_image.loadPng("densitysprite2.png");*/
 			
-    hm.memory(hm_image.memory());
-    nm.memory(nm_image.memory());
-
-    terrt.memory(terr_image.memory());
-
+    /*
     em.memory(em_imageA.memory(), static_cast<ShCubeDirection>(0));
     em.memory(em_imageB.memory(), static_cast<ShCubeDirection>(1));
     em.memory(em_imageC.memory(), static_cast<ShCubeDirection>(2));
     em.memory(em_imageD.memory(), static_cast<ShCubeDirection>(3));
     em.memory(em_imageE.memory(), static_cast<ShCubeDirection>(4));
     em.memory(em_imageF.memory(), static_cast<ShCubeDirection>(5));
-
+*/
    }
 
 void setup_texouts(){
 
-    texpos.size(SQR_NUM_PARTICLES, SQR_NUM_PARTICLES);
-    texpos.memory(posA.memory());
+    dpt0.size(GRID_2D_RES, GRID_2D_RES);
+    dpt1.size(GRID_2D_RES, GRID_2D_RES);
+    dpt2.size(GRID_2D_RES, GRID_2D_RES);
+    dpt3.size(GRID_2D_RES, GRID_2D_RES);
+    dpt4.size(GRID_2D_RES, GRID_2D_RES);
+    colort.size(GRID_2D_RES, GRID_2D_RES);
 
+    
+    dpt0.memory(dp0.memory());
+    dpt1.memory(dp1.memory());
+    dpt2.memory(dp2.memory());
+    dpt3.memory(dp3.memory());
+    dpt4.memory(dp4.memory());
+    colort.memory(color.memory());
 }
 
 void setup_view()
@@ -497,7 +339,7 @@ void display()
       }
 */
   
-  float* terrain_positions = 0;
+ /* float* terrain_positions = 0;
   
     ShHostStoragePtr terrain_storage = shref_dynamic_cast<ShHostStorage>(terrain.memory()->findStorage("host"));
     if (terrain_storage)
@@ -558,7 +400,9 @@ void display()
 
   glEnd();
   glEnable(GL_DEPTH_TEST);
+*/
 
+/*
 #ifdef TERRAIN
  if (terrain_positions) {
     shBind(*terrain_shaders);
@@ -570,6 +414,7 @@ void display()
     glEnd();
   }
 #endif // TERRAIN
+ */
   
  /* 
 // if(fmode > 0){
@@ -726,11 +571,10 @@ void display()
   glEnd();*/
 
   
-/*  
+  
   shBind(*plane_shaders);
 
   // draw volume slabs
-  // diffuse_color = ShColor3f(0.5, 0.7, 0.9);
   glDisable(GL_CULL_FACE);
   glDepthMask(GL_FALSE);
   //glDisable(GL_DEPTH_TEST);
@@ -739,15 +583,15 @@ void display()
   //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE);
   glBegin(GL_QUADS);
-  for(int i=0; i<(SQRNUMSLICES*SQRNUMSLICES*SLICEFACTOR); i++){
-   float pz = (i*2.0*SCALE)/(SQRNUMSLICES*SQRNUMSLICES*SLICEFACTOR)-SCALE;
-   glTexCoord2f(0,0);
+  for(int i=0; i<(GRID_3D_RES); i++){
+   float pz = (i*2.0*SCALE)/GRID_3D_RES-SCALE;
+   //glTexCoord2f(0,0);
    glVertex3f(-SCALE, -SCALE, pz);
-   glTexCoord2f(1,0);
+   //glTexCoord2f(1,0);
    glVertex3f( SCALE, -SCALE, pz);
-   glTexCoord2f(1,1);
+   //glTexCoord2f(1,1);
    glVertex3f( SCALE, SCALE,  pz);
-   glTexCoord2f(0,1);
+   //glTexCoord2f(0,1);
    glVertex3f(-SCALE, SCALE,  pz);
   }
   glEnd();
@@ -756,10 +600,11 @@ void display()
   glDepthMask(GL_TRUE);
   glEnable(GL_CULL_FACE);
   //glCullFace(GL_FRONT);
-
  
   shUnbind(*plane_shaders);
-*/ 
+ 
+ 
+  /*
   // Help information
   if (show_help)
     {
@@ -773,7 +618,9 @@ void display()
   else
     {
     gprintf(10, 10, "'H' for help...");
-    }
+    }*/
+
+  
   glutSwapBuffers();
 
 
@@ -819,13 +666,7 @@ void display()
 
   glDisable(GL_BLEND);
   
-  // copy to texture
-  // glXMakeCurrent(dpy, pb, pb_ctx);
-  //glActiveTexture(GL_TEXTURE0_ARB);
-//  glBindTexture(GL_TEXTURE_2D, pb_texid);
-//  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 0, 0, PBUFFERSIZE, PBUFFERSIZE, 0);
-//  glXMakeCurrent(dpy, win, ctx);
-   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 */
   
   }//display
@@ -925,20 +766,11 @@ void keyboard(unsigned char k, int x, int y)
 
 int main(int argc, char** argv)
   {
-//  printf("init\n");
   glutInit(&argc, argv);
-//  printf("initdispmode\n");
   glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE|GLUT_DEPTH);
-//  printf("initwinsize\n");
   glutInitWindowSize(512, 512);
-//  printf("createwindow\n");
   glutCreateWindow("Sh Stream Example");
-//  printf("glewinit\n");
   glewInit();
- // glxewInit();
-//  printf("initPB\n");
-  //init_pbuffers();
-//  printf("done\n");
 //  init_FBO();  
   
 
@@ -990,14 +822,6 @@ int main(int argc, char** argv)
  load_textures();
  setup_terrain_stream();
 
- //terrain_vsh.node()->code()->print(std::cerr);
- //printf("terrain vertex shader: %s\n", terrain_vsh.code() );
-  
-  //update_streams();
-  //update_streams();
-
- 
-
   glutMainLoop();
       }
   catch (const ShException& e)
@@ -1019,21 +843,20 @@ void init_streams(void)
   // Specifiy the generic particle update program, later it will
   // be specialized for the the actual particle update.
   particle = SH_BEGIN_PROGRAM("gpu:stream") {
-    ShInOutPoint3f pos;
-    ShInOutVector3f vel;
-    ShInOutVector3f initvel;
-    ShInOutVector3f time;
-    ShInputVector3f acc;
-    ShInputAttrib1f delta;
+    ShOutputVector4f dp0;
+    ShOutputVector4f dp1;
+    ShOutputVector4f dp2;
+    ShOutputVector4f dp3;
+    ShOutputVector4f dp4;
+    ShOutputVector4f color;
 
        
-    // parameters controlling the amount of momentum
+/*    // parameters controlling the amount of momentum
     // tranfer on collision
     ShAttrib1f mu(0.8);
     ShAttrib1f eps(0.6);
 
     // check if below ground level
-   // ShAttrib1f under = pos(1) < 0.0;
     ShAttrib1f elev = (hm( (pos(0,2)+SCALE)/(2.0*SCALE)) )(0);
     ShAttrib1f under = pos(1) < elev;
 
@@ -1043,11 +866,7 @@ void init_streams(void)
     pos = cond(time(0), pos, ShPoint3f(0.0,1.0,0.0));
     vel = cond(time(0), vel, initvel);
     time(0) = cond(time(0), time(0), ShAttrib1f(1.0));
-   // time = cond(out, ShAttrib1f(1.0), time);
-
-    
-    // clamp to ground level if necessary
-   // pos = cond(under, pos*ShAttrib3f(1.0, 0.0, 1.0), pos);
+ 
     pos = cond(under,ShPoint3f(pos(0), elev, pos(2)), pos);
 
 
@@ -1059,8 +878,7 @@ void init_streams(void)
     ShVector3f veln = dot(vel,norm)*norm;
     ShVector3f velt = vel - veln;
     vel = cond(under, (1.0 - mu)*velt - eps*veln, vel);
-   // pos(1) = cond(min(under, (vel|vel) < 0.1), ShPoint1f(0.0f), pos(1));
-
+ 
     ShAttrib1f onsurface = abs(pos(1)-elev) < 0.1;
     ShAttrib1f minspeed = length(vel)<ShAttrib1f(MIN_SPEED);
     
@@ -1071,121 +889,43 @@ void init_streams(void)
     vel = cond(onsurface&&minspeed, vel, vel+acc*delta);
     vel -= DAMP_FACTOR*vel*delta;
 
-    // clamp velocity to zero if small to force particles to settle
-    //vel = cond((vel|vel) < 0.5, ShVector3f(0.0, 0.0, 0.0), vel);
-
     // integrate velocity to update position
     pos = cond(onsurface&&minspeed,pos,pos + vel*delta);
-
+*/
     
-    //vel = cond(length(vel)>0.0 && length(vel)<ShAttrib1f(MIN_SPEED), ShVector3f(0.0,0.0,0.0), vel);
-       
-    // clamp to the edge of the plane, just to make it look nice
-  //  pos(0) = min(max(pos(0), -5), 5);
-  //  pos(2) = min(max(pos(2), -5), 5);
-  } SH_END;
+      } SH_END;
 
-  // Allocate ShHostMemory objects that will hold the particle position
-  // and velocity data. We need two set of memory object since we'll
-  // be double buffering the particle system updates. The memory
-  // objects will allocate the memory needed internally, only the
-  // size of the memory is given (in bytes, hence the 3*sizeof(float))
+ 
+  ShHostMemoryPtr host_pd0 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
+  ShHostMemoryPtr host_pd1 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
+  ShHostMemoryPtr host_pd2 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
+  ShHostMemoryPtr host_pd3 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
+  ShHostMemoryPtr host_pd4 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
+  ShHostMemoryPtr host_color = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
 
-  ShHostMemoryPtr host_posA = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
- // ShHostMemoryPtr host_posB = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
-  ShHostMemoryPtr host_velA = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
- // ShHostMemoryPtr host_velB = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
-  ShHostMemoryPtr host_initvelA = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
- // ShHostMemoryPtr host_initvelB = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
-  ShHostMemoryPtr host_timeA = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
- // ShHostMemoryPtr host_timeB = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
 
-host_posA->setTag("host_posA");
-//host_posB->setTag("host_posB");
+
+/*host_posA->setTag("host_posA");
 host_velA->setTag("host_velA");
-//host_velB->setTag("host_velB");
 host_initvelA->setTag("host_initvelA");
-//host_initvelB->setTag("host_initvelB");
-host_timeA->setTag("host_timeA");
-//host_timeB->setTag("host_timeB");
+host_timeA->setTag("host_timeA");*/
 
 
-  ShHostMemoryPtr host_terrain = new ShHostMemory(3*sizeof(float)*(TM_RES-1)*(TM_RES-1)*6, SH_FLOAT);
-
-  // Allocate the associated ShChannel objects for each of
-  // the ShHostMemory objects. The type of channel will determine
-  // how the memory object is interpreted, only the number of
-  // elements is needed (i.e. no needed for the 3*sizeof(float),
-  // this is implicit in the use of ShPoint3f/ShVector3f)
-  posA = ShChannel<ShPoint3f>(host_posA, NUM_PARTICLES);
- // posB = ShChannel<ShPoint3f>(host_posB, NUM_PARTICLES);
-  velA = ShChannel<ShVector3f>(host_velA, NUM_PARTICLES);
-//  velB = ShChannel<ShVector3f>(host_velB, NUM_PARTICLES);
-  initvelA = ShChannel<ShVector3f>(host_initvelA, NUM_PARTICLES);
-//  initvelB = ShChannel<ShVector3f>(host_initvelB, NUM_PARTICLES);
-  timeA = ShChannel<ShVector3f>(host_timeA, NUM_PARTICLES);
-//  timeB = ShChannel<ShVector3f>(host_timeB, NUM_PARTICLES);
-
-  terrain = ShChannel<ShPoint3f>(host_terrain, (TM_RES-1)*(TM_RES-1)*6);
-
-  // Tie the postion and velocity data into an ShStream, one
-  // for the 'A' stream and one for the 'B' stream.
-  ShStream dataA = posA & velA & initvelA & timeA;
-//  ShStream dataB = posB & velB & initvelB & timeB;
-
-  // Process the generic particle program into two versions, one that
-  // uses the dataA stream and one that uses the dataB stream. Additionally,
-  // we feed in two uniforms (gravity & delta) since these will not change
-  // on a particle by particle basis (although they can be changed globally).
-
+  pd0 = ShChannel<ShPoint4f>(host_pd0, NUM_GRID_CELLS);
+  pd1 = ShChannel<ShPoint4f>(host_pd1, NUM_GRID_CELLS);
+  pd2 = ShChannel<ShPoint4f>(host_pd2, NUM_GRID_CELLS);
+  pd3 = ShChannel<ShPoint4f>(host_pd3, NUM_GRID_CELLS);
+  pd4 = ShChannel<ShPoint4f>(host_pd4, NUM_GRID_CELLS);
+  color = ShChannel<ShPoint4f>(host_color, NUM_GRID_CELLS);
+    
+  //ShStream data = posA & velA & initvelA & timeA;
   
-//  particle_updateA = shSwizzle(0, 1) << (particle << dataA << gravity << delta);
-//  particle_updateB = shSwizzle(0, 1) << (particle << dataB << gravity << delta);
-
-  particle_updateA = (particle << dataA << gravity << delta);
-//  particle_updateB = (particle << dataB << gravity << delta);
+  lbm_update = (streaming /*<< dataA << gravity << delta*/);
 
   // Everything has been setup for the particle system to operate, last
   // thing is to set the initial data.
   reset_streams();
   }
-
-void setup_terrain_stream(void){
- 
-  ShHostStoragePtr terrain_storage = shref_dynamic_cast<ShHostStorage>(terrain.memory()->findStorage("host"));
-
-  terrain_storage->dirty();
-
-  float* terrain_data = (float*)terrain_storage->data();
-
-  float terrain_temp[TM_RES*TM_RES*3];
-  for(int i = 0; i < TM_RES*TM_RES; i++)
-    {
-    // All the particles will start at the same places
-    float row, col;
-    col = 1.0/(TM_RES-1) * (i%TM_RES) ;
-    row = 1.0/(TM_RES-1) * (i/TM_RES) ;
-    terrain_temp[3*i+0] = (row-.5)*(2.0*SCALE);
-    terrain_temp[3*i+1] = hm_image((HM_RES-1)*row, (HM_RES-1)*col, 0);
-    terrain_temp[3*i+2] =  (col-.5)*(2.0*SCALE);
-
-  }//for
-
-  for(int i=0;i<(TM_RES-1)*(TM_RES-1);i++){
-	for(int k=0;k<3;k++){  
-  	 terrain_data[(6*i)*3+k] = terrain_temp[i*3+k];
-	 terrain_data[(6*i+2)*3+k] = terrain_temp[(i+TM_RES)*3+k];
-	 terrain_data[(6*i+1)*3+k] = terrain_temp[(i+1)*3+k];
-	 terrain_data[(6*i+3)*3+k] = terrain_temp[(i+TM_RES)*3+k];
-	 terrain_data[(6*i+5)*3+k] = terrain_temp[(i+TM_RES+1)*3+k];
-	 terrain_data[(6*i+4)*3+k] = terrain_temp[(i+1)*3+k];
-	}
-
-  }
-
-  
-
-}
 
 void reset_streams(void)
   {
@@ -1194,22 +934,24 @@ void reset_streams(void)
     
   // Use the ShChannels objects to find the associated ShHostStorage and
   // then fetch the raw data and cast to a float pointer.
-  ShHostStoragePtr posA_storage = shref_dynamic_cast<ShHostStorage>(posA.memory()->findStorage("host"));
-  ShHostStoragePtr velA_storage = shref_dynamic_cast<ShHostStorage>(velA.memory()->findStorage("host"));
-  ShHostStoragePtr initvelA_storage = shref_dynamic_cast<ShHostStorage>(initvelA.memory()->findStorage("host"));
-  ShHostStoragePtr timeA_storage = shref_dynamic_cast<ShHostStorage>(timeA.memory()->findStorage("host"));
+  ShHostStoragePtr dp0_storage = shref_dynamic_cast<ShHostStorage>(dp0.memory()->findStorage("host"));
+  ShHostStoragePtr dp1_storage = shref_dynamic_cast<ShHostStorage>(dp1.memory()->findStorage("host"));
+  ShHostStoragePtr dp2_storage = shref_dynamic_cast<ShHostStorage>(dp2.memory()->findStorage("host"));
+  ShHostStoragePtr dp3_storage = shref_dynamic_cast<ShHostStorage>(dp3.memory()->findStorage("host"));
+  ShHostStoragePtr dp4_storage = shref_dynamic_cast<ShHostStorage>(dp4.memory()->findStorage("host"));
 
 
   // these storages maybe cached on the graphics card, flag them
   // as dirty so that:
   // 1) the latest copies will be on the host 
   // 2) after reseting the stream, the graphics card copy will be updated
-  posA_storage->dirtyall();
-  velA_storage->dirtyall();
-  initvelA_storage->dirtyall();
-  timeA_storage->dirtyall();
+  dp0_storage->dirtyall();
+  dp1_storage->dirtyall();
+  dp2_storage->dirtyall();
+  dp3_storage->dirtyall();
+  dp4_storage->dirtyall();
 
-  float* posA_data = (float*)posA_storage->data();
+ /* float* posA_data = (float*)posA_storage->data();
   float* velA_data = (float*)velA_storage->data();
   float* initvelA_data = (float*)initvelA_storage->data();
   float* timeA_data = (float*)timeA_storage->data();
@@ -1248,14 +990,12 @@ void reset_streams(void)
     lifeStep = ShAttrib1f(1.0/NUM_PARTICLES);
     
     }
-
-  // reset the dir flag to that the simulation will start with the 'A' stream
-  dir = 0;
+*/
   }
 
 void init_shaders(void)
   {
-    skybox_vsh = SH_BEGIN_VERTEX_PROGRAM {
+ /*   skybox_vsh = SH_BEGIN_VERTEX_PROGRAM {
     ShInOutPosition4f pos;
     ShOutputPosition3f posp;
     ShInOutTexCoord2f tc;
@@ -1432,7 +1172,7 @@ void init_shaders(void)
 
    } SH_END;
 
-  /*particle_vsh = SH_BEGIN_VERTEX_PROGRAM {
+  particle_vsh = SH_BEGIN_VERTEX_PROGRAM {
     ShInOutPosition4f pos;
     ShInputTexCoord2f partpos2d;
     //ShInOutTexCoord3f partpos;
@@ -1528,11 +1268,7 @@ void init_shaders(void)
       //color = ShColor3f(col, col, col);
      } SH_END;
  
-*/
-  
-
-
-    
+   
  particle_volume_vsh = SH_BEGIN_VERTEX_PROGRAM {
     ShInOutPosition4f pos;
     ShInOutTexCoord2f tc;
@@ -1544,7 +1280,7 @@ void init_shaders(void)
     ShOutputVector3f lightv;
     ShOutputMatrix4x4f omtm;
 
-    /*
+    
     // Compute camera ray
     //WS
     camray = ShPoint3f(pos(0,1,2)) - wCamOrig;
@@ -1560,19 +1296,15 @@ void init_shaders(void)
     imtm = inverse(mtm);
     camray = imtm(0,1,2)(0,1,2) | camray;
     posm = (imtm | pos)(0,1,2);
-    lightv = -(imtm|lightPos);*/
+    lightv = -(imtm|lightPos);
         
       // Project position
     //pos = mvd | pos;
   
-   /* pos(0) = pos(0)/(8*5) + (2.0/8)*(-3.5 + floor((pos(2)/10+0.5) * 64)%8);
-    pos(1) = pos(1)/(8*5) + (2.0/8)*(-3.5 + floor( floor((pos(2)/10+0.5) * 64)/8));
-    pos(2) = 0.0;
-*/
-    /*ShMatrix4x4f v = mv; // just view, no translation
+    ShMatrix4x4f v = mv; // just view, no translation
     v = transpose(v);
     v[3](0,1,2) = ShVector3f(0.0, 0.0, 0.0);
-    v = transpose(v);*/
+    v = transpose(v);
 
     //ShTexCoord2f vtc = pos(0,1);
     //pos(0,1,2) = ( texpos(vtc) )(0,1,2);
@@ -1595,22 +1327,13 @@ void init_shaders(void)
      color = ShConstColor4f(1.0, 1.0, 1.0, 1.0);//ShConstColor4f(1.0, 1.0, 1.0, 0.3);
      color(3) = terrt(tc)(0)*(1.0/(1*SLICEFACTOR));
    } SH_END;
-
+*/
+	
   plane_vsh = SH_BEGIN_VERTEX_PROGRAM {
     ShInOutPosition4f pos;
-    ShInOutTexCoord2f tc;
+    //ShInOutTexCoord2f tc;
     ShOutputPosition3f posp;
-   // ShInOutTexCoord3f partpos;
-   // ShInOutTexCoord1f parttime;
-   // ShInputNormal3f vel; // not real normal
-   // ShOutputVector3f camray;
-   // ShOutputPoint3f posm; // position in MS
-   // ShOutputVector3f lightv;
-   // ShOutputMatrix4x4f omtm;
-
-   /* tc(0) = (pos(0)/(8*5) + (2.0/8)*(-3.5 +        floor( (pos(2)/10+0.5) * 64)%8) )/2+.5;
-    tc(1) = (pos(1)/(8*5) + (2.0/8)*(-3.5 + floor( floor( (pos(2)/10+0.5) * 64)/8) ) )/2+.5;*/
-    
+      
     posp = pos(0,1,2);
     //tc = color_tex3d.get2DTexCoord(pos(0,1,2)/5);
     pos = vd | pos;
@@ -1622,64 +1345,31 @@ void init_shaders(void)
   // diffuse shader (using the global uniform diffuse_color).
   plane_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
     ShInputPosition4f pos;
-    ShInputTexCoord2f tc;
+    //ShInputTexCoord2f tc;
     ShInputPosition4f posp;
-    //ShInputNormal3f normal;
-    //ShInputVector3f lightv;
     ShOutputColor4f color;
 
        
-    /*ShAttrib1f density = pbtex(tc)(3);
-    ShAttrib2f fw = fwidth(tc);
-    ShAttrib1f w = SH::max(fw(0),fw(1));
-    color = ShColor4f(1,1,1,1) * deprecated_smoothstep(-w,w,density+ShAttrib1f(0.05));*/
-
-    //tc = color_tex3d.get2DTexCoord(posp(0,1,2)/5);
-
-    //color = color_tex(tc);
-    color = color_tex3d(posp(0,1,2)/5);//pbtex(tc);
+    color = colort3d(posp(0,1,2)/SCALE);
     
-    //color = ShConstColor4f(1,1,1,0.01);  
   } SH_END;
 
-  particle_shaders = new ShProgramSet(particle_vsh, particle_fsh);
+/*  particle_shaders = new ShProgramSet(particle_vsh, particle_fsh);
   particle_volume_shaders = new ShProgramSet(particle_volume_vsh, particle_volume_fsh);
-  plane_shaders = new ShProgramSet(plane_vsh, plane_fsh);
   terrain_shaders = new ShProgramSet(terrain_vsh, terrain_fsh);
-  skybox_shaders = new ShProgramSet(skybox_vsh, skybox_fsh);
-  }
+  skybox_shaders = new ShProgramSet(skybox_vsh, skybox_fsh);*/
+  plane_shaders = new ShProgramSet(plane_vsh, plane_fsh);
+   }
 
 void update_streams(void)
   {
 
-  
-  shUnbind(*plane_shaders);
-  shUnbind(*particle_shaders);
-
   try 
     {
-    // The value of dir specifcies whether to run particle_updateA, which
-    // will take the data from stream 'A' and run the particle program to
-    // generate stream 'B', or the opposite using 'B' to generate 'A'. The
-    // rendering code uses dir in the same way to decided which stream has
-    // the latest state data for draw drawing the particle.
-  /*  if (dir == 0)
-      {
-      //texpos.memory(posB.memory());
-      posB & velB & initvelB & timeB = particle_updateA;
-      texpos.memory(posB.memory());
-      }
-    else
-      {
-      //texpos.memory(posA.memory());
-      posA & velA & initvelA & timeA = particle_updateB;
-      texpos.memory(posA.memory());
-      }*/
-    posA & velA & initvelA & timeA = particle_updateA;
+      dp0 & dp1 & dp2 & dp3 & dp4 & color = lbm_update;
 
 	    
-    dir = !dir;
-    simtime += timedelta;
+      simtime += timedelta;
     }
   catch (const ShException& e)
     {
