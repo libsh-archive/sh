@@ -399,20 +399,16 @@ void ShVariableNode::programVarListInit()
 
 void ShVariableNode::programDeclInit() 
 {
-  if(m_kind != SH_TEMP || m_uniform) return;
+  if (m_kind != SH_TEMP || m_uniform) return;
   ShProgramNodePtr prog = ShContext::current()->parsing();
-  if(prog) {
-    if(prog->ctrlGraph) { // already has ctrlGraph, add decl to entry
-// @todo range - remove debug statements
-//      SH_DEBUG_PRINT("Adding decl for " << name() << " to program"); 
+  if (prog) {
+    if (prog->ctrlGraph) { // already has ctrlGraph, add decl to entry
       prog->addDecl(this);
     } else {
-//      SH_DEBUG_PRINT("Adding decl for " << name() << " to parsing blocklist"); 
-      prog->tokenizer.blockList()->addStatement(
-          ShStatement(ShVariable(this), SH_OP_DECL, ShVariable(this)));
+      prog->tokenizer.blockList()->addStatement(ShStatement(ShVariable(this), 
+                                                            SH_OP_DECL, 
+                                                            ShVariable(this)));
     }
-  } else {
-//    SH_DEBUG_PRINT("Not adding decl for " << name() << ".  No current program");
   }
 }
 
