@@ -30,14 +30,11 @@
 #include <stdio.h>
 
 #include <GL/glew.h>
-//#include <GL/gl.h>
-//#include <GL/glext.h>
 #include <GL/glut.h>
 
-#include <GL/glxew.h>
-//#include <GL/glx.h>
-//#include <GL/glxext.h>
-
+#ifndef WIN32
+ #include <GL/glxew.h>
+#endif
 
 #include <sh/sh.hpp>
 
@@ -46,7 +43,7 @@ using namespace std;
 #include "Camera.hpp"
 
 using namespace SH;
-// using namespace std;
+
 
 // defines
 
@@ -174,6 +171,8 @@ ShChannel<ShAttrib1f> timeB;
 
 ShChannel<ShPoint3f> terrain;
 
+
+#ifndef WIN32
 //pbuffers
  Display *dpy;
  int screen;
@@ -183,6 +182,7 @@ ShChannel<ShPoint3f> terrain;
  GLXPbufferSGIX pb;
  GLXContext pb_ctx;
  int pb_texid;
+#endif
 
 // states
  
@@ -264,7 +264,7 @@ int cur_x, cur_y;
 
 bool show_help = false;
 
-
+/*
 void init_pbuffers(void){
   dpy = XOpenDisplay(0);
   screen = DefaultScreen(dpy);
@@ -318,7 +318,7 @@ void init_pbuffers(void){
 
 
 	
-}
+}*/
 
 void load_textures(void){
 

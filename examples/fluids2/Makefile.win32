@@ -16,6 +16,11 @@ GLUT_DIR = \dev\glut
 INCLUDES += -I$(GLUT_DIR)\include
 GLUT_LDADD = $(GLUT_DIR)\lib\glut32.lib
 
+# GLEW
+GLEW_DIR = \dev\glew
+INCLUDES += -I$(GLEW_DIR)\include
+GLEW_LDADD = $(GLEW_DIR)\lib\glew32.lib
+
 # OpenGL
 OPENGL_DIR = \dev\opengl
 INCLUDES += -I$(OPENGL_DIR)\include
@@ -47,13 +52,13 @@ shparticleex_RELEASE_OBJECTS = $(shparticleex_CXXFILES:.cpp=.r.obj)
 shparticleex_DEBUG_OBJECTS = $(shparticleex_CXXFILES:.cpp=.d.obj)
 
 shparticleex_RELEASE_LDADD = $(SH_RELEASE_LDADD)
-shparticleex_RELEASE_LDADD += $(GLUT_LDADD) $(OPENGL_LDADD)
+shparticleex_RELEASE_LDADD += $(GLUT_LDADD) $(OPENGL_LDADD) $(GLEW_LDADD)
 shparticleex_RELEASE_LDADD += kernel32.lib user32.lib gdi32.lib
 shparticleex_RELEASE_LDADD += shell32.lib ole32.lib comctl32.lib
 shparticleex_RELEASE_LDADD += comdlg32.lib rpcrt4.lib advapi32.lib
 
 shparticleex_DEBUG_LDADD = $(SH_DEBUG_LDADD)
-shparticleex_DEBUG_LDADD += $(GLUT_LDADD) $(OPENGL_LDADD)
+shparticleex_DEBUG_LDADD += $(GLUT_LDADD) $(OPENGL_LDADD) $(GLEW_LDADD)
 shparticleex_DEBUG_LDADD += kernel32.lib user32.lib gdi32.lib
 shparticleex_DEBUG_LDADD += shell32.lib ole32.lib comctl32.lib
 shparticleex_DEBUG_LDADD += comdlg32.lib rpcrt4.lib advapi32.lib
