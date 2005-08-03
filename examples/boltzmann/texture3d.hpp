@@ -4,13 +4,15 @@ using namespace SH;
 
 
 class Texture3D{
- 
- public:
+public:
+
  Texture3D(ShBaseTexture2D<ShColor4f>* ptex2d, unsigned int sqrns/*number of slices in one row, total number of slices would be ns^2*/){
     ptexture = ptex2d;	
     sqrnumslices = sqrns;
     ss = sqrnumslices*sqrnumslices; // real number of slices
     rss = 1.0/ss; // reciprocal of ss
+    res3d = ss;
+    fo = 1.0/(sqrnumslices*res3d);
 
     
  }
@@ -53,12 +55,32 @@ class Texture3D{
 
  }
 
+// find neighbors:
+ShColor4f find10(ShTexCoord2f tc){ // (0,1,0)
+ tc(1) -= fo; 	
+ return (*ptexture)(tc);
+} 
+ShColor4f find12(ShTexCoord2f tc){ // (-1,0,0)
+ tc(0) -= fo; 	
+ return (*ptexture)(tc);
+}
+ShColor4f find13(ShTexCoord2f tc){ // (1,0,0)
+ tc(0) += fo; 	
+ return (*ptexture)(tc);
+} 
+ShColor4f find15(ShTexCoord2f tc){ // (0,-1,0)
+ tc(1) += fo; 	
+ return (*ptexture)(tc);
+}
+
 // data	 
  ShBaseTexture2D<ShColor4f>* ptexture;
  unsigned int sqrnumslices;
- unsigned int res2d; // size of a 2d dimension
+ //unsigned int res2d; // size of a 2d dimension
  unsigned int ss;
  unsigned int rss;
+ unsigned int res3d;
+ float fo; // fragment offset
 
  };//class
 

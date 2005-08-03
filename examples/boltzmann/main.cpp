@@ -52,7 +52,7 @@ using namespace SH;
 #define GRID_2D_RES 512
 #define SQR_GRID_3D_RES 8
 #define GRID_3D_RES (SQR_GRID_3D_RES*SQR_GRID_3D_RES)
-#define NUM_GRID_CELLS (GRID_3D_RES*GRID_3D_RES)
+#define NUM_GRID_CELLS (GRID_3D_RES*GRID_3D_RES*GRID_3D_RES)
 
 // forward declarations
 void init_shaders(void);
@@ -288,13 +288,13 @@ void display()
   {
   
 // normal rendering pass
-  glActiveTexture(GL_TEXTURE0_ARB);
+  /*glActiveTexture(GL_TEXTURE0_ARB);
   glBindTexture(GL_TEXTURE_2D, color_tex_id);
 
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);*/
 
   
   // Bind in the programs used to shade the particles
@@ -845,14 +845,17 @@ void init_streams(void)
   // Specifiy the generic particle update program, later it will
   // be specialized for the the actual particle update.
   streaming = SH_BEGIN_PROGRAM("gpu:stream") {
-    ShOutputVector4f dp0;
-    ShOutputVector4f dp1;
-    ShOutputVector4f dp2;
-    ShOutputVector4f dp3;
-    ShOutputVector4f dp4;
-    ShOutputVector4f color;
+    ShOutputColor4f dp0;
+    ShOutputColor4f dp1;
+    ShOutputColor4f dp2;
+    ShOutputColor4f dp3;
+    ShOutputColor4f dp4;
+    ShOutputColor4f color;
+    ShInputTexCoord2f currtc;
 
-       
+    dp0(0) = (dpt3d0.find12(currtc))(0);
+
+    
 /*    // parameters controlling the amount of momentum
     // tranfer on collision
     ShAttrib1f mu(0.8);
