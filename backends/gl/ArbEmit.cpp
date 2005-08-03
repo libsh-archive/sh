@@ -546,7 +546,7 @@ void ArbCode::emit_sgn(const ShStatement& stmt)
   emit(ShStatement(tmp1, stmt.src[0], SH_OP_SGE, zero));
   emit(ShStatement(tmp2, stmt.src[0], SH_OP_SGT, zero));
   emit(ShStatement(tmp1, tmp1, SH_OP_ADD, tmp2));
-  emit(ShStatement(tmp1, tmp1, SH_OP_ADD, minus_one));
+  emit(ShStatement(stmt.dest, tmp1, SH_OP_ADD, minus_one));
 
   /*
   emit(ShStatement(tmp, stmt.src[0], SH_OP_SGE, zero));
