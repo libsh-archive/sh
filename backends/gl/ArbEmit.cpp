@@ -122,7 +122,7 @@ ArbMapping ArbCode::table[] = {
   // Trig
   {SH_OP_ACOS,  SH_ARB_ANY, 0,         SH_ARB_FUN, &ArbCode::emit_invtrig},
   {SH_OP_ASIN,  SH_ARB_ANY, 0,         SH_ARB_FUN, &ArbCode::emit_invtrig},
-  //{SH_OP_ATAN,  SH_ARB_ANY, 0,         SH_ARB_FUN, &ArbCode::emit_invtrig},
+  {SH_OP_ATAN,  SH_ARB_ANY, 0,         SH_ARB_FUN, &ArbCode::emit_atan},
   {SH_OP_COS,   SH_ARB_FP,  scalarize, SH_ARB_COS, 0},
   {SH_OP_COS,   SH_ARB_VP,  0,         SH_ARB_FUN, &ArbCode::emit_trig},
   {SH_OP_COSH,  SH_ARB_ANY, 0,         SH_ARB_FUN, &ArbCode::emit_hyperbolic},
@@ -443,6 +443,18 @@ void ArbCode::emit_invtrig(const ShStatement& stmt)
   if (stmt.op == SH_OP_ACOS) {
     m_instructions.push_back(ArbInst(SH_ARB_ADD, stmt.dest, -output, c0(1,1,1,1)));
   }
+}
+
+void ArbCode::emit_atan(const ShStatement& stmt)
+{
+  ShVariable tmp(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
+  
+  // arctan(x) = arcsin( x / sqrt(x^2 + 1) )
+  emit(ShStatement(tmp, stmt.src[0], SH_OP_MUL, stmt.src[0]));
+  emit(ShStatement(tmp, tmp, SH_OP_ADD, ShConstAttrib1f(1)));
+  emit(ShStatement(tmp, SH_OP_SQRT, tmp));
+  emit(ShStatement(tmp, stmt.src[0], SH_OP_DIV, tmp));
+  emit(ShStatement(stmt.dest, SH_OP_ASIN, tmp));
 }
 
 void ArbCode::emit_tan(const ShStatement& stmt)

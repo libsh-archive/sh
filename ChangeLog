@@ -3,6 +3,8 @@
 	* backends/gl/ArbEmit.cpp (emit_sgn): Fix the sign(0) case without
 	using DIV or COND.
 
+	* backends/gl/ArbEmit.cpp, ArbCode.hpp (emit_atan): Implement ATAN.
+
 2005-08-02  Francois Marier  <francois@serioushack.com>
 
 	* src/ShLibMiscImpl.hpp (cast): Make sure all components are
