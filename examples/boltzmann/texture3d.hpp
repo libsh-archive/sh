@@ -1,11 +1,12 @@
 #include <sh/sh.hpp>
 
+using namespace SH;
 
 
 class Texture3D{
  
  public:
- Texture3D(ShBaseTexture2D<ShColor4f>* unsigned int sqrns/*number of slices in one row, total number of slices would be ns^2*/){
+ Texture3D(ShBaseTexture2D<ShColor4f>* ptex2d, unsigned int sqrns/*number of slices in one row, total number of slices would be ns^2*/){
     ptexture = ptex2d;	
     sqrnumslices = sqrns;
     ss = sqrnumslices*sqrnumslices; // real number of slices
@@ -40,21 +41,21 @@ class Texture3D{
 
  ShPoint3f scatter(ShPoint3f pos, ShAttrib1f scale){
       
-    return ShPoint3f(pos(0)/(sqrnumslices*scale) + (2.0/numslices)*(-(numslices-1.0)/2 + floor(       (pos(2)/(2.0*scale)+0.5) * ss)%numslices),
-        	     pos(1)/(numslices*scale) + (2.0/numslices)*(-(numslices-1.0)/2 + floor( floor((pos(2)/(2.0*scale)+0.5) * ss)/numslices)),
+    return ShPoint3f(pos(0)/(sqrnumslices*scale) + (2.0/sqrnumslices)*(-(sqrnumslices-1.0)/2 + floor(       (pos(2)/(2.0*scale)+0.5) * ss)%sqrnumslices),
+        	     pos(1)/(sqrnumslices*scale) + (2.0/sqrnumslices)*(-(sqrnumslices-1.0)/2 + floor( floor((pos(2)/(2.0*scale)+0.5) * ss)/sqrnumslices)),
     	ShAttrib1f(0.0));
  }
 
  ShTexCoord2f get2DTexCoord(ShPoint3f tc3d){
  
-	 return ShTexCoord2f((tc3d(0)/numslices + (2.0/numslices)*(-(numslices-1.0)/2 + floor( floor( (tc3d(2)/2.0+0.5) * numslices*numslices)%numslices)) )/2+ShAttrib1f(0.5),
-     			     (tc3d(1)/numslices + (2.0/numslices)*(-(numslices-1.0)/2 + floor( floor( (tc3d(2)/2.0+0.5) * numslices*numslices)/numslices)) )/2+ShAttrib1f(0.5));
+	 return ShTexCoord2f((tc3d(0)/sqrnumslices + (2.0/sqrnumslices)*(-(sqrnumslices-1.0)/2 + floor( floor( (tc3d(2)/2.0+0.5) * ss)%sqrnumslices)) )/2+ShAttrib1f(0.5),
+     			     (tc3d(1)/sqrnumslices + (2.0/sqrnumslices)*(-(sqrnumslices-1.0)/2 + floor( floor( (tc3d(2)/2.0+0.5) * ss)/sqrnumslices)) )/2+ShAttrib1f(0.5));
 
  }
 
 // data	 
  ShBaseTexture2D<ShColor4f>* ptexture;
- unsigned int numslices;
+ unsigned int sqrnumslices;
  unsigned int res2d; // size of a 2d dimension
  unsigned int ss;
  unsigned int rss;

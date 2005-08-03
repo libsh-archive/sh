@@ -46,10 +46,13 @@ using namespace std;
 using namespace SH;
 
 // defines
+#define NUMMODES 1
+
 #define SCALE 5
 #define GRID_2D_RES 512
 #define SQR_GRID_3D_RES 8
 #define GRID_3D_RES (SQR_GRID_3D_RES*SQR_GRID_3D_RES)
+#define NUM_GRID_CELLS (GRID_3D_RES*GRID_3D_RES)
 
 // forward declarations
 void init_shaders(void);
@@ -145,7 +148,7 @@ Texture3D dpt3d1(&dpt1, SQR_GRID_3D_RES);
 Texture3D dpt3d2(&dpt2, SQR_GRID_3D_RES);
 Texture3D dpt3d3(&dpt3, SQR_GRID_3D_RES);
 Texture3D dpt3d4(&dpt4, SQR_GRID_3D_RES);
-Texture3D colort3d4(&colort, SQR_GRID_3D_RES);
+Texture3D colort3d(&colort, SQR_GRID_3D_RES);
 
 //ShNoMIPFilter<ShTextureCube<ShColor3f> > em(EM_RES, EM_RES); //env map
 
@@ -173,7 +176,7 @@ int cur_x, cur_y;
 bool show_help = false;
 
 
-void init_FBO(void){
+void init_FBO(void){/*
 glGenFramebuffersEXT(1, &fb1);
 glGenTextures(1, &color_tex_id);
 char tid[5];
@@ -201,7 +204,7 @@ glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
 
 
 glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-
+*/
 }
 
 void load_textures(void){
@@ -818,9 +821,8 @@ int main(int argc, char** argv)
 
   
  setup_texouts();
-  
  load_textures();
- setup_terrain_stream();
+ 
 
   glutMainLoop();
       }
@@ -842,7 +844,7 @@ void init_streams(void)
   {
   // Specifiy the generic particle update program, later it will
   // be specialized for the the actual particle update.
-  particle = SH_BEGIN_PROGRAM("gpu:stream") {
+  streaming = SH_BEGIN_PROGRAM("gpu:stream") {
     ShOutputVector4f dp0;
     ShOutputVector4f dp1;
     ShOutputVector4f dp2;
@@ -896,11 +898,11 @@ void init_streams(void)
       } SH_END;
 
  
-  ShHostMemoryPtr host_pd0 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
-  ShHostMemoryPtr host_pd1 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
-  ShHostMemoryPtr host_pd2 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
-  ShHostMemoryPtr host_pd3 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
-  ShHostMemoryPtr host_pd4 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
+  ShHostMemoryPtr host_dp0 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
+  ShHostMemoryPtr host_dp1 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
+  ShHostMemoryPtr host_dp2 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
+  ShHostMemoryPtr host_dp3 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
+  ShHostMemoryPtr host_dp4 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
   ShHostMemoryPtr host_color = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
 
 
@@ -911,12 +913,12 @@ host_initvelA->setTag("host_initvelA");
 host_timeA->setTag("host_timeA");*/
 
 
-  pd0 = ShChannel<ShPoint4f>(host_pd0, NUM_GRID_CELLS);
-  pd1 = ShChannel<ShPoint4f>(host_pd1, NUM_GRID_CELLS);
-  pd2 = ShChannel<ShPoint4f>(host_pd2, NUM_GRID_CELLS);
-  pd3 = ShChannel<ShPoint4f>(host_pd3, NUM_GRID_CELLS);
-  pd4 = ShChannel<ShPoint4f>(host_pd4, NUM_GRID_CELLS);
-  color = ShChannel<ShPoint4f>(host_color, NUM_GRID_CELLS);
+  dp0 = ShChannel<ShVector4f>(host_dp0, NUM_GRID_CELLS);
+  dp1 = ShChannel<ShVector4f>(host_dp1, NUM_GRID_CELLS);
+  dp2 = ShChannel<ShVector4f>(host_dp2, NUM_GRID_CELLS);
+  dp3 = ShChannel<ShVector4f>(host_dp3, NUM_GRID_CELLS);
+  dp4 = ShChannel<ShVector4f>(host_dp4, NUM_GRID_CELLS);
+  color = ShChannel<ShVector4f>(host_color, NUM_GRID_CELLS);
     
   //ShStream data = posA & velA & initvelA & timeA;
   
