@@ -1,3 +1,8 @@
+2005-08-03  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbEmit.cpp (emit_sgn): Fix the sign(0) case without
+	using DIV or COND.
+
 2005-08-02  Francois Marier  <francois@serioushack.com>
 
 	* src/ShLibMiscImpl.hpp (cast): Make sure all components are
