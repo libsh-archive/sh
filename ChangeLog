@@ -8,7 +8,7 @@
 	* src/ShLibMiscImpl.hpp (cast): Make sure all components are
 	initialized to zero to avoid problems in some environments.
 
-2005-07-27  Andrew Lauritzen  <atlaurit@localhost.localdomain>
+2005-07-27  Andrew Lauritzen  <atlaurit@student.cs.uwaterloo.ca>
 
 	* src/ShMatrix.hpp: Added "rows" and "cols" static variables to
 	ShMatrix set to the corresponding template parameters.
@@ -163,7 +163,7 @@
 	ShWorley.hpp, Makefile.am: Remove the noise and worley code since
 	it is now part of the core.
 	
-2005-07-12  Andrew Lauritzen  <atlaurit@localhost.localdomain>
+2005-07-12  Andrew Lauritzen  <atlaurit@student.cs.uwaterloo.ca>
 
 	* src/ShInternals.*: Add a utility class for tracking variable
 	transformations (while compiling, etc).
@@ -182,7 +182,7 @@
 	
 	* backends/gl/ArbEmit.cpp: Better implementation of SGN.
 
-2005-07-12  Andrew Lauritzen  <atlaurit@localhost.localdomain>
+2005-07-12  Andrew Lauritzen  <atlaurit@student.cs.uwaterloo.ca>
 
 	* src/ShProgramNode.cpp (clone): Cloning ShProgramNodes now copies
 	metadata.
