@@ -46,20 +46,25 @@ using namespace std;
 using namespace SH;
 
 // defines
+//#define USING_STREAMS
+
 #define NUMMODES 1
 
 #define SCALE 5
 #define GRID_2D_RES 512
 #define SQR_GRID_3D_RES 8
-#define GRID_3D_RES (SQR_GRID_3D_RES*SQR_GRID_3D_RES)
-#define NUM_GRID_CELLS (GRID_3D_RES*GRID_3D_RES*GRID_3D_RES)
+#define GRID_3D_RES SQR_GRID_3D_RES*SQR_GRID_3D_RES
+#define NUM_GRID_CELLS GRID_3D_RES*GRID_3D_RES*GRID_3D_RES
+
 
 // forward declarations
 void init_shaders(void);
-void init_streams(void);
 void init_FBO(void);
+#ifdef USING_STREAMS
+void init_streams(void);
 void reset_streams(void);
 void update_streams(void);
+#endif
 void setup_texouts();
 void load_textures(void);
 int gprintf(int x, int y, char* fmt, ...);
@@ -71,6 +76,7 @@ fresnel (
 );
 
 
+#ifdef USING_STREAMS
 // channels holding the distribution packages
 ShChannel<ShVector4f> dp0;
 ShChannel<ShVector4f> dp1;
@@ -79,15 +85,21 @@ ShChannel<ShVector4f> dp3;
 ShChannel<ShVector4f> dp4;
 ShChannel<ShVector4f> color;
 
+// programs
+ShProgram streaming;  
+ShProgram lbm_update;
+#endif
 
-Display *dpy;
-int screen;
-GLXDrawable win;
-GLXContext ctx;
- 
+#ifndef WIN32
+ Display *dpy;
+ int screen;
+ GLXDrawable win;
+ GLXContext ctx;
+#endif 
+
 // FBOs
-GLuint fb1;
-GLuint color_tex_id;
+GLuint fb;
+//GLuint color_tex_id;
 GLuint depth_rb;
 
 // states
@@ -99,9 +111,7 @@ ShAttrib1f delta(0.02);
 ShAttrib1f simtime(0.0);
 ShConstAttrib1f timedelta(0.005);
 
-// programs
-ShProgram streaming;  
-ShProgram lbm_update;
+
 
 //-------------------------------------------------------------------
 // shader data
@@ -128,14 +138,28 @@ ShProgram skybox_vsh;
 ShProgram skybox_fsh;*/
 ShProgram plane_vsh;
 ShProgram plane_fsh;
+ShProgram streaming0_vsh;
+ShProgram streaming0_fsh;
 
 /*ShProgramSet* particle_shaders;
 ShProgramSet* particle_volume_shaders;
 ShProgramSet* terrain_shaders;
 ShProgramSet* skybox_shaders;*/
 ShProgramSet* plane_shaders;
+ShProgramSet* streaming0_shaders;
 
-//distribution package textures 
+#ifndef USING_STREAMS
+//test
+ShImage test_image;
+ShArray1D<ShColor4f> testt;
+
+//distribution package texture ids
+GLuint dpt_ids[2][5];
+int dbc = 0; // double buffering counter
+
+#endif
+
+//distribution package texture nodes 
 ShArray2D<ShColor4f> dpt0;
 ShArray2D<ShColor4f> dpt1;
 ShArray2D<ShColor4f> dpt2;
@@ -176,38 +200,40 @@ int cur_x, cur_y;
 bool show_help = false;
 
 
-void init_FBO(void){/*
-glGenFramebuffersEXT(1, &fb1);
-glGenTextures(1, &color_tex_id);
+void init_FBO(void){
+glGenFramebuffersEXT(1, &fb);
+/*glGenTextures(1, &color_tex_id);
 char tid[5];
 sprintf(tid, "%d",color_tex_id);
 color_tex.meta("opengl:texid", tid);
-printf("tid: %s\n", tid);
+printf("tid: %s\n", tid);*/
+
 glGenRenderbuffersEXT(1, &depth_rb);
 
 
-glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb1);
+glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
 // initialize color texture
-glBindTexture(GL_TEXTURE_2D, color_tex_id);
-glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, PBUFFERSIZE,  PBUFFERSIZE, 0, GL_RGBA, GL_INT, NULL);
+/*glBindTexture(GL_TEXTURE_2D, color_tex_id);
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_INT, NULL);
 glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
-                                  GL_TEXTURE_2D, color_tex_id, 0);
+                                  GL_TEXTURE_2D, color_tex_id, 0);*/
 
 // initialize depth renderbuffer
 glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depth_rb);
 glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT,
-                                 GL_DEPTH_COMPONENT24,  PBUFFERSIZE,  PBUFFERSIZE);
+                                 GL_DEPTH_COMPONENT24, GRID_2D_RES, GRID_2D_RES);
 glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
                                      GL_DEPTH_ATTACHMENT_EXT,
                                      GL_RENDERBUFFER_EXT, depth_rb);
 
 
 glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-*/
+
 }
 
 void load_textures(void){
+
 
    /* hm_image.loadPng("hm2.png");
     nm_image.loadPng("nm2.png");
@@ -231,20 +257,105 @@ void load_textures(void){
 
 void setup_texouts(){
 
-    dpt0.size(GRID_2D_RES, GRID_2D_RES);
-    dpt1.size(GRID_2D_RES, GRID_2D_RES);
-    dpt2.size(GRID_2D_RES, GRID_2D_RES);
-    dpt3.size(GRID_2D_RES, GRID_2D_RES);
-    dpt4.size(GRID_2D_RES, GRID_2D_RES);
-    colort.size(GRID_2D_RES, GRID_2D_RES);
+  dpt0.size(GRID_2D_RES, GRID_2D_RES);
+  dpt1.size(GRID_2D_RES, GRID_2D_RES);
+  dpt2.size(GRID_2D_RES, GRID_2D_RES);
+  dpt3.size(GRID_2D_RES, GRID_2D_RES);
+  dpt4.size(GRID_2D_RES, GRID_2D_RES);
+  colort.size(GRID_2D_RES, GRID_2D_RES);
 
-    
-    dpt0.memory(dp0.memory());
-    dpt1.memory(dp1.memory());
-    dpt2.memory(dp2.memory());
-    dpt3.memory(dp3.memory());
-    dpt4.memory(dp4.memory());
-    colort.memory(color.memory());
+#ifndef USING_STREAMS
+
+//printf("got here!\n");
+  //unsigned int dpt_ids[5];
+  glGenTextures(5, dpt_ids[0]);
+  glGenTextures(5, dpt_ids[1]);
+  
+  float* testdata = new float[NUM_GRID_CELLS*4];
+  //printf("numgridcells: %d\n", NUM_GRID_CELLS);
+  memset(testdata, 0, NUM_GRID_CELLS*4*sizeof(float));
+  for(int i=0;i<10000;i++)
+	  testdata[i] = 1.0;
+  testdata[NUM_GRID_CELLS/2] = 1.0;
+  testdata[NUM_GRID_CELLS/3] = 1.0;
+  testdata[NUM_GRID_CELLS/4] = 1.0;
+
+  for(int i=0;i<2;i++){
+	  for(int j=0;j<5;j++){
+		  //printf("id: %d\n", dpt_ids[i][j]);
+        glBindTexture(GL_TEXTURE_2D, dpt_ids[i][j]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, testdata);  
+	  }
+  }
+
+  /*ShHostMemoryPtr host_dp0 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
+  ShHostMemoryPtr host_dp1 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
+  ShHostMemoryPtr host_dp2 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
+  ShHostMemoryPtr host_dp3 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
+  ShHostMemoryPtr host_dp4 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
+  ShHostMemoryPtr host_color = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
+
+  //ShHostMemoryPtr host_test = new ShHostMemory(3*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
+  test_image.loadPng("A.png");
+  testt.memory(test_image.memory());
+
+
+  ShHostStoragePtr dp0_storage = shref_dynamic_cast<ShHostStorage>(host_dp0->findStorage("host"));
+  ShHostStoragePtr dp1_storage = shref_dynamic_cast<ShHostStorage>(host_dp1->findStorage("host"));
+  ShHostStoragePtr dp2_storage = shref_dynamic_cast<ShHostStorage>(host_dp2->findStorage("host"));
+  ShHostStoragePtr dp3_storage = shref_dynamic_cast<ShHostStorage>(host_dp3->findStorage("host"));
+  ShHostStoragePtr dp4_storage = shref_dynamic_cast<ShHostStorage>(host_dp4->findStorage("host"));
+  ShHostStoragePtr color_storage = shref_dynamic_cast<ShHostStorage>(host_color->findStorage("host"));
+*/
+
+  
+  /*new GlTextureStorage(host_dp0->object(),
+                                     GL_TEXTURE_2D,
+                                     GL_RGBA,
+                                     GL_RGBA_FLOAT16_ATI,
+                                     host_dp0->value_type(),
+                                     dpt0.width(), dpt0.height(), 
+                                     dpt0.depth(), dpt0.size(),
+                                     NUM_GRID_CELLS, dpt0.name(), 0);*/
+
+ /* // these storages maybe cached on the graphics card, flag them
+  // as dirty so that:
+  // 1) the latest copies will be on the host 
+  // 2) after reseting the stream, the graphics card copy will be updated
+  dp0_storage->dirtyall();
+  dp1_storage->dirtyall();
+  dp2_storage->dirtyall();
+  dp3_storage->dirtyall();
+  dp4_storage->dirtyall();
+  color_storage->dirtyall();
+
+  for(int i=0;i<NUM_GRID_CELLS;i++){
+    ((float*)(color_storage->data()) )[i*4] =   0.6;//static_cast<float>( (testt( ShAttrib1f((float)(i*3)/NUM_GRID_CELLS)  ))(0));
+    ((float*)(color_storage->data()) )[i*4+1] = 0.3; //static_cast<float>( (testt(i*3)/NUM_GRID_CELLS )(1));
+    ((float*)(color_storage->data()) )[i*4+2] = 0.1; //static_cast<float>( (testt(i*3)/NUM_GRID_CELLS )(2));
+    ((float*)(color_storage->data()) )[i*4+3] = 0.5;
+  
+  }
+
+
+  dpt0.memory(host_dp0);
+  dpt1.memory(host_dp1);
+  dpt2.memory(host_dp2);
+  dpt3.memory(host_dp3);
+  dpt4.memory(host_dp4);
+  colort.memory(host_color);*/
+
+#else
+
+  dpt0.memory(dp0.memory());
+  dpt1.memory(dp1.memory());
+  dpt2.memory(dp2.memory());
+  dpt3.memory(dp3.memory());
+  dpt4.memory(dp4.memory());
+  colort.memory(color.memory());
+
+#endif
+
 }
 
 void setup_view()
@@ -286,6 +397,100 @@ fresnel (
 
 void display()
   {
+
+//printf("iter\n");
+
+//switch texture buffers:
+  dbc++;
+  dbc %= 2;
+  int idbc = (dbc+1)%2; //inverse dbc
+  //printf("dbc: %d, idbc: %d\n", dbc, idbc);
+  char tid[5];
+
+  // set up texnodes to point to correct texids:
+  sprintf(tid, "%d",dpt_ids[dbc][0]);
+  dpt0.meta("opengl:texid", tid);
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////	  
+// Distribution packages update steps here:
+
+glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
+// initialize color texture
+glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+                                  GL_COLOR_ATTACHMENT0_EXT,
+                                  GL_TEXTURE_2D, dpt_ids[idbc][0], 0);
+
+
+
+glDisable(GL_DEPTH_TEST);
+glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+
+//camera.glProjection(1.0);
+glMatrixMode(GL_MODELVIEW);
+glLoadIdentity();
+glMatrixMode(GL_PROJECTION);
+glLoadIdentity();
+
+shBind(*streaming0_shaders);
+
+  // draw volume slabs
+  
+  //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+  glBegin(GL_QUADS);
+  
+  glTexCoord2f(0,1);
+  glVertex3f(-1.0, -1.0, 0);
+  
+  glTexCoord2f(1,1);
+  glVertex3f( 1.0, -1.0, 0);
+  
+  glTexCoord2f(1,0);
+  glVertex3f( 1.0, 1.0,  0);
+  
+  glTexCoord2f(0,0);
+  glVertex3f(-1.0, 1.0,  0);
+  
+  glEnd();
+ 
+  shUnbind(*streaming0_shaders);
+
+// cleanup
+//glEnable(GL_DEPTH_TEST);
+glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+
+
+glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+//test
+shBind(*streaming0_shaders);
+
+  // draw volume slabs
+  
+  glBegin(GL_QUADS);
+  
+  glTexCoord2f(0,1);
+  glVertex3f(-1.0, -1.0, 0);
+  
+  glTexCoord2f(1,1);
+  glVertex3f( 1.0, -1.0, 0);
+  
+  glTexCoord2f(1,0);
+  glVertex3f( 1.0, 1.0,  0);
+  
+  glTexCoord2f(0,0);
+  glVertex3f(-1.0, 1.0,  0);
+  
+  glEnd();
+ 
+  shUnbind(*streaming0_shaders);
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+// Display pass here:
   
 // normal rendering pass
   /*glActiveTexture(GL_TEXTURE0_ARB);
@@ -573,8 +778,9 @@ void display()
 
   glEnd();*/
 
+
   
-  
+  /*
   shBind(*plane_shaders);
 
   // draw volume slabs
@@ -605,7 +811,7 @@ void display()
   //glCullFace(GL_FRONT);
  
   shUnbind(*plane_shaders);
- 
+ */
  
   /*
   // Help information
@@ -718,7 +924,9 @@ void mouse(int button, int state, int x, int y)
 
 void idle(void)
   {
-  update_streams();
+  #ifdef USING_STREAMS
+   update_streams();
+  #endif
   glutPostRedisplay();
   }
 
@@ -741,13 +949,17 @@ void keyboard(unsigned char k, int x, int y)
     case 'r':
     case 'R':
       {
-      reset_streams();
+      #ifdef USING_STREAMS
+       reset_streams();
+      #endif
       break;
       }
     case 's':
     case 'S':
       {
-      update_streams();
+	  #ifdef USING_STREAMS
+       update_streams();
+      #endif
       break;
       }
     case 'h':
@@ -769,12 +981,18 @@ void keyboard(unsigned char k, int x, int y)
 
 int main(int argc, char** argv)
   {
+
+  if(GRID_3D_RES*GRID_3D_RES*GRID_3D_RES != GRID_2D_RES*GRID_2D_RES){
+	  printf("resolutions don't match!\n");
+	  return 1;
+  }
+
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE|GLUT_DEPTH);
   glutInitWindowSize(512, 512);
-  glutCreateWindow("Sh Stream Example");
+  glutCreateWindow("Lattice-Boltzmann Example");
   glewInit();
-//  init_FBO();  
+  init_FBO();  
   
 
   glutDisplayFunc(display);
@@ -797,7 +1015,9 @@ int main(int argc, char** argv)
     shSetBackend(backend_name);
 
     init_shaders();
-    init_streams();
+    #ifdef USING_STREAMS 
+	 init_streams();
+    #endif
   
     // Place the camera at its initial position
     camera.move(0.0, 0.0, -15.0);
@@ -840,6 +1060,7 @@ int main(int argc, char** argv)
   return 0;
   }
 
+#ifdef USING_STREAMS
 void init_streams(void)
   {
   // Specifiy the generic particle update program, later it will
@@ -998,8 +1219,81 @@ void reset_streams(void)
 */
   }
 
+void update_streams(void)
+  {
+
+  try 
+    {
+      dp0 & dp1 & dp2 & dp3 & dp4 & color = lbm_update;
+
+	    
+      simtime += timedelta;
+    }
+  catch (const ShException& e)
+    {
+    std::cerr << "SH Exception: " << e.message() << std::endl;
+    }
+  catch (...)
+    {
+    std::cerr << "Unknown exception caught." << std::endl;
+    }
+  }
+#endif //USING_STREAMS
+
 void init_shaders(void)
   {
+
+   streaming0_vsh = SH_BEGIN_VERTEX_PROGRAM {
+    ShInOutPosition4f pos;
+    ShInOutTexCoord2f tc;
+    //ShOutputPosition3f posp;
+      
+    //posp = pos(0,1,2);
+    //tc = color_tex3d.get2DTexCoord(pos(0,1,2)/5);
+    //pos = mvd | pos;
+        
+    } SH_END;
+
+  // This fragment shader will be used to shade the other pieces
+  // of geometry (the plane and particle shooter). Its just a simple
+  // diffuse shader (using the global uniform diffuse_color).
+  streaming0_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+    //ShInputPosition4f pos;
+    ShInputTexCoord2f tc;
+    //ShInputPosition4f posp;
+    ShOutputColor4f color;
+
+    //tc(0) = tc(0)+0.01;   
+    color = dpt0(tc);
+    
+  } SH_END;
+
+   plane_vsh = SH_BEGIN_VERTEX_PROGRAM {
+    ShInOutPosition4f pos;
+    //ShInOutTexCoord2f tc;
+    ShOutputPosition3f posp;
+      
+    posp = pos(0,1,2);
+    //tc = color_tex3d.get2DTexCoord(pos(0,1,2)/5);
+    pos = mvd | pos;
+        
+    } SH_END;
+
+  // This fragment shader will be used to shade the other pieces
+  // of geometry (the plane and particle shooter). Its just a simple
+  // diffuse shader (using the global uniform diffuse_color).
+  plane_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+    ShInputPosition4f pos;
+    //ShInputTexCoord2f tc;
+    ShInputPosition4f posp;
+    ShOutputColor4f color;
+
+       
+    color = dpt3d0(posp(0,1,2)/SCALE);
+    
+  } SH_END;
+
+
  /*   skybox_vsh = SH_BEGIN_VERTEX_PROGRAM {
     ShInOutPosition4f pos;
     ShOutputPosition3f posp;
@@ -1334,57 +1628,16 @@ void init_shaders(void)
    } SH_END;
 */
 	
-  plane_vsh = SH_BEGIN_VERTEX_PROGRAM {
-    ShInOutPosition4f pos;
-    //ShInOutTexCoord2f tc;
-    ShOutputPosition3f posp;
-      
-    posp = pos(0,1,2);
-    //tc = color_tex3d.get2DTexCoord(pos(0,1,2)/5);
-    pos = vd | pos;
-        
-    } SH_END;
-
-  // This fragment shader will be used to shade the other pieces
-  // of geometry (the plane and particle shooter). Its just a simple
-  // diffuse shader (using the global uniform diffuse_color).
-  plane_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShInputPosition4f pos;
-    //ShInputTexCoord2f tc;
-    ShInputPosition4f posp;
-    ShOutputColor4f color;
-
-       
-    color = colort3d(posp(0,1,2)/SCALE);
-    
-  } SH_END;
+ 
 
 /*  particle_shaders = new ShProgramSet(particle_vsh, particle_fsh);
   particle_volume_shaders = new ShProgramSet(particle_volume_vsh, particle_volume_fsh);
   terrain_shaders = new ShProgramSet(terrain_vsh, terrain_fsh);
   skybox_shaders = new ShProgramSet(skybox_vsh, skybox_fsh);*/
   plane_shaders = new ShProgramSet(plane_vsh, plane_fsh);
-   }
+  streaming0_shaders = new ShProgramSet(streaming0_vsh, streaming0_fsh);
+ }
 
-void update_streams(void)
-  {
-
-  try 
-    {
-      dp0 & dp1 & dp2 & dp3 & dp4 & color = lbm_update;
-
-	    
-      simtime += timedelta;
-    }
-  catch (const ShException& e)
-    {
-    std::cerr << "SH Exception: " << e.message() << std::endl;
-    }
-  catch (...)
-    {
-    std::cerr << "Unknown exception caught." << std::endl;
-    }
-  }
 
 int gprintf(int x, int y, char* fmt, ...)
   {
