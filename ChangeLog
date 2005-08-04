@@ -1,3 +1,8 @@
+2005-08-04  Francois Marier  <francois@serioushack.com>
+
+	* src/ShNibblesImpl.hpp, ShNibbles.hpp: Rename the nibbles so that
+	they match the book.
+
 2005-08-03  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/ArbEmit.cpp (emit_sgn): Fix the sign(0) case without
