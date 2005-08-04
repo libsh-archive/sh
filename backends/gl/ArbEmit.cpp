@@ -541,17 +541,10 @@ void ArbCode::emit_sgn(const ShStatement& stmt)
   ShVariable tmp1(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
   ShVariable tmp2(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
   ShConstAttrib1f zero(0.0);
-  ShConstAttrib1f minus_one(-1.0);
 
-  emit(ShStatement(tmp1, stmt.src[0], SH_OP_SGE, zero));
-  emit(ShStatement(tmp2, stmt.src[0], SH_OP_SGT, zero));
-  emit(ShStatement(tmp1, tmp1, SH_OP_ADD, tmp2));
-  emit(ShStatement(stmt.dest, tmp1, SH_OP_ADD, minus_one));
-
-  /*
-  emit(ShStatement(tmp, stmt.src[0], SH_OP_SGE, zero));
-  emit(ShStatement(stmt.dest, SH_OP_MAD, tmp, ShConstAttrib1f(2.0), ShConstAttrib1f(-1.0)));
-  */
+  emit(ShStatement(tmp1, stmt.src[0], SH_OP_SGT, zero));
+  emit(ShStatement(tmp2, stmt.src[0], SH_OP_SLT, zero));
+  m_instructions.push_back(ArbInst(SH_ARB_SUB, stmt.dest, tmp1, tmp2)); 
 }
 
 void ArbCode::emit_tex(const ShStatement& stmt)
