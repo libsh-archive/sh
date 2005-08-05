@@ -59,6 +59,7 @@ using namespace SH;
 
 // forward declarations
 void init_shaders(void);
+void init_textures(void);
 void init_FBO(void);
 #ifdef USING_STREAMS
 void init_streams(void);
@@ -154,7 +155,7 @@ ShImage test_image;
 ShArray1D<ShColor4f> testt;
 
 //distribution package texture ids
-GLuint dpt_ids[2][5];
+GLuint dpt_ids[10];
 int dbc = 0; // double buffering counter
 
 #endif
@@ -201,25 +202,63 @@ bool show_help = false;
 
 
 void init_FBO(void){
-glGenFramebuffersEXT(1, &fb);
-/*glGenTextures(1, &color_tex_id);
-char tid[5];
-sprintf(tid, "%d",color_tex_id);
-color_tex.meta("opengl:texid", tid);
-printf("tid: %s\n", tid);*/
+printf("init_FBO()\n");
 
+/*GLuint color_tex;
+
+        glGenFramebuffersEXT(1, &fb);
+        glGenTextures(1, &color_tex);
+        glGenRenderbuffersEXT(1, &depth_rb);
+        
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
+
+        // initialize color texture
+        glBindTexture(GL_TEXTURE_2D, color_tex);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 512, 512, 0,
+                     GL_RGBA, GL_INT, NULL);
+        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+                                  GL_COLOR_ATTACHMENT0_EXT,
+                                  GL_TEXTURE_2D, color_tex, 0);
+
+        // initialize depth renderbuffer
+        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depth_rb);
+        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT,
+                                 GL_DEPTH_COMPONENT24, 512, 512);
+        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
+                                     GL_DEPTH_ATTACHMENT_EXT,
+                                     GL_RENDERBUFFER_EXT, depth_rb);*/
+
+        // initialize stencil renderbuffer
+       /* glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, stencil_rb);
+        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT,
+                                 GL_STENCIL_INDEX, 512, 512);
+        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
+                                     GL_STENCIL_ATTACHMENT_EXT,
+                                     GL_RENDERBUFFER_EXT, stencil_rb);*/
+
+GLuint testid;
+
+glGenFramebuffersEXT(1, &fb);
 glGenRenderbuffersEXT(1, &depth_rb);
 
-
 glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
-// initialize color texture
-/*glBindTexture(GL_TEXTURE_2D, color_tex_id);
-glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_INT, NULL);
+
+/*glBindTexture(GL_TEXTURE_2D, testid);
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, NULL);  
 glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
-                                  GL_TEXTURE_2D, color_tex_id, 0);*/
+                                  GL_TEXTURE_2D, testid, 0);*/	
+/*glGenTextures(1, dpt_ids);
+glBindTexture(GL_TEXTURE_2D, dpt_ids[0]);
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, NULL);*/
 
-// initialize depth renderbuffer
+//init_textures();
+
+glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+                                  GL_COLOR_ATTACHMENT0_EXT,
+                                  GL_TEXTURE_2D, dpt_ids[0], 0);
+
+		// initialize depth renderbuffer
 glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depth_rb);
 glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT,
                                  GL_DEPTH_COMPONENT24, GRID_2D_RES, GRID_2D_RES);
@@ -227,6 +266,14 @@ glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
                                      GL_DEPTH_ATTACHMENT_EXT,
                                      GL_RENDERBUFFER_EXT, depth_rb);
 
+
+glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+
+
+GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+    if(status != GL_FRAMEBUFFER_COMPLETE_EXT)
+       printf("FBO IS INCOMPLETE!\n");
 
 glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 
@@ -255,21 +302,9 @@ void load_textures(void){
 */
    }
 
-void setup_texouts(){
+void init_textures(){
+printf("init_textures()\n");
 
-  dpt0.size(GRID_2D_RES, GRID_2D_RES);
-  dpt1.size(GRID_2D_RES, GRID_2D_RES);
-  dpt2.size(GRID_2D_RES, GRID_2D_RES);
-  dpt3.size(GRID_2D_RES, GRID_2D_RES);
-  dpt4.size(GRID_2D_RES, GRID_2D_RES);
-  colort.size(GRID_2D_RES, GRID_2D_RES);
-
-#ifndef USING_STREAMS
-
-//printf("got here!\n");
-  //unsigned int dpt_ids[5];
-  glGenTextures(5, dpt_ids[0]);
-  glGenTextures(5, dpt_ids[1]);
   
   float* testdata = new float[NUM_GRID_CELLS*4];
   //printf("numgridcells: %d\n", NUM_GRID_CELLS);
@@ -280,13 +315,27 @@ void setup_texouts(){
   testdata[NUM_GRID_CELLS/3] = 1.0;
   testdata[NUM_GRID_CELLS/4] = 1.0;
 
-  for(int i=0;i<2;i++){
-	  for(int j=0;j<5;j++){
-		  //printf("id: %d\n", dpt_ids[i][j]);
-        glBindTexture(GL_TEXTURE_2D, dpt_ids[i][j]);
+  	  for(int j=0;j<10;j++){
+		glGenTextures(1, &(dpt_ids[j]));
+		glBindTexture(GL_TEXTURE_2D, dpt_ids[j]);
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, testdata);  
 	  }
-  }
+  
+}
+
+
+void setup_texouts(){
+
+  dpt0.size(GRID_2D_RES, GRID_2D_RES);
+  dpt1.size(GRID_2D_RES, GRID_2D_RES);
+  dpt2.size(GRID_2D_RES, GRID_2D_RES);
+  dpt3.size(GRID_2D_RES, GRID_2D_RES);
+  dpt4.size(GRID_2D_RES, GRID_2D_RES);
+  colort.size(GRID_2D_RES, GRID_2D_RES);
+
+#ifndef USING_STREAMS
 
   /*ShHostMemoryPtr host_dp0 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
   ShHostMemoryPtr host_dp1 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
@@ -397,8 +446,7 @@ fresnel (
 
 void display()
   {
-
-//printf("iter\n");
+printf("display\n");
 
 //switch texture buffers:
   dbc++;
@@ -408,7 +456,7 @@ void display()
   char tid[5];
 
   // set up texnodes to point to correct texids:
-  sprintf(tid, "%d",dpt_ids[dbc][0]);
+  sprintf(tid, "%d",dpt_ids[dbc]);
   dpt0.meta("opengl:texid", tid);
 
 
@@ -419,11 +467,11 @@ glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
 // initialize color texture
 glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
-                                  GL_TEXTURE_2D, dpt_ids[idbc][0], 0);
+                                  GL_TEXTURE_2D, dpt_ids[idbc], 0);
 
 
 
-glDisable(GL_DEPTH_TEST);
+//glDisable(GL_DEPTH_TEST);
 glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
 glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
@@ -460,13 +508,19 @@ shBind(*streaming0_shaders);
 
 // cleanup
 //glEnable(GL_DEPTH_TEST);
+/*glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+                                  GL_COLOR_ATTACHMENT0_EXT,
+                                  GL_TEXTURE_2D, 0, 0);*/
+
+
 glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 
+  
+//test
 
 glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-//test
-shBind(*streaming0_shaders);
+  shBind(*streaming0_shaders);
 
   // draw volume slabs
   
@@ -832,6 +886,7 @@ shBind(*streaming0_shaders);
   
   glutSwapBuffers();
 
+  //glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
 
 
   /*
@@ -992,6 +1047,7 @@ int main(int argc, char** argv)
   glutInitWindowSize(512, 512);
   glutCreateWindow("Lattice-Boltzmann Example");
   glewInit();
+  init_textures();
   init_FBO();  
   
 
@@ -1177,6 +1233,15 @@ void reset_streams(void)
   dp3_storage->dirtyall();
   dp4_storage->dirtyall();
 
+  float* dp0_data = (float*)dp0_storage->data()
+
+  for(int i=0;i<NUM_GRID_CELLS;i++){
+  	dp0_data[4*i]   = 0.5*((float)rand())/(RAND_MAX-1);
+        dp0_data[4*i+1] = 0;
+        dp0_data[4*i+2] = 0;
+        dp0_data[4*i+3] = 0;
+   } 	  
+
  /* float* posA_data = (float*)posA_storage->data();
   float* velA_data = (float*)velA_storage->data();
   float* initvelA_data = (float*)initvelA_storage->data();
@@ -1258,17 +1323,18 @@ void init_shaders(void)
   // of geometry (the plane and particle shooter). Its just a simple
   // diffuse shader (using the global uniform diffuse_color).
   streaming0_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
-    //ShInputPosition4f pos;
+    ShInputPosition4f pos;
     ShInputTexCoord2f tc;
     //ShInputPosition4f posp;
     ShOutputColor4f color;
 
     //tc(0) = tc(0)+0.01;   
     color = dpt0(tc);
+    //color = ShColor4f(0.2, 0.4, 0.1, 0.5);
     
   } SH_END;
 
-   plane_vsh = SH_BEGIN_VERTEX_PROGRAM {
+ /*  plane_vsh = SH_BEGIN_VERTEX_PROGRAM {
     ShInOutPosition4f pos;
     //ShInOutTexCoord2f tc;
     ShOutputPosition3f posp;
@@ -1291,7 +1357,7 @@ void init_shaders(void)
        
     color = dpt3d0(posp(0,1,2)/SCALE);
     
-  } SH_END;
+  } SH_END;*/
 
 
  /*   skybox_vsh = SH_BEGIN_VERTEX_PROGRAM {
@@ -1634,7 +1700,7 @@ void init_shaders(void)
   particle_volume_shaders = new ShProgramSet(particle_volume_vsh, particle_volume_fsh);
   terrain_shaders = new ShProgramSet(terrain_vsh, terrain_fsh);
   skybox_shaders = new ShProgramSet(skybox_vsh, skybox_fsh);*/
-  plane_shaders = new ShProgramSet(plane_vsh, plane_fsh);
+  //plane_shaders = new ShProgramSet(plane_vsh, plane_fsh);
   streaming0_shaders = new ShProgramSet(streaming0_vsh, streaming0_fsh);
  }
 
