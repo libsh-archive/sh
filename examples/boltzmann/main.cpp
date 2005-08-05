@@ -100,7 +100,6 @@ ShProgram lbm_update;
 
 // FBOs
 GLuint fb;
-//GLuint color_tex_id;
 GLuint depth_rb;
 
 // states
@@ -139,8 +138,19 @@ ShProgram skybox_vsh;
 ShProgram skybox_fsh;*/
 ShProgram plane_vsh;
 ShProgram plane_fsh;
-ShProgram streaming0_vsh;
+
+ShProgram vsh;
 ShProgram streaming0_fsh;
+ShProgram streaming1_fsh;
+ShProgram streaming2_fsh;
+ShProgram streaming3_fsh;
+ShProgram streaming4_fsh;
+ShProgram eq0_fsh;
+ShProgram eq1_fsh;
+ShProgram eq2_fsh;
+ShProgram eq3_fsh;
+ShProgram eq4_fsh;
+ShProgram dv_fsh;
 
 /*ShProgramSet* particle_shaders;
 ShProgramSet* particle_volume_shaders;
@@ -148,6 +158,16 @@ ShProgramSet* terrain_shaders;
 ShProgramSet* skybox_shaders;*/
 ShProgramSet* plane_shaders;
 ShProgramSet* streaming0_shaders;
+ShProgramSet* streaming1_shaders;
+ShProgramSet* streaming2_shaders;
+ShProgramSet* streaming3_shaders;
+ShProgramSet* streaming4_shaders;
+ShProgramSet* eq0_shaders;
+ShProgramSet* eq1_shaders;
+ShProgramSet* eq2_shaders;
+ShProgramSet* eq3_shaders;
+ShProgramSet* eq4_shaders;
+ShProgramSet* dv_shaders;
 
 #ifndef USING_STREAMS
 //test
@@ -155,17 +175,27 @@ ShImage test_image;
 ShArray1D<ShColor4f> testt;
 
 //distribution package texture ids
-GLuint dpt_ids[10];
+GLuint dpt_ids[2][5];
+GLuint eqdpt_ids[5];
+GLuint dvt_id;
+
 int dbc = 0; // double buffering counter
 
 #endif
 
 //distribution package texture nodes 
-ShArray2D<ShColor4f> dpt0;
+ShArray2D<ShColor4f> dpt0; // distribution packages
 ShArray2D<ShColor4f> dpt1;
 ShArray2D<ShColor4f> dpt2;
 ShArray2D<ShColor4f> dpt3;
 ShArray2D<ShColor4f> dpt4;
+ShArray2D<ShColor4f> dvt; // density and velocity
+ShArray2D<ShColor4f> eqdpt0; // equilibrium distribution packages
+ShArray2D<ShColor4f> eqdpt1;
+ShArray2D<ShColor4f> eqdpt2;
+ShArray2D<ShColor4f> eqdpt3;
+ShArray2D<ShColor4f> eqdpt4;
+
 ShArray2D<ShColor4f> colort;
 
 Texture3D dpt3d0(&dpt0, SQR_GRID_3D_RES);
@@ -204,38 +234,6 @@ bool show_help = false;
 void init_FBO(void){
 printf("init_FBO()\n");
 
-/*GLuint color_tex;
-
-        glGenFramebuffersEXT(1, &fb);
-        glGenTextures(1, &color_tex);
-        glGenRenderbuffersEXT(1, &depth_rb);
-        
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
-
-        // initialize color texture
-        glBindTexture(GL_TEXTURE_2D, color_tex);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 512, 512, 0,
-                     GL_RGBA, GL_INT, NULL);
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-                                  GL_COLOR_ATTACHMENT0_EXT,
-                                  GL_TEXTURE_2D, color_tex, 0);
-
-        // initialize depth renderbuffer
-        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depth_rb);
-        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT,
-                                 GL_DEPTH_COMPONENT24, 512, 512);
-        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
-                                     GL_DEPTH_ATTACHMENT_EXT,
-                                     GL_RENDERBUFFER_EXT, depth_rb);*/
-
-        // initialize stencil renderbuffer
-       /* glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, stencil_rb);
-        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT,
-                                 GL_STENCIL_INDEX, 512, 512);
-        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
-                                     GL_STENCIL_ATTACHMENT_EXT,
-                                     GL_RENDERBUFFER_EXT, stencil_rb);*/
-
 GLuint testid;
 
 glGenFramebuffersEXT(1, &fb);
@@ -243,22 +241,8 @@ glGenRenderbuffersEXT(1, &depth_rb);
 
 glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
 
-/*glBindTexture(GL_TEXTURE_2D, testid);
-glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, NULL);  
-glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-                                  GL_COLOR_ATTACHMENT0_EXT,
-                                  GL_TEXTURE_2D, testid, 0);*/	
-/*glGenTextures(1, dpt_ids);
-glBindTexture(GL_TEXTURE_2D, dpt_ids[0]);
-glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, NULL);*/
 
-//init_textures();
-
-glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-                                  GL_COLOR_ATTACHMENT0_EXT,
-                                  GL_TEXTURE_2D, dpt_ids[0], 0);
-
-		// initialize depth renderbuffer
+// initialize depth renderbuffer
 glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depth_rb);
 glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT,
                                  GL_DEPTH_COMPONENT24, GRID_2D_RES, GRID_2D_RES);
@@ -267,13 +251,9 @@ glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
                                      GL_RENDERBUFFER_EXT, depth_rb);
 
 
-glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-
-
-GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+/*GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
     if(status != GL_FRAMEBUFFER_COMPLETE_EXT)
-       printf("FBO IS INCOMPLETE!\n");
+       printf("FBO IS INCOMPLETE!\n");*/
 
 glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 
@@ -315,14 +295,51 @@ printf("init_textures()\n");
   testdata[NUM_GRID_CELLS/3] = 1.0;
   testdata[NUM_GRID_CELLS/4] = 1.0;
 
-  	  for(int j=0;j<10;j++){
-		glGenTextures(1, &(dpt_ids[j]));
-		glBindTexture(GL_TEXTURE_2D, dpt_ids[j]);
+  glGenTextures(5, dpt_ids[0]);
+  glGenTextures(5, dpt_ids[1]);
+
+  for(int i=0;i<2;i++){
+  	  for(int j=0;j<5;j++){
+		glBindTexture(GL_TEXTURE_2D, dpt_ids[i][j]);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, testdata);  
-	  }
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, i ? testdata : NULL);  
+	  }//for
+  }//for
+ 
+
+// init eqdpt's  
+  glGenTextures(5, eqdpt_ids);
+  for(int j=0;j<5;j++){
+		glBindTexture(GL_TEXTURE_2D, eqdpt_ids[j]);
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, NULL);  
+	  }//for
+
+  char tid[5];
+  sprintf(tid, "%d",eqdpt_ids[0]);
+  eqdpt0.meta("opengl:texid", tid);
+  sprintf(tid, "%d",eqdpt_ids[1]);
+  eqdpt1.meta("opengl:texid", tid);
+  sprintf(tid, "%d",eqdpt_ids[2]);
+  eqdpt2.meta("opengl:texid", tid);
+  sprintf(tid, "%d",eqdpt_ids[3]);
+  eqdpt3.meta("opengl:texid", tid);
+  sprintf(tid, "%d",eqdpt_ids[4]);
+  eqdpt4.meta("opengl:texid", tid);
+
+// init density-velocity texture
+
+  glGenTextures(1, &dvt_id);
+  glBindTexture(GL_TEXTURE_2D, dvt_id);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, NULL);  
+
   
+  glBindTexture(GL_TEXTURE_2D, 0);
+
 }
 
 
@@ -444,9 +461,30 @@ fresnel (
 }
 
 
+void drawQuad(){
+  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+  glBegin(GL_QUADS);
+  
+  glTexCoord2f(0,0);
+  glVertex3f(-1.0, -1.0, 0);
+  
+  glTexCoord2f(1,0);
+  glVertex3f( 1.0, -1.0, 0);
+  
+  glTexCoord2f(1,1);
+  glVertex3f( 1.0, 1.0,  0);
+  
+  glTexCoord2f(0,1);
+  glVertex3f(-1.0, 1.0,  0);
+  
+  glEnd();
+
+}
+
+
 void display()
   {
-printf("display\n");
+//printf("display\n");
 
 //switch texture buffers:
   dbc++;
@@ -456,32 +494,60 @@ printf("display\n");
   char tid[5];
 
   // set up texnodes to point to correct texids:
-  sprintf(tid, "%d",dpt_ids[dbc]);
+  sprintf(tid, "%d",dpt_ids[dbc][0]);
   dpt0.meta("opengl:texid", tid);
+  sprintf(tid, "%d",dpt_ids[dbc][1]);
+  dpt1.meta("opengl:texid", tid);
+  sprintf(tid, "%d",dpt_ids[dbc][2]);
+  dpt2.meta("opengl:texid", tid);
+  sprintf(tid, "%d",dpt_ids[dbc][3]);
+  dpt3.meta("opengl:texid", tid);
+  sprintf(tid, "%d",dpt_ids[dbc][4]);
+  dpt4.meta("opengl:texid", tid);
+
+
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////	  
 // Distribution packages update steps here:
 
-glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+
+/////////////////////////////////
+// Calculate density and velocity:
+
+  glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+                                  GL_COLOR_ATTACHMENT0_EXT,
+                                  GL_TEXTURE_2D, dvt_id, 0);
+
+
+  shBind(*dv_shaders);
+  drawQuad();
+  shUnbind(*dv_shaders);
+
+
+
+
+  
+  
 // initialize color texture
 glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
-                                  GL_TEXTURE_2D, dpt_ids[idbc], 0);
+                                  GL_TEXTURE_2D, dpt_ids[idbc][0], 0);
 
 
 
 //glDisable(GL_DEPTH_TEST);
 glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+/*glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);*/
 
 //camera.glProjection(1.0);
-glMatrixMode(GL_MODELVIEW);
-glLoadIdentity();
-glMatrixMode(GL_PROJECTION);
-glLoadIdentity();
 
 shBind(*streaming0_shaders);
 
@@ -490,16 +556,16 @@ shBind(*streaming0_shaders);
   //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
   glBegin(GL_QUADS);
   
-  glTexCoord2f(0,1);
+  glTexCoord2f(0,0);
   glVertex3f(-1.0, -1.0, 0);
   
-  glTexCoord2f(1,1);
+  glTexCoord2f(1,0);
   glVertex3f( 1.0, -1.0, 0);
   
-  glTexCoord2f(1,0);
+  glTexCoord2f(1,1);
   glVertex3f( 1.0, 1.0,  0);
   
-  glTexCoord2f(0,0);
+  glTexCoord2f(0,1);
   glVertex3f(-1.0, 1.0,  0);
   
   glEnd();
@@ -526,16 +592,16 @@ glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
   
   glBegin(GL_QUADS);
   
-  glTexCoord2f(0,1);
+  glTexCoord2f(0,0);
   glVertex3f(-1.0, -1.0, 0);
   
-  glTexCoord2f(1,1);
+  glTexCoord2f(1,0);
   glVertex3f( 1.0, -1.0, 0);
   
-  glTexCoord2f(1,0);
+  glTexCoord2f(1,1);
   glVertex3f( 1.0, 1.0,  0);
   
-  glTexCoord2f(0,0);
+  glTexCoord2f(0,1);
   glVertex3f(-1.0, 1.0,  0);
   
   glEnd();
@@ -1307,8 +1373,83 @@ void update_streams(void)
 
 void init_shaders(void)
   {
+   
+  vsh = SH_BEGIN_VERTEX_PROGRAM {
+    ShInOutPosition4f pos;
+    ShInOutTexCoord2f tc;
+            
+  } SH_END;
 
-   streaming0_vsh = SH_BEGIN_VERTEX_PROGRAM {
+  dv_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+    ShInputPosition4f pos;
+    ShInputTexCoord2f tc;
+    ShOutputColor4f color;
+
+    ShAttrib4f densityvec;
+    densityvec = dpt0(tc) + dpt1(tc) + dpt2(tc) + dpt3(tc) + dpt4(tc);  
+    ShAttrib1f density = densityvec(0) + densityvec(1) + densityvec(2) + densityvec(3);
+    
+    ShAttrib3f velocity(0,0,0);
+    velocity += ShAttrib3f( 1, 0, 0)*dpt0(tc)(0);
+    velocity += ShAttrib3f(-1, 0, 0)*dpt0(tc)(1);
+    velocity += ShAttrib3f( 0, 1, 0)*dpt0(tc)(2);
+    velocity += ShAttrib3f( 0,-1, 0)*dpt0(tc)(3);
+
+    velocity += ShAttrib3f( 1, 1, 0)*dpt1(tc)(0);
+    velocity += ShAttrib3f(-1,-1, 0)*dpt1(tc)(1);
+    velocity += ShAttrib3f( 1,-1, 0)*dpt1(tc)(2);
+    velocity += ShAttrib3f(-1, 1, 0)*dpt1(tc)(3);
+
+    velocity += ShAttrib3f( 1, 0, 1)*dpt2(tc)(0);
+    velocity += ShAttrib3f(-1, 0,-1)*dpt2(tc)(1);
+    velocity += ShAttrib3f( 1, 0,-1)*dpt2(tc)(2);
+    velocity += ShAttrib3f(-1, 0, 1)*dpt2(tc)(3);
+  
+    velocity += ShAttrib3f( 0, 1, 1)*dpt3(tc)(0);
+    velocity += ShAttrib3f( 0,-1,-1)*dpt3(tc)(1);
+    velocity += ShAttrib3f( 0, 1,-1)*dpt3(tc)(2);
+    velocity += ShAttrib3f( 0,-1, 1)*dpt3(tc)(3);
+
+    velocity += ShAttrib3f( 0, 0, 1)*dpt4(tc)(0);
+    velocity += ShAttrib3f( 0, 0,-1)*dpt4(tc)(1);
+    velocity += ShAttrib3f( 0, 0, 0)*dpt4(tc)(2);
+    
+    velocity /= density;
+    
+    color(0,1,2) = velocity;
+    color(3) = density;
+    
+  } SH_END;
+
+  eq0_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+    ShInputPosition4f pos;
+    ShInputTexCoord2f tc;
+    ShOutputColor4f color;
+
+    //constants:
+    ShAttrib1f A, B, C, D;
+    A = 1/18;
+    B = 3/18;
+    C = 1/4;
+    D = -1/12;
+    
+    // inner products:
+    ShAttrib4f eu;
+    ShVector3f u = dvt(tc)(0,1,2);
+    eu(0) = ShVector3f(1,0,0)  | u;
+    eu(1) = ShVector3f(-1,0,0) | u;
+    eu(2) = ShVector3f(0,1,0)  | u;
+    eu(3) = ShVector3f(0,-1,0) | u;
+    
+    ShAttrib4f eu2 = eu * eu;
+    ShAttrib1f uu = u|u;
+     
+    color = (A + B*eu + C*eu2 + D*uu)*dvt(tc)(3);
+    
+  } SH_END;
+
+  
+  /* streaming0_vsh = SH_BEGIN_VERTEX_PROGRAM {
     ShInOutPosition4f pos;
     ShInOutTexCoord2f tc;
     //ShOutputPosition3f posp;
@@ -1317,7 +1458,7 @@ void init_shaders(void)
     //tc = color_tex3d.get2DTexCoord(pos(0,1,2)/5);
     //pos = mvd | pos;
         
-    } SH_END;
+    } SH_END;*/
 
   // This fragment shader will be used to shade the other pieces
   // of geometry (the plane and particle shooter). Its just a simple
@@ -1329,8 +1470,11 @@ void init_shaders(void)
     ShOutputColor4f color;
 
     //tc(0) = tc(0)+0.01;   
-    color = dpt0(tc);
-    //color = ShColor4f(0.2, 0.4, 0.1, 0.5);
+    color(0) = (dpt3d0.find12(tc))(0);
+    color(1) = (dpt3d0.find13(tc))(1);
+    color(2) = (dpt3d0.find15(tc))(2);
+    color(3) = (dpt3d0.find10(tc))(3);
+///color = ShColor4f(0.2, 0.4, 0.1, 0.5);
     
   } SH_END;
 
@@ -1701,7 +1845,9 @@ void init_shaders(void)
   terrain_shaders = new ShProgramSet(terrain_vsh, terrain_fsh);
   skybox_shaders = new ShProgramSet(skybox_vsh, skybox_fsh);*/
   //plane_shaders = new ShProgramSet(plane_vsh, plane_fsh);
-  streaming0_shaders = new ShProgramSet(streaming0_vsh, streaming0_fsh);
+  dv_shaders = new ShProgramSet(vsh, dv_fsh);
+  streaming0_shaders = new ShProgramSet(vsh, streaming0_fsh);
+  eq0_shaders = new ShProgramSet(vsh, eq0_fsh);
  }
 
 
