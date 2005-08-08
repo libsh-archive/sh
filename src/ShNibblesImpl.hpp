@@ -145,13 +145,37 @@ ShProgram opfunc(const std::string & name) {\
 
 SHNIBBLE_UNARY_OP(shAbs, abs(x));
 SHNIBBLE_UNARY_OP(shAcos, acos(x));
+SHNIBBLE_UNARY_OP(shAcosh, acosh(x));
 SHNIBBLE_UNARY_OP(shAsin, asin(x));
+SHNIBBLE_UNARY_OP(shAsinh, asinh(x));
+SHNIBBLE_UNARY_OP(shAtan, atan(x));
+SHNIBBLE_UNARY_OP(shAtanh, atanh(x));
+SHNIBBLE_UNARY_OP(shCbrt, cbrt(x));
 SHNIBBLE_UNARY_OP(shCos, cos(x));
+SHNIBBLE_UNARY_OP(shCosh, cosh(x));
+SHNIBBLE_UNARY_OP(shDx, dx(x));
+SHNIBBLE_UNARY_OP(shDy, dy(x));
 SHNIBBLE_UNARY_OP(shFrac, frac(x));
-SHNIBBLE_UNARY_OP(shSin, sin(x));
-SHNIBBLE_UNARY_OP(shSqrt, sqrt(x));
+SHNIBBLE_UNARY_OP(shExp, exp(x));
+SHNIBBLE_UNARY_OP(shExpm1, expm1(x));
+SHNIBBLE_UNARY_OP(shExp2, exp2(x));
+SHNIBBLE_UNARY_OP(shExp10, exp10(x));
+SHNIBBLE_UNARY_OP(shFwidth, fwidth(x));
+SHNIBBLE_UNARY_OP(shLog, log(x));
+SHNIBBLE_UNARY_OP(shLogp1, logp1(x));
+SHNIBBLE_UNARY_OP(shLog2, log2(x));
+SHNIBBLE_UNARY_OP(shLog10, log10(x));
 SHNIBBLE_UNARY_OP(shNormalize, normalize(x));
 SHNIBBLE_UNARY_OP(shPos, pos(x));
+SHNIBBLE_UNARY_OP(shProd, prod(x));
+SHNIBBLE_UNARY_OP(shRcp, rcp(x));
+SHNIBBLE_UNARY_OP(shRsqrt, rsqrt(x));
+SHNIBBLE_UNARY_OP(shSin, sin(x));
+SHNIBBLE_UNARY_OP(shSinh, sinh(x));
+SHNIBBLE_UNARY_OP(shSqrt, sqrt(x));
+SHNIBBLE_UNARY_OP(shSum, sum(x));
+SHNIBBLE_UNARY_OP(shTan, tan(x));
+SHNIBBLE_UNARY_OP(shTanh, tanh(x));
 
 #define SHNIBBLE_BINARY_OP(opfunc, opcode) \
 template<typename T1, typename T2> \
@@ -174,19 +198,53 @@ ShProgram opfunc(const std::string & output_name,\
 }
 
 SHNIBBLE_BINARY_OP(shAdd, a + b)
-SHNIBBLE_BINARY_OP(shSub, a - b)
-SHNIBBLE_BINARY_OP(shMul, a * b)
-SHNIBBLE_BINARY_OP(shDiv, a / b) 
-SHNIBBLE_BINARY_OP(shPow, pow(a, b))
-SHNIBBLE_BINARY_OP(shSlt, a < b) 
-SHNIBBLE_BINARY_OP(shSle, a <= b) 
-SHNIBBLE_BINARY_OP(shSgt, a > b) 
-SHNIBBLE_BINARY_OP(shSge, a >= b) 
-SHNIBBLE_BINARY_OP(shSeq, a == b) 
-SHNIBBLE_BINARY_OP(shSne, a != b) 
-SHNIBBLE_BINARY_OP(shMod, mod(a, b))
-SHNIBBLE_BINARY_OP(shMin, min(a, b))
+SHNIBBLE_BINARY_OP(shAtan2, atan2(a, b)) 
+SHNIBBLE_BINARY_OP(shDiv, a / b)
 SHNIBBLE_BINARY_OP(shMax, max(a, b))
+SHNIBBLE_BINARY_OP(shMin, min(a, b))
+SHNIBBLE_BINARY_OP(shMod, mod(a, b))
+SHNIBBLE_BINARY_OP(shMul, a * b)
+SHNIBBLE_BINARY_OP(shPow, pow(a, b))
+SHNIBBLE_BINARY_OP(shSeq, a == b) 
+SHNIBBLE_BINARY_OP(shSle, a <= b) 
+SHNIBBLE_BINARY_OP(shSlt, a < b) 
+SHNIBBLE_BINARY_OP(shSge, a >= b) 
+SHNIBBLE_BINARY_OP(shSgt, a > b) 
+SHNIBBLE_BINARY_OP(shSne, a != b) 
+SHNIBBLE_BINARY_OP(shSub, a - b)
+
+#define SHNIBBLE_TERNARY_OP(opfunc, opcode) \
+template<typename T1, typename T2, typename T3> \
+ShProgram opfunc(const std::string & output_name, \
+    const std::string & input_name0, const std::string & input_name1, \
+    const std::string & input_name2) { \
+  ShProgram nibble = SH_BEGIN_PROGRAM() { \
+    typename T1::InputType SH_NAMEDECL(a, input_name0); \
+    typename T2::InputType SH_NAMEDECL(b, input_name1); \
+    typename T3::InputType SH_NAMEDECL(c, input_name2); \
+    typedef typename SelectType<(T1::typesize > T2::typesize), typename T1::OutputType, \
+                                typename T2::OutputType>::type T1T2; \
+    typename SelectType<(T1T2::typesize > T3::typesize), typename T1T2::OutputType, \
+                        typename T3::OutputType>::type SH_NAMEDECL(result, output_name) = opcode; \
+  } SH_END; \
+  nibble.name(# opfunc); \
+  return nibble; \
+} \
+\
+template<typename T1, typename T2> \
+ShProgram opfunc(const std::string & output_name,\
+    const std::string & input_name0, const std::string & input_name1, \
+    const std::string & input_name2) { \
+  return opfunc<T1, T2, T2>(output_name, input_name0, input_name1, input_name2); \
+}
+template<typename T1> \
+ShProgram opfunc(const std::string & output_name,\
+    const std::string & input_name0, const std::string & input_name1, \
+    const std::string & input_name2) { \
+  return opfunc<T1, T1, T1>(output_name, input_name0, input_name1, input_name2); \
+}
+
+SHNIBBLE_TERNARY_OP(shMad, mad(a, b, c))
 
 template<typename T> 
 ShProgram shDot(const std::string & name) { 

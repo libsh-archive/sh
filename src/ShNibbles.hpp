@@ -119,13 +119,37 @@ ShProgram shFillcast(const std::string & name = "result");
  */
 template<typename T> ShProgram shAbs(const std::string & name = "result");
 template<typename T> ShProgram shAcos(const std::string & name = "result");
+template<typename T> ShProgram shAcosh(const std::string & name = "result");
 template<typename T> ShProgram shAsin(const std::string & name = "result");
+template<typename T> ShProgram shAsinh(const std::string & name = "result");
+template<typename T> ShProgram shAtan(const std::string & name = "result");
+template<typename T> ShProgram shAtanh(const std::string & name = "result");
+template<typename T> ShProgram shCbrt(const std::string & name = "result");
 template<typename T> ShProgram shCos(const std::string & name = "result");
+template<typename T> ShProgram shCosh(const std::string & name = "result");
+template<typename T> ShProgram shDx(const std::string & name = "result");
+template<typename T> ShProgram shDy(const std::string & name = "result");
+template<typename T> ShProgram shExp(const std::string & name = "result");
+template<typename T> ShProgram shExpm1(const std::string & name = "result");
+template<typename T> ShProgram shExp2(const std::string & name = "result");
+template<typename T> ShProgram shExp10(const std::string & name = "result");
 template<typename T> ShProgram shFrac(const std::string & name = "result");
-template<typename T> ShProgram shSin(const std::string & name = "result");
-template<typename T> ShProgram shSqrt(const std::string & name = "result");
+template<typename T> ShProgram shFwidth(const std::string & name = "result");
+template<typename T> ShProgram shLog(const std::string & name = "result");
+template<typename T> ShProgram shLogp1(const std::string & name = "result");
+template<typename T> ShProgram shLog2(const std::string & name = "result");
+template<typename T> ShProgram shLog10(const std::string & name = "result");
 template<typename T> ShProgram shNormalize(const std::string & name = "result");
 template<typename T> ShProgram shPos(const std::string & name = "result");
+template<typename T> ShProgram shProd(const std::string & name = "result");
+template<typename T> ShProgram shRcp(const std::string & name = "result");
+template<typename T> ShProgram shRsqrt(const std::string & name = "result");
+template<typename T> ShProgram shSin(const std::string & name = "result");
+template<typename T> ShProgram shSinh(const std::string & name = "result");
+template<typename T> ShProgram shSqrt(const std::string & name = "result");
+template<typename T> ShProgram shSum(const std::string & name = "result");
+template<typename T> ShProgram shTan(const std::string & name = "result");
+template<typename T> ShProgram shTanh(const std::string & name = "result");
 //@}
 
 /**@{ \brief Nibbles for binary operators
@@ -139,27 +163,48 @@ template<typename T> ShProgram shPos(const std::string & name = "result");
   template<typename T1> ShProgram opname(const std::string & output_name = "result",\
       const std::string & input_name0 = "x", const std::string & input_name1 = "y"); 
 SHNIBBLE_BINARY_OP_DECL(shAdd);
-SHNIBBLE_BINARY_OP_DECL(shSub);
-SHNIBBLE_BINARY_OP_DECL(shMul);
+SHNIBBLE_BINARY_OP_DECL(shAtan2);
 SHNIBBLE_BINARY_OP_DECL(shDiv);
-SHNIBBLE_BINARY_OP_DECL(shPow);
-SHNIBBLE_BINARY_OP_DECL(shSlt);
-SHNIBBLE_BINARY_OP_DECL(shSle);
-SHNIBBLE_BINARY_OP_DECL(shSgt);
-SHNIBBLE_BINARY_OP_DECL(shSge);
-SHNIBBLE_BINARY_OP_DECL(shSeq);
-SHNIBBLE_BINARY_OP_DECL(shSne);
 SHNIBBLE_BINARY_OP_DECL(shMax);
 SHNIBBLE_BINARY_OP_DECL(shMin);
 SHNIBBLE_BINARY_OP_DECL(shMod);
+SHNIBBLE_BINARY_OP_DECL(shMul);
+SHNIBBLE_BINARY_OP_DECL(shPow);
+SHNIBBLE_BINARY_OP_DECL(shSeq);
+SHNIBBLE_BINARY_OP_DECL(shSge);
+SHNIBBLE_BINARY_OP_DECL(shSgt);
+SHNIBBLE_BINARY_OP_DECL(shSle);
+SHNIBBLE_BINARY_OP_DECL(shSlt);
+SHNIBBLE_BINARY_OP_DECL(shSne);
+SHNIBBLE_BINARY_OP_DECL(shSub);
+//@}
 
-/** @{ \brief Nibble for dot product operator
+/**@{ \brief Nibbles for ternary operators
+ * Inputs: IN(0) T1 a
+ *         IN(1) T2 b (by default T2 = T1)
+ *         IN(2) T3 c (by default T3 = T2)
+ * Outputs: OUT(0) name  (type is T1, T2 or T3, whichever has more components)
+ */
+#define SHNIBBLE_TERNARY_OP_DECL(opname) \
+  template<typename T1, typename T2, typename T3> ShProgram opname(const std::string & output_name = "result",\
+      const std::string & input_name0 = "x", const std::string & input_name1 = "y", \
+      const std::string & input_name2 = "z"); \
+  template<typename T1, typename T2> ShProgram opname(const std::string & output_name = "result",\
+      const std::string & input_name0 = "x", const std::string & input_name1 = "y", \
+      const std::string & input_name2 = "z"); \
+  template<typename T1> ShProgram opname(const std::string & output_name = "result",\
+      const std::string & input_name0 = "x", const std::string & input_name1 = "y", \
+      const std::string & input_name2 = "z"); \
+
+SHNIBBLE_TERNARY_OP_DECL(shMad);
+//@}
+
+/** \brief Nibble for dot product operator
  * Inputs: IN(0) T a
  *         IN(1) T b
  * Outputs: OUT(0) ShAttrib1f name  
  */
 template<typename T> ShProgram shDot(const std::string & name = "result");
-//@}
 
 /** @{ \brief Nibble for lerp operator
  * Inputs: IN(0) T1 a
@@ -175,7 +220,6 @@ ShProgram shLerp(const std::string & name = "result");
 //@}
 
 }
-
 
 #include "ShNibblesImpl.hpp"
 

@@ -1,3 +1,11 @@
+2005-08-08  Francois Marier  <francois@serioushack.com>
+
+	* src/ShNibblesImpl.hpp, ShNibbles.hpp: Add nibbles for exp,
+	expm1, exp2, exp10, log, logp1, log2, log10, cbrt, rsqrt prod,
+	sum, rcp, atan2, atan, mad, sinh, cosh, tan, tanh, asinh, acosh,
+	atanh, dx, dy and fwidth.
+	Add macros for ternary operations.
+	
 2005-08-04  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/ArbEmit.cpp (emit_sgn): Optimized the sign operation
