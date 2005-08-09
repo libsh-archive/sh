@@ -56,7 +56,9 @@ using namespace SH;
 #define GRID_3D_RES SQR_GRID_3D_RES*SQR_GRID_3D_RES
 #define NUM_GRID_CELLS GRID_3D_RES*GRID_3D_RES*GRID_3D_RES
 
-#define TAU 20
+#define RCPSQR2 0.707106781186
+
+#define TAU 3.25
 #define INV_TAU (1.0f/TAU)
 
 // forward declarations
@@ -163,6 +165,11 @@ ShProgram dv_fsh;
 //test
 ShProgram showvel_fsh;
 ShProgram showeq0_fsh;
+ShProgram redonly_fsh;
+ShProgram greenonly_fsh;
+ShProgram mouse0_fsh;
+ShProgram mouse1_fsh;
+
 
 
 /*ShProgramSet* particle_shaders;
@@ -189,6 +196,13 @@ ShProgramSet* dv_shaders;
 //test
 ShProgramSet* showvel_shaders;
 ShProgramSet* showeq0_shaders;
+ShProgramSet* redonly_shaders;
+ShProgramSet* greenonly_shaders;
+ShProgramSet* mouse0_shaders;
+ShProgramSet* mouse1_shaders;
+
+//test vars
+ShAttrib3f dirs; 
 
 
 #ifndef USING_STREAMS
@@ -197,7 +211,8 @@ ShImage test_image;
 ShArray1D<ShColor4f> testt;
 
 //distribution package texture ids
-GLuint dpt_ids[2][5];
+GLuint dpt_ids[5];
+GLuint dptc_ids[5];
 GLuint eqdpt_ids[5];
 GLuint dvt_id;
 
@@ -211,6 +226,11 @@ ShArray2D<ShColor4f> dpt1;
 ShArray2D<ShColor4f> dpt2;
 ShArray2D<ShColor4f> dpt3;
 ShArray2D<ShColor4f> dpt4;
+ShArray2D<ShColor4f> dptc0; // distribution packages after collision step
+ShArray2D<ShColor4f> dptc1;
+ShArray2D<ShColor4f> dptc2;
+ShArray2D<ShColor4f> dptc3;
+ShArray2D<ShColor4f> dptc4;
 ShArray2D<ShColor4f> dvt; // density and velocity
 ShArray2D<ShColor4f> eqdpt0; // equilibrium distribution packages
 ShArray2D<ShColor4f> eqdpt1;
@@ -220,11 +240,11 @@ ShArray2D<ShColor4f> eqdpt4;
 
 ShArray2D<ShColor4f> colort;
 
-Texture3D dpt3d0(&dpt0, SQR_GRID_3D_RES);
-Texture3D dpt3d1(&dpt1, SQR_GRID_3D_RES);
-Texture3D dpt3d2(&dpt2, SQR_GRID_3D_RES);
-Texture3D dpt3d3(&dpt3, SQR_GRID_3D_RES);
-Texture3D dpt3d4(&dpt4, SQR_GRID_3D_RES);
+Texture3D dptc3d0(&dptc0, SQR_GRID_3D_RES);
+Texture3D dptc3d1(&dptc1, SQR_GRID_3D_RES);
+Texture3D dptc3d2(&dptc2, SQR_GRID_3D_RES);
+Texture3D dptc3d3(&dptc3, SQR_GRID_3D_RES);
+Texture3D dptc3d4(&dptc4, SQR_GRID_3D_RES);
 
 Texture3D colort3d(&colort, SQR_GRID_3D_RES);
 
@@ -249,7 +269,7 @@ ShImage terr_image;*/
 // GLUT data
 //-------------------------------------------------------------------
 int buttons[5] = {GLUT_UP, GLUT_UP, GLUT_UP, GLUT_UP, GLUT_UP};
-int cur_x, cur_y;
+int cur_x, cur_y, old_x, old_y, ddx, ddy;
 
 bool show_help = false;
 
@@ -308,32 +328,64 @@ void load_textures(void){
 void init_textures(){
 printf("init_textures()\n");
 
-  float* expl = new float[] 
+  //float* expl = new float[] 
 
 
-  float* testdata[5];	  
+ float** testdata = new float*[5];	  
   for(int i=0;i<5;i++){ 
+    
     testdata[i] = new float[NUM_GRID_CELLS*4];
     memset(testdata[i], 0, NUM_GRID_CELLS*4*sizeof(float));
-    for(int j=0;j<10000;j++)
-	  testdata[i][j] = ((float)rand())/(RAND_MAX-1);
+   /* for(int j=3000;j<4000;j++)
+	  testdata[i][j] = 1.0;//((float)rand())/(RAND_MAX-1);*/
   /*testdata[NUM_GRID_CELLS/2] = 1.0;
   testdata[NUM_GRID_CELLS/3] = 1.0;
   testdata[NUM_GRID_CELLS/4] = 1.0;*/
   }//for
 
-  glGenTextures(5, dpt_ids[0]);
-  glGenTextures(5, dpt_ids[1]);
+  glGenTextures(5, dpt_ids);
 
-  for(int i=0;i<2;i++){
-  	  for(int j=0;j<5;j++){
-		glBindTexture(GL_TEXTURE_2D, dpt_ids[i][j]);
+  for (int i=0;i<NUM_GRID_CELLS;i++){
+    testdata[4][i*4+2] = 0.3;
+  }
+
+  for(int i=0;i<5;i++){
+		glBindTexture(GL_TEXTURE_2D, dpt_ids[i]);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, i ? testdata : NULL);  
-	  }//for
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA_FLOAT32_ATI, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, testdata[i]);  
   }//for
- 
+  char tid[5];
+  sprintf(tid, "%d",dpt_ids[0]);
+  dpt0.meta("opengl:texid", tid);
+  sprintf(tid, "%d",dpt_ids[1]);
+  dpt1.meta("opengl:texid", tid);
+  sprintf(tid, "%d",dpt_ids[2]);
+  dpt2.meta("opengl:texid", tid);
+  sprintf(tid, "%d",dpt_ids[3]);
+  dpt3.meta("opengl:texid", tid);
+  sprintf(tid, "%d",dpt_ids[4]);
+  dpt4.meta("opengl:texid", tid);
+
+  glGenTextures(5, dptc_ids);
+  for(int i=0;i<5;i++){
+		glBindTexture(GL_TEXTURE_2D, dptc_ids[i]);
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA_FLOAT32_ATI, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, NULL);  
+  }//for
+  sprintf(tid, "%d",dptc_ids[0]);
+  dptc0.meta("opengl:texid", tid);
+  sprintf(tid, "%d",dptc_ids[1]);
+  dptc1.meta("opengl:texid", tid);
+  sprintf(tid, "%d",dptc_ids[2]);
+  dptc2.meta("opengl:texid", tid);
+  sprintf(tid, "%d",dptc_ids[3]);
+  dptc3.meta("opengl:texid", tid);
+  sprintf(tid, "%d",dptc_ids[4]);
+  dptc4.meta("opengl:texid", tid);
+
+
 
 // init eqdpt's  
   glGenTextures(5, eqdpt_ids);
@@ -341,10 +393,9 @@ printf("init_textures()\n");
 		glBindTexture(GL_TEXTURE_2D, eqdpt_ids[i]);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, NULL);  
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA_FLOAT32_ATI, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, NULL);  
 	  }//for
 
-  char tid[5];
   sprintf(tid, "%d",eqdpt_ids[0]);
   eqdpt0.meta("opengl:texid", tid);
   sprintf(tid, "%d",eqdpt_ids[1]);
@@ -362,7 +413,7 @@ printf("init_textures()\n");
   glBindTexture(GL_TEXTURE_2D, dvt_id);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, NULL);  
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA_FLOAT32_ATI, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, NULL);  
 
   sprintf(tid, "%d",dvt_id);
   dvt.meta("opengl:texid", tid);
@@ -513,7 +564,7 @@ void drawQuad(){
 
 void switchBuffers(){
 //switch texture buffers:
-  dbc++;
+/*  dbc++;
   dbc %= 2;
   idbc = (dbc+1)%2; //inverse dbc
   //printf("dbc: %d, idbc: %d\n", dbc, idbc);
@@ -529,7 +580,7 @@ void switchBuffers(){
   sprintf(tid, "%d",dpt_ids[dbc][3]);
   dpt3.meta("opengl:texid", tid);
   sprintf(tid, "%d",dpt_ids[dbc][4]);
-  dpt4.meta("opengl:texid", tid);
+  dpt4.meta("opengl:texid", tid);*/
 
 }
 
@@ -542,7 +593,7 @@ void display()
   {
 //printf("display\n");
 
-  switchBuffers();	  
+//  switchBuffers();	  
   glDisable(GL_DEPTH_TEST); // don't need depth test in stream programs
 
 
@@ -583,10 +634,18 @@ void display()
    drawQuad();
   shUnbind(*eq1_shaders);
  
+  glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+                                  GL_COLOR_ATTACHMENT0_EXT,
+                                  GL_TEXTURE_2D, eqdpt_ids[4], 0);
+
+  shBind(*eq4_shaders);
+   drawQuad();
+  shUnbind(*eq4_shaders);
+
 // Perform collision:
   glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
-                                  GL_TEXTURE_2D, dpt_ids[idbc][0], 0);
+                                  GL_TEXTURE_2D, dptc_ids[0], 0);
   
   shBind(*collision0_shaders);
    drawQuad();
@@ -594,29 +653,93 @@ void display()
   
   glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
-                                  GL_TEXTURE_2D, dpt_ids[idbc][1], 0);
+                                  GL_TEXTURE_2D, dptc_ids[1], 0);
   
   shBind(*collision1_shaders);
    drawQuad();
   shUnbind(*collision1_shaders);
 
-// Perform streaming:
-  switchBuffers(); // need to consider the collision results and not overwrite them
   glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
-                                  GL_TEXTURE_2D, dpt_ids[idbc][0], 0);
+                                  GL_TEXTURE_2D, dptc_ids[4], 0);
+  
+  shBind(*collision4_shaders);
+   drawQuad();
+  shUnbind(*collision4_shaders);
 
+// Perform streaming:
+//  switchBuffers(); // need to consider the collision results and not overwrite them
+  glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+                                  GL_COLOR_ATTACHMENT0_EXT,
+                                  GL_TEXTURE_2D, dpt_ids[0], 0);
+
+ 
   shBind(*streaming0_shaders);
    drawQuad();
   shUnbind(*streaming0_shaders);
 
+ if(buttons[0] == GLUT_DOWN){ 
+  dirs(0) = ((float)ddx)/5;
+  dirs(1) = ((float)ddy)/5;
+  dirs(2) = 0;
+  shBind(*mouse0_shaders);
+  glBegin(GL_QUADS);
+  
+  glTexCoord2f(0,0);
+  glVertex3f(-0.5, 0, 0);
+  
+  glTexCoord2f(1,0);
+  glVertex3f(-0.5+0.1, 0, 0);
+  
+  glTexCoord2f(1,1);
+  glVertex3f(-0.5+0.1, 0.1,  0);
+  
+  glTexCoord2f(0,1);
+  glVertex3f(-0.5, 0.1,  0);
+  
+  glEnd();
+  shUnbind(*mouse0_shaders);
+ }//if
+  
+
+/////////////
+  
   glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
-                                  GL_TEXTURE_2D, dpt_ids[idbc][1], 0);
-
+                                  GL_TEXTURE_2D, dpt_ids[1], 0);
+  
   shBind(*streaming1_shaders);
    drawQuad();
   shUnbind(*streaming1_shaders);
+
+ if(buttons[0] == GLUT_DOWN){ 
+  shBind(*mouse1_shaders);
+  glBegin(GL_QUADS);
+  
+  glTexCoord2f(0,0);
+  glVertex3f(-0.5, 0, 0);
+  
+  glTexCoord2f(1,0);
+  glVertex3f(-0.5+0.1, 0, 0);
+  
+  glTexCoord2f(1,1);
+  glVertex3f(-0.5+0.1, 0.1,  0);
+  
+  glTexCoord2f(0,1);
+  glVertex3f(-0.5, 0.1,  0);
+  
+  glEnd();
+  shUnbind(*mouse1_shaders);
+ }//if
+
+ glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+                                  GL_COLOR_ATTACHMENT0_EXT,
+                                  GL_TEXTURE_2D, dpt_ids[4], 0);
+
+ 
+  shBind(*streaming4_shaders);
+   drawQuad();
+  shUnbind(*streaming4_shaders);
 
 
 //glDisable(GL_DEPTH_TEST);
@@ -1075,6 +1198,13 @@ void motion(int x, int y)
 
   cur_x = x;
   cur_y = y;
+
+  ddx = old_x - cur_x;
+  ddy = old_y - cur_y;
+  
+  old_x = cur_x;
+  old_y = cur_y;
+
   }
 
 void mouse(int button, int state, int x, int y)
@@ -1082,7 +1212,8 @@ void mouse(int button, int state, int x, int y)
   buttons[button] = state;
   cur_x = x;
   cur_y = y;
-  }
+
+    }
 
 void idle(void)
   {
@@ -1458,7 +1589,7 @@ void init_shaders(void)
     
     velocity /= density;
     
-    color(0,1,2) = velocity;
+    color(0,1,2) = velocity*0.5+0.5;
     color(3) = density;
     
   } SH_END;
@@ -1470,14 +1601,14 @@ void init_shaders(void)
 
     //constants:
     ShAttrib1f A, B, C, D;
-    A = 1.0/18;
-    B = 3.0/18;
-    C = 1.0/4;
-    D = -1.0/12;
+    A = 0.05555555555;
+    B = 0.16666666666;
+    C = 0.25;
+    D = -0.0833333333;
     
     // inner products:
     ShAttrib4f eu;
-    ShVector3f u = (dvt(tc))(0,1,2);
+    ShVector3f u = ((dvt(tc))(0,1,2))*2-1.0;
     eu(0) = ShVector3f(1,0,0)  | u;
     eu(1) = ShVector3f(-1,0,0) | u;
     eu(2) = ShVector3f(0,1,0)  | u;
@@ -1497,14 +1628,14 @@ void init_shaders(void)
 
     //constants:
     ShAttrib1f A, B, C, D;
-    A = 1.0/18;
-    B = 3.0/18;
-    C = 1.0/4;
-    D = -1.0/12;
+    A = 0.027777777777;
+    B = 0.083333333333;
+    C = 0.125;
+    D = -0.04166666666;
     
     // inner products:
     ShAttrib4f eu;
-    ShVector3f u = dvt(tc)(0,1,2);
+    ShVector3f u = (dvt(tc)(0,1,2))*2-1.0;
     eu(0) = ShVector3f(1,1,0)  | u;
     eu(1) = ShVector3f(-1,-1,0) | u;
     eu(2) = ShVector3f(1,-1,0)  | u;
@@ -1579,7 +1710,7 @@ void init_shaders(void)
     //constants:
     ShAttrib1f A, B, C, D;
     A = 1.0/18;
-    B = 3.0/18;
+    B = 1.0/6;
     C = 1.0/4;
     D = -1.0/12;
     
@@ -1595,6 +1726,7 @@ void init_shaders(void)
     ShAttrib1f uu = u|u;
      
     color = (A + B*eu + C*eu2 + D*uu)*dvt(tc)(3);
+    color(2) = (0.3333333 - 0.5*uu)*dvt(tc)(3); 
     
   } SH_END;
 
@@ -1613,6 +1745,15 @@ void init_shaders(void)
     ShOutputColor4f color;
 
     color = dpt1(tc) - INV_TAU*(dpt1(tc) - eqdpt1(tc));
+    
+  } SH_END;
+
+ collision4_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+    ShInputPosition4f pos;
+    ShInputTexCoord2f tc;
+    ShOutputColor4f color;
+
+    color = dpt4(tc) - INV_TAU*(dpt4(tc) - eqdpt4(tc));
     
   } SH_END;
 
@@ -1637,10 +1778,10 @@ void init_shaders(void)
     ShOutputColor4f color;
 
     //tc(0) = tc(0)+0.01;   
-    color(0) = (dpt3d0.find12(tc))(0);
-    color(1) = (dpt3d0.find13(tc))(1);
-    color(2) = (dpt3d0.find15(tc))(2);
-    color(3) = (dpt3d0.find10(tc))(3);
+    color(0) = (dptc3d0.find12(tc))(0);
+    color(1) = (dptc3d0.find13(tc))(1);
+    color(2) = (dptc3d0.find15(tc))(2);
+    color(3) = (dptc3d0.find10(tc))(3);
 ///color = ShColor4f(0.2, 0.4, 0.1, 0.5);
     
   } SH_END;
@@ -1652,10 +1793,25 @@ void init_shaders(void)
     ShOutputColor4f color;
 
     //tc(0) = tc(0)+0.01;   
-    color(0) = (dpt3d0.find14(tc))(0);
-    color(1) = (dpt3d0.find11(tc))(1);
-    color(2) = (dpt3d0.find9(tc))(2);
-    color(3) = (dpt3d0.find16(tc))(3);
+    color(0) = (dptc3d1.find14(tc))(0);
+    color(1) = (dptc3d1.find11(tc))(1);
+    color(2) = (dptc3d1.find9(tc))(2);
+    color(3) = (dptc3d1.find16(tc))(3);
+///color = ShColor4f(0.2, 0.4, 0.1, 0.5);
+    
+  } SH_END;
+
+  streaming4_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+    ShInputPosition4f pos;
+    ShInputTexCoord2f tc;
+    //ShInputPosition4f posp;
+    ShOutputColor4f color;
+
+    //tc(0) = tc(0)+0.01;   
+    color(0) = dptc4(tc)(0);//(dptc3d4.find14(tc))(0);
+    color(1) = dptc4(tc)(1);//(dptc3d4.find11(tc))(1);
+    color(2) = dptc4(tc)(2);
+    color(3) = 0;
 ///color = ShColor4f(0.2, 0.4, 0.1, 0.5);
     
   } SH_END;
@@ -1665,8 +1821,8 @@ void init_shaders(void)
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
 
-    color(0,1,2) = dvt(tc)(0,1,2);
-    color(3) = 1.0;
+    color(0,2) = abs((dvt(tc)(0,1))*2-1.0);
+    //color(2) = clamp(abs(-dvt(tc)(0)) + abs(-dvt(tc)(1)),0,1.0);
     
   } SH_END;
   showeq0_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
@@ -1679,7 +1835,50 @@ void init_shaders(void)
     
   } SH_END;
   
- /*  plane_vsh = SH_BEGIN_VERTEX_PROGRAM {
+  redonly_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+    ShInputPosition4f pos;
+    ShInputTexCoord2f tc;
+    ShOutputColor4f color;
+
+    color = ShConstColor4f(1,0,0,1);
+        } SH_END;
+
+   greenonly_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+    ShInputPosition4f pos;
+    ShInputTexCoord2f tc;
+    ShOutputColor4f color;
+
+    color = ShConstColor4f(0,1,0,1);
+       
+  } SH_END;
+
+   mouse0_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+    ShInputPosition4f pos;
+    ShInputTexCoord2f tc;
+    ShOutputColor4f color;
+
+    //color = ShConstColor4f(1,0,0,1);
+    color(0) = clamp(dirs|ShAttrib3f(1,0,0), 0, 1.0);
+    color(1) = clamp(dirs|ShAttrib3f(-1,0,0), 0, 1.0);
+    color(2) = clamp(dirs|ShAttrib3f(0,1,0), 0, 1.0);
+    color(3) = clamp(dirs|ShAttrib3f(0,-1,0), 0, 1.0);
+   } SH_END;
+
+   mouse1_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+    ShInputPosition4f pos;
+    ShInputTexCoord2f tc;
+    ShOutputColor4f color;
+
+    //color = ShConstColor4f(1,0,0,1);
+    color(0) = RCPSQR2*clamp(dirs|ShAttrib3f(1,1,0), 0, 1.0);
+    color(1) = RCPSQR2*clamp(dirs|ShAttrib3f(-1,-1,0), 0, 1.0);
+    color(2) = RCPSQR2*clamp(dirs|ShAttrib3f(1,-1,0), 0, 1.0);
+    color(3) = RCPSQR2*clamp(dirs|ShAttrib3f(-1,1,0), 0, 1.0);
+   } SH_END;
+
+  
+  
+  /*  plane_vsh = SH_BEGIN_VERTEX_PROGRAM {
     ShInOutPosition4f pos;
     //ShInOutTexCoord2f tc;
     ShOutputPosition3f posp;
@@ -2054,12 +2253,18 @@ void init_shaders(void)
   eq4_shaders = new ShProgramSet(vsh, eq4_fsh);
   collision0_shaders = new ShProgramSet(vsh, collision0_fsh);
   collision1_shaders = new ShProgramSet(vsh, collision1_fsh);
+  collision4_shaders = new ShProgramSet(vsh, collision4_fsh);
   streaming0_shaders = new ShProgramSet(vsh, streaming0_fsh);
   streaming1_shaders = new ShProgramSet(vsh, streaming1_fsh);
-///test
+  streaming4_shaders = new ShProgramSet(vsh, streaming4_fsh);
+////test
   showvel_shaders = new ShProgramSet(vsh, showvel_fsh);
   showeq0_shaders = new ShProgramSet(vsh, showeq0_fsh);
-    }
+  redonly_shaders = new ShProgramSet(vsh, redonly_fsh);
+  greenonly_shaders = new ShProgramSet(vsh, greenonly_fsh);
+  mouse0_shaders = new ShProgramSet(vsh, mouse0_fsh);
+  mouse1_shaders = new ShProgramSet(vsh, mouse1_fsh);
+      }
 
 
 int gprintf(int x, int y, char* fmt, ...)
