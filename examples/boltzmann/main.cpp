@@ -48,8 +48,12 @@ using namespace SH;
 // defines
 //#define USING_STREAMS
 
+#define INTERNAL_FORMAT GL_RGBA16 //GL_RGBA_FLOAT32_ATI
+
 #define NUMMODES 1
 
+#define SO1 0.005
+#define SO2 0.3
 #define SCALE 5
 #define GRID_2D_RES 512
 #define SQR_GRID_3D_RES 8
@@ -58,7 +62,7 @@ using namespace SH;
 
 #define RCPSQR2 0.707106781186
 
-#define TAU 3.25
+#define TAU 5.2
 #define INV_TAU (1.0f/TAU)
 
 // forward declarations
@@ -66,11 +70,7 @@ void init_shaders(void);
 void init_textures(void);
 void init_FBO(void);
 void initGL(void);
-#ifdef USING_STREAMS
-void init_streams(void);
-void reset_streams(void);
-void update_streams(void);
-#endif
+
 void switchBuffers(void);
 void setup_texouts();
 void load_textures(void);
@@ -82,20 +82,6 @@ fresnel (
    ShAttrib1f eta
 );
 
-
-#ifdef USING_STREAMS
-// channels holding the distribution packages
-ShChannel<ShVector4f> dp0;
-ShChannel<ShVector4f> dp1;
-ShChannel<ShVector4f> dp2;
-ShChannel<ShVector4f> dp3;
-ShChannel<ShVector4f> dp4;
-ShChannel<ShVector4f> color;
-
-// programs
-ShProgram streaming;  
-ShProgram lbm_update;
-#endif
 
 #ifndef WIN32
  Display *dpy;
@@ -346,14 +332,14 @@ printf("init_textures()\n");
   glGenTextures(5, dpt_ids);
 
   for (int i=0;i<NUM_GRID_CELLS;i++){
-    testdata[4][i*4+2] = 0.3;
+    testdata[4][i*4+2] = 0.001;
   }
 
   for(int i=0;i<5;i++){
 		glBindTexture(GL_TEXTURE_2D, dpt_ids[i]);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA_FLOAT32_ATI, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, testdata[i]);  
+		glTexImage2D(GL_TEXTURE_2D, 0, INTERNAL_FORMAT, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, testdata[i]);  
   }//for
   char tid[5];
   sprintf(tid, "%d",dpt_ids[0]);
@@ -372,7 +358,7 @@ printf("init_textures()\n");
 		glBindTexture(GL_TEXTURE_2D, dptc_ids[i]);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA_FLOAT32_ATI, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, NULL);  
+		glTexImage2D(GL_TEXTURE_2D, 0, INTERNAL_FORMAT, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, NULL);  
   }//for
   sprintf(tid, "%d",dptc_ids[0]);
   dptc0.meta("opengl:texid", tid);
@@ -393,7 +379,7 @@ printf("init_textures()\n");
 		glBindTexture(GL_TEXTURE_2D, eqdpt_ids[i]);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA_FLOAT32_ATI, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, NULL);  
+		glTexImage2D(GL_TEXTURE_2D, 0, INTERNAL_FORMAT, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, NULL);  
 	  }//for
 
   sprintf(tid, "%d",eqdpt_ids[0]);
@@ -413,7 +399,7 @@ printf("init_textures()\n");
   glBindTexture(GL_TEXTURE_2D, dvt_id);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA_FLOAT32_ATI, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, NULL);  
+  glTexImage2D(GL_TEXTURE_2D, 0, INTERNAL_FORMAT, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, NULL);  
 
   sprintf(tid, "%d",dvt_id);
   dvt.meta("opengl:texid", tid);
@@ -431,76 +417,6 @@ void setup_texouts(){
   dpt3.size(GRID_2D_RES, GRID_2D_RES);
   dpt4.size(GRID_2D_RES, GRID_2D_RES);
   colort.size(GRID_2D_RES, GRID_2D_RES);
-
-#ifndef USING_STREAMS
-
-  /*ShHostMemoryPtr host_dp0 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
-  ShHostMemoryPtr host_dp1 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
-  ShHostMemoryPtr host_dp2 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
-  ShHostMemoryPtr host_dp3 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
-  ShHostMemoryPtr host_dp4 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
-  ShHostMemoryPtr host_color = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
-
-  //ShHostMemoryPtr host_test = new ShHostMemory(3*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
-  test_image.loadPng("A.png");
-  testt.memory(test_image.memory());
-
-
-  ShHostStoragePtr dp0_storage = shref_dynamic_cast<ShHostStorage>(host_dp0->findStorage("host"));
-  ShHostStoragePtr dp1_storage = shref_dynamic_cast<ShHostStorage>(host_dp1->findStorage("host"));
-  ShHostStoragePtr dp2_storage = shref_dynamic_cast<ShHostStorage>(host_dp2->findStorage("host"));
-  ShHostStoragePtr dp3_storage = shref_dynamic_cast<ShHostStorage>(host_dp3->findStorage("host"));
-  ShHostStoragePtr dp4_storage = shref_dynamic_cast<ShHostStorage>(host_dp4->findStorage("host"));
-  ShHostStoragePtr color_storage = shref_dynamic_cast<ShHostStorage>(host_color->findStorage("host"));
-*/
-
-  
-  /*new GlTextureStorage(host_dp0->object(),
-                                     GL_TEXTURE_2D,
-                                     GL_RGBA,
-                                     GL_RGBA_FLOAT16_ATI,
-                                     host_dp0->value_type(),
-                                     dpt0.width(), dpt0.height(), 
-                                     dpt0.depth(), dpt0.size(),
-                                     NUM_GRID_CELLS, dpt0.name(), 0);*/
-
- /* // these storages maybe cached on the graphics card, flag them
-  // as dirty so that:
-  // 1) the latest copies will be on the host 
-  // 2) after reseting the stream, the graphics card copy will be updated
-  dp0_storage->dirtyall();
-  dp1_storage->dirtyall();
-  dp2_storage->dirtyall();
-  dp3_storage->dirtyall();
-  dp4_storage->dirtyall();
-  color_storage->dirtyall();
-
-  for(int i=0;i<NUM_GRID_CELLS;i++){
-    ((float*)(color_storage->data()) )[i*4] =   0.6;//static_cast<float>( (testt( ShAttrib1f((float)(i*3)/NUM_GRID_CELLS)  ))(0));
-    ((float*)(color_storage->data()) )[i*4+1] = 0.3; //static_cast<float>( (testt(i*3)/NUM_GRID_CELLS )(1));
-    ((float*)(color_storage->data()) )[i*4+2] = 0.1; //static_cast<float>( (testt(i*3)/NUM_GRID_CELLS )(2));
-    ((float*)(color_storage->data()) )[i*4+3] = 0.5;
-  
-  }
-
-
-  dpt0.memory(host_dp0);
-  dpt1.memory(host_dp1);
-  dpt2.memory(host_dp2);
-  dpt3.memory(host_dp3);
-  dpt4.memory(host_dp4);
-  colort.memory(host_color);*/
-
-#else
-
-  dpt0.memory(dp0.memory());
-  dpt1.memory(dp1.memory());
-  dpt2.memory(dp2.memory());
-  dpt3.memory(dp3.memory());
-  dpt4.memory(dp4.memory());
-  colort.memory(color.memory());
-
-#endif
 
 }
 
@@ -562,30 +478,8 @@ void drawQuad(){
 }
 
 
-void switchBuffers(){
-//switch texture buffers:
-/*  dbc++;
-  dbc %= 2;
-  idbc = (dbc+1)%2; //inverse dbc
-  //printf("dbc: %d, idbc: %d\n", dbc, idbc);
-  char tid[5];
-
-  // set up texnodes to point to correct texids:
-  sprintf(tid, "%d",dpt_ids[dbc][0]);
-  dpt0.meta("opengl:texid", tid);
-  sprintf(tid, "%d",dpt_ids[dbc][1]);
-  dpt1.meta("opengl:texid", tid);
-  sprintf(tid, "%d",dpt_ids[dbc][2]);
-  dpt2.meta("opengl:texid", tid);
-  sprintf(tid, "%d",dpt_ids[dbc][3]);
-  dpt3.meta("opengl:texid", tid);
-  sprintf(tid, "%d",dpt_ids[dbc][4]);
-  dpt4.meta("opengl:texid", tid);*/
-
-}
 
 void initGL(){
-
 		
 }
 
@@ -593,7 +487,7 @@ void display()
   {
 //printf("display\n");
 
-//  switchBuffers();	  
+	  
   glDisable(GL_DEPTH_TEST); // don't need depth test in stream programs
 
 
@@ -667,8 +561,8 @@ void display()
    drawQuad();
   shUnbind(*collision4_shaders);
 
+
 // Perform streaming:
-//  switchBuffers(); // need to consider the collision results and not overwrite them
   glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
                                   GL_TEXTURE_2D, dpt_ids[0], 0);
@@ -689,13 +583,13 @@ void display()
   glVertex3f(-0.5, 0, 0);
   
   glTexCoord2f(1,0);
-  glVertex3f(-0.5+0.1, 0, 0);
+  glVertex3f(-0.5+SO2, 0, 0);
   
   glTexCoord2f(1,1);
-  glVertex3f(-0.5+0.1, 0.1,  0);
+  glVertex3f(-0.5+SO2, SO1,  0);
   
   glTexCoord2f(0,1);
-  glVertex3f(-0.5, 0.1,  0);
+  glVertex3f(-0.5, SO1,  0);
   
   glEnd();
   shUnbind(*mouse0_shaders);
@@ -720,13 +614,13 @@ void display()
   glVertex3f(-0.5, 0, 0);
   
   glTexCoord2f(1,0);
-  glVertex3f(-0.5+0.1, 0, 0);
+  glVertex3f(-0.5+SO2, 0, 0);
   
   glTexCoord2f(1,1);
-  glVertex3f(-0.5+0.1, 0.1,  0);
+  glVertex3f(-0.5+SO2, SO1,  0);
   
   glTexCoord2f(0,1);
-  glVertex3f(-0.5, 0.1,  0);
+  glVertex3f(-0.5, SO1,  0);
   
   glEnd();
   shUnbind(*mouse1_shaders);
@@ -765,404 +659,13 @@ glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 
 glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-/*  shBind(*showeq0_shaders);
-   drawQuad();
-  shUnbind(*showeq0_shaders);*/
-
   shBind(*showvel_shaders);
    drawQuad();
   shUnbind(*showvel_shaders);
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-// Display pass here:
-  
-// normal rendering pass
-  /*glActiveTexture(GL_TEXTURE0_ARB);
-  glBindTexture(GL_TEXTURE_2D, color_tex_id);
-
-  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);*/
-
-  
-  // Bind in the programs used to shade the particles
-  // The updating of the stream is done using double buffering, if we just
-  // ran particle_updateA then the latest data state is in stream 'B', otherwise
-  // its in stream 'A' (because particle_updateB was the last to be run). Based
-  // on the value of dir, render the appropriate stream
- /* float* particle_positions = 0;
-  float* particle_velocities = 0;
-    // Use the ShChannel object to fetch the ShHostStorage object
-    ShHostStoragePtr posA_storage = shref_dynamic_cast<ShHostStorage>(posA.memory()->findStorage("host"));
-    if (posA_storage)
-      {
-      // The ShHostStorage object may be out data with respect to
-      // the lastest copy on the graphics card, call sync() first
-      // to make sure that the ShHostStorage updated
-      posA_storage->sync();
-
-      // fetch the raw data pointer and simply render the particles as points
-      particle_positions = (float*)posA_storage->data();
-      }
-    ShHostStoragePtr velA_storage = shref_dynamic_cast<ShHostStorage>(velA.memory()->findStorage("host"));
-    if (velA_storage)
-      {
-      // The ShHostStorage object may be out data with respect to
-      // the lastest copy on the graphics card, call sync() first
-      // to make sure that the ShHostStorage updated
-      velA_storage->sync();
-
-      // fetch the raw data pointer and simply render the particles as points
-      particle_velocities = (float*)velA_storage->data();
-      }
-  float* particle_times = 0;
-    // Use the ShChannel object to fetch the ShHostStorage object
-    ShHostStoragePtr timeA_storage = shref_dynamic_cast<ShHostStorage>(timeA.memory()->findStorage("host"));
-    if (timeA_storage)
-      {
-      // The ShHostStorage object may be out data with respect to
-      // the lastest copy on the graphics card, call sync() first
-      // to make sure that the ShHostStorage updated
-      timeA_storage->sync();
-
-      // fetch the raw data pointer and simply render the particles as points
-      particle_times = (float*)timeA_storage->data();
-      }
-*/
-  
- /* float* terrain_positions = 0;
-  
-    ShHostStoragePtr terrain_storage = shref_dynamic_cast<ShHostStorage>(terrain.memory()->findStorage("host"));
-    if (terrain_storage)
-      {
-      // The ShHostStorage object may be out data with respect to
-      // the lastest copy on the graphics card, call sync() first
-      // to make sure that the ShHostStorage updated
-      terrain_storage->sync();
-
-      // fetch the raw data pointer and simply render the particles as points
-      terrain_positions = (float*)terrain_storage->data();
-      }
-
- // skybox
-  glDisable(GL_DEPTH_TEST);
-  shBind(*skybox_shaders);
- // diffuse_color = ShColor3f(1.0, 1.0, 1.0);
- // glDisable(GL_LIGHTING);
- glBegin(GL_QUADS);
-
-//  glTexCoord2f(0,1);
-  glVertex3f(-1, 1, -1);
-//  glTexCoord2f(1,1);
-  glVertex3f( 1, 1, -1);
-//  glTexCoord2f(1,0);
-  glVertex3f( 1, 1,  1);
-//  glTexCoord2f(0,0);
-  glVertex3f(-1, 1,  1);
-
-//  glTexCoord2f(0,1);
-  glVertex3f(-1, -1, -1);
-//  glTexCoord2f(1,1);
-  glVertex3f( 1, -1, -1);
-//  glTexCoord2f(1,0);
-  glVertex3f( 1, 1, -1);
-//  glTexCoord2f(0,0);
-  glVertex3f(-1, 1, -1);
-
-  glVertex3f( 1, -1, -1);
-  glVertex3f( 1, -1,  1);
-  glVertex3f( 1, 1,  1);
-  glVertex3f( 1, 1, -1);
-
-  glVertex3f( 1, -1,  1);
-  glVertex3f(-1, -1,  1);
-  glVertex3f(-1, 1,  1);
-  glVertex3f( 1, 1,  1);
-
-  glVertex3f(-1, -1,  1);
-  glVertex3f(-1, -1, -1);
-  glVertex3f(-1, 1, -1);
-  glVertex3f(-1, 1,  1);
-
-  glVertex3f(-1, -1, -1);
-  glVertex3f(-1, -1,  1);
-  glVertex3f( 1, -1,  1);
-  glVertex3f( 1, -1, -1);
-
-  glEnd();
-  glEnable(GL_DEPTH_TEST);
-*/
-
-/*
-#ifdef TERRAIN
- if (terrain_positions) {
-    shBind(*terrain_shaders);
-    glBegin(GL_TRIANGLES);
-    for(int i = 0; i < (TM_RES-1)*(TM_RES-1)*6; i++)
-      {
-        glVertex3fv(&terrain_positions[3*i]);
-      }
-    glEnd();
-  }
-#endif // TERRAIN
- */
-  
- /* 
-// if(fmode > 0){
-  if (particle_positions) {
-  shBind(*particle_shaders);
-  glBegin(GL_QUADS);
-  for(int i = 0; i < NUM_PARTICLES; i++){
-   // for(int k=0;k<3;k++) mm[3](k) = particle_positions[3*i+k];
- 
-  glMultiTexCoord3fARB(GL_TEXTURE0, particle_positions[3*i], particle_positions[3*i+1], particle_positions[3*i+2]);
-  glMultiTexCoord1fARB(GL_TEXTURE1, particle_times[i]);
-  glNormal3f(particle_velocities[3*i],particle_velocities[3*i+1],particle_velocities[3*i+2]);
-  glVertex3f(-PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
-  glVertex3f(PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
-  glVertex3f(PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
-  glVertex3f(-PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
-
-  //glNormal3f(0, 0, -1);
-  glVertex3f(-PCO+particle_positions[3*i], -PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
-  glVertex3f(PCO+particle_positions[3*i], -PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
-  glVertex3f(PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
-  glVertex3f(-PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
-
-  //glNormal3f(1, 0, 0);
-  glVertex3f(PCO+particle_positions[3*i], -PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
-  glVertex3f(PCO+particle_positions[3*i], -PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
-  glVertex3f(PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
-  glVertex3f(PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
-
-  //glNormal3f(0, 0, 1);
-  glVertex3f(PCO+particle_positions[3*i], -PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
-  glVertex3f(-PCO+particle_positions[3*i], -PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
-  glVertex3f(-PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
-  glVertex3f(PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
-
-  //glNormal3f(-1, 0, 0);
-  glVertex3f(-PCO+particle_positions[3*i], -PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
-  glVertex3f(-PCO+particle_positions[3*i], -PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
-  glVertex3f(-PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
-  glVertex3f(-PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
-
-  //glNormal3f(0, -1, 0);
-  glVertex3f(-PCO+particle_positions[3*i], -PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
-  glVertex3f(-PCO+particle_positions[3*i], -PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
-  glVertex3f(PCO+particle_positions[3*i], -PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
-  glVertex3f(PCO+particle_positions[3*i], -PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
- 
-   }//for
-  glEnd();
-
-  }//if
-// }//if fmode
-*/
-
- /*
-  shBind(*particle_shaders);
-  glBegin(GL_QUADS);
-  for(int i = 0; i < NUM_PARTICLES; i++){
-   // for(int k=0;k<3;k++) mm[3](k) = particle_positions[3*i+k];
- 
-  //glMultiTexCoord3fARB(GL_TEXTURE0, ((float)(i%SQR_NUM_PARTICLES))/SQR_NUM_PARTICLES, ((float)(i/SQR_NUM_PARTICLES))/SQR_NUM_PARTICLES, 0);
-  glTexCoord2f(((float)(i%SQR_NUM_PARTICLES))/SQR_NUM_PARTICLES, ((float)(i/SQR_NUM_PARTICLES))/SQR_NUM_PARTICLES);
-  //glMultiTexCoord1fARB(GL_TEXTURE1, particle_times[i]);
-  //glNormal3f(particle_velocities[3*i],particle_velocities[3*i+1],particle_velocities[3*i+2]);
-  glVertex3f(-PCO, PCO, -PCO);
-  glVertex3f(PCO, PCO, -PCO);
-  glVertex3f(PCO, PCO, PCO);
-  glVertex3f(-PCO, PCO, PCO);
-
-  //glNormal3f(0, 0, -1);
-  glVertex3f(-PCO, -PCO, -PCO);
-  glVertex3f(PCO, -PCO, -PCO);
-  glVertex3f(PCO, PCO, -PCO);
-  glVertex3f(-PCO, PCO, -PCO);
-
-  //glNormal3f(1, 0, 0);
-  glVertex3f(PCO, -PCO, -PCO);
-  glVertex3f(PCO, -PCO, PCO);
-  glVertex3f(PCO, PCO, PCO);
-  glVertex3f(PCO, PCO, -PCO);
-
-  //glNormal3f(0, 0, 1);
-  glVertex3f(PCO, -PCO, PCO);
-  glVertex3f(-PCO, -PCO, PCO);
-  glVertex3f(-PCO, PCO, PCO);
-  glVertex3f(PCO, PCO, PCO);
-
-  //glNormal3f(-1, 0, 0);
-  glVertex3f(-PCO, -PCO, PCO);
-  glVertex3f(-PCO, -PCO, -PCO);
-  glVertex3f(-PCO, PCO, -PCO);
-  glVertex3f(-PCO, PCO, PCO);
-
-  //glNormal3f(0, -1, 0);
-  glVertex3f(-PCO, -PCO, -PCO);
-  glVertex3f(-PCO, -PCO, PCO);
-  glVertex3f(PCO, -PCO, PCO);
-  glVertex3f(PCO, -PCO, -PCO);
- 
-   }//for
-  glEnd();
- */
-
- 
- 
- // Bind in the programs to shade the plane pillar
- 
-// glEnable(GL_TEXTURE_2D);
-/* glBindTexture(GL_TEXTURE_2D, pb_texid);
-
-// glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-// glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-
- glBegin(GL_QUADS);
-
-  glTexCoord2f(0,1);
-  glVertex3f(-1, 1, -1);
-  glTexCoord2f(1,1);
-  glVertex3f( 1, 1, -1);
-  glTexCoord2f(1,0);
-  glVertex3f( 1, 1,  1);
-  glTexCoord2f(0,0);
-  glVertex3f(-1, 1,  1);
-
-  glTexCoord2f(0,1);
-  glVertex3f(-1, -1, -1);
-  glTexCoord2f(1,1);
-  glVertex3f( 1, -1, -1);
-  glTexCoord2f(1,0);
-  glVertex3f( 1, 1, -1);
-  glTexCoord2f(0,0);
-  glVertex3f(-1, 1, -1);
-
-  glVertex3f( 1, -1, -1);
-  glVertex3f( 1, -1,  1);
-  glVertex3f( 1, 1,  1);
-  glVertex3f( 1, 1, -1);
-
-  glVertex3f( 1, -1,  1);
-  glVertex3f(-1, -1,  1);
-  glVertex3f(-1, 1,  1);
-  glVertex3f( 1, 1,  1);
-
-  glVertex3f(-1, -1,  1);
-  glVertex3f(-1, -1, -1);
-  glVertex3f(-1, 1, -1);
-  glVertex3f(-1, 1,  1);
-
-  glVertex3f(-1, -1, -1);
-  glVertex3f(-1, -1,  1);
-  glVertex3f( 1, -1,  1);
-  glVertex3f( 1, -1, -1);
-
-  glEnd();*/
-
-
-  
-  /*
-  shBind(*plane_shaders);
-
-  // draw volume slabs
-  glDisable(GL_CULL_FACE);
-  glDepthMask(GL_FALSE);
-  //glDisable(GL_DEPTH_TEST);
-  glEnable(GL_BLEND);
-  //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-  //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-  glBegin(GL_QUADS);
-  for(int i=0; i<(GRID_3D_RES); i++){
-   float pz = (i*2.0*SCALE)/GRID_3D_RES-SCALE;
-   //glTexCoord2f(0,0);
-   glVertex3f(-SCALE, -SCALE, pz);
-   //glTexCoord2f(1,0);
-   glVertex3f( SCALE, -SCALE, pz);
-   //glTexCoord2f(1,1);
-   glVertex3f( SCALE, SCALE,  pz);
-   //glTexCoord2f(0,1);
-   glVertex3f(-SCALE, SCALE,  pz);
-  }
-  glEnd();
-  glDisable(GL_BLEND);
-  //glEnable(GL_DEPTH_TEST);
-  glDepthMask(GL_TRUE);
-  glEnable(GL_CULL_FACE);
-  //glCullFace(GL_FRONT);
- 
-  shUnbind(*plane_shaders);
- */
- 
-  /*
-  // Help information
-  if (show_help)
-    {
-    gprintf(30, 160, "Sh Stream Example Help");
-    gprintf(30, 135, "  'R' - Reset simulation");
-    gprintf(30, 120, "  'S' - Single step simulation");
-    gprintf(30, 105, "Space - Start/stop simulation");
-    gprintf(30, 90,  "  'H' - Show/hide help");
-    gprintf(30, 75,  "  'Q' - Quit");
-    }
-  else
-    {
-    gprintf(10, 10, "'H' for help...");
-    }*/
-
-  
   glutSwapBuffers();
 
-  //glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
-
-
-  /*
-// off screen pass     
-// unbind texture
-  glActiveTexture(GL_TEXTURE0_ARB);
-  glBindTexture(GL_TEXTURE_2D, 0);		  
-
-// render particle positions into texture
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb1);
-  //setup_view();
-
-  glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
- 
-  // Set states
-  glDisable(GL_CULL_FACE);
-  glDisable(GL_DEPTH_TEST);
-  //glDepthFunc(GL_LEQUAL);
-  glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
- 
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
-
-  shBind(*particle_volume_shaders);
-  glTexEnvf( GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE );
-  glEnable( GL_POINT_SPRITE_ARB );
-  glPointSize(5.0f);
-  glBegin(GL_POINTS);
-  for(int i = 0; i < NUM_PARTICLES; i++){
-   //glVertex3f(particle_positions[3*i], particle_positions[3*i+1], particle_positions[3*i+2]);
-    //glMultiTexCoord3fARB(GL_TEXTURE1, particle_positions[3*i], particle_positions[3*i+1], particle_positions[3*i+2]);
-   //glMultiTexCoord1fARB(GL_TEXTURE2, particle_times[i]);
-   //glNormal3f(particle_velocities[3*i],particle_velocities[3*i+1],particle_velocities[3*i+2]);
-   glVertex3f( ((float)(i%SQR_NUM_PARTICLES))/SQR_NUM_PARTICLES, ((float)(i/SQR_NUM_PARTICLES))/SQR_NUM_PARTICLES, 0);
-  }//for
-  glEnd();
-  glDisable( GL_POINT_SPRITE_ARB );
    
-
-  glDisable(GL_BLEND);
-  
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-*/
-  
   }//display
 
 void reshape(int width, int height)
@@ -1217,9 +720,6 @@ void mouse(int button, int state, int x, int y)
 
 void idle(void)
   {
-  #ifdef USING_STREAMS
-   update_streams();
-  #endif
   glutPostRedisplay();
   }
 
@@ -1355,194 +855,6 @@ int main(int argc, char** argv)
   return 0;
   }
 
-#ifdef USING_STREAMS
-void init_streams(void)
-  {
-  // Specifiy the generic particle update program, later it will
-  // be specialized for the the actual particle update.
-  streaming = SH_BEGIN_PROGRAM("gpu:stream") {
-    ShOutputColor4f dp0;
-    ShOutputColor4f dp1;
-    ShOutputColor4f dp2;
-    ShOutputColor4f dp3;
-    ShOutputColor4f dp4;
-    ShOutputColor4f color;
-    ShInputTexCoord2f currtc;
-
-    dp0(0) = (dpt3d0.find12(currtc))(0);
-
-    
-/*    // parameters controlling the amount of momentum
-    // tranfer on collision
-    ShAttrib1f mu(0.8);
-    ShAttrib1f eps(0.6);
-
-    // check if below ground level
-    ShAttrib1f elev = (hm( (pos(0,2)+SCALE)/(2.0*SCALE)) )(0);
-    ShAttrib1f under = pos(1) < elev;
-
-    ShAttrib1f out = (pos(0) < -SCALE) || (pos(0) > SCALE) || (pos(2) < -SCALE) || (pos(2) > SCALE);
-    time(0) -= lifeStep*ShAttrib1f(LIFE_STEP_FACTOR);
-    time(0) = cond(out, ShAttrib1f(0.0), time(0));
-    pos = cond(time(0), pos, ShPoint3f(0.0,1.0,0.0));
-    vel = cond(time(0), vel, initvel);
-    time(0) = cond(time(0), time(0), ShAttrib1f(1.0));
- 
-    pos = cond(under,ShPoint3f(pos(0), elev, pos(2)), pos);
-
-
-    // modify velocity in case of collision
-    ShVector3f norm( (nm((pos(0,2)+SCALE)/(2.0*SCALE)))(0,1,2)  );
-    norm = norm(0,2,1)*2-1.0;
-    norm = normalize(norm);
-    norm(0) = -norm(0); 
-    ShVector3f veln = dot(vel,norm)*norm;
-    ShVector3f velt = vel - veln;
-    vel = cond(under, (1.0 - mu)*velt - eps*veln, vel);
- 
-    ShAttrib1f onsurface = abs(pos(1)-elev) < 0.1;
-    ShAttrib1f minspeed = length(vel)<ShAttrib1f(MIN_SPEED);
-    
-    // clamp acceleration to zero if particles at or below ground plane 
-    acc = cond(onsurface, ShVector3f(0.0, 0.0, 0.0), acc);
-
-    // integrate acceleration to get velocity
-    vel = cond(onsurface&&minspeed, vel, vel+acc*delta);
-    vel -= DAMP_FACTOR*vel*delta;
-
-    // integrate velocity to update position
-    pos = cond(onsurface&&minspeed,pos,pos + vel*delta);
-*/
-    
-      } SH_END;
-
- 
-  ShHostMemoryPtr host_dp0 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
-  ShHostMemoryPtr host_dp1 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
-  ShHostMemoryPtr host_dp2 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
-  ShHostMemoryPtr host_dp3 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
-  ShHostMemoryPtr host_dp4 = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
-  ShHostMemoryPtr host_color = new ShHostMemory(4*sizeof(float)*NUM_GRID_CELLS, SH_FLOAT);
-
-
-
-/*host_posA->setTag("host_posA");
-host_velA->setTag("host_velA");
-host_initvelA->setTag("host_initvelA");
-host_timeA->setTag("host_timeA");*/
-
-
-  dp0 = ShChannel<ShVector4f>(host_dp0, NUM_GRID_CELLS);
-  dp1 = ShChannel<ShVector4f>(host_dp1, NUM_GRID_CELLS);
-  dp2 = ShChannel<ShVector4f>(host_dp2, NUM_GRID_CELLS);
-  dp3 = ShChannel<ShVector4f>(host_dp3, NUM_GRID_CELLS);
-  dp4 = ShChannel<ShVector4f>(host_dp4, NUM_GRID_CELLS);
-  color = ShChannel<ShVector4f>(host_color, NUM_GRID_CELLS);
-    
-  //ShStream data = posA & velA & initvelA & timeA;
-  
-  lbm_update = (streaming /*<< dataA << gravity << delta*/);
-
-  // Everything has been setup for the particle system to operate, last
-  // thing is to set the initial data.
-  reset_streams();
-  }
-
-void reset_streams(void)
-  {
-  // Set our time counter to zero
-  simtime = 0.0;
-    
-  // Use the ShChannels objects to find the associated ShHostStorage and
-  // then fetch the raw data and cast to a float pointer.
-  ShHostStoragePtr dp0_storage = shref_dynamic_cast<ShHostStorage>(dp0.memory()->findStorage("host"));
-  ShHostStoragePtr dp1_storage = shref_dynamic_cast<ShHostStorage>(dp1.memory()->findStorage("host"));
-  ShHostStoragePtr dp2_storage = shref_dynamic_cast<ShHostStorage>(dp2.memory()->findStorage("host"));
-  ShHostStoragePtr dp3_storage = shref_dynamic_cast<ShHostStorage>(dp3.memory()->findStorage("host"));
-  ShHostStoragePtr dp4_storage = shref_dynamic_cast<ShHostStorage>(dp4.memory()->findStorage("host"));
-
-
-  // these storages maybe cached on the graphics card, flag them
-  // as dirty so that:
-  // 1) the latest copies will be on the host 
-  // 2) after reseting the stream, the graphics card copy will be updated
-  dp0_storage->dirtyall();
-  dp1_storage->dirtyall();
-  dp2_storage->dirtyall();
-  dp3_storage->dirtyall();
-  dp4_storage->dirtyall();
-
-  float* dp0_data = (float*)dp0_storage->data()
-
-  for(int i=0;i<NUM_GRID_CELLS;i++){
-  	dp0_data[4*i]   = 0.5*((float)rand())/(RAND_MAX-1);
-        dp0_data[4*i+1] = 0;
-        dp0_data[4*i+2] = 0;
-        dp0_data[4*i+3] = 0;
-   } 	  
-
- /* float* posA_data = (float*)posA_storage->data();
-  float* velA_data = (float*)velA_storage->data();
-  float* initvelA_data = (float*)initvelA_storage->data();
-  float* timeA_data = (float*)timeA_storage->data();
-
-
-  // Iterate over the particle and initialize their state
-  for(int i = 0; i < NUM_PARTICLES; i++)
-    {
-    // All the particles will start at the same places
-    posA_data[3*i+0] = 0;
-    posA_data[3*i+1] = 1;
-    posA_data[3*i+2] = 0;
-
-    // The velocity direction will vary over a small cone of angles.
-    float theta = 2*M_PI*((float)rand()/(RAND_MAX-1));
-    float phi = 0.7*(M_PI/2) + 0.2*(M_PI/2)*((float)rand()/(RAND_MAX-1));
-
-    float cost = cos(theta);
-    float sint = sin(theta);
-    float cosp = cos(phi);
-    float sinp = sin(phi);
-
-    // Additionally, vary the speed (i.e. magnitude of the velocity vector)
-    float power = 5 + 4*((float)rand()/(RAND_MAX-1));
-
-    initvelA_data[3*i+0] = power*sint*cosp;
-    initvelA_data[3*i+1] = power*sinp;
-    initvelA_data[3*i+2] = power*cost*cosp;
-
-    velA_data[3*i+0] = 0;
-    velA_data[3*i+1] = 0;
-    velA_data[3*i+2] = 0;
-
-    timeA_data[3*i] = i*(1.0/NUM_PARTICLES);
-
-    lifeStep = ShAttrib1f(1.0/NUM_PARTICLES);
-    
-    }
-*/
-  }
-
-void update_streams(void)
-  {
-
-  try 
-    {
-      dp0 & dp1 & dp2 & dp3 & dp4 & color = lbm_update;
-
-	    
-      simtime += timedelta;
-    }
-  catch (const ShException& e)
-    {
-    std::cerr << "SH Exception: " << e.message() << std::endl;
-    }
-  catch (...)
-    {
-    std::cerr << "Unknown exception caught." << std::endl;
-    }
-  }
-#endif //USING_STREAMS
 
 void init_shaders(void)
   {
@@ -1585,7 +897,7 @@ void init_shaders(void)
 
     velocity += ShAttrib3f( 0, 0, 1)*dpt4(tc)(0);
     velocity += ShAttrib3f( 0, 0,-1)*dpt4(tc)(1);
-    velocity += ShAttrib3f( 0, 0, 0)*dpt4(tc)(2);
+    //velocity += ShAttrib3f( 0, 0, 0)*dpt4(tc)(2);
     
     velocity /= density;
     
@@ -1655,10 +967,10 @@ void init_shaders(void)
 
     //constants:
     ShAttrib1f A, B, C, D;
-    A = 1.0/18;
-    B = 3.0/18;
-    C = 1.0/4;
-    D = -1.0/12;
+    A = 0.027777777777;
+    B = 0.083333333333;
+    C = 0.125;
+    D = -0.04166666666; 
     
     // inner products:
     ShAttrib4f eu;
@@ -1682,11 +994,10 @@ void init_shaders(void)
 
     //constants:
     ShAttrib1f A, B, C, D;
-    A = 1.0/18;
-    B = 3.0/18;
-    C = 1.0/4;
-    D = -1.0/12;
-    
+    A = 0.027777777777;
+    B = 0.083333333333;
+    C = 0.125;
+    D = -0.04166666666;   
     // inner products:
     ShAttrib4f eu;
     ShVector3f u = dvt(tc)(0,1,2);
@@ -1709,11 +1020,10 @@ void init_shaders(void)
 
     //constants:
     ShAttrib1f A, B, C, D;
-    A = 1.0/18;
-    B = 1.0/6;
-    C = 1.0/4;
-    D = -1.0/12;
-    
+    A = 0.05555555555;
+    B = 0.16666666666;
+    C = 0.25;
+    D = -0.0833333333;   
     // inner products:
     ShAttrib4f eu;
     ShVector3f u = dvt(tc)(0,1,2);
@@ -1757,24 +1067,11 @@ void init_shaders(void)
     
   } SH_END;
 
- /* streaming0_vsh = SH_BEGIN_VERTEX_PROGRAM {
-    ShInOutPosition4f pos;
-    ShInOutTexCoord2f tc;
-    //ShOutputPosition3f posp;
-      
-    //posp = pos(0,1,2);
-    //tc = color_tex3d.get2DTexCoord(pos(0,1,2)/5);
-    //pos = mvd | pos;
-        
-    } SH_END;*/
-
-  // This fragment shader will be used to shade the other pieces
-  // of geometry (the plane and particle shooter). Its just a simple
-  // diffuse shader (using the global uniform diffuse_color).
+ 
+  
   streaming0_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
     ShInputPosition4f pos;
     ShInputTexCoord2f tc;
-    //ShInputPosition4f posp;
     ShOutputColor4f color;
 
     //tc(0) = tc(0)+0.01;   
@@ -1782,14 +1079,13 @@ void init_shaders(void)
     color(1) = (dptc3d0.find13(tc))(1);
     color(2) = (dptc3d0.find15(tc))(2);
     color(3) = (dptc3d0.find10(tc))(3);
-///color = ShColor4f(0.2, 0.4, 0.1, 0.5);
+
     
   } SH_END;
 
   streaming1_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
     ShInputPosition4f pos;
     ShInputTexCoord2f tc;
-    //ShInputPosition4f posp;
     ShOutputColor4f color;
 
     //tc(0) = tc(0)+0.01;   
@@ -1797,14 +1093,13 @@ void init_shaders(void)
     color(1) = (dptc3d1.find11(tc))(1);
     color(2) = (dptc3d1.find9(tc))(2);
     color(3) = (dptc3d1.find16(tc))(3);
-///color = ShColor4f(0.2, 0.4, 0.1, 0.5);
+
     
   } SH_END;
 
   streaming4_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
     ShInputPosition4f pos;
     ShInputTexCoord2f tc;
-    //ShInputPosition4f posp;
     ShOutputColor4f color;
 
     //tc(0) = tc(0)+0.01;   
@@ -1812,7 +1107,7 @@ void init_shaders(void)
     color(1) = dptc4(tc)(1);//(dptc3d4.find11(tc))(1);
     color(2) = dptc4(tc)(2);
     color(3) = 0;
-///color = ShColor4f(0.2, 0.4, 0.1, 0.5);
+
     
   } SH_END;
 
@@ -1822,6 +1117,8 @@ void init_shaders(void)
     ShOutputColor4f color;
 
     color(0,2) = abs((dvt(tc)(0,1))*2-1.0);
+	color(1) = 0;
+	color(3) = 1.0;
     //color(2) = clamp(abs(-dvt(tc)(0)) + abs(-dvt(tc)(1)),0,1.0);
     
   } SH_END;
