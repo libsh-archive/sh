@@ -115,6 +115,9 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node)
   } else if (float_nv) {
     float_formats = fpformats_nv;
     half_formats = halfformats_nv;
+  } else {
+    // TODO: what do we do if none of these extensions are available?
+    // see issue242
   }
 #else
   bool float_apple = (exts.find("APPLE_float_pixels") != std::string::npos);
