@@ -48,12 +48,12 @@ using namespace SH;
 // defines
 //#define USING_STREAMS
 
-#define INTERNAL_FORMAT GL_RGBA16 //GL_RGBA_FLOAT32_ATI
+#define INTERNAL_FORMAT GL_RGBA16 /*GL_RGBA8*/
 
 #define NUMMODES 1
 
 #define SO1 0.005
-#define SO2 0.3
+#define SO2 0.1
 #define SCALE 5
 #define GRID_2D_RES 512
 #define SQR_GRID_3D_RES 8
@@ -62,7 +62,20 @@ using namespace SH;
 
 #define RCPSQR2 0.707106781186
 
-#define TAU 5.2
+#define A0 (2.0/9)
+#define D0 -0.333333333
+
+#define A1 (1.0/9)
+#define B1 0.333333333
+#define C1 0.5
+#define D1 -(1.0/6)
+
+#define A2 (1.0/36)
+#define B2 (1.0/12)
+#define C2 0.125
+#define D2 -(1.0/24)
+
+#define TAU 2.4
 #define INV_TAU (1.0f/TAU)
 
 // forward declarations
@@ -332,7 +345,7 @@ printf("init_textures()\n");
   glGenTextures(5, dpt_ids);
 
   for (int i=0;i<NUM_GRID_CELLS;i++){
-    testdata[4][i*4+2] = 0.001;
+    testdata[4][i*4+2] = 0.1;
   }
 
   for(int i=0;i<5;i++){
@@ -575,6 +588,8 @@ void display()
  if(buttons[0] == GLUT_DOWN){ 
   dirs(0) = ((float)ddx)/5;
   dirs(1) = ((float)ddy)/5;
+  /*dirs(0) = -1.0;
+  dirs(1) = 0.0;*/
   dirs(2) = 0;
   shBind(*mouse0_shaders);
   glBegin(GL_QUADS);
@@ -912,11 +927,11 @@ void init_shaders(void)
     ShOutputColor4f color;
 
     //constants:
-    ShAttrib1f A, B, C, D;
+  /*  ShAttrib1f A, B, C, D;
     A = 0.05555555555;
     B = 0.16666666666;
     C = 0.25;
-    D = -0.0833333333;
+    D = -0.0833333333;*/
     
     // inner products:
     ShAttrib4f eu;
@@ -929,7 +944,7 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = (A + B*eu + C*eu2 + D*uu)*(dvt(tc))(3);
+    color = (A1 + B1*eu + C1*eu2 + D1*uu)*(dvt(tc))(3);
     
   } SH_END;
 
@@ -939,12 +954,15 @@ void init_shaders(void)
     ShOutputColor4f color;
 
     //constants:
-    ShAttrib1f A, B, C, D;
-    A = 0.027777777777;
+ //   ShAttrib1f A, B, C, D;
+/*    A = 0.027777777777;
     B = 0.083333333333;
     C = 0.125;
-    D = -0.04166666666;
-    
+    D = -0.04166666666;*/
+/*    A = 0.04;
+    B = 0.1;
+    C = 0.15;
+    D = -0.1;  */
     // inner products:
     ShAttrib4f eu;
     ShVector3f u = (dvt(tc)(0,1,2))*2-1.0;
@@ -956,7 +974,7 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = (A + B*eu + C*eu2 + D*uu)*dvt(tc)(3);
+    color = (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3);
     
   } SH_END;
 
@@ -966,15 +984,15 @@ void init_shaders(void)
     ShOutputColor4f color;
 
     //constants:
-    ShAttrib1f A, B, C, D;
+/*    ShAttrib1f A, B, C, D;
     A = 0.027777777777;
     B = 0.083333333333;
     C = 0.125;
-    D = -0.04166666666; 
+    D = -0.04166666666; */
     
     // inner products:
     ShAttrib4f eu;
-    ShVector3f u = dvt(tc)(0,1,2);
+    ShVector3f u = (dvt(tc)(0,1,2))*2-1.0;
     eu(0) = ShVector3f(1,0,1)  | u;
     eu(1) = ShVector3f(-1,0,-1) | u;
     eu(2) = ShVector3f(1,0,-1)  | u;
@@ -983,7 +1001,7 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = (A + B*eu + C*eu2 + D*uu)*dvt(tc)(3);
+    color = (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3);
     
   } SH_END;
 
@@ -993,14 +1011,14 @@ void init_shaders(void)
     ShOutputColor4f color;
 
     //constants:
-    ShAttrib1f A, B, C, D;
+/*    ShAttrib1f A, B, C, D;
     A = 0.027777777777;
     B = 0.083333333333;
     C = 0.125;
-    D = -0.04166666666;   
+    D = -0.04166666666; */  
     // inner products:
     ShAttrib4f eu;
-    ShVector3f u = dvt(tc)(0,1,2);
+    ShVector3f u = (dvt(tc)(0,1,2))*2-1.0;
     eu(0) = ShVector3f(0,1,1)  | u;
     eu(1) = ShVector3f(0,-1,-1) | u;
     eu(2) = ShVector3f(0,1,-1)  | u;
@@ -1009,7 +1027,7 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = (A + B*eu + C*eu2 + D*uu)*dvt(tc)(3);
+    color = (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3);
     
   } SH_END;
 
@@ -1019,14 +1037,14 @@ void init_shaders(void)
     ShOutputColor4f color;
 
     //constants:
-    ShAttrib1f A, B, C, D;
+ /*   ShAttrib1f A, B, C, D;
     A = 0.05555555555;
     B = 0.16666666666;
     C = 0.25;
-    D = -0.0833333333;   
+    D = -0.0833333333;  */ 
     // inner products:
     ShAttrib4f eu;
-    ShVector3f u = dvt(tc)(0,1,2);
+    ShVector3f u = (dvt(tc)(0,1,2))*2-1.0;
     eu(0) = ShVector3f(0,0,1)  | u;
     eu(1) = ShVector3f(0,0,-1) | u;
     eu(2) = 0;
@@ -1035,8 +1053,8 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = (A + B*eu + C*eu2 + D*uu)*dvt(tc)(3);
-    color(2) = (0.3333333 - 0.5*uu)*dvt(tc)(3); 
+    color = (A1 + B1*eu + C1*eu2 + D1*uu)*dvt(tc)(3);
+    color(2) = (A0 + D0*uu)*dvt(tc)(3); 
     
   } SH_END;
 
@@ -1074,7 +1092,8 @@ void init_shaders(void)
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
 
-    //tc(0) = tc(0)+0.01;   
+    //color = ShConstColor4f(0,0,0,0);
+
     color(0) = (dptc3d0.find12(tc))(0);
     color(1) = (dptc3d0.find13(tc))(1);
     color(2) = (dptc3d0.find15(tc))(2);
@@ -1088,7 +1107,8 @@ void init_shaders(void)
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
 
-    //tc(0) = tc(0)+0.01;   
+    //color = ShConstColor4f(0,0,0,0);
+
     color(0) = (dptc3d1.find14(tc))(0);
     color(1) = (dptc3d1.find11(tc))(1);
     color(2) = (dptc3d1.find9(tc))(2);
@@ -1155,10 +1175,10 @@ void init_shaders(void)
     ShOutputColor4f color;
 
     //color = ShConstColor4f(1,0,0,1);
-    color(0) = clamp(dirs|ShAttrib3f(1,0,0), 0, 1.0);
-    color(1) = clamp(dirs|ShAttrib3f(-1,0,0), 0, 1.0);
-    color(2) = clamp(dirs|ShAttrib3f(0,1,0), 0, 1.0);
-    color(3) = clamp(dirs|ShAttrib3f(0,-1,0), 0, 1.0);
+    color(0) = clamp(dirs|ShAttrib3f(1,0,0), 0, 10.0);
+    color(1) = clamp(dirs|ShAttrib3f(-1,0,0), 0, 10.0);
+    color(2) = clamp(dirs|ShAttrib3f(0,1,0), 0, 10.0);
+    color(3) = clamp(dirs|ShAttrib3f(0,-1,0), 0, 10.0);
    } SH_END;
 
    mouse1_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
@@ -1167,381 +1187,14 @@ void init_shaders(void)
     ShOutputColor4f color;
 
     //color = ShConstColor4f(1,0,0,1);
-    color(0) = RCPSQR2*clamp(dirs|ShAttrib3f(1,1,0), 0, 1.0);
-    color(1) = RCPSQR2*clamp(dirs|ShAttrib3f(-1,-1,0), 0, 1.0);
-    color(2) = RCPSQR2*clamp(dirs|ShAttrib3f(1,-1,0), 0, 1.0);
-    color(3) = RCPSQR2*clamp(dirs|ShAttrib3f(-1,1,0), 0, 1.0);
+    color(0) = RCPSQR2*clamp(dirs|ShAttrib3f(1,1,0), 0, 10.0);
+    color(1) = RCPSQR2*clamp(dirs|ShAttrib3f(-1,-1,0), 0, 10.0);
+    color(2) = RCPSQR2*clamp(dirs|ShAttrib3f(1,-1,0), 0, 10.0);
+    color(3) = RCPSQR2*clamp(dirs|ShAttrib3f(-1,1,0), 0, 10.0);
    } SH_END;
 
   
   
-  /*  plane_vsh = SH_BEGIN_VERTEX_PROGRAM {
-    ShInOutPosition4f pos;
-    //ShInOutTexCoord2f tc;
-    ShOutputPosition3f posp;
-      
-    posp = pos(0,1,2);
-    //tc = color_tex3d.get2DTexCoord(pos(0,1,2)/5);
-    pos = mvd | pos;
-        
-    } SH_END;
-
-  // This fragment shader will be used to shade the other pieces
-  // of geometry (the plane and particle shooter). Its just a simple
-  // diffuse shader (using the global uniform diffuse_color).
-  plane_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShInputPosition4f pos;
-    //ShInputTexCoord2f tc;
-    ShInputPosition4f posp;
-    ShOutputColor4f color;
-
-       
-    color = dpt3d0(posp(0,1,2)/SCALE);
-    
-  } SH_END;*/
-
-
- /*   skybox_vsh = SH_BEGIN_VERTEX_PROGRAM {
-    ShInOutPosition4f pos;
-    ShOutputPosition3f posp;
-    ShInOutTexCoord2f tc;
-
-    posp = pos(0,1,2);
-    pos(0,1,2) += wCamOrig;
-    
-    pos = mvd | pos;
-
-  } SH_END;
-
-    skybox_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShInputPosition4f pos;
-    ShInputPosition3f posp;
-    ShInputTexCoord2f tc;
-    ShOutputColor3f color;
-
-       color = em(posp); 
-  } SH_END;
-
-    
-    terrain_vsh = SH_BEGIN_VERTEX_PROGRAM {
-    ShInOutPosition4f pos;
-    ShOutputTexCoord2f tc;
-    ShOutputPoint4f posp;
-    //ShInOutNormal3f normal;
-    ShOutputVector3f lightv;
-   
-    // Get the Y value from heightmap
-    //pos(1) = pos(1) + 5.0*(terrt(pos(0,2)))(1); 
-    posp = pos;
-    tc = pos(0,2)/(2.0*SCALE)+.5;
-       
-    // Compute viewspace position
-    ShPoint3f posv = (mv | posp)(0,1,2);
-
-    // Compute light direction
-    lightv = lightPos - posv;
-    
-    // Project position
-    pos = mvd | posp;
-
-    // Project normal
-    //normal = mv | normal;
-
-  } SH_END;
-
-    terrain_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShInputPosition4f pos;
-    ShInputTexCoord2f tc;
-    ShInputPosition4f posp;
-//ShInputNormal3f normal;
-    ShInputVector3f lightv;
-    ShOutputColor3f color;
-
-    //normal = normalize(normal);
-    lightv = normalize(lightv);
-    ShVector3f norm( (nm((posp(0,2)+SCALE)/(2.0*SCALE)))(0,1,2)*2-1.0  );
-    
-    norm = normalize(norm);
-    norm(0)=-norm(0);
-    lightv = normalize(lightv);
-    
-    
-    //color = (norm|lightv)*terrt(tc)*ShColor3f(0.9,0.7,0.5); //terrain color;
-    //color = ShConstColor3f(0.5, 0.5, 0.5);
-    color = (norm|lightv)*((texpos(tc))(0,1,2))*ShColor3f(0.9,0.7,0.5); //terrain color;
-  } SH_END;
-
-     
-  // This vertex program will be used for all our shading, it
-  // simply transforms the incoming position/normal and generates
-  // a light vector. 
-  vsh = SH_BEGIN_VERTEX_PROGRAM {
-    ShInOutPosition4f pos;
-   // ShInOutAttrib1f lifetime;
-    ShInOutNormal3f normal;
-    ShOutputVector3f lightv;
-
-    // Compute viewspace position
-    ShPoint3f posv = (mv | pos)(0,1,2);
-
-    // Compute light direction
-    lightv = lightPos - posv;
-    
-    // Project position
-    pos = mvd | pos;
-
-    // Project normal
-    //normal = mv | normal;
-
-  } SH_END;
-
-    particle_vsh = SH_BEGIN_VERTEX_PROGRAM {
-    ShInOutPosition4f pos;
-    ShInOutTexCoord3f partpos;
-    ShInOutTexCoord1f parttime;
-    ShInputNormal3f vel; // not real normal
-    //ShOutputPoint3f posv;
-    ShOutputVector3f camray;
-    ShOutputPoint3f posm; // position in MS
-    ShOutputVector3f lightv;
-    ShOutputMatrix4x4f omtm;
-
-    // Compute camera ray
-    //WS
-    camray = ShPoint3f(pos(0,1,2)) - wCamOrig;
-    //->MS
-    ShMatrix4x4f mtm, imtm; // inverse model transformation matrix
-    mtm[3](0,1,2) = ShVector3f(partpos); //absolute position of the particle
-    mtm[1](0,1,2) = vel/3 + normalize(vel);
-    mtm[0](0,1,2) = normalize(-partpos);
-    mtm[2](0,1,2) = normalize(mtm[0](0,1,2) ^ mtm[1](0,1,2));
-    mtm[0](0,1,2) = normalize(mtm[2](0,1,2) ^ mtm[1](0,1,2));
-    mtm = transpose(mtm); 
-    omtm = mtm;
-    imtm = inverse(mtm);
-    camray = imtm(0,1,2)(0,1,2) | camray;
-    posm = (imtm | pos)(0,1,2);
-    lightv = -(imtm|lightPos);
-        
-    // Compute viewspace position
-   // posv = (mv | pos)(0,1,2);
-
-    // Compute light direction
-    //lightv = lightPos - posv;
-    
-    // Project position
-    pos = mvd | pos;
-
-    // Project normal
-    //normal = mv | normal;
-
-  } SH_END;
-
- // This fragment shader will be used to shade our particle. Its
-  // just assigns a uniform color (point_color). The above vertex
-  // program will be used in conjunction with this fragment program
-  // the transformed normal and generated light vector are simply
-  // ignored.
-  particle_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
-   ShInputTexCoord3f partpos;
-   ShInputTexCoord1f parttime;
-   //ShInputPoint3f posv;
-   ShInputVector3f camray;
-   ShInputPoint3f posm;
-   ShInputVector3f lightv;
-   ShInputMatrix4x4f mtm;
-   ShOutputColor3f color;
-
-   camray = normalize(camray); 	  
-   // now posv and camray gives us the full camera ray data
-   
-     
-   // solve for intersection
-   ShAttrib1f r1 = .02;
-   ShAttrib1f s1 = (-posm)|camray;
-   ShAttrib1f l2 = (-posm)|(-posm);
-   discard(l2-s1*s1-r1*r1);
-
-   // find the solution
-   ShAttrib1f t1 = s1 - sqrt(r1*r1-l2+s1*s1);
-   ShVector3f norm = normalize(mtm(0,1,2)(0,1,2) | (t1*camray+posm));
-   //ShAttrib1f in = normalize(lightv) | norm;
-//   color = em(mtm(0,1,2)(0,1,2) | (t1*camray+posm));
-   
-   ShVector3f reflv = reflect(camray,norm);
-   ShVector3f refrv = refract(-camray,norm,ShAttrib1f(1.0/1.5));
-   ShVector1f fres = fresnel(camray,norm,ShAttrib1f(1.5));
-   //fres = 1.0;
-   color = fres*em(reflv)(0,1,2) + (1.0f-fres)*em(refrv)(0,1,2); 
-   //ShAttrib1f lifetime(1.0-parttime);
-   color = lerp(parttime*parttime*parttime*parttime-.2, ShConstColor3f(1.0, 1.0, 1.0), color); 
-
-   } SH_END;
-
-  particle_vsh = SH_BEGIN_VERTEX_PROGRAM {
-    ShInOutPosition4f pos;
-    ShInputTexCoord2f partpos2d;
-    //ShInOutTexCoord3f partpos;
-    //ShInOutTexCoord1f parttime;
-    //ShInputNormal3f vel; // not real normal
-    //ShOutputPoint3f posv;
-    ShOutputVector3f camray;
-    ShOutputPoint3f posm; // position in MS
-    ShOutputVector3f lightv;
-    ShOutputMatrix4x4f omtm;
-
-    ShVector3f vel(0,1,0);
-    ShVector3f partpos(0,0,0);
-    
-    //partpos = (texpos(partpos2d(0,1)))(0,1,2);
-    partpos(0,1) = partpos2d(0,1);
-    pos(0,1,2) = pos(0,1,2) + partpos(0,1,2); 
-    //pos(0,1,2) = pos(0,1,2) + partpos(0,1,2); 
-
-    // Compute camera ray
-    //WS
-    camray = ShPoint3f(pos(0,1,2)) - wCamOrig;
-    //->MS
-    ShMatrix4x4f mtm, imtm; // inverse model transformation matrix
-    mtm[3](0,1,2) = ShVector3f(partpos); //absolute position of the particle
-    mtm[1](0,1,2) = vel/3 + normalize(vel);
-    mtm[0](0,1,2) = normalize(-partpos);
-    mtm[2](0,1,2) = normalize(mtm[0](0,1,2) ^ mtm[1](0,1,2));
-    mtm[0](0,1,2) = normalize(mtm[2](0,1,2) ^ mtm[1](0,1,2));
-    mtm = transpose(mtm); 
-    omtm = mtm;
-    imtm = inverse(mtm);
-    camray = imtm(0,1,2)(0,1,2) | camray;
-    posm = (imtm | pos)(0,1,2);
-    lightv = -(imtm|lightPos);
-        
-    // Compute viewspace position
-   // posv = (mv | pos)(0,1,2);
-
-    // Compute light direction
-    //lightv = lightPos - posv;
-    
-    // Project position
-    pos = mvd | pos;
-
-    // Project normal
-    //normal = mv | normal;
-
-  } SH_END;
-
- // This fragment shader will be used to shade our particle. Its
-  // just assigns a uniform color (point_color). The above vertex
-  // program will be used in conjunction with this fragment program
-  // the transformed normal and generated light vector are simply
-  // ignored.
-  particle_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
-   //ShInputTexCoord3f partpos;
-   //ShInputTexCoord1f parttime;
-   //ShInputPoint3f posv;
-   ShInputVector3f camray;
-   ShInputPoint3f posm;
-   ShInputVector3f lightv;
-   ShInputMatrix4x4f mtm;
-   ShOutputColor3f color;
-
-   camray = normalize(camray); 	  
-   // now posv and camray gives us the full camera ray data
-   
-     
-   // solve for intersection
-   ShAttrib1f r1 = .02;
-   ShAttrib1f s1 = (-posm)|camray;
-   ShAttrib1f l2 = (-posm)|(-posm);
-   discard(l2-s1*s1-r1*r1);
-
-   // find the solution
-   ShAttrib1f t1 = s1 - sqrt(r1*r1-l2+s1*s1);
-   ShVector3f norm = normalize(mtm(0,1,2)(0,1,2) | (t1*camray+posm));
-   //ShAttrib1f in = normalize(lightv) | norm;
-//   color = em(mtm(0,1,2)(0,1,2) | (t1*camray+posm));
-   
-   ShVector3f reflv = reflect(camray,norm);
-   ShVector3f refrv = refract(-camray,norm,ShAttrib1f(1.0/1.5));
-   ShVector1f fres = fresnel(camray,norm,ShAttrib1f(1.5));
-   //fres = 1.0;
-   color = fres*em(reflv)(0,1,2) + (1.0f-fres)*em(refrv)(0,1,2); 
-   //ShAttrib1f lifetime(1.0-parttime);
-   //color = lerp(parttime*parttime*parttime*parttime-.2, ShConstColor3f(1.0, 1.0, 1.0), color); 
-
-   //color = cond(l2-s1*s1-r1*r1, ShConstColor3f(0.0, 0.0, 0.0), ShConstColor3f(1.0, 1.0, 1.0));
- //     color = ShConstColor3f(1.0, 1.0, 1.0);
-      
-      //color = ShColor3f(col, col, col);
-     } SH_END;
- 
-   
- particle_volume_vsh = SH_BEGIN_VERTEX_PROGRAM {
-    ShInOutPosition4f pos;
-    ShInOutTexCoord2f tc;
-    //ShInOutTexCoord3f partpos;
-    //ShInOutTexCoord1f parttime;
-    ShInputNormal3f vel; // not real normal
-    ShOutputVector3f camray;
-    ShOutputPoint3f posm; // position in MS
-    ShOutputVector3f lightv;
-    ShOutputMatrix4x4f omtm;
-
-    
-    // Compute camera ray
-    //WS
-    camray = ShPoint3f(pos(0,1,2)) - wCamOrig;
-    //->MS
-    ShMatrix4x4f mtm, imtm; // inverse model transformation matrix
-    mtm[3](0,1,2) = ShVector3f(partpos); //absolute position of the particle
-    mtm[1](0,1,2) = vel/3 + normalize(vel);
-    mtm[0](0,1,2) = normalize(-partpos);
-    mtm[2](0,1,2) = normalize(mtm[0](0,1,2) ^ mtm[1](0,1,2));
-    mtm[0](0,1,2) = normalize(mtm[2](0,1,2) ^ mtm[1](0,1,2));
-    mtm = transpose(mtm); 
-    omtm = mtm;
-    imtm = inverse(mtm);
-    camray = imtm(0,1,2)(0,1,2) | camray;
-    posm = (imtm | pos)(0,1,2);
-    lightv = -(imtm|lightPos);
-        
-      // Project position
-    //pos = mvd | pos;
-  
-    ShMatrix4x4f v = mv; // just view, no translation
-    v = transpose(v);
-    v[3](0,1,2) = ShVector3f(0.0, 0.0, 0.0);
-    v = transpose(v);
-
-    //ShTexCoord2f vtc = pos(0,1);
-    //pos(0,1,2) = ( texpos(vtc) )(0,1,2);
-    pos = v | pos;
-    //pos(0,1,2) = color_tex3d.scatter(pos(0,1,2),SCALE);
-    
-
-   } SH_END;
-
-  particle_volume_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
-   ShInputTexCoord2f tc;
-   //ShInputTexCoord3f partpos;
-   //ShInputTexCoord1f parttime;
-   ShInputVector3f camray;
-   ShInputPoint3f posm;
-   ShInputVector3f lightv;
-   ShInputMatrix4x4f mtm;
-   ShOutputColor4f color;
-
-     color = ShConstColor4f(1.0, 1.0, 1.0, 1.0);//ShConstColor4f(1.0, 1.0, 1.0, 0.3);
-     color(3) = terrt(tc)(0)*(1.0/(1*SLICEFACTOR));
-   } SH_END;
-*/
-	
- 
-
-/*  particle_shaders = new ShProgramSet(particle_vsh, particle_fsh);
-  particle_volume_shaders = new ShProgramSet(particle_volume_vsh, particle_volume_fsh);
-  terrain_shaders = new ShProgramSet(terrain_vsh, terrain_fsh);
-  skybox_shaders = new ShProgramSet(skybox_vsh, skybox_fsh);*/
-  //plane_shaders = new ShProgramSet(plane_vsh, plane_fsh);
   dv_shaders = new ShProgramSet(vsh, dv_fsh);
   eq0_shaders = new ShProgramSet(vsh, eq0_fsh);
   eq1_shaders = new ShProgramSet(vsh, eq1_fsh);

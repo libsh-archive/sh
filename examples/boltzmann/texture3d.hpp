@@ -58,16 +58,16 @@ public:
 // find neighbors:
 ShColor4f find9(ShTexCoord2f tc){ // (-1,1,0)
  tc(0) -= fo; 	
- tc(1) -= fo;
+ tc(1) += fo;
  return (*ptexture)(tc);
 } 
 ShColor4f find10(ShTexCoord2f tc){ // (0,1,0)
- tc(1) -= fo; 	
+ tc(1) += fo; 	
  return (*ptexture)(tc);
 } 
 ShColor4f find11(ShTexCoord2f tc){ // (1,1,0)
  tc(0) += fo; 
- tc(1) -= fo; 	
+ tc(1) += fo; 	
  return (*ptexture)(tc);
 } 
 ShColor4f find12(ShTexCoord2f tc){ // (-1,0,0)
@@ -80,16 +80,16 @@ ShColor4f find13(ShTexCoord2f tc){ // (1,0,0)
 } 
 ShColor4f find14(ShTexCoord2f tc){ // (0,-1,0)
  tc(0) -= fo; 
- tc(1) += fo; 	
+ tc(1) -= fo; 	
  return (*ptexture)(tc);
 }
 ShColor4f find15(ShTexCoord2f tc){ // (0,-1,0)
- tc(1) += fo; 	
+ tc(1) -= fo; 	
  return (*ptexture)(tc);
 }
 ShColor4f find16(ShTexCoord2f tc){ // (0,-1,0)
  tc(0) += fo; 
- tc(1) += fo; 	
+ tc(1) -= fo; 	
  return (*ptexture)(tc);
 }
 
