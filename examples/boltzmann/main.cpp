@@ -75,7 +75,9 @@ using namespace SH;
 #define C2 0.125
 #define D2 -(1.0/24)
 
-#define TAU 2.4
+#define ZEROVEL 0.3
+
+#define TAU 2.6
 #define INV_TAU (1.0f/TAU)
 
 // forward declarations
@@ -132,15 +134,6 @@ ShMatrix4x4f v, vd; // orientation only, no translation
 ShPoint3f wCamOrig; // camera origin in world space
 
 // programs
-/*ShProgram vsh;
-ShProgram particle_vsh;
-ShProgram particle_fsh;
-ShProgram particle_volume_vsh;
-ShProgram particle_volume_fsh;
-ShProgram terrain_vsh;
-ShProgram terrain_fsh;
-ShProgram skybox_vsh;
-ShProgram skybox_fsh;*/
 ShProgram plane_vsh;
 ShProgram plane_fsh;
 
@@ -160,6 +153,16 @@ ShProgram collision1_fsh;
 ShProgram collision2_fsh;
 ShProgram collision3_fsh;
 ShProgram collision4_fsh;
+/*ShProgram xbound0_fsh;
+ShProgram xbound1_fsh;
+ShProgram xbound2_fsh;
+ShProgram xbound3_fsh;
+ShProgram xbound4_fsh;
+ShProgram ybound0_fsh;
+ShProgram ybound1_fsh;
+ShProgram ybound2_fsh;
+ShProgram ybound3_fsh;
+ShProgram ybound4_fsh;*/
 ShProgram dv_fsh;
 //test
 ShProgram showvel_fsh;
@@ -171,10 +174,6 @@ ShProgram mouse1_fsh;
 
 
 
-/*ShProgramSet* particle_shaders;
-ShProgramSet* particle_volume_shaders;
-ShProgramSet* terrain_shaders;
-ShProgramSet* skybox_shaders;*/
 ShProgramSet* plane_shaders;
 ShProgramSet* streaming0_shaders;
 ShProgramSet* streaming1_shaders;
@@ -191,6 +190,16 @@ ShProgramSet* collision1_shaders;
 ShProgramSet* collision2_shaders;
 ShProgramSet* collision3_shaders;
 ShProgramSet* collision4_shaders;
+/*ShProgramSet* xbound0_shaders;
+ShProgramSet* xbound1_shaders;
+ShProgramSet* xbound2_shaders;
+ShProgramSet* xbound3_shaders;
+ShProgramSet* xbound4_shaders;
+ShProgramSet* ybound0_shaders;
+ShProgramSet* ybound1_shaders;
+ShProgramSet* ybound2_shaders;
+ShProgramSet* ybound3_shaders;
+ShProgramSet* ybound4_shaders;*/
 ShProgramSet* dv_shaders;
 //test
 ShProgramSet* showvel_shaders;
@@ -214,6 +223,7 @@ GLuint dpt_ids[5];
 GLuint dptc_ids[5];
 GLuint eqdpt_ids[5];
 GLuint dvt_id;
+GLuint bt_id;
 
 int dbc = 0, idbc = 1; // double buffering counter
 
@@ -236,6 +246,7 @@ ShArray2D<ShColor4f> eqdpt1;
 ShArray2D<ShColor4f> eqdpt2;
 ShArray2D<ShColor4f> eqdpt3;
 ShArray2D<ShColor4f> eqdpt4;
+ShArray2D<ShColor4f> bt;
 
 ShArray2D<ShColor4f> colort;
 
@@ -345,7 +356,7 @@ printf("init_textures()\n");
   glGenTextures(5, dpt_ids);
 
   for (int i=0;i<NUM_GRID_CELLS;i++){
-    testdata[4][i*4+2] = 0.1;
+    testdata[4][i*4+2] = ZEROVEL;
   }
 
   for(int i=0;i<5;i++){
@@ -417,7 +428,19 @@ printf("init_textures()\n");
   sprintf(tid, "%d",dvt_id);
   dvt.meta("opengl:texid", tid);
  
-  glBindTexture(GL_TEXTURE_2D, 0);
+
+// init boundary texture
+ 
+  glGenTextures(1, &bt_id);
+  glBindTexture(GL_TEXTURE_2D, bt_id);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+  glTexImage2D(GL_TEXTURE_2D, 0, INTERNAL_FORMAT, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, NULL);  
+
+  sprintf(tid, "%d",bt_id);
+  bt.meta("opengl:texid", tid);
+ 
+//  glBindTexture(GL_TEXTURE_2D, 0);
 
 }
 
@@ -513,6 +536,81 @@ void display()
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
 
+
+///////////////////  
+// Draw boundaries:
+ glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+                                  GL_COLOR_ATTACHMENT0_EXT,
+                                  GL_TEXTURE_2D, bt_id, 0);
+
+  shBind(*redonly_shaders);
+  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+  glBegin(GL_QUADS);
+  
+  glTexCoord2f(0,0);
+  glVertex3f(0.05, -1.0, 0);
+  
+  glTexCoord2f(1,0);
+  glVertex3f( 0.1, -1.0, 0);
+  
+  glTexCoord2f(1,1);
+  glVertex3f( 0.1, 1.0,  0);
+  
+  glTexCoord2f(0,1);
+  glVertex3f(0.05, 1.0,  0);
+  
+  glEnd();
+  glBegin(GL_QUADS);
+  
+  glTexCoord2f(0,0);
+  glVertex3f(-0.95, -1.0, 0);
+  
+  glTexCoord2f(1,0);
+  glVertex3f( -0.9, -1.0, 0);
+  
+  glTexCoord2f(1,1);
+  glVertex3f( -0.9, 1.0,  0);
+  
+  glTexCoord2f(0,1);
+  glVertex3f(-0.95, 1.0,  0);
+  
+  glEnd();
+  shUnbind(*redonly_shaders);
+
+  shBind(*greenonly_shaders);
+  glBegin(GL_QUADS);
+  
+  glTexCoord2f(0,0);
+  glVertex3f(-1.0, -0.9, 0);
+  
+  glTexCoord2f(1,0);
+  glVertex3f( 1.0, -0.9, 0);
+  
+  glTexCoord2f(1,1);
+  glVertex3f( 1.0, -0.85,  0);
+  
+  glTexCoord2f(0,1);
+  glVertex3f(-1.0, -0.85,  0);
+  
+  glEnd();
+  glBegin(GL_QUADS);
+  
+  glTexCoord2f(0,0);
+  glVertex3f(-1.0, 0.9, 0);
+  
+  glTexCoord2f(1,0);
+  glVertex3f( 1.0, 0.9, 0);
+  
+  glTexCoord2f(1,1);
+  glVertex3f( 1.0, 0.85,  0);
+  
+  glTexCoord2f(0,1);
+  glVertex3f(-1.0, 0.85,  0);
+  
+  glEnd();
+  shUnbind(*greenonly_shaders);
+
+  
 /////////////////////////////////
 // Calculate density and velocity:
 
@@ -524,6 +622,7 @@ void display()
    drawQuad();
   shUnbind(*dv_shaders);
 
+///////////////////////////////  
 // Calculate equilibrium state:  
   glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
@@ -549,6 +648,7 @@ void display()
    drawQuad();
   shUnbind(*eq4_shaders);
 
+/////////////////////
 // Perform collision:
   glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
@@ -574,7 +674,7 @@ void display()
    drawQuad();
   shUnbind(*collision4_shaders);
 
-
+/////////////////////
 // Perform streaming:
   glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
@@ -611,8 +711,7 @@ void display()
  }//if
   
 
-/////////////
-  
+ 
   glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
                                   GL_TEXTURE_2D, dpt_ids[1], 0);
@@ -650,6 +749,11 @@ void display()
    drawQuad();
   shUnbind(*streaming4_shaders);
 
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  
 
 //glDisable(GL_DEPTH_TEST);
 //glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -1094,11 +1198,14 @@ void init_shaders(void)
 
     //color = ShConstColor4f(0,0,0,0);
 
-    color(0) = (dptc3d0.find12(tc))(0);
-    color(1) = (dptc3d0.find13(tc))(1);
-    color(2) = (dptc3d0.find15(tc))(2);
-    color(3) = (dptc3d0.find10(tc))(3);
-
+    ShAttrib1f bdx = (bt(tc))(0);
+    ShAttrib1f bdy = (bt(tc))(1);
+    ShAttrib1f bdz = (bt(tc))(2);
+     
+    color(0) = cond( bdx , (dptc3d0.find13(tc))(1) , (dptc3d0.find12(tc))(0) );
+    color(1) = cond( bdx , (dptc3d0.find12(tc))(0) , (dptc3d0.find13(tc))(1) );
+    color(2) = cond( bdy , (dptc3d0.find10(tc))(3) , (dptc3d0.find15(tc))(2) ); 
+    color(3) = cond( bdy , (dptc3d0.find15(tc))(2) , (dptc3d0.find10(tc))(3) ); 
     
   } SH_END;
 
@@ -1107,14 +1214,23 @@ void init_shaders(void)
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
 
-    //color = ShConstColor4f(0,0,0,0);
+    ShAttrib1f bdx = (bt(tc))(0);
+    ShAttrib1f bdy = (bt(tc))(1);
+    ShAttrib1f bdz = (bt(tc))(2);
 
-    color(0) = (dptc3d1.find14(tc))(0);
-    color(1) = (dptc3d1.find11(tc))(1);
-    color(2) = (dptc3d1.find9(tc))(2);
-    color(3) = (dptc3d1.find16(tc))(3);
-
+    color(0) = cond(bdx, (dptc3d1.find16(tc))(3),  (dptc3d1.find14(tc))(0) );
+    color(0) = cond(bdy, (dptc3d1.find9(tc))(2),  color(0) );
     
+    color(1) = cond(bdx, (dptc3d1.find9(tc))(2) , (dptc3d1.find11(tc))(1) );
+    color(1) = cond(bdy, (dptc3d1.find16(tc))(3) , color(1) );
+ 
+    color(2) = cond(bdx, (dptc3d1.find11(tc))(1) , (dptc3d1.find9(tc))(2));
+    color(2) = cond(bdy, (dptc3d1.find14(tc))(0) , color(2));
+
+    color(3) = cond(bdx, (dptc3d1.find14(tc))(0) , (dptc3d1.find16(tc))(3));
+    color(3) = cond(bdy, (dptc3d1.find11(tc))(1) , color(3));
+
+        
   } SH_END;
 
   streaming4_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
@@ -1137,7 +1253,9 @@ void init_shaders(void)
     ShOutputColor4f color;
 
     color(0,2) = abs((dvt(tc)(0,1))*2-1.0);
-	color(1) = 0;
+	color(1) = clamp(bt(tc)(0) + bt(tc)(1), 0, 1.0);
+	color(0) += bt(tc)(0);
+	color(2) += bt(tc)(1);
 	color(3) = 1.0;
     //color(2) = clamp(abs(-dvt(tc)(0)) + abs(-dvt(tc)(1)),0,1.0);
     
@@ -1175,10 +1293,10 @@ void init_shaders(void)
     ShOutputColor4f color;
 
     //color = ShConstColor4f(1,0,0,1);
-    color(0) = clamp(dirs|ShAttrib3f(1,0,0), 0, 10.0);
-    color(1) = clamp(dirs|ShAttrib3f(-1,0,0), 0, 10.0);
-    color(2) = clamp(dirs|ShAttrib3f(0,1,0), 0, 10.0);
-    color(3) = clamp(dirs|ShAttrib3f(0,-1,0), 0, 10.0);
+    color(0) = dirs|ShAttrib3f(1,0,0);
+    color(1) = dirs|ShAttrib3f(-1,0,0);
+    color(2) = dirs|ShAttrib3f(0,1,0);
+    color(3) = dirs|ShAttrib3f(0,-1,0);
    } SH_END;
 
    mouse1_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
@@ -1187,10 +1305,10 @@ void init_shaders(void)
     ShOutputColor4f color;
 
     //color = ShConstColor4f(1,0,0,1);
-    color(0) = RCPSQR2*clamp(dirs|ShAttrib3f(1,1,0), 0, 10.0);
-    color(1) = RCPSQR2*clamp(dirs|ShAttrib3f(-1,-1,0), 0, 10.0);
-    color(2) = RCPSQR2*clamp(dirs|ShAttrib3f(1,-1,0), 0, 10.0);
-    color(3) = RCPSQR2*clamp(dirs|ShAttrib3f(-1,1,0), 0, 10.0);
+    color(0) = RCPSQR2*dirs|ShAttrib3f(1,1,0);
+    color(1) = RCPSQR2*dirs|ShAttrib3f(-1,-1,0);
+    color(2) = RCPSQR2*dirs|ShAttrib3f(1,-1,0);
+    color(3) = RCPSQR2*dirs|ShAttrib3f(-1,1,0);
    } SH_END;
 
   
