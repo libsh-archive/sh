@@ -116,8 +116,9 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node)
     float_formats = fpformats_nv;
     half_formats = halfformats_nv;
   } else {
-    // TODO: what do we do if none of these extensions are available?
-    // see issue242
+    SH_DEBUG_WARN("Float textures are not available for this texture size.  Using byte textures instead. ");
+    float_formats = byteformats;
+    half_formats = byteformats;
   }
 #else
   bool float_apple = (exts.find("APPLE_float_pixels") != std::string::npos);
