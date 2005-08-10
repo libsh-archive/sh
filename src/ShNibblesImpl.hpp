@@ -27,7 +27,8 @@
 namespace SH {
 
 template<typename T>
-ShProgram keep(const std::string & name) {
+ShProgram keep(const std::string & name) 
+{
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T::InOutType SH_NAMEDECL(attr, name); 
   } SH_END_PROGRAM;
@@ -36,7 +37,8 @@ ShProgram keep(const std::string & name) {
 }
 
 template<typename T>
-ShProgram dup(const std::string & name) {
+ShProgram dup(const std::string & name) 
+{
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T::InputType SH_NAMEDECL(attr, name); 
     typename T::OutputType SH_NAMEDECL(attr1, name + "_1") = attr; 
@@ -47,7 +49,8 @@ ShProgram dup(const std::string & name) {
 }
 
 template<typename T>
-ShProgram lose(const std::string & name) {
+ShProgram lose(const std::string & name) 
+{
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T::InputType SH_NAMEDECL(attr, name);
   } SH_END_PROGRAM;
@@ -56,7 +59,8 @@ ShProgram lose(const std::string & name) {
 };
 
 template<typename T>
-ShProgram shAccess(const ShBaseTexture1D<T> &tex, const std::string &tcname, const std::string & name) {
+ShProgram shAccess(const ShBaseTexture1D<T> &tex, const std::string &tcname, const std::string & name) 
+{
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     ShInputTexCoord1f SH_NAMEDECL(tc, tcname);
     typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
@@ -66,7 +70,8 @@ ShProgram shAccess(const ShBaseTexture1D<T> &tex, const std::string &tcname, con
 }
 
 template<typename T>
-ShProgram shAccess(const ShBaseTexture2D<T> &tex, const std::string & tcname, const std::string & name) {
+ShProgram shAccess(const ShBaseTexture2D<T> &tex, const std::string & tcname, const std::string & name) 
+{
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     ShInputTexCoord2f SH_NAMEDECL(tc, tcname);
     typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
@@ -76,7 +81,8 @@ ShProgram shAccess(const ShBaseTexture2D<T> &tex, const std::string & tcname, co
 }
 
 template<typename T>
-ShProgram shAccess(const ShBaseTextureRect<T> &tex, const std::string & tcname, const std::string & name) {
+ShProgram shAccess(const ShBaseTextureRect<T> &tex, const std::string & tcname, const std::string & name) 
+{
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     ShInputTexCoord2f SH_NAMEDECL(tc, tcname);
     typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
@@ -86,7 +92,8 @@ ShProgram shAccess(const ShBaseTextureRect<T> &tex, const std::string & tcname, 
 }
 
 template<typename T>
-ShProgram shAccess(const ShBaseTexture3D<T> &tex, const std::string & tcname, const std::string & name) {
+ShProgram shAccess(const ShBaseTexture3D<T> &tex, const std::string & tcname, const std::string & name) 
+{
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     ShInputTexCoord3f SH_NAMEDECL(tc, tcname);
     typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
@@ -96,7 +103,8 @@ ShProgram shAccess(const ShBaseTexture3D<T> &tex, const std::string & tcname, co
 }
 
 template<typename T>
-ShProgram shAccess(const ShBaseTextureCube<T> &tex, const std::string & tcname, const std::string & name) {
+ShProgram shAccess(const ShBaseTextureCube<T> &tex, const std::string & tcname, const std::string & name) 
+{
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     ShInputTexCoord3f SH_NAMEDECL(tc, tcname);
     typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
@@ -106,7 +114,8 @@ ShProgram shAccess(const ShBaseTextureCube<T> &tex, const std::string & tcname, 
 }
 
 template<typename T, int Rows, int Cols, ShBindingType Binding, typename T2>
-ShProgram shTransform(const ShMatrix<Rows, Cols, Binding, T2> &m, const std::string & name) {
+ShProgram shTransform(const ShMatrix<Rows, Cols, Binding, T2> &m, const std::string & name) 
+{
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T::InOutType SH_NAMEDECL(attrib, name) = m | attrib;
   } SH_END;
@@ -115,7 +124,8 @@ ShProgram shTransform(const ShMatrix<Rows, Cols, Binding, T2> &m, const std::str
 }
 
 template<typename T, typename T2>
-ShProgram shCast(const std::string & name) {
+ShProgram shCast(const std::string & name)
+{
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T::InputType SH_NAMEDECL(in, name);
     typename T2::OutputType SH_NAMEDECL(out, name) = cast<T2::typesize>( in );
@@ -125,7 +135,8 @@ ShProgram shCast(const std::string & name) {
 }
 
 template<typename T, typename T2>
-ShProgram shFillcast(const std::string & name) {
+ShProgram shFillcast(const std::string & name)
+{
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T::InputType SH_NAMEDECL(in, name);
     typename T2::OutputType SH_NAMEDECL(out, name) = fillcast<T2::typesize>( in );
@@ -136,7 +147,8 @@ ShProgram shFillcast(const std::string & name) {
 
 #define SHNIBBLE_UNARY_OP(opfunc, opcode) \
 template<typename T>\
-ShProgram opfunc(const std::string & name) {\
+ShProgram opfunc(const std::string & name) \
+{\
   ShProgram nibble = SH_BEGIN_PROGRAM() {\
     typename T::InOutType SH_NAMEDECL(x, name) = opcode;\
   } SH_END;\
@@ -181,7 +193,8 @@ SHNIBBLE_UNARY_OP(shTanh, tanh(x));
 #define SHNIBBLE_BINARY_OP(opfunc, opcode) \
 template<typename T1, typename T2> \
 ShProgram opfunc(const std::string & output_name, \
-    const std::string & input_name0, const std::string & input_name1) { \
+    const std::string & input_name0, const std::string & input_name1) \
+{ \
   ShProgram nibble = SH_BEGIN_PROGRAM() { \
     typename T1::InputType SH_NAMEDECL(a, input_name0); \
     typename T2::InputType SH_NAMEDECL(b, input_name1); \
@@ -194,7 +207,8 @@ ShProgram opfunc(const std::string & output_name, \
 \
 template<typename T1> \
 ShProgram opfunc(const std::string & output_name,\
-    const std::string & input_name0, const std::string & input_name1 ) { \
+    const std::string & input_name0, const std::string & input_name1 ) \
+{ \
   return opfunc<T1, T1>(output_name, input_name0, input_name1); \
 }
 
@@ -218,7 +232,8 @@ SHNIBBLE_BINARY_OP(shSub, a - b)
 template<typename T1, typename T2, typename T3> \
 ShProgram opfunc(const std::string & output_name, \
     const std::string & input_name0, const std::string & input_name1, \
-    const std::string & input_name2) { \
+    const std::string & input_name2) \
+{ \
   ShProgram nibble = SH_BEGIN_PROGRAM() { \
     typename T1::InputType SH_NAMEDECL(a, input_name0); \
     typename T2::InputType SH_NAMEDECL(b, input_name1); \
@@ -235,13 +250,15 @@ ShProgram opfunc(const std::string & output_name, \
 template<typename T1, typename T2> \
 ShProgram opfunc(const std::string & output_name,\
     const std::string & input_name0, const std::string & input_name1, \
-    const std::string & input_name2) { \
+    const std::string & input_name2) \
+{ \
   return opfunc<T1, T2, T2>(output_name, input_name0, input_name1, input_name2); \
 }
 template<typename T1> \
 ShProgram opfunc(const std::string & output_name,\
     const std::string & input_name0, const std::string & input_name1, \
-    const std::string & input_name2) { \
+    const std::string & input_name2) \
+{ \
   return opfunc<T1, T1, T1>(output_name, input_name0, input_name1, input_name2); \
 }
 
@@ -249,7 +266,8 @@ SHNIBBLE_TERNARY_OP(shMad, mad(a, b, c))
 
 #define SHNIBBLE_HASH_FUNC(opfunc, opcode) \
 template<typename T1, typename T2> \
-ShProgram opfunc(const std::string & output_name, const std::string & input_name0) { \
+ShProgram opfunc(const std::string & output_name, const std::string & input_name0) \
+{ \
   ShProgram nibble = SH_BEGIN_PROGRAM() { \
     typename T1::InputType SH_NAMEDECL(a, input_name0); \
     typename T2::OutputType SH_NAMEDECL(result, output_name) = opcode<T2::typesize>(a); \
@@ -265,7 +283,8 @@ SHNIBBLE_HASH_FUNC(shTexhash, texhash)
 
 #define SHNIBBLE_NOISE_FUNC(opfunc, opcode) \
 template<typename T1, typename T2> \
-ShProgram opfunc(const std::string & output_name, const std::string & input_name0) { \
+ShProgram opfunc(const std::string & output_name, const std::string & input_name0) \
+{ \
   ShProgram nibble = SH_BEGIN_PROGRAM() { \
     typename T1::InputType SH_NAMEDECL(a, input_name0); \
     typename T2::OutputType SH_NAMEDECL(result, output_name) = opcode<T2::typesize>(a); \
@@ -275,7 +294,8 @@ ShProgram opfunc(const std::string & output_name, const std::string & input_name
 }\
 template<typename T1, typename T2, typename T3> \
 ShProgram opfunc(const std::string & output_name, const std::string & input_name0, \
-                 const std::string & input_name1) { \
+                 const std::string & input_name1) \
+{ \
   ShProgram nibble = SH_BEGIN_PROGRAM() { \
     typename T1::InputType SH_NAMEDECL(a, input_name0); \
     typename T2::InputType SH_NAMEDECL(b, input_name1); \
@@ -295,7 +315,8 @@ SHNIBBLE_NOISE_FUNC(shSperlin, sperlin);
 SHNIBBLE_NOISE_FUNC(shSturbulence, sturbulence);
 
 template<typename T> 
-ShProgram shDot(const std::string & name) { 
+ShProgram shDot(const std::string & name)
+{ 
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T::InputType SH_DECL(a); 
     typename T::InputType SH_DECL(b); 
@@ -306,7 +327,8 @@ ShProgram shDot(const std::string & name) {
 }
 
 template<typename T> 
-ShProgram shGradient(const std::string & name) { 
+ShProgram shGradient(const std::string & name)
+{ 
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T::InputType SH_DECL(a); 
     ShOutputAttrib2f SH_NAMEDECL(result, name) = gradient(a); 
@@ -316,7 +338,8 @@ ShProgram shGradient(const std::string & name) {
 }
 
 template<typename T1, typename T2>
-ShProgram shLerp(const std::string & name) { 
+ShProgram shLerp(const std::string & name)
+{ 
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T1::InputType SH_DECL(a); 
     typename T1::InputType SH_DECL(b); 
@@ -328,10 +351,10 @@ ShProgram shLerp(const std::string & name) {
 }
 
 template<typename T1>
-ShProgram shLerp(const std::string & name) { 
+ShProgram shLerp(const std::string & name)
+{ 
   return shLerp<T1, T1>(name);
 }
-
 
 }
 
