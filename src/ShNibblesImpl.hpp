@@ -22,6 +22,7 @@
 
 #include "ShNibbles.hpp"
 #include "ShTexCoord.hpp"
+#include "ShLibNoise.hpp"
 
 namespace SH {
 
@@ -246,6 +247,53 @@ ShProgram opfunc(const std::string & output_name,\
 
 SHNIBBLE_TERNARY_OP(shMad, mad(a, b, c))
 
+#define SHNIBBLE_HASH_FUNC(opfunc, opcode) \
+template<typename T1, typename T2> \
+ShProgram opfunc(const std::string & output_name, const std::string & input_name0) { \
+  ShProgram nibble = SH_BEGIN_PROGRAM() { \
+    typename T1::InputType SH_NAMEDECL(a, input_name0); \
+    typename T2::OutputType SH_NAMEDECL(result, output_name) = opcode<T2::typesize>(a); \
+  } SH_END; \
+  nibble.name(# opfunc); \
+  return nibble; \
+}
+  
+SHNIBBLE_HASH_FUNC(shCellnoise, cellnoise)
+SHNIBBLE_HASH_FUNC(shScellnoise, scellnoise)
+SHNIBBLE_HASH_FUNC(shHash, SH::hash)
+SHNIBBLE_HASH_FUNC(shTexhash, texhash)
+
+#define SHNIBBLE_NOISE_FUNC(opfunc, opcode) \
+template<typename T1, typename T2> \
+ShProgram opfunc(const std::string & output_name, const std::string & input_name0) { \
+  ShProgram nibble = SH_BEGIN_PROGRAM() { \
+    typename T1::InputType SH_NAMEDECL(a, input_name0); \
+    typename T2::OutputType SH_NAMEDECL(result, output_name) = opcode<T2::typesize>(a); \
+  } SH_END; \
+  nibble.name(# opfunc); \
+  return nibble; \
+}\
+template<typename T1, typename T2, typename T3> \
+ShProgram opfunc(const std::string & output_name, const std::string & input_name0, \
+                 const std::string & input_name1) { \
+  ShProgram nibble = SH_BEGIN_PROGRAM() { \
+    typename T1::InputType SH_NAMEDECL(a, input_name0); \
+    typename T2::InputType SH_NAMEDECL(b, input_name1); \
+    typename T3::OutputType SH_NAMEDECL(result, output_name) = opcode<T2::typesize>(a, b); \
+  } SH_END; \
+  nibble.name(# opfunc); \
+  return nibble; \
+}
+
+SHNIBBLE_NOISE_FUNC(shLinnoise, linnoise);
+SHNIBBLE_NOISE_FUNC(shNoise, noise);
+SHNIBBLE_NOISE_FUNC(shPerlin, perlin);
+SHNIBBLE_NOISE_FUNC(shTurbulence, turbulence);
+SHNIBBLE_NOISE_FUNC(shSlinnoise, slinnoise);
+SHNIBBLE_NOISE_FUNC(shSnoise, snoise);
+SHNIBBLE_NOISE_FUNC(shSperlin, sperlin);
+SHNIBBLE_NOISE_FUNC(shSturbulence, sturbulence);
+
 template<typename T> 
 ShProgram shDot(const std::string & name) { 
   ShProgram nibble = SH_BEGIN_PROGRAM() {
@@ -254,6 +302,16 @@ ShProgram shDot(const std::string & name) {
     ShOutputAttrib1f SH_NAMEDECL(result, name) = dot(a, b); 
   } SH_END; 
   nibble.name("shDot");
+  return nibble;
+}
+
+template<typename T> 
+ShProgram shGradient(const std::string & name) { 
+  ShProgram nibble = SH_BEGIN_PROGRAM() {
+    typename T::InputType SH_DECL(a); 
+    ShOutputAttrib2f SH_NAMEDECL(result, name) = gradient(a); 
+  } SH_END; 
+  nibble.name("shGradient");
   return nibble;
 }
 

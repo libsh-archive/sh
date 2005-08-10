@@ -1,3 +1,9 @@
+2005-08-10  Francois Marier  <francois@serioushack.com>
+
+	* src/ShNibblesImpl.hpp, ShNibbles.hpp: Add nibbles for gradient,
+	cellnoise, scellnoise, hash, texhash, linnoise, slinnoise, noise,
+	snoise, perlin, sperlin, turbulence, sturbulence.
+
 2005-08-09  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlTextures.cpp (shGlInternalFormat): Add a warning

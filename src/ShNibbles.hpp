@@ -199,12 +199,54 @@ SHNIBBLE_BINARY_OP_DECL(shSub);
 SHNIBBLE_TERNARY_OP_DECL(shMad);
 //@}
 
+/**@{ \brief Nibbles for hash functions
+ * Inputs: IN(0) T1 a
+ * Outputs: OUT(0) name  (type is T2)
+ */
+#define SHNIBBLE_HASH_FUNC_DECL(opname) \
+  template<typename T1, typename T2> ShProgram opname(const std::string & output_name = "result",\
+      const std::string & input_name0 = "x");
+
+SHNIBBLE_HASH_FUNC_DECL(shCellnoise);
+SHNIBBLE_HASH_FUNC_DECL(shScellnoise);
+SHNIBBLE_HASH_FUNC_DECL(shHash);
+SHNIBBLE_HASH_FUNC_DECL(shTexhash);
+//@}
+
+/**@{ \brief Nibbles for noise functions
+ * Inputs: IN(0) T1 a
+ *         IN(1) T2 b (optional)
+ * Outputs: OUT(0) name  (type is the last of T2 or T3)
+ */
+#define SHNIBBLE_NOISE_FUNC_DECL(opname) \
+  template<typename T1, typename T2> ShProgram opname(const std::string & output_name = "result",\
+      const std::string & input_name0 = "x"); \
+  template<typename T1, typename T2, typename T3> ShProgram opname(const std::string & output_name = "result",\
+      const std::string & input_name0 = "x", const std::string & input_name1 = "y");
+
+SHNIBBLE_NOISE_FUNC_DECL(shLinnoise);
+SHNIBBLE_NOISE_FUNC_DECL(shNoise);
+SHNIBBLE_NOISE_FUNC_DECL(shPerlin);
+SHNIBBLE_NOISE_FUNC_DECL(shTurbulence);
+SHNIBBLE_NOISE_FUNC_DECL(shSlinnoise);
+SHNIBBLE_NOISE_FUNC_DECL(shSnoise);
+SHNIBBLE_NOISE_FUNC_DECL(shSperlin);
+SHNIBBLE_NOISE_FUNC_DECL(shSturbulence);
+
+//@}
+
 /** \brief Nibble for dot product operator
  * Inputs: IN(0) T a
  *         IN(1) T b
  * Outputs: OUT(0) ShAttrib1f name  
  */
 template<typename T> ShProgram shDot(const std::string & name = "result");
+
+/** \brief Nibble for the gradient function
+ * Inputs: IN(0) T a
+ * Outputs: OUT(0) ShAttrib1f name
+ */
+template<typename T> ShProgram shGradient(const std::string & name = "result");
 
 /** @{ \brief Nibble for lerp operator
  * Inputs: IN(0) T1 a
