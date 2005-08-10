@@ -46,14 +46,14 @@ using namespace std;
 using namespace SH;
 
 // defines
-//#define USING_STREAMS
+
 
 #define INTERNAL_FORMAT GL_RGBA16 /*GL_RGBA8*/
 
 #define NUMMODES 1
 
-#define SO1 0.005
-#define SO2 0.1
+#define SO1 0.2
+#define SO2 0.2
 #define SCALE 5
 #define GRID_2D_RES 512
 #define SQR_GRID_3D_RES 8
@@ -62,29 +62,41 @@ using namespace SH;
 
 #define RCPSQR2 0.707106781186
 
-#define A0 (2.0/9)
-#define D0 -0.333333333
+#define S2 3.0
+
+#define A0 (4.0/9)
+#define D0 -(S2*2.0/3)
 
 #define A1 (1.0/9)
-#define B1 0.333333333
-#define C1 0.5
-#define D1 -(1.0/6)
+#define B1 (S2*1.0/3)
+#define C1 (S2*S2*1.0/2)
+#define D1 -(S2*1.0/6)
 
 #define A2 (1.0/36)
-#define B2 (1.0/12)
-#define C2 0.125
-#define D2 -(1.0/24)
+#define B2 (S2*1.0/12)
+#define C2 (S2*S2*1.0/8)
+#define D2 -(S2*1.0/24)
 
-#define ZEROVEL 0.3
+#define ZEROVEL 1.0
 
-#define TAU 2.6
+#define TAU 5.0
 #define INV_TAU (1.0f/TAU)
+
+#define VELSTEP 0.005
+
+#define SQR_NUM_PARTICLES 512
+#define NUM_PARTICLES (SQR_NUM_PARTICLES*SQR_NUM_PARTICLES)
+#define PCO 0.01
 
 // forward declarations
 void init_shaders(void);
 void init_textures(void);
 void init_FBO(void);
 void initGL(void);
+
+void init_streams(void);
+void reset_streams(void);
+void update_streams(void);
 
 void switchBuffers(void);
 void setup_texouts();
@@ -113,11 +125,6 @@ GLuint depth_rb;
 int fmode = 0;
 
 // uniforms 
-ShVector3f gravity(0.0, -9.8, 0.0);
-ShAttrib1f delta(0.02); 
-ShAttrib1f simtime(0.0);
-ShConstAttrib1f timedelta(0.005);
-
 
 
 //-------------------------------------------------------------------
@@ -153,16 +160,6 @@ ShProgram collision1_fsh;
 ShProgram collision2_fsh;
 ShProgram collision3_fsh;
 ShProgram collision4_fsh;
-/*ShProgram xbound0_fsh;
-ShProgram xbound1_fsh;
-ShProgram xbound2_fsh;
-ShProgram xbound3_fsh;
-ShProgram xbound4_fsh;
-ShProgram ybound0_fsh;
-ShProgram ybound1_fsh;
-ShProgram ybound2_fsh;
-ShProgram ybound3_fsh;
-ShProgram ybound4_fsh;*/
 ShProgram dv_fsh;
 //test
 ShProgram showvel_fsh;
@@ -171,6 +168,10 @@ ShProgram redonly_fsh;
 ShProgram greenonly_fsh;
 ShProgram mouse0_fsh;
 ShProgram mouse1_fsh;
+//particles
+ShProgram advect_fsh;
+ShProgram particle_vsh;
+ShProgram particle_fsh;
 
 
 
@@ -190,16 +191,6 @@ ShProgramSet* collision1_shaders;
 ShProgramSet* collision2_shaders;
 ShProgramSet* collision3_shaders;
 ShProgramSet* collision4_shaders;
-/*ShProgramSet* xbound0_shaders;
-ShProgramSet* xbound1_shaders;
-ShProgramSet* xbound2_shaders;
-ShProgramSet* xbound3_shaders;
-ShProgramSet* xbound4_shaders;
-ShProgramSet* ybound0_shaders;
-ShProgramSet* ybound1_shaders;
-ShProgramSet* ybound2_shaders;
-ShProgramSet* ybound3_shaders;
-ShProgramSet* ybound4_shaders;*/
 ShProgramSet* dv_shaders;
 //test
 ShProgramSet* showvel_shaders;
@@ -208,26 +199,30 @@ ShProgramSet* redonly_shaders;
 ShProgramSet* greenonly_shaders;
 ShProgramSet* mouse0_shaders;
 ShProgramSet* mouse1_shaders;
+// particles
+ShProgramSet* advect_shaders;
+ShProgramSet* particle_shaders;
 
 //test vars
 ShAttrib3f dirs; 
 
 
-#ifndef USING_STREAMS
 //test
 ShImage test_image;
 ShArray1D<ShColor4f> testt;
 
 //distribution package texture ids
+char tid[5];
 GLuint dpt_ids[5];
 GLuint dptc_ids[5];
 GLuint eqdpt_ids[5];
 GLuint dvt_id;
 GLuint bt_id;
+GLuint post_ids[2];
 
 int dbc = 0, idbc = 1; // double buffering counter
 
-#endif
+
 
 //distribution package texture nodes 
 ShArray2D<ShColor4f> dpt0; // distribution packages
@@ -247,8 +242,11 @@ ShArray2D<ShColor4f> eqdpt2;
 ShArray2D<ShColor4f> eqdpt3;
 ShArray2D<ShColor4f> eqdpt4;
 ShArray2D<ShColor4f> bt;
+ShArray2D<ShColor4f> post; 
 
 ShArray2D<ShColor4f> colort;
+ShArray2D<ShColor3fub> gausst(32,32);
+ShImage gauss_image;
 
 Texture3D dptc3d0(&dptc0, SQR_GRID_3D_RES);
 Texture3D dptc3d1(&dptc1, SQR_GRID_3D_RES);
@@ -258,22 +256,18 @@ Texture3D dptc3d4(&dptc4, SQR_GRID_3D_RES);
 
 Texture3D colort3d(&colort, SQR_GRID_3D_RES);
 
-//ShNoMIPFilter<ShTextureCube<ShColor3f> > em(EM_RES, EM_RES); //env map
+int dir = 0;
 
-/*ShTexture2D<ShColor4f> color_tex; 
-Texture3D color_tex3d(&color_tex, SLICERES, SQRNUMSLICES);*/
+int rposbuff = 0, wposbuff = 1;
 
+// channels holding the particle data
+ShChannel<ShPoint3f> posA;
+ShChannel<ShPoint3f> posB;
 
-/*ShImage hm_image;
-ShImage nm_image;
-ShImage em_imageA;
-ShImage em_imageB;
-ShImage em_imageC;
-ShImage em_imageD;
-ShImage em_imageE;
-ShImage em_imageF;
-ShImage terr_image;*/
-
+// programs
+ShProgram particle;  
+ShProgram particle_updateA;
+ShProgram particle_updateB;
 
 //-------------------------------------------------------------------
 // GLUT data
@@ -314,6 +308,8 @@ glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 
 void load_textures(void){
 
+    gauss_image.loadPng("densitysprite2.png");
+    gausst.memory(gauss_image.memory());
 
    /* hm_image.loadPng("hm2.png");
     nm_image.loadPng("nm2.png");
@@ -333,6 +329,8 @@ void load_textures(void){
     em.memory(em_imageE.memory(), static_cast<ShCubeDirection>(4));
     em.memory(em_imageF.memory(), static_cast<ShCubeDirection>(5));
 */
+
+    
    }
 
 void init_textures(){
@@ -365,7 +363,6 @@ printf("init_textures()\n");
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 		glTexImage2D(GL_TEXTURE_2D, 0, INTERNAL_FORMAT, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, testdata[i]);  
   }//for
-  char tid[5];
   sprintf(tid, "%d",dpt_ids[0]);
   dpt0.meta("opengl:texid", tid);
   sprintf(tid, "%d",dpt_ids[1]);
@@ -439,9 +436,37 @@ printf("init_textures()\n");
 
   sprintf(tid, "%d",bt_id);
   bt.meta("opengl:texid", tid);
- 
-//  glBindTexture(GL_TEXTURE_2D, 0);
 
+
+// init positions textures
+  
+  float* posdata = new float[NUM_PARTICLES*4];
+    memset(posdata, 0, NUM_PARTICLES*4*sizeof(float));
+    for(int i=0;i<NUM_PARTICLES;i++){
+	  
+      posdata[4*i+0] = (float)(i%SQR_NUM_PARTICLES)/SQR_NUM_PARTICLES;
+      posdata[4*i+1] = (float)(i/SQR_NUM_PARTICLES)/SQR_NUM_PARTICLES;
+      posdata[4*i+2] = -1.0;
+      posdata[4*i+2] = 1.0;
+
+    
+    }
+ 
+  glGenTextures(2, post_ids);
+ for(int i=0;i<2;i++){
+  glBindTexture(GL_TEXTURE_2D, post_ids[i]);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+  glTexImage2D(GL_TEXTURE_2D, 0, INTERNAL_FORMAT, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, posdata);  
+ }
+  /*sprintf(tid, "%d",post_ids[0]);
+  post.meta("opengl:texid", tid);
+  sprintf(tid, "%d",post_ids[1]);
+  postB.meta("opengl:texid", tid);*/
+
+  
+  
+//  glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 
@@ -471,9 +496,6 @@ void setup_view()
  // wCamOrig = (inverse(mv) | ShPoint4f(.0,.0,.0, 1.0))(0,1,2);
  ShMatrix4x4f imv = inverse(mv);
   wCamOrig = (imv | ShPoint3f(.0,.0,.0));
-
- // gravity = (imv | ShVector3f(.0,-9.8,.0));
-    gravity = ShVector3f(.0,-9.8,.0);
 
   }
 
@@ -522,8 +544,7 @@ void initGL(){
 void display()
   {
 //printf("display\n");
-
-	  
+  
   glDisable(GL_DEPTH_TEST); // don't need depth test in stream programs
 
 
@@ -686,10 +707,8 @@ void display()
   shUnbind(*streaming0_shaders);
 
  if(buttons[0] == GLUT_DOWN){ 
-  dirs(0) = ((float)ddx)/5;
-  dirs(1) = ((float)ddy)/5;
-  /*dirs(0) = -1.0;
-  dirs(1) = 0.0;*/
+  dirs(0) = ((float)ddx)/3;
+  dirs(1) = ((float)ddy)/3;
   dirs(2) = 0;
   shBind(*mouse0_shaders);
   glBegin(GL_QUADS);
@@ -749,29 +768,28 @@ void display()
    drawQuad();
   shUnbind(*streaming4_shaders);
 
+  
+/////////////////////////////////////
+// Update the positions of particles:
 
+  rposbuff++;
+  rposbuff %= 2;
+  wposbuff = (rposbuff+1)%2;
+  sprintf(tid, "%d",post_ids[rposbuff]);
+  post.meta("opengl:texid", tid);
+ 	  
+  glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+                                  GL_COLOR_ATTACHMENT0_EXT,
+                                  GL_TEXTURE_2D, post_ids[wposbuff], 0);
+
+ 
+  shBind(*advect_shaders);
+   drawQuad();
+  shUnbind(*advect_shaders);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  
-
-//glDisable(GL_DEPTH_TEST);
-//glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-/*glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);*/
-
-//camera.glProjection(1.0);
-
-
-// cleanup
-//glEnable(GL_DEPTH_TEST);
-/*glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-                                  GL_COLOR_ATTACHMENT0_EXT,
-                                  GL_TEXTURE_2D, 0, 0);*/
-
-
 glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+
 
   
 //test
@@ -782,9 +800,95 @@ glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
    drawQuad();
   shUnbind(*showvel_shaders);
 
-  glutSwapBuffers();
 
-   
+  
+  
+///////////////////////
+// Draw particles pass:
+glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+
+	
+/*  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+
+  float* particle_positions = 0;
+ if (dir == 0){
+    // Use the ShChannel object to fetch the ShHostStorage object
+    ShHostStoragePtr posA_storage = shref_dynamic_cast<ShHostStorage>(posA.memory()->findStorage("host"));
+    if (posA_storage)
+      {
+
+        posA_storage->sync();
+        particle_positions = (float*)posA_storage->data();
+      }//if
+    
+ }else
+    {
+    // Use the ShChannel object to fetch the ShHostStorage object
+    ShHostStoragePtr posB_storage = shref_dynamic_cast<ShHostStorage>(posB.memory()->findStorage("host"));
+    if (posB_storage){
+ 
+      posB_storage->sync();
+      particle_positions = (float*)posB_storage->data();
+    }
+ }//else
+
+  if (particle_positions) {
+  shBind(*particle_shaders);
+  glBegin(GL_QUADS);
+  for(int i = 0; i < NUM_PARTICLES; i++){
+   // for(int k=0;k<3;k++) mm[3](k) = particle_positions[3*i+k];
+ 
+  //glMultiTexCoord3fARB(GL_TEXTURE0, particle_positions[3*i], particle_positions[3*i+1], particle_positions[3*i+2]);
+  //glMultiTexCoord1fARB(GL_TEXTURE1, particle_times[i]);
+  //glNormal3f(particle_velocities[3*i],particle_velocities[3*i+1],particle_velocities[3*i+2]);
+  glVertex3f(-PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
+  glVertex3f(PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
+  glVertex3f(PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
+  glVertex3f(-PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
+
+  //glNormal3f(0, 0, -1);
+  glVertex3f(-PCO+particle_positions[3*i], -PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
+  glVertex3f(PCO+particle_positions[3*i], -PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
+  glVertex3f(PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
+  glVertex3f(-PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
+
+  //glNormal3f(1, 0, 0);
+  glVertex3f(PCO+particle_positions[3*i], -PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
+  glVertex3f(PCO+particle_positions[3*i], -PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
+  glVertex3f(PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
+  glVertex3f(PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
+
+  //glNormal3f(0, 0, 1);
+  glVertex3f(PCO+particle_positions[3*i], -PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
+  glVertex3f(-PCO+particle_positions[3*i], -PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
+  glVertex3f(-PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
+  glVertex3f(PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
+
+  //glNormal3f(-1, 0, 0);
+  glVertex3f(-PCO+particle_positions[3*i], -PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
+  glVertex3f(-PCO+particle_positions[3*i], -PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
+  glVertex3f(-PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
+  glVertex3f(-PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
+
+  //glNormal3f(0, -1, 0);
+  glVertex3f(-PCO+particle_positions[3*i], -PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
+  glVertex3f(-PCO+particle_positions[3*i], -PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
+  glVertex3f(PCO+particle_positions[3*i], -PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
+  glVertex3f(PCO+particle_positions[3*i], -PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
+ 
+   }//for
+  glEnd();
+  shUnbind(*particle_shaders);
+  }//if
+
+*/  
+
+  
+glutSwapBuffers();
+
   }//display
 
 void reshape(int width, int height)
@@ -839,6 +943,7 @@ void mouse(int button, int state, int x, int y)
 
 void idle(void)
   {
+//  update_streams();
   glutPostRedisplay();
   }
 
@@ -861,17 +966,17 @@ void keyboard(unsigned char k, int x, int y)
     case 'r':
     case 'R':
       {
-      #ifdef USING_STREAMS
+
        reset_streams();
-      #endif
+
       break;
       }
     case 's':
     case 'S':
       {
-	  #ifdef USING_STREAMS
+
        update_streams();
-      #endif
+
       break;
       }
     case 'h':
@@ -907,7 +1012,7 @@ int main(int argc, char** argv)
   initGL();
   init_textures();
   init_FBO();  
-  
+ 
 
   glutDisplayFunc(display);
   glutReshapeFunc(reshape);
@@ -929,9 +1034,8 @@ int main(int argc, char** argv)
     shSetBackend(backend_name);
 
     init_shaders();
-    #ifdef USING_STREAMS 
-	 init_streams();
-    #endif
+    init_streams();
+ 
   
     // Place the camera at its initial position
     camera.move(0.0, 0.0, -15.0);
@@ -974,6 +1078,188 @@ int main(int argc, char** argv)
   return 0;
   }
 
+
+void init_streams(void)
+  {
+ particle = SH_BEGIN_PROGRAM("gpu:stream") {
+    ShInOutPoint3f pos;
+ /*   ShInOutVector3f vel;
+    ShInOutVector3f initvel;
+    ShInOutAttrib1f time;
+    ShInputVector3f acc;
+    ShInputAttrib1f delta;*/
+
+    pos = pos + 0.000000001;
+
+       
+ /*  ShAttrib1f mu(0.8);
+    ShAttrib1f eps(0.6);
+
+    // check if below ground level
+   ShAttrib1f elev = (hm( (pos(0,2)+SCALE)/(2.0*SCALE)) )(0);
+    ShAttrib1f under = pos(1) < elev;
+
+    ShAttrib1f out = (pos(0) < -SCALE) || (pos(0) > SCALE) || (pos(2) < -SCALE) || (pos(2) > SCALE);
+    time -= lifeStep*ShAttrib1f(LIFE_STEP_FACTOR);
+    time = cond(out, ShAttrib1f(0.0), time);
+    pos = cond(time, pos, ShPoint3f(0.0,1.0,0.0));
+    vel = cond(time, vel, initvel);
+    time = cond(time, time, ShAttrib1f(1.0));
+    
+    // clamp to ground level if necessary
+   pos = cond(under,ShPoint3f(pos(0), elev, pos(2)), pos);
+
+
+    // modify velocity in case of collision
+    ShVector3f norm( (nm((pos(0,2)+SCALE)/(2.0*SCALE)))(0,1,2)  );
+    norm = norm(0,2,1)*2-1.0;
+    norm = normalize(norm);
+    norm(0) = -norm(0); 
+    ShVector3f veln = dot(vel,norm)*norm;
+    ShVector3f velt = vel - veln;
+    vel = cond(under, (1.0 - mu)*velt - eps*veln, vel);
+
+    ShAttrib1f onsurface = abs(pos(1)-elev) < 0.1;
+    ShAttrib1f minspeed = length(vel)<ShAttrib1f(MIN_SPEED);
+    
+    // clamp acceleration to zero if particles at or below ground plane 
+    acc = cond(onsurface, ShVector3f(0.0, 0.0, 0.0), acc);
+
+    // integrate acceleration to get velocity
+    vel = cond(onsurface&&minspeed, vel, vel+acc*delta);
+    vel -= DAMP_FACTOR*vel*delta;
+
+    // integrate velocity to update position
+    pos = cond(onsurface&&minspeed,pos,pos + vel*delta);*/
+
+    
+ } SH_END;
+
+  ShHostMemoryPtr host_posA = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
+  ShHostMemoryPtr host_posB = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
+/*  ShHostMemoryPtr host_velA = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
+  ShHostMemoryPtr host_velB = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
+  ShHostMemoryPtr host_initvelA = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
+  ShHostMemoryPtr host_initvelB = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
+  ShHostMemoryPtr host_timeA = new ShHostMemory(sizeof(float)*NUM_PARTICLES, SH_FLOAT);
+  ShHostMemoryPtr host_timeB = new ShHostMemory(sizeof(float)*NUM_PARTICLES, SH_FLOAT);*/
+
+
+ 
+  posA = ShChannel<ShPoint3f>(host_posA, NUM_PARTICLES);
+  posB = ShChannel<ShPoint3f>(host_posB, NUM_PARTICLES);
+ /* velA = ShChannel<ShVector3f>(host_velA, NUM_PARTICLES);
+  velB = ShChannel<ShVector3f>(host_velB, NUM_PARTICLES);
+  initvelA = ShChannel<ShVector3f>(host_initvelA, NUM_PARTICLES);
+  initvelB = ShChannel<ShVector3f>(host_initvelB, NUM_PARTICLES);
+  timeA = ShChannel<ShAttrib1f>(host_timeA, NUM_PARTICLES);
+  timeB = ShChannel<ShAttrib1f>(host_timeB, NUM_PARTICLES);*/
+
+  // Tie the postion and velocity data into an ShStream, one
+  // for the 'A' stream and one for the 'B' stream.
+  ShStream dataA = posA; //& velA & initvelA & timeA;
+  ShStream dataB = posB; //& velB & initvelB & timeB;
+
+  // Process the generic particle program into two versions, one that
+  // uses the dataA stream and one that uses the dataB stream. Additionally,
+  // we feed in two uniforms (gravity & delta) since these will not change
+  // on a particle by particle basis (although they can be changed globally).
+
+  
+//  particle_updateA = shSwizzle(0, 1) << (particle << dataA << gravity << delta);
+//  particle_updateB = shSwizzle(0, 1) << (particle << dataB << gravity << delta);
+
+  particle_updateA = (particle << posA);
+  particle_updateB = (particle << posB);
+
+  // Everything has been setup for the particle system to operate, last
+  // thing is to set the initial data.
+  reset_streams();
+  }
+
+void reset_streams(void)
+  {
+  
+  ShHostStoragePtr posA_storage = shref_dynamic_cast<ShHostStorage>(posA.memory()->findStorage("host"));
+  /*ShHostStoragePtr velA_storage = shref_dynamic_cast<ShHostStorage>(velA.memory()->findStorage("host"));
+  ShHostStoragePtr initvelA_storage = shref_dynamic_cast<ShHostStorage>(initvelA.memory()->findStorage("host"));
+  ShHostStoragePtr timeA_storage = shref_dynamic_cast<ShHostStorage>(timeA.memory()->findStorage("host"));*/
+
+
+  posA_storage->dirty();
+  /*velA_storage->dirty();
+  initvelA_storage->dirty();
+  timeA_storage->dirty();*/
+
+  float* posA_data = (float*)posA_storage->data();
+  /*float* velA_data = (float*)velA_storage->data();
+  float* initvelA_data = (float*)initvelA_storage->data();
+  float* timeA_data = (float*)timeA_storage->data();*/
+
+
+  // Iterate over the particle and initialize their state
+  for(int i = 0; i < NUM_PARTICLES; i++)
+    {
+    // All the particles will start at the same places
+    posA_data[3*i+0] = (float)(i%SQR_NUM_PARTICLES)/SQR_NUM_PARTICLES*2-1.0;
+    posA_data[3*i+1] = (float)(i/SQR_NUM_PARTICLES)/SQR_NUM_PARTICLES*2-1.0;
+    posA_data[3*i+2] = -1.0;
+
+/*    // The velocity direction will vary over a small cone of angles.
+    float theta = 2*M_PI*((float)rand()/(RAND_MAX-1));
+    float phi = 0.7*(M_PI/2) + 0.2*(M_PI/2)*((float)rand()/(RAND_MAX-1));
+
+    float cost = cos(theta);
+    float sint = sin(theta);
+    float cosp = cos(phi);
+    float sinp = sin(phi);
+
+    // Additionally, vary the speed (i.e. magnitude of the velocity vector)
+    float power = 5 + 4*((float)rand()/(RAND_MAX-1));
+
+    initvelA_data[3*i+0] = power*sint*cosp;
+    initvelA_data[3*i+1] = power*sinp;
+    initvelA_data[3*i+2] = power*cost*cosp;
+
+    velA_data[3*i+0] = 0;
+    velA_data[3*i+1] = 0;
+    velA_data[3*i+2] = 0;*/
+
+   
+    }
+
+  // reset the dir flag to that the simulation will start with the 'A' stream
+  dir = 0;
+  }
+
+void update_streams(void)
+  {
+  try 
+    {
+    // The value of dir specifcies whether to run particle_updateA, which
+    // will take the data from stream 'A' and run the particle program to
+    // generate stream 'B', or the opposite using 'B' to generate 'A'. The
+    // rendering code uses dir in the same way to decided which stream has
+    // the latest state data for draw drawing the particle.
+    if (dir == 0)
+      {
+      posB /*& velB & initvelB & timeB*/ = particle_updateA;
+      }
+    else
+      {
+      posA /*& velA & initvelA & timeA*/ = particle_updateB;
+      }
+    dir = !dir;
+   }
+  catch (const ShException& e)
+    {
+    std::cerr << "SH Exception: " << e.message() << std::endl;
+    }
+  catch (...)
+    {
+    std::cerr << "Unknown exception caught." << std::endl;
+    }
+  }
 
 void init_shaders(void)
   {
@@ -1030,13 +1316,7 @@ void init_shaders(void)
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
 
-    //constants:
-  /*  ShAttrib1f A, B, C, D;
-    A = 0.05555555555;
-    B = 0.16666666666;
-    C = 0.25;
-    D = -0.0833333333;*/
-    
+  
     // inner products:
     ShAttrib4f eu;
     ShVector3f u = ((dvt(tc))(0,1,2))*2-1.0;
@@ -1057,16 +1337,6 @@ void init_shaders(void)
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
 
-    //constants:
- //   ShAttrib1f A, B, C, D;
-/*    A = 0.027777777777;
-    B = 0.083333333333;
-    C = 0.125;
-    D = -0.04166666666;*/
-/*    A = 0.04;
-    B = 0.1;
-    C = 0.15;
-    D = -0.1;  */
     // inner products:
     ShAttrib4f eu;
     ShVector3f u = (dvt(tc)(0,1,2))*2-1.0;
@@ -1087,12 +1357,6 @@ void init_shaders(void)
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
 
-    //constants:
-/*    ShAttrib1f A, B, C, D;
-    A = 0.027777777777;
-    B = 0.083333333333;
-    C = 0.125;
-    D = -0.04166666666; */
     
     // inner products:
     ShAttrib4f eu;
@@ -1114,12 +1378,6 @@ void init_shaders(void)
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
 
-    //constants:
-/*    ShAttrib1f A, B, C, D;
-    A = 0.027777777777;
-    B = 0.083333333333;
-    C = 0.125;
-    D = -0.04166666666; */  
     // inner products:
     ShAttrib4f eu;
     ShVector3f u = (dvt(tc)(0,1,2))*2-1.0;
@@ -1140,12 +1398,6 @@ void init_shaders(void)
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
 
-    //constants:
- /*   ShAttrib1f A, B, C, D;
-    A = 0.05555555555;
-    B = 0.16666666666;
-    C = 0.25;
-    D = -0.0833333333;  */ 
     // inner products:
     ShAttrib4f eu;
     ShVector3f u = (dvt(tc)(0,1,2))*2-1.0;
@@ -1186,7 +1438,7 @@ void init_shaders(void)
     ShOutputColor4f color;
 
     color = dpt4(tc) - INV_TAU*(dpt4(tc) - eqdpt4(tc));
-    
+        
   } SH_END;
 
  
@@ -1239,8 +1491,8 @@ void init_shaders(void)
     ShOutputColor4f color;
 
     //tc(0) = tc(0)+0.01;   
-    color(0) = dptc4(tc)(0);//(dptc3d4.find14(tc))(0);
-    color(1) = dptc4(tc)(1);//(dptc3d4.find11(tc))(1);
+    color(0) = 0;//dptc4(tc)(0);//(dptc3d4.find14(tc))(0);
+    color(1) = 0;//dptc4(tc)(1);//(dptc3d4.find11(tc))(1);
     color(2) = dptc4(tc)(2);
     color(3) = 0;
 
@@ -1252,10 +1504,14 @@ void init_shaders(void)
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
 
-    color(0,2) = abs((dvt(tc)(0,1))*2-1.0);
-	color(1) = clamp(bt(tc)(0) + bt(tc)(1), 0, 1.0);
+    //color(0,2) = abs((dvt(tc)(0,1))*2-1.0);
+      ShVector3f vel = (dvt(tc)(0,1,2))*2-1.0;
+      ShAttrib1f dp = vel|vel;
+      color(0,1,2) = ShAttrib3f(dp,dp,dp);
+    //color(0,1,2) = post(tc)(0,1,2);
+/*	color(1) += clamp(bt(tc)(0) + bt(tc)(1), 0, 1.0);
 	color(0) += bt(tc)(0);
-	color(2) += bt(tc)(1);
+	color(2) += bt(tc)(1);*/
 	color(3) = 1.0;
     //color(2) = clamp(abs(-dvt(tc)(0)) + abs(-dvt(tc)(1)),0,1.0);
     
@@ -1293,26 +1549,61 @@ void init_shaders(void)
     ShOutputColor4f color;
 
     //color = ShConstColor4f(1,0,0,1);
-    color(0) = dirs|ShAttrib3f(1,0,0);
-    color(1) = dirs|ShAttrib3f(-1,0,0);
-    color(2) = dirs|ShAttrib3f(0,1,0);
-    color(3) = dirs|ShAttrib3f(0,-1,0);
+    discard(gausst(tc)(0) - 0.9 );
+    ShAttrib1f ampl = 1.0 - gausst(tc)(0);
+    // ShAttrib1f ampl = 1.0 - 2*abs(tc(0)-0.5);
+    color(0) = (dirs|ShAttrib3f(1,0,0));
+    color(1) = (dirs|ShAttrib3f(-1,0,0));
+    color(2) = (dirs|ShAttrib3f(0,1,0));
+    color(3) = (dirs|ShAttrib3f(0,-1,0));
    } SH_END;
 
    mouse1_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
     ShInputPosition4f pos;
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
-
+   
+    //ShAttrib1f ampl = 1.0 - 2*abs(tc(0)-0.5);
+    discard(gausst(tc)(0) - 0.9 );
+   // ShAttrib1f ampl = 1.0 - gausst(tc)(0);
+    
+    
     //color = ShConstColor4f(1,0,0,1);
-    color(0) = RCPSQR2*dirs|ShAttrib3f(1,1,0);
-    color(1) = RCPSQR2*dirs|ShAttrib3f(-1,-1,0);
-    color(2) = RCPSQR2*dirs|ShAttrib3f(1,-1,0);
-    color(3) = RCPSQR2*dirs|ShAttrib3f(-1,1,0);
+    color(0) = RCPSQR2*(dirs|ShAttrib3f(1,1,0));
+    color(1) = RCPSQR2*(dirs|ShAttrib3f(-1,-1,0));
+    color(2) = RCPSQR2*(dirs|ShAttrib3f(1,-1,0));
+    color(3) = RCPSQR2*(dirs|ShAttrib3f(-1,1,0));
    } SH_END;
 
-  
-  
+/////////////////
+//particle shaders
+   
+   advect_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+    ShInputPosition4f pos;
+    ShInputTexCoord2f tc;
+    ShOutputColor4f color;
+
+    ShAttrib4f ppos = post(tc);
+    
+    color(0,1,2) = ppos(0,1,2) + VELSTEP*((dvt(ppos(0,1))(0,1,2))*2-1.0);
+    color(3) = 1.0;
+   } SH_END;
+
+   particle_vsh = SH_BEGIN_VERTEX_PROGRAM {
+    ShInOutPosition4f pos;
+    //ShInOutTexCoord2f tc;
+            
+   } SH_END;
+
+   particle_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+    ShInputPosition4f pos;
+    //ShInputTexCoord2f tc;
+    ShOutputColor4f color;
+
+    color = ShConstColor4f(1,1,1,1);
+   } SH_END;
+ 
+
   dv_shaders = new ShProgramSet(vsh, dv_fsh);
   eq0_shaders = new ShProgramSet(vsh, eq0_fsh);
   eq1_shaders = new ShProgramSet(vsh, eq1_fsh);
@@ -1332,7 +1623,10 @@ void init_shaders(void)
   greenonly_shaders = new ShProgramSet(vsh, greenonly_fsh);
   mouse0_shaders = new ShProgramSet(vsh, mouse0_fsh);
   mouse1_shaders = new ShProgramSet(vsh, mouse1_fsh);
-      }
+//particle shaders
+  advect_shaders = new ShProgramSet(vsh, advect_fsh);
+  particle_shaders = new ShProgramSet(particle_vsh, particle_fsh);
+       }
 
 
 int gprintf(int x, int y, char* fmt, ...)
