@@ -48,7 +48,7 @@ using namespace SH;
 // defines
 
 
-#define INTERNAL_FORMAT GL_RGBA16 /*GL_RGBA8*/
+#define INTERNAL_FORMAT GL_RGBA8 /*GL_RGBA8*/
 
 #define NUMMODES 1
 
