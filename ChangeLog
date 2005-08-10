@@ -2,7 +2,8 @@
 
 	* src/ShNibblesImpl.hpp, ShNibbles.hpp: Add nibbles for gradient,
 	cellnoise, scellnoise, hash, texhash, linnoise, slinnoise, noise,
-	snoise, perlin, sperlin, turbulence, sturbulence.
+	snoise, perlin, sperlin, turbulence, sturbulence, poly, cross,
+	length, length_1, length_inf, distance, distance_1, distance_inf.
 
 2005-08-09  Francois Marier  <francois@serioushack.com>
 

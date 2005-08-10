@@ -235,6 +235,44 @@ SHNIBBLE_NOISE_FUNC_DECL(shSturbulence);
 
 //@}
 
+/**@{ \brief Nibbles for distance functions
+ * Inputs: IN(0) T1 a
+ *         IN(1) T2 b
+ * Outputs: OUT(0) ShAttrib1f name
+ */
+#define SHNIBBLE_DISTANCE_FUNC_DECL(opname) \
+  template<typename T1, typename T2> ShProgram opname(const std::string & output_name = "result",\
+      const std::string & input_name0 = "x", const std::string & input_name1 = "y"); \
+  template<typename T> ShProgram opname(const std::string & output_name = "result",\
+      const std::string & input_name0 = "x", const std::string & input_name1 = "y");
+
+SHNIBBLE_DISTANCE_FUNC_DECL(shDistance);
+SHNIBBLE_DISTANCE_FUNC_DECL(shDistance_1);
+SHNIBBLE_DISTANCE_FUNC_DECL(shDistance_inf);
+//@}
+
+/**@{ \brief Nibbles for length functions
+ * Inputs: IN(0) T1 a
+ * Outputs: OUT(0) ShAttrib1f name
+ */
+#define SHNIBBLE_LENGTH_FUNC_DECL(opname) \
+  template<typename T> ShProgram opname(const std::string & output_name = "result",\
+      const std::string & input_name0 = "x");
+
+SHNIBBLE_LENGTH_FUNC_DECL(shLength);
+SHNIBBLE_LENGTH_FUNC_DECL(shLength_1);
+SHNIBBLE_LENGTH_FUNC_DECL(shLength_inf);
+//@}
+
+/** \brief Nibble for cross product operator
+ * Inputs: IN(0) T a
+ *         IN(1) T b
+ * Outputs: OUT(0) T name  
+ */
+template<typename T> ShProgram shCross(const std::string & name = "result",
+                                       const std::string & input_name0 = "x", 
+                                       const std::string & input_name1 = "y");
+
 /** \brief Nibble for dot product operator
  * Inputs: IN(0) T a
  *         IN(1) T b
@@ -259,6 +297,23 @@ ShProgram shLerp(const std::string & name = "result");
 
 template<typename T1>
 ShProgram shLerp(const std::string & name = "result");
+//@}
+
+/** @{ \brief Nibble for poly function
+ * Inputs: IN(0) T1 a
+ *         IN(1) T1 b
+ *         IN(2) T2 alpha (T2 = T1 by default)
+ * Outputs: OUT(0) T1 name
+ */
+template<typename T1, typename T2>
+ShProgram shPoly(const std::string & name = "result",
+                 const std::string & input_name0 = "x", 
+                 const std::string & input_name1 = "y");
+
+template<typename T1>
+ShProgram shPoly(const std::string & name = "result",
+                 const std::string & input_name0 = "x", 
+                 const std::string & input_name1 = "y");
 //@}
 
 }

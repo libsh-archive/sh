@@ -305,14 +305,70 @@ ShProgram opfunc(const std::string & output_name, const std::string & input_name
   return nibble; \
 }
 
-SHNIBBLE_NOISE_FUNC(shLinnoise, linnoise);
-SHNIBBLE_NOISE_FUNC(shNoise, noise);
-SHNIBBLE_NOISE_FUNC(shPerlin, perlin);
-SHNIBBLE_NOISE_FUNC(shTurbulence, turbulence);
-SHNIBBLE_NOISE_FUNC(shSlinnoise, slinnoise);
-SHNIBBLE_NOISE_FUNC(shSnoise, snoise);
-SHNIBBLE_NOISE_FUNC(shSperlin, sperlin);
-SHNIBBLE_NOISE_FUNC(shSturbulence, sturbulence);
+SHNIBBLE_NOISE_FUNC(shLinnoise, linnoise)
+SHNIBBLE_NOISE_FUNC(shNoise, noise)
+SHNIBBLE_NOISE_FUNC(shPerlin, perlin)
+SHNIBBLE_NOISE_FUNC(shTurbulence, turbulence)
+SHNIBBLE_NOISE_FUNC(shSlinnoise, slinnoise)
+SHNIBBLE_NOISE_FUNC(shSnoise, snoise)
+SHNIBBLE_NOISE_FUNC(shSperlin, sperlin)
+SHNIBBLE_NOISE_FUNC(shSturbulence, sturbulence)
+
+#define SHNIBBLE_DISTANCE_FUNC(opfunc, opcode) \
+template<typename T1, typename T2> \
+ShProgram opfunc(const std::string & output_name, \
+                 const std::string & input_name0, \
+                 const std::string & input_name1) \
+{ \
+  ShProgram nibble = SH_BEGIN_PROGRAM() { \
+    typename T1::InputType SH_NAMEDECL(a, input_name0); \
+    typename T2::InputType SH_NAMEDECL(b, input_name1); \
+    ShOutputAttrib1f SH_NAMEDECL(result, output_name) = opcode; \
+  } SH_END; \
+  nibble.name(# opfunc); \
+  return nibble; \
+} \
+template<typename T> \
+ShProgram opfunc(const std::string & output_name, \
+                 const std::string & input_name0, \
+                 const std::string & input_name1) \
+{ \
+  return opfunc<T, T>(output_name, input_name0, input_name1);\
+}
+
+SHNIBBLE_DISTANCE_FUNC(shDistance, distance(a, b))
+SHNIBBLE_DISTANCE_FUNC(shDistance_1, distance_1(a, b))
+SHNIBBLE_DISTANCE_FUNC(shDistance_inf, distance_inf(a, b))
+
+#define SHNIBBLE_LENGTH_FUNC(opfunc, opcode) \
+template<typename T> \
+ShProgram opfunc(const std::string & output_name, \
+                 const std::string & input_name0) \
+{ \
+  ShProgram nibble = SH_BEGIN_PROGRAM() { \
+    typename T::InputType SH_NAMEDECL(a, input_name0); \
+    ShOutputAttrib1f SH_NAMEDECL(result, output_name) = opcode; \
+  } SH_END; \
+  nibble.name(# opfunc); \
+  return nibble; \
+}
+
+SHNIBBLE_LENGTH_FUNC(shLength, length(a))
+SHNIBBLE_LENGTH_FUNC(shLength_1, length(a))
+SHNIBBLE_LENGTH_FUNC(shLength_inf, length(a))
+
+template<typename T> 
+ShProgram shCross(const std::string& name, const std::string& input_name0 = "x",
+                  const std::string& input_name1 = "y")
+{ 
+  ShProgram nibble = SH_BEGIN_PROGRAM() {
+    typename T::InputType SH_DECL(a); 
+    typename T::InputType SH_DECL(b); 
+    typename T::OutputType SH_NAMEDECL(result, name) = cross(a, b); 
+  } SH_END; 
+  nibble.name("shCross");
+  return nibble;
+}
 
 template<typename T> 
 ShProgram shDot(const std::string & name)
@@ -354,6 +410,28 @@ template<typename T1>
 ShProgram shLerp(const std::string & name)
 { 
   return shLerp<T1, T1>(name);
+}
+
+template<typename T1, typename T2>
+ShProgram shPoly(const std::string & name = "result",
+                 const std::string & input_name0 = "x", 
+                 const std::string & input_name1 = "y")
+{
+  ShProgram nibble = SH_BEGIN_PROGRAM() {
+    typename T1::InputType SH_DECL(a); 
+    typename T2::InputType SH_DECL(b); 
+    typename T1::OutputType SH_NAMEDECL(result, name) = poly(a, b); 
+  } SH_END; 
+  nibble.name("shPoly");
+  return nibble;
+}
+
+template<typename T1>
+ShProgram shPoly(const std::string & name = "result",
+                 const std::string & input_name0 = "x", 
+                 const std::string & input_name1 = "y")
+{
+  return shPoly<T1, T1>(name, input_name0, input_name1);
 }
 
 }
