@@ -62,24 +62,23 @@ using namespace SH;
 
 #define RCPSQR2 0.707106781186
 
-#define S2 3.0
 
 #define A0 (4.0/9)
-#define D0 -(S2*2.0/3)
+#define D0 -(2.0/3)
 
 #define A1 (1.0/9)
-#define B1 (S2*1.0/3)
-#define C1 (S2*S2*1.0/2)
-#define D1 -(S2*1.0/6)
+#define B1 (1.0/3)
+#define C1 (1.0/2)
+#define D1 -(1.0/6)
 
 #define A2 (1.0/36)
-#define B2 (S2*1.0/12)
-#define C2 (S2*S2*1.0/8)
-#define D2 -(S2*1.0/24)
+#define B2 (1.0/12)
+#define C2 (1.0/8)
+#define D2 -(1.0/24)
 
-#define ZEROVEL 1.0
+#define ZEROVEL 0.2
 
-#define TAU 5.0
+#define TAU 3.0
 #define INV_TAU (1.0f/TAU)
 
 #define VELSTEP 0.005
@@ -123,6 +122,8 @@ GLuint depth_rb;
 
 // states
 int fmode = 0;
+
+int mc = 0;
 
 // uniforms 
 
@@ -245,7 +246,7 @@ ShArray2D<ShColor4f> bt;
 ShArray2D<ShColor4f> post; 
 
 ShArray2D<ShColor4f> colort;
-ShArray2D<ShColor3fub> gausst(32,32);
+ShArray2D<ShColor3fub> gausst(16,16);
 ShImage gauss_image;
 
 Texture3D dptc3d0(&dptc0, SQR_GRID_3D_RES);
@@ -273,7 +274,7 @@ ShProgram particle_updateB;
 // GLUT data
 //-------------------------------------------------------------------
 int buttons[5] = {GLUT_UP, GLUT_UP, GLUT_UP, GLUT_UP, GLUT_UP};
-int cur_x, cur_y, old_x, old_y, ddx, ddy;
+int cur_x, cur_y, old_x, old_y;
 
 bool show_help = false;
 
@@ -535,7 +536,25 @@ void drawQuad(){
 
 }
 
+void drawQuad(float qx, float qy, float qw, float qh){
+//  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+  glBegin(GL_QUADS);
+  
+  glTexCoord2f(0,0);
+  glVertex3f(qx, qy, 0);
+  
+  glTexCoord2f(1,0);
+  glVertex3f( qx+qw, qy, 0);
+  
+  glTexCoord2f(1,1);
+  glVertex3f( qx+qw, qy+qh,  0);
+  
+  glTexCoord2f(0,1);
+  glVertex3f(qx, qy+qh,  0);
+  
+  glEnd();
 
+}
 
 void initGL(){
 		
@@ -707,25 +726,17 @@ void display()
   shUnbind(*streaming0_shaders);
 
  if(buttons[0] == GLUT_DOWN){ 
-  dirs(0) = ((float)ddx)/3;
-  dirs(1) = ((float)ddy)/3;
-  dirs(2) = 0;
+ mc++;
+ if( !(mc %= 10) ){
+  dirs(0) = 0.5*dirs(0) + 0.5*((float)(cur_x-old_x));
+  dirs(1) = 0.5*dirs(1) - 0.5*((float)(cur_y-old_y));
+  old_x = cur_x;
+  old_y = cur_y;
+ }
+ 
+ 
   shBind(*mouse0_shaders);
-  glBegin(GL_QUADS);
-  
-  glTexCoord2f(0,0);
-  glVertex3f(-0.5, 0, 0);
-  
-  glTexCoord2f(1,0);
-  glVertex3f(-0.5+SO2, 0, 0);
-  
-  glTexCoord2f(1,1);
-  glVertex3f(-0.5+SO2, SO1,  0);
-  
-  glTexCoord2f(0,1);
-  glVertex3f(-0.5, SO1,  0);
-  
-  glEnd();
+   drawQuad(2*(float)cur_x/512-1.0, -2*(float)cur_y/512+1.0, SO1, SO2);
   shUnbind(*mouse0_shaders);
  }//if
   
@@ -741,21 +752,7 @@ void display()
 
  if(buttons[0] == GLUT_DOWN){ 
   shBind(*mouse1_shaders);
-  glBegin(GL_QUADS);
-  
-  glTexCoord2f(0,0);
-  glVertex3f(-0.5, 0, 0);
-  
-  glTexCoord2f(1,0);
-  glVertex3f(-0.5+SO2, 0, 0);
-  
-  glTexCoord2f(1,1);
-  glVertex3f(-0.5+SO2, SO1,  0);
-  
-  glTexCoord2f(0,1);
-  glVertex3f(-0.5, SO1,  0);
-  
-  glEnd();
+   drawQuad(2*(float)cur_x/512-1.0, -2*(float)cur_y/512+1.0, SO1, SO2);
   shUnbind(*mouse1_shaders);
  }//if
 
@@ -925,12 +922,12 @@ void motion(int x, int y)
   cur_x = x;
   cur_y = y;
 
-  ddx = old_x - cur_x;
+  /*ddx = old_x - cur_x;
   ddy = old_y - cur_y;
   
   old_x = cur_x;
   old_y = cur_y;
-
+*/
   }
 
 void mouse(int button, int state, int x, int y)
@@ -938,6 +935,9 @@ void mouse(int button, int state, int x, int y)
   buttons[button] = state;
   cur_x = x;
   cur_y = y;
+
+  old_x = cur_x;
+  old_y = cur_y;
 
     }
 
@@ -1328,7 +1328,7 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = (A1 + B1*eu + C1*eu2 + D1*uu)*(dvt(tc))(3);
+    color = (A1 + B1*eu + C1*eu2 + D1*uu)*(dvt(tc))(3)*0.5+0.5;
     
   } SH_END;
 
@@ -1348,7 +1348,7 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3);
+    color = (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*0.5+0.5;
     
   } SH_END;
 
@@ -1369,7 +1369,7 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3);
+    color = (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*0.5+0.5;
     
   } SH_END;
 
@@ -1389,7 +1389,7 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3);
+    color = (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*0.5+0.5;
     
   } SH_END;
 
@@ -1409,8 +1409,8 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = (A1 + B1*eu + C1*eu2 + D1*uu)*dvt(tc)(3);
-    color(2) = (A0 + D0*uu)*dvt(tc)(3); 
+    color = (A1 + B1*eu + C1*eu2 + D1*uu)*dvt(tc)(3)*0.5+0.5;
+    color(2) = (A0 + D0*uu)*dvt(tc)(3)*0.5+0.5; 
     
   } SH_END;
 
@@ -1419,7 +1419,7 @@ void init_shaders(void)
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
 
-    color = dpt0(tc) - INV_TAU*(dpt0(tc) - eqdpt0(tc));
+    color = dpt0(tc) - INV_TAU*(dpt0(tc) - (eqdpt0(tc)*2-1.0));
     
   } SH_END;
  
@@ -1428,7 +1428,7 @@ void init_shaders(void)
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
 
-    color = dpt1(tc) - INV_TAU*(dpt1(tc) - eqdpt1(tc));
+    color = dpt1(tc) - INV_TAU*(dpt1(tc) - (eqdpt1(tc)*2-1.0));
     
   } SH_END;
 
@@ -1437,7 +1437,7 @@ void init_shaders(void)
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
 
-    color = dpt4(tc) - INV_TAU*(dpt4(tc) - eqdpt4(tc));
+    color = dpt4(tc) - INV_TAU*(dpt4(tc) - (eqdpt4(tc)*2-1.0));
         
   } SH_END;
 
@@ -1549,7 +1549,7 @@ void init_shaders(void)
     ShOutputColor4f color;
 
     //color = ShConstColor4f(1,0,0,1);
-    discard(gausst(tc)(0) - 0.9 );
+    discard(0.2 - gausst(tc)(0));
     ShAttrib1f ampl = 1.0 - gausst(tc)(0);
     // ShAttrib1f ampl = 1.0 - 2*abs(tc(0)-0.5);
     color(0) = (dirs|ShAttrib3f(1,0,0));
@@ -1564,7 +1564,7 @@ void init_shaders(void)
     ShOutputColor4f color;
    
     //ShAttrib1f ampl = 1.0 - 2*abs(tc(0)-0.5);
-    discard(gausst(tc)(0) - 0.9 );
+    discard(0.2 - gausst(tc)(0));
    // ShAttrib1f ampl = 1.0 - gausst(tc)(0);
     
     
