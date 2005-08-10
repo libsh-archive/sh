@@ -48,7 +48,7 @@ using namespace SH;
 // defines
 
 
-#define INTERNAL_FORMAT GL_RGBA8 /*GL_RGBA8*/
+#define INTERNAL_FORMAT GL_RGBA16 /*GL_RGBA8*/
 
 #define NUMMODES 1
 
@@ -76,16 +76,16 @@ using namespace SH;
 #define C2 (1.0/8)
 #define D2 -(1.0/24)
 
-#define ZEROVEL 0.2
+#define ZEROVEL 1.0
 
-#define TAU 3.0
+#define TAU 2.5
 #define INV_TAU (1.0f/TAU)
 
-#define VELSTEP 0.005
+#define VELSTEP 0.05
 
-#define SQR_NUM_PARTICLES 512
+#define SQR_NUM_PARTICLES GRID_2D_RES
 #define NUM_PARTICLES (SQR_NUM_PARTICLES*SQR_NUM_PARTICLES)
-#define PCO 0.01
+#define PCO 0.02
 
 // forward declarations
 void init_shaders(void);
@@ -96,6 +96,9 @@ void initGL(void);
 void init_streams(void);
 void reset_streams(void);
 void update_streams(void);
+
+//vertexbuffers
+void init_vertexbuffers(void);
 
 void switchBuffers(void);
 void setup_texouts();
@@ -204,6 +207,11 @@ ShProgramSet* mouse1_shaders;
 ShProgramSet* advect_shaders;
 ShProgramSet* particle_shaders;
 
+
+float* particle_positions;
+float* particle_texcoords;
+
+
 //test vars
 ShAttrib3f dirs; 
 
@@ -221,12 +229,33 @@ GLuint dvt_id;
 GLuint bt_id;
 GLuint post_ids[2];
 
+GLuint vbuffer_id;
+
 int dbc = 0, idbc = 1; // double buffering counter
 
 
 
 //distribution package texture nodes 
-ShArray2D<ShColor4f> dpt0; // distribution packages
+ShTexture2D<ShColor4f> dpt0; // distribution packages
+ShTexture2D<ShColor4f> dpt1;
+ShTexture2D<ShColor4f> dpt2;
+ShTexture2D<ShColor4f> dpt3;
+ShTexture2D<ShColor4f> dpt4;
+ShTexture2D<ShColor4f> dptc0; // distribution packages after collision step
+ShTexture2D<ShColor4f> dptc1;
+ShTexture2D<ShColor4f> dptc2;
+ShTexture2D<ShColor4f> dptc3;
+ShTexture2D<ShColor4f> dptc4;
+ShTexture2D<ShColor4f> dvt; // density and velocity
+ShTexture2D<ShColor4f> eqdpt0; // equilibrium distribution packages
+ShTexture2D<ShColor4f> eqdpt1;
+ShTexture2D<ShColor4f> eqdpt2;
+ShTexture2D<ShColor4f> eqdpt3;
+ShTexture2D<ShColor4f> eqdpt4;
+ShTexture2D<ShColor4f> bt;
+ShTexture2D<ShColor4f> post;
+
+/*ShArray2D<ShColor4f> dpt0; // distribution packages
 ShArray2D<ShColor4f> dpt1;
 ShArray2D<ShColor4f> dpt2;
 ShArray2D<ShColor4f> dpt3;
@@ -243,10 +272,10 @@ ShArray2D<ShColor4f> eqdpt2;
 ShArray2D<ShColor4f> eqdpt3;
 ShArray2D<ShColor4f> eqdpt4;
 ShArray2D<ShColor4f> bt;
-ShArray2D<ShColor4f> post; 
+ShArray2D<ShColor4f> post; */
 
 ShArray2D<ShColor4f> colort;
-ShArray2D<ShColor3fub> gausst(16,16);
+ShArray2D<ShColor3fub> gausst(32,32);
 ShImage gauss_image;
 
 Texture3D dptc3d0(&dptc0, SQR_GRID_3D_RES);
@@ -307,6 +336,18 @@ glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 
 }
 
+void init_vertexbuffers(){
+    // create the buffer object
+    glGenBuffersARB(1, &vbuffer_id);
+    glBindBufferARB(GL_PIXEL_PACK_BUFFER_EXT, vbuffer_id);
+    glBufferDataARB(GL_PIXEL_PACK_BUFFER_EXT, NUM_PARTICLES*4*2, 0, GL_STREAM_COPY); // undefined data
+    glBindBufferARB(GL_PIXEL_PACK_BUFFER_EXT, 0);
+    printf("finished initializing VBO\n");
+    GLenum glerror = glGetError();
+    if (glerror != GL_NO_ERROR) printf("Error in glBindBufferARB\n");
+ 
+}
+
 void load_textures(void){
 
     gauss_image.loadPng("densitysprite2.png");
@@ -337,7 +378,16 @@ void load_textures(void){
 void init_textures(){
 printf("init_textures()\n");
 
-  //float* expl = new float[] 
+  particle_positions = new float[NUM_PARTICLES*3];
+  memset(particle_positions, 0, NUM_PARTICLES*3*sizeof(float));
+
+  particle_texcoords = new float[NUM_PARTICLES*2];
+  for(int i=0;i<NUM_PARTICLES;i++){
+    particle_texcoords[2*i] = (float)(i%SQR_NUM_PARTICLES)/SQR_NUM_PARTICLES;
+    particle_texcoords[2*i+1] = (float)(i/SQR_NUM_PARTICLES)/SQR_NUM_PARTICLES;
+   }
+
+
 
 
  float** testdata = new float*[5];	  
@@ -441,12 +491,12 @@ printf("init_textures()\n");
 
 // init positions textures
   
-  float* posdata = new float[NUM_PARTICLES*4];
-    memset(posdata, 0, NUM_PARTICLES*4*sizeof(float));
-    for(int i=0;i<NUM_PARTICLES;i++){
+  float* posdata = new float[/*NUM_PARTICLES*/GRID_2D_RES*GRID_2D_RES*4];
+    memset(posdata, 0, /*NUM_PARTICLES*/GRID_2D_RES*GRID_2D_RES*4*sizeof(float));
+    for(int i=0;i<GRID_2D_RES*GRID_2D_RES;i++){
 	  
-      posdata[4*i+0] = (float)(i%SQR_NUM_PARTICLES)/SQR_NUM_PARTICLES;
-      posdata[4*i+1] = (float)(i/SQR_NUM_PARTICLES)/SQR_NUM_PARTICLES;
+      posdata[4*i+0] = (float)(i%GRID_2D_RES)/GRID_2D_RES;
+      posdata[4*i+1] = (float)(i/GRID_2D_RES)/GRID_2D_RES;
       posdata[4*i+2] = -1.0;
       posdata[4*i+2] = 1.0;
 
@@ -458,7 +508,7 @@ printf("init_textures()\n");
   glBindTexture(GL_TEXTURE_2D, post_ids[i]);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-  glTexImage2D(GL_TEXTURE_2D, 0, INTERNAL_FORMAT, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, posdata);  
+  glTexImage2D(GL_TEXTURE_2D, 0, INTERNAL_FORMAT, /*SQR_NUM_PARTICLES*/GRID_2D_RES, /*SQR_NUM_PARTICLES*/GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, posdata);  
  }
   /*sprintf(tid, "%d",post_ids[0]);
   post.meta("opengl:texid", tid);
@@ -730,6 +780,8 @@ void display()
  if( !(mc %= 10) ){
   dirs(0) = 0.5*dirs(0) + 0.5*((float)(cur_x-old_x));
   dirs(1) = 0.5*dirs(1) - 0.5*((float)(cur_y-old_y));
+  dirs(2) = 0;
+  dirs = 0.5*normalize(dirs);
   old_x = cur_x;
   old_y = cur_y;
  }
@@ -779,10 +831,25 @@ void display()
                                   GL_COLOR_ATTACHMENT0_EXT,
                                   GL_TEXTURE_2D, post_ids[wposbuff], 0);
 
- 
+  glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+
   shBind(*advect_shaders);
    drawQuad();
   shUnbind(*advect_shaders);
+
+// read back into vertex buffer
+    // bind buffer object to pixel pack buffer
+    glBindBufferARB(GL_PIXEL_PACK_BUFFER_EXT, vbuffer_id);
+    // read from frame buffer to buffer object
+    glReadBuffer(GL_COLOR_ATTACHMENT0_EXT/*GL_FRONT*/);
+   GLenum glerror = glGetError();
+    if (glerror != GL_NO_ERROR) printf("Error in glReadBuffer\n");
+ 
+
+    glReadPixels(0, 0, SQR_NUM_PARTICLES, SQR_NUM_PARTICLES, GL_RGBA, GL_HALF_FLOAT_NV, 0);
+    glBindBufferARB(GL_PIXEL_PACK_BUFFER_EXT, 0);
+
+  
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
@@ -793,16 +860,30 @@ glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 
 glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-  shBind(*showvel_shaders);
+  /*shBind(*showvel_shaders);
    drawQuad();
-  shUnbind(*showvel_shaders);
+  shUnbind(*showvel_shaders);*/
 
 
-  
+//printf("about to render particles\n");
+glPointSize(1.0);
+// draw particles  
+    // bind buffer object to vertex array 
+    glBindBufferARB(GL_ARRAY_BUFFER, vbuffer_id);
+    glVertexAttribPointerARB(0, 4, GL_HALF_FLOAT_NV, GL_FALSE, 0, 0);
+    glBindBufferARB(GL_ARRAY_BUFFER, 0);
+
+    glEnableVertexAttribArrayARB(0);
+    shBind(*particle_shaders);
+	glDrawArrays(GL_POINTS, 0, NUM_PARTICLES);
+    shUnbind(*particle_shaders);
+    glDisableVertexAttribArrayARB(0);
+
+  glFlush();
   
 ///////////////////////
 // Draw particles pass:
-glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+//glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 
 	
 /*  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -832,8 +913,7 @@ glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
     }
  }//else
 
-  if (particle_positions) {
-  shBind(*particle_shaders);
+ shBind(*particle_shaders);
   glBegin(GL_QUADS);
   for(int i = 0; i < NUM_PARTICLES; i++){
    // for(int k=0;k<3;k++) mm[3](k) = particle_positions[3*i+k];
@@ -841,6 +921,8 @@ glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
   //glMultiTexCoord3fARB(GL_TEXTURE0, particle_positions[3*i], particle_positions[3*i+1], particle_positions[3*i+2]);
   //glMultiTexCoord1fARB(GL_TEXTURE1, particle_times[i]);
   //glNormal3f(particle_velocities[3*i],particle_velocities[3*i+1],particle_velocities[3*i+2]);
+  
+  glTexCoord2f(particle_texcoords[2*i], particle_texcoords[2*i+1]);
   glVertex3f(-PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
   glVertex3f(PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], -PCO+particle_positions[3*i+2]);
   glVertex3f(PCO+particle_positions[3*i], PCO+particle_positions[3*i+1], PCO+particle_positions[3*i+2]);
@@ -879,9 +961,7 @@ glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
    }//for
   glEnd();
   shUnbind(*particle_shaders);
-  }//if
-
-*/  
+  */
 
   
 glutSwapBuffers();
@@ -1011,7 +1091,8 @@ int main(int argc, char** argv)
   glewInit();
   initGL();
   init_textures();
-  init_FBO();  
+  init_FBO(); 
+  init_vertexbuffers();
  
 
   glutDisplayFunc(display);
@@ -1507,8 +1588,8 @@ void init_shaders(void)
     //color(0,2) = abs((dvt(tc)(0,1))*2-1.0);
       ShVector3f vel = (dvt(tc)(0,1,2))*2-1.0;
       ShAttrib1f dp = vel|vel;
-      color(0,1,2) = ShAttrib3f(dp,dp,dp);
-    //color(0,1,2) = post(tc)(0,1,2);
+     //color(0,1,2) = dvt(tc)(3,3,3);//ShAttrib3f(dp,dp,dp);
+    color(0,1,2) = post(tc)(0,1,2);
 /*	color(1) += clamp(bt(tc)(0) + bt(tc)(1), 0, 1.0);
 	color(0) += bt(tc)(0);
 	color(2) += bt(tc)(1);*/
@@ -1549,7 +1630,7 @@ void init_shaders(void)
     ShOutputColor4f color;
 
     //color = ShConstColor4f(1,0,0,1);
-    discard(0.2 - gausst(tc)(0));
+    discard(gausst(tc)(0) - 0.2);
     ShAttrib1f ampl = 1.0 - gausst(tc)(0);
     // ShAttrib1f ampl = 1.0 - 2*abs(tc(0)-0.5);
     color(0) = (dirs|ShAttrib3f(1,0,0));
@@ -1564,7 +1645,7 @@ void init_shaders(void)
     ShOutputColor4f color;
    
     //ShAttrib1f ampl = 1.0 - 2*abs(tc(0)-0.5);
-    discard(0.2 - gausst(tc)(0));
+    discard(gausst(tc)(0) - 0.2);
    // ShAttrib1f ampl = 1.0 - gausst(tc)(0);
     
     
@@ -1592,6 +1673,8 @@ void init_shaders(void)
    particle_vsh = SH_BEGIN_VERTEX_PROGRAM {
     ShInOutPosition4f pos;
     //ShInOutTexCoord2f tc;
+    
+    //pos(0,1,2) = pos(0,1,2) + dvt(tc)(0,1,2)*2-1.0;  
             
    } SH_END;
 
@@ -1599,6 +1682,9 @@ void init_shaders(void)
     ShInputPosition4f pos;
     //ShInputTexCoord2f tc;
     ShOutputColor4f color;
+
+    /*color(0,1,2) = dvt(tc)(0,1,2);
+    color(3) = 1.0;*/
 
     color = ShConstColor4f(1,1,1,1);
    } SH_END;
