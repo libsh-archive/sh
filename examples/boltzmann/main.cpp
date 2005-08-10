@@ -127,6 +127,7 @@ GLuint depth_rb;
 int fmode = 0;
 
 int mc = 0;
+int counter = 0;
 
 // uniforms 
 
@@ -837,6 +838,10 @@ void display()
    drawQuad();
   shUnbind(*advect_shaders);
 
+counter++;
+counter %= 10;
+  //if(!counter){
+  
 // read back into vertex buffer
     // bind buffer object to pixel pack buffer
     glBindBufferARB(GL_PIXEL_PACK_BUFFER_EXT, vbuffer_id);
@@ -848,7 +853,7 @@ void display()
 
     glReadPixels(0, 0, SQR_NUM_PARTICLES, SQR_NUM_PARTICLES, GL_RGBA, GL_HALF_FLOAT_NV, 0);
     glBindBufferARB(GL_PIXEL_PACK_BUFFER_EXT, 0);
-
+  //}//if
   
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -860,9 +865,9 @@ glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 
 glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-  /*shBind(*showvel_shaders);
+  shBind(*showvel_shaders);
    drawQuad();
-  shUnbind(*showvel_shaders);*/
+  shUnbind(*showvel_shaders);
 
 
 //printf("about to render particles\n");
@@ -879,7 +884,8 @@ glPointSize(1.0);
     shUnbind(*particle_shaders);
     glDisableVertexAttribArrayARB(0);
 
-  glFlush();
+  //glFlush();
+
   
 ///////////////////////
 // Draw particles pass:
@@ -965,7 +971,7 @@ glPointSize(1.0);
 
   
 glutSwapBuffers();
-
+  
   }//display
 
 void reshape(int width, int height)
@@ -1588,8 +1594,9 @@ void init_shaders(void)
     //color(0,2) = abs((dvt(tc)(0,1))*2-1.0);
       ShVector3f vel = (dvt(tc)(0,1,2))*2-1.0;
       ShAttrib1f dp = vel|vel;
+      color(0,1,2) = ShAttrib3f(dp,dp,dp);
      //color(0,1,2) = dvt(tc)(3,3,3);//ShAttrib3f(dp,dp,dp);
-    color(0,1,2) = post(tc)(0,1,2);
+    //color(0,1,2) = post(tc)(0,1,2);
 /*	color(1) += clamp(bt(tc)(0) + bt(tc)(1), 0, 1.0);
 	color(0) += bt(tc)(0);
 	color(2) += bt(tc)(1);*/
