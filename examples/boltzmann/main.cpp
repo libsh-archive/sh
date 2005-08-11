@@ -48,7 +48,20 @@ using namespace SH;
 // defines
 
 
-#define INTERNAL_FORMAT GL_RGBA16 /*GL_RGBA8*/
+#define INTERNAL_FORMAT GL_RGBA8 
+
+#define DVT_INTERNAL_FORMAT GL_FLOAT_RGBA32_NV 
+
+
+/*#define POSITIONS_INTERNAL_FORMAT INTERNAL_FORMAT 
+#define NUM_POS_BYTES 2
+#define POS_TYPE GL_HALF_FLOAT_NV*/
+
+#define POSITIONS_INTERNAL_FORMAT GL_FLOAT_RGBA32_NV
+#define NUM_POS_BYTES 4 
+#define POS_TYPE GL_FLOAT
+
+#define PBO
 
 #define NUMMODES 1
 
@@ -78,12 +91,12 @@ using namespace SH;
 
 #define ZEROVEL 1.0
 
-#define TAU 2.5
+#define TAU 3.0
 #define INV_TAU (1.0f/TAU)
 
-#define VELSTEP 0.05
+#define VELSTEP 0.01
 
-#define SQR_NUM_PARTICLES 256 //GRID_2D_RES
+#define SQR_NUM_PARTICLES 512 //GRID_2D_RES
 #define NUM_PARTICLES (SQR_NUM_PARTICLES*SQR_NUM_PARTICLES)
 #define PCO 0.02
 
@@ -129,6 +142,9 @@ int fmode = 0;
 int mc = 0;
 int counter = 0;
 
+
+GLenum glerror;
+
 // uniforms 
 
 
@@ -171,6 +187,7 @@ ShProgram showvel_fsh;
 ShProgram showeq0_fsh;
 ShProgram redonly_fsh;
 ShProgram greenonly_fsh;
+ShProgram redgreen_fsh;
 ShProgram mouse0_fsh;
 ShProgram mouse1_fsh;
 //particles
@@ -202,6 +219,7 @@ ShProgramSet* showvel_shaders;
 ShProgramSet* showeq0_shaders;
 ShProgramSet* redonly_shaders;
 ShProgramSet* greenonly_shaders;
+ShProgramSet* redgreen_shaders;
 ShProgramSet* mouse0_shaders;
 ShProgramSet* mouse1_shaders;
 // particles
@@ -237,7 +255,7 @@ int dbc = 0, idbc = 1; // double buffering counter
 
 
 //distribution package texture nodes 
-ShTexture2D<ShColor4f> dpt0; // distribution packages
+/*ShTexture2D<ShColor4f> dpt0; // distribution packages
 ShTexture2D<ShColor4f> dpt1;
 ShTexture2D<ShColor4f> dpt2;
 ShTexture2D<ShColor4f> dpt3;
@@ -254,9 +272,9 @@ ShTexture2D<ShColor4f> eqdpt2;
 ShTexture2D<ShColor4f> eqdpt3;
 ShTexture2D<ShColor4f> eqdpt4;
 ShTexture2D<ShColor4f> bt;
-ShTexture2D<ShColor4f> post;
+ShArrayRect<ShColor4f> post;*/
 
-/*ShArray2D<ShColor4f> dpt0; // distribution packages
+ShArray2D<ShColor4f> dpt0; // distribution packages
 ShArray2D<ShColor4f> dpt1;
 ShArray2D<ShColor4f> dpt2;
 ShArray2D<ShColor4f> dpt3;
@@ -266,14 +284,14 @@ ShArray2D<ShColor4f> dptc1;
 ShArray2D<ShColor4f> dptc2;
 ShArray2D<ShColor4f> dptc3;
 ShArray2D<ShColor4f> dptc4;
-ShArray2D<ShColor4f> dvt; // density and velocity
+ShArrayRect<ShColor4f> dvt; // density and velocity
 ShArray2D<ShColor4f> eqdpt0; // equilibrium distribution packages
 ShArray2D<ShColor4f> eqdpt1;
 ShArray2D<ShColor4f> eqdpt2;
 ShArray2D<ShColor4f> eqdpt3;
 ShArray2D<ShColor4f> eqdpt4;
 ShArray2D<ShColor4f> bt;
-ShArray2D<ShColor4f> post; */
+ShArrayRect<ShColor4f> post; 
 
 ShArray2D<ShColor4f> colort;
 ShArray2D<ShColor3fub> gausst(32,32);
@@ -317,7 +335,6 @@ printf("init_FBO()\n");
 GLuint testid;
 
 glGenFramebuffersEXT(1, &fb);
-glGenFramebuffersEXT(1, &fb1);
 glGenRenderbuffersEXT(2, depth_rb);
 
 glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
@@ -327,9 +344,9 @@ glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
 glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depth_rb[0]);
 glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT,
                                  GL_DEPTH_COMPONENT24, GRID_2D_RES, GRID_2D_RES);
-/*glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depth_rb[1]);
+glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depth_rb[1]);
 glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT,
-                                 GL_DEPTH_COMPONENT24, SQR_NUM_PARTICLES, SQR_NUM_PARTICLES);*/
+                                 GL_DEPTH_COMPONENT24, SQR_NUM_PARTICLES, SQR_NUM_PARTICLES);
 glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
                                      GL_DEPTH_ATTACHMENT_EXT,
                                      GL_RENDERBUFFER_EXT, depth_rb[0]);
@@ -339,20 +356,6 @@ glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
     if(status != GL_FRAMEBUFFER_COMPLETE_EXT)
        printf("FB IS INCOMPLETE!\n");*/
     
-glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb1);
-
-
-// initialize depth renderbuffer
-glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depth_rb[1]);
-glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT,
-                                 GL_DEPTH_COMPONENT24, SQR_NUM_PARTICLES, SQR_NUM_PARTICLES);
-glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
-                                     GL_DEPTH_ATTACHMENT_EXT,
-                                     GL_RENDERBUFFER_EXT, depth_rb[1]);
-
-/*GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-    if(status != GL_FRAMEBUFFER_COMPLETE_EXT)
-       printf("FB1 IS INCOMPLETE!\n");*/
 
 glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 
@@ -362,10 +365,10 @@ void init_vertexbuffers(){
     // create the buffer object
     glGenBuffersARB(1, &vbuffer_id);
     glBindBufferARB(GL_PIXEL_PACK_BUFFER_EXT, vbuffer_id);
-    glBufferDataARB(GL_PIXEL_PACK_BUFFER_EXT, NUM_PARTICLES*4*2, 0, GL_STREAM_COPY); // undefined data
+    glBufferDataARB(GL_PIXEL_PACK_BUFFER_EXT, NUM_PARTICLES*4*NUM_POS_BYTES, 0, GL_STREAM_COPY); // undefined data
     glBindBufferARB(GL_PIXEL_PACK_BUFFER_EXT, 0);
     printf("finished initializing VBO\n");
-    GLenum glerror = glGetError();
+    glerror = glGetError();
     if (glerror != GL_NO_ERROR) printf("Error in glBindBufferARB\n");
  
 }
@@ -490,10 +493,10 @@ printf("init_textures()\n");
 // init density-velocity texture
 
   glGenTextures(1, &dvt_id);
-  glBindTexture(GL_TEXTURE_2D, dvt_id);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-  glTexImage2D(GL_TEXTURE_2D, 0, INTERNAL_FORMAT, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, NULL);  
+  glBindTexture(GL_TEXTURE_RECTANGLE_NV, dvt_id);
+  glTexParameteri(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+  glTexImage2D(GL_TEXTURE_RECTANGLE_NV, 0, DVT_INTERNAL_FORMAT, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, NULL);  
 
   sprintf(tid, "%d",dvt_id);
   dvt.meta("opengl:texid", tid);
@@ -510,6 +513,7 @@ printf("init_textures()\n");
   sprintf(tid, "%d",bt_id);
   bt.meta("opengl:texid", tid);
 
+ glBindTexture(GL_TEXTURE_2D, 0);
 
 // init positions textures
   
@@ -519,7 +523,7 @@ printf("init_textures()\n");
 	  
       posdata[4*i+0] = (float)(i%SQR_NUM_PARTICLES)/SQR_NUM_PARTICLES;
       posdata[4*i+1] = (float)(i/SQR_NUM_PARTICLES)/SQR_NUM_PARTICLES;
-      posdata[4*i+2] = -1.0;
+      posdata[4*i+2] = 0.0;
       posdata[4*i+2] = 1.0;
 
     
@@ -527,17 +531,22 @@ printf("init_textures()\n");
  
   glGenTextures(2, post_ids);
  for(int i=0;i<2;i++){
-  glBindTexture(GL_TEXTURE_2D, post_ids[i]);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-  glTexImage2D(GL_TEXTURE_2D, 0, INTERNAL_FORMAT, SQR_NUM_PARTICLES, SQR_NUM_PARTICLES, 0, GL_RGBA, GL_FLOAT, posdata);  
+  glBindTexture(GL_TEXTURE_RECTANGLE_NV, post_ids[i]);
+  glTexParameteri(GL_TEXTURE_RECTANGLE_NV,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_RECTANGLE_NV,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+  glTexImage2D(GL_TEXTURE_RECTANGLE_NV, 0, POSITIONS_INTERNAL_FORMAT, SQR_NUM_PARTICLES, SQR_NUM_PARTICLES, 0, GL_RGBA, GL_FLOAT, posdata);  
  }
+
+ glBindTexture(GL_TEXTURE_RECTANGLE_NV, 0);
+
   /*sprintf(tid, "%d",post_ids[0]);
   post.meta("opengl:texid", tid);
   sprintf(tid, "%d",post_ids[1]);
   postB.meta("opengl:texid", tid);*/
 
-  
+  glerror = glGetError();
+  if (glerror != GL_NO_ERROR) printf("Error in init_textures\n");
+
   
 //  glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -648,7 +657,7 @@ void display()
 //printf("display\n");
   
   glDisable(GL_DEPTH_TEST); // don't need depth test in stream programs
-
+  glViewport(0,0,GRID_2D_RES,GRID_2D_RES);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////	  
 // Distribution packages update steps here:
@@ -666,7 +675,7 @@ void display()
                                   GL_COLOR_ATTACHMENT0_EXT,
                                   GL_TEXTURE_2D, bt_id, 0);
 
-  shBind(*redonly_shaders);
+  shBind(*redgreen_shaders);
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
   glBegin(GL_QUADS);
   
@@ -697,11 +706,11 @@ void display()
   glTexCoord2f(0,1);
   glVertex3f(-0.95, 1.0,  0);
   
-  glEnd();
+ /* glEnd();
   shUnbind(*redonly_shaders);
 
   shBind(*greenonly_shaders);
-  glBegin(GL_QUADS);
+  glBegin(GL_QUADS);*/
   
   glTexCoord2f(0,0);
   glVertex3f(-1.0, -0.9, 0);
@@ -731,7 +740,7 @@ void display()
   glVertex3f(-1.0, 0.85,  0);
   
   glEnd();
-  shUnbind(*greenonly_shaders);
+  shUnbind(*redgreen_shaders);
 
   
 /////////////////////////////////
@@ -739,7 +748,7 @@ void display()
 
   glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
-                                  GL_TEXTURE_2D, dvt_id, 0);
+                                  GL_TEXTURE_RECTANGLE_NV, dvt_id, 0);
 
   shBind(*dv_shaders);
    drawQuad();
@@ -814,7 +823,7 @@ void display()
   dirs(0) = 0.5*dirs(0) + 0.5*((float)(cur_x-old_x));
   dirs(1) = 0.5*dirs(1) - 0.5*((float)(cur_y-old_y));
   dirs(2) = 0;
-  dirs = 0.5*normalize(dirs);
+  dirs = normalize(dirs);
   old_x = cur_x;
   old_y = cur_y;
  }
@@ -869,7 +878,7 @@ void display()
  	  
   glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
-                                  GL_TEXTURE_2D, post_ids[wposbuff], 0);
+                                  GL_TEXTURE_RECTANGLE_NV, post_ids[wposbuff], 0);
 
   //glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
 
@@ -877,18 +886,25 @@ void display()
    drawQuad();
   shUnbind(*advect_shaders);
 
+#ifndef PBO
   
+    float outpos[NUM_PARTICLES*4]; 
+    glReadBuffer(GL_COLOR_ATTACHMENT0_EXT/*GL_FRONT*/);
+    glReadPixels(0, 0, SQR_NUM_PARTICLES, SQR_NUM_PARTICLES, /*GL_FLOAT_RGBA32_NV*/GL_RGBA, /*GL_RGBA_FLOAT32_ATI*//*GL_FLOAT_RGBA32_NV*/POS_TYPE, outpos);
+  
+#else    
 // read back into vertex buffer
     // bind buffer object to pixel pack buffer
     glBindBufferARB(GL_PIXEL_PACK_BUFFER_EXT, vbuffer_id);
     // read from frame buffer to buffer object
     glReadBuffer(GL_COLOR_ATTACHMENT0_EXT/*GL_FRONT*/);
-   GLenum glerror = glGetError();
+    glerror = glGetError();
     if (glerror != GL_NO_ERROR) printf("Error in glReadBuffer\n");
  
 
-    glReadPixels(0, 0, SQR_NUM_PARTICLES, SQR_NUM_PARTICLES, GL_RGBA, GL_HALF_FLOAT_NV, 0);
+    glReadPixels(0, 0, SQR_NUM_PARTICLES, SQR_NUM_PARTICLES, /*GL_FLOAT_RGBA32_NV*/GL_RGBA, /*GL_RGBA_FLOAT32_ATI*/POS_TYPE, 0);
     glBindBufferARB(GL_PIXEL_PACK_BUFFER_EXT, 0);
+#endif    
   
   glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, // bind back to regular depth buffer
                                      GL_DEPTH_ATTACHMENT_EXT,
@@ -914,10 +930,11 @@ glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
  // glViewport(-GRID_2D_RES,-GRID_2D_RES, GRID_2D_RES, GRID_2D_RES);
 
 glPointSize(1.0);
-// draw particles  
+// draw particles 
+#ifdef PBO
     // bind buffer object to vertex array 
     glBindBufferARB(GL_ARRAY_BUFFER, vbuffer_id);
-    glVertexAttribPointerARB(0, 4, GL_HALF_FLOAT_NV, GL_FALSE, 0, 0);
+    glVertexAttribPointerARB(0, 4, POS_TYPE, GL_FALSE, 0, 0);
     glBindBufferARB(GL_ARRAY_BUFFER, 0);
 
     glEnableVertexAttribArrayARB(0);
@@ -926,8 +943,24 @@ glPointSize(1.0);
     shUnbind(*particle_shaders);
     glDisableVertexAttribArrayARB(0);
  
-    glViewport(0,0,GRID_2D_RES, GRID_2D_RES);
+    //glViewport(0,0,GRID_2D_RES, GRID_2D_RES);
+#else
 
+   
+ shBind(*particle_shaders);
+  glBegin(GL_POINTS);
+  for(int i = 0; i < NUM_PARTICLES; i++){
+	  //printf("%d: %f, %f, %f\n", i, outpos[4*i], outpos[4*i+1], outpos[4*i+2]);
+ 
+     glVertex3f(outpos[4*i], outpos[4*i+1], outpos[4*i+2]);
+     //glVertex3f(0, 0, 0);
+  }//for
+  glEnd();
+  shUnbind(*particle_shaders);
+
+
+    
+#endif //PBO
 
   //glFlush();
 
@@ -1440,7 +1473,7 @@ void init_shaders(void)
     velocity /= density;
     
     color(0,1,2) = velocity*0.5+0.5;
-    color(3) = density;
+    color(3) = density*0.1;
     
   } SH_END;
 
@@ -1461,7 +1494,7 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = (A1 + B1*eu + C1*eu2 + D1*uu)*(dvt(tc))(3)*0.5+0.5;
+    color = (A1 + B1*eu + C1*eu2 + D1*uu)*(dvt(tc))(3)*10;
     
   } SH_END;
 
@@ -1481,7 +1514,7 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*0.5+0.5;
+    color = (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*10;
     
   } SH_END;
 
@@ -1502,7 +1535,7 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*0.5+0.5;
+    color = (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*10;
     
   } SH_END;
 
@@ -1522,7 +1555,7 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*0.5+0.5;
+    color = (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*10;
     
   } SH_END;
 
@@ -1542,8 +1575,8 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = (A1 + B1*eu + C1*eu2 + D1*uu)*dvt(tc)(3)*0.5+0.5;
-    color(2) = (A0 + D0*uu)*dvt(tc)(3)*0.5+0.5; 
+    color = (A1 + B1*eu + C1*eu2 + D1*uu)*dvt(tc)(3)*10;
+    color(2) = (A0 + D0*uu)*dvt(tc)(3)*10; 
     
   } SH_END;
 
@@ -1552,7 +1585,7 @@ void init_shaders(void)
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
 
-    color = dpt0(tc) - INV_TAU*(dpt0(tc) - (eqdpt0(tc)*2-1.0));
+    color = dpt0(tc) - INV_TAU*(dpt0(tc) - eqdpt0(tc));
     
   } SH_END;
  
@@ -1561,7 +1594,7 @@ void init_shaders(void)
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
 
-    color = dpt1(tc) - INV_TAU*(dpt1(tc) - (eqdpt1(tc)*2-1.0));
+    color = dpt1(tc) - INV_TAU*(dpt1(tc) - eqdpt1(tc));
     
   } SH_END;
 
@@ -1570,7 +1603,7 @@ void init_shaders(void)
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
 
-    color = dpt4(tc) - INV_TAU*(dpt4(tc) - (eqdpt4(tc)*2-1.0));
+    color = dpt4(tc) - INV_TAU*(dpt4(tc) - eqdpt4(tc));
         
   } SH_END;
 
@@ -1641,11 +1674,11 @@ void init_shaders(void)
       ShVector3f vel = (dvt(tc)(0,1,2))*2-1.0;
       ShAttrib1f dp = vel|vel;
       color(0,1,2) = ShAttrib3f(dp,dp,dp);
-     //color(0,1,2) = dvt(tc)(3,3,3);//ShAttrib3f(dp,dp,dp);
-    //color(0,1,2) = post(tc)(0,1,2);
-/*	color(1) += clamp(bt(tc)(0) + bt(tc)(1), 0, 1.0);
-	color(0) += bt(tc)(0);
-	color(2) += bt(tc)(1);*/
+     color(0,1,2) = dvt(tc)(3,3,3);//ShAttrib3f(dp,dp,dp);
+     //color(0,1,2) = post(tc)(0,1,2);
+/*	color(1) += clamp(bt(tc)(0) + bt(tc)(1), 0, 1.0);*/
+	color(2) += bt(tc)(0);
+	color(2) += bt(tc)(1);
 	color(3) = 1.0;
     //color(2) = clamp(abs(-dvt(tc)(0)) + abs(-dvt(tc)(1)),0,1.0);
     
@@ -1676,6 +1709,15 @@ void init_shaders(void)
     color = ShConstColor4f(0,1,0,1);
        
   } SH_END;
+ 
+   redgreen_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+    ShInputPosition4f pos;
+    ShInputTexCoord2f tc;
+    ShOutputColor4f color;
+
+    color = ShConstColor4f(1,1,0,1);
+       
+   } SH_END;
 
    mouse0_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
     ShInputPosition4f pos;
@@ -1720,6 +1762,7 @@ void init_shaders(void)
     ShAttrib4f ppos = post(tc);
     
     color(0,1,2) = ppos(0,1,2) + VELSTEP*((dvt(ppos(0,1))(0,1,2))*2-1.0);
+    color(2) = 0;
     color(3) = 1.0;
    } SH_END;
 
@@ -1760,7 +1803,8 @@ void init_shaders(void)
   showeq0_shaders = new ShProgramSet(vsh, showeq0_fsh);
   redonly_shaders = new ShProgramSet(vsh, redonly_fsh);
   greenonly_shaders = new ShProgramSet(vsh, greenonly_fsh);
-  mouse0_shaders = new ShProgramSet(vsh, mouse0_fsh);
+  redgreen_shaders = new ShProgramSet(vsh, redgreen_fsh);
+   mouse0_shaders = new ShProgramSet(vsh, mouse0_fsh);
   mouse1_shaders = new ShProgramSet(vsh, mouse1_fsh);
 //particle shaders
   advect_shaders = new ShProgramSet(vsh, advect_fsh);
