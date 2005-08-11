@@ -83,7 +83,7 @@ using namespace SH;
 
 #define VELSTEP 0.05
 
-#define SQR_NUM_PARTICLES GRID_2D_RES
+#define SQR_NUM_PARTICLES 256 //GRID_2D_RES
 #define NUM_PARTICLES (SQR_NUM_PARTICLES*SQR_NUM_PARTICLES)
 #define PCO 0.02
 
@@ -120,8 +120,8 @@ fresnel (
 #endif 
 
 // FBOs
-GLuint fb;
-GLuint depth_rb;
+GLuint fb, fb1;
+GLuint depth_rb[2];
 
 // states
 int fmode = 0;
@@ -291,6 +291,7 @@ int dir = 0;
 
 int rposbuff = 0, wposbuff = 1;
 
+/*
 // channels holding the particle data
 ShChannel<ShPoint3f> posA;
 ShChannel<ShPoint3f> posB;
@@ -299,6 +300,7 @@ ShChannel<ShPoint3f> posB;
 ShProgram particle;  
 ShProgram particle_updateA;
 ShProgram particle_updateB;
+*/
 
 //-------------------------------------------------------------------
 // GLUT data
@@ -315,23 +317,42 @@ printf("init_FBO()\n");
 GLuint testid;
 
 glGenFramebuffersEXT(1, &fb);
-glGenRenderbuffersEXT(1, &depth_rb);
+glGenFramebuffersEXT(1, &fb1);
+glGenRenderbuffersEXT(2, depth_rb);
 
 glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
 
 
 // initialize depth renderbuffer
-glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depth_rb);
+glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depth_rb[0]);
 glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT,
                                  GL_DEPTH_COMPONENT24, GRID_2D_RES, GRID_2D_RES);
+/*glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depth_rb[1]);
+glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT,
+                                 GL_DEPTH_COMPONENT24, SQR_NUM_PARTICLES, SQR_NUM_PARTICLES);*/
 glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
                                      GL_DEPTH_ATTACHMENT_EXT,
-                                     GL_RENDERBUFFER_EXT, depth_rb);
+                                     GL_RENDERBUFFER_EXT, depth_rb[0]);
 
 
 /*GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
     if(status != GL_FRAMEBUFFER_COMPLETE_EXT)
-       printf("FBO IS INCOMPLETE!\n");*/
+       printf("FB IS INCOMPLETE!\n");*/
+    
+glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb1);
+
+
+// initialize depth renderbuffer
+glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depth_rb[1]);
+glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT,
+                                 GL_DEPTH_COMPONENT24, SQR_NUM_PARTICLES, SQR_NUM_PARTICLES);
+glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
+                                     GL_DEPTH_ATTACHMENT_EXT,
+                                     GL_RENDERBUFFER_EXT, depth_rb[1]);
+
+/*GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+    if(status != GL_FRAMEBUFFER_COMPLETE_EXT)
+       printf("FB1 IS INCOMPLETE!\n");*/
 
 glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 
@@ -379,14 +400,14 @@ void load_textures(void){
 void init_textures(){
 printf("init_textures()\n");
 
-  particle_positions = new float[NUM_PARTICLES*3];
+ /* particle_positions = new float[NUM_PARTICLES*3];
   memset(particle_positions, 0, NUM_PARTICLES*3*sizeof(float));
 
   particle_texcoords = new float[NUM_PARTICLES*2];
   for(int i=0;i<NUM_PARTICLES;i++){
     particle_texcoords[2*i] = (float)(i%SQR_NUM_PARTICLES)/SQR_NUM_PARTICLES;
     particle_texcoords[2*i+1] = (float)(i/SQR_NUM_PARTICLES)/SQR_NUM_PARTICLES;
-   }
+   }*/
 
 
 
@@ -492,12 +513,12 @@ printf("init_textures()\n");
 
 // init positions textures
   
-  float* posdata = new float[/*NUM_PARTICLES*/GRID_2D_RES*GRID_2D_RES*4];
-    memset(posdata, 0, /*NUM_PARTICLES*/GRID_2D_RES*GRID_2D_RES*4*sizeof(float));
-    for(int i=0;i<GRID_2D_RES*GRID_2D_RES;i++){
+  float* posdata = new float[NUM_PARTICLES*4];
+    memset(posdata, 0, NUM_PARTICLES*4*sizeof(float));
+    for(int i=0;i<NUM_PARTICLES;i++){
 	  
-      posdata[4*i+0] = (float)(i%GRID_2D_RES)/GRID_2D_RES;
-      posdata[4*i+1] = (float)(i/GRID_2D_RES)/GRID_2D_RES;
+      posdata[4*i+0] = (float)(i%SQR_NUM_PARTICLES)/SQR_NUM_PARTICLES;
+      posdata[4*i+1] = (float)(i/SQR_NUM_PARTICLES)/SQR_NUM_PARTICLES;
       posdata[4*i+2] = -1.0;
       posdata[4*i+2] = 1.0;
 
@@ -509,7 +530,7 @@ printf("init_textures()\n");
   glBindTexture(GL_TEXTURE_2D, post_ids[i]);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-  glTexImage2D(GL_TEXTURE_2D, 0, INTERNAL_FORMAT, /*SQR_NUM_PARTICLES*/GRID_2D_RES, /*SQR_NUM_PARTICLES*/GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, posdata);  
+  glTexImage2D(GL_TEXTURE_2D, 0, INTERNAL_FORMAT, SQR_NUM_PARTICLES, SQR_NUM_PARTICLES, 0, GL_RGBA, GL_FLOAT, posdata);  
  }
   /*sprintf(tid, "%d",post_ids[0]);
   post.meta("opengl:texid", tid);
@@ -529,8 +550,19 @@ void setup_texouts(){
   dpt2.size(GRID_2D_RES, GRID_2D_RES);
   dpt3.size(GRID_2D_RES, GRID_2D_RES);
   dpt4.size(GRID_2D_RES, GRID_2D_RES);
-  colort.size(GRID_2D_RES, GRID_2D_RES);
-
+  dptc0.size(GRID_2D_RES, GRID_2D_RES);
+  dptc1.size(GRID_2D_RES, GRID_2D_RES);
+  dptc2.size(GRID_2D_RES, GRID_2D_RES);
+  dptc3.size(GRID_2D_RES, GRID_2D_RES);
+  dptc4.size(GRID_2D_RES, GRID_2D_RES);
+  eqdpt0.size(GRID_2D_RES, GRID_2D_RES);
+  eqdpt1.size(GRID_2D_RES, GRID_2D_RES);
+  eqdpt2.size(GRID_2D_RES, GRID_2D_RES);
+  eqdpt3.size(GRID_2D_RES, GRID_2D_RES);
+  eqdpt4.size(GRID_2D_RES, GRID_2D_RES);
+  dvt.size(GRID_2D_RES, GRID_2D_RES);
+  bt.size(GRID_2D_RES, GRID_2D_RES);
+  post.size(SQR_NUM_PARTICLES, SQR_NUM_PARTICLES);
 }
 
 void setup_view()
@@ -821,6 +853,13 @@ void display()
   
 /////////////////////////////////////
 // Update the positions of particles:
+//glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
+
+  glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, // bind particle depth buffer
+                                     GL_DEPTH_ATTACHMENT_EXT,
+                                     GL_RENDERBUFFER_EXT, depth_rb[1]);
+
+  glViewport(0,0,SQR_NUM_PARTICLES, SQR_NUM_PARTICLES);
 
   rposbuff++;
   rposbuff %= 2;
@@ -832,15 +871,12 @@ void display()
                                   GL_COLOR_ATTACHMENT0_EXT,
                                   GL_TEXTURE_2D, post_ids[wposbuff], 0);
 
-  glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+  //glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
 
   shBind(*advect_shaders);
    drawQuad();
   shUnbind(*advect_shaders);
 
-counter++;
-counter %= 10;
-  //if(!counter){
   
 // read back into vertex buffer
     // bind buffer object to pixel pack buffer
@@ -853,8 +889,12 @@ counter %= 10;
 
     glReadPixels(0, 0, SQR_NUM_PARTICLES, SQR_NUM_PARTICLES, GL_RGBA, GL_HALF_FLOAT_NV, 0);
     glBindBufferARB(GL_PIXEL_PACK_BUFFER_EXT, 0);
-  //}//if
   
+  glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, // bind back to regular depth buffer
+                                     GL_DEPTH_ATTACHMENT_EXT,
+                                     GL_RENDERBUFFER_EXT, depth_rb[0]);
+  glViewport(0,0,GRID_2D_RES, GRID_2D_RES);
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
@@ -871,6 +911,8 @@ glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
 
 //printf("about to render particles\n");
+ // glViewport(-GRID_2D_RES,-GRID_2D_RES, GRID_2D_RES, GRID_2D_RES);
+
 glPointSize(1.0);
 // draw particles  
     // bind buffer object to vertex array 
@@ -883,6 +925,9 @@ glPointSize(1.0);
 	glDrawArrays(GL_POINTS, 0, NUM_PARTICLES);
     shUnbind(*particle_shaders);
     glDisableVertexAttribArrayARB(0);
+ 
+    glViewport(0,0,GRID_2D_RES, GRID_2D_RES);
+
 
   //glFlush();
 
@@ -1053,7 +1098,7 @@ void keyboard(unsigned char k, int x, int y)
     case 'R':
       {
 
-       reset_streams();
+       //reset_streams();
 
       break;
       }
@@ -1061,7 +1106,7 @@ void keyboard(unsigned char k, int x, int y)
     case 'S':
       {
 
-       update_streams();
+       //update_streams();
 
       break;
       }
@@ -1121,7 +1166,7 @@ int main(int argc, char** argv)
     shSetBackend(backend_name);
 
     init_shaders();
-    init_streams();
+    //init_streams();
  
   
     // Place the camera at its initial position
@@ -1165,7 +1210,7 @@ int main(int argc, char** argv)
   return 0;
   }
 
-
+#if 0
 void init_streams(void)
   {
  particle = SH_BEGIN_PROGRAM("gpu:stream") {
@@ -1347,6 +1392,7 @@ void update_streams(void)
     std::cerr << "Unknown exception caught." << std::endl;
     }
   }
+#endif
 
 void init_shaders(void)
   {
@@ -1681,7 +1727,7 @@ void init_shaders(void)
     ShInOutPosition4f pos;
     //ShInOutTexCoord2f tc;
     
-    //pos(0,1,2) = pos(0,1,2) + dvt(tc)(0,1,2)*2-1.0;  
+    pos(0,1,2) = pos(0,1,2)*2-1.0;  
             
    } SH_END;
 
