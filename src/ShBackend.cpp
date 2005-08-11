@@ -265,9 +265,9 @@ void ShBackend::load_libraries(const string& directory)
     for (struct dirent* entry = readdir(dirp); entry != 0; entry = readdir(dirp)) {
       string filename(entry->d_name);
 # ifdef __APPLE__
-      unsigned extension_pos = filename.rfind(".bundle");
+      size_t extension_pos = filename.rfind(".bundle");
 # else
-      unsigned extension_pos = filename.rfind(".so");
+      size_t extension_pos = filename.rfind(".so");
 
       // Skip files like "libsharb.so.0.0.0"
       const string so_extension(".so");

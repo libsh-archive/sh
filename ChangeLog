@@ -1,6 +1,8 @@
-2005-08-11  Francois Marier  <francois@serioushack.com>
+2005-08-11    <francois@mariachi.digiola.com>
 
-	* backends/gl/GlslEmit.cpp, backends/cc/CcEmit.cpp (*OpCodeVecs):
+	* backends/gl/GlslEmit.cpp (GlslOpCodeVecs), 
+	backends/cc/CcEmit.cpp (CcOpCodeVecs),
+	src/ShBackend.cpp (load_libraries): 
 	Change size of iterators to be size_t so that it works on 64-bit
 	machines.
 
