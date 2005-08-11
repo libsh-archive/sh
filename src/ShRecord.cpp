@@ -149,7 +149,7 @@ ShRecord& ShRecord::operator=(const ShRecord &other)
 
 ShRecord& ShRecord::operator=(const ShProgram& program)
 {
-  SH_DEBUG_PRINT("Assigning program to record");
+  //SH_DEBUG_PRINT("Assigning program to record");
   if(!program.node()->inputs.empty()) {
     std::ostringstream out;
     out << "Insufficient arguments for calling an ShProgram." << std::endl; 
@@ -176,10 +176,10 @@ ShProgram connect(const ShRecord& rec, const ShProgram& program)
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     for(ShRecord::VarList::const_iterator I = rec.begin(); I != rec.end(); ++I) {
       ShVariable out(I->node()->clone(SH_OUTPUT, I->size(), SH_VALUETYPE_END, SH_SEMANTICTYPE_END, 
-            true, false));
-      SH_DEBUG_PRINT("connect ShRecord output size = " << I->size()); 
-     ShContext::current()->parsing()->tokenizer.blockList()->addStatement(
-         ShStatement(out, SH_OP_ASN, *I));  
+        true, false));
+      //SH_DEBUG_PRINT("connect ShRecord output size = " << I->size()); 
+      ShContext::current()->parsing()->tokenizer.blockList()->addStatement(
+        ShStatement(out, SH_OP_ASN, *I));  
     }
   } SH_END;
   return connect(nibble, program);
@@ -199,7 +199,7 @@ ShProgram connect(const ShProgram& program, const ShRecord& rec)
     for(ShRecord::VarList::const_iterator I = rec.begin(); I != rec.end(); ++I) {
       ShVariable in(I->node()->clone(SH_INPUT, I->size(), SH_VALUETYPE_END, SH_SEMANTICTYPE_END, 
             true, false));
-      SH_DEBUG_PRINT("connect ShRecord input size = " << I->size()); 
+      //SH_DEBUG_PRINT("connect ShRecord input size = " << I->size()); 
       ShContext::current()->parsing()->tokenizer.blockList()->addStatement(
          ShStatement(*I, SH_OP_ASN, in));  
     }

@@ -358,8 +358,8 @@ SHNIBBLE_LENGTH_FUNC(shLength_1, length(a))
 SHNIBBLE_LENGTH_FUNC(shLength_inf, length(a))
 
 template<typename T> 
-ShProgram shCross(const std::string& name, const std::string& input_name0 = "x",
-                  const std::string& input_name1 = "y")
+ShProgram shCross(const std::string& name, const std::string& input_name0,
+                  const std::string& input_name1)
 { 
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T::InputType SH_DECL(a); 
@@ -413,9 +413,9 @@ ShProgram shLerp(const std::string & name)
 }
 
 template<typename T1, typename T2>
-ShProgram shPoly(const std::string & name = "result",
-                 const std::string & input_name0 = "x", 
-                 const std::string & input_name1 = "y")
+ShProgram shPoly(const std::string & name,
+                 const std::string & input_name0, 
+                 const std::string & input_name1)
 {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T1::InputType SH_DECL(a); 
@@ -427,9 +427,9 @@ ShProgram shPoly(const std::string & name = "result",
 }
 
 template<typename T1>
-ShProgram shPoly(const std::string & name = "result",
-                 const std::string & input_name0 = "x", 
-                 const std::string & input_name1 = "y")
+ShProgram shPoly(const std::string & name,
+                 const std::string & input_name0, 
+                 const std::string & input_name1)
 {
   return shPoly<T1, T1>(name, input_name0, input_name1);
 }

@@ -1,3 +1,10 @@
+2005-08-11  Andrew Lauritzen  <atlaurit@student.cs.uwaterloo.ca>
+
+	* src/ShNibblesImpl.hpp: Fixed a minor compilation error on
+	windows to do with redefinition of default parameters.
+	
+	* src/ShRecord.cpp: Removed some unnecessary debug spew.
+
 2005-08-10  Francois Marier  <francois@serioushack.com>
 
 	* src/ShNibblesImpl.hpp, ShNibbles.hpp: Add nibbles for gradient,
