@@ -141,7 +141,7 @@ enum ShOperation {
   // Control flow
   SH_OP_RET,
 
-  SH_OPERATION_END, ///< End of List marker.  Not an actual op
+  SH_OPERATION_END ///< End of List marker.  Not an actual op
 };
 
 #ifdef IGNORE
