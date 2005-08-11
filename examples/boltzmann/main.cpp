@@ -756,7 +756,7 @@ void display()
 
 ///////////////////////////////  
 // Calculate equilibrium state:  
-  glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+/*  glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
                                   GL_TEXTURE_2D, eqdpt_ids[0], 0);
 
@@ -778,7 +778,7 @@ void display()
 
   shBind(*eq4_shaders);
    drawQuad();
-  shUnbind(*eq4_shaders);
+  shUnbind(*eq4_shaders);*/
 
 /////////////////////
 // Perform collision:
@@ -1473,7 +1473,7 @@ void init_shaders(void)
     velocity /= density;
     
     color(0,1,2) = velocity*0.5+0.5;
-    color(3) = density*0.1;
+    color(3) = density*0.2;
     
   } SH_END;
 
@@ -1494,7 +1494,7 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = (A1 + B1*eu + C1*eu2 + D1*uu)*(dvt(tc))(3)*10;
+    color = (A1 + B1*eu + C1*eu2 + D1*uu)*(dvt(tc))(3)*5;
     
   } SH_END;
 
@@ -1514,7 +1514,7 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*10;
+    color = (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*5;
     
   } SH_END;
 
@@ -1535,7 +1535,7 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*10;
+    color = (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*5;
     
   } SH_END;
 
@@ -1555,7 +1555,7 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*10;
+    color = (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*5;
     
   } SH_END;
 
@@ -1575,8 +1575,8 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = (A1 + B1*eu + C1*eu2 + D1*uu)*dvt(tc)(3)*10;
-    color(2) = (A0 + D0*uu)*dvt(tc)(3)*10; 
+    color = (A1 + B1*eu + C1*eu2 + D1*uu)*dvt(tc)(3)*5;
+    color(2) = (A0 + D0*uu)*dvt(tc)(3)*5; 
     
   } SH_END;
 
@@ -1584,8 +1584,18 @@ void init_shaders(void)
     ShInputPosition4f pos;
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
-
-    color = dpt0(tc) - INV_TAU*(dpt0(tc) - eqdpt0(tc));
+   
+    ShAttrib4f eu;
+    ShVector3f u = ((dvt(tc))(0,1,2))*2-1.0;
+    eu(0) = ShVector3f(1,0,0)  | u;
+    eu(1) = ShVector3f(-1,0,0) | u;
+    eu(2) = ShVector3f(0,1,0)  | u;
+    eu(3) = ShVector3f(0,-1,0) | u;
+    
+    ShAttrib4f eu2 = eu * eu;
+    ShAttrib1f uu = u|u;
+     
+    color = dpt0(tc) - INV_TAU*(dpt0(tc) - (A1 + B1*eu + C1*eu2 + D1*uu)*(dvt(tc))(3)*5);
     
   } SH_END;
  
@@ -1593,8 +1603,19 @@ void init_shaders(void)
     ShInputPosition4f pos;
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
-
-    color = dpt1(tc) - INV_TAU*(dpt1(tc) - eqdpt1(tc));
+ 
+    // inner products:
+    ShAttrib4f eu;
+    ShVector3f u = (dvt(tc)(0,1,2))*2-1.0;
+    eu(0) = ShVector3f(1,1,0)  | u;
+    eu(1) = ShVector3f(-1,-1,0) | u;
+    eu(2) = ShVector3f(1,-1,0)  | u;
+    eu(3) = ShVector3f(-1,1,0) | u;
+    
+    ShAttrib4f eu2 = eu * eu;
+    ShAttrib1f uu = u|u;
+     
+    color = dpt1(tc) - INV_TAU*(dpt1(tc) - (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*5);
     
   } SH_END;
 
@@ -1602,8 +1623,23 @@ void init_shaders(void)
     ShInputPosition4f pos;
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
-
-    color = dpt4(tc) - INV_TAU*(dpt4(tc) - eqdpt4(tc));
+  
+    // inner products:
+    ShAttrib4f eu;
+    ShVector3f u = (dvt(tc)(0,1,2))*2-1.0;
+    eu(0) = ShVector3f(0,0,1)  | u;
+    eu(1) = ShVector3f(0,0,-1) | u;
+    eu(2) = 0;
+    eu(3) = 0;
+    
+    ShAttrib4f eu2 = eu * eu;
+    ShAttrib1f uu = u|u;
+    
+    ShAttrib4f eq;
+    eq(0,1) = (A1 + B1*eu(0,1) + C1*eu2(0,1) + D1*uu)*dvt(tc)(3)*5;
+    eq(2) = (A0 + D0*uu)*dvt(tc)(3)*5;
+    
+    color = dpt4(tc) - INV_TAU*(dpt4(tc) - eq);
         
   } SH_END;
 
