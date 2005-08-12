@@ -9,7 +9,7 @@ AM_CONFIG_HEADER(config.h)
 
 # Checks for programs.
 if test "x$CXXFLAGS" = x ; then
-    CXXFLAGS="-fPIC -Wall -g -O2"
+    CXXFLAGS="-Wall -g -O2"
 fi
 
 # Additional libraries if in OSX
