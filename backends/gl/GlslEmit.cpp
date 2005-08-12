@@ -72,7 +72,7 @@ GlslOpCodeVecs::GlslOpCodeVecs(const GlslMapping& mapping)
 
   // Dices up the code string into references #i or $i to 
   // src variables and the code fragments between references. 
-  size_t i, j;
+  string::size_type i, j;
   i = j = 0;
   for (; (j = code.find_first_of("$", i)) != string::npos;) {
     frag.push_back(code.substr(i, j - i));

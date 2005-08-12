@@ -85,7 +85,7 @@ typedef std::map<SH::ShOperation, CcOpCodeVecs> CcOpCodeMap;
 CcOpCodeVecs::CcOpCodeVecs(const CcOpCode &op) {
   std::string code = op.code; 
 
-  size_t i, j;
+  std::string::size_type i, j;
   i = j = 0;
   for(; (j = code.find_first_of("#$", i)) != std::string::npos;) {
     frag.push_back(code.substr(i, j - i));

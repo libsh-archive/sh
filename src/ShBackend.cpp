@@ -208,15 +208,15 @@ bool ShBackend::load_library(const string& filename)
 #if defined(WIN32)
   string uc_filename(filename);
   std::transform(filename.begin(), filename.end(), uc_filename.begin(), toupper);
-  size_t extension_pos = uc_filename.rfind("_DEBUG.DLL");
+  string::size_type extension_pos = uc_filename.rfind("_DEBUG.DLL");
   if (uc_filename.npos == extension_pos) extension_pos = uc_filename.rfind(".DLL");
-  size_t filename_pos = uc_filename.rfind("\\") + 1;
+  string::size_type filename_pos = uc_filename.rfind("\\") + 1;
 #elif defined(__APPLE__)
-  size_t extension_pos = filename.rfind(".bundle");
-  size_t filename_pos = filename.rfind("/") + 1;
+  string::size_type extension_pos = filename.rfind(".bundle");
+  string::size_type filename_pos = filename.rfind("/") + 1;
 #else
-  size_t extension_pos = filename.rfind(".so");
-  size_t filename_pos = filename.rfind("/") + 1;
+  string::size_type extension_pos = filename.rfind(".so");
+  string::size_type filename_pos = filename.rfind("/") + 1;
 #endif
   filename_pos += 5; // remove the "libsh" portion of the filename
 
@@ -265,9 +265,9 @@ void ShBackend::load_libraries(const string& directory)
     for (struct dirent* entry = readdir(dirp); entry != 0; entry = readdir(dirp)) {
       string filename(entry->d_name);
 # ifdef __APPLE__
-      size_t extension_pos = filename.rfind(".bundle");
+      string::size_type extension_pos = filename.rfind(".bundle");
 # else
-      size_t extension_pos = filename.rfind(".so");
+      string::size_type extension_pos = filename.rfind(".so");
 
       // Skip files like "libsharb.so.0.0.0"
       const string so_extension(".so");
@@ -381,7 +381,7 @@ string ShBackend::target_handler(const string& target, bool restrict_to_selected
     unsigned end = length - 1;
     while (start < length) {
       while ((start != end) && (' ' == path[start])) start++; // trim leading whitespace
-      size_t separator = path.find(";", start);
+      string::size_type separator = path.find(";", start);
       if (separator != path.npos) end = separator - 1;
       while ((start != end ) && (' ' == path[end])) end--; // trim trailing whitespace
 
