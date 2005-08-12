@@ -36,7 +36,7 @@ enum ShTextureDims {
   SH_TEXTURE_2D,   // Power of two
   SH_TEXTURE_RECT, // Non power of two
   SH_TEXTURE_3D,   // Power of two, but depth may not be
-  SH_TEXTURE_CUBE, // 6 "2D" memory objects, power of two
+  SH_TEXTURE_CUBE // 6 "2D" memory objects, power of two
 };
 
 /** Cube map faces.
@@ -48,7 +48,7 @@ enum ShCubeDirection {
   SH_CUBE_POS_Y = 2,
   SH_CUBE_NEG_Y = 3,
   SH_CUBE_POS_Z = 4,
-  SH_CUBE_NEG_Z = 5,
+  SH_CUBE_NEG_Z = 5
 };
 
 /** Texture traits.

@@ -59,10 +59,10 @@ public:
   void addBlock(const ShBlockPtr& statement);
 
   /// Return the front block from the list (does not remove it)
-  ShBlockPtr ShBlockList::getFront() const;
+  ShBlockPtr getFront() const;
   
   /// Remove the front block from the list and return it
-  ShBlockPtr ShBlockList::removeFront();
+  ShBlockPtr removeFront();
 
   /// Return true iff this list does not contain any blocks.
   bool empty() const;

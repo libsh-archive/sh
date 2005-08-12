@@ -161,7 +161,8 @@ template<typename T> ShProgram shTanh(const std::string & name = "result");
   template<typename T1, typename T2> ShProgram opname(const std::string & output_name = "result",\
       const std::string & input_name0 = "x", const std::string & input_name1 = "y"); \
   template<typename T1> ShProgram opname(const std::string & output_name = "result",\
-      const std::string & input_name0 = "x", const std::string & input_name1 = "y"); 
+      const std::string & input_name0 = "x", const std::string & input_name1 = "y")
+
 SHNIBBLE_BINARY_OP_DECL(shAdd);
 SHNIBBLE_BINARY_OP_DECL(shAtan2);
 SHNIBBLE_BINARY_OP_DECL(shDiv);
@@ -194,7 +195,7 @@ SHNIBBLE_BINARY_OP_DECL(shSub);
       const std::string & input_name2 = "z"); \
   template<typename T1> ShProgram opname(const std::string & output_name = "result",\
       const std::string & input_name0 = "x", const std::string & input_name1 = "y", \
-      const std::string & input_name2 = "z"); \
+      const std::string & input_name2 = "z")
 
 SHNIBBLE_TERNARY_OP_DECL(shMad);
 //@}
@@ -205,7 +206,7 @@ SHNIBBLE_TERNARY_OP_DECL(shMad);
  */
 #define SHNIBBLE_HASH_FUNC_DECL(opname) \
   template<typename T1, typename T2> ShProgram opname(const std::string & output_name = "result",\
-      const std::string & input_name0 = "x");
+      const std::string & input_name0 = "x")
 
 SHNIBBLE_HASH_FUNC_DECL(shCellnoise);
 SHNIBBLE_HASH_FUNC_DECL(shScellnoise);
@@ -222,7 +223,7 @@ SHNIBBLE_HASH_FUNC_DECL(shTexhash);
   template<typename T1, typename T2> ShProgram opname(const std::string & output_name = "result",\
       const std::string & input_name0 = "x"); \
   template<typename T1, typename T2, typename T3> ShProgram opname(const std::string & output_name = "result",\
-      const std::string & input_name0 = "x", const std::string & input_name1 = "y");
+      const std::string & input_name0 = "x", const std::string & input_name1 = "y")
 
 SHNIBBLE_NOISE_FUNC_DECL(shLinnoise);
 SHNIBBLE_NOISE_FUNC_DECL(shNoise);
@@ -244,7 +245,7 @@ SHNIBBLE_NOISE_FUNC_DECL(shSturbulence);
   template<typename T1, typename T2> ShProgram opname(const std::string & output_name = "result",\
       const std::string & input_name0 = "x", const std::string & input_name1 = "y"); \
   template<typename T> ShProgram opname(const std::string & output_name = "result",\
-      const std::string & input_name0 = "x", const std::string & input_name1 = "y");
+      const std::string & input_name0 = "x", const std::string & input_name1 = "y")
 
 SHNIBBLE_DISTANCE_FUNC_DECL(shDistance);
 SHNIBBLE_DISTANCE_FUNC_DECL(shDistance_1);
@@ -257,7 +258,7 @@ SHNIBBLE_DISTANCE_FUNC_DECL(shDistance_inf);
  */
 #define SHNIBBLE_LENGTH_FUNC_DECL(opname) \
   template<typename T> ShProgram opname(const std::string & output_name = "result",\
-      const std::string & input_name0 = "x");
+      const std::string & input_name0 = "x")
 
 SHNIBBLE_LENGTH_FUNC_DECL(shLength);
 SHNIBBLE_LENGTH_FUNC_DECL(shLength_1);

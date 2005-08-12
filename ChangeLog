@@ -1,3 +1,8 @@
+2005-08-12  Francois Marier  <francois@serioushack.com>
+
+	* src/ShBackend.cpp: Changed some more iterators to be 64-bit
+	safe.
+
 2005-08-11  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslEmit.cpp (GlslOpCodeVecs), 

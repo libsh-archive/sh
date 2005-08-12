@@ -208,15 +208,15 @@ bool ShBackend::load_library(const string& filename)
 #if defined(WIN32)
   string uc_filename(filename);
   std::transform(filename.begin(), filename.end(), uc_filename.begin(), toupper);
-  unsigned extension_pos = uc_filename.rfind("_DEBUG.DLL");
+  size_t extension_pos = uc_filename.rfind("_DEBUG.DLL");
   if (uc_filename.npos == extension_pos) extension_pos = uc_filename.rfind(".DLL");
-  unsigned filename_pos = uc_filename.rfind("\\") + 1;
+  size_t filename_pos = uc_filename.rfind("\\") + 1;
 #elif defined(__APPLE__)
-  unsigned extension_pos = filename.rfind(".bundle");
-  unsigned filename_pos = filename.rfind("/") + 1;
+  size_t extension_pos = filename.rfind(".bundle");
+  size_t filename_pos = filename.rfind("/") + 1;
 #else
-  unsigned extension_pos = filename.rfind(".so");
-  unsigned filename_pos = filename.rfind("/") + 1;
+  size_t extension_pos = filename.rfind(".so");
+  size_t filename_pos = filename.rfind("/") + 1;
 #endif
   filename_pos += 5; // remove the "libsh" portion of the filename
 
@@ -381,7 +381,7 @@ string ShBackend::target_handler(const string& target, bool restrict_to_selected
     unsigned end = length - 1;
     while (start < length) {
       while ((start != end) && (' ' == path[start])) start++; // trim leading whitespace
-      unsigned separator = path.find(";", start);
+      size_t separator = path.find(";", start);
       if (separator != path.npos) end = separator - 1;
       while ((start != end ) && (' ' == path[end])) end--; // trim trailing whitespace
 

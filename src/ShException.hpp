@@ -39,7 +39,7 @@ public:
   /// Return an informative message describing the exception.
   const std::string& message() const;
 
-  virtual const char* ShException::what() const throw();
+  virtual const char* what() const throw();
 protected:
   std::string m_message;
 };

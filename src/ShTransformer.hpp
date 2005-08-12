@@ -46,7 +46,7 @@ class
 SH_DLLEXPORT ShTransformer {
 public:
   ShTransformer(const ShProgramNodePtr& program);
-  ShTransformer::~ShTransformer();
+  ~ShTransformer();
   bool changed(); //< returns true iff one of the transformations changed the shader
 
   /**@name Tuple splitting when backend canot support arbitrary 
