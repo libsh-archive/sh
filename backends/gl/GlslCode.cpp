@@ -528,10 +528,15 @@ void GlslCode::gen_structural_node(const ShStructuralNodePtr& node)
   }
 }
 
-string GlslCode::resolve(const ShVariable& v, int index) const
+string GlslCode::resolve(const ShVariable& v, int index, int size) const
 {
   SH_DEBUG_ASSERT(m_varmap);
-  return m_varmap->resolve(v, index);
+
+  if ((0 == size) || (v.size() == size)) {
+    return m_varmap->resolve(v, index);
+  } else {
+    return glsl_typename(v.valueType(), size) + "("  + m_varmap->resolve(v, index) + ")";
+  }
 }
 
 string GlslCode::resolve(const ShVariable& v, const ShVariable& index) const

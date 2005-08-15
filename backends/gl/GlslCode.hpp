@@ -141,13 +141,14 @@ private:
   void emit_logic(const SH::ShStatement& stmt);
   void emit_noise(const SH::ShStatement& stmt);
   void emit_pal(const SH::ShStatement& stmt);
+  void emit_pow(const SH::ShVariable& dest, const SH::ShVariable& a, const SH::ShVariable& b);
   void emit_prod(const SH::ShStatement& stmt);
   void emit_sum(const SH::ShStatement& stmt);
   void emit_texture(const SH::ShStatement& stmt);
   
   void table_substitution(const SH::ShStatement& stmt, GlslOpCodeVecs codeVecs);
   
-  std::string resolve(const SH::ShVariable& v, int index = -1) const;
+  std::string resolve(const SH::ShVariable& v, int index = -1, int size = 0) const;
   std::string resolve(const SH::ShVariable& v, const SH::ShVariable& index) const;
   std::string resolve_constant(double constant, const SH::ShVariable& var, int size = 0) const;
 

@@ -1,5 +1,18 @@
 2005-08-15  Francois Marier  <francois@serioushack.com>
 
+	* backends/gl/GlslCode.hpp, GlslCode.cpp (resolve): Cast the
+	argument to the proper size if necessary.
+
+	* backends/gl/GlslEmit.cpp (table_substitution): Make use of the
+	new resolve method to avoid casting arguments unnecessarily.
+
+	* backends/gl/GlslEmit.cpp, GlslCode.hpp (emit_pow): Add this
+	method to emit pow operations and properly cast both the result
+	and the arguments.
+
+	* backends/gl/GlslEmit.cpp (emit_exp, emit_cbrt, emit_hyperbolic):
+	Make use of emit_pow to do the necessary casts.
+
 	* src/ShTextureNode.cpp (initialize_memories): Make sure the
 	mipmap levels are always >= 1.
 

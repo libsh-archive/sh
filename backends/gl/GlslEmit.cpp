@@ -113,8 +113,7 @@ void GlslCode::table_substitution(const ShStatement& stmt, GlslOpCodeVecs codeVe
     // print each parameter
     for (i=0; i < codeVecs.index.size(); i++) { 
       const ShVariable& src = stmt.src[codeVecs.index[i]];
-      line << codeVecs.frag[i] << glsl_typename(src.valueType(), param_size)
-	   << "(" << resolve(src) << ")";
+      line << codeVecs.frag[i] << resolve(src, -1, param_size);
     }
   }
 
@@ -252,7 +251,7 @@ void GlslCode::emit_cbrt(const ShStatement& stmt)
   SH_DEBUG_ASSERT(SH_OP_CBRT == stmt.op);
 
   ShVariable temp(allocate_constant(stmt, 1.0 / 3.0));
-  append_line(resolve(stmt.dest) + " = pow(" + resolve(stmt.src[0]) + ", " + resolve(temp) + ")");
+  emit_pow(stmt.dest, stmt.src[0], temp);
 }
 
 void GlslCode::emit_comment(const ShStatement& stmt)
@@ -289,12 +288,26 @@ void GlslCode::emit_discard(const ShStatement& stmt)
 	      resolve_constant(0, stmt.src[0]) + ") discard");
 }
 
+void GlslCode::emit_pow(const ShVariable& dest, const ShVariable& a, const ShVariable& b)
+{
+  // cast each argument's size if necessary
+  const int size = std::max(a.size(), b.size());
+  string pow_call = string("pow(") + resolve(a, -1, size) + ", " + resolve(b, -1, size) + ")";
+  
+  // cast to the destination size if necessary
+  if (dest.size() != size) {
+    pow_call = glsl_typename(dest.valueType(), dest.size()) + "(" + pow_call + ")";
+  }
+
+  append_line(resolve(dest) + " = " + pow_call);
+}
+
 void GlslCode::emit_exp(const ShStatement& stmt, double power)
 {
   SH_DEBUG_ASSERT((SH_OP_EXP == stmt.op) || (SH_OP_EXP10 == stmt.op));
 
   ShVariable temp(allocate_constant(stmt, power));
-  append_line(resolve(stmt.dest) + " = pow(" + resolve(temp) + ", " + resolve(stmt.src[0]) + ")");
+  emit_pow(stmt.dest, temp, stmt.src[0]);
 }
 
 void GlslCode::emit_hyperbolic(const ShStatement& stmt)
@@ -304,7 +317,7 @@ void GlslCode::emit_hyperbolic(const ShStatement& stmt)
 
   ShVariable e_plusX(allocate_temp(stmt));
   ShVariable e_minusX(allocate_temp(stmt));
-  append_line(resolve(e_plusX) + " = pow(" + resolve(e) + ", " + resolve(stmt.src[0]) + ")");
+  emit_pow(e_plusX, e, stmt.src[0]);
   append_line(resolve(e_minusX) + " = pow(" + resolve(e) + ", -(" + resolve(stmt.src[0]) + "))");
 
   switch (stmt.op) {
