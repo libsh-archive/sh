@@ -1,3 +1,8 @@
+2005-08-15  Francois Marier  <francois@serioushack.com>
+
+	* src/ShTextureNode.cpp (initialize_memories): Make sure the
+	mipmap levels are always >= 1.
+
 2005-08-12  Francois Marier  <francois@serioushack.com>
 
 	* src/ShBackend.cpp: Changed some more iterators to be 64-bit

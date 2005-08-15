@@ -81,15 +81,13 @@ void ShTextureNode::initialize_memories(bool force_initialization)
   }
   
   // update m_mipmap_levels and m_nb_memories
+  m_mipmap_levels = 1;
   if ((m_traits.filtering() == ShTextureTraits::SH_FILTER_MIPMAP_NEAREST) ||
       (m_traits.filtering() == ShTextureTraits::SH_FILTER_MIPMAP_LINEAR)) {
     SH_DEBUG_ASSERT(m_width == m_height);
-    m_mipmap_levels = 0;
-    for (int w = m_width; w > 0; w >>= 1) {
+    for (int w = m_width; w > 1; w >>= 1) {
       ++m_mipmap_levels;
     }
-  } else {
-    m_mipmap_levels = 1;  
   }
   m_nb_memories = (SH_TEXTURE_CUBE == m_dims) ? 6 * m_mipmap_levels : m_mipmap_levels;
  
