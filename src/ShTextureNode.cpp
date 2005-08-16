@@ -90,12 +90,16 @@ void ShTextureNode::initialize_memories(bool force_initialization)
     }
   }
   m_nb_memories = (SH_TEXTURE_CUBE == m_dims) ? 6 * m_mipmap_levels : m_mipmap_levels;
- 
+
   // reset all textures
   delete [] m_memory;
   m_memory = new ShMemoryPtr[m_nb_memories];
   for (int i=0; i < m_nb_memories; i++) {
     m_memory[i] = NULL;
+  }
+  for (int i=0; i < 6; i++) {
+    m_mipmap_generation_timestamp[i] = -1;
+    m_mipmap_generation_basemem[i] = NULL;
   }
 
   // restore base textures
@@ -152,7 +156,7 @@ ShPointer<const ShMemory> ShTextureNode::memory(int n) const
 
 void ShTextureNode::memory(ShMemoryPtr memory, int n)
 {
-  initialize_memories(false); // nb_memories will change if filtering was changed
+  initialize_memories(0 == n); // nb_memories will change if filtering was changed
   if (n < m_nb_memories) {
     m_memory[n] = memory;
   } else {
@@ -284,8 +288,20 @@ float ShTextureNode::interpolate3D(float* base_data, int scale,
   return sum / (scale * scale * scale);
 }
 
-void ShTextureNode::build_mipmaps(ShCubeDirection dir)
+bool ShTextureNode::build_mipmaps(ShCubeDirection dir)
 {
+  if (m_mipmap_levels <= 1) return false; // mipmapping not enabled
+
+  if (memory(dir, 1)) {
+    // Don't overwrite user-provided mipmap levels
+    if (-1 == m_mipmap_generation_timestamp[dir]) return false;
+
+    // Don't rebuild the levels if the timestamp and memory are the same
+    if ((memory(dir, 0) == m_mipmap_generation_basemem[dir]) &&
+        (memory(dir, 0)->timestamp() == m_mipmap_generation_timestamp[dir]))
+      return false;
+  }
+
   int width = m_width;
   int height = m_height;
   int depth = m_depth;
@@ -354,6 +370,10 @@ void ShTextureNode::build_mipmaps(ShCubeDirection dir)
 
     m_memory[direction * levels + i] = memory;
   }
+
+  m_mipmap_generation_timestamp[dir] = memory(dir, 0)->timestamp();
+  m_mipmap_generation_basemem[dir] = memory(dir, 0).object();
+  return true;
 }
 
 }

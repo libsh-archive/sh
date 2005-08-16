@@ -1,3 +1,16 @@
+2005-08-16  Francois Marier  <francois@serioushack.com>
+
+	* src/ShTextureNode.cpp (memory): Must reinitialize memories
+	whenever the base level is modified.
+
+	* src/ShTextureNode.hpp, ShTextureNode.cpp (build_mipmaps): Add
+	some checks to skip rebuilding the mipmaps when it's not necessary
+	and return a boolean to indicate whether they were rebuilt or
+	not.
+
+	* backends/gl/GlTextures.cpp (bindTexture): Always call
+	build_mipmaps() since it includes the necessary checks now.
+
 2005-08-15  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslCode.hpp, GlslCode.cpp (resolve): Cast the

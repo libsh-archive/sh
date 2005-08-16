@@ -140,7 +140,8 @@ public:
 
   void count(int n);
 
-  void build_mipmaps(ShCubeDirection dir = SH_CUBE_POS_X);
+  /// Generates the mipmaps levels if necessary (returns TRUE if it did, otherwise FALSE)
+  bool build_mipmaps(ShCubeDirection dir = SH_CUBE_POS_X);
   
 private:
   int m_count; // max nb of elements sent to the GPU or -1 if unknown (used by the stream backend)
@@ -150,6 +151,8 @@ private:
   ShMemoryPtr* m_memory; // array
   int m_nb_memories; // size of the array
   int m_mipmap_levels;
+  int m_mipmap_generation_timestamp[6]; // -1 if they were never generated
+  ShMemory* m_mipmap_generation_basemem[6]; // NULL if never generated
 
   ShTextureTraits m_traits;
   int m_width, m_height, m_depth;

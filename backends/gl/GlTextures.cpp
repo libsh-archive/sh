@@ -339,11 +339,10 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target)
         storage->sync();
 
 	if (mipmap_levels > 1) {
-	  if (!node->memory(dir, 1)) {
+	  if (node->build_mipmaps(dir)) {
 	    std::stringstream s;
 	    s << "Automatically generated the " << mipmap_levels << " mipmap levels (dir = " << dir << ").";
 	    SH_DEBUG_WARN(s.str());
-	    node->build_mipmaps(dir);
 	  }
 
 	  int width = node->width();
@@ -397,11 +396,10 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target)
       return;
     }
 
-    if ((mipmap_levels > 1) && (!node->memory(1))) {
+    if (node->build_mipmaps()) {
       std::stringstream s;
       s << "Automatically generated the " << mipmap_levels << " mipmap levels.";
       SH_DEBUG_WARN(s.str());
-      node->build_mipmaps();
     }
 
     StorageFinder finder(node);
