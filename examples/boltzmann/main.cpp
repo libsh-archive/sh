@@ -47,10 +47,13 @@ using namespace SH;
 
 // defines
 
+//display
+//#define VELOCITY_PROFILE
 
+// internal formats
 #define DPT_INTERNAL_FORMAT GL_RGBA8 
 #define BT_INTERNAL_FORMAT GL_RGBA8 
-#define DVT_INTERNAL_FORMAT /*GL_RGBA32F_ARB*/ GL_RGBA16 /*GL_FLOAT_RGBA32_NV */
+#define DVT_INTERNAL_FORMAT GL_RGBA32F_ARB //GL_RGBA16 /*GL_FLOAT_RGBA32_NV */
 
 //#define USE_HALF_FLOAT
 #ifdef USE_HALF_FLOAT
@@ -72,8 +75,8 @@ using namespace SH;
 
 #define NUMMODES 1
 
-#define SO1 0.05
-#define SO2 0.05
+#define SO1 0.1
+#define SO2 0.1
 #define SCALE 5
 #define GRID_2D_RES 512
 #define SQR_GRID_3D_RES 8
@@ -112,13 +115,13 @@ using namespace SH;
 
 #define ZEROVEL 1.0
 
-#define TAU 2.1
+#define TAU 2.0
 #define INV_TAU (1.0f/TAU)
 
 #define VELSTEP 0.1
 
-#define SQR_NUM_PARTICLES 512 //1024 //GRID_2D_RES
-#define NUM_PARTICLES /*1048576*/ 262144 //(SQR_NUM_PARTICLES*SQR_NUM_PARTICLES)
+#define SQR_NUM_PARTICLES 256 /*64*/ /*512*/ //1024 //GRID_2D_RES
+#define NUM_PARTICLES 65536 /*4096*/ /*262144*/ /*1048576*/ //(SQR_NUM_PARTICLES*SQR_NUM_PARTICLES)
 #define PCO 0.02
 
 // forward declarations
@@ -295,7 +298,7 @@ ShArray2D<ShColor4f> dptc1;
 ShArray2D<ShColor4f> dptc2;
 ShArray2D<ShColor4f> dptc3;
 ShArray2D<ShColor4f> dptc4;
-ShTexture2D<ShColor4f> dvt; // density and velocity
+ShArray2D<ShColor4f> dvt; // density and velocity
 ShArray2D<ShColor4f> bt;
 ShArray2D<ShColor4f> post; 
 
@@ -447,8 +450,8 @@ printf("init_textures()\n");
 
   glGenTextures(1, &dvt_id);
   glBindTexture(DVT_TAR, dvt_id);
-  glTexParameteri(DVT_TAR, GL_TEXTURE_MAG_FILTER,GL_LINEAR/*NEAREST*/);
-  glTexParameteri(DVT_TAR, GL_TEXTURE_MIN_FILTER,GL_LINEAR/*NEAREST*/);
+  glTexParameteri(DVT_TAR, GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+  glTexParameteri(DVT_TAR, GL_TEXTURE_MIN_FILTER,GL_NEAREST);
   glTexImage2D(DVT_TAR, 0, DVT_INTERNAL_FORMAT, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, NULL);  
 
   sprintf(tid, "%d",dvt_id);
@@ -474,9 +477,12 @@ printf("init_textures()\n");
     memset(posdata, 0, NUM_PARTICLES*4*sizeof(float));
     for(int i=0;i<NUM_PARTICLES;i++){
 	  
-      posdata[4*i+0] = ((float)((i%4096)%64)) /64;
+      /*posdata[4*i+0] = ((float)((i%4096)%64)) /64;
       posdata[4*i+1] = ((float)((i%4096)/64)) /64;
-      posdata[4*i+2] = ((float)( i/4096)) /64;
+      posdata[4*i+2] = ((float)( i/4096)) /64;*/
+      posdata[4*i+0] = ((float)rand()/(RAND_MAX-1));
+      posdata[4*i+1] = ((float)rand()/(RAND_MAX-1));
+      posdata[4*i+2] = ((float)rand()/(RAND_MAX-1));   
       posdata[4*i+3] = 1.0;
 
      /* posdata[4*i+0] = (float)((i%(GRID_3D_RES*GRID_3D_RES))%GRID_3D_RES)/GRID_3D_RES;
@@ -786,8 +792,8 @@ void display()
   shUnbind(*streaming0_shaders);
 
   dirs(0) = 0;	 
-  dirs(1) = 0;	 
-  dirs(2) = 0.0003;
+  dirs(1) = 0.1;	 
+  dirs(2) = -0.6;
  
  
 /*  shBind(*mouse0_shaders);
@@ -908,15 +914,16 @@ glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 
 glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
+#ifdef VELOCITY_PROFILE
   shBind(*showvel_shaders);
    drawQuad();
   shUnbind(*showvel_shaders);
-
+#endif
 
 //printf("about to render particles\n");
  // glViewport(-GRID_2D_RES,-GRID_2D_RES, GRID_2D_RES, GRID_2D_RES);
 
-shBind(*plane_shaders);
+/*shBind(*plane_shaders);
 
   // draw volume slabs
   glDisable(GL_CULL_FACE);
@@ -944,7 +951,7 @@ shBind(*plane_shaders);
   //glCullFace(GL_FRONT);
 
  
-  shUnbind(*plane_shaders);
+  shUnbind(*plane_shaders);*/
 
 ///////////////////////
 // Draw particles pass:
@@ -1219,7 +1226,7 @@ void init_shaders(void)
     velocity /= density;
     
     color(0,1,2) = velocity*0.5+0.5;
-    color(3) = density*0.2;
+    color(3) = density*0.5;
     
   } SH_END;
 
@@ -1238,7 +1245,7 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = dpt0(tc) - INV_TAU*(dpt0(tc) - (A1 + B1*eu + C1*eu2 + D1*uu)*(dvt(tc))(3)*5);
+    color = dpt0(tc) - INV_TAU*(dpt0(tc) - (A1 + B1*eu + C1*eu2 + D1*uu)*(dvt(tc))(3)*2);
     
   } SH_END;
  
@@ -1258,7 +1265,7 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = dpt1(tc) - INV_TAU*(dpt1(tc) - (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*5);
+    color = dpt1(tc) - INV_TAU*(dpt1(tc) - (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*2);
     
   } SH_END;
 
@@ -1278,7 +1285,7 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = dpt2(tc) - INV_TAU*(dpt2(tc) - (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*5);
+    color = dpt2(tc) - INV_TAU*(dpt2(tc) - (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*2);
     
   } SH_END;
 
@@ -1298,7 +1305,7 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = dpt3(tc) - INV_TAU*(dpt3(tc) - (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*5);
+    color = dpt3(tc) - INV_TAU*(dpt3(tc) - (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*2);
     
   } SH_END;
 
@@ -1319,8 +1326,8 @@ void init_shaders(void)
     ShAttrib1f uu = u|u;
     
     ShAttrib4f eq;
-    eq(0,1) = (A1 + B1*eu(0,1) + C1*eu2(0,1) + D1*uu)*dvt(tc)(3)*5;
-    eq(2) = (A0 + D0*uu)*dvt(tc)(3)*5;
+    eq(0,1) = (A1 + B1*eu(0,1) + C1*eu2(0,1) + D1*uu)*dvt(tc)(3)*2;
+    eq(2) = (A0 + D0*uu)*dvt(tc)(3)*2;
     
     color = dpt4(tc) - INV_TAU*(dpt4(tc) - eq);
         
@@ -1505,10 +1512,10 @@ void init_shaders(void)
     discard(gausst(tc)(0) - 0.2);
     ShAttrib1f ampl = 1.0 - gausst(tc)(0);
     // ShAttrib1f ampl = 1.0 - 2*abs(tc(0)-0.5);
-    color(0) = (dirs|ShAttrib3f(1,0,0));
-    color(1) = (dirs|ShAttrib3f(-1,0,0));
-    color(2) = (dirs|ShAttrib3f(0,1,0));
-    color(3) = (dirs|ShAttrib3f(0,-1,0));
+    color(0) = clamp(dirs|ShAttrib3f(1,0,0),0,1.0);
+    color(1) = clamp(dirs|ShAttrib3f(-1,0,0),0,1.0);
+    color(2) = clamp(dirs|ShAttrib3f(0,1,0),0,1.0);
+    color(3) = clamp(dirs|ShAttrib3f(0,-1,0),0,1.0);
    } SH_END;
 
    mouse1_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
@@ -1518,10 +1525,10 @@ void init_shaders(void)
    
    discard(gausst(tc)(0) - 0.2);
     
-    color(0) = RCPSQR2*(dirs|ShAttrib3f(1,1,0));
-    color(1) = RCPSQR2*(dirs|ShAttrib3f(-1,-1,0));
-    color(2) = RCPSQR2*(dirs|ShAttrib3f(1,-1,0));
-    color(3) = RCPSQR2*(dirs|ShAttrib3f(-1,1,0));
+    color(0) = RCPSQR2*(clamp(dirs|ShAttrib3f(1,1,0),0,1.0));
+    color(1) = RCPSQR2*(clamp(dirs|ShAttrib3f(-1,-1,0),0,1.0));
+    color(2) = RCPSQR2*(clamp(dirs|ShAttrib3f(1,-1,0),0,1.0));
+    color(3) = RCPSQR2*(clamp(dirs|ShAttrib3f(-1,1,0),0,1.0));
    } SH_END;
 
    mouse4_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
@@ -1531,8 +1538,8 @@ void init_shaders(void)
    
    discard(gausst(tc)(0) - 0.2);
     
-    color(0) = (dirs|ShAttrib3f(0,0,1));
-    color(1) = (dirs|ShAttrib3f(0,0,-1));
+    color(0) = clamp(dirs|ShAttrib3f(0,0,1),0,1.0);
+    color(1) = clamp(dirs|ShAttrib3f(0,0,-1),0,1.0);
     color(2) = 0;
     color(3) = 0;
    } SH_END;
@@ -1545,18 +1552,24 @@ void init_shaders(void)
     ShOutputColor4f color;
 
     ShAttrib4f ppos = post(tc);
+
+    ShAttrib3f orig = dvt3d.get3DTexCoord(ShTexCoord2f(0.1+SO1/2,0.5+SO2/2));
     
-    color(0,1,2) = ppos(0,1,2) + VELSTEP*((dvt3d( ppos(0,1,2) )(0,1,2))*2-1.0);
-    //color(2) = 0;
+    ShAttrib3f opos = ppos(0,1,2) + VELSTEP*((dvt3d( ppos(0,1,2) )(0,1,2))*2-1.0);
+    opos = cond(opos, opos, orig/*ShAttrib3f(0.001,0.001,0.001)*/);
+    color(0,1,2) = cond(1.0-opos, opos, orig/*ShAttrib3f(0.999,0.999,0.999)*/);
     color(3) = 1.0;
+    
    } SH_END;
 
    particle_vsh = SH_BEGIN_VERTEX_PROGRAM {
     ShInOutPosition4f pos;
     //ShInOutTexCoord2f tc;
+    ShOutputPosition4f posp;
     
     pos(0,1,2) = (pos(0,1,2)*2-1.0);
     pos(3) = 1.0;
+    posp = pos;
     pos = mvd|pos;
                 
    } SH_END;
@@ -1564,12 +1577,14 @@ void init_shaders(void)
    particle_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
     ShInputPosition4f pos;
     //ShInputTexCoord2f tc;
+    ShInputPosition4f posp;
     ShOutputColor4f color;
 
     /*color(0,1,2) = dvt(tc)(0,1,2);
     color(3) = 1.0;*/
 
-    color = ShConstColor4f(1,1,1,1);
+    color(0,1,2) = ShAttrib3f((1.0-posp(0)*0.8), (1.0-posp(1)*0.8), (1.0-posp(2)*0.8));
+    color(3) = 1.0;
    } SH_END;
  
    plane_vsh = SH_BEGIN_VERTEX_PROGRAM {
