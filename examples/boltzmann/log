@@ -1,0 +1,14 @@
+aug11
+
+- when changing resolution of a FBO texture, have to change viewport
+
+- solved the problem of not seeing particles with 32bit buffers - force z=0 in shader
+
+aug15
+
+- using Rect textures results in some weird behaviour: after 10 frames, positions jump back to their initial positions. 
+
+- 16bit precision for velocity/density texture results in drift of positions (32bit).
+Using 32bit precision for v/d tex eliminates the drift, but the lack of interpolation causes particles to vibrate and oscillate. 
+   Perhaps best solution is to do fuul 3d 32bit interpolation in a shader
+

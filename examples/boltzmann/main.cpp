@@ -50,7 +50,7 @@ using namespace SH;
 
 #define DPT_INTERNAL_FORMAT GL_RGBA8 
 #define BT_INTERNAL_FORMAT GL_RGBA8 
-#define DVT_INTERNAL_FORMAT GL_RGBA32F_ARB //GL_RGBA16 /*GL_FLOAT_RGBA32_NV */
+#define DVT_INTERNAL_FORMAT /*GL_RGBA32F_ARB*/ GL_RGBA16 /*GL_FLOAT_RGBA32_NV */
 
 //#define USE_HALF_FLOAT
 #ifdef USE_HALF_FLOAT
@@ -58,13 +58,13 @@ using namespace SH;
  #define NUM_POS_BYTES 2
  #define POS_TYPE GL_HALF_FLOAT_NV
 #else
- #define POST_INTERNAL_FORMAT GL_FLOAT_RGBA32_NV
+ #define POST_INTERNAL_FORMAT GL_RGBA32F_ARB //GL_FLOAT_RGBA32_NV
  #define NUM_POS_BYTES 4 
  #define POS_TYPE GL_FLOAT
 #endif
 
-#define DVT_TAR GL_TEXTURE_2D //GL_TEXTURE_RECTANGLE_NV
-#define POST_TAR GL_TEXTURE_RECTANGLE_NV
+#define DVT_TAR /*GL_TEXTURE_RECTANGLE_NV*/ GL_TEXTURE_2D
+#define POST_TAR /*GL_TEXTURE_RECTANGLE_NV*/ GL_TEXTURE_2D
 #define DPT_TAR /*GL_TEXTURE_RECTANGLE_NV*/ GL_TEXTURE_2D
 #define BT_TAR /*GL_TEXTURE_RECTANGLE_NV*/ GL_TEXTURE_2D
 
@@ -295,9 +295,9 @@ ShArray2D<ShColor4f> dptc1;
 ShArray2D<ShColor4f> dptc2;
 ShArray2D<ShColor4f> dptc3;
 ShArray2D<ShColor4f> dptc4;
-ShArray2D<ShColor4f> dvt; // density and velocity
+ShTexture2D<ShColor4f> dvt; // density and velocity
 ShArray2D<ShColor4f> bt;
-ShArrayRect<ShColor4f> post; 
+ShArray2D<ShColor4f> post; 
 
 //ShArray2D<ShColor4f> colort;
 ShArray2D<ShColor3fub> gausst(32,32);
@@ -447,8 +447,8 @@ printf("init_textures()\n");
 
   glGenTextures(1, &dvt_id);
   glBindTexture(DVT_TAR, dvt_id);
-  glTexParameteri(DVT_TAR, GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-  glTexParameteri(DVT_TAR, GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+  glTexParameteri(DVT_TAR, GL_TEXTURE_MAG_FILTER,GL_LINEAR/*NEAREST*/);
+  glTexParameteri(DVT_TAR, GL_TEXTURE_MIN_FILTER,GL_LINEAR/*NEAREST*/);
   glTexImage2D(DVT_TAR, 0, DVT_INTERNAL_FORMAT, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, NULL);  
 
   sprintf(tid, "%d",dvt_id);
@@ -498,7 +498,7 @@ printf("init_textures()\n");
   glTexImage2D(POST_TAR, 0, POST_INTERNAL_FORMAT, SQR_NUM_PARTICLES, SQR_NUM_PARTICLES, 0, GL_RGBA, GL_FLOAT, posdata);  
  }
 
- glBindTexture(GL_TEXTURE_RECTANGLE_NV, 0);
+ //glBindTexture(GL_TEXTURE_RECTANGLE_NV, 0);
 
   /*sprintf(tid, "%d",post_ids[0]);
   post.meta("opengl:texid", tid);
