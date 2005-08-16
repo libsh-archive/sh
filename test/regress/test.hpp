@@ -95,7 +95,7 @@ public:
 		    const T& out, const T& exp, int out_size, const double epsilon)
   {
     for(int i=0; i < out_size; i++) {
-      if (fabs(out[i] - exp[i]) > epsilon) {
+      if ((out[i] != out[i]) || (fabs(out[i] - exp[i]) > epsilon)) {
         print_fail(name);
 	for (unsigned j=0; j < inputs.size(); j++) {
 	  char label[4] = "  A";
