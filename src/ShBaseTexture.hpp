@@ -37,6 +37,9 @@ public:
 
   void build_mipmaps() { m_node->build_mipmaps(); }
 
+  /// Obtain access to the node that this texture refers to
+  const ShTextureNodePtr & node() const { return m_node; }
+
 protected:
   ShTextureNodePtr m_node;
 };

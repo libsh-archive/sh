@@ -1,3 +1,8 @@
+2005-08-17  Andrew Lauritzen  <atlaurit@student.cs.uwaterloo.ca>
+
+	* src/ShBaseTexture.hpp: Added a method to access the node that a
+	texture refers to.
+
 2005-08-16  Francois Marier  <francois@serioushack.com>
 
 	* src/ShTextureNode.cpp (memory): Must reinitialize memories
