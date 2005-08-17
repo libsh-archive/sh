@@ -1,3 +1,8 @@
+2005-08-17  Francois Marier  <francois@serioushack.com>
+
+	* src/ShTransformer.cpp (struct ATan2ExpanderBase): Fix issues
+	related to negative values and zeroes in atan2().
+
 2005-08-17  Andrew Lauritzen  <atlaurit@student.cs.uwaterloo.ca>
 
 	* src/ShBaseTexture.hpp: Added a method to access the node that a
