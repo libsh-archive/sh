@@ -97,18 +97,18 @@ def insert_into(test, op):
     test.add_test(func(((2.0,),), op))
     test.add_test(func(((-0.05,),), op))
     test.add_test(func(((1,),), op))
-    test.add_test(func(((0,),), op))
     test.add_test(func(((1,0),(0,1)), op))
-    test.add_test(func(((0,0),(0,0)), op))
     test.add_test(func(((1,2),(3,4)), op))
     test.add_test(func(((-1,0.2),(3000,-4.234)), op))
     test.add_test(func(((1.0, 0.0, 0.0),(0.0, 1.0, 0.0),(0.0, 0.0, 1.0)), op))
-    test.add_test(func(((0.0, 0.0, 0.0),(0.0, 0.0, 0.0),(0.0, 0.0, 0.0)), op))
 
     if not op == inverse:
         # These matrices are not invertible (their determinant is zero)
         test.add_test(func(((-1.0, -2.0, -3.0),(-3.0, -4.0, -5.0),(-5.0, -6.0, -7.0)), op))
         test.add_test(func(((1.0, 2.0, 3.0),(3.0, 4.0, 5.0),(5.0, 6.0, 7.0)), op))
+        test.add_test(func(((0,),), op))
+        test.add_test(func(((0,0),(0,0)), op))
+        test.add_test(func(((0.0, 0.0, 0.0),(0.0, 0.0, 0.0),(0.0, 0.0, 0.0)), op))
         
     test.add_test(func(((-1000.0, 1.3333),(0.0, 1.0)), op))
     test.add_test(func(((0.0, 1.0, 2.0, 3.0),(0.0, 1.0, 0.0, 0.5),(0.0, 0.0, 1.0, 6.7),(1.0, -0.3, -3000, -1.2)), op))

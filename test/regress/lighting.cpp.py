@@ -40,7 +40,6 @@ def faceforward(p, q, types=[]):
 # for normalize()
 def insert_into1(test):
     test.add_test(normalize((1.0, 0.0, 0.0)))
-    test.add_test(normalize((0, 0, 0)))
     test.add_test(normalize((1.0, 2.0, 3.0)))
     test.add_test(normalize((1.0, 1.0, 1.0)))
     test.add_test(normalize((1.0, 0.0, 1.0)))
@@ -62,7 +61,7 @@ def insert_into2(test):
     test.add_test(lit((0.5,),(-1.5,),(5.5,)))
     
     test.add_test(lit((1.0,),(1.0,),(1.0,)))
-    test.add_test(lit((-1.0,),(-1.0,),(-1.0,)))
+    test.add_test(lit((-1.0,),(-1.0,),(1.0,)))
     test.add_test(lit((2.0,),(1.0,),(0.0,)))
     test.add_test(lit((2.0,),(0.5,),(0.0,)))
     test.add_test(lit((0.0,),(0.0,),(1.0,)))
