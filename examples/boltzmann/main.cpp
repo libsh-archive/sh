@@ -48,11 +48,13 @@ using namespace SH;
 // defines
 
 //display
-//#define VELOCITY_PROFILE
-//#define BOUNDARIES
+#define VELOCITY_PROFILE
+#define BOUNDARIES
+#define REFLECTIVE_BOUNDARIES
 
 // internal formats
 #define DPT_INTERNAL_FORMAT GL_RGBA8 
+#define EXT_INTERNAL_FORMAT GL_RGBA8 
 #define BT_INTERNAL_FORMAT GL_RGBA8 
 #define DVT_INTERNAL_FORMAT GL_RGBA32F_ARB //GL_RGBA16 /*GL_FLOAT_RGBA32_NV */
 
@@ -71,6 +73,7 @@ using namespace SH;
 #define POST_TAR /*GL_TEXTURE_RECTANGLE_NV*/ GL_TEXTURE_2D
 #define DPT_TAR /*GL_TEXTURE_RECTANGLE_NV*/ GL_TEXTURE_2D
 #define BT_TAR /*GL_TEXTURE_RECTANGLE_NV*/ GL_TEXTURE_2D
+#define EXT_TAR /*GL_TEXTURE_RECTANGLE_NV*/ GL_TEXTURE_2D
 
 #define PBO
 
@@ -85,6 +88,9 @@ using namespace SH;
 #define NUM_GRID_CELLS 262144 //(GRID_3D_RES*GRID_3D_RES*GRID_3D_RES)
 
 #define RCPSQR2 0.707106781186
+
+#define WINDOW_WIDTH 1024
+#define WINDOW_HEIGHT 1024
 
 
 /*#define A0 (4.0/9)
@@ -116,15 +122,15 @@ using namespace SH;
 
 #define ZEROVEL 1.0
 
-#define TAU 2.0
+#define TAU 3.1
 #define INV_TAU (1.0f/TAU)
 
-#define VELSTEP 0.1
+#define VELSTEP 0.3
 
-#define VELSCALE 0.01
+#define VELSCALE 1.0
 #define VORTEX_POS_X 0.5
 #define VORTEX_POS_Y 0.5
-#define VORTEX_POS_Z 0.9
+#define VORTEX_POS_Z 0.1
 
 
 #define PARTICLE_TIMESTEP 0.0001
@@ -172,9 +178,7 @@ GLuint depth_rb[2];
 // states
 int fmode = 0;
 
-int mc = 0;
-int counter = 0;
-
+float* outpos;
 
 GLenum glerror;
 
@@ -212,6 +216,7 @@ ShProgram collision4_fsh;
 ShProgram dv_fsh;
 //test
 ShProgram showvel_fsh;
+ShProgram allzero_fsh;
 ShProgram redonly_fsh;
 ShProgram greenonly_fsh;
 ShProgram blueonly_fsh;
@@ -242,6 +247,7 @@ ShProgramSet* collision4_shaders;
 ShProgramSet* dv_shaders;
 //test
 ShProgramSet* showvel_shaders;
+ShProgramSet* allzero_shaders;
 ShProgramSet* redonly_shaders;
 ShProgramSet* greenonly_shaders;
 ShProgramSet* blueonly_shaders;
@@ -279,6 +285,7 @@ char tid[5];
 GLuint dpt_ids[5];
 GLuint dptc_ids[5];
 GLuint eqdpt_ids[5];
+GLuint ext_ids[5];
 GLuint dvt_id;
 GLuint bt_id;
 GLuint post_ids[2];
@@ -311,6 +318,11 @@ ShArray2D<ShColor4f> dptc1;
 ShArray2D<ShColor4f> dptc2;
 ShArray2D<ShColor4f> dptc3;
 ShArray2D<ShColor4f> dptc4;
+ShArray2D<ShColor4fub> ext0; // external disturbances
+ShArray2D<ShColor4fub> ext1;
+ShArray2D<ShColor4fub> ext2;
+ShArray2D<ShColor4fub> ext3;
+ShArray2D<ShColor4fub> ext4;
 ShArray2D<ShColor4f> dvt; // density and velocity
 ShArray2D<ShColor4f> bt;
 ShArray2D<ShColor4f> post; 
@@ -354,6 +366,8 @@ int buttons[5] = {GLUT_UP, GLUT_UP, GLUT_UP, GLUT_UP, GLUT_UP};
 int cur_x, cur_y, old_x, old_y;
 
 bool show_help = false;
+
+ShAttrib3f gravity(0,0,0.001);
 
 
 void init_FBO(void){
@@ -463,6 +477,24 @@ printf("init_textures()\n");
   sprintf(tid, "%d",dptc_ids[4]);
   dptc4.meta("opengl:texid", tid);
 
+//init external disturbances textures
+glGenTextures(5, ext_ids);
+  for(int i=0;i<5;i++){
+		glBindTexture(EXT_TAR, ext_ids[i]);
+		glTexParameteri(EXT_TAR,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+		glTexParameteri(EXT_TAR,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+		glTexImage2D(EXT_TAR, 0, EXT_INTERNAL_FORMAT, GRID_2D_RES, GRID_2D_RES, 0, GL_RGBA, GL_FLOAT, NULL);  
+  }//for
+  sprintf(tid, "%d",ext_ids[0]);
+  ext0.meta("opengl:texid", tid);
+  sprintf(tid, "%d",ext_ids[1]);
+  ext1.meta("opengl:texid", tid);
+  sprintf(tid, "%d",ext_ids[2]);
+  ext2.meta("opengl:texid", tid);
+  sprintf(tid, "%d",ext_ids[3]);
+  ext3.meta("opengl:texid", tid);
+  sprintf(tid, "%d",ext_ids[4]);
+  ext4.meta("opengl:texid", tid);
 
 // init density-velocity texture
 
@@ -540,8 +572,14 @@ void setup_texouts(){
   dptc2.size(GRID_2D_RES, GRID_2D_RES);
   dptc3.size(GRID_2D_RES, GRID_2D_RES);
   dptc4.size(GRID_2D_RES, GRID_2D_RES);
+  ext0.size(GRID_2D_RES, GRID_2D_RES);
+  ext1.size(GRID_2D_RES, GRID_2D_RES);
+  ext2.size(GRID_2D_RES, GRID_2D_RES);
+  ext3.size(GRID_2D_RES, GRID_2D_RES);
+  ext4.size(GRID_2D_RES, GRID_2D_RES);
   dvt.size(GRID_2D_RES, GRID_2D_RES);
   bt.size(GRID_2D_RES, GRID_2D_RES);
+
   post.size(SQR_NUM_PARTICLES, SQR_NUM_PARTICLES);
 }
 
@@ -775,17 +813,89 @@ void display()
    drawQuad();
   shUnbind(*dv_shaders);
 
+
+//////////////////////////////
+//Render external disturbances
+glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+                                  GL_COLOR_ATTACHMENT0_EXT,
+                                  EXT_TAR, ext_ids[0], 0);
+ glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); 
+
+shBind(*allzero_shaders);
+   drawQuad();
+shUnbind(*allzero_shaders);
+
+  if(buttons[GLUT_LEFT_BUTTON] == GLUT_DOWN){
+	  shBind(*mouse0_shaders);
+   drawQuad(ShAttrib3f(VORTEX_POS_X,VORTEX_POS_Y,VORTEX_POS_Z), SO1, SO2);
+  shUnbind(*mouse0_shaders);
+  }
+
+glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+                                  GL_COLOR_ATTACHMENT0_EXT,
+                                  EXT_TAR, ext_ids[1], 0);
+ glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); 
+ shBind(*allzero_shaders);
+   drawQuad();
+shUnbind(*allzero_shaders);
+ 
+ if(buttons[GLUT_LEFT_BUTTON] == GLUT_DOWN){
+shBind(*mouse1_shaders);
+   drawQuad(ShAttrib3f(VORTEX_POS_X,VORTEX_POS_Y,VORTEX_POS_Z), SO1, SO2);
+  shUnbind(*mouse1_shaders);
+ }
+glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+                                  GL_COLOR_ATTACHMENT0_EXT,
+                                  EXT_TAR, ext_ids[2], 0);
+ glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); 
+ shBind(*allzero_shaders);
+   drawQuad();
+shUnbind(*allzero_shaders);
+
+  if(buttons[GLUT_LEFT_BUTTON] == GLUT_DOWN){
+ shBind(*mouse2_shaders);
+   drawQuad(ShAttrib3f(VORTEX_POS_X,VORTEX_POS_Y,VORTEX_POS_Z), SO1, SO2);
+  shUnbind(*mouse2_shaders);
+  }
+glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+                                  GL_COLOR_ATTACHMENT0_EXT,
+                                  EXT_TAR, ext_ids[3], 0);
+ glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); 
+ shBind(*allzero_shaders);
+   drawQuad();
+shUnbind(*allzero_shaders); 
+
+  if(buttons[GLUT_LEFT_BUTTON] == GLUT_DOWN){
+ shBind(*mouse3_shaders);
+   drawQuad(ShAttrib3f(VORTEX_POS_X,VORTEX_POS_Y,VORTEX_POS_Z), SO1, SO2);
+  shUnbind(*mouse3_shaders);
+  }
+glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+                                  GL_COLOR_ATTACHMENT0_EXT,
+                                  EXT_TAR, ext_ids[4], 0);
+ glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); 
+ shBind(*allzero_shaders);
+   drawQuad();
+shUnbind(*allzero_shaders); 
+
+  if(buttons[GLUT_LEFT_BUTTON] == GLUT_DOWN){
+ shBind(*mouse4_shaders);
+   drawQuad(ShAttrib3f(VORTEX_POS_X,VORTEX_POS_Y,VORTEX_POS_Z), SO1, SO2);
+  shUnbind(*mouse4_shaders);
+  }
+
 /////////////////////
 // Perform collision:
   glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
                                   DPT_TAR, dptc_ids[0], 0);
-  
+ glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); 
   shBind(*collision0_shaders);
    drawQuad();
   shUnbind(*collision0_shaders);
   
-  glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+
+glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
                                   DPT_TAR, dptc_ids[1], 0);
   
@@ -793,7 +903,8 @@ void display()
    drawQuad();
   shUnbind(*collision1_shaders);
 
-  glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+
+glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
                                   DPT_TAR, dptc_ids[2], 0);
   
@@ -801,7 +912,8 @@ void display()
    drawQuad();
   shUnbind(*collision2_shaders);
 
-  glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+
+glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
                                   DPT_TAR, dptc_ids[3], 0);
   
@@ -809,13 +921,15 @@ void display()
    drawQuad();
   shUnbind(*collision3_shaders);
 
-  glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+
+glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
                                   DPT_TAR, dptc_ids[4], 0);
   
   shBind(*collision4_shaders);
    drawQuad();
   shUnbind(*collision4_shaders);
+
 
 /////////////////////
 // Perform streaming:
@@ -832,11 +946,6 @@ void display()
   dirs(1) = 0.1;	 
   dirs(2) = -0.6;
  
-  shBind(*mouse0_shaders);
-   drawQuad(ShAttrib3f(VORTEX_POS_X,VORTEX_POS_Y,VORTEX_POS_Z), SO1, SO2);
-  shUnbind(*mouse0_shaders);
- 
-
  
   glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
@@ -846,9 +955,6 @@ void display()
    drawQuad();
   shUnbind(*streaming1_shaders);
 
-  shBind(*mouse1_shaders);
-   drawQuad(ShAttrib3f(VORTEX_POS_X,VORTEX_POS_Y,VORTEX_POS_Z), SO1, SO2);
-  shUnbind(*mouse1_shaders);
 
   
  glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
@@ -859,10 +965,6 @@ void display()
    drawQuad();
   shUnbind(*streaming2_shaders);
 
-  shBind(*mouse2_shaders);
-   drawQuad(ShAttrib3f(VORTEX_POS_X,VORTEX_POS_Y,VORTEX_POS_Z), SO1, SO2);
-  shUnbind(*mouse2_shaders);
-
 
  glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
@@ -871,10 +973,6 @@ void display()
   shBind(*streaming3_shaders);
    drawQuad();
   shUnbind(*streaming3_shaders);
-
-  shBind(*mouse3_shaders);
-   drawQuad(ShAttrib3f(VORTEX_POS_X,VORTEX_POS_Y,VORTEX_POS_Z), SO1, SO2);
-  shUnbind(*mouse3_shaders);
 
   
  glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
@@ -885,10 +983,6 @@ void display()
   shBind(*streaming4_shaders);
    drawQuad();
   shUnbind(*streaming4_shaders);
-
-  shBind(*mouse4_shaders);
-   drawQuad(ShAttrib3f(VORTEX_POS_X,VORTEX_POS_Y,VORTEX_POS_Z), SO1, SO2);
-  shUnbind(*mouse4_shaders);
   
 
   
@@ -918,7 +1012,8 @@ void display()
 
 #ifndef PBO
   
-    float outpos[NUM_PARTICLES*4]; 
+    if(!outpos)
+		outpos = new float[NUM_PARTICLES*4]; 
     glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
     glReadPixels(0, 0, SQR_NUM_PARTICLES, SQR_NUM_PARTICLES, GL_RGBA, POS_TYPE, outpos);
   
@@ -939,11 +1034,11 @@ void display()
   glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, // bind back to regular depth buffer
                                      GL_DEPTH_ATTACHMENT_EXT,
                                      GL_RENDERBUFFER_EXT, depth_rb[0]);
-  glViewport(0,0,GRID_2D_RES, GRID_2D_RES);
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+glViewport(0,0,WINDOW_WIDTH, WINDOW_HEIGHT);
 
   glMatrixMode(GL_MODELVIEW);
   glPopMatrix();
@@ -1149,7 +1244,7 @@ int main(int argc, char** argv)
 
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE|GLUT_DEPTH);
-  glutInitWindowSize(512, 512);
+  glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
   glutCreateWindow("Lattice-Boltzmann Example");
   glewInit();
   initGL();
@@ -1279,7 +1374,8 @@ void init_shaders(void)
     ShOutputColor4f color;
    
     ShAttrib4f eu;
-    ShVector3f u = ((dvt(tc))(0,1,2))*2-1.0;
+    ShVector3f u = (dvt(tc))(0,1,2);
+	u = u*2-1.0;
     eu(0) = ShVector3f(1,0,0)  | u;
     eu(1) = ShVector3f(-1,0,0) | u;
     eu(2) = ShVector3f(0,1,0)  | u;
@@ -1288,8 +1384,8 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = dpt0(tc) - INV_TAU*(dpt0(tc) - (A1 + B1*eu + C1*eu2 + D1*uu)*(dvt(tc))(3)*2);
-    
+    color = dpt0(tc) - INV_TAU*(dpt0(tc) - (A1 + B1*eu + C1*eu2 + D1*uu)*(dvt(tc))(3)*2) + ext0(tc);
+       
   } SH_END;
  
  collision1_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
@@ -1299,7 +1395,8 @@ void init_shaders(void)
  
     // inner products:
     ShAttrib4f eu;
-    ShVector3f u = (dvt(tc)(0,1,2))*2-1.0;
+    ShVector3f u = (dvt(tc))(0,1,2);
+	u = u*2-1.0;
     eu(0) = ShVector3f(1,1,0)  | u;
     eu(1) = ShVector3f(-1,-1,0) | u;
     eu(2) = ShVector3f(1,-1,0)  | u;
@@ -1308,8 +1405,8 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = dpt1(tc) - INV_TAU*(dpt1(tc) - (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*2);
-    
+    color = dpt1(tc) - INV_TAU*(dpt1(tc) - (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*2) + ext1(tc);
+       
   } SH_END;
 
  collision2_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
@@ -1319,7 +1416,8 @@ void init_shaders(void)
  
     // inner products:
     ShAttrib4f eu;
-    ShVector3f u = (dvt(tc)(0,1,2))*2-1.0;
+    ShVector3f u = (dvt(tc))(0,1,2);
+	u = u*2-1.0;
     eu(0) = ShVector3f(1,0,1)  | u;
     eu(1) = ShVector3f(-1,0,-1) | u;
     eu(2) = ShVector3f(1,0,-1)  | u;
@@ -1328,7 +1426,7 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = dpt2(tc) - INV_TAU*(dpt2(tc) - (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*2);
+    color = dpt2(tc) - INV_TAU*(dpt2(tc) - (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*2) + ext2(tc);
     
   } SH_END;
 
@@ -1339,7 +1437,8 @@ void init_shaders(void)
  
     // inner products:
     ShAttrib4f eu;
-    ShVector3f u = (dvt(tc)(0,1,2))*2-1.0;
+    ShVector3f u = (dvt(tc))(0,1,2);
+	u = u*2-1.0;
     eu(0) = ShVector3f(0,1,1)  | u;
     eu(1) = ShVector3f(0,-1,-1) | u;
     eu(2) = ShVector3f(0,1,-1)  | u;
@@ -1348,7 +1447,7 @@ void init_shaders(void)
     ShAttrib4f eu2 = eu * eu;
     ShAttrib1f uu = u|u;
      
-    color = dpt3(tc) - INV_TAU*(dpt3(tc) - (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*2);
+    color = dpt3(tc) - INV_TAU*(dpt3(tc) - (A2 + B2*eu + C2*eu2 + D2*uu)*dvt(tc)(3)*2) + ext3(tc);
     
   } SH_END;
 
@@ -1359,7 +1458,8 @@ void init_shaders(void)
   
     // inner products:
     ShAttrib4f eu;
-    ShVector3f u = (dvt(tc)(0,1,2))*2-1.0;
+    ShVector3f u = (dvt(tc))(0,1,2);
+	u = u*2-1.0;  
     eu(0) = ShVector3f(0,0,1)  | u;
     eu(1) = ShVector3f(0,0,-1) | u;
     eu(2) = 0;
@@ -1372,7 +1472,7 @@ void init_shaders(void)
     eq(0,1) = (A1 + B1*eu(0,1) + C1*eu2(0,1) + D1*uu)*dvt(tc)(3)*2;
     eq(2) = (A0 + D0*uu)*dvt(tc)(3)*2;
     
-    color = dpt4(tc) - INV_TAU*(dpt4(tc) - eq);
+    color = dpt4(tc) - INV_TAU*(dpt4(tc) - eq) + ext4(tc);
         
   } SH_END;
 
@@ -1389,10 +1489,18 @@ void init_shaders(void)
     ShAttrib1f bdy = (bt(tc))(1);
     ShAttrib1f bdz = (bt(tc))(2);
      
-    color(0) = cond( bdx , (dptc3d0.find13(tc))(1) , (dptc3d0.find12(tc))(0) );
+#ifdef REFLECTIVE_BOUNDARIES
+	color(0) = cond( bdx , (dptc3d0.find13(tc))(1) , (dptc3d0.find12(tc))(0) );
     color(1) = cond( bdx , (dptc3d0.find12(tc))(0) , (dptc3d0.find13(tc))(1) );
     color(2) = cond( bdy , (dptc3d0.find10(tc))(3) , (dptc3d0.find15(tc))(2) ); 
     color(3) = cond( bdy , (dptc3d0.find15(tc))(2) , (dptc3d0.find10(tc))(3) ); 
+#else
+	ShAttrib1f zero(0.0);
+	color(0) = cond( bdx , zero , (dptc3d0.find12(tc))(0) );
+    color(1) = cond( bdx , zero , (dptc3d0.find13(tc))(1) );
+    color(2) = cond( bdy , zero , (dptc3d0.find15(tc))(2) ); 
+    color(3) = cond( bdy , zero , (dptc3d0.find10(tc))(3) ); 
+#endif
     
   } SH_END;
 
@@ -1405,7 +1513,8 @@ void init_shaders(void)
     ShAttrib1f bdy = (bt(tc))(1);
     ShAttrib1f bdz = (bt(tc))(2);
 
-    color(0) = cond(bdx, (dptc3d1.find16(tc))(3),  (dptc3d1.find14(tc))(0) );
+#ifdef REFLECTIVE_BOUNDARIES
+	color(0) = cond(bdx, (dptc3d1.find16(tc))(3),  (dptc3d1.find14(tc))(0) );
     color(0) = cond(bdy, (dptc3d1.find9(tc))(2),  color(0) );
     
     color(1) = cond(bdx, (dptc3d1.find9(tc))(2) , (dptc3d1.find11(tc))(1) );
@@ -1416,7 +1525,14 @@ void init_shaders(void)
 
     color(3) = cond(bdx, (dptc3d1.find14(tc))(0) , (dptc3d1.find16(tc))(3));
     color(3) = cond(bdy, (dptc3d1.find11(tc))(1) , color(3));
+#else
+	ShAttrib1f zero(0.0);
+	color(0) = cond(bdx+bdy, zero,  (dptc3d1.find14(tc))(0) );
+    color(1) = cond(bdx+bdy, zero , (dptc3d1.find11(tc))(1) );
+    color(2) = cond(bdx+bdy, zero , (dptc3d1.find9(tc))(2));
+    color(3) = cond(bdx+bdy, zero , (dptc3d1.find16(tc))(3));
 
+#endif
         
   } SH_END;
 
@@ -1429,7 +1545,8 @@ void init_shaders(void)
     ShAttrib1f bdy = (bt(tc))(1);
     ShAttrib1f bdz = (bt(tc))(2);
 
-    color(0) = cond(bdx, (dptc3d2.find5(tc))(3),  (dptc3d2.find3(tc))(0) );
+#ifdef REFLECTIVE_BOUNDARIES
+	color(0) = cond(bdx, (dptc3d2.find5(tc))(3),  (dptc3d2.find3(tc))(0) );
     color(0) = cond(bdz, (dptc3d2.find20(tc))(2),  color(0) );
     
     color(1) = cond(bdx, (dptc3d2.find20(tc))(2) , (dptc3d2.find22(tc))(1) );
@@ -1440,7 +1557,14 @@ void init_shaders(void)
 
     color(3) = cond(bdx, (dptc3d2.find5(tc))(0) , (dptc3d2.find5(tc))(3));
     color(3) = cond(bdz, (dptc3d2.find22(tc))(1) , color(3));
+#else
+	ShAttrib1f zero(0.0);
+	color(0) = cond(bdx+bdz, zero , (dptc3d2.find3(tc))(0));
+    color(1) = cond(bdx+bdz, zero , (dptc3d2.find22(tc))(1));
+    color(2) = cond(bdx+bdz, zero , (dptc3d2.find20(tc))(2));
+    color(3) = cond(bdx+bdz, zero , (dptc3d2.find5(tc))(3));
 
+#endif
  /*   color(0) = (dptc3d2.find3(tc))(0);
     color(1) = (dptc3d2.find22(tc))(1);
     color(2) = (dptc3d2.find20(tc))(2);
@@ -1456,7 +1580,8 @@ void init_shaders(void)
     ShAttrib1f bdy = (bt(tc))(1);
     ShAttrib1f bdz = (bt(tc))(2);
 
-    color(0) = cond(bdy, (dptc3d3.find1(tc))(3),  (dptc3d3.find7(tc))(0));
+#ifdef REFLECTIVE_BOUNDARIES
+	color(0) = cond(bdy, (dptc3d3.find1(tc))(3),  (dptc3d3.find7(tc))(0));
     color(0) = cond(bdz, (dptc3d3.find24(tc))(2),  color(0) );
     
     color(1) = cond(bdy, (dptc3d3.find24(tc))(2) , (dptc3d3.find18(tc))(1) );
@@ -1467,7 +1592,14 @@ void init_shaders(void)
 
     color(3) = cond(bdy, (dptc3d3.find7(tc))(0) , (dptc3d3.find1(tc))(3));
     color(3) = cond(bdz, (dptc3d3.find18(tc))(1) , color(3));
+#else
+	ShAttrib1f zero(0.0);
+	color(0) = cond(bdy+bdz, zero,  (dptc3d3.find7(tc))(0));
+    color(1) = cond(bdy+bdz, zero , (dptc3d3.find18(tc))(1) );
+    color(2) = cond(bdy+bdz, zero , (dptc3d3.find24(tc))(2));
+    color(3) = cond(bdy+bdz, zero , (dptc3d3.find1(tc))(3));
 
+#endif
 
 /*    color(0) = (dptc3d3.find7(tc))(0);
     color(1) = (dptc3d3.find18(tc))(1);
@@ -1482,15 +1614,18 @@ void init_shaders(void)
 
     ShAttrib1f bdz = (bt(tc))(2);
 
-    color(0) = cond( bdz , (dptc3d4.find21(tc))(1) , (dptc3d4.find4(tc))(0) );
+#ifdef REFLECTIVE_BOUNDARIES
+	color(0) = cond( bdz , (dptc3d4.find21(tc))(1) , (dptc3d4.find4(tc))(0) );
     color(1) = cond( bdz , (dptc3d4.find4(tc))(0) , (dptc3d4.find21(tc))(1) );
- 
-    /*color(0) = (dptc3d4.find21(tc))(0);
-    color(1) = (dptc3d4.find4(tc))(1);*/
+
+#else
+	ShAttrib1f zero(0.0);
+	color(0) = cond( bdz , zero , (dptc3d4.find4(tc))(0) );
+    color(1) = cond( bdz , zero , (dptc3d4.find21(tc))(1) );
+
+#endif
     color(2) = dptc4(tc)(2);
     color(3) = 0;
-
-    
   } SH_END;
 
   showvel_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
@@ -1499,12 +1634,16 @@ void init_shaders(void)
     ShOutputColor4f color;
 
     //color(0,2) = abs((dvt(tc)(0,1))*2-1.0);
-      ShVector3f vel = (dvt(tc)(0,1,2))*2-1.0;
+      ShVector3f vel = (dvt(tc)(0,1,2));
+	  vel = vel*2-1.0;
       ShAttrib1f dp = vel|vel;
       //color(0,1,2) = ShAttrib3f(dp,dp,dp);
       //color(2) = dvt(tc)(3)*5;//ShAttrib3f(dp,dp,dp);
-     color(0,1,2) = abs(dvt(tc)(0,1,2)*2-1.0)*1.6;
-/*	color(1) += clamp(bt(tc)(0) + bt(tc)(1), 0, 1.0);*/
+     
+	  color(0,1,2) = (vel);
+	  //color(0,1,2) = ext0(tc)(0,1,2);
+
+	  /*	color(1) += clamp(bt(tc)(0) + bt(tc)(1), 0, 1.0);*/
 	/*color(0) = bt(tc)(0);
 	color(1) = bt(tc)(1);*/
         //color(0,1,2) = bt(tc)(0,1,2);
@@ -1512,7 +1651,15 @@ void init_shaders(void)
     //color(2) = clamp(abs(-dvt(tc)(0)) + abs(-dvt(tc)(1)),0,1.0);
     
   } SH_END;
-   
+ 
+  allzero_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+    ShInputPosition4f pos;
+    ShInputTexCoord2f tc;
+    ShOutputColor4f color;
+
+    color = ShConstColor4f(0,0,0,0);
+        } SH_END;
+
   redonly_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
     ShInputPosition4f pos;
     ShInputTexCoord2f tc;
@@ -1552,14 +1699,19 @@ void init_shaders(void)
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
 
-    discard(ringt(tc)(3));
+    discard(0.7-ringt(tc)(3));
 
-    ShAttrib3f vel = ringt(tc)(0,1,2)*2-1.0;
-    color(0) = clamp(vel|ShAttrib3f(1,0,0),0,1.0);
-    color(1) = clamp(vel|ShAttrib3f(-1,0,0),0,1.0);
-    color(2) = clamp(vel|ShAttrib3f(0,1,0),0,1.0);
-    color(3) = clamp(vel|ShAttrib3f(0,-1,0),0,1.0);
-    color *= VELSCALE;
+    ShAttrib3f vel(ringt(tc)(0,1,2));
+    vel = vel*4-1.0;
+    vel(0) = -vel(0);
+	  //    discard(abs(vel(0))+abs(vel(1))+abs(vel(2)) );
+    color(0) = vel|ShAttrib3f(1,0,0);
+    color(1) = vel|ShAttrib3f(-1,0,0);
+	color(2) = vel|ShAttrib3f(0,1,0);
+    color(3) = vel|ShAttrib3f(0,-1,0);
+    color = color*VELSCALE;
+	/*color(0,1,2) = vel(0,1,2);
+	color(3) = 1.0;*/
     } SH_END;
 
    mouse1_fsh = SH_BEGIN_FRAGMENT_PROGRAM {
@@ -1567,9 +1719,12 @@ void init_shaders(void)
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
    
-    discard(ringt(tc)(3));
+    discard(1.0-ringt(tc)(3));
     
-    ShAttrib3f vel = ringt(tc)(0,1,2)*2-1.0;
+    ShAttrib3f vel = (ringt(tc)(0,1,2));
+    vel = vel*4-1.0;
+    vel(0) = -vel(0);
+	//    discard(vel(0)+vel(1)+vel(2));
     color(0) = RCPSQR2*(clamp(vel|ShAttrib3f(1,1,0),0,1.0));
     color(1) = RCPSQR2*(clamp(vel|ShAttrib3f(-1,-1,0),0,1.0));
     color(2) = RCPSQR2*(clamp(vel|ShAttrib3f(1,-1,0),0,1.0));
@@ -1582,9 +1737,12 @@ void init_shaders(void)
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
    
-    discard(ringt(tc)(3));
+    discard(1.0-ringt(tc)(3));
     
-    ShAttrib3f vel = ringt(tc)(0,1,2)*2-1.0;
+    ShAttrib3f vel = (ringt(tc)(0,1,2));
+    vel = vel*4-1.0;
+    vel(0) = -vel(0);
+	//    discard(vel(0)+vel(1)+vel(2));
     color(0) = RCPSQR2*(clamp(vel|ShAttrib3f(1,0,1),0,1.0));
     color(1) = RCPSQR2*(clamp(vel|ShAttrib3f(-1,0,-1),0,1.0));
     color(2) = RCPSQR2*(clamp(vel|ShAttrib3f(1,0,-1),0,1.0));
@@ -1597,9 +1755,12 @@ void init_shaders(void)
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
    
-    discard(ringt(tc)(3));
+    discard(1.0-ringt(tc)(3));
     
-    ShAttrib3f vel = ringt(tc)(0,1,2)*2-1.0;
+    ShAttrib3f vel = (ringt(tc)(0,1,2));
+    vel = vel*4-1.0;
+    vel(0) = -vel(0);
+	//    discard(vel(0)+vel(1)+vel(2));
     color(0) = RCPSQR2*(clamp(vel|ShAttrib3f(0,1,1),0,1.0));
     color(1) = RCPSQR2*(clamp(vel|ShAttrib3f(0,-1,-1),0,1.0));
     color(2) = RCPSQR2*(clamp(vel|ShAttrib3f(0,1,-1),0,1.0));
@@ -1612,9 +1773,12 @@ void init_shaders(void)
     ShInputTexCoord2f tc;
     ShOutputColor4f color;
    
-   discard(ringt(tc)(3));
+   discard(1.0-ringt(tc)(3));
     
-    ShAttrib3f vel = ringt(tc)(0,1,2)*2-1.0;
+    ShAttrib3f vel = (ringt(tc)(0,1,2));
+    vel = vel*4-1.0;
+    vel(0) = -vel(0);
+	//   discard(vel(0)+vel(1)+vel(2));
     color(0) = clamp(vel|ShAttrib3f(0,0,1),0,1.0);
     color(1) = clamp(vel|ShAttrib3f(0,0,-1),0,1.0);
     color(2) = 0;
@@ -1636,7 +1800,7 @@ void init_shaders(void)
     
     ShAttrib3f vel = (dvt3d( ppos(0,1,2) )(0,1,2))*2-1.0;
     ShAttrib1f velm = vel|vel; 
-    ShAttrib3f opos = ppos(0,1,2) + VELSTEP*vel;
+    ShAttrib3f opos = ppos(0,1,2) + VELSTEP*vel + gravity;
     ShAttrib3f opos2 = opos; //cond(velm, opos, orig);
     opos = cond(life, opos2, orig);
     ShAttrib3f opos3 = opos;
@@ -1645,7 +1809,7 @@ void init_shaders(void)
     opos = opos2;
     color(0,1,2) = cond(1.0-opos, opos2, orig/*ShAttrib3f(0.999,0.999,0.999)*/);
     //color(3) = 1.0;
-    color(3) = color(3) - PARTICLE_TIMESTEP;
+    color(3) = cond(velm, color(3), color(3) - PARTICLE_TIMESTEP);
     //color(3) = ppos(3);
  
     
@@ -1714,6 +1878,7 @@ void init_shaders(void)
   streaming4_shaders = new ShProgramSet(vsh, streaming4_fsh);
 ////test
   showvel_shaders = new ShProgramSet(vsh, showvel_fsh);
+  allzero_shaders = new ShProgramSet(vsh, allzero_fsh);
   redonly_shaders = new ShProgramSet(vsh, redonly_fsh);
   greenonly_shaders = new ShProgramSet(vsh, greenonly_fsh);
   blueonly_shaders = new ShProgramSet(vsh, blueonly_fsh);
