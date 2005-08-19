@@ -18,10 +18,6 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include "ShImage.hpp"
-#include <string>
-#include <cstring>
-#include <cstdio>
-#include <cmath>
 #include <png.h>
 #include <sstream>
 #include "ShException.hpp"
@@ -30,142 +26,41 @@
 
 namespace SH {
 
-ShImage::ShImage()
-  : m_width(0), m_height(0), m_elements(0), m_memory(0)
-{
-}
-
-ShImage::ShImage(int width, int height, int elements)
+template<typename T>
+ShImageNode<T>::ShImageNode(int width, int height, int elements)
   : m_width(width), m_height(height), m_elements(elements),
-    m_memory(new ShHostMemory(sizeof(float) * m_width * m_height * m_elements, SH_FLOAT))
+    m_memory(new ShHostMemory(sizeof(T) * m_width * m_height * m_elements, ShStorageTypeInfo<T>::value_type))
 {
 }
 
-ShImage::ShImage(const ShImage& other)
+template<typename T>
+ShImageNode<T>::ShImageNode(const ShImageNode<T>& other)
   : m_width(other.m_width), m_height(other.m_height), m_elements(other.m_elements),
-    m_memory(other.m_memory ? new ShHostMemory(sizeof(float) * m_width * m_height * m_elements, SH_FLOAT) : 0)
+    m_memory(other.m_memory ? new ShHostMemory(sizeof(T) * m_width * m_height * m_elements, ShStorageTypeInfo<T>::value_type) : 0)
 {
   if (m_memory) {
     std::memcpy(m_memory->hostStorage()->data(),
                 other.m_memory->hostStorage()->data(),
-                m_width * m_height * m_elements * sizeof(float));
+                m_width * m_height * m_elements * sizeof(T));
   }
 }
 
-ShImage::~ShImage()
-{
-}
-
-ShImage& ShImage::operator=(const ShImage& other)
+template<typename T>
+ShImageNode<T>& ShImageNode<T>::operator=(const ShImageNode<T>& other)
 {
   m_width = other.m_width;
   m_height = other.m_height;
   m_elements = other.m_elements;
-  m_memory = (other.m_memory ? new ShHostMemory(sizeof(float) * m_width * m_height * m_elements, SH_FLOAT) : 0);
+  m_memory = (other.m_memory ? new ShHostMemory(sizeof(T) * m_width * m_height * m_elements, ShStorageTypeInfo<T>::value_type) : 0);
   std::memcpy(m_memory->hostStorage()->data(),
               other.m_memory->hostStorage()->data(),
-              m_width * m_height * m_elements * sizeof(float));
+              m_width * m_height * m_elements * sizeof(T));
   
   return *this;
 }
 
-int ShImage::width() const
-{
-  return m_width;
-}
-
-int ShImage::height() const
-{
-  return m_height;
-}
-
-int ShImage::elements() const
-{
-  return m_elements;
-}
-
-float ShImage::operator()(int x, int y, int i) const
-{
-  SH_DEBUG_ASSERT(m_memory);
-  return data()[m_elements * (m_width * y + x) + i];
-}
-
-float& ShImage::operator()(int x, int y, int i)
-{
-  return data()[m_elements * (m_width * y + x) + i];
-}
-
-void ShImage::savePng(const std::string& filename, int inverse_alpha)
-{
-  FILE* fout = std::fopen(filename.c_str(), "wb");
-  png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-  png_infop info_ptr = png_create_info_struct(png_ptr);
-  setjmp(png_ptr->jmpbuf);
-
-  /* Setup PNG I/O */
-  png_init_io(png_ptr, fout);
-	 
-  /* Optionally setup a callback to indicate when a row has been
-   * written. */  
-
-  /* Setup filtering. Use Paeth filtering */
-  png_set_filter(png_ptr, 0, PNG_FILTER_PAETH);
-
-  /* Setup compression level. */
-  png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
-
-  /* Setup PNG header information and write it to the file */
-
-  int color_type;
-  switch (m_elements) {
-  case 1:
-    color_type = PNG_COLOR_TYPE_GRAY;
-    break;
-  case 2:
-    color_type = PNG_COLOR_TYPE_GRAY_ALPHA;
-    break;
-  case 3:
-    color_type = PNG_COLOR_TYPE_RGB;
-    break;
-  case 4:
-    color_type = PNG_COLOR_TYPE_RGBA;
-    break;
-  default:
-    throw ShImageException("Invalid element size");
-  }
-   
-  png_set_IHDR(png_ptr, info_ptr,
-               m_width, m_height,
-               8, 
-               color_type,
-               PNG_INTERLACE_NONE, 
-               PNG_COMPRESSION_TYPE_DEFAULT, 
-               PNG_FILTER_TYPE_DEFAULT);
-  png_write_info(png_ptr, info_ptr); 
-    
-  // Actual writing
-  png_byte* tempLine = (png_byte*)malloc(m_width * sizeof(png_byte) * m_elements);
-
-  for(int i=0;i<m_height;i+=1){
-    for(int j=0;j<m_width;j+=1){
-      for(int k = 0;k<m_elements;k+=1)
-        tempLine[m_elements*j+k] = static_cast<png_byte>((*this)(j, i, k)*255.0); 
-       
-      // inverse alpha
-      if(inverse_alpha && m_elements == 4)
-        tempLine[m_elements*j+3] = 255 - tempLine[m_elements*j+3];
-    }
-    png_write_row(png_ptr, tempLine);
-  }
-
-  // closing and freeing the structs
-  png_write_end(png_ptr, info_ptr);
-  png_destroy_write_struct(&png_ptr, &info_ptr);
-  free(tempLine);
-  fclose(fout);
-}
-
-void ShImage::loadPng(const std::string& filename)
+template<typename T>
+void ShImageNode<T>::loadPng(const std::string& filename)
 {
   // check that the file is a png file
   png_byte buf[8];
@@ -246,7 +141,7 @@ void ShImage::loadPng(const std::string& filename)
   
   png_bytep* row_pointers = png_get_rows(png_ptr, info_ptr);
 
-  m_memory = new ShHostMemory(sizeof(float) * m_width * m_height * m_elements, SH_FLOAT);
+  m_memory = new ShHostMemory(sizeof(T) * m_width * m_height * m_elements, ShStorageTypeInfo<T>::value_type);
 
   for (int y = 0; y < m_height; y++) {
     for (int x = 0; x < m_width; x++) {
@@ -254,21 +149,182 @@ void ShImage::loadPng(const std::string& filename)
 	png_byte *row = row_pointers[y];
 	int index = m_elements * (y * m_width + x) + i;
 	
-  long element = 0;
-  for (int j = bit_depth/8 - 1; j >= 0; j--) {
-    element <<= 8;
-    element += row[(x * m_elements + i) * bit_depth/8 + j];
-  }
-
+        long element = 0;
+        for (int j = bit_depth/8 - 1; j >= 0; j--) {
+          element <<= 8;
+          element += row[(x * m_elements + i) * bit_depth/8 + j];
+        }
+        
 	data()[index] = element / static_cast<float>((1 << bit_depth) - 1);
       }
     }
   }
-
+  
   png_destroy_read_struct(&png_ptr, &info_ptr, 0);
 }
 
-void ShImage::savePng16(const std::string& filename, int inverse_alpha)
+template<typename T>
+ShImageNode<T> ShImageNode<T>::getNormalImage()
+{
+  int w = width();
+  int h = height();
+  ShImageNode<T> output_image(w,h,3);
+  for (int j = 0; j < h; j++) {
+    int jp1 = j + 1;
+    if (jp1 >= h) jp1 = 0;
+    int jm1 = (j - 1);
+    if (jm1 < 0) jm1 = h - 1;
+    for (int i = 0; i < w; i++) {
+      int ip1 = i + 1;
+      if (ip1 >= w) ip1 = 0;
+      int im1 = (i - 1);
+      if (im1 < 0) im1 = w - 1;
+      T x, y, z;
+      x = ((*this)(ip1,j,0) - (*this)(im1,j,0))/2.0f;
+      output_image(i,j,0) = x/2.0f + 0.5f;
+      y = ((*this)(i,jp1,0) - (*this)(i,jm1,0))/2.0f;
+      output_image(i,j,1) = y/2.0f + 0.5f;
+      z = x*x + y*y;
+      if (z < 1.0f) {
+	z = std::sqrt(1 - z);
+      } else {
+	z = 0.0f;
+      }
+      output_image(i,j,2) = z;
+    }
+  }
+  return output_image;
+}
+
+template<typename T>
+const T* ShImageNode<T>::data() const
+{
+  if (!m_memory) return 0;
+  return reinterpret_cast<const T*>(m_memory->hostStorage()->data());
+}
+
+template<typename T>
+T* ShImageNode<T>::data()
+{
+  if (!m_memory) return 0;
+  return reinterpret_cast<T*>(m_memory->hostStorage()->data());
+}
+
+template<typename T>
+T ShImageNode<T>::operator()(int x, int y, int i) const
+{
+  SH_DEBUG_ASSERT(m_memory);
+  return data()[m_elements * (m_width * y + x) + i];
+}
+
+template<typename T>
+T& ShImageNode<T>::operator()(int x, int y, int i)
+{
+  return data()[m_elements * (m_width * y + x) + i];
+}
+
+template<typename T>
+ShImageNode<T>::ShImageNode()
+  : m_width(0), m_height(0), m_elements(0), m_memory(0)
+{
+}
+
+template<typename T>
+ShImageNode<T>::~ShImageNode()
+{
+}
+
+template<typename T>
+int ShImageNode<T>::width() const
+{
+  return m_width;
+}
+
+template<typename T>
+int ShImageNode<T>::height() const
+{
+  return m_height;
+}
+
+template<typename T>
+int ShImageNode<T>::elements() const
+{
+  return m_elements;
+}
+
+template<typename T>
+void ShImageNode<T>::savePng(const std::string& filename, int inverse_alpha)
+{
+  FILE* fout = std::fopen(filename.c_str(), "wb");
+  png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+  png_infop info_ptr = png_create_info_struct(png_ptr);
+  setjmp(png_ptr->jmpbuf);
+
+  /* Setup PNG I/O */
+  png_init_io(png_ptr, fout);
+	 
+  /* Optionally setup a callback to indicate when a row has been
+   * written. */  
+
+  /* Setup filtering. Use Paeth filtering */
+  png_set_filter(png_ptr, 0, PNG_FILTER_PAETH);
+
+  /* Setup compression level. */
+  png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
+
+  /* Setup PNG header information and write it to the file */
+
+  int color_type;
+  switch (m_elements) {
+  case 1:
+    color_type = PNG_COLOR_TYPE_GRAY;
+    break;
+  case 2:
+    color_type = PNG_COLOR_TYPE_GRAY_ALPHA;
+    break;
+  case 3:
+    color_type = PNG_COLOR_TYPE_RGB;
+    break;
+  case 4:
+    color_type = PNG_COLOR_TYPE_RGBA;
+    break;
+  default:
+    throw ShImageException("Invalid element size");
+  }
+   
+  png_set_IHDR(png_ptr, info_ptr,
+               m_width, m_height,
+               8, 
+               color_type,
+               PNG_INTERLACE_NONE, 
+               PNG_COMPRESSION_TYPE_DEFAULT, 
+               PNG_FILTER_TYPE_DEFAULT);
+  png_write_info(png_ptr, info_ptr); 
+    
+  // Actual writing
+  png_byte* tempLine = (png_byte*)malloc(m_width * sizeof(png_byte) * m_elements);
+
+  for(int i=0;i<m_height;i+=1){
+    for(int j=0;j<m_width;j+=1){
+      for(int k = 0;k<m_elements;k+=1)
+        tempLine[m_elements*j+k] = static_cast<png_byte>((*this)(j, i, k)*255.0); 
+       
+      // inverse alpha
+      if(inverse_alpha && m_elements == 4)
+        tempLine[m_elements*j+3] = 255 - tempLine[m_elements*j+3];
+    }
+    png_write_row(png_ptr, tempLine);
+  }
+
+  // closing and freeing the structs
+  png_write_end(png_ptr, info_ptr);
+  png_destroy_write_struct(&png_ptr, &info_ptr);
+  free(tempLine);
+  fclose(fout);
+}
+
+template<typename T>
+void ShImageNode<T>::savePng16(const std::string& filename, int inverse_alpha)
 {
   FILE* fout = std::fopen(filename.c_str(), "w");
   png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -338,62 +394,21 @@ void ShImage::savePng16(const std::string& filename, int inverse_alpha)
   fclose(fout);
 }
 
-ShImage ShImage::getNormalImage()
-{
-  int w = width();
-  int h = height();
-  ShImage output_image(w,h,3);
-  for (int j = 0; j < h; j++) {
-    int jp1 = j + 1;
-    if (jp1 >= h) jp1 = 0;
-    int jm1 = (j - 1);
-    if (jm1 < 0) jm1 = h - 1;
-    for (int i = 0; i < w; i++) {
-      int ip1 = i + 1;
-      if (ip1 >= w) ip1 = 0;
-      int im1 = (i - 1);
-      if (im1 < 0) im1 = w - 1;
-      float x, y, z;
-      x = ((*this)(ip1,j,0) - (*this)(im1,j,0))/2.0f;
-      output_image(i,j,0) = x/2.0f + 0.5f;
-      y = ((*this)(i,jp1,0) - (*this)(i,jm1,0))/2.0f;
-      output_image(i,j,1) = y/2.0f + 0.5f;
-      z = x*x + y*y;
-      if (z < 1.0f) {
-	z = std::sqrt(1 - z);
-      } else {
-	z = 0.0f;
-      }
-      output_image(i,j,2) = z;
-    }
-  }
-  return output_image;
-}
-
-const float* ShImage::data() const
-{
-  if (!m_memory) return 0;
-  return reinterpret_cast<const float*>(m_memory->hostStorage()->data());
-}
-
-float* ShImage::data()
-{
-  if (!m_memory) return 0;
-  return reinterpret_cast<float*>(m_memory->hostStorage()->data());
-}
-
-void ShImage::dirty() 
+template<typename T>
+void ShImageNode<T>::dirty() 
 {
   if (!m_memory) return;
   m_memory->hostStorage()->dirty();
 }
 
-ShMemoryPtr ShImage::memory()
+template<typename T>
+ShMemoryPtr ShImageNode<T>::memory()
 {
   return m_memory;
 }
 
-ShPointer<const ShMemory> ShImage::memory() const
+template<typename T>
+ShPointer<const ShMemory> ShImageNode<T>::memory() const
 {
   return m_memory;
 }

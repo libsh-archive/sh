@@ -1,3 +1,10 @@
+2005-08-19  Francois Marier  <francois@serioushack.com>
+
+	* src/ShImage.hpp, ShImageImpl.hpp, ShImage.cpp: Rename ShImage
+	into ShImageNode and template it so that fub images can be created
+	fron PNG files for example.  Make ShImage a typedef of
+	ShImageNode<float> for backwards compatibility.
+
 2005-08-17  Francois Marier  <francois@serioushack.com>
 
 	* src/ShTransformer.cpp (struct ATan2ExpanderBase): Fix issues

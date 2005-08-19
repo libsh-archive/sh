@@ -189,9 +189,6 @@
 				RelativePath="..\src\ShFixedManipulator.cpp">
 			</File>
 			<File
-				RelativePath="..\src\ShImage.cpp">
-			</File>
-			<File
 				RelativePath="..\src\ShImage3D.cpp">
 			</File>
 			<File
@@ -428,6 +425,9 @@
 			</File>
 			<File
 				RelativePath="..\src\ShImage.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShImageImpl.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShImage3D.hpp">

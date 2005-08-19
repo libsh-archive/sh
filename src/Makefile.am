@@ -86,9 +86,9 @@ libsh_la_SOURCES += ShLibWorley.hpp ShLibWorleyImpl.hpp
 libsh_la_SOURCES += ShBaseTexture.hpp ShBaseTextureImpl.hpp ShBaseTexture.cpp
 libsh_la_SOURCES += ShArray.hpp ShTable.hpp ShTexture.hpp
 libsh_la_SOURCES += ShWrap.hpp ShInterp.hpp ShMIPFilter.hpp
-libsh_la_SOURCES += ShTextureNode.hpp ShImage.hpp ShImage3D.hpp
+libsh_la_SOURCES += ShTextureNode.hpp ShImage.hpp ShImageImpl.hpp ShImage3D.hpp
 libsh_la_SOURCES += ShMemory.hpp ShMemory.cpp ShMemoryDep.hpp
-libsh_la_SOURCES += ShTextureNode.cpp ShImage.cpp ShImage3D.cpp
+libsh_la_SOURCES += ShTextureNode.cpp ShImage3D.cpp
 
 # Types
 libsh_la_SOURCES += ShVariableType.hpp ShVariableType.cpp
@@ -165,7 +165,7 @@ incinc_HEADERS += ShMatrix.hpp ShMatrixImpl.hpp
 incinc_HEADERS += ShArray.hpp ShTable.hpp ShTexture.hpp
 incinc_HEADERS += ShWrap.hpp
 incinc_HEADERS += ShBaseTexture.hpp ShBaseTextureImpl.hpp
-incinc_HEADERS += ShTextureNode.hpp ShImage.hpp ShImage3D.hpp
+incinc_HEADERS += ShTextureNode.hpp ShImage.hpp ShImageImpl.hpp ShImage3D.hpp
 incinc_HEADERS += ShLinearAllocator.hpp
 incinc_HEADERS += ShLibAttrib.hpp
 incinc_HEADERS += ShVector.hpp ShLibVector.hpp

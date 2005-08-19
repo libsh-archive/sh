@@ -32,17 +32,18 @@ namespace SH {
  * files.   It stores the image data in a memory object which can
  * then be shared with array, table, and texture objects.
  */
+template<typename T>
 class
-SH_DLLEXPORT ShImage : public ShRefCountable {
+SH_DLLEXPORT ShImageNode : public ShRefCountable {
 public:
-  ShImage(); ///< Construct an empty image
-  ShImage(int width, int height, int depth); ///< Construct a black
+  ShImageNode(); ///< Construct an empty image
+  ShImageNode(int width, int height, int depth); ///< Construct a black
                                              ///image at the given width/height/depth
-  ShImage(const ShImage& other); ///< Copy an image
+  ShImageNode(const ShImageNode& other); ///< Copy an image
 
-  ~ShImage();
+  ~ShImageNode();
 
-  ShImage& operator=(const ShImage& other); ///< Copy the data from
+  ShImageNode& operator=(const ShImageNode& other); ///< Copy the data from
                                             ///one image to another
 
   int width() const; ///< Determine the width of the image
@@ -50,10 +51,10 @@ public:
   int elements() const; ///< Determine the depth (floats per pixel) of
                         ///the image
 
-  float operator()(int x, int y, int i) const; ///< Retrieve a
+  T operator()(int x, int y, int i) const; ///< Retrieve a
                                                ///particular component
                                                ///from the image.
-  float& operator()(int x, int y, int i);  ///< Retrieve a
+  T& operator()(int x, int y, int i);  ///< Retrieve a
                                                ///particular component
                                                ///from the image.
 
@@ -71,10 +72,10 @@ public:
   
   void savePng16(const std::string& filename, int inverse_alpha=0);///< Save a PNG image into
  
-  ShImage getNormalImage();
+  ShImageNode getNormalImage();
 
-  const float* data() const;
-  float* data();
+  const T* data() const;
+  T* data();
   
   void dirty();
   ShMemoryPtr memory();
@@ -86,6 +87,10 @@ private:
   ShHostMemoryPtr m_memory;
 };
 
+typedef ShImageNode<float> ShImage;
+
 }
+
+#include "ShImageImpl.hpp"
 
 #endif
