@@ -203,7 +203,7 @@ bool ShStorage::transfer(const ShStorage* from, ShStorage* to)
   if (!from) return false;
   if (!to) return false;
   if (!m_transfers) return false;
-  
+
   TransferMap::const_iterator I = m_transfers->find(std::make_pair(from->id(), to->id()));
   if (I == m_transfers->end()) return false; // No transfer function?
 
@@ -333,10 +333,12 @@ public:
     if (!host_from) return false;
     if (!host_to) return false;
 
-    // Check that sizes match
-    if (host_from->length() != host_to->length()) return false;
-
     if (host_from->value_type() == host_to->value_type()) {
+      // Check that sizes match
+      if (host_from->length() != host_to->length()) {
+        std::cerr << "From length = " << host_from->length() << ", To length = " << host_to->length() << std::endl;
+        return false;
+      }
       std::memcpy(host_to->data(), host_from->data(), host_to->length());
     } else {
       // Do the type conversion

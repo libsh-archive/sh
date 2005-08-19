@@ -305,9 +305,19 @@ bool ShTextureNode::build_mipmaps(ShCubeDirection dir)
   int width = m_width;
   int height = m_height;
   int depth = m_depth;
-
   int levels = mipmap_levels();
   int direction = static_cast<int>(dir);
+
+  // Create a float copy of the base storage
+  int base_memsize = m_size * m_width * m_height * m_depth * shTypeInfo(SH_FLOAT)->datasize();
+  ShHostMemoryPtr base_memory = new ShHostMemory(base_memsize, SH_FLOAT);
+  float* base_data = reinterpret_cast<float*>(base_memory->hostStorage()->data());
+  ShHostStoragePtr base_storage = shref_dynamic_cast<ShHostStorage>(m_memory[direction * levels]->findStorage("host"));
+  if (!ShStorage::transfer(base_storage.object(), base_memory->hostStorage().object())) {
+    SH_DEBUG_ASSERT(0);
+    return false;
+  }
+
   for (int i=1; i < levels; i++) {
     switch (m_dims) {
     case SH_TEXTURE_3D:
@@ -323,10 +333,6 @@ bool ShTextureNode::build_mipmaps(ShCubeDirection dir)
     int memsize = m_size * width * height * depth * shTypeInfo(SH_FLOAT)->datasize();
     ShHostMemoryPtr memory = new ShHostMemory(memsize, SH_FLOAT);
     float* new_data = reinterpret_cast<float*>(memory->hostStorage()->data());
-
-    ShHostStoragePtr base_storage = shref_dynamic_cast<ShHostStorage>(m_memory[direction * levels]->findStorage("host"));
-    SH_DEBUG_ASSERT(SH_FLOAT == base_storage->value_type());
-    float* base_data = reinterpret_cast<float*>(base_storage->data());
 
     // Nb of texels (for each axis) in the base texture used to
     // generate one texel in this mipmap level

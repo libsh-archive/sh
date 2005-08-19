@@ -1,5 +1,12 @@
 2005-08-19  Francois Marier  <francois@serioushack.com>
 
+	* src/ShMemory.cpp (ShHostHostTransfer::transfer): Only check that
+	sizes match when the types are the same.
+
+	* src/ShTextureNode.cpp (build_mipmaps): Make a float copy of the
+	base storage so that mipmaps can be built from a non-float
+	texture.
+	
 	* src/ShImage.hpp, ShImageImpl.hpp, ShImage.cpp: Rename ShImage
 	into ShImageNode and template it so that fub images can be created
 	fron PNG files for example.  Make ShImage a typedef of
