@@ -1,5 +1,9 @@
 2005-08-22  Francois Marier  <francois@serioushack.com>
 
+	* src/ShImage.hpp, ShImageImpl.hpp, ShImage.cpp: Move all libpng
+	code into a non-templated class to reduce the libpng dependency.
+	Remove the DLL_EXPORT tag so that it compiles on Windows.
+
 	* src/ShImageImpl.hpp, ShImage.hpp: Rename ShImageNode to
 	ShTypedImage.
 

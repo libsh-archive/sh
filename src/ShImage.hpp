@@ -33,8 +33,7 @@ namespace SH {
  * then be shared with array, table, and texture objects.
  */
 template<typename T>
-class
-SH_DLLEXPORT ShTypedImage : public ShRefCountable {
+class ShTypedImage : public ShRefCountable {
 public:
   ShTypedImage(); ///< Construct an empty image
   ShTypedImage(int width, int height, int depth); ///< Construct a black
@@ -64,13 +63,15 @@ public:
    * (e.g. page 181)
    */
   void load_PNG(const std::string& filename) { loadPng(filename); }
-  void loadPng(const std::string& filename); ///< Load a PNG file into
-                                             ///this image.
   
-  void savePng(const std::string& filename, int inverse_alpha=0);///< Save a PNG image into
-                                             ///this file
+  ///< Load a PNG file into this image
+  void loadPng(const std::string& filename);
   
-  void savePng16(const std::string& filename, int inverse_alpha=0);///< Save a PNG image into
+  ///< Save a PNG image into this file
+  void savePng(const std::string& filename, int inverse_alpha=0);
+  
+  ///< Save a PNG image into this file
+  void savePng16(const std::string& filename, int inverse_alpha=0);
  
   ShTypedImage getNormalImage();
 
@@ -85,6 +86,24 @@ private:
   int m_width, m_height;
   int m_elements;
   ShHostMemoryPtr m_memory;
+
+  /// Returns a copy of the memory data in a float array
+  float* float_copy() const;
+};
+
+/** Libpng wrapper
+ * Allows ShImage to load its data from or save to a PNG file.
+ */
+class ShPngImage {
+public:
+  static float* read_png(const std::string& filename, int& width, int& height,
+                         int& elements);
+
+  static void save_png(const std::string& filename, const float* data,
+                       int inverse_alpha, int width, int height, int elements);
+
+  static void save_png16(const std::string& filename, const float* data,
+                         int inverse_alpha, int width, int height, int elements);
 };
 
 typedef ShTypedImage<float> ShImage;

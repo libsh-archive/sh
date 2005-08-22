@@ -192,6 +192,9 @@
 				RelativePath="..\src\ShImage3D.cpp">
 			</File>
 			<File
+				RelativePath="..\src\ShImage.cpp">
+			</File>
+			<File
 				RelativePath="..\src\ShInfo.cpp">
 			</File>
 			<File

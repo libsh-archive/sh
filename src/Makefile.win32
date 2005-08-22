@@ -86,7 +86,7 @@ libsh_dll_SOURCES += ShArray.hpp ShTable.hpp ShTexture.hpp
 libsh_dll_SOURCES += ShWrap.hpp ShInterp.hpp ShMIPFilter.hpp
 libsh_dll_SOURCES += ShTextureNode.hpp ShImage.hpp ShImageImpl.hpp ShImage3D.hpp
 libsh_dll_SOURCES += ShMemory.hpp ShMemory.cpp ShMemoryDep.hpp
-libsh_dll_SOURCES += ShTextureNode.cpp ShImage3D.cpp
+libsh_dll_SOURCES += ShTextureNode.cpp ShImage.cpp ShImage3D.cpp
 
 # Types
 libsh_dll_SOURCES += ShVariableType.hpp ShVariableType.cpp
