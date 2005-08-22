@@ -1,3 +1,8 @@
+2005-08-22  Francois Marier  <francois@serioushack.com>
+
+	* src/ShImageImpl.hpp, ShImage.hpp: Rename ShImageNode to
+	ShTypedImage.
+
 2005-08-19  Francois Marier  <francois@serioushack.com>
 
 	* src/ShMemory.cpp (ShHostHostTransfer::transfer): Only check that

@@ -34,16 +34,16 @@ namespace SH {
  */
 template<typename T>
 class
-SH_DLLEXPORT ShImageNode : public ShRefCountable {
+SH_DLLEXPORT ShTypedImage : public ShRefCountable {
 public:
-  ShImageNode(); ///< Construct an empty image
-  ShImageNode(int width, int height, int depth); ///< Construct a black
+  ShTypedImage(); ///< Construct an empty image
+  ShTypedImage(int width, int height, int depth); ///< Construct a black
                                              ///image at the given width/height/depth
-  ShImageNode(const ShImageNode& other); ///< Copy an image
+  ShTypedImage(const ShTypedImage& other); ///< Copy an image
 
-  ~ShImageNode();
+  ~ShTypedImage();
 
-  ShImageNode& operator=(const ShImageNode& other); ///< Copy the data from
+  ShTypedImage& operator=(const ShTypedImage& other); ///< Copy the data from
                                             ///one image to another
 
   int width() const; ///< Determine the width of the image
@@ -72,7 +72,7 @@ public:
   
   void savePng16(const std::string& filename, int inverse_alpha=0);///< Save a PNG image into
  
-  ShImageNode getNormalImage();
+  ShTypedImage getNormalImage();
 
   const T* data() const;
   T* data();
@@ -87,7 +87,7 @@ private:
   ShHostMemoryPtr m_memory;
 };
 
-typedef ShImageNode<float> ShImage;
+typedef ShTypedImage<float> ShImage;
 
 }
 
