@@ -431,6 +431,10 @@ bool CcBackendCode::generate(void)
   // prologue
   std::stringstream prologue;
   prologue << "#include <math.h>" << std::endl;
+  prologue << "#ifdef __APPLE__" << std::endl;
+  prologue << "inline double exp10(double a) { return pow(10.0, a); }" << std::endl;
+  prologue << "#endif" << std::endl;
+
   for(int i = 0; cc_texture_string[i][0] != 0; ++i) {
     prologue << cc_texture_string[i]; 
   }

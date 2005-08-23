@@ -34,6 +34,7 @@ inline float exp10f(float a) { return powf(10.0f, a); }
 #endif
 #ifdef __APPLE__
 inline float exp10f(float a) { return powf(10.0f, a); }
+inline double exp10(double a) { return pow(10.0, a); }
 #endif
 }
 

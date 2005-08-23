@@ -1,5 +1,10 @@
 2005-08-23  Francois Marier  <francois@serioushack.com>
 
+	* backends/cc/Cc.cpp (generate): On OSX, define exp10() in the
+	prologue of generated programs.
+
+	* src/ShMath.hpp: Add exp10() on OSX.
+
 	* src/ShBackend.cpp, ShBackend.hpp (derived_targets): Go through
 	all installed backends when making a list of derived targets.
 	(check_target): Add this method.
