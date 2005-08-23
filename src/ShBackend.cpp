@@ -363,45 +363,51 @@ int ShBackend::target_cost(const string& backend_name, const string& target)
   return cost;
 }
 
+void ShBackend::load_all_backends()
+{
+  if (m_all_backends_loaded) return;
+
+#if defined(WIN32)
+  load_libraries(string("."));
+  
+  // Search the system path
+  string path(getenv("PATH"));
+  unsigned length = path.size();
+  unsigned start = 0;
+  unsigned end = length - 1;
+  while (start < length) {
+    while ((start != end) && (' ' == path[start])) start++; // trim leading whitespace
+    string::size_type separator = path.find(";", start);
+    if (separator != path.npos) end = separator - 1;
+    while ((start != end ) && (' ' == path[end])) end--; // trim trailing whitespace
+    
+    string entry = path.substr(start, end - start + 1);
+    load_libraries(entry);
+    
+    if (path.npos == separator) break; // reached the end of the path
+    start = separator + 1;
+    end = length - 1;
+  }
+#elif defined(__APPLE__)
+  load_libraries(string(getenv("HOME")) + "/Library/Sh/Backends");
+  load_libraries("/Local/Library/Sh/Backends");
+  load_libraries("/Library/Sh/Backends");
+  load_libraries("/System/Library/Sh/Backends");
+#else
+  load_libraries(string(getenv("HOME")) + "/" + LOCAL_BACKEND_DIRNAME);
+  load_libraries(string(SH_INSTALL_PREFIX) + "/lib/sh");
+#endif
+
+  m_all_backends_loaded = true;
+}
+
 string ShBackend::target_handler(const string& target, bool restrict_to_selected)
 {
   init();
 
   bool selected_only = (m_selected_backends->size() > 0) && restrict_to_selected;
-
-  if (!selected_only && !m_all_backends_loaded) {
-    // Load all installed backend libraries
-#if defined(WIN32)
-    load_libraries(string("."));
-
-    // Search the system path
-    string path(getenv("PATH"));
-    unsigned length = path.size();
-    unsigned start = 0;
-    unsigned end = length - 1;
-    while (start < length) {
-      while ((start != end) && (' ' == path[start])) start++; // trim leading whitespace
-      string::size_type separator = path.find(";", start);
-      if (separator != path.npos) end = separator - 1;
-      while ((start != end ) && (' ' == path[end])) end--; // trim trailing whitespace
-
-      string entry = path.substr(start, end - start + 1);
-      load_libraries(entry);
-
-      if (path.npos == separator) break; // reached the end of the path
-      start = separator + 1;
-      end = length - 1;
-    }
-#elif defined(__APPLE__)
-    load_libraries(string(getenv("HOME")) + "/Library/Sh/Backends");
-    load_libraries("/Local/Library/Sh/Backends");
-    load_libraries("/Library/Sh/Backends");
-    load_libraries("/System/Library/Sh/Backends");
-#else
-    load_libraries(string(getenv("HOME")) + "/" + LOCAL_BACKEND_DIRNAME);
-    load_libraries(string(SH_INSTALL_PREFIX) + "/lib/sh");
-#endif
-    m_all_backends_loaded = true;
+  if (!selected_only) {
+    load_all_backends();
   }
 
   // Look in all loaded libraries for the backend with the lowest cost
@@ -490,40 +496,47 @@ void ShBackend::unbind_all_backends()
   }
 }
 
+void ShBackend::check_target(const string& target, const string& generic_target, 
+                             list<string>& derived_targets)
+{
+  load_all_backends();
+
+  for (LibraryMap::iterator i = m_loaded_libraries->begin(); 
+       i != m_loaded_libraries->end(); i++) {
+    string backend_name = i->first;
+    if (target_cost(backend_name, target) > 0) {
+      derived_targets.push_back(backend_name + ":" + generic_target);
+    }
+  }
+}
+
 list<string> ShBackend::derived_targets(const string& target)
 {
   list<string> ret;
 
   // Vertex shaders
   if (("vertex" == target) || ("*:vertex" == target)) {
-    ret.push_back("arb:vertex");
-    ret.push_back("glsl:vertex");
     ret.push_back("gpu:vertex");
+    check_target(target, "vertex", ret);
   } else if ("gpu:vertex" == target) {
-    ret.push_back("arb:vertex");
-    ret.push_back("glsl:vertex");
+    check_target(target, "vertex", ret);
   } 
   // Fragment shaders
   else if (("fragment" == target) || ("*:fragment" == target)) {
-    ret.push_back("arb:fragment");
-    ret.push_back("glsl:fragment");
     ret.push_back("gpu:fragment");
+    check_target(target, "fragment", ret);
   } else if ("gpu:fragment" == target) {
-    ret.push_back("arb:fragment");
-    ret.push_back("glsl:fragment");
+    check_target(target, "fragment", ret);
   } 
   // Stream programs
   else if (("stream" == target) || ("*:stream" == target)) {
-    ret.push_back("arb:stream");
-    ret.push_back("glsl:stream");
-    ret.push_back("cc:stream");
     ret.push_back("cpu:stream");
     ret.push_back("gpu:stream");
+    check_target(target, "stream", ret);
   } else if ("gpu:stream" == target) {
-    ret.push_back("arb:stream");
-    ret.push_back("glsl:stream");
+    check_target(target, "stream", ret);
   } else if ("cpu:stream" == target) {
-    ret.push_back("cc:stream");
+    check_target(target, "stream", ret);
   }
 
   return ret;

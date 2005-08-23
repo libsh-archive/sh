@@ -173,6 +173,9 @@ private:
   /** Check that the backend name doesn't contain invalid characters. */
   static bool is_valid_name(const std::string& backend_name);
 
+  /** Load all installed backends */
+  static void load_all_backends();
+
   /** Load the given library and initialize the backend it contains
    * Returns true if the library was loaded successfully. */
   static bool load_library(const std::string& filename);
@@ -184,6 +187,11 @@ private:
    * (0 == not handled, 1 == perfect match, 2 == very good, etc.) */
   static int target_cost(const std::string& backend_name, const std::string& target);
   
+  /** Add "backend:generic_target" to the derived_targets list for all
+   * backends that support the given target */
+  static void check_target(const std::string& target, const std::string& generic_target, 
+                           std::list<std::string>& derived_targets);
+
   /** Instantiate and initialize the backend */
   static ShPointer<ShBackend> instantiate_backend(const std::string& backend_name);
 };
