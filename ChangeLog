@@ -1,3 +1,7 @@
+2005-08-23  Francois Marier  <francois@serioushack.com>
+
+	* src/ShImage.hpp: Make ShPngImage a DLL-exported class.
+
 2005-08-22  Francois Marier  <francois@serioushack.com>
 
 	* src/ShImage.hpp, ShImageImpl.hpp, ShImage.cpp: Move all libpng

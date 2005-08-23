@@ -94,7 +94,8 @@ private:
 /** Libpng wrapper
  * Allows ShImage to load its data from or save to a PNG file.
  */
-class ShPngImage {
+class 
+SH_DLLEXPORT ShPngImage {
 public:
   static float* read_png(const std::string& filename, int& width, int& height,
                          int& elements);
