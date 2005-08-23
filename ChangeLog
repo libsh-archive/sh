@@ -1,5 +1,8 @@
 2005-08-23  Francois Marier  <francois@serioushack.com>
 
+	* src/ShGeneric.hpp: Add typedefs like the ones availabled in
+	ShAttrib (e.g. ShGeneric2f, ShGeneric4fub, etc.).
+
 	* src/ShImage.hpp: Make ShPngImage a DLL-exported class.
 
 2005-08-22  Francois Marier  <francois@serioushack.com>

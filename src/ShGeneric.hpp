@@ -269,6 +269,81 @@ protected:
 
 };
 
+typedef ShGeneric<1, ShFracUShort> ShGeneric1fus;
+typedef ShGeneric<2, ShFracUShort> ShGeneric2fus;
+typedef ShGeneric<3, ShFracUShort> ShGeneric3fus;
+typedef ShGeneric<4, ShFracUShort> ShGeneric4fus;
+
+typedef ShGeneric<1, short> ShGeneric1s;
+typedef ShGeneric<2, short> ShGeneric2s;
+typedef ShGeneric<3, short> ShGeneric3s;
+typedef ShGeneric<4, short> ShGeneric4s;
+
+typedef ShGeneric<1, ShFracUInt> ShGeneric1fui;
+typedef ShGeneric<2, ShFracUInt> ShGeneric2fui;
+typedef ShGeneric<3, ShFracUInt> ShGeneric3fui;
+typedef ShGeneric<4, ShFracUInt> ShGeneric4fui;
+
+typedef ShGeneric<1, ShFracByte> ShGeneric1fb;
+typedef ShGeneric<2, ShFracByte> ShGeneric2fb;
+typedef ShGeneric<3, ShFracByte> ShGeneric3fb;
+typedef ShGeneric<4, ShFracByte> ShGeneric4fb;
+
+typedef ShGeneric<1, int> ShGeneric1i;
+typedef ShGeneric<2, int> ShGeneric2i;
+typedef ShGeneric<3, int> ShGeneric3i;
+typedef ShGeneric<4, int> ShGeneric4i;
+
+typedef ShGeneric<1, double> ShGeneric1d;
+typedef ShGeneric<2, double> ShGeneric2d;
+typedef ShGeneric<3, double> ShGeneric3d;
+typedef ShGeneric<4, double> ShGeneric4d;
+
+typedef ShGeneric<1, unsigned char> ShGeneric1ub;
+typedef ShGeneric<2, unsigned char> ShGeneric2ub;
+typedef ShGeneric<3, unsigned char> ShGeneric3ub;
+typedef ShGeneric<4, unsigned char> ShGeneric4ub;
+
+typedef ShGeneric<1, float> ShGeneric1f;
+typedef ShGeneric<2, float> ShGeneric2f;
+typedef ShGeneric<3, float> ShGeneric3f;
+typedef ShGeneric<4, float> ShGeneric4f;
+
+typedef ShGeneric<1, char> ShGeneric1b;
+typedef ShGeneric<2, char> ShGeneric2b;
+typedef ShGeneric<3, char> ShGeneric3b;
+typedef ShGeneric<4, char> ShGeneric4b;
+
+typedef ShGeneric<1, unsigned short> ShGeneric1us;
+typedef ShGeneric<2, unsigned short> ShGeneric2us;
+typedef ShGeneric<3, unsigned short> ShGeneric3us;
+typedef ShGeneric<4, unsigned short> ShGeneric4us;
+
+typedef ShGeneric<1, ShFracUByte> ShGeneric1fub;
+typedef ShGeneric<2, ShFracUByte> ShGeneric2fub;
+typedef ShGeneric<3, ShFracUByte> ShGeneric3fub;
+typedef ShGeneric<4, ShFracUByte> ShGeneric4fub;
+
+typedef ShGeneric<1, ShHalf> ShGeneric1h;
+typedef ShGeneric<2, ShHalf> ShGeneric2h;
+typedef ShGeneric<3, ShHalf> ShGeneric3h;
+typedef ShGeneric<4, ShHalf> ShGeneric4h;
+
+typedef ShGeneric<1, ShFracShort> ShGeneric1fs;
+typedef ShGeneric<2, ShFracShort> ShGeneric2fs;
+typedef ShGeneric<3, ShFracShort> ShGeneric3fs;
+typedef ShGeneric<4, ShFracShort> ShGeneric4fs;
+
+typedef ShGeneric<1, ShFracInt> ShGeneric1fi;
+typedef ShGeneric<2, ShFracInt> ShGeneric2fi;
+typedef ShGeneric<3, ShFracInt> ShGeneric3fi;
+typedef ShGeneric<4, ShFracInt> ShGeneric4fi;
+
+typedef ShGeneric<1, unsigned int> ShGeneric1ui;
+typedef ShGeneric<2, unsigned int> ShGeneric2ui;
+typedef ShGeneric<3, unsigned int> ShGeneric3ui;
+typedef ShGeneric<4, unsigned int> ShGeneric4ui;
+
 }
 
 // This is a hack for ShAttrib.hpp in particular.
