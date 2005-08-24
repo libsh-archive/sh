@@ -134,10 +134,10 @@ private:
   void emit_comment(const SH::ShStatement& stmt);
   void emit_cond(const SH::ShStatement& stmt);
   void emit_discard(const SH::ShStatement& stmt);
-  void emit_exp(const SH::ShStatement& stmt, double power);
+  void emit_exp10(const SH::ShStatement& stmt);
   void emit_hyperbolic(const SH::ShStatement& stmt);
   void emit_lit(const SH::ShStatement& stmt);
-  void emit_log(const SH::ShStatement& stmt, double base);
+  void emit_log10(const SH::ShStatement& stmt);
   void emit_logic(const SH::ShStatement& stmt);
   void emit_noise(const SH::ShStatement& stmt);
   void emit_pal(const SH::ShStatement& stmt);

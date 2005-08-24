@@ -1,5 +1,11 @@
 2005-08-24  Francois Marier  <francois@serioushack.com>
 
+	* backends/gl/GlslEmit.cpp, GlslCode (emit_exp10): Replace the
+	call to pow by a multiplication.
+	(emit_log10): Replace the division by a multiplication.
+	(emit_log, emit_exp): Remove these functions and use the built-in
+	exp and log functions instead.
+
 	* backends/gl/GlslEmit.cpp (table_substitution): Remove
 	unnecessary casts when the destination variable is the same size
 	as the source (in the case of assignments) or the result of the

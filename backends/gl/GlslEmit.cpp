@@ -39,9 +39,11 @@ static GlslMapping opCodeTable[] = {
   {SH_OP_DIV,   "$0 / $1"},
   {SH_OP_DX,    "dFdx($0)"},
   {SH_OP_DY,    "dFdy($0)"},
+  {SH_OP_EXP,   "exp($0)"},
   {SH_OP_EXP2,  "exp2($0)"},
   {SH_OP_FLR,   "floor($0)"},
   {SH_OP_FRAC,  "fract($0)"},
+  {SH_OP_LOG,   "log($0)"},
   {SH_OP_LOG2,  "log2($0)"},
   {SH_OP_LRP,   "mix($2, $1, $0)"},
   {SH_OP_MAD,   "$0 * $1 + $2"},
@@ -154,11 +156,8 @@ void GlslCode::emit(const ShStatement &stmt)
     case SH_OP_COND:
       emit_cond(stmt);
       break;
-    case SH_OP_EXP:
-      emit_exp(stmt, M_E);
-      break;
     case SH_OP_EXP10:
-      emit_exp(stmt, 10);
+      emit_exp10(stmt);
       break;
     case SH_OP_KIL:
       emit_discard(stmt);
@@ -166,11 +165,8 @@ void GlslCode::emit(const ShStatement &stmt)
     case SH_OP_LIT:
       emit_lit(stmt);
       break;
-    case SH_OP_LOG:
-      emit_log(stmt, M_E);
-      break;
     case SH_OP_LOG10:
-      emit_log(stmt, 10);
+      emit_log10(stmt);
       break;
     case SH_OP_NOISE:
       emit_noise(stmt);
@@ -303,12 +299,11 @@ void GlslCode::emit_pow(const ShVariable& dest, const ShVariable& a, const ShVar
   append_line(resolve(dest) + " = " + pow_call);
 }
 
-void GlslCode::emit_exp(const ShStatement& stmt, double power)
+void GlslCode::emit_exp10(const ShStatement& stmt)
 {
-  SH_DEBUG_ASSERT((SH_OP_EXP == stmt.op) || (SH_OP_EXP10 == stmt.op));
-
-  ShVariable temp(allocate_constant(stmt, power));
-  emit_pow(stmt.dest, temp, stmt.src[0]);
+  SH_DEBUG_ASSERT(SH_OP_EXP10 == stmt.op);
+  ShVariable c(allocate_constant(stmt, 1.0/std::log10(2.0)));
+  append_line(resolve(stmt.dest) + " = exp2(" + resolve(c) + " * " + resolve(stmt.src[0]) + ")");
 }
 
 void GlslCode::emit_hyperbolic(const ShStatement& stmt)
@@ -360,14 +355,11 @@ void GlslCode::emit_lit(const ShStatement& stmt)
   append_line(resolve(stmt.dest, 3) + " = " + resolve_constant(1, stmt.dest, 1));
 }
 
-void GlslCode::emit_log(const ShStatement& stmt, double base)
+void GlslCode::emit_log10(const ShStatement& stmt)
 {
-  SH_DEBUG_ASSERT((SH_OP_LOG == stmt.op) || (SH_OP_LOG10 == stmt.op));
-
-  const double log2_base = log(base) / log(2.0);
-
-  ShVariable temp(allocate_constant(stmt, log2_base)); 
-  append_line(resolve(stmt.dest) + " = log2(" + resolve(stmt.src[0]) + ") / " + resolve(temp) + "");
+  SH_DEBUG_ASSERT(SH_OP_LOG10 == stmt.op);
+  ShVariable c(allocate_constant(stmt, std::log10(2.0))); 
+  append_line(resolve(stmt.dest) + " = log2(" + resolve(stmt.src[0]) + ") * " + resolve(c) + "");
 }
 
 void GlslCode::emit_logic(const ShStatement& stmt)
