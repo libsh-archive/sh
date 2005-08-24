@@ -90,36 +90,37 @@ GlslOpCodeVecs::GlslOpCodeVecs(const GlslMapping& mapping)
 
 void GlslCode::table_substitution(const ShStatement& stmt, GlslOpCodeVecs codeVecs)
 {
-  stringstream line;
-  line << resolve(stmt.dest) << " = ";
-  line << glsl_typename(stmt.dest.valueType(), stmt.dest.size()) << "("; // cast for the destination size
-  
   unsigned i=0;
-  if (SH_OP_ASN == stmt.op) {
-    // assignments should not be cast twice
-    const ShVariable& src = stmt.src[codeVecs.index[i]];
-    line << codeVecs.frag[i] << resolve(src);
-  } 
-  else {
-    // find the size of the biggest parameter
-    int param_size=0;
-    for (i=0; i < codeVecs.index.size(); i++) {
-      const ShVariable& src = stmt.src[codeVecs.index[i]];
-      if (src.size() > param_size) {
-	param_size = src.size();
-      }
-    }
 
-    // print each parameter
-    for (i=0; i < codeVecs.index.size(); i++) { 
-      const ShVariable& src = stmt.src[codeVecs.index[i]];
-      line << codeVecs.frag[i] << resolve(src, -1, param_size);
+  // find the size of the biggest parameter
+  int param_size=0;
+  for (i=0; i < codeVecs.index.size(); i++) {
+    const ShVariable& src = stmt.src[codeVecs.index[i]];
+    if (src.size() > param_size) {
+      param_size = src.size();
     }
   }
+  
+  // print each parameter
+  stringstream operation;
+  for (i=0; i < codeVecs.index.size(); i++) { 
+    const ShVariable& src = stmt.src[codeVecs.index[i]];
+    operation << codeVecs.frag[i] << resolve(src, -1, param_size);
+  }
+  operation << codeVecs.frag[i]; // code fragment after the last variable
 
-  line << codeVecs.frag[i]; // code fragment after the last variable
+  // create the full line of code
+  stringstream line;
+  line << resolve(stmt.dest) << " = ";
 
-  line << ")";
+  if (param_size != stmt.dest.size()) {
+    // cast for the destination size  
+    line << glsl_typename(stmt.dest.valueType(), stmt.dest.size()); 
+    line << "(" << operation.str() << ")";
+  } else {
+    line << operation.str();
+  }
+
   append_line(line.str());
 }
 

@@ -1,5 +1,10 @@
 2005-08-24  Francois Marier  <francois@serioushack.com>
 
+	* backends/gl/GlslEmit.cpp (table_substitution): Remove
+	unnecessary casts when the destination variable is the same size
+	as the source (in the case of assignments) or the result of the
+	function call.
+
 	* backends/gl/PBufferStreams.cpp: Use the target of the stream
 	program to come out with the proper target for vertex and fragment
 	programs (e.g. if the stream program's target is "glsl:stream"
