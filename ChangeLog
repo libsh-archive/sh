@@ -1,5 +1,14 @@
 2005-08-24  Francois Marier  <francois@serioushack.com>
 
+	* backends/gl/GlslVariable.cpp, GlslVariable.hpp: Add the draw
+	buffer variable (gl_FragData[]) to the built-in output variables.
+	
+	* backends/gl/GlslVariableMap.cpp (GlslVariableMap): Enable the
+	the draw buffers extension if it's available.
+
+	* backends/gl/ArbCode.cpp (ArbCode): The ATI_draw_buffers
+	extension is also known as ARB_draw_buffers so check for both.
+	
 	* backends/gl/GlslEmit.cpp, GlslCode (emit_exp10): Replace the
 	call to pow by a multiplication.
 	(emit_log10): Replace the division by a multiplication.

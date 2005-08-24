@@ -75,6 +75,19 @@ GlslVariableMap::GlslVariableMap(ShProgramNode* shader, GlslProgramType unit)
   : m_shader(shader), m_unit(unit), m_nb_uniform_variables(0),
     m_nb_regular_variables(0)
 {
+  const GLubyte* extensions = glGetString(GL_EXTENSIONS);
+  if (extensions) {
+    string extstr(reinterpret_cast<const char*>(extensions));
+    
+    if (SH_GLSL_FP == unit) {
+      if ((extstr.find("ATI_draw_buffers") != string::npos) || 
+          (extstr.find("ARB_draw_buffers") != string::npos)) {
+	glslFragmentOutputBindingSpecs[1].binding = SH_GLSL_VAR_FRAGDATA;
+	glslFragmentOutputBindingSpecs[1].max_bindings = 4; // TODO: get the real number from gl_MaxDrawBuffers
+      }
+    }
+  }
+
   allocate_builtin_inputs();
   allocate_builtin_outputs();
 

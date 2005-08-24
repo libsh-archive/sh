@@ -129,7 +129,8 @@ ArbCode::ArbCode(const ShProgramNodeCPtr& shader, const std::string& unit,
       if (extstr.find("NV_fragment_program2") != std::string::npos) {
         m_environment |= SH_ARB_NVFP2;
       }
-      if (extstr.find("ATI_draw_buffers") != std::string::npos) {
+      if ((extstr.find("ATI_draw_buffers") != std::string::npos) ||
+          (extstr.find("ARB_draw_buffers") != std::string::npos)) {
         m_environment |= SH_ARB_ATIDB;
 	arbFragmentOutputBindingSpecs[0].binding = SH_ARB_REG_RESULTCOL_ATI;
 	arbFragmentOutputBindingSpecs[0].maxBindings = 4;

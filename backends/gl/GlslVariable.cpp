@@ -44,7 +44,8 @@ const GlslVarBindingInfo GlslVariable::glslVarBindingInfo[] = {
   {"gl_FrontColor", 4, false},
   {"gl_FrontSecondaryColor", 4, false},
   {"gl_FragDepth", 1, false},
-  {"gl_FragColor", 4, false}
+  {"gl_FragColor", 4, false},
+  {"gl_FragData", 4, true}
 };
 
 GlslVariable::GlslVariable()

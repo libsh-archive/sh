@@ -59,6 +59,7 @@ enum GlslVarBinding {
   // Fragment outputs
   SH_GLSL_VAR_FRAGDEPTH,
   SH_GLSL_VAR_FRAGCOLOR,
+  SH_GLSL_VAR_FRAGDATA,
 
   SH_GLSL_VAR_NONE
 };
