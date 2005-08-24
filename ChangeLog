@@ -1,5 +1,10 @@
 2005-08-24  Francois Marier  <francois@serioushack.com>
 
+	* backends/gl/PBufferStreams.cpp: Use the target of the stream
+	program to come out with the proper target for vertex and fragment
+	programs (e.g. if the stream program's target is "glsl:stream"
+	then the other targets should be "glsl:vertex" and "glsl:fragment")
+
 	* src/ShProgramNode.cpp, ShProgramNode.hpp, ShProgram.hpp
 	(describe_bindings): Add the two versions of describe_bindings().
 	They call the backend functions and return the backend-specific

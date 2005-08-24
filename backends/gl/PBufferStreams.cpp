@@ -48,7 +48,7 @@
 namespace shgl {
 
 using namespace SH;
-
+using namespace std;
 
 #ifdef DO_PBUFFER_TIMING
 
@@ -70,6 +70,19 @@ private:
 };
 
 #endif
+
+// Extract the backend name from the target if there is one (including the colon)
+static string get_target_backend(const ShProgramNodeCPtr& program)
+{
+  const string& target = program->target();
+  string::size_type colon_pos = target.find(":");
+
+  if (target.npos == colon_pos) {
+    return "";
+  } else {
+    return target.substr(0, colon_pos+1); // includes the colon
+  }
+}
 
 class PBufferStreamException : public ShException {
 public:
@@ -140,7 +153,7 @@ PBufferStreamCache::PBufferStreamCache(ShProgramNode* stream_program,
   ChannelGatherer gatherer(m_channel_map, dims);
   stream_program->ctrlGraph->dfs(gatherer);
 
-  split_program(stream_program, m_programs, "gpu:fragment");
+  split_program(stream_program, m_programs, get_target_backend(stream_program) + "fragment");
 
   for (std::list<ShProgramNodePtr>::iterator I = m_programs.begin();
        I != m_programs.end(); ++I) {
@@ -294,7 +307,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
   if (!m_setup_vp) {
     // The (trivial) vertex program
     m_vp = keep<ShPosition4f>() & keep<ShTexCoord2f>();
-    m_vp.node()->target() = "gpu:vertex";
+    m_vp.node()->target() = get_target_backend(program_const) + "vertex";
     shCompile(m_vp);
     m_setup_vp = true;
   }
