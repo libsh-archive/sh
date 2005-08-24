@@ -412,6 +412,12 @@ ostream& GlslCode::describe_interface(ostream& out)
   return out;
 }
 
+ostream& GlslCode::describe_bindings(ostream& out)
+{
+  // TODO
+  return out;
+}
+
 void GlslCode::append_line(const string& line, bool append_semicolon)
 {
   GlslLine l;

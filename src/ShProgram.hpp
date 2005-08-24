@@ -80,6 +80,20 @@ public:
   {
     return m_node->describe_interface();
   }
+
+  /** Obtain a listing stating which attributes will get bound to
+      which program inputs under the current backend. */
+  std::string describe_bindings() const
+  {
+    return m_node->describe_bindings();
+  }
+  
+  /** Obtain a listing stating which attributes will get bound to
+      which program inputs for the given target. */
+  std::string describe_bindings(const std::string& target) const
+  {
+    return m_node->describe_bindings(target);
+  }
   
   /** Obtain the code for currently active backend. 
    * This operation will fail if this program does not have a

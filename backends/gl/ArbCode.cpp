@@ -768,7 +768,8 @@ std::ostream& ArbCode::print(std::ostream& out)
   return out;
 }
 
-std::ostream& ArbCode::describe_interface(std::ostream& out) {
+std::ostream& ArbCode::describe_interface(std::ostream& out)
+{
   ShProgramNode::VarList::const_iterator I;
   out << "Inputs:" << std::endl;
   for (I = m_shader->inputs.begin(); I != m_shader->inputs.end(); ++I) {
@@ -783,6 +784,12 @@ std::ostream& ArbCode::describe_interface(std::ostream& out) {
     m_registers[*I]->printDecl(out);
     out << std::endl;
   }
+  return out;
+}
+
+std::ostream& ArbCode::describe_bindings(std::ostream& out)
+{
+  // TODO
   return out;
 }
 

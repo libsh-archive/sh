@@ -84,6 +84,7 @@ public:
   
   std::ostream& print(std::ostream& out);
   std::ostream& describe_interface(std::ostream& out);
+  std::ostream& describe_bindings(std::ostream& out);
   
   /// Actually generate the code
   void generate();
@@ -95,7 +96,6 @@ public:
   void bind_textures();
   
 private:
-
   static GlslSet* m_fallback_set;
   
   TextureStrategy* m_texture;

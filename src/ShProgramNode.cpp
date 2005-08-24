@@ -162,6 +162,21 @@ std::string ShProgramNode::describe_decls() const
   return os.str();
 }
 
+std::string ShProgramNode::describe_bindings()
+{
+  std::ostringstream os;
+  code()->describe_bindings(os);
+  return os.str();
+}
+
+std::string ShProgramNode::describe_bindings(const std::string& target)
+{
+  std::ostringstream os;
+  ShBackendPtr backend = ShBackend::get_backend(target);
+  code(target, backend)->describe_bindings(os);
+  return os.str();
+}
+
 void ShProgramNode::dump(std::string filename) const
 {
   SH_DEBUG_PRINT("Dumping " << filename);

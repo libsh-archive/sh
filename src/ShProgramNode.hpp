@@ -75,6 +75,10 @@ public:
   std::string describe_vars() const;
   /// Describes all the temps declared in this program 
   std::string describe_decls() const;
+  /// Describe the binding of the inputs under the current backend
+  std::string describe_bindings();
+  /// Describe the binding of the inputs for the given target
+  std::string describe_bindings(const std::string& target);
 
   /** Describes all of the above to the file filename.vars and
    * dumps a DOT version of the cfg to filename.ps */

@@ -75,6 +75,9 @@ public:
   // (Useful for how to format long tuple input on targets 
   // that only support limited tuple lengths) 
   virtual std::ostream& describe_interface(std::ostream& out) = 0;
+
+  /// Prints binding description in target-specific format
+  virtual std::ostream& describe_bindings(std::ostream& out) = 0;
 };
 
 typedef ShPointer<ShBackendCode> ShBackendCodePtr;

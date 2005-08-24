@@ -74,8 +74,8 @@ public:
   void updateUniform(const SH::ShVariableNodePtr& uniform);
     
   std::ostream& print(std::ostream& out);
-    
   std::ostream& describe_interface(std::ostream& out);
+  std::ostream& describe_bindings(std::ostream& out);
 
 protected:
   friend class CcBackend;

@@ -73,6 +73,7 @@ public:
   
   std::ostream& print(std::ostream& out);
   std::ostream& describe_interface(std::ostream& out);
+  std::ostream& describe_bindings(std::ostream& out);
 
   /// Actually generate the code, and do register allocation.
   void generate();

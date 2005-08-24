@@ -1,3 +1,18 @@
+2005-08-24  Francois Marier  <francois@serioushack.com>
+
+	* src/ShProgramNode.cpp, ShProgramNode.hpp, ShProgram.hpp
+	(describe_bindings): Add the two versions of describe_bindings().
+	They call the backend functions and return the backend-specific
+	binding info.
+
+	* src/ShBackend.hpp (describe_bindings): Add this new pure virtual
+	method.
+	
+	* backends/gl/GlslCode.cpp, GlslCode.hpp, ArbCode.cpp,
+	ArbCode.hpp, backends/cc/Cc.cpp, Cc.hpp (describe_bindings): Add
+	empty implementations of describe_bindings() for all three
+	backends.
+
 2005-08-23  Francois Marier  <francois@serioushack.com>
 
 	* backends/cc/Cc.cpp (generate): On OSX, define exp10() in the

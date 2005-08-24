@@ -187,7 +187,13 @@ std::ostream& CcBackendCode::describe_interface(std::ostream& out)
   SH_CC_DEBUG_PRINT(__FUNCTION__);
   return out;
 }
-  
+
+std::ostream& CcBackendCode::describe_bindings(std::ostream& out) 
+{
+  SH_CC_DEBUG_PRINT(__FUNCTION__);
+  return out;
+}
+
 template<typename T>
 void CcBackendCode::allocate_varlist(const std::list<T> &varList, const char* varPrefix, const char* arrayName, const char* typePrefix)
 {
