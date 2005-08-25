@@ -1,3 +1,11 @@
+2005-08-25  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslCode.cpp (describe_bindings): Implementation of
+	describe_bindings() in the Glsl backend.
+
+	* src/ShProgramNode.cpp (describe_bindings): Add a little header
+	before outputing the backend information.
+
 2005-08-24  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslVariable.cpp, GlslVariable.hpp: Add the draw

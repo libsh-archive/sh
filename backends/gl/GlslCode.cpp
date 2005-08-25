@@ -414,7 +414,22 @@ ostream& GlslCode::describe_interface(ostream& out)
 
 ostream& GlslCode::describe_bindings(ostream& out)
 {
-  // TODO
+  SH_DEBUG_ASSERT(m_varmap);
+
+  out << "Inputs:" << endl;
+  for (ShProgramNode::VarList::const_iterator i = m_shader->inputs_begin(); 
+       i != m_shader->inputs_end(); ++i) {
+    ShVariableNodePtr var = *i;
+    out << "  " << var->name() << " => " << m_varmap->variable(var).name() << endl;
+  }
+
+  out << "Outputs:" << endl;
+  for (ShProgramNode::VarList::const_iterator i = m_shader->outputs_begin(); 
+       i != m_shader->outputs_end(); ++i) {
+    ShVariableNodePtr var = *i;
+    out << "  " << var->name() << " => " << m_varmap->variable(var).name() << endl;
+  }
+
   return out;
 }
 

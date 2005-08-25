@@ -165,6 +165,14 @@ std::string ShProgramNode::describe_decls() const
 std::string ShProgramNode::describe_bindings()
 {
   std::ostringstream os;
+  os << "Bindings for ";
+  if (has_name()) {
+    os << name();
+  } else {
+    os << "<anonymous program>";
+  }
+  os << std::endl;
+  os << std::endl;
   code()->describe_bindings(os);
   return os.str();
 }
@@ -172,6 +180,14 @@ std::string ShProgramNode::describe_bindings()
 std::string ShProgramNode::describe_bindings(const std::string& target)
 {
   std::ostringstream os;
+  os << "Bindings for ";
+  if (has_name()) {
+    os << name();
+  } else {
+    os << "<anonymous program>";
+  }
+  os << std::endl;
+  os << std::endl;
   ShBackendPtr backend = ShBackend::get_backend(target);
   code(target, backend)->describe_bindings(os);
   return os.str();
