@@ -1,5 +1,11 @@
 2005-08-25  Francois Marier  <francois@serioushack.com>
 
+	* backends/gl/ArbReg.cpp, ArbReg.hpp (binding_name): Add this
+	method to return the actual name of the Arb variable.
+
+	* backends/gl/ArbCode.cpp (describe_bindings): Implementation of
+	describe_bindings() in the Arb backend.
+
 	* backends/gl/GlslCode.cpp (describe_bindings): Implementation of
 	describe_bindings() in the Glsl backend.
 

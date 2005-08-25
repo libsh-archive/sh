@@ -143,4 +143,9 @@ std::ostream& operator<<(std::ostream& out, const ArbReg& reg)
   return out;
 }
 
+std::string ArbReg::binding_name() const
+{
+  return arbRegBindingInfo[binding.type].name;
+}
+
 }

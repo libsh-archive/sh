@@ -789,7 +789,17 @@ ostream& ArbCode::describe_interface(ostream& out)
 
 ostream& ArbCode::describe_bindings(ostream& out)
 {
-  // TODO
+  out << "Inputs:" << endl;
+  for (ShProgramNode::VarList::const_iterator I = m_shader->inputs_begin();
+       I != m_shader->inputs_end(); ++I) {
+    out << "  " << (*I)->name() << " => " << m_registers[*I]->binding_name() << endl;
+  }
+
+  out << "Outputs:" << endl;
+  for (ShProgramNode::VarList::const_iterator I = m_shader->outputs_begin();
+       I != m_shader->outputs_end(); ++I) {
+    out << "  " << (*I)->name() << " => " << m_registers[*I]->binding_name() << endl;
+  }
   return out;
 }
 

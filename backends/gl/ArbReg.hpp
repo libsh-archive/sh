@@ -105,6 +105,9 @@ struct ArbReg : public SH::ShRefCountable {
   
   /// Print a declaration for this register
   std::ostream& printDecl(std::ostream& out) const;
+
+  /// Return the name of the register binding
+  std::string binding_name() const;
 };
 
 
