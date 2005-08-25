@@ -156,7 +156,7 @@ std::string ShProgramNode::describe_decls() const
 {
   std::ostringstream os;
   os << "Temp Declarations:" << std::endl;
-  for(VarSet::const_iterator I = tempDecls.begin(); I != tempDecls.end(); ++I) {
+  for (VarSet::const_iterator I = tempDecls.begin(); I != tempDecls.end(); ++I) {
     os << (*I)->nameOfType() << " " << (*I)->name() << std::endl;
   }
   return os.str();
@@ -247,7 +247,7 @@ void ShProgramNode::addDecl(ShVariableNodePtr node) {
 
 void ShProgramNode::collectNodeDecls(const ShCtrlGraphNodePtr& node)
 {
-  if(node->marked()) return;
+  if (node->marked()) return;
   node->mark();
   tempDecls.insert(node->decl_begin(), node->decl_end());
   /* @todo range
@@ -337,8 +337,8 @@ std::ostream& ShProgramNode::print(std::ostream& out,
                                    const ShProgramNode::VarList& varList)
 {
   out << "(";
-  for(VarList::const_iterator it = varList.begin(); it != varList.end(); ++it) {
-    if( it != varList.begin() ) out << ", ";
+  for (VarList::const_iterator it = varList.begin(); it != varList.end(); ++it) {
+    if (it != varList.begin()) out << ", ";
     out << (*it)->nameOfType() << " " << (*it)->name(); 
   }
   out << ")";
@@ -460,17 +460,19 @@ void ShProgramNode::assign(const ShVariableNodePtr& var) const
   m_assigned_var = var;
 }
 
-std::string ShProgramNode::describe(const VarList &varlist) {
+std::string ShProgramNode::describe(const VarList &varlist)
+{
   std::ostringstream os;
-  for(VarList::const_iterator I = varlist.begin(); I != varlist.end(); ++I) {
+  for (VarList::const_iterator I = varlist.begin(); I != varlist.end(); ++I) {
     os << "  " << (*I)->nameOfType() << " " << (*I)->name() << std::endl;
   }
   return os.str();
 }
 
-std::string ShProgramNode::describe(const ChannelList& chanlist) {
+std::string ShProgramNode::describe(const ChannelList& chanlist)
+{
   std::ostringstream os;
-  for(ChannelList::const_iterator I = chanlist.begin(); I != chanlist.end(); ++I) {
+  for (ChannelList::const_iterator I = chanlist.begin(); I != chanlist.end(); ++I) {
     os << "  " << (*I)->nameOfType() << " " << (*I)->name() << std::endl;
   }
   return os.str();
