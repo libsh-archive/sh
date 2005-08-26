@@ -1,5 +1,8 @@
 2005-08-26  Francois Marier  <francois@serioushack.com>
 
+	* src/ShLibClampImpl.hpp (smoothpulse): Changed sstep() calls to
+	use smoothstep().
+
 	* src/ShProgramNode.hpp, ShProgram.hpp (backend_name): Add this
 	method to retrieve the backend name on which the program is
 	currently compiled.

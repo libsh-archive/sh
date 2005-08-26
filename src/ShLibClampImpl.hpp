@@ -247,9 +247,8 @@ ShGeneric<N, T>
 smoothpulse (const ShGeneric<N, T>& t, const ShGeneric<N, T>& r0, 
 	     const ShGeneric<N, T>& r1, const ShGeneric<N, T>& w)
 {
-   return sstep(t,r0,w) - sstep(t,r1,w);
+   return smoothstep(t,r0,w) - smoothstep(t,r1,w);
 }
-
 
 }
 
