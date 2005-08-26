@@ -166,6 +166,11 @@ public:
   ChannelList channels; ///< Channels used in FETCH instructions in this program
   PaletteList palettes; ///< Palettes used in PAL instructions in this program
 
+  /** Return the name of the backend for which the program is
+   * currently compiled.  Returns an empty string if the program is
+   * not yet compiled. */
+  std::string backend_name() const { return m_backend_name; }
+
   /// Can be empty, if there is no target associated with this program.
   std::string target() const { return m_target; }
 
@@ -193,6 +198,7 @@ private:
   static std::string describe(const VarList &varlist); 
   static std::string describe(const ChannelList &chanlist); 
 
+  std::string m_backend_name; ///< Can be empty if the program is not yet compiled for a backend.
   std::string m_target; ///< Can be empty, if there is no target associated with this program.
 
   void collectNodeDecls(const ShPointer<ShCtrlGraphNode>& node);

@@ -119,6 +119,11 @@ public:
     m_node->updateUniform(uniform);
   }
 
+  /** Return the name of the backend for which the program is
+   * currently compiled.  Returns an empty string if the program is
+   * not yet compiled. */
+  std::string backend_name() const { return m_node->backend_name(); }
+
   std::string target() const { return m_node->target(); }
 
   /// It may be useful to change a program's target sometimes.

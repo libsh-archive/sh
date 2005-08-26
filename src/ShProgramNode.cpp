@@ -33,15 +33,13 @@
 namespace SH {
 
 ShProgramNode::ShProgramNode(const std::string& target)
-  : m_target(target), m_finished(false),
+  : m_backend_name(""), m_target(target), m_finished(false),
     m_assigned_var(0)
 {
 }
 
 ShProgramNode::~ShProgramNode()
 {
-  // TODO: maybe need some cleanup here, although refcounting ought to
-  // take care of it.
 }
 
 void ShProgramNode::compile(const ShPointer<ShBackend>& backend)
@@ -66,6 +64,7 @@ void ShProgramNode::compile(const std::string& target, const ShPointer<ShBackend
   }
   ShContext::current()->exit();
   m_code[std::make_pair(target, backend)] = code;
+  m_backend_name = backend->name();
 }
 
 bool ShProgramNode::is_compiled() const
