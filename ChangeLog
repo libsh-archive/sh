@@ -1,5 +1,11 @@
 2005-08-26  Francois Marier  <francois@serioushack.com>
 
+	* src/ShNibblesImpl.hpp, ShNibbles.hpp: Added nibbles for
+	faceforward, lit, reflect, refract, sat, ceil, floor, round, sign,
+	sort, not, and, or, any, all, max1, min1, clamp, cond, smoothstep,
+	smoothpulse and join.
+	Fixed the nibbles for prod, sum and mad.
+
 	* src/ShLibClampImpl.hpp (smoothpulse): Changed sstep() calls to
 	use smoothstep().
 

@@ -125,6 +125,7 @@ template<typename T> ShProgram shAsinh(const std::string & name = "result");
 template<typename T> ShProgram shAtan(const std::string & name = "result");
 template<typename T> ShProgram shAtanh(const std::string & name = "result");
 template<typename T> ShProgram shCbrt(const std::string & name = "result");
+template<typename T> ShProgram shCeil(const std::string & name = "result");
 template<typename T> ShProgram shCos(const std::string & name = "result");
 template<typename T> ShProgram shCosh(const std::string & name = "result");
 template<typename T> ShProgram shDx(const std::string & name = "result");
@@ -133,6 +134,7 @@ template<typename T> ShProgram shExp(const std::string & name = "result");
 template<typename T> ShProgram shExpm1(const std::string & name = "result");
 template<typename T> ShProgram shExp2(const std::string & name = "result");
 template<typename T> ShProgram shExp10(const std::string & name = "result");
+template<typename T> ShProgram shFloor(const std::string & name = "result");
 template<typename T> ShProgram shFrac(const std::string & name = "result");
 template<typename T> ShProgram shFwidth(const std::string & name = "result");
 template<typename T> ShProgram shLog(const std::string & name = "result");
@@ -140,14 +142,17 @@ template<typename T> ShProgram shLogp1(const std::string & name = "result");
 template<typename T> ShProgram shLog2(const std::string & name = "result");
 template<typename T> ShProgram shLog10(const std::string & name = "result");
 template<typename T> ShProgram shNormalize(const std::string & name = "result");
+template<typename T> ShProgram shNot(const std::string & name = "result");
 template<typename T> ShProgram shPos(const std::string & name = "result");
-template<typename T> ShProgram shProd(const std::string & name = "result");
 template<typename T> ShProgram shRcp(const std::string & name = "result");
+template<typename T> ShProgram shRound(const std::string & name = "result");
 template<typename T> ShProgram shRsqrt(const std::string & name = "result");
+template<typename T> ShProgram shSat(const std::string & name = "result");
+template<typename T> ShProgram shSign(const std::string & name = "result");
 template<typename T> ShProgram shSin(const std::string & name = "result");
 template<typename T> ShProgram shSinh(const std::string & name = "result");
+template<typename T> ShProgram shSort(const std::string & name = "result");
 template<typename T> ShProgram shSqrt(const std::string & name = "result");
-template<typename T> ShProgram shSum(const std::string & name = "result");
 template<typename T> ShProgram shTan(const std::string & name = "result");
 template<typename T> ShProgram shTanh(const std::string & name = "result");
 //@}
@@ -164,13 +169,17 @@ template<typename T> ShProgram shTanh(const std::string & name = "result");
       const std::string & input_name0 = "x", const std::string & input_name1 = "y")
 
 SHNIBBLE_BINARY_OP_DECL(shAdd);
+SHNIBBLE_BINARY_OP_DECL(shAnd);
 SHNIBBLE_BINARY_OP_DECL(shAtan2);
 SHNIBBLE_BINARY_OP_DECL(shDiv);
+SHNIBBLE_BINARY_OP_DECL(shFaceforward);
 SHNIBBLE_BINARY_OP_DECL(shMax);
 SHNIBBLE_BINARY_OP_DECL(shMin);
 SHNIBBLE_BINARY_OP_DECL(shMod);
 SHNIBBLE_BINARY_OP_DECL(shMul);
+SHNIBBLE_BINARY_OP_DECL(shOr);
 SHNIBBLE_BINARY_OP_DECL(shPow);
+SHNIBBLE_BINARY_OP_DECL(shReflect);
 SHNIBBLE_BINARY_OP_DECL(shSeq);
 SHNIBBLE_BINARY_OP_DECL(shSge);
 SHNIBBLE_BINARY_OP_DECL(shSgt);
@@ -197,7 +206,10 @@ SHNIBBLE_BINARY_OP_DECL(shSub);
       const std::string & input_name0 = "x", const std::string & input_name1 = "y", \
       const std::string & input_name2 = "z")
 
+SHNIBBLE_TERNARY_OP_DECL(shClamp);
+SHNIBBLE_TERNARY_OP_DECL(shCond);
 SHNIBBLE_TERNARY_OP_DECL(shMad);
+SHNIBBLE_TERNARY_OP_DECL(shSmoothstep);
 //@}
 
 /**@{ \brief Nibbles for hash functions
@@ -233,7 +245,6 @@ SHNIBBLE_NOISE_FUNC_DECL(shSlinnoise);
 SHNIBBLE_NOISE_FUNC_DECL(shSnoise);
 SHNIBBLE_NOISE_FUNC_DECL(shSperlin);
 SHNIBBLE_NOISE_FUNC_DECL(shSturbulence);
-
 //@}
 
 /**@{ \brief Nibbles for distance functions
@@ -252,17 +263,23 @@ SHNIBBLE_DISTANCE_FUNC_DECL(shDistance_1);
 SHNIBBLE_DISTANCE_FUNC_DECL(shDistance_inf);
 //@}
 
-/**@{ \brief Nibbles for length functions
+/**@{ \brief Nibbles for unary non-componentwise tuple operators
  * Inputs: IN(0) T1 a
  * Outputs: OUT(0) ShAttrib1f name
  */
-#define SHNIBBLE_LENGTH_FUNC_DECL(opname) \
+#define SHNIBBLE_UNARY_TUPLEOP_DECL(opname) \
   template<typename T> ShProgram opname(const std::string & output_name = "result",\
       const std::string & input_name0 = "x")
 
-SHNIBBLE_LENGTH_FUNC_DECL(shLength);
-SHNIBBLE_LENGTH_FUNC_DECL(shLength_1);
-SHNIBBLE_LENGTH_FUNC_DECL(shLength_inf);
+SHNIBBLE_UNARY_TUPLEOP_DECL(shAll);
+SHNIBBLE_UNARY_TUPLEOP_DECL(shAny);
+SHNIBBLE_UNARY_TUPLEOP_DECL(shLength);
+SHNIBBLE_UNARY_TUPLEOP_DECL(shLength_1);
+SHNIBBLE_UNARY_TUPLEOP_DECL(shLength_inf);
+SHNIBBLE_UNARY_TUPLEOP_DECL(shMax1);
+SHNIBBLE_UNARY_TUPLEOP_DECL(shMin1);
+SHNIBBLE_UNARY_TUPLEOP_DECL(shProd);
+SHNIBBLE_UNARY_TUPLEOP_DECL(shSum);
 //@}
 
 /** \brief Nibble for cross product operator
@@ -279,13 +296,25 @@ template<typename T> ShProgram shCross(const std::string & name = "result",
  *         IN(1) T b
  * Outputs: OUT(0) ShAttrib1f name  
  */
-template<typename T> ShProgram shDot(const std::string & name = "result");
+template<typename T> ShProgram shDot(const std::string & name = "result",
+                                     const std::string & input_name0 = "x", 
+                                     const std::string & input_name1 = "y");
 
 /** \brief Nibble for the gradient function
  * Inputs: IN(0) T a
  * Outputs: OUT(0) ShAttrib1f name
  */
-template<typename T> ShProgram shGradient(const std::string & name = "result");
+template<typename T> ShProgram shGradient(const std::string & name = "result",
+                                          const std::string & input_name0 = "x");
+/** \brief Nibble for the join function
+ * Inputs: IN(0) T1 a
+ *         IN(1) T2 b
+ * Outputs: OUT(0) T1+T2 name
+ */
+template<typename T1, typename T2> 
+ShProgram shJoin(const std::string & name = "result",
+                 const std::string & input_name0 = "x", 
+                 const std::string & input_name1 = "y");
 
 /** @{ \brief Nibble for lerp operator
  * Inputs: IN(0) T1 a
@@ -294,11 +323,29 @@ template<typename T> ShProgram shGradient(const std::string & name = "result");
  * Outputs: OUT(0) T1 name = a * alpha + b * (1 - alpha)  
  */
 template<typename T1, typename T2>
-ShProgram shLerp(const std::string & name = "result");
+ShProgram shLerp(const std::string & name = "result",
+                 const std::string & input_name0 = "x",
+                 const std::string & input_name1 = "y",
+                 const std::string & input_name2 = "z");
 
 template<typename T1>
-ShProgram shLerp(const std::string & name = "result");
+ShProgram shLerp(const std::string & name = "result",
+                 const std::string & input_name0 = "x",
+                 const std::string & input_name1 = "y",
+                 const std::string & input_name2 = "z");
 //@}
+
+/** \brief Nibble for the lit function
+ * Inputs: IN(0) T a
+ *         IN(1) T b
+ *         IN(2) T c
+ * Outputs: OUT(0) ShAttrib4f name  
+ */
+template<typename T> 
+ShProgram shLit(const std::string& name = "result",
+                const std::string& input_name0 = "x", 
+                const std::string& input_name1 = "y",
+                const std::string& input_name2 = "z");
 
 /** @{ \brief Nibble for poly function
  * Inputs: IN(0) T1 a
@@ -317,8 +364,40 @@ ShProgram shPoly(const std::string & name = "result",
                  const std::string & input_name1 = "y");
 //@}
 
-}
+/** @{ \brief Nibble for the refract function
+ * Inputs: IN(0) T1 a
+ *         IN(1) T1 b
+ *         IN(2) T2 c
+ * Outputs: OUT(0) T1 name
+ */
+template<typename T1, typename T2>
+ShProgram shRefract(const std::string& name = "result",
+                    const std::string& input_name0 = "x", 
+                    const std::string& input_name1 = "y",
+                    const std::string& input_name2 = "z");
+
+template<typename T>
+ShProgram shRefract(const std::string& name = "result",
+                    const std::string& input_name0 = "x", 
+                    const std::string& input_name1 = "y",
+                    const std::string& input_name2 = "z");
+//@}
+
+/** \brief Nibble for the smoothpulse function
+ * Inputs: IN(0) T1 a
+ *         IN(1) T1 b
+ *         IN(2) T2 c
+ * Outputs: OUT(0) T1 name
+ */
+template<typename T>
+ShProgram shSmoothpulse(const std::string& name = "result",
+                        const std::string& input_name0 = "x", 
+                        const std::string& input_name1 = "y",
+                        const std::string& input_name2 = "z",
+                        const std::string& input_name3 = "w");
+
+} // namespace
 
 #include "ShNibblesImpl.hpp"
 
-#endif
+#endif // SHNIBBLES_HPP
