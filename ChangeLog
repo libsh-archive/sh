@@ -1,3 +1,15 @@
+2005-08-30  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/FixedManipulator.cpp (operator&): Allow empty manipulators.
+	Might need to be done elsewhere also.
+
+	* backends/gl/ArbCode.cpp: Do not use the same destination register
+	when updating conditional registers on NV. Fixes branches based on
+	uniforms, which cannot be assigned to.
+
+	* src/ShNibblesImpl.hpp: Remove extra default parameters in
+	function definitions. Fixes build with MSVC7.
+	
 2005-08-26  Francois Marier  <francois@serioushack.com>
 
 	* src/ShNibblesImpl.hpp, ShNibbles.hpp: Added nibbles for

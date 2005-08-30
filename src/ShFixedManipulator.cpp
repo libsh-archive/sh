@@ -185,6 +185,12 @@ ShProgram operator<<(const ShFixedManipulator &m, const ShProgram &p) {
 }
 
 ShFixedManipulator operator&(const ShFixedManipulator &m, const ShFixedManipulator &n) {
+  if (!m) {
+    return n;
+  }
+  if (!n) {
+    return m;
+  }
   return new ShTreeManipNode(m, n);
 }
 

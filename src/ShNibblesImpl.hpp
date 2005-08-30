@@ -414,9 +414,9 @@ ShProgram shGradient(const std::string& name, const std::string& input_name0)
 }
 
 template<typename T1, typename T2> 
-ShProgram shJoin(const std::string & name = "result",
-                 const std::string & input_name0 = "x", 
-                 const std::string & input_name1 = "y")
+ShProgram shJoin(const std::string & name,
+                 const std::string & input_name0, 
+                 const std::string & input_name1)
 {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T1::InputType SH_NAMEDECL(a, input_name0);
@@ -449,10 +449,10 @@ ShProgram shLerp(const std::string & name, const std::string& input_name0,
 }
 
 template<typename T> 
-ShProgram shLit(const std::string& name = "result",
-                const std::string& input_name0 = "x", 
-                const std::string& input_name1 = "y",
-                const std::string& input_name2 = "z")
+ShProgram shLit(const std::string& name,
+                const std::string& input_name0, 
+                const std::string& input_name1,
+                const std::string& input_name2)
 { 
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T::InputType SH_NAMEDECL(a, input_name0);
@@ -487,10 +487,10 @@ ShProgram shPoly(const std::string & name,
 }
 
 template<typename T1, typename T2>
-ShProgram shRefract(const std::string& name = "result",
-                    const std::string& input_name0 = "x", 
-                    const std::string& input_name1 = "y",
-                    const std::string& input_name2 = "z")
+ShProgram shRefract(const std::string& name,
+                    const std::string& input_name0, 
+                    const std::string& input_name1,
+                    const std::string& input_name2)
 {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T1::InputType SH_NAMEDECL(a, input_name0);
@@ -503,20 +503,20 @@ ShProgram shRefract(const std::string& name = "result",
 }
 
 template<typename T>
-ShProgram shRefract(const std::string& name = "result",
-                    const std::string& input_name0 = "x", 
-                    const std::string& input_name1 = "y",
-                    const std::string& input_name2 = "z")
+ShProgram shRefract(const std::string& name,
+                    const std::string& input_name0, 
+                    const std::string& input_name1,
+                    const std::string& input_name2)
 {
   return shRefract<T, T>(name, input_name0, input_name1, input_name2);
 }
 
 template<typename T>
-ShProgram shSmoothpulse(const std::string& name = "result",
-                        const std::string& input_name0 = "x", 
-                        const std::string& input_name1 = "y",
-                        const std::string& input_name2 = "z",
-                        const std::string& input_name3 = "w")
+ShProgram shSmoothpulse(const std::string& name,
+                        const std::string& input_name0, 
+                        const std::string& input_name1,
+                        const std::string& input_name2,
+                        const std::string& input_name3)
 {
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T::InputType SH_NAMEDECL(a, input_name0);

@@ -429,6 +429,11 @@ struct InputOutputConvertor {
           m_varMap[oldNode] = cloneNode(oldNode, "_ioc-it");
         }
       }
+      if(oldNode->uniform()) { 
+        if(m_varMap.count(oldNode) == 0) {
+          m_varMap[oldNode] = cloneNode(oldNode, "_ioc-ut");
+        }
+      }
     }
     for(int i = 0; i < 3; ++i) {
       if(!stmt.src[i].null()) {
@@ -459,6 +464,9 @@ struct InputOutputConvertor {
       } else if(oldNode->kind() == SH_INPUT) {
         oldEntry->block->addStatement(ShStatement(
               ShVariable(it->second), SH_OP_ASN, ShVariable(oldNode)));
+      } else if(oldNode->uniform()) {
+        oldEntry->block->addStatement(ShStatement(
+          ShVariable(it->second), SH_OP_ASN, ShVariable(oldNode)));
       } else if(oldNode->kind() == SH_INOUT) {
         // replace INOUT nodes in input/output lists with INPUT and OUTPUT nodes
         ShVariableNodePtr newInNode(cloneNode(oldNode, "_ioc-i", SH_INPUT));

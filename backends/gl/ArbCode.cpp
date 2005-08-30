@@ -630,13 +630,6 @@ ostream& ArbCode::print(ostream& out)
     } else if (I->op == SH_ARB_ENDIF) {
       out << "  ENDIF;";
     } else if (I->op == SH_ARB_BRA) {
-      if (I->src[0].node()) {
-        out << "  MOVC ";
-        printVar(out, true, I->src[0], false);
-        out << ", ";
-        printVar(out, false, I->src[0], false, I->src[0].swizzle());
-        out << ";" << endl;
-      }
       out << "  BRA label" << I->label;
       if (I->src[0].node()) {
         out << "  (GT";
@@ -652,13 +645,6 @@ ostream& ArbCode::print(ostream& out)
       printVar(out, false, I->src[0], false, I->src[0].swizzle());
       out << ";";
     } else if (I->op == SH_ARB_BRK) {
-      if (I->src[0].node()) {
-        out << "  MOVC ";
-        printVar(out, true, I->src[0], false);
-        out << ", ";
-        printVar(out, false, I->src[0], false, I->src[0].swizzle());
-        out << ";" << endl;
-      }
       out << "  BRK ";
       if (I->src[0].node()) {
         out << " (";
@@ -675,13 +661,6 @@ ostream& ArbCode::print(ostream& out)
       }
       out << ";";
     } else if (I->op == SH_ARB_RET) {
-      if (I->src[0].node()) {
-        out << "  MOVC ";
-        printVar(out, true, I->src[0], false);
-        out << ", ";
-        printVar(out, false, I->src[0], false, I->src[0].swizzle());
-        out << ";" << endl;
-      }
       out << "  RET ";
       if (I->src[0].node()) {
         out << " (";
@@ -700,13 +679,6 @@ ostream& ArbCode::print(ostream& out)
     } else if (I->op == SH_ARB_ENDREP) {
       out << "  ENDREP;";
     } else if (I->op == SH_ARB_IF) {
-      if (I->src[0].node()) {
-        out << "  MOVC ";
-        printVar(out, true, I->src[0], false);
-        out << ", ";
-        printVar(out, false, I->src[0], false, I->src[0].swizzle());
-        out << ";" << endl;
-      }
       out << "  IF ";
       if (I->src[0].node()) {
         out << "GT";
@@ -831,6 +803,10 @@ void ArbCode::genNode(ShCtrlGraphNodePtr node)
   if (m_environment & SH_ARB_NVVP2) {
     for (vector<ShCtrlGraphBranch>::iterator I = node->successors.begin();
 	I != node->successors.end(); I++) {
+      ShVariable dummy(new ShVariableNode(SH_TEMP, I->cond.size(), SH_FLOAT));
+      ArbInst updatecc(SH_ARB_MOV, dummy, I->cond);
+      updatecc.update_cc = true;
+      m_instructions.push_back(updatecc);
       m_instructions.push_back(ArbInst(SH_ARB_BRA, getLabel(I->node), I->cond));
     }
     if (!node->successors.empty() || node->follower->marked()) { // else it's next anyway, no need for bra
@@ -876,6 +852,10 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
       }
     }
     genStructNode(header);
+    ShVariable dummy(new ShVariableNode(SH_TEMP, cond.size(), SH_FLOAT));
+    ArbInst updatecc(SH_ARB_MOV, dummy, cond);
+    updatecc.update_cc = true;
+    m_instructions.push_back(updatecc);
     m_instructions.push_back(ArbInst(SH_ARB_IF, ShVariable(), cond)); {
       genStructNode(ifnode);
     } m_instructions.push_back(ArbInst(SH_ARB_ELSE, ShVariable())); {
@@ -894,6 +874,10 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
     m_shader->constants.push_back(maxloop.node());
     m_instructions.push_back(ArbInst(SH_ARB_REP, ShVariable(), maxloop));
     genStructNode(header);
+    ShVariable dummy(new ShVariableNode(SH_TEMP, cond.size(), SH_FLOAT));
+    ArbInst updatecc(SH_ARB_MOV, dummy, cond);
+    updatecc.update_cc = true;
+    m_instructions.push_back(updatecc);
     ArbInst brk(SH_ARB_BRK, ShVariable(), cond);
     brk.invert = true;
     m_instructions.push_back(brk);
@@ -920,6 +904,10 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
     m_shader->constants.push_back(maxloop.node());
     m_instructions.push_back(ArbInst(SH_ARB_REP, ShVariable(), maxloop));
     genStructNode(loopnode);
+    ShVariable dummy(new ShVariableNode(SH_TEMP, cond.size(), SH_FLOAT));
+    ArbInst updatecc(SH_ARB_MOV, dummy, cond);
+    updatecc.update_cc = true;
+    m_instructions.push_back(updatecc);
     ArbInst brk(SH_ARB_BRK, ShVariable(), cond);
     if (!condexit) {
       brk.invert = true;
@@ -933,6 +921,10 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
     ShVariable cond = B->first;
     ShStructuralNodePtr ifnode = B->second;
     genStructNode(header);
+    ShVariable dummy(new ShVariableNode(SH_TEMP, cond.size(), SH_FLOAT));
+    ArbInst updatecc(SH_ARB_MOV, dummy, cond);
+    updatecc.update_cc = true;
+    m_instructions.push_back(updatecc);
     m_instructions.push_back(ArbInst(SH_ARB_IF, ShVariable(), cond)); {
       genStructNode(ifnode);
     } m_instructions.push_back(ArbInst(SH_ARB_ENDIF, ShVariable()));
