@@ -71,7 +71,7 @@ ShProgram connect(ShProgram pa, ShProgram pb)
 
   program->inputs = a->inputs;
 
-// push back extra inputs from b if aosize < bisize
+  // push back extra inputs from b if aosize < bisize
   if(aosize < bisize) {
     ShProgramNode::VarList::const_iterator II = b->inputs.begin();
     for(int i = 0; i < aosize; ++i, ++II); 
@@ -240,7 +240,8 @@ ShProgram mergeNames(ShProgram p)
   return result.node(); 
 }
 
-ShProgram namedCombine(ShProgram a, ShProgram b) {
+ShProgram namedCombine(ShProgram a, ShProgram b)
+{
   return mergeNames(combine(a, b));
 }
 
@@ -302,8 +303,9 @@ ShProgram namedConnect(ShProgram pa, ShProgram pb, bool keepExtra)
   return mergeNames(pb << ( shSwizzle(swiz) << aPass )); 
 }
 
-ShProgram renameInput(ShProgram a,
-                      const std::string& oldName, const std::string& newName) {
+ShProgram renameInput(ShProgram a, const std::string& oldName,
+                      const std::string& newName)
+{
   ShProgram renamer = SH_BEGIN_PROGRAM() {
     for(ShProgramNode::VarList::const_iterator I = a.node()->inputs.begin();
         I != a.node()->inputs.end(); ++I) {
@@ -322,8 +324,9 @@ ShProgram renameInput(ShProgram a,
 }
 
 // TODO factor out common code from renameInput, renameOutput
-ShProgram renameOutput(ShProgram a,
-                       const std::string& oldName, const std::string& newName) {
+ShProgram renameOutput(ShProgram a, const std::string& oldName, 
+                       const std::string& newName)
+{
   ShProgram renamer = SH_BEGIN_PROGRAM() {
     for(ShProgramNode::VarList::const_iterator I = a.node()->outputs.begin();
         I != a.node()->outputs.end(); ++I) {
@@ -341,7 +344,8 @@ ShProgram renameOutput(ShProgram a,
   return connect(a, renamer);
 }
 
-ShProgram namedAlign(ShProgram a, ShProgram b) {
+ShProgram namedAlign(ShProgram a, ShProgram b)
+{
   ShManipulator<std::string> ordering;
 
   for(ShProgramNode::VarList::const_iterator I = b.node()->inputs.begin();
@@ -392,7 +396,8 @@ ShProgram replaceVariable(ShProgram a, const ShVariable& v)
   return program;
 }
 
-ShProgram operator<<(ShProgram a, const ShVariable& var) {
+ShProgram operator<<(ShProgram a, const ShVariable& var)
+{
   ShProgram vNibble = SH_BEGIN_PROGRAM() {
     ShVariable out(var.node()->clone(SH_OUTPUT, var.size(), var.valueType(), SH_SEMANTICTYPE_END, true, false));
     shASN(out, var);
