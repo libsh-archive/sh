@@ -390,6 +390,17 @@ ShProgram shCross(const std::string& name, const std::string& input_name0,
 }
 
 template<typename T> 
+ShProgram shDiscard(const std::string & name, const std::string& input_name0)
+{ 
+  ShProgram nibble = SH_BEGIN_PROGRAM() {
+    typename T::InputType SH_NAMEDECL(a, input_name0);
+    discard(a);
+  } SH_END;
+  nibble.name("shDiscard");
+  return nibble;
+}
+
+template<typename T> 
 ShProgram shDot(const std::string & name, const std::string& input_name0,
                 const std::string& input_name1)
 { 
@@ -410,6 +421,17 @@ ShProgram shGradient(const std::string& name, const std::string& input_name0)
     ShOutputAttrib2f SH_NAMEDECL(result, name) = gradient(a); 
   } SH_END; 
   nibble.name("shGradient");
+  return nibble;
+}
+
+template<int S, typename T>
+ShProgram shGroupsort(const std::string & name, const std::string& input_name0)
+{ 
+  ShProgram nibble = SH_BEGIN_PROGRAM() {
+    typename T::InputType SH_NAMEDECL(a, input_name0);
+    groupsort<S>(a);
+  } SH_END;
+  nibble.name("shGroupsort");
   return nibble;
 }
 

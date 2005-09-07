@@ -1,3 +1,8 @@
+2005-09-07  Francois Marier  <francois@serioushack.com>
+
+	* src/ShNibblesImpl.hpp, ShNibbles.hpp: Add nibbles for discard()
+	and groupsort<S>().
+
 2005-08-30  Stefanus Du Toit  <sdt@serioushack.com>
 
 	* src/FixedManipulator.cpp (operator&): Allow empty manipulators.

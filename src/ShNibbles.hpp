@@ -291,6 +291,13 @@ template<typename T> ShProgram shCross(const std::string & name = "result",
                                        const std::string & input_name0 = "x", 
                                        const std::string & input_name1 = "y");
 
+/** \brief Nibble for discard
+ * Inputs: IN(0) T a
+ * Outputs: (none)
+ */
+template<typename T> ShProgram shDiscard(const std::string & name = "result",
+                                         const std::string & input_name0 = "x");
+
 /** \brief Nibble for dot product operator
  * Inputs: IN(0) T a
  *         IN(1) T b
@@ -306,6 +313,15 @@ template<typename T> ShProgram shDot(const std::string & name = "result",
  */
 template<typename T> ShProgram shGradient(const std::string & name = "result",
                                           const std::string & input_name0 = "x");
+
+/** \brief Nibble for the groupsort<S> function
+ * Inputs: IN(0) T a
+ * Outputs: (none)
+ */
+template<int S, typename T>
+ShProgram shGroupsort(const std::string & name = "result",
+                      const std::string & input_name0 = "x");
+
 /** \brief Nibble for the join function
  * Inputs: IN(0) T1 a
  *         IN(1) T2 b

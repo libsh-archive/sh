@@ -139,7 +139,8 @@ void kill(const ShGeneric<N, T>& c)
 }
 
 template<int S, typename VarType>
-void groupsort(VarType v[]) {
+void groupsort(VarType v[])
+{
   const int N = VarType::typesize;
   typedef typename VarType::storage_type T;
 
