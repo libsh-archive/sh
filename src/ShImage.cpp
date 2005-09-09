@@ -27,7 +27,7 @@ namespace SH {
 
 using namespace std;
 
-float* ShPngImage::read_png(const string& filename, int& width, int& height, int& elements)
+float* ShPngImage::read_PNG(const string& filename, int& width, int& height, int& elements)
 {
   // check that the file is a png file
   png_byte buf[8];
@@ -128,7 +128,7 @@ float* ShPngImage::read_png(const string& filename, int& width, int& height, int
   return data;
 }
 
-void ShPngImage::save_png(const string& filename, const float* data,
+void ShPngImage::save_PNG(const string& filename, const float* data,
                           int inverse_alpha, int width, int height, int elements)
 {
   FILE* fout = fopen(filename.c_str(), "wb");
@@ -202,7 +202,7 @@ void ShPngImage::save_png(const string& filename, const float* data,
   fclose(fout);
 }
 
-void ShPngImage::save_png16(const string& filename, const float* data,
+void ShPngImage::save_PNG16(const string& filename, const float* data,
                             int inverse_alpha, int width, int height, int elements)
 {
   FILE* fout = fopen(filename.c_str(), "w");

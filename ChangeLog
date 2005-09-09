@@ -1,3 +1,9 @@
+2005-09-09  Francois Marier  <francois@serioushack.com>
+
+	* src/ShImage.hpp, ShImageImpl.hpp, ShImage.cpp,
+	examples/textures/main.cpp: Rename loadPng, savePng, savePng16,
+	load_png and save_png to load_PNG, save_PNG and save_PNG16.
+
 2005-09-07  Francois Marier  <francois@serioushack.com>
 
 	* src/ShNibblesImpl.hpp, ShNibbles.hpp: Add nibbles for discard()

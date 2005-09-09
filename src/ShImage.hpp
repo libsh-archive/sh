@@ -56,23 +56,16 @@ public:
   T& operator()(int x, int y, int i);  ///< Retrieve a
                                                ///particular component
                                                ///from the image.
-
-  /** Load a PNG file into this image 
-   *
-   * @deprecated Provided for backward compatibility with the book
-   * (e.g. page 181)
-   */
-  void load_PNG(const std::string& filename) { loadPng(filename); }
   
   ///< Load a PNG file into this image
-  void loadPng(const std::string& filename);
+  void load_PNG(const std::string& filename);
   
   ///< Save a PNG image into this file
-  void savePng(const std::string& filename, int inverse_alpha=0);
+  void save_PNG(const std::string& filename, int inverse_alpha=0);
   
   ///< Save a PNG image into this file
-  void savePng16(const std::string& filename, int inverse_alpha=0);
- 
+  void save_PNG16(const std::string& filename, int inverse_alpha=0);
+
   ShTypedImage getNormalImage();
 
   const T* data() const;
@@ -97,13 +90,13 @@ private:
 class 
 SH_DLLEXPORT ShPngImage {
 public:
-  static float* read_png(const std::string& filename, int& width, int& height,
+  static float* read_PNG(const std::string& filename, int& width, int& height,
                          int& elements);
 
-  static void save_png(const std::string& filename, const float* data,
+  static void save_PNG(const std::string& filename, const float* data,
                        int inverse_alpha, int width, int height, int elements);
 
-  static void save_png16(const std::string& filename, const float* data,
+  static void save_PNG16(const std::string& filename, const float* data,
                          int inverse_alpha, int width, int height, int elements);
 };
 

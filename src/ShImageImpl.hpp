@@ -59,9 +59,9 @@ ShTypedImage<T>& ShTypedImage<T>::operator=(const ShTypedImage<T>& other)
 }
 
 template<typename T>
-void ShTypedImage<T>::loadPng(const std::string& filename)
+void ShTypedImage<T>::load_PNG(const std::string& filename)
 {
-  float* png_data = ShPngImage::read_png(filename, m_width, m_height, m_elements);
+  float* png_data = ShPngImage::read_PNG(filename, m_width, m_height, m_elements);
   int array_length = m_width * m_height * m_elements;
 
   m_memory = new ShHostMemory(sizeof(T) * array_length, ShStorageTypeInfo<T>::value_type);
@@ -89,18 +89,18 @@ float* ShTypedImage<T>::float_copy() const
 }
 
 template<typename T>
-void ShTypedImage<T>::savePng(const std::string& filename, int inverse_alpha)
+void ShTypedImage<T>::save_PNG(const std::string& filename, int inverse_alpha)
 {
   float* float_data = float_copy();
-  ShPngImage::save_png(filename, float_data, inverse_alpha, m_width, m_height, m_elements);
+  ShPngImage::save_PNG(filename, float_data, inverse_alpha, m_width, m_height, m_elements);
   delete [] float_data;
 }
 
 template<typename T>
-void ShTypedImage<T>::savePng16(const std::string& filename, int inverse_alpha)
+void ShTypedImage<T>::save_PNG16(const std::string& filename, int inverse_alpha)
 {
   float* float_data = float_copy();
-  ShPngImage::save_png16(filename, float_data, inverse_alpha, m_width, m_height, m_elements);
+  ShPngImage::save_PNG16(filename, float_data, inverse_alpha, m_width, m_height, m_elements);
   delete [] float_data;
 }
 

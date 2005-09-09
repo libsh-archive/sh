@@ -278,39 +278,39 @@ int main(int argc, char** argv)
                                 kCFURLPOSIXPathStyle);
     filename = new char[CFStringGetLength(s) + 1];
     CFStringGetCString(s, filename, CFStringGetLength(s) + 1, kCFStringEncodingASCII);
-    kd_images[0].loadPng(filename);
+    kd_images[0].load_PNG(filename);
     delete [] filename;
 
     s = CFURLCopyFileSystemPath(CFBundleCopyResourceURL(mainBundle, CFSTR("rustks"), CFSTR("png"), NULL),
                                 kCFURLPOSIXPathStyle);
     filename = new char[CFStringGetLength(s) + 1];
     CFStringGetCString(s, filename, CFStringGetLength(s) + 1, kCFStringEncodingASCII);
-    ks_images[0].loadPng(filename);
+    ks_images[0].load_PNG(filename);
     delete [] filename;
 
     s = CFURLCopyFileSystemPath(CFBundleCopyResourceURL(mainBundle, CFSTR("kd"), CFSTR("png"), NULL),
                                 kCFURLPOSIXPathStyle);
     filename = new char[CFStringGetLength(s) + 1];
     CFStringGetCString(s, filename, CFStringGetLength(s) + 1, kCFStringEncodingASCII);
-    kd_images[1].loadPng(filename);
+    kd_images[1].load_PNG(filename);
     delete [] filename;
     
     s = CFURLCopyFileSystemPath(CFBundleCopyResourceURL(mainBundle, CFSTR("ks"), CFSTR("png"), NULL),
                                 kCFURLPOSIXPathStyle);
     filename = new char[CFStringGetLength(s) + 1];
     CFStringGetCString(s, filename, CFStringGetLength(s) + 1, kCFStringEncodingASCII);
-    ks_images[1].loadPng(filename);
+    ks_images[1].load_PNG(filename);
     delete [] filename;
 #else
-    kd_images[0].loadPng("tex_rustkd.png");
-    ks_images[0].loadPng("tex_rustks.png");
-    kd_images[1].loadPng("tex_kd.png");
-    ks_images[1].loadPng("tex_ks.png");
+    kd_images[0].load_PNG("tex_rustkd.png");
+    ks_images[0].load_PNG("tex_rustks.png");
+    kd_images[1].load_PNG("tex_kd.png");
+    ks_images[1].load_PNG("tex_ks.png");
 
     for (int i=1; i < MIPMAP_LEVELS; i++) {
       stringstream s;
       s << "tex_kd" << i << ".png";
-      kd_images[1 + i].loadPng(s.str());
+      kd_images[1 + i].load_PNG(s.str());
     }
 #endif
   } 
