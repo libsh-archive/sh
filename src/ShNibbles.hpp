@@ -282,6 +282,14 @@ SHNIBBLE_UNARY_TUPLEOP_DECL(shProd);
 SHNIBBLE_UNARY_TUPLEOP_DECL(shSum);
 //@}
 
+/** \brief Nibble for the bernstein<N> function
+ * Inputs: IN(0) T a
+ * Outputs: OUT(0) ShGeneric<N, T>
+ */
+template<int N, typename T>
+ShProgram shBernstein(const std::string & name = "result",
+                      const std::string & input_name0 = "x");
+
 /** \brief Nibble for cross product operator
  * Inputs: IN(0) T a
  *         IN(1) T b

@@ -376,6 +376,17 @@ SHNIBBLE_UNARY_TUPLEOP(shMin1, min(a));
 SHNIBBLE_UNARY_TUPLEOP(shProd, prod(a));
 SHNIBBLE_UNARY_TUPLEOP(shSum, sum(a));
 
+template<int N, typename T>
+ShProgram shBernstein(const std::string& name, const std::string& input_name0)
+{
+  ShProgram nibble = SH_BEGIN_PROGRAM() {
+    typename T::InputType SH_NAMEDECL(a, input_name0);
+    ShAttrib<N, SH_OUTPUT, float> SH_NAMEDECL(result, name) = bernstein<N>(a);
+  } SH_END;
+  nibble.name("shBernstein");
+  return nibble;
+}
+
 template<typename T> 
 ShProgram shCross(const std::string& name, const std::string& input_name0,
                   const std::string& input_name1)
@@ -443,7 +454,7 @@ ShProgram shJoin(const std::string & name,
   ShProgram nibble = SH_BEGIN_PROGRAM() {
     typename T1::InputType SH_NAMEDECL(a, input_name0);
     typename T2::InputType SH_NAMEDECL(b, input_name1);
-    ShAttrib<T1::typesize + T2::typesize, SH_OUTPUT,  float> SH_NAMEDECL(result, name) = join(a, b); 
+    ShAttrib<T1::typesize + T2::typesize, SH_OUTPUT, float> SH_NAMEDECL(result, name) = join(a, b); 
   } SH_END; 
   nibble.name("shJoin");
   return nibble;

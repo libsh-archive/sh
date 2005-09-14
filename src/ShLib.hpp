@@ -141,6 +141,7 @@ SH_SHLIB_CONST_TRINARY_OP_011_RETSIZE_DECL(operation, N);
 #include "ShLibTrig.hpp"
 #include "ShLibDeriv.hpp"
 #include "ShLibNoise.hpp"
+#include "ShLibSplines.hpp"
 #include "ShLibWorley.hpp"
 // If you add anything to this list, make sure that ShLib.hpp is
 // included before the header guard since these libraries must always

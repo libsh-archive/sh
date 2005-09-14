@@ -1,3 +1,17 @@
+2005-09-14  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibSplinesImpl.hpp, ShLibSplines.hpp (bernstein): Add this
+	function to the core.  This is a dummy function for anything other
+	than N=4.
+
+	* src/ShNibblesImpl.hpp, ShNibbles.hpp (shBernstein): Add this
+	nibble.
+
+	* src/ShLib.hpp: Include the splines functions header.
+
+	* util/ShFuncImpl.hpp: Remove the old version of
+	bernstein_basis_4.
+
 2005-09-09  Francois Marier  <francois@serioushack.com>
 
 	* src/ShImage.hpp, ShImageImpl.hpp, ShImage.cpp,
