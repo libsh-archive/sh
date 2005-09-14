@@ -265,7 +265,7 @@ SHCRO_UNARY_OP(SH_OP_TANH, tan(*A));
 
 // Binary ops
 SHCRO_BINARY_OP(SH_OP_ADD, (*A) + (*B));
-SHCRO_BINARY_OP(SH_OP_ATAN2, atan2((*B), (*A)));
+SHCRO_BINARY_OP(SH_OP_ATAN2, atan2((*A), (*B)));
 SHCRO_BINARY_OP(SH_OP_DIV, (*A) / (*B));
 SHCRO_BINARY_OP(SH_OP_MAX, max((*A), (*B))); 
 SHCRO_BINARY_OP(SH_OP_MIN, min((*A), (*B))); 

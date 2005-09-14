@@ -6,7 +6,7 @@ def func(l, op, types=[], epsilon=0):
     return shtest.make_test([op(x) for x in l], [l], types, epsilon)
 
 def atan2_test(p, q, types=[], epsilon=0):
-    result = [math.atan2(b, a) for (a, b) in common.upzip(p, q)]
+    result = [math.atan2(a, b) for (a, b) in common.upzip(p, q)]
     return shtest.make_test(result, [p, q], types, epsilon)
 
 # for cos(), sin(), cosh() and sinh()
@@ -50,19 +50,19 @@ def insert_into4(test, op):
 # for atan2()
 def insert_into5(test):
     test.add_test(atan2_test((1.0, math.pi*2.0, 50, 1.0), (0.3, 1.0, 3.0, -math.pi*2.0), [], 0.015))
-    test.add_test(atan2_test((1.0, 1.0, 1.0), (0.0, 1.0, 2.0), [], 0.003))
-    test.add_test(atan2_test((0.5, 1.5, 3.0), (0.0, 1.0, 2.0), [], 0.003))
+    test.add_test(atan2_test((0, 1.0, 1.0), (1.0, 1.0, 2.0), [], 0.003))
+    test.add_test(atan2_test((0, 1.5, 3.0), (0.5, 1.0, 2.0), [], 0.003))
     test.add_test(atan2_test((1.0, 1.0, 1.0), (0.5, 0.8, 0.9), [], 0.002))
     test.add_test(atan2_test((1.0, 1.0), (math.pi, -math.pi), [], 0.004))
-    test.add_test(atan2_test((math.pi, -math.pi, -1.0), (1.0, 1.0, 0.0)))
+    test.add_test(atan2_test((math.pi, -math.pi, 0.0), (1.0, 1.0, -1.0)))
     test.add_test(atan2_test((math.pi*2.0, math.pi/2.0), (-math.pi*2.0, -math.pi/2.0), [], 0.002))
     test.add_test(atan2_test((math.pi/2.0, 1.0), (1.0, 1.0), [], 0.003))
-    test.add_test(atan2_test((1.0, 1.0), (-math.pi/2.0, 0.0), [], 0.003))
+    test.add_test(atan2_test((1.0, 0.0), (-math.pi/2.0, 1.0), [], 0.003))
     test.add_test(atan2_test((3.0,), (9.0,), [], 0.003))
     test.add_test(atan2_test((0.5, -1.0, -3.0, -3.0), (-1.0, 1.0, 1.0, -1.0)))
     test.add_test(atan2_test((0.5, 1.5, 2.5), (1.0, 1.0, 1.0), [], 0.003))
     test.add_test(atan2_test((1.0, 1.0, 1.0), (0.5, 1.5, 2.5), [], 0.003))
-    test.add_test(atan2_test((0.0, 0.0, 0.0, 0.0), (0.3, 0.34, 1.5, -2.5), [], 0.0001))
+    test.add_test(atan2_test((0.3, 0.34, 1.5, -2.5), (0.0, 0.0, 0.0, 0.0), [], 0.0001))
 
 # for acosh()
 def insert_into6(test, op):

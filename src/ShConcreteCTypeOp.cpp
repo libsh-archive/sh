@@ -170,8 +170,8 @@ SHCCTO_UNARY_OP_SPEC_TMPL(double, SH_OP_TANH, std::tanh(*A));
 SHCCTO_UNARY_OP_SPEC_TMPL(float,  SH_OP_TANH, tanhf(*A)); 
 
 /* Specializations for binary ops */
-SHCCTO_BINARY_OP_SPEC(double, SH_OP_ATAN2, std::atan2((*B), (*A)));
-SHCCTO_BINARY_OP_SPEC(float,  SH_OP_ATAN2, atan2f((*B), (*A)));
+SHCCTO_BINARY_OP_SPEC(double, SH_OP_ATAN2, std::atan2((*A), (*B)));
+SHCCTO_BINARY_OP_SPEC(float,  SH_OP_ATAN2, atan2f((*A), (*B)));
 
 
 // Binary Ops

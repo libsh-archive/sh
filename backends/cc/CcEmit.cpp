@@ -147,7 +147,7 @@ const CcOpCode opCodeTable[] = {
   {SH_OP_ACOS,  "acos(#0)"},
   {SH_OP_ASIN,  "asin(#0)"},
   {SH_OP_ATAN,  "atan(#0)"},
-  {SH_OP_ATAN2, "atan2(#1, #0)"},
+  {SH_OP_ATAN2, "atan2(#0, #1)"},
 #ifdef WIN32
   {SH_OP_ACOSH, "log(#0 + sqrt(#0 * #0 - 1.0))"},
   {SH_OP_ASINH, "log(#0 + sqrt(#0 * #0 + 1.0))"},

@@ -665,17 +665,17 @@ struct ATan2ExpanderBase: public ShTransformerParent
       ShVariable pi_over_two(allocate_constant(I->dest, Pi/2.0));
       ShVariable pi(allocate_constant(I->dest, Pi));
 
-      // tmp1 = (a != 0) ? atan(b/a) : sign(b) * Pi/2
-      new_stmts.push_back(ShStatement(tmp1, I->src[1], SH_OP_DIV, I->src[0]));
+      // tmp1 = (b != 0) ? atan(a/b) : sign(a) * Pi/2
+      new_stmts.push_back(ShStatement(tmp1, I->src[0], SH_OP_DIV, I->src[1]));
       new_stmts.push_back(ShStatement(tmp1, SH_OP_ATAN, tmp1));
-      new_stmts.push_back(ShStatement(tmp2, SH_OP_SGN, I->src[1]));
+      new_stmts.push_back(ShStatement(tmp2, SH_OP_SGN, I->src[0]));
       new_stmts.push_back(ShStatement(tmp2, tmp2, SH_OP_MUL, pi_over_two));
-      new_stmts.push_back(ShStatement(tmp3, I->src[0], SH_OP_SNE, zero));
+      new_stmts.push_back(ShStatement(tmp3, I->src[1], SH_OP_SNE, zero));
       new_stmts.push_back(ShStatement(tmp1, SH_OP_COND, tmp3, tmp1, tmp2));
 
-      // atan2(a, b) = (a < 0) * (b >=0 ? Pi : -Pi) + tmp1
-      new_stmts.push_back(ShStatement(tmp3, I->src[0], SH_OP_SLT, zero));
-      new_stmts.push_back(ShStatement(tmp2, I->src[1], SH_OP_SGE, zero));
+      // atan2(a, b) = (b < 0) * (a >=0 ? Pi : -Pi) + tmp1
+      new_stmts.push_back(ShStatement(tmp3, I->src[1], SH_OP_SLT, zero));
+      new_stmts.push_back(ShStatement(tmp2, I->src[0], SH_OP_SGE, zero));
       new_stmts.push_back(ShStatement(tmp2, SH_OP_COND, tmp2, pi, -pi));
       new_stmts.push_back(ShStatement(I->dest, SH_OP_MAD, tmp3, tmp2, tmp1));
 
