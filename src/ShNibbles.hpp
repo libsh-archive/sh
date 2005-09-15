@@ -287,8 +287,18 @@ SHNIBBLE_UNARY_TUPLEOP_DECL(shSum);
  * Outputs: OUT(0) ShGeneric<N, T>
  */
 template<int N, typename T>
-ShProgram shBernstein(const std::string & name = "result",
-                      const std::string & input_name0 = "x");
+ShProgram shBernstein(const std::string& name = "result",
+                      const std::string& input_name0 = "x");
+
+/** \brief Nibble for the bezier function
+ * Inputs: IN(0) T1 a
+ *         IN(1) T2 b
+ * Outputs: OUT(0) T2
+ */
+template<typename T1, typename T2>
+ShProgram shBezier(const std::string& name = "result",
+                   const std::string& input_name0 = "x",
+                   const std::string& input_name1 = "y");
 
 /** \brief Nibble for cross product operator
  * Inputs: IN(0) T a

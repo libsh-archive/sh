@@ -35,7 +35,7 @@ ShGeneric<N, T> bernstein(const ShGeneric<1, T>& a)
     result(1) = 3.0*it*it*a;
     result(2) = 3.0*it*a*a;
     result(3) = a*a*a;
-  } 
+  }
   else {
     // TODO: implement the real thing for the general case
     SH_DEBUG_WARN("bernstein is not fully implemented yet");
@@ -47,12 +47,13 @@ ShGeneric<N, T> bernstein(const ShGeneric<1, T>& a)
 }
 
 template <int N, typename T>
-ShGeneric<N, T> bezier(const ShGeneric<N, T>& t, const ShGeneric<N, T>& p)
+ShGeneric<N, T> bezier(const ShGeneric<1, T>& t, const ShGeneric<N, T>& p)
 {
-  ShAttrib<N, SH_TEMP, float> B = bernstein<N>(t(0));
-  ShGeneric<N, T> r = B[0] * p[0];
+  ShAttrib<N, SH_TEMP, T> B = bernstein<N>(t(0));
+  ShAttrib<N, SH_TEMP, T> r;
+  r(0) = B[0] * p[0];
   for (int i=1; i < N; i++) {
-    r += B[i] * p[i];
+    r(i) = B[i] * p[i];
   }
   return r;
 }

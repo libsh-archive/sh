@@ -40,7 +40,7 @@ ShGeneric<N, T> bernstein(const ShGeneric<1, T>& a);
 /** Evaluate the cubic Bezier spline.
  */
 template <int N, typename T>
-ShGeneric<N, T> bezier(const ShGeneric<N, T>& t, const ShGeneric<N, T>& p);
+ShGeneric<N, T> bezier(const ShGeneric<1, T>& t, const ShGeneric<N, T>& p);
 
 /*@}*/
 
