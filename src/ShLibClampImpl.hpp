@@ -236,20 +236,30 @@ ShGeneric<N, T> sign(const ShGeneric<N, T>& var)
 template <int N, typename T>
 inline
 ShGeneric<N, T>
-smoothstep (const ShGeneric<N, T>& t, const ShGeneric<N, T>& c, const ShGeneric<N, T>& w)
+smoothstep(const ShGeneric<N, T>& t, const ShGeneric<N, T>& c, const ShGeneric<N, T>& w)
 {
    return clamp((t - c)/w + 0.5f, 0.0f, 1.0f);
+}
+
+template<int N, typename T>
+ShGeneric<N, T> 
+cubicstep(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b, const ShGeneric<N, T>& x)
+{
+  ShGeneric<N, T> t = (x - a) / (b - a);
+  // TODO fix this for other types
+  t = clamp(t, 0.0f, 1.0f); 
+  return t * t * mad(-2.0f, t, ShConstAttrib1f(3.0f));
 }
 
 template <int N, typename T>
 inline
 ShGeneric<N, T>
-smoothpulse (const ShGeneric<N, T>& t, const ShGeneric<N, T>& r0, 
+smoothpulse(const ShGeneric<N, T>& t, const ShGeneric<N, T>& r0, 
 	     const ShGeneric<N, T>& r1, const ShGeneric<N, T>& w)
 {
    return smoothstep(t,r0,w) - smoothstep(t,r1,w);
 }
 
-}
+} // namespace
 
 #endif

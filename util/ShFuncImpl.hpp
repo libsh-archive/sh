@@ -32,15 +32,6 @@ namespace ShUtil {
 
 using namespace SH;
 
-template<int N, typename T>
-ShGeneric<N, T> deprecated_smoothstep(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b,
-    const ShGeneric<N, T> x) {
-  ShGeneric<N, T> t = (x - a) / (b - a);
-  // TODO fix this for other types
-  t = clamp(t, 0.0f, 1.0f); 
-  return t * t * mad(-2.0f, t, ShConstAttrib1f(3.0f));
-}
-
 static const int LCG_REPS = 5; // total instructions for hashlcg will be LCG_REPS * 2 + 2
 /** \brief Parallel linear congruential generator
  * 

@@ -32,15 +32,6 @@ using namespace SH;
  * \brief Miscellaneous small Sh utility functions.  
  */
 
-/** \brief Cubic interpolated step between 0 and 1. 
- * Returns 0 if x < a,
- * 1 if x > b, 
- * cubic interpolation between 0 and 1 otherwise
- */
-template<int N, typename T>
-ShGeneric<N, T> deprecated_smoothstep(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b,
-    const ShGeneric<N, T> x); 
-
 /** \brief Parallel linear congruential generator
  * 
  * This does not work very well right now.  Use hashmrg instead.

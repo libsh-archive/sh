@@ -1,3 +1,11 @@
+2005-09-15  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibClampImpl.hpp, ShLibClamp.hpp (cubicstep): Add
+	cubicstep to the core.
+
+	* util/ShFuncImpl.hpp, ShFunc.hpp (deprecated_smoothstep): Remove
+	this function since it's been renamed and moved to the core.
+
 2005-09-14  Francois Marier  <francois@serioushack.com>
 
 	* src/ShConcreteCTypeOp.cpp, ShConcreteRegularOpImpl.hpp,
