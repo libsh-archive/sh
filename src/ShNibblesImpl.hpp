@@ -459,6 +459,23 @@ ShProgram shGroupsort(const std::string & name, const std::string& input_name0)
   return nibble;
 }
 
+template<typename T1, typename T2>
+ShProgram shHermite(const std::string& name, const std::string& input_name0,
+                    const std::string& input_name1, const std::string& input_name2,
+                    const std::string& input_name3, const std::string& input_name4)
+{
+  ShProgram nibble = SH_BEGIN_PROGRAM() {
+    typename T1::InputType SH_NAMEDECL(a, input_name0);
+    typename T2::InputType SH_NAMEDECL(b, input_name1);
+    typename T2::InputType SH_NAMEDECL(c, input_name2);
+    typename T2::InputType SH_NAMEDECL(d, input_name3);
+    typename T2::InputType SH_NAMEDECL(e, input_name4);
+    typename T2::OutputType SH_NAMEDECL(result, name) = hermite(a, b, c, d, e);
+  } SH_END;
+  nibble.name("shHermite");
+  return nibble;
+}
+
 template<typename T1, typename T2> 
 ShProgram shJoin(const std::string & name,
                  const std::string & input_name0, 

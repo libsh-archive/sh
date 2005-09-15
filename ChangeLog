@@ -1,11 +1,14 @@
 2005-09-15  Francois Marier  <francois@serioushack.com>
 
-	* src/ShNibblesImpl.hpp, ShNibbles.hpp: Add a nibble for bezier.
+	* src/ShNibblesImpl.hpp, ShNibbles.hpp: Add a nibbles for bezier
+	and hermite.
 
-	* src/ShLibSplines.hpp, ShLibSplinesImpl.hpp, util/ShFunc.hpp,
-	ShFuncImpl.hpp: Move bezier to the core and fix it so that it
-	actually compiles.
+	* src/ShLibSplines.hpp, ShLibSplinesImpl.hpp: Move bezier to the
+	core and fix it so that it actually compiles.
+	Add a dummy function for hermite.
 
+	* util/ShFunc.hpp, ShFuncImpl.hpp: Remove bezier from util.
+	
 	* src/ShLibClampImpl.hpp, ShLibClamp.hpp (cubicstep): Add
 	cubicstep to the core.
 

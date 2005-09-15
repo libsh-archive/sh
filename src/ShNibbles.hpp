@@ -340,6 +340,22 @@ template<int S, typename T>
 ShProgram shGroupsort(const std::string & name = "result",
                       const std::string & input_name0 = "x");
 
+/** \brief Nibble for the hermite function
+ * Inputs: IN(0) T1 a
+ *         IN(1) T2 b
+ *         IN(2) T2 c
+ *         IN(3) T2 d
+ *         IN(4) T2 e
+ * Outputs: OUT(0) T2
+ */
+template<typename T1, typename T2>
+ShProgram shHermite(const std::string& name = "result",
+                    const std::string& input_name0 = "x",
+                    const std::string& input_name1 = "y",
+                    const std::string& input_name2 = "z",
+                    const std::string& input_name3 = "w",
+                    const std::string& input_name4 = "v");
+
 /** \brief Nibble for the join function
  * Inputs: IN(0) T1 a
  *         IN(1) T2 b

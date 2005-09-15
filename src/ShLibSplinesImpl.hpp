@@ -58,6 +58,22 @@ ShGeneric<N, T> bezier(const ShGeneric<1, T>& t, const ShGeneric<N, T>& p)
   return r;
 }
 
+template <int N, typename T>
+ShGeneric<N, T> hermite(const ShGeneric<1, T>& a, const ShGeneric<N, T>& b, 
+                        const ShGeneric<N, T>& c, const ShGeneric<N, T>& d, 
+                        const ShGeneric<N, T>& e)
+{
+  ShAttrib<N, SH_TEMP, T> result;
+
+  // TODO: implement the real thing
+  SH_DEBUG_WARN("hermite is not implemented yet");
+  for (int i=0; i < N; i++) {
+    result[i] = a[0];
+  }
+
+  return result;
+}
+
 }
 
 #endif

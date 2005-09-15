@@ -42,6 +42,13 @@ ShGeneric<N, T> bernstein(const ShGeneric<1, T>& a);
 template <int N, typename T>
 ShGeneric<N, T> bezier(const ShGeneric<1, T>& t, const ShGeneric<N, T>& p);
 
+/** Evaluate the cubic Hermite spline at parameter a interpolating b
+ *  at 0 with tangent c and d at 1 with tangent e. */
+template <int N, typename T>
+ShGeneric<N, T> hermite(const ShGeneric<1, T>& a, const ShGeneric<N, T>& b, 
+                        const ShGeneric<N, T>& c, const ShGeneric<N, T>& d, 
+                        const ShGeneric<N, T>& e);
+
 /*@}*/
 
 }
