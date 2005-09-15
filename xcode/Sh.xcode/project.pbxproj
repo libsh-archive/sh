@@ -1685,12 +1685,30 @@
 			refType = 2;
 			sourceTree = SOURCE_ROOT;
 		};
+		3EB30AE608787D7600729309 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.h;
+			name = ShLibSplines.hpp;
+			path = ../src/ShLibSplines.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
 		3EB30AE708787D7600729309 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShLibMiscImpl.hpp;
 			path = ../src/ShLibMiscImpl.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		3EB30AE708787D7600729309 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.h;
+			name = ShLibSplinesImpl.hpp;
+			path = ../src/ShLibSplinesImpl.hpp;
 			refType = 2;
 			sourceTree = SOURCE_ROOT;
 		};

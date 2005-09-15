@@ -77,6 +77,7 @@ libsh_dll_SOURCES += ShLibClamp.hpp ShLibClampImpl.hpp
 libsh_dll_SOURCES += ShLibGeometry.hpp ShLibGeometryImpl.hpp
 libsh_dll_SOURCES += ShLibMatrix.hpp ShLibMatrixImpl.hpp
 libsh_dll_SOURCES += ShLibMisc.hpp ShLibMiscImpl.hpp
+libsh_dll_SOURCES += ShLibSplines.hpp ShLibSplinesImpl.hpp
 libsh_dll_SOURCES += ShLibTrig.hpp ShLibTrigImpl.hpp
 libsh_dll_SOURCES += ShLibDeriv.hpp ShLibDerivImpl.hpp
 

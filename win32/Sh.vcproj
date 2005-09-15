@@ -511,7 +511,13 @@
 				RelativePath="..\src\ShLibMisc.hpp">
 			</File>
 			<File
+				RelativePath="..\src\ShLibSplines.hpp">
+			</File>
+			<File
 				RelativePath="..\src\ShLibMiscImpl.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShLibSplines.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShLibNormal.hpp">
