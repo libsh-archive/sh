@@ -8,6 +8,7 @@
 	Add a dummy function for hermite.
 
 	* util/ShFunc.hpp, ShFuncImpl.hpp: Remove bezier from util.
+	Remove broken hashlcg() function.
 	
 	* src/ShLibClampImpl.hpp, ShLibClamp.hpp (cubicstep): Add
 	cubicstep to the core.

@@ -32,32 +32,6 @@ namespace ShUtil {
 
 using namespace SH;
 
-static const int LCG_REPS = 5; // total instructions for hashlcg will be LCG_REPS * 2 + 2
-/** \brief Parallel linear congruential generator
- * 
- * This does not work very well right now.  Use hashmrg instead.
- *
- * \sa  template<int N, typename T> ShGeneric<N, T> hashmrg(const ShGeneric<N, T>& p)
- */
-// TODO: may not work as intended on 24-bit floats
-// since there may not be enough precision 
-template<int N, typename T>
-ShGeneric<N, T> hashlcg(const ShGeneric<N, T>& p)
-{
-  ShAttrib<N, SH_TEMP, T> result = frac(p * 0.01);
-
-  // TODO fix this for long tuples
-  ShGeneric<N, T> a = fillcast<N>(
-      ShConstAttrib4f(M_PI * M_PI * M_PI * M_PI, std::exp(4.0), 
-          std::pow(13.0, M_PI / 2.0), std::sqrt(1997.0)));
-  ShGeneric<N, T> m = fillcast<N>(
-      ShConstAttrib4f(std::sqrt(2.0), 1.0 / M_PI, std::sqrt(3.0), 
-          std::exp(-1.0)));
-
-  for(int i = 0; i < LCG_REPS; ++i) result = frac(mad(result, a, m)); 
-  return result;
-}
-
 /** \brief Given 3 orthonormal basis vectors b0, b1, b2, specified relative to a coordinate space C, 
  * this does a change of basis on a vector v in space C to the orthonormal basis
  */

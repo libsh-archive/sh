@@ -32,17 +32,6 @@ using namespace SH;
  * \brief Miscellaneous small Sh utility functions.  
  */
 
-/** \brief Parallel linear congruential generator
- * 
- * This does not work very well right now.  Use hashmrg instead.
- *
- * \sa  template<int N, typename T> ShGeneric<N, T> hashmrg(const ShGeneric<N, T>& p)
- */
-// TODO: may not work as intended on 24-bit floats
-// since there may not be enough precision 
-template<int N, typename T>
-ShGeneric<N, T> hashlcg(const ShGeneric<N, T>& p); 
-
 /** \brief Given orthonormal basis b0, b1, b2 and vector v relative to coordinate space C,
  * does change of basis on v to the orthonormal basis b0, b1, b2
  */
