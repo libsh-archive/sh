@@ -1,5 +1,8 @@
 2005-09-15  Francois Marier  <francois@serioushack.com>
 
+	* src/ShLibSplines.hpp, ShLibSplinesImpl.hpp, util/ShFunc.hpp,
+	ShFuncImpl.hpp: Move bezier to the core.
+
 	* src/ShLibClampImpl.hpp, ShLibClamp.hpp (cubicstep): Add
 	cubicstep to the core.
 

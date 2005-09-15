@@ -25,8 +25,6 @@
 
 namespace SH {
 
-/** Evaluate the Bernstein (Bezier) basis functions of order N at
- * parameter a. */
 template<int N, typename T>
 ShGeneric<N, T> bernstein(const ShGeneric<1, T>& a)
 {
@@ -46,6 +44,17 @@ ShGeneric<N, T> bernstein(const ShGeneric<1, T>& a)
     }
   }
   return result;
+}
+
+template <int N, typename T>
+ShGeneric<N, T> bezier(const ShGeneric<N, T>& t, const ShGeneric<N, T>& p)
+{
+  ShAttrib<N, SH_TEMP, float> B = bernstein<N>(t(0));
+  ShGeneric<N, T> r = B[0] * p[0];
+  for (int i=1; i < N; i++) {
+    r += B[i] * p[i];
+  }
+  return r;
 }
 
 }

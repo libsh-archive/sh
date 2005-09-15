@@ -47,10 +47,10 @@ ShGeneric<N, T> hashlcg(const ShGeneric<N, T>& p);
  * does change of basis on v to the orthonormal basis b0, b1, b2
  */
 template<typename T>
-ShGeneric<3, T> changeBasis(const ShGeneric<3, T> &b0, 
-    const ShGeneric<3, T> &b1, const ShGeneric<3, T> &b2, const ShGeneric<3, T> &v); 
+ShGeneric<3, T> changeBasis(const ShGeneric<3, T> &b0, const ShGeneric<3, T> &b1,
+                            const ShGeneric<3, T> &b2, const ShGeneric<3, T> &v); 
 
-}
+} // namespace
 #endif
 
 #include "ShFuncImpl.hpp"

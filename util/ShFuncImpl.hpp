@@ -42,7 +42,8 @@ static const int LCG_REPS = 5; // total instructions for hashlcg will be LCG_REP
 // TODO: may not work as intended on 24-bit floats
 // since there may not be enough precision 
 template<int N, typename T>
-ShGeneric<N, T> hashlcg(const ShGeneric<N, T>& p) {
+ShGeneric<N, T> hashlcg(const ShGeneric<N, T>& p)
+{
   ShAttrib<N, SH_TEMP, T> result = frac(p * 0.01);
 
   // TODO fix this for long tuples
@@ -61,26 +62,14 @@ ShGeneric<N, T> hashlcg(const ShGeneric<N, T>& p) {
  * this does a change of basis on a vector v in space C to the orthonormal basis
  */
 template<typename T>
-ShGeneric<3, T> changeBasis(const ShGeneric<3, T> &b0, 
-    const ShGeneric<3, T> &b1, const ShGeneric<3, T> &b2, const ShGeneric<3, T> &v) {
+ShGeneric<3, T> changeBasis(const ShGeneric<3, T> &b0, const ShGeneric<3, T> &b1,
+                            const ShGeneric<3, T> &b2, const ShGeneric<3, T> &v)
+{
   ShAttrib<3, SH_TEMP, T> result;
   result(0) = b0 | v;
   result(1) = b1 | v;
   result(2) = b2 | v;
   return result;
-}
-
-/** Evaluate cubic Bezier spline.
- */
-template <int N, typename T>
-ShGeneric<N, T> bezier(const ShGeneric<N, T>& t, const ShAttrib4f& p)
-{
-   ShAttrib4f B = bernstein<4>(t(0));
-   ShGeneric<N, T> r = B[0] * p[0];
-   for (int i=1; i<4; i++) {
-      r += B[i] * p[i];  
-   }
-   return r;
 }
 
 }

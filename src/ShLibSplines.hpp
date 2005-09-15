@@ -32,10 +32,15 @@ namespace SH {
  * @{
  */
 
-/** Evaluation of the bernstein (Bezier) basis functions of order N at
+/** Evaluate the bernstein (Bezier) basis functions of order N at
  * parameter a. */
 template<int N, typename T>
 ShGeneric<N, T> bernstein(const ShGeneric<1, T>& a);
+
+/** Evaluate the cubic Bezier spline.
+ */
+template <int N, typename T>
+ShGeneric<N, T> bezier(const ShGeneric<N, T>& t, const ShGeneric<N, T>& p);
 
 /*@}*/
 
