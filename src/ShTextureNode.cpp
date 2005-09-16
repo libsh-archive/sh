@@ -292,6 +292,8 @@ bool ShTextureNode::build_mipmaps(ShCubeDirection dir)
 {
   if (m_mipmap_levels <= 1) return false; // mipmapping not enabled
 
+  if (!memory(dir, 0)) return false; // main memory not set (probably using metadata)
+
   if (memory(dir, 1)) {
     // Don't overwrite user-provided mipmap levels
     if (-1 == m_mipmap_generation_timestamp[dir]) return false;

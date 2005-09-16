@@ -1,3 +1,8 @@
+2005-09-16  Francois Marier  <francois@serioushack.com>
+
+	* src/ShTextureNode.cpp (build_mipmaps): Add a check to avoid
+	building the mipmaps when the texture is set to a specific texid.
+
 2005-09-15  Francois Marier  <francois@serioushack.com>
 
 	* src/ShNibblesImpl.hpp, ShNibbles.hpp: Add a nibbles for bezier
