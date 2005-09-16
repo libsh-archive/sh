@@ -282,6 +282,7 @@ struct FloatConverter {
         case SH_OP_FETCH:
         case SH_OP_TEXD:
         case SH_OP_KIL:
+        case SH_OP_RET:
           // @todo type think of a cleaner solution.
           // - we probably shouldn't be using the host-side set of operations
           // anyway - maybe use a functor given by the backend that decides

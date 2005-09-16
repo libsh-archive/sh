@@ -1,5 +1,15 @@
 2005-09-16  Francois Marier  <francois@serioushack.com>
 
+	* backends/gl/GlslEmit.cpp (emit_discard): Implement SH_OP_RET.
+
+	* backends/gl/GlslCode.hpp (emit_discard): Add a string parameter
+	to select the function to call.
+
+	* src/ShSyntax.cpp: Add the SH_RETURN statement.
+
+	* src/ShTypeConvertTransformer.cpp: Add SH_OP_RET to the switch
+	statement.
+
 	* src/ShTextureNode.cpp (build_mipmaps): Add a check to avoid
 	building the mipmaps when the texture is set to a specific texid.
 

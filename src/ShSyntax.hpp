@@ -184,6 +184,10 @@
  * @see SH_FOR
  */
 #define SH_CONTINUE if (!ShContext::current()->parsing()) { continue; } else { ::SH::shBreak(); }
+/** \def SH_RETURN
+ * Terminate the fragment program without killing the fragment.
+ */
+#define SH_RETURN(a) ::SH::shRET(a)
 //@}
 
 /** \def SH_BEGIN_SECTION

@@ -133,7 +133,7 @@ private:
   void emit_cbrt(const SH::ShStatement& stmt);
   void emit_comment(const SH::ShStatement& stmt);
   void emit_cond(const SH::ShStatement& stmt);
-  void emit_discard(const SH::ShStatement& stmt);
+  void emit_discard(const SH::ShStatement& stmt, const std::string& function);
   void emit_exp10(const SH::ShStatement& stmt);
   void emit_hyperbolic(const SH::ShStatement& stmt);
   void emit_lit(const SH::ShStatement& stmt);

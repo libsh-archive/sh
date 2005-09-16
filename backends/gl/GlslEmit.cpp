@@ -160,7 +160,7 @@ void GlslCode::emit(const ShStatement &stmt)
       emit_exp10(stmt);
       break;
     case SH_OP_KIL:
-      emit_discard(stmt);
+      emit_discard(stmt, "discard");
       break;
     case SH_OP_LIT:
       emit_lit(stmt);
@@ -173,6 +173,9 @@ void GlslCode::emit(const ShStatement &stmt)
       break;
     case SH_OP_PAL:
       emit_pal(stmt);
+      break;
+    case SH_OP_RET:
+      emit_discard(stmt, "return");
       break;
     case SH_OP_SEQ:
     case SH_OP_SGE:
@@ -277,12 +280,11 @@ void GlslCode::emit_cond(const ShStatement& stmt)
   }
 }
 
-void GlslCode::emit_discard(const ShStatement& stmt)
+void GlslCode::emit_discard(const ShStatement& stmt, const string& function)
 {
-  SH_DEBUG_ASSERT(SH_OP_KIL == stmt.op);
+  SH_DEBUG_ASSERT((SH_OP_KIL == stmt.op) || (SH_OP_RET == stmt.op));
 
-  append_line(string("if (") + resolve(stmt.src[0]) + " > " + 
-	      resolve_constant(0, stmt.src[0]) + ") discard");
+  append_line(string("if (any(") + resolve(stmt.src[0]) + ")) " + function);
 }
 
 void GlslCode::emit_pow(const ShVariable& dest, const ShVariable& a, const ShVariable& b)
