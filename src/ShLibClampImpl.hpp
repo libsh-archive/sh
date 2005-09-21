@@ -236,14 +236,14 @@ ShGeneric<N, T> sign(const ShGeneric<N, T>& var)
 template <int N, typename T>
 inline
 ShGeneric<N, T>
-smoothstep(const ShGeneric<N, T>& t, const ShGeneric<N, T>& c, const ShGeneric<N, T>& w)
+linstep(const ShGeneric<N, T>& t, const ShGeneric<N, T>& c, const ShGeneric<N, T>& w)
 {
    return clamp((t - c)/w + 0.5f, 0.0f, 1.0f);
 }
 
 template<int N, typename T>
 ShGeneric<N, T> 
-cubicstep(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b, const ShGeneric<N, T>& x)
+smoothstep(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b, const ShGeneric<N, T>& x)
 {
   ShGeneric<N, T> t = (x - a) / (b - a);
   // TODO fix this for other types

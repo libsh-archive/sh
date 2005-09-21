@@ -162,12 +162,12 @@ template<int N, typename T>
 ShGeneric<N, T> sign(const ShGeneric<N, T>& var);
 
 
-/** Linear smooth step.
- * Linear smooth step of t centered around c with width w.
+/** Linear step.
+ * Linear step of t centered around c with width w.
  */
 template <int N, typename T>
-ShGeneric<N, T> smoothstep(const ShGeneric<N, T>& t, const ShGeneric<N, T>& c,
-                           const ShGeneric<N, T>& w);
+ShGeneric<N, T> linstep(const ShGeneric<N, T>& t, const ShGeneric<N, T>& c,
+                        const ShGeneric<N, T>& w);
 
 /** \brief Cubic interpolated step between 0 and 1. 
  * Returns:
@@ -176,8 +176,8 @@ ShGeneric<N, T> smoothstep(const ShGeneric<N, T>& t, const ShGeneric<N, T>& c,
  * cubic interpolation between 0 and 1 otherwise
  */
 template<int N, typename T>
-ShGeneric<N, T> cubicstep(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b,
-                          const ShGeneric<N, T>& x);
+ShGeneric<N, T> smoothstep(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b,
+                           const ShGeneric<N, T>& x);
 
 /** Linear smooth pulse.
  * Linear smooth pulse of t between r0 and r1 with width w.

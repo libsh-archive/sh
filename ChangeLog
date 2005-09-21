@@ -1,3 +1,9 @@
+2005-09-21  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibClampImpl.hpp, ShLibClamp.hpp: Rename smoothstep() to
+	linstep() and cubicstep() to smoothstep().  This is done to be
+	consistent with RenderMan.
+
 2005-09-16  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslEmit.cpp (emit_discard): Implement SH_OP_RET.
