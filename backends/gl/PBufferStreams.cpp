@@ -334,7 +334,11 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
 
     for (ShStream::const_iterator i = dest.begin(); i != dest.end(); i++) {
       if (input_channels.find(i->object()) != input_channels.end()) {
-	SH_DEBUG_WARN("Using an intermediate stream during execution since some of the channels are both being read from and written to.");
+        static bool warning_seen = false;
+	if (!warning_seen) {
+          SH_DEBUG_WARN("Using an intermediate stream during execution since some of the channels are both being read from and written to.");
+          warning_seen = true;
+        }
 	rw_channels = true;
 	break;
       }

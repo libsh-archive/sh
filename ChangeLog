@@ -1,5 +1,8 @@
 2005-09-22  Francois Marier  <francois@serioushack.com>
 
+	* backends/gl/PBufferStreams.cpp (execute): Only display the
+	warning about intermediate streams once per process.
+
 	* backends/gl/ArbCode.cpp, GlslCode.cpp (genStructNode): Don't
 	check for the size of the successor in IF blocks, it prevents
 	perfectly valid code (e.g. nested IFs inside another IF) from
