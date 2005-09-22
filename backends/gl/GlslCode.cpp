@@ -461,7 +461,6 @@ void GlslCode::gen_structural_node(const ShStructuralNodePtr& node)
   } 
   else if (node->type == ShStructuralNode::IFELSE) {
     ShStructuralNodePtr header = node->structnodes.front();
-    SH_DEBUG_ASSERT(2 == header->succs.size());
 
     ShVariable cond;
     ShStructuralNodePtr ifnode, elsenode;
@@ -489,7 +488,6 @@ void GlslCode::gen_structural_node(const ShStructuralNodePtr& node)
   } 
   else if (node->type == ShStructuralNode::IF) {
     ShStructuralNodePtr header = node->structnodes.front();
-    SH_DEBUG_ASSERT(1 == header->succs.size());
 
     ShStructuralNode::SuccessorList::iterator B = header->succs.begin();
     ShVariable cond = B->first;

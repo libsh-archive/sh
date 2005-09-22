@@ -839,7 +839,7 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
     }
   } else if (node->type == ShStructuralNode::IFELSE) {
     ShStructuralNodePtr header = node->structnodes.front();
-    // TODO Check that header->successors is only two.
+    
     ShVariable cond;
     ShStructuralNodePtr ifnode, elsenode;
     for (ShStructuralNode::SuccessorList::iterator I = header->succs.begin();
@@ -916,7 +916,7 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
     m_instructions.push_back(ArbInst(SH_ARB_ENDREP, ShVariable()));
   } else if (node->type == ShStructuralNode::IF) {
     ShStructuralNodePtr header = node->structnodes.front();
-    // TODO Check that header->successors is only one.
+    
     ShStructuralNode::SuccessorList::iterator B = header->succs.begin();
     ShVariable cond = B->first;
     ShStructuralNodePtr ifnode = B->second;

@@ -1,3 +1,10 @@
+2005-09-22  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbCode.cpp, GlslCode.cpp (genStructNode): Don't
+	check for the size of the successor in IF blocks, it prevents
+	perfectly valid code (e.g. nested IFs inside another IF) from
+	being generated.
+
 2005-09-21  Francois Marier  <francois@serioushack.com>
 
 	* src/ShLibClampImpl.hpp, ShLibClamp.hpp: Rename smoothstep() to
