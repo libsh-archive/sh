@@ -78,15 +78,6 @@ void initShaders()
   } SH_END;
 
   shaders = new ShProgramSet(vsh, fsh);
-
-#if 0
-  cout << "Vertex Unit:" << endl;
-  vsh.node()->code()->print(cout);
-  cout << "--" << endl;
-  cout << "Fragment Unit:" << endl;
-  fsh.node()->code()->print(cout);
-  cout << "--" << endl;
-#endif
 }
 
 void display()
