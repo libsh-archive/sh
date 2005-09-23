@@ -95,7 +95,11 @@ GlslVariableMap::GlslVariableMap(ShProgramNode* shader, GlslProgramType unit)
     }
   }
 
-  allocate_builtin_inputs();
+  if ((SH_GLSL_VP == unit) && (shader->meta("opengl:matching") == "generic")) {
+    allocate_generic_vertex_inputs();
+  } else {
+    allocate_builtin_inputs();
+  }
   allocate_builtin_outputs();
 
   for (ShProgramNode::PaletteList::const_iterator i = m_shader->palettes_begin();
@@ -140,12 +144,24 @@ void GlslVariableMap::allocate_builtin(const ShVariableNodePtr& node,
   }
 }
 
+void GlslVariableMap::allocate_generic_vertex_inputs()
+{
+  int input_nb = 0;
+  for (ShProgramNode::VarList::const_iterator i = m_shader->inputs_begin(); i != m_shader->inputs_end(); i++) {
+    GlslVariable var(*i);
+    var.attribute(input_nb);
+    map_insert(*i, var);
+    m_attribute_declarations.push_back(var.declaration());
+    input_nb++;
+  }
+}
+
 void GlslVariableMap::allocate_builtin_inputs()
 {
   for (ShProgramNode::VarList::const_iterator i = m_shader->inputs_begin(); i != m_shader->inputs_end(); i++) {
     allocate_builtin(*i, glslBindingSpecs(false, m_unit), m_input_bindings, false);
   }
-
+  
   int input_nb = 0;
   for (ShProgramNode::VarList::const_iterator i = m_shader->inputs_begin(); i != m_shader->inputs_end(); i++) {
     allocate_builtin(*i, glslBindingSpecs(false, m_unit), m_input_bindings, true);
@@ -153,7 +169,7 @@ void GlslVariableMap::allocate_builtin_inputs()
     // warn if the input could not be bound to a built-in variable during the second pass
     if (m_varmap.find(*i) == m_varmap.end()) {
       cerr << "Could not bind " << (shIsInteger((*i)->valueType()) ? "int" : "float") 
-	   << " input " << input_nb << " to a built-in variable." << endl;
+           << " input " << input_nb << " to a built-in variable." << endl;
     }
     input_nb++;
   }
@@ -207,6 +223,16 @@ void GlslVariableMap::map_insert(const ShVariableNodePtr& node, GlslVariable var
 {
   m_nodes.push_back(node);
   m_varmap[node] = var;
+}
+
+GlslVariableMap::DeclarationList::const_iterator GlslVariableMap::attribute_begin() const
+{ 
+  return m_attribute_declarations.begin();
+}
+
+GlslVariableMap::DeclarationList::const_iterator GlslVariableMap::attribute_end() const
+{ 
+  return m_attribute_declarations.end();
 }
 
 GlslVariableMap::DeclarationList::const_iterator GlslVariableMap::uniform_begin() const

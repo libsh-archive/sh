@@ -1,5 +1,21 @@
 2005-09-23  Francois Marier  <francois@serioushack.com>
 
+	* backends/gl/GlslVariable.cpp, GlslVariable.hpp (attribute): Add
+	this method to set the name of the variable and make it an
+	attribute (with the new m_attribute bool).
+
+	* backends/gl/GlslVariableMap.cpp, GlslVariableMap.hpp
+	(allocate_generic_vertex_inputs): Add this method and call it
+	instead of allocate_builtin_inputs() when the "opengl:matching"
+	meta tag is set to "generic".  It uses the attribute facility in
+	Glsl instead of using the built-in attribute names (like
+	gl_Position).
+	(attribute_begin, attribute_end): Add these methods to allow the
+	code generation to declare attributes at the top of the code.
+
+	* backends/gl/GlslCode.cpp (print): Declare attributes at the top
+	of the source file.
+
 	* backends/gl/GlslVariableMap.cpp (GlslVariableMap),
 	ArbCode.cpp (ArbCode): Remove the hard-coded number of maximum
 	draw buffers and get it through OpenGL's glGet instead.

@@ -374,7 +374,16 @@ ostream& GlslCode::print(ostream& out)
   out << "// OpenGL " << ((m_unit == SH_GLSL_VP) ? "Vertex" : "Fragment") << " Program" << endl;
   out << endl;
 
-  // Declare Uniforms
+  // Declare attributes
+  if (m_varmap->attribute_begin() != m_varmap->attribute_end()) {
+    for (GlslVariableMap::DeclarationList::const_iterator i = m_varmap->attribute_begin(); 
+	 i != m_varmap->attribute_end(); i++) {
+      out << "attribute " << *i << ";" << endl;
+    }
+    out << endl;
+  }
+
+  // Declare uniforms
   if (m_varmap->uniform_begin() != m_varmap->uniform_end()) {
     for (GlslVariableMap::DeclarationList::const_iterator i = m_varmap->uniform_begin(); 
 	 i != m_varmap->uniform_end(); i++) {

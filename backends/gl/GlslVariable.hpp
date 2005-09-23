@@ -88,9 +88,11 @@ public:
   const bool texture() const { return m_texture; }
 
   void name(int i, enum GlslProgramType unit); /// for regular variables
+  void attribute(int input_nb); /// for generic vertex inputs
   void builtin(GlslVarBinding binding, int index); /// for built-in variables
   
 private:
+  bool m_attribute;
   bool m_builtin; /// if true, it won't be declared or initialized
   bool m_texture;
   bool m_palette;

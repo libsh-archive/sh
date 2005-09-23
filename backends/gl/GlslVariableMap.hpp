@@ -49,6 +49,8 @@ public:
 
   typedef std::list<std::string> DeclarationList;
 
+  DeclarationList::const_iterator attribute_begin() const;
+  DeclarationList::const_iterator attribute_end() const;
   DeclarationList::const_iterator uniform_begin() const;
   DeclarationList::const_iterator uniform_end() const;
   DeclarationList::const_iterator regular_begin() const;
@@ -68,6 +70,7 @@ private:
   std::map<const SH::ShVariableNodePtr, GlslVariable> m_varmap;
   NodeList m_nodes;
   
+  DeclarationList m_attribute_declarations;
   DeclarationList m_uniform_declarations;
   DeclarationList m_regular_declarations;
 
@@ -79,6 +82,7 @@ private:
                         bool generic);
   void allocate_builtin_inputs();
   void allocate_builtin_outputs();
+  void allocate_generic_vertex_inputs();
   void allocate_temp(const SH::ShVariableNodePtr& node);
   
   void map_insert(const SH::ShVariableNodePtr& node, GlslVariable var);

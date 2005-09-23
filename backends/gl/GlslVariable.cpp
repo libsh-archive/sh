@@ -49,22 +49,22 @@ const GlslVarBindingInfo GlslVariable::glslVarBindingInfo[] = {
 };
 
 GlslVariable::GlslVariable()
-  : m_builtin(false), m_texture(false), m_palette(false), m_uniform(false), 
-    m_name(""), m_size(0), m_dims(SH_TEXTURE_1D), m_length(0), m_kind(SH_TEMP),
-    m_type(SH_FLOAT), m_semantic_type(SH_ATTRIB), m_values("")
+  : m_attribute(false), m_builtin(false), m_texture(false), m_palette(false), 
+    m_uniform(false), m_name(""), m_size(0), m_dims(SH_TEXTURE_1D), m_length(0), 
+    m_kind(SH_TEMP), m_type(SH_FLOAT), m_semantic_type(SH_ATTRIB), m_values("")
 {
 }
 
 GlslVariable::GlslVariable(const GlslVariable& v)
-  : m_builtin(v.m_builtin), m_texture(v.m_texture), m_palette(v.m_palette),
-    m_uniform(v.m_uniform), m_name(v.m_name), m_size(v.m_size), 
-    m_dims(v.m_dims), m_length(v.m_length), m_kind(v.m_kind), m_type(v.m_type),
-    m_semantic_type(v.m_semantic_type), m_values(v.m_values)
+  : m_attribute(v.m_attribute), m_builtin(v.m_builtin), m_texture(v.m_texture),
+    m_palette(v.m_palette), m_uniform(v.m_uniform), m_name(v.m_name), 
+    m_size(v.m_size), m_dims(v.m_dims), m_length(v.m_length), m_kind(v.m_kind), 
+    m_type(v.m_type), m_semantic_type(v.m_semantic_type), m_values(v.m_values)
 {
 }
 
 GlslVariable::GlslVariable(const ShVariableNodePtr& v)
-  : m_builtin(!v->meta("opengl:state").empty()), 
+  : m_attribute(false), m_builtin(!v->meta("opengl:state").empty()), 
     m_texture(SH_TEXTURE == v->kind()), m_palette(SH_PALETTE == v->kind()),
     m_uniform(m_texture || m_palette || v->uniform()),
     m_name(v->meta("opengl:state")), m_size(v->size()), m_kind(v->kind()), 
@@ -160,6 +160,15 @@ void GlslVariable::name(int i, enum GlslProgramType unit)
 
   m_name = varname.str();
   m_builtin = false;
+}
+
+void GlslVariable::attribute(int input_nb)
+{
+  SH_DEBUG_ASSERT(SH_FLOAT == m_type); // only float inputs are allowed
+  stringstream name;
+  name << "attrib" << input_nb;
+  m_name = name.str();
+  m_attribute = true;
 }
 
 void GlslVariable::builtin(GlslVarBinding binding, int index)
