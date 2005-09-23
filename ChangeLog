@@ -1,5 +1,9 @@
 2005-09-23  Francois Marier  <francois@serioushack.com>
 
+	* src/ShSyntax.hpp: Add the namespace qualifier to ShContext so
+	that it's not necessary to be using the SH namespace before using
+	SH_IF or any other control flow macro.
+
 	* backends/gl/GlslVariable.cpp, GlslVariable.hpp (attribute): Add
 	this method to set the name of the variable and make it an
 	attribute (with the new m_attribute bool).

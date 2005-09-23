@@ -70,7 +70,7 @@
 #define SH_IF(cond) { \
   bool sh__internal_cond; \
   ::SH::shIf(SH_PUSH_ARG_QUEUE && SH_PUSH_ARG && SH_PROCESS_ARG(cond, &sh__internal_cond)); \
-  if (ShContext::current()->parsing() || sh__internal_cond) {{
+  if (::SH::ShContext::current()->parsing() || sh__internal_cond) {{
 /** \def SH_ELSE
  * Indicate the start of the else-block of an if statement.
  * @see SH_IF
@@ -79,7 +79,7 @@
 #define SH_ELSE  \
   }} \
   ::SH::shElse(); \
-  if (ShContext::current()->parsing() || !sh__internal_cond) {{
+  if (::SH::ShContext::current()->parsing() || !sh__internal_cond) {{
 /** \def SH_ENDIF
  * Indicate the end of an if-statement.
  * @see SH_IF
@@ -101,8 +101,8 @@
   bool sh__internal_cond; \
   ::SH::shWhile(SH_PUSH_ARG_QUEUE && SH_PUSH_ARG && SH_PROCESS_ARG(cond, &sh__internal_cond)); \
   bool sh__internal_firsttime = true; \
-  while ((sh__internal_firsttime && (ShContext::current()->parsing() || sh__internal_cond)) \
-         || (!ShContext::current()->parsing() && ::SH::shEvaluateCondition(cond))) {{{
+  while ((sh__internal_firsttime && (::SH::ShContext::current()->parsing() || sh__internal_cond)) \
+         || (!::SH::ShContext::current()->parsing() && ::SH::shEvaluateCondition(cond))) {{{
 /** \def SH_ENDWHILE
  * Indicate the end of a while-statement.
  * @see SH_WHILE
@@ -128,8 +128,8 @@
  * @see SH_DO
  */
 #define SH_UNTIL(cond) \
-  }}}} while (!ShContext::current()->parsing() && ::SH::shEvaluateCondition(cond)); \
-  if (ShContext::current()->parsing()) ::SH::shUntil(SH_PUSH_ARG_QUEUE && SH_PUSH_ARG && SH_PROCESS_ARG(cond, 0)); }
+  }}}} while (!::SH::ShContext::current()->parsing() && ::SH::shEvaluateCondition(cond)); \
+  if (::SH::ShContext::current()->parsing()) ::SH::shUntil(SH_PUSH_ARG_QUEUE && SH_PUSH_ARG && SH_PROCESS_ARG(cond, 0)); }
 //@}
 
 /// @name For loops
@@ -142,15 +142,15 @@
  */
 // TODO: It is possible to make declaring variables in init work. do so.
 #define SH_FOR(init,cond,update) { \
-  if (ShContext::current()->parsing()) \
+  if (::SH::ShContext::current()->parsing()) \
     ::SH::shFor(SH_PUSH_ARG_QUEUE \
              && SH_PUSH_ARG && SH_PROCESS_ARG(init, 0) \
              && SH_PUSH_ARG && SH_PROCESS_ARG(cond, 0) \
              && SH_PUSH_ARG && SH_PROCESS_ARG(update, 0)); \
-  if (!ShContext::current()->parsing()) init; \
+  if (!::SH::ShContext::current()->parsing()) init; \
   bool sh__internal_first_time = true; \
   while (1) {{{{{ \
-    if (!ShContext::current()->parsing()) { \
+    if (!::SH::ShContext::current()->parsing()) { \
       if (!sh__internal_first_time) { update; } \
       else { sh__internal_first_time = false; } \
       if (!shEvaluateCondition(cond)) break; \
@@ -160,7 +160,7 @@
  * @see SH_FOR
  */
 #define SH_ENDFOR \
-    if (ShContext::current()->parsing()) break; \
+    if (::SH::ShContext::current()->parsing()) break; \
   }}}}} \
   ::SH::shEndFor(); \
 }
@@ -175,7 +175,7 @@
  * @see SH_DO
  * @see SH_FOR
  */
-#define SH_BREAK    if (!ShContext::current()->parsing()) { break; } else { ::SH::shBreak(); }
+#define SH_BREAK    if (!::SH::ShContext::current()->parsing()) { break; } else { ::SH::shBreak(); }
 /** \def SH_CONTINUE
  * Break out of a loop, continuing with the next iteration.
  * @see SH_BREAK
@@ -183,7 +183,7 @@
  * @see SH_DO
  * @see SH_FOR
  */
-#define SH_CONTINUE if (!ShContext::current()->parsing()) { continue; } else { ::SH::shBreak(); }
+#define SH_CONTINUE if (!::SH::ShContext::current()->parsing()) { continue; } else { ::SH::shBreak(); }
 /** \def SH_RETURN
  * Terminate the fragment program without killing the fragment.
  */
@@ -200,13 +200,13 @@
  */
 #define SH_BEGIN_SECTION(name) \
   {{{{{{ \
-    if(ShContext::current()->parsing()) { \
+    if(::SH::ShContext::current()->parsing()) { \
       ::SH::shBeginSection(); \
       ::SH::shComment(name); \
     }
 
 #define SH_END_SECTION \
-    if(ShContext::current()->parsing()) { ::SH::shEndSection(); } \
+    if(::SH::ShContext::current()->parsing()) { ::SH::shEndSection(); } \
   }}}}}} 
 
 
