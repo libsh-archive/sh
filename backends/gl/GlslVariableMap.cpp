@@ -91,7 +91,6 @@ GlslVariableMap::GlslVariableMap(ShProgramNode* shader, GlslProgramType unit)
           SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ARB, &max_draw_buffers));
         }
         glslFragmentOutputBindingSpecs[1].max_bindings = max_draw_buffers;
-        std::cerr << "max_draw_buffers = " << max_draw_buffers << std::endl;
       }
     }
   }
