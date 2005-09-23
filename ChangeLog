@@ -1,3 +1,9 @@
+2005-09-23  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslVariableMap.cpp (GlslVariableMap),
+	ArbCode.cpp (ArbCode): Remove the hard-coded number of maximum
+	draw buffers and get it through OpenGL's glGet instead.
+
 2005-09-22  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/PBufferStreams.cpp (execute): Only display the

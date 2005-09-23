@@ -132,7 +132,14 @@ ArbCode::ArbCode(const ShProgramNodeCPtr& shader, const string& unit,
           (extstr.find("ARB_draw_buffers") != string::npos)) {
         m_environment |= SH_ARB_ATIDB;
 	arbFragmentOutputBindingSpecs[0].binding = SH_ARB_REG_RESULTCOL_ATI;
-	arbFragmentOutputBindingSpecs[0].maxBindings = 4;
+
+        int max_draw_buffers;
+        if (extstr.find("ATI_draw_buffers") != string::npos) {
+          SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ATI, &max_draw_buffers));
+        } else {
+          SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ARB, &max_draw_buffers));
+        }
+        arbFragmentOutputBindingSpecs[0].maxBindings = max_draw_buffers;
       }
     }
     if (unit == "vertex") {
