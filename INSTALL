@@ -1,6 +1,29 @@
-------------------------------
-REQUIREMENTS
-------------------------------
+================================
+BUILDING ON WINDOWS OR MAC OS X
+================================
+
+The simplest way to build Sh on Winodws  is to use the Visual Studio .NET
+solution file:
+  win32/Sh.sln
+
+More information can be found on the wiki at:
+  http://libsh.org/wiki/index.php/Building_Sh_on_Windows
+
+The Mac OS X version of Sh has been tested on Panther and Xcode 1.5.
+
+To compile Sh on OS X, you will need the following fink packages:
+  libpng3
+
+To build Sh, simply open the Xcode project in the "xcode/" directory
+and build it. You can also do:
+  cd xcode
+  xcodebuild -alltargets install
+
+==============================
+BUILDING ON LINUX/UNIX
+==============================
+
+Requirements:
  - g++ > 3.0.0, >= 4.0 is recommended.
  - libpng
  - for the ARB backend, a recent glext.h as well as GL drivers and headers
@@ -10,9 +33,9 @@ REQUIREMENTS
    least a GeForce 5200FX or a Radeon 9600
 
 ------------------------------
-INSTALLING
+COMPILATION AND INSTALLATION
 ------------------------------
-Quick compile and installation:
+Quick installation:
   ./configure
   make
   make install
@@ -87,7 +110,11 @@ can install it to a temporary location with a custom prefix:
 
 and then run "make check" on it.
 
-------------------------------
+==============================
 MORE HELP
-------------------------------
-See the homepage at http://libsh.org/ for mailing list info, etc.
+==============================
+
+See the homepage at
+  http://libsh.org/
+and the wiki at 
+  http://www.libsh.org/wiki/
