@@ -169,6 +169,12 @@
 				RelativePath="..\util\ShObjMesh.hpp">
 			</File>
 			<File
+				RelativePath="..\util\ShPngImage.hpp">
+			</File>
+			<File
+				RelativePath="..\util\ShPngImageImpl.hpp">
+			</File>
+			<File
 				RelativePath="..\util\shutil.hpp">
 			</File>
 		</Filter>

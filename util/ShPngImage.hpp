@@ -17,36 +17,34 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHUTIL_HPP
-#define SHUTIL_HPP
+#ifndef SHPNGIMAGE_HPP
+#define SHPNGIMAGE_HPP
 
-#include "ShFunc.hpp"
-#include "ShKernelLib.hpp"
-#include "ShKernelLight.hpp"
-#include "ShKernelSurfMap.hpp"
-#include "ShKernelSurface.hpp"
-#include "ShKernelPost.hpp"
-#include "ShMesh.hpp"
-#include "ShObjMesh.hpp"
-#include "ShPngImage.hpp"
-#include <string>
+#include "ShImage.hpp"
 
-/** \namespace ShUtil
- * \brief The main ShUtil namespace.
- *
- * All the extra Sh utility functions and objects reside within this namespace.
- */
-
-/** \file shutil.hpp
- * \brief The include file for extra Sh utilities 
- *
- * You can use this to include all available extra utilities.
- */
 namespace ShUtil {
 
-/// Converts "/" to "\" on Windows and the reverse on other OSes
-std::string normalize_path(const std::string& path);
+/** Libpng wrapper functions
+ * Allows ShImage objects to load their data from or save to a PNG file.
+ * @{
+ */
 
-}
+/// Load the PNG file into this image
+template<typename T>
+static void load_PNG(SH::ShTypedImage<T>& image, const std::string& filename);
 
-#endif
+/// Save the PNG image into this file
+template<typename T>
+static void save_PNG(const SH::ShTypedImage<T>& image, const std::string& filename, int inverse_alpha=0);
+
+/// Save the PNG image into this file
+template<typename T>
+static void save_PNG16(const SH::ShTypedImage<T>& image, const std::string& filename, int inverse_alpha=0);
+
+// @}
+
+} // namespace
+
+#include "ShPngImageImpl.hpp"
+
+#endif // SHPNGIMAGE_HPP

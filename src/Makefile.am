@@ -89,7 +89,7 @@ libsh_la_SOURCES += ShArray.hpp ShTable.hpp ShTexture.hpp
 libsh_la_SOURCES += ShWrap.hpp ShInterp.hpp ShMIPFilter.hpp
 libsh_la_SOURCES += ShTextureNode.hpp ShImage.hpp ShImageImpl.hpp ShImage3D.hpp
 libsh_la_SOURCES += ShMemory.hpp ShMemory.cpp ShMemoryDep.hpp
-libsh_la_SOURCES += ShTextureNode.cpp ShImage.cpp ShImage3D.cpp
+libsh_la_SOURCES += ShTextureNode.cpp ShImage3D.cpp
 
 # Types
 libsh_la_SOURCES += ShVariableType.hpp ShVariableType.cpp

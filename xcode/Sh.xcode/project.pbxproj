@@ -1446,15 +1446,6 @@
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.cpp;
-			name = ShImage.cpp;
-			path = ../src/ShImage.cpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		3EB30ACD08787D7600729309 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
 			name = ShImage3D.cpp;
 			path = ../src/ShImage3D.cpp;
 			refType = 2;

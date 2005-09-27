@@ -50,21 +50,15 @@ public:
   int elements() const; ///< Determine the depth (floats per pixel) of
                         ///the image
 
+  void set_size(int width, int height, int depth); /// Set the size of the image 
+                                                   /// and create the underlying memory
+
   T operator()(int x, int y, int i) const; ///< Retrieve a
                                                ///particular component
                                                ///from the image.
   T& operator()(int x, int y, int i);  ///< Retrieve a
                                                ///particular component
                                                ///from the image.
-  
-  ///< Load a PNG file into this image
-  void load_PNG(const std::string& filename);
-  
-  ///< Save a PNG image into this file
-  void save_PNG(const std::string& filename, int inverse_alpha=0);
-  
-  ///< Save a PNG image into this file
-  void save_PNG16(const std::string& filename, int inverse_alpha=0);
 
   ShTypedImage getNormalImage();
 
@@ -79,25 +73,6 @@ private:
   int m_width, m_height;
   int m_elements;
   ShHostMemoryPtr m_memory;
-
-  /// Returns a copy of the memory data in a float array
-  float* float_copy() const;
-};
-
-/** Libpng wrapper
- * Allows ShImage to load its data from or save to a PNG file.
- */
-class 
-SH_DLLEXPORT ShPngImage {
-public:
-  static float* read_PNG(const std::string& filename, int& width, int& height,
-                         int& elements);
-
-  static void save_PNG(const std::string& filename, const float* data,
-                       int inverse_alpha, int width, int height, int elements);
-
-  static void save_PNG16(const std::string& filename, const float* data,
-                         int inverse_alpha, int width, int height, int elements);
 };
 
 typedef ShTypedImage<float> ShImage;

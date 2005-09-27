@@ -18,6 +18,7 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include <sh/sh.hpp>
+#include <sh/shutil.hpp>
 #ifdef __APPLE__
 # include <CoreFoundation/CoreFoundation.h>
 # include <GLUT/glut.h>
@@ -52,8 +53,8 @@ bool show_help = false;
 
 const int MIPMAP_LEVELS = 10;
 
-ShImage kd_images[MIPMAP_LEVELS + 1];
-ShImage ks_images[2];
+ShTypedImage<ShFracUByte> kd_images[MIPMAP_LEVELS + 1];
+ShTypedImage<ShFracUByte> ks_images[2];
 
 void rustTexture()
 {
@@ -278,39 +279,39 @@ int main(int argc, char** argv)
                                 kCFURLPOSIXPathStyle);
     filename = new char[CFStringGetLength(s) + 1];
     CFStringGetCString(s, filename, CFStringGetLength(s) + 1, kCFStringEncodingASCII);
-    kd_images[0].load_PNG(filename);
+    ShUtil::load_PNG(kd_images[0], filename);
     delete [] filename;
 
     s = CFURLCopyFileSystemPath(CFBundleCopyResourceURL(mainBundle, CFSTR("rustks"), CFSTR("png"), NULL),
                                 kCFURLPOSIXPathStyle);
     filename = new char[CFStringGetLength(s) + 1];
     CFStringGetCString(s, filename, CFStringGetLength(s) + 1, kCFStringEncodingASCII);
-    ks_images[0].load_PNG(filename);
+    ShUtil::load_PNG(ks_images[0], filename);
     delete [] filename;
 
     s = CFURLCopyFileSystemPath(CFBundleCopyResourceURL(mainBundle, CFSTR("kd"), CFSTR("png"), NULL),
                                 kCFURLPOSIXPathStyle);
     filename = new char[CFStringGetLength(s) + 1];
     CFStringGetCString(s, filename, CFStringGetLength(s) + 1, kCFStringEncodingASCII);
-    kd_images[1].load_PNG(filename);
+    ShUtil::load_PNG(kd_images[1], filename);
     delete [] filename;
     
     s = CFURLCopyFileSystemPath(CFBundleCopyResourceURL(mainBundle, CFSTR("ks"), CFSTR("png"), NULL),
                                 kCFURLPOSIXPathStyle);
     filename = new char[CFStringGetLength(s) + 1];
     CFStringGetCString(s, filename, CFStringGetLength(s) + 1, kCFStringEncodingASCII);
-    ks_images[1].load_PNG(filename);
+    ShUtil::load_PNG(ks_images[1], filename);
     delete [] filename;
 #else
-    kd_images[0].load_PNG("tex_rustkd.png");
-    ks_images[0].load_PNG("tex_rustks.png");
-    kd_images[1].load_PNG("tex_kd.png");
-    ks_images[1].load_PNG("tex_ks.png");
+    ShUtil::load_PNG(kd_images[0], "tex_rustkd.png");
+    ShUtil::load_PNG(ks_images[0], "tex_rustks.png");
+    ShUtil::load_PNG(kd_images[1], "tex_kd.png");
+    ShUtil::load_PNG(ks_images[1], "tex_ks.png");
 
     for (int i=1; i < MIPMAP_LEVELS; i++) {
       stringstream s;
       s << "tex_kd" << i << ".png";
-      kd_images[1 + i].load_PNG(s.str());
+      ShUtil::load_PNG(kd_images[1 + i], s.str());
     }
 #endif
   } 

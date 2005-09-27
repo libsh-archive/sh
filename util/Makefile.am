@@ -24,4 +24,6 @@ incinc_HEADERS = ShFunc.hpp \
                  ShMesh.hpp \
                  ShMeshImpl.hpp \
                  ShObjMesh.hpp \
+                 ShPngImage.hpp \
+                 ShPngImageImpl.hpp \
                  shutil.hpp

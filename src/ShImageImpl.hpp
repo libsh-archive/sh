@@ -27,9 +27,8 @@ namespace SH {
 
 template<typename T>
 ShTypedImage<T>::ShTypedImage(int width, int height, int elements)
-  : m_width(width), m_height(height), m_elements(elements),
-    m_memory(new ShHostMemory(sizeof(T) * m_width * m_height * m_elements, ShStorageTypeInfo<T>::value_type))
 {
+  set_size(width, height, elements);
 }
 
 template<typename T>
@@ -56,52 +55,6 @@ ShTypedImage<T>& ShTypedImage<T>::operator=(const ShTypedImage<T>& other)
               m_width * m_height * m_elements * sizeof(T));
   
   return *this;
-}
-
-template<typename T>
-void ShTypedImage<T>::load_PNG(const std::string& filename)
-{
-  float* png_data = ShPngImage::read_PNG(filename, m_width, m_height, m_elements);
-  int array_length = m_width * m_height * m_elements;
-
-  m_memory = new ShHostMemory(sizeof(T) * array_length, ShStorageTypeInfo<T>::value_type);
-  T* storage_data = static_cast<T*>(m_memory->hostStorage()->data());
-
-  for (int i=0; i < array_length; i++) {
-    storage_data[i] = png_data[i];
-  }
-
-  delete [] png_data;
-}
-
-template<typename T>
-float* ShTypedImage<T>::float_copy() const
-{
-  int array_length = m_width * m_height * m_elements;
-  float* float_data = new float[array_length];
-  
-  const T* storage_data = static_cast<const T*>(m_memory->hostStorage()->data());
-  for (int i=0; i < array_length; i++) {
-    float_data[i] = storage_data[i];
-  }
-  
-  return float_data;
-}
-
-template<typename T>
-void ShTypedImage<T>::save_PNG(const std::string& filename, int inverse_alpha)
-{
-  float* float_data = float_copy();
-  ShPngImage::save_PNG(filename, float_data, inverse_alpha, m_width, m_height, m_elements);
-  delete [] float_data;
-}
-
-template<typename T>
-void ShTypedImage<T>::save_PNG16(const std::string& filename, int inverse_alpha)
-{
-  float* float_data = float_copy();
-  ShPngImage::save_PNG16(filename, float_data, inverse_alpha, m_width, m_height, m_elements);
-  delete [] float_data;
 }
 
 template<typename T>
@@ -185,6 +138,15 @@ template<typename T>
 int ShTypedImage<T>::height() const
 {
   return m_height;
+}
+
+template<typename T>
+void ShTypedImage<T>::set_size(int width, int height, int elements)
+{
+  m_width = width;
+  m_height = height;
+  m_elements = elements;
+  m_memory = new ShHostMemory(sizeof(T) * m_width * m_height * m_elements, ShStorageTypeInfo<T>::value_type);
 }
 
 template<typename T>

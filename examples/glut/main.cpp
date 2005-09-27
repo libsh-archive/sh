@@ -18,12 +18,17 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include <sh/sh.hpp>
+
+#define GL_GLEXT_VERBOSE 1
+#define GL_GLEXT_PROTOTYPES 1
+
 #ifdef __APPLE__
 # include <OpenGL/gl.h>
 # include <OpenGL/glext.h>
 # include <OpenGL/glu.h>
 # include <GLUT/glut.h>
 #else
+# include <GL/gl.h>
 # include <GL/glut.h>
 # include <GL/glext.h>
 # include <GL/glu.h>
@@ -53,13 +58,17 @@ bool show_help = false;
 void initShaders()
 {
   vsh = SH_BEGIN_VERTEX_PROGRAM {
+
     ShInOutPosition4f pos;
     ShInOutNormal3f normal;
+    ShInputAttrib4f SH_DECL(fudge);
     ShOutputVector3f lightv;
 
     ShPoint3f posv = (mv | pos)(0,1,2); // Compute viewspace position
     lightv = lightPos - posv; // Compute light direction
     
+    fudge = ShAttrib4f(0, 0, 0, 0);
+    pos = pos + fudge;
     pos = mvd | pos; // Project position
     normal = mv | normal; // Project normal
   } SH_END;
@@ -227,6 +236,41 @@ int gprintf(int x, int y, char* fmt, ...)
   return p-temp;
 }
 
+void gl_check_error()
+{
+  GLenum errnum = glGetError();
+  char* error = 0;
+  switch (errnum) {
+  case GL_NO_ERROR:
+    return;
+  case GL_INVALID_ENUM:
+    error = "GL_INVALID_ENUM";
+    break;
+  case GL_INVALID_VALUE:
+    error = "GL_INVALID_VALUE";
+    break;
+  case GL_INVALID_OPERATION:
+    error = "GL_INVALID_OPERATION";
+    break;
+  case GL_STACK_OVERFLOW:
+    error = "GL_STACK_OVERFLOW";
+    break;
+  case GL_STACK_UNDERFLOW:
+    error = "GL_STACK_UNDERFLOW";
+    break;
+  case GL_OUT_OF_MEMORY:
+    error = "GL_OUT_OF_MEMORY";
+    break;
+  case GL_TABLE_TOO_LARGE:
+    error = "GL_TABLE_TOO_LARGE";
+    break;
+  default:
+    error = "Unknown error!";
+    break;
+  }
+  cerr << error << endl;
+}
+
 int main(int argc, char** argv)
 {
   glutInit(&argc, argv);
@@ -253,13 +297,33 @@ int main(int argc, char** argv)
   diffusecolor = ShColor3f(0.5, 0.1, 0.2);
 
   initShaders();
-
+  vsh.meta("opengl:matching", "generic");
   shBind(*shaders);
 
-#if 0
+  float data[] = {0.0f, 0.0f, 0.0f, 0.0f};
+
+  // Fudging the data
+  for (ShProgramNode::VarList::const_iterator i = vsh.inputs_begin(); i != vsh.inputs_end(); i++) {
+    const ShVariableNodePtr &node(*i);
+    if (node->name() == "fudge") {
+      cerr << "fudge = '" << (*i)->meta("opengl:attribindex") << "'" << endl;
+      GLuint index = 2;
+      //for (GLuint index = 0; index < 10; index++) {
+        glVertexAttribPointerARB(index, node->size(), GL_FLOAT, GL_FALSE, 0, data);
+        gl_check_error();
+        glEnableVertexAttribArrayARB(index);
+        gl_check_error();
+      //}
+    }
+  }
+
+
+#if 1
   cout << "Vertex Unit:" << endl;
   vsh.node()->code()->print(cout);
   cout << "--" << endl;
+#endif
+#if 0
   cout << "Fragment Unit:" << endl;
   fsh.node()->code()->print(cout);
   cout << "--" << endl;

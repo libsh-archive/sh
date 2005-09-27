@@ -17,17 +17,21 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShImage.hpp"
+#ifndef SHPNGIMAGEIMPL_HPP
+#define SHPNGIMAGEIMPL_HPP
+
+#include "ShPngImage.hpp"
 #include <png.h>
 #include <sstream>
 #include "ShException.hpp"
 #include "ShError.hpp"
 
-namespace SH {
+namespace ShUtil {
 
+using namespace SH;
 using namespace std;
 
-float* ShPngImage::read_PNG(const string& filename, int& width, int& height, int& elements)
+static float* read_PNG(const string& filename, int& width, int& height, int& elements)
 {
   // check that the file is a png file
   png_byte buf[8];
@@ -128,8 +132,8 @@ float* ShPngImage::read_PNG(const string& filename, int& width, int& height, int
   return data;
 }
 
-void ShPngImage::save_PNG(const string& filename, const float* data,
-                          int inverse_alpha, int width, int height, int elements)
+static void write_PNG(const string& filename, const float* data, int inverse_alpha, 
+                      int width, int height, int elements)
 {
   FILE* fout = fopen(filename.c_str(), "wb");
   png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -202,8 +206,8 @@ void ShPngImage::save_PNG(const string& filename, const float* data,
   fclose(fout);
 }
 
-void ShPngImage::save_PNG16(const string& filename, const float* data,
-                            int inverse_alpha, int width, int height, int elements)
+static void write_PNG16(const string& filename, const float* data, int inverse_alpha,
+                        int width, int height, int elements)
 {
   FILE* fout = fopen(filename.c_str(), "w");
   png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -276,4 +280,56 @@ void ShPngImage::save_PNG16(const string& filename, const float* data,
   fclose(fout);
 }
 
+/// Copy the contents of the image into a float array
+template<typename T>
+static float* float_copy(const ShTypedImage<T>& image)
+{
+  int array_length = image.width() * image.height() * image.elements();
+  float* float_data = new float[array_length];
+  
+  const T* storage_data = image.data();
+  for (int i=0; i < array_length; i++) {
+    float_data[i] = storage_data[i];
+  }
+
+  return float_data;
 }
+
+/// Public functions
+
+template<typename T>
+static void load_PNG(ShTypedImage<T>& image, const string& filename)
+{
+  int width, height, depth;
+  float* png_data = read_PNG(filename, width, height, depth);
+
+  image.set_size(width, height, depth);
+  T* storage_data = image.data();
+
+  int array_length = width * height * depth;
+  for (int i=0; i < array_length; i++) {
+    storage_data[i] = png_data[i];
+  }
+
+  delete [] png_data;
+}
+
+template<typename T>
+static void save_PNG(const ShTypedImage<T>& image, const string& filename, int inverse_alpha=0)
+{
+  float* float_data = float_copy(image);
+  write_PNG(filename, float_data, inverse_alpha, image.width(), image.height(), image.elements());
+  delete [] float_data;
+}
+
+template<typename T>
+static void save_PNG16(const ShTypedImage<T>& image, const string& filename, int inverse_alpha=0)
+{
+  float* float_data = float_copy(image);
+  write_PNG16(filename, float_data, inverse_alpha, image.width(), image.height(), image.elements());
+  delete [] float_data;
+}
+
+} // namespace
+
+#endif // SHPNGIMAGEIMPL_HPP

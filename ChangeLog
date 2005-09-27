@@ -1,3 +1,10 @@
+2005-09-27  Francois Marier  <francois@serioushack.com>
+
+	* util/ShPngImage.hpp, ShPngImageImpl.hpp, shutil.hpp,
+	src/ShImage.hpp, src/ShImageImpl.hpp, src/ShImage.cpp: Move the
+	PNG stuff to util.  Make load_PNG, save_PNG and save_PNG16 free
+	functions instead of ShImage methods.
+
 2005-09-23  Francois Marier  <francois@serioushack.com>
 
 	* src/ShSyntax.hpp: Add the namespace qualifier to ShContext so
