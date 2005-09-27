@@ -23,6 +23,7 @@
 #include <iostream>
 #include <iomanip>
 #include <sh.hpp>
+#include <shutil.hpp>
 
 #define COLOR_GREEN "[32m"
 #define COLOR_RED "[31m"

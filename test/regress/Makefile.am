@@ -1,6 +1,6 @@
-INCLUDES = -I$(top_srcdir)/src
+INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/util
 AM_CXXFLAGS = -Wall -g -O0
-AM_LDFLAGS = -g -L$(top_builddir)/src
+AM_LDFLAGS = -g -L$(top_builddir)/src -L$(top_builddir)/util
 LDADD = -lsh $(GL_LIBS)
 TESTS = abs add cbrt ceil clamp comparisons cross dec_inc div dot exp \
 	floor frac length_distance lerp lighting log logical mad \

@@ -186,7 +186,7 @@ class ImageTexture:
         r =   "  " + self.textype + " " + self.name + ";\n"; 
         r +=   "  {\n" 
         r +=  "    ShImage image;\n"
-        r +=  "    image.load_PNG(\"" + self.filename + "\");\n"
+        r +=  "    ShUtil::load_PNG(image, \"" + self.filename + "\");\n"
         r +=  "    " + self.name + ".size(image.width(), image.height());\n" 
         r +=  "    " + self.name + ".memory(image.memory());\n" 
         r +=  "  }\n"
