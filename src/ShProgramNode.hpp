@@ -135,26 +135,25 @@ public:
   typedef std::list<ShChannelNodePtr> ChannelList;
   typedef std::list<ShPaletteNodePtr> PaletteList;
 
-  VarList::const_iterator inputs_begin() const;
-  VarList::const_iterator inputs_end() const;
-  VarList::const_iterator outputs_begin() const;
-  VarList::const_iterator outputs_end() const;
-  VarList::const_iterator temps_begin() const;
-  VarList::const_iterator temps_end() const;
-  VarList::const_iterator constants_begin() const;
-  VarList::const_iterator constants_end() const;
-  VarList::const_iterator uniforms_begin() const;
-  VarList::const_iterator uniforms_end() const;
+  VarList::const_iterator inputs_begin() const { return inputs.begin(); }
+  VarList::const_iterator inputs_end() const { return inputs.end(); }
+  VarList::const_iterator outputs_begin() const { return outputs.begin(); }
+  VarList::const_iterator outputs_end() const { return outputs.end(); }
+  VarList::const_iterator temps_begin() const { return temps.begin(); }
+  VarList::const_iterator temps_end() const { return temps.end(); }
+  VarList::const_iterator constants_begin() const { return constants.begin(); }
+  VarList::const_iterator constants_end() const { return constants.end(); }
+  VarList::const_iterator uniforms_begin() const { return uniforms.begin(); }
+  VarList::const_iterator uniforms_end() const { return uniforms.end(); }
 
-  TexList::const_iterator textures_begin() const;
-  TexList::const_iterator textures_end() const;
+  TexList::const_iterator textures_begin() const { return textures.begin(); }
+  TexList::const_iterator textures_end() const { return textures.end(); }
 
-  ChannelList::const_iterator channels_begin() const;
-  ChannelList::const_iterator channels_end() const;
+  ChannelList::const_iterator channels_begin() const { return channels.begin(); }
+  ChannelList::const_iterator channels_end() const { return channels.end(); }
 
-  PaletteList::const_iterator palettes_begin() const;
-  PaletteList::const_iterator palettes_end() const;
-  
+  PaletteList::const_iterator palettes_begin() const { return palettes.begin(); }
+  PaletteList::const_iterator palettes_end() const { return palettes.end(); }
   
   VarList inputs; ///< Input variables used in this program
   VarList outputs; ///< Output variables used in this program
@@ -184,7 +183,7 @@ public:
   static std::ostream& print(std::ostream& out, const VarList& list);
 
   /// True if this program has been completed with SH_END.
-  bool finished() const;
+  bool finished() const { return m_finished; }
 
   /// @internal Set finished to true. Only shEndShader() needs to call this.
   void finish();
@@ -192,7 +191,7 @@ public:
   /** @internal Indicate that we have been assigned to a uniform
    * during construction. This is so we can call back that uniform
    * when the program is finished constructing. */
-  void assign(const ShVariableNodePtr& var) const;
+  void assign(const ShVariableNodePtr& var) const { m_assigned_var = var; }
   
 private:
   static std::string describe(const VarList &varlist); 

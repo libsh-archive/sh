@@ -246,17 +246,20 @@ void ShProgramNode::collectDecls()
   }
 }
 
-bool ShProgramNode::hasDecl(ShVariableNodePtr node) const {
+bool ShProgramNode::hasDecl(ShVariableNodePtr node) const
+{
   return tempDecls.find(node) != tempDecls.end();
 }
 
-void ShProgramNode::addDecl(ShVariableNodePtr node, ShCtrlGraphNodePtr cfgNode) {
+void ShProgramNode::addDecl(ShVariableNodePtr node, ShCtrlGraphNodePtr cfgNode)
+{
   tempDecls.insert(node);
   SH_DEBUG_ASSERT(ctrlGraph->entry());
   cfgNode->addDecl(node);
 }
 
-void ShProgramNode::addDecl(ShVariableNodePtr node) {
+void ShProgramNode::addDecl(ShVariableNodePtr node)
+{
   addDecl(node, ctrlGraph->entry());
 }
 
@@ -376,91 +379,6 @@ ShPointer<ShProgramNode> ShProgramNode::clone() const
   return result;
 }
 
-ShProgramNode::VarList::const_iterator ShProgramNode::inputs_begin() const
-{
-  return inputs.begin();
-}
-
-ShProgramNode::VarList::const_iterator ShProgramNode::inputs_end() const
-{
-  return inputs.end();
-}
-
-ShProgramNode::VarList::const_iterator ShProgramNode::outputs_begin() const
-{
-  return outputs.begin();
-}
-
-ShProgramNode::VarList::const_iterator ShProgramNode::outputs_end() const
-{
-  return outputs.end();
-}
-
-ShProgramNode::VarList::const_iterator ShProgramNode::temps_begin() const
-{
-  return temps.begin();
-}
-
-ShProgramNode::VarList::const_iterator ShProgramNode::temps_end() const
-{
-  return temps.end();
-}
-
-ShProgramNode::VarList::const_iterator ShProgramNode::constants_begin() const
-{
-  return constants.begin();
-}
-
-ShProgramNode::VarList::const_iterator ShProgramNode::constants_end() const
-{
-  return constants.end();
-}
-
-ShProgramNode::VarList::const_iterator ShProgramNode::uniforms_begin() const
-{
-  return uniforms.begin();
-}
-
-ShProgramNode::VarList::const_iterator ShProgramNode::uniforms_end() const
-{
-  return uniforms.end();
-}
-
-ShProgramNode::TexList::const_iterator ShProgramNode::textures_begin() const
-{
-  return textures.begin();
-}
-
-ShProgramNode::TexList::const_iterator ShProgramNode::textures_end() const
-{
-  return textures.end();
-}
-
-ShProgramNode::ChannelList::const_iterator ShProgramNode::channels_begin() const
-{
-  return channels.begin();
-}
-
-ShProgramNode::ChannelList::const_iterator ShProgramNode::channels_end() const
-{
-  return channels.end();
-}
-
-ShProgramNode::PaletteList::const_iterator ShProgramNode::palettes_begin() const
-{
-  return palettes.begin();
-}
-
-ShProgramNode::PaletteList::const_iterator ShProgramNode::palettes_end() const
-{
-  return palettes.end();
-}
-
-bool ShProgramNode::finished() const
-{
-  return m_finished;
-}
-
 void ShProgramNode::finish()
 {
   m_finished = true;
@@ -468,11 +386,6 @@ void ShProgramNode::finish()
     m_assigned_var->attach(this);
     m_assigned_var = 0;
   }
-}
-
-void ShProgramNode::assign(const ShVariableNodePtr& var) const
-{
-  m_assigned_var = var;
 }
 
 std::string ShProgramNode::describe(const VarList &varlist)
