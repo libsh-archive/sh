@@ -315,7 +315,7 @@ static void load_PNG(ShTypedImage<T>& image, const string& filename)
 }
 
 template<typename T>
-static void save_PNG(const ShTypedImage<T>& image, const string& filename, int inverse_alpha=0)
+static void save_PNG(const ShTypedImage<T>& image, const string& filename, int inverse_alpha)
 {
   float* float_data = float_copy(image);
   write_PNG(filename, float_data, inverse_alpha, image.width(), image.height(), image.elements());
@@ -323,7 +323,7 @@ static void save_PNG(const ShTypedImage<T>& image, const string& filename, int i
 }
 
 template<typename T>
-static void save_PNG16(const ShTypedImage<T>& image, const string& filename, int inverse_alpha=0)
+static void save_PNG16(const ShTypedImage<T>& image, const string& filename, int inverse_alpha)
 {
   float* float_data = float_copy(image);
   write_PNG16(filename, float_data, inverse_alpha, image.width(), image.height(), image.elements());
