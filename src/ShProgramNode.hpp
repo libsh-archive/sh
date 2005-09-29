@@ -145,6 +145,8 @@ public:
   VarList::const_iterator constants_end() const { return constants.end(); }
   VarList::const_iterator uniforms_begin() const { return uniforms.begin(); }
   VarList::const_iterator uniforms_end() const { return uniforms.end(); }
+  VarList::const_iterator all_uniforms_begin() const { return all_uniforms.begin(); }
+  VarList::const_iterator all_uniforms_end() const { return all_uniforms.end(); }
 
   TexList::const_iterator textures_begin() const { return textures.begin(); }
   TexList::const_iterator textures_end() const { return textures.end(); }
@@ -160,7 +162,8 @@ public:
   VarList temps; ///< Temporary variables used in this program
   VarSet tempDecls; ///< Temporary variables declared in this program
   VarList constants; ///< Constants used in this program
-  VarList uniforms; ///< Uniform variables used in this program
+  VarList uniforms; ///< Uniform variables used in the optimized program
+  VarList all_uniforms; ///< All uniform variables including recursively dependent ones
   TexList textures; ///< Textures used in this program
   ChannelList channels; ///< Channels used in FETCH instructions in this program
   PaletteList palettes; ///< Palettes used in PAL instructions in this program

@@ -139,6 +139,8 @@ public:
   ShProgramNode::VarList::const_iterator constants_end() const { return m_node->constants_end(); }
   ShProgramNode::VarList::const_iterator uniforms_begin() const { return m_node->uniforms_begin(); }
   ShProgramNode::VarList::const_iterator uniforms_end() const { return m_node->uniforms_end(); }
+  ShProgramNode::VarList::const_iterator all_uniforms_begin() const { return m_node->all_uniforms_begin(); }
+  ShProgramNode::VarList::const_iterator all_uniforms_end() const { return m_node->all_uniforms_end(); }
   ShProgramNode::TexList::const_iterator textures_begin() const { return m_node->textures_begin(); }
   ShProgramNode::TexList::const_iterator textures_end() const { return m_node->textures_end(); }
   ShProgramNode::ChannelList::const_iterator channels_begin() const { return m_node->channels_begin(); }

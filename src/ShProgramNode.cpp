@@ -135,7 +135,7 @@ std::string ShProgramNode::describe_interface() const
   os << "Channels:" << std::endl;
   os << describe(channels) << std::endl;
   os << "Uniforms:" << std::endl;
-  os << describe(uniforms) << std::endl;
+  os << describe(all_uniforms) << std::endl;
 
   return os.str();
 }
@@ -220,6 +220,7 @@ void ShProgramNode::collectVariables()
 {
   temps.clear();
   uniforms.clear();
+  all_uniforms.clear();
   constants.clear();
   textures.clear();
   channels.clear();
@@ -312,6 +313,17 @@ void ShProgramNode::collectVar(const ShVariableNodePtr& var)
   if (var->uniform()) {
     if (std::find(uniforms.begin(), uniforms.end(), var) == uniforms.end()) {
       uniforms.push_back(var);
+      all_uniforms.push_back(var);
+    }
+
+    // Get all of the recursively dependent uniforms
+    if (var->evaluator()) {
+      for (ShProgramNode::VarList::const_iterator I = var->evaluator()->uniforms_begin();
+           I != var->evaluator()->uniforms_end(); ++I) {
+        if (std::find(all_uniforms.begin(), all_uniforms.end(), *I) == all_uniforms.end()) {
+          all_uniforms.push_back(*I);
+        }
+      }
     }
   } else switch (var->kind()) {
   case SH_INPUT:

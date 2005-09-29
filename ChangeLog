@@ -1,3 +1,12 @@
+2005-09-29  Francois Marier  <francois@serioushack.com>
+
+	* src/ShProgramNode.hpp, ShProgramNode.cpp, ShProgram.hpp: Add
+	all_uniforms_begin() and all_uniforms_end() to return all
+	uniforms, including recursively dependent ones.
+
+	* src/ShProgramNode.cpp (describe_interface): Display all uniforms
+	instead of just iterating through uniforms_begin().
+
 2005-09-27  Francois Marier  <francois@serioushack.com>
 
 	* util/ShPngImage.hpp, ShPngImageImpl.hpp, shutil.hpp,
