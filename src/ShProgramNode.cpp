@@ -313,8 +313,8 @@ void ShProgramNode::collect_dependent_uniform(const ShVariableNodePtr& var)
 
   // Get all of the recursively dependent uniforms
   if (var->evaluator()) {
-    for (ShProgramNode::VarList::const_iterator I = var->evaluator()->uniforms_begin();
-         I != var->evaluator()->uniforms_end(); ++I) {
+    for (ShProgramNode::VarList::const_iterator I = var->evaluator()->uniforms.begin();
+         I != var->evaluator()->uniforms.end(); ++I) {
       if (std::find(all_uniforms.begin(), all_uniforms.end(), *I) == all_uniforms.end()) {
         collect_dependent_uniform(*I);
       }

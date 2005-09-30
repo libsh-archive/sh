@@ -102,20 +102,20 @@ GlslVariableMap::GlslVariableMap(ShProgramNode* shader, GlslProgramType unit)
   }
   allocate_builtin_outputs();
 
-  for (ShProgramNode::PaletteList::const_iterator i = m_shader->palettes_begin();
-       i != m_shader->palettes_end(); i++) {
+  for (ShProgramNode::PaletteList::const_iterator i = m_shader->begin_palettes();
+       i != m_shader->end_palettes(); i++) {
     allocate_temp(*i);
   }
-  for (ShProgramNode::VarList::const_iterator i = m_shader->temps_begin();
-       i != m_shader->temps_end(); i++) {
+  for (ShProgramNode::VarList::const_iterator i = m_shader->begin_temps();
+       i != m_shader->end_temps(); i++) {
     allocate_temp(*i);
   }
-  for (ShProgramNode::VarList::const_iterator i = m_shader->constants_begin();
-       i != m_shader->constants_end(); i++) {
+  for (ShProgramNode::VarList::const_iterator i = m_shader->begin_constants();
+       i != m_shader->end_constants(); i++) {
     allocate_temp(*i);
   }
-  for (ShProgramNode::VarList::const_iterator i = m_shader->uniforms_begin();
-       i != m_shader->uniforms_end(); i++) {
+  for (ShProgramNode::VarList::const_iterator i = m_shader->begin_parameters();
+       i != m_shader->end_parameters(); i++) {
     allocate_temp(*i);
   }
 }
@@ -147,7 +147,7 @@ void GlslVariableMap::allocate_builtin(const ShVariableNodePtr& node,
 void GlslVariableMap::allocate_generic_vertex_inputs()
 {
   int input_nb = 0;
-  for (ShProgramNode::VarList::const_iterator i = m_shader->inputs_begin(); i != m_shader->inputs_end(); i++) {
+  for (ShProgramNode::VarList::const_iterator i = m_shader->begin_inputs(); i != m_shader->end_inputs(); i++) {
     GlslVariable var(*i);
     var.attribute(input_nb);
     map_insert(*i, var);
@@ -158,12 +158,12 @@ void GlslVariableMap::allocate_generic_vertex_inputs()
 
 void GlslVariableMap::allocate_builtin_inputs()
 {
-  for (ShProgramNode::VarList::const_iterator i = m_shader->inputs_begin(); i != m_shader->inputs_end(); i++) {
+  for (ShProgramNode::VarList::const_iterator i = m_shader->begin_inputs(); i != m_shader->end_inputs(); i++) {
     allocate_builtin(*i, glslBindingSpecs(false, m_unit), m_input_bindings, false);
   }
   
   int input_nb = 0;
-  for (ShProgramNode::VarList::const_iterator i = m_shader->inputs_begin(); i != m_shader->inputs_end(); i++) {
+  for (ShProgramNode::VarList::const_iterator i = m_shader->begin_inputs(); i != m_shader->end_inputs(); i++) {
     allocate_builtin(*i, glslBindingSpecs(false, m_unit), m_input_bindings, true);
     
     // warn if the input could not be bound to a built-in variable during the second pass
@@ -177,12 +177,12 @@ void GlslVariableMap::allocate_builtin_inputs()
 
 void GlslVariableMap::allocate_builtin_outputs()
 {
-  for (ShProgramNode::VarList::const_iterator i = m_shader->outputs_begin(); i != m_shader->outputs_end(); i++) {
+  for (ShProgramNode::VarList::const_iterator i = m_shader->begin_outputs(); i != m_shader->end_outputs(); i++) {
     allocate_builtin(*i, glslBindingSpecs(true, m_unit), m_output_bindings, false);
   }
 
   int output_nb = 0;
-  for (ShProgramNode::VarList::const_iterator i = m_shader->outputs_begin(); i != m_shader->outputs_end(); i++) {
+  for (ShProgramNode::VarList::const_iterator i = m_shader->begin_outputs(); i != m_shader->end_outputs(); i++) {
     allocate_builtin(*i, glslBindingSpecs(true, m_unit), m_output_bindings, true);
 
     // warn if the output could not be bound to a built-in variable during the second pass

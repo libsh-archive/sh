@@ -126,8 +126,8 @@ void split_program(ShProgramNode* program,
                    const std::string& target)
 {
   int i = 0;
-  for (ShProgramNode::VarList::const_iterator I = program->outputs_begin();
-       I != program->outputs_end(); ++I, ++i) {
+  for (ShProgramNode::VarList::const_iterator I = program->begin_outputs();
+       I != program->end_outputs(); ++I, ++i) {
     ShProgram p = shSwizzle(i) << ShProgram(program);
     p.node()->target() = target;
     programs.push_back(p.node());

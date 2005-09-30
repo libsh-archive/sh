@@ -1,5 +1,10 @@
 2005-09-30  Francois Marier  <francois@serioushack.com>
 
+	* src/ShProgramNode.hpp, ShProgramNode.cpp, ShProgram.hpp,
+	ShVariableNode.cpp, backends/gl/Utils.cpp, GlslVariableMap.cpp,
+	PBufferStreams.cpp, GlslCode.cpp, ArbCode.cpp, backends/cc/Cc.cpp:
+	Renamed the iterators according to the names used in the book.
+
 	* util/ShPngImage.hpp, ShPngImageImpl.hpp, ShPngImage.cpp: Move
 	all libpng code to a cpp file so that nobody but Sh will need to
 	include the libpng and zlib headers.

@@ -327,8 +327,8 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
   bool rw_channels = false;
   if (dest.size() > 1) {
     std::set<ShChannelNode*> input_channels;
-    for (ShProgramNode::ChannelList::const_iterator i = program->channels_begin();
-	 i != program->channels_end(); i++) {
+    for (ShProgramNode::ChannelList::const_iterator i = program->begin_channels();
+	 i != program->end_channels(); i++) {
       input_channels.insert(i->object());
     }
 

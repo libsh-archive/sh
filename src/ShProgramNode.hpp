@@ -135,27 +135,24 @@ public:
   typedef std::list<ShChannelNodePtr> ChannelList;
   typedef std::list<ShPaletteNodePtr> PaletteList;
 
-  VarList::const_iterator inputs_begin() const { return inputs.begin(); }
-  VarList::const_iterator inputs_end() const { return inputs.end(); }
-  VarList::const_iterator outputs_begin() const { return outputs.begin(); }
-  VarList::const_iterator outputs_end() const { return outputs.end(); }
-  VarList::const_iterator temps_begin() const { return temps.begin(); }
-  VarList::const_iterator temps_end() const { return temps.end(); }
-  VarList::const_iterator constants_begin() const { return constants.begin(); }
-  VarList::const_iterator constants_end() const { return constants.end(); }
-  VarList::const_iterator uniforms_begin() const { return uniforms.begin(); }
-  VarList::const_iterator uniforms_end() const { return uniforms.end(); }
-  VarList::const_iterator all_uniforms_begin() const { return all_uniforms.begin(); }
-  VarList::const_iterator all_uniforms_end() const { return all_uniforms.end(); }
-
-  TexList::const_iterator textures_begin() const { return textures.begin(); }
-  TexList::const_iterator textures_end() const { return textures.end(); }
-
-  ChannelList::const_iterator channels_begin() const { return channels.begin(); }
-  ChannelList::const_iterator channels_end() const { return channels.end(); }
-
-  PaletteList::const_iterator palettes_begin() const { return palettes.begin(); }
-  PaletteList::const_iterator palettes_end() const { return palettes.end(); }
+  VarList::const_iterator begin_inputs() const         { return inputs.begin(); }
+  VarList::const_iterator end_inputs() const           { return inputs.end(); }
+  VarList::const_iterator begin_outputs() const        { return outputs.begin(); }
+  VarList::const_iterator end_outputs() const          { return outputs.end(); }
+  VarList::const_iterator begin_temps() const          { return temps.begin(); }
+  VarList::const_iterator end_temps() const            { return temps.end(); }
+  VarList::const_iterator begin_constants() const      { return constants.begin(); }
+  VarList::const_iterator end_constants() const        { return constants.end(); }
+  VarList::const_iterator begin_parameters() const     { return uniforms.begin(); }
+  VarList::const_iterator end_parameters() const       { return uniforms.end(); }
+  VarList::const_iterator begin_all_parameters() const { return all_uniforms.begin(); }
+  VarList::const_iterator end_all_parameters() const   { return all_uniforms.end(); }
+  TexList::const_iterator begin_textures() const       { return textures.begin(); }
+  TexList::const_iterator end_textures() const         { return textures.end(); }
+  ChannelList::const_iterator begin_channels() const   { return channels.begin(); }
+  ChannelList::const_iterator end_channels() const     { return channels.end(); }
+  PaletteList::const_iterator begin_palettes() const   { return palettes.begin(); }
+  PaletteList::const_iterator end_palettes() const     { return palettes.end(); }
   
   VarList inputs; ///< Input variables used in this program
   VarList outputs; ///< Output variables used in this program

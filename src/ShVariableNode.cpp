@@ -430,8 +430,8 @@ void ShVariableNode::attach(const ShProgramNodePtr& evaluator)
   m_eval->value = evaluator;
 
   if (m_eval->value) {
-    for (ShProgramNode::VarList::const_iterator I = m_eval->value->uniforms_begin();
-         I != m_eval->value->uniforms_end(); ++I) {
+    for (ShProgramNode::VarList::const_iterator I = m_eval->value->begin_parameters();
+         I != m_eval->value->end_parameters(); ++I) {
       if ((*I).object() == this) continue;
       (*I)->add_dependent(this);
     }
@@ -493,8 +493,8 @@ void ShVariableNode::detach_dependencies()
 {
   if (!m_eval) return;
   if (m_eval->value) {
-    for (ShProgramNode::VarList::const_iterator I = m_eval->value->uniforms_begin();
-         I != m_eval->value->uniforms_end(); ++I) {
+    for (ShProgramNode::VarList::const_iterator I = m_eval->value->begin_parameters();
+         I != m_eval->value->end_parameters(); ++I) {
       if ((*I).object() == this) continue;
       (*I)->remove_dependent(this);
     }

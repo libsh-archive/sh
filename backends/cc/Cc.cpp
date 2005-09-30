@@ -640,8 +640,8 @@ bool CcBackendCode::execute(ShStream& dest)
   int sidx = 0;
     
   SH_CC_DEBUG_PRINT("Assigning input channels to arrays");
-  for(ShProgramNode::ChannelList::const_iterator I = m_program->channels_begin()
-        ;I != m_program->channels_end(); ++I, ++sidx) {
+  for(ShProgramNode::ChannelList::const_iterator I = m_program->begin_channels()
+        ;I != m_program->end_channels(); ++I, ++sidx) {
     ShChannelNodePtr channel = (*I);
     ShHostStoragePtr storage = shref_dynamic_cast<ShHostStorage>(channel->memory()->findStorage("host"));
       
@@ -658,8 +658,8 @@ bool CcBackendCode::execute(ShStream& dest)
   }
 
   int tidx = 0;
-  for(ShProgramNode::TexList::const_iterator I = m_program->textures_begin()
-        ;I != m_program->textures_end(); ++I, ++tidx) {
+  for(ShProgramNode::TexList::const_iterator I = m_program->begin_textures()
+        ;I != m_program->end_textures(); ++I, ++tidx) {
     ShTextureNodePtr texture = (*I);
 
     ShHostStoragePtr storage = shref_dynamic_cast<ShHostStorage>(texture->memory(0)->findStorage("host"));

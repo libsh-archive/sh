@@ -749,16 +749,16 @@ ostream& ArbCode::print(ostream& out)
 ostream& ArbCode::describe_interface(ostream& out)
 {
   out << "Inputs:" << endl;
-  for (ShProgramNode::VarList::const_iterator I = m_shader->inputs_begin();
-       I != m_shader->inputs_end(); ++I) {
+  for (ShProgramNode::VarList::const_iterator I = m_shader->begin_inputs();
+       I != m_shader->end_inputs(); ++I) {
     out << "  ";
     m_registers[*I]->printDecl(out);
     out << endl;
   }
 
   out << "Outputs:" << endl;
-  for (ShProgramNode::VarList::const_iterator I = m_shader->outputs_begin();
-       I != m_shader->outputs_end(); ++I) {
+  for (ShProgramNode::VarList::const_iterator I = m_shader->begin_outputs();
+       I != m_shader->end_outputs(); ++I) {
     out << "  ";
     m_registers[*I]->printDecl(out);
     out << endl;
@@ -769,14 +769,14 @@ ostream& ArbCode::describe_interface(ostream& out)
 ostream& ArbCode::describe_bindings(ostream& out)
 {
   out << "Inputs:" << endl;
-  for (ShProgramNode::VarList::const_iterator I = m_shader->inputs_begin();
-       I != m_shader->inputs_end(); ++I) {
+  for (ShProgramNode::VarList::const_iterator I = m_shader->begin_inputs();
+       I != m_shader->end_inputs(); ++I) {
     out << "  " << (*I)->name() << " => " << m_registers[*I]->binding_name() << endl;
   }
 
   out << "Outputs:" << endl;
-  for (ShProgramNode::VarList::const_iterator I = m_shader->outputs_begin();
-       I != m_shader->outputs_end(); ++I) {
+  for (ShProgramNode::VarList::const_iterator I = m_shader->begin_outputs();
+       I != m_shader->end_outputs(); ++I) {
     out << "  " << (*I)->name() << " => " << m_registers[*I]->binding_name() << endl;
   }
   return out;
@@ -946,13 +946,13 @@ void ArbCode::allocRegs()
   
   allocOutputs(limits);
 
-  for (ShProgramNode::PaletteList::const_iterator I = m_shader->palettes_begin();
-       I != m_shader->palettes_end(); ++I) {
+  for (ShProgramNode::PaletteList::const_iterator I = m_shader->begin_palettes();
+       I != m_shader->end_palettes(); ++I) {
     allocPalette(limits, *I);
   }
   
-  for (ShProgramNode::VarList::const_iterator I = m_shader->uniforms_begin();
-       I != m_shader->uniforms_end(); ++I) {
+  for (ShProgramNode::VarList::const_iterator I = m_shader->begin_parameters();
+       I != m_shader->end_parameters(); ++I) {
     allocParam(limits, *I);
   }
 
@@ -974,7 +974,7 @@ void ArbCode::allocRegs()
   }
 
   // Allocate array register
-  if (m_shader->palettes_begin() != m_shader->palettes.end()) {
+  if (m_shader->begin_palettes() != m_shader->end_palettes()) {
     m_registers[m_address_register.node()] = new ArbReg(SH_ARB_REG_ADDRESS, 0);
     m_reglist.push_back(m_registers[m_address_register.node()]);
   }

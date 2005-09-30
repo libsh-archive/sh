@@ -129,24 +129,24 @@ public:
   /// It may be useful to change a program's target sometimes.
   std::string& target() { return m_node->target(); }
 
-  ShProgramNode::VarList::const_iterator inputs_begin() const { return m_node->inputs_begin(); }
-  ShProgramNode::VarList::const_iterator inputs_end() const { return m_node->inputs_end(); }
-  ShProgramNode::VarList::const_iterator outputs_begin() const { return m_node->outputs_begin(); }
-  ShProgramNode::VarList::const_iterator outputs_end() const { return m_node->outputs_end(); }
-  ShProgramNode::VarList::const_iterator temps_begin() const { return m_node->temps_begin(); }
-  ShProgramNode::VarList::const_iterator temps_end() const { return m_node->temps_end(); }
-  ShProgramNode::VarList::const_iterator constants_begin() const { return m_node->constants_begin(); }
-  ShProgramNode::VarList::const_iterator constants_end() const { return m_node->constants_end(); }
-  ShProgramNode::VarList::const_iterator uniforms_begin() const { return m_node->uniforms_begin(); }
-  ShProgramNode::VarList::const_iterator uniforms_end() const { return m_node->uniforms_end(); }
-  ShProgramNode::VarList::const_iterator all_uniforms_begin() const { return m_node->all_uniforms_begin(); }
-  ShProgramNode::VarList::const_iterator all_uniforms_end() const { return m_node->all_uniforms_end(); }
-  ShProgramNode::TexList::const_iterator textures_begin() const { return m_node->textures_begin(); }
-  ShProgramNode::TexList::const_iterator textures_end() const { return m_node->textures_end(); }
-  ShProgramNode::ChannelList::const_iterator channels_begin() const { return m_node->channels_begin(); }
-  ShProgramNode::ChannelList::const_iterator channels_end() const { return m_node->channels_end(); }
-  ShProgramNode::PaletteList::const_iterator palettes_begin() const { return m_node->palettes_begin(); }
-  ShProgramNode::PaletteList::const_iterator palettes_end() const { return m_node->palettes_end(); }
+  ShProgramNode::VarList::const_iterator begin_inputs() const         { return m_node->begin_inputs(); }
+  ShProgramNode::VarList::const_iterator end_inputs() const           { return m_node->end_inputs(); }
+  ShProgramNode::VarList::const_iterator begin_outputs() const        { return m_node->begin_outputs(); }
+  ShProgramNode::VarList::const_iterator end_outputs() const          { return m_node->end_outputs(); }
+  ShProgramNode::VarList::const_iterator begin_temps() const          { return m_node->begin_temps(); }
+  ShProgramNode::VarList::const_iterator end_temps() const            { return m_node->end_temps(); }
+  ShProgramNode::VarList::const_iterator begin_constants() const      { return m_node->begin_constants(); }
+  ShProgramNode::VarList::const_iterator end_constants() const        { return m_node->end_constants(); }
+  ShProgramNode::VarList::const_iterator begin_parameters() const     { return m_node->begin_parameters(); }
+  ShProgramNode::VarList::const_iterator end_parameters() const       { return m_node->end_parameters(); }
+  ShProgramNode::VarList::const_iterator begin_all_parameters() const { return m_node->begin_all_parameters(); }
+  ShProgramNode::VarList::const_iterator end_all_parameters() const   { return m_node->end_all_parameters(); }
+  ShProgramNode::TexList::const_iterator begin_textures() const       { return m_node->begin_textures(); }
+  ShProgramNode::TexList::const_iterator end_textures() const         { return m_node->end_textures(); }
+  ShProgramNode::ChannelList::const_iterator begin_channels() const   { return m_node->begin_channels(); }
+  ShProgramNode::ChannelList::const_iterator end_channels() const     { return m_node->end_channels(); }
+  ShProgramNode::PaletteList::const_iterator begin_palettes() const   { return m_node->begin_palettes(); }
+  ShProgramNode::PaletteList::const_iterator end_palettes() const     { return m_node->end_palettes(); }
 
   // Call operators for channels and streams.
   // Equivalent to operator<< invocations.
