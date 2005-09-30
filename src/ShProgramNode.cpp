@@ -227,7 +227,7 @@ void ShProgramNode::collectVariables()
   palettes.clear();
   if (ctrlGraph->entry()) {
     ctrlGraph->entry()->clearMarked();
-    collectNodeVars(ctrlGraph->entry());
+    collect_node_vars(ctrlGraph->entry());
     ctrlGraph->entry()->clearMarked();
   }
 }
@@ -242,7 +242,7 @@ void ShProgramNode::collectDecls()
   // since some temps might be removed during optimizations)
   if (ctrlGraph->entry()) {
     ctrlGraph->entry()->clearMarked();
-    collectNodeDecls(ctrlGraph->entry());
+    collect_node_decls(ctrlGraph->entry());
     ctrlGraph->entry()->clearMarked();
   }
 }
@@ -264,7 +264,7 @@ void ShProgramNode::addDecl(ShVariableNodePtr node)
   addDecl(node, ctrlGraph->entry());
 }
 
-void ShProgramNode::collectNodeDecls(const ShCtrlGraphNodePtr& node)
+void ShProgramNode::collect_node_decls(const ShCtrlGraphNodePtr& node)
 {
   if (node->marked()) return;
   node->mark();
@@ -277,13 +277,13 @@ void ShProgramNode::collectNodeDecls(const ShCtrlGraphNodePtr& node)
 
   for (std::vector<ShCtrlGraphBranch>::const_iterator J = node->successors.begin();
        J != node->successors.end(); ++J) {
-    collectNodeDecls(J->node);
+    collect_node_decls(J->node);
   }
   
-  if (node->follower) collectNodeDecls(node->follower);
+  if (node->follower) collect_node_decls(node->follower);
 }
 
-void ShProgramNode::collectNodeVars(const ShCtrlGraphNodePtr& node)
+void ShProgramNode::collect_node_vars(const ShCtrlGraphNodePtr& node)
 {
   if (node->marked()) return;
   node->mark();
@@ -292,38 +292,43 @@ void ShProgramNode::collectNodeVars(const ShCtrlGraphNodePtr& node)
     for (ShBasicBlock::ShStmtList::const_iterator I = node->block->begin();
          I != node->block->end(); ++I) {
       
-      collectVar(I->dest.node());
-      collectVar(I->src[0].node());
-      collectVar(I->src[1].node());
-      collectVar(I->src[2].node());
+      collect_var(I->dest.node());
+      collect_var(I->src[0].node());
+      collect_var(I->src[1].node());
+      collect_var(I->src[2].node());
     }
   }
 
   for (std::vector<ShCtrlGraphBranch>::const_iterator J = node->successors.begin();
        J != node->successors.end(); ++J) {
-    collectNodeVars(J->node);
+    collect_node_vars(J->node);
   }
   
-  if (node->follower) collectNodeVars(node->follower);
+  if (node->follower) collect_node_vars(node->follower);
 }
 
-void ShProgramNode::collectVar(const ShVariableNodePtr& var)
+void ShProgramNode::collect_dependent_uniform(const ShVariableNodePtr& var)
+{
+  all_uniforms.push_back(var);
+
+  // Get all of the recursively dependent uniforms
+  if (var->evaluator()) {
+    for (ShProgramNode::VarList::const_iterator I = var->evaluator()->uniforms_begin();
+         I != var->evaluator()->uniforms_end(); ++I) {
+      if (std::find(all_uniforms.begin(), all_uniforms.end(), *I) == all_uniforms.end()) {
+        collect_dependent_uniform(*I);
+      }
+    }
+  }
+}
+
+void ShProgramNode::collect_var(const ShVariableNodePtr& var)
 {
   if (!var) return;
   if (var->uniform()) {
     if (std::find(uniforms.begin(), uniforms.end(), var) == uniforms.end()) {
       uniforms.push_back(var);
-      all_uniforms.push_back(var);
-    }
-
-    // Get all of the recursively dependent uniforms
-    if (var->evaluator()) {
-      for (ShProgramNode::VarList::const_iterator I = var->evaluator()->uniforms_begin();
-           I != var->evaluator()->uniforms_end(); ++I) {
-        if (std::find(all_uniforms.begin(), all_uniforms.end(), *I) == all_uniforms.end()) {
-          all_uniforms.push_back(*I);
-        }
-      }
+      collect_dependent_uniform(var);
     }
   } else switch (var->kind()) {
   case SH_INPUT:

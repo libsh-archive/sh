@@ -203,10 +203,10 @@ private:
   std::string m_backend_name; ///< Can be empty if the program is not yet compiled for a backend.
   std::string m_target; ///< Can be empty, if there is no target associated with this program.
 
-  void collectNodeDecls(const ShPointer<ShCtrlGraphNode>& node);
-
-  void collectNodeVars(const ShPointer<ShCtrlGraphNode>& node);
-  void collectVar(const ShVariableNodePtr& node);
+  void collect_node_decls(const ShPointer<ShCtrlGraphNode>& node);
+  void collect_node_vars(const ShPointer<ShCtrlGraphNode>& node);
+  void collect_var(const ShVariableNodePtr& node);
+  void collect_dependent_uniform(const ShVariableNodePtr& var);
 
   typedef std::map< std::pair< std::string, ShPointer<ShBackend> >,
                     ShPointer<ShBackendCode> > CodeMap;

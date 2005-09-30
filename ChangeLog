@@ -1,3 +1,11 @@
+2005-09-30  Francois Marier  <francois@serioushack.com>
+
+	* src/ShProgramNode.cpp, ShProgramNode.hpp
+	(collect_dependent_uniform): Add this method to support the
+	collection of dependent uniforms' dependent uniforms.
+	(collectNodeDecls, collectVar, collectNodeVars): Rename some
+	private methods to match new coding standards
+	
 2005-09-29  Francois Marier  <francois@serioushack.com>
 
 	* src/ShProgramNode.hpp, ShProgramNode.cpp, ShProgram.hpp: Add
