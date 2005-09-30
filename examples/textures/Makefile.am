@@ -1,4 +1,4 @@
-LDADD = @GLUT_LIBS@ @GL_LIBS@ -lsh
+LDADD = @GLUT_LIBS@ @GL_LIBS@ -lsh -lshutil
 AM_LDFLAGS = -L$(libdir)
 INCLUDES = -I$(includedir)
 

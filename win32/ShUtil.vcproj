@@ -119,6 +119,9 @@
 				RelativePath="..\util\ShObjMesh.cpp">
 			</File>
 			<File
+				RelativePath="..\util\ShPngImage.cpp">
+			</File>
+			<File
 				RelativePath="..\util\shutil.cpp">
 			</File>
 		</Filter>

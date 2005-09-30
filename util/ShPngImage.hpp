@@ -31,15 +31,15 @@ namespace ShUtil {
 
 /// Load the PNG file into this image
 template<typename T>
-static void load_PNG(SH::ShTypedImage<T>& image, const std::string& filename);
+void load_PNG(SH::ShTypedImage<T>& image, const std::string& filename);
 
 /// Save the PNG image into this file
 template<typename T>
-static void save_PNG(const SH::ShTypedImage<T>& image, const std::string& filename, int inverse_alpha=0);
+void save_PNG(const SH::ShTypedImage<T>& image, const std::string& filename, int inverse_alpha=0);
 
 /// Save the PNG image into this file
 template<typename T>
-static void save_PNG16(const SH::ShTypedImage<T>& image, const std::string& filename, int inverse_alpha=0);
+void save_PNG16(const SH::ShTypedImage<T>& image, const std::string& filename, int inverse_alpha=0);
 
 // @}
 

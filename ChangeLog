@@ -1,5 +1,9 @@
 2005-09-30  Francois Marier  <francois@serioushack.com>
 
+	* util/ShPngImage.hpp, ShPngImageImpl.hpp, ShPngImage.cpp: Move
+	all libpng code to a cpp file so that nobody but Sh will need to
+	include the libpng and zlib headers.
+
 	* src/ShProgramNode.cpp, ShProgramNode.hpp
 	(collect_dependent_uniform): Add this method to support the
 	collection of dependent uniforms' dependent uniforms.
