@@ -35,7 +35,9 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/libshutil_debug.lib"/>
+				AdditionalDependencies="zlib.lib libpng.lib"
+				OutputFile="$(OutDir)/libshutil_debug.lib"
+				AdditionalLibraryDirectories="../../zlib/lib;../../libpng/lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -79,7 +81,9 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/libshutil.lib"/>
+				AdditionalDependencies="zlib.lib libpng.lib"
+				OutputFile="$(OutDir)/libshutil.lib"
+				AdditionalLibraryDirectories="../../zlib/lib;../../libpng/lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
