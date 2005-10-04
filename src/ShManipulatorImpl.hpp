@@ -124,7 +124,7 @@ ShProgram operator<<(const ShProgram &p, const ShManipulator<T> &m) {
       outputs.push_back(out);
     }
 
-    int size = outputs.size();
+    std::vector<ShVariable>::size_type size = outputs.size();
 
     /* Make shader outputs from permuted ranges of inputs */
     std::vector<bool> used(size, false); //mark used inputs
@@ -173,7 +173,7 @@ ShProgram operator<<(const ShManipulator<T> &m, const ShProgram &p) {
       inputs.push_back(in);
     }
 
-    int size = inputs.size();
+    std::vector<ShVariable>::size_type size = inputs.size();
 
     /* Make shader outputs from permuted ranges of inputs */
     for(typename RangeVec::const_iterator irvIt = mranges.begin();
