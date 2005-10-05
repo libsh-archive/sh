@@ -35,7 +35,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="zlib.lib libpng.lib"
+				AdditionalDependencies="libpng.lib"
 				OutputFile="$(OutDir)/libshutil_debug.lib"
 				AdditionalLibraryDirectories="../../zlib/lib;../../libpng/lib"/>
 			<Tool
@@ -81,7 +81,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="zlib.lib libpng.lib"
+				AdditionalDependencies="libpng.lib"
 				OutputFile="$(OutDir)/libshutil.lib"
 				AdditionalLibraryDirectories="../../zlib/lib;../../libpng/lib"/>
 			<Tool
