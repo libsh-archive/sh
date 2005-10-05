@@ -137,7 +137,7 @@ ShProgram operator<<(const ShProgram &p, const ShManipulator<T> &m) {
       if(start == OFFSET_RANGE_BAD_INDEX || end == OFFSET_RANGE_BAD_INDEX ) {
         std::ostringstream os;
         os << "Invalid ShManipulator Range " << irvIt->toString() 
-          << " for an ShProgram with output size " << size;
+          << " for an ShProgram with output size " << static_cast<unsigned>(size);
         shError(ShAlgebraException(os.str())); 
       }
 
@@ -185,7 +185,7 @@ ShProgram operator<<(const ShManipulator<T> &m, const ShProgram &p) {
       if(start == OFFSET_RANGE_BAD_INDEX || end == OFFSET_RANGE_BAD_INDEX ) {
         std::ostringstream os;
         os << "Invalid ShManipulator Range " << irvIt->toString() << 
-          " for an ShProgram with output size " << size;
+          " for an ShProgram with output size " << static_cast<unsigned>(size);
         shError(ShAlgebraException(os.str())); 
       }
 
