@@ -1,3 +1,12 @@
+2005-10-06  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslCode.hpp, GlslCode.cpp, GlslVariableMap.cpp,
+	GlslVariableMap.hpp: Print the original Sh name when declaring
+	variables.
+
+	* backends/gl/ArbCode.cpp: Print an error message when an input
+	cannot be bound to any built-in variables (semantic binding).
+
 2005-09-30  Francois Marier  <francois@serioushack.com>
 
 	* src/ShProgramNode.hpp, ShProgramNode.cpp, ShProgram.hpp,

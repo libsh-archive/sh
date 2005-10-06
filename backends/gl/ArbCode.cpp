@@ -1017,23 +1017,30 @@ void ArbCode::allocSemanticInputs(const ArbLimits& limits)
                 SH_ARB_REG_ATTRIB, m_numInputs);
   }
   
+  int inputnb=0;
   for (ShProgramNode::VarList::const_iterator I = m_shader->inputs.begin();
-       I != m_shader->inputs.end(); ++I) {
+       I != m_shader->inputs.end(); ++I, ++inputnb) {
     ShVariableNodePtr node = *I;
     if (m_registers.find(node) != m_registers.end()) continue;
-    m_registers[node] = new ArbReg(SH_ARB_REG_ATTRIB, m_numInputs++, node->name());
-    m_reglist.push_back(m_registers[node]);
-
+    
     // Binding
+    bool bound = false;
     for (int i = 0; arbBindingSpecs(false, m_unit)[i].binding != SH_ARB_REG_NONE; i++) {
       const ArbBindingSpecs& specs = arbBindingSpecs(false, m_unit)[i];
 
       if (specs.allowGeneric && m_inputBindings[i] < specs.maxBindings) {
+        m_registers[node] = new ArbReg(SH_ARB_REG_ATTRIB, m_numInputs++, node->name());
+        m_reglist.push_back(m_registers[node]);
         m_registers[node]->binding.type = specs.binding;
         m_registers[node]->binding.index = m_inputBindings[i];
         m_inputBindings[i]++;
+        bound = true;
         break;
       }
+    }
+
+    if (!bound) {
+      std::cerr << "Could not bind input " << inputnb << " to a built-in variable." << std::endl;
     }
   }
 }

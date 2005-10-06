@@ -38,6 +38,11 @@ struct GlslBindingSpecs {
   bool allow_generic;
 };
 
+struct GlslVariableDeclaration {
+  std::string declaration;
+  std::string sh_name;
+};
+
 class GlslVariableMap {
 public:
   GlslVariableMap(SH::ShProgramNode* shader, GlslProgramType unit);
@@ -47,7 +52,7 @@ public:
   const GlslVariable& variable(const SH::ShVariableNodePtr& node);
   bool contains(const SH::ShVariableNodePtr& node) const;
 
-  typedef std::list<std::string> DeclarationList;
+  typedef std::list<GlslVariableDeclaration> DeclarationList;
 
   DeclarationList::const_iterator attribute_begin() const;
   DeclarationList::const_iterator attribute_end() const;

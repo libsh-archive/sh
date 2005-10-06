@@ -366,6 +366,15 @@ void GlslCode::real_update_uniform(const ShVariableNodePtr& uniform, const strin
   }
 }
 
+string GlslCode::print_decl(const GlslVariableDeclaration& decl)
+{
+  string s = decl.declaration + ";";
+  if (!decl.sh_name.empty()) {
+    s += " // " + decl.sh_name;
+  }
+  return s;
+}
+
 ostream& GlslCode::print(ostream& out)
 {
   SH_DEBUG_ASSERT(m_varmap);
@@ -378,7 +387,7 @@ ostream& GlslCode::print(ostream& out)
   if (m_varmap->attribute_begin() != m_varmap->attribute_end()) {
     for (GlslVariableMap::DeclarationList::const_iterator i = m_varmap->attribute_begin(); 
 	 i != m_varmap->attribute_end(); i++) {
-      out << "attribute " << *i << ";" << endl;
+      out << "attribute " << print_decl(*i) << endl;
     }
     out << endl;
   }
@@ -387,7 +396,7 @@ ostream& GlslCode::print(ostream& out)
   if (m_varmap->uniform_begin() != m_varmap->uniform_end()) {
     for (GlslVariableMap::DeclarationList::const_iterator i = m_varmap->uniform_begin(); 
 	 i != m_varmap->uniform_end(); i++) {
-      out << "uniform " << *i << ";" << endl;
+      out << "uniform " << print_decl(*i) << endl;
     }
     out << endl;
   }
@@ -399,7 +408,7 @@ ostream& GlslCode::print(ostream& out)
   if (m_varmap->regular_begin() != m_varmap->regular_end()) {
     for (GlslVariableMap::DeclarationList::const_iterator i = m_varmap->regular_begin(); 
 	 i != m_varmap->regular_end(); i++) {
-      out << BLOCK_INDENT << *i << ";" << endl;
+      out << BLOCK_INDENT << print_decl(*i) << endl;
     }
     out << endl;
   }

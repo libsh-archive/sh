@@ -125,6 +125,9 @@ private:
   /// Add a line to the source code (m_lines)
   void append_line(const std::string& line, bool append_semicolon = true);
 
+  /// Print the declaration of a glsl variable along with its Sh name
+  std::string print_decl(const GlslVariableDeclaration& decl);
+
   /// Generate code for this node and those following it.
   void gen_structural_node(const SH::ShStructuralNodePtr& node);
 

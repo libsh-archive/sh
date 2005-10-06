@@ -151,7 +151,10 @@ void GlslVariableMap::allocate_generic_vertex_inputs()
     GlslVariable var(*i);
     var.attribute(input_nb);
     map_insert(*i, var);
-    m_attribute_declarations.push_back(var.declaration());
+    GlslVariableDeclaration decl;
+    decl.declaration = var.declaration();
+    decl.sh_name = (*i)->name();
+    m_attribute_declarations.push_back(decl);
     input_nb++;
   }
 }
@@ -211,10 +214,13 @@ void GlslVariableMap::allocate_temp(const ShVariableNodePtr& node)
   map_insert(node, var);
 
   if (!var.builtin()) {
+    GlslVariableDeclaration decl;
+    decl.declaration = var.declaration();
+    decl.sh_name = node->name();
     if (var.uniform()) {
-      m_uniform_declarations.push_back(var.declaration());
+      m_uniform_declarations.push_back(decl);
     } else {
-      m_regular_declarations.push_back(var.declaration());
+      m_regular_declarations.push_back(decl);
     }
   }
 }
