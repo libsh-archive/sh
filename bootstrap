@@ -2,8 +2,6 @@
 
 rm -rf libltdl
 
-echo "You may ignore messages about updating aclocal.m4."
-
 if test "x${LIBTOOLIZE}" = "x" ; then
     case ${MACHTYPE}
 	in *apple*darwin*)
@@ -12,7 +10,7 @@ if test "x${LIBTOOLIZE}" = "x" ; then
 
 	    ;;
 	*)
-	    LIBTOOLIZE="libtoolize --ltdl"
+	    LIBTOOLIZE="libtoolize --ltdl --copy --force"
     esac
 else
     LIBTOOLIZE="$LIBTOOLIZE --ltdl"
@@ -33,7 +31,7 @@ if test "x${AUTOMAKE}" = "x" ; then
 	    AUTOMAKE=/sw/bin/automake
 	    ;;
 	*)
-	    AUTOMAKE=automake-1.7
+	    AUTOMAKE=automake-1.9
     esac
 fi
 export AUTOMAKE
@@ -44,7 +42,7 @@ if test "x${ACLOCAL}" = "x" ; then
 	    ACLOCAL="/sw/bin/aclocal -I /sw/share/aclocal"
 	    ;;
 	*)
-	    ACLOCAL=aclocal-1.7
+	    ACLOCAL=aclocal-1.9
     esac
 fi
 export ACLOCAL
@@ -60,8 +58,8 @@ case ${MACHTYPE}
 	M4DEST=.
 esac
 cp $M4PRFX/libtool.m4 $M4DEST
-cp $M4PRFX/ltdl.m4 $M4DEST
 
 cat config/*.m4 > acinclude.m4
 
-autoreconf -s -i $*
+echo "You may ignore messages about updating aclocal.m4."
+autoreconf -i $*
