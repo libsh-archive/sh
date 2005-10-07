@@ -1,3 +1,29 @@
+2005-10-07  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslCode.cpp, GlslCode.hpp
+	(bind_generic_attributes): Add this method to be called before
+	linking the glsl program.  It binds all attributes to the index
+	they were assigned to earlier.
+	(generate): Pass the original variables to the variable map so
+	that it can edit the user-facing metadata.
+
+	* backends/gl/GlslSet.cpp: Bind all generic vertex attributes when
+	a vertex shader is bound.
+	
+	* backends/gl/GlslVariable.hpp, GlslVariable.cpp: The m_attribute
+	member variable now keeps track of the index where vertex
+	attributes are located.
+
+	* backends/gl/GlslVariableMap.cpp: Refactor
+	allocate_generic_vertex_inputs() to use the new
+	allocate_generic_vertex_input() method which assign an index to
+	the variable and change its user-facing metadata.
+	Add m_original_vars to constructor and destructor.
+
+	* backends/gl/GlslVariableMap.hpp: Add the
+	allocate_generic_vertex_input() method.  
+	Keep a copy of the original variables to change their metadata.
+
 2005-10-06  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslCode.hpp, GlslCode.cpp, GlslVariableMap.cpp,

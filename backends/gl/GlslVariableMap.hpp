@@ -23,6 +23,7 @@
 #include "Glsl.hpp"
 #include "ShVariableNode.hpp"
 #include "ShProgramNode.hpp"
+#include "ShInternals.hpp"
 #include "GlslVariable.hpp"
 #include <map>
 #include <string>
@@ -45,8 +46,10 @@ struct GlslVariableDeclaration {
 
 class GlslVariableMap {
 public:
-  GlslVariableMap(SH::ShProgramNode* shader, GlslProgramType unit);
-  
+  GlslVariableMap(SH::ShProgramNode* shader, SH::ShVarTransformMap* original_vars, 
+                  GlslProgramType unit);
+  ~GlslVariableMap();
+
   std::string resolve(const SH::ShVariable& v, int index = -1);
   std::string resolve(const SH::ShVariable& v, const SH::ShVariable& index);
   const GlslVariable& variable(const SH::ShVariableNodePtr& node);
@@ -68,6 +71,7 @@ public:
 
 private:
   SH::ShProgramNode* m_shader;
+  SH::ShVarTransformMap* m_original_vars;
   GlslProgramType m_unit;
 
   unsigned m_nb_uniform_variables;
@@ -87,6 +91,7 @@ private:
                         bool generic);
   void allocate_builtin_inputs();
   void allocate_builtin_outputs();
+  void allocate_generic_vertex_input(const SH::ShVariableNodePtr& node, int index);
   void allocate_generic_vertex_inputs();
   void allocate_temp(const SH::ShVariableNodePtr& node);
   

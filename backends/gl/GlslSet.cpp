@@ -97,20 +97,23 @@ GlslSet::~GlslSet()
 
 void GlslSet::attach(const SH::ShPointer<GlslCode>& code)
 {
+  SH_DEBUG_ASSERT(m_arb_program);
+
   if (!code) return;
   if (m_shaders[code->glsl_unit()] == code) return;
 
+  // Unbind old shader
   unbind();
-  
-  SH_DEBUG_ASSERT(m_arb_program);
   if (m_shaders[code->glsl_unit()]) {
     SH_GL_CHECK_ERROR(glDetachObjectARB(m_arb_program, m_shaders[code->glsl_unit()]->glsl_shader()));
   }
+
+  // Bind new shader
   SH_GL_CHECK_ERROR(glAttachObjectARB(m_arb_program, code->glsl_shader()));
   m_shaders[code->glsl_unit()] = code;
+  code->bind_generic_attributes(m_arb_program);
 
-  // Need to relink
-  m_linked = false;
+  m_linked = false; // will need to relink
 }
 
 void GlslSet::detach(const SH::ShPointer<GlslCode>& code)

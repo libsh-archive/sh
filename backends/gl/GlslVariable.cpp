@@ -49,7 +49,7 @@ const GlslVarBindingInfo GlslVariable::glslVarBindingInfo[] = {
 };
 
 GlslVariable::GlslVariable()
-  : m_attribute(false), m_builtin(false), m_texture(false), m_palette(false), 
+  : m_attribute(-1), m_builtin(false), m_texture(false), m_palette(false), 
     m_uniform(false), m_name(""), m_size(0), m_dims(SH_TEXTURE_1D), m_length(0), 
     m_kind(SH_TEMP), m_type(SH_FLOAT), m_semantic_type(SH_ATTRIB), m_values("")
 {
@@ -64,7 +64,7 @@ GlslVariable::GlslVariable(const GlslVariable& v)
 }
 
 GlslVariable::GlslVariable(const ShVariableNodePtr& v)
-  : m_attribute(false), m_builtin(!v->meta("opengl:state").empty()), 
+  : m_attribute(-1), m_builtin(!v->meta("opengl:state").empty()), 
     m_texture(SH_TEXTURE == v->kind()), m_palette(SH_PALETTE == v->kind()),
     m_uniform(m_texture || m_palette || v->uniform()),
     m_name(v->meta("opengl:state")), m_size(v->size()), m_kind(v->kind()), 
@@ -162,13 +162,13 @@ void GlslVariable::name(int i, enum GlslProgramType unit)
   m_builtin = false;
 }
 
-void GlslVariable::attribute(int input_nb)
+void GlslVariable::attribute(int index)
 {
   SH_DEBUG_ASSERT(SH_FLOAT == m_type); // only float inputs are allowed
   stringstream name;
-  name << "attrib" << input_nb;
+  name << "attrib" << index;
   m_name = name.str();
-  m_attribute = true;
+  m_attribute = index;
 }
 
 void GlslVariable::builtin(GlslVarBinding binding, int index)

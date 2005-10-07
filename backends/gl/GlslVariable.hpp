@@ -81,6 +81,7 @@ public:
   std::string declaration() const;
 
   const std::string& name() const { return m_name; }
+  const int attribute() const { return m_attribute; }
   const SH::ShSemanticType& semantic_type() const { return m_semantic_type; }
   const int size() const { return m_size; }
   const bool builtin() const { return m_builtin; }
@@ -88,11 +89,11 @@ public:
   const bool texture() const { return m_texture; }
 
   void name(int i, enum GlslProgramType unit); /// for regular variables
-  void attribute(int input_nb); /// for generic vertex inputs
+  void attribute(int index); /// for generic vertex inputs
   void builtin(GlslVarBinding binding, int index); /// for built-in variables
   
 private:
-  bool m_attribute;
+  int m_attribute; /// index of the attribute (-1 if it's not a generic attribute)
   bool m_builtin; /// if true, it won't be declared or initialized
   bool m_texture;
   bool m_palette;

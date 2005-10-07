@@ -71,9 +71,11 @@ GlslBindingSpecs* glslBindingSpecs(bool output, GlslProgramType unit)
   }
 }
 
-GlslVariableMap::GlslVariableMap(ShProgramNode* shader, GlslProgramType unit)
-  : m_shader(shader), m_unit(unit), m_nb_uniform_variables(0),
-    m_nb_regular_variables(0)
+GlslVariableMap::GlslVariableMap(ShProgramNode* shader, 
+                                 ShVarTransformMap* original_vars, 
+                                 GlslProgramType unit)
+  : m_shader(shader), m_original_vars(original_vars), m_unit(unit),
+    m_nb_uniform_variables(0), m_nb_regular_variables(0)
 {
   const GLubyte* extensions = glGetString(GL_EXTENSIONS);
   if (extensions) {
@@ -120,6 +122,11 @@ GlslVariableMap::GlslVariableMap(ShProgramNode* shader, GlslProgramType unit)
   }
 }
 
+GlslVariableMap::~GlslVariableMap()
+{
+  delete m_original_vars; // we own this object
+}
+
 void GlslVariableMap::allocate_builtin(const ShVariableNodePtr& node,
                                        const GlslBindingSpecs* specs, map<GlslVarBinding, int>& bindings,
                                        bool generic)
@@ -144,18 +151,42 @@ void GlslVariableMap::allocate_builtin(const ShVariableNodePtr& node,
   }
 }
 
+void GlslVariableMap::allocate_generic_vertex_input(const ShVariableNodePtr& node, int index)
+{
+  // Create the Glsl variable
+  GlslVariable var(node);
+  var.attribute(index);
+  map_insert(node, var);
+
+  // Add to the declaration list
+  GlslVariableDeclaration decl;
+  decl.declaration = var.declaration();
+  decl.sh_name = (node)->name();
+  m_attribute_declarations.push_back(decl);
+
+  // Set user-visible metadata on the original object
+  stringstream s;
+  s << index;
+  m_original_vars->get_original_variable(node)->meta("opengl:attribindex", s.str());
+}
+
 void GlslVariableMap::allocate_generic_vertex_inputs()
 {
-  int input_nb = 0;
-  for (ShProgramNode::VarList::const_iterator i = m_shader->begin_inputs(); i != m_shader->end_inputs(); i++) {
-    GlslVariable var(*i);
-    var.attribute(input_nb);
-    map_insert(*i, var);
-    GlslVariableDeclaration decl;
-    decl.declaration = var.declaration();
-    decl.sh_name = (*i)->name();
-    m_attribute_declarations.push_back(decl);
-    input_nb++;
+  // The position has to be at index 0
+  for (ShProgramNode::VarList::const_iterator i = m_shader->begin_inputs(); 
+       i != m_shader->end_inputs(); i++) {
+    if ((*i)->specialType() == SH_POSITION) {
+      allocate_generic_vertex_input(*i, 0);
+      break;
+    }
+  }
+  
+  int index = 1;
+  for (ShProgramNode::VarList::const_iterator i = m_shader->begin_inputs(); 
+       i != m_shader->end_inputs(); i++) {
+    if (!contains(*i)) {
+      allocate_generic_vertex_input(*i, index++);
+    }
   }
 }
 

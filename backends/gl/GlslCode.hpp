@@ -81,6 +81,7 @@ public:
 
   void set_bound(GLhandleARB program);
   void upload_uniforms();
+  void bind_generic_attributes(GLhandleARB glsl_program);
   
   std::ostream& print(std::ostream& out);
   std::ostream& describe_interface(std::ostream& out);

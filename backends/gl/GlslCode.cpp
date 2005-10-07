@@ -78,10 +78,11 @@ void GlslCode::generate()
   ShContext::current()->enter(m_shader);
 
   ShTransformer transform(m_shader);
-  transform.convertInputOutput(); 
+  ShVarTransformMap* original_vars = new ShVarTransformMap;
+  transform.convertInputOutput(original_vars);
   transform.convertTextureLookups();
 
-  SH::ShTransformer::ValueTypeMap convert_map;
+  ShTransformer::ValueTypeMap convert_map;
   convert_map[SH_DOUBLE] = SH_FLOAT; 
   convert_map[SH_HALF] = SH_FLOAT;
   convert_map[SH_INT] = SH_FLOAT;
@@ -114,7 +115,7 @@ void GlslCode::generate()
 
   // Initialize the variable map
   delete m_varmap;
-  m_varmap = new GlslVariableMap(m_shader, m_unit);
+  m_varmap = new GlslVariableMap(m_shader, original_vars, m_unit);
   
   // Code generation
   try {
@@ -175,6 +176,21 @@ void GlslCode::upload()
     os << endl;
     cerr << os.str();
 #endif
+  }
+}
+
+// This must be done before linking the glsl program
+void GlslCode::bind_generic_attributes(GLhandleARB glsl_program)
+{
+  SH_DEBUG_ASSERT(m_arb_shader);
+  if (m_unit != SH_GLSL_VP) return; // generic attributes are only for vertex programs right now
+
+  for (ShProgramNode::VarList::const_iterator i = m_shader->begin_inputs(); 
+       i != m_shader->end_inputs(); i++) {
+    const GlslVariable& var = m_varmap->variable(*i);
+    if (var.attribute() >= 0) {
+      SH_GL_CHECK_ERROR(glBindAttribLocationARB(glsl_program, var.attribute(), var.name().c_str()));
+    }
   }
 }
 
