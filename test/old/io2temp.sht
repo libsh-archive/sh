@@ -1,9 +1,0 @@
-// -*- C++ -*-
-
-ShProgram shader = SH_BEGIN_VERTEX_PROGRAM {
-  ShInputAttrib1f SH_DECL(in); 
-  ShOutputAttrib1f SH_DECL(out); 
-
-  in = in * in;
-  out = out + in;
-} SH_END_PROGRAM;
