@@ -31,7 +31,7 @@ if test "x${AUTOMAKE}" = "x" ; then
 	    AUTOMAKE=/sw/bin/automake
 	    ;;
 	*)
-	    AUTOMAKE=automake-1.9
+	    AUTOMAKE="automake-1.9"
     esac
 fi
 export AUTOMAKE
@@ -42,7 +42,7 @@ if test "x${ACLOCAL}" = "x" ; then
 	    ACLOCAL="/sw/bin/aclocal -I /sw/share/aclocal"
 	    ;;
 	*)
-	    ACLOCAL=aclocal-1.9
+	    ACLOCAL="aclocal-1.9"
     esac
 fi
 export ACLOCAL
