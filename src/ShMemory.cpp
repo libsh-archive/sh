@@ -294,6 +294,7 @@ void* ShHostStorage::data()
 // --- ShHostMemory --- //
 //////////////////////////
 #ifdef WIN32
+# pragma warning(push)
 # pragma warning(disable:4355)
 #endif
 
@@ -310,6 +311,10 @@ ShHostMemory::ShHostMemory(std::size_t length, void* data, ShValueType value_typ
   // Make the host storage represent the newest version of the memory
   m_hostStorage->dirtyall();
 }
+
+#ifdef WIN32
+# pragma warning(pop)
+#endif
 
 ShHostMemory::~ShHostMemory()
 {
