@@ -293,7 +293,7 @@ void* ShHostStorage::data()
 //////////////////////////
 // --- ShHostMemory --- //
 //////////////////////////
-#ifdef WIN32
+#ifdef MSC_VER
 # pragma warning(push)
 # pragma warning(disable:4355)
 #endif
@@ -312,7 +312,7 @@ ShHostMemory::ShHostMemory(std::size_t length, void* data, ShValueType value_typ
   m_hostStorage->dirtyall();
 }
 
-#ifdef WIN32
+#ifdef MSC_VER
 # pragma warning(pop)
 #endif
 
