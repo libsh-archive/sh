@@ -37,7 +37,7 @@
 				Name="VCLibrarianTool"
 				AdditionalDependencies="libpng.lib"
 				OutputFile="$(OutDir)/libshutil_debug.lib"
-				AdditionalLibraryDirectories="../../zlib/lib;../../libpng/lib"/>
+				AdditionalLibraryDirectories="../../libpng/lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -83,7 +83,7 @@
 				Name="VCLibrarianTool"
 				AdditionalDependencies="libpng.lib"
 				OutputFile="$(OutDir)/libshutil.lib"
-				AdditionalLibraryDirectories="../../zlib/lib;../../libpng/lib"/>
+				AdditionalLibraryDirectories="../../libpng/lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
