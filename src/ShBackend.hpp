@@ -30,7 +30,7 @@
 #include "ShVariableNode.hpp"
 
 #if defined(WIN32)
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) && !defined(AUTOTOOLS)
 #include <CoreFoundation/CoreFoundation.h>
 #else
   struct lt_dlhandle_struct;
@@ -147,7 +147,7 @@ public:
 
 #if defined(WIN32)
   typedef void* LibraryHandle;
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) && !defined(AUTOTOOLS)
   typedef CFBundleRef LibraryHandle;
 #else
   typedef lt_dlhandle_struct* LibraryHandle;

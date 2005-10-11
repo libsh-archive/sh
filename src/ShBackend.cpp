@@ -23,7 +23,7 @@
 
 #if defined(WIN32)
 # include <windows.h>
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) && !defined(AUTOTOOLS)
 # include <CoreFoundation/CoreFoundation.h>
 # include <dirent.h>
 #else
@@ -50,7 +50,7 @@ EntryPoint* load_function(SH::ShBackend::LibraryHandle module, const char* name)
 {
 #if defined(WIN32)
   return (EntryPoint*)GetProcAddress((HMODULE)module, name);  
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) && !defined(AUTOTOOLS)
   CFStringRef n = CFStringCreateWithCString(kCFAllocatorDefault, name, kCFStringEncodingASCII);
   EntryPoint* p = (EntryPoint*)CFBundleGetFunctionPointerForName(module, n);
   CFRelease(n);
@@ -145,7 +145,7 @@ ShBackend::~ShBackend()
   if (!FreeLibrary((HMODULE)(*m_loaded_libraries)[backend_name])) {
     SH_DEBUG_ERROR("Could not unload the " << backend_name << " library.");
   }
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) && !defined(AUTOTOOLS)
   CFRelease((*m_loaded_libraries)[backend_name]);
 #else
   if (!lt_dlclose((*m_loaded_libraries)[backend_name])) {
@@ -172,8 +172,10 @@ string ShBackend::lookup_filename(const string& backend_name)
     libname += "_DEBUG";
 # endif
   libname += ".DLL";
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) && !defined(AUTOTOOLS)
   libname += ".bundle";
+#elif defined(__APPLE__) && defined(AUTOTOOLS)
+  libname += ".la";
 #else
   libname += ".so";
 #endif
@@ -211,8 +213,11 @@ bool ShBackend::load_library(const string& filename)
   string::size_type extension_pos = uc_filename.rfind("_DEBUG.DLL");
   if (uc_filename.npos == extension_pos) extension_pos = uc_filename.rfind(".DLL");
   string::size_type filename_pos = uc_filename.rfind("\\") + 1;
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) && !defined(AUTOTOOLS)
   string::size_type extension_pos = filename.rfind(".bundle");
+  string::size_type filename_pos = filename.rfind("/") + 1;
+#elif defined(__APPLE__) && defined(AUTOTOOLS)
+  string::size_type extension_pos = filename.rfind(".la");
   string::size_type filename_pos = filename.rfind("/") + 1;
 #else
   string::size_type extension_pos = filename.rfind(".so");
@@ -229,7 +234,7 @@ bool ShBackend::load_library(const string& filename)
 
 #if defined(WIN32)
   LibraryHandle module = LoadLibrary(filename.c_str());
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) && !defined(AUTOTOOLS)
   CFURLRef bundleURL;
   CFStringRef n = CFStringCreateWithCString(kCFAllocatorDefault, filename.c_str(), kCFStringEncodingASCII);
 
@@ -264,8 +269,10 @@ void ShBackend::load_libraries(const string& directory)
     // Go through all files in lib/sh/
     for (struct dirent* entry = readdir(dirp); entry != 0; entry = readdir(dirp)) {
       string filename(entry->d_name);
-# ifdef __APPLE__
+# if defined(__APPLE__) && !defined(AUTOTOOLS)
       string::size_type extension_pos = filename.rfind(".bundle");
+# elif defined(__APPLE__) && defined(AUTOTOOLS)
+      string::size_type extension_pos = filename.rfind(".la");
 # else
       string::size_type extension_pos = filename.rfind(".so");
 
@@ -388,7 +395,7 @@ void ShBackend::load_all_backends()
     start = separator + 1;
     end = length - 1;
   }
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) && !defined(AUTOTOOLS)
   load_libraries(string(getenv("HOME")) + "/Library/Sh/Backends");
   load_libraries("/Local/Library/Sh/Backends");
   load_libraries("/Library/Sh/Backends");
@@ -458,7 +465,7 @@ void ShBackend::init()
   m_selected_backends = new BackendSet();
   m_loaded_libraries = new LibraryMap();
 
-#if !defined(WIN32) && !defined(__APPLE__)
+#if !defined(WIN32) && (!defined(__APPLE__) || defined(AUTOTOOLS))
   if (lt_dlinit()) {
     SH_DEBUG_ERROR("Error initializing ltdl: " << lt_dlerror());
   }
