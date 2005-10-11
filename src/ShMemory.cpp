@@ -293,6 +293,7 @@ void* ShHostStorage::data()
 //////////////////////////
 // --- ShHostMemory --- //
 //////////////////////////
+#pragma warning(disable:4355) // Disable useless VC warning
 
 ShHostMemory::ShHostMemory(std::size_t length, ShValueType value_type)
   : m_hostStorage(new ShHostStorage(this, length, value_type))
