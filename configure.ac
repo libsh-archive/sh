@@ -70,7 +70,6 @@ esac
 AM_CONDITIONAL(INCLUDE_PBUFFERSTREAMS, test x$enable_pbuffer_streams = xtrue)
 # Backends
 
-SM_WITH_SM_DIR
 GL_WITH_GL_DIR
 
 #version spec is done in the style [current[:release=0[:age=0]]]
@@ -94,18 +93,6 @@ else
 fi
 
 AC_DEFINE_UNQUOTED(SH_SHLIB_EXT, "$sh_shlib_ext", [Platform-specific shared library extension])
-
-# SH_CHECK_BACKEND([sm], [SM])
-# if test "x$sh_backend_sm" = xtrue ; then
-#   SM_CHECK_SM_HEADERS([],
-#     [AC_MSG_WARN([sm.hpp not found. Disabling SM backend.])
-#      sh_backend_sm=false ])
-# fi
-sh_backend_sm=false
-#SH_DECLARE_BACKEND([sm], [SM])
-#SH_BACKEND_MESSAGE([sm], [The SM backend is disabled for the moment.])
-
-AM_CONDITIONAL(ENABLE_SM_BACKEND, test x$sh_backend_sm = xtrue)
 
 SH_CHECK_BACKEND([arb], [OpenGL ARB])
 if test "x$sh_backend_arb" = xtrue ; then
