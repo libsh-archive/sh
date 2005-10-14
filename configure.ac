@@ -37,6 +37,8 @@ AC_PROG_MAKE_SET
 # Set up some stuff
 AC_LANG(C++)
 
+GCC_VISIBILITY_CHECK
+
 SH_CHECK_ENABLE_DEBUG
 
 # Checks for libraries.
