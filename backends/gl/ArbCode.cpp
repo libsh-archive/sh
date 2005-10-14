@@ -114,8 +114,16 @@ ArbCode::ArbCode(const ShProgramNodeCPtr& shader, const string& unit,
 {
   m_originalShader =  const_cast<ShProgramNode*>(shader.object());
 
-  if (unit == "fragment") m_environment |= SH_ARB_FP;
-  if (unit == "vertex") m_environment |= SH_ARB_VP;
+  if (unit == "fragment") {
+    m_environment |= SH_ARB_FP;
+  } else if (unit == "vertex") {
+    m_environment |= SH_ARB_VP;
+  } else {
+    stringstream s;
+    s << "Cannot generate ARB code for the '" << unit
+      << "' unit.  Valid units are 'vertex' and 'fragment'." << endl;
+    shError(ArbException(s.str()));
+  }
 
   const GLubyte* extensions = glGetString(GL_EXTENSIONS);
   if (extensions) {

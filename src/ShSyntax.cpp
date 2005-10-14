@@ -54,16 +54,11 @@ void shEndShader()
   context->exit();
 
   parsing->finish();
-
-  // TODO: compile the program? See issue129.
-  
 }
 
 void shCompile(ShProgram& prg)
 {
-  ShBackendPtr backend = ShBackend::get_backend(prg.target());
-  if (!backend) return;
-  prg.compile(backend);
+  shCompile(prg, prg.target());
 }
 
 void shCompile(ShProgram& prg, const std::string& target)

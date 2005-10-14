@@ -1,3 +1,14 @@
+2005-10-14  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbCode.cpp (ArbCode): Throw an error when creating
+	an ArbCode object with an unit type other than vertex or fragment.
+
+	* src/ShProgramNode.cpp (compile): Ignore compilations of stream
+	programs and output a warning.
+
+	* src/ShSyntax.cpp (shCompile): Move duplicated code into a single
+	generic function.
+
 2005-10-07  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslCode.cpp, GlslCode.hpp

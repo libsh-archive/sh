@@ -44,13 +44,19 @@ ShProgramNode::~ShProgramNode()
 
 void ShProgramNode::compile(const ShPointer<ShBackend>& backend)
 {
-  if (m_target.empty()) shError( ShException( "Invalid ShProgram target" ) );
+  if (m_target.empty()) shError(ShException("Empty ShProgram target"));
   compile(m_target, backend);
 }
 
 void ShProgramNode::compile(const std::string& target, const ShPointer<ShBackend>& backend)
 {
   if (!backend) return;
+  if (target.empty()) shError(ShException("Empty ShProgram target"));
+
+  if (target.find("stream") != target.npos) {
+    SH_DEBUG_WARN("Stream programs cannot be compiled. Execute the program directly without compiling it.");
+    return;
+  }
 
   ShContext::current()->enter(this);
   ShBackendCodePtr code = 0;
