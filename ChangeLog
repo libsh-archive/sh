@@ -1,5 +1,9 @@
 2005-10-14  Francois Marier  <francois@serioushack.com>
 
+	* src/ShDllExport.hpp: Define the SH_DLLEXPORT macro for the gcc
+	visibility feature.  Define a new SH_DLLLOCAL macro to be used for
+	explicitely hiding functions and methods.
+
 	* backends/gl/ArbCode.cpp (ArbCode): Throw an error when creating
 	an ArbCode object with an unit type other than vertex or fragment.
 
