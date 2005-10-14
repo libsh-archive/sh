@@ -21,13 +21,15 @@
 #define SHPNGIMAGEIMPL_HPP
 
 #include "ShPngImage.hpp"
+#include "ShDllExport.hpp"
 
 namespace ShUtil {
 
 using namespace SH;
 using namespace std;
 
-struct ShPngImage {
+struct
+SH_DLLEXPORT ShPngImage {
   static float* read_PNG(const string& filename, int& width, int& height, 
                          int& elements);
   static void write_PNG(const string& filename, const float* data, 
