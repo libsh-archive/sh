@@ -236,17 +236,12 @@ bool ShBackend::load_library(const string& filename)
   LibraryHandle module = LoadLibrary(filename.c_str());
 #elif defined(__APPLE__) && !defined(AUTOTOOLS)
   CFURLRef bundleURL;
-  CFStringRef n = CFStringCreateWithCString(kCFAllocatorDefault, filename.c_str(), kCFStringEncodingASCII);
 
-  bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, 
-											n,
-											kCFURLPOSIXPathStyle,
-											true );
-											
-  CFRelease(n);											
+  CFStringRef n = CFStringCreateWithCString(kCFAllocatorDefault, filename.c_str(), kCFStringEncodingASCII);
+  bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, n, kCFURLPOSIXPathStyle, true );
+  CFRelease(n);
 
   LibraryHandle module = CFBundleCreate( kCFAllocatorDefault, bundleURL );
-  
   CFRelease( bundleURL );
 #else
   LibraryHandle module = lt_dlopenext(filename.c_str());
