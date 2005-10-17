@@ -28,8 +28,7 @@ namespace ShUtil {
 using namespace SH;
 using namespace std;
 
-struct
-SH_DLLEXPORT ShPngImage {
+struct ShPngImage {
   static float* read_PNG(const string& filename, int& width, int& height, 
                          int& elements);
   static void write_PNG(const string& filename, const float* data, 
