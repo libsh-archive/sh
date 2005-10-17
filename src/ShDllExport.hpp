@@ -21,8 +21,12 @@
 #define SHDLLEXPORT_HPP
 
 #if defined(WIN32)
+#ifndef SH_DLLEXPORT
 # define SH_DLLEXPORT __declspec(dllimport)
+#endif
+#ifndef SH_DLLLOCAL
 # define SH_DLLLOCAL
+#endif
 #elif defined(HAVE_GCCVISIBILITYPATCH)
 # define SH_DLLEXPORT __attribute__ ((visibility("default")))
 # define SH_DLLLOCAL __attribute__ ((visibility("hidden")))

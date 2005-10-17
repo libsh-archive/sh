@@ -1,3 +1,8 @@
+2005-10-17  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/ShDllExport.hpp: Don't define SH_DLLEXPORT if it already
+	is. Fixes the build on win32.
+
 2005-10-14  Francois Marier  <francois@serioushack.com>
 
 	* src/ShDllExport.hpp: Define the SH_DLLEXPORT macro for the gcc
