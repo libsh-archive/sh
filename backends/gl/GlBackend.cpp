@@ -336,6 +336,12 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
 SH::ShBackendCodePtr GlBackend::generate_code(const std::string& target,
                                               const SH::ShProgramNodeCPtr& shader)
 {
+  if (target.find("stream") != target.npos) {
+    SH_DEBUG_WARN("Stream programs cannot be compiled on OpenGL backends."
+                  " Execute programs directly without compiling them.");
+    return 0;
+  }
+
   return m_code->generate(target, shader, m_texture);
 }
 

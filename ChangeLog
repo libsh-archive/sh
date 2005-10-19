@@ -1,3 +1,12 @@
+2005-10-19  Francois Marier  <francois@serioushack.com>
+
+	* src/ShProgramNode.cpp (compile): Remove the check for stream
+	programs because on some backends (e.g. cc) it makes sense to
+	compile a stream program.
+
+	* backends/gl/GlBackend.cpp (generate_code): Prevent code
+	generation for stream programs and display a warning.
+
 2005-10-17  Stefanus Du Toit  <sdt@serioushack.com>
 
 	* src/ShDllExport.hpp: Don't define SH_DLLEXPORT if it already

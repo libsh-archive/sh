@@ -53,11 +53,6 @@ void ShProgramNode::compile(const std::string& target, const ShPointer<ShBackend
   if (!backend) return;
   if (target.empty()) shError(ShException("Empty ShProgram target"));
 
-  if (target.find("stream") != target.npos) {
-    SH_DEBUG_WARN("Stream programs cannot be compiled. Execute the program directly without compiling it.");
-    return;
-  }
-
   ShContext::current()->enter(this);
   ShBackendCodePtr code = 0;
   try {
@@ -69,8 +64,10 @@ void ShProgramNode::compile(const std::string& target, const ShPointer<ShBackend
     throw;
   }
   ShContext::current()->exit();
-  m_code[std::make_pair(target, backend)] = code;
-  m_backend_name = backend->name();
+  if (code) {
+    m_code[std::make_pair(target, backend)] = code;
+    m_backend_name = backend->name();
+  }
 }
 
 bool ShProgramNode::is_compiled() const
