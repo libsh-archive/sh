@@ -175,7 +175,12 @@
  * @see SH_DO
  * @see SH_FOR
  */
-#define SH_BREAK    if (!::SH::ShContext::current()->parsing()) { break; } else { ::SH::shBreak(); }
+#define SH_BREAK(cond) \
+  if (!::SH::ShContext::current()->parsing()) { \
+    if (::SH::shEvaluateCondition(cond)) break;\
+  } else {\
+    ::SH::shBreak(SH_PUSH_ARG_QUEUE && SH_PUSH_ARG && SH_PROCESS_ARG(cond, 0));\
+  }
 /** \def SH_CONTINUE
  * Break out of a loop, continuing with the next iteration.
  * @see SH_BREAK
@@ -183,7 +188,12 @@
  * @see SH_DO
  * @see SH_FOR
  */
-#define SH_CONTINUE if (!::SH::ShContext::current()->parsing()) { continue; } else { ::SH::shBreak(); }
+#define SH_CONTINUE(cond) \
+  if (!::SH::ShContext::current()->parsing()) { \
+    if (::SH::shEvaluateCondition(cond)) continue;\
+  } else {\
+    ::SH::shContinue(SH_PUSH_ARG_QUEUE && SH_PUSH_ARG && SH_PROCESS_ARG(cond, 0));\
+  }
 /** \def SH_RETURN
  * Terminate the fragment program without killing the fragment.
  */
@@ -385,10 +395,10 @@ void shEndFor();
 
 /// \internal
 SH_DLLEXPORT
-void shBreak();
+void shBreak(bool);
 /// \internal
 SH_DLLEXPORT
-void shContinue();
+void shContinue(bool);
 
 /// \internal
 SH_DLLEXPORT

@@ -35,6 +35,12 @@ void checkCond(bool cond, const std::string& message = "Internal Error")
 }
 
 
+ShParser* ShParser::instance()
+{
+  static ShParser* instance = new ShParser();
+  return instance;
+}
+
 void ShParser::parse(ShCtrlGraphNodePtr& head,
                      ShCtrlGraphNodePtr& tail,
                      ShBlockListPtr blocks)
@@ -78,8 +84,11 @@ void ShParser::parseStmts(ShCtrlGraphNodePtr& head,
       parseDo(head, tail, blocks);
       break;
     case SH_TOKEN_BREAK:
+      parse_break(head, tail, blocks);
+      break;
     case SH_TOKEN_CONTINUE:
-      return; // TODO: break, continue semantics
+      parse_continue(head, tail, blocks);
+      break;
     case SH_TOKEN_STARTSWITCH:
     case SH_TOKEN_ENDSWITCH:
     case SH_TOKEN_CASE:
@@ -192,7 +201,10 @@ void ShParser::parseFor(ShCtrlGraphNodePtr& head,
   if (!tailUpdate) {
     headUpdate = tailUpdate = new ShCtrlGraphNode();
   }
-  
+
+  ShCtrlGraphNodePtr exit = new ShCtrlGraphNode();
+  push_scope(exit, headUpdate);
+
   ShCtrlGraphNodePtr headBody = 0, tailBody = 0;
   parseStmts(headBody, tailBody, blocks);
   if (!tailBody) {
@@ -203,9 +215,12 @@ void ShParser::parseFor(ShCtrlGraphNodePtr& head,
 
   tail->append(headCond);
   tailCond->append(headBody, condArg.result);
+  tailCond->append(exit);
   tailBody->append(headUpdate);
   tailUpdate->append(headCond);
-  tail = tailCond;
+  tail = exit;
+
+  pop_scope();
 }
 
 void ShParser::parseWhile(ShCtrlGraphNodePtr& head,
@@ -222,6 +237,9 @@ void ShParser::parseWhile(ShCtrlGraphNodePtr& head,
     head = tail = new ShCtrlGraphNode();
   }
 
+  ShCtrlGraphNodePtr exit = new ShCtrlGraphNode();
+  push_scope(exit, head);
+
   ShCtrlGraphNodePtr headBody = 0, tailBody = 0;
   parseStmts(headBody, tailBody, blocks);
   if (!tailBody) {
@@ -231,19 +249,27 @@ void ShParser::parseWhile(ShCtrlGraphNodePtr& head,
   ShTokenPtr nt = popToken(blocks, SH_TOKEN_ENDWHILE);
 
   tail->append(headBody, condArg.result);
+  tail->append(exit); // after the loop has exited
   tailBody->append(head);
+  tail = exit;
+
+  pop_scope();
 }
 
 void ShParser::parseDo(ShCtrlGraphNodePtr& head,
                        ShCtrlGraphNodePtr& tail, ShBlockListPtr blocks)
 {
-  head = tail = 0;
-  
+  head = tail = new ShCtrlGraphNode();
+
   ShTokenPtr doToken = popToken(blocks, SH_TOKEN_DO);
 
-  parseStmts(head, tail, blocks);
-  if (!tail) {
-    head = tail = new ShCtrlGraphNode();
+  ShCtrlGraphNodePtr exit = new ShCtrlGraphNode();
+  push_scope(exit, head);
+
+  ShCtrlGraphNodePtr head_body = 0, tail_body = 0;
+  parseStmts(head_body, tail_body, blocks);
+  if (!tail_body) {
+    head_body = tail_body = new ShCtrlGraphNode();
   }
 
   ShTokenPtr nt = popToken(blocks, SH_TOKEN_UNTIL, 1);
@@ -256,17 +282,17 @@ void ShParser::parseDo(ShCtrlGraphNodePtr& head,
     headCond = tailCond = new ShCtrlGraphNode();
   }
 
-  tail->append(headCond);
-
-  // Add empty fallthrough node.
-  ShCtrlGraphNodePtr fallthrough = new ShCtrlGraphNode();
+  tail->append(head_body);
+  tail_body->append(headCond);
 
   // If the result of the UNTIL test is true, break out of the loop
-  tailCond->append(fallthrough, condArg.result);
+  tailCond->append(exit, condArg.result);
 
   // Otherwise, continue looping.
-  tailCond->append(head);
-  tail = fallthrough;
+  tailCond->append(head_body);
+  tail = exit;
+
+  pop_scope();
 }
 
 void ShParser::parseSection(ShCtrlGraphNodePtr& head,
@@ -307,6 +333,40 @@ void ShParser::parseSection(ShCtrlGraphNodePtr& head,
   secTail->append(tail);
 }
 
+void ShParser::parse_break(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, 
+                           ShBlockListPtr blocks)
+{
+  head = tail = 0;
+  
+  ShTokenPtr break_token = popToken(blocks, SH_TOKEN_BREAK, 1); 
+  
+  ShTokenArgument cond_arg = break_token->arguments.front();
+  
+  parseStmts(head, tail, cond_arg.blockList);
+  if (!tail) {
+    head = tail = new ShCtrlGraphNode();
+  }
+
+  tail->append(m_break_node.top(), cond_arg.result);
+}
+
+void ShParser::parse_continue(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, 
+                              ShBlockListPtr blocks)
+{
+  head = tail = 0;
+  
+  ShTokenPtr continue_token = popToken(blocks, SH_TOKEN_CONTINUE, 1); 
+  
+  ShTokenArgument cond_arg = continue_token->arguments.front();
+  
+  parseStmts(head, tail, cond_arg.blockList);
+  if (!tail) {
+    head = tail = new ShCtrlGraphNode();
+  }
+
+  tail->append(m_continue_node.top(), cond_arg.result);
+}
+
 ShTokenPtr ShParser::popToken(ShBlockListPtr blocks, ShTokenType expectedType, unsigned int expectedArgs)
 {
   ShTokenPtr result = shref_dynamic_cast<ShToken>(blocks->getFront());
@@ -323,6 +383,19 @@ ShTokenPtr ShParser::popToken(ShBlockListPtr blocks)
   checkCond(result);
   blocks->removeFront();
   return result;
+}
+
+void ShParser::push_scope(ShCtrlGraphNodePtr& break_node, 
+                          ShCtrlGraphNodePtr& continue_node)
+{
+  m_break_node.push(break_node);
+  m_continue_node.push(continue_node);
+}
+
+void ShParser::pop_scope()
+{
+  m_break_node.pop();
+  m_continue_node.pop();
 }
 
 }

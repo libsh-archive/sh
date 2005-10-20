@@ -299,16 +299,26 @@ void shEndFor()
   ShContext::current()->parsing()->tokenizer.blockList()->addBlock(new ShToken(SH_TOKEN_ENDFOR));
 }
 
-void ShBreak()
+void shBreak(bool)
 {
   if (!ShContext::current()->parsing()) return;
-  ShContext::current()->parsing()->tokenizer.blockList()->addBlock(new ShToken(SH_TOKEN_BREAK));
+  ShPointer<ShToken> token = new ShToken(SH_TOKEN_BREAK);
+
+  token->arguments.push_back(ShContext::current()->parsing()->tokenizer.getArgument());
+  ShContext::current()->parsing()->tokenizer.popArgQueue();
+
+  ShContext::current()->parsing()->tokenizer.blockList()->addBlock(token);
 }
 
-void ShContinue()
+void shContinue(bool)
 {
   if (!ShContext::current()->parsing()) return;
-  ShContext::current()->parsing()->tokenizer.blockList()->addBlock(new ShToken(SH_TOKEN_CONTINUE));
+  ShPointer<ShToken> token = new ShToken(SH_TOKEN_CONTINUE);
+
+  token->arguments.push_back(ShContext::current()->parsing()->tokenizer.getArgument());
+  ShContext::current()->parsing()->tokenizer.popArgQueue();
+
+  ShContext::current()->parsing()->tokenizer.blockList()->addBlock(token);
 }
 
 void shBeginSection()

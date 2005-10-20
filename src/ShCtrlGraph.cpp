@@ -207,7 +207,7 @@ ShCtrlGraph::ShCtrlGraph(ShBlockListPtr blocks)
 {
   ShCtrlGraphNodePtr head, tail;
 
-  ShParser::parse(head, tail, blocks);
+  ShParser::instance()->parse(head, tail, blocks);
 
   if(!head && !tail) {
     m_entry->append(m_exit);

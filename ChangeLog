@@ -1,3 +1,16 @@
+2005-10-20  Francois Marier  <francois@serioushack.com>
+
+	* src/ShSyntax.cpp, ShSyntax.hpp: Add a boolean parameter to both
+	shBreak() and shContinue().
+
+	* src/ShParser.cpp, ShParser.hpp: Add a stack which keeps track of
+	the break and continue points for each scope.
+	Add parse_break() and parse_continue() to generate the right
+	control flow graphs when using SH_BREAK and SH_CONTINUE.
+
+	* src/ShParser.hpp, ShCtrlGraph.cpp: Turn ShParser into a
+	singleton.
+
 2005-10-19  Francois Marier  <francois@serioushack.com>
 
 	* src/ShProgramNode.cpp (compile): Remove the check for stream
