@@ -847,12 +847,14 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
       const ShStatement& stmt = *I;
       emit(stmt);
     }
-  } else if (node->type == ShStructuralNode::BLOCK) {
+  } 
+  else if (node->type == ShStructuralNode::BLOCK) {
     for (ShStructuralNode::StructNodeList::const_iterator I = node->structnodes.begin();
          I != node->structnodes.end(); ++I) {
       genStructNode(*I);
     }
-  } else if (node->type == ShStructuralNode::IFELSE) {
+  } 
+  else if (node->type == ShStructuralNode::IFELSE) {
     ShStructuralNodePtr header = node->structnodes.front();
     
     ShVariable cond;
@@ -876,7 +878,8 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
     } m_instructions.push_back(ArbInst(SH_ARB_ELSE, ShVariable())); {
       genStructNode(elsenode);
     } m_instructions.push_back(ArbInst(SH_ARB_ENDIF, ShVariable()));
-  } else if (node->type == ShStructuralNode::WHILELOOP) {
+  } 
+  else if (node->type == ShStructuralNode::WHILELOOP) {
     ShStructuralNodePtr header = node->structnodes.front();
 
     ShVariable cond = header->succs.front().first;
@@ -899,7 +902,8 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
     genStructNode(body);
     
     m_instructions.push_back(ArbInst(SH_ARB_ENDREP, ShVariable()));
-  } else if (node->type == ShStructuralNode::SELFLOOP) {
+  } 
+  else if (node->type == ShStructuralNode::SELFLOOP) {
     ShStructuralNodePtr loopnode = node->structnodes.front();
 
     bool condexit = true; // true if the condition causes us to exit the
@@ -924,12 +928,11 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
     updatecc.update_cc = true;
     m_instructions.push_back(updatecc);
     ArbInst brk(SH_ARB_BRK, ShVariable(), cond);
-    if (!condexit) {
-      brk.invert = true;
-    } 
+    brk.invert = !condexit;
     m_instructions.push_back(brk);
     m_instructions.push_back(ArbInst(SH_ARB_ENDREP, ShVariable()));
-  } else if (node->type == ShStructuralNode::IF) {
+  } 
+  else if (node->type == ShStructuralNode::IF) {
     ShStructuralNodePtr header = node->structnodes.front();
     
     ShStructuralNode::SuccessorList::iterator B = header->succs.begin();
