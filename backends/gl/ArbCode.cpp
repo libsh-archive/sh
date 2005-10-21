@@ -1333,22 +1333,6 @@ void ArbCode::allocTemps(const ArbLimits& limits, bool half)
       scopestack.pop_back();
     }
 
-    if (mark(allocator, instr.dest.node(), (int)i, half)) {
-      for (ScopeStack::iterator S = scopestack.begin(); S != scopestack.end(); ++S) {
-        ArbScope& scope = *S;
-        bitset<4> writemask;
-        for (int k = 0; k < instr.dest.size(); k++) {
-          writemask[instr.dest.swizzle()[k]] = true;
-        }
-        // TODO: Only change the writemask for scopes that see this
-        // write unconditionally
-        // I.e. don't change it if the scope is outside an if
-        // statement, or a post-BRK REP scope.
-        scope.write_map[instr.dest.node().object()] |= writemask;
-
-      }        
-    }
-    
     for (int j = 0; j < ArbInst::max_num_sources; j++) {
       if (mark(allocator, instr.src[j].node(), (int)i, half)) {
         for (ScopeStack::iterator S = scopestack.begin(); S != scopestack.end(); ++S) {
@@ -1364,6 +1348,22 @@ void ArbCode::allocTemps(const ArbLimits& limits, bool half)
           }
         }
       }
+    }
+
+    if (mark(allocator, instr.dest.node(), (int)i, half)) {
+      for (ScopeStack::iterator S = scopestack.begin(); S != scopestack.end(); ++S) {
+        ArbScope& scope = *S;
+        bitset<4> writemask;
+        for (int k = 0; k < instr.dest.size(); k++) {
+          writemask[instr.dest.swizzle()[k]] = true;
+        }
+        // TODO: Only change the writemask for scopes that see this
+        // write unconditionally
+        // I.e. don't change it if the scope is outside an if
+        // statement, or a post-BRK REP scope.
+        scope.write_map[instr.dest.node().object()] |= writemask;
+
+      }        
     }
   }
   

@@ -1,3 +1,10 @@
+2005-10-21  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbCode.cpp (allocTemps): Reorder the write mapping
+	and the read check in the register allocator to fix a problem
+	where a variable that has been written to in the scope will not be
+	reused later on in the same scope.
+
 2005-10-20  Francois Marier  <francois@serioushack.com>
 
 	* src/ShSyntax.cpp, ShSyntax.hpp: Add a boolean parameter to both
