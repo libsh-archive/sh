@@ -158,8 +158,7 @@ void shBindShader(const std::string& target, ShProgram& shader)
 bool shSetBackend(const std::string& name)
 {
   SH::ShBackend::clear_backends();
-  if (name.empty()) return false;
-  return SH::ShBackend::use_backend(name);
+  return shUseBackend(name);
 }
 
 bool shUseBackend(const std::string& name)
