@@ -1,5 +1,8 @@
 2005-10-24  Francois Marier  <francois@serioushack.com>
 
+	* src/ShSyntax.hpp (SH_UNTIL): The condition should be negated
+	since the loop becomes a do..while loop in immediate mode.
+
 	* src/ShParser.cpp (parseDo): Add an extra node between the body
 	and the condition evaluation so that SH_CONTINUE can jump there
 	and evaluate the condition again instead of jumping back to the

@@ -128,7 +128,7 @@
  * @see SH_DO
  */
 #define SH_UNTIL(cond) \
-  }}}} while (!::SH::ShContext::current()->parsing() && ::SH::shEvaluateCondition(cond)); \
+  }}}} while (!::SH::ShContext::current()->parsing() && !::SH::shEvaluateCondition(cond)); \
   if (::SH::ShContext::current()->parsing()) ::SH::shUntil(SH_PUSH_ARG_QUEUE && SH_PUSH_ARG && SH_PROCESS_ARG(cond, 0)); }
 //@}
 
