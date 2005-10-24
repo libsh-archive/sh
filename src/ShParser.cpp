@@ -264,7 +264,8 @@ void ShParser::parseDo(ShCtrlGraphNodePtr& head,
   ShTokenPtr doToken = popToken(blocks, SH_TOKEN_DO);
 
   ShCtrlGraphNodePtr exit = new ShCtrlGraphNode();
-  push_scope(exit, head);
+  ShCtrlGraphNodePtr loop_end = new ShCtrlGraphNode();
+  push_scope(exit, loop_end);
 
   ShCtrlGraphNodePtr head_body = 0, tail_body = 0;
   parseStmts(head_body, tail_body, blocks);
@@ -283,7 +284,8 @@ void ShParser::parseDo(ShCtrlGraphNodePtr& head,
   }
 
   tail->append(head_body);
-  tail_body->append(headCond);
+  tail_body->append(loop_end);
+  loop_end->append(headCond);
 
   // If the result of the UNTIL test is true, break out of the loop
   tailCond->append(exit, condArg.result);
