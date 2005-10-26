@@ -946,6 +946,8 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
     m_instructions.push_back(ArbInst(SH_ARB_IF, ShVariable(), cond)); {
       genStructNode(ifnode);
     } m_instructions.push_back(ArbInst(SH_ARB_ENDIF, ShVariable()));
+  } else {
+    SH_DEBUG_WARN("Unknown ShStructuralNode type encountered.  Generated code may be incomplete.");
   }
 }
 

@@ -578,6 +578,8 @@ void GlslCode::gen_structural_node(const ShStructuralNodePtr& node)
     m_indent--;
 
     append_line("} // while", false);
+  } else {
+    SH_DEBUG_WARN("Unknown ShStructuralNode type encountered.  Generated code may be incomplete.");
   }
 }
 
