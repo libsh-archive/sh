@@ -323,6 +323,7 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
   GET_WGL_PROCEDURE(glLinkProgramARB, GLLINKPROGRAMARB);
   GET_WGL_PROCEDURE(glUseProgramObjectARB, GLUSEPROGRAMOBJECTARB);
   GET_WGL_PROCEDURE(glValidateProgramARB, GLVALIDATEPROGRAMARB);
+  GET_WGL_PROCEDURE(glBindAttribLocationARB, GLBINDATTRIBLOCATIONARB);
 
   if (hWnd) {
     wglMakeCurrent(NULL, NULL);
