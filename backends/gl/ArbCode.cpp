@@ -387,16 +387,17 @@ void ArbCode::update()
 
 void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
 {
-  int i;
-
   if (!uniform) return;
 
-  if (!uniform->meta("opengl:readonly").empty())
-    {
-    return;
-    }
+  // This is too slow - if we really need it here later we have to find a
+  // better way of doing it than looking up in a map with a string key!
+  //if (!uniform->meta("opengl:readonly").empty()) {
+  //  return;
+  //}
 
-  ShVariantCPtr uniformVariant = uniform->getVariant();
+  // TODO The "find" and "count" map accesses here are still bottlenecks.
+  // There may be a good way to replace these with something faster.
+  const ShVariant *uniformVariant = uniform->getVariant();
   RegMap::const_iterator I = m_registers.find(uniform);
   if (I == m_registers.end()) { // perhaps uniform was split
     if (m_splits.count(uniform) > 0) {
@@ -407,7 +408,7 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
       for (ShTransformer::VarNodeVec::iterator it = splitVec.begin();
            it != splitVec.end(); offset += (*it)->size(), ++it) {
         // TODO switch to properly swizzled version
-        for (i = 0; i < (*it)->size(); ++i) copySwiz[i] = i + offset;
+        for (int i = 0; i < (*it)->size(); ++i) copySwiz[i] = i + offset;
         (*it)->setVariant(uniformVariant->get(false, ShSwizzle(uniform->size(), (*it)->size(), copySwiz))); 
         updateUniform(*it);
       }
@@ -415,27 +416,35 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
     return;
   }
 
-  ShTextureNodePtr tex = shref_dynamic_cast<ShTextureNode>(uniform);
-  if (tex) {
+  if (uniform->kind() == SH_TEXTURE) {
     return;
   }
     
   const ArbReg& reg = *I->second;
   
-  // @todo type remove the two copies done below
-  // (although it probably won't matter with all the other work we're doing...
-  // cast to float 
-  float values[4];
-  ShPointer<ShDataVariant<float, SH_HOST> > floatVariant = 
-    new ShDataVariant<float, SH_HOST>(uniform->size()); 
-  floatVariant->set(uniformVariant);
+  const int uniform_size = uniform->size();
+  SH_DEBUG_ASSERT(uniform_size <= 4);
 
-  for (i = 0; i < uniform->size(); i++) {
-    // TODO clean this up and handle different types
-    values[i] = (*floatVariant)[i]; 
+  float values[4];
+  int i;
+  if (uniform->valueType() == SH_FLOAT) {
+    // Copy to a float array
+    const float *variant = static_cast<const float *>(uniformVariant->array());
+    for (i = 0; i < uniform_size; ++i)
+      values[i] = variant[i];
   }
+  else {
+    // Componentwise cast to float and copy
+    typedef ShDataVariant<float, SH_HOST> FloatVariant;
+    FloatVariant floatVariant(uniform->size());
+    floatVariant.set(uniformVariant);
+    for (i = 0; i < uniform_size; ++i)
+      values[i] = floatVariant[i];
+  }
+
+  // Zero out any extra components
   for (; i < 4; i++) {
-    values[i] = 0.0;
+    values[i] = 0.0f;
   }
   
   if (reg.type != SH_ARB_REG_PARAM) return;

@@ -1,3 +1,8 @@
+2005-10-31  Andrew Lauritzen  <atlaurit@student.cs.uwaterloo.ca>
+      * backends/gl/ArbCode.cpp: Optimized ArbCode::updateUniforms to
+      be more efficient, especially with normal (<= 4 component) float
+      uniforms.
+
 2005-10-24  Francois Marier  <francois@serioushack.com>
 
 	* src/ShSyntax.hpp (SH_UNTIL): The condition should be negated
