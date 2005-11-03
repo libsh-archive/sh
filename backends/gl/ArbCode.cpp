@@ -216,16 +216,12 @@ void ArbCode::generate()
   // Record changes that the transformer makes to the input/output variables
   // so that we have a mapping from the changed ones back to the originals.
   transform.convertInputOutput(&m_originalVarsMap);
-  //dump(m_shader, "arbcode_io");
   transform.convertTextureLookups();
-  //dump(m_shader, "arbcode_io");
   transform.convertToFloat(m_convertMap);
-  //dump(m_shader, "arbcode_conv2float");
   transform.splitTuples(4, m_splits);
   transform.stripDummyOps();
   transform.expand_atan2();
   transform.expand_inverse_hyperbolic();
-  //dump(m_shader, "arbcode_split");
   dump(m_shader, "arbcode_done");
  
   if (transform.changed()) {
@@ -705,7 +701,11 @@ ostream& ArbCode::print(ostream& out)
     } else if (I->op == SH_ARB_IF) {
       out << "  IF ";
       if (I->src[0].node()) {
-        out << "GT";
+        if (I->invert) {
+          out << "LE";
+        } else {
+          out << "GT";
+        }
         out << ".";
         for (int i = 0; i < I->src[0].swizzle().size(); i++) {
           out << swizChars[I->src[0].swizzle()[i]];
@@ -878,11 +878,7 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
       }
     }
     genStructNode(header);
-    ShVariable dummy(new ShVariableNode(SH_TEMP, cond.size(), SH_FLOAT));
-    ArbInst updatecc(SH_ARB_MOV, dummy, cond);
-    updatecc.update_cc = true;
-    m_instructions.push_back(updatecc);
-    m_instructions.push_back(ArbInst(SH_ARB_IF, ShVariable(), cond)); {
+    push_if(cond, false); {
       genStructNode(ifnode);
     } m_instructions.push_back(ArbInst(SH_ARB_ELSE, ShVariable())); {
       genStructNode(elsenode);
@@ -901,15 +897,8 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
     m_shader->constants.push_back(maxloop.node());
     m_instructions.push_back(ArbInst(SH_ARB_REP, ShVariable(), maxloop));
     genStructNode(header);
-    ShVariable dummy(new ShVariableNode(SH_TEMP, cond.size(), SH_FLOAT));
-    ArbInst updatecc(SH_ARB_MOV, dummy, cond);
-    updatecc.update_cc = true;
-    m_instructions.push_back(updatecc);
-    ArbInst brk(SH_ARB_BRK, ShVariable(), cond);
-    brk.invert = true;
-    m_instructions.push_back(brk);
+    push_break(cond, true);
     genStructNode(body);
-    
     m_instructions.push_back(ArbInst(SH_ARB_ENDREP, ShVariable()));
   } 
   else if (node->type == ShStructuralNode::SELFLOOP) {
@@ -932,13 +921,7 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
     m_shader->constants.push_back(maxloop.node());
     m_instructions.push_back(ArbInst(SH_ARB_REP, ShVariable(), maxloop));
     genStructNode(loopnode);
-    ShVariable dummy(new ShVariableNode(SH_TEMP, cond.size(), SH_FLOAT));
-    ArbInst updatecc(SH_ARB_MOV, dummy, cond);
-    updatecc.update_cc = true;
-    m_instructions.push_back(updatecc);
-    ArbInst brk(SH_ARB_BRK, ShVariable(), cond);
-    brk.invert = !condexit;
-    m_instructions.push_back(brk);
+    push_break(cond, !condexit);
     m_instructions.push_back(ArbInst(SH_ARB_ENDREP, ShVariable()));
   } 
   else if (node->type == ShStructuralNode::IF) {
@@ -948,16 +931,109 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
     ShVariable cond = B->first;
     ShStructuralNodePtr ifnode = B->second;
     genStructNode(header);
-    ShVariable dummy(new ShVariableNode(SH_TEMP, cond.size(), SH_FLOAT));
-    ArbInst updatecc(SH_ARB_MOV, dummy, cond);
-    updatecc.update_cc = true;
-    m_instructions.push_back(updatecc);
-    m_instructions.push_back(ArbInst(SH_ARB_IF, ShVariable(), cond)); {
+    push_if(cond, false); {
       genStructNode(ifnode);
     } m_instructions.push_back(ArbInst(SH_ARB_ENDIF, ShVariable()));
-  } else {
+  }
+  else if (ShStructuralNode::PROPINT == node->type) {
+    float maxloopval = 255.0f;
+    ShConstAttrib1f maxloop(maxloopval);
+
+    m_shader->constants.push_back(maxloop.node());
+    m_instructions.push_back(ArbInst(SH_ARB_REP, ShVariable(), maxloop));
+
+    int continue_levels=0;
+    set<ShStructuralNode*> seen; // keep track of the nodes we have seen already
+    bool found_loop_condition=false;
+    ShStructuralNodePtr n = node->structnodes.front(); 
+    while (seen.find(n.object()) == seen.end()) {
+      seen.insert(n.object());
+      genStructNode(n);
+      if (n->succs.size() > 1) {
+        // Figure out which branch is the conditional one
+        pair<ShVariable, ShStructuralNodePtr> branch_pair = n->succs.front(); // conditional successor
+        pair<ShVariable, ShStructuralNodePtr> default_pair = n->succs.back(); // non-conditional successor
+        if (!branch_pair.first.node()) {
+          branch_pair = n->succs.back();
+          default_pair = n->succs.front();
+        }
+        ShVariable branch_cond = branch_pair.first;
+        const ShStructuralNodePtr branch_node = branch_pair.second;
+
+        // Check if the non-conditional node leaves the PROPINT node
+        if (default_pair.second == node->succs.front().second) {
+          // We are on the condition of a "while (branch_cond)" loop
+          // so we can negate the condition and break
+          push_break(branch_cond, true);
+          found_loop_condition = true;
+          n = branch_pair.second;
+        } else {
+          // We are on a node that looks like
+          //   if (branch_node) break/continue;
+          if (branch_node == node->succs.front().second) {
+            // 'break' case
+            bool is_last_break_statement = (seen.find(default_pair.second.object()) != seen.end());
+            if (!found_loop_condition && is_last_break_statement) {
+              // Must be the loop condition of a do..until loop
+              
+              // Put the loop condition outside of the continue block
+              for (int i=0; i < continue_levels; i++) {
+                m_instructions.push_back(ArbInst(SH_ARB_ENDIF, ShVariable()));
+              }
+              continue_levels = 0;
+
+              push_break(branch_cond, false);
+            } else {
+              // Usual 'break' case
+              push_break(branch_cond, false);
+            }
+          } else {
+            // 'continue' case
+            // Wrap the rest of the body in an if statement
+            continue_levels++;
+            push_if(branch_cond, true);
+          }
+
+          n = default_pair.second;
+        }
+      } else {
+        n = n->succs.front().second; // only one successor
+      }
+    }
+    
+    // Close the continue block
+    for (int i=0; i < continue_levels; i++) {
+      m_instructions.push_back(ArbInst(SH_ARB_ENDIF, ShVariable()));
+    }
+
+    m_instructions.push_back(ArbInst(SH_ARB_ENDREP, ShVariable()));
+  } 
+  else {
     SH_DEBUG_WARN("Unknown ShStructuralNode type encountered.  Generated code may be incomplete.");
   }
+}
+
+void ArbCode::push_break(ShVariable& cond, bool negate)
+{
+  ShVariable dummy(new ShVariableNode(SH_TEMP, cond.size(), SH_FLOAT));
+  ArbInst updatecc(SH_ARB_MOV, dummy, cond);
+  updatecc.update_cc = true;
+  m_instructions.push_back(updatecc);
+
+  ArbInst brk(SH_ARB_BRK, ShVariable(), cond);
+  brk.invert = negate;
+  m_instructions.push_back(brk);
+}
+
+void ArbCode::push_if(ShVariable& cond, bool negate)
+{
+  ShVariable dummy(new ShVariableNode(SH_TEMP, cond.size(), SH_FLOAT));
+  ArbInst updatecc(SH_ARB_MOV, dummy, cond);
+  updatecc.update_cc = true;
+  m_instructions.push_back(updatecc);
+  ArbInst if_inst(SH_ARB_IF, ShVariable(), cond);
+  if_inst.invert = negate;
+  m_instructions.push_back(if_inst);
 }
 
 void ArbCode::allocRegs()

@@ -44,7 +44,8 @@ public:
     IF,
     IFELSE,
     SELFLOOP,
-    WHILELOOP
+    WHILELOOP,
+    PROPINT
   };
 
   ShStructuralNode(const ShCtrlGraphNodePtr& node);

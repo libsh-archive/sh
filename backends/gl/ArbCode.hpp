@@ -88,6 +88,12 @@ private:
   /// Right now this is geared specifically at NV_fragment_program2.
   void genStructNode(const SH::ShStructuralNodePtr& node);
 
+  /// Generate code for a conditional break
+  void push_break(SH::ShVariable& cond, bool negate);
+
+  /// Generate code for an opening if statement
+  void push_if(SH::ShVariable& cond, bool negate);
+
   /// Generate code for a single Sh statement.
   void emit(const SH::ShStatement& stmt);
 

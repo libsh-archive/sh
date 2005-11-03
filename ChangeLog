@@ -1,3 +1,22 @@
+2005-11-03  Francois Marier  <francois@serioushack.com>
+
+	* src/ShStructural.cpp (ShStructural): Detect and create PROPINT
+	nodes (multi-exit loops).
+	Fix bugs in removing duplicate successors and predescessors.
+
+	* src/ShStructural.hpp: Add the PROPINT type.
+
+	* backends/gl/GlslCode.cpp (gen_structural_node): Generate code
+	for PROPINT nodes.
+
+	* backends/gl/ArbCode.cpp (genStructNode): Generate code for
+	PROPINT nodes.
+	Refactor 'if' and 'break' statements into push_if() and
+	push_break().
+	Handle the invert member in 'if' instructions.
+
+	* backends/gl/ArbCode.hpp: Add push_break() and push_if().
+
 2005-10-31  Andrew Lauritzen  <atlaurit@student.cs.uwaterloo.ca>
         
 	* backends/gl/ArbCode.cpp (updateUniforms): Optimized to be

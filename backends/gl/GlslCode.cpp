@@ -578,7 +578,83 @@ void GlslCode::gen_structural_node(const ShStructuralNodePtr& node)
     m_indent--;
 
     append_line("} // while", false);
-  } else {
+  } 
+  else if (ShStructuralNode::PROPINT == node->type) {
+    append_line("// Multi-exit infinite loop", false);
+    append_line("while (true) {", false);
+    
+    m_indent++;
+    int continue_levels=0;
+    set<ShStructuralNode*> seen; // keep track of the nodes we have seen already
+    bool found_loop_condition=false;
+    ShStructuralNodePtr n = node->structnodes.front(); 
+    while (seen.find(n.object()) == seen.end()) {
+      seen.insert(n.object());
+      gen_structural_node(n);
+      if (n->succs.size() > 1) {
+        // Figure out which branch is the conditional one
+        pair<ShVariable, ShStructuralNodePtr> branch_pair = n->succs.front(); // conditional successor
+        pair<ShVariable, ShStructuralNodePtr> default_pair = n->succs.back(); // non-conditional successor
+        if (!branch_pair.first.node()) {
+          branch_pair = n->succs.back();
+          default_pair = n->succs.front();
+        }
+        ShVariable branch_cond = branch_pair.first;
+        const ShStructuralNodePtr branch_node = branch_pair.second;
+
+        // Check if the non-conditional node leaves the PROPINT node
+        if (default_pair.second == node->succs.front().second) {
+          // We are on the condition of a "while (branch_cond)" loop
+          // so we can negate the condition and break
+          append_line("if (!bool(" + resolve(branch_cond.node()) + ")) break; // loop condition", false);
+          found_loop_condition = true;
+          n = branch_pair.second;
+        } else {
+          // We are on a node that looks like
+          //   if (branch_node) break/continue;
+          if (branch_node == node->succs.front().second) {
+            // 'break' case
+            bool is_last_break_statement = (seen.find(default_pair.second.object()) != seen.end());
+            if (!found_loop_condition && is_last_break_statement) {
+              // Must be the loop condition of a do..until loop
+    
+              // Put the loop condition outside of the continue block
+              for (int i=0; i < continue_levels; i++) {
+                m_indent--;
+                append_line("}", false);
+              }
+              continue_levels = 0;
+
+              append_line("if (bool(" + resolve(branch_cond.node()) + ")) break; // loop condition", false);
+            } else {
+              // Usual 'break' case
+              append_line("if (bool(" + resolve(branch_cond.node()) + ")) break");
+            }
+          } else {
+            // 'continue' case
+            // Wrap the rest of the body in an if statement
+            append_line("if (!bool(" + resolve(branch_cond.node()) + ")) {", false);
+            m_indent++;
+            continue_levels++;
+          }
+
+          n = default_pair.second;
+        }
+      } else {
+        n = n->succs.front().second; // only one successor
+      }
+    }
+
+    // Close the continue block
+    for (int i=0; i < continue_levels; i++) {
+      m_indent--;
+      append_line("}", false);
+    }
+
+    m_indent--;
+    append_line("} // infinite while loop", false);
+  }
+  else {
     SH_DEBUG_WARN("Unknown ShStructuralNode type encountered.  Generated code may be incomplete.");
   }
 }

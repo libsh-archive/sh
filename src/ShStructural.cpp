@@ -42,7 +42,8 @@ const char* nodetypename[] ={
   "IF",
   "IFELSE",
   "SELFLOOP",
-  "WHILELOOP"
+  "WHILELOOP",
+  "PROPINT"
 };
 
 std::string gvname(const SH::ShStructuralNode* p)
@@ -369,12 +370,11 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
       typedef std::list<ShStructuralNodePtr> NodeSet;
       NodeSet nodeset;
       ShStructuralNodePtr newnode = 0;
-      
+   
       if (!newnode) {
         // Check for blocks
 
         ShStructuralNodePtr n = node;
-        
         bool p = true;
         bool s = n->succs.size() == 1;
         
@@ -427,7 +427,7 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
             break;
           }
         }
-
+        
         // otherwise may be block
         if(!newnode) {
           if (nodeset.size() >= 2) {
@@ -479,7 +479,6 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
 
       // Find cyclic regions
       if (!newnode) {
-        /*
         typedef std::list<ShStructuralNode*> ReachUnder;
         //        typedef NodeSet ReachUnder;
         ReachUnder ru;
@@ -493,38 +492,19 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
           SH_STR_DEBUG_PRINT("FOUND SELFLOOP");
           SH_DEBUG_ASSERT(ru.front() == node);
           newnode = new ShStructuralNode(ShStructuralNode::SELFLOOP);
-        } else
-        if (ru.size() == 2 && ru.back()->succs.size() == 1) {
+        } else if (ru.size() == 2 && ru.back()->succs.size() == 1) {
           SH_STR_DEBUG_PRINT("FOUND WHILELOOP");
           SH_DEBUG_ASSERT(ru.front() == node);
           SH_DEBUG_ASSERT(ru.back() != node);
           newnode = new ShStructuralNode(ShStructuralNode::WHILELOOP);
-        } 
+        } else if (ru.size() > 0) {
+          SH_STR_DEBUG_PRINT("FOUND PROPINT");
+          newnode = new ShStructuralNode(ShStructuralNode::PROPINT);
+        }
+
         if (newnode) {
           for (ReachUnder::iterator I = ru.begin(); I != ru.end(); ++I) {
             nodeset.push_back(*I);
-          }
-        }
-        */
-
-        for (ShStructuralNode::SuccessorList::iterator S = node->succs.begin();
-             S != node->succs.end(); ++S) {
-          if (S->second->preds.size() == 1
-              && S->second->succs.size() == 1
-              && S->second->succs.begin()->second == node) {
-            // found while loop
-            nodeset.push_back(node);
-            nodeset.push_back(S->second);
-            newnode = new ShStructuralNode(ShStructuralNode::WHILELOOP);
-            SH_DEBUG_ASSERT(!(node->secStart || S->second->secEnd));
-            break;
-          }
-          // self loop?
-          if (S->second == node) {
-            nodeset.push_back(node);
-            newnode = new ShStructuralNode(ShStructuralNode::SELFLOOP);
-            SH_DEBUG_ASSERT(!(node->secStart || node->secEnd));
-            break;
           }
         }
       }
@@ -590,6 +570,26 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
           m_postorder.remove(n.object());
         }
 
+        // Remove duplicate successors from newnode
+        for (ShStructuralNode::SuccessorList::iterator J = newnode->succs.begin();
+             J != newnode->succs.end(); J++) {
+          ShStructuralNode::SuccessorList::iterator K = J;
+          for (K++; K != newnode->succs.end(); K++) {
+            if (K->second == J->second) {
+              // Favour conditional edges for deletion in order to
+              // keep the non-conditional edges if possible
+              if (J->first.node()) {
+                J = newnode->succs.erase(J);
+                J--;
+              } else {
+                K = newnode->succs.erase(K);
+                J = newnode->succs.begin(); // The previous erase has invalidated J
+              }
+              break;
+            }
+          }
+        }
+
         SH_STR_DEBUG_PRINT("Replace parent of children");
         // Replace parent of children
         for (ShStructuralNode::ChildList::iterator I = newnode->children.begin();
@@ -610,10 +610,12 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
           for (ShStructuralNode::PredecessorList::iterator J = s->preds.begin();
                J != s->preds.end(); ++J) {
             ShStructuralNode::PredecessorList::iterator K = J;
-            ++K;
-            if (std::find(K, s->preds.end(), *J) != s->preds.end()) {
-              J = s->preds.erase(J);
-              J--;
+            for (K++; K != s->preds.end(); K++) {
+              if (K->second == J->second) {
+                J = s->preds.erase(J);
+                J--;
+                break;
+              }
             }
           }
         }
@@ -631,10 +633,12 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
           for (ShStructuralNode::SuccessorList::iterator J = p->succs.begin();
                J != p->succs.end(); ++J) {
             ShStructuralNode::SuccessorList::iterator K = J;
-            ++K;
-            if (std::find(K, p->succs.end(), *J) != p->succs.end()) {
-              J = p->succs.erase(J);
-              J--;
+            for (K++; K != p->succs.end(); K++) {
+              if (K->second == J->second) {
+                J = p->succs.erase(J);
+                J--;
+                break;
+              }
             }
           }
         }
