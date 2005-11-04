@@ -943,10 +943,19 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
     m_instructions.push_back(ArbInst(SH_ARB_REP, ShVariable(), maxloop));
 
     int continue_levels=0;
+    ShStructuralNode* continue_destination=0;
+
     set<ShStructuralNode*> seen; // keep track of the nodes we have seen already
-    bool found_loop_condition=false;
     ShStructuralNodePtr n = node->structnodes.front(); 
     while (seen.find(n.object()) == seen.end()) {
+      // Close the continue block if necessary
+      if (continue_destination && n.object() == continue_destination) {
+        for (int i=0; i < continue_levels; i++) {
+          m_instructions.push_back(ArbInst(SH_ARB_ENDIF, ShVariable()));
+        }
+        continue_levels = 0;
+      }
+
       seen.insert(n.object());
       genStructNode(n);
       if (n->succs.size() > 1) {
@@ -965,33 +974,19 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
           // We are on the condition of a "while (branch_cond)" loop
           // so we can negate the condition and break
           push_break(branch_cond, true);
-          found_loop_condition = true;
           n = branch_pair.second;
         } else {
           // We are on a node that looks like
-          //   if (branch_node) break/continue;
+          //   if (branch_cond) break/continue;
           if (branch_node == node->succs.front().second) {
             // 'break' case
-            bool is_last_break_statement = (seen.find(default_pair.second.object()) != seen.end());
-            if (!found_loop_condition && is_last_break_statement) {
-              // Must be the loop condition of a do..until loop
-              
-              // Put the loop condition outside of the continue block
-              for (int i=0; i < continue_levels; i++) {
-                m_instructions.push_back(ArbInst(SH_ARB_ENDIF, ShVariable()));
-              }
-              continue_levels = 0;
-
-              push_break(branch_cond, false);
-            } else {
-              // Usual 'break' case
-              push_break(branch_cond, false);
-            }
+            push_break(branch_cond, false);
           } else {
             // 'continue' case
-            // Wrap the rest of the body in an if statement
-            continue_levels++;
+            // Wrap the rest of the body (until continue_destination) in an if statement
             push_if(branch_cond, true);
+            continue_levels++;
+            continue_destination = branch_node.object();
           }
 
           n = default_pair.second;
@@ -1001,7 +996,7 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
       }
     }
     
-    // Close the continue block
+    // Close the continue block if it hasn't been done already
     for (int i=0; i < continue_levels; i++) {
       m_instructions.push_back(ArbInst(SH_ARB_ENDIF, ShVariable()));
     }

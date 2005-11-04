@@ -582,13 +582,23 @@ void GlslCode::gen_structural_node(const ShStructuralNodePtr& node)
   else if (ShStructuralNode::PROPINT == node->type) {
     append_line("// Multi-exit infinite loop", false);
     append_line("while (true) {", false);
-    
     m_indent++;
+
     int continue_levels=0;
+    ShStructuralNode* continue_destination=0;
+
     set<ShStructuralNode*> seen; // keep track of the nodes we have seen already
-    bool found_loop_condition=false;
     ShStructuralNodePtr n = node->structnodes.front(); 
     while (seen.find(n.object()) == seen.end()) {
+      // Close the continue block if necessary
+      if (continue_destination && n.object() == continue_destination) {
+        for (int i=0; i < continue_levels; i++) {
+          m_indent--;
+          append_line("}", false);
+        }
+        continue_levels = 0;
+      }
+
       seen.insert(n.object());
       gen_structural_node(n);
       if (n->succs.size() > 1) {
@@ -607,35 +617,20 @@ void GlslCode::gen_structural_node(const ShStructuralNodePtr& node)
           // We are on the condition of a "while (branch_cond)" loop
           // so we can negate the condition and break
           append_line("if (!bool(" + resolve(branch_cond.node()) + ")) break; // loop condition", false);
-          found_loop_condition = true;
           n = branch_pair.second;
         } else {
           // We are on a node that looks like
-          //   if (branch_node) break/continue;
+          //   if (branch_cond) break/continue;
           if (branch_node == node->succs.front().second) {
             // 'break' case
-            bool is_last_break_statement = (seen.find(default_pair.second.object()) != seen.end());
-            if (!found_loop_condition && is_last_break_statement) {
-              // Must be the loop condition of a do..until loop
-    
-              // Put the loop condition outside of the continue block
-              for (int i=0; i < continue_levels; i++) {
-                m_indent--;
-                append_line("}", false);
-              }
-              continue_levels = 0;
-
-              append_line("if (bool(" + resolve(branch_cond.node()) + ")) break; // loop condition", false);
-            } else {
-              // Usual 'break' case
-              append_line("if (bool(" + resolve(branch_cond.node()) + ")) break");
-            }
+            append_line("if (bool(" + resolve(branch_cond.node()) + ")) break");
           } else {
             // 'continue' case
-            // Wrap the rest of the body in an if statement
+            // Wrap the rest of the body (until continue_destination) in an if statement
             append_line("if (!bool(" + resolve(branch_cond.node()) + ")) {", false);
             m_indent++;
             continue_levels++;
+            continue_destination = branch_node.object();
           }
 
           n = default_pair.second;
@@ -645,7 +640,7 @@ void GlslCode::gen_structural_node(const ShStructuralNodePtr& node)
       }
     }
 
-    // Close the continue block
+    // Close the continue block if it hasn't been done already
     for (int i=0; i < continue_levels; i++) {
       m_indent--;
       append_line("}", false);
