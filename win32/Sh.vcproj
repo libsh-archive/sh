@@ -30,7 +30,7 @@
 				WarningLevel="1"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4003"/>
+				DisableSpecificWarnings="4003; 4146"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
@@ -423,10 +423,10 @@
 				RelativePath="..\src\ShImage.hpp">
 			</File>
 			<File
-				RelativePath="..\src\ShImageImpl.hpp">
+				RelativePath="..\src\ShImage3D.hpp">
 			</File>
 			<File
-				RelativePath="..\src\ShImage3D.hpp">
+				RelativePath="..\src\ShImageImpl.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShInfo.hpp">
@@ -448,18 +448,6 @@
 			</File>
 			<File
 				RelativePath="..\src\ShLibArith.hpp">
-			</File>
-			<File
-				RelativePath="..\src\ShLibNoise.hpp">
-			</File>
-			<File
-				RelativePath="..\src\ShLibNoiseImpl.hpp">
-			</File>
-			<File
-				RelativePath="..\src\ShLibWorley.hpp">
-			</File>
-			<File
-				RelativePath="..\src\ShLibWorleyImpl.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShLibArithImpl.hpp">
@@ -504,13 +492,13 @@
 				RelativePath="..\src\ShLibMisc.hpp">
 			</File>
 			<File
-				RelativePath="..\src\ShLibSplines.hpp">
-			</File>
-			<File
 				RelativePath="..\src\ShLibMiscImpl.hpp">
 			</File>
 			<File
-				RelativePath="..\src\ShLibSplines.hpp">
+				RelativePath="..\src\ShLibNoise.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShLibNoiseImpl.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShLibNormal.hpp">
@@ -525,6 +513,12 @@
 				RelativePath="..\src\ShLibPosition.hpp">
 			</File>
 			<File
+				RelativePath="..\src\ShLibSplines.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShLibSplines.hpp">
+			</File>
+			<File
 				RelativePath="..\src\ShLibTexCoord.hpp">
 			</File>
 			<File
@@ -535,6 +529,12 @@
 			</File>
 			<File
 				RelativePath="..\src\ShLibVector.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShLibWorley.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShLibWorleyImpl.hpp">
 			</File>
 			<File
 				RelativePath="..\src\ShLinearAllocator.hpp">

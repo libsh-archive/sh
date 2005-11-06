@@ -136,8 +136,9 @@ typedef std::map<std::string, ShProgram> BoundProgramMap;
 
 void shUpdate()
 {
-  for (BoundProgramMap::iterator i = ShContext::current()->begin_bound(); 
-       i != ShContext::current()->end_bound(); i++) {
+  const BoundProgramMap::iterator begin = ShContext::current()->begin_bound();
+  const BoundProgramMap::iterator end   = ShContext::current()->end_bound();
+  for (BoundProgramMap::iterator i = begin; i != end; ++i) {
     ShBackendPtr backend = ShBackend::get_backend(i->second.target());
     if (backend) {
       i->second.code(backend)->update();

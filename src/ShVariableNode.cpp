@@ -363,9 +363,11 @@ ShVariant* ShVariableNode::makeHigh() const
 void ShVariableNode::update_all() 
 {
   if (m_uniform && !m_locked) {
-    for (ShBoundIterator I = shBeginBound(); I != shEndBound(); ++I) {
+    const ShBoundIterator begin = shBeginBound();
+    const ShBoundIterator end   = shEndBound();
+    for (ShBoundIterator i = begin; i != end; ++i) {
       // TODO: Maybe pass in the backend unit to updateUniform
-      if (I->second.node()) I->second.updateUniform(this);
+      if (i->second.node()) i->second.updateUniform(this);
     }
 
     update_dependents();

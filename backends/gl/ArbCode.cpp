@@ -421,7 +421,7 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
   const int uniform_size = uniform->size();
   SH_DEBUG_ASSERT(uniform_size <= 4);
 
-  float values[4];
+  GLfloat values[4];
   int i;
   if (uniform->valueType() == SH_FLOAT) {
     // Copy to a float array
@@ -431,8 +431,8 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
   }
   else {
     // Componentwise cast to float and copy
-    typedef ShDataVariant<float, SH_HOST> FloatVariant;
-    FloatVariant floatVariant(uniform->size());
+    typedef ShDataVariant<GLfloat, SH_HOST> FloatVariant;
+    FloatVariant floatVariant(uniform_size);
     floatVariant.set(uniformVariant);
     for (i = 0; i < uniform_size; ++i)
       values[i] = floatVariant[i];

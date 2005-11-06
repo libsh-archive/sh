@@ -387,14 +387,4 @@ string GlslVariableMap::repeat_scalar(const string& name, ShValueType type, int 
   return s.str();
 }
 
-const GlslVariable& GlslVariableMap::variable(const ShVariableNodePtr& node)
-{
-  return m_varmap[node];
-}
-
-bool GlslVariableMap::contains(const ShVariableNodePtr& node) const
-{
-  return (m_varmap.find(node) != m_varmap.end());
-}
-
 }

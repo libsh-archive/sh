@@ -56,8 +56,15 @@ public:
   
   typedef std::map<std::string, ShProgram> BoundProgramMap;
 
-  BoundProgramMap::iterator begin_bound();
-  BoundProgramMap::iterator end_bound();
+  BoundProgramMap::iterator begin_bound()
+  {
+    return m_bound.begin();
+  }
+
+  BoundProgramMap::iterator end_bound()
+  {
+    return m_bound.end();
+  }
 
   /// \internal
   void set_binding(const std::string& unit, const ShProgram& program);
@@ -102,12 +109,16 @@ SH_DLLEXPORT
 ShProgramNodePtr shBound(const std::string& target);
 
 /// Get beginning of bound program map for current context
-SH_DLLEXPORT
-ShBoundIterator shBeginBound();
+inline ShBoundIterator shBeginBound()
+{
+  return ShContext::current()->begin_bound();
+}
 
 /// Get end of bound program map for current context
-SH_DLLEXPORT
-ShBoundIterator shEndBound();
+inline ShBoundIterator shEndBound()
+{
+  return ShContext::current()->end_bound();
+}
 
 }
 

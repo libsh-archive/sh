@@ -286,23 +286,37 @@ void GlslCode::upload_uniforms()
 
 void GlslCode::update_float_uniform(const ShVariableNodePtr& node, const GLint location)
 {
-  float values[4];
-  for (int i=0; i < node->size(); i++) {
-    values[i] = ((float*)(node->getVariant()->array()))[i];
+  // Space for temporary data if we need it during data conversion
+  GLfloat data[4];
+  const GLfloat *values;
+
+  const int uniform_size = node->size();
+  if (node->valueType() == SH_FLOAT) {
+    values = static_cast<const float *>(node->getVariant()->array());
+  }
+  else {
+    // Componentwise cast to float and copy
+    typedef ShDataVariant<GLfloat, SH_HOST> FloatVariant;
+    FloatVariant floatVariant(uniform_size);
+    floatVariant.set(node->getVariant());
+    for (int i = 0; i < uniform_size; ++i)
+      data[i] = floatVariant[i];
+    values = data;
   }
 
-  switch (node->size()) {
-  case 1:
-    SH_GL_CHECK_ERROR(glUniform1fARB(location, values[0]));
+  // TODO: Create a SH_GL_DEBUG_CHECK_ERROR that gets compiled out in release?
+  switch (uniform_size) {
+  case 1:    
+    SH_GL_CHECK_ERROR(glUniform1fvARB(location, 1, values));
     break;
   case 2:
-    SH_GL_CHECK_ERROR(glUniform2fARB(location, values[0], values[1]));
+    SH_GL_CHECK_ERROR(glUniform2fvARB(location, 1, values));
     break;
   case 3:
-    SH_GL_CHECK_ERROR(glUniform3fARB(location, values[0], values[1], values[2]));
+    SH_GL_CHECK_ERROR(glUniform3fvARB(location, 1, values));
     break;
   case 4:
-    SH_GL_CHECK_ERROR(glUniform4fARB(location, values[0], values[1], values[2], values[3]));
+    SH_GL_CHECK_ERROR(glUniform4fvARB(location, 1, values));
     break;
   default:
     SH_DEBUG_ASSERT(0); // Unsupported size
@@ -311,23 +325,38 @@ void GlslCode::update_float_uniform(const ShVariableNodePtr& node, const GLint l
 
 void GlslCode::update_int_uniform(const ShVariableNodePtr& node, const GLint location)
 {
-  int values[4];
-  for (int i=0; i < node->size(); i++) {
-    values[i] = ((int*)(node->getVariant()->array()))[i];
+  const int uniform_size = node->size();
+
+  // Space for temporary data if we need it during data conversion
+  GLint data[4];
+  const GLint *values;
+
+  if (node->valueType() == SH_INT) {
+    values = static_cast<const int *>(node->getVariant()->array());
+  }
+  else {
+    // Componentwise cast to float and copy
+    typedef ShDataVariant<GLint, SH_HOST> IntVariant;
+    IntVariant intVariant(uniform_size);
+    intVariant.set(node->getVariant());
+    for (int i = 0; i < uniform_size; ++i)
+      data[i] = intVariant[i];
+    values = data;
   }
 
-  switch (node->size()) {
+  // TODO: Create a SH_GL_DEBUG_CHECK_ERROR that gets compiled out in release?
+  switch (uniform_size) {
   case 1:
-    SH_GL_CHECK_ERROR(glUniform1iARB(location, values[0]));
+    SH_GL_CHECK_ERROR(glUniform1ivARB(location, 1, values));
     break;
   case 2:
-    SH_GL_CHECK_ERROR(glUniform2iARB(location, values[0], values[1]));
+    SH_GL_CHECK_ERROR(glUniform2ivARB(location, 1, values));
     break;
   case 3:
-    SH_GL_CHECK_ERROR(glUniform3iARB(location, values[0], values[1], values[2]));
+    SH_GL_CHECK_ERROR(glUniform3ivARB(location, 1, values));
     break;
   case 4:
-    SH_GL_CHECK_ERROR(glUniform4iARB(location, values[0], values[1], values[2], values[3]));
+    SH_GL_CHECK_ERROR(glUniform4ivARB(location, 1, values));
     break;
   default:
     SH_DEBUG_ASSERT(0); // Unsupported size
@@ -340,33 +369,35 @@ void GlslCode::updateUniform(const ShVariableNodePtr& uniform)
 
   SH_DEBUG_ASSERT(uniform);
 
-  if (!m_varmap->contains(uniform)) {
+  // Variable is in the map?
+  const GlslVariable *var;
+  if (m_varmap->contains(uniform, var)) {
+    if (!var->texture()) {
+      real_update_uniform(uniform, var->name());
+    }
+  }
+  else {
     // Check to see if the uniform was split
-    if (m_splits.count(uniform) > 0) {
-      ShTransformer::VarNodeVec &splitVec = m_splits[uniform];
+    SH::ShTransformer::VarSplitMap::iterator split = m_splits.find(uniform);
+    if (split != m_splits.end()) {
+      ShTransformer::VarNodeVec &splitVec = split->second;
       ShVariantCPtr uniformVariant = uniform->getVariant();
 
       int offset = 0;
       int copySwiz[4];
       for (ShTransformer::VarNodeVec::iterator it = splitVec.begin();
-	   it != splitVec.end(); offset += (*it)->size(), ++it) {
-	// TODO switch to properly swizzled version
+	         it != splitVec.end(); offset += (*it)->size(), ++it) {
+	      // TODO switch to properly swizzled version
         for (int i=0; i < (*it)->size(); ++i) {
-	  copySwiz[i] = i + offset;
-	}
+	        copySwiz[i] = i + offset;
+	      }
         (*it)->setVariant(uniformVariant->get(false,
-            ShSwizzle(uniform->size(), (*it)->size(), copySwiz))); 
+          ShSwizzle(uniform->size(), (*it)->size(), copySwiz))); 
         updateUniform(*it);
       }
     }
     return;
-  }
-
-  const GlslVariable& var(m_varmap->variable(uniform));
-  
-  if (!var.texture()) {
-    real_update_uniform(uniform, var.name());
-  }
+  }  
 }
 
 void GlslCode::real_update_uniform(const ShVariableNodePtr& uniform, const string& name)

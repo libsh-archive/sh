@@ -99,16 +99,6 @@ ShProgramNodePtr ShContext::bound_program(const std::string& target)
   return 0;
 }
 
-ShContext::BoundProgramMap::iterator ShContext::begin_bound()
-{
-  return m_bound.begin();
-}
-
-ShContext::BoundProgramMap::iterator ShContext::end_bound()
-{
-  return m_bound.end();
-}
-
 void ShContext::set_binding(const std::string& unit, const ShProgram& program)
 {
   if (!program.node()) {
@@ -150,14 +140,4 @@ ShProgramNodePtr shBound(const std::string& target)
   return ShContext::current()->bound_program(target);
 }
 
-ShBoundIterator shBeginBound()
-{
-  return ShContext::current()->begin_bound();
-}
-
-ShBoundIterator shEndBound()
-{
-  return ShContext::current()->end_bound();
-}
-
-}
+} // namespace SH
