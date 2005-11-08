@@ -27,6 +27,7 @@
 #include "ShVariable.hpp"
 #include "ShAttrib.hpp"
 #include "ShMetaForwarder.hpp"
+#include "ShTexData.hpp"
 
 namespace SH {
 
@@ -53,10 +54,10 @@ public:
   ShBaseTexture1D(int width, const ShTextureTraits& traits);
 
   template<typename T2>
-  T operator()(const ShGeneric<1, T2>& coords) const;
+  ShTexData<T, 1, T2> operator()(const ShGeneric<1, T2>& coords) const;
 
   template<typename T2>
-  T operator[](const ShGeneric<1, T2>& coords) const;
+  ShTexData<T, 1, T2> operator[](const ShGeneric<1, T2>& coords) const;
 
   ShMemoryPtr memory(int mipmap_level=0);
   void memory(ShMemoryPtr memory, int mipmap_level=0);
@@ -77,16 +78,16 @@ public:
   ShBaseTexture2D(int width, int height, const ShTextureTraits& traits);
 
   template<typename T2>
-  T operator()(const ShGeneric<2, T2>& coords) const;
+  ShTexData<T, 2, T2> operator()(const ShGeneric<2, T2>& coords) const;
 
   /// Texture lookup with derivatives
-  template<typename T2, typename T3, typename T4>
-  T operator()(const ShGeneric<2, T2>& coords,
-               const ShGeneric<2, T3>& dx,
-               const ShGeneric<2, T4>& dy) const;
+  template<typename T2>
+  ShTexData<T, 2, T2> operator()(const ShGeneric<2, T2>& coords,
+                                 const ShGeneric<2, T2>& dx,
+                                 const ShGeneric<2, T2>& dy) const;
   
   template<typename T2>
-  T operator[](const ShGeneric<2, T2>& coords) const;
+  ShTexData<T, 2, T2> operator[](const ShGeneric<2, T2>& coords) const;
 
   ShMemoryPtr memory(int mipmap_level=0);
   void memory(ShMemoryPtr memory, int mipmap_level=0);
@@ -109,10 +110,10 @@ public:
   ShBaseTextureRect(int width, int height, const ShTextureTraits& traits);
 
   template<typename T2>
-  T operator()(const ShGeneric<2, T2>& coords) const;
+  ShTexData<T, 2, T2> operator()(const ShGeneric<2, T2>& coords) const;
 
   template<typename T2>
-  T operator[](const ShGeneric<2, T2>& coords) const;
+  ShTexData<T, 2, T2> operator[](const ShGeneric<2, T2>& coords) const;
 
   ShMemoryPtr memory(int mipmap_level=0);
   void memory(ShMemoryPtr memory, int mipmap_level=0);
@@ -135,10 +136,10 @@ public:
   ShBaseTexture3D(int width, int height, int depth, const ShTextureTraits& traits);
 
   template<typename T2>
-  T operator()(const ShGeneric<3, T2>& coords) const;
+  ShTexData<T, 3, T2> operator()(const ShGeneric<3, T2>& coords) const;
 
   template<typename T2>
-  T operator[](const ShGeneric<3, T2>& coords) const;
+  ShTexData<T, 3, T2> operator[](const ShGeneric<3, T2>& coords) const;
 
   ShMemoryPtr memory(int mipmap_level=0);
   void memory(ShMemoryPtr memory, int mipmap_level=0);
@@ -161,7 +162,7 @@ public:
   ShBaseTextureCube(int width, int height, const ShTextureTraits& traits);
 
   template<typename T2>
-  T operator()(const ShGeneric<3, T2>& coords) const;
+  ShTexData<T, 3, T2> operator()(const ShGeneric<3, T2>& coords) const;
 
   ShMemoryPtr memory(ShCubeDirection face, int mipmap_level=0);
   void memory(ShMemoryPtr memory, ShCubeDirection face, int mipmap_level=0);

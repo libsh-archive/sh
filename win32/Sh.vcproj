@@ -669,6 +669,12 @@
 				RelativePath="..\src\ShTexCoord.hpp">
 			</File>
 			<File
+				RelativePath="..\src\ShTexData.hpp">
+			</File>
+			<File
+				RelativePath="..\src\ShTexDataImpl.hpp">
+			</File>
+			<File
 				RelativePath="..\src\ShTexture.hpp">
 			</File>
 			<File

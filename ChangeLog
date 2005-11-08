@@ -1,3 +1,10 @@
+2005-11-08  Francois Marier  <francois@serioushack.com>
+
+	* src/ShBaseTextureImpl.hpp, ShBaseTexture.hpp: operator() and
+	operator[] now return ShTexData objects.  This adds a level of
+	indirection which will allow for immediate mode texture
+	assignments later.
+
 2005-11-06  Andrew Lauritzen  <atlaurit@student.cs.uwaterloo.ca>
 
 	* backends/gl/: Several optimizations to uniform update,

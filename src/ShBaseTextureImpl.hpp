@@ -88,173 +88,74 @@ ShBaseTextureCube<T>::ShBaseTextureCube(const ShTextureTraits& traits)
 
 template<typename T>
 template<typename T2>
-T ShBaseTexture1D<T>::operator()(const ShGeneric<1, T2>& coords) const
+ShTexData<T, 1, T2> ShBaseTexture1D<T>::operator()(const ShGeneric<1, T2>& coords) const
 {
-  if (ShContext::current()->parsing()) {
-    T t;
-    ShVariable texVar(m_node);
-    ShStatement stmt(t, texVar, SH_OP_TEX, coords);
-    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  } else {
-    // TODO!
-    T t;
-    return t;
-  }
+  return ShTexData<T, 1, T2>(m_node, coords, false);
+}
+
+template<typename T>
+template<typename T2> 
+ShTexData<T, 2, T2> ShBaseTexture2D<T>::operator()(const ShGeneric<2, T2>& coords) const
+{
+  return ShTexData<T, 2, T2>(m_node, coords, false);
 }
 
 template<typename T>
 template<typename T2>
-T ShBaseTexture2D<T>::operator()(const ShGeneric<2, T2>& coords) const
+ShTexData<T, 2, T2> ShBaseTexture2D<T>::operator()(const ShGeneric<2, T2>& coords,
+                                                   const ShGeneric<2, T2>& dx,
+                                                   const ShGeneric<2, T2>& dy) const
 {
-  if (ShContext::current()->parsing()) {
-    T t;
-    ShVariable texVar(m_node);
-    ShStatement stmt(t, texVar, SH_OP_TEX, coords);
-    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  } else {
-    // TODO!
-    T t;
-    return t;
-  }
-}
-
-template<typename T>
-template<typename T2, typename T3, typename T4>
-T ShBaseTexture2D<T>::operator()(const ShGeneric<2, T2>& coords,
-                                 const ShGeneric<2, T3>& dx,
-                                 const ShGeneric<2, T4>& dy) const
-{
-  if (ShContext::current()->parsing()) {
-    T t;
-    ShVariable texVar(m_node);
-    ShStatement stmt(t, SH_OP_TEXD, texVar, coords, join(dx, dy));
-    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  } else {
-    shError(ShScopeException("Cannot do derivative texture lookup in immediate mode"));
-    T t; return t;
-  }
+  return ShTexData<T, 2, T2>(m_node, coords, dx, dy);
 }
 
 template<typename T>
 template<typename T2>
-T ShBaseTextureRect<T>::operator()(const ShGeneric<2, T2>& coords) const
+ShTexData<T, 2, T2> ShBaseTextureRect<T>::operator()(const ShGeneric<2, T2>& coords) const
 {
-  if (ShContext::current()->parsing()) {
-    T t;
-    ShVariable texVar(m_node);
-    ShStatement stmt(t, texVar, SH_OP_TEX, coords);
-    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  } else {
-    // TODO!
-    T t;
-    return t;
-  }
+  return ShTexData<T, 2, T2>(m_node, coords, false);
 }
 
 template<typename T>
 template<typename T2>
-T ShBaseTexture3D<T>::operator()(const ShGeneric<3, T2>& coords) const
+ShTexData<T, 3, T2> ShBaseTexture3D<T>::operator()(const ShGeneric<3, T2>& coords) const
 {
-  if (ShContext::current()->parsing()) {
-    T t;
-    ShVariable texVar(m_node);
-    ShStatement stmt(t, texVar, SH_OP_TEX, coords);
-    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  } else {
-    // TODO!
-    T t;
-    return t;
-  }
+  return ShTexData<T, 3, T2>(m_node, coords, false);
 } 
 
 template<typename T>
 template<typename T2>
-T ShBaseTextureCube<T>::operator()(const ShGeneric<3, T2>& coords) const
+ShTexData<T, 3, T2> ShBaseTextureCube<T>::operator()(const ShGeneric<3, T2>& coords) const
 {
-  if (ShContext::current()->parsing()) {
-    T t;
-    ShVariable texVar(m_node);
-    ShStatement stmt(t, texVar, SH_OP_TEX, coords);
-    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  } else {
-    // TODO!
-    T t;
-    return t;
-  }
+  return ShTexData<T, 3, T2>(m_node, coords, false);
 } 
 
 template<typename T>
 template<typename T2>
-T ShBaseTexture1D<T>::operator[](const ShGeneric<1, T2>& coords) const
+ShTexData<T, 1, T2> ShBaseTexture1D<T>::operator[](const ShGeneric<1, T2>& coords) const
 {
-  if (ShContext::current()->parsing()) {
-    T t;
-    ShVariable texVar(m_node);
-    ShStatement stmt(t, texVar, SH_OP_TEXI, coords);
-    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  } else {
-    // TODO!
-    T t;
-    return t;
-  }
+  return ShTexData<T, 1, T2>(m_node, coords, true);
 }
 
 template<typename T>
 template<typename T2>
-T ShBaseTexture2D<T>::operator[](const ShGeneric<2, T2>& coords) const
+ShTexData<T, 2, T2> ShBaseTexture2D<T>::operator[](const ShGeneric<2, T2>& coords) const
 {
-  if (ShContext::current()->parsing()) {
-    T t;
-    ShVariable texVar(m_node);
-    ShStatement stmt(t, texVar, SH_OP_TEXI, coords);
-    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  } else {
-    // TODO!
-    T t;
-    return t;
-  }
+  return ShTexData<T, 2, T2>(m_node, coords, true);
 }
 
 template<typename T>
 template<typename T2>
-T ShBaseTextureRect<T>::operator[](const ShGeneric<2, T2>& coords) const
+ShTexData<T, 2, T2> ShBaseTextureRect<T>::operator[](const ShGeneric<2, T2>& coords) const
 {
-  if (ShContext::current()->parsing()) {
-    T t;
-    ShVariable texVar(m_node);
-    ShStatement stmt(t, texVar, SH_OP_TEXI, coords);
-    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  } else {
-    // TODO!
-    T t;
-    return t;
-  }
+  return ShTexData<T, 2, T2>(m_node, coords, true);
 }
 
 template<typename T>
 template<typename T2>
-T ShBaseTexture3D<T>::operator[](const ShGeneric<3, T2>& coords) const
+ShTexData<T, 3, T2> ShBaseTexture3D<T>::operator[](const ShGeneric<3, T2>& coords) const
 {
-  if (ShContext::current()->parsing()) {
-    T t;
-    ShVariable texVar(m_node);
-    ShStatement stmt(t, texVar, SH_OP_TEXI, coords);
-    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
-    return t;
-  } else {
-    // TODO!
-    T t;
-    return t;
-  }
+  return ShTexData<T, 3, T2>(m_node, coords, true);
 }
 
 // setMemory

@@ -2360,6 +2360,24 @@
 			refType = 2;
 			sourceTree = SOURCE_ROOT;
 		};
+		3EB30ACB08787D7600729309 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.h;
+			name = ShTexData.hpp;
+			path = ../src/ShTexData.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		3EB30ACB08787D7600729309 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.h;
+			name = ShTexDataImpl.hpp;
+			path = ../src/ShTexDataImpl.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
 		3EB30B3108787D7600729309 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
