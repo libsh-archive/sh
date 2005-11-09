@@ -1,3 +1,8 @@
+2005-11-09  Hans-Friedrich Pabst  <hfp@users.sf.net>
+
+	* backends/gl/GlBackend.cpp: glUniform[X]fvARB/glUniform[X]ivARB
+	Match definitions as declared in GlBackend.hpp (Win32 only, VC8).
+
 2005-11-08  Francois Marier  <francois@serioushack.com>
 
 	* src/ShBaseTextureImpl.hpp, ShBaseTexture.hpp: operator() and
