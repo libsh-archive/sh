@@ -434,10 +434,9 @@
 		3E3EA9D4087A19DA00A1405F = {
 			isa = PBXFileReference;
 			lastKnownFileType = text.xml;
-			name = "TexturesExample-Info.plist";
-			path = "/Users/sdt/svn/sh-trunk/xcode/TexturesExample-Info.plist";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = "TexturesExample-Info.plist";
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3E3EA9D5087A1A4200A1405F = {
 			containerPortal = 0867D690FE84028FC02AAC07;
@@ -779,10 +778,9 @@
 		3E60CEAF087A18320078BC55 = {
 			isa = PBXFileReference;
 			lastKnownFileType = text.xml;
-			name = "Particles-Info.plist";
-			path = "/Users/sdt/svn/sh-trunk/xcode/Particles-Info.plist";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = "Particles-Info.plist";
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3E60CEB0087A187C0078BC55 = {
 			containerPortal = 0867D690FE84028FC02AAC07;
@@ -1428,8 +1426,8 @@
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
-			name = ShImageImpl.hpp;
-			path = ../src/ShImageImpl.hpp;
+			name = ShTexDataImpl.hpp;
+			path = ../src/ShTexDataImpl.hpp;
 			refType = 2;
 			sourceTree = SOURCE_ROOT;
 		};
@@ -1671,26 +1669,8 @@
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
-			name = ShLibMisc.hpp;
-			path = ../src/ShLibMisc.hpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		3EB30AE608787D7600729309 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.h;
 			name = ShLibSplines.hpp;
 			path = ../src/ShLibSplines.hpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		3EB30AE708787D7600729309 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.h;
-			name = ShLibMiscImpl.hpp;
-			path = ../src/ShLibMiscImpl.hpp;
 			refType = 2;
 			sourceTree = SOURCE_ROOT;
 		};
@@ -2357,24 +2337,6 @@
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShTexCoord.hpp;
 			path = ../src/ShTexCoord.hpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		3EB30ACB08787D7600729309 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.h;
-			name = ShTexData.hpp;
-			path = ../src/ShTexData.hpp;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		3EB30ACB08787D7600729309 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.h;
-			name = ShTexDataImpl.hpp;
-			path = ../src/ShTexDataImpl.hpp;
 			refType = 2;
 			sourceTree = SOURCE_ROOT;
 		};
@@ -4562,181 +4524,180 @@
 		3EBE960F087EC91B00DA8A69 = {
 			isa = PBXFileReference;
 			lastKnownFileType = text.xml;
-			name = "ShUtil-Info.plist";
-			path = "/Users/sdt/svn/sh-trunk/xcode/ShUtil-Info.plist";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = "ShUtil-Info.plist";
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3EBE9644087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShFunc.hpp;
-			path = "/Users/sdt/svn/sh-trunk/util/ShFunc.hpp";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = ../util/ShFunc.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3EBE9645087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShFuncImpl.hpp;
-			path = "/Users/sdt/svn/sh-trunk/util/ShFuncImpl.hpp";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = ../util/ShFuncImpl.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3EBE9646087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.cpp;
 			name = ShKernelLib.cpp;
-			path = "/Users/sdt/svn/sh-trunk/util/ShKernelLib.cpp";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = ../util/ShKernelLib.cpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3EBE9647087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShKernelLib.hpp;
-			path = "/Users/sdt/svn/sh-trunk/util/ShKernelLib.hpp";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = ../util/ShKernelLib.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3EBE9648087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShKernelLibImpl.hpp;
-			path = "/Users/sdt/svn/sh-trunk/util/ShKernelLibImpl.hpp";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = ../util/ShKernelLibImpl.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3EBE9649087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShKernelLight.hpp;
-			path = "/Users/sdt/svn/sh-trunk/util/ShKernelLight.hpp";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = ../util/ShKernelLight.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3EBE964A087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShKernelLightImpl.hpp;
-			path = "/Users/sdt/svn/sh-trunk/util/ShKernelLightImpl.hpp";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = ../util/ShKernelLightImpl.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3EBE964B087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShKernelPost.hpp;
-			path = "/Users/sdt/svn/sh-trunk/util/ShKernelPost.hpp";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = ../util/ShKernelPost.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3EBE964C087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShKernelPostImpl.hpp;
-			path = "/Users/sdt/svn/sh-trunk/util/ShKernelPostImpl.hpp";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = ../util/ShKernelPostImpl.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3EBE964D087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShKernelSurface.hpp;
-			path = "/Users/sdt/svn/sh-trunk/util/ShKernelSurface.hpp";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = ../util/ShKernelSurface.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3EBE964E087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShKernelSurfaceImpl.hpp;
-			path = "/Users/sdt/svn/sh-trunk/util/ShKernelSurfaceImpl.hpp";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = ../util/ShKernelSurfaceImpl.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3EBE964F087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.cpp;
 			name = ShKernelSurfMap.cpp;
-			path = "/Users/sdt/svn/sh-trunk/util/ShKernelSurfMap.cpp";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = ../util/ShKernelSurfMap.cpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3EBE9650087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShKernelSurfMap.hpp;
-			path = "/Users/sdt/svn/sh-trunk/util/ShKernelSurfMap.hpp";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = ../util/ShKernelSurfMap.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3EBE9651087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShMesh.hpp;
-			path = "/Users/sdt/svn/sh-trunk/util/ShMesh.hpp";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = ../util/ShMesh.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3EBE9652087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShMeshImpl.hpp;
-			path = "/Users/sdt/svn/sh-trunk/util/ShMeshImpl.hpp";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = ../util/ShMeshImpl.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3EBE9655087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.cpp;
 			name = ShObjMesh.cpp;
-			path = "/Users/sdt/svn/sh-trunk/util/ShObjMesh.cpp";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = ../util/ShObjMesh.cpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3EBE9656087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = ShObjMesh.hpp;
-			path = "/Users/sdt/svn/sh-trunk/util/ShObjMesh.hpp";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = ../util/ShObjMesh.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3EBE9657087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.cpp;
 			name = shutil.cpp;
-			path = "/Users/sdt/svn/sh-trunk/util/shutil.cpp";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = ../util/shutil.cpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3EBE9658087EC9CA00DA8A69 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.h;
 			name = shutil.hpp;
-			path = "/Users/sdt/svn/sh-trunk/util/shutil.hpp";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = ../util/shutil.hpp;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3EBE965B087EC9CA00DA8A69 = {
 			fileRef = 3EBE9644087EC9CA00DA8A69;
