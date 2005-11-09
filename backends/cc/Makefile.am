@@ -2,8 +2,6 @@ INCLUDES = -I$(top_srcdir)/src
 
 shbackenddir = $(prefix)/lib/sh
 
-EXTRA_DIST = Makefile.win32
-
 shbackend_LTLIBRARIES = libshcc.la
 
 libshcc_la_LDFLAGS = -L$(prefix)/lib -module

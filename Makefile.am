@@ -12,8 +12,7 @@ DIST_SUBDIRS = libltdl src backends test util doc examples
 
 ## Do not put a directory here since the distributed tarball will include its
 ## *entire* contents, including .svn, .libs, .o and binary files.
-EXTRA_DIST = BUGS CODING_STANDARDS README.osx README.w32.txt \
-             COPYING \
+EXTRA_DIST = BUGS CODING_STANDARDS README.osx COPYING \
 	     win32/postbuild_arb.bat \
 	     win32/postbuild_cc.bat win32/postbuild_glsl.bat \
 	     win32/postbuild_sh.bat win32/postbuild_util.bat \

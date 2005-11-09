@@ -5,4 +5,3 @@ GL_SUBDIR =
 endif
 
 SUBDIRS = cc $(GL_SUBDIR)
-EXTRA_DIST = Makefile.win32
