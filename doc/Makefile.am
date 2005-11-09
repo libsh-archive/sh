@@ -4,9 +4,9 @@ html/index.html: Doxyfile $(wildcard ../src/*.[hc]pp) $(wildcard ../util/*.[hc]p
 	doxygen Doxyfile
 
 upload-docs: docs
-	scp -r html www.libsh.org:/var/www/libsh.org/api/@VERSION@
+	scp -P 10022 -r html www.libsh.org:/var/www/libsh.org/api/@VERSION@
 	date "+%B %d, %Y" > /tmp/@VERSION@.release_date
-	scp /tmp/@VERSION@.release_date www.libsh.org:/var/www/libsh.org/api
+	scp -P 10022 /tmp/@VERSION@.release_date www.libsh.org:/var/www/libsh.org/api
 
 mostlyclean-local:
 	rm -rf html
