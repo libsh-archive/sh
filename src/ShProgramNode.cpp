@@ -30,6 +30,39 @@
 #include "ShCtrlGraph.hpp"
 #include "ShError.hpp"
 
+namespace {
+
+using namespace SH;
+
+std::string describe(const ShProgramNode::VarList &varlist)
+{
+  std::ostringstream os;
+  for (ShProgramNode::VarList::const_iterator I = varlist.begin(); I != varlist.end(); ++I) {
+    os << "  " << (*I)->nameOfType() << " " << (*I)->name() << std::endl;
+  }
+  return os.str();
+}
+
+std::string describe(const ShProgramNode::TexList &texlist)
+{
+  std::ostringstream os;
+  for (ShProgramNode::TexList::const_iterator I = texlist.begin(); I != texlist.end(); ++I) {
+    os << "  " << (*I)->nameOfType() << " " << (*I)->name() << std::endl;
+  }
+  return os.str();
+}
+
+std::string describe(const ShProgramNode::ChannelList& chanlist)
+{
+  std::ostringstream os;
+  for (ShProgramNode::ChannelList::const_iterator I = chanlist.begin(); I != chanlist.end(); ++I) {
+    os << "  " << (*I)->nameOfType() << " " << (*I)->name() << std::endl;
+  }
+  return os.str();
+}
+
+}
+
 namespace SH {
 
 ShProgramNode::ShProgramNode(const std::string& target)
@@ -139,6 +172,8 @@ std::string ShProgramNode::describe_interface() const
   os << describe(channels) << std::endl;
   os << "Uniforms:" << std::endl;
   os << describe(all_uniforms) << std::endl;
+  os << "Arrays:" << std::endl;
+  os << describe(textures) << std::endl;
 
   return os.str();
 }
@@ -406,24 +441,6 @@ void ShProgramNode::finish()
     m_assigned_var->attach(this);
     m_assigned_var = 0;
   }
-}
-
-std::string ShProgramNode::describe(const VarList &varlist)
-{
-  std::ostringstream os;
-  for (VarList::const_iterator I = varlist.begin(); I != varlist.end(); ++I) {
-    os << "  " << (*I)->nameOfType() << " " << (*I)->name() << std::endl;
-  }
-  return os.str();
-}
-
-std::string ShProgramNode::describe(const ChannelList& chanlist)
-{
-  std::ostringstream os;
-  for (ChannelList::const_iterator I = chanlist.begin(); I != chanlist.end(); ++I) {
-    os << "  " << (*I)->nameOfType() << " " << (*I)->name() << std::endl;
-  }
-  return os.str();
 }
 
 }

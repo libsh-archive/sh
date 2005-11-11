@@ -194,9 +194,6 @@ public:
   void assign(const ShVariableNodePtr& var) const { m_assigned_var = var; }
   
 private:
-  static std::string describe(const VarList &varlist); 
-  static std::string describe(const ChannelList &chanlist); 
-
   std::string m_backend_name; ///< Can be empty if the program is not yet compiled for a backend.
   std::string m_target; ///< Can be empty, if there is no target associated with this program.
 
