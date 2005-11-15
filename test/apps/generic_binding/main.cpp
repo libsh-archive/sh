@@ -195,8 +195,6 @@ void initShaders()
     ShInputColor3f SH_DECL(col12);
     ShInputColor3f SH_DECL(col13);
 
-    ShPoint3f posv = (mv | pos)(0,1,2); // Compute viewspace position
-    
     pos = mvd | pos; // Project position
     normal = mv | normal; // Project normal
     
