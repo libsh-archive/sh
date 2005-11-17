@@ -1,0 +1,10 @@
+alias headers
+: # sources
+	[ glob *.hpp ]
+;
+
+
+alias util
+: # sources
+	[ glob *.cpp ]
+;

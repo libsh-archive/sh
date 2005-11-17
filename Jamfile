@@ -1,0 +1,156 @@
+################################################################################
+# imports
+################################################################################
+
+import os ;
+import stage ;
+import package ;
+import config/tools/dll : lib : xlib ;
+
+
+################################################################################
+# requirements
+################################################################################
+
+local requirements =
+	<include>src
+	<variant>debug:<define>SH_DEBUG
+	<rtti>on
+;
+
+
+if [ os.on-windows ]
+{
+	requirements += <define>_USE_MATH_DEFINES ;
+}
+else {
+	requirements += <define>'SH_INSTALL_PREFIX=\"\"' ;
+}
+
+
+################################################################################
+# usage-requirements
+################################################################################
+
+local usage-requirements =
+;
+
+
+if [ os.on-windows ]
+{
+	usage-requirements += <define>WIN32 ;
+	usage-requirements += <define>NOMINMAX ;
+}
+
+
+################################################################################
+# project
+################################################################################
+
+project sh
+: requirements
+	$(requirements)
+: default-build
+	<threading>multi
+	release
+	debug
+: usage-requirements
+	$(usage-requirements)
+;
+
+
+################################################################################
+# targets
+################################################################################
+
+xlib libsh
+: # sources
+	src//sh
+: # requirements
+	<tag>@stage.add-variant-and-compiler
+: # default-build
+: # usage-requirements
+: # symbol
+	SH_DLLEXPORT
+;
+
+
+lib libsharb
+: # sources
+	backends/gl//arb
+	libsh
+	/opengl//libgl
+: # requirements
+	<tag>@stage.add-variant-and-compiler
+: # default-build
+: # usage-requirements
+;
+
+
+lib libshglsl
+: # sources
+	backends/gl//glsl
+	libsh
+	/opengl//libgl
+: # requirements
+	<tag>@stage.add-variant-and-compiler
+: # default-build
+: # usage-requirements
+;
+
+
+lib libshcc
+: # sources
+	backends/cc//cc
+	libsh
+: # requirements
+	<tag>@stage.add-variant-and-compiler
+: # default-build
+: # usage-requirements
+;
+
+
+lib libshutil
+: # sources
+	util//util
+	libsh
+	/libpng//libpng
+: # requirements
+	<tag>@stage.add-variant-and-compiler
+	<link>static
+: # default-build
+: # usage-requirements
+;
+
+
+################################################################################
+# install
+################################################################################
+
+stage headers
+: #sources
+	src//headers
+	util//headers
+: # requirements
+: # default-build
+	<location>include/sh
+;
+explicit headers ;
+
+
+stage libraries
+: # sources
+	libsh libsharb libshglsl libshcc libshutil
+: # requirements
+#	<install-dependencies>on <install-type>EXE <install-type>LIB <install-type>SHARED_LIB
+: # default-build
+	<location>lib
+;
+explicit libraries ;
+
+
+alias binaries : ;
+explicit binaries ;
+
+
+alias all : headers libraries binaries ;

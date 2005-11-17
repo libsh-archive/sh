@@ -1,0 +1,13 @@
+import set ;
+
+
+alias headers
+: # sources
+	[ glob *.hpp ]
+;
+
+
+alias sh
+: # sources
+	[ set.difference [ glob *.cpp ] : ShGeneric.cpp ]
+;

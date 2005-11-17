@@ -1,0 +1,34 @@
+import os ;
+
+
+local platform ;
+if [ os.on-windows ]
+{
+	platform += WGLPBufferContext.cpp ;
+}
+else {
+	platform += GLXPBufferContext.cpp ;
+}
+
+
+local common =
+	[ glob GlTexture*.cpp ]
+	[ glob PBuffer*.cpp ]
+	GlBackend.cpp
+	Utils.cpp
+	$(platform)
+;
+
+
+alias arb
+: # sources
+	[ glob Arb*.cpp ]
+	$(common)
+;
+
+
+alias glsl
+: # sources
+	[ glob Glsl*.cpp ]
+	$(common)
+;

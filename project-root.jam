@@ -1,0 +1,5 @@
+path-constant TOP : . ;
+
+using config/opengl ;
+using config/libpng ;
+using config/zlib ;

@@ -1,3 +1,8 @@
+2005-11-17  Hans-Friedrich Pabst  <hfp@users.sf.net>
+
+	* Boost Build System V2 (www.boost.org/tools/build/v2/index.html)
+	added (how to build instructions coming soon).
+
 2005-11-09  Hans-Friedrich Pabst  <hfp@users.sf.net>
 
 	* backends/gl/GlBackend.cpp: glUniform[X]fvARB/glUniform[X]ivARB

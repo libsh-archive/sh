@@ -1,0 +1,75 @@
+import project ;
+
+
+project.initialize $(__name__) ;
+project opengl ;
+
+
+rule init ( prefix ? )
+{
+	import errors ;
+	import os ;
+
+	if ! $(prefix) # prefix not given
+	{
+		prefix = [ modules.peek : OPENGL_PATH ] ;
+	}
+
+	if $(.initialized)
+	{
+		if $(prefix) != $(.prefix)
+		{
+			errors.error
+			"Attempt to reinitialize opengl with different installation prefix" ;
+		}
+	}
+	else
+	{
+		.initialized = true ;
+		.prefix = $(prefix) ;
+
+		local usage-requirements =
+			<include>$(.prefix)/$(include-subdir)
+			<dll-path>$(.prefix)/lib
+			<library-path>$(.prefix)/lib
+		;
+
+		local sources ;
+		local libgl-name = "" ;
+		local libglu-name = "" ;
+		if [ os.on-windows ]
+		{
+			lib user32 : : <name>user32 ;
+			lib gdi32 : : <name>gdi32 ;
+
+			sources += user32 gdi32 ;
+
+			libgl-name = opengl32 ;
+			libglu-name = glu32 ;
+		}
+		else {
+			libgl-name = GL ;
+			libglu-name = GLU ;
+		}
+
+		lib libgl
+		: # sources
+			$(sources)
+		: # requirements
+			<name>$(libgl-name)
+		: # default-build
+		: # usage-requirements
+			$(usage-requirements)
+		;
+
+		lib libglu
+		: # sources
+			$(sources)
+		: # requirements
+			<name>$(libglu-name)
+		: # default-build
+		: # usage-requirements
+			$(usage-requirements)
+		;
+	}
+}
