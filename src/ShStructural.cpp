@@ -610,10 +610,10 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
           for (ShStructuralNode::PredecessorList::iterator J = s->preds.begin();
                J != s->preds.end(); ++J) {
             ShStructuralNode::PredecessorList::iterator K = J;
-            for (K++; K != s->preds.end(); K++) {
+            for (++K; K != s->preds.end(); ++K) {
               if (K->second == J->second) {
                 J = s->preds.erase(J);
-                J--;
+                if(J != s->preds.begin()) --J;
                 break;
               }
             }
