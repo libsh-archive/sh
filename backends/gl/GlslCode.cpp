@@ -19,6 +19,7 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "GlslCode.hpp"
 #include <iostream>
+#include <fstream>
 
 #include "ShStorageType.hpp"
 #include "ShOptimizations.hpp"
@@ -122,6 +123,11 @@ void GlslCode::generate()
     ShStructural structural(m_shader->ctrlGraph);
     m_shader->ctrlGraph->entry()->clearMarked();
     gen_structural_node(structural.head());
+#ifdef SH_GLSL_DEBUG
+    std::ofstream f("structural.dot");
+    structural.dump(f);
+    std::system("dot -Tps structural.dot -o structural.ps");
+#endif
     m_shader->ctrlGraph->entry()->clearMarked();
     allocate_textures();
   }
