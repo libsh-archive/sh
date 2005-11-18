@@ -85,7 +85,9 @@ void ShProgramNode::compile(const std::string& target, const ShPointer<ShBackend
 {
   if (!backend) return;
   if (target.empty()) shError(ShException("Empty ShProgram target"));
-  SH_DEBUG_ASSERT(ctrlGraph);
+  if (!ctrlGraph || !ctrlGraph->entry()) {
+    shError(ShException("Impossible to compile an empty ShProgram."));
+  } 
 
   ShContext::current()->enter(this);
   ShBackendCodePtr code = 0;

@@ -1,3 +1,8 @@
+2005-11-18  Francois Marier  <francois@serioushack.com>
+
+	* src/ShProgramNode.cpp (compile): Add a check for empty
+	ShProgram and return an error.
+
 2005-11-18  Hans-Friedrich Pabst  <hfp@users.sf.net>
 
 	* src/ShStructural.cpp: C'tor (make preds unique) Decrementing an
