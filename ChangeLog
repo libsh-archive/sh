@@ -1,3 +1,10 @@
+2005-11-18  Hans-Friedrich Pabst  <hfp@users.sf.net>
+
+	* src/ShStructural.cpp: C'tor (make preds unique) Decrementing an
+	iterator needs some check against the begin of the range.
+	* src/ShLinearAllocator.cpp (allocate): multiset requires strict
+	weak ordering; LifeToken (operator<): if (a<b) -> !(b<a).
+
 2005-11-17  Hans-Friedrich Pabst  <hfp@users.sf.net>
 
 	* Boost Build System V2 (www.boost.org/tools/build/v2/index.html)
