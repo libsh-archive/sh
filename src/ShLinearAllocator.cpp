@@ -34,11 +34,15 @@ struct LifeToken {
   int index;
   bool end;
 
-  // order by index, then end
+  /**
+   * Order by index, then end.
+   * Strict weak ordering:
+   * if (a<b) -> !(b<a).
+   */
   bool operator<(const LifeToken& other) const
   {
     if (index == other.index) {
-      return !end;
+      return !end && other.end;
     }
     return index < other.index;
   }
