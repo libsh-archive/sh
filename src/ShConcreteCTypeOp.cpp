@@ -113,7 +113,7 @@ SHCCTO_UNARY_OP_SPEC(float,  SH_OP_LOG2, log2f(*A) / log2f(2.0f));
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_LOG10, std::log(*A) / std::log(10.0)); 
 SHCCTO_UNARY_OP_SPEC(float,  SH_OP_LOG10, logf(*A) / logf(10.0f)); 
 
-#ifdef WIN32
+#ifdef _WIN32
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_ACOSH, std::log((*A) + std::sqrt((*A) * (*A) - 1)));
 SHCCTO_UNARY_OP_SPEC(float,  SH_OP_ACOSH, logf((*A) + sqrtf((*A) * (*A) - 1)));
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_ASINH, std::log((*A) + std::sqrt((*A) * (*A) + 1)));

@@ -123,7 +123,7 @@ SHCRO_UNARY_OP(SH_OP_ATAN, atan(*A));
 SHCRO_UNARY_OP(SH_OP_CBRT, cbrt(*A));
 SHCRO_UNARY_OP(SH_OP_CEIL, ceil(*A));
 
-#ifdef WIN32
+#ifdef _WIN32
 SHCRO_UNARY_OP(SH_OP_ACOSH, log((*A) + sqrt((*A) * (*A) - 1)));
 SHCRO_UNARY_OP(SH_OP_ASINH, log((*A) + sqrt((*A) * (*A) + 1)));
 SHCRO_UNARY_OP(SH_OP_ATANH, log((1.0 + (*A))/(1.0 - (*A)))/2.0);

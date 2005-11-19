@@ -29,7 +29,7 @@
 #include "ShProgramSet.hpp"
 #include "ShVariableNode.hpp"
 
-#if defined(WIN32)
+#if defined(_WIN32)
 #elif defined(__APPLE__) && !defined(AUTOTOOLS)
 #include <CoreFoundation/CoreFoundation.h>
 #else
@@ -145,7 +145,7 @@ public:
       generic target is "gpu:vertex". */
   static std::list<std::string> derived_targets(const std::string& target);
 
-#if defined(WIN32)
+#if defined(_WIN32)
   typedef void* LibraryHandle;
 #elif defined(__APPLE__) && !defined(AUTOTOOLS)
   typedef CFBundleRef LibraryHandle;

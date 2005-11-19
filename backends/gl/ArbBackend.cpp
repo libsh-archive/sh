@@ -17,9 +17,9 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
-#endif /* WIN32 */
+#endif /* _WIN32 */
 
 #include <iostream>
 
@@ -48,7 +48,7 @@ struct ArbBackend : public GlBackend {
   std::string version() const { return "1.0"; }
 };
 
-#ifdef WIN32
+#ifdef _WIN32
 static ArbBackend* backend = 0;
 
 extern "C"
@@ -73,14 +73,14 @@ BOOL APIENTRY DllMain(HANDLE hModule,
   return TRUE;
 }
 
-#endif // WIN32
+#endif // _WIN32
 
 
 }
 
 extern "C" {
   using namespace shgl;
-#ifdef WIN32
+#ifdef _WIN32
   __declspec(dllexport) 
 #endif
   ArbBackend* shBackend_libsharb_instantiate() 
@@ -88,7 +88,7 @@ extern "C" {
     return new ArbBackend();
   }
 
-#ifdef WIN32
+#ifdef _WIN32
   __declspec(dllexport) 
 #endif
   int shBackend_libsharb_target_cost(const std::string& target) 

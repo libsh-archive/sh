@@ -25,7 +25,7 @@
 #include "ShAttrib.hpp"
 #include "ShTypeInfo.hpp"
 
-#ifdef WIN32
+#ifdef _WIN32
 namespace {
 double log2(double x) { return log(x)/log(2.0); }
 }

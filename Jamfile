@@ -2,9 +2,7 @@
 # imports
 ################################################################################
 
-import os ;
 import stage ;
-import package ;
 import config/tools/dll : lib : xlib ;
 
 
@@ -14,18 +12,11 @@ import config/tools/dll : lib : xlib ;
 
 local requirements =
 	<include>src
+	<define>NOMINMAX
+	<define>_USE_MATH_DEFINES
+	<define>'SH_INSTALL_PREFIX=\"\"'
 	<variant>debug:<define>SH_DEBUG
-	<rtti>on
 ;
-
-
-if [ os.on-windows ]
-{
-	requirements += <define>_USE_MATH_DEFINES ;
-}
-else {
-	requirements += <define>'SH_INSTALL_PREFIX=\"\"' ;
-}
 
 
 ################################################################################
@@ -33,14 +24,8 @@ else {
 ################################################################################
 
 local usage-requirements =
+	<define>SHDLLEXPORT_HPP # no export header needed
 ;
-
-
-if [ os.on-windows ]
-{
-	usage-requirements += <define>WIN32 ;
-	usage-requirements += <define>NOMINMAX ;
-}
 
 
 ################################################################################
@@ -68,6 +53,7 @@ xlib libsh
 	src//sh
 : # requirements
 	<tag>@stage.add-variant-and-compiler
+	<rtti>on
 : # default-build
 : # usage-requirements
 : # symbol
@@ -113,7 +99,7 @@ lib libshcc
 lib libshutil
 : # sources
 	util//util
-	libsh
+	libsh/<link>shared
 	/libpng//libpng
 : # requirements
 	<tag>@stage.add-variant-and-compiler
@@ -128,7 +114,7 @@ lib libshutil
 ################################################################################
 
 stage headers
-: #sources
+: # sources
 	src//headers
 	util//headers
 : # requirements
@@ -142,14 +128,13 @@ stage libraries
 : # sources
 	libsh libsharb libshglsl libshcc libshutil
 : # requirements
-#	<install-dependencies>on <install-type>EXE <install-type>LIB <install-type>SHARED_LIB
 : # default-build
 	<location>lib
 ;
 explicit libraries ;
 
 
-alias binaries : ;
+alias binaries ;
 explicit binaries ;
 
 

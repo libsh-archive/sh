@@ -21,7 +21,7 @@
 #include "config.h"
 #endif
 
-#if defined(WIN32)
+#if defined(_WIN32)
 # include <windows.h>
 #elif defined(__APPLE__) && !defined(AUTOTOOLS)
 # include <CoreFoundation/CoreFoundation.h>
@@ -48,7 +48,7 @@ namespace {
 template<typename EntryPoint>
 EntryPoint* load_function(SH::ShBackend::LibraryHandle module, const char* name)
 {
-#if defined(WIN32)
+#if defined(_WIN32)
   return (EntryPoint*)GetProcAddress((HMODULE)module, name);  
 #elif defined(__APPLE__) && !defined(AUTOTOOLS)
   CFStringRef n = CFStringCreateWithCString(kCFAllocatorDefault, name, kCFStringEncodingASCII);
@@ -141,7 +141,7 @@ ShBackend::~ShBackend()
   string backend_name = name();
   m_instantiated_backends->erase(backend_name);
 
-#if defined(WIN32)
+#if defined(_WIN32)
   if (!FreeLibrary((HMODULE)(*m_loaded_libraries)[backend_name])) {
     SH_DEBUG_ERROR("Could not unload the " << backend_name << " library.");
   }
@@ -167,7 +167,7 @@ string ShBackend::lookup_filename(const string& backend_name)
   init();
   string libname = "libsh" + backend_name;
 
-#if defined(WIN32)
+#if defined(_WIN32)
 # ifdef SH_DEBUG
     libname += "_DEBUG";
 # endif
@@ -207,7 +207,7 @@ bool ShBackend::load_library(const string& filename)
 
   if (filename.empty()) return false;
 
-#if defined(WIN32)
+#if defined(_WIN32)
   string uc_filename(filename);
   std::transform(filename.begin(), filename.end(), uc_filename.begin(), toupper);
   string::size_type extension_pos = uc_filename.rfind("_DEBUG.DLL");
@@ -232,7 +232,7 @@ bool ShBackend::load_library(const string& filename)
     return true; // already loaded
   }
 
-#if defined(WIN32)
+#if defined(_WIN32)
   LibraryHandle module = LoadLibrary(filename.c_str());
 #elif defined(__APPLE__) && !defined(AUTOTOOLS)
   CFURLRef bundleURL;
@@ -258,7 +258,7 @@ bool ShBackend::load_library(const string& filename)
 
 void ShBackend::load_libraries(const string& directory)
 {
-#ifndef WIN32
+#ifndef _WIN32
   DIR* dirp = opendir(directory.c_str());
   if (dirp) {
     // Go through all files in lib/sh/
@@ -291,7 +291,7 @@ void ShBackend::load_libraries(const string& directory)
     if (!FindNextFile(file_handle, &find_data)) break;
   }
   FindClose(file_handle);
-#endif /* WIN32 */
+#endif /* _WIN32 */
 }
 
 
@@ -369,7 +369,7 @@ void ShBackend::load_all_backends()
 {
   if (m_all_backends_loaded) return;
 
-#if defined(WIN32)
+#if defined(_WIN32)
   load_libraries(string("."));
   
   // Search the system path
@@ -460,7 +460,7 @@ void ShBackend::init()
   m_selected_backends = new BackendSet();
   m_loaded_libraries = new LibraryMap();
 
-#if !defined(WIN32) && (!defined(__APPLE__) || defined(AUTOTOOLS))
+#if !defined(_WIN32) && (!defined(__APPLE__) || defined(AUTOTOOLS))
   if (lt_dlinit()) {
     SH_DEBUG_ERROR("Error initializing ltdl: " << lt_dlerror());
   }
@@ -477,7 +477,7 @@ void ShBackend::init()
   if (lt_dladdsearchdir(searchpath.c_str())) {
     SH_DEBUG_ERROR("Could not add " + searchpath + " to search dir: " << lt_dlerror());
   }
-#endif /* WIN32 */
+#endif /* _WIN32 */
 
   m_done_init = true;
 }

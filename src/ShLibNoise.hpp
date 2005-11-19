@@ -22,7 +22,7 @@
 #ifndef SHLIBNOISE_HPP
 #define SHLIBNOISE_HPP
 
-#ifndef WIN32
+#ifndef _WIN32
 namespace SH {
 
 /** \defgroup lib_hash Hash functions
@@ -177,7 +177,7 @@ ShGeneric<N, CT1T2> sturbulence(const ShGeneric<M, T1> &p,
 // @}
 
 } // namespace SH
-#endif // WIN32
+#endif // _WIN32
 
 #include "ShLibNoiseImpl.hpp"
 

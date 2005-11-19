@@ -92,7 +92,7 @@ struct PropertyFactory {
   virtual ShGeneric<N, T> operator()(const ShGeneric<D, T> &p, const Generator<D, T> &g) const = 0; 
 };
 
-#ifndef WIN32
+#ifndef _WIN32
 
 /** \brief Worley texture generator.
  * This uses the DefaultGeneratorFactory and DistSqPropFactory 
@@ -126,7 +126,7 @@ ShProgram shWorley(const GeneratorFactory<P, D, T> *genFactory,
                    const PropertyFactory<N, D, T> *propFactory);
 //@}
 
-#endif // WIN32
+#endif // _WIN32
 
 } // namespace SH
 

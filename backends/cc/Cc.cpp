@@ -18,13 +18,13 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <math.h>
 #else
 #include <dlfcn.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#endif /* WIN32 */
+#endif /* _WIN32 */
 
 #include <iostream>
 #include <fstream>
@@ -114,7 +114,7 @@ void CcBackendCode::EmitFunctor::operator()(ShCtrlGraphNode* node)
 CcBackendCode::CcBackendCode(const ShProgramNodeCPtr& program) 
   : m_original_program(program),
     m_program(0),
-#ifdef WIN32
+#ifdef _WIN32
     m_hmodule(NULL),
 #else
     m_handle(NULL),
@@ -448,11 +448,11 @@ bool CcBackendCode::generate(void)
   prologue << std::endl;
   prologue << std::endl;
   prologue << "extern \"C\" "
-#ifdef WIN32
+#ifdef _WIN32
 	   << " void __declspec(dllexport) cc_shader("
 #else
 	   << " void cc_shader("
-#endif /* WIN32 */
+#endif /* _WIN32 */
 	   << "void** inputs, "
 	   << "void** params, "
 	   << "void** channels, "
@@ -481,7 +481,7 @@ bool CcBackendCode::generate(void)
 bool CcBackendCode::load_shader_func(const std::stringstream& prologue,
 				     const std::stringstream& epilogue)
 {
-#ifdef WIN32
+#ifdef _WIN32
   // generate temporary names for the
   // code and the dll
   char path[1024];
@@ -600,7 +600,7 @@ bool CcBackendCode::load_shader_func(const std::stringstream& prologue,
     SH_CC_DEBUG_PRINT("fork failed...");
     return false;
   }
-#endif /* WIN32 */
+#endif /* _WIN32 */
 }
 
 void CcBackendCode::delete_temporary_files()
@@ -770,7 +770,7 @@ void CcBackend::execute(const ShProgramNodeCPtr& program, ShStream& dest)
 extern "C" {
   using namespace ShCc;
 
-#ifdef WIN32
+#ifdef _WIN32
   __declspec(dllexport) 
 #endif
   CcBackend* shBackend_libshcc_instantiate()
@@ -778,7 +778,7 @@ extern "C" {
     return new CcBackend();
   }
 
-#ifdef WIN32
+#ifdef _WIN32
   __declspec(dllexport) 
 #endif
   int shBackend_libshcc_target_cost(const std::string& target)

@@ -8,25 +8,39 @@ project opengl ;
 rule init ( prefix ? )
 {
 	import errors ;
-	import os ;
+
+	local include-subdir = include ;
 
 	if ! $(prefix) # prefix not given
 	{
 		prefix = [ modules.peek : OPENGL_PATH ] ;
+
+		if ! $(prefix) # env var not found
+		{
+			prefix = [ path.glob-in-parents . : opengl ] ;
+
+			if ! $(prefix) # default path doesn't exist
+			{
+				echo "opengl: Try to use compiler default header (no prefix given, OPENGL_PATH empty)" ;
+			}
+		}
 	}
 
 	if $(.initialized)
 	{
 		if $(prefix) != $(.prefix)
 		{
-			errors.error
-			"Attempt to reinitialize opengl with different installation prefix" ;
+			errors.error "opengl: Reinitialized with different prefix" ;
 		}
 	}
-	else
-	{
+	else {
 		.initialized = true ;
 		.prefix = $(prefix) ;
+
+		lib user32 : : <name>user32 ;
+		lib gdi32 : : <name>gdi32 ;
+
+		local sources-msvc = user32 gdi32 ;
 
 		local usage-requirements =
 			<include>$(.prefix)/$(include-subdir)
@@ -34,29 +48,21 @@ rule init ( prefix ? )
 			<library-path>$(.prefix)/lib
 		;
 
-		local sources ;
-		local libgl-name = "" ;
-		local libglu-name = "" ;
-		if [ os.on-windows ]
-		{
-			lib user32 : : <name>user32 ;
-			lib gdi32 : : <name>gdi32 ;
-
-			sources += user32 gdi32 ;
-
-			libgl-name = opengl32 ;
-			libglu-name = glu32 ;
-		}
-		else {
-			libgl-name = GL ;
-			libglu-name = GLU ;
-		}
+		lib libgl
+		: # sources
+			$(sources-msvc)
+		: # requirements
+			<toolset>msvc
+			<name>opengl32
+		: # default-build
+		: # usage-requirements
+			$(usage-requirements)
+		;
 
 		lib libgl
 		: # sources
-			$(sources)
 		: # requirements
-			<name>$(libgl-name)
+			<name>GL
 		: # default-build
 		: # usage-requirements
 			$(usage-requirements)
@@ -64,9 +70,19 @@ rule init ( prefix ? )
 
 		lib libglu
 		: # sources
-			$(sources)
+			$(sources-msvc)
 		: # requirements
-			<name>$(libglu-name)
+			<toolset>msvc
+			<name>glu32
+		: # default-build
+		: # usage-requirements
+			$(usage-requirements)
+		;
+
+		lib libglu
+		: # sources
+		: # requirements
+			<name>GLU
 		: # default-build
 		: # usage-requirements
 			$(usage-requirements)

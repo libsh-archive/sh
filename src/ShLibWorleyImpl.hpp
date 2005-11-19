@@ -415,7 +415,7 @@ void worley(ShGeneric<K, T> result[], const ShGeneric<D, T> &p,
 
 template<int K, int D, typename T>
 ShGeneric<K, T> worley(const ShGeneric<D, T> &p, 
-#ifdef WIN32
+#ifdef _WIN32
                        bool useTexture=true)
 #else
                        bool useTexture)
@@ -430,7 +430,7 @@ ShGeneric<K, T> worley(const ShGeneric<D, T> &p,
 
 template<int K, int D, typename T>
 ShProgram shWorley(
-#ifdef WIN32
+#ifdef _WIN32
                    bool useTexture=true)
 #else
                    bool useTexture)

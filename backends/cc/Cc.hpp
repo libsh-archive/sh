@@ -20,7 +20,7 @@
 #ifndef SHCC_HPP
 #define SHCC_HPP
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
@@ -155,11 +155,11 @@ private:
 
   std::stringstream m_code;
 
-#ifdef WIN32
+#ifdef _WIN32
   HMODULE m_hmodule;
 #else
   void* m_handle;
-#endif /* WIN32 */
+#endif /* _WIN32 */
 
   CcShaderFunc m_shader_func;
 

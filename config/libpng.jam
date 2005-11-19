@@ -8,27 +8,26 @@ project libpng ;
 rule init ( prefix ? )
 {
 	import errors ;
-	import os ;
 
 	local include-subdir = include ;
 
 	if ! $(prefix) # prefix not given
 	{
 		prefix = [ modules.peek : LIBPNG_PATH ] ;
+
 		if ! $(prefix) # env var not found
 		{
-			if [ os.on-windows ]
+			if [ path.exists /usr/$(include-subdir)/png.h ]
 			{
-				prefix = [ path.glob-in-parents . : libpng ] ;
-			}
-			else if [ path.exists /usr/$(include-subdir)/png.h ] {
 				prefix = /usr ;
+			}
+			else {
+				prefix = [ path.glob-in-parents . : libpng ] ;
 			}
 
 			if ! $(prefix) # default path doesn't exist
 			{
-				errors.error
-				"libpng installation prefix not given, LIBPNG_PATH variable is empty and default directory not found" ;
+				errors.error "libpng: No prefix given, LIBPNG_PATH empty and default directory not found" ;
 			}
 		}
 	}
@@ -37,14 +36,14 @@ rule init ( prefix ? )
 	{
 		if $(prefix) != $(.prefix)
 		{
-			errors.error
-			"Attempt the reinitialize libpng with different installation prefix" ;
+			errors.error "libpng: Reinitialized with different prefix" ;
 		}
 	}
-	else
-	{
+	else {
 		.initialized = true ;
 		.prefix = $(prefix) ;
+
+		local sources = /zlib//libz ;
 
 		local usage-requirements =
 			<include>$(.prefix)/$(include-subdir)
@@ -52,17 +51,22 @@ rule init ( prefix ? )
 			<library-path>$(.prefix)/lib
 		;
 
-		local libname-prefix = "" ;
-		if [ os.on-windows ]
-		{
-			libname-prefix = lib ;
-		}
+		lib libpng
+		: # sources
+			$(sources)
+		: # requirements
+			<toolset>msvc
+			<name>libpng
+		: # default-build
+		: # usage-requirements
+			$(usage-requirements)
+		;
 
 		lib libpng
 		: # sources
-			/zlib//libz
+			$(sources)
 		: # requirements
-			<name>$(libname-prefix)png
+			<name>png
 		: # default-build
 		: # usage-requirements
 			$(usage-requirements)

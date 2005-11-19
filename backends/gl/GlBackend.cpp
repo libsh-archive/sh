@@ -23,7 +23,7 @@
 
 #include <sstream>
 
-#ifdef WIN32
+#ifdef _WIN32
 
 PFNGLPROGRAMSTRINGARBPROC glProgramStringARB = 0;
 PFNGLBINDPROGRAMARBPROC glBindProgramARB = 0;
@@ -80,13 +80,13 @@ PFNGLUSEPROGRAMOBJECTARBPROC glUseProgramObjectARB = 0;
 PFNGLVALIDATEPROGRAMARBPROC glValidateProgramARB = 0;
 PFNGLBINDATTRIBLOCATIONARBPROC glBindAttribLocationARB = 0;
 
-#endif /* WIN32 */
+#endif /* _WIN32 */
 
 namespace shgl {
 
 using namespace SH;
 
-#ifdef WIN32
+#ifdef _WIN32
 LRESULT CALLBACK shGlWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
   // An empty WindowProc, we need one to create a window. For now
@@ -96,7 +96,7 @@ LRESULT CALLBACK shGlWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
   // maybe some others.
   return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
-#endif /* WIN32 */
+#endif /* _WIN32 */
 
 void shGlCheckError(const char* desc, const char* file, int line)
 {
@@ -134,7 +134,7 @@ void shGlCheckError(const char* desc, const char* file, int line)
   SH_DEBUG_PRINT("GL ERROR call: " << desc);
 }
 
-#ifdef WIN32
+#ifdef _WIN32
 #define GET_WGL_PROCEDURE(x, T) \
 if ((x = reinterpret_cast<PFN ## T ## PROC>(wglGetProcAddress(#x))) == NULL) \
 { \
@@ -142,7 +142,7 @@ if ((x = reinterpret_cast<PFN ## T ## PROC>(wglGetProcAddress(#x))) == NULL) \
   msg << "wglGetProcAddress failed (" << GetLastError() << ")"; \
   shError(ShException(msg.str())); \
 }
-#endif /* WIN32 */
+#endif /* _WIN32 */
 
 SH::ShBackendSetPtr CodeStrategy::generate_set(const SH::ShProgramSet& s)
 {
@@ -172,7 +172,7 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
   m_texture(texture),
   m_stream(stream)
 {
-#ifdef WIN32
+#ifdef _WIN32
   // wglGetProcessAddress will fail outright if there isn't a current
   // context. So, If there isn't a current context we need to create one.
   // To create a context we need just one thing, an HDC. But not just
@@ -347,7 +347,7 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
     wglDeleteContext(hglrc);
     DestroyWindow(hWnd);
   }
-#endif /* WIN32 */
+#endif /* _WIN32 */
 }
 
 SH::ShBackendCodePtr GlBackend::generate_code(const std::string& target,

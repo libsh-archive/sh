@@ -1,14 +1,14 @@
-import os ;
+alias buffer-context
+: # sources
+	WGLPBufferContext.cpp
+: # requirements
+	<toolset>msvc
+;
 
-
-local platform ;
-if [ os.on-windows ]
-{
-	platform += WGLPBufferContext.cpp ;
-}
-else {
-	platform += GLXPBufferContext.cpp ;
-}
+alias buffer-context
+: # sources
+	GLXPBufferContext.cpp
+;
 
 
 local common =
@@ -16,7 +16,7 @@ local common =
 	[ glob PBuffer*.cpp ]
 	GlBackend.cpp
 	Utils.cpp
-	$(platform)
+	buffer-context
 ;
 
 

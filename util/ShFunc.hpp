@@ -23,7 +23,7 @@
 #include "ShVariable.hpp"
 #include "ShAttrib.hpp"
 
-#ifndef WIN32
+#ifndef _WIN32
 namespace ShUtil {
 
 using namespace SH;

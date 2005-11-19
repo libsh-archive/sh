@@ -24,7 +24,7 @@
 
 #include "ShGeneric.hpp"
 
-#ifndef WIN32
+#ifndef _WIN32
 namespace SH {
 
 /** \defgroup lib_geometry Geometric operations.

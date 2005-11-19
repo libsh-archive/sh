@@ -21,7 +21,7 @@
 #include "GlBackend.hpp"
 #include "GlTextures.hpp"
 #include "GlTextureStorage.hpp"
-#ifdef WIN32
+#ifdef _WIN32
 #include "WGLPBufferContext.hpp"
 #else
 #include "GLXPBufferContext.hpp"
@@ -107,7 +107,7 @@ PBufferFactory::~PBufferFactory()
 
 PBufferFactory* PBufferFactory::instance()
 {
-#ifdef WIN32
+#ifdef _WIN32
   return WGLPBufferFactory::instance();
 #else
   return GLXPBufferFactory::instance();

@@ -25,7 +25,7 @@
 #include "ShStream.hpp"
 #include "ShTextureNode.hpp"
 
-#ifdef WIN32
+#ifdef _WIN32
 
 #include <windows.h>
 
@@ -105,7 +105,7 @@ extern PFNGLBINDATTRIBLOCATIONARBPROC glBindAttribLocationARB;
 #include <GL/glx.h>
 #endif /* __APPLE */
 
-#endif /* WIN32 */
+#endif /* _WIN32 */
 
 namespace shgl {
 

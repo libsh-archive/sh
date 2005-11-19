@@ -1,3 +1,8 @@
+2005-11-19  Hans-Friedrich Pabst  <hfp@users.sf.net>
+
+	* Some conditions (preprocessor) are changed to allow
+	new targets (platform/compiler).
+
 2005-11-18  Francois Marier  <francois@serioushack.com>
 
 	* src/ShProgramNode.cpp (compile): Add a check for empty

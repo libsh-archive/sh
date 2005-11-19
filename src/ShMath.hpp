@@ -27,14 +27,19 @@
 #include <cmath>
 
 namespace {
-#ifdef WIN32
-inline float log2f(float a) { return logf(a) / logf(2.0f); }
-inline float exp2f(float a) { return powf(2.0f, a); }
-inline float exp10f(float a) { return powf(10.0f, a); }
+#ifdef _WIN32
+  inline float log2f(float a) { return logf(a) / logf(2.0f); }
+  inline float exp2f(float a) { return powf(2.0f, a); }
+  inline float exp10f(float a) { return powf(10.0f, a); }
 #endif
+
+#ifdef __CYGWIN__
+# undef log2
+#endif
+
 #ifdef __APPLE__
-inline float exp10f(float a) { return powf(10.0f, a); }
-inline double exp10(double a) { return pow(10.0, a); }
+  inline float exp10f(float a) { return powf(10.0f, a); }
+  inline double exp10(double a) { return pow(10.0, a); }
 #endif
 }
 
