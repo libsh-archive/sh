@@ -39,6 +39,9 @@ struct ChannelGatherer {
   {
   }
 
+  // assignment operator could not be generated
+  ChannelGatherer& operator=(ChannelGatherer const&);
+
   void operator()(const SH::ShCtrlGraphNode* node);
   
   ChannelMap& channel_map;
@@ -58,6 +61,9 @@ public:
   void operator()(SH::ShCtrlGraphNode* node);
 
 private:
+  // assignment operator could not be generated
+  TexFetcher& operator=(TexFetcher const&);
+
   ChannelMap& channel_map;
   SH::ShVariableNodePtr tc_node;
   bool indexed;

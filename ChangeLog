@@ -5,6 +5,9 @@
 	Base-from-member initialization problem.
 	* src/ShStructural.cpp: Add range check before iterator
 	decrement (remove duplicate successors; make succs unique).
+	* libsharb: Some tiny problems (compile warnings) avoided.
+	Assignment operator could not be generated.
+	Some bit-ops (unsigned int) forced to bool.
 
 2005-11-19  Hans-Friedrich Pabst  <hfp@users.sf.net>
 

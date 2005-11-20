@@ -56,7 +56,8 @@ using namespace std;
 
 // #define ARBCODE_DEBUG
 
-struct ArbBindingSpecs {
+class ArbBindingSpecs {
+public:
   ArbRegBinding binding;
   int maxBindings;
   ShSemanticType semanticType;
@@ -163,7 +164,7 @@ ArbCode::ArbCode(const ShProgramNodeCPtr& shader, const string& unit,
   // initialize m_convertMap
   m_convertMap[SH_DOUBLE] = SH_FLOAT; 
 
-  bool halfSupport = m_environment & SH_ARB_NVFP; 
+  bool halfSupport = (m_environment & SH_ARB_NVFP) != 0;
   if (!halfSupport) m_convertMap[SH_HALF] = SH_FLOAT;
 
   m_convertMap[SH_INT] = SH_FLOAT;
@@ -612,7 +613,7 @@ ostream& ArbCode::print(ostream& out)
     (*I)->printDecl(out);
     out << endl;
   }
-  bool halfSupport = m_environment & SH_ARB_NVFP;
+  bool halfSupport = (m_environment & SH_ARB_NVFP) != 0;
   if (m_numTemps > 0) { 
     if (halfSupport) {
       out << "  LONG TEMP ";
@@ -1053,7 +1054,7 @@ void ArbCode::allocRegs()
 
   try {
     allocTemps(limits, false);
-    bool halfSupport = m_environment & SH_ARB_NVFP; 
+    bool halfSupport = (m_environment & SH_ARB_NVFP) != 0;
     if (halfSupport) {
       allocTemps(limits, true);
     }

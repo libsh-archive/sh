@@ -244,6 +244,9 @@ struct StorageFinder {
     : node(node), ignoreTarget(ignoreTarget)
   {
   }
+
+  // assignment operator could not be generated
+  StorageFinder& operator=(StorageFinder const&);
   
   bool operator()(const ShStoragePtr& storage) const
   {

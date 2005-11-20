@@ -43,7 +43,8 @@ const unsigned int negate_first = 0x04; // Negate first source
 const unsigned int delay_mask   = 0x08; // Do writemasking in separate step
 };
 
-struct ArbMapping {
+class ArbMapping {
+public:
   ShOperation sh_op;
   unsigned int filters;
   
@@ -357,11 +358,11 @@ void ArbCode::emit_mod(const ShStatement& stmt)
 void ArbCode::emit_trig(const ShStatement& stmt)
 {
   // Use float constants.  Conversions will take place as necessary
-  ShConstAttrib4f c0(0.0, 0.5, 1.0, 0.0);
-  ShConstAttrib4f c1(0.25, -9.0, 0.75, 1.0/(2.0*M_PI));
-  ShConstAttrib4f c2(24.9808039603, -24.9808039603, -60.1458091736, 60.1458091736);
-  ShConstAttrib4f c3(85.4537887573, -85.4537887573, -64.9393539429, 64.9393539429);
-  ShConstAttrib4f c4(19.7392082214, -19.7392082214, -1.0, 1.0);
+  ShConstAttrib4f c0(0.00f,  0.50f, 1.00f, 0.0f);
+  ShConstAttrib4f c1(0.25f, -9.00f, 0.75f, 1.0f / (2.0 * M_PI));
+  ShConstAttrib4f c2(24.9808039603f, -24.9808039603f, -60.1458091736f, 60.1458091736f);
+  ShConstAttrib4f c3(85.4537887573f, -85.4537887573f, -64.9393539429f, 64.9393539429f);
+  ShConstAttrib4f c4(19.7392082214f, -19.7392082214f, -1.0f, 1.0f);
 
   m_shader->constants.push_back(c0.node());
   m_shader->constants.push_back(c1.node());
@@ -401,11 +402,11 @@ void ArbCode::emit_trig(const ShStatement& stmt)
 void ArbCode::emit_invtrig(const ShStatement& stmt)
 {
   // Use float constants.  Conversions will take place to other types as necessary 
-  ShConstAttrib4f c0(0.0, 1.570796327, -0.5860008052, 0.5860008052);
-  ShConstAttrib4f c1(1.571945105, -1.571945105, -1.669668977, 1.669668977);
-  ShConstAttrib4f c2(0.8999841642, -0.8999841642, -0.6575341673, 0.6575341673);
-  ShConstAttrib4f c3(1.012386649, -1.012386649, 0.9998421793, -0.9998421793);
-  ShConstAttrib4f c4(1.0, -1.0, 1.0, -1.0);
+  ShConstAttrib4f c0(0.0f, 1.570796327f, -0.5860008052f, 0.5860008052f);
+  ShConstAttrib4f c1(1.5719451050f, -1.5719451050f, -1.6696689770f,  1.6696689770f);
+  ShConstAttrib4f c2(0.8999841642f, -0.8999841642f, -0.6575341673f,  0.6575341673f);
+  ShConstAttrib4f c3(1.0123866490f, -1.0123866490f,  0.9998421793f, -0.9998421793f);
+  ShConstAttrib4f c4(1.0f, -1.0f, 1.0f, -1.0f);
 
   m_shader->constants.push_back(c0.node());
   m_shader->constants.push_back(c1.node());
