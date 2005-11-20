@@ -573,15 +573,15 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
 
         // Remove duplicate successors from newnode
         for (ShStructuralNode::SuccessorList::iterator J = newnode->succs.begin();
-             J != newnode->succs.end(); J++) {
+             J != newnode->succs.end(); ++J) {
           ShStructuralNode::SuccessorList::iterator K = J;
-          for (K++; K != newnode->succs.end(); K++) {
+          for (K++; K != newnode->succs.end(); ++K) {
             if (K->second == J->second) {
               // Favour conditional edges for deletion in order to
               // keep the non-conditional edges if possible
               if (J->first.node()) {
                 J = newnode->succs.erase(J);
-                J--;
+                if (J != newnode->succs.begin()) --J;
               } else {
                 K = newnode->succs.erase(K);
                 J = newnode->succs.begin(); // The previous erase has invalidated J
@@ -614,7 +614,7 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
             for (++K; K != s->preds.end(); ++K) {
               if (K->second == J->second) {
                 J = s->preds.erase(J);
-                if(J != s->preds.begin()) --J;
+                if (J != s->preds.begin()) --J;
                 break;
               }
             }
@@ -634,10 +634,10 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
           for (ShStructuralNode::SuccessorList::iterator J = p->succs.begin();
                J != p->succs.end(); ++J) {
             ShStructuralNode::SuccessorList::iterator K = J;
-            for (K++; K != p->succs.end(); K++) {
+            for (K++; K != p->succs.end(); ++K) {
               if (K->second == J->second) {
                 J = p->succs.erase(J);
-                J--;
+                if (J != p->succs.begin()) --J;
                 break;
               }
             }
