@@ -52,6 +52,9 @@ struct VariableSplitter {
   VariableSplitter(int maxTuple, ShTransformer::VarSplitMap& splits, bool& changed)
     : maxTuple(maxTuple), splits(splits), changed(changed) {}
 
+  // assignment operator could not be generated: declaration only
+  VariableSplitter& operator=(VariableSplitter const&);
+
   void operator()(ShCtrlGraphNodePtr node) {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
@@ -140,6 +143,9 @@ struct StatementSplitter {
 
   StatementSplitter(int maxTuple, ShTransformer::VarSplitMap &splits, bool& changed)
     : maxTuple(maxTuple), splits(splits), changed(changed) {}
+
+  // assignment operator could not be generated: declaration only
+  StatementSplitter& operator=(StatementSplitter const&);
 
   void operator()(ShCtrlGraphNodePtr node) {
     if (!node) return;
@@ -393,6 +399,9 @@ struct InputOutputConvertor {
                        ShVarMap &varMap, bool& changed)
     : m_program(program), m_varMap( varMap ), m_changed(changed), m_id(++id)
   {}
+
+  // assignment operator could not be generated: declaration only
+  InputOutputConvertor& operator=(InputOutputConvertor const&);
 
   void operator()(ShCtrlGraphNodePtr node) {
     if (!node) return;

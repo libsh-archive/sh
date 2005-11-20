@@ -332,6 +332,9 @@ struct CtrlGraphCopier {
     : copyMap(copyMap)
   {
   }
+
+  // assignment operator could not be generated: declaration only
+  CtrlGraphCopier& operator=(CtrlGraphCopier const&);
   
   void operator()(ShCtrlGraphNodePtr node) {
     if (!node) return;

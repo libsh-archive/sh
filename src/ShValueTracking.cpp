@@ -152,6 +152,9 @@ struct DefFinder {
   {
   }
 
+  // assignment operator could not be generated: declaration only
+  DefFinder& operator=(DefFinder const&);
+
   void operator()(ShCtrlGraphNodePtr node)
   {
     if (!node) return;
@@ -221,6 +224,9 @@ struct InitRch {
   {
   }
 
+  // assignment operator could not be generated: declaration only
+  InitRch& operator=(InitRch const&);
+
   void operator()(ShCtrlGraphNodePtr node)
   {
     if (!node) return;
@@ -278,6 +284,9 @@ struct IterateRch {
   {
   }
 
+  // assignment operator could not be generated: declaration only
+  IterateRch& operator=(IterateRch const&);
+
   void operator()(const ShCtrlGraphNodePtr& node)
   {
     if (!node) return;
@@ -332,7 +341,10 @@ struct UdDuBuilder {
     ShVariableNodePtr node;
     int index;
   };
-  
+
+  // assignment operator could not be generated: declaration only
+  UdDuBuilder& operator=(UdDuBuilder const&);
+
   void operator()(ShCtrlGraphNodePtr node) {
     typedef std::set<ValueTracking::Def> DefSet;
     typedef std::map<TupleElement, DefSet> DefMap;

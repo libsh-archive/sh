@@ -566,6 +566,9 @@ struct InitConstProp {
   {
   }
 
+  // assignment operator could not be generated: declaration only
+  InitConstProp& operator=(InitConstProp const&);
+
   void operator()(const ShCtrlGraphNodePtr& node)
   {
     if (!node) return;

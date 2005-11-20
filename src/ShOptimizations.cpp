@@ -73,6 +73,9 @@ struct Straightener {
   {
   }
 
+  // assignment operator could not be generated: declaration only
+  Straightener& operator=(Straightener const&);
+
   void operator()(const ShCtrlGraphNodePtr& node)
   {
     if (!node) return;
@@ -134,6 +137,9 @@ struct EmptyBlockRemover {
     : graph(graph), changed(changed)
   {
   }
+
+  // assignment operator could not be generated: declaration only
+  EmptyBlockRemover& operator=(EmptyBlockRemover const&);
 
   void operator()(const ShCtrlGraphNodePtr& node)
   {
@@ -202,6 +208,9 @@ struct RedundantEdgeRemover {
   {
   }
 
+  // assignment operator could not be generated: declaration only
+  RedundantEdgeRemover& operator=(RedundantEdgeRemover const&);
+
   void operator()(const ShCtrlGraphNodePtr& node)
   {
     if (!node) return;
@@ -209,7 +218,7 @@ struct RedundantEdgeRemover {
     if (node->successors.empty()) return;
 
     ShCtrlGraphNode::SuccessorList::iterator I = node->successors.end();
-    I--;
+    --I;
     while (1) {
       if (I->node == node->follower) {
         I = node->successors.erase(I);
@@ -235,6 +244,9 @@ struct InitLiveCode {
   {
   }
   
+  // assignment operator could not be generated: declaration only
+  InitLiveCode& operator=(InitLiveCode const&);
+
   void operator()(ShCtrlGraphNodePtr node) {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
@@ -273,6 +285,9 @@ struct DeadCodeRemover {
   {
   }
   
+  // assignment operator could not be generated: declaration only
+  DeadCodeRemover& operator=(DeadCodeRemover const&);
+
   void operator()(ShCtrlGraphNodePtr node) {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
@@ -299,6 +314,9 @@ struct CopyPropagator {
     : changed(changed)
   {
   }
+
+  // assignment operator could not be generated: declaration only
+  CopyPropagator& operator=(CopyPropagator const&);
 
   void operator()(const ShCtrlGraphNodePtr& node) {
     if (!node) return;
@@ -370,6 +388,9 @@ struct ForwardSubst {
     : changed(changed)
   {
   }
+
+  // assignment operator could not be generated: declaration only
+  ForwardSubst& operator=(ForwardSubst const&);
 
   void operator()(const ShCtrlGraphNodePtr& node) {
     if (!node) return;

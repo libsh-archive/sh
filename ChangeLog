@@ -1,6 +1,12 @@
+2005-11-20  Hans-Friedrich Pabst  <hfp@users.sf.net>
+
+	* libsh: Some tiny problems (compile warnings) avoided.
+	Assignment operator could not be generated.
+	Base-from-member initialization problem.
+
 2005-11-19  Hans-Friedrich Pabst  <hfp@users.sf.net>
 
-	* Some conditions (preprocessor) are changed to allow
+	* Some conditions (preprocessor) are modified to allow
 	new targets (platform/compiler).
 
 2005-11-18  Francois Marier  <francois@serioushack.com>

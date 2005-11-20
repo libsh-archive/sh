@@ -33,7 +33,7 @@ class ShVariant;
 /// @file ShVariantCast.hpp
 /// Declares a cast between one data type of a storage type and another.  
 
-struct 
+class 
 SH_DLLEXPORT
 ShVariantCast {
   public:

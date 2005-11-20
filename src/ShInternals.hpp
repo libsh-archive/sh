@@ -38,6 +38,9 @@ SH_DLLEXPORT ShVariableReplacer {
 
   ShVariableReplacer(ShVarMap& v);
 
+  // assignment operator could not be generated: declaration only
+  ShVariableReplacer& operator=(ShVariableReplacer const&);
+
   // replaces variables in node based on varMap
   void operator()(ShCtrlGraphNodePtr node);
 

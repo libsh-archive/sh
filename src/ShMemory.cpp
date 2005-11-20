@@ -293,28 +293,26 @@ void* ShHostStorage::data()
 //////////////////////////
 // --- ShHostMemory --- //
 //////////////////////////
-#ifdef MSC_VER
-# pragma warning(push)
-# pragma warning(disable:4355)
-#endif
 
 ShHostMemory::ShHostMemory(std::size_t length, ShValueType value_type)
-  : m_hostStorage(new ShHostStorage(this, length, value_type))
+  : m_hostStorage(0)
 {
+  // avoids base-from-member initialization problem
+  m_hostStorage = new ShHostStorage(this, length, value_type);
+
   // Make the host storage represent the newest version of the memory
   m_hostStorage->dirtyall();
 }
 
 ShHostMemory::ShHostMemory(std::size_t length, void* data, ShValueType value_type)
-  : m_hostStorage(new ShHostStorage(this, length, data, value_type))
+  : m_hostStorage(0)
 {
+  // avoids base-from-member initialization problem
+  m_hostStorage = new ShHostStorage(this, length, data, value_type);
+
   // Make the host storage represent the newest version of the memory
   m_hostStorage->dirtyall();
 }
-
-#ifdef MSC_VER
-# pragma warning(pop)
-#endif
 
 ShHostMemory::~ShHostMemory()
 {

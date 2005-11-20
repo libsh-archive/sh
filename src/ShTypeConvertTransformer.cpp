@@ -124,6 +124,9 @@ struct FloatConverter {
   {
   }
 
+  // assignment operator could not be generated: declaration only
+  FloatConverter& operator=(FloatConverter const&);
+
   void operator()(ShCtrlGraphNodePtr node) {
     if (!node) return;
     ShBasicBlockPtr block = node->block;

@@ -88,7 +88,7 @@ bool descendent(const SH::ShStructuralNodePtr& a,
     n = n->parent;
   }
   
-  return n;
+  return n != 0;
 }
 
 template<typename Container, typename T>
@@ -264,6 +264,7 @@ std::ostream& ShStructuralNode::dump(std::ostream& out, int noedges) const
 struct SuccEdgePred {
   const ShStructuralNode::SuccessorEdge &edge;
   SuccEdgePred(const ShStructuralNode::SuccessorEdge &edge): edge(edge) {}
+  SuccEdgePred& operator=(SuccEdgePred const&);
   bool operator()(const ShCtrlGraphNodePtr &from, const ShCtrlGraphNodePtr &to, const ShVariable &var) const 
   {
     return (edge.first == var && edge.second->contains(to));
