@@ -1,3 +1,10 @@
+2005-11-20  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShTexData.hpp, src/ShTexDataImpl.hpp, src/ShAttrib.hp,
+	src/ShBaseTexture.hpp: Avoid circular inclusion of Impl files.
+	* xcode: Update to Xcode 2.2, many many fixes.
+	* backends/gl: Several small fixes for Apple OS X build.
+
 2005-11-20  Hans-Friedrich Pabst  <hfp@users.sf.net>
 
 	* libsh: Some tiny problems (compile warnings) avoided.

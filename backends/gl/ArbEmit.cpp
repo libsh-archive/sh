@@ -327,6 +327,7 @@ void ArbCode::emit_eq(const ShStatement& stmt)
     combine = SH_ARB_MAX;
   } else {
     SH_DEBUG_ASSERT(false);
+    return;
   }
   
   m_instructions.push_back(ArbInst(op, t1, stmt.src[0], stmt.src[1]));

@@ -137,17 +137,24 @@ ArbCode::ArbCode(const ShProgramNodeCPtr& shader, const string& unit,
       if (extstr.find("NV_fragment_program2") != string::npos) {
         m_environment |= SH_ARB_NVFP2;
       }
-      if ((extstr.find("ATI_draw_buffers") != string::npos) ||
+      if (
+#ifdef ATI_draw_buffers
+          (extstr.find("ATI_draw_buffers") != string::npos) ||
+#endif
           (extstr.find("ARB_draw_buffers") != string::npos)) {
         m_environment |= SH_ARB_ATIDB;
 	arbFragmentOutputBindingSpecs[0].binding = SH_ARB_REG_RESULTCOL_ATI;
 
-        int max_draw_buffers;
+        GLint max_draw_buffers;
+#ifdef ATI_draw_buffers
         if (extstr.find("ATI_draw_buffers") != string::npos) {
           SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ATI, &max_draw_buffers));
         } else {
+#endif
           SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ARB, &max_draw_buffers));
+#ifdef ATI_draw_buffers
         }
+#endif
         arbFragmentOutputBindingSpecs[0].maxBindings = max_draw_buffers;
       }
     }

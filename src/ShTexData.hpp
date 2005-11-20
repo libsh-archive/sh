@@ -20,7 +20,13 @@
 #ifndef SHTEXDATA_HPP
 #define SHTEXDATA_HPP
 
+#ifndef SH_DO_NOT_INCLUDE_GENERIC_IMPL
+#define SH_DO_NOT_INCLUDE_GENERIC_IMPL
 #include "ShGeneric.hpp"
+#undef SH_DO_NOT_INCLUDE_GENERIC_IMPL
+#else
+#include "ShGeneric.hpp"
+#endif
 #include "ShTextureNode.hpp"
 
 namespace SH {

@@ -34,7 +34,11 @@ struct GlslBackend : public GlBackend {
   GlslBackend()
     : GlBackend(new GlslCodeStrategy(),
                 new GlTextures(),
+#ifdef __APPLE__
+                0)
+#else
                 new PBufferStreams())
+#endif
   {
   }
 

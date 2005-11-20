@@ -338,7 +338,7 @@ void GlslCode::update_int_uniform(const ShVariableNodePtr& node, const GLint loc
   const GLint *values;
 
   if (node->valueType() == SH_INT) {
-    values = static_cast<const int *>(node->getVariant()->array());
+    values = static_cast<const GLint *>(node->getVariant()->array());
   }
   else {
     // Componentwise cast to float and copy

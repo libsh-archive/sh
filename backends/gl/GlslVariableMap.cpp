@@ -86,12 +86,16 @@ GlslVariableMap::GlslVariableMap(ShProgramNode* shader,
           (extstr.find("ARB_draw_buffers") != string::npos)) {
         glslFragmentOutputBindingSpecs[1].binding = SH_GLSL_VAR_FRAGDATA;
 
-        int max_draw_buffers;
+        GLint max_draw_buffers;
+#ifdef GL_ATI_draw_buffers
         if (extstr.find("ATI_draw_buffers") != string::npos) {
           SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ATI, &max_draw_buffers));
         } else {
+#endif
           SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ARB, &max_draw_buffers));
+#ifdef GL_ATI_draw_buffers
         }
+#endif
         glslFragmentOutputBindingSpecs[1].max_bindings = max_draw_buffers;
       }
     }

@@ -25,7 +25,13 @@
 #include "ShTextureNode.hpp"
 #include "ShMemory.hpp"
 #include "ShVariable.hpp"
+#ifndef SH_DO_NOT_INCLUDE_GENERIC_IMPL
+#define SH_DO_NOT_INCLUDE_GENERIC_IMPL
 #include "ShAttrib.hpp"
+#undef  SH_DO_NOT_INCLUDE_GENERIC_IMPL
+#else
+#include "ShAttrib.hpp"
+#endif
 #include "ShMetaForwarder.hpp"
 #include "ShTexData.hpp"
 

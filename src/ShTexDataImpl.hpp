@@ -22,6 +22,7 @@
 
 #include "ShTexData.hpp"
 #include "ShError.hpp"
+#include "ShContext.hpp"
 
 namespace SH {
 
