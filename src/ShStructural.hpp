@@ -83,7 +83,7 @@ public:
    * Used in searching for cfg edges that match criteria in the structural
    * graph.
    */
-  struct CfgMatch {
+  struct SH_DLLEXPORT CfgMatch {
     ShCtrlGraphNodePtr from, to;
     ShCtrlGraphNode::SuccessorList::iterator S; //< set to succ.end() if edge is from->follower 
 

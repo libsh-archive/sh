@@ -8,6 +8,8 @@
 	* libsharb: Some tiny problems (compile warnings) avoided.
 	Assignment operator could not be generated.
 	Some bit-ops (unsigned int) forced to bool.
+	* src/ShStructural.hpp: Public nested classes (CfgMatch)
+	needs (different heaps) to be exported (SH_DLLEXPORT).
 
 2005-11-19  Hans-Friedrich Pabst  <hfp@users.sf.net>
 
