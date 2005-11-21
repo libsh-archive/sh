@@ -1,5 +1,8 @@
 2005-11-21  Francois Marier  <francois@serioushack.com>
 
+	* backends/gl/ArbCode.cpp (updateUniform): Only display the
+	warning once.
+
 	* src/, backends/gl, backends/cc: Convert most ShPointer
 	parameters to const references to ShPointer (thanks to pmr for the
 	patch)

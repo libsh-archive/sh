@@ -460,7 +460,13 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
     SH_GL_CHECK_ERROR(shGlProgramEnvParameter4fvARB(arbTarget(m_unit), reg.binding.index, values));
     break;
   case SH_ARB_REG_STATE:
-    SH_DEBUG_WARN("Updating uniforms bound to OpenGL state is not currently supported.");
+    {
+      static bool warning_seen=false;
+      if (!warning_seen) {
+        SH_DEBUG_WARN("Updating uniforms bound to OpenGL state is not currently supported.");
+        warning_seen = true;
+      }
+    }
   default:
     return;
   }
