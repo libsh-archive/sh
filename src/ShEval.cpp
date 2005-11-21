@@ -97,8 +97,8 @@ void ShEval::operator()(ShOperation op, ShVariant* dest,
 #endif
 }
 
-void ShEval::operator()(ShOperation op, ShVariantPtr dest, 
-    ShVariantCPtr a, ShVariantCPtr b, ShVariantCPtr c) const
+void ShEval::operator()(ShOperation op, const ShVariantPtr& dest, 
+    const ShVariantCPtr& a, const ShVariantCPtr& b, const ShVariantCPtr& c) const
 {
   operator()(op, dest.object(), a.object(), b.object(), c.object());
 }

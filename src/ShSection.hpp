@@ -77,7 +77,7 @@ class ShSectionNode: public ShRefCountable {
     cfg_iterator cfgEnd() { return cfgNodes.end(); }
     const_cfg_iterator cfgBegin() const { return cfgNodes.begin(); }
     const_cfg_iterator cfgEnd() const { return cfgNodes.end(); }
-    void addCfg(ShCtrlGraphNodePtr cfgNode) { cfgNodes.push_back(cfgNode); }
+    void addCfg(const ShCtrlGraphNodePtr& cfgNode) { cfgNodes.push_back(cfgNode); }
 
     /* Returns whether this is the root */
     bool isRoot() const { return !parent; }
@@ -106,11 +106,11 @@ class ShSectionTree {
     void dfs(F& functor);
      
     /* Retrieves the section containing cfgNode */
-    ShSectionNodePtr operator[](ShCtrlGraphNodePtr cfgNode);
+    ShSectionNodePtr operator[](const ShCtrlGraphNodePtr& cfgNode);
 
     /* Returns whether a section node in this tree contains a particular section
      * node. */ 
-    bool contains(ShSectionNodePtr section, ShCtrlGraphNodePtr cfgNode);
+    bool contains(const ShSectionNodePtr& section, const ShCtrlGraphNodePtr& cfgNode);
 
     /* Graphviz dump */
     std::ostream& dump(std::ostream& out); 
@@ -127,15 +127,15 @@ class ShSectionTree {
 
   private:
     // adds structural subtree rooted at structNode to the section 
-    static void makeSection(ShStructuralNodePtr structNode, ShSectionNodePtr section);
+    static void makeSection(const ShStructuralNodePtr& structNode, ShSectionNodePtr section);
 
     typedef std::map<ShCtrlGraphNodePtr, ShSectionNodePtr> CfgSectionMap;
     CfgSectionMap cfgSection; 
-    void gatherCfgSection(ShSectionNodePtr section); 
+    void gatherCfgSection(const ShSectionNodePtr& section); 
 
     /* DFS through the section tree */
     template<class F>
-    static void realDfs(ShSectionNodePtr node, F& functor);
+    static void realDfs(const ShSectionNodePtr& node, F& functor);
 
     /* Dump a node and subtree using the given functor (functor described above in dump()) 
      *
@@ -146,7 +146,7 @@ class ShSectionTree {
      * @param node The root of the section subtree to process
      * @param F functor as described above in dump*/
     template<class F>
-    void realDump(std::ostream& out, std::ostream& cfgout, ShSectionNodePtr node, F& functor);
+    void realDump(std::ostream& out, std::ostream& cfgout, const ShSectionNodePtr& node, F& functor);
 };
 
 }

@@ -102,10 +102,10 @@ public:
   typedef DeclSet::const_iterator DeclIt;
 
   /** Adds a temporary declaration to this cfg node */
-  void addDecl(ShVariableNodePtr node);
+  void addDecl(const ShVariableNodePtr& node);
 
   /** Returns whether this node contains a declaration for the given node */
-  bool hasDecl(ShVariableNodePtr node) const;
+  bool hasDecl(const ShVariableNodePtr& node) const;
 
   /** Inserts the given declarations into this */ 
   void insert_decls(DeclIt f, DeclIt l);
@@ -153,8 +153,8 @@ typedef ShPointer<const ShCtrlGraphNode> ShCtrlGraphNodeCPtr;
 class
 SH_DLLEXPORT ShCtrlGraph : public ShRefCountable {
 public:
-  ShCtrlGraph(ShCtrlGraphNodePtr head, ShCtrlGraphNodePtr tail);
-  ShCtrlGraph(ShBlockListPtr blocks);
+  ShCtrlGraph(const ShCtrlGraphNodePtr& head, const ShCtrlGraphNodePtr& tail);
+  ShCtrlGraph(const ShBlockListPtr& blocks);
   ~ShCtrlGraph();
 
   std::ostream& print(std::ostream& out, int indent) const;

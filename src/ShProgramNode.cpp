@@ -288,19 +288,19 @@ void ShProgramNode::collectDecls()
   }
 }
 
-bool ShProgramNode::hasDecl(ShVariableNodePtr node) const
+bool ShProgramNode::hasDecl(const ShVariableNodePtr& node) const
 {
   return tempDecls.find(node) != tempDecls.end();
 }
 
-void ShProgramNode::addDecl(ShVariableNodePtr node, ShCtrlGraphNodePtr cfgNode)
+void ShProgramNode::addDecl(const ShVariableNodePtr& node, const ShCtrlGraphNodePtr& cfgNode)
 {
   tempDecls.insert(node);
   SH_DEBUG_ASSERT(ctrlGraph->entry());
   cfgNode->addDecl(node);
 }
 
-void ShProgramNode::addDecl(ShVariableNodePtr node)
+void ShProgramNode::addDecl(const ShVariableNodePtr& node)
 {
   addDecl(node, ctrlGraph->entry());
 }

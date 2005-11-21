@@ -34,7 +34,7 @@ void ShSectionTree::dfs(F& functor) {
 }
 
 template<class F>
-void ShSectionTree::realDfs(ShSectionNodePtr node, F& functor)
+void ShSectionTree::realDfs(const ShSectionNodePtr& node, F& functor)
 {
   for(ShSectionNode::iterator I = node->begin(); I != node->end(); ++I) {
     realDfs(*I, functor);
@@ -55,7 +55,7 @@ std::ostream& ShSectionTree::dump(std::ostream& out, F& functor)
 
 template<class F>
 void ShSectionTree::realDump(std::ostream& out, std::ostream& cfgout, 
-                             ShSectionNodePtr node, F& functor)
+                             const ShSectionNodePtr& node, F& functor)
 {
   out << "subgraph " << "cluster_" << node.object() << " {" << std::endl; 
     functor(out, node);

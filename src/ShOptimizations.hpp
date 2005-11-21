@@ -95,7 +95,7 @@ ValueTracking : public ShInfo {
     {
     }
 
-    Def(ShVariableNodePtr node, int index)
+    Def(const ShVariableNodePtr& node, int index)
       : kind(INPUT), node(node), stmt(0), index(index) 
     {}
     
@@ -134,7 +134,7 @@ ValueTracking : public ShInfo {
     {
     }
 
-    Use(ShVariableNodePtr node, int index)
+    Use(const ShVariableNodePtr& node, int index)
       : kind(OUTPUT), node(node), stmt(0), source(0), index(index)
     {
     }

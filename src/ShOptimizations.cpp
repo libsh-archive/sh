@@ -37,7 +37,7 @@ using namespace SH;
 // Branch instruction insertion/removal
 
 struct BraInstInserter {
-  void operator()(ShCtrlGraphNodePtr node)
+  void operator()(const ShCtrlGraphNodePtr& node)
   {
     if (!node) return;
 
@@ -50,7 +50,7 @@ struct BraInstInserter {
 };
 
 struct BraInstRemover {
-  void operator()(ShCtrlGraphNodePtr node)
+  void operator()(const ShCtrlGraphNodePtr& node)
   {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
@@ -114,7 +114,7 @@ struct Straightener {
     changed = true;
   }
 
-  void replacePredecessors(ShCtrlGraphNodePtr node,
+  void replacePredecessors(const ShCtrlGraphNodePtr& node,
                            ShCtrlGraphNode* old,
                            ShCtrlGraphNode* replacement)
   {
@@ -239,7 +239,7 @@ struct RedundantEdgeRemover {
 typedef std::queue<ShStatement*> DeadCodeWorkList;
 
 struct InitLiveCode {
-  InitLiveCode(ShProgramNodeCPtr p, DeadCodeWorkList& w)
+  InitLiveCode(const ShProgramNodeCPtr& p, DeadCodeWorkList& w)
     : p(p), w(w)
   {
   }
@@ -247,7 +247,7 @@ struct InitLiveCode {
   // assignment operator could not be generated: declaration only
   InitLiveCode& operator=(InitLiveCode const&);
 
-  void operator()(ShCtrlGraphNodePtr node) {
+  void operator()(const ShCtrlGraphNodePtr& node) {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
     if (!block) return;
@@ -288,7 +288,7 @@ struct DeadCodeRemover {
   // assignment operator could not be generated: declaration only
   DeadCodeRemover& operator=(DeadCodeRemover const&);
 
-  void operator()(ShCtrlGraphNodePtr node) {
+  void operator()(const ShCtrlGraphNodePtr& node) {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
     if (!block) return;

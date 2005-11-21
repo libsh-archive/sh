@@ -161,31 +161,31 @@ ShTexData<T, 3, T2> ShBaseTexture3D<T>::operator[](const ShGeneric<3, T2>& coord
 // setMemory
 
 template<typename T>
-void ShBaseTexture1D<T>::memory(ShMemoryPtr memory, int mipmap_level)
+void ShBaseTexture1D<T>::memory(const ShMemoryPtr& memory, int mipmap_level)
 {
   m_node->memory(memory, mipmap_level);
 }
 
 template<typename T>
-void ShBaseTexture2D<T>::memory(ShMemoryPtr memory, int mipmap_level)
+void ShBaseTexture2D<T>::memory(const ShMemoryPtr& memory, int mipmap_level)
 {
   m_node->memory(memory, mipmap_level);
 }
 
 template<typename T>
-void ShBaseTextureRect<T>::memory(ShMemoryPtr memory, int mipmap_level)
+void ShBaseTextureRect<T>::memory(const ShMemoryPtr& memory, int mipmap_level)
 {
   m_node->memory(memory, mipmap_level);
 }
 
 template<typename T>
-void ShBaseTexture3D<T>::memory(ShMemoryPtr memory, int mipmap_level)
+void ShBaseTexture3D<T>::memory(const ShMemoryPtr& memory, int mipmap_level)
 {
   m_node->memory(memory, mipmap_level);
 }
 
 template<typename T>
-void ShBaseTextureCube<T>::memory(ShMemoryPtr memory, ShCubeDirection face, 
+void ShBaseTextureCube<T>::memory(const ShMemoryPtr& memory, ShCubeDirection face, 
 				  int mipmap_level)
 {
   m_node->memory(memory, face, mipmap_level);

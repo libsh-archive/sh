@@ -173,7 +173,7 @@ void ShDataVariant<T, DT>::set(const ShVariant* other)
 }
 
 template<typename T, ShDataType DT>
-void ShDataVariant<T, DT>::set(ShVariantCPtr other)
+void ShDataVariant<T, DT>::set(const ShVariantCPtr& other)
 {
   set(other.object());
 }
@@ -194,7 +194,7 @@ void ShDataVariant<T, DT>::set(const ShVariant* other, int index)
 }
 
 template<typename T, ShDataType DT>
-void ShDataVariant<T, DT>::set(ShVariantCPtr other, int index)
+void ShDataVariant<T, DT>::set(const ShVariantCPtr& other, int index)
 {
   set(other.object(), index);
 }
@@ -230,7 +230,7 @@ void ShDataVariant<T, DT>::set(const ShVariant* other, bool neg, const ShSwizzle
 }
 
 template<typename T, ShDataType DT>
-void ShDataVariant<T, DT>::set(ShVariantCPtr other, bool neg, const ShSwizzle &writemask) 
+void ShDataVariant<T, DT>::set(const ShVariantCPtr& other, bool neg, const ShSwizzle &writemask) 
 {
   set(other.object(), neg, writemask);
 }
@@ -271,7 +271,7 @@ bool ShDataVariant<T, DT>::equals(const ShVariant* other) const
 }
 
 template<typename T, ShDataType DT>
-bool ShDataVariant<T, DT>::equals(ShVariantCPtr other) const 
+bool ShDataVariant<T, DT>::equals(const ShVariantCPtr& other) const 
 {
   return equals(other.object());
 }
@@ -405,14 +405,14 @@ void ShDataVariant<T, DT>::operator delete(void* ptr, std::size_t size)
 
 template<typename T, ShDataType DT>
 inline
-ShPointer<ShDataVariant<T, DT> > variant_cast(ShVariantPtr c)
+ShPointer<ShDataVariant<T, DT> > variant_cast(const ShVariantPtr& c)
 {
   return shref_dynamic_cast<ShDataVariant<T, DT> >(c);
 }
 
 template<typename T, ShDataType DT>
 inline
-ShPointer<const ShDataVariant<T, DT> > variant_cast(ShVariantCPtr c)
+ShPointer<const ShDataVariant<T, DT> > variant_cast(const ShVariantCPtr& c)
 {
   return shref_dynamic_cast<const ShDataVariant<T, DT> >(c);
 }
@@ -432,7 +432,7 @@ const ShDataVariant<T, DT>* variant_cast(const ShVariant* c)
 }
 
 template<typename T, ShDataType DT>
-ShPointer<ShDataVariant<T, DT> > variant_convert(ShVariantCPtr c)
+ShPointer<ShDataVariant<T, DT> > variant_convert(const ShVariantCPtr& c)
 {
   ShDataVariant<T, DT>* result = new ShDataVariant<T, DT>(c->size());
   result->set(c);

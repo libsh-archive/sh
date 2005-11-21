@@ -42,14 +42,14 @@ SH_DLLEXPORT ShVariableReplacer {
   ShVariableReplacer& operator=(ShVariableReplacer const&);
 
   // replaces variables in node based on varMap
-  void operator()(ShCtrlGraphNodePtr node);
+  void operator()(const ShCtrlGraphNodePtr& node);
 
   // replaces variables in a ShProgramNode::VarList based on varMap 
   void operator()(ShProgramNode::VarList &varList);
 
   // replaces variables in a ShStructuralNode and all Structural
   // Nodes in its region.
-  void operator()(ShStructuralNodePtr node);
+  void operator()(const ShStructuralNodePtr& node);
 
   // replaces node in a single variable using varMap
   void repVar(ShVariable& var);
@@ -84,12 +84,12 @@ public:
   /// Indicate that we are creating a new transformed variable derived from the
   /// given original variable. If the original variable is already in the map, the
   /// mapping from new to old will follow the chain all the way back.
-  void add_variable_transform(ShVariableNodePtr origVar, ShVariableNodePtr newVar);
+  void add_variable_transform(const ShVariableNodePtr& origVar, const ShVariableNodePtr& newVar);
 
   /// Get the original variable (ALL the way back) that gave rise to the given
   /// transformed variable. If a mapping is not found for the given variable,
   /// the variable itself is return (ie. it has not been transformed at all).
-  ShVariableNodePtr get_original_variable(ShVariableNodePtr newVar) const
+  ShVariableNodePtr get_original_variable(const ShVariableNodePtr& newVar) const
   {
     ShVarMap::const_iterator i = m_NewToOldMap.find(newVar);
     return (i != m_NewToOldMap.end() ? i->second : newVar);

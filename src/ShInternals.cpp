@@ -27,7 +27,7 @@ ShVariableReplacer::ShVariableReplacer(ShVarMap& v)
 {
 }
 
-void ShVariableReplacer::operator()(ShCtrlGraphNodePtr node) 
+void ShVariableReplacer::operator()(const ShCtrlGraphNodePtr& node) 
 {
   // replace variables that are conditions in branches
   ShCtrlGraphNode::SuccessorList::iterator I;
@@ -48,7 +48,7 @@ void ShVariableReplacer::operator()(ShCtrlGraphNodePtr node)
 
 }
 
-void ShVariableReplacer::operator()(ShStructuralNodePtr node) 
+void ShVariableReplacer::operator()(const ShStructuralNodePtr& node) 
 {
   if(node->cfg_node) operator()(node->cfg_node);
   for (ShStructuralNode::StructNodeList::iterator I = node->structnodes.begin(); 
@@ -78,7 +78,7 @@ void ShVariableReplacer::repVar(ShVariable& var)
 
 
 
-void ShVarTransformMap::add_variable_transform(ShVariableNodePtr origVar, ShVariableNodePtr newVar)
+void ShVarTransformMap::add_variable_transform(const ShVariableNodePtr& origVar, const ShVariableNodePtr& newVar)
 {
   // We need only go one level of depth since we store the mappings to the ORIGINAL,
   // instead of traversing the chain each time.

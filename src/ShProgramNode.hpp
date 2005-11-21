@@ -114,7 +114,7 @@ public:
   void collectVariables();
 
   /// Returns whether a temporary variable is declared in this program
-  bool hasDecl(ShVariableNodePtr node) const;
+  bool hasDecl(const ShVariableNodePtr& node) const;
 
   /** Add a declaration.  This is for use when a program is
    * transformed and new temporaries are added.
@@ -125,8 +125,8 @@ public:
    * @todo range check that adding to the cfg node doesn't screw anything up...
    * (i.e. if somewhere we don't copy cfg when manipulating program...) */
   //@{
-  void addDecl(ShVariableNodePtr node, ShCtrlGraphNodePtr);
-  void addDecl(ShVariableNodePtr node);
+  void addDecl(const ShVariableNodePtr& node, const ShCtrlGraphNodePtr&);
+  void addDecl(const ShVariableNodePtr& node);
   //@}
 
   typedef std::set<ShVariableNodePtr> VarSet;

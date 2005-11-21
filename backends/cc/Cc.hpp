@@ -137,8 +137,8 @@ private:
         
   void emit(const SH::ShStatement& stmt);
   void emitTexLookup(const SH::ShStatement &stmt, const char* texfunc);
-  void emit(SH::ShBasicBlockPtr block);
-  void emit(SH::ShCtrlGraphNodePtr node);
+  void emit(const SH::ShBasicBlockPtr& block);
+  void emit(const SH::ShCtrlGraphNodePtr& node);
       
 private:
   const SH::ShProgramNodeCPtr& m_original_program;

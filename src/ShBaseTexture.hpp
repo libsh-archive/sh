@@ -66,7 +66,7 @@ public:
   ShTexData<T, 1, T2> operator[](const ShGeneric<1, T2>& coords) const;
 
   ShMemoryPtr memory(int mipmap_level=0);
-  void memory(ShMemoryPtr memory, int mipmap_level=0);
+  void memory(const ShMemoryPtr& memory, int mipmap_level=0);
   void size(int width);
 
   ShAttrib1f size() const;
@@ -96,7 +96,7 @@ public:
   ShTexData<T, 2, T2> operator[](const ShGeneric<2, T2>& coords) const;
 
   ShMemoryPtr memory(int mipmap_level=0);
-  void memory(ShMemoryPtr memory, int mipmap_level=0);
+  void memory(const ShMemoryPtr& memory, int mipmap_level=0);
   void size(int width, int height);
 
   ShAttrib2f size() const;
@@ -122,7 +122,7 @@ public:
   ShTexData<T, 2, T2> operator[](const ShGeneric<2, T2>& coords) const;
 
   ShMemoryPtr memory(int mipmap_level=0);
-  void memory(ShMemoryPtr memory, int mipmap_level=0);
+  void memory(const ShMemoryPtr& memory, int mipmap_level=0);
   void size(int width, int height);
 
   ShAttrib2f size() const;
@@ -148,7 +148,7 @@ public:
   ShTexData<T, 3, T2> operator[](const ShGeneric<3, T2>& coords) const;
 
   ShMemoryPtr memory(int mipmap_level=0);
-  void memory(ShMemoryPtr memory, int mipmap_level=0);
+  void memory(const ShMemoryPtr& memory, int mipmap_level=0);
   void size(int width, int height, int depth);
 
   ShAttrib3f size() const;
@@ -171,7 +171,7 @@ public:
   ShTexData<T, 3, T2> operator()(const ShGeneric<3, T2>& coords) const;
 
   ShMemoryPtr memory(ShCubeDirection face, int mipmap_level=0);
-  void memory(ShMemoryPtr memory, ShCubeDirection face, int mipmap_level=0);
+  void memory(const ShMemoryPtr& memory, ShCubeDirection face, int mipmap_level=0);
   void size(int width, int height);
 
   ShAttrib2f size() const;

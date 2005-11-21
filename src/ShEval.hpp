@@ -97,8 +97,8 @@ ShEval {
     void operator()(ShOperation op, ShVariant* dest,
         const ShVariant* a, const ShVariant* b, const ShVariant* c) const;
 
-    void operator()(ShOperation op, ShVariantPtr dest,
-        ShVariantCPtr a, ShVariantCPtr b, ShVariantCPtr c) const;
+    void operator()(ShOperation op, const ShVariantPtr& dest,
+        const ShVariantCPtr& a, const ShVariantCPtr& b, const ShVariantCPtr& c) const;
     // @}
 
     /** Registers a evalOp for a certain operation/source type index combination */ 

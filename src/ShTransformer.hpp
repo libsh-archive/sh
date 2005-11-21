@@ -131,7 +131,7 @@ private:
 /* A default transformer.
  * T can overload any of the methods in ShTransformerParent 
  *
- * - void start(ShProgramNodePtr)
+ * - void start(const ShProgramNodePtr&)
  *   Does whatever initialization may be necessary.  Initializes changed() to
  *   false.
  *
@@ -140,7 +140,7 @@ private:
  *   variable lists. 
  * - handleTexList, handleChannelList, handlePaletteList are similar
  *
- * - bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node);
+ * - bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, const ShCtrlGraphNodePtr& node);
  *   This performs some kind of per-statement transformation during a dfs
  *   through the cfg.  Returns true iff the transformation has already
  *   incremented I (or deleted I and moved I to the next element). 
@@ -166,21 +166,21 @@ private:
 template<typename T>
 struct ShDefaultTransformer: public T {
   // Applies transformation to the given ctrl graph node. 
-  void operator()(ShCtrlGraphNodePtr node); 
+  void operator()(const ShCtrlGraphNodePtr& node); 
 
   // Applies transformation to the given ShProgram 
-  bool transform(ShProgramNodePtr p); 
+  bool transform(const ShProgramNodePtr& p); 
 };
 
 struct ShTransformerParent {
  ShTransformerParent() : m_changed(false) {}
- void start(ShProgramNodePtr program) { m_program = program; }
+ void start(const ShProgramNodePtr& program) { m_program = program; }
  void handleVarList(ShProgramNode::VarList &varlist, ShBindingType type) {}
  void handleTexList(ShProgramNode::TexList &texlist) {}
  void handleChannelList(ShProgramNode::ChannelList &chanlist) {}
  void handlePaletteList(ShProgramNode::PaletteList &palettelist) {}
 
- bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node) { return false; }
+ bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, const ShCtrlGraphNodePtr& node) { return false; }
  void finish() {}
  bool changed() 
  { return m_changed; }

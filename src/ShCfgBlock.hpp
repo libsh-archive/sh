@@ -36,8 +36,8 @@ SH_DLLEXPORT
 ShCfgBlock : public ShBlock {
 public:
   ShCfgBlock(const ShProgram &program, bool copy=true);
-  ShCfgBlock(ShCtrlGraphPtr cfg, bool copy=true);
-  ShCfgBlock(ShCtrlGraphNodePtr node, bool copy=true); 
+  ShCfgBlock(const ShCtrlGraphPtr& cfg, bool copy=true);
+  ShCfgBlock(const ShCtrlGraphNodePtr& node, bool copy=true); 
 
   ~ShCfgBlock();
 
@@ -49,7 +49,7 @@ public:
 
   
 private:
-  void init(ShCtrlGraphPtr cfg, bool copy);
+  void init(const ShCtrlGraphPtr& cfg, bool copy);
   ShCtrlGraphNodePtr m_entry, m_exit;
 };
 

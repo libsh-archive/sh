@@ -81,7 +81,7 @@ public:
 private:
 
   /// Generate code for this node and those following it.
-  void genNode(SH::ShCtrlGraphNodePtr node);
+  void genNode(const SH::ShCtrlGraphNodePtr& node);
 
   /// Generate code for this structural node and those contained by
   /// it.
@@ -186,7 +186,7 @@ private:
   /// and return true. Otherwise, output nothing and return false.
   bool printSamplingInstruction(std::ostream& out, const ArbInst& inst) const;
 
-  int getLabel(SH::ShCtrlGraphNodePtr node);
+  int getLabel(const SH::ShCtrlGraphNodePtr& node);
   
   TextureStrategy* m_texture;
   // NOTE: These two pointer are deliberately not smart pointers

@@ -148,7 +148,7 @@ void ShTransformer::vectorizeScalars()
 #endif
 
 template<typename T>
-void ShDefaultTransformer<T>::operator()(ShCtrlGraphNodePtr node) {
+void ShDefaultTransformer<T>::operator()(const ShCtrlGraphNodePtr& node) {
   if (!node) return;
   ShBasicBlockPtr block = node->block;
   if (!block) return;
@@ -159,7 +159,7 @@ void ShDefaultTransformer<T>::operator()(ShCtrlGraphNodePtr node) {
 }
 
 template<typename T>
-bool ShDefaultTransformer<T>::transform(ShProgramNodePtr p) {
+bool ShDefaultTransformer<T>::transform(const ShProgramNodePtr& p) {
   T::start(p);
 
   T::handleVarList(p->inputs, SH_INPUT);

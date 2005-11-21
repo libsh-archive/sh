@@ -43,7 +43,7 @@ ShParser* ShParser::instance()
 
 void ShParser::parse(ShCtrlGraphNodePtr& head,
                      ShCtrlGraphNodePtr& tail,
-                     ShBlockListPtr blocks)
+                     const ShBlockListPtr& blocks)
 {
   parseStmts(head, tail, blocks);
   checkCond(blocks->empty(), "Unexpected token"); // TODO: improve
@@ -52,7 +52,7 @@ void ShParser::parse(ShCtrlGraphNodePtr& head,
 
 void ShParser::parseStmts(ShCtrlGraphNodePtr& head,
                           ShCtrlGraphNodePtr& tail,
-                          ShBlockListPtr blocks)
+                          const ShBlockListPtr& blocks)
 {
   ShBlockPtr next = blocks->getFront();
   head = tail = 0;
@@ -122,7 +122,7 @@ void ShParser::parseStmts(ShCtrlGraphNodePtr& head,
 }
 
 void ShParser::parseBlock(ShCtrlGraphNodePtr& head,
-                          ShCtrlGraphNodePtr& tail, ShBasicBlockPtr block)
+                          ShCtrlGraphNodePtr& tail, const ShBasicBlockPtr& block)
 {
   head = tail = new ShCtrlGraphNode();
   tail->block = block;
@@ -137,7 +137,7 @@ void ShParser::parseBlock(ShCtrlGraphNodePtr& head,
 }
 
 void ShParser::parseIf(ShCtrlGraphNodePtr& head,
-                       ShCtrlGraphNodePtr& tail, ShBlockListPtr blocks)
+                       ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks)
 {
   head = tail = 0;
   
@@ -175,7 +175,7 @@ void ShParser::parseIf(ShCtrlGraphNodePtr& head,
 }
 
 void ShParser::parseFor(ShCtrlGraphNodePtr& head,
-                        ShCtrlGraphNodePtr& tail, ShBlockListPtr blocks)
+                        ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks)
 {
   head = tail = 0;
   
@@ -224,7 +224,7 @@ void ShParser::parseFor(ShCtrlGraphNodePtr& head,
 }
 
 void ShParser::parseWhile(ShCtrlGraphNodePtr& head,
-                          ShCtrlGraphNodePtr& tail, ShBlockListPtr blocks)
+                          ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks)
 {
   head = tail = 0;
   
@@ -257,7 +257,7 @@ void ShParser::parseWhile(ShCtrlGraphNodePtr& head,
 }
 
 void ShParser::parseDo(ShCtrlGraphNodePtr& head,
-                       ShCtrlGraphNodePtr& tail, ShBlockListPtr blocks)
+                       ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks)
 {
   head = tail = new ShCtrlGraphNode();
 
@@ -299,7 +299,7 @@ void ShParser::parseDo(ShCtrlGraphNodePtr& head,
 
 void ShParser::parseSection(ShCtrlGraphNodePtr& head,
                            ShCtrlGraphNodePtr& tail,
-                           ShBlockListPtr blocks)
+                           const ShBlockListPtr& blocks)
 {
   ShTokenPtr startToken = popToken(blocks, SH_TOKEN_STARTSEC);
 
@@ -336,7 +336,7 @@ void ShParser::parseSection(ShCtrlGraphNodePtr& head,
 }
 
 void ShParser::parse_break(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, 
-                           ShBlockListPtr blocks)
+                           const ShBlockListPtr& blocks)
 {
   head = tail = 0;
   
@@ -353,7 +353,7 @@ void ShParser::parse_break(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail,
 }
 
 void ShParser::parse_continue(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, 
-                              ShBlockListPtr blocks)
+                              const ShBlockListPtr& blocks)
 {
   head = tail = 0;
   
@@ -369,7 +369,7 @@ void ShParser::parse_continue(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail
   tail->append(m_continue_node.top(), cond_arg.result);
 }
 
-ShTokenPtr ShParser::popToken(ShBlockListPtr blocks, ShTokenType expectedType, unsigned int expectedArgs)
+ShTokenPtr ShParser::popToken(const ShBlockListPtr& blocks, ShTokenType expectedType, unsigned int expectedArgs)
 {
   ShTokenPtr result = shref_dynamic_cast<ShToken>(blocks->getFront());
   checkCond(result);
@@ -379,7 +379,7 @@ ShTokenPtr ShParser::popToken(ShBlockListPtr blocks, ShTokenType expectedType, u
   return result;
 }
 
-ShTokenPtr ShParser::popToken(ShBlockListPtr blocks)
+ShTokenPtr ShParser::popToken(const ShBlockListPtr& blocks)
 {
   ShTokenPtr result = shref_dynamic_cast<ShToken>(blocks->getFront());
   checkCond(result);

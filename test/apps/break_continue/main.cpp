@@ -172,13 +172,13 @@ void initShaders()
     
     ShColor3f col1;
     ShAttrib1f it(0.0);
-//     SH_WHILE(it < 5.0) {
-//       it += 1.0;
-//       //SH_BREAK(it > 1);
-//       SH_CONTINUE(it > 3);
-//       SH_CONTINUE(it > 1);
-//       col1 += ShColor3f(0.0, 0.0, 0.2);
-//     } SH_ENDWHILE;
+    SH_WHILE(it < 5.0) {
+      it += 1.0;
+      //SH_BREAK(it > 1);
+      SH_CONTINUE(it > 3);
+      SH_CONTINUE(it > 1);
+      col1 += ShColor3f(0.0, 0.0, 0.2);
+    } SH_ENDWHILE;
 
 //     SH_FOR(it = 0.0, it < 5.0, it += 1.0) {
 //       //SH_BREAK(it > 1);

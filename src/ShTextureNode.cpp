@@ -154,7 +154,7 @@ ShPointer<const ShMemory> ShTextureNode::memory(int n) const
   }
 }
 
-void ShTextureNode::memory(ShMemoryPtr memory, int n)
+void ShTextureNode::memory(const ShMemoryPtr& memory, int n)
 {
   initialize_memories(0 == n); // nb_memories will change if filtering was changed
   if (n < m_nb_memories) {
@@ -174,7 +174,7 @@ ShPointer<const ShMemory> ShTextureNode::memory(ShCubeDirection dir, int n) cons
   return memory(static_cast<int>(dir) * m_mipmap_levels + n);
 }
 
-void ShTextureNode::memory(ShMemoryPtr mem, ShCubeDirection dir, int n)
+void ShTextureNode::memory(const ShMemoryPtr& mem, ShCubeDirection dir, int n)
 {
   memory(mem, static_cast<int>(dir) * mipmap_levels() + n);
 }

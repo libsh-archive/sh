@@ -29,18 +29,18 @@ ShCfgBlock::ShCfgBlock(const ShProgram &program, bool copy)
   init(program.node()->ctrlGraph, copy);
 }
 
-ShCfgBlock::ShCfgBlock(ShCtrlGraphPtr cfg, bool copy)
+ShCfgBlock::ShCfgBlock(const ShCtrlGraphPtr& cfg, bool copy)
 {
   init(cfg, copy);
 }
 
-ShCfgBlock::ShCfgBlock(ShCtrlGraphNodePtr node, bool copy)
+ShCfgBlock::ShCfgBlock(const ShCtrlGraphNodePtr& node, bool copy)
 {
   ShCtrlGraphPtr cfg = new ShCtrlGraph(node, node); 
   init(cfg, copy);
 }
 
-void ShCfgBlock::init(ShCtrlGraphPtr cfg, bool copy)
+void ShCfgBlock::init(const ShCtrlGraphPtr& cfg, bool copy)
 {
   if(copy) {
     cfg->copy(m_entry, m_exit);

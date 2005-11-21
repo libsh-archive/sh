@@ -293,7 +293,7 @@ void ShVariableNode::setVariant(const ShVariant* other)
   update_all();
 }
 
-void ShVariableNode::setVariant(ShVariantCPtr other)
+void ShVariableNode::setVariant(const ShVariantCPtr& other)
 {
   setVariant(other.object());
 }
@@ -305,7 +305,7 @@ void ShVariableNode::setVariant(const ShVariant* other, int index)
   update_all();
 }
 
-void ShVariableNode::setVariant(ShVariantCPtr other, int index) 
+void ShVariableNode::setVariant(const ShVariantCPtr& other, int index) 
 {
   setVariant(other.object(), index);
 }
@@ -317,7 +317,7 @@ void ShVariableNode::setVariant(const ShVariant* other, bool neg, const ShSwizzl
   update_all();
 }
 
-void ShVariableNode::setVariant(ShVariantCPtr other, bool neg, const ShSwizzle &writemask)
+void ShVariableNode::setVariant(const ShVariantCPtr& other, bool neg, const ShSwizzle &writemask)
 {
   setVariant(other.object(), neg, writemask);
 }

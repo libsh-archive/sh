@@ -339,7 +339,7 @@ const char* CcBackendCode::ctype(ShValueType valueType)
   return "unknown"; 
 }
 
-void CcBackendCode::emit(ShBasicBlockPtr block) 
+void CcBackendCode::emit(const ShBasicBlockPtr& block) 
 {
   if (!block) {
     m_code << "  // empty basic block" << std::endl;
@@ -354,7 +354,7 @@ void CcBackendCode::emit(ShBasicBlockPtr block)
   }
 }
 
-void CcBackendCode::emit(ShCtrlGraphNodePtr node) 
+void CcBackendCode::emit(const ShCtrlGraphNodePtr& node) 
 {
   m_code << "label_" << m_label_map[node] << ":" << std::endl
 	 << "  ;" << std::endl;

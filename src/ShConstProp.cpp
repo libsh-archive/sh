@@ -234,7 +234,7 @@ struct ConstProp : public ShInfo {
     // @todo type...this is my current understanding:
     // May be constant or if !constval, value is not
     // known to be constant
-    Uniform(ShVariantCPtr cval)
+    Uniform(const ShVariantCPtr& cval)
       : constant(true),
         constval(cval ? cval->get() : ShVariantPtr(0))
     {
@@ -561,7 +561,7 @@ std::ostream& operator<<(std::ostream& out, const ConstProp::Cell& cell)
 }
 
 struct InitConstProp {
-  InitConstProp(ShProgramNodeCPtr prog, ConstWorkList& worklist)
+  InitConstProp(const ShProgramNodeCPtr& prog, ConstWorkList& worklist)
     : prog(prog), worklist(worklist)
   {
   }

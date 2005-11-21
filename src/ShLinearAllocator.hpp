@@ -58,7 +58,7 @@ SH_DLLEXPORT ShLifeTime {
 class
 SH_DLLEXPORT ShLinearAllocator {
 public:
-  ShLinearAllocator(ShBackendCodePtr backendCode);
+  ShLinearAllocator(const ShBackendCodePtr& backendCode);
   
   // Mark that a variable is alive at a given index.
   void mark(const ShVariableNodePtr& var, int index);

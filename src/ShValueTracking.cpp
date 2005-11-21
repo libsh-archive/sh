@@ -60,7 +60,7 @@ struct ReachingDefs {
         disable_mask(disable_mask)
     {}
 
-    Definition(ShVariableNodePtr varnode,
+    Definition(const ShVariableNodePtr& varnode,
                const ShCtrlGraphNodePtr& node,
                int offset,
                ShBitSet disable_mask)
@@ -147,7 +147,7 @@ struct ReachingDefs {
 };
 
 struct DefFinder {
-  DefFinder(ReachingDefs& r, ShCtrlGraphNodePtr entry, const ShProgramNode::VarList& inputs)
+  DefFinder(ReachingDefs& r, const ShCtrlGraphNodePtr& entry, const ShProgramNode::VarList& inputs)
     : entry(entry), inputs(inputs), r(r), offset(0)
   {
   }
@@ -155,7 +155,7 @@ struct DefFinder {
   // assignment operator could not be generated: declaration only
   DefFinder& operator=(DefFinder const&);
 
-  void operator()(ShCtrlGraphNodePtr node)
+  void operator()(const ShCtrlGraphNodePtr& node)
   {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
@@ -227,7 +227,7 @@ struct InitRch {
   // assignment operator could not be generated: declaration only
   InitRch& operator=(InitRch const&);
 
-  void operator()(ShCtrlGraphNodePtr node)
+  void operator()(const ShCtrlGraphNodePtr& node)
   {
     if (!node) return;
 
@@ -314,7 +314,7 @@ struct IterateRch {
 // Builds ud and du chains per statement and
 // also gathers input du and output ud chains into the program
 struct UdDuBuilder {
-  UdDuBuilder(ReachingDefs& r, ShProgramNodePtr p) 
+  UdDuBuilder(ReachingDefs& r, const ShProgramNodePtr& p) 
     : r(r), m_exit(p->ctrlGraph->exit()), p(p),
       intrack(new InputValueTracking()),
       outtrack(new OutputValueTracking())
@@ -345,7 +345,7 @@ struct UdDuBuilder {
   // assignment operator could not be generated: declaration only
   UdDuBuilder& operator=(UdDuBuilder const&);
 
-  void operator()(ShCtrlGraphNodePtr node) {
+  void operator()(const ShCtrlGraphNodePtr& node) {
     typedef std::set<ValueTracking::Def> DefSet;
     typedef std::map<TupleElement, DefSet> DefMap;
 
@@ -467,7 +467,7 @@ struct UdDuBuilder {
 };
 
 struct UdDuClearer {
-  void operator()(ShCtrlGraphNodePtr node) {
+  void operator()(const ShCtrlGraphNodePtr& node) {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
     if (!block) return;
@@ -479,7 +479,7 @@ struct UdDuClearer {
 };
 
 struct UdDuDumper {
-  void operator()(ShCtrlGraphNodePtr node) {
+  void operator()(const ShCtrlGraphNodePtr& node) {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
     if (!block) return;
@@ -498,7 +498,7 @@ struct UdDuDumper {
     }
   }
 
-  void operator()(ShProgramNodePtr p) {
+  void operator()(const ShProgramNodePtr& p) {
 #ifdef SH_DEBUG
     InputValueTracking* ivt = p->get_info<InputValueTracking>();
     SH_DEBUG_ASSERT(ivt);

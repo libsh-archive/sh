@@ -59,7 +59,7 @@ public:
   ShStructuralNode* container;
   typedef std::list< ShPointer< ShStructuralNode> > StructNodeList;
   StructNodeList structnodes; ///< Nodes in this region
-  bool contains(ShCtrlGraphNodePtr node) const; ///< Contains the cfg_node in this region
+  bool contains(const ShCtrlGraphNodePtr& node) const; ///< Contains the cfg_node in this region
   
   // Graph structure
   ShCtrlGraphNodePtr cfg_node;
@@ -88,8 +88,8 @@ public:
     ShCtrlGraphNode::SuccessorList::iterator S; //< set to succ.end() if edge is from->follower 
 
     CfgMatch();
-    CfgMatch(ShCtrlGraphNodePtr from); //< for a follower
-    CfgMatch(ShCtrlGraphNodePtr from, 
+    CfgMatch(const ShCtrlGraphNodePtr& from); //< for a follower
+    CfgMatch(const ShCtrlGraphNodePtr& from, 
         ShCtrlGraphNode::SuccessorList::iterator S); //< for a successor 
         
     bool isFollower(); 

@@ -52,7 +52,7 @@ struct LifeToken {
 
 namespace SH {
 
-ShLinearAllocator::ShLinearAllocator(ShBackendCodePtr backendCode)
+ShLinearAllocator::ShLinearAllocator(const ShBackendCodePtr& backendCode)
   : m_backendCode(backendCode)
 {
 }

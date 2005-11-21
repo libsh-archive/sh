@@ -55,7 +55,7 @@ struct VariableSplitter {
   // assignment operator could not be generated: declaration only
   VariableSplitter& operator=(VariableSplitter const&);
 
-  void operator()(ShCtrlGraphNodePtr node) {
+  void operator()(const ShCtrlGraphNodePtr& node) {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
     if (!block) return;
@@ -90,7 +90,7 @@ struct VariableSplitter {
   // does not add variable to Program's VarList, so this must be handled manually 
   // (since this matters only for IN/OUT/INOUT types, splitVarList handles the
   // insertions nicely)
-  bool split(ShVariableNodePtr node)
+  bool split(const ShVariableNodePtr& node)
   {
     int i, offset;
     int n = node->size();
@@ -147,7 +147,7 @@ struct StatementSplitter {
   // assignment operator could not be generated: declaration only
   StatementSplitter& operator=(StatementSplitter const&);
 
-  void operator()(ShCtrlGraphNodePtr node) {
+  void operator()(const ShCtrlGraphNodePtr& node) {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
     if (!block) return;
@@ -238,7 +238,7 @@ struct StatementSplitter {
     delete [] swizr;
   }
 
-  ShVariableNodePtr resizeCloneNode(ShVariableNodePtr node, int newSize) {
+  ShVariableNodePtr resizeCloneNode(const ShVariableNodePtr& node, int newSize) {
     return node->clone(SH_TEMP, newSize, SH_VALUETYPE_END, 
         SH_SEMANTICTYPE_END, true, false);
   }
@@ -341,7 +341,7 @@ struct StatementSplitter {
   
   /** splices a new sequence of resized tuples in to replace the original statement 
    * and ensures stit points at next statement in block*/
-  void splitStatement(ShBasicBlockPtr block, ShBasicBlock::ShStmtList::iterator &stit) {
+  void splitStatement(const ShBasicBlockPtr& block, ShBasicBlock::ShStmtList::iterator &stit) {
     ShStatement &stmt = *stit;
     int i;
     if(!stmt.marked && stmt.dest.size() <= maxTuple) {
@@ -403,7 +403,7 @@ struct InputOutputConvertor {
   // assignment operator could not be generated: declaration only
   InputOutputConvertor& operator=(InputOutputConvertor const&);
 
-  void operator()(ShCtrlGraphNodePtr node) {
+  void operator()(const ShCtrlGraphNodePtr& node) {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
     if (!block) return;
@@ -414,7 +414,7 @@ struct InputOutputConvertor {
 
   // Turn node into a temporary, but do not update var list and do not keep
   // uniform
-  ShVariableNodePtr cloneNode(ShVariableNodePtr node, const char* suffix, ShBindingType binding_type=SH_TEMP) {
+  ShVariableNodePtr cloneNode(const ShVariableNodePtr& node, const char* suffix, ShBindingType binding_type=SH_TEMP) {
     ShVariableNodePtr result = node->clone(binding_type, 0, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, false, false);
     result->name(node->name() + suffix); 
     return result;
@@ -422,7 +422,7 @@ struct InputOutputConvertor {
 
   /* Convert all INOUT nodes that appear in a VarList (use std::for_each with this object)
    * (currently InOuts are always converted) */ 
-  void operator()(ShVariableNodePtr node) {
+  void operator()(const ShVariableNodePtr& node) {
     if (node->kind() != SH_INOUT || m_varMap.count(node) > 0) return;
     m_varMap[node] = cloneNode(node, "_ioc-iot");
   }
@@ -556,11 +556,11 @@ struct TextureLookupConverter {
     }
   }
 
-  ShVariableNodePtr cloneNode(ShVariableNodePtr node) {
+  ShVariableNodePtr cloneNode(const ShVariableNodePtr& node) {
     return node->clone(SH_TEMP, 0, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, true, false);
   }
 
-  void convert(ShBasicBlockPtr block, ShBasicBlock::ShStmtList::iterator& I)
+  void convert(const ShBasicBlockPtr& block, ShBasicBlock::ShStmtList::iterator& I)
   {
     const ShStatement& stmt = *I;
     if (stmt.op != SH_OP_TEX && stmt.op != SH_OP_TEXI) return;
@@ -613,7 +613,7 @@ void ShTransformer::convertTextureLookups()
 
 struct DummyOpStripperBase: public ShTransformerParent 
 {
- bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node) { 
+ bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, const ShCtrlGraphNodePtr& node) { 
    switch(I->op) {
      case SH_OP_STARTSEC:
      case SH_OP_ENDSEC:
@@ -707,7 +707,7 @@ void ShTransformer::expand_atan2()
 
 struct InverseHyperbolicExpanderBase: public ShTransformerParent 
 {
-  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node)
+  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, const ShCtrlGraphNodePtr& node)
   { 
     ShBasicBlock::ShStmtList new_stmts;
     switch (I->op) {

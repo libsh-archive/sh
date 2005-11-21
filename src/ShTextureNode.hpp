@@ -121,8 +121,8 @@ public:
   ShPointer<const ShMemory> memory(ShCubeDirection dir, int n) const;
   ShMemoryPtr memory(int n);
   ShMemoryPtr memory(ShCubeDirection dir, int n);
-  void memory(ShMemoryPtr memory, int n);
-  void memory(ShMemoryPtr memory, ShCubeDirection dir, int n);
+  void memory(const ShMemoryPtr& memory, int n);
+  void memory(const ShMemoryPtr& memory, ShCubeDirection dir, int n);
 
   // Basic properties - not all may be valid for all types
   const ShTextureTraits& traits() const; // valid for all texture nodes

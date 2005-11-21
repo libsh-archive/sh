@@ -140,13 +140,13 @@ namespace SH {
 
 ShStructuralNode::CfgMatch::CfgMatch() {}
 
-ShStructuralNode::CfgMatch::CfgMatch(ShCtrlGraphNodePtr from)
+ShStructuralNode::CfgMatch::CfgMatch(const ShCtrlGraphNodePtr& from)
   : from(from), to(from->follower), S(from->successors.end())
 {
   SH_DEBUG_ASSERT(to);
 }
 
-ShStructuralNode::CfgMatch::CfgMatch(ShCtrlGraphNodePtr from, 
+ShStructuralNode::CfgMatch::CfgMatch(const ShCtrlGraphNodePtr& from, 
     ShCtrlGraphNode::SuccessorList::iterator S)
   : from(from), to(S->node), S(S)
 {
@@ -185,7 +185,7 @@ ShStructuralNode::ShStructuralNode(NodeType type)
 {
 }
 
-bool ShStructuralNode::contains(ShCtrlGraphNodePtr node) const
+bool ShStructuralNode::contains(const ShCtrlGraphNodePtr& node) const
 {
   if(cfg_node == node) return true;
   for(StructNodeList::const_iterator S = structnodes.begin();
@@ -265,7 +265,7 @@ struct SuccEdgePred {
   const ShStructuralNode::SuccessorEdge &edge;
   SuccEdgePred(const ShStructuralNode::SuccessorEdge &edge): edge(edge) {}
   SuccEdgePred& operator=(SuccEdgePred const&);
-  bool operator()(const ShCtrlGraphNodePtr &from, const ShCtrlGraphNodePtr &to, const ShVariable &var) const 
+  bool operator()(const ShCtrlGraphNodePtr& from, const ShCtrlGraphNodePtr& to, const ShVariable& var) const 
   {
     return (edge.first == var && edge.second->contains(to));
   }
@@ -279,8 +279,8 @@ struct SuccEdgePred {
 struct SuccNodePred {
   ShStructuralNodePtr node;
   bool in;
-  SuccNodePred(ShStructuralNodePtr node, bool in): node(node), in(in) {}
-  bool operator()(const ShCtrlGraphNodePtr &from, const ShCtrlGraphNodePtr &to, const ShVariable &var) const 
+  SuccNodePred(const ShStructuralNodePtr& node, bool in): node(node), in(in) {}
+  bool operator()(const ShCtrlGraphNodePtr& from, const ShCtrlGraphNodePtr& to, const ShVariable& var) const 
   {
     return node->contains(to) == in; 
   }
@@ -292,7 +292,7 @@ struct SuccNodePred {
 
 
 template<typename P>
-void getStructuralSuccs(ShStructuralNode::CfgMatchList &result, ShStructuralNodePtr node, const P &predicate) 
+void getStructuralSuccs(ShStructuralNode::CfgMatchList &result, const ShStructuralNodePtr& node, const P &predicate) 
 {
   ShCtrlGraphNodePtr cfg = node->cfg_node;
   if(cfg) {
@@ -324,7 +324,7 @@ void ShStructuralNode::getExits(CfgMatchList &result, ShStructuralNodePtr node)
 }
 
 template<typename P>
-void getStructuralPreds(ShStructuralNode::CfgMatchList &result, ShStructuralNodePtr node, const P &predicate) 
+void getStructuralPreds(ShStructuralNode::CfgMatchList &result, const ShStructuralNodePtr& node, const P &predicate) 
 {
   ShStructuralNode::PredecessorList::iterator I = node->preds.begin();
   for(; I != node->preds.end(); ++I) {

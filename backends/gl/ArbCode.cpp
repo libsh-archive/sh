@@ -197,7 +197,7 @@ ArbCode::~ArbCode()
    }
 }
 
-void dump(ShProgramNodePtr foo, string desc) {
+void dump(const ShProgramNodePtr& foo, string desc) {
 #ifdef ARBCODE_DEBUG
   optimize(foo);
   foo->dump(desc + "_" + foo->name() + "_" + foo->target());
@@ -807,7 +807,7 @@ ostream& ArbCode::describe_bindings(ostream& out)
   return out;
 }
 
-int ArbCode::getLabel(ShCtrlGraphNodePtr node)
+int ArbCode::getLabel(const ShCtrlGraphNodePtr& node)
 {
   if (m_label_map.find(node) == m_label_map.end()) {
     m_label_map[node] = m_max_label++;
@@ -815,7 +815,7 @@ int ArbCode::getLabel(ShCtrlGraphNodePtr node)
   return m_label_map[node];
 }
 
-void ArbCode::genNode(ShCtrlGraphNodePtr node)
+void ArbCode::genNode(const ShCtrlGraphNodePtr& node)
 {
   if (!node || node->marked()) return;
   node->mark();
@@ -1307,7 +1307,7 @@ void ArbCode::allocConsts(const ArbLimits& limits)
   }
 }
 
-bool mark(ShLinearAllocator& allocator, ShVariableNodePtr node, int i, bool half)
+bool mark(ShLinearAllocator& allocator, const ShVariableNodePtr& node, int i, bool half)
 {
   if (!node) return false;
   if (node->kind() != SH_TEMP) return false;
@@ -1317,7 +1317,7 @@ bool mark(ShLinearAllocator& allocator, ShVariableNodePtr node, int i, bool half
   return true;
 }
 
-bool markable(ShVariableNodePtr node, bool half)
+bool markable(const ShVariableNodePtr& node, bool half)
 {
   if (!node) return false;
   if (node->kind() != SH_TEMP) return false;

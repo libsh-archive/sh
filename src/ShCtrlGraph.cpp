@@ -165,12 +165,12 @@ ShCtrlGraphNodePtr ShCtrlGraphNode::split(ShBasicBlock::ShStmtList::iterator stm
   return after;
 }
 
-void ShCtrlGraphNode::addDecl(ShVariableNodePtr node)
+void ShCtrlGraphNode::addDecl(const ShVariableNodePtr& node)
 {
   m_decls.insert(node);
 }
 
-bool ShCtrlGraphNode::hasDecl(ShVariableNodePtr node) const
+bool ShCtrlGraphNode::hasDecl(const ShVariableNodePtr& node) const
 {
   return m_decls.find(node) != m_decls.end();
 }
@@ -195,13 +195,13 @@ ShCtrlGraphBranch::ShCtrlGraphBranch(const ShPointer<ShCtrlGraphNode>& node,
 {
 }
 
-ShCtrlGraph::ShCtrlGraph(ShCtrlGraphNodePtr head, ShCtrlGraphNodePtr tail)
+ShCtrlGraph::ShCtrlGraph(const ShCtrlGraphNodePtr& head, const ShCtrlGraphNodePtr& tail)
   : m_entry(head),
     m_exit(tail)
 {
 }
 
-ShCtrlGraph::ShCtrlGraph(ShBlockListPtr blocks)
+ShCtrlGraph::ShCtrlGraph(const ShBlockListPtr& blocks)
   : m_entry(new ShCtrlGraphNode()),
     m_exit(new ShCtrlGraphNode())
 {
@@ -297,7 +297,7 @@ std::ostream& ShCtrlGraph::graphvizDump(std::ostream& out) const
 }
 
 struct ClearPreds {
-  void operator()(ShCtrlGraphNodePtr node) {
+  void operator()(const ShCtrlGraphNodePtr& node) {
     if (!node) return;
     node->predecessors.clear();
   }
@@ -336,7 +336,7 @@ struct CtrlGraphCopier {
   // assignment operator could not be generated: declaration only
   CtrlGraphCopier& operator=(CtrlGraphCopier const&);
   
-  void operator()(ShCtrlGraphNodePtr node) {
+  void operator()(const ShCtrlGraphNodePtr& node) {
     if (!node) return;
     ShCtrlGraphNodePtr newNode = new ShCtrlGraphNode(*node);
     copyMap[node] = newNode;

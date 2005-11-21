@@ -39,26 +39,26 @@ public:
 
   /** Parse blocks into the control graph between head and tail.
    */
-  void parse(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, ShBlockListPtr blocks);
+  void parse(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks);
   
 private:
   // This class is a singleton
   ShParser() {}
 
-  void parseBlock(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, ShBasicBlockPtr block);
-  void parseStmts(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, ShBlockListPtr blocks);
-  void parseIf(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, ShBlockListPtr blocks);
-  void parseFor(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, ShBlockListPtr blocks);
-  void parseWhile(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, ShBlockListPtr blocks);
-  void parseDo(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, ShBlockListPtr blocks);
-  void parseSection(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, ShBlockListPtr blocks);
-  void parse_break(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, ShBlockListPtr blocks);
-  void parse_continue(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, ShBlockListPtr blocks);
+  void parseBlock(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, const ShBasicBlockPtr& block);
+  void parseStmts(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks);
+  void parseIf(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks);
+  void parseFor(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks);
+  void parseWhile(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks);
+  void parseDo(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks);
+  void parseSection(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks);
+  void parse_break(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks);
+  void parse_continue(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks);
 
   /// Just pops a token
-  ShTokenPtr popToken(ShBlockListPtr blocks);
+  ShTokenPtr popToken(const ShBlockListPtr& blocks);
   /// Checks if front of block list matches expected, pops, and returns
-  ShTokenPtr popToken(ShBlockListPtr blocks, ShTokenType expectedType, unsigned int expectedArgs=0);
+  ShTokenPtr popToken(const ShBlockListPtr& blocks, ShTokenType expectedType, unsigned int expectedArgs=0);
 
   /// Push the break and continue scope
   void push_scope(ShCtrlGraphNodePtr& break_node, ShCtrlGraphNodePtr& continue_node);

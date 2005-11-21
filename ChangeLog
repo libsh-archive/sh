@@ -1,3 +1,9 @@
+2005-11-21  Francois Marier  <francois@serioushack.com>
+
+	* src/, backends/gl, backends/cc: Convert most ShPointer
+	parameters to const references to ShPointer (thanks to pmr for the
+	patch)
+
 2005-11-20  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
 
 	* src/ShTexData.hpp, src/ShTexDataImpl.hpp, src/ShAttrib.hp,
@@ -7,12 +13,12 @@
 
 2005-11-20  Hans-Friedrich Pabst  <hfp@users.sf.net>
 
-	* libsh: Some tiny problems (compile warnings) avoided.
+	* src: Some tiny problems (compile warnings) avoided.
 	Assignment operator could not be generated.
 	Base-from-member initialization problem.
 	* src/ShStructural.cpp: Add range check before iterator
 	decrement (remove duplicate successors; make succs unique).
-	* libsharb: Some tiny problems (compile warnings) avoided.
+	* backends/gl: Some tiny problems (compile warnings) avoided.
 	Assignment operator could not be generated.
 	Some bit-ops (unsigned int) forced to bool.
 	* src/ShStructural.hpp: Public nested classes (CfgMatch)
@@ -20,7 +26,7 @@
 
 2005-11-19  Hans-Friedrich Pabst  <hfp@users.sf.net>
 
-	* Some conditions (preprocessor) are modified to allow
+	* src: Some conditions (preprocessor) are modified to allow
 	new targets (platform/compiler).
 
 2005-11-18  Francois Marier  <francois@serioushack.com>

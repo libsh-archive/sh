@@ -24,7 +24,7 @@ namespace {
 using namespace SH;
 
 struct DefaultDumper {
-  void operator()(std::ostream& out, ShCtrlGraphNodePtr node)
+  void operator()(std::ostream& out, const ShCtrlGraphNodePtr& node)
   {
     out << "[label=\"";
     if(node->block) {
@@ -35,7 +35,7 @@ struct DefaultDumper {
     }
 }
 
-  void operator()(std::ostream& out, ShSectionNodePtr node)
+  void operator()(std::ostream& out, const ShSectionNodePtr& node)
   {
     out << "label=\"" << node->name() << "\"" << std::endl;
   }
@@ -111,7 +111,7 @@ ShSectionTree::ShSectionTree(ShStructural& structural)
   makeSection(structural.head(), root);
 }
 
-ShSectionNodePtr ShSectionTree::operator[](ShCtrlGraphNodePtr cfgNode)
+ShSectionNodePtr ShSectionTree::operator[](const ShCtrlGraphNodePtr& cfgNode)
 {
   if(cfgSection.empty()) {
     gatherCfgSection(root);
@@ -119,7 +119,7 @@ ShSectionNodePtr ShSectionTree::operator[](ShCtrlGraphNodePtr cfgNode)
   return cfgSection[cfgNode];
 }
 
-bool ShSectionTree::contains(ShSectionNodePtr section, ShCtrlGraphNodePtr cfgNode)
+bool ShSectionTree::contains(const ShSectionNodePtr& section, const ShCtrlGraphNodePtr& cfgNode)
 {
   for(ShSectionNodePtr s = cfgSection[cfgNode]; s; s = s->parent) {
     if(s == section) return true;
@@ -135,7 +135,7 @@ std::ostream& ShSectionTree::dump(std::ostream& out)
   return out;
 }
 
-void ShSectionTree::makeSection(ShStructuralNodePtr structNode, ShSectionNodePtr section) 
+void ShSectionTree::makeSection(const ShStructuralNodePtr& structNode, ShSectionNodePtr section) 
 {
   if(structNode->type == ShStructuralNode::SECTION) {
     ShSectionNodePtr newSection = new ShSectionNode(); 
@@ -151,7 +151,7 @@ void ShSectionTree::makeSection(ShStructuralNodePtr structNode, ShSectionNodePtr
   }
 }
 
-void ShSectionTree::gatherCfgSection(ShSectionNodePtr section) {
+void ShSectionTree::gatherCfgSection(const ShSectionNodePtr& section) {
   for(ShSectionNode::cfg_iterator I = section->cfgBegin(); I != section->cfgEnd(); ++I) {
     cfgSection[*I] = section;
   }

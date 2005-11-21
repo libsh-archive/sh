@@ -107,20 +107,20 @@ ShVariant: public ShRefCountable {
     /** Sets the values of this from other.  
      * size() must equal other.size() 
      * @{ */
-    virtual void set(ShPointer<const ShVariant> other) = 0;
+    virtual void set(const ShPointer<const ShVariant>& other) = 0;
     virtual void set(const ShVariant* other) = 0;
     // @}
 
     /** Sets the value of the indexed element in this from the first element of other 
      * @{ */
-    virtual void set(ShPointer<const ShVariant> other, int index) = 0;
+    virtual void set(const ShPointer<const ShVariant>& other, int index) = 0;
     virtual void set(const ShVariant* other, int index) = 0;
     // @}
 
     /** Sets the value of this from other using the given negation and writemask
      * on this.  other.size() must equal writemask.size()
      * @{ */
-    virtual void set(ShPointer<const ShVariant> other, bool neg, const ShSwizzle &writemask) = 0;
+    virtual void set(const ShPointer<const ShVariant>& other, bool neg, const ShSwizzle &writemask) = 0;
     virtual void set(const ShVariant* other, bool neg, const ShSwizzle &writemask) = 0;
     // @}
 
@@ -140,7 +140,7 @@ ShVariant: public ShRefCountable {
     //
     // @see ShDataType.hpp
     //@{
-    virtual bool equals(ShPointer<const ShVariant> other) const = 0;
+    virtual bool equals(const ShPointer<const ShVariant>& other) const = 0;
     virtual bool equals(const ShVariant* other) const = 0;
     //@}
 
@@ -230,18 +230,18 @@ class ShDataVariant: public ShVariant {
 
     void negate();
 
-    void set(ShVariantCPtr other);
+    void set(const ShVariantCPtr& other);
     void set(const ShVariant* other);
-    void set(ShVariantCPtr other, int index);
+    void set(const ShVariantCPtr& other, int index);
     void set(const ShVariant* other, int index);
-    void set(ShVariantCPtr other, bool neg, const ShSwizzle &writemask);
+    void set(const ShVariantCPtr& other, bool neg, const ShSwizzle &writemask);
     void set(const ShVariant* other, bool neg, const ShSwizzle &writemask);
 
     ShVariantPtr get() const; 
     ShVariantPtr get(int index) const; 
     ShVariantPtr get(bool neg, const ShSwizzle &swizzle, int count=1) const; 
 
-    bool equals(ShVariantCPtr other) const; 
+    bool equals(const ShVariantCPtr& other) const; 
     bool equals(const ShVariant* other) const; 
 
     bool isTrue() const;
@@ -300,10 +300,10 @@ class ShDataVariant: public ShVariant {
 // Refcounted and non-refcounted versions
 //@{
 template<typename T, ShDataType DT>
-ShPointer<ShDataVariant<T, DT> > variant_cast(ShVariantPtr c);
+ShPointer<ShDataVariant<T, DT> > variant_cast(const ShVariantPtr& c);
 
 template<typename T, ShDataType DT>
-ShPointer<const ShDataVariant<T, DT> > variant_cast(ShVariantCPtr c);
+ShPointer<const ShDataVariant<T, DT> > variant_cast(const ShVariantCPtr& c);
 
 template<typename T, ShDataType DT>
 ShDataVariant<T, DT>* variant_cast(ShVariant* c);
@@ -315,7 +315,7 @@ const ShDataVariant<T, DT>* variant_cast(const ShVariant* c);
 // Make a copy of c cast to the requested type 
 //@{
 template<typename T, ShDataType DT>
-ShPointer<ShDataVariant<T, DT> > variant_convert(ShVariantCPtr c);
+ShPointer<ShDataVariant<T, DT> > variant_convert(const ShVariantCPtr& c);
 // @}
 
 
