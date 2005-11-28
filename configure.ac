@@ -34,6 +34,10 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 
+dnl get SDL path (due to a bug/feature in SDL.m4 this has to be before AC_LANG(C++))
+SDL_VERSION=1.2.0
+AM_PATH_SDL($SDL_VERSION,[HAVE_SDL=yes],)
+
 # Set up some stuff
 AC_LANG(C++)
 
@@ -146,6 +150,11 @@ else
    AC_DEFINE_UNQUOTED(SH_INSTALL_PREFIX, "$prefix", [Installation prefix directory])
 fi
 
+# Make list of examples to build
+if test x$HAVE_SDL = xyes; then
+  EXAMPLE_DIRS="$EXAMPLE_DIRS sdl"
+fi
+AC_SUBST(EXAMPLE_DIRS)
 
 AC_CONFIG_FILES([Makefile
 		 src/Makefile
@@ -159,6 +168,7 @@ AC_CONFIG_FILES([Makefile
 		 examples/binding/Makefile
 		 examples/glut/Makefile
 		 examples/particle/Makefile
+		 examples/sdl/Makefile
 		 examples/textures/Makefile
 		 doc/Makefile])
 
