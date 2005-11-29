@@ -1,0 +1,8 @@
+You need to install the SDL library in order to try this example.
+
+  http://www.libsdl.org
+
+On Debian, just do the following:
+  apt-get install libsdl1.2-dev
+
+Once the library is installed, re-run the configure script before trying to compile the example.
