@@ -99,13 +99,14 @@ lib libshcc
 lib libshutil
 : # sources
 	util//util
-	libsh/<link>shared
 	/libpng//libpng
 : # requirements
 	<tag>@stage.add-variant-and-compiler
+	<use>libsh
 	<link>static
 : # default-build
 : # usage-requirements
+	<library>libsh
 ;
 
 
