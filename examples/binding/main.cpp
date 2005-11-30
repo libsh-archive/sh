@@ -35,6 +35,7 @@
 
 #include <sh/sh.hpp>
 #include <iostream>
+#include <cstdio>
 
 using namespace SH;
 using namespace std;

@@ -22,6 +22,7 @@
 #endif /* WIN32 */
 
 #include <iostream>
+#include <cstdio>
 
 #ifdef __APPLE__
 #include <OpenGL/gl.h>

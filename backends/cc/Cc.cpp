@@ -26,6 +26,7 @@
 #include <sys/wait.h>
 #endif /* _WIN32 */
 
+#include <cstdio>
 #include <iostream>
 #include <fstream>
 

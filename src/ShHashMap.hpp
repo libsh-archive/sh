@@ -43,7 +43,7 @@ namespace SH {
  * The Less functor is only used in VS .NET, and the Equal functor is only
  * used under libstdc++.
  */
-#ifdef _WIN32
+#if defined(_MSC_VER)
 #define SH_STD_HASH(T) stdext::hash_compare<T>
 /** Implementation of hash_compare interface */
 template<class Key, class Hash, class Less>
@@ -71,8 +71,10 @@ struct ShHashFunc {
 template<class Key, class Data, class Hash=SH_STD_HASH(Key),
   class Less=std::less<Key>, class Equal=std::equal_to<Key> >
 class ShHashMap {
-#ifdef _WIN32
+#if defined(_MSC_VER)
     typedef stdext::hash_map<Key, Data, ShHashCompare<Key, Hash, Less> > map_type;
+#elif defined(__SGI_STL_PORT)
+    typedef std::hash_map<Key, Data, Hash, Equal> map_type;
 #else
     typedef __gnu_cxx::hash_map<Key, Data, Hash, Equal> map_type;
 #endif
