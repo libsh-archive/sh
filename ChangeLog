@@ -1,3 +1,9 @@
+2005-11-30  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/ShGeneric*: Undo Hans's change from 2005-11-29 as it
+	breaks a few things. This is done with the intention on
+	adding it back and fixing those things properly in 0.9.
+
 2005-11-30  Francois Marier  <francois@serioushack.com>
 
 	* src/ShLibMiscImpl.hpp (poly, sort): Avoid using ShGeneric as a

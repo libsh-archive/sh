@@ -65,16 +65,6 @@ ShGeneric<N, T>::ShGeneric(const ShGeneric<N, T2>& other)
 }
 
 template<int N, typename T>
-ShGeneric<N, T>::ShGeneric(const ShGeneric& other)
-  : ShVariable(new ShVariableNode(SH_TEMP, N, value_type, 
-        other.node()->specialType()))
-{
-  SH_DEBUG_ASSERT(other.node());
-  SH_DEBUG_ASSERT(m_node);
-  shASN(*this, other);
-}
-
-template<int N, typename T>
 ShGeneric<N, T>& ShGeneric<N, T>::operator=(const ShProgram& prg)
 {
   this->ShVariable::operator=(prg);
@@ -370,15 +360,6 @@ ShGeneric<1, T>::~ShGeneric()
 template<typename T>
 template<typename T2>
 ShGeneric<1, T>::ShGeneric(const ShGeneric<1, T2>& other)
-  : ShVariable(new ShVariableNode(SH_TEMP, 1, value_type, other.node()->specialType()))
-{
-  SH_DEBUG_ASSERT(other.node());
-  SH_DEBUG_ASSERT(m_node);
-  shASN(*this, other);
-}
-
-template<typename T>
-ShGeneric<1, T>::ShGeneric(const ShGeneric& other)
   : ShVariable(new ShVariableNode(SH_TEMP, 1, value_type, other.node()->specialType()))
 {
   SH_DEBUG_ASSERT(other.node());

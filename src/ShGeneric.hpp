@@ -71,19 +71,17 @@ public:
   ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, bool neg);
   ~ShGeneric();
 
-  // Copy constructor
+  // Copy constructor 
   // This should only be used internally.
-  // It generates a ShVariableNode of type SH_TEMP
+  // It generates a ShVariableNode of type SH_TEMP 
   // @{
 
-  // @todo type get rid of this. default should be okay for
+  // @todo type get rid of this. default should be okay for 
   // internal usage
   // ShGeneric(const ShGeneric<N, T> &other);
 
-  ShGeneric(const ShGeneric& other);
-
   template<typename T2>
-  ShGeneric(const ShGeneric<N, T2>& other);
+  ShGeneric(const ShGeneric<N, T2> &other);
   // @}
 
   // This is needed because the templated assignment op is 
@@ -166,8 +164,10 @@ public:
   void setValue(int index, const host_type &value); 
   void setValues(const host_type values[]);
 
+
 protected:
   ShGeneric(const ShVariableNodePtr& node);
+
 };
 
 template<typename T>
@@ -188,18 +188,17 @@ public:
   ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, bool neg);
   ~ShGeneric();
 
-  // Copy constructor
-  // This should only be used internally.  It generates a SH_TEMP,
+  // Copy constructor 
+  // This should only be used internally.  It generates a SH_TEMP, 
   // SH_ATTRIB, with the only characteristic copied from other being
   // the storage type.
   // @{
 
   // @todo type get rid of this
   // ShGeneric(const ShGeneric<1, T> &other);
-  ShGeneric(const ShGeneric& other);
 
   template<typename T2>
-  ShGeneric(const ShGeneric<1, T2>& other);
+  ShGeneric(const ShGeneric<1, T2> &other);
   // @}
 
   ShGeneric& operator=(const ShGeneric<1, T>& other);
@@ -267,6 +266,7 @@ public:
 
 protected:
   ShGeneric(const ShVariableNodePtr& node);
+
 };
 
 typedef ShGeneric<1, ShFracUShort> ShGeneric1fus;
