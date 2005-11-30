@@ -204,7 +204,7 @@ void groupsort(VarType v[])
 template<int N, typename T> 
 ShGeneric<N, T> sort(const ShGeneric<N, T>& a)
 {
-  ShGeneric<N, T> result(a);
+  ShAttrib<N, SH_TEMP, T> result(a);
   groupsort<1>(&result);
   return result;
 }
@@ -221,18 +221,13 @@ template<int N, int M, typename T1, typename T2>
 ShGeneric<N, CT1T2> poly(const ShGeneric<N, T1>& a, const ShGeneric<M, T2>& b)
 {
   ShAttrib<N, SH_TEMP, CT1T2> t;
-
   for (int i=0; i < N; i++) {
-    ShGeneric<1, CT1T2> r_i = t[i];
-    ShGeneric<1, T1> a_i = a[i];
-
     // Uses Horner's rule
-    r_i = b[M - 1];
+    t[i] = b[M - 1];
     for (int j = M - 1; j > 0; j--) {
-      r_i = mad(a_i, r_i, b[j-1]);
+      t[i] = mad(a[i], t[i], b[j-1]);
     }
   }
-
   return t;
 }
 

@@ -1,3 +1,8 @@
+2005-11-30  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibMiscImpl.hpp (poly, sort): Avoid using ShGeneric as a
+	temporary variable.  This fixes the 'poly' unit test.
+
 2005-11-29  Hans-Friedrich Pabst  <hfp@users.sf.net>
 
 	* src/ShGeneric*: The C++ Standard says that a templated
