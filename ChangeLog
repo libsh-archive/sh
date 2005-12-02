@@ -9,6 +9,19 @@
 	* src/ShLibMiscImpl.hpp (poly, sort): Avoid using ShGeneric as a
 	temporary variable.  This fixes the 'poly' unit test.
 
+2005-11-29  Hans-Friedrich Pabst  <hfp@users.sf.net>
+
+	* src/ShGeneric*: The C++ Standard says that a templated
+	copy c'tor will be never instanciated for the class type itself.
+	Example: You need to provide ShGeneric(const ShGeneric& other)
+	also if you have already implemented an conversion copy c'tor:
+	template<typename T2> ShGeneric(const ShGeneric<N, T2>& other).
+
+	Before the fix: A copy construction of a ShGeneric (without
+	conversion) slices the other ShGeneric down to a ShVariable.
+
+	ShGeneric provides a copy c'tor now.
+
 2005-11-21  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/ArbCode.cpp (updateUniform): Only display the
