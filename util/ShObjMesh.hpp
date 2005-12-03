@@ -22,7 +22,7 @@
 
 #include <iosfwd>
 
-#include <sh/sh.hpp>
+#include "sh.hpp"
 #include "ShMesh.hpp"
 
 namespace ShUtil {

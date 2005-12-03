@@ -43,7 +43,7 @@
  * @retval ShProgram A reference to the new program.
  * @see SH_END_PROGRAM
  */
-#define SH_BEGIN_PROGRAM(target) ::SH::shBeginShader(target); {{{{{{
+#define SH_BEGIN_PROGRAM(target) ::SH::shBeginShader(target);
 /** \def SH_END_PROGRAM
  * End the current program definition.
  *
@@ -52,7 +52,7 @@
  *
  * @see SH_BEGIN_PROGRAM
  */
-#define SH_END_PROGRAM         }}}}}} ::SH::shEndShader();
+#define SH_END_PROGRAM         ::SH::shEndShader();
 //@}
 
 #define SH_END                 SH_END_PROGRAM

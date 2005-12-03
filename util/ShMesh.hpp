@@ -24,7 +24,7 @@
 #include <map>
 #include <set>
 
-#include <sh/sh.hpp>
+#include "sh.hpp"
 
 namespace ShUtil {
 
