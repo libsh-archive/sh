@@ -262,10 +262,16 @@ void GlslCode::emit_comment(const ShStatement& stmt)
 void GlslCode::emit_cond(const ShStatement& stmt)
 {
   SH_DEBUG_ASSERT(SH_OP_COND == stmt.op);
-  static string vendor((char*)glGetString(GL_VENDOR));
+
+  bool on_nvidia = false;
+  const GLubyte* vendor = SH_GL_CHECK_ERROR(glGetString(GL_VENDOR));
+  if (vendor) {
+    string s(reinterpret_cast<const char*>(vendor));
+    on_nvidia = s.find("NVIDIA") != s.npos;
+  }
 
   const int size = stmt.src[0].size();
-  if (("NVIDIA Corporation" == vendor) || (1 == size)) {
+  if (on_nvidia || (1 == size)) {
     // CG has a component-wise COND operator
     append_line(resolve(stmt.dest) + " = (" + resolve(stmt.src[0]) + " > " + 
 		resolve_constant(0, stmt.src[0]) + ") ? " + resolve(stmt.src[1]) +
