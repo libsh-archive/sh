@@ -72,6 +72,7 @@ GlslVariable::GlslVariable(const ShVariableNodePtr& v)
 {
   if (v->hasValues()) {
     m_values = v->getVariant()->encodeArray();
+    replace(m_values.begin(), m_values.end(), ';', ',');
 
     // Scalar constants are not assigned a variable
     if ((1 == m_size) && (SH_CONST == m_kind)) {

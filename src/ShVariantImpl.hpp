@@ -336,7 +336,7 @@ std::string ShDataVariant<T, DT>::encode() const {
   std::ostringstream out;
   out << size();
   for(const_iterator I = m_begin; I != m_end; ++I) {
-    out << "," << *I;
+    out << "; " << *I;
   }
   return out.str();
 }
@@ -346,7 +346,7 @@ std::string ShDataVariant<T, DT>::encode(int index, int repeats) const
   std::ostringstream out;
   out << repeats;
   for(int i = 0; i < repeats; ++i) {
-    out << ", " << m_begin[index];
+    out << "; " << m_begin[index];
   }
   return out.str();
 }
@@ -357,7 +357,7 @@ std::string ShDataVariant<T, DT>::encode(bool neg, const ShSwizzle &swizzle) con
   std::ostringstream out;
   out << swizzle.size(); 
   for(int i = 0; i < swizzle.size(); ++i) {
-    out << ", " << m_begin[swizzle[i]];
+    out << "; " << m_begin[swizzle[i]];
   }
   return out.str();
 }
@@ -368,7 +368,7 @@ std::string ShDataVariant<T, DT>::encodeArray() const {
 
   std::ostringstream out;
   for(const_iterator I = m_begin; I != m_end; ++I) {
-    if(I != m_begin) out << ", ";
+    if(I != m_begin) out << "; ";
     out << *I;
   }
   return out.str();
