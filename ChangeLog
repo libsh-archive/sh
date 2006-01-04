@@ -1,3 +1,12 @@
+2006-01-04  Francois Marier  <francois@serioushack.com>
+
+	* src/ShVariantImpl.hpp: Use semicolons instead of commas as the
+	separator for array initialization.  This avoids a problem with
+	the stringstream constructor in VS2005.
+	
+	* backends/gl/GlslVariable.cpp (GlslVariable): Replace semicolons
+	with commas since the behaviour of encodeArray() changed.
+
 2005-12-12  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslEmit.cpp (emit_cond): Check the GL_VENDOR safely
