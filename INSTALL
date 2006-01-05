@@ -32,6 +32,9 @@ Requirements:
  - for the ARB or GLSL backends, you need a GPU that supports shaders: at 
    least a GeForce 5200FX or a Radeon 9600
 
+On Debian GNU/Linux:
+  apt-get install automake1.9, autoconf, g++, python, libltdl3-dev, libwxgtk2.6-dev
+
 ------------------------------
 COMPILATION AND INSTALLATION
 ------------------------------
