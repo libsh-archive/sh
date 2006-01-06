@@ -32,7 +32,6 @@
 # define LOCAL_BACKEND_DIRNAME ".shbackends"
 #endif
 
-
 #include <algorithm>
 #include <cctype>
 
@@ -141,17 +140,22 @@ ShBackend::~ShBackend()
   string backend_name = name();
   m_instantiated_backends->erase(backend_name);
 
+  LibraryHandle handle = (*m_loaded_libraries)[backend_name]->handle();
+
+  // handle may be null if library was loaded by app (i.e. statically linked)
+  if (handle) {
 #if defined(_WIN32)
-  if (!FreeLibrary((HMODULE)(*m_loaded_libraries)[backend_name])) {
-    SH_DEBUG_ERROR("Could not unload the " << backend_name << " library.");
-  }
+    if (!FreeLibrary((HMODULE)handle)) {
+      SH_DEBUG_ERROR("Could not unload the " << backend_name << " library.");
+    }
 #elif defined(__APPLE__) && !defined(AUTOTOOLS)
-  CFRelease((*m_loaded_libraries)[backend_name]);
+    CFRelease(handle);
 #else
-  if (!lt_dlclose((*m_loaded_libraries)[backend_name])) {
-    SH_DEBUG_ERROR("Could not unload the " << backend_name << " library: " << lt_dlerror());
-  }
+    if (!lt_dlclose(handle)) {
+      SH_DEBUG_ERROR("Could not unload the " << backend_name << " library: " << lt_dlerror());
+    }
 #endif
+  }
 
   m_loaded_libraries->erase(backend_name);
   m_selected_backends->erase(backend_name);
@@ -201,6 +205,17 @@ bool ShBackend::is_valid_name(const string& backend_name)
   return true;
 }
 
+void ShBackend::register_backend(const std::string& backend_name, InstantiateEntryPoint *instantiate, TargetCostEntryPoint *target_cost)
+{
+  init();
+  
+  if (m_loaded_libraries->find(backend_name) != m_loaded_libraries->end()) {
+    return; // already loaded
+  }
+
+  (*m_loaded_libraries)[backend_name] = new LibraryInformation(NULL, instantiate, target_cost);
+}
+
 bool ShBackend::load_library(const string& filename)
 {
   init();
@@ -246,14 +261,28 @@ bool ShBackend::load_library(const string& filename)
 #else
   LibraryHandle module = lt_dlopenext(filename.c_str());
 #endif
-  
-  if (module) {
-    (*m_loaded_libraries)[backend_name] = module;
-    return true;
-  } else {
+
+  if (!module) {
     SH_DEBUG_WARN("Could not open " << filename);
     return false;
   }
+
+  string init_function_name = "shBackend_libsh" + backend_name + "_instantiate";
+  string target_cost_function_name = "shBackend_libsh" + backend_name + "_target_cost";
+  
+  InstantiateEntryPoint* instantiate = load_function<InstantiateEntryPoint>(module, init_function_name.c_str());
+  TargetCostEntryPoint* target_cost = load_function<TargetCostEntryPoint>(module, target_cost_function_name.c_str());
+
+  if (!instantiate) {
+    SH_DEBUG_ERROR("Could not find " << init_function_name);
+  }
+
+  if (!target_cost) {
+    SH_DEBUG_ERROR("Could not find " << target_cost_function_name);
+  }
+
+  (*m_loaded_libraries)[backend_name] = new LibraryInformation(module, instantiate, target_cost);
+  return true;
 }
 
 void ShBackend::load_libraries(const string& directory)
@@ -304,17 +333,11 @@ ShBackendPtr ShBackend::instantiate_backend(const string& backend_name)
     return (*m_instantiated_backends)[backend_name];
   }
 
-  LibraryHandle module = (*m_loaded_libraries)[backend_name];
-  string init_function_name = "shBackend_libsh" + backend_name + "_instantiate";
-
-  typedef ShBackend* EntryPoint();
-
-  EntryPoint* instantiate = load_function<EntryPoint>(module, init_function_name.c_str());
+  SH_DEBUG_ASSERT((*m_loaded_libraries)[backend_name]); // library not loaded
+  InstantiateEntryPoint* instantiate = (*m_loaded_libraries)[backend_name]->instantiate_function();
 
   if (instantiate) {
     backend = (*instantiate)();
-  } else {
-    SH_DEBUG_ERROR("Could not find " << init_function_name);
   }
 
   if (backend) {
@@ -348,18 +371,11 @@ int ShBackend::target_cost(const string& backend_name, const string& target)
   init();
   int cost = 0;
 
-  string init_function_name = "shBackend_libsh" + backend_name + "_target_cost";
-  LibraryHandle module = (*m_loaded_libraries)[backend_name];
-  SH_DEBUG_ASSERT(module); // library not loaded
-
-  typedef int EntryPoint(const string&);
-  
-  EntryPoint* func = load_function<EntryPoint>(module, init_function_name.c_str());
+  SH_DEBUG_ASSERT((*m_loaded_libraries)[backend_name]); // library not loaded
+  TargetCostEntryPoint* func = (*m_loaded_libraries)[backend_name]->target_cost_function();
 
   if (func) {
-     cost = (*func)(target);
-  } else {
-    SH_DEBUG_ERROR("Could not find " << init_function_name);
+    cost = (*func)(target);
   }
 
   return cost;

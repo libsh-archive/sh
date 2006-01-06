@@ -185,6 +185,10 @@ std::string shFindBackend(const std::string& target)
   return SH::ShBackend::target_handler(target, false);
 }
 
+void shRegisterBackend(const std::string& backend_name, SH::ShBackend::InstantiateEntryPoint *instantiate, SH::ShBackend::TargetCostEntryPoint *target_cost) {
+  SH::ShBackend::register_backend(backend_name, instantiate, target_cost);
+}
+
 bool shEvaluateCondition(const ShVariable& arg)
 {
   bool cond = false;

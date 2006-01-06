@@ -354,6 +354,10 @@ void shClearBackends();
 SH_DLLEXPORT
 std::string shFindBackend(const std::string& target);
 
+/// Register a backend
+SH_DLLEXPORT
+void shRegisterBackend(const std::string& name, SH::ShBackend::InstantiateEntryPoint *instantiate, SH::ShBackend::TargetCostEntryPoint *target_cost);
+
 /** \brief SH Initialization Function.
  *
  * The function needs to be called prior to the use of any other SH functions. Additionally,
