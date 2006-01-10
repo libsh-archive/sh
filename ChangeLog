@@ -1,3 +1,26 @@
+2006-01-10  Francois Marier  <francois@serioushack.com>
+
+	* src/ShBackend.cpp, ShBackend.hpp, backends/cc/Cc.hpp, Cc.cpp,
+	backends/gl/ArbBackend.cpp, GlslBackend.cpp, GlBackend.cpp,
+	GlBackend.hpp: Turn name() and version() into non-virtual
+	functions which return the contents of member variables set by the
+	backend constructors.  
+
+	* src/ShBackend.cpp (~ShBackend): Add assertions to make sure the
+	backend name is valid and exists in the map.
+
+2006-01-06  Barold Genova  <barold@serioushack.com>
+
+	* src/ShBackend*: Add new LibraryInformation class that
+	stores the backend handle and entry points.  This allows the
+	use of statically linked backends.
+
+	* src/ShSyntax*: Add new shRegisterBackend to allow using
+	backends that are not dynamically loaded.
+
+	* src/ShSwizzleImpl.hpp: Use __PPC__ as big endian flag
+	instead of __APPLE__.
+
 2006-01-04  Francois Marier  <francois@serioushack.com>
 
 	* src/ShVariantImpl.hpp: Use semicolons instead of commas as the

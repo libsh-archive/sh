@@ -185,9 +185,6 @@ public:
   CcBackend(void);
   ~CcBackend(void);
   
-  std::string name(void) const { return "cc"; }
-  std::string version(void) const { return "1.0"; }
-  
   SH::ShBackendCodePtr generate_code(const std::string& target,
 				     const SH::ShProgramNodeCPtr& program);
   

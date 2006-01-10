@@ -105,10 +105,10 @@ public:
   virtual ~ShBackend();
 
   /** Short name of the backend (e.g. "arb", "cc", "glsl")*/
-  virtual std::string name() const { return "";}
+  std::string name() const { return m_name;}
 
   /** Backend-specific version number */
-  virtual std::string version() const = 0;
+  std::string version() const { return m_version; }
 
   /** Generate the backend code for a particular shader. */
   virtual ShBackendCodePtr generate_code(const std::string& target,
@@ -145,6 +145,12 @@ public:
       generic target is "gpu:vertex". */
   static std::list<std::string> derived_targets(const std::string& target);
 
+  typedef ShBackend* InstantiateEntryPoint();
+  typedef int TargetCostEntryPoint(const std::string &);
+
+  /** Add a backend to the list of loaded backends. */
+  static void register_backend(const std::string& backend_name, InstantiateEntryPoint *instantiate, TargetCostEntryPoint *target_cost);
+  
 #if defined(_WIN32)
   typedef void* LibraryHandle;
 #elif defined(__APPLE__) && !defined(AUTOTOOLS)
@@ -152,12 +158,28 @@ public:
 #else
   typedef lt_dlhandle_struct* LibraryHandle;
 #endif
-  typedef std::map<std::string, LibraryHandle> LibraryMap;
+  
+  class LibraryInformation : public ShRefCountable {
+  public:
+    LibraryInformation(LibraryHandle handle, InstantiateEntryPoint* instantiate_function, TargetCostEntryPoint* target_cost_function) :
+      m_handle(handle), m_instantiate_function(instantiate_function), m_target_cost_function(target_cost_function)
+    {}
+    
+    LibraryHandle handle() { return m_handle; }
+    InstantiateEntryPoint* instantiate_function() { return m_instantiate_function; }
+    TargetCostEntryPoint* target_cost_function() { return m_target_cost_function; }
+  private: 
+    LibraryHandle m_handle;
+    InstantiateEntryPoint* m_instantiate_function;
+    TargetCostEntryPoint* m_target_cost_function;
+  };
+
+  typedef std::map<std::string, ShPointer<LibraryInformation> > LibraryMap;
   typedef std::map<std::string, ShPointer<ShBackend> > BackendMap;
   typedef std::set<std::string> BackendSet;
-
+  
 protected:
-  ShBackend();
+  ShBackend(const std::string& name, const std::string& version);
   
 private:
   static BackendMap* m_instantiated_backends;
@@ -165,6 +187,9 @@ private:
   static LibraryMap* m_loaded_libraries;
   static bool m_done_init;
   static bool m_all_backends_loaded;
+
+  std::string m_name;
+  std::string m_version;
 
   /** Initialize the data structures */
   static void init();

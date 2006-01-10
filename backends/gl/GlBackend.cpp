@@ -167,7 +167,9 @@ bool CodeStrategy::use_default_unbind_all() const
   return true;
 }
 
-GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrategy* stream) :
+GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrategy* stream, 
+                     const std::string& name, const std::string& version) :
+  ShBackend(name, version),
   m_code(code),
   m_texture(texture),
   m_stream(stream)

@@ -222,8 +222,8 @@ inline bool ShSwizzle::local() const
 inline int ShSwizzle::idswiz() const
 {
 // @todo type detect endianess correctly
-// mac's are not the only big endian machines...
-#ifdef __APPLE__
+// power pc's are not the only big endian machines...
+#ifdef __PPC__
   return 0x00010203;
 #else
   return 0x03020100;

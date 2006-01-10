@@ -35,15 +35,13 @@ struct GlslBackend : public GlBackend {
     : GlBackend(new GlslCodeStrategy(),
                 new GlTextures(),
 #ifdef __APPLE__
-                0)
+                0,
 #else
-                new PBufferStreams())
+                new PBufferStreams(),
 #endif
+                "glsl", "1.0")
   {
   }
-
-  std::string name() const { return "glsl"; }
-  std::string version() const { return "1.0"; }
 };
 
 #ifdef _WIN32
