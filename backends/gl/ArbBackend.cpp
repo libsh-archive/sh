@@ -37,15 +37,13 @@ struct ArbBackend : public GlBackend {
                 new GlTextures(),
 #ifdef __APPLE__
                 // For now...
-                0)
+                0,
 #else
-                new PBufferStreams())
+                new PBufferStreams(),
 #endif
+                "arb", "1.0")
   {
   }
-
-  std::string name() const { return "arb"; }
-  std::string version() const { return "1.0"; }
 };
 
 #ifdef _WIN32

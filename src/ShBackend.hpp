@@ -105,10 +105,10 @@ public:
   virtual ~ShBackend();
 
   /** Short name of the backend (e.g. "arb", "cc", "glsl")*/
-  virtual std::string name() const { return "";}
+  std::string name() const { return m_name;}
 
   /** Backend-specific version number */
-  virtual std::string version() const = 0;
+  std::string version() const { return m_version; }
 
   /** Generate the backend code for a particular shader. */
   virtual ShBackendCodePtr generate_code(const std::string& target,
@@ -179,7 +179,7 @@ public:
   typedef std::set<std::string> BackendSet;
   
 protected:
-  ShBackend();
+  ShBackend(const std::string& name, const std::string& version);
   
 private:
   static BackendMap* m_instantiated_backends;
@@ -187,6 +187,9 @@ private:
   static LibraryMap* m_loaded_libraries;
   static bool m_done_init;
   static bool m_all_backends_loaded;
+
+  std::string m_name;
+  std::string m_version;
 
   /** Initialize the data structures */
   static void init();

@@ -149,7 +149,8 @@ public:
   virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
 
 protected:
-  GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrategy* stream);
+  GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrategy* stream,
+            const std::string& name, const std::string& version);
   
 private:
   CodeStrategy* m_code;

@@ -733,7 +733,8 @@ bool CcBackendCode::execute(ShStream& dest)
 }
 
 
-CcBackend::CcBackend(void) 
+CcBackend::CcBackend(void)
+  : ShBackend("cc", "1.0")
 {
   SH_CC_DEBUG_PRINT(__FUNCTION__);
 }

@@ -131,34 +131,35 @@ void ShTrivialBackendSet::unbind()
   }
 }
  
-ShBackend::ShBackend()
+ShBackend::ShBackend(const string& name, const string& version)
+  : m_name(name), m_version(version)
 {
 }
 
 ShBackend::~ShBackend()
 {
-  string backend_name = name();
-  m_instantiated_backends->erase(backend_name);
-
-  LibraryHandle handle = (*m_loaded_libraries)[backend_name]->handle();
-
+  SH_DEBUG_ASSERT(!m_name.empty());
+  SH_DEBUG_ASSERT(m_loaded_libraries->find(m_name) != m_loaded_libraries->end());
+  LibraryHandle handle = (*m_loaded_libraries)[m_name]->handle();
+  
   // handle may be null if library was loaded by app (i.e. statically linked)
   if (handle) {
 #if defined(_WIN32)
     if (!FreeLibrary((HMODULE)handle)) {
-      SH_DEBUG_ERROR("Could not unload the " << backend_name << " library.");
+      SH_DEBUG_ERROR("Could not unload the " << m_name << " library.");
     }
 #elif defined(__APPLE__) && !defined(AUTOTOOLS)
     CFRelease(handle);
 #else
     if (!lt_dlclose(handle)) {
-      SH_DEBUG_ERROR("Could not unload the " << backend_name << " library: " << lt_dlerror());
+      SH_DEBUG_ERROR("Could not unload the " << m_name << " library: " << lt_dlerror());
     }
 #endif
   }
 
-  m_loaded_libraries->erase(backend_name);
-  m_selected_backends->erase(backend_name);
+  m_instantiated_backends->erase(m_name);
+  m_loaded_libraries->erase(m_name);
+  m_selected_backends->erase(m_name);
 }
 
 ShBackendSetPtr ShBackend::generate_set(const ShProgramSet& s)
@@ -333,7 +334,7 @@ ShBackendPtr ShBackend::instantiate_backend(const string& backend_name)
     return (*m_instantiated_backends)[backend_name];
   }
 
-  SH_DEBUG_ASSERT((*m_loaded_libraries)[backend_name]); // library not loaded
+  SH_DEBUG_ASSERT(m_loaded_libraries->find(backend_name) != m_loaded_libraries->end());
   InstantiateEntryPoint* instantiate = (*m_loaded_libraries)[backend_name]->instantiate_function();
 
   if (instantiate) {
@@ -371,7 +372,7 @@ int ShBackend::target_cost(const string& backend_name, const string& target)
   init();
   int cost = 0;
 
-  SH_DEBUG_ASSERT((*m_loaded_libraries)[backend_name]); // library not loaded
+  SH_DEBUG_ASSERT(m_loaded_libraries->find(backend_name) != m_loaded_libraries->end());
   TargetCostEntryPoint* func = (*m_loaded_libraries)[backend_name]->target_cost_function();
 
   if (func) {
