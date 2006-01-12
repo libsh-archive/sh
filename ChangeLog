@@ -1,3 +1,8 @@
+2006-01-12  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibGeometryImpl.hpp (reflect): Actually normalize b as
+	mentioned in the book.
+
 2006-01-10  Francois Marier  <francois@serioushack.com>
 
 	* src/ShBackend.cpp, ShBackend.hpp, backends/cc/Cc.hpp, Cc.cpp,

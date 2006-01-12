@@ -73,7 +73,7 @@ template<int N, typename T1, typename T2>
 ShGeneric<N, CT1T2> reflect(const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b)
 {
   ShGeneric<N, T2> bn = normalize(b);
-  return 2 * dot(a, b) * b - a;
+  return 2 * dot(a, bn) * bn - a;
 }
 
 template<int N, typename T1, typename T2, typename T3>
