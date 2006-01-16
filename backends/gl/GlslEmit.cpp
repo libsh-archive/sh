@@ -505,12 +505,18 @@ void GlslCode::emit_texture(const ShStatement& stmt)
   }
 
   line << "(" << resolve(stmt.src[0]) << ", " << resolve(stmt.src[1]) << ")";
-  if (2 == texture->size()) {
-    line << ".xw"; // 2-component inputs are uploaded as GL_LUMINANCE_ALPHA
-  } else if (texture->size() != 4) {
+
+  // Apply the right swizzle, based on the texture size and destination size
+  if ((2 == texture->size()) || (stmt.dest.size() != 4)) {
+    string components = "xyzw";
+    if (2 == texture->size()) {
+      components = "xwyz"; // 2-component inputs are uploaded as GL_LUMINANCE_ALPHA
+    }
+    
     line << ".";
-    for (int i = 0; i < texture->size(); i++) {
-      line << "xyzw"[i];
+    const int swiz_length = stmt.dest.size();
+    for (int i = 0; i < swiz_length; i++) {
+      line << components[i];
     }
   }
 
