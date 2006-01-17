@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\install\include;..\..\..\glut\include;..\..\..\opengl\include"
+				AdditionalIncludeDirectories="..\..\..\install\vc8\include;..\..\..\glut\include;..\..\..\opengl\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;NOMINMAX;_USE_MATH_DEFINES;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -121,7 +121,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\install\include;..\..\..\glut\include;..\..\..\opengl\include"
+				AdditionalIncludeDirectories="..\..\..\install\vc8\include;..\..\..\glut\include;..\..\..\opengl\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;NOMINMAX;_USE_MATH_DEFINES;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="true"
