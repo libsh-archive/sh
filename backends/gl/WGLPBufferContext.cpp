@@ -132,6 +132,19 @@ void WGLPBufferFactory::init_config()
   fb_base_attribs.push_back(WGL_SUPPORT_OPENGL_ARB); fb_base_attribs.push_back(true);
   fb_base_attribs.push_back(WGL_STENCIL_BITS_ARB); fb_base_attribs.push_back(1);
 
+  // Try ATI
+  if (!m_format) {
+    std::vector<int> fb_attribs(fb_base_attribs);
+    fb_attribs.push_back(WGL_PIXEL_TYPE_ARB); fb_attribs.push_back(WGL_TYPE_RGBA_FLOAT_ATI);
+    fb_attribs.push_back(0);
+    
+    unsigned int items = 0;
+    if (wglChoosePixelFormatARB(m_dc, &fb_attribs[0], NULL, 1, &m_format, &items)
+	&& items > 0) {
+      m_extension = SH_ARB_ATI_PIXEL_FORMAT_FLOAT;
+    }
+  }
+
   // Try NVIDIA
   if (!m_format) {
     std::vector<int> fb_attribs(fb_base_attribs);
@@ -143,19 +156,6 @@ void WGLPBufferFactory::init_config()
     if (wglChoosePixelFormatARB(m_dc, &fb_attribs[0], NULL, 1, &m_format, &items)
 	&& items > 0) {
       m_extension = SH_ARB_NV_FLOAT_BUFFER;
-    }
-  }
-
-  // Try ATI
-  if (!m_format) {
-    std::vector<int> fb_attribs(fb_base_attribs);
-    fb_attribs.push_back(WGL_PIXEL_TYPE_ARB); fb_attribs.push_back(WGL_TYPE_RGBA_FLOAT_ATI);
-    fb_attribs.push_back(0);
-    
-    unsigned int items = 0;
-    if (wglChoosePixelFormatARB(m_dc, &fb_attribs[0], NULL, 1, &m_format, &items)
-	&& items > 0) {
-      m_extension = SH_ARB_ATI_PIXEL_FORMAT_FLOAT;
     }
   }
 
