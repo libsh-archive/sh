@@ -1,3 +1,10 @@
+2006-01-19  Barold Genova  <barold@serioushack.com>
+
+	* configure.ac: Add configure check for zlib, which libpng
+	depends on.  This fixes the case where libpng and zlib are
+	both static libraries and the linker is not aware of the
+	dependency.
+
 2006-01-18  Stefanus Du Toit  <sdt@serioushack.com>
 
 	* src/ShVariantImpl.hpp (encodeArray): Use "," since the purpose
