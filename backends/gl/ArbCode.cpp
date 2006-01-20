@@ -253,7 +253,6 @@ void ArbCode::generate()
       m_shader->ctrlGraph->entry()->clearMarked();
       genNode(m_shader->ctrlGraph->entry());
     
-      // TODO: Does this code get run?  Should it really be in the other part of this if?
       if (m_environment & SH_ARB_NVVP2) {
         m_instructions.push_back(ArbInst(SH_ARB_LABEL, getLabel(m_shader->ctrlGraph->exit())));
       }
