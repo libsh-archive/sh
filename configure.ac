@@ -46,6 +46,10 @@ AC_LANG(C++)
 SH_CHECK_ENABLE_DEBUG
 
 # Checks for libraries.
+AC_CHECK_LIB([z], [deflate],
+             [],
+             [AC_MSG_ERROR([sh requires zlib.])])
+
 AC_CHECK_LIB([png], [png_create_read_struct],
              [],
              [AC_MSG_ERROR([sh requires libpng.])])
