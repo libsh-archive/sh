@@ -13,13 +13,20 @@ DIST_SUBDIRS = libltdl src backends test util doc examples
 ## Do not put a directory here since the distributed tarball will include its
 ## *entire* contents, including .svn, .libs, .o and binary files.
 EXTRA_DIST = BUGS CODING_STANDARDS README.osx COPYING \
-	     win32/postbuild_arb.bat \
-	     win32/postbuild_cc.bat win32/postbuild_glsl.bat \
-	     win32/postbuild_sh.bat win32/postbuild_util.bat \
-	     win32/prebuild.bat win32/ShArbBackend.vcproj \
-	     win32/ShCcBackend.vcproj win32/ShGlslBackend.vcproj \
-	     win32/Sh.sln win32/ShUtil.vcproj win32/Sh.vcproj \
-	     win32/ShGlutExample.vcproj \
+	     win32/vc8/postbuild_arb.bat \
+	     win32/vc8/postbuild_cc.bat win32/vc8/postbuild_glsl.bat \
+	     win32/vc8/postbuild_sh.bat win32/vc8/postbuild_util.bat \
+	     win32/vc8/prebuild.bat win32/vc8/ShArbBackend.vcproj \
+	     win32/vc8/ShCcBackend.vcproj win32/vc8/ShGlslBackend.vcproj \
+	     win32/vc8/Sh.sln win32/vc8/ShUtil.vcproj win32/vc8/Sh.vcproj \
+	     win32/vc8/ShGlutExample.vcproj \
+	     win32/vc7/postbuild_arb.bat \
+	     win32/vc7/postbuild_cc.bat win32/vc7/postbuild_glsl.bat \
+	     win32/vc7/postbuild_sh.bat win32/vc7/postbuild_util.bat \
+	     win32/vc7/prebuild.bat win32/vc7/ShArbBackend.vcproj \
+	     win32/vc7/ShCcBackend.vcproj win32/vc7/ShGlslBackend.vcproj \
+	     win32/vc7/Sh.sln win32/vc7/ShUtil.vcproj win32/vc7/Sh.vcproj \
+	     win32/vc7/ShGlutExample.vcproj \
 	     xcode/ArbBackend-Info.plist xcode/CcBackend-Info.plist \
 	     xcode/Particles-Info.plist xcode/GlutExample-Info.plist \
 	     xcode/Info.plist xcode/Particles-Info.plist xcode/version.plist \

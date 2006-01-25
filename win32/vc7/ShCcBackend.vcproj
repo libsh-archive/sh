@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="ShUtil"
-	ProjectGUID="{AAB247CA-4D0A-41E6-BA0B-C673B30B1AAD}"
+	Name="ShCcBackend"
+	ProjectGUID="{5EBFE9AC-414D-4A1F-A0DA-4AB8B118C1C2}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -14,13 +14,12 @@
 			Name="Debug|Win32"
 			OutputDirectory="Debug"
 			IntermediateDirectory="Debug"
-			ConfigurationType="4"
+			ConfigurationType="2"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/GR /EHsc /wd4003 /MDd /Zi /Od"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\src;..\..\libpng\include;..\..\zlib\include"
+				AdditionalIncludeDirectories="..\..\src"
 				PreprocessorDefinitions="SH_DLLEXPORT=&quot;__declspec(dllimport)&quot;;WIN32;NOMINMAX;_USE_MATH_DEFINES;_DEBUG;SH_DEBUG"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -34,15 +33,21 @@
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLibrarianTool"
-				AdditionalDependencies="libpng.lib"
-				OutputFile="$(OutDir)/libshutil_debug.lib"
-				AdditionalLibraryDirectories="../../libpng/lib"/>
+				Name="VCLinkerTool"
+				AdditionalDependencies="libsh_debug.lib"
+				OutputFile="$(OutDir)/libshcc_debug.dll"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="$(OutDir)"
+				GenerateDebugInformation="TRUE"
+				ProgramDatabaseFile="$(OutDir)/libshcc_debug.pdb"
+				SubSystem="2"
+				ImportLibrary="$(OutDir)/libshcc_debug.lib"
+				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="postbuild_util.bat"/>
+				CommandLine="postbuild_cc.bat"/>
 			<Tool
 				Name="VCPreBuildEventTool"
 				CommandLine="prebuild.bat"/>
@@ -55,6 +60,8 @@
 			<Tool
 				Name="VCXMLDataGeneratorTool"/>
 			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
 				Name="VCManagedWrapperGeneratorTool"/>
 			<Tool
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
@@ -63,12 +70,12 @@
 			Name="Release|Win32"
 			OutputDirectory="Release"
 			IntermediateDirectory="Release"
-			ConfigurationType="4"
+			ConfigurationType="2"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/GR /EHsc /wd4003 /MD /O2"
-				AdditionalIncludeDirectories="..\src;..\..\libpng\include;..\..\zlib\include"
+				AdditionalOptions="/GR /EHsc /wd4003 /O2"
+				AdditionalIncludeDirectories="..\..\src"
 				PreprocessorDefinitions="SH_DLLEXPORT=&quot;__declspec(dllimport)&quot;;WIN32;NOMINMAX;_USE_MATH_DEFINES"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="TRUE"
@@ -80,15 +87,23 @@
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLibrarianTool"
-				AdditionalDependencies="libpng.lib"
-				OutputFile="$(OutDir)/libshutil.lib"
-				AdditionalLibraryDirectories="../../libpng/lib"/>
+				Name="VCLinkerTool"
+				AdditionalDependencies="libsh.lib"
+				OutputFile="$(OutDir)/libshcc.dll"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="$(OutDir)"
+				GenerateDebugInformation="TRUE"
+				ProgramDatabaseFile="$(OutDir)/libshcc.pdb"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				ImportLibrary="$(OutDir)/libshcc.lib"
+				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="postbuild_util.bat"/>
+				CommandLine="postbuild_cc.bat"/>
 			<Tool
 				Name="VCPreBuildEventTool"
 				CommandLine="prebuild.bat"/>
@@ -100,6 +115,8 @@
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
 			<Tool
 				Name="VCManagedWrapperGeneratorTool"/>
 			<Tool
@@ -114,19 +131,10 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath="..\util\ShKernelLib.cpp">
+				RelativePath="..\..\backends\cc\Cc.cpp">
 			</File>
 			<File
-				RelativePath="..\util\ShKernelSurfMap.cpp">
-			</File>
-			<File
-				RelativePath="..\util\ShObjMesh.cpp">
-			</File>
-			<File
-				RelativePath="..\util\ShPngImage.cpp">
-			</File>
-			<File
-				RelativePath="..\util\shutil.cpp">
+				RelativePath="..\..\backends\cc\CcEmit.cpp">
 			</File>
 		</Filter>
 		<Filter
@@ -134,55 +142,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
-				RelativePath="..\util\ShFunc.hpp">
+				RelativePath="..\..\backends\cc\Cc.hpp">
 			</File>
 			<File
-				RelativePath="..\util\ShFuncImpl.hpp">
-			</File>
-			<File
-				RelativePath="..\util\ShKernelLib.hpp">
-			</File>
-			<File
-				RelativePath="..\util\ShKernelLibImpl.hpp">
-			</File>
-			<File
-				RelativePath="..\util\ShKernelLight.hpp">
-			</File>
-			<File
-				RelativePath="..\util\ShKernelLightImpl.hpp">
-			</File>
-			<File
-				RelativePath="..\util\ShKernelPost.hpp">
-			</File>
-			<File
-				RelativePath="..\util\ShKernelPostImpl.hpp">
-			</File>
-			<File
-				RelativePath="..\util\ShKernelSurface.hpp">
-			</File>
-			<File
-				RelativePath="..\util\ShKernelSurfaceImpl.hpp">
-			</File>
-			<File
-				RelativePath="..\util\ShKernelSurfMap.hpp">
-			</File>
-			<File
-				RelativePath="..\util\ShMesh.hpp">
-			</File>
-			<File
-				RelativePath="..\util\ShMeshImpl.hpp">
-			</File>
-			<File
-				RelativePath="..\util\ShObjMesh.hpp">
-			</File>
-			<File
-				RelativePath="..\util\ShPngImage.hpp">
-			</File>
-			<File
-				RelativePath="..\util\ShPngImageImpl.hpp">
-			</File>
-			<File
-				RelativePath="..\util\shutil.hpp">
+				RelativePath="..\..\backends\cc\CcTexturesString.hpp">
 			</File>
 		</Filter>
 		<Filter
