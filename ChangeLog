@@ -1,3 +1,11 @@
+2006-01-18  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/ShVariantImpl.hpp (encodeArray): Use "," since the purpose
+	of encodeArray is to provide C-style array declarations.
+	
+	* backends/gl/WGLPBufferContext.hpp: Prefer ATI extensions for
+	floating point buffers.
+	
 2006-01-16  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslEmit.cpp (emit_texture): Apply the right swizzle
