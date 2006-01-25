@@ -48,4 +48,9 @@ dist dist-all: distdir
 	zip -rq $(distdir).zip $(distdir)
 	$(am__remove_distdir)
 
-test: check
+regress:
+	@if [ -z "$$SH_REGRESS_BACKEND" ] ; then echo "You must specify the backend to test through the SH_REGRESS_BACKEND environment variable. For example:" ;  echo "" ; echo "  SH_REGRESS_BACKEND=arb make regress"; else $(MAKE) check-recursive; fi
+
+BACKENDS=arb cc glsl host
+regressall:
+	for i in $(BACKENDS) ; do SH_REGRESS_BACKEND=$$i $(MAKE) check-recursive ; done

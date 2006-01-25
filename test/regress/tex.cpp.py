@@ -2,10 +2,12 @@
 
 import shtest, sys
 
+test = shtest.StreamTest('tex', 1)
+test.broken_backend("cc")
+
 # all the tests use nearest-neighbour lookup right now
 
 # test float textures
-test = shtest.StreamTest('tex', 1)
 test.add_texture(shtest.ImageTexture("ShNoMIPFilter<ShTexture2D<ShColor3f> >", "test2d_tex", "tex.png")) 
 test.add_call(shtest.Call(shtest.Call.call, 'test2d_tex', 1))
 test.add_make_test((1.0, 0.0, 0.0), [(0.0, 0.0)])
