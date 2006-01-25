@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="ShGlslBackend"
-	ProjectGUID="{51FE302B-9FB8-4525-B7AB-E1447ED75CBE}"
+	Name="ShCcBackend"
+	ProjectGUID="{5EBFE9AC-414D-4A1F-A0DA-4AB8B118C1C2}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -18,9 +18,8 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/GR /EHsc /wd4003"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\src;..\..\opengl\include"
+				AdditionalIncludeDirectories="..\..\src"
 				PreprocessorDefinitions="SH_DLLEXPORT=&quot;__declspec(dllimport)&quot;;WIN32;NOMINMAX;_USE_MATH_DEFINES;_DEBUG;SH_DEBUG"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -35,20 +34,20 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libsh_debug.lib opengl32.lib"
-				OutputFile="$(OutDir)/libshglsl_debug.dll"
+				AdditionalDependencies="libsh_debug.lib"
+				OutputFile="$(OutDir)/libshcc_debug.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(OutDir)"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/libshglsl_debug.pdb"
+				ProgramDatabaseFile="$(OutDir)/libshcc_debug.pdb"
 				SubSystem="2"
-				ImportLibrary="$(OutDir)/libshglsl_debug.lib"
+				ImportLibrary="$(OutDir)/libshcc_debug.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="postbuild_glsl.bat"/>
+				CommandLine="postbuild_cc.bat"/>
 			<Tool
 				Name="VCPreBuildEventTool"
 				CommandLine="prebuild.bat"/>
@@ -76,7 +75,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GR /EHsc /wd4003 /O2"
-				AdditionalIncludeDirectories="..\src;..\..\opengl\include"
+				AdditionalIncludeDirectories="..\..\src"
 				PreprocessorDefinitions="SH_DLLEXPORT=&quot;__declspec(dllimport)&quot;;WIN32;NOMINMAX;_USE_MATH_DEFINES"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="TRUE"
@@ -89,22 +88,22 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libsh.lib opengl32.lib"
-				OutputFile="$(OutDir)/libshglsl.dll"
+				AdditionalDependencies="libsh.lib"
+				OutputFile="$(OutDir)/libshcc.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(OutDir)"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/libshglsl.pdb"
+				ProgramDatabaseFile="$(OutDir)/libshcc.pdb"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="$(OutDir)/libshglsl.lib"
+				ImportLibrary="$(OutDir)/libshcc.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="postbuild_glsl.bat"/>
+				CommandLine="postbuild_cc.bat"/>
 			<Tool
 				Name="VCPreBuildEventTool"
 				CommandLine="prebuild.bat"/>
@@ -132,49 +131,10 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath="..\backends\gl\GlBackend.cpp">
+				RelativePath="..\..\backends\cc\Cc.cpp">
 			</File>
 			<File
-				RelativePath="..\backends\gl\Glsl.cpp">
-			</File>
-			<File
-				RelativePath="..\backends\gl\GlslBackend.cpp">
-			</File>
-			<File
-				RelativePath="..\backends\gl\GlslCode.cpp">
-			</File>
-			<File
-				RelativePath="..\backends\gl\GlslEmit.cpp">
-			</File>
-			<File
-				RelativePath="..\backends\gl\GlslSet.cpp">
-			</File>
-			<File
-				RelativePath="..\backends\gl\GlslVariable.cpp">
-			</File>
-			<File
-				RelativePath="..\backends\gl\GlslVariableMap.cpp">
-			</File>
-			<File
-				RelativePath="..\backends\gl\GlTextureName.cpp">
-			</File>
-			<File
-				RelativePath="..\backends\gl\GlTextures.cpp">
-			</File>
-			<File
-				RelativePath="..\backends\gl\GlTextureStorage.cpp">
-			</File>
-			<File
-				RelativePath="..\backends\gl\PBufferContext.cpp">
-			</File>
-			<File
-				RelativePath="..\backends\gl\PBufferStreams.cpp">
-			</File>
-			<File
-				RelativePath="..\backends\gl\Utils.cpp">
-			</File>
-			<File
-				RelativePath="..\backends\gl\WGLPBufferContext.cpp">
+				RelativePath="..\..\backends\cc\CcEmit.cpp">
 			</File>
 		</Filter>
 		<Filter
@@ -182,43 +142,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
-				RelativePath="..\backends\gl\GlBackend.hpp">
+				RelativePath="..\..\backends\cc\Cc.hpp">
 			</File>
 			<File
-				RelativePath="..\backends\gl\Glsl.hpp">
-			</File>
-			<File
-				RelativePath="..\backends\gl\GlslCode.hpp">
-			</File>
-			<File
-				RelativePath="..\backends\gl\GlslSet.hpp">
-			</File>
-			<File
-				RelativePath="..\backends\gl\GlslVariable.hpp">
-			</File>
-			<File
-				RelativePath="..\backends\gl\GlslVariableMap.hpp">
-			</File>
-			<File
-				RelativePath="..\backends\gl\GlTextureName.hpp">
-			</File>
-			<File
-				RelativePath="..\backends\gl\GlTextures.hpp">
-			</File>
-			<File
-				RelativePath="..\backends\gl\GlTextureStorage.hpp">
-			</File>
-			<File
-				RelativePath="..\backends\gl\PBufferContext.hpp">
-			</File>
-			<File
-				RelativePath="..\backends\gl\PBufferStreams.hpp">
-			</File>
-			<File
-				RelativePath="..\backends\gl\Utils.hpp">
-			</File>
-			<File
-				RelativePath="..\backends\gl\WGLPBufferContext.hpp">
+				RelativePath="..\..\backends\cc\CcTexturesString.hpp">
 			</File>
 		</Filter>
 		<Filter

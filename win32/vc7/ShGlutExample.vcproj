@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\install\include;..\..\glut\include;..\..\opengl\include"
+				AdditionalIncludeDirectories="..\..\..\install\include;..\..\..\glut\include;..\..\..\opengl\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;NOMINMAX;_USE_MATH_DEFINES"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -34,7 +34,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="..\..\glut\lib\glut32.lib"
+				AdditionalDependencies="..\..\..\glut\lib\glut32.lib"
 				OutputFile="$(OutDir)/ShGlutExample.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
@@ -70,7 +70,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\install\include;..\..\glut\include;..\..\opengl\include"
+				AdditionalIncludeDirectories="..\..\..\install\include;..\..\..\glut\include;..\..\..\opengl\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;NOMINMAX;_USE_MATH_DEFINES"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="TRUE"
@@ -83,7 +83,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="..\..\glut\lib\glut32.lib ..\..\install\lib\libsh.lib"
+				AdditionalDependencies="..\..\..\glut\lib\glut32.lib ..\..\..\install\lib\libsh.lib"
 				OutputFile="$(OutDir)/ShGlutExample.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="TRUE"
@@ -121,13 +121,13 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath="..\examples\glut\Camera.cpp">
+				RelativePath="..\..\examples\glut\Camera.cpp">
 			</File>
 			<File
-				RelativePath="..\examples\glut\main.cpp">
+				RelativePath="..\..\examples\glut\main.cpp">
 			</File>
 			<File
-				RelativePath="..\examples\glut\ShTrackball.cpp">
+				RelativePath="..\..\examples\glut\ShTrackball.cpp">
 			</File>
 		</Filter>
 		<Filter
@@ -135,10 +135,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
-				RelativePath="..\examples\glut\Camera.hpp">
+				RelativePath="..\..\examples\glut\Camera.hpp">
 			</File>
 			<File
-				RelativePath="..\examples\glut\ShTrackball.hpp">
+				RelativePath="..\..\examples\glut\ShTrackball.hpp">
 			</File>
 		</Filter>
 		<Filter

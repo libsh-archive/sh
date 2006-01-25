@@ -20,7 +20,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GR /EHsc /wd4003 /MDd /Zi /Od"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\src;..\..\libpng\include;..\..\zlib\include"
+				AdditionalIncludeDirectories="..\..\src;..\..\..\libpng\include;..\..\..\zlib\include"
 				PreprocessorDefinitions="SH_DLLEXPORT=&quot;__declspec(dllimport)&quot;;WIN32;NOMINMAX;_USE_MATH_DEFINES;_DEBUG;SH_DEBUG"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -37,7 +37,7 @@
 				Name="VCLibrarianTool"
 				AdditionalDependencies="libpng.lib"
 				OutputFile="$(OutDir)/libshutil_debug.lib"
-				AdditionalLibraryDirectories="../../libpng/lib"/>
+				AdditionalLibraryDirectories="../../../libpng/lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -68,7 +68,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GR /EHsc /wd4003 /MD /O2"
-				AdditionalIncludeDirectories="..\src;..\..\libpng\include;..\..\zlib\include"
+				AdditionalIncludeDirectories="..\..\src;..\..\..\libpng\include;..\..\..\zlib\include"
 				PreprocessorDefinitions="SH_DLLEXPORT=&quot;__declspec(dllimport)&quot;;WIN32;NOMINMAX;_USE_MATH_DEFINES"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="TRUE"
@@ -83,7 +83,7 @@
 				Name="VCLibrarianTool"
 				AdditionalDependencies="libpng.lib"
 				OutputFile="$(OutDir)/libshutil.lib"
-				AdditionalLibraryDirectories="../../libpng/lib"/>
+				AdditionalLibraryDirectories="../../../libpng/lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -114,19 +114,19 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath="..\util\ShKernelLib.cpp">
+				RelativePath="..\..\util\ShKernelLib.cpp">
 			</File>
 			<File
-				RelativePath="..\util\ShKernelSurfMap.cpp">
+				RelativePath="..\..\util\ShKernelSurfMap.cpp">
 			</File>
 			<File
-				RelativePath="..\util\ShObjMesh.cpp">
+				RelativePath="..\..\util\ShObjMesh.cpp">
 			</File>
 			<File
-				RelativePath="..\util\ShPngImage.cpp">
+				RelativePath="..\..\util\ShPngImage.cpp">
 			</File>
 			<File
-				RelativePath="..\util\shutil.cpp">
+				RelativePath="..\..\util\shutil.cpp">
 			</File>
 		</Filter>
 		<Filter
@@ -134,55 +134,55 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
-				RelativePath="..\util\ShFunc.hpp">
+				RelativePath="..\..\util\ShFunc.hpp">
 			</File>
 			<File
-				RelativePath="..\util\ShFuncImpl.hpp">
+				RelativePath="..\..\util\ShFuncImpl.hpp">
 			</File>
 			<File
-				RelativePath="..\util\ShKernelLib.hpp">
+				RelativePath="..\..\util\ShKernelLib.hpp">
 			</File>
 			<File
-				RelativePath="..\util\ShKernelLibImpl.hpp">
+				RelativePath="..\..\util\ShKernelLibImpl.hpp">
 			</File>
 			<File
-				RelativePath="..\util\ShKernelLight.hpp">
+				RelativePath="..\..\util\ShKernelLight.hpp">
 			</File>
 			<File
-				RelativePath="..\util\ShKernelLightImpl.hpp">
+				RelativePath="..\..\util\ShKernelLightImpl.hpp">
 			</File>
 			<File
-				RelativePath="..\util\ShKernelPost.hpp">
+				RelativePath="..\..\util\ShKernelPost.hpp">
 			</File>
 			<File
-				RelativePath="..\util\ShKernelPostImpl.hpp">
+				RelativePath="..\..\util\ShKernelPostImpl.hpp">
 			</File>
 			<File
-				RelativePath="..\util\ShKernelSurface.hpp">
+				RelativePath="..\..\util\ShKernelSurface.hpp">
 			</File>
 			<File
-				RelativePath="..\util\ShKernelSurfaceImpl.hpp">
+				RelativePath="..\..\util\ShKernelSurfaceImpl.hpp">
 			</File>
 			<File
-				RelativePath="..\util\ShKernelSurfMap.hpp">
+				RelativePath="..\..\util\ShKernelSurfMap.hpp">
 			</File>
 			<File
-				RelativePath="..\util\ShMesh.hpp">
+				RelativePath="..\..\util\ShMesh.hpp">
 			</File>
 			<File
-				RelativePath="..\util\ShMeshImpl.hpp">
+				RelativePath="..\..\util\ShMeshImpl.hpp">
 			</File>
 			<File
-				RelativePath="..\util\ShObjMesh.hpp">
+				RelativePath="..\..\util\ShObjMesh.hpp">
 			</File>
 			<File
-				RelativePath="..\util\ShPngImage.hpp">
+				RelativePath="..\..\util\ShPngImage.hpp">
 			</File>
 			<File
-				RelativePath="..\util\ShPngImageImpl.hpp">
+				RelativePath="..\..\util\ShPngImageImpl.hpp">
 			</File>
 			<File
-				RelativePath="..\util\shutil.hpp">
+				RelativePath="..\..\util\shutil.hpp">
 			</File>
 		</Filter>
 		<Filter
