@@ -4,7 +4,7 @@ See the "INSTALL" file for directions.
 
 STATUS 
 
-Sh is currently roughly in the "alpha" stage. Most things are
+Sh is currently roughly in the "beta" stage. Most things are
 working. For an overview of what's not working (that we know of) see
 https://issues.libsh.org/, our issue tracker.
 

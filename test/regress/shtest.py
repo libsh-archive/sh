@@ -242,6 +242,10 @@ class Test:
         self.calls = []
         self.textures = []
         self.tests = []
+        self.broken_backends = []
+
+    def broken_backend(self, backend_name):
+        self.broken_backends.append(backend_name)
 
     # add a call to the current list
     def add_call(self, call):
@@ -273,8 +277,10 @@ class Test:
         out.write('int main(int argc, char** argv) {\n')
         out.write('  using namespace SH;\n\n')
         out.write('  char* last_test = "none";\n\n')
-        out.write('  Test test(argc, argv);\n\n')
-        out.write('  int errors = 0;\n')
+        out.write('  Test test(argc, argv);\n')
+        for backend in self.broken_backends:
+            out.write('  if (test.backend() == "' + str(backend) + '") return 77;\n')
+        out.write('\n  int errors = 0;\n')
 
     def start_catch(self, out):
         out.write('    try {\n')

@@ -96,22 +96,21 @@ REGRESSION TESTS
 ------------------------------
 Extra requirement: Python
 
-To run the test suite on the cc backend:
+To run the test suite on the arb backend:
 
   make install
-  make check
+  SH_REGRESS_BACKEND=arb make regress
 
-To specify a different backend (e.g. arb):
+To run it on all backends:
+  make regressall
 
-  SH_REGRESS_BACKEND=arb make check
-
-Note that "make check" will use the currently installed version of
+Note that "make regress" will use the currently installed version of
 Sh.  If you wish to test a new version before installing it, you
 can install it to a temporary location with a custom prefix:
 
   ./configure --prefix=/tmp/sh-test
 
-and then run "make check" on it.
+and then run "make regress" on it.
 
 ==============================
 MORE HELP

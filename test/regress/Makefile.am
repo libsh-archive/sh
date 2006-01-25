@@ -13,9 +13,6 @@ EXTRA_DIST = shtest.py common.py tex_squares.png
 
 common = test.cpp test.hpp
 
-checkall:
-	for i in $(BACKENDS) ; do SH_REGRESS_BACKEND=$$i $(MAKE) check ; done
-
 clean:
 	@rm -f *.log
 	@rm -f testlist

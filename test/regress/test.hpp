@@ -221,6 +221,8 @@ public:
     std::vector<std::string> inputs(0);
     return output_result(name, inputs, _out, _res, res.size(), epsilon);
   }
+
+  const std::string backend() const { return m_backend; }
   
 private:
   void print_values(const char* varname, const std::string& values);
