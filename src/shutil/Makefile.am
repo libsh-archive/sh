@@ -1,4 +1,4 @@
-INCLUDES = -I$(includedir)/src $(LTDLINCL) 
+INCLUDES = -I$(top_srcdir)/src $(LTDLINCL) 
 
 lib_LTLIBRARIES = libshutil.la
 

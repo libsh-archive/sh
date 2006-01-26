@@ -6,9 +6,7 @@ DEPENDS = $(SOURCES:.cpp=.d)
 CPPFLAGS = -I$(src_dir)
 #CXXFLAGS = -g -O0 -Wall
 CXXFLAGS = -g -O2 -Wall
-LDFLAGS = $(src_dir)/libsh.la -lGL -lglut
-
-# LDFLAGS = $(src_dir)/libsh.la
+LDFLAGS = $(src_dir)/sh/libsh.la -lGL -lglut
 
 all: main
 

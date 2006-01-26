@@ -17,7 +17,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include <sh.hpp>
+#include <sh/sh.hpp>
 #include <fstream>
 
 #define GL_GLEXT_VERBOSE 1
