@@ -33,7 +33,7 @@
 #include <GL/glut.h>
 #endif
 
-#include <sh.hpp>
+#include <sh/sh.hpp>
 #include <iostream>
 
 using namespace SH;

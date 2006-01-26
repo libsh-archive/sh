@@ -20,8 +20,8 @@
 #ifndef SHPNGIMAGEIMPL_HPP
 #define SHPNGIMAGEIMPL_HPP
 
+#include "sh/ShDllExport.hpp"
 #include "ShPngImage.hpp"
-#include "ShDllExport.hpp"
 
 namespace ShUtil {
 

@@ -255,7 +255,7 @@ struct InitLiveCode {
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
 #ifdef SH_DEBUG_OPTIMIZER
       if(!I->dest.null() && I->dest.node()->kind() == SH_TEMP && !p->hasDecl(I->dest.node())) {
-        SH_DEBUG_PRINT("No decl for " << I->dest.name());
+        std::cerr << "No decl for " << I->dest.name() << std::endl;
       }
 #endif
       // @todo range check if IGNORE is right
@@ -265,7 +265,7 @@ struct InitLiveCode {
       if (opInfo[I->op].result_source == ShOperationInfo::IGNORE
           || I->dest.node()->kind() != SH_TEMP
           || I->dest.node()->uniform()
-          || !p->hasDecl(I->dest.node())
+//          || !p->hasDecl(I->dest.node())
           || I->op == SH_OP_OPTBRA) {
         I->marked = true;
         w.push(&(*I));

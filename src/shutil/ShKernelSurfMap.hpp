@@ -17,31 +17,42 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHUTIL_FUNC_HPP 
-#define SHUTIL_FUNC_HPP 
+#ifndef SHUTIL_KERNELSURFMAP_HPP 
+#define SHUTIL_KERNELSURFMAP_HPP 
 
-#include "ShVariable.hpp"
-#include "ShAttrib.hpp"
+#include "sh/ShProgram.hpp"
 
-#ifndef _WIN32
+/** \file ShKernelSurfMap.hpp
+ * 
+ */
+
 namespace ShUtil {
 
 using namespace SH;
 
-/** \file ShFunc.hpp
- * \brief Miscellaneous small Sh utility functions.  
- */
+class ShKernelSurfMap {
+  public:
+    /** Bump program
+     * Takes a gradient direction and applies 
+     * IN(0) ShAttrib2f gradient  - gradient
+     * IN(1) ShNormal3f normalt    - normalized normal vector (tangent space) 
+     *
+     * OUT(0) ShNormal3f normalt   - perturbed normal (tangent space)
+     */
+    static ShProgram bump();
 
-/** \brief Given orthonormal basis b0, b1, b2 and vector v relative to coordinate space C,
- * does change of basis on v to the orthonormal basis b0, b1, b2
- */
-template<typename T>
-ShGeneric<3, T> changeBasis(const ShGeneric<3, T> &b0, const ShGeneric<3, T> &b1,
-                            const ShGeneric<3, T> &b2, const ShGeneric<3, T> &v); 
+    /** VCS Bump program
+     * Takes a gradient direction and applies 
+     * IN(0) ShAttrib2f gradient  - gradient
+     * IN(1) ShNormal3f normal    - normalized normal vector (VCS)
+     * IN(2) ShVector3f tangent   - normalized tangent vector (VCS)
+     * IN(3) ShVector3f tangent2  - normalized secondary tangent (VCS)
+     *
+     * OUT(0) ShNormal3f normal   - perturbed normal (VCS)
+     */
+    static ShProgram vcsBump();
+};
 
-} // namespace
+}
+
 #endif
-
-#include "ShFuncImpl.hpp"
-
-#endif // SHUTIL_FUNC_HPP 

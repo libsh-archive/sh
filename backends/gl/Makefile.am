@@ -1,4 +1,4 @@
-INCLUDES = -I$(top_srcdir)/src
+INCLUDES = -I$(top_srcdir)/src/sh
 
 EXTRA_DIST = WGLPBufferContext.hpp WGLPBufferContext.cpp
 
@@ -39,13 +39,13 @@ endif
 
 if ENABLE_GL_BACKENDS
 libshgl_la_LDFLAGS = -L$(prefix)/lib
-libshgl_la_LIBADD = $(top_builddir)/src/libsh.la
+libshgl_la_LIBADD = $(top_builddir)/src/sh/libsh.la
 libshgl_la_SOURCES = $(GLBACKEND_SOURCES) $(GLTEXTURE_SOURCES) $(PBUFFERSTREAM_SOURCES)
 endif
 
 if ENABLE_ARB_BACKEND
 libsharb_la_LDFLAGS = -L$(prefix)/lib -module
-libsharb_la_LIBADD = $(top_builddir)/src/libsh.la libshgl.la
+libsharb_la_LIBADD = $(top_builddir)/src/sh/libsh.la libshgl.la
 libsharb_la_SOURCES = Arb.cpp ArbCode.cpp ArbEmit.cpp ArbInst.cpp ArbLimits.cpp \
 		      ArbReg.cpp \
 		      Arb.hpp ArbCode.hpp ArbInst.hpp ArbLimits.hpp \
@@ -54,7 +54,7 @@ endif
 
 if ENABLE_GLSL_BACKEND
 libshglsl_la_LDFLAGS = -L$(prefix)/lib -module
-libshglsl_la_LIBADD = $(top_builddir)/src/libsh.la libshgl.la
+libshglsl_la_LIBADD = $(top_builddir)/src/sh/libsh.la libshgl.la
 libshglsl_la_SOURCES = Glsl.cpp Glsl.hpp GlslCode.cpp GlslCode.hpp \
 		       GlslBackend.cpp GlslVariable.cpp GlslVariable.hpp \
 		       GlslVariableMap.cpp GlslVariableMap.hpp GlslEmit.cpp \

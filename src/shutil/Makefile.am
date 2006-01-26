@@ -6,7 +6,7 @@ libshutil_la_LDFLAGS = -export-dynamic # -no-undefined
 
 libshutil_la_SOURCES = ShKernelLib.cpp ShKernelSurfMap.cpp ShObjMesh.cpp ShPngImage.cpp shutil.cpp
 
-incincdir = $(includedir)/sh
+incincdir = $(includedir)/shutil
 
 incinc_HEADERS = ShFunc.hpp \
                  ShFuncImpl.hpp \

@@ -23,9 +23,9 @@
 #include <iostream>
 #include <string>
 #include <map>
-#include "ShError.hpp"
-#include "ShException.hpp"
-#include "ShDebug.hpp"
+#include "sh/ShError.hpp"
+#include "sh/ShException.hpp"
+#include "sh/ShDebug.hpp"
 #include "ShMesh.hpp"
 
 namespace ShUtil {

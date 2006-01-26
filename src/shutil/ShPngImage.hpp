@@ -17,35 +17,34 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHUTIL_FUNCIMPL_HPP 
-#define SHUTIL_FUNCIMPL_HPP 
+#ifndef SHPNGIMAGE_HPP
+#define SHPNGIMAGE_HPP
 
-#include <cmath>
-#include <numeric>
-#include "ShAttrib.hpp"
-#include "ShSwizzle.hpp" 
-#include "ShVariable.hpp"
-#include "ShFunc.hpp"
-#include "ShLib.hpp"
+#include "sh/ShImage.hpp"
 
 namespace ShUtil {
 
-using namespace SH;
-
-/** \brief Given 3 orthonormal basis vectors b0, b1, b2, specified relative to a coordinate space C, 
- * this does a change of basis on a vector v in space C to the orthonormal basis
+/** Libpng wrapper functions
+ * Allows ShImage objects to load their data from or save to a PNG file.
+ * @{
  */
+
+/// Load the PNG file into this image
 template<typename T>
-ShGeneric<3, T> changeBasis(const ShGeneric<3, T> &b0, const ShGeneric<3, T> &b1,
-                            const ShGeneric<3, T> &b2, const ShGeneric<3, T> &v)
-{
-  ShAttrib<3, SH_TEMP, T> result;
-  result(0) = b0 | v;
-  result(1) = b1 | v;
-  result(2) = b2 | v;
-  return result;
-}
+void load_PNG(SH::ShTypedImage<T>& image, const std::string& filename);
 
-}
+/// Save the PNG image into this file
+template<typename T>
+void save_PNG(const SH::ShTypedImage<T>& image, const std::string& filename, int inverse_alpha=0);
 
-#endif // SHUTIL_FUNCIMPL_HPP 
+/// Save the PNG image into this file
+template<typename T>
+void save_PNG16(const SH::ShTypedImage<T>& image, const std::string& filename, int inverse_alpha=0);
+
+// @}
+
+} // namespace
+
+#include "ShPngImageImpl.hpp"
+
+#endif // SHPNGIMAGE_HPP

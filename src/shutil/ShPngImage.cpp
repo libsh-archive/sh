@@ -20,8 +20,8 @@
 #include "ShPngImage.hpp"
 #include <png.h>
 #include <sstream>
-#include "ShException.hpp"
-#include "ShError.hpp"
+#include "sh/ShException.hpp"
+#include "sh/ShError.hpp"
 
 namespace ShUtil {
 

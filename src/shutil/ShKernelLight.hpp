@@ -20,9 +20,9 @@
 #ifndef SHUTIL_KERNELLIGHT_HPP 
 #define SHUTIL_KERNELLIGHT_HPP 
 
-#include "ShMatrix.hpp"
-#include "ShTexture.hpp"
-#include "ShProgram.hpp"
+#include "sh/ShMatrix.hpp"
+#include "sh/ShTexture.hpp"
+#include "sh/ShProgram.hpp"
 
 /** \file ShKernelLight.hpp
  * A set of light shaders

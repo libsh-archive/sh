@@ -21,9 +21,9 @@
 #define SHUTIL_KERNELPOST_HPP 
 
 #include <string>
-#include "ShMatrix.hpp"
-#include "ShTexture.hpp"
-#include "ShProgram.hpp"
+#include "sh/ShMatrix.hpp"
+#include "sh/ShTexture.hpp"
+#include "sh/ShProgram.hpp"
 
 /** \file ShKernelPost.hpp
  * These are postprocessing kernels.  Several postprocessing kernels can be

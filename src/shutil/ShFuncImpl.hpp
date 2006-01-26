@@ -17,42 +17,35 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHUTIL_KERNELSURFMAP_HPP 
-#define SHUTIL_KERNELSURFMAP_HPP 
+#ifndef SHUTIL_FUNCIMPL_HPP 
+#define SHUTIL_FUNCIMPL_HPP 
 
-#include "ShProgram.hpp"
-
-/** \file ShKernelSurfMap.hpp
- * 
- */
+#include <cmath>
+#include <numeric>
+#include "sh/ShAttrib.hpp"
+#include "sh/ShSwizzle.hpp" 
+#include "sh/ShVariable.hpp"
+#include "sh/ShLib.hpp"
+#include "ShFunc.hpp"
 
 namespace ShUtil {
 
 using namespace SH;
 
-class ShKernelSurfMap {
-  public:
-    /** Bump program
-     * Takes a gradient direction and applies 
-     * IN(0) ShAttrib2f gradient  - gradient
-     * IN(1) ShNormal3f normalt    - normalized normal vector (tangent space) 
-     *
-     * OUT(0) ShNormal3f normalt   - perturbed normal (tangent space)
-     */
-    static ShProgram bump();
-
-    /** VCS Bump program
-     * Takes a gradient direction and applies 
-     * IN(0) ShAttrib2f gradient  - gradient
-     * IN(1) ShNormal3f normal    - normalized normal vector (VCS)
-     * IN(2) ShVector3f tangent   - normalized tangent vector (VCS)
-     * IN(3) ShVector3f tangent2  - normalized secondary tangent (VCS)
-     *
-     * OUT(0) ShNormal3f normal   - perturbed normal (VCS)
-     */
-    static ShProgram vcsBump();
-};
+/** \brief Given 3 orthonormal basis vectors b0, b1, b2, specified relative to a coordinate space C, 
+ * this does a change of basis on a vector v in space C to the orthonormal basis
+ */
+template<typename T>
+ShGeneric<3, T> changeBasis(const ShGeneric<3, T> &b0, const ShGeneric<3, T> &b1,
+                            const ShGeneric<3, T> &b2, const ShGeneric<3, T> &v)
+{
+  ShAttrib<3, SH_TEMP, T> result;
+  result(0) = b0 | v;
+  result(1) = b1 | v;
+  result(2) = b2 | v;
+  return result;
+}
 
 }
 
-#endif
+#endif // SHUTIL_FUNCIMPL_HPP 

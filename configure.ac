@@ -1,6 +1,6 @@
 # Process this file with autoconf to produce a configure script.
 AC_INIT(Sh, 0.8.0rc0, libsh-devel@lists.libsh.org, libsh)
-AC_CONFIG_SRCDIR([src/ShVariable.hpp])
+AC_CONFIG_SRCDIR([src/sh/ShVariable.hpp])
 AM_INIT_AUTOMAKE
 
 AC_CANONICAL_HOST
@@ -162,12 +162,13 @@ AC_SUBST(EXAMPLE_DIRS)
 
 AC_CONFIG_FILES([Makefile
 		 src/Makefile
+		 src/sh/Makefile
+		 src/shutil/Makefile
 		 test/Makefile
 		 test/regress/Makefile
 		 backends/Makefile
 		 backends/cc/Makefile
 		 backends/gl/Makefile
-		 util/Makefile
 		 examples/Makefile
 		 examples/binding/Makefile
 		 examples/glut/Makefile
