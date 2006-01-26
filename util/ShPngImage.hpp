@@ -20,7 +20,7 @@
 #ifndef SHPNGIMAGE_HPP
 #define SHPNGIMAGE_HPP
 
-#include "ShImage.hpp"
+#include "sh/ShImage.hpp"
 
 namespace ShUtil {
 

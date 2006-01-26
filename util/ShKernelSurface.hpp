@@ -21,9 +21,9 @@
 #define SHUTIL_KERNELSURFACE_HPP 
 
 #include <string>
-#include "ShMatrix.hpp"
-#include "ShTexture.hpp"
-#include "ShProgram.hpp"
+#include "sh/ShMatrix.hpp"
+#include "sh/ShTexture.hpp"
+#include "sh/ShProgram.hpp"
 
 /** \file ShKernelSurface.hpp
  * These are the surface shader kernels.

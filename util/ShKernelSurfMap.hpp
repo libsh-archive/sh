@@ -20,7 +20,7 @@
 #ifndef SHUTIL_KERNELSURFMAP_HPP 
 #define SHUTIL_KERNELSURFMAP_HPP 
 
-#include "ShProgram.hpp"
+#include "sh/ShProgram.hpp"
 
 /** \file ShKernelSurfMap.hpp
  * 

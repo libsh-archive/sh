@@ -21,10 +21,10 @@
 #define SHUTIL_KERNELLIB_HPP 
 
 #include <string>
-#include "ShLib.hpp"
-#include "ShMatrix.hpp"
-#include "ShTexture.hpp"
-#include "ShProgram.hpp"
+#include "sh/ShLib.hpp"
+#include "sh/ShMatrix.hpp"
+#include "sh/ShTexture.hpp"
+#include "sh/ShProgram.hpp"
 
 /** \file ShKernelLib.hpp
  * This is an implementation of useful kernels and nibbles (simple kernels).

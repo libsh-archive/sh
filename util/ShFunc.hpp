@@ -20,8 +20,8 @@
 #ifndef SHUTIL_FUNC_HPP 
 #define SHUTIL_FUNC_HPP 
 
-#include "ShVariable.hpp"
-#include "ShAttrib.hpp"
+#include "sh/ShVariable.hpp"
+#include "sh/ShAttrib.hpp"
 
 #ifndef _WIN32
 namespace ShUtil {

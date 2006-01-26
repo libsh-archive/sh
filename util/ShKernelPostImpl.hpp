@@ -21,12 +21,12 @@
 #define SHUTIL_KERNELPOSTIMPL_HPP 
 
 #include <sstream>
-#include "ShSyntax.hpp"
-#include "ShPosition.hpp"
-#include "ShManipulator.hpp"
-#include "ShAlgebra.hpp"
-#include "ShProgram.hpp"
-#include "ShNibbles.hpp"
+#include "sh/ShSyntax.hpp"
+#include "sh/ShPosition.hpp"
+#include "sh/ShManipulator.hpp"
+#include "sh/ShAlgebra.hpp"
+#include "sh/ShProgram.hpp"
+#include "sh/ShNibbles.hpp"
 #include "ShKernelPost.hpp"
 #include "ShFunc.hpp"
 

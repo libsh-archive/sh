@@ -22,11 +22,11 @@
 
 #include <cmath>
 #include <numeric>
-#include "ShAttrib.hpp"
-#include "ShSwizzle.hpp" 
-#include "ShVariable.hpp"
+#include "sh/ShAttrib.hpp"
+#include "sh/ShSwizzle.hpp" 
+#include "sh/ShVariable.hpp"
+#include "sh/ShLib.hpp"
 #include "ShFunc.hpp"
-#include "ShLib.hpp"
 
 namespace ShUtil {
 

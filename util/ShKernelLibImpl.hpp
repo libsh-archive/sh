@@ -21,19 +21,19 @@
 #define SHUTIL_KERNELLIBIMPL_HPP 
 
 #include <sstream>
-#include "ShSyntax.hpp"
-#include "ShPosition.hpp"
-#include "ShManipulator.hpp"
-#include "ShAlgebra.hpp"
-#include "ShProgram.hpp"
-#include "ShNibbles.hpp"
+#include "sh/ShSyntax.hpp"
+#include "sh/ShPosition.hpp"
+#include "sh/ShManipulator.hpp"
+#include "sh/ShAlgebra.hpp"
+#include "sh/ShProgram.hpp"
+#include "sh/ShNibbles.hpp"
+#include "sh/ShTexCoord.hpp"
+#include "sh/ShVector.hpp"
+#include "sh/ShPoint.hpp"
+#include "sh/ShPosition.hpp"
+#include "sh/ShNormal.hpp"
 #include "ShKernelLib.hpp"
 #include "ShFunc.hpp"
-#include "ShTexCoord.hpp"
-#include "ShVector.hpp"
-#include "ShPoint.hpp"
-#include "ShPosition.hpp"
-#include "ShNormal.hpp"
 
 /** \file ShKernelLibImpl.hpp
  * This is an implementation of useful kernels and nibbles (simple kernels).

@@ -18,7 +18,7 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include <sh/sh.hpp>
-#include <sh/shutil.hpp>
+#include <shutil/shutil.hpp>
 #ifdef __APPLE__
 # include <CoreFoundation/CoreFoundation.h>
 # include <GLUT/glut.h>

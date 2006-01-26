@@ -17,11 +17,11 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
+#include "sh/ShSyntax.hpp"
+#include "sh/ShNormal.hpp"
+#include "sh/ShLib.hpp"
 #include "ShKernelSurfMap.hpp"
 #include "ShFunc.hpp"
-#include "ShSyntax.hpp"
-#include "ShNormal.hpp"
-#include "ShLib.hpp"
 
 namespace ShUtil {
 
