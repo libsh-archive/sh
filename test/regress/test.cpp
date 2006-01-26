@@ -19,13 +19,26 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "test.hpp"
 
+using namespace std;
+
 Test::Test(int argc, char** argv)
 {
-  m_backend = "cc";
+  m_backend = "";
   char *env_var = getenv("SH_REGRESS_BACKEND");
   if (env_var != NULL) m_backend = env_var;
   if (argc >= 2) m_backend = argv[1];
-  if (m_backend != "host") SH::shSetBackend(m_backend);
+
+  if ("" == m_backend) {
+    cerr << "You must specify the backend to test through the SH_REGRESS_BACKEND"
+         << " environment variable or by passing an argument to a unit test "
+         << "program. For example:" << endl << endl
+         << "  SH_REGRESS_BACKEND=arb make check" << endl << endl
+         << "will run all tests on the arb backend, and:" << endl << endl
+         << "  test/regress/add glsl" << endl << endl
+         << "will run the addition unit test on the glsl backend." << endl;
+    exit(1);
+  }
+  if (m_backend != "host") SH::shSetBackend(m_backend); 
 }
 
 void Test::print_values(const char* varname, const std::string& values)
