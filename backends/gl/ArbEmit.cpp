@@ -293,7 +293,7 @@ void ArbCode::emit_div(const ShStatement& stmt)
     // Work-around ATI bug where a number divided by itself returns 0 instead of 1
     ShVariable divided(new ShVariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
     m_instructions.push_back(ArbInst(SH_ARB_MUL, divided, stmt.src[0], rcp));
-    ShVariable equal(new ShVariableNode(SH_TEMP, stmt.src[1].size(), SH_FLOAT));
+    ShVariable equal(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
     emit(ShStatement(equal, stmt.src[0], SH_OP_SEQ, stmt.src[1]));
     emit(ShStatement(stmt.dest,SH_OP_COND, equal, equal, divided));
   } else {
