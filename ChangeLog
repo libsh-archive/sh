@@ -1,3 +1,9 @@
+2006-01-27  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbEmit.cpp, ArbCode.hpp (emit_div): Add a hack for
+	fixing division by the same number on ATI.
+	(real_div): refactor the code to remove this function
+
 2006-01-19  Stefanus Du Toit  <sdt@serioushack.com>
 
 	* src/ShOptimizations.cpp: Don't mark variables with decls
