@@ -42,7 +42,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GR /EHsc /wd4003 /MDd /Zi /Od"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\src;..\..\..\libpng\include;..\..\..\zlib\include"
+				AdditionalIncludeDirectories="..\..\src\sh;..\..\..\libpng\include;..\..\..\zlib\include"
 				PreprocessorDefinitions="SH_DLLEXPORT=&quot;__declspec(dllimport)&quot;;WIN32;NOMINMAX;_USE_MATH_DEFINES;_DEBUG;SH_DEBUG;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -113,7 +113,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GR /EHsc /wd4003 /MD /O2"
-				AdditionalIncludeDirectories="..\..\src;..\..\..\libpng\include;..\..\..\zlib\include"
+				AdditionalIncludeDirectories="..\..\src\sh;..\..\..\libpng\include;..\..\..\zlib\include"
 				PreprocessorDefinitions="SH_DLLEXPORT=&quot;__declspec(dllimport)&quot;;WIN32;NOMINMAX;_USE_MATH_DEFINES;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="true"
@@ -165,23 +165,23 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\util\ShKernelLib.cpp"
+				RelativePath="..\..\src\shutil\ShKernelLib.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\util\ShKernelSurfMap.cpp"
+				RelativePath="..\..\src\shutil\ShKernelSurfMap.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\util\ShObjMesh.cpp"
+				RelativePath="..\..\src\shutil\ShObjMesh.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\util\ShPngImage.cpp"
+				RelativePath="..\..\src\shutil\ShPngImage.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\util\shutil.cpp"
+				RelativePath="..\..\src\shutil\shutil.cpp"
 				>
 			</File>
 		</Filter>
@@ -191,71 +191,71 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\util\ShFunc.hpp"
+				RelativePath="..\..\src\shutil\ShFunc.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\util\ShFuncImpl.hpp"
+				RelativePath="..\..\src\shutil\ShFuncImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\util\ShKernelLib.hpp"
+				RelativePath="..\..\src\shutil\ShKernelLib.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\util\ShKernelLibImpl.hpp"
+				RelativePath="..\..\src\shutil\ShKernelLibImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\util\ShKernelLight.hpp"
+				RelativePath="..\..\src\shutil\ShKernelLight.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\util\ShKernelLightImpl.hpp"
+				RelativePath="..\..\src\shutil\ShKernelLightImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\util\ShKernelPost.hpp"
+				RelativePath="..\..\src\shutil\ShKernelPost.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\util\ShKernelPostImpl.hpp"
+				RelativePath="..\..\src\shutil\ShKernelPostImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\util\ShKernelSurface.hpp"
+				RelativePath="..\..\src\shutil\ShKernelSurface.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\util\ShKernelSurfaceImpl.hpp"
+				RelativePath="..\..\src\shutil\ShKernelSurfaceImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\util\ShKernelSurfMap.hpp"
+				RelativePath="..\..\src\shutil\ShKernelSurfMap.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\util\ShMesh.hpp"
+				RelativePath="..\..\src\shutil\ShMesh.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\util\ShMeshImpl.hpp"
+				RelativePath="..\..\src\shutil\ShMeshImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\util\ShObjMesh.hpp"
+				RelativePath="..\..\src\shutil\ShObjMesh.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\util\ShPngImage.hpp"
+				RelativePath="..\..\src\shutil\ShPngImage.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\util\ShPngImageImpl.hpp"
+				RelativePath="..\..\src\shutil\ShPngImageImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\util\shutil.hpp"
+				RelativePath="..\..\src\shutil\shutil.hpp"
 				>
 			</File>
 		</Filter>

@@ -1,4 +1,4 @@
-xcopy /D /Q /Y /K "..\..\src\*.hpp" "..\..\..\install\include\sh"
+xcopy /D /Q /Y /K "..\..\src\sh\*.hpp" "..\..\..\install\include\sh"
 
 IF EXIST "Debug\libsh_debug.dll" xcopy /D /Q /Y /K "Debug\libsh_debug.dll" "..\..\..\install"
 IF EXIST "Debug\libsh_debug.pdb" xcopy /D /Q /Y /K "Debug\libsh_debug.pdb" "..\..\..\install"
