@@ -192,227 +192,227 @@
 			Name="Source Files"
 			>
 			<File
-				RelativePath="..\..\src\ShAlgebra.cpp"
+				RelativePath="..\..\src\sh\ShAlgebra.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShBackend.cpp"
+				RelativePath="..\..\src\sh\ShBackend.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShBaseTexture.cpp"
+				RelativePath="..\..\src\sh\ShBaseTexture.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShBasicBlock.cpp"
+				RelativePath="..\..\src\sh\ShBasicBlock.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShBitSet.cpp"
+				RelativePath="..\..\src\sh\ShBitSet.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShBlock.cpp"
+				RelativePath="..\..\src\sh\ShBlock.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShCastManager.cpp"
+				RelativePath="..\..\src\sh\ShCastManager.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShCfgBlock.cpp"
+				RelativePath="..\..\src\sh\ShCfgBlock.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShChannelNode.cpp"
+				RelativePath="..\..\src\sh\ShChannelNode.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShConcreteCTypeOp.cpp"
+				RelativePath="..\..\src\sh\ShConcreteCTypeOp.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShConstProp.cpp"
+				RelativePath="..\..\src\sh\ShConstProp.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShContext.cpp"
+				RelativePath="..\..\src\sh\ShContext.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShCtrlGraph.cpp"
+				RelativePath="..\..\src\sh\ShCtrlGraph.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShDataType.cpp"
+				RelativePath="..\..\src\sh\ShDataType.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShError.cpp"
+				RelativePath="..\..\src\sh\ShError.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShEval.cpp"
+				RelativePath="..\..\src\sh\ShEval.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShEvaluate.cpp"
+				RelativePath="..\..\src\sh\ShEvaluate.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShException.cpp"
+				RelativePath="..\..\src\sh\ShException.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShFixedManipulator.cpp"
+				RelativePath="..\..\src\sh\ShFixedManipulator.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShImage3D.cpp"
+				RelativePath="..\..\src\sh\ShImage3D.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShInfo.cpp"
+				RelativePath="..\..\src\sh\ShInfo.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShInstructions.cpp"
+				RelativePath="..\..\src\sh\ShInstructions.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShInternals.cpp"
+				RelativePath="..\..\src\sh\ShInternals.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLinearAllocator.cpp"
+				RelativePath="..\..\src\sh\ShLinearAllocator.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShManipulator.cpp"
+				RelativePath="..\..\src\sh\ShManipulator.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShMemory.cpp"
+				RelativePath="..\..\src\sh\ShMemory.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShMetaForwarder.cpp"
+				RelativePath="..\..\src\sh\ShMetaForwarder.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShOperation.cpp"
+				RelativePath="..\..\src\sh\ShOperation.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShOptimizations.cpp"
+				RelativePath="..\..\src\sh\ShOptimizations.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShPaletteNode.cpp"
+				RelativePath="..\..\src\sh\ShPaletteNode.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShParser.cpp"
+				RelativePath="..\..\src\sh\ShParser.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShPool.cpp"
+				RelativePath="..\..\src\sh\ShPool.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShProgram.cpp"
+				RelativePath="..\..\src\sh\ShProgram.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShProgramNode.cpp"
+				RelativePath="..\..\src\sh\ShProgramNode.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShProgramSet.cpp"
+				RelativePath="..\..\src\sh\ShProgramSet.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShRecord.cpp"
+				RelativePath="..\..\src\sh\ShRecord.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShStatement.cpp"
+				RelativePath="..\..\src\sh\ShStatement.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShStorageType.cpp"
+				RelativePath="..\..\src\sh\ShStorageType.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShStream.cpp"
+				RelativePath="..\..\src\sh\ShStream.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShStructural.cpp"
+				RelativePath="..\..\src\sh\ShStructural.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShSwizzle.cpp"
+				RelativePath="..\..\src\sh\ShSwizzle.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShSyntax.cpp"
+				RelativePath="..\..\src\sh\ShSyntax.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShTextureNode.cpp"
+				RelativePath="..\..\src\sh\ShTextureNode.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShToken.cpp"
+				RelativePath="..\..\src\sh\ShToken.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShTokenizer.cpp"
+				RelativePath="..\..\src\sh\ShTokenizer.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShTransformer.cpp"
+				RelativePath="..\..\src\sh\ShTransformer.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShTypeConvertTransformer.cpp"
+				RelativePath="..\..\src\sh\ShTypeConvertTransformer.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShTypeInfo.cpp"
+				RelativePath="..\..\src\sh\ShTypeInfo.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShTypeInfoCasts.cpp"
+				RelativePath="..\..\src\sh\ShTypeInfoCasts.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShTypeInfoOps.cpp"
+				RelativePath="..\..\src\sh\ShTypeInfoOps.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShUtility.cpp"
+				RelativePath="..\..\src\sh\ShUtility.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShValueTracking.cpp"
+				RelativePath="..\..\src\sh\ShValueTracking.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShVariable.cpp"
+				RelativePath="..\..\src\sh\ShVariable.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShVariableNode.cpp"
+				RelativePath="..\..\src\sh\ShVariableNode.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShVariableType.cpp"
+				RelativePath="..\..\src\sh\ShVariableType.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShVariant.cpp"
+				RelativePath="..\..\src\sh\ShVariant.cpp"
 				>
 			</File>
 		</Filter>
@@ -420,579 +420,579 @@
 			Name="Header Files"
 			>
 			<File
-				RelativePath="..\..\src\sh.hpp"
+				RelativePath="..\..\src\sh\sh.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShAlgebra.hpp"
+				RelativePath="..\..\src\sh\ShAlgebra.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShArray.hpp"
+				RelativePath="..\..\src\sh\ShArray.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShAttrib.hpp"
+				RelativePath="..\..\src\sh\ShAttrib.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShAttribImpl.hpp"
+				RelativePath="..\..\src\sh\ShAttribImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShBackend.hpp"
+				RelativePath="..\..\src\sh\ShBackend.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShBaseTexture.hpp"
+				RelativePath="..\..\src\sh\ShBaseTexture.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShBaseTextureImpl.hpp"
+				RelativePath="..\..\src\sh\ShBaseTextureImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShBasicBlock.hpp"
+				RelativePath="..\..\src\sh\ShBasicBlock.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShBitSet.hpp"
+				RelativePath="..\..\src\sh\ShBitSet.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShBlock.hpp"
+				RelativePath="..\..\src\sh\ShBlock.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShCastManager.hpp"
+				RelativePath="..\..\src\sh\ShCastManager.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShCfgBlock.hpp"
+				RelativePath="..\..\src\sh\ShCfgBlock.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShChannel.hpp"
+				RelativePath="..\..\src\sh\ShChannel.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShChannelImpl.hpp"
+				RelativePath="..\..\src\sh\ShChannelImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShChannelNode.hpp"
+				RelativePath="..\..\src\sh\ShChannelNode.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShColor.hpp"
+				RelativePath="..\..\src\sh\ShColor.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShConcreteCTypeOpImpl.hpp"
+				RelativePath="..\..\src\sh\ShConcreteCTypeOpImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShConcreteRegularOpImpl.hpp"
+				RelativePath="..\..\src\sh\ShConcreteRegularOpImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShContext.hpp"
+				RelativePath="..\..\src\sh\ShContext.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShCtrlGraph.hpp"
+				RelativePath="..\..\src\sh\ShCtrlGraph.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShDataType.hpp"
+				RelativePath="..\..\src\sh\ShDataType.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShDataTypeImpl.hpp"
+				RelativePath="..\..\src\sh\ShDataTypeImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShDebug.hpp"
+				RelativePath="..\..\src\sh\ShDebug.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShDllExport.hpp"
+				RelativePath="..\..\src\sh\ShDllExport.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShError.hpp"
+				RelativePath="..\..\src\sh\ShError.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShEval.hpp"
+				RelativePath="..\..\src\sh\ShEval.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShEvalImpl.hpp"
+				RelativePath="..\..\src\sh\ShEvalImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShEvaluate.hpp"
+				RelativePath="..\..\src\sh\ShEvaluate.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShException.hpp"
+				RelativePath="..\..\src\sh\ShException.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShFixedManipulator.hpp"
+				RelativePath="..\..\src\sh\ShFixedManipulator.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShFraction.hpp"
+				RelativePath="..\..\src\sh\ShFraction.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShFractionImpl.hpp"
+				RelativePath="..\..\src\sh\ShFractionImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShGeneric.hpp"
+				RelativePath="..\..\src\sh\ShGeneric.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShGenericImpl.hpp"
+				RelativePath="..\..\src\sh\ShGenericImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShGraph.hpp"
+				RelativePath="..\..\src\sh\ShGraph.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShGraphImpl.hpp"
+				RelativePath="..\..\src\sh\ShGraphImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShHalf.hpp"
+				RelativePath="..\..\src\sh\ShHalf.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShHalfImpl.hpp"
+				RelativePath="..\..\src\sh\ShHalfImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShHashMap.hpp"
+				RelativePath="..\..\src\sh\ShHashMap.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShImage.hpp"
+				RelativePath="..\..\src\sh\ShImage.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShImage3D.hpp"
+				RelativePath="..\..\src\sh\ShImage3D.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShImageImpl.hpp"
+				RelativePath="..\..\src\sh\ShImageImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShInfo.hpp"
+				RelativePath="..\..\src\sh\ShInfo.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShInfoImpl.hpp"
+				RelativePath="..\..\src\sh\ShInfoImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShInstructions.hpp"
+				RelativePath="..\..\src\sh\ShInstructions.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShInternals.hpp"
+				RelativePath="..\..\src\sh\ShInternals.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShInterp.hpp"
+				RelativePath="..\..\src\sh\ShInterp.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLib.hpp"
+				RelativePath="..\..\src\sh\ShLib.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibArith.hpp"
+				RelativePath="..\..\src\sh\ShLibArith.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibArithImpl.hpp"
+				RelativePath="..\..\src\sh\ShLibArithImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibAttrib.hpp"
+				RelativePath="..\..\src\sh\ShLibAttrib.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibBoolean.hpp"
+				RelativePath="..\..\src\sh\ShLibBoolean.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibBooleanImpl.hpp"
+				RelativePath="..\..\src\sh\ShLibBooleanImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibClamp.hpp"
+				RelativePath="..\..\src\sh\ShLibClamp.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibClampImpl.hpp"
+				RelativePath="..\..\src\sh\ShLibClampImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibColor.hpp"
+				RelativePath="..\..\src\sh\ShLibColor.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibDeriv.hpp"
+				RelativePath="..\..\src\sh\ShLibDeriv.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibDerivImpl.hpp"
+				RelativePath="..\..\src\sh\ShLibDerivImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibGeometry.hpp"
+				RelativePath="..\..\src\sh\ShLibGeometry.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibGeometryImpl.hpp"
+				RelativePath="..\..\src\sh\ShLibGeometryImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibMatrix.hpp"
+				RelativePath="..\..\src\sh\ShLibMatrix.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibMatrixImpl.hpp"
+				RelativePath="..\..\src\sh\ShLibMatrixImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibMisc.hpp"
+				RelativePath="..\..\src\sh\ShLibMisc.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibMiscImpl.hpp"
+				RelativePath="..\..\src\sh\ShLibMiscImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibNoise.hpp"
+				RelativePath="..\..\src\sh\ShLibNoise.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibNoiseImpl.hpp"
+				RelativePath="..\..\src\sh\ShLibNoiseImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibNormal.hpp"
+				RelativePath="..\..\src\sh\ShLibNormal.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibPlane.hpp"
+				RelativePath="..\..\src\sh\ShLibPlane.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibPoint.hpp"
+				RelativePath="..\..\src\sh\ShLibPoint.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibPosition.hpp"
+				RelativePath="..\..\src\sh\ShLibPosition.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibSplines.hpp"
+				RelativePath="..\..\src\sh\ShLibSplines.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibSplines.hpp"
+				RelativePath="..\..\src\sh\ShLibSplines.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibTexCoord.hpp"
+				RelativePath="..\..\src\sh\ShLibTexCoord.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibTrig.hpp"
+				RelativePath="..\..\src\sh\ShLibTrig.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibTrigImpl.hpp"
+				RelativePath="..\..\src\sh\ShLibTrigImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibVector.hpp"
+				RelativePath="..\..\src\sh\ShLibVector.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibWorley.hpp"
+				RelativePath="..\..\src\sh\ShLibWorley.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLibWorleyImpl.hpp"
+				RelativePath="..\..\src\sh\ShLibWorleyImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShLinearAllocator.hpp"
+				RelativePath="..\..\src\sh\ShLinearAllocator.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShManipulator.hpp"
+				RelativePath="..\..\src\sh\ShManipulator.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShManipulatorImpl.hpp"
+				RelativePath="..\..\src\sh\ShManipulatorImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShMath.hpp"
+				RelativePath="..\..\src\sh\ShMath.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShMatrix.hpp"
+				RelativePath="..\..\src\sh\ShMatrix.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShMatrixImpl.hpp"
+				RelativePath="..\..\src\sh\ShMatrixImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShMemory.hpp"
+				RelativePath="..\..\src\sh\ShMemory.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShMemoryDep.hpp"
+				RelativePath="..\..\src\sh\ShMemoryDep.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShMeta.hpp"
+				RelativePath="..\..\src\sh\ShMeta.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShMetaForwarder.hpp"
+				RelativePath="..\..\src\sh\ShMetaForwarder.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShMetaImpl.hpp"
+				RelativePath="..\..\src\sh\ShMetaImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShMIPFilter.hpp"
+				RelativePath="..\..\src\sh\ShMIPFilter.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShNibbles.hpp"
+				RelativePath="..\..\src\sh\ShNibbles.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShNibblesImpl.hpp"
+				RelativePath="..\..\src\sh\ShNibblesImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShNormal.hpp"
+				RelativePath="..\..\src\sh\ShNormal.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShOperation.hpp"
+				RelativePath="..\..\src\sh\ShOperation.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShOptimizations.hpp"
+				RelativePath="..\..\src\sh\ShOptimizations.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShPalette.hpp"
+				RelativePath="..\..\src\sh\ShPalette.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShPaletteImpl.hpp"
+				RelativePath="..\..\src\sh\ShPaletteImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShPaletteNode.hpp"
+				RelativePath="..\..\src\sh\ShPaletteNode.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShParser.hpp"
+				RelativePath="..\..\src\sh\ShParser.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShPlane.hpp"
+				RelativePath="..\..\src\sh\ShPlane.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShPoint.hpp"
+				RelativePath="..\..\src\sh\ShPoint.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShPool.hpp"
+				RelativePath="..\..\src\sh\ShPool.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShPosition.hpp"
+				RelativePath="..\..\src\sh\ShPosition.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShProgram.hpp"
+				RelativePath="..\..\src\sh\ShProgram.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShProgramNode.hpp"
+				RelativePath="..\..\src\sh\ShProgramNode.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShProgramSet.hpp"
+				RelativePath="..\..\src\sh\ShProgramSet.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShQuaternion.hpp"
+				RelativePath="..\..\src\sh\ShQuaternion.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShQuaternionImpl.hpp"
+				RelativePath="..\..\src\sh\ShQuaternionImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShRecord.hpp"
+				RelativePath="..\..\src\sh\ShRecord.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShRefCount.hpp"
+				RelativePath="..\..\src\sh\ShRefCount.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShRefCountImpl.hpp"
+				RelativePath="..\..\src\sh\ShRefCountImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShStatement.hpp"
+				RelativePath="..\..\src\sh\ShStatement.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShStorageType.hpp"
+				RelativePath="..\..\src\sh\ShStorageType.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShStorageTypeImpl.hpp"
+				RelativePath="..\..\src\sh\ShStorageTypeImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShStream.hpp"
+				RelativePath="..\..\src\sh\ShStream.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShStreamImpl.hpp"
+				RelativePath="..\..\src\sh\ShStreamImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShStructural.hpp"
+				RelativePath="..\..\src\sh\ShStructural.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShSwizzle.hpp"
+				RelativePath="..\..\src\sh\ShSwizzle.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShSwizzleImpl.hpp"
+				RelativePath="..\..\src\sh\ShSwizzleImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShSyntax.hpp"
+				RelativePath="..\..\src\sh\ShSyntax.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShTable.hpp"
+				RelativePath="..\..\src\sh\ShTable.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShTexCoord.hpp"
+				RelativePath="..\..\src\sh\ShTexCoord.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShTexData.hpp"
+				RelativePath="..\..\src\sh\ShTexData.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShTexDataImpl.hpp"
+				RelativePath="..\..\src\sh\ShTexDataImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShTexture.hpp"
+				RelativePath="..\..\src\sh\ShTexture.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShTextureNode.hpp"
+				RelativePath="..\..\src\sh\ShTextureNode.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShToken.hpp"
+				RelativePath="..\..\src\sh\ShToken.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShTokenizer.hpp"
+				RelativePath="..\..\src\sh\ShTokenizer.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShTransformer.hpp"
+				RelativePath="..\..\src\sh\ShTransformer.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShTypeInfo.hpp"
+				RelativePath="..\..\src\sh\ShTypeInfo.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShTypeInfoImpl.hpp"
+				RelativePath="..\..\src\sh\ShTypeInfoImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShUtility.hpp"
+				RelativePath="..\..\src\sh\ShUtility.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShVariable.hpp"
+				RelativePath="..\..\src\sh\ShVariable.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShVariableNode.hpp"
+				RelativePath="..\..\src\sh\ShVariableNode.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShVariableType.hpp"
+				RelativePath="..\..\src\sh\ShVariableType.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShVariant.hpp"
+				RelativePath="..\..\src\sh\ShVariant.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShVariantCast.hpp"
+				RelativePath="..\..\src\sh\ShVariantCast.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShVariantCastImpl.hpp"
+				RelativePath="..\..\src\sh\ShVariantCastImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShVariantFactory.hpp"
+				RelativePath="..\..\src\sh\ShVariantFactory.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShVariantFactoryImpl.hpp"
+				RelativePath="..\..\src\sh\ShVariantFactoryImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShVariantImpl.hpp"
+				RelativePath="..\..\src\sh\ShVariantImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShVector.hpp"
+				RelativePath="..\..\src\sh\ShVector.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ShWrap.hpp"
+				RelativePath="..\..\src\sh\ShWrap.hpp"
 				>
 			</File>
 		</Filter>
