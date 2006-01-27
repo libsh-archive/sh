@@ -42,7 +42,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GR /EHsc /wd4003 /MDd /Zi /Od"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\src\sh;..\..\..\libpng\include;..\..\..\zlib\include"
+				AdditionalIncludeDirectories="..\..\src;..\..\..\libpng\include;..\..\..\zlib\include"
 				PreprocessorDefinitions="SH_DLLEXPORT=&quot;__declspec(dllimport)&quot;;WIN32;NOMINMAX;_USE_MATH_DEFINES;_DEBUG;SH_DEBUG;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -113,7 +113,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GR /EHsc /wd4003 /MD /O2"
-				AdditionalIncludeDirectories="..\..\src\sh;..\..\..\libpng\include;..\..\..\zlib\include"
+				AdditionalIncludeDirectories="..\..\src;..\..\..\libpng\include;..\..\..\zlib\include"
 				PreprocessorDefinitions="SH_DLLEXPORT=&quot;__declspec(dllimport)&quot;;WIN32;NOMINMAX;_USE_MATH_DEFINES;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="true"
