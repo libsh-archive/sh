@@ -29,13 +29,13 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 				DisableSpecificWarnings="4003;4251;4244"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="..\..\..\glut\lib\glut32.lib"
+				AdditionalDependencies="..\..\..\glut\lib\glut32.lib ..\..\..\install\lib\libsh.lib"
 				OutputFile="$(OutDir)/ShGlutExample.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
