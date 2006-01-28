@@ -290,7 +290,25 @@ void GlslCode::emit_discard(const ShStatement& stmt, const string& function)
 {
   SH_DEBUG_ASSERT((SH_OP_KIL == stmt.op) || (SH_OP_RET == stmt.op));
 
-  append_line(string("if (any(") + resolve(stmt.src[0]) + ")) " + function);
+  // Form a statement consistent with Sh's "discard" semantics
+  ostringstream oss;
+  oss << "if (";  
+  if (stmt.src[0].size() > 1) {
+    // Vector operand - cast to boolean vector and use "any"
+    oss << "any(bvec" << stmt.src[0].size() << "(";
+    oss << resolve(stmt.src[0]);
+    oss << "))";
+  } else {
+    // Scalar operand - simply cast to boolean
+    oss << "bool(";
+    oss << resolve(stmt.src[0]);
+    oss << ")";
+  }
+  // Close "if" and output contents
+  oss << ") " << function;
+
+  // Add the line
+  append_line(oss.str());
 }
 
 void GlslCode::emit_pow(const ShVariable& dest, const ShVariable& a, const ShVariable& b)
