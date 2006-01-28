@@ -74,15 +74,8 @@ void initShaders()
 
     normal = normalize(normal);
     lightv = normalize(lightv);
-
-    ShAttrib1f dp = normal | lightv;
-    ShAttrib1f compare = dp < 0.1f;
-        
-    SH_IF(compare) {
-      color = ShColor3f(1,0,1);
-    } SH_ELSE {
-      color = dp * diffusecolor;
-    } SH_ENDIF;
+    
+    color = (normal | lightv) * diffusecolor;
   } SH_END;
 
   shaders = new ShProgramSet(vsh, fsh);
