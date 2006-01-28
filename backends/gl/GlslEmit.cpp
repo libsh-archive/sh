@@ -423,6 +423,12 @@ void GlslCode::emit_logic(const ShStatement& stmt)
     }
   }
 
+  // Prepend cast to destination type
+  const std::string new_code =
+    glsl_typename(stmt.dest.valueType(), stmt.src[0].size()) +
+    std::string("(") + mapping.code + std::string(")");
+  mapping.code = new_code.c_str();
+
   // TODO: cache these mappings?
   
   table_substitution(stmt, mapping);
