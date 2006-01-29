@@ -4,7 +4,7 @@ alias headers
 ;
 
 
-alias util
+alias sources
 : # sources
 	[ glob *.cpp ]
 ;

@@ -7,7 +7,7 @@ alias headers
 ;
 
 
-alias sh
+alias sources
 : # sources
-	[ set.difference [ glob *.cpp ] : ShGeneric.cpp ]
+	[ set.difference [ glob *.cpp ] : ShGeneric.cpp ShDomTree.cpp ShSection.cpp ]
 ;
