@@ -3,6 +3,15 @@
 	* src/ShMeta.hpp, src/ShMetaImpl.hpp, src/ShMetaForwarder.hpp,
 	src/ShMetaForwarder.cpp: Allow iterating through meta data with
 	begin_meta and end_meta functions.
+
+2006-01-28  Andrew Lauritzen  <atlaurit@serioushack.com>
+	
+	* backends/gl/GlslEmit.cpp: Cast GLSL logical operations (<, >,
+	==, etc) to statement destination types (ex. float). This resolves
+	issue279, where not having this case would cause the shader to
+	fail to compile.
+	Fixed discard on ATI cards. (Needs to cast operand of bool/bvec
+	and use "any" on vector operands).
 	
 2006-01-27  Francois Marier  <francois@serioushack.com>
 
