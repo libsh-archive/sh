@@ -1,5 +1,7 @@
 path-constant TOP : . ;
 
+local location = [ project.attribute $(__name__) location ] ;
+
 using config/opengl ;
-using config/libpng ;
-using config/zlib ;
+using config/libpng : $(location)/../libpng ;
+using config/zlib : $(location)/../zlib ;
