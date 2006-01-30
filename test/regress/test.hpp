@@ -109,9 +109,14 @@ public:
       }
     }
 #ifdef SH_REGRESS_SHOWALL
+    print_pass(name);
+    for (unsigned j=0; j < inputs.size(); j++) {
+      char label[4] = "  A";
+      label[2] += j;
+      print_values(label, inputs[j]);
+    }
     pretty_print("out", out_size, out);
     pretty_print("exp", out_size, exp);
-    print_pass(name);
 #endif
     return 0;
   }

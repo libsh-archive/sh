@@ -272,22 +272,33 @@ void ArbCode::emit(const ShStatement& stmt)
   }
 }
 
-void ArbCode::real_div(const ShVariable& dest, const ShVariable& src0,
-		       const ShVariable& src1)
+void ArbCode::emit_div(const ShStatement& stmt)
 {
   // @todo type should handle other types (half-floats, fixed point)
 
-  ShVariable rcp(new ShVariableNode(SH_TEMP, src1.size(), SH_FLOAT));
+  ShVariable rcp(new ShVariableNode(SH_TEMP, stmt.src[1].size(), SH_FLOAT));
 
-  for (int i = 0; i < src1.size(); i++) {
-    m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp(i), src1(i)));
+  for (int i = 0; i < stmt.src[1].size(); i++) {
+    m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp(i), stmt.src[1](i)));
   }
-  m_instructions.push_back(ArbInst(SH_ARB_MUL, dest, src0, rcp));
-}
+  
+  bool on_ati = false;
+  const GLubyte* vendor = SH_GL_CHECK_ERROR(glGetString(GL_VENDOR));
+  if (vendor) {
+    std::string s(reinterpret_cast<const char*>(vendor));
+    on_ati = s.find("ATI") != s.npos;
+  }
 
-void ArbCode::emit_div(const ShStatement& stmt)
-{
-  real_div(stmt.dest, stmt.src[0], stmt.src[1]);
+  if (on_ati) {
+    // Work-around ATI bug where a number divided by itself returns 0 instead of 1
+    ShVariable divided(new ShVariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
+    m_instructions.push_back(ArbInst(SH_ARB_MUL, divided, stmt.src[0], rcp));
+    ShVariable equal(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
+    emit(ShStatement(equal, stmt.src[0], SH_OP_SEQ, stmt.src[1]));
+    emit(ShStatement(stmt.dest,SH_OP_COND, equal, equal, divided));
+  } else {
+    m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0], rcp));
+  }
 }
 
 void ArbCode::emit_sqrt(const ShStatement& stmt)
@@ -498,19 +509,19 @@ void ArbCode::emit_hyperbolic(const ShStatement& stmt)
   switch (stmt.op) {
   case SH_OP_COSH:
     // cosh x = [e^x + e^-x] / 2
-    m_instructions.push_back(ArbInst(SH_ARB_ADD, temp_cosh, e_plusX, e_minusX)); 
-    real_div(stmt.dest, temp_cosh, two);
+    m_instructions.push_back(ArbInst(SH_ARB_ADD, temp_cosh, e_plusX, e_minusX));
+    emit(ShStatement(stmt.dest, temp_cosh, SH_OP_DIV, two));
     break;
   case SH_OP_SINH:
     // cosh x = [e^x - e^-x] / 2
     m_instructions.push_back(ArbInst(SH_ARB_SUB, temp_sinh, e_plusX, e_minusX)); 
-    real_div(stmt.dest, temp_sinh, two);
+    emit(ShStatement(stmt.dest, temp_sinh, SH_OP_DIV, two));
     break;
   case SH_OP_TANH:
     // tanh x = sinh x / cosh x = [e^x - e^-x] / [e^x + e^-x]
     m_instructions.push_back(ArbInst(SH_ARB_ADD, temp_cosh, e_plusX, e_minusX)); 
     m_instructions.push_back(ArbInst(SH_ARB_SUB, temp_sinh, e_plusX, e_minusX)); 
-    real_div(stmt.dest, temp_sinh, temp_cosh);
+    emit(ShStatement(stmt.dest, temp_sinh, SH_OP_DIV, temp_cosh));
     break;
   default:
     SH_DEBUG_ASSERT(0);
@@ -587,22 +598,11 @@ void ArbCode::emit_tex(const ShStatement& stmt)
 
 void ArbCode::emit_nvcond(const ShStatement& stmt)
 {
-
   ShVariable dummy(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
   ArbInst updatecc(SH_ARB_MOV, dummy, stmt.src[0]);
   updatecc.update_cc = true;
   m_instructions.push_back(updatecc);
 
-  /*
-  ShSwizzle ccswiz = stmt.src[0].swizzle();
-  if (ccswiz.size() == 1) {
-    int indices[4];
-    for (int i = 0; i < stmt.dest.size(); i++) {
-      indices[i] = 0;
-    }
-    ccswiz *= ShSwizzle(1, stmt.dest.size(), indices);
-  }
-  */  
   if (stmt.dest != stmt.src[1]) {
     ArbInst movt(SH_ARB_MOV, stmt.dest, stmt.src[1]);
     movt.ccode = ArbInst::GT;

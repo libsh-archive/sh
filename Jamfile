@@ -11,11 +11,13 @@ import config/tools/dll : lib : xlib ;
 ################################################################################
 
 local requirements =
-	<include>src
-	<define>NOMINMAX
-	<define>_USE_MATH_DEFINES
-	<define>'SH_INSTALL_PREFIX=\"\"'
-	<variant>debug:<define>SH_DEBUG
+  <toolset>msvc:<define>NOMINMAX
+  <toolset>msvc:<define>_USE_MATH_DEFINES
+  <toolset>msvc:<define>_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1
+  <toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
+  <toolset>msvc:<define>_SCL_SECURE_NO_DEPRECATE
+  <define>'SH_INSTALL_PREFIX=\"\"'
+  <rtti>on
 ;
 
 
@@ -24,7 +26,9 @@ local requirements =
 ################################################################################
 
 local usage-requirements =
-	<define>SHDLLEXPORT_HPP # no export header needed
+  <include>src
+  <define>SHDLLEXPORT_HPP # no export header needed
+  <variant>debug:<define>SH_DEBUG
 ;
 
 
@@ -34,13 +38,13 @@ local usage-requirements =
 
 project sh
 : requirements
-	$(requirements)
+  $(requirements)
 : default-build
-	<threading>multi
-	release
-	debug
+  <threading>multi
+  release
+  debug
 : usage-requirements
-	$(usage-requirements)
+  $(usage-requirements)
 ;
 
 
@@ -50,24 +54,24 @@ project sh
 
 xlib libsh
 : # sources
-	src//sh
+  src/sh//sources
 : # requirements
-	<tag>@stage.add-variant-and-compiler
-	<rtti>on
+  <tag>@stage.add-variant-and-compiler
 : # default-build
 : # usage-requirements
 : # symbol
-	SH_DLLEXPORT
+  SH_DLLEXPORT
 ;
 
 
 lib libsharb
 : # sources
-	backends/gl//arb
-	libsh
-	/opengl//libgl
+  backends/gl//arb
+  libsh
+  /opengl//libgl
 : # requirements
-	<tag>@stage.add-variant-and-compiler
+  <include>src/sh
+  <tag>@stage.add-variant-and-compiler
 : # default-build
 : # usage-requirements
 ;
@@ -75,11 +79,12 @@ lib libsharb
 
 lib libshglsl
 : # sources
-	backends/gl//glsl
-	libsh
-	/opengl//libgl
+  backends/gl//glsl
+  libsh
+  /opengl//libgl
 : # requirements
-	<tag>@stage.add-variant-and-compiler
+  <include>src/sh
+  <tag>@stage.add-variant-and-compiler
 : # default-build
 : # usage-requirements
 ;
@@ -87,10 +92,11 @@ lib libshglsl
 
 lib libshcc
 : # sources
-	backends/cc//cc
-	libsh
+  backends/cc//cc
+  libsh
 : # requirements
-	<tag>@stage.add-variant-and-compiler
+  <include>src/sh
+  <tag>@stage.add-variant-and-compiler
 : # default-build
 : # usage-requirements
 ;
@@ -98,15 +104,15 @@ lib libshcc
 
 lib libshutil
 : # sources
-	util//util
-	/libpng//libpng
+  src/shutil//sources
+  /libpng//libpng
 : # requirements
-	<tag>@stage.add-variant-and-compiler
-	<use>libsh
-	<link>static
+  <tag>@stage.add-variant-and-compiler
+  <use>libsh
+  <link>static
 : # default-build
 : # usage-requirements
-	<library>libsh
+  <library>libsh
 ;
 
 
@@ -116,21 +122,21 @@ lib libshutil
 
 stage headers
 : # sources
-	src//headers
-	util//headers
+  src/sh//headers
+  src/shutil//headers
 : # requirements
 : # default-build
-	<location>include/sh
+  <location>include/sh
 ;
 explicit headers ;
 
 
 stage libraries
 : # sources
-	libsh libsharb libshglsl libshcc libshutil
+  libsh libsharb libshglsl libshcc libshutil
 : # requirements
 : # default-build
-	<location>lib
+  <location>lib
 ;
 explicit libraries ;
 

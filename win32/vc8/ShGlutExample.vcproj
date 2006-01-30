@@ -4,6 +4,7 @@
 	Version="8.00"
 	Name="ShGlutExample"
 	ProjectGUID="{227C5940-6E2C-4213-9460-DF65BD7F314F}"
+	RootNamespace="ShGlutExample"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -49,7 +50,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 				DisableSpecificWarnings="4003;4251;4244"
 			/>
 			<Tool
@@ -63,9 +64,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="..\..\..\glut\lib\glut32.lib"
+				AdditionalDependencies="libsh_debug.lib glut32.lib"
 				OutputFile="$(OutDir)/ShGlutExample.exe"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories="..\..\..\install\vc8\lib;..\..\..\glut\lib"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/ShGlutExample.pdb"
 				SubSystem="1"
@@ -142,9 +144,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="..\..\..\glut\lib\glut32.lib"
+				AdditionalDependencies="libsh.lib glut32.lib"
 				OutputFile="$(OutDir)/ShGlutExample.exe"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="..\..\..\install\vc8\lib;..\..\..\glut\lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"

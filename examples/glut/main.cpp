@@ -253,11 +253,19 @@ int main(int argc, char** argv)
   lightPos = ShPoint3f(5.0, 5.0, 5.0);
   diffusecolor = ShColor3f(0.5, 0.1, 0.2);
 
-  initShaders();
+  try {
+    initShaders();
+    shBind(*shaders);
+  }
+  catch (const std::exception &e) {
+    cerr << e.what() << endl;
+#ifdef _WIN32
+    system("pause");
+#endif
+    return 1;
+  }
 
-  shBind(*shaders);
-
-#if 0
+#if 1
   cout << "Vertex Unit:" << endl;
   vsh.node()->code()->print(cout);
   cout << "--" << endl;

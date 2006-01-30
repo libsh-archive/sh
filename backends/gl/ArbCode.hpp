@@ -126,9 +126,6 @@ private:
   void emit_ret(const SH::ShStatement& stmt);
   void emit_comment(const SH::ShStatement& stmt);
 
-  /// Emit the proper instructions for any kind of division
-  void real_div(const SH::ShVariable& dest, const SH::ShVariable& src0, const SH::ShVariable& src1);
-
   /// Allocate registers, after the code has been generated
   void allocRegs();
 
