@@ -277,14 +277,14 @@ void GlslCode::upload_uniforms()
       // Palettes are implemented as uniform arrays
       ShPaletteNodePtr palette = shref_dynamic_cast<ShPaletteNode>(*i);
       if (palette) {
-	      const GlslVariable& var(m_varmap->variable(palette));
+	const GlslVariable& var(m_varmap->variable(palette));
 
-	      for (unsigned i=0; i < palette->palette_length(); i++) {
-	        ShVariableNodePtr uniform = palette->get_node(i);
-	        stringstream name;
-	        name << var.name() << "[" << i << "]";
-	        real_update_uniform(uniform, name.str().c_str());
-	      }
+	for (unsigned i=0; i < palette->palette_length(); i++) {
+	  ShVariableNodePtr uniform = palette->get_node(i);
+	  stringstream name;
+	  name << var.name() << "[" << i << "]";
+	  real_update_uniform(uniform, name.str().c_str());
+	}
       }
     }
   }
