@@ -1,3 +1,9 @@
+2006-01-30  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/ShMeta.hpp, src/ShMetaImpl.hpp, src/ShMetaForwarder.hpp,
+	src/ShMetaForwarder.cpp: Allow iterating through meta data with
+	begin_meta and end_meta functions.
+	
 2006-01-27  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/ArbEmit.cpp, ArbCode.hpp (emit_div): Add a hack for
