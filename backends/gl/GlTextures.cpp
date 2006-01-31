@@ -96,7 +96,13 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node)
 #endif
   GLenum* formats = 0;
   
-  std::string exts(reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS)));
+  const char* exts_ptr = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
+  std::string exts;
+  if (exts_ptr) {
+    exts = std::string(exts_ptr);
+  } else {
+    SH_DEBUG_WARN("Could not read GL_EXTENSIONS.  Something wrong with your driver installation?");
+  }
 
   GLenum* float_formats = 0;
   GLenum* half_formats = 0;
@@ -221,7 +227,14 @@ GLenum shGlType(ShValueType valueType, ShValueType &convertedType) {
       break;
   }
 
-  std::string exts(reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS)));
+  const char* exts_ptr = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
+  std::string exts;
+  if (exts_ptr) {
+    exts = std::string(exts_ptr);
+  } else {
+    SH_DEBUG_WARN("Could not read GL_EXTENSIONS.  Something wrong with your driver installation?");
+  }
+
   if(valueType == SH_HALF) {
 #ifndef __APPLE__
     if (exts.find("NV_half_float") != std::string::npos) {

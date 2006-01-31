@@ -11,7 +11,6 @@ import config/tools/dll : lib : xlib ;
 ################################################################################
 
 local requirements =
-  <toolset>msvc:<define>NOMINMAX
   <toolset>msvc:<define>_USE_MATH_DEFINES
   <toolset>msvc:<define>_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1
   <toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
@@ -28,6 +27,7 @@ local requirements =
 local usage-requirements =
   <include>src
   <define>SHDLLEXPORT_HPP # no export header needed
+  <toolset>msvc:<define>NOMINMAX
   <variant>debug:<define>SH_DEBUG
 ;
 
@@ -64,6 +64,38 @@ xlib libsh
 ;
 
 
+lib libshutil
+: # sources
+  src/shutil//sources
+  /libpng//libpng
+: # requirements
+  <tag>@stage.add-variant-and-compiler
+  <use>libsh
+  <link>static
+: # default-build
+: # usage-requirements
+#  <library>libsh
+;
+
+
+################################################################################
+# backends
+################################################################################
+
+rule add-backend-tag ( name : type ? : property-set )
+{
+  import type ;
+  if [ type.is-derived $(type) LIB ]
+  {            
+    local properties = [ $(property-set).raw ] ;
+    if <variant>debug in $(properties) { name = $(name)_debug ; }
+
+    import virtual-target ;
+    return [ virtual-target.add-prefix-and-suffix $(name) : $(type) : $(property-set) ] ;
+  }
+}
+
+
 lib libsharb
 : # sources
   backends/gl//arb
@@ -71,7 +103,7 @@ lib libsharb
   /opengl//libgl
 : # requirements
   <include>src/sh
-  <tag>@stage.add-variant-and-compiler
+  <tag>@add-backend-tag
 : # default-build
 : # usage-requirements
 ;
@@ -84,7 +116,7 @@ lib libshglsl
   /opengl//libgl
 : # requirements
   <include>src/sh
-  <tag>@stage.add-variant-and-compiler
+  <tag>@add-backend-tag
 : # default-build
 : # usage-requirements
 ;
@@ -96,23 +128,9 @@ lib libshcc
   libsh
 : # requirements
   <include>src/sh
-  <tag>@stage.add-variant-and-compiler
+  <tag>@add-backend-tag
 : # default-build
 : # usage-requirements
-;
-
-
-lib libshutil
-: # sources
-  src/shutil//sources
-  /libpng//libpng
-: # requirements
-  <tag>@stage.add-variant-and-compiler
-  <use>libsh
-  <link>static
-: # default-build
-: # usage-requirements
-  <library>libsh
 ;
 
 
