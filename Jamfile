@@ -11,7 +11,6 @@ import config/tools/dll : lib : xlib ;
 ################################################################################
 
 local requirements =
-  <toolset>msvc:<define>NOMINMAX
   <toolset>msvc:<define>_USE_MATH_DEFINES
   <toolset>msvc:<define>_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1
   <toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
@@ -28,6 +27,7 @@ local requirements =
 local usage-requirements =
   <include>src
   <define>SHDLLEXPORT_HPP # no export header needed
+  <toolset>msvc:<define>NOMINMAX
   <variant>debug:<define>SH_DEBUG
 ;
 
@@ -112,7 +112,7 @@ lib libshutil
   <link>static
 : # default-build
 : # usage-requirements
-  <library>libsh
+#  <library>libsh
 ;
 
 
