@@ -116,7 +116,9 @@ ShProgram operator<<(const ShProgram& program, const ShStream& stream)
 
 ShStream& ShStream::operator=(const ShProgram& program)
 {
+  SH_DEBUG_ASSERT(program.node());
   ShBackendPtr backend = ShBackend::get_backend(program.target());
+  SH_DEBUG_ASSERT(backend);
   backend->execute(program.node(), *this);
   return *this;
 }
