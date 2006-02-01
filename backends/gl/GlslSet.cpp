@@ -28,26 +28,32 @@ using namespace SH;
 using namespace std;
 
 GlslSet::GlslSet()
-  : m_arb_program(glCreateProgramObjectARB()),
-    m_linked(false), m_bound(false)
+  : m_linked(false), m_bound(false)
 {
+  SH_GL_CHECK_ERROR(m_arb_program = glCreateProgramObjectARB());
+  SH_DEBUG_ASSERT(m_arb_program);
+
   m_shaders[0] = 0;
   m_shaders[1] = 0;
 }
 
 GlslSet::GlslSet(const SH::ShPointer<GlslCode>& code)
-  : m_arb_program(glCreateProgramObjectARB()),
-    m_linked(false), m_bound(false)
+  : m_linked(false), m_bound(false)
 {
+  SH_GL_CHECK_ERROR(m_arb_program = glCreateProgramObjectARB());
+  SH_DEBUG_ASSERT(m_arb_program);
+
   m_shaders[0] = 0;
   m_shaders[1] = 0;
   attach(code);
 }
 
 GlslSet::GlslSet(const SH::ShProgramSet& s)
-  : m_arb_program(glCreateProgramObjectARB()),
-    m_linked(false), m_bound(false)
+  : m_linked(false), m_bound(false)
 {
+  SH_GL_CHECK_ERROR(m_arb_program = glCreateProgramObjectARB());
+  SH_DEBUG_ASSERT(m_arb_program);
+
   m_shaders[0] = 0;
   m_shaders[1] = 0;
   for (ShProgramSet::const_iterator I = s.begin(); I != s.end(); ++I) {
@@ -63,9 +69,11 @@ GlslSet::GlslSet(const SH::ShProgramSet& s)
 }
 
 GlslSet::GlslSet(const GlslSet& other)
-  : m_arb_program(glCreateProgramObjectARB()),
-    m_linked(false), m_bound(false)
+  : m_linked(false), m_bound(false)
 {
+  SH_GL_CHECK_ERROR(m_arb_program = glCreateProgramObjectARB());
+  SH_DEBUG_ASSERT(m_arb_program);
+
   m_shaders[0] = 0;
   m_shaders[1] = 0;
   attach(other.m_shaders[0]);
