@@ -66,50 +66,49 @@ static GlslMapping opCodeTable[] = {
   {SH_OPERATION_END,  0} 
 };
 
-typedef map<SH::ShOperation, GlslOpCodeVecs> GlslOpCodeMap;
-
-GlslOpCodeVecs::GlslOpCodeVecs(const GlslMapping& mapping)
+void GlslCode::table_substitution(const ShStatement& stmt, const char* code_ptr)
 {
-  string code(mapping.code);
+  // TODO: This should definitely not be done every time a statement
+  // is emitted, we should cache it under the operation type.
 
-  // Dices up the code string into references #i or $i to 
-  // src variables and the code fragments between references. 
-  string::size_type i, j;
-  i = j = 0;
-  for (; (j = code.find_first_of("$", i)) != string::npos;) {
-    frag.push_back(code.substr(i, j - i));
-    i = j + 1;
-    j = code.find_first_not_of("012345689", i);
-    index.push_back(atoi(code.substr(i, j - i).c_str()));
-    i = j;
-  }
-  if (i == string::npos) {
-    frag.push_back("");
-  } else {
-    frag.push_back(code.substr(i));
-  }
-}
-
-void GlslCode::table_substitution(const ShStatement& stmt, GlslOpCodeVecs codeVecs)
-{
-  unsigned i=0;
-
-  // find the size of the biggest parameter
+  string code = code_ptr;
+  stringstream operation;
   int param_size=0;
-  for (i=0; i < codeVecs.index.size(); i++) {
-    const ShVariable& src = stmt.src[codeVecs.index[i]];
-    if (src.size() > param_size) {
-      param_size = src.size();
+
+  {
+    // find the size of the biggest parameter
+    string::size_type i = 0;
+    for (string::size_type j=0; (j = code.find_first_of("$", i)) != string::npos; i = j) {
+      i = j + 1;
+      j = code.find_first_not_of("012345689", i);
+      int index = atoi(code.substr(i, j - i).c_str());
+      const ShVariable& src = stmt.src[index];
+      if (src.size() > param_size) {
+        param_size = src.size();
+      }
     }
   }
-  
-  // print each parameter
-  stringstream operation;
-  for (i=0; i < codeVecs.index.size(); i++) { 
-    const ShVariable& src = stmt.src[codeVecs.index[i]];
-    operation << codeVecs.frag[i] << resolve(src, -1, param_size);
+
+  // Dices up the code string into references #i or $i to 
+  // src variables and the code fragments between references.
+  {
+    string::size_type i = 0;
+    for (string::size_type j=0; (j = code.find_first_of("$", i)) != string::npos; i = j) {
+      // print fragment before the variable
+      operation << code.substr(i, j - i);
+      i = j + 1;
+      j = code.find_first_not_of("012345689", i);
+
+      // print the variable
+      int index = atoi(code.substr(i, j - i).c_str());
+      const ShVariable& src = stmt.src[index];
+      operation << resolve(src, -1, param_size);
+    }
+
+    if (i != string::npos) {
+      operation << code.substr(i);
+    }
   }
-  operation << codeVecs.frag[i]; // code fragment after the last variable
 
   // create the full line of code
   stringstream line;
@@ -126,22 +125,29 @@ void GlslCode::table_substitution(const ShStatement& stmt, GlslOpCodeVecs codeVe
   append_line(line.str());
 }
 
-void GlslCode::emit(const ShStatement &stmt)
+bool GlslCode::handle_table_operation(const ShStatement& stmt)
 {
-  static GlslOpCodeMap opCodeMap;
-
-  // Lazily fill-in opCodeMap from the above table
-  if (opCodeMap.empty()) {
-    for (int i=0; opCodeTable[i].op != SH_OPERATION_END; i++) {
-      opCodeMap[opCodeTable[i].op] = GlslOpCodeVecs(opCodeTable[i]);
+  const char* code = 0;
+  {
+    unsigned i = 0;
+    for (ShOperation op = opCodeTable[i].op; op != SH_OPERATION_END; op = opCodeTable[++i].op) {
+      if (stmt.op == op) {
+        code = opCodeTable[i].code;
+      }
     }
   }
 
-  if(opCodeMap.find(stmt.op) != opCodeMap.end()) {
-    // Handle ops in the table first  
-    table_substitution(stmt, opCodeMap[stmt.op]);
-  } 
-  else {
+  if (code) {
+    table_substitution(stmt, code);
+    return true; // mapping was found
+  } else {
+    return false; // did not find a mapping in the table
+  }
+}
+
+void GlslCode::emit(const ShStatement &stmt)
+{
+  if (!handle_table_operation(stmt)) {
     // Handle the rest of the operations
     switch(stmt.op) {
     case SH_OP_CBRT:
@@ -390,28 +396,26 @@ void GlslCode::emit_log10(const ShStatement& stmt)
 
 void GlslCode::emit_logic(const ShStatement& stmt)
 {
-  GlslMapping mapping;
-  mapping.op = stmt.op;
-
+  string code = "";
   if ((stmt.src[0].size() > 1) || (stmt.src[1].size() > 1) ) {
     switch (stmt.op) {
     case SH_OP_SEQ:
-      mapping.code = "equal($0, $1)";
+      code = "equal($0, $1)";
       break;
     case SH_OP_SGT:
-      mapping.code = "greaterThan($0, $1)";
+      code = "greaterThan($0, $1)";
       break;
     case SH_OP_SGE:
-      mapping.code = "greaterThanEqual($0, $1)";
+      code = "greaterThanEqual($0, $1)";
       break;
     case SH_OP_SNE:
-      mapping.code = "notEqual($0, $1)";
+      code = "notEqual($0, $1)";
       break;
     case SH_OP_SLT:
-      mapping.code = "lessThan($0, $1)";
+      code = "lessThan($0, $1)";
       break;
     case SH_OP_SLE:
-      mapping.code = "lessThanEqual($0, $1)";
+      code = "lessThanEqual($0, $1)";
       break;
     default:
       SH_DEBUG_ASSERT(0);
@@ -419,22 +423,22 @@ void GlslCode::emit_logic(const ShStatement& stmt)
   } else {
     switch (stmt.op) {
     case SH_OP_SEQ:
-      mapping.code = "$0 == $1";
+      code = "$0 == $1";
       break;
     case SH_OP_SGT:
-      mapping.code = "$0 > $1";
+      code = "$0 > $1";
       break;
     case SH_OP_SGE:
-      mapping.code = "$0 >= $1";
+      code = "$0 >= $1";
       break;
     case SH_OP_SNE:
-      mapping.code = "$0 != $1";
+      code = "$0 != $1";
       break;
     case SH_OP_SLT:
-      mapping.code = "$0 < $1";
+      code = "$0 < $1";
       break;
     case SH_OP_SLE:
-      mapping.code = "$0 <= $1";
+      code = "$0 <= $1";
       break;
     default:
       SH_DEBUG_ASSERT(0);
@@ -442,14 +446,10 @@ void GlslCode::emit_logic(const ShStatement& stmt)
   }
 
   // Prepend cast to destination type
-  const std::string new_code =
-    glsl_typename(stmt.dest.valueType(), stmt.src[0].size()) +
-    std::string("(") + mapping.code + std::string(")");
-  mapping.code = new_code.c_str();
+  code = glsl_typename(stmt.dest.valueType(), stmt.src[0].size()) +
+    std::string("(") + code + std::string(")");
 
-  // TODO: cache these mappings?
-  
-  table_substitution(stmt, mapping);
+  table_substitution(stmt, code.c_str());
 }
 
 void GlslCode::emit_noise(const ShStatement& stmt)
