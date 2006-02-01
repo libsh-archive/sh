@@ -57,7 +57,7 @@ rule init ( prefix ? : include-dir ? )
       lib libltdl
       : # sources
       : # requirements
-        <name>ltdl
+        <file>$(prefix)/lib/libltdl.so.3
       : # default-build
       : # usage-requirements
         $(usage-requirements)
