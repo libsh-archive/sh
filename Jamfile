@@ -2,8 +2,9 @@
 # imports
 ################################################################################
 
-import stage ;
 import config/tools/dll : lib : xlib ;
+import package ;
+import stage ;
 
 
 ################################################################################
@@ -49,7 +50,7 @@ project sh
 
 
 ################################################################################
-# targets
+# libraries
 ################################################################################
 
 xlib libsh
@@ -138,29 +139,28 @@ lib libshcc
 # install
 ################################################################################
 
-stage headers
-: # sources
-  src/sh//headers
-  src/shutil//headers
-: # requirements
-: # default-build
-  <location>include/sh
-;
-explicit headers ;
-
-
-stage libraries
-: # sources
-  libsh libsharb libshglsl libshcc libshutil
-: # requirements
-: # default-build
-  <location>lib
-;
-explicit libraries ;
-
-
 alias binaries ;
 explicit binaries ;
 
 
-alias all : headers libraries binaries ;
+alias libraries : libsh libsharb libshglsl libshcc libshutil ;
+explicit libraries ;
+
+
+alias headers : src//headers ;
+explicit headers ;
+
+
+alias all : binaries libraries headers ;
+
+
+package.install sh
+: # properties
+  <install-source-root>src
+: binaries
+: libraries
+: headers
+;
+
+alias install-sh : sh ;
+explicit install-sh ;
