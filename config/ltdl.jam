@@ -17,12 +17,12 @@ rule init ( prefix ? : include-dir ? )
 
     if ! $(prefix) # env var not found
     {
-	    import os ;
       if [ path.exists /usr/$(include-subdir)/ltdl.h ]
       {
         prefix = /usr ;
       }
 
+      import os ;
       if ! $(prefix) && [ os.on-unix ]
       {
         errors.error "ltdl: No prefix given, LTDL_PATH empty and default directory not found" ;
@@ -47,21 +47,24 @@ rule init ( prefix ? : include-dir ? )
     .prefix = $(prefix) ;
 
     local usage-requirements =
-      <include>$(.prefix)/$(include-subdir)
-      <dll-path>$(.prefix)/lib
-      <library-path>$(.prefix)/lib
+      <include>$(include-dir)
+      <dll-path>$(prefix)/lib
+      <library-path>$(prefix)/lib
     ;
 
-    alias libltdl ;
-
-    lib libltdl
-    : # sources
-    : # requirements
-      <os>unix
-      <name>ltdl
-    : # default-build
-    : # usage-requirements
-      $(usage-requirements)
-    ;
+    if [ os.on-unix ]
+    {
+      lib libltdl
+      : # sources
+      : # requirements
+        <file>$(prefix)/lib/libltdl.so.3
+      : # default-build
+      : # usage-requirements
+        $(usage-requirements)
+      ;
+    }
+    else {
+      alias libltdl ;
+    }
   }
 }
