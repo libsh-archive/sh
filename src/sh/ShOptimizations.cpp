@@ -446,6 +446,36 @@ struct ForwardSubst {
   AME m_ame;
 };
 
+struct ForwardPlacement {
+  
+  void operator()(const ShCtrlGraphNodePtr& node) {
+    if (!node) return;
+    ShBasicBlockPtr block = node->block;
+    if (!block) return;
+    for (ShBasicBlock::ShStmtList::iterator I = block->begin();
+         I != block->end(); ++I) {
+      if(I->dest.null()) continue;
+
+      for (MovableList::iterator J = m_movable.begin(); 
+           J != m_movable.end();) {
+        if (inRHS((*J)->dest.node(), *I) || 
+            inRHS(I->dest.node(), **J)) {
+          block->m_statements.insert(I, **J);
+          block->m_statements.erase(*J);
+          J = m_movable.erase(J);
+        }
+        else
+          ++J;
+      }
+      m_movable.push_back(I);
+    }
+    m_movable.clear();
+  }
+  
+  typedef std::list<ShBasicBlock::ShStmtList::iterator> MovableList;
+  MovableList m_movable;
+};
+
 }
 
 namespace SH {
@@ -525,6 +555,12 @@ void forward_substitute(ShProgram& p, bool& changed)
   p.node()->ctrlGraph->dfs(f);
 }
 
+void forward_placement(ShProgram& p)
+{
+  ForwardPlacement r;
+  p.node()->ctrlGraph->dfs(r);
+}
+
 void optimize(ShProgram& p, int level)
 {
   if (level <= 0) return;
@@ -592,6 +628,10 @@ void optimize(ShProgram& p, int level)
     }
 
     remove_branch_instructions(p);
+
+    if (!ShContext::current()->optimization_disabled("forward placement")) {
+      forward_placement(p);
+    }
 
 #ifdef SH_DEBUG_OPTIMIZER
     SH_DEBUG_PRINT("---Optimizer pass " << pass << " END---");
