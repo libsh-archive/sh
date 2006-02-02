@@ -36,20 +36,20 @@ static GlslMapping opCodeTable[] = {
   {SH_OP_CEIL,  "ceil($0)"},
   {SH_OP_COS,   "cos($0)"},
   {SH_OP_DOT,   "dot($0, $1)"},
-  {SH_OP_DIV,   "$0 / $1"},
+  //{SH_OP_DIV,   "$0 / $1"}, // Needs ATI work-around
   {SH_OP_DX,    "dFdx($0)"},
   {SH_OP_DY,    "dFdy($0)"},
   {SH_OP_EXP,   "exp($0)"},
   {SH_OP_EXP2,  "exp2($0)"},
   {SH_OP_FLR,   "floor($0)"},
   {SH_OP_FRAC,  "fract($0)"},
-  {SH_OP_LOG,   "log($0)"},
+  //{SH_OP_LOG,   "log($0)"}, // Needs ATI work-around
   {SH_OP_LOG2,  "log2($0)"},
   {SH_OP_LRP,   "mix($2, $1, $0)"},
   {SH_OP_MAD,   "$0 * $1 + $2"},
   {SH_OP_MAX,   "max($0, $1)"},
   {SH_OP_MIN,   "min($0, $1)"},
-  {SH_OP_MOD,   "mod($0, $1)"},
+  //{SH_OP_MOD,   "mod($0, $1)"}, // Needs ATI work-around
   {SH_OP_MUL,   "$0 * $1"},
   {SH_OP_NEG,   "-($0)"},
   {SH_OP_NORM,  "normalize($0)"},
@@ -66,50 +66,49 @@ static GlslMapping opCodeTable[] = {
   {SH_OPERATION_END,  0} 
 };
 
-typedef map<SH::ShOperation, GlslOpCodeVecs> GlslOpCodeMap;
-
-GlslOpCodeVecs::GlslOpCodeVecs(const GlslMapping& mapping)
+void GlslCode::table_substitution(const ShStatement& stmt, const char* code_ptr)
 {
-  string code(mapping.code);
+  // TODO: This should definitely not be done every time a statement
+  // is emitted, we should cache it under the operation type.
 
-  // Dices up the code string into references #i or $i to 
-  // src variables and the code fragments between references. 
-  string::size_type i, j;
-  i = j = 0;
-  for (; (j = code.find_first_of("$", i)) != string::npos;) {
-    frag.push_back(code.substr(i, j - i));
-    i = j + 1;
-    j = code.find_first_not_of("012345689", i);
-    index.push_back(atoi(code.substr(i, j - i).c_str()));
-    i = j;
-  }
-  if (i == string::npos) {
-    frag.push_back("");
-  } else {
-    frag.push_back(code.substr(i));
-  }
-}
-
-void GlslCode::table_substitution(const ShStatement& stmt, GlslOpCodeVecs codeVecs)
-{
-  unsigned i=0;
-
-  // find the size of the biggest parameter
+  string code = code_ptr;
+  stringstream operation;
   int param_size=0;
-  for (i=0; i < codeVecs.index.size(); i++) {
-    const ShVariable& src = stmt.src[codeVecs.index[i]];
-    if (src.size() > param_size) {
-      param_size = src.size();
+
+  {
+    // find the size of the biggest parameter
+    string::size_type i = 0;
+    for (string::size_type j=0; (j = code.find_first_of("$", i)) != string::npos; i = j) {
+      i = j + 1;
+      j = code.find_first_not_of("012345689", i);
+      int index = atoi(code.substr(i, j - i).c_str());
+      const ShVariable& src = stmt.src[index];
+      if (src.size() > param_size) {
+        param_size = src.size();
+      }
     }
   }
-  
-  // print each parameter
-  stringstream operation;
-  for (i=0; i < codeVecs.index.size(); i++) { 
-    const ShVariable& src = stmt.src[codeVecs.index[i]];
-    operation << codeVecs.frag[i] << resolve(src, -1, param_size);
+
+  // Dices up the code string into references #i or $i to 
+  // src variables and the code fragments between references.
+  {
+    string::size_type i = 0;
+    for (string::size_type j=0; (j = code.find_first_of("$", i)) != string::npos; i = j) {
+      // print fragment before the variable
+      operation << code.substr(i, j - i);
+      i = j + 1;
+      j = code.find_first_not_of("012345689", i);
+
+      // print the variable
+      int index = atoi(code.substr(i, j - i).c_str());
+      const ShVariable& src = stmt.src[index];
+      operation << resolve(src, -1, param_size);
+    }
+
+    if (i != string::npos) {
+      operation << code.substr(i);
+    }
   }
-  operation << codeVecs.frag[i]; // code fragment after the last variable
 
   // create the full line of code
   stringstream line;
@@ -126,22 +125,29 @@ void GlslCode::table_substitution(const ShStatement& stmt, GlslOpCodeVecs codeVe
   append_line(line.str());
 }
 
-void GlslCode::emit(const ShStatement &stmt)
+bool GlslCode::handle_table_operation(const ShStatement& stmt)
 {
-  static GlslOpCodeMap opCodeMap;
-
-  // Lazily fill-in opCodeMap from the above table
-  if (opCodeMap.empty()) {
-    for (int i=0; opCodeTable[i].op != SH_OPERATION_END; i++) {
-      opCodeMap[opCodeTable[i].op] = GlslOpCodeVecs(opCodeTable[i]);
+  const char* code = 0;
+  {
+    unsigned i = 0;
+    for (ShOperation op = opCodeTable[i].op; op != SH_OPERATION_END; op = opCodeTable[++i].op) {
+      if (stmt.op == op) {
+        code = opCodeTable[i].code;
+      }
     }
   }
 
-  if(opCodeMap.find(stmt.op) != opCodeMap.end()) {
-    // Handle ops in the table first  
-    table_substitution(stmt, opCodeMap[stmt.op]);
-  } 
-  else {
+  if (code) {
+    table_substitution(stmt, code);
+    return true; // mapping was found
+  } else {
+    return false; // did not find a mapping in the table
+  }
+}
+
+void GlslCode::emit(const ShStatement &stmt)
+{
+  if (!handle_table_operation(stmt)) {
     // Handle the rest of the operations
     switch(stmt.op) {
     case SH_OP_CBRT:
@@ -156,6 +162,9 @@ void GlslCode::emit(const ShStatement &stmt)
     case SH_OP_COND:
       emit_cond(stmt);
       break;
+    case SH_OP_DIV:
+      emit_ati_workaround(stmt, 1, "$0 / $1");
+      break;
     case SH_OP_EXP10:
       emit_exp10(stmt);
       break;
@@ -165,8 +174,14 @@ void GlslCode::emit(const ShStatement &stmt)
     case SH_OP_LIT:
       emit_lit(stmt);
       break;
+    case SH_OP_LOG:
+      emit_log(stmt);
+      break;
     case SH_OP_LOG10:
       emit_log10(stmt);
+      break;
+    case SH_OP_MOD:
+      emit_ati_workaround(stmt, 0, "mod($0, $1)");
       break;
     case SH_OP_NOISE:
       emit_noise(stmt);
@@ -198,7 +213,7 @@ void GlslCode::emit(const ShStatement &stmt)
       emit_comment(stmt);
       break;
     default:
-      shError(ShException(string("Glsl Code: Unknown operation ") + opInfo[stmt.op].name));
+      shError(ShBackendException(string("Glsl Code: Unknown operation ") + opInfo[stmt.op].name));
       break;
     }
   }
@@ -246,6 +261,25 @@ string GlslCode::resolve_constant(double constant, const ShVariable& var, int si
   return s.str();
 }
 
+void GlslCode::emit_ati_workaround(const ShStatement& stmt, double real_answer, const char* code)
+{
+  bool on_ati = false;
+  const GLubyte* vendor = SH_GL_CHECK_ERROR(glGetString(GL_VENDOR));
+  if (vendor) {
+    std::string s(reinterpret_cast<const char*>(vendor));
+    on_ati = s.find("ATI") != s.npos;
+  }
+
+  if (on_ati) {
+    ShVariable tmp(allocate_temp(stmt));
+    ShVariable constant(allocate_constant(stmt, real_answer));
+    table_substitution(ShStatement(tmp, stmt.src[0], stmt.op, stmt.src[1]), code);
+    append_line(resolve(stmt.dest) + " = (" + resolve(stmt.src[0]) + " == " + resolve(stmt.src[1]) + ") ? " + resolve(constant) + " : " + resolve(tmp));
+  } else {
+    table_substitution(stmt, code);
+  }
+}
+
 void GlslCode::emit_cbrt(const ShStatement& stmt)
 {
   SH_DEBUG_ASSERT(SH_OP_CBRT == stmt.op);
@@ -273,9 +307,14 @@ void GlslCode::emit_cond(const ShStatement& stmt)
   const int size = stmt.src[0].size();
   if (on_nvidia || (1 == size)) {
     // CG has a component-wise COND operator
-    append_line(resolve(stmt.dest) + " = (" + resolve(stmt.src[0]) + " > " + 
-		resolve_constant(0, stmt.src[0]) + ") ? " + resolve(stmt.src[1]) +
-		" : " + resolve(stmt.src[2]));
+    string code = string ("(") + resolve(stmt.src[0]) + " > " + 
+      resolve_constant(0, stmt.src[0]) + ") ? " + resolve(stmt.src[1]) +
+      " : " + resolve(stmt.src[2]);
+  
+    if (size != stmt.dest.size()) {
+      code = glsl_typename(stmt.dest.valueType(), stmt.dest.size()) +  "(" + code + ")";
+    }
+    append_line(resolve(stmt.dest) + " = " + code);
   } else {
     // The Glsl spec requires the first argument to COND to be a scalar
     for (int i=0; i < size; i++) {
@@ -290,7 +329,25 @@ void GlslCode::emit_discard(const ShStatement& stmt, const string& function)
 {
   SH_DEBUG_ASSERT((SH_OP_KIL == stmt.op) || (SH_OP_RET == stmt.op));
 
-  append_line(string("if (any(") + resolve(stmt.src[0]) + ")) " + function);
+  // Form a statement consistent with Sh's "discard" semantics
+  ostringstream oss;
+  oss << "if (";  
+  if (stmt.src[0].size() > 1) {
+    // Vector operand - cast to boolean vector and use "any"
+    oss << "any(bvec" << stmt.src[0].size() << "(";
+    oss << resolve(stmt.src[0]);
+    oss << "))";
+  } else {
+    // Scalar operand - simply cast to boolean
+    oss << "bool(";
+    oss << resolve(stmt.src[0]);
+    oss << ")";
+  }
+  // Close "if" and output contents
+  oss << ") " << function;
+
+  // Add the line
+  append_line(oss.str());
 }
 
 void GlslCode::emit_pow(const ShVariable& dest, const ShVariable& a, const ShVariable& b)
@@ -363,6 +420,38 @@ void GlslCode::emit_lit(const ShStatement& stmt)
   append_line(resolve(stmt.dest, 3) + " = " + resolve_constant(1, stmt.dest, 1));
 }
 
+void GlslCode::emit_log(const ShStatement& stmt)
+{
+  SH_DEBUG_ASSERT(SH_OP_LOG == stmt.op);
+  bool on_ati = false;
+  const GLubyte* vendor = SH_GL_CHECK_ERROR(glGetString(GL_VENDOR));
+  if (vendor) {
+    std::string s(reinterpret_cast<const char*>(vendor));
+    on_ati = s.find("ATI") != s.npos;
+  }
+
+  if (on_ati) {
+    ShVariable tmp(allocate_temp(stmt));
+    table_substitution(ShStatement(tmp, stmt.op, stmt.src[0]), "log($0)");
+
+    const int size = stmt.dest.size();
+    if (1 == size) {
+      // Must be handled separately to preserve the destination swizzle
+      append_line(resolve(stmt.dest) + " = (" + resolve(stmt.src[0]) + " == " + 
+                  resolve_constant(1, stmt.src[0], 1) + ") ? " + resolve_constant(0, stmt.src[0], 1) +
+                  " : " + resolve(tmp, 0));
+    } else {
+      for (int i=0; i < size; i++) {
+        append_line(resolve(stmt.dest, i) + " = (" + resolve(stmt.src[0], i) + " == " + 
+                    resolve_constant(1, stmt.src[0], 1) + ") ? " + resolve_constant(0, stmt.src[0], 1) +
+                    " : " + resolve(tmp, i));
+      }
+    }
+  } else {
+    table_substitution(stmt, "log($0)");
+  }
+}
+
 void GlslCode::emit_log10(const ShStatement& stmt)
 {
   SH_DEBUG_ASSERT(SH_OP_LOG10 == stmt.op);
@@ -372,28 +461,26 @@ void GlslCode::emit_log10(const ShStatement& stmt)
 
 void GlslCode::emit_logic(const ShStatement& stmt)
 {
-  GlslMapping mapping;
-  mapping.op = stmt.op;
-
+  string code = "";
   if ((stmt.src[0].size() > 1) || (stmt.src[1].size() > 1) ) {
     switch (stmt.op) {
     case SH_OP_SEQ:
-      mapping.code = "equal($0, $1)";
+      code = "equal($0, $1)";
       break;
     case SH_OP_SGT:
-      mapping.code = "greaterThan($0, $1)";
+      code = "greaterThan($0, $1)";
       break;
     case SH_OP_SGE:
-      mapping.code = "greaterThanEqual($0, $1)";
+      code = "greaterThanEqual($0, $1)";
       break;
     case SH_OP_SNE:
-      mapping.code = "notEqual($0, $1)";
+      code = "notEqual($0, $1)";
       break;
     case SH_OP_SLT:
-      mapping.code = "lessThan($0, $1)";
+      code = "lessThan($0, $1)";
       break;
     case SH_OP_SLE:
-      mapping.code = "lessThanEqual($0, $1)";
+      code = "lessThanEqual($0, $1)";
       break;
     default:
       SH_DEBUG_ASSERT(0);
@@ -401,31 +488,32 @@ void GlslCode::emit_logic(const ShStatement& stmt)
   } else {
     switch (stmt.op) {
     case SH_OP_SEQ:
-      mapping.code = "$0 == $1";
+      code = "$0 == $1";
       break;
     case SH_OP_SGT:
-      mapping.code = "$0 > $1";
+      code = "$0 > $1";
       break;
     case SH_OP_SGE:
-      mapping.code = "$0 >= $1";
+      code = "$0 >= $1";
       break;
     case SH_OP_SNE:
-      mapping.code = "$0 != $1";
+      code = "$0 != $1";
       break;
     case SH_OP_SLT:
-      mapping.code = "$0 < $1";
+      code = "$0 < $1";
       break;
     case SH_OP_SLE:
-      mapping.code = "$0 <= $1";
+      code = "$0 <= $1";
       break;
     default:
       SH_DEBUG_ASSERT(0);
     }
   }
 
-  // TODO: cache these mappings?
-  
-  table_substitution(stmt, mapping);
+  // cast for the destination type
+  code = glsl_typename(stmt.dest.valueType(), stmt.dest.size()) +  "(" + code + ")";
+
+  table_substitution(stmt, code.c_str());
 }
 
 void GlslCode::emit_noise(const ShStatement& stmt)

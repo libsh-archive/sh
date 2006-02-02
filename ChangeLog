@@ -1,8 +1,29 @@
+2006-02-01  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslEmit.cpp, GlslCode.hpp (emit_logic): Fix the
+	destination cast.
+	(emit_log): Work-around for log(1) != 0 on ATI.
+	(emit_ati_workaround): Work-around for DIV and MOD on ATI.
+
+2006-01-31  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslEmit.cpp, GlslCode.cpp: Remove the table lookup
+	caching code to work around gcc crashes with ATI on Linux.
+
 2006-01-30  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlTextures.cpp: Check for errors when getting the
 	list of GL_EXTENSIONS and display a warning.
 
+2006-01-28  Andrew Lauritzen  <atlaurit@serioushack.com>
+	
+	* backends/gl/GlslEmit.cpp: Cast GLSL logical operations (<, >,
+	==, etc) to statement destination types (ex. float). This resolves
+	issue279, where not having this case would cause the shader to
+	fail to compile.
+	Fixed discard on ATI cards. (Needs to cast operand of bool/bvec
+	and use "any" on vector operands).
+	
 2006-01-27  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/ArbEmit.cpp, ArbCode.hpp (emit_div): Add a hack for

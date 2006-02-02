@@ -45,20 +45,6 @@ struct GlslMapping {
   const char* code;
 };
 
-struct GlslOpCodeVecs
-{
-  GlslOpCodeVecs(const GlslMapping& mapping);
-
-  GlslOpCodeVecs() {}
-  bool operator<(const GlslOpCodeVecs &other) {
-    return op < other.op;
-  }
-
-  SH::ShOperation op;
-  std::vector<int> index;
-  std::vector<std::string> frag;
-};
-
 struct GlslLine {
   int indent;
   std::string code;
@@ -134,6 +120,7 @@ private:
 
   /// Generate code for a single Sh statement.
   void emit(const SH::ShStatement& stmt);
+  void emit_ati_workaround(const SH::ShStatement& stmt, double real_answer, const char* code);
   void emit_cbrt(const SH::ShStatement& stmt);
   void emit_comment(const SH::ShStatement& stmt);
   void emit_cond(const SH::ShStatement& stmt);
@@ -141,6 +128,7 @@ private:
   void emit_exp10(const SH::ShStatement& stmt);
   void emit_hyperbolic(const SH::ShStatement& stmt);
   void emit_lit(const SH::ShStatement& stmt);
+  void emit_log(const SH::ShStatement& stmt);
   void emit_log10(const SH::ShStatement& stmt);
   void emit_logic(const SH::ShStatement& stmt);
   void emit_noise(const SH::ShStatement& stmt);
@@ -150,7 +138,8 @@ private:
   void emit_sum(const SH::ShStatement& stmt);
   void emit_texture(const SH::ShStatement& stmt);
   
-  void table_substitution(const SH::ShStatement& stmt, GlslOpCodeVecs codeVecs);
+  void table_substitution(const SH::ShStatement& stmt, const char* code_ptr);
+  bool handle_table_operation(const SH::ShStatement& stmt);
   
   std::string resolve(const SH::ShVariable& v, int index = -1, int size = 0) const;
   std::string resolve(const SH::ShVariable& v, const SH::ShVariable& index) const;
