@@ -36,20 +36,20 @@ static GlslMapping opCodeTable[] = {
   {SH_OP_CEIL,  "ceil($0)"},
   {SH_OP_COS,   "cos($0)"},
   {SH_OP_DOT,   "dot($0, $1)"},
-  {SH_OP_DIV,   "$0 / $1"},
+  //{SH_OP_DIV,   "$0 / $1"}, // Needs ATI work-around
   {SH_OP_DX,    "dFdx($0)"},
   {SH_OP_DY,    "dFdy($0)"},
   {SH_OP_EXP,   "exp($0)"},
   {SH_OP_EXP2,  "exp2($0)"},
   {SH_OP_FLR,   "floor($0)"},
   {SH_OP_FRAC,  "fract($0)"},
-  {SH_OP_LOG,   "log($0)"},
+  //{SH_OP_LOG,   "log($0)"}, // Needs ATI work-around
   {SH_OP_LOG2,  "log2($0)"},
   {SH_OP_LRP,   "mix($2, $1, $0)"},
   {SH_OP_MAD,   "$0 * $1 + $2"},
   {SH_OP_MAX,   "max($0, $1)"},
   {SH_OP_MIN,   "min($0, $1)"},
-  {SH_OP_MOD,   "mod($0, $1)"},
+  //{SH_OP_MOD,   "mod($0, $1)"}, // Needs ATI work-around
   {SH_OP_MUL,   "$0 * $1"},
   {SH_OP_NEG,   "-($0)"},
   {SH_OP_NORM,  "normalize($0)"},
@@ -162,6 +162,9 @@ void GlslCode::emit(const ShStatement &stmt)
     case SH_OP_COND:
       emit_cond(stmt);
       break;
+    case SH_OP_DIV:
+      emit_ati_workaround(stmt, 1, "$0 / $1");
+      break;
     case SH_OP_EXP10:
       emit_exp10(stmt);
       break;
@@ -171,8 +174,14 @@ void GlslCode::emit(const ShStatement &stmt)
     case SH_OP_LIT:
       emit_lit(stmt);
       break;
+    case SH_OP_LOG:
+      emit_log(stmt);
+      break;
     case SH_OP_LOG10:
       emit_log10(stmt);
+      break;
+    case SH_OP_MOD:
+      emit_ati_workaround(stmt, 0, "mod($0, $1)");
       break;
     case SH_OP_NOISE:
       emit_noise(stmt);
@@ -204,7 +213,7 @@ void GlslCode::emit(const ShStatement &stmt)
       emit_comment(stmt);
       break;
     default:
-      shError(ShException(string("Glsl Code: Unknown operation ") + opInfo[stmt.op].name));
+      shError(ShBackendException(string("Glsl Code: Unknown operation ") + opInfo[stmt.op].name));
       break;
     }
   }
@@ -252,6 +261,25 @@ string GlslCode::resolve_constant(double constant, const ShVariable& var, int si
   return s.str();
 }
 
+void GlslCode::emit_ati_workaround(const ShStatement& stmt, double real_answer, const char* code)
+{
+  bool on_ati = false;
+  const GLubyte* vendor = SH_GL_CHECK_ERROR(glGetString(GL_VENDOR));
+  if (vendor) {
+    std::string s(reinterpret_cast<const char*>(vendor));
+    on_ati = s.find("ATI") != s.npos;
+  }
+
+  if (on_ati) {
+    ShVariable tmp(allocate_temp(stmt));
+    ShVariable constant(allocate_constant(stmt, real_answer));
+    table_substitution(ShStatement(tmp, stmt.src[0], stmt.op, stmt.src[1]), code);
+    append_line(resolve(stmt.dest) + " = (" + resolve(stmt.src[0]) + " == " + resolve(stmt.src[1]) + ") ? " + resolve(constant) + " : " + resolve(tmp));
+  } else {
+    table_substitution(stmt, code);
+  }
+}
+
 void GlslCode::emit_cbrt(const ShStatement& stmt)
 {
   SH_DEBUG_ASSERT(SH_OP_CBRT == stmt.op);
@@ -279,9 +307,14 @@ void GlslCode::emit_cond(const ShStatement& stmt)
   const int size = stmt.src[0].size();
   if (on_nvidia || (1 == size)) {
     // CG has a component-wise COND operator
-    append_line(resolve(stmt.dest) + " = (" + resolve(stmt.src[0]) + " > " + 
-		resolve_constant(0, stmt.src[0]) + ") ? " + resolve(stmt.src[1]) +
-		" : " + resolve(stmt.src[2]));
+    string code = string ("(") + resolve(stmt.src[0]) + " > " + 
+      resolve_constant(0, stmt.src[0]) + ") ? " + resolve(stmt.src[1]) +
+      " : " + resolve(stmt.src[2]);
+  
+    if (size != stmt.dest.size()) {
+      code = glsl_typename(stmt.dest.valueType(), stmt.dest.size()) +  "(" + code + ")";
+    }
+    append_line(resolve(stmt.dest) + " = " + code);
   } else {
     // The Glsl spec requires the first argument to COND to be a scalar
     for (int i=0; i < size; i++) {
@@ -387,6 +420,38 @@ void GlslCode::emit_lit(const ShStatement& stmt)
   append_line(resolve(stmt.dest, 3) + " = " + resolve_constant(1, stmt.dest, 1));
 }
 
+void GlslCode::emit_log(const ShStatement& stmt)
+{
+  SH_DEBUG_ASSERT(SH_OP_LOG == stmt.op);
+  bool on_ati = false;
+  const GLubyte* vendor = SH_GL_CHECK_ERROR(glGetString(GL_VENDOR));
+  if (vendor) {
+    std::string s(reinterpret_cast<const char*>(vendor));
+    on_ati = s.find("ATI") != s.npos;
+  }
+
+  if (on_ati) {
+    ShVariable tmp(allocate_temp(stmt));
+    table_substitution(ShStatement(tmp, stmt.op, stmt.src[0]), "log($0)");
+
+    const int size = stmt.dest.size();
+    if (1 == size) {
+      // Must be handled separately to preserve the destination swizzle
+      append_line(resolve(stmt.dest) + " = (" + resolve(stmt.src[0]) + " == " + 
+                  resolve_constant(1, stmt.src[0], 1) + ") ? " + resolve_constant(0, stmt.src[0], 1) +
+                  " : " + resolve(tmp, 0));
+    } else {
+      for (int i=0; i < size; i++) {
+        append_line(resolve(stmt.dest, i) + " = (" + resolve(stmt.src[0], i) + " == " + 
+                    resolve_constant(1, stmt.src[0], 1) + ") ? " + resolve_constant(0, stmt.src[0], 1) +
+                    " : " + resolve(tmp, i));
+      }
+    }
+  } else {
+    table_substitution(stmt, "log($0)");
+  }
+}
+
 void GlslCode::emit_log10(const ShStatement& stmt)
 {
   SH_DEBUG_ASSERT(SH_OP_LOG10 == stmt.op);
@@ -445,9 +510,8 @@ void GlslCode::emit_logic(const ShStatement& stmt)
     }
   }
 
-  // Prepend cast to destination type
-  code = glsl_typename(stmt.dest.valueType(), stmt.src[0].size()) +
-    std::string("(") + code + std::string(")");
+  // cast for the destination type
+  code = glsl_typename(stmt.dest.valueType(), stmt.dest.size()) +  "(" + code + ")";
 
   table_substitution(stmt, code.c_str());
 }

@@ -1,3 +1,10 @@
+2006-02-01  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslEmit.cpp, GlslCode.hpp (emit_logic): Fix the
+	destination cast.
+	(emit_log): Work-around for log(1) != 0 on ATI.
+	(emit_ati_workaround): Work-around for DIV and MOD on ATI.
+
 2006-01-31  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslEmit.cpp, GlslCode.cpp: Remove the table lookup

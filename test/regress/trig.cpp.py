@@ -24,8 +24,9 @@ def insert_into1(test, op):
 def insert_into2(test, op):
     test.add_test(func((0.0,), op))
     test.add_test(func((0.3, 0.5, 0.8, 0.9), op))
-    test.add_test(func((1 - 0.1, -1 + 0.1, 0.0), op))
-    test.add_test(func((-0.5, -0.9, -0.1), op))
+    test.add_test(func((1 - 0.1, 0.0), op))
+    test.add_test(func((-1 + 0.1,), op, [], 0.09))
+    test.add_test(func((-0.5, -0.1), op))
     test.add_test(func((0.5, 0.6, 0.9), op))
 
 # for tan() and tanh()
