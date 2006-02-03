@@ -7,65 +7,69 @@ project zlib ;
 
 rule init ( prefix ? )
 {
-	import errors ;
+  import errors ;
 
-	local include-subdir = include ;
+  local include-subdir = include ;
 
-	if ! $(prefix) # prefix not given
-	{
-		prefix = [ modules.peek : ZLIB_PATH ] ;
+  if ! $(prefix) # prefix not given
+  {
+    prefix = [ modules.peek : ZLIB_PATH ] ;
 
-		if ! $(prefix) # env var not found
-		{
-			if [ path.exists /usr/$(include-subdir)/zlib.h ]
-			{
-				prefix = /usr ;
-			}
-			else {
-				prefix = [ path.glob-in-parents . : zlib ] ;
-			}
+    if ! $(prefix) # env var not found
+    {
+      if [ path.exists /usr/$(include-subdir)/zlib.h ]
+      {
+        prefix = /usr ;
+      }
+      else {
+        prefix = [ path.glob-in-parents . : zlib ] ;
+      }
 
-			if ! $(prefix) # default path doesn't exist
-			{
-				errors.error "zlib: No prefix given, ZLIB_PATH empty and default directory not found" ;
-			}
-		}
-	}
+      if ! $(prefix) # default path doesn't exist
+      {
+        errors.error "zlib: No prefix given, ZLIB_PATH empty and default directory not found" ;
+      }
+    }
+  }
 
-	if $(.initialized)
-	{
-		if $(prefix) != $(.prefix)
-		{
-			errors.error "zlib: Reinitialized with different prefix" ;
-		}
-	}
-	else {
-		.initialized = true ;
-		.prefix = $(prefix) ;
+  if $(.initialized)
+  {
+    if $(prefix) != $(.prefix)
+    {
+      errors.error "zlib: Reinitialized with different prefix" ;
+    }
+  }
+  else {
+    .initialized = true ;
+    .prefix = $(prefix) ;
 
-		local usage-requirements =
-			<include>$(.prefix)/$(include-subdir)
-			<dll-path>$(.prefix)/lib
-			<library-path>$(.prefix)/lib
-		;
+    local usage-requirements =
+      <include>$(.prefix)/$(include-subdir)
+      <library-path>$(.prefix)/lib
+      #<dll-path>$(.prefix)/lib
+    ;
 
-		lib libz
-		: # sources
-		: # requirements
-			<toolset>msvc
-			<name>zlib
-		: # default-build
-		: # usage-requirements
-			$(usage-requirements)
-		;
-
-		lib libz
-		: # sources
-		: # requirements
-			<name>z
-		: # default-build
-		: # usage-requirements
-			$(usage-requirements)
-		;
-	}
+    import os ;
+    if [ os.on-unix ]
+    {
+      lib libz
+      : # sources
+      : # requirements
+        <name>z
+      : # default-build
+      : # usage-requirements
+        $(usage-requirements)
+      ;
+    }
+    else {
+      lib libz
+      : # sources
+      : # requirements
+        <name>zlib
+      : # default-build
+      : # usage-requirements
+        $(usage-requirements)
+      ;
+    }
+  }
 }

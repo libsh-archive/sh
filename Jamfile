@@ -41,7 +41,6 @@ project sh
 : requirements
   $(requirements)
 : default-build
-  <threading>multi
   release
   debug
 : usage-requirements

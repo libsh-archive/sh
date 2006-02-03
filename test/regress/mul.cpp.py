@@ -18,6 +18,11 @@ def insert_into(test, modifying=False):
     test.add_test(mul((1.0,), (7.0,)))
     test.add_test(mul((4.0, 5.0, 6.0), (-4.0, -5.0, -6.0)))
 
+    test.add_test(mul((0.0, 1.0, 2.0), (3.0, 4.0, 5.0), ['i', 'i', 'i']))
+    test.add_test(mul((1.0, 2.0, 3.0), (7.0,), ['i', 'i', 'i']))
+    test.add_test(mul((1.0,), (7.0,), ['i', 'i', 'i']))
+    test.add_test(mul((4.0, 5.0, 6.0), (-4.0, -5.0, -6.0), ['i', 'i', 'i']))
+
     # 1 * N
     if not modifying:
         test.add_test(mul((1.0,), (3.0, 4.0, 5.0)))
