@@ -48,8 +48,8 @@ rule init ( prefix ? : include-dir ? )
 
     local usage-requirements =
       <include>$(include-dir)
-      <dll-path>$(prefix)/lib
       <library-path>$(prefix)/lib
+      #<dll-path>$(prefix)/lib
     ;
 
     if [ os.on-unix ]

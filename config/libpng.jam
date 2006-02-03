@@ -7,69 +7,73 @@ project libpng ;
 
 rule init ( prefix ? )
 {
-	import errors ;
+  import errors ;
 
-	local include-subdir = include ;
+  local include-subdir = include ;
 
-	if ! $(prefix) # prefix not given
-	{
-		prefix = [ modules.peek : LIBPNG_PATH ] ;
+  if ! $(prefix) # prefix not given
+  {
+    prefix = [ modules.peek : LIBPNG_PATH ] ;
 
-		if ! $(prefix) # env var not found
-		{
-			if [ path.exists /usr/$(include-subdir)/png.h ]
-			{
-				prefix = /usr ;
-			}
-			else {
-				prefix = [ path.glob-in-parents . : libpng ] ;
-			}
+    if ! $(prefix) # env var not found
+    {
+      if [ path.exists /usr/$(include-subdir)/png.h ]
+      {
+        prefix = /usr ;
+      }
+      else {
+        prefix = [ path.glob-in-parents . : libpng ] ;
+      }
 
-			if ! $(prefix) # default path doesn't exist
-			{
-				errors.error "libpng: No prefix given, LIBPNG_PATH empty and default directory not found" ;
-			}
-		}
-	}
+      if ! $(prefix) # default path doesn't exist
+      {
+        errors.error "libpng: No prefix given, LIBPNG_PATH empty and default directory not found" ;
+      }
+    }
+  }
 
-	if $(.initialized)
-	{
-		if $(prefix) != $(.prefix)
-		{
-			errors.error "libpng: Reinitialized with different prefix" ;
-		}
-	}
-	else {
-		.initialized = true ;
-		.prefix = $(prefix) ;
+  if $(.initialized)
+  {
+    if $(prefix) != $(.prefix)
+    {
+      errors.error "libpng: Reinitialized with different prefix" ;
+    }
+  }
+  else {
+    .initialized = true ;
+    .prefix = $(prefix) ;
 
-		local sources = /zlib//libz ;
+    local sources = /zlib//libz ;
 
-		local usage-requirements =
-			<include>$(.prefix)/$(include-subdir)
-			<dll-path>$(.prefix)/lib
-			<library-path>$(.prefix)/lib
-		;
+    local usage-requirements =
+      <include>$(.prefix)/$(include-subdir)
+      <library-path>$(.prefix)/lib
+      #<dll-path>$(.prefix)/lib
+    ;
 
-		lib libpng
-		: # sources
-			$(sources)
-		: # requirements
-			<toolset>msvc
-			<name>libpng
-		: # default-build
-		: # usage-requirements
-			$(usage-requirements)
-		;
-
-		lib libpng
-		: # sources
-			$(sources)
-		: # requirements
-			<name>png
-		: # default-build
-		: # usage-requirements
-			$(usage-requirements)
-		;
-	}
+    import os ;
+    if [ os.on-unix ]
+    {
+      lib libpng
+      : # sources
+        $(sources)
+      : # requirements
+        <name>png
+      : # default-build
+      : # usage-requirements
+        $(usage-requirements)
+      ;
+    }
+    else {
+      lib libpng
+      : # sources
+        $(sources)
+      : # requirements
+        <name>libpng
+      : # default-build
+      : # usage-requirements
+        $(usage-requirements)
+      ;
+    }
+  }
 }

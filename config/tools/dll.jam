@@ -40,32 +40,32 @@
 #
 rule lib ( names + : sources * : requirements * : default-build * : usage-requirements * : symbol ? )
 {
-	if ! $(symbol)
-	{
-		# By default use the uppercase name
-		symbol = $(names:U) ;
-	}
+  if ! $(symbol)
+  {
+    # By default use the uppercase name
+    symbol = $(names:U) ;
+  }
 
-	import os ;
-	if [ os.on-windows ]
-	{
-		echo $(names)": define macro" $(symbol) "to export symbols" ;
+  import os ;
+  if [ os.on-windows ]
+  {
+    echo $(names)": define macro" $(symbol) "to export symbols" ;
 
-		requirements +=
-			<link>shared:<define>$(symbol)=__declspec(dllexport)
-			<link>static:<define>$(symbol)= ;
+    requirements +=
+      <link>shared:<define>$(symbol)=__declspec(dllexport)
+      <link>static:<define>$(symbol)= ;
 
-		usage-requirements +=
-			<link>shared:<define>$(symbol)=__declspec(dllimport)
-			<link>static:<define>$(symbol)= ;
-	}
-	else {
-		echo $(names)": remove macro" $(symbol) "on unix" ;
+    usage-requirements +=
+      <link>shared:<define>$(symbol)=__declspec(dllimport)
+      <link>static:<define>$(symbol)= ;
+  }
+  else {
+    echo $(names)": remove macro" $(symbol) "on unix" ;
 
-		requirements += <define>$(symbol)= ;
-		usage-requirements += <define>$(symbol)= ;
-	}
+    requirements += <define>$(symbol)= ;
+    usage-requirements += <define>$(symbol)= ;
+  }
 
-	import builtin : lib : builtin.lib ;
-	builtin.lib $(names) : $(sources) : $(requirements) : $(default-build) : $(usage-requirements) ;
+  import builtin : lib : builtin.lib ;
+  builtin.lib $(names) : $(sources) : $(requirements) : $(default-build) : $(usage-requirements) ;
 }
