@@ -21,10 +21,25 @@ def insert_into(test, func):
     test.add_test(func_test((2.0, 3.0, 2.0, 3.0), (-0.5, -1.0, -2.0, -4.0), func))
     test.add_test(func_test((-2.0, -3.0, -2.0, -3.0), (-0.5, -1.0, -2.0, -4.0), func))
 
+    test.add_test(func_test((0.0, 0.0, 0.0), (1.0, 2.0, 5.0), func, ['i', 'i', 'i']))
+    test.add_test(func_test((0.2, 0.5, 0.9, 1.5), (0, 0, 0, 0), func, ['i', 'i', 'i']))
+    test.add_test(func_test((2.0, 3.0, 2.0, 3.0), (0.0, 1.0, 2.0, 5.0), func, ['i', 'i', 'i']))
+    test.add_test(func_test((2.0, 3.0, 2.0, 3.0), (0.1, 0.5, 2.9, 2.3), func, ['i', 'i', 'i']))
+    test.add_test(func_test((2.0, 3.0, 2.0, 3.0), (-0.5, -1.0, -2.0, -4.0), func, ['i', 'i', 'i']))
+    test.add_test(func_test((-2.0, -3.0, -2.0, -3.0), (-0.5, -1.0, -2.0, -4.0), func, ['i', 'i', 'i']))
+
 def insert_into_comp(test, func):
     test.add_test(comp_test((0, 0.1, 0.5, 1.9), func))
+    test.add_test(comp_test((0.1, 0, 1.9, 1.5), func))
     test.add_test(comp_test((1.0, 2.0, 3.0, 4.0), func))
+    test.add_test(comp_test((2.0, 1.0, 4.0, 3.0), func))
     test.add_test(comp_test((-1.0, -2.1, -3.5, -4.4), func))
+
+    test.add_test(comp_test((0, 0.1, 0.5, 1.9), func, ['i', 'i', 'i']))
+    test.add_test(comp_test((0.1, 0, 1.9, 1.5), func, ['i', 'i', 'i']))
+    test.add_test(comp_test((1.0, 2.0, 3.0, 4.0), func, ['i', 'i', 'i']))
+    test.add_test(comp_test((2.0, 1.0, 4.0, 3.0), func, ['i', 'i', 'i']))
+    test.add_test(comp_test((-1.0, -2.1, -3.5, -4.4), func, ['i', 'i', 'i']))
 
 #-------------
 # MAX
