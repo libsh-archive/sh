@@ -1,3 +1,8 @@
+2006-02-02  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslEmit.cpp, src/sh/ShTransformer.cpp
+	(allocate_constant): Fix memory leak.
+
 2006-02-01  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslEmit.cpp, GlslCode.hpp (emit_logic): Fix the
@@ -15,6 +20,12 @@
 	* backends/gl/GlTextures.cpp: Check for errors when getting the
 	list of GL_EXTENSIONS and display a warning.
 
+2006-01-30  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/ShMeta.hpp, src/ShMetaImpl.hpp, src/ShMetaForwarder.hpp,
+	src/ShMetaForwarder.cpp: Allow iterating through meta data with
+	begin_meta and end_meta functions.
+	
 2006-01-28  Andrew Lauritzen  <atlaurit@serioushack.com>
 	
 	* backends/gl/GlslEmit.cpp: Cast GLSL logical operations (<, >,

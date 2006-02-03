@@ -57,9 +57,13 @@ public:
   virtual void meta(const std::string& key, const std::string& value);
   virtual bool has_meta(const std::string& key) const;
 
-private:
   typedef std::map<std::string, std::string> MetaMap;
-  MetaMap *m_meta;
+
+  virtual MetaMap::const_iterator begin_meta() const;
+  virtual MetaMap::const_iterator end_meta() const;
+
+private:
+  mutable MetaMap *m_meta;
 };
 
 }

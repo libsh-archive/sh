@@ -21,6 +21,7 @@
 #define SHMETAFORWARDER_HPP
 
 #include <string>
+#include <map>
 #include "ShDllExport.hpp"
 
 namespace SH {
@@ -47,6 +48,9 @@ public:
 
   std::string meta(const std::string& key) const;
   void meta(const std::string& key, const std::string& value);
+
+  std::map<std::string, std::string>::const_iterator begin_meta() const;
+  std::map<std::string, std::string>::const_iterator end_meta() const;
 
 protected:
   ShMeta* real_meta();

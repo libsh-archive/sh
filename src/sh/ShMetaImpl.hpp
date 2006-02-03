@@ -94,11 +94,23 @@ inline void ShMeta::description(const std::string& d)
 
 inline std::string ShMeta::meta(const std::string& key) const
 {
-  if(!m_meta) return std::string(); 
+  if (!m_meta) return std::string(); 
 
   MetaMap::const_iterator I = m_meta->find(key);
   if (I == m_meta->end()) return std::string();
   return I->second;
+}
+
+inline ShMeta::MetaMap::const_iterator ShMeta::begin_meta() const
+{
+  if (!m_meta) m_meta = new MetaMap();
+  return m_meta->begin();
+}
+
+inline ShMeta::MetaMap::const_iterator ShMeta::end_meta() const
+{
+  if (!m_meta) m_meta = new MetaMap();
+  return m_meta->end();
 }
 
 inline void ShMeta::meta(const std::string& key, const std::string& value)

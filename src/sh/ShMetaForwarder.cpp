@@ -82,6 +82,16 @@ void ShMetaForwarder::meta(const std::string& key, const std::string& value)
   m_meta->meta(key, value);
 }
 
+std::map<std::string, std::string>::const_iterator ShMetaForwarder::begin_meta() const
+{
+  return m_meta->begin_meta();
+}
+
+std::map<std::string, std::string>::const_iterator ShMetaForwarder::end_meta() const
+{
+  return m_meta->end_meta();
+}
+
 ShMeta* ShMetaForwarder::real_meta()
 {
   return m_meta;
