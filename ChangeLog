@@ -1,3 +1,8 @@
+2006-02-02  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslEmit.cpp, src/sh/ShTransformer.cpp
+	(allocate_constant): Fix memory leak.
+
 2006-02-01  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslEmit.cpp, GlslCode.hpp (emit_logic): Fix the

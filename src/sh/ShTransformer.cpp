@@ -643,7 +643,8 @@ ShVariableNodePtr allocate_constant(const ShVariable& dest, double constant)
     
   ShDataVariant<double>* variant = new ShDataVariant<double>(dest_node->size(), 
                                                              constant);
-  node->setVariant(variant);
+  ShVariantCPtr variant_ptr = variant;
+  node->setVariant(variant_ptr);
   
   ShVariableNodePtr node_ptr = ShPointer<ShVariableNode>(node);
   return node_ptr;

@@ -227,7 +227,8 @@ ShVariableNodePtr GlslCode::allocate_constant(const ShStatement& stmt, double co
   ShVariableNode* node = new ShVariableNode(SH_CONST, size, dest_node->valueType(), dest_node->specialType());
   
   ShDataVariant<double>* variant = new ShDataVariant<double>(size, constant);
-  node->setVariant(variant);
+  ShVariantCPtr variant_ptr = variant;
+  node->setVariant(variant_ptr);
 
   ShVariableNodePtr node_ptr = ShPointer<ShVariableNode>(node);
   return node_ptr;
