@@ -15,6 +15,10 @@ def insert_into(test):
     test.add_test(abs_test((-0.0, -0.5, 0.0, 0.5)))
     test.add_test(abs_test((8.0, 8.9, 8.5, 8.1)))
 
+    test.add_test(abs_test((-8.0, -7.0, -9.0, -6.0), ['i', 'i', 'i', 'i']))
+    test.add_test(abs_test((-0.0, -1.0, 0.0, 1.0), ['i', 'i', 'i', 'i']))
+    test.add_test(abs_test((8.0, 7.0, 9.0, 6.0), ['i', 'i', 'i', 'i']))
+
 # Test abs in stream programs
 test = shtest.StreamTest('abs', 1)
 test.add_call(shtest.Call(shtest.Call.call, 'abs', 1))
