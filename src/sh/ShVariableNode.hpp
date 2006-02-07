@@ -168,7 +168,7 @@ public:
 #ifdef SH_USE_MEMORY_POOL
   // Memory pool stuff.
   void* operator new(std::size_t size);
-  void operator delete(void* d);
+  void operator delete(void* d, std::size_t size);
 #endif
   
 protected:
