@@ -13,6 +13,11 @@ def insert_into(test):
     test.add_test(dot((1.0, 0.0, 1.0), (0.0, 1.0, 0.0)))
     test.add_test(dot((0.5, -1.0, 1.0), (0.5, -1.5, -6.0)))
 
+    test.add_test(dot((1.0, 2.0, 3.0), (1.0, 2.0, 3.0), ['i', 'i', 'i']))
+    test.add_test(dot((1.0, 1.0, 1.0), (1.0, 1.0, 1.0), ['i', 'i', 'i']))
+    test.add_test(dot((1.0, 0.0, 1.0), (0.0, 1.0, 0.0), ['i', 'i', 'i']))
+    test.add_test(dot((7.0, -1.0, 1.0), (7.0, -1.0, -6.0), ['i', 'i', 'i']))
+
 # Test the dot product in stream programs
 test = shtest.StreamTest('dot', 2)
 test.add_call(shtest.Call(shtest.Call.infix, '|', 2))

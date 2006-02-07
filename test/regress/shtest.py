@@ -280,7 +280,7 @@ class Test:
         out.write('  Test test(argc, argv);\n')
         for backend in self.broken_backends:
             out.write('  if (test.backend() == "' + str(backend) + '") return 77;\n')
-        out.write('\n  int errors = 0;\n')
+        out.write('\n  int errors = 0, total_tests = 0;\n')
 
     def start_catch(self, out):
         out.write('    try {\n')
@@ -296,7 +296,10 @@ class Test:
         out.write('\n')
         
     def output_footer(self, out):
-        out.write('  if (errors !=0) return 1;\n')
+        out.write('  if (errors !=0) {\n')
+        out.write('    std::cout << "Total Errors: " << errors << "/" << total_tests << std::endl;\n')
+        out.write('    return 1;\n')
+        out.write('  }\n')
         out.write('}\n')
         out.write("\n")
 
@@ -342,6 +345,8 @@ class StreamTest(Test):
                           + variable_names(src_arg_types)
                           + ', ' + 'expected' + epsilon + ') != 0) errors++;\n')
                 self.end_catch(out)
+	
+                out.write('    total_tests++;\n')
 
                 out.write('  }\n')
                 test_nb += 1

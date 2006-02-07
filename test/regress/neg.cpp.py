@@ -18,6 +18,12 @@ def insert_into(test):
     test.add_test(neg((5000)))
     test.add_test(neg((-0.3333)))
 
+    test.add_test(neg((0.0, 0.0, 0.0), ['i', 'i', 'i']))
+    test.add_test(neg((1.0, 2.0, 3.0), ['i', 'i', 'i']))
+    test.add_test(neg((-1.0, -2.0, -3.0), ['i', 'i', 'i']))
+    test.add_test(neg((0.5, -1.0, -2.0, -3.0), ['i', 'i', 'i', 'i']))
+    test.add_test(neg((5000), ['i']))
+
 # Test the negation operator in stream programs
 test = shtest.StreamTest('neg', 1)
 test.add_call(shtest.Call(shtest.Call.prefix, '-', 1))

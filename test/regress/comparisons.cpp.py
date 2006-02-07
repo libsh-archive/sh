@@ -47,6 +47,22 @@ def insert_into(test, op):
     test.add_test(func((-1.0, 0.0, 1.0), -2.0, op))
     test.add_test(func((-1.0, 0.0, 1.0), 0.0, op))
 
+    test.add_test(func((1.0,), (2.0,), op, ['i']))
+    test.add_test(func((1.0,), (1.0,), op, ['i']))
+    test.add_test(func((3.0,), (1.0,), op, ['i']))
+    
+    test.add_test(func((1.0, 2.0, 3.0), (2.0, 1.0, 3.0), op, ['i', 'i', 'i']))
+    test.add_test(func((-1.0, -2.0, -3.0), (-2.0, -1.0, -3.0), op, ['i', 'i', 'i']))
+
+    test.add_test(func((1.0, -2.0, 3.0), (-2.0, 1.0, -3.0), op, ['i', 'i', 'i']))
+    test.add_test(func((0.0, 1.0, -0.5, 0.1), (0.0, 0.0, 1.0, -1.0), op, ['i', 'i', 'i', 'i']))
+
+    test.add_test(func(0.0, (-1.0, 0.0, 1.0), op, ['i', 'i', 'i']))
+    test.add_test(func(2.0, (-1.0, 0.0, 1.0), op, ['i', 'i', 'i']))
+
+    test.add_test(func((-1.0, 0.0, 1.0), -2.0, op, ['i', 'i', 'i']))
+    test.add_test(func((-1.0, 0.0, 1.0), 0.0, op, ['i', 'i', 'i']))
+
 # Test the "less than" operator in stream programs
 test = shtest.StreamTest('lt', 2)
 test.add_call(shtest.Call(shtest.Call.infix, '<', 2))
