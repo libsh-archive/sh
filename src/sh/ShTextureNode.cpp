@@ -84,30 +84,6 @@ void ShTextureNode::initialize_memories(bool force_initialization)
   m_mipmap_levels = 1;
   if ((m_traits.filtering() == ShTextureTraits::SH_FILTER_MIPMAP_NEAREST) ||
       (m_traits.filtering() == ShTextureTraits::SH_FILTER_MIPMAP_LINEAR)) {
-    // Check for supported texture sizes
-    switch (m_dims) {
-    case SH_TEXTURE_RECT:
-      shError(ShException("Rect textures cannot be mipmapped."));
-      return;
-    case SH_TEXTURE_1D:
-      break; // no check necessary
-    case SH_TEXTURE_3D: {
-      if (m_depth != m_height || m_width != m_height || m_width != m_depth) {
-        shError(ShException("The width, height and depth of mipmapped 3D textures must all be the same size."));
-        return;
-      }
-      break;
-    }
-    case SH_TEXTURE_2D:
-    case SH_TEXTURE_CUBE: {
-      if (m_width != m_height) {
-        shError(ShException("The width and height of mipmapped 2D textures must be of the same size."));
-        return;
-      }
-      break;
-    }
-    }
-
     for (int w = m_width; w > 1; w >>= 1) {
       ++m_mipmap_levels;
     }
@@ -332,6 +308,28 @@ bool ShTextureNode::build_mipmaps(ShCubeDirection dir)
   int depth = m_depth;
   int levels = mipmap_levels();
   int direction = static_cast<int>(dir);
+
+  // Check for supported texture sizes
+  switch (m_dims) {
+  case SH_TEXTURE_RECT:
+    shError(ShException("Rect textures cannot be mipmapped."));
+    break;
+  case SH_TEXTURE_1D:
+    break; // no check necessary
+  case SH_TEXTURE_3D: {
+    if (depth != height || width != height || width != depth) {
+      shError(ShException("The width, height and depth of mipmapped 3D textures must all be the same size."));
+    }
+    break;
+  }
+  case SH_TEXTURE_2D:
+  case SH_TEXTURE_CUBE: {
+    if (width != height) {
+      shError(ShException("The width and height of mipmapped 2D textures must be of the same size."));
+    }
+    break;
+  }
+  }
 
   // Create a float copy of the base storage
   int base_memsize = m_size * m_width * m_height * m_depth * shTypeInfo(SH_FLOAT)->datasize();

@@ -612,7 +612,13 @@ ostream& ArbCode::print(ostream& out)
     if (m_environment & SH_ARB_NVFP2) out << "OPTION NV_fragment_program2;" << endl;
     else if (m_environment & SH_ARB_NVFP) out << "OPTION NV_fragment_program;" << endl;
 
-    if (m_environment & SH_ARB_ATIDB) out << "OPTION ATI_draw_buffers;" << endl;
+    if (m_environment & SH_ARB_ATIDB) {
+#ifdef ATI_draw_buffers
+      out << "OPTION ATI_draw_buffers;" << endl;
+#else
+      out << "OPTION ARB_draw_buffers;" << endl;
+#endif
+    }
   }
   
   // Print register declarations
