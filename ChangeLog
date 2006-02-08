@@ -1,3 +1,9 @@
+2006-02-08  Francois Marier  <francois@serioushack.com>
+
+	* src/sh/ShTextureNode.cpp (initialize_memories): Improve the size
+	check for mipmapped textures and make it a runtime error instead
+	of an assertion.
+
 2006-02-08  Stefanus Du Toit  <sdt@serioushack.com>
 
 	* src/sh/ShSwizzleImpl.hpp: Check for __BIG_ENDIAN__ define.
