@@ -407,14 +407,22 @@ void ShBackend::load_all_backends()
     start = separator + 1;
     end = length - 1;
   }
-#elif defined(__APPLE__) && !defined(AUTOTOOLS)
-  load_libraries(string(getenv("HOME")) + "/Library/Sh/Backends");
-  load_libraries("/Local/Library/Sh/Backends");
-  load_libraries("/Library/Sh/Backends");
-  load_libraries("/System/Library/Sh/Backends");
 #else
-  load_libraries(string(getenv("HOME")) + "/" + LOCAL_BACKEND_DIRNAME);
-  load_libraries(string(SH_INSTALL_PREFIX) + "/lib/sh");
+  std::string backend_dir(string(getenv("SH_BACKEND_DIR")));
+  
+  if (backend_dir.empty()) {
+# if defined(__APPLE__) && !defined(AUTOTOOLS)
+    load_libraries(string(getenv("HOME")) + "/Library/Sh/Backends");
+    load_libraries("/Local/Library/Sh/Backends");
+    load_libraries("/Library/Sh/Backends");
+    load_libraries("/System/Library/Sh/Backends");
+# else
+    load_libraries(string(getenv("HOME")) + "/" + LOCAL_BACKEND_DIRNAME);
+    load_libraries(string(SH_INSTALL_PREFIX) + "/lib/sh");
+# endif
+  } else {
+    load_libraries(backend_dir);
+  }
 #endif
 
   m_all_backends_loaded = true;

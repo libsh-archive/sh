@@ -223,7 +223,7 @@ inline int ShSwizzle::idswiz() const
 {
 // @todo type detect endianess correctly
 // power pc's are not the only big endian machines...
-#ifdef __PPC__
+#if defined(__PPC__) || defined(__BIG_ENDIAN__)
   return 0x00010203;
 #else
   return 0x03020100;

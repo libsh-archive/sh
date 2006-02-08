@@ -84,7 +84,30 @@ void ShTextureNode::initialize_memories(bool force_initialization)
   m_mipmap_levels = 1;
   if ((m_traits.filtering() == ShTextureTraits::SH_FILTER_MIPMAP_NEAREST) ||
       (m_traits.filtering() == ShTextureTraits::SH_FILTER_MIPMAP_LINEAR)) {
-    SH_DEBUG_ASSERT(m_width == m_height);
+    // Check for supported texture sizes
+    switch (m_dims) {
+    case SH_TEXTURE_RECT:
+      shError(ShException("Rect textures cannot be mipmapped."));
+      return;
+    case SH_TEXTURE_1D:
+      break; // no check necessary
+    case SH_TEXTURE_3D: {
+      if (m_depth != m_height || m_width != m_height || m_width != m_depth) {
+        shError(ShException("The width, height and depth of mipmapped 3D textures must all be the same size."));
+        return;
+      }
+      break;
+    }
+    case SH_TEXTURE_2D:
+    case SH_TEXTURE_CUBE: {
+      if (m_width != m_height) {
+        shError(ShException("The width and height of mipmapped 2D textures must be of the same size."));
+        return;
+      }
+      break;
+    }
+    }
+
     for (int w = m_width; w > 1; w >>= 1) {
       ++m_mipmap_levels;
     }
