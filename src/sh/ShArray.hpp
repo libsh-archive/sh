@@ -20,10 +20,14 @@
 #ifndef SHARRAY_HPP
 #define SHARRAY_HPP
 
-#include "ShBaseTexture.hpp"
-
 namespace SH {
 
+template<typename T> class ShBaseTexture1D;
+template<typename T> class ShBaseTexture2D;
+template<typename T> class ShBaseTexture3D;
+template<typename T> class ShBaseTextureRect;
+template<typename T> class ShBaseTextureCube;
+  
 /** Default traits for ShArray.
  * An array is a texture that does not support filtering or interpolation.
  */
@@ -35,7 +39,6 @@ ShArrayTraits : public ShTextureTraits {
 };
 
 template<typename T> class ShArrayRect;
-
 /** One-dimensional array.
  */
 template<typename T>

@@ -1,3 +1,14 @@
+2006-02-08  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/sh/ShSwizzleImpl.hpp: Check for __BIG_ENDIAN__ define.
+	
+	* src/sh/ShArray.hpp: Remove cyclic reference on BaseTexture.hpp.
+	
+	* src/sh/ShBackend.cpp: If an environment variable SH_BACKEND_DIR
+	is set on OS X or Linux, use it (and only it) to search for
+	backends. This is useful for IDEs. Should probably be done on
+	Windows as well.
+	
 2006-02-07  Francois Marier  <francois@serioushack.com>
 
 	* src/sh/ShAttribImpl.hpp, ShAttrib.hpp (ShAttrib): Make the

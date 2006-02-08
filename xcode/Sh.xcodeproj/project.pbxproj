@@ -280,6 +280,9 @@
 		3EF90F7D0878A0F900A31AD9 /* GlTextures.hpp in Resources */ = {isa = PBXBuildFile; fileRef = 3EF90F650878A0F900A31AD9 /* GlTextures.hpp */; };
 		3EF90F7E0878A0F900A31AD9 /* GlTextureStorage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EF90F660878A0F900A31AD9 /* GlTextureStorage.cpp */; };
 		3EF90F7F0878A0F900A31AD9 /* GlTextureStorage.hpp in Resources */ = {isa = PBXBuildFile; fileRef = 3EF90F670878A0F900A31AD9 /* GlTextureStorage.hpp */; };
+		3EF9A645099A15B4009470BA /* ShPngImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EF9A642099A15B4009470BA /* ShPngImage.cpp */; };
+		3EF9A646099A15B4009470BA /* ShPngImage.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EF9A643099A15B4009470BA /* ShPngImage.hpp */; };
+		3EF9A647099A15B4009470BA /* ShPngImageImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EF9A644099A15B4009470BA /* ShPngImageImpl.hpp */; };
 		8D07F2C00486CC7A007CD1D0 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C1666FE841158C02AAC07 /* InfoPlist.strings */; };
 /* End PBXBuildFile section */
 
@@ -398,6 +401,13 @@
 			remoteGlobalIDString = 8D07F2BC0486CC7A007CD1D0;
 			remoteInfo = Sh;
 		};
+		3EF9A66A099A16FD009470BA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3EBE960D087EC91B00DA8A69 /* ShUtil */;
+			remoteInfo = ShUtil;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -414,6 +424,7 @@
 		3E3EA9E8087A1A8B00A1405F /* rustks.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = rustks.png; path = ../examples/textures/rustks.png; sourceTree = SOURCE_ROOT; };
 		3E3EA9E9087A1A8B00A1405F /* ShTrackball.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShTrackball.cpp; path = ../examples/textures/ShTrackball.cpp; sourceTree = SOURCE_ROOT; };
 		3E3EA9EA087A1A8B00A1405F /* ShTrackball.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShTrackball.hpp; path = ../examples/textures/ShTrackball.hpp; sourceTree = SOURCE_ROOT; };
+		3E442EF9099A12D30045676A /* ChangeLog */ = {isa = PBXFileReference; fileEncoding = 30; indentWidth = 8; lastKnownFileType = text; name = ChangeLog; path = ../ChangeLog; sourceTree = SOURCE_ROOT; usesTabs = 1; };
 		3E5FD0490899DCD700A1BAFF /* ShLibNoise.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibNoise.hpp; path = ../src/sh/ShLibNoise.hpp; sourceTree = SOURCE_ROOT; };
 		3E5FD04A0899DCD700A1BAFF /* ShLibNoiseImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibNoiseImpl.hpp; path = ../src/sh/ShLibNoiseImpl.hpp; sourceTree = SOURCE_ROOT; };
 		3E5FD04B0899DCD700A1BAFF /* ShLibWorley.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibWorley.hpp; path = ../src/sh/ShLibWorley.hpp; sourceTree = SOURCE_ROOT; };
@@ -442,7 +453,7 @@
 		3EB30A8D08787D7600729309 /* sh.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = sh.hpp; path = ../src/sh/sh.hpp; sourceTree = SOURCE_ROOT; };
 		3EB30A8E08787D7600729309 /* ShAlgebra.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShAlgebra.cpp; path = ../src/sh/ShAlgebra.cpp; sourceTree = SOURCE_ROOT; };
 		3EB30A8F08787D7600729309 /* ShAlgebra.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShAlgebra.hpp; path = ../src/sh/ShAlgebra.hpp; sourceTree = SOURCE_ROOT; };
-		3EB30A9008787D7600729309 /* ShArray.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShArray.hpp; path = ../src/sh/ShArray.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30A9008787D7600729309 /* ShArray.hpp */ = {isa = PBXFileReference; fileEncoding = 30; indentWidth = 2; lastKnownFileType = sourcecode.cpp.h; name = ShArray.hpp; path = ../src/sh/ShArray.hpp; sourceTree = SOURCE_ROOT; tabWidth = 8; usesTabs = 0; };
 		3EB30A9108787D7600729309 /* ShAttrib.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShAttrib.hpp; path = ../src/sh/ShAttrib.hpp; sourceTree = SOURCE_ROOT; };
 		3EB30A9208787D7600729309 /* ShAttribImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShAttribImpl.hpp; path = ../src/sh/ShAttribImpl.hpp; sourceTree = SOURCE_ROOT; };
 		3EB30A9308787D7600729309 /* ShBackend.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShBackend.cpp; path = ../src/sh/ShBackend.cpp; sourceTree = SOURCE_ROOT; };
@@ -692,6 +703,9 @@
 		3EF90F650878A0F900A31AD9 /* GlTextures.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = GlTextures.hpp; path = ../backends/gl/GlTextures.hpp; sourceTree = SOURCE_ROOT; };
 		3EF90F660878A0F900A31AD9 /* GlTextureStorage.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GlTextureStorage.cpp; path = ../backends/gl/GlTextureStorage.cpp; sourceTree = SOURCE_ROOT; };
 		3EF90F670878A0F900A31AD9 /* GlTextureStorage.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = GlTextureStorage.hpp; path = ../backends/gl/GlTextureStorage.hpp; sourceTree = SOURCE_ROOT; };
+		3EF9A642099A15B4009470BA /* ShPngImage.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShPngImage.cpp; path = ../src/shutil/ShPngImage.cpp; sourceTree = SOURCE_ROOT; };
+		3EF9A643099A15B4009470BA /* ShPngImage.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShPngImage.hpp; path = ../src/shutil/ShPngImage.hpp; sourceTree = SOURCE_ROOT; };
+		3EF9A644099A15B4009470BA /* ShPngImageImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShPngImageImpl.hpp; path = ../src/shutil/ShPngImageImpl.hpp; sourceTree = SOURCE_ROOT; };
 		8D07F2C70486CC7A007CD1D0 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D07F2C80486CC7A007CD1D0 /* Sh.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Sh.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -774,6 +788,7 @@
 		0867D691FE84028FC02AAC07 /* Sh */ = {
 			isa = PBXGroup;
 			children = (
+				3E442EF9099A12D30045676A /* ChangeLog */,
 				3E7CF7C0092C1ACE0080FDD2 /* GlslBackend */,
 				3EC22E010899D79800EB5F51 /* ShUtil */,
 				3E3EA9E1087A1A6200A1405F /* TexturesExample */,
@@ -1082,6 +1097,9 @@
 		3EC22E010899D79800EB5F51 /* ShUtil */ = {
 			isa = PBXGroup;
 			children = (
+				3EF9A642099A15B4009470BA /* ShPngImage.cpp */,
+				3EF9A643099A15B4009470BA /* ShPngImage.hpp */,
+				3EF9A644099A15B4009470BA /* ShPngImageImpl.hpp */,
 				3EBE9644087EC9CA00DA8A69 /* ShFunc.hpp */,
 				3EBE9645087EC9CA00DA8A69 /* ShFuncImpl.hpp */,
 				3EBE9646087EC9CA00DA8A69 /* ShKernelLib.cpp */,
@@ -1166,6 +1184,8 @@
 				3EBE9669087EC9CA00DA8A69 /* ShMeshImpl.hpp in Headers */,
 				3EBE966D087EC9CA00DA8A69 /* ShObjMesh.hpp in Headers */,
 				3EBE966F087EC9CA00DA8A69 /* shutil.hpp in Headers */,
+				3EF9A646099A15B4009470BA /* ShPngImage.hpp in Headers */,
+				3EF9A647099A15B4009470BA /* ShPngImageImpl.hpp in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1361,6 +1381,7 @@
 			dependencies = (
 				3E3EA9D6087A1A4200A1405F /* PBXTargetDependency */,
 				3E3EA9D8087A1A4200A1405F /* PBXTargetDependency */,
+				3EF9A66B099A16FD009470BA /* PBXTargetDependency */,
 			);
 			name = TexturesExample;
 			productName = TexturesExample;
@@ -2005,6 +2026,7 @@
 				3EBE9666087EC9CA00DA8A69 /* ShKernelSurfMap.cpp in Sources */,
 				3EBE966C087EC9CA00DA8A69 /* ShObjMesh.cpp in Sources */,
 				3EBE966E087EC9CA00DA8A69 /* shutil.cpp in Sources */,
+				3EF9A645099A15B4009470BA /* ShPngImage.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2157,6 +2179,11 @@
 			isa = PBXTargetDependency;
 			target = 8D07F2BC0486CC7A007CD1D0 /* Sh */;
 			targetProxy = 3EF90F500878A0C500A31AD9 /* PBXContainerItemProxy */;
+		};
+		3EF9A66B099A16FD009470BA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3EBE960D087EC91B00DA8A69 /* ShUtil */;
+			targetProxy = 3EF9A66A099A16FD009470BA /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -2593,6 +2620,8 @@
 					GLUT,
 					"-framework",
 					Sh,
+					"-framework",
+					ShUtil,
 					"-lobjc",
 				);
 				OTHER_REZFLAGS = "";
@@ -2632,6 +2661,8 @@
 					GLUT,
 					"-framework",
 					Sh,
+					"-framework",
+					ShUtil,
 					"-lobjc",
 				);
 				OTHER_REZFLAGS = "";
@@ -2661,11 +2692,13 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
+				HEADER_SEARCH_PATHS = /sw/include;
 				INFOPLIST_FILE = "ShUtil-Info.plist";
 				INSTALL_GROUP = admin;
 				INSTALL_MODE_FLAG = "a-w,a+rX,gu+rw";
 				INSTALL_OWNER = root;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LIBRARY_SEARCH_PATHS = /sw/lib;
 				LIBRARY_STYLE = DYNAMIC;
 				MACH_O_TYPE = mh_dylib;
 				OPTIMIZATION_CFLAGS = "-O0";
@@ -2673,11 +2706,13 @@
 				OTHER_LDFLAGS = (
 					"-framework",
 					Sh,
+					"-lpng",
 				);
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = ShUtil;
 				REZ_PREPROCESSOR_DEFINITIONS = SH_DEBUG;
 				SECTORDER_FLAGS = "";
+				USER_HEADER_SEARCH_PATHS = "";
 				WARNING_CFLAGS = (
 					"-Wmost",
 					"-Wno-four-char-constants",
@@ -2698,21 +2733,25 @@
 				GCC_OPTIMIZATION_LEVEL = 2;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
+				HEADER_SEARCH_PATHS = /sw/include;
 				INFOPLIST_FILE = "ShUtil-Info.plist";
 				INSTALL_GROUP = admin;
 				INSTALL_MODE_FLAG = "a-w,a+rX,gu+rw";
 				INSTALL_OWNER = root;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LIBRARY_SEARCH_PATHS = /sw/lib;
 				LIBRARY_STYLE = DYNAMIC;
 				MACH_O_TYPE = mh_dylib;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Sh,
+					"-lpng",
 				);
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = ShUtil;
 				SECTORDER_FLAGS = "";
+				USER_HEADER_SEARCH_PATHS = "";
 				WARNING_CFLAGS = (
 					"-Wmost",
 					"-Wno-four-char-constants",
