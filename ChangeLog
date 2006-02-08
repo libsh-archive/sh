@@ -3,6 +3,18 @@
 	* src/sh/ShAttribImpl.hpp, ShAttrib.hpp (ShAttrib): Make the
 	constructor take a const array (issue283).
 
+2006-02-07  Filip Spacek  <filip@serioushack.com>
+
+	* src/sh/ShVariableNode.cpp, ShVariableNode.hpp: Delete variable
+	nodes allocated using the global operator new
+
+2006-02-07  Andrew Lauritzen  <atlaurit@serioushack.com>
+
+	* backends/gl/GlslSet.cpp, GlslSet.hpp, GlBackend.hpp,
+	GlBackend.cpp: Changed GLSL backend sets to always bind, and query
+	the GL state to determine whether to unbind. This is
+	necessary for multi-GL-context situations.
+	
 2006-02-02  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslEmit.cpp, src/sh/ShTransformer.cpp
