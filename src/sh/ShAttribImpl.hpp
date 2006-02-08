@@ -71,7 +71,7 @@ ShAttrib<N, Binding, T, Semantic, Swizzled>::ShAttrib(const ShVariableNodePtr& n
 }
 
 template<int N, ShBindingType Binding, typename T, ShSemanticType Semantic, bool Swizzled>
-ShAttrib<N, Binding, T, Semantic, Swizzled>::ShAttrib(host_type data[N])
+ShAttrib<N, Binding, T, Semantic, Swizzled>::ShAttrib(const host_type data[N])
   : ShGeneric<N, T>(new ShVariableNode(Binding, N, ShStorageTypeInfo<T>::value_type, Semantic))
 {
   if (Binding == SH_CONST) {
@@ -353,7 +353,7 @@ ShAttrib<1, Binding, T, Semantic, Swizzled>::ShAttrib(const ShVariableNodePtr& n
 }
 
 template<ShBindingType Binding, typename T, ShSemanticType Semantic, bool Swizzled>
-ShAttrib<1, Binding, T, Semantic, Swizzled>::ShAttrib(host_type data[1])
+ShAttrib<1, Binding, T, Semantic, Swizzled>::ShAttrib(const host_type data[1])
   : ShGeneric<1, T>(new ShVariableNode(Binding, 1, ShStorageTypeInfo<T>::value_type, Semantic))
 {
   if (Binding == SH_CONST) {
@@ -364,7 +364,7 @@ ShAttrib<1, Binding, T, Semantic, Swizzled>::ShAttrib(host_type data[1])
 }
 
 template<ShBindingType Binding, typename T, ShSemanticType Semantic, bool Swizzled>
-ShAttrib<1, Binding, T, Semantic, Swizzled>::ShAttrib(host_type s0)
+ShAttrib<1, Binding, T, Semantic, Swizzled>::ShAttrib(const host_type s0)
   : ShGeneric<1, T>(new ShVariableNode(Binding, 1, ShStorageTypeInfo<T>::value_type, Semantic))
 {
   if (Binding == SH_CONST) {
@@ -609,7 +609,7 @@ ShAttrib<2, Binding, T, Semantic, Swizzled>::ShAttrib(const ShVariableNodePtr& n
 }
 
 template<ShBindingType Binding, typename T, ShSemanticType Semantic, bool Swizzled>
-ShAttrib<2, Binding, T, Semantic, Swizzled>::ShAttrib(host_type data[2])
+ShAttrib<2, Binding, T, Semantic, Swizzled>::ShAttrib(const host_type data[2])
   : ShGeneric<2, T>(new ShVariableNode(Binding, 2, ShStorageTypeInfo<T>::value_type, Semantic))
 {
   if (Binding == SH_CONST) {
@@ -620,7 +620,7 @@ ShAttrib<2, Binding, T, Semantic, Swizzled>::ShAttrib(host_type data[2])
 }
 
 template<ShBindingType Binding, typename T, ShSemanticType Semantic, bool Swizzled>
-ShAttrib<2, Binding, T, Semantic, Swizzled>::ShAttrib(host_type s0, host_type s1)
+ShAttrib<2, Binding, T, Semantic, Swizzled>::ShAttrib(const host_type s0, const host_type s1)
   : ShGeneric<2, T>(new ShVariableNode(Binding, 2, ShStorageTypeInfo<T>::value_type, Semantic))
 {
   if (Binding == SH_CONST) {
@@ -919,7 +919,7 @@ ShAttrib<3, Binding, T, Semantic, Swizzled>::ShAttrib(const ShVariableNodePtr& n
 }
 
 template<ShBindingType Binding, typename T, ShSemanticType Semantic, bool Swizzled>
-ShAttrib<3, Binding, T, Semantic, Swizzled>::ShAttrib(host_type data[3])
+ShAttrib<3, Binding, T, Semantic, Swizzled>::ShAttrib(const host_type data[3])
   : ShGeneric<3, T>(new ShVariableNode(Binding, 3, ShStorageTypeInfo<T>::value_type, Semantic))
 {
   if (Binding == SH_CONST) {
@@ -930,7 +930,7 @@ ShAttrib<3, Binding, T, Semantic, Swizzled>::ShAttrib(host_type data[3])
 }
 
 template<ShBindingType Binding, typename T, ShSemanticType Semantic, bool Swizzled>
-ShAttrib<3, Binding, T, Semantic, Swizzled>::ShAttrib(host_type s0, host_type s1, host_type s2)
+ShAttrib<3, Binding, T, Semantic, Swizzled>::ShAttrib(const host_type s0, const host_type s1, const host_type s2)
   : ShGeneric<3, T>(new ShVariableNode(Binding, 3, ShStorageTypeInfo<T>::value_type, Semantic))
 {
   if (Binding == SH_CONST) {
@@ -1231,7 +1231,7 @@ ShAttrib<4, Binding, T, Semantic, Swizzled>::ShAttrib(const ShVariableNodePtr& n
 }
 
 template<ShBindingType Binding, typename T, ShSemanticType Semantic, bool Swizzled>
-ShAttrib<4, Binding, T, Semantic, Swizzled>::ShAttrib(host_type data[4])
+ShAttrib<4, Binding, T, Semantic, Swizzled>::ShAttrib(const host_type data[4])
   : ShGeneric<4, T>(new ShVariableNode(Binding, 4, ShStorageTypeInfo<T>::value_type, Semantic))
 {
   if (Binding == SH_CONST) {
@@ -1242,7 +1242,7 @@ ShAttrib<4, Binding, T, Semantic, Swizzled>::ShAttrib(host_type data[4])
 }
 
 template<ShBindingType Binding, typename T, ShSemanticType Semantic, bool Swizzled>
-ShAttrib<4, Binding, T, Semantic, Swizzled>::ShAttrib(host_type s0, host_type s1, host_type s2, host_type s3)
+ShAttrib<4, Binding, T, Semantic, Swizzled>::ShAttrib(const host_type s0, const host_type s1, const host_type s2, const host_type s3)
   : ShGeneric<4, T>(new ShVariableNode(Binding, 4, ShStorageTypeInfo<T>::value_type, Semantic))
 {
   if (Binding == SH_CONST) {

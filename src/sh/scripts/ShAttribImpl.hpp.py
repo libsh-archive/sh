@@ -51,7 +51,7 @@ class Impl(semantic.Impl):
             values = ""
             for i in range(0, size):
                 if i > 0: values += ", "
-                if args[0][0] == "host_type":
+                if args[0][0] == "const host_type":
                     values += "s" + str(i)
                 else:
                     common.inprint("SH_DEBUG_ASSERT(s" + str(i) + ".hasValues());")
@@ -59,7 +59,7 @@ class Impl(semantic.Impl):
             common.inprint("host_type data[" + str(size) + "] = {" + values + "};")
             common.inprint("setValues(data);")
         else:
-            if args[0][0] == "host_type":
+            if args[0][0] == "const host_type":
                 common.inprint("setValue(0, s0);")
             else:
                 common.inprint("SH_DEBUG_ASSERT(s0.hasValues());")
@@ -67,7 +67,7 @@ class Impl(semantic.Impl):
         common.deindent()
         common.inprint("} else {")
         common.indent()
-        if args[0][0] != "host_type":
+        if args[0][0] != "const host_type":
             for i in range(0, size):
                 common.inprint("(*this)[" + str(i) + "] = s" + str(i) + ";")
         else:
@@ -110,7 +110,7 @@ class Impl(semantic.Impl):
 
         common.inprint(self.tpl(size))
         #common.inprint("inline")
-        common.inprint(self.tplcls(size) + "::" + self.name + "(host_type data[" + self.sizevar(size) + "])")
+        common.inprint(self.tplcls(size) + "::" + self.name + "(const host_type data[" + self.sizevar(size) + "])")
         common.inprint("  : ShGeneric<" + self.sizevar(size) + ", T>" +
                        "(new ShVariableNode(Binding, " + self.sizevar(size) + ", ShStorageTypeInfo<T>::value_type, Semantic))")
         common.inprint("{")
@@ -129,7 +129,7 @@ class Impl(semantic.Impl):
         common.inprint("")
 
         if size > 0:
-            self.scalarcons([["host_type", "s" + str(x)] for x in range(0, size)], size)
+            self.scalarcons([["const host_type", "s" + str(x)] for x in range(0, size)], size)
         if size > 1:
             self.scalarcons([["const ShGeneric<1, T" + str(x + 2) + ">&", "s" + str(x)] for x in range(0, size)], size, ["typename T" + str(x + 2) for x in range(0, size)])
 
