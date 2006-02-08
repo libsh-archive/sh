@@ -41,6 +41,7 @@ public:
   void unbind();
 
   bool empty() const;
+  bool bound() const;
   
   void attach(const SH::ShPointer<GlslCode>& code);
   void detach(const SH::ShPointer<GlslCode>& code);
@@ -53,7 +54,7 @@ private:
   SH::ShPointer<GlslCode> m_shaders[2];
   GLhandleARB m_arb_program;
 
-  bool m_linked, m_bound;
+  bool m_linked;
 
   static GlslSet* m_current;
 };

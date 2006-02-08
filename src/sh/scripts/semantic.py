@@ -113,7 +113,7 @@ public:""")
         common.inprint(self.name + "(const " + self.name + "<" + self.sizevar(size) + ", Binding, T2, Semantic, Swizzled>& other);")
         common.inprint(self.name + "(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);")
         # common.inprint(self.name + "(const ShProgram&);")
-        common.inprint("explicit " + self.name + "(host_type data[" + self.sizevar(size) + "]);")
+        common.inprint("explicit " + self.name + "(const host_type data[" + self.sizevar(size) + "]);")
         common.inprint("")
 
     def destructor(self):
@@ -289,10 +289,10 @@ class Impl:
         self.constructor([["const ShVariableNodePtr&", "node"],
                           ["const ShSwizzle&", "swizzle"],
                           ["bool", "neg"]], size)
-        self.constructor([["host_type", "data[" + self.sizevar(size) + "]"]], size)
+        self.constructor([["const host_type", "data[" + self.sizevar(size) + "]"]], size)
         # self.constructor([["const ShProgram&", "prg"]], size)
         if size > 0:
-            self.constructor([["host_type", "s" + str(x)] for x in range(0, size)], size)
+            self.constructor([["const host_type", "s" + str(x)] for x in range(0, size)], size)
         if size > 1:
             self.constructor([["const ShGeneric<1, T" + str(x + 2) + ">&", "s" + str(x)] for x in range(0, size)], size, 
                 ["typename T" + str(x) for x in range(2, size + 2)])

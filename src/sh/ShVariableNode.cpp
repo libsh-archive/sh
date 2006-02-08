@@ -464,11 +464,14 @@ void* ShVariableNode::operator new(std::size_t size)
   return m_pool->alloc();
 }
 
-void ShVariableNode::operator delete(void* ptr)
+void ShVariableNode::operator delete(void* ptr, std::size_t size)
 {
-  // We won't have a pool if the object is an instance of a class
-  // derived from ShVariableNode (ShChannelNode for example)
-  if (m_pool) m_pool->free(ptr);
+  if (size != sizeof(ShVariableNode)) ::operator delete(ptr);
+  else {
+    // We won't have a pool if the object is an instance of a class
+    // derived from ShVariableNode (ShChannelNode for example)
+    if (m_pool) m_pool->free(ptr);
+  }
 }
 #endif
 

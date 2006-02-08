@@ -28,7 +28,7 @@ using namespace SH;
 using namespace std;
 
 GlslSet::GlslSet()
-  : m_linked(false), m_bound(false)
+  : m_linked(false)
 {
   SH_GL_CHECK_ERROR(m_arb_program = glCreateProgramObjectARB());
   if (!m_arb_program) {
@@ -40,7 +40,7 @@ GlslSet::GlslSet()
 }
 
 GlslSet::GlslSet(const SH::ShPointer<GlslCode>& code)
-  : m_linked(false), m_bound(false)
+  : m_linked(false)
 {
   SH_GL_CHECK_ERROR(m_arb_program = glCreateProgramObjectARB());
   if (!m_arb_program) {
@@ -53,7 +53,7 @@ GlslSet::GlslSet(const SH::ShPointer<GlslCode>& code)
 }
 
 GlslSet::GlslSet(const SH::ShProgramSet& s)
-  : m_linked(false), m_bound(false)
+  : m_linked(false)
 {
   SH_GL_CHECK_ERROR(m_arb_program = glCreateProgramObjectARB());
   if (!m_arb_program) {
@@ -75,7 +75,7 @@ GlslSet::GlslSet(const SH::ShProgramSet& s)
 }
 
 GlslSet::GlslSet(const GlslSet& other)
-  : m_linked(false), m_bound(false)
+  : m_linked(false)
 {
   SH_GL_CHECK_ERROR(m_arb_program = glCreateProgramObjectARB());
   if (!m_arb_program) {
@@ -187,16 +187,16 @@ bool GlslSet::empty() const
   return true;
 }
 
+bool GlslSet::bound() const
+{
+  // Query GL to see if we are bound
+  GLhandleARB currently_bound = 0;
+  SH_GL_CHECK_ERROR(currently_bound = glGetHandleARB(GL_PROGRAM_OBJECT_ARB));
+  return (currently_bound == m_arb_program);
+}
+
 void GlslSet::bind()
 {
-  if (m_bound) {
-    for (int i = 0; i < 2; i++) {
-      if (!m_shaders[i]) continue;
-      m_shaders[i]->update();
-    }
-    return;
-  }
-
   if (!m_linked) link();
 
   if (current() && current() != this) current()->unbind();
@@ -225,12 +225,11 @@ void GlslSet::bind()
   }
 
   m_current = this;
-  m_bound = true;
 }
 
 void GlslSet::unbind()
 {
-  if (!m_bound) return;
+  if (!bound()) return;
 
   SH_GL_CHECK_ERROR(glUseProgramObjectARB(0));
 
@@ -239,7 +238,6 @@ void GlslSet::unbind()
     m_shaders[i]->set_bound(0);
   }
   m_current = 0;
-  m_bound = false;
 }
 
 }

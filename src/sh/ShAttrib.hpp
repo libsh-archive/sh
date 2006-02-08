@@ -73,7 +73,7 @@ public:
   template<typename T2>
   ShAttrib(const ShAttrib<N, Binding, T2, Semantic, Swizzled>& other);
   ShAttrib(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShAttrib(host_type data[N]);
+  explicit ShAttrib(const host_type data[N]);
   
   ~ShAttrib();
 
@@ -163,7 +163,7 @@ public:
   template<typename T2>
   ShAttrib(const ShAttrib<1, Binding, T2, Semantic, Swizzled>& other);
   ShAttrib(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShAttrib(host_type data[1]);
+  explicit ShAttrib(const host_type data[1]);
   
   ShAttrib(host_type);
   
@@ -242,7 +242,7 @@ public:
   template<typename T2>
   ShAttrib(const ShAttrib<2, Binding, T2, Semantic, Swizzled>& other);
   ShAttrib(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShAttrib(host_type data[2]);
+  explicit ShAttrib(const host_type data[2]);
   
   ShAttrib(host_type, host_type);
   template<typename T2, typename T3>
@@ -336,7 +336,7 @@ public:
   template<typename T2>
   ShAttrib(const ShAttrib<3, Binding, T2, Semantic, Swizzled>& other);
   ShAttrib(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShAttrib(host_type data[3]);
+  explicit ShAttrib(const host_type data[3]);
   
   ShAttrib(host_type, host_type, host_type);
   template<typename T2, typename T3, typename T4>
@@ -430,7 +430,7 @@ public:
   template<typename T2>
   ShAttrib(const ShAttrib<4, Binding, T2, Semantic, Swizzled>& other);
   ShAttrib(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
-  explicit ShAttrib(host_type data[4]);
+  explicit ShAttrib(const host_type data[4]);
   
   ShAttrib(host_type, host_type, host_type, host_type);
   template<typename T2, typename T3, typename T4, typename T5>
