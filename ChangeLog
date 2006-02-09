@@ -1,5 +1,8 @@
 2006-02-09  Francois Marier  <francois@serioushack.com>
 
+	* backends/gl/GlslEmit.cpp, ArbEmit.cpp: Remove the ATI hacks for
+	DIV and MOD.  Tweak the unit tests instead.
+
 	* backends/gl/ArbCode.cpp (ArbCode): Fix the ATI_draw_buffers code
 	for ATI on Linux.
 

@@ -36,7 +36,7 @@ static GlslMapping opCodeTable[] = {
   {SH_OP_CEIL,  "ceil($0)"},
   {SH_OP_COS,   "cos($0)"},
   {SH_OP_DOT,   "dot($0, $1)"},
-  //{SH_OP_DIV,   "$0 / $1"}, // Needs ATI work-around
+  {SH_OP_DIV,   "$0 / $1"},
   {SH_OP_DX,    "dFdx($0)"},
   {SH_OP_DY,    "dFdy($0)"},
   {SH_OP_EXP,   "exp($0)"},
@@ -49,7 +49,7 @@ static GlslMapping opCodeTable[] = {
   {SH_OP_MAD,   "$0 * $1 + $2"},
   {SH_OP_MAX,   "max($0, $1)"},
   {SH_OP_MIN,   "min($0, $1)"},
-  //{SH_OP_MOD,   "mod($0, $1)"}, // Needs ATI work-around
+  {SH_OP_MOD,   "mod($0, $1)"},
   {SH_OP_MUL,   "$0 * $1"},
   {SH_OP_NEG,   "-($0)"},
   {SH_OP_NORM,  "normalize($0)"},
@@ -162,9 +162,6 @@ void GlslCode::emit(const ShStatement &stmt)
     case SH_OP_COND:
       emit_cond(stmt);
       break;
-    case SH_OP_DIV:
-      emit_ati_workaround(stmt, 1, "$0 / $1");
-      break;
     case SH_OP_EXP10:
       emit_exp10(stmt);
       break;
@@ -179,9 +176,6 @@ void GlslCode::emit(const ShStatement &stmt)
       break;
     case SH_OP_LOG10:
       emit_log10(stmt);
-      break;
-    case SH_OP_MOD:
-      emit_ati_workaround(stmt, 0, "mod($0, $1)");
       break;
     case SH_OP_NOISE:
       emit_noise(stmt);

@@ -281,24 +281,7 @@ void ArbCode::emit_div(const ShStatement& stmt)
   for (int i = 0; i < stmt.src[1].size(); i++) {
     m_instructions.push_back(ArbInst(SH_ARB_RCP, rcp(i), stmt.src[1](i)));
   }
-  
-  bool on_ati = false;
-  const GLubyte* vendor = SH_GL_CHECK_ERROR(glGetString(GL_VENDOR));
-  if (vendor) {
-    std::string s(reinterpret_cast<const char*>(vendor));
-    on_ati = s.find("ATI") != s.npos;
-  }
-
-  if (on_ati) {
-    // Work-around ATI bug where a number divided by itself returns 0 instead of 1
-    ShVariable divided(new ShVariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
-    m_instructions.push_back(ArbInst(SH_ARB_MUL, divided, stmt.src[0], rcp));
-    ShVariable equal(new ShVariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
-    emit(ShStatement(equal, stmt.src[0], SH_OP_SEQ, stmt.src[1]));
-    emit(ShStatement(stmt.dest,SH_OP_COND, equal, equal, divided));
-  } else {
-    m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0], rcp));
-  }
+  m_instructions.push_back(ArbInst(SH_ARB_MUL, stmt.dest, stmt.src[0], rcp));
 }
 
 void ArbCode::emit_sqrt(const ShStatement& stmt)
