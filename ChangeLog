@@ -1,5 +1,8 @@
 2006-02-09  Francois Marier  <francois@serioushack.com>
 
+	* backends/cc/Cc.cpp (allocate_outputs): Initialize outputs to
+	zero in order to be consistent with GPU backends.
+
 	* backends/gl/GlslEmit.cpp, ArbEmit.cpp: Remove the ATI hacks for
 	DIV and MOD.  Tweak the unit tests instead.
 
