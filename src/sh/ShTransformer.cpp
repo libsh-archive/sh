@@ -660,6 +660,16 @@ ShVariableNodePtr allocate_temp(const ShVariable& dest)
   return node_ptr;
 }
 
+ShVariableNodePtr allocate_scalar_temp(const ShVariable& dest)
+{
+  const ShVariableNodePtr& dest_node = dest.node();
+  ShVariableNode* node = new ShVariableNode(SH_TEMP, 1, 
+                                            dest_node->valueType(), 
+                                            dest_node->specialType());
+  ShVariableNodePtr node_ptr = ShPointer<ShVariableNode>(node);
+  return node_ptr;
+}
+
 struct ATan2ExpanderBase: public ShTransformerParent 
 {
   bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node)
@@ -704,6 +714,46 @@ void ShTransformer::expand_atan2()
 {
   ATan2Expander expander;
   m_changed |= expander.transform(m_program);
+}
+
+
+struct TexdToTexlodBase : public ShTransformerParent 
+{
+  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node)
+  { 
+    if (SH_OP_TEXD == I->op) {
+      ShBasicBlock::ShStmtList new_stmts;
+      
+      ShVariable tmp1(allocate_scalar_temp(I->dest));
+      ShVariable tmp2(allocate_scalar_temp(I->dest));
+
+      int indices[] = {0, 1, 2, 3, 4, 5};
+      ShVariable dx(I->src[2].node(), ShSwizzle(I->src[2].size(), I->src[2].size()/2, indices), I->src[2].neg());
+      ShVariable dy(I->src[2].node(), ShSwizzle(I->src[2].size(), I->src[2].size()/2, indices + I->src[2].size()/2), I->src[2].neg());
+
+      new_stmts.push_back(ShStatement(tmp1, dx, SH_OP_DOT, dx));
+      new_stmts.push_back(ShStatement(tmp2, dy, SH_OP_DOT, dy));
+      new_stmts.push_back(ShStatement(tmp1, tmp1, SH_OP_MAX, tmp2));
+      new_stmts.push_back(ShStatement(tmp1, SH_OP_SQRT, tmp1));
+      new_stmts.push_back(ShStatement(tmp1, SH_OP_LOG2, tmp1));
+
+      new_stmts.push_back(ShStatement(I->dest, SH_OP_TEXLOD, I->src[0], I->src[1], tmp1));
+
+      I = node->block->erase(I);
+      node->block->splice(I, new_stmts);
+      m_changed = true;
+      return true;
+    } else {
+      return false;
+    }
+  }
+};
+
+typedef ShDefaultTransformer<TexdToTexlodBase> TexdToTexlod;
+void ShTransformer::texd_to_texlod()
+{
+  TexdToTexlod t2t;
+  m_changed |= t2t.transform(m_program);
 }
 
 struct InverseHyperbolicExpanderBase: public ShTransformerParent 
