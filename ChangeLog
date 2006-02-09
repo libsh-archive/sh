@@ -1,8 +1,21 @@
 2006-02-08  Francois Marier  <francois@serioushack.com>
 
+	* src/sh/ShBackend.cpp (load_all_backends): Fix an exception
+	thrown when SH_BACKEND_DIR is not set and no backend has been
+	specified.
+
+	* backends/gl/ArbCode.cpp (print): The option to output in the
+	shader should be ARB_draw_buffers if ATI_draw_buffers is not
+	defined.
+
+	* backends/cc/Cc.cpp (load_shader_func): Must compile the programs
+	with -fPIC to work on 64-bit machines.
+
 	* src/sh/ShTextureNode.cpp (initialize_memories): Improve the size
 	check for mipmapped textures and make it a runtime error instead
-	of an assertion.
+	of an assertion.  Move that check to build_mipmaps since textures
+	filtering might be set incorrectly the first time the memory is
+	initialized.
 
 2006-02-08  Stefanus Du Toit  <sdt@serioushack.com>
 
