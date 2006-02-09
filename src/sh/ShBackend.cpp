@@ -408,8 +408,14 @@ void ShBackend::load_all_backends()
     end = length - 1;
   }
 #else
-  std::string backend_dir(string(getenv("SH_BACKEND_DIR")));
-  
+  string backend_dir = "";
+  {
+    const char* env_var = getenv("SH_BACKEND_DIR");
+    if (env_var) {
+      backend_dir = string(env_var);
+    }
+  }
+
   if (backend_dir.empty()) {
 # if defined(__APPLE__) && !defined(AUTOTOOLS)
     load_libraries(string(getenv("HOME")) + "/Library/Sh/Backends");

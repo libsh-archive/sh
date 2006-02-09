@@ -1,5 +1,9 @@
 2006-02-08  Francois Marier  <francois@serioushack.com>
 
+	* src/sh/ShBackend.cpp (load_all_backends): Fix an exception
+	thrown when SH_BACKEND_DIR is not set and no backend has been
+	specified.
+
 	* backends/gl/ArbCode.cpp (print): The option to output in the
 	shader should be ARB_draw_buffers if ATI_draw_buffers is not
 	defined.
