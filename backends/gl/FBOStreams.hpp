@@ -17,21 +17,38 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef GLTEXTURES_HPP
-#define GLTEXTURES_HPP
+#ifndef FBOSTREAMS_HPP
+#define FBOSTREAMS_HPP
 
+#include "ShProgram.hpp"
 #include "GlBackend.hpp"
 
 namespace shgl {
 
-class GlTextures : public TextureStrategy {
-public:
-  GlTextures(void);
+struct FBOStreams : public StreamStrategy {
+  FBOStreams();
+  virtual ~FBOStreams();
 
-  TextureStrategy* create(void);
+  void execute(const SH::ShProgramNodeCPtr& program, 
+               SH::ShStream& dest, TextureStrategy *texture);
+
+  virtual StreamStrategy* create();
+
+private:
+  SH::ShProgramSet* m_shaders;
+  bool m_setup_vp;
+  SH::ShProgram m_vp;
   
-  void bindTexture(const SH::ShTextureNodePtr& texture,
-                   GLenum target, bool write);
+  enum DrawBuffersExt {
+    ATI,
+    ARB,
+    OGL20,
+    NONE
+  };
+  DrawBuffersExt m_draw_buffers_ext;
+  int m_max_draw_buffers;
+  
+  GLuint m_framebuffer;
 };
 
 }

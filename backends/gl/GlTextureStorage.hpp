@@ -37,6 +37,8 @@ public:
   
   ~GlTextureStorage();
   
+  void initTexture();
+  
   std::string id() const { return "opengl:texture"; }
   
   GLuint name() const { return m_name->value(); }
@@ -51,6 +53,8 @@ public:
   int count() const { return (m_count != -1) ? m_count : m_width * m_height * m_depth; }
   GLint mipmap_level() const { return m_mipmap_level; }
   
+  bool write() const { return m_write; }
+  void write(bool w) { m_write = w; }
 private:
   GlTextureNamePtr m_name;
 
@@ -62,6 +66,8 @@ private:
   int m_width, m_height, m_depth, m_tuplesize, m_count;
   
   unsigned int m_params;
+  
+  bool m_write;
 
   GlTextureStorage(const GlTextureStorage&);
   GlTextureStorage& operator=(const GlTextureStorage&);

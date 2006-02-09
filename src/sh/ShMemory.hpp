@@ -60,6 +60,8 @@ public:
   /// @arg functor A functor of ShStoragePtr -> bool.
   template<typename Functor>
   ShPointer<ShStorage> findStorage(const std::string& id, const Functor& f);
+  template<typename Functor>
+  ShPointer<ShStorage> findStorage(const std::string& id, Functor& f);
 
   /// Discard this storage from this memory
   void removeStorage(const ShPointer<ShStorage>& storage);
@@ -69,6 +71,9 @@ public:
 
   /// modify the memory data by using the links to the dependencies
   void flush();
+  
+  /// (un)freeze the current timestamp
+  void freeze(bool state);
 
 protected:
   ShMemory();
@@ -81,6 +86,9 @@ private:
   typedef std::list< ShPointer<ShStorage> > StorageList;
   StorageList m_storages;
   int m_timestamp;
+
+  bool m_frozen;
+  int m_frozenTimestamp;
 
   /// the list of all dependencies, for update calls
   std::list<ShMemoryDep*> dependencies;
@@ -284,6 +292,15 @@ private:
 
 typedef ShPointer<ShHostMemory> ShHostMemoryPtr;
 typedef ShPointer<const ShHostMemory> ShHostMemoryCPtr;
+
+template<typename Functor>
+ShPointer<ShStorage> ShMemory::findStorage(const std::string& id, Functor& f)
+{
+  for (StorageList::iterator I = m_storages.begin(); I != m_storages.end(); ++I) {
+    if ((*I)->id() == id && f(*I)) return *I;
+  }
+  return 0;
+}
 
 template<typename Functor>
 ShPointer<ShStorage> ShMemory::findStorage(const std::string& id, const Functor& f)

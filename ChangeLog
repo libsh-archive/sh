@@ -1,3 +1,16 @@
+2006-02-09  Filip Spacek  <filip@serioushack.com>
+
+	* backends/gl/FBOStreams.cpp: Frame Buffer Object streams
+	implementation.
+
+	* backends/gl/GlTextureStorage.cpp: Write flag for double
+	buffering and GlTexture to Host transfer class.
+
+	* backends/gl/GlTextures.cpp (bindTexture): Add support to bind
+	textures for writing (FBOs).
+
+	* src/sh/ShMemory.hpp: Add a freeze flag to ShMemory.
+
 2006-02-09  Francois Marier  <francois@serioushack.com>
 
 	* src/sh/ShSyntax.hpp: Add extra brackets to SH_BEGIN and SH_END

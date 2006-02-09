@@ -114,13 +114,15 @@ struct TextureStrategy {
   virtual ~TextureStrategy() {}
   virtual TextureStrategy* create() = 0;
   virtual void bindTexture(const SH::ShTextureNodePtr& texture,
-                           GLenum target) = 0;
+                           GLenum target, bool write) = 0;
 };
 
 struct StreamStrategy {
   virtual ~StreamStrategy() {}
   virtual StreamStrategy* create() = 0;
-  virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest) = 0;
+  virtual void execute(const SH::ShProgramNodeCPtr& program, 
+                       SH::ShStream& dest,
+                       TextureStrategy* texture) = 0;
 };
 
 struct CodeStrategy {

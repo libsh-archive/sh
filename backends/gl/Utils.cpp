@@ -123,12 +123,17 @@ void TexFetcher::operator()(ShCtrlGraphNode* node)
 
 void split_program(ShProgramNode* program,
                    std::list<ShProgramNodePtr>& programs,
-                   const std::string& target)
+                   const std::string& target, int chunk_size)
 {
-  int i = 0;
+  SH_DEBUG_ASSERT(chunk_size > 0);
+  int var = 0;
   for (ShProgramNode::VarList::const_iterator I = program->begin_outputs();
-       I != program->end_outputs(); ++I, ++i) {
-    ShProgram p = shSwizzle(i) << ShProgram(program);
+       I != program->end_outputs(); ) {
+    std::vector<int> chunk;
+    for (int i = 0; i < chunk_size && I != program->end_outputs(); ++I,++i,++var){
+      chunk.push_back(var);
+    }
+    ShProgram p = shSwizzle(chunk) << ShProgram(program);
     p.node()->target() = target;
     programs.push_back(p.node());
   }

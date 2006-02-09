@@ -32,7 +32,8 @@ if INCLUDE_PBUFFERSTREAMS
 PBUFFERSTREAM_SOURCES = PBufferStreams.hpp PBufferStreams.cpp \
 			PBufferContext.hpp PBufferContext.cpp \
 			GLXPBufferContext.hpp GLXPBufferContext.cpp \
-			Utils.hpp Utils.cpp
+			Utils.hpp Utils.cpp \
+			FBOStreams.hpp FBOStreams.cpp
 else
 PBUFFERSTREAM_SOURCES = 
 endif

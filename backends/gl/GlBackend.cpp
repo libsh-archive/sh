@@ -386,7 +386,7 @@ void GlBackend::unbind_all_programs()
 
 void GlBackend::execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest)
 {
-  m_stream->execute(program, dest);
+  m_stream->execute(program, dest, m_texture);
 }
 
 }

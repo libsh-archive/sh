@@ -72,7 +72,7 @@ private:
 
 void split_program(SH::ShProgramNode* program,
                    std::list<SH::ShProgramNodePtr>& programs,
-                   const std::string& target);
+                   const std::string& target, int chunk_size);
 
 }
 

@@ -29,7 +29,8 @@ struct PBufferStreams : public StreamStrategy {
   PBufferStreams();
   virtual ~PBufferStreams();
 
-  void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
+  void execute(const SH::ShProgramNodeCPtr& program, 
+               SH::ShStream& dest, TextureStrategy* texture);
 
   virtual StreamStrategy* create();
 

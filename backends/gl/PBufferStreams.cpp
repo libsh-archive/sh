@@ -153,7 +153,7 @@ PBufferStreamCache::PBufferStreamCache(ShProgramNode* stream_program,
   ChannelGatherer gatherer(m_channel_map, dims);
   stream_program->ctrlGraph->dfs(gatherer);
 
-  split_program(stream_program, m_programs, get_target_backend(stream_program) + "fragment");
+  split_program(stream_program, m_programs, get_target_backend(stream_program) + "fragment", 1);
 
   for (std::list<ShProgramNodePtr>::iterator I = m_programs.begin();
        I != m_programs.end(); ++I) {
@@ -232,7 +232,7 @@ void fillin()
 #endif
 
 void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
-                             ShStream& dest)
+                             ShStream& dest, TextureStrategy* texture)
 {
   // Let's get rid of that constness... Yes, yes, I know...
   ShProgramNodePtr program = shref_const_cast<ShProgramNode>(program_const);

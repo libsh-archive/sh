@@ -1560,7 +1560,7 @@ void ArbCode::bindTextures()
   for (ShProgramNode::TexList::const_iterator I = m_shader->textures.begin();
        I != m_shader->textures.end(); ++I) {
     if (!m_registers[*I]->preset) {
-      m_texture->bindTexture(*I, GL_TEXTURE0 + m_registers[*I]->index);
+      m_texture->bindTexture(*I, GL_TEXTURE0 + m_registers[*I]->index, false);
     }
   }
 }

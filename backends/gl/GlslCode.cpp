@@ -804,7 +804,7 @@ void GlslCode::bind_textures()
       SH_GL_CHECK_ERROR(glUniform1iARB(location, index));
       
       if (!m_texture_units[texture].preset) {
-	m_texture->bindTexture(texture, GL_TEXTURE0 + index);
+	m_texture->bindTexture(texture, GL_TEXTURE0 + index, false);
       }
     } else {
       cerr << "Cannot find uniform texture named '" << var.name() << "'." << endl;
