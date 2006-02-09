@@ -726,10 +726,23 @@ struct TexdToTexlodBase : public ShTransformerParent
       
       ShVariable tmp1(allocate_scalar_temp(I->dest));
       ShVariable tmp2(allocate_scalar_temp(I->dest));
+      ShVariable tmp3(allocate_temp(I->src[2]));
+
+      ShTextureNodePtr texnode = shref_dynamic_cast<ShTextureNode>(I->src[0].node());
+
+      int size_indices[6];
+      for (int i = 0; i < texnode->texSizeVar().size(); i++) {
+        size_indices[i] = i;
+        size_indices[texnode->texSizeVar().size() + i] = i;
+      }
+      ShVariable size_var(texnode->texSizeVar().node(), ShSwizzle(texnode->texSizeVar().size(), texnode->texSizeVar().size() * 2, size_indices), texnode->texSizeVar().neg());
+
+      new_stmts.push_back(ShStatement(tmp3, I->src[2], SH_OP_MUL, size_var));
 
       int indices[] = {0, 1, 2, 3, 4, 5};
-      ShVariable dx(I->src[2].node(), ShSwizzle(I->src[2].size(), I->src[2].size()/2, indices), I->src[2].neg());
-      ShVariable dy(I->src[2].node(), ShSwizzle(I->src[2].size(), I->src[2].size()/2, indices + I->src[2].size()/2), I->src[2].neg());
+      ShVariable dx(tmp3.node(), ShSwizzle(tmp3.size(), tmp3.size()/2, indices), tmp3.neg());
+      ShVariable dy(tmp3.node(), ShSwizzle(tmp3.size(), tmp3.size()/2, indices + tmp3.size()/2), tmp3.neg());
+
 
       new_stmts.push_back(ShStatement(tmp1, dx, SH_OP_DOT, dx));
       new_stmts.push_back(ShStatement(tmp2, dy, SH_OP_DOT, dy));
