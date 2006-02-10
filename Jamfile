@@ -71,11 +71,11 @@ lib libshutil
   /libpng//libpng
 : # requirements
   <tag>@stage.add-variant-and-compiler
-  <use>libsh
+  <dependency>libsh/<link>shared
   <link>static
 : # default-build
 : # usage-requirements
-#  <library>libsh
+  <library>libsh/<link>shared
 ;
 
 
@@ -97,13 +97,27 @@ rule add-backend-tag ( name : type ? : property-set )
 }
 
 
+lib libshgl
+: # sources
+  backends/gl//gl
+  /opengl//libgl
+: # requirements
+  <tag>@stage.add-variant-and-compiler
+  <dependency>libsh/<link>shared
+  <include>src/sh
+  <link>static
+: # default-build
+: # usage-requirements
+  <library>libsh/<link>shared
+  <include>src/sh
+;
+
+
 lib libsharb
 : # sources
   backends/gl//arb
-  libsh
-  /opengl//libgl
+  libshgl
 : # requirements
-  <include>src/sh
   <tag>@add-backend-tag
 : # default-build
 : # usage-requirements
@@ -113,10 +127,8 @@ lib libsharb
 lib libshglsl
 : # sources
   backends/gl//glsl
-  libsh
-  /opengl//libgl
+  libshgl
 : # requirements
-  <include>src/sh
   <tag>@add-backend-tag
 : # default-build
 : # usage-requirements
@@ -128,10 +140,11 @@ lib libshcc
   backends/cc//cc
   libsh
 : # requirements
-  <include>src/sh
   <tag>@add-backend-tag
+  <include>src/sh
 : # default-build
 : # usage-requirements
+  <include>src/sh
 ;
 
 
