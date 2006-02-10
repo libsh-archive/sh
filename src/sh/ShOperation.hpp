@@ -108,7 +108,9 @@ enum ShOperation {
   // Textures
   SH_OP_TEX, ///< Texture lookup (0..1)
   SH_OP_TEXI, ///< Texture lookup, indexed mode (0..width - 1)
-  SH_OP_TEXD, ///< Texture lookup with derivatives
+  SH_OP_TEXD, ///< Texture lookup with derivatives [0..1]
+  SH_OP_TEXLOD, ///< Texture lookup with LOD [0..1]
+  SH_OP_TEXBIAS, ///< Texture lookup with LOD Bias [0..1]
 
   // Conditionals
   SH_OP_COND, ///< Conditional assignment: dst[i] = (src[0][i] > 0.0 ? src[1][i] : src[2][i])

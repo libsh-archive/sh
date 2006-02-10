@@ -137,24 +137,24 @@ ArbCode::ArbCode(const ShProgramNodeCPtr& shader, const string& unit,
       if (extstr.find("NV_fragment_program2") != string::npos) {
         m_environment |= SH_ARB_NVFP2;
       }
-      if (
-#ifdef ATI_draw_buffers
-          (extstr.find("ATI_draw_buffers") != string::npos) ||
-#endif
-          (extstr.find("ARB_draw_buffers") != string::npos)) {
+      if (extstr.find("ATI_draw_buffers") != string::npos) {
         m_environment |= SH_ARB_ATIDB;
 	arbFragmentOutputBindingSpecs[0].binding = SH_ARB_REG_RESULTCOL_ATI;
 
         GLint max_draw_buffers;
 #ifdef ATI_draw_buffers
-        if (extstr.find("ATI_draw_buffers") != string::npos) {
-          SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ATI, &max_draw_buffers));
-        } else {
+        SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ATI, &max_draw_buffers));
+#else 
+        SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ARB, &max_draw_buffers));
 #endif
-          SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ARB, &max_draw_buffers));
-#ifdef ATI_draw_buffers
-        }
-#endif
+        arbFragmentOutputBindingSpecs[0].maxBindings = max_draw_buffers;
+      } 
+      else if (extstr.find("ARB_draw_buffers") != string::npos) {
+        m_environment |= SH_ARB_ARBDB;
+	arbFragmentOutputBindingSpecs[0].binding = SH_ARB_REG_RESULTCOL_ATI;
+
+        GLint max_draw_buffers;
+        SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ARB, &max_draw_buffers));
         arbFragmentOutputBindingSpecs[0].maxBindings = max_draw_buffers;
       }
     }
@@ -613,11 +613,9 @@ ostream& ArbCode::print(ostream& out)
     else if (m_environment & SH_ARB_NVFP) out << "OPTION NV_fragment_program;" << endl;
 
     if (m_environment & SH_ARB_ATIDB) {
-#ifdef ATI_draw_buffers
       out << "OPTION ATI_draw_buffers;" << endl;
-#else
+    } else if (m_environment & SH_ARB_ARBDB) {
       out << "OPTION ARB_draw_buffers;" << endl;
-#endif
     }
   }
   

@@ -246,6 +246,20 @@ void CcBackendCode::allocate_inputs(void)
 void CcBackendCode::allocate_outputs(void) 
 {
   allocate_varlist(m_program->outputs, OutputPrefix, "outputs"); 
+  
+  m_code << "  // Initializing output variables to zero " << std::endl;
+  int num = 0;
+  for (ShProgramNode::VarList::const_iterator I = m_program->outputs.begin(); 
+       I != m_program->outputs.end(); ++I, ++num) {
+    ShVariableNodePtr node = *I; 
+
+    const char* name = makeVarname(OutputPrefix, num);
+    const char* type = ctype(node->valueType());
+    for (int i=0; i < node->size(); i++) {
+      m_code << "  " << name << "[" << i << "] = (" << type << ")0;" << std::endl;
+    }
+  }
+  m_code << std::endl;
 }
 
 void CcBackendCode::allocate_channels(void) 

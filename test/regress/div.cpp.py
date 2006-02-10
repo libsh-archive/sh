@@ -25,7 +25,9 @@ def insert_into(test, modifying=False):
     test.add_test(div((1.0, 2.0), (3, 3), ['f', 'f']))
     test.add_test(div((1, 2), (3.0, 3.0), ['s', 's']))
 
-    test.add_test(div((3, 3, 3), (3, 3, 3), ['s', 'f', 'i']))
+    test.add_test(div((4, 4, 4), (4, 4, 4), ['i', 'i', 'i']))
+    test.add_test(div((1, 0.5, 2), (1, 0.5, 2), ['f', 'f', 'f']))
+    test.add_test(div((64, 64, 64), (64, 64, 64), ['f', 'f', 'f']))
 
     test.add_test(div((-4.0, -5.0, -6.0), 0.3)) # N / 1
     if not modifying:

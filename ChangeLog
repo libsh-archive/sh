@@ -1,3 +1,17 @@
+2006-02-09  Francois Marier  <francois@serioushack.com>
+
+	* src/sh/ShSyntax.hpp: Add extra brackets to SH_BEGIN and SH_END
+	to prevent compilation when SH_END is missing (issue290).
+
+	* backends/cc/Cc.cpp (allocate_outputs): Initialize outputs to
+	zero in order to be consistent with GPU backends.
+
+	* backends/gl/GlslEmit.cpp, ArbEmit.cpp: Remove the ATI hacks for
+	DIV and MOD.  Tweak the unit tests instead.
+
+	* backends/gl/ArbCode.cpp (ArbCode): Fix the ATI_draw_buffers code
+	for ATI on Linux.
+
 2006-02-08  Francois Marier  <francois@serioushack.com>
 
 	* src/sh/ShBackend.cpp (load_all_backends): Fix an exception

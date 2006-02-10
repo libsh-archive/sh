@@ -660,6 +660,16 @@ ShVariableNodePtr allocate_temp(const ShVariable& dest)
   return node_ptr;
 }
 
+ShVariableNodePtr allocate_scalar_temp(const ShVariable& dest)
+{
+  const ShVariableNodePtr& dest_node = dest.node();
+  ShVariableNode* node = new ShVariableNode(SH_TEMP, 1, 
+                                            dest_node->valueType(), 
+                                            dest_node->specialType());
+  ShVariableNodePtr node_ptr = ShPointer<ShVariableNode>(node);
+  return node_ptr;
+}
+
 struct ATan2ExpanderBase: public ShTransformerParent 
 {
   bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node)
@@ -704,6 +714,59 @@ void ShTransformer::expand_atan2()
 {
   ATan2Expander expander;
   m_changed |= expander.transform(m_program);
+}
+
+
+struct TexdToTexlodBase : public ShTransformerParent 
+{
+  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node)
+  { 
+    if (SH_OP_TEXD == I->op) {
+      ShBasicBlock::ShStmtList new_stmts;
+      
+      ShVariable tmp1(allocate_scalar_temp(I->dest));
+      ShVariable tmp2(allocate_scalar_temp(I->dest));
+      ShVariable tmp3(allocate_temp(I->src[2]));
+
+      ShTextureNodePtr texnode = shref_dynamic_cast<ShTextureNode>(I->src[0].node());
+
+      int size_indices[6];
+      for (int i = 0; i < texnode->texSizeVar().size(); i++) {
+        size_indices[i] = i;
+        size_indices[texnode->texSizeVar().size() + i] = i;
+      }
+      ShVariable size_var(texnode->texSizeVar().node(), ShSwizzle(texnode->texSizeVar().size(), texnode->texSizeVar().size() * 2, size_indices), texnode->texSizeVar().neg());
+
+      new_stmts.push_back(ShStatement(tmp3, I->src[2], SH_OP_MUL, size_var));
+
+      int indices[] = {0, 1, 2, 3, 4, 5};
+      ShVariable dx(tmp3.node(), ShSwizzle(tmp3.size(), tmp3.size()/2, indices), tmp3.neg());
+      ShVariable dy(tmp3.node(), ShSwizzle(tmp3.size(), tmp3.size()/2, indices + tmp3.size()/2), tmp3.neg());
+
+
+      new_stmts.push_back(ShStatement(tmp1, dx, SH_OP_DOT, dx));
+      new_stmts.push_back(ShStatement(tmp2, dy, SH_OP_DOT, dy));
+      new_stmts.push_back(ShStatement(tmp1, tmp1, SH_OP_MAX, tmp2));
+      new_stmts.push_back(ShStatement(tmp1, SH_OP_SQRT, tmp1));
+      new_stmts.push_back(ShStatement(tmp1, SH_OP_LOG2, tmp1));
+
+      new_stmts.push_back(ShStatement(I->dest, SH_OP_TEXLOD, I->src[0], I->src[1], tmp1));
+
+      I = node->block->erase(I);
+      node->block->splice(I, new_stmts);
+      m_changed = true;
+      return true;
+    } else {
+      return false;
+    }
+  }
+};
+
+typedef ShDefaultTransformer<TexdToTexlodBase> TexdToTexlod;
+void ShTransformer::texd_to_texlod()
+{
+  TexdToTexlod t2t;
+  m_changed |= t2t.transform(m_program);
 }
 
 struct InverseHyperbolicExpanderBase: public ShTransformerParent 

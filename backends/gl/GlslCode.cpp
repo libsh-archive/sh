@@ -82,6 +82,7 @@ void GlslCode::generate()
   ShVarTransformMap* original_vars = new ShVarTransformMap;
   transform.convertInputOutput(original_vars);
   transform.convertTextureLookups();
+  transform.texd_to_texlod();
 
   ShTransformer::ValueTypeMap convert_map;
   convert_map[SH_DOUBLE] = SH_FLOAT; 

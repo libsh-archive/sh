@@ -118,6 +118,10 @@ public:
    */
   void expand_inverse_hyperbolic();
 
+  /** Replace TEXD with TEXLOD ops.
+   */
+  void texd_to_texlod();
+
 private:
   /// NOT IMPLEMENTED
   ShTransformer(const ShTransformer& other);
