@@ -1,6 +1,6 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright 2003-2005 Serious Hack Inc.
+// Copyright 2003-2006 Serious Hack Inc.
 // 
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 const char* cc_texture_string[] = {
 "// Sh: A GPU metaprogramming language.\n",
 "//\n",
-"// Copyright 2003-2005 Serious Hack Inc.\n",
+"// Copyright 2003-2006 Serious Hack Inc.\n",
 "// \n",
 "// This library is free software; you can redistribute it and/or\n",
 "// modify it under the terms of the GNU Lesser General Public\n",
