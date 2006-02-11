@@ -135,6 +135,7 @@
 				AdditionalDependencies="libsh.lib glut32.lib"
 				OutputFile="$(OutDir)/ShBindingExample.exe"
 				AdditionalLibraryDirectories="..\..\..\install\vc8\lib;..\..\..\glut\lib"
+				GenerateDebugInformation="true"
 				SubSystem="1"
 			/>
 			<Tool

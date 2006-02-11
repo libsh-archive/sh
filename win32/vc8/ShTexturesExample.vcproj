@@ -138,6 +138,7 @@
 				OutputFile="$(OutDir)/ShTexturesExample.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\install\vc8\lib;..\..\..\glut\lib"
+				GenerateDebugInformation="true"
 			/>
 			<Tool
 				Name="VCALinkTool"
