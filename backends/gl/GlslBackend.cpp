@@ -45,27 +45,12 @@ struct GlslBackend : public GlBackend {
 };
 
 #ifdef _WIN32
-static GlslBackend* backend = 0;
 
 extern "C"
 BOOL APIENTRY DllMain(HANDLE hModule, 
                       DWORD  ul_reason_for_call, 
                       LPVOID lpReserved)
 {
-  switch (ul_reason_for_call) {
-  case DLL_PROCESS_ATTACH:
-    if (backend) return TRUE;
-    backend = new GlslBackend();
-    break;
-  case DLL_THREAD_ATTACH:
-  case DLL_THREAD_DETACH:
-	  break;
-  case DLL_PROCESS_DETACH:
-    delete backend;
-    break;
-  default:
-	  break;
-  }
   return TRUE;
 }
 #endif // _WIN32
