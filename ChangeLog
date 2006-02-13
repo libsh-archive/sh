@@ -4,6 +4,11 @@
 	calls to new and delete in DLLMain, it's now handled by
 	instantiate_backend.
 
+2006-02-10  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlBackend.cpp (GlBackend): Prevent double
+	registration of the GlBackend DLL.
+
 2006-02-09  Francois Marier  <francois@serioushack.com>
 
 	* src/sh/ShSyntax.hpp: Add extra brackets to SH_BEGIN and SH_END

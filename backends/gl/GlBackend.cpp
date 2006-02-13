@@ -220,9 +220,12 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
     wc.hIconSm = NULL;
 
     if (!RegisterClassEx(&wc)) {
-      std::stringstream msg;
-      msg << "RegisterClassEx failed (" << GetLastError() << ")";
-      shError(ShException(msg.str()));
+      DWORD error = GetLastError();
+      if (error != ERROR_CLASS_ALREADY_EXISTS) {
+        std::stringstream msg;
+        msg << "RegisterClassEx failed (" << error << ")";
+        shError(ShException(msg.str()));
+      }
     }
 
     hWnd = CreateWindowEx(0, "shGlWindow", "shGlWindow", WS_POPUP,
