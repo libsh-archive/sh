@@ -1003,7 +1003,7 @@
 			>
 		</Filter>
 		<File
-			RelativePath="..\ChangeLog"
+			RelativePath="..\..\ChangeLog"
 			>
 		</File>
 	</Files>

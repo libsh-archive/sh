@@ -1,3 +1,9 @@
+2006-02-13  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslBackend.cpp, ArbBackend.cpp: Remove the
+	calls to new and delete in DLLMain, it's now handled by
+	instantiate_backend.
+
 2006-02-09  Francois Marier  <francois@serioushack.com>
 
 	* src/sh/ShSyntax.hpp: Add extra brackets to SH_BEGIN and SH_END
