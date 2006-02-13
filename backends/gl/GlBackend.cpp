@@ -247,7 +247,7 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
       DWORD error = GetLastError();
       if (error != ERROR_CLASS_ALREADY_EXISTS) {
         std::stringstream msg;
-        msg << "RegisterClassEx failed (" << GetLastError() << ")";
+        msg << "RegisterClassEx failed (" << error << ")";
         shError(ShException(msg.str()));
       }
     }
