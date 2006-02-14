@@ -39,7 +39,10 @@ ShMemory::~ShMemory()
 
 int ShMemory::timestamp() const
 {
-  return m_timestamp;
+  if (m_frozen)
+    return m_frozenTimestamp;
+  else
+    return m_timestamp;
 }
 
 ShPointer<ShStorage> ShMemory::findStorage(const std::string& id)
@@ -51,7 +54,7 @@ ShPointer<ShStorage> ShMemory::findStorage(const std::string& id)
 }
 
 ShMemory::ShMemory()
-  : m_timestamp(0)
+  : m_timestamp(0), m_frozen(false), m_frozenTimestamp(0)
 {
 }
 
@@ -86,6 +89,12 @@ void ShMemory::flush()
   storage->dirtyall();
   for(std::list<ShMemoryDep*>::iterator i = dependencies.begin(); i != dependencies.end(); i++)
     (*i)->memory_update();
+}
+
+void ShMemory::freeze(bool state)
+{
+  m_frozen = state;
+  m_frozenTimestamp = m_timestamp;
 }
 
 ////////////////////////
