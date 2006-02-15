@@ -377,14 +377,17 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
     
     DECLARE_TIMER(binding);
     // Then, bind vertex (pass-through) and fragment program
-    shBind(**I);
+    ShProgramSetPtr program_set = *I;
+    shBind(*program_set);
     TIMING_RESULT(binding);
 
 #ifdef SH_DEBUG_PBS_PRINTFP
     {
-      ShProgramSet::NodeList::const_iterator i = (*I)->begin();
+      ShProgramSet::NodeList::const_iterator i = program_set->begin();
       ++i;
-      (*i)->code()->print(std::cerr);
+      ShProgramNodePtr program_node = *i;
+      std::cerr << program_node->describe_interface() << std::endl;
+      program_node->code()->print(std::cerr);
     }
 #endif
 
