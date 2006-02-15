@@ -33,7 +33,8 @@ public:
                    GLenum format, GLint internalFormat,
                    SH::ShValueType valueType, 
                    int width, int height, int depth, int tuplesize,
-                   int count, GlTextureNamePtr name, GLint mipmap_level);
+                   int count, GlTextureNamePtr name, 
+                   GLint mipmap_level, bool internalRGB);
   
   ~GlTextureStorage();
   
@@ -46,6 +47,7 @@ public:
   GLenum target() const { return m_target; }
   GLenum format() const { return m_format; }
   GLint internalFormat() const { return m_internalFormat; }
+  bool internalFormatRGB() const { return m_internalFormatRGB; }
   int width() const { return m_width; }
   int height() const { return m_height; }
   int depth() const { return m_depth; }
@@ -67,7 +69,10 @@ private:
   
   unsigned int m_params;
   
+  // True if the storage is currently being written to
   bool m_write;
+  // True if the internal storage format is a form of RGB or RGBA
+  bool m_internalFormatRGB;
 
   GlTextureStorage(const GlTextureStorage&);
   GlTextureStorage& operator=(const GlTextureStorage&);

@@ -1,3 +1,13 @@
+2006-02-15  Filip Spacek  <filip@serioushack.com>
+
+	* backends/gl/GlTextureStorage.cpp: Implement OpenGL to host
+	transfer using glReadPixels
+
+	* backends/gl/FBOCache.cpp: Cache framebuffer objects between
+	stream executions.
+
+	* test/regress/test.hpp: Sync the storage before reading the results.
+
 2006-02-13  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslBackend.cpp, ArbBackend.cpp: Remove the

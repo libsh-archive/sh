@@ -20,6 +20,7 @@
 #include "GlTextureStorage.hpp"
 #include "ShTypeInfo.hpp"
 #include "ShVariantFactory.hpp"
+#include "FBOCache.hpp"
 
 namespace shgl {
 
@@ -29,12 +30,14 @@ GlTextureStorage::GlTextureStorage(ShMemory* memory, GLenum target,
                                    GLenum format, GLint internalFormat,
                                    ShValueType valueType, 
                                    int width, int height, int depth, int tuplesize,
-                                   int count, GlTextureNamePtr name, GLint mipmap_level)
+                                   int count, GlTextureNamePtr name, 
+                                   GLint mipmap_level, bool internalRGB)
   : ShStorage(memory, valueType),
-    m_name(name), m_target(target), m_format(format), 
+    m_name(name), m_target(target), m_format(format),
     m_internalFormat(internalFormat),
     m_width(width), m_height(height), m_depth(depth), m_tuplesize(tuplesize), m_count(count),
     m_write(false),
+    m_internalFormatRGB(internalRGB),
     m_mipmap_level(mipmap_level)
 {
   m_name->addStorage(this);
@@ -196,7 +199,6 @@ class HostGlTextureTransfer : public ShTransfer {
       break;
     }
     
-    
     return true;
   }
   
@@ -223,10 +225,7 @@ class GlTextureHostTransfer : public ShTransfer {
     GlTextureStorage* texture = 
       dynamic_cast<GlTextureStorage*>(const_cast<ShStorage*>(from));
     ShHostStorage* host = dynamic_cast<ShHostStorage*>(to);
-
-    // Bind texture name for this scope.
-    GlTextureName::Binding binding(texture->texName());
-
+        
     ShValueType host_type = host->value_type();
     ShValueType texture_type = texture->value_type();
     int count = texture->count();
@@ -253,48 +252,53 @@ class GlTextureHostTransfer : public ShTransfer {
     int height = texture->height();
     int depth = texture->depth();
 
-    // If the texture is not full, must not copy more than count
-    bool full_copy = (count == (width * height * depth));
-    if (!full_copy || converted_type != SH_VALUETYPE_END || texture_type != host_type) {
+    SH_DEBUG_ASSERT(tuplesize > 0 && tuplesize < 5)
+    int glTuplesize[5] = { 0, 1, 3, 3, 4 };
+    GLenum format[5] = { 0, GL_RED, GL_RGB, GL_RGB, GL_RGBA };
+
+    if (converted_type != SH_VALUETYPE_END || 
+        texture_type != host_type || tuplesize == 2) {
       dest_variant = shVariantFactory(texture_type, SH_MEM)->
-        generate(width * height * depth * tuplesize);
-    } else {
+        generate(width * height * depth * glTuplesize[tuplesize]);
+    } 
+    else {
       dest_variant = host_variant;
     }
 
-    switch(texture->target()) {
-    case GL_TEXTURE_1D:
-      SH_GL_CHECK_ERROR(glGetTexImage(GL_TEXTURE_1D, texture->mipmap_level(),
-                                      texture->format(), type,
-                                      dest_variant->array()));
-      break;
-    case GL_TEXTURE_2D:
-    case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
-    case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
-    case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
-    case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
-    case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
-    case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
-#if defined( __APPLE__ )
-    case GL_TEXTURE_RECTANGLE_EXT:
-#else
-    case GL_TEXTURE_RECTANGLE_NV:
-#endif
-      SH_GL_CHECK_ERROR(glGetTexImage(GL_TEXTURE_2D, texture->mipmap_level(),
-                                      texture->format(), type,
-                                      dest_variant->array()));
-      break;
-    default:
-      SH_DEBUG_WARN("Texture target " << texture->target() << " not handled by GL backend");
-      break;
+    FBOCache::instance()->bindFramebuffer();
+    GLenum buffer = FBOCache::instance()->bindTexture(texture);
+    FBOCache::instance()->check();
+    
+    GLint prevRead;
+    SH_GL_CHECK_ERROR(glGetIntegerv(GL_READ_BUFFER, &prevRead));
+    SH_GL_CHECK_ERROR(glReadBuffer(buffer));
+
+    SH_GL_CHECK_ERROR(glPushAttrib(GL_VIEWPORT_BIT));
+    SH_GL_CHECK_ERROR(glViewport(0, 0, width, height));
+
+    SH_GL_CHECK_ERROR(glReadPixels(0, 0, count > width ? width : count,
+                                   count/width, format[tuplesize], type,
+                                   dest_variant->array()));
+    if (count % width) {
+      SH_GL_CHECK_ERROR(glReadPixels(0, count/width, count % width, 1, 
+                                     format[tuplesize], type,
+                                     static_cast<char *>(dest_variant->array())
+                                     + (count - (count % width)) * 
+                                       glTuplesize[tuplesize] * 
+                                       dest_variant->datasize()));
+    }
+
+    if (dest_variant != host_variant) {
+      if (tuplesize == 2) {
+        dest_variant = dest_variant->get(false, ShSwizzle(3, 0, 1), count);
+      }
+      host_variant->set(dest_variant);
     }
     
-    if (dest_variant != host_variant) {
-      ShVariantPtr temp_variant = shVariantFactory(texture_type, SH_MEM)->
-        generate(count * tuplesize, const_cast<void*>(dest_variant->array()), false);
-      host_variant->set(temp_variant);
-    }
-        
+    SH_GL_CHECK_ERROR(glPopAttrib());
+    SH_GL_CHECK_ERROR(glReadBuffer(prevRead));
+    FBOCache::instance()->unbindFramebuffer();
+
     return true;
   }
   

@@ -22,6 +22,7 @@
 #include <sstream>
 #include "GlTextureName.hpp"
 #include "GlTextureStorage.hpp"
+#include "FBOCache.hpp"
 
 namespace shgl {
 
@@ -67,7 +68,7 @@ ShCubeDirection glToShCubeDir(GLuint target)
   return SH_CUBE_POS_X;
 }
 
-GLenum shGlInternalFormat(const ShTextureNodePtr& node)
+GLenum shGlInternalFormat(const ShTextureNodePtr& node, bool forceRGB)
 {
   GLenum byteformats[4] = {GL_LUMINANCE8, GL_LUMINANCE8_ALPHA8, GL_RGB8, GL_RGBA8}; 
   GLenum shortformats[4] = {GL_LUMINANCE16, GL_LUMINANCE16_ALPHA16, GL_RGB16, GL_RGBA16}; 
@@ -173,7 +174,10 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node)
     return node->size();
     break;
   }
-  return formats[node->size() - 1];
+  if (forceRGB && node->size() <= 2)
+    return formats[node->size() - 1 + 2];
+  else
+    return formats[node->size() - 1];
 }
 
 GLenum shGlFormat(const ShTextureNodePtr& node)
@@ -291,6 +295,10 @@ struct StorageFinder {
     }
     // either a dirty page or the second clean one
     if (m_lookFor == WRITE) {
+      // only RGB textures can be rendered to
+      if (!t->internalFormatRGB()) {
+        return false;
+      }
       if (t->memory()->timestamp() != t->timestamp()) {
         return true;
       }
@@ -383,11 +391,12 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target, bool w
         GlTextureStoragePtr storage = new GlTextureStorage(node->memory(dir, 0).object(),
                                                            shGlCubeMapTargets[i],
                                                            shGlFormat(node),
-                                                           shGlInternalFormat(node),
+                                                           shGlInternalFormat(node, write),
                                                            node->valueType(),
                                                            node->width(), node->height(),
                                                            node->depth(), node->size(),
-                                                           node->count(), texname, 0);
+                                                           node->count(), texname, 0,
+                                                           write || node->size() >= 3);
         storage->sync();
 
         if (mipmap_levels > 1) {
@@ -413,11 +422,12 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target, bool w
             GlTextureStoragePtr mip_storage = new GlTextureStorage(node->memory(dir, j).object(),
                                                                    shGlCubeMapTargets[i],
                                                                    shGlFormat(node),
-                                                                   shGlInternalFormat(node),
+                                                                   shGlInternalFormat(node, write),
                                                                    node->valueType(),
                                                                    width, height,
                                                                    node->depth(), node->size(),
-                                                                   count, texname, j);
+                                                                   count, texname, j,
+                                                                   write || node->size() >= 3);
             // TODO: this should go away, needs to be done every time
             mip_storage->sync();
           }
@@ -469,11 +479,12 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target, bool w
       storage = new GlTextureStorage(node->memory(0).object(),
                                      shGlTargets[node->dims()],
                                      shGlFormat(node),
-                                     shGlInternalFormat(node),
+                                     shGlInternalFormat(node, write),
                                      node->valueType(),
                                      node->width(), node->height(), 
                                      node->depth(), node->size(),
-                                     node->count(), name, 0);
+                                     node->count(), name, 0,
+                                     write || node->size() >= 3);
       if (write) {
         storage->initTexture();
       }
@@ -493,11 +504,12 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target, bool w
           GlTextureStoragePtr mip_storage = new GlTextureStorage(node->memory(i).object(),
                                                                  shGlTargets[node->dims()],
                                                                  shGlFormat(node),
-                                                                 shGlInternalFormat(node),
+                                                                 shGlInternalFormat(node, write),
                                                                  node->valueType(),
                                                                  width, height,
                                                                  node->depth(), node->size(),
-                                                                 count, name, i);
+                                                                 count, name, i,
+                                                                 write || node->size() >= 3);
           // TODO: this should go away, needs to be done every time
           mip_storage->sync();
         }
@@ -512,9 +524,7 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target, bool w
       // TODO: write to different mipmap level?
 
       // No need to sync here, all content will be overwritten
-      SH_GL_CHECK_ERROR(glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, target,
-                                                  shGlTargets[node->dims()],
-                                                  storage->name(), 0));
+      FBOCache::instance()->bindTexture(storage, target);
       storage->dirtyall();
       storage->write(true);
     }

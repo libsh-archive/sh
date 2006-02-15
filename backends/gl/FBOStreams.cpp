@@ -40,6 +40,7 @@
 #include "GlTextureStorage.hpp"
 #include "PBufferContext.hpp"
 #include "Utils.hpp"
+#include "FBOCache.hpp"
 
 #ifdef DO_FBO_TIMING
 #include <sys/time.h>
@@ -71,42 +72,6 @@ private:
 };
 
 #endif
-
-
-static void check_framebuffer()
-{
-  GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-  char *error = 0;
-  switch (status) {
-  case GL_FRAMEBUFFER_COMPLETE_EXT:
-    return;
-  case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT:
-    error = "FRAMEBUFFER_INCOMPLETE_ATTACHMENT";
-    break;
-  case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT:
-    error = "FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";
-    break;
-  case GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT_EXT:
-    error = "FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT";
-    break;
-  case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
-    error = "FRAMEBUFFER_INCOMPLETE_DIMENSIONS";
-    break;
-  case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:
-    error = "FRAMEBUFFER_INCOMPLETE_FORMATS";
-    break;
-  case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT:
-    error = "FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER";
-    break;
-  case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT:
-    error = "FRAMEBUFFER_INCOMPLETE_READ_BUFFER";
-    break;
-  default:
-    error = "Unknown error";
-    break;
-  }
-  SH_DEBUG_PRINT("GL Framebuffer error " << error);
-}
 
 // Extract the backend name from the target if there is one (including the colon)
 static string get_target_backend(const ShProgramNodeCPtr& program)
@@ -337,9 +302,16 @@ void FBOStreams::execute(const ShProgramNodeCPtr& program_const,
     }
   }
 
-  PBufferFactory* factory = PBufferFactory::instance();
-  PBufferContextPtr context = factory->get_context(1,1);
-  PBufferHandlePtr old_handle = context->activate();
+  PBufferHandlePtr old_handle = 0;
+#ifdef WIN32
+  if (wglGetCurrentContext() == NULL) {
+#else
+  if (glXGetCurrentContext() == NULL) {
+#endif
+    PBufferFactory* factory = PBufferFactory::instance();
+    PBufferContextPtr context = factory->get_context(1,1);
+    old_handle = context->activate();
+  }
 
   DECLARE_TIMER(vpsetup);
 
@@ -391,12 +363,8 @@ void FBOStreams::execute(const ShProgramNodeCPtr& program_const,
   cache->update_channels(tex_size, tex_size);
   cache->freeze_inputs(true);
 
-  GLint viewport[4];
-  glGetIntegerv(GL_VIEWPORT, viewport);
-
-  GLint prevFramebuffer;
-  SH_GL_CHECK_ERROR(glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFramebuffer));
-  SH_GL_CHECK_ERROR(glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_framebuffer));
+  SH_GL_CHECK_ERROR(glPushAttrib(GL_VIEWPORT_BIT));
+  FBOCache::instance()->bindFramebuffer();
 
   ShStream::iterator dest_iter = dest.begin();
   // Run each fragment program
@@ -421,7 +389,7 @@ void FBOStreams::execute(const ShProgramNodeCPtr& program_const,
     if (m_draw_buffers_ext == ARB)
       glDrawBuffersARB(draw_buffers.size(), &draw_buffers.front());
 
-    check_framebuffer();                     
+    FBOCache::instance()->check();
 
     DECLARE_TIMER(binding);
     // Then, bind vertex (pass-through) and fragment program
@@ -441,17 +409,8 @@ void FBOStreams::execute(const ShProgramNodeCPtr& program_const,
     glClear(GL_COLOR_BUFFER_BIT);
     TIMING_RESULT(clear);
 
-    DECLARE_TIMER(rendersetup);
     glViewport(0, 0, tex_size, tex_size);
     
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-        
-    TIMING_RESULT(rendersetup);
-
     DECLARE_TIMER(render);
     
     // Generate quad geometry
@@ -490,8 +449,8 @@ void FBOStreams::execute(const ShProgramNodeCPtr& program_const,
     I->object()->memory()->findStorage("opengl:texture", UnflagWrite());
   }
     
-  glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFramebuffer);
+  SH_GL_CHECK_ERROR(glPopAttrib());
+  FBOCache::instance()->unbindFramebuffer();
   
   if (old_handle) {
     old_handle->restore();

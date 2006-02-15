@@ -33,7 +33,8 @@ PBUFFERSTREAM_SOURCES = PBufferStreams.hpp PBufferStreams.cpp \
 			PBufferContext.hpp PBufferContext.cpp \
 			GLXPBufferContext.hpp GLXPBufferContext.cpp \
 			Utils.hpp Utils.cpp \
-			FBOStreams.hpp FBOStreams.cpp
+			FBOStreams.hpp FBOStreams.cpp \
+			FBOCache.hpp FBOCache.cpp
 else
 PBUFFERSTREAM_SOURCES = 
 endif
