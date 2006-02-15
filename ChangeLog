@@ -119,6 +119,15 @@
 	fixing division by the same number on ATI.
 	(real_div): refactor the code to remove this function
 
+2006-01-19  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/ShOptimizations.cpp: Don't mark variables with decls
+	outside this programs as live because decls are currently
+	broken. Luckily, they're not really necessary.
+
+	* src/ArbCode.cpp: Remove unnecessary TODO. NVVP and NVFP are
+	different things entirely.
+
 2006-01-19  Barold Genova  <barold@serioushack.com>
 
 	* configure.ac: Add configure check for zlib, which libpng
