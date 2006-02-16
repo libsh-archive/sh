@@ -20,6 +20,9 @@ EXTRA_DIST = BUGS CODING_STANDARDS README.osx COPYING \
 	     win32/vc8/ShCcBackend.vcproj win32/vc8/ShGlslBackend.vcproj \
 	     win32/vc8/Sh.sln win32/vc8/ShUtil.vcproj win32/vc8/Sh.vcproj \
 	     win32/vc8/ShGlutExample.vcproj \
+	     win32/vc8/ShTexturesExample.vcproj \
+	     win32/vc8/ShBindingExample.vcproj \
+	     win32/vc8/ShParticleExample.vcproj \
 	     win32/vc7/postbuild_arb.bat \
 	     win32/vc7/postbuild_cc.bat win32/vc7/postbuild_glsl.bat \
 	     win32/vc7/postbuild_sh.bat win32/vc7/postbuild_util.bat \
@@ -27,10 +30,14 @@ EXTRA_DIST = BUGS CODING_STANDARDS README.osx COPYING \
 	     win32/vc7/ShCcBackend.vcproj win32/vc7/ShGlslBackend.vcproj \
 	     win32/vc7/Sh.sln win32/vc7/ShUtil.vcproj win32/vc7/Sh.vcproj \
 	     win32/vc7/ShGlutExample.vcproj \
+	     win32/vc7/ShTexturesExample.vcproj \
+	     win32/vc7/ShBindingExample.vcproj \
+	     win32/vc7/ShParticleExample.vcproj \
 	     xcode/ArbBackend-Info.plist xcode/CcBackend-Info.plist \
 	     xcode/Particles-Info.plist xcode/GlutExample-Info.plist \
 	     xcode/Info.plist xcode/Particles-Info.plist xcode/version.plist \
-	     xcode/TexturesExample-Info.plist xcode/Sh.xcode/project.pbxproj \
+	     xcode/TexturesExample-Info.plist \
+	     xcode/Sh.xcodeproj/project.pbxproj \
 	     xcode/English.lproj/InfoPlist.strings xcode/Sh.icns \
 	     xcode/Sh.pmsp xcode/ShUtil-Info.plist \
 	     xcode/pkg_resources/License.txt \
