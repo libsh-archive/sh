@@ -14,6 +14,7 @@ DIST_SUBDIRS = libltdl src backends test doc examples
 ## *entire* contents, including .svn, .libs, .o and binary files.
 EXTRA_DIST = BUGS CODING_STANDARDS README.osx COPYING \
 	     win32/vc8/postbuild_arb.bat \
+	     win32/vc8/postbuild_textures.bat \
 	     win32/vc8/postbuild_cc.bat win32/vc8/postbuild_glsl.bat \
 	     win32/vc8/postbuild_sh.bat win32/vc8/postbuild_util.bat \
 	     win32/vc8/prebuild.bat win32/vc8/ShArbBackend.vcproj \
@@ -23,6 +24,7 @@ EXTRA_DIST = BUGS CODING_STANDARDS README.osx COPYING \
 	     win32/vc8/ShTexturesExample.vcproj \
 	     win32/vc8/ShBindingExample.vcproj \
 	     win32/vc8/ShParticleExample.vcproj \
+	     win32/vc7/postbuild_textures.bat \
 	     win32/vc7/postbuild_arb.bat \
 	     win32/vc7/postbuild_cc.bat win32/vc7/postbuild_glsl.bat \
 	     win32/vc7/postbuild_sh.bat win32/vc7/postbuild_util.bat \
