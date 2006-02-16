@@ -225,6 +225,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\backends\gl\FBOCache.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\backends\gl\FBOStreams.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\backends\gl\GlBackend.cpp"
 				>
 			</File>
@@ -280,6 +288,14 @@
 			</File>
 			<File
 				RelativePath="..\..\backends\gl\ArbReg.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\backends\gl\FBOCache.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\backends\gl\FBOStreams.hpp"
 				>
 			</File>
 			<File
