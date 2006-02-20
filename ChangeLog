@@ -1,3 +1,11 @@
+2006-02-20  Stefanus Du Toit  <sdt@lynch.serioushack.com>
+
+	* src/sh/ShTransformer.cpp: Implement expand_normalize() and
+	reciprocate_sqrt() transformers.
+
+	* src/sh/ShTransformer.hpp: Add expand_normalize() and
+	reciprocate_sqrt() transformers.
+
 2006-02-15  Filip Spacek  <filip@serioushack.com>
 
 	* backends/gl/GlTextureStorage.cpp: Implement OpenGL to host
