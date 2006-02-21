@@ -82,6 +82,22 @@ private:
 
 typedef SH::ShPointer<GlTextureStorage> GlTextureStoragePtr;
 
+class HostGlTextureTransfer : public SH::ShTransfer {
+public:
+  HostGlTextureTransfer();
+  bool transfer(const SH::ShStorage* from, SH::ShStorage* to);
+  int cost(const SH::ShStorage* from, const SH::ShStorage* to);
+  static HostGlTextureTransfer* instance;
+};
+
+class GlTextureHostTransfer : public SH::ShTransfer {
+public:
+  GlTextureHostTransfer();
+  bool transfer(const SH::ShStorage* from, SH::ShStorage* to);
+  int cost(const SH::ShStorage* from, const SH::ShStorage* to);
+  static GlTextureHostTransfer* instance;
+};
+
 }
 
 #endif

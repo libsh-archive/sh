@@ -40,7 +40,7 @@ struct ArbBackend : public GlBackend {
                 // For now...
                 0,
 #else
-                new PBufferStreams(),
+                new FBOStreams(),
 #endif
                 "arb", "1.0")
   {

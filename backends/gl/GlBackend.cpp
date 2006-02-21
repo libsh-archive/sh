@@ -20,6 +20,7 @@
 #include "GlBackend.hpp"
 #include "ShDebug.hpp"
 #include "ShError.hpp"
+#include "GlTextureStorage.hpp"
 
 #include <sstream>
 
@@ -403,6 +404,9 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
     DestroyWindow(hWnd);
   }
 #endif /* _WIN32 */
+
+  HostGlTextureTransfer::instance = new HostGlTextureTransfer();
+  GlTextureHostTransfer::instance = new GlTextureHostTransfer();
 }
 
 SH::ShBackendCodePtr GlBackend::generate_code(const std::string& target,
