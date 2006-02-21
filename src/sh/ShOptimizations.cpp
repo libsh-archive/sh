@@ -30,6 +30,8 @@
 #include <sstream>
 #include <fstream>
 
+//#define SH_DEBUG_OPTIMIZER
+
 namespace {
 
 using namespace SH;
@@ -418,6 +420,8 @@ struct ForwardSubst {
     if (stmt.src[0].neg()) return;
     if (stmt.src[0].node()->kind() != SH_TEMP) return;
     if (!stmt.src[0].swizzle().identity()) return;
+    // Added to preserve casts
+    if (stmt.dest.valueType() != stmt.src[0].valueType()) return;
 
     for (AME::const_iterator I = m_ame.begin(); I != m_ame.end(); ++I) {
       if (I->dest.node() == stmt.src[0].node()) {
