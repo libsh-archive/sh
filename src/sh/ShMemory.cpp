@@ -48,7 +48,9 @@ int ShMemory::timestamp() const
 ShPointer<ShStorage> ShMemory::findStorage(const std::string& id)
 {
   for (StorageList::iterator I = m_storages.begin(); I != m_storages.end(); ++I) {
-    if ((*I)->id() == id) return *I;
+    if ((*I)->id() == id) {
+      return *I;
+    }
   }
   return 0;
 }
@@ -71,7 +73,9 @@ void ShMemory::addStorage(const ShPointer<ShStorage>& storage)
 void ShMemory::removeStorage(const ShPointer<ShStorage>& storage)
 {
   StorageList::iterator I = std::find(m_storages.begin(), m_storages.end(), storage);
-  if (I == m_storages.end()) return;
+  if (I == m_storages.end()) {
+    return;
+  }
   (*I)->orphan();
   m_storages.erase(I);
 
@@ -255,18 +259,20 @@ ShStorage::TransferMap* ShStorage::m_transfers = 0;
 // --- ShHostStorage --- //
 ///////////////////////////
 
-ShHostStorage::ShHostStorage(ShMemory* memory, std::size_t length, ShValueType value_type)
+ShHostStorage::ShHostStorage(ShMemory* memory, std::size_t length, ShValueType value_type, std::size_t align)
   : ShStorage(memory, value_type),
     m_length(length),
-    m_data(new char[length]),
+    m_data_unaligned(new char[length + align - 1]),
     m_managed(true)
 {
+  m_data = reinterpret_cast<void *>(((reinterpret_cast<ptrdiff_t>(m_data_unaligned) + align - 1) / align) * align);
 }
 
 ShHostStorage::ShHostStorage(ShMemory* memory, std::size_t length, void* data, ShValueType value_type)
   : ShStorage(memory, value_type),
     m_length(length),
     m_data(data),
+    m_data_unaligned(data),
     m_managed(false)
 {
 }
@@ -274,7 +280,7 @@ ShHostStorage::ShHostStorage(ShMemory* memory, std::size_t length, void* data, S
 ShHostStorage::~ShHostStorage()
 {
   if (m_managed) {
-    delete [] reinterpret_cast<char*>(m_data);
+    delete [] reinterpret_cast<char*>(m_data_unaligned);
   }
 }
 
@@ -303,11 +309,11 @@ void* ShHostStorage::data()
 // --- ShHostMemory --- //
 //////////////////////////
 
-ShHostMemory::ShHostMemory(std::size_t length, ShValueType value_type)
+ShHostMemory::ShHostMemory(std::size_t length, ShValueType value_type, std::size_t align)
   : m_hostStorage(0)
 {
   // avoids base-from-member initialization problem
-  m_hostStorage = new ShHostStorage(this, length, value_type);
+  m_hostStorage = new ShHostStorage(this, length, value_type, align);
 
   // Make the host storage represent the newest version of the memory
   m_hostStorage->dirtyall();
