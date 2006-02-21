@@ -39,7 +39,7 @@ template<typename T> \
 ShGeneric<1, T> \
 operation(const ShGeneric<1, T>& left, double right) \
 { \
-  return operation(left, ShAttrib<1, SH_CONST, T>(right)); \
+  return operation(left, ShAttrib<1, SH_CONST, T>(static_cast<T>(right))); \
 } \
 template<typename T> \
 ShGeneric<1, T> \
@@ -62,7 +62,7 @@ template<int N, typename T> \
 ShGeneric<retsize, T> \
 operation(const ShGeneric<N, T>& left, double right) \
 { \
-  return operation(left, ShAttrib<1, SH_CONST, T>(right)); \
+  return operation(left, ShAttrib<1, SH_CONST, T>(static_cast<T>(right))); \
 } 
 
 #define SH_SHLIB_CONST_N_OP_RETSIZE_LEFT_DECL(operation, retsize) \
@@ -75,7 +75,7 @@ template<int N, typename T> \
 ShGeneric<retsize, T> \
 operation(double left, const ShGeneric<N, T>& right) \
 { \
-  return operation(ShAttrib<1, SH_CONST, T>(left), right); \
+  return operation(ShAttrib<1, SH_CONST, T>(static_cast<T>(left)), right); \
 } 
 
 #define SH_SHLIB_CONST_N_OP_RETSIZE_RIGHT_DECL(operation, retsize) \
