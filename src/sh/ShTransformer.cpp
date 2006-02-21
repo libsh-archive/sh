@@ -810,7 +810,7 @@ struct ReciprocateSqrtBase : public ShTransformerParent
       ShVariable tmp1(allocate_temp(I->dest));
 
       new_stmts.push_back(ShStatement(tmp1, SH_OP_RSQ, I->src[0]));
-      new_stmts.push_back(ShStatement(I->dest, SH_OP_RCP, I->src[0]));
+      new_stmts.push_back(ShStatement(I->dest, SH_OP_RCP, tmp1));
 
       I = node->block->erase(I);
       node->block->splice(I, new_stmts);
