@@ -44,6 +44,7 @@ public:
 
   /// Return the number of elements in this channel
   int count() const;
+  void count(int c);
   /// Return this channel's memory
   ShPointer<const ShMemory> memory() const;
   /// Return this channel's memory

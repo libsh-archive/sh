@@ -39,6 +39,7 @@ public:
   ShMemoryPtr memory();
   
   int count() const;
+  void count(int c);
   
 private:
   ShMemoryPtr m_memory;
