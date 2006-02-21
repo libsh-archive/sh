@@ -119,8 +119,8 @@ namespace SH {
 //  
 //   SH_STREAM = 
 struct FloatConverter {
-  FloatConverter(ShTransformer::ValueTypeMap &valueTypeMap, ShVarMap &converts)
-    : m_valueTypeMap(valueTypeMap), m_converts(converts), m_eval(ShEval::instance())
+  FloatConverter(ShTransformer::ValueTypeMap &valueTypeMap, ShVarMap &converts, bool preserve_casts)
+    : m_valueTypeMap(valueTypeMap), m_converts(converts), m_eval(ShEval::instance()), m_preserve_casts(preserve_casts)
   {
   }
 
@@ -133,9 +133,34 @@ struct FloatConverter {
     if (!block) return;
     
     ShBasicBlock::ShStmtList::iterator I;
+
+#ifdef SH_DEBUG_TYPECONVERT
+    for(I = block->begin(); I != block->end(); ++I) {
+      std::cout << "FloatConv Before [" << *I << "]" << std::endl;
+      if (! I->dest.null()) {
+        std::cout << "  DestType: " << shTypeInfo(I->dest.valueType())->name() << std::endl;
+      }
+      for (int i = 0; i < opInfo[I->op].arity; i++) {
+        std::cout << "  SrcType[" << i << "]: " << shTypeInfo(I->src[i].valueType())->name() << std::endl;
+      }
+    }
+#endif
+
     for(I = block->begin(); I != block->end(); ++I) {
       fixStatement(block->m_statements, I);  
     }
+
+#ifdef SH_DEBUG_TYPECONVERT
+    for(I = block->begin(); I != block->end(); ++I) {
+      std::cout << "FloatConv After [" << *I << "]" << std::endl;
+      if (! I->dest.null()) {
+        std::cout << "  DestType: " << shTypeInfo(I->dest.valueType())->name() << std::endl;
+      }
+      for (int i = 0; i < opInfo[I->op].arity; i++) {
+        std::cout << "  SrcType[" << i << "]: " << shTypeInfo(I->src[i].valueType())->name() << std::endl;
+      }
+    }
+#endif
   }
 
   // @todo might want to make these more global (perhaps even
@@ -208,38 +233,42 @@ struct FloatConverter {
         operations |= APPLY_MIN1;
       }
     }
-    // @todo make sure to run make another temp in case
-    // one of var/result is an IN/OUT and hence cannot be used in computation 
-    ShVariable temp(var.node()->clone(SH_TEMP, var.size(), SH_VALUETYPE_END, SH_SEMANTICTYPE_END, false, false));
 
-    stmtList.insert(I, ShStatement(temp, SH_OP_ASN, var));
+    if (operations) {
+      // make another temp in case one of var/result is an IN/OUT and hence cannot be used in computation 
+      ShVariable temp(var.node()->clone(SH_TEMP, var.size(), SH_VALUETYPE_END, SH_SEMANTICTYPE_END, false, false));
 
-    if(operations & APPLY_MAX_1) {
-      ShVariable one(var.node()->clone(SH_CONST, 1, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, false, false));
-      one.setVariant(shVariantFactory(var.valueType())->generateOne());
-      stmtList.insert(I, ShStatement(temp, temp, SH_OP_MAX, one)); 
-    }
+      stmtList.insert(I, ShStatement(temp, SH_OP_ASN, var));
 
-    if(operations & APPLY_MAX0)  {
-      ShVariable zero(var.node()->clone(SH_CONST, 1, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, false, false));
-      zero.setVariant(shVariantFactory(var.valueType())->generateZero());
-      stmtList.insert(I, ShStatement(temp, temp, SH_OP_MAX, zero)); 
-    }
+      if(operations & APPLY_MAX_1) {
+        ShVariable one(var.node()->clone(SH_CONST, 1, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, false, false));
+        one.setVariant(shVariantFactory(var.valueType())->generateOne());
+        stmtList.insert(I, ShStatement(temp, temp, SH_OP_MAX, one)); 
+      }
 
-    if(operations & APPLY_MIN1)  {
-      ShVariable one(var.node()->clone(SH_CONST, 1, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, false, false));
-      one.setVariant(shVariantFactory(var.valueType())->generateOne());
-      stmtList.insert(I, ShStatement(temp, temp, SH_OP_MIN, one)); 
-    }
+      if(operations & APPLY_MAX0)  {
+        ShVariable zero(var.node()->clone(SH_CONST, 1, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, false, false));
+        zero.setVariant(shVariantFactory(var.valueType())->generateZero());
+        stmtList.insert(I, ShStatement(temp, temp, SH_OP_MAX, zero)); 
+      }
 
-    if(operations & APPLY_FLR) stmtList.insert(I, ShStatement(temp, SH_OP_FLR, temp)); 
+      if(operations & APPLY_MIN1)  {
+        ShVariable one(var.node()->clone(SH_CONST, 1, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, false, false));
+        one.setVariant(shVariantFactory(var.valueType())->generateOne());
+        stmtList.insert(I, ShStatement(temp, temp, SH_OP_MIN, one)); 
+      }
 
-    stmtList.insert(I, ShStatement(result, SH_OP_ASN, temp));
+      if(operations & APPLY_FLR) stmtList.insert(I, ShStatement(temp, SH_OP_FLR, temp)); 
 
-    if((operations & APPLY_FLR) && (operations - APPLY_FLR)) {
+      if((operations & APPLY_FLR) && (operations - APPLY_FLR)) {
 #ifdef SH_DEBUG_TYPECONVERT
-      SH_DEBUG_PRINT("Unhandled conversion operations");
+        SH_DEBUG_PRINT("Unhandled conversion operations");
 #endif
+      }
+
+      stmtList.insert(I, ShStatement(result, SH_OP_ASN, temp));
+    } else {
+      stmtList.insert(I, ShStatement(result, SH_OP_ASN, var));
     }
   }
 
@@ -268,6 +297,9 @@ struct FloatConverter {
         // temporary hack - make an evalop for this
         evalOpInfo = texInfo = new ShEvalOpInfo(stmt.op, 0, stmt.dest.valueType(), stmt.src[0].valueType(), stmt.src[1].valueType(), stmt.src[2].valueType());
         break;
+      case SH_OP_ASN: // FIXME cheap hack to ignore the casts we add... don't deal with assignments
+        if (m_preserve_casts) return;
+        // FALL THROUGH
       default:
         evalOpInfo = m_eval->getEvalOpInfo(
             stmt.op,
@@ -376,7 +408,7 @@ struct FloatConverter {
     if(m_converts.count(p) > 0) return; 
     if(m_valueTypeMap.count(p->valueType()) == 0) return; 
     ShVariableNodePtr &converted_p = m_converts[p] 
-      = p->clone(SH_BINDINGTYPE_END, 0, m_valueTypeMap[p->valueType()], SH_SEMANTICTYPE_END, false);
+      = p->clone(SH_BINDINGTYPE_END, 0, m_preserve_casts ? p->valueType() : m_valueTypeMap[p->valueType()], SH_SEMANTICTYPE_END, false);
 
     if(p->hasValues()) {
       converted_p->setVariant(p->getVariant());
@@ -407,12 +439,13 @@ struct FloatConverter {
 
   private:
     ShEval* m_eval;
+    bool m_preserve_casts;
 };
 
-void ShTransformer::convertToFloat(ValueTypeMap &valueTypeMap)
+void ShTransformer::convertToFloat(ValueTypeMap &valueTypeMap, bool preserve_casts)
 {
   ShVarMap converts;
-  FloatConverter floatconv(valueTypeMap, converts);
+  FloatConverter floatconv(valueTypeMap, converts, preserve_casts);
 
   // Step 1
   m_program->collectVariables(); 
