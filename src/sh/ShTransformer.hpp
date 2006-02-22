@@ -130,6 +130,10 @@ public:
    */
   void reciprocate_sqrt();
 
+  /** Replace DIV with RCP and MUL
+   */
+  void expand_div();
+
 private:
   /// NOT IMPLEMENTED
   ShTransformer(const ShTransformer& other);

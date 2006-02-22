@@ -829,6 +829,35 @@ void ShTransformer::reciprocate_sqrt()
   m_changed |= rs.transform(m_program);
 }
 
+struct ExpandDivBase : public ShTransformerParent 
+{
+  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node)
+  { 
+    if (SH_OP_DIV == I->op) {
+      ShBasicBlock::ShStmtList new_stmts;
+      
+      ShVariable tmp1(allocate_temp(I->src[1]));
+
+      new_stmts.push_back(ShStatement(tmp1, SH_OP_RCP, I->src[1]));
+      new_stmts.push_back(ShStatement(I->dest, I->src[0], SH_OP_MUL, tmp1));
+
+      I = node->block->erase(I);
+      node->block->splice(I, new_stmts);
+      m_changed = true;
+      return true;
+    } else {
+      return false;
+    }
+  }
+};
+
+typedef ShDefaultTransformer<ExpandDivBase> ExpandDiv;
+void ShTransformer::expand_div()
+{
+  ExpandDiv ed;
+  m_changed |= ed.transform(m_program);
+}
+
 
 struct InverseHyperbolicExpanderBase: public ShTransformerParent 
 {
