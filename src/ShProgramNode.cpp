@@ -147,12 +147,9 @@ void ShProgramNode::dump(std::string filename) const
   varout << describe_vars(); 
   varout << describe_decls();
 
-  std::string dotfile = filename + ".dot";
-  std::string psfile = filename + ".ps";
-  std::ofstream dotout(dotfile.c_str());
-  ctrlGraph->graphvizDump(dotout);
-  std::string cmd = std::string("dot -Tps < ") + dotfile + " > " + psfile; 
-  system(cmd.c_str());
+  std::ostringstream sout;
+  ctrlGraph->graphvizDump(sout);
+  shDotGen(sout.str(), filename);
 }
 
 void ShProgramNode::updateUniform(const ShVariableNodePtr& uniform)
@@ -313,6 +310,7 @@ ShPointer<ShProgramNode> ShProgramNode::clone() const
 
   ShProgramNodePtr result = new ShProgramNode(target());
   result->ShInfoHolder::operator=(*this);
+  result->ShMeta::operator=(*this);
   result->ctrlGraph = new ShCtrlGraph(head, tail);
   result->inputs = inputs;
   result->outputs = outputs;

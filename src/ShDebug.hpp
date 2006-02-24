@@ -36,6 +36,7 @@
 #define SH_DEBUG_WARN(x) { SH_DEBUG_PRINT("Warning: " << x) }
 #define SH_DEBUG_ERROR(x) { SH_DEBUG_PRINT("Error: " << x) }
 #define SH_DEBUG_ASSERT(cond) { if (!(cond)) { SH_DEBUG_ERROR("Assertion failed: " << # cond); abort(); } }
+#define SH_DEBUG_ASSERT_PRINT(cond, x) { if (!(cond)) { SH_DEBUG_ERROR("Assertion failed: " << # cond << std::endl << "Error: " << x); abort(); } }
 
 #else
 

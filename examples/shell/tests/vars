@@ -1,0 +1,64 @@
+# Some variables that might be useful
+@1f uZero = 0 
+@1f uOne = 1
+@1f uTwo = 2
+@3f uNumbers = @3f(1, 2, 3)
+
+@6f seq = @6f(0.5, 1, 1.5, 2, 2.5, 3)
+# @5f seq = @5f(1, 1, 1, 1, 1)
+
+
+# some intervals
+@1f uNegLo1f = -seq(1)
+@1f uNegHi1f = -seq(0) 
+stream uNeg1f uNegLo1f uNegHi1f
+
+@1f uPosLo1f = seq(0) 
+@1f uPosHi1f = seq(1) 
+stream uPos1f uPosLo1f uPosHi1f
+
+@1f uSpanLo1f = -seq(0) 
+@1f uSpanHi1f = seq(1) 
+stream uSpan1f uSpanLo1f uSpanHi1f
+
+@2f uNegLo2f = -seq(1, 2) 
+@2f uNegHi2f = -seq(0, 1) 
+stream uNeg2f uNegLo2f uNegHi2f
+
+@2f uPosLo2f = seq(0, 1) 
+@2f uPosHi2f = seq(1, 2) 
+stream uPos2f uPosLo2f uPosHi2f
+
+@2f uSpanLo2f = -seq(0, 1) 
+@2f uSpanHi2f = seq(1, 2) 
+stream uSpan2f uSpanLo2f uSpanHi2f
+
+@3f uNegLo3f = -seq(1, 2, 3) 
+@3f uNegHi3f = -seq(0, 1, 2) 
+stream uNeg3f uNegLo3f uNegHi3f
+
+@3f uPosLo3f = seq(0, 1, 2) 
+@3f uPosHi3f = seq(1, 2, 3) 
+stream uPos3f uPosLo3f uPosHi3f
+
+@3f uSpanLo3f = -seq(0, 1, 2) 
+@3f uSpanHi3f = seq(1, 2, 3) 
+stream uSpan3f uSpanLo3f uSpanHi3f
+
+@4f uNegLo4f = -seq(1, 2, 3, 4) 
+@4f uNegHi4f = -seq(0, 1, 2, 3) 
+stream uNeg4f uNegLo4f uNegHi4f
+
+@4f uPosLo4f = seq(0, 1, 2, 3) 
+@4f uPosHi4f = seq(1, 2, 3, 4) 
+stream uPos4f uPosLo4f uPosHi4f
+
+@4f uSpanLo4f = -seq(0, 1, 2, 3) 
+@4f uSpanHi4f = seq(1, 2, 3, 4) 
+stream uSpan4f uSpanLo4f uSpanHi4f
+
+# some temporaries
+r maketemps t 1
+r maketemps t 2
+r maketemps t 3
+r maketemps t 4

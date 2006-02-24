@@ -212,7 +212,7 @@ template<int N, typename T>
 inline
 void dbg_output(const ShGeneric<N, T>& a)
 {
-  shDBG(c);
+  shDBG(a);
 }
 
 template<int N, int M, typename T1, typename T2>

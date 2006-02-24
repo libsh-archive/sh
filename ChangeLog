@@ -1,3 +1,54 @@
+2006-02-22  Bryan Chan <b8chan@cgl.uwaterloo.ca>
+	* src/ShAaSymPlacer.hpp, ShAaSymPlacer.cpp:
+	Added in detection and condensation of unique symbols
+	(finding live definition ranges, counting noise symbols,
+	dataflow for propagating merged symbols)
+
+	* src/ShAaOpHandler.cpp src/ShAaOps.cpp:
+		- Added in code to handle merged symbols 
+		(do same op, then add a summing operation)
+		- Fixed RCP from triggering NaN propagation 
+			problems
+
+ 	* examples/shell:
+		Added in a quick hacky shell for building and testing 
+		IA/AA stream programs. 
+		(Should use Andrew's lua bindings in the future)
+
+	* examples/implicit:
+		Put in a toggle ('z') between IA, AA, and AA without unique sym condensation
+		for ray-tracing the level surfaces.
+		(Plus added some pointless cosmetic upgrades like colours and torii (which
+		have numerical problems under AA))
+
+  * examples/graph:
+	  Turned off unique condensation for this example, since it 
+		interferes with the extraction of particular error symbols
+		used to draw the AA ranges in the graph.
+		(TODO mark or detect symbols that should not be condensed) 
+	
+	* src/ShStructural.cpp:
+	Fixed SECTION detection when complex structures exist inside the section. 
+
+	* src/ShDebug.hpp:
+	Added associated error messages to SH_DEBUG_ASSERTs.
+
+	* src/ShUtility.?pp, ShProgramNode.cpp, ShTypeInfoCasts.cpp,
+	  ShRangeBranchFixer.cpp, ShConstProp.cpp, ShAaScanErr.cpp:
+	Cleaned up the various system("some_string") calls used all
+	over the place to generate dot files.
+	Plus changed to generate PNG files for faster/easier browsing
+	through multiple graphs.
+
+	* src/ShTransformer.hpp, ShTransformerImpl.hpp :
+	Added CFG-node traversal, proper init of change flag.
+
+	* src/ShLibMiscImpl.hpp :
+	Fixed variable name in dbg_output.
+
+	* src/ShMeta.hpp, ShMetaImpl.hpp:
+	Merged in operator= fix from trunk.
+
 2005-05-10  Bryan Chan <b8chan@cgl.uwaterloo.ca>
 	* examples/bb:
 	Branch & Bound global optimizer

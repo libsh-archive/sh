@@ -359,7 +359,7 @@ struct __aaop_rcp {
   static void f(V r, V x) { shRCP(r, x); }
   static void dfinv(V r, V x, V lo, V hi) { 
     shRSQ(r, -x); 
-    V rSgtHi(r.node()->clone(SH_TEMP));
+    V rSgtHi(r.node()->clone(SH_TEMP, r.size()));
     shSGT(rSgtHi, r, hi);
     shCOND(r, rSgtHi, -r, r);
   }
@@ -375,7 +375,48 @@ ShAaVariable aaPOW(const ShAaVariable& a, const ShAaVariable& b, const ShAaSyms&
 ShAaVariable aaRCP(const ShAaVariable& a, const ShAaSyms& newsyms)
 {
   ShAaVariable result(new ShAaVariableNode(*a.node(), a.use() | newsyms));
-  convexApprox<__aaop_rcp>(result, a, newsyms); // @todo range - fix this
+
+  // check if 0 is in the range 
+  ShVariable lo, hi; 
+  a.lohi(lo, hi);
+  ShVariable hasZero = a.temp("hasZero");  // whether each tuple element spans 0
+  ShAttrib1f SH_DECL(someZero);  // whether any tuple element spans 0
+  ShVariable lolt  = a.temp("lolt"); 
+  ShVariable higt = a.temp("higt"); 
+  ShConstAttrib1f ZERO(0.0f);
+  ShConstAttrib1f INF(1e6); // @todo figure out how to represent this
+
+  shSLT(lolt, lo, ZERO);
+  shSGT(higt, hi, ZERO);
+  shMUL(hasZero, lolt, higt);
+  // @todo should really use the unary max function in ShLibClamp (but that won't work with ShVariable) 
+  shASN(someZero, hasZero(0));
+  for(int i = 1; i < hasZero.size(); ++i) {
+    shMAX(someZero, someZero, hasZero(i));
+  }
+  
+  // @todo this is rather inefficient
+  SH_IF(someZero) {
+    int asize  = a.size();
+    for(int i = 0; i < asize; ++i) {
+      ShAaSyms newsymsi = newsyms.swizSyms(ShSwizzle(asize, i));
+      SH_IF(hasZero(i)) {
+        ShVariable centeri = result.center()(i);
+        shASN(centeri, ZERO);
+
+        ShVariable erri = result.err(i);
+        shASN(erri, ZERO.repeat(erri.size()));
+        
+        result(i).addErr(INF, newsymsi);
+      } SH_ELSE {
+        ShAaVariable resulti = result(i);
+        convexApprox<__aaop_rcp>(resulti, a(i), newsymsi); // @todo range - fix this
+      } SH_ENDIF;
+    }
+  } SH_ELSE {
+    convexApprox<__aaop_rcp>(result, a, newsyms); // @todo range - fix this
+  } SH_ENDIF;
+
   return result;
 }
 
@@ -684,7 +725,7 @@ ShAaVariable aaIVAL(const ShVariable& a, const ShVariable& b,
     const ShAaSyms& newsyms) 
 {
   SH_DEBUG_ASSERT(a.size() == b.size());
-  ShVariable iaValue(a.node()->clone(SH_TEMP, 0, 
+  ShVariable iaValue(a.node()->clone(SH_TEMP, a.size(), 
         shIntervalValueType(a.valueType())));
   shIVAL(iaValue, a, b);
   return aaFROMIVAL(iaValue, newsyms);
@@ -746,6 +787,26 @@ ShAaVariable aaFROMTUPLE(const ShVariable& a)
   ShVariable resultCenter = result.center();
   shASN(resultCenter, a);
   return result;
+}
+
+void aaUNIQUE_MERGE(ShAaVariable& mergeDest, ShAaVariable& dest, const ShAaStmtSyms* syms)
+{
+  ShAaSyms passThrough = syms->mergeDest - syms->mergeRep; 
+  mergeDest.ASN(dest, passThrough);
+
+  for(int i = 0; i < dest.size(); ++i) {
+    if(syms->mergeRep[i].empty()) {
+      continue;
+    }
+    // need an ABS on unique, ASN to mergerep in mergeDest
+    // assign rest from dest to mergeDest
+    ShVariable uniquei = dest.err(i, syms->unique[i]);
+    ShVariable absUniquei(uniquei.node()->clone(SH_TEMP, uniquei.size()));
+    ShVariable mergei = mergeDest.err(i, syms->mergeRep[i]);
+
+    shABS(absUniquei, uniquei);
+    shCSUM(mergei, absUniquei);
+  }
 }
 
 

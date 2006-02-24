@@ -18,7 +18,7 @@ all: $(MAIN)
 depend: $(DEPENDS)
 
 clean:
-	rm -f *.o *.d $(MAIN)
+	rm -f *.o *.d $(MAIN) *.png *.vars *.dot
 
 $(MAIN): $(OBJECTS)
 	libtool --mode=link $(CXX) -o $@ $(OBJECTS) $(LDFLAGS)

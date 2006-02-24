@@ -105,7 +105,7 @@ struct SymAllocator {
     } SH_END;
     m_program->ctrlGraph->prepend(inputMapper.node()->ctrlGraph);
 
-    // Transform input list
+    // Transform output list
     ShProgram outputMapper= SH_BEGIN_PROGRAM() {
       for(I = m_program->outputs.begin(); I != m_program->outputs.end();) {
         ShVariableNodePtr node = *I;
@@ -139,8 +139,9 @@ struct SymAllocator {
    * symbols in use 
    * @{ */
   ShAaVariable operator[](ShVariableNodePtr node) {
-    SH_DEBUG_ASSERT(m_nodes.find(node) != m_nodes.end());
     SH_DEBUG_PRINT_AHO("alloc - lookup on " << node->name());
+    SH_DEBUG_ASSERT_PRINT(m_nodes.find(node) != m_nodes.end(),
+                          "Variable " << node->nameOfType() << " " << node->name() << " not allocated");
     return ShAaVariable(m_nodes[node]); 
   }
   // @}
@@ -153,18 +154,17 @@ struct SymAllocator {
    * @{*/
   ShAaVariable operator()(const ShVariable& var, const ShAaSyms& use) {
     SH_DEBUG_PRINT_AHO("alloc - lookup on " << var.name());
-    SH_DEBUG_ASSERT(m_nodes.find(var.node()) != m_nodes.end());
+    SH_DEBUG_ASSERT_PRINT(m_nodes.find(var.node()) != m_nodes.end(),
+                          "Variable " << var.node()->nameOfType() << " " << var.name() << " not allocated");
 
     ShAaVariableNodePtr node = m_nodes[var.node()];
     return ShAaVariable(node, var.swizzle(), var.neg(), use); 
   }
 
   ShAaVariable operator()(const ShVariable& var) {
-    if(m_nodes.find(var.node()) == m_nodes.end()) {
-      SH_DEBUG_PRINT("Cannot find " << var.name());
-      SH_DEBUG_ASSERT(0);
-    }
     SH_DEBUG_PRINT_AHO("alloc - lookup on " << var.name());
+    SH_DEBUG_ASSERT_PRINT(m_nodes.find(var.node()) != m_nodes.end(), 
+                          "Variable " << var.node()->nameOfType() << " " << var.name() << " not allocated");
 
     ShAaVariableNodePtr node = m_nodes[var.node()];
     if(var.swizzle().identity()) {
@@ -240,7 +240,7 @@ ShProgram getProgram(ShStatement& stmt, SymAllocator& alloc) {
             if(shIsAffine(srcvt)) { // handled below 
               special = false;
             } else if (shIsInterval(srcvt)) { // assign to new errsyms
-              alloc(stmt.dest).ASN(aaFROMIVAL(stmt.src[0], stmtSyms->newdest));
+              alloc(stmt.dest).ASN(aaFROMIVAL(stmt.src[0], stmtSyms->src[0]));
             } else { //  
               if(!shIsRegularValueType(srcvt)) {
                 SH_DEBUG_PRINT("Expecting regular src[0], actual type = "
@@ -274,12 +274,24 @@ ShProgram getProgram(ShStatement& stmt, SymAllocator& alloc) {
     std::ostringstream secOut;
     secOut << stmt;
     SH_BEGIN_SECTION(secOut.str()) {
-
+      enum {
+        AA_DEFAULT,
+        AA_MERGE,
+        IA_MERGE
+      } mergeCase;
       ShAaVariable dest; 
       ShValueType destValueType = stmt.dest.valueType();
+
       if(shIsAffine(destValueType)) {
-        dest = alloc(stmt.dest); 
+        if(stmtSyms->mergeRep.empty()) {
+          mergeCase = AA_DEFAULT;
+          dest = alloc(stmt.dest); 
+        } else {
+          mergeCase = AA_MERGE;
+          dest = ShAaVariable(new ShAaVariableNode(stmt.dest.node(), stmtSyms->dest));  
+        }
       } else if(shIsInterval(destValueType)) {
+        mergeCase = IA_MERGE;
         dest = ShAaVariable(new ShAaVariableNode(stmt.dest.node(), stmtSyms->dest));  
       } else {
         // @todo range - handle IA dests 
@@ -378,8 +390,17 @@ ShProgram getProgram(ShStatement& stmt, SymAllocator& alloc) {
       }
       if(arity > 0) delete[] src;
 
-      if(shIsInterval(destValueType)) {
-        shASN(stmt.dest, aaTOIVAL(dest));
+      switch(mergeCase) {
+        case AA_DEFAULT:
+          break;
+        case AA_MERGE: {
+            ShAaVariable mergeDest = alloc(stmt.dest);
+            aaUNIQUE_MERGE(mergeDest, dest, stmtSyms); 
+          }
+          break;
+        case IA_MERGE:
+          shASN(stmt.dest, aaTOIVAL(dest));
+          break;
       }
     } SH_END_SECTION;
   } SH_END;
@@ -429,7 +450,7 @@ struct SymOpSplitterBase: public ShTransformerParent {
 };
 typedef ShDefaultTransformer<SymOpSplitterBase> SymOpSplitter;
 
-void dump(ShProgramNodePtr p, const char* name)
+void dump(ShProgramNodePtr p, std::string name) 
 {
 #ifdef SH_DEBUG_AAOPHANDLER
   p->collectVariables();
@@ -446,7 +467,7 @@ bool handleAaOps(ShProgramNodePtr programNode) {
   ShAaProgramSyms* progSyms = programNode->get_info<ShAaProgramSyms>();
   SH_DEBUG_ASSERT(progSyms && "Run placeAaSyms before calling this"); 
 
-  dump(programNode, "aho_start");
+  dump(programNode, programNode->name() + "_aho-0-start");
   
   /* replace branches first with non-range types
    * @todo range - leave this out for now - it has been tested on
@@ -454,7 +475,7 @@ bool handleAaOps(ShProgramNodePtr programNode) {
    * how some transformations affect the validity of error term
    * values relative to the original program. */
   //m_changed |= fixRangeBranches(p);
-  //p->dump("aho_fixbranch");
+  //p->dump(programNode->name() + "_aho_fixbranch");
 
   /* Transform into a nice canonical form without automatic promotion casts, and 
    * automatic vectorization of scalars done explicitly. 
@@ -465,7 +486,7 @@ bool handleAaOps(ShProgramNodePtr programNode) {
   //extractCasts<AffineCanCast>();
   //vectorizeScalars<AffineDoVec>();
   //optimize(p);
-  //p->dump("aho_canon");
+  //p->dump(programNode->name() + "_aho_canon");
 
   // Disable optimizations - some of the program fragment insertions may break
   // with dead code removal taking away too much for example.
@@ -481,13 +502,13 @@ bool handleAaOps(ShProgramNodePtr programNode) {
   // Allocates regular tuples corresponding to assigned error symbols 
   // Change affine inputs, outputs to these regular tuples
   SymAllocator sa(programNode);
-  dump(programNode, "aho_alloc");
+  dump(programNode, programNode->name() + "_aho-1-alloc");
 
   // Fix operations within the program 
   SymOpSplitter sos;
   sos.init(&sa);
   changed |= sos.transform(programNode);
-  dump(programNode, "aho_opfix");
+  dump(programNode, programNode->name() + "_aho-2-opfix");
 
   // Clean up symbol assignments, since they're almost certainly no longer valid
   clearAaSyms(programNode);
@@ -510,7 +531,7 @@ bool handleAaOps(ShProgramNodePtr programNode) {
   //  Should handle conversion of src if its an interval or a regular type 
 
   optimize(programNode); // should do this here since there are likely lots of program fragments that could use straightening start later work
-  dump(programNode, "aho_done");
+  dump(programNode, programNode->name() + "_aho-3-done");
   return changed;
 }
 

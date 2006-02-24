@@ -1,0 +1,7 @@
+p $1 
+@InPoint3f p
+@OutAttrib1f t
+DOT t, p, p
+RCP t, t
+p
+

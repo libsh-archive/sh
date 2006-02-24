@@ -197,6 +197,8 @@ private:
  *   through the cfg.  Returns true iff the transformation has already
  *   incremented I (or deleted I and moved I to the next element). 
  *
+ *   Statements are handled in sequence according to the ShBasicBlock in node.
+ *
  * - void finish();
  *   Does any cleanup necessary afterwards, any other transformations to wrap
  *   things up. 
@@ -226,11 +228,12 @@ struct ShDefaultTransformer: public T {
 
 struct ShTransformerParent {
  ShTransformerParent() : m_changed(false) {}
- void start(ShProgramNodePtr program) { m_program = program; }
+ void start(ShProgramNodePtr program) { m_program = program; m_changed = false; }
  void handleVarList(ShProgramNode::VarList &varlist, ShBindingType type) {}
  void handleTexList(ShProgramNode::TexList &texlist) {}
  void handleChannelList(ShProgramNode::ChannelList &chanlist) {}
  void handlePaletteList(ShProgramNode::PaletteList &palettelist) {}
+ void handleNode(ShCtrlGraphNodePtr node) {}
 
  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node) { return false; }
  void finish() {}

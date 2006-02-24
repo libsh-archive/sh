@@ -144,9 +144,9 @@ void ShTypeInfo::addCasts()
   ShCastManager::instance()->init();
 
 #if 0
-  std::ofstream fout("castgraph.dot");
-  ShCastManager::instance()->graphvizDump(fout);
-  system("dot -Tps < castgraph.dot > castgraph.ps");
+  std::ostringstream sout; 
+  ShCastManager::instance()->graphvizDump(sout);
+  shDotGen(sout.str(), "castgraph");
 #endif
 }
 

@@ -35,10 +35,6 @@ namespace SH {
 /**************************************************************
  *** Use Specialization to define particular ops 
  **************************************************************/
-#define SHCCTO_UNARY_OP_SPEC_TMPL(T, op, opsrc)\
-template<>\
-SHCCTO_UNARY_OP_SPEC(T, op, opsrc)
-
 #define SHCCTO_UNARY_OP_SPEC(T, op, opsrc)\
 void ShConcreteCTypeOp<op, T>::doop(DataPtr dest, DataCPtr a, DataCPtr b, DataCPtr c) \
 {\
@@ -50,6 +46,11 @@ void ShConcreteCTypeOp<op, T>::doop(DataPtr dest, DataCPtr a, DataCPtr b, DataCP
     (*D) = opsrc;\
   }\
 }\
+
+#define SHCCTO_UNARY_OP_SPEC_TMPL(T, op, opsrc)\
+template<>\
+SHCCTO_UNARY_OP_SPEC(T, op, opsrc)
+
 
 #define SHCCTO_BINARY_OP_SPEC(T, op, opsrc)\
 void ShConcreteCTypeOp<op, T>::doop(DataPtr dest, DataCPtr a, DataCPtr b, DataCPtr c) \
@@ -98,8 +99,8 @@ SHCCTO_UNARY_OP_SPEC(double, SH_OP_CEIL, std::ceil(*A));
 SHCCTO_UNARY_OP_SPEC(float,  SH_OP_CEIL, ceilf(*A));
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_COS, std::cos(*A));
 SHCCTO_UNARY_OP_SPEC(float,  SH_OP_COS, cosf(*A));
-SHCCTO_UNARY_OP_SPEC(double, SH_OP_COSH, std::cosh(*A));
-SHCCTO_UNARY_OP_SPEC(float,  SH_OP_COSH, coshf(*A));
+SHCCTO_UNARY_OP_SPEC_TMPL(double, SH_OP_COSH, std::cosh(*A));
+SHCCTO_UNARY_OP_SPEC_TMPL(float,  SH_OP_COSH, coshf(*A));
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_EXP, std::exp(*A));
 SHCCTO_UNARY_OP_SPEC(float,  SH_OP_EXP, expf(*A));
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_EXP2, std::pow(2.0, *A));
@@ -149,14 +150,14 @@ SHCCTO_UNARY_OP_SPEC_TMPL(double, SH_OP_SGN, ((*A) < 0 ? -1 : (*A) > 0 ? 1 : 0))
 SHCCTO_UNARY_OP_SPEC_TMPL(float , SH_OP_SGN, ((*A) < 0 ? -1 : (*A) > 0 ? 1 : 0)); 
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_SIN, std::sin(*A)); 
 SHCCTO_UNARY_OP_SPEC(float,  SH_OP_SIN, sinf(*A)); 
-SHCCTO_UNARY_OP_SPEC(double, SH_OP_SINH, std::sinh(*A)); 
-SHCCTO_UNARY_OP_SPEC(float,  SH_OP_SINH, sinhf(*A)); 
+SHCCTO_UNARY_OP_SPEC_TMPL(double, SH_OP_SINH, std::sinh(*A)); 
+SHCCTO_UNARY_OP_SPEC_TMPL(float,  SH_OP_SINH, sinhf(*A)); 
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_SQRT, std::sqrt(*A)); 
 SHCCTO_UNARY_OP_SPEC(float,  SH_OP_SQRT, sqrtf(*A)); 
 SHCCTO_UNARY_OP_SPEC(double, SH_OP_TAN, std::tan(*A)); 
 SHCCTO_UNARY_OP_SPEC(float,  SH_OP_TAN, tanf(*A)); 
-SHCCTO_UNARY_OP_SPEC(double, SH_OP_TANH, std::tanh(*A)); 
-SHCCTO_UNARY_OP_SPEC(float,  SH_OP_TANH, tanhf(*A)); 
+SHCCTO_UNARY_OP_SPEC_TMPL(double, SH_OP_TANH, std::tanh(*A)); 
+SHCCTO_UNARY_OP_SPEC_TMPL(float,  SH_OP_TANH, tanhf(*A)); 
 
 /* Specializations for binary ops */
 SHCCTO_BINARY_OP_SPEC(double, SH_OP_ATAN2, std::atan2((*A), (*B)));

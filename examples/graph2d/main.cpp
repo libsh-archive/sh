@@ -18,6 +18,7 @@ int gprintf(int x, int y, char* fmt, ...);
 enum Graph {
   GR_PLANE, // just a plane with slope (MUL) 
   GR_POLY, // polynomial (tests MAD, ADD, MUL)
+  GR_CAMEL, // six hump camel
 /*
   GR_RATPOLY, // rational polynomial (MAD, ADD, MUL, RCP, DIV)
   GR_EXP, // exponential (EXP, EXP2, EXP10)
@@ -42,6 +43,7 @@ const int WIDTH = 2;
 const char* GraphName[] = {
   "plane",
   "poly",
+  "camel",
   /*
   "ratpoly",
   "exp",
@@ -115,6 +117,9 @@ struct PlotFunction {
             //value = mad(t, mad(t, coeff(2), coeff(1)), coeff(0)); 
             value = sum(t * mad(t, mad(t, coeff[3], coeff[2]), coeff[1]) + coeff[0]); break; 
               break;
+         case GR_CAMEL:
+            value = (4 - 2.1 * t(0) * t(0) + pow(t(0), 4.0 / 3.0)) * t(0) * t(0) + t(0) * t(1) + (-4 + 4 * t(1) * t(1)) * t(1) * t(1);  
+            break;
 #if 0
           case GR_RATPOLY:
             value = (t * mad(t, mad(t, coeff(3), coeff(2)), coeff(1)) + coeff(0))
@@ -243,7 +248,7 @@ void initShaders() {
                 ShAttrib2f start = floor(texcoord / rangeWidth) * rangeWidth; 
                 ShAttrib2f end = ceil(texcoord / rangeWidth) * rangeWidth; 
 
-#if 0
+#if 1
                 ShAttrib2a_f SH_DECL(range) = make_interval(start, end);
                 ShAttrib2f SH_DECL(center) = range_center(range);
 

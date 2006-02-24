@@ -822,11 +822,10 @@ struct FinishConstProp
       std::ostringstream s;
       s << "lifted_" << valuenum;
       std::string dotfilename(s.str() + ".dot");
-      std::ofstream dot(dotfilename.c_str());
-      prg.node()->ctrlGraph->graphvizDump(dot);
-      dot.close();
-      std::string cmdline = std::string("dot -Tps -o ") + s.str() + ".ps " + s.str() + ".dot";
-      system(cmdline.c_str());
+
+      std::ostringstream sout;
+      prg.node()->ctrlGraph->graphvizDump(sout);
+      shDotGen(sout, s.str());
     }
 #endif
     

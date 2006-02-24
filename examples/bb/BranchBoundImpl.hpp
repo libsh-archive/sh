@@ -301,7 +301,7 @@ bool BranchBound<D, R>::filter(ResultType input, ResultType& output)
   // return true if bounds are small enough 
   Domain test = input.domain.hi(0) - input.domain.lo(0);
   for(int i = 0; i < test.size(); ++i) {
-    if(test.getValue(i) > eps) return false;
+    if(test.getValue(i) > m_eps) return false;
   }
   return true;
 }

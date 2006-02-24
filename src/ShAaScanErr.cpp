@@ -265,15 +265,10 @@ void shAaScanErrDump(const std::string& filename, ShAaScanErrMap& errMap, ShProg
   ShIndexStmtMap indexStmt = gather_indices(program);
 
   ScanErrDumper sed(errMap, indexStmt);
-  std::string dotfile = filename + ".dot";
-  std::string psfile = filename + ".ps";
 
-  std::ofstream fout(dotfile.c_str());
-  sectionTree.dump(fout, sed); 
-  fout.close();
-
-  std::string cmd = std::string("dot -Tps < ") + dotfile + " > " + psfile;
-  system(cmd.c_str());
+  std::ostringstream sout;
+  sectionTree.dump(sout, sed); 
+  shDotGen(sout.str(), filename);
 }
 
 }

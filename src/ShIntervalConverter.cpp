@@ -402,6 +402,7 @@ ShProgram getProgram(ShOperation op, int N, ShValueType valueType) {
     case SH_OP_LRP:   return intervalLRP(N, valueType);
     case SH_OP_MAX:   return intervalBinaryMonotonic<SH_OP_MAX>(N, valueType);
     case SH_OP_MIN:   return intervalBinaryMonotonic<SH_OP_MIN>(N, valueType);
+    case SH_OP_RSQ:   return intervalBinaryMonotonic<SH_OP_RSQ>(N, valueType);
     case SH_OP_RCP:   return intervalRCP(N, valueType);
     case SH_OP_RND:   return intervalBinaryMonotonic<SH_OP_RND>(N, valueType);
     case SH_OP_SGN:   return intervalBinaryMonotonic<SH_OP_SGN>(N, valueType);
@@ -688,8 +689,7 @@ struct IntervalStatementFixer {
     SH_DEBUG_PRINT("ia type = " << shValueTypeName(iaType) << " newtype = " << shValueTypeName(newType)); 
 #endif
 
-    // @todo type do actual detection of operation type, don't just assume thd
-    // est type is it
+    // @todo type do actual detection of operation type, don't just assume the dest type is it
     if(!iasrc) {
 #ifdef SH_DEBUG_ICONV
       SH_DEBUG_PRINT("Handling " << opInfo[stmt.op].name << "as an updated assignment");

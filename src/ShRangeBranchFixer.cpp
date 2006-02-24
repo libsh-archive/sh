@@ -498,9 +498,9 @@ struct RangeBranchFixer {
     } SH_END;
     ShContext::current()->optimization(oldOpt);
 
-    std::ofstream fout("selfloop.dot");
-    newGraph.node()->ctrlGraph->graphvizDump(fout);
-    system("dot -Tps < selfloop.dot > selfloop.ps");
+    std::ostringstream sout; 
+    newGraph.node()->ctrlGraph->graphvizDump(sout);
+    shDotGen(sout.str(), "selfloop");
 
     // do structural analysis on newGraph
     ShStructural newStruct(newGraph.node()->ctrlGraph);
@@ -512,9 +512,9 @@ struct RangeBranchFixer {
     structReplaceExits(selfNode, selfExit, newExit); 
     structReplaceEntries(selfNode, newEntry, selfEntry); 
 
-    std::ofstream fout2("selfloop-after.dot");
-    newGraph.node()->ctrlGraph->graphvizDump(fout2);
-    system("dot -Tps < selfloop-after.dot > selfloop-after.ps");
+    std::ostringstream sout2; 
+    newGraph.node()->ctrlGraph->graphvizDump(sout2);
+    shDotGen(sout2.str(), "selfloop-after");
 
     // add newHead to the region
     // (Note, the structnodes no longer matches the expected format for an
@@ -635,9 +635,9 @@ struct RangeBranchFixer {
     } SH_END;
     ShContext::current()->optimization(oldOpt);
 
-    std::ofstream fout("whileloop.dot");
-    newGraph.node()->ctrlGraph->graphvizDump(fout);
-    system("dot -Tps < whileloop.dot > whileloop.ps");
+    std::ostringstream sout; 
+    newGraph.node()->ctrlGraph->graphvizDump(sout);
+    shDotGen(sout.str(), "whileloop");
 
     // do structural analysis on newGraph
     ShStructural newStruct(newGraph.node()->ctrlGraph);
@@ -651,9 +651,9 @@ struct RangeBranchFixer {
     structSplit(condNode, bodyNode, condExit, bodyEntry);
     structSplit(bodyNode, condNode, bodyExit, condEntry);
 
-    std::ofstream fout2("whileloop-after.dot");
-    newGraph.node()->ctrlGraph->graphvizDump(fout2);
-    system("dot -Tps < whileloop-after.dot > whileloop-after.ps");
+    std::ostringstream sout2; 
+    newGraph.node()->ctrlGraph->graphvizDump(sout2);
+    shDotGen(sout2.str(), "whileloop-after");
 
     // add newHead to the region
     // (Note, the structnodes no longer matches the expected format for an

@@ -30,7 +30,7 @@
 #include "ShCtrlGraph.hpp"
 #include "ShDebug.hpp"
 
-// #define SH_STRUCTURAL_DEBUG
+//#define SH_STRUCTURAL_DEBUG
 
 #ifdef SH_STRUCTURAL_DEBUG
 #  define SH_STR_DEBUG_PRINT(x) SH_DEBUG_PRINT(x)
@@ -402,49 +402,78 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
         // search for a section
         // find the last START (if there is one)
         // the next END after that must represent a SECTION
-        NodeSet::iterator S, E;
-        for(S = nodeset.end(); !newnode && S != nodeset.begin();) {
-          --S;
-          if((*S)->secStart) {
-            for(E = S;; ++E) {
-              if(E == nodeset.end()) {
-                SH_STR_DEBUG_PRINT("Found STARTSEC with no ENDSEC!");
-                SH_DEBUG_ASSERT(0);
-                break;
-              }
+        // (If there is no END, then we haven't found all the nodes in the
+        // section yet)
+        NodeSet::iterator F, firstE, lastS; 
+        firstE = lastS = nodeset.end();
+        for(F = nodeset.end(); !newnode && F != nodeset.begin();) {
+          --F;
+          if((*F)->secEnd) {
+            firstE = F;
+          } 
+          if((*F)->secStart && lastS == nodeset.end()) {
+            lastS = F;
+          }
 
-              // great...have a section, erase other nodes, and make a newnode
-              if((*E)->secEnd) { 
-                newnode = new ShStructuralNode(ShStructuralNode::SECTION);
-                // @todo range - do we need to check if these are empty
-                // ranges?
-                ++E;
-                nodeset.erase(E, nodeset.end());
-                nodeset.erase(nodeset.begin(), S);
-                SH_STR_DEBUG_PRINT("FOUND SECTION of size " << nodeset.size());
-                for (NodeSet::iterator I = nodeset.begin(); I != nodeset.end(); ++I) {
-                  SH_STR_DEBUG_PRINT("  node " << I->object());
-                }
-                break;
-              }
+          if((*F)->secStart && firstE != nodeset.end()) {
+            newnode = new ShStructuralNode(ShStructuralNode::SECTION);
+            // @todo range - do we need to check if these are empty
+            // ranges?
+            ++firstE;
+            nodeset.erase(firstE, nodeset.end());
+            nodeset.erase(nodeset.begin(), F);
+            SH_STR_DEBUG_PRINT("FOUND SECTION of size " << nodeset.size());
+            for (NodeSet::iterator I = nodeset.begin(); I != nodeset.end(); ++I) {
+              SH_STR_DEBUG_PRINT("  node " << I->object());
             }
             break;
           }
         }
 
-        // otherwise may be block
-        if(!newnode) {
-          if (nodeset.size() >= 2) {
+        if(!newnode) { 
+          // try to make a block
+          // note - we did not find a section, so this means that any
+          // ends/starts that appear in the sequence of nodes looks like  
+          // End*Start*
+          //
+          // There are two potential blocks we can make 
+          // [... firstE] stuff [lastS ... ] 
+          // or if there is no firstE/lastS, then the whole thing may be a block
+          
+          NodeSet::iterator blockS, blockE;
+          blockS = blockE = nodeset.end(); 
+
+          if(lastS != nodeset.end()) { 
+            NodeSet::iterator lastSNext = lastS;
+            lastSNext++;
+            if(lastSNext != nodeset.end()) {
+              blockS = lastS; 
+              blockE = nodeset.end(); 
+            }
+          } 
+
+          if (firstE != nodeset.end() && firstE != nodeset.begin()) {
+            blockS = nodeset.begin();
+            blockE = ++firstE;
+          } 
+
+          if(firstE == nodeset.end() && lastS == nodeset.end() && nodeset.size() >= 2) {
+            blockS = nodeset.begin();
+            blockE = nodeset.end();
+          }
+
+          if(blockS != blockE) {
             SH_STR_DEBUG_PRINT("FOUND BLOCK of size " << nodeset.size());
-            for (NodeSet::iterator I = nodeset.begin(); I != nodeset.end(); ++I) {
+            for (NodeSet::iterator I = blockS; I != blockE; ++I) { 
               SH_STR_DEBUG_PRINT("  node " << I->object());
             }
-            //node = n.object();
+            nodeset.erase(nodeset.begin(), blockS);
+            nodeset.erase(blockE, nodeset.end());
             newnode = new ShStructuralNode(ShStructuralNode::BLOCK);
             newnode->secStart = nodeset.front()->secStart;
             newnode->secEnd = nodeset.back()->secEnd;
             SH_DEBUG_ASSERT(!(newnode->secStart && newnode->secEnd));
-          } else {
+          } else { 
             nodeset.clear();
           }
         }

@@ -40,6 +40,8 @@ public:
 
   ShMeta(const ShMeta &other);
 
+  const ShMeta & operator=(const ShMeta &other);
+
   virtual ~ShMeta();
   
   virtual std::string name() const;

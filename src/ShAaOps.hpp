@@ -30,6 +30,7 @@
 #include "ShDllExport.hpp"
 #include "ShProgram.hpp"
 #include "ShAaSyms.hpp"
+#include "ShAaSymPlacer.hpp"
 #include "ShAaVariable.hpp"
 
 namespace SH {
@@ -37,7 +38,8 @@ namespace SH {
 /** @file ShAaInstructions.hpp
  * Performs affine operations using regular tuples wrapped in ShAaVariable
  * objects.  This is used primarily during code generation for platforms 
- * that do not support affine types directly. 
+ * that do not support affine types directly, and handles affine arithmetic
+ * without merging of unique symbols only. 
  *
  * In each case, dest must be assigned the correct symbols for the operation
  * before hand.
@@ -191,5 +193,7 @@ ShVariable aaTOIVAL(const ShAaVariable& a);
 // Conversion from regular variable
 ShAaVariable aaFROMTUPLE(const ShVariable& a);
 
+// Affine arithmetic unique merging operation
+void aaUNIQUE_MERGE(ShAaVariable& mergeDest, ShAaVariable& dest, const ShAaStmtSyms* syms);
 }
 #endif

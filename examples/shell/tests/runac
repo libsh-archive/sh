@@ -1,0 +1,33 @@
+# Converts a single input/single output program using
+# interval and affine inclusion, and runs tests 
+#
+# @parm
+# 1 - name of program to convert
+# 2 - number of tuple elements in input
+# 3 - number of tupel elements in output
+r vars
+r $1.shp $1
+dot $1
+
+print Running IA Test Cases
+incl $1 $1_i
+conv $1_i $1_ic
+r runac_runone $1_ic $2 $3 arb Interval_ARB
+r runac_runone $1_ic $2 $3 cc  Interval_CC
+
+print Running AA_NoUM Test Cases
+aincl $1 $1_a
+meta $1_a aa_disable_uniqmerge true
+conv $1_a $1_ac_noum
+dot $1_ac_noum
+
+r runac_runone $1_ac_noum $2 $3 arb AA_NoUM_ARB 
+r runac_runone $1_ac_noum $2 $3 cc  AA_NoUM_CC 
+
+print Running AA Test Cases
+meta $1_a aa_disable_uniqmerge false 
+conv $1_a $1_ac
+dot $1_ac
+
+r runac_runone $1_ac $2 $3 arb AA_ARB 
+r runac_runone $1_ac $2 $3 cc  AA_CC 

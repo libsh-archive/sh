@@ -1,0 +1,8 @@
+p $1 
+@InVec1f x
+@Vec1f z
+@OutAttrib1f y
+z = x * x
+y = z * z
+p
+

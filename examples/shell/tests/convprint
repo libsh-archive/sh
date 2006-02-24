@@ -1,0 +1,5 @@
+# Reads in an shp and runs the standard conversions
+# @parm 
+# 1 - name of script file to run that generates a program named $1 
+r $1.shp $1 
+r convert $1

@@ -1,0 +1,7 @@
+p $1 
+@InAttrib3f x
+@InAttrib3f y
+@OutAttrib3f z
+z = x * y
+p
+

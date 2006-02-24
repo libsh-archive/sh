@@ -1,0 +1,6 @@
+p $1 
+@InAttrib3f x
+@OutAttrib3f y
+y = x - x
+p
+

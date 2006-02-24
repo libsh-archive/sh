@@ -1,0 +1,7 @@
+#!/bin/bash
+
+rm -rf -- *.vars *.dot *.ps *.png i_tracer *~
+cd results
+rm -rf -- *.vars *.dot *.ps *.png i_tracer *~
+cd ..
+

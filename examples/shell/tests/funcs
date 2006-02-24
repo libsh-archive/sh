@@ -1,0 +1,22 @@
+# Generates some functions that work solely on n-tuples
+#
+# @param
+# 1 - tuple size
+
+p mad$1
+  @In$1f mad$1a
+  @In$1f mad$1b
+  @In$1f mad$1c
+
+  @Out$1f mad$1d
+
+  MAD mad$1d, mad$1a, mad$1b, mad$1c
+p
+
+p rcp$1
+  @In$1f rcp$1a
+
+  @Out$1f rcp$1b
+
+  RCP rcp$1b, rcp$1a
+p

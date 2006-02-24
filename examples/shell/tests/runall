@@ -1,0 +1,16 @@
+#!/bin/bash
+
+./run convprint add_3f 
+./run convprint sub_3f 
+./run convprint mul_1f
+./run convprint mul_3f
+./run convprint um_mul_1f
+./run convprint um_metaball_3d
+
+./run runac add_3f  3 3
+./run runac sub_3f  3 3
+./run runac mul_1f 1 1
+./run runac mul_3f 3 3
+./run runac um_mul_1f 1 1
+./run runac um_metaball_3d 3 1
+

@@ -34,7 +34,7 @@
 #include "ShDllExport.hpp"
 
 // enable this to turn on all AA debugging
-// #define SH_DBG_AA
+//#define SH_DBG_AA
 
 namespace SH {
 
@@ -47,6 +47,7 @@ namespace SH {
 
 /** Represents a set of error symbol indices. */
 struct ShAaIndexSet {
+  typedef int value_type; // @TODO this was stuck in after the fact, and doesn't necessarily make sense
   typedef std::set<int> IndexSet;
   typedef IndexSet::iterator iterator;
   typedef IndexSet::const_iterator const_iterator;
@@ -64,9 +65,15 @@ struct ShAaIndexSet {
   /* Returns the size of the index set */
   int size() const { return m_idx.size(); }
 
+  /* Clears this index set */
+  void clear() { m_idx.clear(); }
+
   /* Returns the largest error symbol, bombs out with an assertion if no such 
    * symbol exists. */
   int last() const;
+
+  /* Returns the smallest error symbol */
+  int first() const;
 
   /* Returns whether the index set contains a certain error symbol */
   bool contains(int idx) const;
@@ -76,6 +83,7 @@ struct ShAaIndexSet {
   friend ShAaIndexSet operator|(const ShAaIndexSet &a, const ShAaIndexSet &b);
   friend ShAaIndexSet operator&(const ShAaIndexSet &a, const ShAaIndexSet &b);
   friend ShAaIndexSet operator-(const ShAaIndexSet &a, const ShAaIndexSet &b);
+  friend bool operator!=(const ShAaIndexSet &a, const ShAaIndexSet &b);
   // @}
 
   friend std::ostream& operator<<(std::ostream& out, const ShAaIndexSet& a); 
@@ -121,6 +129,9 @@ struct ShAaSyms {
   // Resizes 
   void resize(int size) { m_tidx.resize(size); }
 
+  // Resizes 
+  void clear() { for(iterator I = begin(); I != end(); ++I) I->clear(); } 
+
   // Returns a swizzling of this aasyms
   ShAaSyms swizSyms(const ShSwizzle& swiz) const;
 
@@ -155,6 +166,9 @@ struct ShAaSyms {
 
   // Picks out the last element of each index set 
   ShAaSyms last() const;
+
+  // Picks out the first element of each index set 
+  ShAaSyms first() const;
 
   // Returns whether all index sets are empty 
   bool empty() const;

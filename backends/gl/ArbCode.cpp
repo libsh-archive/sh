@@ -190,12 +190,12 @@ void dump(ShProgramNodePtr foo, std::string desc) {
   ShStructural st(foo->ctrlGraph);
   std::ostringstream structOut; 
   st.dump(structOut);
-  shDotToPs(structOut.str(), desc + "_struct.ps");
+  shDotGen(structOut.str(), desc + "_struct");
 
   ShSectionTree sec(st); 
   std::ostringstream secOut;
   sec.dump(secOut);
-  shDotToPs(secOut.str(), desc + "_sec.ps");
+  shDotGen(secOut.str(), desc + "_sec");
 #endif
 }
 

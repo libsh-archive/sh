@@ -47,9 +47,9 @@ namespace {
 
 using namespace SH;
 
-#define SH_DEBUG_INCL
+//#define SH_DEBUG_INCL
 
-void dump(ShProgram a, const char* name) {
+void dump(ShProgram a, std::string name) {
 #ifdef SH_DEBUG_INCL
     a.node()->dump(name);
 #endif
@@ -335,7 +335,8 @@ ShProgram inclusion(ShProgram a)
 {
   add_stmt_indices(a);
   ShProgram result(a.node()->clone());
-  dump(result,"inclusion_start");
+  result.name(a.name() + "_ia_incl");
+  dump(result, a.name() + "_inclusion_start");
 
   ShContext::current()->enter(result.node());
     FloatToIntervalConverter ftic;
@@ -344,7 +345,7 @@ ShProgram inclusion(ShProgram a)
     optimize(result);
   ShContext::current()->exit();
 
-  dump(result, "inclusion_done");
+  dump(result, a.name() + "_inclusion_done");
   return result;
 }
 
@@ -360,23 +361,24 @@ ShProgram affine_inclusion_syms(ShProgram a)
 {
   add_stmt_indices(a);
   ShProgram result(a.node()->clone());
-  dump(result, "aaincl_start");
+  result.name(a.name() + "_ia_incl");
+  dump(result, a.name() + "_aaincl_start");
 
   ShContext::current()->enter(result.node());
     FloatToAffineConverter ftac;
     ftac.transform(result.node());
-  dump(result, "aaincl_ftac");
+  dump(result, a.name() + "_aaincl_ftac");
     //fixRangeBranches(result);
     optimize(result);
   ShContext::current()->exit();
 
-  dump(result, "aaincl_done");
+  dump(result, a.name() + "_aaincl_done");
   return result;
 }
 
 void affine_to_interval_inputs(ShProgram a)
 {
-  dump(a, "atoi_inputs_start");
+  dump(a, a.name() + "_atoi_inputs_start");
 
   int oldOptimization = ShContext::current()->optimization();
   ShContext::current()->optimization(0);
@@ -385,12 +387,12 @@ void affine_to_interval_inputs(ShProgram a)
     aii.transform(a.node());
   ShContext::current()->exit();
   ShContext::current()->optimization(oldOptimization);
-  dump(a, "atoi_inputs_done");
+  dump(a, a.name() + "_atoi_inputs_done");
 }
 
 void affine_to_interval_outputs(ShProgram a)
 {
-  dump(a, "atoi_outputs_start");
+  dump(a, a.name() + "_atoi_outputs_start");
   int oldOptimization = ShContext::current()->optimization();
   ShContext::current()->optimization(0);
   ShContext::current()->enter(a.node());
@@ -398,7 +400,7 @@ void affine_to_interval_outputs(ShProgram a)
     aii.transform(a.node());
   ShContext::current()->exit();
   ShContext::current()->optimization(oldOptimization);
-  dump(a, "atoi_outputs_done");
+  dump(a, a.name() + "_atoi_outputs_done");
 }
 
 // @todo range - add something after affine_inclusion to 

@@ -154,6 +154,8 @@ void ShTransformer::vectorizeScalars()
 template<typename T>
 void ShDefaultTransformer<T>::operator()(ShCtrlGraphNodePtr node) {
   if (!node) return;
+  T::handleNode(node);
+
   ShBasicBlockPtr block = node->block;
   if (!block) return;
 

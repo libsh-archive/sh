@@ -1,0 +1,20 @@
+# runs one set of interval tests
+#
+# @parm
+# 1 - name of program to run
+# 2 - number of tuple elements in input
+# 3 - number of tuple elements in output
+# 4 - backend
+# 5 - name of case
+
+print Running Test Case $5
+b $4
+
+apply t$3fS $1 uNeg$2f
+print Apply [ uNegLo$2f , uNegHi$2f ] = [ t$3fLo , t$3fHi ]
+
+apply t$3fS $1 uPos$2f
+print Apply [ uPosLo$2f , uPosHi$2f ] = [ t$3fLo , t$3fHi ]
+
+apply t$3fS $1 uSpan$2f
+print Apply [ uSpanLo$2f , uSpanHi$2f ] = [ t$3fLo , t$3fHi ]

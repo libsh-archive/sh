@@ -1,0 +1,11 @@
+# Does all the standard conversions and outputs dot files
+#
+# @parm
+# 1 - name of program to convert
+incl $1 $1_i
+aincl $1 $1_a
+conv $1_a $1_ac
+dot $1
+dot $1_i
+dot $1_a
+dot $1_ac

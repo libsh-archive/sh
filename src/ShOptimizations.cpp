@@ -417,12 +417,10 @@ void optimize(ShProgram& p, int level)
     SH_DEBUG_PRINT("---Optimizer pass " << pass << " BEGIN---");
     std::ostringstream s;
     s << "opt_" << pass;
-    std::string filename = s.str() + ".dot";
-    std::ofstream out(filename.c_str());
-    p.node()->ctrlGraph->graphvizDump(out);
-    out.close();
-    std::string cmdline = std::string("dot -Tps -o ") + s.str() + ".ps " + s.str() + ".dot";
-    system(cmdline.c_str());
+    
+    std::ostringstream sout;
+    p.node()->ctrlGraph->graphvizDump(sout);
+    shDotGen(sout.str(), s.str());
 #endif
 
     changed = false;

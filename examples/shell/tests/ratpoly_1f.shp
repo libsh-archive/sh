@@ -1,0 +1,18 @@
+# Rational polynomial function
+# 
+# @param
+# 1 - name of the program to generate
+
+r funcs 1
+
+@4f ratpoly_num = @4f(1, 1, 1.5 -1)
+@3f ratpoly_denom = @3f(1, 0, 0)
+
+p $1 
+@InAttrib1f t
+@OutAttrib1f y
+
+y = (t * mad1(t, mad1(t, ratpoly_num(3), ratpoly_num(2)), ratpoly_num(1)) + ratpoly_num(0))
+    * rcp1(mad1(t, mad1(t, ratpoly_denom(2), ratpoly_denom(1)), ratpoly_denom(0)));
+p
+

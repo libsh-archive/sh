@@ -123,7 +123,9 @@ struct InEscFinderBase: public ShTransformerParent
     ShStatement& stmt = *I;
     ValueTracking *vt = stmt.get_info<ValueTracking>();
     if(!vt) {
-      SH_DEBUG_PRINT("No valuetracking on " << stmt);
+      if(!stmt.dest.null()) {
+        SH_DEBUG_PRINT("No valuetracking on " << stmt);
+      }
       return false;
     }
       

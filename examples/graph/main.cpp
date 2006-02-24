@@ -12,6 +12,9 @@ using namespace std;
 using namespace SH;
 using namespace ShUtil;
 
+#define SHOWAA true 
+#define SHOWIA true 
+
 int gprintf(int x, int y, char* fmt, ...);
 
 // replace with an RPN parser soon
@@ -67,8 +70,8 @@ ShAttrib1f edge;
 ShAttrib1f edge2;
 ShAttrib1f edge3;
 ShProgram vsh, fsh[NUMGRAPHS];
-#define DBG_MODE
-Graph mode = GR_RCP; 
+//#define DBG_MODE
+Graph mode = GR_POLY; 
 
 ShAttrib<5, SH_TEMP, float> coeff;
 ShAttrib<3, SH_TEMP, float> denom;
@@ -228,16 +231,18 @@ void initShaders() {
         ShPoint2f pos = texcoord * myscale + offset;
 
         ShAttrib1f scaled_eps = eps * myscale;
+        ShAttrib1f SH_DECL(inGrid) = 0.0f;
+        ShAttrib1f SH_DECL(inEdge) = 0.0f;
+        ShAttrib1f SH_DECL(inCurve) = 0.0f; 
+        ShAttrib1f SH_DECL(inRange) = 0.0f;
+        ShColor3f rangeColor = inrangeColor; 
 
         // check if in curve
         ShAttrib1f SH_DECL(val) = func(pos(0));  // evaluate function 
         ShAttrib1f deriv = abs(dx(val));
-        ShAttrib1f inCurve = abs(val - pos(1)) < scaled_eps * myscale2 * deriv; 
+        inCurve = abs(val - pos(1)) < scaled_eps * myscale2 * deriv; 
 
         // check if in range
-        ShAttrib1f SH_DECL(inRange) = 0.0f;
-        ShAttrib1f SH_DECL(inEdge) = 0.0f;
-        ShColor3f rangeColor = inrangeColor; 
 
         ShAttrib1f start = floor(pos(0) / rangeWidth) * rangeWidth; 
         ShAttrib1f end = ceil(pos(0) / rangeWidth) * rangeWidth; 
@@ -245,7 +250,7 @@ void initShaders() {
         ShAttrib1f SH_DECL(center) = range_center(range);
 
         // check if in affine range
-#if 1
+#if SHOWAA
         ShAttrib1a_f SH_DECL(result_range) = afunc(range);
         ShAttrib1f SH_DECL(result_center) = range_center(result_range);
         ShAttrib1f SH_DECL(result_inerr) = affine_lasterr(result_range, range);
@@ -273,7 +278,7 @@ void initShaders() {
 #endif
 
         // check if in IA range
-#if 1
+#if SHOWIA 
         ShAttrib1i_f SH_DECL(rangei) = make_interval(start, end); 
         ShAttrib1i_f SH_DECL(result_rangei) = ifunc(rangei);
 
@@ -293,17 +298,21 @@ void initShaders() {
 
 
         // check if in grid
-        //ShAttrib1f inGrid = (abs(pos(0)) < scaled_eps) + (abs(pos(1)) < scaled_eps); 
-        ShAttrib1f inGrid = 0.0f; 
+        inGrid = (abs(pos(0)) < scaled_eps) + (abs(pos(1)) < scaled_eps); 
 
         color = lerp(inGrid, gridColor, 
             lerp(inEdge, edgeColor, lerp(inCurve, funcColor, lerp(inRange, rangeColor, bkgdColor))));
         //color=pos(0,1,0);
+        //color = abs(dx(val))(0, 0, 0) * myscale2;
+        //color = inCurve(0,0,0);
       } SH_END;
 
       fsh[i].node()->dump(std::string("fsh_") + GraphName[i]);
+      fsh[i].name(std::string("fsh_") + GraphName[i]);
+      fsh[i].meta("aa_disable_uniqmerge", "true"); // disabling unique merging
     }
     vsh = namedAlign(vsh, fsh[mode]);
+    vsh.name("vsh");
     vsh.node()->dump("vsh");
 }
 
@@ -448,12 +457,13 @@ void keyboard(unsigned char k, int x, int y)
 
 int main(int argc, char** argv)
 {
-  coeff(0) = 0.0f; 
-  coeff(1) = 0.0f; 
+  coeff(0) = 1.0f; 
+  coeff(1) = 1.0f; 
   coeff(2) = 1.5f; 
   coeff(3) = -1.0; 
 
   denom(0) = 1.0f;
+  denom(1) = denom(2) = 0.0f;
 
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);

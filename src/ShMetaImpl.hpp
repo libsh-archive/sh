@@ -31,10 +31,19 @@ namespace SH {
 inline ShMeta::ShMeta(const ShMeta &other)
   : m_meta(0)
 {
+  *this = other;
+}
+
+inline const ShMeta & ShMeta::operator=(const ShMeta &other)
+{
   if(other.m_meta) {
     m_meta = new MetaMap();
     *m_meta = *other.m_meta;
   }
+  else {
+    m_meta = 0;
+  }
+  return *this;
 }
 
 inline ShMeta::~ShMeta()

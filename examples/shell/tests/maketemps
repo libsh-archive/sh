@@ -1,0 +1,19 @@
+# makes temporaries 
+# name$2f - float temporary
+# name$2i_f - IA temporary
+# name$2a_f - AA temporary
+# name$2fLo - lo bound (float)
+# name$2fHi - hi bound
+# name$2fS - stream of lo/hi 
+#
+# @parm
+# 1 - name of temporary
+# 2 - size of temporary
+
+@$2f $1$2f
+@$2i_f $1$2i_f
+@$2a_f $1$2a_f
+
+@$2f $1$2fLo
+@$2f $1$2fHi
+stream $1$2fS $1$2fLo $1$2fHi

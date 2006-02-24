@@ -33,15 +33,18 @@ std::ostream& shPrintIndent(std::ostream& out, int indent)
   return out;
 }
 
-void shDotToPs(const std::string& dot_string, const std::string& ps_filename)
+void shDotGen(const std::string& dot_string, const std::string& filename)
 {
   // @todo range does not work on most platforms
   // use tmpnam to generate a real temp file
-  std::string dot_filename = ps_filename + ".dot"; 
+  std::string dot_filename = filename + ".dot"; 
   std::ofstream fout(dot_filename.c_str());
   fout << dot_string;
   fout.close();
-  std::string cmd = std::string("dot -Tps < ") + dot_filename + " > " + ps_filename; 
+  std::string cmd;
+  //std::string cmd = std::string("dot -Tps < ") + dot_filename + " > " + filename + ".ps"; 
+  //system(cmd.c_str());
+  cmd = std::string("dot -Tpng < ") + dot_filename + " > " + filename + ".png"; 
   system(cmd.c_str());
 //  cmd = std::string("rm -f ") + dot_filename; 
 //  system(cmd.c_str());

@@ -1,0 +1,11 @@
+# 2D "Six-hump camel back" function
+p $1 
+@In2f x
+@Out1f camel 
+
+@2f x2 = x * x
+@1f x4_3
+POW x4_3, x(0), 1.333333333
+camel = (4 - 2.1 * x2(0) + x4_3) * x2(0) + x(0) * x(1) + (-4 + 4 * x2(1)) * x2(1) 
+p
+
