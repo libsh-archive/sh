@@ -143,6 +143,7 @@ public:
     std::vector<std::string> inputs(1);
     SH::ShProgram program1 = bind_input(program, in1, inputs[0]);
     chan_out = program1;
+    mem_out->hostStorage()->sync();
 
     return output_result(program.name(), inputs, _out, _res, res.size(), epsilon);
   }
@@ -171,6 +172,7 @@ public:
     SH::ShProgram program1 = bind_input(program, in1, inputs[0]);
     SH::ShProgram program2 = bind_input(program1, in2, inputs[1]);
     chan_out = program2;
+    mem_out->hostStorage()->sync();
 
     return output_result(program.name(), inputs, _out, _res, res.size(), epsilon);
   }
@@ -200,6 +202,7 @@ public:
     SH::ShProgram program2 = bind_input(program1, in2, inputs[1]);
     SH::ShProgram program3 = bind_input(program2, in3, inputs[2]);
     chan_out = program3;
+    mem_out->hostStorage()->sync();
 
     return output_result(program.name(), inputs, _out, _res, res.size(), epsilon);
   }

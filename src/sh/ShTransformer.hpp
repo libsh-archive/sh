@@ -101,7 +101,7 @@ public:
    * but j is also floatMapping[k])
    *
    */
-  void convertToFloat(ValueTypeMap &typeMap);
+  void convertToFloat(ValueTypeMap &typeMap, bool preserve_casts = false);
 
   //@todo  use dependent uniforms in conversion and spliting functions
   //instead of separate VarSplitMaps and ShVarMaps
@@ -121,6 +121,18 @@ public:
   /** Replace TEXD with TEXLOD ops.
    */
   void texd_to_texlod();
+
+  /** Replace NORM with DOT, RSQRT and MUL
+   */
+  void expand_normalize();
+
+  /** Replace SQRT with RCP and RSQRT
+   */
+  void reciprocate_sqrt();
+
+  /** Replace DIV with RCP and MUL
+   */
+  void expand_div();
 
 private:
   /// NOT IMPLEMENTED

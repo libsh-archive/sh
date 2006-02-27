@@ -237,7 +237,7 @@ typedef ShPointer<const ShStorage> ShStorageCPtr;
 class
 SH_DLLEXPORT ShHostStorage : public ShStorage {
 public:
-  ShHostStorage(ShMemory* memory, std::size_t length, ShValueType storage_type); ///< Internally managed storage
+  ShHostStorage(ShMemory* memory, std::size_t length, ShValueType storage_type, std::size_t align = 1); ///< Internally managed storage
   ShHostStorage(ShMemory* memory, std::size_t length, void* data, ShValueType storage_type); ///< Externally managed storage
 
   /// Destruct this storage.
@@ -256,7 +256,8 @@ public:
   
 private:
   std::size_t m_length; ///< number of bytes stored
-  void* m_data;         ///< the actual data, stored on the host
+  void* m_data;         ///< the actual data, stored on the host, aligned
+  void* m_data_unaligned; ///< the actual data, stored on the host
 
   bool m_managed; ///< Did we create the data? If so, this is true
 
@@ -275,7 +276,7 @@ typedef ShPointer<const ShHostStorage> ShHostStorageCPtr;
 class
 SH_DLLEXPORT ShHostMemory : public ShMemory {
 public:
-  ShHostMemory(std::size_t length, ShValueType value_type);
+  ShHostMemory(std::size_t length, ShValueType value_type, std::size_t align = 1);
   ShHostMemory(std::size_t length, void* data, ShValueType value_type);
 
   ~ShHostMemory();

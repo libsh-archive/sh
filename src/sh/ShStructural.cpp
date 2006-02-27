@@ -353,8 +353,9 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
 {
   // Build DFS spanning tree, and postorder traversal stack
 
+  std::map<ShCtrlGraphNodePtr, ShStructuralNodePtr> nodemap;
   graph->entry()->clearMarked();
-  m_head = build_tree(graph->entry());
+  m_head = build_tree(graph->entry(), nodemap);
   graph->entry()->clearMarked();
 
   bool changed;
@@ -670,9 +671,8 @@ std::ostream& ShStructural::dump(std::ostream& out) const
   return out;
 }
 
-ShStructuralNodePtr ShStructural::build_tree(const ShCtrlGraphNodePtr& node)
+ShStructuralNodePtr ShStructural::build_tree(const ShCtrlGraphNodePtr& node, std::map<ShCtrlGraphNodePtr, ShStructuralNodePtr>& nodemap)
 {
-  static std::map<ShCtrlGraphNodePtr, ShStructuralNodePtr> nodemap;
   using std::make_pair;
   
   if (!node) return 0;
@@ -686,7 +686,7 @@ ShStructuralNodePtr ShStructural::build_tree(const ShCtrlGraphNodePtr& node)
   for (ShCtrlGraphNode::SuccessorList::iterator I = node->successors.begin();
        I != node->successors.end(); ++I) {
     if (!I->node) continue; // should never happen
-    ShStructuralNodePtr child = build_tree(I->node);
+    ShStructuralNodePtr child = build_tree(I->node, nodemap);
     if (child) {
       child->parent = snode.object();
       snode->children.push_back(child);
@@ -697,7 +697,7 @@ ShStructuralNodePtr ShStructural::build_tree(const ShCtrlGraphNodePtr& node)
   }
 
   if (node->follower) {
-    ShStructuralNodePtr fchild = build_tree(node->follower);
+    ShStructuralNodePtr fchild = build_tree(node->follower, nodemap);
     if (fchild) {
       fchild->parent = snode.object();
       snode->children.push_back(fchild);

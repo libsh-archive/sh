@@ -95,6 +95,10 @@ public:
 
   /// Determine whether two swizzles are identical
   bool operator==(const ShSwizzle& other) const;
+
+  /// Determine whether a swizzle is "less" than another swizzle.
+  /// This is only useful to provide strong ordering.
+  bool operator<(const ShSwizzle& other) const;
   
 private:
   // copies the other swizzle's elements 

@@ -1,3 +1,50 @@
+2006-02-27  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* examples/glut/main.cpp: Glut example destroys its programs at
+	program end.
+
+	* src/sh/ShBackend.cpp: On Windows, release backends won't get loaded.
+	This can otherwise cause trouble because the CRTs will be different.
+
+2006-02-24  Andrew Lauritzen  <atlaurit@serioushack.com>
+
+	* src/sh/ShStructural.cpp, ShStructural.hpp: Fixed an bug with
+	references to various bits of Sh data living on in a static member of
+	an internal Sh function.
+
+2006-02-22  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/sh/ShTransformer.cpp, ShTransformer.hpp: Add DIV->RCP/MUL
+	transfomer.
+	
+2006-02-20  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/sh/ShChannel.hpp, ShChannelImpl.hpp, ShChannelNode.cpp
+	ShChannelNode.hpp: Allow changing the count of a channel without
+	changing its memory.
+
+	* src/sh/ShMemory.cpp, ShMemory.hpp: Allow setting memory alignment in
+	host storage.
+
+	* src/sh/ShOptimizations.cpp, ShSwizzle.hpp, ShSwizzleImpl.hpp: Allow
+	comparing swizzles. Do not forward substitute type conversions.
+
+	* src/sh/ShTypeConvertTransformer.cpp: Allow preserve_casts in
+	typeconverttransformer.
+
+	* src/sh/ShLib.hpp, ShLibBooleanImpl.hpp: Statically cast a few
+	things to avoid compiler warnings on some platforms.
+
+	* src/sh/ShTransformer.cpp: Implement expand_normalize() and
+	reciprocate_sqrt() transformers.
+
+	* src/sh/ShTransformer.hpp: Add expand_normalize() and
+	reciprocate_sqrt() transformers.
+
+2006-02-15  Filip Spacek  <filip@serioushack.com>
+
+	* test/regress/test.hpp: Sync the storage before reading the results.
+
 2006-02-13  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslBackend.cpp, ArbBackend.cpp: Remove the

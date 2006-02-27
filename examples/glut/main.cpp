@@ -39,7 +39,7 @@ ShMatrix4x4f mv, mvd;
 ShPoint3f lightPos;
 Camera camera;
 ShProgram vsh, fsh;
-ShProgramSet* shaders;
+ShProgramSetPtr shaders;
 
 ShColor3f diffusecolor;
 
@@ -275,6 +275,4 @@ int main(int argc, char** argv)
 #endif
 
   glutMainLoop();
-
-  delete shaders;
 }

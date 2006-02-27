@@ -252,7 +252,7 @@ ShGeneric<N, CT1T2> cond(const CT1T2& condition,
 template<int N, typename T>
 ShGeneric<N, T> operator!(const ShGeneric<N, T>& a)
 {
-  return 1.0f - (a > 0.0f);
+  return static_cast<T>(1) - (a > static_cast<T>(0));
 }
 
 

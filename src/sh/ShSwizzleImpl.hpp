@@ -251,6 +251,18 @@ inline bool ShSwizzle::operator==(const ShSwizzle& other) const
   return memcmp(m_index.ptr, other.m_index.ptr, sizeof(int)*m_size) == 0;
 }
 
+inline bool ShSwizzle::operator<(const ShSwizzle& other) const
+{
+  if (m_srcSize < other.m_srcSize) return true;
+  if (m_srcSize > other.m_srcSize) return false;
+  if (m_size < other.m_size) return true;
+  if (m_size > other.m_size) return false;
+  if (local()) {
+    return m_index.intval < other.m_index.intval;
+  }
+  return memcmp(m_index.ptr, other.m_index.ptr, sizeof(int)*m_size) < 0;
+}
+
 } // namespace SH
 
 #endif

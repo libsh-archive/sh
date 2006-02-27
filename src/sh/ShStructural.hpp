@@ -136,7 +136,7 @@ private:
   typedef std::list<ShStructuralNode*> PostorderList;
   PostorderList m_postorder;
 
-  ShStructuralNodePtr build_tree(const ShCtrlGraphNodePtr& node);
+  ShStructuralNodePtr build_tree(const ShCtrlGraphNodePtr& node, std::map<ShCtrlGraphNodePtr, ShStructuralNodePtr>& nodemap);
   void build_postorder(const ShStructuralNodePtr& node);
 };
 

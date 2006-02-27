@@ -227,7 +227,14 @@ bool ShBackend::load_library(const string& filename)
   string uc_filename(filename);
   std::transform(filename.begin(), filename.end(), uc_filename.begin(), toupper);
   string::size_type extension_pos = uc_filename.rfind("_DEBUG.DLL");
-  if (uc_filename.npos == extension_pos) extension_pos = uc_filename.rfind(".DLL");
+  if (uc_filename.npos == extension_pos) {
+#ifdef SH_DEBUG
+    // refuse to load non-debugging libraries
+    return false;
+#else
+    extension_pos = uc_filename.rfind(".DLL");
+#endif
+  }
   string::size_type filename_pos = uc_filename.rfind("\\") + 1;
 #elif defined(__APPLE__) && !defined(AUTOTOOLS)
   string::size_type extension_pos = filename.rfind(".bundle");

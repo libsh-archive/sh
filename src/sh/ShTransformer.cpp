@@ -769,6 +769,96 @@ void ShTransformer::texd_to_texlod()
   m_changed |= t2t.transform(m_program);
 }
 
+struct ExpandNormalizeBase : public ShTransformerParent 
+{
+  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node)
+  { 
+    if (SH_OP_NORM == I->op) {
+      ShBasicBlock::ShStmtList new_stmts;
+      
+      ShVariable tmp1(allocate_scalar_temp(I->dest));
+
+      new_stmts.push_back(ShStatement(tmp1, I->src[0], SH_OP_DOT, I->src[0]));
+      new_stmts.push_back(ShStatement(tmp1, SH_OP_RSQ, tmp1));
+      new_stmts.push_back(ShStatement(I->dest, tmp1, SH_OP_MUL, I->src[0]));
+
+      I = node->block->erase(I);
+      node->block->splice(I, new_stmts);
+      m_changed = true;
+      return true;
+    } else {
+      return false;
+    }
+  }
+};
+
+typedef ShDefaultTransformer<ExpandNormalizeBase> ExpandNormalize;
+void ShTransformer::expand_normalize()
+{
+  ExpandNormalize en;
+  m_changed |= en.transform(m_program);
+}
+
+
+struct ReciprocateSqrtBase : public ShTransformerParent 
+{
+  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node)
+  { 
+    if (SH_OP_SQRT == I->op) {
+      ShBasicBlock::ShStmtList new_stmts;
+      
+      ShVariable tmp1(allocate_temp(I->dest));
+
+      new_stmts.push_back(ShStatement(tmp1, SH_OP_RSQ, I->src[0]));
+      new_stmts.push_back(ShStatement(I->dest, SH_OP_RCP, tmp1));
+
+      I = node->block->erase(I);
+      node->block->splice(I, new_stmts);
+      m_changed = true;
+      return true;
+    } else {
+      return false;
+    }
+  }
+};
+
+typedef ShDefaultTransformer<ReciprocateSqrtBase> ReciprocateSqrt;
+void ShTransformer::reciprocate_sqrt()
+{
+  ReciprocateSqrt rs;
+  m_changed |= rs.transform(m_program);
+}
+
+struct ExpandDivBase : public ShTransformerParent 
+{
+  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node)
+  { 
+    if (SH_OP_DIV == I->op) {
+      ShBasicBlock::ShStmtList new_stmts;
+      
+      ShVariable tmp1(allocate_temp(I->src[1]));
+
+      new_stmts.push_back(ShStatement(tmp1, SH_OP_RCP, I->src[1]));
+      new_stmts.push_back(ShStatement(I->dest, I->src[0], SH_OP_MUL, tmp1));
+
+      I = node->block->erase(I);
+      node->block->splice(I, new_stmts);
+      m_changed = true;
+      return true;
+    } else {
+      return false;
+    }
+  }
+};
+
+typedef ShDefaultTransformer<ExpandDivBase> ExpandDiv;
+void ShTransformer::expand_div()
+{
+  ExpandDiv ed;
+  m_changed |= ed.transform(m_program);
+}
+
+
 struct InverseHyperbolicExpanderBase: public ShTransformerParent 
 {
   bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, const ShCtrlGraphNodePtr& node)
