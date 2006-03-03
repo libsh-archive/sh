@@ -61,10 +61,34 @@ int ShChannel<T>::count() const
   return m_node->count();
 }
 
-template <typename T>
-void ShChannel<T>::count(int c)
+template<typename T>
+void ShChannel<T>::count(int count)
 {
-  m_node->count(c);
+  m_node->count(count);
+}
+
+template<typename T>
+void ShChannel<T>::stride(int stride)
+{
+  m_node->stride(stride);
+}
+
+template<typename T>
+void ShChannel<T>::offset(int offset)
+{
+  m_node->offset(offset);
+}
+
+template<typename T>
+int ShChannel<T>::stride()
+{
+  return m_node->stride();
+}
+
+template<typename T>
+int ShChannel<T>::offset()
+{
+  return m_node->offset();
 }
 
 template<typename T>

@@ -23,6 +23,7 @@
 #include "ShDllExport.hpp"
 #include "ShVariableNode.hpp"
 #include "ShMemory.hpp"
+#include "ShAttrib.hpp"
 
 namespace SH {
 
@@ -39,11 +40,21 @@ public:
   ShMemoryPtr memory();
   
   int count() const;
-  void count(int c);
+  void count(int count);
+  
+  int stride() const;
+  void stride(int stride);
+  const ShAttrib1i& stride_var() const;
+  
+  int offset() const;
+  void offset(int offset);
+  const ShAttrib1i& offset_var() const;
   
 private:
   ShMemoryPtr m_memory;
   int m_count;
+  ShAttrib1i m_stride;
+  ShAttrib1i m_offset;
 
   // NOT IMPLEMENTED
   ShChannelNode(const ShChannelNode& other);

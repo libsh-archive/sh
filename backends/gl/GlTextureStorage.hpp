@@ -24,6 +24,7 @@
 #include "ShMemory.hpp"
 #include "GlBackend.hpp"
 #include "GlTextureName.hpp"
+#include <sh.hpp>
 
 namespace shgl {
 
@@ -33,7 +34,7 @@ public:
                    GLenum format, GLint internalFormat,
                    SH::ShValueType valueType, 
                    int width, int height, int depth, int tuplesize,
-                   int count, GlTextureNamePtr name, 
+                   GlTextureNamePtr name, 
                    GLint mipmap_level, bool internalRGB);
   
   ~GlTextureStorage();
@@ -52,7 +53,6 @@ public:
   int height() const { return m_height; }
   int depth() const { return m_depth; }
   int tuplesize() const { return m_tuplesize; }
-  int count() const { return (m_count != -1) ? m_count : m_width * m_height * m_depth; }
   GLint mipmap_level() const { return m_mipmap_level; }
   
   bool write() const { return m_write; }
@@ -65,7 +65,7 @@ private:
   GLenum m_format;
   GLint m_internalFormat;
 
-  int m_width, m_height, m_depth, m_tuplesize, m_count;
+  int m_width, m_height, m_depth, m_tuplesize;
   
   unsigned int m_params;
   
@@ -81,6 +81,7 @@ private:
 };
 
 typedef SH::ShPointer<GlTextureStorage> GlTextureStoragePtr;
+typedef SH::ShPointer<const GlTextureStorage> GlTextureStorageCPtr;
 
 class HostGlTextureTransfer : public SH::ShTransfer {
 public:
@@ -96,6 +97,18 @@ public:
   bool transfer(const SH::ShStorage* from, SH::ShStorage* to);
   int cost(const SH::ShStorage* from, const SH::ShStorage* to);
   static GlTextureHostTransfer* instance;
+};
+
+class GlTextureGlTextureTransfer : public SH::ShTransfer {
+public:
+  GlTextureGlTextureTransfer();
+  bool transfer(const SH::ShStorage* from, SH::ShStorage* to);
+  int cost(const SH::ShStorage* from, const SH::ShStorage* to);
+  static GlTextureGlTextureTransfer* instance;
+
+private:
+  SH::ShArray2D<SH::ShAttrib4f> source_texture;
+  SH::ShProgramSetPtr render_to_tex_prog;
 };
 
 }

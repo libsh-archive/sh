@@ -29,8 +29,7 @@ GLBACKEND_SOURCES = GlBackend.cpp GlBackend.hpp \
 GLTEXTURE_SOURCES = GlTextureStorage.hpp GlTextureStorage.cpp \
 		     GlTextures.hpp GlTextures.cpp 
 if INCLUDE_PBUFFERSTREAMS
-PBUFFERSTREAM_SOURCES = PBufferStreams.hpp PBufferStreams.cpp \
-			PBufferContext.hpp PBufferContext.cpp \
+PBUFFERSTREAM_SOURCES =  PBufferContext.hpp PBufferContext.cpp \
 			GLXPBufferContext.hpp GLXPBufferContext.cpp \
 			Utils.hpp Utils.cpp \
 			FBOStreams.hpp FBOStreams.cpp \

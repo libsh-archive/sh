@@ -30,7 +30,6 @@ FBOCache::FBOCache()
     m_fbo[i].m_lru_prev = &m_fbo[(i+NUM_FBOS-1) % NUM_FBOS];
     SH_GL_CHECK_ERROR(glGenFramebuffersEXT(1, &m_fbo[i].id));
   }
-  m_current = 0;
   m_lru = &m_fbo[0];
 }
 
@@ -44,96 +43,108 @@ FBOCache *FBOCache::instance()
 
 void FBOCache::bindFramebuffer()
 {
-  SH_DEBUG_ASSERT(!m_current);
-  SH_GL_CHECK_ERROR(glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &m_previous));
+  if (m_fbo_stack.empty()) {
+    SH_GL_CHECK_ERROR(glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &m_original_fbo));
+  }
+  
+  m_fbo_stack.push(0);
 }
 
 void FBOCache::unbindFramebuffer()
 {
-  SH_GL_CHECK_ERROR(glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_previous));
-  m_current = 0;
+  m_fbo_stack.pop();
+  if (m_fbo_stack.empty()) {
+    SH_GL_CHECK_ERROR(glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_original_fbo))
+  }
+  else {
+    SH_GL_CHECK_ERROR(glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 
+                                           m_fbo_stack.top()->id));
+  }
 }
 
 void FBOCache::bindTexture(GlTextureStoragePtr storage, 
                            GLenum attachment, GLint zoffset)
 {
+  SH_DEBUG_ASSERT(!m_fbo_stack.empty());
   // If we aren't already working with an FBO, either find one with the
   // storage in the right place, or make a new one
-  if (!m_current) {
+  if (!m_fbo_stack.top()) {
     // First look for FBO with the storage in the right place
     for (int i = 0; i < NUM_FBOS; ++i) {
       if (m_fbo[i].m_attachment[attachment - GL_COLOR_ATTACHMENT0_EXT] == storage) {
-        m_current = &m_fbo[i];
+        m_fbo_stack.top() = &m_fbo[i];
         break;
       }
     }
     // no such FBO exists, trash the LRU one
-    if (!m_current) {
-      m_current = m_lru;
+    if (!m_fbo_stack.top()) {
+      m_fbo_stack.top() = m_lru;
       for (int i = 0; i < 16; ++i)
-        m_current->m_attachment[i] = 0;
+        m_fbo_stack.top()->m_attachment[i] = 0;
     }
     
     // At this point, if we needed to restart with a different FBO, we
     // wouldn't have to copy any other attachments
     for (int i = 0; i < 16; ++i)
-      m_current->m_used[i] = false;
+      m_fbo_stack.top()->m_used[i] = false;
     
     updateLRU();    
       
-    SH_GL_CHECK_ERROR(glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_current->id));
+    SH_GL_CHECK_ERROR(glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 
+                                           m_fbo_stack.top()->id));
   }
   // If we are already working with an FBO, make sure it has the storage in
   // the right place, or make a new FBO otherwise
   else {
-    if (m_current->m_attachment[attachment - GL_COLOR_ATTACHMENT0_EXT] &&
-        m_current->m_attachment[attachment - GL_COLOR_ATTACHMENT0_EXT] != storage) {
-      FBO *previous = m_current;
-      m_current = m_lru;
-      SH_GL_CHECK_ERROR(glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_current->id));
+    if (m_fbo_stack.top()->m_attachment[attachment - GL_COLOR_ATTACHMENT0_EXT] &&
+        m_fbo_stack.top()->m_attachment[attachment - GL_COLOR_ATTACHMENT0_EXT] != storage) {
+      FBO *previous = m_fbo_stack.top();
+      m_fbo_stack.top() = m_lru;
+      SH_GL_CHECK_ERROR(glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 
+                                             m_fbo_stack.top()->id));
 
       for (int i = 0; i < NUM_FBOS; ++i) {
         if (previous->m_used[i]) {
           fbTexture(previous->m_attachment[i], 
                     GL_COLOR_ATTACHMENT0_EXT + i, 
                     previous->m_zoffset[i]);
-          m_current->m_used[i] = true;
+          m_fbo_stack.top()->m_used[i] = true;
         }
         else {
-          m_current->m_attachment[i] = 0;
-          m_current->m_used[i] = false;
+          m_fbo_stack.top()->m_attachment[i] = 0;
+          m_fbo_stack.top()->m_used[i] = false;
         }
       }
     }
   }
   
   fbTexture(storage, attachment, zoffset);
-  m_current->m_used[attachment - GL_COLOR_ATTACHMENT0_EXT] = true;
+  m_fbo_stack.top()->m_used[attachment - GL_COLOR_ATTACHMENT0_EXT] = true;
 }
 
 GLenum FBOCache::bindTexture(GlTextureStoragePtr storage, GLint zoffset)
 {
-  SH_DEBUG_ASSERT(!m_current);
+  SH_DEBUG_ASSERT(!m_fbo_stack.top());
   
   int attachment = 0;
-  for (int i = 0; i < NUM_FBOS && !m_current; ++i) {
+  for (int i = 0; i < NUM_FBOS && !m_fbo_stack.top(); ++i) {
     for (attachment = 0; attachment < 16; ++attachment) {
       if (m_fbo[i].m_attachment[attachment] == storage) {
-        m_current = &m_fbo[i];
+        m_fbo_stack.top() = &m_fbo[i];
         break;
       }
     }
   }
-  if (!m_current) {
-    m_current = m_lru;
+  if (!m_fbo_stack.top()) {
+    m_fbo_stack.top() = m_lru;
     for (int i = 0; i < 16; ++i)
-      m_current->m_attachment[i] = 0;
+      m_fbo_stack.top()->m_attachment[i] = 0;
     attachment = 0;
   }
   updateLRU();
-
-  SH_GL_CHECK_ERROR(glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_current->id));
-  
+  SH_GL_CHECK_ERROR(glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 
+                                         m_fbo_stack.top()->id));
+    
   fbTexture(storage, GL_COLOR_ATTACHMENT0_EXT + attachment, zoffset);
   return GL_COLOR_ATTACHMENT0_EXT + attachment;
 }
@@ -141,26 +152,27 @@ GLenum FBOCache::bindTexture(GlTextureStoragePtr storage, GLint zoffset)
 void FBOCache::updateLRU()
 {
   // update LRU chain
-  if (m_current == m_lru)
+  if (m_fbo_stack.top() == m_lru)
     m_lru = m_lru->m_lru_next;
   else {
-    m_current->m_lru_prev->m_lru_next = m_current->m_lru_next;
-    m_current->m_lru_next->m_lru_prev = m_current->m_lru_prev;
-    m_current->m_lru_prev = m_lru->m_lru_prev;
-    m_current->m_lru_next = m_lru;
-    m_current->m_lru_prev->m_lru_next = m_current;
-    m_current->m_lru_next->m_lru_prev = m_current;
+    FBO *current = m_fbo_stack.top();
+    current->m_lru_prev->m_lru_next = current->m_lru_next;
+    current->m_lru_next->m_lru_prev = current->m_lru_prev;
+    current->m_lru_prev = m_lru->m_lru_prev;
+    current->m_lru_next = m_lru;
+    current->m_lru_prev->m_lru_next = current;
+    current->m_lru_next->m_lru_prev = current;
   }
 }
 
 void FBOCache::fbTexture(GlTextureStoragePtr storage,
                          GLenum attachment, GLint zoffset)
 {
-  SH_DEBUG_ASSERT(m_current);
-  if (m_current->m_attachment[attachment - GL_COLOR_ATTACHMENT0_EXT] != storage) {
+  SH_DEBUG_ASSERT(m_fbo_stack.top());
+  if (m_fbo_stack.top()->m_attachment[attachment - GL_COLOR_ATTACHMENT0_EXT] != storage) {
   
-    m_current->m_attachment[attachment - GL_COLOR_ATTACHMENT0_EXT] = storage;
-    m_current->m_zoffset[attachment - GL_COLOR_ATTACHMENT0_EXT] = zoffset;
+    m_fbo_stack.top()->m_attachment[attachment - GL_COLOR_ATTACHMENT0_EXT] = storage;
+    m_fbo_stack.top()->m_zoffset[attachment - GL_COLOR_ATTACHMENT0_EXT] = zoffset;
 
     switch (storage->target()) {
     case GL_TEXTURE_1D:
@@ -179,10 +191,11 @@ void FBOCache::fbTexture(GlTextureStoragePtr storage,
     case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
     case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
     case GL_TEXTURE_RECTANGLE_ARB:
+      SH_GL_CHECK_ERROR();
       SH_GL_CHECK_ERROR(glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, 
                                                   attachment,
                                                   storage->target(), 
-                                                  storage->texName()->value(),
+                                                  storage->name(),
                                                   storage->mipmap_level()));
       break;
 

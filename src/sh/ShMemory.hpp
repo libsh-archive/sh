@@ -87,7 +87,9 @@ private:
   StorageList m_storages;
   int m_timestamp;
 
+  /// frozen memory's timestamp is updated only once it is thawed
   bool m_frozen;
+  /// timestamp at the point when the memory was frozen
   int m_frozenTimestamp;
 
   /// the list of all dependencies, for update calls

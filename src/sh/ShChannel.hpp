@@ -44,11 +44,22 @@ public:
 
   /// Return the number of elements in this channel
   int count() const;
+  /// Set the number of elements in this channel
   void count(int c);
   /// Return this channel's memory
   ShPointer<const ShMemory> memory() const;
   /// Return this channel's memory
   ShMemoryPtr memory();
+
+  /// Set the stride on the elements of this channel
+  void stride(int stride);
+  /// Set the offset on the elements of this channel
+  void offset(int offset);
+  
+  /// Fetch the stride for this stream
+  int stride();
+  /// Fetch the offset for this stream
+  int offset();
 
   /// Fetch the current element from this stream.
   /// This is only useful in stream programs

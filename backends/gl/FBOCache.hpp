@@ -34,10 +34,10 @@ public:
   void check();
 
   void bindTexture(GlTextureStoragePtr storage, 
-                   GLenum attachment, GLint zoffset = 0);
-  GLenum bindTexture(GlTextureStoragePtr storage, GLint zoffset = 0);
+                   GLenum attachment, GLint zoffset);
+  GLenum bindTexture(GlTextureStoragePtr storage, GLint zoffset);
 
-private:
+//private:
   FBOCache();
   void updateLRU();
   void fbTexture(GlTextureStoragePtr storage, GLenum attachment, GLint zoffset);
@@ -53,8 +53,10 @@ private:
   static const int NUM_FBOS = 8;
   FBO m_fbo[NUM_FBOS];
   
-  FBO *m_lru, *m_current;
-  GLint m_previous;
+  FBO *m_lru;
+  GLint m_original_fbo;
+  
+  std::stack<FBO *> m_fbo_stack;
   
   static FBOCache *m_instance;
 };

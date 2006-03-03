@@ -73,19 +73,6 @@ private:
 
 #endif
 
-// Extract the backend name from the target if there is one (including the colon)
-static string get_target_backend(const ShProgramNodeCPtr& program)
-{
-  const string& target = program->target();
-  string::size_type colon_pos = target.find(":");
-
-  if (target.npos == colon_pos) {
-    return "";
-  } else {
-    return target.substr(0, colon_pos+1); // includes the colon
-  }
-}
-
 class FBOStreamException : public ShException {
 public:
   FBOStreamException(const std::string& message)
@@ -94,116 +81,6 @@ public:
   }
 };
 
-
-class FBOStreamCache : public ShInfo {
-public:
-  FBOStreamCache(ShProgramNode* stream_program,
-                 ShProgramNode* vertex_program,
-                 int max_outputs);
-
-  ShInfo* clone() const;
-
-  void update_channels(int width, int height);
-
-  void build_sets(ShProgramNode* vertex_program);
-  
-  void freeze_inputs(bool state);
-
-  typedef std::list<ShProgramSetPtr>::iterator set_iterator;
-  typedef std::list<ShProgramSetPtr>::const_iterator set_const_iterator;
-  typedef std::list<ShProgramNodePtr>::iterator program_iterator;
-  typedef std::list<ShProgramNodePtr>::const_iterator program_const_iterator;
-
-  set_iterator sets_begin() { return m_program_sets.begin(); }
-  set_iterator sets_end() { return m_program_sets.end(); }
-  set_const_iterator sets_begin() const { return m_program_sets.begin(); }
-  set_const_iterator sets_end() const { return m_program_sets.end(); }
-
-  program_iterator programs_begin() { return m_programs.begin(); }
-  program_iterator programs_end() { return m_programs.end(); }
-  program_const_iterator programs_begin() const { return m_programs.begin(); }
-  program_const_iterator programs_end() const { return m_programs.end(); }
-  
-private:
-  ShProgramNode* m_stream_program;
-  ShProgramNode* m_vertex_program;
-  ChannelMap m_channel_map;
-  std::list<ShProgramNodePtr> m_programs;
-  std::list<ShProgramSetPtr> m_program_sets;
-  int m_max_outputs;
-
-  FBOStreamCache(const FBOStreamCache& other);
-  FBOStreamCache& operator=(const FBOStreamCache& other);
-};
-
-FBOStreamCache::FBOStreamCache(ShProgramNode* stream_program,
-                               ShProgramNode* vertex_program,
-                               int max_outputs)
-  : m_stream_program(stream_program),
-    m_vertex_program(vertex_program),
-    m_max_outputs(max_outputs)
-{
-  ShTextureDims dims(SH_TEXTURE_2D);
-
-  ChannelGatherer gatherer(m_channel_map, dims);
-  stream_program->ctrlGraph->dfs(gatherer);
-
-  split_program(stream_program, m_programs, 
-                get_target_backend(stream_program) + "fragment",
-                max_outputs);
-
-  for (std::list<ShProgramNodePtr>::iterator I = m_programs.begin();
-       I != m_programs.end(); ++I) {
-    ShProgram with_tc = ShProgram(*I) & lose<ShTexCoord2f>("streamcoord");
-    
-    TexFetcher fetcher(m_channel_map, with_tc.node()->inputs.back(),
-                       dims == SH_TEXTURE_RECT, with_tc.node());
-    with_tc.node()->ctrlGraph->dfs(fetcher);
-
-    optimize(with_tc);
-    
-    *I = with_tc.node();
-  }
-
-  build_sets(vertex_program);
-}
-
-ShInfo* FBOStreamCache::clone() const
-{
-  return new FBOStreamCache(m_stream_program, m_vertex_program, m_max_outputs);
-}
-
-void FBOStreamCache::update_channels(int width, int height)
-{
-  for (ChannelMap::iterator I = m_channel_map.begin(); I != m_channel_map.end(); ++I) {
-    ShChannelNode* channel = I->first.object();
-    ShTextureNode* texture = I->second.object();
-
-    SH_DEBUG_ASSERT(channel);
-    SH_DEBUG_ASSERT(texture);
-
-    texture->memory(channel->memory(), 0);
-    texture->setTexSize(width, height);
-    texture->count(channel->count());
-  }
-}
-
-void FBOStreamCache::freeze_inputs(bool state)
-{
-  for (ChannelMap::iterator I = m_channel_map.begin(); I != m_channel_map.end(); ++I) {
-    I->second->memory(0)->freeze(state);
-  }
-}
-
-void FBOStreamCache::build_sets(ShProgramNode* vertex_program)
-{
-  m_vertex_program = vertex_program;
-  m_program_sets.clear();
-  for (std::list<ShProgramNodePtr>::iterator I = m_programs.begin(); I != m_programs.end(); ++I) {
-    m_program_sets.push_back(new ShProgramSet(ShProgram(vertex_program),
-                                              ShProgram(*I)));
-  }
-}
 
 FBOStreams::FBOStreams(void) :
   m_shaders(NULL), m_setup_vp(false), 
@@ -249,14 +126,24 @@ struct UnflagWrite {
   }
 };
 
+static void draw_rectangle(float x, float y, float w, float h, float size)
+{
+  glTexCoord3f(x/size, y/size, 0.0);
+  glVertex3f(2.0*x/size-1.0, 2.0*y/size-1.0, 0.0);
+  glTexCoord3f((x+w)/size, y/size, 0.0);
+  glVertex3f(2.0*(x+w)/size-1.0, 2.0*y/size-1.0, 0.0);
+  glTexCoord3f((x+w)/size, (y+h)/size, 0.0);
+  glVertex3f(2.0*(x+w)/size-1.0, 2.0*(y+h)/size-1.0, 0.0);
+  glTexCoord3f(x/size, (y+h)/size, 0.0);
+  glVertex3f(2.0*x/size-1.0, 2.0*(y+h)/size-1.0, 0.0);
+}
+
 void FBOStreams::execute(const ShProgramNodeCPtr& program_const,
                          ShStream& dest, TextureStrategy *texture)
 {
   // Let's get rid of that constness... Yes, yes, I know...
   ShProgramNodePtr program = shref_const_cast<ShProgramNode>(program_const);
   
-  DECLARE_TIMER(overhead);
-
   // Make sure program has no inputs
   if (!program->inputs.empty()) {
     shError(FBOStreamException("Stream program has unbound inputs, and can hence not be executed."));
@@ -276,7 +163,6 @@ void FBOStreams::execute(const ShProgramNodeCPtr& program_const,
                    << ").");
     return;
   }
-  TIMING_RESULT(overhead);
 
   // TODO: Check that the size of each output matches the size of each dest.
 
@@ -288,19 +174,6 @@ void FBOStreams::execute(const ShProgramNodeCPtr& program_const,
     }
   }
   
-  // Pick a size for the texture that just fits the output data.
-  int tex_size = 1;
-  {
-    // The texture size needs to be as large as the area that will be
-    // read.  In the case of 2-component output, we need to read an
-    // extra element.
-    int tex_elem_count = count;
-    if (2 == count) tex_elem_count = 3;
-    
-    while (tex_size * tex_size < tex_elem_count) {
-      tex_size <<= 1;
-    }
-  }
 
   PBufferHandlePtr old_handle = 0;
 #ifdef WIN32
@@ -354,32 +227,61 @@ void FBOStreams::execute(const ShProgramNodeCPtr& program_const,
   SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS_EXT, &max_outputs));
 
   // --- Set up the fragment programs and such
-  FBOStreamCache* cache = program->get_info<FBOStreamCache>();
+  StreamCache* cache = program->get_info<StreamCache>();
   if (!cache) {
-    cache = new FBOStreamCache(program.object(), m_vp.node().object(), max_outputs);
+    // Pick a size for the texture that is as large as the largest output
+    int tex_size = 1;
+    for (ShStream::iterator I = dest.begin(); I != dest.end(); ++I) {
+      ShHostStoragePtr hs = 
+        shref_dynamic_cast<ShHostStorage>((*I)->memory()->findStorage("host"));
+      // Dirty cast, but if length is too big we'll blow up anyways
+      while (hs && tex_size * tex_size < (int)hs->length()/hs->value_size())
+        tex_size <<= 1;
+    }
+
+    cache = new StreamCache(program.object(), m_vp.node().object(), 
+                            tex_size, max_outputs);
     program->add_info(cache);
   }
   
-  cache->update_channels(tex_size, tex_size);
+  cache->update_channels();
   cache->freeze_inputs(true);
+
+  // Check if all the outputs use the same stride and offsets. If they
+  // differ we need do each output in a separate pass
+  int single_output = false;
+  ShChannelNodePtr first_output = *dest.begin();
+  int stride = first_output->stride();
+  int offset = first_output->offset();
+  for (ShStream::iterator I = dest.begin(); I != dest.end(); ++I) {
+    if (stride != (*I)->stride() || offset != (*I)->offset())
+      single_output = true;
+  }
+  if (single_output)
+    max_outputs = 1;
 
   SH_GL_CHECK_ERROR(glPushAttrib(GL_VIEWPORT_BIT));
   FBOCache::instance()->bindFramebuffer();
 
   ShStream::iterator dest_iter = dest.begin();
   // Run each fragment program
-  for (FBOStreamCache::set_iterator I = cache->sets_begin();
-       I != cache->sets_end(); ++I) {
+  for (StreamCache::set_iterator I = cache->sets_begin(single_output);
+       I != cache->sets_end(single_output); ++I) {
     std::vector<GLuint> draw_buffers;
-    for (int i = 0; i < m_max_draw_buffers && dest_iter != dest.end(); ++i,++dest_iter) {
-      // TODO: Should we cache the texture node?
+    int offset = 0, stride = 1, count = 0;
+    for (int i = 0; i < max_outputs && dest_iter != dest.end(); ++i,++dest_iter) {
+      offset = (*dest_iter)->offset();
+      stride = (*dest_iter)->stride();
+      count = (*dest_iter)->count();
+    
       ShTextureNodePtr tex;
-      ShTextureTraits traits = ShArrayTraits();
+      ShTextureTraits traits(0, ShTextureTraits::SH_FILTER_NONE, 
+                             ShTextureTraits::SH_WRAP_REPEAT);
       // TODO: are these always the right dims?
       ShTextureDims dims(SH_TEXTURE_2D);
       tex = new ShTextureNode(dims, (*dest_iter)->size(), 
-                              (*dest_iter)->valueType(),
-                              traits, tex_size, tex_size, 1, count);
+                              (*dest_iter)->valueType(), traits,
+                              cache->tex_size(), cache->tex_size(), 1, count);
       tex->memory((*dest_iter)->memory(), 0);
       texture->bindTexture(tex, GL_COLOR_ATTACHMENT0_EXT+i, true);
       draw_buffers.push_back(GL_COLOR_ATTACHMENT0_EXT+i);
@@ -405,24 +307,28 @@ void FBOStreams::execute(const ShProgramNodeCPtr& program_const,
     }
 #endif
 
-    DECLARE_TIMER(clear);
-    glClear(GL_COLOR_BUFFER_BIT);
-    TIMING_RESULT(clear);
-
-    glViewport(0, 0, tex_size, tex_size);
+    int size = cache->tex_size();
+    glViewport(0, 0, size, size);
     
     DECLARE_TIMER(render);
     
     // Generate quad geometry
     glBegin(GL_QUADS); {
-      glTexCoord2f(0.0, 0.0);
-      glVertex3f(-1, -1, 0);
-      glTexCoord2f(1.0, 0.0);
-      glVertex3f( 1, -1, 0);
-      glTexCoord2f(1.0, 1.0);
-      glVertex3f( 1,  1, 0);
-      glTexCoord2f(0.0, 1.0);
-      glVertex3f(-1,  1, 0);
+      int full_lines_start = offset / size;
+      int full_lines_end = (offset+count) / size;
+      int last_line_count = (offset+count) % size;
+      int first_line_start = offset % size;
+      
+      if (first_line_start) {
+        draw_rectangle(first_line_start, full_lines_start, 
+                       size - first_line_start, 1, size);
+        ++full_lines_start;
+      }
+      if (last_line_count) {
+        draw_rectangle(0, full_lines_end, last_line_count, 1, size);
+      }
+      draw_rectangle(0, full_lines_start, size, 
+                     full_lines_end - full_lines_start, size);
     } glEnd();
     
     TIMING_RESULT(render);

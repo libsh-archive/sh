@@ -407,6 +407,7 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
 
   HostGlTextureTransfer::instance = new HostGlTextureTransfer();
   GlTextureHostTransfer::instance = new GlTextureHostTransfer();
+  GlTextureGlTextureTransfer::instance = new GlTextureGlTextureTransfer();
 }
 
 SH::ShBackendCodePtr GlBackend::generate_code(const std::string& target,

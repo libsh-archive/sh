@@ -25,6 +25,13 @@ ShChannelNode::ShChannelNode(ShSemanticType specType, int elements, ShValueType 
   : ShVariableNode(SH_STREAM, elements, valueType),
     m_memory(0), m_count(0)
 {
+  ShContext::current()->enter(0);
+  
+  m_stride = ShAttrib1i(1);
+  m_offset = ShAttrib1i(0);
+  
+  ShContext::current()->exit();
+
   specialType(specType);
 }
 
@@ -33,6 +40,13 @@ ShChannelNode::ShChannelNode(ShSemanticType specType, int elements, ShValueType 
   : ShVariableNode(SH_STREAM, elements, valueType),
     m_memory(memory), m_count(count)
 {
+  ShContext::current()->enter(0);
+  
+  m_stride = ShAttrib1i(1);
+  m_offset = ShAttrib1i(0);
+  
+  ShContext::current()->exit();
+
   specialType(specType);
 }
 
@@ -61,9 +75,40 @@ int ShChannelNode::count() const
   return m_count;
 }
 
-void ShChannelNode::count(int c)
+void ShChannelNode::count(int count)
 {
-  m_count = c;
+  m_count = count;
+}
+
+void ShChannelNode::stride(int stride)
+{
+  m_stride = ShAttrib1i(stride);
+}
+
+void ShChannelNode::offset(int offset)
+{
+  m_offset = ShAttrib1i(offset);
+}
+
+int ShChannelNode::stride() const
+{
+  return m_stride.getValue(0);
+}
+
+int ShChannelNode::offset() const
+{
+  return m_offset.getValue(0);
+}
+
+const ShAttrib1i& ShChannelNode::stride_var() const
+{
+  return m_stride;
+}
+
+const ShAttrib1i& ShChannelNode::offset_var() const
+{
+  return m_offset;
 }
 
 }
+

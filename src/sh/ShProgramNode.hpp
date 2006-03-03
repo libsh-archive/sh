@@ -30,7 +30,6 @@
 #include "ShVariableNode.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShTextureNode.hpp"
-#include "ShChannelNode.hpp"
 #include "ShPaletteNode.hpp"
 #include "ShMeta.hpp"
 
@@ -38,6 +37,8 @@ namespace SH {
 
 class ShBackendCode;
 class ShBackend;
+class ShChannelNode;
+typedef ShPointer<ShChannelNode> ShChannelNodePtr;
 
 /** A particular Sh program.
  */

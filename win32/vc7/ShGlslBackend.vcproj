@@ -176,9 +176,6 @@
 				RelativePath="..\..\backends\gl\PBufferContext.cpp">
 			</File>
 			<File
-				RelativePath="..\..\backends\gl\PBufferStreams.cpp">
-			</File>
-			<File
 				RelativePath="..\..\backends\gl\Utils.cpp">
 			</File>
 			<File
@@ -224,9 +221,6 @@
 			</File>
 			<File
 				RelativePath="..\..\backends\gl\PBufferContext.hpp">
-			</File>
-			<File
-				RelativePath="..\..\backends\gl\PBufferStreams.hpp">
 			</File>
 			<File
 				RelativePath="..\..\backends\gl\Utils.hpp">
