@@ -25,7 +25,7 @@
 #include "ShAttrib.hpp"
 #include "ShTypeInfo.hpp"
 
-#ifdef _WIN32
+#if defined (_WIN32) || defined (__CYGWIN__)
 namespace {
 double log2(double x) { return log(x)/log(2.0); }
 }
