@@ -48,7 +48,7 @@ incinc_HEADERS   += ShPool.hpp
 
 # Backend
 libsh_la_SOURCES += ShBackend.cpp ShBackend.hpp 
-libsh_la_SOURCES += ShLinearAllocator.hpp ShLinearAllocator.cpp
+libsh_la_SOURCES += ShLinearAllocator.hpp
 
 # Optimizer and compiler internals
 libsh_la_SOURCES += ShTransformer.hpp ShBitSet.hpp

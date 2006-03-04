@@ -21,6 +21,9 @@
 #define SHLINEARALLOCATOR_HPP
 
 #include <map>
+#include <set>
+#include <algorithm>
+#include "ShDebug.hpp"
 #include "ShDllExport.hpp"
 #include "ShVariableNode.hpp"
 #include "ShBackend.hpp"
@@ -33,12 +36,12 @@ SH_DLLEXPORT ShLifeTime {
   {
   }
   
-  ShLifeTime(const ShVariableNodePtr& var, int first)
+  ShLifeTime(void *var, int first)
     : var(var), first(first), last(first)
   {
   }
   
-  SH::ShVariableNodePtr var;
+  void *var;
   int first, last;
 
   void mark(int index)
@@ -53,27 +56,95 @@ SH_DLLEXPORT ShLifeTime {
   }
 };
 
+struct LifeToken {
+  LifeToken(void *var, int index, bool end)
+    : var(var), index(index), end(end) 
+  {
+  }
+  
+  void *var;
+  int index;
+  bool end;
+
+  /**
+   * Order by index, then end.
+   * Strict weak ordering:
+   * if (a<b) -> !(b<a).
+   */
+  bool operator<(const LifeToken& other) const
+  {
+    if (index == other.index) {
+      return !end && other.end;
+    }
+    return index < other.index;
+  }
+};
+
 /** A simple, basic-block based linear register allocator.
  */
+template<typename T>
 class
-SH_DLLEXPORT ShLinearAllocator {
+SH_DLLEXPORT ShLinearAllocatorBase {
 public:
-  ShLinearAllocator(const ShBackendCodePtr& backendCode);
+  typedef ShPointer<T> TPtr;
+
+  ShLinearAllocatorBase(const ShBackendCodePtr& backendCode)
+    : m_backendCode(backendCode)
+  {
+  }
   
   // Mark that a variable is alive at a given index.
-  void mark(const ShVariableNodePtr& var, int index);
+  void mark(const TPtr& var, int index)
+  {
+    if (!var) return;
+    LifetimeMap::iterator I = m_lifetimes.find(var.object());
+
+    if (I == m_lifetimes.end()) {
+      m_lifetimes[var.object()] = ShLifeTime(var.object(), index);
+    } else {
+      I->second.mark(index);
+    }
+  }
 
   // Dump the life times to stderr
-  void debugDump();
+  void debugDump()
+  {
+#ifdef SH_DEBUG
+    for (LifetimeMap::const_iterator I = m_lifetimes.begin(); I != m_lifetimes.end(); ++I) {
+      SH_DEBUG_PRINT(I->first << " = {" << I->second.first << ", " << I->second.last << "}");
+    }
+#endif
+  }
   
   // Calls back the backend with register allocation/deallocation requests.
-  void allocate();
+  void allocate()
+  {
+    std::multiset<LifeToken> temps;
+
+    for (LifetimeMap::const_iterator I = m_lifetimes.begin(); I != m_lifetimes.end(); ++I) {
+      temps.insert(LifeToken(I->first, I->second.first, false));
+      temps.insert(LifeToken(I->first, I->second.last, true));
+    }
+
+    for (std::multiset<LifeToken>::const_iterator I = temps.begin(); I != temps.end(); ++I) {
+      if (!I->end) {
+        if (!m_backendCode->allocateRegister(TPtr(reinterpret_cast<T *>(I->var)))) {
+          // TODO: Error
+          SH_DEBUG_WARN("Error allocating a register for " << I->var);
+        }
+      } else {
+        m_backendCode->freeRegister(TPtr(reinterpret_cast<T *>(I->var)));
+      }
+    }
+  }
 
 private:
   ShBackendCodePtr m_backendCode;
-  typedef std::map<ShVariableNodePtr, ShLifeTime> LifetimeMap;
+  typedef std::map<void *, ShLifeTime> LifetimeMap;
   LifetimeMap m_lifetimes;
 };
+
+typedef ShLinearAllocatorBase<ShVariableNode> ShLinearAllocator;
 
 }
 

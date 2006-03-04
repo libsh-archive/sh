@@ -1,3 +1,12 @@
+2006-03-04  Barold  <barold@serioushack.com>
+
+	* src/sh/ShLinearAllocator.hpp: Linear Allocator can now be used
+	to uniquely identify overlapping ranges on arbitrary types (not
+	just ShVariableNodes.)
+
+	* src/sh/ShLinearAllocator.cpp: Removed and inlined into new
+	template class in the hpp.
+
 2006-02-27  Stefanus Du Toit  <sdt@serioushack.com>
 
 	* examples/glut/main.cpp: Glut example destroys its programs at
