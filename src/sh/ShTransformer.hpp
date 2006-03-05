@@ -134,6 +134,11 @@ public:
    */
   void expand_div();
 
+  void order_dest_swizzles();
+
+  // Assumes order_dest_swizzles has already run
+  void remove_writemasks();
+  
 private:
   /// NOT IMPLEMENTED
   ShTransformer(const ShTransformer& other);

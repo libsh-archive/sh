@@ -1,5 +1,9 @@
 2006-03-05  Stefanus Du Toit  <sdt@serioushack.com>
 
+	* src/sh/ShTransformer.hpp, src/sh/ShTransformer.cpp: Add
+	transformers to order swizzles on destinations and remove
+	writemasks.
+
 	* Fix Windows compilation breakage due to recent stride/offset changes.
 
 2006-03-04  Barold  <barold@serioushack.com>

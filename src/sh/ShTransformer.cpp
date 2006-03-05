@@ -651,6 +651,21 @@ ShVariableNodePtr allocate_constant(const ShVariable& dest, double constant)
   return node_ptr;
 }
 
+ShVariableNodePtr allocate_constant(unsigned int size, float* constants)
+{
+  ShVariableNode* node = new ShVariableNode(SH_CONST, size,
+                                            SH_FLOAT,
+                                            SH_ATTRIB);
+    
+  ShDataVariant<float>* variant = new ShDataVariant<float>(size,
+                                                           constants);
+  ShVariantCPtr variant_ptr = variant;
+  node->setVariant(variant_ptr);
+  
+  ShVariableNodePtr node_ptr = ShPointer<ShVariableNode>(node);
+  return node_ptr;
+}
+
 ShVariableNodePtr allocate_temp(const ShVariable& dest)
 {
   const ShVariableNodePtr& dest_node = dest.node();
@@ -928,6 +943,136 @@ void ShTransformer::expand_inverse_hyperbolic()
 {
   InverseHyperbolicExpander expander;
   m_changed |= expander.transform(m_program);
+}
+
+
+bool ordered(const ShSwizzle& s)
+{
+  int m = -1;
+
+  for (int i = 0; i < s.size(); i++) {
+    if (s[i] <= m) return false;
+    m = s[i];
+  }
+
+  return true;
+}
+
+struct DestSwizzleOrdererBase : public ShTransformerParent 
+{
+  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, const ShCtrlGraphNodePtr& node)
+  { 
+    if (I->dest.node() && !I->dest.swizzle().identity() && !ordered(I->dest.swizzle())) {
+      ShBasicBlock::ShStmtList new_stmts;
+
+      ShVariable tmp1(new ShVariableNode(SH_TEMP, I->dest.size(), I->dest.node()->valueType(), I->dest.node()->specialType()));
+
+      // First, run the original statement, but into an
+      // unmasked/swizzled temp.
+      ShStatement orig = *I;
+      orig.dest = tmp1;
+      new_stmts.push_back(orig);
+
+      // Now, compute the indices of how we need to swizzle out of tmp1
+      int* indices = new int[I->dest.size()];
+      int* new_mask = new int[I->dest.size()];
+
+      unsigned int count = 0;
+
+      // Assumes no duplicates in dest.swizzle
+      for (int i = 0; i < I->dest.node()->size(); i++) {
+        for (int j = 0; j < I->dest.size(); j++) {
+          if (I->dest.swizzle()[j] == i) {
+            new_mask[count] = i;
+            indices[j] = count;
+            count++;
+            break;
+          }
+        }
+      }
+      
+      ShVariable swizzled_temp(tmp1.node(), ShSwizzle(tmp1.node()->size(), I->dest.size(), indices), false);
+      ShVariable ordered_dest(I->dest.node(), ShSwizzle(I->dest.node()->size(), I->dest.size(), new_mask), false);
+
+      delete [] indices;
+      delete [] new_mask;
+
+      new_stmts.push_back(ShStatement(ordered_dest, SH_OP_ASN, swizzled_temp));
+      
+      I = node->block->erase(I);
+      node->block->splice(I, new_stmts);
+      m_changed = true;
+      return true;
+    } else {
+      return false;
+    }
+  }
+};
+
+typedef ShDefaultTransformer<DestSwizzleOrdererBase> DestSwizzleOrderer;
+void ShTransformer::order_dest_swizzles()
+{
+  DestSwizzleOrderer orderer;
+  m_changed |= orderer.transform(m_program);
+}
+
+struct RemoveWritemasksBase : public ShTransformerParent 
+{
+  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, const ShCtrlGraphNodePtr& node)
+  { 
+    if (I->dest.node() && I->dest.swizzle().size() < I->dest.node()->size()) {
+      ShBasicBlock::ShStmtList new_stmts;
+
+      ShVariable tmp1(new ShVariableNode(SH_TEMP, I->dest.size(), I->dest.node()->valueType(), I->dest.node()->specialType()));
+
+      // First, run the original statement, but into an
+      // unmasked temp.
+      ShStatement orig = *I;
+      orig.dest = tmp1;
+      new_stmts.push_back(orig);
+
+      float* mask_values = new float[I->dest.node()->size()];
+      int* tmp1_expand = new int[I->dest.node()->size()];
+      for (int i = 0; i < I->dest.node()->size(); i++) mask_values[i] = 0.0f;
+      for (int i = 0; i < I->dest.node()->size(); i++) tmp1_expand[i] = 0;
+      
+
+      for (int i = 0; i < I->dest.size(); i++) {
+        mask_values[I->dest.swizzle()[i]] = 1.0f;
+      }
+
+      int count = 0;
+      for (int i = 0; i < I->dest.node()->size(); i++) {
+        if (mask_values[i]) {
+          tmp1_expand[i] = count;
+          count++;
+        }
+      }
+      
+      ShVariable mask(allocate_constant(I->dest.node()->size(), mask_values));
+      ShVariable dest_nomask(I->dest.node());
+      ShVariable tmp1_rightsize(tmp1.node(), ShSwizzle(tmp1.size(), I->dest.node()->size(), tmp1_expand), false);
+
+      new_stmts.push_back(ShStatement(dest_nomask, SH_OP_COND, mask, tmp1_rightsize, dest_nomask));
+
+      delete [] mask_values;
+      delete [] tmp1_expand;
+      
+      I = node->block->erase(I);
+      node->block->splice(I, new_stmts);
+      m_changed = true;
+      return true;
+    } else {
+      return false;
+    }
+  }
+};
+
+typedef ShDefaultTransformer<RemoveWritemasksBase> RemoveWritemasks;
+void ShTransformer::remove_writemasks()
+{
+  RemoveWritemasks r;
+  m_changed |= r.transform(m_program);
 }
 
 }
