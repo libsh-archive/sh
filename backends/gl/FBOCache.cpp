@@ -191,7 +191,6 @@ void FBOCache::fbTexture(GlTextureStoragePtr storage,
     case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
     case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
     case GL_TEXTURE_RECTANGLE_ARB:
-      SH_GL_CHECK_ERROR();
       SH_GL_CHECK_ERROR(glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, 
                                                   attachment,
                                                   storage->target(), 

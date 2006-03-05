@@ -1,3 +1,7 @@
+2006-03-05  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* Fix Windows compilation breakage due to recent stride/offset changes.
+
 2006-03-04  Barold  <barold@serioushack.com>
 
 	* src/sh/ShLinearAllocator.hpp: Linear Allocator can now be used

@@ -18,17 +18,23 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include "ShChannelNode.hpp"
+#include "ShAttrib.hpp"
 
 namespace SH {
 
+struct ShChannelNodeImpl {
+  ShAttrib1i stride;
+  ShAttrib1i offset;
+};
+
 ShChannelNode::ShChannelNode(ShSemanticType specType, int elements, ShValueType valueType)
   : ShVariableNode(SH_STREAM, elements, valueType),
-    m_memory(0), m_count(0)
+    m_memory(0), m_count(0), m_impl(new ShChannelNodeImpl)
 {
   ShContext::current()->enter(0);
   
-  m_stride = ShAttrib1i(1);
-  m_offset = ShAttrib1i(0);
+  m_impl->stride = ShAttrib1i(1);
+  m_impl->offset = ShAttrib1i(0);
   
   ShContext::current()->exit();
 
@@ -38,12 +44,12 @@ ShChannelNode::ShChannelNode(ShSemanticType specType, int elements, ShValueType 
 ShChannelNode::ShChannelNode(ShSemanticType specType, int elements, ShValueType valueType,
                              const ShMemoryPtr& memory, int count)
   : ShVariableNode(SH_STREAM, elements, valueType),
-    m_memory(memory), m_count(count)
+    m_memory(memory), m_count(count), m_impl(new ShChannelNodeImpl)
 {
   ShContext::current()->enter(0);
   
-  m_stride = ShAttrib1i(1);
-  m_offset = ShAttrib1i(0);
+  m_impl->stride = ShAttrib1i(1);
+  m_impl->offset = ShAttrib1i(0);
   
   ShContext::current()->exit();
 
@@ -82,32 +88,32 @@ void ShChannelNode::count(int count)
 
 void ShChannelNode::stride(int stride)
 {
-  m_stride = ShAttrib1i(stride);
+  m_impl->stride = ShAttrib1i(stride);
 }
 
 void ShChannelNode::offset(int offset)
 {
-  m_offset = ShAttrib1i(offset);
+  m_impl->offset = ShAttrib1i(offset);
 }
 
 int ShChannelNode::stride() const
 {
-  return m_stride.getValue(0);
+  return m_impl->stride.getValue(0);
 }
 
 int ShChannelNode::offset() const
 {
-  return m_offset.getValue(0);
+  return m_impl->offset.getValue(0);
 }
 
 const ShAttrib1i& ShChannelNode::stride_var() const
 {
-  return m_stride;
+  return m_impl->stride;
 }
 
 const ShAttrib1i& ShChannelNode::offset_var() const
 {
-  return m_offset;
+  return m_impl->offset;
 }
 
 }

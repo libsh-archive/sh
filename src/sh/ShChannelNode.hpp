@@ -23,9 +23,14 @@
 #include "ShDllExport.hpp"
 #include "ShVariableNode.hpp"
 #include "ShMemory.hpp"
-#include "ShAttrib.hpp"
 
 namespace SH {
+
+struct ShChannelNodeImpl;
+template<int N, ShBindingType Binding, typename T, ShSemanticType Semantic, bool Swizzled>
+class ShAttrib;
+typedef ShAttrib<1, SH_TEMP, int, SH_ATTRIB, false> ShAttrib1i;
+
 
 class
 SH_DLLEXPORT ShChannelNode : public ShVariableNode {
@@ -53,8 +58,8 @@ public:
 private:
   ShMemoryPtr m_memory;
   int m_count;
-  ShAttrib1i m_stride;
-  ShAttrib1i m_offset;
+
+  std::auto_ptr<ShChannelNodeImpl> m_impl;
 
   // NOT IMPLEMENTED
   ShChannelNode(const ShChannelNode& other);

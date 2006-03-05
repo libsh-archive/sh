@@ -26,6 +26,7 @@
 #include "ShTextureNode.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShProgramNode.hpp"
+#include "ShProgramSet.hpp"
 
 namespace shgl {
 

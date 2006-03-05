@@ -284,10 +284,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\sh\ShLinearAllocator.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\sh\ShManipulator.cpp"
 				>
 			</File>

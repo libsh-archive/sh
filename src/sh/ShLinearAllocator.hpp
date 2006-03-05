@@ -30,8 +30,7 @@
 
 namespace SH {
 
-struct
-SH_DLLEXPORT ShLifeTime {
+struct ShLifeTime {
   ShLifeTime()
   {
   }
@@ -83,8 +82,7 @@ struct LifeToken {
 /** A simple, basic-block based linear register allocator.
  */
 template<typename T>
-class
-SH_DLLEXPORT ShLinearAllocatorBase {
+class ShLinearAllocatorBase {
 public:
   typedef ShPointer<T> TPtr;
 
