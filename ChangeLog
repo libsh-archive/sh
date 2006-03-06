@@ -1,3 +1,8 @@
+2006-03-06  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* backends/gl/GlTextureStorage.cpp: Use correct count when transfering
+	textures.
+
 2006-03-05  Stefanus Du Toit  <sdt@serioushack.com>
 
 	* src/sh/ShTransformer.hpp, src/sh/ShTransformer.cpp: Add
@@ -14,6 +19,18 @@
 
 	* src/sh/ShLinearAllocator.cpp: Removed and inlined into new
 	template class in the hpp.
+
+2006-03-02  Filip Spacek  <filip@serioushack.com>
+
+	* backends/gl/FBOCache.cpp FBOCache.hpp FBOStreams.cpp GlBackend.cpp
+	GlTextureStorage.cpp GlTextureStorage.hpp GlTextures.cpp Makefile.am
+	PBufferStreams.cpp Utils.cpp Utils.hpp src/sh/ShChannel.hpp
+	src/sh/ShChannelImpl.hpp ShChannelNode.cpp ShChannelNode.hpp
+	ShMemory.hpp ShProgramNode.cpp ShProgramNode.hpp ShTransformer.cpp
+	win32/vc7/ShArbBackend.vcproj ShGlslBackend.vcproj
+	win32/vc8/ShArbBackend.vcproj ShGlslBackend.vcproj: First version of
+	offset/stride support. No destination offset/stride yet,
+	no support for RECT textures (old nv cards), breakage likely.
 
 2006-02-27  Stefanus Du Toit  <sdt@serioushack.com>
 
@@ -34,6 +51,13 @@
 	* src/sh/ShTransformer.cpp, ShTransformer.hpp: Add DIV->RCP/MUL
 	transfomer.
 	
+2006-02-21  Filip Spacek  <filip@serioushack.com>
+
+	* backends/gl/ArbBackend.cpp FBOCache.cpp GlBackend.cpp
+	GlTextureStorage.cpp GlTextureStorage.hpp GlslBackend.cpp: Register
+	transfer functions during initialization. Enable FBOs on both arb and
+	glsl backends.
+
 2006-02-20  Stefanus Du Toit  <sdt@serioushack.com>
 
 	* src/sh/ShChannel.hpp, ShChannelImpl.hpp, ShChannelNode.cpp
