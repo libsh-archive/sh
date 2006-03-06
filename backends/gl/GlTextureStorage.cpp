@@ -81,7 +81,7 @@ bool HostGlTextureTransfer::transfer(const ShStorage* from, ShStorage* to)
   int count = 0;
   bool full_copy = false;
   if (host) {
-    count = host->length() / host->value_size();
+    count = host->length() / host->value_size() / tuplesize;
     full_copy = (count >= (width * height * depth));
 
     ShValueType host_type = host->value_type();
@@ -239,7 +239,7 @@ bool GlTextureHostTransfer::transfer(const ShStorage* from, ShStorage* to)
   int height = texture->height();
   int depth = texture->depth();
   int tuplesize = texture->tuplesize();
-  int count = host->length() / host->value_size();
+  int count = host->length() / host->value_size() / tuplesize;
   if (count > width * height * depth)
     count = width * height * depth;
 
