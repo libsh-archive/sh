@@ -56,6 +56,8 @@ public:
   /// Find a storage of a given id.
   ShPointer<ShStorage> findStorage(const std::string& id);
 
+  ShPointer<const ShStorage> findStorage(const std::string& id) const;
+
   /// Find a storage of a given id selected by an external functor.
   /// @arg functor A functor of ShStoragePtr -> bool.
   template<typename Functor>

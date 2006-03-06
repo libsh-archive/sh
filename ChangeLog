@@ -1,3 +1,9 @@
+2006-03-05  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/sh/ShTransformer.hpp, src/sh/ShTransformer.cpp: Add
+	transformers to order swizzles on destinations and remove
+	writemasks.
+
 2006-02-27  Stefanus Du Toit  <sdt@serioushack.com>
 
 	* examples/glut/main.cpp: Glut example destroys its programs at

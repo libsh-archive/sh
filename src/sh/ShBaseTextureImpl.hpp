@@ -223,6 +223,36 @@ ShMemoryPtr ShBaseTextureCube<T>::memory(ShCubeDirection face, int mipmap_level)
   return m_node->memory(face, mipmap_level);
 }
 
+template<typename T>
+ShMemoryCPtr ShBaseTexture1D<T>::memory(int mipmap_level) const
+{
+  return m_node->memory(mipmap_level);
+}
+
+template<typename T>
+ShMemoryCPtr ShBaseTexture2D<T>::memory(int mipmap_level) const
+{
+  return m_node->memory(mipmap_level);
+}
+
+template<typename T>
+ShMemoryCPtr ShBaseTextureRect<T>::memory(int mipmap_level) const
+{
+  return m_node->memory(mipmap_level);
+}
+
+template<typename T>
+ShMemoryCPtr ShBaseTexture3D<T>::memory(int mipmap_level) const
+{
+  return m_node->memory(mipmap_level);
+}
+
+template<typename T>
+ShMemoryCPtr ShBaseTextureCube<T>::memory(ShCubeDirection face, int mipmap_level) const
+{
+  return m_node->memory(face, mipmap_level);
+}
+
 // get size
 
 template<typename T>

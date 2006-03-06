@@ -55,6 +55,16 @@ ShPointer<ShStorage> ShMemory::findStorage(const std::string& id)
   return 0;
 }
 
+ShPointer<const ShStorage> ShMemory::findStorage(const std::string& id) const
+{
+  for (StorageList::const_iterator I = m_storages.begin(); I != m_storages.end(); ++I) {
+    if ((*I)->id() == id) {
+      return *I;
+    }
+  }
+  return 0;
+}
+
 ShMemory::ShMemory()
   : m_timestamp(0), m_frozen(false), m_frozenTimestamp(0)
 {
