@@ -251,7 +251,7 @@ void ShStorage::addTransfer(const std::string& from,
 
 ShStorage::ShStorage(ShMemory* memory, ShValueType value_type)
   : m_value_type(value_type), 
-    m_value_size(shTypeInfo(value_type)->datasize()),
+    m_value_size(shTypeInfo(value_type, SH_MEM)->datasize()),
     m_memory(memory), m_timestamp(-1)
 {
   m_memory->addStorage(this);
@@ -260,7 +260,7 @@ ShStorage::ShStorage(ShMemory* memory, ShValueType value_type)
 void ShStorage::value_type(ShValueType value_type)
 { 
   m_value_type = value_type;
-  m_value_size = shTypeInfo(value_type)->datasize();
+  m_value_size = shTypeInfo(value_type, SH_MEM)->datasize();
 }
 
 ShStorage::TransferMap* ShStorage::m_transfers = 0;
