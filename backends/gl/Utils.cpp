@@ -115,7 +115,7 @@ void TexFetcher::operator()(ShCtrlGraphNode* node)
       new_stmts.push_back(ShStatement(result(1), result(0,1,2), SH_OP_DOT, os2_var(0,1,2)));
       new_stmts.push_back(ShStatement(result(1), SH_OP_FLR, result(1)));
       new_stmts.push_back(ShStatement(result(0,1), SH_OP_MAD, result(0,1), os1_var(0,2), os1_var(1,3)));
-      new_stmts.push_back(ShStatement(stmt.dest, tex_var, SH_OP_TEX, result));
+      new_stmts.push_back(ShStatement(stmt.dest, tex_var, SH_OP_TEX, result(0,1)));
 
       I = node->block->erase(I);
       node->block->splice(I, new_stmts);

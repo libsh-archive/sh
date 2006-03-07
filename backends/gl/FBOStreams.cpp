@@ -235,7 +235,8 @@ void FBOStreams::execute(const ShProgramNodeCPtr& program_const,
       ShHostStoragePtr hs = 
         shref_dynamic_cast<ShHostStorage>((*I)->memory()->findStorage("host"));
       // Dirty cast, but if length is too big we'll blow up anyways
-      while (hs && tex_size * tex_size < (int)hs->length()/hs->value_size())
+      while (hs && tex_size * tex_size < 
+             (int)hs->length()/hs->value_size()/(*I)->size())
         tex_size <<= 1;
     }
 
