@@ -381,7 +381,7 @@ void init_streams(void)
 {
   // Specifiy the generic particle update program, later it will
   // be specialized for the the actual particle update.
-  particle = SH_BEGIN_PROGRAM("cpu:stream") {
+  particle = SH_BEGIN_PROGRAM("stream") {
     ShInOutPoint3f  SH_DECL(pos);
     ShInOutVector3f SH_DECL(vel);
     ShInputVector3f SH_DECL(acc);
