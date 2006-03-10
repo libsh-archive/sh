@@ -220,6 +220,9 @@ void StreamCache::update_channels()
 
     SH_DEBUG_ASSERT(channel);
     SH_DEBUG_ASSERT(texture);
+    
+    // TODO: potentially increase the texture size
+    texture->memory(channel->memory(), 0);
 
     ShAttrib4f os1(I->second.os1_var.object(), ShSwizzle(), false);
     ShAttrib4f os2(I->second.os2_var.object(), ShSwizzle(), false);
