@@ -132,6 +132,7 @@ public:
   int depth() const; // 1 unless SH_TEXTURE_3D
   int count() const; // number of elements  
   int mipmap_levels();
+  int num_memories() const;
 
   void setTexSize(int w);
   void setTexSize(int w, int h);
