@@ -1,3 +1,8 @@
+2006-03-16  Francois Marier  <francois@serioushack.com>
+
+	* backends/cc/Cc.cpp: Replaced sprintf with snprintf and tmpname
+	with mktemp.
+
 2006-03-06  Stefanus Du Toit  <sdt@serioushack.com>
 
 	* backends/gl/GlTextureStorage.cpp: Use correct count when transfering
