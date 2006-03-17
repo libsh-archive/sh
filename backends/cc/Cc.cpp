@@ -68,7 +68,7 @@ std::string encode(const ShVariable& v)
 const char* makeVarname(const char* prefix, int suffix)
 {
   static char buffer[128];
-  snprintf(buffer, 128, "%s%d", prefix, suffix); 
+  sprintf(buffer, "%s%d", prefix, suffix); 
   return buffer;
 }
 
@@ -507,8 +507,8 @@ bool CcBackendCode::load_shader_func(const std::stringstream& prologue,
 
   char cppfile[1024];
   char dllfile[1024];
-  snprintf(cppfile, 1024, "%s.cpp", prefix);
-  snprintf(dllfile, 1024, "%s.dll", prefix);
+  sprintf(cppfile, "%s.cpp", prefix);
+  sprintf(dllfile, "%s.dll", prefix);
   m_code_filename = cppfile;
   m_lib_filename  = dllfile;
 
@@ -522,7 +522,7 @@ bool CcBackendCode::load_shader_func(const std::stringstream& prologue,
 
   // run cl on cppfile and generate dllfile
   char cmdline[1024];
-  snprintf(cmdline, 1024, "cl /EHsc /LD /Fe\"%s\" \"%s\"", dllfile, cppfile);
+  sprintf(cmdline, "cl /EHsc /LD /Fe\"%s\" \"%s\"", dllfile, cppfile);
 
   SH_CC_DEBUG_PRINT("cmdline: \"" << cmdline << "\"");
 
@@ -558,15 +558,15 @@ bool CcBackendCode::load_shader_func(const std::stringstream& prologue,
   return true;
 
 #else
-  char name[] = "sh_cc_XXXXXX";
-  mktemp(name);
+  char name[32];
+  tmpnam(name);
   char ccfile[32];
   char sofile[32];
-  snprintf(ccfile, 32, "%s.cc", name);
+  sprintf(ccfile, "%s.cc", name);
   #ifdef __APPLE__
-  snprintf(sofile, 32, "%s.dylib", name);
+  sprintf(sofile, "%s.dylib", name);
   #else
-  snprintf(sofile, 32, "%s.so", name);
+  sprintf(sofile, "%s.so", name);
   #endif
   m_code_filename = ccfile;
   m_lib_filename  = sofile;
