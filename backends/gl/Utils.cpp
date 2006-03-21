@@ -147,7 +147,7 @@ void TexFetcher::operator()(ShCtrlGraphNode* node)
         I--;
       }
       else {
-        stmt = ShStatement(stmt.dest, tex_var, SH_OP_TEX, coords_var);
+        stmt = ShStatement(stmt.dest, tex_var, SH_OP_TEX, coords_var(0,1));
       }
     } else {
       // Make sure our actualy index is a temporary in the program.
