@@ -54,6 +54,20 @@ void GlTextureStorage::initTexture()
   HostGlTextureTransfer::instance->transfer(0, this);
 }
 
+std::ostream& operator<<(std::ostream& out, const GlTextureStorage& storage)
+{
+  out << "ID " << storage.name() << " tgt 0x" << std::hex
+      << storage.target() << " fmt 0x" << storage.format() 
+      << " infmt 0x" << storage.internalFormat()
+      << (storage.internalFormatRGB() ? " (RGBx) " : " ")
+      << std::dec << storage.width() << "x" << storage.height()
+      << "x" << storage.depth() << "x" << storage.tuplesize()
+      << " time " << storage.timestamp();
+  if (storage.write())
+    out << " write";
+  return out;
+}
+
 HostGlTextureTransfer::HostGlTextureTransfer()
   : ShTransfer("host", "opengl:texture")
 {

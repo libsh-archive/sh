@@ -514,12 +514,12 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target, bool w
 
       name->params(node->traits());
     }
-
-
+    
     if (write) {
       // TODO: write to different mipmap level?
 
       FBOCache::instance()->bindTexture(storage, target, 0);
+      // TODO use dirtyall when the full texture is written to
       storage->dirty();
       storage->write(true);
     }

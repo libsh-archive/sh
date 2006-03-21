@@ -66,7 +66,7 @@ class TexFetcher {
 public:
   TexFetcher(ChannelMap& channel_map,
              const SH::ShVariableNodePtr& tc_node,
-             bool indexed,
+             bool indexed, bool os_calculation,
              const SH::ShProgramNodePtr& program);
 
   void operator()(SH::ShCtrlGraphNode* node);
@@ -77,7 +77,7 @@ private:
 
   ChannelMap& channel_map;
   SH::ShVariableNodePtr tc_node;
-  bool indexed;
+  bool indexed, os_calculation;
   SH::ShProgramNodePtr program;
 };
 
@@ -100,19 +100,26 @@ public:
   typedef std::list<SH::ShProgramNodePtr>::iterator program_iterator;
   typedef std::list<SH::ShProgramNodePtr>::const_iterator program_const_iterator;
 
-  set_iterator sets_begin(bool single_output = false);
-  set_iterator sets_end(bool single_output = false);
-  set_const_iterator sets_begin(bool single_output = false) const;
-  set_const_iterator sets_end(bool single_output = false) const;
+  enum SetType {
+    NO_OFFSET_STRIDE = 0,
+    FULL,
+    SINGLE_OUTPUT,
+    NUM_SET_TYPES
+  };
+
+  set_iterator sets_begin(SetType type);
+  set_iterator sets_end(SetType type);
+  set_const_iterator sets_begin(SetType type) const;
+  set_const_iterator sets_end(SetType type) const;
 
   int tex_size() { return m_tex_size; }
-  
+
 private:
   SH::ShProgramNode* m_stream_program;
   SH::ShProgramNode* m_vertex_program;
   ChannelMap m_channel_map;
-  std::list<SH::ShProgramNodePtr> m_programs[2];
-  std::list<SH::ShProgramSetPtr> m_program_sets[2];
+  std::list<SH::ShProgramNodePtr> m_programs[NUM_SET_TYPES];
+  std::list<SH::ShProgramSetPtr> m_program_sets[NUM_SET_TYPES];
   int m_tex_size;
   int m_max_outputs;
 

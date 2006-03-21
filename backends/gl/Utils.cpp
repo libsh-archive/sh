@@ -61,11 +61,12 @@ void ChannelGatherer::operator()(const ShCtrlGraphNode* node)
 
 TexFetcher::TexFetcher(ChannelMap& channel_map,
                        const ShVariableNodePtr& tc_node,
-                       bool indexed,
+                       bool indexed, bool os_calculation,
                        const ShProgramNodePtr& program)
     : channel_map(channel_map),
       tc_node(tc_node),
       indexed(indexed),
+      os_calculation(os_calculation),
       program(program)
 {
 }
@@ -105,22 +106,49 @@ void TexFetcher::operator()(ShCtrlGraphNode* node)
 
     if (stmt.op == SH_OP_FETCH) {
       ShVariable coords_var(tc_node);
-      ShContext::current()->enter(program);
-      ShVariable result(new ShVariableNode(SH_TEMP, 3, SH_FLOAT));
-      ShContext::current()->exit();
+      if (os_calculation) {
+        ShContext::current()->enter(program);
+        ShVariable result(new ShVariableNode(SH_TEMP, 3, SH_FLOAT));
+        ShContext::current()->exit();
 
-      ShBasicBlock::ShStmtList new_stmts;
+        ShBasicBlock::ShStmtList new_stmts;
 
-      new_stmts.push_back(ShStatement(result(0,1,2), coords_var(0,1,2), SH_OP_ADD, os2_var(3,3,3)));
-      new_stmts.push_back(ShStatement(result(1), result(0,1,2), SH_OP_DOT, os2_var(0,1,2)));
-      new_stmts.push_back(ShStatement(result(1), SH_OP_FLR, result(1)));
-      new_stmts.push_back(ShStatement(result(0,1), SH_OP_MAD, result(0,1), os1_var(0,2), os1_var(1,3)));
-      new_stmts.push_back(ShStatement(stmt.dest, tex_var, SH_OP_TEX, result(0,1)));
+        //
+        // The calculation we are doing here is:
+        //
+        // x = (((y-bias)*width + (x-bias)) * stride + offset) % width + bias
+        // y = (((y-bias)*width + (x-bias)) * stride + offset) / width + bias
+        //
+        // First subtract bias from the coordinates from the interpolation
+        // (x,y,z) = (x - bias, y - bias, 0 - bias)
+        //
+        new_stmts.push_back(ShStatement(result(0,1,2), coords_var(0,1,2), SH_OP_ADD, os2_var(3,3,3)));
+        //
+        // y = x*stride + y*(width*stride) + z*(offset*-bias)
+        // (note that z = -bias)
+        //
+        new_stmts.push_back(ShStatement(result(1), result(0,1,2), SH_OP_DOT, os2_var(0,1,2)));
+        //
+        // the integer part of y is now the actual y value (0 to tex size)
+        // y = floor(y)
+        //
+        new_stmts.push_back(ShStatement(result(1), SH_OP_FLR, result(1)));
+        //
+        // (x, y) = (x*stride + offset%width + bias, y/width + bias)
+        //
+        new_stmts.push_back(ShStatement(result(0,1), SH_OP_MAD, result(0,1), os1_var(0,2), os1_var(1,3)));
+        //
+        // and finally look up the texel
+        //
+        new_stmts.push_back(ShStatement(stmt.dest, tex_var, SH_OP_TEX, result(0,1)));
 
-      I = node->block->erase(I);
-      node->block->splice(I, new_stmts);
-      I--;
-
+        I = node->block->erase(I);
+        node->block->splice(I, new_stmts);
+        I--;
+      }
+      else {
+        stmt = ShStatement(stmt.dest, tex_var, SH_OP_TEX, coords_var);
+      }
     } else {
       // Make sure our actualy index is a temporary in the program.
       ShContext::current()->enter(program);
@@ -164,17 +192,19 @@ StreamCache::StreamCache(ShProgramNode* stream_program,
   ChannelGatherer gatherer(m_channel_map, dims);
   stream_program->ctrlGraph->dfs(gatherer);
 
-  for (int i = 0; ; max_outputs = 1, ++i) {
+  for (int i = 0; i < NUM_SET_TYPES; ++i) {
     split_program(stream_program, m_programs[i],
                   get_target_backend(stream_program) + "fragment",
-                  max_outputs);
+                  i == SINGLE_OUTPUT ? 1 : max_outputs);
 
     for (std::list<ShProgramNodePtr>::iterator I = m_programs[i].begin();
          I != m_programs[i].end(); ++I) {
       ShProgram with_tc = ShProgram(*I) & lose<ShTexCoord3f>("streamcoord");
   
       TexFetcher fetcher(m_channel_map, with_tc.node()->inputs.back(),
-                         dims == SH_TEXTURE_RECT, with_tc.node());
+                         dims == SH_TEXTURE_RECT, 
+                         i != NO_OFFSET_STRIDE,
+                         with_tc.node());
       with_tc.node()->ctrlGraph->dfs(fetcher);
 
       optimize(with_tc);
@@ -187,9 +217,6 @@ StreamCache::StreamCache(ShProgramNode* stream_program,
       m_program_sets[i].push_back(new ShProgramSet(ShProgram(vertex_program),
                                                    ShProgram(*I)));
     }
-    
-    if (max_outputs == 1)
-      break;
   }
 
   for (ChannelMap::iterator I = m_channel_map.begin(); I != m_channel_map.end(); ++I) {
@@ -227,6 +254,10 @@ void StreamCache::update_channels()
     ShAttrib4f os1(I->second.os1_var.object(), ShSwizzle(), false);
     ShAttrib4f os2(I->second.os2_var.object(), ShSwizzle(), false);
 
+    //
+    // See TexFetcher::operator() for explanation of the two
+    // offset/stride parameters
+    //
     float os1_val[4];
     float one_over_w = 1/(float)m_tex_size;
     os1_val[0] = channel->stride();
@@ -235,7 +266,7 @@ void StreamCache::update_channels()
     os1_val[2] = one_over_w;
     os1_val[3] = one_over_w/2;
     os1.setValues(os1_val);
-    
+
     float os2_val[4];
     os2_val[0] = channel->stride();
     os2_val[1] = m_tex_size*channel->stride();
@@ -252,36 +283,28 @@ void StreamCache::freeze_inputs(bool state)
   }
 }
 
-StreamCache::set_iterator StreamCache::sets_begin(bool single_output)
+StreamCache::set_iterator StreamCache::sets_begin(SetType type)
 {
-  if (single_output && m_max_outputs != 1)
-    return m_program_sets[1].begin();
-  else
-    return m_program_sets[0].begin();
+  SH_DEBUG_ASSERT(type >= NO_OFFSET_STRIDE && type <= SINGLE_OUTPUT);
+  return m_program_sets[type].begin();
 }
 
-StreamCache::set_iterator StreamCache::sets_end(bool single_output)
+StreamCache::set_iterator StreamCache::sets_end(SetType type)
 {
-  if (single_output && m_max_outputs != 1)
-    return m_program_sets[1].end();
-  else
-    return m_program_sets[0].end();
+  SH_DEBUG_ASSERT(type >= NO_OFFSET_STRIDE && type <= SINGLE_OUTPUT);
+  return m_program_sets[type].end();
 }
 
-StreamCache::set_const_iterator StreamCache::sets_begin(bool single_output) const
+StreamCache::set_const_iterator StreamCache::sets_begin(SetType type) const
 {
-  if (single_output && m_max_outputs != 1)
-    return m_program_sets[1].begin();
-  else
-    return m_program_sets[0].begin();
+  SH_DEBUG_ASSERT(type >= NO_OFFSET_STRIDE && type <= SINGLE_OUTPUT);
+  return m_program_sets[type].begin();
 }
 
-StreamCache::set_const_iterator StreamCache::sets_end(bool single_output) const
+StreamCache::set_const_iterator StreamCache::sets_end(SetType type) const
 {
-  if (single_output && m_max_outputs != 1)
-    return m_program_sets[1].end();
-  else
-    return m_program_sets[0].end();
+  SH_DEBUG_ASSERT(type >= NO_OFFSET_STRIDE && type <= SINGLE_OUTPUT);
+  return m_program_sets[type].end();
 }
 
 void split_program(ShProgramNode* program,

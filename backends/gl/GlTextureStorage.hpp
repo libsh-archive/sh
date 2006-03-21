@@ -80,8 +80,11 @@ private:
   GLint m_mipmap_level;
 };
 
+
 typedef SH::ShPointer<GlTextureStorage> GlTextureStoragePtr;
 typedef SH::ShPointer<const GlTextureStorage> GlTextureStorageCPtr;
+
+std::ostream& operator<<(std::ostream &out, const GlTextureStorage& storage);
 
 class HostGlTextureTransfer : public SH::ShTransfer {
 public:

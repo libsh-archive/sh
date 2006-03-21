@@ -126,6 +126,16 @@ struct UnflagWrite {
   }
 };
 
+struct PrintStorages {
+  bool operator()(const ShStoragePtr& storage) const
+  {
+    GlTextureStoragePtr t = shref_dynamic_cast<GlTextureStorage>(storage);
+    if (!t) return false;
+    std::cerr << *t << std::endl;
+    return false;
+  }
+};
+
 static void draw_rectangle(float x, float y, float w, float h, float size)
 {
   glTexCoord3f(x/size, y/size, 0.0);
@@ -248,26 +258,55 @@ void FBOStreams::execute(const ShProgramNodeCPtr& program_const,
   cache->update_channels();
   cache->freeze_inputs(true);
 
+  // If none of the inputs use strides/offsets, use a quicker 
+  // simpler version of the stream program
+  StreamCache::SetType program_type = StreamCache::NO_OFFSET_STRIDE;
+  for (ShProgramNode::ChannelList::const_iterator I = program->begin_channels();
+       I != program->end_channels(); ++I) {
+    if ((*I)->stride() != 1 || (*I)->offset() != 0) {
+      program_type = StreamCache::FULL;
+      break;
+    }
+  }  
+
   // Check if all the outputs use the same stride and offsets. If they
   // differ we need do each output in a separate pass
-  int single_output = false;
-  ShChannelNodePtr first_output = *dest.begin();
-  int stride = first_output->stride();
-  int offset = first_output->offset();
   for (ShStream::iterator I = dest.begin(); I != dest.end(); ++I) {
-    if (stride != (*I)->stride() || offset != (*I)->offset())
-      single_output = true;
+    if ((*I)->stride() != 1 || (*I)->offset() != 0) {
+      program_type = StreamCache::FULL;
+    }
+    if ((*dest.begin())->stride() != (*I)->stride() || 
+        (*dest.begin())->offset() != (*I)->offset()) {
+      program_type = StreamCache::SINGLE_OUTPUT;
+      break;
+    }
   }
-  if (single_output)
+  if (program_type == StreamCache::SINGLE_OUTPUT)
     max_outputs = 1;
+
+#ifdef SH_DEBUG_FBOS_PRINTTEX
+  int num = 0;
+  for (ShStream::iterator I = dest.begin(); I != dest.end(); ++I, ++num) {
+    std::cerr << "output " << num << " memory time " 
+              << (*I)->memory()->timestamp() << std::endl;
+    (*I)->memory()->findStorage("opengl:texture", PrintStorages());
+  }
+  num = 0;
+  for (ShProgramNode::ChannelList::const_iterator I = program->begin_channels();
+       I != program->end_channels(); ++I, ++num) {
+    std::cerr << "input " << num << " memory time "
+              << (*I)->memory()->timestamp() << std::endl;
+    (*I)->memory()->findStorage("opengl:texture", PrintStorages());
+  }  
+#endif
 
   SH_GL_CHECK_ERROR(glPushAttrib(GL_VIEWPORT_BIT));
   FBOCache::instance()->bindFramebuffer();
 
   ShStream::iterator dest_iter = dest.begin();
   // Run each fragment program
-  for (StreamCache::set_iterator I = cache->sets_begin(single_output);
-       I != cache->sets_end(single_output); ++I) {
+  for (StreamCache::set_iterator I = cache->sets_begin(program_type);
+       I != cache->sets_end(program_type); ++I) {
     std::vector<GLuint> draw_buffers;
     int offset = 0, stride = 1, count = 0;
     for (int i = 0; i < max_outputs && dest_iter != dest.end(); ++i,++dest_iter) {
@@ -293,13 +332,13 @@ void FBOStreams::execute(const ShProgramNodeCPtr& program_const,
       glDrawBuffersARB(draw_buffers.size(), &draw_buffers.front());
 
     FBOCache::instance()->check();
-
+    
     DECLARE_TIMER(binding);
     // Then, bind vertex (pass-through) and fragment program
     shBind(**I);
     TIMING_RESULT(binding);    
-    
-#ifdef SH_DEBUG_PBS_PRINTFP
+
+#ifdef SH_DEBUG_FBOS_PRINTFP
     {
       ShProgramSet::NodeList::const_iterator i = (*I)->begin();
       (*i)->code()->print(std::cerr);
@@ -328,8 +367,10 @@ void FBOStreams::execute(const ShProgramNodeCPtr& program_const,
       if (last_line_count) {
         draw_rectangle(0, full_lines_end, last_line_count, 1, size);
       }
-      draw_rectangle(0, full_lines_start, size, 
-                     full_lines_end - full_lines_start, size);
+      if (full_lines_end != full_lines_start) {
+        draw_rectangle(0, full_lines_start, size, 
+                       full_lines_end - full_lines_start, size);
+      }
     } glEnd();
     
     TIMING_RESULT(render);
