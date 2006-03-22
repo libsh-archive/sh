@@ -108,7 +108,7 @@ void TexFetcher::operator()(ShCtrlGraphNode* node)
       ShVariable coords_var(tc_node);
       if (os_calculation) {
         ShContext::current()->enter(program);
-        ShVariable result(new ShVariableNode(SH_TEMP, 3, SH_FLOAT));
+        ShVariable result(new ShVariableNode(SH_TEMP, 4, SH_FLOAT));
         ShContext::current()->exit();
 
         ShBasicBlock::ShStmtList new_stmts;
@@ -116,30 +116,23 @@ void TexFetcher::operator()(ShCtrlGraphNode* node)
         //
         // The calculation we are doing here is:
         //
-        // x = (((y-bias)*width + (x-bias)) * stride + offset) % width + bias
-        // y = (((y-bias)*width + (x-bias)) * stride + offset) / width + bias
+        // (x, y) = (x - bias, y - bias)
+        // i = y*width + x - dest_offset
+        // i = i*stride + offset
+        // x = frac(i + bias)
+        // y = i/width + (0.5 - x)*2*bias
         //
-        // First subtract bias from the coordinates from the interpolation
-        // (x,y,z) = (x - bias, y - bias, 0 - bias)
-        //
-        new_stmts.push_back(ShStatement(result(0,1,2), coords_var(0,1,2), SH_OP_ADD, os2_var(3,3,3)));
-        //
-        // y = x*stride + y*(width*stride) + z*(offset*-bias)
-        // (note that z = -bias)
-        //
-        new_stmts.push_back(ShStatement(result(1), result(0,1,2), SH_OP_DOT, os2_var(0,1,2)));
-        //
-        // the integer part of y is now the actual y value (0 to tex size)
-        // y = floor(y)
-        //
-        new_stmts.push_back(ShStatement(result(1), SH_OP_FLR, result(1)));
-        //
-        // (x, y) = (x*stride + offset%width + bias, y/width + bias)
-        //
-        new_stmts.push_back(ShStatement(result(0,1), SH_OP_MAD, result(0,1), os1_var(0,2), os1_var(1,3)));
-        //
-        // and finally look up the texel
-        //
+        // (x, y, z, w) = (x-b, y-b, -b, 1-b)
+        new_stmts.push_back(ShStatement(result, coords_var, SH_OP_ADD, os1_var(3,3,3,3)));
+        // z = x*s + y*wi*s + z*(-do*s+o)/-b
+        new_stmts.push_back(ShStatement(result(2), result(0,1,2), SH_OP_DOT, os1_var(0,1,2)));
+        // x = z + b
+        new_stmts.push_back(ShStatement(result(0), result(2), SH_OP_ADD, -os1_var(3)));
+        // x = frac x
+        new_stmts.push_back(ShStatement(result(0), SH_OP_FRAC, result(0)));
+        // y = x*-2*b + y*0 + z/wi + w*b/(1-b)
+        new_stmts.push_back(ShStatement(result(1), result, SH_OP_DOT, os2_var));
+
         new_stmts.push_back(ShStatement(stmt.dest, tex_var, SH_OP_TEX, result(0,1)));
 
         I = node->block->erase(I);
@@ -199,7 +192,7 @@ StreamCache::StreamCache(ShProgramNode* stream_program,
 
     for (std::list<ShProgramNodePtr>::iterator I = m_programs[i].begin();
          I != m_programs[i].end(); ++I) {
-      ShProgram with_tc = ShProgram(*I) & lose<ShTexCoord3f>("streamcoord");
+      ShProgram with_tc = ShProgram(*I) & lose<ShTexCoord4f>("streamcoord");
   
       TexFetcher fetcher(m_channel_map, with_tc.node()->inputs.back(),
                          dims == SH_TEXTURE_RECT, 
@@ -261,17 +254,16 @@ void StreamCache::update_channels()
     float os1_val[4];
     float one_over_w = 1/(float)m_tex_size;
     os1_val[0] = channel->stride();
-    os1_val[1] = channel->offset()*one_over_w - 
-                 floor(channel->offset()*one_over_w) + one_over_w/2;
-    os1_val[2] = one_over_w;
-    os1_val[3] = one_over_w/2;
+    os1_val[1] = m_tex_size * channel->stride();
+    os1_val[2] = (/* -do*s + */ channel->offset()*one_over_w)/(-one_over_w/2);
+    os1_val[3] = -one_over_w/2;
     os1.setValues(os1_val);
 
     float os2_val[4];
-    os2_val[0] = channel->stride();
-    os2_val[1] = m_tex_size*channel->stride();
-    os2_val[2] = -2*channel->offset();
-    os2_val[3] = -one_over_w/2;
+    os2_val[0] = -one_over_w;
+    os2_val[1] = 0;
+    os2_val[2] = one_over_w;
+    os2_val[3] = 1/(float)(2*m_tex_size - 1);
     os2.setValues(os2_val);
   }
 }

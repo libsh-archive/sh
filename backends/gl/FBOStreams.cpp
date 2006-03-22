@@ -138,13 +138,13 @@ struct PrintStorages {
 
 static void draw_rectangle(float x, float y, float w, float h, float size)
 {
-  glTexCoord3f(x/size, y/size, 0.0);
+  glTexCoord4f(x/size, y/size, 0.0, 1.0);
   glVertex3f(2.0*x/size-1.0, 2.0*y/size-1.0, 0.0);
-  glTexCoord3f((x+w)/size, y/size, 0.0);
+  glTexCoord4f((x+w)/size, y/size, 0.0, 1.0);
   glVertex3f(2.0*(x+w)/size-1.0, 2.0*y/size-1.0, 0.0);
-  glTexCoord3f((x+w)/size, (y+h)/size, 0.0);
+  glTexCoord4f((x+w)/size, (y+h)/size, 0.0, 1.0);
   glVertex3f(2.0*(x+w)/size-1.0, 2.0*(y+h)/size-1.0, 0.0);
-  glTexCoord3f(x/size, (y+h)/size, 0.0);
+  glTexCoord4f(x/size, (y+h)/size, 0.0, 1.0);
   glVertex3f(2.0*x/size-1.0, 2.0*(y+h)/size-1.0, 0.0);
 }
 
