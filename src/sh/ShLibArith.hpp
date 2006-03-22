@@ -178,18 +178,34 @@ mad(const ShGeneric<N, T1>& m1, const ShGeneric<N, T2>& m2,
     const ShGeneric<N, T3>& a);
 template<int N, typename T1, typename T2, typename T3>
 ShGeneric<N, CT1T2T3>
+mad(const ShGeneric<N, T1>& m1, const ShGeneric<N, T2>& m2, 
+    const ShGeneric<1, T3>& a);
+template<int N, typename T1, typename T2, typename T3>
+ShGeneric<N, CT1T2T3>
 mad(const ShGeneric<N, T1>& m1, const ShGeneric<1, T2>& m2, 
     const ShGeneric<N, T3>& a);
 template<int N, typename T1, typename T2, typename T3>
 ShGeneric<N, CT1T2T3>
+mad(const ShGeneric<N, T1>& m1, const ShGeneric<1, T2>& m2, 
+    const ShGeneric<1, T3>& a);
+template<int N, typename T1, typename T2, typename T3>
+ShGeneric<N, CT1T2T3>
 mad(const ShGeneric<1, T1>& m1, const ShGeneric<N, T2>& m2, 
+    const ShGeneric<N, T3>& a);
+template<int N, typename T1, typename T2, typename T3>
+ShGeneric<N, CT1T2T3>
+mad(const ShGeneric<1, T1>& m1, const ShGeneric<N, T2>& m2, 
+    const ShGeneric<1, T3>& a);
+template<int N, typename T1, typename T2, typename T3>
+ShGeneric<N, CT1T2T3>
+mad(const ShGeneric<1, T1>& m1, const ShGeneric<1, T2>& m2, 
     const ShGeneric<N, T3>& a);
 template<typename T1, typename T2, typename T3>
 ShGeneric<1, CT1T2T3>
 mad(const ShGeneric<1, T1>& m1, const ShGeneric<1, T2>& m2, 
     const ShGeneric<1, T3>& a);
 
-template<int N, typename T1, typename T2> 
+template<int N, typename T1, typename T2>
 ShGeneric<N, CT1T2> 
 mad(const CT1T2& m1, const ShGeneric<N, T1>& m2, const ShGeneric<N, T2>& a);
 template<int N, typename T1, typename T2> 

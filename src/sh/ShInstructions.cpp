@@ -251,10 +251,52 @@ SHINST_UNARY_OP(LOG);
 SHINST_UNARY_OP(LOG2);
 SHINST_UNARY_OP(LOG10);
   
-SHINST_TERNARY_OP(MAD,
-    (dest.size() == c.size() &&
-    (dest.size() == a.size() || (dest.size() == b.size() && a.size() == 1)) &&
-    (dest.size() == b.size() || (dest.size() == a.size() && b.size() == 1))));
+SHINST_TERNARY_OP(MAD,\
+(\
+  (dest.size() == c.size() &&\
+    (dest.size() == a.size() ||\
+      (dest.size() == b.size() && a.size() == 1\
+      )\
+    ) &&\
+    (dest.size() == b.size() ||\
+      (dest.size() == a.size() && b.size() == 1\
+      )\
+    ) \
+  ) ||\
+  (dest.size() == a.size() &&\
+    (dest.size() == c.size() ||\
+      (dest.size() == b.size() && c.size() == 1\
+      )\
+    ) &&\
+    (dest.size() == b.size() ||\
+      (dest.size() == c.size() && b.size() == 1\
+      )\
+    )\
+  ) ||\
+  (dest.size() == b.size() &&\
+    (dest.size() == c.size() ||\
+      (dest.size() == a.size() && c.size() == 1\
+      )\
+    ) &&\
+    (dest.size() == a.size() ||\
+      (dest.size() == c.size() && a.size() == 1\
+      )\
+    )\
+  ) ||\
+  (dest.size() == a.size() &&\
+    (b.size() == 1 && c.size() == 1\
+    )\
+  ) ||\
+  (dest.size() == b.size() &&\
+    (a.size() == 1 && c.size() == 1\
+    )\
+  ) ||\
+  (dest.size() == c.size() &&\
+    (a.size() == 1 && b.size() == 1\
+    )\
+  ) \
+)\
+);
 
 SHINST_BINARY_OP(MAX, false, false);
 SHINST_BINARY_OP(MIN, false, false);

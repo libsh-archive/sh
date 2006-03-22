@@ -248,7 +248,7 @@ smoothstep(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b, const ShGeneric<N
   ShGeneric<N, T> t = (x - a) / (b - a);
   // TODO fix this for other types
   t = clamp(t, 0.0f, 1.0f); 
-  return t * t * mad(-2.0f, t, ShConstAttrib1f(3.0f));
+  return t * t * mad(ShConstAttrib1f(-2.0f), t, ShConstAttrib1f(3.0f));
 }
 
 template <int N, typename T>

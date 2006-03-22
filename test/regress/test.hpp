@@ -207,6 +207,37 @@ public:
     return output_result(program.name(), inputs, _out, _res, res.size(), epsilon);
   }
 
+  /// Run stream test on current backend (4 input parameters)
+  template <class INPUT1, class INPUT2, class INPUT3, class INPUT4, class OUTPUT>
+  int run(SH::ShProgram& program, const INPUT1& in1, const INPUT2& in2,
+           const INPUT3& in3, const INPUT4& in4, const OUTPUT res, const double epsilon)
+  {
+    if (on_host()) return 0; // skip this test
+
+    typedef typename OUTPUT::mem_type OT;
+  
+    OT* _out = new OT[res.size()];
+    mem_from_host(_out, res);
+    // Arbitrarily change output values
+    for (int i = 0; i < res.size(); i++) _out[i] += 10;
+
+    OT* _res = new OT[res.size()];
+    mem_from_host(_res, res);
+  
+    SH::ShHostMemoryPtr mem_out = new SH::ShHostMemory(res.size()*sizeof(OT), _out, OUTPUT::value_type);
+    SH::ShChannel<typename OUTPUT::TempType> chan_out(mem_out, 1);
+
+    std::vector<std::string> inputs(4);
+    SH::ShProgram program1 = bind_input(program, in1, inputs[0]);
+    SH::ShProgram program2 = bind_input(program1, in2, inputs[1]);
+    SH::ShProgram program3 = bind_input(program2, in3, inputs[2]);
+    SH::ShProgram program4 = bind_input(program3, in4, inputs[3]);
+    chan_out = program4;
+    mem_out->hostStorage()->sync();
+
+    return output_result(program.name(), inputs, _out, _res, res.size(), epsilon);
+  }
+
   /// Check results from running ops on the host
   template <class OUTPUT, class EXPECTED>
   int check(std::string name, const OUTPUT &out, const EXPECTED &res, const double epsilon)
