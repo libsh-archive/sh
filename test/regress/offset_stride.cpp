@@ -27,6 +27,9 @@ void reset_memories(ShHostMemoryPtr mem[], int n)
 
 int main(int argc, char* argv[])
 {
+  int errors = 0;
+  int total_tests = 3;
+
   Test test(argc, argv);
 
   ShProgram prg = SH_BEGIN_PROGRAM("stream") {
@@ -58,9 +61,9 @@ int main(int argc, char* argv[])
   b.offset(3);
   c = prg;
   mem[2]->hostStorage()->sync();
-  test.output_result<float*>("one offset", inputs, 
+  if (test.output_result<float*>("one offset", inputs, 
                      reinterpret_cast<float*>(mem[2]->hostStorage()->data()),
-                     expected, 16, 0.001);}
+                     expected, 16, 0.001)) errors++;}
                      
   {float expected[] = {3,7,11,15, 4,5,6,7, 8,9,10,11, 12,13,14,15};
   reset_memories(mem, 3);
@@ -68,9 +71,9 @@ int main(int argc, char* argv[])
   b.stride(3);
   c = prg;
   mem[2]->hostStorage()->sync();
-  test.output_result<float*>("one stride offset", inputs, 
+  if (test.output_result<float*>("one stride offset", inputs, 
                      reinterpret_cast<float*>(mem[2]->hostStorage()->data()),
-                     expected, 16, 0.001);}
+                     expected, 16, 0.001)) errors++;}
   
   {float expected[] = {11,16,21,26, 4,5,6,7, 8,9,10,11, 12,13,14,15};
   reset_memories(mem, 3);
@@ -80,8 +83,13 @@ int main(int argc, char* argv[])
   b.stride(2);
   c = prg;
   mem[2]->hostStorage()->sync();
-  test.output_result<float*>("two stride offset", inputs, 
+  if (test.output_result<float*>("two stride offset", inputs, 
                      reinterpret_cast<float*>(mem[2]->hostStorage()->data()),
-                     expected, 16, 0.001);}
-                     
+                     expected, 16, 0.001)) errors++;}
+
+  if (errors !=0) {
+    std::cout << "Total Errors: " << errors << "/" << total_tests << std::endl;
+    return 1;
+  }
+  return 0;
 } 
