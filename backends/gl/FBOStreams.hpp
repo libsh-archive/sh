@@ -22,6 +22,7 @@
 
 #include "ShProgram.hpp"
 #include "GlBackend.hpp"
+#include "Utils.hpp"
 
 namespace shgl {
 
@@ -46,6 +47,7 @@ private:
     NONE
   };
   DrawBuffersExt m_draw_buffers_ext;
+  FloatExtension m_float_extension;
   int m_max_draw_buffers;
   
   GLuint m_framebuffer;

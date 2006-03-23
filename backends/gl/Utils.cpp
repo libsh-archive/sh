@@ -45,8 +45,7 @@ void ChannelGatherer::operator()(const ShCtrlGraphNode* node)
     ShChannelNodePtr channel = shref_dynamic_cast<ShChannelNode>(stmt.src[0].node());
 
     ShTextureNodePtr tex;
-    ShTextureTraits traits(0, ShTextureTraits::SH_FILTER_NONE, 
-                           ShTextureTraits::SH_WRAP_REPEAT);
+    ShTextureTraits traits = ShArrayTraits();
 
     tex = new ShTextureNode(dims, channel->size(), channel->valueType(),
                             traits, 1, 1, 1, 0);
@@ -61,12 +60,13 @@ void ChannelGatherer::operator()(const ShCtrlGraphNode* node)
 
 TexFetcher::TexFetcher(ChannelMap& channel_map,
                        const ShVariableNodePtr& tc_node,
-                       bool indexed, bool os_calculation,
+                       bool indexed, bool os_calculation, int tex_size,
                        const ShProgramNodePtr& program)
     : channel_map(channel_map),
       tc_node(tc_node),
       indexed(indexed),
       os_calculation(os_calculation),
+      tex_size(tex_size),
       program(program)
 {
 }
@@ -123,7 +123,12 @@ void TexFetcher::operator()(ShCtrlGraphNode* node)
         // y = i/width + (0.5 - x)*2*bias
         //
         // (x, y, z, w) = (x-b, y-b, -b, 1-b)
-        new_stmts.push_back(ShStatement(result, coords_var, SH_OP_ADD, os1_var(3,3,3,3)));
+        if (indexed) {
+          new_stmts.push_back(ShStatement(result, coords_var, SH_OP_ADD, ShAttrib4f(-.5,-.5,-.5,-.5)));
+        }
+        else {
+          new_stmts.push_back(ShStatement(result, coords_var, SH_OP_ADD, os1_var(3,3,3,3)));
+        }
         // z = x*s + y*wi*s + z*(-do*s+o)/-b
         new_stmts.push_back(ShStatement(result(2), result(0,1,2), SH_OP_DOT, os1_var(0,1,2)));
         // x = z + b
@@ -133,14 +138,26 @@ void TexFetcher::operator()(ShCtrlGraphNode* node)
         // y = x*-2*b + y*0 + z/wi + w*b/(1-b)
         new_stmts.push_back(ShStatement(result(1), result, SH_OP_DOT, os2_var));
 
-        new_stmts.push_back(ShStatement(stmt.dest, tex_var, SH_OP_TEX, result(0,1)));
+        if (indexed) {
+          // TODO: make this a uniform
+          new_stmts.push_back(ShStatement(result(0,1), result(0,1), SH_OP_MUL, ShAttrib2f(tex_size, tex_size)));
+          new_stmts.push_back(ShStatement(stmt.dest, tex_var, SH_OP_TEXI, result(0,1)));
+        }
+        else {
+          new_stmts.push_back(ShStatement(stmt.dest, tex_var, SH_OP_TEX, result(0,1)));
+        }
 
         I = node->block->erase(I);
         node->block->splice(I, new_stmts);
         I--;
       }
       else {
-        stmt = ShStatement(stmt.dest, tex_var, SH_OP_TEX, coords_var(0,1));
+        if (indexed) {
+          stmt = ShStatement(stmt.dest, tex_var, SH_OP_TEXI, coords_var(0,1));
+        }
+        else {
+          stmt = ShStatement(stmt.dest, tex_var, SH_OP_TEX, coords_var(0,1));
+        }
       }
     } else {
       // Make sure our actualy index is a temporary in the program.
@@ -174,13 +191,27 @@ string get_target_backend(const ShProgramNodeCPtr& program)
 
 StreamCache::StreamCache(ShProgramNode* stream_program,
                          ShProgramNode* vertex_program,
-                         int tex_size, int max_outputs)
+                         int tex_size, int max_outputs,
+                         FloatExtension float_extension)
   : m_stream_program(stream_program),
     m_vertex_program(vertex_program),
     m_tex_size(tex_size),
-    m_max_outputs(max_outputs)
+    m_max_outputs(max_outputs),
+    m_float_extension(float_extension)
 {
   ShTextureDims dims(SH_TEXTURE_2D);
+  
+  switch (m_float_extension) {
+  case SH_ARB_NV_FLOAT_BUFFER:
+    dims = SH_TEXTURE_RECT;
+    break;
+  case SH_ARB_ATI_PIXEL_FORMAT_FLOAT:
+    dims = SH_TEXTURE_2D;
+    break;
+  default:
+    SH_DEBUG_ASSERT(false);
+    break;
+  }
 
   ChannelGatherer gatherer(m_channel_map, dims);
   stream_program->ctrlGraph->dfs(gatherer);
@@ -197,6 +228,7 @@ StreamCache::StreamCache(ShProgramNode* stream_program,
       TexFetcher fetcher(m_channel_map, with_tc.node()->inputs.back(),
                          dims == SH_TEXTURE_RECT, 
                          i != NO_OFFSET_STRIDE,
+                         m_tex_size,
                          with_tc.node());
       with_tc.node()->ctrlGraph->dfs(fetcher);
 
@@ -253,10 +285,18 @@ void StreamCache::update_channels()
     //
     float os1_val[4];
     float one_over_w = 1/(float)m_tex_size;
-    os1_val[0] = channel->stride();
-    os1_val[1] = m_tex_size * channel->stride();
-    os1_val[2] = (/* -do*s + */ channel->offset()*one_over_w)/(-one_over_w/2);
-    os1_val[3] = -one_over_w/2;
+    if (m_float_extension == SH_ARB_NV_FLOAT_BUFFER) {
+      os1_val[0] = channel->stride() * one_over_w;
+      os1_val[1] = channel->stride();
+      os1_val[2] = (/* -do*s + */ channel->offset()*one_over_w)/-0.5;
+      os1_val[3] = -one_over_w/2;
+    }
+    else {
+      os1_val[0] = channel->stride();
+      os1_val[1] = m_tex_size * channel->stride();
+      os1_val[2] = (/* -do*s + */ channel->offset()*one_over_w)/(-one_over_w/2);
+      os1_val[3] = -one_over_w/2;
+    }
     os1.setValues(os1_val);
 
     float os2_val[4];

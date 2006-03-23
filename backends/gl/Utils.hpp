@@ -30,6 +30,12 @@
 
 namespace shgl {
 
+enum FloatExtension {
+  SH_ARB_NV_FLOAT_BUFFER,
+  SH_ARB_ATI_PIXEL_FORMAT_FLOAT,
+  SH_ARB_NO_FLOAT_EXT
+};
+
 struct ChannelData {
   ChannelData(SH::ShTextureNodePtr t, 
               SH::ShVariableNodePtr o1,
@@ -66,7 +72,7 @@ class TexFetcher {
 public:
   TexFetcher(ChannelMap& channel_map,
              const SH::ShVariableNodePtr& tc_node,
-             bool indexed, bool os_calculation,
+             bool indexed, bool os_calculation, int tex_size,
              const SH::ShProgramNodePtr& program);
 
   void operator()(SH::ShCtrlGraphNode* node);
@@ -78,6 +84,7 @@ private:
   ChannelMap& channel_map;
   SH::ShVariableNodePtr tc_node;
   bool indexed, os_calculation;
+  int tex_size;
   SH::ShProgramNodePtr program;
 };
 
@@ -85,7 +92,7 @@ class StreamCache : public SH::ShInfo {
 public:
   StreamCache(SH::ShProgramNode* stream_program,
               SH::ShProgramNode* vertex_program,
-              int tex_size, int max_outputs);
+              int tex_size, int max_outputs, FloatExtension ext);
 
   SH::ShInfo* clone() const;
 
@@ -122,6 +129,7 @@ private:
   std::list<SH::ShProgramSetPtr> m_program_sets[NUM_SET_TYPES];
   int m_tex_size;
   int m_max_outputs;
+  FloatExtension m_float_extension;
 
   StreamCache(const StreamCache& other);
   StreamCache& operator=(const StreamCache& other);

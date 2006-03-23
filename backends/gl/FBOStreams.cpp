@@ -136,15 +136,15 @@ struct PrintStorages {
   }
 };
 
-static void draw_rectangle(float x, float y, float w, float h, float size)
+static void draw_rectangle(float x, float y, float w, float h, float size, float coords)
 {
-  glTexCoord4f(x/size, y/size, 0.0, 1.0);
+  glTexCoord4f(x/coords, y/coords, 0.0, 1.0);
   glVertex3f(2.0*x/size-1.0, 2.0*y/size-1.0, 0.0);
-  glTexCoord4f((x+w)/size, y/size, 0.0, 1.0);
+  glTexCoord4f((x+w)/coords, y/coords, 0.0, 1.0);
   glVertex3f(2.0*(x+w)/size-1.0, 2.0*y/size-1.0, 0.0);
-  glTexCoord4f((x+w)/size, (y+h)/size, 0.0, 1.0);
+  glTexCoord4f((x+w)/coords, (y+h)/coords, 0.0, 1.0);
   glVertex3f(2.0*(x+w)/size-1.0, 2.0*(y+h)/size-1.0, 0.0);
-  glTexCoord4f(x/size, (y+h)/size, 0.0, 1.0);
+  glTexCoord4f(x/coords, (y+h)/coords, 0.0, 1.0);
   glVertex3f(2.0*x/size-1.0, 2.0*(y+h)/size-1.0, 0.0);
 }
 
@@ -221,6 +221,15 @@ void FBOStreams::execute(const ShProgramNodeCPtr& program_const,
         }
 #endif
       }
+      if (extstr.find("ATI_texture_float") != string::npos) {
+        m_float_extension = SH_ARB_ATI_PIXEL_FORMAT_FLOAT;
+      }
+      else if (extstr.find("NV_float_buffer") != string::npos) {
+        m_float_extension = SH_ARB_NV_FLOAT_BUFFER;
+      }
+      else {
+        m_float_extension = SH_ARB_NO_FLOAT_EXT;
+      }
     }
     SH_GL_CHECK_ERROR(glGenFramebuffersEXT(1, &m_framebuffer));
 
@@ -229,6 +238,11 @@ void FBOStreams::execute(const ShProgramNodeCPtr& program_const,
     m_vp.node()->target() = get_target_backend(program_const) + "vertex";
     shCompile(m_vp);
     m_setup_vp = true;
+  }
+  
+  if (m_float_extension == SH_ARB_NO_FLOAT_EXT) {
+    shError(FBOStreamException("Cannot execute stream program, floating point texture support not found"));
+    return;
   }
   
   TIMING_RESULT(vpsetup);
@@ -251,7 +265,7 @@ void FBOStreams::execute(const ShProgramNodeCPtr& program_const,
     }
 
     cache = new StreamCache(program.object(), m_vp.node().object(), 
-                            tex_size, max_outputs);
+                            tex_size, max_outputs, m_float_extension);
     program->add_info(cache);
   }
   
@@ -315,10 +329,14 @@ void FBOStreams::execute(const ShProgramNodeCPtr& program_const,
       count = (*dest_iter)->count();
     
       ShTextureNodePtr tex;
-      ShTextureTraits traits(0, ShTextureTraits::SH_FILTER_NONE, 
-                             ShTextureTraits::SH_WRAP_REPEAT);
-      // TODO: are these always the right dims?
-      ShTextureDims dims(SH_TEXTURE_2D);
+      ShTextureTraits traits = ShArrayTraits();
+      ShTextureDims dims;
+      if (m_float_extension == SH_ARB_NV_FLOAT_BUFFER) {
+        dims = SH_TEXTURE_RECT;
+      }
+      else {
+        dims = SH_TEXTURE_2D;
+      }
       tex = new ShTextureNode(dims, (*dest_iter)->size(), 
                               (*dest_iter)->valueType(), traits,
                               cache->tex_size(), cache->tex_size(), 1, count);
@@ -348,6 +366,7 @@ void FBOStreams::execute(const ShProgramNodeCPtr& program_const,
 #endif
 
     int size = cache->tex_size();
+    int coords = (m_float_extension == SH_ARB_NV_FLOAT_BUFFER) ? 1 : size;
     glViewport(0, 0, size, size);
     
     DECLARE_TIMER(render);
@@ -361,15 +380,15 @@ void FBOStreams::execute(const ShProgramNodeCPtr& program_const,
       
       if (first_line_start) {
         draw_rectangle(first_line_start, full_lines_start, 
-                       size - first_line_start, 1, size);
+                       size - first_line_start, 1, size, coords);
         ++full_lines_start;
       }
       if (last_line_count) {
-        draw_rectangle(0, full_lines_end, last_line_count, 1, size);
+        draw_rectangle(0, full_lines_end, last_line_count, 1, size, coords);
       }
       if (full_lines_end != full_lines_start) {
         draw_rectangle(0, full_lines_start, size, 
-                       full_lines_end - full_lines_start, size);
+                       full_lines_end - full_lines_start, size, coords);
       }
     } glEnd();
     
