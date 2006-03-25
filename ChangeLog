@@ -1,3 +1,9 @@
+2006-03-24  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslVariableMap.hpp, GlslVariable.cpp: Honour the
+	semantic index specified by the user through the
+	opengl:semantic_index metadata.
+
 2006-03-22  Kuo-Yu Tong  <k3tong@serioushack.com>
 
 	* src/sh/ShLibArith.hpp, ShLibArithImpl.hpp, ShLibClampImpl.hpp,

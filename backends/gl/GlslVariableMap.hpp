@@ -26,6 +26,7 @@
 #include "ShInternals.hpp"
 #include "GlslVariable.hpp"
 #include <map>
+#include <set>
 #include <string>
 #include <list>
 #include <string>
@@ -65,11 +66,12 @@ private:
   DeclarationList m_uniform_declarations;
   DeclarationList m_regular_declarations;
 
-  std::map<GlslVarBinding, int> m_input_bindings;
-  std::map<GlslVarBinding, int> m_output_bindings;
+  std::map<GlslVarBinding, std::set<int> > m_input_bindings;
+  std::map<GlslVarBinding, std::set<int> > m_output_bindings;
 
   void allocate_builtin(const SH::ShVariableNodePtr& node,
-                        const GlslBindingSpecs* specs, std::map<GlslVarBinding, int>& bindings,
+                        const GlslBindingSpecs* specs, 
+                        std::map<GlslVarBinding, std::set<int> >& bindings,
                         bool generic);
   void allocate_builtin_inputs();
   void allocate_builtin_outputs();

@@ -132,25 +132,74 @@ GlslVariableMap::~GlslVariableMap()
 }
 
 void GlslVariableMap::allocate_builtin(const ShVariableNodePtr& node,
-                                       const GlslBindingSpecs* specs, map<GlslVarBinding, int>& bindings,
+                                       const GlslBindingSpecs* specs, 
+                                       map<GlslVarBinding, set<int> >& bindings,
                                        bool generic)
 {
   if (m_varmap.find(node) != m_varmap.end()) return;
 
   for (const GlslBindingSpecs* s = specs; s->binding != SH_GLSL_VAR_NONE; s++) {
     if (s->semantic_type == node->specialType() || (generic && s->allow_generic)) {
-      if (bindings[s->binding] >= s->max_bindings) continue;
-
-      GlslVariable var(node);
       int index = -1;
-      if (GlslVariable::glslVarBindingInfo[s->binding].indexed) {
-	index = bindings[s->binding];
+      if (!generic) {
+        string semantic_index = node->meta("opengl:semantic_index");
+        if (!semantic_index.empty()) {
+          stringstream s;
+          s << semantic_index;
+          s >> index;
+        }
       }
-      var.builtin(s->binding, index);
-      map_insert(node, var);
 
-      bindings[s->binding]++;
-      return;
+      bool bind_variable = true;
+      if (index > -1) {
+        // The index was specified by the user
+        if (!GlslVariable::glslVarBindingInfo[s->binding].indexed) {
+          // Special case for a MULTITEXCOORD with a semantic_index
+          // since it's not handled by the array code (.indexed is false)
+          switch (s->binding) {
+          case SH_GLSL_VAR_MULTITEXCOORD0: bind_variable = (index == 0); break;
+          case SH_GLSL_VAR_MULTITEXCOORD1: bind_variable = (index == 1); break;
+          case SH_GLSL_VAR_MULTITEXCOORD2: bind_variable = (index == 2); break;
+          case SH_GLSL_VAR_MULTITEXCOORD3: bind_variable = (index == 3); break;
+          case SH_GLSL_VAR_MULTITEXCOORD4: bind_variable = (index == 4); break;
+          case SH_GLSL_VAR_MULTITEXCOORD5: bind_variable = (index == 5); break;
+          case SH_GLSL_VAR_MULTITEXCOORD6: bind_variable = (index == 6); break;
+          case SH_GLSL_VAR_MULTITEXCOORD7: bind_variable = (index == 7); break;
+          default:
+            SH_DEBUG_WARN(string("Variable '") << node->name() << "' was assigned a semantic_index of " 
+                          << index << " but it is not of an indexed type.  Ignoring user-specified index.");
+            break;
+          }
+          index = -1;
+        }
+      } else {
+        // Automatically select the index if necessary
+        if (GlslVariable::glslVarBindingInfo[s->binding].indexed) {
+          // Go through all indices and check whether they're taken
+          for (int i=0; i < s->max_bindings; ++i) {
+            if (bindings[s->binding].find(i) == bindings[s->binding].end()) {
+              index = i;
+              break;
+            }
+          }
+
+          if (-1 == index) {
+            // All indices are taken
+            bind_variable = false;
+          }
+        }
+      }
+      
+      if (bind_variable) {
+        GlslVariable var(node);
+        var.builtin(s->binding, index);
+        map_insert(node, var);
+        
+        bindings[s->binding].insert(index);
+        return;
+      } else {
+        // Continue looking for a good match
+      }
     }
   }
 }
