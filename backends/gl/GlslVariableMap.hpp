@@ -69,10 +69,12 @@ private:
   std::map<GlslVarBinding, std::set<int> > m_input_bindings;
   std::map<GlslVarBinding, std::set<int> > m_output_bindings;
 
+  enum BuiltInPass {USER_INDEX, EXACT_SEMANTIC, GENERIC };
+
   void allocate_builtin(const SH::ShVariableNodePtr& node,
                         const GlslBindingSpecs* specs, 
                         std::map<GlslVarBinding, std::set<int> >& bindings,
-                        bool generic);
+                        BuiltInPass pass_type);
   void allocate_builtin_inputs();
   void allocate_builtin_outputs();
   void allocate_generic_vertex_input(const SH::ShVariableNodePtr& node, int index);

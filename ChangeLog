@@ -1,3 +1,12 @@
+2006-03-27  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslVariableMap.cpp, GlslVariableMap.hpp: Fix
+	allocation of user-specified semantic indices by adding an extra
+	pass at the beginning.
+
+	* backends/gl/ArbCode.cpp, ArbCode.hpp: Add support for the
+	semantic_index metadata.
+
 2006-03-24  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslVariableMap.hpp, GlslVariable.cpp: Honour the
