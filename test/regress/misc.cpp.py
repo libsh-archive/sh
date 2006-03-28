@@ -24,6 +24,15 @@ def insert_into3(test):
     test.add_test(shtest.make_test([1.0, 2.0, 2.0], [[1.0, 2.0]], []))
     test.add_test(shtest.make_test([1.0, 1.0, 1.0], [[1.0,]], []))
 
+# for join()
+def insert_into5(test):
+    test.add_test(shtest.make_test([1.0, 2.0], [[1.0,], [2.0,]], []))
+    test.add_test(shtest.make_test([1.0, 2.0, 3.0], [[1.0], [2.0, 3.0]], []))
+    test.add_test(shtest.make_test([1.0, 2.0, 3.0, 4.0], [[1.0,], [2.0, 3.0, 4.0]], []))
+    test.add_test(shtest.make_test([-3.0, -2.0, -1.0], [[-3.0, -2.0], [-1.0]], []))
+    test.add_test(shtest.make_test([4.0, -3.0, 2.0, -1.0], [[4.0, -3.0], [2.0, -1.0]], []))
+    test.add_test(shtest.make_test([4.0, 3.0, 2.0, 1.0], [[4.0, 3.0, 2.0], [1.0,]], []))
+
 # Test the sort function in stream programs
 test = shtest.StreamTest('sort', 1)
 test.add_call(shtest.Call(shtest.Call.call, 'sort', 1))
@@ -43,6 +52,12 @@ test.add_call(shtest.Call(shtest.Call.call, 'fillcast<3>', 1))
 insert_into3(test)
 test.output(sys.stdout, False)
 
+# Test the join function in stream programs
+test = shtest.StreamTest('join', 2)
+test.add_call(shtest.Call(shtest.Call.call, 'join', 2))
+insert_into5(test)
+test.output(sys.stdout, False)
+
 # Test the sort function in immediate mode
 test = shtest.ImmediateTest('sort_im', 1)
 test.add_call(shtest.Call(shtest.Call.call, 'sort', 1))
@@ -59,6 +74,12 @@ test.output(sys.stdout, False)
 test = shtest.ImmediateTest('fillcast_im', 1)
 test.add_call(shtest.Call(shtest.Call.call, 'fillcast<3>', 1))
 insert_into3(test)
+test.output(sys.stdout, False)
+
+# Test the join function in immediate mode
+test = shtest.ImmediateTest('join_im', 2)
+test.add_call(shtest.Call(shtest.Call.call, 'join', 2))
+insert_into5(test)
 test.output(sys.stdout, False)
 
 test.output_footer(sys.stdout)

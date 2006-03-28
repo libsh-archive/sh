@@ -120,6 +120,11 @@ int ShTextureNode::mipmap_levels()
   return m_mipmap_levels;
 }
 
+int ShTextureNode::num_memories() const
+{
+  return m_nb_memories;
+}
+
 ShTextureDims ShTextureNode::dims() const
 {
   return m_dims;

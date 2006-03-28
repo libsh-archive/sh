@@ -15,6 +15,10 @@ def insert_into(test):
     test.add_test(frac_test((-8.0, -8.9, -8.5, -8.1)))
     test.add_test(frac_test((-0.0, -0.5, 0.0, 0.5)))
     test.add_test(frac_test((8.0, 8.9, 8.5, 8.1)))
+    test.add_test(frac_test((18.0, 18.9, -18.1)))
+    test.add_make_test((0, 0), [(1098908.975123, -12131318.123456)])
+    test.add_test(frac_test((1234567890123456789.0, )))
+    test.add_test(frac_test((-1234567890123456789.0, )))
 
 # Test frac in stream programs
 test = shtest.StreamTest('frac', 1)

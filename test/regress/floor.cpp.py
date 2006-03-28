@@ -18,6 +18,10 @@ def insert_into(test):
     test.add_test(floor_test(0.75))
     test.add_test(floor_test(0.2))
     test.add_test(floor_test(-0.2))
+    test.add_test(floor_test((-0.0, 0.0)))
+    test.add_test(floor_test((-12345.6787, 12324.4838)))
+    test.add_test(floor_test((1234567890123456789.0, )))
+    test.add_test(floor_test((-1234567890123456789.0, )))
 
 # Test floor in stream programs
 test = shtest.StreamTest('floor', 1)

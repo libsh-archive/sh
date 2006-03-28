@@ -6,7 +6,7 @@ TESTS = abs add cbrt ceil clamp comparisons cross dec_inc div dot exp \
 	floor frac length_distance lerp lighting log logical mad \
 	matrix_add matrix_div matrix_functions matrix_mul matrix_neg \
 	matrix_sub max_min misc mod mul neg poly pow prod_sum rcp rnd \
-	sign sqrt sub tex trig
+	sign smooth_clamp sqrt sub tex trig
 check_PROGRAMS = $(TESTS)
 BACKENDS = arb cc host glsl
 EXTRA_DIST = shtest.py common.py tex_squares.png
@@ -93,6 +93,8 @@ rnd_SOURCES = rnd.cpp $(common)
 EXTRA_DIST += rnd.cpp.py
 sign_SOURCES = sign.cpp $(common)
 EXTRA_DIST += sign.cpp.py
+smooth_clamp_SOURCES = smooth_clamp.cpp $(common)
+EXTRA_DIST += smooth_clamp.cpp.py
 sqrt_SOURCES = sqrt.cpp $(common)
 EXTRA_DIST += sqrt.cpp.py
 sub_SOURCES = sub.cpp $(common)

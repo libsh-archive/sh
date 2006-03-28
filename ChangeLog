@@ -1,3 +1,9 @@
+2006-03-22  Kuo-Yu Tong  <k3tong@serioushack.com>
+
+	* src/sh/ShLibArith.hpp, ShLibArithImpl.hpp, ShLibClampImpl.hpp,
+	ShInstructions.cpp: Add a few overloaded versions of mad to get smoothstep
+	to compile with 1-tuples.
+
 2006-03-05  Stefanus Du Toit  <sdt@serioushack.com>
 
 	* src/sh/ShTransformer.hpp, src/sh/ShTransformer.cpp: Add
