@@ -60,13 +60,14 @@ void ChannelGatherer::operator()(const ShCtrlGraphNode* node)
 
 TexFetcher::TexFetcher(ChannelMap& channel_map,
                        const ShVariableNodePtr& tc_node,
-                       bool indexed, bool os_calculation, int tex_size,
+                       bool indexed, bool os_calculation,
+                       const ShVariableNodePtr& tex_size_node,
                        const ShProgramNodePtr& program)
     : channel_map(channel_map),
       tc_node(tc_node),
       indexed(indexed),
       os_calculation(os_calculation),
-      tex_size(tex_size),
+      tex_size_node(tex_size_node),
       program(program)
 {
 }
@@ -116,31 +117,21 @@ void TexFetcher::operator()(ShCtrlGraphNode* node)
         //
         // The calculation we are doing here is:
         //
-        // (x, y) = (x - bias, y - bias)
-        // i = y*width + x - dest_offset
-        // i = i*stride + offset
-        // x = frac(i + bias)
+        // i = i*stride + offset + bias
+        // x = frac(i)
         // y = i/width + (0.5 - x)*2*bias
         //
-        // (x, y, z, w) = (x-b, y-b, -b, 1-b)
-        if (indexed) {
-          new_stmts.push_back(ShStatement(result, coords_var, SH_OP_ADD, ShAttrib4f(-.5,-.5,-.5,-.5)));
-        }
-        else {
-          new_stmts.push_back(ShStatement(result, coords_var, SH_OP_ADD, os1_var(3,3,3,3)));
-        }
-        // z = x*s + y*wi*s + z*(-do*s+o)/-b
-        new_stmts.push_back(ShStatement(result(2), result(0,1,2), SH_OP_DOT, os1_var(0,1,2)));
-        // x = z + b
-        new_stmts.push_back(ShStatement(result(0), result(2), SH_OP_ADD, -os1_var(3)));
-        // x = frac x
-        new_stmts.push_back(ShStatement(result(0), SH_OP_FRAC, result(0)));
-        // y = x*-2*b + y*0 + z/wi + w*b/(1-b)
+        // z = z*s + o + b
+        // w = 1
+        new_stmts.push_back(ShStatement(result(2,3), SH_OP_MAD, coords_var(2,3), os1_var(0,2), os1_var(1,3)));
+        // x = frac z
+        new_stmts.push_back(ShStatement(result(0), SH_OP_FRAC, result(2)));
+        // y = x*-2*b + y*0 + z/wi + w*b
         new_stmts.push_back(ShStatement(result(1), result, SH_OP_DOT, os2_var));
 
         if (indexed) {
-          // TODO: make this a uniform
-          new_stmts.push_back(ShStatement(result(0,1), result(0,1), SH_OP_MUL, ShAttrib2f(tex_size, tex_size)));
+          ShVariable tex_size_var(tex_size_node);
+          new_stmts.push_back(ShStatement(result(0,1), result(0,1), SH_OP_MUL, tex_size_var(2,2)));
           new_stmts.push_back(ShStatement(stmt.dest, tex_var, SH_OP_TEXI, result(0,1)));
         }
         else {
@@ -224,16 +215,33 @@ StreamCache::StreamCache(ShProgramNode* stream_program,
     for (std::list<ShProgramNodePtr>::iterator I = m_programs[i].begin();
          I != m_programs[i].end(); ++I) {
       ShProgram with_tc = ShProgram(*I) & lose<ShTexCoord4f>("streamcoord");
-  
       TexFetcher fetcher(m_channel_map, with_tc.node()->inputs.back(),
                          dims == SH_TEXTURE_RECT, 
                          i != NO_OFFSET_STRIDE,
-                         m_tex_size,
+                         m_output_stride.node(),
                          with_tc.node());
       with_tc.node()->ctrlGraph->dfs(fetcher);
 
       optimize(with_tc);
     
+      if (i != NO_OFFSET_STRIDE) {
+        string target = get_target_backend(stream_program) + "fragment";
+        ShProgram preamble = SH_BEGIN_PROGRAM(target) {
+          ShInputTexCoord4f SH_DECL(streamcoord);
+          ShOutputTexCoord4f SH_DECL(index);
+          // index = (x - bias, y - bias, -bias, 1-bias)
+          index = streamcoord - m_output_offset(3,3,3,3);
+          // z = (x + y*width + z*dest_offset/bias)/dest_stride
+          index(2) = index(0,1,2) | m_output_offset(0,1,2);
+
+          ShAttrib1f SH_DECL(stride);
+          // stride = z*width
+          stride = index(2) * m_output_stride(0);
+          discard(frac(stride) - m_output_stride(1));
+        } SH_END_PROGRAM;
+        with_tc = with_tc << preamble;
+      }
+      
       *I = with_tc.node();
     }
 
@@ -264,6 +272,26 @@ ShInfo* StreamCache::clone() const
 //  return new FBOStreamCache(m_stream_program, m_vertex_program, m_max_outputs);
 }
 
+void StreamCache::update_destination(int dest_offset, int dest_stride)
+{
+  if (m_float_extension == SH_ARB_NV_FLOAT_BUFFER) {
+    float bias = 0.5;
+    float z = (float)dest_offset/m_tex_size/dest_stride/bias;
+    m_output_offset = ShAttrib4f(1.0/m_tex_size/dest_stride, 
+                                 1.0/dest_stride, z, bias);
+    m_output_stride = ShAttrib3f((float)m_tex_size, 
+                                 0.5/dest_stride, m_tex_size);
+  }
+  else {
+    float bias = 1.0/(2*m_tex_size);
+    float z = (float)dest_offset/m_tex_size/dest_stride/bias;
+    m_output_offset = ShAttrib4f(1.0/dest_stride, 
+                                 (float)m_tex_size/dest_stride, z, bias);
+    m_output_stride = ShAttrib3f((float)m_tex_size,
+                                 0.5/dest_stride, m_tex_size);
+  }
+}
+
 void StreamCache::update_channels()
 {
   for (ChannelMap::iterator I = m_channel_map.begin(); I != m_channel_map.end(); ++I) {
@@ -285,25 +313,17 @@ void StreamCache::update_channels()
     //
     float os1_val[4];
     float one_over_w = 1/(float)m_tex_size;
-    if (m_float_extension == SH_ARB_NV_FLOAT_BUFFER) {
-      os1_val[0] = channel->stride() * one_over_w;
-      os1_val[1] = channel->stride();
-      os1_val[2] = (/* -do*s + */ channel->offset()*one_over_w)/-0.5;
-      os1_val[3] = -one_over_w/2;
-    }
-    else {
-      os1_val[0] = channel->stride();
-      os1_val[1] = m_tex_size * channel->stride();
-      os1_val[2] = (/* -do*s + */ channel->offset()*one_over_w)/(-one_over_w/2);
-      os1_val[3] = -one_over_w/2;
-    }
+    os1_val[0] = (float)channel->stride();
+    os1_val[1] = channel->offset() * one_over_w + one_over_w/2;
+    os1_val[2] = 0;
+    os1_val[3] = 1;
     os1.setValues(os1_val);
 
     float os2_val[4];
     os2_val[0] = -one_over_w;
     os2_val[1] = 0;
     os2_val[2] = one_over_w;
-    os2_val[3] = 1/(float)(2*m_tex_size - 1);
+    os2_val[3] = one_over_w/2;
     os2.setValues(os2_val);
   }
 }

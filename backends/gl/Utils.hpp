@@ -27,6 +27,7 @@
 #include "ShCtrlGraph.hpp"
 #include "ShProgramNode.hpp"
 #include "ShProgramSet.hpp"
+#include "ShAttrib.hpp"
 
 namespace shgl {
 
@@ -72,7 +73,8 @@ class TexFetcher {
 public:
   TexFetcher(ChannelMap& channel_map,
              const SH::ShVariableNodePtr& tc_node,
-             bool indexed, bool os_calculation, int tex_size,
+             bool indexed, bool os_calculation,
+             const SH::ShVariableNodePtr& tex_size_node,
              const SH::ShProgramNodePtr& program);
 
   void operator()(SH::ShCtrlGraphNode* node);
@@ -84,7 +86,7 @@ private:
   ChannelMap& channel_map;
   SH::ShVariableNodePtr tc_node;
   bool indexed, os_calculation;
-  int tex_size;
+  SH::ShVariableNodePtr tex_size_node;
   SH::ShProgramNodePtr program;
 };
 
@@ -97,6 +99,7 @@ public:
   SH::ShInfo* clone() const;
 
   void update_channels();
+  void update_destination(int dest_offset, int dest_stride);
 
   void build_sets(SH::ShProgramNode* vertex_program);
   
@@ -130,6 +133,8 @@ private:
   int m_tex_size;
   int m_max_outputs;
   FloatExtension m_float_extension;
+  SH::ShAttrib4f m_output_offset;
+  SH::ShAttrib3f m_output_stride;
 
   StreamCache(const StreamCache& other);
   StreamCache& operator=(const StreamCache& other);

@@ -351,6 +351,8 @@ void FBOStreams::execute(const ShProgramNodeCPtr& program_const,
 
     FBOCache::instance()->check();
     
+    cache->update_destination(offset, stride);
+
     DECLARE_TIMER(binding);
     // Then, bind vertex (pass-through) and fragment program
     shBind(**I);
@@ -374,8 +376,8 @@ void FBOStreams::execute(const ShProgramNodeCPtr& program_const,
     // Generate quad geometry
     glBegin(GL_QUADS); {
       int full_lines_start = offset / size;
-      int full_lines_end = (offset+count) / size;
-      int last_line_count = (offset+count) % size;
+      int full_lines_end = (offset+count*stride) / size;
+      int last_line_count = (offset+count*stride) % size;
       int first_line_start = offset % size;
       
       if (first_line_start) {

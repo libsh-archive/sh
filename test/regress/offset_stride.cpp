@@ -28,7 +28,7 @@ void reset_memories(ShHostMemoryPtr mem[], int n)
 int main(int argc, char* argv[])
 {
   int errors = 0;
-  int total_tests = 3;
+  int total_tests = 6;
 
   Test test(argc, argv);
 
@@ -84,6 +84,47 @@ int main(int argc, char* argv[])
   c = prg;
   mem[2]->hostStorage()->sync();
   if (test.output_result<float*>("two stride offset", inputs, 
+                     reinterpret_cast<float*>(mem[2]->hostStorage()->data()),
+                     expected, 16, 0.001)) errors++;}
+
+  {float expected[] = {0,1,2,3, 4,5,0,2, 4,6,10,11, 12,13,14,15};
+  reset_memories(mem, 3);
+  a.offset(0);
+  a.stride(1);
+  b.offset(0);
+  b.stride(1);
+  c.offset(6);
+  c = prg;
+  mem[2]->hostStorage()->sync();
+  if (test.output_result<float*>("destination offset", inputs, 
+                     reinterpret_cast<float*>(mem[2]->hostStorage()->data()),
+                     expected, 16, 0.001)) errors++;}
+
+  {float expected[] = {0,1,2,2, 4,5,4,7, 8,6,10,11, 12,13,14,15};
+  reset_memories(mem, 3);
+  a.offset(0);
+  a.stride(1);
+  b.offset(0);
+  b.stride(1);
+  c.offset(0);
+  c.stride(3);
+  c = prg;
+  mem[2]->hostStorage()->sync();
+  if (test.output_result<float*>("destination stride", inputs, 
+                     reinterpret_cast<float*>(mem[2]->hostStorage()->data()),
+                     expected, 16, 0.001)) errors++;}
+
+  {float expected[] = {0,1,2,11, 4,5,16,7, 8,21,10,11, 26,13,14,15};
+  reset_memories(mem, 3);
+  a.offset(2);
+  a.stride(3);
+  b.offset(9);
+  b.stride(2);
+  c.offset(3);
+  c.stride(3);
+  c = prg;
+  mem[2]->hostStorage()->sync();
+  if (test.output_result<float*>("everything", inputs, 
                      reinterpret_cast<float*>(mem[2]->hostStorage()->data()),
                      expected, 16, 0.001)) errors++;}
 
