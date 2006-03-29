@@ -329,15 +329,16 @@ void GlslCode::emit_discard(const ShStatement& stmt, const string& function)
   ostringstream oss;
   oss << "if (";  
   if (stmt.src[0].size() > 1) {
-    // Vector operand - cast to boolean vector and use "any"
-    oss << "any(bvec" << stmt.src[0].size() << "(";
+    // Vector operand - component wise compare and use "any"
+    oss << "any(greaterThan(";
     oss << resolve(stmt.src[0]);
+    oss << ", ";
+    oss << resolve_constant(0, stmt.src[0]);
     oss << "))";
   } else {
-    // Scalar operand - simply cast to boolean
-    oss << "bool(";
+    // Scalar operand - discard of greater than 0
     oss << resolve(stmt.src[0]);
-    oss << ")";
+    oss << " > float(0)";
   }
   // Close "if" and output contents
   oss << ") " << function;
