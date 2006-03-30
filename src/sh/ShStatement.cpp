@@ -50,6 +50,13 @@ ShStatement::ShStatement(ShVariable dest, ShVariable src0, ShOperation op, ShVar
   src[1] = src1;
 }
 
+ShStatement::ShStatement(ShVariable dest, ShOperation op, ShVariable src0, ShVariable src1)
+  : dest(dest), src(3), op(op), marked(false)
+{
+  src[0] = src0;
+  src[1] = src1;
+}
+
 ShStatement::ShStatement(ShVariable dest, ShOperation op, ShVariable src0, ShVariable src1, ShVariable src2)
   : dest(dest), src(3), op(op), marked(false)
 {
