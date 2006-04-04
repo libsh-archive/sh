@@ -174,10 +174,20 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node, bool forceRGB)
     return node->size();
     break;
   }
-  if (forceRGB && node->size() <= 2)
-    return formats[node->size() - 1 + 2];
-  else
-    return formats[node->size() - 1];
+  if (forceRGB) {
+    // The NV_float_buffer extension is only used on older NVIDIA hardware
+    // (the one that doesn't support ATI_texture_float extension) very old
+    // such hardware (FX5200 in particular) supports writing only to RGBA
+    // so we always force RGBA here as the gcd.
+    if (formats == fpformats_nv || formats == halfformats_nv) {
+      return formats[3];
+    }
+    if (node->size() <= 2) {
+      return formats[node->size() - 1 + 2];
+    }
+  }
+
+  return formats[node->size() - 1];
 }
 
 GLenum shGlFormat(const ShTextureNodePtr& node)
