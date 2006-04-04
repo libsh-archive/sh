@@ -1,3 +1,8 @@
+2006-04-04  Filip Spacek  <filip@rapidmind.net>
+
+	* backends/gl/GlTextures.cpp: Sync mipmap storages after the main storage.
+	Force RGBA textures as render targets when using NV_float_buffer extension.
+
 2006-03-30  Francois Marier  <francois@serioushack.com>
 
 	* src/sh/ShStatement.hpp, ShStatement.cpp: Add a new constructor with 
