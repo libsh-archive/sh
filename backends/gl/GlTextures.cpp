@@ -507,8 +507,6 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target, bool w
                                                                  node->depth(), node->size(),
                                                                  name, i,
                                                                  write || node->size() >= 3);
-          // TODO: this should go away, needs to be done every time
-          mip_storage->sync();
         }
       }
 
@@ -526,6 +524,11 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target, bool w
     else {
       SH_GL_CHECK_ERROR(glActiveTextureARB(target));
       storage->sync();
+      for (int i = 1; i < mipmap_levels; ++i) {
+        ShStoragePtr mip_storage = node->memory(i)->findStorage("opengl:texture");
+        SH_DEBUG_ASSERT(mip_storage);
+        mip_storage->sync();
+      }
       SH_GL_CHECK_ERROR(glBindTexture(shGlTargets[node->dims()], storage->name()));
     }
 
