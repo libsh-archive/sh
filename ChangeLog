@@ -8,6 +8,11 @@
 	* src/sh/ShStatement.hpp, ShStatement.cpp: Add a new constructor with 
 	two source parameters for consistency.
 
+2006-03-29  Filip Spacek  <filip@rapidmind.net>
+
+	* backends/gl/GlslEmit.cpp: Discard fragments if any component is > 0 
+	rather than != 0.
+
 2006-03-27  Francois Marier  <francois@serioushack.com>
 
 	* backends/gl/GlslVariableMap.cpp, GlslVariableMap.hpp: Fix
