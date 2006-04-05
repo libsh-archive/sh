@@ -22,37 +22,18 @@
 
 namespace SH {
 
-struct ShChannelNodeImpl {
-  ShAttrib1i stride;
-  ShAttrib1i offset;
-};
-
 ShChannelNode::ShChannelNode(ShSemanticType specType, int elements, ShValueType valueType)
   : ShVariableNode(SH_STREAM, elements, valueType),
-    m_memory(0), m_count(0), m_impl(new ShChannelNodeImpl)
+    m_memory(0), m_count(0), m_stride(1), m_offset(0)
 {
-  ShContext::current()->enter(0);
-  
-  m_impl->stride = ShAttrib1i(1);
-  m_impl->offset = ShAttrib1i(0);
-  
-  ShContext::current()->exit();
-
   specialType(specType);
 }
 
 ShChannelNode::ShChannelNode(ShSemanticType specType, int elements, ShValueType valueType,
                              const ShMemoryPtr& memory, int count)
   : ShVariableNode(SH_STREAM, elements, valueType),
-    m_memory(memory), m_count(count), m_impl(new ShChannelNodeImpl)
+    m_memory(memory), m_count(count), m_stride(1), m_offset(0)
 {
-  ShContext::current()->enter(0);
-  
-  m_impl->stride = ShAttrib1i(1);
-  m_impl->offset = ShAttrib1i(0);
-  
-  ShContext::current()->exit();
-
   specialType(specType);
 }
 
@@ -74,46 +55,6 @@ ShPointer<const ShMemory> ShChannelNode::memory() const
 ShMemoryPtr ShChannelNode::memory() 
 {
   return m_memory;
-}
-
-int ShChannelNode::count() const
-{
-  return m_count;
-}
-
-void ShChannelNode::count(int count)
-{
-  m_count = count;
-}
-
-void ShChannelNode::stride(int stride)
-{
-  m_impl->stride = ShAttrib1i(stride);
-}
-
-void ShChannelNode::offset(int offset)
-{
-  m_impl->offset = ShAttrib1i(offset);
-}
-
-int ShChannelNode::stride() const
-{
-  return m_impl->stride.getValue(0);
-}
-
-int ShChannelNode::offset() const
-{
-  return m_impl->offset.getValue(0);
-}
-
-const ShAttrib1i& ShChannelNode::stride_var() const
-{
-  return m_impl->stride;
-}
-
-const ShAttrib1i& ShChannelNode::offset_var() const
-{
-  return m_impl->offset;
 }
 
 }

@@ -26,12 +26,6 @@
 
 namespace SH {
 
-struct ShChannelNodeImpl;
-template<int N, ShBindingType Binding, typename T, ShSemanticType Semantic, bool Swizzled>
-class ShAttrib;
-typedef ShAttrib<1, SH_TEMP, int, SH_ATTRIB, false> ShAttrib1i;
-
-
 class
 SH_DLLEXPORT ShChannelNode : public ShVariableNode {
 public:
@@ -44,22 +38,20 @@ public:
   ShPointer<const ShMemory> memory() const;
   ShMemoryPtr memory();
   
-  int count() const;
-  void count(int count);
+  int count() const { return m_count; }
+  void count(int count) { m_count = count; }
   
-  int stride() const;
-  void stride(int stride);
-  const ShAttrib1i& stride_var() const;
+  int stride() const { return m_stride; }
+  void stride(int stride) { m_stride = stride; }
   
-  int offset() const;
-  void offset(int offset);
-  const ShAttrib1i& offset_var() const;
+  int offset() const { return m_offset; }
+  void offset(int offset) { m_offset = offset; }
   
 private:
   ShMemoryPtr m_memory;
   int m_count;
-
-  std::auto_ptr<ShChannelNodeImpl> m_impl;
+  int m_stride;
+  int m_offset;
 
   // NOT IMPLEMENTED
   ShChannelNode(const ShChannelNode& other);

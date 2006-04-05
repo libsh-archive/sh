@@ -1,5 +1,10 @@
 2006-04-05  Filip Spacek  <filip@rapidmind.net>
 
+	* src/sh/ShChannelNode.hpp: Make stride and offset simple ints
+	rather than uniforms.
+
+2006-04-05  Filip Spacek  <filip@rapidmind.net>
+
 	* backends/gl/GlTextures.cpp: Fix binding of mipmapped cube maps.
 
 2006-04-04  Filip Spacek  <filip@rapidmind.net>
