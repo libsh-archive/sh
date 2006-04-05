@@ -42,6 +42,16 @@ ShChannel<T>::ShChannel()
 }
 
 template<typename T>
+ShChannel<T>::ShChannel(int count)
+  : ShMetaForwarder(0),
+    m_node(new ShChannelNode(T::semantic_type, T::typesize, T::value_type))
+{
+  real_meta(m_node.object());
+  ShHostMemoryPtr mem = new ShHostMemory(count * T::typesize * sizeof(typename T::mem_type), T::value_type);
+  m_node->memory(mem, count);
+}
+
+template<typename T>
 ShChannel<T>::ShChannel(const ShMemoryPtr& memory, int count)
   : ShMetaForwarder(0),
     m_node(new ShChannelNode(T::semantic_type, T::typesize, T::value_type, memory, count))
@@ -113,6 +123,28 @@ template<typename T>
 const ShChannelNodePtr ShChannel<T>::node() const
 {
   return m_node;
+}
+
+template<typename T>
+typename T::mem_type* ShChannel<T>::read_data()
+{
+  ShStoragePtr storage = memory()->findStorage("host");
+  if (!storage) shError(ShException("No host storage found"));
+  ShHostStoragePtr host_storage = shref_dynamic_cast<ShHostStorage>(storage);
+  SH_DEBUG_ASSERT(host_storage);
+  host_storage->sync();
+  return static_cast<typename T::mem_type*>(host_storage->data());
+}
+
+template<typename T>
+typename T::mem_type* ShChannel<T>::write_data()
+{
+  ShStoragePtr storage = memory()->findStorage("host");
+  if (!storage) shError(ShException("No host storage found"));
+  ShHostStoragePtr host_storage = shref_dynamic_cast<ShHostStorage>(storage);
+  SH_DEBUG_ASSERT(host_storage);
+  host_storage->dirty();
+  return static_cast<typename T::mem_type*>(host_storage->data());
 }
 
 template<typename T>

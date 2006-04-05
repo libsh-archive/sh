@@ -1,5 +1,10 @@
 2006-04-05  Filip Spacek  <filip@rapidmind.net>
 
+	* src/sh/ShChannel.hpp: Add convenience method so that users don't
+	need to use ShMemory directly.
+
+2006-04-05  Filip Spacek  <filip@rapidmind.net>
+
 	* src/sh/ShChannelNode.hpp: Make stride and offset simple ints
 	rather than uniforms.
 
