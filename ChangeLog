@@ -1,3 +1,7 @@
+2006-04-05  Filip Spacek  <filip@rapidmind.net>
+
+	* backends/gl/GlTextures.cpp: Fix binding of mipmapped cube maps.
+
 2006-04-04  Filip Spacek  <filip@rapidmind.net>
 
 	* backends/gl/GlTextures.cpp: Sync mipmap storages after the main storage.

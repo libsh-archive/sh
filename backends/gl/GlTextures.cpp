@@ -379,8 +379,12 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target, bool w
           shError(ShException("No memory associated with the cube map texture."));
           return;
         }
-        if (s->memory() != node->memory(dir, 0).object() || !StorageFinder(node, StorageFinder::READ_ANY, true)(s))
-          break;
+        if (s->mipmap_level() == 0) {
+          if (s->memory() != node->memory(dir, 0).object() ||
+              !StorageFinder(node, StorageFinder::READ_ANY, true)(s)) {
+            break;
+          }
+        }
       }
       // If we got through the whole list, we've found a matching list.
       if (S == name->endStorages()) break;
