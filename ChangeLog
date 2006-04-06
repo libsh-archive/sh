@@ -1,3 +1,8 @@
+2006-04-06  Filip Spacek  <filip@rapidmind.net>
+
+	* backends/gl/GlTextures.cpp: Handle the case where mipmaps are
+	added after the main texture is bound.
+
 2006-04-05  Filip Spacek  <filip@rapidmind.net>
 
 	* src/sh/ShChannel.hpp: Add convenience method so that users don't
