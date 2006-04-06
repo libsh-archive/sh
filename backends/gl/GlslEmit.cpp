@@ -559,11 +559,35 @@ void GlslCode::emit_sum(const ShStatement& stmt)
 
 void GlslCode::emit_texture(const ShStatement& stmt)
 {
-  SH_DEBUG_ASSERT((SH_OP_TEX == stmt.op) || (SH_OP_TEXI == stmt.op) ||
+  SH_DEBUG_ASSERT((SH_OP_TEX    == stmt.op) || (SH_OP_TEXI == stmt.op) ||
                   (SH_OP_TEXLOD == stmt.op) || (SH_OP_TEXD == stmt.op));
 
+  SH::ShOperation op = stmt.op; 
+  bool cg_function = false;
+  bool ati_function = false;
+  if (SH_OP_TEXD == stmt.op) {    
+    switch (m_vendor) {
+      // On NVIDIA, for TEXD we can use the Cg functions (tex2D, etc.)
+      case VENDOR_NVIDIA:
+        cg_function = true;
+        break;
+
+      // On ATI, we can use the extension
+      case VENDOR_ATI:
+        ati_function = true;
+        use_extension("GL_ATI_shader_texture_lod", EXT_REQUIRE);
+        break;
+
+      // On other hardware, we're sunk, so just ignore it
+      default:
+        op = SH_OP_TEX;
+        SH_DEBUG_WARN("TEXD is not supported on this hardware in the GLSL backend");
+        break;
+    }
+  }
+
   stringstream line;
-  line << resolve(stmt.dest) << " = texture";
+  line << resolve(stmt.dest) << (cg_function ? " = tex" : " = texture");
 
   ShTextureNodePtr texture = shref_dynamic_cast<ShTextureNode>(stmt.src[0].node());
   switch (texture->dims()) {
@@ -577,20 +601,28 @@ void GlslCode::emit_texture(const ShStatement& stmt)
     line << "3D";
     break;
   case SH_TEXTURE_CUBE:
-    line << "Cube";
+    line << (cg_function ? "CUBE" : "Cube");
     break;
   case SH_TEXTURE_RECT:
-    line << "2DRect"; // Not supported on ATI, but there is no equivalent
+    // Not supported on ATI, but there is no equivalent
+    line << (cg_function ? "RECT" : "2DRect");
     break;
   }
 
   if (SH_OP_TEXLOD == stmt.op) {
+    // TODO: Technically this requires an extension... enable it?
     line << "Lod";
+  } else if (ati_function) {
+    line << "_ATI";
   }
+
   line << "(" << resolve(stmt.src[0]) << ", " << resolve(stmt.src[1]);
 
   if (SH_OP_TEXLOD == stmt.op) {
     line << ", " << resolve(stmt.src[2]);
+  } else if (SH_OP_TEXD == stmt.op) {
+    // TODO: Support derivative lookup for 3D and CUBE textures (i.e. float3 derivatives)
+    line << ", " << resolve(stmt.src[2](0,1)) << ", " << resolve(stmt.src[2](2,3));
   }
 
   line << ")";
