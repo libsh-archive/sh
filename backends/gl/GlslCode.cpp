@@ -51,7 +51,21 @@ GlslCode::GlslCode(const ShProgramNodeCPtr& shader, const std::string& unit,
   if (unit == "fragment"){
     m_unit = SH_GLSL_FP;
   } else if (unit == "vertex") {
-    m_unit = SH_GLSL_VP;
+    m_unit = SH_GLSL_VP;  
+  }
+
+  // Query the GL vendor string
+  m_vendor = VENDOR_UNKNOWN;  
+  const GLubyte* vendor = SH_GL_CHECK_ERROR(glGetString(GL_VENDOR));
+  if (vendor) {
+    std::string s(reinterpret_cast<const char*>(vendor));
+    if (s.find("NVIDIA") != s.npos) {
+      m_vendor = VENDOR_NVIDIA;
+    } else if( s.find("ATI") != s.npos) {
+      m_vendor = VENDOR_ATI;
+    } else {
+      m_vendor = VENDOR_OTHER;
+    }
   }
 }
 
@@ -82,7 +96,7 @@ void GlslCode::generate()
   ShVarTransformMap* original_vars = new ShVarTransformMap;
   transform.convertInputOutput(original_vars);
   transform.convertTextureLookups();
-  transform.texd_to_texlod();
+  //transform.texd_to_texlod();
 
   ShTransformer::ValueTypeMap convert_map;
   convert_map[SH_DOUBLE] = SH_FLOAT; 

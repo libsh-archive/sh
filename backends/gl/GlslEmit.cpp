@@ -197,6 +197,7 @@ void GlslCode::emit(const ShStatement &stmt)
     case SH_OP_TEX:
     case SH_OP_TEXI:
     case SH_OP_TEXLOD:
+    case SH_OP_TEXD:
       emit_texture(stmt);
       break;
     case SH_OP_COSH:
@@ -259,14 +260,7 @@ string GlslCode::resolve_constant(double constant, const ShVariable& var, int si
 
 void GlslCode::emit_ati_workaround(const ShStatement& stmt, double real_answer, const char* code)
 {
-  bool on_ati = false;
-  const GLubyte* vendor = SH_GL_CHECK_ERROR(glGetString(GL_VENDOR));
-  if (vendor) {
-    std::string s(reinterpret_cast<const char*>(vendor));
-    on_ati = s.find("ATI") != s.npos;
-  }
-
-  if (on_ati) {
+  if (m_vendor == VENDOR_ATI) {
     ShVariable tmp(allocate_temp(stmt));
     ShVariable constant(allocate_constant(stmt, real_answer));
     table_substitution(ShStatement(tmp, stmt.src[0], stmt.op, stmt.src[1]), code);
@@ -565,7 +559,8 @@ void GlslCode::emit_sum(const ShStatement& stmt)
 
 void GlslCode::emit_texture(const ShStatement& stmt)
 {
-  SH_DEBUG_ASSERT((SH_OP_TEX == stmt.op) || (SH_OP_TEXI == stmt.op) || (SH_OP_TEXLOD == stmt.op));
+  SH_DEBUG_ASSERT((SH_OP_TEX == stmt.op) || (SH_OP_TEXI == stmt.op) ||
+                  (SH_OP_TEXLOD == stmt.op) || (SH_OP_TEXD == stmt.op));
 
   stringstream line;
   line << resolve(stmt.dest) << " = texture";

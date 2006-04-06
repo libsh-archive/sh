@@ -109,6 +109,14 @@ private:
   // bound, if any
   GLhandleARB m_bound;
 
+  // Data about the current GLSL target vendor
+  enum Vendor {
+    VENDOR_ATI = 0,
+    VENDOR_NVIDIA,
+    VENDOR_OTHER,
+    VENDOR_UNKNOWN
+  } m_vendor;
+
   /// Add a line to the source code (m_lines)
   void append_line(const std::string& line, bool append_semicolon = true);
 
