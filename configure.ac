@@ -166,6 +166,7 @@ AC_CONFIG_FILES([Makefile
 		 src/shutil/Makefile
 		 test/Makefile
 		 test/regress/Makefile
+		 test/sandbox/Makefile
 		 backends/Makefile
 		 backends/cc/Makefile
 		 backends/gl/Makefile
