@@ -20,6 +20,7 @@
 #include "ShContext.hpp"
 #include "ShDebug.hpp"
 #include "ShTypeInfo.hpp"
+#include "binreloc.h"
 
 namespace SH {
 
@@ -33,6 +34,14 @@ ShContext* ShContext::current()
     // must be done this way since
     // init_types requires a ShContext object, 
     ShTypeInfo::init();
+
+    // Enable binary relocation (from autopackage)
+    BrInitError error;
+    int init_passed = br_init_lib(&error);
+    if (!init_passed && error != BR_INIT_ERROR_DISABLED) {
+      SH_DEBUG_WARN("BinReloc failed to initialize (error code " 
+        << error << "). Will fallback to hardcoded default paths.");
+    }
   }
   return m_instance;
 }
