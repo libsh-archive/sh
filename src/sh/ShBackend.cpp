@@ -433,7 +433,6 @@ void ShBackend::load_all_backends()
 # else
     load_libraries(string(getenv("HOME")) + "/" + LOCAL_BACKEND_DIRNAME);
     char* install_prefix = br_find_prefix(SH_INSTALL_PREFIX);
-    std::cerr << "install_prefix = " << install_prefix << std::endl;
     load_libraries(string(install_prefix) + "/lib/sh");
     free(install_prefix);
 # endif
@@ -515,7 +514,6 @@ void ShBackend::init()
   }
 
   char* install_prefix = br_find_prefix(SH_INSTALL_PREFIX);
-  std::cerr << "install_prefix = " << install_prefix << std::endl;
   string searchpath(install_prefix);
   searchpath += "/lib/sh";
   free(install_prefix);
