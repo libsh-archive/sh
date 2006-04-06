@@ -192,6 +192,10 @@
 			Name="Source Files"
 			>
 			<File
+				RelativePath="..\..\src\sh\binreloc.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\sh\ShAlgebra.cpp"
 				>
 			</File>
