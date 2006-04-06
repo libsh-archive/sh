@@ -4,6 +4,7 @@
 	Version="8.00"
 	Name="ShTexturesExample"
 	ProjectGUID="{306F5DA5-A049-4ADA-A2F3-A2A964A97879}"
+	RootNamespace="ShTexturesExample"
 	>
 	<Platforms>
 		<Platform
@@ -63,7 +64,7 @@
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\..\install\vc8\lib;..\..\..\glut\lib"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/ShGlutExample.pdb"
+				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
 				SubSystem="1"
 			/>
 			<Tool
@@ -139,6 +140,7 @@
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\install\vc8\lib;..\..\..\glut\lib"
 				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
 			/>
 			<Tool
 				Name="VCALinkTool"
