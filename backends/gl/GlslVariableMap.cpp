@@ -390,12 +390,14 @@ string GlslVariableMap::real_resolve(const ShVariable& v, const string& array_in
   }
  
   if (!var.texture()) {
-    if (-1 == index) {      
+    if (-1 == index) {
       if (1 == var.size()) {
-	// Scalars cannot be swizzled
-	s = repeat_scalar(s, v.valueType(), v.swizzle().size());
+	      // Scalars cannot be swizzled
+	      s = repeat_scalar(s, v.valueType(), v.swizzle().size());
       } else {
-	s += swizzle(v, var.size());
+        // Force the swizzle if the variable is built-in
+        // This avoids an error if they declare state metadata for the "wrong" sized Sh variable
+	      s += swizzle(v, var.size(), var.builtin());
       }
     } else if ((0 == index) && (v.size() > 1)) {
       s += ".x";
@@ -425,11 +427,13 @@ string GlslVariableMap::resolve(const ShVariable& v, int index)
   return real_resolve(v, "", index);
 }
 
-string GlslVariableMap::swizzle(const ShVariable& v, int var_size) const
+string GlslVariableMap::swizzle(const ShVariable& v, int var_size, bool force) const
 {
   ShSwizzle swizzle = v.swizzle();
 
-  if (swizzle.identity() && (swizzle.size() == var_size)) return ""; // no need for a swizzle
+  if (!force && swizzle.identity() && (swizzle.size() == var_size)) {
+    return ""; // no need for a swizzle
+  }
 
   stringstream ss;
   for (int i=0; i < v.size(); i++) {
