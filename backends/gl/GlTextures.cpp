@@ -294,8 +294,8 @@ struct StorageFinder {
       return false;
     }
     if (!ignoreTarget) {
-      if (t->texName()->params() != node->traits()) return false;
       if (t->target() != shGlTargets[node->dims()]) return false;
+      // We copy traits if they differ, so they need not match
     }
     if (t->width()  != m_width ) return false;
     if (t->height() != m_height) return false;
@@ -370,8 +370,8 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target, bool w
 	    shError(ShException("Cannot render to cube map texture."));
 	    return;
     }
-    // Look for a cubemap that happens to have just the right storages
-    
+
+    // Look for a cubemap that happens to have just the right storages    
     GlTextureName::NameList::const_iterator I;
     for (I = GlTextureName::beginNames(); I != GlTextureName::endNames(); ++I) {
       const GlTextureName* name = *I;
@@ -513,11 +513,14 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target, bool w
       if (!name) {
         if (storage) {
           name = storage->texName();
-        }
-        else {
+        } else {
           name = new GlTextureName(shGlTargets[node->dims()]);
         }
-        name->params(node->traits());
+
+        // Copy traits (interpolation, etc) if they have changed
+        if (name->params() != node->traits()) {
+          name->params(node->traits());
+        }
       }
     
       if (!storage) {
