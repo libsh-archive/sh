@@ -273,10 +273,15 @@ struct StorageFinder {
     WRITE
   };
 
-  StorageFinder(const ShTextureNodePtr& node, LookFor lookFor,
-               bool ignoreTarget = false)
+  // Can optionally provide custom dimensions, otherwise node dimentions are used
+  StorageFinder(const ShTextureNodePtr& node, LookFor lookFor, bool ignoreTarget = false,
+                int width = -1, int height = -1, int depth = -1)
     : node(node), m_lookFor(lookFor), ignoreTarget(ignoreTarget), m_nr_clean(0)
+    , m_width(width), m_height(height), m_depth(depth)
   {
+    if (m_width  < 0) m_width  = node->width();
+    if (m_height < 0) m_height = node->height();
+    if (m_depth  < 0) m_depth  = node->depth();
   }
 
   // assignment operator could not be generated
@@ -292,9 +297,9 @@ struct StorageFinder {
       if (t->texName()->params() != node->traits()) return false;
       if (t->target() != shGlTargets[node->dims()]) return false;
     }
-    if (t->width() != node->width()) return false;
-    if (t->height() != node->height()) return false;
-    if (t->depth() != node->depth()) return false;
+    if (t->width()  != m_width ) return false;
+    if (t->height() != m_height) return false;
+    if (t->depth()  != m_depth ) return false;
     
     if (m_lookFor == READ_CLEAN && !t->write() &&
         t->memory()->timestamp() == t->timestamp()) {
@@ -321,6 +326,9 @@ struct StorageFinder {
   }
   
   const ShTextureNodePtr& node;
+  int m_width;
+  int m_height;
+  int m_depth;
   LookFor m_lookFor;
   bool ignoreTarget;
   int m_nr_clean;
@@ -488,12 +496,13 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target, bool w
         shError(ShException(s.str()));
       }
       
-      StorageFinder finder(node, (write ? StorageFinder::WRITE : StorageFinder::READ_CLEAN));
+      StorageFinder finder(node, (write ? StorageFinder::WRITE : StorageFinder::READ_CLEAN),
+                           false, width, height);
       GlTextureStoragePtr storage =
         shref_dynamic_cast<GlTextureStorage>(node->memory(i)->findStorage("opengl:texture", finder));
       if (!storage && !write) {
         // Couldn't find a clean storage, find a dirty one and sync it
-        StorageFinder finder(node, StorageFinder::READ_ANY);
+        StorageFinder finder(node, StorageFinder::READ_ANY, false, width, height);
         storage =
           shref_dynamic_cast<GlTextureStorage>(node->memory(i)->findStorage("opengl:texture", finder));
       }
