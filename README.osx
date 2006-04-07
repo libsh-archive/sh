@@ -1,8 +1,0 @@
-Additional Mac OS X Notes
-=========================
-
-Currently the cc and ARB backends are known to work.
-
-Floating point textures should work, but are untested. PBufferStreams
-(i.e. stream programs in the ARB backend) have not been implemented on
-OSX yet.
