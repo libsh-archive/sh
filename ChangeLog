@@ -2,6 +2,7 @@
 
 	* backends/gl/GlTextures.cpp: Fixed an issue wherein Sh was recreating 
 	all GL storages for mip levels every time a texture was bound.
+	Avoid updating texture parameters if they have not changed.
 
 2006-04-06  Andrew Lauritzen  <atlaurit@rapidmind.net>
 
