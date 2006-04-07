@@ -42,7 +42,7 @@ using namespace SH;
 using namespace std;
 
 // defines
-#define NUM_PARTICLES 16384
+#define NUM_PARTICLES 1600000
 
 // forward declarations
 void init_shaders(void);
@@ -57,23 +57,23 @@ int gprintf(int x, int y, char* fmt, ...);
 
 // direction the particle_updateX is going
 int dir = 0;
+int nump = 0;
 
 // channels holding the particle data
-ShChannel<ShPoint3f> posA;
-ShChannel<ShPoint3f> posB;
-ShChannel<ShVector3f> velA;
-ShChannel<ShVector3f> velB;
+ShChannel<ShPoint3f> pos_stream;
+ShChannel<ShVector3f> vel_stream;
+
+ShHostMemoryPtr pos_memory[2];
+ShHostMemoryPtr vel_memory[2];
 
 // uniforms 
 ShVector3f gravity(0.0, -9.8, 0.0);
-ShAttrib1f delta(0.02);
+ShAttrib1f delta(0.015);
 ShAttrib1f simtime(0.0);
-ShConstAttrib1f timedelta(0.005);
+ShConstAttrib1f timedelta(0.0005);
 
 // programs
 ShProgram particle;
-ShProgram particle_updateA;
-ShProgram particle_updateB;
 
 //-------------------------------------------------------------------
 // shader data
@@ -84,17 +84,26 @@ Camera camera;
 ShPoint3f lightPos;
 ShMatrix4x4f mv;
 ShMatrix4x4f mvd;
+ShPoint3f disp;
 
 // shader uniforms
 ShColor3f diffuse_color = ShColor3f(0.5, 0.7, 0.9);
+unsigned int particle_counts[8];
+ShAttrib1f particle_index;
+
+ShAttrib1f matrix_mode = 0.0;
+ShAttrib1f prematrix_speed;
 
 // programs
-ShProgram vsh;
-ShProgram particle_fsh;
-ShProgram plane_fsh;
-
 ShProgramSet* particle_shaders;
 ShProgramSet* plane_shaders;
+
+const int num_spheres = 1;
+struct Sphere {
+  ShPoint3f center;
+  ShAttrib1f radius;
+};
+Sphere spheres[num_spheres];
 
 //-------------------------------------------------------------------
 // GLUT data
@@ -105,13 +114,13 @@ int cur_x, cur_y;
 bool show_help = false;
 
 void setup_view()
-  {
+{
   mv = camera.shModelView();
   mvd = camera.shModelViewProjection(ShMatrix4x4f());
-  }
+}
 
 void display()
-  {
+{
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
   
   // Bind in the programs used to shade the particles
@@ -120,46 +129,16 @@ void display()
   // its in stream 'A' (because particle_updateB was the last to be run). Based
   // on the value of dir, render the appropriate stream
   float* particle_positions = 0;
-  if (dir == 0)
-    {
-    // Use the ShChannel object to fetch the ShHostStorage object
-    ShHostStoragePtr posA_storage = shref_dynamic_cast<ShHostStorage>(posA.memory()->findStorage("host"));
-    if (posA_storage)
-      {
-      // The ShHostStorage object may be out data with respect to
-      // the lastest copy on the graphics card, call sync() first
-      // to make sure that the ShHostStorage updated
-      posA_storage->sync();
 
-      // fetch the raw data pointer and simply render the particles as points
-      particle_positions = (float*)posA_storage->data();
-      }
-    }
-  else
-    {
-    // Use the ShChannel object to fetch the ShHostStorage object
-    ShHostStoragePtr posB_storage = shref_dynamic_cast<ShHostStorage>(posB.memory()->findStorage("host"));
-    if (posB_storage)
-      {
-      // The ShHostStorage object may be out data with respect to
-      // the lastest copy on the graphics card, call sync() first
-      // to make sure that the ShHostStorage updated
-      posB_storage->sync();
+  pos_memory[dir]->hostStorage()->sync();
+  particle_positions = reinterpret_cast<float*>(pos_memory[dir]->hostStorage()->data());
+  float* particle_positions_old = reinterpret_cast<float*>(pos_memory[1 - dir]->hostStorage()->data());
 
-      particle_positions = (float*)posB_storage->data();
-      }
-    }
+  float* particle_velocities = 0;
 
-  if (particle_positions) {
-    shBind(*particle_shaders);
-    glBegin(GL_POINTS);
-    for(int i = 0; i < NUM_PARTICLES; i++)
-      {
-        glVertex3fv(&particle_positions[3*i]);
-      }
-    glEnd();
-  }
-  
+  vel_memory[dir]->hostStorage()->sync();
+  particle_velocities = reinterpret_cast<float*>(vel_memory[dir]->hostStorage()->data());
+
   // Bind in the programs to shade the plane pillar
   shBind(*plane_shaders);
 
@@ -167,73 +146,69 @@ void display()
   diffuse_color = ShColor3f(0.5, 0.7, 0.9);
   glBegin(GL_QUADS);
   glNormal3f(0, 1, 0);
-  glVertex3f(-5, 0, -5);
-  glVertex3f( 5, 0, -5);
-  glVertex3f( 5, 0,  5);
-  glVertex3f(-5, 0,  5);
+  glVertex3f(-5000, 0, -5000);
+  glVertex3f( 5000, 0, -5000);
+  glVertex3f( 5000, 0,  5000);
+  glVertex3f(-5000, 0,  5000);
   glEnd();
 
-  // set a different color and draw a small pillar from
-  // which the particles 'shoot' out of.
   diffuse_color = ShColor3f(0.7, 0.5, 0.3);
-  glBegin(GL_QUADS);
-  glNormal3f(0, 1, 0);
-  glVertex3f(-.2, 1, -.2);
-  glVertex3f( .2, 1, -.2);
-  glVertex3f( .2, 1,  .2);
-  glVertex3f(-.2, 1,  .2);
 
-  glNormal3f(0, 0, -1);
-  glVertex3f(-.2, 0, -.2);
-  glVertex3f( .2, 0, -.2);
-  glVertex3f( .2, 1, -.2);
-  glVertex3f(-.2, 1, -.2);
-
-  glNormal3f(1, 0, 0);
-  glVertex3f( .2, 0, -.2);
-  glVertex3f( .2, 0,  .2);
-  glVertex3f( .2, 1,  .2);
-  glVertex3f( .2, 1, -.2);
-
-  glNormal3f(0, 0, 1);
-  glVertex3f( .2, 0,  .2);
-  glVertex3f(-.2, 0,  .2);
-  glVertex3f(-.2, 1,  .2);
-  glVertex3f( .2, 1,  .2);
-
-  glNormal3f(-1, 0, 0);
-  glVertex3f(-.2, 0,  .2);
-  glVertex3f(-.2, 0, -.2);
-  glVertex3f(-.2, 1, -.2);
-  glVertex3f(-.2, 1,  .2);
-  glEnd();
+  disp = spheres[0].center;
+  glutSolidSphere(spheres[0].radius.getValue(0), 50, 50);
+  disp = ShPoint3f(0,0,0);
 
   shUnbind(*plane_shaders);
+
+  
+
+  if (particle_positions) {
+    // TODO: Get these externally instead
+    for (int division = 0; division < 8; division++) {
+      particle_counts[division] = nump/8;
+      if (division == 0) particle_counts[division] += nump % 8;
+    }
+    shBind(*particle_shaders);
+    unsigned int offset = 0;
+    for (int division = 0; division < 8; division++) {
+      particle_index = division;
+      //      glBegin(GL_POINTS);
+      glBegin(GL_LINES);
+      for (unsigned int i = 0; i < particle_counts[division]; i++) {
+	glNormal3fv(&particle_velocities[3 * (i + offset)]);
+        glVertex3fv(&particle_positions[3 * (i + offset)]);
+        glVertex3fv(&particle_positions_old[3 * (i + offset)]);
+      }
+      glEnd();
+      offset += particle_counts[division];
+    }
+  }
+  
   // Help information
   if (show_help)
     {
-    gprintf(30, 160, "Sh Stream Example Help");
-    gprintf(30, 135, "  'R' - Reset simulation");
-    gprintf(30, 120, "  'S' - Single step simulation");
-    gprintf(30, 105, "Space - Start/stop simulation");
-    gprintf(30, 90,  "  'H' - Show/hide help");
-    gprintf(30, 75,  "  'Q' - Quit");
+      gprintf(30, 160, "Sh Stream Example Help");
+      gprintf(30, 135, "  'R' - Reset simulation");
+      gprintf(30, 120, "  'S' - Single step simulation");
+      gprintf(30, 105, "Space - Start/stop simulation");
+      gprintf(30, 90,  "  'H' - Show/hide help");
+      gprintf(30, 75,  "  'Q' - Quit");
     }
   else
     {
-    gprintf(10, 10, "'H' for help...");
+      gprintf(10, 10, "'H' for help...");
     }
   glutSwapBuffers();
-  }
+}
 
 void reshape(int width, int height)
-  {
+{
   glViewport(0, 0, width, height);
   setup_view();
-  }
+}
 
 void motion(int x, int y)
-  {
+{
   const double factor = 20.0;
   bool changed = false;
   
@@ -259,63 +234,101 @@ void motion(int x, int y)
 
   cur_x = x;
   cur_y = y;
-  }
+}
 
 void mouse(int button, int state, int x, int y)
-  {
+{
   buttons[button] = state;
   cur_x = x;
   cur_y = y;
-  }
+}
 
 void idle(void)
-  {
+{
   update_streams();
   glutPostRedisplay();
-  }
+}
 
 void keyboard(unsigned char k, int x, int y)
-  {
+{
   switch(k)
     {
-    case 'q':
-    case 'Q':
-      exit(0);
-      break;
     case ' ':
       {
-      static bool idling = false;
-      if (idling) glutIdleFunc(NULL);
-      else glutIdleFunc(idle);
-      idling = !idling;
-      break;
+	static bool idling = false;
+	if (idling) glutIdleFunc(NULL);
+	else glutIdleFunc(idle);
+	idling = !idling;
+	break;
       }
+      
+    case 'l':
+      delta *= 0.8;
+      break;
+      
+    case 'o':
+      delta /= 0.8;
+      break;
+    
     case 'r':
     case 'R':
       {
-      reset_streams();
-      break;
+	reset_streams();
+	break;
       }
-    case 's':
-    case 'S':
+    case 'i':
+    case 'I':
       {
-      update_streams();
-      break;
+	update_streams();
+	break;
       }
     case 'h':
     case 'H':
       {
-      show_help = !show_help;
-      break;
+	show_help = !show_help;
+	break;
       }
+    case 'd':
+      spheres[0].center[0] += 0.05;
+      break;
+    case 'a':
+      spheres[0].center[0] -= 0.05;
+      break;
+    case 'q':
+      spheres[0].center[2] += 0.05;
+      break;
+    case 'e':
+      spheres[0].center[2] -= 0.05;
+      break;
+    case 'w':
+      spheres[0].center[1] += 0.05;
+      break;
+    case 's':
+      spheres[0].center[1] -= 0.05;
+      break;
+    case 'm':
+      matrix_mode = 1.0 - matrix_mode.getValue(0);
+      if (matrix_mode.getValue(0)) {
+	prematrix_speed = delta;
+	delta = 0.002 * 0.1;
+      } else {
+	delta = prematrix_speed;
+      }
+      break;
+    case '+':
+      spheres[0].radius += 0.05;
+      break;
+    case '-':
+      spheres[0].radius -= 0.05;
+      break;
     }
   glutPostRedisplay();
-  }
+}
 
 int main(int argc, char** argv)
-  {
+{
   glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE|GLUT_DEPTH);
+  glutInitDisplayMode(GLUT_RGBA|GLUT_DOUBLE|GLUT_DEPTH|GLUT_MULTISAMPLE);
   glutInitWindowSize(512, 512);
   glutCreateWindow("Sh Stream Example");
 
@@ -328,53 +341,44 @@ int main(int argc, char** argv)
   glEnable(GL_DEPTH_TEST);
   glClearColor(0.0, 0.0, 0.0, 1.0);
   glPointSize(5);
+  glLineWidth(3);
 
   try
     {
-    if (argc > 1) {
-      shUseBackend(argv[1]);
-    }
+      if (argc > 1) {
+	shUseBackend(argv[1]);
+      }
       
-    init_shaders();
-    init_streams();
+      init_shaders();
+      init_streams();
   
-    // Place the camera at its initial position
-    camera.move(0.0, 0.0, -15.0);
-    camera.rotate(-45, 0.0, 1.0, 0.0);
-    camera.rotate(30, 1.0, 0.0, 0.0);
-    setup_view();
+      // Place the camera at its initial position
+      camera.move(0.0, 0.0, -15.0);
+      camera.rotate(-45, 0.0, 1.0, 0.0);
+      camera.rotate(30, 1.0, 0.0, 0.0);
+      setup_view();
 
-    // Set up the light position
-    lightPos = ShPoint3f(5.0, 5.0, 5.0);
+      // Set up the light position
+      lightPos = ShPoint3f(5.0, 5.0, 5.0);
+      disp = ShPoint3f(0, 0, 0);
     }
   catch (const ShException& e)
     {
-    std::cerr << "SH Exception: " << e.message() << std::endl;
-    return 1;
+      std::cerr << "SH Exception: " << e.message() << std::endl;
+      return 1;
     }
   catch (...)
     {
-    std::cerr << "Unknown exception caught." << std::endl;
-    return 1;
+      std::cerr << "Unknown exception caught." << std::endl;
+      return 1;
     }
-
-#if 0
-  cout << "Vertex Unit:" << endl;
-  vsh.node()->code()->print(cout);
-  cout << "--" << endl;
-  cout << "Fragment Unit:" << endl;
-  particle_fsh.node()->code()->print(cout);
-  cout << "--" << endl;
-  plane_fsh.node()->code()->print(cout);
-  cout << "--" << endl;
-#endif
  
   glutMainLoop();
   return 0;
-  }
+}
 
 void init_streams(void)
-  {
+{
   // Specifiy the generic particle update program, later it will
   // be specialized for the the actual particle update.
   particle = SH_BEGIN_PROGRAM("stream") {
@@ -400,6 +404,19 @@ void init_streams(void)
     ShAttrib1f mu(0.3);
     ShAttrib1f eps(0.6);
 
+    for (int i = 0; i < num_spheres; i++) { // Sphere collisions
+      ShPoint3f C = spheres[i].center;
+      ShAttrib1f r = spheres[i].radius;
+      ShVector3f PosC = pos - C;
+      ShVector3f N = normalize(PosC);
+      ShPoint3f S = C + N * r;
+      ShAttrib1f collide = ((PosC|PosC) < r * r) * ((vel|N) < 0);
+      pos = cond(collide, pos - 2.0 * ((pos - S)|N) * N, pos);
+      ShVector3f Vn = (vel|N) * N;
+      ShVector3f Vt = vel - Vn;
+      vel = cond(collide, (1.0 - mu) * Vt - eps * Vn, vel);
+    }
+
     // check if below ground level
     ShAttrib1f under = pos(1) < 0.0;
 
@@ -411,10 +428,6 @@ void init_streams(void)
     ShVector3f velt = vel - veln;
     vel = cond(under, (1.0 - mu)*velt - eps*veln, vel);
     pos(1) = cond(min(under, (vel|vel) < 0.1), ShPoint1f(0.0f), pos(1));
-
-    // clamp to the edge of the plane, just to make it look nice
-    pos(0) = min(max(pos(0), -5), 5);
-    pos(2) = min(max(pos(2), -5), 5);
   } SH_END;
 
   // Allocate ShHostMemory objects that will hold the particle position
@@ -422,97 +435,97 @@ void init_streams(void)
   // be double buffering the particle system updates. The memory
   // objects will allocate the memory needed internally, only the
   // size of the memory is given (in bytes, hence the 3*sizeof(float))
-  ShHostMemoryPtr host_posA = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
-  ShHostMemoryPtr host_posB = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
-  ShHostMemoryPtr host_velA = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
-  ShHostMemoryPtr host_velB = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
+  for (int i = 0; i < 2; i++) {
+    pos_memory[i] = new ShHostMemory(3*sizeof(float) * NUM_PARTICLES, SH_FLOAT);
+    vel_memory[i] = new ShHostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
+  }
 
   // Allocate the associated ShChannel objects for each of
   // the ShHostMemory objects. The type of channel will determine
   // how the memory object is interpreted, only the number of
   // elements is needed (i.e. no needed for the 3*sizeof(float),
   // this is implicit in the use of ShPoint3f/ShVector3f)
-  posA = ShChannel<ShPoint3f>(host_posA, NUM_PARTICLES);
-  posB = ShChannel<ShPoint3f>(host_posB, NUM_PARTICLES);
-  velA = ShChannel<ShVector3f>(host_velA, NUM_PARTICLES);
-  velB = ShChannel<ShVector3f>(host_velB, NUM_PARTICLES);
-
-  // Tie the postion and velocity data into an ShStream, one
-  // for the 'A' stream and one for the 'B' stream.
-  ShStream dataA = posA & velA;
-  ShStream dataB = posB & velB;
+  pos_stream = ShChannel<ShPoint3f>(pos_memory[0], NUM_PARTICLES);
+  vel_stream = ShChannel<ShVector3f>(vel_memory[0], NUM_PARTICLES);
 
   // Process the generic particle program into two versions, one that
   // uses the dataA stream and one that uses the dataB stream. Additionally,
   // we feed in two uniforms (gravity & delta) since these will not change
   // on a particle by particle basis (although they can be changed globally).
-  particle_updateA = shSwizzle(0, 1) << (particle << dataA << gravity << delta);
-  particle_updateB = shSwizzle(0, 1) << (particle << dataB << gravity << delta);
+  particle = shSwizzle(0, 1) << (particle << pos_stream << vel_stream << gravity << delta);
 
   // Everything has been setup for the particle system to operate, last
   // thing is to set the initial data.
   reset_streams();
-  }
+}
 
 void reset_streams(void)
-  {
+{
   // Set our time counter to zero
   simtime = 0.0;
+  
+  spheres[0].center = ShPoint3f(0, 3, 0);
+  spheres[0].radius = ShAttrib1f(1);
     
-  // Use the ShChannels objects to find the associated ShHostStorage and
-  // then fetch the raw data and cast to a float pointer.
-  ShHostStoragePtr posA_storage = shref_dynamic_cast<ShHostStorage>(posA.memory()->findStorage("host"));
-  ShHostStoragePtr velA_storage = shref_dynamic_cast<ShHostStorage>(velA.memory()->findStorage("host"));
-
   // these storages maybe cached on the graphics card, flag them
   // as dirty so that:
   // 1) the latest copies will be on the host 
   // 2) after reseting the stream, the graphics card copy will be updated
-  posA_storage->dirty();
-  velA_storage->dirty();
+  pos_memory[0]->hostStorage()->dirty();
+  vel_memory[0]->hostStorage()->dirty();
 
-  float* posA_data = (float*)posA_storage->data();
-  float* velA_data = (float*)velA_storage->data();
+  float* pos_data = reinterpret_cast<float*>(pos_memory[0]->hostStorage()->data());
+  float* vel_data = reinterpret_cast<float*>(vel_memory[0]->hostStorage()->data());
 
   // Iterate over the particle and initialize their state
-  for(int i = 0; i < NUM_PARTICLES; i++)
-    {
+  for(int i = 0; i < NUM_PARTICLES; i++) {
     // All the particles will start at the same places
-    posA_data[3*i+0] = 0;
-    posA_data[3*i+1] = 1;
-    posA_data[3*i+2] = 0;
+    pos_data[3*i+0] = 1.0*((float)rand()/(RAND_MAX-1))-0.5;
+    pos_data[3*i+1] = 5;
+    pos_data[3*i+2] = 0;
 
     // The velocity direction will vary over a small cone of angles.
-    float theta = 2*M_PI*((float)rand()/(RAND_MAX-1));
-    float phi = 0.7*(M_PI/2) + 0.2*(M_PI/2)*((float)rand()/(RAND_MAX-1));
 
-    float cost = cos(theta);
-    float sint = sin(theta);
-    float cosp = cos(phi);
-    float sinp = sin(phi);
+    /*
+      float theta = 2*M_PI*((float)rand()/(RAND_MAX-1));
+      float phi = 0.7*(M_PI/2) + 0.2*(M_PI/2)*((float)rand()/(RAND_MAX-1));
 
+      float cost = cos(theta);
+      float sint = sin(theta);
+      float cosp = cos(phi);
+      float sinp = sin(phi);
+    */
     // Additionally, vary the speed (i.e. magnitude of the velocity vector)
-    float power = 5 + 3*((float)rand()/(RAND_MAX-1));
+    // float power = 5 + 3*((float)rand()/(RAND_MAX-1));
 
-    velA_data[3*i+0] = power*sint*cosp;
-    velA_data[3*i+1] = power*sinp;
-    velA_data[3*i+2] = power*cost*cosp;
+    vel_data[3*i+0] = 0.04*((float)rand()/(RAND_MAX-1)) - 0.02;
+    vel_data[3*i+1] = 0;
+    vel_data[3*i+2] = 1.9 + 0.2*((float)rand()/(RAND_MAX-1));
+
+    for (int m = 0; m < 3; m++) {
+      pos_data[3*i+m] += /* vel_data[3*i+m] * */ ((float)rand()/(RAND_MAX-1)) * 0.1;
     }
+  }
 
   // reset the dir flag to that the simulation will start with the 'A' stream
   dir = 0;
-  }
+  
+  pos_stream.count(8);
+  vel_stream.count(8);
+  nump = 8;
+}
 
 void init_shaders(void)
-  {
+{
   // This vertex program will be used for all our shading, it
   // simply transforms the incoming position/normal and generates
   // a light vector. 
-  vsh = SH_BEGIN_PROGRAM("gpu:vertex") {
+  ShProgram plane_vsh = SH_BEGIN_PROGRAM("gpu:vertex") {
     ShInOutPosition4f pos;
     ShInOutNormal3f normal;
     ShOutputVector3f lightv;
 
+    pos(0,1,2) += disp;
     // Compute viewspace position
     ShPoint3f posv = (mv | pos)(0,1,2);
 
@@ -524,7 +537,20 @@ void init_shaders(void)
 
     // Project normal
     normal = mv | normal;
+  } SH_END;
 
+  // This vertex program will be used for all our shading, it
+  // simply transforms the incoming position/normal and generates
+  // a light vector. 
+  ShProgram particle_vsh = SH_BEGIN_PROGRAM("gpu:vertex") {
+    ShInOutPosition4f pos;
+    ShInOutNormal3f normal;
+
+    // Compute viewspace position
+    ShPoint3f posv = (mv | pos)(0,1,2);
+
+    // Project position
+    pos = mvd | pos;
   } SH_END;
 
   // This fragment shader will be used to shade our particle. Its
@@ -532,22 +558,34 @@ void init_shaders(void)
   // program will be used in conjunction with this fragment program
   // the transformed normal and generated light vector are simply
   // ignored.
-  particle_fsh = SH_BEGIN_PROGRAM("gpu:fragment") {
-    ShOutputColor3f color;
+  ShProgram particle_fsh = SH_BEGIN_PROGRAM("gpu:fragment") {
+    ShInputNormal3f normal;
+    ShOutputColor4f color;
 
-    color = cond(simtime < 0.5,
-                 lerp(simtime * 2.0,
-                      ShConstColor3f(1.0, 0.0, 0.0),   // red
-                      ShConstColor3f(1.0, 1.0, 0.0)),  // yellow
-                 lerp(min((simtime - 0.5) * 2.0, 1.0),
-                      ShConstColor3f(0.0, 0.0, 1.0),   // blue
-                      ShConstColor3f(1.0, 0.0, 0.0))); // red
+    ShAttrib1f speed = length(normal);
+
+    normal = normalize(normal);
+    ShVector3f light = normalize(ShVector3f(0.0, -1.0, -1.0));
+    ShAttrib1f interpolator = dot(normal, light);
+
+    ShColor3f warm(0.8, 0.3, 0.2), cold(0.3, 0.1, 0.0);
+
+    color(0,1,2) = lerp(interpolator * 0.5 + 0.5, warm, cold);
+    
+    color(0,1,2) += speed * ShColor3f(0.1, 0.1, 0.1);
+
+    // color(0,1,2) = abs(join(sin(particle_index), cos(particle_index), 1.0/(particle_index + 1.0)));
+    color(3) = 1.0;
+
+    ShColor3f matrix_color(0.0, 0.0, 0.0);
+    matrix_color(1) = length(color(0,1,2));
+    color(0,1,2) = cond(matrix_mode, matrix_color, color(0,1,2));
   } SH_END;
 
   // This fragment shader will be used to shade the other pieces
   // of geometry (the plane and particle shooter). Its just a simple
   // diffuse shader (using the global uniform diffuse_color).
-  plane_fsh = SH_BEGIN_PROGRAM("gpu:fragment") {
+  ShProgram plane_fsh = SH_BEGIN_PROGRAM("gpu:fragment") {
     ShInputPosition4f pos;
     ShInputNormal3f normal;
     ShInputVector3f lightv;
@@ -557,47 +595,53 @@ void init_shaders(void)
     lightv = normalize(lightv);
     
     color = (normal|lightv)*diffuse_color;
+
+    ShColor3f matrix_color(0.0, 0.0, 0.0);
+    matrix_color(1) = length(color(0,1,2));
+    color(0,1,2) = cond(matrix_mode, matrix_color, color(0,1,2));
   } SH_END;
 
-  particle_shaders = new ShProgramSet(vsh, particle_fsh);
-  plane_shaders = new ShProgramSet(vsh, plane_fsh);
-  }
+  particle_shaders = new ShProgramSet(particle_vsh, particle_fsh);
+  plane_shaders = new ShProgramSet(plane_vsh, plane_fsh);
+}
 
 void update_streams(void)
-  {
+{
   shUnbind(*plane_shaders);
   shUnbind(*particle_shaders);
 
-  try 
-    {
+
+  try {
     // The value of dir specifcies whether to run particle_updateA, which
     // will take the data from stream 'A' and run the particle program to
     // generate stream 'B', or the opposite using 'B' to generate 'A'. The
     // rendering code uses dir in the same way to decided which stream has
     // the latest state data for draw drawing the particle.
-    if (dir == 0)
-      {
-      posB & velB = particle_updateA;
-      }
-    else
-      {
-      posA & velA = particle_updateB;
-      }
+    if (dir == 0) {
+      nump += 64;
+      std::cerr << "Setting size to " << nump << std::endl;
+      pos_stream.count(nump);
+      vel_stream.count(nump);
+    }
+
+    ShChannel<ShPoint3f> pos_dest(pos_memory[1 - dir], pos_stream.count());
+    ShChannel<ShVector3f> vel_dest(vel_memory[1 - dir], vel_stream.count());
+
+    pos_stream.memory(pos_memory[dir], pos_stream.count());
+    vel_stream.memory(vel_memory[dir], vel_stream.count());
+
+    pos_dest & vel_dest = particle;
     dir = !dir;
     simtime += timedelta;
-    }
-  catch (const ShException& e)
-    {
+  } catch (const ShException& e) {
     std::cerr << "SH Exception: " << e.message() << std::endl;
-    }
-  catch (...)
-    {
+  } catch (...) {
     std::cerr << "Unknown exception caught." << std::endl;
-    }
   }
+}
 
 int gprintf(int x, int y, char* fmt, ...)
-  {
+{
   char temp[1024];
   va_list va;
   va_start(va, fmt);
@@ -626,8 +670,8 @@ int gprintf(int x, int y, char* fmt, ...)
   glRasterPos2f(x, y);
   while(*p)
     {
-    glutBitmapCharacter(GLUT_BITMAP_8_BY_13, (*p));
-    p++;
+      glutBitmapCharacter(GLUT_BITMAP_8_BY_13, (*p));
+      p++;
     }
 
   // reset OpenGL to what is was
@@ -639,4 +683,4 @@ int gprintf(int x, int y, char* fmt, ...)
   glPopMatrix();
 
   return p-temp;
-  }
+}

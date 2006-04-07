@@ -36,6 +36,8 @@ class ShChannel : public ShMetaForwarder {
 public:
   /// Construct a channel without any associated memory.
   ShChannel();
+  /// Construct a channel with a memory containing \a count elements
+  ShChannel(int count);
   /// Construct a channel with \a count elements in \a memory
   ShChannel(const ShMemoryPtr& memory, int count);
 
@@ -44,11 +46,27 @@ public:
 
   /// Return the number of elements in this channel
   int count() const;
+  /// Set the number of elements in this channel
   void count(int c);
   /// Return this channel's memory
   ShPointer<const ShMemory> memory() const;
   /// Return this channel's memory
   ShMemoryPtr memory();
+
+  /// Set the stride on the elements of this channel
+  void stride(int stride);
+  /// Set the offset on the elements of this channel
+  void offset(int offset);
+  
+  /// Fetch the stride for this stream
+  int stride();
+  /// Fetch the offset for this stream
+  int offset();
+  
+  /// Sync and return a pointer to the channel's host storage
+  typename T::mem_type* read_data();
+  /// Dirty and return a pointer to the channel's host storage
+  typename T::mem_type* write_data();
 
   /// Fetch the current element from this stream.
   /// This is only useful in stream programs

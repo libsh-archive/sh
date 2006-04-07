@@ -17,27 +17,48 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef PBUFFERSTREAMS_HPP
-#define PBUFFERSTREAMS_HPP
+#ifndef FBOCACHE_HPP
+#define FBOCACHE_HPP
 
-#include "ShProgram.hpp"
-#include "GlBackend.hpp"
+#include "GlTextureStorage.hpp"
 
 namespace shgl {
 
-struct PBufferStreams : public StreamStrategy {
-  PBufferStreams();
-  virtual ~PBufferStreams();
+class FBOCache {
+public:
 
-  void execute(const SH::ShProgramNodeCPtr& program, 
-               SH::ShStream& dest, TextureStrategy* texture);
+  static FBOCache *instance();
 
-  virtual StreamStrategy* create();
+  void bindFramebuffer();
+  void unbindFramebuffer();
+  void check();
 
-private:
-  SH::ShProgramSet* m_shaders;
-  bool m_setup_vp;
-  SH::ShProgram m_vp;
+  void bindTexture(GlTextureStoragePtr storage, 
+                   GLenum attachment, GLint zoffset);
+  GLenum bindTexture(GlTextureStoragePtr storage, GLint zoffset);
+
+//private:
+  FBOCache();
+  void updateLRU();
+  void fbTexture(GlTextureStoragePtr storage, GLenum attachment, GLint zoffset);
+  
+  struct FBO {
+    GLuint id;
+    GlTextureStoragePtr m_attachment[16];
+    GLint m_zoffset[16];
+    bool m_used[16];
+    FBO *m_lru_next, *m_lru_prev;
+  };
+  
+  static const int NUM_FBOS = 8;
+  FBO m_fbo[NUM_FBOS];
+  
+  FBO *m_lru;
+  GLint m_original_fbo;
+  
+  std::stack<FBO *> m_fbo_stack;
+  
+  static FBOCache *m_instance;
 };
 
 }

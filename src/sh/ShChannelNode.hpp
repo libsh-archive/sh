@@ -38,12 +38,20 @@ public:
   ShPointer<const ShMemory> memory() const;
   ShMemoryPtr memory();
   
-  int count() const;
-  void count(int c);
+  int count() const { return m_count; }
+  void count(int count) { m_count = count; }
+  
+  int stride() const { return m_stride; }
+  void stride(int stride) { m_stride = stride; }
+  
+  int offset() const { return m_offset; }
+  void offset(int offset) { m_offset = offset; }
   
 private:
   ShMemoryPtr m_memory;
   int m_count;
+  int m_stride;
+  int m_offset;
 
   // NOT IMPLEMENTED
   ShChannelNode(const ShChannelNode& other);

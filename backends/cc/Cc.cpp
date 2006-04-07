@@ -661,7 +661,7 @@ bool CcBackendCode::execute(ShStream& dest)
     ShHostStoragePtr storage = shref_dynamic_cast<ShHostStorage>(channel->memory()->findStorage("host"));
       
     int datasize = shTypeInfo(channel->valueType(), SH_MEM)->datasize();
-    stream_sizes[sidx] = datasize * channel->size();
+    stream_sizes[sidx] = datasize * channel->size() * channel->stride();
     stream_types[sidx] = channel->valueType();
 
     if (!storage) {
@@ -669,7 +669,8 @@ bool CcBackendCode::execute(ShStream& dest)
 				  datasize * channel->size() * channel->count(), channel->valueType());
     }
     storage->dirty();
-    streams[sidx] = storage->data();
+    streams[sidx] = reinterpret_cast<char*>(storage->data()) +
+                    datasize * channel->size() * channel->offset();
   }
 
   int tidx = 0;
@@ -698,7 +699,7 @@ bool CcBackendCode::execute(ShStream& dest)
 								 channel->memory()->findStorage("host"));
 
     int datasize = shTypeInfo(channel->valueType(), SH_MEM)->datasize();
-    output_sizes[oidx] = datasize * channel->size();
+    output_sizes[oidx] = datasize * channel->size() * channel->stride();
     output_types[oidx] = channel->valueType();
 
     if (!storage) {
@@ -707,7 +708,8 @@ bool CcBackendCode::execute(ShStream& dest)
 				  datasize * channel->size() * channel->count(), channel->valueType());
     }
     storage->dirty();
-    outputs[oidx] = storage->data();
+    outputs[oidx] = reinterpret_cast<char*>(storage->data()) +
+                    datasize * channel->size() * channel->offset();
     SH_CC_DEBUG_PRINT("  outputs[" << oidx << "] = " << outputs[oidx]);
 
     if (count == 0) {

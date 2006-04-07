@@ -28,6 +28,7 @@
 #include "ShVariableNode.hpp"
 #include "ShInternals.hpp"
 #include "ShTransformer.hpp"
+#include "ShTextureNode.hpp"
 
 // #define SH_DBG_TRANSFORMER
 

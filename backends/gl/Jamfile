@@ -1,34 +1,29 @@
-alias buffer-context
+import os ;
+if [ os.on-unix ] {
+  alias pbuffer-context : GLXPBufferContext.cpp PBufferContext.cpp ;
+}
+else {
+  alias pbuffer-context : WGLPBufferContext.cpp PBufferContext.cpp ;
+}
+
+
+alias gl
 : # sources
-	WGLPBufferContext.cpp
-: # requirements
-	<toolset>msvc
-;
-
-alias buffer-context
-: # sources
-	GLXPBufferContext.cpp
-;
-
-
-local common =
-	[ glob GlTexture*.cpp ]
-	[ glob PBuffer*.cpp ]
-	GlBackend.cpp
-	Utils.cpp
-	buffer-context
+  pbuffer-context
+  [ glob GlTexture*.cpp ]
+  [ glob FBO*.cpp ]
+  GlBackend.cpp
+  Utils.cpp
 ;
 
 
 alias arb
 : # sources
-	[ glob Arb*.cpp ]
-	$(common)
+  [ glob Arb*.cpp ]
 ;
 
 
 alias glsl
 : # sources
-	[ glob Glsl*.cpp ]
-	$(common)
+  [ glob Glsl*.cpp ]
 ;

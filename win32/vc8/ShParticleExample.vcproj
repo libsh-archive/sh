@@ -62,7 +62,7 @@
 				OutputFile="$(OutDir)/ShParticleExample.exe"
 				AdditionalLibraryDirectories="..\..\..\install\vc8\lib;..\..\..\glut\lib"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/ShParticleExample.pdb"
+				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
 				SubSystem="1"
 			/>
 			<Tool
@@ -136,6 +136,7 @@
 				OutputFile="$(OutDir)/ShParticleExample.exe"
 				AdditionalLibraryDirectories="..\..\..\install\vc8\lib;..\..\..\glut\lib"
 				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
 				SubSystem="1"
 			/>
 			<Tool

@@ -56,6 +56,11 @@ extern PFNWGLRELEASEPBUFFERDCARBPROC wglReleasePbufferDCARB;
 extern PFNWGLDESTROYPBUFFERARBPROC wglDestroyPbufferARB;
 extern PFNWGLQUERYPBUFFERARBPROC wglQueryPbufferARB;
 
+// ATI/ARB_draw_buffers
+extern PFNGLDRAWBUFFERSATIPROC glDrawBuffersATI;
+extern PFNGLDRAWBUFFERSARBPROC glDrawBuffersARB;
+
+// GL_ARB_shader_objects
 extern PFNGLGETOBJECTPARAMETERIVARBPROC glGetObjectParameterivARB;
 extern PFNGLGETINFOLOGARBPROC glGetInfoLogARB;
 extern PFNGLGETSHADERSOURCEARBPROC glGetShaderSourceARB;
@@ -89,6 +94,25 @@ extern PFNGLVALIDATEPROGRAMARBPROC glValidateProgramARB;
 extern PFNGLBINDATTRIBLOCATIONARBPROC glBindAttribLocationARB;
 extern PFNGLGETHANDLEARBPROC glGetHandleARB;
 
+// EXT_framebuffer_object
+extern PFNGLISRENDERBUFFEREXTPROC glIsRenderbufferEXT;
+extern PFNGLBINDRENDERBUFFEREXTPROC glBindRenderbufferEXT;
+extern PFNGLDELETERENDERBUFFERSEXTPROC glDeleteRenderbuffersEXT;
+extern PFNGLGENRENDERBUFFERSEXTPROC glGenRenderbuffersEXT;
+extern PFNGLRENDERBUFFERSTORAGEEXTPROC glRenderbufferStorageEXT;
+extern PFNGLGETRENDERBUFFERPARAMETERIVEXTPROC glGetRenderbufferParameterivEXT;
+extern PFNGLISFRAMEBUFFEREXTPROC glIsFramebufferEXT;
+extern PFNGLBINDFRAMEBUFFEREXTPROC glBindFramebufferEXT;
+extern PFNGLDELETEFRAMEBUFFERSEXTPROC glDeleteFramebuffersEXT;
+extern PFNGLGENFRAMEBUFFERSEXTPROC glGenFramebuffersEXT;
+extern PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC glCheckFramebufferStatusEXT;
+extern PFNGLFRAMEBUFFERTEXTURE1DEXTPROC glFramebufferTexture1DEXT;
+extern PFNGLFRAMEBUFFERTEXTURE2DEXTPROC glFramebufferTexture2DEXT;
+extern PFNGLFRAMEBUFFERTEXTURE3DEXTPROC glFramebufferTexture3DEXT;
+extern PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC glFramebufferRenderbufferEXT;
+extern PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC glGetFramebufferAttachmentParameterivEXT;
+extern PFNGLGENERATEMIPMAPEXTPROC glGenerateMipmapEXT;
+
 // extern PFN ARBPROC ARB;
 
 #else
@@ -114,13 +138,15 @@ struct TextureStrategy {
   virtual ~TextureStrategy() {}
   virtual TextureStrategy* create() = 0;
   virtual void bindTexture(const SH::ShTextureNodePtr& texture,
-                           GLenum target) = 0;
+                           GLenum target, bool write) = 0;
 };
 
 struct StreamStrategy {
   virtual ~StreamStrategy() {}
   virtual StreamStrategy* create() = 0;
-  virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest) = 0;
+  virtual void execute(const SH::ShProgramNodeCPtr& program, 
+                       SH::ShStream& dest,
+                       TextureStrategy* texture) = 0;
 };
 
 struct CodeStrategy {

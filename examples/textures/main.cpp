@@ -111,6 +111,15 @@ void initShaders()
   } SH_END;
 
   shaders = new ShProgramSet(vsh, fsh);
+
+#if 0
+  cout << "Vertex Unit:" << endl;
+  vsh.node()->code()->print(cout);
+  cout << "--" << endl;
+  cout << "Fragment Unit:" << endl;
+  fsh.node()->code()->print(cout);
+  cout << "--" << endl;
+#endif
 }
 
 void display()
@@ -268,8 +277,6 @@ int main(int argc, char** argv)
     shUseBackend(argv[1]);
   }
 
-  initShaders();
-
   try {
 #ifdef __APPLE__
     CFBundleRef mainBundle = CFBundleGetMainBundle();
@@ -358,15 +365,6 @@ int main(int argc, char** argv)
   xTexture();
   
   shBind(*shaders);
-  
-#if 0
-  cout << "Vertex Unit:" << endl;
-  vsh.node()->code()->print(cout);
-  cout << "--" << endl;
-  cout << "Fragment Unit:" << endl;
-  fsh.node()->code()->print(cout);
-  cout << "--" << endl;
-#endif
   
   glutMainLoop();
 

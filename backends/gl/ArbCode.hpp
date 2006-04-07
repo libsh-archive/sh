@@ -34,6 +34,9 @@
 #include "ArbReg.hpp"
 #include "ArbInst.hpp"
 
+#include <map>
+#include <set>
+
 namespace shgl {
 
 class ArbCode;
@@ -170,8 +173,7 @@ private:
     
   void bindSpecial(const SH::ShProgramNode::VarList::const_iterator& begin,
                    const SH::ShProgramNode::VarList::const_iterator& end,
-                   const ArbBindingSpecs& specs, 
-                   std::vector<int>& bindings,
+                   bool is_output, std::map<ArbRegBinding, std::set<int> >& bindings,
                    ArbRegType type, int& num);
 
   /// Output a use of a variable.
@@ -232,8 +234,8 @@ private:
   typedef std::list< SH::ShPointer<ArbReg> > RegList;
   RegList m_reglist;
 
-  std::vector<int> m_outputBindings;
-  std::vector<int> m_inputBindings;
+  std::map<ArbRegBinding, std::set<int> > m_outputBindings;
+  std::map<ArbRegBinding, std::set<int> > m_inputBindings;
 
   /// Map any new variables that we create back to their originals in
   /// m_originalShader.

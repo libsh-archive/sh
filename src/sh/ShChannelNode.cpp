@@ -18,12 +18,13 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include "ShChannelNode.hpp"
+#include "ShAttrib.hpp"
 
 namespace SH {
 
 ShChannelNode::ShChannelNode(ShSemanticType specType, int elements, ShValueType valueType)
   : ShVariableNode(SH_STREAM, elements, valueType),
-    m_memory(0), m_count(0)
+    m_memory(0), m_count(0), m_stride(1), m_offset(0)
 {
   specialType(specType);
 }
@@ -31,7 +32,7 @@ ShChannelNode::ShChannelNode(ShSemanticType specType, int elements, ShValueType 
 ShChannelNode::ShChannelNode(ShSemanticType specType, int elements, ShValueType valueType,
                              const ShMemoryPtr& memory, int count)
   : ShVariableNode(SH_STREAM, elements, valueType),
-    m_memory(memory), m_count(count)
+    m_memory(memory), m_count(count), m_stride(1), m_offset(0)
 {
   specialType(specType);
 }
@@ -56,14 +57,5 @@ ShMemoryPtr ShChannelNode::memory()
   return m_memory;
 }
 
-int ShChannelNode::count() const
-{
-  return m_count;
 }
 
-void ShChannelNode::count(int c)
-{
-  m_count = c;
-}
-
-}

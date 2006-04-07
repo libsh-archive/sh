@@ -1095,39 +1095,92 @@ void ArbCode::allocRegs()
 
 void ArbCode::bindSpecial(const ShProgramNode::VarList::const_iterator& begin,
                           const ShProgramNode::VarList::const_iterator& end,
-                          const ArbBindingSpecs& specs, 
-                          vector<int>& bindings,
+                          bool is_output, map<ArbRegBinding, set<int> >& bindings,
                           ArbRegType type, int& num)
 {
-  bindings.push_back(0);
-  
-  if (specs.semanticType == SH_ATTRIB) return;
-  
+  // Pass 1: bind the variables with a user-specified semantic_index
   for (ShProgramNode::VarList::const_iterator I = begin; I != end; ++I) {
     ShVariableNodePtr node = *I;
-    
+
+    if (node->meta("opengl:semantic_index").empty()) continue;
     if (m_registers.find(node) != m_registers.end()) continue;
-    if (node->specialType() != specs.semanticType) continue;
+
+    for (int i = 0; arbBindingSpecs(is_output, m_unit)[i].binding != SH_ARB_REG_NONE; ++i) {
+      const ArbBindingSpecs& specs = arbBindingSpecs(is_output, m_unit)[i];
+
+      if (specs.semanticType == SH_ATTRIB) continue;
+      if (node->specialType() != specs.semanticType) continue;
+
+      int index = -1;
+      stringstream ss;
+      ss << node->meta("opengl:semantic_index");
+      ss >> index;
+        
+      if (bindings[specs.binding].find(index) == bindings[specs.binding].end()) {
+        m_registers[node] = new ArbReg(type, num++, node->name());
+        m_registers[node]->binding.type = specs.binding;
+        m_registers[node]->binding.index = index;
+        m_reglist.push_back(m_registers[node]);
+        
+        bindings[specs.binding].insert(index);
+        break;
+      } else {
+        // Index is not available, continue looking for a match
+      }
+    }
+  }
+
+  // Pass 2: map all other variables which match the semantic type of the built-in variable
+  for (ShProgramNode::VarList::const_iterator I = begin; I != end; ++I) {
+    ShVariableNodePtr node = *I;
+
+    if (m_registers.find(node) != m_registers.end()) continue;
+
+    for (int i = 0; arbBindingSpecs(is_output, m_unit)[i].binding != SH_ARB_REG_NONE; ++i) {
+      const ArbBindingSpecs& specs = arbBindingSpecs(is_output, m_unit)[i];
+
+      if (specs.semanticType == SH_ATTRIB) continue;
+      if (node->specialType() != specs.semanticType) continue;
     
-    m_registers[node] = new ArbReg(type, num++, node->name());
-    m_registers[node]->binding.type = specs.binding;
-    m_registers[node]->binding.index = bindings.back();
-    m_reglist.push_back(m_registers[node]);
-    
-    bindings.back()++;
-    if (bindings.back() == specs.maxBindings) break;
-  }    
+      string semantic_index = node->meta("opengl:semantic_index");
+      if (!semantic_index.empty()) {
+        SH_DEBUG_WARN(string("Variable '") << node->name() 
+                      << "' was assigned a semantic_index of " << semantic_index
+                      << " but that index has already been used.  "
+                      << "Ignoring user-specified index.");
+      }
+      
+      // Go through all indices and check if they're taken
+      int index = -1;
+      for (int j=0; j < specs.maxBindings; ++j) {
+        if (bindings[specs.binding].find(j) == bindings[specs.binding].end()) {
+          index = j;
+          break;
+        }
+      }
+      
+      if (index > -1) {
+        m_registers[node] = new ArbReg(type, num++, node->name());
+        m_registers[node]->binding.type = specs.binding;
+        m_registers[node]->binding.index = index;
+        m_reglist.push_back(m_registers[node]);
+        
+        bindings[specs.binding].insert(index);
+        break;
+      } else {
+        // All indices are taken, continue looking for a match
+      }
+    }
+  }
 }
 
 void ArbCode::allocSemanticInputs(const ArbLimits& limits)
+
 {
   // First, try to assign some "special" input register bindings
-  for (int i = 0; arbBindingSpecs(false, m_unit)[i].binding != SH_ARB_REG_NONE; i++) {
-    bindSpecial(m_shader->inputs.begin(), m_shader->inputs.end(),
-                arbBindingSpecs(false, m_unit)[i], m_inputBindings,
-                SH_ARB_REG_ATTRIB, m_numInputs);
-  }
-  
+  bindSpecial(m_shader->inputs.begin(), m_shader->inputs.end(), false,
+              m_inputBindings, SH_ARB_REG_ATTRIB, m_numInputs);
+
   int inputnb=0;
   for (ShProgramNode::VarList::const_iterator I = m_shader->inputs.begin();
        I != m_shader->inputs.end(); ++I, ++inputnb) {
@@ -1139,12 +1192,22 @@ void ArbCode::allocSemanticInputs(const ArbLimits& limits)
     for (int i = 0; arbBindingSpecs(false, m_unit)[i].binding != SH_ARB_REG_NONE; i++) {
       const ArbBindingSpecs& specs = arbBindingSpecs(false, m_unit)[i];
 
-      if (specs.allowGeneric && m_inputBindings[i] < specs.maxBindings) {
+      // Find the smallest unused index
+      int index = -1;
+      for (int j=0; j < specs.maxBindings; ++j) {
+        if (m_inputBindings[specs.binding].find(j) == m_inputBindings[specs.binding].end()) {
+          index = j;
+          break;
+        }
+      }
+
+      if (specs.allowGeneric && (index > -1)) {
+        cerr << node->name() << " was bound in allocSemanticInputs" << endl;
         m_registers[node] = new ArbReg(SH_ARB_REG_ATTRIB, m_numInputs++, node->name());
         m_reglist.push_back(m_registers[node]);
         m_registers[node]->binding.type = specs.binding;
-        m_registers[node]->binding.index = m_inputBindings[i];
-        m_inputBindings[i]++;
+        m_registers[node]->binding.index = index;
+        m_inputBindings[specs.binding].insert(index);
         bound = true;
         break;
       }
@@ -1208,12 +1271,9 @@ void ArbCode::allocInputs(const ArbLimits& limits)
 void ArbCode::allocOutputs(const ArbLimits& limits)
 {
   // First, try to assign some "special" output register bindings
-  for (int i = 0; arbBindingSpecs(true, m_unit)[i].binding != SH_ARB_REG_NONE; i++) {
-    bindSpecial(m_shader->outputs.begin(), m_shader->outputs.end(),
-                arbBindingSpecs(true, m_unit)[i], m_outputBindings,
-                SH_ARB_REG_OUTPUT, m_numOutputs);
-  }
-  
+  bindSpecial(m_shader->outputs.begin(), m_shader->outputs.end(), true, 
+              m_outputBindings, SH_ARB_REG_OUTPUT, m_numOutputs);
+
   for (ShProgramNode::VarList::const_iterator I = m_shader->outputs.begin();
        I != m_shader->outputs.end(); ++I) {
     ShVariableNodePtr node = *I;
@@ -1225,10 +1285,19 @@ void ArbCode::allocOutputs(const ArbLimits& limits)
     for (int i = 0; arbBindingSpecs(true, m_unit)[i].binding != SH_ARB_REG_NONE; i++) {
       const ArbBindingSpecs& specs = arbBindingSpecs(true, m_unit)[i];
 
-      if (specs.allowGeneric && m_outputBindings[i] < specs.maxBindings) {
+      // Find the smallest unused index
+      int index = -1;
+      for (int j=0; j < specs.maxBindings; ++j) {
+        if (m_outputBindings[specs.binding].find(j) == m_outputBindings[specs.binding].end()) {
+          index = j;
+          break;
+        }
+      }
+
+      if (specs.allowGeneric && (index > -1)) {
         m_registers[node]->binding.type = specs.binding;
-        m_registers[node]->binding.index = m_outputBindings[i];
-        m_outputBindings[i]++;
+        m_registers[node]->binding.index = index;
+        m_outputBindings[specs.binding].insert(index);
         break;
       }
     }
@@ -1560,7 +1629,7 @@ void ArbCode::bindTextures()
   for (ShProgramNode::TexList::const_iterator I = m_shader->textures.begin();
        I != m_shader->textures.end(); ++I) {
     if (!m_registers[*I]->preset) {
-      m_texture->bindTexture(*I, GL_TEXTURE0 + m_registers[*I]->index);
+      m_texture->bindTexture(*I, GL_TEXTURE0 + m_registers[*I]->index, false);
     }
   }
 }

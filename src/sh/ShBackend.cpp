@@ -32,15 +32,16 @@
 # define LOCAL_BACKEND_DIRNAME ".shbackends"
 #endif
 
-#include <algorithm>
-#include <cctype>
-
 #include "ShBackend.hpp"
 #include "ShProgram.hpp"
 #include "ShDebug.hpp"
 #include "ShInternals.hpp"
 #include "ShTransformer.hpp"
 #include "ShSyntax.hpp"
+
+#include <algorithm>
+#include <cctype>
+#include "binreloc.h"
 
 namespace {
 
@@ -431,7 +432,9 @@ void ShBackend::load_all_backends()
     load_libraries("/System/Library/Sh/Backends");
 # else
     load_libraries(string(getenv("HOME")) + "/" + LOCAL_BACKEND_DIRNAME);
-    load_libraries(string(SH_INSTALL_PREFIX) + "/lib/sh");
+    char* install_prefix = br_find_prefix(SH_INSTALL_PREFIX);
+    load_libraries(string(install_prefix) + "/lib/sh");
+    free(install_prefix);
 # endif
   } else {
     load_libraries(backend_dir);
@@ -510,8 +513,10 @@ void ShBackend::init()
     SH_DEBUG_ERROR("Could not add " + userpath + " to search dir: " << lt_dlerror());
   }
 
-  string searchpath(SH_INSTALL_PREFIX);
+  char* install_prefix = br_find_prefix(SH_INSTALL_PREFIX);
+  string searchpath(install_prefix);
   searchpath += "/lib/sh";
+  free(install_prefix);
   if (lt_dladdsearchdir(searchpath.c_str())) {
     SH_DEBUG_ERROR("Could not add " + searchpath + " to search dir: " << lt_dlerror());
   }

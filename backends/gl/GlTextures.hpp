@@ -31,7 +31,7 @@ public:
   TextureStrategy* create(void);
   
   void bindTexture(const SH::ShTextureNodePtr& texture,
-                   GLenum target);
+                   GLenum target, bool write);
 };
 
 }

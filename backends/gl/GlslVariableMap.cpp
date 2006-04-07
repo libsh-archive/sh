@@ -132,25 +132,92 @@ GlslVariableMap::~GlslVariableMap()
 }
 
 void GlslVariableMap::allocate_builtin(const ShVariableNodePtr& node,
-                                       const GlslBindingSpecs* specs, map<GlslVarBinding, int>& bindings,
-                                       bool generic)
+                                       const GlslBindingSpecs* specs, 
+                                       map<GlslVarBinding, set<int> >& bindings,
+                                       BuiltInPass pass_type)
 {
   if (m_varmap.find(node) != m_varmap.end()) return;
 
   for (const GlslBindingSpecs* s = specs; s->binding != SH_GLSL_VAR_NONE; s++) {
-    if (s->semantic_type == node->specialType() || (generic && s->allow_generic)) {
-      if (bindings[s->binding] >= s->max_bindings) continue;
+    int index = -1;
+    bool bind_variable = true;
+    if (USER_INDEX == pass_type) {
+      if (s->semantic_type != node->specialType()) continue;
 
-      GlslVariable var(node);
-      int index = -1;
-      if (GlslVariable::glslVarBindingInfo[s->binding].indexed) {
-	index = bindings[s->binding];
+      string semantic_index = node->meta("opengl:semantic_index");
+      if (semantic_index.empty()) continue; // will be done in a later pass
+
+      stringstream ss;
+      ss << semantic_index;
+      ss >> index;
+
+      if (bindings[s->binding].find(index) != bindings[s->binding].end()) {
+        // Index not available, skip this binding
+        continue;
       }
+
+      if (!GlslVariable::glslVarBindingInfo[s->binding].indexed) {
+        // Special case for a MULTITEXCOORD with a semantic_index
+        // since it's not handled by the array code (.indexed is false)
+        switch (s->binding) {
+        case SH_GLSL_VAR_MULTITEXCOORD0: bind_variable = (index == 0); break;
+        case SH_GLSL_VAR_MULTITEXCOORD1: bind_variable = (index == 1); break;
+        case SH_GLSL_VAR_MULTITEXCOORD2: bind_variable = (index == 2); break;
+        case SH_GLSL_VAR_MULTITEXCOORD3: bind_variable = (index == 3); break;
+        case SH_GLSL_VAR_MULTITEXCOORD4: bind_variable = (index == 4); break;
+        case SH_GLSL_VAR_MULTITEXCOORD5: bind_variable = (index == 5); break;
+        case SH_GLSL_VAR_MULTITEXCOORD6: bind_variable = (index == 6); break;
+        case SH_GLSL_VAR_MULTITEXCOORD7: bind_variable = (index == 7); break;
+        default:
+          SH_DEBUG_WARN(string("Variable '") << node->name() 
+                        << "' was assigned a semantic_index of " 
+                        << index << " but it is not of an indexed type.  "
+                        << "Ignoring user-specified index.");
+          break;
+        }
+        if (!bind_variable) continue;
+        index = -1;
+      }
+    } else {
+      if ((GENERIC == pass_type)  && !s->allow_generic) continue;
+
+      if (EXACT_SEMANTIC == pass_type) {
+        if (s->semantic_type != node->specialType()) continue;
+
+        string semantic_index = node->meta("opengl:semantic_index");
+        if (!semantic_index.empty()) {        
+          SH_DEBUG_WARN(string("Variable '") << node->name() 
+                        << "' was assigned a semantic_index of " << semantic_index
+                        << " but that index has already been used.  "
+                        << "Ignoring user-specified index.");
+        }
+      }
+
+      if (GlslVariable::glslVarBindingInfo[s->binding].indexed) {
+        // Go through all indices and check if they're taken
+        bind_variable = false;
+        for (int j=0; j < s->max_bindings; ++j) {
+          if (bindings[s->binding].find(j) == bindings[s->binding].end()) {
+            index = j;
+            bind_variable = true;
+            break;
+          }
+        }
+      } else {
+        index = -1;
+        bind_variable = (bindings[s->binding].find(index) == bindings[s->binding].end());
+      }
+    }
+
+    if (bind_variable) {
+      GlslVariable var(node);
       var.builtin(s->binding, index);
       map_insert(node, var);
-
-      bindings[s->binding]++;
+      
+      bindings[s->binding].insert(index);
       return;
+    } else {
+      // Continue looking for a good match
     }
   }
 }
@@ -196,15 +263,22 @@ void GlslVariableMap::allocate_generic_vertex_inputs()
 
 void GlslVariableMap::allocate_builtin_inputs()
 {
+  // Pass 1: bind variables with user-specified index (opengl:semantic_index)
   for (ShProgramNode::VarList::const_iterator i = m_shader->begin_inputs(); i != m_shader->end_inputs(); i++) {
-    allocate_builtin(*i, glslBindingSpecs(false, m_unit), m_input_bindings, false);
+    allocate_builtin(*i, glslBindingSpecs(false, m_unit), m_input_bindings, USER_INDEX);
+  }
+
+  // Pass 2: bind variables matching to their exact semantic type
+  for (ShProgramNode::VarList::const_iterator i = m_shader->begin_inputs(); i != m_shader->end_inputs(); i++) {
+    allocate_builtin(*i, glslBindingSpecs(false, m_unit), m_input_bindings, EXACT_SEMANTIC);
   }
   
+  // Pass 3: generic binding for the remaining variables
   int input_nb = 0;
   for (ShProgramNode::VarList::const_iterator i = m_shader->begin_inputs(); i != m_shader->end_inputs(); i++) {
-    allocate_builtin(*i, glslBindingSpecs(false, m_unit), m_input_bindings, true);
+    allocate_builtin(*i, glslBindingSpecs(false, m_unit), m_input_bindings, GENERIC);
     
-    // warn if the input could not be bound to a built-in variable during the second pass
+    // warn if the input could not be bound to a built-in variable during the third pass
     if (m_varmap.find(*i) == m_varmap.end()) {
       cerr << "Could not bind " << (shIsInteger((*i)->valueType()) ? "int" : "float") 
            << " input " << input_nb << " to a built-in variable." << endl;
@@ -215,15 +289,22 @@ void GlslVariableMap::allocate_builtin_inputs()
 
 void GlslVariableMap::allocate_builtin_outputs()
 {
+  // Pass 1: bind variables with user-specified index (opengl:semantic_index)
   for (ShProgramNode::VarList::const_iterator i = m_shader->begin_outputs(); i != m_shader->end_outputs(); i++) {
-    allocate_builtin(*i, glslBindingSpecs(true, m_unit), m_output_bindings, false);
+    allocate_builtin(*i, glslBindingSpecs(true, m_unit), m_output_bindings, USER_INDEX);
   }
 
+  // Pass 2: bind variables matching to their exact semantic type
+  for (ShProgramNode::VarList::const_iterator i = m_shader->begin_outputs(); i != m_shader->end_outputs(); i++) {
+    allocate_builtin(*i, glslBindingSpecs(true, m_unit), m_output_bindings, EXACT_SEMANTIC);
+  }
+
+  // Pass 3: generic binding for the remaining variables
   int output_nb = 0;
   for (ShProgramNode::VarList::const_iterator i = m_shader->begin_outputs(); i != m_shader->end_outputs(); i++) {
-    allocate_builtin(*i, glslBindingSpecs(true, m_unit), m_output_bindings, true);
+    allocate_builtin(*i, glslBindingSpecs(true, m_unit), m_output_bindings, GENERIC);
 
-    // warn if the output could not be bound to a built-in variable during the second pass
+    // warn if the output could not be bound to a built-in variable during the third pass
     if (m_varmap.find(*i) == m_varmap.end()) {
       cerr << "Could not bind " << (shIsInteger((*i)->valueType()) ? "int" : "float") 
 	   << " output " << output_nb << " to a built-in variable." << endl;

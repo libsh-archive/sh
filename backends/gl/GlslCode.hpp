@@ -109,6 +109,30 @@ private:
   // bound, if any
   GLhandleARB m_bound;
 
+  // Data about the current GLSL target vendor
+  enum Vendor {
+    VENDOR_ATI = 0,
+    VENDOR_NVIDIA,
+    VENDOR_OTHER,
+    VENDOR_UNKNOWN
+  } m_vendor;
+
+  // Possible extension behaviours from least required to most required
+  enum ExtBehaviour {
+    EXT_DISABLE = 0,
+    EXT_WARN = 1,
+    EXT_ENABLE = 2,
+    EXT_REQUIRE = 3
+  };
+
+  // Map of extensions to behaviours
+  typedef std::map<std::string, ExtBehaviour> ExtensionMap;
+  ExtensionMap m_glsl_extensions;
+
+
+  /// Require a specific behaviour level from the given extension
+  void use_extension(const std::string &ext, ExtBehaviour behaviour);
+
   /// Add a line to the source code (m_lines)
   void append_line(const std::string& line, bool append_semicolon = true);
 

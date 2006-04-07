@@ -5,7 +5,7 @@ LDADD = -lsh -lshutil $(GL_LIBS)
 TESTS = abs add cbrt ceil clamp comparisons cross dec_inc div dot exp \
 	floor frac length_distance lerp lighting log logical mad \
 	matrix_add matrix_div matrix_functions matrix_mul matrix_neg \
-	matrix_sub max_min misc mod mul neg poly pow prod_sum rcp rnd \
+	matrix_sub max_min misc mod mul neg offset_stride poly pow prod_sum rcp rnd \
 	sign smooth_clamp sqrt sub tex trig
 check_PROGRAMS = $(TESTS)
 BACKENDS = arb cc host glsl
@@ -81,6 +81,7 @@ mul_SOURCES = mul.cpp $(common)
 EXTRA_DIST += mul.cpp.py
 neg_SOURCES = neg.cpp $(common)
 EXTRA_DIST += neg.cpp.py
+offset_stride_SOURCES = offset_stride.cpp $(common)
 poly_SOURCES = poly.cpp $(common)
 EXTRA_DIST += poly.cpp.py
 pow_SOURCES = pow.cpp $(common)

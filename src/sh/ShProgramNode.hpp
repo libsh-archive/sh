@@ -30,8 +30,8 @@
 #include "ShVariableNode.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShTextureNode.hpp"
-#include "ShChannelNode.hpp"
 #include "ShPaletteNode.hpp"
+#include "ShChannelNode.hpp"
 #include "ShMeta.hpp"
 
 namespace SH {

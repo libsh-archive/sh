@@ -27,6 +27,7 @@
 #include "ShDebug.hpp"
 #include "ShTextureNode.hpp"
 #include "ShPaletteNode.hpp"
+#include "ShChannelNode.hpp"
 #include "ShCtrlGraph.hpp"
 #include "ShError.hpp"
 

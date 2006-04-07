@@ -130,6 +130,9 @@
 			Name="Source Files"
 			Filter="">
 			<File
+				RelativePath="..\..\src\sh\binreloc.c">
+			</File>
+			<File
 				RelativePath="..\..\src\sh\ShAlgebra.cpp">
 			</File>
 			<File
@@ -197,9 +200,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\sh\ShInternals.cpp">
-			</File>
-			<File
-				RelativePath="..\..\src\sh\ShLinearAllocator.cpp">
 			</File>
 			<File
 				RelativePath="..\..\src\sh\ShManipulator.cpp">

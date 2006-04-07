@@ -71,19 +71,6 @@ private:
 
 #endif
 
-// Extract the backend name from the target if there is one (including the colon)
-static string get_target_backend(const ShProgramNodeCPtr& program)
-{
-  const string& target = program->target();
-  string::size_type colon_pos = target.find(":");
-
-  if (target.npos == colon_pos) {
-    return "";
-  } else {
-    return target.substr(0, colon_pos+1); // includes the colon
-  }
-}
-
 class PBufferStreamException : public ShException {
 public:
   PBufferStreamException(const std::string& message)
@@ -91,115 +78,6 @@ public:
   {
   }
 };
-
-class PBufferStreamCache : public ShInfo {
-public:
-  PBufferStreamCache(ShProgramNode* stream_program,
-                     ShProgramNode* vertex_program);
-
-  ShInfo* clone() const;
-
-  void update_channels(int width, int height);
-
-  void build_sets(ShProgramNode* vertex_program);
-
-  typedef std::list<ShProgramSetPtr>::iterator set_iterator;
-  typedef std::list<ShProgramSetPtr>::const_iterator set_const_iterator;
-  typedef std::list<ShProgramNodePtr>::iterator program_iterator;
-  typedef std::list<ShProgramNodePtr>::const_iterator program_const_iterator;
-
-  set_iterator sets_begin() { return m_program_sets.begin(); }
-  set_iterator sets_end() { return m_program_sets.end(); }
-  set_const_iterator sets_begin() const { return m_program_sets.begin(); }
-  set_const_iterator sets_end() const { return m_program_sets.end(); }
-
-  program_iterator programs_begin() { return m_programs.begin(); }
-  program_iterator programs_end() { return m_programs.end(); }
-  program_const_iterator programs_begin() const { return m_programs.begin(); }
-  program_const_iterator programs_end() const { return m_programs.end(); }
-  
-private:
-  ShProgramNode* m_stream_program;
-  ShProgramNode* m_vertex_program;
-  ChannelMap m_channel_map;
-  std::list<ShProgramNodePtr> m_programs;
-  std::list<ShProgramSetPtr> m_program_sets;
-
-  PBufferStreamCache(const PBufferStreamCache& other);
-  PBufferStreamCache& operator=(const PBufferStreamCache& other);
-};
-
-PBufferStreamCache::PBufferStreamCache(ShProgramNode* stream_program,
-                                       ShProgramNode* vertex_program)
-  : m_stream_program(stream_program),
-    m_vertex_program(vertex_program)
-{
-  FloatExtension extension = PBufferFactory::instance()->get_extension();
-  ShTextureDims dims(SH_TEXTURE_2D);
-  
-  switch (extension) {
-  case SH_ARB_NV_FLOAT_BUFFER:
-    dims = SH_TEXTURE_RECT;
-    break;
-  case SH_ARB_ATI_PIXEL_FORMAT_FLOAT:
-    dims = SH_TEXTURE_2D;
-    break;
-  case SH_ARB_NO_FLOAT_EXT:
-    throw PBufferStreamException("No floating point rendering target.\n"
-                                 "Ensure your system supports floating point pbuffers.");
-    break;
-  } 
-
-  ChannelGatherer gatherer(m_channel_map, dims);
-  stream_program->ctrlGraph->dfs(gatherer);
-
-  split_program(stream_program, m_programs, get_target_backend(stream_program) + "fragment");
-
-  for (std::list<ShProgramNodePtr>::iterator I = m_programs.begin();
-       I != m_programs.end(); ++I) {
-    ShProgram with_tc = ShProgram(*I) & lose<ShTexCoord2f>("streamcoord");
-    
-    TexFetcher fetcher(m_channel_map, with_tc.node()->inputs.back(),
-                       dims == SH_TEXTURE_RECT, with_tc.node());
-    with_tc.node()->ctrlGraph->dfs(fetcher);
-
-    optimize(with_tc);
-    
-    *I = with_tc.node();
-  }
-
-  build_sets(vertex_program);
-}
-
-ShInfo* PBufferStreamCache::clone() const
-{
-  return new PBufferStreamCache(m_stream_program, m_vertex_program);
-}
-
-void PBufferStreamCache::update_channels(int width, int height)
-{
-  for (ChannelMap::iterator I = m_channel_map.begin(); I != m_channel_map.end(); ++I) {
-    ShChannelNode* channel = I->first.object();
-    ShTextureNode* texture = I->second.object();
-
-    SH_DEBUG_ASSERT(channel);
-    SH_DEBUG_ASSERT(texture);
-
-    texture->memory(channel->memory(), 0);
-    texture->setTexSize(width, height);
-    texture->count(channel->count());
-  }
-}
-
-void PBufferStreamCache::build_sets(ShProgramNode* vertex_program)
-{
-  m_vertex_program = vertex_program;
-  m_program_sets.clear();
-  for (std::list<ShProgramNodePtr>::iterator I = m_programs.begin(); I != m_programs.end(); ++I) {
-    m_program_sets.push_back(new ShProgramSet(ShProgram(vertex_program),
-                                              ShProgram(*I)));
-  }
-}
 
 PBufferStreams::PBufferStreams(void) :
   m_shaders(NULL), m_setup_vp(false)
@@ -232,7 +110,7 @@ void fillin()
 #endif
 
 void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
-                             ShStream& dest)
+                             ShStream& dest, TextureStrategy* texture)
 {
   // Let's get rid of that constness... Yes, yes, I know...
   ShProgramNodePtr program = shref_const_cast<ShProgramNode>(program_const);
@@ -296,11 +174,6 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
 
   FloatExtension extension = factory->get_extension();
   
-  // --- Set up the GLX context
-  PBufferContextPtr context = factory->get_context(tex_size, tex_size);
-
-  PBufferHandlePtr old_handle = context->activate();
-
   DECLARE_TIMER(vpsetup);
 
   // --- Set up the vertex program
@@ -315,32 +188,38 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
   TIMING_RESULT(vpsetup);
 
   // --- Set up the fragment programs and such
-  PBufferStreamCache* cache = program->get_info<PBufferStreamCache>();
+  StreamCache* cache = program->get_info<StreamCache>();
   if (!cache) {
-    cache = new PBufferStreamCache(program.object(), m_vp.node().object());
+    cache = new StreamCache(program.object(), m_vp.node().object(), tex_size, 1);
     program->add_info(cache);
   }
   
-  cache->update_channels(tex_size, tex_size);
+  cache->update_channels();
+
+  // --- Set up the GLX context
+  PBufferContextPtr context = 
+    factory->get_context(cache->tex_size(), cache->tex_size());
+
+  PBufferHandlePtr old_handle = context->activate();
 
   // Check whether some channels are both being read and written to
   bool rw_channels = false;
   if (dest.size() > 1) {
-    std::set<ShChannelNode*> input_channels;
+    std::set<ShMemory*> input_channels;
     for (ShProgramNode::ChannelList::const_iterator i = program->begin_channels();
-	 i != program->end_channels(); i++) {
-      input_channels.insert(i->object());
+         i != program->end_channels(); i++) {
+      input_channels.insert((*i)->memory().object());
     }
 
     for (ShStream::const_iterator i = dest.begin(); i != dest.end(); i++) {
-      if (input_channels.find(i->object()) != input_channels.end()) {
+      if (input_channels.find((*i)->memory().object()) != input_channels.end()) {
         static bool warning_seen = false;
-	if (!warning_seen) {
+        if (!warning_seen) {
           SH_DEBUG_WARN("Using an intermediate stream during execution since some of the channels are both being read from and written to.");
           warning_seen = true;
         }
-	rw_channels = true;
-	break;
+        rw_channels = true;
+        break;
       }
     }
   }
@@ -370,7 +249,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
   }
 
   // Run each fragment program
-  for (PBufferStreamCache::set_iterator I = cache->sets_begin();
+  for (StreamCache::set_iterator I = cache->sets_begin();
        I != cache->sets_end(); ++I, ++dest_iter) {
 
     ShChannelNode* output = dest_iter->object();
@@ -381,7 +260,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
     shBind(*program_set);
     TIMING_RESULT(binding);
 
-#ifdef SH_DEBUG_PBS_PRINTFP
+//#ifdef SH_DEBUG_PBS_PRINTFP
     {
       ShProgramSet::NodeList::const_iterator i = program_set->begin();
       ++i;
@@ -389,14 +268,14 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
       std::cerr << program_node->describe_interface() << std::endl;
       program_node->code()->print(std::cerr);
     }
-#endif
+//#endif
 
     DECLARE_TIMER(clear);
     glClear(GL_COLOR_BUFFER_BIT);
     TIMING_RESULT(clear);
 
     DECLARE_TIMER(rendersetup);
-    glViewport(0, 0, tex_size, tex_size);
+    glViewport(0, 0, cache->tex_size(), cache->tex_size());
     
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -408,8 +287,8 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
     float tc_upper;
     
     if (extension == SH_ARB_NV_FLOAT_BUFFER) {
-      tc_right = static_cast<float>(tex_size);
-      tc_upper = static_cast<float>(tex_size);
+      tc_right = static_cast<float>(cache->tex_size());
+      tc_upper = static_cast<float>(cache->tex_size());
     } else {
       tc_right = 1.0;
       tc_upper = 1.0;
@@ -523,16 +402,19 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
       using_temporary_buffer = true;
     }
     
-    glReadPixels(0, 0, tex_size, count / tex_size, format, // actual copy of the
-                 readpixelType, resultBuffer->array());    // results to the stream
+    // actual copy of the results to the stream
+    glReadPixels(0, 0, cache->tex_size(), count / cache->tex_size(), format,
+                 readpixelType, resultBuffer->array());
     gl_error = glGetError();
     if (gl_error != GL_NO_ERROR) {
       shError(PBufferStreamException("Could not do glReadPixels()"));
       return;
     }
-    if (count % tex_size) {
-      glReadPixels(0, count / tex_size, count % tex_size, 1, format, readpixelType,
-                   (char*)(resultBuffer->array()) + (count - (count % tex_size)) * 
+    if (count % cache->tex_size()) {
+      glReadPixels(0, count / cache->tex_size(), 
+                   count % cache->tex_size(), 1, format, readpixelType,
+                   (char*)(resultBuffer->array()) 
+                   + (count - (count % cache->tex_size())) * 
 		   output->size() * resultBuffer->datasize());
       gl_error = glGetError();
       if (gl_error != GL_NO_ERROR) {

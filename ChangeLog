@@ -1,14 +1,113 @@
+2006-04-07  Andrew Lauritzen  <atlaurit@rapidmind.net>
+
+	* backends/gl/GlTextures.cpp: Fixed an issue wherein Sh was recreating 
+	all GL storages for mip levels every time a texture was bound.
+
+2006-04-06  Andrew Lauritzen  <atlaurit@rapidmind.net>
+
+	* backends/gl/GlslCode.cpp, GlslCode.hpp, GlslEmit.cpp: Support for 
+	TEXD in glsl.  On NVIDIA, it uses the Cg function.  On ATI, it uses the
+	GL_ATI_shader_texture_lod extension.
+	Fixed maximum texture unit query.
+	
+	* backends/gl/GlslCode.cpp, GlslCode.hpp: Add single vendor query as 
+	well as a single extensions mechanism.
+
+	* examples/textures/main.cpp: Cleanups.
+
+2006-04-06  Francois Marier  <francois@rapidmind.net>
+
+	* src/sh/ShBackend.cpp, ShContext.cpp: Add binary relocation support
+	on Linux (necessary for autopackage).
+
+2006-04-06  Filip Spacek  <filip@rapidmind.net>
+
+	* backends/gl/GlTextures.cpp: Handle the case where mipmaps are
+	added after the main texture is bound.
+
+2006-04-05  Filip Spacek  <filip@rapidmind.net>
+
+	* src/sh/ShChannel.hpp: Add convenience method so that users don't
+	need to use ShMemory directly.
+
+2006-04-05  Filip Spacek  <filip@rapidmind.net>
+
+	* src/sh/ShChannelNode.hpp: Make stride and offset simple ints
+	rather than uniforms.
+
+2006-04-05  Filip Spacek  <filip@rapidmind.net>
+
+	* backends/gl/GlTextures.cpp: Fix binding of mipmapped cube maps.
+
+2006-04-04  Filip Spacek  <filip@rapidmind.net>
+
+	* backends/gl/GlTextures.cpp: Sync mipmap storages after the main storage.
+	Force RGBA textures as render targets when using NV_float_buffer extension.
+
+2006-03-30  Francois Marier  <francois@serioushack.com>
+
+	* src/sh/ShStatement.hpp, ShStatement.cpp: Add a new constructor with 
+	two source parameters for consistency.
+
+2006-03-29  Filip Spacek  <filip@rapidmind.net>
+
+	* backends/gl/GlslEmit.cpp: Discard fragments if any component is > 0 
+	rather than != 0.
+
+2006-03-27  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslVariableMap.cpp, GlslVariableMap.hpp: Fix
+	allocation of user-specified semantic indices by adding an extra
+	pass at the beginning.
+
+	* backends/gl/ArbCode.cpp, ArbCode.hpp: Add support for the
+	semantic_index metadata.
+
+2006-03-24  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslVariableMap.hpp, GlslVariable.cpp: Honour the
+	semantic index specified by the user through the
+	opengl:semantic_index metadata.
+
 2006-03-22  Kuo-Yu Tong  <k3tong@serioushack.com>
 
 	* src/sh/ShLibArith.hpp, ShLibArithImpl.hpp, ShLibClampImpl.hpp,
 	ShInstructions.cpp: Add a few overloaded versions of mad to get smoothstep
 	to compile with 1-tuples.
 
+2006-03-06  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* backends/gl/GlTextureStorage.cpp: Use correct count when transfering
+	textures.
+
 2006-03-05  Stefanus Du Toit  <sdt@serioushack.com>
 
 	* src/sh/ShTransformer.hpp, src/sh/ShTransformer.cpp: Add
 	transformers to order swizzles on destinations and remove
 	writemasks.
+
+	* Fix Windows compilation breakage due to recent stride/offset changes.
+
+2006-03-04  Barold  <barold@serioushack.com>
+
+	* src/sh/ShLinearAllocator.hpp: Linear Allocator can now be used
+	to uniquely identify overlapping ranges on arbitrary types (not
+	just ShVariableNodes.)
+
+	* src/sh/ShLinearAllocator.cpp: Removed and inlined into new
+	template class in the hpp.
+
+2006-03-02  Filip Spacek  <filip@serioushack.com>
+
+	* backends/gl/FBOCache.cpp FBOCache.hpp FBOStreams.cpp GlBackend.cpp
+	GlTextureStorage.cpp GlTextureStorage.hpp GlTextures.cpp Makefile.am
+	PBufferStreams.cpp Utils.cpp Utils.hpp src/sh/ShChannel.hpp
+	src/sh/ShChannelImpl.hpp ShChannelNode.cpp ShChannelNode.hpp
+	ShMemory.hpp ShProgramNode.cpp ShProgramNode.hpp ShTransformer.cpp
+	win32/vc7/ShArbBackend.vcproj ShGlslBackend.vcproj
+	win32/vc8/ShArbBackend.vcproj ShGlslBackend.vcproj: First version of
+	offset/stride support. No destination offset/stride yet,
+	no support for RECT textures (old nv cards), breakage likely.
 
 2006-02-27  Stefanus Du Toit  <sdt@serioushack.com>
 
@@ -29,6 +128,13 @@
 	* src/sh/ShTransformer.cpp, ShTransformer.hpp: Add DIV->RCP/MUL
 	transfomer.
 	
+2006-02-21  Filip Spacek  <filip@serioushack.com>
+
+	* backends/gl/ArbBackend.cpp FBOCache.cpp GlBackend.cpp
+	GlTextureStorage.cpp GlTextureStorage.hpp GlslBackend.cpp: Register
+	transfer functions during initialization. Enable FBOs on both arb and
+	glsl backends.
+
 2006-02-20  Stefanus Du Toit  <sdt@serioushack.com>
 
 	* src/sh/ShChannel.hpp, ShChannelImpl.hpp, ShChannelNode.cpp
@@ -55,6 +161,12 @@
 
 2006-02-15  Filip Spacek  <filip@serioushack.com>
 
+	* backends/gl/GlTextureStorage.cpp: Implement OpenGL to host
+	transfer using glReadPixels
+
+	* backends/gl/FBOCache.cpp: Cache framebuffer objects between
+	stream executions.
+
 	* test/regress/test.hpp: Sync the storage before reading the results.
 
 2006-02-13  Francois Marier  <francois@serioushack.com>
@@ -67,6 +179,19 @@
 
 	* backends/gl/GlBackend.cpp (GlBackend): Prevent double
 	registration of the GlBackend DLL.
+
+2006-02-09  Filip Spacek  <filip@serioushack.com>
+
+	* backends/gl/FBOStreams.cpp: Frame Buffer Object streams
+	implementation.
+
+	* backends/gl/GlTextureStorage.cpp: Write flag for double
+	buffering and GlTexture to Host transfer class.
+
+	* backends/gl/GlTextures.cpp (bindTexture): Add support to bind
+	textures for writing (FBOs).
+
+	* src/sh/ShMemory.hpp: Add a freeze flag to ShMemory.
 
 2006-02-09  Francois Marier  <francois@serioushack.com>
 
@@ -162,7 +287,7 @@
 	* src/ShMeta.hpp, src/ShMetaImpl.hpp, src/ShMetaForwarder.hpp,
 	src/ShMetaForwarder.cpp: Allow iterating through meta data with
 	begin_meta and end_meta functions.
-	
+
 2006-01-28  Andrew Lauritzen  <atlaurit@serioushack.com>
 	
 	* backends/gl/GlslEmit.cpp: Cast GLSL logical operations (<, >,
@@ -378,7 +503,7 @@
 	* backends/gl/ArbCode.hpp: Add push_break() and push_if().
 
 2005-10-31  Andrew Lauritzen  <atlaurit@student.cs.uwaterloo.ca>
-
+        
 	* backends/gl/ArbCode.cpp (updateUniforms): Optimized to be
 	more efficient, especially with normal (<= 4 component) float
 	uniforms.

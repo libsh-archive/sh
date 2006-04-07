@@ -51,7 +51,21 @@ GlslCode::GlslCode(const ShProgramNodeCPtr& shader, const std::string& unit,
   if (unit == "fragment"){
     m_unit = SH_GLSL_FP;
   } else if (unit == "vertex") {
-    m_unit = SH_GLSL_VP;
+    m_unit = SH_GLSL_VP;  
+  }
+
+  // Query the GL vendor string
+  m_vendor = VENDOR_UNKNOWN;
+  const GLubyte* vendor = SH_GL_CHECK_ERROR(glGetString(GL_VENDOR));
+  if (vendor) {
+    std::string s(reinterpret_cast<const char*>(vendor));
+    if (s.find("NVIDIA") != s.npos) {
+      m_vendor = VENDOR_NVIDIA;
+    } else if( s.find("ATI") != s.npos) {
+      m_vendor = VENDOR_ATI;
+    } else {
+      m_vendor = VENDOR_OTHER;
+    }
   }
 }
 
@@ -82,7 +96,6 @@ void GlslCode::generate()
   ShVarTransformMap* original_vars = new ShVarTransformMap;
   transform.convertInputOutput(original_vars);
   transform.convertTextureLookups();
-  transform.texd_to_texlod();
 
   ShTransformer::ValueTypeMap convert_map;
   convert_map[SH_DOUBLE] = SH_FLOAT; 
@@ -105,6 +118,7 @@ void GlslCode::generate()
   transform.stripDummyOps();
   transform.expand_atan2();
   transform.expand_inverse_hyperbolic();
+  //transform.texd_to_texlod();
 
   if (transform.changed()) {
     optimize(m_shader);
@@ -114,6 +128,9 @@ void GlslCode::generate()
     ShContext::current()->exit();
     ShContext::current()->enter(m_shader);
   }
+
+  // Initialize the extensions map
+  m_glsl_extensions.clear();
 
   // Initialize the variable map
   delete m_varmap;
@@ -435,6 +452,19 @@ ostream& GlslCode::print(ostream& out)
   const string BLOCK_INDENT("    ");
 
   out << "// OpenGL " << ((m_unit == SH_GLSL_VP) ? "Vertex" : "Fragment") << " Program" << endl;
+
+  // Declare extensions
+  for (ExtensionMap::const_iterator i = m_glsl_extensions.begin();
+       i != m_glsl_extensions.end(); ++i) {
+    out << "#extension " << i->first << " : ";
+    switch (i->second) {
+      case EXT_DISABLE: out << "disable"; break;
+      case EXT_WARN:    out << "warn";    break;
+      case EXT_ENABLE:  out << "enable";  break;
+      case EXT_REQUIRE: out << "require"; break;
+    };
+    out << endl;
+  }
   out << endl;
 
   // Declare attributes
@@ -503,6 +533,16 @@ ostream& GlslCode::describe_bindings(ostream& out)
   }
 
   return out;
+}
+
+void GlslCode::use_extension(const std::string &ext, ExtBehaviour behaviour)
+{
+  ExtensionMap::iterator i = m_glsl_extensions.find(ext);
+  if (i == m_glsl_extensions.end()) {
+    m_glsl_extensions[ext] = behaviour;
+  } else {
+    i->second = std::max(i->second, behaviour);
+  }
 }
 
 void GlslCode::append_line(const string& line, bool append_semicolon)
@@ -731,50 +771,53 @@ void GlslCode::allocate_textures()
     ShTextureNodePtr node = *i;
     
     if (!node->meta("opengl:texunit").empty() ||
-	!node->meta("opengl:preset").empty()) {
+	      !node->meta("opengl:preset").empty()) {
       GLuint index;
       std::istringstream is;
       
       if (!node->meta("opengl:texunit").empty()) {
-	is.str(node->meta("opengl:texunit"));
+	      is.str(node->meta("opengl:texunit"));
       } else {
-	is.str(node->meta("opengl:preset"));
+	      is.str(node->meta("opengl:preset"));
       }
       
       is >> index; // TODO: Check for errors
       
       if (find(reserved.begin(), reserved.end(), index) == reserved.end()) {
-	m_texture_units[node].index = index;
-	m_texture_units[node].preset = true;
-	reserved.push_back(index);
+	      m_texture_units[node].index = index;
+	      m_texture_units[node].preset = true;
+	      reserved.push_back(index);
       } else {
-	cerr << "Texture unit " << index << " is used more than once." << endl;
+	      cerr << "Texture unit " << index << " is used more than once." << endl;
       }
     }
   }
   
+  // TODO: Cache this result? We may want something like ArbLimits here (GlslLimits perhaps)
+  GLint max_texture_units;
+  SH_GL_CHECK_ERROR(glGetIntegerv((SH_GLSL_VP == m_unit ?
+    GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS_ARB : GL_MAX_TEXTURE_IMAGE_UNITS_ARB),
+    &max_texture_units));
+
   // allocate remaining textures units with respect to the reserved list
   for (ShProgramNode::TexList::const_iterator i = m_shader->textures.begin();
        i != m_shader->textures.end(); i++) {
     ShTextureNodePtr node = *i;
     
     if (node->meta("opengl:texunit").empty() &&
-	node->meta("opengl:preset").empty()) {
-      GLuint index;
-      const unsigned MAX_TEXTURE_UNITS = (SH_GLSL_VP == m_unit ?
-					  GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS_ARB :
-					  GL_MAX_TEXTURE_IMAGE_UNITS_ARB);
+	      node->meta("opengl:preset").empty()) {
+      GLuint index;      
       
-      for (index = m_nb_textures; index < MAX_TEXTURE_UNITS; index++) {
-	if (find(reserved.begin(), reserved.end(), index) == reserved.end()) {
-	  break;
-	}
+      for (index = m_nb_textures; index < max_texture_units; index++) {
+	      if (find(reserved.begin(), reserved.end(), index) == reserved.end()) {
+	        break;
+	      }
       }
       
-      if (index < MAX_TEXTURE_UNITS) {
-	m_texture_units[node].index = index;
+      if (index < max_texture_units) {
+	      m_texture_units[node].index = index;
       } else {
-	cerr << "No available texture unit for '" << node->name() << "'." << endl;
+	      cerr << "No available texture unit for '" << node->name() << "'." << endl;
       }
 
       m_nb_textures = index + 1;
@@ -804,7 +847,7 @@ void GlslCode::bind_textures()
       SH_GL_CHECK_ERROR(glUniform1iARB(location, index));
       
       if (!m_texture_units[texture].preset) {
-	m_texture->bindTexture(texture, GL_TEXTURE0 + index);
+	m_texture->bindTexture(texture, GL_TEXTURE0 + index, false);
       }
     } else {
       cerr << "Cannot find uniform texture named '" << var.name() << "'." << endl;

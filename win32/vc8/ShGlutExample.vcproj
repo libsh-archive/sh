@@ -69,7 +69,7 @@
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\..\install\vc8\lib;..\..\..\glut\lib"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/ShGlutExample.pdb"
+				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -149,6 +149,7 @@
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\install\vc8\lib;..\..\..\glut\lib"
 				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"

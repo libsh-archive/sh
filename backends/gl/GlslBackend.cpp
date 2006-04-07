@@ -27,6 +27,7 @@
 #include "GlTextures.hpp"
 #include "GlBackend.hpp"
 #include "PBufferStreams.hpp"
+#include "FBOStreams.hpp"
 
 namespace shgl {
 
@@ -37,7 +38,7 @@ struct GlslBackend : public GlBackend {
 #ifdef __APPLE__
                 0,
 #else
-                new PBufferStreams(),
+                new FBOStreams(),
 #endif
                 "glsl", "1.0")
   {
