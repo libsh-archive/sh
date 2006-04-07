@@ -1,3 +1,25 @@
+2006-04-07  Andrew Lauritzen  <atlaurit@rapidmind.net>
+
+	* backends/gl/GlTextures.cpp: Fixed an issue wherein Sh was recreating 
+	all GL storages for mip levels every time a texture was bound.
+
+2006-04-06  Andrew Lauritzen  <atlaurit@rapidmind.net>
+
+	* backends/gl/GlslCode.cpp, GlslCode.hpp, GlslEmit.cpp: Support for 
+	TEXD in glsl.  On NVIDIA, it uses the Cg function.  On ATI, it uses the
+	GL_ATI_shader_texture_lod extension.
+	Fixed maximum texture unit query.
+	
+	* backends/gl/GlslCode.cpp, GlslCode.hpp: Add single vendor query as 
+	well as a single extensions mechanism.
+
+	* examples/textures/main.cpp: Cleanups.
+
+2006-04-06  Francois Marier  <francois@rapidmind.net>
+
+	* src/sh/ShBackend.cpp, ShContext.cpp: Add binary relocation support
+	on Linux (necessary for autopackage).
+
 2006-04-06  Filip Spacek  <filip@rapidmind.net>
 
 	* backends/gl/GlTextures.cpp: Handle the case where mipmaps are
