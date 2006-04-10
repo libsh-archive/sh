@@ -60,21 +60,8 @@ sub process_file
 
     my @lines;
     while (<INPUT>) {
-        # Header guards
-        s/ SH([A-Z]+)_HPP/ XYZXYZ\1_HPP/g;
-        
-        # Macros/enums
-        s/(^|[^a-zA-Z])SH_?([A-Z]+)/$1 . &substituted_macro($2)/eg;
-
-        # Class names
-        s/([^a-zA-Z]?)Sh([A-Z])/\1\2/g;
-
-        # Function names (e.g. nibbles)
-        s/(^|[^a-zA-Z])sh([A-Z]+[a-z]+)/$1 . &to_lower($2)/eg;
-
-	# Restore header guard
-        s/ XYZXYZ([A-Z]+)_HPP/ SH\1_HPP/g;
-
+        s/ SH([A-Z]+)_HPP/ \1_HPP/g;
+        s/ ([A-Z]+)_HPP/ SH\1_HPP/g;
         push @lines, $_;
     }
     close INPUT;
