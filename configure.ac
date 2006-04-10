@@ -1,6 +1,6 @@
 # Process this file with autoconf to produce a configure script.
 AC_INIT(Sh, 0.8.0rc0, libsh-devel@lists.libsh.org, libsh)
-AC_CONFIG_SRCDIR([src/sh/ShVariable.hpp])
+AC_CONFIG_SRCDIR([src/sh/Variable.hpp])
 AM_INIT_AUTOMAKE
 
 AC_CANONICAL_HOST
