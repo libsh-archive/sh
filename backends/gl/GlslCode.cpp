@@ -808,13 +808,13 @@ void GlslCode::allocate_textures()
 	      node->meta("opengl:preset").empty()) {
       GLuint index;      
       
-      for (index = m_nb_textures; index < max_texture_units; index++) {
+      for (index = m_nb_textures; index < static_cast<GLuint>(max_texture_units); index++) {
 	      if (find(reserved.begin(), reserved.end(), index) == reserved.end()) {
 	        break;
 	      }
       }
       
-      if (index < max_texture_units) {
+      if (index < static_cast<GLuint>(max_texture_units)) {
 	      m_texture_units[node].index = index;
       } else {
 	      cerr << "No available texture unit for '" << node->name() << "'." << endl;
