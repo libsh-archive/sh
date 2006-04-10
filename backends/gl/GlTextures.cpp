@@ -276,8 +276,8 @@ struct StorageFinder {
   // Can optionally provide custom dimensions, otherwise node dimentions are used
   StorageFinder(const ShTextureNodePtr& node, LookFor lookFor, bool ignoreTarget = false,
                 int width = -1, int height = -1, int depth = -1)
-    : node(node), m_lookFor(lookFor), ignoreTarget(ignoreTarget), m_nr_clean(0)
-    , m_width(width), m_height(height), m_depth(depth)
+    : node(node), m_width(width), m_height(height), m_depth(depth),
+      m_lookFor(lookFor), ignoreTarget(ignoreTarget), m_nr_clean(0)
   {
     if (m_width  < 0) m_width  = node->width();
     if (m_height < 0) m_height = node->height();
