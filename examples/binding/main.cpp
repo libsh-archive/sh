@@ -161,7 +161,7 @@ void init_gl(void)
 void init_sh()
 {
   // set OpenGL backend
-  shSetBackend("arb");
+  shSetBackend("glsl");
 
   // Sh data
   ShMatrix4x4f mv;
@@ -213,6 +213,14 @@ void init_sh()
     oclr = pos(inrm|ilightv)*diffuse + ambient;
   } SH_END;
 
+#if 1
+  cout << "Vertex Unit:" << endl;
+  vsh.node()->code()->print(cout);
+  cout << "--" << endl;
+  cout << "Fragment Unit:" << endl;
+  fsh.node()->code()->print(cout);
+  cout << "--" << endl;
+#endif
 }
 
 int main(int argc, char** argv)

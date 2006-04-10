@@ -92,6 +92,15 @@ public:
   void attribute(int index); /// for generic vertex inputs
   void builtin(GlslVarBinding binding, int index); /// for built-in variables
   
+  // ARB to GLSL state translation tables
+  struct ArbToGlslEntry
+  {
+    char *from;
+    char *to;
+    bool to_is_array;
+    const ArbToGlslEntry *subtable;
+  };
+
 private:
   int m_attribute; /// index of the attribute (-1 if it's not a generic attribute)
   bool m_builtin; /// if true, it won't be declared or initialized
@@ -112,6 +121,20 @@ private:
   std::string m_values;
   
   std::string type_string() const;
+
+  /// Translates an arb state value to a glsl state value.
+  /// Returns the original string if something fails.
+  static std::string translate_state_arb_to_glsl
+    (const std::string &value, const ArbToGlslEntry *table);
+
+  /// Handy utilities for above
+  static const ArbToGlslEntry * find
+    (const std::string &value, const ArbToGlslEntry *table);
+  
+  /// Returns an empty string if no array operator was found
+  static std::string parse_state_array
+    (char &cur_delim, std::string &cur_string);
+  
 };
 
 }

@@ -84,7 +84,7 @@ private:
   void map_insert(const SH::ShVariableNodePtr& node, GlslVariable var);
 
   std::string real_resolve(const SH::ShVariable& v, const std::string& array_index, int index);
-  std::string swizzle(const SH::ShVariable& v, int var_size) const;
+  std::string swizzle(const SH::ShVariable& v, int var_size, bool force = false) const;
   std::string repeat_scalar(const std::string& name, SH::ShValueType type, int size) const;
 
 public:
