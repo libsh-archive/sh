@@ -1,5 +1,12 @@
 2006-04-07  Andrew Lauritzen  <atlaurit@rapidmind.net>
 
+	* backends/gl/GlslVariable.cpp, GlslVariable.hpp, GlslVariableMap.cpp, 
+	GlslVariableMap.hpp: Support state metadata in the GLSL backend. The 
+	metadata is converted from the ARB_fragment_program metadata where 
+	possible (basically everywhere except some obscure cases like light 
+	attenuations, etc. where there is not anobvious mapping between the 
+	data that GLSL provides and that of ARB).
+
 	* backends/gl/GlTextures.cpp: Fixed an issue wherein Sh was recreating 
 	all GL storages for mip levels every time a texture was bound.
 	Avoid updating texture parameters if they have not changed.
