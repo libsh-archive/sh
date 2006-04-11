@@ -165,25 +165,25 @@ struct FloatConverter {
 
   // @todo might want to make these more global (perhaps even
   // put it into the TypeInfo for standard types?)
-  bool isFloat(ValueType valueType) {
+  bool is_float(ValueType valueType) {
     return isFloat(valueType) && isRegularValueType(valueType);
   }
 
-  bool isInt(ValueType valueType) {
+  bool is_int(ValueType valueType) {
     return isInteger(valueType) && isSigned(valueType);
   }
 
   // @todo not implemented yet 
-  bool isUint(ValueType valueType) {
+  bool is_uint(ValueType valueType) {
     return isInteger(valueType) && !isSigned(valueType);
   }
 
   // @todo not implemented yet 
-  bool isFrac(ValueType valueType) {
+  bool is_frac(ValueType valueType) {
     return isFraction(valueType) && isSigned(valueType);
   }
 
-  bool isUfrac(ValueType valueType) {
+  bool is_ufrac(ValueType valueType) {
     return isFraction(valueType) && !isSigned(valueType);
   }
 
@@ -208,28 +208,28 @@ struct FloatConverter {
       unsigned int forced = 0)
   {
     unsigned int operations = forced;
-    if(isFloat(toType)) {
-    } else if(isInt(toType)) {
-      if(!(isInt(fromType) || isUint(fromType))) {
+    if(is_float(toType)) {
+    } else if(is_int(toType)) {
+      if(!(is_int(fromType) || is_uint(fromType))) {
         operations |= APPLY_FLR;
       }
-    } else if(isUint(toType)) {
-      if(isFloat(fromType) || isInt(fromType) || isFrac(fromType)) {
+    } else if(is_uint(toType)) {
+      if(is_float(fromType) || is_int(fromType) || is_frac(fromType)) {
         operations |= APPLY_MAX0; 
       }
       operations |= APPLY_FLR;
-    } else if(isFrac(toType)) {
-      if (isFloat(fromType) || isInt(fromType)) {
+    } else if(is_frac(toType)) {
+      if (is_float(fromType) || is_int(fromType)) {
         operations |= APPLY_MAX_1;
         operations |= APPLY_MIN1;
-      } else if (isUint(fromType)) {
+      } else if (is_uint(fromType)) {
         operations |= APPLY_MIN1;
       }
-    } else if(isUfrac(toType)) {
-      if (isFloat(fromType) || isInt(fromType)) {
+    } else if(is_ufrac(toType)) {
+      if (is_float(fromType) || is_int(fromType)) {
         operations |= APPLY_MAX0;
         operations |= APPLY_MIN1;
-      } else if (isUint(fromType)) {
+      } else if (is_uint(fromType)) {
         operations |= APPLY_MIN1;
       }
     }
@@ -390,7 +390,7 @@ struct FloatConverter {
       // @todo type check for other special cases
       unsigned int forcedOps = 0;
       if((stmt.op == OP_DIV || stmt.op == OP_POW) && 
-         (isInt(destValueType) || isUint(destValueType))) {
+         (is_int(destValueType) || is_uint(destValueType))) {
         forcedOps |= APPLY_FLR; 
       }
 
