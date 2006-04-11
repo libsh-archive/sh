@@ -8,7 +8,7 @@ EPSILON = 0.01
 
 value_type_enum = {'d': 'double',
             'f': 'float',
-            'h': 'ShHalf',
+            'h': 'Half',
 
             'i': 'int',
             's': 'short',
@@ -17,12 +17,12 @@ value_type_enum = {'d': 'double',
             'us': 'unsigned short',
             'ub': 'unsigned char',
 
-            'fi': 'ShFracInt',
-            'fs': 'ShFracShort',
-            'fb': 'ShFracByte',
-            'fui': 'ShFracUInt',
-            'fus': 'ShFracUShort',
-            'fub': 'ShFracUByte' 
+            'fi': 'FracInt',
+            'fs': 'FracShort',
+            'fb': 'FracByte',
+            'fui': 'FracUInt',
+            'fus': 'FracUShort',
+            'fub': 'FracUByte' 
             }
 
 enum_value_type = dict(zip(value_type_enum.values(), value_type_enum.keys()))
@@ -31,14 +31,14 @@ def make_variable(arg, binding_type, value_type, immediate=False):
     if is_array(arg) and is_array(arg[0]):
         ncols = len(arg[0])
         nrows = len(arg)
-        return 'ShMatrix<' + str(nrows) + ', ' + str(ncols) + ', ' + binding_type + ', ' + value_type + '>'    
+        return 'Matrix<' + str(nrows) + ', ' + str(ncols) + ', ' + binding_type + ', ' + value_type + '>'    
     elif is_array(arg):
         size = len(arg)
-        return 'ShAttrib<' + str(size) + ', ' + binding_type + ', ' + value_type + '>'
+        return 'Attrib<' + str(size) + ', ' + binding_type + ', ' + value_type + '>'
     elif immediate:
         return value_type
     else:
-        return 'ShAttrib<1, ' + binding_type + ', ' + value_type  + '>'
+        return 'Attrib<1, ' + binding_type + ', ' + value_type  + '>'
 
 # Convert complex numbers to floats
 def number_literal(n):
@@ -49,7 +49,7 @@ def number_literal(n):
 
 def init_matrix(indent, arg, argtype, varname):
     out = ''
-    out += indent + make_variable(arg, 'SH_TEMP', argtype) + ' ' + varname + ';\n'
+    out += indent + make_variable(arg, 'TEMP', argtype) + ' ' + varname + ';\n'
     i = 0
     for row in arg:
         j = 0
@@ -63,14 +63,14 @@ def init_matrix(indent, arg, argtype, varname):
 
 def init_attrib(indent, arg, argtype, varname):
     out = indent
-    out += make_variable(arg, 'SH_CONST', argtype) + ' ' + varname
+    out += make_variable(arg, 'CONST', argtype) + ' ' + varname
     out += '(' + ', '.join([("(" + argtype + ")(" + number_literal(a) + ")") for a in arg]) + ')'
     out += ';\n'
     return out
 
 def init_scalar(indent, arg, argtype, varname, immediate):
     out = indent
-    out += make_variable(arg, 'SH_CONST', argtype, immediate) + ' ' + varname
+    out += make_variable(arg, 'CONST', argtype, immediate) + ' ' + varname
     out += '(' + argtype + '(' + number_literal(arg) + '));\n'
     return out
 
@@ -185,7 +185,7 @@ class ImageTexture:
         # @todo type move this into test.hpp or test.cpp
         r =   "  " + self.textype + " " + self.name + ";\n"; 
         r +=   "  {\n" 
-        r +=  "    ShImage image;\n"
+        r +=  "    Image image;\n"
         r +=  "    ShUtil::load_PNG(image, \"" + self.filename + "\");\n"
         r +=  "    " + self.name + ".size(image.width(), image.height());\n" 
         r +=  "    " + self.name + ".memory(image.memory());\n" 
@@ -212,11 +212,11 @@ class GenTexture:
 
     def __str__(self):
         r =  "  " + self.textype + " " + self.name + "(" + ",".join([str(x) for x in self.dims]) + ");\n"; 
-        mem_type = "ShDataVariant<" + self.tex_value_type + ", SH_MEM>";
-        r += "  ShPointer<" + mem_type + " > " + self.mem() + " = new " + mem_type + "(" + self.size() + ");\n"  
+        mem_type = "DataVariant<" + self.tex_value_type + ", MEM>";
+        r += "  Pointer<" + mem_type + " > " + self.mem() + " = new " + mem_type + "(" + self.size() + ");\n"  
         r += "  {\n" 
-        host_type = "ShDataVariant<" + self.tex_value_type + ", SH_HOST>";
-        r += "    ShPointer<" + host_type + " > data = new " + host_type + "(" + self.size() + ");\n"  
+        host_type = "DataVariant<" + self.tex_value_type + ", HOST>";
+        r += "    Pointer<" + host_type + " > data = new " + host_type + "(" + self.size() + ");\n"  
         r += "    int index = 0;\n"
         loops = "" # todo should be a better way to reverse dims...
         for i, dim in enumerate(self.dims):
@@ -228,7 +228,7 @@ class GenTexture:
         r += "       (*data)[index] = " + self.code + ";\n" 
         r += "    }\n"
         r += "    " + self.mem() + "->set(data);\n"
-        r += "    ShPointer<ShHostMemory> hostmem = new ShHostMemory(" + self.size() + " * " + self.mem() + "->datasize(), " + self.mem() + "->array(), " + self.storage_type + ");\n"
+        r += "    Pointer<HostMemory> hostmem = new HostMemory(" + self.size() + " * " + self.mem() + "->datasize(), " + self.mem() + "->array(), " + self.storage_type + ");\n"
         r += "    " + self.name + ".memory(hostmem);\n"
         r += "  }\n"
         return r
@@ -286,7 +286,7 @@ class Test:
         out.write('    try {\n')
 
     def end_catch(self, out):
-        out.write("""    } catch (const ShException &e) {
+        out.write("""    } catch (const Exception &e) {
       std::cout << "Caught Sh Exception in '" << last_test << "'." << std::endl << e.message() << std::endl;
       errors++;
     } catch (const std::exception& e) {
@@ -322,11 +322,11 @@ class StreamTest(Test):
                     programs[testname] = []
                     progname = self.name + '_' + string.ascii_lowercase[i] + '_' + testname
                     programs[testname].append(progname)
-                    out.write('  ShProgram ' + progname + ' = SH_BEGIN_PROGRAM("stream") {\n')
+                    out.write('  Program ' + progname + ' = SH_BEGIN_PROGRAM("stream") {\n')
                     for j, (arg, argtype) in enumerate(src_arg_types):
-                        out.write('    ' + make_variable(arg, 'SH_INPUT', argtype)
+                        out.write('    ' + make_variable(arg, 'INPUT', argtype)
                                   + ' ' + string.ascii_lowercase[j] + ';\n')
-                    out.write('    ' + make_variable(test[0], 'SH_OUTPUT', types[0]) +  ' out;\n')
+                    out.write('    ' + make_variable(test[0], 'OUTPUT', types[0]) +  ' out;\n')
                     out.write('    ' + str(call) + ';\n')
                     out.write('  } SH_END;\n\n')
                     out.write('  ' + progname + '.name("' + progname + '");\n')
@@ -373,7 +373,7 @@ class ImmediateTest(Test):
                 out.write(init_inputs('    ', src_arg_types, False))
                 out.write(init_expected('    ', test[0], types[0], False))
                 out.write('\n')
-                out.write('    ' + make_variable(test[0], 'SH_TEMP', types[0], False) +  ' out;\n')
+                out.write('    ' + make_variable(test[0], 'TEMP', types[0], False) +  ' out;\n')
                 out.write('    ' + str(call) + ';\n')
                 out.write('\n')
                 self.start_catch(out)
@@ -390,12 +390,12 @@ class ImmediateTest(Test):
 
 if __name__ == "__main__":
     foo = StreamTest("add", 2)
-    foo.add_texture(ImageTexture("ShTexture2D<ShColor3f>", "mytex", "mytex.png")) 
-    foo.add_texture(GenTexture("ShTexture2D<ShColor3f>", "float", 3, (128, 64), "mytex2", "i / 128.0 + j / 64.0"))
+    foo.add_texture(ImageTexture("Texture2D<Color3f>", "mytex", "mytex.png")) 
+    foo.add_texture(GenTexture("Texture2D<Color3f>", "float", 3, (128, 64), "mytex2", "i / 128.0 + j / 64.0"))
     foo.add_call(Call(Call.infix, '+', 2))
     foo.add_call(Call(Call.call, 'add', 2))
     foo.add_make_test((3, 5, 7), [(0, 1, 2), (3, 4, 5)])
-    foo.add_make_test((4, 5, 6), [(1,), (3, 4, 5)], ['i', 'SH_INT'])
+    foo.add_make_test((4, 5, 6), [(1,), (3, 4, 5)], ['i', 'INT'])
     foo.add_make_test((8, 9, 10), [(1, 2, 3), (7,)])
     foo.add_make_test((8,), [(1,), (7,)])
     foo.add_make_test((0, 0, 0), [(4, 5, 6), (-4, -5, -6)])
@@ -405,7 +405,7 @@ if __name__ == "__main__":
     foo.add_call(Call(Call.infix, '+', 2))
     foo.add_call(Call(Call.call, 'add', 2))
     foo.add_make_test((3, 5, 7), [(0, 1, 2), (3, 4, 5)])
-    foo.add_make_test((4, 5, 6), [(1,), (3, 4, 5)], ['i', 'SH_INT'])
+    foo.add_make_test((4, 5, 6), [(1,), (3, 4, 5)], ['i', 'INT'])
     foo.add_make_test((8, 9, 10), [(1, 2, 3), (7,)])
     foo.add_make_test((8,), [(1,), (7,)])
     foo.add_make_test((0, 0, 0), [(4, 5, 6), (-4, -5, -6)])

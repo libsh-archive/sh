@@ -9,7 +9,7 @@
 using namespace std;
 using namespace SH;
 
-void reset_memory(ShHostMemoryPtr mem)
+void reset_memory(HostMemoryPtr mem)
 {
   mem->hostStorage()->dirtyall();
   float* data = reinterpret_cast<float *>(mem->hostStorage()->data());
@@ -18,7 +18,7 @@ void reset_memory(ShHostMemoryPtr mem)
   }
 }
 
-void reset_memories(ShHostMemoryPtr mem[], int n)
+void reset_memories(HostMemoryPtr mem[], int n)
 {
   for (int i = 0; i < n; ++i) {
     reset_memory(mem[i]);
@@ -32,19 +32,19 @@ int main(int argc, char* argv[])
 
   Test test(argc, argv);
 
-  ShProgram prg = SH_BEGIN_PROGRAM("stream") {
-    ShInputAttrib1f a;
-    ShInputAttrib1f b;
-    ShOutputAttrib1f c;
+  Program prg = SH_BEGIN_PROGRAM("stream") {
+    InputAttrib1f a;
+    InputAttrib1f b;
+    OutputAttrib1f c;
     c = a + b;
   } SH_END;
 
-  ShHostMemoryPtr mem[3];
+  HostMemoryPtr mem[3];
   for (int i = 0; i < 3; ++i) {
-    mem[i] = new ShHostMemory(sizeof(float)*ELEMENTS, SH_FLOAT);
+    mem[i] = new HostMemory(sizeof(float)*ELEMENTS, FLOAT);
   }
   
-  ShChannel<ShAttrib1f> a(mem[0], ELEMENTS),
+  Channel<Attrib1f> a(mem[0], ELEMENTS),
                         b(mem[1], ELEMENTS),
                         c(mem[2], ELEMENTS);
   vector<string> inputs;
