@@ -25,47 +25,47 @@
 
 namespace SH {
 
-SHLIB_USUAL_NON_UNIT_OPS_RETTYPE(SH_VECTOR, SH_VECTOR);
+SHLIB_USUAL_NON_UNIT_OPS_RETTYPE(SH_NORMAL, SH_NORMAL);
 
 template<int N, BindingType B1, typename T, bool S1>
-Attrib<N, SH_TEMP, T, SH_VECTOR, false>
-abs(const Attrib<N, B1, T, SH_VECTOR, S1>& var)
+Attrib<N, SH_TEMP, T, SH_NORMAL, false>
+abs(const Attrib<N, B1, T, SH_NORMAL, S1>& var)
 {
   Generic<N, T> t = abs(static_cast< Generic<N, T> >(var));
-  Attrib<N, SH_TEMP, T, SH_VECTOR, false> vec(t.node(), t.swizzle(), t.neg());
+  Attrib<N, SH_TEMP, T, SH_NORMAL, false> vec(t.node(), t.swizzle(), t.neg());
   return vec;
 }
 
 template<int N, BindingType B1, typename T, bool S1>
-Attrib<N, SH_TEMP, T, SH_VECTOR, false>
-normalize(const Attrib<N, B1, T, SH_VECTOR, S1>& var)
+Attrib<N, SH_TEMP, T, SH_NORMAL, false>
+normalize(const Attrib<N, B1, T, SH_NORMAL, S1>& var)
 {
   Generic<N, T> t = normalize(static_cast< Generic<N, T> >(var));
-  Attrib<N, SH_TEMP, T, SH_VECTOR, false> vec(t.node(), t.swizzle(), t.neg());
+  Attrib<N, SH_TEMP, T, SH_NORMAL, false> vec(t.node(), t.swizzle(), t.neg());
   return vec;
 }
 
-SHLIB_USUAL_SUBTRACT(SH_VECTOR);
+SHLIB_USUAL_SUBTRACT(SH_NORMAL);
 
-SHLIB_LEFT_MATRIX_OPERATION(SH_VECTOR, operator|, M);
+SHLIB_LEFT_MATRIX_OPERATION(SH_NORMAL, operator|, M);
 
 template<int N, BindingType B1, BindingType B2, typename T, bool S1, bool S2>
 Generic<1, T>
-operator|(const Attrib<N, B1, T, SH_VECTOR, S1>& a, const Attrib<N, B2, T, SH_VECTOR, S2>& b)
+operator|(const Attrib<N, B1, T, SH_NORMAL, S1>& a, const Attrib<N, B2, T, SH_NORMAL, S2>& b)
 {
   return dot(a, b);
 }
 
 template<int N, BindingType B1, BindingType B2, typename T, bool S1, bool S2>
 Generic<1, T> 
-operator|(const Attrib<N, B1, T, SH_VECTOR, S1>& a, const Attrib<N, B2, T, SH_VECTOR, S2>& b)
+operator|(const Attrib<N, B1, T, SH_VECTOR, S1>& a, const Attrib<N, B2, T, SH_NORMAL, S2>& b)
 {
   return dot(a, b);
 }
 
 template<int N, BindingType B1, BindingType B2, typename T, bool S1, bool S2>
 Generic<1, T>
-operator|(const Attrib<N, B1, T, SH_VECTOR, S1>& a, const Attrib<N, B2, T, SH_VECTOR, S2>& b)
+operator|(const Attrib<N, B1, T, SH_NORMAL, S1>& a, const Attrib<N, B2, T, SH_VECTOR, S2>& b)
 {
   return dot(a, b);
 }

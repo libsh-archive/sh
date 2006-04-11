@@ -82,14 +82,14 @@ template<int M, int N, BindingType Binding1, BindingType Binding2, typename T1, 
 Attrib<N-1, SH_TEMP, CT1T2, SH_VECTOR>
 operator|(const Matrix<M, N, Binding1, T1>& a, const Attrib<N-1, Binding2, T2, SH_VECTOR, swizzled>& b);
 template<int M, int N, BindingType Binding1, BindingType Binding2, typename T1, typename T2, bool swizzled>
-Attrib<N-1, SH_TEMP, CT1T2, SH_VECTOR>
-operator|(const Matrix<M, N, Binding1, T1>& a, const Attrib<N-1, Binding2, T2, SH_VECTOR, swizzled>& b);
+Attrib<N-1, SH_TEMP, CT1T2, SH_NORMAL>
+operator|(const Matrix<M, N, Binding1, T1>& a, const Attrib<N-1, Binding2, T2, SH_NORMAL, swizzled>& b);
 template<int M, int N, BindingType Binding1, BindingType Binding2, typename T1, typename T2, bool swizzled>
 Attrib<N-1, SH_TEMP, CT1T2, SH_VECTOR>
 operator*(const Matrix<M, N, Binding1, T1>& a, const Attrib<N-1, Binding2, T2, SH_VECTOR, swizzled>& b);
 template<int M, int N, BindingType Binding1, BindingType Binding2, typename T1, typename T2, bool swizzled>
-Attrib<N-1, SH_TEMP, CT1T2, SH_VECTOR>
-operator*(const Matrix<M, N, Binding1, T1>& a, const Attrib<N-1, Binding2, T2, SH_VECTOR, swizzled>& b);
+Attrib<N-1, SH_TEMP, CT1T2, SH_NORMAL>
+operator*(const Matrix<M, N, Binding1, T1>& a, const Attrib<N-1, Binding2, T2, SH_NORMAL, swizzled>& b);
 // @}
 
 /** Matrix-tuple multiplication.

@@ -74,10 +74,10 @@ template<int N, BindingType Binding, typename T, SemanticType Semantic, bool Swi
 Attrib<N, Binding, T, Semantic, Swizzled>::Attrib(const host_type data[N])
   : Generic<N, T>(new VariableNode(Binding, N, StorageTypeInfo<T>::value_type, Semantic))
 {
-  if (Binding == CONST) {
+  if (Binding == SH_CONST) {
     for (int i = 0; i < N; i++) setValue(i, data[i]);
   } else {
-    (*this) = Attrib<N, CONST, T, Semantic>(data);
+    (*this) = Attrib<N, SH_CONST, T, Semantic>(data);
   }
 }
 
@@ -356,10 +356,10 @@ template<BindingType Binding, typename T, SemanticType Semantic, bool Swizzled>
 Attrib<1, Binding, T, Semantic, Swizzled>::Attrib(const host_type data[1])
   : Generic<1, T>(new VariableNode(Binding, 1, StorageTypeInfo<T>::value_type, Semantic))
 {
-  if (Binding == CONST) {
+  if (Binding == SH_CONST) {
     for (int i = 0; i < 1; i++) setValue(i, data[i]);
   } else {
-    (*this) = Attrib<1, CONST, T, Semantic>(data);
+    (*this) = Attrib<1, SH_CONST, T, Semantic>(data);
   }
 }
 
@@ -367,10 +367,10 @@ template<BindingType Binding, typename T, SemanticType Semantic, bool Swizzled>
 Attrib<1, Binding, T, Semantic, Swizzled>::Attrib(const host_type s0)
   : Generic<1, T>(new VariableNode(Binding, 1, StorageTypeInfo<T>::value_type, Semantic))
 {
-  if (Binding == CONST) {
+  if (Binding == SH_CONST) {
     setValue(0, s0);
   } else {
-    (*this) = Attrib<1, CONST, T, Semantic>(s0);
+    (*this) = Attrib<1, SH_CONST, T, Semantic>(s0);
   }
 }
 
@@ -612,10 +612,10 @@ template<BindingType Binding, typename T, SemanticType Semantic, bool Swizzled>
 Attrib<2, Binding, T, Semantic, Swizzled>::Attrib(const host_type data[2])
   : Generic<2, T>(new VariableNode(Binding, 2, StorageTypeInfo<T>::value_type, Semantic))
 {
-  if (Binding == CONST) {
+  if (Binding == SH_CONST) {
     for (int i = 0; i < 2; i++) setValue(i, data[i]);
   } else {
-    (*this) = Attrib<2, CONST, T, Semantic>(data);
+    (*this) = Attrib<2, SH_CONST, T, Semantic>(data);
   }
 }
 
@@ -623,11 +623,11 @@ template<BindingType Binding, typename T, SemanticType Semantic, bool Swizzled>
 Attrib<2, Binding, T, Semantic, Swizzled>::Attrib(const host_type s0, const host_type s1)
   : Generic<2, T>(new VariableNode(Binding, 2, StorageTypeInfo<T>::value_type, Semantic))
 {
-  if (Binding == CONST) {
+  if (Binding == SH_CONST) {
     host_type data[2] = {s0, s1};
     setValues(data);
   } else {
-    (*this) = Attrib<2, CONST, T, Semantic>(s0, s1);
+    (*this) = Attrib<2, SH_CONST, T, Semantic>(s0, s1);
   }
 }
 
@@ -636,7 +636,7 @@ template<typename T2, typename T3>
 Attrib<2, Binding, T, Semantic, Swizzled>::Attrib(const Generic<1, T2>& s0, const Generic<1, T3>& s1)
   : Generic<2, T>(new VariableNode(Binding, 2, StorageTypeInfo<T>::value_type, Semantic))
 {
-  if (Binding == CONST) {
+  if (Binding == SH_CONST) {
     DEBUG_ASSERT(s0.hasValues());
     DEBUG_ASSERT(s1.hasValues());
     host_type data[2] = {s0.getValue(0), s1.getValue(0)};
@@ -922,10 +922,10 @@ template<BindingType Binding, typename T, SemanticType Semantic, bool Swizzled>
 Attrib<3, Binding, T, Semantic, Swizzled>::Attrib(const host_type data[3])
   : Generic<3, T>(new VariableNode(Binding, 3, StorageTypeInfo<T>::value_type, Semantic))
 {
-  if (Binding == CONST) {
+  if (Binding == SH_CONST) {
     for (int i = 0; i < 3; i++) setValue(i, data[i]);
   } else {
-    (*this) = Attrib<3, CONST, T, Semantic>(data);
+    (*this) = Attrib<3, SH_CONST, T, Semantic>(data);
   }
 }
 
@@ -933,11 +933,11 @@ template<BindingType Binding, typename T, SemanticType Semantic, bool Swizzled>
 Attrib<3, Binding, T, Semantic, Swizzled>::Attrib(const host_type s0, const host_type s1, const host_type s2)
   : Generic<3, T>(new VariableNode(Binding, 3, StorageTypeInfo<T>::value_type, Semantic))
 {
-  if (Binding == CONST) {
+  if (Binding == SH_CONST) {
     host_type data[3] = {s0, s1, s2};
     setValues(data);
   } else {
-    (*this) = Attrib<3, CONST, T, Semantic>(s0, s1, s2);
+    (*this) = Attrib<3, SH_CONST, T, Semantic>(s0, s1, s2);
   }
 }
 
@@ -946,7 +946,7 @@ template<typename T2, typename T3, typename T4>
 Attrib<3, Binding, T, Semantic, Swizzled>::Attrib(const Generic<1, T2>& s0, const Generic<1, T3>& s1, const Generic<1, T4>& s2)
   : Generic<3, T>(new VariableNode(Binding, 3, StorageTypeInfo<T>::value_type, Semantic))
 {
-  if (Binding == CONST) {
+  if (Binding == SH_CONST) {
     DEBUG_ASSERT(s0.hasValues());
     DEBUG_ASSERT(s1.hasValues());
     DEBUG_ASSERT(s2.hasValues());
@@ -1234,10 +1234,10 @@ template<BindingType Binding, typename T, SemanticType Semantic, bool Swizzled>
 Attrib<4, Binding, T, Semantic, Swizzled>::Attrib(const host_type data[4])
   : Generic<4, T>(new VariableNode(Binding, 4, StorageTypeInfo<T>::value_type, Semantic))
 {
-  if (Binding == CONST) {
+  if (Binding == SH_CONST) {
     for (int i = 0; i < 4; i++) setValue(i, data[i]);
   } else {
-    (*this) = Attrib<4, CONST, T, Semantic>(data);
+    (*this) = Attrib<4, SH_CONST, T, Semantic>(data);
   }
 }
 
@@ -1245,11 +1245,11 @@ template<BindingType Binding, typename T, SemanticType Semantic, bool Swizzled>
 Attrib<4, Binding, T, Semantic, Swizzled>::Attrib(const host_type s0, const host_type s1, const host_type s2, const host_type s3)
   : Generic<4, T>(new VariableNode(Binding, 4, StorageTypeInfo<T>::value_type, Semantic))
 {
-  if (Binding == CONST) {
+  if (Binding == SH_CONST) {
     host_type data[4] = {s0, s1, s2, s3};
     setValues(data);
   } else {
-    (*this) = Attrib<4, CONST, T, Semantic>(s0, s1, s2, s3);
+    (*this) = Attrib<4, SH_CONST, T, Semantic>(s0, s1, s2, s3);
   }
 }
 
@@ -1258,7 +1258,7 @@ template<typename T2, typename T3, typename T4, typename T5>
 Attrib<4, Binding, T, Semantic, Swizzled>::Attrib(const Generic<1, T2>& s0, const Generic<1, T3>& s1, const Generic<1, T4>& s2, const Generic<1, T5>& s3)
   : Generic<4, T>(new VariableNode(Binding, 4, StorageTypeInfo<T>::value_type, Semantic))
 {
-  if (Binding == CONST) {
+  if (Binding == SH_CONST) {
     DEBUG_ASSERT(s0.hasValues());
     DEBUG_ASSERT(s1.hasValues());
     DEBUG_ASSERT(s2.hasValues());

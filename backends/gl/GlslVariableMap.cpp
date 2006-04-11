@@ -26,7 +26,7 @@ using namespace std;
 
 GlslBindingSpecs glslVertexInputBindingSpecs[] = {
   {GLSL_VAR_VERTEX, 1, SH_POSITION, false},
-  {GLSL_VAR_NORMAL, 1, SH_VECTOR, false},
+  {GLSL_VAR_NORMAL, 1, SH_NORMAL, false},
   {GLSL_VAR_COLOR, 1, SH_COLOR, false},
   {GLSL_VAR_SECONDARYCOLOR, 1, SH_COLOR, false},
   {GLSL_VAR_MULTITEXCOORD0, 1, SH_TEXCOORD, true},

@@ -6,7 +6,7 @@ common.guard("SHNORMAL_HPP")
 common.inprint('#include "Vector.hpp"')
 common.namespace()
 
-decl = semantic.Class("Normal", "normal", "SH_VECTOR",
+decl = semantic.Class("Normal", "normal", "SH_NORMAL",
                       """An n-normal.
 """, "Vector")
 

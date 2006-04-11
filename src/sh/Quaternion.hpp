@@ -144,7 +144,7 @@ public:
    * \param right 3-normal converted to a quaternion multiplied to this one
    */  
   template<BindingType B2>
-  Quaternion& operator*=(const Attrib<3, B2, T, SH_VECTOR>& right);
+  Quaternion& operator*=(const Attrib<3, B2, T, SH_NORMAL>& right);
 
   /** \brief Definition of the add operation with another quaternion
    *
@@ -194,7 +194,7 @@ public:
    * \param q2 3-normal converted to a quaternion multiplied to this one
    */  
   template<BindingType B2>
-  Quaternion<SH_TEMP, T> operator*(const Attrib<3, B2, T, SH_VECTOR>& q2);
+  Quaternion<SH_TEMP, T> operator*(const Attrib<3, B2, T, SH_NORMAL>& q2);
 
   /** \brief Definition of the normalize function
    *

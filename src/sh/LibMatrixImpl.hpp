@@ -32,10 +32,10 @@ op (const Matrix<M, N, Binding1, T1>& a, const Attrib<NminusOne, Binding2, T2, s
   return op<M, N, Binding1, Binding2, T1, T2, swizzled>(a, b); \
 }
 
-MATRIX_MSVC_OPERATOR_HACK(operator|, SH_VECTOR, 4, 3)
-MATRIX_MSVC_OPERATOR_HACK(operator|, SH_VECTOR, 3, 2)
-MATRIX_MSVC_OPERATOR_HACK(operator*, SH_VECTOR, 4, 3)
-MATRIX_MSVC_OPERATOR_HACK(operator*, SH_VECTOR, 3, 2)
+MATRIX_MSVC_OPERATOR_HACK(operator|, SH_NORMAL, 4, 3)
+MATRIX_MSVC_OPERATOR_HACK(operator|, SH_NORMAL, 3, 2)
+MATRIX_MSVC_OPERATOR_HACK(operator*, SH_NORMAL, 4, 3)
+MATRIX_MSVC_OPERATOR_HACK(operator*, SH_NORMAL, 3, 2)
 MATRIX_MSVC_OPERATOR_HACK(operator|, SH_PLANE, 4, 3)
 MATRIX_MSVC_OPERATOR_HACK(operator|, SH_PLANE, 3, 2)
 MATRIX_MSVC_OPERATOR_HACK(operator*, SH_PLANE, 4, 3)
@@ -191,11 +191,11 @@ operator|(const Matrix<M, N, Binding1, T1>& a,
 
 template<int M, int N, BindingType Binding1, BindingType Binding2, 
          typename T1, typename T2, bool swizzled>
-Attrib<N-1, SH_TEMP, CT1T2, SH_VECTOR>
+Attrib<N-1, SH_TEMP, CT1T2, SH_NORMAL>
 operator|(const Matrix<M, N, Binding1, T1>& a, 
-          const Attrib<N-1, Binding2, T2, SH_VECTOR, swizzled>& b)
+          const Attrib<N-1, Binding2, T2, SH_NORMAL, swizzled>& b)
 {
-  Attrib<M, SH_TEMP, CT1T2, SH_VECTOR> ret;
+  Attrib<M, SH_TEMP, CT1T2, SH_NORMAL> ret;
   for (int i = 0; i < M; i++) {
     ret[i] = dot(cast<N-1>(a[i]), b);
   }
@@ -215,9 +215,9 @@ operator*(const Matrix<M, N, Binding1, T1>& a,
 template<int M, int N, BindingType Binding1, BindingType Binding2, 
          typename T1, typename T2, bool swizzled>
 inline
-Attrib<N-1, SH_TEMP, CT1T2, SH_VECTOR>
+Attrib<N-1, SH_TEMP, CT1T2, SH_NORMAL>
 operator*(const Matrix<M, N, Binding1, T1>& a,
-          const Attrib<N-1, Binding2, T2, SH_VECTOR, swizzled>& b)
+          const Attrib<N-1, Binding2, T2, SH_NORMAL, swizzled>& b)
 {
   return a | b;
 }

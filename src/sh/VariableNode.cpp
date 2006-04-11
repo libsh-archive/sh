@@ -341,7 +341,7 @@ Variant* VariableNode::makeLow() const
   switch(m_specialType) {
     case SH_POINT:
     case SH_VECTOR:
-    case SH_VECTOR:
+    case SH_NORMAL:
     case SH_POSITION:
       result = factory->generateOne(m_size);
       // @todo types handle unsigned types

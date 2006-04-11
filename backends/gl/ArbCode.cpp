@@ -66,7 +66,7 @@ public:
 
 ArbBindingSpecs arbVertexAttribBindingSpecs[] = {
   {ARB_REG_VERTEXPOS, 1, SH_POSITION, false},
-  {ARB_REG_VERTEXNRM, 1, SH_VECTOR, false},
+  {ARB_REG_VERTEXNRM, 1, SH_NORMAL, false},
   {ARB_REG_VERTEXCOL, 1, SH_COLOR, false},
   {ARB_REG_VERTEXTEX, 8, SH_TEXCOORD, true},
   {ARB_REG_VERTEXFOG, 1, SH_ATTRIB, true},

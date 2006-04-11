@@ -188,7 +188,7 @@ Quaternion<B, T>::operator*=(const Attrib<3, B2, T, SH_VECTOR>& right)
 template<BindingType B, typename T>
 template<BindingType B2>
 Quaternion<B, T>& 
-Quaternion<B, T>::operator*=(const Attrib<3, B2, T, SH_VECTOR>& right) 
+Quaternion<B, T>::operator*=(const Attrib<3, B2, T, SH_NORMAL>& right) 
 {
   Vector4f v;
   v(0) = 0.0;
@@ -305,7 +305,7 @@ Quaternion<B, T>::operator*(const Attrib<3, B2, T, SH_VECTOR>& v)
 template<BindingType B, typename T>
 template<BindingType B2>
 Quaternion<SH_TEMP, T> 
-Quaternion<B, T>::operator*(const Attrib<3, B2, T, SH_VECTOR>& v)
+Quaternion<B, T>::operator*(const Attrib<3, B2, T, SH_NORMAL>& v)
 {
   Quaternion<B, T> r = *this;
   return (r *= v);

@@ -63,7 +63,7 @@ enum SemanticType {
   SH_ATTRIB,
   SH_POINT,
   SH_VECTOR,
-  SH_VECTOR,
+  SH_NORMAL,
   SH_COLOR,
   SH_TEXCOORD,
   SH_POSITION,
