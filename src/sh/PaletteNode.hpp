@@ -34,7 +34,7 @@ namespace SH {
  *
  * @see Palette
  */
-class DLLEXPORT PaletteNode : public VariableNode {
+class SH_DLLEXPORT PaletteNode : public VariableNode {
 public:
   PaletteNode(int elements, SemanticType semantic, ValueType valueType, std::size_t length);
 

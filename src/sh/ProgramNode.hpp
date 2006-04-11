@@ -42,7 +42,7 @@ class Backend;
 /** A particular Sh program.
  */
 class
-DLLEXPORT ProgramNode : public virtual RefCountable, public virtual Meta, public virtual InfoHolder {
+SH_DLLEXPORT ProgramNode : public virtual RefCountable, public virtual Meta, public virtual InfoHolder {
 public:
   ProgramNode(const std::string& target);
 

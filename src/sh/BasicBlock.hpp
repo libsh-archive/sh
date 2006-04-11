@@ -33,7 +33,7 @@ namespace SH {
  * these assignments might be conditional).
  */
 class 
-DLLEXPORT
+SH_DLLEXPORT
 BasicBlock : public Block {
 public:
   typedef std::list<Statement> StmtList;

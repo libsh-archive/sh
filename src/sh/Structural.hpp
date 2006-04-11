@@ -33,7 +33,7 @@
 namespace SH {
 
 class
-DLLEXPORT StructuralNode : public virtual RefCountable /*, public virtual Info */ {
+SH_DLLEXPORT StructuralNode : public virtual RefCountable /*, public virtual Info */ {
 public:
   friend class Structural;
   
@@ -83,7 +83,7 @@ public:
    * Used in searching for cfg edges that match criteria in the structural
    * graph.
    */
-  struct DLLEXPORT CfgMatch {
+  struct SH_DLLEXPORT CfgMatch {
     CtrlGraphNodePtr from, to;
     CtrlGraphNode::SuccessorList::iterator S; //< set to succ.end() if edge is from->follower 
 
@@ -120,7 +120,7 @@ typedef Pointer<StructuralNode> StructuralNodePtr;
 typedef Pointer<const StructuralNode> StructuralNodeCPtr;
 
 class
-DLLEXPORT Structural {
+SH_DLLEXPORT Structural {
 public:
   Structural(const CtrlGraphPtr& graph);
 

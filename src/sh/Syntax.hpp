@@ -255,107 +255,107 @@
 namespace SH {
 
 /// \internal
-DLLEXPORT
+SH_DLLEXPORT
 bool processArg(const Variable& arg, bool* internal_cond);
 
 /// \internal
-DLLEXPORT
+SH_DLLEXPORT
 bool pushArg();
 
 /// \internal
-DLLEXPORT
+SH_DLLEXPORT
 bool pushArgQueue();
 
 /// \internal
-DLLEXPORT
+SH_DLLEXPORT
 bool evaluateCondition(const Variable& arg);
 
 /// \internal
-DLLEXPORT
+SH_DLLEXPORT
 Program beginShader(const std::string& kind = "");
 /// \internal
-DLLEXPORT
+SH_DLLEXPORT
 void endShader();
 
 /// Force (re)compilation of a program under its default target.
-DLLEXPORT
+SH_DLLEXPORT
 void compile(Program& prg);
 /// Force (re)compilation of a program for a given target.
-DLLEXPORT
+SH_DLLEXPORT
 void compile(Program& prg, const std::string& target);
 
 /// \deprecated Use compile() instead
-DLLEXPORT
+SH_DLLEXPORT
 void compileShader(Program& prg);
 /// \deprecated Use compile() instead
-DLLEXPORT
+SH_DLLEXPORT
 void compileShader(Program& prg, const std::string& target);
 
 /// Bind a program using the program's default target
-DLLEXPORT
+SH_DLLEXPORT
 void bind(Program& prg);
 /// Bind a program with the given target.
-DLLEXPORT
+SH_DLLEXPORT
 void bind(const std::string& target, Program& shader);
 
 /// \deprecated Use bind() instead.
-DLLEXPORT
+SH_DLLEXPORT
 void bindShader(Program& shader);
 /// \deprecated Use bind() instead.
-DLLEXPORT
+SH_DLLEXPORT
 void bindShader(const std::string& target, Program& shader);
 
 /// Bind a set of programs
-DLLEXPORT
+SH_DLLEXPORT
 void bind(const ProgramSet& s);
 
 /// Unbind all currently bound programs
-DLLEXPORT
+SH_DLLEXPORT
 void unbind();
 
 /// Unbind a program.
-DLLEXPORT
+SH_DLLEXPORT
 void unbind(Program& prg);
 /// Unbind a program with the given target.
-DLLEXPORT
+SH_DLLEXPORT
 void unbind(const std::string& target, Program& shader);
 
 /// Unbind a set of programs, if it's bound
-DLLEXPORT
+SH_DLLEXPORT
 void unbind(const ProgramSet& s);
 
 /// Link a set of programs
-DLLEXPORT
+SH_DLLEXPORT
 void link(const ProgramSet& s);
 
 /// Upload any textures and uniform parameters which are out-of-date
 /// but required on all compilation targets that have any programs
 /// bound
-DLLEXPORT
+SH_DLLEXPORT
 void update();
 
 /// Switch to a particular backend
-DLLEXPORT
+SH_DLLEXPORT
 bool setBackend(const std::string& name);
 
 /// Add a backend to the list of selected backends
-DLLEXPORT
+SH_DLLEXPORT
 bool useBackend(const std::string& name);
 
 /// Checks whether the backend is available
-DLLEXPORT
+SH_DLLEXPORT
 bool haveBackend(const std::string& name);
 
 /// Clear the list of selected backends
-DLLEXPORT
+SH_DLLEXPORT
 void clearBackends();
 
 /// Find the name of the best backend that handles the given target
-DLLEXPORT
+SH_DLLEXPORT
 std::string findBackend(const std::string& target);
 
 /// Register a backend
-DLLEXPORT
+SH_DLLEXPORT
 void registerBackend(const std::string& name, SH::Backend::InstantiateEntryPoint *instantiate, SH::Backend::TargetCostEntryPoint *target_cost);
 
 /** \brief SH Initialization Function.
@@ -363,57 +363,57 @@ void registerBackend(const std::string& name, SH::Backend::InstantiateEntryPoint
  * The function needs to be called prior to the use of any other SH functions. Additionally,
  * in Windows, this function needs to be called after a OpenGL context/window has been created.
  */
-DLLEXPORT
+SH_DLLEXPORT
 void init();
 
 /// \internal
-DLLEXPORT
+SH_DLLEXPORT
 void internal_if(bool);
 /// \internal
-DLLEXPORT
+SH_DLLEXPORT
 void internal_else();
 /// \internal
-DLLEXPORT
+SH_DLLEXPORT
 void endIf();
 
 /// \internal
-DLLEXPORT
+SH_DLLEXPORT
 void internal_while(bool);
 /// \internal
-DLLEXPORT
+SH_DLLEXPORT
 void endWhile();
 
 /// \internal
-DLLEXPORT
+SH_DLLEXPORT
 void internal_do();
 /// \internal
-DLLEXPORT
+SH_DLLEXPORT
 void until(bool);
 
 /// \internal
-DLLEXPORT
+SH_DLLEXPORT
 void internal_for(bool);
 /// \internal
-DLLEXPORT
+SH_DLLEXPORT
 void endFor();
 
 /// \internal
-DLLEXPORT
+SH_DLLEXPORT
 void internal_break(bool);
 /// \internal
-DLLEXPORT
+SH_DLLEXPORT
 void internal_continue(bool);
 
 /// \internal
-DLLEXPORT
+SH_DLLEXPORT
 void beginSection();
 /// \internal
-DLLEXPORT
+SH_DLLEXPORT
 void endSection();
 
 /// \internal
 /// Adds a comment to the immediate representation 
-DLLEXPORT
+SH_DLLEXPORT
 void comment(const std::string& comment);
 
 }

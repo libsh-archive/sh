@@ -56,7 +56,7 @@ enum CubeDirection {
  * by textures.
  */
 class 
-DLLEXPORT TextureTraits {
+SH_DLLEXPORT TextureTraits {
 public:
   enum Filtering {
     FILTER_NONE,
@@ -105,7 +105,7 @@ private:
 };
 
 class 
-DLLEXPORT TextureNode : public VariableNode {
+SH_DLLEXPORT TextureNode : public VariableNode {
 public:
   TextureNode(TextureDims dims,
                 int size, // scalars per tuple 

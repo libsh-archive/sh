@@ -28,7 +28,7 @@
 namespace SH {
 
 class
-DLLEXPORT Context {
+SH_DLLEXPORT Context {
 public:
   static Context* current();
 
@@ -101,11 +101,11 @@ private:
 typedef Context::BoundProgramMap::iterator BoundIterator;
 
 /// Check whether a program is bound to the given target
-DLLEXPORT
+SH_DLLEXPORT
 bool isBound(const std::string& target);
 
 /// Return the program bound to the given target
-DLLEXPORT
+SH_DLLEXPORT
 ProgramNodePtr bound(const std::string& target);
 
 /// Get beginning of bound program map for current context

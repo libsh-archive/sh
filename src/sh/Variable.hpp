@@ -39,7 +39,7 @@ class Program;
  * placed in Statements.
 */
 class 
-DLLEXPORT Variable : public MetaForwarder {
+SH_DLLEXPORT Variable : public MetaForwarder {
 public:
   Variable();
   Variable(const VariableNodePtr& node);
@@ -173,7 +173,7 @@ protected:
   Swizzle m_swizzle; ///< Swizzling applied to this variable.
   bool m_neg; ///< True iff this variable is negated
 
-  friend DLLEXPORT std::ostream& operator<<(std::ostream& out, const Variable& variableToPrint);
+  friend SH_DLLEXPORT std::ostream& operator<<(std::ostream& out, const Variable& variableToPrint);
 };
 
 }

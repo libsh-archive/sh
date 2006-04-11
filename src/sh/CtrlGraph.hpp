@@ -35,7 +35,7 @@ namespace SH {
 class CtrlGraphNode;
 
 struct
-DLLEXPORT CtrlGraphBranch {
+SH_DLLEXPORT CtrlGraphBranch {
   CtrlGraphBranch(const Pointer<CtrlGraphNode>& node,
                     Variable cond);
   
@@ -54,7 +54,7 @@ DLLEXPORT CtrlGraphBranch {
  * successor of 0.
  */
 class
-DLLEXPORT CtrlGraphNode : public RefCountable, public InfoHolder {
+SH_DLLEXPORT CtrlGraphNode : public RefCountable, public InfoHolder {
 public:
   CtrlGraphNode();
   ~CtrlGraphNode();
@@ -151,7 +151,7 @@ typedef Pointer<const CtrlGraphNode> CtrlGraphNodeCPtr;
  * This is the parsed form of a shader body.
  */
 class
-DLLEXPORT CtrlGraph : public RefCountable {
+SH_DLLEXPORT CtrlGraph : public RefCountable {
 public:
   CtrlGraph(const CtrlGraphNodePtr& head, const CtrlGraphNodePtr& tail);
   CtrlGraph(const BlockListPtr& blocks);

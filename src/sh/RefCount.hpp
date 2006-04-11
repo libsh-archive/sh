@@ -44,7 +44,7 @@ namespace SH {
  * if you want to reference-count your class.
  */
 class 
-DLLEXPORT
+SH_DLLEXPORT
 RefCountable 
 {
 public:

@@ -33,7 +33,7 @@ class Record;
 /** Thin wrapper around ProgramNode.
  */
 class
-DLLEXPORT Program : public MetaForwarder {
+SH_DLLEXPORT Program : public MetaForwarder {
 public:
   Program();
   Program(const Program& other);

@@ -46,7 +46,7 @@ class Storage;
  * @see Storage
  */
 class
-DLLEXPORT Memory : public RefCountable {
+SH_DLLEXPORT Memory : public RefCountable {
 public:
   virtual ~Memory();
 
@@ -120,7 +120,7 @@ typedef Pointer<const Memory> MemoryCPtr;
  * @see Storage
  */
 class
-DLLEXPORT Transfer {
+SH_DLLEXPORT Transfer {
 public:
   virtual ~Transfer() {}
 
@@ -152,7 +152,7 @@ private:
  * @see Transfer
  */
 class
-DLLEXPORT Storage : public RefCountable {
+SH_DLLEXPORT Storage : public RefCountable {
 public:
   Storage();
   virtual ~Storage();
@@ -239,7 +239,7 @@ typedef Pointer<const Storage> StorageCPtr;
  * @see HostMemory
  */
 class
-DLLEXPORT HostStorage : public Storage {
+SH_DLLEXPORT HostStorage : public Storage {
 public:
   HostStorage(Memory* memory, std::size_t length, ValueType storage_type, std::size_t align = 1); ///< Internally managed storage
   HostStorage(Memory* memory, std::size_t length, void* data, ValueType storage_type); ///< Externally managed storage
@@ -278,7 +278,7 @@ typedef Pointer<const HostStorage> HostStorageCPtr;
  * @see HostStorage
  */
 class
-DLLEXPORT HostMemory : public Memory {
+SH_DLLEXPORT HostMemory : public Memory {
 public:
   HostMemory(std::size_t length, ValueType value_type, std::size_t align = 1);
   HostMemory(std::size_t length, void* data, ValueType value_type);

@@ -62,7 +62,7 @@ class EvalOp;
 //typedef Pointer<const Variant> const Variant*;
 
 struct 
-DLLEXPORT
+SH_DLLEXPORT
 EvalOpInfo: public Info {
   Operation m_op;
 
@@ -83,7 +83,7 @@ EvalOpInfo: public Info {
 };
 
 class 
-DLLEXPORT
+SH_DLLEXPORT
 Eval {
   public:
     /** Decides which evaluation evalOp to use and calls it up.
@@ -138,7 +138,7 @@ Eval {
 };
 
 class 
-DLLEXPORT
+SH_DLLEXPORT
 EvalOp {
   public:
     virtual ~EvalOp();

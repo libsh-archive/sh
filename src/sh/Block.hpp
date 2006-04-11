@@ -32,7 +32,7 @@ namespace SH {
  * These are either basic blocks or tokens.
  */
 class
-DLLEXPORT Block : public RefCountable {
+SH_DLLEXPORT Block : public RefCountable {
 public:
   virtual ~Block();
 
@@ -46,7 +46,7 @@ typedef Pointer<const Block> BlockCPtr;
 /** A list of generic blocks.
  */
 class
-DLLEXPORT BlockList : public RefCountable {
+SH_DLLEXPORT BlockList : public RefCountable {
 public:
   BlockList(bool isArgument = false);
 
@@ -68,7 +68,7 @@ public:
   bool empty() const;
 
   /// Output a token list
-  friend DLLEXPORT std::ostream& operator<<(std::ostream& out, const BlockList& blockList);
+  friend SH_DLLEXPORT std::ostream& operator<<(std::ostream& out, const BlockList& blockList);
 
   /// Output a token list at a given indentation
   std::ostream& print(std::ostream& out, int indentation) const;

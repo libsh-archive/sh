@@ -40,7 +40,7 @@ namespace SH {
  * <pre>dest := src[0]</pre>
  */
 class
-DLLEXPORT Statement: public InfoHolder {
+SH_DLLEXPORT Statement: public InfoHolder {
 public:
   /** Constructs a statement with the given operator, src(s), and dest
    * variables. Sets marked to false.
@@ -65,7 +65,7 @@ public:
 
   bool marked;
 
-  friend DLLEXPORT std::ostream& operator<<(std::ostream& out, const SH::Statement& stmt);
+  friend SH_DLLEXPORT std::ostream& operator<<(std::ostream& out, const SH::Statement& stmt);
 
   private:
     static std::ostream& dumpVar(std::ostream &out, const Variable& var);

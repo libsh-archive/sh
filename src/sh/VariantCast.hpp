@@ -34,7 +34,7 @@ class Variant;
 /// Declares a cast between one data type of a storage type and another.  
 
 class 
-DLLEXPORT
+SH_DLLEXPORT
 VariantCast {
   public:
     virtual ~VariantCast() {}

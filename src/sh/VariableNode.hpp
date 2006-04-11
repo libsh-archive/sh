@@ -44,7 +44,7 @@ struct VariableNodeEval;
 /** A generic n-tuple variable.
  */
 class 
-DLLEXPORT VariableNode : public virtual RefCountable,
+SH_DLLEXPORT VariableNode : public virtual RefCountable,
                        public virtual Meta {
 public:
   /// Constructs a VariableNode that holds a tuple of data of type 

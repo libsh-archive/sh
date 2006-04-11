@@ -27,7 +27,7 @@
 namespace SH {
 
 class
-DLLEXPORT Meta {
+SH_DLLEXPORT Meta {
 public:
   Meta()
     : m_meta(0) 

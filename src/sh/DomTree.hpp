@@ -34,7 +34,7 @@ namespace SH {
   /** A dominator tree in a flowgraph.
    */
   class
-  DLLEXPORT DomTree {
+  SH_DLLEXPORT DomTree {
   public:
     DomTree(CtrlGraphPtr ctrlGraph);
 

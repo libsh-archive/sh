@@ -47,7 +47,7 @@ namespace SH {
  * particular the size of) the tuple which they are swizzling.
  */
 class
-DLLEXPORT
+SH_DLLEXPORT
 Swizzle {
 public:
 
@@ -133,13 +133,13 @@ private:
     int* ptr;
   } m_index;
 
-  friend DLLEXPORT std::ostream& operator<<(std::ostream& out, const Swizzle& swizzle);
+  friend SH_DLLEXPORT std::ostream& operator<<(std::ostream& out, const Swizzle& swizzle);
 };
 
 /// Thrown when an invalid swizzle is specified (e.g. an index in the
 /// swizzle is out of range).
 class
-DLLEXPORT SwizzleException : public Exception 
+SH_DLLEXPORT SwizzleException : public Exception 
 {
 public:
   SwizzleException(const Swizzle& s, int idx, int size);

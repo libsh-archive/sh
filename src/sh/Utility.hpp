@@ -31,7 +31,7 @@
 namespace SH {
 
 /// Print "indent" spaces to out.
-DLLEXPORT
+SH_DLLEXPORT
 std::ostream& printIndent(std::ostream& out, int indent);
 
 /** Check a boolean condition at compile time.
@@ -51,7 +51,7 @@ template<> struct CompileTimeChecker<false> {
 }
 
 struct 
-DLLEXPORT Ignore {
+SH_DLLEXPORT Ignore {
   template<typename T>
   T& operator&(T& other) { return other; }
 };

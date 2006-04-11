@@ -39,7 +39,7 @@ struct VariantFactory;
  * @see DataType.hpp
  * */ 
 struct 
-DLLEXPORT
+SH_DLLEXPORT
 TypeInfo {
   virtual ~TypeInfo() {}
 
@@ -93,13 +93,13 @@ struct DataTypeInfo: public TypeInfo {
 };
 
 
-DLLEXPORT
+SH_DLLEXPORT
 extern const TypeInfo* typeInfo(ValueType valueType, DataType dataType = HOST);
 
-DLLEXPORT
+SH_DLLEXPORT
 extern const VariantFactory* variantFactory(ValueType valueType, DataType dataType = HOST);
 
-DLLEXPORT
+SH_DLLEXPORT
 extern const char* valueTypeName(ValueType valueType);
 }
 

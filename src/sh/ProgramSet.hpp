@@ -31,7 +31,7 @@ class BackendSet;
 class Program;
 
 class
-DLLEXPORT ProgramSet : public RefCountable {
+SH_DLLEXPORT ProgramSet : public RefCountable {
 public:
   ProgramSet(); // empty set
   explicit ProgramSet(const Program& a);

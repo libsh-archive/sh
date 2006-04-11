@@ -41,7 +41,7 @@ namespace SH  {
 class Stream;
 
 class
-DLLEXPORT BackendCode : public RefCountable {
+SH_DLLEXPORT BackendCode : public RefCountable {
 public:
   virtual ~BackendCode();
 
@@ -85,7 +85,7 @@ typedef Pointer<const BackendCode> BackendCodeCPtr;
 
 // A backend-specific set of programs, to be linked together/bound at once
 class
-DLLEXPORT BackendSet : public RefCountable {
+SH_DLLEXPORT BackendSet : public RefCountable {
 public:
   virtual ~BackendSet();
 
@@ -100,7 +100,7 @@ typedef Pointer<const BackendSet> BackendSetCPtr;
 
 class Transformer;
 class
-DLLEXPORT Backend : public RefCountable {
+SH_DLLEXPORT Backend : public RefCountable {
 public:
   virtual ~Backend();
 

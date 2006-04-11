@@ -64,7 +64,7 @@ struct CastMgrVertex;
 typedef GraphType<CastMgrVertex, CastMgrEdge> CastMgrGraphType;
 
 struct 
-DLLEXPORT
+SH_DLLEXPORT
 CastMgrEdge: public GraphEdge<CastMgrGraphType> 
 {
   // Creates an edges describing a relationship between two types.
@@ -80,7 +80,7 @@ CastMgrEdge: public GraphEdge<CastMgrGraphType>
 };
 
 struct 
-DLLEXPORT
+SH_DLLEXPORT
 CastMgrVertex: public GraphVertex<CastMgrGraphType>
 {
   CastMgrVertex(ValueType valueType, DataType dataType);
@@ -93,7 +93,7 @@ CastMgrVertex: public GraphVertex<CastMgrGraphType>
 };
 
 class 
-DLLEXPORT
+SH_DLLEXPORT
 CastMgrGraph: public Graph<CastMgrGraphType>
 {
   public:
@@ -112,7 +112,7 @@ CastMgrGraph: public Graph<CastMgrGraphType>
 };
 
 class 
-DLLEXPORT
+SH_DLLEXPORT
 CastManager {
   public:
     void addCast(const VariantCast *caster, bool automatic);

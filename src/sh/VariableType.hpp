@@ -55,7 +55,7 @@ enum BindingType {
   BINDINGTYPE_END
 };
 
-DLLEXPORT extern const char* bindingTypeName[];
+SH_DLLEXPORT extern const char* bindingTypeName[];
 
 /** The various ways semantic types for variables.
  */
@@ -72,7 +72,7 @@ enum SemanticType {
   SEMANTICTYPE_END
 };
 
-DLLEXPORT extern const char* semanticTypeName[];
+SH_DLLEXPORT extern const char* semanticTypeName[];
 
 
 }

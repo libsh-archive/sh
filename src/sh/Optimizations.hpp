@@ -35,16 +35,16 @@
 namespace SH {
 
 /// Optimize the program with the given optimization level.
-DLLEXPORT
+SH_DLLEXPORT
 void optimize(Program& p, int level);
-DLLEXPORT
+SH_DLLEXPORT
 void optimize(const ProgramNodePtr& p, int level);
 
 /// Optimize the program with the current context's default
 /// optimization level.
-DLLEXPORT
+SH_DLLEXPORT
 void optimize(Program& p);
-DLLEXPORT
+SH_DLLEXPORT
 void optimize(const ProgramNodePtr& p);
 
 // Internal stuff.
@@ -52,32 +52,32 @@ void optimize(const ProgramNodePtr& p);
 // Add value tracking information to the given program's CFG
 // statements.
 // If it already exists, overwrite it.
-DLLEXPORT
+SH_DLLEXPORT
 void add_value_tracking(Program& prg);
 
 /// Insert instructions representing each conditional branch
-DLLEXPORT
+SH_DLLEXPORT
 void insert_branch_instructions(Program& prg);
 
 /// Remove instructions representing conditional branches
-DLLEXPORT
+SH_DLLEXPORT
 void remove_branch_instructions(Program& prg);
 
 /// Merge blocks with redundant edges
-DLLEXPORT
+SH_DLLEXPORT
 void straighten(Program& p, bool& changed);
 
 /// Remove code that serves no purpose in the given program
-DLLEXPORT
+SH_DLLEXPORT
 void remove_dead_code(Program& p, bool& changed);
 
 /// Propagate constants and lift uniform computations
-DLLEXPORT
+SH_DLLEXPORT
 void propagate_constants(Program& p);
 
 /* per statement uddu chains */
 struct 
-DLLEXPORT
+SH_DLLEXPORT
 ValueTracking : public Info {
   ValueTracking(Statement* stmt);
 

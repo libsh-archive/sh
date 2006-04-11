@@ -39,7 +39,7 @@ namespace SH {
  * of the argument, and a block list describing how that value is to
  * be computed */
 struct 
-DLLEXPORT TokenArgument {
+SH_DLLEXPORT TokenArgument {
   TokenArgument(const Variable& result, const BlockListPtr& blockList)
     : result(result), blockList(blockList)
   {
@@ -54,7 +54,7 @@ DLLEXPORT TokenArgument {
  * the error.
  */
 class 
-DLLEXPORT TokenizerException : public Exception {
+SH_DLLEXPORT TokenizerException : public Exception {
 public:
   TokenizerException(const std::string& error);
 };
@@ -69,7 +69,7 @@ public:
  *
  */
 class 
-DLLEXPORT Tokenizer {
+SH_DLLEXPORT Tokenizer {
 public:
   Tokenizer();
 

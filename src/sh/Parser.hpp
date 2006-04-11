@@ -32,7 +32,7 @@ namespace SH {
  * blocks and parses it into a control graph.
  */
 class
-DLLEXPORT Parser {
+SH_DLLEXPORT Parser {
 public:
   /// Return a pointer to the singleton instance
   static Parser* instance();

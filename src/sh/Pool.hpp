@@ -30,7 +30,7 @@
 namespace SH {
 
 class 
-DLLEXPORT
+SH_DLLEXPORT
 Pool {
 public:
   Pool(std::size_t element_size, std::size_t block_size);

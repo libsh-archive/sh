@@ -30,7 +30,7 @@ namespace SH {
  * @see BitSet
  */
 class
-DLLEXPORT BitRef {
+SH_DLLEXPORT BitRef {
 public:
   operator bool() const;
   BitRef& operator=(bool b);
@@ -53,7 +53,7 @@ private:
  * may need.
  */
 class
-DLLEXPORT BitSet {
+SH_DLLEXPORT BitSet {
 public:
   /** Construct a bitset with size bits.
    * By default all bits are set to 0.
@@ -94,7 +94,7 @@ private:
   unsigned int* m_data;
 };
 
-DLLEXPORT
+SH_DLLEXPORT
 std::ostream& operator<<(std::ostream& out, const BitSet& bitset);
 
 }

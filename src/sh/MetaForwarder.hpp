@@ -29,7 +29,7 @@ namespace SH {
 class Meta;
 
 class
-DLLEXPORT MetaForwarder {
+SH_DLLEXPORT MetaForwarder {
 public:
   MetaForwarder(Meta* meta);
   

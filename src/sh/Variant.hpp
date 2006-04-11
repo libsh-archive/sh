@@ -68,7 +68,7 @@ namespace SH {
  * @see DataVariant
  */
 class 
-DLLEXPORT 
+SH_DLLEXPORT 
 Variant: public RefCountable {
   public:
     Variant();

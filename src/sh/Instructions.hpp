@@ -32,129 +32,129 @@ namespace SH {
  * @{
  */
 
-DLLEXPORT
+SH_DLLEXPORT
 void shASN(Variable& dest, const Variable& src);
 //void shNEG(Variable& dest, const Variable& src);
-DLLEXPORT
+SH_DLLEXPORT
 void shADD(Variable& dest, const Variable& a, const Variable& b);
-DLLEXPORT
+SH_DLLEXPORT
 void shMUL(Variable& dest, const Variable& a, const Variable& b);
-DLLEXPORT
+SH_DLLEXPORT
 void shDIV(Variable& dest, const Variable& a, const Variable& b);
 
-DLLEXPORT
+SH_DLLEXPORT
 void shSLT(Variable& dest, const Variable& a, const Variable& b);
-DLLEXPORT
+SH_DLLEXPORT
 void shSLE(Variable& dest, const Variable& a, const Variable& b);
-DLLEXPORT
+SH_DLLEXPORT
 void shSGT(Variable& dest, const Variable& a, const Variable& b);
-DLLEXPORT
+SH_DLLEXPORT
 void shSGE(Variable& dest, const Variable& a, const Variable& b);
-DLLEXPORT
+SH_DLLEXPORT
 void shSEQ(Variable& dest, const Variable& a, const Variable& b);
-DLLEXPORT
+SH_DLLEXPORT
 void shSNE(Variable& dest, const Variable& a, const Variable& b);
 
-DLLEXPORT
+SH_DLLEXPORT
 void shABS(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shACOS(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shACOSH(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shASIN(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shASINH(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shATAN(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shATAN2(Variable& dest, const Variable& a, const Variable& b);
-DLLEXPORT
+SH_DLLEXPORT
 void shATANH(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shCBRT(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shCEIL(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shCOS(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shCOSH(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shCMUL(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shCSUM(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shDOT(Variable& dest, const Variable& a, const Variable& b);
-DLLEXPORT
+SH_DLLEXPORT
 void shDX(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shDY(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shEXP(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shEXP2(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shEXP10(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shFLR(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shFRAC(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shLIT(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shLOG(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shLOG2(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shLOG10(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shLRP(Variable& dest, const Variable& alpha,
            const Variable& a, const Variable& b);
-DLLEXPORT
+SH_DLLEXPORT
 void shHASH(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shMAD(Variable& dest, const Variable& a,
            const Variable& b, const Variable& c);
-DLLEXPORT
+SH_DLLEXPORT
 void shMAX(Variable& dest, const Variable& a, const Variable& b);
-DLLEXPORT
+SH_DLLEXPORT
 void shMIN(Variable& dest, const Variable& a, const Variable& b);
-DLLEXPORT
+SH_DLLEXPORT
 void shMOD(Variable& dest, const Variable& a, const Variable& b);
-DLLEXPORT
+SH_DLLEXPORT
 void shNOISE(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shPOW(Variable& dest, const Variable& a, const Variable& b);
-DLLEXPORT
+SH_DLLEXPORT
 void shRCP(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shRND(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shRSQ(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shSGN(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shSIN(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shSINH(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shSQRT(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shTAN(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shTANH(Variable& dest, const Variable& a);
 
-DLLEXPORT
+SH_DLLEXPORT
 void shNORM(Variable& dest, const Variable& a);
-DLLEXPORT
+SH_DLLEXPORT
 void shXPD(Variable& dest, const Variable& a, const Variable& b);
 
-DLLEXPORT
+SH_DLLEXPORT
 void shCOND(Variable& dest, const Variable& cond,
             const Variable& a, const Variable& b);
-DLLEXPORT
+SH_DLLEXPORT
 void shKIL(const Variable& cond);
-DLLEXPORT
+SH_DLLEXPORT
 void shRET(const Variable& cond);
 
 /*@}*/

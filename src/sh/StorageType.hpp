@@ -148,7 +148,7 @@ template<typename T> struct __StorageTypeName { static const char* name; };
 template<typename T> const char* __StorageTypeName<T>::name = "unknown";
 
 #define STORAGETYPE_NAME_SPEC(T)\
-  template<> struct DLLEXPORT __StorageTypeName<T > { static const char* name; };
+  template<> struct SH_DLLEXPORT __StorageTypeName<T > { static const char* name; };
 
 STORAGETYPE_NAME_SPEC(Half);
 STORAGETYPE_NAME_SPEC(float);

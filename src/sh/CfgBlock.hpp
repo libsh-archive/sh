@@ -32,7 +32,7 @@ namespace SH {
  * false to use the original graph.  
  */
 class 
-DLLEXPORT
+SH_DLLEXPORT
 CfgBlock : public Block {
 public:
   CfgBlock(const Program &program, bool copy=true);

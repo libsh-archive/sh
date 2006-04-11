@@ -29,7 +29,7 @@ namespace SH {
  * You should derive from this class to make more specific exceptions.
  */
 class
-DLLEXPORT Exception : public std::exception {
+SH_DLLEXPORT Exception : public std::exception {
 public:
   /// Construct a general exception with the given message.
   Exception(const std::string& message);
@@ -47,7 +47,7 @@ protected:
 /** An exception representing a parse error.
  */
 class
-DLLEXPORT ParseException : public Exception {
+SH_DLLEXPORT ParseException : public Exception {
 public:
   ParseException(const std::string& message);
 };
@@ -55,7 +55,7 @@ public:
 /** An exception representing a scoping violation
  */
 class
-DLLEXPORT ScopeException : public Exception {
+SH_DLLEXPORT ScopeException : public Exception {
 public:
   ScopeException(const std::string& message);
 };
@@ -63,7 +63,7 @@ public:
 /** An exception relating to an Image operation.
  */
 class
-DLLEXPORT ImageException : public Exception {
+SH_DLLEXPORT ImageException : public Exception {
 public:
   ImageException(const std::string& message);
 };
@@ -71,7 +71,7 @@ public:
 /** An exception relating to an Algebra operation.
  */
 class
-DLLEXPORT AlgebraException : public Exception {
+SH_DLLEXPORT AlgebraException : public Exception {
 public:
   AlgebraException(const std::string& message);
 };
@@ -79,7 +79,7 @@ public:
 /** An exception relating to an Optimizer operation.
  */
 class
-DLLEXPORT OptimizerException : public Exception {
+SH_DLLEXPORT OptimizerException : public Exception {
 public:
   OptimizerException(const std::string& message);
 };
@@ -87,7 +87,7 @@ public:
 /** An exception relating to an Transformer operation.
  */
 class
-DLLEXPORT TransformerException : public Exception {
+SH_DLLEXPORT TransformerException : public Exception {
 public:
   TransformerException(const std::string& message);
 };
@@ -95,7 +95,7 @@ public:
 /** An exception relating to an Backend operation.
  */
 class
-DLLEXPORT BackendException : public Exception {
+SH_DLLEXPORT BackendException : public Exception {
 public:
   BackendException(const std::string& message);
 };

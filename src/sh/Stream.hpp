@@ -33,7 +33,7 @@ namespace SH {
  * @see Channel
  */
 class
-DLLEXPORT Stream {
+SH_DLLEXPORT Stream {
 public:
   typedef std::list<ChannelNodePtr> NodeList;
   typedef NodeList::iterator iterator;
@@ -85,7 +85,7 @@ Stream combine(const Stream& left, const Channel<T2>& right);
 template<typename T1>
 Stream combine(const Channel<T1>& left, const Stream& right);
 
-DLLEXPORT
+SH_DLLEXPORT
 Stream combine(const Stream& left, const Stream& right);
 
 /** An operator alias for combine between channels.
@@ -105,19 +105,19 @@ Stream operator&(const Channel<T1>& left, const Stream& right);
 
 /** An operator alias for combine between two streams.
  */
-DLLEXPORT
+SH_DLLEXPORT
 Stream operator&(const Stream& left, const Stream& right);
 
 /** Apply a program to a stream. 
  * This function connects streams onto the output of programs
  * TODO: is this right?  why is the stream argument first?
  */
-DLLEXPORT
+SH_DLLEXPORT
 Program connect(const Stream& stream, const Program& program);
 
 /** An operator alias for connect(p,s).
  */
-DLLEXPORT
+SH_DLLEXPORT
 Program operator<<(const Program& program, const Stream& stream);
 
 

@@ -30,7 +30,7 @@ namespace SH {
 class Variant;
 
 struct 
-DLLEXPORT 
+SH_DLLEXPORT 
 VariantFactory {
   virtual ~VariantFactory() {}
 

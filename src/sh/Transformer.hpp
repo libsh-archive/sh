@@ -43,7 +43,7 @@ namespace SH {
  * Context::current()->parsing() == program
  */
 class 
-DLLEXPORT Transformer {
+SH_DLLEXPORT Transformer {
 public:
   Transformer(const ProgramNodePtr& program);
   ~Transformer();

@@ -34,7 +34,7 @@ typedef ProgramNode::VarList::const_iterator ManipVarIterator;
  * Program outputs.
  */
 class
-DLLEXPORT FixedManipulatorNode: public RefCountable { 
+SH_DLLEXPORT FixedManipulatorNode: public RefCountable { 
   public:
     FixedManipulatorNode();
     virtual ~FixedManipulatorNode(); 
@@ -56,7 +56,7 @@ DLLEXPORT FixedManipulatorNode: public RefCountable {
 typedef Pointer<FixedManipulatorNode> FixedManipulator;
 
 class
-DLLEXPORT KeepNode: public FixedManipulatorNode {
+SH_DLLEXPORT KeepNode: public FixedManipulatorNode {
   public:
     KeepNode(int numChannels); 
     Program applyToInputs(ManipVarIterator &finger, ManipVarIterator end) const;
@@ -65,11 +65,11 @@ DLLEXPORT KeepNode: public FixedManipulatorNode {
   private:
     int m_numChannels;
 };
-DLLEXPORT
+SH_DLLEXPORT
 FixedManipulator keep(int numChannels = 1);
 
 class
-DLLEXPORT LoseNode: public FixedManipulatorNode {
+SH_DLLEXPORT LoseNode: public FixedManipulatorNode {
   public:
     LoseNode(int numChannels); 
     Program applyToInputs(ManipVarIterator &finger, ManipVarIterator end) const;
@@ -78,11 +78,11 @@ DLLEXPORT LoseNode: public FixedManipulatorNode {
   private:
     int m_numChannels;
 };
-DLLEXPORT
+SH_DLLEXPORT
 FixedManipulator lose(int numChannels = 1);
 
 class
-DLLEXPORT DupNode: public FixedManipulatorNode {
+SH_DLLEXPORT DupNode: public FixedManipulatorNode {
   public:
     DupNode(int numDups);
     Program applyToInputs(ManipVarIterator &finger, ManipVarIterator end) const;
@@ -91,7 +91,7 @@ DLLEXPORT DupNode: public FixedManipulatorNode {
   private:
     int m_numDups;
 };
-DLLEXPORT
+SH_DLLEXPORT
 FixedManipulator dup(int numDups = 2);
 
 // TODO make class names less clunky
@@ -102,7 +102,7 @@ FixedManipulator dup(int numDups = 2);
 // default connect way when inputs != outpus)
 //
 class
-DLLEXPORT ProgramManipNode: public FixedManipulatorNode {
+SH_DLLEXPORT ProgramManipNode: public FixedManipulatorNode {
   public:
     Program applyToInputs(ManipVarIterator &finger, ManipVarIterator end) const;
     Program applyToOutputs(ManipVarIterator &finger, ManipVarIterator end) const;
@@ -112,9 +112,9 @@ DLLEXPORT ProgramManipNode: public FixedManipulatorNode {
 
     ProgramManipNode(const Program &p);
 
-  friend DLLEXPORT
+  friend SH_DLLEXPORT
   FixedManipulator operator&(const FixedManipulator &m, const Program &p );
-  friend DLLEXPORT
+  friend SH_DLLEXPORT
   FixedManipulator operator&( const Program &p, const FixedManipulator &m);
 };
 
@@ -128,22 +128,22 @@ class TreeManipNode: public FixedManipulatorNode {
 
     TreeManipNode(const FixedManipulator &a, const FixedManipulator &b); 
 
-    friend DLLEXPORT
+    friend SH_DLLEXPORT
 
     FixedManipulator operator&(const FixedManipulator &m, const FixedManipulator &n);
 };
 
-DLLEXPORT
+SH_DLLEXPORT
 Program operator<<(const Program &p, const FixedManipulator &m); 
-DLLEXPORT
+SH_DLLEXPORT
 Program operator<<(const FixedManipulator &m, const Program &p);
-DLLEXPORT
+SH_DLLEXPORT
 FixedManipulator operator&(const FixedManipulator &m, 
 			     const FixedManipulator &n);
-DLLEXPORT
+SH_DLLEXPORT
 FixedManipulator operator&(const FixedManipulator &m, 
 			     const Program &p );
-DLLEXPORT
+SH_DLLEXPORT
 FixedManipulator operator&(const Program &p, 
 			     const FixedManipulator &m);
 

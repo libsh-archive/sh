@@ -34,7 +34,7 @@ namespace SH {
  * If A > B, extra outputs are kept at end
  * If A < B, extra inputs are kept at end
  */
-DLLEXPORT
+SH_DLLEXPORT
 Program connect(Program a, Program b);
 
 /** Combine a and b.
@@ -42,7 +42,7 @@ Program connect(Program a, Program b);
  * concatenated in order,
  * and perform all operations from both programs.
  */
-DLLEXPORT
+SH_DLLEXPORT
 Program combine(Program a, Program b);
 
 /** Combine a and b.
@@ -58,7 +58,7 @@ Program combine(Program a, Program b);
  * For instance, if a has inputs x, y, k, x, z and b has inputs w, y, x, v
  * then the result has inputs x, y, k, z, w, v
  */
-DLLEXPORT
+SH_DLLEXPORT
 Program namedCombine(Program a, Program b);
 
 /** Replace inputs of b with outputs of a.
@@ -70,46 +70,46 @@ Program namedCombine(Program a, Program b);
  * another output of a.
  * Extra inputs remain at the end.  Extra outputs remain iff keepExtra = true 
  */
-DLLEXPORT
+SH_DLLEXPORT
 Program namedConnect(Program a, Program b, bool keepExtra = false );
 
 /** Renames all inputs named oldName to newName.
  */
-DLLEXPORT
+SH_DLLEXPORT
 Program renameInput(Program a, const std::string& oldName, const std::string& newName);
 
 /** Renames all outputs named oldName to newName.
  */
-DLLEXPORT
+SH_DLLEXPORT
 Program renameOutput(Program a, const std::string& oldName, const std::string& newName);
 
 /** Swizzles named outputs of a to match named inputs of b.
  * This only works on programs with inputs/outputs that all have unique names. 
  * Also, the inputs of b must be a subset of the outputs of a.
  */
-DLLEXPORT
+SH_DLLEXPORT
 Program namedAlign(Program a, Program b);
 
 /** Replaces variable with input attribute.
  * Replaces a variable by appending an
  * input attribute to the end of the list of inputs.
  */
-DLLEXPORT
+SH_DLLEXPORT
 Program replaceVariable(Program a, const Variable &var); 
 
 /** Equivalent to combine(a,b).
  */
-DLLEXPORT
+SH_DLLEXPORT
 Program operator&(Program a, Program b);
 
 /** Equivalent to connect(b,a).
  */
-DLLEXPORT
+SH_DLLEXPORT
 Program operator<<(Program a, Program b);
 
 /** Equivalent to replaceVariable(p,var).
  */
-DLLEXPORT
+SH_DLLEXPORT
 Program operator>>(Program p, const Variable &var); 
 
 /** Application operator.
@@ -117,7 +117,7 @@ Program operator>>(Program p, const Variable &var);
  * to a variable.   The implementation supports currying with delayed
  * read, which is equivalent to replacing an input with a parameter.
  */
-DLLEXPORT
+SH_DLLEXPORT
 Program operator<<(Program a, const Variable& var); 
 
 }

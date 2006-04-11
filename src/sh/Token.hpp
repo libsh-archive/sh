@@ -58,7 +58,7 @@ enum TokenType {
  * will be parsed into real control structures by the parser.
  */
 class 
-DLLEXPORT Token : public Block {
+SH_DLLEXPORT Token : public Block {
 public:
   Token(TokenType type);
   ~Token();

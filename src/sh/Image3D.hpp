@@ -34,7 +34,7 @@ namespace SH {
  * @see Image
  */
 class
-DLLEXPORT Image3D : public RefCountable {
+SH_DLLEXPORT Image3D : public RefCountable {
 public:
   Image3D(); ///< Construct an empty image
   Image3D(int width, int height, int depth, int elements); ///< Construct a black

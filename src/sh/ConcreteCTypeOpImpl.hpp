@@ -139,7 +139,7 @@ struct ConcreteCTypeOp<op, T>\
 #define CCTO_OP_SPEC(T, op)\
 template<>\
 struct  \
-DLLEXPORT \
+SH_DLLEXPORT \
 ConcreteCTypeOp<op, T>\
 { \
   typedef DataVariant<T, HOST> Variant; \

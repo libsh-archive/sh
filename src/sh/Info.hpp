@@ -30,7 +30,7 @@ namespace SH {
  * to certain Sh objects for internal usage. 
  */
 class 
-DLLEXPORT
+SH_DLLEXPORT
 Info {
 public:
   virtual ~Info();
@@ -42,7 +42,7 @@ protected:
 
 /** A simple Info class for attaching string comments to objects */
 class
-DLLEXPORT
+SH_DLLEXPORT
 InfoComment: public Info {
 public:
   InfoComment(const std::string& comment); 
@@ -57,7 +57,7 @@ public:
  * it must call this operator=.
  */
 class
-DLLEXPORT InfoHolder {
+SH_DLLEXPORT InfoHolder {
 public:
 
   InfoHolder();

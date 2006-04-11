@@ -32,7 +32,7 @@ namespace SH {
 /** Throws the given exception when Context::current()->throw_errors() is on. 
  * Otherwise prints error message.
  */
-DLLEXPORT
+SH_DLLEXPORT
 void error(const Exception& exception); 
 
 }

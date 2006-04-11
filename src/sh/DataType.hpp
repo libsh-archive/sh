@@ -41,7 +41,7 @@ enum DataType {
   DATATYPE_END
 };
 
-DLLEXPORT
+SH_DLLEXPORT
 extern const char* dataTypeName[];
 
 /** Sets the actual host computation and memory data types for a given Value type.

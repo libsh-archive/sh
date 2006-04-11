@@ -34,7 +34,7 @@ namespace SH {
 typedef std::map<VariableNodePtr, VariableNodePtr> VarMap;
 
 struct
-DLLEXPORT VariableReplacer {
+SH_DLLEXPORT VariableReplacer {
 
   VariableReplacer(VarMap& v);
 
@@ -63,7 +63,7 @@ DLLEXPORT VariableReplacer {
  * the given "transformed" variable was derived.
  */
 class
-DLLEXPORT VarTransformMap {
+SH_DLLEXPORT VarTransformMap {
 private:
   VarMap m_NewToOldMap;
 

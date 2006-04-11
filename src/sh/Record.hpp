@@ -35,7 +35,7 @@ namespace SH {
  * @see Channel
  */
 class
-DLLEXPORT Record {
+SH_DLLEXPORT Record {
 public:
   typedef std::list<Variable> VarList; 
   typedef VarList::iterator iterator;
@@ -79,68 +79,68 @@ private:
 /** Combine two records.
  * This concatenates the list of variables in the component records.
  */
-DLLEXPORT
+SH_DLLEXPORT
 Record combine(const Variable &left, const Variable &right);
 
 /** Combine a record and a variable.
  * This concatenates the given variable to the end of the list of
  * variables in the record.
  */
-DLLEXPORT
+SH_DLLEXPORT
 Record combine(const Record& left, const Variable& right);
 
 /** Combine a variable and a record.
  * This concatenates the given variable to the start of the list of
  * variables in the record.
  */
-DLLEXPORT
+SH_DLLEXPORT
 Record combine(const Variable& left, const Record& right);
 
-DLLEXPORT
+SH_DLLEXPORT
 Record combine(const Record& left, const Record& right);
 
 /** An operator alias for combine between variables.
  */
-DLLEXPORT
+SH_DLLEXPORT
 Record operator&(const Variable& left, const Variable& right);
 
 /** An operator alias for combine between a record and a variable.
  */
-DLLEXPORT
+SH_DLLEXPORT
 Record operator&(const Record& left, const Variable& right);
 
 /** An operator alias for combine between a variable and a record.
  */
-DLLEXPORT
+SH_DLLEXPORT
 Record operator&(const Variable& left, const Record& right);
 
 /** An operator alias for combine between two records.
  */
-DLLEXPORT
+SH_DLLEXPORT
 Record operator&(const Record& left, const Record& right);
 
 /** Apply a program to a record. 
  * This function connects records onto the output of programs
  * TODO: is this right?  why is the record argument first?
  */
-DLLEXPORT
+SH_DLLEXPORT
 Program connect(const Record& rec, const Program& program);
 
 /** An operator alias for connect(p,s).
  */
-DLLEXPORT
+SH_DLLEXPORT
 Program operator<<(const Program& program, const Record& rec);
 
 /** Send program outputs to a record 
  * This should only be used internally as the program the gets generated
  * will be turned into dust by dead code elimination in general usage.
  */
-DLLEXPORT
+SH_DLLEXPORT
 Program connect(const Program& program, const Record& rec);
 
 /** An operator alias for connect(
  */
-DLLEXPORT
+SH_DLLEXPORT
 Program operator<<(const Record& rec, const Program& program);
 
 }

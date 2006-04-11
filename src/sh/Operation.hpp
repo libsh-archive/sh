@@ -152,7 +152,7 @@ enum Operation {
 
 /** Information related to a specific operation */
 struct
-DLLEXPORT
+SH_DLLEXPORT
 OperationInfo {
   const char* name; ///< The operation's name, e.g. "ASN"
   int arity; ///< The arity of the operation. 1, 2 or 3.
@@ -169,7 +169,7 @@ OperationInfo {
 };
 
 
-DLLEXPORT
+SH_DLLEXPORT
 extern const OperationInfo opInfo[];
 
 } // namespace SH

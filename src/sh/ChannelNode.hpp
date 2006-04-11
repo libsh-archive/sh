@@ -27,7 +27,7 @@
 namespace SH {
 
 class
-DLLEXPORT ChannelNode : public VariableNode {
+SH_DLLEXPORT ChannelNode : public VariableNode {
 public:
   ChannelNode(SemanticType specType, int elements, ValueType valueType);
   ChannelNode(SemanticType specType, int elements, ValueType valueType,

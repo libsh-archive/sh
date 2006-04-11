@@ -38,7 +38,7 @@
 namespace SH {
 
 class
-DLLEXPORT BaseTexture : public MetaForwarder {
+SH_DLLEXPORT BaseTexture : public MetaForwarder {
 public:
   BaseTexture(const TextureNodePtr& node);
 

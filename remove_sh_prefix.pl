@@ -32,6 +32,7 @@ my %special_macros = (
     "LIB"      => "SHLIB",
     "INSTALL"  => "SH_INSTALL",
     "REGRESS"  => "SH_REGRESS",
+    "DLLEXPORT"=> "SH_DLLEXPORT",
 );
 
 my %reserved_words = (

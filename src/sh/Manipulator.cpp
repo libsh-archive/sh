@@ -40,7 +40,7 @@ namespace SH {
  */
 /* int versions */
 template<>
-DLLEXPORT
+SH_DLLEXPORT
 int OffsetRange<int>::absIndex( int index, int offset, const ProgramNode::VarList &v ) const {
   if( offset == _FIRST ) return 0;
   else if( offset == _SECOND ) return 1;
@@ -55,7 +55,7 @@ int OffsetRange<int>::absIndex( int index, int offset, const ProgramNode::VarLis
 
 /* string versions */
 template<>
-DLLEXPORT
+SH_DLLEXPORT
 int OffsetRange<std::string>::absIndex( std::string index, int offset, 
     const ProgramNode::VarList &v ) const {
   if( offset == _FIRST ) return 0;

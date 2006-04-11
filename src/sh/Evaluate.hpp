@@ -26,10 +26,10 @@
 // @todo merge this with Eval.hpp, Eval.cpp
 namespace SH {
 // Evaluate the given statement.
-DLLEXPORT
+SH_DLLEXPORT
 void evaluate(Statement& stmt);
 
-DLLEXPORT
+SH_DLLEXPORT
 void evaluate(const ProgramNodePtr& p);
 
 }
