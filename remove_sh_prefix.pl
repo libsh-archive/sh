@@ -79,7 +79,7 @@ sub process_file
         s/ SHUTIL_([A-Z]+)_HPP/ ZZZZZZ\1_HPP/g;
         
         # Macros/enums
-        s/(^|[^a-zA-Z])SH_?([A-Z]+)/$1 . &substituted_macro($2)/eg;
+        s/(^|[^a-zA-Z_])SH_?([A-Z]+)/$1 . &substituted_macro($2)/eg;
 
         # Class names
         s/(^|[^a-zA-Z])Sh([A-Z]+[a-z]+)/$1 . &substituted_classname($2)/eg;
