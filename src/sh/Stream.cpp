@@ -30,7 +30,7 @@ namespace SH {
 Program connect(const ChannelNodePtr& node, const Program& program)
 {
   Program nibble = SH_BEGIN_PROGRAM() {
-    Variable out(node->clone(OUTPUT));
+    Variable out(node->clone(SH_OUTPUT));
 
     Variable streamVar(node);
     Statement stmt(out, OP_FETCH, streamVar);

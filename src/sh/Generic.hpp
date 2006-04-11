@@ -42,13 +42,13 @@ class Program;
  *
  * template<int N, typename T, BindingType B1, BindingType B2,
  *          bool S1, bool S2>
- * Attrib<N, TEMP, T> add(const Attrib<N, B1, T, S1>& a,
+ * Attrib<N, SH_TEMP, T> add(const Attrib<N, B1, T, S1>& a,
  *                             const Attrib<N, B2, T, S2>& b);
  *
  * With Generic:
  *
  * template<int N, typename T>
- * Attrib<N, TEMP, T> add(const Generic<N, T>& a,
+ * Attrib<N, SH_TEMP, T> add(const Generic<N, T>& a,
  *                             const Generic<N, T>& b);
  *
  * This class is explicitly instantiated for T = float with 1 <= N <= 4.
@@ -73,7 +73,7 @@ public:
 
   // Copy constructor 
   // This should only be used internally.
-  // It generates a VariableNode of type TEMP 
+  // It generates a VariableNode of type SH_TEMP 
   // @{
 
   // @todo type get rid of this. default should be okay for 
@@ -189,8 +189,8 @@ public:
   ~Generic();
 
   // Copy constructor 
-  // This should only be used internally.  It generates a TEMP, 
-  // ATTRIB, with the only characteristic copied from other being
+  // This should only be used internally.  It generates a SH_TEMP, 
+  // SH_ATTRIB, with the only characteristic copied from other being
   // the storage type.
   // @{
 

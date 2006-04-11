@@ -25,41 +25,41 @@ using namespace SH;
 using namespace std;
 
 GlslBindingSpecs glslVertexInputBindingSpecs[] = {
-  {GLSL_VAR_VERTEX, 1, POSITION, false},
-  {GLSL_VAR_NORMAL, 1, NORMAL, false},
-  {GLSL_VAR_COLOR, 1, COLOR, false},
-  {GLSL_VAR_SECONDARYCOLOR, 1, COLOR, false},
-  {GLSL_VAR_MULTITEXCOORD0, 1, TEXCOORD, true},
-  {GLSL_VAR_MULTITEXCOORD1, 1, TEXCOORD, true},
-  {GLSL_VAR_MULTITEXCOORD2, 1, TEXCOORD, true},
-  {GLSL_VAR_MULTITEXCOORD3, 1, TEXCOORD, true},
-  {GLSL_VAR_MULTITEXCOORD4, 1, TEXCOORD, true},
-  {GLSL_VAR_MULTITEXCOORD5, 1, TEXCOORD, true},
-  {GLSL_VAR_MULTITEXCOORD6, 1, TEXCOORD, true},
-  {GLSL_VAR_MULTITEXCOORD7, 1, TEXCOORD, true},
-  {GLSL_VAR_NONE, 0, ATTRIB, false}
+  {GLSL_VAR_VERTEX, 1, SH_POSITION, false},
+  {GLSL_VAR_NORMAL, 1, SH_VECTOR, false},
+  {GLSL_VAR_COLOR, 1, SH_COLOR, false},
+  {GLSL_VAR_SECONDARYCOLOR, 1, SH_COLOR, false},
+  {GLSL_VAR_MULTITEXCOORD0, 1, SH_TEXCOORD, true},
+  {GLSL_VAR_MULTITEXCOORD1, 1, SH_TEXCOORD, true},
+  {GLSL_VAR_MULTITEXCOORD2, 1, SH_TEXCOORD, true},
+  {GLSL_VAR_MULTITEXCOORD3, 1, SH_TEXCOORD, true},
+  {GLSL_VAR_MULTITEXCOORD4, 1, SH_TEXCOORD, true},
+  {GLSL_VAR_MULTITEXCOORD5, 1, SH_TEXCOORD, true},
+  {GLSL_VAR_MULTITEXCOORD6, 1, SH_TEXCOORD, true},
+  {GLSL_VAR_MULTITEXCOORD7, 1, SH_TEXCOORD, true},
+  {GLSL_VAR_NONE, 0, SH_ATTRIB, false}
 };
 
 GlslBindingSpecs glslFragmentInputBindingSpecs[] = {
-  {GLSL_VAR_FRAGCOORD, 1, POSITION, false},
-  {GLSL_VAR_COLOR, 1, COLOR, false},
-  {GLSL_VAR_SECONDARYCOLOR, 1, COLOR, false},
-  {GLSL_VAR_TEXCOORD, 8, TEXCOORD, true},
-  {GLSL_VAR_NONE, 0, ATTRIB, false}
+  {GLSL_VAR_FRAGCOORD, 1, SH_POSITION, false},
+  {GLSL_VAR_COLOR, 1, SH_COLOR, false},
+  {GLSL_VAR_SECONDARYCOLOR, 1, SH_COLOR, false},
+  {GLSL_VAR_TEXCOORD, 8, SH_TEXCOORD, true},
+  {GLSL_VAR_NONE, 0, SH_ATTRIB, false}
 };
 
 GlslBindingSpecs glslVertexOutputBindingSpecs[] = {
-  {GLSL_VAR_POSITION, 1, POSITION, false},
-  {GLSL_VAR_FRONTCOLOR, 1, COLOR, false},
-  {GLSL_VAR_FRONTSECONDARYCOLOR, 1, COLOR, false},
-  {GLSL_VAR_TEXCOORD, 8, TEXCOORD, true},
-  {GLSL_VAR_NONE, 0, ATTRIB, false}
+  {GLSL_VAR_POSITION, 1, SH_POSITION, false},
+  {GLSL_VAR_FRONTCOLOR, 1, SH_COLOR, false},
+  {GLSL_VAR_FRONTSECONDARYCOLOR, 1, SH_COLOR, false},
+  {GLSL_VAR_TEXCOORD, 8, SH_TEXCOORD, true},
+  {GLSL_VAR_NONE, 0, SH_ATTRIB, false}
 };
 
 GlslBindingSpecs glslFragmentOutputBindingSpecs[] = {
-  {GLSL_VAR_FRAGDEPTH, 1, POSITION, false},
-  {GLSL_VAR_FRAGCOLOR, 1, COLOR, true},
-  {GLSL_VAR_NONE, 0, ATTRIB, false}
+  {GLSL_VAR_FRAGDEPTH, 1, SH_POSITION, false},
+  {GLSL_VAR_FRAGCOLOR, 1, SH_COLOR, true},
+  {GLSL_VAR_NONE, 0, SH_ATTRIB, false}
 };
 
 GlslBindingSpecs* glslBindingSpecs(bool output, GlslProgramType unit)
@@ -246,7 +246,7 @@ void GlslVariableMap::allocate_generic_vertex_inputs()
   // The position has to be at index 0
   for (ProgramNode::VarList::const_iterator i = m_shader->begin_inputs(); 
        i != m_shader->end_inputs(); i++) {
-    if ((*i)->specialType() == POSITION) {
+    if ((*i)->specialType() == SH_POSITION) {
       allocate_generic_vertex_input(*i, 0);
       break;
     }

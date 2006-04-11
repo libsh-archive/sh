@@ -29,7 +29,7 @@ namespace SH {
 template<int N, typename T>
 Generic<N, T> acos(const Generic<N, T>& var)
 {
-  Attrib<N, TEMP, T> t;
+  Attrib<N, SH_TEMP, T> t;
   shACOS(t, var);
   return t;
 }
@@ -37,7 +37,7 @@ Generic<N, T> acos(const Generic<N, T>& var)
 template<int N, typename T>
 Generic<N, T> asin(const Generic<N, T>& var)
 {
-  Attrib<N, TEMP, T> t;
+  Attrib<N, SH_TEMP, T> t;
   shASIN(t, var);
   return t;
 }
@@ -45,7 +45,7 @@ Generic<N, T> asin(const Generic<N, T>& var)
 template<int N, typename T>
 Generic<N, T> atan(const Generic<N, T>& var)
 {
-  Attrib<N, TEMP, T> t;
+  Attrib<N, SH_TEMP, T> t;
   shATAN(t, var);
   return t;
 }
@@ -53,7 +53,7 @@ Generic<N, T> atan(const Generic<N, T>& var)
 template<int N, typename T>
 Generic<N, T> atan2(const Generic<N, T>& y, const Generic<N, T>& x)
 {
-  Attrib<N, TEMP, T> t;
+  Attrib<N, SH_TEMP, T> t;
   shATAN2(t, y, x);
   return t;
 }
@@ -61,7 +61,7 @@ Generic<N, T> atan2(const Generic<N, T>& y, const Generic<N, T>& x)
 template<int N, typename T>
 Generic<N, T> cos(const Generic<N, T>& var)
 {
-  Attrib<N, TEMP, T> t;
+  Attrib<N, SH_TEMP, T> t;
   shCOS(t, var);
   return t;
 }
@@ -69,7 +69,7 @@ Generic<N, T> cos(const Generic<N, T>& var)
 template<int N, typename T>
 Generic<N, T> sin(const Generic<N, T>& var)
 {
-  Attrib<N, TEMP, T> t;
+  Attrib<N, SH_TEMP, T> t;
   shSIN(t, var);
   return t;
 }
@@ -77,7 +77,7 @@ Generic<N, T> sin(const Generic<N, T>& var)
 template<int N, typename T>
 Generic<N, T> tan(const Generic<N, T>& var)
 {
-  Attrib<N, TEMP, T> t;
+  Attrib<N, SH_TEMP, T> t;
   shTAN(t, var);
   return t;
 }
@@ -85,7 +85,7 @@ Generic<N, T> tan(const Generic<N, T>& var)
 template<int N, typename T>
 Generic<N, T> cosh(const Generic<N, T>& var)
 {
-  Attrib<N, TEMP, T> t;
+  Attrib<N, SH_TEMP, T> t;
   shCOSH(t, var);
   return t;
 }
@@ -93,7 +93,7 @@ Generic<N, T> cosh(const Generic<N, T>& var)
 template<int N, typename T>
 Generic<N, T> sinh(const Generic<N, T>& var)
 {
-  Attrib<N, TEMP, T> t;
+  Attrib<N, SH_TEMP, T> t;
   shSINH(t, var);
   return t;
 }
@@ -101,7 +101,7 @@ Generic<N, T> sinh(const Generic<N, T>& var)
 template<int N, typename T>
 Generic<N, T> tanh(const Generic<N, T>& var)
 {
-  Attrib<N, TEMP, T> t;
+  Attrib<N, SH_TEMP, T> t;
   shTANH(t, var);
   return t;
 }
@@ -109,7 +109,7 @@ Generic<N, T> tanh(const Generic<N, T>& var)
 template<int N, typename T>
 Generic<N, T> acosh(const Generic<N, T>& var)
 {
-  Attrib<N, TEMP, T> t;
+  Attrib<N, SH_TEMP, T> t;
   shACOSH(t, var);
   return t;
 }
@@ -117,7 +117,7 @@ Generic<N, T> acosh(const Generic<N, T>& var)
 template<int N, typename T>
 Generic<N, T> asinh(const Generic<N, T>& var)
 {
-  Attrib<N, TEMP, T> t;
+  Attrib<N, SH_TEMP, T> t;
   shASINH(t, var);
   return t;
 }
@@ -125,7 +125,7 @@ Generic<N, T> asinh(const Generic<N, T>& var)
 template<int N, typename T>
 Generic<N, T> atanh(const Generic<N, T>& var)
 {
-  Attrib<N, TEMP, T> t;
+  Attrib<N, SH_TEMP, T> t;
   shATANH(t, var);
   return t;
 }

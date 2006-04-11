@@ -170,7 +170,7 @@ struct DefFinder {
       while (1) {
         if (I == block->begin()) break;
         --I;
-        if (!I->dest.null() && I->op != OP_KIL && I->op != OP_OPTBRA /*&& I->dest.node()->kind() == TEMP*/) {
+        if (!I->dest.null() && I->op != OP_KIL && I->op != OP_OPTBRA /*&& I->dest.node()->kind() == SH_TEMP*/) {
           // Construct a disable map if this node has not yet been
           // assigned to in a later statement in this block.
           if (disable_map.find(I->dest.node()) == disable_map.end()) {
@@ -259,7 +259,7 @@ struct InitRch {
       if (I->dest.null() 
           || I->op == OP_KIL
           || I->op == OP_OPTBRA
-          /*|| I->dest.node()->kind() != TEMP*/) continue;
+          /*|| I->dest.node()->kind() != SH_TEMP*/) continue;
       for (unsigned int i = 0; i < r.defs.size(); i++) {
         ReachingDefs::Definition &d = r.defs[i];
         if (d.varnode != I->dest.node()) continue;
@@ -376,7 +376,7 @@ struct UdDuBuilder {
         // Compute the ud chains for the statement's source variables,
         // and contribute to the du chains of the source variables' definitions.
         for (int j = 0; j < opInfo[I->op].arity; j++) {
-          //if (I->src[j].node()->kind() == TEMP) {
+          //if (I->src[j].node()->kind() == SH_TEMP) {
             ValueTracking* vt = I->get_info<ValueTracking>();
             if (!vt) {
               vt = new ValueTracking(&(*I));
@@ -390,7 +390,7 @@ struct UdDuBuilder {
               ValueTracking::Use srcUse(&(*I), j, i);
               for (DefSet::const_iterator J = ds.begin(); J != ds.end(); J++) {
                 switch(J->kind) {
-                  case ValueTracking::Def::INPUT:
+                  case ValueTracking::Def::SH_INPUT:
                     {
                       ValueTracking::TupleDefUseChain& inputDu = 
                         intrack->inputUses[srcNode];
@@ -434,7 +434,7 @@ struct UdDuBuilder {
         BindingType kind = node->kind();
         int index = D->first.index;
 
-        if(kind == INOUT || kind == OUTPUT) {
+        if(kind == SH_INOUT || kind == SH_OUTPUT) {
           DefSet& ds = D->second;
 
           ValueTracking::TupleUseDefChain& outDef = outtrack->outputDefs[node];
@@ -538,7 +538,7 @@ std::ostream& operator<<(std::ostream& out, const ValueTracking::Use& use) {
   if(use.kind == ValueTracking::Use::STMT) {
     out << "(" << *use.stmt << ").src" << use.source << "[" << use.index << "]";
   } else {
-    out << "(OUTPUT " << use.node->name() << ")[" << use.index << "]"; 
+    out << "(SH_OUTPUT " << use.node->name() << ")[" << use.index << "]"; 
   }
   return out;
 }
@@ -562,7 +562,7 @@ std::ostream& operator<<(std::ostream& out, const ValueTracking::Def& def) {
   if(def.kind == ValueTracking::Def::STMT) {
     out << "(" << *def.stmt << ").dst" << "[" << def.index << "]";
   } else {
-    out << "(INPUT " << def.node->name() << ")[" << def.index << "]"; 
+    out << "(SH_INPUT " << def.node->name() << ")[" << def.index << "]"; 
   }
   return out;
 }

@@ -40,7 +40,7 @@ void ChannelGatherer::operator()(const CtrlGraphNode* node)
     if (stmt.op != OP_FETCH) continue;
 
     // TODO: ought to complain here
-    if (stmt.src[0].node()->kind() != STREAM) continue;
+    if (stmt.src[0].node()->kind() != SH_STREAM) continue;
     
     ChannelNodePtr channel = shref_dynamic_cast<ChannelNode>(stmt.src[0].node());
 
@@ -51,8 +51,8 @@ void ChannelGatherer::operator()(const CtrlGraphNode* node)
                             traits, 1, 1, 1, 0);
     tex->memory(channel->memory(), 0);
     
-    VariableNodePtr os1(new VariableNode(TEMP, 4, FLOAT));
-    VariableNodePtr os2(new VariableNode(TEMP, 4, FLOAT));
+    VariableNodePtr os1(new VariableNode(SH_TEMP, 4, SH_FLOAT));
+    VariableNodePtr os2(new VariableNode(SH_TEMP, 4, SH_FLOAT));
 
     channel_map.insert(std::make_pair(channel, ChannelData(tex, os1, os2)));
   }
@@ -84,7 +84,7 @@ void TexFetcher::operator()(CtrlGraphNode* node)
       DEBUG_WARN("FETCH/LOOKUP from null stream");
       continue;
     }
-    if (stmt.src[0].node()->kind() != STREAM) {
+    if (stmt.src[0].node()->kind() != SH_STREAM) {
       DEBUG_WARN("FETCH/LOOKUP from non-stream");
       continue;
     }
@@ -109,7 +109,7 @@ void TexFetcher::operator()(CtrlGraphNode* node)
       Variable coords_var(tc_node);
       if (os_calculation) {
         Context::current()->enter(program);
-        Variable result(new VariableNode(TEMP, 4, FLOAT));
+        Variable result(new VariableNode(SH_TEMP, 4, SH_FLOAT));
         Context::current()->exit();
 
         BasicBlock::StmtList new_stmts;
@@ -153,7 +153,7 @@ void TexFetcher::operator()(CtrlGraphNode* node)
     } else {
       // Make sure our actualy index is a temporary in the program.
       Context::current()->enter(program);
-      Variable coordsVar(new VariableNode(TEMP, 2, FLOAT));
+      Variable coordsVar(new VariableNode(SH_TEMP, 2, SH_FLOAT));
       Context::current()->exit();
         
       BasicBlock::StmtList new_stmts;
@@ -190,14 +190,14 @@ StreamCache::StreamCache(ProgramNode* stream_program,
     m_max_outputs(max_outputs),
     m_float_extension(float_extension)
 {
-  TextureDims dims(TEXTURE_2D);
+  TextureDims dims(SH_TEXTURE_2D);
   
   switch (m_float_extension) {
   case ARB_NV_FLOAT_BUFFER:
-    dims = TEXTURE_RECT;
+    dims = SH_TEXTURE_RECT;
     break;
   case ARB_ATI_PIXEL_FORMAT_FLOAT:
-    dims = TEXTURE_2D;
+    dims = SH_TEXTURE_2D;
     break;
   default:
     DEBUG_ASSERT(false);
@@ -216,7 +216,7 @@ StreamCache::StreamCache(ProgramNode* stream_program,
          I != m_programs[i].end(); ++I) {
       Program with_tc = Program(*I) & lose<TexCoord4f>("streamcoord");
       TexFetcher fetcher(m_channel_map, with_tc.node()->inputs.back(),
-                         dims == TEXTURE_RECT, 
+                         dims == SH_TEXTURE_RECT, 
                          i != NO_OFFSET_STRIDE,
                          m_output_stride.node(),
                          with_tc.node());

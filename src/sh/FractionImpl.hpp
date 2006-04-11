@@ -504,9 +504,9 @@ Fraction<T> rnd(const Fraction<T> &a)
   T ONE = Fraction<T>::ONE;
   T HALF = ONE >> 1; // slightly less than half
   T result;
-  if(a.m_val > HALF) {
+  if(a.m_val > SH_HALF) {
     result = ONE;
-  } else if(!Fraction<T>::is_signed || result > -HALF) {
+  } else if(!Fraction<T>::is_signed || result > -SH_HALF) {
     result = 0;
   } else {
     result = -ONE;

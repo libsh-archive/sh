@@ -220,7 +220,7 @@ VariableNodePtr GlslCode::allocate_constant(const Statement& stmt, double consta
   if (size <= 0) size = stmt.dest.size(); // default size is size of destination variable
 
   const VariableNodePtr& dest_node = stmt.dest.node();
-  VariableNode* node = new VariableNode(CONST, size, dest_node->valueType(), dest_node->specialType());
+  VariableNode* node = new VariableNode(SH_CONST, size, dest_node->valueType(), dest_node->specialType());
   
   DataVariant<double>* variant = new DataVariant<double>(size, constant);
   VariantCPtr variant_ptr = variant;
@@ -235,7 +235,7 @@ VariableNodePtr GlslCode::allocate_temp(const Statement& stmt, int size) const
   if (size <= 0) size = stmt.dest.size(); // default size is size of destination variable
   
   const VariableNodePtr& dest_node = stmt.dest.node();
-  VariableNode* node = new VariableNode(TEMP, size, dest_node->valueType(), dest_node->specialType());
+  VariableNode* node = new VariableNode(SH_TEMP, size, dest_node->valueType(), dest_node->specialType());
   VariableNodePtr node_ptr = Pointer<VariableNode>(node);
   return node_ptr;
 }
@@ -591,19 +591,19 @@ void GlslCode::emit_texture(const Statement& stmt)
 
   TextureNodePtr texture = shref_dynamic_cast<TextureNode>(stmt.src[0].node());
   switch (texture->dims()) {
-  case TEXTURE_1D:
+  case SH_TEXTURE_1D:
     line << "1D";
     break;
-  case TEXTURE_2D:
+  case SH_TEXTURE_2D:
     line << "2D";
     break;
-  case TEXTURE_3D:
+  case SH_TEXTURE_3D:
     line << "3D";
     break;
-  case TEXTURE_CUBE:
+  case SH_TEXTURE_CUBE:
     line << (cg_function ? "CUBE" : "Cube");
     break;
-  case TEXTURE_RECT:
+  case SH_TEXTURE_RECT:
     // Not supported on ATI, but there is no equivalent
     line << (cg_function ? "RECT" : "2DRect");
     break;

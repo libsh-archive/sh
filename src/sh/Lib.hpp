@@ -39,13 +39,13 @@ template<typename T> \
 Generic<1, T> \
 operation(const Generic<1, T>& left, double right) \
 { \
-  return operation(left, Attrib<1, CONST, T>(static_cast<T>(right))); \
+  return operation(left, Attrib<1, SH_CONST, T>(static_cast<T>(right))); \
 } \
 template<typename T> \
 Generic<1, T> \
 operation(double left, const Generic<1, T>& right) \
 { \
-  return operation(Attrib<1, CONST, T>(left), right); \
+  return operation(Attrib<1, SH_CONST, T>(left), right); \
 } 
 
 #define SHLIB_CONST_SCALAR_OP_DECL(operation) \
@@ -62,7 +62,7 @@ template<int N, typename T> \
 Generic<retsize, T> \
 operation(const Generic<N, T>& left, double right) \
 { \
-  return operation(left, Attrib<1, CONST, T>(static_cast<T>(right))); \
+  return operation(left, Attrib<1, SH_CONST, T>(static_cast<T>(right))); \
 } 
 
 #define SHLIB_CONST_N_OP_RETSIZE_LEFT_DECL(operation, retsize) \
@@ -75,7 +75,7 @@ template<int N, typename T> \
 Generic<retsize, T> \
 operation(double left, const Generic<N, T>& right) \
 { \
-  return operation(Attrib<1, CONST, T>(static_cast<T>(left)), right); \
+  return operation(Attrib<1, SH_CONST, T>(static_cast<T>(left)), right); \
 } 
 
 #define SHLIB_CONST_N_OP_RETSIZE_RIGHT_DECL(operation, retsize) \
@@ -118,7 +118,7 @@ template<int N, typename T> \
 Generic<retsize, T> \
 operation(const Generic<N, T>& a, double b, double c) \
 { \
-  return operation(a, Attrib<1, CONST, T>(b), Attrib<1, CONST, T>(c)); \
+  return operation(a, Attrib<1, SH_CONST, T>(b), Attrib<1, SH_CONST, T>(c)); \
 } 
 
 #define SHLIB_CONST_TRINARY_OP_011_RETSIZE_DECL(operation, retsize) \
@@ -156,11 +156,11 @@ SHLIB_CONST_TRINARY_OP_011_RETSIZE_DECL(operation, N);
 
 #define SHLIB_UNARY_RETTYPE_OPERATION(libtype, libop, librettype, libretsize) \
 template<int N, BindingType K1, typename T, bool S1> \
-Attrib<libretsize, TEMP, T, librettype, false> \
+Attrib<libretsize, SH_TEMP, T, librettype, false> \
 libop(const Attrib<N, K1, T, libtype, S1>& var) \
 { \
   Generic<libretsize, T> t = libop(static_cast< Generic<N, T> >(var)); \
-  return Attrib<libretsize, TEMP, T, librettype, false>(t.node(), t.swizzle(), t.neg()); \
+  return Attrib<libretsize, SH_TEMP, T, librettype, false>(t.node(), t.swizzle(), t.neg()); \
 }
 
 #define SHLIB_UNARY_OPERATION(libtype, libop, libretsize) \
@@ -168,12 +168,12 @@ libop(const Attrib<N, K1, T, libtype, S1>& var) \
 
 #define SHLIB_BINARY_RETTYPE_OPERATION(libtype, libop, librettype, libretsize) \
 template<int N, BindingType K1, BindingType K2, typename T1, typename T2, bool S1, bool S2> \
-Attrib<libretsize, TEMP, typename CommonType<T1, T2>::type, librettype, false> \
+Attrib<libretsize, SH_TEMP, typename CommonType<T1, T2>::type, librettype, false> \
 libop(const Attrib<N, K1, T1, libtype, S1>& left, const Attrib<N, K2, T2, libtype, S2>& right) \
 { \
   Generic<libretsize, typename CommonType<T1, T2>::type> t = libop(\
       static_cast< Generic<N, T1> >(left), static_cast< Generic<N, T2> >(right)); \
-  return Attrib<libretsize, TEMP, typename CommonType<T1, T2>::type, librettype, false>(t.node(), \
+  return Attrib<libretsize, SH_TEMP, typename CommonType<T1, T2>::type, librettype, false>(t.node(), \
       t.swizzle(), t.neg()); \
 }
 
@@ -182,12 +182,12 @@ libop(const Attrib<N, K1, T1, libtype, S1>& left, const Attrib<N, K2, T2, libtyp
 
 #define SHLIB_UNEQ_BINARY_RETTYPE_OPERATION(libtype, libop, librettype, libretsize) \
 template<int N, int M, BindingType K1, BindingType K2, typename T1, typename T2, bool S1, bool S2> \
-Attrib<libretsize, TEMP, typename CommonType<T1, T2>::type, librettype, false> \
+Attrib<libretsize, SH_TEMP, typename CommonType<T1, T2>::type, librettype, false> \
 libop(const Attrib<N, K1, T1, libtype, S1>& left, const Attrib<M, K2, T2, libtype, S2>& right) \
 { \
   Generic<libretsize, typename CommonType<T1, T2>::type> t = libop(\
       static_cast< Generic<N, T1> >(left), static_cast< Generic<M, T2> >(right)); \
-  return Attrib<libretsize, TEMP, typename CommonType<T1, T2>::type, librettype, false>(\
+  return Attrib<libretsize, SH_TEMP, typename CommonType<T1, T2>::type, librettype, false>(\
       t.node(), t.swizzle(), t.neg()); \
 }
 
@@ -196,12 +196,12 @@ libop(const Attrib<N, K1, T1, libtype, S1>& left, const Attrib<M, K2, T2, libtyp
 
 #define SHLIB_LEFT_SCALAR_RETTYPE_OPERATION(libtype, libop, librettype) \
 template<int M, BindingType K1, BindingType K2, typename T1, typename T2, bool S1, bool S2> \
-Attrib<M, TEMP, typename CommonType<T1, T2>::type, librettype, false> \
+Attrib<M, SH_TEMP, typename CommonType<T1, T2>::type, librettype, false> \
 libop(const Attrib<1, K2, T1, libtype, S2>& left, const Attrib<M, K1, T2, libtype, S1>& right) \
 { \
   Generic<M, typename CommonType<T1, T2>::type> t = libop( \
       static_cast< Generic<1, T1> >(left), static_cast< Generic<M, T2> >(right)); \
-  return Attrib<M, TEMP, typename CommonType<T1, T2>::type, librettype, false>(\
+  return Attrib<M, SH_TEMP, typename CommonType<T1, T2>::type, librettype, false>(\
       t.node(), t.swizzle(), t.neg()); \
 }
 
@@ -210,7 +210,7 @@ libop(const Attrib<1, K2, T1, libtype, S2>& left, const Attrib<M, K1, T2, libtyp
 
 #define SHLIB_LEFT_MATRIX_RETTYPE_OPERATION(libtype, libop, librettype, libretsize) \
 template<int M, int N, BindingType K1, BindingType K2, typename T1, typename T2, bool S1> \
-Attrib<libretsize, TEMP, typename CommonType<T1, T2>::type, librettype, false> \
+Attrib<libretsize, SH_TEMP, typename CommonType<T1, T2>::type, librettype, false> \
 libop(const Matrix<M, N, K1, T1>& a, const Attrib<N, K2, T2, libtype, S1>& b) \
 { \
   Generic<libretsize, typename CommonType<T1, T2>::type> t = libop(a, \
@@ -226,16 +226,16 @@ libop(const Matrix<M, N, K1, T1>& a, const Attrib<N, K2, T2, libtype, S1>& b) \
 
 #define SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(libtype, libop, librettype, libretsize) \
 template<BindingType K, typename T, bool S> \
-Attrib<libretsize, TEMP, T, librettype, false> \
+Attrib<libretsize, SH_TEMP, T, librettype, false> \
 libop(const Attrib<1, K, T, libtype, S>& left, double right) \
 { \
-  return libop(left, Attrib<1, CONST, T>(right)); \
+  return libop(left, Attrib<1, SH_CONST, T>(right)); \
 } \
 template<BindingType K, typename T, bool S> \
-Attrib<libretsize, TEMP, T, librettype, false> \
+Attrib<libretsize, SH_TEMP, T, librettype, false> \
 libop(double left, const Attrib<1, K, T, libtype, S>& right) \
 { \
-  return libop(Attrib<1, CONST, T>(left), right); \
+  return libop(Attrib<1, SH_CONST, T>(left), right); \
 } 
 
 #define SHLIB_SPECIAL_CONST_SCALAR_OP(libtype, libop) \
@@ -243,10 +243,10 @@ libop(double left, const Attrib<1, K, T, libtype, S>& right) \
 
 #define SHLIB_SPECIAL_RETTYPE_CONST_N_OP_LEFT(libtype, libop, librettype, libretsize) \
 template<int N, BindingType K, typename T, bool S> \
-Attrib<libretsize, TEMP, T, librettype, false> \
+Attrib<libretsize, SH_TEMP, T, librettype, false> \
 libop(const Attrib<N, K, T, libtype, S>& left, double right) \
 { \
-  return libop(left, Attrib<1, CONST, T>(right)); \
+  return libop(left, Attrib<1, SH_CONST, T>(right)); \
 } 
 
 #define SHLIB_SPECIAL_CONST_N_OP_LEFT(libtype, libop) \
@@ -254,10 +254,10 @@ libop(const Attrib<N, K, T, libtype, S>& left, double right) \
 
 #define SHLIB_SPECIAL_RETTYPE_CONST_N_OP_RIGHT(libtype, libop, librettype, libretsize) \
 template<int N, BindingType K, typename T, bool S> \
-Attrib<libretsize, TEMP, T, librettype, false> \
+Attrib<libretsize, SH_TEMP, T, librettype, false> \
 libop(double left, const Attrib<N, K, T, libtype, S>& right) \
 { \
-  return libop(Attrib<1, CONST, T>(left), right); \
+  return libop(Attrib<1, SH_CONST, T>(left), right); \
 } 
 
 #define SHLIB_SPECIAL_CONST_N_OP_RIGHT(libtype, libop) \

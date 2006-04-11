@@ -31,7 +31,7 @@ static const int MRG_REPS = 2; // total instructions for hashmrg will be MRG_REP
 template<int N, int M, typename T>
 Generic<N, T> hash(const Generic<M, T>& p)
 {
-  Attrib<N, TEMP, T> result = cast<N>(frac(p * 0.01));
+  Attrib<N, SH_TEMP, T> result = cast<N>(frac(p * 0.01));
   Generic<N, T> a = fillcast<N>(ConstAttrib4f(M_PI * M_PI * M_PI * M_PI, 
                                                   std::exp(4.0), 
                                                   std::pow(13.0, M_PI / 2.0), 
@@ -82,24 +82,24 @@ public:
   static Generic<M, T> linnoise(const Generic<K, T> &p, bool useTexture);
 
 private:
-  static Attrib<1, CONST, T> constP, invP;
+  static Attrib<1, SH_CONST, T> constP, invP;
   static bool m_init;
-  static Array3D<Attrib<M, TEMP, T, COLOR> > noiseTex; ///< pseudorandom 2D perlin noise texture 
+  static Array3D<Attrib<M, SH_TEMP, T, SH_COLOR> > noiseTex; ///< pseudorandom 2D perlin noise texture 
   
   static void init();
 };
 
 template<int M, typename T, int P>
-Array3D<Attrib<M, TEMP, T, COLOR> > Noise<M, T, P>::noiseTex(P, P, P); // pseudorandom 3D noise texture
+Array3D<Attrib<M, SH_TEMP, T, SH_COLOR> > Noise<M, T, P>::noiseTex(P, P, P); // pseudorandom 3D noise texture
 
 template<int M, typename T, int P>
 bool Noise<M, T, P>::m_init = false; // whether Perlin is initialized. 
 
 template<int M, typename T, int P>
-Attrib<1, CONST, T> Noise<M, T, P>::constP(P);
+Attrib<1, SH_CONST, T> Noise<M, T, P>::constP(P);
 
 template<int M, typename T, int P>
-Attrib<1, CONST, T> Noise<M, T, P>::invP(1.0 / P);
+Attrib<1, SH_CONST, T> Noise<M, T, P>::invP(1.0 / P);
 
 template<int M, typename T, int P>
 void Noise<M, T, P>::init() {
@@ -148,9 +148,9 @@ Generic<M, T> Noise<M, T, P>::perlin(const Generic<K, T> &p, bool useTexture)
 {
   init();
   int i, j;
-  typedef Attrib<K, TEMP, T> TempType;
-  typedef Attrib<M, TEMP, T> ResultType;
-  typedef Attrib<K, CONST, T> ConstTempType;
+  typedef Attrib<K, SH_TEMP, T> TempType;
+  typedef Attrib<M, SH_TEMP, T> ResultType;
+  typedef Attrib<K, SH_CONST, T> ConstTempType;
   static const int NUM_SAMPLES = 1 << K;
 
   TempType rp = frac(p); // offset from integer lattice point
@@ -200,7 +200,7 @@ template<int K>
 Generic<M, T> Noise<M, T, P>::cellnoise(const Generic<K, T> &p, bool useTexture)
 {
   init();
-  Attrib<K, TEMP, T> ip;
+  Attrib<K, SH_TEMP, T> ip;
 
   ip = floor(p);
 
@@ -223,7 +223,7 @@ Generic<M, T> Noise<M, T, P>::linnoise(const Generic<K, T> &p, bool useTexture)
 #define NOISE_WITH_AMP(name) \
 template<int N, int M, int K, typename T1, typename T2>\
   Generic<N, CT1T2> name(const Generic<M, T1> &p, const Generic<K, T2> &amp, bool useTexture=true) {\
-    Attrib<N, TEMP, CT1T2> result; \
+    Attrib<N, SH_TEMP, CT1T2> result; \
     int freq = 1;\
     result *= DataTypeInfo<CT1T2, HOST>::Zero; \
     for(int i = 0; i < K; ++i, freq *= 2) {\
@@ -235,7 +235,7 @@ template<int N, int M, int K, typename T1, typename T2>\
 #define NOISE_WITH_AMP(name) \
 template<int N, int M, int K, typename T1, typename T2>\
   Generic<N, CT1T2> name(const Generic<M, T1> &p, const Generic<K, T2> &amp, bool useTexture) {\
-    Attrib<N, TEMP, CT1T2> result; \
+    Attrib<N, SH_TEMP, CT1T2> result; \
     int freq = 1;\
     result *= DataTypeInfo<CT1T2, HOST>::Zero; \
     for(int i = 0; i < K; ++i, freq *= 2) {\

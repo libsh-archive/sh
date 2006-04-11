@@ -115,12 +115,12 @@ Program connect(Program pa, Program pb)
       error(AlgebraException(err.str()));
       return Program(ProgramNodePtr(0));
     }
-    VariableNodePtr n = (*I)->clone(TEMP);
+    VariableNodePtr n = (*I)->clone(SH_TEMP);
     varMap[*I] = n;
     varMap[*J] = n;
 
-    if((*I)->kind() == INOUT) InOutInputs.push_back((*I)); 
-    if((*J)->kind() == INOUT) InOutOutputs.push_back((*J)); 
+    if((*I)->kind() == SH_INOUT) InOutInputs.push_back((*I)); 
+    if((*J)->kind() == SH_INOUT) InOutOutputs.push_back((*J)); 
   }
 
   // Change connected InOut variables to either Input or Output only
@@ -128,7 +128,7 @@ Program connect(Program pa, Program pb)
   CtrlGraphNodePtr graphEntry;
   for (I = InOutInputs.begin(); I != InOutInputs.end(); ++I) {
     if(!graphEntry) graphEntry = program->ctrlGraph->prependEntry();
-    VariableNodePtr newInput((*I)->clone(INPUT)); 
+    VariableNodePtr newInput((*I)->clone(SH_INPUT)); 
 
     std::replace(program->inputs.begin(), program->inputs.end(),
         (*I), newInput);
@@ -141,7 +141,7 @@ Program connect(Program pa, Program pb)
   CtrlGraphNodePtr graphExit;
   for (I = InOutOutputs.begin(); I != InOutOutputs.end(); ++I) {
     if(!graphExit) graphExit = program->ctrlGraph->appendExit();
-    VariableNodePtr newOutput((*I)->clone(OUTPUT));
+    VariableNodePtr newOutput((*I)->clone(SH_OUTPUT));
     
     std::replace(program->outputs.begin(), program->outputs.end(),
         (*I), newOutput);
@@ -286,7 +286,7 @@ Program namedConnect(Program pa, Program pb, bool keepExtra)
   for(j = 0, J= b->inputs.begin(); J != b->inputs.end(); ++J, ++j) {
     if( !bMatch[j] ) {
       Program passOne = SH_BEGIN_PROGRAM() {
-        Variable var((*J)->clone(INOUT));
+        Variable var((*J)->clone(SH_INOUT));
       } SH_END;
       passer = passer & passOne; 
       swiz[j] = newInputIdx++;
@@ -309,7 +309,7 @@ Program renameInput(Program a, const std::string& oldName,
   Program renamer = SH_BEGIN_PROGRAM() {
     for(ProgramNode::VarList::const_iterator I = a.node()->inputs.begin();
         I != a.node()->inputs.end(); ++I) {
-      Variable var((*I)->clone(INOUT));
+      Variable var((*I)->clone(SH_INOUT));
 
       if (!(*I)->has_name()) continue;
       std::string name = (*I)->name();
@@ -330,7 +330,7 @@ Program renameOutput(Program a, const std::string& oldName,
   Program renamer = SH_BEGIN_PROGRAM() {
     for(ProgramNode::VarList::const_iterator I = a.node()->outputs.begin();
         I != a.node()->outputs.end(); ++I) {
-      Variable var((*I)->clone(INOUT));
+      Variable var((*I)->clone(SH_INOUT));
 
       if (!(*I)->has_name()) continue;
       std::string name = (*I)->name();
@@ -384,7 +384,7 @@ Program replaceVariable(Program a, const Variable& v)
   Context::current()->enter(program.node());
 
   // make a new input
-  VariableNodePtr newInput(v.node()->clone(INPUT)); 
+  VariableNodePtr newInput(v.node()->clone(SH_INPUT)); 
   varMap[v.node()] = newInput;
 
   Context::current()->exit();
@@ -399,7 +399,7 @@ Program replaceVariable(Program a, const Variable& v)
 Program operator<<(Program a, const Variable& var)
 {
   Program vNibble = SH_BEGIN_PROGRAM() {
-    Variable out(var.node()->clone(OUTPUT, var.size(), var.valueType(), SEMANTICTYPE_END, true, false));
+    Variable out(var.node()->clone(SH_OUTPUT, var.size(), var.valueType(), SEMANTICTYPE_END, true, false));
     shASN(out, var);
   } SH_END_PROGRAM;
   return connect(vNibble, a); 

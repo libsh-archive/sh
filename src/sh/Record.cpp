@@ -175,7 +175,7 @@ Program connect(const Record& rec, const Program& program)
 {
   Program nibble = SH_BEGIN_PROGRAM() {
     for(Record::VarList::const_iterator I = rec.begin(); I != rec.end(); ++I) {
-      Variable out(I->node()->clone(OUTPUT, I->size(), VALUETYPE_END, SEMANTICTYPE_END, 
+      Variable out(I->node()->clone(SH_OUTPUT, I->size(), VALUETYPE_END, SEMANTICTYPE_END, 
         true, false));
       //DEBUG_PRINT("connect Record output size = " << I->size()); 
       Context::current()->parsing()->tokenizer.blockList()->addStatement(
@@ -197,7 +197,7 @@ Program connect(const Program& program, const Record& rec)
 
   Program nibble = SH_BEGIN_PROGRAM() {
     for(Record::VarList::const_iterator I = rec.begin(); I != rec.end(); ++I) {
-      Variable in(I->node()->clone(INPUT, I->size(), VALUETYPE_END, SEMANTICTYPE_END, 
+      Variable in(I->node()->clone(SH_INPUT, I->size(), VALUETYPE_END, SEMANTICTYPE_END, 
             true, false));
       //DEBUG_PRINT("connect Record input size = " << I->size()); 
       Context::current()->parsing()->tokenizer.blockList()->addStatement(

@@ -29,7 +29,7 @@ namespace SH {
 template<typename T1, typename T2>
 Generic<3, CT1T2> cross(const Generic<3, T1>& left, const Generic<3, T2>& right)
 {
-  Attrib<3, TEMP, CT1T2> t;
+  Attrib<3, SH_TEMP, CT1T2> t;
   shXPD(t, left, right);
   return t;
 }
@@ -44,7 +44,7 @@ Generic<3, CT1T2> operator^(const Generic<3, T1>& left, const Generic<3, T2>& ri
 template<int N, typename T>
 Generic<N, T> normalize(const Generic<N, T>& var)
 {
-  Attrib<N, TEMP, T> t;
+  Attrib<N, SH_TEMP, T> t;
   shNORM(t, var);
   return t;
 }
@@ -52,7 +52,7 @@ Generic<N, T> normalize(const Generic<N, T>& var)
 template<int N1, int N2, typename T1, typename T2>
 Generic<1, CT1T2> dot(const Generic<N1, T1>& left, const Generic<N2, T2>& right)
 {
-  Attrib<1, TEMP, CT1T2> t;
+  Attrib<1, SH_TEMP, CT1T2> t;
   if (N1 == N2) {
     shDOT(t, left, right);
   } else {
@@ -106,8 +106,8 @@ Generic<4, CT1T2T3> lit(const Generic<1, T1>& a,
                           const Generic<1, T2>& b,
                           const Generic<1, T3>& c)
 {
-  Attrib<4, TEMP, CT1T2T3> i;
-  Attrib<4, TEMP, CT1T2T3> r;
+  Attrib<4, SH_TEMP, CT1T2T3> i;
+  Attrib<4, SH_TEMP, CT1T2T3> r;
   shLIT(r, join(a, b, c, c));
   return r;
 }

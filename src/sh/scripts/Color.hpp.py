@@ -6,7 +6,7 @@ common.guard("SHCOLOR_HPP")
 common.inprint('#include "Attrib.hpp"')
 common.namespace()
 
-decl = semantic.Class("Color", "color", "COLOR",
+decl = semantic.Class("Color", "color", "SH_COLOR",
                       """An n-color.
 """)
 

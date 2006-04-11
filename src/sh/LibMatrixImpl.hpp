@@ -26,76 +26,76 @@ namespace SH {
 
 #define MATRIX_MSVC_OPERATOR_HACK(op, semantic, N, NminusOne) \
 template<int M, BindingType Binding1, BindingType Binding2, typename T1, typename T2, bool swizzled> \
-Attrib<NminusOne, TEMP, CT1T2, semantic> \
+Attrib<NminusOne, SH_TEMP, CT1T2, semantic> \
 op (const Matrix<M, N, Binding1, T1>& a, const Attrib<NminusOne, Binding2, T2, semantic, swizzled>& b) \
 { \
   return op<M, N, Binding1, Binding2, T1, T2, swizzled>(a, b); \
 }
 
-MATRIX_MSVC_OPERATOR_HACK(operator|, NORMAL, 4, 3)
-MATRIX_MSVC_OPERATOR_HACK(operator|, NORMAL, 3, 2)
-MATRIX_MSVC_OPERATOR_HACK(operator*, NORMAL, 4, 3)
-MATRIX_MSVC_OPERATOR_HACK(operator*, NORMAL, 3, 2)
-MATRIX_MSVC_OPERATOR_HACK(operator|, PLANE, 4, 3)
-MATRIX_MSVC_OPERATOR_HACK(operator|, PLANE, 3, 2)
-MATRIX_MSVC_OPERATOR_HACK(operator*, PLANE, 4, 3)
-MATRIX_MSVC_OPERATOR_HACK(operator*, PLANE, 3, 2)
-MATRIX_MSVC_OPERATOR_HACK(operator|, POINT, 4, 3)
-MATRIX_MSVC_OPERATOR_HACK(operator|, POINT, 3, 2)
-MATRIX_MSVC_OPERATOR_HACK(operator*, POINT, 4, 3)
-MATRIX_MSVC_OPERATOR_HACK(operator*, POINT, 3, 2)
-MATRIX_MSVC_OPERATOR_HACK(operator|, TEXCOORD, 4, 3)
-MATRIX_MSVC_OPERATOR_HACK(operator|, TEXCOORD, 3, 2)
-MATRIX_MSVC_OPERATOR_HACK(operator*, TEXCOORD, 4, 3)
-MATRIX_MSVC_OPERATOR_HACK(operator*, TEXCOORD, 3, 2)
-MATRIX_MSVC_OPERATOR_HACK(operator|, VECTOR, 4, 3)
-MATRIX_MSVC_OPERATOR_HACK(operator|, VECTOR, 3, 2)
-MATRIX_MSVC_OPERATOR_HACK(operator*, VECTOR, 4, 3)
-MATRIX_MSVC_OPERATOR_HACK(operator*, VECTOR, 3, 2)
+MATRIX_MSVC_OPERATOR_HACK(operator|, SH_VECTOR, 4, 3)
+MATRIX_MSVC_OPERATOR_HACK(operator|, SH_VECTOR, 3, 2)
+MATRIX_MSVC_OPERATOR_HACK(operator*, SH_VECTOR, 4, 3)
+MATRIX_MSVC_OPERATOR_HACK(operator*, SH_VECTOR, 3, 2)
+MATRIX_MSVC_OPERATOR_HACK(operator|, SH_PLANE, 4, 3)
+MATRIX_MSVC_OPERATOR_HACK(operator|, SH_PLANE, 3, 2)
+MATRIX_MSVC_OPERATOR_HACK(operator*, SH_PLANE, 4, 3)
+MATRIX_MSVC_OPERATOR_HACK(operator*, SH_PLANE, 3, 2)
+MATRIX_MSVC_OPERATOR_HACK(operator|, SH_POINT, 4, 3)
+MATRIX_MSVC_OPERATOR_HACK(operator|, SH_POINT, 3, 2)
+MATRIX_MSVC_OPERATOR_HACK(operator*, SH_POINT, 4, 3)
+MATRIX_MSVC_OPERATOR_HACK(operator*, SH_POINT, 3, 2)
+MATRIX_MSVC_OPERATOR_HACK(operator|, SH_TEXCOORD, 4, 3)
+MATRIX_MSVC_OPERATOR_HACK(operator|, SH_TEXCOORD, 3, 2)
+MATRIX_MSVC_OPERATOR_HACK(operator*, SH_TEXCOORD, 4, 3)
+MATRIX_MSVC_OPERATOR_HACK(operator*, SH_TEXCOORD, 3, 2)
+MATRIX_MSVC_OPERATOR_HACK(operator|, SH_VECTOR, 4, 3)
+MATRIX_MSVC_OPERATOR_HACK(operator|, SH_VECTOR, 3, 2)
+MATRIX_MSVC_OPERATOR_HACK(operator*, SH_VECTOR, 4, 3)
+MATRIX_MSVC_OPERATOR_HACK(operator*, SH_VECTOR, 3, 2)
 
 template<int M, int N, BindingType Binding, BindingType Binding2, typename T1, typename T2>
-Matrix<N, M, TEMP, CT1T2>
+Matrix<N, M, SH_TEMP, CT1T2>
 operator+(const Matrix<N, M, Binding, T1>& a, 
 	  const Matrix<N, M, Binding2, T2>& b)
 {
-  Matrix<N, M, TEMP, CT1T2> r(a);
+  Matrix<N, M, SH_TEMP, CT1T2> r(a);
   r += b;
   return r;
 }
 
 template<int M, int N, BindingType Binding, BindingType Binding2, typename T1, typename T2>
-Matrix<N, M, TEMP, CT1T2>
+Matrix<N, M, SH_TEMP, CT1T2>
 operator-(const Matrix<N, M, Binding, T1>& a, 
 	  const Matrix<N, M, Binding2, T2>& b)
 {
-  Matrix<N, M, TEMP, CT1T2> r(a);
+  Matrix<N, M, SH_TEMP, CT1T2> r(a);
   r -= b;
   return r;
 }
 
 template<int M, int N, BindingType Binding, BindingType Binding2, typename T1, typename T2>
-Matrix<N, M, TEMP, CT1T2>
+Matrix<N, M, SH_TEMP, CT1T2>
 operator/(const Matrix<N, M, Binding, T1>& a, 
 	  const Matrix<N, M, Binding2, T2>& b)
 {
-  Matrix<N, M, TEMP, CT1T2> r(a);
+  Matrix<N, M, SH_TEMP, CT1T2> r(a);
   r /= b;
   return r;
 }
 
 template<int M, int N1, int N2, int P, BindingType Binding, BindingType Binding2, typename T1, typename T2>
-Matrix<M, P, TEMP, CT1T2>
+Matrix<M, P, SH_TEMP, CT1T2>
 operator|(const Matrix<M, N1, Binding, T1>& a,
           const Matrix<N2, P, Binding2, T2>& b)
 {
-  Matrix<P, N2, TEMP, T2> tb = transpose(b);
-  Matrix<M, P, TEMP, CT1T2> result;
+  Matrix<P, N2, SH_TEMP, T2> tb = transpose(b);
+  Matrix<M, P, SH_TEMP, CT1T2> result;
 
   if (N1 > N2) {
     // Matrix b must be expanded
     for (int i = 0; i < M; i++) {
       for (int j = 0; j < P; j++) {
-	Attrib<1, TEMP, CT1T2> sum = a[i][0] * tb[j][0];
+	Attrib<1, SH_TEMP, CT1T2> sum = a[i][0] * tb[j][0];
 	for (int k = 1; k < N2; k++) {
 	  sum += a[i][k] * tb[j][k];
 	}
@@ -109,7 +109,7 @@ operator|(const Matrix<M, N1, Binding, T1>& a,
     // Matrix a must be expanded
     for (int i = 0; i < M; i++) {
       for (int j = 0; j < P; j++) {
-	Attrib<1, TEMP, CT1T2> sum = a[i][0] * tb[j][0];
+	Attrib<1, SH_TEMP, CT1T2> sum = a[i][0] * tb[j][0];
 	for (int k = 1; k < N1; k++) {
 	  sum += a[i][k] * tb[j][k];
 	}
@@ -132,7 +132,7 @@ operator|(const Matrix<M, N1, Binding, T1>& a,
 
 template<int M, int N1, int N2, int P, BindingType Binding, BindingType Binding2, typename T1, typename T2>
 inline
-Matrix<M, P, TEMP, CT1T2>
+Matrix<M, P, SH_TEMP, CT1T2>
 operator*(const Matrix<M, N1, Binding, T1>& a,
           const Matrix<N2, P, Binding2, T2>& b)
 {
@@ -142,7 +142,7 @@ operator*(const Matrix<M, N1, Binding, T1>& a,
 template<int M, int N, BindingType Binding, typename T1, typename T2>
 Generic<M, CT1T2> operator|(const Matrix<M, N, Binding, T1>& a, const Generic<N, T2>& b)
 {
-  Attrib<M, TEMP, CT1T2> ret;
+  Attrib<M, SH_TEMP, CT1T2> ret;
   for (int i = 0; i < M; i++) {
     ret[i] = dot(a[i], b);
   }
@@ -152,7 +152,7 @@ Generic<M, CT1T2> operator|(const Matrix<M, N, Binding, T1>& a, const Generic<N,
 template<int M, int N, BindingType Binding, typename T1, typename T2>
 Generic<N, CT1T2> operator|(const Generic<M, T1>& a, const Matrix<M, N, Binding, T2>& b)
 {
-  Attrib<N, TEMP, CT1T2> ret;
+  Attrib<N, SH_TEMP, CT1T2> ret;
   for (int i = 0; i < N; i++) {
     ret[i] = 0;
     for (int j=0; j < M; j++) {
@@ -178,11 +178,11 @@ Generic<M, CT1T2> operator*(const Matrix<M, N, Binding, T1>& a, const Generic<N,
 
 template<int M, int N, BindingType Binding1, BindingType Binding2, 
          typename T1, typename T2, bool swizzled>
-Attrib<N-1, TEMP, CT1T2, VECTOR>
+Attrib<N-1, SH_TEMP, CT1T2, SH_VECTOR>
 operator|(const Matrix<M, N, Binding1, T1>& a,
-          const Attrib<N-1, Binding2, T2, VECTOR, swizzled>& b)
+          const Attrib<N-1, Binding2, T2, SH_VECTOR, swizzled>& b)
 {
-  Attrib<M, TEMP, CT1T2, VECTOR> ret;
+  Attrib<M, SH_TEMP, CT1T2, SH_VECTOR> ret;
   for (int i = 0; i < M; i++) {
     ret[i] = dot(cast<N-1>(a[i]), b);
   }
@@ -191,11 +191,11 @@ operator|(const Matrix<M, N, Binding1, T1>& a,
 
 template<int M, int N, BindingType Binding1, BindingType Binding2, 
          typename T1, typename T2, bool swizzled>
-Attrib<N-1, TEMP, CT1T2, NORMAL>
+Attrib<N-1, SH_TEMP, CT1T2, SH_VECTOR>
 operator|(const Matrix<M, N, Binding1, T1>& a, 
-          const Attrib<N-1, Binding2, T2, NORMAL, swizzled>& b)
+          const Attrib<N-1, Binding2, T2, SH_VECTOR, swizzled>& b)
 {
-  Attrib<M, TEMP, CT1T2, NORMAL> ret;
+  Attrib<M, SH_TEMP, CT1T2, SH_VECTOR> ret;
   for (int i = 0; i < M; i++) {
     ret[i] = dot(cast<N-1>(a[i]), b);
   }
@@ -205,9 +205,9 @@ operator|(const Matrix<M, N, Binding1, T1>& a,
 template<int M, int N, BindingType Binding1, BindingType Binding2, 
          typename T1, typename T2, bool swizzled>
 inline
-Attrib<N-1, TEMP, CT1T2, VECTOR>
+Attrib<N-1, SH_TEMP, CT1T2, SH_VECTOR>
 operator*(const Matrix<M, N, Binding1, T1>& a,
-          const Attrib<N-1, Binding2, T2, VECTOR, swizzled>& b)
+          const Attrib<N-1, Binding2, T2, SH_VECTOR, swizzled>& b)
 {
   return a | b;
 }
@@ -215,42 +215,42 @@ operator*(const Matrix<M, N, Binding1, T1>& a,
 template<int M, int N, BindingType Binding1, BindingType Binding2, 
          typename T1, typename T2, bool swizzled>
 inline
-Attrib<N-1, TEMP, CT1T2, NORMAL>
+Attrib<N-1, SH_TEMP, CT1T2, SH_VECTOR>
 operator*(const Matrix<M, N, Binding1, T1>& a,
-          const Attrib<N-1, Binding2, T2, NORMAL, swizzled>& b)
+          const Attrib<N-1, Binding2, T2, SH_VECTOR, swizzled>& b)
 {
   return a | b;
 }
 
 template<int M, int N, BindingType Binding1, BindingType Binding2,
          typename T1, typename T2, bool swizzled>
-Attrib<N-1, TEMP, CT1T2, TEXCOORD>
+Attrib<N-1, SH_TEMP, CT1T2, SH_TEXCOORD>
 operator|(const Matrix<M, N, Binding1, T1>& a,
-          const Attrib<N-1, Binding2, T2, TEXCOORD, swizzled>& b)
+          const Attrib<N-1, Binding2, T2, SH_TEXCOORD, swizzled>& b)
 {
-  Attrib<N, TEMP, T2, TEXCOORD, swizzled> tmp = cast<N>(b);
+  Attrib<N, SH_TEMP, T2, SH_TEXCOORD, swizzled> tmp = cast<N>(b);
   tmp[N-1] = static_cast<T2>(1);
   return cast<N-1>(a | tmp);
 }
 
 template<int M, int N, BindingType Binding1, BindingType Binding2, 
          typename T1, typename T2, bool swizzled>
-Attrib<N-1, TEMP, CT1T2, POINT>
+Attrib<N-1, SH_TEMP, CT1T2, SH_POINT>
 operator|(const Matrix<M, N, Binding1, T1>& a,
-          const Attrib<N-1, Binding2, T2, POINT, swizzled>& b)
+          const Attrib<N-1, Binding2, T2, SH_POINT, swizzled>& b)
 {
-  Attrib<N, TEMP, T2, POINT, swizzled> tmp = cast<N>(b);
+  Attrib<N, SH_TEMP, T2, SH_POINT, swizzled> tmp = cast<N>(b);
   tmp[N-1] = static_cast<T2>(1);
   return cast<N-1>(a | tmp);
 }
 
 template<int M, int N, BindingType Binding1, BindingType Binding2,
          typename T1, typename T2, bool swizzled>
-Attrib<N-1, TEMP, CT1T2, PLANE>
+Attrib<N-1, SH_TEMP, CT1T2, SH_PLANE>
 operator|(const Matrix<M, N, Binding1, T1>& a,
-          const Attrib<N-1, Binding2, T2, PLANE, swizzled>& b)
+          const Attrib<N-1, Binding2, T2, SH_PLANE, swizzled>& b)
 {
-  Attrib<N, TEMP, T2, PLANE, swizzled> tmp = cast<N>(b);
+  Attrib<N, SH_TEMP, T2, SH_PLANE, swizzled> tmp = cast<N>(b);
   tmp[N-1] = static_cast<T2>(1);
   return cast<N-1>(a | tmp);
 }
@@ -258,9 +258,9 @@ operator|(const Matrix<M, N, Binding1, T1>& a,
 template<int M, int N, BindingType Binding1, BindingType Binding2,
          typename T1, typename T2, bool swizzled>
 inline
-Attrib<N-1, TEMP, CT1T2, TEXCOORD>
+Attrib<N-1, SH_TEMP, CT1T2, SH_TEXCOORD>
 operator*(const Matrix<M, N, Binding1, T1>& a,
-          const Attrib<N-1, Binding2, T2, TEXCOORD, swizzled>& b)
+          const Attrib<N-1, Binding2, T2, SH_TEXCOORD, swizzled>& b)
 {
   return a | b;
 }
@@ -268,9 +268,9 @@ operator*(const Matrix<M, N, Binding1, T1>& a,
 template<int M, int N, BindingType Binding1, BindingType Binding2, 
          typename T1, typename T2, bool swizzled>
 inline
-Attrib<N-1, TEMP, CT1T2, POINT>
+Attrib<N-1, SH_TEMP, CT1T2, SH_POINT>
 operator*(const Matrix<M, N, Binding1, T1>& a,
-          const Attrib<N-1, Binding2, T2, POINT, swizzled>& b)
+          const Attrib<N-1, Binding2, T2, SH_POINT, swizzled>& b)
 {
   return a | b;
 }
@@ -278,54 +278,54 @@ operator*(const Matrix<M, N, Binding1, T1>& a,
 template<int M, int N, BindingType Binding1, BindingType Binding2,
          typename T1, typename T2, bool swizzled>
 inline
-Attrib<N-1, TEMP, CT1T2, PLANE>
+Attrib<N-1, SH_TEMP, CT1T2, SH_PLANE>
 operator*(const Matrix<M, N, Binding1, T1>& a,
-          const Attrib<N-1, Binding2, T2, PLANE, swizzled>& b)
+          const Attrib<N-1, Binding2, T2, SH_PLANE, swizzled>& b)
 {
   return a | b;
 }
 
 template<int M, int N, BindingType Binding, typename T1, typename T2>
-Matrix<M, N, TEMP, CT1T2>
+Matrix<M, N, SH_TEMP, CT1T2>
 operator*(const Matrix<M, N, Binding, T1>& a, const Generic<1, T2>& b)
 {
-  Matrix<M, N, TEMP, CT1T2> r(a);
+  Matrix<M, N, SH_TEMP, CT1T2> r(a);
   r *= b;
   return r;
 }
 
 template<int M, BindingType Binding, typename T1, typename T2>
-Matrix<M, 1, TEMP, CT1T2>
+Matrix<M, 1, SH_TEMP, CT1T2>
 operator*(const Matrix<M, 1, Binding, T1>& a, const Generic<1, T2>& b)
 {
-  Matrix<M, 1, TEMP, CT1T2> r(a);
+  Matrix<M, 1, SH_TEMP, CT1T2> r(a);
   r *= b;
   return r;
 }
 
 template<int M, int N, BindingType Binding, typename T1, typename T2>
-Matrix<M, N, TEMP, CT1T2>
+Matrix<M, N, SH_TEMP, CT1T2>
 operator*(const Generic<1, T1>& a, const Matrix<M, N, Binding, T2>& b)
 {
-  Matrix<M, N, TEMP, CT1T2> r(b);
+  Matrix<M, N, SH_TEMP, CT1T2> r(b);
   r *= a;
   return r;
 }
 
 template<int M, int N, BindingType Binding, typename T1, typename T2>
-Matrix<1, N, TEMP, CT1T2>
+Matrix<1, N, SH_TEMP, CT1T2>
 operator*(const Generic<1, T1>& a, const Matrix<1, N, Binding, T2>& b)
 {
-  Matrix<1, N, TEMP, CT1T2> r(b);
+  Matrix<1, N, SH_TEMP, CT1T2> r(b);
   r *= a;
   return r;
 }
 
 template<int M, int N, BindingType Binding, typename T1, typename T2>
-Matrix<M, N, TEMP, CT1T2>
+Matrix<M, N, SH_TEMP, CT1T2>
 operator/(const Matrix<M, N, Binding, T1>& a, const Generic<1, T2>& b)
 {
-  Matrix<M, N, TEMP, CT1T2> r(a);
+  Matrix<M, N, SH_TEMP, CT1T2> r(a);
   r /= b;
   return r;
 }
@@ -377,14 +377,14 @@ det(const Matrix<RowsCols, RowsCols, Binding, T>& matrix)
 //Matrix of Cofactors
 template<BindingType Binding, typename T>
 inline
-Matrix<1, 1, TEMP, T>
+Matrix<1, 1, SH_TEMP, T>
 cofactors(const Matrix<1, 1, Binding, T>& matrix)
 {
   return matrix;
 }
     
 template<BindingType Binding, typename T>
-Matrix<2, 2, TEMP, T>
+Matrix<2, 2, SH_TEMP, T>
 cofactors(const Matrix<2, 2, Binding, T>& matrix)
 {
   Matrix<2, 2, Binding, T> r;
@@ -396,7 +396,7 @@ cofactors(const Matrix<2, 2, Binding, T>& matrix)
 }
   
 template<int RowsCols, BindingType Binding, typename T>
-Matrix<RowsCols, RowsCols, TEMP, T>
+Matrix<RowsCols, RowsCols, SH_TEMP, T>
 cofactors(const Matrix<RowsCols, RowsCols, Binding, T>& matrix)
 {
   Matrix<RowsCols, RowsCols, Binding, T> r;
@@ -415,10 +415,10 @@ cofactors(const Matrix<RowsCols, RowsCols, Binding, T>& matrix)
 
 //Transpose
 template<int M, int N, BindingType Binding, typename T>
-Matrix<N, M, TEMP, T>
+Matrix<N, M, SH_TEMP, T>
 transpose(const Matrix<M, N, Binding, T>& matrix)
 {    
-  Matrix<N, M, TEMP, T> r;
+  Matrix<N, M, SH_TEMP, T> r;
 
   for (int i = 0; i < N; i++) {
     for (int j = 0; j < M; j++) {	  
@@ -431,7 +431,7 @@ transpose(const Matrix<M, N, Binding, T>& matrix)
 
 // Adjoint
 template<int RowsCols, BindingType Binding, typename T>
-Matrix<RowsCols, RowsCols, TEMP, T>
+Matrix<RowsCols, RowsCols, SH_TEMP, T>
 adjoint(const Matrix<RowsCols, RowsCols, Binding, T>& matrix)
 {
   return transpose(cofactors(matrix));
@@ -439,7 +439,7 @@ adjoint(const Matrix<RowsCols, RowsCols, Binding, T>& matrix)
   
 //Inverse
 template<int RowsCols, BindingType Binding, typename T>
-Matrix<RowsCols, RowsCols, TEMP, T>
+Matrix<RowsCols, RowsCols, SH_TEMP, T>
 inverse(const Matrix<RowsCols, RowsCols, Binding, T>& matrix)
 {
   return adjoint(matrix)/det(matrix);
@@ -449,7 +449,7 @@ template<int RowsCols, BindingType Binding, typename T>
 Generic<1, T>
 trace(const Matrix<RowsCols, RowsCols, Binding, T>& matrix)
 {
-  Attrib<1, TEMP, T> r(matrix[0][0]);
+  Attrib<1, SH_TEMP, T> r(matrix[0][0]);
   for (int i=1; i < RowsCols; i++) {
     r += matrix[i][i];
   }
@@ -457,32 +457,32 @@ trace(const Matrix<RowsCols, RowsCols, Binding, T>& matrix)
 }
 
 template<int N, typename T>
-Matrix<1, N, TEMP, T>
+Matrix<1, N, SH_TEMP, T>
 rowmat(const Generic<N, T>& s0)
 {
-  Matrix<1, N, TEMP, T> r;
+  Matrix<1, N, SH_TEMP, T> r;
   r[0] = s0;
   return r;
 }
 
 template<int N, typename T>
-Matrix<2, N, TEMP, T>
+Matrix<2, N, SH_TEMP, T>
 rowmat(const Generic<N, T>& s0,
        const Generic<N, T>& s1)
 {
-  Matrix<2, N, TEMP, T> r;
+  Matrix<2, N, SH_TEMP, T> r;
   r[0] = s0;
   r[1] = s1;
   return r;
 }
 
 template<int N, typename T>
-Matrix<3, N, TEMP, T>
+Matrix<3, N, SH_TEMP, T>
 rowmat(const Generic<N, T>& s0,
        const Generic<N, T>& s1,
        const Generic<N, T>& s2)
 {
-  Matrix<3, N, TEMP, T> r;
+  Matrix<3, N, SH_TEMP, T> r;
   r[0] = s0;
   r[1] = s1;
   r[2] = s2;
@@ -491,13 +491,13 @@ rowmat(const Generic<N, T>& s0,
 
 
 template<int N, typename T>
-Matrix<4, N, TEMP, T>
+Matrix<4, N, SH_TEMP, T>
 rowmat(const Generic<N, T>& s0,
        const Generic<N, T>& s1,
        const Generic<N, T>& s2,
        const Generic<N, T>& s3)
 {
-  Matrix<4, N, TEMP, T> r;
+  Matrix<4, N, SH_TEMP, T> r;
   r[0] = s0;
   r[1] = s1;
   r[2] = s2;
@@ -507,10 +507,10 @@ rowmat(const Generic<N, T>& s0,
 
 
 template<int N, typename T>
-Matrix<N, 1, TEMP, T>
+Matrix<N, 1, SH_TEMP, T>
 colmat(const Generic<N, T>& s0)
 {
-  Matrix<N, 1, TEMP, T> r;
+  Matrix<N, 1, SH_TEMP, T> r;
   for (int i = 0; i < N; ++i) {
     r[i][0] = s0[i];
   }
@@ -518,11 +518,11 @@ colmat(const Generic<N, T>& s0)
 }
 
 template<int N, typename T>
-Matrix<N, 2, TEMP, T>
+Matrix<N, 2, SH_TEMP, T>
 colmat(const Generic<N, T>& s0,
        const Generic<N, T>& s1)
 {
-  Matrix<N, 2, TEMP, T> r;
+  Matrix<N, 2, SH_TEMP, T> r;
   for (int i = 0; i < N; ++i) {
     r[i][0] = s0[i];
     r[i][1] = s1[i];
@@ -531,12 +531,12 @@ colmat(const Generic<N, T>& s0,
 }
 
 template<int N, typename T>
-Matrix<N, 3, TEMP, T>
+Matrix<N, 3, SH_TEMP, T>
 colmat(const Generic<N, T>& s0,
        const Generic<N, T>& s1,
        const Generic<N, T>& s2)
 {
-  Matrix<N, 3, TEMP, T> r;
+  Matrix<N, 3, SH_TEMP, T> r;
   for (int i = 0; i < N; ++i) {
     r[i][0] = s0[i];
     r[i][1] = s1[i];
@@ -547,13 +547,13 @@ colmat(const Generic<N, T>& s0,
 
 
 template<int N, typename T>
-Matrix<N, 4, TEMP, T>
+Matrix<N, 4, SH_TEMP, T>
 colmat(const Generic<N, T>& s0,
        const Generic<N, T>& s1,
        const Generic<N, T>& s2,
        const Generic<N, T>& s3)
 {
-  Matrix<N, 4, TEMP, T> r;
+  Matrix<N, 4, SH_TEMP, T> r;
   for (int i = 0; i < N; ++i) {
     r[i][0] = s0[i];
     r[i][1] = s1[i];
@@ -565,17 +565,17 @@ colmat(const Generic<N, T>& s0,
 
 
 template<int N, typename T>
-Matrix<N, N, TEMP, T>
+Matrix<N, N, SH_TEMP, T>
 diag(const Generic<N, T>& a)
 {
-  Matrix<N, N, TEMP, T> r;
+  Matrix<N, N, SH_TEMP, T> r;
   
   for (int i = 0; i < N; ++i) r[i][i] = a[i];
   return r;
 }
 
 template<typename T>
-Matrix<4, 4, TEMP, T>
+Matrix<4, 4, SH_TEMP, T>
 rotate(const Generic<3, T>& axis,
        const Generic<1, T>& angle)
 {
@@ -583,7 +583,7 @@ rotate(const Generic<3, T>& axis,
   Generic<1, T> s = sin(angle);
   Generic<3, T> xyz = normalize(axis);
 
-  Matrix<4, 4, TEMP, T> result;
+  Matrix<4, 4, SH_TEMP, T> result;
 
   result[0](0,1,2) = fillcast<3>((1.0 - c) * xyz(0));
   result[1](0,1,2) = fillcast<3>((1.0 - c) * xyz(1));
@@ -609,25 +609,25 @@ rotate(const Generic<3, T>& axis,
 }
 
 template<typename T>
-Matrix<3, 3, TEMP, T>
+Matrix<3, 3, SH_TEMP, T>
 rotate(const Generic<1, T>& angle)
 {
-  Matrix<3, 3, TEMP, T> result;
+  Matrix<3, 3, SH_TEMP, T> result;
   
   Generic<1, T> c = cos(angle);
   Generic<1, T> s = sin(angle);
-  result[0] = Attrib<3, TEMP, T>(c, -s, 0.0f);
-  result[1] = Attrib<3, TEMP, T>(c, s, 0.0f);
-  result[2] = Attrib<3, TEMP, T>(0.0f, 0.0f, 1.0f);
+  result[0] = Attrib<3, SH_TEMP, T>(c, -s, 0.0f);
+  result[1] = Attrib<3, SH_TEMP, T>(c, s, 0.0f);
+  result[2] = Attrib<3, SH_TEMP, T>(0.0f, 0.0f, 1.0f);
 
   return result;
 }
 
 template<typename T>
-Matrix<4, 4, TEMP, T>
+Matrix<4, 4, SH_TEMP, T>
 translate(const Generic<3, T>& a)
 {
-  Matrix<4, 4, TEMP, T> result;
+  Matrix<4, 4, SH_TEMP, T> result;
 
   for (int i = 0; i < 3; i++) {
     result[i][3] = a[i];
@@ -637,10 +637,10 @@ translate(const Generic<3, T>& a)
 }
 
 template<typename T>
-Matrix<3, 3, TEMP, T>
+Matrix<3, 3, SH_TEMP, T>
 translate(const Generic<2, T>& a)
 {
-  Matrix<3, 3, TEMP, T> result;
+  Matrix<3, 3, SH_TEMP, T> result;
 
   result[0][2] = a[0];
   result[1][2] = a[1];
@@ -651,7 +651,7 @@ translate(const Generic<2, T>& a)
 
 template<typename T>
 inline
-Matrix<4, 4, TEMP, T>
+Matrix<4, 4, SH_TEMP, T>
 scale(const Generic<3, T>& a)
 {
   return diag(join(a, ConstAttrib1f(1.0)));
@@ -659,7 +659,7 @@ scale(const Generic<3, T>& a)
 
 template<typename T>
 inline
-Matrix<3, 3, TEMP, T>
+Matrix<3, 3, SH_TEMP, T>
 scale(const Generic<2, T>& a)
 {
   return diag(join(a, ConstAttrib1f(1.0)));
@@ -667,7 +667,7 @@ scale(const Generic<2, T>& a)
 
 template<int N, typename T>
 inline
-Matrix<N, N, TEMP, T>
+Matrix<N, N, SH_TEMP, T>
 scale(const Generic<1, T>& a)
 {
   return diag(join(fillcast<N - 1>(a), ConstAttrib1f(1.0)));

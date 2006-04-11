@@ -65,35 +65,35 @@ public:
 };
 
 ArbBindingSpecs arbVertexAttribBindingSpecs[] = {
-  {ARB_REG_VERTEXPOS, 1, POSITION, false},
-  {ARB_REG_VERTEXNRM, 1, NORMAL, false},
-  {ARB_REG_VERTEXCOL, 1, COLOR, false},
-  {ARB_REG_VERTEXTEX, 8, TEXCOORD, true},
-  {ARB_REG_VERTEXFOG, 1, ATTRIB, true},
-  {ARB_REG_NONE, 0, ATTRIB, true}
+  {ARB_REG_VERTEXPOS, 1, SH_POSITION, false},
+  {ARB_REG_VERTEXNRM, 1, SH_VECTOR, false},
+  {ARB_REG_VERTEXCOL, 1, SH_COLOR, false},
+  {ARB_REG_VERTEXTEX, 8, SH_TEXCOORD, true},
+  {ARB_REG_VERTEXFOG, 1, SH_ATTRIB, true},
+  {ARB_REG_NONE, 0, SH_ATTRIB, true}
 };
 
 ArbBindingSpecs arbFragmentAttribBindingSpecs[] = {
-  {ARB_REG_FRAGMENTPOS, 1, POSITION, false},
-  {ARB_REG_FRAGMENTCOL, 1, COLOR, false},
-  {ARB_REG_FRAGMENTTEX, 8, TEXCOORD, true},
-  {ARB_REG_FRAGMENTFOG, 1, ATTRIB, true},
-  {ARB_REG_NONE, 0, ATTRIB, true}
+  {ARB_REG_FRAGMENTPOS, 1, SH_POSITION, false},
+  {ARB_REG_FRAGMENTCOL, 1, SH_COLOR, false},
+  {ARB_REG_FRAGMENTTEX, 8, SH_TEXCOORD, true},
+  {ARB_REG_FRAGMENTFOG, 1, SH_ATTRIB, true},
+  {ARB_REG_NONE, 0, SH_ATTRIB, true}
 };
 
 ArbBindingSpecs arbVertexOutputBindingSpecs[] = {
-  {ARB_REG_RESULTPOS, 1, POSITION, false},
-  {ARB_REG_RESULTCOL, 1, COLOR, false},
-  {ARB_REG_RESULTTEX, 8, TEXCOORD, true},
-  {ARB_REG_RESULTFOG, 1, ATTRIB, true},
-  {ARB_REG_RESULTPTS, 1, ATTRIB, true},
-  {ARB_REG_NONE, 0, ATTRIB}
+  {ARB_REG_RESULTPOS, 1, SH_POSITION, false},
+  {ARB_REG_RESULTCOL, 1, SH_COLOR, false},
+  {ARB_REG_RESULTTEX, 8, SH_TEXCOORD, true},
+  {ARB_REG_RESULTFOG, 1, SH_ATTRIB, true},
+  {ARB_REG_RESULTPTS, 1, SH_ATTRIB, true},
+  {ARB_REG_NONE, 0, SH_ATTRIB}
 };
 
 ArbBindingSpecs arbFragmentOutputBindingSpecs[] = {
-  {ARB_REG_RESULTCOL, 1, COLOR, true}, // modified by constructor if ATI_draw_buffers is present
-  {ARB_REG_RESULTDPT, 1, POSITION, false},
-  {ARB_REG_NONE, 0, ATTRIB}
+  {ARB_REG_RESULTCOL, 1, SH_COLOR, true}, // modified by constructor if ATI_draw_buffers is present
+  {ARB_REG_RESULTDPT, 1, SH_POSITION, false},
+  {ARB_REG_NONE, 0, SH_ATTRIB}
 };
 
 ArbBindingSpecs* arbBindingSpecs(bool output, const string& unit)
@@ -111,7 +111,7 @@ ArbCode::ArbCode(const ProgramNodeCPtr& shader, const string& unit,
     m_numTemps(0), m_numHalfTemps(0), m_numInputs(0), m_numOutputs(0), m_numParams(0), m_numParamBindings(0),
     m_numConsts(0),
     m_numTextures(0), m_programId(0), m_environment(0), m_max_label(0),
-    m_address_register(new VariableNode(TEMP, 1, FLOAT))
+    m_address_register(new VariableNode(SH_TEMP, 1, SH_FLOAT))
 {
   m_originalShader =  const_cast<ProgramNode*>(shader.object());
 
@@ -169,24 +169,24 @@ ArbCode::ArbCode(const ProgramNodeCPtr& shader, const string& unit,
   }
 
   // initialize m_convertMap
-  m_convertMap[DOUBLE] = FLOAT; 
+  m_convertMap[SH_DOUBLE] = SH_FLOAT; 
 
   bool halfSupport = (m_environment & ARB_NVFP) != 0;
-  if (!halfSupport) m_convertMap[HALF] = FLOAT;
+  if (!halfSupport) m_convertMap[SH_HALF] = SH_FLOAT;
 
-  m_convertMap[INT] = FLOAT;
-  m_convertMap[SHORT] = halfSupport ? HALF: FLOAT;
-  m_convertMap[BYTE] = halfSupport ? HALF: FLOAT;
-  m_convertMap[UINT] = FLOAT;
-  m_convertMap[USHORT] = halfSupport ? HALF: FLOAT;
-  m_convertMap[UBYTE] = halfSupport ? HALF: FLOAT;
+  m_convertMap[SH_INT] = SH_FLOAT;
+  m_convertMap[SH_SHORT] = halfSupport ? SH_HALF: SH_FLOAT;
+  m_convertMap[SH_BYTE] = halfSupport ? SH_HALF: SH_FLOAT;
+  m_convertMap[SH_UINT] = SH_FLOAT;
+  m_convertMap[SH_USHORT] = halfSupport ? SH_HALF: SH_FLOAT;
+  m_convertMap[SH_UBYTE] = halfSupport ? SH_HALF: SH_FLOAT;
 
-  m_convertMap[FINT] = FLOAT;
-  m_convertMap[FSHORT] = FLOAT;
-  m_convertMap[FBYTE] = halfSupport ? HALF : FLOAT;
-  m_convertMap[FUINT] = FLOAT;
-  m_convertMap[FUSHORT] = FLOAT;
-  m_convertMap[FUBYTE] = halfSupport ? HALF : FLOAT;
+  m_convertMap[SH_FINT] = SH_FLOAT;
+  m_convertMap[SH_FSHORT] = SH_FLOAT;
+  m_convertMap[SH_FBYTE] = halfSupport ? SH_HALF : SH_FLOAT;
+  m_convertMap[SH_FUINT] = SH_FLOAT;
+  m_convertMap[SH_FUSHORT] = SH_FLOAT;
+  m_convertMap[SH_FUBYTE] = halfSupport ? SH_HALF : SH_FLOAT;
 }
 
 ArbCode::~ArbCode()
@@ -270,7 +270,7 @@ void ArbCode::generate()
 bool ArbCode::allocateRegister(const VariableNodePtr& var)
 {
   if (!var) return true;
-  if (var->kind() != TEMP) return true;
+  if (var->kind() != SH_TEMP) return true;
   if (var->uniform()) return true;
 
   if (m_tempRegs.empty()) {
@@ -281,7 +281,7 @@ bool ArbCode::allocateRegister(const VariableNodePtr& var)
 
   int idx = m_tempRegs.front();
   m_tempRegs.pop_front();
-  if (var->valueType() == HALF) {
+  if (var->valueType() == SH_HALF) {
     if (idx + 1 > m_numHalfTemps) m_numHalfTemps = idx + 1;
     m_registers[var] = new ArbReg(ARB_REG_HALF_TEMP, idx);
   } else {
@@ -296,7 +296,7 @@ bool ArbCode::allocateRegister(const VariableNodePtr& var)
 void ArbCode::freeRegister(const VariableNodePtr& var)
 {
   if (!var) return;
-  if (var->kind() != TEMP) return;
+  if (var->kind() != SH_TEMP) return;
   if (var->uniform()) return;
 
   DEBUG_ASSERT(m_registers.find(var) != m_registers.end());
@@ -420,7 +420,7 @@ void ArbCode::updateUniform(const VariableNodePtr& uniform)
     return;
   }
 
-  if (uniform->kind() == TEXTURE) {
+  if (uniform->kind() == SH_TEXTURE) {
     return;
   }
     
@@ -431,7 +431,7 @@ void ArbCode::updateUniform(const VariableNodePtr& uniform)
 
   GLfloat values[4];
   int i;
-  if (uniform->valueType() == FLOAT) {
+  if (uniform->valueType() == SH_FLOAT) {
     // Copy to a float array
     const float *variant = static_cast<const float *>(uniformVariant->array());
     for (i = 0; i < uniform_size; ++i)
@@ -478,7 +478,7 @@ ostream& ArbCode::printVar(ostream& out, bool dest, const Variable& var,
 {
   RegMap::const_iterator I = m_registers.find(var.node());
   if (I == m_registers.end()) {
-    if ((1 == var.size()) && (CONST == var.node()->kind())) {
+    if ((1 == var.size()) && (SH_CONST == var.node()->kind())) {
       // Immediate value -- no need for a register
       out << var.getVariant()->encodeArray();
       return out; // no swizzling
@@ -575,19 +575,19 @@ bool ArbCode::printSamplingInstruction(ostream& out, const ArbInst& instr) const
   }
   out << "texture[" << texReg.index << "], ";
   switch (texture->dims()) {
-  case TEXTURE_1D:
+  case SH_TEXTURE_1D:
     out << "1D";
     break;
-  case TEXTURE_2D:
+  case SH_TEXTURE_2D:
     out << "2D";
     break;
-  case TEXTURE_3D:
+  case SH_TEXTURE_3D:
     out << "3D";
     break;
-  case TEXTURE_CUBE:
+  case SH_TEXTURE_CUBE:
     out << "CUBE";
     break;
-  case TEXTURE_RECT:
+  case SH_TEXTURE_RECT:
     out << "RECT";
     break;
   }
@@ -635,7 +635,7 @@ ostream& ArbCode::print(ostream& out)
     if (halfSupport) {
       out << "  LONG TEMP ";
     } else {
-      out << "  TEMP ";
+      out << "  SH_TEMP ";
     }
     for (int i = 0; i < m_numTemps; i++) {
       if (i > 0) out << ", ";
@@ -845,7 +845,7 @@ void ArbCode::genNode(const CtrlGraphNodePtr& node)
   if (m_environment & ARB_NVVP2) {
     for (vector<CtrlGraphBranch>::iterator I = node->successors.begin();
 	I != node->successors.end(); I++) {
-      Variable dummy(new VariableNode(TEMP, I->cond.size(), FLOAT));
+      Variable dummy(new VariableNode(SH_TEMP, I->cond.size(), SH_FLOAT));
       ArbInst updatecc(ARB_MOV, dummy, I->cond);
       updatecc.update_cc = true;
       m_instructions.push_back(updatecc);
@@ -1028,7 +1028,7 @@ void ArbCode::genStructNode(const StructuralNodePtr& node)
 
 void ArbCode::push_break(Variable& cond, bool negate)
 {
-  Variable dummy(new VariableNode(TEMP, cond.size(), FLOAT));
+  Variable dummy(new VariableNode(SH_TEMP, cond.size(), SH_FLOAT));
   ArbInst updatecc(ARB_MOV, dummy, cond);
   updatecc.update_cc = true;
   m_instructions.push_back(updatecc);
@@ -1040,7 +1040,7 @@ void ArbCode::push_break(Variable& cond, bool negate)
 
 void ArbCode::push_if(Variable& cond, bool negate)
 {
-  Variable dummy(new VariableNode(TEMP, cond.size(), FLOAT));
+  Variable dummy(new VariableNode(SH_TEMP, cond.size(), SH_FLOAT));
   ArbInst updatecc(ARB_MOV, dummy, cond);
   updatecc.update_cc = true;
   m_instructions.push_back(updatecc);
@@ -1108,7 +1108,7 @@ void ArbCode::bindSpecial(const ProgramNode::VarList::const_iterator& begin,
     for (int i = 0; arbBindingSpecs(is_output, m_unit)[i].binding != ARB_REG_NONE; ++i) {
       const ArbBindingSpecs& specs = arbBindingSpecs(is_output, m_unit)[i];
 
-      if (specs.semanticType == ATTRIB) continue;
+      if (specs.semanticType == SH_ATTRIB) continue;
       if (node->specialType() != specs.semanticType) continue;
 
       int index = -1;
@@ -1139,7 +1139,7 @@ void ArbCode::bindSpecial(const ProgramNode::VarList::const_iterator& begin,
     for (int i = 0; arbBindingSpecs(is_output, m_unit)[i].binding != ARB_REG_NONE; ++i) {
       const ArbBindingSpecs& specs = arbBindingSpecs(is_output, m_unit)[i];
 
-      if (specs.semanticType == ATTRIB) continue;
+      if (specs.semanticType == SH_ATTRIB) continue;
       if (node->specialType() != specs.semanticType) continue;
     
       string semantic_index = node->meta("opengl:semantic_index");
@@ -1226,7 +1226,7 @@ void ArbCode::allocGenericInputs(const ArbLimits& limits)
        I != m_shader->inputs.end(); ++I) {
     VariableNodePtr node = *I;
     if (m_registers.find(node) == m_registers.end() &&
-        node->specialType() == POSITION) {
+        node->specialType() == SH_POSITION) {
       m_registers[node] = new ArbReg(ARB_REG_ATTRIB, m_numInputs++, node->name());
       m_registers[node]->binding.type = ARB_REG_VERTEXATR;
       m_registers[node]->binding.index = 0;    // map to vertex.attrib[0]
@@ -1389,8 +1389,8 @@ void ArbCode::allocConsts(const ArbLimits& limits)
 bool mark(LinearAllocator& allocator, const VariableNodePtr& node, int i, bool half)
 {
   if (!node) return false;
-  if (node->kind() != TEMP) return false;
-  if (half && (node->valueType() != HALF)) return false; 
+  if (node->kind() != SH_TEMP) return false;
+  if (half && (node->valueType() != SH_HALF)) return false; 
   if (node->hasValues()) return false;
   allocator.mark(node, i);
   return true;
@@ -1399,8 +1399,8 @@ bool mark(LinearAllocator& allocator, const VariableNodePtr& node, int i, bool h
 bool markable(const VariableNodePtr& node, bool half)
 {
   if (!node) return false;
-  if (node->kind() != TEMP) return false;
-  if (half && (node->valueType() != HALF)) return false; 
+  if (node->kind() != SH_TEMP) return false;
+  if (half && (node->valueType() != SH_HALF)) return false; 
   if (node->hasValues()) return false;
   return true;
 }

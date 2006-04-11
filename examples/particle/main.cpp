@@ -436,8 +436,8 @@ void init_streams(void)
   // objects will allocate the memory needed internally, only the
   // size of the memory is given (in bytes, hence the 3*sizeof(float))
   for (int i = 0; i < 2; i++) {
-    pos_memory[i] = new HostMemory(3*sizeof(float) * NUM_PARTICLES, FLOAT);
-    vel_memory[i] = new HostMemory(3*sizeof(float)*NUM_PARTICLES, FLOAT);
+    pos_memory[i] = new HostMemory(3*sizeof(float) * NUM_PARTICLES, SH_FLOAT);
+    vel_memory[i] = new HostMemory(3*sizeof(float)*NUM_PARTICLES, SH_FLOAT);
   }
 
   // Allocate the associated Channel objects for each of

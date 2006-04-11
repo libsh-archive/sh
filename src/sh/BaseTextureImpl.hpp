@@ -28,61 +28,61 @@ namespace SH {
 
 template<typename T>
 BaseTexture1D<T>::BaseTexture1D(int width, const TextureTraits& traits)
-  : BaseTexture(new TextureNode(TEXTURE_1D, T::typesize, T::value_type, traits, width))
+  : BaseTexture(new TextureNode(SH_TEXTURE_1D, T::typesize, T::value_type, traits, width))
 {
 }
 
 template<typename T>
 BaseTexture2D<T>::BaseTexture2D(int width, int height, const TextureTraits& traits)
-  : BaseTexture(new TextureNode(TEXTURE_2D, T::typesize, T::value_type, traits, width, height))
+  : BaseTexture(new TextureNode(SH_TEXTURE_2D, T::typesize, T::value_type, traits, width, height))
 {
 }
 
 template<typename T>
 BaseTextureRect<T>::BaseTextureRect(int width, int height, const TextureTraits& traits)
-  : BaseTexture(new TextureNode(TEXTURE_RECT, T::typesize, T::value_type, traits, width, height))
+  : BaseTexture(new TextureNode(SH_TEXTURE_RECT, T::typesize, T::value_type, traits, width, height))
 {
 }
 
 template<typename T>
 BaseTexture3D<T>::BaseTexture3D(int width, int height, int depth, const TextureTraits& traits)
-  : BaseTexture(new TextureNode(TEXTURE_3D, T::typesize, T::value_type, traits, width, height, depth))
+  : BaseTexture(new TextureNode(SH_TEXTURE_3D, T::typesize, T::value_type, traits, width, height, depth))
 {
 }
 
 template<typename T>
 BaseTextureCube<T>::BaseTextureCube(int width, int height, const TextureTraits& traits)
-  : BaseTexture(new TextureNode(TEXTURE_CUBE, T::typesize, T::value_type, traits, width, height))
+  : BaseTexture(new TextureNode(SH_TEXTURE_CUBE, T::typesize, T::value_type, traits, width, height))
 {
 }
 
 template<typename T>
 BaseTexture1D<T>::BaseTexture1D(const TextureTraits& traits)
-  : BaseTexture(new TextureNode(TEXTURE_1D, T::typesize, T::value_type, traits, 0))
+  : BaseTexture(new TextureNode(SH_TEXTURE_1D, T::typesize, T::value_type, traits, 0))
 {
 }
 
 template<typename T>
 BaseTexture2D<T>::BaseTexture2D(const TextureTraits& traits)
-  : BaseTexture(new TextureNode(TEXTURE_2D, T::typesize, T::value_type, traits, 0, 0))
+  : BaseTexture(new TextureNode(SH_TEXTURE_2D, T::typesize, T::value_type, traits, 0, 0))
 {
 }
 
 template<typename T>
 BaseTextureRect<T>::BaseTextureRect(const TextureTraits& traits)
-  : BaseTexture(new TextureNode(TEXTURE_RECT, T::typesize, T::value_type, traits, 0, 0))
+  : BaseTexture(new TextureNode(SH_TEXTURE_RECT, T::typesize, T::value_type, traits, 0, 0))
 {
 }
 
 template<typename T>
 BaseTexture3D<T>::BaseTexture3D(const TextureTraits& traits)
-  : BaseTexture(new TextureNode(TEXTURE_3D, T::typesize, T::value_type, traits, 0, 0, 0))
+  : BaseTexture(new TextureNode(SH_TEXTURE_3D, T::typesize, T::value_type, traits, 0, 0, 0))
 {
 }
 
 template<typename T>
 BaseTextureCube<T>::BaseTextureCube(const TextureTraits& traits)
-  : BaseTexture(new TextureNode(TEXTURE_CUBE, T::typesize, T::value_type, traits, 0, 0))
+  : BaseTexture(new TextureNode(SH_TEXTURE_CUBE, T::typesize, T::value_type, traits, 0, 0))
 {
 }
 

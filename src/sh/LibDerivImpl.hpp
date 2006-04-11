@@ -27,7 +27,7 @@ namespace SH {
 template<int N, typename T>
 Generic<N, T> dx(const Generic<N, T>& var)
 {
-  Attrib<N, TEMP, T> t;
+  Attrib<N, SH_TEMP, T> t;
   shDX(t, var);
   return t;
 }
@@ -35,7 +35,7 @@ Generic<N, T> dx(const Generic<N, T>& var)
 template<int N, typename T>
 Generic<N, T> dy(const Generic<N, T>& var)
 {
-  Attrib<N, TEMP, T> t;
+  Attrib<N, SH_TEMP, T> t;
   shDY(t, var);
   return t;
 }
@@ -55,9 +55,9 @@ Generic<2, T> gradient(const Generic<1, T>& var)
 }
 
 template<int N, typename T>
-Matrix<2, N, TEMP, T> jacobian(const Generic<N, T>& var)
+Matrix<2, N, SH_TEMP, T> jacobian(const Generic<N, T>& var)
 {
-  Matrix<2, N, TEMP, T> ret;
+  Matrix<2, N, SH_TEMP, T> ret;
   ret[0] = dx(var);
   ret[1] = dy(var);
   return ret;

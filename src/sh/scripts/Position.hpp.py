@@ -6,7 +6,7 @@ common.guard("SHPOSITION_HPP")
 common.inprint('#include "Point.hpp"')
 common.namespace()
 
-decl = semantic.Class("Position", "position", "POSITION",
+decl = semantic.Class("Position", "position", "SH_POSITION",
                       """A vertex or fragment position.
 
 This is semantically a point, but is bound preferentially to the position

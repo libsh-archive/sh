@@ -381,7 +381,7 @@ Program bernstein(const std::string& name, const std::string& input_name0)
 {
   Program nibble = SH_BEGIN_PROGRAM() {
     typename T::InputType NAMEDECL(a, input_name0);
-    Attrib<N, OUTPUT, float> NAMEDECL(result, name) = bernstein<N>(a);
+    Attrib<N, SH_OUTPUT, float> NAMEDECL(result, name) = bernstein<N>(a);
   } SH_END;
   nibble.name("bernstein");
   return nibble;
@@ -484,7 +484,7 @@ Program join(const std::string & name,
   Program nibble = SH_BEGIN_PROGRAM() {
     typename T1::InputType NAMEDECL(a, input_name0);
     typename T2::InputType NAMEDECL(b, input_name1);
-    Attrib<T1::typesize + T2::typesize, OUTPUT, float> NAMEDECL(result, name) = join(a, b); 
+    Attrib<T1::typesize + T2::typesize, SH_OUTPUT, float> NAMEDECL(result, name) = join(a, b); 
   } SH_END; 
   nibble.name("join");
   return nibble;

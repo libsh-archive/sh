@@ -98,20 +98,20 @@ void GlslCode::generate()
   transform.convertTextureLookups();
 
   Transformer::ValueTypeMap convert_map;
-  convert_map[DOUBLE] = FLOAT; 
-  convert_map[HALF] = FLOAT;
-  convert_map[INT] = FLOAT;
-  convert_map[SHORT] = FLOAT;
-  convert_map[BYTE] = FLOAT;
-  convert_map[UINT] = FLOAT;
-  convert_map[USHORT] = FLOAT;
-  convert_map[UBYTE] = FLOAT;
-  convert_map[FINT] = FLOAT;
-  convert_map[FSHORT] = FLOAT;
-  convert_map[FBYTE] = FLOAT;
-  convert_map[FUINT] = FLOAT;
-  convert_map[FUSHORT] = FLOAT;
-  convert_map[FUBYTE] = FLOAT;
+  convert_map[SH_DOUBLE] = SH_FLOAT; 
+  convert_map[SH_HALF] = SH_FLOAT;
+  convert_map[SH_INT] = SH_FLOAT;
+  convert_map[SH_SHORT] = SH_FLOAT;
+  convert_map[SH_BYTE] = SH_FLOAT;
+  convert_map[SH_UINT] = SH_FLOAT;
+  convert_map[SH_USHORT] = SH_FLOAT;
+  convert_map[SH_UBYTE] = SH_FLOAT;
+  convert_map[SH_FINT] = SH_FLOAT;
+  convert_map[SH_FSHORT] = SH_FLOAT;
+  convert_map[SH_FBYTE] = SH_FLOAT;
+  convert_map[SH_FUINT] = SH_FLOAT;
+  convert_map[SH_FUSHORT] = SH_FLOAT;
+  convert_map[SH_FUBYTE] = SH_FLOAT;
   
   transform.convertToFloat(convert_map);
   transform.splitTuples(4, m_splits);
@@ -315,7 +315,7 @@ void GlslCode::update_float_uniform(const VariableNodePtr& node, const GLint loc
   const GLfloat *values;
 
   const int uniform_size = node->size();
-  if (node->valueType() == FLOAT) {
+  if (node->valueType() == SH_FLOAT) {
     values = static_cast<const float *>(node->getVariant()->array());
   }
   else {
@@ -355,7 +355,7 @@ void GlslCode::update_int_uniform(const VariableNodePtr& node, const GLint locat
   GLint data[4];
   const GLint *values;
 
-  if (node->valueType() == INT) {
+  if (node->valueType() == SH_INT) {
     values = static_cast<const GLint *>(node->getVariant()->array());
   }
   else {

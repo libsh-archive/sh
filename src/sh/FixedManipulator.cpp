@@ -43,7 +43,7 @@ Program KeepNode::applyToInputs(ManipVarIterator &finger, ManipVarIterator end) 
       if(finger == end) {
         error(AlgebraException("Not enough Program channels for keep manipulator"));
       }
-      Variable inout = (*finger)->clone(INOUT);
+      Variable inout = (*finger)->clone(SH_INOUT);
     }
   } SH_END;
   return result;
@@ -69,7 +69,7 @@ Program LoseNode::applyToInputs(ManipVarIterator &finger, ManipVarIterator end) 
       if(finger == end) {
         error(AlgebraException("Not enough Program input channels for lose manipulator"));
       }
-      Variable output((*finger)->clone(OUTPUT));
+      Variable output((*finger)->clone(SH_OUTPUT));
     }
   } SH_END;
   return result;
@@ -81,7 +81,7 @@ Program LoseNode::applyToOutputs(ManipVarIterator &finger, ManipVarIterator end)
       if(finger == end) {
         error(AlgebraException("Not enough Program output channels for lose manipulator"));
       }
-      Variable input((*finger)->clone(INPUT));
+      Variable input((*finger)->clone(SH_INPUT));
     }
   } SH_END;
   return result;
@@ -103,13 +103,13 @@ Program DupNode::applyToInputs(ManipVarIterator &finger, ManipVarIterator end) c
         error(AlgebraException("Not enough Program input channels for dup manipulator"));
       }
       if(i == 0) {
-        input = (*finger)->clone(INPUT);
+        input = (*finger)->clone(SH_INPUT);
       }
       if((*finger)->size() != input.size()) {
         error(AlgebraException("Duplicating type " + input.node()->nameOfType()
               + " to incompatible type " + (*finger)->nameOfType()));
       }
-      Variable output((*finger)->clone(OUTPUT));
+      Variable output((*finger)->clone(SH_OUTPUT));
       shASN(output, input);
     }
   } SH_END;
@@ -121,10 +121,10 @@ Program DupNode::applyToOutputs(ManipVarIterator &finger, ManipVarIterator end) 
     if(finger == end) {
       error(AlgebraException("Not enough Program output channels for dup manipulator"));
     }
-    Variable input((*finger)->clone(INPUT));
+    Variable input((*finger)->clone(SH_INPUT));
 
     for(int i = 0; i < m_numDups; ++i) {
-      Variable output((*finger)->clone(OUTPUT));
+      Variable output((*finger)->clone(SH_OUTPUT));
       shASN(output, input);
     }
     ++finger;

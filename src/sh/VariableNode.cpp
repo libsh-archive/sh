@@ -54,7 +54,7 @@ Pool* VariableNodeEval::m_pool = 0;
 #endif
 
 VariableNode::VariableNode(BindingType kind, int size, ValueType valueType, SemanticType type)
-  : m_uniform(!Context::current()->parsing() && kind == TEMP),
+  : m_uniform(!Context::current()->parsing() && kind == SH_TEMP),
     m_kind(kind), m_specialType(type),
     m_valueType(valueType), 
     m_size(size), 
@@ -62,7 +62,7 @@ VariableNode::VariableNode(BindingType kind, int size, ValueType valueType, Sema
     m_variant(0),
     m_eval(0)
 {
-  if (m_uniform || m_kind == CONST) addVariant();
+  if (m_uniform || m_kind == SH_CONST) addVariant();
   programVarListInit();
   programDeclInit();
 }
@@ -79,10 +79,10 @@ VariableNode::VariableNode(const VariableNode& old, BindingType newKind,
     m_eval(new VariableNodeEval)
 {
   if(!keepUniform) {
-    m_uniform = !Context::current()->parsing() && m_kind == TEMP;
+    m_uniform = !Context::current()->parsing() && m_kind == SH_TEMP;
   }
 
-  if(m_uniform || m_kind == CONST) addVariant(); 
+  if(m_uniform || m_kind == SH_CONST) addVariant(); 
   if(updateVarList) programVarListInit();
   programDeclInit();
 }
@@ -164,34 +164,34 @@ std::string VariableNode::name() const
   std::ostringstream stream;
   
   // Special case for constants
-  if (m_kind == CONST) {
+  if (m_kind == SH_CONST) {
     return m_variant->encodeArray();
   }
 
   switch (m_kind) {
-  case INPUT:
+  case SH_INPUT:
     stream << "i";
     break;
-  case OUTPUT:
+  case SH_OUTPUT:
     stream << "o";
     break;
-  case INOUT:
+  case SH_INOUT:
     stream << "io";
     break;
-  case TEMP:
+  case SH_TEMP:
     if(uniform()) stream << "ut";
     else stream << "t";
     break;
-  case CONST:
+  case SH_CONST:
     stream << "c";
     break;
-  case TEXTURE:
+  case SH_TEXTURE:
     stream << "tex";
     break;
-  case STREAM:
+  case SH_STREAM:
     stream << "str";
     break;
-  case PALETTE:
+  case SH_PALETTE:
     stream << "pal";
     break;
   default:
@@ -339,10 +339,10 @@ Variant* VariableNode::makeLow() const
   Variant* result;
 
   switch(m_specialType) {
-    case POINT:
-    case VECTOR:
-    case NORMAL:
-    case POSITION:
+    case SH_POINT:
+    case SH_VECTOR:
+    case SH_VECTOR:
+    case SH_POSITION:
       result = factory->generateOne(m_size);
       // @todo types handle unsigned types
       result->negate();
@@ -378,20 +378,20 @@ void VariableNode::programVarListInit()
 {
   ProgramNodePtr prog = Context::current()->parsing();
   switch (m_kind) {
-  case INPUT:
+  case SH_INPUT:
     assert(prog);
     prog->inputs.push_back(this);
     break;
-  case OUTPUT:
+  case SH_OUTPUT:
     assert(prog);
     prog->outputs.push_back(this);
     break;
-  case INOUT:
+  case SH_INOUT:
     assert(prog);
     prog->outputs.push_back(this);
     prog->inputs.push_back(this);
     break;
-  case TEMP:
+  case SH_TEMP:
     break;
   default:
     // Do nothing
@@ -401,7 +401,7 @@ void VariableNode::programVarListInit()
 
 void VariableNode::programDeclInit() 
 {
-  if (m_kind != TEMP || m_uniform) return;
+  if (m_kind != SH_TEMP || m_uniform) return;
   ProgramNodePtr prog = Context::current()->parsing();
   if (prog) {
     if (prog->ctrlGraph) { // already has ctrlGraph, add decl to entry

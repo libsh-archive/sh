@@ -34,7 +34,7 @@ namespace SH {
 template<int Rows, int Cols, BindingType Binding, typename T>
 Matrix<Rows, Cols, Binding, T>::Matrix()
 { 
-  if (Binding != INPUT) {
+  if (Binding != SH_INPUT) {
     for (int i = 0; i < std::min(Rows, Cols); i++)
       m_data[i][i] = 1.0;
   }
@@ -144,7 +144,7 @@ template<BindingType Binding2>
 Matrix<Rows, Cols, Binding, T>&
 Matrix<Rows, Cols, Binding, T>::operator*=(const Matrix<Rows, Cols, Binding2, T>& other)
 {
-  Matrix<Rows, Cols, TEMP, T> r = *this * other;
+  Matrix<Rows, Cols, SH_TEMP, T> r = *this * other;
   *this = r;
   return *this;
 }
@@ -225,11 +225,11 @@ std::ostream& operator<<(std::ostream& out,
   
   
 template<int Rows, int Cols, BindingType Binding, typename T>
-Matrix<Rows - 1, Cols -1, TEMP, T>
+Matrix<Rows - 1, Cols -1, SH_TEMP, T>
 Matrix<Rows, Cols, Binding, T>::subMatrix(int rowToRemove,
                                             int columnToRemove) const
 {
-  Matrix<Rows - 1, Cols - 1, TEMP, T> myMatrix;
+  Matrix<Rows - 1, Cols - 1, SH_TEMP, T> myMatrix;
     
   int indices[Cols - 1];
   for (int i = 0; i < columnToRemove; i++) 
@@ -331,46 +331,46 @@ MatrixRows<Rows, Cols, T>::operator=(const MatrixRows<Rows, Cols, T>& other)
 }
 
 template<int Rows, int Cols, typename T>
-Matrix<Rows, Cols, TEMP, T>
+Matrix<Rows, Cols, SH_TEMP, T>
 MatrixRows<Rows, Cols, T>::operator()() const
 {
-  Matrix<Rows, Cols, TEMP, T> r;
+  Matrix<Rows, Cols, SH_TEMP, T> r;
   for (int i = 0; i < Rows; i++) r[i].clone(m_data[i]);
   return r;
 }
 
 template<int Rows, int Cols, typename T>
-Matrix<Rows, 1, TEMP, T>
+Matrix<Rows, 1, SH_TEMP, T>
 MatrixRows<Rows, Cols, T>::operator()(int i0) const
 {
-  Matrix<Rows, 1, TEMP, T> r;
+  Matrix<Rows, 1, SH_TEMP, T> r;
   for (int i = 0; i < Rows; i++) r[i].clone(m_data[i](i0));
   return r;
 }
 
 template<int Rows, int Cols, typename T>
-Matrix<Rows, 2, TEMP, T>
+Matrix<Rows, 2, SH_TEMP, T>
 MatrixRows<Rows, Cols, T>::operator()(int i0, int i1) const
 {
-  Matrix<Rows, 2, TEMP, T> r;
+  Matrix<Rows, 2, SH_TEMP, T> r;
   for (int i = 0; i < Rows; i++) r[i].clone(m_data[i](i0, i1));
   return r;
 }
 
 template<int Rows, int Cols, typename T>
-Matrix<Rows, 3, TEMP, T>
+Matrix<Rows, 3, SH_TEMP, T>
 MatrixRows<Rows, Cols, T>::operator()(int i0, int i1, int i2) const
 {
-  Matrix<Rows, 3, TEMP, T> r;
+  Matrix<Rows, 3, SH_TEMP, T> r;
   for (int i = 0; i < Rows; i++) r[i].clone(m_data[i](i0, i1, i2));
   return r;
 }
 
 template<int Rows, int Cols, typename T>
-Matrix<Rows, 4, TEMP, T>
+Matrix<Rows, 4, SH_TEMP, T>
 MatrixRows<Rows, Cols, T>::operator()(int i0, int i1, int i2, int i3) const
 {
-  Matrix<Rows, 4, TEMP, T> r;
+  Matrix<Rows, 4, SH_TEMP, T> r;
   for (int i = 0; i < Rows; i++) r[i].clone(m_data[i](i0, i1, i2, i3));
   return r;
 }

@@ -22,7 +22,7 @@
 namespace SH {
 
 PaletteNode::PaletteNode(int elements, SemanticType semantic, ValueType valueType, std::size_t length)
-  : VariableNode(PALETTE, elements, valueType, semantic),
+  : VariableNode(SH_PALETTE, elements, valueType, semantic),
     m_length(length),
     m_nodes(new VariableNodePtr[length])
 {

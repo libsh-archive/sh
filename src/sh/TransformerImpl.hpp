@@ -56,7 +56,7 @@ struct CastExtractorBase: public TransformerParent
             << valueTypeName(from) << "->" 
             << valueTypeName(to) << " on stmt=" << stmt);
 #endif
-        Variable temp(stmt.src[i].node()->clone(TEMP, 0, to));
+        Variable temp(stmt.src[i].node()->clone(SH_TEMP, 0, to));
         node->block->m_statements.insert(I, Statement(temp, OP_ASN, stmt.src[i]));
         stmt.src[i] = temp;
         m_changed = true;
@@ -72,7 +72,7 @@ struct CastExtractorBase: public TransformerParent
           << valueTypeName(from) << "->" 
           << valueTypeName(to) << " on stmt=" << stmt);
 #endif
-      Variable temp(stmt.dest.node()->clone(TEMP, 0, to));
+      Variable temp(stmt.dest.node()->clone(SH_TEMP, 0, to));
       BasicBlock::StmtList::iterator J = I;
       ++J;
       node->block->m_statements.insert(J, Statement(stmt.dest, OP_ASN, temp));
@@ -162,11 +162,11 @@ template<typename T>
 bool DefaultTransformer<T>::transform(const ProgramNodePtr& p) {
   T::start(p);
 
-  T::handleVarList(p->inputs, INPUT);
-  T::handleVarList(p->outputs, OUTPUT);
-  T::handleVarList(p->temps, TEMP);
-  T::handleVarList(p->constants, CONST);
-  T::handleVarList(p->uniforms, TEMP);
+  T::handleVarList(p->inputs, SH_INPUT);
+  T::handleVarList(p->outputs, SH_OUTPUT);
+  T::handleVarList(p->temps, SH_TEMP);
+  T::handleVarList(p->constants, SH_CONST);
+  T::handleVarList(p->uniforms, SH_TEMP);
 
   T::handleTexList(p->textures);
   T::handleChannelList(p->channels);

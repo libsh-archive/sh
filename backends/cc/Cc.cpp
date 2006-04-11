@@ -127,13 +127,13 @@ CcBackendCode::CcBackendCode(const ProgramNodeCPtr& program)
   CC_DEBUG_PRINT(__FUNCTION__);
 
   // convert half floats, fractionals to types we can use
-  m_convertMap[HALF] = FLOAT;
-  m_convertMap[FINT] = FLOAT;
-  m_convertMap[FSHORT] = FLOAT;
-  m_convertMap[FBYTE] = FLOAT;
-  m_convertMap[FUINT] = FLOAT;
-  m_convertMap[FUSHORT] = FLOAT;
-  m_convertMap[FUBYTE] = FLOAT;
+  m_convertMap[SH_HALF] = SH_FLOAT;
+  m_convertMap[SH_FINT] = SH_FLOAT;
+  m_convertMap[SH_FSHORT] = SH_FLOAT;
+  m_convertMap[SH_FBYTE] = SH_FLOAT;
+  m_convertMap[SH_FUINT] = SH_FLOAT;
+  m_convertMap[SH_FUSHORT] = SH_FLOAT;
+  m_convertMap[SH_FUBYTE] = SH_FLOAT;
 }
 
 CcBackendCode::~CcBackendCode(void) 
@@ -330,23 +330,23 @@ std::string CcBackendCode::resolve(const Variable& v, int idx)
 const char* CcBackendCode::ctype(ValueType valueType)
 {
   switch(valueType) {
-  case HALF:
-  case FLOAT:
-  case FBYTE:
-  case FSHORT:
-  case FINT:
-  case FUBYTE:
-  case FUSHORT:
-  case FUINT:
+  case SH_HALF:
+  case SH_FLOAT:
+  case SH_FBYTE:
+  case SH_FSHORT:
+  case SH_FINT:
+  case SH_FUBYTE:
+  case SH_FUSHORT:
+  case SH_FUINT:
     return "float";
 
-  case DOUBLE: return "double";
-  case BYTE:   return "char";
-  case SHORT:  return "short";
-  case INT:    return "int";
-  case UBYTE:  return "unsigned char";
-  case USHORT: return "unsigned short";
-  case UINT:   return "unsigned int";
+  case SH_DOUBLE: return "double";
+  case SH_BYTE:   return "char";
+  case SH_SHORT:  return "short";
+  case SH_INT:    return "int";
+  case SH_UBYTE:  return "unsigned char";
+  case SH_USHORT: return "unsigned short";
+  case SH_UINT:   return "unsigned int";
   default:
     DEBUG_PRINT("Invalid value type: " << valueTypeName(valueType));
     DEBUG_ASSERT(0); 

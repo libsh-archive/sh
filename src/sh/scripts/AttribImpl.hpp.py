@@ -12,12 +12,12 @@ common.namespace()
 
 # TODO
 #  - array constructor
-# Special cases for CONST:
+# Special cases for SH_CONST:
 #  - operator=()
 
 class Impl(semantic.Impl):
     def __init__(self):
-        semantic.Impl.__init__(self, "Attrib", "attribute", "ATTRIB", "Generic")
+        semantic.Impl.__init__(self, "Attrib", "attribute", "SH_ATTRIB", "Generic")
 
     def copycons(self, args, size, extraTplArg=[]):
         other = args[0][1]
@@ -45,7 +45,7 @@ class Impl(semantic.Impl):
         common.inprint("{")
         common.indent()
         
-        common.inprint("if (Binding == CONST) {")
+        common.inprint("if (Binding == SH_CONST) {")
         common.indent()
         if size > 1:
             values = ""
@@ -76,7 +76,7 @@ class Impl(semantic.Impl):
                 if data != "":
                     data += ", "
                 data += "s" + str(i)
-            common.inprint("(*this) = Attrib<" + self.sizevar(size) + ", CONST, T, Semantic>(" + data + ");")
+            common.inprint("(*this) = Attrib<" + self.sizevar(size) + ", SH_CONST, T, Semantic>(" + data + ");")
         common.deindent()
         common.inprint("}")
         common.deindent()
@@ -115,13 +115,13 @@ class Impl(semantic.Impl):
                        "(new VariableNode(Binding, " + self.sizevar(size) + ", StorageTypeInfo<T>::value_type, Semantic))")
         common.inprint("{")
         common.indent()
-        common.inprint("if (Binding == CONST) {")
+        common.inprint("if (Binding == SH_CONST) {")
         common.indent()
         common.inprint("for (int i = 0; i < " + self.sizevar(size) + "; i++) setValue(i, data[i]);")
         common.deindent()
         common.inprint("} else {")
         common.indent()
-        common.inprint("(*this) = Attrib<" + self.sizevar(size) + ", CONST, T, Semantic>(data);")
+        common.inprint("(*this) = Attrib<" + self.sizevar(size) + ", SH_CONST, T, Semantic>(data);")
         common.deindent()
         common.inprint("}")
         common.deindent()

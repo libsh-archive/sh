@@ -30,7 +30,7 @@ namespace SH {
 template<int N, typename T>
 Generic<N, T> abs(const Generic<N, T>& var)
 {
-  Attrib<N, TEMP, T> t;
+  Attrib<N, SH_TEMP, T> t;
   shABS(t, var);
   return t;
 }
@@ -38,7 +38,7 @@ Generic<N, T> abs(const Generic<N, T>& var)
 template<int N, typename T>
 Generic<N, T> ceil(const Generic<N, T>& var)
 {
-  Attrib<N, TEMP, T> t;
+  Attrib<N, SH_TEMP, T> t;
   shCEIL(t, var);
   return t;
 }
@@ -46,7 +46,7 @@ Generic<N, T> ceil(const Generic<N, T>& var)
 template<int N, typename T>
 Generic<N, T> floor(const Generic<N, T>& var)
 {
-  Attrib<N, TEMP, T> t;
+  Attrib<N, SH_TEMP, T> t;
   shFLR(t, var);
   return t;
 }
@@ -54,7 +54,7 @@ Generic<N, T> floor(const Generic<N, T>& var)
 template<int N, typename T>
 Generic<N, T> round(const Generic<N, T>& var)
 {
-  Attrib<N, TEMP, T> t;
+  Attrib<N, SH_TEMP, T> t;
   shRND(t, var);
   return t;
 }
@@ -62,28 +62,28 @@ Generic<N, T> round(const Generic<N, T>& var)
 template<int N, typename T1, typename T2>
 Generic<N, CT1T2> mod(const Generic<N, T1>& left, const Generic<N, T2>& right)
 {
-  Attrib<N, TEMP, CT1T2> t;
+  Attrib<N, SH_TEMP, CT1T2> t;
   shMOD(t, left, right);
   return t;
 }
 template<int N, typename T1, typename T2>
 Generic<N, CT1T2> mod(const Generic<N, T1>& left, const Generic<1, T2>& right)
 {
-  Attrib<N, TEMP, CT1T2> t;
+  Attrib<N, SH_TEMP, CT1T2> t;
   shMOD(t, left, right);
   return t;
 }
 template<int N, typename T1, typename T2>
 Generic<N, CT1T2> mod(const Generic<1, T1>& left, const Generic<N, T2>& right)
 {
-  Attrib<N, TEMP, CT1T2> t;
+  Attrib<N, SH_TEMP, CT1T2> t;
   shMOD(t, left, right);
   return t;
 }
 template<typename T1, typename T2>
 Generic<1, CT1T2> mod(const Generic<1, T1>& left, const Generic<1, T2>& right)
 {
-  Attrib<1, TEMP, CT1T2> t;
+  Attrib<1, SH_TEMP, CT1T2> t;
   shMOD(t, left, right);
   return t;
 }
@@ -120,7 +120,7 @@ SHLIB_CONST_N_OP_LEFT(operator%);
 template<int N, typename T>
 Generic<N, T> frac(const Generic<N, T>& var)
 {
-  Attrib<N, TEMP, T> t;
+  Attrib<N, SH_TEMP, T> t;
   shFRAC(t, var);
   return t;
 }
@@ -135,7 +135,7 @@ Generic<N, T> pos(const Generic<N, T>& var)
 template<int N, typename T1, typename T2>
 Generic<N,  CT1T2> max(const Generic<N, T1>& left, const Generic<N, T2>& right)
 {
-  Attrib<N, TEMP, CT1T2> t;
+  Attrib<N, SH_TEMP, CT1T2> t;
   shMAX(t, left, right);
   return t;
 }
@@ -144,7 +144,7 @@ SHLIB_CONST_SCALAR_OP(max);
 template<int N, typename T1, typename T2>
 Generic<N,  CT1T2> min(const Generic<N, T1>& left, const Generic<N, T2>& right)
 {
-  Attrib<N, TEMP, CT1T2> t;
+  Attrib<N, SH_TEMP, CT1T2> t;
   shMIN(t, left, right);
   return t;
 }
@@ -228,7 +228,7 @@ Generic<N, T> sat(const Generic<N, T>& var)
 template<int N, typename T>
 Generic<N, T> sign(const Generic<N, T>& var)
 {
-  Attrib<N, TEMP, T> t;
+  Attrib<N, SH_TEMP, T> t;
   shSGN(t, var);
   return t;
 }

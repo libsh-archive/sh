@@ -440,11 +440,11 @@ void CcBackendCode::emitTexLookup(const Statement& stmt, const char* texfunc) {
   TextureNodePtr node = shref_dynamic_cast<TextureNode>(stmt.src[0].node());
   int dims = 0; 
   switch(node->dims()) {
-    case TEXTURE_1D: dims = 1; break;   
-    case TEXTURE_2D: dims = 2; break; 
-    case TEXTURE_RECT: dims = 2; break;
-    case TEXTURE_3D: dims = 3; break; 
-    case TEXTURE_CUBE: 
+    case SH_TEXTURE_1D: dims = 1; break;   
+    case SH_TEXTURE_2D: dims = 2; break; 
+    case SH_TEXTURE_RECT: dims = 2; break;
+    case SH_TEXTURE_3D: dims = 3; break; 
+    case SH_TEXTURE_CUBE: 
       DEBUG_ERROR("Cube maps not handled"); 
     default:
       DEBUG_ERROR("Unhandled texture dim");

@@ -25,11 +25,11 @@
 #include <sh/sh.hpp>
 #include <shutil/shutil.hpp>
 
-#define COLOR_GREEN "[32m"
-#define COLOR_RED "[31m"
-#define COLOR_BLUE "[34m"
-#define COLOR_YELLOW "[33m"
-#define COLOR_NORMAL "[0m"
+#define SH_COLOR_GREEN "[32m"
+#define SH_COLOR_RED "[31m"
+#define SH_COLOR_BLUE "[34m"
+#define SH_COLOR_YELLOW "[33m"
+#define SH_COLOR_NORMAL "[0m"
 
 // turns on output of all results, even if they pass 
 //#define REGRESS_OWALL 
@@ -122,12 +122,12 @@ public:
   }
 
   /// Run stream test on current backend (1 input parameter)
-  template <class INPUT1, class OUTPUT>
-  int run(SH::Program& program, const INPUT1& in1, const OUTPUT& res, const double epsilon)
+  template <class SH_INPUT1, class SH_OUTPUT>
+  int run(SH::Program& program, const SH_INPUT1& in1, const SH_OUTPUT& res, const double epsilon)
   {
     if (on_host()) return 0; // skip this test
 
-    typedef typename OUTPUT::mem_type OT;
+    typedef typename SH_OUTPUT::mem_type OT;
 
     OT* _out = new OT[res.size()];
     mem_from_host(_out, res);
@@ -137,8 +137,8 @@ public:
     OT* _res = new OT[res.size()];
     mem_from_host(_res, res);
 
-    SH::HostMemoryPtr mem_out = new SH::HostMemory(res.size()*sizeof(OT), _out, OUTPUT::value_type);
-    SH::Channel<typename OUTPUT::TempType> chan_out(mem_out, 1);
+    SH::HostMemoryPtr mem_out = new SH::HostMemory(res.size()*sizeof(OT), _out, SH_OUTPUT::value_type);
+    SH::Channel<typename SH_OUTPUT::TempType> chan_out(mem_out, 1);
 
     std::vector<std::string> inputs(1);
     SH::Program program1 = bind_input(program, in1, inputs[0]);
@@ -149,13 +149,13 @@ public:
   }
 
   /// Run stream test on current backend (2 input parameters)
-  template <class INPUT1, class INPUT2, class OUTPUT>
-  int run(SH::Program& program, const INPUT1& in1, const INPUT2& in2,
-	  const OUTPUT& res, const double epsilon)
+  template <class SH_INPUT1, class SH_INPUT2, class SH_OUTPUT>
+  int run(SH::Program& program, const SH_INPUT1& in1, const SH_INPUT2& in2,
+	  const SH_OUTPUT& res, const double epsilon)
   {
     if (on_host()) return 0; // skip this test
 
-    typedef typename OUTPUT::mem_type OT;
+    typedef typename SH_OUTPUT::mem_type OT;
 
     OT* _out = new OT[res.size()];
     mem_from_host(_out, res);
@@ -165,8 +165,8 @@ public:
     OT* _res = new OT[res.size()];
     mem_from_host(_res, res);
 
-    SH::HostMemoryPtr mem_out = new SH::HostMemory(res.size()*sizeof(OT), _out, OUTPUT::value_type);
-    SH::Channel<typename OUTPUT::TempType> chan_out(mem_out, 1);
+    SH::HostMemoryPtr mem_out = new SH::HostMemory(res.size()*sizeof(OT), _out, SH_OUTPUT::value_type);
+    SH::Channel<typename SH_OUTPUT::TempType> chan_out(mem_out, 1);
 
     std::vector<std::string> inputs(2);
     SH::Program program1 = bind_input(program, in1, inputs[0]);
@@ -178,13 +178,13 @@ public:
   }
 
   /// Run stream test on current backend (3 input parameters)
-  template <class INPUT1, class INPUT2, class INPUT3, class OUTPUT>
-  int run(SH::Program& program, const INPUT1& in1, const INPUT2& in2,
-           const INPUT3& in3, const OUTPUT res, const double epsilon)
+  template <class SH_INPUT1, class SH_INPUT2, class SH_INPUT3, class SH_OUTPUT>
+  int run(SH::Program& program, const SH_INPUT1& in1, const SH_INPUT2& in2,
+           const SH_INPUT3& in3, const SH_OUTPUT res, const double epsilon)
   {
     if (on_host()) return 0; // skip this test
 
-    typedef typename OUTPUT::mem_type OT;
+    typedef typename SH_OUTPUT::mem_type OT;
   
     OT* _out = new OT[res.size()];
     mem_from_host(_out, res);
@@ -194,8 +194,8 @@ public:
     OT* _res = new OT[res.size()];
     mem_from_host(_res, res);
   
-    SH::HostMemoryPtr mem_out = new SH::HostMemory(res.size()*sizeof(OT), _out, OUTPUT::value_type);
-    SH::Channel<typename OUTPUT::TempType> chan_out(mem_out, 1);
+    SH::HostMemoryPtr mem_out = new SH::HostMemory(res.size()*sizeof(OT), _out, SH_OUTPUT::value_type);
+    SH::Channel<typename SH_OUTPUT::TempType> chan_out(mem_out, 1);
 
     std::vector<std::string> inputs(3);
     SH::Program program1 = bind_input(program, in1, inputs[0]);
@@ -208,13 +208,13 @@ public:
   }
 
   /// Run stream test on current backend (4 input parameters)
-  template <class INPUT1, class INPUT2, class INPUT3, class INPUT4, class OUTPUT>
-  int run(SH::Program& program, const INPUT1& in1, const INPUT2& in2,
-           const INPUT3& in3, const INPUT4& in4, const OUTPUT res, const double epsilon)
+  template <class SH_INPUT1, class SH_INPUT2, class SH_INPUT3, class SH_INPUT4, class SH_OUTPUT>
+  int run(SH::Program& program, const SH_INPUT1& in1, const SH_INPUT2& in2,
+           const SH_INPUT3& in3, const SH_INPUT4& in4, const SH_OUTPUT res, const double epsilon)
   {
     if (on_host()) return 0; // skip this test
 
-    typedef typename OUTPUT::mem_type OT;
+    typedef typename SH_OUTPUT::mem_type OT;
   
     OT* _out = new OT[res.size()];
     mem_from_host(_out, res);
@@ -224,8 +224,8 @@ public:
     OT* _res = new OT[res.size()];
     mem_from_host(_res, res);
   
-    SH::HostMemoryPtr mem_out = new SH::HostMemory(res.size()*sizeof(OT), _out, OUTPUT::value_type);
-    SH::Channel<typename OUTPUT::TempType> chan_out(mem_out, 1);
+    SH::HostMemoryPtr mem_out = new SH::HostMemory(res.size()*sizeof(OT), _out, SH_OUTPUT::value_type);
+    SH::Channel<typename SH_OUTPUT::TempType> chan_out(mem_out, 1);
 
     std::vector<std::string> inputs(4);
     SH::Program program1 = bind_input(program, in1, inputs[0]);
@@ -239,12 +239,12 @@ public:
   }
 
   /// Check results from running ops on the host
-  template <class OUTPUT, class EXPECTED>
-  int check(std::string name, const OUTPUT &out, const EXPECTED &res, const double epsilon)
+  template <class SH_OUTPUT, class EXPECTED>
+  int check(std::string name, const SH_OUTPUT &out, const EXPECTED &res, const double epsilon)
   {
     if (!on_host()) return 0; // skip this test
  
-    typedef typename OUTPUT::host_type OT;
+    typedef typename SH_OUTPUT::host_type OT;
     OT* _out = new OT[out.size()];
     out.getValues(_out);
     

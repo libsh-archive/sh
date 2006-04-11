@@ -31,12 +31,12 @@ static struct {
   char* name;
   char* estName;
 } arbRegTypeInfo[] = {
-  {"ATTRIB", "i"},
+  {"SH_ATTRIB", "i"},
   {"PARAM", "u"},
-  {"TEMP", "t"},
+  {"SH_TEMP", "t"},
   {"HALFTEMP", "h"},
   {"ADDRESS", "a"},
-  {"OUTPUT", "o"},
+  {"SH_OUTPUT", "o"},
   {"PARAM", "c"},
   {"<texture>", "<texture>"}
 };

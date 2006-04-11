@@ -35,7 +35,7 @@ Program KernelLib::outputPass( const Program &p ) {
     for( ProgramNode::VarList::const_iterator it = p.node()->outputs.begin();
         it != p.node()->outputs.end(); ++it ) {
       VariableNodePtr var = *it;
-      Variable inout(new VariableNode(INOUT, var->size(), var->valueType(), var->specialType()));
+      Variable inout(new VariableNode(SH_INOUT, var->size(), var->valueType(), var->specialType()));
       inout.name( var->name() ); 
     }
   } SH_END;
@@ -47,7 +47,7 @@ Program KernelLib::inputPass( const Program &p ) {
     for( ProgramNode::VarList::const_iterator it = p.node()->inputs.begin();
         it != p.node()->inputs.end(); ++it ) {
       VariableNodePtr var = *it;
-      Variable inout(new VariableNode(INOUT, var->size(), var->valueType(), var->specialType()));
+      Variable inout(new VariableNode(SH_INOUT, var->size(), var->valueType(), var->specialType()));
       inout.name( var->name() ); 
     }
   } SH_END;

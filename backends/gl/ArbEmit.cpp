@@ -235,7 +235,7 @@ void ArbCode::emit(const Statement& stmt)
       if (I->dest.swizzle().identity()) continue;
 
       Variable realdest(I->dest);
-      Variable tmp(I->dest.node()->clone(TEMP, ATTRIB, 4));
+      Variable tmp(I->dest.node()->clone(SH_TEMP, SH_ATTRIB, 4));
       I->dest = tmp;
 
       Statement mask(realdest, OP_ASN, tmp);
@@ -276,7 +276,7 @@ void ArbCode::emit_div(const Statement& stmt)
 {
   // @todo type should handle other types (half-floats, fixed point)
 
-  Variable rcp(new VariableNode(TEMP, stmt.src[1].size(), FLOAT));
+  Variable rcp(new VariableNode(SH_TEMP, stmt.src[1].size(), SH_FLOAT));
 
   for (int i = 0; i < stmt.src[1].size(); i++) {
     m_instructions.push_back(ArbInst(ARB_RCP, rcp(i), stmt.src[1](i)));
@@ -286,7 +286,7 @@ void ArbCode::emit_div(const Statement& stmt)
 
 void ArbCode::emit_sqrt(const Statement& stmt)
 {
-  Variable rsq(new VariableNode(TEMP, 1, FLOAT));
+  Variable rsq(new VariableNode(SH_TEMP, 1, SH_FLOAT));
   m_instructions.push_back(ArbInst(ARB_RSQ, rsq, stmt.src[0]));
   m_instructions.push_back(ArbInst(ARB_RCP, stmt.dest, rsq));
 }
@@ -295,22 +295,22 @@ void ArbCode::emit_lerp(const Statement& stmt)
 {
   // lerp(f,a,b)= f*a + (1-f)*b = f*(a-b) + b
   
-  Variable t(new VariableNode(TEMP, stmt.src[1].size(), FLOAT));
+  Variable t(new VariableNode(SH_TEMP, stmt.src[1].size(), SH_FLOAT));
   m_instructions.push_back(ArbInst(ARB_ADD, t, stmt.src[1], -stmt.src[2]));
   m_instructions.push_back(ArbInst(ARB_MAD, stmt.dest, stmt.src[0], t, stmt.src[2]));
 }
 
 void ArbCode::emit_dot2(const Statement& stmt)
 {
-  Variable mul(new VariableNode(TEMP, 2, FLOAT));
+  Variable mul(new VariableNode(SH_TEMP, 2, SH_FLOAT));
   m_instructions.push_back(ArbInst(ARB_MUL, mul, stmt.src[0], stmt.src[1]));
   m_instructions.push_back(ArbInst(ARB_ADD, stmt.dest, mul(0), mul(1)));
 }
 
 void ArbCode::emit_eq(const Statement& stmt)
 {
-  Variable t1(new VariableNode(TEMP, stmt.dest.size(), FLOAT));
-  Variable t2(new VariableNode(TEMP, stmt.dest.size(), FLOAT));
+  Variable t1(new VariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
+  Variable t2(new VariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
 
   ArbOp op, combine;
   if (stmt.op == OP_SEQ) {
@@ -331,7 +331,7 @@ void ArbCode::emit_eq(const Statement& stmt)
 
 void ArbCode::emit_ceil(const Statement& stmt)
 {
-  Variable t(new VariableNode(TEMP, stmt.dest.size(), FLOAT));
+  Variable t(new VariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
 
   m_instructions.push_back(ArbInst(ARB_FLR, t, -stmt.src[0])); 
   m_instructions.push_back(ArbInst(ARB_MOV, stmt.dest, -t));
@@ -340,8 +340,8 @@ void ArbCode::emit_ceil(const Statement& stmt)
 void ArbCode::emit_mod(const Statement& stmt)
 {
   // TODO - is this really optimal?
-  Variable t1(new VariableNode(TEMP, stmt.dest.size(), FLOAT));
-  Variable t2(new VariableNode(TEMP, stmt.dest.size(), FLOAT));
+  Variable t1(new VariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
+  Variable t2(new VariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
   
   // result = x - y*floor(x/y)
   emit(Statement(t1, stmt.src[0], OP_DIV, stmt.src[1]));
@@ -365,10 +365,10 @@ void ArbCode::emit_trig(const Statement& stmt)
   m_shader->constants.push_back(c3.node());
   m_shader->constants.push_back(c4.node());
   
-  Variable r0(new VariableNode(TEMP, 4, FLOAT));
-  Variable r1(new VariableNode(TEMP, 4, FLOAT));
-  Variable r2(new VariableNode(TEMP, 4, FLOAT));
-  Variable rs(new VariableNode(TEMP, 4, FLOAT));
+  Variable r0(new VariableNode(SH_TEMP, 4, SH_FLOAT));
+  Variable r1(new VariableNode(SH_TEMP, 4, SH_FLOAT));
+  Variable r2(new VariableNode(SH_TEMP, 4, SH_FLOAT));
+  Variable rs(new VariableNode(SH_TEMP, 4, SH_FLOAT));
   
   if (stmt.op == OP_SIN) {
     m_instructions.push_back(ArbInst(ARB_MAD, rs, c1(3,3,3,3), stmt.src[0], -c1(0,0,0,0)));
@@ -409,11 +409,11 @@ void ArbCode::emit_invtrig(const Statement& stmt)
   m_shader->constants.push_back(c3.node());
   m_shader->constants.push_back(c4.node());
   
-  Variable r0(new VariableNode(TEMP, 4, FLOAT));
-  Variable r1(new VariableNode(TEMP, 4, FLOAT));
-  Variable r2(new VariableNode(TEMP, 4, FLOAT));
-  Variable offset(new VariableNode(TEMP, 4, FLOAT));
-  Variable output(new VariableNode(TEMP, stmt.dest.size(), FLOAT));
+  Variable r0(new VariableNode(SH_TEMP, 4, SH_FLOAT));
+  Variable r1(new VariableNode(SH_TEMP, 4, SH_FLOAT));
+  Variable r2(new VariableNode(SH_TEMP, 4, SH_FLOAT));
+  Variable offset(new VariableNode(SH_TEMP, 4, SH_FLOAT));
+  Variable output(new VariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
   m_instructions.push_back(ArbInst(ARB_ABS, r0, stmt.src[0]));
   m_instructions.push_back(ArbInst(ARB_MAD, offset, -r0, r0, c4(0,0,0,0)));
   
@@ -443,7 +443,7 @@ void ArbCode::emit_invtrig(const Statement& stmt)
 
 void ArbCode::emit_atan(const Statement& stmt)
 {
-  Variable tmp(new VariableNode(TEMP, stmt.src[0].size(), FLOAT));
+  Variable tmp(new VariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
   
   // arctan(x) = arcsin( x / sqrt(x^2 + 1) )
   emit(Statement(tmp, stmt.src[0], OP_MUL, stmt.src[0]));
@@ -455,8 +455,8 @@ void ArbCode::emit_atan(const Statement& stmt)
 
 void ArbCode::emit_tan(const Statement& stmt)
 {
-  Variable tmp1(new VariableNode(TEMP, stmt.src[0].size(), FLOAT));
-  Variable tmp2(new VariableNode(TEMP, stmt.src[0].size(), FLOAT));
+  Variable tmp1(new VariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
+  Variable tmp2(new VariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
 
   emit(Statement(tmp1, OP_COS, stmt.src[0]));
   emit(Statement(tmp1, OP_RCP, tmp1));
@@ -480,14 +480,14 @@ void ArbCode::emit_hyperbolic(const Statement& stmt)
   ConstAttrib1f two(2.0f);
   m_shader->constants.push_back(two.node());
 
-  Variable e_plusX(new VariableNode(TEMP, stmt.src[0].size(), FLOAT)); // e^x
-  Variable e_minusX(new VariableNode(TEMP, stmt.src[0].size(), FLOAT)); // e^-x
+  Variable e_plusX(new VariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT)); // e^x
+  Variable e_minusX(new VariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT)); // e^-x
   emit(Statement(e_plusX, OP_EXP, stmt.src[0]));
   emit(Statement(e_minusX, OP_NEG, stmt.src[0]));
   emit(Statement(e_minusX, OP_EXP, e_minusX));
 
-  Variable temp_cosh(new VariableNode(TEMP, stmt.src[0].size(), FLOAT)); // e^x + e^-x
-  Variable temp_sinh(new VariableNode(TEMP, stmt.src[0].size(), FLOAT)); // e^x - e^-x
+  Variable temp_cosh(new VariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT)); // e^x + e^-x
+  Variable temp_sinh(new VariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT)); // e^x - e^-x
 
   switch (stmt.op) {
   case OP_COSH:
@@ -518,7 +518,7 @@ void ArbCode::emit_log(const Statement& stmt)
   ConstAttrib1f scale(scalef);
   m_shader->constants.push_back(scale.node());
 
-  Variable tmp(new VariableNode(TEMP, stmt.dest.size(), FLOAT));
+  Variable tmp(new VariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
   
   emit(Statement(tmp, OP_LOG2, stmt.src[0]));
   m_instructions.push_back(ArbInst(ARB_MUL, stmt.dest, tmp, scale));
@@ -526,7 +526,7 @@ void ArbCode::emit_log(const Statement& stmt)
 
 void ArbCode::emit_norm(const Statement& stmt)
 {
-  Variable tmp(new VariableNode(TEMP, 1, FLOAT));
+  Variable tmp(new VariableNode(SH_TEMP, 1, SH_FLOAT));
   emit(Statement(tmp, stmt.src[0], OP_DOT, stmt.src[0]));
   m_instructions.push_back(ArbInst(ARB_RSQ, tmp, tmp));
   m_instructions.push_back(ArbInst(ARB_MUL, stmt.dest, tmp, stmt.src[0]));
@@ -534,8 +534,8 @@ void ArbCode::emit_norm(const Statement& stmt)
 
 void ArbCode::emit_sgn(const Statement& stmt)
 {
-  Variable tmp1(new VariableNode(TEMP, stmt.src[0].size(), FLOAT));
-  Variable tmp2(new VariableNode(TEMP, stmt.src[0].size(), FLOAT));
+  Variable tmp1(new VariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
+  Variable tmp2(new VariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
   ConstAttrib1f zero(0.0);
 
   emit(Statement(tmp1, stmt.src[0], OP_SGT, zero));
@@ -552,7 +552,7 @@ void ArbCode::emit_tex(const Statement& stmt)
   TextureNodePtr tnode = shref_dynamic_cast<TextureNode>(stmt.src[0].node());
 
   if (!stmt.dest.swizzle().identity()) {
-    tmpdest = Variable(new VariableNode(TEMP, tnode->size(), FLOAT));
+    tmpdest = Variable(new VariableNode(SH_TEMP, tnode->size(), SH_FLOAT));
     tmpsrc = tmpdest;
     delay = true;
   }
@@ -561,13 +561,13 @@ void ArbCode::emit_tex(const Statement& stmt)
 
   if (tnode->size() == 2) {
     // Special case for LUMINANCE_ALPHA
-    tmpdest = Variable(new VariableNode(TEMP, 4, FLOAT));
+    tmpdest = Variable(new VariableNode(SH_TEMP, 4, SH_FLOAT));
     tmpsrc = tmpdest(0,3);
     delay = true;
   }
 
   if (stmt.op == OP_TEXD) {
-    DEBUG_ASSERT(tnode->dims() == TEXTURE_2D);
+    DEBUG_ASSERT(tnode->dims() == SH_TEXTURE_2D);
     m_instructions.push_back(ArbInst(ARB_TXD,
                                      (delay ? tmpdest : stmt.dest), stmt.src[1], stmt.src[0],
                                      stmt.src[2](0,1), stmt.src[2](2,3)));
@@ -581,7 +581,7 @@ void ArbCode::emit_tex(const Statement& stmt)
 
 void ArbCode::emit_nvcond(const Statement& stmt)
 {
-  Variable dummy(new VariableNode(TEMP, stmt.src[0].size(), FLOAT));
+  Variable dummy(new VariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
   ArbInst updatecc(ARB_MOV, dummy, stmt.src[0]);
   updatecc.update_cc = true;
   m_instructions.push_back(updatecc);
@@ -605,7 +605,7 @@ void ArbCode::emit_csum(const Statement& stmt)
 
   // @todo type make this function handle more than floats
   VariantPtr c1_values = new DataVariant<float, HOST>(stmt.src[0].size(), 1.0f); 
-  Variable c1(new VariableNode(CONST, stmt.src[0].size(), FLOAT));
+  Variable c1(new VariableNode(SH_CONST, stmt.src[0].size(), SH_FLOAT));
   c1.setVariant(c1_values);
   m_shader->constants.push_back(c1.node());
   
@@ -615,7 +615,7 @@ void ArbCode::emit_csum(const Statement& stmt)
 void ArbCode::emit_cmul(const Statement& stmt)
 {
   // @todo use clone
-  Variable prod(new VariableNode(TEMP, 1, stmt.dest.valueType()));
+  Variable prod(new VariableNode(SH_TEMP, 1, stmt.dest.valueType()));
 
   // TODO: Could use vector mul here.
   
@@ -633,7 +633,7 @@ void ArbCode::emit_kil(const Statement& stmt)
 
 void ArbCode::emit_ret(const Statement& stmt)
 {
-  Variable dummy(new VariableNode(TEMP, stmt.src[0].size(), FLOAT));
+  Variable dummy(new VariableNode(SH_TEMP, stmt.src[0].size(), SH_FLOAT));
   ArbInst updatecc(ARB_MOV, dummy, stmt.src[0]);
   updatecc.update_cc = true;
   m_instructions.push_back(updatecc);
@@ -648,7 +648,7 @@ void ArbCode::emit_pal(const Statement& stmt)
 
 void ArbCode::emit_lit(const Statement& stmt)
 {
-  Variable tmp(new VariableNode(TEMP, stmt.dest.size(), FLOAT));
+  Variable tmp(new VariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
   ArbInst inst(ARB_LIT, tmp, stmt.src[0]);
   m_instructions.push_back(inst);
 
@@ -657,10 +657,10 @@ void ArbCode::emit_lit(const Statement& stmt)
 
 void ArbCode::emit_rnd(const Statement& stmt)
 {
-  Variable t(new VariableNode(TEMP, stmt.dest.size(), FLOAT));
+  Variable t(new VariableNode(SH_TEMP, stmt.dest.size(), SH_FLOAT));
   
   VariantPtr c1_values = new DataVariant<float, HOST>(stmt.src[0].size(), 0.5f); 
-  Variable c1(new VariableNode(CONST, stmt.src[0].size(), FLOAT));
+  Variable c1(new VariableNode(SH_CONST, stmt.src[0].size(), SH_FLOAT));
   c1.setVariant(c1_values);
   m_shader->constants.push_back(c1.node());
 
@@ -670,7 +670,7 @@ void ArbCode::emit_rnd(const Statement& stmt)
 
 void ArbCode::emit_cbrt(const Statement& stmt)
 {
-  Variable t(new VariableNode(TEMP, 1, FLOAT));
+  Variable t(new VariableNode(SH_TEMP, 1, SH_FLOAT));
   ConstAttrib1f c(3.0f);
   m_shader->constants.push_back(c.node());
 

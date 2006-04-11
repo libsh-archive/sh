@@ -16,7 +16,7 @@ my $COLOR_NORMAL = "[0m";
 my @SRC_DIRS = ('backends', 'src', 'test', 'examples');
 
 my %special_macros = (
-# control flow
+# control flow:
     "BEGIN"    => "SH_BEGIN",
     "END"      => "SH_END",
     "IF"       => "SH_IF",
@@ -32,6 +32,40 @@ my %special_macros = (
     "BREAK"    => "SH_BREAK",
     "CONTINUE" => "SH_CONTINUE",
     "RETURN"   => "SH_RETURN",
+# binding types:
+    "INPUT"    => "SH_INPUT",
+    "OUTPUT"   => "SH_OUTPUT",
+    "INOUT"    => "SH_INOUT",
+    "TEMP"     => "SH_TEMP",
+    "CONST"    => "SH_CONST",
+    "TEXTURE"  => "SH_TEXTURE",
+    "STREAM"   => "SH_STREAM",
+    "PALETTE"  => "SH_PALETTE",
+# semantic types:
+    "ATTRIB"   => "SH_ATTRIB",
+    "POINT"    => "SH_POINT",
+    "VECTOR"   => "SH_VECTOR",
+    "NORMAL"   => "SH_VECTOR",
+    "COLOR"    => "SH_COLOR",
+    "TEXCOORD" => "SH_TEXCOORD",
+    "POSITION" => "SH_POSITION",
+    "PLANE"    => "SH_PLANE",
+# storage types:
+    "HALF"     => "SH_HALF",
+    "FLOAT"    => "SH_FLOAT",
+    "DOUBLE"   => "SH_DOUBLE",
+    "BYTE"     => "SH_BYTE",
+    "SHORT"    => "SH_SHORT",
+    "INT"      => "SH_INT",
+    "UBYTE"    => "SH_UBYTE",
+    "USHORT"   => "SH_USHORT",
+    "UINT"     => "SH_UINT",
+    "FBYTE"    => "SH_FBYTE",
+    "FSHORT"   => "SH_FSHORT",
+    "FINT"     => "SH_FINT",
+    "FUBYTE"   => "SH_FUBYTE",
+    "FUSHORT"  => "SH_FUSHORT",
+    "FUINT"    => "SH_FUINT",
 # other:
     "ORT"      => "SHORT",
     "ADER"     => "SHADER",

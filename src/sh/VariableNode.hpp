@@ -49,7 +49,7 @@ SH_DLLEXPORT VariableNode : public virtual RefCountable,
 public:
   /// Constructs a VariableNode that holds a tuple of data of type 
   //given by the valueType.
-  VariableNode(BindingType kind, int size, ValueType valueType, SemanticType type = ATTRIB);
+  VariableNode(BindingType kind, int size, ValueType valueType, SemanticType type = SH_ATTRIB);
 
   virtual ~VariableNode();
 
@@ -58,7 +58,7 @@ public:
   //
   // If updateVarList is set to false, then the clone is not added to the
   // current ProgramNode's variable lists.  You *must* add it in manually 
-  // for INPUT/OUTPUT/INOUT types.
+  // for SH_INPUT/OUTPUT/SH_INOUT types.
   //
   // If keepUniform is set to false, then the new variable  
   // has m_uniform set to false even if the original m_uniform was true. 

@@ -50,25 +50,25 @@ struct InvalidStorageType {};
  * @{ */
 typedef unsigned int ValueType;
 enum __ValueTypeEnum {
-  HALF       = 0x0001, 
-  FLOAT      = 0x0002, 
-  DOUBLE     = 0x0003, 
+  SH_HALF       = 0x0001, 
+  SH_FLOAT      = 0x0002, 
+  SH_DOUBLE     = 0x0003, 
 
-  BYTE       = 0x0010,
-  SHORT      = 0x0011,
-  INT        = 0x0012,
+  SH_BYTE       = 0x0010,
+  SH_SHORT      = 0x0011,
+  SH_INT        = 0x0012,
 
-  UBYTE      = 0x0018,
-  USHORT     = 0x0019,
-  UINT       = 0x001A,
+  SH_UBYTE      = 0x0018,
+  SH_USHORT     = 0x0019,
+  SH_UINT       = 0x001A,
 
-  FBYTE      = 0x0020,
-  FSHORT     = 0x0021,
-  FINT       = 0x0022,
+  SH_FBYTE      = 0x0020,
+  SH_FSHORT     = 0x0021,
+  SH_FINT       = 0x0022,
 
-  FUBYTE     = 0x0028,
-  FUSHORT    = 0x0029,
-  FUINT      = 0x002A,
+  SH_FUBYTE     = 0x0028,
+  SH_FUSHORT    = 0x0029,
+  SH_FUINT      = 0x002A,
 
   I_HALF    = 0x0101,
   I_FLOAT   = 0x0102,
@@ -122,23 +122,23 @@ template<typename T> struct __StorageToValueType { static const ValueType type =
   template<> struct __ValueToStorageType<V >    { typedef T type; }; \
   template<> struct __StorageToValueType<T >    { static const ValueType type = V; }; 
 
-VALUE_STORAGE_TYPE_MAPPING(HALF,    Half); 
-VALUE_STORAGE_TYPE_MAPPING(FLOAT,   float); 
-VALUE_STORAGE_TYPE_MAPPING(DOUBLE,  double); 
+VALUE_STORAGE_TYPE_MAPPING(SH_HALF,    Half); 
+VALUE_STORAGE_TYPE_MAPPING(SH_FLOAT,   float); 
+VALUE_STORAGE_TYPE_MAPPING(SH_DOUBLE,  double); 
 
-VALUE_STORAGE_TYPE_MAPPING(BYTE,    char); 
-VALUE_STORAGE_TYPE_MAPPING(SHORT,   short); 
-VALUE_STORAGE_TYPE_MAPPING(INT,     int); 
-VALUE_STORAGE_TYPE_MAPPING(UBYTE,   unsigned char); 
-VALUE_STORAGE_TYPE_MAPPING(USHORT,  unsigned short); 
-VALUE_STORAGE_TYPE_MAPPING(UINT,    unsigned int); 
+VALUE_STORAGE_TYPE_MAPPING(SH_BYTE,    char); 
+VALUE_STORAGE_TYPE_MAPPING(SH_SHORT,   short); 
+VALUE_STORAGE_TYPE_MAPPING(SH_INT,     int); 
+VALUE_STORAGE_TYPE_MAPPING(SH_UBYTE,   unsigned char); 
+VALUE_STORAGE_TYPE_MAPPING(SH_USHORT,  unsigned short); 
+VALUE_STORAGE_TYPE_MAPPING(SH_UINT,    unsigned int); 
 
-VALUE_STORAGE_TYPE_MAPPING(FBYTE,   FracByte); 
-VALUE_STORAGE_TYPE_MAPPING(FSHORT,  FracShort); 
-VALUE_STORAGE_TYPE_MAPPING(FINT,    FracInt); 
-VALUE_STORAGE_TYPE_MAPPING(FUBYTE,  FracUByte); 
-VALUE_STORAGE_TYPE_MAPPING(FUSHORT, FracUShort); 
-VALUE_STORAGE_TYPE_MAPPING(FUINT,   FracUInt); 
+VALUE_STORAGE_TYPE_MAPPING(SH_FBYTE,   FracByte); 
+VALUE_STORAGE_TYPE_MAPPING(SH_FSHORT,  FracShort); 
+VALUE_STORAGE_TYPE_MAPPING(SH_FINT,    FracInt); 
+VALUE_STORAGE_TYPE_MAPPING(SH_FUBYTE,  FracUByte); 
+VALUE_STORAGE_TYPE_MAPPING(SH_FUSHORT, FracUShort); 
+VALUE_STORAGE_TYPE_MAPPING(SH_FUINT,   FracUInt); 
 
 // @}
 

@@ -58,7 +58,7 @@ Program noisify(bool useTexture) {
   Program kernel = SH_BEGIN_FRAGMENT_PROGRAM {
     InputAttrib1f DECL(noise_scale);
     typename T::InputType NAMEDECL(in, "result");
-    Attrib<N, INPUT, typename T::storage_type> NAMEDECL(tc, "texcoord");
+    Attrib<N, SH_INPUT, typename T::storage_type> NAMEDECL(tc, "texcoord");
 
     typename T::OutputType NAMEDECL(out, "result");
 

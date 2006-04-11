@@ -158,7 +158,7 @@ private:
   void allocConsts(const ArbLimits& limits);
 
   /// Allocate temporary registers (called by allocRegs)
-  /// half indicates whether to allocate the HALF or the FLOAT temporaries 
+  /// half indicates whether to allocate the SH_HALF or the SH_FLOAT temporaries 
   /// on this pass
   void allocTemps(const ArbLimits& limits, bool half);
 

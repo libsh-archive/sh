@@ -256,7 +256,7 @@ struct InitLiveCode {
 
     for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end(); ++I) {
 #ifdef DEBUG_OPTIMIZER
-      if(!I->dest.null() && I->dest.node()->kind() == TEMP && !p->hasDecl(I->dest.node())) {
+      if(!I->dest.null() && I->dest.node()->kind() == SH_TEMP && !p->hasDecl(I->dest.node())) {
         std::cerr << "No decl for " << I->dest.name() << std::endl;
       }
 #endif
@@ -265,7 +265,7 @@ struct InitLiveCode {
       // @todo range conditions here are probably too conservative for 
       // inputs, outputs used in computation -> use the valuetracking
       if (opInfo[I->op].result_source == OperationInfo::IGNORE
-          || I->dest.node()->kind() != TEMP
+          || I->dest.node()->kind() != SH_TEMP
           || I->dest.node()->uniform()
 //          || !p->hasDecl(I->dest.node())
           || I->op == OP_OPTBRA) {
@@ -331,7 +331,7 @@ struct CopyPropagator {
       
       if (I->op == OP_ASN
           && I->dest.node() != I->src[0].node()
-          && I->dest.node()->kind() == TEMP
+          && I->dest.node()->kind() == SH_TEMP
           && I->dest.swizzle().identity()
           && I->src[0].swizzle().identity()
 
@@ -406,7 +406,7 @@ struct ForwardSubst {
       removeAME(I->dest.node());
       
       if (!inRHS(I->dest.node(), *I)
-          && I->dest.node()->kind() == TEMP
+          && I->dest.node()->kind() == SH_TEMP
           && I->dest.swizzle().identity()) {
         m_ame.push_back(*I);
       }
@@ -418,7 +418,7 @@ struct ForwardSubst {
   {
     if (stmt.op != OP_ASN) return;
     if (stmt.src[0].neg()) return;
-    if (stmt.src[0].node()->kind() != TEMP) return;
+    if (stmt.src[0].node()->kind() != SH_TEMP) return;
     if (!stmt.src[0].swizzle().identity()) return;
     // Added to preserve casts
     if (stmt.dest.valueType() != stmt.src[0].valueType()) return;

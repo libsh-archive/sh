@@ -86,7 +86,7 @@ ValueTracking : public Info {
   
   struct Def {
     enum Kind {
-      INPUT,
+      SH_INPUT,
       STMT
     };
 
@@ -96,7 +96,7 @@ ValueTracking : public Info {
     }
 
     Def(const VariableNodePtr& node, int index)
-      : kind(INPUT), node(node), stmt(0), index(index) 
+      : kind(SH_INPUT), node(node), stmt(0), index(index) 
     {}
     
     Kind kind;
@@ -116,7 +116,7 @@ ValueTracking : public Info {
 
     int absIndex() const
     {
-      if(kind == INPUT) return index;
+      if(kind == SH_INPUT) return index;
       return stmt->dest.swizzle()[index];
     }
 
@@ -125,7 +125,7 @@ ValueTracking : public Info {
 
   struct Use {
     enum Kind {
-      OUTPUT,
+      SH_OUTPUT,
       STMT
     };
 
@@ -135,7 +135,7 @@ ValueTracking : public Info {
     }
 
     Use(const VariableNodePtr& node, int index)
-      : kind(OUTPUT), node(node), stmt(0), source(0), index(index)
+      : kind(SH_OUTPUT), node(node), stmt(0), source(0), index(index)
     {
     }
 
@@ -153,7 +153,7 @@ ValueTracking : public Info {
 
     int absIndex() const
     {
-      if(kind == OUTPUT) return index;
+      if(kind == SH_OUTPUT) return index;
       return stmt->src[source].swizzle()[index];
     }
 

@@ -57,7 +57,7 @@ Generic<2, T> gradient(const Generic<1, T>& var);
 /** Jacobian matrix
  */
 template<int N, typename T>
-Matrix<2, N, TEMP, T> jacobian(const Generic<N, T>& var);
+Matrix<2, N, SH_TEMP, T> jacobian(const Generic<N, T>& var);
 
 /*@}*/
 

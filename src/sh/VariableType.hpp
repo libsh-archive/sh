@@ -43,14 +43,14 @@ namespace SH {
 /** The various ways variables can be bound.
  */
 enum BindingType {
-  INPUT, 
-  OUTPUT, 
-  INOUT,
-  TEMP,
-  CONST, 
-  TEXTURE, 
-  STREAM, 
-  PALETTE, 
+  SH_INPUT, 
+  SH_OUTPUT, 
+  SH_INOUT,
+  SH_TEMP,
+  SH_CONST, 
+  SH_TEXTURE, 
+  SH_STREAM, 
+  SH_PALETTE, 
 
   BINDINGTYPE_END
 };
@@ -60,14 +60,14 @@ SH_DLLEXPORT extern const char* bindingTypeName[];
 /** The various ways semantic types for variables.
  */
 enum SemanticType {
-  ATTRIB,
-  POINT,
-  VECTOR,
-  NORMAL,
-  COLOR,
-  TEXCOORD,
-  POSITION,
-  PLANE,
+  SH_ATTRIB,
+  SH_POINT,
+  SH_VECTOR,
+  SH_VECTOR,
+  SH_COLOR,
+  SH_TEXCOORD,
+  SH_POSITION,
+  SH_PLANE,
   
   SEMANTICTYPE_END
 };

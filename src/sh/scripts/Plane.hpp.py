@@ -6,7 +6,7 @@ common.guard("SHPLANE_HPP")
 common.inprint('#include "Attrib.hpp"')
 common.namespace()
 
-decl = semantic.Class("Plane", "plane", "PLANE",
+decl = semantic.Class("Plane", "plane", "SH_PLANE",
                       """An n-plane.
 """)
 

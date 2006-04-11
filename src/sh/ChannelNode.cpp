@@ -23,7 +23,7 @@
 namespace SH {
 
 ChannelNode::ChannelNode(SemanticType specType, int elements, ValueType valueType)
-  : VariableNode(STREAM, elements, valueType),
+  : VariableNode(SH_STREAM, elements, valueType),
     m_memory(0), m_count(0), m_stride(1), m_offset(0)
 {
   specialType(specType);
@@ -31,7 +31,7 @@ ChannelNode::ChannelNode(SemanticType specType, int elements, ValueType valueTyp
 
 ChannelNode::ChannelNode(SemanticType specType, int elements, ValueType valueType,
                              const MemoryPtr& memory, int count)
-  : VariableNode(STREAM, elements, valueType),
+  : VariableNode(SH_STREAM, elements, valueType),
     m_memory(memory), m_count(count), m_stride(1), m_offset(0)
 {
   specialType(specType);

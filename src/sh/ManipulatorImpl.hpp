@@ -120,7 +120,7 @@ Program operator<<(const Program &p, const Manipulator<T> &m) {
     std::vector<Variable> outputs;
     for(ProgramNode::VarList::const_iterator inIt = p.node()->inputs.begin();
         inIt != p.node()->inputs.end(); ++inIt) {
-      Variable out((*inIt)->clone(OUTPUT));
+      Variable out((*inIt)->clone(SH_OUTPUT));
       outputs.push_back(out);
     }
 
@@ -150,7 +150,7 @@ Program operator<<(const Program &p, const Manipulator<T> &m) {
         }
         used[i] = true;
 
-        Variable input(outputs[i].node()->clone(INPUT));
+        Variable input(outputs[i].node()->clone(SH_INPUT));
         shASN(outputs[i], input);
       }
     }
@@ -169,7 +169,7 @@ Program operator<<(const Manipulator<T> &m, const Program &p) {
     std::vector<Variable> inputs;
     for(ProgramNode::VarList::const_iterator outIt = p.node()->outputs.begin();
         outIt != p.node()->outputs.end(); ++outIt) {
-      Variable in((*outIt)->clone(INPUT));
+      Variable in((*outIt)->clone(SH_INPUT));
       inputs.push_back(in);
     }
 
@@ -190,7 +190,7 @@ Program operator<<(const Manipulator<T> &m, const Program &p) {
       }
 
       for(int i = start; i <= end; ++i) { // handles end < start case
-        Variable output(inputs[i].node()->clone(OUTPUT));
+        Variable output(inputs[i].node()->clone(SH_OUTPUT));
         shASN(output, inputs[i]);
       }
     }

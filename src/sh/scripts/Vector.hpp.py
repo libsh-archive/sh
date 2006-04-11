@@ -6,7 +6,7 @@ common.guard("SHVECTOR_HPP")
 common.inprint('#include "Attrib.hpp"')
 common.namespace()
 
-decl = semantic.Class("Vector", "vector", "VECTOR",
+decl = semantic.Class("Vector", "vector", "SH_VECTOR",
                       """A (geometric) n-vector.
 
 By "vector" we mean a geometric vector, not just a tuple or an

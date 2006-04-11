@@ -88,19 +88,19 @@ struct CommonType {
   static const ValueType V1 = StorageTypeInfo<T1>::value_type;
   static const ValueType V2 = StorageTypeInfo<T2>::value_type;
 
-  static const bool eitherDouble = V1 == DOUBLE || V2 == DOUBLE; 
-  static const bool eitherFloat = V1 == FLOAT || V2 == FLOAT; 
+  static const bool eitherDouble = V1 == SH_DOUBLE || V2 == SH_DOUBLE; 
+  static const bool eitherFloat = V1 == SH_FLOAT || V2 == SH_FLOAT; 
   static const bool eitherFraction = IsFraction<T1>::matches || IsFraction<T2>::matches;
-  static const bool bothHalf = V1 == HALF && V2 == HALF;  
+  static const bool bothHalf = V1 == SH_HALF && V2 == SH_HALF;  
 
   static const ValueType value_type = 
           (eitherDouble ?
-            DOUBLE :
+            SH_DOUBLE :
           ((eitherFloat || eitherFraction) ?
-            FLOAT :
+            SH_FLOAT :
           (bothHalf ?
-            HALF :
-            INT)));
+            SH_HALF :
+            SH_INT)));
 
   typedef typename ValueTypeInfo<value_type>::storage_type type;
 };

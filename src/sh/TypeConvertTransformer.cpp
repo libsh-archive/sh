@@ -52,11 +52,11 @@ namespace SH {
 //
 // Algorithm: 
 // 1) Identify variables of the following types that are not float  
-//   INPUT = 0,
-//   OUTPUT = 1,
-//   INOUT = 2,
-//   TEMP = 3,
-//   CONST = 4,
+//   SH_INPUT = 0,
+//   SH_OUTPUT = 1,
+//   SH_INOUT = 2,
+//   SH_TEMP = 3,
+//   SH_CONST = 4,
 //   
 //   Add a replacement to an VarMap
 //
@@ -115,9 +115,9 @@ namespace SH {
 // and have storage formats that vary more with
 // the backend. 
 //
-//   TEXTURE = 5,
+//   SH_TEXTURE = 5,
 //  
-//   STREAM = 
+//   SH_STREAM = 
 struct FloatConverter {
   FloatConverter(Transformer::ValueTypeMap &valueTypeMap, VarMap &converts, bool preserve_casts)
     : m_valueTypeMap(valueTypeMap), m_converts(converts), m_eval(Eval::instance()), m_preserve_casts(preserve_casts)
@@ -236,24 +236,24 @@ struct FloatConverter {
 
     if (operations) {
       // make another temp in case one of var/result is an IN/OUT and hence cannot be used in computation 
-      Variable temp(var.node()->clone(TEMP, var.size(), VALUETYPE_END, SEMANTICTYPE_END, false, false));
+      Variable temp(var.node()->clone(SH_TEMP, var.size(), VALUETYPE_END, SEMANTICTYPE_END, false, false));
 
       stmtList.insert(I, Statement(temp, OP_ASN, var));
 
       if(operations & APPLY_MAX_1) {
-        Variable one(var.node()->clone(CONST, 1, VALUETYPE_END, SEMANTICTYPE_END, false, false));
+        Variable one(var.node()->clone(SH_CONST, 1, VALUETYPE_END, SEMANTICTYPE_END, false, false));
         one.setVariant(variantFactory(var.valueType())->generateOne());
         stmtList.insert(I, Statement(temp, temp, OP_MAX, one)); 
       }
 
       if(operations & APPLY_MAX0)  {
-        Variable zero(var.node()->clone(CONST, 1, VALUETYPE_END, SEMANTICTYPE_END, false, false));
+        Variable zero(var.node()->clone(SH_CONST, 1, VALUETYPE_END, SEMANTICTYPE_END, false, false));
         zero.setVariant(variantFactory(var.valueType())->generateZero());
         stmtList.insert(I, Statement(temp, temp, OP_MAX, zero)); 
       }
 
       if(operations & APPLY_MIN1)  {
-        Variable one(var.node()->clone(CONST, 1, VALUETYPE_END, SEMANTICTYPE_END, false, false));
+        Variable one(var.node()->clone(SH_CONST, 1, VALUETYPE_END, SEMANTICTYPE_END, false, false));
         one.setVariant(variantFactory(var.valueType())->generateOne());
         stmtList.insert(I, Statement(temp, temp, OP_MIN, one)); 
       }
@@ -350,7 +350,7 @@ struct FloatConverter {
       // involved are converted if their type is in m_valueTypeMap
       ValueType tempValueType = opValueType;
       if(m_valueTypeMap.count(tempValueType) > 0) tempValueType = m_valueTypeMap[tempValueType];
-      Variable temp(stmt.src[i].node()->clone(TEMP, stmt.src[i].size(), tempValueType, SEMANTICTYPE_END, false, false));
+      Variable temp(stmt.src[i].node()->clone(SH_TEMP, stmt.src[i].size(), tempValueType, SEMANTICTYPE_END, false, false));
 
       VariableNodePtr varNode = stmt.src[i].node();
       if(m_converts.count(varNode) > 0) varNode = m_converts[varNode];
@@ -381,7 +381,7 @@ struct FloatConverter {
 
       ValueType tempValueType = opDest;
       if(m_valueTypeMap.count(tempValueType) > 0) tempValueType = m_valueTypeMap[tempValueType];
-      Variable temp(stmt.dest.node()->clone(TEMP, stmt.dest.size(), tempValueType, SEMANTICTYPE_END, false, false));
+      Variable temp(stmt.dest.node()->clone(SH_TEMP, stmt.dest.size(), tempValueType, SEMANTICTYPE_END, false, false));
 
       VariableNodePtr varNode = stmt.dest.node();
       if(m_converts.count(varNode) > 0) varNode = m_converts[varNode];

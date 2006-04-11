@@ -63,9 +63,9 @@ namespace SH {
 template<int D, typename T>
 struct Generator {
   Generator() {}
-  Attrib<D, TEMP, T> pos; // position 
-  Attrib<D, TEMP, T> offset; // offset of the cell relative to lookup point's cell
-  Attrib<D, TEMP, T> cell; // integer cell (this should actually be typed T = int, but not possible yet) 
+  Attrib<D, SH_TEMP, T> pos; // position 
+  Attrib<D, SH_TEMP, T> offset; // offset of the cell relative to lookup point's cell
+  Attrib<D, SH_TEMP, T> cell; // integer cell (this should actually be typed T = int, but not possible yet) 
 };
 
 // Generator Factory 

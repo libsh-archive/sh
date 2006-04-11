@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
 
   HostMemoryPtr mem[3];
   for (int i = 0; i < 3; ++i) {
-    mem[i] = new HostMemory(sizeof(float)*ELEMENTS, FLOAT);
+    mem[i] = new HostMemory(sizeof(float)*ELEMENTS, SH_FLOAT);
   }
   
   Channel<Attrib1f> a(mem[0], ELEMENTS),

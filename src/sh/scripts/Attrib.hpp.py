@@ -12,7 +12,7 @@ common.inprint('#  include "Generic.hpp"')
 common.inprint('#endif');
 common.namespace()
 
-decl = semantic.Class("Attrib", "attribute", "ATTRIB",
+decl = semantic.Class("Attrib", "attribute", "SH_ATTRIB",
                       """A generic attribute (or parameter) holding N values.
 
 The reason we have the Swizzle template argument is so that

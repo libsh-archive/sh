@@ -28,9 +28,9 @@ namespace SH {
 template<int N, typename T>
 Generic<N, T> bernstein(const Generic<1, T>& a)
 {
-  Attrib<N, TEMP, T> result;
+  Attrib<N, SH_TEMP, T> result;
   if (4 == N) {
-    Attrib<1, TEMP, T> it = Attrib<1,TEMP, T>(1.0f) - a;
+    Attrib<1, SH_TEMP, T> it = Attrib<1,SH_TEMP, T>(1.0f) - a;
     result(0) = it*it*it;
     result(1) = 3.0*it*it*a;
     result(2) = 3.0*it*a*a;
@@ -49,8 +49,8 @@ Generic<N, T> bernstein(const Generic<1, T>& a)
 template <int N, typename T>
 Generic<N, T> bezier(const Generic<1, T>& t, const Generic<N, T>& p)
 {
-  Attrib<N, TEMP, T> B = bernstein<N>(t(0));
-  Attrib<N, TEMP, T> r;
+  Attrib<N, SH_TEMP, T> B = bernstein<N>(t(0));
+  Attrib<N, SH_TEMP, T> r;
   r(0) = B[0] * p[0];
   for (int i=1; i < N; i++) {
     r(i) = B[i] * p[i];
@@ -63,7 +63,7 @@ Generic<N, T> hermite(const Generic<1, T>& a, const Generic<N, T>& b,
                         const Generic<N, T>& c, const Generic<N, T>& d, 
                         const Generic<N, T>& e)
 {
-  Attrib<N, TEMP, T> result;
+  Attrib<N, SH_TEMP, T> result;
 
   // TODO: implement the real thing
   DEBUG_WARN("hermite is not implemented yet");

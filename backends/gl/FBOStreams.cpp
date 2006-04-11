@@ -332,10 +332,10 @@ void FBOStreams::execute(const ProgramNodeCPtr& program_const,
       TextureTraits traits = ArrayTraits();
       TextureDims dims;
       if (m_float_extension == ARB_NV_FLOAT_BUFFER) {
-        dims = TEXTURE_RECT;
+        dims = SH_TEXTURE_RECT;
       }
       else {
-        dims = TEXTURE_2D;
+        dims = SH_TEXTURE_2D;
       }
       tex = new TextureNode(dims, (*dest_iter)->size(), 
                               (*dest_iter)->valueType(), traits,

@@ -51,11 +51,11 @@ public:
   static const int cols = Cols;
   static const int typesize = Rows * Cols;
 
-  typedef Matrix<Rows, Cols, INPUT, T> InputType;
-  typedef Matrix<Rows, Cols, OUTPUT, T> OutputType;
-  typedef Matrix<Rows, Cols, INOUT, T> InOutType;
-  typedef Matrix<Rows, Cols, TEMP, T> TempType;
-  typedef Matrix<Rows, Cols, CONST, T> ConstType;
+  typedef Matrix<Rows, Cols, SH_INPUT, T> InputType;
+  typedef Matrix<Rows, Cols, SH_OUTPUT, T> OutputType;
+  typedef Matrix<Rows, Cols, SH_INOUT, T> InOutType;
+  typedef Matrix<Rows, Cols, SH_TEMP, T> TempType;
+  typedef Matrix<Rows, Cols, SH_CONST, T> ConstType;
 
   /** \brief Identity constructor.
    *
@@ -158,7 +158,7 @@ public:
    *
    * Return a copy of this matrix not containing the given row and column.
    */
-  Matrix<Rows - 1, Cols -1, TEMP, T> subMatrix(int,int) const;
+  Matrix<Rows - 1, Cols -1, SH_TEMP, T> subMatrix(int,int) const;
 
   void setTranslation(const Generic<Rows-1, T>& trans);
   
@@ -272,84 +272,84 @@ public:
    * Retrieve a matrix consisting of these rows and the given columns.
    */
   //@{
-  Matrix<Rows, Cols, TEMP, T> operator()() const; ///< Identity swizzle
-  Matrix<Rows, 1, TEMP, T> operator()(int) const;
-  Matrix<Rows, 2, TEMP, T> operator()(int, int) const;
-  Matrix<Rows, 3, TEMP, T> operator()(int, int, int) const;
-  Matrix<Rows, 4, TEMP, T> operator()(int, int, int, int) const;
+  Matrix<Rows, Cols, SH_TEMP, T> operator()() const; ///< Identity swizzle
+  Matrix<Rows, 1, SH_TEMP, T> operator()(int) const;
+  Matrix<Rows, 2, SH_TEMP, T> operator()(int, int) const;
+  Matrix<Rows, 3, SH_TEMP, T> operator()(int, int, int) const;
+  Matrix<Rows, 4, SH_TEMP, T> operator()(int, int, int, int) const;
   //@}
 private:
-  Attrib<Cols, TEMP, T> m_data[Rows];
+  Attrib<Cols, SH_TEMP, T> m_data[Rows];
 };
 
 
-typedef Matrix<1, 1, INPUT, float> InputMatrix1x1f;
-typedef Matrix<1, 1, OUTPUT, float> OutputMatrix1x1f;
-typedef Matrix<1, 1, INOUT, float> InOutMatrix1x1f;
-typedef Matrix<1, 1, TEMP, float> Matrix1x1f;
-typedef Matrix<1, 2, INPUT, float> InputMatrix1x2f;
-typedef Matrix<1, 2, OUTPUT, float> OutputMatrix1x2f;
-typedef Matrix<1, 2, INOUT, float> InOutMatrix1x2f;
-typedef Matrix<1, 2, TEMP, float> Matrix1x2f;
-typedef Matrix<1, 3, INPUT, float> InputMatrix1x3f;
-typedef Matrix<1, 3, OUTPUT, float> OutputMatrix1x3f;
-typedef Matrix<1, 3, INOUT, float> InOutMatrix1x3f;
-typedef Matrix<1, 3, TEMP, float> Matrix1x3f;
-typedef Matrix<1, 4, INPUT, float> InputMatrix1x4f;
-typedef Matrix<1, 4, OUTPUT, float> OutputMatrix1x4f;
-typedef Matrix<1, 4, INOUT, float> InOutMatrix1x4f;
-typedef Matrix<1, 4, TEMP, float> Matrix1x4f;
+typedef Matrix<1, 1, SH_INPUT, float> InputMatrix1x1f;
+typedef Matrix<1, 1, SH_OUTPUT, float> OutputMatrix1x1f;
+typedef Matrix<1, 1, SH_INOUT, float> InOutMatrix1x1f;
+typedef Matrix<1, 1, SH_TEMP, float> Matrix1x1f;
+typedef Matrix<1, 2, SH_INPUT, float> InputMatrix1x2f;
+typedef Matrix<1, 2, SH_OUTPUT, float> OutputMatrix1x2f;
+typedef Matrix<1, 2, SH_INOUT, float> InOutMatrix1x2f;
+typedef Matrix<1, 2, SH_TEMP, float> Matrix1x2f;
+typedef Matrix<1, 3, SH_INPUT, float> InputMatrix1x3f;
+typedef Matrix<1, 3, SH_OUTPUT, float> OutputMatrix1x3f;
+typedef Matrix<1, 3, SH_INOUT, float> InOutMatrix1x3f;
+typedef Matrix<1, 3, SH_TEMP, float> Matrix1x3f;
+typedef Matrix<1, 4, SH_INPUT, float> InputMatrix1x4f;
+typedef Matrix<1, 4, SH_OUTPUT, float> OutputMatrix1x4f;
+typedef Matrix<1, 4, SH_INOUT, float> InOutMatrix1x4f;
+typedef Matrix<1, 4, SH_TEMP, float> Matrix1x4f;
 
-typedef Matrix<2, 1, INPUT, float> InputMatrix2x1f;
-typedef Matrix<2, 1, OUTPUT, float> OutputMatrix2x1f;
-typedef Matrix<2, 1, INOUT, float> InOutMatrix2x1f;
-typedef Matrix<2, 1, TEMP, float> Matrix2x1f;
-typedef Matrix<2, 2, INPUT, float> InputMatrix2x2f;
-typedef Matrix<2, 2, OUTPUT, float> OutputMatrix2x2f;
-typedef Matrix<2, 2, INOUT, float> InOutMatrix2x2f;
-typedef Matrix<2, 2, TEMP, float> Matrix2x2f;
-typedef Matrix<2, 3, INPUT, float> InputMatrix2x3f;
-typedef Matrix<2, 3, OUTPUT, float> OutputMatrix2x3f;
-typedef Matrix<2, 3, INOUT, float> InOutMatrix2x3f;
-typedef Matrix<2, 3, TEMP, float> Matrix2x3f;
-typedef Matrix<2, 4, INPUT, float> InputMatrix2x4f;
-typedef Matrix<2, 4, OUTPUT, float> OutputMatrix2x4f;
-typedef Matrix<2, 4, INOUT, float> InOutMatrix2x4f;
-typedef Matrix<2, 4, TEMP, float> Matrix2x4f;
+typedef Matrix<2, 1, SH_INPUT, float> InputMatrix2x1f;
+typedef Matrix<2, 1, SH_OUTPUT, float> OutputMatrix2x1f;
+typedef Matrix<2, 1, SH_INOUT, float> InOutMatrix2x1f;
+typedef Matrix<2, 1, SH_TEMP, float> Matrix2x1f;
+typedef Matrix<2, 2, SH_INPUT, float> InputMatrix2x2f;
+typedef Matrix<2, 2, SH_OUTPUT, float> OutputMatrix2x2f;
+typedef Matrix<2, 2, SH_INOUT, float> InOutMatrix2x2f;
+typedef Matrix<2, 2, SH_TEMP, float> Matrix2x2f;
+typedef Matrix<2, 3, SH_INPUT, float> InputMatrix2x3f;
+typedef Matrix<2, 3, SH_OUTPUT, float> OutputMatrix2x3f;
+typedef Matrix<2, 3, SH_INOUT, float> InOutMatrix2x3f;
+typedef Matrix<2, 3, SH_TEMP, float> Matrix2x3f;
+typedef Matrix<2, 4, SH_INPUT, float> InputMatrix2x4f;
+typedef Matrix<2, 4, SH_OUTPUT, float> OutputMatrix2x4f;
+typedef Matrix<2, 4, SH_INOUT, float> InOutMatrix2x4f;
+typedef Matrix<2, 4, SH_TEMP, float> Matrix2x4f;
 
-typedef Matrix<3, 1, INPUT, float> InputMatrix3x1f;
-typedef Matrix<3, 1, OUTPUT, float> OutputMatrix3x1f;
-typedef Matrix<3, 1, INOUT, float> InOutMatrix3x1f;
-typedef Matrix<3, 1, TEMP, float> Matrix3x1f;
-typedef Matrix<3, 2, INPUT, float> InputMatrix3x2f;
-typedef Matrix<3, 2, OUTPUT, float> OutputMatrix3x2f;
-typedef Matrix<3, 2, INOUT, float> InOutMatrix3x2f;
-typedef Matrix<3, 2, TEMP, float> Matrix3x2f;
-typedef Matrix<3, 3, INPUT, float> InputMatrix3x3f;
-typedef Matrix<3, 3, OUTPUT, float> OutputMatrix3x3f;
-typedef Matrix<3, 3, INOUT, float> InOutMatrix3x3f;
-typedef Matrix<3, 3, TEMP, float> Matrix3x3f;
-typedef Matrix<3, 4, INPUT, float> InputMatrix3x4f;
-typedef Matrix<3, 4, OUTPUT, float> OutputMatrix3x4f;
-typedef Matrix<3, 4, INOUT, float> InOutMatrix3x4f;
-typedef Matrix<3, 4, TEMP, float> Matrix3x4f;
+typedef Matrix<3, 1, SH_INPUT, float> InputMatrix3x1f;
+typedef Matrix<3, 1, SH_OUTPUT, float> OutputMatrix3x1f;
+typedef Matrix<3, 1, SH_INOUT, float> InOutMatrix3x1f;
+typedef Matrix<3, 1, SH_TEMP, float> Matrix3x1f;
+typedef Matrix<3, 2, SH_INPUT, float> InputMatrix3x2f;
+typedef Matrix<3, 2, SH_OUTPUT, float> OutputMatrix3x2f;
+typedef Matrix<3, 2, SH_INOUT, float> InOutMatrix3x2f;
+typedef Matrix<3, 2, SH_TEMP, float> Matrix3x2f;
+typedef Matrix<3, 3, SH_INPUT, float> InputMatrix3x3f;
+typedef Matrix<3, 3, SH_OUTPUT, float> OutputMatrix3x3f;
+typedef Matrix<3, 3, SH_INOUT, float> InOutMatrix3x3f;
+typedef Matrix<3, 3, SH_TEMP, float> Matrix3x3f;
+typedef Matrix<3, 4, SH_INPUT, float> InputMatrix3x4f;
+typedef Matrix<3, 4, SH_OUTPUT, float> OutputMatrix3x4f;
+typedef Matrix<3, 4, SH_INOUT, float> InOutMatrix3x4f;
+typedef Matrix<3, 4, SH_TEMP, float> Matrix3x4f;
 
-typedef Matrix<4, 1, INPUT, float> InputMatrix4x1f;
-typedef Matrix<4, 1, OUTPUT, float> OutputMatrix4x1f;
-typedef Matrix<4, 1, INOUT, float> InOutMatrix4x1f;
-typedef Matrix<4, 1, TEMP, float> Matrix4x1f;
-typedef Matrix<4, 2, INPUT, float> InputMatrix4x2f;
-typedef Matrix<4, 2, OUTPUT, float> OutputMatrix4x2f;
-typedef Matrix<4, 2, INOUT, float> InOutMatrix4x2f;
-typedef Matrix<4, 2, TEMP, float> Matrix4x2f;
-typedef Matrix<4, 3, INPUT, float> InputMatrix4x3f;
-typedef Matrix<4, 3, OUTPUT, float> OutputMatrix4x3f;
-typedef Matrix<4, 3, INOUT, float> InOutMatrix4x3f;
-typedef Matrix<4, 3, TEMP, float> Matrix4x3f;
-typedef Matrix<4, 4, INPUT, float> InputMatrix4x4f;
-typedef Matrix<4, 4, OUTPUT, float> OutputMatrix4x4f;
-typedef Matrix<4, 4, INOUT, float> InOutMatrix4x4f;
-typedef Matrix<4, 4, TEMP, float> Matrix4x4f;
+typedef Matrix<4, 1, SH_INPUT, float> InputMatrix4x1f;
+typedef Matrix<4, 1, SH_OUTPUT, float> OutputMatrix4x1f;
+typedef Matrix<4, 1, SH_INOUT, float> InOutMatrix4x1f;
+typedef Matrix<4, 1, SH_TEMP, float> Matrix4x1f;
+typedef Matrix<4, 2, SH_INPUT, float> InputMatrix4x2f;
+typedef Matrix<4, 2, SH_OUTPUT, float> OutputMatrix4x2f;
+typedef Matrix<4, 2, SH_INOUT, float> InOutMatrix4x2f;
+typedef Matrix<4, 2, SH_TEMP, float> Matrix4x2f;
+typedef Matrix<4, 3, SH_INPUT, float> InputMatrix4x3f;
+typedef Matrix<4, 3, SH_OUTPUT, float> OutputMatrix4x3f;
+typedef Matrix<4, 3, SH_INOUT, float> InOutMatrix4x3f;
+typedef Matrix<4, 3, SH_TEMP, float> Matrix4x3f;
+typedef Matrix<4, 4, SH_INPUT, float> InputMatrix4x4f;
+typedef Matrix<4, 4, SH_OUTPUT, float> OutputMatrix4x4f;
+typedef Matrix<4, 4, SH_INOUT, float> InOutMatrix4x4f;
+typedef Matrix<4, 4, SH_TEMP, float> Matrix4x4f;
 
 }
 

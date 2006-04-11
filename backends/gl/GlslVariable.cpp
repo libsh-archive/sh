@@ -110,8 +110,8 @@ const GlslVariable::ArbToGlslEntry arb_to_glsl_table[] = {
 
 GlslVariable::GlslVariable()
   : m_attribute(-1), m_builtin(false), m_texture(false), m_palette(false), 
-    m_uniform(false), m_name(""), m_size(0), m_dims(TEXTURE_1D), m_length(0), 
-    m_kind(TEMP), m_type(FLOAT), m_semantic_type(ATTRIB), m_values("")
+    m_uniform(false), m_name(""), m_size(0), m_dims(SH_TEXTURE_1D), m_length(0), 
+    m_kind(SH_TEMP), m_type(SH_FLOAT), m_semantic_type(SH_ATTRIB), m_values("")
 {
 }
 
@@ -125,7 +125,7 @@ GlslVariable::GlslVariable(const GlslVariable& v)
 
 GlslVariable::GlslVariable(const VariableNodePtr& v)
   : m_attribute(-1), m_builtin(!v->meta("opengl:state").empty()), 
-    m_texture(TEXTURE == v->kind()), m_palette(PALETTE == v->kind()),
+    m_texture(SH_TEXTURE == v->kind()), m_palette(SH_PALETTE == v->kind()),
     m_uniform(m_texture || m_palette || v->uniform()),
     m_name(v->meta("opengl:state")), m_size(v->size()), m_kind(v->kind()), 
     m_type(v->valueType()), m_semantic_type(v->specialType())
@@ -138,7 +138,7 @@ GlslVariable::GlslVariable(const VariableNodePtr& v)
     replace(m_values.begin(), m_values.end(), ';', ',');
 
     // Scalar constants are not assigned a variable
-    if ((1 == m_size) && (CONST == m_kind)) {
+    if ((1 == m_size) && (SH_CONST == m_kind)) {
       m_name = type_string() + "(" + m_values + ")";
       m_builtin = true;
     }
@@ -159,7 +159,7 @@ string GlslVariable::declaration() const
   stringstream s;
   string type = type_string();
 
-  if (m_kind == CONST) {
+  if (m_kind == SH_CONST) {
     s << "const ";
   }
 
@@ -191,28 +191,28 @@ void GlslVariable::name(int i, enum GlslProgramType unit)
   } 
   else {
     switch (m_kind) {
-    case INPUT:
+    case SH_INPUT:
       varname << "var_i";
       break;
-    case OUTPUT:
+    case SH_OUTPUT:
       varname << "var_o";
       break;
-    case INOUT:
+    case SH_INOUT:
       varname << "var_io";
       break;
-    case TEMP:
+    case SH_TEMP:
       varname << "var_t";
       break;
-    case CONST:
+    case SH_CONST:
       varname << "var_c";
       break;
-    case TEXTURE:
+    case SH_TEXTURE:
       varname << "var_tex";
       break;
-    case STREAM:
+    case SH_STREAM:
       varname << "var_s";
       break;
-    case PALETTE:
+    case SH_PALETTE:
       varname << "var_p";
       break;
     case BINDINGTYPE_END:
@@ -228,7 +228,7 @@ void GlslVariable::name(int i, enum GlslProgramType unit)
 
 void GlslVariable::attribute(int index)
 {
-  DEBUG_ASSERT(FLOAT == m_type); // only float inputs are allowed
+  DEBUG_ASSERT(SH_FLOAT == m_type); // only float inputs are allowed
   stringstream name;
   name << "attrib" << index;
   m_name = name.str();
@@ -254,19 +254,19 @@ string GlslVariable::type_string() const
     stringstream s;
     s << "sampler";
     switch (m_dims) {
-    case TEXTURE_1D:
+    case SH_TEXTURE_1D:
       s << "1D";
       break;
-    case TEXTURE_2D:
+    case SH_TEXTURE_2D:
       s << "2D";
       break;
-    case TEXTURE_3D:
+    case SH_TEXTURE_3D:
       s << "3D";
       break;
-    case TEXTURE_CUBE:
+    case SH_TEXTURE_CUBE:
       s << "Cube";
       break;
-    case TEXTURE_RECT:
+    case SH_TEXTURE_RECT:
       s << "2DRect";
       break;
     }

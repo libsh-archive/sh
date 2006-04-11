@@ -39,7 +39,7 @@ template<typename T>
 Generic<3, T> changeBasis(const Generic<3, T> &b0, const Generic<3, T> &b1,
                             const Generic<3, T> &b2, const Generic<3, T> &v)
 {
-  Attrib<3, TEMP, T> result;
+  Attrib<3, SH_TEMP, T> result;
   result(0) = b0 | v;
   result(1) = b1 | v;
   result(2) = b2 | v;

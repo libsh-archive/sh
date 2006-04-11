@@ -75,7 +75,7 @@ public:
    * update with any new variable transformations that it makes.
    *
    * @todo currently all or none approach to conversion.
-   * could parameterize this with flags to choose INPUT, OUTPUT, INOUT
+   * could parameterize this with flags to choose SH_INPUT, SH_OUTPUT, SH_INOUT
    */
   //@{
   friend struct InputOutputConvertor;

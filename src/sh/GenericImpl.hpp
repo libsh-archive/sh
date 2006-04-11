@@ -56,7 +56,7 @@ Generic<N, T>::~Generic()
 template<int N, typename T>
 template<typename T2>
 Generic<N, T>::Generic(const Generic<N, T2>& other)
-  : Variable(new VariableNode(TEMP, N, value_type, 
+  : Variable(new VariableNode(SH_TEMP, N, value_type, 
         other.node()->specialType()))
 {
   DEBUG_ASSERT(other.node());
@@ -360,7 +360,7 @@ Generic<1, T>::~Generic()
 template<typename T>
 template<typename T2>
 Generic<1, T>::Generic(const Generic<1, T2>& other)
-  : Variable(new VariableNode(TEMP, 1, value_type, other.node()->specialType()))
+  : Variable(new VariableNode(SH_TEMP, 1, value_type, other.node()->specialType()))
 {
   DEBUG_ASSERT(other.node());
   DEBUG_ASSERT(m_node);
@@ -393,7 +393,7 @@ Generic<1, T>& Generic<1, T>::operator=(const Generic<1, T2>& other)
 template<typename T>
 Generic<1, T>& Generic<1, T>::operator=(host_type other)
 {
-  shASN(*this, Attrib<1, CONST, T>(other));
+  shASN(*this, Attrib<1, SH_CONST, T>(other));
   return *this;
 }
 

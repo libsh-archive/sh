@@ -32,11 +32,11 @@ namespace SH {
  * An enumeration of the various ways textures can be laid out.
  */
 enum TextureDims {
-  TEXTURE_1D,   // Power of two
-  TEXTURE_2D,   // Power of two
-  TEXTURE_RECT, // Non power of two
-  TEXTURE_3D,   // Power of two, but depth may not be
-  TEXTURE_CUBE // 6 "2D" memory objects, power of two
+  SH_TEXTURE_1D,   // Power of two
+  SH_TEXTURE_2D,   // Power of two
+  SH_TEXTURE_RECT, // Non power of two
+  SH_TEXTURE_3D,   // Power of two, but depth may not be
+  SH_TEXTURE_CUBE // 6 "2D" memory objects, power of two
 };
 
 /** Cube map faces.
@@ -128,8 +128,8 @@ public:
   const TextureTraits& traits() const; // valid for all texture nodes
   TextureTraits& traits(); // valid for all texture nodes
   int width() const; // valid for all texture nodes
-  int height() const; // 1 for TEXTURE_1D
-  int depth() const; // 1 unless TEXTURE_3D
+  int height() const; // 1 for SH_TEXTURE_1D
+  int depth() const; // 1 unless SH_TEXTURE_3D
   int count() const; // number of elements  
   int mipmap_levels();
   int num_memories() const;

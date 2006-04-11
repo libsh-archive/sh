@@ -89,7 +89,7 @@ struct VariableSplitter {
 
   // returns true if variable split
   // does not add variable to Program's VarList, so this must be handled manually 
-  // (since this matters only for IN/OUT/INOUT types, splitVarList handles the
+  // (since this matters only for IN/OUT/SH_INOUT types, splitVarList handles the
   // insertions nicely)
   bool split(const VariableNodePtr& node)
   {
@@ -97,7 +97,7 @@ struct VariableSplitter {
     int n = node->size();
     if(n <= maxTuple ) return false;
     else if(splits.count(node) > 0) return true;
-    if( node->kind() == TEXTURE || node->kind() == STREAM ) {
+    if( node->kind() == SH_TEXTURE || node->kind() == SH_STREAM ) {
       error( TransformerException(
             "Long tuple support is not implemented for textures or streams"));
             
@@ -240,7 +240,7 @@ struct StatementSplitter {
   }
 
   VariableNodePtr resizeCloneNode(const VariableNodePtr& node, int newSize) {
-    return node->clone(TEMP, newSize, VALUETYPE_END, 
+    return node->clone(SH_TEMP, newSize, VALUETYPE_END, 
         SEMANTICTYPE_END, true, false);
   }
   // works on two assumptions
@@ -415,16 +415,16 @@ struct InputOutputConvertor {
 
   // Turn node into a temporary, but do not update var list and do not keep
   // uniform
-  VariableNodePtr cloneNode(const VariableNodePtr& node, const char* suffix, BindingType binding_type=TEMP) {
+  VariableNodePtr cloneNode(const VariableNodePtr& node, const char* suffix, BindingType binding_type=SH_TEMP) {
     VariableNodePtr result = node->clone(binding_type, 0, VALUETYPE_END, SEMANTICTYPE_END, false, false);
     result->name(node->name() + suffix); 
     return result;
   }
 
-  /* Convert all INOUT nodes that appear in a VarList (use std::for_each with this object)
+  /* Convert all SH_INOUT nodes that appear in a VarList (use std::for_each with this object)
    * (currently InOuts are always converted) */ 
   void operator()(const VariableNodePtr& node) {
-    if (node->kind() != INOUT || m_varMap.count(node) > 0) return;
+    if (node->kind() != SH_INOUT || m_varMap.count(node) > 0) return;
     m_varMap[node] = cloneNode(node, "_ioc-iot");
   }
 
@@ -434,7 +434,7 @@ struct InputOutputConvertor {
   {
     if(!stmt.dest.null()) {
       const VariableNodePtr &oldNode = stmt.dest.node();
-      if(oldNode->kind() == INPUT) { 
+      if(oldNode->kind() == SH_INPUT) { 
         if(m_varMap.count(oldNode) == 0) {
           m_varMap[oldNode] = cloneNode(oldNode, "_ioc-it");
         }
@@ -448,7 +448,7 @@ struct InputOutputConvertor {
     for(int i = 0; i < 3; ++i) {
       if(!stmt.src[i].null()) {
         const VariableNodePtr &oldNode = stmt.src[i].node();
-        if(oldNode->kind() == OUTPUT) { 
+        if(oldNode->kind() == SH_OUTPUT) { 
           if(m_varMap.count(oldNode) == 0) {
             m_varMap[oldNode] = cloneNode(oldNode, "_ioc-ot");
           }
@@ -468,19 +468,19 @@ struct InputOutputConvertor {
     for(VarMap::const_iterator it = m_varMap.begin(); it != m_varMap.end(); ++it) {
       // assign temporary to output
       VariableNodePtr oldNode = it->first; 
-      if(oldNode->kind() == OUTPUT) {
+      if(oldNode->kind() == SH_OUTPUT) {
         oldExit->block->addStatement(Statement(
               Variable(oldNode), OP_ASN, Variable(it->second)));
-      } else if(oldNode->kind() == INPUT) {
+      } else if(oldNode->kind() == SH_INPUT) {
         oldEntry->block->addStatement(Statement(
               Variable(it->second), OP_ASN, Variable(oldNode)));
       } else if(oldNode->uniform()) {
         oldEntry->block->addStatement(Statement(
           Variable(it->second), OP_ASN, Variable(oldNode)));
-      } else if(oldNode->kind() == INOUT) {
-        // replace INOUT nodes in input/output lists with INPUT and OUTPUT nodes
-        VariableNodePtr newInNode(cloneNode(oldNode, "_ioc-i", INPUT));
-        VariableNodePtr newOutNode(cloneNode(oldNode, "_ioc-o", OUTPUT));
+      } else if(oldNode->kind() == SH_INOUT) {
+        // replace SH_INOUT nodes in input/output lists with SH_INPUT and SH_OUTPUT nodes
+        VariableNodePtr newInNode(cloneNode(oldNode, "_ioc-i", SH_INPUT));
+        VariableNodePtr newOutNode(cloneNode(oldNode, "_ioc-o", SH_OUTPUT));
 
         std::replace(m_program->inputs.begin(), m_program->inputs.end(),
             oldNode, newInNode);
@@ -558,7 +558,7 @@ struct TextureLookupConverter {
   }
 
   VariableNodePtr cloneNode(const VariableNodePtr& node) {
-    return node->clone(TEMP, 0, VALUETYPE_END, SEMANTICTYPE_END, true, false);
+    return node->clone(SH_TEMP, 0, VALUETYPE_END, SEMANTICTYPE_END, true, false);
   }
 
   void convert(const BasicBlockPtr& block, BasicBlock::StmtList::iterator& I)
@@ -570,16 +570,16 @@ struct TextureLookupConverter {
     BasicBlock::StmtList newStmts;
     
     if (!tn) { DEBUG_ERROR("TEX Instruction from non-texture"); return; }
-    if (stmt.op == OP_TEX && tn->dims() == TEXTURE_RECT) {
+    if (stmt.op == OP_TEX && tn->dims() == SH_TEXTURE_RECT) {
       // TODO check typing
-      //Variable tc(new VariableNode(TEMP, tn->texSizeVar().size()));
+      //Variable tc(new VariableNode(SH_TEMP, tn->texSizeVar().size()));
       Variable tc(cloneNode(tn->texSizeVar().node()));
 
       newStmts.push_back(Statement(tc, stmt.src[1], OP_MUL, tn->texSizeVar()));
       newStmts.push_back(Statement(stmt.dest, stmt.src[0], OP_TEXI, tc));
-    } else if (stmt.op == OP_TEXI && tn->dims() != TEXTURE_RECT) {
+    } else if (stmt.op == OP_TEXI && tn->dims() != SH_TEXTURE_RECT) {
       // TODO check typing
-      //Variable tc(new VariableNode(TEMP, tn->texSizeVar().size()));
+      //Variable tc(new VariableNode(SH_TEMP, tn->texSizeVar().size()));
       Variable tc(cloneNode(tn->texSizeVar().node()));
 
       newStmts.push_back(Statement(tc, stmt.src[1], OP_DIV, tn->texSizeVar()));
@@ -638,7 +638,7 @@ void Transformer::stripDummyOps()
 VariableNodePtr allocate_constant(const Variable& dest, double constant)
 {
   const VariableNodePtr& dest_node = dest.node();
-  VariableNode* node = new VariableNode(CONST, dest_node->size(), 
+  VariableNode* node = new VariableNode(SH_CONST, dest_node->size(), 
                                             dest_node->valueType(), 
                                             dest_node->specialType());
     
@@ -653,9 +653,9 @@ VariableNodePtr allocate_constant(const Variable& dest, double constant)
 
 VariableNodePtr allocate_constant(unsigned int size, float* constants)
 {
-  VariableNode* node = new VariableNode(CONST, size,
-                                            FLOAT,
-                                            ATTRIB);
+  VariableNode* node = new VariableNode(SH_CONST, size,
+                                            SH_FLOAT,
+                                            SH_ATTRIB);
     
   DataVariant<float>* variant = new DataVariant<float>(size,
                                                            constants);
@@ -669,7 +669,7 @@ VariableNodePtr allocate_constant(unsigned int size, float* constants)
 VariableNodePtr allocate_temp(const Variable& dest)
 {
   const VariableNodePtr& dest_node = dest.node();
-  VariableNode* node = new VariableNode(TEMP, dest_node->size(), 
+  VariableNode* node = new VariableNode(SH_TEMP, dest_node->size(), 
                                             dest_node->valueType(), 
                                             dest_node->specialType());
   VariableNodePtr node_ptr = Pointer<VariableNode>(node);
@@ -679,7 +679,7 @@ VariableNodePtr allocate_temp(const Variable& dest)
 VariableNodePtr allocate_scalar_temp(const Variable& dest)
 {
   const VariableNodePtr& dest_node = dest.node();
-  VariableNode* node = new VariableNode(TEMP, 1, 
+  VariableNode* node = new VariableNode(SH_TEMP, 1, 
                                             dest_node->valueType(), 
                                             dest_node->specialType());
   VariableNodePtr node_ptr = Pointer<VariableNode>(node);
@@ -965,7 +965,7 @@ struct DestSwizzleOrdererBase : public TransformerParent
     if (I->dest.node() && !I->dest.swizzle().identity() && !ordered(I->dest.swizzle())) {
       BasicBlock::StmtList new_stmts;
 
-      Variable tmp1(new VariableNode(TEMP, I->dest.size(), I->dest.node()->valueType(), I->dest.node()->specialType()));
+      Variable tmp1(new VariableNode(SH_TEMP, I->dest.size(), I->dest.node()->valueType(), I->dest.node()->specialType()));
 
       // First, run the original statement, but into an
       // unmasked/swizzled temp.
@@ -1023,7 +1023,7 @@ struct RemoveWritemasksBase : public TransformerParent
     if (I->dest.node() && I->dest.swizzle().size() < I->dest.node()->size()) {
       BasicBlock::StmtList new_stmts;
 
-      Variable tmp1(new VariableNode(TEMP, I->dest.size(), I->dest.node()->valueType(), I->dest.node()->specialType()));
+      Variable tmp1(new VariableNode(SH_TEMP, I->dest.size(), I->dest.node()->valueType(), I->dest.node()->specialType()));
 
       // First, run the original statement, but into an
       // unmasked temp.

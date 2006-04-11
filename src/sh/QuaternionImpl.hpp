@@ -23,7 +23,7 @@ namespace SH {
 template<BindingType B, typename T>
 Quaternion<B, T>::Quaternion() 
 {
-  if (B == TEMP) 
+  if (B == SH_TEMP) 
     {
       m_data = Vector4f(1.0, 0.0, 0.0, 0.0);
       //m_data.setUnit(true);
@@ -39,7 +39,7 @@ Quaternion<B, T>::Quaternion(const Quaternion<B2, T>& other)
 
 template<BindingType B, typename T>
 template<BindingType B2>
-Quaternion<B, T>::Quaternion(const Attrib<4, B2, T, VECTOR>& values)
+Quaternion<B, T>::Quaternion(const Attrib<4, B2, T, SH_VECTOR>& values)
   : m_data(values)
 {
 }
@@ -47,7 +47,7 @@ Quaternion<B, T>::Quaternion(const Attrib<4, B2, T, VECTOR>& values)
 template<BindingType B, typename T>
 template<BindingType B2, BindingType B3>   
 Quaternion<B, T>::Quaternion(const Attrib<1, B2, T>& angle, 
-                                 const Attrib<3, B3, T, VECTOR>& axis)
+                                 const Attrib<3, B3, T, SH_VECTOR>& axis)
 {
   m_data(0) = cos(angle/2.0);
   m_data(1,2,3) = SH::normalize(axis);
@@ -175,7 +175,7 @@ Quaternion<B, T>::operator*=(const Attrib<1, B2, T>& right)
 template<BindingType B, typename T>
 template<BindingType B2>
 Quaternion<B, T>& 
-Quaternion<B, T>::operator*=(const Attrib<3, B2, T, VECTOR>& right) 
+Quaternion<B, T>::operator*=(const Attrib<3, B2, T, SH_VECTOR>& right) 
 {
   Vector4f v;
   v(0) = 0.0;
@@ -188,7 +188,7 @@ Quaternion<B, T>::operator*=(const Attrib<3, B2, T, VECTOR>& right)
 template<BindingType B, typename T>
 template<BindingType B2>
 Quaternion<B, T>& 
-Quaternion<B, T>::operator*=(const Attrib<3, B2, T, NORMAL>& right) 
+Quaternion<B, T>::operator*=(const Attrib<3, B2, T, SH_VECTOR>& right) 
 {
   Vector4f v;
   v(0) = 0.0;
@@ -200,25 +200,25 @@ Quaternion<B, T>::operator*=(const Attrib<3, B2, T, NORMAL>& right)
 
 template<BindingType B, typename T>
 template<BindingType B2>
-Attrib<1, TEMP, T> 
+Attrib<1, SH_TEMP, T> 
 Quaternion<B, T>::dot(const Quaternion<B2, T>& q) const 
 {
   return SH::dot(m_data, q.getVector());
 }
 
 template<BindingType B, typename T>
-Quaternion<TEMP, T> Quaternion<B, T>::conjugate() const 
+Quaternion<SH_TEMP, T> Quaternion<B, T>::conjugate() const 
 {
   Vector4f conjData;
   conjData(0) = m_data(0);
   conjData(1, 2, 3) = -m_data(1, 2, 3);
   //conjData.setUnit(m_data.isUnit());
 
-  return Quaternion<TEMP>(conjData);
+  return Quaternion<SH_TEMP>(conjData);
 }
 
 template<BindingType B, typename T>
-Quaternion<TEMP, T> Quaternion<B, T>::inverse() const 
+Quaternion<SH_TEMP, T> Quaternion<B, T>::inverse() const 
 {
   //  if (m_data.isUnit()) {
   //    return conjugate();
@@ -229,7 +229,7 @@ Quaternion<TEMP, T> Quaternion<B, T>::inverse() const
 }
 
 template<BindingType B, typename T>
-Matrix<4, 4, TEMP, T> Quaternion<B, T>::getMatrix() const
+Matrix<4, 4, SH_TEMP, T> Quaternion<B, T>::getMatrix() const
 {
   SH::Matrix4x4f m;
   Attrib4f x = m_data(1,1,1,1) * m_data(1,2,3,0);
@@ -252,14 +252,14 @@ Matrix<4, 4, TEMP, T> Quaternion<B, T>::getMatrix() const
 }
 
 template<BindingType B, typename T>
-Attrib<4, TEMP, T, VECTOR> Quaternion<B, T>::getVector() const
+Attrib<4, SH_TEMP, T, SH_VECTOR> Quaternion<B, T>::getVector() const
 {
   return m_data;
 }
 
 template<BindingType B, typename T>
 template<BindingType B2>
-Quaternion<TEMP, T> 
+Quaternion<SH_TEMP, T> 
 Quaternion<B, T>::operator+(const Quaternion<B2, T>& q)
 {
   Quaternion<B, T> r = *this;
@@ -268,7 +268,7 @@ Quaternion<B, T>::operator+(const Quaternion<B2, T>& q)
 
 template<BindingType B, typename T>
 template<BindingType B2>
-Quaternion<TEMP, T> 
+Quaternion<SH_TEMP, T> 
 Quaternion<B, T>::operator-(const Quaternion<B2, T>& q)
 {
   Quaternion<B, T> r = *this;
@@ -277,7 +277,7 @@ Quaternion<B, T>::operator-(const Quaternion<B2, T>& q)
   
 template<BindingType B, typename T>
 template<BindingType B2>
-Quaternion<TEMP, T> 
+Quaternion<SH_TEMP, T> 
 Quaternion<B, T>::operator*(const Quaternion<B2, T>& q)
 {
   Quaternion<B, T> r = *this;
@@ -286,7 +286,7 @@ Quaternion<B, T>::operator*(const Quaternion<B2, T>& q)
 
 template<BindingType B, typename T>
 template<BindingType B2>
-Quaternion<TEMP, T> 
+Quaternion<SH_TEMP, T> 
 Quaternion<B, T>::operator*(const Attrib<1, B2, T>& c)
 {
   Quaternion<B, T> r = *this;
@@ -295,8 +295,8 @@ Quaternion<B, T>::operator*(const Attrib<1, B2, T>& c)
 
 template<BindingType B, typename T>
 template<BindingType B2>
-Quaternion<TEMP, T> 
-Quaternion<B, T>::operator*(const Attrib<3, B2, T, VECTOR>& v)
+Quaternion<SH_TEMP, T> 
+Quaternion<B, T>::operator*(const Attrib<3, B2, T, SH_VECTOR>& v)
 {
   Quaternion<B, T> r = *this;
   return (r *= v);
@@ -304,8 +304,8 @@ Quaternion<B, T>::operator*(const Attrib<3, B2, T, VECTOR>& v)
 
 template<BindingType B, typename T>
 template<BindingType B2>
-Quaternion<TEMP, T> 
-Quaternion<B, T>::operator*(const Attrib<3, B2, T, NORMAL>& v)
+Quaternion<SH_TEMP, T> 
+Quaternion<B, T>::operator*(const Attrib<3, B2, T, SH_VECTOR>& v)
 {
   Quaternion<B, T> r = *this;
   return (r *= v);
@@ -330,7 +330,7 @@ void Quaternion<B, T>::getValues(HostType values[]) const
 }
 
 template<BindingType B, typename T, BindingType B2>
-Quaternion<TEMP, T> 
+Quaternion<SH_TEMP, T> 
 operator*(const Attrib<1, B2, T>& c, const Quaternion<B, T>& q)
 {
   Quaternion<B, T> r = q;
@@ -338,18 +338,18 @@ operator*(const Attrib<1, B2, T>& c, const Quaternion<B, T>& q)
 }
 
 template<BindingType B1, BindingType B2, typename T>
-extern Quaternion<TEMP, T>
+extern Quaternion<SH_TEMP, T>
 slerp(const Quaternion<B1, T>& q1, const Quaternion<B2, T>& q2, const Attrib1f& t)
 {
   //TODO::q1 and q2 must be unit quaternions, we cannot call normalize here
   //since it's not a const function.
   //TODO: when cosTheta is 1 or -1, we need to fallback to linear interpolation
   //not sure how to implement this efficiently yet
-  Attrib<1, TEMP, T> cosTheta = q1.dot(q2);
-  Attrib<1, TEMP, T> sinTheta = sqrt(1.0 - cosTheta*cosTheta);
+  Attrib<1, SH_TEMP, T> cosTheta = q1.dot(q2);
+  Attrib<1, SH_TEMP, T> sinTheta = sqrt(1.0 - cosTheta*cosTheta);
   
   Quaternion<B2, T> q2prime = (cosTheta >= 0.0)*q2 - (cosTheta < 0.0)*q2;
-  Attrib<1, TEMP, T> theta = asin(sinTheta);
+  Attrib<1, SH_TEMP, T> theta = asin(sinTheta);
 
   return (sin((1.0 - t)*theta)/sinTheta)*q1 + (sin(t*theta)/sinTheta)*q2prime;
 }

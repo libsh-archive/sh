@@ -373,33 +373,33 @@ void ProgramNode::collect_var(const VariableNodePtr& var)
       collect_dependent_uniform(var);
     }
   } else switch (var->kind()) {
-  case INPUT:
-  case OUTPUT:
-  case INOUT:
+  case SH_INPUT:
+  case SH_OUTPUT:
+  case SH_INOUT:
     // Taken care of by VariableNode constructor
     break;
-  case TEMP:
+  case SH_TEMP:
     if (std::find(temps.begin(), temps.end(), var) == temps.end()) {
       temps.push_back(var);
     }
     break;
-  case CONST:
+  case SH_CONST:
     if (std::find(constants.begin(), constants.end(), var) == constants.end()) {
       constants.push_back(var);
     }
     break;
-  case TEXTURE:
+  case SH_TEXTURE:
     if (std::find(textures.begin(), textures.end(),
                   shref_dynamic_cast<TextureNode>(var)) == textures.end()) {
       textures.push_back(shref_dynamic_cast<TextureNode>(var));
     }    
     break;
-  case STREAM:
+  case SH_STREAM:
     if (std::find(channels.begin(), channels.end(),
                   shref_dynamic_cast<ChannelNode>(var)) == channels.end()) {
       channels.push_back(shref_dynamic_cast<ChannelNode>(var));
     }
-  case PALETTE:
+  case SH_PALETTE:
     if (std::find(palettes.begin(), palettes.end(),
                   shref_dynamic_cast<PaletteNode>(var)) == palettes.end()) {
       palettes.push_back(shref_dynamic_cast<PaletteNode>(var));

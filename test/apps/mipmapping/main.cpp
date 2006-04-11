@@ -177,7 +177,7 @@ void init_sh()
 
   for (int i=0; i < MIPMAP_LEVELS; i++) {
     int size = 512 >> i;
-    HostMemoryPtr memory = new HostMemory(3 * size * size * sizeof(unsigned char), FUBYTE);
+    HostMemoryPtr memory = new HostMemory(3 * size * size * sizeof(unsigned char), SH_FUBYTE);
     
     unsigned char * data = reinterpret_cast<unsigned char*>(memory->hostStorage()->data());
 

@@ -112,7 +112,7 @@ GLenum glInternalFormat(const TextureNodePtr& node, bool forceRGB)
   // note that right now 1/2/3D float textures on NV are only supported through
   // the ATI extension, so we only use nv for RECT. 
   bool float_nv = (exts.find("NV_float_buffer") != std::string::npos) && 
-                  (node->dims() == TEXTURE_RECT);
+                  (node->dims() == SH_TEXTURE_RECT);
 
   bool float_ati = (exts.find("ATI_texture_float") != std::string::npos);
 
@@ -143,29 +143,29 @@ GLenum glInternalFormat(const TextureNodePtr& node, bool forceRGB)
   // be stored internally as float if possible
 
   switch(node->valueType()) {
-  case DOUBLE:
-  case FLOAT:        
-  case INT: 
-  case UINT:
+  case SH_DOUBLE:
+  case SH_FLOAT:        
+  case SH_INT: 
+  case SH_UINT:
     formats = float_formats;
     break;
-  case HALF:
-  case SHORT: 
-  case BYTE:
-  case USHORT:
-  case UBYTE:
+  case SH_HALF:
+  case SH_SHORT: 
+  case SH_BYTE:
+  case SH_USHORT:
+  case SH_UBYTE:
     formats = half_formats;
     break;
     
-  case FINT:
-  case FSHORT:
-  case FUINT:
-  case FUSHORT:
+  case SH_FINT:
+  case SH_FSHORT:
+  case SH_FUINT:
+  case SH_FUSHORT:
     formats = shortformats;
     break;
     
-  case FBYTE:
-  case FUBYTE:
+  case SH_FBYTE:
+  case SH_FUBYTE:
     formats = byteformats;
     break;
   default:
@@ -216,24 +216,24 @@ GLenum glType(ValueType valueType, ValueType &convertedType) {
   convertedType = VALUETYPE_END;
   GLenum result = GL_NONE;
   switch(valueType) {
-    case DOUBLE:
-    case HALF:
-    case INT: 
-    case SHORT: 
-    case BYTE:
-    case UINT:
-    case USHORT:
-    case UBYTE:
-      convertedType = FLOAT;
-    case FLOAT:        result = GL_FLOAT; break;
+    case SH_DOUBLE:
+    case SH_HALF:
+    case SH_INT: 
+    case SH_SHORT: 
+    case SH_BYTE:
+    case SH_UINT:
+    case SH_USHORT:
+    case SH_UBYTE:
+      convertedType = SH_FLOAT;
+    case SH_FLOAT:        result = GL_FLOAT; break;
 
 
-    case FINT:     result = GL_INT; break;
-    case FSHORT:   result = GL_SHORT; break;
-    case FBYTE:    result = GL_BYTE; break;
-    case FUINT:    result = GL_UNSIGNED_INT; break;
-    case FUSHORT:  result = GL_UNSIGNED_SHORT; break;
-    case FUBYTE:   result = GL_UNSIGNED_BYTE; break;
+    case SH_FINT:     result = GL_INT; break;
+    case SH_FSHORT:   result = GL_SHORT; break;
+    case SH_FBYTE:    result = GL_BYTE; break;
+    case SH_FUINT:    result = GL_UNSIGNED_INT; break;
+    case SH_FUSHORT:  result = GL_UNSIGNED_SHORT; break;
+    case SH_FUBYTE:   result = GL_UNSIGNED_BYTE; break;
 
     default:
       DEBUG_ERROR("Unsupported value type to glReadPixel type conversion"); 
@@ -248,7 +248,7 @@ GLenum glType(ValueType valueType, ValueType &convertedType) {
     DEBUG_WARN("Could not read GL_EXTENSIONS.  Something wrong with your driver installation?");
   }
 
-  if(valueType == HALF) {
+  if(valueType == SH_HALF) {
 #ifndef __APPLE__
     if (exts.find("NV_half_float") != std::string::npos) {
       convertedType = VALUETYPE_END; 
@@ -363,7 +363,7 @@ void GlTextures::bindTexture(const TextureNodePtr& node, GLenum target, bool wri
     return;
   }
 
-  if (node->dims() == TEXTURE_CUBE) {
+  if (node->dims() == SH_TEXTURE_CUBE) {
     
     if (write) {
       // Actually, maybe it could be done

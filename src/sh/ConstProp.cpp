@@ -57,15 +57,15 @@ struct ConstProp : public Info {
     for (int i = 0; i < opInfo[stmt->op].arity ; i++) {
       for (int j = 0; j < stmt->src[i].size(); j++) {
         switch(stmt->src[i].node()->kind()) {
-        case INPUT:
-        case OUTPUT:
-        case INOUT:
-        case TEXTURE:
-        case STREAM:
-        case PALETTE:
+        case SH_INPUT:
+        case SH_OUTPUT:
+        case SH_INOUT:
+        case SH_TEXTURE:
+        case SH_STREAM:
+        case SH_PALETTE:
           src[i].push_back(Cell(Cell::BOTTOM));
           break;
-        case TEMP:
+        case SH_TEMP:
           if (stmt->src[i].uniform()) {
             // Don't lift computations dependent on uniforms which
             // have been marked with "opt:lifting" == "never"
@@ -78,7 +78,7 @@ struct ConstProp : public Info {
             src[i].push_back(Cell(Cell::TOP));
           }
           break;
-        case CONST:
+        case SH_CONST:
           src[i].push_back(Cell(Cell::CONSTANT, stmt->src[i].getVariant(j)));
           break;
         default:
@@ -121,8 +121,8 @@ struct ConstProp : public Info {
       // a) whenever one src becomes bottom, dest becomes bottom
       // b) uniform only gets set when ALL src are uniform (because value
       // tracking requires it)
-      // c) otherwise, propagate CONST state per element
-      // @todo range (CONST may move across to UNIFORM, check that this is okay)
+      // c) otherwise, propagate SH_CONST state per element
+      // @todo range (SH_CONST may move across to UNIFORM, check that this is okay)
 
       // Consider each tuple element in turn.
       // Dest and sources are guaranteed to be of the same length.
@@ -147,12 +147,12 @@ struct ConstProp : public Info {
         some_field_bottom |= somebottom;
         if (!(alluniform && !allconst)) all_fields_uniform = false;
         if (allconst) {
-          Variable tmpdest(new VariableNode(CONST, 1, stmt->dest.valueType()));
+          Variable tmpdest(new VariableNode(SH_CONST, 1, stmt->dest.valueType()));
           Statement eval(*stmt);
           eval.dest = tmpdest;
           for (int k = 0; k < opInfo[stmt->op].arity; k++) {
             VariantCPtr srcValue = src[k][idx(i,k)].value;
-            Variable tmpsrc(new VariableNode(CONST, 1, srcValue->valueType()));
+            Variable tmpsrc(new VariableNode(SH_CONST, 1, srcValue->valueType()));
             tmpsrc.setVariant(srcValue, 0);
             eval.src[k] = tmpsrc;
           }
@@ -192,13 +192,13 @@ struct ConstProp : public Info {
         }
       }
       if (allconst) { 
-        Variable tmpdest(new VariableNode(CONST, stmt->dest.size(), stmt->dest.valueType()));
+        Variable tmpdest(new VariableNode(SH_CONST, stmt->dest.size(), stmt->dest.valueType()));
         Statement eval(*stmt);
         eval.dest = tmpdest;
         for (int i = 0; i < opInfo[stmt->op].arity; i++) {
           DEBUG_ASSERT(src[i][0].value); // @todo type DEBUGGING
           ValueType srcValueType = src[i][0].value->valueType(); 
-          Variable tmpsrc(new VariableNode(CONST, stmt->src[i].size(), srcValueType));
+          Variable tmpsrc(new VariableNode(SH_CONST, stmt->src[i].size(), srcValueType));
           for (int j = 0; j < stmt->src[i].size(); j++) {
             tmpsrc.setVariant(src[i][j].value, j);
           }
@@ -639,7 +639,7 @@ struct FinishConstProp
         // if all dest fields are constants, replace this with a
         // constant assignment
 
-        if (I->op != OP_ASN || I->src[0].node()->kind() != CONST) {
+        if (I->op != OP_ASN || I->src[0].node()->kind() != SH_CONST) {
           bool allconst = true;
           for (int i = 0; i < I->dest.size(); i++) {
             if (cp->dest[i].state != ConstProp::Cell::CONSTANT) {
@@ -650,7 +650,7 @@ struct FinishConstProp
           if (allconst) {
             DEBUG_ASSERT(cp->dest[0].value); // @todo type debugging
             ValueType destValueType = cp->dest[0].value->valueType(); 
-            Variable newconst(new VariableNode(CONST, I->dest.size(), destValueType));
+            Variable newconst(new VariableNode(SH_CONST, I->dest.size(), destValueType));
             for(int i = 0; i < I->dest.size(); ++i) {
               newconst.setVariant(cp->dest[i].value, i);
             }
@@ -661,10 +661,10 @@ struct FinishConstProp
           } else {
             // otherwise, do the same for each source field.
             for (int s = 0; s < opInfo[I->op].arity; s++) {
-              if (I->src[s].node()->kind() == CONST) continue;
+              if (I->src[s].node()->kind() == SH_CONST) continue;
             
               ValueType srcValueType = I->src[s].valueType();
-              Variable newconst(new VariableNode(CONST, I->src[s].size(), srcValueType));
+              Variable newconst(new VariableNode(SH_CONST, I->src[s].size(), srcValueType));
               bool allconst = true;
               for (int i = 0; i < I->src[s].size(); i++) {
                 if (cp->src[s][i].state != ConstProp::Cell::CONSTANT) {
@@ -698,8 +698,8 @@ struct FinishConstProp
             }
             if (!alluniform) break;
           }
-          if (!alluniform || I->dest.node()->kind() == OUTPUT
-              || I->dest.node()->kind() == INOUT) {
+          if (!alluniform || I->dest.node()->kind() == SH_OUTPUT
+              || I->dest.node()->kind() == SH_INOUT) {
 #ifdef DEBUG_CONSTPROP
             DEBUG_PRINT("Considering " << *I << " for uniform lifting");
 #endif          
@@ -791,7 +791,7 @@ struct FinishConstProp
     }
     
     Context::current()->enter(0);
-    VariableNodePtr node = new VariableNode(TEMP, value->destsize, value->destValueType);
+    VariableNodePtr node = new VariableNode(SH_TEMP, value->destsize, value->destValueType);
     {
     std::ostringstream s;
     s << "dep_" << valuenum << "_" << value->name();
@@ -867,7 +867,7 @@ struct FinishConstProp
     }
     if (!allsame) {
       // Make intermediate variables, combine them together.
-      Variable r = Variable(new VariableNode(TEMP, src.size(), src[0].valueType()));
+      Variable r = Variable(new VariableNode(SH_TEMP, src.size(), src[0].valueType()));
       
       for (std::size_t i = 0; i < src.size(); i++) {
         std::vector<ConstProp::Uniform> v;
@@ -880,7 +880,7 @@ struct FinishConstProp
     }
 
     if (!constvals.empty()) {
-      Variable var(new VariableNode(CONST, constvals.size(), constvals[0]->valueType()));
+      Variable var(new VariableNode(SH_CONST, constvals.size(), constvals[0]->valueType()));
       for(std::size_t i = 0; i < constvals.size(); ++i) var.setVariant(constvals[i], i);
       return var;
     }
@@ -892,7 +892,7 @@ struct FinishConstProp
       return Variable(value->node, swizzle, neg);
     }
     if (value->type == ConstProp::Value::STMT) {
-      VariableNodePtr node = new VariableNode(TEMP, value->destsize, value->destValueType);
+      VariableNodePtr node = new VariableNode(SH_TEMP, value->destsize, value->destValueType);
       Statement stmt(node, value->op);
 
       for (int i = 0; i < opInfo[value->op].arity; i++) {

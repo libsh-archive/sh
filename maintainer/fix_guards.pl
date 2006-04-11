@@ -6,7 +6,6 @@ use File::Copy;
 use File::Find;
 use File::Temp;
 
-
 my $COLOR_GREEN  = "[32m";
 my $COLOR_RED    = "[31m";
 my $COLOR_BLUE   = "[34m";

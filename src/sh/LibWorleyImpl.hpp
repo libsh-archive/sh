@@ -177,7 +177,7 @@ template<int D, typename T>
 void GridGenFactory<D, T>::operator()(const Generic<D, T> &p, 
                                       Generator<D, T> result[]) const
 {
-  Attrib<D, TEMP, T> pCell = floor(p);
+  Attrib<D, SH_TEMP, T> pCell = floor(p);
 
   // each set of two bits represents offset along one dimension
   // if the bit value = 0, offset by -1, 1 = no offset, 2 = offset by 1 
@@ -210,7 +210,7 @@ void DefaultGenFactory<D, T>::makePos(Generator<D, T> &g) const
 template<int D, typename T>
 void NullGenFactory<D, T>::makePos(Generator<D, T> &g) const 
 {
-  g.pos = g.cell + fillcast<D>(Attrib<1, CONST, T>(0.5f)); 
+  g.pos = g.cell + fillcast<D>(Attrib<1, SH_CONST, T>(0.5f)); 
 }
 
 template<int D, typename T>
@@ -222,16 +222,16 @@ LerpGenFactory<D, T>::LerpGenFactory(const Generic<1, T> &time, bool useTexture)
 template<int D, typename T>
 void LerpGenFactory<D, T>::makePos(Generator<D, T> &g) const
 {
-  Attrib<1, TEMP, T> lastTime = floor(m_time);
-  Attrib<1, TEMP, T> timeOffset = frac(m_time);
-  Attrib<D + 1, TEMP, T> offsetCell;
+  Attrib<1, SH_TEMP, T> lastTime = floor(m_time);
+  Attrib<1, SH_TEMP, T> timeOffset = frac(m_time);
+  Attrib<D + 1, SH_TEMP, T> offsetCell;
 
   offsetCell = fillcast<D+1>(g.cell);
   offsetCell(D) = lastTime;
-  Attrib<D, TEMP, T> p1 = cellnoise<D>(offsetCell, m_useTexture); 
+  Attrib<D, SH_TEMP, T> p1 = cellnoise<D>(offsetCell, m_useTexture); 
 
   offsetCell(D) += 1;
-  Attrib<D, TEMP, T> p2 = cellnoise<D>(offsetCell, m_useTexture); 
+  Attrib<D, SH_TEMP, T> p2 = cellnoise<D>(offsetCell, m_useTexture); 
 
   g.pos = g.cell + lerp(timeOffset, p2, p1);
 }
@@ -264,7 +264,7 @@ Generic<1, T>
 DistSqPropFactory<D, T>::operator()(const Generic<D, T> &p,
                                     const Generator<D, T> &g) const
 {
-  Attrib<D, TEMP, T> delta = p - g.pos;
+  Attrib<D, SH_TEMP, T> delta = p - g.pos;
   return delta | delta; 
 }
 
@@ -273,7 +273,7 @@ Generic<1, T>
 Dist_1PropFactory<D, T>::operator() (const Generic<D, T> &p, 
                                      const Generator<D, T> &g) const
 {
-  Attrib<D, TEMP, T> delta = abs(p - g.pos);
+  Attrib<D, SH_TEMP, T> delta = abs(p - g.pos);
   return delta | fillcast<D>(ConstAttrib1f(1.0f)); 
 }
 
@@ -282,10 +282,10 @@ Generic<1, T>
 Dist_InfPropFactory<D, T>::operator() (const Generic<D, T> &p,
                                        const Generator<D, T> &g) const
 {
-  Attrib<D, TEMP, T> delta = abs(p - g.pos);
+  Attrib<D, SH_TEMP, T> delta = abs(p - g.pos);
 
   // TODO replace with tuple max function when implemented 
-  Attrib<1, TEMP, T> result = 0; 
+  Attrib<1, SH_TEMP, T> result = 0; 
   for(int i = 0; i < D; ++i) result = max(result, delta(i));
   return result;
 }
@@ -295,8 +295,8 @@ Generic<D + 1, T>
 DistSqGradientPropFactory<D, T>::operator() (const Generic<D, T> &p,
                                              const Generator<D, T> &g) const
 {
-  Attrib<D + 1, TEMP, T> result;
-  Attrib<D, TEMP, T> delta = p - g.pos;
+  Attrib<D + 1, SH_TEMP, T> result;
+  Attrib<D, SH_TEMP, T> delta = p - g.pos;
 
   result(0) = delta | delta; 
   for(int i = 1; i < D + 1; ++i) {
@@ -311,10 +311,10 @@ Dist_1GradientPropFactory<D, T>::operator() (const Generic<D, T> &p,
                                              const Generator<D, T> &g) const
 {
 
-  Attrib<D + 1, TEMP, T> result;
-  Attrib<D, TEMP, T> delta = p - g.pos;
+  Attrib<D + 1, SH_TEMP, T> result;
+  Attrib<D, SH_TEMP, T> delta = p - g.pos;
 
-  Attrib<1, CONST, T> ONE(1);
+  Attrib<1, SH_CONST, T> ONE(1);
   result(0) = abs(delta) | fillcast<D>(ONE);
   for(int i = 1; i < D + 1; ++i) { // TODO switch to a swizzled version
     result(i) = cond(delta(i-1), ONE, -ONE); 
@@ -327,15 +327,15 @@ Generic<D + 1, T>
 Dist_InfGradientPropFactory<D, T>::operator() (const Generic<D, T> &p, 
                                                const Generator<D, T> &g) const
 {
-  Attrib<D + 1, TEMP, T> result;
-  Attrib<D, TEMP, T> delta = p - g.pos;
-  Attrib<D, TEMP, T> absDelta = abs(delta); 
+  Attrib<D + 1, SH_TEMP, T> result;
+  Attrib<D, SH_TEMP, T> delta = p - g.pos;
+  Attrib<D, SH_TEMP, T> absDelta = abs(delta); 
 
   result(0) = 0;
   for(int i = 0; i < D; ++i) result(0) = max(result(0), absDelta(i)); 
 
   // TODO remove this when constant folding is available
-  Attrib<1, CONST, T> ONE(1);
+  Attrib<1, SH_CONST, T> ONE(1);
   for(int i = 1; i < D + 1; ++i) { // TODO switch to a swizzled version
     result(i) = (absDelta(i-1) >= result(0)) * cond(delta(i-1), ONE, -ONE); 
   }
@@ -397,8 +397,8 @@ void worley(Generic<K, T> result[], const Generic<D, T> &p,
 {
   int i, j;
   Generator<D, T> generators[P];
-  Attrib<P, TEMP, T> props[L]; 
-  Attrib<L, TEMP, T> propTemp; 
+  Attrib<P, SH_TEMP, T> props[L]; 
+  Attrib<L, SH_TEMP, T> propTemp; 
 
   (*genFactory)(p, generators); // make generators
   for(i = 0; i < P; ++i) {
@@ -423,7 +423,7 @@ Generic<K, T> worley(const Generic<D, T> &p,
 {
   DefaultGenFactory<D, T> genFactory(useTexture);
   DistSqPropFactory<D, T> propFactory;
-  Attrib<K, TEMP, T> result;
+  Attrib<K, SH_TEMP, T> result;
   worley(&result, p, &genFactory, &propFactory);
   return result;
 }
@@ -446,9 +446,9 @@ Program worley(const GeneratorFactory<P, D, T> *genFactory,
                    const PropertyFactory<L, D, T> *propFactory)
 {
   Program program = SH_BEGIN_PROGRAM() {
-    Attrib<D, INPUT, T, TEXCOORD> DECL(texcoord);
+    Attrib<D, SH_INPUT, T, SH_TEXCOORD> DECL(texcoord);
 
-    Attrib<K, OUTPUT, T> result[L]; 
+    Attrib<K, SH_OUTPUT, T> result[L]; 
     worley(&result[0], texcoord, genFactory, propFactory); 
   } SH_END_PROGRAM;
   return program;

@@ -35,7 +35,7 @@ Image3D::Image3D()
 
 Image3D::Image3D(int width, int height, int depth, int elements)
   : m_width(width), m_height(height), m_depth(depth), m_elements(elements),
-    m_memory(new HostMemory(sizeof(float) * m_width * m_height * m_depth * m_elements, FLOAT))
+    m_memory(new HostMemory(sizeof(float) * m_width * m_height * m_depth * m_elements, SH_FLOAT))
 {
 }
 
@@ -43,7 +43,7 @@ Image3D::Image3D(const Image3D& other)
   : m_width(other.m_width), m_height(other.m_height), m_depth(other.m_depth),
     m_elements(other.m_elements),
     m_memory(other.m_memory ?
-             new HostMemory(sizeof(float) * m_width * m_height * m_depth * m_elements, FLOAT) : 0)
+             new HostMemory(sizeof(float) * m_width * m_height * m_depth * m_elements, SH_FLOAT) : 0)
 {
   if (m_memory) {
     std::memcpy(m_memory->hostStorage()->data(),
@@ -63,7 +63,7 @@ Image3D& Image3D::operator=(const Image3D& other)
   m_depth = other.m_depth;
   m_elements = other.m_elements;
   m_memory = (other.m_memory ?
-              new HostMemory(sizeof(float) * m_width * m_height * m_depth * m_elements, FLOAT) : 0);
+              new HostMemory(sizeof(float) * m_width * m_height * m_depth * m_elements, SH_FLOAT) : 0);
   std::memcpy(m_memory->hostStorage()->data(),
               other.m_memory->hostStorage()->data(),
               m_width * m_height * m_depth * m_elements * sizeof(float));

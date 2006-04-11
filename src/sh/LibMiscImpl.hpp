@@ -30,7 +30,7 @@ template<int M, int N, typename T>
 Generic<M, T> cast(const Generic<N, T>& a)
 {
   int copySize = std::min(M, N);
-  Attrib<M, TEMP, T> result;
+  Attrib<M, SH_TEMP, T> result;
 
   int* indices = new int[copySize];
   for(int i = 0; i < copySize; ++i) indices[i] = i;
@@ -52,7 +52,7 @@ template<int M>
 inline
 Generic<M, double> cast(double a)
 {
-  return cast<M>(Attrib<1, CONST, double>(a));
+  return cast<M>(Attrib<1, SH_CONST, double>(a));
 }
 
 template<int M, int N, typename T> 
@@ -68,7 +68,7 @@ template<int M>
 inline
 Generic<M, double> fillcast(double a)
 {
-  return fillcast<M>(Attrib<1, CONST, double>(a));
+  return fillcast<M>(Attrib<1, SH_CONST, double>(a));
 }
 
 template<int M, int N, typename T1, typename T2> 
@@ -76,7 +76,7 @@ Generic<M+N, CT1T2> join(const Generic<M, T1>& a, const Generic<N, T2>& b)
 {
   int indices[M+N];
   for(int i = 0; i < M+N; ++i) indices[i] = i; 
-  Attrib<M+N, TEMP, CT1T2> result;
+  Attrib<M+N, SH_TEMP, CT1T2> result;
   result.template swiz<M>(indices) = a;
   result.template swiz<N>(indices + M) = b;
   return result;
@@ -85,13 +85,13 @@ Generic<M+N, CT1T2> join(const Generic<M, T1>& a, const Generic<N, T2>& b)
 template<int M, typename T> 
 Generic<M+1, T> join(const T& a, const Generic<M, T>& b)
 {
-  return join(Attrib<1, CONST, T>(a), b);
+  return join(Attrib<1, SH_CONST, T>(a), b);
 }
 
 template<int M, typename T> 
 Generic<M+1, T> join(const Generic<M, T>& a, const T& b)
 {
-  return join(a, Attrib<1, CONST, T>(b));
+  return join(a, Attrib<1, SH_CONST, T>(b));
 }
 
 template<int M, int N, int O, typename T1, typename T2, typename T3> 
@@ -101,7 +101,7 @@ Generic<M+N+O, CT1T2T3> join(const Generic<M, T1>& a,
 {
   int indices[M+N+O];
   for(int i = 0; i < M+N+O; ++i) indices[i] = i; 
-  Attrib<M+N+O, TEMP, CT1T2T3> result;
+  Attrib<M+N+O, SH_TEMP, CT1T2T3> result;
   result.template swiz<M>(indices) = a;
   result.template swiz<N>(indices + M) = b;
   result.template swiz<N>(indices + M + N) = c;
@@ -116,7 +116,7 @@ Generic<M+N+O+P, CT1T2T3T4> join(const Generic<M, T1>& a,
 {
   int indices[M+N+O+P];
   for(int i = 0; i < M+N+O+P; ++i) indices[i] = i; 
-  Attrib<M+N+O+P, TEMP, CT1T2T3T4> result;
+  Attrib<M+N+O+P, SH_TEMP, CT1T2T3T4> result;
   result.template swiz<M>(indices) = a;
   result.template swiz<N>(indices + M) = b;
   result.template swiz<N>(indices + M + N) = c;
@@ -152,8 +152,8 @@ void groupsort(VarType v[])
   int i, j;
   // hold even/odd temps and condition code for (2i, 2i+1) "up" and (2i, 2i-1) "down" comparisons 
 
-  Attrib<NU, TEMP, T> eu, ou, ccu; 
-  Attrib<ND, TEMP, T> ed, od, ccd; 
+  Attrib<NU, SH_TEMP, T> eu, ou, ccu; 
+  Attrib<ND, SH_TEMP, T> ed, od, ccd; 
 
   // even and odd swizzle (elms 0..NE-1 are the "even" subsequence, NE..N-1 "odd")
   int eswiz[NE], oswiz[NO]; 
@@ -195,7 +195,7 @@ void groupsort(VarType v[])
   for(i = 0; i < NE; ++i) resultEswiz[i] = i * 2;
   for(i = 0; i < NO; ++i) resultOswiz[i] = i * 2 + 1; 
   for(i = 0; i < S; ++i) {
-    Attrib<NE, TEMP, T> evens = v[i].template swiz<NE>(eswiz);
+    Attrib<NE, SH_TEMP, T> evens = v[i].template swiz<NE>(eswiz);
     v[i].template swiz<NO>(resultOswiz) = v[i].template swiz<NO>(oswiz);
     v[i].template swiz<NE>(resultEswiz) = evens;
   }
@@ -204,7 +204,7 @@ void groupsort(VarType v[])
 template<int N, typename T> 
 Generic<N, T> sort(const Generic<N, T>& a)
 {
-  Attrib<N, TEMP, T> result(a);
+  Attrib<N, SH_TEMP, T> result(a);
   groupsort<1>(&result);
   return result;
 }
@@ -220,7 +220,7 @@ Program freeze(const Program& p,
 template<int N, int M, typename T1, typename T2>
 Generic<N, CT1T2> poly(const Generic<N, T1>& a, const Generic<M, T2>& b)
 {
-  Attrib<N, TEMP, CT1T2> t;
+  Attrib<N, SH_TEMP, CT1T2> t;
   for (int i=0; i < N; i++) {
     // Uses Horner's rule
     t[i] = b[M - 1];
