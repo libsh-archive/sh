@@ -24,8 +24,8 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef SH_SHATTRIB_HPP
-#define SH_SHATTRIB_HPP
+#ifndef SHATTRIB_HPP
+#define SHATTRIB_HPP
 
 #ifndef SH_DO_NOT_INCLUDE_GENERIC_IMPL
 #  define SH_DO_NOT_INCLUDE_GENERIC_IMPL
@@ -836,4 +836,4 @@ typedef Attrib<4, CONST, unsigned int, ATTRIB> ConstAttrib4ui;
 #include "GenericImpl.hpp"
 #include "AttribImpl.hpp"
 
-#endif // SH_SHATTRIB_HPP
+#endif // SHATTRIB_HPP
