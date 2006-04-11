@@ -31,6 +31,7 @@ my %special_macros = (
     "ADER"     => "SHADER",
     "LIB"      => "SHLIB",
     "INSTALL"  => "SH_INSTALL",
+    "REGRESS"  => "SH_REGRESS",
 );
 
 my %reserved_words = (
